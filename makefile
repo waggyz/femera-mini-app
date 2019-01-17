@@ -5,10 +5,7 @@ CPPFLAGS=-std=c++11 -Wall -Wextra -g -Ofast -ftree-vectorize -march=native \
 NCPU=2
 NUMA=2
 
-CPUMODEL:=$(shell grep -m 1 "model name" /proc/cpuinfo | awk '{print($$7)}')
-ifeq ($(CPUMODEL),CPU)
-CPUMODEL:=$(shell grep -m 1 "model name" /proc/cpuinfo | awk '{print($$6)}')
-endif
+CPUMODEL:=$(shell ./cpumodel.sh)
 
 # Check for intel compiler
 ifdef INTEL_LICENSE_FILE

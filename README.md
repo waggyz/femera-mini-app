@@ -18,8 +18,7 @@ If you have [Gmsh 4](http://gmsh.info/ "Gmsh Website") installed, try making and
 
 ```bash
 C=4 ; P=1 ; H=89 ; N=16
-CPUMODEL=`grep -m 1 "model name" /proc/cpuinfo | awk '{print($7)}'`
-if [ "$CPUMODEL" == "CPU" ];then CPUMODEL=`grep -m 1 "model name" /proc/cpuinfo | awk '{print($6)}'`;fi
+CPUMODEL=`./cpumodel.sh`
 gmsh -setnumber p $P -setnumber h $H -setnumber n $N geo/unst-cube.geo -
 ./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu0.001 -M0 -E100e9 -N0.3 -R -ap "cube/unst"$H"p"$P"n"$N
 ./femera-$CPUMODEL -v2 -c $C -p "cube/unst"$H"p"$P"n"$N
@@ -29,8 +28,7 @@ Then, change `P=2` in the script above to make and solve an even bigger quadrati
 
 ```bash
 C=4 ; N=16
-CPUMODEL=`grep -m 1 "model name" /proc/cpuinfo | awk '{print($7)}'`
-if [ "$CPUMODEL" == "CPU" ];then CPUMODEL=`grep -m 1 "model name" /proc/cpuinfo | awk '{print($6)}'`;fi
+CPUMODEL=`./cpumodel.sh`
 neper -T -reg 1 -n $N
 neper -M "n"$N"-id1.tess"
 ./gmsh2fmr -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -M0 -E100e9 -N0.3 -R -a "neper/n"$N"-id1"
@@ -46,8 +44,7 @@ Here is a more detailed  microstructure model.
 
 ```bash
 C=4 ; N=100 ; L=0.005
-CPUMODEL=`grep -m 1 "model name" /proc/cpuinfo | awk '{print($7)}'`
-if [ "$CPUMODEL" == "CPU" ];then CPUMODEL=`grep -m 1 "model name" /proc/cpuinfo | awk '{print($6)}'`;fi
+CPUMODEL=`./cpumodel.sh`
 neper -T -reg 1 -morpho graingrowth -oricrysym cubic -ori uniform -domain "cube("$L,$L,$L")" -n $N -for tess,ori -o "neper/cubic"$N
 neper -V "neper/cubic"$N".tess" -datacellcol id -print "neper/cubic"$N
 neper -M "neper/cubic"$N".tess"
