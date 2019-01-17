@@ -1,5 +1,5 @@
 # Femera
-Femera is an open-source finite element-by-element (EBE) matrix-free implementation that can be tuned for performance across a wide range of problem sizes and HPC architectures. It is implemented in a C++ framework, but compuational kernels are coded as vanilla C, Fortran 99, or CUDA for better performance.
+Femera is an open-source finite element-by-element (EBE) matrix-free implementation that can be tuned for performance across a wide range of problem sizes and HPC architectures. It is implemented in a C++ framework, but computational kernels are coded as vanilla C, Fortran 99, or CUDA for better performance.
 
 # Femera Mini-App
 The Femera Mini-App is a minimal implentation with limited element and mesh format support.
