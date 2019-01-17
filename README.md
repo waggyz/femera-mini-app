@@ -23,9 +23,7 @@ gmsh -setnumber p $P -setnumber h $H -setnumber n $N geo/unst-cube.geo -
 ./femera-<cpumodel> -v2 -c $C -p "cube/unst"$H"p"$P"n"$N
 ```
 
-Then, change `P=2` in the script above to make and solve an even bigger quadratic tet model.
-
-If you have [Neper](http://neper.sourceforge.net/ "Neper Website") installed, try making and solving a microstructure model.
+Then, change `P=2` in the script above to make and solve an even bigger quadratic tet model. If you have [Neper](http://neper.sourceforge.net/ "Neper Website") installed, try making and solving a microstructure model.
 
 ```bash
 C=4 ; N=16
