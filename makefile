@@ -51,16 +51,14 @@ test-mini:
 	mv -f a.out a.old 2>/dev/null ; \
 	$(CXX) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(FEMERA_MINI_CC) test.cc femera-mini.cc $(CPPLOG) ;\
-	./a.out -v 2 -p cube/unit1p2m2 ;\
-	./a.out -v 2 -p cube/unit1p2m1 ;\
-	#command /usr/bin/time -v ./a.out -v2 -p cube/unit1p2m2
+	./a.out -v 2 -p cube/unit1p1n2 ;
 
 mini-omp:
 	mv -f femera-$(CPUMODEL) femera.old 2>/dev/null ; \
 	$(CXX) -fopenmp $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femera-$(CPUMODEL) $(CPPLOG) ;\
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread ;\
-	command /usr/bin/time -v ./femera-$(CPUMODEL) -v2 -c$(NCPU) -p cube/unst19p$(NCPU) ;
+	command /usr/bin/time -v ./femera-$(CPUMODEL) -v2 -c$(NCPU) -p cube/unst19p1n16 ;
 
 mini-mpi:
 	mv -f femera-mpi-$(CPUMODEL) femera.old 2>/dev/null ; \
@@ -69,24 +67,24 @@ mini-mpi:
 	export OMPI_CXXFLAGS=-std=c++11 ; \
 	mpicc -x c++ $(LDFLAGS) $(LDLIBS) \
 	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femera-mpi-$(CPUMODEL) $(CPPLOG) ;\
-	command /usr/bin/time -v ./femera-mpi-$(CPUMODEL) -v2 -c$(NCPU) -p cube/unst19p$(NCPU) ;
+	command /usr/bin/time -v ./femera-mpi-$(CPUMODEL) -v2 -c$(NCPU) -p cube/unst19p1n16$(NCPU) ;
 
 knl-mini:
 	mv -f femera-knl femera.old 2>/dev/null ; \
 	$(CXX) -fopenmp $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femera-knl $(CPPLOG);\
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread ;\
-	command /usr/bin/time -v ./femera-knl -v2 -c$(NCPU) -p cube/unst19p16 ;
+	command /usr/bin/time -v ./femera-knl -v2 -c$(NCPU) -p cube/unst19p1n16 ;
 
 test-asc:
 	mv -f a.out a.old 2>/dev/null ;\
 	mv -f cube/unit1p2_1.cpy cube/unit1p2_1.old 2>/dev/null ;\
-	./gmsh2fmr  -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu0.001 -p cube/unit1p2;
-	cp cube/unit1p2_1.fmr cube/unit1p2_1.cpy ;\
+	./gmsh2fmr  -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu0.001 -p cube/unit1p1n2;
+	cp cube/unit1p2_1.fmr cube/unit1p1n2_1.cpy ;\
 	$(CXX) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	elem.cc elem-tet.cc phys.cc numa-elas-ort3.cc numa-elas-iso3.cc \
 	test_asc.cc $(CPPLOG) ; ./a.out ;\
-	diff cube/unit1p2_1.fmr cube/unit1p2_1.cpy ;
+	diff cube/unit1p1n2_1.fmr cube/unit1p1n2_1.cpy ;
 
 gmsh2fmr-ser:
 	mv -f gmsh2fmr gmsh2fmr.old 2>/dev/null ;\
@@ -95,7 +93,7 @@ gmsh2fmr-ser:
 	./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu 0.001 \
 	-M1 -E100e9 -N0.3 \
 	-M2 -E100e9 -N0.3 -Z1 -X0 -Z0 \
-	-ap cube/unit1p2m2;
+	-ap cube/unit1p2n2;
 
 gmsh2fmr-rve:
 	mv -f gmsh2fmr gmsh2fmr.old 2>/dev/null ;\
@@ -111,7 +109,10 @@ gmsh2fmr-omp:
 	$(FEMERA_MINI_CC) gmsh2.cc gmsh2fmr.cc -o gmsh2fmr ;\
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread ;\
 	export OMP_NUM_THREADS=$(NCPU) ;\
-	./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu 0.001 -a -p cube/unit1p2;
+	./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu 0.001 \
+	-M1 -E100e9 -N0.3 \
+	-M2 -E100e9 -N0.3 -Z1 -X0 -Z0 \
+	-ap cube/unit1p2n2;
 
 test-head: femera.h test_h.cc
 	$(CXX) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \

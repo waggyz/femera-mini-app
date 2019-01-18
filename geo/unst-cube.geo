@@ -69,7 +69,7 @@ RenumberMeshElements;
 
 PartitionMesh n;
 
-Save Sprintf("../cube/unst%gp%gm%g.msh2",h,p,n);
+Save Sprintf("../cube/unst%gp%gn%g.msh2",h,p,n);
 
 //FIXME These are probably not needed
 //Coherence Mesh;
