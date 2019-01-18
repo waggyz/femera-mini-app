@@ -95,7 +95,7 @@ Specify the condition to apply after a node selection argument above.
  * `-x0` `-y0` `-z0` Fix displacement to zero in the specified direction.
  * `-xu<float>` `-yu<float>` `-zu<float>` Set displacement in the direction specified to `<float>`.
  * `-xf<float>` `-yf<float>` `-zf<float>` Set RHS nodal force in the direction specified to `<float>`.
- *Note* these direction specifiers (`x` `y` `z`) may be combined, e.g., `-xyz0` fixes all three displacement components to zero (encastre).
+ - *Note* these direction specifiers (`x` `y` `z`) may be combined, e.g., `-xyz0` fixes all three displacement components to zero (encastre).
 
 Material properties are set for each partition.
 
