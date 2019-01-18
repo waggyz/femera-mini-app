@@ -86,7 +86,7 @@ These are not necessary for compiling the Mini-App.
 
  Boundary conditions may be applied to nodes specified by node number, Gmsh physical ID of linear or surface elements, or by location within a plane.
  
- * `-n<int>` Apply boundary condition or load to node with Gmsh ID `<int>`.
+ * `-n<int>` Apply boundary condition or load to node with Gmsh ID `<int>`.  *IMPORTANT NOTE* not tested.
  * `-t<int>` Apply boundary condition or load to nodes that are in lines and surfaces tagged with Gmsh physical ID `<int>`.
  * `-x@<float>`  `-y@<float>`  `-z@<float>` Apply boundary condition or load to nodes located in a specified plane at, e.g., x=`<float>`.
 
