@@ -11,7 +11,7 @@ CPUMODEL:=$(shell ./cpumodel.sh)
 ifdef INTEL_LICENSE_FILE
 CXX=icc
 CPPFLAGS=-std=c++11 -Wall -Wextra -Ofast -xHost -axSKYLAKE-AVX512 \
- -ffast-math -no-fast-transcendentals -fno-alias -diag-disable 3180  \
+ -ffast-math -no-fast-transcendentals -fno-alias -diag-disable 3180 \
  -qopt-zmm-usage=high -no-inline-max-size -no-inline-max-total-size -g
 # -march=native
 NCPU=8
@@ -22,7 +22,7 @@ endif
 ifdef INTEL_PYTHONHOME
 CXX=icc
 CPPFLAGS=-std=c++11 -Wall -Wextra -Ofast -xHost -axSKYLAKE-AVX512 \
- -ffast-math -no-fast-transcendentals -fno-alias -diag-disable 3180  \
+ -ffast-math -no-fast-transcendentals -fno-alias -diag-disable 3180 \
  -qopt-zmm-usage=high -no-inline-max-size -no-inline-max-total-size -g
 NCPU=40
 NUMA=6

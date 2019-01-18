@@ -202,7 +202,7 @@ int HaloPCR::Init(){// Preconditioned Conjugate Residual
   INT_MESH halo_n=0;
   // Local copies for atomic ops and reduction
   FLOAT_SOLV glob_r2a = 0.0, alpha=0.0;//this->resi_pow2;
-  FLOAT_SOLV glob_to2 = this->rtol_pow2,glob_sum1=0.0;
+  FLOAT_SOLV glob_to2 = this->rtol_pow2, glob_sum1=0.0;//glob_chk2=0.0, 
 #pragma omp parallel num_threads(comp_n)
 {// parallel init region
   long int my_scat_count=0, my_prec_count=0,
@@ -348,6 +348,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     const INT_MESH hl0=S->halo_loca_0,sysn=S->udof_n;
     for(INT_MESH i=hl0; i<sysn; i++){
       glob_sum1 += S->sys_d[i] * S->sys_g[i] * S->sys_g[i];
+      //glob_chk2 += S->sys_r[i] * S->sys_r[i];
     };
   };
 #pragma omp single
@@ -378,7 +379,9 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
   this->time_secs[5]+=float(my_solv_count)*1e-9;
 }
 }// end init parallel region
-  this->resi_pow2=glob_r2a; this->rtol_pow2=glob_to2;
+  this->resi_pow2=glob_r2a ;
+  this->resi_chk2=glob_r2a ;//glob_chk2; 
+  this->rtol_pow2=glob_to2 ;
   return 0;
 };
 int HaloPCR::Iter(){//-----------------------------------------------
@@ -393,7 +396,7 @@ int HaloPCR::Iter(){//-----------------------------------------------
   //if( (iter % halo_mod)==0 ){ halo_update=true; }else{ halo_update=false; };
   //
   FLOAT_SOLV glob_sum1=0.0, glob_sum2=0.0, alpha=0.0, beta=0.0;
-  FLOAT_SOLV glob_r2a = this->resi_pow2;
+  FLOAT_SOLV glob_r2a = this->resi_pow2;// glob_chk2=0.0,
   const auto P=this->mesh_part;//FIXME Undo this?
 #pragma omp parallel num_threads(comp_n)
 {// iter parallel region
@@ -494,6 +497,7 @@ int HaloPCR::Iter(){//-----------------------------------------------
       S->sys_p[i] = S->sys_r[i] + beta * S->sys_p[i];
       S->sys_g[i] = S->sys_f[i] + beta * S->sys_g[i];
       glob_sum2  += S->sys_d[i] * S->sys_g[i] * S->sys_g[i];
+      //glob_chk2  += S->sys_r[i] * S->sys_r[i];
     };
   };
 #pragma omp single
@@ -523,6 +527,7 @@ int HaloPCR::Iter(){//-----------------------------------------------
 }
 }// end iter parallel region
   this->resi_pow2 = glob_r2a;
+  this->resi_chk2 = glob_r2a;//FIXME glob_chk2 should be reduction sum of r*r*d
   return 0;
 };
 

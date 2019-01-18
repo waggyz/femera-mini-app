@@ -58,11 +58,13 @@ gmsh -refine -o "neper/cubic"$N"s1p1.msh2" "neper/cubic"$N".msh"
 `femera.h` `femera-mini.cc` Set compile-time constants in the header file (though most of these don't work). The femera-mini executable parses a partitioned set of .fmr files having the provided base name.  It supports a few command line options.
 
  * `-p <str>` Find and read partitioned `<str>_?.fmr` files in parallel. *Required.*
+ * `-v <int>` Verbosity level [default: 1]; `-v2` is good.
  * `-c <uint>` Number of parallel compute threads.
  * `-s <int>` Choose a Jacobi preconditioned solver:
    * `-s1` for conjugate gradient [default], or
    * `-s2` for conjugate residual.
- * `-v <int>` Verbosity level [default: 1]; `-v2` is good.
+ * `-r <float>` Solution tolerance.
+ * `-i <int>` Maximum number of iterations.
 
 `mesh.h` `mesh.cc` An instance of this class contains global mesh information.
 

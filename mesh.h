@@ -48,7 +48,7 @@ public:
   float solv_flop=0, solv_band=0;
   //
   int iter_max=0;
-  FLOAT_SOLV solv_rtol=0.0, rtol_pow2=0.0, resi_pow2=0.0;//, resb_pow2;
+  FLOAT_SOLV solv_rtol=0.0, rtol_pow2=0.0, resi_chk2=0.0, resi_pow2=0.0;//, resb_pow2;
   //
   //FIXED Change these to < node_id, dof_id, value >  and < node_id, dof_id >:
   //FIXME Move these into Elem?

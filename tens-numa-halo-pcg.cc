@@ -324,6 +324,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
 }
 }// end init parallel region
   this->resi_pow2 = glob_r2a;
+  this->resi_chk2 = glob_r2a;
   this->rtol_pow2 = glob_to2;// / ((FLOAT_SOLV)this->udof_n);
   return 0;
 };
@@ -469,5 +470,6 @@ int HaloPCG::Iter(){
 }
 }// end iter parallel region
   this->resi_pow2 = glob_r2a;
+  this->resi_chk2 = glob_r2a;
   return 0;
 };

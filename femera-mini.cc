@@ -15,7 +15,7 @@
 #include "test.h"
 //
 int main( int argc, char** argv ){
-  float sec=1.0, ms=1e-3,us=1e-6,ns=1e-9, Meg=1e6, pct=100.0;// k=1e3,G=1e9,
+  float sec=1.0, ms=1e-3,us=1e-6,ns=1e-9, Meg=1e6, pct=100.0;// k=1e3,Gig=1e9,
   int comp_n     = 0;//, numa_n=0;
   int verbosity  = 1;
   int iter_max   =-1;
@@ -298,7 +298,8 @@ int main( int argc, char** argv ){
     printf("Iterating...\n");
 #endif
     printf("     init ||R||%9.2e /%9.2e tol in %f s\n",
-      std::sqrt(M->resi_pow2), std::sqrt(M->rtol_pow2),init_sec );
+      std::sqrt(M->resi_chk2), std::sqrt(M->rtol_pow2),init_sec );
+      //std::sqrt(M->resi_pow2), std::sqrt(M->rtol_pow2),init_sec );
 #endif
   }// end init scope
   {// iter scope
@@ -310,10 +311,10 @@ int main( int argc, char** argv ){
       if(!((iter) % iter_info_n) ){
         float iter_sec=M->time_secs[5];
         printf("%9i ||R||%9.2e @ %.0f iter/s\n",
-          iter, std::sqrt(M->resi_pow2),
+          iter, std::sqrt(M->resi_chk2),
           float(iter)/iter_sec*float(comp_n) ); };
 #endif
-    }while( ( (iter < iter_max) & (M->resi_pow2 > M->rtol_pow2) ) | !halo_update );
+    }while( ( (iter < iter_max) & (M->resi_chk2 > M->rtol_pow2) ) | !halo_update );
     // End iteration loop ===========================================
 #if VERB_MAX>1
     auto loop_done = std::chrono::high_resolution_clock::now();
@@ -324,7 +325,7 @@ int main( int argc, char** argv ){
     if( loop_sec < 100.0*ms ){ sc=us; ss="μs"; }
     else if( loop_sec > 100.0*sec ){sc=sec; ss=" s"; };
     printf("%9i ||R||%9.2e /%9.2e tol in %f s\nDone.\n", iter,
-      std::sqrt(M->resi_pow2), std::sqrt(M->rtol_pow2), loop_sec );
+      std::sqrt(M->resi_chk2), std::sqrt(M->rtol_pow2), loop_sec );
 #endif
 #if VERB_MAX>2
     float phys_sec=M->time_secs[0];
