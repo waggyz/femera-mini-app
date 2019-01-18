@@ -316,11 +316,11 @@ int main( int argc, char** argv ) {
         // Check if can open file.
         FILE* pfile;
         pfile = fopen(pname.c_str(),"r");
-        if (pfile==NULL){
-          ss << bname << "_" << part_i << ".msh2" ;
+        if (pfile==NULL){// fclose(pfile);
+          ss << "2";//bname << "_" << part_i << ".msh2" ;
           pname = ss.str();
           pfile = fopen(pname.c_str(),"r");
-          if (pfile==NULL){ fok = false;
+          if (pfile==NULL){ fok = false;//  fclose(pfile); 
           }else{part_i++; iname=bname; file_ext=".msh2";
 #if VERB_MAX>1
           std::cout << "Found " << pname << "..." <<'\n';
@@ -343,16 +343,16 @@ int main( int argc, char** argv ) {
         // Check if can open file.
         FILE * pfile;
         pfile = fopen(pname.c_str(),"r");
-        if (pfile==NULL){
+        if (pfile==NULL){// fclose(pfile);
           ss << ".msh" ;
           pname = ss.str();
           pfile = fopen(pname.c_str(),"r");
-          if (pfile==NULL){
+          if (pfile==NULL){// fclose(pfile);
             ss << "2" ;
             pname = ss.str();
             pfile = fopen(pname.c_str(),"r");
-            if (pfile==NULL){
-              std::cout << "ERROR opening " << pname << " for reading." << '\n';
+            if (pfile==NULL){// fclose(pfile);
+              std::cout << "ERROR opening " << bname << " for reading." << '\n';
               return 1;
             }}}
 //            }else{ part_n=1;
@@ -372,7 +372,7 @@ int main( int argc, char** argv ) {
 #if VERB_MAX>1
           std::cout << "Found " << pname << "..." << '\n';
 #endif
-          fclose (pfile);
+          if(pfile!=NULL){ fclose (pfile); };
 //          };
       };
     };

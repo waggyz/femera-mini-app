@@ -29,8 +29,8 @@ Then, change `P=2` in the script above to make and solve an even bigger quadrati
 ```bash
 C=4 ; N=16
 CPUMODEL=`./cpumodel.sh`
-neper -T -reg 1 -n $N
-neper -M "n"$N"-id1.tess"
+neper -T -reg 1 -n $N -o "neper/n"$N"-id1"
+neper -M "neper/n"$N"-id1.tess"
 ./gmsh2fmr -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -M0 -E100e9 -N0.3 -R -a "neper/n"$N"-id1"
 ./femera-$CPUMODEL -v2 -c $C -s2 -p "neper/n"$N"-id1"
 ```
