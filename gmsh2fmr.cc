@@ -379,7 +379,7 @@ int main( int argc, char** argv ) {
           part_n=1; iname=pname.c_str();
 #if VERB_MAX>1
         if(verbosity>1){
-          std::cout << "Found " << pname << "..." << '\n'; };
+          std::cout << "Found " << pname << "." << '\n'; };
 #endif
           if(pfile!=NULL){ fclose (pfile); };
 //          };
@@ -426,7 +426,7 @@ int main( int argc, char** argv ) {
     //std::unordered_map<int,INT_MESH_PART> glel_part;
     auto E0=partlist[0];
     uint(cn)=uint(E0->elem_conn_n);//printf("**** %u ****",cn);
-        if(verbosity>1){
+        if(verbosity>0){
     std::cout << "Partitioning " << pname << " by " << M->elms_phid.size()
       <<" Gmsh volume physical IDs..." <<'\n'; };
     for(auto pr : M->elms_phid){ part_n++;

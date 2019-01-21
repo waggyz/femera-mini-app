@@ -101,7 +101,7 @@ gmsh2fmr-rve:
 	$(FEMERA_MINI_CC) gmsh2.cc gmsh2fmr.cc -o gmsh2fmr ;\
 	./gmsh2fmr -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
 	-M0 -E100e9 -N0.3 -R \
-	-a neper/n5-id1;
+	-v3 -a neper/n5-id1;
 
 gmsh2fmr-omp:
 	mv -f gmsh2fmr gmsh2fmr.old 2>/dev/null ;\
@@ -112,7 +112,7 @@ gmsh2fmr-omp:
 	./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu 0.001 \
 	-M1 -E100e9 -N0.3 \
 	-M2 -E100e9 -N0.3 -Z1 -X0 -Z0 \
-	-ap cube/unit1p2n2;
+	-v2 -ap cube/unit1p2n2;
 
 test-head: femera.h test_h.cc
 	$(CXX) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
