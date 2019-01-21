@@ -20,7 +20,7 @@ If you have [Gmsh 4](http://gmsh.info/ "Gmsh Website") installed, try making and
 C=4 ; P=1 ; H=89 ; N=16
 CPUMODEL=`./cpumodel.sh`
 gmsh -setnumber p $P -setnumber h $H -setnumber n $N geo/unst-cube.geo -
-./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu0.001 -M0 -E100e9 -N0.3 -R -ap "cube/unst"$H"p"$P"n"$N
+./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu0.001 -M0 -E100e9 -N0.3 -R -v2 -ap "cube/unst"$H"p"$P"n"$N
 ./femera-$CPUMODEL -v2 -c $C -p "cube/unst"$H"p"$P"n"$N
 ```
 
@@ -31,7 +31,7 @@ C=4 ; N=16
 CPUMODEL=`./cpumodel.sh`
 neper -T -reg 1 -n $N -o "neper/n"$N"-id1"
 neper -M "neper/n"$N"-id1.tess"
-./gmsh2fmr -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -M0 -E100e9 -N0.3 -R -a "neper/n"$N"-id1"
+./gmsh2fmr -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -M0 -E100e9 -N0.3 -R -v1 -a "neper/n"$N"-id1"
 ./femera-$CPUMODEL -v2 -c $C -s1 -p "neper/n"$N"-id1"
 ```
 
@@ -49,7 +49,7 @@ neper -T -reg 1 -morpho graingrowth -oricrysym cubic -ori uniform -domain "cube(
 neper -V "neper/cubic"$N".tess" -datacellcol id -print "neper/cubic"$N
 neper -M "neper/cubic"$N".tess"
 gmsh -refine -o "neper/cubic"$N"s1p1.msh2" "neper/cubic"$N".msh"
-./gmsh2fmr -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 "-x@"$L -xu0.001 -M0 -E136.31e9 -N0.37 -G127.40e9 -R -a "neper/cubic"$N"s1p1"
+./gmsh2fmr -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 "-x@"$L -xu0.001 -M0 -E136.31e9 -N0.37 -G127.40e9 -R -v1 -a "neper/cubic"$N"s1p1"
 ./femera-$CPUMODEL -v2 -c $C -s1 -p "neper/cubic"$N"s1p1"
 ```
 
@@ -83,6 +83,7 @@ These are not necessary for compiling the Mini-App.
 
  * `-a <str>` Read Gmsh file `<str>.msh` or `<str>.msh2`, partition the mesh by volume physical IDs, and save the partitions as ASCII files `<str>_?.fmr`.
  * `-ap <str>` Read partitioned Gmsh files `<str>_?.msh`, and save the partitions as ASCII files `<str>_?.fmr`.
+ * `-v<int>` Verboisty. Set to 1 when there are a large number of partitions.
 
  Boundary conditions may be applied to nodes specified by node number, Gmsh physical ID of linear or surface elements, or by location within a plane.
  
