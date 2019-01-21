@@ -41,7 +41,7 @@ public:
   INT_MESH  udof_n=0;// Total number of solution values (size of system)
   //
   int comp_n=1, numa_n=1;
-  int solv_meth=Solv::SOLV_CG, verbosity=2;
+  int solv_meth=Solv::SOLV_CG, verbosity=1;
   //
   //FIXME Consider moving these to Test*
   float phys_flop=0, phys_band=0;
