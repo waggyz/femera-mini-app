@@ -5,9 +5,13 @@ Femera is an open-source finite element-by-element (EBE) matrix-free implementat
 The Femera Mini-App is a minimal implentation with limited element and mesh format support.
 
 ## Quick Start
-Use `make mini-omp` to build and check the executable `femera-<cpumodel>`. *Make a note of the name of the executable.*
+Build and check the executable `femera-<cpumodel>`. *Make a note of the name of the executable.*
 
-If you have Gmsh 2.x mesh files of your models, you'll need a mesh file format converter. *WARNING* The OpenMP version does not work (race conditions). Instead, compile the single-core serial converter with `make gmsh2fmr-ser`.
+ * `make mini-omp` 
+
+If you have Gmsh 2.x mesh files of your models, you'll need a mesh file format converter. *WARNING* The OpenMP version does not work (race conditions). Instead, compile the single-core serial converter.
+
+ *  `make gmsh2fmr-ser`
 
 If you have [Gmsh 4](http://gmsh.info/ "Gmsh Website") installed, try making and solving a 1.1 million degree of freedom linear tetrahedron model.
 
