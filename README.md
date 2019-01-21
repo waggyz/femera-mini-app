@@ -5,7 +5,7 @@ Femera is an open-source finite element-by-element (EBE) matrix-free implementat
 The Femera Mini-App is a minimal implentation with limited element and mesh format support.
 
 ## Quick Start
-Build and check the executable `femera-<cpumodel>`. *Make a note of the name of the executable.*
+Build and check the executable `femera-<cpumodel>`. *Make a note of the name of the executable built.*
 
  * `make mini-omp` 
 
