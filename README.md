@@ -83,7 +83,7 @@ These are not necessary for compiling the Mini-App.
 
  * `-a <str>` Read Gmsh file `<str>.msh` or `<str>.msh2`, partition the mesh by volume physical IDs, and save the partitions as ASCII files `<str>_?.fmr`.
  * `-ap <str>` Read partitioned Gmsh files `<str>_?.msh`, and save the partitions as ASCII files `<str>_?.fmr`.
- * `-v<int>` Verboisty. Set to 1 when there are a large number of partitions.
+ * `-v<int>` Verbosity level [default: 1]; set higher to see details of each partition.
 
  Boundary conditions may be applied to nodes specified by node number, Gmsh physical ID of linear or surface elements, or by location within a plane.
  
