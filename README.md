@@ -16,7 +16,7 @@ If you have Gmsh 2.x mesh files of your models, you'll need a mesh file format c
 If you have [Gmsh 4](http://gmsh.info/ "Gmsh Website") installed, try making and solving a 1.1 million degree of freedom linear tetrahedron model.
 
  * Set `C` to the total number of physical cores in your machine.
- * Set `P` to 1 for linear tets, or 2 for quadratic tets.
+ * Set `P` to 1 for linear tets.
  * Set `H` to 89 elements (90 nodes) along each edge of the modeled cube.
  * Set `N` to the number of partitions desired (N>=C); try 4xC to 16xC.
 
