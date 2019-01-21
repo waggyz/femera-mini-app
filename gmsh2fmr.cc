@@ -32,6 +32,7 @@ int main( int argc, char** argv ) {
    *   solution u fixed at zero in z for nodes in elements with physical id tag #2,3
    *   solution u set to 1e-3 in x,z for nodes in elements with physical id tag #4
    * */
+  int verbosity=1;//,dots_mod=0;
   const char* bname=NULL;//FIXME Store this in Femera or Mesh instance?
   const char* iname=NULL; std::string file_ext=".msh";
   std::string pname,oriname;
@@ -61,11 +62,12 @@ int main( int argc, char** argv ) {
     //
     opterr = 0; int c;
     while ((c = getopt (argc, argv,
-      "abcpt:n:@:xyz0u:f:M:X:Y:Z:E:N:G:C:B:O:R")) != -1){
+      "abcpv:t:n:@:xyz0u:f:M:X:Y:Z:E:N:G:C:B:O:R")) != -1){
       // x:  x requires an argument
       mtrldone=true;
       switch (c) {
         // Input filename(s)
+        case 'v':{ verbosity = atoi(optarg);M->verbosity=verbosity; break; }
         case 'p':{ is_part = true; break; }
         //case 'P':{ is_part = true; part_n=atoi(optarg); break;}// pstr = optarg;
         // Output format
@@ -194,7 +196,7 @@ int main( int argc, char** argv ) {
       //if( mtrldone & ((volutags.size()+parttags.size()) > 0) ){
       if( mtrldone & (parttags.size() > 0) ){
 #if VERB_MAX>4
-        //if(verbosity>3){
+        if(verbosity>4){
         //std::cout << "Volume tags:";
         //  for(int v : volutags ){ std::cout << " " << v; };
         std::cout << ", ";
@@ -220,7 +222,7 @@ int main( int argc, char** argv ) {
         std::cout << "RAxes:";
           for(int v : axislist ){ std::cout << " " << v; };
         std::cout << std::endl;
-        //};
+        };
 #endif
         {uint n= uint(3)-rdeglist.size();
         if(rotrand){ for(uint i=0; i<n; i++){
@@ -251,6 +253,7 @@ int main( int argc, char** argv ) {
       //
     };// end argument parsing loop
 #if VERB_MAX>2
+    if(verbosity>2){
     if(mtrl_part.size()>0){
       std::cout << "Partition Physics: "<< std::endl;;
       for (std::pair<int,std::vector<FLOAT_PHYS>> pr : mtrl_part){
@@ -265,6 +268,7 @@ int main( int argc, char** argv ) {
         for(FLOAT_PHYS v : pr.second ){ std::cout <<" "<<v; };
         std::cout << std::endl;
       }; };
+    };
 #endif
     //if(!is_part){ std::cout << "ERROR Must specify -p or -P n" <<'\n'; return 1;};
     //FIXME Does not yet read unpartitioned meshes.
@@ -283,10 +287,11 @@ int main( int argc, char** argv ) {
       //  std::cout << "ERROR Could not open " <<oriname<< " for reading."<<std::endl;
       //  return 1;
       //}else{
-  #if VERB_MAX>1
+#if VERB_MAX>1
+      if(verbosity>1){
         std::cout << "Reading Bunge (deg) crystal orientations from " 
-        << oriname << "..." <<'\n';
-  #endif
+        << oriname << "..." <<'\n'; };
+#endif
         FLOAT_PHYS o;
         while( ofile>>o ){ orislist.push_back( o * oriunit); };
         //fclose (ofile);
@@ -305,7 +310,8 @@ int main( int argc, char** argv ) {
     else{
       if(is_part){
 #if VERB_MAX>1
-      printf ("Looking for Gmsh partitions of %s...\n", bname);
+        if(verbosity>0){
+      printf ("Looking for Gmsh partitions of %s...\n", bname); };
 #endif
       bool fok=true; INT_MESH_PART part_i=1;
       while( fok ){
@@ -323,13 +329,15 @@ int main( int argc, char** argv ) {
           if (pfile==NULL){ fok = false;//  fclose(pfile); 
           }else{part_i++; iname=bname; file_ext=".msh2";
 #if VERB_MAX>1
-          std::cout << "Found " << pname << "..." <<'\n';
+        if(verbosity>1){
+          std::cout << "Found " << pname << "..." <<'\n'; };
 #endif
           fclose (pfile); }
         }else{// part_0=1;
           part_i++; iname=bname;
 #if VERB_MAX>1
-          std::cout << "Found " << pname << "..." <<'\n';
+        if(verbosity>1){
+          std::cout << "Found " << pname << "..." <<'\n'; };
 #endif
           fclose (pfile);
           };
@@ -370,7 +378,8 @@ int main( int argc, char** argv ) {
 //        }else{//part_0=0;
           part_n=1; iname=pname.c_str();
 #if VERB_MAX>1
-          std::cout << "Found " << pname << "..." << '\n';
+        if(verbosity>1){
+          std::cout << "Found " << pname << "..." << '\n'; };
 #endif
           if(pfile!=NULL){ fclose (pfile); };
 //          };
@@ -379,7 +388,8 @@ int main( int argc, char** argv ) {
     if(part_n>0){ part_0=0;// is_part=false;
       if(part_n>1){ part_0=1;// is_part=true;
 #if VERB_MAX>1
-      printf ("Found %u mesh partitions.\n", part_n);};
+        if(verbosity>0){
+      printf ("Found %u mesh partitions.\n", part_n);}; };
 #endif
     }else{
       std::cerr << "ERROR No mesh partition files could be opened for reading."
@@ -404,7 +414,8 @@ int main( int argc, char** argv ) {
       pname = ss.str();
     };
 #if VERB_MAX>3
-    std::cout << "Reading " << pname << "..." <<'\n';
+        if(verbosity>3){
+    std::cout << "Reading " << pname << "..." <<'\n'; };
 #endif
     E=M->ReadMsh2( pname.c_str() );
 #pragma omp atomic write
@@ -415,14 +426,16 @@ int main( int argc, char** argv ) {
     //std::unordered_map<int,INT_MESH_PART> glel_part;
     auto E0=partlist[0];
     uint(cn)=uint(E0->elem_conn_n);//printf("**** %u ****",cn);
+        if(verbosity>1){
     std::cout << "Partitioning " << pname << " by " << M->elms_phid.size()
-      <<" Gmsh volume physical IDs..." <<'\n';
+      <<" Gmsh volume physical IDs..." <<'\n'; };
     for(auto pr : M->elms_phid){ part_n++;
       Elem* E = new Tet( E0->elem_p, pr.second.size());
       //printf("elem_glid[%u]\n",uint(E->elem_glid.size()));
       //E->elem_glid=pr.second;
       //INT_MESH node_i=0;
-      std::cout << "Making partition " << (part_n-1) <<"..."<<std::endl;
+        if(verbosity>2){
+      std::cout << "Making partition " << (part_n-1) <<"..."<<std::endl; };
       E->node_n=0;
       for(INT_MESH e=0;e<E->elem_n;e++){
         auto glel=pr.second[e];
@@ -459,8 +472,9 @@ int main( int argc, char** argv ) {
   M->list_elem = partlist;
   //
 #if VERB_MAX>1
-  //if(verbosity>1)
-  { printf("Applying boundary conditions...\n");
+  if(verbosity>0){
+    printf("Applying boundary conditions...\n");
+    if(verbosity>1){
     FLOAT_MESH loc,amt; INT_DOF f,g;
     for(auto tp : bc0_at){ std::tie(f,g,loc)=tp;
       printf("BC0 @DOF %u == %f: set DOF %u to zero.\n", uint(f),loc,uint(g)); };
@@ -468,7 +482,7 @@ int main( int argc, char** argv ) {
       printf("BCS @DOF %u == %f: set DOF %u = %f.\n", uint(f),loc,uint(g),amt); };
     for(auto tp : rhs_at){ std::tie(f,g,loc,amt)=tp;
       printf("RHS @DOF %u == %f: set DOF %u = %f.\n", uint(f),loc,uint(g),amt); };
-  };
+    }; };
 #endif
   //
   if( (bc0_at.size()+bcs_at.size()+rhs_at.size()) >0 ){
@@ -495,6 +509,7 @@ int main( int argc, char** argv ) {
   M->list_elem[0]=NULL; if(part_0==0){part_0=1; part_n-=1;}//FIXME
   M->SyncIDs();//FIXME need to skip [0] when syncing
 #if VERB_MAX>2
+  if(verbosity>2){
   for(uint i=0; i<M->list_elem.size(); i++){
     std::cout << "Mesh Partition " << i ;
     if(M->list_elem[i]==NULL){std::cout << " is null.\n";
@@ -506,6 +521,7 @@ int main( int argc, char** argv ) {
         << E->elem_conn.size()<<"].";
       std::cout <<'\n' ;
 #if VERB_MAX>3
+    if(verbosity>3){
       printf("Nodes:");
       for(uint j=0;j<E->vert_coor.size();j++){
         if(!(j%3)){printf("\n%3u(%3u):",j/3,E->node_glid[j/3]);};
@@ -527,8 +543,10 @@ int main( int argc, char** argv ) {
     std::cout << "BC0:" << '\n';
     for(auto t : E->bc0_nf  ){ std::tie(n,f)=t;
       std::cout << n << ":" << uint(f) <<'\n'; };
+    };
 #endif
     };//end if this Elem is defined
+  };
   };
 #endif
   if(save_csv){
@@ -542,6 +560,8 @@ int main( int argc, char** argv ) {
     };
   };
   if(save_asc | save_bin){
+    if(verbosity==1){ 
+      printf("Saving and appending physics to partitions...\n"); };
 #pragma omp parallel for schedule(static)
     for(int part_i=part_0;part_i<(part_n+part_0);part_i++){
       Phys::vals props={100e9,0.3};//FIXME Should not have defaults here...
@@ -553,7 +573,8 @@ int main( int argc, char** argv ) {
       if(is_part){ ss << "_" << part_i ;};
       ss << ".fmr";
       std::string pname = ss.str();
-      std::cout << "Saving part " << pname << "..." <<'\n';
+      if(verbosity>1){
+      std::cout << "Saving part " << pname << "..." <<'\n'; };
       //if(save_bin){
       //  M->list_elem[part_i]->SavePartFMR( pname.c_str(), true  ); };
       if(save_asc){
@@ -587,7 +608,8 @@ int main( int argc, char** argv ) {
           for(uint i=0;i<props.size();i++){ prop[i]=props[i]; };
           Y=new ElastIso3D(prop[0],prop[1]);
         };
-        std::cout << "Appending physics to " << pname << "..." <<'\n';
+        if(verbosity>1){
+          std::cout << "Appending physics to " << pname << "..." <<'\n'; };
         Y->SavePartFMR( pname.c_str(), false );
       };
     };

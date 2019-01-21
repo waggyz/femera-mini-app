@@ -44,8 +44,10 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
     if(mshstring=="$MeshFormat"){//----------------------------------
       mshfile >> version >> file_type >> data_size ;
 #if VERB_MAX>2
-      std::cout << "Reading Gmsh " << version << " "
-        << file_type_name[file_type] << " file "<< fname <<"..." <<'\n';
+      if(verbosity>2){
+        std::cout << "Reading Gmsh " << version << " "
+          << file_type_name[file_type] << " file "<< fname <<"..." <<'\n';
+      };
 #endif
       if(file_type==1){
       std::cout << "WARNING Gmsh binary file format not supported.";
@@ -56,7 +58,8 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
       vert_coor.resize(node_n*mesh_d);
       node_glid.resize(node_n);
 #if VERB_MAX>3
-      std::cout << "Reading " << number_of_nodes << " nodes..." <<'\n';
+      if(verbosity>3){
+      std::cout << "Reading " << number_of_nodes << " nodes..." <<'\n'; };
 #endif
       for(int i=0; i<number_of_nodes; i++){
         mshfile >> node_number >> x>>y>>z ;
@@ -75,7 +78,8 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
       INT_MESH elxx_i=0;
       mshfile >> number_of_elements ;
 #if VERB_MAX>3
-      std::cout << "Reading " << number_of_elements << " elements..." <<'\n';
+      if(verbosity>3){
+      std::cout << "Reading " << number_of_elements << " elements..." <<'\n'; };
 #endif
       for(int i=0; i<number_of_elements; i++){
         mshfile >> elm_number >> elm_type >> number_of_tags ;
@@ -115,24 +119,26 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
           };//FIXME Is this always true?
         };
 #if VERB_MAX>3
-        std::cout << elm_number <<" ["<< physical_tag <<"]: ";
+      if(verbosity>3){
+        std::cout << elm_number <<" ["<< physical_tag <<"]: "; };
 #endif
         for(uint j=0; j<this->typeEleNodes[elm_type]; j++){
           mshfile >> node_number;
 #if VERB_MAX>3
-        std::cout << node_number <<" ";
+      if(verbosity>3){ std::cout << node_number <<" "; };
 #endif
           if(is_volu){tet_conn.push_back((INT_MESH)node_number); };
           if(is_line){line_nodes_tagged[physical_tag].insert(node_number); };
           if(is_surf){surf_nodes_tagged[physical_tag].insert(node_number); };
         };
 #if VERB_MAX>3
-        std::cout << '\n';
+      if(verbosity>3){ std::cout << '\n'; };
 #endif
       };
       elxx_n=elxx_i;
 #if VERB_MAX>3
-      std::cout << "Found " << elxx_n << " Tet Elements." <<'\n';
+      if(verbosity>3){
+      std::cout << "Found " << elxx_n << " Tet Elements." <<'\n'; };
 #endif
       if(elxx_n>0){
         E = new Tet(pord,elxx_n);
@@ -163,6 +169,7 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
       };
     };// Done reading elements
 #if VERB_MAX>3
+    if(verbosity>3){
     // Not supported ------------------------------------------------
     if(mshstring=="$PhyscialNames"){std::cout << mshstring <<'\n';};
     if(mshstring=="$Periodic"){std::cout << mshstring <<'\n';};
@@ -180,6 +187,7 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
     if(mshstring=="$EndElementData"){std::cout << mshstring <<'\n';};
     if(mshstring=="$EndElementNodeData"){std::cout << mshstring <<'\n';};
     if(mshstring=="$EndInterpolationScheme"){std::cout << mshstring <<'\n';};
+    };
 #endif
   };// EOF ==========================================================
   {// Scope these local variables

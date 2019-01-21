@@ -56,7 +56,8 @@ int Mesh::SyncIDs(){//FIXME Not parallelized
         std::tie(n,f,v)=t;
         this->bcs_vals.insert(Mesh::nfval( E->node_glid[n],f,v ));
 #if VERB_MAX>3
-        printf("BCS: %u(%u),%u: %f\n",n,E->node_glid[n],uint(f),v);
+        if(verbosity>3){
+        printf("BCS: %u(%u),%u: %f\n",n,E->node_glid[n],uint(f),v); };
 #endif
       };
       for(auto t : E->bc0_nf){
@@ -67,7 +68,8 @@ int Mesh::SyncIDs(){//FIXME Not parallelized
   };
   this->node_n=node_glid_owner.size();
 #if VERB_MAX>2
-  printf("Found %u global nodes...\n",node_n);
+  if(verbosity>2){
+    printf("Found %u global nodes...\n",node_n); };
 #endif
   //ScatterHaloIDs();//----------------------------------------------
   for(auto t : node_glid_parts){
@@ -75,9 +77,11 @@ int Mesh::SyncIDs(){//FIXME Not parallelized
     std::tie( n, ps)=t;
     auto o=node_glid_owner[n];
 #if VERB_MAX>3
-    printf("Node %i in parts (",n);
-    for(size_t i=0;i<ps.size();i++){ printf("%u ",ps[i]); };
-    printf(") owner: %u\n",o);
+    if(verbosity>3){
+      printf("Node %i in parts (",n);
+      for(size_t i=0;i<ps.size();i++){ printf("%u ",ps[i]); };
+      printf(") owner: %u\n",o);
+    };
 #endif
     if(ps.size()>1){// n is a halo node
       for(size_t i=0;i<ps.size();i++){
@@ -102,7 +106,8 @@ int Mesh::SyncIDs(){//FIXME Not parallelized
       RESTRICT Mesh::ints enew(E->elem_n);
       std::set<INT_MESH> nset={};
 #if VERB_MAX>2
-  printf("Renumbering nodes in partition %u...\n",i);
+  if(verbosity>2){
+    printf("Renumbering nodes in partition %u...\n",i); };
 #endif
       for(INT_MESH j=0; j<E->halo_remo_n; j++){// remote halo nodes first
         auto l = E->node_loid[ E->remo_glid[j] ];
@@ -110,11 +115,12 @@ int Mesh::SyncIDs(){//FIXME Not parallelized
         nnew[l]= j ;
         nset.insert( l );
 #if VERB_MAX>3
-        printf(" %u=>%u ", l,j);
+        if(verbosity>3){
+        printf(" %u=>%u ", l,j); };
 #endif
       };
 #if VERB_MAX>3
-      printf(":");
+        if(verbosity>3){ printf(":"); };
 #endif
       for(INT_MESH j=0; j<E->halo_loca_n; j++){// then local halo nodes
         auto l = E->node_loid[ E->loca_glid[j] ];
@@ -122,11 +128,11 @@ int Mesh::SyncIDs(){//FIXME Not parallelized
         nnew[ l ] = E->halo_remo_n+j ; 
         nset.insert( l );
 #if VERB_MAX>3
-        printf(" %u=>%u ", l,E->halo_remo_n+j);
+        if(verbosity>3){ printf(" %u=>%u ", l,E->halo_remo_n+j); };
 #endif
       };
 #if VERB_MAX>3
-      printf("|");
+        if(verbosity>3){ printf("|"); };
 #endif
       // Fill the interior nodes in this partition,
       // sorted by elems they're in.
@@ -144,7 +150,7 @@ int Mesh::SyncIDs(){//FIXME Not parallelized
           nset.insert(n);
           nnew[n]=node_i;
 #if VERB_MAX>3
-          printf(" %u=>%u ", n,node_i);
+        if(verbosity>3){ printf(" %u=>%u ", n,node_i); };
 #endif
           node_i++;
         };
@@ -168,7 +174,8 @@ int Mesh::SyncIDs(){//FIXME Not parallelized
       };
       // Renumber elements ------------------------------------------
 #if VERB_MAX>2
-  printf("Renumbering elements in partition %u...\n",i);
+      if(verbosity>2){
+        printf("Renumbering elements in partition %u...\n",i); };
 #endif
       auto c=uint(E->elem_conn_n);
       INT_MESH elem_i=0;
@@ -187,7 +194,7 @@ int Mesh::SyncIDs(){//FIXME Not parallelized
       };
       }//end scope
 #if VERB_MAX>3
-      printf("\n");
+      if(verbosity>3){ printf("\n"); };
 #endif
       {// scope
       auto g=E->node_glid;
@@ -245,9 +252,11 @@ int Mesh::Setup(){
     ss << this->base_name; if(is_part){ ss << "_" << part_i << ".fmr" ;};
     std::string pname = ss.str();
 #if VERB_MAX>3
+    if(verbosity>3){
     //if(part_n<10){
       std::cout << "Reading " << pname << "..." <<'\n';
     //};
+    };
 #endif
     Elem* E = new Tet(pord);//FIXME
     Phys* Y = E->ReadPartFMR(pname.c_str(),false);
@@ -269,6 +278,7 @@ int Mesh::Setup(){
     S->Setup( E,Y );// Applies BCs & sets S->udof_flop and 
     // For PCR, also computes diagonal of K for Jacobi preconditioner
 #if VERB_MAX>10
+    if(verbosity>10){
 #pragma omp critical(print)
 {
     uint d=uint(Y->ndof_n);
@@ -279,6 +289,7 @@ int Mesh::Setup(){
       }; std::cout <<'\n';
     };
 }
+    };
 #endif
     Mesh::part P(E,Y,S);
 #pragma omp critical(systot)
@@ -312,7 +323,7 @@ int Mesh::Setup(){
         printf("            %10u Nodes (%u halo: %u remote, %u local)\n",
           E->node_n, E->halo_node_n, E->halo_remo_n, E->halo_loca_n);
 #if VERB_MAX>4
-      if(verbosity>3){
+      if(verbosity>4){
         printf("|J|: ");
         for(uint j=9; j<E->elip_jacs.size(); j+=10){
           printf("%+9.2e ",E->elip_jacs[j]); }; printf("\n");
@@ -357,16 +368,18 @@ int Mesh::Setup(){
   };
   this->halo_val.resize(halo_udof_tot);//ndof_n*halo_loca_tot);
 #if VERB_MAX>0
-  printf("Total:%10u Elems (%u halo) in %u partitions\n",
-    elem_tot, halo_elem_tot, part_n);
-  printf("      %10u Nodes (%u halo: %u remote, %u local)\n",
-        node_tot, halo_node_tot, halo_remo_tot, halo_loca_tot);
-  //printf("Read and set up in %f s.\n", float(read_time.count())*1e-9 );
-  //std::cout <<"Solving ";
-  //std::cout <<"system: "<<this->_elem_n<<" Elems, "
-  //  <<this->node_n<<" Nodes, "<<this->udof_n<<" DOF; "<<'\n'
-  //  <<"     to within: "<<rtol<<" relative tolerance,"<<'\n'
-  //  <<"or stopping at: "<<iter_max<<" "<<solv_name<<" iterations..."<<'\n';
+  if(verbosity>0){
+    printf("Total:%10u Elems (%u halo) in %u partitions\n",
+      elem_tot, halo_elem_tot, part_n);
+    printf("      %10u Nodes (%u halo: %u remote, %u local)\n",
+          node_tot, halo_node_tot, halo_remo_tot, halo_loca_tot);
+    //printf("Read and set up in %f s.\n", float(read_time.count())*1e-9 );
+    //std::cout <<"Solving ";
+    //std::cout <<"system: "<<this->_elem_n<<" Elems, "
+    //  <<this->node_n<<" Nodes, "<<this->udof_n<<" DOF; "<<'\n'
+    //  <<"     to within: "<<rtol<<" relative tolerance,"<<'\n'
+    //  <<"or stopping at: "<<iter_max<<" "<<solv_name<<" iterations..."<<'\n';
+  };
 #endif
   return 0;
 };
