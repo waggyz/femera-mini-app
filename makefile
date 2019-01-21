@@ -1,7 +1,7 @@
 # Defaults: use g++
 CPPFLAGS=-std=c++11 -Wall -Wextra -g -Ofast -ftree-vectorize -march=native \
- -mtune=core-avx2 -fno-builtin-sin -fno-builtin-cos -Wno-unknown-pragmas
-# -mtune=native doesn't work right
+ -mtune=native -fno-builtin-sin -fno-builtin-cos -Wno-unknown-pragmas
+#FIXME -mtune=core-avx2 when -mtune=native doesn't work
 NCPU=2
 NUMA=2
 
