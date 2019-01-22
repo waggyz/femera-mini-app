@@ -8,7 +8,8 @@ public:
     SOLV_GD=0, SOLV_CG=1, SOLV_CR=2
   };
   INT_MESH iter=0, iter_max=0, udof_n;
-  FLOAT_SOLV tol=1e-3;// Default Solution Tolerance
+  FLOAT_SOLV loca_rtol=0.0;
+  //FLOAT_SOLV tol=1e-3;// Default Solution Tolerance
   //
   RESTRICT Solv::vals sys_u;// solution
   RESTRICT Solv::vals sys_f;// f=[A]{u}
@@ -34,8 +35,10 @@ public:
   int Precond( Elem*, Phys*);
   //
   //FIXME Make the rest private or protected later?
-  FLOAT_SOLV to2=0.0;// Solution Tolerance Squared
-  FLOAT_SOLV r2a=0.0;// [r2b, alpha kept local to each iteration]
+  FLOAT_SOLV loca_rto2=0.0;// Solution Tolerance Squared
+  FLOAT_SOLV loca_res2=0.0;// [r2b, alpha kept local to each iteration]
+  //FLOAT_SOLV to2=0.0;// Solution Tolerance Squared
+  //FLOAT_SOLV r2a=0.0;// [r2b, alpha kept local to each iteration]
   INT_MESH halo_loca_0=0;// Associated Elem->halo_remo_n * Phys->ndof_n
   uint udof_flop=0, udof_band=0;
   //uint udof_flop=12, udof_band=sizeof(FLOAT_SOLV)*(5+2+3+1);//+2PCG
@@ -43,8 +46,8 @@ public:
 protected:
   //Solv():{}:
   Solv( INT_MESH n, INT_MESH i, FLOAT_PHYS r ) :
-    iter_max(i), udof_n(n), tol(r){
-    to2=tol*tol;
+    iter_max(i), udof_n(n), loca_rtol(r){
+    loca_rto2=loca_rtol*loca_rtol;
     sys_u.resize(udof_n,0.0);// Initial Solution Guess
     sys_f.resize(udof_n,0.0);// f=Au
     sys_r.resize(udof_n,0.0);// Residuals

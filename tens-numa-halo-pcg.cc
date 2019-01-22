@@ -85,24 +85,24 @@ int PCG::Init( Elem* E, Phys* Y ){
   return 0;
 };
 int PCG::Init(){
-  const uint n=sys_u.size();// r2a is a member variable.
+  const uint n=sys_u.size();// loca_res2 is a member variable.
   const uint sumi0=this->halo_loca_0;// *this->ndof_n;
   this->sys_r -= this->sys_f;
   //FLOAT_PHYS avg_d=S->sys_d.sum()/S->sys_d.size();
   //sys_r  = sys_b - sys_f;// This is done sparsely now.
   //sys_z  = sys_d * sys_r;
   //sys_p  = sys_z;
-  //r2a    = inner_product( sys_r,sys_z );
+  //loca_res2    = inner_product( sys_r,sys_z );
   //FIXED Try inlining sys_z into next two
   sys_p  = sys_d * sys_r;
-  //r2a    = inner_product( sys_r,sys_d * sys_r );
+  //loca_res2    = inner_product( sys_r,sys_d * sys_r );
   //FLOAT_SOLV r=0.0;
-  this->r2a=0.0;
+  this->loca_res2=0.0;
 //#pragma omp parallel for reduction(+:r)
   for(uint i=sumi0; i<n; i++){
-    this->r2a += sys_r[i] * sys_r[i] * sys_d[i]; };
-  //this->r2a=r; //FIXME HALO SUM this->r2a ***************************
-  this->to2 = this->tol*tol *r2a;//FIXME Move this somewhere.
+    this->loca_res2 += sys_r[i] * sys_r[i] * sys_d[i]; };
+  //this->loca_res2=r; //FIXME HALO SUM this->loca_res2 ***************************
+  this->loca_rto2 = this->loca_rtol*loca_rtol *loca_res2;//FIXME Move this somewhere.
   //    printf("r2a: %9.2e, sys_r:\n",this->r2a);
   //    for(uint i=0; i<sys_r.size()/3; i++){
   //      printf("%u: %9.2e %9.2e %9.2e\n",i,
@@ -113,7 +113,7 @@ int PCG::Iter(){// 2 FLOP + 12 FLOP/DOF, 14 float/DOF
   //NOTE Compute current sys_f=[k][p] before iterating with this.
   const uint n=sys_u.size();
   const uint sumi0=this->halo_loca_0;// *this->ndof_n;//FIXME Magic number
-  const auto ra=this->r2a;// Make a local version of this member variable
+  const auto ra=this->loca_res2;// Make a local version of this member variable
   //
   //const FLOAT_SOLV alpha  = ra / inner_product( sys_p,sys_f );// 1 DIV +(2 FLOP/DOF)
   FLOAT_SOLV s=0.0;
@@ -129,7 +129,7 @@ int PCG::Iter(){// 2 FLOP + 12 FLOP/DOF, 14 float/DOF
   //sys_r -= alpha * sys_f;//Moved inside next loop
   //sys_z  = sys_d * sys_r;
   //r2b    = inner_product( sys_r,sys_z );
-  //sys_p  = sys_z + (r2b/r2a)*sys_p;
+  //sys_p  = sys_z + (r2b/loca_res2)*sys_p;
   //FIXED Inlined sys_z into next two loops...
   FLOAT_SOLV r2b=0.0;
   for(uint i=0; i<n; i++){// 4 FLOP/DOF, 4 read + 2 write =6/DOF
@@ -140,16 +140,16 @@ int PCG::Iter(){// 2 FLOP + 12 FLOP/DOF, 14 float/DOF
   for(uint i=sumi0; i<n; i++){// 3 FLOP/DOF, 2 read =2/DOF
     r2b += sys_r[i] * sys_r[i] * sys_d[i];
   };//FIXME HALO SUM r2b ********************************************
-  if( ra < to2 ){ return(SOLV_CNVG_PTOL);};
+  if( ra < loca_rto2 ){ return(SOLV_CNVG_PTOL);};
   //sys_p  = sys_d * sys_r + (r2b/ra)*sys_p;
   const FLOAT_PHYS beta = r2b/ra;//  1 FLOP
-  this->r2a = r2b;// Update member residual (squared)
+  this->loca_res2 = r2b;// Update member residual (squared)
 //#pragma omp parallel for
   for(uint i=0; i<n; i++){// 3 FLOP/DOF, 3 read + 1 write =4/DOF
     //sys_u[i] += alpha * sys_p[i];// Better data locality here, but not faster
     sys_p[i] = sys_d[i] * sys_r[i] + beta * sys_p[i];
   };
-  //r2a = r2b;
+  //loca_res2 = r2b;
   //if( r2b < to2 ){ return(SOLV_CNVG_PTOL);};
   return(0);
 };
@@ -157,7 +157,7 @@ int PCG::Solve( Elem* E, Phys* Y ){//FIXME Redo this
   //this->Setup( E,Y );
   this->Init( E,Y );
   if( !this->Init() ){//============ Solve ================
-    printf("SER INIT r2a:%9.2e\n",this->r2a);
+    printf("SER INIT r2a:%9.2e\n",this->loca_rto2);
     for(this->iter=0; this->iter < this->iter_max; this->iter++){
       this->sys_f=0.0;
       //Y->ScatterNode2Elem(E,this->sys_p,Y->elem_inout);
@@ -172,8 +172,8 @@ int PCG::Solve( Elem* E, Phys* Y ){//FIXME Redo this
       if( this->Iter() ){ break ;};// CG Iteration
 #if VERB_MAX>2
       if(!((iter+1) % 100) ){
-        printf("%6i ||R||%9.2e\n", iter+1, std::sqrt(r2a) ); };
-          //std::sqrt(r2a), std::sqrt(this->to2) ); };
+        printf("%6i ||R||%9.2e\n", iter+1, std::sqrt(loca_res2) ); };
+          //std::sqrt(loca_res2), std::sqrt(this->loca_rto2) ); };
 #endif
     };// End iteration loop.
   };
@@ -189,7 +189,7 @@ int HaloPCG::Init(){// Preconditioned Conjugate Gradient
   //
   INT_MESH halo_n=0;
   // Local copies for atomic ops and reduction
-  FLOAT_SOLV glob_r2a = this->resi_pow2, glob_to2 = this->rtol_pow2;
+  FLOAT_SOLV glob_r2a = this->glob_res2, glob_to2 = this->glob_rto2;
 #pragma omp parallel num_threads(comp_n)
 {// parallel init region
   long int my_scat_count=0, my_prec_count=0,
@@ -301,14 +301,14 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
   start = std::chrono::high_resolution_clock::now();
 #pragma omp critical(init)
 { S->Init(); }
-  glob_r2a += S->r2a;
+  glob_r2a += S->loca_res2;
   };
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
-    S->to2 = S->tol*S->tol *glob_r2a;
+    S->loca_rto2 = S->loca_rtol*S->loca_rtol *glob_r2a;
 #pragma omp atomic write
-    glob_to2 = S->to2;// Pass the relative tolerance out.
+    glob_to2 = S->loca_rto2;// Pass the relative tolerance out.
   };
   dur = std::chrono::duration_cast<std::chrono::nanoseconds>
     (std::chrono::high_resolution_clock::now()-start);
@@ -323,9 +323,9 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
   this->time_secs[5]+=float(my_solv_count)*1e-9;
 }
 }// end init parallel region
-  this->resi_pow2 = glob_r2a;
-  this->resi_chk2 = glob_r2a;
-  this->rtol_pow2 = glob_to2;// / ((FLOAT_SOLV)this->udof_n);
+  this->glob_res2 = glob_r2a;
+  this->glob_chk2 = glob_r2a;
+  this->glob_rto2 = glob_to2;// / ((FLOAT_SOLV)this->udof_n);
   return 0;
 };
 int HaloPCG::Iter(){
@@ -340,7 +340,7 @@ int HaloPCG::Iter(){
   //if( (iter % halo_mod)==0 ){ halo_update=true; }else{ halo_update=false; };
   //
   FLOAT_SOLV glob_sum1=0.0, glob_sum2=0.0;
-  FLOAT_SOLV glob_r2a = this->resi_pow2;
+  FLOAT_SOLV glob_r2a = this->glob_res2;
   const auto P=this->mesh_part;//FIXME Undo this?
 #pragma omp parallel num_threads(comp_n)
 {// iter parallel region
@@ -469,7 +469,7 @@ int HaloPCG::Iter(){
   this->time_secs[5]+=float(iter_time.count())*1e-9;
 }
 }// end iter parallel region
-  this->resi_pow2 = glob_r2a;
-  this->resi_chk2 = glob_r2a;
+  this->glob_res2 = glob_r2a;
+  this->glob_chk2 = glob_r2a;
   return 0;
 };

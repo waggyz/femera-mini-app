@@ -48,7 +48,8 @@ public:
   float solv_flop=0, solv_band=0;
   //
   int iter_max=0;
-  FLOAT_SOLV solv_rtol=0.0, rtol_pow2=0.0, resi_chk2=0.0, resi_pow2=0.0;//, resb_pow2;
+  FLOAT_SOLV glob_rtol=0.0, glob_rto2=0.0, glob_chk2=0.0, glob_res2=0.0;
+  //FLOAT_SOLV solv_rtol=0.0, rtol_pow2=0.0, resi_chk2=0.0, resi_pow2=0.0;//, resb_pow2;
   //
   //FIXED Change these to < node_id, dof_id, value >  and < node_id, dof_id >:
   //FIXME Move these into Elem?
@@ -90,9 +91,9 @@ public:
 protected:
   Mesh( Solv::Meth m ) : solv_meth(m){};
   Mesh( Solv::Meth m, INT_MESH i, FLOAT_PHYS r ) :
-    solv_meth(m),iter_max(i),solv_rtol(r){};
+    solv_meth(m),iter_max(i),glob_rtol(r){};
   Mesh( int p, Solv::Meth m, INT_MESH i, FLOAT_PHYS r ) :
-    solv_meth(m),iter_max(i),solv_rtol(r){
+    solv_meth(m),iter_max(i),glob_rtol(r){
       mesh_part.resize(p);
     };
 private:

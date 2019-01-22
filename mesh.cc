@@ -263,14 +263,14 @@ int Mesh::Setup(){
     Solv* S;//FIXME can this be passed as an argument and copied?
     switch( solv_meth ){
       case(Solv::SOLV_CG):{
-        S=new PCG( E->node_n * Y->ndof_n, this->iter_max, solv_rtol ); 
+        S=new PCG( E->node_n * Y->ndof_n, this->iter_max, glob_rtol ); 
         break;}
       case(Solv::SOLV_CR):{
-        S=new PCR( E->node_n * Y->ndof_n, this->iter_max, solv_rtol ); 
+        S=new PCR( E->node_n * Y->ndof_n, this->iter_max, glob_rtol ); 
         break;}
-      default:{ S=new PCG(E->node_n * Y->ndof_n, this->iter_max, solv_rtol );  }
+      default:{ S=new PCG(E->node_n * Y->ndof_n, this->iter_max, glob_rtol );  }
     };
-    //S->tol = this->solv_rtol;
+    //S->tol = this->glob_rtol;
     if(dots_mod>0){
       if((part_i%dots_mod)==0){ std::cout <<"."; fflush(stdout); }; };
     E->Setup();

@@ -95,10 +95,11 @@ int PCR::Init(){
   FLOAT_SOLV s=0.0;
   for(uint i=sumi0; i<n; i++){// 2 FLOP/DOF, 2 read = 2/DOF
     s += sys_r[i] * sys_f[i]; };
-  this->r2a=s;
-  this->to2 = this->tol*tol *r2a;//FIXME Move this somewhere.
+  this->loca_res2=s;
+  //this->to2 = this->tol*tol *loca_res2;//FIXED Move this somewhere.
+  this->loca_rto2 = loca_rtol*loca_rtol *loca_res2;//FIXME Move this somewhere.
   //
-  //if( r2a < to2 ){ return(SOLV_CNVG_PTOL); }
+  //if( loca_res2 < to2 ){ return(SOLV_CNVG_PTOL); }
   //else{ return(0); };
   return 0;
 };
@@ -108,21 +109,20 @@ int PCR::Iter(){// 2 FLOP + 14 FLOP/DOF, 17 mem/DOF
   //FIXME Compute current sys_f before iterating with this?
   const uint n=sys_u.size();
   const uint sumi0=this->halo_loca_0;// *this->ndof_n;//FIXME Magic number
-  //const auto ra=this->r2a;// Make a local version of this member variable
-  /*--------------------------------------------
-  FLOAT_SOLV s=0.0;
-  for(uint i=sumi0; i<n; i++){
-    s += sys_d[i] * sys_g[i] * sys_g[i];
-  };//printf("||r|| %9.2e\n",std::sqrt(s) );
-  const FLOAT_SOLV alpha  = r2a / s;// 1 DIV FLOP
-  //
-  for(uint i=0; i<n; i++){
-    sys_u[i] += alpha * sys_p[i];
-    sys_r[i] -= alpha * sys_d[i] * sys_g[i];
-  };
-  if( r2a < to2 ){ return(SOLV_CNVG_PTOL); };
+  //const auto ra=this->loca_res2;// Make a local version of this member variable
   //--------------------------------------------
-  */
+  //FLOAT_SOLV s=0.0;
+  //for(uint i=sumi0; i<n; i++){
+  //  s += sys_d[i] * sys_g[i] * sys_g[i];
+  //};//printf("||r|| %9.2e\n",std::sqrt(s) );
+  //const FLOAT_SOLV alpha  = loca_res2 / s;// 1 DIV FLOP
+  //
+  //for(uint i=0; i<n; i++){
+  //  sys_u[i] += alpha * sys_p[i];
+  //  sys_r[i] -= alpha * sys_d[i] * sys_g[i];
+  //};
+  //if( loca_res2 < to2 ){ return(SOLV_CNVG_PTOL); };
+  //--------------------------------------------
   //this->sys_f = 0.0;
   //E->do_halo=true;
   //Y->ElemLinear( E,this->sys_f,this->sys_r );
@@ -133,8 +133,8 @@ int PCR::Iter(){// 2 FLOP + 14 FLOP/DOF, 17 mem/DOF
   for(uint i=sumi0; i<n; i++){// 2 FLOP/DOF, 2 read =2/DOF
     r2b += sys_r[i] * sys_f[i];
   };
-  const FLOAT_PHYS beta = r2b/r2a;//  1 DIV FLOP
-  this->r2a=r2b;
+  const FLOAT_PHYS beta = r2b/loca_rto2;//  1 DIV FLOP
+  this->loca_rto2=r2b;
   //
   for(uint i=0; i<n; i++){// 4 FLOP/DOF, 4 read +2 write =6/DOF
      sys_p[i] = sys_r[i] + beta * sys_p[i];
@@ -145,13 +145,13 @@ int PCR::Iter(){// 2 FLOP + 14 FLOP/DOF, 17 mem/DOF
   for(uint i=sumi0; i<n; i++){// 3 FLOP/DOF, 2 read =2/DOF
     s += sys_d[i] * sys_g[i] * sys_g[i];
   };//printf("||r|| %9.2e\n",std::sqrt(s) );
-  const FLOAT_SOLV alpha  = r2a / s;// 1 DIV FLOP
+  const FLOAT_SOLV alpha  = loca_rto2 / s;// 1 DIV FLOP
   //
   for(uint i=0; i<n; i++){// 5 FLOP/DOF, 5 read +2 write =7/DOF
     sys_u[i] += alpha * sys_p[i];//FIXME This may be one update too many
     sys_r[i] -= alpha * sys_d[i] * sys_g[i];
   };
-  if( r2a < to2 ){ return(SOLV_CNVG_PTOL); }
+  if( loca_rto2 < loca_rto2 ){ return(SOLV_CNVG_PTOL); }
   else{ return(0); };
 };
 int PCR::Solve( Elem* E, Phys* Y ){//FIXME Redo this
@@ -165,15 +165,15 @@ int PCR::Solve( Elem* E, Phys* Y ){//FIXME Redo this
     for(uint i=sumi0; i<n; i++){
       s += sys_d[i] * sys_g[i] * sys_g[i];
     };//printf("||r|| %9.2e\n",std::sqrt(s) );
-    const FLOAT_SOLV alpha  = r2a / s;
+    const FLOAT_SOLV alpha  = loca_res2 / s;
     for(uint i=0; i<n; i++){
       sys_u[i] += alpha * sys_p[i];
       sys_r[i] -= alpha * sys_d[i] * sys_g[i];
     };
-    if( r2a < to2 ){ return(SOLV_CNVG_PTOL); }
-    //printf("SER INIT r2a:%9.2e /%9.2e\n",this->r2a,this->to2);
+    if( loca_res2 < loca_rto2 ){ return(SOLV_CNVG_PTOL); }
+    //printf("SER INIT loca_res2:%9.2e /%9.2e\n",this->loca_res2,this->to2);
     printf("SER INIT ||R|:%9.2e /%9.2e\n",
-      std::sqrt(this->r2a),std::sqrt(this->to2) );
+      std::sqrt(this->loca_res2),std::sqrt(this->loca_rto2) );
     for(this->iter=0; this->iter < this->iter_max; this->iter++){
       this->sys_f=0.0;
       //FIXME HALO SYNC this->sys_f
@@ -185,7 +185,7 @@ int PCR::Solve( Elem* E, Phys* Y ){//FIXME Redo this
       if( this->Iter() ){ break ;};// CR Iteration
 #if VERB_MAX>1
       if(!((iter+1) % 100) ){
-        printf("%6i ||R||%9.2e\n", iter+1, std::sqrt(r2a) ); };
+        printf("%6i ||R||%9.2e\n", iter+1, std::sqrt(loca_res2) ); };
 #endif
     };// End iteration loop.
   };
@@ -201,8 +201,8 @@ int HaloPCR::Init(){// Preconditioned Conjugate Residual
   //
   INT_MESH halo_n=0;
   // Local copies for atomic ops and reduction
-  FLOAT_SOLV glob_r2a = 0.0, alpha=0.0;//this->resi_pow2;
-  FLOAT_SOLV glob_to2 = this->rtol_pow2, glob_sum1=0.0;//glob_chk2=0.0, 
+  FLOAT_SOLV glob_r2a = 0.0, alpha=0.0;//this->glob_res2;
+  FLOAT_SOLV glob_to2 = this->glob_rto2, glob_sum1=0.0;//glob_chk2=0.0, 
 #pragma omp parallel num_threads(comp_n)
 {// parallel init region
   long int my_scat_count=0, my_prec_count=0,
@@ -338,7 +338,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     };
 //#pragma omp critical(init)
   S->Init();// looks like not critical
-  glob_r2a += S->r2a;//FIXME should check this before continuing
+  glob_r2a += S->loca_res2;//FIXME should check this before continuing
   };
 //#pragma omp single
 //{  glob_sum1=0.0; }
@@ -362,9 +362,9 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
       S->sys_r[i] -= alpha * S->sys_d[i] * S->sys_g[i];
     };
 //#pragma omp atomic read
-    S->to2 = S->tol*S->tol *glob_r2a;
+    S->loca_rto2 = S->loca_rtol*S->loca_rtol *glob_r2a;
 #pragma omp atomic write
-    glob_to2 = S->to2;// Pass the relative tolerance out.
+    glob_to2 = S->loca_rto2;// Pass the relative tolerance out.
   };
   dur = std::chrono::duration_cast<std::chrono::nanoseconds>
     (std::chrono::high_resolution_clock::now()-start);
@@ -379,9 +379,9 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
   this->time_secs[5]+=float(my_solv_count)*1e-9;
 }
 }// end init parallel region
-  this->resi_pow2=glob_r2a ;
-  this->resi_chk2=glob_r2a ;//glob_chk2; 
-  this->rtol_pow2=glob_to2 ;
+  this->glob_res2=glob_r2a ;
+  this->glob_chk2=glob_r2a ;
+  this->glob_rto2=glob_to2 ;
   return 0;
 };
 int HaloPCR::Iter(){//-----------------------------------------------
@@ -396,7 +396,7 @@ int HaloPCR::Iter(){//-----------------------------------------------
   //if( (iter % halo_mod)==0 ){ halo_update=true; }else{ halo_update=false; };
   //
   FLOAT_SOLV glob_sum1=0.0, glob_sum2=0.0, alpha=0.0, beta=0.0;
-  FLOAT_SOLV glob_r2a = this->resi_pow2;// glob_chk2=0.0,
+  FLOAT_SOLV glob_r2a = this->glob_res2;// glob_chk2=0.0,
   const auto P=this->mesh_part;//FIXME Undo this?
 #pragma omp parallel num_threads(comp_n)
 {// iter parallel region
@@ -526,8 +526,8 @@ int HaloPCR::Iter(){//-----------------------------------------------
   this->time_secs[5]+=float(iter_time.count())*1e-9;
 }
 }// end iter parallel region
-  this->resi_pow2 = glob_r2a;
-  this->resi_chk2 = glob_r2a;//FIXME glob_chk2 should be reduction sum of r*r*d
+  this->glob_res2 = glob_r2a;
+  this->glob_chk2 = glob_r2a;//FIXME glob_chk2 should be reduction sum of r*r*d
   return 0;
 };
 
