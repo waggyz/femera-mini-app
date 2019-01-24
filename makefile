@@ -47,11 +47,11 @@ FEMERA_MINI_CC = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc \
 
 all: test-all
 
-test-mini:
-	mv -f a.out a.old 2>/dev/null ; \
+mini-ser:
+	mv -f femser-$(CPUMODEL) femser.old 2>/dev/null ; \
 	$(CXX) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
-	$(FEMERA_MINI_CC) test.cc femera-mini.cc $(CPPLOG) ;\
-	./a.out -v 2 -p cube/unit1p1n2 ;
+	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femser-$(CPUMODEL) $(CPPLOG) ;\
+	./femser-$(CPUMODEL) -v 2 -p cube/unit1p1n2 ;
 
 mini-omp:
 	mv -f femera-$(CPUMODEL) femera.old 2>/dev/null ; \
