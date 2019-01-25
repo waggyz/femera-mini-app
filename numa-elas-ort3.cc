@@ -57,6 +57,13 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
     mtrl_rotc[6],mtrl_rotc[7],mtrl_rotc[8]};
   //int imfirst=0;
+  #if VERB_MAX>10
+  printf( "Material [%u]:", (uint)mtrl_matc.size() );
+  for(uint j=0;j<mtrl_matc.size();j++){
+    //if(j%mesh_d==0){printf("\n");}
+    printf("%+9.2e ",mtrl_matc[j]);
+  }; printf("\n");
+  #endif
   //
   INT_MESH e0=0, ee=elem_n;
   if(E->do_halo==true){ e0=0; ee=E->halo_elem_n;
@@ -117,7 +124,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         printf("%+9.2e ",H[j]);
       }; printf("\n");
       #endif
-      det = jac[9];// Save for later
+      //det = jac[9];// Save for later
       //ij+=Nj;//FIXME Prefetch the next jac&det...
       //ij=Nj*ie*intp_n +Nj*(ip+1);
       //if(ij<nej){
@@ -196,12 +203,19 @@ int ElastOrtho3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){//FIXME Doesn
   FLOAT_PHYS G[Ne],jac[Nj];//,elem_diag[Ne];// 6 rows, Ne cols
   for(uint j=0; j<(Ne*6); j++){ B[j]=0.0; };
   const FLOAT_PHYS D[]={
-    mtrl_matc[0],mtrl_matc[1],mtrl_matc[1],0.0,0.0,0.0,
-    mtrl_matc[1],mtrl_matc[0],mtrl_matc[1],0.0,0.0,0.0,
-    mtrl_matc[1],mtrl_matc[1],mtrl_matc[0],0.0,0.0,0.0,
-    0.0,0.0,0.0,mtrl_matc[2],0.0,0.0,
-    0.0,0.0,0.0,0.0,mtrl_matc[2],0.0,
-    0.0,0.0,0.0,0.0,0.0,mtrl_matc[2]};
+    mtrl_matc[0],mtrl_matc[3],mtrl_matc[5],0.0,0.0,0.0,
+    mtrl_matc[3],mtrl_matc[1],mtrl_matc[4],0.0,0.0,0.0,
+    mtrl_matc[5],mtrl_matc[4],mtrl_matc[2],0.0,0.0,0.0,
+    0.0,0.0,0.0,mtrl_matc[6],0.0,0.0,
+    0.0,0.0,0.0,0.0,mtrl_matc[7],0.0,
+    0.0,0.0,0.0,0.0,0.0,mtrl_matc[8]};
+    // Does the following wrong one actually converge faster?
+    //mtrl_matc[0],mtrl_matc[1],mtrl_matc[1],0.0,0.0,0.0,
+    //mtrl_matc[1],mtrl_matc[0],mtrl_matc[1],0.0,0.0,0.0,
+    //mtrl_matc[1],mtrl_matc[1],mtrl_matc[0],0.0,0.0,0.0,
+    //0.0,0.0,0.0,mtrl_matc[2],0.0,0.0,
+    //0.0,0.0,0.0,0.0,mtrl_matc[2],0.0,
+    //0.0,0.0,0.0,0.0,0.0,mtrl_matc[2]};
   //elem_inout=0.0;
   for(int ie=0;ie<elem_n;ie++){
     uint ij=Nj*ie;

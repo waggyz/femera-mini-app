@@ -22,7 +22,6 @@ int ElastIso3D::Setup( Elem* E ){
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) +1);
   return 0;
 };
-//
 //int ElastIso3D::ElemLinear( std::vector<Elem*> list_elem,
 //FIXME add the above variant as an option...
 int ElastIso3D::ElemLinear( Elem* E,
@@ -39,8 +38,8 @@ int ElastIso3D::ElemLinear( Elem* E,
   const uint     Ne = ndof*Nc;//, nej=E->elip_jacs.size();
   INT_MESH         Ng;//printf("PHYSICS GAUSS PTS: %i\n",(int)E->gaus_n);
   const int intp_n = E->gaus_n;//E->elip_jacs.size()/elem_n/Nj;
-  const int flop = int(elem_n) * int(intp_n)
-    *( int(Nc)* (33+18) + 27 );
+  //const int flop = int(elem_n) * int(intp_n)
+  //  *( int(Nc)* (33+18) + 27 );
   #if VERB_MAX>11
   printf("DOF: %i, Elems:%i, IntPts:%i, Nodes/elem:%i\n",
     (int)ndof,(int)elem_n,(int)intp_n,(int)Nc );
@@ -54,6 +53,13 @@ int ElastIso3D::ElemLinear( Elem* E,
   std::copy( &E->gaus_weig[0],
              &E->gaus_weig[intp_n], wgt );
   //int imfirst=0;
+  #if VERB_MAX>10
+  printf( "Material [%u]:", (uint)mtrl_matc.size() );
+  for(uint j=0;j<mtrl_matc.size();j++){
+    //if(j%mesh_d==0){printf("\n");}
+    printf("%+9.2e ",mtrl_matc[j]);
+  }; printf("\n");
+  #endif
   //
   INT_MESH e0=0, ee=elem_n;
   if(E->do_halo==true){ e0=0; ee=E->halo_elem_n;// printf("-%u-",E->halo_elem_n);
@@ -121,13 +127,6 @@ int ElastIso3D::ElemLinear( Elem* E,
       //  std::copy( &E->elip_jacs[ij],
       //             &E->elip_jacs[ij+Nj], jac );
       //};
-      #if VERB_MAX>10
-      printf( "Material [%u]:", mtrl_matc.size() );
-      for(uint j=0;j<mtrl_matc.size();j++){
-        //if(j%mesh_d==0){printf("\n");}
-        printf("%+9.2e ",mtrl_matc[j]);
-      }; printf("\n");
-      #endif
       FLOAT_PHYS w = det * wgt[ip];//0.25;
       S[0]=(mtrl_matc[0]* H[0] + mtrl_matc[1]* H[4] + mtrl_matc[1]* H[8])*w;//Sxx
       S[4]=(mtrl_matc[1]* H[0] + mtrl_matc[0]* H[4] + mtrl_matc[1]* H[8])*w;//Syy
@@ -166,7 +165,7 @@ int ElastIso3D::ElemLinear( Elem* E,
     //
     //FIXME Write elem_f into a buffer to accumulate node_f
   };//end elem loop
-  return flop;
+  return 0;//return flop;
   };
 int ElastIso3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
   const int ndof   = 3;//this->ndof_n
@@ -198,9 +197,9 @@ int ElastIso3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
     std::copy( &E->elip_jacs[ij],
                &E->elip_jacs[ij+Nj], jac ); det=jac[d2];
     for(int ip=0;ip<intp_n;ip++){
-      /*uint ij=Nj*ie*intp_n +Nj*ip;
-      std::copy( &E->elip_jacs[ij],
-                 &E->elip_jacs[ij+Nj], jac ); det=jac[d2];*/
+      //uint ij=Nj*ie*intp_n +Nj*ip;
+      //std::copy( &E->elip_jacs[ij],
+      //           &E->elip_jacs[ij+Nj], jac ); det=jac[d2];
       //jac = E->elip_jacs[std::slice(ie*intp_n*Nj+ip*Nj,d2,1)];
       //det = E->elip_jacs[ie*intp_n*Nj+ip*Nj +d2];
       //shg = E->intp_shpg[std::slice(ip*Ne,Ne,1)];
