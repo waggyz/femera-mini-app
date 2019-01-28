@@ -23,7 +23,7 @@ If you have [Gmsh 4](http://gmsh.info/ "Gmsh Website") installed, try making and
 ```bash
 C=4 ; P=1 ; H=89 ; N=16
 CPUMODEL=`./cpumodel.sh`
-gmsh -setnumber p $P -setnumber h $H -setnumber n $N geo/unst-cube.geo -
+gmsh -setnumber p $P -setnumber h $H -setnumber n $N -nt $C geo/unst-cube.geo -
 ./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu0.001 -M0 -E100e9 -N0.3 -R -v2 -ap "cube/unst"$H"p"$P"n"$N
 ./femera-$CPUMODEL -v2 -c $C -p "cube/unst"$H"p"$P"n"$N
 ```
