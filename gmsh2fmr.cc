@@ -425,7 +425,7 @@ int main( int argc, char** argv ) {
     // Partition M[0] based on physical IDs...
     //std::unordered_map<int,INT_MESH_PART> glel_part;
     auto E0=partlist[0];
-    uint(cn)=uint(E0->elem_conn_n);//printf("**** %u ****",cn);
+    uint cn =uint(E0->elem_conn_n);//printf("**** %u ****",cn);
         if(verbosity>0){
     std::cout << "Partitioning " << pname << " by " << M->elms_phid.size()
       <<" Gmsh volume physical IDs..." <<'\n'; };
