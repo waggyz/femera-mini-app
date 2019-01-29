@@ -12,5 +12,3 @@ Output: ../cube/cube<h>p<p>m<m>_<i>.msh
 
 A total of m files, one for each partition i, will be written to the ../cube/ directory.
 
-For unst-cube.geo and p=1: ndof ~ 1.505 * h^3, or h ~ 2/3 * ndof^(1/3).
-For unst-cube.geo and p=2: ndof ~ 1.355 * h^3, or h ~ 3/4 * ndof^(1/3).
