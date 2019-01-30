@@ -1,6 +1,6 @@
 #ifndef INCLUDED_PHYS_H
 #define INCLUDED_PHYS_H
-#include "math.hpp"//FIXME This is messed up! should be somewhere else...
+//#include "math.hpp"//FIXED This is messed up! should be somewhere else...
 
 class Phys{
 public:
@@ -231,7 +231,13 @@ public:
     Phys::vals Z1={cos(z1),sin(z1),0.0, -sin(z1),cos(z1),0.0, 0.0,0.0,1.0};
     Phys::vals X2={1.0,0.0,0.0, 0.0,cos(x2),sin(x2), 0.0,-sin(x2),cos(x2)};
     Phys::vals Z3={cos(z3),sin(z3),0, -sin(z3),cos(z3),0.0, 0.0,0.0,1.0};
-    mtrl_rotc = MatMul3x3xN(MatMul3x3xN(Z1,X2),Z3);
+    //mtrl_rotc = MatMul3x3xN(MatMul3x3xN(Z1,X2),Z3);
+    for(int i=0;i<3;i++){
+      for(int l=0;l<3;l++){ mtrl_rotc[3* i+l ]=0.0;
+        for(int j=0;j<3;j++){
+          for(int k=0;k<3;k++){
+            mtrl_rotc[3* i+l ] += Z1[3* i+j ] * X2[3* j+k ] * Z3[3* k+l ];
+    };};};};
     #if VERBOSITY_MAX>10
     printf("Material Tensor Rotation:");
     for(size_t i=0; i<mtrl_rotc.size(); i++){
@@ -314,7 +320,13 @@ public:
     }; printf("\n");
     #endif
     //
-    const RESTRICT Phys::vals E = MatMul3x3xN( mtrl_rotc,e );
+    //const RESTRICT Phys::vals E = MatMul3x3xN( mtrl_rotc,e );
+    RESTRICT Phys::vals E(9);
+    for(int i=0;i<3;i++){
+      for(int j=0;j<3;j++){
+        for(int k=0;k<3;k++){
+          E[3* i+k ] += mtrl_rotc[3* i+j ] * e[3* j+k ];
+    };};};
     //
     #if VERBOSITY_MAX>10
     printf("Strain (Material):");
@@ -338,7 +350,13 @@ public:
       printf("%10.3e ",S[i]);
     }; printf("\n");
     #endif
-    const RESTRICT Phys::vals s = MatMul3x3xNT( mtrl_rotc,S );//FIXME
+    //const RESTRICT Phys::vals s = MatMul3x3xNT( mtrl_rotc,S );//FIXME
+    RESTRICT Phys::vals s(9);
+    for(int i=0;i<3;i++){
+      for(int k=0;k<3;k++){
+        for(int j=0;j<3;j++){
+          s[3* i+k ] += mtrl_rotc[3* i+j ] * S[3* k+j ];
+    };};};
     //
     #if VERBOSITY_MAX>10
     printf("Stress (Global):");

@@ -8,6 +8,7 @@
 #include <cstring>// std::memcpy
 //#include <omp.h>
 #include "femera.h"
+//#include "math.hpp"
 int Phys::ScatterNode2Elem(Elem* E,//FIXME
   RESTRICT const Phys::vals & node_v,
   RESTRICT       Phys::vals & elem_v ){
@@ -109,7 +110,13 @@ int Phys::JacRot( Elem* E ){
     Phys::vals Z1={cos(z1),sin(z1),0.0, -sin(z1),cos(z1),0.0, 0.0,0.0,1.0};
     Phys::vals X2={1.0,0.0,0.0, 0.0,cos(x2),sin(x2), 0.0,-sin(x2),cos(x2)};
     Phys::vals Z3={cos(z3),sin(z3),0, -sin(z3),cos(z3),0.0, 0.0,0.0,1.0};
-    mtrl_rotc = MatMul3x3xN(Z1,MatMul3x3xN(X2,Z3));
+    //mtrl_rotc = MatMul3x3xN(Z1,MatMul3x3xN(X2,Z3));
+    for(int i=0;i<3;i++){
+      for(int l=0;l<3;l++){ mtrl_rotc[3* i+l ]=0.0;
+        for(int j=0;j<3;j++){
+          for(int k=0;k<3;k++){
+            mtrl_rotc[3* i+l ] += Z1[3* i+j ] * X2[3* j+k ] * Z3[3* k+l ];
+    };};};};
     //mtrl_rotc=MatMul3x3xN(R,R);
     #if VERB_MAX>10
     printf("Material Tensor Rotation:");
@@ -135,7 +142,12 @@ int Phys::JacRot( Elem* E ){
           printf("%10.3e ",jac[i]);
         }; printf("\n");
         #endif
-        J=MatMul3x3xN(mtrl_rotc,jac);
+        //J=MatMul3x3xN(mtrl_rotc,jac);
+        for(int i=0;i<3;i++){
+          for(int k=0;k<3;k++){ J[3* i+k ]=0.0;
+            for(int j=0;j<3;j++){
+              J[3* i+k ] += mtrl_rotc[3* i+j ] * jac[3* j+k ];
+        };};};
         //Phys::vals J=MatMul3x3xN( mtrl_rotc,MatMul3x3xNT(jac,mtrl_rotc));
         /*
         FLOAT_PHYS dx=1.0/sqrt(jac[0]*jac[0] + jac[3]*jac[3] + jac[6]*jac[6]);

@@ -8,6 +8,7 @@
 #include <string>
 #include <ctype.h>
 #include "femera.h"
+//#include "math.hpp"
 /*
 int Elem::ScatterVert2Elem(  ){
   //const auto elem_d=E->elem_d;
@@ -67,6 +68,7 @@ const RESTRICT Mesh::vals Elem::ShapeGradient( const INT_ORDER pord,
 };
 int Elem::Jac1Dets(){//FIXME 1D can be optimized
   int ok=0;
+  /*
   const RESTRICT Mesh::vals ipws = GaussLegendre( (INT_ORDER)1 );//this->gaus_p );
   const RESTRICT Mesh::vals shpg=ShapeGradient(1, ipws );
   //const int cn=elem_vert.size()/elem_n;
@@ -98,6 +100,7 @@ int Elem::Jac1Dets(){//FIXME 1D can be optimized
       //for(int i=0;i<4;i++){printf(" %g",jac[i]);};printf("\n");
       };
     };
+    */
   return ok; };
 int Elem::Jac2Dets(){
   int ok=0;
@@ -127,9 +130,15 @@ int Elem::Jac2Dets(){
       for(uint j=0;j<d;j++){
         vert[vn* j+i]=vert_coor[d* n+j]; }; };
     for(int ip=0; ip<np; ip++){
-      RESTRICT Mesh::vals jac=MatMul2xNx2T(
-        shpg[std::slice(ip*ng,ng,1)], vert );
-        //elem_vert[std::slice(ie*cn,cn,1)] );
+      RESTRICT Mesh::vals jac(d2);
+      for(uint j=0;j<vn;j++){
+        for(uint i=0;i<d;i++){
+          for(uint k=0;k<d;k++){
+            jac[d* i+k ] += shpg[ip*ng+ vn* i+j ] * vert[vn* k+j ];
+      };};};
+      //RESTRICT Mesh::vals jac=MatMul2xNx2T(
+      //  shpg[std::slice(ip*ng,ng,1)], vert );
+      //  //elem_vert[std::slice(ie*cn,cn,1)] );
       FLOAT_MESH det=Jac2Det(jac);
       //int ok_jac=Jac2Inv(jac,det)//FIXME return these?
       Jac2Inv(jac,det);
@@ -141,7 +150,7 @@ int Elem::Jac2Dets(){
       };
     };
   return ok; };
-int Elem::Jac3Dets(){//FIXME Weird: slow in serial, but fast in parallel?
+int Elem::Jac3Dets(){
   int ok=0;// printf("**** JA ****\n");
   const RESTRICT Mesh::vals ipws = GaussLegendre( (INT_ORDER)1 );//this->gaus_p );
   //auto p=this->elem_p;
@@ -172,9 +181,15 @@ int Elem::Jac3Dets(){//FIXME Weird: slow in serial, but fast in parallel?
         vert[vn* j+i]=vert_coor[d* n+j]; }; };
         //vert[d* i+j]=vert_coor[d* n+j]; }; };
     for(uint ip=0; ip<np; ip++){//printf("ELEM:%u, INTPT: %i\n",ie,ip);
-      RESTRICT Mesh::vals jac=MatMul3xNx3T(//FIXME loop this
-        shpg[std::slice(ip*ng,ng,1)], vert );
-        //elem_vert[std::slice(ie*cn*d,cn*d,1)] );
+      RESTRICT Mesh::vals jac(0.0,d2);
+      for(uint i=0;i<d;i++){
+      for(uint k=0;k<d;k++){// jac[d* i+k ]=0.0;
+      for(uint j=0;j<vn;j++){
+        jac[d* i+k ] += shpg[ip*ng+ vn* i+j ] * vert[vn* k+j ];
+      };};};
+      //RESTRICT Mesh::vals jac=MatMul3xNx3T(//FIXME loop this
+      //  shpg[std::slice(ip*ng,ng,1)], vert );
+      //  //elem_vert[std::slice(ie*cn*d,cn*d,1)] );
       FLOAT_MESH det=Jac3Det(jac);//printf("DET: %e\n",det);
       //int ok_jac=Jac3Inv(jac,det)//FIXME return these?
       Jac3Inv(jac,det);
