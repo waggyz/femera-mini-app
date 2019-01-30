@@ -74,7 +74,7 @@ gmsh -refine -o "neper/cubic"$N"s1p1.msh2" "neper/cubic"$N".msh"
 
 `elem.h` `elem.cc` `elem-tet.cc` An Elem instance contains a single mesh partition. The mini-app only supports first- and second-order tetrahedral elements at present.
 
-`phys.h` `phys.cc` `numa-elast-iso3.cc` `numa-elas-ort3.cc` `math.hpp` Two linear-elastic models, implementing both tensor train and the more traditional local matrix evaluation approaches, along with Jacobi preconditioner computation.
+`phys.h` `phys.cc` `numa-elast-iso3.cc` `numa-elas-ort3.cc` Two linear-elastic models, implementing both tensor train and the more traditional local matrix evaluation approaches, along with Jacobi preconditioner computation.
 
 `solv.h` `solv.cc` `tens-numa-halo-pcg.cc` `tens-numa-halo-pcr.cc` Implements preconditioned conjugate gradient and cojugate residual solvers.
 
