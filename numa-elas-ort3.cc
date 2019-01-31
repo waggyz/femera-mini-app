@@ -82,6 +82,9 @@ int ElastOrtho3D::ElemLinear( Elem* E,
                     sizeof(FLOAT_SOLV)*ndof ); };
     for(uint j=0;j<Ne;j++){ f[j]=0.0; };// Seems faster here instead of after.
     for(int ip=0; ip<intp_n; ip++){
+      //for(uint i=0; i<Ne; i++){ G[i]=0.0; };// these are slower here?
+      for( int i=0; i< 9; i++){ A[i]=0.0; };
+      //for( int i=0; i< 9; i++){ B[i]=0.0; };
       //if(imfirst==0){ //ij=Nj*ie*intp_n;
       //  ij=Nj*ie*intp_n+Nj*ip;//FIXME Figure out how to put these below...
       //  std::copy( &E->elip_jacs[ij],
@@ -89,9 +92,26 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       //imfirst=1;
       Ng = ip*Ne;
       //G = MatMul3x3xN( jac,shg );
+      for(uint k=0; k<Nc; k++){
+        for(uint i=0; i<3 ; i++){ G[3* k+i ]=0.0;// G[Nc* i+k ]=0.0;
+          for(uint j=0; j<3 ; j++){
+            //G[Nc* i+k ] += jac[ 3* i+j ] * intp_shpg[Ng+ Nc* j+k ];
+            G[3* k+i ] += jac[ 3* i+j ] * intp_shpg[Ng+ Nc* j+k ];
+          };
+          //for(uint j=0; j<3 ; j++){
+          //  A[ 3* i+j ] +=   G[Nc* i+k ] *         u[  ndof* k+j ];
+          //};
+        };
+      };
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
+      for(uint k=0; k<Nc; k++){
+        for(uint i=0; i<3 ; i++){
+          for(uint j=0; j<3 ; j++){
+            //A[ 3* i+j ] += G[Nc* i+k ] * u[ndof* k+j ];
+            A[ 3* i+j ] += G[3* k+i ] * u[ndof* k+j ];
+      };};};
+      /*
       // Unroll G & H together here.
-      for(int i=0; i<9; i++){ A[i]=0.0; };
       for(uint k=0; k<Nc; k++){//for(uint i=0; i<3 ; i++){//for(uint j=0; j<3 ; j++){
         G[Nc* 0+k ]  = jac[3* 0+0 ] * intp_shpg[Ng+ Nc* 0+k ]
                      + jac[3* 0+1 ] * intp_shpg[Ng+ Nc* 1+k ]
@@ -117,6 +137,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         A[ 3* 2+1 ] += G[Nc* 2+k ] * u[ndof* k+1 ];
         A[ 3* 2+2 ] += G[Nc* 2+k ] * u[ndof* k+2 ];
       };//};//};//------------------------------------------ N* 3*11 = 33*N FLOP
+      */
       #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
       for(uint j=0;j<HH.size();j++){
@@ -131,9 +152,15 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       //  std::copy( &E->elip_jacs[ij],
       //             &E->elip_jacs[ij+Nj], jac );
       //};
-      //for(int i=0; i<9; i++){ A[i]=0.0; };
+      // [H][RT] : matmul3x3x3T
+      for(int i=0; i<3; i++){
+        for(int k=0; k<3; k++){ B[3* i+k ]=0.0;
+          for(int j=0; j<3; j++){
+            B[3* i+k ] += A[3*i+j]*R[3*k+j];
+      };};};
+      /*
+       // Unrolled doesn't need B zeroed first
       for(int i=0; i<3; i++){//for(uint k=0; k<3; k++){//for(uint j=0; j<3; j++){
-        // [H][RT] : matmul3x3x3T
         //  A[3* i+k ]+= HH[3* i+j ] * mtrl_rotc[3* k+j ];
         B[3* i+0 ] = A[3*i+0]*R[3*0+0] + A[3*i+1]*R[3*0+1] + A[3*i+2]*R[3*0+2];
         //};for(uint i=0; i<3; i++){
@@ -141,6 +168,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         //};for(uint i=0; i<3; i++){
         B[3* i+2 ] = A[3*i+0]*R[3*2+0] + A[3*i+1]*R[3*2+1] + A[3*i+2]*R[3*2+2];
       };//};//};//---------------------------------------------- 3*3*5 = 45 FLOP
+      */
       FLOAT_PHYS w = det * wgt[ip];//0.25;
       A[0]=(mtrl_matc[0]* B[0] + mtrl_matc[3]* B[4] + mtrl_matc[5]* B[8])*w;//Sxx
       A[4]=(mtrl_matc[3]* B[0] + mtrl_matc[1]* B[4] + mtrl_matc[4]* B[8])*w;//Syy
@@ -150,11 +178,30 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       A[5]=( B[5] + B[7])*mtrl_matc[7]*w; A[7]= A[5];//Syz Szy
       A[2]=( B[2] + B[6])*mtrl_matc[8]*w; A[6]= A[2];//Sxz Szx
       //--------------------------------------------------------- 18+9= 27 FLOP
-      for(int i=0; i<3; i++){// [S][R] : matmul3x3x3, R is transposed
+      // [S][R] : matmul3x3x3, R is transposed
+      //for(int i=0; i<9; i++){ B[i]=0.0; };
+      for(int i=0; i<3; i++){
+        for(int k=0; k<3; k++){ B[3* i+k ]=0.0;
+          for(int j=0; j<3; j++){
+            B[3* i+k ] += A[3*i+j]*R[3*j+k];
+      };};};
+      /*
+      //unrolled
+      for(int i=0; i<3; i++){
         B[3* i+0 ]= A[3*i+0]*R[3*0+0] + A[3*i+1]*R[3*1+0] + A[3*i+2]*R[3*2+0];
         B[3* i+1 ]= A[3*i+0]*R[3*0+1] + A[3*i+1]*R[3*1+1] + A[3*i+2]*R[3*2+1];
         B[3* i+2 ]= A[3*i+0]*R[3*0+2] + A[3*i+1]*R[3*1+2] + A[3*i+2]*R[3*2+2];
       };//------------------------------------------------------ 3*3*5 = 45 FLOP
+      */
+      for(uint i=0; i<Nc; i++){
+        for(uint k=0; k<3 ; k++){
+          for(uint j=0; j<3 ; j++){
+            //f[mesh_d* i+k ]+= G[Nc* j+i ] * B[mesh_d*j + k];
+            //f[3* i+k ] += G[Nc*j+i]* B[3*j+k];
+            f[3* i+k ] += G[3*i+j]* B[3*j+k];
+      };};};
+      /*
+      // unrolled
       for(uint i=0; i<Nc; i++){//for(uint k=0; k<3 ; k++){//for(uint j=0; j<3 ; j++){
         //f[mesh_d* i+k ]+= G[Nc* j+i ] * B[mesh_d*j + k];
         f[3* i+0 ]+=G[Nc*0+i]* B[3*0+0] + G[Nc*1+i]* B[3*1+0] + G[Nc*2+i]* B[3*2+0];
@@ -163,6 +210,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       };for(uint i=0; i<Nc; i++){//NOTE Time this with and without these
         f[3* i+2 ]+=G[Nc*0+i]* B[3*0+2] + G[Nc*1+i]* B[3*1+2] + G[Nc*2+i]* B[3*2+2];
       };//};//};//------------------------------------------- N* 3*6 = 18*N FLOP
+      */
       #if VERB_MAX>10
       printf( "ff:");
       for(uint j=0;j<Ne;j++){

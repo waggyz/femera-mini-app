@@ -86,6 +86,20 @@ int ElastIso3D::ElemLinear( Elem* E,
       Ng = ip*Ne;
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
+      for(uint k=0; k<Nc; k++){
+        for(uint i=0; i<3 ; i++){ G[3* k+i ]=0.0;// G[Nc* i+k ]=0.0;
+          for(uint j=0; j<3 ; j++){
+            //G[Nc* i+k ] += jac[3* i+j ] * intp_shpg[Ng+ Nc* j+k ];
+            G[3* k+i ] += jac[3* i+j ] * intp_shpg[Ng+ Nc* j+k ];
+      };};};
+      //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
+      for(int i=0; i<9; i++){ H[i]=0.0; };
+      for(uint k=0; k<Nc; k++){
+        for(uint i=0; i<3 ; i++){
+          for(uint j=0; j<3 ; j++){
+            //H[ 3* i+j ] +=  G[Nc* i+k ] *           u[ndof* k+j ];
+            H[ 3* i+j ] += G[3* k+i ] * u[ndof* k+j ];
+      };};};/*
       // Unroll G & H together here.
       for(int i=0; i<9; i++){ H[i]=0.0; };
       for(uint k=0; k<Nc; k++){//for(uint i=0; i<3 ; i++){//for(uint j=0; j<3 ; j++){
@@ -113,6 +127,7 @@ int ElastIso3D::ElemLinear( Elem* E,
         H[ 3* 2+1 ] += G[Nc* 2+k ] * u[ndof* k+1 ];
         H[ 3* 2+2 ] += G[Nc* 2+k ] * u[ndof* k+2 ];
       };//};//};//------------------------------------------ N* 3*11 = 33*N FLOP
+      */
       #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
       for(uint j=0;j<HH.size();j++){
@@ -136,6 +151,13 @@ int ElastIso3D::ElemLinear( Elem* E,
       S[5]=( H[5] + H[7])*mtrl_matc[2]*w; S[7]= S[5];//Syz Szy
       S[2]=( H[2] + H[6])*mtrl_matc[2]*w; S[6]= S[2];//Sxz Szx
       //------------------------------------------------------ 18+9 = 27 FLOP
+      for(uint i=0; i<Nc; i++){
+        for(uint k=0; k<3 ; k++){
+          for(uint j=0; j<3 ; j++){
+            //f[mesh_d* i+k ]+= G[Nc* j+i ] * B[mesh_d*j + k];
+            //f[3* i+k ]+=G[Nc*j+i]* S[3*j+k];
+            f[3* i+k ]+=G[3*i+j]* S[3*j+k];
+      };};};/*
       for(uint i=0; i<Nc; i++){//for(uint k=0; k<3 ; k++){//for(uint j=0; j<3 ; j++){
         //f[mesh_d* i+k ]+= G[Nc* j+i ] * B[mesh_d*j + k];
         f[3* i+0 ]+=G[Nc*0+i]* S[3*0+0] + G[Nc*1+i]* S[3*1+0] + G[Nc*2+i]* S[3*2+0];
@@ -144,6 +166,7 @@ int ElastIso3D::ElemLinear( Elem* E,
       };for(uint i=0; i<Nc; i++){//NOTE Time this with and without these
         f[3* i+2 ]+=G[Nc*0+i]* S[3*0+2] + G[Nc*1+i]* S[3*1+2] + G[Nc*2+i]* S[3*2+2];
       };//};//};//------------------------------------------- N* 3*6 = 18*N FLOP
+      */
       #if VERB_MAX>10
       printf( "ff:");
       for(uint j=0;j<Ne;j++){
