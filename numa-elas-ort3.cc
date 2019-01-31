@@ -97,6 +97,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
           for(uint j=0; j<3 ; j++){
             //G[Nc* i+k ] += jac[ 3* i+j ] * intp_shpg[Ng+ Nc* j+k ];
             G[3* k+i ] += jac[ 3* i+j ] * intp_shpg[Ng+ Nc* j+k ];
+            //G[3* k+i ] += jac[ 3* i+j ] * intp_shpg[Ng+ 3* k+j ];
           };
           //for(uint j=0; j<3 ; j++){
           //  A[ 3* i+j ] +=   G[Nc* i+k ] *         u[  ndof* k+j ];
@@ -177,14 +178,22 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       A[1]=( B[1] + B[3])*mtrl_matc[6]*w; A[3]= A[1];//Sxy Syx
       A[5]=( B[5] + B[7])*mtrl_matc[7]*w; A[7]= A[5];//Syz Szy
       A[2]=( B[2] + B[6])*mtrl_matc[8]*w; A[6]= A[2];//Sxz Szx
+      #if VERB_MAX>10
+      printf( "Stress (Natural Coords):");
+      for(uint j=0;j<9;j++){
+        if(j%3==0){printf("\n");}
+        printf("%+9.2e ",A[j]);
+      }; printf("\n");
+      #endif
       //--------------------------------------------------------- 18+9= 27 FLOP
       // [S][R] : matmul3x3x3, R is transposed
       //for(int i=0; i<9; i++){ B[i]=0.0; };
       for(int i=0; i<3; i++){
         for(int k=0; k<3; k++){ B[3* i+k ]=0.0;
           for(int j=0; j<3; j++){
-            B[3* i+k ] += A[3*i+j]*R[3*j+k];
-      };};};
+            B[3* i+k ] += A[3*i+j] * R[3*j+k];
+      };};};//NOTE [B] is not symmetric Cauchy stress.
+      //NOTE Cauchy stress is ( B + BT ) /2
       /*
       //unrolled
       for(int i=0; i<3; i++){
@@ -193,12 +202,20 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         B[3* i+2 ]= A[3*i+0]*R[3*0+2] + A[3*i+1]*R[3*1+2] + A[3*i+2]*R[3*2+2];
       };//------------------------------------------------------ 3*3*5 = 45 FLOP
       */
+      #if VERB_MAX>10
+      printf( "Rotated Stress (Global Coords):");
+      for(uint j=0;j<9;j++){
+        if(j%3==0){printf("\n");}
+        printf("%+9.2e ",B[j]);
+      }; printf("\n");
+      #endif
       for(uint i=0; i<Nc; i++){
         for(uint k=0; k<3 ; k++){
           for(uint j=0; j<3 ; j++){
             //f[mesh_d* i+k ]+= G[Nc* j+i ] * B[mesh_d*j + k];
-            //f[3* i+k ] += G[Nc*j+i]* B[3*j+k];
-            f[3* i+k ] += G[3*i+j]* B[3*j+k];
+            //f[3* i+k ] += G[Nc*j+i] * B[3*j+k];
+            f[3* i+k ] += G[3*i+j] * B[3*j+k];  // [B] is not symmetric,
+            //f[3* i+k ] += G[3*i+j] * B[3*k+j];// so this does not work.
       };};};
       /*
       // unrolled
@@ -279,8 +296,11 @@ int ElastOrtho3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){//FIXME Doesn
       //G   = MatMul3x3xN(jac,shg);
       uint ig=ip*Ne;
       for(uint i=0;i<Ne;i++){ G[i]=0.0; };
-      for(uint i=0;i<3;i++){ for(uint j=0;j<3;j++){ for(uint k=0;k<Nc;k++){
+      for(uint k=0;k<Nc;k++){
+      for(uint i=0;i<3;i++){
+      for(uint j=0;j<3;j++){
         G[3* i+k] += jac[3* i+j] * E->intp_shpg[ig+Nc* j+k]; }; }; };
+        //G[3* i+k] += jac[3* i+j] * E->intp_shpg[ig+3* k+j]; }; }; };
       #if VERB_MAX>10
       printf( "Jacobian Inverse & Determinant:");
       for(uint j=0;j<d2;j++){

@@ -87,18 +87,19 @@ int ElastIso3D::ElemLinear( Elem* E,
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       for(uint k=0; k<Nc; k++){
-        for(uint i=0; i<3 ; i++){ G[3* k+i ]=0.0;// G[Nc* i+k ]=0.0;
-          for(uint j=0; j<3 ; j++){
-            //G[Nc* i+k ] += jac[3* i+j ] * intp_shpg[Ng+ Nc* j+k ];
-            G[3* k+i ] += jac[3* i+j ] * intp_shpg[Ng+ Nc* j+k ];
+      for(uint i=0; i<3 ; i++){ G[3* k+i ]=0.0;// G[Nc* i+k ]=0.0;
+      for(uint j=0; j<3 ; j++){
+        //G[Nc* i+k ] += jac[3* i+j ] * intp_shpg[Ng+ Nc* j+k ];
+        G[3* k+i ] += jac[3* i+j ] * intp_shpg[Ng+ Nc* j+k ];
+        //G[3* k+i ] += jac[3* i+j ] * intp_shpg[Ng+ 3* k+j ];
       };};};
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
-      for(int i=0; i<9; i++){ H[i]=0.0; };
+      for( int i=0; i<9 ; i++){ H[i]=0.0; };
       for(uint k=0; k<Nc; k++){
-        for(uint i=0; i<3 ; i++){
-          for(uint j=0; j<3 ; j++){
-            //H[ 3* i+j ] +=  G[Nc* i+k ] *           u[ndof* k+j ];
-            H[ 3* i+j ] += G[3* k+i ] * u[ndof* k+j ];
+      for(uint i=0; i<3 ; i++){
+      for(uint j=0; j<3 ; j++){
+        //H[ 3* i+j ] +=  G[Nc* i+k ] *           u[ndof* k+j ];
+        H[ 3* i+j ] += G[3* k+i ] * u[ndof* k+j ];
       };};};/*
       // Unroll G & H together here.
       for(int i=0; i<9; i++){ H[i]=0.0; };
@@ -155,8 +156,9 @@ int ElastIso3D::ElemLinear( Elem* E,
         for(uint k=0; k<3 ; k++){
           for(uint j=0; j<3 ; j++){
             //f[mesh_d* i+k ]+= G[Nc* j+i ] * B[mesh_d*j + k];
-            //f[3* i+k ]+=G[Nc*j+i]* S[3*j+k];
-            f[3* i+k ]+=G[3*i+j]* S[3*j+k];
+            //f[3* i+k ] += G[Nc*j+i] * S[3*j+k];
+            //f[3* i+k ] += G[3*i+j] * S[3*j+k];
+            f[3* i+k ] += G[3*i+j] * S[3*k+j];
       };};};/*
       for(uint i=0; i<Nc; i++){//for(uint k=0; k<3 ; k++){//for(uint j=0; j<3 ; j++){
         //f[mesh_d* i+k ]+= G[Nc* j+i ] * B[mesh_d*j + k];
@@ -229,8 +231,11 @@ int ElastIso3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
       //G   = MatMul3x3xN(jac,shg);
       uint ig=ip*Ne;
       for(uint i=0;i<Ne;i++){ G[i]=0.0; };
-      for(uint i=0;i<3;i++){ for(uint j=0;j<3;j++){ for(uint k=0;k<Nc;k++){
+      for(uint k=0;k<Nc;k++){
+      for(uint i=0;i<3;i++){
+      for(uint j=0;j<3;j++){
         G[3* i+k] += jac[3* i+j] * E->intp_shpg[ig+Nc* j+k]; }; }; };
+        //G[3* i+k] += jac[3* i+j] * E->intp_shpg[ig+3* k+j]; }; }; };
       #if VERB_MAX>10
       printf( "Jacobian Inverse & Determinant:");
       for(uint j=0;j<d2;j++){

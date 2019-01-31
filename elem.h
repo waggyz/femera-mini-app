@@ -11,9 +11,15 @@ public:
     //ELEM_TET=34, ELEM_BRI=38, ELEM_PRI=36, ELEM_PYR=35 };
     ELEM_SCA=0, ELEM_VEC=1, ELEM_BAR=2, ELEM_TRI=3, ELEM_QUA=4,
     ELEM_TET=5, ELEM_PYR=6, ELEM_PRI=7, ELEM_BRI=8 };
+  inline FLOAT_MESH Jac1Det( const FLOAT_MESH  );
+  inline FLOAT_MESH Jac2Det( const FLOAT_MESH* );
+  inline FLOAT_MESH Jac3Det( const FLOAT_MESH* );
   inline FLOAT_MESH Jac1Det( const RESTRICT Mesh::vals&);
   inline FLOAT_MESH Jac2Det( const RESTRICT Mesh::vals&);
   inline FLOAT_MESH Jac3Det( const RESTRICT Mesh::vals&);
+  inline int Jac1Inv( FLOAT_MESH  , const FLOAT_MESH);
+  inline int Jac2Inv( FLOAT_MESH*, const FLOAT_MESH);
+  inline int Jac3Inv( FLOAT_MESH*, const FLOAT_MESH);
   inline int Jac1Inv(RESTRICT Mesh::vals&, const FLOAT_MESH);
   inline int Jac2Inv(RESTRICT Mesh::vals&, const FLOAT_MESH);
   inline int Jac3Inv(RESTRICT Mesh::vals&, const FLOAT_MESH);
@@ -269,6 +275,9 @@ private:
 //============= Inline Function Definitions ===============
 // JD is jacobian dimension (1-3)
 #define JD 1
+inline FLOAT_MESH Elem::Jac1Det(const FLOAT_MESH m){
+  return( m );
+};
 inline FLOAT_MESH Elem::Jac1Det(RESTRICT const Mesh::vals& m){
   return( m[0] );
 };
@@ -279,8 +288,24 @@ inline int Elem::Jac1Inv(RESTRICT Mesh::vals& m, const FLOAT_MESH jacdet){
 };
 #undef JD
 #define JD 2
+inline FLOAT_MESH Elem::Jac2Det(const FLOAT_MESH* m){
+  return( m[JD*0+ 0]*m[JD*1+ 1] - m[JD*0+ 1]*m[JD*1+ 0]);
+};
 inline FLOAT_MESH Elem::Jac2Det(const RESTRICT Mesh::vals& m){
   return( m[JD*0+ 0]*m[JD*1+ 1] - m[JD*0+ 1]*m[JD*1+ 0]);
+};
+inline int Elem::Jac2Inv( FLOAT_MESH* m, const FLOAT_MESH jacdet){
+  if(jacdet==0){return 1;}
+  //RESTRICT Mesh::vals minv(4);
+  FLOAT_MESH minv[4]; FLOAT_MESH dinv=static_cast<FLOAT_MESH>(1.0)/jacdet;
+  for(int i=0;i<4;i++){ minv[i]=dinv; };
+  minv[JD*0+ 0]*= m[JD*1+ 1] ;
+  minv[JD*0+ 1]*=-m[JD*0+ 1] ;
+  minv[JD*1+ 0]*=-m[JD*1+ 0] ;
+  minv[JD*1+ 1]*= m[JD*0+ 0] ;
+  //m=minv*(static_cast<FLOAT_MESH>(1.0)/jacdet);
+  for(int i=0;i<4;i++){ m[i]=minv[i]; };
+  if(jacdet < 0){return -1;} else{return 0;}
 };
 inline int Elem::Jac2Inv(RESTRICT Mesh::vals& m, const FLOAT_MESH jacdet){
   if(jacdet==0){return 1;}
@@ -304,11 +329,39 @@ inline int Elem::Jac2Tnv(RESTRICT Mesh::vals& m, const FLOAT_MESH jacdet){
 };
 #undef JD
 #define JD 3
+inline FLOAT_MESH Elem::Jac3Det(const FLOAT_MESH* m ){
+  return(
+      m[JD*0+ 0]*(m[JD*1+ 1] * m[JD*2+ 2] - m[JD*2+ 1] * m[JD*1+ 2])
+    + m[JD*0+ 1]*(m[JD*1+ 2] * m[JD*2+ 0] - m[JD*2+ 2] * m[JD*1+ 0])
+    + m[JD*0+ 2]*(m[JD*1+ 0] * m[JD*2+ 1] - m[JD*2+ 0] * m[JD*1+ 1]) );
+};
 inline FLOAT_MESH Elem::Jac3Det(RESTRICT const Mesh::vals& m){
   return(
       m[JD*0+ 0]*(m[JD*1+ 1] * m[JD*2+ 2] - m[JD*2+ 1] * m[JD*1+ 2])
     + m[JD*0+ 1]*(m[JD*1+ 2] * m[JD*2+ 0] - m[JD*2+ 2] * m[JD*1+ 0])
     + m[JD*0+ 2]*(m[JD*1+ 0] * m[JD*2+ 1] - m[JD*2+ 0] * m[JD*1+ 1]) );
+};
+inline int Elem::Jac3Inv( FLOAT_MESH* m, const FLOAT_MESH jacdet){
+  if(jacdet==0){return 1;}
+  //returns inverse in m
+  //RESTRICT Mesh::vals minv(static_cast<FLOAT_MESH>(1.0)/jacdet,9);
+  FLOAT_MESH minv[9]; FLOAT_MESH dinv=static_cast<FLOAT_MESH>(1.0)/jacdet;
+  for(int i=0;i<9;i++){ minv[i]=dinv; };
+  //
+  minv[JD*0+ 0]*= (m[JD*1+ 1] * m[JD*2+ 2] - m[JD*2+ 1] * m[JD*1+ 2]) ;
+  minv[JD*0+ 1]*= (m[JD*0+ 2] * m[JD*2+ 1] - m[JD*0+ 1] * m[JD*2+ 2]) ;
+  minv[JD*0+ 2]*= (m[JD*0+ 1] * m[JD*1+ 2] - m[JD*0+ 2] * m[JD*1+ 1]) ;
+  //
+  minv[JD*1+ 0]*= (m[JD*1+ 2] * m[JD*2+ 0] - m[JD*1+ 0] * m[JD*2+ 2]) ;
+  minv[JD*1+ 1]*= (m[JD*0+ 0] * m[JD*2+ 2] - m[JD*0+ 2] * m[JD*2+ 0]) ;
+  minv[JD*1+ 2]*= (m[JD*1+ 0] * m[JD*0+ 2] - m[JD*0+ 0] * m[JD*1+ 2]) ;
+  //
+  minv[JD*2+ 0]*= (m[JD*1+ 0] * m[JD*2+ 1] - m[JD*2+ 0] * m[JD*1+ 1]) ;
+  minv[JD*2+ 1]*= (m[JD*2+ 0] * m[JD*0+ 1] - m[JD*0+ 0] * m[JD*2+ 1]) ;
+  minv[JD*2+ 2]*= (m[JD*0+ 0] * m[JD*1+ 1] - m[JD*1+ 0] * m[JD*0+ 1]) ;
+  //m=minv;//*(static_cast<FLOAT_MESH>(1.0)/jacdet);
+  for(int i=0;i<9;i++){ m[i]=minv[i]; };
+  if(jacdet < 0){return -1;} else{return 0;}
 };
 inline int Elem::Jac3Inv(RESTRICT Mesh::vals& m, const FLOAT_MESH jacdet){
   if(jacdet==0){return 1;}

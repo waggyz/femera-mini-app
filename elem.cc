@@ -52,8 +52,8 @@ const RESTRICT Mesh::vals Elem::ShapeGradient( const INT_ORDER pord,
   const RESTRICT Mesh::vals iptw ){//printf("=== gA ===\n");
   const uint d=uint(elem_d)+1;
   const uint np=iptw.size()/d;
-  uint ng=elem_vert_n*uint(elem_d);// printf("*** SIZE ng: %u\n",ng);
-  Mesh::vals shpg(ng*np);
+  uint ng=0;//=elem_vert_n*uint(elem_d);// printf("*** SIZE ng: %u\n",ng);
+  Mesh::vals shpg;//(ng*np);
   FLOAT_MESH p[elem_d];
   this->gaus_weig.resize(np);
   for(uint ip=0; ip<np; ip++ ){
@@ -115,6 +115,7 @@ int Elem::Jac2Dets(){
   const int ng=shpg.size()/np;
   const int d=2;
   const int d2=elem_d*elem_d, Nj=d2+1;
+  FLOAT_MESH jac[d2], vert[vn*d];
   //const RESTRICT Mesh::vals iwts=ipws[std::slice(ipws.size()-np,np,1)];
   //const RESTRICT Mesh::vals iwts=ipws[std::slice(d,np,d+1)];
   //printf("IPWS: ");
@@ -125,16 +126,19 @@ int Elem::Jac2Dets(){
   //elip_dets.resize(elem_n*np);
   elip_jacs.resize(elem_n*np*Nj);
   for(INT_MESH ie=0; ie<elem_n; ie++){//printf("Triangle Jacobian Elem %i\n",ie);
-    RESTRICT Mesh::vals vert(vn*d);
+    //RESTRICT Mesh::vals vert(vn*d);
     for(uint i=0; i<vn; i++){ uint n=elem_conn[cn* ie+i];
       for(uint j=0;j<d;j++){
         vert[vn* j+i]=vert_coor[d* n+j]; }; };
+        //vert[d* i+j]=vert_coor[d* n+j]; }; };
     for(int ip=0; ip<np; ip++){
-      RESTRICT Mesh::vals jac(d2);
+      //RESTRICT Mesh::vals jac(d2);
+      //for( int i=0;i<d2;i++){ jac[i]=0.0; };
+      for(uint i=0;i< d;i++){
+      for(uint k=0;k< d;k++){ jac[d* i+k ]=0.0;
       for(uint j=0;j<vn;j++){
-        for(uint i=0;i<d;i++){
-          for(uint k=0;k<d;k++){
-            jac[d* i+k ] += shpg[ip*ng+ vn* i+j ] * vert[vn* k+j ];
+        jac[d* i+k ] += shpg[ip*ng+ vn* i+j ] * vert[vn* k+j ];
+        //jac[d* i+k ] += shpg[ip*ng+ d* j+i ] * vert[d* j+k ];
       };};};
       //RESTRICT Mesh::vals jac=MatMul2xNx2T(
       //  shpg[std::slice(ip*ng,ng,1)], vert );
@@ -144,7 +148,8 @@ int Elem::Jac2Dets(){
       Jac2Inv(jac,det);
       if(det<=0){ok-=1;};
       //elip_dets[ie*np+ip]=det*iwts[ip];//printf("DETWT: %10.3e\n",elip_dets[ie*np+ip]);
-      elip_jacs[std::slice(ie*np*Nj+ip*Nj,d2,1)]=jac;
+      //elip_jacs[std::slice(ie*np*Nj+ip*Nj,d2,1)]=jac;
+      for(int i=0;i<d2;i++){ elip_jacs[ie*np*Nj+ip*Nj +i ] = jac[i]; };
       elip_jacs[ie*np*Nj+ip*Nj+d2]=det;//*iwts[ip];
       //for(int i=0;i<4;i++){printf(" %g",jac[i]);};printf("\n");
       };
@@ -169,23 +174,26 @@ int Elem::Jac3Dets(){
   const uint vn=elem_vert_n;//*mesh_d;
   const uint np=ipws.size()/(d+1);
   const uint ng=shpg.size()/np;// printf("**** JE ****\n");
+  FLOAT_MESH jac[d2], vert[vn*d];
   //const int d2=elem_d*elem_d;
   //const int d2=9,Nj=10;
   //const RESTRICT Mesh::vals iwts=ipws[std::slice(d,np,d+1)];
   //elip_dets.resize(elem_n*np);
   elip_jacs.resize(elem_n*np*Nj);//printf("ELEMS:%u, INTPTS: %i\n",elem_n,np);
   for(INT_MESH ie=0; ie<elem_n; ie++){// printf("**** JF ****\n");
-    RESTRICT Mesh::vals vert(vn*d);
+    //RESTRICT Mesh::vals vert(vn*d);
     for(uint i=0; i<vn; i++){ uint n=elem_conn[cn* ie+i];
       for(uint j=0;j<d;j++){
         vert[vn* j+i]=vert_coor[d* n+j]; }; };
         //vert[d* i+j]=vert_coor[d* n+j]; }; };
     for(uint ip=0; ip<np; ip++){//printf("ELEM:%u, INTPT: %i\n",ie,ip);
-      RESTRICT Mesh::vals jac(0.0,d2);
-      for(uint i=0;i<d;i++){
-      for(uint k=0;k<d;k++){// jac[d* i+k ]=0.0;
+      //RESTRICT Mesh::vals jac(0.0,d2);
+      //for( int i=0;i<d2;i++){ jac[i]=0.0; };
+      for(uint i=0;i< d;i++){
+      for(uint k=0;k< d;k++){ jac[d* i+k ]=0.0;
       for(uint j=0;j<vn;j++){
         jac[d* i+k ] += shpg[ip*ng+ vn* i+j ] * vert[vn* k+j ];
+        //jac[d* i+k ] += shpg[ip*ng+ d* j+i ] * vert[d* j+k ];
       };};};
       //RESTRICT Mesh::vals jac=MatMul3xNx3T(//FIXME loop this
       //  shpg[std::slice(ip*ng,ng,1)], vert );
@@ -194,8 +202,9 @@ int Elem::Jac3Dets(){
       //int ok_jac=Jac3Inv(jac,det)//FIXME return these?
       Jac3Inv(jac,det);
       if(det<=0){ok-=1;};
+      for(uint i=0;i<d2;i++){ elip_jacs[ie*np*Nj+ip*Nj +i ] = jac[i]; };
       //elip_dets[ie*np+ip]=det*iwts[ip];
-      elip_jacs[std::slice(ie*np*Nj+ip*Nj,d2,1)]=jac;// printf("**** JG ****\n");
+      //elip_jacs[std::slice(ie*np*Nj+ip*Nj,d2,1)]=jac;// printf("**** JG ****\n");
       //elip_jacs[ie*np*Nj+ip*Nj +d2 ]=det*iwts[ip];//FIXED Don't apply weight yet
       elip_jacs[ie*np*Nj+ip*Nj +d2 ]=det;
       #if VERB_MAX>10

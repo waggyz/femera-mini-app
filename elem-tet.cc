@@ -106,12 +106,15 @@ const RESTRICT Mesh::vals Tet::ShapeFunction(
 };
 const RESTRICT Mesh::vals Tet::ShapeGradient(
   const INT_ORDER p, const FLOAT_MESH x[3]){
+  RESTRICT Mesh::vals g={};
   //printf("=== GA ===\n");
   //FIXME Should these take a list of points?
   FLOAT_MESH v=1.0;//0.550321208149104;// (1/6)^(1/3)//FIXME?
   switch( int(p) ){//this->elem_p
   case(1):{// printf("=== G1 ===\n"); 
-    return Mesh::vals {//FIXME Transpose?
+    //return Mesh::vals {//FIXME Transpose?
+    g.resize(12);
+    g={//FIXME Transpose?
       -v, v, 0.0, 0.0,  // dN/dx (natural coords)//FIXED Check these.
       -v, 0.0, v, 0.0,  // dN/dy
       -v, 0.0, 0.0, v }; break;}// dN/
@@ -123,8 +126,9 @@ const RESTRICT Mesh::vals Tet::ShapeGradient(
     const FLOAT_MESH L1s=-v, L2s=0., L3s=v , L4s=0.;
     const FLOAT_MESH L1t=-v, L2t=0., L3t=0., L4t=v ;
     // edges: 0,1; 1,2; 0,2; 0,3; 2,3; 1,3;
-    RESTRICT Mesh::vals g(3*10);
+    //RESTRICT Mesh::vals g(3*10);
     // r-derivs by product rule
+    g.resize(30);
     g[ 0] = 2.*L1*L1r + 2.*L1r*L1 - L1r;// Corner nodes
     g[ 1] = 2.*L2*L2r + 2.*L2r*L2 - L2r;
     g[ 2] = 2.*L3*L3r + 2.*L3r*L3 - L3r;
@@ -158,7 +162,8 @@ const RESTRICT Mesh::vals Tet::ShapeGradient(
     g[28] = 4.*L3*L4t + 4.*L3t*L4;
     g[29] = 4.*L4*L2t + 4.*L4t*L2;
     //
-    return g; break;}
+    //return g;
+    break;}
   case(3):{ v=1.0;
     const FLOAT_MESH L2=x[0]*v, L3=x[1]*v, L4=x[2]*v;
     const FLOAT_MESH L1=(1.-L2-L3-L4);
@@ -167,7 +172,8 @@ const RESTRICT Mesh::vals Tet::ShapeGradient(
     const FLOAT_MESH L1s=-v, L2s=0., L3s=v , L4s=0.;
     const FLOAT_MESH L1t=-v, L2t=0., L3t=0., L4t=v ;
     // edges: 0,1; 1,2; 0,2; 0,3; 2,3; 1,3;
-    RESTRICT Mesh::vals g(3*20);
+    //RESTRICT Mesh::vals g(3*20);
+    g.resize(60);
     g[ 0]= 0.5* L1r *(3.* L1 -1.)*(3.* L1 -2.)// corner nodes
          + 0.5* L1  *(3.* L1r   )*(3.* L1 -2.)
          + 0.5* L1  *(3.* L1 -1.)*(3.* L1r   );
@@ -276,7 +282,18 @@ const RESTRICT Mesh::vals Tet::ShapeGradient(
     g[58]=27.*( L1t*L4 *L3 + L1 *L4t*L3 + L1 *L4 *L3t);
     g[59]=27.*( L2t*L3 *L4 + L2 *L3t*L4 + L2 *L3 *L4t);
     //
-    return g; break;  }
-  default: return Mesh::vals{};
+    //return g;
+    break;}
+  //default: return Mesh::vals{};
+  default: break;//const RESTRICT Mesh::vals g={};
   };
+  return g;
+  // Transpose it
+  //RESTRICT Mesh::vals t(g.size());
+  //int r = int( g.size()/3 );
+  //for(int i=0;i<r;i++){
+  //  for(int j=0;j<3;j++){
+  //    t[3* j+i ] = g[r* i+j ];
+  //};};
+  //return t;
   };
