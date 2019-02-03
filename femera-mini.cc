@@ -4,6 +4,7 @@
 #include <limits>
 #include <unordered_map>
 #include <chrono>
+#include <valarray>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,6 +13,7 @@
 #include <omp.h>
 #endif
 #include "femera.h"
+//FIXME if HAS_TEST
 #include "test.h"
 //
 int main( int argc, char** argv ){
@@ -25,6 +27,7 @@ int main( int argc, char** argv ){
   FLOAT_SOLV rtol = 1e-4;
   //Solv::Meth solv_meth = Solv::SOLV_CG;
   int solv_meth = Solv::SOLV_CG;
+  FLOAT_SOLV test_u=0.001;
   //
   bool is_part    = false;
   INT_MESH_PART part_n=0;
@@ -33,7 +36,7 @@ int main( int argc, char** argv ){
   // Parse Command Line =============================================
   //FIXME Consider using C++ for parsing command line options.
   opterr = 0; int c;
-  while ((c = getopt (argc, argv, "v:pP:h:c:m:s:i:r:")) != -1){
+  while ((c = getopt (argc, argv, "v:pP:h:c:m:s:i:r:x:")) != -1){
     // x:  -x requires an argument
     switch (c) {
       case 'c':{ comp_n   = atoi(optarg); break;}
@@ -45,6 +48,7 @@ int main( int argc, char** argv ){
       case 'i':{ iter_max = atoi(optarg); break;}
       case 'r':{ rtol     = atof(optarg); break;}
       case 's':{ solv_meth= atoi(optarg); break;}
+      case 'x':{ test_u   = atof(optarg); break;}// Cube test applied x-displace
       case 'p':{ is_part  = true; break;}
       case 'P':{ is_part  = true; part_n = atoi(optarg); break;}// pstr = optarg;
       case '?':{
@@ -307,6 +311,10 @@ int main( int argc, char** argv ){
     // Iterate ------------------------------------------------------
     auto loop_start = std::chrono::high_resolution_clock::now();
     do{ M->Iter(); iter++;
+      //for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
+      //  Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->mesh_part[part_i];
+      //  S->Init(); S->Iter();
+      //}; M->Init();
 #if VERB_MAX>1
       if(!((iter) % iter_info_n) ){
         float iter_sec=M->time_secs[5];
@@ -385,7 +393,10 @@ int main( int argc, char** argv ){
     for(int i= 8; i<12; i++){ errtot[i] =-99e99; };
     printf("Solution Error (Compared to Isotropic)\n");
     Test* T = new Test(); int mesh_d=3;
-    FLOAT_PHYS scale=1.0,smin= 99e9,smax=-99e9;//FIXME only works for cubes
+    //FLOAT_PHYS scale=1.0,smin= 99e9,smax=-99e9;//FIXME only works for cubes
+    FLOAT_PHYS scax=1.0,minx= 99e9,maxx=-99e9;
+    FLOAT_PHYS scay=1.0,miny= 99e9,maxy=-99e9;
+    FLOAT_PHYS scaz=1.0,minz= 99e9,maxz=-99e9;
 #pragma omp parallel
 {
 #pragma omp for schedule(static)
@@ -393,21 +404,40 @@ int main( int argc, char** argv ){
       Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->mesh_part[part_i];
 #pragma omp critical(minmax)
 {
-      smin=std::min( smin, E->vert_coor.min() );
-      smax=std::max( smax, E->vert_coor.max() );
+      //smin=std::min( smin, E->vert_coor.min() );
+      //smax=std::max( smax, E->vert_coor.max() );
+      Phys::vals t = E->vert_coor[std::slice(0,E->node_n,3)];
+      minx=std::min(minx, t.min() );
+      maxx=std::max(maxx, t.max() );
+      t = E->vert_coor[std::slice(1,E->node_n,3)];
+      miny=std::min(miny, t.min() );
+      maxy=std::max(maxy, t.max() );
+      t = E->vert_coor[std::slice(2,E->node_n,3)];
+      minz=std::min(minz, t.min() );
+      maxz=std::max(maxz, t.max() );
 }
     };
 #pragma omp single
 {
-    scale = 1.0/(smax-smin);
+    //scale = 1.0/(smax-smin);
+    scax = 1.0/(maxx-minx);
+    scay = 1.0/(maxy-miny);
+    scaz = 1.0/(maxz-minz);
 }
 #pragma omp for schedule(static)
     for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
       Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->mesh_part[part_i];
       Phys::vals errors={};
       FLOAT_PHYS nu=Y->mtrl_prop[1];
+      Phys::vals coor = E->vert_coor;
+      for(uint i=0;i<E->node_n*3;i+=3){
+        coor[i]*=scax; coor[i+1]*=scay; coor[i+2]*=scaz; };
+      //coor[std::slice(0,E->node_n,3)]=coor[std::slice(0,E->node_n,3)]*scax;
+      //coor[std::slice(1,E->node_n,3)]=coor[std::slice(1,E->node_n,3)]*scay;
+      //coor[std::slice(2,E->node_n,3)]=coor[std::slice(2,E->node_n,3)]*scaz;
       T->CheckCubeError( errors, nu,
-        E->vert_coor*scale, S->sys_u/FLOAT_SOLV(1e-3) );
+        coor, S->sys_u/FLOAT_SOLV(test_u) );
+        //E->vert_coor*scale, S->sys_u/FLOAT_SOLV(test_u) );
 #pragma omp critical(errs)
 {
       for(int i= 0; i< 4; i++){ errtot[i] = std::min(errtot[i],errors[i]); };
@@ -548,17 +578,21 @@ int main( int argc, char** argv ){
 }
   };
   }// end parallel 
-  FLOAT_PHYS A=1.0/(scale*scale);
+  //FLOAT_PHYS A=1.0/(scale*scale);
+  FLOAT_PHYS A=1.0/(scay*scaz);
   printf("Model Response\n");
   printf("        Load / Area  : %+9.2e /%9.2e  N/m2 = %+9.2e Pa\n",
     reac_x, A, reac_x/A );
   printf("Displacement / Length: %+9.2e /%9.2e  m/m  = %+9.2e strain\n",
-    0.001, 1.0/scale, 0.001*scale );
+    test_u, 1.0/scax, test_u*scax );
+    //test_u, 1.0/scale, test_u*scale );
   printf("              Modulus: %9.2e /%9.2e Pa/Pa Voigt Average\n",
-    reac_x/A/(0.001*scale), youn_voig );
-  { float e=( reac_x/A/(0.001*scale))/youn_voig -1.0;
+    reac_x/A/(test_u*scax), youn_voig );
+    //reac_x/A/(test_u*scale), youn_voig );
+  { float e=( reac_x/A/(test_u*scax))/youn_voig -1.0;
+  //{ float e=( reac_x/A/(test_u*scale))/youn_voig -1.0;
   printf("        Modulus Error:");
-  if( std::abs(e)<0.001 ){ printf(" %+9.2e\n",e); 
+  if( std::abs(e)<test_u ){ printf(" %+9.2e\n",e); 
   }else{ printf("%+6.2f%%\n",100.*e); };
   }
   return 0;
