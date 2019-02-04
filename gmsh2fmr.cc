@@ -593,6 +593,7 @@ int main( int argc, char** argv ) {
               };
           };
           if(rotfile &(props.size()>3)){
+            //FIXME Does not work unless -X0 -Z0 -X0 specified
             for(uint i=0; i<3; i++){
               props[i]=orislist[3* (part_i-part_0)+i ];
               };
