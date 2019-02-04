@@ -231,6 +231,8 @@ int main( int argc, char** argv ) {
           if(n==3){allrand=true;};//FIXME Not quite the way to do this
           }; }; }
         if(rotfile){ rdeglist={0.0,0.0,0.0};};
+        if(( smodlist.size()>0 ) & ( rdeglist.size()<3 ) ){
+          rdeglist={0.0,0.0,0.0};};
         for(int p : parttags ){
           for(FLOAT_PHYS v : rdeglist ){ mtrl_part[p].push_back(v); };
           for(FLOAT_PHYS v : younlist ){ mtrl_part[p].push_back(v); };
