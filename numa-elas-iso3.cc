@@ -242,8 +242,8 @@ int ElastIso3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
       for(uint k=0;k<Nc;k++){
       for(uint i=0;i<3;i++){
       for(uint j=0;j<3;j++){
-        G[3* i+k] += jac[3* i+j] * E->intp_shpg[ig+Nc* j+k]; }; }; };
-        //G[3* i+k] += jac[3* i+j] * E->intp_shpg[ig+3* k+j]; }; }; };
+        //G[3* i+k] += jac[3* i+j] * E->intp_shpg[ig+Nc* j+k]; }; }; };
+        G[3* i+k] += jac[3* i+j] * E->intp_shpg[ig+3* k+j]; }; }; };
       #if VERB_MAX>10
       printf( "Jacobian Inverse & Determinant:");
       for(uint j=0;j<d2;j++){
