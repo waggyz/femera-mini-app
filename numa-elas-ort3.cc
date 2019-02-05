@@ -98,7 +98,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
             G[3* k+i ] += jac[3* i+j ] * intp_shpg[Ng+ 3* k+j ];
           };
           for(uint j=0; j<3 ; j++){
-            A[3* i+j ] += G[Nc* i+k ] * u[ndof* k+j ];
+            A[3* i+j ] += G[3* k+i ] * u[ndof* k+j ];
           };
         };
       };
