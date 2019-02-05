@@ -102,7 +102,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
           for(int j=0; j<3; j++){
             B[3* i+k ] += A[3* i+j ] * R[3* k+j ];
       };};};//---------------------------------------------- 3*3*5 = 45 FLOP
-      FLOAT_PHYS w = det * wgt[ip];//0.25;
+      FLOAT_PHYS w = det * wgt[ip];
       A[0]=(mtrl_matc[0]* B[0] + mtrl_matc[3]* B[4] + mtrl_matc[5]* B[8])*w;//Sxx
       A[4]=(mtrl_matc[3]* B[0] + mtrl_matc[1]* B[4] + mtrl_matc[4]* B[8])*w;//Syy
       A[8]=(mtrl_matc[5]* B[0] + mtrl_matc[4]* B[4] + mtrl_matc[2]* B[8])*w;//Szz
