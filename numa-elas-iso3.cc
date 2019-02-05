@@ -86,21 +86,29 @@ int ElastIso3D::ElemLinear( Elem* E,
       Ng = ip*Ne;
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
+      for( int i=0; i<9 ; i++){ H[i]=0.0; };
       for(uint k=0; k<Nc; k++){
-      for(uint i=0; i<3 ; i++){ G[3* k+i ]=0.0;// G[Nc* i+k ]=0.0;
-      for(uint j=0; j<3 ; j++){
-        //G[Nc* i+k ] += jac[3* i+j ] * intp_shpg[Ng+ Nc* j+k ];
-        //G[3* k+i ] += jac[3* i+j ] * intp_shpg[Ng+ Nc* j+k ];
-        G[3* k+i ] += jac[3* i+j ] * intp_shpg[Ng+ 3* k+j ];
-      };};};
+        for(uint i=0; i<3 ; i++){ G[3* k+i ]=0.0;
+          // G[Nc* i+k ]=0.0;
+          for(uint j=0; j<3 ; j++){
+            G[3* k+i ] += jac[3* i+j ] * intp_shpg[Ng+ 3* k+j ];
+          };
+          for(uint j=0; j<3 ; j++){
+            H[ 3* i+j ] += G[3* k+i ] * u[ndof* k+j ];
+          };
+        };
+      };
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
+      /*
       for( int i=0; i<9 ; i++){ H[i]=0.0; };
       for(uint k=0; k<Nc; k++){
       for(uint i=0; i<3 ; i++){
       for(uint j=0; j<3 ; j++){
         //H[ 3* i+j ] +=  G[Nc* i+k ] *           u[ndof* k+j ];
         H[ 3* i+j ] += G[3* k+i ] * u[ndof* k+j ];
-      };};};/*
+      };};};
+      */
+      /*
       // Unroll G & H together here.
       for(int i=0; i<9; i++){ H[i]=0.0; };
       for(uint k=0; k<Nc; k++){//for(uint i=0; i<3 ; i++){//for(uint j=0; j<3 ; j++){
