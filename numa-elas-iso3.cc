@@ -44,10 +44,10 @@ int ElastIso3D::ElemLinear( Elem* E,
   printf("DOF: %i, Elems:%i, IntPts:%i, Nodes/elem:%i\n",
     (int)ndof,(int)elem_n,(int)intp_n,(int)Nc );
   #endif
-  FLOAT_PHYS G[Ne], u[Ne],f[Ne];//,shg[Ne] //FIXME Should f[] be Phys::vals?
-  FLOAT_PHYS det, jac[Nj], H[9],S[9];// A[9], B[9];
+  FLOAT_PHYS G[Ne], u[Ne],f[Ne];
+  FLOAT_PHYS det, jac[Nj], H[9],S[9];
   FLOAT_PHYS intp_shpg[intp_n*Ne];
-  std::copy( &E->intp_shpg[0],// Prefetch seems to help
+  std::copy( &E->intp_shpg[0],
              &E->intp_shpg[intp_n*Ne], intp_shpg );
   FLOAT_PHYS wgt[intp_n];
   std::copy( &E->gaus_weig[0],
@@ -62,14 +62,10 @@ int ElastIso3D::ElemLinear( Elem* E,
   #endif
   //
   INT_MESH e0=0, ee=elem_n;
-  if(E->do_halo==true){ e0=0; ee=E->halo_elem_n;// printf("-%u-",E->halo_elem_n);
-  }else{ e0=E->halo_elem_n; ee=elem_n;};//  printf("*%u*",E->halo_elem_n);};
+  if(E->do_halo==true){ e0=0; ee=E->halo_elem_n;
+  }else{ e0=E->halo_elem_n; ee=elem_n;};
   //
   for(INT_MESH ie=e0;ie<ee;ie++){
-  //for(INT_MESH ie=0;ie<elem_n;ie++){
-    //if(imfirst==0){//FIXME Need another buffer to prefetch this
-    //  std::copy( &elem_inout[ie*Ne],
-    //             &elem_inout[ie*Ne+Ne], u );//};
     ij=Nj*ie;//FIXME only good for tets
     std::copy( &E->elip_jacs[ij],
                &E->elip_jacs[ij+Nj], jac ); det=jac[9];
@@ -78,18 +74,12 @@ int ElastIso3D::ElemLinear( Elem* E,
                     sizeof(FLOAT_SOLV)*ndof ); };
     for(uint j=0;j<Ne;j++){ f[j]=0.0; };
     for(int ip=0; ip<intp_n; ip++){
-      //if(imfirst==0){ //ij=Nj*ie*intp_n;
-      //  ij=Nj*ie*intp_n+Nj*ip;//FIXME Figure out how to put these below...
-      //  std::copy( &E->elip_jacs[ij],
-      //             &E->elip_jacs[ij+Nj], jac );};
-      //imfirst=1;
       Ng = ip*Ne;
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       for( int i=0; i<9 ; i++){ H[i]=0.0; };
       for(uint k=0; k<Nc; k++){
         for(uint i=0; i<3 ; i++){ G[3* k+i ]=0.0;
-          // G[Nc* i+k ]=0.0;
           for(uint j=0; j<3 ; j++){
             G[3* k+i ] += jac[3* i+j ] * intp_shpg[Ng+ 3* k+j ];
           };
@@ -97,46 +87,7 @@ int ElastIso3D::ElemLinear( Elem* E,
             H[ 3* i+j ] += G[3* k+i ] * u[ndof* k+j ];
           };
         };
-      };
-      //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
-      /*
-      for( int i=0; i<9 ; i++){ H[i]=0.0; };
-      for(uint k=0; k<Nc; k++){
-      for(uint i=0; i<3 ; i++){
-      for(uint j=0; j<3 ; j++){
-        //H[ 3* i+j ] +=  G[Nc* i+k ] *           u[ndof* k+j ];
-        H[ 3* i+j ] += G[3* k+i ] * u[ndof* k+j ];
-      };};};
-      */
-      /*
-      // Unroll G & H together here.
-      for(int i=0; i<9; i++){ H[i]=0.0; };
-      for(uint k=0; k<Nc; k++){//for(uint i=0; i<3 ; i++){//for(uint j=0; j<3 ; j++){
-        G[Nc* 0+k ]  = jac[3* 0+0 ] * intp_shpg[Ng+ Nc* 0+k ]
-                     + jac[3* 0+1 ] * intp_shpg[Ng+ Nc* 1+k ]
-                     + jac[3* 0+2 ] * intp_shpg[Ng+ Nc* 2+k ];// Nc* 5 FLOP
-      //};for(uint k=0; k<Nc; k++){
-        H[ 3* 0+0 ] += G[Nc* 0+k ] * u[ndof* k+0 ];
-        H[ 3* 0+1 ] += G[Nc* 0+k ] * u[ndof* k+1 ];
-        H[ 3* 0+2 ] += G[Nc* 0+k ] * u[ndof* k+2 ];// Nc* 6 FLOP
-      };for(uint k=0; k<Nc; k++){//NOTE Time these with and without these
-        G[Nc* 1+k ]  = jac[3* 1+0 ] * intp_shpg[Ng+ Nc* 0+k ]
-                     + jac[3* 1+1 ] * intp_shpg[Ng+ Nc* 1+k ]
-                     + jac[3* 1+2 ] * intp_shpg[Ng+ Nc* 2+k ];
-      //};for(uint k=0; k<Nc; k++){
-        H[ 3* 1+0 ] += G[Nc* 1+k ] * u[ndof* k+0 ];
-        H[ 3* 1+1 ] += G[Nc* 1+k ] * u[ndof* k+1 ];
-        H[ 3* 1+2 ] += G[Nc* 1+k ] * u[ndof* k+2 ];
-      };for(uint k=0; k<Nc; k++){
-        G[Nc* 2+k ]  = jac[3* 2+0 ] * intp_shpg[Ng+ Nc* 0+k ]
-                     + jac[3* 2+1 ] * intp_shpg[Ng+ Nc* 1+k ]
-                     + jac[3* 2+2 ] * intp_shpg[Ng+ Nc* 2+k ];
-      //};for(uint k=0; k<Nc; k++){
-        H[ 3* 2+0 ] += G[Nc* 2+k ] * u[ndof* k+0 ];
-        H[ 3* 2+1 ] += G[Nc* 2+k ] * u[ndof* k+1 ];
-        H[ 3* 2+2 ] += G[Nc* 2+k ] * u[ndof* k+2 ];
-      };//};//};//------------------------------------------ N* 3*11 = 33*N FLOP
-      */
+      };//------------------------------------------ N* 3*11 = 33*N FLOP
       #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
       for(uint j=0;j<HH.size();j++){
@@ -144,14 +95,7 @@ int ElastIso3D::ElemLinear( Elem* E,
         printf("%+9.2e ",H[j]);
       }; printf("\n");
       #endif
-      //det = jac[9];// Save for later
-      //ij+=Nj;//FIXME Prefetch the next jac&det...
-      //ij=Nj*ie*intp_n +Nj*(ip+1);
-      //if(ij<nej){
-      //  std::copy( &E->elip_jacs[ij],
-      //             &E->elip_jacs[ij+Nj], jac );
-      //};
-      FLOAT_PHYS w = det * wgt[ip];//0.25;
+      FLOAT_PHYS w = det * wgt[ip];
       S[0]=(mtrl_matc[0]* H[0] + mtrl_matc[1]* H[4] + mtrl_matc[1]* H[8])*w;//Sxx
       S[4]=(mtrl_matc[1]* H[0] + mtrl_matc[0]* H[4] + mtrl_matc[1]* H[8])*w;//Syy
       S[8]=(mtrl_matc[1]* H[0] + mtrl_matc[1]* H[4] + mtrl_matc[0]* H[8])*w;//Szz
@@ -163,20 +107,8 @@ int ElastIso3D::ElemLinear( Elem* E,
       for(uint i=0; i<Nc; i++){
         for(uint k=0; k<3 ; k++){
           for(uint j=0; j<3 ; j++){
-            //f[mesh_d* i+k ]+= G[Nc* j+i ] * B[mesh_d*j + k];
-            //f[3* i+k ] += G[Nc*j+i] * S[3*j+k];
-            //f[3* i+k ] += G[3*i+j] * S[3*j+k];
             f[3* i+k ] += G[3*i+j] * S[3*k+j];
-      };};};/*
-      for(uint i=0; i<Nc; i++){//for(uint k=0; k<3 ; k++){//for(uint j=0; j<3 ; j++){
-        //f[mesh_d* i+k ]+= G[Nc* j+i ] * B[mesh_d*j + k];
-        f[3* i+0 ]+=G[Nc*0+i]* S[3*0+0] + G[Nc*1+i]* S[3*1+0] + G[Nc*2+i]* S[3*2+0];
-      };for(uint i=0; i<Nc; i++){//NOTE Time this with and without these
-        f[3* i+1 ]+=G[Nc*0+i]* S[3*0+1] + G[Nc*1+i]* S[3*1+1] + G[Nc*2+i]* S[3*2+1];
-      };for(uint i=0; i<Nc; i++){//NOTE Time this with and without these
-        f[3* i+2 ]+=G[Nc*0+i]* S[3*0+2] + G[Nc*1+i]* S[3*1+2] + G[Nc*2+i]* S[3*2+2];
-      };//};//};//------------------------------------------- N* 3*6 = 18*N FLOP
-      */
+      };};};//------------------------------------------- N* 3*6 = 18*N FLOP
       #if VERB_MAX>10
       printf( "ff:");
       for(uint j=0;j<Ne;j++){
@@ -190,13 +122,6 @@ int ElastIso3D::ElemLinear( Elem* E,
       for(int j=0; j<3; j++){
         sys_f[E->elem_conn[Nc*ie+i]*3+j] += f[3*i+j];
       }; };
-    //
-    //std::memcpy( &elem_inout[ie*Ne], &f, sizeof(f) );
-    //for (int i=0; i<int(Nc); i++){
-    //  sys_f[std::slice(E->elem_conn[Nc*ie+i]*ndof,ndof,1)]
-    //    += f[std::slice(i*ndof,ndof,1)]; }
-    //
-    //FIXME Write elem_f into a buffer to accumulate node_f
   };//end elem loop
   return 0;//return flop;
   };
