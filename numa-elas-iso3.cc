@@ -76,7 +76,7 @@ int ElastIso3D::ElemLinear( Elem* E,
     for (uint i=0; i<Nc; i++){
       std::memcpy( &u[ndof*i], &sys_u[E->elem_conn[Nc*ie+i]*ndof],
                     sizeof(FLOAT_SOLV)*ndof ); };
-    for(uint j=0;j<Ne;j++){ f[j]=0.0; };// Seems faster here instead of after.
+    for(uint j=0;j<Ne;j++){ f[j]=0.0; };
     for(int ip=0; ip<intp_n; ip++){
       //if(imfirst==0){ //ij=Nj*ie*intp_n;
       //  ij=Nj*ie*intp_n+Nj*ip;//FIXME Figure out how to put these below...
@@ -90,8 +90,8 @@ int ElastIso3D::ElemLinear( Elem* E,
       for(uint i=0; i<3 ; i++){ G[3* k+i ]=0.0;// G[Nc* i+k ]=0.0;
       for(uint j=0; j<3 ; j++){
         //G[Nc* i+k ] += jac[3* i+j ] * intp_shpg[Ng+ Nc* j+k ];
-        G[3* k+i ] += jac[3* i+j ] * intp_shpg[Ng+ Nc* j+k ];
-        //G[3* k+i ] += jac[3* i+j ] * intp_shpg[Ng+ 3* k+j ];
+        //G[3* k+i ] += jac[3* i+j ] * intp_shpg[Ng+ Nc* j+k ];
+        G[3* k+i ] += jac[3* i+j ] * intp_shpg[Ng+ 3* k+j ];
       };};};
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       for( int i=0; i<9 ; i++){ H[i]=0.0; };

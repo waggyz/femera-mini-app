@@ -27,7 +27,7 @@ int main( int argc, char** argv ){
   FLOAT_SOLV rtol = 1e-4;
   //Solv::Meth solv_meth = Solv::SOLV_CG;
   int solv_meth = Solv::SOLV_CG;
-  FLOAT_SOLV test_u=0.001;
+  FLOAT_SOLV test_u=0.001; INT_DOF test_dir=0;
   //
   bool is_part    = false;
   INT_MESH_PART part_n=0;
@@ -36,7 +36,7 @@ int main( int argc, char** argv ){
   // Parse Command Line =============================================
   //FIXME Consider using C++ for parsing command line options.
   opterr = 0; int c;
-  while ((c = getopt (argc, argv, "v:pP:h:c:m:s:i:r:x:")) != -1){
+  while ((c = getopt (argc, argv, "v:pP:h:c:m:s:i:r:x:y:z:")) != -1){
     // x:  -x requires an argument
     switch (c) {
       case 'c':{ comp_n   = atoi(optarg); break;}
@@ -48,7 +48,10 @@ int main( int argc, char** argv ){
       case 'i':{ iter_max = atoi(optarg); break;}
       case 'r':{ rtol     = atof(optarg); break;}
       case 's':{ solv_meth= atoi(optarg); break;}
-      case 'x':{ test_u   = atof(optarg); break;}// Cube test applied x-displace
+      // Cube test applied displacement
+      case 'x':{ test_u   = atof(optarg); test_dir=0; break;}
+      case 'y':{ test_u   = atof(optarg); test_dir=1; break;}
+      case 'z':{ test_u   = atof(optarg); test_dir=2; break;}
       case 'p':{ is_part  = true; break;}
       case 'P':{ is_part  = true; part_n = atoi(optarg); break;}// pstr = optarg;
       case '?':{
@@ -429,7 +432,21 @@ int main( int argc, char** argv ){
       Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->mesh_part[part_i];
       Phys::vals errors={};
       FLOAT_PHYS nu=Y->mtrl_prop[1];
-      Phys::vals coor = E->vert_coor;
+      Phys::vals coor(E->vert_coor.size());
+      switch(test_dir){
+      case(1):{
+        coor[std::slice(0,E->node_n,3)]=E->vert_coor[std::slice(1,E->node_n,3)];
+        coor[std::slice(1,E->node_n,3)]=E->vert_coor[std::slice(2,E->node_n,3)];
+        coor[std::slice(2,E->node_n,3)]=E->vert_coor[std::slice(0,E->node_n,3)];
+        break;}
+      case(2):{
+        coor[std::slice(0,E->node_n,3)]=E->vert_coor[std::slice(2,E->node_n,3)];
+        coor[std::slice(1,E->node_n,3)]=E->vert_coor[std::slice(0,E->node_n,3)];
+        coor[std::slice(2,E->node_n,3)]=E->vert_coor[std::slice(1,E->node_n,3)];
+        break;}
+      case(0):
+      default:{ coor = E->vert_coor; break;}
+      };
       for(uint i=0;i<E->node_n*3;i+=3){
         coor[i]*=scax; coor[i+1]*=scay; coor[i+2]*=scaz; };
       //coor[std::slice(0,E->node_n,3)]=coor[std::slice(0,E->node_n,3)]*scax;

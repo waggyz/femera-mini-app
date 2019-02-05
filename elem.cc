@@ -44,7 +44,16 @@ int Elem::Setup(){
   //if(this->elem_p==2){ this->gaus_n=4; };
   //FIXME this->gaus_p is always 1? );//this->gaus_p );
   const RESTRICT Mesh::vals t=ShapeGradient(this->elem_p, ipws );
-  this->intp_shpg.resize(t.size()); intp_shpg= t;// icc wants resize() first.
+  this->intp_shpg.resize(t.size());
+  //intp_shpg= t;// icc wants resize() first.
+  //FIXME Transpose the shape gradients for ElemLinear()
+  uint cn=this->elem_conn_n;
+  uint Ng=t.size()/this->gaus_n;
+  for(uint p=0;p<this->gaus_n;p++){
+    for(uint i=0;i<this->elem_d;i++){
+      for(uint j=0;j<cn;j++){
+        this->intp_shpg[Ng*p +3 *j+i ] = t[Ng*p +cn* i+j];
+  };};};
   //printf("*** %u %u %u ***\n",uint(elem_p),uint(gaus_p),uint(intp_shpg.size()) );
   return 0;
   };
