@@ -53,10 +53,8 @@ int PCG::Setup( Elem* E, Phys* Y ){
   this->halo_loca_0 = E->halo_remo_n * Y->ndof_n;
   this->RHS( E,Y );
   this->BCS( E,Y );
-  E->do_halo=true;
-  Y->ElemLinear( E,this->sys_f,this->sys_u );
-  E->do_halo=false;
-  Y->ElemLinear( E,this->sys_f,this->sys_u );
+  E->do_halo=true ; Y->ElemLinear( E,this->sys_f,this->sys_u );
+  E->do_halo=false; Y->ElemLinear( E,this->sys_f,this->sys_u );
   return(0);
 };
 int PCG::Init( Elem* E, Phys* Y ){
@@ -143,10 +141,8 @@ int PCG::Solve( Elem* E, Phys* Y ){//FIXME Redo this
       //Y->ElemLinear( E );
       //Y->GatherElem2Node(E,Y->elem_inout,this->sys_f);
       //Y->ElemLinear( E,this->sys_f,this->sys_p );
-      E->do_halo=true;
-      Y->ElemLinear( E,this->sys_f,this->sys_p );
-      E->do_halo=false;
-      Y->ElemLinear( E,this->sys_f,this->sys_p );
+      E->do_halo=true ; Y->ElemLinear( E,this->sys_f,this->sys_p );
+      E->do_halo=false; Y->ElemLinear( E,this->sys_f,this->sys_p );
       //FIXME HALO SYNC this->sys_f
       if( this->Iter() ){ break ;};// CG Iteration
 #if VERB_MAX>2
@@ -341,8 +337,7 @@ int HaloPCG::Iter(){
     const INT_MESH d=uint(Y->ndof_n);
     phys_start = std::chrono::high_resolution_clock::now();
     S->sys_f=0.0;
-    E->do_halo=true;
-    Y->ElemLinear( E, S->sys_f, S->sys_p );
+    E->do_halo=true; Y->ElemLinear( E, S->sys_f, S->sys_p );
     dur = std::chrono::duration_cast<std::chrono::nanoseconds>
       (std::chrono::high_resolution_clock::now()-phys_start);
     my_phys_count += dur.count();
@@ -390,8 +385,7 @@ int HaloPCG::Iter(){
       (std::chrono::high_resolution_clock::now()-scat_start);
     my_scat_count += dur.count();
     phys_start = std::chrono::high_resolution_clock::now();
-    E->do_halo=false;
-    Y->ElemLinear( E, S->sys_f, S->sys_p );
+    E->do_halo=false; Y->ElemLinear( E, S->sys_f, S->sys_p );
     dur= std::chrono::duration_cast<std::chrono::nanoseconds>
       (std::chrono::high_resolution_clock::now()-phys_start);
     my_phys_count += dur.count();
