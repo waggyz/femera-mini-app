@@ -168,19 +168,23 @@ int HaloPCG::Init(){// Preconditioned Conjugate Gradient
   FLOAT_SOLV glob_r2a = this->glob_res2, glob_to2 = this->glob_rto2;
 #pragma omp parallel num_threads(comp_n)
 {// parallel init region
+#if VERB_MAX>1
   long int my_scat_count=0, my_prec_count=0,
     my_gat0_count=0,my_gat1_count=0, my_gmap_count=0, my_solv_count=0;
   auto start = std::chrono::high_resolution_clock::now();
+#endif
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
     S->Precond( E,Y );
   };
   // Sync sys_d [this inits halo_map]
+#if VERB_MAX>1
   auto dur = std::chrono::duration_cast<std::chrono::nanoseconds>
     (std::chrono::high_resolution_clock::now()-start);
   my_prec_count += dur.count();
   start = std::chrono::high_resolution_clock::now();
+#endif
 #pragma omp for schedule(static)
 for(int part_i=part_0; part_i<part_o; part_i++){
   Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
@@ -200,10 +204,12 @@ for(int part_i=part_0; part_i<part_o; part_i++){
 }
     };
   };// End sys_d gather
+#if VERB_MAX>1
   dur = std::chrono::duration_cast<std::chrono::nanoseconds>
     (std::chrono::high_resolution_clock::now()-start);
   my_gmap_count += dur.count();
   start = std::chrono::high_resolution_clock::now();
+#endif
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
@@ -215,10 +221,12 @@ for(int part_i=part_0; part_i<part_o; part_i++){
         S->sys_d[d*i +j] = this->halo_val[f+j]; };
     };
   };// end sys_d scatter
+#if VERB_MAX>1
   dur = std::chrono::duration_cast<std::chrono::nanoseconds>
     (std::chrono::high_resolution_clock::now()-start);
   my_scat_count += dur.count();
   start = std::chrono::high_resolution_clock::now();
+#endif
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
@@ -238,14 +246,18 @@ for(int part_i=part_0; part_i<part_o; part_i++){
     //  for( uint j=0; j<ndof_n; j++){// parallel halo_vals zero
     //    halo_vals[E->node_glid[i]][j] =0.0; }; };
   };
+#if VERB_MAX>1
   dur = std::chrono::duration_cast<std::chrono::nanoseconds>
     (std::chrono::high_resolution_clock::now()-start);
   my_solv_count += dur.count();
   start = std::chrono::high_resolution_clock::now();
+#endif
 #pragma omp single
 {   this->halo_val = 0.0; }// serial halo_vals zero
+#if VERB_MAX>1
   my_gat0_count +=dur.count();
   start = std::chrono::high_resolution_clock::now();
+#endif
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
@@ -256,11 +268,13 @@ for(int part_i=part_0; part_i<part_o; part_i++){
 #pragma omp atomic update
         this->halo_val[f+j] += S->sys_f[d*i +j]; };
     };
-  };// End halo_vals 
+  };// End halo_vals
+#if VERB_MAX>1
   dur = std::chrono::duration_cast<std::chrono::nanoseconds>
     (std::chrono::high_resolution_clock::now()-start);
   my_gat1_count += dur.count();
   start = std::chrono::high_resolution_clock::now();
+#endif
 #pragma omp for schedule(static) reduction(+:glob_r2a)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
@@ -271,10 +285,12 @@ for(int part_i=part_0; part_i<part_o; part_i++){
 #pragma omp atomic read
         S->sys_f[d*i +j] = this->halo_val[f+j]; };
     };
+#if VERB_MAX>1
   dur = std::chrono::duration_cast<std::chrono::nanoseconds>
     (std::chrono::high_resolution_clock::now()-start);
   my_scat_count += dur.count();
   start = std::chrono::high_resolution_clock::now();
+#endif
 #pragma omp critical(init)
 { S->Init(); }
   glob_r2a += S->loca_res2;
@@ -286,6 +302,7 @@ for(int part_i=part_0; part_i<part_o; part_i++){
 #pragma omp atomic write
     glob_to2 = S->loca_rto2;// Pass the relative tolerance out.
   };
+#if VERB_MAX>1
   dur = std::chrono::duration_cast<std::chrono::nanoseconds>
     (std::chrono::high_resolution_clock::now()-start);
   my_solv_count += dur.count();
@@ -298,6 +315,7 @@ for(int part_i=part_0; part_i<part_o; part_i++){
   this->time_secs[4]+=float(my_scat_count)*1e-9;
   this->time_secs[5]+=float(my_solv_count)*1e-9;
 }
+#endif
 }// end init parallel region
   this->glob_res2 = glob_r2a;
   this->glob_chk2 = glob_r2a;

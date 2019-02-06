@@ -17,17 +17,25 @@
 #include "test.h"
 //
 int main( int argc, char** argv ){
-  float sec=1.0, ms=1e-3,us=1e-6,ns=1e-9, Meg=1e6, pct=100.0;// k=1e3,Gig=1e9,
+  float ns=1e-9;
+#if VERB_MAX>1
+  float sec=1.0, ms=1e-3,us=1e-6, Meg=1e6, pct=100.0;// k=1e3,Gig=1e9,
+#endif
   int comp_n     = 0;//, numa_n=0;
   int verbosity  = 1;
   int iter_max   =-1;
 #ifdef _OPENMP
-  int numa_n=0, halo_mod=1;
+  int numa_n=0;
+#if VERB_MAX>1
+  int halo_mod=1;
+#endif
 #endif
   FLOAT_SOLV rtol = 1e-4;
   //Solv::Meth solv_meth = Solv::SOLV_CG;
   int solv_meth = Solv::SOLV_CG;
+#if VERB_MAX>1
   FLOAT_SOLV test_u=0.001; INT_DOF test_dir=0;
+#endif
   //
   bool is_part    = false;
   INT_MESH_PART part_n=0;
@@ -43,15 +51,19 @@ int main( int argc, char** argv ){
       case 'v':{ verbosity= atoi(optarg); break;}
 #ifdef _OPENMP
       case 'm':{ numa_n   = atoi(optarg); break;}//FIXME Not yet used.
+#if VERB_MAX>1
       case 'h':{ halo_mod = atoi(optarg); break;}
+#endif
 #endif
       case 'i':{ iter_max = atoi(optarg); break;}
       case 'r':{ rtol     = atof(optarg); break;}
       case 's':{ solv_meth= atoi(optarg); break;}
+#if VERB_MAX>1
       // Cube test applied displacement
       case 'x':{ test_u   = atof(optarg); test_dir=0; break;}
       case 'y':{ test_u   = atof(optarg); test_dir=1; break;}
       case 'z':{ test_u   = atof(optarg); test_dir=2; break;}
+#endif
       case 'p':{ is_part  = true; break;}
       case 'P':{ is_part  = true; part_n = atoi(optarg); break;}// pstr = optarg;
       case '?':{
@@ -184,8 +196,8 @@ int main( int argc, char** argv ){
 #if VERB_MAX>1
   if(verbosity>1){
     printf ("Found %u mesh partitions.\n", part_n);};
-    };
 #endif
+    };
   }else{
     std::cerr << "ERROR No mesh partition files could be opened for reading."
       << '\n'; 
@@ -193,9 +205,11 @@ int main( int argc, char** argv ){
   };
   // Read and Setup =============================================
   int iter=0;
-  int iter_info_n = 1;
 #if VERB_MAX>0
   float read_sec=0.0,init_sec=0.0,loop_sec=0.0;
+#endif
+#if VERB_MAX>1
+  int iter_info_n = 1;
 #endif
 #ifdef _OPENMP
   if( comp_n <1){ comp_n = omp_get_max_threads(); };//omp_get_max_threads();
@@ -247,6 +261,7 @@ int main( int argc, char** argv ){
   read_start = std::chrono::high_resolution_clock::now();
 #endif
   M->Setup();
+#if VERB_MAX>1
   //std::string solv_name="FIXME";
   {// scope local variables
   int sugg_max=3000;
@@ -257,13 +272,14 @@ int main( int argc, char** argv ){
   }else                         { iter_info_n =   1; sugg_max =M->udof_n; };
   if(iter_max<0){ iter_max=sugg_max; };
   }// end variable scope
+#endif
 #if VERB_MAX>0
   setu_done = std::chrono::high_resolution_clock::now();
   read_time = std::chrono::duration_cast<std::chrono::nanoseconds>
     (setu_done-read_start);
   read_sec=float(read_time.count())*1e-9;
   if(verbosity==1){
-  std::cout << M->elem_n<<" "<<M->node_n<<" "<<M->udof_n;
+  std::cout << M->elem_n<<","<<M->node_n<<","<<M->udof_n;
   };
 #endif
 #if VERB_MAX>1

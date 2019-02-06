@@ -2,7 +2,7 @@
 #define INCLUDED_FEMERA_H
 // Conditional Compiling
 #define VERB_MAX 3 // Maximum verbosity supported by executable
-// 0:none, 1:only class-level stats, 2: timing, 3: status //11:debug level
+// 0:none, 1:CSV line output, 2: timing, 3: status //11:debug level
 //
 #define INT_MESH_PART int// Mesh Partition ID (user-defined?)
 //#define INT_MESH unsigned int// Element Numbers
