@@ -21,7 +21,7 @@ endif
 # Check if using intel compiler on k3 or k4
 ifdef INTEL_PYTHONHOME
 CXX=icc
-CPPFLAGS=-std=c++11 -Wall -Wextra -Ofast -xHost -axSKYLAKE-AVX512 \
+CPPFLAGS=-std=c++11 -Wall -Wextra -Ofast -xHost \
  -ffast-math -no-fast-transcendentals -fno-alias -diag-disable 3180 \
  -qopt-zmm-usage=high -no-inline-max-size -no-inline-max-total-size -g
 NCPU=40
@@ -61,6 +61,12 @@ mini-omp:
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread ;\
 	command /usr/bin/time -v ./femera-$(CPUMODEL) -v2 -c$(NCPU) -p cube/unst19p1n16 ;
 
+mini-ser1:
+	mv -f femse1-$(CPUMODEL) femse1.old 2>/dev/null ; \
+	$(CXX) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
+	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femse1-$(CPUMODEL) $(CPPLOG) ;\
+	./femse1-$(CPUMODEL) -v 2 -p cube/unit1p1n2 ;\
+	./femse1-$(CPUMODEL) -v 2 -p cube/unit1p2n2 ;
 
 mini-omp1:
 	mv -f femer1-$(CPUMODEL) femer1.old 2>/dev/null ; \
