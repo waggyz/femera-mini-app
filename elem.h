@@ -80,11 +80,10 @@ public:
   // = elem_vert_n + (elem_p-1)*elem_edge_n + elem_face_n
   INT_MESH elem_n=0, vert_n=0, node_n=0, jacs_n=0,
     halo_node_n=0, halo_loca_n=0, halo_remo_n=0, halo_elem_n=0;
-  //FIXED Remove  halo_uniq_n
   // Local halo and system sizes.
   // Halo nodes are [0...halo_n-1]; interior nodes are [halo_n...node_n-1].
   RESTRICT Mesh::vals intp_shpg={};
-  RESTRICT Mesh::ints elem_conn={};// Sort so halo nodes come first.
+  RESTRICT Mesh::ints elem_conn={};// Grouped so halo nodes come first.
   //FIXME Should be conn_node or elem_node?
   //RESTRICT Mesh::vals elem_vert={};// Fill w/ Elem::ScatterVert2Elem(Mesh*)
   //(mesh_d*elem_vert_n*elem_n) used for jac calc
@@ -94,7 +93,8 @@ public:
   RESTRICT Mesh::vals gaus_weig={};
   //
   RESTRICT Mesh::vals vert_coor={};// Local element vertices.
-  // Nodes are sorted:
+  //FIXME contains all nodal coordinates, not just vertices
+  // Nodes are grouped:
   // 0           .. (halo_remo_n-1) [Ghost nodes]
   // halo_remo_n .. (halo_node_n-1) [There are halo_loca_n of these.]
   // halo_node_n .. (     node_n-1) [Interior nodes]

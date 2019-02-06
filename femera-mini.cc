@@ -13,9 +13,9 @@
 #include <omp.h>
 #endif
 #include "femera.h"
-//FIXME if HAS_TEST
+#ifdef HAS_TEST
 #include "test.h"
-//
+#endif
 int main( int argc, char** argv ){
   float ns=1e-9;
 #if VERB_MAX>1
@@ -448,6 +448,7 @@ int main( int argc, char** argv ){
     };
 #endif
   }// end iter scope
+#ifdef HAS_TEST
     // Check solution ===============================================
 #if VERB_MAX>1
     if(verbosity>1){
@@ -670,5 +671,6 @@ int main( int argc, char** argv ){
   }
     };
 #endif
+#endif //HAS_TEST
   return 0;
 };

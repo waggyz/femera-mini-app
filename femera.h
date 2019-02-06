@@ -38,7 +38,7 @@
 #ifndef RESTRICT
 #define RESTRICT __restrict
 #endif
-// #define HAS_ PATCH //Set this as a compiler option: -DHAS_PATCH
+// #define HAS_PATCH //Set this as a compiler option: -DHAS_PATCH
 //FIXME Remove unneeded headers:
 #include <valarray>
 #include <deque>
@@ -53,47 +53,8 @@ class Solv;
 #include "solv.h"
 #include "mesh.h"
 #include "elem.h"
-#include "phys.h" //#include "math.hpp" /FIXME Currently included in phys.h
-//#include "mtrl.h" //FIXME Empty file
+#include "phys.h"
 //
-// Physics EBE evaluation methods
-// tens-trai tensor train evaluation
-// stif-bank elemental stiffness matrix-vector evaluation
-//
-// Local EBE memory access methods
-// elem-bank Same as eken-buff with max buffer size
-// elem-buff
-// elem-numa
-//
-// Global EBE system update methods
-// glob-vect Store and update global system vectors
-// glob-halo Update local vectors through global halo map reduction
-// loca-halo Update local vectors by interpartition halo exchange
-//
-// Combined
-// tens-bank-glup.cc First implementation (does not scale)
-// stif-bank-glup.cc First LMA implementation (does not scale)
-
-// tens-bank-halo.cc Second LMA implementation (does not scale)
-// stif-bank-halo.cc Second LMA implementation (does not scale)
-//
-// tens-numa-halo.cc Current implentation, global halo reduction *******
-// stif-numa-halo.cc LMA for comparison (not done yet)
-//
-// tens-buff-halo.cc Next attempt: buffered elemental values
-// tens-buff-hagl.cc Next attempt: interpartition halo exchange
-//
-// These have tensor eval and LMA physics methods
-// bank-elas-iso2.cc 
-// bank-elas-iso3.cc
-// bank-elas-ort3.cc Old working version *******
-//
-// numa-elas-ort3.cc Current working version *******
-//
-// git rm phys-sys.cc phys-elastiso2d.cc phys-elastiso3d.cc phys-elastortho3d.cc
-// git rm solv-pcg-halo solv-pcg-part solv-pcg-syst
-//
-//============= Inline Function Definitions ===============
 class Femera{
 public:
   typedef std::tuple< Elem*, Phys*, Solv* > partitem;
