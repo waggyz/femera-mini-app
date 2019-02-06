@@ -61,6 +61,15 @@ mini-omp:
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread ;\
 	command /usr/bin/time -v ./femera-$(CPUMODEL) -v2 -c$(NCPU) -p cube/unst19p1n16 ;
 
+
+mini-omp1:
+	mv -f femer1-$(CPUMODEL) femer1.old 2>/dev/null ; \
+	export VERB_MAX=1; \
+	$(CXX) -fopenmp $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
+	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femer1-$(CPUMODEL) $(CPPLOG) ;\
+	export OMP_PLACES=cores; export OMP_PROC_BIND=spread ;\
+	command /usr/bin/time -v ./femer1-$(CPUMODEL) -v1 -c$(NCPU) -p cube/unst19p1n16 ;
+
 mini-mpi:
 	mv -f femera-mpi-$(CPUMODEL) femera.old 2>/dev/null ; \
 	export OMPI_CXX=$(CXX) ; \
