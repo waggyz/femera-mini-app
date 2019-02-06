@@ -63,6 +63,7 @@ mini-omp:
 
 mini-ser1:
 	mv -f femse1-$(CPUMODEL) femse1.old 2>/dev/null ; \
+	export VERB_MAX=1; \
 	$(CXX) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femse1-$(CPUMODEL) $(CPPLOG) ;\
 	./femse1-$(CPUMODEL) -v 2 -p cube/unit1p1n2 ;\
