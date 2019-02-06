@@ -42,6 +42,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   printf("Dim: %i, Elems:%i, IntPts:%i, Nodes/elem:%i\n",
     (int)mesh_d,(int)elem_n,(int)intp_n,(int)Nc);
   #endif
+  INT_MESH   conn[Nc];
   FLOAT_PHYS G[Ne], u[Ne],f[Ne];
   FLOAT_PHYS det, jac[Nj], A[9], B[9], H[9], S[9];
   FLOAT_PHYS intp_shpg[intp_n*Ne];
@@ -68,10 +69,13 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   //
   for(uint ie=e0;ie<ee;ie++){
     ij=Nj*ie;//FIXME only good for tets
+    std::copy( &E->elem_conn[Nc*ie],
+               &E->elem_conn[Nc*ie+Nc], conn );
     std::copy( &E->elip_jacs[ij],
                &E->elip_jacs[ij+Nj], jac ); det=jac[9];
     for (uint i=0; i<Nc; i++){//FIXME replace elem_d with dofs_n
-      std::memcpy( &u[ndof*i], &sys_u[E->elem_conn[Nc*ie+i]*ndof],
+      //std::memcpy( &u[ndof*i], &sys_u[E->elem_conn[Nc*ie+i]*ndof],
+      std::memcpy( &u[ndof*i], &sys_u[conn[i]*ndof],
                     sizeof(FLOAT_SOLV)*ndof ); };
     for(uint j=0;j<Ne;j++){ f[j]=0.0; };
     for(int ip=0; ip<intp_n; ip++){
@@ -150,7 +154,8 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     for (int i=0; i<int(Nc); i++){
       //const int c=E->elem_conn[Nc*ie+i]*3;
       for(int j=0; j<3; j++){
-        sys_f[E->elem_conn[Nc*ie+i]*3+j] += f[3*i+j];
+        //sys_f[E->elem_conn[Nc*ie+i]*3+j] += f[3*i+j];
+        sys_f[3*conn[i]+j] += f[3*i+j];
         //sys_f[c+j] += f[3*i+j];
       }; };
   };//end elem loop
