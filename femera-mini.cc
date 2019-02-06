@@ -208,9 +208,9 @@ int main( int argc, char** argv ){
 #if VERB_MAX>0
   float read_sec=0.0,init_sec=0.0,loop_sec=0.0;
 #endif
-#if VERB_MAX>1
+//if VERB_MAX>1
   int iter_info_n = 1;
-#endif
+//endif
 #ifdef _OPENMP
   if( comp_n <1){ comp_n = omp_get_max_threads(); };//omp_get_max_threads();
   if( numa_n==0){ numa_n = comp_n / 2; };//FIXME just a guess...and not yet used
@@ -261,18 +261,19 @@ int main( int argc, char** argv ){
   read_start = std::chrono::high_resolution_clock::now();
 #endif
   M->Setup();
-#if VERB_MAX>1
+//if VERB_MAX>1
   //std::string solv_name="FIXME";
   {// scope local variables
-  int sugg_max=3000;
-  iter_info_n =   1; sugg_max = M->udof_n;
-  if      ( M->udof_n>int(1e8) ){ iter_info_n =1000; sugg_max =M->udof_n/1000;
-  }else if( M->udof_n>int(1e4) ){ iter_info_n = 100; sugg_max =M->udof_n/10;
-  }else if( M->udof_n>int(1e2) ){ iter_info_n =  10; sugg_max =M->udof_n/10;
-  }else                         { iter_info_n =   1; sugg_max =M->udof_n; };
-  if(iter_max<0){ iter_max=sugg_max; };
+  //int sugg_max=3000;
+  iter_info_n =   1;// sugg_max = M->udof_n;
+  if      ( M->udof_n>int(1e8) ){ iter_info_n =1000;// sugg_max =M->udof_n/1000;
+  }else if( M->udof_n>int(1e4) ){ iter_info_n = 100;// sugg_max =M->udof_n/10;
+  }else if( M->udof_n>int(1e2) ){ iter_info_n =  10;// sugg_max =M->udof_n/10;
+  }else                         { iter_info_n =   1;// sugg_max =M->udof_n; 
+  };
+  if(iter_max<0){ iter_max=M->udof_n/iter_info_n; };
   }// end variable scope
-#endif
+//endif
 #if VERB_MAX>0
   setu_done = std::chrono::high_resolution_clock::now();
   read_time = std::chrono::duration_cast<std::chrono::nanoseconds>
@@ -389,6 +390,7 @@ int main( int argc, char** argv ){
     if(verbosity==1){
     std::cout <<","<<iter<<","<<iter_max;
     std::cout <<","<<std::sqrt(M->glob_chk2)<<","<< std::sqrt(M->glob_rto2);
+    std::cout <<","<<comp_n;
     std::cout <<","<<read_sec<<","<<init_sec<<","<<loop_sec;
     std::cout <<","<<float(M->udof_n)*float(iter)/loop_sec<<'\n';
     };
