@@ -13,7 +13,7 @@ int ElastOrtho3D::Setup( Elem* E ){
   const uint jacs_n = E->elip_jacs.size()/E->elem_n/ 10 ;
   const uint intp_n = E->gaus_n;
   this->tens_flop = uint(E->elem_n) * intp_n
-    *( uint(E->elem_conn_n)* (33+18) + 2*45 + 27 );;
+    *( uint(E->elem_conn_n)* (36+18+3) + 2*54 + 27 );;
   this->tens_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
     *(3*uint(E->elem_conn_n)*3+ jacs_n*10);
   this->stif_flop = uint(E->elem_n)
@@ -92,7 +92,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
             A[3* i+j ] += G[3* k+i ] * u[ndof* k+j ];
           };
         };
-      };//------------------------------------------ N* 3*11 = 33*N FLOP
+      };//------------------------------------------------- N*3*6*2 = 36*N FLOP
       #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
       for(uint j=0;j<HH.size();j++){
@@ -105,7 +105,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         for(int k=0; k<3; k++){ H[3* i+k ]=0.0;
           for(int j=0; j<3; j++){
             H[3* i+k ] += A[3* i+j ] * R[3* k+j ];
-      };};};//---------------------------------------------- 3*3*5 = 45 FLOP
+      };};};//---------------------------------------------- 27*2 =      54 FLOP
       FLOAT_PHYS w = det * wgt[ip];
       S[0]=(mtrl_matc[0]* H[0] + mtrl_matc[3]* H[4] + mtrl_matc[5]* H[8])*w;//Sxx
       S[4]=(mtrl_matc[3]* H[0] + mtrl_matc[1]* H[4] + mtrl_matc[4]* H[8])*w;//Syy
@@ -128,7 +128,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         for(int k=0; k<3; k++){ B[3* i+k ]=0.0;
           for(int j=0; j<3; j++){
             B[3* i+k ] += S[3* i+j ] * R[3* j+k ];
-      };};};//------------------------------------------------- 3*3*5 = 45 FLOP
+      };};};//-------------------------------------------------- 27*2 = 54 FLOP
       //NOTE [B] is not symmetric Cauchy stress.
       //NOTE Cauchy stress is ( B + BT ) /2
       #if VERB_MAX>10
@@ -142,7 +142,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         for(uint k=0; k<3 ; k++){
           for(uint j=0; j<3 ; j++){
             f[3* i+k ] += G[3* i+j ] * B[3* j+k ];
-      };};};//------------------------------------------- N* 3*6 = 18*N FLOP
+      };};};//----------------------------------------------- N*9*2 = 18*N FLOP
       // This is way slower:
       //for(uint i=0; i<Nc; i++){
       //  for(uint k=0; k<3 ; k++){
@@ -164,7 +164,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         //sys_f[E->elem_conn[Nc*ie+i]*3+j] += f[3*i+j];
         sys_f[3*conn[i]+j] += f[3*i+j];
         //sys_f[c+j] += f[3*i+j];
-      }; };
+      }; };//-------------------------------------------------- N*3 =  3*N FLOP
   };//end elem loop
   return 0;
   };

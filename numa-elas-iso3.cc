@@ -13,7 +13,7 @@ int ElastIso3D::Setup( Elem* E ){
   const uint intp_n = E->gaus_n;
   //FIXME These don't include the NUMA sum flops and bandwidth.
   this->tens_flop = uint(E->elem_n) * intp_n
-    *( uint(E->elem_conn_n)* (33+18) + 27 );
+    *( uint(E->elem_conn_n)* (36+18+3) + 27 );
   this->tens_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
     *(3*uint(E->elem_conn_n)*3+ jacs_n*10);//FIXME
   this->stif_flop = uint(E->elem_n)
@@ -91,7 +91,7 @@ int ElastIso3D::ElemLinear( Elem* E,
             H[ 3* i+j ] += G[3* k+i ] * u[ndof* k+j ];
           };
         };
-      };//------------------------------------------ N* 3*11 = 33*N FLOP
+      };//------------------------------------------------- N*3*6*2 = 36*N FLOP
       #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
       for(uint j=0;j<HH.size();j++){
@@ -107,12 +107,12 @@ int ElastIso3D::ElemLinear( Elem* E,
       S[1]=( H[1] + H[3])*mtrl_matc[2]*w; S[3]= S[1];//Sxy Syx
       S[5]=( H[5] + H[7])*mtrl_matc[2]*w; S[7]= S[5];//Syz Szy
       S[2]=( H[2] + H[6])*mtrl_matc[2]*w; S[6]= S[2];//Sxz Szx
-      //------------------------------------------------------ 18+9 = 27 FLOP
+      //------------------------------------------------------- 18+9 = 27 FLOP
       for(uint i=0; i<Nc; i++){
         for(uint k=0; k<3; k++){
           for(uint j=0; j<3; j++){
             f[3* i+k ] += G[3* i+j ] * S[3* k+j ];
-      };};};//------------------------------------------- N* 3*6 = 18*N FLOP
+      };};};//---------------------------------------------- N*3*6 = 18*N FLOP
       #if VERB_MAX>10
       printf( "ff:");
       for(uint j=0;j<Ne;j++){
@@ -127,7 +127,7 @@ int ElastIso3D::ElemLinear( Elem* E,
         //sys_f[E->elem_conn[Nc*ie+i]*3+j] += f[3*i+j];
         sys_f[3*conn[i]+j] += f[3*i+j];
         //sys_f[c+j] += f[3*i+j];
-    }; };
+    }; };//--------------------------------------------------- N*3 =  3*N FLOP
   };//end elem loop
   return 0;//return flop;
   };
