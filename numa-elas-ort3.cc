@@ -121,6 +121,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         printf("%+9.2e ",S[j]);
       }; printf("\n");
       #endif
+      /*
       //--------------------------------------------------------- 18+9= 27 FLOP
       // [S][R] : matmul3x3x3, R is transposed
       //for(int i=0; i<9; i++){ B[i]=0.0; };
@@ -143,6 +144,13 @@ int ElastOrtho3D::ElemLinear( Elem* E,
           for(uint j=0; j<3 ; j++){
             f[3* i+k ] += G[3* i+j ] * B[3* j+k ];
       };};};//------------------------------------------- N* 3*6 = 18*N FLOP
+      */
+      for(uint i=0; i<Nc; i++){
+        for(uint k=0; k<3 ; k++){
+          for(uint j=0; j<3 ; j++){
+          for(uint l=0; l<3 ; l++){
+            f[3* i+l ] += G[3* i+j ] * S[3* j+k ] * R[3* k+l ];
+      };};};};
       #if VERB_MAX>10
       printf( "ff:");
       for(uint j=0;j<Ne;j++){
