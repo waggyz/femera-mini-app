@@ -107,7 +107,7 @@ int main( int argc, char** argv ){
       << size_t(std::numeric_limits<INT_ELEM_NODE>::max()) <<'\n';
     std::cout << "Maximum DOFs/Node: "
       << size_t(std::numeric_limits<INT_DOF>::max()) <<'\n';
-  std::cout <<"Verbosity: "<<VERBOSITY<<" / "<< VERB_MAX <<" maximum "<<'\n';
+  std::cout <<"Verbosity: "<<verbosity<<" / "<< VERB_MAX <<" maximum "<<'\n';
   };
   if( verbosity > VERB_MAX ){
     std::cout <<"WARNING Verbosity "<< verbosity
@@ -120,7 +120,9 @@ int main( int argc, char** argv ){
   else{
     if(is_part){
 #if VERB_MAX>1
+     if(verbosity>1){
      printf ("Looking for Femera partitions of %s...\n", bname);
+     };
 #endif
     bool fok=true; INT_MESH_PART part_i=1;
     while( fok ){
@@ -136,7 +138,9 @@ int main( int argc, char** argv ){
       }else{
         part_i++; iname=bname;
 #if VERB_MAX>3
+        if(verbosity>3){
         std::cout << "Found " << pname << "..." <<'\n';
+        };
 #endif
         fclose (pfile);
         };
@@ -158,14 +162,18 @@ int main( int argc, char** argv ){
           return 1; }
         else{ part_n=1; pname=pname.c_str();
 #if VERB_MAX>3
+          if(verbosity>3){
           std::cout << "Found " << pname << "..." << '\n';
+          };
 #endif
           iname = pname.c_str();
           fclose (pfile); };
       }else{
         part_n=1; iname=pname.c_str();
 #if VERB_MAX>3
+        if(verbosity>3){
         std::cout << "Found " << pname << "..." << '\n';
+        };
 #endif
         fclose (pfile);
         };
@@ -174,7 +182,9 @@ int main( int argc, char** argv ){
   if(part_n>0){
     if(part_n>1){
 #if VERB_MAX>1
+  if(verbosity>1){
     printf ("Found %u mesh partitions.\n", part_n);};
+    };
 #endif
   }else{
     std::cerr << "ERROR No mesh partition files could be opened for reading."
@@ -184,7 +194,9 @@ int main( int argc, char** argv ){
   // Read and Setup =============================================
   int iter=0;
   int iter_info_n = 1;
-  //int comp_n=1;
+#if VERB_MAX>0
+  float read_sec=0.0,init_sec=0.0,loop_sec=0.0;
+#endif
 #ifdef _OPENMP
   if( comp_n <1){ comp_n = omp_get_max_threads(); };//omp_get_max_threads();
   if( numa_n==0){ numa_n = comp_n / 2; };//FIXME just a guess...and not yet used
@@ -192,18 +204,21 @@ int main( int argc, char** argv ){
   if( comp_n >int(part_n) ){ comp_n=int(part_n); };
   if( numa_n >int(part_n) ){ numa_n=int(part_n); };
 #if VERB_MAX>1
+  if(verbosity>1){
   std::cout <<"Parallel OpenMP " << "using "  <<comp_n<< " threads..."<<'\n';
     //<<comp_n<< " compute and "<<numa_n<<" NUMA threads..."<<'\n';
+  };
 #endif
 #endif
   if(comp_n<1){ comp_n = 1; };
   //INT_ORDER pord=1;
   int part_0=1;//FIXME unpartitioned mesh in mesh_part[0]
-#if VERB_MAX>0
-  if(verbosity>0){
-    std::cout << "Reading and setting up "<<(part_n-part_0+1)<<" partitions"; };
+#if VERB_MAX>1
+  if(verbosity>1){
+    std::cout << "Reading and setting up "<<(part_n-part_0+1)<<" partitions";
   //int dots_mod=0;
   if(verbosity!=2){ std::cout <<"..." <<'\n'; };
+  };
 #endif
   //printf("****** SOLVER: %i: %i,%i,%i\n",solv_meth,
   //  Solv::SOLV_GD,Solv::SOLV_CG,Solv::SOLV_CR);
@@ -220,18 +235,17 @@ int main( int argc, char** argv ){
   M->verbosity=verbosity;
   //M->mesh_part.resize(part_n+part_0);
   M->time_secs.resize(10);
-//#if VERB_MAX>1
-//  INT_MESH sys_elem_n=0, sys_node_n=0, sys_udof_n=0;// Total system size
-//#endif
+#if VERB_MAX>0
   std::chrono::high_resolution_clock::time_point
     read_start, setu_done, init_done;
-  std::chrono::nanoseconds read_time, setu_time, init_time;
+  std::chrono::nanoseconds read_time, init_time;// setu_time,
   { auto sometime=std::chrono::high_resolution_clock::now();
     read_time = std::chrono::duration_cast<std::chrono::nanoseconds>
       (sometime-sometime);
-    read_time=read_time;// setu_time=read_time;
+    //read_time=read_time;// setu_time=read_time;
   }
   read_start = std::chrono::high_resolution_clock::now();
+#endif
   M->Setup();
   //std::string solv_name="FIXME";
   {// scope local variables
@@ -243,20 +257,29 @@ int main( int argc, char** argv ){
   }else                         { iter_info_n =   1; sugg_max =M->udof_n; };
   if(iter_max<0){ iter_max=sugg_max; };
   }// end variable scope
+#if VERB_MAX>0
   setu_done = std::chrono::high_resolution_clock::now();
   read_time = std::chrono::duration_cast<std::chrono::nanoseconds>
     (setu_done-read_start);
-  printf("Read and set up                         in %f s\n",
-    float(read_time.count())*1e-9 );
+  read_sec=float(read_time.count())*1e-9;
+  if(verbosity==1){
+  std::cout << M->elem_n<<" "<<M->node_n<<" "<<M->udof_n;
+  };
+#endif
+#if VERB_MAX>1
+  if(verbosity>1){
+  printf("Read and set up                         in %f s\n", read_sec );
   std::cout <<"Solving ";
   std::cout <<"system: "<<M->elem_n<<" Elems, "
     <<M->node_n<<" Nodes, "<<M->udof_n<<" DOF; "<<'\n'
     <<"     to within: "<<rtol<<" relative tolerance,"<<'\n'
     <<"or stopping at: "<<iter_max<<" "<<M->meth_name<<" iterations..."<<'\n';
+  };
+#endif
   // Solve parallel =================================================
   bool halo_update=true;
 #ifdef _OPENMP
-#if VERB_MAX>1
+#if VERB_MAX>2
   if(halo_mod!=1){
     std::cout<<"with halo updates every "
     <<halo_mod<< " iterations..."<<'\n'; };
@@ -267,11 +290,14 @@ int main( int argc, char** argv ){
   {// init scope
     M->time_secs=0.0;//FIXME conditional?
     M->Init();
-#if VERB_MAX>1
+#if VERB_MAX>0
+    if(verbosity>0){
     init_done = std::chrono::high_resolution_clock::now();
     init_time = std::chrono::duration_cast<std::chrono::nanoseconds>
       (init_done-setu_done);
-    float init_sec =float(init_time.count())*ns;
+    };
+    init_sec =float(init_time.count())*ns;
+#endif
 #if VERB_MAX>2
     float prec_sec =M->time_secs[0];
     float gmap_sec =M->time_secs[1];
@@ -302,11 +328,13 @@ int main( int argc, char** argv ){
         (init_sec-work_sec/float(comp_n))/sc, ss,
         (init_sec-work_sec/float(comp_n))/init_sec*pct );
     };
-    printf("Iterating...\n");
 #endif
+#if VERB_MAX>1
+    if(verbosity>1){
+    printf("Iterating...\n");
     printf("     init ||R||%9.2e /%9.2e tol in %f s\n",
       std::sqrt(M->glob_chk2), std::sqrt(M->glob_rto2),init_sec );
-      //std::sqrt(M->resi_pow2), std::sqrt(M->glob_rto2),init_sec );
+    };
 #endif
   }// end init scope
   {// iter scope
@@ -319,11 +347,13 @@ int main( int argc, char** argv ){
       //  S->Init(); S->Iter();
       //}; M->Init();
 #if VERB_MAX>1
+      if(verbosity>1){
       if(!((iter) % iter_info_n) ){
         float iter_sec=M->time_secs[5];
         printf("%9i ||R||%9.2e @ %.0f iter/s\n",
           iter, std::sqrt(M->glob_chk2),
           float(iter)/iter_sec*float(comp_n) ); };
+      };
 #endif
 #if VERB_MAX>10
     // Partition Residuals
@@ -335,18 +365,29 @@ int main( int argc, char** argv ){
 #endif
     }while( ( (iter < iter_max) & (M->glob_chk2 > M->glob_rto2) ) | !halo_update );
     // End iteration loop ===========================================
-#if VERB_MAX>1
+#if VERB_MAX>0
     auto loop_done = std::chrono::high_resolution_clock::now();
     auto loop_time = std::chrono::duration_cast<std::chrono::nanoseconds>
       (loop_done - loop_start);
-    float loop_sec=float(loop_time.count())*ns;
+    loop_sec=float(loop_time.count())*ns;
+    if(verbosity==1){
+    std::cout <<","<<iter<<","<<iter_max;
+    std::cout <<","<<std::sqrt(M->glob_chk2)<<","<< std::sqrt(M->glob_rto2);
+    std::cout <<","<<read_sec<<","<<init_sec<<","<<loop_sec;
+    std::cout <<","<<float(M->udof_n)*float(iter)/loop_sec<<'\n';
+    };
+#endif
+#if VERB_MAX>1
     float sc = ms; const char* ss="ms";
+    if(verbosity>1){
     if( loop_sec < 100.0*ms ){ sc=us; ss="μs"; }
     else if( loop_sec > 100.0*sec ){sc=sec; ss=" s"; };
     printf("%9i ||R||%9.2e /%9.2e tol in %f s\nDone.\n", iter,
       std::sqrt(M->glob_chk2), std::sqrt(M->glob_rto2), loop_sec );
+    };
 #endif
-#if VERB_MAX>2
+#if VERB_MAX>1
+    if(verbosity>1){
     float phys_sec=M->time_secs[0];
     float gat0_sec=M->time_secs[1];
     float gat1_sec=M->time_secs[2];
@@ -386,10 +427,12 @@ int main( int argc, char** argv ){
       float(M->solv_flop)*float(iter)*float(comp_n)/solv_sec/1e9,
       float(M->solv_flop)/float(M->udof_n),float(M->solv_band)/float(M->udof_n),
       M->solv_flop/M->solv_band );
+    };
 #endif
   }// end iter scope
-#if VERB_MAX>1
     // Check solution ===============================================
+#if VERB_MAX>1
+    if(verbosity>1){
     // Displacement errors ------------------------------------------
     Phys::vals errtot; errtot.resize(13); errtot=0.0;
     for(int i= 0; i< 4; i++){ errtot[i] = 99e99; };
@@ -513,9 +556,7 @@ int main( int argc, char** argv ){
     };
     printf(" R2                 %9.2e  ||R||\n",
       std::sqrt(errtot[errtot.size()-1]) );
-#endif
     // Effective modulus --------------------------------------------
-    //
     // Calculate nodal forces from displacement solution
     FLOAT_PHYS reac_x=0.0, youn_voig=0.0;// polycrystal approx.
     //FIXME should do this only for elems with prescribed BCS
@@ -609,5 +650,7 @@ int main( int argc, char** argv ){
   if( std::abs(e)<test_u ){ printf(" %+9.2e\n",e); 
   }else{ printf("%+6.2f%%\n",100.*e); };
   }
+    };
+#endif
   return 0;
 };

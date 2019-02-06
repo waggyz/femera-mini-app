@@ -32,9 +32,6 @@
 //
 #define COLOR_NONE 0
 //
-#ifndef VERBOSITY
-#define VERBOSITY VERB_MAX
-#endif
 #ifndef RESTRICT
 #define RESTRICT __restrict
 #endif
