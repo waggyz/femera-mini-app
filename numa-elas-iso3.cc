@@ -118,9 +118,10 @@ int ElastIso3D::ElemLinear( Elem* E,
       #endif
     };//end intp loop
     for (int i=0; i<int(Nc); i++){
-      //int c=E->elem_conn[Nc*ie+i]*3;
+      //const int c=E->elem_conn[Nc*ie+i]*3;
       for(int j=0; j<3; j++){
         sys_f[E->elem_conn[Nc*ie+i]*3+j] += f[3*i+j];
+        //sys_f[c+j] += f[3*i+j];
     }; };
   };//end elem loop
   return 0;//return flop;

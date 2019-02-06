@@ -43,7 +43,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     (int)mesh_d,(int)elem_n,(int)intp_n,(int)Nc);
   #endif
   FLOAT_PHYS G[Ne], u[Ne],f[Ne];
-  FLOAT_PHYS det, jac[Nj], A[9], B[9];
+  FLOAT_PHYS det, jac[Nj], A[9], B[9], H[9], S[9];
   FLOAT_PHYS intp_shpg[intp_n*Ne];
   std::copy( &E->intp_shpg[0],// local copy
              &E->intp_shpg[intp_n*Ne], intp_shpg );
@@ -98,23 +98,23 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       #endif
       // [H][RT] : matmul3x3x3T
       for(int i=0; i<3; i++){
-        for(int k=0; k<3; k++){ B[3* i+k ]=0.0;
+        for(int k=0; k<3; k++){ H[3* i+k ]=0.0;
           for(int j=0; j<3; j++){
-            B[3* i+k ] += A[3* i+j ] * R[3* k+j ];
+            H[3* i+k ] += A[3* i+j ] * R[3* k+j ];
       };};};//---------------------------------------------- 3*3*5 = 45 FLOP
       FLOAT_PHYS w = det * wgt[ip];
-      A[0]=(mtrl_matc[0]* B[0] + mtrl_matc[3]* B[4] + mtrl_matc[5]* B[8])*w;//Sxx
-      A[4]=(mtrl_matc[3]* B[0] + mtrl_matc[1]* B[4] + mtrl_matc[4]* B[8])*w;//Syy
-      A[8]=(mtrl_matc[5]* B[0] + mtrl_matc[4]* B[4] + mtrl_matc[2]* B[8])*w;//Szz
+      S[0]=(mtrl_matc[0]* H[0] + mtrl_matc[3]* H[4] + mtrl_matc[5]* H[8])*w;//Sxx
+      S[4]=(mtrl_matc[3]* H[0] + mtrl_matc[1]* H[4] + mtrl_matc[4]* H[8])*w;//Syy
+      S[8]=(mtrl_matc[5]* H[0] + mtrl_matc[4]* H[4] + mtrl_matc[2]* H[8])*w;//Szz
       //
-      A[1]=( B[1] + B[3])*mtrl_matc[6]*w; A[3]= A[1];//Sxy Syx
-      A[5]=( B[5] + B[7])*mtrl_matc[7]*w; A[7]= A[5];//Syz Szy
-      A[2]=( B[2] + B[6])*mtrl_matc[8]*w; A[6]= A[2];//Sxz Szx
+      S[1]=( H[1] + H[3])*mtrl_matc[6]*w; S[3]= S[1];//Sxy Syx
+      S[5]=( H[5] + H[7])*mtrl_matc[7]*w; S[7]= S[5];//Syz Szy
+      S[2]=( H[2] + H[6])*mtrl_matc[8]*w; S[6]= S[2];//Sxz Szx
       #if VERB_MAX>10
       printf( "Stress (Natural Coords):");
       for(uint j=0;j<9;j++){
         if(j%3==0){printf("\n");}
-        printf("%+9.2e ",A[j]);
+        printf("%+9.2e ",S[j]);
       }; printf("\n");
       #endif
       //--------------------------------------------------------- 18+9= 27 FLOP
@@ -123,7 +123,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       for(int i=0; i<3; i++){
         for(int k=0; k<3; k++){ B[3* i+k ]=0.0;
           for(int j=0; j<3; j++){
-            B[3* i+k ] += A[3* i+j ] * R[3* j+k ];
+            B[3* i+k ] += S[3* i+j ] * R[3* j+k ];
       };};};//------------------------------------------------- 3*3*5 = 45 FLOP
       //NOTE [B] is not symmetric Cauchy stress.
       //NOTE Cauchy stress is ( B + BT ) /2
@@ -131,7 +131,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       printf( "Rotated Stress (Global Coords):");
       for(uint j=0;j<9;j++){
         if(j%3==0){printf("\n");}
-        printf("%+9.2e ",B[j]);
+        printf("%+9.2e ",S[j]);
       }; printf("\n");
       #endif
       for(uint i=0; i<Nc; i++){
@@ -148,9 +148,10 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       #endif
     };//end intp loop
     for (int i=0; i<int(Nc); i++){
-      //int c=E->elem_conn[Nc*ie+i]*3;
+      //const int c=E->elem_conn[Nc*ie+i]*3;
       for(int j=0; j<3; j++){
         sys_f[E->elem_conn[Nc*ie+i]*3+j] += f[3*i+j];
+        //sys_f[c+j] += f[3*i+j];
       }; };
   };//end elem loop
   return 0;

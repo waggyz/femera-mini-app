@@ -36,11 +36,9 @@ endif
 
 # CPPLOG=-fopt-info-vec-optimized 2>a.log ; grep -i vectorized a.log ; grep -i warn a.log; grep -i error a.log
 
-# FEMERA_MINI_CC = mesh.cc elem.cc elem-tet.cc \
-# phys.cc phys-elastortho3d.cc solv-pcg-halo.cc
-
 FEMERA_MINI_CC = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc \
- tens-numa-halo-pcg.cc tens-numa-halo-pcr.cc numa-elas-iso3.cc numa-elas-ort3.cc
+ tens-numa-halo-pcg.cc tens-numa-halo-pcr.cc \
+ numa-elas-iso3.cc numa-elas-ort3.cc
 
 #OMPI_CPPFLAGS=$(CPPFLAGS) ; \
 #OMPI_CXXFLAGS=$(CPPFLAGS) ; \
@@ -50,28 +48,28 @@ all: test-all
 mini-ser:
 	mv -f femser-$(CPUMODEL) femser.old 2>/dev/null ; \
 	$(CXX) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DHAS_TEST \
-	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femser-$(CPUMODEL) $(CPPLOG) ;\
+	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femser-$(CPUMODEL) $(CPPLOG);\
 	./femser-$(CPUMODEL) -v2 -p cube/unit1p1n2 ;\
 	./femser-$(CPUMODEL) -v2 -p cube/unit1p2n2 ;
 
 mini-omp:
 	mv -f femera-$(CPUMODEL) femera.old 2>/dev/null ; \
 	$(CXX) -fopenmp $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DHAS_TEST \
-	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femera-$(CPUMODEL) $(CPPLOG) ;\
+	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femera-$(CPUMODEL) $(CPPLOG);\
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	command /usr/bin/time -v ./femera-$(CPUMODEL) -v2 -c$(NCPU) -p cube/unst19p1n16 ;
 
 mini-ser1:
 	mv -f femse1-$(CPUMODEL) femse1.old 2>/dev/null ; \
 	$(CXX) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DVERB_MAX=1 \
-	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femse1-$(CPUMODEL) $(CPPLOG) ;\
+	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femse1-$(CPUMODEL) $(CPPLOG);\
 	./femse1-$(CPUMODEL) -v1 -p cube/unit1p1n2 ;\
 	./femse1-$(CPUMODEL) -v1 -p cube/unit1p2n2 ;
 
 mini-omp1:
 	mv -f femer1-$(CPUMODEL) femer1.old 2>/dev/null ; \
 	$(CXX) -fopenmp $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DVERB_MAX=1 \
-	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femer1-$(CPUMODEL) $(CPPLOG) ;\
+	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femer1-$(CPUMODEL) $(CPPLOG);\
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread ;\
 	command /usr/bin/time -v ./femer1-$(CPUMODEL) -v1 -c$(NCPU) -p cube/unst19p1n16 ;
 
@@ -81,7 +79,7 @@ mini-mpi:
 	export OMPI_CPPFLAGS=-std=c++11 ; \
 	export OMPI_CXXFLAGS=-std=c++11 ; \
 	mpicc -x c++ $(LDFLAGS) $(LDLIBS) -DHAS_TEST \
-	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femera-mpi-$(CPUMODEL) $(CPPLOG) ;\
+	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femera-mpi-$(CPUMODEL) $(CPPLOG);\
 	command /usr/bin/time -v ./femera-mpi-$(CPUMODEL) -v2 -c$(NCPU) -p cube/unst19p1n16$(NCPU) ;
 
 knl-mini:

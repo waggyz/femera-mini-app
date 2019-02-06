@@ -39,6 +39,7 @@
 #define RESTRICT __restrict
 #endif
 // #define HAS_PATCH //Set this as a compiler option: -DHAS_PATCH
+// #define HAS_TEST  //Set this as a compiler option: -DHAS_TEST
 //FIXME Remove unneeded headers:
 #include <valarray>
 #include <deque>
