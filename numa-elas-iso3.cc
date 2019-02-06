@@ -30,7 +30,7 @@ int ElastIso3D::ElemLinear( Elem* E,
   static const int ndof   = 3;//this->ndof_n
   //static const int mesh_d = 3;//E->elem_d;
   static const uint  Nj =10;//,d2=9;//mesh_d*mesh_d;
-  uint ij=0;
+  //uint ij=0;
   //
   const INT_MESH elem_n = E->elem_n;
   //const int    intp_n = E->elip_dets.size()/elem_n;
@@ -44,6 +44,7 @@ int ElastIso3D::ElemLinear( Elem* E,
   printf("DOF: %i, Elems:%i, IntPts:%i, Nodes/elem:%i\n",
     (int)ndof,(int)elem_n,(int)intp_n,(int)Nc );
   #endif
+  INT_MESH   conn[Nc];
   FLOAT_PHYS G[Ne], u[Ne],f[Ne];
   FLOAT_PHYS det, jac[Nj], H[9],S[9];
   FLOAT_PHYS intp_shpg[intp_n*Ne];
@@ -66,11 +67,14 @@ int ElastIso3D::ElemLinear( Elem* E,
   }else{ e0=E->halo_elem_n; ee=elem_n;};
   //
   for(INT_MESH ie=e0;ie<ee;ie++){
-    ij=Nj*ie;//FIXME only good for tets
-    std::copy( &E->elip_jacs[ij],
-               &E->elip_jacs[ij+Nj], jac ); det=jac[9];
+    std::copy( &E->elem_conn[Nc*ie],
+               &E->elem_conn[Nc*ie+Nc], conn );
+    //ij=Nj*ie;//FIXME only good for tets
+    std::copy( &E->elip_jacs[Nj*ie],
+               &E->elip_jacs[Nj*ie+Nj], jac ); det=jac[9];
     for (uint i=0; i<Nc; i++){
-      std::memcpy( &u[ndof*i], &sys_u[E->elem_conn[Nc*ie+i]*ndof],
+      //std::memcpy( &u[ndof*i], &sys_u[E->elem_conn[Nc*ie+i]*ndof],
+      std::memcpy( &u[ndof*i], &sys_u[conn[i]*ndof],
                     sizeof(FLOAT_SOLV)*ndof ); };
     for(uint j=0;j<Ne;j++){ f[j]=0.0; };
     for(int ip=0; ip<intp_n; ip++){
@@ -120,7 +124,8 @@ int ElastIso3D::ElemLinear( Elem* E,
     for (int i=0; i<int(Nc); i++){
       //const int c=E->elem_conn[Nc*ie+i]*3;
       for(int j=0; j<3; j++){
-        sys_f[E->elem_conn[Nc*ie+i]*3+j] += f[3*i+j];
+        //sys_f[E->elem_conn[Nc*ie+i]*3+j] += f[3*i+j];
+        sys_f[3*conn[i]+j] += f[3*i+j];
         //sys_f[c+j] += f[3*i+j];
     }; };
   };//end elem loop

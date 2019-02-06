@@ -30,7 +30,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   static const int ndof   = 3;//this->ndof_n
   //static const int mesh_d = 3;//E->elem_d;
   static const uint  Nj =10;//,d2=9;//mesh_d*mesh_d;
-  uint ij=0;
+  //uint ij=0;
   //
   const INT_MESH elem_n = E->elem_n;
   //const int    intp_n = E->elip_dets.size()/elem_n;
@@ -68,11 +68,11 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   }else{ e0=E->halo_elem_n; ee=elem_n; };
   //
   for(uint ie=e0;ie<ee;ie++){
-    ij=Nj*ie;//FIXME only good for tets
     std::copy( &E->elem_conn[Nc*ie],
                &E->elem_conn[Nc*ie+Nc], conn );
-    std::copy( &E->elip_jacs[ij],
-               &E->elip_jacs[ij+Nj], jac ); det=jac[9];
+    //ij=Nj*ie;//FIXME only good for tets
+    std::copy( &E->elip_jacs[Nj*ie],
+               &E->elip_jacs[Nj*ie+Nj], jac ); det=jac[9];
     for (uint i=0; i<Nc; i++){//FIXME replace elem_d with dofs_n
       //std::memcpy( &u[ndof*i], &sys_u[E->elem_conn[Nc*ie+i]*ndof],
       std::memcpy( &u[ndof*i], &sys_u[conn[i]*ndof],
