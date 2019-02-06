@@ -104,9 +104,10 @@ int ElastIso3D::ElemLinear( Elem* E,
       S[4]=(mtrl_matc[1]* H[0] + mtrl_matc[0]* H[4] + mtrl_matc[1]* H[8])*w;//Syy
       S[8]=(mtrl_matc[1]* H[0] + mtrl_matc[1]* H[4] + mtrl_matc[0]* H[8])*w;//Szz
       //
-      S[1]=( H[1] + H[3])*mtrl_matc[2]*w; S[3]= S[1];//Sxy Syx
-      S[5]=( H[5] + H[7])*mtrl_matc[2]*w; S[7]= S[5];//Syz Szy
-      S[2]=( H[2] + H[6])*mtrl_matc[2]*w; S[6]= S[2];//Sxz Szx
+      S[1]=( H[1] + H[3] )*mtrl_matc[2]*w;// S[3]= S[1];//Sxy Syx
+      S[5]=( H[5] + H[7] )*mtrl_matc[2]*w;// S[7]= S[5];//Syz Szy
+      S[2]=( H[2] + H[6] )*mtrl_matc[2]*w;// S[6]= S[2];//Sxz Szx
+      S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
       //------------------------------------------------------- 18+9 = 27 FLOP
       for(uint i=0; i<Nc; i++){
         for(uint k=0; k<3; k++){
