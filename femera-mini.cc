@@ -271,7 +271,7 @@ int main( int argc, char** argv ){
   }else if( M->udof_n>int(1e2) ){ iter_info_n =  10;// sugg_max =M->udof_n/10;
   }else                         { iter_info_n =   1;// sugg_max =M->udof_n; 
   };
-  if(iter_max<0){ iter_max=M->udof_n/iter_info_n; };
+  if(iter_max<0){ iter_max=M->udof_n/iter_info_n*10; };
   }// end variable scope
 //endif
 #if VERB_MAX>0
@@ -280,7 +280,7 @@ int main( int argc, char** argv ){
     (setu_done-read_start);
   read_sec=float(read_time.count())*1e-9;
   if(verbosity==1){
-  std::cout << M->elem_n<<","<<M->node_n<<","<<M->udof_n;
+  std::cout << M->elem_n<<","<<M->node_n<<","<<M->udof_n<<","<<(part_n-part_0+1);
   };
 #endif
 #if VERB_MAX>1
