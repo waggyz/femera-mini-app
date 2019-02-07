@@ -11,7 +11,6 @@ int ElastIso3D::ScatStiff( Elem* ){ return 1; };//FIXME
 int ElastIso3D::Setup( Elem* E ){
   const uint jacs_n = E->elip_jacs.size()/E->elem_n/ 10 ;
   const uint intp_n = E->gaus_n;
-  //FIXME These don't include the NUMA sum flops and bandwidth.
   this->tens_flop = uint(E->elem_n) * intp_n
     *( uint(E->elem_conn_n)* (36+18+3) + 27 );
   this->tens_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)

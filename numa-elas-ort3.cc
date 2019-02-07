@@ -13,13 +13,15 @@ int ElastOrtho3D::Setup( Elem* E ){
   const uint jacs_n = E->elip_jacs.size()/E->elem_n/ 10 ;
   const uint intp_n = E->gaus_n;
   this->tens_flop = uint(E->elem_n) * intp_n
-    *( uint(E->elem_conn_n)* (36+18+3) + 2*54 + 27 );;
-  this->tens_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
-    *(3*uint(E->elem_conn_n)*3+ jacs_n*10);
+    *( uint(E->elem_conn_n)* (36+18+3) + 2*54 + 27 );
+  this->tens_band = uint(E->elem_n) *(
+     sizeof(FLOAT_PHYS)*(3*uint(E->elem_conn_n)*3+ jacs_n*10)
+    +sizeof(INT_MESH)*uint(E->elem_conn_n) );
   this->stif_flop = uint(E->elem_n)
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) );
-  this->stif_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
-    * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) -1+2);
+  this->stif_band = uint(E->elem_n) *(
+    sizeof(FLOAT_PHYS)* 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) -1+2)
+    +sizeof(INT_MESH) *uint(E->elem_conn_n) );
   return 0;
 };
 //int ElastOrtho3D::ElemLinear( std::vector<Elem*> list_elem,
@@ -130,7 +132,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         for(int k=0; k<3; k++){ B[3* k+i ]=0.0;
           for(int j=0; j<3; j++){
             //B[3* i+k ] += S[3* i+j ] * R[3* j+k ];
-            B[3* k+i ] += S[3* i+j ] * R[3* j+k ];
+            B[3* k+i ] += S[3* i+j ] * R[3* j+k ];// B is transposed
       };};};//-------------------------------------------------- 27*2 = 54 FLOP
       //NOTE [B] is not symmetric Cauchy stress.
       //NOTE Cauchy stress is ( B + BT ) /2
@@ -145,7 +147,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         for(uint k=0; k<3 ; k++){
           for(uint j=0; j<3 ; j++){
             //f[3* i+k ] += G[3* i+j ] * B[3* j+k ];
-            f[3* i+k ] += G[3* i+j ] * B[3* k+j ];
+            f[3* i+k ] += G[3* i+j ] * B[3* k+j ];// For transposed B
       };};};//----------------------------------------------- N*9*2 = 18*N FLOP
       // This is way slower:
       //for(uint i=0; i<Nc; i++){
