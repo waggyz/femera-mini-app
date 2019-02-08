@@ -81,6 +81,7 @@ int ElastIso3D::ElemLinear( Elem* E,
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       for(uint i=0; i<9 ; i++){ H[i]=0.0; };
+#pragma omp simd
       for(uint k=0; k<Nc; k++){
         for(uint i=0; i<3 ; i++){ G[3* k+i ]=0.0;
           for(uint j=0; j<3 ; j++){
@@ -108,6 +109,7 @@ int ElastIso3D::ElemLinear( Elem* E,
       S[2]=( H[2] + H[6] )*mtrl_matc[2]*w;// S[6]= S[2];//Sxz Szx
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
       //------------------------------------------------------- 18+9 = 27 FLOP
+#pragma omp simd
       for(uint i=0; i<Nc; i++){
         for(uint k=0; k<3; k++){
           for(uint j=0; j<3; j++){
@@ -121,6 +123,7 @@ int ElastIso3D::ElemLinear( Elem* E,
       }; printf("\n");
       #endif
     };//end intp loop
+#pragma omp simd
     for (uint i=0; i<Nc; i++){
       //const int c=E->elem_conn[Nc*ie+i]*3;
       for(uint j=0; j<3; j++){

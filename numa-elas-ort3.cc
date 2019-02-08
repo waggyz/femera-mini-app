@@ -85,6 +85,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       Ng = ip*Ne;
       //G = MatMul3x3xN( jac,shg );
       //A = MatMul3xNx3T( G,u );// [H] Small deformation tensor
+#pragma omp simd
       for(uint k=0; k<Nc; k++){
         for(uint i=0; i<3 ; i++){ G[3* k+i ]=0.0;
           for(uint j=0; j<3 ; j++){
@@ -143,6 +144,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         printf("%+9.2e ",S[j]);
       }; printf("\n");
       #endif
+#pragma omp simd
       for(uint i=0; i<Nc; i++){
         for(uint k=0; k<3 ; k++){
           for(uint j=0; j<3 ; j++){
@@ -164,6 +166,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       }; printf("\n");
       #endif
     };//end intp loop
+#pragma omp simd
     for (uint i=0; i<Nc; i++){
       //const int c=E->elem_conn[Nc*ie+i]*3;
       for(uint j=0; j<3; j++){
