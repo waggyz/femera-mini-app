@@ -1,7 +1,9 @@
 # Defaults: use g++
 CPPFLAGS=-std=c++11 -Wall -Wextra -g -Ofast -ftree-vectorize -march=native \
- -mtune=native -fno-builtin-sin -fno-builtin-cos -Wno-unknown-pragmas
+ -mtune=native -fno-builtin-sin -fno-builtin-cos
 #FIXME -mtune=core-avx2 when -mtune=native doesn't work
+OMPFLAGS=-fopenmp
+SERFLAGS=-Wno-unknown-pragmas
 NCPU=2
 NUMA=2
 
@@ -11,9 +13,10 @@ CPUMODEL:=$(shell ./cpumodel.sh)
 ifdef INTEL_LICENSE_FILE
 CXX=icc
 CPPFLAGS=-std=c++11 -Wall -Wextra -Ofast -xHost -axSKYLAKE-AVX512 \
- -ffast-math -no-fast-transcendentals -fno-alias -diag-disable 3180 \
+ -ffast-math -no-fast-transcendentals \
  -qopt-zmm-usage=high -no-inline-max-size -no-inline-max-total-size -g
 # -march=native
+SERFLAGS=-fno-alias -diag-disable 3180
 NCPU=8
 NUMA=2
 endif
@@ -22,8 +25,9 @@ endif
 ifdef INTEL_PYTHONHOME
 CXX=icc
 CPPFLAGS=-std=c++11 -Wall -Wextra -Ofast -xHost \
- -ffast-math -no-fast-transcendentals -fno-alias -diag-disable 3180 \
+ -ffast-math -no-fast-transcendentals \
  -qopt-zmm-usage=high -no-inline-max-size -no-inline-max-total-size -g
+SERFLAGS=-fno-alias -diag-disable 3180
 NCPU=40
 NUMA=6
 endif
@@ -47,28 +51,28 @@ all: test-all
 
 mini-ser:
 	mv -f femser-$(CPUMODEL) femser.old 2>/dev/null ; \
-	$(CXX) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DHAS_TEST \
+	$(CXX) $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DHAS_TEST \
 	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femser-$(CPUMODEL) $(CPPLOG);\
 	./femser-$(CPUMODEL) -v2 -p cube/unit1p1n2 ;\
 	./femser-$(CPUMODEL) -v2 -p cube/unit1p2n2 ;
 
 mini-omp:
 	mv -f femera-$(CPUMODEL) femera.old 2>/dev/null ; \
-	$(CXX) -fopenmp $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DHAS_TEST \
+	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DHAS_TEST \
 	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femera-$(CPUMODEL) $(CPPLOG);\
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	command /usr/bin/time -v ./femera-$(CPUMODEL) -v2 -c$(NCPU) -p cube/unst19p1n16 ;
 
 mini-ser1:
 	mv -f femse1-$(CPUMODEL) femse1.old 2>/dev/null ; \
-	$(CXX) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DVERB_MAX=1 \
+	$(CXX) $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DVERB_MAX=1 \
 	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femse1-$(CPUMODEL) $(CPPLOG);\
 	./femse1-$(CPUMODEL) -v1 -p cube/unit1p1n2 ;\
 	./femse1-$(CPUMODEL) -v1 -p cube/unit1p2n2 ;
 
 mini-omp1:
 	mv -f femer1-$(CPUMODEL) femer1.old 2>/dev/null ; \
-	$(CXX) -fopenmp $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DVERB_MAX=1 \
+	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DVERB_MAX=1 \
 	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femer1-$(CPUMODEL) $(CPPLOG);\
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread ;\
 	command /usr/bin/time -v ./femer1-$(CPUMODEL) -v1 -c$(NCPU) -p cube/unst19p1n16 ;
@@ -84,7 +88,7 @@ mini-mpi:
 
 knl-mini:
 	mv -f femera-knl femera.old 2>/dev/null ; \
-	$(CXX) -fopenmp $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DHAS_TEST \
+	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DHAS_TEST \
 	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femera-knl $(CPPLOG);\
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread ;\
 	command /usr/bin/time -v ./femera-knl -v2 -c$(NCPU) -p cube/unst19p1n16 ;
@@ -101,7 +105,7 @@ test-asc:
 
 gmsh2fmr-ser:
 	mv -f gmsh2fmr gmsh2fmr.old 2>/dev/null ;\
-	$(CXX) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
+	$(CXX) $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(FEMERA_MINI_CC) gmsh2.cc gmsh2fmr.cc -o gmsh2fmr ;\
 	./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu 0.001 \
 	-M1 -E100e9 -N0.3 \
@@ -118,7 +122,7 @@ gmsh2fmr-rve:
 
 gmsh2fmr-omp:
 	mv -f gmsh2fmr gmsh2fmr.old 2>/dev/null ;\
-	$(CXX) -fopenmp $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
+	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(FEMERA_MINI_CC) gmsh2.cc gmsh2fmr.cc -o gmsh2fmr ;\
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread ;\
 	export OMP_NUM_THREADS=$(NCPU) ;\
