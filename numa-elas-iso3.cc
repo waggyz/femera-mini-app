@@ -26,7 +26,7 @@ int ElastIso3D::Setup( Elem* E ){
 int ElastIso3D::ElemLinear( Elem* E,
   RESTRICT Phys::vals &sys_f, const RESTRICT Phys::vals &sys_u ){
   //FIXME Don't need these local variables anymore?
-  static const int ndof   = 3;//this->ndof_n
+  static const uint ndof   = 3;//this->ndof_n
   //static const int mesh_d = 3;//E->elem_d;
   static const uint  Nj =10;//,d2=9;//mesh_d*mesh_d;
   //uint ij=0;
@@ -36,7 +36,7 @@ int ElastIso3D::ElemLinear( Elem* E,
   const uint     Nc = E->elem_conn_n;// Number of Nodes/Element
   const uint     Ne = ndof*Nc;//, nej=E->elip_jacs.size();
   INT_MESH         Ng;//printf("PHYSICS GAUSS PTS: %i\n",(int)E->gaus_n);
-  const int intp_n = E->gaus_n;//E->elip_jacs.size()/elem_n/Nj;
+  const uint intp_n = uint(E->gaus_n);//E->elip_jacs.size()/elem_n/Nj;
   //const int flop = int(elem_n) * int(intp_n)
   //  *( int(Nc)* (33+18) + 27 );
   #if VERB_MAX>11
@@ -76,11 +76,11 @@ int ElastIso3D::ElemLinear( Elem* E,
       std::memcpy( &u[ndof*i], &sys_u[conn[i]*ndof],
                     sizeof(FLOAT_SOLV)*ndof ); };
     for(uint j=0;j<Ne;j++){ f[j]=0.0; };
-    for(int ip=0; ip<intp_n; ip++){
+    for(uint ip=0; ip<intp_n; ip++){
       Ng = ip*Ne;
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
-      for( int i=0; i<9 ; i++){ H[i]=0.0; };
+      for(uint i=0; i<9 ; i++){ H[i]=0.0; };
       for(uint k=0; k<Nc; k++){
         for(uint i=0; i<3 ; i++){ G[3* k+i ]=0.0;
           for(uint j=0; j<3 ; j++){
@@ -121,9 +121,9 @@ int ElastIso3D::ElemLinear( Elem* E,
       }; printf("\n");
       #endif
     };//end intp loop
-    for (int i=0; i<int(Nc); i++){
+    for (uint i=0; i<Nc; i++){
       //const int c=E->elem_conn[Nc*ie+i]*3;
-      for(int j=0; j<3; j++){
+      for(uint j=0; j<3; j++){
         //sys_f[E->elem_conn[Nc*ie+i]*3+j] += f[3*i+j];
         sys_f[3*conn[i]+j] += f[3*i+j];
         //sys_f[c+j] += f[3*i+j];
@@ -132,15 +132,15 @@ int ElastIso3D::ElemLinear( Elem* E,
   return 0;//return flop;
   };
 int ElastIso3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
-  const int ndof   = 3;//this->ndof_n
+  const uint ndof   = 3;//this->ndof_n
   //const int mesh_d = E->elem_d;
-  const int elem_n = E->elem_n;
+  const uint elem_n = E->elem_n;
   //const int intp_n = E->elip_dets.size()/elem_n;
   const uint  Nc = E->elem_conn_n;
   const uint  Nj = 10,d2=9;
-  const uint  Ne = int(ndof*Nc);
+  const uint  Ne = uint(ndof*Nc);
   //printf("JACOBI GAUSS PTS: %i\n",(int)E->gaus_n);
-  const int intp_n = E->gaus_n;//E->elip_jacs.size()/elem_n/Nj;
+  const uint intp_n = E->gaus_n;//E->elip_jacs.size()/elem_n/Nj;
   //
   FLOAT_PHYS det;
   RESTRICT Phys::vals elem_diag(Ne);//,  shg(Ne);//,jac(Nj);//, G(Ne);
@@ -156,11 +156,11 @@ int ElastIso3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
     0.0,0.0,0.0,0.0,mtrl_matc[2],0.0,
     0.0,0.0,0.0,0.0,0.0,mtrl_matc[2]};
   //elem_inout=0.0;
-  for(int ie=0;ie<elem_n;ie++){
+  for(uint ie=0;ie<elem_n;ie++){
     uint ij=Nj*ie;//FIXME only good for tets
     std::copy( &E->elip_jacs[ij],
                &E->elip_jacs[ij+Nj], jac ); det=jac[d2];
-    for(int ip=0;ip<intp_n;ip++){
+    for(uint ip=0;ip<intp_n;ip++){
       //uint ij=Nj*ie*intp_n +Nj*ip;
       //std::copy( &E->elip_jacs[ij],
       //           &E->elip_jacs[ij+Nj], jac ); det=jac[d2];
@@ -228,9 +228,9 @@ int ElastIso3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
         elem_diag[i]+=(B[Ne*5 + i] * D[6*5 + k] * B[Ne*k + i])*w;
       };};//};//};
     };//end intp loop
-    for (int i=0; i<int(Nc); i++){
+    for (uint i=0; i<Nc; i++){
       //int c=E->elem_conn[Nc*ie+i]*3;
-      for(int j=0; j<3; j++){
+      for(uint j=0; j<3; j++){
         sys_d[E->elem_conn[Nc*ie+i]*3+j] += elem_diag[3*i+j];
       }; };
     elem_diag=0.0;

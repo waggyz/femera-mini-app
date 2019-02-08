@@ -29,7 +29,7 @@ int ElastOrtho3D::Setup( Elem* E ){
 int ElastOrtho3D::ElemLinear( Elem* E,
   RESTRICT Phys::vals &sys_f, const RESTRICT Phys::vals &sys_u ){
   //FIXME Don't need these local variables anymore?
-  static const int ndof   = 3;//this->ndof_n
+  static const uint ndof   = 3;//this->ndof_n
   //static const int mesh_d = 3;//E->elem_d;
   static const uint  Nj =10;//,d2=9;//mesh_d*mesh_d;
   //uint ij=0;
@@ -39,7 +39,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   const uint     Nc = E->elem_conn_n;// Number of Nodes/Element
   const uint     Ne = ndof*Nc;//, nej=E->elip_jacs.size();
   INT_MESH         Ng;
-  const int intp_n = E->gaus_n;//E->elip_jacs.size()/elem_n/Nj;
+  const uint intp_n = uint(E->gaus_n);//E->elip_jacs.size()/elem_n/Nj;
   #if VERB_MAX>11
   printf("Dim: %i, Elems:%i, IntPts:%i, Nodes/elem:%i\n",
     (int)mesh_d,(int)elem_n,(int)intp_n,(int)Nc);
@@ -80,8 +80,8 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       std::memcpy( &u[ndof*i], &sys_u[conn[i]*ndof],
                     sizeof(FLOAT_SOLV)*ndof ); };
     for(uint j=0;j<Ne;j++){ f[j]=0.0; };
-    for(int ip=0; ip<intp_n; ip++){
-      for( int i=0; i< 9; i++){ A[i]=0.0; };
+    for(uint ip=0; ip<intp_n; ip++){
+      for(uint i=0; i< 9; i++){ A[i]=0.0; };
       Ng = ip*Ne;
       //G = MatMul3x3xN( jac,shg );
       //A = MatMul3xNx3T( G,u );// [H] Small deformation tensor
@@ -103,9 +103,9 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       }; printf("\n");
       #endif
       // [H][RT] : matmul3x3x3T
-      for(int i=0; i<3; i++){
-        for(int k=0; k<3; k++){ H[3* i+k ]=0.0;
-          for(int j=0; j<3; j++){
+      for(uint i=0; i<3; i++){
+        for(uint k=0; k<3; k++){ H[3* i+k ]=0.0;
+          for(uint j=0; j<3; j++){
             H[3* i+k ] += A[3* i+j ] * R[3* k+j ];
       };};};//---------------------------------------------- 27*2 =      54 FLOP
       FLOAT_PHYS w = det * wgt[ip];
@@ -127,10 +127,10 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       //--------------------------------------------------------- 18+9= 27 FLOP
       // [S][R] : matmul3x3x3, R is transposed
       //for(int i=0; i<9; i++){ B[i]=0.0; };
-      for(int i=0; i<3; i++){
+      for(uint i=0; i<3; i++){
         //for(int k=0; k<3; k++){ B[3* i+k ]=0.0;
-        for(int k=0; k<3; k++){ B[3* k+i ]=0.0;
-          for(int j=0; j<3; j++){
+        for(uint k=0; k<3; k++){ B[3* k+i ]=0.0;
+          for(uint j=0; j<3; j++){
             //B[3* i+k ] += S[3* i+j ] * R[3* j+k ];
             B[3* k+i ] += S[3* i+j ] * R[3* j+k ];// B is transposed
       };};};//-------------------------------------------------- 27*2 = 54 FLOP
@@ -164,9 +164,9 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       }; printf("\n");
       #endif
     };//end intp loop
-    for (int i=0; i<int(Nc); i++){
+    for (uint i=0; i<Nc; i++){
       //const int c=E->elem_conn[Nc*ie+i]*3;
-      for(int j=0; j<3; j++){
+      for(uint j=0; j<3; j++){
         //sys_f[E->elem_conn[Nc*ie+i]*3+j] += f[3*i+j];
         sys_f[3*conn[i]+j] += f[3*i+j];
         //sys_f[c+j] += f[3*i+j];
@@ -175,14 +175,14 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   return 0;
   };
 int ElastOrtho3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){//FIXME Doesn't do rotation yet
-  const int ndof   = 3;//this->ndof_n
+  const uint ndof   = 3;//this->ndof_n
   //const int mesh_d = E->elem_d;
-  const int elem_n = E->elem_n;
+  const uint elem_n = E->elem_n;
   //const int intp_n = E->elip_dets.size()/elem_n;
   const uint  Nc = E->elem_conn_n;
   const uint  Nj = 10,d2=9;
   const uint  Ne = ndof*Nc;// printf("GAUSS PTS: %i\n",(int)E->gaus_n);
-  const int intp_n = E->gaus_n;//E->elip_jacs.size()/elem_n/Nj;
+  const uint intp_n = uint(E->gaus_n);//E->elip_jacs.size()/elem_n/Nj;
   //
   FLOAT_PHYS det;
   RESTRICT Phys::vals elem_diag(Ne);//,  shg(Ne), G(Ne),jac(d2);
@@ -205,11 +205,11 @@ int ElastOrtho3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){//FIXME Doesn
     //0.0,0.0,0.0,0.0,mtrl_matc[2],0.0,
     //0.0,0.0,0.0,0.0,0.0,mtrl_matc[2]};
   //elem_inout=0.0;
-  for(int ie=0;ie<elem_n;ie++){
+  for(uint ie=0;ie<elem_n;ie++){
     uint ij=Nj*ie;
     std::copy( &E->elip_jacs[ij],
                &E->elip_jacs[ij+Nj], jac ); det=jac[d2];
-    for(int ip=0;ip<intp_n;ip++){
+    for(uint ip=0;ip<intp_n;ip++){
       //uint ij=Nj*ie*intp_n +Nj*ip;
       //std::copy( &E->elip_jacs[ij],
       //           &E->elip_jacs[ij+Nj], jac ); det=jac[d2];
@@ -277,9 +277,9 @@ int ElastOrtho3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){//FIXME Doesn
         elem_diag[i]+=(B[Ne*5 + i] * D[6*5 + k] * B[Ne*k + i])*w;
       };};//};//};
     };//end intp loop
-    for (int i=0; i<int(Nc); i++){
+    for (uint i=0; i<Nc; i++){
       //int c=E->elem_conn[Nc*ie+i]*3;
-      for(int j=0; j<3; j++){
+      for(uint j=0; j<3; j++){
         sys_d[E->elem_conn[Nc*ie+i]*3+j] += elem_diag[3*i+j];
       }; };
     elem_diag=0.0;
