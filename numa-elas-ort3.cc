@@ -28,9 +28,6 @@ int ElastOrtho3D::Setup( Elem* E ){
 //FIXME add the above variant as an option...
 int ElastOrtho3D::ElemLinear( Elem* E,
   RESTRICT Phys::vals &sys_f, const RESTRICT Phys::vals &sys_u ){
-  //
-  uint Nv=16;// Vector block size
-  //
   //FIXME Cleanup local variables.
   const uint ndof   = 3;//this->ndof_n
   //const int mesh_d = 3;//E->elem_d;
@@ -40,6 +37,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   const uint     Nc = E->elem_conn_n;// Number of Nodes/Element
   const uint     Ne = ndof*Nc;
   const uint intp_n = uint(E->gaus_n);
+  uint           Nv = E->simd_n;// Vector block size
   //
   INT_MESH e0=0, ee=elem_n;
   if(E->do_halo==true){ e0=0; ee=E->halo_elem_n;

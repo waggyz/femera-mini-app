@@ -39,6 +39,7 @@ public:
   INT_MESH  node_n=0;// Total number of nodes
   INT_MESH  elem_n=0;// Total number of nodes
   INT_MESH  udof_n=0;// Total number of solution values (size of system)
+  uint      simd_n=1;// Initial vectorization width
   //
   int comp_n=1, numa_n=1;
   int solv_meth=Solv::SOLV_CG, verbosity=1;

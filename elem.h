@@ -75,6 +75,7 @@ public:
   INT_ELEM_NODE elem_edge_n;// Edges of one element
   INT_ELEM_NODE elem_face_n;// Faces of one element containing a node
   INT_ELEM_NODE elem_conn_n;
+  uint simd_n=1;
   //INT_MESH  jacs_n=0;//=elem_n * elem_jacs_n;
   //FIXME Use this instead of gauss_n*elem_n*(d^2+1)
   // = elem_vert_n + (elem_p-1)*elem_edge_n + elem_face_n

@@ -23,9 +23,6 @@ int ElastIso3D::Setup( Elem* E ){
 };
 int ElastIso3D::ElemLinear( Elem* E,
   RESTRICT Phys::vals &sys_f, const RESTRICT Phys::vals &sys_u ){
-  //
-  uint Nv=16;// Vector block size
-  //
   //FIXME Clean up local variables.
   const uint ndof= 3;//this->ndof_n
   const uint  Nj =10;//,d2=9;//mesh_d*mesh_d;
@@ -33,6 +30,7 @@ int ElastIso3D::ElemLinear( Elem* E,
   const uint intp_n = uint(E->gaus_n);
   const uint     Nc = E->elem_conn_n;// Number of Nodes/Element
   const uint     Ne = ndof*Nc;
+  uint           Nv = E->simd_n;// Vector block size
   //
   INT_MESH e0=0, ee=elem_n;
   if(E->do_halo==true){ e0=0; ee=E->halo_elem_n;

@@ -33,6 +33,7 @@ int main( int argc, char** argv ){
   FLOAT_SOLV rtol = 1e-4;
   //Solv::Meth solv_meth = Solv::SOLV_CG;
   int solv_meth = Solv::SOLV_CG;
+  uint simd_n=1;
 #if VERB_MAX>1
   FLOAT_SOLV test_u=0.001; INT_DOF test_dir=0;
 #endif
@@ -44,11 +45,12 @@ int main( int argc, char** argv ){
   // Parse Command Line =============================================
   //FIXME Consider using C++ for parsing command line options.
   opterr = 0; int c;
-  while ((c = getopt (argc, argv, "v:pP:h:c:m:s:i:r:x:y:z:")) != -1){
+  while ((c = getopt (argc, argv, "v:pP:h:c:m:s:i:r:x:y:z:V:")) != -1){
     // x:  -x requires an argument
     switch (c) {
       case 'c':{ comp_n   = atoi(optarg); break;}
       case 'v':{ verbosity= atoi(optarg); break;}
+      case 'V':{ simd_n   = atoi(optarg); break;}
 #ifdef _OPENMP
       case 'm':{ numa_n   = atoi(optarg); break;}//FIXME Not yet used.
 #if VERB_MAX>1
@@ -245,6 +247,7 @@ int main( int argc, char** argv ){
   //M->solv_meth = solv_meth;//FIXME set in constructor?
   M->base_name=iname;
   M->comp_n=comp_n;
+  M->simd_n=simd_n;
   //M->glob_rtol = rtol;
   M->verbosity=verbosity;
   //M->mesh_part.resize(part_n+part_0);

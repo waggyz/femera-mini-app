@@ -259,6 +259,7 @@ int Mesh::Setup(){
     };
 #endif
     Elem* E = new Tet(pord);//FIXME
+    E->simd_n = this->simd_n;
     Phys* Y = E->ReadPartFMR(pname.c_str(),false);
     Solv* S;//FIXME can this be passed as an argument and copied?
     switch( solv_meth ){
