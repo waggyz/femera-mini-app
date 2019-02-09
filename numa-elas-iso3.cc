@@ -26,26 +26,25 @@ int ElastIso3D::Setup( Elem* E ){
 int ElastIso3D::ElemLinear( Elem* E,
   RESTRICT Phys::vals &sys_f, const RESTRICT Phys::vals &sys_u ){
   //FIXME Don't need these local variables anymore?
-  static const uint ndof   = 3;//this->ndof_n
-  //static const int mesh_d = 3;//E->elem_d;
+  static const uint ndof= 3;//this->ndof_n
   static const uint  Nj =10;//,d2=9;//mesh_d*mesh_d;
-  //uint ij=0;
+  //
+  const uint Nv=16;// Vector block size
   //
   const INT_MESH elem_n = E->elem_n;
-  //const int    intp_n = E->elip_dets.size()/elem_n;
+  const uint intp_n = uint(E->gaus_n);
   const uint     Nc = E->elem_conn_n;// Number of Nodes/Element
-  const uint     Ne = ndof*Nc;//, nej=E->elip_jacs.size();
-  INT_MESH         Ng;//printf("PHYSICS GAUSS PTS: %i\n",(int)E->gaus_n);
-  const uint intp_n = uint(E->gaus_n);//E->elip_jacs.size()/elem_n/Nj;
-  //const int flop = int(elem_n) * int(intp_n)
-  //  *( int(Nc)* (33+18) + 27 );
+  const uint     Ne = ndof*Nc;
+  uint           Ng;
   #if VERB_MAX>11
   printf("DOF: %i, Elems:%i, IntPts:%i, Nodes/elem:%i\n",
     (int)ndof,(int)elem_n,(int)intp_n,(int)Nc );
   #endif
-  INT_MESH   conn[Nc];
-  FLOAT_PHYS G[Ne], u[Ne],f[Ne];
-  FLOAT_PHYS det, jac[Nj], H[9],S[9];
+  FLOAT_PHYS det;
+  INT_MESH   conn[Nc*Nv];
+  FLOAT_PHYS G[Ne*Nv], u[Ne*Nv], f[Ne*Nv];
+  FLOAT_PHYS jac[Nj*Nv], H[9*Nv],S[9*Nv];
+  //
   FLOAT_PHYS intp_shpg[intp_n*Ne];
   std::copy( &E->intp_shpg[0],
              &E->intp_shpg[intp_n*Ne], intp_shpg );
@@ -65,30 +64,36 @@ int ElastIso3D::ElemLinear( Elem* E,
   if(E->do_halo==true){ e0=0; ee=E->halo_elem_n;
   }else{ e0=E->halo_elem_n; ee=elem_n;};
   //
-  for(INT_MESH ie=e0;ie<ee;ie++){
+  for(INT_MESH ie=e0;ie<ee;ie+=Nv){
+    //for(uint i=0;i<(Nv*Nc);i++){ conn[i]=0; };
+    //for(uint i=0;i<(Nv*Ne);i++){ u[i]=0; };
+    //for(uint i=0;i<(Nv*Nj);i++){ jac[i]=0; };
+    uint Cc;
+    if((ie+Nv)<ee){ Cc=Nv; }else{ Cc=ee-ie; };// Nv=Cc;
+    //printf("ie:%u ee:%u Cc:%u\n",ie,ee,Cc);
     std::copy( &E->elem_conn[Nc*ie],
-               &E->elem_conn[Nc*ie+Nc], conn );
+               &E->elem_conn[Nc*ie+Nc*Cc], conn );
     //ij=Nj*ie;//FIXME only good for tets
     std::copy( &E->elip_jacs[Nj*ie],
-               &E->elip_jacs[Nj*ie+Nj], jac ); det=jac[9];
-    for (uint i=0; i<Nc; i++){
+               &E->elip_jacs[Nj*ie+Nj*Cc], jac );// det=jac[9];
+    for (uint i=0; i<(Nc*Cc); i++){
       //std::memcpy( &u[ndof*i], &sys_u[E->elem_conn[Nc*ie+i]*ndof],
       std::memcpy( &u[ndof*i], &sys_u[conn[i]*ndof],
                     sizeof(FLOAT_SOLV)*ndof ); };
-    for(uint j=0;j<Ne;j++){ f[j]=0.0; };
+    for(uint i=0;i<(Ne*Nv);i++){ f[i]=0.0; };
     for(uint ip=0; ip<intp_n; ip++){
-      Ng = ip*Ne;
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
-      for(uint i=0; i<9 ; i++){ H[i]=0.0; };
-#pragma omp simd
+      for(uint i=0; i< 9*Nv ; i++){ H[i]=0.0; };
+      for(uint i=0; i<(Ne*Nv) ; i++){ G[i]=0.0; };
       for(uint k=0; k<Nc; k++){
-        for(uint i=0; i<3 ; i++){ G[3* k+i ]=0.0;
+        for(uint i=0; i<3 ; i++){// G[3* k+i ]=0.0;
           for(uint j=0; j<3 ; j++){
-            G[3* k+i ] += jac[3* i+j ] * intp_shpg[Ng+ 3* k+j ];
-          };
-          for(uint j=0; j<3 ; j++){
-            H[ 3* i+j ] += G[3* k+i ] * u[ndof* k+j ];
+#pragma omp simd
+            for(uint l=0;l<Nv;l++){
+            G[(3* k+i)*Nv+l ] += jac[3* i+j +l*Nj ] * intp_shpg[ip*Ne+ 3* k+j ];
+            H[(3* i+j)*Nv+l ] += G[(3* k+i)*Nv+l ] * u[ndof* k+j +l*Ne ];
+            };
           };
         };
       };//------------------------------------------------- N*3*6*2 = 36*N FLOP
@@ -99,36 +104,45 @@ int ElastIso3D::ElemLinear( Elem* E,
         printf("%+9.2e ",H[j]);
       }; printf("\n");
       #endif
-      FLOAT_PHYS w = det * wgt[ip];
-      S[0]=(mtrl_matc[0]* H[0] + mtrl_matc[1]* H[4] + mtrl_matc[1]* H[8])*w;//Sxx
-      S[4]=(mtrl_matc[1]* H[0] + mtrl_matc[0]* H[4] + mtrl_matc[1]* H[8])*w;//Syy
-      S[8]=(mtrl_matc[1]* H[0] + mtrl_matc[1]* H[4] + mtrl_matc[0]* H[8])*w;//Szz
-      //
-      S[1]=( H[1] + H[3] )*mtrl_matc[2]*w;// S[3]= S[1];//Sxy Syx
-      S[5]=( H[5] + H[7] )*mtrl_matc[2]*w;// S[7]= S[5];//Syz Szy
-      S[2]=( H[2] + H[6] )*mtrl_matc[2]*w;// S[6]= S[2];//Sxz Szx
-      S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
-      //------------------------------------------------------- 18+9 = 27 FLOP
 #pragma omp simd
+      for(uint l=0;l<Nv;l++){
+      det=jac[9 +Nj*l];// printf("%f\n",det);
+      FLOAT_PHYS w = det * wgt[ip];
+      S[0*Nv+l]=(mtrl_matc[0]* H[0*Nv+l] + mtrl_matc[1]* H[4*Nv+l] + mtrl_matc[1]* H[8*Nv+l])*w;//Sxx
+      S[4*Nv+l]=(mtrl_matc[1]* H[0*Nv+l] + mtrl_matc[0]* H[4*Nv+l] + mtrl_matc[1]* H[8*Nv+l])*w;//Syy
+      S[8*Nv+l]=(mtrl_matc[1]* H[0*Nv+l] + mtrl_matc[1]* H[4*Nv+l] + mtrl_matc[0]* H[8*Nv+l])*w;//Szz
+      //
+      S[1*Nv+l]=( H[1*Nv+l] + H[3*Nv+l] )*mtrl_matc[2]*w;// S[3]= S[1];//Sxy Syx
+      S[5*Nv+l]=( H[5*Nv+l] + H[7*Nv+l] )*mtrl_matc[2]*w;// S[7]= S[5];//Syz Szy
+      S[2*Nv+l]=( H[2*Nv+l] + H[6*Nv+l] )*mtrl_matc[2]*w;// S[6]= S[2];//Sxz Szx
+      S[3*Nv+l]=S[1*Nv+l]; S[7*Nv+l]=S[5*Nv+l]; S[6*Nv+l]=S[2*Nv+l];
+      };
+      //------------------------------------------------------- 18+9 = 27 FLOP
       for(uint i=0; i<Nc; i++){
         for(uint k=0; k<3; k++){
           for(uint j=0; j<3; j++){
-            f[3* i+k ] += G[3* i+j ] * S[3* k+j ];
+#pragma omp simd
+            for(uint l=0;l<Nv;l++){
+            f[(3* i+k)*Nv+l ] += G[(3* i+j)*Nv+l ] * S[(3* k+j)*Nv+l ]; };
       };};};//---------------------------------------------- N*3*6 = 18*N FLOP
       #if VERB_MAX>10
-      printf( "ff:");
-      for(uint j=0;j<Ne;j++){
-        if(j%mesh_d==0){printf("\n");}
+      printf( "f:");
+      for(uint j=0;j<Ne*Nv;j++){
+        if(j%ndof==0){printf("\n");}
         printf("%+9.2e ",f[j]);
       }; printf("\n");
       #endif
     };//end intp loop
-#pragma omp simd
+    //printf( "F:");
     for (uint i=0; i<Nc; i++){
       //const int c=E->elem_conn[Nc*ie+i]*3;
       for(uint j=0; j<3; j++){
+#pragma omp simd
+        for(uint l=0;l<Cc;l++){
         //sys_f[E->elem_conn[Nc*ie+i]*3+j] += f[3*i+j];
-        sys_f[3*conn[i]+j] += f[3*i+j];
+        sys_f[3*conn[i+Nc*l]+j] += f[(3*i+j)*Nv+l];
+        //printf("%+9.2e ",f[(3*i+j)*Nv+l]);
+        }; //printf("\n");
         //sys_f[c+j] += f[3*i+j];
     }; };//--------------------------------------------------- N*3 =  3*N FLOP
   };//end elem loop
