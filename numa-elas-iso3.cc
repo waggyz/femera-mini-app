@@ -35,7 +35,6 @@ int ElastIso3D::ElemLinear( Elem* E,
   const uint intp_n = uint(E->gaus_n);
   const uint     Nc = E->elem_conn_n;// Number of Nodes/Element
   const uint     Ne = ndof*Nc;
-  uint           Ng;
   #if VERB_MAX>11
   printf("DOF: %i, Elems:%i, IntPts:%i, Nodes/elem:%i\n",
     (int)ndof,(int)elem_n,(int)intp_n,(int)Nc );
@@ -51,7 +50,6 @@ int ElastIso3D::ElemLinear( Elem* E,
   FLOAT_PHYS wgt[intp_n];
   std::copy( &E->gaus_weig[0],
              &E->gaus_weig[intp_n], wgt );
-  //int imfirst=0;
   #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
   for(uint j=0;j<mtrl_matc.size();j++){
@@ -65,19 +63,13 @@ int ElastIso3D::ElemLinear( Elem* E,
   }else{ e0=E->halo_elem_n; ee=elem_n;};
   //
   for(INT_MESH ie=e0;ie<ee;ie+=Nv){
-    //for(uint i=0;i<(Nv*Nc);i++){ conn[i]=0; };
-    //for(uint i=0;i<(Nv*Ne);i++){ u[i]=0; };
-    //for(uint i=0;i<(Nv*Nj);i++){ jac[i]=0; };
     uint Cc;
     if((ie+Nv)<ee){ Cc=Nv; }else{ Cc=ee-ie; };// Nv=Cc;
-    //printf("ie:%u ee:%u Cc:%u\n",ie,ee,Cc);
     std::copy( &E->elem_conn[Nc*ie],
                &E->elem_conn[Nc*ie+Nc*Cc], conn );
-    //ij=Nj*ie;//FIXME only good for tets
     std::copy( &E->elip_jacs[Nj*ie],
                &E->elip_jacs[Nj*ie+Nj*Cc], jac );// det=jac[9];
     for (uint i=0; i<(Nc*Cc); i++){
-      //std::memcpy( &u[ndof*i], &sys_u[E->elem_conn[Nc*ie+i]*ndof],
       std::memcpy( &u[ndof*i], &sys_u[conn[i]*ndof],
                     sizeof(FLOAT_SOLV)*ndof ); };
     for(uint i=0;i<(Ne*Nv);i++){ f[i]=0.0; };
@@ -106,8 +98,8 @@ int ElastIso3D::ElemLinear( Elem* E,
       #endif
 #pragma omp simd
       for(uint l=0;l<Nv;l++){
-      det=jac[9 +Nj*l];// printf("%f\n",det);
-      FLOAT_PHYS w = det * wgt[ip];
+      det=jac[9 +Nj*l]; FLOAT_PHYS w = det * wgt[ip];
+      //
       S[0*Nv+l]=(mtrl_matc[0]* H[0*Nv+l] + mtrl_matc[1]* H[4*Nv+l] + mtrl_matc[1]* H[8*Nv+l])*w;//Sxx
       S[4*Nv+l]=(mtrl_matc[1]* H[0*Nv+l] + mtrl_matc[0]* H[4*Nv+l] + mtrl_matc[1]* H[8*Nv+l])*w;//Syy
       S[8*Nv+l]=(mtrl_matc[1]* H[0*Nv+l] + mtrl_matc[1]* H[4*Nv+l] + mtrl_matc[0]* H[8*Nv+l])*w;//Szz
@@ -133,17 +125,12 @@ int ElastIso3D::ElemLinear( Elem* E,
       }; printf("\n");
       #endif
     };//end intp loop
-    //printf( "F:");
     for (uint i=0; i<Nc; i++){
-      //const int c=E->elem_conn[Nc*ie+i]*3;
       for(uint j=0; j<3; j++){
 #pragma omp simd
         for(uint l=0;l<Cc;l++){
-        //sys_f[E->elem_conn[Nc*ie+i]*3+j] += f[3*i+j];
         sys_f[3*conn[i+Nc*l]+j] += f[(3*i+j)*Nv+l];
-        //printf("%+9.2e ",f[(3*i+j)*Nv+l]);
-        }; //printf("\n");
-        //sys_f[c+j] += f[3*i+j];
+        };
     }; };//--------------------------------------------------- N*3 =  3*N FLOP
   };//end elem loop
   return 0;//return flop;
