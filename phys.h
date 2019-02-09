@@ -7,6 +7,7 @@ public:
   typedef std::valarray<FLOAT_PHYS> vals;
   //
   //virtual int ElemLinear( std::vector<Elem*>,RESTRICT Phys::vals&,const RESTRICT Phys::vals&)=0;
+  virtual int BlocLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&)=0;
   virtual int ElemLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&)=0;
   virtual int ElemJacobi( Elem*,RESTRICT Phys::vals& )=0;// Jacobi Preconditioner
   virtual int ElemLinear( Elem* )=0;//FIXME OLD
@@ -89,6 +90,7 @@ public: ElastIso2D(FLOAT_PHYS young, FLOAT_PHYS poiss, FLOAT_PHYS thick) :
   };
   int Setup( Elem* )final;
   //int ElemLinear( std::vector<Elem*>,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
+  int BlocLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
   int ElemLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
   int ElemJacobi( Elem*,RESTRICT Phys::vals& ) final;
   int ElemLinear( Elem* ) final;
@@ -130,6 +132,7 @@ public: ElastIso3D(FLOAT_PHYS young, FLOAT_PHYS poiss ) :
   };
   int Setup( Elem* )final;
   //int ElemLinear( std::vector<Elem*>,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
+  int BlocLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
   int ElemLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
   int ElemJacobi( Elem*,RESTRICT Phys::vals& ) final;
   int ElemLinear( Elem* ) final;
@@ -216,6 +219,7 @@ public:
      { ndof_n = 3; ElastOrtho3D::MtrlProp2MatC(); };
   int Setup( Elem* )final;
   //int ElemLinear( std::vector<Elem*>,RESTRICT Phys::vals&,const RESTRICT Phys::vals&)
+  int BlocLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
   int ElemLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
   int ElemJacobi( Elem*,RESTRICT Phys::vals& ) final;
   int ElemLinear( Elem* ) ;
