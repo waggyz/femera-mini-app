@@ -21,25 +21,27 @@ int ElastIso3D::Setup( Elem* E ){
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) +1);
   return 0;
 };
-//int ElastIso3D::ElemLinear( std::vector<Elem*> list_elem,
-//FIXME add the above variant as an option...
 int ElastIso3D::ElemLinear( Elem* E,
   RESTRICT Phys::vals &sys_f, const RESTRICT Phys::vals &sys_u ){
-  //FIXME Don't need these local variables anymore?
-  static const uint ndof= 3;//this->ndof_n
-  static const uint  Nj =10;//,d2=9;//mesh_d*mesh_d;
   //
-  const uint Nv=16;// Vector block size
+  uint Nv=16;// Vector block size
   //
+  //FIXME Clean up local variables.
+  const uint ndof= 3;//this->ndof_n
+  const uint  Nj =10;//,d2=9;//mesh_d*mesh_d;
   const INT_MESH elem_n = E->elem_n;
   const uint intp_n = uint(E->gaus_n);
   const uint     Nc = E->elem_conn_n;// Number of Nodes/Element
   const uint     Ne = ndof*Nc;
-  #if VERB_MAX>11
-  printf("DOF: %i, Elems:%i, IntPts:%i, Nodes/elem:%i\n",
-    (int)ndof,(int)elem_n,(int)intp_n,(int)Nc );
-  #endif
-  FLOAT_PHYS det;
+  //
+  INT_MESH e0=0, ee=elem_n;
+  if(E->do_halo==true){ e0=0; ee=E->halo_elem_n;
+  }else{ e0=E->halo_elem_n; ee=elem_n;};
+#if VERB_MAX>11
+  printf("DOF: %u, Elems:%u, IntPts:%u, Nodes/elem:%u\n",
+    (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
+#endif
+  //FLOAT_PHYS det;
   INT_MESH   conn[Nc*Nv];
   FLOAT_PHYS G[Ne*Nv], u[Ne*Nv], f[Ne*Nv];
   FLOAT_PHYS jac[Nj*Nv], H[9*Nv],S[9*Nv];
@@ -50,28 +52,24 @@ int ElastIso3D::ElemLinear( Elem* E,
   FLOAT_PHYS wgt[intp_n];
   std::copy( &E->gaus_weig[0],
              &E->gaus_weig[intp_n], wgt );
-  #if VERB_MAX>10
+#if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
   for(uint j=0;j<mtrl_matc.size();j++){
     //if(j%mesh_d==0){printf("\n");}
     printf("%+9.2e ",mtrl_matc[j]);
   }; printf("\n");
-  #endif
-  //
-  INT_MESH e0=0, ee=elem_n;
-  if(E->do_halo==true){ e0=0; ee=E->halo_elem_n;
-  }else{ e0=E->halo_elem_n; ee=elem_n;};
-  //
+#endif
   for(INT_MESH ie=e0;ie<ee;ie+=Nv){
-    uint Cc;
-    if((ie+Nv)<ee){ Cc=Nv; }else{ Cc=ee-ie; };// Nv=Cc;
+    //uint Cv; if((ie+Nv)<ee){ Cv=Nv; }else{ Cv=ee-ie; };// Nv=Cv;
+    if( (ie+Nv)>=ee ){ Nv=ee-ie; };
+    //
     std::copy( &E->elem_conn[Nc*ie],
-               &E->elem_conn[Nc*ie+Nc*Cc], conn );
+               &E->elem_conn[Nc*ie+Nc*Nv], conn );//Cv
     std::copy( &E->elip_jacs[Nj*ie],
-               &E->elip_jacs[Nj*ie+Nj*Cc], jac );// det=jac[9];
-    for (uint i=0; i<(Nc*Cc); i++){
-      std::memcpy( &u[ndof*i], &sys_u[conn[i]*ndof],
-                    sizeof(FLOAT_SOLV)*ndof ); };
+               &E->elip_jacs[Nj*ie+Nj*Nv], jac );//Cv // det=jac[9];
+    for (uint i=0; i<(Nc*Nv); i++){//Cv
+      std::memcpy( &    u[ndof*i],
+                   &sys_u[conn[i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
     for(uint i=0;i<(Ne*Nv);i++){ f[i]=0.0; };
     for(uint ip=0; ip<intp_n; ip++){
       //G = MatMul3x3xN( jac,shg );
@@ -82,23 +80,29 @@ int ElastIso3D::ElemLinear( Elem* E,
         for(uint i=0; i<3 ; i++){// G[3* k+i ]=0.0;
           for(uint j=0; j<3 ; j++){
 #pragma omp simd
-            for(uint l=0;l<Nv;l++){
+            for(uint l=0;l<Nv;l++){//FIXME can this vectorize?
             G[(3* k+i)*Nv+l ] += jac[3* i+j +l*Nj ] * intp_shpg[ip*Ne+ 3* k+j ];
+            };
+          };
+          for(uint j=0; j<3 ; j++){
+#pragma omp simd
+            for(uint l=0;l<Nv;l++){
             H[(3* i+j)*Nv+l ] += G[(3* k+i)*Nv+l ] * u[ndof* k+j +l*Ne ];
             };
           };
         };
       };//------------------------------------------------- N*3*6*2 = 36*N FLOP
-      #if VERB_MAX>10
+#if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
       for(uint j=0;j<HH.size();j++){
         if(j%mesh_d==0){printf("\n");}
         printf("%+9.2e ",H[j]);
       }; printf("\n");
-      #endif
+#endif
 #pragma omp simd
       for(uint l=0;l<Nv;l++){
-      det=jac[9 +Nj*l]; FLOAT_PHYS w = det * wgt[ip];
+      //det=jac[9 +Nj*l]; FLOAT_PHYS w = det * wgt[ip];
+      FLOAT_PHYS w = jac[9 +Nj*l] * wgt[ip];
       //
       S[0*Nv+l]=(mtrl_matc[0]* H[0*Nv+l] + mtrl_matc[1]* H[4*Nv+l] + mtrl_matc[1]* H[8*Nv+l])*w;//Sxx
       S[4*Nv+l]=(mtrl_matc[1]* H[0*Nv+l] + mtrl_matc[0]* H[4*Nv+l] + mtrl_matc[1]* H[8*Nv+l])*w;//Syy
@@ -117,23 +121,23 @@ int ElastIso3D::ElemLinear( Elem* E,
             for(uint l=0;l<Nv;l++){
             f[(3* i+k)*Nv+l ] += G[(3* i+j)*Nv+l ] * S[(3* k+j)*Nv+l ]; };
       };};};//---------------------------------------------- N*3*6 = 18*N FLOP
-      #if VERB_MAX>10
+#if VERB_MAX>10
       printf( "f:");
       for(uint j=0;j<Ne*Nv;j++){
         if(j%ndof==0){printf("\n");}
         printf("%+9.2e ",f[j]);
       }; printf("\n");
-      #endif
+#endif
     };//end intp loop
     for (uint i=0; i<Nc; i++){
       for(uint j=0; j<3; j++){
 #pragma omp simd
-        for(uint l=0;l<Cc;l++){
+        for(uint l=0;l<Nv;l++){//Cv
         sys_f[3*conn[i+Nc*l]+j] += f[(3*i+j)*Nv+l];
         };
     }; };//--------------------------------------------------- N*3 =  3*N FLOP
   };//end elem loop
-  return 0;//return flop;
+  return 0;
   };
 int ElastIso3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
   const uint ndof   = 3;//this->ndof_n
