@@ -86,13 +86,18 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       for(uint i=0; i< 9*Nv ; i++){ H[i]=0.0; A[i]=0.0; B[i]=0.0; };
       for(uint i=0; i<(Ne*Nv) ; i++){ G[i]=0.0; };
       for(uint k=0; k<Nc; k++){
+#pragma omp simd
+            for(uint l=0;l<Nv;l++){
         for(uint i=0; i<3 ; i++){// G[3* k+i ]=0.0;
           for(uint j=0; j<3 ; j++){
-#pragma omp simd
-            for(uint l=0;l<Nv;l++){//FIXME can this vectorize?
+            //FIXME can this vectorize?
             G[(3* k+i)*Nv+l ] += jac[3* i+j +l*Nj ] * intp_shpg[ip*Ne+ 3* k+j ];
             };
           };
+        };
+      };
+      for(uint k=0; k<Nc; k++){
+        for(uint i=0; i<3 ; i++){
           for(uint j=0; j<3 ; j++){
 #pragma omp simd
             for(uint l=0;l<Nv;l++){
