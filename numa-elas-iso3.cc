@@ -73,9 +73,9 @@ int ElastIso3D::ElemLinear( Elem* E,
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       for(uint i=0; i< 9 ; i++){ H[i]=0.0; };
       //for(uint i=0; i<(Ne) ; i++){ G[i]=0.0; };
+#pragma omp simd
       for(uint k=0; k<Nc; k++){
         for(uint i=0; i<3 ; i++){ G[3* k+i ]=0.0;
-#pragma omp simd
           for(uint j=0; j<3 ; j++){
             G[(3* k+i) ] += jac[3* i+j ] * intp_shpg[ip*Ne+ 3* k+j ];
           };
