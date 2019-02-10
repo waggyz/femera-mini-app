@@ -75,6 +75,7 @@ int ElastIso3D::ElemLinear( Elem* E,
       //for(uint i=0; i<(Ne) ; i++){ G[i]=0.0; };
       for(uint k=0; k<Nc; k++){
         for(uint i=0; i<3 ; i++){ G[3* k+i ]=0.0;
+#pragma omp simd
           for(uint j=0; j<3 ; j++){
             G[(3* k+i) ] += jac[3* i+j ] * intp_shpg[ip*Ne+ 3* k+j ];
           };
@@ -90,7 +91,6 @@ int ElastIso3D::ElemLinear( Elem* E,
         printf("%+9.2e ",H[j]);
       }; printf("\n");
 #endif
-#pragma omp simd
       //det=jac[9 +Nj*l]; FLOAT_PHYS w = det * wgt[ip];
       FLOAT_PHYS w = jac[9] * wgt[ip];
       //
@@ -106,6 +106,7 @@ int ElastIso3D::ElemLinear( Elem* E,
       for(uint i=0; i<Nc; i++){
         for(uint k=0; k<3; k++){
           for(uint j=0; j<3; j++){
+#pragma omp simd
             f[(3* i+k) ] += G[(3* i+j) ] * S[(3* k+j) ];
       };};};//---------------------------------------------- N*3*6 = 18*N FLOP
 #if VERB_MAX>10

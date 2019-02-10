@@ -81,6 +81,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       //A = MatMul3xNx3T( G,u );
       for(uint i=0; i< 9 ; i++){ A[i]=0.0;};// H[i]=0.0; B[i]=0.0; };
       //for(uint i=0; i<(Ne) ; i++){ G[i]=0.0; };
+#pragma omp simd
       for(uint k=0; k<Nc; k++){
         for(uint i=0; i<3 ; i++){ G[3* k+i ]=0.0;
           for(uint j=0; j<3 ; j++){
@@ -100,12 +101,12 @@ int ElastOrtho3D::ElemLinear( Elem* E,
 #endif
       // [H] Small deformation tensor
       // [H][RT] : matmul3x3x3T
+#pragma omp simd
       for(uint i=0; i<3; i++){
         for(uint k=0; k<3; k++){ H[3* i+k ]=0.0;
           for(uint j=0; j<3; j++){
             H[(3* i+k) ] += A[(3* i+j)] * R[3* k+j ];
       };};};//---------------------------------------------- 27*2 =      54 FLOP
-#pragma omp simd
       //det=jac[9 +Nj*l]; FLOAT_PHYS w = det * wgt[ip];
       FLOAT_PHYS w = jac[9] * wgt[ip];
       //
@@ -127,6 +128,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       //--------------------------------------------------------- 18+9= 27 FLOP
       // [S][R] : matmul3x3x3, R is transposed
       //for(int i=0; i<9; i++){ B[i]=0.0; };
+#pragma omp simd
       for(uint i=0; i<3; i++){
         //for(int k=0; k<3; k++){ B[3* i+k ]=0.0;
         for(uint k=0; k<3; k++){ B[3* k+i ]=0.0;
@@ -143,6 +145,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         printf("%+9.2e ",S[j]);
       }; printf("\n");
 #endif
+#pragma omp simd
       for(uint i=0; i<Nc; i++){
         for(uint k=0; k<3; k++){
           for(uint j=0; j<3; j++){
