@@ -103,10 +103,10 @@ int ElastIso3D::ElemLinear( Elem* E,
       S[2]=( H[2] + H[6] )*mtrl_matc[2]*w;// S[6]= S[2];//Sxz Szx
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
       //------------------------------------------------------- 18+9 = 27 FLOP
+#pragma omp simd
       for(uint i=0; i<Nc; i++){
         for(uint k=0; k<3; k++){
           for(uint j=0; j<3; j++){
-#pragma omp simd
             f[(3* i+k) ] += G[(3* i+j) ] * S[(3* k+j) ];
       };};};//---------------------------------------------- N*3*6 = 18*N FLOP
 #if VERB_MAX>10
