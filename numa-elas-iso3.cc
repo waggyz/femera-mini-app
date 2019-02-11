@@ -43,7 +43,7 @@ int ElastIso3D::ElemLinear( Elem* E,
   INT_MESH   conn[Nc];
   FLOAT_MESH jac[Nj];
   FLOAT_PHYS dw, G[Ne], u[Ne], f[Ne];
-  FLOAT_PHYS H[9],S[9];
+  FLOAT_PHYS H[9], S[9];
   //
   FLOAT_PHYS intp_shpg[intp_n*Ne];
   std::copy( &E->intp_shpg[0],
@@ -51,11 +51,14 @@ int ElastIso3D::ElemLinear( Elem* E,
   FLOAT_PHYS wgt[intp_n];
   std::copy( &E->gaus_weig[0],
              &E->gaus_weig[intp_n], wgt );
+  FLOAT_PHYS C[this->mtrl_matc.size()];
+  std::copy( &this->mtrl_matc[0],
+             &this->mtrl_matc[this->mtrl_matc.size()], C );
 #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
   for(uint j=0;j<mtrl_matc.size();j++){
     //if(j%mesh_d==0){printf("\n");}
-    printf("%+9.2e ",mtrl_matc[j]);
+    printf("%+9.2e ",C[j]);
   }; printf("\n");
 #endif
   const auto Econn = &E->elem_conn[0];
@@ -100,13 +103,13 @@ int ElastIso3D::ElemLinear( Elem* E,
       //det=jac[9 +Nj*l]; FLOAT_PHYS w = det * wgt[ip];
       dw = jac[9] * wgt[ip];
       //
-      S[0]=(mtrl_matc[0]* H[0] + mtrl_matc[1]* H[4] + mtrl_matc[1]* H[8])*dw;//Sxx
-      S[4]=(mtrl_matc[1]* H[0] + mtrl_matc[0]* H[4] + mtrl_matc[1]* H[8])*dw;//Syy
-      S[8]=(mtrl_matc[1]* H[0] + mtrl_matc[1]* H[4] + mtrl_matc[0]* H[8])*dw;//Szz
+      S[0]=(C[0]* H[0] + C[1]* H[4] + C[1]* H[8])*dw;//Sxx
+      S[4]=(C[1]* H[0] + C[0]* H[4] + C[1]* H[8])*dw;//Syy
+      S[8]=(C[1]* H[0] + C[1]* H[4] + C[0]* H[8])*dw;//Szz
       //
-      S[1]=( H[1] + H[3] )*mtrl_matc[2]*dw;// S[3]= S[1];//Sxy Syx
-      S[5]=( H[5] + H[7] )*mtrl_matc[2]*dw;// S[7]= S[5];//Syz Szy
-      S[2]=( H[2] + H[6] )*mtrl_matc[2]*dw;// S[6]= S[2];//Sxz Szx
+      S[1]=( H[1] + H[3] )*C[2]*dw;// S[3]= S[1];//Sxy Syx
+      S[5]=( H[5] + H[7] )*C[2]*dw;// S[7]= S[5];//Syz Szy
+      S[2]=( H[2] + H[6] )*C[2]*dw;// S[6]= S[2];//Sxz Szx
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
       //------------------------------------------------------- 18+9 = 27 FLOP
 //#pragma omp simd
