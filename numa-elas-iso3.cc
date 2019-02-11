@@ -42,7 +42,7 @@ int ElastIso3D::ElemLinear( Elem* E,
   //FLOAT_PHYS det;
   INT_MESH   conn[Nc];
   FLOAT_MESH jac[Nj];
-  FLOAT_PHYS G[Ne], u[Ne], f[Ne];
+  FLOAT_PHYS dw, G[Ne], u[Ne], f[Ne];
   FLOAT_PHYS H[9],S[9];
   //
   FLOAT_PHYS intp_shpg[intp_n*Ne];
@@ -97,18 +97,16 @@ int ElastIso3D::ElemLinear( Elem* E,
         printf("%+9.2e ",H[j]);
       }; printf("\n");
 #endif
-      {
       //det=jac[9 +Nj*l]; FLOAT_PHYS w = det * wgt[ip];
-      FLOAT_PHYS w = jac[9] * wgt[ip];
+      dw = jac[9] * wgt[ip];
       //
-      S[0]=(mtrl_matc[0]* H[0] + mtrl_matc[1]* H[4] + mtrl_matc[1]* H[8])*w;//Sxx
-      S[4]=(mtrl_matc[1]* H[0] + mtrl_matc[0]* H[4] + mtrl_matc[1]* H[8])*w;//Syy
-      S[8]=(mtrl_matc[1]* H[0] + mtrl_matc[1]* H[4] + mtrl_matc[0]* H[8])*w;//Szz
+      S[0]=(mtrl_matc[0]* H[0] + mtrl_matc[1]* H[4] + mtrl_matc[1]* H[8])*dw;//Sxx
+      S[4]=(mtrl_matc[1]* H[0] + mtrl_matc[0]* H[4] + mtrl_matc[1]* H[8])*dw;//Syy
+      S[8]=(mtrl_matc[1]* H[0] + mtrl_matc[1]* H[4] + mtrl_matc[0]* H[8])*dw;//Szz
       //
-      S[1]=( H[1] + H[3] )*mtrl_matc[2]*w;// S[3]= S[1];//Sxy Syx
-      S[5]=( H[5] + H[7] )*mtrl_matc[2]*w;// S[7]= S[5];//Syz Szy
-      S[2]=( H[2] + H[6] )*mtrl_matc[2]*w;// S[6]= S[2];//Sxz Szx
-      }
+      S[1]=( H[1] + H[3] )*mtrl_matc[2]*dw;// S[3]= S[1];//Sxy Syx
+      S[5]=( H[5] + H[7] )*mtrl_matc[2]*dw;// S[7]= S[5];//Syz Szy
+      S[2]=( H[2] + H[6] )*mtrl_matc[2]*dw;// S[6]= S[2];//Sxz Szx
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
       //------------------------------------------------------- 18+9 = 27 FLOP
 //#pragma omp simd

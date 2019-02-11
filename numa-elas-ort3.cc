@@ -46,7 +46,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
 #endif
   INT_MESH   conn[Nc];
   FLOAT_MESH jac[Nj];
-  FLOAT_PHYS G[Ne], u[Ne],f[Ne];
+  FLOAT_PHYS dw, G[Ne], u[Ne],f[Ne];
   //FLOAT_PHYS det,
   FLOAT_PHYS A[9], B[9], H[9], S[9];
   //
@@ -115,15 +115,15 @@ int ElastOrtho3D::ElemLinear( Elem* E,
             H[(3* i+k) ] += A[(3* i+j)] * R[3* k+j ];
       };};};//---------------------------------------------- 27*2 =      54 FLOP
       //det=jac[9 +Nj*l]; FLOAT_PHYS w = det * wgt[ip];
-      FLOAT_PHYS w = jac[9] * wgt[ip];
+      dw = jac[9] * wgt[ip];
       //
-      S[0]=(mtrl_matc[0]* H[0] + mtrl_matc[3]* H[4] + mtrl_matc[5]* H[8])*w;//Sxx
-      S[4]=(mtrl_matc[3]* H[0] + mtrl_matc[1]* H[4] + mtrl_matc[4]* H[8])*w;//Syy
-      S[8]=(mtrl_matc[5]* H[0] + mtrl_matc[4]* H[4] + mtrl_matc[2]* H[8])*w;//Szz
+      S[0]=(mtrl_matc[0]* H[0] + mtrl_matc[3]* H[4] + mtrl_matc[5]* H[8])*dw;//Sxx
+      S[4]=(mtrl_matc[3]* H[0] + mtrl_matc[1]* H[4] + mtrl_matc[4]* H[8])*dw;//Syy
+      S[8]=(mtrl_matc[5]* H[0] + mtrl_matc[4]* H[4] + mtrl_matc[2]* H[8])*dw;//Szz
       //
-      S[1]=( H[1] + H[3] )*mtrl_matc[6]*w;// S[3]= S[1];//Sxy Syx
-      S[5]=( H[5] + H[7] )*mtrl_matc[7]*w;// S[7]= S[5];//Syz Szy
-      S[2]=( H[2] + H[6] )*mtrl_matc[8]*w;// S[6]= S[2];//Sxz Szx
+      S[1]=( H[1] + H[3] )*mtrl_matc[6]*dw;// S[3]= S[1];//Sxy Syx
+      S[5]=( H[5] + H[7] )*mtrl_matc[7]*dw;// S[7]= S[5];//Syz Szy
+      S[2]=( H[2] + H[6] )*mtrl_matc[8]*dw;// S[6]= S[2];//Sxz Szx
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
 #if VERB_MAX>10
       printf( "Stress (Natural Coords):");
