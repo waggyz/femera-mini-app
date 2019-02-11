@@ -41,8 +41,9 @@ int ElastIso3D::ElemLinear( Elem* E,
 #endif
   //FLOAT_PHYS det;
   INT_MESH   conn[Nc];
+  FLOAT_MESH jac[Nj];
   FLOAT_PHYS G[Ne], u[Ne], f[Ne];
-  FLOAT_PHYS jac[Nj], H[9],S[9];
+  FLOAT_PHYS H[9],S[9];
   //
   FLOAT_PHYS intp_shpg[intp_n*Ne];
   std::copy( &E->intp_shpg[0],
@@ -57,15 +58,20 @@ int ElastIso3D::ElemLinear( Elem* E,
     printf("%+9.2e ",mtrl_matc[j]);
   }; printf("\n");
 #endif
+  const auto Econn = &E->elem_conn[0];
+  const auto Ejacs = &E->elip_jacs[0];
+  const auto sysu0 = &sys_u[0];
   for(INT_MESH ie=e0;ie<ee;ie++){
-    //
-    std::copy( &E->elem_conn[Nc*ie],
-               &E->elem_conn[Nc*ie+Nc], conn );
-    std::copy( &E->elip_jacs[Nj*ie],
-               &E->elip_jacs[Nj*ie+Nj], jac );// det=jac[9];
+    std::memcpy( &conn, &Econn[Nc*ie], sizeof(  INT_MESH)*Nc);
+    std::memcpy( &jac , &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
+    //std::copy( &Econn[Nc*ie],
+    //           &Econn[Nc*ie+Nc], conn );
+    //std::copy( &Ejacs[Nj*ie],
+    //           &Ejacs[Nj*ie+Nj], jac );// det=jac[9];
     for (uint i=0; i<(Nc); i++){
       std::memcpy( &    u[ndof*i],
-                   &sys_u[conn[i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
+                   //&sys_u[Econn[Nc*ie+i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
+                   &sysu0[conn[i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
     //
     for(uint i=0;i<(Ne);i++){ f[i]=0.0; };
     for(uint ip=0; ip<intp_n; ip++){
@@ -119,6 +125,7 @@ int ElastIso3D::ElemLinear( Elem* E,
     };//end intp loop
     for (uint i=0; i<Nc; i++){
       for(uint j=0; j<3; j++){
+        //sys_f[3*Econn[Nc*ie+i]+j] += f[(3*i+j)];
         sys_f[3*conn[i]+j] += f[(3*i+j)];
     }; };//--------------------------------------------------- N*3 =  3*N FLOP
   };//end elem loop

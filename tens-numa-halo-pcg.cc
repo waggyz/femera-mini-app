@@ -351,7 +351,6 @@ int HaloPCG::Iter(){
     (phys_start-phys_start);
   iter_start = std::chrono::high_resolution_clock::now();
 #endif
-  //nowait
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     //Elem* E; Phys* Y; Solv* S;
