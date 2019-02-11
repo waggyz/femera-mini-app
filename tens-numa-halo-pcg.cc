@@ -339,6 +339,7 @@ int HaloPCG::Iter(){
   const auto P=this->mesh_part;//FIXME Undo this?
 #pragma omp parallel num_threads(comp_n)
 {// iter parallel region
+#if VERB_MAX>1
   long int my_phys_count=0, my_scat_count=0, my_solv_count=0,
     my_gat0_count=0,my_gat1_count=0;
   std::chrono::high_resolution_clock::time_point iter_start,
@@ -348,18 +349,23 @@ int HaloPCG::Iter(){
   auto dur = std::chrono::duration_cast<std::chrono::nanoseconds>
     (phys_start-phys_start);
   iter_start = std::chrono::high_resolution_clock::now();
+#endif
   //nowait
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH d=uint(Y->ndof_n);
+#if VERB_MAX>1
     phys_start = std::chrono::high_resolution_clock::now();
+#endif
     S->sys_f=0.0;
     E->do_halo=true; Y->ElemLinear( E, S->sys_f, S->sys_p );
+#if VERB_MAX>1
     dur = std::chrono::duration_cast<std::chrono::nanoseconds>
       (std::chrono::high_resolution_clock::now()-phys_start);
     my_phys_count += dur.count();
     gath_start = std::chrono::high_resolution_clock::now();
+#endif
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
     for(INT_MESH i=hrn; i<hnn; i++){
       auto f = d* this->halo_map[E->node_glid[i]];
@@ -367,14 +373,18 @@ int HaloPCG::Iter(){
 #pragma omp atomic write
         this->halo_val[f+j] = S->sys_f[d* i+j]; };
     };
+#if VERB_MAX>1
     dur= std::chrono::duration_cast<std::chrono::nanoseconds>
       (std::chrono::high_resolution_clock::now()-gath_start);
     my_gat0_count += dur.count();
+#endif
   };
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+#if VERB_MAX>1
     gath_start = std::chrono::high_resolution_clock::now();
+#endif
     const INT_MESH d=uint(Y->ndof_n);
     const INT_MESH hrn=E->halo_remo_n;
     for(INT_MESH i=0; i<hrn; i++){
@@ -384,14 +394,18 @@ int HaloPCG::Iter(){
         this->halo_val[f+j]+= S->sys_f[d* i+j]; };
     };
   };// End halo_vals sum; now scatter back to elems
+#if VERB_MAX>1
   dur= std::chrono::duration_cast<std::chrono::nanoseconds>
     (std::chrono::high_resolution_clock::now()-gath_start);
   my_gat1_count += dur.count();
+#endif
 #pragma omp for schedule(static) reduction(+:glob_sum1)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH d=uint(Y->ndof_n);
+#if VERB_MAX>1
     scat_start = std::chrono::high_resolution_clock::now();
+#endif
     const INT_MESH hnn=E->halo_node_n,hl0=S->halo_loca_0,sysn=S->udof_n;
     for(INT_MESH i=0; i<hnn; i++){
       auto f = d* this->halo_map[E->node_glid[i]];
@@ -399,28 +413,35 @@ int HaloPCG::Iter(){
 //#pragma omp atomic read
         S->sys_f[d* i+j] = this->halo_val[f+j]; };
     };
+#if VERB_MAX>1
     dur= std::chrono::duration_cast<std::chrono::nanoseconds>
       (std::chrono::high_resolution_clock::now()-scat_start);
     my_scat_count += dur.count();
     phys_start = std::chrono::high_resolution_clock::now();
+#endif
     E->do_halo=false; Y->ElemLinear( E, S->sys_f, S->sys_p );
+#if VERB_MAX>1
     dur= std::chrono::duration_cast<std::chrono::nanoseconds>
       (std::chrono::high_resolution_clock::now()-phys_start);
     my_phys_count += dur.count();
-    //
     solv_start = std::chrono::high_resolution_clock::now();
+#endif
     //FLOAT_SOLV loca_sum=0.0;
     for(INT_MESH i=hl0; i<sysn; i++){
       //loca_sum += S->sys_p[i] * S->sys_f[i];
       glob_sum1 += S->sys_p[i] * S->sys_f[i];
     };
+#if VERB_MAX>1
     dur= std::chrono::duration_cast<std::chrono::nanoseconds>
       (std::chrono::high_resolution_clock::now()-solv_start);
     my_solv_count += dur.count();
+#endif
 //#pragma omp atomic
 //        glob_sum1 += loca_sum;
   };
+#if VERB_MAX>1
   solv_start = std::chrono::high_resolution_clock::now();
+#endif
   const FLOAT_SOLV alpha = glob_r2a / glob_sum1;// 1 FLOP
 #pragma omp for schedule(static) reduction(+:glob_sum2)
   for(int part_i=part_0; part_i<part_o; part_i++){// ? FLOP/DOF
@@ -446,6 +467,7 @@ int HaloPCG::Iter(){
   };
 #pragma omp single nowait
 { glob_r2a = glob_sum2; }// Update residual (squared)
+#if VERB_MAX>1
   iter_done  = std::chrono::high_resolution_clock::now();
   auto solv_time  = std::chrono::duration_cast<std::chrono::nanoseconds>
     (iter_done - solv_start);
@@ -461,6 +483,7 @@ int HaloPCG::Iter(){
  //this->time_secs[4]+=float(solv_time.count())*1e-9;
   this->time_secs[5]+=float(iter_time.count())*1e-9;
 }
+#endif
 }// end iter parallel region
   this->glob_res2 = glob_r2a;
   this->glob_chk2 = glob_r2a;
