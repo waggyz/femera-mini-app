@@ -339,6 +339,7 @@ int HaloPCG::Iter(){
   const auto P=this->mesh_part;//FIXME Undo this?
 #pragma omp parallel num_threads(comp_n)
 {// iter parallel region
+  Elem* E; Phys* Y; Solv* S;
 #if VERB_MAX>1
   long int my_phys_count=0, my_scat_count=0, my_solv_count=0,
     my_gat0_count=0,my_gat1_count=0;
@@ -353,7 +354,8 @@ int HaloPCG::Iter(){
   //nowait
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+    //Elem* E; Phys* Y; Solv* S;
+    std::tie(E,Y,S)=P[part_i];
     const INT_MESH d=uint(Y->ndof_n);
 #if VERB_MAX>1
     phys_start = std::chrono::high_resolution_clock::now();
@@ -381,7 +383,8 @@ int HaloPCG::Iter(){
   };
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+    //Elem* E; Phys* Y; Solv* S;
+    std::tie(E,Y,S)=P[part_i];
 #if VERB_MAX>1
     gath_start = std::chrono::high_resolution_clock::now();
 #endif
@@ -401,7 +404,8 @@ int HaloPCG::Iter(){
 #endif
 #pragma omp for schedule(static) reduction(+:glob_sum1)
   for(int part_i=part_0; part_i<part_o; part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+    //Elem* E; Phys* Y; Solv* S;
+    std::tie(E,Y,S)=P[part_i];
     const INT_MESH d=uint(Y->ndof_n);
 #if VERB_MAX>1
     scat_start = std::chrono::high_resolution_clock::now();
@@ -445,7 +449,8 @@ int HaloPCG::Iter(){
   const FLOAT_SOLV alpha = glob_r2a / glob_sum1;// 1 FLOP
 #pragma omp for schedule(static) reduction(+:glob_sum2)
   for(int part_i=part_0; part_i<part_o; part_i++){// ? FLOP/DOF
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+    //Elem* E; Phys* Y; Solv* S;
+    std::tie(E,Y,S)=P[part_i];
     const INT_MESH hl0=S->halo_loca_0,sysn=S->udof_n;
     for(INT_MESH i=0; i<hl0; i++){
       S->sys_r[i] -= alpha * S->sys_f[i]; };//printf("DOF: %u\n",Y->ndof_n);
@@ -457,7 +462,8 @@ int HaloPCG::Iter(){
   const FLOAT_PHYS beta = glob_sum2 / glob_r2a;// 1 FLOP
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+    //Elem* E; Phys* Y; Solv* S;
+    std::tie(E,Y,S)=P[part_i];
     const INT_MESH sysn=S->udof_n;
     //sys_p  = sys_d * sys_r + (r2b/ra)*sys_p;
     //S->r2a = glob_sum2;// Update member residual (squared)
