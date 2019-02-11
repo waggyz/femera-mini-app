@@ -97,6 +97,7 @@ int ElastIso3D::ElemLinear( Elem* E,
         printf("%+9.2e ",H[j]);
       }; printf("\n");
 #endif
+      {
       //det=jac[9 +Nj*l]; FLOAT_PHYS w = det * wgt[ip];
       FLOAT_PHYS w = jac[9] * wgt[ip];
       //
@@ -107,6 +108,7 @@ int ElastIso3D::ElemLinear( Elem* E,
       S[1]=( H[1] + H[3] )*mtrl_matc[2]*w;// S[3]= S[1];//Sxy Syx
       S[5]=( H[5] + H[7] )*mtrl_matc[2]*w;// S[7]= S[5];//Syz Szy
       S[2]=( H[2] + H[6] )*mtrl_matc[2]*w;// S[6]= S[2];//Sxz Szx
+      }
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
       //------------------------------------------------------- 18+9 = 27 FLOP
 //#pragma omp simd
