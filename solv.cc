@@ -16,7 +16,10 @@ int Solv::Precond(Elem* E, Phys* Y){// Jacobi Preconditioner
   };
   Y->ElemLinear( E );
   */
-  Y->ElemJacobi( E, this->sys_d );//FIXED Replace above with this
+  //Y->ElemJacobi( E, this->sys_d );//FIXED Replace above with this
+  Y->ElemRowSumAbs( E, this->sys_d );
+  //for(uint i=1; i<this->sys_d.size(); i++){
+  //    this->sys_d[i]=std::sqrt(this->sys_d[i]); };
   //
   #if VERB_MAX>10
   printf("System Preconditioner [%i]",(int)this->sys_d.size());

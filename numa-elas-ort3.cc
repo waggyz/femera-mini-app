@@ -354,7 +354,8 @@ int ElastOrtho3D::BlocLinear( Elem* E,
   };//end elem loop
   return 0;
 };
-int ElastOrtho3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){//FIXME Doesn't do rotation yet
+int ElastOrtho3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
+  //FIXME Doesn't do rotation yet
   const uint ndof   = 3;//this->ndof_n
   //const int mesh_d = E->elem_d;
   const uint elem_n = E->elem_n;
@@ -463,6 +464,93 @@ int ElastOrtho3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){//FIXME Doesn
         sys_d[E->elem_conn[Nc*ie+i]*3+j] += elem_diag[3*i+j];
       }; };
     elem_diag=0.0;
+  };
+  return 0;
+};
+
+int ElastOrtho3D::ElemRowSumAbs(Elem* E, RESTRICT Phys::vals &sys_d ){
+  //FIXME Doesn't do rotation yet
+  const uint ndof   = 3;//this->ndof_n
+  //const int mesh_d = E->elem_d;
+  const uint elem_n = E->elem_n;
+  const uint  Nc = E->elem_conn_n;
+  const uint  Nj = 10,d2=9;
+  const uint  Ne = uint(ndof*Nc);
+  const uint intp_n = E->gaus_n;
+  //
+  FLOAT_PHYS det;
+  RESTRICT Phys::vals elem_sum(Ne);
+  RESTRICT Phys::vals K(Ne*Ne);
+  //RESTRICT Phys::vals B(Ne*6);
+  FLOAT_PHYS B[Ne*6];//6 rows, Ne cols
+  FLOAT_PHYS G[Ne],jac[Nj];
+  for(uint j=0; j<(Ne*6); j++){ B[j]=0.0; };
+  const FLOAT_PHYS D[]={
+    mtrl_matc[0],mtrl_matc[1],mtrl_matc[1],0.0,0.0,0.0,
+    mtrl_matc[1],mtrl_matc[0],mtrl_matc[1],0.0,0.0,0.0,
+    mtrl_matc[1],mtrl_matc[1],mtrl_matc[0],0.0,0.0,0.0,
+    0.0,0.0,0.0,mtrl_matc[2],0.0,0.0,
+    0.0,0.0,0.0,0.0,mtrl_matc[2],0.0,
+    0.0,0.0,0.0,0.0,0.0,mtrl_matc[2]};
+  for(uint ie=0;ie<elem_n;ie++){
+    uint ij=Nj*ie;//FIXME only good for tets
+    std::copy( &E->elip_jacs[ij],
+               &E->elip_jacs[ij+Nj], jac ); det=jac[d2];
+    for(uint ip=0;ip<intp_n;ip++){
+      uint ig=ip*Ne;
+      for(uint i=0;i<Ne;i++){ G[i]=0.0; };
+      for(uint k=0;k<Nc;k++){
+      for(uint i=0;i<3;i++){
+      for(uint j=0;j<3;j++){
+        G[3* i+k] += jac[3* i+j] * E->intp_shpg[ig+3* k+j]; }; }; };
+      #if VERB_MAX>10
+      printf( "Jacobian Inverse & Determinant:");
+      for(uint j=0;j<d2;j++){
+        if(j%3==0){printf("\n");}
+        printf("%+9.2e",jac[j]);
+      }; printf(" det:%+9.2e\n",det);
+      #endif
+      // xx yy zz
+      for(uint j=0; j<Nc; j++){
+        B[Ne*0 + 0+j*ndof] = G[Nc*0+j];
+        B[Ne*1 + 1+j*ndof] = G[Nc*1+j];
+        B[Ne*2 + 2+j*ndof] = G[Nc*2+j];
+      // xy yx
+        B[Ne*3 + 0+j*ndof] = G[Nc*1+j];
+        B[Ne*3 + 1+j*ndof] = G[Nc*0+j];
+      // yz zy
+        B[Ne*4 + 1+j*ndof] = G[Nc*2+j];
+        B[Ne*4 + 2+j*ndof] = G[Nc*1+j];
+      // xz zx
+        B[Ne*5 + 0+j*ndof] = G[Nc*2+j];
+        B[Ne*5 + 2+j*ndof] = G[Nc*0+j];
+      };
+      #if VERB_MAX>10
+      printf( "[B]:");
+      for(uint j=0;j<B.size();j++){
+        if(j%Ne==0){printf("\n");}
+        printf("%+9.2e ",B[j]);
+      }; printf("\n");
+      #endif
+      FLOAT_PHYS w = det * E->gaus_weig[ip];
+      for(uint i=0; i<Ne; i++){
+      for(uint l=0; l<Ne; l++){
+      for(uint j=0; j<6 ; j++){
+      for(uint k=0; k<6 ; k++){
+        K[Ne*i+l]+= B[Ne*j + i] * D[6*j + k] * B[Ne*k + l]*w;
+        //elem_sum[i]+=std::abs(B[Ne*j + i] * D[6*j + k] * B[Ne*k + l])*w; };
+      };};};};
+    };//end intp loop
+    for (uint i=0; i<Ne; i++){
+      for(uint j=0; j<Ne; j++){
+        //elem_sum[i] += K[Ne*i+j]*K[Ne*i+j];
+        elem_sum[i] += std::abs(K[Ne*i+j]);
+      };};
+    for (uint i=0; i<Nc; i++){
+      for(uint j=0; j<3; j++){
+        sys_d[E->elem_conn[Nc*ie+i]*3+j] += elem_sum[3*i+j];
+      };};
+    K=0.0; elem_sum=0.0;
   };
   return 0;
 };
