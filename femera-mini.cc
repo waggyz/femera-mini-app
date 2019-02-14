@@ -296,11 +296,19 @@ int main( int argc, char** argv ){
 #if VERB_MAX>1
   if(verbosity>1){
   printf("Read and set up                         in %f s\n", read_sec );
+  if(verbosity>1){
+    std::cout<< "  Initializing: ";
+    switch(solv_cond){
+      case(Solv::COND_NONE): std::cout<< "no"; break;
+      case(Solv::COND_JACO): std::cout<< "Jacobi"; break;
+      case(Solv::COND_ROW1): std::cout<< "element row one-norm"; break;
+      default: std::cout<< "unknown";
+    };
+    std::cout<< " preconditioner..." <<'\n';
+  };
   std::cout <<"Solving ";
   std::cout <<"system: "<<M->elem_n<<" Elems, "
-    <<M->node_n<<" Nodes, "<<M->udof_n<<" DOF; "<<'\n'
-    <<"     to within: "<<rtol<<" relative tolerance,"<<'\n'
-    <<"or stopping at: "<<iter_max<<" "<<M->meth_name<<" iterations..."<<'\n';
+    <<M->node_n<<" Nodes, "<<M->udof_n<<" DOF "<<'\n';
   };
 #endif
   // Solve parallel =================================================
@@ -358,7 +366,8 @@ int main( int argc, char** argv ){
 #endif
 #if VERB_MAX>1
     if(verbosity>1){
-    printf("Iterating...\n");
+    std::cout<< "  Iterating to: "<<rtol<<" relative tolerance,"<<'\n'
+    <<"or stopping at: "<<iter_max<<" "<<M->meth_name<<" iterations..."<<'\n';
     printf("     init ||R||%9.2e /%9.2e tol in %f s\n",
       std::sqrt(M->glob_chk2), std::sqrt(M->glob_rto2),init_sec );
     };

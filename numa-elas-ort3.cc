@@ -359,17 +359,15 @@ int ElastOrtho3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
   const uint ndof   = 3;//this->ndof_n
   //const int mesh_d = E->elem_d;
   const uint elem_n = E->elem_n;
-  //const int intp_n = E->elip_dets.size()/elem_n;
   const uint  Nc = E->elem_conn_n;
   const uint  Nj = 10,d2=9;
-  const uint  Ne = ndof*Nc;// printf("GAUSS PTS: %i\n",(int)E->gaus_n);
-  const uint intp_n = uint(E->gaus_n);//E->elip_jacs.size()/elem_n/Nj;
+  const uint  Ne = ndof*Nc;
+  const uint intp_n = uint(E->gaus_n);
   //
   FLOAT_PHYS det;
-  RESTRICT Phys::vals elem_diag(Ne);//,  shg(Ne), G(Ne),jac(d2);
-  //RESTRICT Phys::vals B(Ne*6);// 6 rows, Ne cols
-  FLOAT_PHYS B[Ne*6];
-  FLOAT_PHYS G[Ne],jac[Nj];//,elem_diag[Ne];// 6 rows, Ne cols
+  FLOAT_PHYS elem_diag[Ne];
+  FLOAT_PHYS B[Ne*6];// 6 rows, Ne cols
+  FLOAT_PHYS G[Ne],jac[Nj];
   for(uint j=0; j<(Ne*6); j++){ B[j]=0.0; };
   const FLOAT_PHYS D[]={
     mtrl_matc[0],mtrl_matc[3],mtrl_matc[5],0.0,0.0,0.0,
@@ -390,6 +388,7 @@ int ElastOrtho3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
     uint ij=Nj*ie;
     std::copy( &E->elip_jacs[ij],
                &E->elip_jacs[ij+Nj], jac ); det=jac[d2];
+    for(uint i=0;i<Ne;i++){ elem_diag[i]=0.0; };
     for(uint ip=0;ip<intp_n;ip++){
       //uint ij=Nj*ie*intp_n +Nj*ip;
       //std::copy( &E->elip_jacs[ij],
@@ -463,7 +462,7 @@ int ElastOrtho3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
       for(uint j=0; j<3; j++){
         sys_d[E->elem_conn[Nc*ie+i]*3+j] += elem_diag[3*i+j];
       }; };
-    elem_diag=0.0;
+    //elem_diag=0.0;
   };
   return 0;
 };
@@ -479,8 +478,8 @@ int ElastOrtho3D::ElemRowSumAbs(Elem* E, RESTRICT Phys::vals &sys_d ){
   const uint intp_n = E->gaus_n;
   //
   FLOAT_PHYS det;
-  RESTRICT Phys::vals elem_sum(Ne);
-  RESTRICT Phys::vals K(Ne*Ne);
+  FLOAT_PHYS elem_sum[Ne];
+  FLOAT_PHYS K[Ne*Ne];
   //RESTRICT Phys::vals B(Ne*6);
   FLOAT_PHYS B[Ne*6];//6 rows, Ne cols
   FLOAT_PHYS G[Ne],jac[Nj];
@@ -496,6 +495,8 @@ int ElastOrtho3D::ElemRowSumAbs(Elem* E, RESTRICT Phys::vals &sys_d ){
     uint ij=Nj*ie;//FIXME only good for tets
     std::copy( &E->elip_jacs[ij],
                &E->elip_jacs[ij+Nj], jac ); det=jac[d2];
+    for(uint i=0;i<Ne;i++){ elem_sum[i]=0.0; };
+    for(uint i=0;i<(Ne*Ne);i++){ K[i]=0.0; };
     for(uint ip=0;ip<intp_n;ip++){
       uint ig=ip*Ne;
       for(uint i=0;i<Ne;i++){ G[i]=0.0; };
@@ -550,7 +551,7 @@ int ElastOrtho3D::ElemRowSumAbs(Elem* E, RESTRICT Phys::vals &sys_d ){
       for(uint j=0; j<3; j++){
         sys_d[E->elem_conn[Nc*ie+i]*3+j] += elem_sum[3*i+j];
       };};
-    K=0.0; elem_sum=0.0;
+    //K=0.0; elem_sum=0.0;
   };
   return 0;
 };
