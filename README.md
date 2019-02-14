@@ -64,7 +64,7 @@ gmsh -refine -o "neper/cubic"$N"s1p1.msh2" "neper/cubic"$N".msh"
  * `-p <str>` Find and read partitioned `<str>_?.fmr` files in parallel. *Required.*
  * `-v <int>` Verbosity level [default: 1]; `-v2` is good.
  * `-c <uint>` Number of parallel compute threads.
- * `-d <int>` Choose a preconditioner:
+ * `-d <int>` Choose a diagonal preconditioner:
    * `-d0` for none,
    * `-d1` for element row one-norm sum, or
    * `-d3` for Jacobi [default].
@@ -78,7 +78,7 @@ gmsh -refine -o "neper/cubic"$N"s1p1.msh2" "neper/cubic"$N".msh"
 
 `elem.h` `elem.cc` `elem-tet.cc` An Elem instance contains a single mesh partition. The mini-app only supports first- and second-order tetrahedral elements at present.
 
-`phys.h` `phys.cc` `numa-elast-iso3.cc` `numa-elas-ort3.cc` Two linear-elastic models, implementing both tensor train and the more traditional local matrix evaluation approaches, along with Jacobi preconditioner computation.
+`phys.h` `phys.cc` `numa-elast-iso3.cc` `numa-elas-ort3.cc` Two linear-elastic models, implementing both tensor train and (eventually) the more traditional local matrix evaluation approaches. Two preconditioners are also provided.
 
 `solv.h` `solv.cc` `tens-numa-halo-pcg.cc` `tens-numa-halo-pcr.cc` Implements preconditioned conjugate gradient and cojugate residual solvers.
 
