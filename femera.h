@@ -46,6 +46,7 @@
 #include <utility>// std::pair
 #include <tuple>
 #include <vector>
+#include <chrono>
 const double PI = FLOAT_PHYS(3.141592653589793);
 class Mesh;
 class Elem;
@@ -67,6 +68,33 @@ public:
 protected:
 private:
 };
+// Helper functions that can be compiled out for performance testing.
+#if VERB_MAX>1
+inline void time_reset(long int &counter,
+  std::chrono::high_resolution_clock::time_point &start ){
+  auto dur = std::chrono::duration_cast<std::chrono::nanoseconds>
+    (std::chrono::high_resolution_clock::now()-start);
+  counter += dur.count();
+  start = std::chrono::high_resolution_clock::now();
+};
+inline void time_accum(long int &counter,
+  std::chrono::high_resolution_clock::time_point &start ){
+  auto dur = std::chrono::duration_cast<std::chrono::nanoseconds>
+    (std::chrono::high_resolution_clock::now()-start);
+  counter += dur.count();
+};
+inline void time_start(
+  std::chrono::high_resolution_clock::time_point &start ){
+  start = std::chrono::high_resolution_clock::now();
+};
+#else
+inline void time_reset(long int &,
+  std::chrono::high_resolution_clock::time_point & ){};
+inline void time_accum(long int &,
+  std::chrono::high_resolution_clock::time_point & ){};
+inline void time_start(
+  std::chrono::high_resolution_clock::time_point & ){};
+#endif
 #endif
 /*
 Notices:
