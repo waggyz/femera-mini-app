@@ -64,18 +64,18 @@ mini-omp:
 	command /usr/bin/time -v ./femera-$(CPUMODEL) -v2 -c$(NCPU) -p cube/unst19p1n16 ;
 
 mini-seq:
-	mv -f femse1-$(CPUMODEL) femse1.old 2>/dev/null ; \
+	mv -f femseq-$(CPUMODEL) femseq.old 2>/dev/null ; \
 	$(CXX) $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DVERB_MAX=1 \
-	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femse1-$(CPUMODEL) $(CPPLOG);\
-	./femse1-$(CPUMODEL) -v1 -p cube/unit1p1n2 ;\
-	./femse1-$(CPUMODEL) -v1 -p cube/unit1p2n2 ;
+	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femseq-$(CPUMODEL) $(CPPLOG);\
+	./femseq-$(CPUMODEL) -v1 -p cube/unit1p1n2 ;\
+	./femseq-$(CPUMODEL) -v1 -p cube/unit1p2n2 ;
 
 mini-omq:
-	mv -f femer1-$(CPUMODEL) femer1.old 2>/dev/null ; \
+	mv -f femerq-$(CPUMODEL) femerq.old 2>/dev/null ; \
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DVERB_MAX=1 \
-	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femer1-$(CPUMODEL) $(CPPLOG);\
+	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femerq-$(CPUMODEL) $(CPPLOG);\
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread ;\
-	command /usr/bin/time -v ./femer1-$(CPUMODEL) -v1 -c$(NCPU) -p cube/unst19p1n16 ;
+	command /usr/bin/time -v ./femerq-$(CPUMODEL) -v1 -c$(NCPU) -p cube/unst19p1n16 ;
 
 mini-mpi:
 	mv -f femera-mpi-$(CPUMODEL) femera.old 2>/dev/null ; \
@@ -85,13 +85,6 @@ mini-mpi:
 	mpicc -x c++ $(LDFLAGS) $(LDLIBS) -DHAS_TEST \
 	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femera-mpi-$(CPUMODEL) $(CPPLOG);\
 	command /usr/bin/time -v ./femera-mpi-$(CPUMODEL) -v2 -c$(NCPU) -p cube/unst19p1n16$(NCPU) ;
-
-knl-mini:
-	mv -f femera-knl femera.old 2>/dev/null ; \
-	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DHAS_TEST \
-	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femera-knl $(CPPLOG);\
-	export OMP_PLACES=cores; export OMP_PROC_BIND=spread ;\
-	command /usr/bin/time -v ./femera-knl -v2 -c$(NCPU) -p cube/unst19p1n16 ;
 
 test-asc:
 	mv -f a.out a.old 2>/dev/null ;\
