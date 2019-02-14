@@ -144,12 +144,6 @@ int PCG::Solve( Elem* E, Phys* Y ){//FIXME Redo this
   };
   return 0;//FIXME
 };
-
-
-
-
-  
-  
 int HaloPCG::Init(){// Preconditioned Conjugate Gradient
   int part_0=0;
   if(std::get<0>( this->mesh_part[0] )==NULL){ part_0=1; };
@@ -287,7 +281,7 @@ int HaloPCG::Iter(){
 #pragma omp parallel num_threads(comp_n)
 {// iter parallel region
   Elem* E; Phys* Y; Solv* S;
-  // Timing variables (used only when verbosity > 1)
+  // Timing variables (used when verbosity > 1)
   long int my_phys_count=0, my_scat_count=0, my_solv_count=0,
     my_gat0_count=0,my_gat1_count=0;
   std::chrono::high_resolution_clock::time_point iter_start,
@@ -364,7 +358,7 @@ int HaloPCG::Iter(){
     std::tie(E,Y,S)=P[part_i];
     const INT_MESH hl0=S->halo_loca_0,sysn=S->udof_n;
     for(INT_MESH i=0; i<hl0; i++){
-      S->sys_r[i] -= alpha * S->sys_f[i]; };//printf("DOF: %u\n",Y->ndof_n);
+      S->sys_r[i] -= alpha * S->sys_f[i]; };
     for(INT_MESH i=hl0; i<sysn; i++){
       //r2b += S->sys_r[i] * S->sys_r[i] * S->sys_d[i];
       S->sys_r[i] -= S->sys_f[i] * alpha;
