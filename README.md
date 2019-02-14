@@ -64,7 +64,11 @@ gmsh -refine -o "neper/cubic"$N"s1p1.msh2" "neper/cubic"$N".msh"
  * `-p <str>` Find and read partitioned `<str>_?.fmr` files in parallel. *Required.*
  * `-v <int>` Verbosity level [default: 1]; `-v2` is good.
  * `-c <uint>` Number of parallel compute threads.
- * `-s <int>` Choose a Jacobi preconditioned solver:
+ * `-d <int>` Choose a preconditioner:
+   * `-d0` for none,
+   * `-d1` for element row one-norm sum, or
+   * `-d3` for Jacobi [default].
+ * `-s <int>` Choose a solver:
    * `-s1` for conjugate gradient [default], or
    * `-s2` for conjugate residual.
  * `-r <float>` Solution tolerance.

@@ -235,7 +235,7 @@ for(int part_i=part_0; part_i<part_o; part_i++){
     };
   time_reset( my_scat_count, start );
 #pragma omp critical(init)
-{ S->Init(); }
+{ S->Init(); }//FIXME Why is this serialized?
   glob_r2a += S->loca_res2;
   };
 #pragma omp for schedule(static)
@@ -280,7 +280,7 @@ int HaloPCG::Iter(){
   const auto P=this->mesh_part;//FIXME Undo this?
 #pragma omp parallel num_threads(comp_n)
 {// iter parallel region
-  Elem* E; Phys* Y; Solv* S;
+  Elem* E; Phys* Y; Solv* S;// Seems to be faster to reuse these.
   // Timing variables (used when verbosity > 1)
   long int my_phys_count=0, my_scat_count=0, my_solv_count=0,
     my_gat0_count=0,my_gat1_count=0;

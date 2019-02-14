@@ -63,14 +63,14 @@ mini-omp:
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	command /usr/bin/time -v ./femera-$(CPUMODEL) -v2 -c$(NCPU) -p cube/unst19p1n16 ;
 
-mini-ser1:
+mini-seq:
 	mv -f femse1-$(CPUMODEL) femse1.old 2>/dev/null ; \
 	$(CXX) $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DVERB_MAX=1 \
 	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femse1-$(CPUMODEL) $(CPPLOG);\
 	./femse1-$(CPUMODEL) -v1 -p cube/unit1p1n2 ;\
 	./femse1-$(CPUMODEL) -v1 -p cube/unit1p2n2 ;
 
-mini-omp1:
+mini-omq:
 	mv -f femer1-$(CPUMODEL) femer1.old 2>/dev/null ; \
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DVERB_MAX=1 \
 	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femer1-$(CPUMODEL) $(CPPLOG);\

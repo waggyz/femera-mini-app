@@ -17,28 +17,27 @@
 #include "test.h"
 #endif
 int main( int argc, char** argv ){
-  float ns=1e-9;
+  const float ns=1e-9;
 #if VERB_MAX>1
-  float sec=1.0, ms=1e-3,us=1e-6, Meg=1e6, pct=100.0;// k=1e3,Gig=1e9,
+  const float sec=1.0, ms=1e-3,us=1e-6, Meg=1e6, pct=100.0;// k=1e3,Gig=1e9,
 #endif
+  // defaults
   int comp_n     = 0;//, numa_n=0;
   int verbosity  = 1;
   int iter_max   =-1;
+  FLOAT_SOLV rtol= 1e-4;
+  int solv_meth  = Solv::SOLV_CG;
+  int solv_cond  = Solv::COND_JACO;
+  uint simd_n    = 1;
 #ifdef _OPENMP
-  int numa_n=0;
+  int numa_n     = 0;
 #if VERB_MAX>1
-  int halo_mod=1;
+  int halo_mod   = 1;
 #endif
 #endif
-  FLOAT_SOLV rtol = 1e-4;
-  //Solv::Meth solv_meth = Solv::SOLV_CG;
-  int solv_meth = Solv::SOLV_CG;
-  int solv_cond = Solv::COND_JACO;
-  uint simd_n=1;
 #if VERB_MAX>1
   FLOAT_SOLV test_u=0.001; INT_DOF test_dir=0;
 #endif
-  //
   bool is_part    = false;
   INT_MESH_PART part_n=0;
   char* bname      = NULL;//FIXME Store this in Femera or Mesh instance?
@@ -123,12 +122,14 @@ int main( int argc, char** argv ){
       << size_t(std::numeric_limits<INT_ELEM_NODE>::max()) <<'\n';
     std::cout << "Maximum DOFs/Node: "
       << size_t(std::numeric_limits<INT_DOF>::max()) <<'\n';
-  std::cout <<"Verbosity: "<<verbosity<<" / "<< VERB_MAX <<" maximum "<<'\n';
+    std::cout <<"Verbosity: "<<verbosity<<" / "<< VERB_MAX <<" maximum "<<'\n';
   };
   if( verbosity > VERB_MAX ){
     std::cout <<"WARNING Verbosity "<< verbosity
     <<" requested is more than compiled verbosity maximum "
-    << VERB_MAX <<"."<<'\n';};
+    << VERB_MAX <<". Downgrading to "<<VERB_MAX <<"."<<'\n';
+    verbosity=VERB_MAX;
+  };
   // Find Mesh Files ================================================
   if(bname == NULL){
     std::cerr << "ERROR Mesh partition base filename not provided." << '\n';
