@@ -63,7 +63,7 @@ int PCR::Setup( Elem* E, Phys* Y ){
   //sys_g.resize(udof_n,0.0);// CR response vector g=Ap
   //
   //sys_d=0.0; Y->ElemJacobi( E, this->sys_d );
-  this->Precond( E,Y );//FIXME Precond doesn't rotate yet
+  //this->Precond( E,Y );//FIXME Precond doesn't rotate yet
   //FIXME Report returned int: negative values corrected.
   //NOTE sync sys_d before inverting it.
   //
@@ -218,6 +218,12 @@ int HaloPCR::Init(){// Preconditioned Conjugate Residual
     (std::chrono::high_resolution_clock::now()-start);
   my_prec_count += dur.count();
   start = std::chrono::high_resolution_clock::now();
+#pragma omp for schedule(static)
+  for(int part_i=part_0; part_i<(part_n+part_0); part_i++){
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
+    S->solv_cond=this->solv_cond;
+    S->Precond( E,Y );
+  };
 #pragma omp for schedule(static)
 for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
   Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
