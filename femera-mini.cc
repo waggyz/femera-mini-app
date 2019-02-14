@@ -33,6 +33,7 @@ int main( int argc, char** argv ){
   FLOAT_SOLV rtol = 1e-4;
   //Solv::Meth solv_meth = Solv::SOLV_CG;
   int solv_meth = Solv::SOLV_CG;
+  int solv_cond = Solv::COND_JACO;
   uint simd_n=1;
 #if VERB_MAX>1
   FLOAT_SOLV test_u=0.001; INT_DOF test_dir=0;
@@ -45,7 +46,7 @@ int main( int argc, char** argv ){
   // Parse Command Line =============================================
   //FIXME Consider using C++ for parsing command line options.
   opterr = 0; int c;
-  while ((c = getopt (argc, argv, "v:pP:h:c:m:s:i:r:x:y:z:V:")) != -1){
+  while ((c = getopt (argc, argv, "v:pP:h:c:m:s:i:r:x:y:z:V:d:")) != -1){
     // x:  -x requires an argument
     switch (c) {
       case 'c':{ comp_n   = atoi(optarg); break;}
@@ -60,6 +61,7 @@ int main( int argc, char** argv ){
       case 'i':{ iter_max = atoi(optarg); break;}
       case 'r':{ rtol     = atof(optarg); break;}
       case 's':{ solv_meth= atoi(optarg); break;}
+      case 'd':{ solv_cond= atoi(optarg); break;}
 #if VERB_MAX>1
       // Cube test applied displacement
       case 'x':{ test_u   = atof(optarg); test_dir=0; break;}
@@ -246,6 +248,7 @@ int main( int argc, char** argv ){
     default            :{ M=new HaloPCG(part_n+part_0,iter_max,rtol); }
   };
   //M->solv_meth = solv_meth;//FIXME set in constructor?
+  M->solv_cond=solv_cond;
   M->base_name=iname;
   M->comp_n=comp_n;
   M->simd_n=simd_n;

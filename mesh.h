@@ -42,7 +42,7 @@ public:
   uint      simd_n=1;// Initial vectorization width
   //
   int comp_n=1, numa_n=1;
-  int solv_meth=Solv::SOLV_CG, verbosity=1;
+  int solv_meth=Solv::SOLV_CG, solv_cond=Solv::COND_JACO, verbosity=1;
   //
   //FIXME Consider moving these to Test*
   float phys_flop=0, phys_band=0;

@@ -7,6 +7,9 @@ public:
   enum Meth {
     SOLV_GD=0, SOLV_CG=1, SOLV_CR=2
   };
+  enum Cond {
+    COND_NONE=0, COND_JACO=1, COND_ROW1=2
+  };
   INT_MESH iter=0, iter_max=0, udof_n;
   FLOAT_SOLV loca_rtol=0.0;
   //FLOAT_SOLV tol=1e-3;// Default Solution Tolerance
@@ -43,6 +46,7 @@ public:
   uint udof_flop=0, udof_band=0;
   //uint udof_flop=12, udof_band=sizeof(FLOAT_SOLV)*(5+2+3+1);//+2PCG
   //uint udof_flop=14, udof_band=sizeof(FLOAT_SOLV)*( 13 );//PCR
+  int solv_cond;
 protected:
   //Solv():{}:
   Solv( INT_MESH n, INT_MESH i, FLOAT_PHYS r ) :

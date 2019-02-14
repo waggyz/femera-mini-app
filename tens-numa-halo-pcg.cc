@@ -176,6 +176,7 @@ int HaloPCG::Init(){// Preconditioned Conjugate Gradient
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
+    S->solv_cond=this->solv_cond;
     S->Precond( E,Y );
   };
   // Sync sys_d [this inits halo_map]
