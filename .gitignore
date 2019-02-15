@@ -37,4 +37,7 @@
 *.app
 femera-*
 !femera-mini.cc
+femerq*
+femser*
+femseq*
 gmsh2fmr
