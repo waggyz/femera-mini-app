@@ -264,10 +264,9 @@ for(int part_i=part_0; part_i<part_o; part_i++){
   return 0;
 };
 int HaloPCG::Iter(){
-  int part_0=0;
-  if(std::get<0>( this->mesh_part[0])==NULL ){ part_0=1; };
-  const int part_n = int(this->mesh_part.size())-part_0;
-  const int part_o=part_n+part_0;
+  int part_0=0; if(std::get<0>( this->mesh_part[0])==NULL ){ part_0=1; };
+  const int part_n = int(this->mesh_part.size()) - part_0;
+  const int part_o = part_n + part_0;
 #ifdef _OPENMP
   const int comp_n = this->comp_n;
 #endif
@@ -277,7 +276,7 @@ int HaloPCG::Iter(){
   //
   FLOAT_SOLV glob_sum1=0.0, glob_sum2=0.0;
   FLOAT_SOLV glob_r2a = this->glob_res2;
-  const auto P=this->mesh_part;//FIXME Undo this?
+  const auto P = this->mesh_part;//FIXME Undo this?
 #pragma omp parallel num_threads(comp_n)
 {// iter parallel region
   Elem* E; Phys* Y; Solv* S;// Seems to be faster to reuse these.
