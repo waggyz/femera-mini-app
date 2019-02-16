@@ -458,15 +458,6 @@ int ElastIso3D::ElemStrain( Elem* E,
   const uint intp_n = uint(E->gaus_n);
   const uint     Nc = E->elem_conn_n;// Number of Nodes/Element
   const uint     Ne = ndof*Nc;
-  //uint           Nv = E->simd_n;// Vector block size
-  //
-  //INT_MESH e0=0, ee=elem_n;
-  //if(E->do_halo==true){ e0=0; ee=E->halo_elem_n;
-  //}else{ e0=E->halo_elem_n; ee=elem_n;};
-#if VERB_MAX>11
-  printf("DOF: %u, Elems:%u, IntPts:%u, Nodes/elem:%u\n",
-    (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
-#endif
   //FLOAT_PHYS det;
   INT_MESH   conn[Nc];
   FLOAT_MESH jac[Nj];
@@ -485,16 +476,9 @@ int ElastIso3D::ElemStrain( Elem* E,
   FLOAT_PHYS C[this->mtrl_matc.size()];
   std::copy( &this->mtrl_matc[0],
              &this->mtrl_matc[this->mtrl_matc.size()], C );
-#if VERB_MAX>10
-  printf( "Material [%u]:", (uint)mtrl_matc.size() );
-  for(uint j=0;j<mtrl_matc.size();j++){
-    //if(j%mesh_d==0){printf("\n");}
-    printf("%+9.2e ",C[j]);
-  }; printf("\n");
-#endif
   const auto Econn = &E->elem_conn[0];
   const auto Ejacs = &E->elip_jacs[0];
-  //for(INT_MESH ie=e0;ie<ee;ie++){
+  //
   for(INT_MESH ie=0;ie<elem_n;ie++){
     std::memcpy( &conn, &Econn[Nc*ie], sizeof(  INT_MESH)*Nc);
     std::memcpy( &jac , &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
@@ -530,7 +514,6 @@ int ElastIso3D::ElemStrain( Elem* E,
       S[2]=( H[2] + H[6] )*C[2]*dw;// S[6]= S[2];//Sxz Szx
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
       //------------------------------------------------------- 18+9 = 27 FLOP
-//#pragma omp simd collapse(3)
       for(uint i=0; i<Nc; i++){
         for(uint k=0; k<3; k++){
           for(uint j=0; j<3; j++){
@@ -544,7 +527,6 @@ int ElastIso3D::ElemStrain( Elem* E,
       }; printf("\n");
 #endif
     };//end intp loop
-//#pragma omp simd
     for (uint i=0; i<Nc; i++){
       for(uint j=0; j<3; j++){
         //sys_f[3*conn[i]+j] += f[(3*i+j)];

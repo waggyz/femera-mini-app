@@ -564,15 +564,6 @@ int ElastOrtho3D::ElemStrain( Elem* E,
   const uint intp_n = uint(E->gaus_n);
   const uint     Nc = E->elem_conn_n;// Number of Nodes/Element
   const uint     Ne = ndof*Nc;
-  //uint           Nv = E->simd_n;// Vector block size
-  //
-  //INT_MESH e0=0, ee=elem_n;
-  //if(E->do_halo==true){ e0=0; ee=E->halo_elem_n;
-  //}else{ e0=E->halo_elem_n; ee=elem_n;};
-#if VERB_MAX>11
-  printf("DOF: %u, Elems:%u, IntPts:%u, Nodes/elem:%u\n",
-    (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
-#endif
   //FLOAT_PHYS det;
   INT_MESH   conn[Nc];
   FLOAT_MESH jac[Nj];
@@ -601,16 +592,9 @@ int ElastOrtho3D::ElemStrain( Elem* E,
         for(uint j=0; j<3; j++){
             H[(3* i+k) ] += A[(3* i+j)] * R[3* k+j ];
     };};};
-#if VERB_MAX>10
-  printf( "Material [%u]:", (uint)mtrl_matc.size() );
-  for(uint j=0;j<mtrl_matc.size();j++){
-    //if(j%mesh_d==0){printf("\n");}
-    printf("%+9.2e ",C[j]);
-  }; printf("\n");
-#endif
   const auto Econn = &E->elem_conn[0];
   const auto Ejacs = &E->elip_jacs[0];
-  //for(INT_MESH ie=e0;ie<ee;ie++){
+  //
   for(INT_MESH ie=0;ie<elem_n;ie++){
     std::memcpy( &conn, &Econn[Nc*ie], sizeof(  INT_MESH)*Nc);
     std::memcpy( &jac , &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
@@ -651,9 +635,8 @@ int ElastOrtho3D::ElemStrain( Elem* E,
         for(uint k=0; k<3; k++){ B[3* k+i ]=0.0;
           for(uint j=0; j<3; j++){
             //A[3* i+k ] += S[3* i+j ] * R[3* j+k ];
-            B[(3* k+i) ] += S[(3* i+j) ] * R[3* j+k ];// A is transposed
+            B[(3* k+i) ] += S[(3* i+j) ] * R[3* j+k ];// B is transposed
       };};};
-//#pragma omp simd collapse(3)
       for(uint i=0; i<Nc; i++){
         for(uint k=0; k<3; k++){
           for(uint j=0; j<3; j++){
@@ -667,7 +650,6 @@ int ElastOrtho3D::ElemStrain( Elem* E,
       }; printf("\n");
 #endif
     };//end intp loop
-//#pragma omp simd
     for (uint i=0; i<Nc; i++){
       for(uint j=0; j<3; j++){
         //sys_f[3*conn[i]+j] +=f[(3*i+j)];
