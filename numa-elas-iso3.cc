@@ -449,3 +449,107 @@ int ElastIso3D::ElemRowSumAbs(Elem* E, RESTRICT Phys::vals &sys_d ){
   };
   return 0;
 };
+int ElastIso3D::ElemStrain( Elem* E,
+  RESTRICT Phys::vals &sys_f ){
+  //FIXME Clean up local variables.
+  const uint ndof= 3;//this->ndof_n
+  const uint  Nj =10;//,d2=9;//mesh_d*mesh_d;
+  const INT_MESH elem_n = E->elem_n;
+  const uint intp_n = uint(E->gaus_n);
+  const uint     Nc = E->elem_conn_n;// Number of Nodes/Element
+  const uint     Ne = ndof*Nc;
+  //uint           Nv = E->simd_n;// Vector block size
+  //
+  //INT_MESH e0=0, ee=elem_n;
+  //if(E->do_halo==true){ e0=0; ee=E->halo_elem_n;
+  //}else{ e0=E->halo_elem_n; ee=elem_n;};
+#if VERB_MAX>11
+  printf("DOF: %u, Elems:%u, IntPts:%u, Nodes/elem:%u\n",
+    (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
+#endif
+  //FLOAT_PHYS det;
+  INT_MESH   conn[Nc];
+  FLOAT_MESH jac[Nj];
+  FLOAT_PHYS dw, G[Ne], f[Ne];
+  FLOAT_PHYS H[9], S[9];
+  //
+  for(uint i=0; i< 9 ; i++){ H[i]=0.0; };
+  H[0]=1.0; H[4]=1.0; H[8]=1.0;// unit pressure
+  //
+  FLOAT_PHYS intp_shpg[intp_n*Ne];
+  std::copy( &E->intp_shpg[0],
+             &E->intp_shpg[intp_n*Ne], intp_shpg );
+  FLOAT_PHYS wgt[intp_n];
+  std::copy( &E->gaus_weig[0],
+             &E->gaus_weig[intp_n], wgt );
+  FLOAT_PHYS C[this->mtrl_matc.size()];
+  std::copy( &this->mtrl_matc[0],
+             &this->mtrl_matc[this->mtrl_matc.size()], C );
+#if VERB_MAX>10
+  printf( "Material [%u]:", (uint)mtrl_matc.size() );
+  for(uint j=0;j<mtrl_matc.size();j++){
+    //if(j%mesh_d==0){printf("\n");}
+    printf("%+9.2e ",C[j]);
+  }; printf("\n");
+#endif
+  const auto Econn = &E->elem_conn[0];
+  const auto Ejacs = &E->elip_jacs[0];
+  //for(INT_MESH ie=e0;ie<ee;ie++){
+  for(INT_MESH ie=0;ie<elem_n;ie++){
+    std::memcpy( &conn, &Econn[Nc*ie], sizeof(  INT_MESH)*Nc);
+    std::memcpy( &jac , &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
+    //
+    for(uint i=0;i<(Ne);i++){ f[i]=0.0; };
+    for(uint ip=0; ip<intp_n; ip++){
+      //G = MatMul3x3xN( jac,shg );
+      //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
+      //for(uint i=0; i<(Ne) ; i++){ G[i]=0.0; };
+      for(uint k=0; k<Nc; k++){
+        for(uint i=0; i<3 ; i++){ G[3* k+i ]=0.0;
+          for(uint j=0; j<3 ; j++){
+            G[(3* k+i) ] += jac[3* i+j ] * intp_shpg[ip*Ne+ 3* k+j ];
+          };
+        };
+      };//------------------------------------------------- N*3*6*2 = 36*N FLOP
+#if VERB_MAX>10
+      printf( "Small Strains (Elem: %i):", ie );
+      for(uint j=0;j<9;j++){
+        if(j%mesh_d==0){printf("\n");}
+        printf("%+9.2e ",H[j]);
+      }; printf("\n");
+#endif
+      //det=jac[9 +Nj*l]; FLOAT_PHYS w = det * wgt[ip];
+      dw = jac[9] * wgt[ip];
+      //
+      S[0]=(C[0]* H[0] + C[1]* H[4] + C[1]* H[8])*dw;//Sxx
+      S[4]=(C[1]* H[0] + C[0]* H[4] + C[1]* H[8])*dw;//Syy
+      S[8]=(C[1]* H[0] + C[1]* H[4] + C[0]* H[8])*dw;//Szz
+      //
+      S[1]=( H[1] + H[3] )*C[2]*dw;// S[3]= S[1];//Sxy Syx
+      S[5]=( H[5] + H[7] )*C[2]*dw;// S[7]= S[5];//Syz Szy
+      S[2]=( H[2] + H[6] )*C[2]*dw;// S[6]= S[2];//Sxz Szx
+      S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
+      //------------------------------------------------------- 18+9 = 27 FLOP
+//#pragma omp simd collapse(3)
+      for(uint i=0; i<Nc; i++){
+        for(uint k=0; k<3; k++){
+          for(uint j=0; j<3; j++){
+            f[(3* i+k) ] += G[(3* i+j) ] * S[(3* k+j) ];
+      };};};//---------------------------------------------- N*3*6 = 18*N FLOP
+#if VERB_MAX>10
+      printf( "f:");
+      for(uint j=0;j<Ne;j++){
+        if(j%ndof==0){printf("\n");}
+        printf("%+9.2e ",f[j]);
+      }; printf("\n");
+#endif
+    };//end intp loop
+//#pragma omp simd
+    for (uint i=0; i<Nc; i++){
+      for(uint j=0; j<3; j++){
+        //sys_f[3*conn[i]+j] += f[(3*i+j)];
+        sys_f[3*conn[i]+j] += std::abs( f[(3*i+j)] );
+    }; };//--------------------------------------------------- N*3 =  3*N FLOP
+  };//end elem loop
+  return 0;
+  };

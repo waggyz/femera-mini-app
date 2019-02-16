@@ -303,6 +303,7 @@ int main( int argc, char** argv ){
       case(Solv::COND_NONE): std::cout<< "no"; break;
       case(Solv::COND_JACO): std::cout<< "Jacobi"; break;
       case(Solv::COND_ROW1): std::cout<< "element row one-norm"; break;
+      case(Solv::COND_STRA): std::cout<< "element strain"; break;
       default: std::cout<< "unknown";
     };
     std::cout<< " preconditioner..." <<'\n';

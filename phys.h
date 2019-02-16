@@ -11,6 +11,7 @@ public:
   virtual int ElemLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&)=0;
   virtual int ElemJacobi( Elem*,RESTRICT Phys::vals& )=0;// Jacobi Preconditioner
   virtual int ElemRowSumAbs(Elem*, RESTRICT Phys::vals& )=0;// Row Norm Preconditioner
+  virtual int ElemStrain(Elem*, RESTRICT Phys::vals& )=0;// Applied Element Strain Preconditioner
   virtual int ElemLinear( Elem* )=0;//FIXME OLD
   virtual int ElemJacobi( Elem* )=0;//FIXME old
   //
@@ -95,6 +96,7 @@ public: ElastIso2D(FLOAT_PHYS young, FLOAT_PHYS poiss, FLOAT_PHYS thick) :
   int ElemLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
   int ElemJacobi( Elem*,RESTRICT Phys::vals& ) final;
   int ElemRowSumAbs(Elem*, RESTRICT Phys::vals& ) final;
+  int ElemStrain(Elem*, RESTRICT Phys::vals& ) final;
   int ElemLinear( Elem* ) final;
   int ElemJacobi( Elem* ) final;
   int ScatStiff ( Elem* ) final;// Used for testing traditional EBE
@@ -138,6 +140,7 @@ public: ElastIso3D(FLOAT_PHYS young, FLOAT_PHYS poiss ) :
   int ElemLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
   int ElemJacobi( Elem*,RESTRICT Phys::vals& ) final;
   int ElemRowSumAbs(Elem*, RESTRICT Phys::vals& ) final;
+  int ElemStrain(Elem*, RESTRICT Phys::vals& ) final;
   int ElemLinear( Elem* ) final;
   int ElemJacobi( Elem* ) final;
   int ScatStiff ( Elem* ) final;
@@ -226,6 +229,7 @@ public:
   int ElemLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
   int ElemJacobi( Elem*,RESTRICT Phys::vals& ) final;
   int ElemRowSumAbs(Elem*, RESTRICT Phys::vals& ) final;
+  int ElemStrain(Elem*, RESTRICT Phys::vals& ) final;
   int ElemLinear( Elem* ) ;
   int ElemJacobi( Elem* ) ;
   int ScatStiff ( Elem* ) ;

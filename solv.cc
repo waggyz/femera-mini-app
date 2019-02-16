@@ -22,6 +22,7 @@ int Solv::Precond(Elem* E, Phys* Y){// Jacobi Preconditioner
     #endif
     break;}
   case(Solv::COND_ROW1):{ Y->ElemRowSumAbs( E, this->sys_d ); break;}
+  case(Solv::COND_STRA):{ Y->ElemStrain( E, this->sys_d ); break;}
   default:{ this->sys_d=1.0; break;}
   };
   /*
@@ -48,4 +49,4 @@ int Solv::Precond(Elem* E, Phys* Y){// Jacobi Preconditioner
   #endif
   //this->sys_d=1.0/this->sys_d;
   return( bad_d );
-}; 
+};

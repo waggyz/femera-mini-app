@@ -8,7 +8,7 @@ public:
     SOLV_GD=0, SOLV_CG=1, SOLV_CR=2
   };
   enum Cond {
-    COND_NONE=0, COND_JACO=3, COND_ROW1=1
+    COND_NONE=0, COND_JACO=3, COND_ROW1=1, COND_STRA=4
   };
   INT_MESH iter=0, iter_max=0, udof_n;
   FLOAT_SOLV loca_rtol=0.0;
