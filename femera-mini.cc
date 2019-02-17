@@ -454,9 +454,6 @@ int main( int argc, char** argv ){
     printf("%9.0f %s  %6.2f%% Wall Clock Solve Time (Load Balance)\n",
       loop_sec /sc, ss, (iter_sec/comp_n)/loop_sec *pct );
     //
-    printf("Performance:%8.2f  MDOF/s\n",
-      float(M->udof_n)*float(iter)/loop_sec /Meg );
-    //
     //printf("Effective FPU Performance\n");
     printf("    Physics:%8.2f  GFLOP/s @ %4.0f/%.0f /elem =%5.2f FLOP/Byte\n",
       float(M->phys_flop)*float(iter)*float(comp_n)/phys_sec/1e9,
@@ -466,6 +463,9 @@ int main( int argc, char** argv ){
       float(M->solv_flop)*float(iter)*float(comp_n)/solv_sec/1e9,
       float(M->solv_flop)/float(M->udof_n),float(M->solv_band)/float(M->udof_n),
       M->solv_flop/M->solv_band );
+    //
+    printf("Performance:%8.2f  MDOF/s\n",
+      float(M->udof_n)*float(iter)/loop_sec /Meg );
     };
 #endif
   }// end iter scope
