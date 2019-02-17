@@ -370,9 +370,9 @@ int Mesh::Setup(){
   this->halo_val.resize(halo_udof_tot);//ndof_n*halo_loca_tot);
 #if VERB_MAX>1
   if(verbosity>1){
-    printf("Total:%10u Elems (%u halo) in %u partitions\n",
+    printf(" Total:%10u Elems (%u halo) in %u partitions\n",
       elem_tot, halo_elem_tot, part_n);
-    printf("      %10u Nodes (%u halo: %u remote, %u local)\n",
+    printf("       %10u Nodes (%u halo: %u remote, %u local)\n",
           node_tot, halo_node_tot, halo_remo_tot, halo_loca_tot);
     //printf("Read and set up in %f s.\n", float(read_time.count())*1e-9 );
     //std::cout <<"Solving ";

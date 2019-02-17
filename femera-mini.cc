@@ -296,6 +296,8 @@ int main( int argc, char** argv ){
 #endif
 #if VERB_MAX>1
   if(verbosity>1){
+  std::cout <<"System:     "<<M->elem_n<<" Elems, "
+    <<M->node_n<<" Nodes, "<<M->udof_n<<" DOF "<<'\n';
   printf("Read and set up                         in %f s\n", read_sec );
   if(verbosity>1){
     std::cout<< "  Initializing: ";
@@ -308,9 +310,6 @@ int main( int argc, char** argv ){
     };
     std::cout<< " preconditioner..." <<'\n';
   };
-  std::cout <<"Solving ";
-  std::cout <<"system: "<<M->elem_n<<" Elems, "
-    <<M->node_n<<" Nodes, "<<M->udof_n<<" DOF "<<'\n';
   };
 #endif
   // Solve parallel =================================================
@@ -369,7 +368,8 @@ int main( int argc, char** argv ){
 #if VERB_MAX>1
     if(verbosity>1){
     std::cout<< "  Iterating to: "<<rtol<<" relative tolerance,"<<'\n'
-    <<"or stopping at: "<<iter_max<<" "<<M->meth_name<<" iterations..."<<'\n';
+      <<"or stopping at: "<<iter_max<<" "<<M->meth_name<<" iterations..."<<'\n';
+    std::cout <<"Solving..."<<'\n';
     printf("     init ||R||%9.2e /%9.2e tol in %f s\n",
       std::sqrt(M->glob_chk2), std::sqrt(M->glob_rto2),init_sec );
     };
