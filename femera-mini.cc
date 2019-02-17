@@ -457,7 +457,7 @@ int main( int argc, char** argv ){
     printf("Performance:%8.2f  MDOF/s\n",
       float(M->udof_n)*float(iter)/loop_sec /Meg );
     //
-    printf("Effective FPU Performance\n");
+    //printf("Effective FPU Performance\n");
     printf("Physics:%12.2f  GFLOP/s @ %4.0f/%.0f /elem =%5.2f FLOP/Byte\n",
       float(M->phys_flop)*float(iter)*float(comp_n)/phys_sec/1e9,
       float(M->phys_flop)/float(M->elem_n),float(M->phys_band)/float(M->elem_n),
