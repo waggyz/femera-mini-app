@@ -458,11 +458,11 @@ int main( int argc, char** argv ){
       float(M->udof_n)*float(iter)/loop_sec /Meg );
     //
     //printf("Effective FPU Performance\n");
-    printf("Physics:%12.2f  GFLOP/s @ %4.0f/%.0f /elem =%5.2f FLOP/Byte\n",
+    printf("    Physics:%8.2f  GFLOP/s @ %4.0f/%.0f /elem =%5.2f FLOP/Byte\n",
       float(M->phys_flop)*float(iter)*float(comp_n)/phys_sec/1e9,
       float(M->phys_flop)/float(M->elem_n),float(M->phys_band)/float(M->elem_n),
       M->phys_flop/M->phys_band );
-    printf("  Solve:%12.2f  GFLOP/s @ %4.0f/%.0f /DOF  =%5.2f FLOP/Byte\n",
+    printf("      Solve:%8.2f  GFLOP/s @ %4.0f/%.0f /DOF  =%5.2f FLOP/Byte\n",
       float(M->solv_flop)*float(iter)*float(comp_n)/solv_sec/1e9,
       float(M->solv_flop)/float(M->udof_n),float(M->solv_band)/float(M->udof_n),
       M->solv_flop/M->solv_band );
