@@ -188,9 +188,9 @@ int ElastIso3D::BlocLinear( Elem* E,
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       for(uint i=0; i< 9*Nv ; i++){ H[i]=0.0; };
       for(uint i=0; i<(Ne*Nv) ; i++){ G[i]=0.0; };
+#pragma omp simd collapse(1)
+      for(uint l=0;l<Nv;l++){
       for(uint k=0; k<Nc; k++){
-#pragma omp simd
-            for(uint l=0;l<Nv;l++){
         for(uint i=0; i<3 ; i++){// G[3* k+i ]=0.0;
           for(uint j=0; j<3 ; j++){
             //FIXME can this vectorize?
@@ -199,11 +199,11 @@ int ElastIso3D::BlocLinear( Elem* E,
           };
         };
       };
+#pragma omp simd collapse(1)
+      for(uint l=0;l<Nv;l++){
       for(uint k=0; k<Nc; k++){
         for(uint i=0; i<3 ; i++){
           for(uint j=0; j<3 ; j++){
-#pragma omp simd
-            for(uint l=0;l<Nv;l++){
             H[(3* i+j)*Nv+l ] += G[(3* k+i)*Nv+l ] * u[ndof* k+j +l*Ne ];
             };
           };
@@ -231,11 +231,11 @@ int ElastIso3D::BlocLinear( Elem* E,
       S[3*Nv+l]=S[1*Nv+l]; S[7*Nv+l]=S[5*Nv+l]; S[6*Nv+l]=S[2*Nv+l];
       };
       //------------------------------------------------------- 18+9 = 27 FLOP
+#pragma omp simd collapse(1)
+      for(uint l=0;l<Nv;l++){
       for(uint i=0; i<Nc; i++){
         for(uint k=0; k<3; k++){
           for(uint j=0; j<3; j++){
-#pragma omp simd
-            for(uint l=0;l<Nv;l++){
             f[(3* i+k)*Nv+l ] += G[(3* i+j)*Nv+l ] * S[(3* k+j)*Nv+l ]; };
       };};};//---------------------------------------------- N*3*6 = 18*N FLOP
 #if VERB_MAX>10
@@ -246,10 +246,10 @@ int ElastIso3D::BlocLinear( Elem* E,
       }; printf("\n");
 #endif
     };//end intp loop
+#pragma omp simd collapse(1)
+    for(uint l=0;l<Nv;l++){//Cv
     for (uint i=0; i<Nc; i++){
       for(uint j=0; j<3; j++){
-#pragma omp simd
-        for(uint l=0;l<Nv;l++){//Cv
         sys_f[3*conn[i+Nc*l]+j] += f[(3*i+j)*Nv+l];
         };
     }; };//--------------------------------------------------- N*3 =  3*N FLOP

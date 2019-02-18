@@ -280,7 +280,7 @@ int ElastOrtho3D::BlocLinear( Elem* E,
           for(uint j=0; j<3; j++){
             H[(3* i+k)*Nv+l ] += A[(3* i+j)*Nv +l] * R[3* k+j ]; };
       };};};//---------------------------------------------- 27*2 =      54 FLOP
-#pragma omp simd collapse(1)
+#pragma omp simd
       for(uint l=0;l<Nv;l++){
       //det=jac[9 +Nj*l]; FLOAT_PHYS w = det * wgt[ip];
       FLOAT_PHYS w = jac[9 +Nj*l] * wgt[ip];
