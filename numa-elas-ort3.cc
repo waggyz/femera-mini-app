@@ -20,7 +20,7 @@ int ElastOrtho3D::Setup( Elem* E ){
   this->stif_flop = uint(E->elem_n)
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) );
   this->stif_band = uint(E->elem_n) *(
-    sizeof(FLOAT_PHYS)* 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) -1+2)
+    sizeof(FLOAT_PHYS)* 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) -1+3)
     +sizeof(INT_MESH) *uint(E->elem_conn_n) );
   return 0;
 };
@@ -243,9 +243,9 @@ int ElastOrtho3D::BlocLinear( Elem* E,
       //A = MatMul3xNx3T( G,u );
       for(uint i=0; i< 9*Nv ; i++){ H[i]=0.0; A[i]=0.0; B[i]=0.0; };
       for(uint i=0; i<(Ne*Nv) ; i++){ G[i]=0.0; };
+#pragma omp simd collapse(1)
+      for(uint l=0;l<Nv;l++){
       for(uint k=0; k<Nc; k++){
-#pragma omp simd
-            for(uint l=0;l<Nv;l++){
         for(uint i=0; i<3 ; i++){// G[3* k+i ]=0.0;
           for(uint j=0; j<3 ; j++){
             //FIXME can this vectorize?
@@ -254,11 +254,11 @@ int ElastOrtho3D::BlocLinear( Elem* E,
           };
         };
       };
+#pragma omp simd collapse(1)
+      for(uint l=0;l<Nv;l++){
       for(uint k=0; k<Nc; k++){
         for(uint i=0; i<3 ; i++){
           for(uint j=0; j<3 ; j++){
-#pragma omp simd
-            for(uint l=0;l<Nv;l++){
             A[(3* i+j)*Nv+l ] += G[(3* k+i)*Nv+l ] * u[ndof* k+j +l*Ne ];
             };
           };
@@ -273,14 +273,14 @@ int ElastOrtho3D::BlocLinear( Elem* E,
 #endif
       // [H] Small deformation tensor
       // [H][RT] : matmul3x3x3T
+#pragma omp simd collapse(1)
+      for(uint l=0;l<Nv;l++){
       for(uint i=0; i<3; i++){
         for(uint k=0; k<3; k++){// H[3* i+k ]=0.0;
           for(uint j=0; j<3; j++){
-#pragma omp simd
-            for(uint l=0;l<Nv;l++){
             H[(3* i+k)*Nv+l ] += A[(3* i+j)*Nv +l] * R[3* k+j ]; };
       };};};//---------------------------------------------- 27*2 =      54 FLOP
-#pragma omp simd
+#pragma omp simd collapse(1)
       for(uint l=0;l<Nv;l++){
       //det=jac[9 +Nj*l]; FLOAT_PHYS w = det * wgt[ip];
       FLOAT_PHYS w = jac[9 +Nj*l] * wgt[ip];
@@ -304,12 +304,12 @@ int ElastOrtho3D::BlocLinear( Elem* E,
       //--------------------------------------------------------- 18+9= 27 FLOP
       // [S][R] : matmul3x3x3, R is transposed
       //for(int i=0; i<9; i++){ B[i]=0.0; };
+#pragma omp simd collapse(1)
+      for(uint l=0;l<Nv;l++){
       for(uint i=0; i<3; i++){
         //for(int k=0; k<3; k++){ B[3* i+k ]=0.0;
         for(uint k=0; k<3; k++){// B[3* k+i ]=0.0;
           for(uint j=0; j<3; j++){
-#pragma omp simd
-            for(uint l=0;l<Nv;l++){
             //B[3* i+k ] += S[3* i+j ] * R[3* j+k ];
             B[(3* k+i)*Nv+l ] += S[(3* i+j)*Nv+l ] * R[3* j+k ]; };// B is transposed
       };};};//-------------------------------------------------- 27*2 = 54 FLOP
@@ -322,11 +322,11 @@ int ElastOrtho3D::BlocLinear( Elem* E,
         printf("%+9.2e ",S[j]);
       }; printf("\n");
 #endif
+#pragma omp simd collapse(1)
+      for(uint l=0;l<Nv;l++){
       for(uint i=0; i<Nc; i++){
         for(uint k=0; k<3; k++){
           for(uint j=0; j<3; j++){
-#pragma omp simd
-            for(uint l=0;l<Nv;l++){
             f[(3* i+k)*Nv+l ] += G[(3* i+j)*Nv+l ] * B[(3* k+j)*Nv+l ]; };
       };};};//---------------------------------------------- N*3*6 = 18*N FLOP
       // This is way slower:

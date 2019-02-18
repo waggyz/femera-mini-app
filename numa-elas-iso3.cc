@@ -18,7 +18,7 @@ int ElastIso3D::Setup( Elem* E ){
   this->stif_flop = uint(E->elem_n)
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) );
   this->stif_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
-    * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) +1);
+    * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) +2);
   return 0;
 };
 int ElastIso3D::ElemLinear( Elem* E,
