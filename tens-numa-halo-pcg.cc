@@ -295,8 +295,8 @@ int HaloPCG::Iter(){
     const INT_MESH d=uint(Y->ndof_n);
     time_start( phys_start );
     S->sys_f=0.0;
-    //E->do_halo=true; Y->ElemLinear( E, S->sys_f, S->sys_p );
-    E->do_halo=true; Y->BlocLinear( E, S->sys_f, S->sys_p );
+    E->do_halo=true; Y->ElemLinear( E, S->sys_f, S->sys_p );
+    //E->do_halo=true; Y->BlocLinear( E, S->sys_f, S->sys_p );
     time_accum( my_phys_count, phys_start );
     time_start( gath_start );
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
@@ -338,8 +338,8 @@ int HaloPCG::Iter(){
     };
     time_accum( my_scat_count, scat_start );
     time_start( phys_start );
-    //E->do_halo=false; Y->ElemLinear( E, S->sys_f, S->sys_p );
-    E->do_halo=false; Y->BlocLinear( E, S->sys_f, S->sys_p );
+    E->do_halo=false; Y->ElemLinear( E, S->sys_f, S->sys_p );
+    //E->do_halo=false; Y->BlocLinear( E, S->sys_f, S->sys_p );
     time_accum( my_phys_count, phys_start );
     time_start( solv_start );
     //FLOAT_SOLV loca_sum=0.0;
