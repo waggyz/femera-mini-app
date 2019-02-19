@@ -121,10 +121,8 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       }; printf("\n");
 #endif
       dw = jac[9] * wgt[ip];
-      if(ip==(intp_n-1)){
-      if((ie+1)<ee){//if(fetch_next){// Fetch stuff for the next iteration
+      if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
         std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
-        //FIXME Check if last int pt.
         const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
         for (uint i=0; i<Nc; i++){
           std::memcpy( & u[ndof*i],
