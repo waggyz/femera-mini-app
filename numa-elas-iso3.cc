@@ -40,8 +40,8 @@ int ElastIso3D::ElemLinear( Elem* E,
     (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
 #endif
   //FLOAT_PHYS det;
-  INT_MESH   conn[Nc];
-  FLOAT_MESH jac[Nj];
+  //INT_MESH   conn[Nc];
+  //FLOAT_MESH jac[Nj];
   FLOAT_PHYS dw, G[Ne], u[Ne], f[Ne];
   FLOAT_PHYS H[9], S[9];
   //
@@ -65,8 +65,10 @@ int ElastIso3D::ElemLinear( Elem* E,
   const auto Ejacs = &E->elip_jacs[0];
   const auto sysu0 = &sys_u[0];
   for(INT_MESH ie=e0;ie<ee;ie++){
-    std::memcpy( &conn, &Econn[Nc*ie], sizeof(  INT_MESH)*Nc);
-    std::memcpy( &jac , &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
+    const   INT_MESH * RESTRICT conn = &Econn[Nc*ie];
+    const FLOAT_MESH * RESTRICT jac  = &Ejacs[Nj*ie];
+    //std::memcpy( &conn, &Econn[Nc*ie], sizeof(  INT_MESH)*Nc);
+    //std::memcpy( &jac , &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
     //std::copy( &Econn[Nc*ie],
     //           &Econn[Nc*ie+Nc], conn );
     //std::copy( &Ejacs[Nj*ie],
@@ -153,9 +155,9 @@ int ElastIso3D::BlocLinear( Elem* E,
     (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
 #endif
   //FLOAT_PHYS det;
-  INT_MESH   conn[Nc*Nv];
-  FLOAT_PHYS G[Ne*Nv], u[Ne*Nv], f[Ne*Nv];
-  FLOAT_PHYS jac[Nj*Nv], H[9*Nv],S[9*Nv];
+  //INT_MESH   conn[Nc*Nv];
+  FLOAT_PHYS G[Ne*Nv], u[Ne*Nv], f[Ne*Nv], H[9*Nv],S[9*Nv];
+  //FLOAT_PHYS jac[Nj*Nv];
   //
   FLOAT_PHYS intp_shpg[intp_n*Ne];
   std::copy( &E->intp_shpg[0],
@@ -179,9 +181,11 @@ int ElastIso3D::BlocLinear( Elem* E,
   for(INT_MESH ie=e0;ie<ee;ie+=Nv){
     //uint Cv; if((ie+Nv)<ee){ Cv=Nv; }else{ Cv=ee-ie; };// Nv=Cv;
     if( (ie+Nv)>=ee ){ Nv=ee-ie; };
+    const   INT_MESH * RESTRICT conn = &Econn[Nc*ie];
+    const FLOAT_MESH * RESTRICT jac  = &Ejacs[Nj*ie];
     //
-    std::memcpy( &conn, &Econn[Nc*ie], sizeof(  INT_MESH)*Nc*Nv);
-    std::memcpy( &jac , &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj*Nv);
+    //std::memcpy( &conn, &Econn[Nc*ie], sizeof(  INT_MESH)*Nc*Nv);
+    //std::memcpy( &jac , &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj*Nv);
     //std::copy( &E->elem_conn[Nc*ie],
     //           &E->elem_conn[Nc*ie+Nc*Nv], conn );//Cv
     //std::copy( &E->elip_jacs[Nj*ie],
