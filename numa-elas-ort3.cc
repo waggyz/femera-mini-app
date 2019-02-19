@@ -126,7 +126,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
         for (uint i=0; i<Nc; i++){
           std::memcpy( & u[ndof*i],
-                       & sys_u[c[i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
+                       & sysu0[c[i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
       };
       // [H] Small deformation tensor
       // [H][RT] : matmul3x3x3T

@@ -66,11 +66,11 @@ int ElastIso3D::ElemLinear( Elem* E,
   if(e0<ee){
     std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
     const   INT_MESH* RESTRICT c = &Econn[Nc*e0];
-    for (uint i=0; i<(Nc); i++){
+    for (uint i=0; i<Nc; i++){
       std::memcpy( &    u[ndof*i],
                    &sysu0[c[i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
   };
-  bool fetch_next=false;
+  //bool fetch_next=false;
   for(INT_MESH ie=e0;ie<ee;ie++){
     //if((ie+1)<ee){fetch_next=true;}else{fetch_next=false;};
     //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
@@ -115,7 +115,7 @@ int ElastIso3D::ElemLinear( Elem* E,
         const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
         for (uint i=0; i<Nc; i++){
           std::memcpy( & u[ndof*i],
-                       & sys_u[c[i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
+                       & sysu0[c[i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
       };
       //
       S[0]=(C[0]* H[0] + C[1]* H[4] + C[1]* H[8])*dw;//Sxx
