@@ -227,16 +227,22 @@ int ElastOrtho3D::BlocLinear( Elem* E,
     printf("%+9.2e ",mtrl_matc[j]);
   }; printf("\n");
 #endif
+  const auto Econn = &E->elem_conn[0];
+  const auto Ejacs = &E->elip_jacs[0];
+  const auto sysu0 = &sys_u[0];
   for(INT_MESH ie=e0;ie<ee;ie+=Nv){
     if( (ie+Nv)>=ee ){ Nv=ee-ie; };
     //
-    std::copy( &E->elem_conn[Nc*ie],
-               &E->elem_conn[Nc*ie+Nc*Nv], conn );
-    std::copy( &E->elip_jacs[Nj*ie],
-               &E->elip_jacs[Nj*ie+Nj*Nv], jac );// det=jac[9];
+    std::memcpy( &conn, &Econn[Nc*ie], sizeof(  INT_MESH)*Nc*Nv);
+    std::memcpy( &jac , &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj*Nv);
+    //std::copy( &E->elem_conn[Nc*ie],
+    //           &E->elem_conn[Nc*ie+Nc*Nv], conn );
+    //std::copy( &E->elip_jacs[Nj*ie],
+    //           &E->elip_jacs[Nj*ie+Nj*Nv], jac );// det=jac[9];
     for (uint i=0; i<(Nc*Nv); i++){
       std::memcpy( &    u[ndof*i],
-                   &sys_u[conn[i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
+                   //&sys_u[conn[i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
+                   &sysu0[conn[i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
     for(uint i=0;i<(Ne*Nv);i++){ f[i]=0.0; };
     for(uint ip=0; ip<intp_n; ip++){
       //G = MatMul3x3xN( jac,shg );

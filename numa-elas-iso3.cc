@@ -186,8 +186,8 @@ int ElastIso3D::BlocLinear( Elem* E,
     for(uint ip=0; ip<intp_n; ip++){
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
-      for(uint i=0; i< 9*Nv ; i++){ H[i]=0.0; };
-      for(uint i=0; i<(Ne*Nv) ; i++){ G[i]=0.0; };
+      for(uint i=0; i<  9*Nv ; i++){ H[i]=0.0; };
+      for(uint i=0; i<(Ne*Nv); i++){ G[i]=0.0; };
 #pragma omp simd collapse(1)
       for(uint l=0;l<Nv;l++){
       for(uint k=0; k<Nc; k++){
