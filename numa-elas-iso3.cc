@@ -209,13 +209,13 @@ int ElastIso3D::BlocLinear( Elem* E,
             //FIXME can this vectorize?
             G[(3* k+i)*Nv+l ] += jac[3* i+j +l*Nj ] * intp_shpg[ip*Ne+ 3* k+j ];
             };
-          };
-        };
-      };
-#pragma omp simd collapse(1)
-      for(uint l=0;l<Nv;l++){
-      for(uint k=0; k<Nc; k++){
-        for(uint i=0; i<3 ; i++){
+ //         };
+ //       };
+ //     };
+//#pragma omp simd collapse(1)
+ //     for(uint l=0;l<Nv;l++){
+ //     for(uint k=0; k<Nc; k++){
+ //       for(uint i=0; i<3 ; i++){
           for(uint j=0; j<3 ; j++){
             H[(3* i+j)*Nv+l ] += G[(3* k+i)*Nv+l ] * u[ndof* k+j +l*Ne ];
             };
@@ -244,7 +244,7 @@ int ElastIso3D::BlocLinear( Elem* E,
       S[3*Nv+l]=S[1*Nv+l]; S[7*Nv+l]=S[5*Nv+l]; S[6*Nv+l]=S[2*Nv+l];
       };
       //------------------------------------------------------- 18+9 = 27 FLOP
-#pragma omp simd collapse(1)
+//#pragma omp simd collapse(2)
       for(uint l=0;l<Nv;l++){
       for(uint i=0; i<Nc; i++){
         for(uint k=0; k<3; k++){
