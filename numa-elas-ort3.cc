@@ -76,7 +76,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     //std::memcpy( &conn, &Econn[Nc*e0], sizeof(  INT_MESH)*Nc);
     std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
     const   INT_MESH* RESTRICT c = &Econn[Nc*e0];
-    for (uint i=0; i<(Nc); i++){
+    for (uint i=0; i<Nc; i++){
       std::memcpy( &    u[ndof*i],
                    &sysu0[c[i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
   };
@@ -115,19 +115,21 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       };//------------------------------------------------- N*3*6*2 = 36*N FLOP
 #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
-      for(uint j=0;j<HH.size();j++){
+      for(uint j=0;j<H.size();j++){
         if(j%mesh_d==0){printf("\n");}
         printf("%+9.2e ",H[j]);
       }; printf("\n");
 #endif
       dw = jac[9] * wgt[ip];
+      if(ip==(intp_n-1)){
       if((ie+1)<ee){//if(fetch_next){// Fetch stuff for the next iteration
         std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
+        //FIXME Check if last int pt.
         const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
         for (uint i=0; i<Nc; i++){
           std::memcpy( & u[ndof*i],
                        & sysu0[c[i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
-      };
+      }; };
       // [H] Small deformation tensor
       // [H][RT] : matmul3x3x3T
 //#pragma omp simd
