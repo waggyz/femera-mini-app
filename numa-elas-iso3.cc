@@ -40,7 +40,7 @@ int ElastIso3D::ElemLinear( Elem* E,
     (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
 #endif
   //INT_MESH   conn[Nc];
-  //FLOAT_MESH jac[Nj], det;
+  //FLOAT_MESH jac[Nj];//, det;
   FLOAT_PHYS dw, G[Ne], u[Ne], f[Ne];
   FLOAT_PHYS H[9], S[9];
   //
@@ -95,7 +95,7 @@ int ElastIso3D::ElemLinear( Elem* E,
       };//------------------------------------------------- N*3*6*2 = 36*N FLOP
 #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
-      for(uint j=0;j<HH.size();j++){
+      for(uint j=0;j<H.size();j++){
         if(j%mesh_d==0){printf("\n");}
         printf("%+9.2e ",H[j]);
       }; printf("\n");

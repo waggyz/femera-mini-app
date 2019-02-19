@@ -44,8 +44,8 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   printf("Dim: %i, Elems:%i, IntPts:%i, Nodes/elem:%i\n",
     (int)mesh_d,(int)elem_n,(int)intp_n,(int)Nc);
 #endif
-  //INT_MESH   conn[Nc];
-  //FLOAT_MESH jac[Nj], det;
+  INT_MESH   conn[Nc];
+  FLOAT_MESH jac[Nj], det;
   FLOAT_PHYS dw, G[Ne], u[Ne],f[Ne];
   FLOAT_PHYS H[9], S[9], A[9];//, B[9];
   //
@@ -72,9 +72,15 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
   const FLOAT_SOLV* RESTRICT sysu0 = &sys_u[0];
+  if(e0<ee){
+    std::memcpy( &conn, &Econn[Nc*e0], sizeof(  INT_MESH)*Nc);
+    std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
+  };
+  bool fetch_next=false;
   for(INT_MESH ie=e0;ie<ee;ie++){
-    const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
-    const FLOAT_MESH* RESTRICT jac  = &Ejacs[Nj*ie];
+    if((ie+1)<ee){fetch_next=true;}else{fetch_next=false;};
+    //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
+    //const FLOAT_MESH* RESTRICT jac  = &Ejacs[Nj*ie];
     //std::memcpy( &conn, &Econn[Nc*ie], sizeof(  INT_MESH)*Nc);
     //std::memcpy( &jac , &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
     //std::copy( &Econn[Nc*ie],
@@ -103,6 +109,9 @@ int ElastOrtho3D::ElemLinear( Elem* E,
           };
         };
       };//------------------------------------------------- N*3*6*2 = 36*N FLOP
+    det=jac[9];
+    if(fetch_next){
+      std::memcpy( &jac , &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj); };
 #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
       for(uint j=0;j<HH.size();j++){
@@ -119,7 +128,8 @@ int ElastOrtho3D::ElemLinear( Elem* E,
             H[(3* i+k) ] += A[(3* i+j)] * R[3* k+j ];
       };};};//---------------------------------------------- 27*2 =      54 FLOP
       //det=jac[9 +Nj*l]; FLOAT_PHYS w = det * wgt[ip];
-      dw = jac[9] * wgt[ip];
+      //dw = jac[9] * wgt[ip];
+      dw = det * wgt[ip];
       //
       S[0]=(C[0]* H[0] + C[3]* H[4] + C[5]* H[8])*dw;//Sxx
       S[4]=(C[3]* H[0] + C[1]* H[4] + C[4]* H[8])*dw;//Syy
@@ -182,6 +192,8 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         //sys_f[3*Econn[Nc*ie+i]+j] += f[(3*i+j)];
         sys_f[3*conn[i]+j] += f[(3*i+j)];
     }; };//--------------------------------------------------- N*3 =  3*N FLOP
+    if(fetch_next){
+      std::memcpy( &conn, &Econn[Nc*(ie+1)], sizeof(  INT_MESH)*Nc); };
   };//end elem loop
   return 0;
 };
