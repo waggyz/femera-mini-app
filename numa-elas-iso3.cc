@@ -61,12 +61,12 @@ int ElastIso3D::ElemLinear( Elem* E,
     printf("%+9.2e ",C[j]);
   }; printf("\n");
 #endif
-  const auto Econn = &E->elem_conn[0];
-  const auto Ejacs = &E->elip_jacs[0];
-  const auto sysu0 = &sys_u[0];
+  const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
+  const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
+  const FLOAT_SOLV* RESTRICT sysu0 = &sys_u[0];
   for(INT_MESH ie=e0;ie<ee;ie++){
-    const   INT_MESH * RESTRICT conn = &Econn[Nc*ie];
-    const FLOAT_MESH * RESTRICT jac  = &Ejacs[Nj*ie];
+    const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
+    const FLOAT_MESH* RESTRICT jac  = &Ejacs[Nj*ie];
     //std::memcpy( &conn, &Econn[Nc*ie], sizeof(  INT_MESH)*Nc);
     //std::memcpy( &jac , &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
     //std::copy( &Econn[Nc*ie],
@@ -175,14 +175,14 @@ int ElastIso3D::BlocLinear( Elem* E,
     printf("%+9.2e ",mtrl_matc[j]);
   }; printf("\n");
 #endif
-  const auto Econn = &E->elem_conn[0];
-  const auto Ejacs = &E->elip_jacs[0];
-  const auto sysu0 = &sys_u[0];
+  const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
+  const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
+  const FLOAT_SOLV* RESTRICT sysu0 = &sys_u[0];
   for(INT_MESH ie=e0;ie<ee;ie+=Nv){
     //uint Cv; if((ie+Nv)<ee){ Cv=Nv; }else{ Cv=ee-ie; };// Nv=Cv;
     if( (ie+Nv)>=ee ){ Nv=ee-ie; };
-    const   INT_MESH * RESTRICT conn = &Econn[Nc*ie];
-    const FLOAT_MESH * RESTRICT jac  = &Ejacs[Nj*ie];
+    const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
+    const FLOAT_MESH* RESTRICT jac  = &Ejacs[Nj*ie];
     //
     //std::memcpy( &conn, &Econn[Nc*ie], sizeof(  INT_MESH)*Nc*Nv);
     //std::memcpy( &jac , &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj*Nv);
