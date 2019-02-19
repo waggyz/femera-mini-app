@@ -45,9 +45,8 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     (int)mesh_d,(int)elem_n,(int)intp_n,(int)Nc);
 #endif
   //INT_MESH   conn[Nc];
-  //FLOAT_MESH jac[Nj];
+  //FLOAT_MESH jac[Nj], det;
   FLOAT_PHYS dw, G[Ne], u[Ne],f[Ne];
-  //FLOAT_PHYS det,
   FLOAT_PHYS H[9], S[9], A[9];//, B[9];
   //
   FLOAT_PHYS intp_shpg[intp_n*Ne];
@@ -209,8 +208,7 @@ int ElastOrtho3D::BlocLinear( Elem* E,
 #endif
   //INT_MESH   conn[Nc*Nv];
   FLOAT_PHYS G[Ne*Nv], u[Ne*Nv],f[Ne*Nv];
-  //FLOAT_PHYS det, 
-  //FLOAT_PHYS jac[Nj*Nv];
+  //FLOAT_PHYS jac[Nj*Nv], det;
   FLOAT_PHYS A[9*Nv], B[9*Nv], H[9*Nv], S[9*Nv];
   //
   FLOAT_PHYS intp_shpg[intp_n*Ne];

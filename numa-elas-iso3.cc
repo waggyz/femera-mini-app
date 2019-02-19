@@ -39,9 +39,8 @@ int ElastIso3D::ElemLinear( Elem* E,
   printf("DOF: %u, Elems:%u, IntPts:%u, Nodes/elem:%u\n",
     (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
 #endif
-  //FLOAT_PHYS det;
   //INT_MESH   conn[Nc];
-  //FLOAT_MESH jac[Nj];
+  //FLOAT_MESH jac[Nj], det;
   FLOAT_PHYS dw, G[Ne], u[Ne], f[Ne];
   FLOAT_PHYS H[9], S[9];
   //
@@ -154,10 +153,9 @@ int ElastIso3D::BlocLinear( Elem* E,
   printf("DOF: %u, Elems:%u, IntPts:%u, Nodes/elem:%u\n",
     (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
 #endif
-  //FLOAT_PHYS det;
   //INT_MESH   conn[Nc*Nv];
   FLOAT_PHYS G[Ne*Nv], u[Ne*Nv], f[Ne*Nv], H[9*Nv],S[9*Nv];
-  //FLOAT_PHYS jac[Nj*Nv];
+  //FLOAT_PHYS jac[Nj*Nv], det;
   //
   FLOAT_PHYS intp_shpg[intp_n*Ne];
   std::copy( &E->intp_shpg[0],
