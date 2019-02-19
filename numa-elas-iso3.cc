@@ -180,8 +180,8 @@ int ElastIso3D::BlocLinear( Elem* E,
     //uint Cv; if((ie+Nv)<ee){ Cv=Nv; }else{ Cv=ee-ie; };// Nv=Cv;
     if( (ie+Nv)>=ee ){ Nv=ee-ie; };
     //
-    std::memcpy( &conn, &Econn[Nc*ie], sizeof(  INT_MESH)*Nc);
-    std::memcpy( &jac , &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
+    std::memcpy( &conn, &Econn[Nc*ie], sizeof(  INT_MESH)*Nc*Nv);
+    std::memcpy( &jac , &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj*Nv);
     //std::copy( &E->elem_conn[Nc*ie],
     //           &E->elem_conn[Nc*ie+Nc*Nv], conn );//Cv
     //std::copy( &E->elip_jacs[Nj*ie],
