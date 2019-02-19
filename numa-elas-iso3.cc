@@ -163,6 +163,9 @@ int ElastIso3D::BlocLinear( Elem* E,
   FLOAT_PHYS wgt[intp_n];
   std::copy( &E->gaus_weig[0],
              &E->gaus_weig[intp_n], wgt );
+  FLOAT_PHYS C[this->mtrl_matc.size()];
+  std::copy( &this->mtrl_matc[0],
+             &this->mtrl_matc[this->mtrl_matc.size()], C );
 #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
   for(uint j=0;j<mtrl_matc.size();j++){
@@ -170,17 +173,23 @@ int ElastIso3D::BlocLinear( Elem* E,
     printf("%+9.2e ",mtrl_matc[j]);
   }; printf("\n");
 #endif
+  const auto Econn = &E->elem_conn[0];
+  const auto Ejacs = &E->elip_jacs[0];
+  const auto sysu0 = &sys_u[0];
   for(INT_MESH ie=e0;ie<ee;ie+=Nv){
     //uint Cv; if((ie+Nv)<ee){ Cv=Nv; }else{ Cv=ee-ie; };// Nv=Cv;
     if( (ie+Nv)>=ee ){ Nv=ee-ie; };
     //
-    std::copy( &E->elem_conn[Nc*ie],
-               &E->elem_conn[Nc*ie+Nc*Nv], conn );//Cv
-    std::copy( &E->elip_jacs[Nj*ie],
-               &E->elip_jacs[Nj*ie+Nj*Nv], jac );//Cv // det=jac[9];
+    std::memcpy( &conn, &Econn[Nc*ie], sizeof(  INT_MESH)*Nc);
+    std::memcpy( &jac , &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
+    //std::copy( &E->elem_conn[Nc*ie],
+    //           &E->elem_conn[Nc*ie+Nc*Nv], conn );//Cv
+    //std::copy( &E->elip_jacs[Nj*ie],
+    //           &E->elip_jacs[Nj*ie+Nj*Nv], jac );//Cv // det=jac[9];
     for (uint i=0; i<(Nc*Nv); i++){//Cv
       std::memcpy( &    u[ndof*i],
-                   &sys_u[conn[i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
+                   &sysu0[conn[i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
+                   //&sys_u[conn[i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
     //
     for(uint i=0;i<(Ne*Nv);i++){ f[i]=0.0; };
     for(uint ip=0; ip<intp_n; ip++){
@@ -221,13 +230,13 @@ int ElastIso3D::BlocLinear( Elem* E,
       //det=jac[9 +Nj*l]; FLOAT_PHYS w = det * wgt[ip];
       FLOAT_PHYS w = jac[9 +Nj*l] * wgt[ip];
       //
-      S[0*Nv+l]=(mtrl_matc[0]* H[0*Nv+l] + mtrl_matc[1]* H[4*Nv+l] + mtrl_matc[1]* H[8*Nv+l])*w;//Sxx
-      S[4*Nv+l]=(mtrl_matc[1]* H[0*Nv+l] + mtrl_matc[0]* H[4*Nv+l] + mtrl_matc[1]* H[8*Nv+l])*w;//Syy
-      S[8*Nv+l]=(mtrl_matc[1]* H[0*Nv+l] + mtrl_matc[1]* H[4*Nv+l] + mtrl_matc[0]* H[8*Nv+l])*w;//Szz
+      S[0*Nv+l]=(C[0]* H[0*Nv+l] + C[1]* H[4*Nv+l] + C[1]* H[8*Nv+l])*w;//Sxx
+      S[4*Nv+l]=(C[1]* H[0*Nv+l] + C[0]* H[4*Nv+l] + C[1]* H[8*Nv+l])*w;//Syy
+      S[8*Nv+l]=(C[1]* H[0*Nv+l] + C[1]* H[4*Nv+l] + C[0]* H[8*Nv+l])*w;//Szz
       //
-      S[1*Nv+l]=( H[1*Nv+l] + H[3*Nv+l] )*mtrl_matc[2]*w;// S[3]= S[1];//Sxy Syx
-      S[5*Nv+l]=( H[5*Nv+l] + H[7*Nv+l] )*mtrl_matc[2]*w;// S[7]= S[5];//Syz Szy
-      S[2*Nv+l]=( H[2*Nv+l] + H[6*Nv+l] )*mtrl_matc[2]*w;// S[6]= S[2];//Sxz Szx
+      S[1*Nv+l]=( H[1*Nv+l] + H[3*Nv+l] )*C[2]*w;// S[3]= S[1];//Sxy Syx
+      S[5*Nv+l]=( H[5*Nv+l] + H[7*Nv+l] )*C[2]*w;// S[7]= S[5];//Syz Szy
+      S[2*Nv+l]=( H[2*Nv+l] + H[6*Nv+l] )*C[2]*w;// S[6]= S[2];//Sxz Szx
       S[3*Nv+l]=S[1*Nv+l]; S[7*Nv+l]=S[5*Nv+l]; S[6*Nv+l]=S[2*Nv+l];
       };
       //------------------------------------------------------- 18+9 = 27 FLOP

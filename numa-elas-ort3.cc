@@ -216,6 +216,9 @@ int ElastOrtho3D::BlocLinear( Elem* E,
   FLOAT_PHYS wgt[intp_n];
   std::copy( &E->gaus_weig[0],
              &E->gaus_weig[intp_n], wgt );
+  FLOAT_PHYS C[this->mtrl_matc.size()];
+  std::copy( &this->mtrl_matc[0],
+             &this->mtrl_matc[this->mtrl_matc.size()], C );
   const FLOAT_PHYS R[9] = {
     mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
     mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
@@ -291,13 +294,13 @@ int ElastOrtho3D::BlocLinear( Elem* E,
       //det=jac[9 +Nj*l]; FLOAT_PHYS w = det * wgt[ip];
       FLOAT_PHYS w = jac[9 +Nj*l] * wgt[ip];
       //
-      S[0*Nv+l]=(mtrl_matc[0]* H[0*Nv+l] + mtrl_matc[3]* H[4*Nv+l] + mtrl_matc[5]* H[8*Nv+l])*w;//Sxx
-      S[4*Nv+l]=(mtrl_matc[3]* H[0*Nv+l] + mtrl_matc[1]* H[4*Nv+l] + mtrl_matc[4]* H[8*Nv+l])*w;//Syy
-      S[8*Nv+l]=(mtrl_matc[5]* H[0*Nv+l] + mtrl_matc[4]* H[4*Nv+l] + mtrl_matc[2]* H[8*Nv+l])*w;//Szz
+      S[0*Nv+l]=(C[0]* H[0*Nv+l] + C[3]* H[4*Nv+l] + C[5]* H[8*Nv+l])*w;//Sxx
+      S[4*Nv+l]=(C[3]* H[0*Nv+l] + C[1]* H[4*Nv+l] + C[4]* H[8*Nv+l])*w;//Syy
+      S[8*Nv+l]=(C[5]* H[0*Nv+l] + C[4]* H[4*Nv+l] + C[2]* H[8*Nv+l])*w;//Szz
       //
-      S[1*Nv+l]=( H[1*Nv+l] + H[3*Nv+l] )*mtrl_matc[6]*w;// S[3]= S[1];//Sxy Syx
-      S[5*Nv+l]=( H[5*Nv+l] + H[7*Nv+l] )*mtrl_matc[7]*w;// S[7]= S[5];//Syz Szy
-      S[2*Nv+l]=( H[2*Nv+l] + H[6*Nv+l] )*mtrl_matc[8]*w;// S[6]= S[2];//Sxz Szx
+      S[1*Nv+l]=( H[1*Nv+l] + H[3*Nv+l] )*C[6]*w;// S[3]= S[1];//Sxy Syx
+      S[5*Nv+l]=( H[5*Nv+l] + H[7*Nv+l] )*C[7]*w;// S[7]= S[5];//Syz Szy
+      S[2*Nv+l]=( H[2*Nv+l] + H[6*Nv+l] )*C[8]*w;// S[6]= S[2];//Sxz Szx
       S[3*Nv+l]=S[1*Nv+l]; S[7*Nv+l]=S[5*Nv+l]; S[6*Nv+l]=S[2*Nv+l];
       };
 #if VERB_MAX>10
