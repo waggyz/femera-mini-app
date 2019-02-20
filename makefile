@@ -47,7 +47,7 @@ FEMERA_MINI_CC = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc \
 #OMPI_CPPFLAGS=$(CPPFLAGS) ; \
 #OMPI_CXXFLAGS=$(CPPFLAGS) ; \
 
-all: test-all
+all: gmsh2fmr-ser mini-omp mini-ser mini-omq mini-seq
 
 mini-ser:
 	mv -f femser-$(CPUMODEL) femser.old 2>/dev/null ; \
