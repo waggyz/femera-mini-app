@@ -108,7 +108,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         for(uint i=0; i<3 ; i++){ G[3* k+i ]=0.0;
           for(uint j=0; j<3 ; j++){
             //G[(3* k+i) ] += jac[3* i+j ] * intpp[j];
-            G[(3* k+i) ] += jac[3* i+j ] * intp_shpg[ip*Ne+ 3* k+j ];
+            G[3* k+i ] += jac[3* i+j ] * intp_shpg[ip*Ne+ 3* k+j ];
           };
           for(uint j=0; j<3 ; j++){
             A[(3* i+j) ] += G[(3* k+i) ] * u[ndof* k+j ];
@@ -156,14 +156,14 @@ int ElastOrtho3D::ElemLinear( Elem* E,
 #endif
       //--------------------------------------------------------- 18+9= 27 FLOP
       // [S][R] : matmul3x3x3, R is transposed
-      //for(int i=0; i<9; i++){ A[i]=0.0; };
+      for(int i=0; i<9; i++){ A[i]=0.0; };
 //#pragma omp simd
+          for(uint j=0; j<3; j++){
+        for(uint k=0; k<3; k++){ //A[3* k+i ]=0.0;
       for(uint i=0; i<3; i++){
         //for(int k=0; k<3; k++){ A[3* i+k ]=0.0;
-        for(uint k=0; k<3; k++){ A[3* k+i ]=0.0;
-          for(uint j=0; j<3; j++){
             //A[3* i+k ] += S[3* i+j ] * R[3* j+k ];
-            A[(3* k+i) ] += S[(3* i+j) ] * R[3* j+k ];// A is transposed
+            A[(3* k+i) ] += S[(3* j+i) ] * R[3* j+k ];// A is transposed
       };};};//-------------------------------------------------- 27*2 = 54 FLOP
       //NOTE [A] is not symmetric Cauchy stress.
       //NOTE Cauchy stress is ( A + AT ) /2
