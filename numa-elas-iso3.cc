@@ -93,10 +93,11 @@ int ElastIso3D::ElemLinear( Elem* E,
       for(uint i=0; i< 9 ; i++){ H[i]=0.0; };
       //for(uint i=0; i<(Ne) ; i++){ G[i]=0.0; };
       for(uint k=0; k<Nc; k++){
-        const FLOAT_PHYS * RESTRICT intpp = &intp_shpg[ip*Ne+k*3];
+        //const FLOAT_PHYS * RESTRICT intpp = &intp_shpg[ip*Ne+k*3];
         for(uint i=0; i<3 ; i++){ G[3* k+i ]=0.0;
           for(uint j=0; j<3 ; j++){
-            G[(3* k+i) ] += jac[3* i+j ] * intpp[j];//intp_shpg[ip*Ne+ 3* k+j ];
+            G[(3* k+i) ] += jac[3* i+j ] * intp_shpg[ip*Ne+ 3* k+j ];
+            //G[(3* k+i) ] += jac[3* i+j ] * intpp[j]
           };
           for(uint j=0; j<3 ; j++){
             H[(3* i+j) ] += G[(3* k+i) ] * u[ndof* k+j ];
