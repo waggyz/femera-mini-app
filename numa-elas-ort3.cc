@@ -102,7 +102,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       //A = MatMul3xNx3T( G,u );
       for(uint i=0; i< 9 ; i++){ A[i]=0.0;};// H[i]=0.0; B[i]=0.0; };
       //for(uint i=0; i<(Ne) ; i++){ G[i]=0.0; };
-//#pragma omp simd
+#pragma omp simd
       for(uint k=0; k<Nc; k++){
         //const FLOAT_PHYS * RESTRICT intpp = &intp_shpg[ip*Ne+k*3];
         for(uint i=0; i<3 ; i++){ G[3* k+i ]=0.0;
@@ -174,7 +174,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         printf("%+9.2e ",S[j]);
       }; printf("\n");
 #endif
-//#pragma omp simd
+#pragma omp simd
       for(uint i=0; i<Nc; i++){
         for(uint k=0; k<3; k++){
           for(uint j=0; j<3; j++){
@@ -197,6 +197,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
 #endif
     };//end intp loop
     const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
+#pragma omp simd
     for (uint i=0; i<Nc; i++){
       for(uint j=0; j<3; j++){
         //sys_f[3*Econn[Nc*ie+i]+j] += f[(3*i+j)];
