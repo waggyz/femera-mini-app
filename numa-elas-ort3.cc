@@ -179,6 +179,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         for(uint k=0; k<3; k++){
           for(uint j=0; j<3; j++){
             f[(3* i+k) ] += G[(3* i+j) ] * A[(3* k+j) ];
+            //f[(Nc* k+i) ] += G[(Nc* j+i) ] * A[(3* k+j) ];
       };};};//---------------------------------------------- N*3*6 = 18*N FLOP
       // This is way slower:
       //for(uint i=0; i<Nc; i++){
