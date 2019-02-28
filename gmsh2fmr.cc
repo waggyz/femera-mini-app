@@ -625,7 +625,7 @@ int main( int argc, char** argv ) {
     pname = ss.str();
     //pfile = fopen(pname.c_str(),"w");
     std::ofstream abqfile(pname);
-    if(verbosity>1){
+    if(verbosity>0){
       std::cout << "Exporting Abaqus file "<< pname<<"..." <<'\n'; };
     // Create file with header
     abqfile << "*HEADING" <<'\n';
@@ -665,12 +665,23 @@ int main( int argc, char** argv ) {
         abqfile <<'\n';
       };
     };
+    for(int part_i=part_0;part_i<(part_n+part_0);part_i++){
+      auto E=M->list_elem[part_i];
+      abqfile << "*ELSET,ELSET=Part_"<< part_i;// <<'\n';
+      for(uint e=0; e<E->elem_n; e++){
+        if( (e%40)==0){ abqfile<<'\n'; }else{ abqfile<<","; };
+        //if(!(e%40)==0){ abqfile<<","; };
+        abqfile << E->elem_glid[e];
+      };
+      abqfile <<'\n';
+    };
     // Define Materials
-    abqfile << "*MATERIAL, TYPE=ISOTROPIC, NAME=MAT1" <<'\n';
+    abqfile << "*MATERIAL, TYPE=ISOTROPIC, NAME=MAT_0" <<'\n';
     abqfile << "*ELASTIC" <<'\n';
-    auto mp=mtrl_part[part_0];//FIXME
-    if(mp.size()>1){ mp=mtrl_part[1];
-      abqfile << mp[0] <<','<< mp[1]; };
+    auto mp=mtrl_part[0];//part_0];//FIXME
+    if(mp.size()>1){// mp=mtrl_part[1];
+      abqfile << mp[0] <<','<< mp[1]; }
+    else{ mp=mtrl_part[1]; abqfile << mp[0] <<','<< mp[1]; };
     //if(mp.size()<2){ mp=mtrl_part[1]; };//FIXME
     //for(uint i=0;i<mp.size();i++){
     //  if(i<2){//FIXME Only iso
@@ -678,6 +689,7 @@ int main( int argc, char** argv ) {
     //};
     abqfile << '\n';
     // Assign Materials to Elements
+    abqfile << "*SOLID SECTION, MATERIAL=MAT_0, ELSET=ALLTETS" <<'\n';
     // Append BCs
     if((M->bc0_nf.size()+M->bcs_vals.size())>0){
       abqfile << "*BOUNDARY" <<'\n';
