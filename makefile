@@ -103,7 +103,7 @@ gmsh2fmr-ser:
 	./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu 0.001 \
 	-M1 -E100e9 -N0.3 \
 	-M2 -E100e9 -N0.3 -Z1 -X0 -Z0 \
-	-v3 -ap cube/unit1p2n2;
+	-v3 -aqp cube/unit1p2n2;
 
 gmsh2fmr-rve:
 	mv -f gmsh2fmr gmsh2fmr.old 2>/dev/null ;\

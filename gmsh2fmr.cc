@@ -38,7 +38,7 @@ int main( int argc, char** argv ) {
   std::string pname,oriname;
   INT_MESH_PART part_0=0, part_n=0;
   Gmsh* M = new Gmsh();
-  bool save_asc=false, save_bin=false, save_csv=false;
+  bool save_asc=false, save_bin=false, save_csv=false, save_abq=false;
   bool is_part=false;
   std::unordered_map<int,std::vector<FLOAT_PHYS>> mtrl_part,mtrl_volu;
   bool rotfile=false, allrand=false;// Random orientations
@@ -62,7 +62,7 @@ int main( int argc, char** argv ) {
     //
     opterr = 0; int c;
     while ((c = getopt (argc, argv,
-      "abcpv:t:n:@:xyz0u:f:M:X:Y:Z:E:N:G:C:B:O:R")) != -1){
+      "abcqpv:t:n:@:xyz0u:f:M:X:Y:Z:E:N:G:C:B:O:R")) != -1){
       // x:  x requires an argument
       mtrldone=true;
       switch (c) {
@@ -74,6 +74,7 @@ int main( int argc, char** argv ) {
         case 'a':{ save_asc=true; break; }
         case 'b':{ save_bin=true; break; }
         case 'c':{ save_csv=true; break; }
+        case 'q':{ save_abq=true; break; }
         // Boundary Conditions
         case 'n':{ nodelist.push_back(atoi(optarg)); uval=0.0; fval=0.0; break; }
         case 't':{ tagslist.push_back(atoi(optarg)); uval=0.0; fval=0.0; break; }
@@ -562,7 +563,7 @@ int main( int argc, char** argv ) {
     };
   };
   if(save_asc | save_bin){
-    if(verbosity==1){ 
+    if(verbosity==1){
       printf("Saving and appending physics to partitions...\n"); };
 #pragma omp parallel for schedule(static)
     for(int part_i=part_0;part_i<(part_n+part_0);part_i++){
@@ -576,7 +577,7 @@ int main( int argc, char** argv ) {
       ss << ".fmr";
       std::string pname = ss.str();
       if(verbosity>1){
-      std::cout << "Saving part " << pname << "..." <<'\n'; };
+        std::cout << "Saving part " << pname << "..." <<'\n'; };
       //if(save_bin){
       //  M->list_elem[part_i]->SavePartFMR( pname.c_str(), true  ); };
       if(save_asc){
@@ -615,8 +616,89 @@ int main( int argc, char** argv ) {
           std::cout << "Appending physics to " << pname << "..." <<'\n'; };
         Y->SavePartFMR( pname.c_str(), false );
       };
+    };//end partition loop
+  };//end Femera format save
+  if(save_abq){//FIXME Move to a method
+    std::stringstream ss;
+    ss << bname;;
+    ss << ".inp";
+    pname = ss.str();
+    //pfile = fopen(pname.c_str(),"w");
+    std::ofstream abqfile(pname);
+    if(verbosity>1){
+      std::cout << "Exporting Abaqus file "<< pname<<"..." <<'\n'; };
+    // Create file with header
+    abqfile << "*HEADING" <<'\n';
+    abqfile << "Exported using gmsh2fmr" <<'\n';
+    //
+    // Append nodes
+    abqfile << "*NODE" <<'\n';
+    for(int part_i=part_0;part_i<(part_n+part_0);part_i++){
+      auto E=M->list_elem[part_i];
+      for(uint n=E->halo_remo_n; n<E->node_n; n++){
+        abqfile << E->node_glid[n];
+        for(uint i=0;i<E->mesh_d;i++){
+          abqfile << "," << E->vert_coor[E->mesh_d*n+i]; };
+        abqfile << '\n';
+      };
     };
-  };
+    // Append Elements
+    //std::string abq_el_str = "3D4";
+    uint c=M->list_elem[part_0]->elem_conn_n;
+    //if( c<1 ){ c=M->list_elem[1]->elem_conn_n; };
+    abqfile << "*ELEMENT, TYPE=C3D"<< c <<", ELSET=ALLTETS"<<'\n';
+    for(int part_i=part_0;part_i<(part_n+part_0);part_i++){
+      auto E=M->list_elem[part_i];
+      uint Nc=E->elem_conn_n;
+      for(uint e=0; e<E->elem_n; e++){
+        abqfile << E->elem_glid[e];
+        switch(c){
+          case(10):{
+            std::vector<uint> xn ={0,1,2,3, 4,5,6,7,9,8};// gmsh-> abq node number
+            for(uint i=0; i<Nc; i++){
+              abqfile <<"," << E->node_glid[ E->elem_conn[Nc* e+xn[i] ]]; };
+            break;}
+          default:{
+            for(uint i=0; i<Nc; i++){
+              abqfile <<"," << E->node_glid[ E->elem_conn[Nc* e+i ]]; }; }
+        };
+        abqfile <<'\n';
+      };
+    };
+    // Define Materials
+    abqfile << "*MATERIAL, TYPE=ISOTROPIC, NAME=MAT1" <<'\n';
+    abqfile << "*ELASTIC" <<'\n';
+    auto mp=mtrl_part[part_0];//FIXME
+    if(mp.size()>1){ mp=mtrl_part[1];
+      abqfile << mp[0] <<','<< mp[1]; };
+    //if(mp.size()<2){ mp=mtrl_part[1]; };//FIXME
+    //for(uint i=0;i<mp.size();i++){
+    //  if(i<2){//FIXME Only iso
+    //    abqfile << mp[i]; if(i<(mp.size()-1)){ abqfile  <<","; };
+    //};
+    abqfile << '\n';
+    // Assign Materials to Elements
+    // Append BCs
+    if((M->bc0_nf.size()+M->bcs_vals.size())>0){
+      abqfile << "*BOUNDARY" <<'\n';
+      int n; INT_DOF f; FLOAT_SOLV v;
+      for(auto t : M->bc0_nf  ){ std::tie(n,f)=t;
+        abqfile << n << ","<< uint(f+1) << "," << uint(f+1) <<'\n';
+      };
+      for(auto t : M->bcs_vals  ){ std::tie(n,f,v)=t;
+        abqfile << n << "," << uint(f+1) <<","<< uint(f+1) <<"," << v <<'\n';
+      };
+    };
+    // Start a load step
+    abqfile << "*STEP, NAME=STEP-1, PERTURBATION" <<'\n';
+    abqfile << "*STATIC" <<'\n';
+    //FIXME Append load
+    abqfile << "*NODE PRINT" <<'\n';
+    abqfile << "COORD, U" <<'\n';
+    abqfile << "*END STEP" <<'\n';
+    //if(pfile!=NULL){ fclose (pfile); };
+    abqfile.close();
+  };// end Abaqus inp file export
   //if(save_bin){
   //  std::cout << "ERROR Binary save not yet implemented. " << '\n';
   //};
