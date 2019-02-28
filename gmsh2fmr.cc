@@ -646,8 +646,9 @@ int main( int argc, char** argv ) {
     //std::string abq_el_str = "3D4";
     uint c=M->list_elem[part_0]->elem_conn_n;
     //if( c<1 ){ c=M->list_elem[1]->elem_conn_n; };
-    abqfile << "*ELEMENT, TYPE=C3D"<< c <<", ELSET=ALLTETS"<<'\n';
+    //abqfile << "*ELEMENT, TYPE=C3D"<< c <<", ELSET=ALLTETS"<<'\n';
     for(int part_i=part_0;part_i<(part_n+part_0);part_i++){
+      abqfile << "*ELEMENT, TYPE=C3D"<< c <<", ELSET=Volume" << part_i <<'\n';
       auto E=M->list_elem[part_i];
       uint Nc=E->elem_conn_n;
       for(uint e=0; e<E->elem_n; e++){
@@ -665,9 +666,22 @@ int main( int argc, char** argv ) {
         abqfile <<'\n';
       };
     };
+    // Node sets for Sai's ScIFEN converter
+    //for(int part_i=part_0;part_i<(part_n+part_0);part_i++){
+    //  auto E=M->list_elem[part_i];
+    //  abqfile << "*NODESET,NODESET=n_POLYCRYSTAL-"<< part_i;
+    //  for(uint e=0; e<E->elem_n; e++){
+    //    if( (e%40)==0){ abqfile<<'\n'; }else{ abqfile<<","; };
+    //    //if(!(e%40)==0){ abqfile<<","; };
+    //    abqfile << E->elem_glid[e];
+    //  };
+    //  abqfile <<'\n';
+    //};
+    // Element sets for Sai's ScIFEN converter
     for(int part_i=part_0;part_i<(part_n+part_0);part_i++){
       auto E=M->list_elem[part_i];
-      abqfile << "*ELSET,ELSET=Part_"<< part_i;// <<'\n';
+      //abqfile << "*ELSET,ELSET=Part_"<< part_i;
+      abqfile << "*ELSET,ELSET=PhysicalVolume"<< part_i;
       for(uint e=0; e<E->elem_n; e++){
         if( (e%40)==0){ abqfile<<'\n'; }else{ abqfile<<","; };
         //if(!(e%40)==0){ abqfile<<","; };
