@@ -24,10 +24,11 @@ endif
 # Check if using intel compiler on k3 or k4
 ifdef INTEL_PYTHONHOME
 CXX=icc
-CPPFLAGS=-std=c++11 -Wall -Wextra -Ofast -xHost \
+CPPFLAGS=-std=c++11 -Wall -Wextra -O2 -xcore-avx2 -axSKYLAKE-AVX512 \
  -ffast-math -no-fast-transcendentals \
  -qopt-zmm-usage=high -no-inline-max-size -no-inline-max-total-size -g
 SERFLAGS=-fno-alias -diag-disable 3180
+OMPFLAGS=-qopenmp
 NCPU=40
 NUMA=6
 endif
