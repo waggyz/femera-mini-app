@@ -27,14 +27,14 @@ int ElastOrtho3D::Setup( Elem* E ){
 int ElastOrtho3D::ElemLinear( Elem* E,
   RESTRICT Phys::vals &sys_f, const RESTRICT Phys::vals &sys_u ){
   //FIXME Cleanup local variables.
-  const uint ndof   = 3;//this->ndof_n
+  const int ndof   = 3;//this->ndof_n
   //const int mesh_d = 3;//E->elem_d;
-  const uint  Nj =10;//,d2=9;//mesh_d*mesh_d;
+  const int  Nj =10;//,d2=9;//mesh_d*mesh_d;
   //
   const INT_MESH elem_n = E->elem_n;
-  const uint     Nc = E->elem_conn_n;// Number of Nodes/Element
-  const uint     Ne = ndof*Nc;
-  const uint intp_n = uint(E->gaus_n);
+  const int     Nc = E->elem_conn_n;// Number of Nodes/Element
+  const int     Ne = ndof*Nc;
+  const int intp_n = int(E->gaus_n);
   //
   INT_MESH e0=0, ee=elem_n;
   if(E->do_halo==true){ e0=0; ee=E->halo_elem_n;
@@ -68,7 +68,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   const FLOAT_PHYS* RESTRICT         R = &this->mtrl_rotc[0];
 #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
-  for(uint j=0;j<mtrl_matc.size();j++){
+  for(int j=0;j<mtrl_matc.size();j++){
     //if(j%mesh_d==0){printf("\n");}
     printf("%+9.2e ",C[j]);
   }; printf("\n");
@@ -80,7 +80,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     //std::memcpy( &conn, &Econn[Nc*e0], sizeof(  INT_MESH)*Nc);
     //std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
     const   INT_MESH* RESTRICT c = &Econn[Nc*e0];
-    for (uint i=0; i<Nc; i++){
+    for (int i=0; i<Nc; i++){
       std::memcpy( &    u[ndof*i],
                    &sysu0[c[i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
   };
@@ -101,28 +101,28 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     //  std::memcpy( &    u[ndof*i],
     //               //&sys_u[Econn[Nc*ie+i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
     //               &sysu0[conn[i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
-    for(uint i=0;i<Ne;i++){ f[i]=0.0; };
-    for(uint ip=0; ip<intp_n; ip++){
+    for(int i=0;i<Ne;i++){ f[i]=0.0; };
+    for(int ip=0; ip<intp_n; ip++){
       //G = MatMul3x3xN( jac,shg );
       //A = MatMul3xNx3T( G,u );
-      for(uint i=0; i< 9 ; i++){ A[i]=0.0;};// H[i]=0.0; B[i]=0.0; };
+      for(int i=0; i< 9 ; i++){ A[i]=0.0;};// H[i]=0.0; B[i]=0.0; };
       //for(uint i=0; i<(Ne) ; i++){ G[i]=0.0; };
 #pragma omp simd
-      for(uint k=0; k<Nc; k++){
+      for(int k=0; k<Nc; k++){
         //const FLOAT_PHYS * RESTRICT intpp = &intp_shpg[ip*Ne+k*3];
-        for(uint i=0; i<3 ; i++){ G[3* k+i ]=0.0;
-          for(uint j=0; j<3 ; j++){
+        for(int i=0; i<3 ; i++){ G[3* k+i ]=0.0;
+          for(int j=0; j<3 ; j++){
             //G[(3* k+i) ] += jac[3* i+j ] * intpp[j];
             G[3* k+i ] += jac[3* i+j ] * intp_shpg[ip*Ne+ 3* k+j ];
           };
-          for(uint j=0; j<3 ; j++){
+          for(int j=0; j<3 ; j++){
             A[(3* i+j) ] += G[(3* k+i) ] * u[ndof* k+j ];
           };
         };
       };//------------------------------------------------- N*3*6*2 = 36*N FLOP
 #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
-      for(uint j=0;j<H.size();j++){
+      for(int j=0;j<H.size();j++){
         if(j%mesh_d==0){printf("\n");}
         printf("%+9.2e ",H[j]);
       }; printf("\n");
@@ -131,16 +131,16 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
         //std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
         const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
-        for (uint i=0; i<Nc; i++){
+        for (int i=0; i<Nc; i++){
           std::memcpy( & u[ndof*i],
                        & sysu0[c[i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
       }; };
       // [H] Small deformation tensor
       // [H][RT] : matmul3x3x3T
 //#pragma omp simd
-      for(uint i=0; i<3; i++){
-        for(uint k=0; k<3; k++){ H[3* i+k ]=0.0;
-          for(uint j=0; j<3; j++){
+      for(int i=0; i<3; i++){
+        for(int k=0; k<3; k++){ H[3* i+k ]=0.0;
+          for(int j=0; j<3; j++){
             H[(3* i+k) ] += A[(3* i+j)] * R[3* k+j ];
       };};};//---------------------------------------------- 27*2 =      54 FLOP
       //
@@ -154,7 +154,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
 #if VERB_MAX>10
       printf( "Stress (Natural Coords):");
-      for(uint j=0;j<9;j++){
+      for(int j=0;j<9;j++){
         if(j%3==0){printf("\n");}
         printf("%+9.2e ",S[j]);
       }; printf("\n");
@@ -163,9 +163,9 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       // [S][R] : matmul3x3x3, R is transposed
       for(int i=0; i<9; i++){ A[i]=0.0; };
 //#pragma omp simd
-          for(uint j=0; j<3; j++){
-        for(uint k=0; k<3; k++){ //A[3* k+i ]=0.0;
-      for(uint i=0; i<3; i++){
+          for(int j=0; j<3; j++){
+        for(int k=0; k<3; k++){ //A[3* k+i ]=0.0;
+      for(int i=0; i<3; i++){
         //for(int k=0; k<3; k++){ A[3* i+k ]=0.0;
             //A[3* i+k ] += S[3* i+j ] * R[3* j+k ];
             A[(3* k+i) ] += S[(3* j+i) ] * R[3* j+k ];// A is transposed
@@ -174,15 +174,15 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       //NOTE Cauchy stress is ( A + AT ) /2
 #if VERB_MAX>10
       printf( "Rotated Stress (Global Coords):");
-      for(uint j=0;j<9;j++){
+      for(int j=0;j<9;j++){
         if(j%3==0){printf("\n");}
         printf("%+9.2e ",S[j]);
       }; printf("\n");
 #endif
 #pragma omp simd
-      for(uint i=0; i<Nc; i++){
-        for(uint k=0; k<3; k++){
-          for(uint j=0; j<3; j++){
+      for(int i=0; i<Nc; i++){
+        for(int k=0; k<3; k++){
+          for(int j=0; j<3; j++){
             f[(3* i+k) ] += G[(3* i+j) ] * A[(3* k+j) ];
             //f[(Nc* k+i) ] += G[(Nc* j+i) ] * A[(3* k+j) ];
       };};};//---------------------------------------------- N*3*6 = 18*N FLOP
@@ -195,7 +195,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       //};};};};
 #if VERB_MAX>10
       printf( "ff:");
-      for(uint j=0;j<Ne;j++){
+      for(int j=0;j<Ne;j++){
         if(j%mesh_d==0){printf("\n");}
         printf("%+9.2e ",f[j]);
       }; printf("\n");
@@ -203,8 +203,8 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     };//end intp loop
     const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
 #pragma omp simd
-    for (uint i=0; i<Nc; i++){
-      for(uint j=0; j<3; j++){
+    for (int i=0; i<Nc; i++){
+      for(int j=0; j<3; j++){
         //sys_f[3*Econn[Nc*ie+i]+j] += f[(3*i+j)];
         sys_f[3*conn[i]+j] += f[(3*i+j)];
     }; };//--------------------------------------------------- N*3 =  3*N FLOP
