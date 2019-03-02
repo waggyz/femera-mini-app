@@ -44,18 +44,21 @@ int ElastIso3D::ElemLinear( Elem* E,
   FLOAT_PHYS dw, G[Ne], u[Ne], f[Ne];
   FLOAT_PHYS H[9], S[9];
   //
-  //FLOAT_PHYS intp_shpg[intp_n*Ne];
-  //std::copy( &E->intp_shpg[0],
-  //           &E->intp_shpg[intp_n*Ne], intp_shpg );
-  //FLOAT_PHYS wgt[intp_n];
-  //std::copy( &E->gaus_weig[0],
-  //           &E->gaus_weig[intp_n], wgt );
-  //FLOAT_PHYS C[this->mtrl_matc.size()];
-  //std::copy( &this->mtrl_matc[0],
-  //           &this->mtrl_matc[this->mtrl_matc.size()], C );
-  const FLOAT_PHYS* RESTRICT intp_shpg = &E->intp_shpg[0];
-  const FLOAT_PHYS* RESTRICT       wgt = &E->gaus_weig[0];
-  const FLOAT_PHYS* RESTRICT         C = &this->mtrl_matc[0];
+  FLOAT_PHYS Tintp_shpg[intp_n*Ne];
+  std::copy( &E->intp_shpg[0],
+             &E->intp_shpg[intp_n*Ne], Tintp_shpg );
+  FLOAT_PHYS Twgt[intp_n];
+  std::copy( &E->gaus_weig[0],
+             &E->gaus_weig[intp_n], Twgt );
+  FLOAT_PHYS TC[this->mtrl_matc.size()];
+  std::copy( &this->mtrl_matc[0],
+             &this->mtrl_matc[this->mtrl_matc.size()], TC );
+  const FLOAT_PHYS* RESTRICT intp_shpg = &Tintp_shpg[0];
+  const FLOAT_PHYS* RESTRICT       wgt = &Twgt[0];
+  const FLOAT_PHYS* RESTRICT         C = &TC[0];
+  //const FLOAT_PHYS* RESTRICT intp_shpg = &E->intp_shpg[0];
+  //const FLOAT_PHYS* RESTRICT       wgt = &E->gaus_weig[0];
+  //const FLOAT_PHYS* RESTRICT         C = &this->mtrl_matc[0];
 #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
   for(uint j=0;j<mtrl_matc.size();j++){
@@ -133,7 +136,7 @@ int ElastIso3D::ElemLinear( Elem* E,
       S[2]=( H[2] + H[6] )*C[2]*dw;// S[6]= S[2];//Sxz Szx
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
       //------------------------------------------------------- 18+9 = 27 FLOP
-#pragma omp simd
+//#pragma omp simd
       for(int i=0; i<Nc; i++){
         for(int k=0; k<3; k++){
           for(int j=0; j<3; j++){
@@ -148,7 +151,7 @@ int ElastIso3D::ElemLinear( Elem* E,
 #endif
     };//end intp loop
     const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
-#pragma omp simd
+//#pragma omp simd
     for (int i=0; i<Nc; i++){
       for(int j=0; j<3; j++){
         //sys_f[3*Econn[Nc*ie+i]+j] += f[(3*i+j)];

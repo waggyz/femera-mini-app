@@ -49,23 +49,26 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   FLOAT_PHYS dw, G[Ne], u[Ne],f[Ne];
   FLOAT_PHYS H[9], S[9], A[9];//, B[9];
   //
-  //FLOAT_PHYS intp_shpg[intp_n*Ne];
-  //std::copy( &E->intp_shpg[0],// local copy
-  //           &E->intp_shpg[intp_n*Ne], intp_shpg );
-  //FLOAT_PHYS wgt[intp_n];
-  //std::copy( &E->gaus_weig[0],
-  //           &E->gaus_weig[intp_n], wgt );
-  //FLOAT_PHYS C[this->mtrl_matc.size()];
-  //std::copy( &this->mtrl_matc[0],
-  //           &this->mtrl_matc[this->mtrl_matc.size()], C );
-  //const FLOAT_PHYS R[9] = {
-  //  mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
-  //  mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
-  //  mtrl_rotc[6],mtrl_rotc[7],mtrl_rotc[8]};
-  const FLOAT_PHYS* RESTRICT intp_shpg = &E->intp_shpg[0];
-  const FLOAT_PHYS* RESTRICT       wgt = &E->gaus_weig[0];
-  const FLOAT_PHYS* RESTRICT         C = &this->mtrl_matc[0];
-  const FLOAT_PHYS* RESTRICT         R = &this->mtrl_rotc[0];
+  FLOAT_PHYS Tintp_shpg[intp_n*Ne];
+  std::copy( &E->intp_shpg[0],// local copy
+             &E->intp_shpg[intp_n*Ne], Tintp_shpg );
+  FLOAT_PHYS Twgt[intp_n];
+  std::copy( &E->gaus_weig[0],
+             &E->gaus_weig[intp_n], Twgt );
+  FLOAT_PHYS TC[this->mtrl_matc.size()];
+  std::copy( &this->mtrl_matc[0],
+             &this->mtrl_matc[this->mtrl_matc.size()], TC );
+  const FLOAT_PHYS R[9] = {
+    mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
+    mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
+    mtrl_rotc[6],mtrl_rotc[7],mtrl_rotc[8]};
+  const FLOAT_PHYS* RESTRICT intp_shpg = &Tintp_shpg[0];
+  const FLOAT_PHYS* RESTRICT       wgt = &Twgt[0];
+  const FLOAT_PHYS* RESTRICT         C = &TC[0];
+  //const FLOAT_PHYS* RESTRICT intp_shpg = &E->intp_shpg[0];
+  //const FLOAT_PHYS* RESTRICT       wgt = &E->gaus_weig[0];
+  //const FLOAT_PHYS* RESTRICT         C = &this->mtrl_matc[0];
+  //const FLOAT_PHYS* RESTRICT         R = &this->mtrl_rotc[0];
 #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
   for(int j=0;j<mtrl_matc.size();j++){
@@ -107,7 +110,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       //A = MatMul3xNx3T( G,u );
       for(int i=0; i< 9 ; i++){ A[i]=0.0;};// H[i]=0.0; B[i]=0.0; };
       //for(uint i=0; i<(Ne) ; i++){ G[i]=0.0; };
-#pragma omp simd
+//#pragma omp simd
       for(int k=0; k<Nc; k++){
         //const FLOAT_PHYS * RESTRICT intpp = &intp_shpg[ip*Ne+k*3];
         for(int i=0; i<3 ; i++){ G[3* k+i ]=0.0;
@@ -179,7 +182,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         printf("%+9.2e ",S[j]);
       }; printf("\n");
 #endif
-#pragma omp simd
+//#pragma omp simd
       for(int i=0; i<Nc; i++){
         for(int k=0; k<3; k++){
           for(int j=0; j<3; j++){
@@ -202,7 +205,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
 #endif
     };//end intp loop
     const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
-#pragma omp simd
+//#pragma omp simd
     for (int i=0; i<Nc; i++){
       for(int j=0; j<3; j++){
         //sys_f[3*Econn[Nc*ie+i]+j] += f[(3*i+j)];
