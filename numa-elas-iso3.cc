@@ -129,7 +129,8 @@ int ElastIso3D::ElemLinear( Elem* E,
           std::memcpy( & u[ndof*i],
                        & sysu0[c[i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
       }; };
-      //
+//#define MTRL_FMA
+#ifndef MTRL_FMA
       S[0]=(C[0]* H[0] + C[1]* H[4] + C[1]* H[8])*dw;//Sxx
       S[4]=(C[1]* H[0] + C[0]* H[4] + C[1]* H[8])*dw;//Syy
       S[8]=(C[1]* H[0] + C[1]* H[4] + C[0]* H[8])*dw;//Szz
@@ -139,6 +140,21 @@ int ElastIso3D::ElemLinear( Elem* E,
       S[2]=( H[2] + H[6] )*C[2]*dw;// S[6]= S[2];//Sxz Szx
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];// 12 FMA, 15 OPS
       //------------------------------------------------------- 18+9 = 27 FLOP
+#endif
+#ifdef MTRL_FMA
+      for(int i=0;i<9;i++){ S[i]=dw; };
+      S[0]*=C[0]* H[0] + C[1]* H[4] + C[1]* H[8];//Sxx
+      S[4]*=C[1]* H[0] + C[0]* H[4] + C[1]* H[8];//Syy
+      S[8]*=C[1]* H[0] + C[1]* H[4] + C[0]* H[8];//Szz
+      //
+      S[1]*=C[2]* H[1] + C[2]* H[3];// S[3]= S[1];//Sxy Syx
+      S[2]*=C[2]* H[2] + C[2]* H[6];// S[6]= S[2];//Sxz Szx
+      S[3]*=C[2]* H[3] + C[2]* H[1];// S[3]= S[1];//Sxy Syx
+      S[5]*=C[2]* H[5] + C[2]* H[7];// S[7]= S[5];//Syz Szy
+      S[6]*=C[2]* H[6] + C[2]* H[2];// S[6]= S[2];//Sxz Szx
+      S[7]*=C[2]* H[7] + C[2]* H[5];// S[7]= S[5];//Syz Szy
+      //for(int i=0;i<9;i++){ S[i]*=dw; };
+#endif
 //#pragma omp simd
       for(int i=0; i<Nc; i++){
         for(int k=0; k<3; k++){

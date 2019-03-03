@@ -125,7 +125,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
             A[(3* i+j) ] += G[(3* k+i) ] * u[ndof* k+j ];
           };
         };
-      };//------------------------------------------------- N*3*6*2 = 36*N FLOP
+      };//------------------------------------------------ N*3*6*2 = 36*N FLOP
 #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
       for(int j=0;j<H.size();j++){
@@ -148,8 +148,9 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         for(int k=0; k<3; k++){ H[3* i+k ]=0.0;
           for(int j=0; j<3; j++){
             H[(3* i+k) ] += A[(3* i+j)] * R[3* k+j ];
-      };};};//---------------------------------------------- 27*2 =      54 FLOP
-      //
+      };};};//------------------------------------------------- 27*2 = 54 FLOP
+//#define MTRL_FMA
+#ifndef MTRL_FMA
       S[0]=(C[0]* H[0] + C[3]* H[4] + C[5]* H[8])*dw;//Sxx
       S[4]=(C[3]* H[0] + C[1]* H[4] + C[4]* H[8])*dw;//Syy
       S[8]=(C[5]* H[0] + C[4]* H[4] + C[2]* H[8])*dw;//Szz
@@ -158,6 +159,22 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       S[5]=( H[5] + H[7] )*C[7]*dw;// S[7]= S[5];//Syz Szy
       S[2]=( H[2] + H[6] )*C[8]*dw;// S[6]= S[2];//Sxz Szx
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
+      //-------------------------------------------------------- 18+9= 27 FLOP
+#endif
+#ifdef MTRL_FMA
+      for(int i=0;i<9;i++){ S[i]=dw; };
+      S[0]*=C[0]* H[0] + C[3]* H[4] + C[5]* H[8];//Sxx
+      S[4]*=C[3]* H[0] + C[1]* H[4] + C[4]* H[8];//Syy
+      S[8]*=C[5]* H[0] + C[4]* H[4] + C[2]* H[8];//Szz
+      //
+      S[1]*=C[6]* H[1] + C[6]* H[3];// S[3]= S[1];//Sxy Syx
+      S[2]*=C[8]* H[2] + C[8]* H[6];// S[6]= S[2];//Sxz Szx
+      S[3]*=C[6]* H[3] + C[6]* H[1];// S[3]= S[1];//Sxy Syx
+      S[5]*=C[7]* H[5] + C[7]* H[7];// S[7]= S[5];//Syz Szy
+      S[6]*=C[8]* H[6] + C[8]* H[2];// S[6]= S[2];//Sxz Szx
+      S[7]*=C[7]* H[7] + C[7]* H[5];// S[7]= S[5];//Syz Szy
+      //for(int i=0;i<9;i++){ S[i]*=dw; };
+#endif
 #if VERB_MAX>10
       printf( "Stress (Natural Coords):");
       for(int j=0;j<9;j++){
@@ -165,7 +182,6 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         printf("%+9.2e ",S[j]);
       }; printf("\n");
 #endif
-      //--------------------------------------------------------- 18+9= 27 FLOP
       // [S][R] : matmul3x3x3, R is transposed
       for(int i=0; i<9; i++){ A[i]=0.0; };
 //#pragma omp simd
@@ -175,7 +191,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         //for(int k=0; k<3; k++){ A[3* i+k ]=0.0;
             //A[3* i+k ] += S[3* i+j ] * R[3* j+k ];
             A[(3* k+i) ] += S[(3* j+i) ] * R[3* j+k ];// A is transposed
-      };};};//-------------------------------------------------- 27*2 = 54 FLOP
+      };};};//------------------------------------------------- 27*2 = 54 FLOP
       //NOTE [A] is not symmetric Cauchy stress.
       //NOTE Cauchy stress is ( A + AT ) /2
 #if VERB_MAX>10
