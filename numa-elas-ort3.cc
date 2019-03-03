@@ -46,8 +46,9 @@ int ElastOrtho3D::ElemLinear( Elem* E,
 #endif
   //INT_MESH   conn[Nc];
   //FLOAT_MESH jac[Nj];//, det;
-  FLOAT_PHYS dw, G[Ne], u[Ne],f[Ne];
-  FLOAT_PHYS H[9], S[9], A[9];//, B[9];
+  //FLOAT_PHYS dw, G[Ne], u[Ne],f[Ne];
+  //FLOAT_PHYS H[9], S[9], A[9];//, B[9];
+  FLOAT_PHYS u[Ne], f[Ne];
   //
   FLOAT_PHYS Tintp_shpg[intp_n*Ne];
   std::copy( &E->intp_shpg[0],// local copy
@@ -89,6 +90,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   };
   //bool fetch_next=false;
   for(INT_MESH ie=e0;ie<ee;ie++){
+    //FLOAT_PHYS f[Ne];
     //if((ie+1)<ee){fetch_next=true;}else{fetch_next=false;};
     //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     //const   INT_MESH* RESTRICT c    = &Econn[Nc*(ie+1)];
@@ -106,6 +108,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     //               &sysu0[conn[i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
     for(int i=0;i<Ne;i++){ f[i]=0.0; };
     for(int ip=0; ip<intp_n; ip++){
+      FLOAT_PHYS G[Ne], H[9], S[9], A[9];
       //G = MatMul3x3xN( jac,shg );
       //A = MatMul3xNx3T( G,u );
       for(int i=0; i< 9 ; i++){ A[i]=0.0;};// H[i]=0.0; B[i]=0.0; };
@@ -130,7 +133,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         printf("%+9.2e ",H[j]);
       }; printf("\n");
 #endif
-      dw = jac[9] * wgt[ip];
+      const FLOAT_PHYS dw = jac[9] * wgt[ip];
       if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
         //std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
         const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];

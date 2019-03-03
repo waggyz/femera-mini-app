@@ -41,8 +41,9 @@ int ElastIso3D::ElemLinear( Elem* E,
 #endif
   //INT_MESH   conn[Nc];
   //FLOAT_MESH jac[Nj];//, det;
-  FLOAT_PHYS dw, G[Ne], u[Ne], f[Ne];
-  FLOAT_PHYS H[9], S[9];
+  //FLOAT_PHYS dw, G[Ne], u[Ne], f[Ne];
+  //FLOAT_PHYS H[9], S[9];
+  FLOAT_PHYS u[Ne], f[Ne];
   //
   FLOAT_PHYS Tintp_shpg[intp_n*Ne];
   std::copy( &E->intp_shpg[0],
@@ -78,6 +79,7 @@ int ElastIso3D::ElemLinear( Elem* E,
   };
   //bool fetch_next=false;
   for(INT_MESH ie=e0;ie<ee;ie++){
+    //FLOAT_PHYS f[Ne];
     //if((ie+1)<ee){fetch_next=true;}else{fetch_next=false;};
     //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     const FLOAT_MESH* RESTRICT jac  = &Ejacs[Nj*ie];
@@ -94,6 +96,7 @@ int ElastIso3D::ElemLinear( Elem* E,
     //
     for(int i=0;i<Ne;i++){ f[i]=0.0; };
     for(int ip=0; ip<intp_n; ip++){
+      FLOAT_PHYS G[Ne], H[9], S[9];
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       for(int i=0; i< 9 ; i++){ H[i]=0.0; };
@@ -109,8 +112,8 @@ int ElastIso3D::ElemLinear( Elem* E,
           for(int j=0; j<3 ; j++){
             H[(3* i+j) ] += G[(3* k+i) ] * u[ndof* k+j ];
           };
-        };
-      };//------------------------------------------------- N*3*6*2 = 36*N FLOP
+        };// 36*N FMA FLOP
+      };//------------------------------------------------ N*3*6*2 = 36*N FLOP
 #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
       for(int j=0;j<H.size();j++){
@@ -118,7 +121,7 @@ int ElastIso3D::ElemLinear( Elem* E,
         printf("%+9.2e ",H[j]);
       }; printf("\n");
 #endif
-      dw = jac[9] * wgt[ip];
+      const FLOAT_PHYS dw = jac[9] * wgt[ip];
       if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
         //std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
         const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
@@ -134,13 +137,13 @@ int ElastIso3D::ElemLinear( Elem* E,
       S[1]=( H[1] + H[3] )*C[2]*dw;// S[3]= S[1];//Sxy Syx
       S[5]=( H[5] + H[7] )*C[2]*dw;// S[7]= S[5];//Syz Szy
       S[2]=( H[2] + H[6] )*C[2]*dw;// S[6]= S[2];//Sxz Szx
-      S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
+      S[3]=S[1]; S[7]=S[5]; S[6]=S[2];// 12 FMA, 15 OPS
       //------------------------------------------------------- 18+9 = 27 FLOP
 //#pragma omp simd
       for(int i=0; i<Nc; i++){
         for(int k=0; k<3; k++){
           for(int j=0; j<3; j++){
-            f[(3* i+k) ] += G[(3* i+j) ] * S[(3* k+j) ];
+            f[(3* i+k) ] += G[(3* i+j) ] * S[(3* k+j) ];// 18*N FMA FLOP
       };};};//---------------------------------------------- N*3*6 = 18*N FLOP
 #if VERB_MAX>10
       printf( "f:");
@@ -155,7 +158,7 @@ int ElastIso3D::ElemLinear( Elem* E,
     for (int i=0; i<Nc; i++){
       for(int j=0; j<3; j++){
         //sys_f[3*Econn[Nc*ie+i]+j] += f[(3*i+j)];
-        sys_f[3*conn[i]+j] += f[(3*i+j)];
+        sys_f[3*conn[i]+j] += f[(3*i+j)];// 3*N FMA FLOP
     }; };//--------------------------------------------------- N*3 =  3*N FLOP
   };//end elem loop
   return 0;
