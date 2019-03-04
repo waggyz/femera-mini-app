@@ -343,7 +343,7 @@ int HaloPCG::Iter(){
     time_accum( my_phys_count, phys_start );
     time_start( solv_start );
     //FLOAT_SOLV loca_sum=0.0;
-#pragma omp simd
+#pragma omp simd reduction(+:glob_sum1)
     for(INT_MESH i=hl0; i<sysn; i++){
       //loca_sum += S->sys_p[i] * S->sys_f[i];
       glob_sum1 += S->sys_p[i] * S->sys_f[i];
@@ -362,7 +362,7 @@ int HaloPCG::Iter(){
 #pragma omp simd
     for(INT_MESH i=0; i<hl0; i++){
       S->sys_r[i] -= alpha * S->sys_f[i]; };
-#pragma omp simd
+#pragma omp simd reduction(+:glob_sum2)
     for(INT_MESH i=hl0; i<sysn; i++){
       //r2b += S->sys_r[i] * S->sys_r[i] * S->sys_d[i];
       S->sys_r[i] -= S->sys_f[i] * alpha;
