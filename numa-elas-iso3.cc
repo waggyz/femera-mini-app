@@ -41,9 +41,9 @@ int ElastIso3D::ElemLinear( Elem* E,
 #endif
   //INT_MESH   conn[Nc];
   //FLOAT_MESH jac[Nj];//, det;
-  //FLOAT_PHYS dw, G[Ne], u[Ne], f[Ne];
+  //FLOAT_PHYS dw, G[Ne];
   //FLOAT_PHYS H[9], S[9];
-  FLOAT_PHYS u[Ne], f[Ne];
+  FLOAT_PHYS u[Ne];//, f[Ne];
   //
   FLOAT_PHYS Tintp_shpg[intp_n*Ne];
   std::copy( &E->intp_shpg[0],
@@ -80,7 +80,6 @@ int ElastIso3D::ElemLinear( Elem* E,
   };
   //bool fetch_next=false;
   for(INT_MESH ie=e0;ie<ee;ie++){
-    //FLOAT_PHYS f[Ne];
     //if((ie+1)<ee){fetch_next=true;}else{fetch_next=false;};
     //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     const FLOAT_MESH* RESTRICT jac  = &Ejacs[Nj*ie];
@@ -96,6 +95,7 @@ int ElastIso3D::ElemLinear( Elem* E,
     //               &sysu0[conn[i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
     //
     //for(int i=0;i<Ne;i++){ f[i]=0.0; };
+    FLOAT_PHYS f[Ne];
     const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     for (int i=0; i<Nc; i++){
           std::memcpy( & f[ndof*i],

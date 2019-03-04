@@ -48,7 +48,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   //FLOAT_MESH jac[Nj];//, det;
   //FLOAT_PHYS dw, G[Ne], u[Ne],f[Ne];
   //FLOAT_PHYS H[9], S[9], A[9];//, B[9];
-  FLOAT_PHYS u[Ne], f[Ne];
+  FLOAT_PHYS u[Ne];//, f[Ne];
   //
   FLOAT_PHYS Tintp_shpg[intp_n*Ne];
   std::copy( &E->intp_shpg[0],// local copy
@@ -93,7 +93,6 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   };
   //bool fetch_next=false;
   for(INT_MESH ie=e0;ie<ee;ie++){
-    //FLOAT_PHYS f[Ne];
     //if((ie+1)<ee){fetch_next=true;}else{fetch_next=false;};
     //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     //const   INT_MESH* RESTRICT c    = &Econn[Nc*(ie+1)];
@@ -104,6 +103,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     //           &Econn[Nc*ie+Nc], conn );
     //std::copy( &Ejacs[Nj*ie],
     //           &Ejacs[Nj*ie+Nj], jac );// det=jac[9];
+    FLOAT_PHYS f[Ne];
     const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     for (int i=0; i<Nc; i++){
           std::memcpy( & f[ndof*i],
