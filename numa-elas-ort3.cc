@@ -81,10 +81,14 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
   const FLOAT_SOLV* RESTRICT sysu0 = &sys_u[0];
   FLOAT_SOLV* RESTRICT sysf0 = &sys_f[0];
+  //
+  //INT_MESH* RESTRICT c = &Econn[Nc*e0];
+  //FLOAT_MESH* RESTRICT jac;
+  //
   if(e0<ee){
     //std::memcpy( &conn, &Econn[Nc*e0], sizeof(  INT_MESH)*Nc);
     //std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
-    const   INT_MESH* RESTRICT c = &Econn[Nc*e0];
+    const   INT_MESH* RESTRICT     c = &Econn[Nc*e0];
     for (int i=0; i<Nc; i++){
       std::memcpy( &    u[ndof*i],
                    &sysu0[c[i]*ndof], sizeof(FLOAT_SOLV)*ndof ); };
@@ -96,7 +100,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     //if((ie+1)<ee){fetch_next=true;}else{fetch_next=false;};
     //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     //const   INT_MESH* RESTRICT c    = &Econn[Nc*(ie+1)];
-    const FLOAT_MESH* RESTRICT jac  = &Ejacs[Nj*ie];
+    const FLOAT_MESH* RESTRICT     jac  = &Ejacs[Nj*ie];
     //std::memcpy( &conn, &Econn[Nc*ie], sizeof(  INT_MESH)*Nc);
     //std::memcpy( &jac , &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
     //std::copy( &Econn[Nc*ie],
