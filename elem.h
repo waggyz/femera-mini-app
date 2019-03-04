@@ -335,7 +335,7 @@ inline FLOAT_MESH Elem::Jac3Det(const FLOAT_MESH* m ){
       m[JD*0+ 0]*(m[JD*1+ 1] * m[JD*2+ 2] - m[JD*2+ 1] * m[JD*1+ 2])
     + m[JD*0+ 1]*(m[JD*1+ 2] * m[JD*2+ 0] - m[JD*2+ 2] * m[JD*1+ 0])
     + m[JD*0+ 2]*(m[JD*1+ 0] * m[JD*2+ 1] - m[JD*2+ 0] * m[JD*1+ 1]) );
-};
+};//------------------------------------------------------------------- 15 FLOP
 inline FLOAT_MESH Elem::Jac3Det(RESTRICT const Mesh::vals& m){
   return(
       m[JD*0+ 0]*(m[JD*1+ 1] * m[JD*2+ 2] - m[JD*2+ 1] * m[JD*1+ 2])
@@ -346,7 +346,8 @@ inline int Elem::Jac3Inv( FLOAT_MESH* m, const FLOAT_MESH jacdet){
   if(jacdet==0){return 1;}
   //returns inverse in m
   //RESTRICT Mesh::vals minv(static_cast<FLOAT_MESH>(1.0)/jacdet,9);
-  FLOAT_MESH minv[9]; FLOAT_MESH dinv=static_cast<FLOAT_MESH>(1.0)/jacdet;
+  FLOAT_MESH minv[9];
+  FLOAT_MESH dinv=static_cast<FLOAT_MESH>(1.0)/jacdet;//------------ 1 DIV FLOP
   for(int i=0;i<9;i++){ minv[i]=dinv; };
   //
   minv[JD*0+ 0]*= (m[JD*1+ 1] * m[JD*2+ 2] - m[JD*2+ 1] * m[JD*1+ 2]) ;
@@ -360,10 +361,12 @@ inline int Elem::Jac3Inv( FLOAT_MESH* m, const FLOAT_MESH jacdet){
   minv[JD*2+ 0]*= (m[JD*1+ 0] * m[JD*2+ 1] - m[JD*2+ 0] * m[JD*1+ 1]) ;
   minv[JD*2+ 1]*= (m[JD*2+ 0] * m[JD*0+ 1] - m[JD*0+ 0] * m[JD*2+ 1]) ;
   minv[JD*2+ 2]*= (m[JD*0+ 0] * m[JD*1+ 1] - m[JD*1+ 0] * m[JD*0+ 1]) ;
+  //------------------------------------------------------------------- 36 FLOP
   //m=minv;//*(static_cast<FLOAT_MESH>(1.0)/jacdet);
   for(int i=0;i<9;i++){ m[i]=minv[i]; };
   if(jacdet < 0){return -1;} else{return 0;}
-};
+};//------------------------------------------------------------------- 37 FLOP
+//NOTE 3D JacInv+Det can be done together, total ---------------------- 40 FLOP
 inline int Elem::Jac3Inv(RESTRICT Mesh::vals& m, const FLOAT_MESH jacdet){
   if(jacdet==0){return 1;}
   //returns inverse in m

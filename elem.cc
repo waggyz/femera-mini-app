@@ -203,13 +203,13 @@ int Elem::Jac3Dets(){
       for(uint j=0;j<vn;j++){
         jac[d* i+k ] += shpg[ip*ng+ vn* i+j ] * vert[vn* k+j ];
         //jac[d* i+k ] += shpg[ip*ng+ d* j+i ] * vert[d* j+k ];
-      };};};
+      };};};//-------------------------------------------------- 18*Nv FMA FLOP
       //RESTRICT Mesh::vals jac=MatMul3xNx3T(//FIXME loop this
       //  shpg[std::slice(ip*ng,ng,1)], vert );
       //  //elem_vert[std::slice(ie*cn*d,cn*d,1)] );
       FLOAT_MESH det=Jac3Det(jac);//printf("DET: %e\n",det);
       //int ok_jac=Jac3Inv(jac,det)//FIXME return these?
-      Jac3Inv(jac,det);
+      Jac3Inv(jac,det);//---------------------------------------------- 61 FLOP
       if(det<=0){ok-=1;};
       for(uint i=0;i<d2;i++){ elip_jacs[ie*np*Nj+ip*Nj +i ] = jac[i]; };
       //elip_dets[ie*np+ip]=det*iwts[ip];

@@ -343,6 +343,7 @@ int HaloPCG::Iter(){
     time_accum( my_phys_count, phys_start );
     time_start( solv_start );
     //FLOAT_SOLV loca_sum=0.0;
+#pragma omp simd
     for(INT_MESH i=hl0; i<sysn; i++){
       //loca_sum += S->sys_p[i] * S->sys_f[i];
       glob_sum1 += S->sys_p[i] * S->sys_f[i];
@@ -358,8 +359,10 @@ int HaloPCG::Iter(){
     //Elem* E; Phys* Y; Solv* S;
     std::tie(E,Y,S)=P[part_i];
     const INT_MESH hl0=S->halo_loca_0,sysn=S->udof_n;
+#pragma omp simd
     for(INT_MESH i=0; i<hl0; i++){
       S->sys_r[i] -= alpha * S->sys_f[i]; };
+#pragma omp simd
     for(INT_MESH i=hl0; i<sysn; i++){
       //r2b += S->sys_r[i] * S->sys_r[i] * S->sys_d[i];
       S->sys_r[i] -= S->sys_f[i] * alpha;
@@ -373,6 +376,7 @@ int HaloPCG::Iter(){
     const INT_MESH sysn=S->udof_n;
     //sys_p  = sys_d * sys_r + (r2b/ra)*sys_p;
     //S->r2a = glob_sum2;// Update member residual (squared)
+#pragma omp simd
     for(INT_MESH i=0; i<sysn; i++){// ? FLOP/DOF
       S->sys_u[i] += S->sys_p[i] * alpha;// better data locality here
       S->sys_p[i]  = S->sys_d[i] * S->sys_r[i] + beta*S->sys_p[i]; };

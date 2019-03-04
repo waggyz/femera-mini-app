@@ -275,7 +275,7 @@ int Mesh::Setup(){
     if(dots_mod>0){
       if((part_i%dots_mod)==0){ std::cout <<"."; fflush(stdout); }; };
     E->Setup();
-    Y->Setup( E );;// Applies material rotations & sets Y->elem_flop and elem_band
+    Y->Setup( E );// Applies material rotations & sets Y->elem_flop and elem_band
     S->Setup( E,Y );// Applies BCs & sets S->udof_flop and 
     // For PCR, also computes diagonal of K for Jacobi preconditioner
 #if VERB_MAX>10
