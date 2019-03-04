@@ -352,6 +352,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
     const INT_MESH hl0=S->halo_loca_0,sysn=S->udof_n;
+#pragma omp simd reduction(+:glob_sum1)
     for(INT_MESH i=hl0; i<sysn; i++){
       glob_sum1 += S->sys_d[i] * S->sys_g[i] * S->sys_g[i];
       //glob_chk2 += S->sys_r[i] * S->sys_r[i];
@@ -363,6 +364,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
     const INT_MESH sysn=S->udof_n;
+#pragma omp simd
     for(INT_MESH i=0; i<sysn; i++){
       S->sys_u[i] += alpha * S->sys_p[i];
       S->sys_r[i] -= alpha * S->sys_d[i] * S->sys_g[i];
@@ -482,6 +484,7 @@ int HaloPCR::Iter(){//-----------------------------------------------
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH hl0=S->halo_loca_0,sysn=S->udof_n;
+#pragma omp simd reduction(+:glob_sum1)
     for(INT_MESH i=hl0; i<sysn; i++){
       glob_sum1 += S->sys_r[i] * S->sys_f[i];
     };
@@ -495,10 +498,12 @@ int HaloPCR::Iter(){//-----------------------------------------------
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH hl0=S->halo_loca_0,sysn=S->udof_n;
+#pragma omp simd
     for(INT_MESH i=0; i<hl0; i++){
       S->sys_p[i] = S->sys_r[i] + beta * S->sys_p[i];
       S->sys_g[i] = S->sys_f[i] + beta * S->sys_g[i];
     };
+#pragma omp simd reduction(+:glob_sum2)
     for(INT_MESH i=hl0; i<sysn; i++){
       S->sys_p[i] = S->sys_r[i] + beta * S->sys_p[i];
       S->sys_g[i] = S->sys_f[i] + beta * S->sys_g[i];
@@ -512,6 +517,7 @@ int HaloPCR::Iter(){//-----------------------------------------------
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH sysn=S->udof_n;
+#pragma omp simd
     for(INT_MESH i=0; i<sysn; i++){
       S->sys_u[i] += alpha * S->sys_p[i];
       S->sys_r[i] -= alpha * S->sys_d[i] * S->sys_g[i]; };
