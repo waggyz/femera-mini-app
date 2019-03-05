@@ -55,18 +55,18 @@ int ElastIso3D::ElemLinear( Elem* E,
   FLOAT_PHYS f[Ne];
   FLOAT_PHYS G[Ne], H[Nf*Nf], S[Nf*Nf];//FIXME wrong?
   //
-  FLOAT_PHYS Tintp_shpg[intp_n*Ne];
+  FLOAT_PHYS intp_shpg[intp_n*Ne];
   std::copy( &E->intp_shpg[0],
-             &E->intp_shpg[intp_n*Ne], Tintp_shpg );
-  FLOAT_PHYS Twgt[intp_n];
+             &E->intp_shpg[intp_n*Ne], intp_shpg );
+  FLOAT_PHYS wgt[intp_n];
   std::copy( &E->gaus_weig[0],
-             &E->gaus_weig[intp_n], Twgt );
-  FLOAT_PHYS TC[this->mtrl_matc.size()];
+             &E->gaus_weig[intp_n], wgt );
+  FLOAT_PHYS C[this->mtrl_matc.size()];
   std::copy( &this->mtrl_matc[0],
-             &this->mtrl_matc[this->mtrl_matc.size()], TC );
-  const FLOAT_PHYS* RESTRICT intp_shpg = &Tintp_shpg[0];
-  const FLOAT_PHYS* RESTRICT       wgt = &Twgt[0];
-  const FLOAT_PHYS* RESTRICT         C = &TC[0];
+             &this->mtrl_matc[this->mtrl_matc.size()], C );
+  //const FLOAT_PHYS* RESTRICT intp_shpg = &Tintp_shpg[0];
+  //const FLOAT_PHYS* RESTRICT       wgt = &Twgt[0];
+  //const FLOAT_PHYS* RESTRICT         C = &TC[0];
   //const FLOAT_PHYS* RESTRICT intp_shpg = &E->intp_shpg[0];
   //const FLOAT_PHYS* RESTRICT       wgt = &E->gaus_weig[0];
   //const FLOAT_PHYS* RESTRICT         C = &this->mtrl_matc[0];
