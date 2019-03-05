@@ -140,9 +140,6 @@ int ElastIso3D::ElemLinear( Elem* E,
 #endif
       const FLOAT_PHYS dw = jac[9] * wgt[ip];
       if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
-        //for (int i=0; i<Nc; i++){
-        //      std::memcpy( & f[Nf*i],
-        //              & sysf0[Econn[Nc*ie+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
         std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
         //const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
         for (int i=0; i<Nc; i++){
@@ -152,7 +149,7 @@ int ElastIso3D::ElemLinear( Elem* E,
       if(ip==0){
         for (int i=0; i<Nc; i++){
           std::memcpy(&    f[Nf*i],
-                      &sysf0[Econn[Nc*(ie+1)+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+                      &sysf0[Econn[Nc*ie+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
       };
 //#define MTRL_FMA
 #ifndef MTRL_FMA
