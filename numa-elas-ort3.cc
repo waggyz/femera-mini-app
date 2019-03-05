@@ -53,22 +53,22 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   FLOAT_PHYS f[Ne];
   FLOAT_PHYS G[Ne], H[Nf*Nf], S[Nf*Nf], A[Nf*Nf];//FIXME wrong?
   //
-  FLOAT_PHYS Tintp_shpg[intp_n*Ne];
+  FLOAT_PHYS intp_shpg[intp_n*Ne];
   std::copy( &E->intp_shpg[0],// local copy
-             &E->intp_shpg[intp_n*Ne], Tintp_shpg );
-  FLOAT_PHYS Twgt[intp_n];
+             &E->intp_shpg[intp_n*Ne], intp_shpg );
+  FLOAT_PHYS wgt[intp_n];
   std::copy( &E->gaus_weig[0],
-             &E->gaus_weig[intp_n], Twgt );
-  FLOAT_PHYS TC[this->mtrl_matc.size()];
+             &E->gaus_weig[intp_n], wgt );
+  FLOAT_PHYS C[this->mtrl_matc.size()];
   std::copy( &this->mtrl_matc[0],
-             &this->mtrl_matc[this->mtrl_matc.size()], TC );
+             &this->mtrl_matc[this->mtrl_matc.size()], C );
   const FLOAT_PHYS R[9] = {
     mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
     mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
     mtrl_rotc[6],mtrl_rotc[7],mtrl_rotc[8]};
-  const FLOAT_PHYS* RESTRICT intp_shpg = &Tintp_shpg[0];
-  const FLOAT_PHYS* RESTRICT       wgt = &Twgt[0];
-  const FLOAT_PHYS* RESTRICT         C = &TC[0];
+  //const FLOAT_PHYS* RESTRICT intp_shpg = &Tintp_shpg[0];
+  //const FLOAT_PHYS* RESTRICT       wgt = &Twgt[0];
+  //const FLOAT_PHYS* RESTRICT         C = &TC[0];
   //const FLOAT_PHYS* RESTRICT intp_shpg = &E->intp_shpg[0];
   //const FLOAT_PHYS* RESTRICT       wgt = &E->gaus_weig[0];
   //const FLOAT_PHYS* RESTRICT         C = &this->mtrl_matc[0];
@@ -82,8 +82,8 @@ int ElastOrtho3D::ElemLinear( Elem* E,
 #endif
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
-  const FLOAT_SOLV* RESTRICT sysu0 = &sys_u[0];
-        FLOAT_SOLV* RESTRICT sysf0 = &sys_f[0];
+  const FLOAT_SOLV* RESTRICT sysu  = &sys_u[0];
+        FLOAT_SOLV* RESTRICT sysf  = &sys_f[0];
   //
   //INT_MESH* RESTRICT c = &Econn[Nc*e0];
   //FLOAT_MESH* RESTRICT jac;
@@ -93,8 +93,8 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
     //const   INT_MESH* RESTRICT     c = &Econn[Nc*e0];
     for (int i=0; i<Nc; i++){
-      std::memcpy( &    u[Nf*i],
-                   &sysu0[Econn[Nc*e0+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+      std::memcpy( &   u[Nf*i],
+                   &sysu[Econn[Nc*e0+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
       //std::memcpy( &    f[Nf*i],
       //             &sysf0[c[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
   };
@@ -112,9 +112,9 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     //           &Ejacs[Nj*ie+Nj], jac );// det=jac[9];
     //FLOAT_PHYS f[Ne];
     //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
-    //for (int i=0; i<Nc; i++){
-    //      std::memcpy( & f[Nf*i],
-    //                   & sysf0[conn[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+    for (int i=0; i<Nc; i++){
+          std::memcpy( & f[Nf*i],
+                       & sysf[Econn[Nc*ie+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
     //  //std::memcpy( &    u[Nf*i],
     //  std::memcpy( &    u[Nf*i],
     //               //&sys_u[Econn[Nc*ie+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
@@ -152,7 +152,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         //const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
         for (int i=0; i<Nc; i++){
           std::memcpy( & u[Nf*i],
-                       & sysu0[Econn[Nc*(ie+1)+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+                       & sysu[Econn[Nc*(ie+1)+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
       }; };
       // [H] Small deformation tensor
       // [H][RT] : matmul3x3x3T
@@ -164,8 +164,8 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       };};};//------------------------------------------------- 27*2 = 54 FLOP
       if(ip==0){
         for (int i=0; i<Nc; i++){
-          std::memcpy(&    f[Nf*i],
-                      &sysf0[Econn[Nc*ie+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+          std::memcpy(&   f[Nf*i],
+                      &sysf[Econn[Nc*ie+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
       };
 //#define MTRL_FMA
 #ifndef MTRL_FMA
@@ -244,7 +244,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
 //#pragma omp simd
     for (int i=0; i<Nc; i++){
-      std::memcpy( & sysf0[Econn[Nc*ie+i]*Nf],
+      std::memcpy( & sysf[Econn[Nc*ie+i]*Nf],
                    & f[Nf*i], sizeof(FLOAT_SOLV)*Nf ); };
 //      for(int j=0; j<3; j++){
       //  //sys_f[3*Econn[Nc*ie+i]+j] += f[(3*i+j)];
