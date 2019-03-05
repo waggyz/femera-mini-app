@@ -87,9 +87,9 @@ int ElastIso3D::ElemLinear( Elem* E,
     for (int i=0; i<Nc; i++){
       std::memcpy( &    u[Nf*i],
                    &sysu0[Econn[Nc*e0+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
-    for (int i=0; i<Nc; i++){
-      std::memcpy( &    f[Nf*i],
-                   &sysf0[Econn[Nc*e0+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+    //for (int i=0; i<Nc; i++){
+    //  std::memcpy( &    f[Nf*i],
+    //               &sysf0[Econn[Nc*e0+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
   };
   //bool fetch_next=false;
   for(INT_MESH ie=e0;ie<ee;ie++){
@@ -139,22 +139,21 @@ int ElastIso3D::ElemLinear( Elem* E,
       }; printf("\n");
 #endif
       const FLOAT_PHYS dw = jac[9] * wgt[ip];
-      if(ip==(intp_n-1)){
-        for (int i=0; i<Nc; i++){
-          std::memcpy(&sysf0[Econn[Nc*ie+i]*Nf],
-                      &    f[Nf*i], sizeof(FLOAT_SOLV)*Nf ); };
-        if((ie+1)<ee){// Fetch stuff for the next iteration
+      if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
         //for (int i=0; i<Nc; i++){
         //      std::memcpy( & f[Nf*i],
         //              & sysf0[Econn[Nc*ie+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
         std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
         //const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
         for (int i=0; i<Nc; i++){
-          std::memcpy(&    f[Nf*i],
-                      &sysf0[Econn[Nc*(ie+1)+i]*Nf], sizeof(FLOAT_SOLV)*Nf );
           std::memcpy(&    u[Nf*i],
                       &sysu0[Econn[Nc*(ie+1)+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
       }; };
+      if(ip==0){
+        for (int i=0; i<Nc; i++){
+          std::memcpy(&    f[Nf*i],
+                      &sysf0[Econn[Nc*(ie+1)+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+      };
 //#define MTRL_FMA
 #ifndef MTRL_FMA
       S[0]=(C[0]* H[0] + C[1]* H[4] + C[1]* H[8])*dw;//Sxx
@@ -196,9 +195,9 @@ int ElastIso3D::ElemLinear( Elem* E,
 #endif
     };//end intp loop
     //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
-    //for (int i=0; i<Nc; i++){
-    //  std::memcpy( & sysf0[Econn[Nc*ie+i]*Nf],
-    //               & f[Nf*i], sizeof(FLOAT_SOLV)*Nf ); };
+    for (int i=0; i<Nc; i++){
+      std::memcpy( & sysf0[Econn[Nc*ie+i]*Nf],
+                   & f[Nf*i], sizeof(FLOAT_SOLV)*Nf ); };
 //#pragma omp simd
 //    for (int i=0; i<Nc; i++){
 //      for(int j=0; j<3; j++){
