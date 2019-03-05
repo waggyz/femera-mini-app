@@ -139,15 +139,16 @@ int ElastIso3D::ElemLinear( Elem* E,
       }; printf("\n");
 #endif
       const FLOAT_PHYS dw = jac[9] * wgt[ip];
-      if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
+      if(ip==(intp_n-1)){
+        for (int i=0; i<Nc; i++){
+          std::memcpy(&sysf0[Econn[Nc*ie+i]*Nf],
+                      &    f[Nf*i], sizeof(FLOAT_SOLV)*Nf ); };
+        if((ie+1)<ee){// Fetch stuff for the next iteration
         //for (int i=0; i<Nc; i++){
         //      std::memcpy( & f[Nf*i],
         //              & sysf0[Econn[Nc*ie+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
         std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
         //const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
-        for (int i=0; i<Nc; i++){
-          std::memcpy(&sysf0[Econn[Nc*ie+i]*Nf],
-                      &    f[Nf*i], sizeof(FLOAT_SOLV)*Nf );};
         for (int i=0; i<Nc; i++){
           std::memcpy(&    f[Nf*i],
                       &sysf0[Econn[Nc*(ie+1)+i]*Nf], sizeof(FLOAT_SOLV)*Nf );
