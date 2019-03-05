@@ -12,7 +12,7 @@ int ElastIso3D::Setup( Elem* E ){
   const uint jacs_n = E->elip_jacs.size()/E->elem_n/ 10 ;
   const uint intp_n = E->gaus_n;
   this->tens_flop = uint(E->elem_n) * intp_n
-    *( uint(E->elem_conn_n)* (36+18+3) + 27 );
+    *( uint(E->elem_conn_n)* (36+18) + 27 );
   this->tens_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
     *(3*uint(E->elem_conn_n)*3+ jacs_n*10);//FIXME
   this->stif_flop = uint(E->elem_n)
@@ -146,7 +146,7 @@ int ElastIso3D::ElemLinear( Elem* E,
           std::memcpy(&    u[Nf*i],
                       &sysu0[Econn[Nc*(ie+1)+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
       }; };
-      if(ip==0){
+      if(ip==0){// Little bit faster here
         for (int i=0; i<Nc; i++){
           std::memcpy(&    f[Nf*i],
                       &sysf0[Econn[Nc*ie+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
@@ -195,12 +195,6 @@ int ElastIso3D::ElemLinear( Elem* E,
     for (int i=0; i<Nc; i++){
       std::memcpy( & sysf0[Econn[Nc*ie+i]*Nf],
                    & f[Nf*i], sizeof(FLOAT_SOLV)*Nf ); };
-//#pragma omp simd
-//    for (int i=0; i<Nc; i++){
-//      for(int j=0; j<3; j++){
-//        //sys_f[3*Econn[Nc*ie+i]+j] += f[(3*i+j)];
-//        sys_f[3*conn[i]+j] += f[(3*i+j)];// 3*N FMA FLOP
-//    }; };//--------------------------------------------------- N*3 =  3*N FLOP
   };//end elem loop
   return 0;
   };
