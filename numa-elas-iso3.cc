@@ -77,17 +77,17 @@ int ElastIso3D::ElemLinear( Elem* E,
     printf("%+9.2e ",C[j]);
   }; printf("\n");
 #endif
-  const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
-  const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
-  const FLOAT_SOLV* RESTRICT sysu0 = &sys_u[0];
-        FLOAT_SOLV* RESTRICT sysf0 = &sys_f[0];
+  //const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
+  //const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
+  //const FLOAT_SOLV* RESTRICT sysu0 = &sys_u[0];
+  //      FLOAT_SOLV* RESTRICT sysf0 = &sys_f[0];
   //
   if(e0<ee){
-    std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
+    std::memcpy( &jac , &E->elip_jacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
     //const   INT_MESH* RESTRICT c = &Econn[Nc*e0];
     for (int i=0; i<Nc; i++){
       std::memcpy( &    u[Nf*i],
-                   &sysu0[Econn[Nc*e0+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+                   &sys_u[E->elem_conn[Nc*e0+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
     //for (int i=0; i<Nc; i++){
     //  std::memcpy( &    f[Nf*i],
     //               &sysf0[Econn[Nc*e0+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
@@ -141,16 +141,16 @@ int ElastIso3D::ElemLinear( Elem* E,
 #endif
       const FLOAT_PHYS dw = jac[9] * wgt[ip];
       if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
-        std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
+        std::memcpy( &jac, &E->elip_jacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
         //const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
         for (int i=0; i<Nc; i++){
           std::memcpy(&    u[Nf*i],
-                      &sysu0[Econn[Nc*(ie+1)+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+                      &sys_u[E->elem_conn[Nc*(ie+1)+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
       }; };
       if(ip==0){// Little bit faster here
         for (int i=0; i<Nc; i++){
           std::memcpy(&    f[Nf*i],
-                      &sysf0[Econn[Nc*ie+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+                      &sys_f[E->elem_conn[Nc*ie+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
       };
 //#define MTRL_FMA
 #ifndef MTRL_FMA
@@ -194,7 +194,7 @@ int ElastIso3D::ElemLinear( Elem* E,
     };//end intp loop
     //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     for (int i=0; i<Nc; i++){
-      std::memcpy( & sysf0[Econn[Nc*ie+i]*Nf],
+      std::memcpy( & sys_f[E->elem_conn[Nc*ie+i]*Nf],
                    & f[Nf*i], sizeof(FLOAT_SOLV)*Nf ); };
   };//end elem loop
   return 0;
