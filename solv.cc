@@ -3,7 +3,7 @@
 #include <omp.h>
 #include "femera.h"
 int Solv::Precond(Elem* E, Phys* Y){// Jacobi Preconditioner
-  int bad_d=0;
+  int bad_d=0;//printf("Solv::Precond( E,Y )\n");
   //this->udof_n = E->node_n * Y->ndof_n;
   //sys_d.resize(udof_n,1.0);// Default Diagonal Preconditioner
   //if(this->solv_cond != Solv::COND_NONE){ this->sys_d=0.0; };//FIXME

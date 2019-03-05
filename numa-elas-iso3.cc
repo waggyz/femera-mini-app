@@ -269,7 +269,7 @@ int ElastIso3D::BlocLinear( Elem* E,
         for(uint i=0; i<3 ; i++){// G[3* k+i ]=0.0;
           for(uint j=0; j<3 ; j++){
             //FIXME can this vectorize?
-            G[(3* k+i)*Nv+l ] += jac[3* i+j +l*Nj ] * intp_shpg[ip*Ne+ 3* k+j ];
+            G[(3* k+i)*Nv+l ] += jac[3* j+i +l*Nj ] * intp_shpg[ip*Ne+ 3* k+j ];
             };
  //         };
  //       };
@@ -472,7 +472,7 @@ int ElastIso3D::ElemRowSumAbs(Elem* E, RESTRICT Phys::vals &sys_d ){
       for(uint k=0;k<Nc;k++){
       for(uint i=0;i<3;i++){
       for(uint j=0;j<3;j++){
-        G[3* i+k] += jac[3* i+j] * E->intp_shpg[ig+3* k+j]; }; }; };
+        G[3* i+k] += jac[3* j+i] * E->intp_shpg[ig+3* k+j]; }; }; };
       #if VERB_MAX>10
       printf( "Jacobian Inverse & Determinant:");
       for(uint j=0;j<d2;j++){
@@ -566,7 +566,7 @@ int ElastIso3D::ElemStrain( Elem* E,
       for(uint k=0; k<Nc; k++){
         for(uint i=0; i<3 ; i++){ G[3* k+i ]=0.0;
           for(uint j=0; j<3 ; j++){
-            G[(3* k+i) ] += jac[3* i+j ] * intp_shpg[ip*Ne+ 3* k+j ];
+            G[(3* k+i) ] += jac[3* j+i ] * intp_shpg[ip*Ne+ 3* k+j ];
           };
         };
       };//------------------------------------------------- N*3*6*2 = 36*N FLOP

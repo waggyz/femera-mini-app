@@ -9,8 +9,8 @@ int ElastOrtho3D::ElemJacobi( Elem* ){ return 1; };//FIXME
 int ElastOrtho3D::ScatStiff( Elem* ){ return 1; };//FIXME
 //
 int ElastOrtho3D::Setup( Elem* E ){
-  JacRot( E );
-  JacT  ( E );
+  JacRot( E );//printf("JacRot ( E )\n");
+  JacT  ( E );//find a way to apply this after computing preconditioner sys_d.
   const uint jacs_n = E->elip_jacs.size()/E->elem_n/ 10 ;
   const uint intp_n = E->gaus_n;
   this->tens_flop = uint(E->elem_n) * intp_n
@@ -27,6 +27,7 @@ int ElastOrtho3D::Setup( Elem* E ){
 };
 int ElastOrtho3D::ElemLinear( Elem* E,
   RESTRICT Phys::vals &sys_f, const RESTRICT Phys::vals &sys_u ){
+  //printf("ElemLinear ( E )\n");
   //FIXME Cleanup local variables.
   const int Dn = 3;// Node (mesh) Dimension
   const int Nf = 3;// this->ndof_n DOF/node
@@ -331,7 +332,7 @@ int ElastOrtho3D::BlocLinear( Elem* E,
         for(uint i=0; i<3 ; i++){// G[3* k+i ]=0.0;
           for(uint j=0; j<3 ; j++){
             //FIXME can this vectorize?
-            G[(3* k+i)*Nv+l ] += jac[3* i+j +l*Nj ] * intp_shpg[ip*Ne+ 3* k+j ];
+            G[(3* k+i)*Nv+l ] += jac[3* j+i +l*Nj ] * intp_shpg[ip*Ne+ 3* k+j ];
             };
           };
         };
@@ -449,7 +450,7 @@ int ElastOrtho3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
   FLOAT_PHYS det;
   FLOAT_PHYS elem_diag[Ne];
   FLOAT_PHYS B[Ne*6];// 6 rows, Ne cols
-  FLOAT_PHYS G[Ne],jac[Nj];
+  FLOAT_PHYS G[Ne],jac[Nj],jacR[Nj];
   for(uint j=0; j<(Ne*6); j++){ B[j]=0.0; };
   const FLOAT_PHYS D[]={
     mtrl_matc[0],mtrl_matc[3],mtrl_matc[5],0.0,0.0,0.0,
@@ -465,11 +466,21 @@ int ElastOrtho3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
     //0.0,0.0,0.0,mtrl_matc[2],0.0,0.0,
     //0.0,0.0,0.0,0.0,mtrl_matc[2],0.0,
     //0.0,0.0,0.0,0.0,0.0,mtrl_matc[2]};
+  const FLOAT_PHYS R[9] = {
+    mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
+    mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
+    mtrl_rotc[6],mtrl_rotc[7],mtrl_rotc[8]};
   //elem_inout=0.0;
   for(uint ie=0;ie<elem_n;ie++){
     uint ij=Nj*ie;
     std::copy( &E->elip_jacs[ij],
-               &E->elip_jacs[ij+Nj], jac ); det=jac[d2];
+               &E->elip_jacs[ij+Nj], jacR ); det=jacR[d2];
+    // un-rotate jac
+    for(int i=0;i<9;i++){ jac[i]=0.0; };
+    for(int i=0;i<3;i++){
+    for(int j=0;j<3;j++){
+    for(int k=0;k<3;k++){
+      jac[3* i+k ] += R[3* j+i ] * jacR[3* j+k ]; };};};
     for(uint i=0;i<Ne;i++){ elem_diag[i]=0.0; };
     for(uint ip=0;ip<intp_n;ip++){
       //uint ij=Nj*ie*intp_n +Nj*ip;
@@ -585,7 +596,7 @@ int ElastOrtho3D::ElemRowSumAbs(Elem* E, RESTRICT Phys::vals &sys_d ){
       for(uint k=0;k<Nc;k++){
       for(uint i=0;i<3;i++){
       for(uint j=0;j<3;j++){
-        G[3* i+k] += jac[3* i+j] * E->intp_shpg[ig+3* k+j]; }; }; };
+        G[3* i+k] += jac[3* j+i] * E->intp_shpg[ig+3* k+j]; }; }; };
       #if VERB_MAX>10
       printf( "Jacobian Inverse & Determinant:");
       for(uint j=0;j<d2;j++){
@@ -689,7 +700,7 @@ int ElastOrtho3D::ElemStrain( Elem* E,
       for(uint k=0; k<Nc; k++){
         for(uint i=0; i<3 ; i++){ G[3* k+i ]=0.0;
           for(uint j=0; j<3 ; j++){
-            G[(3* k+i) ] += jac[3* i+j ] * intp_shpg[ip*Ne+ 3* k+j ];
+            G[(3* k+i) ] += jac[3* j+i ] * intp_shpg[ip*Ne+ 3* k+j ];
           };
         };
       };//------------------------------------------------- N*3*6*2 = 36*N FLOP
