@@ -77,17 +77,17 @@ int ElastIso3D::ElemLinear( Elem* E,
     printf("%+9.2e ",C[j]);
   }; printf("\n");
 #endif
-  //const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
-  //const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
-  //const FLOAT_SOLV* RESTRICT sysu0 = &sys_u[0];
-  //      FLOAT_SOLV* RESTRICT sysf0 = &sys_f[0];
+  const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
+  const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
+  const FLOAT_SOLV* RESTRICT sysu = &sys_u[0];
+        FLOAT_SOLV* RESTRICT sysf = &sys_f[0];
   //
   if(e0<ee){
-    std::memcpy( &jac , &E->elip_jacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
+    std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
     //const   INT_MESH* RESTRICT c = &Econn[Nc*e0];
     for (int i=0; i<Nc; i++){
       std::memcpy( &    u[Nf*i],
-                   &sys_u[E->elem_conn[Nc*e0+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+                   &sysu[Econn[Nc*e0+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
     //for (int i=0; i<Nc; i++){
     //  std::memcpy( &    f[Nf*i],
     //               &sysf0[Econn[Nc*e0+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
@@ -97,12 +97,12 @@ int ElastIso3D::ElemLinear( Elem* E,
     //if((ie+1)<ee){fetch_next=true;}else{fetch_next=false;};
     //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     //const FLOAT_MESH* RESTRICT jac  = &Ejacs[Nj*ie];
-    //std::memcpy( &conn, &Econn[Nc*ie], sizeof(  INT_MESH)*Nc);
+    //std::memcpy( &conn, &E->elem_conn[Nc*ie], sizeof(  INT_MESH)*Nc);
     //std::memcpy( &jac , &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
-    //std::copy( &Econn[Nc*ie],
-    //           &Econn[Nc*ie+Nc], conn );
-    //std::copy( &Ejacs[Nj*ie],
-    //           &Ejacs[Nj*ie+Nj], jac );// det=jac[9];
+    //std::copy( &E->elem_conn[Nc*ie],
+    //           &E->elem_conn[Nc*ie+Nc], conn );
+    //std::copy( &E->elip_jacs[Nj*ie],
+    //           &E->elip_jacs[Nj*ie+Nj], jac );// det=jac[9];
     //for (uint i=0; i<(Nc); i++){
     //  std::memcpy( &    u[Nf*i],
     //               //&sys_u[Econn[Nc*ie+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
@@ -110,9 +110,12 @@ int ElastIso3D::ElemLinear( Elem* E,
     //
     //for(int i=0;i<Ne;i++){ f[i]=0.0; };
     //FLOAT_PHYS f[Ne];
-    //for (int i=0; i<Nc; i++){
-    //      std::memcpy( & f[Nf*i],
-    //               & sysf0[Econn[Nc*ie+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+    for (int i=0; i<Nc; i++){
+      std::memcpy( & f[Nf*i],
+        & sysf[Econn[Nc*ie +i]*Nf], sizeof(FLOAT_SOLV)*Nf ); 
+      //std::memcpy( & u[Nf*i],
+      //  & sys_u[E->elem_conn[Nc*ie +i]*Nf], sizeof(FLOAT_SOLV)*Nf ); 
+    };
     for(int ip=0; ip<intp_n; ip++){
       //FLOAT_PHYS G[Ne], H[9], S[9];
       //G = MatMul3x3xN( jac,shg );
@@ -141,17 +144,17 @@ int ElastIso3D::ElemLinear( Elem* E,
 #endif
       const FLOAT_PHYS dw = jac[9] * wgt[ip];
       if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
-        std::memcpy( &jac, &E->elip_jacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
+        std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
         //const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
         for (int i=0; i<Nc; i++){
-          std::memcpy(&    u[Nf*i],
-                      &sys_u[E->elem_conn[Nc*(ie+1)+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+          std::memcpy(& u[Nf*i],
+            & sysu[Econn[Nc*(ie+1)+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
       }; };
-      if(ip==0){// Little bit faster here
-        for (int i=0; i<Nc; i++){
-          std::memcpy(&    f[Nf*i],
-                      &sys_f[E->elem_conn[Nc*ie+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
-      };
+      //if(ip==0){// Little bit faster here
+      //  for (int i=0; i<Nc; i++){
+      //    std::memcpy(&    f[Nf*i],
+      //      &sys_f[E->elem_conn[Nc*ie+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+      //};
 //#define MTRL_FMA
 #ifndef MTRL_FMA
       S[0]=(C[0]* H[0] + C[1]* H[4] + C[1]* H[8])*dw;//Sxx
@@ -194,7 +197,7 @@ int ElastIso3D::ElemLinear( Elem* E,
     };//end intp loop
     //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     for (int i=0; i<Nc; i++){
-      std::memcpy( & sys_f[E->elem_conn[Nc*ie+i]*Nf],
+      std::memcpy( & sysf[Econn[Nc*ie +i]*Nf],
                    & f[Nf*i], sizeof(FLOAT_SOLV)*Nf ); };
   };//end elem loop
   return 0;
