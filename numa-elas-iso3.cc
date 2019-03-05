@@ -79,19 +79,22 @@ int ElastIso3D::ElemLinear( Elem* E,
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
   const FLOAT_SOLV* RESTRICT sysu0 = &sys_u[0];
-  FLOAT_SOLV* RESTRICT sysf0 = &sys_f[0];
+        FLOAT_SOLV* RESTRICT sysf0 = &sys_f[0];
   //
   if(e0<ee){
     std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
-    const   INT_MESH* RESTRICT c = &Econn[Nc*e0];
+    //const   INT_MESH* RESTRICT c = &Econn[Nc*e0];
     for (int i=0; i<Nc; i++){
       std::memcpy( &    u[Nf*i],
-                   &sysu0[c[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+                   &sysu0[Econn[Nc*e0+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+    for (int i=0; i<Nc; i++){
+          std::memcpy( & f[Nf*i],
+                   & sysf0[Econn[Nc*e0+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
   };
   //bool fetch_next=false;
   for(INT_MESH ie=e0;ie<ee;ie++){
     //if((ie+1)<ee){fetch_next=true;}else{fetch_next=false;};
-    const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
+    //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     //const FLOAT_MESH* RESTRICT jac  = &Ejacs[Nj*ie];
     //std::memcpy( &conn, &Econn[Nc*ie], sizeof(  INT_MESH)*Nc);
     //std::memcpy( &jac , &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
@@ -106,9 +109,9 @@ int ElastIso3D::ElemLinear( Elem* E,
     //
     //for(int i=0;i<Ne;i++){ f[i]=0.0; };
     //FLOAT_PHYS f[Ne];
-    for (int i=0; i<Nc; i++){
-          std::memcpy( & f[Nf*i],
-                       & sysf0[conn[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+    //for (int i=0; i<Nc; i++){
+    //      std::memcpy( & f[Nf*i],
+    //               & sysf0[Econn[Nc*ie+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
     for(int ip=0; ip<intp_n; ip++){
       //FLOAT_PHYS G[Ne], H[9], S[9];
       //G = MatMul3x3xN( jac,shg );
@@ -137,11 +140,16 @@ int ElastIso3D::ElemLinear( Elem* E,
 #endif
       const FLOAT_PHYS dw = jac[9] * wgt[ip];
       if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
+        //for (int i=0; i<Nc; i++){
+        //      std::memcpy( & f[Nf*i],
+        //              & sysf0[Econn[Nc*ie+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
         std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
-        const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
+        //const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
         for (int i=0; i<Nc; i++){
+          std::memcpy( & f[Nf*i],
+                   & sysf0[Econn[Nc*(ie+1)+i]*Nf], sizeof(FLOAT_SOLV)*Nf );
           std::memcpy( & u[Nf*i],
-                       & sysu0[c[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+                   & sysu0[Econn[Nc*(ie+1)+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
       }; };
 //#define MTRL_FMA
 #ifndef MTRL_FMA
@@ -185,7 +193,7 @@ int ElastIso3D::ElemLinear( Elem* E,
     };//end intp loop
     //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     for (int i=0; i<Nc; i++){
-      std::memcpy( & sysf0[conn[i]*Nf],
+      std::memcpy( & sysf0[Econn[Nc*ie+i]*Nf],
                    & f[Nf*i], sizeof(FLOAT_SOLV)*Nf ); };
 //#pragma omp simd
 //    for (int i=0; i<Nc; i++){
