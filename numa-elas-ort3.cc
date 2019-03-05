@@ -450,7 +450,7 @@ int ElastOrtho3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
   FLOAT_PHYS det;
   FLOAT_PHYS elem_diag[Ne];
   FLOAT_PHYS B[Ne*6];// 6 rows, Ne cols
-  FLOAT_PHYS G[Ne],jac[Nj],jacR[Nj];
+  FLOAT_PHYS G[Ne],jac[Nj];//,jacR[Nj];
   for(uint j=0; j<(Ne*6); j++){ B[j]=0.0; };
   const FLOAT_PHYS D[]={
     mtrl_matc[0],mtrl_matc[3],mtrl_matc[5],0.0,0.0,0.0,
@@ -466,21 +466,21 @@ int ElastOrtho3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
     //0.0,0.0,0.0,mtrl_matc[2],0.0,0.0,
     //0.0,0.0,0.0,0.0,mtrl_matc[2],0.0,
     //0.0,0.0,0.0,0.0,0.0,mtrl_matc[2]};
-  const FLOAT_PHYS R[9] = {
-    mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
-    mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
-    mtrl_rotc[6],mtrl_rotc[7],mtrl_rotc[8]};
+  //const FLOAT_PHYS R[9] = {
+  //  mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
+  //  mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
+  //  mtrl_rotc[6],mtrl_rotc[7],mtrl_rotc[8]};
   //elem_inout=0.0;
   for(uint ie=0;ie<elem_n;ie++){
     uint ij=Nj*ie;
     std::copy( &E->elip_jacs[ij],
-               &E->elip_jacs[ij+Nj], jacR ); det=jacR[d2];
+               &E->elip_jacs[ij+Nj], jac ); det=jac[d2];
     // un-rotate jac
-    for(int i=0;i<9;i++){ jac[i]=0.0; };
-    for(int i=0;i<3;i++){
-    for(int j=0;j<3;j++){
-    for(int k=0;k<3;k++){
-      jac[3* i+k ] += R[3* j+i ] * jacR[3* j+k ]; };};};
+    //for(int i=0;i<9;i++){ jac[i]=0.0; };
+    //for(int i=0;i<3;i++){
+    //for(int j=0;j<3;j++){
+    //for(int k=0;k<3;k++){
+    //  jac[3* i+k ] += R[3* i+j ] * jacR[3* j+k ]; };};};
     for(uint i=0;i<Ne;i++){ elem_diag[i]=0.0; };
     for(uint ip=0;ip<intp_n;ip++){
       //uint ij=Nj*ie*intp_n +Nj*ip;

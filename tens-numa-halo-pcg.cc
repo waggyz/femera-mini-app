@@ -332,6 +332,7 @@ int HaloPCG::Iter(){
     const INT_MESH hnn=E->halo_node_n,hl0=S->halo_loca_0,sysn=S->udof_n;
     for(INT_MESH i=0; i<hnn; i++){
       auto f = d* this->halo_map[E->node_glid[i]];
+//#pragma omp simd
       for( uint j=0; j<d; j++){//NOTE appears not to be critical
 //#pragma omp atomic read
         S->sys_f[d* i+j] = this->halo_val[f+j]; };
