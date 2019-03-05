@@ -30,7 +30,7 @@ int ElastIso3D::ElemLinear( Elem* E,
   const int Nj = Dn*Nf+1;
   const int Nc = E->elem_conn_n;// Number of nodes/element
   const int Ne = Nf*Nc;
-  const INT_MESH elem_n = E->elem_n;
+  const INT_MESH elem_n =E->elem_n;
   const int intp_n = int(E->gaus_n);
   //uint           Nv = E->simd_n;// Vector block size
   //
