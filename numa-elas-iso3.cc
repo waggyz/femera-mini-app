@@ -9,10 +9,11 @@ int ElastIso3D::ElemJacobi( Elem* ){ return 1; };//FIXME
 int ElastIso3D::ScatStiff( Elem* ){ return 1; };//FIXME
 //
 int ElastIso3D::Setup( Elem* E ){
+  JacT  ( E );
   const uint jacs_n = E->elip_jacs.size()/E->elem_n/ 10 ;
   const uint intp_n = E->gaus_n;
   this->tens_flop = uint(E->elem_n) * intp_n
-    *( uint(E->elem_conn_n)* (36+18) + 27 );
+    *( uint(E->elem_conn_n)* (54) + 27 );
   this->tens_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
     *(3*uint(E->elem_conn_n)*3+ jacs_n*10);//FIXME
   this->stif_flop = uint(E->elem_n)
@@ -27,7 +28,7 @@ int ElastIso3D::ElemLinear( Elem* E,
   //const int De = 3;// Element Dimension
   const int Dn = 3;// Node (mesh) Dimension
   const int Nf = 3;// this->ndof_n DOF/node
-  const int Nj = Dn*Nf+1;
+  const int Nj = Dn*Nf+1;//FIXME wrong?
   const int Nc = E->elem_conn_n;// Number of nodes/element
   const int Ne = Nf*Nc;
   const INT_MESH elem_n =E->elem_n;
@@ -52,7 +53,7 @@ int ElastIso3D::ElemLinear( Elem* E,
   //     G: Nf x Nc 4 x Nc
   //   H,S: Nf x Nf 4 x 4
   FLOAT_PHYS f[Ne];
-  FLOAT_PHYS G[Ne], H[Nf*Nf], S[Nf*Nf];
+  FLOAT_PHYS G[Ne], H[Nf*Nf], S[Nf*Nf];//FIXME wrong?
   //
   FLOAT_PHYS Tintp_shpg[intp_n*Ne];
   std::copy( &E->intp_shpg[0],
@@ -123,7 +124,7 @@ int ElastIso3D::ElemLinear( Elem* E,
         //const FLOAT_PHYS * RESTRICT intpp = &intp_shpg[ip*Ne+k*3];
         for(int i=0; i<Nf ; i++){ G[Nf* k+i ]=0.0;
           for(int j=0; j<Dn ; j++){
-            G[(Nf* k+i) ] += jac[Dn* i+j ] * intp_shpg[ip*Ne+ Dn* k+j ];
+            G[(Nf* k+i) ] += jac[Dn* j+i ] * intp_shpg[ip*Ne+ Dn* k+j ];
             //G[(3* k+i) ] += jac[3* i+j ] * intpp[j]
           };
           for(int j=0; j<Nf ; j++){
@@ -373,7 +374,7 @@ int ElastIso3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
       for(uint i=0;i<3;i++){
       for(uint j=0;j<3;j++){
         //G[3* i+k] += jac[3* i+j] * E->intp_shpg[ig+Nc* j+k]; }; }; };
-        G[3* i+k] += jac[3* i+j] * E->intp_shpg[ig+3* k+j]; }; }; };
+        G[3* i+k] += jac[3* j+i] * E->intp_shpg[ig+3* k+j]; }; }; };
       #if VERB_MAX>10
       printf( "Jacobian Inverse & Determinant:");
       for(uint j=0;j<d2;j++){

@@ -30,6 +30,7 @@ public:
   //
   virtual int Setup( Elem* E )=0;
   int JacRot( Elem* E );
+  int JacT  ( Elem* E );
   //
   virtual int ScatStiff( Elem* )=0;//FIXME should be local to subclass?
   int ElemStiff( RESTRICT Phys::vals& );//for comparison to LMA EBE

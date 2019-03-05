@@ -90,6 +90,23 @@ int Phys::JacRot( Elem* E ){//
   };//end elem loop
   return 0;
 };*/
+int Phys::JacT  ( Elem* E ){
+  static const uint  Nj = 10,d2=9;//mesh_d*mesh_d;
+  const uint elem_n = E->elem_n;
+  const int intp_n = E->elip_jacs.size()/elem_n/Nj;
+  Phys::vals J(d2),JT(d2);
+  for(uint ie=0;ie<elem_n;ie++){
+    for(int ip=0;ip<intp_n;ip++){
+      std::copy(&E->elip_jacs[ie*intp_n*Nj+ip*Nj],
+                &E->elip_jacs[ie*intp_n*Nj+ip*Nj+d2], &J[0] );
+      for(int i=0;i<3;i++){
+        for(int j=0;j<3;j++){
+          JT[3* i+j ] = J[3* j+i ]; }; };
+      E->elip_jacs[std::slice(ie*intp_n*Nj+ip*Nj,d2,1)]=JT;
+    };
+  };
+  return 0;
+};
 int Phys::JacRot( Elem* E ){
   static const int mesh_d = E->elem_d;;
   #if VERB_MAX>10
