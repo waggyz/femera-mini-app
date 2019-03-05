@@ -147,11 +147,12 @@ int ElastIso3D::ElemLinear( Elem* E,
         //const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
         for (int i=0; i<Nc; i++){
           std::memcpy(&sysf0[Econn[Nc*ie+i]*Nf],
-                      &    f[Nf*i], sizeof(FLOAT_SOLV)*Nf );
+                      &    f[Nf*i], sizeof(FLOAT_SOLV)*Nf );};
+        for (int i=0; i<Nc; i++){
           std::memcpy(&    f[Nf*i],
                       &sysf0[Econn[Nc*(ie+1)+i]*Nf], sizeof(FLOAT_SOLV)*Nf );
-          std::memcpy( & u[Nf*i],
-                   & sysu0[Econn[Nc*(ie+1)+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+          std::memcpy(&    u[Nf*i],
+                      &sysu0[Econn[Nc*(ie+1)+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
       }; };
 //#define MTRL_FMA
 #ifndef MTRL_FMA
