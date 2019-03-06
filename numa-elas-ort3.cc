@@ -200,9 +200,9 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         printf("%+9.2e ",S[j]);
       }; printf("\n");
 #endif
+      /*
       // [S][R] : matmul3x3x3, R is transposed
       for(int i=0; i<9; i++){ A[i]=0.0; };
-//#pragma omp simd
           for(int j=0; j<3; j++){
         for(int k=0; k<3; k++){ //A[3* k+i ]=0.0;
       for(int i=0; i<3; i++){
@@ -212,6 +212,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       };};};//------------------------------------------------- 27*2 = 54 FLOP
       //NOTE [A] is not symmetric Cauchy stress.
       //NOTE Cauchy stress is ( A + AT ) /2
+      */
 #if VERB_MAX>10
       printf( "Rotated Stress (Global Coords):");
       for(int j=0;j<9;j++){
@@ -219,11 +220,11 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         printf("%+9.2e ",S[j]);
       }; printf("\n");
 #endif
-//#pragma omp simd
       for(int i=0; i<Nc; i++){
         for(int k=0; k<3; k++){
           for(int j=0; j<3; j++){
-            f[(3* i+k) ] += G[(3* i+j) ] * A[(3* k+j) ];
+            f[(3* i+k) ] += G[(3* i+j) ] * S[(3* k+j) ];
+            //f[(3* i+k) ] += G[(3* i+j) ] * A[(3* k+j) ];
             //f[(Nc* k+i) ] += G[(Nc* j+i) ] * A[(3* k+j) ];
       };};};//---------------------------------------------- N*3*6 = 18*N FLOP
       // This is way slower:
@@ -241,11 +242,19 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       }; printf("\n");
 #endif
     };//end intp loop
+      for(int i=0; i<Ne; i++){ G[i]=0.0; };
+      for(int i=0; i<Nc; i++){
+        for(int k=0; k<3; k++){
+          for(int j=0; j<3; j++){
+            G[(3* i+k) ] += f[(3* i+j) ] * R[(3* k+j) ];
+            //f[(3* i+k) ] += G[(3* i+j) ] * A[(3* k+j) ];
+            //f[(Nc* k+i) ] += G[(Nc* j+i) ] * A[(3* k+j) ];
+      };};};//---------------------------------------------- N*3*6 = 18*N FLOP
     //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
-//#pragma omp simd
     for (int i=0; i<Nc; i++){
       std::memcpy( & sysf[Econn[Nc*ie+i]*Nf],
-                   & f[Nf*i], sizeof(FLOAT_SOLV)*Nf ); };
+                   & G[Nf*i], sizeof(FLOAT_SOLV)*Nf ); };
+                   //& f[Nf*i], sizeof(FLOAT_SOLV)*Nf ); };
 //      for(int j=0; j<3; j++){
       //  //sys_f[3*Econn[Nc*ie+i]+j] += f[(3*i+j)];
       //  sys_f[3*conn[i]+j] += f[(3*i+j)]; };
