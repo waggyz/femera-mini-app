@@ -100,7 +100,10 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   };
   //bool fetch_next=false;
   for(INT_MESH ie=e0;ie<ee;ie++){
-      for(int i=0;i<Ne;i++){ GR[i]=0.0; };
+    for (int i=0; i<Nc; i++){
+      std::memcpy(&   f[Nf*i],
+                  &sysf[Econn[Nc*ie+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+    for(int i=0;i<Ne;i++){ GR[i]=0.0; };
     //if((ie+1)<ee){fetch_next=true;}else{fetch_next=false;};
     //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     //const   INT_MESH* RESTRICT c    = &Econn[Nc*(ie+1)];
@@ -113,9 +116,9 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     //           &Ejacs[Nj*ie+Nj], jac );// det=jac[9];
     //FLOAT_PHYS f[Ne];
     //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
-    for (int i=0; i<Nc; i++){
-          std::memcpy( & f[Nf*i],
-                       & sysf[Econn[Nc*ie+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+    //for (int i=0; i<Nc; i++){
+    //      std::memcpy( & f[Nf*i],
+    //                   & sysf[Econn[Nc*ie+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
     //  //std::memcpy( &    u[Nf*i],
     //  std::memcpy( &    u[Nf*i],
     //               //&sys_u[Econn[Nc*ie+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
@@ -163,11 +166,11 @@ int ElastOrtho3D::ElemLinear( Elem* E,
           for(int j=0; j<3; j++){
             H[(3* i+k) ] += A[(3* i+j)] * R[3* k+j ];
       };};};//------------------------------------------------- 27*2 = 54 FLOP
-      if(ip==0){
-        for (int i=0; i<Nc; i++){
-          std::memcpy(&   f[Nf*i],
-                      &sysf[Econn[Nc*ie+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
-      };
+      //if(ip==0){
+      //  for (int i=0; i<Nc; i++){
+      //    std::memcpy(&   f[Nf*i],
+      //                &sysf[Econn[Nc*ie+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+      //};
 //#define MTRL_FMA
 #ifndef MTRL_FMA
       S[0]=(C[0]* H[0] + C[3]* H[4] + C[5]* H[8])*dw;//Sxx
@@ -242,14 +245,14 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         printf("%+9.2e ",f[j]);
       }; printf("\n");
 #endif
-    };//end intp loop
-      for(int i=0; i<Nc; i++){
-        for(int k=0; k<3; k++){
-          for(int j=0; j<3; j++){
-            f[(3* i+k) ] += GR[(3* i+j) ] * R[(3* j+k) ];
-            //f[(3* i+k) ] += G[(3* i+j) ] * A[(3* k+j) ];
-            //f[(Nc* k+i) ] += G[(Nc* j+i) ] * A[(3* k+j) ];
-      };};};//---------------------------------------------- N*3*6 = 18*N FLOP
+  };//end intp loop
+    for(int i=0; i<Nc; i++){
+      for(int k=0; k<3; k++){
+        for(int j=0; j<3; j++){
+          f[(3* i+k) ] += GR[(3* i+j) ] * R[(3* j+k) ];
+          //f[(3* i+k) ] += G[(3* i+j) ] * A[(3* k+j) ];
+          //f[(Nc* k+i) ] += G[(Nc* j+i) ] * A[(3* k+j) ];
+    };};};//---------------------------------------------- N*3*6 = 18*N FLOP
     //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     for (int i=0; i<Nc; i++){
       std::memcpy( & sysf[Econn[Nc*ie+i]*Nf],
