@@ -253,7 +253,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     for (int i=0; i<Nc; i++){
       std::memcpy( & sysf[Econn[Nc*ie+i]*Nf],
-                   & G[Nf*i], sizeof(FLOAT_SOLV)*Nf ); };
+                   & f[Nf*i], sizeof(FLOAT_SOLV)*Nf ); };
                    //& f[Nf*i], sizeof(FLOAT_SOLV)*Nf ); };
 //      for(int j=0; j<3; j++){
       //  //sys_f[3*Econn[Nc*ie+i]+j] += f[(3*i+j)];
