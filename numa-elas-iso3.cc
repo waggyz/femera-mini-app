@@ -79,7 +79,7 @@ int ElastIso3D::ElemLinear( Elem* E,
   }; printf("\n");
 #endif
   //const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
-  const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
+  //const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
   const FLOAT_SOLV* RESTRICT sysu  = &sys_u[0];
         FLOAT_SOLV* RESTRICT sysf  = &sys_f[0];
   //        INT_MESH*  thisc = &this_conn[0];
@@ -90,7 +90,7 @@ int ElastIso3D::ElemLinear( Elem* E,
     //           &E->elem_conn[Nc*e0+Nc], this_conn );
     //std::memcpy(& thisc[0],
     //            & Econn[Nc*e0], sizeof(INT_MESH)*Nc );
-    std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
+    std::memcpy( &jac , &E->elip_jacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
     //const   INT_MESH* RESTRICT c = &Econn[Nc*e0];
     for (int i=0; i<Nc; i++){
       std::memcpy( &    u[Nf*i],
@@ -154,7 +154,7 @@ int ElastIso3D::ElemLinear( Elem* E,
 #endif
       const FLOAT_PHYS dw = jac[9] * wgt[ip];
       if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
-        std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
+        std::memcpy( &jac, &E->elip_jacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
         //const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
         for (int i=0; i<Nc; i++){
           std::memcpy(& u[Nf*i],
@@ -215,7 +215,7 @@ int ElastIso3D::ElemLinear( Elem* E,
     //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     for (int i=0; i<Nc; i++){
       //std::memcpy(& sysf[thisc[i]*Nf],
-      std::memcpy( & sysf[E->elem_conn[Nc*ie +i]*Nf],
+      std::memcpy(& sysf[E->elem_conn[Nc*ie +i]*Nf],
                   & f[Nf*i], sizeof(FLOAT_SOLV)*Nf ); };
     //if((ie+1)<ee){ thisc = nextc; };
       //std::memcpy(& next_conn[0],
