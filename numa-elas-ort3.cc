@@ -100,7 +100,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   };
   //bool fetch_next=false;
   for(INT_MESH ie=e0;ie<ee;ie++){
-      for(int i=0;i<Ne;i++){ GR[i]=dw; };
+      for(int i=0;i<Ne;i++){ GR[i]=0.0; };
     //if((ie+1)<ee){fetch_next=true;}else{fetch_next=false;};
     //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     //const   INT_MESH* RESTRICT c    = &Econn[Nc*(ie+1)];
