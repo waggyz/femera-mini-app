@@ -88,7 +88,7 @@ int ElastIso3D::ElemLinear( Elem* E,
   if(e0<ee){
     //std::copy( &E->elem_conn[Nc*e0],
     //           &E->elem_conn[Nc*e0+Nc], this_conn );
-    std::memcpy(& thisc,
+    std::memcpy(& thisc[0],
                 & Econn[Nc*e0], sizeof(INT_MESH)*Nc );
     std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
     //const   INT_MESH* RESTRICT c = &Econn[Nc*e0];
@@ -98,8 +98,8 @@ int ElastIso3D::ElemLinear( Elem* E,
     if((e0+1)<ee){
     //std::copy( &E->elem_conn[Nc*(e0+1)],
     //           &E->elem_conn[Nc*(e0+1)+Nc], next_conn );
-      std::memcpy( &nextc,
-                   &Econn[Nc*e0+Nc], sizeof(INT_MESH)*Nc );
+      std::memcpy( &nextc[0],
+                   &Econn[Nc*(e0+1)], sizeof(INT_MESH)*Nc );
     };
   };
   //bool fetch_next=false;
@@ -163,7 +163,7 @@ int ElastIso3D::ElemLinear( Elem* E,
         if((ie+2)<ee){
           //std::copy(&E->elem_conn[Nc*(ie+2)],
           //          &E->elem_conn[Nc*(ie+2)+Nc], next_conn );
-      std::memcpy( &nextc,
+      std::memcpy( &nextc[0],
                    &Econn[Nc*(ie+2)], sizeof(INT_MESH)*Nc );
           };
       }; };
@@ -215,7 +215,7 @@ int ElastIso3D::ElemLinear( Elem* E,
     //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     for (int i=0; i<Nc; i++){
       //std::memcpy( & sysf[Econn[Nc*ie +i]*Nf],
-      std::memcpy(& sysf[this_conn[i]*Nf],
+      std::memcpy(& sysf[thisc[i]*Nf],
                   & f[Nf*i], sizeof(FLOAT_SOLV)*Nf ); };
     if((ie+1)<ee){ thisc = nextc; };
       //std::memcpy(& next_conn[0],
