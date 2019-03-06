@@ -79,7 +79,7 @@ int ElastIso3D::ElemLinear( Elem* E,
   }; printf("\n");
 #endif
   //const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
-  //const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
+  const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
   const FLOAT_SOLV* RESTRICT sysu  = &sys_u[0];
         FLOAT_SOLV* RESTRICT sysf  = &sys_f[0];
   //        INT_MESH*  thisc = &this_conn[0];
@@ -90,7 +90,7 @@ int ElastIso3D::ElemLinear( Elem* E,
     //           &E->elem_conn[Nc*e0+Nc], this_conn );
     //std::memcpy(& thisc[0],
     //            & Econn[Nc*e0], sizeof(INT_MESH)*Nc );
-    //std::memcpy( &jac , &E->elip_jacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
+    std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
     //const   INT_MESH* RESTRICT c = &Econn[Nc*e0];
     for (int i=0; i<Nc; i++){
       std::memcpy( &    u[Nf*i],
@@ -108,7 +108,7 @@ int ElastIso3D::ElemLinear( Elem* E,
     //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     //const FLOAT_MESH* RESTRICT jac  = &Ejacs[Nj*ie];
     //std::memcpy( &conn, &E->elem_conn[Nc*ie], sizeof(  INT_MESH)*Nc);
-    //std::memcpy( &jac , &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
+    //std::memcpy( &jac , &E->elem_jacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
     //std::copy( &E->elem_conn[Nc*ie],
     //           &E->elem_conn[Nc*ie+Nc], conn );
     //std::copy( &E->elip_jacs[Nj*ie],
@@ -126,6 +126,8 @@ int ElastIso3D::ElemLinear( Elem* E,
       //std::memcpy( & u[Nf*i],
       //  & sys_u[E->elem_conn[Nc*ie +i]*Nf], sizeof(FLOAT_SOLV)*Nf ); 
     };
+    //const FLOAT_PHYS J = Ejacs[Nj*ie+9];
+    const FLOAT_PHYS J = jac[9];
     for(int ip=0; ip<intp_n; ip++){
       //FLOAT_PHYS G[Ne], H[9], S[9];
       //G = MatMul3x3xN( jac,shg );
@@ -137,8 +139,7 @@ int ElastIso3D::ElemLinear( Elem* E,
         //const FLOAT_PHYS * RESTRICT intpp = &intp_shpg[ip*Ne+k*3];
         for(int i=0; i<Nf ; i++){ G[Nf* k+i ]=0.0;
           for(int j=0; j<Dn ; j++){
-            G[(Nf* k+i) ] += E->elip_jacs[Nj*ie+Dn* j+i ] * intp_shpg[ip*Ne+ Dn* k+j ];
-            //G[(Nf* k+i) ] += jac[Dn* j+i ] * intp_shpg[ip*Ne+ Dn* k+j ];
+            G[(Nf* k+i) ] += jac[Dn* j+i ] * intp_shpg[ip*Ne+ Dn* k+j ];
             //G[(3* k+i) ] += jac[3* i+j ] * intpp[j]
           };
           for(int j=0; j<Nf ; j++){
@@ -153,10 +154,8 @@ int ElastIso3D::ElemLinear( Elem* E,
         printf("%+9.2e ",H[j]);
       }; printf("\n");
 #endif
-      const FLOAT_PHYS dw = E->elip_jacs[Nj*ie+9] * wgt[ip];
       //const FLOAT_PHYS dw = jac[9] * wgt[ip];
       if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
-        //std::memcpy( &jac, &E->elip_jacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
         //const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
         for (int i=0; i<Nc; i++){
           std::memcpy(& u[Nf*i],
@@ -168,12 +167,14 @@ int ElastIso3D::ElemLinear( Elem* E,
       //std::memcpy( &nextc[0],
       //             &Econn[Nc*(ie+2)], sizeof(INT_MESH)*Nc );
       //    };
+        std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
       }; };
       //if(ip==0){// Little bit faster here
       //  for (int i=0; i<Nc; i++){
       //    std::memcpy(&    f[Nf*i],
       //      &sys_f[E->elem_conn[Nc*ie+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
       //};
+      const FLOAT_PHYS dw = J * wgt[ip];
 //#define MTRL_FMA
 #ifndef MTRL_FMA
       S[0]=(C[0]* H[0] + C[1]* H[4] + C[1]* H[8])*dw;//Sxx
