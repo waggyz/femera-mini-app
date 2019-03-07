@@ -46,8 +46,8 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     (int)mesh_d,(int)elem_n,(int)intp_n,(int)Nc);
 #endif
   FLOAT_MESH jac[Nj];//, det;
-  FLOAT_PHYS u[Ne], f[Ne],GS[Ne];//,uR[Ne];
-  FLOAT_PHYS G[Ne], H[Nf*Nf], S[Nf*Nf], A[Nf*Nf];//FIXME wrong sizes?
+  FLOAT_PHYS u[Ne], f[Ne],GS[Ne],uR[Ne];
+  FLOAT_PHYS G[Ne], H[Nf*Nf], S[Nf*Nf];//, A[Nf*Nf];//FIXME wrong sizes?
   // local copies
   FLOAT_PHYS intp_shpg[intp_n*Ne];
   std::copy( &E->intp_shpg[0],
@@ -89,22 +89,22 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   };
   for(INT_MESH ie=e0;ie<ee;ie++){
     for(int i=0;i<Ne;i++){ GS[i]=0.0; };
-//    for(int i=0; i<Nc; i++){
-//      for(int k=0; k<3; k++){ uR[(3* i+k) ]=0.0;
-//        for(int j=0; j<3; j++){
-//          uR[(3* i+k) ] += u[(3* i+j) ] * R[(3* k+j) ];
-//    };};};
+    for(int i=0; i<Nc; i++){
+      for(int k=0; k<3; k++){ uR[(3* i+k) ]=0.0;
+        for(int j=0; j<3; j++){
+          uR[(3* i+k) ] += u[(3* i+j) ] * R[(3* k+j) ];
+    };};};
     for (int i=0; i<Nc; i++){
       std::memcpy(&   f[Nf*i],& sysf[Econn[Nc*ie+i]*Nf],
         sizeof(FLOAT_SOLV)*Nf ); };
-//    if((ie+1)<ee){// Fetch stuff for the next iteration
-//      for (int i=0; i<Nc; i++){
-//        std::memcpy( & u[Nf*i],& sysu[Econn[Nc*(ie+1)+i]*Nf],
-//          sizeof(FLOAT_SOLV)*Nf ); };
-//    };
+    if((ie+1)<ee){// Fetch stuff for the next iteration
+      for (int i=0; i<Nc; i++){
+        std::memcpy( & u[Nf*i],& sysu[Econn[Nc*(ie+1)+i]*Nf],
+          sizeof(FLOAT_SOLV)*Nf ); };
+    };
     for(int ip=0; ip<intp_n; ip++){
       //G = MatMul3x3xN( jac,shg );
-      for(int i=0; i< 9 ; i++){ A[i]=0.0; };
+      for(int i=0; i< 9 ; i++){ H[i]=0.0; };
       //for(uint i=0; i<(Ne) ; i++){ G[i]=0.0; };
       for(int k=0; k<Nc; k++){
         for(int i=0; i<3 ; i++){ G[3* k+i ]=0.0;
@@ -112,15 +112,15 @@ int ElastOrtho3D::ElemLinear( Elem* E,
             G[3* k+i ] += jac[3* j+i ] * intp_shpg[ip*Ne+ 3* k+j ];
           };
           for(int j=0; j<3 ; j++){
-            A[(3* i+j) ] += G[(3* k+i) ] * u[Nf* k+j ];
+            H[(3* i+j) ] += G[(3* k+i) ] * uR[Nf* k+j ];
           };
         };
       };//------------------------------------------------ N*3*6*2 = 36*N FLOP
-      for(uint i=0; i<3; i++){
-        for(uint k=0; k<3; k++){ H[3* i+k ]=0.0;
-          for(uint j=0; j<3; j++){
-            H[(3* i+k) ] += A[(3* i+j)] * R[3* k+j ];
-        };};};
+//      for(uint i=0; i<3; i++){
+//        for(uint k=0; k<3; k++){ H[3* i+k ]=0.0;
+//          for(uint j=0; j<3; j++){
+//            H[(3* i+k) ] += A[(3* i+j)] * R[3* k+j ];
+//        };};};
 #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
       for(int j=0;j<H.size();j++){
