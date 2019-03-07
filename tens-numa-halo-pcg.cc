@@ -276,9 +276,12 @@ int HaloPCG::Iter(){
   //
   FLOAT_SOLV glob_sum1=0.0, glob_sum2=0.0;
   FLOAT_SOLV glob_r2a = this->glob_res2;
-  const auto P = this->mesh_part;//FIXME Undo this?
+  //const auto P = this->mesh_part;//FIXME Undo this?
 #pragma omp parallel num_threads(comp_n)
 {// iter parallel region
+  std::vector<part> P;
+  P.resize(this->mesh_part.size());
+  std::copy(this->mesh_part.begin(), this->mesh_part.end(), P.begin());
   Elem* E; Phys* Y; Solv* S;// Seems to be faster to reuse these.
   // Timing variables (used when verbosity > 1)
   long int my_phys_count=0, my_scat_count=0, my_solv_count=0,

@@ -672,7 +672,7 @@ int main( int argc, char** argv ){
     //printf("ELEM NODES: %u\n",uint(E->elem_conn_n));
 }
   };
-  }// end parallel 
+  }// end parallel
   //FLOAT_PHYS A=1.0/(scale*scale);
   FLOAT_PHYS A=1.0/(scay*scaz);
   printf("Model Response\n");
