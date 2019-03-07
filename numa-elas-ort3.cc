@@ -108,7 +108,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       for(int k=0; k<Nc; k++){
         for(int i=0; i<3 ; i++){ G[3* k+i ]=0.0;
           for(int j=0; j<3 ; j++){
-            G[3* k+i ] += jac[3* j+i ] * intp_shpg[ip*Ne+ 3* k+j ];
+            G[3* k+i ] += jac[3* i+j ] * intp_shpg[ip*Ne+ 3* k+j ];
           };
           for(int j=0; j<3 ; j++){
             A[(3* i+j) ] += G[(3* k+i) ] * u[Nf* k+j ];
@@ -168,11 +168,16 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         printf("%+9.2e ",S[j]);
       }; printf("\n");
 #endif
-      for(int i=0; i<Nc; i++){
-        for(int k=0; k<3; k++){ GS[(3* i+k) ]=0.0;
+      for(int i=0; i<3; i++){
+        for(int k=0; k<3; k++){ A[3* k+i ]=0.0;
           for(int j=0; j<3; j++){
-            GS[(3* i+k) ] += G[(3* i+j) ] * S[(3* j+k) ];
-      };};};//---------------------------------------------- N*3*6 = 18*N FLOP
+            A[(3* k+i) ] += S[(3* i+j) ] * R[3* j+k ];// A is transposed
+};};};
+//      for(int i=0; i<Nc; i++){
+//        for(int k=0; k<3; k++){ GS[(3* i+k) ]=0.0;
+//          for(int j=0; j<3; j++){
+//            GS[(3* i+k) ] += G[(3* i+j) ] * S[(3* j+k) ];
+//      };};};//---------------------------------------------- N*3*6 = 18*N FLOP
 #if VERB_MAX>10
       printf( "ff:");
       for(int j=0;j<Ne;j++){
@@ -180,12 +185,17 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         printf("%+9.2e ",f[j]);
       }; printf("\n");
 #endif
+      for(int i=0; i<Nc; i++){
+        for(int k=0; k<3; k++){
+          for(int j=0; j<3; j++){
+            f[(3* i+k) ] += G[(3* i+j) ] * A[(3* k+j) ];
+};};};
     };//end intp loop
-    for(int i=0; i<Nc; i++){
-      for(int k=0; k<3; k++){
-        for(int j=0; j<3; j++){
-          f[(3* i+k) ] += GS[(3* i+j) ] * R[(3* j+k) ];
-    };};};//---------------------------------------------- N*3*6 = 18*N FLOP
+//    for(int i=0; i<Nc; i++){
+//      for(int k=0; k<3; k++){
+//        for(int j=0; j<3; j++){
+//          f[(3* i+k) ] += GS[(3* i+j) ] * R[(3* j+k) ];
+//    };};};//---------------------------------------------- N*3*6 = 18*N FLOP
       //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     for (int i=0; i<Nc; i++){
       std::memcpy(& sysf[Econn[Nc*ie+i]*Nf],& f[Nf*i],
