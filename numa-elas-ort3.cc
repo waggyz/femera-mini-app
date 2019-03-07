@@ -82,10 +82,10 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         FLOAT_SOLV* RESTRICT sysf  = &sys_f[0];
   //
   if(e0<ee){
-    std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
     for (int i=0; i<Nc; i++){
       std::memcpy( &   u[Nf*i],
                    &sysu[Econn[Nc*e0+i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+    std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
   };
   for(INT_MESH ie=e0;ie<ee;ie++){
     for(int i=0; i<Nc; i++){
