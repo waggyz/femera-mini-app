@@ -11,18 +11,20 @@ int ElastOrtho3D::ScatStiff( Elem* ){ return 1; };//FIXME
 int ElastOrtho3D::Setup( Elem* E ){
   JacRot( E );//printf("JacRot ( E )\n");
   JacT  ( E );//find a way to apply this after computing preconditioner sys_d.
-  const uint jacs_n = E->elip_jacs.size()/E->elem_n/ 10 ;
-  const uint intp_n = E->gaus_n;
-  this->tens_flop = uint(E->elem_n) * intp_n
-    *( uint(E->elem_conn_n)* (36+18) + 2*54 + 27 );
-  this->tens_band = uint(E->elem_n) *(
-     sizeof(FLOAT_PHYS)*(3*uint(E->elem_conn_n)*3+ jacs_n*10)
-    +sizeof(INT_MESH)*uint(E->elem_conn_n) );
-  this->stif_flop = uint(E->elem_n)
-    * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) );
-  this->stif_band = uint(E->elem_n) *(
-    sizeof(FLOAT_PHYS)* 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) -1+3)
-    +sizeof(INT_MESH) *uint(E->elem_conn_n) );
+  const uint elem_n = uint(E->elem_n);
+  const uint jacs_n = uint(E->elip_jacs.size()/elem_n/ 10) ;
+  const uint intp_n = uint(E->gaus_n);
+  const uint conn_n = uint(E->elem_conn_n);
+  this->tens_flop = elem_n *( conn_n* (2*18)
+    +intp_n*( conn_n* (36+18) + 27 ) );
+  this->tens_band = elem_n *(
+     sizeof(FLOAT_PHYS)*(3*conn_n*3+ jacs_n*10)
+    +sizeof(INT_MESH)*conn_n );
+  this->stif_flop = elem_n
+    * 3*conn_n *( 3*conn_n );
+  this->stif_band = elem_n *(
+    sizeof(FLOAT_PHYS)* 3*conn_n *( 3*conn_n -1+3)
+    +sizeof(INT_MESH) *conn_n );
   return 0;
 };
 int ElastOrtho3D::ElemLinear( Elem* E,
@@ -99,7 +101,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       for(int k=0; k<3; k++){ uR[(3* i+k) ]=0.0;
         for(int j=0; j<3; j++){
           uR[(3* i+k) ] += u[(3* i+j) ] * R[(3* j+k) ];
-    };};};
+    };};};//-------------------------------------------- 2 *3*3*Nc = 18*Nc FLOP
     for (int i=0; i<Nc; i++){
       std::memcpy(&   f[Nf*i],& sysf[Econn[Nc*ie+i]*Nf],
         sizeof(FLOAT_SOLV)*Nf ); };
@@ -121,7 +123,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
             H[(3* k+j) ] += G[(3* i+k) ] * uR[Nf* i+j ];
           };
         };
-      };//------------------------------------------------ N*3*6*2 = 36*N FLOP
+      };//------------------------------------------- 4 *3*3*Nc = 36*Nc*Ng FLOP
 //      for(uint i=0; i<3; i++){
 //        for(uint k=0; k<3; k++){ H[3* i+k ]=0.0;
 //          for(uint j=0; j<3; j++){
@@ -152,7 +154,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       S[5]=( H[5] + H[7] )*C[7]*dw;// S[7]= S[5];//Syz Szy
       S[2]=( H[2] + H[6] )*C[8]*dw;// S[6]= S[2];//Sxz Szx
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
-      //-------------------------------------------------------- 18+9= 27 FLOP
+      //------------------------------------------------------ 18+9= 27*Ng FLOP
 #endif
 #ifdef MTRL_FMA
       for(int i=0;i<9;i++){ S[i]=dw; };
@@ -184,7 +186,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         for(int k=0; k<3; k++){
           for(int j=0; j<3; j++){
             GS[(3* i+k) ] += G[(3* i+j) ] * S[(3* j+k) ];
-      };};};//---------------------------------------------- N*3*6 = 18*N FLOP
+      };};};//--------------------------------------- 2 *3*3*Nc = 18*Nc*Ng FLOP
 #if VERB_MAX>10
       printf( "ff:");
       for(int j=0;j<Ne;j++){
@@ -204,7 +206,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       for(int k=0; k<3; k++){
         for(int j=0; j<3; j++){
           f[(3* i+k) ] += GS[(3* i+j) ] * R[(3* j+k) ];
-    };};};//---------------------------------------------- N*3*6 = 18*N FLOP
+    };};};//-------------------------------------------- 2 *3*3*Nc = 18*Nc FLOP
       //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     for (int i=0; i<Nc; i++){
       std::memcpy(& sysf[Econn[Nc*ie+i]*Nf],& f[Nf*i],
