@@ -15,15 +15,16 @@ int ElastOrtho3D::Setup( Elem* E ){
   const uint jacs_n = uint(E->elip_jacs.size()/elem_n/ 10) ;
   const uint intp_n = uint(E->gaus_n);
   const uint conn_n = uint(E->elem_conn_n);
-  this->tens_flop = elem_n *( conn_n* (2*18)
-    +intp_n*( conn_n* (36+18) + 27 ) );
+  this->tens_flop = elem_n *( conn_n*(2*18)
+    +intp_n*( conn_n*(36+18) + 27 ) );
   this->tens_band = elem_n *(
-     sizeof(FLOAT_PHYS)*(3*conn_n*3+ jacs_n*10)
-    +sizeof(INT_MESH)*conn_n );
+     sizeof(FLOAT_SOLV)*(3*conn_n*3+ jacs_n*10)// Main mem
+    +sizeof(INT_MESH)*conn_n // Main mem ints
+    +sizeof(FLOAT_PHYS)*(3*intp_n*conn_n +9+9+1 ) );// Stack
   this->stif_flop = elem_n
     * 3*conn_n *( 3*conn_n );
   this->stif_band = elem_n *(
-    sizeof(FLOAT_PHYS)* 3*conn_n *( 3*conn_n -1+3)
+    sizeof(FLOAT_SOLV)* 3*conn_n *( 3*conn_n -1+3)
     +sizeof(INT_MESH) *conn_n );
   return 0;
 };
