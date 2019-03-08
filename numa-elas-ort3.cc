@@ -58,10 +58,14 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   FLOAT_PHYS C[this->mtrl_matc.size()];
   std::copy( &this->mtrl_matc[0],
              &this->mtrl_matc[this->mtrl_matc.size()], C );
-  const FLOAT_PHYS R[9] = {
+  FLOAT_PHYS R[9] = {
     mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
     mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
     mtrl_rotc[6],mtrl_rotc[7],mtrl_rotc[8]};
+  //const FLOAT_PHYS Rt[9] = {
+  //  mtrl_rotc[0],mtrl_rotc[3],mtrl_rotc[6],
+  //  mtrl_rotc[1],mtrl_rotc[4],mtrl_rotc[7],
+  //  mtrl_rotc[2],mtrl_rotc[5],mtrl_rotc[8]};
   //const FLOAT_PHYS* RESTRICT intp_shpg = &Tintp_shpg[0];
   //const FLOAT_PHYS* RESTRICT       wgt = &Twgt[0];
   //const FLOAT_PHYS* RESTRICT         C = &TC[0];
@@ -89,10 +93,12 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   };
   for(INT_MESH ie=e0;ie<ee;ie++){
     for(int i=0;i<Ne;i++){ GS[i]=0.0; };
+    // Transpose R
+    std::swap(R[1],R[3]); std::swap(R[2],R[6]); std::swap(R[5],R[7]);
     for(int i=0; i<Nc; i++){
       for(int k=0; k<3; k++){ uR[(3* i+k) ]=0.0;
         for(int j=0; j<3; j++){
-          uR[(3* i+k) ] += u[(3* i+j) ] * R[(3* k+j) ];
+          uR[(3* i+k) ] += u[(3* i+j) ] * R[(3* j+k) ];
     };};};
     for (int i=0; i<Nc; i++){
       std::memcpy(&   f[Nf*i],& sysf[Econn[Nc*ie+i]*Nf],
@@ -106,13 +112,13 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       //G = MatMul3x3xN( jac,shg );
       for(int i=0; i< 9 ; i++){ H[i]=0.0; };
       //for(uint i=0; i<(Ne) ; i++){ G[i]=0.0; };
-      for(int k=0; k<Nc; k++){
-        for(int i=0; i<3 ; i++){ G[3* k+i ]=0.0;
+      for(int i=0; i<Nc; i++){
+        for(int k=0; k<3 ; k++){ G[3* i+k ]=0.0;
           for(int j=0; j<3 ; j++){
-            G[3* k+i ] += jac[3* j+i ] * intp_shpg[ip*Ne+ 3* k+j ];
+            G[3* i+k ] += intp_shpg[ip*Ne+ 3* i+j ] * jac[3* j+k ];
           };
           for(int j=0; j<3 ; j++){
-            H[(3* i+j) ] += G[(3* k+i) ] * uR[Nf* k+j ];
+            H[(3* k+j) ] += G[(3* i+k) ] * uR[Nf* i+j ];
           };
         };
       };//------------------------------------------------ N*3*6*2 = 36*N FLOP
@@ -192,6 +198,8 @@ int ElastOrtho3D::ElemLinear( Elem* E,
 //            f[(3* i+k) ] += G[(3* i+j) ] * A[(3* k+j) ];
 //};};};
     };//end intp loop
+    // Transpose R back again
+    std::swap(R[1],R[3]); std::swap(R[2],R[6]); std::swap(R[5],R[7]);
     for(int i=0; i<Nc; i++){
       for(int k=0; k<3; k++){
         for(int j=0; j<3; j++){
