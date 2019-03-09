@@ -138,16 +138,13 @@ int ElastIso3D::ElemLinear( Elem* E,
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       for(int i=0; i< 9 ; i++){ H[i]=0.0; };
       //for(uint i=0; i<(Ne) ; i++){ G[i]=0.0; };
-//#pragma omp simd
-      for(int k=0; k<Nc; k++){
-        //const FLOAT_PHYS * RESTRICT intpp = &intp_shpg[ip*Ne+k*3];
-        for(int i=0; i<Nf ; i++){ G[Nf* k+i ]=0.0;
+      for(int i=0; i<Nc; i++){
+        for(int k=0; k<Nf ; k++){ G[Nf* i+k ]=0.0;
           for(int j=0; j<Dn ; j++){
-            G[(Nf* k+i) ] += jac[Dn* j+i ] * intp_shpg[ip*Ne+ Dn* k+j ];
-            //G[(3* k+i) ] += jac[3* i+j ] * intpp[j]
+            G[(Nf* i+k) ] += intp_shpg[ip*Ne+ Dn* i+j ] * jac[Dn* j+k ];
           };
           for(int j=0; j<Nf ; j++){
-            H[(Nf* i+j) ] += G[(Nf* k+i) ] * u[Nf* k+j ];
+            H[(Nf* k+j) ] += G[(Nf* i+k) ] * u[Nf* i+j ];
           };
         };// 36*N FMA FLOP
       };//------------------------------------------------ N*3*6*2 = 36*N FLOP
@@ -209,7 +206,7 @@ int ElastIso3D::ElemLinear( Elem* E,
       for(int i=0; i<Nc; i++){
         for(int k=0; k<Nf; k++){
           for(int j=0; j<Nf; j++){
-            f[(Nf* i+k) ] += G[(Nf* i+j) ] * S[(Nf* k+j) ];// 18*N FMA FLOP
+            f[(Nf* i+k) ] += G[(Nf* i+j) ] * S[(Nf* j+k) ];// 18*N FMA FLOP
       };};};//---------------------------------------------- N*3*6 = 18*N FLOP
 #if VERB_MAX>10
       printf( "f:");
