@@ -14,6 +14,8 @@
 #include <stdio.h>
 #endif
 //FIXME Remove unneeded includes
+extern std::vector<Mesh::part>*  tpvt_mesh_part;
+extern std::unordered_map<INT_MESH,INT_MESH>* tpvt_halo_map;
 int Mesh::GatherGlobalIDs(){ return 0; };
 int Mesh::ScatterHaloIDs(){
   /*
@@ -245,7 +247,9 @@ int Mesh::Setup(){
   INT_MESH halo_udof_tot=0;
   std::string solv_name="";
   //Mesh* M = new SolvePCG();// Gmsh* G;
-#pragma omp parallel for schedule(static) num_threads(comp_n)
+#pragma omp parallel num_threads(comp_n)
+  {
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
   // Read Mesh ======================================================
     std::stringstream ss;
@@ -306,7 +310,14 @@ int Mesh::Setup(){
     this->phys_flop += float(Y->tens_flop);
     this->phys_band += float(Y->tens_band);
 }
-  };// End parallel read & setup ====================================
+  };// End parallel read & setup loop ========================================
+  // Copy to threadprivate variables.
+  //tpvt_mesh_part= new std::vector<Mesh::part>();
+  //tpvt_mesh_part->resize(this->mesh_part.size);
+  //tpvt_halo_map = new std::unordered_map<INT_MESH,INT_MESH>();
+  //tpvt_halo_map->resize (this->halo_map.size);
+  
+  }// End parallel region ====================================================
   //this->udof_n = sys_udof_n;
   //read_done = std::chrono::high_resolution_clock::now();
   if(dots_mod>0){ std::cout <<'\n'; };

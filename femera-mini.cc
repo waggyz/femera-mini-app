@@ -3,6 +3,7 @@
 #include <string>
 #include <limits>
 #include <unordered_map>
+#include <vector>
 #include <chrono>
 #include <valarray>
 #include <ctype.h>
@@ -16,6 +17,10 @@
 #ifdef HAS_TEST
 #include "test.h"
 #endif
+// Global variables for omp threadprivate
+//std::vector<Mesh::part>* tpvt_mesh_part;
+//#pragma omp threadprivate(tpvt_mesh_part)
+//
 int main( int argc, char** argv ){
   const float ns=1e-9;
 #if VERB_MAX>1
@@ -613,7 +618,7 @@ int main( int argc, char** argv ){
     const INT_MESH d=uint(Y->ndof_n);
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
     for(INT_MESH i=hrn; i<hnn; i++){
-      auto f = d* M->halo_map[E->node_glid[i]];
+      auto f = d* E->node_haid[i];
       for(uint j=0; j<d; j++){
 #pragma omp atomic write
         M->halo_val[f+j] = S->sys_f[d* i+j]; };
@@ -625,7 +630,7 @@ int main( int argc, char** argv ){
     const INT_MESH d=uint(Y->ndof_n);
     const INT_MESH hrn=E->halo_remo_n;
     for(INT_MESH i=0; i<hrn; i++){
-      auto f = d* M->halo_map[E->node_glid[i]];
+      auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic update
         M->halo_val[f+j]+= S->sys_f[d* i+j]; };
@@ -637,7 +642,7 @@ int main( int argc, char** argv ){
     const INT_MESH d=uint(Y->ndof_n);
     const INT_MESH hnn=E->halo_node_n;
     for(INT_MESH i=0; i<hnn; i++){
-      auto f = d* M->halo_map[E->node_glid[i]];
+      auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){//NOTE appears not to be critical
 //#pragma omp atomic read
         S->sys_f[d* i+j] = M->halo_val[f+j]; };

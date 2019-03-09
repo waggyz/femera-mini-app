@@ -20,7 +20,7 @@ int ElastOrtho3D::Setup( Elem* E ){
   this->tens_band = elem_n *(
      sizeof(FLOAT_SOLV)*(3*conn_n*3+ jacs_n*10)// Main mem
     +sizeof(INT_MESH)*conn_n // Main mem ints
-    +sizeof(FLOAT_PHYS)*(3*intp_n*conn_n +9+9+1 ) );// Stack
+    +sizeof(FLOAT_PHYS)*(3*intp_n*conn_n +9+9+1 ) );// Stack (assumes read once)
   this->stif_flop = elem_n
     * 3*conn_n *( 3*conn_n );
   this->stif_band = elem_n *(
@@ -32,9 +32,9 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   RESTRICT Phys::vals &sys_f, const RESTRICT Phys::vals &sys_u ){
   //printf("ElemLinear ( E )\n");
   //FIXME Cleanup local variables.
-  const int Dn = 3;// Node (mesh) Dimension
+  const int Nd = 3;// Node (mesh) Dimension FIXME can include temperature?
   const int Nf = 3;// this->ndof_n DOF/node
-  const int Nj = Dn*Nf+1;//FIXME wrong?
+  const int Nj = Nd*Nf+1;//FIXME wrong?
   const int Nc = E->elem_conn_n;// Number of nodes/element
   const int Ne = Nf*Nc;
   const INT_MESH elem_n =E->elem_n;
@@ -50,7 +50,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
 #endif
   FLOAT_MESH jac[Nj];//, det;
   FLOAT_PHYS u[Ne], f[Ne],GS[Ne],uR[Ne];
-  FLOAT_PHYS G[Ne], H[Nf*Nf], S[Nf*Nf];//, A[Nf*Nf];//FIXME wrong sizes?
+  FLOAT_PHYS G[Ne], H[Nd*Nf], S[Nd*Nf];//, A[Nd*Nf];//FIXME wrong sizes?
   // local copies
   FLOAT_PHYS intp_shpg[intp_n*Ne];
   std::copy( &E->intp_shpg[0],
