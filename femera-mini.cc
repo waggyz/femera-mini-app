@@ -490,9 +490,11 @@ int main( int argc, char** argv ){
     FLOAT_PHYS scaz=1.0,minz= 99e9,maxz=-99e9;
 #pragma omp parallel
 {
+  std::vector<Mesh::part> P;  P.resize(M->mesh_part.size());
+  std::copy(M->mesh_part.begin(), M->mesh_part.end(), P.begin());
 #pragma omp for schedule(static)
     for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
-      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->mesh_part[part_i];
+      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
 #pragma omp critical(minmax)
 {
       //smin=std::min( smin, E->vert_coor.min() );
@@ -517,7 +519,7 @@ int main( int argc, char** argv ){
 }
 #pragma omp for schedule(static)
     for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
-      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->mesh_part[part_i];
+      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
       Phys::vals errors={};
       FLOAT_PHYS nu=Y->mtrl_prop[1];
       Phys::vals coor(E->vert_coor.size());
@@ -605,9 +607,11 @@ int main( int argc, char** argv ){
     // Calculate nodal forces from displacement solution
     FLOAT_PHYS reac_x=0.0, youn_voig=0.0;// polycrystal approx.
     //FIXME should do this only for elems with prescribed BCS
-    auto P=M->mesh_part;
+    //auto P=M->mesh_part;
 #pragma omp parallel num_threads(comp_n)
 {
+  std::vector<Mesh::part> P;  P.resize(M->mesh_part.size());
+  std::copy(M->mesh_part.begin(), M->mesh_part.end(), P.begin());
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];

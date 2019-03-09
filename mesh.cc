@@ -313,7 +313,6 @@ int Mesh::Setup(){
   // Copy to threadprivate variables.
   //tpvt_mesh_part= new std::vector<Mesh::part>();
   //tpvt_mesh_part->resize(this->mesh_part.size);
-  
   }// End parallel region ====================================================
   //this->udof_n = sys_udof_n;
   //read_done = std::chrono::high_resolution_clock::now();

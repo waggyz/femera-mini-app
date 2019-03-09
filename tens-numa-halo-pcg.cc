@@ -163,9 +163,11 @@ int HaloPCG::Init(){// Preconditioned Conjugate Gradient
   long int my_scat_count=0, my_prec_count=0,
     my_gat0_count=0,my_gat1_count=0, my_gmap_count=0, my_solv_count=0;
   auto start = std::chrono::high_resolution_clock::now();
+  std::vector<part> P;  P.resize(this->mesh_part.size());
+  std::copy(this->mesh_part.begin(), this->mesh_part.end(), P.begin());
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     S->solv_cond=this->solv_cond;
     S->Precond( E,Y );
   };
@@ -173,7 +175,7 @@ int HaloPCG::Init(){// Preconditioned Conjugate Gradient
   time_reset( my_prec_count, start );
 #pragma omp for schedule(static)
 for(int part_i=part_0; part_i<part_o; part_i++){
-  Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
+  Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
   if(E->node_haid.size()==0){ E->node_haid.resize(E->halo_node_n); };
   const INT_MESH d=uint(Y->ndof_n);
   for(INT_MESH i=0; i<E->halo_node_n; i++){
@@ -197,7 +199,7 @@ for(int part_i=part_0; part_i<part_o; part_i++){
   time_reset( my_gmap_count, start );
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH d=uint(Y->ndof_n);
     for(INT_MESH i=0; i<E->halo_node_n; i++){
       auto f = d* E->node_haid[i];
@@ -209,7 +211,7 @@ for(int part_i=part_0; part_i<part_o; part_i++){
   time_reset( my_scat_count, start );
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     S->sys_d=FLOAT_SOLV(1.0)/S->sys_d;
     S->Init( E,Y );// Zeros boundary conditions
   };
@@ -219,7 +221,7 @@ for(int part_i=part_0; part_i<part_o; part_i++){
   time_reset( my_gat0_count, start );
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH d=uint(Y->ndof_n);
     for(INT_MESH i=0; i<E->halo_node_n; i++){
       auto f = d* E->node_haid[i];
@@ -231,7 +233,7 @@ for(int part_i=part_0; part_i<part_o; part_i++){
   time_reset( my_gat1_count, start );
 #pragma omp for schedule(static) reduction(+:glob_r2a)
   for(int part_i=part_0; part_i<part_o; part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH d=uint(Y->ndof_n);
     for(INT_MESH i=0; i<E->halo_node_n; i++){
       auto f = d* E->node_haid[i];
@@ -246,7 +248,7 @@ for(int part_i=part_0; part_i<part_o; part_i++){
   };
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     S->loca_rto2 = S->loca_rtol*S->loca_rtol *glob_r2a;
 #pragma omp atomic write
     glob_to2 = S->loca_rto2;// Pass the relative tolerance out.
@@ -286,8 +288,7 @@ int HaloPCG::Iter(){
 #pragma omp parallel num_threads(comp_n)
 {// iter parallel region
   //auto P = this->mesh_part;
-  std::vector<part> P;
-  P.resize(this->mesh_part.size());
+  std::vector<part> P;  P.resize(this->mesh_part.size());
   std::copy(this->mesh_part.begin(), this->mesh_part.end(), P.begin());
   Elem* E; Phys* Y; Solv* S;// Seems to be faster to reuse these.
   // Timing variables (used when verbosity > 1)

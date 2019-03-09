@@ -218,15 +218,17 @@ int HaloPCR::Init(){// Preconditioned Conjugate Residual
     (std::chrono::high_resolution_clock::now()-start);
   my_prec_count += dur.count();
   start = std::chrono::high_resolution_clock::now();
+  std::vector<Mesh::part> P;  P.resize(this->mesh_part.size());
+  std::copy(this->mesh_part.begin(), this->mesh_part.end(), P.begin());
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<(part_n+part_0); part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     S->solv_cond=this->solv_cond;
     S->Precond( E,Y );
   };
 #pragma omp for schedule(static)
 for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
-  Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
+  Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
   if(E->node_haid.size()==0){ E->node_haid.resize(E->halo_node_n); };
   const INT_MESH d=uint(Y->ndof_n);
   for(INT_MESH i=0; i<E->halo_node_n; i++){
@@ -253,7 +255,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
   start = std::chrono::high_resolution_clock::now();
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH d=uint(Y->ndof_n);
     for(INT_MESH i=0; i<E->halo_node_n; i++){
       auto f = d* E->node_haid[i];
@@ -274,7 +276,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
   start = std::chrono::high_resolution_clock::now();
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH d=uint(Y->ndof_n);
     for(INT_MESH i=0; i<E->halo_node_n; i++){
       auto f = d* E->node_haid[i];
@@ -289,7 +291,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
   start = std::chrono::high_resolution_clock::now();
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH d=uint(Y->ndof_n);
     for(INT_MESH i=0; i<E->halo_node_n; i++){
       auto f = d* E->node_haid[i];
@@ -305,7 +307,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
   start = std::chrono::high_resolution_clock::now();
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     //S->sys_d=FLOAT_SOLV(1.0)/S->sys_d;
 //#pragma omp  critical(initEY)
     { S->Init(E,Y); }// Applies zero BCs and does initial f=Kr
@@ -323,7 +325,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
   start = std::chrono::high_resolution_clock::now();
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH d=uint(Y->ndof_n);
     for(INT_MESH i=0; i<E->halo_node_n; i++){
       auto f = d* E->node_haid[i];
@@ -338,7 +340,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
   start = std::chrono::high_resolution_clock::now();
 #pragma omp for schedule(static) reduction(+:glob_r2a)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH d=uint(Y->ndof_n);
     for(INT_MESH i=0; i<E->halo_node_n; i++){
       auto f = d* E->node_haid[i];
@@ -354,7 +356,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
 //{  glob_sum1=0.0; }
 #pragma omp for schedule(static) reduction(+:glob_sum1)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH hl0=S->halo_loca_0,sysn=S->udof_n;
 #pragma omp simd reduction(+:glob_sum1)
     for(INT_MESH i=hl0; i<sysn; i++){
@@ -366,7 +368,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
 {  alpha = glob_r2a / glob_sum1; }// CHECK PRAGMA
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH sysn=S->udof_n;
 #pragma omp simd
     for(INT_MESH i=0; i<sysn; i++){
@@ -409,7 +411,7 @@ int HaloPCR::Iter(){//-----------------------------------------------
   //
   FLOAT_SOLV glob_sum1=0.0, glob_sum2=0.0, alpha=0.0, beta=0.0;
   FLOAT_SOLV glob_r2a = this->glob_res2;// glob_chk2=0.0,
-  const auto P=this->mesh_part;//FIXME Undo this?
+  //const auto P=this->mesh_part;//FIXME Undo this?
 #pragma omp parallel num_threads(comp_n)
 {// iter parallel region
   long int my_phys_count=0, my_scat_count=0, my_solv_count=0,
@@ -420,6 +422,9 @@ int HaloPCR::Iter(){//-----------------------------------------------
     (start-start);
   iter_start = std::chrono::high_resolution_clock::now();
   start = std::chrono::high_resolution_clock::now();
+  //
+  std::vector<Mesh::part> P;  P.resize(this->mesh_part.size());
+  std::copy(this->mesh_part.begin(), this->mesh_part.end(), P.begin());
 //#pragma omp single
 //{   this->halo_val = 0.0; }// serial halo_vals zero
 #pragma omp for schedule(static)
