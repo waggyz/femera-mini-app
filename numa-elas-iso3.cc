@@ -10,12 +10,16 @@ int ElastIso3D::ScatStiff( Elem* ){ return 1; };//FIXME
 //
 int ElastIso3D::Setup( Elem* E ){
   JacT  ( E );
-  const uint jacs_n = E->elip_jacs.size()/E->elem_n/ 10 ;
-  const uint intp_n = E->gaus_n;
+  const uint elem_n = uint(E->elem_n);
+  const uint jacs_n = uint(E->elip_jacs.size()/elem_n/ 10) ;
+  const uint intp_n = uint(E->gaus_n);
+  const uint conn_n = uint(E->elem_conn_n);
   this->tens_flop = uint(E->elem_n) * intp_n
     *( uint(E->elem_conn_n)* (54) + 27 );
-  this->tens_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
-    *(3*uint(E->elem_conn_n)*3+ jacs_n*10);//FIXME
+  this->tens_band = elem_n *(
+     sizeof(FLOAT_SOLV)*(3*conn_n*3+ jacs_n*10)// Main mem
+    +sizeof(INT_MESH)*conn_n // Main mem ints
+    +sizeof(FLOAT_PHYS)*(3*intp_n*conn_n +3+1 ) );// Stack (assumes read once)
   this->stif_flop = uint(E->elem_n)
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) );
   this->stif_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
