@@ -14,8 +14,7 @@
 #include <stdio.h>
 #endif
 //FIXME Remove unneeded includes
-extern std::vector<Mesh::part>*  tpvt_mesh_part;
-extern std::unordered_map<INT_MESH,INT_MESH>* tpvt_halo_map;
+//extern std::vector<Mesh::part>*  tpvt_mesh_part;
 int Mesh::GatherGlobalIDs(){ return 0; };
 int Mesh::ScatterHaloIDs(){
   /*
@@ -314,8 +313,6 @@ int Mesh::Setup(){
   // Copy to threadprivate variables.
   //tpvt_mesh_part= new std::vector<Mesh::part>();
   //tpvt_mesh_part->resize(this->mesh_part.size);
-  //tpvt_halo_map = new std::unordered_map<INT_MESH,INT_MESH>();
-  //tpvt_halo_map->resize (this->halo_map.size);
   
   }// End parallel region ====================================================
   //this->udof_n = sys_udof_n;
