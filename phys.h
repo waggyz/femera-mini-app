@@ -1,12 +1,10 @@
 #ifndef INCLUDED_PHYS_H
 #define INCLUDED_PHYS_H
-//#include "math.hpp"//FIXED This is messed up! should be somewhere else...
 
 class Phys{
 public:
   typedef std::valarray<FLOAT_PHYS> vals;
   //
-  //virtual int ElemLinear( std::vector<Elem*>,RESTRICT Phys::vals&,const RESTRICT Phys::vals&)=0;
   virtual int BlocLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&)=0;
   virtual int ElemLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&)=0;
   virtual int ElemJacobi( Elem*,RESTRICT Phys::vals& )=0;// Jacobi Preconditioner
@@ -18,8 +16,6 @@ public:
   virtual inline int MtrlProp2MatC( )=0;//why does this inline?
   virtual RESTRICT Phys::vals MtrlLinear(//FIXME Not used for 3D yet
     const RESTRICT Phys::vals &strain )=0;
-  //virtual int MtrlLinear(
-  //  const FLOAT_PHYS strain[9] )=0;
   //
   int ScatterNode2Elem( Elem*,
     const RESTRICT Phys::vals & node_v,
@@ -30,6 +26,7 @@ public:
   //
   virtual int Setup( Elem* E )=0;
   int JacRot( Elem* E );
+  int JacT  ( Elem* E );
   //
   virtual int ScatStiff( Elem* )=0;//FIXME should be local to subclass?
   int ElemStiff( RESTRICT Phys::vals& );//for comparison to LMA EBE
@@ -59,8 +56,6 @@ public:
 protected:
   Phys( Phys::vals p ) : mtrl_prop(p){};
   Phys( Phys::vals p, Phys::vals d ) : mtrl_prop(p),mtrl_dirs(d){};
-  //Phys( Phys::vals p, size_t f ) : mtrl_prop(p), elem_linear_flop(f){};
-  //Phys( Phys::vals p,Phys::vals r ) : mtrl_prop(p){};mtrl_rots(r){};
   //constructor computes material vals
   inline RESTRICT Phys::vals Tens2VoigtEng(const RESTRICT Phys::vals&);
   inline RESTRICT Phys::vals Tens3VoigtEng(const RESTRICT Phys::vals&);
@@ -91,7 +86,6 @@ public: ElastIso2D(FLOAT_PHYS young, FLOAT_PHYS poiss, FLOAT_PHYS thick) :
     ElastIso2D::MtrlProp2MatC();
   };
   int Setup( Elem* )final;
-  //int ElemLinear( std::vector<Elem*>,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
   int BlocLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
   int ElemLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
   int ElemJacobi( Elem*,RESTRICT Phys::vals& ) final;
@@ -115,14 +109,7 @@ public: ElastIso2D(FLOAT_PHYS young, FLOAT_PHYS poiss, FLOAT_PHYS thick) :
       mtrl_matc[0]*e[0] +mtrl_matc[1]*e[1] ,
       mtrl_matc[1]*e[0] +mtrl_matc[0]*e[1] ,
       mtrl_matc[2]*e[2] });
-    };/*
-  RESTRICT Phys::vals MtrlLinear(
-    const FLOAT_PHYS e[4])final{//FIXME Plane Stress
-    return( Phys::vals {
-      mtrl_matc[0]*e[0] +mtrl_matc[1]*e[3] ,
-      mtrl_matc[1]*e[0] +mtrl_matc[0]*e[3] ,
-      mtrl_matc[2]*e[1] +mtrl_matc[2]*e[2]});
-    };*/
+    };
 protected:
 private:
 };
@@ -169,19 +156,7 @@ public: ElastIso3D(FLOAT_PHYS young, FLOAT_PHYS poiss ) :
     s[5]= mtrl_matc[2]*e[2] +mtrl_matc[2]*e[6];
     //FIXME Tensor form: http://solidmechanics.org/text/Chapter3_2/Chapter3_2.htm
     return s;
-  };/*
-  RESTRICT Phys::vals MtrlLinear( const FLOAT_PHYS e[9])final{
-    RESTRICT Phys::vals s(0.0,6);
-    s[0]= mtrl_matc[0]*e[0] +mtrl_matc[1]*e[4] +mtrl_matc[1]*e[8];
-    s[1]= mtrl_matc[1]*e[0] +mtrl_matc[0]*e[4] +mtrl_matc[1]*e[8];
-    s[2]= mtrl_matc[1]*e[0] +mtrl_matc[1]*e[4] +mtrl_matc[0]*e[8];
-    // Fused multiply-add probably better
-    s[3]= mtrl_matc[2]*e[1] +mtrl_matc[2]*e[3];
-    s[4]= mtrl_matc[2]*e[5] +mtrl_matc[2]*e[7];
-    s[5]= mtrl_matc[2]*e[2] +mtrl_matc[2]*e[6];
-    //FIXME Tensor form: http://solidmechanics.org/text/Chapter3_2/Chapter3_2.htm
-    return s;
-  };*/
+  };
 protected:
 private:
 };

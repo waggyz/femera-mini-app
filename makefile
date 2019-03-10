@@ -14,7 +14,7 @@ ifdef INTEL_LICENSE_FILE
 CXX=icc
 CPPFLAGS=-std=c++11 -Wall -Wextra -Ofast -xHost -axSKYLAKE-AVX512 \
  -ffast-math -no-fast-transcendentals \
- -qopt-zmm-usage=high -no-inline-max-size -no-inline-max-total-size -g
+ -no-inline-max-size -no-inline-max-total-size -g
 # -march=native
 SERFLAGS=-fno-alias -diag-disable 3180
 NCPU=8
@@ -26,7 +26,7 @@ ifdef INTEL_PYTHONHOME
 CXX=icc
 CPPFLAGS=-std=c++11 -Wall -Wextra -Ofast -xHost \
  -ffast-math -no-fast-transcendentals \
- -qopt-zmm-usage=high -no-inline-max-size -no-inline-max-total-size -g
+ -no-inline-max-size -no-inline-max-total-size -g
 SERFLAGS=-fno-alias -diag-disable 3180
 NCPU=40
 NUMA=6
