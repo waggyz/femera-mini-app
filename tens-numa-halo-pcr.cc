@@ -227,18 +227,22 @@ int HaloPCR::Init(){// Preconditioned Conjugate Residual
 #pragma omp for schedule(static)
 for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
   Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
+  if(E->node_haid.size()==0){ E->node_haid.resize(E->halo_node_n); };
   const INT_MESH d=uint(Y->ndof_n);
   for(INT_MESH i=0; i<E->halo_node_n; i++){
 #pragma omp critical(halomap)
 {//FIXME critical section here?
       INT_MESH g=E->node_glid[i];
       if(this->halo_map.count(g)==0){// Initialize halo_map
-        this->halo_map[g]=halo_n; halo_n++;
+        this->halo_map[g]=halo_n;
+        E->node_haid[i]=halo_n;
         for( uint j=0; j<d; j++){
-          this->halo_val[d*this->halo_map[g]+j]  = S->sys_d[d*i +j]; };
+          this->halo_val[d*E->node_haid[i]+j]  = S->sys_d[d*i +j]; };
+        halo_n++;
       }else{// Add in the rest.
+        E->node_haid[i]=this->halo_map[g];
         for( uint j=0; j<d; j++){
-          this->halo_val[d*this->halo_map[g]+j] += S->sys_d[d*i +j]; };
+          this->halo_val[d*E->node_haid[i]+j] += S->sys_d[d*i +j]; };
       };
 }
     };
@@ -252,7 +256,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
     const INT_MESH d=uint(Y->ndof_n);
     for(INT_MESH i=0; i<E->halo_node_n; i++){
-      auto f = d* this->halo_map[E->node_glid[i]];
+      auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic read
         S->sys_d[d*i +j] = this->halo_val[f+j]; };
@@ -273,7 +277,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
     const INT_MESH d=uint(Y->ndof_n);
     for(INT_MESH i=0; i<E->halo_node_n; i++){
-      auto f = d* this->halo_map[E->node_glid[i]];
+      auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic update
         this->halo_val[f+j] += S->sys_f[d*i +j]; };
@@ -288,7 +292,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
     const INT_MESH d=uint(Y->ndof_n);
     for(INT_MESH i=0; i<E->halo_node_n; i++){
-      auto f = d* this->halo_map[E->node_glid[i]];
+      auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic read
         S->sys_f[d*i +j] = this->halo_val[f+j]; };
@@ -322,7 +326,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
     const INT_MESH d=uint(Y->ndof_n);
     for(INT_MESH i=0; i<E->halo_node_n; i++){
-      auto f = d* this->halo_map[E->node_glid[i]];
+      auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic update
         this->halo_val[f+j] += S->sys_f[d*i +j]; };
@@ -337,7 +341,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[part_i];
     const INT_MESH d=uint(Y->ndof_n);
     for(INT_MESH i=0; i<E->halo_node_n; i++){
-      auto f = d* this->halo_map[E->node_glid[i]];
+      auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic read
         S->sys_f[d*i +j] = this->halo_val[f+j]; };
@@ -430,7 +434,7 @@ int HaloPCR::Iter(){//-----------------------------------------------
     start = std::chrono::high_resolution_clock::now();
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
     for(INT_MESH i=hrn; i<hnn; i++){
-      auto f = d* this->halo_map[E->node_glid[i]];
+      auto f = d* E->node_haid[i];
       for(uint j=0; j<d; j++){
 #pragma omp atomic write
         this->halo_val[f+j] = S->sys_f[d* i+j]; };
@@ -446,7 +450,7 @@ int HaloPCR::Iter(){//-----------------------------------------------
     const INT_MESH d=uint(Y->ndof_n);
     const INT_MESH hrn=E->halo_remo_n;
     for(INT_MESH i=0; i<hrn; i++){
-      auto f = d* this->halo_map[E->node_glid[i]];
+      auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic update
         this->halo_val[f+j]+= S->sys_f[d* i+j]; };
@@ -462,7 +466,7 @@ int HaloPCR::Iter(){//-----------------------------------------------
     const INT_MESH hnn=E->halo_node_n;
     start = std::chrono::high_resolution_clock::now();
     for(INT_MESH i=0; i<hnn; i++){
-      auto f = d* this->halo_map[E->node_glid[i]];
+      auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){//NOTE appears not to be critical
 #pragma omp atomic read
         S->sys_f[d* i+j] = this->halo_val[f+j]; };// CHECK PRAGMA

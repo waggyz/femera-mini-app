@@ -101,7 +101,6 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     for(int ip=0; ip<intp_n; ip++){
       //G = MatMul3x3xN( jac,shg );
       for(int i=0; i< 9 ; i++){ H[i]=0.0; };
-      //for(uint i=0; i<(Ne) ; i++){ G[i]=0.0; };
       for(int i=0; i<Nc; i++){
         for(int k=0; k<3 ; k++){ G[3* i+k ]=0.0;
           for(int j=0; j<3 ; j++){
@@ -156,7 +155,6 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         for(int j=0; j<3; j++){
           f[(3* i+k) ] += GS[(3* i+j) ] * R[(3* j+k) ];
     };};};//-------------------------------------------- 2 *3*3*Nc = 18*Nc FLOP
-      //const   INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     for (int i=0; i<Nc; i++){
       std::memcpy(& sysf[Econn[Nc*ie+i]*Nf],& f[Nf*i],
         sizeof(FLOAT_SOLV)*Nf ); };

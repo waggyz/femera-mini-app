@@ -19,7 +19,7 @@ int ElastIso3D::Setup( Elem* E ){
   this->tens_band = elem_n *(
      sizeof(FLOAT_SOLV)*(3*conn_n*3+ jacs_n*10)// Main mem
     +sizeof(INT_MESH)*conn_n // Main mem ints
-+sizeof(FLOAT_PHYS)*(3*intp_n*conn_n +3+1 ) );// Stack (assumes read once)
+    +sizeof(FLOAT_PHYS)*(3*intp_n*conn_n +3+1 ) );// Stack (assumes read once)
   this->stif_flop = uint(E->elem_n)
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) );
   this->stif_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
@@ -123,7 +123,7 @@ const int intp_n = int(E->gaus_n);
       };};};//---------------------------------------------- N*3*6 = 18*N FLOP
 #if VERB_MAX>10
       printf( "f:");
-      for(uint j=0;j<Ne;j++){
+      for(int j=0;j<Ne;j++){
         if(j%ndof==0){printf("\n");}
         printf("%+9.2e ",f[j]);
       }; printf("\n");

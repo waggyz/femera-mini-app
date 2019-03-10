@@ -104,6 +104,8 @@ public:
   //FIXME Should be <int> to match Gmsh tags
   RESTRICT Mesh::ints node_glid ={};// xref from local to global node number
   // global_id=node_glid[local_id];
+  RESTRICT Mesh::ints node_haid ={};// xref from local to halo node number
+  // M->node_halo_id = E->node_haid[ node_part_id ]
   std::unordered_map<int,INT_MESH> elem_loid;
   std::unordered_map<int,INT_MESH> node_loid;
   std::vector<int> halo_glid ={};// = loca_glid U remo_glid
