@@ -303,7 +303,7 @@ int HaloPCG::Iter(){
     time_accum( my_phys_count, phys_start );
     time_start( gath_start );
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
-    for(INT_MESH i=hrn; i<hnn; i++){i//NOTE memcpy apparently not critical
+    for(INT_MESH i=hrn; i<hnn; i++){//NOTE memcpy apparently not critical
       std::memcpy(
         & this->halo_val[d* E->node_haid[i]],
         & S->sys_f[d* i],
