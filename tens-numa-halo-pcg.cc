@@ -147,10 +147,6 @@ int PCG::Solve( Elem* E, Phys* Y ){//FIXME Redo this
   return 0;//FIXME
 };
 int HaloPCG::Init(){// Preconditioned Conjugate Gradient
-  int part_0=0;
-  if(std::get<0>( this->mesh_part[0] )==NULL){ part_0=1; };
-  const int part_n = int(this->mesh_part.size())-part_0;
-  const int part_o = part_n+part_0;
 #ifdef _OPENMP
   const int comp_n = this->comp_n;
 #endif
@@ -165,6 +161,9 @@ int HaloPCG::Init(){// Preconditioned Conjugate Gradient
   auto start = std::chrono::high_resolution_clock::now();
   std::vector<part> P;  P.resize(this->mesh_part.size());
   std::copy(this->mesh_part.begin(), this->mesh_part.end(), P.begin());
+  int part_0=0; if(std::get<0>( P[0])==NULL ){ part_0=1; };
+  const int part_n = int(P.size()) - part_0;
+  const int part_o = part_n + part_0;
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
@@ -272,9 +271,6 @@ for(int part_i=part_0; part_i<part_o; part_i++){
   return 0;
 };
 int HaloPCG::Iter(){
-  int part_0=0; if(std::get<0>( this->mesh_part[0])==NULL ){ part_0=1; };
-  const int part_n = int(this->mesh_part.size()) - part_0;
-  const int part_o = part_n + part_0;
 #ifdef _OPENMP
   const int comp_n = this->comp_n;
 #endif
@@ -290,6 +286,9 @@ int HaloPCG::Iter(){
   //auto P = this->mesh_part;
   std::vector<part> P;  P.resize(this->mesh_part.size());
   std::copy(this->mesh_part.begin(), this->mesh_part.end(), P.begin());
+  int part_0=0; if(std::get<0>( P[0])==NULL ){ part_0=1; };
+  const int part_n = int(P.size()) - part_0;
+  const int part_o = part_n + part_0;
   Elem* E; Phys* Y; Solv* S;// Seems to be faster to reuse these.
   // Timing variables (used when verbosity > 1)
   long int my_phys_count=0, my_scat_count=0, my_solv_count=0,
