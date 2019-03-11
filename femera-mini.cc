@@ -484,9 +484,9 @@ int main( int argc, char** argv ){
     FLOAT_PHYS scay=1.0,miny= 99e9,maxy=-99e9;
     FLOAT_PHYS scaz=1.0,minz= 99e9,maxz=-99e9;
 #pragma omp parallel
-{  std::vector<part> P;
-   P.resize(this->mesh_part.size());
-   std::copy(this->mesh_part.begin(), this->mesh_part.end(), P.begin());
+{  std::vector<Mesh::part> P;
+   P.resize(M->mesh_part.size());
+   std::copy(M->mesh_part.begin(), M->mesh_part.end(), P.begin());
 #pragma omp for schedule(static)
     for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
       Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
