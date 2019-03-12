@@ -121,9 +121,6 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       const FLOAT_PHYS dw = jac[9] * wgt[ip];
       if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
         std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
-        for (int i=0; i<Nc; i++){
-          std::memcpy( & u[Nf*i],& sysu[Econn[Nc*(ie+1)+i]*Nf],
-            sizeof(FLOAT_SOLV)*Nf ); };
       }; };
       // Material Response
       S[0]=(C[0]* H[0] + C[3]* H[4] + C[5]* H[8])*dw;//Sxx
