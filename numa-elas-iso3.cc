@@ -268,9 +268,9 @@ int ElastIso3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
     mtrl_matc[0],mtrl_matc[1],mtrl_matc[1],0.0,0.0,0.0,
     mtrl_matc[1],mtrl_matc[0],mtrl_matc[1],0.0,0.0,0.0,
     mtrl_matc[1],mtrl_matc[1],mtrl_matc[0],0.0,0.0,0.0,
-    0.0,0.0,0.0,mtrl_matc[2],0.0,0.0,
-    0.0,0.0,0.0,0.0,mtrl_matc[2],0.0,
-    0.0,0.0,0.0,0.0,0.0,mtrl_matc[2]};
+    0.0,0.0,0.0,mtrl_matc[2]*2.0,0.0,0.0,
+    0.0,0.0,0.0,0.0,mtrl_matc[2]*2.0,0.0,
+    0.0,0.0,0.0,0.0,0.0,mtrl_matc[2]*2.0};
   //elem_inout=0.0;
   for(uint ie=0;ie<elem_n;ie++){
     uint ij=Nj*ie;//FIXME only good for tets

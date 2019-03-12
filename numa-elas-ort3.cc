@@ -50,16 +50,17 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   FLOAT_MESH jac[Nj];//, det;
   FLOAT_PHYS u[Ne], f[Ne], GS[Ne], uR[Ne];
   FLOAT_PHYS G[Ne], H[Nd*Nf], S[Nd*Nf];//FIXME wrong sizes?
-  //
-  FLOAT_PHYS intp_shpg[intp_n*Ne];
+  /*
+  FLOAT_PHYS Lintp_shpg[intp_n*Ne];
   std::copy( &E->intp_shpg[0],// local copy
-             &E->intp_shpg[intp_n*Ne], intp_shpg );
-  FLOAT_PHYS wgt[intp_n];
+             &E->intp_shpg[intp_n*Ne], Lintp_shpg );
+  FLOAT_PHYS Lwgt[intp_n];
   std::copy( &E->gaus_weig[0],
-             &E->gaus_weig[intp_n], wgt );
-  FLOAT_PHYS C[this->mtrl_matc.size()];
+             &E->gaus_weig[intp_n], Lwgt );
+  FLOAT_PHYS LC[this->mtrl_matc.size()];
   std::copy( &this->mtrl_matc[0],
-             &this->mtrl_matc[this->mtrl_matc.size()], C );
+             &this->mtrl_matc[this->mtrl_matc.size()], LC );
+  */
   FLOAT_PHYS R[9] = {
     mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
     mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
@@ -71,10 +72,14 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     printf("%+9.2e ",C[j]);
   }; printf("\n");
 #endif
-  const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
-  const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
-  const FLOAT_SOLV* RESTRICT sysu  = &sys_u[0];
-        FLOAT_SOLV* RESTRICT sysf  = &sys_f[0];
+  const FLOAT_PHYS* RESTRICT intp_shpg = &E->intp_shpg[0];
+  const FLOAT_PHYS* RESTRICT wgt       = &E->gaus_weig[0];
+  const FLOAT_PHYS* RESTRICT C         = &this->mtrl_matc[0];
+  //      FLOAT_PHYS* RESTRICT R         = &this->mtrl_rotc[0];
+  const   INT_MESH* RESTRICT Econn     = &E->elem_conn[0];
+  const FLOAT_MESH* RESTRICT Ejacs     = &E->elip_jacs[0];
+  const FLOAT_SOLV* RESTRICT sysu      = &sys_u[0];
+        FLOAT_SOLV* RESTRICT sysf      = &sys_f[0];
   if(e0<ee){
     for (int i=0; i<Nc; i++){
       std::memcpy( &   u[Nf*i], &sysu[Econn[Nc*e0+i]*Nf],
@@ -90,14 +95,14 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         for(int j=0; j<3; j++){
           uR[(3* i+k) ] += u[(3* i+j) ] * R[(3* j+k) ];
     };};};//-------------------------------------------- 2 *3*3*Nc = 18*Nc FLOP
-    for (int i=0; i<Nc; i++){
-      std::memcpy(&   f[Nf*i],& sysf[Econn[Nc*ie+i]*Nf],
-        sizeof(FLOAT_SOLV)*Nf ); };
     if((ie+1)<ee){// Fetch stuff for the next iteration
       for (int i=0; i<Nc; i++){
         std::memcpy( & u[Nf*i],& sysu[Econn[Nc*(ie+1)+i]*Nf],
           sizeof(FLOAT_SOLV)*Nf ); };
     };
+    for (int i=0; i<Nc; i++){
+      std::memcpy(&   f[Nf*i],& sysf[Econn[Nc*ie+i]*Nf],
+        sizeof(FLOAT_SOLV)*Nf ); };
     for(int ip=0; ip<intp_n; ip++){
       //G = MatMul3x3xN( jac,shg );
       for(int i=0; i< 9 ; i++){ H[i]=0.0; };
@@ -119,12 +124,16 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       }; printf("\n");
 #endif
       const FLOAT_PHYS dw = jac[9] * wgt[ip];
-      if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
-        std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
-        for (int i=0; i<Nc; i++){
-          std::memcpy( & u[Nf*i],& sysu[Econn[Nc*(ie+1)+i]*Nf],
-            sizeof(FLOAT_SOLV)*Nf ); };
-      }; };
+      if(ip==(intp_n-1)){
+        if((ie+1)<ee){// Fetch stuff for the next iteration
+          std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
+        };
+        //if(ip==0){
+        //  for (int i=0; i<Nc; i++){
+        //    std::memcpy( & u[Nf*i],& sysu[Econn[Nc*(ie+1)+i]*Nf],
+        //      sizeof(FLOAT_SOLV)*Nf ); };
+        //};
+      };
       // Material Response
       S[0]=(C[0]* H[0] + C[3]* H[4] + C[5]* H[8])*dw;//Sxx
       S[4]=(C[3]* H[0] + C[1]* H[4] + C[4]* H[8])*dw;//Syy
@@ -361,9 +370,9 @@ int ElastOrtho3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
     mtrl_matc[0],mtrl_matc[3],mtrl_matc[5],0.0,0.0,0.0,
     mtrl_matc[3],mtrl_matc[1],mtrl_matc[4],0.0,0.0,0.0,
     mtrl_matc[5],mtrl_matc[4],mtrl_matc[2],0.0,0.0,0.0,
-    0.0,0.0,0.0,mtrl_matc[6],0.0,0.0,
-    0.0,0.0,0.0,0.0,mtrl_matc[7],0.0,
-    0.0,0.0,0.0,0.0,0.0,mtrl_matc[8]};
+    0.0,0.0,0.0,mtrl_matc[6]*2.0,0.0,0.0,
+    0.0,0.0,0.0,0.0,mtrl_matc[7]*2.0,0.0,
+    0.0,0.0,0.0,0.0,0.0,mtrl_matc[8]*2.0};
   for(uint ie=0;ie<elem_n;ie++){
     uint ij=Nj*ie;
     std::copy( &E->elip_jacs[ij],

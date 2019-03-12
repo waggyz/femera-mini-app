@@ -99,7 +99,7 @@ public: ElastIso2D(FLOAT_PHYS young, FLOAT_PHYS poiss, FLOAT_PHYS thick) :
     const FLOAT_PHYS n=mtrl_prop[1];
     const FLOAT_PHYS t=mtrl_prop[2];
     const FLOAT_PHYS d=E/(1.0-n*n)*t;
-    mtrl_matc.resize(3); mtrl_matc={ d, n*d, (1.0-n)*d*0.5 };//*0.5 eng. strain
+    mtrl_matc.resize(3); mtrl_matc={ d, n*d, (1.0-n)*d*0.25 };//*0.5 eng. strain
     return 0;
   };
   RESTRICT Phys::vals MtrlLinear(//FIXME Doesn't inline
