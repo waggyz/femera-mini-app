@@ -88,7 +88,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, RESTRICT Phys::vals &sys_f, const RESTRIC
   if(e0<ee){
     std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
     const   INT_MESH* RESTRICT c = &Econn[Nc*e0];
-    for (uint i=0; i<Nc; i++){
+    for (int i=0; i<Nc; i++){
       std::memcpy( &    u[ndof*i], &sysu[c[i]*ndof], sizeof(FLOAT_SOLV)*ndof );
     };
   };
@@ -132,7 +132,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, RESTRICT Phys::vals &sys_f, const RESTRIC
     __m512d is0,is1,is2,is3,is4,is5;
     __m512d a036zmm, a147zmm, a258zmm;
     __m256d a036, a147, a258;
-    double * restrict isp = &intp_shpg[ip*Ne];
+    double * RESTRICT isp = &intp_shpg[ip*Ne];
 
     is0= _mm512_insertf64x4(_mm512_castpd256_pd512(_mm256_set1_pd(isp[0])), _mm256_set1_pd(isp[3]),0x1);
     is1= _mm512_insertf64x4(_mm512_castpd256_pd512(_mm256_set1_pd(isp[1])), _mm256_set1_pd(isp[4]),0x1);
@@ -219,7 +219,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, RESTRICT Phys::vals &sys_f, const RESTRIC
     __m256d u0,u1,u2,u3,u4,u5,g0,g1,g2;
     __m256d is0,is1,is2,is3,is4,is5;
     __m256d a036, a147, a258;
-    double * restrict isp = &intp_shpg[ip*Ne];
+    double * RESTRICT isp = &intp_shpg[ip*Ne];
 
     is0= _mm256_set1_pd(isp[0]); is1= _mm256_set1_pd(isp[1]); is2= _mm256_set1_pd(isp[2]);
     u0 = _mm256_set1_pd(  u[0]); u1 = _mm256_set1_pd(  u[1]); u2 = _mm256_set1_pd(  u[2]);
@@ -297,7 +297,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, RESTRICT Phys::vals &sys_f, const RESTRIC
 #else
     __m256d s0,s1,s2,is0,is1,u0,u1,a01,a31,a61,g0,g1,g2;
     __m256d s3,s4,s5,is2,is3,u2,u3,a02,a32,a62,g3,g4,g5;
-    double * restrict isp = &intp_shpg[ip*Ne];
+    double * RESTRICT isp = &intp_shpg[ip*Ne];
     a01= _mm256_setzero_pd(); a31 = _mm256_setzero_pd(); a61 = _mm256_setzero_pd();
     a02= _mm256_setzero_pd(); a32 = _mm256_setzero_pd(); a62 = _mm256_setzero_pd();
     //j0 = _mm256_loadu_pd(&jac[0]);  // j0 = [j3 j2 j1 j0]
@@ -421,10 +421,10 @@ int ElastOrtho3D::ElemLinear( Elem* E, RESTRICT Phys::vals &sys_f, const RESTRIC
     _mm256_storeu_pd(&A[6],a62);
 #endif
 #else
-    for(uint k=0; k<Nc; k++){
-      double * restrict Gp = &G[3*k];
-      double * restrict isp = &intp_shpg[ip*Ne+ 3*k];
-      double * restrict up = &u[ndof*k];
+    for(int k=0; k<Nc; k++){
+      double * RESTRICT Gp = &G[3*k];
+      double * RESTRICT isp = &intp_shpg[ip*Ne+ 3*k];
+      double * RESTRICT up = &u[ndof*k];
 
       is0= _mm256_loadu_pd(isp) ; u0 = _mm256_loadu_pd(up);
       s0 = _mm256_mul_pd(j0,is0); s1 = _mm256_mul_pd(j1,is0); s2 = _mm256_mul_pd(j2,is0);
@@ -514,7 +514,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, RESTRICT Phys::vals &sys_f, const RESTRIC
     A[2] += G[27]*u[29]; A[5] += G[28]*u[29]; A[8] += G[29]*u[29];
 #else
 #pragma vector unaligned
-    for(uint k=0; k<Nc; k++){
+    for(int k=0; k<Nc; k++){
       G[3*k+0]=0.0;
       G[3*k+0] += jac[3*0+0] * intp_shpg[ip*Ne+ 3*k+0];
       G[3*k+0] += jac[3*0+1] * intp_shpg[ip*Ne+ 3*k+1];
