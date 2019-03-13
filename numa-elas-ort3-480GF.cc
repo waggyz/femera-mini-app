@@ -88,7 +88,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, RESTRICT Phys::vals &sys_f, const RESTRIC
   if(e0<ee){
     std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
     const   INT_MESH* RESTRICT c = &Econn[Nc*e0];
-    for (uint i=0; i<Nc; i++){
+    for (int i=0; i<Nc; i++){
       std::memcpy( &    u[ndof*i], &sysu[c[i]*ndof], sizeof(FLOAT_SOLV)*ndof );
     };
   };
@@ -219,7 +219,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, RESTRICT Phys::vals &sys_f, const RESTRIC
     __m256d u0,u1,u2,u3,u4,u5,g0,g1,g2;
     __m256d is0,is1,is2,is3,is4,is5;
     __m256d a036, a147, a258;
-    double * restrict isp = &intp_shpg[ip*Ne];
+    double * RESTRICT isp = &intp_shpg[ip*Ne];
 
     is0= _mm256_set1_pd(isp[0]); is1= _mm256_set1_pd(isp[1]); is2= _mm256_set1_pd(isp[2]);
     u0 = _mm256_set1_pd(  u[0]); u1 = _mm256_set1_pd(  u[1]); u2 = _mm256_set1_pd(  u[2]);
