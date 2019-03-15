@@ -181,9 +181,9 @@ int ElastOrtho3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
     mtrl_matc[0],mtrl_matc[3],mtrl_matc[5],0.0,0.0,0.0,
     mtrl_matc[3],mtrl_matc[1],mtrl_matc[4],0.0,0.0,0.0,
     mtrl_matc[5],mtrl_matc[4],mtrl_matc[2],0.0,0.0,0.0,
-    0.0,0.0,0.0,mtrl_matc[6],0.0,0.0,
-    0.0,0.0,0.0,0.0,mtrl_matc[7],0.0,
-    0.0,0.0,0.0,0.0,0.0,mtrl_matc[8]};
+    0.0,0.0,0.0,mtrl_matc[6]*2.0,0.0,0.0,
+    0.0,0.0,0.0,0.0,mtrl_matc[7]*2.0,0.0,
+    0.0,0.0,0.0,0.0,0.0,mtrl_matc[8]*2.0};
   for(uint ie=0;ie<elem_n;ie++){
     uint ij=Nj*ie;
     std::copy( &E->elip_jacs[ij],
@@ -272,9 +272,9 @@ int ElastOrtho3D::ElemRowSumAbs(Elem* E, RESTRICT Phys::vals &sys_d ){
     mtrl_matc[0],mtrl_matc[1],mtrl_matc[1],0.0,0.0,0.0,
     mtrl_matc[1],mtrl_matc[0],mtrl_matc[1],0.0,0.0,0.0,
     mtrl_matc[1],mtrl_matc[1],mtrl_matc[0],0.0,0.0,0.0,
-    0.0,0.0,0.0,mtrl_matc[2],0.0,0.0,
-    0.0,0.0,0.0,0.0,mtrl_matc[2],0.0,
-    0.0,0.0,0.0,0.0,0.0,mtrl_matc[2]};
+    0.0,0.0,0.0,mtrl_matc[2]*2.0,0.0,0.0,
+    0.0,0.0,0.0,0.0,mtrl_matc[2]*2.0,0.0,
+    0.0,0.0,0.0,0.0,0.0,mtrl_matc[2]*2.0};
   for(uint ie=0;ie<elem_n;ie++){
     uint ij=Nj*ie;//FIXME only good for tets
     std::copy( &E->elip_jacs[ij],
