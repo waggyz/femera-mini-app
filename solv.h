@@ -4,6 +4,7 @@
 class Solv{
 public:
   typedef std::valarray<FLOAT_SOLV> vals;
+  typedef std::vector<FLOAT_SOLV> valign;
   enum Meth {
     SOLV_GD=0, SOLV_CG=1, SOLV_CR=2
   };
@@ -14,8 +15,9 @@ public:
   FLOAT_SOLV loca_rtol=0.0;
   //FLOAT_SOLV tol=1e-3;// Default Solution Tolerance
   //
+  RESTRICT Solv::valign sys_f;// f=[A]{u}//FIXME Move to Phys*?
+  //RESTRICT Solv::vals sys_f;// f=[A]{u}
   RESTRICT Solv::vals sys_u;// solution
-  RESTRICT Solv::vals sys_f;// f=[A]{u}
   RESTRICT Solv::vals sys_r;// Residuals
   //RESTRICT Solv::vals sys_d;//FIXME Diagonal Preconditioner
   //NOTE Additional working vectors needed are defined in each solver subclass
@@ -53,7 +55,7 @@ protected:
     iter_max(i), udof_n(n), loca_rtol(r){
     loca_rto2=loca_rtol*loca_rtol;
     sys_u.resize(udof_n,0.0);// Initial Solution Guess
-    sys_f.resize(udof_n,0.0);// f=Au
+    sys_f.resize(udof_n*4/3,0.0);// f=Au
     sys_r.resize(udof_n,0.0);// Residuals
     sys_d.resize(udof_n,0.0);// Diagonal Preconditioner
   };

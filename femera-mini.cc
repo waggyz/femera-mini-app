@@ -213,9 +213,7 @@ int main( int argc, char** argv ){
 #if VERB_MAX>0
   float read_sec=0.0,init_sec=0.0,loop_sec=0.0;
 #endif
-//if VERB_MAX>1
   int iter_info_n = 1;
-//endif
 #ifdef _OPENMP
   if( comp_n <1){ comp_n = omp_get_max_threads(); };//omp_get_max_threads();
   if( numa_n==0){ numa_n = comp_n / 2; };//FIXME just a guess...and not yet used
@@ -232,12 +230,10 @@ int main( int argc, char** argv ){
 #endif
 #endif
   if(comp_n<1){ comp_n = 1; };
-  //INT_ORDER pord=1;
   int part_0=1;//FIXME unpartitioned mesh in mesh_part[0]
 #if VERB_MAX>1
   if(verbosity>1){
     std::cout << "Reading and setting up "<<(part_n-part_0+1)<<" partitions";
-  //int dots_mod=0;
   if(verbosity!=2){ std::cout <<"..." <<'\n'; };
   };
 #endif
@@ -249,14 +245,12 @@ int main( int argc, char** argv ){
     case(Solv::SOLV_CR):{ M=new HaloPCR(part_n+part_0,iter_max,rtol); break;}
     default            :{ M=new HaloPCG(part_n+part_0,iter_max,rtol); }
   };
-  //M->solv_meth = solv_meth;//FIXME set in constructor?
   M->solv_cond=solv_cond;
   M->base_name=iname;
   M->comp_n=comp_n;
   M->simd_n=simd_n;
   //M->glob_rtol = rtol;
   M->verbosity=verbosity;
-  //M->mesh_part.resize(part_n+part_0);
   M->time_secs.resize(10);
 #if VERB_MAX>0
   std::chrono::high_resolution_clock::time_point
@@ -271,7 +265,6 @@ int main( int argc, char** argv ){
 #endif
   M->Setup();
 //if VERB_MAX>1
-  //std::string solv_name="FIXME";
   {// scope local variables
   //int sugg_max=3000;
   iter_info_n =   1;// sugg_max = M->udof_n;
@@ -609,9 +602,9 @@ int main( int argc, char** argv ){
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
-    S->sys_f=0.0;
+    for(uint i=0;i<S->sys_f.size();i++){
+      S->sys_f[i]=0.0; }
     E->do_halo=true; Y->ElemLinear( E, S->sys_f, S->sys_u );
-    //E->do_halo=false; Y->ElemLinear( E, S->sys_f, S->sys_p );
     // sync sys_f
     const INT_MESH d=uint(Y->ndof_n);
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
@@ -619,7 +612,7 @@ int main( int argc, char** argv ){
       auto f = d* E->node_haid[i];
       for(uint j=0; j<d; j++){
 #pragma omp atomic write
-        M->halo_val[f+j] = S->sys_f[d* i+j]; };
+        M->halo_val[f+j] = S->sys_f[4* i+j]; };
     };
   };
 #pragma omp for schedule(static)
@@ -631,7 +624,7 @@ int main( int argc, char** argv ){
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic update
-        M->halo_val[f+j]+= S->sys_f[d* i+j]; };
+        M->halo_val[f+j]+= S->sys_f[4* i+j]; };
     };
   };// finished gather, now scatter back to elems
 #pragma omp for schedule(static) reduction(+:reac_x)
@@ -643,7 +636,7 @@ int main( int argc, char** argv ){
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){//NOTE appears not to be critical
 //#pragma omp atomic read
-        S->sys_f[d* i+j] = M->halo_val[f+j]; };
+        S->sys_f[4* i+j] = M->halo_val[f+j]; };
     };
     E->do_halo=false; Y->ElemLinear( E, S->sys_f, S->sys_u );
   };
@@ -652,13 +645,13 @@ int main( int argc, char** argv ){
 #pragma omp for schedule(static) reduction(+:reac_x)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
-    const INT_MESH d=uint(Y->ndof_n);
+    //const INT_MESH d=uint(Y->ndof_n);
     uint dof=0;// x-direction
     INT_MESH n,f; FLOAT_MESH v;
     INT_MESH r=E->halo_remo_n;
     for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
       // Don't duplicate halo nodes
-      if(n>=r){ reac_x+=S->sys_f[d* n+dof]; };
+      if(n>=r){ reac_x+=S->sys_f[4* n+dof]; };
     };
 #pragma omp critical
 {
