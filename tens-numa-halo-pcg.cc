@@ -134,8 +134,8 @@ int PCG::Solve( Elem* E, Phys* Y ){//FIXME Redo this
   if( !this->Init() ){//============ Solve ================
     printf("SER INIT r2a:%9.2e\n",this->loca_rto2);
     for(this->iter=0; this->iter < this->iter_max; this->iter++){
-      for(uint i=0;i<sys_f.size();i++){
-        this->sys_f[i]=0.0; };
+      for(uint i=0;i<dat_f.size();i++){
+        this->dat_f[i]=0.0; };
       //Y->ScatterNode2Elem(E,this->sys_p,Y->elem_inout);
       //Y->ElemLinear( E );
       //Y->GatherElem2Node(E,Y->elem_inout,this->sys_f);
@@ -304,8 +304,8 @@ int HaloPCG::Iter(){
     std::tie(E,Y,S)=P[part_i];
     const INT_MESH d=uint(Y->ndof_n);
     time_start( phys_start );
-    for(uint i=0;i<S->sys_f.size();i++){
-      S->sys_f[i]=0.0; };
+    for(uint i=0;i<S->dat_f.size();i++){
+      S->dat_f[i]=0.0; };
     E->do_halo=true; Y->ElemLinear( E, S->sys_f, S->sys_p );
     time_accum( my_phys_count, phys_start );
     time_start( gath_start );

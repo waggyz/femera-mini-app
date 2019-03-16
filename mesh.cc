@@ -294,11 +294,11 @@ int Mesh::Setup(){
 }
     };
 #endif
-    Mesh::part P(E,Y,S);
+    Mesh::part t(E,Y,S);
 #pragma omp critical(systot)
 {
     //this->meth_name=S->meth_name;
-    this->mesh_part[part_i] = P;
+    this->mesh_part[part_i] = t;
     //M->list_elem[part_i] = E;
     this->elem_n += E->elem_n;
     this->node_n += E->node_n - E->halo_remo_n;

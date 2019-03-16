@@ -33,7 +33,7 @@ int ElastOrtho3D::Setup( Elem* E ){
   return 0;
 };
 int ElastOrtho3D::ElemLinear( Elem* E,
-  RESTRICT Solv::valign &sys_f, const RESTRICT Solv::vals &sys_u ){
+  FLOAT_SOLV *sys_f, const RESTRICT Solv::vals &sys_u ){
   //FIXME Cleanup local variables.
   const int Nd = 3;// Node (mesh) Dimension FIXME can include temperature?
   const int Nf = 3;// this->ndof_n DOF/node

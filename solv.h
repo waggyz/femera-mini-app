@@ -1,6 +1,8 @@
 #ifndef INCLUDED_SOLV_H
 #define INCLUDED_SOLV_H
-
+#if VERB_MAX > 3
+#include <iostream>
+#endif
 class Solv{
 public:
   typedef std::valarray<FLOAT_SOLV> vals;
@@ -11,11 +13,12 @@ public:
   enum Cond {
     COND_NONE=0, COND_JACO=3, COND_ROW1=1, COND_STRA=4
   };
-  INT_MESH iter=0, iter_max=0, udof_n;
+  INT_MESH iter=0, iter_max=0, udof_n, udof_p;
   FLOAT_SOLV loca_rtol=0.0;
   //FLOAT_SOLV tol=1e-3;// Default Solution Tolerance
   //
-  RESTRICT Solv::valign sys_f;// f=[A]{u}//FIXME Move to Phys*?
+  FLOAT_SOLV *sys_f;
+  RESTRICT Solv::valign dat_f;// f=[A]{u}//FIXME Move to Phys*?
   //RESTRICT Solv::vals sys_f;// f=[A]{u}
   RESTRICT Solv::vals sys_u;// solution
   RESTRICT Solv::vals sys_r;// Residuals
@@ -52,12 +55,24 @@ public:
 protected:
   //Solv():{}:
   Solv( INT_MESH n, INT_MESH i, FLOAT_PHYS r ) :
-    iter_max(i), udof_n(n), loca_rtol(r){
+    iter_max(i), udof_n(n), udof_p(n*4/3), loca_rtol(r){
     loca_rto2=loca_rtol*loca_rtol;
     sys_u.resize(udof_n,0.0);// Initial Solution Guess
-    sys_f.resize(udof_n*4/3,0.0);// f=Au
     sys_r.resize(udof_n,0.0);// Residuals
     sys_d.resize(udof_n,0.0);// Diagonal Preconditioner
+    //
+    int align_byte=256;
+    dat_f.resize(udof_p +align_byte/sizeof(FLOAT_SOLV)+1,0.0);// f=Au
+#if VERB_MAX > 3
+    std::cout << &dat_f[0] <<" ";
+#endif
+    intptr_t ptr = reinterpret_cast<intptr_t>(&dat_f[0]);
+    auto m = ptr % align_byte;
+    auto o = align_byte - m;
+    sys_f = &dat_f[(o%align_byte)/sizeof(FLOAT_SOLV)];
+#if VERB_MAX > 3
+    std::cout << &sys_f[0] <<'\n';
+#endif
   };
   //Solv( uint f, uint m ) : udof_flop(f), udof_band(m) {};
 private:

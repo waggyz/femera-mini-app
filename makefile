@@ -25,7 +25,7 @@ endif
 ifdef INTEL_PYTHONHOME
 CXX=icc
 CPPFLAGS=-std=c++11 -Wall -Wextra -Ofast -xHost \
- -ffast-math -no-fast-transcendentals \
+ -ffast-math -no-fast-transcendentals -ansi-alias \
  -no-inline-max-size -no-inline-max-total-size -g
 SERFLAGS=-fno-alias -diag-disable 3180
 NCPU=40

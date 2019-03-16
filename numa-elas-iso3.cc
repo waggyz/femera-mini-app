@@ -31,7 +31,7 @@ int ElastIso3D::Setup( Elem* E ){
   return 0;
 };
 int ElastIso3D::ElemLinear( Elem* E,
-  RESTRICT Solv::valign &sys_f, const RESTRICT Solv::vals &sys_u ){
+  FLOAT_SOLV* sys_f, const RESTRICT Solv::vals &sys_u ){
   //FIXME Clean up local variables.
   //const int De = 3;// Element Dimension
   const int Nd = 3;// Node (mesh) Dimension

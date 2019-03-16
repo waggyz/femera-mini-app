@@ -264,6 +264,10 @@ int main( int argc, char** argv ){
   read_start = std::chrono::high_resolution_clock::now();
 #endif
   M->Setup();
+#if 0
+  std::vector<Mesh::part> P_in_main( M->mesh_part.size() );
+  std::copy( M->mesh_part.begin(), M->mesh_part.end(), P_in_main.begin());
+#endif
 //if VERB_MAX>1
   {// scope local variables
   //int sugg_max=3000;
@@ -602,8 +606,8 @@ int main( int argc, char** argv ){
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
-    for(uint i=0;i<S->sys_f.size();i++){
-      S->sys_f[i]=0.0; }
+    for(uint i=0;i<S->dat_f.size();i++){
+      S->dat_f[i]=0.0; }
     E->do_halo=true; Y->ElemLinear( E, S->sys_f, S->sys_u );
     // sync sys_f
     const INT_MESH d=uint(Y->ndof_n);
