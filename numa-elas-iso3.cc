@@ -31,7 +31,7 @@ int ElastIso3D::Setup( Elem* E ){
   return 0;
 };
 int ElastIso3D::ElemLinear( Elem* E,
-  FLOAT_SOLV* sys_f, const RESTRICT Solv::vals &sys_u ){
+  FLOAT_SOLV* sys_f, const FLOAT_SOLV* sys_u ){
   //FIXME Clean up local variables.
   //const int De = 3;// Element Dimension
   const int Nd = 3;// Node (mesh) Dimension
@@ -139,7 +139,7 @@ const int intp_n = int(E->gaus_n);
   };//end elem loop
   return 0;
   };
-int ElastIso3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
+int ElastIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
   const uint ndof   = 3;//this->ndof_n
   const uint elem_n = E->elem_n;
   const uint  Nc = E->elem_conn_n;
@@ -216,7 +216,7 @@ int ElastIso3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
   };
   return 0;
 };
-int ElastIso3D::ElemRowSumAbs(Elem* E, RESTRICT Phys::vals &sys_d ){
+int ElastIso3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* sys_d ){
   const uint ndof   = 3;//this->ndof_n
   const uint elem_n = E->elem_n;
   const uint  Nc = E->elem_conn_n;
@@ -297,8 +297,7 @@ int ElastIso3D::ElemRowSumAbs(Elem* E, RESTRICT Phys::vals &sys_d ){
   };
   return 0;
 };
-int ElastIso3D::ElemStrain( Elem* E,
-  RESTRICT Phys::vals &sys_f ){//FIXME valign
+int ElastIso3D::ElemStrain( Elem* E,FLOAT_SOLV* sys_f ){
   //FIXME Clean up local variables.
   const uint ndof= 3;//this->ndof_n
   const uint  Nj =10;//,d2=9;//mesh_d*mesh_d;

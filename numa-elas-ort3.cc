@@ -33,7 +33,7 @@ int ElastOrtho3D::Setup( Elem* E ){
   return 0;
 };
 int ElastOrtho3D::ElemLinear( Elem* E,
-  FLOAT_SOLV *sys_f, const RESTRICT Solv::vals &sys_u ){
+  FLOAT_SOLV *sys_f, const FLOAT_SOLV* sys_u ){
   //FIXME Cleanup local variables.
   const int Nd = 3;// Node (mesh) Dimension FIXME can include temperature?
   const int Nf = 3;// this->ndof_n DOF/node
@@ -162,7 +162,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   };//end elem loop
   return 0;
 };
-int ElastOrtho3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
+int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
   //FIXME Doesn't do rotation yet
   const uint ndof   = 3;//this->ndof_n
   //const int mesh_d = E->elem_d;
@@ -251,7 +251,7 @@ int ElastOrtho3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
   return 0;
 };
 
-int ElastOrtho3D::ElemRowSumAbs(Elem* E, RESTRICT Phys::vals &sys_d ){
+int ElastOrtho3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* sys_d ){
   //FIXME Doesn't do rotation yet
   const uint ndof   = 3;//this->ndof_n
   //const int mesh_d = E->elem_d;
@@ -339,8 +339,7 @@ int ElastOrtho3D::ElemRowSumAbs(Elem* E, RESTRICT Phys::vals &sys_d ){
   };
   return 0;
 };
-int ElastOrtho3D::ElemStrain( Elem* E,
-  RESTRICT Phys::vals &sys_f ){//FIXME valign
+int ElastOrtho3D::ElemStrain( Elem* E,FLOAT_SOLV* sys_f ){
   //FIXME Clean up local variables.
   const uint ndof= 3;//this->ndof_n
   const uint  Nj =10;//,d2=9;//mesh_d*mesh_d;

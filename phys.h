@@ -7,10 +7,10 @@ public:
   //typedef std::vector<FLOAT_PHYS> valign;
   //
   virtual int BlocLinear( Elem*,RESTRICT Solv::vals&,const RESTRICT Solv::vals&)=0;
-  virtual int ElemLinear( Elem*,FLOAT_SOLV*,const RESTRICT Solv::vals&)=0;
-  virtual int ElemJacobi( Elem*,RESTRICT Solv::vals& )=0;// Jacobi Preconditioner
-  virtual int ElemRowSumAbs(Elem*, RESTRICT Solv::vals& )=0;// Row Norm Preconditioner
-  virtual int ElemStrain(Elem*, RESTRICT Solv::vals& )=0;// Applied Element Strain Preconditioner
+  virtual int ElemLinear( Elem*,FLOAT_SOLV*,const FLOAT_SOLV*)=0;
+  virtual int ElemJacobi( Elem*,FLOAT_SOLV* )=0;// Jacobi Preconditioner
+  virtual int ElemRowSumAbs(Elem*, FLOAT_SOLV* )=0;// Row Norm Preconditioner
+  virtual int ElemStrain(Elem*, FLOAT_SOLV* )=0;// Applied Element Strain Preconditioner
   virtual int ElemLinear( Elem* )=0;//FIXME OLD
   virtual int ElemJacobi( Elem* )=0;//FIXME old
   //
@@ -89,10 +89,10 @@ public: ElastIso2D(FLOAT_PHYS young, FLOAT_PHYS poiss, FLOAT_PHYS thick) :
   };
   int Setup( Elem* )final;
   int BlocLinear( Elem*,RESTRICT Solv::vals&,const RESTRICT Solv::vals&) final;
-  int ElemLinear( Elem*,FLOAT_SOLV*,const RESTRICT Solv::vals&) final;
-  int ElemJacobi( Elem*,RESTRICT Solv::vals& ) final;
-  int ElemRowSumAbs(Elem*, RESTRICT Solv::vals& ) final;
-  int ElemStrain(Elem*, RESTRICT Solv::vals& ) final;
+  int ElemLinear( Elem*,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemJacobi( Elem*,FLOAT_SOLV* ) final;
+  int ElemRowSumAbs(Elem*, FLOAT_SOLV* ) final;
+  int ElemStrain(Elem*, FLOAT_SOLV* ) final;
   int ElemLinear( Elem* ) final;
   int ElemJacobi( Elem* ) final;
   int ScatStiff ( Elem* ) final;// Used for testing traditional EBE
@@ -126,10 +126,10 @@ public: ElastIso3D(FLOAT_PHYS young, FLOAT_PHYS poiss ) :
   int Setup( Elem* )final;
   //int ElemLinear( std::vector<Elem*>,RESTRICT Solv::vals&,const RESTRICT Solv::vals&) final;
   int BlocLinear( Elem*,RESTRICT Solv::vals&,const RESTRICT Solv::vals&) final;
-  int ElemLinear( Elem*,FLOAT_SOLV*,const RESTRICT Solv::vals&) final;
-  int ElemJacobi( Elem*,RESTRICT Solv::vals& ) final;
-  int ElemRowSumAbs(Elem*, RESTRICT Solv::vals& ) final;
-  int ElemStrain(Elem*, RESTRICT Solv::vals& ) final;
+  int ElemLinear( Elem*,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemJacobi( Elem*,FLOAT_SOLV* ) final;
+  int ElemRowSumAbs(Elem*, FLOAT_SOLV* ) final;
+  int ElemStrain(Elem*, FLOAT_SOLV* ) final;
   int ElemLinear( Elem* ) final;
   int ElemJacobi( Elem* ) final;
   int ScatStiff ( Elem* ) final;
@@ -203,10 +203,10 @@ public:
   int Setup( Elem* )final;
   //int ElemLinear( std::vector<Elem*>,RESTRICT Solv::vals&,const RESTRICT Solv::vals&)
   int BlocLinear( Elem*,RESTRICT Solv::vals&,const RESTRICT Solv::vals&) final;
-  int ElemLinear( Elem*,FLOAT_SOLV*,const RESTRICT Solv::vals&) final;
-  int ElemJacobi( Elem*,RESTRICT Solv::vals& ) final;
-  int ElemRowSumAbs(Elem*, RESTRICT Solv::vals& ) final;
-  int ElemStrain(Elem*, RESTRICT Solv::vals& ) final;
+  int ElemLinear( Elem*,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemJacobi( Elem*,FLOAT_SOLV* ) final;
+  int ElemRowSumAbs(Elem*, FLOAT_SOLV* ) final;
+  int ElemStrain(Elem*, FLOAT_SOLV* ) final;
   int ElemLinear( Elem* ) ;
   int ElemJacobi( Elem* ) ;
   int ScatStiff ( Elem* ) ;

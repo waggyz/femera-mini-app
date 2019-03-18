@@ -63,9 +63,9 @@ int PCG::Init( Elem* E, Phys* Y ){
   return 0;
 };
 int PCG::Init(){
-  const uint n=sys_u.size();// loca_res2 is a member variable.
+  const uint sysn=this->udof_n;// loca_res2 is a member variable.
   const uint sumi0=this->halo_loca_0;// *this->ndof_n;
-  const uint node_n=n/3;//FIXME
+  const uint node_n=sysn/3;//FIXME
   for(uint i=0; i<node_n; i++){
     for(uint j=0;j<3;j++){
       this->sys_r[3*i+j] -= this->sys_f[4*i+j];
@@ -73,22 +73,23 @@ int PCG::Init(){
   //sys_r  = sys_b - sys_f;// This is done sparsely now.
   //sys_z  = sys_d * sys_r;// This is merged where it's used (2x/iter)
   //sys_p  = sys_z;
+  for(INT_MESH i=0; i<sysn; i++){
+    sys_p[i]  = sys_d[i] * sys_r[i]; };
   //loca_res2    = inner_product( sys_r,sys_z );
-  sys_p  = sys_d * sys_r;
   //loca_res2    = inner_product( sys_r,sys_d * sys_r );
   this->loca_res2=0.0;
 //#pragma omp parallel for reduction(+:r)
-  for(uint i=sumi0; i<n; i++){
+  for(uint i=sumi0; i<sysn; i++){
     this->loca_res2 += sys_r[i] * sys_r[i] * sys_d[i]; };
   this->loca_rto2 = this->loca_rtol*loca_rtol *loca_res2;//FIXME Move this somewhere.
   return(0);
 };
 int PCG::Iter(){// 2 FLOP + 12 FLOP/DOF, 14 float/DOF
   //NOTE Compute current sys_f=[k][p] before iterating with this.
-  const uint n=sys_u.size();
+  const INT_MESH sysn=udof_n;
   const uint sumi0=this->halo_loca_0;// this->ndof_n;//FIXME Magic number
   const auto ra=this->loca_res2;// Make a local version of this member variable
-  const uint node_n=n/3;//FIXME
+  const INT_MESH node_n=sysn/3;//FIXME
   const uint sumn0=this->halo_loca_0/3;//FIXME
   //
   //const FLOAT_SOLV alpha  = ra / inner_product( sys_p,sys_f );// 1 DIV +(2 FLOP/DOF)
@@ -106,7 +107,7 @@ int PCG::Iter(){// 2 FLOP + 12 FLOP/DOF, 14 float/DOF
   //r2b    = inner_product( sys_r,sys_z );
   //sys_p  = sys_z + (r2b/loca_res2)*sys_p;
   FLOAT_SOLV r2b=0.0;
-  for(uint i=0; i<n; i++){// 4 FLOP/DOF, 4 read + 2 write =6/DOF
+  for(uint i=0; i<sysn; i++){// 4 FLOP/DOF, 4 read + 2 write =6/DOF
     sys_u[i] += alpha * sys_p[i];// works fine here
   };
   for(uint i=0;i<node_n;i++){
@@ -114,7 +115,7 @@ int PCG::Iter(){// 2 FLOP + 12 FLOP/DOF, 14 float/DOF
       sys_r[3*i+j] -= alpha * sys_f[4*i+j];
   }; };
 #pragma omp parallel for reduction(+:r2b)
-  for(uint i=sumi0; i<n; i++){
+  for(uint i=sumi0; i<sysn; i++){
     r2b += sys_r[i] * sys_r[i] * sys_d[i];// 3 FLOP/DOF, 2 read =2/DOF
   };
   if( ra < loca_rto2 ){ return(SOLV_CNVG_PTOL);};
@@ -122,7 +123,7 @@ int PCG::Iter(){// 2 FLOP + 12 FLOP/DOF, 14 float/DOF
   const FLOAT_PHYS beta = r2b/ra;//  1 FLOP
   this->loca_res2 = r2b;// Update member residual (squared)
 #pragma omp parallel for
-  for(uint i=0; i<n; i++){// 3 FLOP/DOF, 3 read + 1 write =4/DOF
+  for(uint i=0; i<sysn; i++){// 3 FLOP/DOF, 3 read + 1 write =4/DOF
     sys_p[i] = sys_d[i] * sys_r[i] + beta * sys_p[i];
   };
   //if( r2b < to2 ){ return(SOLV_CNVG_PTOL);};
@@ -134,8 +135,8 @@ int PCG::Solve( Elem* E, Phys* Y ){//FIXME Redo this
   if( !this->Init() ){//============ Solve ================
     printf("SER INIT r2a:%9.2e\n",this->loca_rto2);
     for(this->iter=0; this->iter < this->iter_max; this->iter++){
-      for(uint i=0;i<dat_f.size();i++){
-        this->dat_f[i]=0.0; };
+      const auto n = this->upad_n;
+      for(uint i=0;i<n;i++){ this->sys_f[i]=0.0; };
       //Y->ScatterNode2Elem(E,this->sys_p,Y->elem_inout);
       //Y->ElemLinear( E );
       //Y->GatherElem2Node(E,Y->elem_inout,this->sys_f);
@@ -218,7 +219,8 @@ for(int part_i=part_0; part_i<part_o; part_i++){
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
-    S->sys_d=FLOAT_SOLV(1.0)/S->sys_d;
+    const INT_MESH sysn=S->udof_n;
+    for(uint i=0;i<sysn;i++){ S->sys_d[i]=FLOAT_SOLV(1.0)/S->sys_d[i]; };
     S->Init( E,Y );// Zeros boundary conditions
   };
   time_reset( my_solv_count, start );
@@ -304,8 +306,8 @@ int HaloPCG::Iter(){
     std::tie(E,Y,S)=P[part_i];
     const INT_MESH d=uint(Y->ndof_n);
     time_start( phys_start );
-    for(uint i=0;i<S->dat_f.size();i++){
-      S->dat_f[i]=0.0; };
+    const auto n = S->upad_n;
+    for(uint i=0;i<n;i++){ S->sys_f[i]=0.0; };
     E->do_halo=true; Y->ElemLinear( E, S->sys_f, S->sys_p );
     time_accum( my_phys_count, phys_start );
     time_start( gath_start );

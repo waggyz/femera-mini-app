@@ -6,27 +6,30 @@
 class Solv{
 public:
   typedef std::valarray<FLOAT_SOLV> vals;
-  typedef std::vector<FLOAT_SOLV> valign;
+  typedef FLOAT_SOLV* valign;// memory-aligned vals
+  const uint valign_byte = 64;
   enum Meth {
     SOLV_GD=0, SOLV_CG=1, SOLV_CR=2
   };
   enum Cond {
     COND_NONE=0, COND_JACO=3, COND_ROW1=1, COND_STRA=4
   };
-  INT_MESH iter=0, iter_max=0, udof_n, udof_p;
+  INT_MESH iter=0, iter_max=0, udof_n, upad_n;
   FLOAT_SOLV loca_rtol=0.0;
-  //FLOAT_SOLV tol=1e-3;// Default Solution Tolerance
-  //
-  FLOAT_SOLV *sys_f;
-  RESTRICT Solv::valign dat_f;// f=[A]{u}//FIXME Move to Phys*?
-  //RESTRICT Solv::vals sys_f;// f=[A]{u}
-  RESTRICT Solv::vals sys_u;// solution
-  RESTRICT Solv::vals sys_r;// Residuals
-  //RESTRICT Solv::vals sys_d;//FIXME Diagonal Preconditioner
+  // Pointers to memory-aligned vanilla C arrays
+  valign sys_f;// f=[A]{u}//FIXME Move to Phys*?
+  valign sys_u;// solution
+  valign sys_r;// Residuals
   //NOTE Additional working vectors needed are defined in each solver subclass
   //FIXME Moved them back here for now
-  RESTRICT Solv::vals sys_d;//FIXME diagonal preconditioner w/ fixed BC DOFs set to zero
-  RESTRICT Solv::vals sys_p, sys_g;//FIXME working vectors specific to each method
+  valign sys_d;//FIXME diagonal preconditioner w/ fixed BC DOFs set to zero
+  valign sys_p, sys_g;//FIXME working vectors specific to each method
+  // The data is actually stored in corresponding C++ objects.
+  RESTRICT Solv::vals dat_f;
+  RESTRICT Solv::vals dat_u;
+  RESTRICT Solv::vals dat_r;
+  RESTRICT Solv::vals dat_d;
+  RESTRICT Solv::vals dat_p, dat_g;
   //
   std::string meth_name="";
   //
@@ -45,36 +48,25 @@ public:
   //FIXME Make the rest private or protected later?
   FLOAT_SOLV loca_rto2=0.0;// Solution Tolerance Squared
   FLOAT_SOLV loca_res2=0.0;// [r2b, alpha kept local to each iteration]
-  //FLOAT_SOLV to2=0.0;// Solution Tolerance Squared
-  //FLOAT_SOLV r2a=0.0;// [r2b, alpha kept local to each iteration]
   INT_MESH halo_loca_0=0;// Associated Elem->halo_remo_n * Phys->ndof_n
   uint udof_flop=0, udof_band=0;
-  //uint udof_flop=12, udof_band=sizeof(FLOAT_SOLV)*(5+2+3+1);//+2PCG
-  //uint udof_flop=14, udof_band=sizeof(FLOAT_SOLV)*( 13 );//PCR
   int solv_cond;
 protected:
-  //Solv():{}:
+  inline valign align_resize(RESTRICT Solv::vals&, INT_MESH, const uint);
   Solv( INT_MESH n, INT_MESH i, FLOAT_PHYS r ) :
-    iter_max(i), udof_n(n), udof_p(n*4/3), loca_rtol(r){
+    iter_max(i), udof_n(n), upad_n(n/3*4), loca_rtol(r){
     loca_rto2=loca_rtol*loca_rtol;
-    sys_u.resize(udof_n,0.0);// Initial Solution Guess
-    sys_r.resize(udof_n,0.0);// Residuals
-    sys_d.resize(udof_n,0.0);// Diagonal Preconditioner
-    //
-    int align_byte=256;
-    dat_f.resize(udof_p +align_byte/sizeof(FLOAT_SOLV)+1,0.0);// f=Au
-#if VERB_MAX > 3
-    std::cout << &dat_f[0] <<" ";
-#endif
-    intptr_t ptr = reinterpret_cast<intptr_t>(&dat_f[0]);
-    auto m = ptr % align_byte;
-    auto o = align_byte - m;
-    sys_f = &dat_f[(o%align_byte)/sizeof(FLOAT_SOLV)];
+    //sys_u.resize(udof_n,0.0);// Initial Solution Guess
+    //sys_r.resize(udof_n,0.0);// Residuals
+    //sys_d.resize(udof_n,0.0);// Diagonal Preconditioner
+    sys_f = align_resize( dat_f, upad_n, valign_byte );// f=Au
+    sys_u = align_resize( dat_u, upad_n, valign_byte );
+    sys_r = align_resize( dat_r, upad_n, valign_byte );
+    sys_d = align_resize( dat_d, upad_n, valign_byte );
 #if VERB_MAX > 3
     std::cout << &sys_f[0] <<'\n';
 #endif
   };
-  //Solv( uint f, uint m ) : udof_flop(f), udof_band(m) {};
 private:
 };
 class PCG final: public Solv{
@@ -85,7 +77,8 @@ public:
   //};
   PCG( INT_MESH n, INT_MESH i, FLOAT_PHYS r ) : Solv(n,i,r){
     meth_name="preconditioned cojugate gradient";
-    sys_p.resize(udof_n,0.0);// CG working vector
+    //sys_p.resize(udof_n,0.0);// CG working vector
+    sys_p = align_resize( dat_p, upad_n, valign_byte );
     udof_flop = 12;//*elem_n
     udof_band = 14*sizeof(FLOAT_SOLV);//*udof_n + 2
   };
@@ -116,8 +109,10 @@ public:
   //};
   PCR( INT_MESH n, INT_MESH i, FLOAT_PHYS r ) : Solv(n,i,r){
     meth_name="preconditioned cojugate residual";
-    sys_p.resize(udof_n,0.0);// CR working vector
-    sys_g.resize(udof_n,0.0);// CR working vector
+    //sys_p.resize(udof_n,0.0);// CR working vector
+    //sys_g.resize(udof_n,0.0);// CR working vector
+    sys_p = align_resize( dat_p, upad_n, valign_byte );
+    sys_g = align_resize( dat_g, upad_n, valign_byte );
     udof_flop = 14;//*elem_n
     udof_band = 17*sizeof(FLOAT_SOLV);//*udof_n +?
   };
@@ -141,7 +136,15 @@ private:
   int BC0( Elem*, Phys* Y );
 };
 //============= Inline Function Definitions ===============
-
+//
+inline Solv::valign Solv::align_resize(RESTRICT Solv::vals &v,
+  INT_MESH n, const uint bytes){
+  //FIXME Hack to align sys_f
+  v.resize( n + bytes/sizeof(FLOAT_SOLV),0.0);
+  intptr_t ptr = reinterpret_cast<intptr_t>(&v[0]);
+  const auto offset = bytes - ( ptr % bytes );
+  return(&v[( offset % bytes )/sizeof(FLOAT_SOLV)]);
+};
 
 
 #endif

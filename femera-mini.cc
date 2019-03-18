@@ -534,8 +534,11 @@ int main( int argc, char** argv ){
       //coor[std::slice(0,E->node_n,3)]=coor[std::slice(0,E->node_n,3)]*scax;
       //coor[std::slice(1,E->node_n,3)]=coor[std::slice(1,E->node_n,3)]*scay;
       //coor[std::slice(2,E->node_n,3)]=coor[std::slice(2,E->node_n,3)]*scaz;
+      Solv::vals norm_u(S->udof_n);
+      for(INT_MESH i=0;i<S->udof_n;i++){
+        norm_u[i] = S->sys_u[i]/FLOAT_SOLV(test_u);};
       T->CheckCubeError( errors, nu,
-        coor, S->sys_u/FLOAT_SOLV(test_u) );
+        coor, norm_u );
         //E->vert_coor*scale, S->sys_u/FLOAT_SOLV(test_u) );
 #pragma omp critical(errs)
 {
@@ -544,7 +547,7 @@ int main( int argc, char** argv ){
       for(int i= 8; i<12; i++){ errtot[i] = std::max(errtot[i],errors[i]); };
       errtot[12]+=errors[12];
 #if VERB_MAX>3
-      if(S->sys_u.size()<300){
+      if(S->udof_n<300){
         //printf("Node Coordinates:");
         //for(uint i=0;i<E->vert_coor.size();i++){
         //  if((i%3)==0){printf("\n");};
@@ -606,8 +609,8 @@ int main( int argc, char** argv ){
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
-    for(uint i=0;i<S->dat_f.size();i++){
-      S->dat_f[i]=0.0; }
+    const auto n = S->upad_n;
+    for(uint i=0;i<n;i++){ S->sys_f[i]=0.0; }
     E->do_halo=true; Y->ElemLinear( E, S->sys_f, S->sys_u );
     // sync sys_f
     const INT_MESH d=uint(Y->ndof_n);

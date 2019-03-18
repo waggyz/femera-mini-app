@@ -8,10 +8,12 @@ int Solv::Precond(Elem* E, Phys* Y){// Jacobi Preconditioner
   //sys_d.resize(udof_n,1.0);// Default Diagonal Preconditioner
   //if(this->solv_cond != Solv::COND_NONE){ this->sys_d=0.0; };//FIXME
   switch(this->solv_cond){
-  case(Solv::COND_NONE):{ this->sys_d=1.0; break;}
+  case(Solv::COND_NONE):{
+    for(uint i=0; i<this->udof_n; i++){ this->sys_d[i]=1.0; };
+    break;}
   case(Solv::COND_JACO):{
     Y->ElemJacobi( E, this->sys_d );
-    for(uint i=1; i<this->sys_d.size(); i++){
+    for(uint i=0; i<this->udof_n; i++){
       if(this->sys_d[i]<0.0){ bad_d++;
         this->sys_d[i]=std::abs(this->sys_d[i]);
       }; };
@@ -23,7 +25,7 @@ int Solv::Precond(Elem* E, Phys* Y){// Jacobi Preconditioner
     break;}
   case(Solv::COND_ROW1):{ Y->ElemRowSumAbs( E, this->sys_d ); break;}
   case(Solv::COND_STRA):{ Y->ElemStrain( E, this->sys_d ); break;}
-  default:{ this->sys_d=1.0; break;}
+  default:{ for(uint i=0; i<this->udof_n; i++){ this->sys_d[i]=1.0; }; break;}
   };
   /*
   //FIXME This isn't part of the preconditioner setup...
@@ -37,12 +39,12 @@ int Solv::Precond(Elem* E, Phys* Y){// Jacobi Preconditioner
   */
   //Y->ElemJacobi( E, this->sys_d );//FIXED Replace above with this
   //Y->ElemRowSumAbs( E, this->sys_d );
-  //for(uint i=1; i<this->sys_d.size(); i++){
+  //for(uint i=1; i<this->udof_n; i++){
   //    this->sys_d[i]=std::sqrt(this->sys_d[i]); };
   //
   #if VERB_MAX>10
-  printf("System Preconditioner [%i]",(int)this->sys_d.size());
-  for(uint j=0;j<this->sys_d.size();j++){
+  printf("System Preconditioner [%i]",(int)this->udof_n);
+  for(uint j=0;j<this->udof_n;j++){
     if(j%2 ==0){printf("\n");};
     printf("%+9.2e ",this->sys_d[j]);
   }; printf("\n");
