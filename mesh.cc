@@ -40,8 +40,8 @@ int Mesh::SyncIDs(){//FIXME Not parallelized
         //node_glid_count[n]+=1;
         if(node_glid_parts[n].size() == 1){
           node_glid_owner[n] = i; }
-        //else if( (E->node_n ==list_elem[node_glid_owner[n]]->node_n)
-        //  & (n%2) ){ node_glid_owner[n] = i; }// simple balancing
+        else if( (E->node_n ==list_elem[node_glid_owner[n]]->node_n)
+          & (n%2) ){ node_glid_owner[n] = i; }// simple balancing
         //NOTE May be better to leave nodes lumped together, not balanced.
         //NOTE This may reduce the number of mpi messages.
         else if( E->node_n < list_elem[node_glid_owner[n]]->node_n ){

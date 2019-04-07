@@ -40,7 +40,7 @@ int ElastIso3D::ElemLinear( Elem* E,
   const int Nc = E->elem_conn_n;// Number of nodes/element
   const int Ne = Nf*Nc;
   const INT_MESH elem_n =E->elem_n;
-const int intp_n = int(E->gaus_n);
+  const int intp_n = int(E->gaus_n);
   //
   INT_MESH e0=0, ee=elem_n;
   if(E->do_halo==true){ e0=0; ee=E->halo_elem_n;
@@ -133,9 +133,19 @@ const int intp_n = int(E->gaus_n);
       }; printf("\n");
 #endif
     };//end intp loop
-    for (int i=0; i<Nc; i++){
-      std::memcpy(& sysf[E->elem_conn[Nc*ie +i]*4],& f[Nf*i],
-        sizeof(FLOAT_SOLV)*Nf ); };
+    for (uint i=0; i<uint(Nc); i++){
+      const INT_MESH n=E->elem_conn[Nc*ie+i];
+      std::memcpy(& sysf[n*4],& f[Nf*i], sizeof(FLOAT_SOLV)*Nf );
+#if 0
+      if( n >=my_node_start ){
+        for(uint j=0;j<3;j++){
+          this->part_sum1+= f[Nf* i+j ] * sysu[Nf* n+j ];
+          //FIXME u already contains next elem sys_u
+          //this->part_sum1+= f[Nf* i+j ] * u[Nf* i+j];
+        };
+      };
+#endif
+    };
   };//end elem loop
   return 0;
   };

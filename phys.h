@@ -5,6 +5,10 @@ class Phys{
 public:
   typedef std::valarray<FLOAT_PHYS> vals;
   //typedef std::vector<FLOAT_PHYS> valign;
+  INT_DOF ndof_n;// Degrees of freedom per node:
+  // 2 for elastic 2D, 3 for elastic 3D, 1 for thermal
+  //INT_DOF ndop_n;// Padded degrees of freedom
+  FLOAT_PHYS part_sum1=0.0;
   //
   virtual int BlocLinear( Elem*,RESTRICT Solv::vals&,const RESTRICT Solv::vals&)=0;
   virtual int ElemLinear( Elem*,FLOAT_SOLV*,const FLOAT_SOLV*)=0;
@@ -36,9 +40,6 @@ public:
   int SavePartFMR( const char* bname, bool is_bin );//FIXME ASCII/Binary file format
   int ReadPartFMR( const char* bname, bool is_bin );
   //
-  INT_DOF ndof_n;// Degrees of freedom per node:
-  // 2 for elastic 2D, 3 for elastic 3D, 1 for thermal
-  //INT_DOF ndop_n;// Padded degrees of freedom
   int tens_flop=0, tens_band=0;
   int stif_flop=0, stif_band=0;
   //
