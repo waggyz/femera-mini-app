@@ -54,7 +54,7 @@ public:
 protected:
   inline valign align_resize(RESTRICT Solv::vals&, INT_MESH, const uint);
   Solv( INT_MESH n, INT_MESH i, FLOAT_PHYS r ) :
-    iter_max(i), udof_n(n), upad_n(n/3*4), loca_rtol(r){
+    iter_max(i), udof_n(n), upad_n(n), loca_rtol(r){
     loca_rto2=loca_rtol*loca_rtol;
     //sys_u.resize(udof_n,0.0);// Initial Solution Guess
     //sys_r.resize(udof_n,0.0);// Residuals

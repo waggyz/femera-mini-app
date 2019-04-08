@@ -619,7 +619,7 @@ int main( int argc, char** argv ){
       auto f = d* E->node_haid[i];
       for(uint j=0; j<d; j++){
 #pragma omp atomic write
-        M->halo_val[f+j] = S->sys_f[4* i+j]; };
+        M->halo_val[f+j] = S->sys_f[3* i+j]; };
     };
   };
 #pragma omp for schedule(static)
@@ -631,7 +631,7 @@ int main( int argc, char** argv ){
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic update
-        M->halo_val[f+j]+= S->sys_f[4* i+j]; };
+        M->halo_val[f+j]+= S->sys_f[3* i+j]; };
     };
   };// finished gather, now scatter back to elems
 #pragma omp for schedule(static) reduction(+:reac_x)
@@ -643,7 +643,7 @@ int main( int argc, char** argv ){
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){//NOTE appears not to be critical
 //#pragma omp atomic read
-        S->sys_f[4* i+j] = M->halo_val[f+j]; };
+        S->sys_f[3* i+j] = M->halo_val[f+j]; };
     };
     E->do_halo=false; Y->ElemLinear( E, S->sys_f, S->sys_u );
   };
@@ -658,7 +658,7 @@ int main( int argc, char** argv ){
     INT_MESH r=E->halo_remo_n;
     for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
       // Don't duplicate halo nodes
-      if(n>=r){ reac_x+=S->sys_f[4* n+dof]; };
+      if(n>=r){ reac_x+=S->sys_f[3* n+dof]; };
     };
 #pragma omp critical
 {

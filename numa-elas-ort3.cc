@@ -95,7 +95,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
           uR[(3* i+k) ] += u[(3* i+j) ] * R[(3* j+k) ];
     };};};//-------------------------------------------- 2 *3*3*Nc = 18*Nc FLOP
     for (int i=0; i<Nc; i++){
-      std::memcpy(&   f[Nf*i],& sysf[Econn[Nc*ie+i]*4],
+      std::memcpy(&   f[Nf*i],& sysf[Econn[Nc*ie+i]*3],
         sizeof(FLOAT_SOLV)*Nf ); };
     if((ie+1)<ee){// Fetch stuff for the next iteration
       for (int i=0; i<Nc; i++){
@@ -157,7 +157,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
           f[(3* i+k) ] += GS[(3* i+j) ] * R[(3* j+k) ];
     };};};//-------------------------------------------- 2 *3*3*Nc = 18*Nc FLOP
     for (int i=0; i<Nc; i++){
-      std::memcpy(& sysf[Econn[Nc*ie+i]*4],& f[Nf*i],
+      std::memcpy(& sysf[Econn[Nc*ie+i]*3],& f[Nf*i],
         sizeof(FLOAT_SOLV)*Nf ); };
   };//end elem loop
   return 0;

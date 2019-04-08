@@ -80,7 +80,7 @@ int ElastIso3D::ElemLinear( Elem* E,
   };
   for(INT_MESH ie=e0;ie<ee;ie++){
     for (int i=0; i<Nc; i++){
-      std::memcpy( & f[Nf*i],& sysf[E->elem_conn[Nc*ie+i]*4],
+      std::memcpy( & f[Nf*i],& sysf[E->elem_conn[Nc*ie+i]*3],
         sizeof(FLOAT_SOLV)*Nf ); };
     for(int ip=0; ip<intp_n; ip++){
       //G = MatMul3x3xN( jac,shg );
@@ -135,7 +135,7 @@ int ElastIso3D::ElemLinear( Elem* E,
     };//end intp loop
     for (uint i=0; i<uint(Nc); i++){
       const INT_MESH n=E->elem_conn[Nc*ie+i];
-      std::memcpy(& sysf[n*4],& f[Nf*i], sizeof(FLOAT_SOLV)*Nf );
+      std::memcpy(& sysf[n*3],& f[Nf*i], sizeof(FLOAT_SOLV)*Nf );
 #if 0
       if( n >=my_node_start ){
         for(uint j=0;j<3;j++){

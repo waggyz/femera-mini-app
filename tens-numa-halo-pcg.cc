@@ -39,7 +39,7 @@ int PCG::BC0(Elem* E, Phys* Y ){
   INT_MESH n; INT_DOF f; FLOAT_PHYS v;
   for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
     this->sys_d[d* n+uint(f)]=0.0;
-    this->sys_f[4* n+uint(f)]=0.0;
+    this->sys_f[3* n+uint(f)]=0.0;
   };
   for(auto t : E->bc0_nf   ){ std::tie(n,f)=t;
     this->sys_d[d* n+uint(f)]=0.0;
@@ -68,7 +68,7 @@ int PCG::Init(){
   const uint node_n=sysn/3;//FIXME
   for(uint i=0; i<node_n; i++){
     for(uint j=0;j<3;j++){
-      this->sys_r[3*i+j] -= this->sys_f[4*i+j];
+      this->sys_r[3*i+j] -= this->sys_f[3*i+j];
   };};
   //sys_r  = sys_b - sys_f;// This is done sparsely now.
   //sys_z  = sys_d * sys_r;// This is merged where it's used (2x/iter)
@@ -96,7 +96,7 @@ int PCG::Iter(){// 2 FLOP + 12 FLOP/DOF, 14 float/DOF
   FLOAT_SOLV s=0.0;
   for(uint i=sumn0; i<node_n; i++){
     for(uint j=0;j<3;j++){
-    s += sys_p[3*i+j] * sys_f[4*i+j];// 2 FLOP/DOF, 2 read =2/DOF
+    s += sys_p[3*i+j] * sys_f[3*i+j];// 2 FLOP/DOF, 2 read =2/DOF
   };};
   const FLOAT_SOLV alpha  = ra / s;// 1 DIV FLOP
   //if(!isnan(alpha)){// moved to inside last loop
@@ -112,7 +112,7 @@ int PCG::Iter(){// 2 FLOP + 12 FLOP/DOF, 14 float/DOF
   };
   for(uint i=0;i<node_n;i++){
     for(uint j=0;j<3;j++){
-      sys_r[3*i+j] -= alpha * sys_f[4*i+j];
+      sys_r[3*i+j] -= alpha * sys_f[3*i+j];
   }; };
 #pragma omp parallel for reduction(+:r2b)
   for(uint i=sumi0; i<sysn; i++){
@@ -235,7 +235,7 @@ for(int part_i=part_0; part_i<part_o; part_i++){
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic update
-        this->halo_val[f+j] += S->sys_f[4*i +j]; };
+        this->halo_val[f+j] += S->sys_f[3*i +j]; };
     };
   };// End halo_vals
   time_reset( my_gat1_count, start );
@@ -247,7 +247,7 @@ for(int part_i=part_0; part_i<part_o; part_i++){
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic read
-        S->sys_f[4*i +j] = this->halo_val[f+j]; };
+        S->sys_f[3*i +j] = this->halo_val[f+j]; };
     };
   time_reset( my_scat_count, start );
 #pragma omp critical(init)
@@ -315,7 +315,7 @@ int HaloPCG::Iter(){
     for(INT_MESH i=hrn; i<hnn; i++){//NOTE memcpy apparently not critical
       std::memcpy(
         & this->halo_val[d* E->node_haid[i]],
-        & S->sys_f[4* i],
+        & S->sys_f[3* i],
         d *sizeof(FLOAT_PHYS) );
     };
     time_accum( my_gat0_count, gath_start );
@@ -330,7 +330,7 @@ int HaloPCG::Iter(){
       const auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic update
-        this->halo_val[f+j]+= S->sys_f[4* i+j]; };
+        this->halo_val[f+j]+= S->sys_f[3* i+j]; };
     };
   };// End halo_vals sum; now scatter back to elems
   time_accum( my_gat1_count, gath_start );
@@ -344,7 +344,7 @@ int HaloPCG::Iter(){
     const uint hln0=hl0/3;//FIXME
     for(INT_MESH i=0; i<hnn; i++){//NOTE appears not to be critical
       std::memcpy(
-        & S->sys_f[4* i],
+        & S->sys_f[3* i],
         & this->halo_val[d* E->node_haid[i]],
         d *sizeof(FLOAT_PHYS) );
     };
@@ -356,7 +356,7 @@ int HaloPCG::Iter(){
 #pragma omp simd reduction(+:glob_sum1)
     for(INT_MESH i=hln0; i<node_n; i++){
       for(INT_MESH j=0; j<3; j++){
-        glob_sum1 += S->sys_p[3*i+j] * S->sys_f[4*i+j];
+        glob_sum1 += S->sys_p[3*i+j] * S->sys_f[3*i+j];
     };};
     time_accum( my_solv_count, solv_start );
   };
@@ -370,7 +370,7 @@ int HaloPCG::Iter(){
 #pragma omp simd
     for(INT_MESH i=0; i<node_n; i++){
       for(INT_MESH j=0; j<3; j++){
-        S->sys_r[3*i+j] -= alpha * S->sys_f[4*i+j];
+        S->sys_r[3*i+j] -= alpha * S->sys_f[3*i+j];
     };};
 #pragma omp simd reduction(+:glob_sum2)
     for(INT_MESH i=hl0; i<sysn; i++){
