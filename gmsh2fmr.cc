@@ -45,6 +45,11 @@ int main( int argc, char** argv ) {
   FLOAT_MESH eps_find=1e-6;
   FLOAT_PHYS oriunit=1.0;
   std::vector<FLOAT_PHYS> orislist={};
+  //int hown_meth = 2;// Algorithm to balance halo node owner
+  // 0: first touch (lowest partition number)
+  // 1: partition with fewest nodes, first touch tiebreaker (original optimize)
+  // 2: partition with fewest nodes, even-odd tiebreaker
+  // 3: random
   //
   //FIXME Consider using C++ for parsing command line options.
   {//Scope these variables
@@ -62,13 +67,14 @@ int main( int argc, char** argv ) {
     //
     opterr = 0; int c;
     while ((c = getopt (argc, argv,
-      "abcpv:t:n:@:xyz0u:f:M:X:Y:Z:E:N:G:C:B:O:R")) != -1){
+      "abco:pv:t:n:@:xyz0u:f:M:X:Y:Z:E:N:G:C:B:O:R")) != -1){
       // x:  x requires an argument
       mtrldone=true;
       switch (c) {
         // Input filename(s)
         case 'v':{ verbosity = atoi(optarg);M->verbosity=verbosity; break; }
         case 'p':{ is_part = true; break; }
+        case 'o':{ M->hown_meth = atoi(optarg); break; }
         //case 'P':{ is_part = true; part_n=atoi(optarg); break;}// pstr = optarg;
         // Output format
         case 'a':{ save_asc=true; break; }
@@ -81,7 +87,7 @@ int main( int argc, char** argv ) {
         case 'x':{ dofslist.push_back(0); break; }
         case 'y':{ dofslist.push_back(1); break; }
         case 'z':{ dofslist.push_back(2); break; }
-        case '0':{ fix0=true; ;break; }
+        case '0':{ fix0=true; break; }
         case 'u':{ disp=true; uval=atof(optarg); break; }
         case 'f':{ load=true; fval=atof(optarg); break; }
         // Physics

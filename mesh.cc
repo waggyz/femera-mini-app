@@ -37,15 +37,33 @@ int Mesh::SyncIDs(){//FIXME Not parallelized
       for(uint j=0; j<E->node_glid.size(); j++){
         auto n = E->node_glid[j];
         node_glid_parts[n].push_back(i);
-        //node_glid_count[n]+=1;
-        if(node_glid_parts[n].size() == 1){
+        // Assign this node's owner
+        if(node_glid_parts[n].size() == 1){// Node has no owner yet
           node_glid_owner[n] = i; }
-        else if( (E->node_n ==list_elem[node_glid_owner[n]]->node_n)
-          & (n%2) ){ node_glid_owner[n] = i; }// simple balancing
-        //NOTE May be better to leave nodes lumped together, not balanced.
-        //NOTE This may reduce the number of mpi messages.
-        else if( E->node_n < list_elem[node_glid_owner[n]]->node_n ){
-            node_glid_owner[n] = i; };
+        else{
+          switch(this->hown_meth){
+          case(1):{// owner: fewest nodes, first touch tiebreaker
+            //NOTE May be better to leave nodes lumped together, not balanced.
+            //NOTE This may reduce the number of mpi messages.
+            if( E->node_n < list_elem[node_glid_owner[n]]->node_n ){
+              // Assign owner to smallest partition (fewest nodes)
+              node_glid_owner[n] = i; };
+            break ;}
+          case(2):{//owner: fewest nodes, even-odd tiebreaker
+            if( (E->node_n ==list_elem[node_glid_owner[n]]->node_n)
+              // This partition is the same size as the current owner
+              & (n%2) ){ node_glid_owner[n] = i; }// even-odd tiebreaker
+            else if( E->node_n < list_elem[node_glid_owner[n]]->node_n ){
+              // Assign owner to smallest partition (fewest nodes)
+              node_glid_owner[n] = i; };
+              break; }
+          case(3):{// random
+              node_glid_owner[n] = node_glid_parts[n][
+                (node_glid_parts[n].size() * std::rand())/(long(RAND_MAX)+1) ];
+            break; };
+          default:{ break; }// also case(0)
+          };
+        };
       };// Gather boundary conditions by global node number ---------
       INT_MESH n,f; FLOAT_MESH v;
       for(auto t : E->rhs_vals){
