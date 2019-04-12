@@ -24,9 +24,9 @@ endif
 # Check if using intel compiler on k3 or k4
 ifdef INTEL_PYTHONHOME
 CXX=icc
-CPPFLAGS=-std=c++11 -Wall -Wextra -Ofast -xHost \
- -ffast-math -no-fast-transcendentals -ansi-alias \
- -no-inline-max-size -no-inline-max-total-size -g
+CPPFLAGS=-restrict -std=c++11 -Wall -Wextra -O2 -ansi-alias\
+ -ffast-math -no-fast-transcendentals\
+ -no-inline-max-size -no-inline-max-total-size -xSKYLAKE-AVX512 -g
 SERFLAGS=-fno-alias -diag-disable 3180
 NCPU=40
 NUMA=6
