@@ -25,11 +25,11 @@ public:
   valign sys_d;//FIXME diagonal preconditioner w/ fixed BC DOFs set to zero
   valign sys_p, sys_g;//FIXME working vectors specific to each method
   // The data is actually stored in corresponding C++ objects.
-  RESTRICT Solv::vals dat_f;
-  RESTRICT Solv::vals dat_u;
-  RESTRICT Solv::vals dat_r;
-  RESTRICT Solv::vals dat_d;
-  RESTRICT Solv::vals dat_p, dat_g;
+  Solv::vals dat_f;
+  Solv::vals dat_u;
+  Solv::vals dat_r;
+  Solv::vals dat_d;
+  Solv::vals dat_p, dat_g;
   //
   std::string meth_name="";
   //

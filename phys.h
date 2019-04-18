@@ -19,7 +19,7 @@ public:
   virtual int ElemJacobi( Elem* )=0;//FIXME old
   //
   virtual inline int MtrlProp2MatC( )=0;//why does this inline?
-  virtual RESTRICT Solv::vals MtrlLinear(//FIXME Not used for 3D yet
+  virtual Solv::vals MtrlLinear(//FIXME Not used for 3D yet
     const RESTRICT Solv::vals &strain )=0;
   //
   int ScatterNode2Elem( Elem*,
@@ -43,41 +43,41 @@ public:
   int tens_flop=0, tens_band=0;
   int stif_flop=0, stif_band=0;
   //
-  RESTRICT Solv::vals mtrl_prop;// Conventional Material Properties
+  Solv::vals mtrl_prop;// Conventional Material Properties
   // (Young's, Poisson's, etc.)
-  RESTRICT Solv::vals mtrl_dirs;// Orientation [x,z,x]
+  Solv::vals mtrl_dirs;// Orientation [x,z,x]
   //
-  RESTRICT Solv::vals mtrl_matc;// Unique D-matrix values
-  RESTRICT Solv::vals mtrl_rotc;
+  Solv::vals mtrl_matc;// Unique D-matrix values
+  Solv::vals mtrl_rotc;
   //
-  RESTRICT Solv::vals elem_inout;// Elemental nodal value workspace (serial)
+  Solv::vals elem_inout;// Elemental nodal value workspace (serial)
   // Fill w/ Phys::ScatterNode2Elem(...),ElemLinear(Elem*),ElemJacobi(),...
-  RESTRICT Solv::vals elem_in, elem_out;// Double-buffer for parallel
+  Solv::vals elem_in, elem_out;// Double-buffer for parallel
   // The next is for comparison to traditional EBE
-  RESTRICT Solv::vals elem_stiff;// Fill w/ Phys::ScatterStiff(...)
+  Solv::vals elem_stiff;// Fill w/ Phys::ScatterStiff(...)
   //size_t elem_linear_flop=0;
 protected:
   Phys( Solv::vals p ) : mtrl_prop(p){};
   Phys( Solv::vals p, Solv::vals d ) : mtrl_prop(p),mtrl_dirs(d){};
   //constructor computes material vals
-  inline RESTRICT Solv::vals Tens2VoigtEng(const RESTRICT Solv::vals&);
-  inline RESTRICT Solv::vals Tens3VoigtEng(const RESTRICT Solv::vals&);
-  inline RESTRICT Solv::vals Tens2VoigtEng(const FLOAT_PHYS H[4]);
-  inline RESTRICT Solv::vals Tens3VoigtEng(const FLOAT_PHYS H[9]);
+  inline Solv::vals Tens2VoigtEng(const RESTRICT Solv::vals&);
+  inline Solv::vals Tens3VoigtEng(const RESTRICT Solv::vals&);
+  inline Solv::vals Tens2VoigtEng(const FLOAT_PHYS H[4]);
+  inline Solv::vals Tens3VoigtEng(const FLOAT_PHYS H[9]);
 private:
 };
 // Inline Functions =======================================
 //
-inline RESTRICT Solv::vals Phys::Tens3VoigtEng(const RESTRICT Solv::vals &H){
+inline Solv::vals Phys::Tens3VoigtEng(const RESTRICT Solv::vals &H){
   return(Solv::vals { H[0],H[4],H[8], H[1]+H[3],H[5]+H[7],H[2]+H[6] });
   // exx,eyy,ezz, exy,eyz,exz
 };
-inline RESTRICT Solv::vals Phys::Tens3VoigtEng(const FLOAT_PHYS H[9]){
+inline Solv::vals Phys::Tens3VoigtEng(const FLOAT_PHYS H[9]){
   return(Solv::vals { H[0],H[4],H[8], H[1]+H[3],H[5]+H[7],H[2]+H[6] });};
   // exx,eyy,ezz, exy,eyz,exz
-inline RESTRICT Solv::vals Phys::Tens2VoigtEng(const RESTRICT Solv::vals &H){
+inline Solv::vals Phys::Tens2VoigtEng(const RESTRICT Solv::vals &H){
   return(Solv::vals { H[0],H[3], H[1]+H[2] });};
-inline RESTRICT Solv::vals Phys::Tens2VoigtEng(const FLOAT_PHYS H[4]){
+inline Solv::vals Phys::Tens2VoigtEng(const FLOAT_PHYS H[4]){
   return(Solv::vals { H[0],H[3], H[1]+H[2] });
 };
 // Physics Kernels: ---------------------------------------
@@ -105,7 +105,7 @@ public: ElastIso2D(FLOAT_PHYS young, FLOAT_PHYS poiss, FLOAT_PHYS thick) :
     mtrl_matc.resize(3); mtrl_matc={ d, n*d, (1.0-n)*d*0.5 };//*0.5 eng. strain
     return 0;
   };
-  RESTRICT Solv::vals MtrlLinear(//FIXME Doesn't inline
+  Solv::vals MtrlLinear(//FIXME Doesn't inline
     const RESTRICT Solv::vals &strain_tensor)final{//FIXME Plane Stress
     const Solv::vals e=Tens2VoigtEng(strain_tensor);
     return( Solv::vals {
@@ -146,7 +146,7 @@ public: ElastIso3D(FLOAT_PHYS young, FLOAT_PHYS poiss ) :
     mtrl_matc.resize(3); mtrl_matc={ (1.0-nu)*d,nu*d,(1.0-2.0*nu)*d*0.5};
     return 0;
   };
-  RESTRICT Solv::vals MtrlLinear( const RESTRICT Solv::vals &e)final{
+  Solv::vals MtrlLinear( const RESTRICT Solv::vals &e)final{
     //FIXME Doesn't inline
     //const Solv::vals e=Tens3VoigtEng(strain_tensor);
     RESTRICT Solv::vals s(0.0,6);
@@ -285,7 +285,7 @@ public:
     return 0;
   };
   //FLOAT_PHYS* MtrlLinear(FLOAT_PHYS e[9])final{
-  RESTRICT Solv::vals MtrlLinear(const RESTRICT Solv::vals &e)final{
+  Solv::vals MtrlLinear(const RESTRICT Solv::vals &e)final{
     RESTRICT Solv::vals S(9);//FIXME
     //RESTRICT Solv::vals s(6);
     //

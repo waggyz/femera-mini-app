@@ -39,20 +39,17 @@ public:
   int Setup( Mesh* );//FIXME No longer needed?
   //
   // Shape Function Bulk Eval -----------------------------
-  const RESTRICT Mesh::vals ShapeFunction(const INT_ORDER, RESTRICT Mesh::vals);
-  const RESTRICT Mesh::vals ShapeGradient(const INT_ORDER,
-                                          const RESTRICT Mesh::vals);
+  const Mesh::vals ShapeFunction(const INT_ORDER, RESTRICT Mesh::vals);
+  const Mesh::vals ShapeGradient(const INT_ORDER, const RESTRICT Mesh::vals);
   //FIXME need to handle higher-order elements
   // Shape Function Kernels -------------------------------
   //FIXME virtual functions are difficult to inline...how to fix?
-  virtual const RESTRICT Mesh::vals ShapeFunction(const INT_ORDER,
-                                                  const FLOAT_MESH[])=0;
-  virtual const RESTRICT Mesh::vals ShapeGradient(const INT_ORDER,
-                                                  const FLOAT_MESH[])=0;
+  virtual const Mesh::vals ShapeFunction(const INT_ORDER, const FLOAT_MESH[])=0;
+  virtual const Mesh::vals ShapeGradient(const INT_ORDER, const FLOAT_MESH[])=0;
   // Integration Kernel -----------------------------------
   // integration points & weights
-  virtual const RESTRICT Mesh::vals GaussLegendre(const INT_ORDER )=0;
-  const RESTRICT Mesh::vals GaussLegendre( ){
+  virtual const Mesh::vals GaussLegendre(const INT_ORDER )=0;
+  const Mesh::vals GaussLegendre( ){
     return GaussLegendre( gaus_p ); };
   //
   int SavePartCSV( const char* bname );
@@ -83,28 +80,28 @@ public:
     halo_node_n=0, halo_loca_n=0, halo_remo_n=0, halo_elem_n=0;
   // Local halo and system sizes.
   // Halo nodes are [0...halo_n-1]; interior nodes are [halo_n...node_n-1].
-  RESTRICT Mesh::vals intp_shpg={};
-  RESTRICT Mesh::ints elem_conn={};// Grouped so halo nodes come first.
+  Mesh::vals intp_shpg={};
+  Mesh::ints elem_conn={};// Grouped so halo nodes come first.
   //FIXME Should be conn_node or elem_node?
   //RESTRICT Mesh::vals elem_vert={};// Fill w/ Elem::ScatterVert2Elem(Mesh*)
   //(mesh_d*elem_vert_n*elem_n) used for jac calc
-  RESTRICT Mesh::vals elip_jacs={};
+  Mesh::vals elip_jacs={};
   //FIXME Change to elem_jacs, size: jacs_f * jacs_n
   //FIXME Broke 2D physics
-  RESTRICT Mesh::vals gaus_weig={};
+  Mesh::vals gaus_weig={};
   //
-  RESTRICT Mesh::vals vert_coor={};// Local element vertices.
+  Mesh::vals vert_coor={};// Local element vertices.
   //FIXME contains all nodal coordinates, not just vertices
   // Nodes are grouped:
   // 0           .. (halo_remo_n-1) [Ghost nodes]
   // halo_remo_n .. (halo_node_n-1) [There are halo_loca_n of these.]
   // halo_node_n .. (     node_n-1) [Interior nodes]
   //
-  RESTRICT Mesh::ints elem_glid ={};// xref from local to global element number
+  Mesh::ints elem_glid ={};// xref from local to global element number
   //FIXME Should be <int> to match Gmsh tags
-  RESTRICT Mesh::ints node_glid ={};// xref from local to global node number
+  Mesh::ints node_glid ={};// xref from local to global node number
   // global_id=node_glid[local_id];
-  RESTRICT Mesh::ints node_haid ={};// xref from local to halo node number
+  Mesh::ints node_haid ={};// xref from local to halo node number
   // M->node_halo_id = E->node_haid[ node_part_id ]
   std::unordered_map<int,INT_MESH> elem_loid;
   std::unordered_map<int,INT_MESH> node_loid;
@@ -149,38 +146,34 @@ private:
 class Bar final: public Elem{
 public: Bar(INT_ORDER p) : Elem(1,2,1,p,1){}// Set properties in base Elem class
   //Elem(elem_d, elem_n, elem_vert_n, elem_edge_n , elem_p)
-  const RESTRICT Mesh::vals ShapeFunction(const INT_ORDER,
-                                          const FLOAT_MESH p[1])final;
-  const RESTRICT Mesh::vals ShapeGradient(const INT_ORDER,
-                                          const FLOAT_MESH  [1])final;
-  const RESTRICT Mesh::vals GaussLegendre(const INT_ORDER p )final;
+  const Mesh::vals ShapeFunction(const INT_ORDER, const FLOAT_MESH p[1])final;
+  const Mesh::vals ShapeGradient(const INT_ORDER, const FLOAT_MESH  [1])final;
+  const Mesh::vals GaussLegendre(const INT_ORDER p )final;
   int JacsDets()final;
 #ifdef HAS_PATCH
   Mesh* Mesh1Natu()final;
   Mesh* MeshPatch()final;
 #endif
 protected:
-  const RESTRICT Mesh::ints vert_conn={ 0,1 };
-  const RESTRICT Mesh::ints vert_edge={ 0,1 };// Bar2 connectivity of 3 sides
-  const RESTRICT Mesh::vals vert_coor={-1.0,1.0};
+  const Mesh::ints vert_conn={ 0,1 };
+  const Mesh::ints vert_edge={ 0,1 };// Bar2 connectivity of 3 sides
+  const Mesh::vals vert_coor={-1.0,1.0};
 private: 
 };
 class Tri final: public Elem{
 public: Tri(INT_ORDER p) : Elem(2,3,3,p,1){}// Set properties in base Elem class
-  const RESTRICT Mesh::vals ShapeFunction(const INT_ORDER,
-                                          const FLOAT_MESH p[2])final;
-  const RESTRICT Mesh::vals ShapeGradient(const INT_ORDER,
-                                          const FLOAT_MESH  [2])final;
-  const RESTRICT Mesh::vals GaussLegendre(const INT_ORDER p )final;
+  const Mesh::vals ShapeFunction(const INT_ORDER, const FLOAT_MESH p[2])final;
+  const Mesh::vals ShapeGradient(const INT_ORDER, const FLOAT_MESH  [2])final;
+  const Mesh::vals GaussLegendre(const INT_ORDER p )final;
   int JacsDets()final;
 #ifdef HAS_PATCH
   Mesh* Mesh1Natu()final;
   Mesh* MeshPatch()final;
 #endif
 protected:
-  const RESTRICT Mesh::ints vert_conn={ 0,1,2 };
-  const RESTRICT Mesh::ints vert_edge={ 0,1, 1,2, 2,0 };// Bar2 connectivity of 3 sides
-  const RESTRICT Mesh::vals vert_coor={
+  const Mesh::ints vert_conn={ 0,1,2 };
+  const Mesh::ints vert_edge={ 0,1, 1,2, 2,0 };// Bar2 connectivity of 3 sides
+  const Mesh::vals vert_coor={
     0.0, 0.0,
     1.0, 0.0,
     0.0, 1.0};
@@ -188,20 +181,18 @@ private:
 };
 class Qua final: public Elem{
 public: Qua(INT_ORDER p) : Elem(2,4,4,p,1){}
-  const RESTRICT Mesh::vals ShapeFunction(const INT_ORDER,
-                                          const FLOAT_MESH p[2])final;
-  const RESTRICT Mesh::vals ShapeGradient(const INT_ORDER,
-                                          const FLOAT_MESH p[2])final;
-  const RESTRICT Mesh::vals GaussLegendre(const INT_ORDER p )final;
+  const Mesh::vals ShapeFunction(const INT_ORDER, const FLOAT_MESH p[2])final;
+  const Mesh::vals ShapeGradient(const INT_ORDER, const FLOAT_MESH p[2])final;
+  const Mesh::vals GaussLegendre(const INT_ORDER p )final;
   int JacsDets()final;
 #ifdef HAS_PATCH
   Mesh* Mesh1Natu()final;
   Mesh* MeshPatch()final;
 #endif
 protected:
-  const RESTRICT Mesh::ints vert_conn={ 0,1,2,3 };
-  const RESTRICT Mesh::ints vert_edge={ 0,1, 1,2, 2,3, 3,0 };// Bar2 connectivity of 3 sides
-  const RESTRICT Mesh::vals vert_coor={
+  const Mesh::ints vert_conn={ 0,1,2,3 };
+  const Mesh::ints vert_edge={ 0,1, 1,2, 2,3, 3,0 };// Bar2 connectivity of 3 sides
+  const Mesh::vals vert_coor={
     -1.0,-1.0,
      1.0,-1.0,
      1.0, 1.0,
@@ -215,24 +206,22 @@ public:
   //Tet(INT_ORDER p) : Elem(3,4,6,p,1){ this->gaus_p=p; };//FIXME Remove?
   Tet(INT_ORDER p) : Elem(3,4,6,((p<3)?0:4),p,p,1){  };//FIXME Remove?
   Tet(INT_ORDER p, INT_MESH e) : Elem(3,4,6,((p<3)?0:4),p,p,e){};
-  const RESTRICT Mesh::vals ShapeFunction(const INT_ORDER,
-                                          const FLOAT_MESH p[3])final;
-  const RESTRICT Mesh::vals ShapeGradient(const INT_ORDER,
-                                          const FLOAT_MESH  [3])final;
-  const RESTRICT Mesh::vals GaussLegendre(const INT_ORDER p )final;
+  const Mesh::vals ShapeFunction(const INT_ORDER, const FLOAT_MESH p[3])final;
+  const Mesh::vals ShapeGradient(const INT_ORDER, const FLOAT_MESH  [3])final;
+  const Mesh::vals GaussLegendre(const INT_ORDER p )final;
   int JacsDets()final;
 #ifdef HAS_PATCH
   Mesh* Mesh1Natu()final;
   Mesh* MeshPatch()final;
 #endif
 protected:
-  const RESTRICT Mesh::ints vert_conn={ 0,1,2,3 };
+  const Mesh::ints vert_conn={ 0,1,2,3 };
   //const RESTRICT Mesh::ints vert_edge={ 0,1, 1,2, 2,0, 0,3, 1,3, 2,3 };
   //const RESTRICT Mesh::ints vert_face={ 0,1,2, 0,1,3, 1,2,3, 2,0,3 }
   //NOTE The following match gmsh convention for quadratic tets
-  const RESTRICT Mesh::ints vert_edge={ 0,1, 1,2, 2,0, 0,3, 2,3, 1,3 };
-  const RESTRICT Mesh::ints vert_face={ 0,1,2, 0,1,3, 0,3,2, 1,2,3 };
-  const RESTRICT Mesh::vals vert_coor={
+  const Mesh::ints vert_edge={ 0,1, 1,2, 2,0, 0,3, 2,3, 1,3 };
+  const Mesh::ints vert_face={ 0,1,2, 0,1,3, 0,3,2, 1,2,3 };
+  const Mesh::vals vert_coor={
     0.0, 0.0, 0.0,
     1.0, 0.0, 0.0,
     0.0, 1.0, 0.0,
@@ -245,23 +234,21 @@ private:
 class Bri final: public Elem{
 public: Bri(INT_ORDER p) : Elem(3,8,12,p,1){}
   //Elem(elem_d, elem_n, elem_vert_n, elem_edge_n , elem_p)
-  const RESTRICT Mesh::vals ShapeFunction(const INT_ORDER,
-                                          const FLOAT_MESH p[3])final;
-  const RESTRICT Mesh::vals ShapeGradient(const INT_ORDER,
-                                          const FLOAT_MESH  [3])final;
-  const RESTRICT Mesh::vals GaussLegendre(const INT_ORDER p )final;
+  const Mesh::vals ShapeFunction(const INT_ORDER, const FLOAT_MESH p[3])final;
+  const Mesh::vals ShapeGradient(const INT_ORDER, const FLOAT_MESH  [3])final;
+  const Mesh::vals GaussLegendre(const INT_ORDER p )final;
   int JacsDets()final;
 #ifdef HAS_PATCH
   Mesh* Mesh1Natu()final;
   Mesh* MeshPatch()final;
 #endif
 protected:
-  const RESTRICT Mesh::ints vert_conn={ 0,1,2,3, 4,5,6,7 };
-  const RESTRICT Mesh::ints vert_edge// Bar2 connectivity
+  const Mesh::ints vert_conn={ 0,1,2,3, 4,5,6,7 };
+  const Mesh::ints vert_edge// Bar2 connectivity
     ={ 0,1, 1,2, 2,3,3,0, 4,5,5,6,6,7,7,4, 0,4,1,5,2,6,3,7 };
-  const RESTRICT Mesh::ints vert_face
+  const Mesh::ints vert_face
     ={ 0,1,2,3, 7,6,5,4, 0,4,5,1, 2,3,7,6, 0,3,7,4, 1,5,6,2 };
-  const RESTRICT Mesh::vals vert_coor={
+  const Mesh::vals vert_coor={
                    //       7---------6
      0.0, 0.0, 0.0,//      /|        /|
      1.0, 0.0, 0.0,//     / |       / |
