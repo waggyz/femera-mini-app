@@ -36,7 +36,8 @@
 #define COLOR_NONE 0
 //
 #ifndef RESTRICT
-#define RESTRICT __restrict
+//#define RESTRICT __restrict
+#define RESTRICT 
 #endif
 // #define HAS_PATCH //Set this as a compiler option: -DHAS_PATCH
 // #define HAS_TEST  //Set this as a compiler option: -DHAS_TEST

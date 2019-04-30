@@ -30,8 +30,7 @@ int ElastIso3D::Setup( Elem* E ){
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) +2);
   return 0;
 };
-int ElastIso3D::ElemLinear( Elem* E,
-  FLOAT_SOLV* sys_f, const FLOAT_SOLV* sys_u ){
+int ElastIso3D::ElemLinear( Elem* E, FLOAT_SOLV* sys_f, const FLOAT_SOLV* sys_u ){
   //FIXME Clean up local variables.
   //const int De = 3;// Element Dimension
   const int Nd = 3;// Node (mesh) Dimension

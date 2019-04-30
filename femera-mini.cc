@@ -505,9 +505,12 @@ int main( int argc, char** argv ){
 #pragma omp single
 {
     //scale = 1.0/(smax-smin);
-    scax = 1.0/(maxx-minx);
-    scay = 1.0/(maxy-miny);
-    scaz = 1.0/(maxz-minz);
+    //scax = 1.0;
+    //scay = 1.0;
+   // scaz = 1.0;
+     scax = 1.0/(maxx-minx);
+     scay = 1.0/(maxy-miny);
+     scaz = 1.0/(maxz-minz);
 }
 #pragma omp for schedule(static)
     for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
