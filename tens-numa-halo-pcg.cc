@@ -65,11 +65,9 @@ int PCG::Init( Elem* E, Phys* Y ){
 int PCG::Init(){
   const uint sysn=this->udof_n;// loca_res2 is a member variable.
   const uint sumi0=this->halo_loca_0;// *this->ndof_n;
-  const uint node_n=sysn/3;//FIXME
-  for(uint i=0; i<node_n; i++){
-    for(uint j=0;j<3;j++){
-      this->sys_r[3*i+j] -= this->sys_f[3*i+j];
-  };};
+  for(uint i=0; i<sysn; i++){
+    this->sys_r[i] -= this->sys_f[i];
+  };
   //sys_r  = sys_b - sys_f;// This is done sparsely now.
   //sys_z  = sys_d * sys_r;// This is merged where it's used (2x/iter)
   //sys_p  = sys_z;
@@ -89,15 +87,12 @@ int PCG::Iter(){// 2 FLOP + 12 FLOP/DOF, 14 float/DOF
   const INT_MESH sysn=udof_n;
   const uint sumi0=this->halo_loca_0;// this->ndof_n;//FIXME Magic number
   const auto ra=this->loca_res2;// Make a local version of this member variable
-  const INT_MESH node_n=sysn/3;//FIXME
-  const uint sumn0=this->halo_loca_0/3;//FIXME
   //
   //const FLOAT_SOLV alpha  = ra / inner_product( sys_p,sys_f );// 1 DIV +(2 FLOP/DOF)
   FLOAT_SOLV s=0.0;
-  for(uint i=sumn0; i<node_n; i++){
-    for(uint j=0;j<3;j++){
-    s += sys_p[3*i+j] * sys_f[3*i+j];// 2 FLOP/DOF, 2 read =2/DOF
-  };};
+  for(uint i=sumi0; i<sysn; i++){
+    s += sys_p[i] * sys_f[i];// 2 FLOP/DOF, 2 read =2/DOF
+  };
   const FLOAT_SOLV alpha  = ra / s;// 1 DIV FLOP
   //if(!isnan(alpha)){// moved to inside last loop
   //  sys_u += alpha * sys_p; };
@@ -109,11 +104,8 @@ int PCG::Iter(){// 2 FLOP + 12 FLOP/DOF, 14 float/DOF
   FLOAT_SOLV r2b=0.0;
   for(uint i=0; i<sysn; i++){// 4 FLOP/DOF, 4 read + 2 write =6/DOF
     sys_u[i] += alpha * sys_p[i];// works fine here
+    sys_r[i] -= alpha * sys_f[i];
   };
-  for(uint i=0;i<node_n;i++){
-    for(uint j=0;j<3;j++){
-      sys_r[3*i+j] -= alpha * sys_f[3*i+j];
-  }; };
 #pragma omp parallel for reduction(+:r2b)
   for(uint i=sumi0; i<sysn; i++){
     r2b += sys_r[i] * sys_r[i] * sys_d[i];// 3 FLOP/DOF, 2 read =2/DOF
@@ -340,8 +332,6 @@ int HaloPCG::Iter(){
     const INT_MESH d=uint(Y->ndof_n);
     time_start( scat_start );
     const INT_MESH hnn=E->halo_node_n,hl0=S->halo_loca_0,sysn=S->udof_n;
-    const uint node_n=sysn/3;//FIXME
-    const uint hln0=hl0/3;//FIXME
     for(INT_MESH i=0; i<hnn; i++){//NOTE appears not to be critical
       std::memcpy(
         & S->sys_f[3* i],
@@ -354,10 +344,9 @@ int HaloPCG::Iter(){
     time_accum( my_phys_count, phys_start );
     time_start( solv_start );
 #pragma omp simd reduction(+:glob_sum1)
-    for(INT_MESH i=hln0; i<node_n; i++){
-      for(INT_MESH j=0; j<3; j++){
-        glob_sum1 += S->sys_p[3*i+j] * S->sys_f[3*i+j];
-    };};
+    for(INT_MESH i=hli0; i<sysn; i++){
+        glob_sum1 += S->sys_p[i] * S->sys_f[i];
+    };
     time_accum( my_solv_count, solv_start );
   };
   time_start( solv_start );
@@ -368,10 +357,9 @@ int HaloPCG::Iter(){
     const INT_MESH hl0=S->halo_loca_0,sysn=S->udof_n;
     const uint node_n=sysn/3;//FIXME
 #pragma omp simd
-    for(INT_MESH i=0; i<node_n; i++){
-      for(INT_MESH j=0; j<3; j++){
-        S->sys_r[3*i+j] -= alpha * S->sys_f[3*i+j];
-    };};
+    for(INT_MESH i=0; i<sysn; i++){
+        S->sys_r[i] -= alpha * S->sys_f[i];
+    };
 #pragma omp simd reduction(+:glob_sum2)
     for(INT_MESH i=hl0; i<sysn; i++){
       glob_sum2   += S->sys_r[i] * S->sys_r[i] * S->sys_d[i]; };
