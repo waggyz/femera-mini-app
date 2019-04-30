@@ -344,7 +344,7 @@ int HaloPCG::Iter(){
     time_accum( my_phys_count, phys_start );
     time_start( solv_start );
 #pragma omp simd reduction(+:glob_sum1)
-    for(INT_MESH i=hli0; i<sysn; i++){
+    for(INT_MESH i=hl0; i<sysn; i++){
         glob_sum1 += S->sys_p[i] * S->sys_f[i];
     };
     time_accum( my_solv_count, solv_start );
@@ -355,7 +355,6 @@ int HaloPCG::Iter(){
   for(int part_i=part_0; part_i<part_o; part_i++){// ? FLOP/DOF
     std::tie(E,Y,S)=P[part_i];
     const INT_MESH hl0=S->halo_loca_0,sysn=S->udof_n;
-    const uint node_n=sysn/3;//FIXME
 #pragma omp simd
     for(INT_MESH i=0; i<sysn; i++){
         S->sys_r[i] -= alpha * S->sys_f[i];
