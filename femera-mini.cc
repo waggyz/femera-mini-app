@@ -383,7 +383,7 @@ int main( int argc, char** argv ){
   // First, figure out the sizes of the arrays needed
   IDX_GPU gpu_total_ints=0,gpu_total_real=0;
   {//scope
-  int ii=0,ri=0; // int/real accumulators
+  IDX_GPU ii=0,ri=0; // int/real accumulators
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_DMESH      ] = ii; ii+=1;
@@ -399,11 +399,11 @@ int main( int argc, char** argv ){
     gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NODE_HAID  ] = ii; ii+= E->node_haid.size();
     gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NODE_GLID  ] = ii; ii+= E->node_glid.size();
     //
-    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_MATC ] = ri; ri+=9;
     gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_ROTC ] = ri; ri+=9;
-    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SHPG ] = ri; ri+=E->elem_conn_n*E->gaus_n*3;
-    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_WGTS ] = ri; ri+=E->gaus_n;
-    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_JACS ] = ri; ri+=E->mesh_d*E->mesh_d+1;
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_MATC ] = ri; ri+=9;
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SHPG ] = ri; ri+=E->intp_shpg.size();
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_WGTS ] = ri; ri+=E->gaus_weig.size();
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_JACS ] = ri; ri+=E->elip_jacs.size();
     //
     INT_GPU partsize=E->node_n*3;
     gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSP ] = ri; ri+=partsize;
@@ -428,6 +428,12 @@ int main( int argc, char** argv ){
   INT_GPU   Pints[gpu_total_ints];
   FLOAT_GPU Preal[gpu_total_real];
   {  // Now fill these
+  for(int part_i=0; part_i<part_0; part_i++){
+    IDX_GPU Oi=GPU_INTS_COUNT*part_i;
+    IDX_GPU Or=GPU_REAL_COUNT*part_i;
+    for(int j=0; j<GPU_INTS_COUNT; j++){ gpu_ints_idx[Oi+j]=0;};
+    for(int j=0; j<GPU_REAL_COUNT; j++){ gpu_real_idx[Or+j]=0;};
+  };
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     IDX_GPU Oi=GPU_INTS_COUNT*part_i;
@@ -468,6 +474,12 @@ int main( int argc, char** argv ){
     for(int i=0; i<int( partsize ); i++){
       Preal[gpu_real_idx[Or + IDX_SYSD] +i] = S->sys_d[i]; };
   };
+#if 0
+  for(int i=0; i<(part_n+part_0) * GPU_INTS_COUNT; i++){
+    if(!(i%GPU_INTS_COUNT)){ printf("\n"); };
+    printf("%i ",gpu_ints_idx[i]);
+  }; printf("\n");
+#endif
   }// end local var scope
   //end loading GPU data
   {// iter scope
