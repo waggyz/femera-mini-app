@@ -459,14 +459,14 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
         hava[f+j]+= sysf[3* i+j]; };
     };
   };// End halo_vals sum; now scatter back to elems
-#if 0
   for(int part_i=part_0; part_i<part_o; part_i++){
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
     const INT_GPU Or = GPU_REAL_COUNT*part_i;
     const INT_GPU d = Pints[gpu_ints_idx[Oi+ IDX_DMESH ]];
-    const INT_MESH hnn=E->halo_node_n,
-    hl0=S->halo_loca_0,
-    sysn=S->udof_n;
+    const INT_GPU hrn=Pints[gpu_ints_idx[Oi+ IDX_NNODE_REMO ]];
+    const INT_GPU hnn=hrn + Pints[gpu_ints_idx[Oi+ IDX_NNODE_LOCA ]];
+    const INT_GPU hl0=hrn * d;
+    const INT_GPU sysn=Pints[gpu_ints_idx[Oi+ IDX_NNODE ]] * d;
     const INT_GPU* haid = &Pints[gpu_ints_idx[Oi+ IDX_NODE_HAID ]];
     FLOAT_GPU* sysf = &Preal[gpu_real_idx[Or+ IDX_SYSF ]];
     FLOAT_GPU* sysp = &Preal[gpu_real_idx[Or+ IDX_SYSP ]];
@@ -476,7 +476,8 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
         & this->hava[d* E->haid[i]],
         d*sizeof(FLOAT_PHYS) );
     };
-    const INT_GPU d = Pints[gpu_ints_idx[Oi+ IDX_NELEM ]];
+    const INT_GPU halo_elem_n = Pints[gpu_ints_idx[Oi + IDX_NELEM_HALO ]];
+    const INT_GPU elem_n = Pints[gpu_ints_idx[Oi + IDX_NELEM ]];
     const INT_GPU d = Pints[gpu_ints_idx[Oi+ IDX_NELEM ]];
     Y->ElemLinearGPU( gpu_ints_idx,gpu_real_idx, Pints,Preal,
                       part_i, halo_elem_n,elem_n );
@@ -486,7 +487,7 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
     };
   };
   const FLOAT_SOLV alpha = glob_r2a / glob_sum1;
-#endif
+
   //
   return(0); };
   
