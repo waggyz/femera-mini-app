@@ -52,9 +52,9 @@
 #define IDX_PART_0     2
 #define IDX_PART_N     3
 #define IDX_VERB       4
-#endif
 // Model Reals
 #define IDX_TOL2       0
+#endif
 // Partition Integers
 #define IDX_DMESH      0
 #define IDX_NNODE      1

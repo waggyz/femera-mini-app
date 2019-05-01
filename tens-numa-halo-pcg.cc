@@ -407,7 +407,14 @@ int HaloPCG::Iter(){
 };
 int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
                       const INT_GPU* Pints, FLOAT_GPU* Preal){
-  //
+  INT_GPU part_0     =this->part_0;// In only
+  INT_GPU part_n     =this->part_n;// In only
+  INT_GPU iter_max   =this->iter_max;// In only
+  INT_GPU iter_info_n=this->info_mod;// In only
+  FLOAT_GPU glob_rto2=this->glob_rto2;// In only
+  FLOAT_GPU glob_chk2=this->glob_rto2;// In/out
+  FLOAT_GPU glob_res2=0.0;// local
+  
   //
   //
   return(0); };

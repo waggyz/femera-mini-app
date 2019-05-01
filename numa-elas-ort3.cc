@@ -442,8 +442,11 @@ int ElastOrtho3D::ElemStrain( Elem* E,FLOAT_SOLV* sys_f ){
   return 0;
   };
 int Mesh::ElemLinearGPU( const IDX_GPU* gpu_ints_idx,const IDX_GPU* gpu_real_idx,
-                         const INT_GPU* Pints, FLOAT_GPU* Preal){
-    
-    
+                         const INT_GPU* Pints, FLOAT_GPU* Preal,
+                         INT_GPU part_i ){
+  //
+  INT_GPU Nc = Pints[gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_ECONN_N]];
+  //
+  //
   return 0;
   };
