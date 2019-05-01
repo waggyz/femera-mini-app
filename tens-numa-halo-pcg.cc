@@ -407,23 +407,23 @@ int HaloPCG::Iter(){
 };
 int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
                       const INT_GPU* Pints, FLOAT_GPU* Preal){
-  const INT_GPU part_0     =this->part_0;// In only
-  const INT_GPU part_n     =this->part_n;// In only
-  const INT_GPU iter_max   =this->iter_max;// In only
+  const INT_GPU gpup_0     =this->part_0;// In only
+  const INT_GPU gpup_n     =this->part_n;// In only
+  const INT_GPU gpui_max   =this->iter_max;// In only
   const INT_GPU iter_info_n=this->info_mod;// In only
   //const INT_GPU comp_n     =this->comp_n;// In only
-  const FLOAT_GPU glob_rto2=this->glob_rto2;// In only
+  const FLOAT_GPU gpu_rto2=this->glob_rto2;// In only
   FLOAT_GPU gpu_chk2=this->glob_chk2;// In/out
   FLOAT_GPU gpu_r2a =this->glob_res2;// In? Local to GPU?
   FLOAT_GPU gpu_sum1=0.0, gpu_sum2=0.0;// Local to GPU
   //
   FLOAT_GPU hava[ this->halo_val.size() ];
   //
-  const INT_GPU part_o = part_n+part_0;
+  const INT_GPU part_o = gpup_n+gpup_0;
   INT_GPU iter=0;
   do{ iter++;
 //#pragma omp for schedule(static)
-  for(INT_GPU part_i=part_0; part_i<part_o; part_i++){
+  for(INT_GPU part_i=gpup_0; part_i<part_o; part_i++){
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
     const INT_GPU Or = GPU_REAL_COUNT*part_i;
     const INT_GPU d = Pints[gpu_ints_idx[Oi+ IDX_DMESH ]];
@@ -444,12 +444,12 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
     for(INT_GPU i=hrn; i<hnn; i++){
       std::memcpy(
         & hava[d* haid[i]],
-        & sysf[3* i],
+        & sysf[d* i],
         d*sizeof(FLOAT_GPU) );
     };
   };
 //#pragma omp for schedule(static)
-  for(int part_i=part_0; part_i<part_o; part_i++){
+  for(INT_GPU part_i=gpup_0; part_i<part_o; part_i++){
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
     const INT_GPU Or = GPU_REAL_COUNT*part_i;
     const INT_GPU d = Pints[gpu_ints_idx[Oi+ IDX_DMESH ]];
@@ -457,14 +457,14 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
     const INT_GPU* haid = &Pints[gpu_ints_idx[Oi+ IDX_NODE_HAID ]];
     FLOAT_GPU* sysf = &Preal[gpu_real_idx[Or+ IDX_SYSF ]];
     for(INT_GPU i=0; i<hrn; i++){
-      const auto f = d* haid[i];
-      for( uint j=0; j<d; j++){
+      const INT_GPU f = d* haid[i];
+      for( INT_GPU j=0; j<d; j++){
 //#pragma omp atomic update
-        hava[f+j]+= sysf[3* i+j]; };
+        hava[f+j]+= sysf[d* i+j]; };
     };
   };// End halo_vals sum; now scatter back to elems
 //#pragma omp for schedule(static) reduction(+:gpu_sum1)
-  for(int part_i=part_0; part_i<part_o; part_i++){
+  for(INT_GPU part_i=gpup_0; part_i<part_o; part_i++){
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
     const INT_GPU Or = GPU_REAL_COUNT*part_i;
     const INT_GPU d = Pints[gpu_ints_idx[Oi+ IDX_DMESH ]];
@@ -477,7 +477,7 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
     FLOAT_GPU* sysp = &Preal[gpu_real_idx[Or+ IDX_SYSP ]];
     for(INT_GPU i=0; i<hnn; i++){
       std::memcpy(
-        & sysf[3* i],
+        & sysf[d* i],
         & hava[d* haid[i]],
         d*sizeof(FLOAT_PHYS) );
     };
@@ -492,7 +492,7 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
   };
   const FLOAT_SOLV alpha = gpu_r2a / gpu_sum1;
 //#pragma omp for schedule(static) reduction(+:gpu_sum2)
-  for(int part_i=part_0; part_i<part_o; part_i++){
+  for(INT_GPU part_i=gpup_0; part_i<part_o; part_i++){
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
     const INT_GPU Or = GPU_REAL_COUNT*part_i;
     const INT_GPU d = Pints[gpu_ints_idx[Oi+ IDX_DMESH ]];
@@ -512,7 +512,7 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
   };
   const FLOAT_PHYS beta = gpu_sum2 / gpu_r2a;
 //#pragma omp for schedule(static)
-  for(int part_i=part_0; part_i<part_o; part_i++){
+  for(INT_GPU part_i=gpup_0; part_i<part_o; part_i++){
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
     const INT_GPU Or = GPU_REAL_COUNT*part_i;
     const INT_GPU d = Pints[gpu_ints_idx[Oi+ IDX_DMESH ]];
@@ -533,7 +533,9 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
   this->glob_res2 = gpu_r2a;
 #endif
   gpu_chk2 = gpu_r2a;
-  }while( (iter < iter_max) & (gpu_chk2 > glob_rto2) );
+  }while( (iter < gpui_max) & (gpu_chk2 > gpu_rto2) );
   //
+  printf("%9i ||R||%9.2e /%9.2e tol in ? s\nGPU Done.\n", iter,
+    std::sqrt(gpu_chk2), std::sqrt(gpu_rto2) );
   return(0); };
   
