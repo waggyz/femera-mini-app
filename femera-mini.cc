@@ -396,14 +396,14 @@ int main( int argc, char** argv ){
     gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_ECONN_N    ] = ii; ii+=1;
     //
     gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_ECONN      ] = ii; ii+= E->elem_n*E->elem_conn_n;
-    gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NODE_HAID  ] = ii; ii+= E->node_haid.size();
-    gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NODE_GLID  ] = ii; ii+= E->node_glid.size();
+    gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NODE_HAID  ] = ii; ii+= INT_GPU(E->node_haid.size());
+    //gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NODE_GLID  ] = ii; ii+= INT_GPU(E->node_glid.size());
     //
     gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_ROTC ] = ri; ri+=9;
     gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_MATC ] = ri; ri+=9;
-    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SHPG ] = ri; ri+=E->intp_shpg.size();
-    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_WGTS ] = ri; ri+=E->gaus_weig.size();
-    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_JACS ] = ri; ri+=E->elip_jacs.size();
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SHPG ] = ri; ri+=INT_GPU(E->intp_shpg.size());
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_WGTS ] = ri; ri+=INT_GPU(E->gaus_weig.size());
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_JACS ] = ri; ri+=INT_GPU(E->elip_jacs.size());
     //
     INT_GPU partsize=E->node_n*3;
     gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSP ] = ri; ri+=partsize;
@@ -449,8 +449,8 @@ int main( int argc, char** argv ){
       Pints[gpu_ints_idx[Oi + IDX_ECONN] +i] = E->elem_conn[i]; };
     for(int i=0; i<int(E->node_haid.size()); i++){
       Pints[gpu_ints_idx[Oi + IDX_NODE_HAID] +i] = E->node_haid[i]; };
-    for(int i=0; i<int(E->node_glid.size()); i++){
-      Pints[gpu_ints_idx[Oi + IDX_NODE_GLID] +i] = E->node_glid[i]; };
+    //for(int i=0; i<int(E->node_glid.size()); i++){
+    //  Pints[gpu_ints_idx[Oi + IDX_NODE_GLID] +i] = E->node_glid[i]; };
     int Or=GPU_REAL_COUNT*part_i;
     for(int i=0; i<int( Y->mtrl_rotc.size() ); i++){
       Preal[gpu_real_idx[Or + IDX_ROTC] +i] = Y->mtrl_rotc[i]; };
@@ -483,14 +483,20 @@ int main( int argc, char** argv ){
   }// end local var scope
   //end loading GPU data
   {// iter scope
-    M->time_secs=0.0;//FIXME conditional?
-    // Iterate ------------------------------------------------------
-    auto loop_start = std::chrono::high_resolution_clock::now();
+    auto gpu_start = std::chrono::high_resolution_clock::now();
     M->iter_max=iter_max;
     M->info_mod=iter_info_n;
     M->part_0=part_0;
     M->part_n=part_n;
     M->IterGPU( gpu_ints_idx, gpu_real_idx, Pints, Preal );
+    auto gpu_done = std::chrono::high_resolution_clock::now();
+    auto gpu_time = std::chrono::duration_cast<std::chrono::nanoseconds>
+      (gpu_done - gpu_start);
+    auto gpu_sec=float(gpu_time.count())*ns;
+    printf("in %f s.\n",gpu_sec);
+    M->time_secs=0.0;//FIXME conditional?
+    // Iterate ------------------------------------------------------
+    auto loop_start = std::chrono::high_resolution_clock::now();
     do{ M->Iter(); iter++;
 #if VERB_MAX>1
       if(verbosity>1){

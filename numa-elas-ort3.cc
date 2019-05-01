@@ -85,6 +85,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         sizeof(FLOAT_SOLV)*Nf ); };
     std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
   };
+  //for(int i=0; i<10; i++){ printf("%+8e ",sysu[i]); };//*******************
   for(INT_MESH ie=e0;ie<ee;ie++){
     for(int i=0;i<Ne;i++){ GS[i]=0.0; };
     // Transpose R
@@ -466,22 +467,22 @@ int Mesh::ElemLinearGPU( const IDX_GPU* gpu_ints_idx,const IDX_GPU* gpu_real_idx
   FLOAT_PHYS G[Ne], H[Nd*Nf], S[Nd*Nf];//FIXME wrong sizes?
 
   FLOAT_PHYS intp_shpg[intp_n*Ne];
-  for(int i=0; i<(intp_n*Ne);i++){ intp_shpg[i] = Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SHPG + i]]; };
+  for(int i=0; i<(intp_n*Ne);i++){ intp_shpg[i] = Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SHPG] + i]; };
   //std::copy( Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SHPG]], Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SHPG+intp_n*Ne]], intp_shpg );
   //std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
 
   FLOAT_PHYS wgt[intp_n];
-  for(int i=0; i<(intp_n);i++){ wgt[i] = Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_WGTS+intp_n + i]]; };
+  for(int i=0; i<(intp_n);i++){ wgt[i] = Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_WGTS] + i]; };
   //std::copy( Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_WGTS]], Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_WGTS+intp_n]], wgt );
   //std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
 
   FLOAT_PHYS C[9];
-  for(int i=0; i<9;i++){ C[i] = Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_MATC + i]]; };
+  for(int i=0; i<9;i++){ C[i] = Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_MATC] + i]; };
   //std::copy( Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_MATC]], Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_MATC+9]], C );
   //FLOAT_PHYS C[this->mtrl_matc.size()];
 
   FLOAT_PHYS R[9];
-  for(int i=0; i<9;i++){ R[i] = Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_ROTC + i]]; };
+  for(int i=0; i<9;i++){ R[i] = Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_ROTC] + i]; };
   //std::copy( Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_ROTC]], Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_ROTC+9]], R );
   //FLOAT_PHYS R[9] = {
   //  mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
@@ -508,7 +509,7 @@ int Mesh::ElemLinearGPU( const IDX_GPU* gpu_ints_idx,const IDX_GPU* gpu_real_idx
   const FLOAT_GPU* RESTRICT Ejacs = &Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_JACS]];
   //const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
 
-  const FLOAT_GPU* RESTRICT sysu  = &Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSU]];
+  const FLOAT_GPU* RESTRICT sysu  = &Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSP]];
   //const FLOAT_SOLV* RESTRICT sysu  = &sys_u[0];
 
         FLOAT_GPU* RESTRICT sysf  = &Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSF]];

@@ -305,6 +305,7 @@ int HaloPCG::Iter(){
     const auto n = S->upad_n;
     for(uint i=0;i<n;i++){ S->sys_f[i]=0.0; };
     E->do_halo=true; Y->ElemLinear( E, S->sys_f, S->sys_p );
+  //for(int i=0; i<(E->node_n*3); i++){ printf("%+8e ",S->sys_f[i]); }//********
     time_accum( my_phys_count, phys_start );
     time_start( gath_start );
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
@@ -412,7 +413,7 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
   const INT_GPU gpui_max   =this->iter_max;// In only
   const INT_GPU iter_info_n=this->info_mod;// In only
   //const INT_GPU comp_n     =this->comp_n;// In only
-  const FLOAT_GPU gpu_rto2=this->glob_rto2;// In only
+  const FLOAT_GPU gpu_rto2 =this->glob_rto2;// In only
   FLOAT_GPU gpu_chk2=this->glob_chk2;// In/out
   FLOAT_GPU gpu_r2a =this->glob_res2;// In? Local to GPU?
   FLOAT_GPU gpu_sum1=0.0, gpu_sum2=0.0;// Local to GPU
@@ -422,6 +423,7 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
   const INT_GPU part_o = gpup_n+gpup_0;
   INT_GPU iter=0;
   do{ iter++;
+    gpu_sum1=0.0, gpu_sum2=0.0;
 //#pragma omp for schedule(static)
   for(INT_GPU part_i=gpup_0; part_i<part_o; part_i++){
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
@@ -479,12 +481,12 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
       std::memcpy(
         & sysf[d* i],
         & hava[d* haid[i]],
-        d*sizeof(FLOAT_PHYS) );
+        d*sizeof(FLOAT_GPU) );
     };
     const INT_GPU halo_elem_n = Pints[gpu_ints_idx[Oi + IDX_NELEM_HALO ]];
     const INT_GPU elem_n = Pints[gpu_ints_idx[Oi + IDX_NELEM ]];
     this->ElemLinearGPU( gpu_ints_idx,gpu_real_idx, Pints,Preal,
-                      part_i, halo_elem_n,elem_n );
+                         part_i, halo_elem_n,elem_n );
 //#pragma omp simd reduction(+:gpu_sum1)
     for(INT_GPU i=hl0; i<sysn; i++){
         gpu_sum1 += sysp[i] * sysf[i];
@@ -498,7 +500,7 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
     const INT_GPU d = Pints[gpu_ints_idx[Oi+ IDX_DMESH ]];
     const INT_GPU hrn=Pints[gpu_ints_idx[Oi+ IDX_NNODE_REMO ]];
     const INT_GPU hl0=hrn * d;
-    const INT_GPU sysn=Pints[gpu_ints_idx[Oi+ IDX_NNODE ]] * d;
+    const INT_GPU sysn=Pints[gpu_ints_idx[Oi+ IDX_NNODE]] * d;
     FLOAT_GPU* sysf = &Preal[gpu_real_idx[Or+ IDX_SYSF ]];
     FLOAT_GPU* sysr = &Preal[gpu_real_idx[Or+ IDX_SYSR ]];
     FLOAT_GPU* sysd = &Preal[gpu_real_idx[Or+ IDX_SYSD ]];
@@ -516,7 +518,7 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
     const INT_GPU Or = GPU_REAL_COUNT*part_i;
     const INT_GPU d = Pints[gpu_ints_idx[Oi+ IDX_DMESH ]];
-    const INT_GPU sysn=Pints[gpu_ints_idx[Oi+ IDX_NNODE ]] * d;
+    const INT_GPU sysn=Pints[gpu_ints_idx[Oi+ IDX_NNODE]] * d;
     FLOAT_GPU* sysp = &Preal[gpu_real_idx[Or+ IDX_SYSP ]];
     FLOAT_GPU* sysd = &Preal[gpu_real_idx[Or+ IDX_SYSD ]];
     FLOAT_GPU* sysu = &Preal[gpu_real_idx[Or+ IDX_SYSU ]];

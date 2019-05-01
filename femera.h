@@ -67,8 +67,8 @@
 // Partition Integer Arrays
 #define IDX_ECONN      8
 #define IDX_NODE_HAID  9
-#define IDX_NODE_GLID  10
-#define GPU_INTS_COUNT 11
+//#define IDX_NODE_GLID  10
+#define GPU_INTS_COUNT 10
 // Total number of integer structures indexed
 // Partition Real Arrays
 #define IDX_ROTC  0
