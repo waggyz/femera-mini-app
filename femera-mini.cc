@@ -25,6 +25,7 @@ int main( int argc, char** argv ){
   int comp_n     = 0;//, numa_n=0;
   int verbosity  = 1;
   int iter_max   =-1;
+  int iter_info_n=-1;
   FLOAT_SOLV rtol= 1e-4;
   int solv_meth  = Solv::SOLV_CG;
   int solv_cond  = Solv::COND_JACO;
@@ -45,7 +46,7 @@ int main( int argc, char** argv ){
   // Parse Command Line =============================================
   //FIXME Consider using C++ for parsing command line options.
   opterr = 0; int c;
-  while ((c = getopt (argc, argv, "v:pP:h:c:m:s:i:r:x:y:z:V:d:")) != -1){
+  while ((c = getopt (argc, argv, "v:pP:h:c:m:s:i:I:r:x:y:z:V:d:")) != -1){
     // x:  -x requires an argument
     switch (c) {
       case 'c':{ comp_n   = atoi(optarg); break;}
@@ -58,6 +59,7 @@ int main( int argc, char** argv ){
 #endif
 #endif
       case 'i':{ iter_max = atoi(optarg); break;}
+      case 'I':{ iter_info_n = atoi(optarg); break;}
       case 'r':{ rtol     = atof(optarg); break;}
       case 's':{ solv_meth= atoi(optarg); break;}
       case 'd':{ solv_cond= atoi(optarg); break;}
@@ -213,7 +215,6 @@ int main( int argc, char** argv ){
 #if VERB_MAX>0
   float read_sec=0.0,init_sec=0.0,loop_sec=0.0;
 #endif
-  int iter_info_n = 1;
 #ifdef _OPENMP
   if( comp_n <1){ comp_n = omp_get_max_threads(); };//omp_get_max_threads();
   if( numa_n==0){ numa_n = comp_n / 2; };//FIXME just a guess...and not yet used
@@ -271,12 +272,12 @@ int main( int argc, char** argv ){
 //if VERB_MAX>1
   {// scope local variables
   //int sugg_max=3000;
-  iter_info_n =   1;// sugg_max = M->udof_n;
+  if(iter_info_n <0 ){// sugg_max = M->udof_n;
   if      ( M->udof_n>int(1e8) ){ iter_info_n =1000;// sugg_max =M->udof_n/1000;
   }else if( M->udof_n>int(1e4) ){ iter_info_n = 100;// sugg_max =M->udof_n/10;
   }else if( M->udof_n>int(1e2) ){ iter_info_n =  10;// sugg_max =M->udof_n/10;
   }else                         { iter_info_n =   1;// sugg_max =M->udof_n; 
-  };
+  }; };
   if(iter_max<0){
     iter_max=M->udof_n/iter_info_n*10;
     if(iter_max>int(M->udof_n)){ iter_max=M->udof_n; }; };
@@ -373,15 +374,14 @@ int main( int argc, char** argv ){
 #endif
   }// end init scope
   // Load GPU data
-  //
-  INT_GPU gpu_ints_idx[ (part_n+part_0) * GPU_INTS_COUNT ];// Np * Cints table
-  INT_GPU gpu_real_idx[ (part_n+part_0) * GPU_REAL_COUNT ];// Np * Creal table
+  IDX_GPU gpu_ints_idx[ (part_n+part_0) * GPU_INTS_COUNT ];// Np * Cints table
+  IDX_GPU gpu_real_idx[ (part_n+part_0) * GPU_REAL_COUNT ];// Np * Creal table
   //
   std::vector<Mesh::part> P;
   P.resize(M->mesh_part.size());
   std::copy(M->mesh_part.begin(), M->mesh_part.end(), P.begin());
   // First, figure out the sizes of the arrays needed
-  INT_GPU gpu_total_ints=0,gpu_total_real=0;
+  IDX_GPU gpu_total_ints=0,gpu_total_real=0;
   {//scope
   int ii=0,ri=0; // int/real accumulators
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
@@ -418,8 +418,9 @@ int main( int argc, char** argv ){
   }//end scope
 #if VERB_MAX > 2
   if(verbosity > 2){
-    printf("GPU INTS: %12i, REAL: %12i Count\n", gpu_total_ints, gpu_total_real);
-    printf("GPU INTS: %12lu, REAL: %12lu, TOTAL: %lu Bytes\n",
+    printf("GPU Ints: %12li, Real: %12li Count\n",
+           long(gpu_total_ints), long(gpu_total_real) );
+    printf("GPU Ints: %12lu, Real: %12lu, Total: %lu Bytes\n",
       gpu_total_ints*sizeof(INT_GPU), gpu_total_real*sizeof(FLOAT_GPU),
       gpu_total_ints*sizeof(INT_GPU)+ gpu_total_real*sizeof(FLOAT_GPU) );
   };
@@ -429,7 +430,7 @@ int main( int argc, char** argv ){
   {  // Now fill these
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
-    int Oi=GPU_INTS_COUNT*part_i;
+    IDX_GPU Oi=GPU_INTS_COUNT*part_i;
     Pints[gpu_ints_idx[Oi + IDX_DMESH]] = E->mesh_d;
     Pints[gpu_ints_idx[Oi + IDX_NNODE]] = E->node_n;
     Pints[gpu_ints_idx[Oi + IDX_NNODE_REMO]] = E->halo_remo_n;
@@ -455,7 +456,7 @@ int main( int argc, char** argv ){
       Preal[gpu_real_idx[Or + IDX_WGTS] +i] = E->gaus_weig[i]; };
     for(int i=0; i<int( E->elip_jacs.size() ); i++){
       Preal[gpu_real_idx[Or + IDX_JACS] +i] = E->elip_jacs[i]; };
-    INT_GPU partsize=E->node_n*3;
+    IDX_GPU partsize=E->node_n*3;
     for(int i=0; i<int( partsize ); i++){
       Preal[gpu_real_idx[Or + IDX_SYSP] +i] = S->sys_p[i]; };
     for(int i=0; i<int( partsize ); i++){
@@ -473,11 +474,12 @@ int main( int argc, char** argv ){
     M->time_secs=0.0;//FIXME conditional?
     // Iterate ------------------------------------------------------
     auto loop_start = std::chrono::high_resolution_clock::now();
+    M->iter_max=iter_max;
+    M->info_mod=iter_info_n;
+    M->part_0=part_0;
+    M->part_n=part_n;
+    M->IterGPU( gpu_ints_idx, gpu_real_idx, Pints, Preal );
     do{ M->Iter(); iter++;
-      //for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
-      //  Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->mesh_part[part_i];
-      //  S->Init(); S->Iter();
-      //}; M->Init();
 #if VERB_MAX>1
       if(verbosity>1){
       if(!((iter) % iter_info_n) ){

@@ -49,7 +49,7 @@ public:
   float phys_flop=0, phys_band=0;
   float solv_flop=0, solv_band=0;
   //
-  int iter_max=0;
+  int iter_max=0, info_mod=0, part_0, part_n;
   FLOAT_SOLV glob_rtol=0.0, glob_rto2=0.0, glob_chk2=0.0, glob_res2=0.0;
   //FLOAT_SOLV solv_rtol=0.0, rtol_pow2=0.0, resi_chk2=0.0, resi_pow2=0.0;//, resb_pow2;
   //
@@ -84,9 +84,13 @@ public:
   int Setup();//FIXME Not yet used?
   virtual int Init()=0;
   virtual int Iter()=0;
+  virtual int IterGPU( const IDX_GPU*,const IDX_GPU*, const INT_GPU*, FLOAT_GPU*)=0;
   int GatherGlobalIDs();
   int ScatterHaloIDs();
   int SyncIDs();
+  //
+  //FIXME Move this into Phys somehow
+  int ElemLinearGPU( const IDX_GPU*,const IDX_GPU*, const INT_GPU*, FLOAT_GPU*);
   //
   //virtual Elem* ReadFile( const char* fname, INT_ORDER pord )=0;
   //
@@ -114,6 +118,7 @@ public:
   };
   int Init() final;
   int Iter() final;
+  int IterGPU( const IDX_GPU*, const IDX_GPU*, const INT_GPU*, FLOAT_GPU* ) final;
 protected:
 private:
 };
@@ -131,6 +136,7 @@ public:
   };
   int Init() final;
   int Iter() final;
+  int IterGPU( const IDX_GPU*, const IDX_GPU*, const INT_GPU*, FLOAT_GPU* ) final;
 protected:
 private:
 };

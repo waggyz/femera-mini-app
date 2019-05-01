@@ -42,8 +42,20 @@
 // #define HAS_TEST  //Set this as a compiler option: -DHAS_TEST
 //
 #define INT_GPU int
+#define IDX_GPU int
+//FIXME Can overflow
 #define FLOAT_GPU double
-// Integers
+#if 0
+// Model Integers
+#define IDX_IMOD       0
+#define IDX_IMAX       1
+#define IDX_PART_0     2
+#define IDX_PART_N     3
+#define IDX_VERB       4
+#endif
+// Model Reals
+#define IDX_TOL2       0
+// Partition Integers
 #define IDX_DMESH      0
 #define IDX_NNODE      1
 #define IDX_NNODE_REMO 2
@@ -52,13 +64,13 @@
 #define IDX_NELEM_HALO 5
 #define IDX_NINTP      6
 #define IDX_ECONN_N    7
-// integer arrays
+// Partition Integer Arrays
 #define IDX_ECONN      8
 #define IDX_NODE_HAID  9
 #define IDX_NODE_GLID  10
 #define GPU_INTS_COUNT 11
 // Total number of integer structures indexed
-// Real Arrays
+// Partition Real Arrays
 #define IDX_ROTC  0
 #define IDX_MATC  1
 #define IDX_SHPG  2

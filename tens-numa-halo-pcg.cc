@@ -16,6 +16,8 @@
 
 int PCG::BC (Mesh* ){return 0;};
 int PCG::RHS(Mesh* ){return 0;};
+//int PCG::IterGPU( const FLOAT_GPU*,const FLOAT_GPU*,
+//                  const FLOAT_GPU*, FLOAT_GPU* ){ return(0); };
 //
 int PCG::RHS(Elem* E, Phys* Y ){
   uint d=uint(Y->ndof_n);
@@ -403,3 +405,9 @@ int HaloPCG::Iter(){
   this->glob_chk2 = glob_r2a;
   return 0;
 };
+int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
+                      const INT_GPU* Pints, FLOAT_GPU* Preal){
+  //
+  //
+  //
+  return(0); };

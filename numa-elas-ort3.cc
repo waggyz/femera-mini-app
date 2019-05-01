@@ -441,3 +441,9 @@ int ElastOrtho3D::ElemStrain( Elem* E,FLOAT_SOLV* sys_f ){
   };//end elem loop
   return 0;
   };
+int Mesh::ElemLinearGPU( const IDX_GPU* gpu_ints_idx,const IDX_GPU* gpu_real_idx,
+                         const INT_GPU* Pints, FLOAT_GPU* Preal){
+    
+    
+  return 0;
+  };
