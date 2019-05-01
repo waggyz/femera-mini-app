@@ -91,8 +91,7 @@ public:
   //
   //FIXME Move this into Phys somehow
   int ElemLinearGPU( const IDX_GPU*,const IDX_GPU*, const INT_GPU*, FLOAT_GPU*,
-    INT_GPU
-  );
+    INT_GPU,INT_GPU,INT_GPU );
   //
   //virtual Elem* ReadFile( const char* fname, INT_ORDER pord )=0;
   //
