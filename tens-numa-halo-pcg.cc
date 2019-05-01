@@ -420,6 +420,8 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
   FLOAT_GPU hava[ this->halo_val.size() ];
   //
   const INT_GPU part_o = part_n+part_0;
+  INT_GPU iter=0;
+  do{ iter++;
 //#pragma omp for schedule(static)
   for(INT_GPU part_i=part_0; part_i<part_o; part_i++){
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
@@ -529,8 +531,9 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
   //
 #if 0
   this->glob_res2 = gpu_r2a;
-  this->glob_chk2 = gpu_r2a;
 #endif
+  gpu_chk2 = gpu_r2a;
+  }while( (iter < iter_max) & (gpu_chk2 > glob_rto2) );
   //
   return(0); };
   
