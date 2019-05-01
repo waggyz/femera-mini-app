@@ -441,12 +441,184 @@ int ElastOrtho3D::ElemStrain( Elem* E,FLOAT_SOLV* sys_f ){
   };//end elem loop
   return 0;
   };
+
+
 int Mesh::ElemLinearGPU( const IDX_GPU* gpu_ints_idx,const IDX_GPU* gpu_real_idx,
-                         const INT_GPU* Pints, FLOAT_GPU* Preal,
-                         INT_GPU part_i ){
-  //
+                         const INT_GPU* Pints, FLOAT_GPU* Preal, INT_GPU part_i ){
+
+  //FIXME Cleanup local variables.
+  const int Nd = 3;// Node (mesh) Dimension FIXME can include temperature?
+  const int Nf = 3;// this->ndof_n DOF/node
+  const int Nj = Nd*Nf+1;//FIXME wrong?
+
   INT_GPU Nc = Pints[gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_ECONN_N]];
-  //
-  //
+  //const int Ne = Nf*Nc;
+  
+  INT_GPU elem_n = Pints[gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NELEM]];
+  //const INT_MESH elem_n =E->elem_n;
+
+  INT_GPU intp_n = Pints[gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NINTP]];
+  //const int intp_n = int(E->gaus_n);
+
+  INT_MESH e0, ee;
+  if(E->do_halo==true){
+    e0 = 0;
+    ee = Pints[gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NELEM_HALO]];
+    //ee=E->halo_elem_n;
+  }else{
+    e0 = Pints[gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NELEM_HALO]];
+    ee = elem_n;
+    //e0=E->halo_elem_n;
+  }
+
+#if VERB_MAX>11
+  printf("Dim: %i, Elems:%i, IntPts:%i, Nodes/elem:%i\n", (int)mesh_d,(int)elem_n,(int)intp_n,(int)Nc);
+#endif
+  FLOAT_MESH jac[Nj];//, det;
+  FLOAT_PHYS u[Ne], f[Ne], GS[Ne], uR[Ne];
+  FLOAT_PHYS G[Ne], H[Nd*Nf], S[Nd*Nf];//FIXME wrong sizes?
+
+  FLOAT_PHYS intp_shpg[intp_n*Ne];
+  //FLOAT_PHYS Preal[gpu_reals_idx[GPU_REAL_COUNT*part_i + IDX_SHPG]]
+  std::copy( Preal[gpu_reals_idx[GPU_REAL_COUNT*part_i + IDX_SHPG]], Preal[gpu_reals_idx[GPU_REAL_COUNT*part_i + IDX_SHPG+intp_n*Ne]], intp_shpg );
+  //std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
+
+  FLOAT_PHYS wgt[intp_n];
+  std::copy( Preal[gpu_reals_idx[GPU_REAL_COUNT*part_i + IDX_WGTS]], Preal[gpu_reals_idx[GPU_REAL_COUNT*part_i + IDX_WGTS+intp_n]], wgt );
+  //std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
+
+  FLOAT_PHYS C[9];
+  //FLOAT_PHYS C[this->mtrl_matc.size()];
+  std::copy( Preal[gpu_reals_idx[GPU_REAL_COUNT*part_i + IDX_MATC]], Preal[gpu_reals_idx[GPU_REAL_COUNT*part_i + IDX_MATC+9]], C );
+
+  FLOAT_PHYS R[9];
+  std::copy( Preal[gpu_reals_idx[GPU_REAL_COUNT*part_i + IDX_ROTC]], Preal[gpu_reals_idx[GPU_REAL_COUNT*part_i + IDX_ROTC+9]], R );
+  //FLOAT_PHYS R[9] = {
+  //  mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
+  //  mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
+  //  mtrl_rotc[6],mtrl_rotc[7],mtrl_rotc[8]};
+
+  FLOAT_PHYS Rs[9];
+  for(int i=0; i<9;i++){
+    Rs[i] = R[i];
+  }
+  Rs[1]=R[3]; Rs[2]=R[6]; Rs[5]=R[7];
+  Rs[3]=R[1]; Rs[6]=R[2]; Rs[7]=R[5];
+
+#if VERB_MAX>10
+  printf( "Material [%u]:", (uint)mtrl_matc.size() );
+  for(uint j=0;j<mtrl_matc.size();j++){
+    //if(j%mesh_d==0){printf("\n");}
+    printf("%+9.2e ",C[j]);
+  }; printf("\n");
+#endif
+  const   INT_MESH* RESTRICT Econn = Pints[gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_ECONN]];
+  //const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
+
+  const FLOAT_MESH* RESTRICT Ejacs = Preal[gpu_reals_idx[GPU_REAL_COUNT*part_i + IDX_JACS]]
+  //const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
+
+  const FLOAT_SOLV* RESTRICT sysu  = Preal[gpu_reals_idx[GPU_REAL_COUNT*part_i + IDX_SYSU]]
+  //const FLOAT_SOLV* RESTRICT sysu  = &sys_u[0];
+
+        FLOAT_SOLV* RESTRICT sysf  = Preal[gpu_reals_idx[GPU_REAL_COUNT*part_i + IDX_SYSF]]
+        //FLOAT_SOLV* RESTRICT sysf  = &sys_f[0];
+
+  if(e0<ee){
+    for (int i=0; i<Nc; i++){
+      for( int j=0; j<3; j++){ u[Nf*i+j] = sysu[Econn[Nc*e0+i]*Nf+j]; };
+    };
+    for( int j=0; j<Nj; j++){ jac[j] = Ejacs[Nj*e0+j]; };
+  }
+
+  for(INT_MESH ie=e0;ie<ee;ie++){
+    for(int i=0;i<Ne;i++){ GS[i]=0.0; };
+    // Transpose R
+    //std::swap(R[1],R[3]); std::swap(R[2],R[6]); std::swap(R[5],R[7]);
+
+    for(int i=0; i<Nc; i++){// Rotate vectors in u
+      for(int k=0; k<3; k++){ uR[(3* i+k) ]=0.0;
+        for(int j=0; j<3; j++){
+          uR[(3* i+k) ] += u[(3* i+j) ] * Rs[(3* j+k) ];
+    };};};//-------------------------------------------- 2 *3*3*Nc = 18*Nc FLOP
+
+    for (int i=0; i<Nc; i++){
+      for(int j=0; j<3; j++){
+        f[Nf*i+j]=sysf[Econn[Nc*ie+i]*3+j];
+      };
+    };
+
+    if((ie+1)<ee){// Fetch stuff for the next iteration
+      for (int i=0; i<Nc; i++){
+        for(int j=0; j<3; j++){
+          u[Nf*i+j]=sysu[Econn[Nc*(ie+1)+i]*Nf+j];
+        };
+      };
+    }
+
+    for(int ip=0; ip<intp_n; ip++){
+      //G = MatMul3x3xN( jac,shg );
+      for(int i=0; i< 9 ; i++){ H[i]=0.0; };
+      for(int i=0; i<Nc; i++){
+        for(int k=0; k<3 ; k++){ G[3* i+k ]=0.0;
+          for(int j=0; j<3 ; j++){
+            G[3* i+k ] += intp_shpg[ip*Ne+ 3* i+j ] * jac[3* j+k ];
+          };
+          for(int j=0; j<3 ; j++){
+            H[(3* k+j) ] += G[(3* i+k) ] * uR[Nf* i+j ];
+          };
+        };
+      };//------------------------------------------- 4 *3*3*Nc = 36*Nc*Ng FLOP
+
+#if VERB_MAX>10
+      printf( "Small Strains (Elem: %i):", ie );
+      for(int j=0;j<H.size();j++){
+        if(j%mesh_d==0){printf("\n");}
+        printf("%+9.2e ",H[j]);
+      }; printf("\n");
+#endif
+
+      const FLOAT_PHYS dw = jac[9] * wgt[ip];
+      if(ip==(intp_n-1)){
+        if((ie+1)<ee){// Fetch stuff for the next iteration
+          for(int i=0; i<Nj; i++){ jac[i] = Ejacs[Nj*(ie+1)+i]; };
+        }
+      }
+
+      // Material Response
+      S[0]=(C[0]* H[0] + C[3]* H[4] + C[5]* H[8])*dw;//Sxx
+      S[4]=(C[3]* H[0] + C[1]* H[4] + C[4]* H[8])*dw;//Syy
+      S[8]=(C[5]* H[0] + C[4]* H[4] + C[2]* H[8])*dw;//Szz
+      //
+      S[1]=( H[1] + H[3] )*C[6]*dw;// S[3]= S[1];//Sxy Syx
+      S[5]=( H[5] + H[7] )*C[7]*dw;// S[7]= S[5];//Syz Szy
+      S[2]=( H[2] + H[6] )*C[8]*dw;// S[6]= S[2];//Sxz Szx
+      S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
+      //------------------------------------------------------ 18+9= 27*Ng FLOP
+#if VERB_MAX>10
+      printf( "Stress:");
+      for(uint j=0;j<9;j++){
+        if(j%3==0){printf("\n");}
+        printf("%+9.2e ",S[j]);
+      }; printf("\n");
+#endif
+      for(int i=0; i<Nc; i++){
+        for(int k=0; k<3; k++){
+          for(int j=0; j<3; j++){
+            GS[(3* i+k) ] += G[(3* i+j) ] * S[(3* j+k) ];
+      }}}//--------------------------------------- 2 *3*3*Nc = 18*Nc*Ng FLOP
+    }//end intp loop
+
+    for(int i=0; i<Nc; i++){// rotate before summing in f
+      for(int k=0; k<3; k++){
+        for(int j=0; j<3; j++){
+          f[(3* i+k) ] += GS[(3* i+j) ] * R[(3* j+k) ];
+    }}};//-------------------------------------------- 2 *3*3*Nc = 18*Nc FLOP
+    for (int i=0; i<Nc; i++){
+      for(int j=0;j<3;j++){
+        sysf[Econn[Nc*ie+i]*3+j] = f[Nf*i+j];
+      }
+    }
+  };//end elem loop
   return 0;
-  };
+};
