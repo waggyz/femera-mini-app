@@ -372,6 +372,103 @@ int main( int argc, char** argv ){
     };
 #endif
   }// end init scope
+  // Load GPU data
+  //
+  INT_GPU gpu_ints_idx[ (part_n+part_0) * GPU_INTS_COUNT ];// Np * Cints table
+  INT_GPU gpu_real_idx[ (part_n+part_0) * GPU_REAL_COUNT ];// Np * Creal table
+  //
+  std::vector<Mesh::part> P;
+  P.resize(M->mesh_part.size());
+  std::copy(M->mesh_part.begin(), M->mesh_part.end(), P.begin());
+  // First, figure out the sizes of the arrays needed
+  INT_GPU gpu_total_ints=0,gpu_total_real=0;
+  {//scope
+  int ii=0,ri=0; // int/real accumulators
+  for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+    gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_DMESH      ] = ii; ii+=1;
+    gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NNODE      ] = ii; ii+=1;
+    gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NNODE_REMO ] = ii; ii+=1;
+    gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NNODE_LOCA ] = ii; ii+=1;
+    gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NELEM      ] = ii; ii+=1;
+    gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NELEM_HALO ] = ii; ii+=1;
+    gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NINTP      ] = ii; ii+=1;
+    gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_ECONN_N    ] = ii; ii+=1;
+    //
+    gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_ECONN      ] = ii; ii+= E->elem_n*E->elem_conn_n;
+    gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NODE_HAID  ] = ii; ii+= E->node_haid.size();
+    gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NODE_GLID  ] = ii; ii+= E->node_glid.size();
+    //
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_MATC ] = ri; ri+=9;
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_ROTC ] = ri; ri+=9;
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SHPG ] = ri; ri+=E->elem_conn_n*E->gaus_n*3;
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_WGTS ] = ri; ri+=E->gaus_n;
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_JACS ] = ri; ri+=E->mesh_d*E->mesh_d+1;
+    //
+    INT_GPU partsize=E->node_n*3;
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSP ] = ri; ri+=partsize;
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSF ] = ri; ri+=partsize;
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSR ] = ri; ri+=partsize;
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSU ] = ri; ri+=partsize;
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSD ] = ri; ri+=partsize;
+    //
+  };
+    gpu_total_ints = ii;
+    gpu_total_real = ri;
+  }//end scope
+#if VERB_MAX > 2
+  if(verbosity > 2){
+    printf("GPU INTS: %12i, REAL: %12i Count\n", gpu_total_ints, gpu_total_real);
+    printf("GPU INTS: %12lu, REAL: %12lu, TOTAL: %lu Bytes\n",
+      gpu_total_ints*sizeof(INT_GPU), gpu_total_real*sizeof(FLOAT_GPU),
+      gpu_total_ints*sizeof(INT_GPU)+ gpu_total_real*sizeof(FLOAT_GPU) );
+  };
+#endif
+  INT_GPU   Pints[gpu_total_ints];
+  FLOAT_GPU Preal[gpu_total_real];
+  {  // Now fill these
+  for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+    int Oi=GPU_INTS_COUNT*part_i;
+    Pints[gpu_ints_idx[Oi + IDX_DMESH]] = E->mesh_d;
+    Pints[gpu_ints_idx[Oi + IDX_NNODE]] = E->node_n;
+    Pints[gpu_ints_idx[Oi + IDX_NNODE_REMO]] = E->halo_remo_n;
+    Pints[gpu_ints_idx[Oi + IDX_NNODE_LOCA]] = E->halo_loca_n;
+    Pints[gpu_ints_idx[Oi + IDX_NELEM]] = E->elem_n;
+    Pints[gpu_ints_idx[Oi + IDX_NELEM_HALO]] = E->halo_elem_n;
+    Pints[gpu_ints_idx[Oi + IDX_NINTP]] = E->gaus_n;
+    Pints[gpu_ints_idx[Oi + IDX_ECONN_N]] = E->elem_conn_n;
+    for(int i=0; i<int( E->elem_n*E->elem_conn_n ); i++){
+      Pints[gpu_ints_idx[Oi + IDX_ECONN] +i] = E->elem_conn[i]; };
+    for(int i=0; i<int(E->node_haid.size()); i++){
+      Pints[gpu_ints_idx[Oi + IDX_NODE_HAID] +i] = E->node_haid[i]; };
+    for(int i=0; i<int(E->node_glid.size()); i++){
+      Pints[gpu_ints_idx[Oi + IDX_NODE_GLID] +i] = E->node_glid[i]; };
+    int Or=GPU_REAL_COUNT*part_i;
+    for(int i=0; i<int( Y->mtrl_rotc.size() ); i++){
+      Preal[gpu_real_idx[Or + IDX_ROTC] +i] = Y->mtrl_rotc[i]; };
+    for(int i=0; i<int( Y->mtrl_matc.size() ); i++){
+      Preal[gpu_real_idx[Or + IDX_MATC] +i] = Y->mtrl_matc[i]; };
+    for(int i=0; i<int( E->intp_shpg.size() ); i++){
+      Preal[gpu_real_idx[Or + IDX_SHPG] +i] = E->intp_shpg[i]; };
+    for(int i=0; i<int( E->gaus_weig.size() ); i++){
+      Preal[gpu_real_idx[Or + IDX_WGTS] +i] = E->gaus_weig[i]; };
+    for(int i=0; i<int( E->elip_jacs.size() ); i++){
+      Preal[gpu_real_idx[Or + IDX_JACS] +i] = E->elip_jacs[i]; };
+    INT_GPU partsize=E->node_n*3;
+    for(int i=0; i<int( partsize ); i++){
+      Preal[gpu_real_idx[Or + IDX_SYSP] +i] = S->sys_p[i]; };
+    for(int i=0; i<int( partsize ); i++){
+      Preal[gpu_real_idx[Or + IDX_SYSF] +i] = S->sys_f[i]; };
+    for(int i=0; i<int( partsize ); i++){
+      Preal[gpu_real_idx[Or + IDX_SYSR] +i] = S->sys_r[i]; };
+    for(int i=0; i<int( partsize ); i++){
+      Preal[gpu_real_idx[Or + IDX_SYSU] +i] = S->sys_u[i]; };
+    for(int i=0; i<int( partsize ); i++){
+      Preal[gpu_real_idx[Or + IDX_SYSD] +i] = S->sys_d[i]; };
+  };
+  }// end local var scope
+  //end loading GPU data
   {// iter scope
     M->time_secs=0.0;//FIXME conditional?
     // Iterate ------------------------------------------------------

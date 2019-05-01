@@ -40,6 +40,38 @@
 #endif
 // #define HAS_PATCH //Set this as a compiler option: -DHAS_PATCH
 // #define HAS_TEST  //Set this as a compiler option: -DHAS_TEST
+//
+#define INT_GPU int
+#define FLOAT_GPU double
+// Integers
+#define IDX_DMESH      0
+#define IDX_NNODE      1
+#define IDX_NNODE_REMO 2
+#define IDX_NNODE_LOCA 3
+#define IDX_NELEM      4
+#define IDX_NELEM_HALO 5
+#define IDX_NINTP      6
+#define IDX_ECONN_N    7
+// integer arrays
+#define IDX_ECONN      8
+#define IDX_NODE_HAID  9
+#define IDX_NODE_GLID  10
+#define GPU_INTS_COUNT 11
+// Total number of integer structures indexed
+// Real Arrays
+#define IDX_ROTC  0
+#define IDX_MATC  1
+#define IDX_SHPG  2
+#define IDX_WGTS  3
+#define IDX_JACS  4
+#define IDX_SYSP  5
+#define IDX_SYSF  6
+#define IDX_SYSR  7
+#define IDX_SYSU  8
+#define IDX_SYSD  9
+#define GPU_REAL_COUNT 10
+// Total number of real structures indexed
+//
 //FIXME Remove unneeded headers:
 #include <valarray>
 #include <deque>
