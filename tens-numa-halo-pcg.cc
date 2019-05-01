@@ -473,13 +473,12 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
     for(INT_MESH i=0; i<hnn; i++){
       std::memcpy(
         & sysf[3* i],
-        & this->hava[d* E->haid[i]],
+        & hava[d* haid[i]],
         d*sizeof(FLOAT_PHYS) );
     };
     const INT_GPU halo_elem_n = Pints[gpu_ints_idx[Oi + IDX_NELEM_HALO ]];
     const INT_GPU elem_n = Pints[gpu_ints_idx[Oi + IDX_NELEM ]];
-    const INT_GPU d = Pints[gpu_ints_idx[Oi+ IDX_NELEM ]];
-    Y->ElemLinearGPU( gpu_ints_idx,gpu_real_idx, Pints,Preal,
+    this->ElemLinearGPU( gpu_ints_idx,gpu_real_idx, Pints,Preal,
                       part_i, halo_elem_n,elem_n );
 #pragma omp simd reduction(+:glob_sum1)
     for(INT_MESH i=hl0; i<sysn; i++){
