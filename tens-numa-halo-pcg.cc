@@ -277,6 +277,7 @@ int HaloPCG::Iter(){
 #endif
   FLOAT_SOLV glob_sum1=0.0, glob_sum2=0.0;
   FLOAT_SOLV glob_r2a = this->glob_res2;
+
 #pragma omp parallel num_threads(comp_n)
 {// iter parallel region
   int tid = omp_get_thread_num();
@@ -287,12 +288,9 @@ int HaloPCG::Iter(){
   const int part_o = part_n+part_0;
   Elem* E; Phys* Y; Solv* S;// Seems to be faster to reuse these.
   // Timing variables (used when verbosity > 1)
-  long int my_phys_count=0, my_scat_count=0, my_solv_count=0,
-    my_gat0_count=0,my_gat1_count=0;
-  std::chrono::high_resolution_clock::time_point iter_start,
-    solv_start, inte_start, iter_done;
-  std::chrono::high_resolution_clock::time_point
-    gath_start, scat_start, phys_start;
+  long int my_phys_count=0, my_scat_count=0, my_solv_count=0, my_gat0_count=0,my_gat1_count=0;
+  std::chrono::high_resolution_clock::time_point iter_start, solv_start, inte_start, iter_done;
+  std::chrono::high_resolution_clock::time_point gath_start, scat_start, phys_start;
   time_start( iter_start );
 
 #pragma omp for schedule(static)
@@ -364,7 +362,7 @@ int HaloPCG::Iter(){
   for(int part_i=part_0; part_i<part_o; part_i++){// ? FLOP/DOF
     std::tie(E,Y,S)=P[part_i];
     const int sysn=S->udof_n;
-#if 0
+#if 1
 #pragma omp simd
     for(int i=0; i<sysn; i++){
       S->sys_r[i] -= alpha * S->sys_f[i];
@@ -378,7 +376,7 @@ int HaloPCG::Iter(){
       for(int j=0; j<3; j++){
         S->sys_r[3*i+j] -= alpha * S->sys_f[3*i+j];
         //sf+=S->sys_f[3*i+j];
-      };};
+      }};
     //printf("HaloPCG::Iter: tid=%i part_i=%i sys_f=%.15f\n",tid,part_i,sf);
 #endif
   };
