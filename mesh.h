@@ -49,9 +49,11 @@ public:
   float phys_flop=0, phys_band=0;
   float solv_flop=0, solv_band=0;
   //
-  int iter_max=0, info_mod=0, part_0, part_n;
+  int iter_end=0, iter_max=0, info_mod=0, part_0, part_n;
   FLOAT_SOLV glob_rtol=0.0, glob_rto2=0.0, glob_chk2=0.0, glob_res2=0.0;
   //FLOAT_SOLV solv_rtol=0.0, rtol_pow2=0.0, resi_chk2=0.0, resi_pow2=0.0;//, resb_pow2;
+  //
+  FLOAT_TIME time_iter=0.0;
   //
   //FIXED Change these to < node_id, dof_id, value >  and < node_id, dof_id >:
   //FIXME Move these into Elem?
@@ -66,7 +68,7 @@ public:
   // Used by Sync/Gather/ScatterHaloCoor
   //
   std::unordered_map<INT_MESH,INT_MESH> halo_map;
-  std::valarray<FLOAT_SOLV> halo_val={};//(ndof_n*halo_loca_tot);
+  std::valarray<FLOAT_SOLV> halo_val;//={};//(ndof_n*halo_loca_tot);
   std::valarray<float> time_secs={};
   //
   std::string base_name = "";// base of partitioned mesh filename (without _i)

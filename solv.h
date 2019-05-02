@@ -63,7 +63,7 @@ protected:
     sys_u = align_resize( dat_u, upad_n, valign_byte );
     sys_r = align_resize( dat_r, upad_n, valign_byte );
     sys_d = align_resize( dat_d, upad_n, valign_byte );
-#if VERB_MAX > 3
+#if VERB_MAX > 13
     std::cout << &sys_f[0] <<'\n';
 #endif
   };

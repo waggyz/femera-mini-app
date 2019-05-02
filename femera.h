@@ -23,6 +23,8 @@
 // Physics precision
 #define FLOAT_SOLV double
 // Solver precision
+#define FLOAT_TIME float
+// Timing precision
 //FIXME I don't think the following are needed...
 #define VOIGT_FRUP 0,4,8, 5,2,1// Extract from upper-triangular part of
 //symmetric 3x3 stress or strain tensor
@@ -67,8 +69,8 @@
 // Partition Integer Arrays
 #define IDX_ECONN      8
 #define IDX_NODE_HAID  9
-#define IDX_NODE_GLID  10
-#define GPU_INTS_COUNT 11
+//#define IDX_NODE_GLID  10
+#define GPU_INTS_COUNT 10
 // Total number of integer structures indexed
 // Partition Real Arrays
 #define IDX_ROTC  0
@@ -79,8 +81,8 @@
 #define IDX_SYSP  5
 #define IDX_SYSF  6
 #define IDX_SYSR  7
-#define IDX_SYSU  8
-#define IDX_SYSD  9
+#define IDX_SYSD  8
+#define IDX_SYSU  9
 #define GPU_REAL_COUNT 10
 // Total number of real structures indexed
 //

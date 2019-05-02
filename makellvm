@@ -26,7 +26,7 @@ endif
 ifdef INTEL_PYTHONHOME
 CXX=icc
 CPPFLAGS=-restrict -std=c++11 -Wall -Wextra -O2 -ansi-alias\
- -ffast-math -no-fast-transcendentals\
+ -ffast-math -no-fast-transcendentals -DHAS_TEST\
  -no-inline-max-size -no-inline-max-total-size -xSKYLAKE-AVX512 -g
 SERFLAGS=-fno-alias -diag-disable 3180
 NCPU=40
@@ -34,7 +34,7 @@ NUMA=6
 endif
 
 CXX=clang++
-CPPFLAGS=-DVERB_MAX=6 -O3 -g -std=gnu++11 -fopenmp
+CPPFLAGS=-DVERB_MAX=4 -O3 -g -std=gnu++11 -fopenmp -DHAS_TEST
 NUMA=8
 #CPPFLAGS=-DVERB_MAX=6 -O3 -g -q64 -qrestrict -std=c++11 -qsmp=omp -qoffload
 #CPPFLAGS=-O0 -g -std=c++11  
@@ -50,7 +50,7 @@ OMPFLAGS=
 
 FEMERA_MINI_CC = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc \
  tens-numa-halo-pcg.cc halo-pcr-dummy.cc \
- numa-elas-iso3.cc numa-elas-ort3.cc
+ numa-elas-iso3.cc numa-elas-ort3.cc test.cc
 
 SRCS = $(FEMERA_MINI_CC) femera-mini.cc
 OBJS = $(SRCS:.cc=.o)
@@ -75,7 +75,7 @@ mini-ser:
 
 mini-omp:
 	mv -f femera-$(CPUMODEL) femera.old 2>/dev/null ; \
-	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
+	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DHAS_TEST \
 	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femera-$(CPUMODEL) $(CPPLOG);\
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	command /usr/bin/time -v ./femera-$(CPUMODEL) -v2 -c$(NCPU) -p cube/unst19p1n16 ;

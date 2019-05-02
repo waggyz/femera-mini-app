@@ -396,44 +396,39 @@ int main( int argc, char** argv ){
     gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_ECONN_N    ] = ii; ii+=1;
     //
     gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_ECONN      ] = ii; ii+= E->elem_n*E->elem_conn_n;
-    gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NODE_HAID  ] = ii; ii+= E->node_haid.size();
-    gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NODE_GLID  ] = ii; ii+= E->node_glid.size();
+    gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NODE_HAID  ] = ii; ii+= INT_GPU(E->node_haid.size());
+    //gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NODE_GLID  ] = ii; ii+= INT_GPU(E->node_glid.size());
     //
     gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_ROTC ] = ri; ri+=9;
     gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_MATC ] = ri; ri+=9;
-    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SHPG ] = ri; ri+=E->intp_shpg.size();
-    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_WGTS ] = ri; ri+=E->gaus_weig.size();
-    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_JACS ] = ri; ri+=E->elip_jacs.size();
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SHPG ] = ri; ri+=INT_GPU(E->intp_shpg.size());
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_WGTS ] = ri; ri+=INT_GPU(E->gaus_weig.size());
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_JACS ] = ri; ri+=INT_GPU(E->elip_jacs.size());
     //
     INT_GPU partsize=E->node_n*3;
     gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSP ] = ri; ri+=partsize;
     gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSF ] = ri; ri+=partsize;
     gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSR ] = ri; ri+=partsize;
-    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSU ] = ri; ri+=partsize;
     gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSD ] = ri; ri+=partsize;
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSU ] = ri; ri+=partsize;
     //
   };
     gpu_total_ints = ii;
     gpu_total_real = ri;
   }//end scope
-#if VERB_MAX > 2
-  if(verbosity > 2){
-    printf("GPU Ints: %12li, Real: %12li Count\n",
-           long(gpu_total_ints), long(gpu_total_real) );
-    printf("GPU Ints: %12lu, Real: %12lu, Total: %lu Bytes\n",
-      gpu_total_ints*sizeof(INT_GPU), gpu_total_real*sizeof(FLOAT_GPU),
-      gpu_total_ints*sizeof(INT_GPU)+ gpu_total_real*sizeof(FLOAT_GPU) );
-  };
-#endif
   INT_GPU   Pints[gpu_total_ints];
   FLOAT_GPU Preal[gpu_total_real];
   {  // Now fill these
+#pragma omp parallel num_threads(comp_n)
+{
+#pragma omp for schedule(static)
   for(int part_i=0; part_i<part_0; part_i++){
     IDX_GPU Oi=GPU_INTS_COUNT*part_i;
     IDX_GPU Or=GPU_REAL_COUNT*part_i;
     for(int j=0; j<GPU_INTS_COUNT; j++){ gpu_ints_idx[Oi+j]=0;};
     for(int j=0; j<GPU_REAL_COUNT; j++){ gpu_real_idx[Or+j]=0;};
   };
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     IDX_GPU Oi=GPU_INTS_COUNT*part_i;
@@ -449,8 +444,8 @@ int main( int argc, char** argv ){
       Pints[gpu_ints_idx[Oi + IDX_ECONN] +i] = E->elem_conn[i]; };
     for(int i=0; i<int(E->node_haid.size()); i++){
       Pints[gpu_ints_idx[Oi + IDX_NODE_HAID] +i] = E->node_haid[i]; };
-    for(int i=0; i<int(E->node_glid.size()); i++){
-      Pints[gpu_ints_idx[Oi + IDX_NODE_GLID] +i] = E->node_glid[i]; };
+    //for(int i=0; i<int(E->node_glid.size()); i++){
+    //  Pints[gpu_ints_idx[Oi + IDX_NODE_GLID] +i] = E->node_glid[i]; };
     int Or=GPU_REAL_COUNT*part_i;
     for(int i=0; i<int( Y->mtrl_rotc.size() ); i++){
       Preal[gpu_real_idx[Or + IDX_ROTC] +i] = Y->mtrl_rotc[i]; };
@@ -470,10 +465,11 @@ int main( int argc, char** argv ){
     for(int i=0; i<int( partsize ); i++){
       Preal[gpu_real_idx[Or + IDX_SYSR] +i] = S->sys_r[i]; };
     for(int i=0; i<int( partsize ); i++){
-      Preal[gpu_real_idx[Or + IDX_SYSU] +i] = S->sys_u[i]; };
-    for(int i=0; i<int( partsize ); i++){
       Preal[gpu_real_idx[Or + IDX_SYSD] +i] = S->sys_d[i]; };
+    for(int i=0; i<int( partsize ); i++){
+      Preal[gpu_real_idx[Or + IDX_SYSU] +i] = S->sys_u[i]; };
   };
+}// end parallel region
 #if 0
   for(int i=0; i<(part_n+part_0) * GPU_INTS_COUNT; i++){
     if(!(i%GPU_INTS_COUNT)){ printf("\n"); };
@@ -483,15 +479,46 @@ int main( int argc, char** argv ){
   }// end local var scope
   //end loading GPU data
   {// iter scope
-    M->time_secs=0.0;//FIXME conditional?
-    // Iterate ------------------------------------------------------
-    auto loop_start = std::chrono::high_resolution_clock::now();
+#if 1
+// Iterate the big array storage version
+    auto gpu_start = std::chrono::high_resolution_clock::now();
     M->iter_max=iter_max;
     M->info_mod=iter_info_n;
     M->part_0=part_0;
     M->part_n=part_n;
     M->IterGPU( gpu_ints_idx, gpu_real_idx, Pints, Preal );
-#if 0
+    auto gpu_done = std::chrono::high_resolution_clock::now();
+    auto gpu_time = std::chrono::duration_cast<std::chrono::nanoseconds>
+      (gpu_done - gpu_start);
+    M->time_iter=float(gpu_time.count())*ns;
+    iter=M->iter_end; loop_sec=M->time_iter;
+#if VERB_MAX > 1
+    if(verbosity > 1){
+      printf("%9i ||R||%9.2e /%9.2e tol in %f s\nDone.\n", iter,
+        std::sqrt(M->glob_chk2), std::sqrt(M->glob_rto2),loop_sec );
+      printf("Performance:%8.2f     MDOF/s\n",
+        float(M->iter_end) * float(M->udof_n) / M->time_iter /Meg );
+      printf("      Using:%12li ints %12li real\n",
+            long(gpu_total_ints), long(gpu_total_real) );
+      printf("            %12lu bytes%12lu bytes total: %lu\n",
+        gpu_total_ints*sizeof(INT_GPU), gpu_total_real*sizeof(FLOAT_GPU),
+        gpu_total_ints*sizeof(INT_GPU)+ gpu_total_real*sizeof(FLOAT_GPU) );
+    };
+#endif
+    // Put the GPU array solution back into C++ E->sys_u arrays.
+#pragma omp parallel for schedule(static) num_threads(comp_n)
+    for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
+      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+      int Or=GPU_REAL_COUNT*part_i;
+      IDX_GPU partsize=E->node_n*3;
+      for(int i=0; i<int( partsize ); i++){
+        S->sys_u[i] = Preal[gpu_real_idx[Or + IDX_SYSU] +i]; };
+    };
+#else
+// Iterate the C++ object storage version
+    M->time_secs=0.0;//FIXME conditional?
+    // Iterate ------------------------------------------------------
+    auto loop_start = std::chrono::high_resolution_clock::now();
     do{ M->Iter(); iter++;
 #if VERB_MAX>1
       if(verbosity>1){
@@ -578,6 +605,7 @@ int main( int argc, char** argv ){
 #endif
     };
 #endif
+// end C++ object version solve
   }// end iter scope
 #ifdef HAS_TEST
     // Check solution ===============================================
@@ -593,7 +621,7 @@ int main( int argc, char** argv ){
     FLOAT_PHYS scax=1.0,minx= 99e9,maxx=-99e9;
     FLOAT_PHYS scay=1.0,miny= 99e9,maxy=-99e9;
     FLOAT_PHYS scaz=1.0,minz= 99e9,maxz=-99e9;
-#pragma omp parallel
+#pragma omp parallel num_threads(comp_n)
 {  std::vector<Mesh::part> P;
    P.resize(M->mesh_part.size());
    std::copy(M->mesh_part.begin(), M->mesh_part.end(), P.begin());
@@ -659,7 +687,7 @@ int main( int argc, char** argv ){
       for(int i= 4; i< 8; i++){ errtot[i]+= errors[i]; };
       for(int i= 8; i<12; i++){ errtot[i] = std::max(errtot[i],errors[i]); };
       errtot[12]+=errors[12];
-#if VERB_MAX>3
+#if VERB_MAX>13
       if(S->udof_n<300){
         //printf("Node Coordinates:");
         //for(uint i=0;i<E->vert_coor.size();i++){
