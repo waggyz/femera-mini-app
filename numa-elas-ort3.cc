@@ -79,12 +79,15 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
   const FLOAT_SOLV* RESTRICT sysu  = &sys_u[0];
         FLOAT_SOLV* RESTRICT sysf  = &sys_f[0];
+  //printf( "ElemLinear: sysu=%.15f\n",sysu[15]);
+
   if(e0<ee){
     for (int i=0; i<Nc; i++){
       std::memcpy( &   u[Nf*i], &sysu[Econn[Nc*e0+i]*Nf],
         sizeof(FLOAT_SOLV)*Nf ); };
     std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
   };
+  //double fsum=0.0, Ssum=0.0;
   for(INT_MESH ie=e0;ie<ee;ie++){
     for(int i=0;i<Ne;i++){ GS[i]=0.0; };
     // Transpose R
@@ -135,6 +138,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       S[5]=( H[5] + H[7] )*C[7]*dw;// S[7]= S[5];//Syz Szy
       S[2]=( H[2] + H[6] )*C[8]*dw;// S[6]= S[2];//Sxz Szx
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
+      //for (int i=0; i<9; i++){Ssum+=S[i];}
       //------------------------------------------------------ 18+9= 27*Ng FLOP
 #if VERB_MAX>10
       printf( "Stress:");
@@ -155,11 +159,19 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       for(int k=0; k<3; k++){
         for(int j=0; j<3; j++){
           f[(3* i+k) ] += GS[(3* i+j) ] * R[(3* j+k) ];
+          //fsum += f[Nf*i+j];
     };};};//-------------------------------------------- 2 *3*3*Nc = 18*Nc FLOP
     for (int i=0; i<Nc; i++){
-      std::memcpy(& sysf[Econn[Nc*ie+i]*3],& f[Nf*i],
-        sizeof(FLOAT_SOLV)*Nf ); };
+      std::memcpy(& sysf[Econn[Nc*ie+i]*3],& f[Nf*i], sizeof(FLOAT_SOLV)*Nf ); };
+
+    //for (int i=0; i<Nc; i++){
+    //  for(int j=0;j<3;j++){
+    //    fsum += f[Nf*i+j];
+    //  }
+    //}
   };//end elem loop
+  //printf( "ElemLinear: fsum=%.15f\n",fsum);
+  //printf( "ElemLinear: Ssum=%.15f\n",Ssum);
   return 0;
 };
 int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
@@ -452,6 +464,7 @@ int Mesh::ElemLinearGPU( const IDX_GPU* gpu_ints_idx,const IDX_GPU* gpu_real_idx
   const int Nj = Nd*Nf+1;//FIXME wrong?
 
   INT_GPU Nc = Pints[gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_ECONN_N]];
+  //printf( "ElemLinearGPU: Part_i=%i, Nc=%i\n",part_i,Nc);
   const int Ne = Nf*Nc;
   
   INT_GPU elem_n = Pints[gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NELEM]];
@@ -467,28 +480,48 @@ int Mesh::ElemLinearGPU( const IDX_GPU* gpu_ints_idx,const IDX_GPU* gpu_real_idx
   FLOAT_PHYS u[Ne], f[Ne], GS[Ne], uR[Ne];
   FLOAT_PHYS G[Ne], H[Nd*Nf], S[Nd*Nf];//FIXME wrong sizes?
 
+  //double tmp=0.0;
   FLOAT_PHYS intp_shpg[intp_n*Ne];
-  for(int i=0; i<(intp_n*Ne);i++){ intp_shpg[i] = Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SHPG + i]]; };
+  for(int i=0; i<(intp_n*Ne);i++){
+    intp_shpg[i] = Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SHPG] + i];
+    //tmp +=intp_shpg[i];
+  }
   //std::copy( Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SHPG]], Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SHPG+intp_n*Ne]], intp_shpg );
   //std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
+  //printf( "ElemLinearGPU: shpg=%.15f\n",tmp);
 
+  //tmp=0.0;
   FLOAT_PHYS wgt[intp_n];
-  for(int i=0; i<(intp_n);i++){ wgt[i] = Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_WGTS+intp_n + i]]; };
+  for(int i=0; i<(intp_n);i++){
+    wgt[i] = Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_WGTS] + i];
+    //tmp +=wgt[i];
+  }
   //std::copy( Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_WGTS]], Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_WGTS+intp_n]], wgt );
   //std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
+  //printf( "ElemLinearGPU: wgt=%.15f\n",tmp);
 
+  //tmp=0.0;
   FLOAT_PHYS C[9];
-  for(int i=0; i<9;i++){ C[i] = Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_MATC + i]]; };
+  for(int i=0; i<9;i++){
+    C[i] = Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_MATC] + i];
+    //tmp +=C[i];
+  }
   //std::copy( Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_MATC]], Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_MATC+9]], C );
   //FLOAT_PHYS C[this->mtrl_matc.size()];
+  //printf( "ElemLinearGPU: C=%.15f\n",tmp);
 
+  //tmp=0.0;
   FLOAT_PHYS R[9];
-  for(int i=0; i<9;i++){ R[i] = Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_ROTC + i]]; };
+  for(int i=0; i<9;i++){
+    R[i] = Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_ROTC] + i];
+    //tmp +=R[i];
+  }
   //std::copy( Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_ROTC]], Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_ROTC+9]], R );
   //FLOAT_PHYS R[9] = {
   //  mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
   //  mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
   //  mtrl_rotc[6],mtrl_rotc[7],mtrl_rotc[8]};
+  //printf( "ElemLinearGPU: R=%.15f\n",tmp);
 
   FLOAT_PHYS Rs[9];
   for(int i=0; i<9;i++){
@@ -510,8 +543,9 @@ int Mesh::ElemLinearGPU( const IDX_GPU* gpu_ints_idx,const IDX_GPU* gpu_real_idx
   const FLOAT_GPU* RESTRICT Ejacs = &Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_JACS]];
   //const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
 
-  const FLOAT_GPU* RESTRICT sysu  = &Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSU]];
+  const FLOAT_GPU* RESTRICT sysu  = &Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSP]];
   //const FLOAT_SOLV* RESTRICT sysu  = &sys_u[0];
+  //printf( "ElemLinearGPU: sysu=%.15f\n",sysu[15]);
 
         FLOAT_GPU* RESTRICT sysf  = &Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSF]];
         //FLOAT_SOLV* RESTRICT sysf  = &sys_f[0];
@@ -523,6 +557,7 @@ int Mesh::ElemLinearGPU( const IDX_GPU* gpu_ints_idx,const IDX_GPU* gpu_real_idx
     for( int j=0; j<Nj; j++){ jac[j] = Ejacs[Nj*e0+j]; };
   }
 
+  double fsum=0.0, Ssum=0.0;
   for(INT_MESH ie=e0;ie<ee;ie++){
     for(int i=0;i<Ne;i++){ GS[i]=0.0; };
     // Transpose R
@@ -586,6 +621,7 @@ int Mesh::ElemLinearGPU( const IDX_GPU* gpu_ints_idx,const IDX_GPU* gpu_real_idx
       S[5]=( H[5] + H[7] )*C[7]*dw;// S[7]= S[5];//Syz Szy
       S[2]=( H[2] + H[6] )*C[8]*dw;// S[6]= S[2];//Sxz Szx
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
+      //for (int i=0; i<9; i++){Ssum+=S[i];}
       //------------------------------------------------------ 18+9= 27*Ng FLOP
 #if VERB_MAX>10
       printf( "Stress:");
@@ -609,8 +645,11 @@ int Mesh::ElemLinearGPU( const IDX_GPU* gpu_ints_idx,const IDX_GPU* gpu_real_idx
     for (int i=0; i<Nc; i++){
       for(int j=0;j<3;j++){
         sysf[Econn[Nc*ie+i]*3+j] = f[Nf*i+j];
+        //fsum += f[Nf*i+j];
       }
     }
   };//end elem loop
+  //printf( "ElemLinearGPU: Part_i=%i fsum=%.15f\n",part_i,fsum);
+  //printf( "ElemLinearGPU: Ssum=%.15f\n",Ssum);
   return 0;
 };
