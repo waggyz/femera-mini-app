@@ -44,6 +44,7 @@ public:
   int comp_n=1, numa_n=1;
   int solv_meth=Solv::SOLV_CG, solv_cond=Solv::COND_JACO, verbosity=1;
   int hown_meth=2;
+  INT_GPU iter_ints_count=0, iter_real_count=0;
   //
   //FIXME Consider moving these to Test*
   float phys_flop=0, phys_band=0;
