@@ -536,7 +536,7 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
 #endif
   gpu_chk2 = gpu_r2a;
   }while( (iter < gpui_max) & (gpu_chk2 > gpu_rto2) );
-  this->iter_end=iter;
+  this->iter_end=iter; this->glob_chk2 = gpu_chk2;
   //
   return(0); };
   

@@ -81,8 +81,8 @@
 #define IDX_SYSP  5
 #define IDX_SYSF  6
 #define IDX_SYSR  7
-#define IDX_SYSU  8
-#define IDX_SYSD  9
+#define IDX_SYSD  8
+#define IDX_SYSU  9
 #define GPU_REAL_COUNT 10
 // Total number of real structures indexed
 //

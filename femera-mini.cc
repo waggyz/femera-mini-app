@@ -409,31 +409,26 @@ int main( int argc, char** argv ){
     gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSP ] = ri; ri+=partsize;
     gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSF ] = ri; ri+=partsize;
     gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSR ] = ri; ri+=partsize;
-    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSU ] = ri; ri+=partsize;
     gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSD ] = ri; ri+=partsize;
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSU ] = ri; ri+=partsize;
     //
   };
     gpu_total_ints = ii;
     gpu_total_real = ri;
   }//end scope
-#if VERB_MAX > 2
-  if(verbosity > 2){
-    printf("GPU Ints: %12li, Real: %12li Count\n",
-           long(gpu_total_ints), long(gpu_total_real) );
-    printf("GPU Ints: %12lu, Real: %12lu, Total: %lu Bytes\n",
-      gpu_total_ints*sizeof(INT_GPU), gpu_total_real*sizeof(FLOAT_GPU),
-      gpu_total_ints*sizeof(INT_GPU)+ gpu_total_real*sizeof(FLOAT_GPU) );
-  };
-#endif
   INT_GPU   Pints[gpu_total_ints];
   FLOAT_GPU Preal[gpu_total_real];
   {  // Now fill these
+#pragma omp parallel
+{
+#pragma omp for schedule(static)
   for(int part_i=0; part_i<part_0; part_i++){
     IDX_GPU Oi=GPU_INTS_COUNT*part_i;
     IDX_GPU Or=GPU_REAL_COUNT*part_i;
     for(int j=0; j<GPU_INTS_COUNT; j++){ gpu_ints_idx[Oi+j]=0;};
     for(int j=0; j<GPU_REAL_COUNT; j++){ gpu_real_idx[Or+j]=0;};
   };
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     IDX_GPU Oi=GPU_INTS_COUNT*part_i;
@@ -470,10 +465,11 @@ int main( int argc, char** argv ){
     for(int i=0; i<int( partsize ); i++){
       Preal[gpu_real_idx[Or + IDX_SYSR] +i] = S->sys_r[i]; };
     for(int i=0; i<int( partsize ); i++){
-      Preal[gpu_real_idx[Or + IDX_SYSU] +i] = S->sys_u[i]; };
-    for(int i=0; i<int( partsize ); i++){
       Preal[gpu_real_idx[Or + IDX_SYSD] +i] = S->sys_d[i]; };
+    for(int i=0; i<int( partsize ); i++){
+      Preal[gpu_real_idx[Or + IDX_SYSU] +i] = S->sys_u[i]; };
   };
+}// end parallel region
 #if 0
   for(int i=0; i<(part_n+part_0) * GPU_INTS_COUNT; i++){
     if(!(i%GPU_INTS_COUNT)){ printf("\n"); };
@@ -484,6 +480,7 @@ int main( int argc, char** argv ){
   //end loading GPU data
   {// iter scope
 #if 1
+// Iterate the big array storage version
     auto gpu_start = std::chrono::high_resolution_clock::now();
     M->iter_max=iter_max;
     M->info_mod=iter_info_n;
@@ -495,12 +492,30 @@ int main( int argc, char** argv ){
       (gpu_done - gpu_start);
     M->time_iter=float(gpu_time.count())*ns;
     iter=M->iter_end; loop_sec=M->time_iter;
-    //
-    printf("%9i ||R||%9.2e /%9.2e tol in %f s\nDone.\n", iter,
-      std::sqrt(M->glob_chk2), std::sqrt(M->glob_rto2),loop_sec );
-    printf("Performance:%8.2f  MDOF/s\n",
-      float(M->iter_end) * float(M->udof_n) / M->time_iter /Meg );
+#if VERB_MAX > 1
+    if(verbosity > 1){
+      printf("%9i ||R||%9.2e /%9.2e tol in %f s\nDone.\n", iter,
+        std::sqrt(M->glob_chk2), std::sqrt(M->glob_rto2),loop_sec );
+      printf("Performance:%8.2f     MDOF/s\n",
+        float(M->iter_end) * float(M->udof_n) / M->time_iter /Meg );
+      printf("      Using:%12li ints %12li real\n",
+            long(gpu_total_ints), long(gpu_total_real) );
+      printf("            %12lu bytes%12lu bytes total: %lu\n",
+        gpu_total_ints*sizeof(INT_GPU), gpu_total_real*sizeof(FLOAT_GPU),
+        gpu_total_ints*sizeof(INT_GPU)+ gpu_total_real*sizeof(FLOAT_GPU) );
+    };
+#endif
+    // Put the GPU array solution back into C++ E->sys_u arrays.
+#pragma omp parallel for schedule(static)
+    for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
+      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+      int Or=GPU_REAL_COUNT*part_i;
+      IDX_GPU partsize=E->node_n*3;
+      for(int i=0; i<int( partsize ); i++){
+        S->sys_u[i] = Preal[gpu_real_idx[Or + IDX_SYSU] +i]; };
+    };
 #else
+// Iterate the C++ object storage version
     M->time_secs=0.0;//FIXME conditional?
     // Iterate ------------------------------------------------------
     auto loop_start = std::chrono::high_resolution_clock::now();
@@ -590,6 +605,7 @@ int main( int argc, char** argv ){
     };
 #endif
 #endif
+// end C++ object version solve
   }// end iter scope
 #ifdef HAS_TEST
     // Check solution ===============================================
