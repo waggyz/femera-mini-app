@@ -491,6 +491,7 @@ int main( int argc, char** argv ){
     M->part_0=part_0;
     M->part_n=part_n;
     M->IterGPU( gpu_ints_idx, gpu_real_idx, Pints, Preal );
+#if 0
     do{ M->Iter(); iter++;
 #if VERB_MAX>1
       if(verbosity>1){
@@ -574,6 +575,7 @@ int main( int argc, char** argv ){
     //
     printf("Performance:%8.2f  MDOF/s\n",
       float(M->udof_n)*float(iter)/loop_sec /Meg );
+#endif
     };
 #endif
   }// end iter scope
