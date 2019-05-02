@@ -433,7 +433,7 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
     const INT_GPU halo_elem_n = Pints[gpu_ints_idx[Oi + IDX_NELEM_HALO ]];
     FLOAT_GPU* sysf = &Preal[gpu_real_idx[Or+ IDX_SYSF ]];
     //
-    for(uint i=0;i<n;i++){ sysf[i]=0.0; };
+    for(INT_GPU i=0;i<n;i++){ sysf[i]=0.0; };
     //
     this->ElemLinearGPU( gpu_ints_idx,gpu_real_idx, Pints,Preal,
                          part_i, 0,halo_elem_n );
@@ -536,8 +536,7 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
 #endif
   gpu_chk2 = gpu_r2a;
   }while( (iter < gpui_max) & (gpu_chk2 > gpu_rto2) );
+  this->iter_end=iter;
   //
-  printf("%9i ||R||%9.2e /%9.2e tol in ? s\nGPU Done.\n", iter,
-    std::sqrt(gpu_chk2), std::sqrt(gpu_rto2) );
   return(0); };
   

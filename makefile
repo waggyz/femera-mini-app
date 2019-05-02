@@ -62,6 +62,7 @@ mini-omp:
 	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femera-$(CPUMODEL) $(CPPLOG);\
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	command /usr/bin/time -v ./femera-$(CPUMODEL) -v2 -c$(NCPU) -p cube/unst19p1n16 ;
+	#command /usr/bin/time -v ./femera-$(CPUMODEL) -v2 -c1 -i0 -p cube/unit1p2n2 ;
 
 mini-seq:
 	mv -f femseq-$(CPUMODEL) femseq.old 2>/dev/null ; \

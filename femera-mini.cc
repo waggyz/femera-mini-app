@@ -483,6 +483,7 @@ int main( int argc, char** argv ){
   }// end local var scope
   //end loading GPU data
   {// iter scope
+#if 1
     auto gpu_start = std::chrono::high_resolution_clock::now();
     M->iter_max=iter_max;
     M->info_mod=iter_info_n;
@@ -492,8 +493,14 @@ int main( int argc, char** argv ){
     auto gpu_done = std::chrono::high_resolution_clock::now();
     auto gpu_time = std::chrono::duration_cast<std::chrono::nanoseconds>
       (gpu_done - gpu_start);
-    auto gpu_sec=float(gpu_time.count())*ns;
-    printf("in %f s.\n",gpu_sec);
+    M->time_iter=float(gpu_time.count())*ns;
+    iter=M->iter_end; loop_sec=M->time_iter;
+    //
+    printf("%9i ||R||%9.2e /%9.2e tol in %f s\nDone.\n", iter,
+      std::sqrt(M->glob_chk2), std::sqrt(M->glob_rto2),loop_sec );
+    printf("Performance:%8.2f  MDOF/s\n",
+      float(M->iter_end) * float(M->udof_n) / M->time_iter /Meg );
+#else
     M->time_secs=0.0;//FIXME conditional?
     // Iterate ------------------------------------------------------
     auto loop_start = std::chrono::high_resolution_clock::now();
@@ -581,6 +588,7 @@ int main( int argc, char** argv ){
     printf("Performance:%8.2f  MDOF/s\n",
       float(M->udof_n)*float(iter)/loop_sec /Meg );
     };
+#endif
 #endif
   }// end iter scope
 #ifdef HAS_TEST

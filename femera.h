@@ -23,6 +23,8 @@
 // Physics precision
 #define FLOAT_SOLV double
 // Solver precision
+#define FLOAT_TIME float
+// Timing precision
 //FIXME I don't think the following are needed...
 #define VOIGT_FRUP 0,4,8, 5,2,1// Extract from upper-triangular part of
 //symmetric 3x3 stress or strain tensor

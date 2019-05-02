@@ -453,7 +453,7 @@ int Mesh::ElemLinearGPU( const IDX_GPU* gpu_ints_idx,const IDX_GPU* gpu_real_idx
   INT_GPU Nc = Pints[gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_ECONN_N]];
   const int Ne = Nf*Nc;
   
-  INT_GPU elem_n = Pints[gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NELEM]];
+  //INT_GPU elem_n = Pints[gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NELEM]];
   //const INT_MESH elem_n =E->elem_n;
 
   INT_GPU intp_n = Pints[gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NINTP]];
@@ -522,7 +522,7 @@ int Mesh::ElemLinearGPU( const IDX_GPU* gpu_ints_idx,const IDX_GPU* gpu_real_idx
     for( int j=0; j<Nj; j++){ jac[j] = Ejacs[Nj*e0+j]; };
   }
 
-  for(INT_MESH ie=e0;ie<ee;ie++){
+  for(INT_GPU ie=e0;ie<ee;ie++){
     for(int i=0;i<Ne;i++){ GS[i]=0.0; };
     // Transpose R
     //std::swap(R[1],R[3]); std::swap(R[2],R[6]); std::swap(R[5],R[7]);
