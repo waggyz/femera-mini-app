@@ -419,7 +419,7 @@ int main( int argc, char** argv ){
   INT_GPU   Pints[gpu_total_ints];
   FLOAT_GPU Preal[gpu_total_real];
   {  // Now fill these
-#pragma omp parallel
+#pragma omp parallel num_threads(comp_n)
 {
 #pragma omp for schedule(static)
   for(int part_i=0; part_i<part_0; part_i++){
@@ -506,7 +506,7 @@ int main( int argc, char** argv ){
     };
 #endif
     // Put the GPU array solution back into C++ E->sys_u arrays.
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(comp_n)
     for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
       Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
       int Or=GPU_REAL_COUNT*part_i;
@@ -621,7 +621,7 @@ int main( int argc, char** argv ){
     FLOAT_PHYS scax=1.0,minx= 99e9,maxx=-99e9;
     FLOAT_PHYS scay=1.0,miny= 99e9,maxy=-99e9;
     FLOAT_PHYS scaz=1.0,minz= 99e9,maxz=-99e9;
-#pragma omp parallel
+#pragma omp parallel num_threads(comp_n)
 {  std::vector<Mesh::part> P;
    P.resize(M->mesh_part.size());
    std::copy(M->mesh_part.begin(), M->mesh_part.end(), P.begin());
@@ -687,7 +687,7 @@ int main( int argc, char** argv ){
       for(int i= 4; i< 8; i++){ errtot[i]+= errors[i]; };
       for(int i= 8; i<12; i++){ errtot[i] = std::max(errtot[i],errors[i]); };
       errtot[12]+=errors[12];
-#if VERB_MAX>3
+#if VERB_MAX>13
       if(S->udof_n<300){
         //printf("Node Coordinates:");
         //for(uint i=0;i<E->vert_coor.size();i++){
