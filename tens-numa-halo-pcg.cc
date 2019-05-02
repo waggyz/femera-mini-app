@@ -420,20 +420,22 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
   const int int_count = (gpup_n+gpup_0)*GPU_INTS_COUNT;
   const int real_count= (gpup_n+gpup_0)*GPU_REAL_COUNT;
   const int real_count2 =this->iter_real_count;
-  const int int_count2 =this->iter_int_count;
+  const int int_count2 =this->iter_ints_count;
   //
   FLOAT_GPU hava[ this->halo_val.size() ];
   //
   const INT_GPU part_o = gpup_n+gpup_0;
 
   #pragma omp target data map(to:gpu_ints_idx[0:int_count], gpu_real_idx[0:real_count], Pints[0:int_count2]), map(tofrom:Preal[0:real_count2])
-
-  INT_GPU iter=0;
+{
+  int iter=0;
   do{ iter++;
   gpu_sum1=0.0;gpu_sum2=0.0;
-#pragma omp target teams distribute num_teams(numparts)
-{// iter parallel region
+//{// iter parallel region
+
 //#pragma omp for schedule(static)
+//#pragma omp target teams distribute
+#pragma omp target teams distribute num_teams(gpup_n)
   for(INT_GPU part_i=part_0; part_i<part_o; part_i++){
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
     const INT_GPU Or = GPU_REAL_COUNT*part_i;
@@ -442,7 +444,7 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
     const INT_GPU halo_elem_n = Pints[gpu_ints_idx[Oi + IDX_NELEM_HALO ]];
     FLOAT_GPU* sysf = &Preal[gpu_real_idx[Or+ IDX_SYSF ]];
     //
-    for(INT_GPU i=0;i<n;i++){ sysf[i]=0.0; };
+    for(INT_GPU i=0;i<n;i++){ sysf[i]=0.0; }
     //
     this->ElemLinearGPU( gpu_ints_idx,gpu_real_idx, Pints,Preal,
                          part_i, 0,halo_elem_n );
@@ -457,8 +459,9 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
         & hava[d* haid[i]],
         & sysf[d* i],
         d*sizeof(FLOAT_GPU) );
-    };
-  };
+    }
+  }
+
 //#pragma omp for schedule(static)
   for(INT_GPU part_i=gpup_0; part_i<part_o; part_i++){
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
@@ -546,9 +549,10 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
   this->glob_res2 = gpu_r2a;
 #endif
   gpu_chk2 = gpu_r2a;
-}//end parallel region
+//}//end parallel region
   }while( (iter < gpui_max) & (gpu_chk2 > gpu_rto2) );
   this->iter_end=iter; this->glob_chk2 = gpu_chk2;
+}
   //
   return(0); };
   
