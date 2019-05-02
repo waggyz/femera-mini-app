@@ -486,6 +486,8 @@ int main( int argc, char** argv ){
     M->info_mod=iter_info_n;
     M->part_0=part_0;
     M->part_n=part_n;
+    M->iter_ints_count = gpu_total_ints;
+    M->iter_real_count = gpu_total_real;
     M->IterGPU( gpu_ints_idx, gpu_real_idx, Pints, Preal );
     auto gpu_done = std::chrono::high_resolution_clock::now();
     auto gpu_time = std::chrono::duration_cast<std::chrono::nanoseconds>
