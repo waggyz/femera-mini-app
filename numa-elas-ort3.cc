@@ -453,7 +453,7 @@ int ElastOrtho3D::ElemStrain( Elem* E,FLOAT_SOLV* sys_f ){
   return 0;
   };
 
-
+#pragma omp declare target
 int Mesh::ElemLinearGPU( const IDX_GPU* gpu_ints_idx,const IDX_GPU* gpu_real_idx,
                          const INT_GPU* Pints, FLOAT_GPU* Preal, INT_GPU part_i, INT_GPU e0, INT_GPU ee ){
 
@@ -475,19 +475,19 @@ int Mesh::ElemLinearGPU( const IDX_GPU* gpu_ints_idx,const IDX_GPU* gpu_real_idx
 #if VERB_MAX>11
   printf("Dim: %i, Elems:%i, IntPts:%i, Nodes/elem:%i\n", (int)mesh_d,(int)elem_n,(int)intp_n,(int)Nc);
 #endif
-  FLOAT_MESH jac[Nj];//, det;
-  FLOAT_PHYS u[Ne], f[Ne], GS[Ne], uR[Ne];
-  FLOAT_PHYS G[Ne], H[Nd*Nf], S[Nd*Nf];//FIXME wrong sizes?
+  FLOAT_MESH jac[10];//, det;
+  FLOAT_PHYS u[60], f[60], GS[60], uR[60];
+  FLOAT_PHYS G[60], H[60], S[60];//FIXME wrong sizes?
 
   //double tmp=0.0;
-  FLOAT_PHYS intp_shpg[intp_n*Ne];
+  FLOAT_PHYS intp_shpg[5*60];
   for(int i=0; i<(intp_n*Ne);i++){ intp_shpg[i] = Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SHPG] + i]; };
   //std::copy( Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SHPG]], Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SHPG+intp_n*Ne]], intp_shpg );
   //std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
   //printf( "ElemLinearGPU: shpg=%.15f\n",tmp);
 
   //tmp=0.0;
-  FLOAT_PHYS wgt[intp_n];
+  FLOAT_PHYS wgt[5];
   for(int i=0; i<(intp_n);i++){ wgt[i] = Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_WGTS] + i]; };
   //std::copy( Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_WGTS]], Preal[gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_WGTS+intp_n]], wgt );
   //std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
@@ -640,3 +640,4 @@ int Mesh::ElemLinearGPU( const IDX_GPU* gpu_ints_idx,const IDX_GPU* gpu_real_idx
   //printf( "ElemLinearGPU: Ssum=%.15f\n",Ssum);
   return 0;
 };
+#pragma omp end declare target
