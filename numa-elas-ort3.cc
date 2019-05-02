@@ -544,6 +544,7 @@ int Mesh::ElemLinearGPU( const IDX_GPU* gpu_ints_idx,const IDX_GPU* gpu_real_idx
     for( int j=0; j<Nj; j++){ jac[j] = Ejacs[Nj*e0+j]; };
   }
 
+//#pragma omp for
   for(INT_GPU ie=e0;ie<ee;ie++){
     for(int i=0;i<Ne;i++){ GS[i]=0.0; };
     // Transpose R

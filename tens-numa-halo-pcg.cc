@@ -417,16 +417,23 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
   FLOAT_GPU gpu_chk2=this->glob_chk2;// In/out
   FLOAT_GPU gpu_r2a =this->glob_res2;// In? Local to GPU?
   FLOAT_GPU gpu_sum1=0.0, gpu_sum2=0.0;// Local to GPU
+  const int int_count = (gpup_n+gpup_0)*GPU_INTS_COUNT;
+  const int real_count= (gpup_n+gpup_0)*GPU_REAL_COUNT;
+  const int real_count2 =this->iter_real_count;
+  const int int_count2 =this->iter_int_count;
   //
   FLOAT_GPU hava[ this->halo_val.size() ];
   //
   const INT_GPU part_o = gpup_n+gpup_0;
+
+  #pragma omp target data map(to:gpu_ints_idx[0:int_count], gpu_real_idx[0:real_count], Pints[0:int_count2]), map(tofrom:Preal[0:real_count2])
+
   INT_GPU iter=0;
   do{ iter++;
   gpu_sum1=0.0;gpu_sum2=0.0;
-#pragma omp parallel num_threads(comp_n)
+#pragma omp target teams distribute num_teams(numparts)
 {// iter parallel region
-#pragma omp for schedule(static)
+//#pragma omp for schedule(static)
   for(INT_GPU part_i=part_0; part_i<part_o; part_i++){
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
     const INT_GPU Or = GPU_REAL_COUNT*part_i;
@@ -452,7 +459,7 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
         d*sizeof(FLOAT_GPU) );
     };
   };
-#pragma omp for schedule(static)
+//#pragma omp for schedule(static)
   for(INT_GPU part_i=gpup_0; part_i<part_o; part_i++){
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
     const INT_GPU Or = GPU_REAL_COUNT*part_i;
@@ -467,7 +474,7 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
         hava[f+j]+= sysf[d* i+j]; };
     };
   };// End halo_vals sum; now scatter back to elems
-#pragma omp for schedule(static) reduction(+:gpu_sum1)
+//#pragma omp for schedule(static) reduction(+:gpu_sum1)
   for(INT_GPU part_i=gpup_0; part_i<part_o; part_i++){
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
     const INT_GPU Or = GPU_REAL_COUNT*part_i;
@@ -494,8 +501,9 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
         gpu_sum1 += sysp[i] * sysf[i];
     };
   };
+
   const FLOAT_SOLV alpha = gpu_r2a / gpu_sum1;
-#pragma omp for schedule(static) reduction(+:gpu_sum2)
+//#pragma omp for schedule(static) reduction(+:gpu_sum2)
   for(INT_GPU part_i=gpup_0; part_i<part_o; part_i++){
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
     const INT_GPU Or = GPU_REAL_COUNT*part_i;
@@ -514,8 +522,9 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
     for(INT_GPU i=hl0; i<sysn; i++){
       gpu_sum2   += sysr[i] * sysr[i] * sysd[i]; };
   };
+
   const FLOAT_PHYS beta = gpu_sum2 / gpu_r2a;
-#pragma omp for schedule(static)
+//#pragma omp for schedule(static)
   for(INT_GPU part_i=gpup_0; part_i<part_o; part_i++){
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
     const INT_GPU Or = GPU_REAL_COUNT*part_i;
