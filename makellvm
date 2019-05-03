@@ -34,7 +34,9 @@ NUMA=6
 endif
 
 CXX=clang++
+#CPPFLAGS=-DVERB_MAX=4 -O3 -g -std=gnu++11 -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda --cuda-path=${OLCF_CUDA_ROOT} -DHAS_TEST
 CPPFLAGS=-DVERB_MAX=4 -O3 -g -std=gnu++11 -fopenmp -DHAS_TEST
+#CPPFLAGS=-DVERB_MAX=4 -O3 -g -std=gnu++11 -DHAS_TEST
 NUMA=8
 #CPPFLAGS=-DVERB_MAX=6 -O3 -g -q64 -qrestrict -std=c++11 -qsmp=omp -qoffload
 #CPPFLAGS=-O0 -g -std=c++11  

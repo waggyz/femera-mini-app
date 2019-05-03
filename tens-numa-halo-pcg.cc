@@ -422,11 +422,12 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
   const int real_count2 =this->iter_real_count;
   const int int_count2 =this->iter_ints_count;
   //
+  const int hava_count = int(this->halo_val.size());
   FLOAT_GPU hava[ this->halo_val.size() ];
   //
   const INT_GPU part_o = gpup_n+gpup_0;
 
-  #pragma omp target data map(to:gpu_ints_idx[0:int_count], gpu_real_idx[0:real_count], Pints[0:int_count2]), map(tofrom:Preal[0:real_count2])
+  #pragma omp target data map(to:gpu_ints_idx[0:int_count], gpu_real_idx[0:real_count], Pints[0:int_count2], hava[0:hava_count]), map(tofrom:Preal[0:real_count2])
 {
   int iter=0;
   do{ iter++;
@@ -434,15 +435,18 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
 //{// iter parallel region
 
 //#pragma omp for schedule(static)
-//#pragma omp target teams distribute
+//#pragma omp parallel for schedule(static)
+//#pragma omp target teams num_teams(1)
+//#pragma omp target teams distribute num_teams(1)
 #pragma omp target teams distribute num_teams(gpup_n)
+//#pragma omp target teams distribute parallel for num_teams(gpup_n)
   for(INT_GPU part_i=part_0; part_i<part_o; part_i++){
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
     const INT_GPU Or = GPU_REAL_COUNT*part_i;
     const INT_GPU d = Pints[gpu_ints_idx[Oi+ IDX_DMESH ]];
     const INT_GPU n = Pints[gpu_ints_idx[Oi+ IDX_NNODE ]] *d;
     const INT_GPU halo_elem_n = Pints[gpu_ints_idx[Oi + IDX_NELEM_HALO ]];
-    FLOAT_GPU* sysf = &Preal[gpu_real_idx[Or+ IDX_SYSF ]];
+        FLOAT_GPU* sysf = &Preal[gpu_real_idx[Or+ IDX_SYSF ]];
     //
     for(INT_GPU i=0;i<n;i++){ sysf[i]=0.0; }
     //
@@ -455,13 +459,15 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
     const INT_GPU* haid = &Pints[gpu_ints_idx[Oi+ IDX_NODE_HAID ]];
     //
     for(INT_GPU i=hrn; i<hnn; i++){
-      std::memcpy(
-        & hava[d* haid[i]],
-        & sysf[d* i],
-        d*sizeof(FLOAT_GPU) );
+      for(INT_GPU j=0; j<d; j++){
+        hava[d*haid[i]+j] = sysf[d*i+j];
+      }
+      //std::memcpy( &hava[d*haid[i]], &sysf[d*i], d*sizeof(FLOAT_GPU) );
     }
   }
 
+#pragma omp target teams distribute num_teams(gpup_n)
+//#pragma omp parallel for schedule(static)
 //#pragma omp for schedule(static)
   for(INT_GPU part_i=gpup_0; part_i<part_o; part_i++){
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
@@ -473,10 +479,14 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
     for(INT_GPU i=0; i<hrn; i++){
       const INT_GPU f = d* haid[i];
       for( INT_GPU j=0; j<d; j++){
-#pragma omp atomic update
+        #pragma omp atomic update
         hava[f+j]+= sysf[d* i+j]; };
     };
   };// End halo_vals sum; now scatter back to elems
+
+
+#pragma omp target teams distribute num_teams(gpup_n) reduction(+:gpu_sum1)
+//#pragma omp parallel for schedule(static) reduction(+:gpu_sum1)
 //#pragma omp for schedule(static) reduction(+:gpu_sum1)
   for(INT_GPU part_i=gpup_0; part_i<part_o; part_i++){
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
@@ -490,22 +500,23 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
     FLOAT_GPU* sysf = &Preal[gpu_real_idx[Or+ IDX_SYSF ]];
     FLOAT_GPU* sysp = &Preal[gpu_real_idx[Or+ IDX_SYSP ]];
     for(INT_GPU i=0; i<hnn; i++){
-      std::memcpy(
-        & sysf[d* i],
-        & hava[d* haid[i]],
-        d*sizeof(FLOAT_GPU) );
+      for(INT_GPU j=0; j<d; j++){
+        sysf[d*i+j] = hava[d*haid[i]+j];
+      }
+      //std::memcpy( &sysf[d*i], &hava[d*haid[i]], d*sizeof(FLOAT_GPU) );
     };
     const INT_GPU halo_elem_n = Pints[gpu_ints_idx[Oi + IDX_NELEM_HALO ]];
     const INT_GPU elem_n = Pints[gpu_ints_idx[Oi + IDX_NELEM ]];
-    this->ElemLinearGPU( gpu_ints_idx,gpu_real_idx, Pints,Preal,
-                         part_i, halo_elem_n,elem_n );
-#pragma omp simd reduction(+:gpu_sum1)
+    this->ElemLinearGPU( gpu_ints_idx,gpu_real_idx, Pints,Preal, part_i, halo_elem_n,elem_n );
+    #pragma omp simd reduction(+:gpu_sum1)
     for(INT_GPU i=hl0; i<sysn; i++){
         gpu_sum1 += sysp[i] * sysf[i];
     };
   };
 
   const FLOAT_SOLV alpha = gpu_r2a / gpu_sum1;
+#pragma omp target teams distribute num_teams(gpup_n) reduction(+:gpu_sum2)
+//#pragma omp parallel for schedule(static) reduction(+:gpu_sum2)
 //#pragma omp for schedule(static) reduction(+:gpu_sum2)
   for(INT_GPU part_i=gpup_0; part_i<part_o; part_i++){
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
@@ -517,16 +528,18 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
     FLOAT_GPU* sysf = &Preal[gpu_real_idx[Or+ IDX_SYSF ]];
     FLOAT_GPU* sysr = &Preal[gpu_real_idx[Or+ IDX_SYSR ]];
     FLOAT_GPU* sysd = &Preal[gpu_real_idx[Or+ IDX_SYSD ]];
-#pragma omp simd
+    #pragma omp simd
     for(INT_GPU i=0; i<sysn; i++){
         sysr[i] -= alpha * sysf[i];
     };
-#pragma omp simd reduction(+:gpu_sum2)
+    #pragma omp simd reduction(+:gpu_sum2)
     for(INT_GPU i=hl0; i<sysn; i++){
       gpu_sum2   += sysr[i] * sysr[i] * sysd[i]; };
   };
 
   const FLOAT_PHYS beta = gpu_sum2 / gpu_r2a;
+#pragma omp target teams distribute num_teams(gpup_n)
+//#pragma omp parallel for schedule(static)
 //#pragma omp for schedule(static)
   for(INT_GPU part_i=gpup_0; part_i<part_o; part_i++){
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
@@ -537,11 +550,12 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
     FLOAT_GPU* sysd = &Preal[gpu_real_idx[Or+ IDX_SYSD ]];
     FLOAT_GPU* sysu = &Preal[gpu_real_idx[Or+ IDX_SYSU ]];
     FLOAT_GPU* sysr = &Preal[gpu_real_idx[Or+ IDX_SYSR ]];
-#pragma omp simd
+    #pragma omp simd
     for(INT_GPU i=0; i<sysn; i++){
       sysu[i] += sysp[i] * alpha;// better data locality here
       sysp[i]  = sysd[i] * sysr[i] + beta*sysp[i]; };
   };
+
 #pragma omp single nowait
 { gpu_r2a = gpu_sum2; }// Update residual (squared)
   //
@@ -549,7 +563,6 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
   this->glob_res2 = gpu_r2a;
 #endif
   gpu_chk2 = gpu_r2a;
-//}//end parallel region
   }while( (iter < gpui_max) & (gpu_chk2 > gpu_rto2) );
   this->iter_end=iter; this->glob_chk2 = gpu_chk2;
 }
