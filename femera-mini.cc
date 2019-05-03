@@ -419,16 +419,16 @@ int main( int argc, char** argv ){
   INT_GPU   Pints[gpu_total_ints];
   FLOAT_GPU Preal[gpu_total_real];
   {  // Now fill these
-#pragma omp parallel num_threads(comp_n)
+//#pragma omp parallel num_threads(comp_n)
 {
-#pragma omp for schedule(static)
+//#pragma omp for schedule(static)
   for(int part_i=0; part_i<part_0; part_i++){
     IDX_GPU Oi=GPU_INTS_COUNT*part_i;
     IDX_GPU Or=GPU_REAL_COUNT*part_i;
     for(int j=0; j<GPU_INTS_COUNT; j++){ gpu_ints_idx[Oi+j]=0;};
     for(int j=0; j<GPU_REAL_COUNT; j++){ gpu_real_idx[Or+j]=0;};
   };
-#pragma omp for schedule(static)
+//#pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     IDX_GPU Oi=GPU_INTS_COUNT*part_i;
@@ -508,7 +508,7 @@ int main( int argc, char** argv ){
     };
 #endif
     // Put the GPU array solution back into C++ E->sys_u arrays.
-#pragma omp parallel for schedule(static) num_threads(comp_n)
+//#pragma omp parallel for schedule(static) num_threads(comp_n)
     for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
       Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
       int Or=GPU_REAL_COUNT*part_i;

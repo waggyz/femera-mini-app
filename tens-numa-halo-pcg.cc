@@ -431,7 +431,7 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
 {
   int iter=0;
   do{ iter++;
-  gpu_sum1=0.0;gpu_sum2=0.0;
+  gpu_sum1=0.0;gpu_sum2=0.0;FLOAT_GPU alpha=0.0;
 //{// iter parallel region
 
 //#pragma omp for schedule(static)
@@ -468,7 +468,9 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
 
 #pragma omp target teams distribute num_teams(gpup_n)
 //#pragma omp parallel for schedule(static)
+//#pragma omp target update from(hava[0:hava_size],Preal[0:real_count2])
 //#pragma omp for schedule(static)
+//#pragma omp target teams distribute num_teams(gpup_n)
   for(INT_GPU part_i=gpup_0; part_i<part_o; part_i++){
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
     const INT_GPU Or = GPU_REAL_COUNT*part_i;
@@ -488,6 +490,8 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
 #pragma omp target teams distribute num_teams(gpup_n) reduction(+:gpu_sum1)
 //#pragma omp parallel for schedule(static) reduction(+:gpu_sum1)
 //#pragma omp for schedule(static) reduction(+:gpu_sum1)
+//#pragma omp target teams distribute num_teams(gpup_n)
+//#pragma omp target teams distribute num_teams(gpup_n) shared(gpu_sum1,gpu_sum2)
   for(INT_GPU part_i=gpup_0; part_i<part_o; part_i++){
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
     const INT_GPU Or = GPU_REAL_COUNT*part_i;
@@ -518,7 +522,9 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
 #pragma omp target teams distribute num_teams(gpup_n) reduction(+:gpu_sum2)
 //#pragma omp parallel for schedule(static) reduction(+:gpu_sum2)
 //#pragma omp for schedule(static) reduction(+:gpu_sum2)
+//#pragma omp target teams distribute num_teams(gpup_n) shared(gpu_sum1,gpu_sum2)
   for(INT_GPU part_i=gpup_0; part_i<part_o; part_i++){
+  alpha = gpu_r2a / gpu_sum1;
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
     const INT_GPU Or = GPU_REAL_COUNT*part_i;
     const INT_GPU d = Pints[gpu_ints_idx[Oi+ IDX_DMESH ]];
@@ -541,7 +547,9 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
 #pragma omp target teams distribute num_teams(gpup_n)
 //#pragma omp parallel for schedule(static)
 //#pragma omp for schedule(static)
+//#pragma omp target teams distribute num_teams(gpup_n)
   for(INT_GPU part_i=gpup_0; part_i<part_o; part_i++){
+  const FLOAT_PHYS beta = gpu_sum2 / gpu_r2a;
     const INT_GPU Oi = GPU_INTS_COUNT*part_i;
     const INT_GPU Or = GPU_REAL_COUNT*part_i;
     const INT_GPU d = Pints[gpu_ints_idx[Oi+ IDX_DMESH ]];
@@ -554,6 +562,8 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
     for(INT_GPU i=0; i<sysn; i++){
       sysu[i] += sysp[i] * alpha;// better data locality here
       sysp[i]  = sysd[i] * sysr[i] + beta*sysp[i]; };
+  gpu_r2a =gpu_sum2;
+  gpu_chk2=gpu_sum2;
   };
 
 #pragma omp single nowait
