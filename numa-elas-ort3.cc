@@ -453,7 +453,7 @@ int ElastOrtho3D::ElemStrain( Elem* E,FLOAT_SOLV* sys_f ){
   return 0;
   };
 
-
+#pragma omp declare target
 int Mesh::ElemLinearGPU( const IDX_GPU* gpu_ints_idx,const IDX_GPU* gpu_real_idx,
                          const INT_GPU* Pints, FLOAT_GPU* Preal, INT_GPU part_i, INT_GPU e0, INT_GPU ee ){
 
@@ -640,3 +640,4 @@ int Mesh::ElemLinearGPU( const IDX_GPU* gpu_ints_idx,const IDX_GPU* gpu_real_idx
   //printf( "ElemLinearGPU: Ssum=%.15f\n",Ssum);
   return 0;
 };
+#pragma omp end declare target
