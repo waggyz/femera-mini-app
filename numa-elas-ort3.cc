@@ -509,8 +509,8 @@ int Mesh::ElemLinearGPU( const IDX_GPU* gpu_ints_idx,const IDX_GPU* gpu_real_idx
 
 //#pragma omp parallel for private(jac,u,f,GS,uR,G,H,S) schedule(static,1)
 //#pragma omp parallel for private(jac,u,f,GS,uR,G,H,S)
-#pragma omp parallel for private(jac,u,f,GS,uR,G,H,S) num_threads(32)
-//#pragma omp parallel for private(jac,u,f,GS,uR,G,H,S) num_threads(1)
+//#pragma omp parallel for private(jac,u,f,GS,uR,G,H,S) num_threads(32)
+#pragma omp parallel for private(jac,u,f,GS,uR,G,H,S) num_threads(1)
   for(INT_GPU ie=e0;ie<ee;ie++){
 
     for(int i=0;i<Ne;i++){ GS[i]=0.0; }
