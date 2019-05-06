@@ -518,7 +518,7 @@ int HaloPCG::IterGPU( const IDX_GPU* gpu_ints_idx, const IDX_GPU* gpu_real_idx,
     };
   };
 
-  const FLOAT_SOLV alpha = gpu_r2a / gpu_sum1;
+  alpha = gpu_r2a / gpu_sum1;
 #pragma omp target teams distribute num_teams(gpup_n) reduction(+:gpu_sum2)
 //#pragma omp parallel for schedule(static) reduction(+:gpu_sum2)
 //#pragma omp for schedule(static) reduction(+:gpu_sum2)
