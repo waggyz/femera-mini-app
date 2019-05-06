@@ -4,6 +4,7 @@
 #include <cstring>// std::memcpy
 #include "femera.h"
 //
+//void ElastOrtho3D::ElemLinear( Elem* ){};//FIXME
 int ElastOrtho3D::ElemLinear( Elem* ){ return 1; };//FIXME
 int ElastOrtho3D::ElemJacobi( Elem* ){ return 1; };//FIXME
 int ElastOrtho3D::ScatStiff( Elem* ){ return 1; };//FIXME
@@ -32,9 +33,12 @@ int ElastOrtho3D::Setup( Elem* E ){
 +sizeof(INT_MESH) *conn_n );
   return 0;
 };
-int ElastOrtho3D::ElemLinear( Elem* E,
-  FLOAT_SOLV *sys_f, const FLOAT_SOLV* sys_u ){
+
+//void ElastOrtho3D::ElemLinear( Elem* E, FLOAT_SOLV *sys_f, const FLOAT_SOLV* sys_u ){
+int ElastOrtho3D::ElemLinear( Elem* E, FLOAT_SOLV *sys_f, const FLOAT_SOLV* sys_u ){
   //FIXME Cleanup local variables.
+//#pragma omp critical
+//{
   const int Nd = 3;// Node (mesh) Dimension FIXME can include temperature?
   const int Nf = 3;// this->ndof_n DOF/node
   const int Nj = Nd*Nf+1;//FIXME wrong?
@@ -47,121 +51,174 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   if(E->do_halo==true){ e0=0; ee=E->halo_elem_n;
   }else{ e0=E->halo_elem_n; ee=elem_n; };
   //
-#if VERB_MAX>11
-  printf("Dim: %i, Elems:%i, IntPts:%i, Nodes/elem:%i\n",
-    (int)mesh_d,(int)elem_n,(int)intp_n,(int)Nc);
-#endif
-  FLOAT_MESH jac[Nj];//, det;
-  FLOAT_PHYS u[Ne], f[Ne], GS[Ne], uR[Ne];
-  FLOAT_PHYS G[Ne], H[Nd*Nf], S[Nd*Nf];//FIXME wrong sizes?
+  FLOAT_MESH jac[Nj+16];//, det;
+  FLOAT_PHYS u[Ne+16], f[Ne+16], GS[Ne+16], uR[Ne+16];
+  FLOAT_PHYS G[Ne+16], H[Nd*Nf+16], S[Nd*Nf+16];//FIXME wrong sizes?
   //
   FLOAT_PHYS intp_shpg[intp_n*Ne];
-  std::copy( &E->intp_shpg[0],// local copy
-             &E->intp_shpg[intp_n*Ne], intp_shpg );
   FLOAT_PHYS wgt[intp_n];
-  std::copy( &E->gaus_weig[0],
-             &E->gaus_weig[intp_n], wgt );
   FLOAT_PHYS C[this->mtrl_matc.size()];
-  std::copy( &this->mtrl_matc[0],
-             &this->mtrl_matc[this->mtrl_matc.size()], C );
-  FLOAT_PHYS R[9] = {
+  int sysn = E->node_n*3;
+  for(int i=0; i<(intp_n*Ne);i++){ intp_shpg[i] = E->intp_shpg[i]; };
+  for(int i=0; i<(intp_n);i++){ wgt[i] = E->gaus_weig[i]; };
+  for(int i=0; i<mtrl_matc.size();i++){ C[i] = this->mtrl_matc[i]; };
+  FLOAT_PHYS R[16] = {
     mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
     mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
-    mtrl_rotc[6],mtrl_rotc[7],mtrl_rotc[8]};
-#if VERB_MAX>10
-  printf( "Material [%u]:", (uint)mtrl_matc.size() );
-  for(uint j=0;j<mtrl_matc.size();j++){
-    //if(j%mesh_d==0){printf("\n");}
-    printf("%+9.2e ",C[j]);
-  }; printf("\n");
-#endif
+    mtrl_rotc[6],mtrl_rotc[7],mtrl_rotc[8], 0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+  FLOAT_PHYS Rs[16];
+  for(int i=0; i<16;i++){ Rs[i] = R[i]; };
+  Rs[1]=R[3]; Rs[2]=R[6]; Rs[5]=R[7];
+  Rs[3]=R[1]; Rs[6]=R[2]; Rs[7]=R[5];
+
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
   const FLOAT_SOLV* RESTRICT sysu  = &sys_u[0];
         FLOAT_SOLV* RESTRICT sysf  = &sys_f[0];
+//  for (int i; i<sysn; i++) sysu[i] = 1.;
+//  for (int i; i<sysn; i++) sysf[i] = 0.;
+
   if(e0<ee){
     for (int i=0; i<Nc; i++){
-      std::memcpy( &   u[Nf*i], &sysu[Econn[Nc*e0+i]*Nf],
-        sizeof(FLOAT_SOLV)*Nf ); };
-    std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
-  };
+      for( int j=0; j<3; j++){ u[Nf*i+j] = sysu[Econn[Nc*e0+i]*Nf+j]; };
+    };
+    for( int j=0; j<Nj; j++){ jac[j] = Ejacs[Nj*e0+j]; };
+  }
+
+  #pragma omp target data map(to:u[0:Ne+16], Rs[0:16], R[0:16], jac[0:Nj+16],intp_shpg[0:intp_n*Ne]) \
+                          map(alloc:uR[0:Ne+16],GS[0:Ne],f[0:3*Nc],G[0:Ne+16])
   for(INT_MESH ie=e0;ie<ee;ie++){
-    for(int i=0;i<Ne;i++){ GS[i]=0.0; };
-    // Transpose R
-    std::swap(R[1],R[3]); std::swap(R[2],R[6]); std::swap(R[5],R[7]);
-    for(int i=0; i<Nc; i++){// Rotate vectors in u
-      for(int k=0; k<3; k++){ uR[(3* i+k) ]=0.0;
-        for(int j=0; j<3; j++){
-          uR[(3* i+k) ] += u[(3* i+j) ] * R[(3* j+k) ];
-    };};};//-------------------------------------------- 2 *3*3*Nc = 18*Nc FLOP
+
+    // READ f from HOST
     for (int i=0; i<Nc; i++){
-      std::memcpy(&   f[Nf*i],& sysf[Econn[Nc*ie+i]*3],
-        sizeof(FLOAT_SOLV)*Nf ); };
+      for(int j=0; j<3; j++){
+        f[Nf*i+j]=sysf[Econn[Nc*ie+i]*3+j];
+      }
+    }
+
+    // MOVE f to DEVICE
+    #pragma omp target update to(Rs[0:16], u[0:Ne+16])
+    #pragma omp target update to(f[0:3*Nc])
+
+    #pragma omp target teams distribute parallel for collapse(2)
+    for(int i=0; i<Nc; i++){// Rotate vectors in u
+      for(int k=0; k<3; k++){
+        uR[(3*i+k)] = 0.0;
+        for(int j=0; j<3; j++){
+          uR[(3* i+k) ] += u[(3* i+j) ] * Rs[(3* j+k) ];
+        }
+      }
+    }//-------------------------------------------- 2 *3*3*Nc = 18*Nc FLOP
+
     if((ie+1)<ee){// Fetch stuff for the next iteration
       for (int i=0; i<Nc; i++){
-        std::memcpy( & u[Nf*i],& sysu[Econn[Nc*(ie+1)+i]*Nf],
-          sizeof(FLOAT_SOLV)*Nf ); };
-    };
-    for(int ip=0; ip<intp_n; ip++){
-      //G = MatMul3x3xN( jac,shg );
-      for(int i=0; i< 9 ; i++){ H[i]=0.0; };
-      for(int i=0; i<Nc; i++){
-        for(int k=0; k<3 ; k++){ G[3* i+k ]=0.0;
-          for(int j=0; j<3 ; j++){
-            G[3* i+k ] += intp_shpg[ip*Ne+ 3* i+j ] * jac[3* j+k ];
-          };
-          for(int j=0; j<3 ; j++){
-            H[(3* k+j) ] += G[(3* i+k) ] * uR[Nf* i+j ];
-          };
+        for(int j=0; j<3; j++){
+          u[Nf*i+j]=sysu[Econn[Nc*(ie+1)+i]*Nf+j];
         };
-      };//------------------------------------------- 4 *3*3*Nc = 36*Nc*Ng FLOP
-#if VERB_MAX>10
-      printf( "Small Strains (Elem: %i):", ie );
-      for(int j=0;j<H.size();j++){
-        if(j%mesh_d==0){printf("\n");}
-        printf("%+9.2e ",H[j]);
-      }; printf("\n");
-#endif
+      };
+    };
+    
+    #pragma omp target teams distribute parallel for
+    for(int i=0;i<Ne;i++){
+      GS[i]=0.0;
+    }
+
+    #pragma omp target update from(uR[0:Ne+16])
+    #pragma omp target update from(GS[0:Ne])
+
+    for(int ip=0; ip<intp_n; ip++){
+
+      //FLOAT_PHYS H_loc[9];
+      //for(int i=0; i<9; i++){
+      //  H_loc[i]=0.0;
+      //}
+      //for(int i=0; i<9; i++){
+       // H[i]=0.0;
+      //}
+       
+      double h0 = 0.;
+      double h1 = 0.;
+      double h2 = 0.;
+      double h3 = 0.;
+      double h4 = 0.;
+      double h5 = 0.;
+      double h6 = 0.;
+      double h7 = 0.;
+      double h8 = 0.;
+
+#pragma omp target teams distribute parallel for reduction(+:h0, h1, h2, h3, h4, h5, h6,h7,h8) map(tofrom:G[0:Ne+16]) 
+      for(int i=0; i<Nc; i++){
+        for(int k=0; k<3; k++){
+          G[3* i+k ]=0.0;
+          G[3* i+k ] += intp_shpg[ip*Ne+ 3* i+0 ] * jac[3* 0+k ];
+          G[3* i+k ] += intp_shpg[ip*Ne+ 3* i+1 ] * jac[3* 1+k ];
+          G[3* i+k ] += intp_shpg[ip*Ne+ 3* i+2 ] * jac[3* 2+k ];
+        }
+        h0 += G[(3* i+0) ] * uR[Nf* i+0 ];
+        h1 += G[(3* i+1) ] * uR[Nf* i+1 ];
+        h2 += G[(3* i+2) ] * uR[Nf* i+2 ];
+        h3 += G[(3* i+0) ] * uR[Nf* i+0 ];
+        h4 += G[(3* i+1) ] * uR[Nf* i+1 ];
+        h5 += G[(3* i+2) ] * uR[Nf* i+2 ];
+        h6 += G[(3* i+0) ] * uR[Nf* i+0 ];
+        h7 += G[(3* i+1) ] * uR[Nf* i+1 ];
+        h8 += G[(3* i+2) ] * uR[Nf* i+2 ];
+        
+      } //------------------------------------------- 4 *3*3*Nc = 36*Nc*Ng FLOP
+
       const FLOAT_PHYS dw = jac[9] * wgt[ip];
-      if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
-        std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
-      }; };
+
       // Material Response
-      S[0]=(C[0]* H[0] + C[3]* H[4] + C[5]* H[8])*dw;//Sxx
-      S[4]=(C[3]* H[0] + C[1]* H[4] + C[4]* H[8])*dw;//Syy
-      S[8]=(C[5]* H[0] + C[4]* H[4] + C[2]* H[8])*dw;//Szz
+      S[0]=(C[0]* h0 + C[3]* h4 + C[5]* h8)*dw;//Sxx
+      S[4]=(C[3]* h0 + C[1]* h4 + C[4]* h8)*dw;//Syy
+      S[8]=(C[5]* h0 + C[4]* h4 + C[2]* h8)*dw;//Szz
       //
-      S[1]=( H[1] + H[3] )*C[6]*dw;// S[3]= S[1];//Sxy Syx
-      S[5]=( H[5] + H[7] )*C[7]*dw;// S[7]= S[5];//Syz Szy
-      S[2]=( H[2] + H[6] )*C[8]*dw;// S[6]= S[2];//Sxz Szx
+      S[1]=( h1 + h3 )*C[6]*dw;// S[3]= S[1];//Sxy Syx
+      S[5]=( h5 + h7 )*C[7]*dw;// S[7]= S[5];//Syz Szy
+      S[2]=( h2 + h6 )*C[8]*dw;// S[6]= S[2];//Sxz Szx
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
       //------------------------------------------------------ 18+9= 27*Ng FLOP
-#if VERB_MAX>10
-      printf( "Stress:");
-      for(uint j=0;j<9;j++){
-        if(j%3==0){printf("\n");}
-        printf("%+9.2e ",S[j]);
-      }; printf("\n");
-#endif
+  #pragma omp target teams distribute parallel for map(to:S[0:Nd*Nf+16])
       for(int i=0; i<Nc; i++){
         for(int k=0; k<3; k++){
           for(int j=0; j<3; j++){
             GS[(3* i+k) ] += G[(3* i+j) ] * S[(3* j+k) ];
-      };};};//--------------------------------------- 2 *3*3*Nc = 18*Nc*Ng FLOP
-    };//end intp loop
-    // Transpose R back again
-    std::swap(R[1],R[3]); std::swap(R[2],R[6]); std::swap(R[5],R[7]);
+          }
+        }
+      }//--------------------------------------- 2 *3*3*Nc = 18*Nc*Ng FLOP
+
+
+    }//end intp loop
+
+    if((ie+1)<ee){// Fetch stuff for the next iteration
+       for(int i=0; i<Nj; i++){
+          jac[i] = Ejacs[Nj*(ie+1)+i];
+        }
+     }
+#pragma omp target update to(jac[0:Nj+16])
+
+//    #pragma omp target update to(GS[0:Ne])
+    #pragma omp target teams distribute parallel for
     for(int i=0; i<Nc; i++){// rotate before summing in f
       for(int k=0; k<3; k++){
         for(int j=0; j<3; j++){
-          f[(3* i+k) ] += GS[(3* i+j) ] * R[(3* j+k) ];
-    };};};//-------------------------------------------- 2 *3*3*Nc = 18*Nc FLOP
+          f[(3*i+k) ] += GS[(3*i+j) ] * R[(3*j+k)];
+        }
+      }
+    }//-------------------------------------------- 2 *3*3*Nc = 18*Nc FLOP
+
+    #pragma omp target update from(f[0:3*Nc])
+
     for (int i=0; i<Nc; i++){
-      std::memcpy(& sysf[Econn[Nc*ie+i]*3],& f[Nf*i],
-        sizeof(FLOAT_SOLV)*Nf ); };
-  };//end elem loop
+      for(int j=0;j<3;j++){
+        sysf[Econn[Nc*ie+i]*3+j] = f[Nf*i+j];
+      }
+    }
+  }//end elem loop
+  
   return 0;
 };
+
 int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
   //FIXME Doesn't do rotation yet
   const uint ndof   = 3;//this->ndof_n
