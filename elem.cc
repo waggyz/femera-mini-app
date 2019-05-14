@@ -229,12 +229,13 @@ int Elem::Jac3Dets(){
 };
 //
 Phys* Elem::ReadPartFMR( const char* fname, bool is_bin ){
-  Phys* Y = new ElastIso3D( 100e9,0.3 );// default physics
+  Phys* Y;
   //
   std::string s; if(is_bin){ s="binary";}else{s="ASCII";};
   if(is_bin){
     std::cout << "ERROR Could not open "<< fname << " for reading." <<'\n'
       << "ERROR Femera (fmr) "<< s <<" format not yet supported." <<'\n';
+    Y = new ElastIso3D( 100e9,0.3 );// default physics
     return Y;}
   //std::cout <<fname;
   //int eltype=4;//FIXME element type id
