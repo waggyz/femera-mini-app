@@ -122,48 +122,99 @@ int Phys::JacT  ( Elem* E ){
   return 0;
 };
 //-------------------------------------------------------------------
+
 int Phys::ReadPartFMR( const char* fname, bool is_bin ){
   //FIXME This is not used. It's done in Elem::ReadPartFMR...
-  std::string s; if(is_bin){ s="binary";}else{s="ASCII";};
+  std::string s; if(is_bin){ s="binary";}else{s="ASCII";}
   if(is_bin){
     std::cout << "ERROR Could not open "<< fname << " for reading." <<'\n'
       << "ERROR Femera (fmr) "<< s <<" format not yet supported." <<'\n';
     return 1;
-  };
+  }
   std::string fmrstring;
   std::ifstream fmrfile(fname);
   while( fmrfile >> fmrstring ){
-    if(fmrstring=="$ElasticProperties"){
+    if(fmrstring=="$ElasticProperties"){//FIXME Deprecated
       int s=0; fmrfile >> s;
       mtrl_prop.resize(s);
-      for(int i=0; i<s; i++){ fmrfile >> mtrl_prop[i]; };
+      for(int i=0; i<s; i++){ fmrfile >> mtrl_prop[i]; }
       //this->MtrlProp2MatC();
       s=0; fmrfile >> s;
       if(s>0){
         mtrl_dirs.resize(s);
-      for(int i=0; i<s; i++){ fmrfile >> mtrl_dirs[i]; mtrl_dirs[i]*=(PI/180.0) ;};
-      };
-    };
-  };
+      for(int i=0; i<s; i++){ fmrfile >> mtrl_dirs[i]; mtrl_dirs[i]*=(PI/180.0) ;}
+      }
+    }
+    if(fmrstring=="$Orientation"){// Material orientation (radians)
+      int s=0; fmrfile >> s;
+      if(s>0){
+        mtrl_dirs.resize(s);
+        for(int i=0; i<s; i++){ fmrfile >> mtrl_dirs[i]; mtrl_dirs[i]*=(PI/180.0) ;}
+      }
+    }
+    //FIXED This parsing requires properties in a specific order
+    if(fmrstring=="$Elastic"){// Elastic Constants
+      int s=0; fmrfile >> s;
+      elas_prop.resize(s);
+      for(int i=0; i<s; i++){ fmrfile >> elas_prop[i]; }
+    }
+    if(fmrstring=="$ThermalExpansion"){// Thermal expansion
+      int s=0; fmrfile >> s;
+      ther_expa.resize(s);
+      for(int i=0; i<s; i++){ fmrfile >> ther_expa[i]; }
+    }
+    if(fmrstring=="$ThermalConductivity"){// Thermal conductivity
+      int s=0; fmrfile >> s;
+      ther_cond.resize(s);
+      for(int i=0; i<s; i++){ fmrfile >> ther_cond[i]; }
+    }
+  }
   return 0;
-};
+}
 int Phys::SavePartFMR( const char* fname, bool is_bin ){
   std::string s; if(is_bin){ s="binary";}else{s="ASCII";};
   if(is_bin){
     std::cout << "ERROR Could not append "<< fname << "." <<'\n'
       << "ERROR Femera (fmr) "<< s <<" format not yet supported." <<'\n';
     return 1;
-  };
+  }
   std::ofstream fmrfile;
   fmrfile.open(fname, std::ios_base::app);
   //
-  fmrfile << "$ElasticProperties" <<'\n';
+  fmrfile << "$ElasticProperties" <<'\n';//FIXME Deprecated
   fmrfile << mtrl_prop.size();
-  for(uint i=0;i<mtrl_prop.size();i++){ fmrfile <<" "<< mtrl_prop[i]; };
+  elas_prop.resize(mtrl_prop.size()); elas_prop = mtrl_prop;
+  for(uint i=0;i<mtrl_prop.size();i++){ fmrfile <<" "<< mtrl_prop[i]; }
   fmrfile << '\n';
   if(mtrl_dirs.size()>0){
     fmrfile << mtrl_dirs.size();
-    for(uint i=0;i<mtrl_dirs.size();i++){ fmrfile <<" "<< mtrl_dirs[i]; };
-  }; fmrfile <<'\n';
+    for(uint i=0;i<mtrl_dirs.size();i++){ fmrfile <<" "<< mtrl_dirs[i]; }
+    fmrfile <<'\n';
+  }
+  // Replace $ElasticProperties with these
+  if(mtrl_dirs.size()>0){
+    fmrfile << "$Orientation" <<'\n';
+    fmrfile << mtrl_dirs.size();
+    for(uint i=0;i<mtrl_dirs.size();i++){ fmrfile <<" "<< mtrl_dirs[i]; }
+    fmrfile <<'\n';
+  }
+  if(elas_prop.size()>0){
+    fmrfile << "$Elastic" <<'\n';
+    fmrfile << elas_prop.size();
+    for(uint i=0;i<elas_prop.size();i++){ fmrfile <<" "<< elas_prop[i]; }
+    fmrfile << '\n';
+  }
+  if(ther_expa.size()>0){
+    fmrfile << "$ThermalExpansion" <<'\n';
+    fmrfile << ther_expa.size();
+    for(uint i=0;i<ther_expa.size();i++){ fmrfile <<" "<< ther_expa[i]; }
+    fmrfile << '\n';
+  }
+  if(ther_cond.size()>0){
+    fmrfile << "$ThermalConductivity" <<'\n';
+    fmrfile << ther_cond.size();
+    for(uint i=0;i<ther_cond.size();i++){ fmrfile <<" "<< ther_cond[i]; }
+    fmrfile << '\n';
+  }
   return 0;
-};
+}

@@ -330,7 +330,7 @@ Phys* Elem::ReadPartFMR( const char* fname, bool is_bin ){
         rhs_vals.insert(Mesh::nfval(n,f,v));
       };
     };
-    if(fmrstring=="$ElasticProperties"){
+    if(fmrstring=="$ElasticProperties"){//FIXME Deprecated
       Phys::vals mtrl_prop={},mtrl_dirs={};
       int s=0; fmrfile >> s;
       mtrl_prop.resize(s);
@@ -348,6 +348,20 @@ Phys* Elem::ReadPartFMR( const char* fname, bool is_bin ){
       };
       //Y->MtrlProp2MatC();
     };
+    if(fmrstring=="$Orientation"){//FIXME
+    }
+    if(fmrstring=="$Elastic"){//FIXME
+    }
+    if(fmrstring=="$ThermalExpansion"){//printf("THERM EXPA\n");
+      int s=0; fmrfile >> s;
+      Y->ther_expa.resize(s);
+      for(int i=0; i<s; i++){ fmrfile >> Y->ther_expa[i]; }
+    }
+    if(fmrstring=="$ThermalConductivity"){//printf("THERM COND\n");
+      int s=0; fmrfile >> s;
+      Y->ther_cond.resize(s);
+      for(int i=0; i<s; i++){ fmrfile >> Y->ther_cond[i]; }
+    }
     /*
     //if(fmrstring=="$Physics"){ //FIXME
     if(fmrstring=="$ElasticIsotropic"){ //FIXME

@@ -7,14 +7,17 @@ class Solv{
 public:
   typedef std::valarray<FLOAT_SOLV> vals;
   typedef FLOAT_SOLV* valign;// memory-aligned vals
+#ifdef ALIGN_SYS
   const uint valign_byte = 64;
+#endif
   enum Meth {
     SOLV_GD=0, SOLV_CG=1, SOLV_CR=2
   };
   enum Cond {
     COND_NONE=0, COND_JACO=3, COND_ROW1=1, COND_STRA=4
   };
-  INT_MESH iter=0, iter_max=0, udof_n, upad_n;
+  INT_MESH iter=0, iter_max=0;
+  INT_MESH uinp_n,udof_n;//, upad_n;//FIXME Remove upad_n
   FLOAT_SOLV loca_rtol=0.0;
   // Pointers to memory-aligned vanilla C arrays
   valign sys_f;// f=[A]{u}//FIXME Move to Phys*?
@@ -54,15 +57,18 @@ public:
 protected:
   inline valign align_resize(RESTRICT Solv::vals&, INT_MESH, const uint);
   Solv( INT_MESH n, INT_MESH i, FLOAT_PHYS r ) :
-    iter_max(i), udof_n(n), upad_n(n), loca_rtol(r){
+    iter_max(i), udof_n(n), loca_rtol(r){
     loca_rto2=loca_rtol*loca_rtol;
-    //sys_u.resize(udof_n,0.0);// Initial Solution Guess
-    //sys_r.resize(udof_n,0.0);// Residuals
-    //sys_d.resize(udof_n,0.0);// Diagonal Preconditioner
-    sys_f = align_resize( dat_f, upad_n, valign_byte );// f=Au
-    sys_u = align_resize( dat_u, upad_n, valign_byte );
-    sys_r = align_resize( dat_r, upad_n, valign_byte );
-    sys_d = align_resize( dat_d, upad_n, valign_byte );
+#ifdef ALIGN_SYS
+    sys_f = align_resize( dat_f, udof_n, valign_byte );// f=Au
+    sys_u = align_resize( dat_u, udof_n, valign_byte );
+    sys_r = align_resize( dat_r, udof_n, valign_byte );
+    sys_d = align_resize( dat_d, udof_n, valign_byte );
+#else
+    sys_u.resize(udof_n,0.0);// Initial Solution Guess
+    sys_r.resize(udof_n,0.0);// Residuals
+    sys_d.resize(udof_n,0.0);// Diagonal Preconditioner
+#endif
 #if VERB_MAX > 3
     std::cout << &sys_f[0] <<'\n';
 #endif
@@ -77,8 +83,11 @@ public:
   //};
   PCG( INT_MESH n, INT_MESH i, FLOAT_PHYS r ) : Solv(n,i,r){
     meth_name="preconditioned cojugate gradient";
-    //sys_p.resize(udof_n,0.0);// CG working vector
-    sys_p = align_resize( dat_p, upad_n, valign_byte );
+#ifdef ALIGN_SYS
+    sys_p = align_resize( dat_p, udof_n, valign_byte );
+#else
+    sys_p.resize(udof_n,0.0);// CG working vector
+#endif
     udof_flop = 12;//*elem_n
     udof_band = 14*sizeof(FLOAT_SOLV);//*udof_n + 2
   };
@@ -109,10 +118,13 @@ public:
   //};
   PCR( INT_MESH n, INT_MESH i, FLOAT_PHYS r ) : Solv(n,i,r){
     meth_name="preconditioned cojugate residual";
-    //sys_p.resize(udof_n,0.0);// CR working vector
-    //sys_g.resize(udof_n,0.0);// CR working vector
-    sys_p = align_resize( dat_p, upad_n, valign_byte );
-    sys_g = align_resize( dat_g, upad_n, valign_byte );
+#ifdef ALIGN_SYS
+    sys_p = align_resize( dat_p, udof_n, valign_byte );
+    sys_g = align_resize( dat_g, udof_n, valign_byte );
+#else
+    sys_p.resize(udof_n,0.0);// CR working vector
+    sys_g.resize(udof_n,0.0);// CR working vector
+#endif
     udof_flop = 14;//*elem_n
     udof_band = 17*sizeof(FLOAT_SOLV);//*udof_n +?
   };
@@ -136,7 +148,7 @@ private:
   int BC0( Elem*, Phys* Y );
 };
 //============= Inline Function Definitions ===============
-//
+#ifdef ALIGN_SYS
 inline Solv::valign Solv::align_resize(RESTRICT Solv::vals &v,
   INT_MESH n, const uint bytes){
   //FIXME Hack to align sys_f
@@ -145,6 +157,7 @@ inline Solv::valign Solv::align_resize(RESTRICT Solv::vals &v,
   const auto offset = bytes - ( ptr % bytes );
   return(&v[( offset % bytes )/sizeof(FLOAT_SOLV)]);
 };
+#endif
 
 
 #endif

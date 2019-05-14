@@ -48,6 +48,8 @@ public: Gmsh() : Mesh(Solv::SOLV_CG){
   typedef std::tuple<int,INT_DOF> tfitem;
   typedef std::deque<tfitem> tflist;// for fixed-zero boundary conditions
   //
+  bool calc_band=false;//FIXME estimate average matrix nonzero bandwidth
+  //
   // Apply to nodes in surfaces with gmsh physical id tags given
   tfvals rhs_tvals={};// Nodal forces applied (nonzeros) to tags
   tfvals bcs_tvals={};// Dirichlet bundary conditions (nonzeros) applied to tags

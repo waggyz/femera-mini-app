@@ -6,14 +6,20 @@
 #endif
 // Maximum verbosity supported by executable
 // 0:none, 1:CSV line output, 2: timing, 3: status //11:debug level
-//
-#define INT_MESH_PART int// Mesh Partition ID (user-defined?)
+//FIXME Change the next to INT_PART
+#define INT_MESH_PART int
+// Mesh Partition ID (user-defined?)
 //#define INT_MESH unsigned int// Element Numbers
 //#define INT_ELEM_COLOR unsigned char// Color numbers
 // (unsigned char or unisgned short int) color 0 is no color assigned
-#define INT_ELEM_NODE unsigned short int// char Number of nodes/element
-#define INT_ORDER unsigned short int// char Element order, mesh dimension, etc.
-#define INT_DOF unsigned short int// char DOF id number
+#define INT_ELEM_NODE unsigned short int
+// char Number of nodes/element
+#define INT_DIM short int
+//FIXME Change the next two to INT_DIM
+#define INT_ORDER unsigned short int
+// char Element order, mesh dimension, etc.
+#define INT_DOF unsigned short int
+// char DOF id number
 //
 // Node, Element, DOF Numbers
 #define INT_MESH unsigned int
@@ -23,6 +29,8 @@
 // Physics precision
 #define FLOAT_SOLV double
 // Solver precision
+#define ALIGN_SYS
+// align system vectors
 //FIXME I don't think the following are needed...
 #define VOIGT_FRUP 0,4,8, 5,2,1// Extract from upper-triangular part of
 //symmetric 3x3 stress or strain tensor

@@ -40,15 +40,17 @@ int main( int argc, char** argv ) {
   Gmsh* M = new Gmsh();
   bool save_asc=false, save_bin=false, save_csv=false;
   bool is_part=false;
-  std::unordered_map<int,std::vector<FLOAT_PHYS>> mtrl_part,mtrl_volu;
+  std::unordered_map<int,std::vector<FLOAT_PHYS>>
+    mtrl_part, tcon_part, texp_part;//  mtrl_volu, tcon_volu, texp_volu;
   bool rotfile=false, allrand=false;// Random orientations
+  bool hasther=false;
   FLOAT_MESH eps_find=1e-6;
   FLOAT_PHYS oriunit=1.0;
   std::vector<FLOAT_PHYS> orislist={};
   //int hown_meth = 2;// Algorithm to balance halo node owner
   // 0: first touch (lowest partition number)
   // 1: partition with fewest nodes, first touch tiebreaker (original optimize)
-  // 2: partition with fewest nodes, even-odd tiebreaker
+  // 2: partition with fewest nodes, even-odd tiebreaker (default)
   // 3: random
   //
   //FIXME Consider using C++ for parsing command line options.
@@ -56,8 +58,9 @@ int main( int argc, char** argv ) {
     std::vector<int> tagslist={},nodelist={},dofslist={};
     //std::vector<int> volutags={},volutmp={};
     std::vector<int>  parttags={}, axislist={},parttmp={};
-    std::vector<FLOAT_PHYS> younlist={}, poislist={}, smodlist={}, matclist={},
-      rdeglist={}, avallist={};
+    std::vector<FLOAT_PHYS> younlist={}, poislist={}, smodlist={},
+      matclist={}, rdeglist={}, avallist={},
+      tconlist={}, texplist={};// therlist={},
     //  younlist, poislist, smodlist, matclist, rdeglist;
     //std::unordered_map<int,std::vector<int>> axislist;
     //int volutag=0, parttag=0;
@@ -67,13 +70,14 @@ int main( int argc, char** argv ) {
     //
     opterr = 0; int c;
     while ((c = getopt (argc, argv,
-      "abco:pv:t:n:@:xyz0u:f:M:X:Y:Z:E:N:G:C:B:O:R")) != -1){
+      "abco:pv:wt:n:@:xyzT0u:f:M:X:Y:Z:E:N:G:A:K:C:B:O:R")) != -1){
       // x:  x requires an argument
       mtrldone=true;
       switch (c) {
         // Input filename(s)
         case 'v':{ verbosity = atoi(optarg);M->verbosity=verbosity; break; }
         case 'p':{ is_part = true; break; }
+        case 'w':{ M->calc_band = true; break; }
         case 'o':{ M->hown_meth = atoi(optarg); break; }
         //case 'P':{ is_part = true; part_n=atoi(optarg); break;}// pstr = optarg;
         // Output format
@@ -87,6 +91,7 @@ int main( int argc, char** argv ) {
         case 'x':{ dofslist.push_back(0); break; }
         case 'y':{ dofslist.push_back(1); break; }
         case 'z':{ dofslist.push_back(2); break; }
+        case 'T':{ dofslist.push_back(3); break; }//FIXME Swap -t and -T?
         case '0':{ fix0=true; break; }
         case 'u':{ disp=true; uval=atof(optarg); break; }
         case 'f':{ load=true; fval=atof(optarg); break; }
@@ -105,9 +110,13 @@ int main( int argc, char** argv ) {
         case 'E':{ younlist.push_back(atof(optarg)); hasmatp=true; mtrldone=false;break; }
         case 'N':{ poislist.push_back(atof(optarg)); hasmatp=true; mtrldone=false;break; }
         case 'G':{ smodlist.push_back(atof(optarg)); hasmatp=true; mtrldone=false;break; }
+        case 'A':{ texplist.push_back(atof(optarg)); hasther=true; mtrldone=false;break; }
+        case 'K':{ tconlist.push_back(atof(optarg)); hasther=true; mtrldone=false;break; }
+        //case 'H':{ therlist.push_back(atof(optarg)); hasmatp=true; mtrldone=false;break; }
         case 'X':{ axislist.push_back(0); rdeglist.push_back(atof(optarg)); mtrldone=false;break; }
         case 'Y':{ axislist.push_back(1); rdeglist.push_back(atof(optarg)); mtrldone=false;break; }
         case 'Z':{ axislist.push_back(2); rdeglist.push_back(atof(optarg)); mtrldone=false;break; }
+        //case 'T':{ axislist.push_back(3); rdeglist.push_back(atof(optarg)); mtrldone=false; hasther=true;break; }
         case 'R':{ rotrand=true; mtrldone=false;break; }
         case 'B':{ rotfile=true; oriname=optarg; mtrldone=false; break; }
         case 'O':{ rotfile=true; oriname=optarg; mtrldone=false;
@@ -134,7 +143,8 @@ int main( int argc, char** argv ) {
       };
       if( hasmatp & hasmatc){
         fprintf (stderr,"ERROR Specify only material properties:\n");
-        fprintf (stderr,"      -E<Young's modulus> -N<Poisson's ratio> -G<shear modulus>...\n");
+        fprintf (stderr,"      -E<Young's modulus> -N<Poisson's ratio>\n");
+        fprintf (stderr,"      -G<shear modulus> -H<thermal expansion>...\n");
         fprintf (stderr,"   OR material response matrix values:\n");
         fprintf (stderr,"      -C<c11>...\n");
         return 1; };
@@ -148,7 +158,7 @@ int main( int argc, char** argv ) {
         for(size_t i=0;i<avallist.size();i++){ printf(" %f",avallist[i]); };
         printf(" DOFs:");
         for(size_t i=0;i<dofslist.size();i++){ printf(" %i",dofslist[i]); };
-        printf(", Displacement fixed zero\n");
+        printf(", Displacement/temperature fixed zero\n");
       };
       if(disp){
         printf("Tags:");
@@ -159,7 +169,7 @@ int main( int argc, char** argv ) {
         for(size_t i=0;i<avallist.size();i++){ printf(" %f",avallist[i]); };
         printf(" DOFs:");
         for(size_t i=0;i<dofslist.size();i++){ printf(" %i",dofslist[i]); };
-        printf(", Displacement: %+9.2e\n",uval);
+        printf(", Displacement/temperature: %+9.2e\n",uval);
       };
       if(load){
         printf("Tags:");
@@ -219,6 +229,12 @@ int main( int argc, char** argv ) {
         std::cout << "Shear:";
           for(FLOAT_PHYS v : smodlist ){ std::cout << " " << v; };
         std::cout << std::endl;
+        std::cout << "Thermal expansion:";
+          for(FLOAT_PHYS v : texplist ){ std::cout << " " << v; };
+        std::cout << std::endl;
+        std::cout << "Thermal conductivity:";
+          for(FLOAT_PHYS v : tconlist ){ std::cout << " " << v; };
+        std::cout << std::endl;
         std::cout << " matC:";
           for(FLOAT_PHYS v : matclist ){ std::cout << " " << v; };
         std::cout << std::endl;
@@ -244,6 +260,8 @@ int main( int argc, char** argv ) {
           for(FLOAT_PHYS v : younlist ){ mtrl_part[p].push_back(v); };
           for(FLOAT_PHYS v : poislist ){ mtrl_part[p].push_back(v); };
           for(FLOAT_PHYS v : smodlist ){ mtrl_part[p].push_back(v); };
+          for(FLOAT_PHYS v : texplist ){ texp_part[p].push_back(v); };
+          for(FLOAT_PHYS v : tconlist ){ tcon_part[p].push_back(v); };
         };
         //for(int p : volutags ){
         //  for(FLOAT_PHYS v : rdeglist ){ mtrl_volu[p].push_back(v); };
@@ -252,9 +270,10 @@ int main( int argc, char** argv ) {
         //  for(FLOAT_PHYS v : smodlist ){ mtrl_volu[p].push_back(v); };
         //};
         //
-        mtrldone=true; hasmatc=false; hasmatp=false; rotrand=false;
+        mtrldone=true; hasmatc=false; hasmatp=false; rotrand=false, hasther=false;
         parttags=parttmp;//volutags=volutmp;
         younlist={}; poislist={}; smodlist={}; matclist={};
+        tconlist={}; texplist={};
         rdeglist={}; axislist={};
          parttmp={};// volutmp={};
       };// Done getting material property set
@@ -262,13 +281,15 @@ int main( int argc, char** argv ) {
     };// end argument parsing loop
 #if VERB_MAX>2
     if(verbosity>2){
-    if(mtrl_part.size()>0){
-      std::cout << "Partition Physics: "<< std::endl;;
-      for (std::pair<int,std::vector<FLOAT_PHYS>> pr : mtrl_part){
-        std::cout << "["<< pr.first <<"]";
-        for(FLOAT_PHYS v : pr.second ){ std::cout <<" "<<v; };
-        std::cout << std::endl;
-      }; };
+      if(mtrl_part.size()>0){
+        std::cout << "Partition Physics: "<< std::endl;;
+        for (std::pair<int,std::vector<FLOAT_PHYS>> pr : mtrl_part){
+          std::cout << "["<< pr.first <<"]";
+          for(FLOAT_PHYS v : pr.second ){ std::cout <<" "<<v; };
+          std::cout << std::endl;
+        }; };
+        //FIXME add thermal here
+#if 0
     if(mtrl_volu.size()>0){
       std::cout << "Tagged Volume Physics:" << std::endl;
       for (std::pair<int,std::vector<FLOAT_PHYS>> pr : mtrl_volu){
@@ -276,6 +297,7 @@ int main( int argc, char** argv ) {
         for(FLOAT_PHYS v : pr.second ){ std::cout <<" "<<v; };
         std::cout << std::endl;
       }; };
+#endif
     };
 #endif
     //if(!is_part){ std::cout << "ERROR Must specify -p or -P n" <<'\n'; return 1;};
@@ -462,6 +484,7 @@ int main( int argc, char** argv ) {
       };
       //E->node_n=999;
       uint d=uint(E->mesh_d);
+      //if(hasther){ d+=1; };//FIXME mesh_d remains 3?, udof_n=4?
       E->vert_n=E->node_n;
       E->vert_coor.resize(d*E->vert_n);
       E->node_glid.resize(E->node_n);
@@ -573,7 +596,7 @@ int main( int argc, char** argv ) {
 #pragma omp parallel for schedule(static)
     for(int part_i=part_0;part_i<(part_n+part_0);part_i++){
       Phys::vals props={100e9,0.3};//FIXME Should not have defaults here...
-      Phys::vals dirs={0.0,0.0,0.0};
+      Phys::vals dirs={0.0,0.0,0.0};// 
       Phys::vals prop={};
       auto m0=mtrl_part[0];
       std::stringstream ss;
@@ -607,22 +630,65 @@ int main( int argc, char** argv ) {
               };
           };
         };
-        if(props.size()>3){
-          for(uint i=0;i<3;i++){ dirs[i]=props[i]; };
-          prop.resize(props.size()-3);
-          for(uint i=3;i<props.size();i++){ prop[i-3]=props[i]; };
-          Y=new ElastOrtho3D(prop,dirs);
+#if 0
+        if(hasther){// check hasther t/f
+          if(props.size()>3){
+            for(uint i=0;i<3;i++){ dirs[i]=props[i]; }
+            prop.resize(props.size()-3);
+            for(uint i=3;i<props.size();i++){ prop[i-3]=props[i]; }
+            Y=new ThermoElastOrtho3D(prop,dirs);
+          }else{
+            prop.resize(props.size());
+            for(uint i=0;i<props.size();i++){ prop[i]=props[i]; }
+            Y=new ThermoElastIso3D(prop[0],prop[1]);
+          }
         }else{
-          prop.resize(props.size());
-          for(uint i=0;i<props.size();i++){ prop[i]=props[i]; };
-          Y=new ElastIso3D(prop[0],prop[1]);
-        };
+#endif
+          if(props.size()>3){
+            for(uint i=0;i<3;i++){ dirs[i]=props[i]; }
+            prop.resize(props.size()-3);
+            for(uint i=3;i<props.size();i++){ prop[i-3]=props[i]; }
+            Y=new ElastOrtho3D(prop,dirs);
+          }else{
+            prop.resize(props.size());
+            for(uint i=0;i<props.size();i++){ prop[i]=props[i]; }
+            Y=new ElastIso3D(prop[0],prop[1]);
+          }
+#if 0
+        }
+#endif
+        if(tcon_part[part_i].size()>0){
+          if(verbosity>1){
+            std::cout << "Setting thermal conductivity..." <<'\n'; }
+          Y->ther_cond.resize(tcon_part[part_i].size());
+          for(uint i=0; i<tcon_part[part_i].size(); i++){
+            Y->ther_cond[i] = tcon_part[part_i][i]; }
+        }else if(tcon_part[0].size()>0){
+          if(verbosity>1){
+            std::cout << "Setting default thermal conductivity..." <<'\n'; }
+          Y->ther_cond.resize(tcon_part[0].size());
+          for(uint i=0; i<tcon_part[0].size(); i++){
+            Y->ther_cond[i] = tcon_part[0][i]; }
+        }
+        if(texp_part[part_i].size()>0){
+          if(verbosity>1){
+            std::cout << "Setting thermal expansion..." <<'\n'; }
+          Y->ther_expa.resize(texp_part[part_i].size());
+          for(uint i=0; i<texp_part[part_i].size(); i++){
+            Y->ther_expa[i] = texp_part[part_i][i]; }
+        }else if(texp_part[0].size()>0){
+          if(verbosity>1){
+            std::cout << "Setting default thermal expansion..." <<'\n'; }
+          Y->ther_expa.resize(texp_part[0].size());
+          for(uint i=0; i<texp_part[0].size(); i++){
+            Y->ther_expa[i] = texp_part[0][i]; }
+        }
         if(verbosity>1){
-          std::cout << "Appending physics to " << pname << "..." <<'\n'; };
+          std::cout << "Appending physics to " << pname << "..." <<'\n'; }
         Y->SavePartFMR( pname.c_str(), false );
-      };
-    };
-  };
+      }
+    }
+  }
   //if(save_bin){
   //  std::cout << "ERROR Binary save not yet implemented. " << '\n';
   //};

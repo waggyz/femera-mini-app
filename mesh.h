@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <array>
 //
+
 class Mesh{
 public:
   // valarray: variable-length numerical c++ type
@@ -34,12 +35,13 @@ public:
   //NOTE Local (partition) node numbers are 0-indexed.
   //
   //
-  INT_ORDER mesh_d=3;//FIXME mesh_d_n?
-  INT_MESH  vert_n=0;// Total number of element vertex nodes
-  INT_MESH  node_n=0;// Total number of nodes
-  INT_MESH  elem_n=0;// Total number of nodes
-  INT_MESH  udof_n=0;// Total number of solution values (size of system)
-  uint      simd_n=1;// Initial vectorization width
+  INT_DIM  mesh_d=3;// Mesh Dimension (usually max of elem_d)
+  INT_MESH vert_n=0;// Total number of element vertex nodes
+  INT_MESH node_n=0;// Total number of nodes
+  INT_MESH elem_n=0;// Total number of nodes
+  INT_MESH udof_n=0;// Total number of solution values (size of system)
+  //
+  uint     simd_n=1;//FIXME Remove? Initial vectorization width
   //
   int comp_n=1, numa_n=1;
   int solv_meth=Solv::SOLV_CG, solv_cond=Solv::COND_JACO, verbosity=1;
@@ -114,6 +116,10 @@ public:
   };
   int Init() final;
   int Iter() final;
+  static std::vector<part> P;
+#pragma omp threadprivate(P)
+//  static std::vector<part> Ptoto;
+//#pragma omp threadprivate(Ptoto)
 protected:
 private:
 };

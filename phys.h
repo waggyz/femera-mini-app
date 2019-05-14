@@ -5,9 +5,18 @@ class Phys{
 public:
   typedef std::valarray<FLOAT_PHYS> vals;
   //typedef std::vector<FLOAT_PHYS> valign;
-  INT_DOF ndof_n;// Degrees of freedom per node:
-  // 2 for elastic 2D, 3 for elastic 3D, 1 for thermal
-  //INT_DOF ndop_n;// Padded degrees of freedom
+  INT_DIM ndof_n;// Degrees of freedom per node://FIXME change to ndof_d
+  // 1 for thermal, 2 for elastic 2D, 3 for elastic 3D, 4 for thermoelastic 3D
+  //
+  // The followig are stored interleaved in the system vectors
+  INT_DIM ninp_d=3;// Inputs/node (defines size of sys_u,p?)
+  //                  usually ndof_d + user-defined nodal field and state vars
+  INT_DIM ndof_d=3;// Unknowns/node (defines size of sys_f?)
+  //FIXME The followig will be stored in blocks, some in other arrays
+  INT_DIM nvar_d=0;// Inputs/node: user-defined nodal state vars
+  INT_DIM evar_d=0;// Inputs/element: user-defined elemental state vars
+  INT_DIM gvar_d=0;// Inputs/gauss point: user-defined state vars
+  //
   FLOAT_PHYS part_sum1=0.0;
   //
   virtual int BlocLinear( Elem*,RESTRICT Solv::vals&,const RESTRICT Solv::vals&)=0;
@@ -19,8 +28,8 @@ public:
   virtual int ElemJacobi( Elem* )=0;//FIXME old
   //
   virtual inline int MtrlProp2MatC( )=0;//why does this inline?
-  virtual Solv::vals MtrlLinear(//FIXME Not used for 3D yet
-    const RESTRICT Solv::vals &strain )=0;
+  virtual Phys::vals MtrlLinear(//FIXME Not used for 3D yet
+    const RESTRICT Phys::vals &strain )=0;
   //
   int ScatterNode2Elem( Elem*,
     const RESTRICT Solv::vals & node_v,
@@ -34,62 +43,75 @@ public:
   int JacT  ( Elem* E );
   //
   virtual int ScatStiff( Elem* )=0;//FIXME should be local to subclass?
-  int ElemStiff( RESTRICT Solv::vals& );//for comparison to LMA EBE
+  int ElemStiff( RESTRICT Phys::vals& );//for comparison to LMA EBE
   int ElemStiff();
   //
+#if 0
+  virtual int SavePartFMR( const char* bname, bool is_bin )=0;//FIXME ASCII/Binary file format
+  virtual int ReadPartFMR( const char* bname, bool is_bin )=0;
+#else
   int SavePartFMR( const char* bname, bool is_bin );//FIXME ASCII/Binary file format
   int ReadPartFMR( const char* bname, bool is_bin );
+#endif
   //
   int tens_flop=0, tens_band=0;
   int stif_flop=0, stif_band=0;
   //
-  Solv::vals mtrl_prop;// Conventional Material Properties
+  Phys::vals mtrl_prop;// Conventional Material Properties
   // (Young's, Poisson's, etc.)
-  Solv::vals mtrl_dirs;// Orientation [x,z,x]
+  Phys::vals mtrl_dirs;// Orientation [x,z,x]
   //
-  Solv::vals mtrl_matc;// Unique D-matrix values
-  Solv::vals mtrl_rotc;
+  Phys::vals mtrl_matc;// Unique D-matrix values
+  Phys::vals mtrl_rotc;
   //
-  Solv::vals elem_inout;// Elemental nodal value workspace (serial)
+  Phys::vals elas_prop;
+  Phys::vals ther_expa;//FIXME Hacked thermal constants into these
+  Phys::vals ther_cond;
+  //
+  Phys::vals elem_inout;// Elemental nodal value workspace (serial)
   // Fill w/ Phys::ScatterNode2Elem(...),ElemLinear(Elem*),ElemJacobi(),...
-  Solv::vals elem_in, elem_out;// Double-buffer for parallel
+  Phys::vals elem_in, elem_out;// Double-buffer for parallel
   // The next is for comparison to traditional EBE
-  Solv::vals elem_stiff;// Fill w/ Phys::ScatterStiff(...)
+  Phys::vals elem_stiff;// Fill w/ Phys::ScatterStiff(...)
   //size_t elem_linear_flop=0;
 protected:
-  Phys( Solv::vals p ) : mtrl_prop(p){};
-  Phys( Solv::vals p, Solv::vals d ) : mtrl_prop(p),mtrl_dirs(d){};
+  Phys( Phys::vals p ) : mtrl_prop(p){};
+  Phys( Phys::vals p, Phys::vals d ) : mtrl_prop(p),mtrl_dirs(d){};
   //constructor computes material vals
-  inline Solv::vals Tens2VoigtEng(const RESTRICT Solv::vals&);
-  inline Solv::vals Tens3VoigtEng(const RESTRICT Solv::vals&);
-  inline Solv::vals Tens2VoigtEng(const FLOAT_PHYS H[4]);
-  inline Solv::vals Tens3VoigtEng(const FLOAT_PHYS H[9]);
+  inline Phys::vals Tens2VoigtEng(const RESTRICT Phys::vals&);
+  inline Phys::vals Tens3VoigtEng(const RESTRICT Phys::vals&);
+  inline Phys::vals Tens2VoigtEng(const FLOAT_PHYS H[4]);
+  inline Phys::vals Tens3VoigtEng(const FLOAT_PHYS H[9]);
 private:
 };
 // Inline Functions =======================================
 //
-inline Solv::vals Phys::Tens3VoigtEng(const RESTRICT Solv::vals &H){
-  return(Solv::vals { H[0],H[4],H[8], H[1]+H[3],H[5]+H[7],H[2]+H[6] });
+inline Phys::vals Phys::Tens3VoigtEng(const RESTRICT Phys::vals &H){
+  return(Phys::vals { H[0],H[4],H[8], H[1]+H[3],H[5]+H[7],H[2]+H[6] });
   // exx,eyy,ezz, exy,eyz,exz
 };
-inline Solv::vals Phys::Tens3VoigtEng(const FLOAT_PHYS H[9]){
-  return(Solv::vals { H[0],H[4],H[8], H[1]+H[3],H[5]+H[7],H[2]+H[6] });};
+inline Phys::vals Phys::Tens3VoigtEng(const FLOAT_PHYS H[9]){
+  return(Phys::vals { H[0],H[4],H[8], H[1]+H[3],H[5]+H[7],H[2]+H[6] });};
   // exx,eyy,ezz, exy,eyz,exz
-inline Solv::vals Phys::Tens2VoigtEng(const RESTRICT Solv::vals &H){
-  return(Solv::vals { H[0],H[3], H[1]+H[2] });};
-inline Solv::vals Phys::Tens2VoigtEng(const FLOAT_PHYS H[4]){
-  return(Solv::vals { H[0],H[3], H[1]+H[2] });
+inline Phys::vals Phys::Tens2VoigtEng(const RESTRICT Phys::vals &H){
+  return(Phys::vals { H[0],H[3], H[1]+H[2] });};
+inline Phys::vals Phys::Tens2VoigtEng(const FLOAT_PHYS H[4]){
+  return(Phys::vals { H[0],H[3], H[1]+H[2] });
 };
 // Physics Kernels: ---------------------------------------
 class ElastIso2D final: public Phys{
 public: ElastIso2D(FLOAT_PHYS young, FLOAT_PHYS poiss, FLOAT_PHYS thick) :
-  Phys((Solv::vals){young,poiss,thick}){// Constructor
+  Phys((Phys::vals){young,poiss,thick}){// Constructor
     this->ndof_n      = 2;
     //this->elem_flop = FIXME;
     ElastIso2D::MtrlProp2MatC();
   };
+#if 0
+  int SavePartFMR( const char* bname, bool is_bin ) final;
+  int ReadPartFMR( const char* bname, bool is_bin ) final;
+#endif
   int Setup( Elem* )final;
-  int BlocLinear( Elem*,RESTRICT Solv::vals&,const RESTRICT Solv::vals&) final;
+  int BlocLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
   int ElemLinear( Elem*,FLOAT_SOLV*,const FLOAT_SOLV*) final;
   int ElemJacobi( Elem*,FLOAT_SOLV* ) final;
   int ElemRowSumAbs(Elem*, FLOAT_SOLV* ) final;
@@ -105,10 +127,10 @@ public: ElastIso2D(FLOAT_PHYS young, FLOAT_PHYS poiss, FLOAT_PHYS thick) :
     mtrl_matc.resize(3); mtrl_matc={ d, n*d, (1.0-n)*d*0.5 };//*0.5 eng. strain
     return 0;
   };
-  Solv::vals MtrlLinear(//FIXME Doesn't inline
-    const RESTRICT Solv::vals &strain_tensor)final{//FIXME Plane Stress
-    const Solv::vals e=Tens2VoigtEng(strain_tensor);
-    return( Solv::vals {
+  Phys::vals MtrlLinear(//FIXME Doesn't inline
+    const RESTRICT Phys::vals &strain_tensor)final{//FIXME Plane Stress
+    const Phys::vals e=Tens2VoigtEng(strain_tensor);
+    return( Phys::vals {
       mtrl_matc[0]*e[0] +mtrl_matc[1]*e[1] ,
       mtrl_matc[1]*e[0] +mtrl_matc[0]*e[1] ,
       mtrl_matc[2]*e[2] });
@@ -118,15 +140,19 @@ private:
 };
 class ElastIso3D final: public Phys{
 public: ElastIso3D(FLOAT_PHYS young, FLOAT_PHYS poiss ) :
-  Phys((Solv::vals){young,poiss}){
+  Phys((Phys::vals){young,poiss}){
     this->ndof_n = 3;
     //this->elem_flop = 225;//FIXME Tensor eval for linear tet
     // calc stiff_flop from (ndof_n*E->elem_node_n)*(ndof_n*E->elem_node_n-1.0)
     ElastIso3D::MtrlProp2MatC();
   };
+#if 0
+  int SavePartFMR( const char* bname, bool is_bin ) final;
+  int ReadPartFMR( const char* bname, bool is_bin ) final;
+#endif
   int Setup( Elem* )final;
-  //int ElemLinear( std::vector<Elem*>,RESTRICT Solv::vals&,const RESTRICT Solv::vals&) final;
-  int BlocLinear( Elem*,RESTRICT Solv::vals&,const RESTRICT Solv::vals&) final;
+  //int ElemLinear( std::vector<Elem*>,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
+  int BlocLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
   int ElemLinear( Elem*,FLOAT_SOLV*,const FLOAT_SOLV*) final;
   int ElemJacobi( Elem*,FLOAT_SOLV* ) final;
   int ElemRowSumAbs(Elem*, FLOAT_SOLV* ) final;
@@ -141,15 +167,15 @@ public: ElastIso3D(FLOAT_PHYS young, FLOAT_PHYS poiss ) :
     //const FLOAT_PHYS C11=(1.0-n)*d;
     //const FLOAT_PHYS C12=n*d ;
     //const FLOAT_PHYS C44=(1.0-2.0*n)*d*0.5;
-    ////const Solv::vals C={C11,C12,C44};
-    //return( Solv::vals {C11,C12,C44} );
+    ////const Phys::vals C={C11,C12,C44};
+    //return( Phys::vals {C11,C12,C44} );
     mtrl_matc.resize(3); mtrl_matc={ (1.0-nu)*d,nu*d,(1.0-2.0*nu)*d*0.5};
     return 0;
   };
-  Solv::vals MtrlLinear( const RESTRICT Solv::vals &e)final{
+  Phys::vals MtrlLinear( const RESTRICT Phys::vals &e)final{
     //FIXME Doesn't inline
-    //const Solv::vals e=Tens3VoigtEng(strain_tensor);
-    RESTRICT Solv::vals s(0.0,6);
+    //const Phys::vals e=Tens3VoigtEng(strain_tensor);
+    RESTRICT Phys::vals s(0.0,6);
     s[0]= mtrl_matc[0]*e[0] +mtrl_matc[1]*e[4] +mtrl_matc[1]*e[8];
     s[1]= mtrl_matc[1]*e[0] +mtrl_matc[0]*e[4] +mtrl_matc[1]*e[8];
     s[2]= mtrl_matc[1]*e[0] +mtrl_matc[1]*e[4] +mtrl_matc[0]*e[8];
@@ -167,50 +193,54 @@ class ElastOrtho3D final: public Phys{
 public:
   ElastOrtho3D(// Isotropic Material Constructor
     FLOAT_PHYS young, FLOAT_PHYS poiss ) :
-    Phys((Solv::vals){young,poiss},
-         (Solv::vals){0.0,0.0,0.0} )
+    Phys((Phys::vals){young,poiss},
+         (Phys::vals){0.0,0.0,0.0} )
      { ndof_n = 3; ElastOrtho3D::MtrlProp2MatC(); };
   ElastOrtho3D(// Isotropic Material Constructor (Rotated)
     FLOAT_PHYS r1z  , FLOAT_PHYS r2x  , FLOAT_PHYS r3z,
     FLOAT_PHYS young, FLOAT_PHYS poiss ) :
-    Phys((Solv::vals){ young, poiss },
-         (Solv::vals){r1z,r2x,r3z} )
+    Phys((Phys::vals){ young, poiss },
+         (Phys::vals){r1z,r2x,r3z} )
      { ndof_n = 3; ElastOrtho3D::MtrlProp2MatC(); };
   ElastOrtho3D(// Cubic Material Constructor
     FLOAT_PHYS r1z  , FLOAT_PHYS r2x  , FLOAT_PHYS r3z,
     FLOAT_PHYS young, FLOAT_PHYS poiss, FLOAT_PHYS shear ) :
-    Phys((Solv::vals){ young, poiss, shear },
-         (Solv::vals){r1z,r2x,r3z} )
+    Phys((Phys::vals){ young, poiss, shear },
+         (Phys::vals){r1z,r2x,r3z} )
      { ndof_n = 3; ElastOrtho3D::MtrlProp2MatC(); };
   ElastOrtho3D(// Transversely Isotropic Material Constructor
     FLOAT_PHYS r1z, FLOAT_PHYS r2x, FLOAT_PHYS r3z,
     FLOAT_PHYS C11, FLOAT_PHYS C33,
     FLOAT_PHYS C12, FLOAT_PHYS C13, FLOAT_PHYS C44 ) :
-    Phys((Solv::vals){C11,C33, C12,C13, C44 },
-         (Solv::vals){r1z,r2x,r3z} )
+    Phys((Phys::vals){C11,C33, C12,C13, C44 },
+         (Phys::vals){r1z,r2x,r3z} )
      { ndof_n = 3; ElastOrtho3D::MtrlProp2MatC(); };
   ElastOrtho3D(// Orthotropic Material Constructor
     FLOAT_PHYS r1z, FLOAT_PHYS r2x, FLOAT_PHYS r3z,
     FLOAT_PHYS C11, FLOAT_PHYS C22, FLOAT_PHYS C33,
     FLOAT_PHYS C12, FLOAT_PHYS C23, FLOAT_PHYS C13,
     FLOAT_PHYS C44, FLOAT_PHYS C55, FLOAT_PHYS C66 ) :
-    Phys((Solv::vals){C11,C22,C33, C12,C23,C13, C44,C55,C66 },
-         (Solv::vals){r1z,r2x,r3z} )
+    Phys((Phys::vals){C11,C22,C33, C12,C23,C13, C44,C55,C66 },
+         (Phys::vals){r1z,r2x,r3z} )
      { ndof_n = 3; ElastOrtho3D::MtrlProp2MatC(); };
   ElastOrtho3D(// Orthotropic Material Constructor
-    Solv::vals prop, Solv::vals dirs ) :
+    Phys::vals prop, Phys::vals dirs ) :
     Phys( prop,dirs )
      { ndof_n = 3; ElastOrtho3D::MtrlProp2MatC(); };
+#if 0
+  int SavePartFMR( const char* bname, bool is_bin ) final;
+  int ReadPartFMR( const char* bname, bool is_bin ) final;
+#endif
   int Setup( Elem* )final;
-  //int ElemLinear( std::vector<Elem*>,RESTRICT Solv::vals&,const RESTRICT Solv::vals&)
-  int BlocLinear( Elem*,RESTRICT Solv::vals&,const RESTRICT Solv::vals&) final;
+  //int ElemLinear( std::vector<Elem*>,RESTRICT Phys::vals&,const RESTRICT Phys::vals&)
+  int BlocLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
   int ElemLinear( Elem*,FLOAT_SOLV*,const FLOAT_SOLV*) final;
   int ElemJacobi( Elem*,FLOAT_SOLV* ) final;
   int ElemRowSumAbs(Elem*, FLOAT_SOLV* ) final;
   int ElemStrain(Elem*, FLOAT_SOLV* ) final;
-  int ElemLinear( Elem* ) ;
-  int ElemJacobi( Elem* ) ;
-  int ScatStiff ( Elem* ) ;
+  int ElemLinear( Elem* ) final;
+  int ElemJacobi( Elem* ) final;
+  int ScatStiff ( Elem* ) final;
   inline int MtrlProp2MatC()final{
     const FLOAT_PHYS z1=mtrl_dirs[0];// Rotation about z (radians)
     const FLOAT_PHYS x2=mtrl_dirs[1];// Rotation about x (radians)
@@ -218,9 +248,9 @@ public:
     //mtrl_rotc.resize(6);// Rotation Matrix Components
     //mtrl_rotc={cos(z1),sin(z1),cos(x2),sin(x2),cos(z3),sin(z3)};
     mtrl_rotc.resize(9);// Rotation Matrix
-    Solv::vals Z1={cos(z1),sin(z1),0.0, -sin(z1),cos(z1),0.0, 0.0,0.0,1.0};
-    Solv::vals X2={1.0,0.0,0.0, 0.0,cos(x2),sin(x2), 0.0,-sin(x2),cos(x2)};
-    Solv::vals Z3={cos(z3),sin(z3),0, -sin(z3),cos(z3),0.0, 0.0,0.0,1.0};
+    Phys::vals Z1={cos(z1),sin(z1),0.0, -sin(z1),cos(z1),0.0, 0.0,0.0,1.0};
+    Phys::vals X2={1.0,0.0,0.0, 0.0,cos(x2),sin(x2), 0.0,-sin(x2),cos(x2)};
+    Phys::vals Z3={cos(z3),sin(z3),0, -sin(z3),cos(z3),0.0, 0.0,0.0,1.0};
     //mtrl_rotc = MatMul3x3xN(MatMul3x3xN(Z1,X2),Z3);
     for(int i=0;i<3;i++){
       for(int l=0;l<3;l++){ mtrl_rotc[3* i+l ]=0.0;
@@ -285,9 +315,9 @@ public:
     return 0;
   };
   //FLOAT_PHYS* MtrlLinear(FLOAT_PHYS e[9])final{
-  Solv::vals MtrlLinear(const RESTRICT Solv::vals &e)final{
-    RESTRICT Solv::vals S(9);//FIXME
-    //RESTRICT Solv::vals s(6);
+  Phys::vals MtrlLinear(const RESTRICT Phys::vals &e)final{
+    RESTRICT Phys::vals S(9);//FIXME
+    //RESTRICT Phys::vals s(6);
     //
     //FLOAT_PHYS Z1[4]={mtrl_rotc[0],mtrl_rotc[1],-mtrl_rotc[1],mtrl_rotc[0]};
     //FLOAT_PHYS X2[4]={mtrl_rotc[2],mtrl_rotc[3],-mtrl_rotc[3],mtrl_rotc[2]};
@@ -310,8 +340,8 @@ public:
     }; printf("\n");
     #endif
     //
-    //const RESTRICT Solv::vals E = MatMul3x3xN( mtrl_rotc,e );
-    RESTRICT Solv::vals E(9);
+    //const RESTRICT Phys::vals E = MatMul3x3xN( mtrl_rotc,e );
+    RESTRICT Phys::vals E(9);
     for(int i=0;i<3;i++){
       for(int j=0;j<3;j++){
         for(int k=0;k<3;k++){
@@ -340,8 +370,8 @@ public:
       printf("%10.3e ",S[i]);
     }; printf("\n");
     #endif
-    //const RESTRICT Solv::vals s = MatMul3x3xNT( mtrl_rotc,S );//FIXME
-    RESTRICT Solv::vals s(9);
+    //const RESTRICT Phys::vals s = MatMul3x3xNT( mtrl_rotc,S );//FIXME
+    RESTRICT Phys::vals s(9);
     for(int i=0;i<3;i++){
       for(int k=0;k<3;k++){
         for(int j=0;j<3;j++){
@@ -364,23 +394,23 @@ private:
 };
 /*
 // 2D Elastic Continuum ---------------------------------
-inline RESTRICT Solv::vals Mtr2StrsIsoEng(//FIXME Plane Stress
+inline RESTRICT Phys::vals Mtr2StrsIsoEng(//FIXME Plane Stress
   const FLOAT_PHYS E, const FLOAT_PHYS n, const FLOAT_PHYS t){
   const FLOAT_PHYS d=E/(1.0-n*n)*t;
   //const FLOAT_PHYS C11=d;
   //const FLOAT_PHYS C12=n*d ;
   //const FLOAT_PHYS C33=(1.0-n)*d*0.5;
-  ////const Solv::vals C={C11,C12,C44};
-  //return( Solv::vals {C11,C12,C33} );
-  return(Solv::vals { d, n*d, (1.0-n)*d*0.5 } );
+  ////const Phys::vals C={C11,C12,C44};
+  //return( Phys::vals {C11,C12,C33} );
+  return(Phys::vals { d, n*d, (1.0-n)*d*0.5 } );
 };
-inline RESTRICT Solv::vals Mtr2ValsIsoEng2Cau(
-  RESTRICT const Solv::vals &C, RESTRICT const Solv::vals &e){
-  return( Solv::vals {
+inline RESTRICT Phys::vals Mtr2ValsIsoEng2Cau(
+  RESTRICT const Phys::vals &C, RESTRICT const Phys::vals &e){
+  return( Phys::vals {
     C[0]*e[0] +C[1]*e[1] ,
     C[1]*e[0] +C[0]*e[1] ,
     C[2]*e[2] });
-  //RESTRICT Solv::vals s(3,0.0);
+  //RESTRICT Phys::vals s(3,0.0);
   //s[0]= C[0]*e[0] +C[1]*e[1] ;
   //s[1]= C[1]*e[0] +C[0]*e[1] ;
   //s[2]= C[2]*e[2] ;
@@ -389,26 +419,26 @@ inline RESTRICT Solv::vals Mtr2ValsIsoEng2Cau(
 //FIXED 2D homogeneous isotropic already done.
 //FIXME Redo the following derived from Phys::...
 // 3D Elastic Continuum ---------------------------------
-inline RESTRICT Solv::vals MtrlValsIsoEng(
+inline RESTRICT Phys::vals MtrlValsIsoEng(
   const FLOAT_PHYS E, const FLOAT_PHYS n){
   const FLOAT_PHYS d=E/((1.0+n)*(1.0-2.0*n));
   //const FLOAT_PHYS C11=(1.0-n)*d;
   //const FLOAT_PHYS C12=n*d ;
   //const FLOAT_PHYS C44=(1.0-2.0*n)*d*0.5;
-  ////const Solv::vals C={C11,C12,C44};
-  //return( Solv::vals {C11,C12,C44} );
-  return( Solv::vals { (1.0-n)*d,n*d,(1.0-2.0*n)*d*0.5 } );
+  ////const Phys::vals C={C11,C12,C44};
+  //return( Phys::vals {C11,C12,C44} );
+  return( Phys::vals { (1.0-n)*d,n*d,(1.0-2.0*n)*d*0.5 } );
 };
-inline RESTRICT Solv::vals MtrlValsIsoEng2Cau(
-  RESTRICT const Solv::vals &C, RESTRICT const Solv::vals &e){
-  RESTRICT Solv::vals s(0.0,6);//0.0,0.0,0.0, 0.0,0.0,0.0};
-  //RESTRICT Solv::vals C1={
+inline RESTRICT Phys::vals MtrlValsIsoEng2Cau(
+  RESTRICT const Phys::vals &C, RESTRICT const Phys::vals &e){
+  RESTRICT Phys::vals s(0.0,6);//0.0,0.0,0.0, 0.0,0.0,0.0};
+  //RESTRICT Phys::vals C1={
   //  C[1],C[2],C[2],
   //  C[2],C[1],C[2],
   //  C[2],C[2],C[1]};
   //s1=Mesh::MatMul3xNx3t(C1,e);
   //s[1]=s1[1]; s[2]=s1[2]; s[3]=s1[3];
-  //s[1]=Solv::inner_product(Solv::vals {C[1],C[4],C[6]},e1);
+  //s[1]=Solv::inner_product(Phys::vals {C[1],C[4],C[6]},e1);
   s[0]= C[0]*e[0] +C[1]*e[1] +C[1]*e[2];
   s[1]= C[1]*e[0] +C[0]*e[1] +C[1]*e[2];
   s[2]= C[1]*e[0] +C[1]*e[1] +C[0]*e[2];
@@ -417,7 +447,7 @@ inline RESTRICT Solv::vals MtrlValsIsoEng2Cau(
   s[5]= C[2]*e[5] ;
   return s;
 };
-inline RESTRICT Solv::vals Phys::MtrlValsTransEng(
+inline RESTRICT Phys::vals Phys::MtrlValsTransEng(
   const FLOAT_PHYS Ep , const FLOAT_PHYS Epz,//FIXME What convention?
   const FLOAT_PHYS np , const FLOAT_PHYS npz,
   const FLOAT_PHYS Gzp ){
@@ -430,13 +460,13 @@ inline RESTRICT Solv::vals Phys::MtrlValsTransEng(
   const FLOAT_PHYS C13=(0)*d;//FIXME
   const FLOAT_PHYS C44=(0)*d;//FIXME
   //const FLOAT_PHYS C66=()*d;
-  const Solv::vals C={C11,C33,C12,C13,C44};
+  const Phys::vals C={C11,C33,C12,C13,C44};
   return(C);
 };
-inline RESTRICT Solv::vals Phys::MtrlValsTransEng2Cau(
-  RESTRICT const Solv::vals &C, RESTRICT const Solv::vals &e){
-  RESTRICT Solv::vals s(6);
-  //RESTRICT Solv::vals C1={
+inline RESTRICT Phys::vals Phys::MtrlValsTransEng2Cau(
+  RESTRICT const Phys::vals &C, RESTRICT const Phys::vals &e){
+  RESTRICT Phys::vals s(6);
+  //RESTRICT Phys::vals C1={
   //  C[1],C[2],C[2],
   //  C[2],C[1],C[2],
   //  C[2],C[2],C[1]};
@@ -448,8 +478,8 @@ inline RESTRICT Solv::vals Phys::MtrlValsTransEng2Cau(
   s[5]=(C[0]-C[2])*0.5*e[5];
   return s;
 };
-//inline int MtrlValsOrthoTru( RESTRICT const Solv::vals& e,
-inline RESTRICT Solv::vals MtrlValsOrthoEng(
+//inline int MtrlValsOrthoTru( RESTRICT const Phys::vals& e,
+inline RESTRICT Phys::vals MtrlValsOrthoEng(
   const FLOAT_PHYS Ex , const FLOAT_PHYS Ey , const FLOAT_PHYS Ez ,
   const FLOAT_PHYS Gxy, const FLOAT_PHYS Gyz, const FLOAT_PHYS Gxz,
   const FLOAT_PHYS nxy, const FLOAT_PHYS nyz, const FLOAT_PHYS nxz){
@@ -471,10 +501,10 @@ inline RESTRICT Solv::vals MtrlValsOrthoEng(
   const FLOAT_PHYS C55=Gxz;
   const FLOAT_PHYS C66=Gxy;//FIXED make function to return these
   //
-  //const Solv::vals C={C11,C22,C33, C12,C23,C13, C44,C55,C66};
-  return( Solv::vals {C11,C22,C33, C12,C23,C13, C44,C55,C66} );
+  //const Phys::vals C={C11,C22,C33, C12,C23,C13, C44,C55,C66};
+  return( Phys::vals {C11,C22,C33, C12,C23,C13, C44,C55,C66} );
   //
-  //const RESTRICT Solv::vals C={//FIXED Don't do it this way.
+  //const RESTRICT Phys::vals C={//FIXED Don't do it this way.
   //  C11,C12,C13,0.0,0.0,0.0,
   //  C12,C22,C23,0.0,0.0,0.0,
   //  C13,C23,C33,0.0,0.0,0.0,
@@ -483,17 +513,17 @@ inline RESTRICT Solv::vals MtrlValsOrthoEng(
   //  0.0,0.0,0.0,0.0,0.0,C66};
   //return(0);
   };
-inline RESTRICT Solv::vals MtrlValsOrthoEng2Cau(
-  RESTRICT const Solv::vals &C, RESTRICT const Solv::vals &e){
-  //RESTRICT Solv::vals e1={e[1],e[2],e[3]};
-  RESTRICT Solv::vals s(6);
-  //RESTRICT Solv::vals C1={
+inline RESTRICT Phys::vals MtrlValsOrthoEng2Cau(
+  RESTRICT const Phys::vals &C, RESTRICT const Phys::vals &e){
+  //RESTRICT Phys::vals e1={e[1],e[2],e[3]};
+  RESTRICT Phys::vals s(6);
+  //RESTRICT Phys::vals C1={
   //  C[0],C[3],C[5],
   //  C[3],C[1],C[4],
   //  C[5],C45],C[2]};
   //s1=Mesh::MatMul3xNx3t(C1,e);
   //s[1]=s1[1]; s[2]=s1[2]; s[3]=s1[3];
-  //s[1]=Solv::inner_product(Solv::vals {C[1],C[4],C[6]},e1);
+  //s[1]=Solv::inner_product(Phys::vals {C[1],C[4],C[6]},e1);
   s[0]= C[0]*e[0] +C[3]*e[1] +C[5]*e[2];
   s[1]= C[3]*e[0] +C[1]*e[1] +C[4]*e[2];
   s[2]= C[5]*e[0] +C[4]*e[1] +C[2]*e[2];

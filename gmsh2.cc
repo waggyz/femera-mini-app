@@ -81,6 +81,8 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
       if(verbosity>3){
       std::cout << "Reading " << number_of_elements << " elements..." <<'\n'; };
 #endif
+      //FIXME row-col index of node nonzeros
+      std::unordered_map<int,std::set<INT_MESH>> conn_sets_glid;//FIXME
       for(int i=0; i<number_of_elements; i++){
         mshfile >> elm_number >> elm_type >> number_of_tags ;
         is_volu=false; is_line=false; is_surf=false;
@@ -127,15 +129,34 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
 #if VERB_MAX>3
       if(verbosity>3){ std::cout << node_number <<" "; };
 #endif
-          if(is_volu){tet_conn.push_back((INT_MESH)node_number); };
           if(is_line){line_nodes_tagged[physical_tag].insert(node_number); };
           if(is_surf){surf_nodes_tagged[physical_tag].insert(node_number); };
+          if(is_volu){tet_conn.push_back((INT_MESH)node_number);
+          };
+        };
+        if(this->calc_band && is_volu){//FIXME build row-col index of node nonzeros
+          INT_MESH e = tet_conn.size() - this->typeEleNodes[elm_type];
+          for(uint j=0;j<this->typeEleNodes[elm_type]; j++){
+            INT_MESH nj = tet_conn[e+j];
+            for(uint k=0;k<this->typeEleNodes[elm_type]; k++){
+              INT_MESH nk = tet_conn[e+k];
+              conn_sets_glid[nj].insert(nk);
+              //std::cout << nj <<":"<< nk << "(" << conn_sets_glid.size() << ")" <<'\n';
+            }; };
         };
 #if VERB_MAX>3
       if(verbosity>3){ std::cout << '\n'; };
 #endif
-      };
+      };// end element loop
       elxx_n=elxx_i;
+      if(this->calc_band){//FIXME calculate and report average matrix bandwidth
+        FLOAT_MESH nzbw=0.0;
+        long int n=0,t=0;
+        for(auto s : conn_sets_glid){ t+=1; n += s.second.size(); };
+        nzbw = FLOAT_MESH(n) / FLOAT_MESH(t);
+        std::cout << "Average Node Connectivity: " << (nzbw) << "." <<'\n';
+        std::cout << "Average Matrix Bandwidth : " << (3.0*nzbw) << "." <<'\n';
+      };
 #if VERB_MAX>3
       if(verbosity>3){
       std::cout << "Found " << elxx_n << " Tet Elements." <<'\n'; };

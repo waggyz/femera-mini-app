@@ -609,7 +609,7 @@ int main( int argc, char** argv ){
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
-    const auto n = S->upad_n;
+    const auto n = S->udof_n;
     for(uint i=0;i<n;i++){ S->sys_f[i]=0.0; }
     E->do_halo=true; Y->ElemLinear( E, S->sys_f, S->sys_u );
     // sync sys_f
