@@ -74,6 +74,8 @@ public:
   std::string base_name = "";// base of partitioned mesh filename (without _i)
   std::string meth_name = "";// solution method name
   //
+  int SavePartFMR( part&, const char* bname, bool is_bin );//FIXME ASCII/Binary file format
+  int ReadPartFMR( part&, const char* bname, bool is_bin );
   //int InitPCG();
   //int IterPCG();
   //int InitPCR();

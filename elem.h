@@ -51,13 +51,10 @@ public:
   virtual const Mesh::vals GaussLegendre(const INT_ORDER )=0;
   const Mesh::vals GaussLegendre( ){
     return GaussLegendre( gaus_p ); };
-  //
-  int SavePartCSV( const char* bname );
-  int ReadPartCSV( const char* bname );//FIXME should be in Mesh* and return Elem*?
-  //
+#if 0
   int   SavePartFMR( const char* bname, bool is_bin );//FIXME ASCII/Binary file format
   Phys* ReadPartFMR( const char* bname, bool is_bin );
-  //
+#endif
 #ifdef HAS_PATCH
   virtual Mesh* Mesh1Natu( )=0;//FIXME These are defined in patch.cc
   virtual Mesh* MeshPatch( )=0;//FIXME Only first order

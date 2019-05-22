@@ -580,6 +580,7 @@ int main( int argc, char** argv ) {
   };
   };
 #endif
+#if 0
   if(save_csv){
 #pragma omp parallel for schedule(static)
     for(int part_i=part_0;part_i<(part_n+part_0);part_i++){
@@ -590,6 +591,7 @@ int main( int argc, char** argv ) {
       M->list_elem[part_i]->SavePartCSV( pname.c_str() );
     };
   };
+#endif
   if(save_asc | save_bin){
     if(verbosity==1){ 
       printf("Saving and appending physics to partitions...\n"); };
@@ -609,7 +611,8 @@ int main( int argc, char** argv ) {
       //if(save_bin){
       //  M->list_elem[part_i]->SavePartFMR( pname.c_str(), true  ); };
       if(save_asc){
-        M->list_elem[part_i]->SavePartFMR( pname.c_str(), false );
+        //M->list_elem[part_i]->SavePartFMR( pname.c_str(), false );
+        //M->SavePartFMR( M->mesh_part[part_i], pname.c_str(), false );
         Phys* Y;
         auto mp=mtrl_part[part_i];
         if(mp.size()>0){
@@ -683,9 +686,12 @@ int main( int argc, char** argv ) {
           for(uint i=0; i<texp_part[0].size(); i++){
             Y->ther_expa[i] = texp_part[0][i]; }
         }
+        Solv* S;
+        Mesh::part t(M->list_elem[part_i],Y,S);
+        M->SavePartFMR( t, pname.c_str(), false );
         if(verbosity>1){
           std::cout << "Appending physics to " << pname << "..." <<'\n'; }
-        Y->SavePartFMR( pname.c_str(), false );
+        Y->SavePartFMR( pname.c_str(), false );//FIXME Move into M->SavePartFMR()
       }
     }
   }
