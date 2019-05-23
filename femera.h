@@ -44,8 +44,8 @@
 // #define HAS_TEST  //Set this as a compiler option: -DHAS_TEST
 //
 #define INT_GPU int
-#define IDX_GPU int
-//FIXME Can overflow
+#define IDX_GPU long
+//FIXME int can overflow
 #define FLOAT_GPU double
 #if 0
 // Model Integers

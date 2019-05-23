@@ -396,23 +396,41 @@ int main( int argc, char** argv ){
     gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_ECONN_N    ] = ii; ii+=1;
     //
     gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_ECONN      ] = ii; ii+= E->elem_n*E->elem_conn_n;
-    gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NODE_HAID  ] = ii; ii+= INT_GPU(E->node_haid.size());
-    //gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NODE_GLID  ] = ii; ii+= INT_GPU(E->node_glid.size());
+    gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NODE_HAID  ] = ii; ii+= IDX_GPU(E->node_haid.size());
+    //gpu_ints_idx[GPU_INTS_COUNT*part_i + IDX_NODE_GLID  ] = ii; ii+= IDX_GPU(E->node_glid.size());
     //
     gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_ROTC ] = ri; ri+=9;
     gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_MATC ] = ri; ri+=9;
-    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SHPG ] = ri; ri+=INT_GPU(E->intp_shpg.size());
-    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_WGTS ] = ri; ri+=INT_GPU(E->gaus_weig.size());
-    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_JACS ] = ri; ri+=INT_GPU(E->elip_jacs.size());
-    //
-    INT_GPU partsize=E->node_n*3;
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SHPG ] = ri; ri+=IDX_GPU(E->intp_shpg.size());
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_WGTS ] = ri; ri+=IDX_GPU(E->gaus_weig.size());
+    gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_JACS ] = ri; ri+=IDX_GPU(E->elip_jacs.size());
+  }//Consolidate sys vectors
+  for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+    IDX_GPU partsize=E->node_n*3;
     gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSP ] = ri; ri+=partsize;
+  }
+  for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+    IDX_GPU partsize=E->node_n*3;
     gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSF ] = ri; ri+=partsize;
+  }
+  for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+    IDX_GPU partsize=E->node_n*3;
     gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSR ] = ri; ri+=partsize;
+  }
+  for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+    IDX_GPU partsize=E->node_n*3;
     gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSD ] = ri; ri+=partsize;
+  }
+  for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+    IDX_GPU partsize=E->node_n*3;
     gpu_real_idx[GPU_REAL_COUNT*part_i + IDX_SYSU ] = ri; ri+=partsize;
+  }
     //
-  };
     gpu_total_ints = ii;
     gpu_total_real = ri;
   }//end scope
@@ -471,9 +489,17 @@ int main( int argc, char** argv ){
   };
 }// end parallel region
 #if 0
+  printf("Integer POD Starting Indices [%i]", gpu_total_ints);
   for(int i=0; i<(part_n+part_0) * GPU_INTS_COUNT; i++){
     if(!(i%GPU_INTS_COUNT)){ printf("\n"); };
     printf("%i ",gpu_ints_idx[i]);
+  }; printf("\n");
+#endif
+#if 0
+  printf("Real POD Starting Indices [%i]", gpu_total_real);
+  for(int i=0; i<(part_n+part_0) * GPU_REAL_COUNT; i++){
+    if(!(i%GPU_REAL_COUNT)){ printf("\n"); };
+    printf("%i ",gpu_real_idx[i]);
   }; printf("\n");
 #endif
   }// end local var scope
