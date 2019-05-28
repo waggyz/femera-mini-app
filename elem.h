@@ -77,6 +77,7 @@ public:
     halo_node_n=0, halo_loca_n=0, halo_remo_n=0, halo_elem_n=0;
   // Local halo and system sizes.
   // Halo nodes are [0...halo_n-1]; interior nodes are [halo_n...node_n-1].
+  Mesh::vals intp_shpf={};
   Mesh::vals intp_shpg={};
   Mesh::ints elem_conn={};// Grouped so halo nodes come first.
   //FIXME Should be conn_node or elem_node?

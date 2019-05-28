@@ -44,6 +44,7 @@ int Elem::Setup(){
   const RESTRICT Mesh::vals ipws = GaussLegendre( this->elem_p);
   //if(this->elem_p==2){ this->gaus_n=4; };
   //FIXME this->gaus_p is always 1? );//this->gaus_p );
+  this->intp_shpf = ShapeFunction(this->elem_p, ipws );
   const RESTRICT Mesh::vals t=ShapeGradient(this->elem_p, ipws );
   this->intp_shpg.resize(t.size());
   //intp_shpg= t;// icc wants resize() first.
@@ -53,7 +54,7 @@ int Elem::Setup(){
   for(uint p=0;p<this->gaus_n;p++){
     for(uint i=0;i<this->elem_d;i++){
       for(uint j=0;j<cn;j++){
-        this->intp_shpg[Ng*p +3 *j+i ] = t[Ng*p +cn* i+j];
+        this->intp_shpg[Ng*p +elem_d *j+i ] = t[Ng*p +cn* i+j];
   };};};
   //printf("*** %u %u %u ***\n",uint(elem_p),uint(gaus_p),uint(intp_shpg.size()) );
   return 0;
@@ -75,6 +76,25 @@ const RESTRICT Mesh::vals Elem::ShapeGradient( const INT_ORDER pord,
     shpg[std::slice(ng*ip,ng,1)]=g;
   };
   return(shpg);
+};
+
+const RESTRICT Mesh::vals Elem::ShapeFunction( const INT_ORDER pord,
+  const RESTRICT Mesh::vals iptw ){//printf("=== gA ===\n");
+  const uint d=uint(elem_d)+1;
+  const uint np=iptw.size()/d;
+  uint ng=0;//=elem_vert_n*uint(elem_d);// printf("*** SIZE ng: %u\n",ng);
+  Mesh::vals shpf;//(ng*np);
+  FLOAT_MESH p[elem_d];
+  this->gaus_weig.resize(np);
+  for(uint ip=0; ip<np; ip++ ){
+    //for(uint id=0; id<uint(elem_d); id++){ p[id]=iptw[id*d+ip]; };
+    for(uint id=0; id<uint(elem_d); id++){ p[id]=iptw[ip*d+id]; };
+    this->gaus_weig[ip]=iptw[ip*d+uint(elem_d)];
+    auto g=ShapeFunction(pord, p);// printf("*** SIZE sg: %u\n",uint(g.size()));
+    if(ip==0){ ng = uint(g.size()); shpf.resize(ng*np); };
+    shpf[std::slice(ng*ip,ng,1)]=g;
+  };
+  return(shpf);
 };
 int Elem::Jac1Dets(){//FIXME 1D can be optimized
   int ok=0;

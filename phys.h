@@ -4,14 +4,14 @@
 class Phys{
 public:
   typedef std::valarray<FLOAT_PHYS> vals;
-  //typedef std::vector<FLOAT_PHYS> valign;
-  INT_DIM ndof_n;// Degrees of freedom per node://FIXME change to ndof_d
+  INT_DIM node_d;// Degrees of freedom per node://WAS ndof_n
   // 1 for thermal, 2 for elastic 2D, 3 for elastic 3D, 4 for thermoelastic 3D
-  //
+#if 0
   // The followig are stored interleaved in the system vectors
   INT_DIM ninp_d=3;// Inputs/node (defines size of sys_u,p?)
   //                  usually ndof_d + user-defined nodal field and state vars
   INT_DIM ndof_d=3;// Unknowns/node (defines size of sys_f?)
+#endif
   //FIXME The followig will be stored in blocks, some in other arrays
   INT_DIM nvar_d=0;// Inputs/node: user-defined nodal state vars
   INT_DIM evar_d=0;// Inputs/element: user-defined elemental state vars
@@ -66,7 +66,7 @@ public:
   //
   Phys::vals elas_prop;
   Phys::vals ther_expa;//FIXME Hacked thermal constants into these
-  Phys::vals ther_cond;
+  Phys::vals ther_diff;
   //
   Phys::vals elem_inout;// Elemental nodal value workspace (serial)
   // Fill w/ Phys::ScatterNode2Elem(...),ElemLinear(Elem*),ElemJacobi(),...
@@ -102,7 +102,7 @@ inline Phys::vals Phys::Tens2VoigtEng(const FLOAT_PHYS H[4]){
 class ElastIso2D final: public Phys{
 public: ElastIso2D(FLOAT_PHYS young, FLOAT_PHYS poiss, FLOAT_PHYS thick) :
   Phys((Phys::vals){young,poiss,thick}){// Constructor
-    this->ndof_n      = 2;
+    this->node_d      = 2;
     //this->elem_flop = FIXME;
     ElastIso2D::MtrlProp2MatC();
   };
@@ -141,9 +141,9 @@ private:
 class ElastIso3D final: public Phys{
 public: ElastIso3D(FLOAT_PHYS young, FLOAT_PHYS poiss ) :
   Phys((Phys::vals){young,poiss}){
-    this->ndof_n = 3;
+    this->node_d = 3;
     //this->elem_flop = 225;//FIXME Tensor eval for linear tet
-    // calc stiff_flop from (ndof_n*E->elem_node_n)*(ndof_n*E->elem_node_n-1.0)
+    // calc stiff_flop from (node_d*E->elem_node_n)*(node_d*E->elem_node_n-1.0)
     ElastIso3D::MtrlProp2MatC();
   };
 #if 0
@@ -195,26 +195,26 @@ public:
     FLOAT_PHYS young, FLOAT_PHYS poiss ) :
     Phys((Phys::vals){young,poiss},
          (Phys::vals){0.0,0.0,0.0} )
-     { ndof_n = 3; ElastOrtho3D::MtrlProp2MatC(); };
+     { node_d = 3; ElastOrtho3D::MtrlProp2MatC(); };
   ElastOrtho3D(// Isotropic Material Constructor (Rotated)
     FLOAT_PHYS r1z  , FLOAT_PHYS r2x  , FLOAT_PHYS r3z,
     FLOAT_PHYS young, FLOAT_PHYS poiss ) :
     Phys((Phys::vals){ young, poiss },
          (Phys::vals){r1z,r2x,r3z} )
-     { ndof_n = 3; ElastOrtho3D::MtrlProp2MatC(); };
+     { node_d = 3; ElastOrtho3D::MtrlProp2MatC(); };
   ElastOrtho3D(// Cubic Material Constructor
     FLOAT_PHYS r1z  , FLOAT_PHYS r2x  , FLOAT_PHYS r3z,
     FLOAT_PHYS young, FLOAT_PHYS poiss, FLOAT_PHYS shear ) :
     Phys((Phys::vals){ young, poiss, shear },
          (Phys::vals){r1z,r2x,r3z} )
-     { ndof_n = 3; ElastOrtho3D::MtrlProp2MatC(); };
+     { node_d = 3; ElastOrtho3D::MtrlProp2MatC(); };
   ElastOrtho3D(// Transversely Isotropic Material Constructor
     FLOAT_PHYS r1z, FLOAT_PHYS r2x, FLOAT_PHYS r3z,
     FLOAT_PHYS C11, FLOAT_PHYS C33,
     FLOAT_PHYS C12, FLOAT_PHYS C13, FLOAT_PHYS C44 ) :
     Phys((Phys::vals){C11,C33, C12,C13, C44 },
          (Phys::vals){r1z,r2x,r3z} )
-     { ndof_n = 3; ElastOrtho3D::MtrlProp2MatC(); };
+     { node_d = 3; ElastOrtho3D::MtrlProp2MatC(); };
   ElastOrtho3D(// Orthotropic Material Constructor
     FLOAT_PHYS r1z, FLOAT_PHYS r2x, FLOAT_PHYS r3z,
     FLOAT_PHYS C11, FLOAT_PHYS C22, FLOAT_PHYS C33,
@@ -222,11 +222,11 @@ public:
     FLOAT_PHYS C44, FLOAT_PHYS C55, FLOAT_PHYS C66 ) :
     Phys((Phys::vals){C11,C22,C33, C12,C23,C13, C44,C55,C66 },
          (Phys::vals){r1z,r2x,r3z} )
-     { ndof_n = 3; ElastOrtho3D::MtrlProp2MatC(); };
+     { node_d = 3; ElastOrtho3D::MtrlProp2MatC(); };
   ElastOrtho3D(// Orthotropic Material Constructor
     Phys::vals prop, Phys::vals dirs ) :
     Phys( prop,dirs )
-     { ndof_n = 3; ElastOrtho3D::MtrlProp2MatC(); };
+     { node_d = 3; ElastOrtho3D::MtrlProp2MatC(); };
 #if 0
   int SavePartFMR( const char* bname, bool is_bin ) final;
   int ReadPartFMR( const char* bname, bool is_bin ) final;

@@ -257,74 +257,47 @@ int Mesh::Setup(){
   //
   int dots_mod=0;
   if(verbosity==2){ dots_mod=1;
-    if( part_n>(comp_n*4) ){ dots_mod=comp_n; };
+    if( part_n>(comp_n*4) ){ dots_mod=comp_n; }
   }
   //
   INT_MESH elem_tot=0, halo_elem_tot=0;
   INT_MESH node_tot=0, halo_node_tot=0,halo_remo_tot=0,halo_loca_tot=0;
   INT_MESH halo_udof_tot=0;
   std::string solv_name="";
-  //Mesh* M = new SolvePCG();// Gmsh* G;
 #pragma omp parallel num_threads(comp_n)
   {
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
   // Read Mesh ======================================================
     std::stringstream ss;
-    ss << this->base_name; if(is_part){ ss << "_" << part_i << ".fmr" ;};
+    ss << this->base_name; if(is_part){ ss << "_" << part_i << ".fmr" ;}
     std::string pname = ss.str();
 #if VERB_MAX>3
     if(verbosity>3){
     //if(part_n<10){
       std::cout << "Reading " << pname << "..." <<'\n';
     //};
-    };
+    }
 #endif
     Mesh::part t;
     this->ReadPartFMR(t,pname.c_str(),false);
-    Elem* E; Phys* Y; Solv* S;
-    std::tie(E,Y,S)=t;
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=t;
     if(dots_mod>0){
-      if((part_i%dots_mod)==0){ std::cout <<"."; fflush(stdout); }; };
-#if 0
-    Elem* E = new Tet(pord);//FIXME
-    E->simd_n = this->simd_n;
-    Phys* Y;
-    Solv* S;//FIXME can this be passed as an argument and copied?
-    Mesh::part t(E,Y,S);
-    this->ReadPartFMR(t,pname.c_str(),false);
-    switch( this->solv_meth ){
-      case(Solv::SOLV_CG):{
-        S=new PCG( E->node_n * Y->ndof_n, this->iter_max, glob_rtol ); 
-        break;}
-      case(Solv::SOLV_CR):{
-        S=new PCR( E->node_n * Y->ndof_n, this->iter_max, glob_rtol ); 
-        break;}
-      default:{ S=new PCG(E->node_n * Y->ndof_n, this->iter_max, glob_rtol );  }
-    }; return 0;
-    //S->tol = this->glob_rtol;
-    if(dots_mod>0){
-      if((part_i%dots_mod)==0){ std::cout <<"."; fflush(stdout); }; };
-    E->Setup();
-    Y->Setup( E );;// Applies material rotations & sets Y->elem_flop and elem_band
-    S->Setup( E,Y );// Applies BCs & sets S->udof_flop and 
-    // For PCR, also computes diagonal of K for Jacobi preconditioner
-#endif
+      if((part_i%dots_mod)==0){ std::cout <<"."; fflush(stdout); } }
 #if VERB_MAX>10
     if(verbosity>10){
 #pragma omp critical(print)
 {
-    uint d=uint(Y->ndof_n);
+    uint d=uint(Y->node_d);
     for(INT_MESH i=0; i<E->node_n; i++){
       std::cout << E->node_glid[i] <<":";
       for(uint j=0; j<d; j++){
         std::cout <<" "<< S->sys_d[d* i+j];
-      }; std::cout <<'\n';
-    };
+      } std::cout <<'\n';
+    }
 }
-    };
+    }
 #endif
-    //Mesh::part t(E,Y,S);
 #pragma omp critical(systot)
 {
     //this->meth_name=S->meth_name;
@@ -332,13 +305,13 @@ int Mesh::Setup(){
     //M->list_elem[part_i] = E;
     this->elem_n += E->elem_n;
     this->node_n += E->node_n - E->halo_remo_n;
-    this->udof_n += uint(Y->ndof_n) * (E->node_n - E->halo_remo_n);
-    this->solv_flop += float(S->udof_flop *uint(Y->ndof_n) * (E->node_n - E->halo_remo_n));
-    this->solv_band += float(S->udof_band *uint(Y->ndof_n) * (E->node_n - E->halo_remo_n));
+    this->udof_n += uint(Y->node_d) * (E->node_n - E->halo_remo_n);
+    this->solv_flop += float(S->udof_flop *uint(Y->node_d) * (E->node_n - E->halo_remo_n));
+    this->solv_band += float(S->udof_band *uint(Y->node_d) * (E->node_n - E->halo_remo_n));
     this->phys_flop += float(Y->tens_flop);
     this->phys_band += float(Y->tens_band);
 }
-  };// End parallel read & setup loop ====================================
+  }// End parallel read & setup loop ====================================
 }// End parallel region ==================================================
   //this->udof_n = sys_udof_n;
   //read_done = std::chrono::high_resolution_clock::now();
@@ -347,9 +320,9 @@ int Mesh::Setup(){
   for(uint i=0; i<this->mesh_part.size(); i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[i];
     //std::cout << "Partition " << i ;
-    if(verbosity>2){ printf("Partition %u", i); };
+    if(verbosity>2){ printf("Partition %u", i); }
     if( E == NULL ){
-      if(verbosity>2){ printf(" is null.\n"); };
+      if(verbosity>2){ printf(" is null.\n"); }
     }else{
 #if VERB_MAX>2
       if(verbosity>2){
@@ -361,7 +334,7 @@ int Mesh::Setup(){
         printf("|J|: ");
         for(uint j=9; j<E->elip_jacs.size(); j+=10){
           printf("%+9.2e ",E->elip_jacs[j]); }; printf("\n");
-      };
+      }
 #endif
       if(Y->mtrl_prop.size()>2){
         printf("Orthotropic Elastic: E=%9.2e, nu=%4.2f, G:%9.2e\n",
@@ -369,26 +342,33 @@ int Mesh::Setup(){
       }else{
         printf("  Isotropic Elastic: E=%9.2e, nu=%4.2f, G:iso\n",
           Y->mtrl_prop[0], Y->mtrl_prop[1] );
-      };
+      }
+      if(Y->ther_expa.size()>0){
+        printf("  Thermal Expansion:");
+        for(uint i=0; i<Y->ther_expa.size(); i++){
+          printf("%9.2e",Y->ther_expa[i]); }
+        printf("\n");
+      }
+      if(Y->ther_diff.size()>0){
+        printf("  Thermal Diffusion:");
+        for(uint i=0; i<Y->ther_diff.size(); i++){
+          printf("%9.2e",Y->ther_diff[i]); }
+        printf("\n");
+      }
       printf("   Tensor Constants:");
       for(uint i=0; i<Y->mtrl_matc.size(); i++){
         printf("%9.2e",Y->mtrl_matc[i]);
         if( ((i+0)%3)==2){ printf("\n");
-        if( i<8 ){ printf("                    "); };
-        };
-      };
+        if( i<(Y->mtrl_matc.size()-1) ){ printf("                    "); }
+        }
+      }
       if(Y->mtrl_dirs.size()>2){
       printf("            Rotated: [%+6.2f,%+6.2f,%+6.2f] rad around [z,x,z].\n",
-        Y->mtrl_dirs[0],Y->mtrl_dirs[1],Y->mtrl_dirs[2] ); };
-      //std::cout <<"Elastic Material: "
-      //  << Y->mtrl_prop[0] <<", "<< Y->mtrl_prop[1] <<'\n';
-      //std::cout <<"         Rotated: "
-      //  << Y->mtrl_dirs[0] <<", "<< Y->mtrl_dirs[1]
-      //  <<", "<< Y->mtrl_dirs[2] <<'\n';
+        Y->mtrl_dirs[0],Y->mtrl_dirs[1],Y->mtrl_dirs[2] ); }
       //std::cout <<"  Preconditioner: ";
       //for(size_t i=0;i<S->sys_d.size();i++){ std::cout << S->sys_d[i] <<" ";};
       //std::cout <<'\n';
-    };
+    }
 #endif
     solv_name      = S->meth_name;
     elem_tot      += E->elem_n;
@@ -397,40 +377,33 @@ int Mesh::Setup(){
     halo_node_tot += E->halo_node_n;
     halo_remo_tot += E->halo_remo_n;
     halo_loca_tot += E->halo_loca_n;
-    halo_udof_tot += E->halo_node_n * Y->ndof_n;
-    };
-  };
-  this->halo_val.resize(halo_udof_tot);//ndof_n*halo_loca_tot);
+    halo_udof_tot += E->halo_node_n * Y->node_d;
+    }
+  }
+  this->halo_val.resize(halo_udof_tot);//node_d*halo_loca_tot);
 #if VERB_MAX>1
   if(verbosity>1){
     printf(" Total:%10u Elems (%u halo) in %u partitions\n",
       elem_tot, halo_elem_tot, part_n);
     printf("       %10u Nodes (%u halo: %u remote, %u local)\n",
           node_tot, halo_node_tot, halo_remo_tot, halo_loca_tot);
+#if 0
     //printf("Read and set up in %f s.\n", float(read_time.count())*1e-9 );
     //std::cout <<"Solving ";
     //std::cout <<"system: "<<this->_elem_n<<" Elems, "
     //  <<this->node_n<<" Nodes, "<<this->udof_n<<" DOF; "<<'\n'
     //  <<"     to within: "<<rtol<<" relative tolerance,"<<'\n'
     //  <<"or stopping at: "<<iter_max<<" "<<solv_name<<" iterations..."<<'\n';
-  };
+#endif
+  }
 #endif
   return 0;
-};
+}
 int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
-  
-  Elem* E; Phys* Y; Solv* S;
-  std::tie(E,Y,S)=P;
-  
-  
+  Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P;
   INT_ORDER pord=1;
-    E = new Tet(pord);//FIXME
-    E->simd_n = this->simd_n;
-    //Phys* Y;
-    //Solv* S;//FIXME can this be passed as an argument and copied?
-  
-  
-  
+  E = new Tet(pord);//FIXME
+  E->simd_n = this->simd_n;
   //
   std::string s; if(is_bin){ s="binary";}else{s="ASCII";};
   if(is_bin){
@@ -444,6 +417,7 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
   //
   std::string fmrstring;
   std::ifstream fmrfile(fname);//return 0;
+  Phys::vals t_mtrl_prop={},t_mtrl_dirs={}, t_ther_diff={},t_ther_expa={};
   while( fmrfile >> fmrstring ){// std::cout <<fmrstring;//printf("%s ",fmrstring.c_str());
     if(fmrstring=="$Femera"){
       std::string line;
@@ -456,13 +430,11 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
       fmrfile >> d >> eltype >> p;// this=new Tet(p);
       E->elem_d=(INT_DOF)d;
       E->elem_p =(INT_ORDER)p;
-      //std::cout << uint(elem_d) << eltype << uint(elem_p) <<'\n';
     };
     if(fmrstring=="$Conn"){
       int c;
       fmrfile >> c >> E->elem_n >> E->halo_elem_n ;
       E->elem_conn_n =(INT_ELEM_NODE)c;
-      //std::cout <<"***"<< uint(elem_conn_n) << elem_n << halo_elem_n <<'\n';
       E->elem_conn.resize(uint(E->elem_conn_n)*E->elem_n);
       E->elem_glid.resize(E->elem_n);
       for(uint i=0; i<E->elem_n; i++){
@@ -471,22 +443,19 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
       };
     };
     if(fmrstring=="$Node"){
-      int d,v;//return 0;
+      int d,v;
       fmrfile >> d >> v >> E->node_n
         >> E->halo_node_n >> E->halo_remo_n >> E->halo_loca_n ;
-      //fmrfile >> d >> d >>d>>d>>d>>d;
       E->mesh_d=(INT_ORDER)d; E->vert_n=v;
-      //E->vert_n=node_n;
-      //return 0;//(INT_MESH )v;return 0;
-      //std::cout << uint(mesh_d) << vert_n << node_n << halo_node_n <<'\n';
-    };/*
+    };
+#if 0
     if(fmrstring=="$HaloNodeID"){
       node_glid.resize(halo_node_n);
       for(size_t i=0; i<node_glid.size(); i++){
         fmrfile >> node_glid[i]; 
         node_loid[node_glid[i]] = i;
-      };*/
-    /*};
+      };
+    };
     if(fmrstring=="$HaloRemote"){
       halo_remo.resize(halo_remo_n);
       for(size_t i=0; i<halo_remo.size(); i++){
@@ -498,17 +467,16 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
       for(size_t i=0; i<halo_loca.size(); i++){
         fmrfile >> halo_loca[i];
       };
-    };*/
+    };
+#endif
     if(fmrstring=="$VertCoor"){
       E->vert_coor.resize(uint(E->mesh_d)*E->node_n);//FIXME vert_n
       E->node_glid.resize(E->node_n);
-      //for(size_t i=0; i<vert_coor.size(); i++){
-      //  fmrfile >> vert_coor[i]; };
       for(INT_MESH i=0; i<E->node_n; i++){//FIXME vert_n
         fmrfile >> E->node_glid[i];
         E->node_loid[E->node_glid[i]] = i;
         for(uint j=0; j<(uint)E->mesh_d; j++){
-          fmrfile >> E->vert_coor[E->mesh_d *i+j]; };//return 0;
+          fmrfile >> E->vert_coor[E->mesh_d *i+j]; };
       };
     };
     if(fmrstring=="$BC0"){ INT_MESH n,f,m;
@@ -533,38 +501,42 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
       };
     };
     if(fmrstring=="$ElasticProperties"){//FIXME Deprecated
-      Phys::vals t_mtrl_prop={},t_mtrl_dirs={};
+      if(t_mtrl_prop.size()==0){
+        int s=0; fmrfile >> s;
+        t_mtrl_prop.resize(s);
+        for(int i=0; i<s; i++){ fmrfile >> t_mtrl_prop[i]; }
+        s=0; fmrfile >> s;
+        if(s>0){
+          t_mtrl_dirs.resize(s);
+        for(int i=0; i<s; i++){ fmrfile >> t_mtrl_dirs[i]; }
+        }
+      }
+    }
+    if(fmrstring=="$Orientation"){
       int s=0; fmrfile >> s;
-      t_mtrl_prop.resize(s);
-      for(int i=0; i<s; i++){ fmrfile >> t_mtrl_prop[i]; };
-      s=0; fmrfile >> s;
       if(s>0){
         t_mtrl_dirs.resize(s);
-      for(int i=0; i<s; i++){ fmrfile >> t_mtrl_dirs[i]; };
-      // mtrl_dirs[i]*=(PI/180.0) ;};
-      };
-      if(t_mtrl_dirs.size()<3){
-        Y = new ElastIso3D(t_mtrl_prop[0],t_mtrl_prop[1]);
-      }else{
-        Y = new ElastOrtho3D(t_mtrl_prop,t_mtrl_dirs);
-      };
-      //Y->MtrlProp2MatC();
-    };
-    if(fmrstring=="$Orientation"){//FIXME
+        for(int i=0; i<s; i++){ fmrfile >> t_mtrl_dirs[i]; }
+      }
     }
-    if(fmrstring=="$Elastic"){//FIXME
+    if(fmrstring=="$Elastic"){
+      int s=0; fmrfile >> s;
+      if(s>0){
+        t_mtrl_prop.resize(s);
+        for(int i=0; i<s; i++){ fmrfile >> t_mtrl_prop[i]; }
+      }
     }
     if(fmrstring=="$ThermalExpansion"){//printf("THERM EXPA\n");
       int s=0; fmrfile >> s;
-      Y->ther_expa.resize(s);
-      for(int i=0; i<s; i++){ fmrfile >> Y->ther_expa[i]; }
+      t_ther_expa.resize(s);
+      for(int i=0; i<s; i++){ fmrfile >> t_ther_expa[i]; }
     }
-    if(fmrstring=="$ThermalConductivity"){//printf("THERM COND\n");
+    if(fmrstring=="$ThermalDiffusivity"){//printf("THERM COND\n");
       int s=0; fmrfile >> s;
-      Y->ther_cond.resize(s);
-      for(int i=0; i<s; i++){ fmrfile >> Y->ther_cond[i]; }
+      t_ther_diff.resize(s);
+      for(int i=0; i<s; i++){ fmrfile >> t_ther_diff[i]; }
     }
-    /*
+#if 0
     //if(fmrstring=="$Physics"){ //FIXME
     if(fmrstring=="$ElasticIsotropic"){ //FIXME
       fmrfile >> m;// Should be 2
@@ -574,29 +546,71 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
     };
     if(fmrstring=="$ElasticOrthotropic"){ //FIXME
     };
-    */
     //std::cout <<"*" << fmrstring <<"*" ;
-    };//EOF
-    switch( this->solv_meth ){
-      case(Solv::SOLV_CG):{
-        S=new PCG( E->node_n * Y->ndof_n, this->iter_max, glob_rtol ); 
-        break;}
-      case(Solv::SOLV_CR):{
-        S=new PCR( E->node_n * Y->ndof_n, this->iter_max, glob_rtol ); 
-        break;}
-      default:{ S=new PCG(E->node_n * Y->ndof_n, this->iter_max, glob_rtol );  }
-    };
-    //S->tol = this->glob_rtol;
-    //if(dots_mod>0){
-    //  if((part_i%dots_mod)==0){ std::cout <<"."; fflush(stdout); }; };
-    E->Setup();
-    Y->Setup( E );;// Applies material rotations & sets Y->elem_flop and elem_band
-    S->Setup( E,Y );// Applies BCs & sets S->udof_flop and 
-    // For PCR, also computes diagonal of K for Jacobi preconditioner
-    
-    Mesh::part tP(E,Y,S); P=tP;
+#endif
+  }//EOF
+    if(t_mtrl_dirs.size()<3){
+      Y = new ElastIso3D(t_mtrl_prop[0],t_mtrl_prop[1]);
+    }else{
+      Y = new ElastOrtho3D(t_mtrl_prop,t_mtrl_dirs);
+    }
+  //elas_prop.resize(mtrl_prop.size()); elas_prop = mtrl_prop;//FIXME
+  if(t_ther_expa.size()>0){
+    //FIXME Thermal props should be handled in the Phys* constructor.
+    Y->ther_expa.resize(t_ther_expa.size()); Y->ther_expa=t_ther_expa;
+    Y->node_d+=1;
+    Phys::vals c=Y->mtrl_matc;
+    if(Y->mtrl_dirs.size()==0){//FIXME
+      Y->mtrl_matc.resize(c.size()+1);
+      for(uint j=0;j<c.size();j++){ Y->mtrl_matc[j]=c[j]; }
+        Y->mtrl_matc[c.size()]=Y->ther_expa[0];
+    }else{
+      Y->mtrl_matc.resize(c.size()+3);
+      for(uint j=0;j<c.size();j++){ Y->mtrl_matc[j]=c[j]; }
+      for(uint j=c.size();j<Y->mtrl_matc.size();j++){
+        Y->mtrl_matc[j]=Y->ther_expa[0]; }
+      for(uint j=0;j<Y->ther_expa.size();j++){
+        Y->mtrl_matc[c.size()+j]=Y->ther_expa[j]; }
+    }
+  }
+  if(t_ther_diff.size()>0){
+    //FIXME Thermal props should be handled in the Phys* constructor.
+    Y->ther_diff.resize(t_ther_diff.size()); Y->ther_diff=t_ther_diff;
+    Phys::vals c=Y->mtrl_matc;
+    if(Y->mtrl_dirs.size()==0){//FIXME
+      Y->mtrl_matc.resize(c.size()+1);
+      for(uint j=0;j<c.size();j++){ Y->mtrl_matc[j]=c[j]; }
+        Y->mtrl_matc[c.size()] = 1.0 / Y->ther_diff[0];
+    }else{
+      Y->mtrl_matc.resize(c.size()+3);
+      for(uint j=0;j<c.size();j++){ Y->mtrl_matc[j]=c[j]; }
+      for(uint j=c.size();j<Y->mtrl_matc.size();j++){
+        Y->mtrl_matc[j] = 1.0 / Y->ther_diff[0]; }
+      for(uint j=0;j<Y->ther_diff.size();j++){
+        Y->mtrl_matc[c.size()+j] = 1.0 / Y->ther_diff[j]; }
+    }
+  }
+  switch( this->solv_meth ){
+    case(Solv::SOLV_CG):{
+      S=new PCG( E->node_n * Y->node_d, this->iter_max, glob_rtol ); 
+      break;}
+    case(Solv::SOLV_CR):{
+      S=new PCR( E->node_n * Y->node_d, this->iter_max, glob_rtol ); 
+      break;}
+    default:{ S=new PCG(E->node_n * Y->node_d, this->iter_max, glob_rtol );  }
+  };
+  //S->tol = this->glob_rtol;
+  //if(dots_mod>0){
+  //  if((part_i%dots_mod)==0){ std::cout <<"."; fflush(stdout); }; };
+  E->Setup();
+  Y->Setup( E );;// Applies material rotations & sets Y->elem_flop and elem_band
+  S->Setup( E,Y );// Applies BCs & sets S->udof_flop and 
+  // For PCR, also computes diagonal of K for Jacobi preconditioner
   //
-  return 0;}
+  Mesh::part tP(E,Y,S); P=tP;
+  //
+  return 0;
+}
 //-------------------------------------------------------------------
 int Mesh::SavePartFMR( part& P, const char* fname, bool is_bin ){
   Elem* E; Phys* Y; Solv* S;
@@ -630,30 +644,23 @@ int Mesh::SavePartFMR( part& P, const char* fname, bool is_bin ){
     };
     fmrfile<<'\n';
   };
-  //for(size_t i=0; i<elem_conn.size(); i++){
-  //  if(!(i%elem_conn_n)){ fmrfile<<'\n'; };
-  //  fmrfile << " " << elem_conn[i]; }; fmrfile<<'\n';
-    
-    
   fmrfile << "$Node" <<'\n';
-  //halo_uniq_n=halo_uniq.size();
-  //E->halo_loca_n=halo_coor.size();
   fmrfile <<""<< int(E->mesh_d) <<" "<< E->vert_n <<" "<< E->node_n
     <<" "<< E->halo_node_n <<" "<< E->halo_remo_n<<" "<< E->halo_loca_n <<'\n';
-  /*
+#if 0
   if(node_glid.size()>0){//E->halo_node_n){
     fmrfile << "$HaloNodeID" ;
     for(size_t i=0; i<node_glid.size(); i++){
       if(!(i%20)){ fmrfile<<'\n'; };
       fmrfile << " " << node_glid[i]; }; fmrfile<<'\n';
-  };*/
-  /*
+  };
   if(halo_loca.size()>0){
     fmrfile << "$HaloLocal" ;
     for(size_t i=0; i<halo_loca.size(); i++){
       if(!(i%20)){ fmrfile<<'\n'; };
       fmrfile << " " << halo_loca[i]; }; fmrfile<<'\n';
-  };*/
+  };
+#endif
   fmrfile << "$VertCoor"<<'\n';;
   for(INT_MESH i=0; i<E->vert_n; i++){
     fmrfile << E->node_glid[i];

@@ -32,8 +32,8 @@ int ElastOrtho3D::Setup( Elem* E ){
 };
 int ElastOrtho3D::ElemLinear( Elem* E, RESTRICT Phys::vals &sys_f, const RESTRICT Phys::vals &sys_u ){
   //FIXME Cleanup local variables.
-  const int ndof = 3;//this->ndof_n
-  const int Nf   = 3;// this->ndof_n DOF/node
+  const int ndof = 3;//this->node_d
+  const int Nf   = 3;// this->node_d DOF/node
   const int Nj   =10;//,d2=9;//mesh_d*mesh_d;
   const INT_MESH elem_n = E->elem_n;
   const int   Nc = E->elem_conn_n;// Number of Nodes/Element
@@ -921,7 +921,7 @@ return 0;
 };
 int ElastOrtho3D::BlocLinear( Elem* E, RESTRICT Phys::vals &sys_f, const RESTRICT Phys::vals &sys_u ){
   //FIXME Cleanup local variables.
-  const uint ndof   = 3;//this->ndof_n
+  const uint ndof   = 3;//this->node_d
   //const int mesh_d = 3;//E->elem_d;
   const uint  Nj =10;//,d2=9;//mesh_d*mesh_d;
   //
@@ -1101,7 +1101,7 @@ int ElastOrtho3D::BlocLinear( Elem* E, RESTRICT Phys::vals &sys_f, const RESTRIC
 };
 int ElastOrtho3D::ElemJacobi(Elem* E, RESTRICT Phys::vals &sys_d ){
   //FIXME Doesn't do rotation yet
-  const uint ndof   = 3;//this->ndof_n
+  const uint ndof   = 3;//this->node_d
   //const int mesh_d = E->elem_d;
   const uint elem_n = E->elem_n;
   const uint  Nc = E->elem_conn_n;
@@ -1190,7 +1190,7 @@ return 0;
 
 int ElastOrtho3D::ElemRowSumAbs(Elem* E, RESTRICT Phys::vals &sys_d ){
   //FIXME Doesn't do rotation yet
-  const uint ndof   = 3;//this->ndof_n
+  const uint ndof   = 3;//this->node_d
   //const int mesh_d = E->elem_d;
   const uint elem_n = E->elem_n;
   const uint  Nc = E->elem_conn_n;
@@ -1279,7 +1279,7 @@ return 0;
 int ElastOrtho3D::ElemStrain( Elem* E,
     RESTRICT Phys::vals &sys_f ){
   //FIXME Clean up local variables.
-  const uint ndof= 3;//this->ndof_n
+  const uint ndof= 3;//this->node_d
   const uint  Nj =10;//,d2=9;//mesh_d*mesh_d;
   const INT_MESH elem_n = E->elem_n;
   const uint intp_n = uint(E->gaus_n);

@@ -232,7 +232,7 @@ int main( int argc, char** argv ) {
         std::cout << "Thermal expansion:";
           for(FLOAT_PHYS v : texplist ){ std::cout << " " << v; };
         std::cout << std::endl;
-        std::cout << "Thermal conductivity:";
+        std::cout << "Thermal diffusivity:";
           for(FLOAT_PHYS v : tconlist ){ std::cout << " " << v; };
         std::cout << std::endl;
         std::cout << " matC:";
@@ -662,16 +662,16 @@ int main( int argc, char** argv ) {
 #endif
         if(tcon_part[part_i].size()>0){
           if(verbosity>1){
-            std::cout << "Setting thermal conductivity..." <<'\n'; }
-          Y->ther_cond.resize(tcon_part[part_i].size());
+            std::cout << "Setting thermal diffusivity..." <<'\n'; }
+          Y->ther_diff.resize(tcon_part[part_i].size());
           for(uint i=0; i<tcon_part[part_i].size(); i++){
-            Y->ther_cond[i] = tcon_part[part_i][i]; }
+            Y->ther_diff[i] = tcon_part[part_i][i]; }
         }else if(tcon_part[0].size()>0){
           if(verbosity>1){
-            std::cout << "Setting default thermal conductivity..." <<'\n'; }
-          Y->ther_cond.resize(tcon_part[0].size());
+            std::cout << "Setting default thermal diffusivity..." <<'\n'; }
+          Y->ther_diff.resize(tcon_part[0].size());
           for(uint i=0; i<tcon_part[0].size(); i++){
-            Y->ther_cond[i] = tcon_part[0][i]; }
+            Y->ther_diff[i] = tcon_part[0][i]; }
         }
         if(texp_part[part_i].size()>0){
           if(verbosity>1){

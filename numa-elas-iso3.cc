@@ -40,7 +40,7 @@ int ElastIso3D::ElemLinear( Elem* E,
   //FIXME Clean up local variables.
   //const int De = 3;// Element Dimension
   const int Nd = 3;// Node (mesh) Dimension
-  const int Nf = 3;// this->ndof_n DOF/node
+  const int Nf = 3;// this->node_d DOF/node
   const int Nj = Nd*Nf+1;//FIXME wrong?
   const int Nc = E->elem_conn_n;// Number of nodes/element
   const int Ne = Nf*Nc;
@@ -155,7 +155,7 @@ int ElastIso3D::ElemLinear( Elem* E,
   return 0;
   };
 int ElastIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
-  const uint ndof   = 3;//this->ndof_n
+  const uint ndof   = 3;//this->node_d
   const uint elem_n = E->elem_n;
   const uint  Nc = E->elem_conn_n;
   const uint  Nj = 10,d2=9;
@@ -232,7 +232,7 @@ int ElastIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
   return 0;
 };
 int ElastIso3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* sys_d ){
-  const uint ndof   = 3;//this->ndof_n
+  const uint ndof   = 3;//this->node_d
   const uint elem_n = E->elem_n;
   const uint  Nc = E->elem_conn_n;
   const uint  Nj = 10,d2=9;
@@ -314,7 +314,7 @@ int ElastIso3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* sys_d ){
 };
 int ElastIso3D::ElemStrain( Elem* E,FLOAT_SOLV* sys_f ){
   //FIXME Clean up local variables.
-  const uint ndof= 3;//this->ndof_n
+  const uint ndof= 3;//this->node_d
   const uint  Nj =10;//,d2=9;//mesh_d*mesh_d;
   const INT_MESH elem_n = E->elem_n;
   const uint intp_n = uint(E->gaus_n);
@@ -440,7 +440,7 @@ int ElastIso3D::ReadPartFMR( const char* fname, bool is_bin ){
       mtrl_prop[std::slice(tsz,tsz+s,1)] = tprop;
       for(int i=0; i<s; i++){ fmrfile >> mtrl_prop[i+tprop.size()]; }
     }
-    if(fmrstring=="$ThermalConductivity"){// Thermal conductivity
+    if(fmrstring=="$ThermalDiffusivity"){// Thermal diffusivity
       int s=0; fmrfile >> s;
       mtrl_prop.resize(s + tprop.size());
       mtrl_prop[std::slice(tsz,tsz+s,1)] = tprop;

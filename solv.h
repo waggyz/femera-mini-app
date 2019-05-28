@@ -51,7 +51,7 @@ public:
   //FIXME Make the rest private or protected later?
   FLOAT_SOLV loca_rto2=0.0;// Solution Tolerance Squared
   FLOAT_SOLV loca_res2=0.0;// [r2b, alpha kept local to each iteration]
-  INT_MESH halo_loca_0=0;// Associated Elem->halo_remo_n * Phys->ndof_n
+  INT_MESH halo_loca_0=0;// Associated Elem->halo_remo_n * Phys->node_d
   uint udof_flop=0, udof_band=0;
   int solv_cond;
 protected:

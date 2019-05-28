@@ -17,7 +17,7 @@ int PCR::BC (Mesh* ){return 0;};
 int PCR::RHS(Mesh* ){return 0;};
 //
 int PCR::RHS(Elem* E, Phys* Y ){
-  uint d=uint(Y->ndof_n);
+  uint d=uint(Y->node_d);
   INT_MESH n; INT_DOF f; FLOAT_PHYS v;
   for(auto t : E->rhs_vals ){ std::tie(n,f,v)=t;
     this->sys_r[d* n+uint(f)]+= v;
@@ -25,7 +25,7 @@ int PCR::RHS(Elem* E, Phys* Y ){
   return(0);
 };
 int PCR::BCS(Elem* E, Phys* Y ){
-  uint d=uint(Y->ndof_n);
+  uint d=uint(Y->node_d);
   INT_MESH n; INT_DOF f; FLOAT_PHYS v;
   for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
     this->sys_u[d* n+uint(f)] = v;
@@ -33,7 +33,7 @@ int PCR::BCS(Elem* E, Phys* Y ){
   return(0);
 };
 int PCR::BC0(Elem* E, Phys* Y ){
-  uint d=uint(Y->ndof_n);
+  uint d=uint(Y->node_d);
   INT_MESH n; INT_DOF f; FLOAT_PHYS v;
   for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
     this->sys_d[d* n+uint(f)]=0.0;
@@ -49,8 +49,8 @@ int PCR::BC0(Elem* E, Phys* Y ){
 };
 int PCR::Setup( Elem* E, Phys* Y ){
   //this->meth_name="preconditioned conjugate residual";
-  this->halo_loca_0 = E->halo_remo_n * Y->ndof_n;
-  //this->udof_n = E->node_n * Y->ndof_n;
+  this->halo_loca_0 = E->halo_remo_n * Y->node_d;
+  //this->udof_n = E->node_n * Y->node_d;
   //this->udof_flop = 14;//*elem_n
   //this->udof_band = 17*sizeof(FLOAT_SOLV);//*udof_n + 2
   //this->Setup();
@@ -89,7 +89,7 @@ int PCR::Init( Elem* E, Phys* Y ){
 };
 int PCR::Init(){
   const uint n=sys_u.size();
-  const uint sumi0=this->halo_loca_0;// *this->ndof_n;
+  const uint sumi0=this->halo_loca_0;// *this->node_d;
   sys_g = sys_f;
   sys_p = sys_r;
   FLOAT_SOLV s=0.0;
@@ -108,7 +108,7 @@ int PCR::Iter(){// 2 FLOP + 14 FLOP/DOF, 17 mem/DOF
   //NOTE Compute initial sys_f=sys_g=[k][r] before iterating with this?
   //FIXME Compute current sys_f before iterating with this?
   const uint n=sys_u.size();
-  const uint sumi0=this->halo_loca_0;// *this->ndof_n;//FIXME Magic number
+  const uint sumi0=this->halo_loca_0;// *this->node_d;//FIXME Magic number
   //const auto ra=this->loca_res2;// Make a local version of this member variable
   //--------------------------------------------
   //FLOAT_SOLV s=0.0;
@@ -226,7 +226,7 @@ int HaloPCR::Init(){// Preconditioned Conjugate Residual
 for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
   Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
   if(E->node_haid.size()==0){ E->node_haid.resize(E->halo_node_n); };
-  const INT_MESH d=uint(Y->ndof_n);
+  const INT_MESH d=uint(Y->node_d);
   for(INT_MESH i=0; i<E->halo_node_n; i++){
 #pragma omp critical(halomap)
 {//FIXME critical section here?
@@ -252,7 +252,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
-    const INT_MESH d=uint(Y->ndof_n);
+    const INT_MESH d=uint(Y->node_d);
     for(INT_MESH i=0; i<E->halo_node_n; i++){
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
@@ -273,7 +273,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
-    const INT_MESH d=uint(Y->ndof_n);
+    const INT_MESH d=uint(Y->node_d);
     for(INT_MESH i=0; i<E->halo_node_n; i++){
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
@@ -288,7 +288,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
-    const INT_MESH d=uint(Y->ndof_n);
+    const INT_MESH d=uint(Y->node_d);
     for(INT_MESH i=0; i<E->halo_node_n; i++){
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
@@ -321,7 +321,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
-    const INT_MESH d=uint(Y->ndof_n);
+    const INT_MESH d=uint(Y->node_d);
     for(INT_MESH i=0; i<E->halo_node_n; i++){
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
@@ -336,7 +336,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
 #pragma omp for schedule(static) reduction(+:glob_r2a)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
-    const INT_MESH d=uint(Y->ndof_n);
+    const INT_MESH d=uint(Y->node_d);
     for(INT_MESH i=0; i<E->halo_node_n; i++){
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
@@ -415,7 +415,7 @@ int HaloPCR::Iter(){//-----------------------------------------------
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
-    const INT_MESH d=uint(Y->ndof_n);
+    const INT_MESH d=uint(Y->node_d);
     start = std::chrono::high_resolution_clock::now();
     S->sys_f=0.0;
     E->do_halo=true;
@@ -439,7 +439,7 @@ int HaloPCR::Iter(){//-----------------------------------------------
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
-    const INT_MESH d=uint(Y->ndof_n);
+    const INT_MESH d=uint(Y->node_d);
     const INT_MESH hrn=E->halo_remo_n;
     for(INT_MESH i=0; i<hrn; i++){
       auto f = d* E->node_haid[i];
@@ -454,7 +454,7 @@ int HaloPCR::Iter(){//-----------------------------------------------
 #pragma omp for schedule(static) reduction(+:glob_sum1)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
-    const INT_MESH d=uint(Y->ndof_n);
+    const INT_MESH d=uint(Y->node_d);
     const INT_MESH hnn=E->halo_node_n;
     start = std::chrono::high_resolution_clock::now();
     for(INT_MESH i=0; i<hnn; i++){

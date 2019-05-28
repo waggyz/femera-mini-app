@@ -13,11 +13,11 @@ int Phys::ScatterNode2Elem(Elem* E,//FIXME
   const uint elem_n = E->elem_n;
   const uint conn_n = E->elem_conn_n;
   const uint N      = elem_n*conn_n;
-  const uint Nv     = elem_n*conn_n*this->ndof_n;
+  const uint Nv     = elem_n*conn_n*this->node_d;
   if(elem_v.size()!=Nv){ elem_v.resize(Nv); };//FIXME
   for(uint i=0; i<N; i++){//FIXME replace elem_d with dofs_n
-    elem_v[std::slice( i*this->ndof_n,this->ndof_n,1 )]
-      =node_v[std::slice(E->elem_conn[i]*this->ndof_n,this->ndof_n,1)];
+    elem_v[std::slice( i*this->node_d,this->node_d,1 )]
+      =node_v[std::slice(E->elem_conn[i]*this->node_d,this->node_d,1)];
   };
   return 0;
 };
@@ -28,8 +28,8 @@ int Phys::GatherElem2Node(Elem* E,
   const uint conn_n = E->elem_conn_n;
   const uint N      = elem_n*conn_n;
   for (uint i=0; i<N; i++){
-    node_v[std::slice(E->elem_conn[i]*this->ndof_n,this->ndof_n,1)]
-      +=elem_v[std::slice( i*this->ndof_n,this->ndof_n,1 )];
+    node_v[std::slice(E->elem_conn[i]*this->node_d,this->node_d,1)]
+      +=elem_v[std::slice( i*this->node_d,this->node_d,1 )];
   };
   return 0;
 };
@@ -163,10 +163,10 @@ int Phys::ReadPartFMR( const char* fname, bool is_bin ){
       ther_expa.resize(s);
       for(int i=0; i<s; i++){ fmrfile >> ther_expa[i]; }
     }
-    if(fmrstring=="$ThermalConductivity"){// Thermal conductivity
+    if(fmrstring=="$ThermalDiffusivity"){// Thermal diffusivity
       int s=0; fmrfile >> s;
-      ther_cond.resize(s);
-      for(int i=0; i<s; i++){ fmrfile >> ther_cond[i]; }
+      ther_diff.resize(s);
+      for(int i=0; i<s; i++){ fmrfile >> ther_diff[i]; }
     }
   }
   return 0;
@@ -181,9 +181,10 @@ int Phys::SavePartFMR( const char* fname, bool is_bin ){
   std::ofstream fmrfile;
   fmrfile.open(fname, std::ios_base::app);
   //
+  elas_prop.resize(mtrl_prop.size()); elas_prop = mtrl_prop;
+#if 0
   fmrfile << "$ElasticProperties" <<'\n';//FIXME Deprecated
   fmrfile << mtrl_prop.size();
-  elas_prop.resize(mtrl_prop.size()); elas_prop = mtrl_prop;
   for(uint i=0;i<mtrl_prop.size();i++){ fmrfile <<" "<< mtrl_prop[i]; }
   fmrfile << '\n';
   if(mtrl_dirs.size()>0){
@@ -191,6 +192,7 @@ int Phys::SavePartFMR( const char* fname, bool is_bin ){
     for(uint i=0;i<mtrl_dirs.size();i++){ fmrfile <<" "<< mtrl_dirs[i]; }
     fmrfile <<'\n';
   }
+#endif
   // Replace $ElasticProperties with these
   if(mtrl_dirs.size()>0){
     fmrfile << "$Orientation" <<'\n';
@@ -210,10 +212,10 @@ int Phys::SavePartFMR( const char* fname, bool is_bin ){
     for(uint i=0;i<ther_expa.size();i++){ fmrfile <<" "<< ther_expa[i]; }
     fmrfile << '\n';
   }
-  if(ther_cond.size()>0){
-    fmrfile << "$ThermalConductivity" <<'\n';
-    fmrfile << ther_cond.size();
-    for(uint i=0;i<ther_cond.size();i++){ fmrfile <<" "<< ther_cond[i]; }
+  if(ther_diff.size()>0){
+    fmrfile << "$ThermalDiffusivity" <<'\n';
+    fmrfile << ther_diff.size();
+    for(uint i=0;i<ther_diff.size();i++){ fmrfile <<" "<< ther_diff[i]; }
     fmrfile << '\n';
   }
   return 0;

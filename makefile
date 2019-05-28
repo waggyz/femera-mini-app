@@ -51,10 +51,10 @@ all: gmsh2fmr-ser mini-omp mini-ser mini-omq mini-seq
 
 mini-ser:
 	mv -f femser-$(CPUMODEL) femser.old 2>/dev/null ; \
-	$(CXX) $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DHAS_TEST \
+	$(CXX) $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DVERB_MAX=4 -DHAS_TEST \
 	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femser-$(CPUMODEL) $(CPPLOG);\
 	./femser-$(CPUMODEL) -v2 -p cube/unit1p1n2 ;\
-	./femser-$(CPUMODEL) -v2 -p cube/unit1p2n2 ;
+	./femser-$(CPUMODEL) -v3 -p cube/unit1p2n2 ;
 
 mini-omp:
 	mv -f femera-$(CPUMODEL) femera.old 2>/dev/null ; \
@@ -101,11 +101,11 @@ gmsh2fmr-ser:
 	$(CXX) $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(FEMERA_MINI_CC) gmsh2.cc gmsh2fmr.cc -o gmsh2fmr ;\
 	./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu 0.001 \
-	-M1 -E100e9 -N0.3 -A20e-6 -K200 \
+	-M1 -E100e9 -N0.3 -A20e-6 -K1e-4 \
 	-M2 -E100e9 -N0.3 -Z1 -X0 -Z0 \
 	-v3 -ap cube/unit1p2n2;
 	./gmsh2fmr -t111 -z0 -t666 -xT0 -t333 -y0 -t444 -xu 0.001 -t444 -Tu 100 \
-	-M0 -E100e9 -N0.3 -A20e-6 -K200 -R \
+	-M0 -E100e9 -N0.3 -A20e-6 -K1e-4 -R \
 	-v3 -ap cube/unit1p2n2;
 
 gmsh2fmr-rve:

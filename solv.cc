@@ -4,7 +4,7 @@
 #include "femera.h"
 int Solv::Precond(Elem* E, Phys* Y){// Jacobi Preconditioner
   int bad_d=0;
-  //this->udof_n = E->node_n * Y->ndof_n;
+  //this->udof_n = E->node_n * Y->node_d;
   //sys_d.resize(udof_n,1.0);// Default Diagonal Preconditioner
   //if(this->solv_cond != Solv::COND_NONE){ this->sys_d=0.0; };//FIXME
   switch(this->solv_cond){
@@ -29,7 +29,7 @@ int Solv::Precond(Elem* E, Phys* Y){// Jacobi Preconditioner
   };
   /*
   //FIXME This isn't part of the preconditioner setup...
-  uint d=uint(Y->ndof_n);
+  uint d=uint(Y->node_d);
   INT_MESH n; INT_DOF f; FLOAT_PHYS v;
   for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
     //printf("FIX ID %i, DOF %i, val %+9.2e\n",i,E->bcs_vals[i].first,E->bcs_vals[i].second);

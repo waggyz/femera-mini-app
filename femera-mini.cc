@@ -346,7 +346,7 @@ int main( int argc, char** argv ){
     //
     if(verbosity>2){
       if(prec_sec/init_sec/float(comp_n)*pct > 0.03){//FIXME
-      printf("%9.0f %s  %6.2f%% Combined Thread Jacobi Preconditioner Time\n",
+      printf("%9.0f %s  %6.2f%% Combined Thread Preconditioner Time\n",
         prec_sec/sc, ss, prec_sec/init_sec/float(comp_n)*pct); };
       printf("%9.0f %s  %6.2f%% Combined Global Node ID Map Init Time\n",
         gmap_sec/sc, ss, gmap_sec/init_sec/float(comp_n)*pct );
@@ -512,52 +512,91 @@ int main( int argc, char** argv ){
 #pragma omp for schedule(static)
     for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
       Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+      const INT_MESH d=uint(Y->node_d);
       Phys::vals errors={};
       FLOAT_PHYS nu=Y->mtrl_prop[1];
       Phys::vals coor(E->vert_coor.size());
+      const auto Nn=E->node_n;
       switch(test_dir){
       case(1):{
-        coor[std::slice(0,E->node_n,3)]=E->vert_coor[std::slice(1,E->node_n,3)];
-        coor[std::slice(1,E->node_n,3)]=E->vert_coor[std::slice(2,E->node_n,3)];
-        coor[std::slice(2,E->node_n,3)]=E->vert_coor[std::slice(0,E->node_n,3)];
+        coor[std::slice(0,Nn,3)]=E->vert_coor[std::slice(1,Nn,3)];
+        coor[std::slice(1,Nn,3)]=E->vert_coor[std::slice(2,Nn,3)];
+        coor[std::slice(2,Nn,3)]=E->vert_coor[std::slice(0,Nn,3)];
         break;}
       case(2):{
-        coor[std::slice(0,E->node_n,3)]=E->vert_coor[std::slice(2,E->node_n,3)];
-        coor[std::slice(1,E->node_n,3)]=E->vert_coor[std::slice(0,E->node_n,3)];
-        coor[std::slice(2,E->node_n,3)]=E->vert_coor[std::slice(1,E->node_n,3)];
+        coor[std::slice(0,Nn,3)]=E->vert_coor[std::slice(2,Nn,3)];
+        coor[std::slice(1,Nn,3)]=E->vert_coor[std::slice(0,Nn,3)];
+        coor[std::slice(2,Nn,3)]=E->vert_coor[std::slice(1,Nn,3)];
         break;}
       case(0):
       default:{ coor = E->vert_coor; break;}
       };
-      for(uint i=0;i<E->node_n*3;i+=3){
+      for(uint i=0;i<Nn*3;i+=3){
         coor[i]*=scax; coor[i+1]*=scay; coor[i+2]*=scaz; };
-      //coor[std::slice(0,E->node_n,3)]=coor[std::slice(0,E->node_n,3)]*scax;
-      //coor[std::slice(1,E->node_n,3)]=coor[std::slice(1,E->node_n,3)]*scay;
-      //coor[std::slice(2,E->node_n,3)]=coor[std::slice(2,E->node_n,3)]*scaz;
-      Solv::vals norm_u(S->udof_n);
-      for(INT_MESH i=0;i<S->udof_n;i++){
-        norm_u[i] = S->sys_u[i]/FLOAT_SOLV(test_u);};
-      T->CheckCubeError( errors, nu,
-        coor, norm_u );
-        //E->vert_coor*scale, S->sys_u/FLOAT_SOLV(test_u) );
+      //coor[std::slice(0,Nn,3)]=coor[std::slice(0,Nn,3)]*scax;
+      //coor[std::slice(1,Nn,3)]=coor[std::slice(1,Nn,3)]*scay;
+      //coor[std::slice(2,Nn,3)]=coor[std::slice(2,Nn,3)]*scaz;
+      //
+      Solv::vals norm_u(Nn*3);
+      for(INT_MESH i=0;i<Nn;i++){
+        for(INT_MESH j=0;j<3;j++){
+          norm_u[3* i+j] = S->sys_u[d* i+j]/FLOAT_SOLV(test_u);
+        }
+      }
+      T->CheckCubeError( errors, nu, coor, norm_u );
 #pragma omp critical(errs)
 {
       for(int i= 0; i< 4; i++){ errtot[i] = std::min(errtot[i],errors[i]); };
       for(int i= 4; i< 8; i++){ errtot[i]+= errors[i]; };
       for(int i= 8; i<12; i++){ errtot[i] = std::max(errtot[i],errors[i]); };
       errtot[12]+=errors[12];
-#if VERB_MAX>3
-      if(S->udof_n<300){
-        //printf("Node Coordinates:");
-        //for(uint i=0;i<E->vert_coor.size();i++){
-        //  if((i%3)==0){printf("\n");};
-        //  printf("%+9.2e ",E->vert_coor[i]);
-        //}; printf("\n Displacements:");
-        for(uint i=0;i<S->sys_u.size();i++){
-          if((i%3)==0){printf("\n");};
-          printf("%+9.2e ",S->sys_u[i]);
-        }; printf("\n");
-      };
+#if VERB_MAX > 2
+      if(verbosity>2){
+        if(S->udof_n<300){
+          printf("------- Node Coordinates --------------- Displacements -------");
+          if(d>3){ printf("  Temperature"); }
+          printf("\n");
+          for(uint i=0;i<Nn;i++){
+            for(uint j=0;j<3;j++){ printf("%+9.2e ",E->vert_coor[3* i+j]); }
+            printf(" | ");
+            for(uint j=0;j<3;j++){ printf("%+9.2e ",S->sys_u[d* i+j]); }
+            if(d>3){ printf("  %+9.2e",S->sys_u[d* i+3]); }
+            printf("\n");
+          }
+        }
+      }
+#endif
+#if VERB_MAX > 3
+      if(verbosity>3){
+        if(S->udof_n<300){
+          printf("---- Normalized Coordinates ------ Normalized Displacements --");
+          if(d>3){ printf("  Temperature"); }
+          printf("\n");
+          for(uint i=0;i<Nn;i++){
+            for(uint j=0;j<3;j++){ printf("%+9.2e ",coor[3* i+j]); }
+            printf(" | ");
+            for(uint j=0;j<3;j++){ printf("%+9.2e ",norm_u[3* i+j]); }
+            //if(d>3){ printf("  %+9.2e",norm_u[d* i+3]); }
+            printf("\n");
+          }
+        }
+      }
+#endif
+#if VERB_MAX > 3
+      if(verbosity>3){
+        if(S->udof_n<300){
+          printf("------- Node Coordinates -------------- Preconditioner -------");
+          if(d>3){ printf("  Temperature"); }
+          printf("\n");
+          for(uint i=0;i<Nn;i++){
+            for(uint j=0;j<3;j++){ printf("%+9.2e ",E->vert_coor[3* i+j]); }
+            printf(" | ");
+            for(uint j=0;j<3;j++){ printf("%+9.2e ",S->sys_d[d* i+j]); }
+            if(d>3){ printf("  %+9.2e",S->sys_d[d* i+3]); }
+            printf("\n");
+          }
+        }
+      }
 #endif
 }
 #if VERB_MAX>2
@@ -613,37 +652,37 @@ int main( int argc, char** argv ){
     for(uint i=0;i<n;i++){ S->sys_f[i]=0.0; }
     E->do_halo=true; Y->ElemLinear( E, S->sys_f, S->sys_u );
     // sync sys_f
-    const INT_MESH d=uint(Y->ndof_n);
+    const INT_MESH d=uint(Y->node_d);
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
     for(INT_MESH i=hrn; i<hnn; i++){
       auto f = d* E->node_haid[i];
       for(uint j=0; j<d; j++){
 #pragma omp atomic write
-        M->halo_val[f+j] = S->sys_f[3* i+j]; };
+        M->halo_val[f+j] = S->sys_f[d* i+j]; };
     };
   };
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
-    const INT_MESH d=uint(Y->ndof_n);
+    const INT_MESH d=uint(Y->node_d);
     const INT_MESH hrn=E->halo_remo_n;
     for(INT_MESH i=0; i<hrn; i++){
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic update
-        M->halo_val[f+j]+= S->sys_f[3* i+j]; };
+        M->halo_val[f+j]+= S->sys_f[d* i+j]; };
     };
   };// finished gather, now scatter back to elems
 #pragma omp for schedule(static) reduction(+:reac_x)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
-    const INT_MESH d=uint(Y->ndof_n);
+    const INT_MESH d=uint(Y->node_d);
     const INT_MESH hnn=E->halo_node_n;
     for(INT_MESH i=0; i<hnn; i++){
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){//NOTE appears not to be critical
 //#pragma omp atomic read
-        S->sys_f[3* i+j] = M->halo_val[f+j]; };
+        S->sys_f[d* i+j] = M->halo_val[f+j]; };
     };
     E->do_halo=false; Y->ElemLinear( E, S->sys_f, S->sys_u );
   };
@@ -652,20 +691,22 @@ int main( int argc, char** argv ){
 #pragma omp for schedule(static) reduction(+:reac_x)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
-    //const INT_MESH d=uint(Y->ndof_n);
+    const INT_MESH d=uint(Y->node_d);
     uint dof=0;// x-direction
     INT_MESH n,f; FLOAT_MESH v;
     INT_MESH r=E->halo_remo_n;
     for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
       // Don't duplicate halo nodes
-      if(n>=r){ reac_x+=S->sys_f[3* n+dof]; };
+      if(n>=r){ if(f==0){ reac_x+=S->sys_f[d* n+dof]; } }
     };
 #pragma omp critical
 {
     FLOAT_PHYS A=0.0,B=0.0,C=0.0;
-    if(Y->mtrl_matc.size()==3){
+    //if(Y->mtrl_matc.size()==3){
+    if(Y->mtrl_dirs.size()==0){
       A=Y->mtrl_matc[0]; B=Y->mtrl_matc[1]; C=Y->mtrl_matc[2];
-    }else if(Y->mtrl_matc.size()==9){
+    //}else if(Y->mtrl_matc.size()==9){
+    }else{
       A=(Y->mtrl_matc[0]+Y->mtrl_matc[1]+Y->mtrl_matc[2])/3.0;
       B=(Y->mtrl_matc[3]+Y->mtrl_matc[4]+Y->mtrl_matc[5])/3.0;
       C=(Y->mtrl_matc[6]+Y->mtrl_matc[7]+Y->mtrl_matc[8])/3.0;
@@ -673,6 +714,7 @@ int main( int argc, char** argv ){
     youn_voig=(A-B+3.0*C)*(A+2.0*B)/(2.0*A+3.0*B+C);
     //printf("c11:%e, c12:%e, c44:%e\n",A,B,C);
     //printf("ELEM NODES: %u\n",uint(E->elem_conn_n));
+    //printf("mtrl_prop size: %u\n",uint(Y->mtrl_prop.size()));
 }
   };
   }// end parallel 
