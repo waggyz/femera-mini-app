@@ -18,6 +18,7 @@ public:
   INT_DIM gvar_d=0;// Inputs/gauss point: user-defined state vars
   //
   FLOAT_PHYS part_sum1=0.0;
+  Phys::vals udof_magn={1e-3,1e-3,1e-3,100.0};//FIXME Set from BCS
   //
   virtual int BlocLinear( Elem*,RESTRICT Solv::vals&,const RESTRICT Solv::vals&)=0;
   virtual int ElemLinear( Elem*,FLOAT_SOLV*,const FLOAT_SOLV*)=0;

@@ -123,7 +123,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
           uR[(Dn* i+k) ] += u[(Dn* i+j) ] * R[(Dm* j+k) ];
     };};};//-------------------------------------------- 2 *3*3*Nc = 18*Nc FLOP
     // Copy thermal vals from u to ur.
-    //FIXME Should just load uR initially?
+    //FIXME Should just store in uR initially?
     if(has_ther){
       for(int i=0; i<Nc; i++){ uR[Dn* i+Dm ]=u[Dn* i+Dm ]; }
     }
@@ -137,7 +137,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     };
     for(int ip=0; ip<intp_n; ip++){
       //G = MatMul3x3xN( jac,shg );
-      for(int i=0; i< Dn*Dn ; i++){ H[i]=0.0; };
+      for(int i=0; i<(Dm*Dn); i++){ H[i]=0.0; };
       for(int i=0; i<Nc; i++){
         for(int k=0; k<Dm ; k++){ G[Dm* i+k ]=0.0;
           for(int j=0; j<Dm ; j++){
@@ -295,15 +295,18 @@ int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
         elem_diag[i]+=(B[Ne*4 + i] * D[6*4 + k] * B[Ne*k + i])*w;
         elem_diag[i]+=(B[Ne*5 + i] * D[6*5 + k] * B[Ne*k + i])*w;
       };};//};//};
-      for (uint i=0; i<Nc; i++){
-        for(uint j=3; j<Dn; j++){
-          sys_d[E->elem_conn[Nc*ie+i]*Dn+j] += w * mtrl_matc[12-3+j]; }
+      if(Dn>3){
+        for (uint i=0; i<Nc; i++){
+          for(uint j=3; j<Dn; j++){// Thermal DOFs
+            sys_d[E->elem_conn[Nc*ie+i]*Dn+j]//FIXME is det used correctly here?
+              += udof_magn[j] * mtrl_matc[j] / mtrl_matc[12-3+j] *w; }
+        }
       }
     };//end intp loop
     for (uint i=0; i<Nc; i++){
       //int c=E->elem_conn[Nc*ie+i]*3;
       for(uint j=0; j<3; j++){
-        sys_d[E->elem_conn[Nc*ie+i]*Dn+j] += elem_diag[3*i+j];
+        sys_d[E->elem_conn[Nc*ie+i]*Dn+j] += elem_diag[3*i+j] *udof_magn[j];
       }
       //for(uint j=3; j<Dn; j++){ sys_d[E->elem_conn[Nc*ie+i]*Dn+j] = 1.0; }
     }

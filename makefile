@@ -97,14 +97,14 @@ test-asc:
 	diff cube/unit1p1n2_1.fmr cube/unit1p1n2_1.cpy ;
 
 gmsh2fmr-ser:
-	mv -f gmsh2fmr gmsh2fmr.old 2>/dev/null ;\
+	mv -f gmsh2fmr gmsh2fmr.old 2>/dev/null ;
 	$(CXX) $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
-	$(FEMERA_MINI_CC) gmsh2.cc gmsh2fmr.cc -o gmsh2fmr ;\
-	./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu 0.001 \
+	$(FEMERA_MINI_CC) gmsh2.cc gmsh2fmr.cc -o gmsh2fmr ;
+	./gmsh2fmr -t666 -x0 -t111 -z0 -t333 -y0 -t444 -xu 0.001 \
 	-M1 -E100e9 -N0.3 -A20e-6 -K100e-6 \
 	-M2 -E100e9 -N0.3 -Z1 -X0 -Z0 \
 	-v3 -ap cube/unit1p2n2;
-	./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu 0.001 -t444 666 -Tu 100 \
+	./gmsh2fmr -t666 -x0 -t333 -y0 -t111 -z0 -t444 -xu 0.001 -t444 -Tu 100 \
 	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 -R \
 	-v3 -ap cube/unit1p2n2;
 
