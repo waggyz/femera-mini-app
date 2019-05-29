@@ -43,7 +43,7 @@ int main( int argc, char** argv ) {
   std::unordered_map<int,std::vector<FLOAT_PHYS>>
     mtrl_part, tcon_part, texp_part;//  mtrl_volu, tcon_volu, texp_volu;
   bool rotfile=false, allrand=false;// Random orientations
-  bool hasther=false;
+  //bool hasther=false;
   FLOAT_MESH eps_find=1e-6;
   FLOAT_PHYS oriunit=1.0;
   std::vector<FLOAT_PHYS> orislist={};
@@ -110,8 +110,8 @@ int main( int argc, char** argv ) {
         case 'E':{ younlist.push_back(atof(optarg)); hasmatp=true; mtrldone=false;break; }
         case 'N':{ poislist.push_back(atof(optarg)); hasmatp=true; mtrldone=false;break; }
         case 'G':{ smodlist.push_back(atof(optarg)); hasmatp=true; mtrldone=false;break; }
-        case 'A':{ texplist.push_back(atof(optarg)); hasther=true; mtrldone=false;break; }
-        case 'K':{ tconlist.push_back(atof(optarg)); hasther=true; mtrldone=false;break; }
+        case 'A':{ texplist.push_back(atof(optarg)); hasmatp=true; mtrldone=false;break; }
+        case 'K':{ tconlist.push_back(atof(optarg)); hasmatp=true; mtrldone=false;break; }
         //case 'H':{ therlist.push_back(atof(optarg)); hasmatp=true; mtrldone=false;break; }
         case 'X':{ axislist.push_back(0); rdeglist.push_back(atof(optarg)); mtrldone=false;break; }
         case 'Y':{ axislist.push_back(1); rdeglist.push_back(atof(optarg)); mtrldone=false;break; }
@@ -144,7 +144,8 @@ int main( int argc, char** argv ) {
       if( hasmatp & hasmatc){
         fprintf (stderr,"ERROR Specify only material properties:\n");
         fprintf (stderr,"      -E<Young's modulus> -N<Poisson's ratio>\n");
-        fprintf (stderr,"      -G<shear modulus> -H<thermal expansion>...\n");
+        fprintf (stderr,"      -G<shear modulus>\n");
+        fprintf (stderr,"      -A<Thermal expansion> -K<thermal conductivity>...\n");
         fprintf (stderr,"   OR material response matrix values:\n");
         fprintf (stderr,"      -C<c11>...\n");
         return 1; };
@@ -270,7 +271,7 @@ int main( int argc, char** argv ) {
         //  for(FLOAT_PHYS v : smodlist ){ mtrl_volu[p].push_back(v); };
         //};
         //
-        mtrldone=true; hasmatc=false; hasmatp=false; rotrand=false, hasther=false;
+        mtrldone=true; hasmatc=false; hasmatp=false; rotrand=false;//, hasther=false;
         parttags=parttmp;//volutags=volutmp;
         younlist={}; poislist={}; smodlist={}; matclist={};
         tconlist={}; texplist={};

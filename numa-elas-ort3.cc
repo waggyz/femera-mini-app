@@ -58,7 +58,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
 #endif
   FLOAT_MESH jac[Nj];//, det;
   FLOAT_PHYS u[Ne], f[Ne], uR[Ne];
-  FLOAT_PHYS G[Dm*Nc], GS[Ne], H[Dm*Dn], S[Dm*Dn];//FIXME wrong sizes?
+  FLOAT_PHYS G[Dm*Nc], GS[Dm*Nc], H[Dm*Dn], S[Dm*Dn];//FIXME wrong sizes?
   //FIXME
   const bool has_ther = ( this->ther_expa.size() > 0 );
   //
@@ -114,7 +114,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     } printf("\n");
 #endif
   for(INT_MESH ie=e0;ie<ee;ie++){
-    for(int i=0;i<Ne;i++){ GS[i]=0.0; };
+    for(int i=0;i<(Dm*Nc);i++){ GS[i]=0.0; };
     // Transpose R
     std::swap(R[1],R[3]); std::swap(R[2],R[6]); std::swap(R[5],R[7]);
     for(int i=0; i<Nc; i++){// Rotate vectors in u
@@ -166,7 +166,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         }
         //printf("TEMPERATURE[%i]: %+9.2e\n",ip,Tip);
         //Apply thermal expansion to the volumetric strains
-        H[ 0]-=Tip*C[ 9]*dw; H[ 4]-=Tip*C[10]*dw; H[ 8]-=Tip*C[11]*dw;
+        H[ 0]-=Tip*C[ 9]; H[ 4]-=Tip*C[10]; H[ 8]-=Tip*C[11];
       }
       // Material Response
       S[0]=(C[0]* H[0] + C[3]* H[4] + C[5]* H[8])*dw;//Sxx
@@ -191,7 +191,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       for(int i=0; i<Nc; i++){
         for(int k=0; k<Dm; k++){//FIXME Dm?
           for(int j=0; j<Dm; j++){
-            GS[Dn* i+k ] += G[Dm* i+j ] * S[Dm* j+k ];
+            GS[Dm* i+k ] += G[Dm* i+j ] * S[Dm* j+k ];
       };};};//--------------------------------------- 2 *3*3*Nc = 18*Nc*Ng FLOP
       if(has_ther){
         for(int i=0; i<Nc; i++){
@@ -206,7 +206,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     for(int i=0; i<Nc; i++){// rotate before summing in f
       for(int k=0; k<Dm; k++){
         for(int j=0; j<Dm; j++){
-          f[Dn* i+k ] += GS[Dn* i+j ] * R[Dm* j+k ];
+          f[Dn* i+k ] += GS[Dm* i+j ] * R[Dm* j+k ];
     };};};//-------------------------------------------- 2 *3*3*Nc = 18*Nc FLOP
     for (int i=0; i<Nc; i++){
       std::memcpy(& sysf[Econn[Nc*ie+i]*Dn],& f[Dn*i],
@@ -297,7 +297,7 @@ int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
       };};//};//};
       for (uint i=0; i<Nc; i++){
         for(uint j=3; j<Dn; j++){
-          sys_d[E->elem_conn[Nc*ie+i]*Dn+j] += w * mtrl_matc[12-3+j]; }// *1e18; }
+          sys_d[E->elem_conn[Nc*ie+i]*Dn+j] += w * mtrl_matc[12-3+j]; }
       }
     };//end intp loop
     for (uint i=0; i<Nc; i++){
