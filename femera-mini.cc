@@ -480,6 +480,7 @@ int main( int argc, char** argv ){
     FLOAT_PHYS scax=1.0,minx= 99e9,maxx=-99e9;
     FLOAT_PHYS scay=1.0,miny= 99e9,maxy=-99e9;
     FLOAT_PHYS scaz=1.0,minz= 99e9,maxz=-99e9;
+    FLOAT_PHYS youn_voig=0.0, ther_pres=0.0;;
 #pragma omp parallel
 {  std::vector<Mesh::part> P;
    P.resize(M->mesh_part.size());
@@ -501,6 +502,23 @@ int main( int argc, char** argv ){
       minz=std::min(minz, t.min() );
       maxz=std::max(maxz, t.max() );
 }
+#pragma omp critical youngs
+{
+    FLOAT_PHYS A=0.0,B=0.0,C=0.0;
+    //if(Y->mtrl_matc.size()==3){
+    if(Y->mtrl_dirs.size()==0){
+      A=Y->mtrl_matc[0]; B=Y->mtrl_matc[1]; C=Y->mtrl_matc[2];
+    //}else if(Y->mtrl_matc.size()==9){
+    }else{
+      A=(Y->mtrl_matc[0]+Y->mtrl_matc[1]+Y->mtrl_matc[2])/3.0;
+      B=(Y->mtrl_matc[3]+Y->mtrl_matc[4]+Y->mtrl_matc[5])/3.0;
+      C=(Y->mtrl_matc[6]+Y->mtrl_matc[7]+Y->mtrl_matc[8])/3.0;
+    };
+    youn_voig=(A-B+3.0*C)*(A+2.0*B)/(2.0*A+3.0*B+C);
+    //printf("c11:%e, c12:%e, c44:%e\n",A,B,C);
+    //printf("ELEM NODES: %u\n",uint(E->elem_conn_n));
+    //printf("mtrl_prop size: %u\n",uint(Y->mtrl_prop.size()));
+}
     };
 #pragma omp single
 {
@@ -512,35 +530,55 @@ int main( int argc, char** argv ){
 #pragma omp for schedule(static)
     for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
       Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
-      const INT_MESH d=uint(Y->node_d);
+      const int Dm=3; const int Dn=Y->node_d;
       Phys::vals errors={};
       FLOAT_PHYS nu=Y->mtrl_prop[1];
       Phys::vals coor(E->vert_coor.size());
       const auto Nn=E->node_n;
       switch(test_dir){
       case(1):{
-        coor[std::slice(0,Nn,3)]=E->vert_coor[std::slice(1,Nn,3)];
-        coor[std::slice(1,Nn,3)]=E->vert_coor[std::slice(2,Nn,3)];
-        coor[std::slice(2,Nn,3)]=E->vert_coor[std::slice(0,Nn,3)];
+        coor[std::slice(0,Nn,Dm)]=E->vert_coor[std::slice(1,Nn,Dm)];
+        coor[std::slice(1,Nn,Dm)]=E->vert_coor[std::slice(2,Nn,Dm)];
+        coor[std::slice(2,Nn,Dm)]=E->vert_coor[std::slice(0,Nn,Dm)];
         break;}
       case(2):{
-        coor[std::slice(0,Nn,3)]=E->vert_coor[std::slice(2,Nn,3)];
-        coor[std::slice(1,Nn,3)]=E->vert_coor[std::slice(0,Nn,3)];
-        coor[std::slice(2,Nn,3)]=E->vert_coor[std::slice(1,Nn,3)];
+        coor[std::slice(0,Nn,Dm)]=E->vert_coor[std::slice(2,Nn,Dm)];
+        coor[std::slice(1,Nn,Dm)]=E->vert_coor[std::slice(0,Nn,Dm)];
+        coor[std::slice(2,Nn,Dm)]=E->vert_coor[std::slice(1,Nn,Dm)];
         break;}
       case(0):
       default:{ coor = E->vert_coor; break;}
       };
-      for(uint i=0;i<Nn*3;i+=3){
-        coor[i]*=scax; coor[i+1]*=scay; coor[i+2]*=scaz; };
-      //coor[std::slice(0,Nn,3)]=coor[std::slice(0,Nn,3)]*scax;
-      //coor[std::slice(1,Nn,3)]=coor[std::slice(1,Nn,3)]*scay;
-      //coor[std::slice(2,Nn,3)]=coor[std::slice(2,Nn,3)]*scaz;
+      for(uint i=0;i<(Nn*Dm);i+=Dm){
+        coor[i+0]*=scax; coor[i+1]*=scay; coor[i+2]*=scaz; };
       //
-      Solv::vals norm_u(Nn*3);
-      for(INT_MESH i=0;i<Nn;i++){
-        for(INT_MESH j=0;j<3;j++){
-          norm_u[3* i+j] = S->sys_u[d* i+j]/FLOAT_SOLV(test_u);
+      test_u=Y->udof_magn[0]; FLOAT_PHYS test_T=Y->udof_magn[3];
+      //
+      Solv::vals norm_u(Nn*Dm);
+      if(Dn<4){
+        for(INT_MESH i=0;i<Nn;i++){
+          for(int j=0;j<Dm;j++){
+            norm_u[Dm* i+j] = S->sys_u[Dn* i+j] / FLOAT_SOLV(test_u);
+          }
+        }
+      }else{// Adjust for thermal expansion
+        //FLOAT_PHYS kappa=(Y->ther_expa[0]+Y->ther_expa[1]+Y->ther_expa[2])/3.0;
+        FLOAT_PHYS kappa = Y->ther_expa[0];//FIXME
+        FLOAT_PHYS ther_u = scax * kappa * test_T;// Unconstrained expansion displacement
+        //FLOAT_PHYS delt_u = ther_u - test_u;
+        ther_pres = youn_voig * ther_u / scax;// Thermal pressure @ 0 displacement
+        //printf("KAPPA: %f, THERU: %f, THERP: %f\n", kappa,ther_u,ther_pres);
+        for(INT_MESH i=0;i<Nn;i++){
+          // Don't adjust x displacements
+          norm_u[Dm* i+0] = S->sys_u[Dn* i+0] / FLOAT_SOLV(test_u);
+          // Adjust transverse displacements
+          for(int j=1;j<Dm;j++){
+            norm_u[Dm* i+j] =(
+              S->sys_u[Dn* i+j]
+              - kappa * test_T * coor[Dm* i+j]// thermal expansion
+              - nu * ther_pres / youn_voig * coor[Dm* i+j]//pressure-induced expansion
+              )/ FLOAT_SOLV(test_u);
+          }
         }
       }
       T->CheckCubeError( errors, nu, coor, norm_u );
@@ -554,13 +592,13 @@ int main( int argc, char** argv ){
       if(verbosity>2){
         if(S->udof_n<300){
           printf("------- Node Coordinates --------------- Displacements -------");
-          if(d>3){ printf("  Temperature"); }
+          if(Dn>3){ printf("  Temperature"); }
           printf("\n");
           for(uint i=0;i<Nn;i++){
-            for(uint j=0;j<3;j++){ printf("%+9.2e ",E->vert_coor[3* i+j]); }
+            for(int j=0;j<3;j++){ printf("%+9.2e ",E->vert_coor[3* i+j]); }
             printf(" | ");
-            for(uint j=0;j<3;j++){ printf("%+9.2e ",S->sys_u[d* i+j]); }
-            if(d>3){ printf("  %+9.2e",S->sys_u[d* i+3]); }
+            for(int j=0;j<3;j++){ printf("%+9.2e ",S->sys_u[Dn* i+j]); }
+            if(Dn>3){ printf("  %+9.2e",S->sys_u[Dn* i+3]); }//FIXME Temperature
             printf("\n");
           }
         }
@@ -570,13 +608,13 @@ int main( int argc, char** argv ){
       if(verbosity>3){
         if(S->udof_n<300){
           printf("---- Normalized Coordinates ------ Normalized Displacements --");
-          if(d>3){ printf("  Temperature"); }
+          if(Dn>3){ printf("  Temperature"); }
           printf("\n");
           for(uint i=0;i<Nn;i++){
-            for(uint j=0;j<3;j++){ printf("%+9.2e ",coor[3* i+j]); }
+            for(int j=0;j<3;j++){ printf("%+9.2e ",coor[3* i+j]); }
             printf(" | ");
-            for(uint j=0;j<3;j++){ printf("%+9.2e ",norm_u[3* i+j]); }
-            //if(d>3){ printf("  %+9.2e",norm_u[d* i+3]); }
+            for(int j=0;j<3;j++){ printf("%+9.2e ",norm_u[3* i+j]); }
+            if(Dn>3){ printf("  %+9.2e",S->sys_u[Dn* i+3]/test_T); }
             printf("\n");
           }
         }
@@ -586,13 +624,13 @@ int main( int argc, char** argv ){
       if(verbosity>3){
         if(S->udof_n<300){
           printf("------- Node Coordinates -------------- Preconditioner -------");
-          if(d>3){ printf("  Temperature"); }
+          if(Dn>3){ printf("  Temperature"); }
           printf("\n");
           for(uint i=0;i<Nn;i++){
-            for(uint j=0;j<3;j++){ printf("%+9.2e ",E->vert_coor[3* i+j]); }
+            for(int j=0;j<3;j++){ printf("%+9.2e ",E->vert_coor[3* i+j]); }
             printf(" | ");
-            for(uint j=0;j<3;j++){ printf("%+9.2e ",S->sys_d[d* i+j]); }
-            if(d>3){ printf("  %+9.2e",S->sys_d[d* i+3]); }
+            for(int j=0;j<3;j++){ printf("%+9.2e ",S->sys_d[Dn* i+j]); }
+            if(Dn>3){ printf("  %+9.2e",S->sys_d[Dn* i+3]); }
             printf("\n");
           }
         }
@@ -639,7 +677,7 @@ int main( int argc, char** argv ){
       std::sqrt(errtot[errtot.size()-1]) );
     // Effective modulus --------------------------------------------
     // Calculate nodal forces from displacement solution
-    FLOAT_PHYS reac_x=0.0, youn_voig=0.0;// polycrystal approx.
+    FLOAT_PHYS reac_x=0.0;// polycrystal approx.
     //FIXME should do this only for elems with prescribed BCS
 #pragma omp parallel num_threads(comp_n)
 {
@@ -652,37 +690,37 @@ int main( int argc, char** argv ){
     for(uint i=0;i<n;i++){ S->sys_f[i]=0.0; }
     E->do_halo=true; Y->ElemLinear( E, S->sys_f, S->sys_u );
     // sync sys_f
-    const INT_MESH d=uint(Y->node_d);
+    const INT_MESH Dn=uint(Y->node_d);
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
     for(INT_MESH i=hrn; i<hnn; i++){
-      auto f = d* E->node_haid[i];
-      for(uint j=0; j<d; j++){
+      auto f = Dn* E->node_haid[i];
+      for(uint j=0; j<Dn; j++){
 #pragma omp atomic write
-        M->halo_val[f+j] = S->sys_f[d* i+j]; };
+        M->halo_val[f+j] = S->sys_f[Dn* i+j]; };
     };
   };
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
-    const INT_MESH d=uint(Y->node_d);
+    const INT_MESH Dn=uint(Y->node_d);
     const INT_MESH hrn=E->halo_remo_n;
     for(INT_MESH i=0; i<hrn; i++){
-      auto f = d* E->node_haid[i];
-      for( uint j=0; j<d; j++){
+      auto f = Dn* E->node_haid[i];
+      for( uint j=0; j<Dn; j++){
 #pragma omp atomic update
-        M->halo_val[f+j]+= S->sys_f[d* i+j]; };
+        M->halo_val[f+j]+= S->sys_f[Dn* i+j]; };
     };
   };// finished gather, now scatter back to elems
 #pragma omp for schedule(static) reduction(+:reac_x)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
-    const INT_MESH d=uint(Y->node_d);
+    const INT_MESH Dn=uint(Y->node_d);
     const INT_MESH hnn=E->halo_node_n;
     for(INT_MESH i=0; i<hnn; i++){
-      auto f = d* E->node_haid[i];
-      for( uint j=0; j<d; j++){//NOTE appears not to be critical
+      auto f = Dn* E->node_haid[i];
+      for( uint j=0; j<Dn; j++){//NOTE appears not to be critical
 //#pragma omp atomic read
-        S->sys_f[d* i+j] = M->halo_val[f+j]; };
+        S->sys_f[Dn* i+j] = M->halo_val[f+j]; };
     };
     E->do_halo=false; Y->ElemLinear( E, S->sys_f, S->sys_u );
   };
@@ -691,45 +729,32 @@ int main( int argc, char** argv ){
 #pragma omp for schedule(static) reduction(+:reac_x)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
-    const INT_MESH d=uint(Y->node_d);
+    const INT_MESH Dn=uint(Y->node_d);
     uint dof=0;// x-direction
     INT_MESH n,f; FLOAT_MESH v;
     INT_MESH r=E->halo_remo_n;
     for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
       // Don't duplicate halo nodes
-      if(n>=r){ if(f==0){ reac_x+=S->sys_f[d* n+dof]; } }
+      if(n>=r){ if(f==0){ reac_x+=S->sys_f[Dn* n+dof]; } }
     };
-#pragma omp critical
-{
-    FLOAT_PHYS A=0.0,B=0.0,C=0.0;
-    //if(Y->mtrl_matc.size()==3){
-    if(Y->mtrl_dirs.size()==0){
-      A=Y->mtrl_matc[0]; B=Y->mtrl_matc[1]; C=Y->mtrl_matc[2];
-    //}else if(Y->mtrl_matc.size()==9){
-    }else{
-      A=(Y->mtrl_matc[0]+Y->mtrl_matc[1]+Y->mtrl_matc[2])/3.0;
-      B=(Y->mtrl_matc[3]+Y->mtrl_matc[4]+Y->mtrl_matc[5])/3.0;
-      C=(Y->mtrl_matc[6]+Y->mtrl_matc[7]+Y->mtrl_matc[8])/3.0;
-    };
-    youn_voig=(A-B+3.0*C)*(A+2.0*B)/(2.0*A+3.0*B+C);
-    //printf("c11:%e, c12:%e, c44:%e\n",A,B,C);
-    //printf("ELEM NODES: %u\n",uint(E->elem_conn_n));
-    //printf("mtrl_prop size: %u\n",uint(Y->mtrl_prop.size()));
-}
   };
   }// end parallel 
   //FLOAT_PHYS A=1.0/(scale*scale);
   FLOAT_PHYS A=1.0/(scay*scaz);
+  FLOAT_PHYS reac_ther = ther_pres * A;
   printf("Model Response\n");
-  printf("        Load / Area  : %+9.2e /%9.2e  N/m2 = %+9.2e Pa\n",
-    reac_x, A, reac_x/A );
   printf("Displacement / Length: %+9.2e /%9.2e  m/m  = %+9.2e strain\n",
     test_u, 1.0/scax, test_u*scax );
+  printf("        Load / Area  : %+9.2e /%9.2e  N/m2 = %+9.2e Pa\n",
+    reac_x, A, reac_x/A );
+  if(reac_ther!=0.0){
+  printf("Thermal Load / Area  : %+9.2e /%9.2e  N/m2 = %+9.2e Pa\n",
+    reac_ther, A, reac_ther/A ); }
     //test_u, 1.0/scale, test_u*scale );
-  printf("              Modulus: %9.2e /%9.2e Pa/Pa Voigt Average\n",
-    reac_x/A/(test_u*scax), youn_voig );
+  printf("    Effective Modulus: %9.2e /%9.2e Pa/Pa Voigt Average\n",
+    (reac_x+reac_ther)/A/(test_u*scax), youn_voig );
     //reac_x/A/(test_u*scale), youn_voig );
-  { float e=( reac_x/A/(test_u*scax))/youn_voig -1.0;
+  { float e=( (reac_x+reac_ther)/A/(test_u*scax))/youn_voig -1.0;
   //{ float e=( reac_x/A/(test_u*scale))/youn_voig -1.0;
   printf("        Modulus Error:");
   if( std::abs(e)<test_u ){ printf(" %+9.2e\n",e); 

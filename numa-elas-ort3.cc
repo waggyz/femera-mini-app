@@ -299,7 +299,7 @@ int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
         for (uint i=0; i<Nc; i++){
           for(uint j=3; j<Dn; j++){// Thermal DOFs
             for(int k=0; k<3; k++){
-            sys_d[E->elem_conn[Nc*ie+i]*Dn+j] += w* jac[k]*jac[k]
+            sys_d[E->elem_conn[Nc*ie+i]*Dn+j] += jac[k]*jac[k] * w
               * this->udof_magn[k] / this->udof_magn[j] 
               * mtrl_matc[9+k] * mtrl_matc[j];
             }
