@@ -298,15 +298,19 @@ int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
       if(Dn>3){
         for (uint i=0; i<Nc; i++){
           for(uint j=3; j<Dn; j++){// Thermal DOFs
-            sys_d[E->elem_conn[Nc*ie+i]*Dn+j]//FIXME is det used correctly here?
-              += udof_magn[j] * mtrl_matc[j] / mtrl_matc[12-3+j] *w; }
+            for(int k=0; k<3; k++){
+            sys_d[E->elem_conn[Nc*ie+i]*Dn+j] += w* jac[k]*jac[k]
+              * this->udof_magn[k] / this->udof_magn[j] 
+              * mtrl_matc[9+k] * mtrl_matc[j];
+            }
+          }
         }
       }
     };//end intp loop
     for (uint i=0; i<Nc; i++){
       //int c=E->elem_conn[Nc*ie+i]*3;
       for(uint j=0; j<3; j++){
-        sys_d[E->elem_conn[Nc*ie+i]*Dn+j] += elem_diag[3*i+j] *udof_magn[j];
+        sys_d[E->elem_conn[Nc*ie+i]*Dn+j] += elem_diag[3*i+j] *this->udof_magn[j];
       }
       //for(uint j=3; j<Dn; j++){ sys_d[E->elem_conn[Nc*ie+i]*Dn+j] = 1.0; }
     }

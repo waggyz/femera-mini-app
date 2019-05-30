@@ -34,6 +34,7 @@ int PCG::BCS(Elem* E, Phys* Y ){
   for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
     //printf("FIX ID %i, DOF %i, val %+9.2e\n",i,E->bcs_vals[i].first,E->bcs_vals[i].second);
     this->sys_u[d* n+uint(f)] = v;
+    if(std::abs(v) > Y->udof_magn[f]){ Y->udof_magn[f] = std::abs(v); }
   };
   return(0);
 };
@@ -56,7 +57,7 @@ int PCG::Setup( Elem* E, Phys* Y ){
   //this->meth_name="preconditioned conjugate gradient";
   this->halo_loca_0 = E->halo_remo_n * Y->node_d;
   this->RHS( E,Y );
-  this->BCS( E,Y );
+  this->BCS( E,Y );// Sync max Y->udof_magn before Precond()
   E->do_halo=true ; Y->ElemLinear( E,this->sys_f,this->sys_u );
   E->do_halo=false; Y->ElemLinear( E,this->sys_f,this->sys_u );
   return(0);
@@ -164,6 +165,7 @@ int HaloPCG::Init(){// Preconditioned Conjugate Gradient
   INT_MESH halo_n=0;
   // Local copies for atomic ops and reduction
   FLOAT_SOLV glob_r2a = this->glob_res2, glob_to2 = this->glob_rto2;
+  Phys::vals bcmax={0.0,0.0,0.0,0.0};
 #pragma omp parallel num_threads(comp_n)
 {// parallel init region
   long int my_scat_count=0, my_prec_count=0,
@@ -178,10 +180,41 @@ int HaloPCG::Init(){// Preconditioned Conjugate Gradient
   int part_0=0; if(std::get<0>( P[0] )==NULL){ part_0=1; };
   const int part_n = int(P.size())-part_0;
   const int part_o = part_n+part_0;
+  // Sync max Y->udof_magn
+#pragma omp for schedule(OMP_SCHEDULE)
+  for(int part_i=part_0; part_i<part_o; part_i++){
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+    for(uint i=0;i<Y->udof_magn.size();i++){
+      //printf("GLOBAL MAX BC[%u]: %f\n",i,bcmax[i]);
+      if(Y->udof_magn[i] > bcmax[i]){
+#pragma omp atomic write
+        bcmax[i]=Y->udof_magn[i];
+      }
+    }
+  }
+#pragma omp single
+{
+  auto m=bcmax[0];
+  for(uint i=1;i<3;i++){ if(bcmax[0] > m){ m=bcmax[i]; } }
+  for(uint i=0;i<3;i++){ bcmax[i]=m; }
+  for(uint i=0;i<bcmax.size();i++){ if(bcmax[i]<=0.0){ bcmax[i]=1.0; } }
+#if VERB_MAX>2
+    if(verbosity>2){
+      printf("    DOF Scales:");
+      for(uint i=0;i<bcmax.size();i++){ printf(" %g",bcmax[i]); }
+      printf("\n");
+    }
+#endif
+}
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     S->solv_cond=this->solv_cond;
+    for(uint i=0;i<Y->udof_magn.size();i++){
+//#pragma omp atomic read
+      Y->udof_magn[i] = bcmax[i];
+      //printf("Sync MAX BC[%u]: %f\n",i,Y->udof_magn[i]);
+    }
     S->Precond( E,Y );
   };
   // Sync sys_d [this inits M->halo_map and E->node_haid]//FIXME separate
