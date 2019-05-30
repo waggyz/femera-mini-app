@@ -502,7 +502,7 @@ int main( int argc, char** argv ){
       minz=std::min(minz, t.min() );
       maxz=std::max(maxz, t.max() );
 }
-#pragma omp critical youngs
+#pragma omp critical(youngs)
 {
     FLOAT_PHYS A=0.0,B=0.0,C=0.0;
     //if(Y->mtrl_matc.size()==3){
@@ -743,13 +743,13 @@ int main( int argc, char** argv ){
   FLOAT_PHYS A=1.0/(scay*scaz);
   FLOAT_PHYS reac_ther = ther_pres * A;
   printf("Model Response\n");
-  printf("Displacement / Length: %+9.2e /%9.2e  m/m  = %+9.2e strain\n",
-    test_u, 1.0/scax, test_u*scax );
   printf("        Load / Area  : %+9.2e /%9.2e  N/m2 = %+9.2e Pa\n",
     reac_x, A, reac_x/A );
   if(reac_ther!=0.0){
   printf("Thermal Load / Area  : %+9.2e /%9.2e  N/m2 = %+9.2e Pa\n",
     reac_ther, A, reac_ther/A ); }
+  printf("Displacement / Length: %+9.2e /%9.2e  m/m  = %+9.2e strain\n",
+    test_u, 1.0/scax, test_u*scax );
     //test_u, 1.0/scale, test_u*scale );
   printf("    Effective Modulus: %9.2e /%9.2e Pa/Pa Voigt Average\n",
     (reac_x+reac_ther)/A/(test_u*scax), youn_voig );
