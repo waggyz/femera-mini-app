@@ -471,9 +471,12 @@ int main( int argc, char** argv ){
 #if VERB_MAX>1
     if(verbosity>1){
     // Displacement errors ------------------------------------------
-    Phys::vals errtot; errtot.resize(13); errtot=0.0;
-    for(int i= 0; i< 4; i++){ errtot[i] = 99e99; };
-    for(int i= 8; i<12; i++){ errtot[i] =-99e99; };
+    Phys::vals errtot; int node_d=3;
+    auto tY = std::get<1>(M->mesh_part[1]);
+    if(tY->ther_diff.size()>0){ node_d=4; }
+    errtot.resize(3*(node_d+1)+1); errtot=0.0;// printf("NODED: %i\n",node_d);
+    for(int i= 0; i< 1*(node_d+1); i++){ errtot[i] = 99e99; };
+    for(int i= 2*(node_d+1); i< 3*(node_d+1); i++){ errtot[i] =-99e99; };
     printf("Solution Error (Compared to Isotropic)\n");
     Test* T = new Test(); int mesh_d=3;
     //FLOAT_PHYS scale=1.0,smin= 99e9,smax=-99e9;//FIXME only works for cubes
@@ -531,7 +534,7 @@ int main( int argc, char** argv ){
     for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
       Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
       const int Dm=3; const int Dn=Y->node_d;
-      Phys::vals errors={};
+      Phys::vals errors;
       FLOAT_PHYS nu=Y->mtrl_prop[1];
       Phys::vals coor(E->vert_coor.size());
       const auto Nn=E->node_n;
@@ -554,11 +557,11 @@ int main( int argc, char** argv ){
       //
       test_u=Y->udof_magn[0]; FLOAT_PHYS test_T=Y->udof_magn[3];
       //
-      Solv::vals norm_u(Nn*Dm);
+      Solv::vals norm_u(Nn*Dn);
       if(Dn<4){
         for(INT_MESH i=0;i<Nn;i++){
-          for(int j=0;j<Dm;j++){
-            norm_u[Dm* i+j] = S->sys_u[Dn* i+j] / FLOAT_SOLV(test_u);
+          for(int j=0;j<Dn;j++){
+            norm_u[Dn* i+j] = S->sys_u[Dn* i+j] / FLOAT_SOLV(test_u);
           }
         }
       }else{// Adjust for thermal expansion
@@ -570,24 +573,26 @@ int main( int argc, char** argv ){
         //printf("KAPPA: %f, THERU: %f, THERP: %f\n", kappa,ther_u,ther_pres);
         for(INT_MESH i=0;i<Nn;i++){
           // Don't adjust x displacements
-          norm_u[Dm* i+0] = S->sys_u[Dn* i+0] / FLOAT_SOLV(test_u);
+          norm_u[Dn* i+0] = S->sys_u[Dn* i+0] / FLOAT_SOLV(test_u);
           // Adjust transverse displacements
           for(int j=1;j<Dm;j++){
-            norm_u[Dm* i+j] =(
+            norm_u[Dn* i+j] =(
               S->sys_u[Dn* i+j]
               - kappa * test_T * coor[Dm* i+j]// thermal expansion
               - nu * ther_pres / youn_voig * coor[Dm* i+j]//pressure-induced expansion
               )/ FLOAT_SOLV(test_u);
           }
+          norm_u[Dn* i+Dm] = S->sys_u[Dn* i+Dm] / FLOAT_SOLV(test_T);
         }
       }
+      //errors.resize(3*(Dn+1)+1); errors=0.0;
       T->CheckCubeError( errors, nu, coor, norm_u );
 #pragma omp critical(errs)
 {
-      for(int i= 0; i< 4; i++){ errtot[i] = std::min(errtot[i],errors[i]); };
-      for(int i= 4; i< 8; i++){ errtot[i]+= errors[i]; };
-      for(int i= 8; i<12; i++){ errtot[i] = std::max(errtot[i],errors[i]); };
-      errtot[12]+=errors[12];
+      for(int i= 0*(Dn+1); i< 1*(Dn+1); i++){ errtot[i] = std::min(errtot[i],errors[i]); };
+      for(int i= 1*(Dn+1); i< 2*(Dn+1); i++){ errtot[i]+= errors[i]; };
+      for(int i= 2*(Dn+1); i< 3*(Dn+1); i++){ errtot[i] = std::max(errtot[i],errors[i]); };
+      errtot[3*(Dn+1)]+=errors[3*(Dn+1)];
 #if VERB_MAX > 2
       if(verbosity>2){
         if(S->udof_n<300){
@@ -642,38 +647,43 @@ int main( int argc, char** argv ){
 #pragma omp critical(print)
 {
       printf(" ux        uy        uz        mag       ");
-      printf("Normalized Error in Partition %i", part_i );
+      if(node_d>3){ printf("Temp      Normalized Error Part %i", part_i ); }
+      else{ printf("Normalized Error in Partition %i", part_i ); }
       for(size_t i=0;i<errors.size();i++){
-        if(!(i%(mesh_d+1))){
-          switch(i){
-            case( 4): printf(" Min"); break;
-            case( 8): printf(" Avg"); break;
-            case(12): printf(" Max"); break;
-            default : printf("    "); break;
-        }; printf("\n"); };
+        if(!(i%(node_d+1))){
+          if(     i==1*(node_d+1)){ printf(" Min"); }
+          else if(i==2*(node_d+1)){ printf(" Avg"); }
+          else if(i==3*(node_d+1)){ printf(" Max"); }
+          else if(i!=0){ printf("    "); }
+          printf("\n"); };
         printf("%+9.2e ",errors[i]);
       };
-    printf(" R2                 %9.2e  ||R||\n",
+    printf(" R2       ");
+    if(node_d>3){ printf("          "); }
+    printf("          %9.2e  ||R||\n",
       std::sqrt(errtot[errtot.size()-1]) );
 }
       };
 #endif
     };//end parallel for
 }//end parallel region
-    for(int i= 4; i< 8; i++){ errtot[i]/=part_n; };
+    for(int i= 4; i< 2*(node_d+1); i++){ errtot[i]/=part_n; };
     printf(" ux        uy        uz        mag       ");
-    printf("Normalized Error in %i Partitions", part_n );
+    //printf("Normalized Error in %i Partitions", part_n );
+    if(node_d>3){ printf("Temp      Normalized Error in %i Parts", part_n ); }
+    else{ printf("Normalized Error in %i Partitions", part_n ); }
     for(size_t i=0;i<errtot.size();i++){
-      if(!(i%(mesh_d+1))){
-        switch(i){
-          case( 4): printf(" Min"); break;
-          case( 8): printf(" Avg"); break;
-          case(12): printf(" Max"); break;
-          default : printf("    "); break;
-      }; printf("\n"); };
+      if(!(i%(node_d+1))){
+        if(     i==1*(node_d+1)){ printf(" Min"); }
+        else if(i==2*(node_d+1)){ printf(" Avg"); }
+        else if(i==3*(node_d+1)){ printf(" Max"); }
+        else if(i!=0){ printf("    "); }
+        printf("\n"); };
       printf("%+9.2e ",errtot[i]);
     };
-    printf(" R2                 %9.2e  ||R||\n",
+    printf(" R2       ");
+    if(node_d>3){ printf("          "); }
+    printf("          %9.2e  ||R||\n",
       std::sqrt(errtot[errtot.size()-1]) );
     // Effective modulus --------------------------------------------
     // Calculate nodal forces from displacement solution
@@ -751,7 +761,7 @@ int main( int argc, char** argv ){
   printf("Displacement / Length: %+9.2e /%9.2e  m/m  = %+9.2e strain\n",
     test_u, 1.0/scax, test_u*scax );
     //test_u, 1.0/scale, test_u*scale );
-  printf("    Effective Modulus: %9.2e /%9.2e Pa/Pa Voigt Average\n",
+  printf("              Modulus: %9.2e /%9.2e Pa/Pa Voigt Average\n",
     (reac_x+reac_ther)/A/(test_u*scax), youn_voig );
     //reac_x/A/(test_u*scale), youn_voig );
   { float e=( (reac_x+reac_ther)/A/(test_u*scax))/youn_voig -1.0;
