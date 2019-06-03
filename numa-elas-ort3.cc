@@ -163,8 +163,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       if(has_ther){// Thermal strains
         for(int i=0; i<Nc; i++){
           Tip += intp_shpf[Nc*ip +i] * uR[Dn* i+Dm ];
-        }
-        //printf("TEMPERATURE[%i]: %+9.2e\n",ip,Tip);
+        }//printf("TEMPERATURE[%i]: %+9.2e\n",ip,Tip);
         //Apply thermal expansion to the volumetric strains
         H[ 0]-=Tip*C[ 9]; H[ 4]-=Tip*C[10]; H[ 8]-=Tip*C[11];
       }
@@ -218,13 +217,13 @@ int ElastOrtho3D::ElemLinear( Elem* E,
 };
 int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
   //FIXME Doesn't do rotation yet
-  const uint ndof   = 3;//this->node_d
-  const uint Dn     = this->node_d;
+  const uint Dm = 3;//this->mesh_d
+  const uint Dn = this->node_d;
   //const int mesh_d = E->elem_d;
   const uint elem_n = E->elem_n;
-  const uint  Nc = E->elem_conn_n;
-  const uint  Nj = 10,d2=9;
-  const uint  Ne = ndof*Nc;
+  const uint Nc = E->elem_conn_n;
+  const uint Nj = 10,d2=9;
+  const uint Ne = Dm*Nc;
   const uint intp_n = uint(E->gaus_n);
   //
   FLOAT_PHYS det;
@@ -261,18 +260,18 @@ int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
       #endif
       // xx yy zz
       for(uint j=0; j<Nc; j++){
-        B[Ne*0 + 0+j*ndof] = G[Nc*0+j];
-        B[Ne*1 + 1+j*ndof] = G[Nc*1+j];
-        B[Ne*2 + 2+j*ndof] = G[Nc*2+j];
+        B[Ne*0 + 0+j*Dm] = G[Nc*0+j];
+        B[Ne*1 + 1+j*Dm] = G[Nc*1+j];
+        B[Ne*2 + 2+j*Dm] = G[Nc*2+j];
       // xy yx
-        B[Ne*3 + 0+j*ndof] = G[Nc*1+j];
-        B[Ne*3 + 1+j*ndof] = G[Nc*0+j];
+        B[Ne*3 + 0+j*Dm] = G[Nc*1+j];
+        B[Ne*3 + 1+j*Dm] = G[Nc*0+j];
       // yz zy
-        B[Ne*4 + 1+j*ndof] = G[Nc*2+j];
-        B[Ne*4 + 2+j*ndof] = G[Nc*1+j];
+        B[Ne*4 + 1+j*Dm] = G[Nc*2+j];
+        B[Ne*4 + 2+j*Dm] = G[Nc*1+j];
       // xz zx
-        B[Ne*5 + 0+j*ndof] = G[Nc*2+j];
-        B[Ne*5 + 2+j*ndof] = G[Nc*0+j];
+        B[Ne*5 + 0+j*Dm] = G[Nc*2+j];
+        B[Ne*5 + 2+j*Dm] = G[Nc*0+j];
       };
       #if VERB_MAX>10
       printf( "[B]:");
@@ -301,16 +300,21 @@ int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
             for(int k=0; k<3; k++){
             sys_d[E->elem_conn[Nc*ie+i]*Dn+j] += jac[k]*jac[k] * w
               * this->udof_magn[k] / this->udof_magn[j]
-              * mtrl_matc[9+k] * mtrl_matc[j];
+              * mtrl_matc[9+k] * mtrl_matc[k];
             }
           }
         }
       }
     };//end intp loop
+#if 0
+    printf("MTRL_MATC:");
+    for(uint i=0;i<mtrl_matc.size(); i++){printf(" %e",mtrl_matc[i]);}
+    printf("\n");
+#endif
     for (uint i=0; i<Nc; i++){
       //int c=E->elem_conn[Nc*ie+i]*3;
-      for(uint j=0; j<3; j++){
-        sys_d[E->elem_conn[Nc*ie+i]*Dn+j] += elem_diag[3*i+j] *this->udof_magn[j];
+      for(uint j=0; j<Dm; j++){
+        sys_d[E->elem_conn[Nc*ie+i]*Dn+j] += elem_diag[Dm*i+j] *this->udof_magn[j];
       }
       //for(uint j=3; j<Dn; j++){ sys_d[E->elem_conn[Nc*ie+i]*Dn+j] = 1.0; }
     }

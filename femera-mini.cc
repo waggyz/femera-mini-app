@@ -478,7 +478,7 @@ int main( int argc, char** argv ){
     for(int i= 0; i< 1*(node_d+1); i++){ errtot[i] = 99e99; };
     for(int i= 2*(node_d+1); i< 3*(node_d+1); i++){ errtot[i] =-99e99; };
     printf("Solution Error (Compared to Isotropic)\n");
-    Test* T = new Test(); int mesh_d=3;
+    Test* T = new Test();
     //FLOAT_PHYS scale=1.0,smin= 99e9,smax=-99e9;//FIXME only works for cubes
     FLOAT_PHYS scax=1.0,minx= 99e9,maxx=-99e9;
     FLOAT_PHYS scay=1.0,miny= 99e9,maxy=-99e9;
@@ -600,10 +600,10 @@ int main( int argc, char** argv ){
           if(Dn>3){ printf("  Temperature"); }
           printf("\n");
           for(uint i=0;i<Nn;i++){
-            for(int j=0;j<3;j++){ printf("%+9.2e ",E->vert_coor[3* i+j]); }
+            for(int j=0;j<Dm;j++){ printf("%+9.2e ",E->vert_coor[Dm* i+j]); }
             printf(" | ");
-            for(int j=0;j<3;j++){ printf("%+9.2e ",S->sys_u[Dn* i+j]); }
-            if(Dn>3){ printf("  %+9.2e",S->sys_u[Dn* i+3]); }//FIXME Temperature
+            for(int j=0;j<Dm;j++){ printf("%+9.2e ",S->sys_u[Dn* i+j]); }
+            if(Dn>Dm){ printf("  %+9.2e",S->sys_u[Dn* i+Dm]); }//FIXME Temperature
             printf("\n");
           }
         }
@@ -616,10 +616,10 @@ int main( int argc, char** argv ){
           if(Dn>3){ printf("  Temperature"); }
           printf("\n");
           for(uint i=0;i<Nn;i++){
-            for(int j=0;j<3;j++){ printf("%+9.2e ",coor[3* i+j]); }
+            for(int j=0;j<Dm;j++){ printf("%+9.2e ",coor[Dm* i+j]); }
             printf(" | ");
-            for(int j=0;j<3;j++){ printf("%+9.2e ",norm_u[3* i+j]); }
-            if(Dn>3){ printf("  %+9.2e",S->sys_u[Dn* i+3]/test_T); }
+            for(int j=0;j<Dm;j++){ printf("%+9.2e ",norm_u[Dn* i+j]); }
+            if(Dn>Dm){ printf("  %+9.2e",S->sys_u[Dn* i+Dm]/test_T); }
             printf("\n");
           }
         }
@@ -632,10 +632,10 @@ int main( int argc, char** argv ){
           if(Dn>3){ printf("  Temperature"); }
           printf("\n");
           for(uint i=0;i<Nn;i++){
-            for(int j=0;j<3;j++){ printf("%+9.2e ",E->vert_coor[3* i+j]); }
+            for(int j=0;j<Dm;j++){ printf("%+9.2e ",E->vert_coor[Dm* i+j]); }
             printf(" | ");
-            for(int j=0;j<3;j++){ printf("%+9.2e ",S->sys_d[Dn* i+j]); }
-            if(Dn>3){ printf("  %+9.2e",S->sys_d[Dn* i+3]); }
+            for(int j=0;j<Dm;j++){ printf("%+9.2e ",S->sys_d[Dn* i+j]); }
+            if(Dn>Dm){ printf("  %+9.2e",S->sys_d[Dn* i+Dm]); }
             printf("\n");
           }
         }
@@ -649,7 +649,7 @@ int main( int argc, char** argv ){
       printf(" ux        uy        uz        mag       ");
       if(node_d>3){ printf("Temp      Normalized Error Part %i", part_i ); }
       else{ printf("Normalized Error in Partition %i", part_i ); }
-      for(size_t i=0;i<errors.size();i++){
+      for(int i=0;i<int(errors.size());i++){
         if(!(i%(node_d+1))){
           if(     i==1*(node_d+1)){ printf(" Min"); }
           else if(i==2*(node_d+1)){ printf(" Avg"); }
@@ -672,7 +672,7 @@ int main( int argc, char** argv ){
     //printf("Normalized Error in %i Partitions", part_n );
     if(node_d>3){ printf("Temp      Normalized Error in %i Parts", part_n ); }
     else{ printf("Normalized Error in %i Partitions", part_n ); }
-    for(size_t i=0;i<errtot.size();i++){
+    for(int i=0;i<int(errtot.size());i++){
       if(!(i%(node_d+1))){
         if(     i==1*(node_d+1)){ printf(" Min"); }
         else if(i==2*(node_d+1)){ printf(" Avg"); }
