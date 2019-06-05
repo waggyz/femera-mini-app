@@ -17,8 +17,13 @@ public:
     COND_NONE=0, COND_JACO=3, COND_ROW1=1, COND_STRA=4
   };
   INT_MESH iter=0, iter_max=0;
-  INT_MESH uinp_n,udof_n;//, upad_n;//FIXME Remove upad_n
+  INT_MESH uinp_n,udof_n;
   FLOAT_SOLV loca_rtol=0.0;
+  FLOAT_SOLV loca_delu=0.0, rtol_delu=0.0;// Cauchy convergence check
+  // Stop when ALL resi_maxi < resi_rtol * resi_init;
+  FLOAT_SOLV resi_init;// Initial force residual avg (for relative check)
+  FLOAT_SOLV resi_maxi;// Current maximum residual force
+  FLOAT_SOLV resi_rtol;// Max residual relative convergence tolerance
   // Pointers to memory-aligned vanilla C arrays
   valign sys_f;// f=[A]{u}//FIXME Move to Phys*?
   valign sys_u;// solution
@@ -30,7 +35,7 @@ public:
   // The data is actually stored in corresponding C++ objects.
   Solv::vals dat_f;
   Solv::vals dat_u;
-  Solv::vals dat_r;
+  Solv::vals dat_r;// Conatins (preconditioned) force residuals (PCG)
   Solv::vals dat_d;
   Solv::vals dat_p, dat_g;
   //

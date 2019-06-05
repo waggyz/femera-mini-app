@@ -349,10 +349,10 @@ int Mesh::Setup(){
           printf("%9.2e",Y->ther_expa[i]); }
         printf("\n");
       }
-      if(Y->ther_diff.size()>0){
-        printf("  Thermal Diffusion:");
-        for(uint i=0; i<Y->ther_diff.size(); i++){
-          printf("%9.2e",Y->ther_diff[i]); }
+      if(Y->ther_cond.size()>0){
+        printf("       Conductivity:");
+        for(uint i=0; i<Y->ther_cond.size(); i++){
+          printf("%9.2e",Y->ther_cond[i]); }
         printf("\n");
       }
       printf("   Tensor Constants:");
@@ -417,7 +417,7 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
   //
   std::string fmrstring;
   std::ifstream fmrfile(fname);//return 0;
-  Phys::vals t_mtrl_prop={},t_mtrl_dirs={}, t_ther_diff={},t_ther_expa={};
+  Phys::vals t_mtrl_prop={},t_mtrl_dirs={}, t_ther_cond={},t_ther_expa={};
   while( fmrfile >> fmrstring ){// std::cout <<fmrstring;//printf("%s ",fmrstring.c_str());
     if(fmrstring=="$Femera"){
       std::string line;
@@ -531,10 +531,10 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
       t_ther_expa.resize(s);
       for(int i=0; i<s; i++){ fmrfile >> t_ther_expa[i]; }
     }
-    if(fmrstring=="$ThermalDiffusivity"){//printf("THERM COND\n");
+    if(fmrstring=="$ThermalConductivity"){//printf("THERM COND\n");
       int s=0; fmrfile >> s;
-      t_ther_diff.resize(s);
-      for(int i=0; i<s; i++){ fmrfile >> t_ther_diff[i]; }
+      t_ther_cond.resize(s);
+      for(int i=0; i<s; i++){ fmrfile >> t_ther_cond[i]; }
     }
 #if 0
     //if(fmrstring=="$Physics"){ //FIXME
@@ -573,21 +573,24 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
         Y->mtrl_matc[c.size()+j]=Y->ther_expa[j]; }
     }
   }
-  if(t_ther_diff.size()>0){
+  if(t_ther_cond.size()>0){
     //FIXME Thermal props should be handled in the Phys* constructor.
-    Y->ther_diff.resize(t_ther_diff.size()); Y->ther_diff=t_ther_diff;
+    Y->ther_cond.resize(t_ther_cond.size()); Y->ther_cond=t_ther_cond;
     Phys::vals c=Y->mtrl_matc;
     if(Y->mtrl_dirs.size()==0){//FIXME
       Y->mtrl_matc.resize(c.size()+1);
       for(uint j=0;j<c.size();j++){ Y->mtrl_matc[j]=c[j]; }
-        Y->mtrl_matc[c.size()] = 1.0 / Y->ther_diff[0];
+        Y->mtrl_matc[c.size()] = Y->ther_cond[0];
+        //Y->mtrl_matc[c.size()] = 1.0 / Y->ther_cond[0];
     }else{
       Y->mtrl_matc.resize(c.size()+3);
       for(uint j=0;j<c.size();j++){ Y->mtrl_matc[j]=c[j]; }
       for(uint j=c.size();j<Y->mtrl_matc.size();j++){
-        Y->mtrl_matc[j] = 1.0 / Y->ther_diff[0]; }
-      for(uint j=0;j<Y->ther_diff.size();j++){
-        Y->mtrl_matc[c.size()+j] = 1.0 / Y->ther_diff[j]; }
+        Y->mtrl_matc[j] = Y->ther_cond[0]; }
+        //Y->mtrl_matc[j] = 1.0 / Y->ther_cond[0]; }
+      for(uint j=0;j<Y->ther_cond.size();j++){
+        Y->mtrl_matc[c.size()+j] = Y->ther_cond[j]; }
+        //Y->mtrl_matc[c.size()+j] = 1.0 / Y->ther_cond[j]; }
     }
   }
   switch( this->solv_meth ){

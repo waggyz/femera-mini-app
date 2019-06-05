@@ -186,8 +186,8 @@ int HaloPCG::Init(){// Preconditioned Conjugate Gradient
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     for(uint i=0;i<Y->udof_magn.size();i++){
       //printf("GLOBAL MAX BC[%u]: %f\n",i,bcmax[i]);
-      if(Y->udof_magn[i] > bcmax[i]){
-#pragma omp atomic write
+      if(Y->udof_magn[i] > bcmax[i]){//FIXME Atomic read?
+//#pragma omp atomic write
         bcmax[i]=Y->udof_magn[i];
       }
     }
@@ -409,6 +409,7 @@ int HaloPCG::Iter(){
   };
   time_start( solv_start );
   const FLOAT_SOLV alpha = glob_r2a / glob_sum1;// 1 FLOP
+  //printf("ALPHA:%+9.2e\n",alpha);
 #pragma omp for schedule(OMP_SCHEDULE) reduction(+:glob_sum2)
   for(int part_i=part_0; part_i<part_o; part_i++){// ? FLOP/DOF
     std::tie(E,Y,S)=P[part_i];
@@ -418,7 +419,7 @@ int HaloPCG::Iter(){
 #pragma omp simd
     for(INT_MESH i=0; i<node_n; i++){
       for(INT_MESH j=0; j<d; j++){
-        S->sys_r[d*i+j] -= alpha * S->sys_f[d*i+j];
+        S->sys_r[d*i+j] -= alpha * S->sys_f[d*i+j];// Update force residuals
     };};
 #pragma omp simd reduction(+:glob_sum2)
     for(INT_MESH i=hl0; i<sysn; i++){

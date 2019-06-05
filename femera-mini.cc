@@ -473,7 +473,7 @@ int main( int argc, char** argv ){
     // Displacement errors ------------------------------------------
     Phys::vals errtot; int node_d=3;
     auto tY = std::get<1>(M->mesh_part[1]);
-    if(tY->ther_diff.size()>0){ node_d=4; }
+    if(tY->ther_cond.size()>0){ node_d=4; }
     errtot.resize(3*(node_d+1)+1); errtot=0.0;// printf("NODED: %i\n",node_d);
     for(int i= 0; i< 1*(node_d+1); i++){ errtot[i] = 99e99; };
     for(int i= 2*(node_d+1); i< 3*(node_d+1); i++){ errtot[i] =-99e99; };

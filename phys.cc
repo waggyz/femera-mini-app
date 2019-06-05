@@ -163,10 +163,10 @@ int Phys::ReadPartFMR( const char* fname, bool is_bin ){
       ther_expa.resize(s);
       for(int i=0; i<s; i++){ fmrfile >> ther_expa[i]; }
     }
-    if(fmrstring=="$ThermalDiffusivity"){// Thermal diffusivity
+    if(fmrstring=="$ThermalConductivity"){// Thermal conductivity
       int s=0; fmrfile >> s;
-      ther_diff.resize(s);
-      for(int i=0; i<s; i++){ fmrfile >> ther_diff[i]; }
+      ther_cond.resize(s);
+      for(int i=0; i<s; i++){ fmrfile >> ther_cond[i]; }
     }
   }
   return 0;
@@ -212,10 +212,10 @@ int Phys::SavePartFMR( const char* fname, bool is_bin ){
     for(uint i=0;i<ther_expa.size();i++){ fmrfile <<" "<< ther_expa[i]; }
     fmrfile << '\n';
   }
-  if(ther_diff.size()>0){
-    fmrfile << "$ThermalDiffusivity" <<'\n';
-    fmrfile << ther_diff.size();
-    for(uint i=0;i<ther_diff.size();i++){ fmrfile <<" "<< ther_diff[i]; }
+  if(ther_cond.size()>0){
+    fmrfile << "$ThermalConductivity" <<'\n';
+    fmrfile << ther_cond.size();
+    for(uint i=0;i<ther_cond.size();i++){ fmrfile <<" "<< ther_cond[i]; }
     fmrfile << '\n';
   }
   return 0;

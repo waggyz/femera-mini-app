@@ -440,7 +440,7 @@ int ElastIso3D::ReadPartFMR( const char* fname, bool is_bin ){
       mtrl_prop[std::slice(tsz,tsz+s,1)] = tprop;
       for(int i=0; i<s; i++){ fmrfile >> mtrl_prop[i+tprop.size()]; }
     }
-    if(fmrstring=="$ThermalDiffusivity"){// Thermal diffusivity
+    if(fmrstring=="$ThermalConductivity"){// Thermal conductivity
       int s=0; fmrfile >> s;
       mtrl_prop.resize(s + tprop.size());
       mtrl_prop[std::slice(tsz,tsz+s,1)] = tprop;
