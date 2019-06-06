@@ -21,32 +21,32 @@ int PCG::BC (Mesh* ){return 0;};
 int PCG::RHS(Mesh* ){return 0;};
 //
 int PCG::RHS(Elem* E, Phys* Y ){
-  uint d=uint(Y->node_d);
+  const uint Dn=uint(Y->node_d);
   INT_MESH n; INT_DOF f; FLOAT_PHYS v;
   for(auto t : E->rhs_vals ){ std::tie(n,f,v)=t;
-    this->sys_r[d* n+uint(f)]+= v;
+    this->sys_r[Dn* n+uint(f)]+= v;
   };
   return(0);
 };
 int PCG::BCS(Elem* E, Phys* Y ){
-  uint d=uint(Y->node_d);
+  uint Dn=uint(Y->node_d);
   INT_MESH n; INT_DOF f; FLOAT_PHYS v;
   for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
     //printf("FIX ID %i, DOF %i, val %+9.2e\n",i,E->bcs_vals[i].first,E->bcs_vals[i].second);
-    this->sys_u[d* n+uint(f)] = v;
+    this->sys_u[Dn* n+uint(f)] = v;
     if(std::abs(v) > Y->udof_magn[f]){ Y->udof_magn[f] = std::abs(v); }
   };
   return(0);
 };
 int PCG::BC0(Elem* E, Phys* Y ){
-  uint d=uint(Y->node_d);
+  uint Dn=uint(Y->node_d);
   INT_MESH n; INT_DOF f; FLOAT_PHYS v;
   for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
-    this->sys_d[d* n+uint(f)]=0.0;
-    this->sys_f[d* n+uint(f)]=0.0;
+    this->sys_d[Dn* n+uint(f)]=0.0;
+    this->sys_f[Dn* n+uint(f)]=0.0;
   };
   for(auto t : E->bc0_nf   ){ std::tie(n,f)=t;
-    this->sys_d[d* n+uint(f)]=0.0;
+    this->sys_d[Dn* n+uint(f)]=0.0;
     #if VERB_MAX>10
     printf("BC0: [%i]:0\n",E->bc0_nf[i]);
     #endif
@@ -68,12 +68,10 @@ int PCG::Init( Elem* E, Phys* Y ){
 };
 int PCG::Init(){
   const uint sysn=this->udof_n;// loca_res2 is a member variable.
-  const uint sumi0=this->halo_loca_0;// *this->node_d;
-  const uint node_n=sysn/3;//FIXME
-  for(uint i=0; i<node_n; i++){
-    for(uint j=0;j<3;j++){
-      this->sys_r[3*i+j] -= this->sys_f[3*i+j];
-  };};
+  const uint sumi0=this->halo_loca_0;
+  for(uint i=0; i<sysn; i++){
+      this->sys_r[i] -= this->sys_f[i];
+  };
   //sys_r  = sys_b - sys_f;// This is done sparsely now.
   //sys_z  = sys_d * sys_r;// This is merged where it's used (2x/iter)
   //sys_p  = sys_z;
@@ -93,15 +91,12 @@ int PCG::Iter(){// 2 FLOP + 12 FLOP/DOF, 14 float/DOF
   const INT_MESH sysn=udof_n;
   const uint sumi0=this->halo_loca_0;// this->node_d;//FIXME Magic number
   const auto ra=this->loca_res2;// Make a local version of this member variable
-  const INT_MESH node_n=sysn/3;//FIXME
-  const uint sumn0=this->halo_loca_0/3;//FIXME
   //
   //const FLOAT_SOLV alpha  = ra / inner_product( sys_p,sys_f );// 1 DIV +(2 FLOP/DOF)
   FLOAT_SOLV s=0.0;
-  for(uint i=sumn0; i<node_n; i++){
-    for(uint j=0;j<3;j++){
-    s += sys_p[3*i+j] * sys_f[3*i+j];// 2 FLOP/DOF, 2 read =2/DOF
-  };};
+  for(uint i=sumi0; i<sysn; i++){
+    s += sys_p[i] * sys_f[i];// 2 FLOP/DOF, 2 read =2/DOF
+  };
   const FLOAT_SOLV alpha  = ra / s;// 1 DIV FLOP
   //if(!isnan(alpha)){// moved to inside last loop
   //  sys_u += alpha * sys_p; };
@@ -114,10 +109,9 @@ int PCG::Iter(){// 2 FLOP + 12 FLOP/DOF, 14 float/DOF
   for(uint i=0; i<sysn; i++){// 4 FLOP/DOF, 4 read + 2 write =6/DOF
     sys_u[i] += alpha * sys_p[i];// works fine here
   };
-  for(uint i=0;i<node_n;i++){
-    for(uint j=0;j<3;j++){
-      sys_r[3*i+j] -= alpha * sys_f[3*i+j];
-  }; };
+  for(uint i=0;i<sysn;i++){
+      sys_r[i] -= alpha * sys_f[i];
+  };
 #pragma omp parallel for reduction(+:r2b)
   for(uint i=sumi0; i<sysn; i++){
     r2b += sys_r[i] * sys_r[i] * sys_d[i];// 3 FLOP/DOF, 2 read =2/DOF
@@ -139,8 +133,8 @@ int PCG::Solve( Elem* E, Phys* Y ){//FIXME Redo this
   if( !this->Init() ){//============ Solve ================
     printf("SER INIT r2a:%9.2e\n",this->loca_rto2);
     for(this->iter=0; this->iter < this->iter_max; this->iter++){
-      const auto n = this->udof_n;
-      for(uint i=0;i<n;i++){ this->sys_f[i]=0.0; };
+      const auto sysn = this->udof_n;
+      for(uint i=0;i<sysn;i++){ this->sys_f[i]=0.0; };
       //Y->ScatterNode2Elem(E,this->sys_p,Y->elem_inout);
       //Y->ElemLinear( E );
       //Y->GatherElem2Node(E,Y->elem_inout,this->sys_f);

@@ -170,7 +170,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
       if(has_ther){
         FLOAT_PHYS Tip=0.0;// Zero the temperature at this integration point
-        FLOAT_PHYS dT=0.0;
+        //FLOAT_PHYS dT=0.0;
         for(int i=0; i<Nc; i++){// Interpolate temperature at this int. pt.
           Tip += intp_shpf[Nc*ip +i] * uR[Dn* i+Dm ];
         }
@@ -194,9 +194,6 @@ int ElastOrtho3D::ElemLinear( Elem* E,
 #else
         // Apply thermal expansion to the volumetric (diagonal) strains
         //H[ 0]-=Tip*C[ 9]; H[ 4]-=Tip*C[10]; H[ 8]-=Tip*C[11];
-        //S[ 0]-=Tip*C[ 9]*C[0];
-        //S[ 4]-=Tip*C[10]*C[1];
-        //S[ 8]-=Tip*C[11]*C[2];
         S[0]-=Tip*(C[0]*C[ 9] + C[3]* C[10] + C[5]* C[11]);//Sxx
         S[4]-=Tip*(C[3]*C[ 9] + C[1]* C[10] + C[4]* C[11]);//Syy
         S[8]-=Tip*(C[5]*C[ 9] + C[4]* C[10] + C[2]* C[11]);//Szz
@@ -273,7 +270,7 @@ int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
     0.0,0.0,0.0,0.0,0.0,mtrl_matc[8]*2.0};
   const FLOAT_PHYS scal_disp = udof_magn[0] ;
   FLOAT_PHYS scal_ther;
-  if(Dn>Dm){ scal_ther = udof_magn[3] *mtrl_matc[12] * 4e-4;}
+  if(Dn>Dm){ scal_ther = udof_magn[3] * 1e-3;}//4e-4
   //if(Dn>Dm){ scal_ther = udof_magn[3] *1e-2 ;}
   else{scal_ther=1.0;}
 #if VERB_MAX>10
@@ -337,12 +334,13 @@ int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
         }
       }
       if(Dn>Dm){
-        uint j=Dm;
         for(uint i=0; i<Nc; i++){
           for(uint k=0; k<Dm ; k++){
-            sys_d[E->elem_conn[Nc*ie+i]*Dn+j] +=// 1e-4* //1e-3 ok
+            sys_d[E->elem_conn[Nc*ie+i]*Dn+Dm] +=// 1e-4* //1e-3 ok
               //G[Nc* k+i] * mtrl_matc[12+k] * G[Nc* k+i] * this->udof_magn[j] * w;
-              G[Nc* k+i] * G[Nc* k+i] * scal_ther * w;
+              G[Nc* 0+i] * G[Nc* k+i]*mtrl_matc[12+0] * scal_ther * w
+             +G[Nc* 1+i] * G[Nc* k+i]*mtrl_matc[12+1] * scal_ther * w
+             +G[Nc* 2+i] * G[Nc* k+i]*mtrl_matc[12+2] * scal_ther * w;
           }
         }
       }
