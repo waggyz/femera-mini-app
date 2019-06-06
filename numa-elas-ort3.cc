@@ -85,6 +85,8 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   FLOAT_PHYS C[this->mtrl_matc.size()];
   std::copy( &this->mtrl_matc[0],
              &this->mtrl_matc[this->mtrl_matc.size()], C );
+  FLOAT_PHYS gamma[3];// gamma = alpha * E/(1-2*nu), thermoelastic effect
+  for(int i=0; i<Dm; i++){ gamma[i] = 1.0/(C[i] * C[9+i]); }//FIXME may be 1.0/this
   FLOAT_PHYS R[9] = {
     mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
     mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
@@ -159,7 +161,15 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         if((ie+1)<ee){// Fetch stuff for the next iteration
           std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
       } }
-      // Elastic (only) Material Response
+      if(has_ther){
+        FLOAT_PHYS Tip=0.0;// Zero the temperature at this integration point
+        for(int i=0; i<Nc; i++){// Interpolate temperature at this int. pt.
+          Tip += intp_shpf[Nc*ip +i] * uR[Dn* i+Dm ];
+        }
+        // Apply thermal expansion to the volumetric (diagonal) strains
+        H[ 0]-=Tip*C[ 9]; H[ 4]-=Tip*C[10]; H[ 8]-=Tip*C[11];
+      }
+      // Elastic material response
       S[0]=(C[0]* H[0] + C[3]* H[4] + C[5]* H[8]);//Sxx
       S[4]=(C[3]* H[0] + C[1]* H[4] + C[4]* H[8]);//Syy
       S[8]=(C[5]* H[0] + C[4]* H[4] + C[2]* H[8]);//Szz
@@ -169,11 +179,24 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       S[2]=( H[2] + H[6] )*C[8];// S[6]= S[2];//Sxz Szx
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
       if(has_ther){
-        FLOAT_PHYS Tip=0.0;// Zero the temperature at this integration point
-        //FLOAT_PHYS dT=0.0;
-        for(int i=0; i<Nc; i++){// Interpolate temperature at this int. pt.
-          Tip += intp_shpf[Nc*ip +i] * uR[Dn* i+Dm ];
-        }
+#if 1
+        // Apply thermal conductivities
+        // Store heat flux in the last row of S
+        S[ 9]=H[ 9]*C[12];
+        S[10]=H[10]*C[13];
+        S[11]=H[11]*C[14];
+#endif
+#if 1
+        // Calculate volumetric thermoelastic effect temperature change
+        // Small and neglected for quasi-static (high-cycle?) fatigue loading
+        S[ 9]-= gamma[0]*S[0];
+        S[10]-= gamma[1]*S[4];
+        S[11]-= gamma[2]*S[8];
+#endif
+#if 0
+        //FLOAT_PHYS dT = C[15]*S[0] + C[16]*S[4] + C[17]*S[8];
+        //S[ 9]-= dT*C[12]; S[10]-= dT*C[13]; S[11]-= dT*C[14];
+#endif
 #if VERB_MAX>10
         printf("TEMPERATURE[%i]: %+9.2e\n",ip,Tip);
 #endif
@@ -187,21 +210,17 @@ int ElastOrtho3D::ElemLinear( Elem* E,
 #if 0
         // Calculate volumetric thermoelastic effect temperature change
         // Small and neglected for quasi-static (high-cycle?) fatigue loading
-        dT += C[15]*S[0] + C[16]*S[4] + C[17]*S[8];
+        dT = C[15]*S[0] + C[16]*S[4] + C[17]*S[8];
         S[ 9]=(H[ 9]-dT)*C[12];
         S[10]=(H[10]-dT)*C[13];
         S[11]=(H[11]-dT)*C[14];
-#else
+#endif
+#if 0
         // Apply thermal expansion to the volumetric (diagonal) strains
-        //H[ 0]-=Tip*C[ 9]; H[ 4]-=Tip*C[10]; H[ 8]-=Tip*C[11];
+        // ...and subtract it from the stress
         S[0]-=Tip*(C[0]*C[ 9] + C[3]* C[10] + C[5]* C[11]);//Sxx
         S[4]-=Tip*(C[3]*C[ 9] + C[1]* C[10] + C[4]* C[11]);//Syy
         S[8]-=Tip*(C[5]*C[ 9] + C[4]* C[10] + C[2]* C[11]);//Szz
-        // Apply thermal conductivities (and strain heating ?)
-        // Store heat flux in the last row of S
-        S[ 9]=H[ 9]*C[12];
-        S[10]=H[10]*C[13];
-        S[11]=H[11]*C[14];
 #endif
       }// end thermal stuff
       //------------------------------------------------------ 18+9= 27*Ng FLOP
