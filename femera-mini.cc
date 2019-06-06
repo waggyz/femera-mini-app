@@ -721,7 +721,7 @@ int main( int argc, char** argv ){
         M->halo_val[f+j]+= S->sys_f[Dn* i+j]; };
     };
   };// finished gather, now scatter back to elems
-#pragma omp for schedule(static) reduction(+:reac_x)
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH Dn=uint(Y->node_d);

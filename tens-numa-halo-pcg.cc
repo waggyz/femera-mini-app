@@ -351,19 +351,19 @@ int HaloPCG::Iter(){
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=P[part_i];
-    const INT_MESH d=uint(Y->node_d);
+    const INT_MESH Dn=uint(Y->node_d);
     time_start( phys_start );
-    const auto n = S->udof_n;
-    for(uint i=0;i<n;i++){ S->sys_f[i]=0.0; };
+    const auto sysn = S->udof_n;
+    for(uint i=0;i<sysn;i++){ S->sys_f[i]=0.0; };
     E->do_halo=true; Y->ElemLinear( E, S->sys_f, S->sys_p );
     time_accum( my_phys_count, phys_start );
     time_start( gath_start );
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
     for(INT_MESH i=hrn; i<hnn; i++){//NOTE memcpy apparently not critical
       std::memcpy(
-        & this->halo_val[d* E->node_haid[i]],
-        & S->sys_f[d* i],
-        d *sizeof(FLOAT_PHYS) );
+        & this->halo_val[Dn* E->node_haid[i]],
+        & S->sys_f[Dn* i],
+        Dn*sizeof(FLOAT_PHYS) );
     };
     time_accum( my_gat0_count, gath_start );
   };
@@ -371,29 +371,27 @@ int HaloPCG::Iter(){
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=P[part_i];
     time_start( gath_start );
-    const INT_MESH d=uint(Y->node_d);
+    const INT_MESH Dn=uint(Y->node_d);
     const INT_MESH hrn=E->halo_remo_n;
     for(INT_MESH i=0; i<hrn; i++){
-      const auto f = d* E->node_haid[i];
-      for( uint j=0; j<d; j++){
+      const auto f = Dn* E->node_haid[i];
+      for( uint j=0; j<Dn; j++){
 #pragma omp atomic update
-        this->halo_val[f+j]+= S->sys_f[d* i+j]; };
+        this->halo_val[f+j]+= S->sys_f[Dn* i+j]; };
     };
     time_accum( my_gat1_count, gath_start );
   };// End halo_vals sum; now scatter back to elems
 #pragma omp for schedule(OMP_SCHEDULE) reduction(+:glob_sum1)
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=P[part_i];
-    const INT_MESH d=uint(Y->node_d);
+    const INT_MESH Dn=uint(Y->node_d);
     time_start( scat_start );
     const INT_MESH hnn=E->halo_node_n,hl0=S->halo_loca_0,sysn=S->udof_n;
-    const uint node_n=sysn/d;//FIXME
-    const uint hln0=hl0/d;//FIXME
     for(INT_MESH i=0; i<hnn; i++){//NOTE appears not to be critical
       std::memcpy(
-        & S->sys_f[d* i],
-        & this->halo_val[d* E->node_haid[i]],
-        d *sizeof(FLOAT_PHYS) );
+        & S->sys_f[Dn* i],
+        & this->halo_val[Dn* E->node_haid[i]],
+        Dn*sizeof(FLOAT_PHYS) );
     };
     time_accum( my_scat_count, scat_start );
     time_start( phys_start );
@@ -401,10 +399,9 @@ int HaloPCG::Iter(){
     time_accum( my_phys_count, phys_start );
     time_start( solv_start );
 #pragma omp simd reduction(+:glob_sum1)
-    for(INT_MESH i=hln0; i<node_n; i++){
-      for(INT_MESH j=0; j<d; j++){
-        glob_sum1 += S->sys_p[d*i+j] * S->sys_f[d*i+j];
-    };};
+    for(INT_MESH i=hl0; i<sysn; i++){
+        glob_sum1 += S->sys_p[i] * S->sys_f[i];
+    };
     time_accum( my_solv_count, solv_start );
   };
   time_start( solv_start );
@@ -413,14 +410,11 @@ int HaloPCG::Iter(){
 #pragma omp for schedule(OMP_SCHEDULE) reduction(+:glob_sum2)
   for(int part_i=part_0; part_i<part_o; part_i++){// ? FLOP/DOF
     std::tie(E,Y,S)=P[part_i];
-    const INT_MESH d=uint(Y->node_d);
     const INT_MESH hl0=S->halo_loca_0,sysn=S->udof_n;
-    const uint node_n=sysn/d;//FIXME
 #pragma omp simd
-    for(INT_MESH i=0; i<node_n; i++){
-      for(INT_MESH j=0; j<d; j++){
-        S->sys_r[d*i+j] -= alpha * S->sys_f[d*i+j];// Update force residuals
-    };};
+    for(INT_MESH i=0; i<sysn; i++){
+        S->sys_r[i] -= alpha * S->sys_f[i];// Update force residuals
+    };
 #pragma omp simd reduction(+:glob_sum2)
     for(INT_MESH i=hl0; i<sysn; i++){
       glob_sum2   += S->sys_r[i] * S->sys_r[i] * S->sys_d[i]; };

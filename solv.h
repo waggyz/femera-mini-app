@@ -20,10 +20,12 @@ public:
   INT_MESH uinp_n,udof_n;
   FLOAT_SOLV loca_rtol=0.0;
   FLOAT_SOLV loca_delu=0.0, rtol_delu=0.0;// Cauchy convergence check
+  //
   // Stop when ALL resi_maxi < resi_rtol * resi_init;
   FLOAT_SOLV resi_init;// Initial force residual avg (for relative check)
   FLOAT_SOLV resi_maxi;// Current maximum residual force
   FLOAT_SOLV resi_rtol;// Max residual relative convergence tolerance
+  //
   // Pointers to memory-aligned vanilla C arrays
   valign sys_f;// f=[A]{u}//FIXME Move to Phys*?
   valign sys_u;// solution
