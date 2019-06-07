@@ -32,10 +32,11 @@ int ThermElastOrtho3D::Setup( Elem* E ){
 int ThermElastOrtho3D::ElemLinear( Elem* E,
   FLOAT_SOLV *sys_f, const FLOAT_SOLV* sys_u ){
   //FIXME Cleanup local variables.
-  const int Dm = E->mesh_d;// Node (mesh) Dimension FIXME should be elem_d?
-  const int Dn = this->node_d;// this->node_d DOF/node
-  const int Nj = Dm*Dm+1;// Jac inv & det
+  const int Dm = 3;//E->mesh_d;// Node (mesh) Dimension FIXME should be elem_d?
+  const int Dn = 4;//this->node_d;// this->node_d DOF/node
+  const int Nj = 10;//Dm*Dm+1;// Jac inv & det
   const int Nc = E->elem_conn_n;// Number of nodes/element
+  const int Ng = Dm*Nc;
   const int Ne = Dn*Nc;
   const INT_MESH elem_n =E->elem_n;
   const int intp_n = int(E->gaus_n);
@@ -50,19 +51,19 @@ int ThermElastOrtho3D::ElemLinear( Elem* E,
 #endif
   FLOAT_MESH jac[Nj];//, det;
   FLOAT_PHYS u[Ne], f[Ne], uR[Ne];
-  FLOAT_PHYS G[Dm*Nc], GS[Dm*Nc], H[Dm*Dn], S[Dm*Dn];//FIXME wrong sizes?
+  FLOAT_PHYS G[Ng], GS[Ng], H[Dm*Dn], S[Dm*Dn];//FIXME wrong sizes?
   //FIXME
   //const bool has_ther = ( this->ther_expa.size() > 0 );
   //
-  FLOAT_PHYS intp_shpf[intp_n*Nc];
   // Make local copies of constant data structures
+  FLOAT_PHYS intp_shpf[intp_n*Nc];
   //if(has_therm){
   std::copy( &E->intp_shpf[0],
              &E->intp_shpf[intp_n*Nc], intp_shpf );
   //}
-  FLOAT_PHYS intp_shpg[intp_n*Dm*Nc];
+  FLOAT_PHYS intp_shpg[intp_n*Ng];
   std::copy( &E->intp_shpg[0],
-             &E->intp_shpg[intp_n*Dm*Nc], intp_shpg );
+             &E->intp_shpg[intp_n*Ng], intp_shpg );
   FLOAT_PHYS wgt[intp_n];
   std::copy( &E->gaus_weig[0],
              &E->gaus_weig[intp_n], wgt );
@@ -101,7 +102,7 @@ int ThermElastOrtho3D::ElemLinear( Elem* E,
     } printf("\n");
 #endif
   for(INT_MESH ie=e0;ie<ee;ie++){//=============================== Element Loop
-    for(int i=0;i<(Dm*Nc);i++){ GS[i]=0.0; };
+    for(int i=0;i<Ng;i++){ GS[i]=0.0; };
     // Transpose R
     std::swap(R[1],R[3]); std::swap(R[2],R[6]); std::swap(R[5],R[7]);
     for(int i=0; i<Nc; i++){// Rotate vectors in u
@@ -126,7 +127,7 @@ int ThermElastOrtho3D::ElemLinear( Elem* E,
       for(int i=0; i<Nc; i++){
         for(int k=0; k<Dm ; k++){ G[Dm* i+k ]=0.0;
           for(int j=0; j<Dm ; j++){
-            G[Dm* i+k ] += intp_shpg[ip*Dm*Nc+ Dm* i+j ] * jac[Dm* j+k ];
+            G[Dm* i+k ] += intp_shpg[ip*Ng+ Dm* i+j ] * jac[Dm* j+k ];
           }
           for(int j=0; j<Dn ; j++){// Unsymmetric small strain tensor
             H[Dm* j+k ] += G[Dm* i+k ] * uR[Dn* i+j ];

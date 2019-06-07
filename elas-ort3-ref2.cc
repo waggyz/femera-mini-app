@@ -29,9 +29,9 @@ int ElastOrtho3D::Setup( Elem* E ){
 int ElastOrtho3D::ElemLinear( Elem* E,
   FLOAT_SOLV *sys_f, const FLOAT_SOLV* sys_u ){
   //FIXME Cleanup local variables.
-  const int Dm = E->mesh_d;// Node (mesh) Dimension FIXME should be elem_d?
-  const int Dn = this->node_d;// this->node_d DOF/node
-  const int Nj = Dm*Dm+1;// Jac inv & det
+  const int Dm = 3;//E->mesh_d;// Node (mesh) Dimension FIXME should be elem_d?
+  const int Dn = 3;//this->node_d;// this->node_d DOF/node
+  const int Nj = 10;//Dm*Dm+1;// Jac inv & det
   const int Nc = E->elem_conn_n;// Number of nodes/element
   const int Ne = Dn*Nc;
   const INT_MESH elem_n =E->elem_n;
@@ -103,16 +103,16 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     for(int ip=0; ip<intp_n; ip++){
       //G = MatMul3x3xN( jac,shg );
       //A = MatMul3xNx3T( G,u );
-      for(int i=0; i< 9 ; i++){ A[i]=0.0;};// H[i]=0.0; B[i]=0.0; };
+      for(int i=0; i<(Dm*Dm) ; i++){ A[i]=0.0;};// H[i]=0.0; B[i]=0.0; };
       //for(int i=0; i<(Ne) ; i++){ G[i]=0.0; };
 //#pragma omp simd
       for(int k=0; k<Nc; k++){
-        for(int i=0; i<3 ; i++){ G[3* k+i ]=0.0;
-          for(int j=0; j<3 ; j++){
-            G[(3* k+i) ] += jac[3* j+i ] * intp_shpg[ip*Ne+ 3* k+j ];
+        for(int i=0; i<Dm ; i++){ G[Dm* k+i ]=0.0;
+          for(int j=0; j<Dm ; j++){
+            G[(Dm* k+i) ] += jac[Dm* j+i ] * intp_shpg[ip*Ne+ Dm* k+j ];
           };
-          for(int j=0; j<3 ; j++){
-            A[(3* i+j) ] += G[(3* k+i) ] * u[Dn* k+j ];
+          for(int j=0; j<Dm ; j++){
+            A[Dm* i+j ] += G[Dm* k+i ] * u[Dn* k+j ];
           };
         };
       };//------------------------------------------------- N*3*6*2 = 36*N FLOP

@@ -32,9 +32,9 @@ int ElastOrtho3D::Setup( Elem* E ){
 int ElastOrtho3D::ElemLinear( Elem* E,
   FLOAT_SOLV *sys_f, const FLOAT_SOLV* sys_u ){
   //FIXME Cleanup local variables.
-  const int Dm = E->mesh_d;// Node (mesh) Dimension FIXME should be elem_d?
-  const int Dn = this->node_d;// this->node_d DOF/node
-  const int Nj = Dm*Dm+1;// Jac inv & det
+  const int Dm = 3;//E->mesh_d;// Node (mesh) Dimension FIXME should be elem_d?
+  const int Dn = 3;//this->node_d;// this->node_d DOF/node
+  const int Nj = 10;//Dm*Dm+1;// Jac inv & det
   const int Nc = E->elem_conn_n;// Number of nodes/element
   const int Ne = Dn*Nc;
   const INT_MESH elem_n =E->elem_n;
