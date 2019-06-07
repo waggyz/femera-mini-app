@@ -9,22 +9,21 @@
 #include <cstring>// std::memcpy
 #include "femera.h"
 //
-int ElastOrtho3D::ElemLinear( Elem* ){ return 1; };//FIXME
-int ElastOrtho3D::ElemJacobi( Elem* ){ return 1; };//FIXME
-int ElastOrtho3D::ScatStiff( Elem* ){ return 1; };//FIXME
-int ElastOrtho3D::BlocLinear( Elem* ,
-  RESTRICT Phys::vals &, const RESTRICT Solv::vals & ){
-  return 0;
-};
+int ThermElastOrtho3D::ElemLinear( Elem* ){ return 1; };//FIXME
+int ThermElastOrtho3D::ElemJacobi( Elem* ){ return 1; };//FIXME
+int ThermElastOrtho3D::ScatStiff( Elem* ){ return 1; };//FIXME
+int ThermElastOrtho3D::BlocLinear( Elem* ,
+  RESTRICT Phys::vals &, const RESTRICT Solv::vals & ){ return 1; };
+int ThermElastOrtho3D::ElemStrain( Elem* ,FLOAT_SOLV*  ){ return 1; }
 //
-int ElastOrtho3D::Setup( Elem* E ){
+int ThermElastOrtho3D::Setup( Elem* E ){
   JacRot( E );
   JacT  ( E );
   const uint elem_n = uint(E->elem_n);
   const uint jacs_n = uint(E->elip_jacs.size()/elem_n/ 10) ;
   const uint intp_n = uint(E->gaus_n);
   const uint conn_n = uint(E->elem_conn_n);
-  this->tens_flop = elem_n *( conn_n*(2*18)
+  this->tens_flop = elem_n *( conn_n*(2*18)// FIXME wrong calcs
     +intp_n*( conn_n*(36+18) + 27 ) );
   this->tens_band = elem_n *(
      sizeof(FLOAT_SOLV)*(3*conn_n*3+ jacs_n*10)// Main mem
@@ -37,7 +36,7 @@ int ElastOrtho3D::Setup( Elem* E ){
 +sizeof(INT_MESH) *conn_n );
   return 0;
 };
-int ElastOrtho3D::ElemLinear( Elem* E,
+int ThermElastOrtho3D::ElemLinear( Elem* E,
   FLOAT_SOLV *sys_f, const FLOAT_SOLV* sys_u ){
   //FIXME Cleanup local variables.
   const int Dm = E->mesh_d;// Node (mesh) Dimension FIXME should be elem_d?
@@ -60,7 +59,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   FLOAT_PHYS u[Ne], f[Ne], uR[Ne];
   FLOAT_PHYS G[Dm*Nc], GS[Dm*Nc], H[Dm*Dn], S[Dm*Dn];//FIXME wrong sizes?
   //FIXME
-  const bool has_ther = ( this->ther_expa.size() > 0 );
+  //const bool has_ther = ( this->ther_expa.size() > 0 );
   //
 #if 0
   FLOAT_PHYS k0,k1,k2,s0,s1,s2;
@@ -72,12 +71,13 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   }
 #endif
   FLOAT_PHYS intp_shpf[intp_n*Nc];
+  // Make local copies of constant data structures
   //if(has_therm){
-  std::copy( &E->intp_shpf[0],// local copy
+  std::copy( &E->intp_shpf[0],
              &E->intp_shpf[intp_n*Nc], intp_shpf );
   //}
   FLOAT_PHYS intp_shpg[intp_n*Dm*Nc];
-  std::copy( &E->intp_shpg[0],// local copy
+  std::copy( &E->intp_shpg[0],
              &E->intp_shpg[intp_n*Dm*Nc], intp_shpg );
   FLOAT_PHYS wgt[intp_n];
   std::copy( &E->gaus_weig[0],
@@ -125,9 +125,9 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         for(int j=0; j<Dm; j++){
           uR[(Dn* i+k) ] += u[(Dn* i+j) ] * R[(Dm* j+k) ];
     } } }//--------------------------------------------- 2 *3*3*Nc = 18*Nc FLOP
-    if(has_ther){// Copy thermal vals from u to ur.
+    //if(has_ther){// Copy thermal vals from u to ur.
       for(int i=0; i<Nc; i++){ uR[Dn* i+Dm ]=u[Dn* i+Dm ]; }
-    }//FIXME Should just store in uR initially?
+    //}//FIXME Should just store in uR initially?
     for (int i=0; i<Nc; i++){// Fetch the current output values
       std::memcpy(& f[Dn*i],& sysf[Econn[Nc*ie+i]*Dn], sizeof(FLOAT_SOLV)*Dn );
     }
@@ -161,14 +161,14 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         if((ie+1)<ee){// Fetch stuff for the next iteration
           std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
       } }
-      if(has_ther){
+      //if(has_ther){
         FLOAT_PHYS Tip=0.0;// Zero the temperature at this integration point
         for(int i=0; i<Nc; i++){// Interpolate temperature at this int. pt.
           Tip += intp_shpf[Nc*ip +i] * uR[Dn* i+Dm ];
         }
         // Apply thermal expansion to the volumetric (diagonal) strains
         H[ 0]-=Tip*C[ 9]; H[ 4]-=Tip*C[10]; H[ 8]-=Tip*C[11];
-      }
+      //}
       // Elastic material response
       S[0]=(C[0]* H[0] + C[3]* H[4] + C[5]* H[8]);//Sxx
       S[4]=(C[3]* H[0] + C[1]* H[4] + C[4]* H[8]);//Syy
@@ -178,7 +178,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       S[5]=( H[5] + H[7] )*C[7];// S[7]= S[5];//Syz Szy
       S[2]=( H[2] + H[6] )*C[8];// S[6]= S[2];//Sxz Szx
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
-      if(has_ther){
+      //if(has_ther){
 #if 1
         // Apply thermal conductivities
         // Store heat flux in the last row of S
@@ -193,10 +193,6 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         S[10]-= gamma[1]*S[4];
         S[11]-= gamma[2]*S[8];
 #endif
-#if 0
-        //FLOAT_PHYS dT = C[15]*S[0] + C[16]*S[4] + C[17]*S[8];
-        //S[ 9]-= dT*C[12]; S[10]-= dT*C[13]; S[11]-= dT*C[14];
-#endif
 #if VERB_MAX>10
         printf("TEMPERATURE[%i]: %+9.2e\n",ip,Tip);
 #endif
@@ -207,22 +203,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
           + C[21]* H[3] + C[19]* H[4] + C[22]* H[5]
           + C[23]* H[6] + C[22]* H[7] + C[20]* H[8]);
 #endif
-#if 0
-        // Calculate volumetric thermoelastic effect temperature change
-        // Small and neglected for quasi-static (high-cycle?) fatigue loading
-        dT = C[15]*S[0] + C[16]*S[4] + C[17]*S[8];
-        S[ 9]=(H[ 9]-dT)*C[12];
-        S[10]=(H[10]-dT)*C[13];
-        S[11]=(H[11]-dT)*C[14];
-#endif
-#if 0
-        // Apply thermal expansion to the volumetric (diagonal) strains
-        // ...and subtract it from the stress
-        S[0]-=Tip*(C[0]*C[ 9] + C[3]* C[10] + C[5]* C[11]);//Sxx
-        S[4]-=Tip*(C[3]*C[ 9] + C[1]* C[10] + C[4]* C[11]);//Syy
-        S[8]-=Tip*(C[5]*C[ 9] + C[4]* C[10] + C[2]* C[11]);//Szz
-#endif
-      }// end thermal stuff
+      //}// end thermal stuff
       //------------------------------------------------------ 18+9= 27*Ng FLOP
 #if VERB_MAX>10
       printf( "Stress:");
@@ -238,11 +219,11 @@ int ElastOrtho3D::ElemLinear( Elem* E,
           for(int j=0; j<Dm; j++){
             GS[Dm* i+k ] += G[Dm* i+j ] * S[Dm* j+k ];
       } } }//---------------------------------------- 2 *3*3*Nc = 18*Nc*Ng FLOP
-      if(has_ther){// Compute nodal heat flow
+      //if(has_ther){// Compute nodal heat flow
         for(int i=0; i<Nc; i++){
           for(int j=0;j<Dm; j++){
             f[Dn* i+Dm ] += G[Dm* i+j ] * S[9+j];
-      } } }
+      } }// }
     }//========================================================== End intp loop
     // Transpose R back again
     std::swap(R[1],R[3]); std::swap(R[2],R[6]); std::swap(R[5],R[7]);
@@ -264,7 +245,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   };//=========================================================== End elem loop
   return 0;
 };
-int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
+int ThermElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
   //FIXME Doesn't do rotation yet
   const uint Dm = 3;//this->mesh_d
   const uint Dn = this->node_d;
@@ -288,10 +269,7 @@ int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
     0.0,0.0,0.0,0.0,mtrl_matc[7]*2.0,0.0,
     0.0,0.0,0.0,0.0,0.0,mtrl_matc[8]*2.0};
   const FLOAT_PHYS scal_disp = udof_magn[0] ;
-  FLOAT_PHYS scal_ther;
-  if(Dn>Dm){ scal_ther = udof_magn[3] * 1e-3;}//4e-4
-  //if(Dn>Dm){ scal_ther = udof_magn[3] *1e-2 ;}
-  else{scal_ther=1.0;}
+  FLOAT_PHYS scal_ther = udof_magn[3] * 1e-3;//4e-4
 #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
   for(uint j=0;j<mtrl_matc.size();j++){
@@ -352,7 +330,7 @@ int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
           elem_diag[i]+=B[Ne*5 + i] * D[6*5 + k] * B[Ne*k + i] * scal_disp * w;
         }
       }
-      if(Dn>Dm){
+      //if(Dn>Dm){
         for(uint i=0; i<Nc; i++){
           for(uint k=0; k<Dm ; k++){
             sys_d[E->elem_conn[Nc*ie+i]*Dn+Dm] +=// 1e-4* //1e-3 ok
@@ -362,7 +340,7 @@ int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
              +G[Nc* 2+i] * G[Nc* k+i]*mtrl_matc[12+2] * scal_ther * w;
           }
         }
-      }
+      //}
     };//end intp loop
 #if 0
     printf("MTRL_MATC:");
@@ -373,16 +351,13 @@ int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
       //int c=E->elem_conn[Nc*ie+i]*3;
       for(uint j=0; j<Dm; j++){
         sys_d[E->elem_conn[Nc*ie+i]*Dn+j] += elem_diag[Dm*i+j];
-        //sys_d[E->elem_conn[Nc*ie+i]*Dn+j] += std::abs(elem_diag[Dm*i+j]);
       }
-      //for(uint j=3; j<Dn; j++){ sys_d[E->elem_conn[Nc*ie+i]*Dn+j] = 1.0; }
     }
-    //elem_diag=0.0;
   };
   return 0;
 };
 
-int ElastOrtho3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* sys_d ){
+int ThermElastOrtho3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* sys_d ){
   //FIXME Doesn't do rotation yet
   const uint ndof   = 3;//this->node_d
   //const int mesh_d = E->elem_d;
@@ -470,179 +445,3 @@ int ElastOrtho3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* sys_d ){
   };
   return 0;
 };
-int ElastOrtho3D::ElemStrain( Elem* E,FLOAT_SOLV* sys_f ){
-  //FIXME Clean up local variables.
-  const uint ndof= 3;//this->node_d
-  const uint  Nj =10;//,d2=9;//mesh_d*mesh_d;
-  const INT_MESH elem_n = E->elem_n;
-  const uint intp_n = uint(E->gaus_n);
-  const uint     Nc = E->elem_conn_n;// Number of Nodes/Element
-  const uint     Ne = ndof*Nc;
-  //FLOAT_PHYS det;
-  INT_MESH   conn[Nc];
-  FLOAT_MESH jac[Nj];
-  FLOAT_PHYS dw, G[Ne], f[Ne];
-  FLOAT_PHYS H[9], S[9], A[9], B[9];
-  //
-  for(uint i=0; i< 9 ; i++){ A[i]=0.0; };
-  for(uint i=0; i< 9 ; i++){ H[i]=0.0; };
-  H[0]=1.0; H[4]=1.0; H[8]=1.0;// unit pressure
-  //
-  FLOAT_PHYS intp_shpg[intp_n*Ne];
-  std::copy( &E->intp_shpg[0],
-             &E->intp_shpg[intp_n*Ne], intp_shpg );
-  FLOAT_PHYS wgt[intp_n];
-  std::copy( &E->gaus_weig[0],
-             &E->gaus_weig[intp_n], wgt );
-  FLOAT_PHYS C[this->mtrl_matc.size()];
-  std::copy( &this->mtrl_matc[0],
-             &this->mtrl_matc[this->mtrl_matc.size()], C );
-  const FLOAT_PHYS R[9] = {
-    mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
-    mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
-    mtrl_rotc[6],mtrl_rotc[7],mtrl_rotc[8]};
-    for(uint i=0; i<3; i++){
-      for(uint k=0; k<3; k++){
-        for(uint j=0; j<3; j++){
-            H[(3* i+k) ] += A[(3* i+j)] * R[3* k+j ];
-    };};};
-  const auto Econn = &E->elem_conn[0];
-  const auto Ejacs = &E->elip_jacs[0];
-  //
-  for(INT_MESH ie=0;ie<elem_n;ie++){
-    std::memcpy( &conn, &Econn[Nc*ie], sizeof(  INT_MESH)*Nc);
-    std::memcpy( &jac , &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
-    //
-    for(uint i=0;i<(Ne);i++){ f[i]=0.0; };
-    for(uint ip=0; ip<intp_n; ip++){
-      //G = MatMul3x3xN( jac,shg );
-      //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
-      //for(uint i=0; i<(Ne) ; i++){ G[i]=0.0; };
-      for(uint k=0; k<Nc; k++){
-        for(uint i=0; i<3 ; i++){ G[3* k+i ]=0.0;
-          for(uint j=0; j<3 ; j++){
-            G[(3* k+i) ] += jac[3* j+i ] * intp_shpg[ip*Ne+ 3* k+j ];
-          };
-        };
-      };//------------------------------------------------- N*3*6*2 = 36*N FLOP
-#if VERB_MAX>10
-      printf( "Small Strains (Elem: %i):", ie );
-      for(uint j=0;j<HH.size();j++){
-        if(j%mesh_d==0){printf("\n");}
-        printf("%+9.2e ",H[j]);
-      }; printf("\n");
-#endif
-      //det=jac[9 +Nj*l]; FLOAT_PHYS w = det * wgt[ip];
-      dw = jac[9] * wgt[ip];
-      //
-      S[0]=(C[0]* H[0] + C[1]* H[4] + C[1]* H[8])*dw;//Sxx
-      S[4]=(C[1]* H[0] + C[0]* H[4] + C[1]* H[8])*dw;//Syy
-      S[8]=(C[1]* H[0] + C[1]* H[4] + C[0]* H[8])*dw;//Szz
-      //
-      S[1]=( H[1] + H[3] )*C[2]*dw;// S[3]= S[1];//Sxy Syx
-      S[5]=( H[5] + H[7] )*C[2]*dw;// S[7]= S[5];//Syz Szy
-      S[2]=( H[2] + H[6] )*C[2]*dw;// S[6]= S[2];//Sxz Szx
-      S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
-      //------------------------------------------------------- 18+9 = 27 FLOP
-      for(uint i=0; i<3; i++){
-        //for(int k=0; k<3; k++){ A[3* i+k ]=0.0;
-        for(uint k=0; k<3; k++){ B[3* k+i ]=0.0;
-          for(uint j=0; j<3; j++){
-            //A[3* i+k ] += S[3* i+j ] * R[3* j+k ];
-            B[(3* k+i) ] += S[(3* i+j) ] * R[3* j+k ];// B is transposed
-      };};};
-      for(uint i=0; i<Nc; i++){
-        for(uint k=0; k<3; k++){
-          for(uint j=0; j<3; j++){
-            f[(3* i+k) ] += G[(3* i+j) ] * B[(3* k+j) ];
-      };};};//---------------------------------------------- N*3*6 = 18*N FLOP
-#if VERB_MAX>10
-      printf( "f:");
-      for(uint j=0;j<Ne;j++){
-        if(j%ndof==0){printf("\n");}
-        printf("%+9.2e ",f[j]);
-      }; printf("\n");
-#endif
-    };//end intp loop
-    for (uint i=0; i<Nc; i++){
-      for(uint j=0; j<3; j++){
-        //sys_f[3*conn[i]+j] +=f[(3*i+j)];
-        sys_f[4*conn[i]+j] += std::abs( f[(3*i+j)] );
-    }; };//--------------------------------------------------- N*3 =  3*N FLOP
-  };//end elem loop
-  return 0;
-  };
-#if 0
-int ElastOrtho3D::ReadPartFMR( const char* fname, bool is_bin ){
-  //FIXME This is not used. It's done in Elem::ReadPartFMR...
-  std::string s; if(is_bin){ s="binary";}else{s="ASCII";}
-  if(is_bin){
-    std::cout << "ERROR Could not open "<< fname << " for reading." <<'\n'
-      << "ERROR Femera (fmr) "<< s <<" format not yet supported." <<'\n';
-    return 1;
-  }
-  std::string fmrstring;
-  std::ifstream fmrfile(fname);
-  while( fmrfile >> fmrstring ){
-    if(fmrstring=="$ElasticProperties"){//FIXME Deprecated
-      int s=0; fmrfile >> s;
-      mtrl_prop.resize(s);
-      for(int i=0; i<s; i++){ fmrfile >> mtrl_prop[i]; }
-      //this->MtrlProp2MatC();
-      s=0; fmrfile >> s;
-      if(s>0){
-        mtrl_dirs.resize(s);
-      for(int i=0; i<s; i++){ fmrfile >> mtrl_dirs[i]; mtrl_dirs[i]*=(PI/180.0) ;}
-      }
-    }
-    if(fmrstring=="$Orientation"){// Material orientation (radians)
-      int s=0; fmrfile >> s;
-      if(s>0){
-        mtrl_dirs.resize(s);
-        for(int i=0; i<s; i++){ fmrfile >> mtrl_dirs[i]; mtrl_dirs[i]*=(PI/180.0) ;}
-      }
-    }
-    //FIXME This parsing requires properties in a specific order
-    auto tprop = mtrl_prop; auto tsz=tprop.size();
-    if(fmrstring=="$Elastic"){// Elastic Constants
-      int s=0; fmrfile >> s;
-      mtrl_prop.resize(tsz+s);
-      mtrl_prop[std::slice(tsz,tsz+s,1)] = tprop;
-      for(int i=0; i<s; i++){ fmrfile >> mtrl_prop[i+tprop.size()]; }
-    }
-    if(fmrstring=="$ThermalExpansion"){// Thermal expansion
-      int s=0; fmrfile >> s;
-      mtrl_prop.resize(s + tprop.size());
-      mtrl_prop[std::slice(tsz,tsz+s,1)] = tprop;
-      for(int i=0; i<s; i++){ fmrfile >> mtrl_prop[i+tprop.size()]; }
-    }
-    if(fmrstring=="$ThermalConductivity"){// Thermal conductivity
-      int s=0; fmrfile >> s;
-      mtrl_prop.resize(s + tprop.size());
-      mtrl_prop[std::slice(tsz,tsz+s,1)] = tprop;
-      for(int i=0; i<s; i++){ fmrfile >> mtrl_prop[i+tprop.size()]; }
-    }
-  }
-  return 0;
-}
-int ElastOrtho3D::SavePartFMR( const char* fname, bool is_bin ){
-  std::string s; if(is_bin){ s="binary";}else{s="ASCII";};
-  if(is_bin){
-    std::cout << "ERROR Could not append "<< fname << "." <<'\n'
-      << "ERROR Femera (fmr) "<< s <<" format not yet supported." <<'\n';
-    return 1;
-  };
-  std::ofstream fmrfile;
-  fmrfile.open(fname, std::ios_base::app);
-  //
-  fmrfile << "$ElasticProperties" <<'\n';
-  fmrfile << mtrl_prop.size();
-  for(uint i=0;i<mtrl_prop.size();i++){ fmrfile <<" "<< mtrl_prop[i]; };
-  fmrfile << '\n';
-  if(mtrl_dirs.size()>0){
-    fmrfile << mtrl_dirs.size();
-    for(uint i=0;i<mtrl_dirs.size();i++){ fmrfile <<" "<< mtrl_dirs[i]; };
-  }; fmrfile <<'\n';
-  return 0;
-};
-#endif

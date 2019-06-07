@@ -549,11 +549,22 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
     //std::cout <<"*" << fmrstring <<"*" ;
 #endif
   }//EOF
+  bool has_therm=false;
+  if( (t_ther_expa.size()>0) | (t_ther_cond.size()>0) ){ has_therm=true; }
+  if( has_therm ){
+    if(t_mtrl_dirs.size()<3){
+      Y = new ElastIso3D(t_mtrl_prop[0],t_mtrl_prop[1]);//FIXME
+    }else{
+      Y = new ThermElastOrtho3D(t_mtrl_prop,t_mtrl_dirs,t_ther_expa,t_ther_cond);
+    }
+  }else{
     if(t_mtrl_dirs.size()<3){
       Y = new ElastIso3D(t_mtrl_prop[0],t_mtrl_prop[1]);
     }else{
       Y = new ElastOrtho3D(t_mtrl_prop,t_mtrl_dirs);
     }
+  }
+#if 0
   //elas_prop.resize(mtrl_prop.size()); elas_prop = mtrl_prop;//FIXME
   if(t_ther_expa.size()>0){
     //FIXME Thermal props should be handled in the Phys* constructor.
@@ -593,6 +604,7 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
         //Y->mtrl_matc[c.size()+j] = 1.0 / Y->ther_cond[j]; }
     }
   }
+#endif
   switch( this->solv_meth ){
     case(Solv::SOLV_CG):{
       S=new PCG( E->node_n * Y->node_d, this->iter_max, glob_rtol ); 

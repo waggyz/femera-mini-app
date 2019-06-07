@@ -395,151 +395,56 @@ public:
 protected:
 private:
 };
-/*
-// 2D Elastic Continuum ---------------------------------
-inline RESTRICT Phys::vals Mtr2StrsIsoEng(//FIXME Plane Stress
-  const FLOAT_PHYS E, const FLOAT_PHYS n, const FLOAT_PHYS t){
-  const FLOAT_PHYS d=E/(1.0-n*n)*t;
-  //const FLOAT_PHYS C11=d;
-  //const FLOAT_PHYS C12=n*d ;
-  //const FLOAT_PHYS C33=(1.0-n)*d*0.5;
-  ////const Phys::vals C={C11,C12,C44};
-  //return( Phys::vals {C11,C12,C33} );
-  return(Phys::vals { d, n*d, (1.0-n)*d*0.5 } );
+class ThermElastOrtho3D final: public Phys{
+public:
+  ThermElastOrtho3D(// Orthotropic Material Constructor
+    Phys::vals prop, Phys::vals dirs, Phys::vals expa, Phys::vals cond ) :
+    Phys( prop,dirs ){
+      node_d = 4;
+      ther_expa.resize(expa.size()); ther_expa=expa;
+      ther_cond.resize(cond.size()); ther_cond=cond;
+      ThermElastOrtho3D::MtrlProp2MatC(); 
+    }
+#if 0
+  int SavePartFMR( const char* bname, bool is_bin ) final;
+  int ReadPartFMR( const char* bname, bool is_bin ) final;
+#endif
+  int Setup( Elem* )final;
+  //int ElemLinear( std::vector<Elem*>,RESTRICT Phys::vals&,const RESTRICT Phys::vals&)
+  int BlocLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
+  int ElemLinear( Elem*,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemJacobi( Elem*,FLOAT_SOLV* ) final;
+  int ElemRowSumAbs(Elem*, FLOAT_SOLV* ) final;
+  int ElemStrain(Elem*, FLOAT_SOLV* ) final;
+  int ElemLinear( Elem* ) final;
+  int ElemJacobi( Elem* ) final;
+  int ScatStiff ( Elem* ) final;
+  inline int MtrlProp2MatC()final{
+    // First, set the elastic-only part
+    auto Y = new ElastOrtho3D(this->mtrl_prop,this->mtrl_dirs);
+    Y->MtrlProp2MatC();
+    auto n = Y->mtrl_matc.size();
+    this->mtrl_matc.resize(n+6);
+    for(uint i=0; i<n; i++){ this->mtrl_matc[i]=Y->mtrl_matc[i]; }
+    //delete Y;
+    // now set the thermal part
+    if(this->ther_expa.size()>0){
+      uint N=9;
+      for(uint j=N;j<(N+3);j++){ mtrl_matc[j]=ther_expa[0]; }
+      for(uint j=0;j<ther_expa.size();j++){ mtrl_matc[N+j]=ther_expa[j]; }
+    }
+    if(this->ther_cond.size()>0){
+      uint N=12;
+      for(uint j=N;j<(N+3);j++){ mtrl_matc[j]=ther_cond[0]; }
+      for(uint j=0;j<ther_cond.size();j++){ mtrl_matc[N+j]=ther_cond[j]; }
+    }
+    //FIXME
+    return 0;
+  }
+  Phys::vals MtrlLinear(const RESTRICT Phys::vals &e)final{ return e; }// dummy
+protected:
+private:
 };
-inline RESTRICT Phys::vals Mtr2ValsIsoEng2Cau(
-  RESTRICT const Phys::vals &C, RESTRICT const Phys::vals &e){
-  return( Phys::vals {
-    C[0]*e[0] +C[1]*e[1] ,
-    C[1]*e[0] +C[0]*e[1] ,
-    C[2]*e[2] });
-  //RESTRICT Phys::vals s(3,0.0);
-  //s[0]= C[0]*e[0] +C[1]*e[1] ;
-  //s[1]= C[1]*e[0] +C[0]*e[1] ;
-  //s[2]= C[2]*e[2] ;
-  //return s;
-};
-//FIXED 2D homogeneous isotropic already done.
-//FIXME Redo the following derived from Phys::...
-// 3D Elastic Continuum ---------------------------------
-inline RESTRICT Phys::vals MtrlValsIsoEng(
-  const FLOAT_PHYS E, const FLOAT_PHYS n){
-  const FLOAT_PHYS d=E/((1.0+n)*(1.0-2.0*n));
-  //const FLOAT_PHYS C11=(1.0-n)*d;
-  //const FLOAT_PHYS C12=n*d ;
-  //const FLOAT_PHYS C44=(1.0-2.0*n)*d*0.5;
-  ////const Phys::vals C={C11,C12,C44};
-  //return( Phys::vals {C11,C12,C44} );
-  return( Phys::vals { (1.0-n)*d,n*d,(1.0-2.0*n)*d*0.5 } );
-};
-inline RESTRICT Phys::vals MtrlValsIsoEng2Cau(
-  RESTRICT const Phys::vals &C, RESTRICT const Phys::vals &e){
-  RESTRICT Phys::vals s(0.0,6);//0.0,0.0,0.0, 0.0,0.0,0.0};
-  //RESTRICT Phys::vals C1={
-  //  C[1],C[2],C[2],
-  //  C[2],C[1],C[2],
-  //  C[2],C[2],C[1]};
-  //s1=Mesh::MatMul3xNx3t(C1,e);
-  //s[1]=s1[1]; s[2]=s1[2]; s[3]=s1[3];
-  //s[1]=Solv::inner_product(Phys::vals {C[1],C[4],C[6]},e1);
-  s[0]= C[0]*e[0] +C[1]*e[1] +C[1]*e[2];
-  s[1]= C[1]*e[0] +C[0]*e[1] +C[1]*e[2];
-  s[2]= C[1]*e[0] +C[1]*e[1] +C[0]*e[2];
-  s[3]= C[2]*e[3] ;
-  s[4]= C[2]*e[4] ;
-  s[5]= C[2]*e[5] ;
-  return s;
-};
-inline RESTRICT Phys::vals Phys::MtrlValsTransEng(
-  const FLOAT_PHYS Ep , const FLOAT_PHYS Epz,//FIXME What convention?
-  const FLOAT_PHYS np , const FLOAT_PHYS npz,
-  const FLOAT_PHYS Gzp ){
-  //const FLOAT_PHYS d=Ep*Ep*Ep/((1+np)*(1-np-2*npz*nzp));
-  const FLOAT_PHYS d=1.0;//1.0/(1-np*np-2*npz*nzp);//FIXME
-  const FLOAT_PHYS C11=(0)*d;//FIXME
-  const FLOAT_PHYS C33=(0)*d;//FIXME
-  const FLOAT_PHYS C12=(0)*d;//FIXME
-  //const FLOAT_PHYS C23=()*d;
-  const FLOAT_PHYS C13=(0)*d;//FIXME
-  const FLOAT_PHYS C44=(0)*d;//FIXME
-  //const FLOAT_PHYS C66=()*d;
-  const Phys::vals C={C11,C33,C12,C13,C44};
-  return(C);
-};
-inline RESTRICT Phys::vals Phys::MtrlValsTransEng2Cau(
-  RESTRICT const Phys::vals &C, RESTRICT const Phys::vals &e){
-  RESTRICT Phys::vals s(6);
-  //RESTRICT Phys::vals C1={
-  //  C[1],C[2],C[2],
-  //  C[2],C[1],C[2],
-  //  C[2],C[2],C[1]};
-  s[0]= C[0]*e[0] +C[2]*e[1] +C[3]*e[2];
-  s[1]= C[2]*e[0] +C[0]*e[1] +C[3]*e[2];
-  s[2]= C[3]*e[0] +C[3]*e[1] +C[1]*e[2];
-  s[3]= C[4]*e[3];
-  s[4]= C[4]*e[4];
-  s[5]=(C[0]-C[2])*0.5*e[5];
-  return s;
-};
-//inline int MtrlValsOrthoTru( RESTRICT const Phys::vals& e,
-inline RESTRICT Phys::vals MtrlValsOrthoEng(
-  const FLOAT_PHYS Ex , const FLOAT_PHYS Ey , const FLOAT_PHYS Ez ,
-  const FLOAT_PHYS Gxy, const FLOAT_PHYS Gyz, const FLOAT_PHYS Gxz,
-  const FLOAT_PHYS nxy, const FLOAT_PHYS nyz, const FLOAT_PHYS nxz){
-  //
-  const FLOAT_PHYS nyx=nxy*Ey/Ex;
-  const FLOAT_PHYS nzy=nyz*Ez/Ey;
-  const FLOAT_PHYS nzx=nxz*Ez/Ex;
-  const FLOAT_PHYS d=Ex*Ey*Ez/(1.0-nxy*nyx-nyz*nzy-nzx*nxz-2.0*nxy*nyz*nzx);
-  //
-  const FLOAT_PHYS C11=(1.0-nyz*nzy)/(Ey*Ez)*d;
-  const FLOAT_PHYS C22=(1.0-nzx*nxz)/(Ez*Ez)*d;
-  const FLOAT_PHYS C33=(1.0-nxy*nyz)/(Ex*Ey)*d;
-  //
-  const FLOAT_PHYS C12=-(nxy+nxz*nzy)/(Ez*Ex)*d;
-  const FLOAT_PHYS C13=-(nxz+nxy*nyz)/(Ez*Ex)*d;
-  const FLOAT_PHYS C23=-(nyz+nxz*nyz)/(Ez*Ey)*d;
-  //
-  const FLOAT_PHYS C44=Gyz;// * 2.0 for true strain
-  const FLOAT_PHYS C55=Gxz;
-  const FLOAT_PHYS C66=Gxy;//FIXED make function to return these
-  //
-  //const Phys::vals C={C11,C22,C33, C12,C23,C13, C44,C55,C66};
-  return( Phys::vals {C11,C22,C33, C12,C23,C13, C44,C55,C66} );
-  //
-  //const RESTRICT Phys::vals C={//FIXED Don't do it this way.
-  //  C11,C12,C13,0.0,0.0,0.0,
-  //  C12,C22,C23,0.0,0.0,0.0,
-  //  C13,C23,C33,0.0,0.0,0.0,
-  //  0.0,0.0,0.0,C44,0.0,0.0,
-  //  0.0,0.0,0.0,0.0,C55,0.0,
-  //  0.0,0.0,0.0,0.0,0.0,C66};
-  //return(0);
-  };
-inline RESTRICT Phys::vals MtrlValsOrthoEng2Cau(
-  RESTRICT const Phys::vals &C, RESTRICT const Phys::vals &e){
-  //RESTRICT Phys::vals e1={e[1],e[2],e[3]};
-  RESTRICT Phys::vals s(6);
-  //RESTRICT Phys::vals C1={
-  //  C[0],C[3],C[5],
-  //  C[3],C[1],C[4],
-  //  C[5],C45],C[2]};
-  //s1=Mesh::MatMul3xNx3t(C1,e);
-  //s[1]=s1[1]; s[2]=s1[2]; s[3]=s1[3];
-  //s[1]=Solv::inner_product(Phys::vals {C[1],C[4],C[6]},e1);
-  s[0]= C[0]*e[0] +C[3]*e[1] +C[5]*e[2];
-  s[1]= C[3]*e[0] +C[1]*e[1] +C[4]*e[2];
-  s[2]= C[5]*e[0] +C[4]*e[1] +C[2]*e[2];
-  s[3]= C[6]*e[3];
-  s[4]= C[7]*e[4];
-  s[5]= C[8]*e[5];
-  return s;
-};
-*/
-
-
-
-
 
 
 

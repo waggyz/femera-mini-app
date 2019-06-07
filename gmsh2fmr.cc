@@ -640,11 +640,11 @@ int main( int argc, char** argv ) {
             for(uint i=0;i<3;i++){ dirs[i]=props[i]; }
             prop.resize(props.size()-3);
             for(uint i=3;i<props.size();i++){ prop[i-3]=props[i]; }
-            Y=new ThermoElastOrtho3D(prop,dirs);
+            Y=new ThermElastOrtho3D(prop,dirs);
           }else{
             prop.resize(props.size());
             for(uint i=0;i<props.size();i++){ prop[i]=props[i]; }
-            Y=new ThermoElastIso3D(prop[0],prop[1]);
+            Y=new ThermElastIso3D(prop[0],prop[1]);
           }
         }else{
 #endif

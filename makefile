@@ -41,8 +41,8 @@ endif
 # CPPLOG=-fopt-info-vec-optimized 2>a.log ; grep -i vectorized a.log ; grep -i warn a.log; grep -i error a.log
 
 FEMERA_MINI_CC = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc \
- tens-numa-halo-pcg.cc halo-pcr-dummy.cc \
- numa-elas-iso3.cc numa-elas-ort3.cc
+ halo-pcg-omp.cc halo-pcr-dummy.cc \
+ elas-iso3.cc elas-ort3.cc elas-ther-ort3.cc
 
 #OMPI_CPPFLAGS=$(CPPFLAGS) ; \
 #OMPI_CXXFLAGS=$(CPPFLAGS) ; \
