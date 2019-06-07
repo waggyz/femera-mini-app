@@ -15,14 +15,14 @@ int ThermElastOrtho3D::Setup( Elem* E ){
   const uint jacs_n = E->elip_jacs.size()/E->elem_n/ 10 ;
   const uint intp_n = E->gaus_n;
   this->tens_flop = uint(E->elem_n) * intp_n
-    *( uint(E->elem_conn_n)* (36+18+3) + 2*54 + 27 );
+    *( uint(E->elem_conn_n)* (42+6+6+24+6) + 1+54+3+21+3+6+12+54 );
   this->tens_band = uint(E->elem_n) *(
-     sizeof(FLOAT_PHYS)*(3*uint(E->elem_conn_n)*3+ jacs_n*10)
+     sizeof(FLOAT_PHYS)*(4*uint(E->elem_conn_n)*3+ jacs_n*10)
     +sizeof(INT_MESH)*uint(E->elem_conn_n) );
   this->stif_flop = uint(E->elem_n)
-    * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) );
+    * 4*uint(E->elem_conn_n) *( 4*uint(E->elem_conn_n) );
   this->stif_band = uint(E->elem_n) *(
-    sizeof(FLOAT_PHYS)* 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) -1+2)
+    sizeof(FLOAT_PHYS)* 4*uint(E->elem_conn_n) *( 4*uint(E->elem_conn_n) -1+2)
     +sizeof(INT_MESH) *uint(E->elem_conn_n) );
   return 0;
 };
@@ -107,59 +107,57 @@ int ThermElastOrtho3D::ElemLinear( Elem* E,
       for(int k=0; k<Nc; k++){
         for(int i=0; i<Dm ; i++){ G[Dm* k+i ]=0.0;
           for(int j=0; j<Dm ; j++){
-            G[Dm* k+i ] += jac[Dm* j+i ] * intp_shpg[ip*Ng+ Dm* k+j ];
-          };
+            G[Dm* k+i ] += jac[Dm* j+i ] * intp_shpg[Ng*ip + Dm* k+j ];
+          }
           for(int j=0; j<Dn ; j++){
             A[Dn* i+j ] += G[Dm* k+i ] * u[Dn* k+j ];
-          };// The last column A[3,7,11] has dT/dx
-        };
-      };//------------------------------------------------- N*3*6*2 = 36*N FLOP
+          }// The last COLUMMN A[3,7,11] has dT/dx
+        }
+      }//----------------------------------------------- N*3*(6+8) = 42*Nc FLOP
 #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
       for(int j=0;j<HH.size();j++){
-        if(j%mesh_d==0){printf("\n");}
+        if(j%mesh_d==0){ printf("\n"); }
         printf("%+9.2e ",H[j]);
-      }; printf("\n");
+      } printf("\n");
 #endif
       // [H] Small deformation tensor
       // [H][RT] : matmul3x3x3T
-      dw = jac[9] * wgt[ip];
+      dw = jac[9] * wgt[ip];//------------------------------------------ 1 FLOP
 //#pragma omp simd
       for(int i=0; i<Dm; i++){
         for(int k=0; k<Dm; k++){ H[Dm* i+k ]=0.0;
           for(int j=0; j<Dm; j++){
             H[Dm* i+k ] += A[Dn* i+j] * R[Dm* k+j ];
-      };};};//---------------------------------------------- 27*2 =      54 FLOP
-      //det=jac[9 +Nj*l]; FLOAT_PHYS w = det * wgt[ip];
+      } } }//---------------------------------------------- 27*2 =      54 FLOP
       //
       FLOAT_PHYS Tip=0.0;// Zero the temperature at this integration point
-      for(int i=0; i<Nc; i++){// Interpolate temperature at this int. pt.
-        Tip += intp_shpf[Nc*ip +i] * u[Dn* i+Dm ];
+      for(int i=0; i<Nc; i++){// Interpolate temperature
+        Tip += intp_shpf[Nc*ip +i] * u[Dn* i+Dm ];//----------------- 6*Nc FLOP
       }
       // Apply thermal expansion to the volumetric (diagonal) strains
-      H[ 0]-=Tip*C[ 9]; H[ 4]-=Tip*C[10]; H[ 8]-=Tip*C[11];
+      H[ 0]-=Tip*C[ 9]; H[ 4]-=Tip*C[10]; H[ 8]-=Tip*C[11];//----------- 3 FLOP
       //
-      S[0]=(C[0]* H[0] + C[3]* H[4] + C[5]* H[8]);//Sxx
-      S[4]=(C[3]* H[0] + C[1]* H[4] + C[4]* H[8]);//Syy
-      S[8]=(C[5]* H[0] + C[4]* H[4] + C[2]* H[8]);//Szz
+      S[0]= C[0]* H[0] + C[3]* H[4] + C[5]* H[8];//Sxx
+      S[4]= C[3]* H[0] + C[1]* H[4] + C[4]* H[8];//Syy
+      S[8]= C[5]* H[0] + C[4]* H[4] + C[2]* H[8];//Szz
       //
-      S[1]=( H[1] + H[3] )*C[6];// S[3]= S[1];//Sxy Syx
-      S[5]=( H[5] + H[7] )*C[7];// S[7]= S[5];//Syz Szy
-      S[2]=( H[2] + H[6] )*C[8];// S[6]= S[2];//Sxz Szx
-      S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
+      S[1]=(H[1] + H[3])*C[6];// S[3]= S[1];//Sxy Syx
+      S[5]=(H[5] + H[7])*C[7];// S[7]= S[5];//Syz Szy
+      S[2]=(H[2] + H[6])*C[8];// S[6]= S[2];//Sxz Szx
+      S[3]=S[1]; S[7]=S[5]; S[6]=S[2];//------------------------------- 21 FLOP
 #if 1
-      // Apply thermal conductivities
-      // Store heat flux in the last row of S
+      // Apply thermal conductivities, storing heat flux in the last ROW of S
       S[ 9]=A[Dn* 0+Dm]*C[12];
       S[10]=A[Dn* 1+Dm]*C[13];
-      S[11]=A[Dn* 2+Dm]*C[14];
+      S[11]=A[Dn* 2+Dm]*C[14];//---------------------------------------- 3 FLOP
 #endif
 #if 1
       // Calculate volumetric thermoelastic effect temperature change
       // Small and neglected for quasi-static (high-cycle?) fatigue loading
       S[ 9]-= gamma[0]*S[0];
       S[10]-= gamma[1]*S[4];
-      S[11]-= gamma[2]*S[8];
+      S[11]-= gamma[2]*S[8];//------------------------------------------ 6 FLOP
 #endif
 #if VERB_MAX>10
       printf( "Stress (Natural Coords):");
@@ -168,9 +166,8 @@ int ThermElastOrtho3D::ElemLinear( Elem* E,
         printf("%+9.2e ",S[j]);
       }; printf("\n");
 #endif
-      //--------------------------------------------------------- 18+9= 27 FLOP
       // Apply integration weights and |jac|.
-      for(int i=0; i<(Dm*Dn); i++){ S[i] *= dw; }
+      for(int i=0; i<(Dm*Dn); i++){ S[i] *= dw; }//-------------------- 12 FLOP
       // [S][R] : matmul3x3x3, R is transposed
       //for(int i=0; i<9; i++){ A[i]=0.0; };
 //#pragma omp simd
@@ -193,7 +190,7 @@ int ThermElastOrtho3D::ElemLinear( Elem* E,
         for(int k=0; k<Dm; k++){
           for(int j=0; j<Dm; j++){
             f[Dn* i+k ] += G[Dm* i+j ] * A[Dm* k+j ] ;
-      } } }//------------------------------------------------ N*3*6 = 18*N FLOP
+      } } }//------------------------------------------------ N*3*8 = 24*N FLOP
       // This is way slower:
       //for(int i=0; i<Nc; i++){
       //  for(int k=0; k<3 ; k++){
@@ -205,7 +202,7 @@ int ThermElastOrtho3D::ElemLinear( Elem* E,
       for(int i=0; i<Nc; i++){
         for(int j=0;j<Dm; j++){
           f[Dn* i+Dm ] += G[Dm* i+j ] * S[9+j];
-      } }
+      } }//----------------------------------------------------------- 6*N FLOP
 #if VERB_MAX>10
       printf( "ff:");
       for(int j=0;j<Ne;j++){
