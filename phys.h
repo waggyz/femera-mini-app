@@ -424,20 +424,31 @@ public:
     auto Y = new ElastOrtho3D(this->mtrl_prop,this->mtrl_dirs);
     Y->MtrlProp2MatC();
     auto n = Y->mtrl_matc.size();
-    this->mtrl_matc.resize(n+6);
+    this->mtrl_matc.resize(n+9);
     for(uint i=0; i<n; i++){ this->mtrl_matc[i]=Y->mtrl_matc[i]; }
     //delete Y;
     // now set the thermal part
     if(this->ther_expa.size()>0){
       uint N=9;
-      for(uint j=N;j<(N+3);j++){ mtrl_matc[j]=ther_expa[0]; }
-      for(uint j=0;j<ther_expa.size();j++){ mtrl_matc[N+j]=ther_expa[j]; }
+      for(uint i=N;i<(N+3);i++){ mtrl_matc[i]=ther_expa[0]; }
+      for(uint i=0;i<ther_expa.size();i++){ mtrl_matc[N+i]=ther_expa[i]; }
     }
     if(this->ther_cond.size()>0){
       uint N=12;
-      for(uint j=N;j<(N+3);j++){ mtrl_matc[j]=ther_cond[0]; }
-      for(uint j=0;j<ther_cond.size();j++){ mtrl_matc[N+j]=ther_cond[j]; }
+      for(uint i=N;i<(N+3);i++){ mtrl_matc[i]=ther_cond[0]; }
+      for(uint i=0;i<ther_cond.size();i++){ mtrl_matc[N+i]=ther_cond[i]; }
+#if 0
+      //FIXME Scaling applied here for conditioning the system
+      auto s = mtrl_matc[0] / mtrl_matc[N];
+      for(uint i=0;i<3;i++){ mtrl_matc[N+i] *= s; }
+      //FIXME Need to store this scaling factor in Phys* to adjust reactions
+#endif
     }
+    for(uint i=0;i<3;i++){
+      // gamma = alpha * E/(1-2*nu), thermoelastic effect
+      //FIXME may be 1.0/this
+      mtrl_matc[15+i] = 1.0/(mtrl_matc[i] * mtrl_matc[9+i]); }
+      //FIXME should read from .fmr file first
     //FIXME
     return 0;
   }

@@ -70,8 +70,10 @@ int ThermElastOrtho3D::ElemLinear( Elem* E,
   FLOAT_PHYS C[this->mtrl_matc.size()];
   std::copy( &this->mtrl_matc[0],
              &this->mtrl_matc[this->mtrl_matc.size()], C );
+#if 0
   FLOAT_PHYS gamma[3];// gamma = alpha * E/(1-2*nu), thermoelastic effect
   for(int i=0; i<Dm; i++){ gamma[i] = 1.0/(C[i] * C[9+i]); }//FIXME may be 1.0/this
+#endif
   FLOAT_PHYS R[9] = {
     mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
     mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
@@ -163,18 +165,18 @@ int ThermElastOrtho3D::ElemLinear( Elem* E,
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];//------------------------------- 21 FLOP
       //if(has_ther){
 #if 1
-        // Apply thermal conductivities
-        // Store heat flux in the last row of S
-        S[ 9]=H[ 9]*C[12];
-        S[10]=H[10]*C[13];
-        S[11]=H[11]*C[14];//-------------------------------------------- 3 FLOP
+      // Apply thermal conductivities
+      // Store heat flux in the last row of S
+      S[ 9]=H[ 9]*C[12];
+      S[10]=H[10]*C[13];
+      S[11]=H[11]*C[14];//-------------------------------------------- 3 FLOP
 #endif
 #if 1
         // Calculate volumetric thermoelastic effect temperature change
         // Small and neglected for quasi-static (high-cycle?) fatigue loading
-        S[ 9]-= gamma[0]*S[0];
-        S[10]-= gamma[1]*S[4];
-        S[11]-= gamma[2]*S[8];//---------------------------------------- 6 FLOP
+      S[ 9]-= S[0] * C[15];
+      S[10]-= S[4] * C[16];
+      S[11]-= S[8] * C[17];//------------------------------------------- 6 FLOP
 #endif
 #if VERB_MAX>10
         printf("TEMPERATURE[%i]: %+9.2e\n",ip,Tip);
