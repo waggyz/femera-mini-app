@@ -40,7 +40,7 @@ int ThermElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
     0.0,0.0,0.0,0.0,mtrl_matc[7]*2.0,0.0,
     0.0,0.0,0.0,0.0,0.0,mtrl_matc[8]*2.0};
   const FLOAT_PHYS scal_disp = udof_magn[0] ;
-  FLOAT_PHYS scal_ther = udof_magn[3] * 1e-3;//4e-4
+  FLOAT_PHYS scal_ther = udof_magn[3] * 5e-4;
 #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
   for(uint j=0;j<mtrl_matc.size();j++){
