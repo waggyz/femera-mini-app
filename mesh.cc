@@ -379,8 +379,17 @@ int Mesh::Setup(){
     halo_loca_tot += E->halo_loca_n;
     halo_udof_tot += E->halo_node_n * Y->node_d;
     }
-  }
+  }//end serial partition loop
   this->halo_val.resize(halo_udof_tot);//node_d*halo_loca_tot);
+#if VERB_MAX > 1
+      if(verbosity>1){
+        printf(" Parts:");
+        if(iso3_part_n>0){ printf("%10u iso",iso3_part_n); }
+        if(ort3_part_n>0){ printf("%10u ortho",ort3_part_n); }
+        if(ther_part_n>0){ printf(" (%u thermo)",ther_part_n); }
+        printf("\n");
+      }
+#endif
 #if VERB_MAX>1
   if(verbosity>1){
     printf(" Total:%10u Elems (%u halo) in %u partitions\n",
@@ -554,14 +563,32 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
   if( has_therm ){
     if(t_mtrl_dirs.size()<3){
       Y = new ElastIso3D(t_mtrl_prop[0],t_mtrl_prop[1]);//FIXME
+#if VERB_MAX>1
+#pragma omp atomic update
+      this->iso3_part_n+=1;
+      //this->ther_part_n+=1;
+#endif
     }else{
       Y = new ThermElastOrtho3D(t_mtrl_prop,t_mtrl_dirs,t_ther_expa,t_ther_cond);
+#if VERB_MAX>1
+#pragma omp atomic update
+      this->ort3_part_n+=1;
+      this->ther_part_n+=1;
+#endif
     }
   }else{
     if(t_mtrl_dirs.size()<3){
       Y = new ElastIso3D(t_mtrl_prop[0],t_mtrl_prop[1]);
+#if VERB_MAX>1
+#pragma omp atomic update
+      this->iso3_part_n+=1;
+#endif
     }else{
       Y = new ElastOrtho3D(t_mtrl_prop,t_mtrl_dirs);
+#if VERB_MAX>1
+#pragma omp atomic update
+      this->ort3_part_n+=1;
+#endif
     }
   }
 #if 0

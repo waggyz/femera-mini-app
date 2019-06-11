@@ -47,6 +47,10 @@ public:
   int solv_meth=Solv::SOLV_CG, solv_cond=Solv::COND_JACO, verbosity=1;
   int hown_meth=2;
   //
+  INT_MESH iso3_part_n=0;
+  INT_MESH ort3_part_n=0;
+  INT_MESH ther_part_n=0;
+  //
   //FIXME Consider moving these to Test*
   float phys_flop=0, phys_band=0;
   float solv_flop=0, solv_band=0;
