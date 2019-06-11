@@ -106,7 +106,7 @@ int Mesh::SyncIDs(){//FIXME Not parallelized
     if(ps.size()>1){// n is a halo node
       for(size_t i=0;i<ps.size();i++){
         auto p=ps[i];
-        list_elem[p]->halo_node_n++;//FIXME set these later base on *.size()
+        list_elem[p]->halo_node_n++;//FIXME set these later based on *.size()
         list_elem[p]->halo_glid.push_back(n);
         if(p==o){// My local halo node
           list_elem[p]->halo_loca_n++;
@@ -418,12 +418,8 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
   if(is_bin){
     std::cout << "ERROR Could not open "<< fname << " for reading." <<'\n'
       << "ERROR Femera (fmr) "<< s <<" format not yet supported." <<'\n';
-    //Y = new ElastIso3D( 100e9,0.3 );// default physics
-    return 0;}
-  //std::cout <<fname;
-  //int eltype=4;//FIXME element type id
-  //int elem_p=pord;//FIXME
-  //
+    return 0;
+  }
   std::string fmrstring;
   std::ifstream fmrfile(fname);//return 0;
   Phys::vals t_mtrl_prop={},t_mtrl_dirs={}, t_ther_cond={},t_ther_expa={};
@@ -535,16 +531,17 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
         for(int i=0; i<s; i++){ fmrfile >> t_mtrl_prop[i]; }
       }
     }
-    if(fmrstring=="$ThermalExpansion"){//printf("THERM EXPA\n");
+    if(fmrstring=="$ThermalExpansion"){
       int s=0; fmrfile >> s;
       t_ther_expa.resize(s);
       for(int i=0; i<s; i++){ fmrfile >> t_ther_expa[i]; }
     }
-    if(fmrstring=="$ThermalConductivity"){//printf("THERM COND\n");
+    if(fmrstring=="$ThermalConductivity"){
       int s=0; fmrfile >> s;
       t_ther_cond.resize(s);
       for(int i=0; i<s; i++){ fmrfile >> t_ther_cond[i]; }
     }
+    //FIXME Add ThermalElastic section
 #if 0
     //if(fmrstring=="$Physics"){ //FIXME
     if(fmrstring=="$ElasticIsotropic"){ //FIXME
@@ -591,47 +588,6 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
 #endif
     }
   }
-#if 0
-  //elas_prop.resize(mtrl_prop.size()); elas_prop = mtrl_prop;//FIXME
-  if(t_ther_expa.size()>0){
-    //FIXME Thermal props should be handled in the Phys* constructor.
-    Y->ther_expa.resize(t_ther_expa.size()); Y->ther_expa=t_ther_expa;
-    Y->node_d+=1;
-    Phys::vals c=Y->mtrl_matc;
-    if(Y->mtrl_dirs.size()==0){//FIXME
-      Y->mtrl_matc.resize(c.size()+1);
-      for(uint j=0;j<c.size();j++){ Y->mtrl_matc[j]=c[j]; }
-        Y->mtrl_matc[c.size()]=Y->ther_expa[0];
-    }else{
-      Y->mtrl_matc.resize(c.size()+3);
-      for(uint j=0;j<c.size();j++){ Y->mtrl_matc[j]=c[j]; }
-      for(uint j=c.size();j<Y->mtrl_matc.size();j++){
-        Y->mtrl_matc[j]=Y->ther_expa[0]; }
-      for(uint j=0;j<Y->ther_expa.size();j++){
-        Y->mtrl_matc[c.size()+j]=Y->ther_expa[j]; }
-    }
-  }
-  if(t_ther_cond.size()>0){
-    //FIXME Thermal props should be handled in the Phys* constructor.
-    Y->ther_cond.resize(t_ther_cond.size()); Y->ther_cond=t_ther_cond;
-    Phys::vals c=Y->mtrl_matc;
-    if(Y->mtrl_dirs.size()==0){//FIXME
-      Y->mtrl_matc.resize(c.size()+1);
-      for(uint j=0;j<c.size();j++){ Y->mtrl_matc[j]=c[j]; }
-        Y->mtrl_matc[c.size()] = Y->ther_cond[0];
-        //Y->mtrl_matc[c.size()] = 1.0 / Y->ther_cond[0];
-    }else{
-      Y->mtrl_matc.resize(c.size()+3);
-      for(uint j=0;j<c.size();j++){ Y->mtrl_matc[j]=c[j]; }
-      for(uint j=c.size();j<Y->mtrl_matc.size();j++){
-        Y->mtrl_matc[j] = Y->ther_cond[0]; }
-        //Y->mtrl_matc[j] = 1.0 / Y->ther_cond[0]; }
-      for(uint j=0;j<Y->ther_cond.size();j++){
-        Y->mtrl_matc[c.size()+j] = Y->ther_cond[j]; }
-        //Y->mtrl_matc[c.size()+j] = 1.0 / Y->ther_cond[j]; }
-    }
-  }
-#endif
   switch( this->solv_meth ){
     case(Solv::SOLV_CG):{
       S=new PCG( E->node_n * Y->node_d, this->iter_max, glob_rtol ); 

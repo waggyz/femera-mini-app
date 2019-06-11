@@ -122,10 +122,8 @@ public:
   };
   int Init() final;
   int Iter() final;
-  static std::vector<part> P;
+  static std::vector<part> P;//FIXME Change this name
 #pragma omp threadprivate(P)
-//  static std::vector<part> Ptoto;
-//#pragma omp threadprivate(Ptoto)
 protected:
 private:
 };

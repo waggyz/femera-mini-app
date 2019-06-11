@@ -6,8 +6,7 @@ OMPFLAGS=-fopenmp
 SERFLAGS=-Wno-unknown-pragmas
 NCPU=2
 NUMA=2
-
-CPUMODEL:=$(shell ./cpumodel.sh)
+CPUSTR=gcc
 
 # Check for intel compiler
 ifdef INTEL_LICENSE_FILE
@@ -19,6 +18,7 @@ CPPFLAGS=-std=c++11 -Wall -Wextra -Ofast -xHost -axSKYLAKE-AVX512 \
 SERFLAGS=-fno-alias -diag-disable 3180
 NCPU=8
 NUMA=2
+CPUSTR=icc
 endif
 
 # Check if using intel compiler on k3 or k4
@@ -30,7 +30,10 @@ CPPFLAGS=-restrict -std=c++11 -Wall -Wextra -O2 -ansi-alias\
 SERFLAGS=-fno-alias -diag-disable 3180
 NCPU=40
 NUMA=6
+CPUSTR=icc
 endif
+
+CPUMODEL:=$(shell ./cpumodel.sh)-$(CPUSTR)
 
 #-O3 -ftree-vectorize -ffast-math -march=native
 # -funsafe-loop-optimizations

@@ -165,12 +165,9 @@ int HaloPCG::Init(){// Preconditioned Conjugate Gradient
   long int my_scat_count=0, my_prec_count=0,
     my_gat0_count=0,my_gat1_count=0, my_gmap_count=0, my_solv_count=0;
   auto start = std::chrono::high_resolution_clock::now();
-  // Make thread-local copies of mesh_part.
-  //std::vector<part> P;  P.resize(this->mesh_part.size());
+  // Make thread-local copies of mesh_part into threadprivate P.
   P.resize(this->mesh_part.size());
-  //Ptoto.resize(this->mesh_part.size());
   std::copy(this->mesh_part.begin(), this->mesh_part.end(), P.begin());
-//  std::copy(this->mesh_part.begin(), this->mesh_part.end(), Ptoto.begin());
   int part_0=0; if(std::get<0>( P[0] )==NULL){ part_0=1; };
   const int part_n = int(P.size())-part_0;
   const int part_o = part_n+part_0;
