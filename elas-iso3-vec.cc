@@ -93,7 +93,8 @@ int ElastIso3D::ElemLinear( Elem* E,
       std::memcpy( &jac, &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
 #endif
     const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
-#if 1
+#if 0
+// This is slower
     __m256d f0,f1,f2,f3,f4,f5,f6,f7,f8,f9;
     f0 = _mm256_loadu_pd(&sysf[3*conn[0]]); f1 = _mm256_loadu_pd(&sysf[3*conn[1]]); f2 = _mm256_loadu_pd(&sysf[3*conn[2]]);
     f3 = _mm256_loadu_pd(&sysf[3*conn[3]]); f4 = _mm256_loadu_pd(&sysf[3*conn[4]]); f5 = _mm256_loadu_pd(&sysf[3*conn[5]]);
@@ -207,7 +208,8 @@ int ElastIso3D::ElemLinear( Elem* E,
         std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
 #endif
       }; };
-#if 1
+#if 0
+// This does not work
       __m256d s048;
       __m256d w0 = _mm256_set1_pd(dw);
       s048= _mm256_mul_pd(w0, _mm256_add_pd(_mm256_mul_pd(c0,_mm256_set1_pd(H[0])), _mm256_add_pd(_mm256_mul_pd(c1,_mm256_set1_pd(H[4])), _mm256_mul_pd(c2,_mm256_set1_pd(H[8])))));
@@ -226,7 +228,7 @@ int ElastIso3D::ElemLinear( Elem* E,
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
 #endif
       //------------------------------------------------------- 18+9 = 27 FLOP
-#if 1
+#if 0
     a036 = _mm256_loadu_pd(&S[0]); // [a3 a2 a1 a0]
     a147 = _mm256_loadu_pd(&S[3]); // [a6 a5 a4 a3]
     a258 = _mm256_loadu_pd(&S[6]); // [a9 a8 a7 a6]
@@ -278,7 +280,7 @@ int ElastIso3D::ElemLinear( Elem* E,
       }; printf("\n");
 #endif
     };//end intp loop
-#if 1
+#if 0
     _mm256_storeu_pd(&f[0],f0);
     _mm256_storeu_pd(&f[3],f1);
     _mm256_storeu_pd(&f[6],f2);
@@ -289,6 +291,10 @@ int ElastIso3D::ElemLinear( Elem* E,
     _mm256_storeu_pd(&f[21],f7);
     _mm256_storeu_pd(&f[24],f8);
     _mm256_storeu_pd(&f[27],f9);
+    for(int i=0; i<Nc; i++){
+      for(int j=0; j<3;j++){
+        sysf[3*conn[i] +j] = f[3*i +j];
+    } }
 #else
     for (uint i=0; i<uint(Nc); i++){
       std::memcpy(& sysf[conn[i]*3],& f[Nf*i], sizeof(FLOAT_SOLV)*Nf );
