@@ -48,7 +48,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   FLOAT_PHYS dw;
   FLOAT_MESH __attribute__((aligned(64))) jac[Nj];//, det;
   FLOAT_PHYS __attribute__((aligned(64))) G[Ne+1], u[Ne+1],f[Ne+1];
-  FLOAT_PHYS __attribute__((aligned(64))) H[9+1], S[9], A[9+1];
+  FLOAT_PHYS __attribute__((aligned(64))) H[Nf*ndof+1], S[9];//, A[9+1];
   //
   FLOAT_PHYS __attribute__((aligned(64))) intp_shpg[intp_n*Ne];
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );// local copy
