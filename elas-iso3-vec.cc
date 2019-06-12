@@ -292,28 +292,32 @@ int ElastIso3D::ElemLinear( Elem* E,
 #endif
     };//========================================================= end intp loop
 #ifdef VEC_F
-    _mm256_storeu_pd(&f[0],f0);
-    _mm256_storeu_pd(&f[3],f1);
-    _mm256_storeu_pd(&f[6],f2);
-    _mm256_storeu_pd(&f[9],f3);
+    _mm256_storeu_pd(&f[ 0],f0);
+    _mm256_storeu_pd(&f[ 3],f1);
+    _mm256_storeu_pd(&f[ 6],f2);
+    _mm256_storeu_pd(&f[ 9],f3);
     _mm256_storeu_pd(&f[12],f4);
     _mm256_storeu_pd(&f[15],f5);
     _mm256_storeu_pd(&f[18],f6);
     _mm256_storeu_pd(&f[21],f7);
     _mm256_storeu_pd(&f[24],f8);
     _mm256_storeu_pd(&f[27],f9);
+//#pragma vector unaligned
+//    for(int i=0; i<Nc; i++){
+//#pragma vector unaligned
+//      for(int j=0; j<3;j++){
+//        sysf[3*conn[i] +j] = f[3*i +j];
+//    } }
 #pragma vector unaligned
-    for(int i=0; i<Nc; i++){
-#pragma vector unaligned
-      for(int j=0; j<3;j++){
-        sysf[3*conn[i] +j] = f[3*i +j];
-    } }
+    for (uint i=0; i<uint(Nc); i++){
+      std::memcpy(& sysf[conn[i]*3],& f[Nf*i], sizeof(FLOAT_SOLV)*Nf );
+    }
 #else
 #pragma vector unaligned
     for (uint i=0; i<uint(Nc); i++){
       std::memcpy(& sysf[conn[i]*3],& f[Nf*i], sizeof(FLOAT_SOLV)*Nf );
-    };
+    }
 #endif
-  };//=========================================================== end elem loop
+  }//============================================================ end elem loop
   return 0;
-  };
+  }
