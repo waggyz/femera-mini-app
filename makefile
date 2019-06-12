@@ -46,7 +46,7 @@ CPUMODEL:=$(shell ./cpumodel.sh)-$(CPUSTR)
 FEMERA_MINI_CC = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc \
  halo-pcg-omp.cc halo-pcr-dummy.cc \
  elas-iso3.cc elas-ort3.cc \
- elas-iso3-ref.cc elas-ort3-vec2.cc elas-ther-ort3.cc elas-ther-ort3-ref2.cc
+ elas-iso3-vec.cc elas-ort3-vec2.cc elas-ther-ort3.cc elas-ther-ort3-ref2.cc
 
 #OMPI_CPPFLAGS=$(CPPFLAGS) ; \
 #OMPI_CXXFLAGS=$(CPPFLAGS) ; \
