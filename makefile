@@ -45,8 +45,8 @@ CPUMODEL:=$(shell ./cpumodel.sh)-$(CPUSTR)
 
 FEMERA_MINI_CC = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc \
  halo-pcg-omp.cc halo-pcr-dummy.cc \
- elas-iso3.cc elas-ort3.cc elas-ort3-vec2.cc \
- elas-ther-ort3.cc elas-ther-ort3-ref2.cc
+ elas-iso3.cc elas-ort3.cc \
+ elas-iso3-ref.cc elas-ort3-vec2.cc elas-ther-ort3.cc elas-ther-ort3-ref2.cc
 
 #OMPI_CPPFLAGS=$(CPPFLAGS) ; \
 #OMPI_CXXFLAGS=$(CPPFLAGS) ; \
@@ -55,14 +55,16 @@ all: gmsh2fmr-ser mini-omp mini-ser mini-omq mini-seq
 
 mini-ser:
 	mv -f femser-$(CPUMODEL) femser.old 2>/dev/null ; \
-	$(CXX) $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DVERB_MAX=4 -DHAS_TEST \
+	$(CXX) $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
+	-DVERB_MAX=4 -DHAS_TEST -DFETCH_JAC \
 	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femser-$(CPUMODEL) $(CPPLOG);\
 	./femser-$(CPUMODEL) -v2 -p cube/unit1p1n2 ;\
 	./femser-$(CPUMODEL) -v3 -p cube/unit1p2n2 ;
 
 mini-omp:
 	mv -f femera-$(CPUMODEL) femera.old 2>/dev/null ; \
-	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DOMP_SCHEDULE=static -DHAS_TEST \
+	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
+	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
 	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femera-$(CPUMODEL) $(CPPLOG);\
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	command /usr/bin/time -v ./femera-$(CPUMODEL) -v2 -c$(NCPU) -p cube/unst19p1n16 ;
@@ -76,7 +78,8 @@ mini-seq:
 
 mini-omq:
 	mv -f femerq-$(CPUMODEL) femerq.old 2>/dev/null ; \
-	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) -DVERB_MAX=1 \
+	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
+	-DVERB_MAX=1 -DOMP_SCHEDULE=static -DFETCH_JAC \
 	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femerq-$(CPUMODEL) $(CPPLOG);\
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread ;\
 	command /usr/bin/time -v ./femerq-$(CPUMODEL) -v1 -c$(NCPU) -p cube/unst19p1n16 ;

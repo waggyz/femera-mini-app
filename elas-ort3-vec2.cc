@@ -83,7 +83,9 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
   const FLOAT_SOLV* RESTRICT sysu  = &sys_u[0];
   if(e0<ee){
+#ifdef FETCH_JAC
     std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
+#endif
     const   INT_MESH* RESTRICT c = &Econn[Nc*e0];
     for (int i=0; i<Nc; i++){
       std::memcpy( &    u[ndof*i], &sysu[c[i]*ndof], sizeof(FLOAT_SOLV)*ndof );
@@ -92,7 +94,9 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   //bool fetch_next=false;
 
   for(INT_MESH ie=e0;ie<ee;ie++){
-
+#ifndef FETCH_JAC
+      std::memcpy( &jac, &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
+#endif
 #if 1
     __m256d f0,f1,f2,f3,f4,f5,f6,f7,f8,f9;
   const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
@@ -566,7 +570,9 @@ int ElastOrtho3D::ElemLinear( Elem* E,
 #endif
     dw = jac[9] * wgt[ip];
     if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
+#ifdef FETCH_JAC
       std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
+#endif
       const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
 #pragma vector unaligned
       for (int i=0; i<Nc; i++){
