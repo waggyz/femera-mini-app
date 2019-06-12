@@ -74,19 +74,22 @@ int ElastIso3D::ElemLinear( Elem* E,
     printf("%+9.2e ",C[j]);
   }; printf("\n");
 #endif
+  const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
   const FLOAT_SOLV* RESTRICT sysu  = &sys_u[0];
         FLOAT_SOLV* RESTRICT sysf  = &sys_f[0];
   if(e0<ee){
     std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
     for (int i=0; i<Nc; i++){
-      std::memcpy( & u[Nf*i],& sysu[E->elem_conn[Nc*e0+i]*Nf],
+      std::memcpy( & u[Nf*i],& sysu[Econn[Nc*e0+i]*Nf],
         sizeof(FLOAT_SOLV)*Nf ); };
   };
   for(INT_MESH ie=e0;ie<ee;ie++){
+    {//scope c
+    const INT_MESH* RESTRICT c = &Econn[Nc*ie];
     for (int i=0; i<Nc; i++){
-      std::memcpy( & f[Nf*i],& sysf[E->elem_conn[Nc*ie+i]*3],
-        sizeof(FLOAT_SOLV)*Nf ); };
+      std::memcpy( & f[Nf*i],& sysf[c[i]*3], sizeof(FLOAT_SOLV)*Nf ); }
+    }//end scope of c
     for(int ip=0; ip<intp_n; ip++){
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
@@ -110,9 +113,9 @@ int ElastIso3D::ElemLinear( Elem* E,
 #endif
       dw = jac[9] * wgt[ip];
       if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
+        const INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
         for (int i=0; i<Nc; i++){
-          std::memcpy(& u[Nf*i],& sysu[E->elem_conn[Nc*(ie+1)+i]*Nf],
-            sizeof(FLOAT_SOLV)*Nf ); };
+          std::memcpy(& u[Nf*i],& sysu[c[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
         std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
       }; };
       //
@@ -164,9 +167,8 @@ int ElastIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
   //
   FLOAT_PHYS det;
   RESTRICT Phys::vals elem_diag(Ne);
-  //RESTRICT Phys::vals B(Ne*6);// 6 rows, Ne cols
-  FLOAT_PHYS B[Ne*6];
-  FLOAT_PHYS G[Ne],jac[Nj];//,elem_diag[Ne];// 6 rows, Ne cols
+  FLOAT_PHYS B[Ne*6];// 6 rows, Ne cols
+  FLOAT_PHYS G[Ne],jac[Nj];//,elem_diag[Ne];
   for(uint j=0; j<(Ne*6); j++){ B[j]=0.0; };
   const FLOAT_PHYS D[]={
     mtrl_matc[0],mtrl_matc[1],mtrl_matc[1],0.0,0.0,0.0,
@@ -175,7 +177,6 @@ int ElastIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
     0.0,0.0,0.0,mtrl_matc[2]*2.0,0.0,0.0,
     0.0,0.0,0.0,0.0,mtrl_matc[2]*2.0,0.0,
     0.0,0.0,0.0,0.0,0.0,mtrl_matc[2]*2.0};
-  //elem_inout=0.0;
   for(uint ie=0;ie<elem_n;ie++){
     uint ij=Nj*ie;//FIXME only good for tets
     std::copy( &E->elip_jacs[ij],

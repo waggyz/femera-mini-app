@@ -126,10 +126,10 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       dw = jac[9] * wgt[ip];
       if(ip==(intp_n-1)){
         if((ie+1)<ee){// Fetch stuff for the next iteration
+          const INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
           for (int i=0; i<Nc; i++){
             //std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
-            std::memcpy(&u[Dn*i],&sysu[Econn[Nc*(ie+1)+i]*Dn],
-                        sizeof(FLOAT_SOLV)*Dn);
+            std::memcpy(&u[Dn*i],&sysu[c[i]*Dn], sizeof(FLOAT_SOLV)*Dn);
           }
         }// Done fetching next iter stuff
       }
