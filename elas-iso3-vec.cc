@@ -87,7 +87,7 @@ int ElastIso3D::ElemLinear( Elem* E,
     const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     
     
-#define VEC_F
+#undef VEC_F
     
     
 #ifdef VEC_F
@@ -281,16 +281,16 @@ int ElastIso3D::ElemLinear( Elem* E,
 #pragma vector unaligned
           for(int j=0; j<Nf; j++){
             f[(Nf* i+k) ] += G[(Nf* i+j) ] * S[(Nf* j+k) ];// 18*N FMA FLOP
-      };};};//---------------------------------------------- N*3*6 = 18*N FLOP
+      } } }//------------------------------------------------ N*3*6 = 18*N FLOP
 #endif
 #if VERB_MAX>10
       printf( "f:");
       for(int j=0;j<Ne;j++){
         if(j%ndof==0){printf("\n");}
         printf("%+9.2e ",f[j]);
-      }; printf("\n");
+      } printf("\n");
 #endif
-    };//========================================================= end intp loop
+    }//========================================================== end intp loop
 #ifdef VEC_F
     _mm256_storeu_pd(&f[ 0],f0);
     _mm256_storeu_pd(&f[ 3],f1);
@@ -302,16 +302,12 @@ int ElastIso3D::ElemLinear( Elem* E,
     _mm256_storeu_pd(&f[21],f7);
     _mm256_storeu_pd(&f[24],f8);
     _mm256_storeu_pd(&f[27],f9);
-//#pragma vector unaligned
-//    for(int i=0; i<Nc; i++){
-//#pragma vector unaligned
-//      for(int j=0; j<3;j++){
-//        sysf[3*conn[i] +j] = f[3*i +j];
-//    } }
 #pragma vector unaligned
-    for (uint i=0; i<uint(Nc); i++){
-      std::memcpy(& sysf[conn[i]*3],& f[Nf*i], sizeof(FLOAT_SOLV)*Nf );
-    }
+    for(int i=0; i<Nc; i++){
+#pragma vector unaligned
+      for(int j=0; j<3;j++){
+        sysf[3*conn[i] +j] = f[3*i +j];
+    } }
 #else
 #pragma vector unaligned
     for (uint i=0; i<uint(Nc); i++){
