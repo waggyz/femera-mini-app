@@ -85,7 +85,7 @@ int ElastIso3D::ElemLinear( Elem* E,
 //#pragma omp simd
 #endif
     for (int i=0; i<Nc; i++){
-      std::memcpy( & u[Nf*i],&sysu[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf ); }
+      std::memcpy( & u[Nf*i],&sysu[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf );}
   }
   for(INT_MESH ie=e0;ie<ee;ie++){//================================== Elem loop
 #ifndef FETCH_JAC
@@ -105,9 +105,8 @@ int ElastIso3D::ElemLinear( Elem* E,
 //#else
 //#pragma omp simd
 #endif
-    //for (int i=0; i<Nc; i++){
-    //  std::memcpy( & f[Nf*i],& sysf[conn[i]*3], sizeof(FLOAT_SOLV)*Nf ); }
-    for(int i=0; i<Ne; i++){ f[i]=0.0; }
+    for (int i=0; i<Nc; i++){
+      std::memcpy( & f[Nf*i],& sysf[conn[i]*3], sizeof(FLOAT_SOLV)*Nf ); }
 #endif
     __m256d j0,j1,j2;
     j0 = _mm256_loadu_pd(&jac[0]);  // j0 = [j3 j2 j1 j0]
@@ -289,13 +288,13 @@ int ElastIso3D::ElemLinear( Elem* E,
 #endif
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
-//#else
-//#pragma omp simd
 #endif
     for (int i=0; i<Nc; i++){
-      for(int j=0; j<3; j++){ sysf[3* conn[i]+j ] += f[3* i+j ]; } }
-    //for (uint i=0; i<uint(Nc); i++){
-    //  std::memcpy(& sysf[conn[i]*3],& f[Nf*i], sizeof(FLOAT_SOLV)*Nf ); }
+#ifdef __INTEL_COMPILER
+#pragma vector unaligned
+#endif
+      for(int j=0; j<3; j++){
+        sys_f[3*conn[i]+j] = f[(3*i+j)]; } }
   }//============================================================ end elem loop
   return 0;
 }
