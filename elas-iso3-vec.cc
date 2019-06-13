@@ -81,8 +81,8 @@ int ElastIso3D::ElemLinear( Elem* E,
     const INT_MESH* RESTRICT c = &Econn[Nc*e0];
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
-#else
-#pragma omp simd
+//#else
+//#pragma omp simd
 #endif
     for (int i=0; i<Nc; i++){
       std::memcpy( & u[Nf*i],&sysu[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf ); }
@@ -102,8 +102,8 @@ int ElastIso3D::ElemLinear( Elem* E,
 #else
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
-#else
-#pragma omp simd
+//#else
+//#pragma omp simd
 #endif
     for (int i=0; i<Nc; i++){
       std::memcpy( & f[Nf*i],& sysf[conn[i]*3], sizeof(FLOAT_SOLV)*Nf ); }
@@ -251,14 +251,14 @@ int ElastIso3D::ElemLinear( Elem* E,
 #else
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
-#else
-#pragma omp simd
+//#else
+//#pragma omp simd
 #endif
       for(int i=0; i< 9 ; i++){ H[i]=0.0; };
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
-#else
-#pragma omp simd
+//#else
+//#pragma omp simd
 #endif
       for(int i=0; i<Nc; i++){
         for(int k=0; k<Nf ; k++){ G[Nf* i+k ]=0.0;
@@ -289,8 +289,8 @@ int ElastIso3D::ElemLinear( Elem* E,
         const INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
-#else
-#pragma omp simd
+//#else
+//#pragma omp simd
 #endif
         for (int i=0; i<Nc; i++){
           std::memcpy(& u[Nf*i],& sysu[c[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
@@ -359,8 +359,8 @@ int ElastIso3D::ElemLinear( Elem* E,
 #else
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
-#else
-#pragma omp simd
+//#else
+//#pragma omp simd
 #endif
       for(int i=0; i<Nc; i++){
 #ifdef __INTEL_COMPILER
@@ -397,8 +397,8 @@ int ElastIso3D::ElemLinear( Elem* E,
     }
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
-#else
-#pragma omp simd
+//#else
+//#pragma omp simd
 #endif
     for(int i=0; i<Nc; i++){
 #ifdef __INTEL_COMPILER
@@ -409,8 +409,8 @@ int ElastIso3D::ElemLinear( Elem* E,
 #else
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
-#else
-#pragma omp simd
+//#else
+//#pragma omp simd
 #endif
     for (uint i=0; i<uint(Nc); i++){
       std::memcpy(& sysf[conn[i]*3],& f[Nf*i], sizeof(FLOAT_SOLV)*Nf );
