@@ -203,7 +203,7 @@ int ElastIso3D::ElemLinear( Elem* E,
         is0= _mm256_set1_pd(isp[42]); is1= _mm256_set1_pd(isp[43]); is2= _mm256_set1_pd(isp[44]);
         u0 = _mm256_set1_pd(  u[42]); u1 = _mm256_set1_pd(  u[43]); u2 = _mm256_set1_pd(  u[44]);
         g0 = _mm256_add_pd(_mm256_mul_pd(j0,is0), _mm256_add_pd(_mm256_mul_pd(j1,is1),_mm256_mul_pd(j2,is2)));
-        a036= _mm256_mul_pd(g0,u0); a147 = _mm256_mul_pd(g0,u1); a258 = _mm256_mul_pd(g0,u2);
+        a036= _mm256_add_pd(a036, _mm256_mul_pd(g0,u0)); a147 = _mm256_add_pd(a147, _mm256_mul_pd(g0,u1)); a258 = _mm256_add_pd(a258, _mm256_mul_pd(g0,u2));
             _mm256_storeu_pd(&G[42],g0);
 
         is3= _mm256_set1_pd(isp[45]); is4= _mm256_set1_pd(isp[46]); is5= _mm256_set1_pd(isp[47]);
