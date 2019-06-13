@@ -108,11 +108,11 @@ int ElastIso3D::ElemLinear( Elem* E,
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
 #if 1
+      __m256d a036, a147, a258;
       switch(elem_p){
         case(1):{
       __m256d u0,u1,u2,u3,u4,u5,g0,g1;
       __m256d is0,is1,is2,is3,is4,is5;
-      __m256d a036, a147, a258;
       double * RESTRICT isp = &intp_shpg[ip*Ne];
       is0= _mm256_set1_pd(isp[0]); is1= _mm256_set1_pd(isp[1]); is2= _mm256_set1_pd(isp[2]);
       u0 = _mm256_set1_pd(  u[0]); u1 = _mm256_set1_pd(  u[1]); u2 = _mm256_set1_pd(  u[2]);
@@ -141,7 +141,6 @@ int ElastIso3D::ElemLinear( Elem* E,
         case(2):{// scope vector registers
       __m256d u0,u1,u2,u3,u4,u5,g0,g1;
       __m256d is0,is1,is2,is3,is4,is5;
-      __m256d a036, a147, a258;
       double * RESTRICT isp = &intp_shpg[ip*Ne];
       is0= _mm256_set1_pd(isp[0]); is1= _mm256_set1_pd(isp[1]); is2= _mm256_set1_pd(isp[2]);
       u0 = _mm256_set1_pd(  u[0]); u1 = _mm256_set1_pd(  u[1]); u2 = _mm256_set1_pd(  u[2]);
