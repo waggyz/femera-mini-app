@@ -514,7 +514,9 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     A[1] += G[27]*u[28]; A[4] += G[28]*u[28]; A[7] += G[29]*u[28];
     A[2] += G[27]*u[29]; A[5] += G[28]*u[29]; A[8] += G[29]*u[29];
 #else
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#endif
     for(int k=0; k<Nc; k++){
       G[3*k+0]=0.0;
       G[3*k+0] += jac[3*0+0] * intp_shpg[ip*Ne+ 3*k+0];
@@ -544,16 +546,24 @@ int ElastOrtho3D::ElemLinear( Elem* E,
 #else
     for(int i=0; i< 9 ; i++){ A[i]=0.0;};// H[i]=0.0; B[i]=0.0; };
     //#pragma omp simd
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#endif
     for(int k=0; k<Nc; k++){
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#endif
       for(int i=0; i<3 ; i++){
         G[3*k+i]=0.0;
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#endif
         for(int j=0; j<3 ; j++){
           G[(3* k+i) ] += jac[3* i+j ] * intp_shpg[ip*Ne+ 3* k+j ];
         };
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#endif
         for(int j=0; j<3 ; j++){
           A[(3* i+j) ] += G[(3* k+i) ] * u[ndof* k+j ];
         };
@@ -574,7 +584,9 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
 #endif
       const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#endif
       for (int i=0; i<Nc; i++){
 #if 0
 // Slower 44->42
@@ -584,7 +596,9 @@ int ElastOrtho3D::ElemLinear( Elem* E,
 #else
 #if 0
 // Slower 44->42
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#endif
         for(int j=0; j<3 ; j++) {
           u[ndof*i+j] = sysu[c[i]*ndof+j];
         }
@@ -633,11 +647,17 @@ int ElastOrtho3D::ElemLinear( Elem* E,
 #endif
 #else
     //#pragma omp simd
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#endif
     for(int i=0; i<3; i++){
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#endif
       for(int k=0; k<3; k++){ H[3* i+k ]=0.0;
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#endif
         for(int j=0; j<3; j++){
           H[(3* i+k) ] += A[(3* i+j)] * R[3* k+j ];
         };};};//---------------------------------------------- 27*2 =      54 FLOP
@@ -727,12 +747,18 @@ int ElastOrtho3D::ElemLinear( Elem* E,
 #endif
 #else
     //#pragma omp simd
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#endif
     for(int i=0; i<3; i++){
       //for(int k=0; k<3; k++){ A[3* i+k ]=0.0;
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#endif
       for(int k=0; k<3; k++){ A[3* k+i ]=0.0;
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#endif
         for(int j=0; j<3; j++){
           //A[3* i+k ] += S[3* i+j ] * R[3* j+k ];
           A[(3* k+i) ] += S[(3* i+j) ] * R[3* j+k ];// A is transposed
@@ -823,11 +849,17 @@ int ElastOrtho3D::ElemLinear( Elem* E,
 #endif
 #else
     //#pragma omp simd
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#endif
     for(int i=0; i<Nc; i++){
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#endif
       for(int k=0; k<3; k++){
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#endif
         for(int j=0; j<3; j++){
           f[(3* i+k) ] += G[(3* i+j) ] * A[(3* k+j) ];
         };};};//---------------------------------------------- N*3*6 = 18*N FLOP
@@ -899,14 +931,20 @@ int ElastOrtho3D::ElemLinear( Elem* E,
 #else
 #if 0
 //Slower! 44->41
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#endif
     for (int i=0; i<Nc; i++){
       std::memcpy(& sys_f[Econn[Nc*ie+i]*Nf],& f[Nf*i], sizeof(FLOAT_SOLV)*Nf ); };
 #else
 
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#endif
     for (int i=0; i<Nc; i++){
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#endif
       for(int j=0; j<3; j++){
 #if 0
 //Slower! 44->40

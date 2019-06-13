@@ -79,7 +79,11 @@ int ElastIso3D::ElemLinear( Elem* E,
     std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
 #endif
     const INT_MESH* RESTRICT c = &Econn[Nc*e0];
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#else
+#pragma omp simd
+#endif
     for (int i=0; i<Nc; i++){
       std::memcpy( & u[Nf*i],&sysu[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf ); }
   }
@@ -96,7 +100,11 @@ int ElastIso3D::ElemLinear( Elem* E,
     f6 = _mm256_loadu_pd(&sysf[3*conn[6]]); f7 = _mm256_loadu_pd(&sysf[3*conn[7]]); f8 = _mm256_loadu_pd(&sysf[3*conn[8]]);
     f9 = _mm256_loadu_pd(&sysf[3*conn[9]]);
 #else
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#else
+#pragma omp simd
+#endif
     for (int i=0; i<Nc; i++){
       std::memcpy( & f[Nf*i],& sysf[conn[i]*3], sizeof(FLOAT_SOLV)*Nf ); }
 #endif
@@ -241,16 +249,32 @@ int ElastIso3D::ElemLinear( Elem* E,
       _mm256_storeu_pd(&H[6],a258);
       }//end register scope
 #else
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#else
+#pragma omp simd
+#endif
       for(int i=0; i< 9 ; i++){ H[i]=0.0; };
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#else
+#pragma omp simd
+#endif
       for(int i=0; i<Nc; i++){
         for(int k=0; k<Nf ; k++){ G[Nf* i+k ]=0.0;
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#else
+#pragma omp simd
+#endif
           for(int j=0; j<Nd ; j++){
             G[(Nf* i+k) ] += intp_shpg[ip*Ne+ Nd* i+j ] * jac[Nd* j+k ];
           }
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#else
+#pragma omp simd
+#endif
           for(int j=0; j<Nf ; j++){
             H[(Nf* k+j) ] += G[(Nf* i+k) ] * u[Nf* i+j ];
           }
@@ -267,7 +291,11 @@ int ElastIso3D::ElemLinear( Elem* E,
       dw = jac[9] * wgt[ip];
       if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
         const INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#else
+#pragma omp simd
+#endif
         for (int i=0; i<Nc; i++){
           std::memcpy(& u[Nf*i],& sysu[c[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
 #ifdef FETCH_JAC
@@ -300,9 +328,7 @@ int ElastIso3D::ElemLinear( Elem* E,
       a036 = _mm256_loadu_pd(&S[0]); // [a3 a2 a1 a0]
       a147 = _mm256_loadu_pd(&S[3]); // [a6 a5 a4 a3]
       a258 = _mm256_loadu_pd(&S[6]); // [a9 a8 a7 a6]
-      //_MM256_TRANSPOSE3_PD(a036,a147,a258);
-      //__m256d s6,s7,s8;
-      
+
       __m256d g3,g4,g5,g6,g7,g8,g9,g10,g11;
       g0 = _mm256_set1_pd(G[0])  ; g1 = _mm256_set1_pd(G[1])  ; g2 = _mm256_set1_pd(G[2]);
       f0 = _mm256_add_pd(f0, _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
@@ -335,11 +361,23 @@ int ElastIso3D::ElemLinear( Elem* E,
       f9 = _mm256_add_pd(f9, _mm256_add_pd(_mm256_mul_pd(g3,a036), _mm256_add_pd(_mm256_mul_pd(g4,a147),_mm256_mul_pd(g5,a258))));
       }
 #else
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#else
+#pragma omp simd
+#endif
       for(int i=0; i<Nc; i++){
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#else
+#pragma omp simd
+#endif
         for(int k=0; k<Nf; k++){
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#else
+#pragma omp simd
+#endif
           for(int j=0; j<Nf; j++){
             f[(Nf* i+k) ] += G[(Nf* i+j) ] * S[(Nf* j+k) ];// 18*N FMA FLOP
       } } }//------------------------------------------------ N*3*6 = 18*N FLOP
@@ -365,14 +403,26 @@ int ElastIso3D::ElemLinear( Elem* E,
     _mm256_storeu_pd(&f[24],f8);
     _mm256_storeu_pd(&f[27],f9);
     }
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#else
+#pragma omp simd
+#endif
     for(int i=0; i<Nc; i++){
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#else
+#pragma omp simd
+#endif
       for(int j=0; j<3;j++){
         sysf[3*conn[i] +j] = f[3*i +j];
     } }
 #else
+#ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#else
+#pragma omp simd
+#endif
     for (uint i=0; i<uint(Nc); i++){
       std::memcpy(& sysf[conn[i]*3],& f[Nf*i], sizeof(FLOAT_SOLV)*Nf );
     }
