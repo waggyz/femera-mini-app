@@ -11,7 +11,7 @@
 int ElastIso3D::Setup( Elem* E ){
   JacT  ( E );
   const uint elem_n = uint(E->elem_n);
-  const uint jacs_n = uint(E->elip_jacs.size()/elem_n/ 10) ;
+  const uint jacs_n = uint(E->elip_jacs.size()/elem_n/ 10);
   const uint intp_n = uint(E->gaus_n);
   const uint conn_n = uint(E->elem_conn_n);
   this->tens_flop = uint(E->elem_n) * intp_n
@@ -41,7 +41,7 @@ int ElastIso3D::ElemLinear( Elem* E,
   //
   INT_MESH e0=0, ee=elem_n;
   if(E->do_halo==true){ e0=0; ee=E->halo_elem_n;
-  }else{ e0=E->halo_elem_n; ee=elem_n;};
+  }else{ e0=E->halo_elem_n; ee=elem_n; }
 #if VERB_MAX>11
   printf("DOF: %u, Elems:%u, IntPts:%u, Nodes/elem:%u\n",
     (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
@@ -68,7 +68,7 @@ int ElastIso3D::ElemLinear( Elem* E,
   for(uint j=0;j<mtrl_matc.size();j++){
     //if(j%mesh_d==0){printf("\n");}
     printf("%+9.2e ",C[j]);
-  }; printf("\n");
+  } printf("\n");
 #endif
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
@@ -249,13 +249,13 @@ int ElastIso3D::ElemLinear( Elem* E,
 #pragma vector unaligned
           for(int j=0; j<Nd ; j++){
             G[(Nf* i+k) ] += intp_shpg[ip*Ne+ Nd* i+j ] * jac[Nd* j+k ];
-          };
+          }
 #pragma vector unaligned
           for(int j=0; j<Nf ; j++){
             H[(Nf* k+j) ] += G[(Nf* i+k) ] * u[Nf* i+j ];
-          };
-        };// 36*N FMA FLOP
-      };//------------------------------------------------ N*3*6*2 = 36*N FLOP
+          }
+        }// 36*N FMA FLOP
+      }//-------------------------------------------------- N*3*6*2 = 36*N FLOP
 #endif
 #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
@@ -269,11 +269,11 @@ int ElastIso3D::ElemLinear( Elem* E,
         const INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
 #pragma vector unaligned
         for (int i=0; i<Nc; i++){
-          std::memcpy(& u[Nf*i],& sysu[c[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+          std::memcpy(& u[Nf*i],& sysu[c[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
 #ifdef FETCH_JAC
           std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
 #endif
-      }; };
+      } }
 #if 0
 //FIXME change C indices for iso
       __m256d s048;
