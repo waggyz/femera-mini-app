@@ -5,6 +5,8 @@
 #include "femera.h"
 #include <immintrin.h>
 
+// Vectorize f calculation
+#undef VEC_F
 //
 int ElastIso3D::Setup( Elem* E ){
   JacT  ( E );
@@ -30,11 +32,12 @@ int ElastIso3D::ElemLinear( Elem* E,
   //const int De = 3;// Element Dimension
   const int Nd = 3;// Node (mesh) Dimension
   const int Nf = 3;// this->node_d DOF/node
-  const int Nj = Nd*Nf+1;//FIXME wrong?
+  const int Nj = Nd*Nd+1;
   const int Nc = E->elem_conn_n;// Number of nodes/element
   const int Ne = Nf*Nc;
   const INT_MESH elem_n =E->elem_n;
   const int intp_n = int(E->gaus_n);
+  const INT_ORDER elem_p =E->elem_p;
   //
   INT_MESH e0=0, ee=elem_n;
   if(E->do_halo==true){ e0=0; ee=E->halo_elem_n;
@@ -75,8 +78,8 @@ int ElastIso3D::ElemLinear( Elem* E,
 #ifdef FETCH_JAC
     std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
 #endif
-#pragma vector unaligned
     const INT_MESH* RESTRICT c = &Econn[Nc*e0];
+#pragma vector unaligned
     for (int i=0; i<Nc; i++){
       std::memcpy( & u[Nf*i],&sysu[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf ); }
   }
@@ -85,11 +88,6 @@ int ElastIso3D::ElemLinear( Elem* E,
       std::memcpy( &jac, &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
 #endif
     const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
-    
-    
-#undef VEC_F
-    
-    
 #ifdef VEC_F
 // This is slower
     __m256d f0,f1,f2,f3,f4,f5,f6,f7,f8,f9;
@@ -110,8 +108,38 @@ int ElastIso3D::ElemLinear( Elem* E,
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
 #if 1
-      {// scope vector registers
-      __m256d u0,u1,u2,u3,u4,u5,g0,g1,g2;
+      switch(elem_p){
+        case(1):{
+      __m256d u0,u1,u2,u3,u4,u5,g0,g1;
+      __m256d is0,is1,is2,is3,is4,is5;
+      __m256d a036, a147, a258;
+      double * RESTRICT isp = &intp_shpg[ip*Ne];
+      is0= _mm256_set1_pd(isp[0]); is1= _mm256_set1_pd(isp[1]); is2= _mm256_set1_pd(isp[2]);
+      u0 = _mm256_set1_pd(  u[0]); u1 = _mm256_set1_pd(  u[1]); u2 = _mm256_set1_pd(  u[2]);
+      g0 = _mm256_add_pd(_mm256_mul_pd(j0,is0), _mm256_add_pd(_mm256_mul_pd(j1,is1),_mm256_mul_pd(j2,is2)));
+      a036= _mm256_mul_pd(g0,u0); a147 = _mm256_mul_pd(g0,u1); a258 = _mm256_mul_pd(g0,u2);
+          _mm256_storeu_pd(&G[0],g0);
+
+      is3= _mm256_set1_pd(isp[3]); is4= _mm256_set1_pd(isp[4]); is5= _mm256_set1_pd(isp[5]);
+      u3 = _mm256_set1_pd(  u[3]); u4 = _mm256_set1_pd(  u[4]); u5 = _mm256_set1_pd(  u[5]);
+      g1 = _mm256_add_pd(_mm256_mul_pd(j0,is3), _mm256_add_pd(_mm256_mul_pd(j1,is4),_mm256_mul_pd(j2,is5)));
+      a036= _mm256_add_pd(a036, _mm256_mul_pd(g1,u3)); a147 = _mm256_add_pd(a147, _mm256_mul_pd(g1,u4)); a258 = _mm256_add_pd(a258, _mm256_mul_pd(g1,u5));
+          _mm256_storeu_pd(&G[3],g1);
+
+      is0= _mm256_set1_pd(isp[6]); is1= _mm256_set1_pd(isp[7]); is2= _mm256_set1_pd(isp[8]);
+      u0 = _mm256_set1_pd(  u[6]); u1 = _mm256_set1_pd(  u[7]); u2 = _mm256_set1_pd(  u[8]);
+      g0 = _mm256_add_pd(_mm256_mul_pd(j0,is0), _mm256_add_pd(_mm256_mul_pd(j1,is1),_mm256_mul_pd(j2,is2)));
+      a036= _mm256_add_pd(a036, _mm256_mul_pd(g0,u0)); a147 = _mm256_add_pd(a147, _mm256_mul_pd(g0,u1)); a258 = _mm256_add_pd(a258, _mm256_mul_pd(g0,u2));
+          _mm256_storeu_pd(&G[6],g0);
+
+      is3= _mm256_set1_pd(isp[9]); is4= _mm256_set1_pd(isp[10]); is5= _mm256_set1_pd(isp[11]);
+      u3 = _mm256_set1_pd(  u[9]); u4 = _mm256_set1_pd(  u[10]); u5 = _mm256_set1_pd(  u[11]);
+      g1 = _mm256_add_pd(_mm256_mul_pd(j0,is3), _mm256_add_pd(_mm256_mul_pd(j1,is4),_mm256_mul_pd(j2,is5)));
+      a036= _mm256_add_pd(a036, _mm256_mul_pd(g1,u3)); a147 = _mm256_add_pd(a147, _mm256_mul_pd(g1,u4)); a258 = _mm256_add_pd(a258, _mm256_mul_pd(g1,u5));
+          _mm256_storeu_pd(&G[9],g1);
+        break; }
+        case(2):{// scope vector registers
+      __m256d u0,u1,u2,u3,u4,u5,g0,g1;
       __m256d is0,is1,is2,is3,is4,is5;
       __m256d a036, a147, a258;
       double * RESTRICT isp = &intp_shpg[ip*Ne];
@@ -175,10 +203,13 @@ int ElastIso3D::ElemLinear( Elem* E,
       a036= _mm256_add_pd(a036, _mm256_mul_pd(g1,u3)); a147 = _mm256_add_pd(a147, _mm256_mul_pd(g1,u4)); a258 = _mm256_add_pd(a258, _mm256_mul_pd(g1,u5));
           _mm256_storeu_pd(&G[27],g1);
 
+      break; }
+      case(3):{ break;}
+      default:{}
+      }//end elem_p switch
       _mm256_storeu_pd(&H[0],a036);
       _mm256_storeu_pd(&H[3],a147);
       _mm256_storeu_pd(&H[6],a258);
-      }
 #else
 #pragma vector unaligned
       for(int i=0; i< 9 ; i++){ H[i]=0.0; };
@@ -296,12 +327,14 @@ int ElastIso3D::ElemLinear( Elem* E,
     _mm256_storeu_pd(&f[ 3],f1);
     _mm256_storeu_pd(&f[ 6],f2);
     _mm256_storeu_pd(&f[ 9],f3);
+    if(elem_p>1){
     _mm256_storeu_pd(&f[12],f4);
     _mm256_storeu_pd(&f[15],f5);
     _mm256_storeu_pd(&f[18],f6);
     _mm256_storeu_pd(&f[21],f7);
     _mm256_storeu_pd(&f[24],f8);
     _mm256_storeu_pd(&f[27],f9);
+    }
 #pragma vector unaligned
     for(int i=0; i<Nc; i++){
 #pragma vector unaligned
@@ -316,4 +349,4 @@ int ElastIso3D::ElemLinear( Elem* E,
 #endif
   }//============================================================ end elem loop
   return 0;
-  }
+}
