@@ -210,8 +210,8 @@ int ElastIso3D::ElemLinear( Elem* E,
         u3 = _mm256_set1_pd(  u[45]); u4 = _mm256_set1_pd(  u[46]); u5 = _mm256_set1_pd(  u[47]);
         g1 = _mm256_add_pd(_mm256_mul_pd(j0,is3), _mm256_add_pd(_mm256_mul_pd(j1,is4),_mm256_mul_pd(j2,is5)));
         a036= _mm256_add_pd(a036, _mm256_mul_pd(g1,u3)); a147 = _mm256_add_pd(a147, _mm256_mul_pd(g1,u4)); a258 = _mm256_add_pd(a258, _mm256_mul_pd(g1,u5));
-        _mm256_storeu_pd(&G[45],g1);
-        
+            _mm256_storeu_pd(&G[45],g1);
+
         is0= _mm256_set1_pd(isp[48]); is1= _mm256_set1_pd(isp[49]); is2= _mm256_set1_pd(isp[50]);
         u0 = _mm256_set1_pd(  u[48]); u1 = _mm256_set1_pd(  u[49]); u2 = _mm256_set1_pd(  u[50]);
         g0 = _mm256_add_pd(_mm256_mul_pd(j0,is0), _mm256_add_pd(_mm256_mul_pd(j1,is1),_mm256_mul_pd(j2,is2)));
@@ -235,7 +235,6 @@ int ElastIso3D::ElemLinear( Elem* E,
         g1 = _mm256_add_pd(_mm256_mul_pd(j0,is3), _mm256_add_pd(_mm256_mul_pd(j1,is4),_mm256_mul_pd(j2,is5)));
         a036= _mm256_add_pd(a036, _mm256_mul_pd(g1,u3)); a147 = _mm256_add_pd(a147, _mm256_mul_pd(g1,u4)); a258 = _mm256_add_pd(a258, _mm256_mul_pd(g1,u5));
             _mm256_storeu_pd(&G[57],g1);
-        
       }
       _mm256_storeu_pd(&H[0],a036);
       _mm256_storeu_pd(&H[3],a147);
