@@ -402,7 +402,7 @@ int ElastIso3D::ElemLinear( Elem* E,
 #endif
     for(int i=0; i<Nc; i++){
 #ifdef __INTEL_COMPILER
-#pragma vector unaligned
+#endif
       for(int j=0; j<3;j++){
         sysf[3*conn[i] +j] = f[3*i +j];
     } }
