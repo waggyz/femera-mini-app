@@ -264,16 +264,12 @@ int ElastIso3D::ElemLinear( Elem* E,
         for(int k=0; k<Nf ; k++){ G[Nf* i+k ]=0.0;
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
-#else
-#pragma omp simd
 #endif
           for(int j=0; j<Nd ; j++){
             G[(Nf* i+k) ] += intp_shpg[ip*Ne+ Nd* i+j ] * jac[Nd* j+k ];
           }
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
-#else
-#pragma omp simd
 #endif
           for(int j=0; j<Nf ; j++){
             H[(Nf* k+j) ] += G[(Nf* i+k) ] * u[Nf* i+j ];
@@ -369,14 +365,10 @@ int ElastIso3D::ElemLinear( Elem* E,
       for(int i=0; i<Nc; i++){
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
-#else
-#pragma omp simd
 #endif
         for(int k=0; k<Nf; k++){
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
-#else
-#pragma omp simd
 #endif
           for(int j=0; j<Nf; j++){
             f[(Nf* i+k) ] += G[(Nf* i+j) ] * S[(Nf* j+k) ];// 18*N FMA FLOP
@@ -411,9 +403,6 @@ int ElastIso3D::ElemLinear( Elem* E,
     for(int i=0; i<Nc; i++){
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
-#else
-#pragma omp simd
-#endif
       for(int j=0; j<3;j++){
         sysf[3*conn[i] +j] = f[3*i +j];
     } }
