@@ -47,24 +47,21 @@ int ElastIso3D::ElemLinear( Elem* E,
   printf("DOF: %u, Elems:%u, IntPts:%u, Nodes/elem:%u\n",
     (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
 #endif
-  FLOAT_MESH __attribute__((aligned(32))) jac[Nj], dw;
+  FLOAT_MESH __attribute__((aligned(32))) dw, jac[Nj];
 #if 1
   FLOAT_PHYS __attribute__((aligned(32))) G[Ne+1], u[Ne+1], f[Ne+1];
-  FLOAT_PHYS __attribute__((aligned(32))) H[Nd*4], S[Nd*Nf];
+  FLOAT_PHYS __attribute__((aligned(32))) H[Nd*Nf+1], S[Nd*Nf];
 #else
   FLOAT_PHYS __attribute__((aligned(32))) G[Nt], u[Nt], f[Nt];
-  FLOAT_PHYS __attribute__((aligned(32))) H[Nd*Nf+1], S[Nd*Nf];
+  FLOAT_PHYS __attribute__((aligned(32))) H[Nd*4], S[Nd*Nf];
 #endif
   //
   FLOAT_PHYS __attribute__((aligned(32))) intp_shpg[intp_n*Ne];
-  std::copy( &E->intp_shpg[0],
-             &E->intp_shpg[intp_n*Ne], intp_shpg );
+  std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
   FLOAT_PHYS __attribute__((aligned(32))) wgt[intp_n];
-  std::copy( &E->gaus_weig[0],
-             &E->gaus_weig[intp_n], wgt );
+  std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
   FLOAT_PHYS __attribute__((aligned(32))) C[this->mtrl_matc.size()];
-  std::copy( &this->mtrl_matc[0],
-             &this->mtrl_matc[this->mtrl_matc.size()], C );
+  std::copy( &this->mtrl_matc[0], &this->mtrl_matc[this->mtrl_matc.size()], C );
 #if 0
   __m256d c0,c1,c2,c3;
   c0 = _mm256_set_pd(0.,C[5],C[3],C[0]); c1 = _mm256_set_pd(0.,C[4],C[1],C[3]); c2 = _mm256_set_pd(0.,C[2],C[4],C[5]); c3 = _mm256_set_pd(0.,C[7],C[8],C[6]);
