@@ -77,7 +77,8 @@ protected:
     sys_d.resize(udof_n,0.0);// Diagonal Preconditioner
 #endif
 #if VERB_MAX > 13
-    std::cout << &sys_f[0] <<'\n';
+    std::cout << valign_byte "-byte aligned pointer to sys_f[0]: "
+      << &sys_f[0] <<'\n';
 #endif
   };
 private:
