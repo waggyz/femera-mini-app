@@ -1,11 +1,6 @@
 #if VERB_MAX > 10
 #include <iostream>
 #endif
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <ctype.h>
 #include <cstring>// std::memcpy
 #include "femera.h"
 //
@@ -52,8 +47,8 @@ int ElastIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
         printf("%+9.2e",jac[j]);
       }; printf(" det:%+9.2e\n",det);
       #endif
-      // xx yy zz
       for(uint j=0; j<Nc; j++){
+      // xx yy zz
         B[Ne*0 + 0+j*ndof] = G[Nc*0+j];
         B[Ne*1 + 1+j*ndof] = G[Nc*1+j];
         B[Ne*2 + 2+j*ndof] = G[Nc*2+j];
@@ -89,11 +84,10 @@ int ElastIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
   };
   return 0;
 };
-int ElastIso3D::ElemStiff(Elem* E ){
+int ElastIso3D::ElemStiff(Elem* E  ){
   //FIXME Doesn't do rotation yet
-  const uint Dm = 3;//this->mesh_d
+  const uint Dm = 3;//E->mesh_d
   const uint Dn = this->node_d;
-  //const int mesh_d = E->elem_d;
   const uint elem_n = E->elem_n;
   const uint Nc = E->elem_conn_n;
   const uint Nj = 10,d2=9;
@@ -113,7 +107,6 @@ int ElastIso3D::ElemStiff(Elem* E ){
     0.0,0.0,0.0,mtrl_matc[2]*2.0,0.0,0.0,
     0.0,0.0,0.0,0.0,mtrl_matc[2]*2.0,0.0,
     0.0,0.0,0.0,0.0,0.0,mtrl_matc[2]*2.0 };
-  const FLOAT_PHYS scal_disp = udof_magn[0];
 #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
   for(uint j=0;j<mtrl_matc.size();j++){
@@ -138,8 +131,8 @@ int ElastIso3D::ElemStiff(Elem* E ){
         printf("%+9.2e",jac[j]);
       } printf(" det:%+9.2e\n",det);
 #endif
-      // xx yy zz
       for(uint j=0; j<Nc; j++){
+      // xx yy zz
         B[Ne*0 + 0+j*Dm] = G[Nc*0+j];
         B[Ne*1 + 1+j*Dm] = G[Nc*1+j];
         B[Ne*2 + 2+j*Dm] = G[Nc*2+j];
@@ -160,12 +153,12 @@ int ElastIso3D::ElemStiff(Elem* E ){
         printf("%+9.2e ",B[j]);
       } printf("\n");
 #endif
-      FLOAT_PHYS w = det * E->gaus_weig[ip] * scal_disp;
+      FLOAT_PHYS w = det * E->gaus_weig[ip];
       for(uint i=0; i<Ne; i++){
-      for(uint j=0; j<6 ; j++){
-      for(uint k=0; k<6 ; k++){
       for(uint l=0; l<Ne; l++){
-        elem_stiff[Nk*ie +Nr* i+l ]+=B[Ne* i+j ] * D[6* j+k ] * B[Ne* k+l ] * w;
+      for(uint k=0; k<6 ; k++){
+      for(uint j=0; j<6 ; j++){
+        elem_stiff[Nk*ie +Nr* i+l ]+=B[Ne* i+j ] * D[6* k+j ] * B[Ne* k+l ] * w;
       } } } }
     }// end intp loop
   }// End elem loop

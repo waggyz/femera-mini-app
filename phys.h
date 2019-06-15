@@ -45,9 +45,7 @@ public:
   int JacRot( Elem* E );
   int JacT  ( Elem* E );
   //
-  virtual int ElemStiff( Elem* )=0;//FIXME should be local to subclass?
-  int ElemStiff( RESTRICT Phys::vals& );//for comparison to LMA EBE
-  int ElemStiff();
+  virtual int ElemStiff( Elem* )=0;
   //
 #if 0
   virtual int SavePartFMR( const char* bname, bool is_bin )=0;//FIXME ASCII/Binary file format

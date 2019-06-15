@@ -1,11 +1,6 @@
 #if VERB_MAX > 10
 #include <iostream>
 #endif
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <ctype.h>
 #include <cstring>// std::memcpy
 #include "femera.h"
 //
@@ -18,9 +13,8 @@ int ElastOrtho3D::BlocLinear( Elem* ,
 //
 int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
   //FIXME Doesn't do rotation yet
-  const uint Dm = 3;//this->mesh_d
+  const uint Dm = 3;//E->mesh_d
   const uint Dn = this->node_d;
-  //const int mesh_d = E->elem_d;
   const uint elem_n = E->elem_n;
   const uint Nc = E->elem_conn_n;
   const uint Nj = 10,d2=9;
@@ -70,8 +64,8 @@ int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
         printf("%+9.2e",jac[j]);
       } printf(" det:%+9.2e\n",det);
       #endif
-      // xx yy zz
       for(uint j=0; j<Nc; j++){
+      // xx yy zz
         B[Ne*0 + 0+j*Dm] = G[Nc*0+j];
         B[Ne*1 + 1+j*Dm] = G[Nc*1+j];
         B[Ne*2 + 2+j*Dm] = G[Nc*2+j];
@@ -105,7 +99,7 @@ int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
       }
       if(Dn>Dm){
         for(uint i=0; i<Nc; i++){
-          for(uint k=0; k<Dm ; k++){
+          for(uint k=0; k<Dm; k++){
             sys_d[E->elem_conn[Nc*ie+i]*Dn+Dm] +=
               G[Nc* 0+i] * G[Nc* k+i]*mtrl_matc[12+0] * scal_ther * w
              +G[Nc* 1+i] * G[Nc* k+i]*mtrl_matc[12+1] * scal_ther * w
@@ -126,11 +120,10 @@ int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
   }
   return 0;
 }
-int ElastOrtho3D::ElemStiff(Elem* E ){
+int ElastOrtho3D::ElemStiff(Elem* E  ){
   //FIXME Doesn't do rotation yet
-  const uint Dm = 3;//this->mesh_d
+  const uint Dm = 3;//E->mesh_d
   const uint Dn = this->node_d;
-  //const int mesh_d = E->elem_d;
   const uint elem_n = E->elem_n;
   const uint Nc = E->elem_conn_n;
   const uint Nj = 10,d2=9;
@@ -150,11 +143,6 @@ int ElastOrtho3D::ElemStiff(Elem* E ){
     0.0,0.0,0.0,mtrl_matc[6]*2.0,0.0,0.0,
     0.0,0.0,0.0,0.0,mtrl_matc[7]*2.0,0.0,
     0.0,0.0,0.0,0.0,0.0,mtrl_matc[8]*2.0 };
-  const FLOAT_PHYS scal_disp = udof_magn[0];
-  FLOAT_PHYS scal_ther;
-  if(Dn>Dm){ scal_ther = udof_magn[3] * 1e-3; }//4e-4
-  //if(Dn>Dm){ scal_ther = udof_magn[3] *1e-2; }
-  else{ scal_ther=1.0; }
 #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
   for(uint j=0;j<mtrl_matc.size();j++){
@@ -179,8 +167,8 @@ int ElastOrtho3D::ElemStiff(Elem* E ){
         printf("%+9.2e",jac[j]);
       } printf(" det:%+9.2e\n",det);
 #endif
-      // xx yy zz
       for(uint j=0; j<Nc; j++){
+      // xx yy zz
         B[Ne*0 + 0+j*Dm] = G[Nc*0+j];
         B[Ne*1 + 1+j*Dm] = G[Nc*1+j];
         B[Ne*2 + 2+j*Dm] = G[Nc*2+j];
@@ -201,12 +189,12 @@ int ElastOrtho3D::ElemStiff(Elem* E ){
         printf("%+9.2e ",B[j]);
       } printf("\n");
 #endif
-      FLOAT_PHYS w = det * E->gaus_weig[ip] * scal_disp;
+      FLOAT_PHYS w = det * E->gaus_weig[ip];
       for(uint i=0; i<Ne; i++){
-      for(uint j=0; j<6 ; j++){
-      for(uint k=0; k<6 ; k++){
       for(uint l=0; l<Ne; l++){
-        elem_stiff[Nk*ie +Nr* i+l ]+=B[Ne* i+j ] * D[6* j+k ] * B[Ne* k+l ] * w;
+      for(uint k=0; k<6 ; k++){
+      for(uint j=0; j<6 ; j++){
+        elem_stiff[Nk*ie +Nr* i+l ]+=B[Ne* i+j ] * D[6* k+j ] * B[Ne* k+l ] * w;
       } } } }
 #if 0
       if(Dn>Dm){
@@ -214,11 +202,10 @@ int ElastOrtho3D::ElemStiff(Elem* E ){
           for(uint k=0; k<Dm ; k++){
             sys_d[E->elem_conn[Nc*ie+i]*Dn+Dm] +=// 1e-4* //1e-3 ok
               //G[Nc* k+i] * mtrl_matc[12+k] * G[Nc* k+i] * this->udof_magn[j] * w;
-              G[Nc* 0+i] * G[Nc* k+i]*mtrl_matc[12+0] * scal_ther * w
-             +G[Nc* 1+i] * G[Nc* k+i]*mtrl_matc[12+1] * scal_ther * w
-             +G[Nc* 2+i] * G[Nc* k+i]*mtrl_matc[12+2] * scal_ther * w;
-          }
-        }
+              G[Nc* 0+i] * G[Nc* k+i]*mtrl_matc[12+0] * w
+             +G[Nc* 1+i] * G[Nc* k+i]*mtrl_matc[12+1] * w
+             +G[Nc* 2+i] * G[Nc* k+i]*mtrl_matc[12+2] * w;
+          } }
       }
 #endif
     }//end intp loop
