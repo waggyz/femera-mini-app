@@ -14,12 +14,12 @@ int ElastIso3D::ElemStiff(Elem* E  ){
   //FIXME Doesn't do rotation yet
   const uint Dm = 3;//E->mesh_d
   const uint Dn = this->node_d;
-  const uint elem_n = E->elem_n;
-  const uint Nc = E->elem_conn_n;
   const uint Nj = 10,d2=9;
+  const uint Nc = E->elem_conn_n;
   const uint Ne = Dm*Nc;
   const uint Nr = Dn*Nc;// One row of stiffness matrix
   const uint Nk = Nr*Nr;// Elements of stiffness matrix
+  const uint elem_n = E->elem_n;
   const uint intp_n = uint(E->gaus_n);
   //
   FLOAT_PHYS det;
@@ -93,8 +93,8 @@ int ElastIso3D::ElemStiff(Elem* E  ){
 int ElastIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
   const uint ndof   = 3;//this->node_d
   const uint  Nj = 10,d2=9;
-  const uint  Ne = uint(ndof*Nc);
   const uint  Nc = E->elem_conn_n;
+  const uint  Ne = uint(ndof*Nc);
   const uint elem_n = E->elem_n;
   const uint intp_n = E->gaus_n;
   //
