@@ -17,7 +17,7 @@
 //
 int ElastOrtho3D::ElemLinear( Elem* ){ return 1; };//FIXME
 int ElastOrtho3D::ElemJacobi( Elem* ){ return 1; };//FIXME
-int ElastOrtho3D::ScatStiff( Elem* ){ return 1; };//FIXME
+int ElastOrtho3D::ElemStiff( Elem* ){ return 1; };//FIXME
 //
 int ElastOrtho3D::Setup( Elem* E ){
   JacRot( E );

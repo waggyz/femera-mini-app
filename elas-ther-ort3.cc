@@ -11,7 +11,7 @@
 //
 int ThermElastOrtho3D::ElemLinear( Elem* ){ return 1; };//FIXME
 int ThermElastOrtho3D::ElemJacobi( Elem* ){ return 1; };//FIXME
-int ThermElastOrtho3D::ScatStiff( Elem* ){ return 1; };//FIXME
+int ThermElastOrtho3D::ElemStiff( Elem* ){ return 1; };//FIXME
 int ThermElastOrtho3D::BlocLinear( Elem* ,
   RESTRICT Phys::vals &, const RESTRICT Solv::vals & ){ return 1; };
 int ThermElastOrtho3D::ElemStrain( Elem* ,FLOAT_SOLV*  ){ return 1; }
