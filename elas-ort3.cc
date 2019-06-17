@@ -12,6 +12,7 @@ int ElastOrtho3D::BlocLinear( Elem* ,
 }
 int ElastOrtho3D::ElemStiff(Elem* E  ){
   //FIXME Doesn't do rotation yet
+  //FIXME Doesn't do thermal yet
   const uint Dm = 3;//E->mesh_d
   const uint Dn = this->node_d;
   const uint Nj = 10,d2=9;
@@ -87,7 +88,7 @@ int ElastOrtho3D::ElemStiff(Elem* E  ){
         elem_stiff[Nk*ie +Nr* i+l ]+=B[Ne* i+j ] * D[6* k+j ] * B[Ne* k+l ] * w;
       } } } }
 #if 0
-      if(Dn>Dm){
+      if(Dn>Dm){//FIXME
         for(uint i=0; i<Nc; i++){
           for(uint k=0; k<Dm ; k++){
             sys_d[E->elem_conn[Nc*ie+i]*Dn+Dm] +=// 1e-4* //1e-3 ok

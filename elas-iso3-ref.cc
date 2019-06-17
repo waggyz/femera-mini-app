@@ -8,6 +8,7 @@
 #include <ctype.h>
 #include <cstring>// std::memcpy
 #include "femera.h"
+//#define FETCH_JAC
 //
 int ElastIso3D::Setup( Elem* E ){
   JacT  ( E );
@@ -33,7 +34,7 @@ int ElastIso3D::ElemLinear( Elem* E,
   //const int De = 3;// Element Dimension
   const int Nd = 3;// Node (mesh) Dimension
   const int Nf = 3;// this->node_d DOF/node
-  const int Nj = Nd*Nf+1;//FIXME wrong?
+  const int Nj = Nd*Nd+1;
   const int Nc = E->elem_conn_n;// Number of nodes/element
   const int Ne = Nf*Nc;
   const INT_MESH elem_n =E->elem_n;
@@ -76,33 +77,42 @@ int ElastIso3D::ElemLinear( Elem* E,
 #ifdef FETCH_JAC
     std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
 #endif
+#if 1
     for (int i=0; i<Nc; i++){
       std::memcpy( & u[Nf*i],& sysu[Econn[Nc*e0+i]*Nf],
         sizeof(FLOAT_SOLV)*Nf ); };
+#endif
   };
   for(INT_MESH ie=e0;ie<ee;ie++){
     const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     for (int i=0; i<Nc; i++){
       std::memcpy( & f[Nf*i],& sysf[conn[i]*3], sizeof(FLOAT_SOLV)*Nf ); }
     for(int ip=0; ip<intp_n; ip++){
+      const bool fetch_next = (ip==(intp_n-1)) & ((ie+1)<ee);
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       for(int i=0; i< 9 ; i++){ H[i]=0.0; };
       for(int i=0; i<Nc; i++){
         for(int k=0; k<Nf ; k++){ G[Nf* i+k ]=0.0;
           for(int j=0; j<Nd ; j++){
-            G[(Nf* i+k) ] += intp_shpg[ip*Ne+ Nd* i+j ]
+            G[Nf* i+k ] += intp_shpg[ip*Ne+ Nd* i+j ]
 #ifdef FETCH_JAC
               * jac[Nd* j+k ];
 #else
               * Ejacs[Nj*ie+ Nd* j+k ];
 #endif
-          };
+          }
           for(int j=0; j<Nf ; j++){
-            H[(Nf* k+j) ] += G[(Nf* i+k) ] * u[Nf* i+j ];
-          };
-        };// 36*N FMA FLOP
-};//------------------------------------------------ N*3*6*2 = 36*N FLOP
+            H[Nf* k+j ] += G[Nf* i+k ] * u[Nf* i+j ];
+          }
+        }
+#if 1
+        if(fetch_next){// Fetch u for the next iteration
+          std::memcpy(& u[Nf*i],& sysu[Econn[Nc*(ie+1)+i]*Nf],
+            sizeof(FLOAT_SOLV)*Nf );
+          }
+#endif
+      }//-------------------------------------------------- N*3*6*2 = 36*N FLOP
 #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
       for(int j=0;j<H.size();j++){
@@ -115,14 +125,16 @@ int ElastIso3D::ElemLinear( Elem* E,
 #else
       dw = Ejacs[Nj*ie+ 9] * wgt[ip];
 #endif
-      if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
+      if(fetch_next){// Fetch stuff for the next iteration
+#if 0
         const INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
         for (int i=0; i<Nc; i++){
           std::memcpy(& u[Nf*i],& sysu[c[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
+#endif
 #ifdef FETCH_JAC
         std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
 #endif
-      }; };
+      }
       //
       S[0]=(C[0]* H[0] + C[1]* H[4] + C[1]* H[8])*dw;//Sxx
       S[4]=(C[1]* H[0] + C[0]* H[4] + C[1]* H[8])*dw;//Syy
@@ -136,7 +148,7 @@ int ElastIso3D::ElemLinear( Elem* E,
       for(int i=0; i<Nc; i++){
         for(int k=0; k<Nf; k++){
           for(int j=0; j<Nf; j++){
-            f[(Nf* i+k) ] += G[(Nf* i+j) ] * S[(Nf* j+k) ];// 18*N FMA FLOP
+            f[Nf* i+k ] += G[Nf* i+j ] * S[Nf* j+k ];// 18*N FMA FLOP
       };};};//---------------------------------------------- N*3*6 = 18*N FLOP
 #if VERB_MAX>10
       printf( "f:");
@@ -147,7 +159,7 @@ int ElastIso3D::ElemLinear( Elem* E,
 #endif
     };//end intp loop
     for (uint i=0; i<uint(Nc); i++){
-      std::memcpy(& sysf[conn[i]*3],& f[Nf*i], sizeof(FLOAT_SOLV)*Nf );
+      std::memcpy(& sysf[conn[i]*Nf],& f[Nf*i], sizeof(FLOAT_SOLV)*Nf );
 #if 0
       if( n >=my_node_start ){
         for(uint j=0;j<3;j++){
