@@ -8,7 +8,7 @@
 // Vectorize f calculation
 #undef VEC_F
 // Fetch next u within G,H loop nest
-#define FETCH_U_EARLY
+#undef FETCH_U_EARLY
 //
 int ElastIso3D::Setup( Elem* E ){
   JacT  ( E );
@@ -128,7 +128,7 @@ int ElastIso3D::ElemLinear( Elem* E,
       __m256d u0,u1,u2,u3,u4,u5,g0,g1;
       __m256d is0,is1,is2,is3,is4,is5;
 #ifdef FETCH_U_EARLY
-      //const bool fetch_next = (ip==(intp_n-1)) & ((ie+1)<ee);
+      const bool fetch_next = (ip==(intp_n-1)) & ((ie+1)<ee);
       const INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
       for(int n= 0; n<4; n+=2){ int i=n*Nf;
 #else
@@ -141,8 +141,8 @@ int ElastIso3D::ElemLinear( Elem* E,
         a036= _mm256_add_pd(a036, _mm256_mul_pd(g0,u0)); a147 = _mm256_add_pd(a147, _mm256_mul_pd(g0,u1)); a258 = _mm256_add_pd(a258, _mm256_mul_pd(g0,u2));
             _mm256_storeu_pd(&G[i+0],g0);
 #ifdef FETCH_U_EARLY
-        //if(fetch_next){
-          std::memcpy(& u[Nf*n],& sysu[c[n]*Nf], sizeof(FLOAT_SOLV)*Nf );// }
+        if(fetch_next){
+          std::memcpy(& u[Nf*n],& sysu[c[n]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
 #endif
         is3= _mm256_set1_pd(isp[i+3]); is4= _mm256_set1_pd(isp[i+4]); is5= _mm256_set1_pd(isp[i+5]);
         u3 = _mm256_set1_pd(  u[i+3]); u4 = _mm256_set1_pd(  u[i+4]); u5 = _mm256_set1_pd(  u[i+5]);
@@ -150,8 +150,8 @@ int ElastIso3D::ElemLinear( Elem* E,
         a036= _mm256_add_pd(a036, _mm256_mul_pd(g1,u3)); a147 = _mm256_add_pd(a147, _mm256_mul_pd(g1,u4)); a258 = _mm256_add_pd(a258, _mm256_mul_pd(g1,u5));
             _mm256_storeu_pd(&G[i+3],g1);
 #ifdef FETCH_U_EARLY
-        //if(fetch_next){
-          std::memcpy(& u[Nf*(n+1)],& sysu[c[n+1]*Nf], sizeof(FLOAT_SOLV)*Nf );// }
+        if(fetch_next){
+          std::memcpy(& u[Nf*(n+1)],& sysu[c[n+1]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
 #endif
       }
       if(elem_p>1){// 3* 10
@@ -166,8 +166,8 @@ int ElastIso3D::ElemLinear( Elem* E,
         a036= _mm256_add_pd(a036, _mm256_mul_pd(g0,u0)); a147 = _mm256_add_pd(a147, _mm256_mul_pd(g0,u1)); a258 = _mm256_add_pd(a258, _mm256_mul_pd(g0,u2));
             _mm256_storeu_pd(&G[i+0],g0);
 #ifdef FETCH_U_EARLY
-        //if(fetch_next){
-          std::memcpy(& u[Nf*n],& sysu[c[n]*Nf], sizeof(FLOAT_SOLV)*Nf );// }
+        if(fetch_next){
+          std::memcpy(& u[Nf*n],& sysu[c[n]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
 #endif
         is3= _mm256_set1_pd(isp[i+3]); is4= _mm256_set1_pd(isp[i+4]); is5= _mm256_set1_pd(isp[i+5]);
         u3 = _mm256_set1_pd(  u[i+3]); u4 = _mm256_set1_pd(  u[i+4]); u5 = _mm256_set1_pd(  u[i+5]);
@@ -175,8 +175,8 @@ int ElastIso3D::ElemLinear( Elem* E,
         a036= _mm256_add_pd(a036, _mm256_mul_pd(g1,u3)); a147 = _mm256_add_pd(a147, _mm256_mul_pd(g1,u4)); a258 = _mm256_add_pd(a258, _mm256_mul_pd(g1,u5));
             _mm256_storeu_pd(&G[i+3],g1);
 #ifdef FETCH_U_EARLY
-        //if(fetch_next){
-          std::memcpy(& u[Nf*(n+1)],& sysu[c[n+1]*Nf], sizeof(FLOAT_SOLV)*Nf );// }
+        if(fetch_next){
+          std::memcpy(& u[Nf*(n+1)],& sysu[c[n+1]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
 #endif
       } }
       if(elem_p>2){// 3* 20
@@ -314,7 +314,7 @@ int ElastIso3D::ElemLinear( Elem* E,
       }; printf("\n");
 #endif
       dw = jac[9] * wgt[ip];
-      //if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
+      if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
 //#else
@@ -328,7 +328,7 @@ int ElastIso3D::ElemLinear( Elem* E,
 #ifdef FETCH_JAC
           std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj );
 #endif
-      //} }
+      } }
 #if 0
 //FIXME change C indices for iso
       __m256d s048;

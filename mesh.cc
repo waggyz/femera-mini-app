@@ -440,9 +440,14 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
       int c;
       fmrfile >> c >> E->elem_n >> E->halo_elem_n ;
       E->elem_conn_n =(INT_ELEM_NODE)c;
+#if 0
+      // Oversize elem_conn for prefetching...doesn't help
       E->elem_conn.resize(uint(E->elem_conn_n)*(E->elem_n+1));
       for(int i=0;i< E->elem_conn_n;i++){//FIXME fill with last entry
         E->elem_conn[E->elem_conn_n*E->elem_n +i ]=0 ;}
+#else
+      E->elem_conn.resize(uint(E->elem_conn_n)*E->elem_n);
+#endif
       E->elem_glid.resize(E->elem_n);
       for(uint i=0; i<E->elem_n; i++){
         fmrfile >> E->elem_glid[i];
