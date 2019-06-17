@@ -6,7 +6,7 @@
 #include <immintrin.h>
 
 // Vectorize f calculation
-#undef VEC_F
+#define VEC_F
 // Fetch next u within G,H loop nest
 #undef FETCH_U_EARLY
 //
@@ -27,7 +27,7 @@ int ElastIso3D::Setup( Elem* E ){
   this->stif_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) +2);
   return 0;
-};
+}
 int ElastIso3D::ElemLinear( Elem* E,
   FLOAT_SOLV* sys_f, const FLOAT_SOLV* sys_u ){
   //FIXME Clean up local variables.
@@ -51,7 +51,7 @@ int ElastIso3D::ElemLinear( Elem* E,
 #endif
   FLOAT_MESH __attribute__((aligned(32))) dw, jac[Nj];
 #if 1
-  FLOAT_PHYS __attribute__((aligned(32))) G[Ne+1], u[Ne+1], f[Ne+1];
+  FLOAT_PHYS __attribute__((aligned(32))) G[Nt+1], u[Ne], f[Nt];
   FLOAT_PHYS __attribute__((aligned(32))) H[Nd*Nf+1], S[Nd*Nf];
 #else
   FLOAT_PHYS __attribute__((aligned(32))) G[Nt], u[Nt], f[Nt];
@@ -59,10 +59,11 @@ int ElastIso3D::ElemLinear( Elem* E,
 #endif
   //
   FLOAT_PHYS __attribute__((aligned(32))) intp_shpg[intp_n*Ne];
-  std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
   FLOAT_PHYS __attribute__((aligned(32))) wgt[intp_n];
-  std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
   FLOAT_PHYS __attribute__((aligned(32))) C[this->mtrl_matc.size()];
+  //
+  std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
+  std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
   std::copy( &this->mtrl_matc[0], &this->mtrl_matc[this->mtrl_matc.size()], C );
 #if 0
   __m256d c0,c1,c2,c3;
@@ -98,12 +99,7 @@ int ElastIso3D::ElemLinear( Elem* E,
 #endif
     const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
 #ifdef VEC_F
-// This is slower
     __m256d f0,f1,f2,f3,f4,f5,f6,f7,f8,f9;
-    f0 = _mm256_loadu_pd(&sysf[3*conn[0]]); f1 = _mm256_loadu_pd(&sysf[3*conn[1]]); f2 = _mm256_loadu_pd(&sysf[3*conn[2]]);
-    f3 = _mm256_loadu_pd(&sysf[3*conn[3]]); f4 = _mm256_loadu_pd(&sysf[3*conn[4]]); f5 = _mm256_loadu_pd(&sysf[3*conn[5]]);
-    f6 = _mm256_loadu_pd(&sysf[3*conn[6]]); f7 = _mm256_loadu_pd(&sysf[3*conn[7]]); f8 = _mm256_loadu_pd(&sysf[3*conn[8]]);
-    f9 = _mm256_loadu_pd(&sysf[3*conn[9]]);
 #else
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
@@ -124,7 +120,7 @@ int ElastIso3D::ElemLinear( Elem* E,
       {// scope vector registers
       double * RESTRICT isp = &intp_shpg[ip*Ne];
       __m256d a036=_mm256_set1_pd(0.0), a147=_mm256_set1_pd(0.0), a258=_mm256_set1_pd(0.0);
-#if 1
+#if 0
       __m256d u0,u1,u2,u3,u4,u5,g0,g1;
       __m256d is0,is1,is2,is3,is4,is5;
 #ifdef FETCH_U_EARLY
@@ -295,13 +291,13 @@ int ElastIso3D::ElemLinear( Elem* E,
 #pragma vector unaligned
 #endif
           for(int j=0; j<Nd ; j++){
-            G[(Nf* i+k) ] += intp_shpg[ip*Ne+ Nd* i+j ] * jac[Nd* j+k ];
+            G[(4* i+k) ] += intp_shpg[ip*Ne+ Nd* i+j ] * jac[Nd* j+k ];
           }
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
 #endif
           for(int j=0; j<Nf ; j++){
-            H[(Nf* k+j) ] += G[(Nf* i+k) ] * u[Nf* i+j ];
+            H[(Nf* k+j) ] += G[(4* i+k) ] * u[Nf* i+j ];
           }
         }
       }//-------------------------------------------------- N*3*6*2 = 36*N FLOP
@@ -331,13 +327,14 @@ int ElastIso3D::ElemLinear( Elem* E,
       } }
 #if 0
 //FIXME change C indices for iso
-      __m256d s048;
-      __m256d w0 = _mm256_set1_pd(dw);
-      s048= _mm256_mul_pd(w0, _mm256_add_pd(_mm256_mul_pd(c0,_mm256_set1_pd(H[0])), _mm256_add_pd(_mm256_mul_pd(c1,_mm256_set1_pd(H[4])), _mm256_mul_pd(c2,_mm256_set1_pd(H[8])))));
-            _mm256_storeu_pd(&S[0], s048);
-      S[3]=(H[1] + H[3])*C[6]*dw; // S[1]
-      S[4]=(H[2] + H[6])*C[8]*dw; // S[2]
-      S[5]=(H[5] + H[7])*C[7]*dw; // S[5]
+      { // Scope vector registers
+        __m256d s048;
+        s048= _mm256_mul_pd(_mm256_set1_pd(dw), _mm256_add_pd(_mm256_mul_pd(c0,_mm256_set1_pd(H[0])), _mm256_add_pd(_mm256_mul_pd(c1,_mm256_set1_pd(H[5])), _mm256_mul_pd(c2,_mm256_set1_pd(H[10])))));
+              _mm256_store_pd(&S[0], s048);
+        S[4]=(H[1] + H[4])*C[6]*dw; // S[1]
+        S[5]=(H[2] + H[8])*C[8]*dw; // S[2]
+        S[6]=(H[6] + H[9])*C[7]*dw; // S[5]
+      } // end scoping unit
 #else
       S[0]=(C[0]* H[0] + C[1]* H[4] + C[1]* H[8])*dw;//Sxx
       S[4]=(C[1]* H[0] + C[0]* H[4] + C[1]* H[8])*dw;//Syy
@@ -350,43 +347,51 @@ int ElastIso3D::ElemLinear( Elem* E,
 #endif
       //------------------------------------------------------- 18+9 = 27 FLOP
 #ifdef VEC_F
-      {
-      __m256d a036, a147, a258, g0,g1,g2;
-      a036 = _mm256_loadu_pd(&S[0]); // [a3 a2 a1 a0]
-      a147 = _mm256_loadu_pd(&S[3]); // [a6 a5 a4 a3]
-      a258 = _mm256_loadu_pd(&S[6]); // [a9 a8 a7 a6]
+      {// Scope variables
+        __m256d a036, a147, a258;
+        if(ip==(0)){
+          f0 = _mm256_loadu_pd(&sys_f[3*conn[ 0]]);
+          f1 = _mm256_loadu_pd(&sys_f[3*conn[ 1]]);
+          f2 = _mm256_loadu_pd(&sys_f[3*conn[ 2]]);
+          f3 = _mm256_loadu_pd(&sys_f[3*conn[ 3]]);
+          f4 = _mm256_loadu_pd(&sys_f[3*conn[ 4]]);
+          f5 = _mm256_loadu_pd(&sys_f[3*conn[ 5]]);
+          f6 = _mm256_loadu_pd(&sys_f[3*conn[ 6]]);
+          f7 = _mm256_loadu_pd(&sys_f[3*conn[ 7]]);
+          f8 = _mm256_loadu_pd(&sys_f[3*conn[ 8]]);
+          f9 = _mm256_loadu_pd(&sys_f[3*conn[ 9]]);
+        }
+        __m256d g0,g1,g2,g3,g4,g5,g6,g7,g8,g9,g10,g11;
+        g0 = _mm256_set1_pd(G[0])  ; g1 = _mm256_set1_pd(G[1])  ; g2 = _mm256_set1_pd(G[2]);
+        f0 = _mm256_add_pd(f0, _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
 
-      __m256d g3,g4,g5,g6,g7,g8,g9,g10,g11;
-      g0 = _mm256_set1_pd(G[0])  ; g1 = _mm256_set1_pd(G[1])  ; g2 = _mm256_set1_pd(G[2]);
-      f0 = _mm256_add_pd(f0, _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
+        g3 = _mm256_set1_pd(G[4])  ; g4 = _mm256_set1_pd(G[5])  ; g5 = _mm256_set1_pd(G[6]);
+        f1 = _mm256_add_pd(f1, _mm256_add_pd(_mm256_mul_pd(g3,a036), _mm256_add_pd(_mm256_mul_pd(g4,a147),_mm256_mul_pd(g5,a258))));
 
-      g3 = _mm256_set1_pd(G[3])  ; g4 = _mm256_set1_pd(G[4])  ; g5 = _mm256_set1_pd(G[5]);
-      f1 = _mm256_add_pd(f1, _mm256_add_pd(_mm256_mul_pd(g3,a036), _mm256_add_pd(_mm256_mul_pd(g4,a147),_mm256_mul_pd(g5,a258))));
+        g6 = _mm256_set1_pd(G[8])  ; g7 = _mm256_set1_pd(G[9])  ; g8 = _mm256_set1_pd(G[10]);
+        f2 = _mm256_add_pd(f2, _mm256_add_pd(_mm256_mul_pd(g6,a036), _mm256_add_pd(_mm256_mul_pd(g7,a147),_mm256_mul_pd(g8,a258))));
 
-      g6 = _mm256_set1_pd(G[6])  ; g7 = _mm256_set1_pd(G[7])  ; g8 = _mm256_set1_pd(G[8]);
-      f2 = _mm256_add_pd(f2, _mm256_add_pd(_mm256_mul_pd(g6,a036), _mm256_add_pd(_mm256_mul_pd(g7,a147),_mm256_mul_pd(g8,a258))));
+        g9 = _mm256_set1_pd(G[12]) ; g10= _mm256_set1_pd(G[13]) ; g11= _mm256_set1_pd(G[14]);
+        f3 = _mm256_add_pd(f3, _mm256_add_pd(_mm256_mul_pd(g9,a036), _mm256_add_pd(_mm256_mul_pd(g10,a147),_mm256_mul_pd(g11,a258))));
 
-      g9 = _mm256_set1_pd(G[9])  ; g10= _mm256_set1_pd(G[10])  ; g11 = _mm256_set1_pd(G[11]);
-      f3 = _mm256_add_pd(f3, _mm256_add_pd(_mm256_mul_pd(g9,a036), _mm256_add_pd(_mm256_mul_pd(g10,a147),_mm256_mul_pd(g11,a258))));
+        g0 = _mm256_set1_pd(G[16]) ; g1 = _mm256_set1_pd(G[17]) ; g2 = _mm256_set1_pd(G[18]);
+        f4 = _mm256_add_pd(f4, _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
 
-      g0 = _mm256_set1_pd(G[12]) ; g1 = _mm256_set1_pd(G[13]) ; g2 = _mm256_set1_pd(G[14]);
-      f4 = _mm256_add_pd(f4, _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
+        g3 = _mm256_set1_pd(G[20]) ; g4 = _mm256_set1_pd(G[21]) ; g5 = _mm256_set1_pd(G[22]);
+        f5 = _mm256_add_pd(f5, _mm256_add_pd(_mm256_mul_pd(g3,a036), _mm256_add_pd(_mm256_mul_pd(g4,a147),_mm256_mul_pd(g5,a258))));
 
-      g3 = _mm256_set1_pd(G[15]) ; g4 = _mm256_set1_pd(G[16]) ; g5 = _mm256_set1_pd(G[17]);
-      f5 = _mm256_add_pd(f5, _mm256_add_pd(_mm256_mul_pd(g3,a036), _mm256_add_pd(_mm256_mul_pd(g4,a147),_mm256_mul_pd(g5,a258))));
+        g6 = _mm256_set1_pd(G[24]) ; g7 = _mm256_set1_pd(G[25]) ; g8 = _mm256_set1_pd(G[26]);
+        f6 = _mm256_add_pd(f6, _mm256_add_pd(_mm256_mul_pd(g6,a036), _mm256_add_pd(_mm256_mul_pd(g7,a147),_mm256_mul_pd(g8,a258))));
 
-      g6 = _mm256_set1_pd(G[18]) ; g7 = _mm256_set1_pd(G[19]) ; g8 = _mm256_set1_pd(G[20]);
-      f6 = _mm256_add_pd(f6, _mm256_add_pd(_mm256_mul_pd(g6,a036), _mm256_add_pd(_mm256_mul_pd(g7,a147),_mm256_mul_pd(g8,a258))));
+        g9 = _mm256_set1_pd(G[28]) ; g10= _mm256_set1_pd(G[29]) ; g11= _mm256_set1_pd(G[30]);
+        f7 = _mm256_add_pd(f7, _mm256_add_pd(_mm256_mul_pd(g9,a036), _mm256_add_pd(_mm256_mul_pd(g10,a147),_mm256_mul_pd(g11,a258))));
 
-      g9 = _mm256_set1_pd(G[21]) ; g10= _mm256_set1_pd(G[22])  ; g11 = _mm256_set1_pd(G[23]);
-      f7 = _mm256_add_pd(f7, _mm256_add_pd(_mm256_mul_pd(g9,a036), _mm256_add_pd(_mm256_mul_pd(g10,a147),_mm256_mul_pd(g11,a258))));
+        g0 = _mm256_set1_pd(G[32]) ; g1 = _mm256_set1_pd(G[33]) ; g2 = _mm256_set1_pd(G[34]);
+        f8 = _mm256_add_pd(f8, _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
 
-      g0 = _mm256_set1_pd(G[24]) ; g1 = _mm256_set1_pd(G[25]) ; g2 = _mm256_set1_pd(G[26]);
-      f8 = _mm256_add_pd(f8, _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
-
-      g3 = _mm256_set1_pd(G[27]) ; g4 = _mm256_set1_pd(G[28]) ; g5 = _mm256_set1_pd(G[29]);
-      f9 = _mm256_add_pd(f9, _mm256_add_pd(_mm256_mul_pd(g3,a036), _mm256_add_pd(_mm256_mul_pd(g4,a147),_mm256_mul_pd(g5,a258))));
-      }
+        g3 = _mm256_set1_pd(G[36]) ; g4 = _mm256_set1_pd(G[37]) ; g5 = _mm256_set1_pd(G[38]);
+        f9 = _mm256_add_pd(f9, _mm256_add_pd(_mm256_mul_pd(g3,a036), _mm256_add_pd(_mm256_mul_pd(g4,a147),_mm256_mul_pd(g5,a258))));
+      } // end scoping unit
 #else
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
@@ -402,7 +407,7 @@ int ElastIso3D::ElemLinear( Elem* E,
 #pragma vector unaligned
 #endif
           for(int j=0; j<Nf; j++){
-            f[(Nf* i+k) ] += G[(Nf* i+j) ] * S[(Nf* j+k) ];// 18*N FMA FLOP
+            f[(4* i+k) ] += G[(Nf* i+j) ] * S[(Nf* j+k) ];// 18*N FMA FLOP
       } } }//------------------------------------------------ N*3*6 = 18*N FLOP
 #endif
 #if VERB_MAX>10
@@ -414,17 +419,17 @@ int ElastIso3D::ElemLinear( Elem* E,
 #endif
     }//========================================================== end intp loop
 #ifdef VEC_F
-    _mm256_storeu_pd(&f[ 0],f0);
-    _mm256_storeu_pd(&f[ 3],f1);
-    _mm256_storeu_pd(&f[ 6],f2);
-    _mm256_storeu_pd(&f[ 9],f3);
+    _mm256_store_pd(&f[ 0],f0);
+    _mm256_store_pd(&f[ 4],f1);
+    _mm256_store_pd(&f[ 8],f2);
+    _mm256_store_pd(&f[12],f3);
     if(elem_p>1){
-    _mm256_storeu_pd(&f[12],f4);
-    _mm256_storeu_pd(&f[15],f5);
-    _mm256_storeu_pd(&f[18],f6);
-    _mm256_storeu_pd(&f[21],f7);
-    _mm256_storeu_pd(&f[24],f8);
-    _mm256_storeu_pd(&f[27],f9);
+    _mm256_store_pd(&f[16],f4);
+    _mm256_store_pd(&f[20],f5);
+    _mm256_store_pd(&f[24],f6);
+    _mm256_store_pd(&f[28],f7);
+    _mm256_store_pd(&f[32],f8);
+    _mm256_store_pd(&f[36],f9);
     }
 #endif
 #ifdef __INTEL_COMPILER
@@ -435,7 +440,7 @@ int ElastIso3D::ElemLinear( Elem* E,
 #pragma vector unaligned
 #endif
       for(int j=0; j<3; j++){
-        sys_f[3* conn[i]+j ] = f[3* i+j ]; } }
+        sys_f[3* conn[i]+j ] = f[4* i+j ]; } }
   }//============================================================ end elem loop
   return 0;
 }

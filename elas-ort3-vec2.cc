@@ -15,7 +15,7 @@ int ElastOrtho3D::Setup( Elem* E ){
   this->stif_flop = uint(E->elem_n) * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) );
   this->stif_band = uint(E->elem_n) *( sizeof(FLOAT_PHYS)* 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) -1+3) +sizeof(INT_MESH) *uint(E->elem_conn_n) );
   return 0;
-};
+}
 int ElastOrtho3D::ElemLinear( Elem* E,
   FLOAT_SOLV *sys_f, const FLOAT_SOLV* sys_u ){
   //FIXME Cleanup local variables.
@@ -86,7 +86,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   __m256d f0,f1,f2,f3,f4,f5,f6,f7,f8,f9;
   const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
 
-  __m256d j0,j1,j2;
+  __m256d j0,j1,j2;//FIXME should these be _load_ instead?
   j0 = _mm256_loadu_pd(&jac[0]);  // j0 = [j3 j2 j1 j0]
   j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
   j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
