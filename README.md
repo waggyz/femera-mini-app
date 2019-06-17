@@ -13,7 +13,7 @@ If you have Gmsh 2.x mesh files of your models, you'll need a mesh file format c
 
  *  `make gmsh2fmr-ser`
 
-If you have [Gmsh 4](http://gmsh.info/ "Gmsh Website") installed, try making and solving a one million degree of freedom quadratic tetrahedron model.
+If you have [Gmsh 4](http://gmsh.info/ "Gmsh Website") installed, try making and solving a one million degree of freedom (MDOF) quadratic tetrahedron model.
 
  * Set `C` to the total number of physical cores in your machine.
  * Set `P` to 2 for qaudratic tets.

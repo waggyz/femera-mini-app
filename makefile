@@ -58,13 +58,13 @@ FEMERA_BASE_CC = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc \
 
 all: gmsh2fmr-ser mini-omp mini-ser mini-omq mini-seq
 
-mini-base:
-	mv -f fembase-$(CPUMODEL) fembase.old 2>/dev/null ; \
+base-omp:
+	mv -f basera-$(CPUMODEL) fembase.old 2>/dev/null ; \
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
-	$(FEMERA_BASE_CC) test.cc femera-mini.cc -o fembase-$(CPUMODEL) $(CPPLOG);\
+	$(FEMERA_BASE_CC) test.cc femera-mini.cc -o basera-$(CPUMODEL) $(CPPLOG);\
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
-	command /usr/bin/time -v ./fembase-$(CPUMODEL) -v2 -c$(NCPU) -p cube/unst19p1n16 ;
+	command /usr/bin/time -v ./basera-$(CPUMODEL) -v2 -c$(NCPU) -p cube/unst19p1n16 ;
 
 mini-omp:
 	mv -f femera-$(CPUMODEL) femera.old 2>/dev/null ; \
