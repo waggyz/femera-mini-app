@@ -403,11 +403,12 @@ int HaloPCG::Iter(){
     std::tie(E,Y,S)=P[part_i];
     const INT_MESH hl0=S->halo_loca_0,sysn=S->udof_n;
 #pragma omp simd
-    for(INT_MESH i=0; i<sysn; i++){
-        S->sys_r[i] -= alpha * S->sys_f[i];// Update force residuals
+    for(INT_MESH i=0; i<hl0; i++){
+      S->sys_r[i] -= alpha * S->sys_f[i];// Update force residuals
     };
 #pragma omp simd reduction(+:glob_sum2)
     for(INT_MESH i=hl0; i<sysn; i++){
+      S->sys_r[i] -= alpha * S->sys_f[i];
       glob_sum2   += S->sys_r[i] * S->sys_r[i] * S->sys_d[i]; };
   };
   const FLOAT_PHYS beta = glob_sum2 / glob_r2a;// 1 FLOP
