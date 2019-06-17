@@ -121,7 +121,11 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       for(int k=0; k<Nc; k++){
         for(int i=0; i<Dm ; i++){ G[Dm* k+i ]=0.0;
           for(int j=0; j<Dm ; j++){
+#if 0
             G[(Dm* k+i) ] += jac[Dm* j+i ] * intp_shpg[ip*Ne+ Dm* k+j ];
+#else
+            G[(Dm* k+i) ] += Ejacs[Nj*ie+ Dm* j+i ] * intp_shpg[ip*Ne+ Dm* k+j ];
+#endif
           };
           for(int j=0; j<Dm ; j++){
             A[Dm* i+j ] += G[Dm* k+i ] * u[Dn* k+j ];
@@ -135,7 +139,11 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         printf("%+9.2e ",H[j]);
       }; printf("\n");
 #endif
+#if 0
       dw = jac[9] * wgt[ip];
+#else
+      dw = Ejacs[Nj*ie+ 9 ] * wgt[ip];
+#endif
       if(ip==(intp_n-1)){
         if((ie+1)<ee){// Fetch stuff for the next iteration
           const INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
