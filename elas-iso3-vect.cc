@@ -349,6 +349,9 @@ int ElastIso3D::ElemLinear( Elem* E,
 #ifdef VEC_F
       {// Scope variables
         __m256d a036, a147, a258;
+      a036 = _mm256_loadu_pd(&S[0]); // [a3 a2 a1 a0]
+      a147 = _mm256_loadu_pd(&S[3]); // [a6 a5 a4 a3]
+      a258 = _mm256_loadu_pd(&S[6]); // [a9 a8 a7 a6]
         if(ip==(0)){
           f0 = _mm256_loadu_pd(&sys_f[3*conn[ 0]]);
           f1 = _mm256_loadu_pd(&sys_f[3*conn[ 1]]);
