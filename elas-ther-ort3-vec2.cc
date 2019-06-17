@@ -48,29 +48,26 @@ int ThermElastOrtho3D::ElemLinear( Elem* E,
 #endif
   //INT_MESH   conn[Nc];
   //FLOAT_MESH jac[Nj];
-  FLOAT_PHYS G[Ng], u[Ne],f[Ne];
-  //FLOAT_PHYS det,
-  FLOAT_PHYS S[Dm*Dn], A[Dm*Dn], H[Dm*Dm];
   FLOAT_PHYS dw;
+  FLOAT_PHYS __attribute__((aligned(64))) G[Ng], u[Ne],f[Ne];
+  FLOAT_PHYS __attribute__((aligned(64))) S[Dm*Dm], H[Dm*Dm], A[Dm*Dn];
   //
   // Make local copies of constant data structures
-  FLOAT_PHYS intp_shpf[intp_n*Nc];
-  std::copy( &E->intp_shpf[0],
-             &E->intp_shpf[intp_n*Nc], intp_shpf );
-  FLOAT_PHYS intp_shpg[intp_n*Ng];
-  std::copy( &E->intp_shpg[0],
-             &E->intp_shpg[intp_n*Ng], intp_shpg );
-  FLOAT_PHYS wgt[intp_n];
-  std::copy( &E->gaus_weig[0],
-             &E->gaus_weig[intp_n], wgt );
-  FLOAT_PHYS C[this->mtrl_matc.size()];
+  FLOAT_PHYS __attribute__((aligned(64))) intp_shpf[intp_n*Nc];
+  FLOAT_PHYS __attribute__((aligned(64))) intp_shpg[intp_n*Ng];
+  FLOAT_PHYS __attribute__((aligned(64))) wgt[intp_n];
+  FLOAT_PHYS __attribute__((aligned(64))) C[this->mtrl_matc.size()];
+  //
+  std::copy( &E->intp_shpf[0], &E->intp_shpf[intp_n*Nc], intp_shpf );
+  std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ng], intp_shpg );
+  std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
   std::copy( &this->mtrl_matc[0],
              &this->mtrl_matc[this->mtrl_matc.size()], C );
 #if 0
   FLOAT_PHYS gamma[3];// gamma = alpha * E/(1-2*nu), thermoelastic effect
   for(int i=0; i<Dm; i++){ gamma[i] = 1.0/(C[i] * C[9+i]); }//FIXME may be 1.0/this
 #endif
-  const FLOAT_PHYS R[9] = {
+  const FLOAT_PHYS __attribute__((aligned(64))) R[9] = {
     mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
     mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
     mtrl_rotc[6],mtrl_rotc[7],mtrl_rotc[8]};
@@ -103,9 +100,8 @@ int ThermElastOrtho3D::ElemLinear( Elem* E,
     for(int ip=0; ip<intp_n; ip++){//==========================================
       //G = MatMul3x3xN( jac,shg );
       //A = MatMul3xNx3T( G,u );
-      for(int i=0; i<(Dm*Dn) ; i++){ A[i]=0.0;};// H[i]=0.0; B[i]=0.0; };
+      for(int i=0; i<(Dm*Dn) ; i++){ A[i]=0.0; };// H[i]=0.0; B[i]=0.0; };
       //for(int i=0; i<(Ng) ; i++){ G[i]=0.0; };
-//#pragma omp simd
       for(int k=0; k<Nc; k++){
         for(int i=0; i<Dm ; i++){ G[Dm* k+i ]=0.0;
           for(int j=0; j<Dm ; j++){
@@ -126,7 +122,6 @@ int ThermElastOrtho3D::ElemLinear( Elem* E,
       // [H] Small deformation tensor
       // [H][RT] : matmul3x3x3T
       dw = jac[9] * wgt[ip];//------------------------------------------ 1 FLOP
-//#pragma omp simd
       for(int i=0; i<Dm; i++){
         for(int k=0; k<Dm; k++){ H[Dm* i+k ]=0.0;
           for(int j=0; j<Dm; j++){
@@ -148,18 +143,23 @@ int ThermElastOrtho3D::ElemLinear( Elem* E,
       S[5]=(H[5] + H[7])*C[7];// S[7]= S[5];//Syz Szy
       S[2]=(H[2] + H[6])*C[8];// S[6]= S[2];//Sxz Szx
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];//------------------------------- 21 FLOP
-#if 1
+#if 0
       // Apply thermal conductivities, storing heat flux in the last ROW of S
       S[ 9]=A[Dn* 0+Dm]*C[12];
       S[10]=A[Dn* 1+Dm]*C[13];
       S[11]=A[Dn* 2+Dm]*C[14];//---------------------------------------- 3 FLOP
+#else
+      // Apply thermal conductivities, storing heat flux in the last ROW of A
+      A[ 9]=A[Dn* 0+Dm]*C[12];
+      A[10]=A[Dn* 1+Dm]*C[13];
+      A[11]=A[Dn* 2+Dm]*C[14];//---------------------------------------- 3 FLOP
 #endif
 #if 1
       // Calculate volumetric thermoelastic effect temperature change
       // Small and neglected for quasi-static (high-cycle?) fatigue loading
-      S[ 9]-= S[0] * C[15];
-      S[10]-= S[4] * C[16];
-      S[11]-= S[8] * C[17];//------------------------------------------- 6 FLOP
+      A[ 9]-= S[0] * C[15];
+      A[10]-= S[4] * C[16];
+      A[11]-= S[8] * C[17];//------------------------------------------- 6 FLOP
 #endif
 #if VERB_MAX>10
       printf( "Stress (Natural Coords):");
@@ -168,11 +168,8 @@ int ThermElastOrtho3D::ElemLinear( Elem* E,
         printf("%+9.2e ",S[j]);
       }; printf("\n");
 #endif
-      // Apply integration weights and |jac|.
-      for(int i=0; i<(Dm*Dn); i++){ S[i] *= dw; }//-------------------- 12 FLOP
       // [S][R] : matmul3x3x3, R is transposed
       //for(int i=0; i<9; i++){ A[i]=0.0; };
-//#pragma omp simd
       for(int i=0; i<Dm; i++){
         for(int k=0; k<Dm; k++){ A[Dm* k+i ]=0.0;
           for(int j=0; j<Dm; j++){
@@ -187,24 +184,21 @@ int ThermElastOrtho3D::ElemLinear( Elem* E,
         printf("%+9.2e ",S[j]);
       } printf("\n");
 #endif
-//#pragma omp simd
+      // Apply integration weights and |jac|.
+      for(int i=0; i<(Dm*Dn); i++){ A[i] *= dw; }//-------------------- 12 FLOP
+      // Accumulate nodal forces
       for(int i=0; i<Nc; i++){
-        for(int k=0; k<Dm; k++){
+        for(int k=0; k<Dn; k++){
           for(int j=0; j<Dm; j++){
             f[Dn* i+k ] += G[Dm* i+j ] * A[Dm* k+j ] ;
-      } } }//------------------------------------------------ N*3*8 = 24*N FLOP
-      // This is way slower:
-      //for(int i=0; i<Nc; i++){
-      //  for(int k=0; k<3 ; k++){
-      //    for(int j=0; j<3 ; j++){
-      //    for(int l=0; l<3 ; l++){
-      //      f[3* i+l ] += G[3* i+j ] * S[3* j+k ] * R[3* k+l ];
-      //};};};};
+      } } }//------------------------------------------------ N*3*8 = 30*N FLOP
+#if 0
       // Apply nodal heat flow
       for(int i=0; i<Nc; i++){
         for(int j=0;j<Dm; j++){
           f[Dn* i+Dm ] += G[Dm* i+j ] * S[9+j];
       } }//----------------------------------------------------------- 6*N FLOP
+#endif
 #if VERB_MAX>10
       printf( "ff:");
       for(int j=0;j<Ne;j++){
@@ -218,4 +212,4 @@ int ThermElastOrtho3D::ElemLinear( Elem* E,
     }
   }//end elem loop ============================================================
   return 0;
-};
+}
