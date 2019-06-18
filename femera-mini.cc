@@ -222,7 +222,8 @@ int main( int argc, char** argv ){
   if( numa_n >int(part_n) ){ numa_n=int(part_n); };
 #if VERB_MAX>1
   if(verbosity>1){
-  std::cout <<"Parallel OpenMP " << "using "  <<comp_n<< " threads";
+  std::cout <<"Parallel OpenMP " << "using "  <<comp_n<< " threads "
+    << std::getenv("OMP_PROC_BIND") << " to " <<std::getenv( "OMP_PLACES");
   if(simd_n>1){std::cout <<" and starting physics block width of "<<simd_n;};
   std::cout  <<"..."<<'\n';
     //<<comp_n<< " compute and "<<numa_n<<" NUMA threads..."<<'\n';
