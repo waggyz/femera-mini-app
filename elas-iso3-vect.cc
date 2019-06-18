@@ -84,7 +84,7 @@ int ElastIso3D::ElemLinear( Elem* E,
     const INT_MESH* RESTRICT c = &Econn[Nc*e0];
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
-//#else
+#else
 //#pragma omp simd
 #endif
     for (int i=0; i<Nc; i++){
@@ -100,14 +100,14 @@ int ElastIso3D::ElemLinear( Elem* E,
 #else
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
-//#else
+#else
 //#pragma omp simd
 #endif
     for (int i=0; i<Nc; i++){
       std::memcpy( & f[4*i],& sysf[conn[i]*3], sizeof(FLOAT_SOLV)*Nf ); }
 #endif
     __m256d j0,j1,j2;
-    j0 = _mm256_loadu_pd(&jac[0]);  // j0 = [j3 j2 j1 j0]
+    j0 = _mm256_load_pd (&jac[0]);  // j0 = [j3 j2 j1 j0]
     j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
     j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
@@ -121,7 +121,7 @@ int ElastIso3D::ElemLinear( Elem* E,
       __m256d is0,is1,is2,is3,is4,is5,is6,is7,is8;
       int ig=0;
 #if 1
-        for(int i= 0; i<Ne; i+=9){// 3* 4
+        for(int i= 0; i<Ne; i+=9){
           is0= _mm256_set1_pd(isp[i+0]); is1= _mm256_set1_pd(isp[i+1]); is2= _mm256_set1_pd(isp[i+2]);
           u0 = _mm256_set1_pd(  u[i+0]); u1 = _mm256_set1_pd(  u[i+1]); u2 = _mm256_set1_pd(  u[i+2]);
           g0 = _mm256_add_pd(_mm256_mul_pd(j0,is0), _mm256_add_pd(_mm256_mul_pd(j1,is1),_mm256_mul_pd(j2,is2)));
@@ -145,7 +145,7 @@ int ElastIso3D::ElemLinear( Elem* E,
           }
         }
 #else
-      switch(elem_p){//FIXME I don't think this switch helped...
+      switch(elem_p){//FIXME I don't think this switch helped...maybe 1-2% faster?
       default:
       case(1):
         for(int i= 0; i<12; i+=9){// 3* 4
@@ -222,8 +222,8 @@ int ElastIso3D::ElemLinear( Elem* E,
       }// end elem_p switch
 #endif
       _mm256_store_pd(&H[0],a036);
-      _mm256_store_pd(&H[3+1],a147);
-      _mm256_store_pd(&H[6+2],a258);
+      _mm256_store_pd(&H[4],a147);
+      _mm256_store_pd(&H[8],a258);
       }//end register scope
 #else
 #ifdef __INTEL_COMPILER
@@ -291,7 +291,7 @@ int ElastIso3D::ElemLinear( Elem* E,
       S[ 0]=(C[0]* H[0] + C[1]* H[5] + C[1]* H[10])*dw;//Sxx
       S[ 5]=(C[1]* H[0] + C[0]* H[5] + C[1]* H[10])*dw;//Syy
       S[10]=(C[1]* H[0] + C[1]* H[5] + C[0]* H[10])*dw;//Szz
-      
+
       S[1]=( H[1] + H[4] )*C[2]*dw;// S[3]= S[1];//Sxy Syx
       S[2]=( H[2] + H[8] )*C[2]*dw;// S[6]= S[2];//Sxz Szx
       S[6]=( H[6] + H[9] )*C[2]*dw;// S[7]= S[5];//Syz Szy
@@ -301,9 +301,9 @@ int ElastIso3D::ElemLinear( Elem* E,
 #ifdef VECTORIZED
       {// Scope variables
         __m256d a036, a147, a258;
-      a036 = _mm256_loadu_pd(&S[0]); // [a3 a2 a1 a0]
-      a147 = _mm256_loadu_pd(&S[4]); // [a6 a5 a4 a3]
-      a258 = _mm256_loadu_pd(&S[8]); // [a9 a8 a7 a6]
+      a036 = _mm256_load_pd(&S[0]); // [a3 a2 a1 a0]
+      a147 = _mm256_load_pd(&S[4]); // [a6 a5 a4 a3]
+      a258 = _mm256_load_pd(&S[8]); // [a9 a8 a7 a6]
         if(ip==0){
           f0 = _mm256_loadu_pd(&sys_f[3*conn[ 0]]);
           f1 = _mm256_loadu_pd(&sys_f[3*conn[ 1]]);
@@ -349,7 +349,7 @@ int ElastIso3D::ElemLinear( Elem* E,
           g3 = _mm256_set1_pd(G[36]) ; g4 = _mm256_set1_pd(G[37]) ; g5 = _mm256_set1_pd(G[38]);
           f9 = _mm256_add_pd(f9, _mm256_add_pd(_mm256_mul_pd(g3,a036), _mm256_add_pd(_mm256_mul_pd(g4,a147),_mm256_mul_pd(g5,a258))));
         }
-      } // end scoping unit
+      } // end variable scope
 #else
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
