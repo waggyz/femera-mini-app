@@ -74,7 +74,9 @@ int ElastIso3D::ElemLinear( Elem* E,
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
   const FLOAT_SOLV* RESTRICT sysu  = &sys_u[0];
+#ifndef VECTORIZED
         FLOAT_SOLV* RESTRICT sysf  = &sys_f[0];
+#endif
   if(e0<ee){
 #ifdef FETCH_JAC
     std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
@@ -118,9 +120,10 @@ int ElastIso3D::ElemLinear( Elem* E,
       __m256d u0,u1,u2,u3,u4,u5,u6,u7,u8,g0,g1,g2;
       __m256d is0,is1,is2,is3,is4,is5,is6,is7,is8;
       int ig=0;
-      switch(elem_p){
+      switch(elem_p){//FIXME I don't think this switch helped...
       default:
       case(1):
+        //for(int i= 0; i<Ne; i+=9){
         for(int i= 0; i<12; i+=9){// 3* 4
           is0= _mm256_set1_pd(isp[i+0]); is1= _mm256_set1_pd(isp[i+1]); is2= _mm256_set1_pd(isp[i+2]);
           u0 = _mm256_set1_pd(  u[i+0]); u1 = _mm256_set1_pd(  u[i+1]); u2 = _mm256_set1_pd(  u[i+2]);
@@ -260,22 +263,22 @@ int ElastIso3D::ElemLinear( Elem* E,
         S[6]=(H[6] + H[9])*C[7]*dw; // S[5]
       } // end scoping unit
 #else
-      S[ 0]=(C[0]* H[0] + C[1]* H[4+1] + C[1]* H[8+2])*dw;//Sxx
-      S[ 5]=(C[1]* H[0] + C[0]* H[4+1] + C[1]* H[8+2])*dw;//Syy
-      S[10]=(C[1]* H[0] + C[1]* H[4+1] + C[0]* H[8+2])*dw;//Szz
+      S[ 0]=(C[0]* H[0] + C[1]* H[5] + C[1]* H[10])*dw;//Sxx
+      S[ 5]=(C[1]* H[0] + C[0]* H[5] + C[1]* H[10])*dw;//Syy
+      S[10]=(C[1]* H[0] + C[1]* H[5] + C[0]* H[10])*dw;//Szz
       
-      S[ 1]=( H[1] + H[3+1] )*C[2]*dw;// S[3]= S[1];//Sxy Syx
-      S[ 2]=( H[2] + H[6+2] )*C[2]*dw;// S[6]= S[2];//Sxz Szx
-      S[ 6]=( H[5+1] + H[7+2] )*C[2]*dw;// S[7]= S[5];//Syz Szy
-      S[3+1]=S[1]; S[7+2]=S[5+1]; S[6+2]=S[2];
+      S[1]=( H[1] + H[4] )*C[2]*dw;// S[3]= S[1];//Sxy Syx
+      S[2]=( H[2] + H[8] )*C[2]*dw;// S[6]= S[2];//Sxz Szx
+      S[6]=( H[6] + H[9] )*C[2]*dw;// S[7]= S[5];//Syz Szy
+      S[4]=S[1]; S[9]=S[6]; S[8]=S[2];
 #endif
       //------------------------------------------------------- 18+9 = 27 FLOP
 #ifdef VECTORIZED
       {// Scope variables
         __m256d a036, a147, a258;
       a036 = _mm256_loadu_pd(&S[0]); // [a3 a2 a1 a0]
-      a147 = _mm256_loadu_pd(&S[3+1]); // [a6 a5 a4 a3]
-      a258 = _mm256_loadu_pd(&S[6+2]); // [a9 a8 a7 a6]
+      a147 = _mm256_loadu_pd(&S[4]); // [a6 a5 a4 a3]
+      a258 = _mm256_loadu_pd(&S[8]); // [a9 a8 a7 a6]
         if(ip==0){
           f0 = _mm256_loadu_pd(&sys_f[3*conn[ 0]]);
           f1 = _mm256_loadu_pd(&sys_f[3*conn[ 1]]);
