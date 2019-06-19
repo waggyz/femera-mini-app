@@ -223,7 +223,7 @@ int main( int argc, char** argv ){
 #if VERB_MAX>1
   if(verbosity>1){
   std::cout <<"Parallel OpenMP " << "using "  <<comp_n<< " threads";
-    if(auto c=std::getenv("OMP_PROC_BIND")){ std::cout <<" " c; }
+    if(auto c=std::getenv("OMP_PROC_BIND")){ std::cout <<" "<< c; }
     if(auto c=std::getenv("OMP_PLACES")){ std::cout << " to " <<c; }
   if(simd_n>1){std::cout <<" and starting physics block width of "<<simd_n;};
   std::cout  <<"..."<<'\n';
