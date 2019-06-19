@@ -61,7 +61,7 @@ FEMERA_REF_CC = $(FEMERA_COMMON)\
 all: gmsh2fmr-ser mini-omp mini-ser mini-omq mini-seq
 
 mini-ref:
-	mv -f reera-$(CPUMODEL) fembase.old 2>/dev/null ; \
+	mv -f refera-$(CPUMODEL) refera.old 2>/dev/null ; \
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
 	$(FEMERA_REF_CC) test.cc femera-mini.cc -o refera-$(CPUMODEL) $(CPPLOG);\
@@ -70,7 +70,7 @@ mini-ref:
 
 
 base-omp:
-	mv -f basera-$(CPUMODEL) fembase.old 2>/dev/null ; \
+	mv -f basera-$(CPUMODEL) basera.old 2>/dev/null ; \
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
 	$(FEMERA_BASE_CC) test.cc femera-mini.cc -o basera-$(CPUMODEL) $(CPPLOG);\

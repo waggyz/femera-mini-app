@@ -27,7 +27,7 @@ int ElastIso3D::Setup( Elem* E ){
   this->stif_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) +2);
   return 0;
-};
+}
 int ElastIso3D::ElemLinear( Elem* E,
   FLOAT_SOLV* sys_f, const FLOAT_SOLV* sys_u ){
   //FIXME Clean up local variables.
@@ -51,8 +51,8 @@ int ElastIso3D::ElemLinear( Elem* E,
   FLOAT_PHYS H[Nd*Nf], S[Nd*Nf];
   //
   const FLOAT_PHYS* RESTRICT intp_shpg = &E->intp_shpg[0];
-  const FLOAT_PHYS* RESTRICT wgt = &E->gaus_weig[0];
-  const FLOAT_PHYS* RESTRICT C = &this->mtrl_matc[0];
+  const FLOAT_PHYS* RESTRICT       wgt = &E->gaus_weig[0];
+  const FLOAT_PHYS* RESTRICT         C = &this->mtrl_matc[0];
 #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
   for(uint j=0;j<mtrl_matc.size();j++){

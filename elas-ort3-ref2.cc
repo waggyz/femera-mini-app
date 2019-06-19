@@ -25,7 +25,7 @@ int ElastOrtho3D::Setup( Elem* E ){
     sizeof(FLOAT_PHYS)* 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) -1+2)
     +sizeof(INT_MESH) *uint(E->elem_conn_n) );
   return 0;
-};
+}
 int ElastOrtho3D::ElemLinear( Elem* E,
   FLOAT_SOLV *sys_f, const FLOAT_SOLV* sys_u ){
   //FIXME Cleanup local variables.
