@@ -10,7 +10,7 @@ int ElastOrtho3D::Setup( Elem* E ){
   JacT  ( E );
   const uint jacs_n = E->elip_jacs.size()/E->elem_n/ 10 ;
   const uint intp_n = E->gaus_n;
-  this->tens_flop = uint(E->elem_n) * intp_n *( uint(E->elem_conn_n)* (36+18+3) + 2*54 + 27 );
+  this->tens_flop = uint(E->elem_n) * intp_n *( uint(E->elem_conn_n)* (36+18) + 2*54 + 27 );
   this->tens_band = uint(E->elem_n) *( sizeof(FLOAT_PHYS)*(3*uint(E->elem_conn_n)*3+ jacs_n*10) +sizeof(INT_MESH)*uint(E->elem_conn_n) );
   this->stif_flop = uint(E->elem_n) * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) );
   this->stif_band = uint(E->elem_n) *( sizeof(FLOAT_PHYS)* 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) -1+3) +sizeof(INT_MESH) *uint(E->elem_conn_n) );

@@ -15,7 +15,7 @@ int ElastOrtho3D::Setup( Elem* E ){
   const uint jacs_n = E->elip_jacs.size()/E->elem_n/ 10 ;
   const uint intp_n = E->gaus_n;
   this->tens_flop = uint(E->elem_n) * intp_n
-    *( uint(E->elem_conn_n)* (36+18+3) + 2*54 + 27 );
+    *( uint(E->elem_conn_n)* (36+18)+uint(E->elem_conn_n)*3 + 2*54 + 27 );
   this->tens_band = uint(E->elem_n) *(
      sizeof(FLOAT_PHYS)*(3*uint(E->elem_conn_n)*3+ jacs_n*10)
     +sizeof(INT_MESH)*uint(E->elem_conn_n) );
@@ -52,7 +52,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   const FLOAT_PHYS* RESTRICT intp_shpg = &E->intp_shpg[0];
   const FLOAT_PHYS* RESTRICT       wgt = &E->gaus_weig[0];
   const FLOAT_PHYS* RESTRICT         C = &this->mtrl_matc[0];
-  const FLOAT_PHYS*                  R = &this->mtrl_rotc[0];
+  const FLOAT_PHYS* RESTRICT         R = &this->mtrl_rotc[0];
 #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
   for(uint j=0;j<mtrl_matc.size();j++){
@@ -159,7 +159,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
     }//end intp loop
     for (uint i=0; i<uint(Nc); i++){
       for (uint j=0; j<uint(Dn); j++){
-        sysf[conn[i]*Dn+j] += f[Dn*i+j]; } }
+        sysf[conn[i]*Dn+j] += f[Dn*i+j]; } }//------------------------ 3*N FLOP
   }//end elem loop
   return 0;
 }

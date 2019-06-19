@@ -48,7 +48,7 @@ int ElastIso3D::ElemLinear( Elem* E,
     (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
 #endif
 #ifdef FETCH_JAC
-  FLOAT_MESH jac[Nj];
+  FLOAT_PHYS jac[Nj];
 #endif
   FLOAT_PHYS dw, G[Ne], u[Ne], f[Ne];
   FLOAT_PHYS H[Nd*Nf], S[Nd*Nf];

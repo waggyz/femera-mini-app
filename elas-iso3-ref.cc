@@ -69,8 +69,8 @@ int ElastIso3D::ElemLinear( Elem* E,
     for (uint i=0; i<uint(Nc); i++){
       for (uint j=0; j<uint(Nf); j++){
         u[Nf*i+j] = sysu[conn[i]*Nf+j];
-      } }
-    for (int i=0; i<Ne; i++){ f[i]=0.0; }
+    } }
+    for(int i=0; i<Ne; i++){ f[i]=0.0; }
     for(int ip=0; ip<intp_n; ip++){
       for(int i=0; i< 9 ; i++){ H[i]=0.0; }
       for(int i=0; i<Ne ; i++){ G[i]=0.0; }
@@ -80,18 +80,18 @@ int ElastIso3D::ElemLinear( Elem* E,
         for(int k=0; k<Nf ; k++){ 
           for(int j=0; j<Nd ; j++){
             G[Nf* i+k ] += intp_shpg[ip*Ne+ Nd* i+j ] * Ejacs[Nj*ie+ Nd* j+k ];
-             } } }
+      } } }
       for(int i=0; i<Nc; i++){
         for(int k=0; k<Nf ; k++){
           for(int j=0; j<Nf ; j++){
             H[Nf* k+j ] += G[Nf* i+k ] * u[Nf* i+j ];
-            } } }//---------------------------------------- N*3*6*2 = 36*N FLOP
+      } } }//---------------------------------------------- N*3*6*2 = 36*N FLOP
 #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
       for(int j=0;j<H.size();j++){
-        if(j%mesh_d==0){printf("\n");}
+        if(j%mesh_d==0){printf("\n"); }
         printf("%+9.2e ",H[j]);
-      }; printf("\n");
+      } printf("\n");
 #endif
       dw = Ejacs[Nj*ie+ 9] * wgt[ip];
       //
@@ -107,8 +107,8 @@ int ElastIso3D::ElemLinear( Elem* E,
       for(int i=0; i<Nc; i++){
         for(int k=0; k<Nf; k++){
           for(int j=0; j<Nf; j++){
-            f[Nf* i+k ] += G[Nf* i+j ] * S[Nf* j+k ];// 18*N FMA FLOP
-      } } }//------------------------------------------------ N*3*6 = 18*N FLOP
+            f[Nf* i+k ] += G[Nf* i+j ] * S[Nf* j+k ];
+      } } }//------------------------------------------------- N*3*6 = 18*N FMA
 #if VERB_MAX>10
       printf( "f:");
       for(int j=0;j<Ne;j++){
@@ -119,7 +119,8 @@ int ElastIso3D::ElemLinear( Elem* E,
     }//end intp loop
     for (uint i=0; i<uint(Nc); i++){
       for (uint j=0; j<uint(Nf); j++){
-        sysf[conn[i]*Nf+j] += f[Nf*i+j]; } }
+        sysf[conn[i]*Nf+j] += f[Nf*i+j];
+    } }//------------------------------------------------------------- 3*n FLOP
   }//end elem loop
   return 0;
   }

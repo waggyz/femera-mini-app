@@ -49,7 +49,8 @@ int ElastIso3D::ElemLinear( Elem* E,
   printf("DOF: %u, Elems:%u, IntPts:%u, Nodes/elem:%u\n",
     (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
 #endif
-  FLOAT_MESH __attribute__((aligned(32))) dw, jac[Nj];
+  FLOAT_PHYS dw;
+  FLOAT_MESH __attribute__((aligned(32))) jac[Nj];
   FLOAT_PHYS __attribute__((aligned(32))) G[Nt], u[Ne], f[Nt];
   FLOAT_PHYS __attribute__((aligned(32))) H[Nd*4], S[Nd*4];//FIXME S size
   //
