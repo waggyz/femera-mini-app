@@ -42,21 +42,32 @@ CPUMODEL:=$(shell ./cpumodel.sh)-$(CPUSTR)
 # -Wsuggest-final-types and -Wsuggest-final-methods -O3 -flto
 
 # CPPLOG=-fopt-info-vec-optimized 2>a.log ; grep -i vectorized a.log ; grep -i warn a.log; grep -i error a.log
+FEMERA_COMMON = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
+ halo-pcg-omp.cc halo-pcr-dummy.cc \
+ elas-iso3.cc elas-ort3.cc elas-ther-ort3.cc\
 
-FEMERA_MINI_CC = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc \
- halo-pcg-omp.cc halo-pcr-dummy.cc \
- elas-iso3.cc elas-ort3.cc elas-ther-ort3.cc \
+FEMERA_MINI_CC = $(FEMERA_COMMON)\
  elas-iso3-vect.cc elas-ort3-vec2.cc elas-ther-ort3-vec2.cc
- 
-FEMERA_BASE_CC = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc \
- halo-pcg-omp.cc halo-pcr-dummy.cc \
- elas-iso3.cc elas-ort3.cc elas-ther-ort3.cc \
+
+FEMERA_BASE_CC = $(FEMERA_COMMON)\
  elas-iso3-base.cc elas-ort3-bas2.cc elas-ther-ort3-bas2.cc
+ 
+FEMERA_REF_CC = $(FEMERA_COMMON)\
+ elas-iso3-ref.cc elas-ort3-ref2.cc elas-ther-ort3-ref2.cc
 
 #OMPI_CPPFLAGS=$(CPPFLAGS) ; \
 #OMPI_CXXFLAGS=$(CPPFLAGS) ; \
 
 all: gmsh2fmr-ser mini-omp mini-ser mini-omq mini-seq
+
+mini-ref:
+	mv -f reera-$(CPUMODEL) fembase.old 2>/dev/null ; \
+	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
+	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
+	$(FEMERA_REF_CC) test.cc femera-mini.cc -o refera-$(CPUMODEL) $(CPPLOG);\
+	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
+	command /usr/bin/time -v ./refera-$(CPUMODEL) -v2 -c$(NCPU) -p cube/unst19p1n16 ;
+
 
 base-omp:
 	mv -f basera-$(CPUMODEL) fembase.old 2>/dev/null ; \
