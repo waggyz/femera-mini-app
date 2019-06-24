@@ -4,7 +4,6 @@ CPPFLAGS=-std=c++11 -Wall -Wextra -g -Ofast -ftree-vectorize -march=native \
 #FIXME -mtune=core-avx2 when -mtune=native doesn't work
 OMPFLAGS=-fopenmp
 SERFLAGS=-Wno-unknown-pragmas
-NCPU=2
 NUMA=2
 CPUSTR=gcc
 
@@ -16,7 +15,6 @@ CPPFLAGS=-std=c++11 -Wall -Wextra -Ofast -xHost -axSKYLAKE-AVX512 \
  -no-inline-max-size -no-inline-max-total-size -g
 # -march=native
 SERFLAGS=-fno-alias -diag-disable 3180
-NCPU=8
 NUMA=2
 CPUSTR=icc
 endif
@@ -28,11 +26,12 @@ CPPFLAGS=-restrict -std=c++11 -Wall -Wextra -O2 -ansi-alias\
  -ffast-math -no-fast-transcendentals\
  -no-inline-max-size -no-inline-max-total-size -xSKYLAKE-AVX512 -g
 SERFLAGS=-fno-alias -diag-disable 3180
-NCPU=40
 NUMA=6
 CPUSTR=icc
 endif
 
+
+NCPU:=$(shell ./cpucount.sh)
 CPUMODEL:=$(shell ./cpumodel.sh)-$(CPUSTR)
 
 #-O3 -ftree-vectorize -ffast-math -march=native
