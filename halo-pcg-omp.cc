@@ -215,7 +215,7 @@ int HaloPCG::Init(){// Preconditioned Conjugate Gradient
       Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
       if(E->node_haid.size()==0){ E->node_haid.resize(E->halo_node_n); };
     }
-  if(this->solv_cond != Solv::COND_NONE){// Don't sync after sys_d=1;
+    // Sync sys_d
 #pragma omp for schedule(OMP_SCHEDULE)
     for(int part_i=part_0; part_i<part_o; part_i++){
       Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
@@ -233,9 +233,13 @@ int HaloPCG::Init(){// Preconditioned Conjugate Gradient
         halo_n++;
       }else{// Add in the rest.
         E->node_haid[i]=this->halo_map[g];
-        for( uint j=0; j<d; j++){
-          this->halo_val[d*E->node_haid[i]+j] += S->sys_d[d*i +j]; };
-      };
+        if(this->solv_cond == Solv::COND_NONE){
+          for( uint j=0; j<d; j++){
+            this->halo_val[d*E->node_haid[i]+j] = S->sys_d[d*i +j]; } }
+        else{
+          for( uint j=0; j<d; j++){
+            this->halo_val[d*E->node_haid[i]+j]+= S->sys_d[d*i +j]; } }
+      }
 }
     };
     };// End sys_d gather
@@ -251,7 +255,6 @@ int HaloPCG::Init(){// Preconditioned Conjugate Gradient
           S->sys_d[d*i +j] = this->halo_val[f+j]; };
       };
     };// end sys_d scatter
-  }//end skip if no preconditioner
   time_reset( my_scat_count, start );
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){

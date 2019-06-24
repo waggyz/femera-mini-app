@@ -9,8 +9,7 @@ int Solv::Precond(Elem* E, Phys* Y){// Jacobi Preconditioner
   //if(this->solv_cond != Solv::COND_NONE){ this->sys_d=0.0; };//FIXME
   switch(this->solv_cond){
   case(Solv::COND_NONE):{
-    for(uint i=0; i<this->udof_n; i++){ this->sys_d[i]=1.0; };
-    break;}
+    for(uint i=0; i<this->udof_n; i++){ this->sys_d[i]=1.0; }; break;}
   case(Solv::COND_JACO):{
     Y->ElemJacobi( E, this->sys_d );
     for(uint i=0; i<this->udof_n; i++){

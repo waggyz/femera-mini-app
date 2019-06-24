@@ -369,8 +369,11 @@ int main( int argc, char** argv ){
     std::cout<< "  Iterating to: "<<rtol<<" relative tolerance,"<<'\n'
       <<"or stopping at: "<<iter_max<<" "<<M->meth_name<<" iterations..."<<'\n';
     std::cout <<"Solving..."<<'\n';
-    printf("     init ||R||%9.2e /%9.2e tol in %f s\n",
-      std::sqrt(M->glob_chk2), std::sqrt(M->glob_rto2),init_sec );
+    const char* c="=";
+    if(M->glob_chk2 < M->glob_rto2){ c="<"; }
+    else if(M->glob_chk2 > M->glob_rto2){ c=">"; }
+    printf("     init ||R||%9.2e %s%9.2e tol in %f s\n",
+      std::sqrt(M->glob_chk2), c, std::sqrt(M->glob_rto2),init_sec );
     };
 #endif
   }// end init scope
@@ -420,8 +423,11 @@ int main( int argc, char** argv ){
     if(verbosity>1){
     if( loop_sec < 100.0*ms ){ sc=us; ss="μs"; }
     else if( loop_sec > 100.0*sec ){sc=sec; ss=" s"; };
-    printf("%9i ||R||%9.2e /%9.2e tol in %f s\nDone.\n", iter,
-      std::sqrt(M->glob_chk2), std::sqrt(M->glob_rto2), loop_sec );
+    const char* c="=";
+    if(M->glob_chk2 < M->glob_rto2){ c="<"; }
+    else if(M->glob_chk2 > M->glob_rto2){ c=">"; }
+    printf("%9i ||R||%9.2e %s%9.2e tol in %f s\nDone.\n", iter,
+      std::sqrt(M->glob_chk2), c, std::sqrt(M->glob_rto2), loop_sec );
     };
 #endif
 #if VERB_MAX>1
