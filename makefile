@@ -42,7 +42,7 @@ CPUMODEL:=$(shell ./cpumodel.sh)-$(CPUSTR)
 
 # CPPLOG=-fopt-info-vec-optimized 2>a.log ; grep -i vectorized a.log ; grep -i warn a.log; grep -i error a.log
 FEMERA_COMMON = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
- halo-pcg-omp.cc halo-pcr-dummy.cc \
+ halo-pcg-omp.cc halo-ncg-omp.cc halo-pcr-dummy.cc \
  elas-iso3.cc elas-ort3.cc elas-ther-ort3.cc\
 
 FEMERA_MINI_CC = $(FEMERA_COMMON)\

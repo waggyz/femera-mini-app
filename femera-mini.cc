@@ -245,6 +245,7 @@ int main( int argc, char** argv ){
   switch( solv_meth ){
     case(Solv::SOLV_CG):{ M=new HaloPCG(part_n+part_0,iter_max,rtol); break;}
     case(Solv::SOLV_CR):{ M=new HaloPCR(part_n+part_0,iter_max,rtol); break;}
+    case(Solv::SOLV_NG):{ M=new HaloNCG(part_n+part_0,iter_max,rtol); break;}
     default            :{ M=new HaloPCG(part_n+part_0,iter_max,rtol); }
   };
   M->solv_cond=solv_cond;

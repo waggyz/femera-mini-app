@@ -11,7 +11,7 @@ public:
   const uint valign_byte = 64;
 #endif
   enum Meth {
-    SOLV_GD=0, SOLV_CG=1, SOLV_CR=2
+    SOLV_GD=0, SOLV_CG=1, SOLV_CR=2, SOLV_NG=3
   };
   enum Cond {
     COND_NONE=0, COND_JACO=3, COND_ROW1=1, COND_STRA=4
@@ -30,16 +30,18 @@ public:
   valign sys_f;// f=[A]{u}//FIXME Move to Phys*?
   valign sys_u;// solution
   valign sys_r;// Residuals
+  valign sys_b;// RHS
   //NOTE Additional working vectors needed are defined in each solver subclass
   //FIXME Moved them back here for now
   valign sys_d;//FIXME diagonal preconditioner w/ fixed BC DOFs set to zero
-  valign sys_p, sys_g;//FIXME working vectors specific to each method
+  valign sys_p, sys_q, sys_g;//FIXME working vectors specific to each method
   // The data is actually stored in corresponding C++ objects.
   Solv::vals dat_f;
   Solv::vals dat_u;
-  Solv::vals dat_r;// Conatins (preconditioned) force residuals (PCG)
+  Solv::vals dat_r;// Force residuals (PCG)
+  Solv::vals dat_b;// RHS
   Solv::vals dat_d;
-  Solv::vals dat_p, dat_g;
+  Solv::vals dat_p, dat_q, dat_g;
   //
   std::string meth_name="";
   //
@@ -68,9 +70,9 @@ protected:
     loca_rto2=loca_rtol*loca_rtol;
 #ifdef ALIGN_SYS
     sys_f = align_resize( dat_f, udof_n, valign_byte );// f=Au
-    sys_u = align_resize( dat_u, udof_n, valign_byte );
-    sys_r = align_resize( dat_r, udof_n, valign_byte );
-    sys_d = align_resize( dat_d, udof_n, valign_byte );
+    sys_u = align_resize( dat_u, udof_n, valign_byte );// solution
+    sys_r = align_resize( dat_r, udof_n, valign_byte );// residuals
+    sys_d = align_resize( dat_d, udof_n, valign_byte );// Preconditioner
 #else
     sys_u.resize(udof_n,0.0);// Initial Solution Guess
     sys_r.resize(udof_n,0.0);// Residuals
@@ -82,6 +84,47 @@ protected:
 #endif
   };
 private:
+};
+class NCG final: public Solv{
+// Nonlinear Conjugate Gradient Kernel ----------------------------
+public:
+  NCG( INT_MESH n, INT_MESH i, FLOAT_PHYS r ) : Solv(n,i,r){
+    meth_name="nonlinear cojugate gradient";
+#ifdef ALIGN_SYS
+    sys_p = align_resize( dat_p, udof_n, valign_byte );
+    sys_g = align_resize( dat_g, udof_n, valign_byte );
+    sys_q = align_resize( dat_q, udof_n, valign_byte );
+#else
+    // sys_d : diagonal preconditioner
+    // sys_b : RHS
+    // sys_u : solution
+    // sys_f : solution forces f = A u
+    // sys_r : force (gradient) residuals  r = A u - b
+    sys_p.resize(udof_n,0.0);// Search direction
+    sys_q.resize(udof_n,0.0);// perturbed solution gradient: A(u + alpha*p)
+    sys_g.resize(udof_n,0.0);// residual grad. of perturbed sol. g = A q -b
+#endif
+    udof_flop = 0;//*elem_n
+    udof_band = 0*sizeof(FLOAT_SOLV);//*udof_n + 2
+  };
+  //NCG( ):Solv(12,11){};
+  int Solve( Elem*, Phys* ) final;
+  int Setup( Elem*, Phys* ) final;
+  int Init ( Elem*, Phys* ) final;
+  int Init () final;
+  int Iter () final;
+  //int Iter (Elem*, Phys*) final;
+  //FIXME Make the rest private or protected later?
+  //RESTRICT Solv::vals sys_d;//FIXME diagonal preconditioner w/ fixed BC DOFs set to zero
+  //RESTRICT Solv::vals sys_p;// [sys_z no longer needed]
+protected:
+private:
+  //int Precond( Elem*, Phys*);
+  int RHS( Mesh* );//FIXME Remove?
+  int BC ( Mesh* );//FIXME Remove?
+  int RHS( Elem*, Phys* Y );
+  int BCS( Elem*, Phys* Y );
+  int BC0( Elem*, Phys* Y );
 };
 class PCG final: public Solv{
 // Preconditioned Conjugate Gradient Kernel ----------------------------

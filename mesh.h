@@ -144,6 +144,25 @@ public:
 protected:
 private:
 };
+class HaloNCG final: public Mesh{
+// Preconditioned Conjugate Gradient Kernel ----------------------------
+public:
+  HaloNCG() : Mesh(Solv::SOLV_NG){
+    meth_name="nonlinear cojugate gradient";
+  };
+  HaloNCG( INT_MESH i, FLOAT_PHYS r ) : Mesh(Solv::SOLV_NG,i,r){
+    meth_name="nonlinear cojugate gradient";
+  };
+  HaloNCG( int p, INT_MESH i, FLOAT_PHYS r ) : Mesh(p,Solv::SOLV_NG,i,r){
+    meth_name="nonlinear cojugate gradient";
+  };
+  int Init() final;
+  int Iter() final;
+  static std::vector<part> P;//FIXME Change this name
+#pragma omp threadprivate(P)
+protected:
+private:
+};
 //Elem* Mesh::ReadFile( const char* fname, INT_ORDER pord ){};
 /*
 class Msh final: public Mesh{
