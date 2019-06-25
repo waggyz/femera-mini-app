@@ -85,47 +85,6 @@ protected:
   };
 private:
 };
-class NCG final: public Solv{
-// Nonlinear Conjugate Gradient Kernel ----------------------------
-public:
-  NCG( INT_MESH n, INT_MESH i, FLOAT_PHYS r ) : Solv(n,i,r){
-    meth_name="nonlinear cojugate gradient";
-#ifdef ALIGN_SYS
-    sys_p = align_resize( dat_p, udof_n, valign_byte );
-    sys_g = align_resize( dat_g, udof_n, valign_byte );
-    sys_q = align_resize( dat_q, udof_n, valign_byte );
-#else
-    // sys_d : diagonal preconditioner
-    // sys_b : RHS
-    // sys_u : solution
-    // sys_f : solution forces f = A u
-    // sys_r : force (gradient) residuals  r = A u - b
-    sys_p.resize(udof_n,0.0);// Search direction
-    sys_q.resize(udof_n,0.0);// perturbed solution gradient: A(u + alpha*p)
-    sys_g.resize(udof_n,0.0);// residual grad. of perturbed sol. g = A q -b
-#endif
-    udof_flop = 0;//*elem_n
-    udof_band = 0*sizeof(FLOAT_SOLV);//*udof_n + 2
-  };
-  //NCG( ):Solv(12,11){};
-  int Solve( Elem*, Phys* ) final;
-  int Setup( Elem*, Phys* ) final;
-  int Init ( Elem*, Phys* ) final;
-  int Init () final;
-  int Iter () final;
-  //int Iter (Elem*, Phys*) final;
-  //FIXME Make the rest private or protected later?
-  //RESTRICT Solv::vals sys_d;//FIXME diagonal preconditioner w/ fixed BC DOFs set to zero
-  //RESTRICT Solv::vals sys_p;// [sys_z no longer needed]
-protected:
-private:
-  //int Precond( Elem*, Phys*);
-  int RHS( Mesh* );//FIXME Remove?
-  int BC ( Mesh* );//FIXME Remove?
-  int RHS( Elem*, Phys* Y );
-  int BCS( Elem*, Phys* Y );
-  int BC0( Elem*, Phys* Y );
-};
 class PCG final: public Solv{
 // Preconditioned Conjugate Gradient Kernel ----------------------------
 public:
@@ -189,6 +148,48 @@ public:
   //FIXME Make the rest private or protected later?
   //RESTRICT Solv::vals sys_d;//FIXME diagonal preconditioner w/ fixed BC DOFs set to zero
   //RESTRICT Solv::vals sys_g;// [f]=[A][r], [g]=[A][p]
+protected:
+private:
+  //int Precond( Elem*, Phys*);
+  int RHS( Mesh* );//FIXME Remove?
+  int BC ( Mesh* );//FIXME Remove?
+  int RHS( Elem*, Phys* Y );
+  int BCS( Elem*, Phys* Y );
+  int BC0( Elem*, Phys* Y );
+};
+class NCG final: public Solv{// Nonlinear Conjugate Gradient Kernel -----------
+public:
+  NCG( INT_MESH n, INT_MESH i, FLOAT_PHYS r ) : Solv(n,i,r){
+    meth_name="nonlinear cojugate gradient";
+#ifdef ALIGN_SYS
+    sys_b = align_resize( dat_b, udof_n, valign_byte );
+    sys_p = align_resize( dat_p, udof_n, valign_byte );
+    sys_g = align_resize( dat_g, udof_n, valign_byte );
+    sys_q = align_resize( dat_q, udof_n, valign_byte );
+#else
+    // sys_d : diagonal preconditioner
+    // sys_b : RHS
+    // sys_u : solution
+    // sys_f : solution forces f = A u
+    // sys_r : force (gradient) residuals  r = A u - b
+    sys_b.resize(udof_n,0.0);// RHS
+    sys_p.resize(udof_n,0.0);// Search direction
+    sys_q.resize(udof_n,0.0);// perturbed solution gradient: q = u + alpha*p
+    sys_g.resize(udof_n,0.0);// residual grad. of perturbed sol. g = A q -b
+#endif
+    udof_flop = 0;//*elem_n
+    udof_band = 0*sizeof(FLOAT_SOLV);//*udof_n + 2
+  };
+  //NCG( ):Solv(12,11){};
+  int Solve( Elem*, Phys* ) final;
+  int Setup( Elem*, Phys* ) final;
+  int Init ( Elem*, Phys* ) final;
+  int Init () final;
+  int Iter () final;
+  //int Iter (Elem*, Phys*) final;
+  //FIXME Make the rest private or protected later?
+  //RESTRICT Solv::vals sys_d;//FIXME diagonal preconditioner w/ fixed BC DOFs set to zero
+  //RESTRICT Solv::vals sys_p;// [sys_z no longer needed]
 protected:
 private:
   //int Precond( Elem*, Phys*);

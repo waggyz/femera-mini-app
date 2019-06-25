@@ -602,6 +602,9 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
     case(Solv::SOLV_CR):{
       S=new PCR( E->node_n * Y->node_d, this->iter_max, glob_rtol ); 
       break;}
+    case(Solv::SOLV_NG):{
+      S=new NCG( E->node_n * Y->node_d, this->iter_max, glob_rtol ); 
+      break;}
     default:{ S=new PCG(E->node_n * Y->node_d, this->iter_max, glob_rtol );  }
   };
   //S->tol = this->glob_rtol;
