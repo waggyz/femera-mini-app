@@ -82,7 +82,7 @@ int NCG::Init(){// printf("*** NCG::Init() ***\n");
   }
 #pragma omp simd reduction(+:R2)
   for(uint i=sumi0; i<sysn; i++){
-    R2 += this->sys_r[i]*this->sys_r[i] *this->sys_0[i]; }//FIXME div out precond
+    R2 += this->sys_r[i]*this->sys_r[i];}// *this->sys_0[i]; }//FIXME div out precond
   this->loca_res2=R2;
   this->loca_rto2 = this->loca_rtol*loca_rtol *loca_res2;//FIXME Move this somewhere.
   return(0);
