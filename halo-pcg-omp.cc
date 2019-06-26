@@ -432,8 +432,8 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
       S->sys_u[i] += S->sys_p[i] * alpha;// better data locality here
       S->sys_p[i]  = S->sys_d[i] * S->sys_r[i] + beta*S->sys_p[i]; };
   };
-#pragma omp single nowait
-{ glob_r2a = glob_sum2; }// Update residual (squared)
+//#pragma omp single nowait
+//{ glob_r2a = glob_sum2; }// Update residual (squared)
 #if VERB_MAX>1
   iter_done  = std::chrono::high_resolution_clock::now();
   auto solv_time  = std::chrono::duration_cast<std::chrono::nanoseconds>
@@ -452,7 +452,7 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
 }
 #endif
 }// end iter parallel region
-  this->glob_res2 = glob_r2a;
-  this->glob_chk2 = glob_r2a;
+  this->glob_res2 = glob_sum2;
+  this->glob_chk2 = glob_sum2;
   return 0;
 };
