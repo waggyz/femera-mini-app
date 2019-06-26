@@ -119,7 +119,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
       }
     }
   }
-#pragma omp master
+#pragma omp single
 {
   auto m=bcmax[0];
   for(uint i=1;i<3;i++){ if(bcmax[0] > m){ m=bcmax[i]; } }
@@ -133,6 +133,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     }
 #endif
 }
+//#pragma omp barrier
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
@@ -204,6 +205,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   time_reset( my_gat0_count, start );//FIXME wtf?
 #pragma omp single nowait
 {   this->halo_val = 0.0; }// serial halo_vals zero
+//#pragma omp barrier
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){// --------------- sync sys_f
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
