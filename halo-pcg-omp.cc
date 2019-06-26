@@ -189,7 +189,7 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
       }
     }
   }
-#pragma omp master
+#pragma omp single
 {
   auto m=bcmax[0];
   for(uint i=1;i<3;i++){ if(bcmax[0] > m){ m=bcmax[i]; } }
@@ -270,7 +270,7 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
     S->Init( E,Y );// Zeros boundary conditions
   };
   time_reset( my_solv_count, start );
-#pragma omp master
+#pragma omp single
 {   this->halo_val = 0.0; }// serial halo_vals zero
   time_reset( my_gat0_count, start );// ---------------------------  Sync sys_f
 #pragma omp for schedule(OMP_SCHEDULE)
