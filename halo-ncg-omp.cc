@@ -150,7 +150,6 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
       Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
       if(E->node_haid.size()==0){ E->node_haid.resize(E->halo_node_n); }
     }
-    // Sync sys_d
 #pragma omp for schedule(OMP_SCHEDULE)
     for(int part_i=part_0; part_i<part_o; part_i++){
       Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
@@ -196,12 +195,15 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH sysn=S->udof_n;
     for(uint i=0;i<sysn;i++){ S->sys_d[i] = FLOAT_SOLV(1.0) / S->sys_d[i]; }
+//#pragma omp critical
+//{
     S->Init( E,Y );// Zeros boundary conditions
+//}
   }
-  time_reset( my_solv_count, start );
-#pragma omp master
+  time_reset( my_solv_count, start );//FIXME wtf?
+  time_reset( my_gat0_count, start );//FIXME wtf?
+#pragma omp single nowait
 {   this->halo_val = 0.0; }// serial halo_vals zero
-  time_reset( my_gat0_count, start );
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){// --------------- sync sys_f
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
@@ -334,14 +336,17 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     E->do_halo=false; Y->ElemLinear( E, S->sys_g, S->sys_q );
     time_accum( my_phys_count, phys_start );
     //--------------------------------------------- Done compute and sync sys_g
+//  }
+//#pragma omp for schedule(OMP_SCHEDULE) reduction(+:glob_sum1,glob_sum2)
+//  for(int part_i=part_0; part_i<part_o; part_i++){
+//    std::tie(E,Y,S)=P[part_i];
+//    const auto sysn = S->udof_n,hl0=S->halo_loca_0;
     time_start( solv_start );
-#if 1
 #pragma omp simd
     for(INT_MESH i=0; i<sysn; i++){
       S->sys_g[i] *= S->sys_d[i];
       //S->sys_g[i] = S->sys_b[i] - S->sys_g[i] * S->sys_d[i];
     }
-#endif
 #pragma omp simd reduction(+:glob_sum1,glob_sum2)
     for(INT_MESH i=hl0; i<sysn; i++){
       glob_sum1 += S->sys_p[i] * S->sys_r[i];// alpha numerator
@@ -350,7 +355,6 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_accum( my_solv_count, solv_start );//FIXME?
   }
   //----------------------------------------------------------- Calculate alpha
-  time_start( solv_start );//FIXME?
   const FLOAT_SOLV alpha = glob_sum1 / glob_sum2;// 1 FLOP
   //printf("ALPHA:%+9.2e\n",alpha);
   //----------------------------------------------------- Update solution sys_u
@@ -358,11 +362,12 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
   for(int part_i=part_0; part_i<part_o; part_i++){//FIXME Merge with next loop
     std::tie(E,Y,S)=P[part_i];
     const auto sysn = S->udof_n;
+    time_start( solv_start );
 #pragma omp simd
     for(INT_MESH i=0; i<sysn; i++){
       S->sys_u[i] += alpha * S->sys_p[i]; }
+    time_accum( my_solv_count, solv_start );
   }
-  time_accum( my_solv_count, solv_start );
   //--------------------------------------------- Compute and sync forces sys_f
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
@@ -403,7 +408,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     std::tie(E,Y,S)=P[part_i];
     const INT_MESH Dn=uint(Y->node_d);
     time_start( scat_start );
-    const INT_MESH hnn=E->halo_node_n,hl0=S->halo_loca_0,sysn=S->udof_n;
+    const INT_MESH hnn=E->halo_node_n;//,hl0=S->halo_loca_0,sysn=S->udof_n;
     for(INT_MESH i=0; i<hnn; i++){//NOTE appears not to be critical
       std::memcpy(
         & S->sys_f[Dn* i],
@@ -415,35 +420,36 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     E->do_halo=false; Y->ElemLinear( E, S->sys_f, S->sys_u );
     time_accum( my_phys_count, phys_start );
     //--------------------------------------------- Done compute and sync sys_f
-    time_start( solv_start );
     //-------------------------------------- Calculate negative residuals sys_r
+    time_start( solv_start );
+    const INT_MESH hl0=S->halo_loca_0,sysn=S->udof_n;
 #pragma omp simd
     for(INT_MESH i=0; i<sysn; i++){
       S->sys_f[i] *= S->sys_d[i];
       S->sys_r[i]  = S->sys_b[i] - S->sys_f[i]; }
 #pragma omp simd reduction(+:glob_sum3)
     for(INT_MESH i=hl0; i<sysn; i++){// Reduce residual norm
-      glob_sum3+= S->sys_r[i] * S->sys_r[i]; }
+      glob_sum3 += S->sys_r[i] * S->sys_r[i]; }
     time_accum( my_solv_count, solv_start );
   }
-  time_start( solv_start );
   //-------------------------------------------------------------- Compute beta
   const FLOAT_SOLV beta = glob_sum3 / glob_r2a;// this R2 / last R2
-#pragma omp single nowait
-{ glob_r2a = glob_sum3; }// Update residual (squared)
   //--------------------------------------------- Update search direction sys_p
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=P[part_i];
     const INT_MESH sysn=S->udof_n;
+    time_start( solv_start );
 #pragma omp simd
     for(INT_MESH i=0; i<sysn; i++){
-      S->sys_p[i] = S->sys_r[i] + beta * S->sys_p[i]; }
+      S->sys_p[i] = S->sys_r[i] + beta * S->sys_p[i];
+    }
+    time_accum( my_solv_count, solv_start );
   }
 #if VERB_MAX>1
   iter_done  = std::chrono::high_resolution_clock::now();
-  auto solv_time  = std::chrono::duration_cast<std::chrono::nanoseconds>
-    (iter_done - solv_start);
+  //auto solv_time  = std::chrono::duration_cast<std::chrono::nanoseconds>
+   // (iter_done - solv_start);
   auto iter_time  = std::chrono::duration_cast<std::chrono::nanoseconds>
     (iter_done - iter_start);// printf("%i ",iter);
 #pragma omp critical(time)
@@ -452,13 +458,14 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
   this->time_secs[1]+=float(my_gat0_count)*1e-9;
   this->time_secs[2]+=float(my_gat1_count)*1e-9;
   this->time_secs[3]+=float(my_scat_count)*1e-9;
-  this->time_secs[4]+=float(my_solv_count+solv_time.count())*1e-9;
- //this->time_secs[4]+=float(solv_time.count())*1e-9;
+  this->time_secs[4]+=float(my_solv_count)*1e-9;
+  //this->time_secs[4]+=float(my_solv_count+solv_time.count())*1e-9;
+  //this->time_secs[4]+=float(solv_time.count())*1e-9;
   this->time_secs[5]+=float(iter_time.count())*1e-9;
 }
 #endif
 }// end iter parallel region
-  this->glob_res2 = glob_r2a;
-  this->glob_chk2 = glob_r2a;
+  this->glob_res2 = glob_sum3;
+  this->glob_chk2 = glob_sum3;
   return 0;
-};
+}
