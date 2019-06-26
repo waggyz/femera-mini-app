@@ -31,6 +31,7 @@ public:
   valign sys_u;// solution
   valign sys_r;// Residuals
   valign sys_b;// RHS
+  valign sys_0;// Dirichlet (fixed to zero) BCs
   //NOTE Additional working vectors needed are defined in each solver subclass
   //FIXME Moved them back here for now
   valign sys_d;//FIXME diagonal preconditioner w/ fixed BC DOFs set to zero
@@ -41,6 +42,7 @@ public:
   Solv::vals dat_r;// Force residuals (PCG)
   Solv::vals dat_b;// RHS
   Solv::vals dat_d;
+  Solv::vals dat_0;
   Solv::vals dat_p, dat_q, dat_g, dat_o;
   //
   std::string meth_name="";
@@ -73,10 +75,13 @@ protected:
     sys_u = align_resize( dat_u, udof_n, valign_byte );// solution
     sys_r = align_resize( dat_r, udof_n, valign_byte );// residuals
     sys_d = align_resize( dat_d, udof_n, valign_byte );// Preconditioner
+    sys_0 = align_resize( dat_0, udof_n, valign_byte );
+    for(INT_MESH i=0; i<udof_n; i++){ sys_0[i]=1.0; }
 #else
     sys_u.resize(udof_n,0.0);// Initial Solution Guess
     sys_r.resize(udof_n,0.0);// Residuals
     sys_d.resize(udof_n,0.0);// Diagonal Preconditioner
+    sys_0.resize(udof_n,1.0);
 #endif
 #if VERB_MAX > 13
     std::cout << valign_byte "-byte aligned pointer to sys_f[0]: "

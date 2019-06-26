@@ -25,7 +25,7 @@ int NCG::RHS(Elem* E, Phys* Y ){// printf("*** NCG::RHS(E,Y) ***\n");
   const uint Dn=uint(Y->node_d);
   INT_MESH n; INT_DOF f; FLOAT_PHYS v;
   for(auto t : E->rhs_vals ){ std::tie(n,f,v)=t;
-    this->sys_b[Dn* n+uint(f)]+= v;//FIXME apply preconditioner sys_d?
+    this->sys_b[Dn* n+uint(f)]+= v;
   }
   return(0);
 }
@@ -36,7 +36,6 @@ int NCG::BCS(Elem* E, Phys* Y ){// printf("*** NCG::BCS(E,Y) ***\n");
     //printf("FIX ID %i, DOF %i, val %+9.2e\n",i,E->bcs_vals[i].first,E->bcs_vals[i].second);
     this->sys_u[Dn* n+uint(f)] = v;
     if(std::abs(v) > Y->udof_magn[f]){ Y->udof_magn[f] = std::abs(v); }
-    //FIXME v * sys_d[]???
   }
   return(0);
 }
@@ -45,10 +44,12 @@ int NCG::BC0(Elem* E, Phys* Y ){// printf("*** NCG::BC0(E,Y) ***\n");
   INT_MESH n; INT_DOF f; FLOAT_PHYS v;
   for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
     this->sys_d[Dn* n+uint(f)]=0.0;
-    this->sys_f[Dn* n+uint(f)]=0.0;
+    this->sys_0[Dn* n+uint(f)]=0.0;
+    this->sys_f[Dn* n+uint(f)]=0.0;//FIXME apply to sys_b?
   }
   for(auto t : E->bc0_nf   ){ std::tie(n,f)=t;
     this->sys_d[Dn* n+uint(f)]=0.0;
+    this->sys_0[Dn* n+uint(f)]=0.0;
     #if VERB_MAX>10
     printf("BC0: [%i]:0\n",E->bc0_nf[i]);
     #endif
@@ -74,16 +75,14 @@ int NCG::Init(){// printf("*** NCG::Init() ***\n");
   FLOAT_SOLV R2=0.0;
 #pragma omp simd
   for(uint i=0; i<sysn; i++){
-    //this->sys_b[i] -= this->sys_f[i]*this->sys_d[i];
     this->old_r[i] = 0.0;
-    this->sys_b[i]*= sys_d[i];
-    this->sys_f[i]*= sys_d[i];
-    this->sys_p[i] = this->sys_b[i] - this->sys_f[i];//*this->sys_d[i];//FIXME sign?
-    this->sys_r[i] = this->sys_p[i];//FIXME initial search (p) is grad. desc. (r)
+    // Initial search (p) is preconditioned grad descent of (r)
+    this->sys_r[i] = this->sys_b[i] - this->sys_f[i];
+    this->sys_p[i] = this->sys_r[i] * this->sys_d[i];
   }
 #pragma omp simd reduction(+:R2)
   for(uint i=sumi0; i<sysn; i++){
-    R2 += this->sys_p[i]*this->sys_p[i]; }
+    R2 += this->sys_r[i]*this->sys_r[i] *this->sys_0[i]; }//FIXME div out precond
   this->loca_res2=R2;
   this->loca_rto2 = this->loca_rtol*loca_rtol *loca_res2;//FIXME Move this somewhere.
   return(0);
@@ -261,8 +260,9 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 #ifdef _OPENMP
   const int comp_n = this->comp_n;
 #endif
-  FLOAT_SOLV glob_sum1=0.0, glob_sum2=0.0, glob_sum3=0.0, glob_sum4=0.0;
-  FLOAT_SOLV glob_r2a = this->glob_res2;
+  FLOAT_SOLV glob_sum1=0.0, glob_sum2=0.0, glob_sum3=0.0, glob_sum4=0.0,
+    glob_sum5=0.0;
+  //FLOAT_SOLV glob_r2a = this->glob_res2;
 #pragma omp parallel num_threads(comp_n)
 {// iter parallel region
 // not needed anymore,since P is threadprivate
@@ -338,17 +338,12 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_accum( my_phys_count, phys_start );
     //--------------------------------------------- Done compute and sync sys_g
     time_start( solv_start );
-#pragma omp simd
-    for(INT_MESH i=0; i<sysn; i++){
-      S->sys_g[i] *= S->sys_d[i];
-      //S->sys_g[i] = S->sys_b[i] - S->sys_g[i] * S->sys_d[i];
-    }
-  //------------------------------------------------------- Secant method alpha
-  // Assumes constant RHS
+  //------------------------------------------------------- Actual method alpha
+  // Equivalent to secant for constant RHS
 #pragma omp simd reduction(+:glob_sum1,glob_sum2)
     for(INT_MESH i=hl0; i<sysn; i++){
-      glob_sum1+= S->sys_p[i] * S->sys_r[i];// alpha numerator
-      glob_sum2+= S->sys_p[i] *(S->sys_g[i] - S->sys_f[i]);// alpha denominator
+      glob_sum1+= S->sys_p[i] * S->sys_d[i] * S->sys_r[i];// alpha numerator
+      glob_sum2+= S->sys_p[i] * S->sys_d[i] *(S->sys_g[i] - S->sys_f[i]);// alpha denominator
     }
     time_accum( my_solv_count, solv_start );//FIXME?
   }
@@ -362,7 +357,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_start( solv_start );
 #pragma omp simd
     for(INT_MESH i=0; i<sysn; i++){
-      S->sys_u[i] += alpha * S->sys_p[i]; }
+      S->sys_u[i] += alpha * S->sys_p[i]; }//* S->sys_d[i]; }
     time_accum( my_solv_count, solv_start );
   }
   //--------------------------------------------- Compute and sync forces sys_f
@@ -400,7 +395,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     }
     time_accum( my_gat1_count, gath_start );
   }// End halo_vals sum; now scatter back to elems
-#pragma omp for schedule(OMP_SCHEDULE) reduction(+:glob_sum3,glob_sum4)
+#pragma omp for schedule(OMP_SCHEDULE) reduction(+:glob_sum3,glob_sum4,glob_sum5)
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=P[part_i];
     const INT_MESH Dn=uint(Y->node_d);
@@ -422,19 +417,28 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     const INT_MESH hl0=S->halo_loca_0,sysn=S->udof_n;
 #pragma omp simd
     for(INT_MESH i=0; i<sysn; i++){
-      S->sys_f[i] *= S->sys_d[i];
-      S->old_r[i]  = S->sys_r[i];
-      S->sys_r[i]  = S->sys_b[i] - S->sys_f[i]; }
-#pragma omp simd reduction(+:glob_sum3,glob_sum4)
+      //S->sys_f[i] *= S->sys_d[i];
+      S->old_r[i] = S->sys_r[i];
+      S->sys_r[i] = S->sys_b[i] - S->sys_f[i]; }
+#pragma omp simd reduction(+:glob_sum3,glob_sum4,glob_sum5)
     for(INT_MESH i=hl0; i<sysn; i++){// Reduce residual norms
-      glob_sum3 += S->sys_r[i] * S->sys_r[i];
-      glob_sum4 += S->sys_r[i] * S->old_r[i];
+#if 0
+      // FletcherReeves
+      glob_sum3 += S->sys_r[i] * S->sys_d[i] * S->sys_r[i];
+      glob_sum4 += S->old_r[i] * S->sys_d[i] * S->old_r[i];
+      glob_sum5 += S->sys_r[i] * S->sys_r[i] * S->sys_0[i];//FIXME div out prec
+#else
+      // PolakRibiere
+      glob_sum3 += S->sys_r[i] * S->sys_d[i] *(S->sys_r[i] - S->old_r[i]);
+      glob_sum4 += S->old_r[i] * S->sys_d[i] * S->old_r[i];
+      glob_sum5 += S->sys_r[i] * S->sys_r[i] * S->sys_0[i];//FIXME div out precond
+#endif
     }
     time_accum( my_solv_count, solv_start );
   }
   //-------------------------------------------------------------- Compute beta
 #if 1
-  const FLOAT_SOLV beta =( glob_sum3 - glob_sum4 )/ glob_r2a;
+  const FLOAT_SOLV beta = glob_sum3 / glob_sum4;
 #else
   const FLOAT_SOLV beta = glob_sum3 / glob_r2a;// this R2 / last R2
 #endif
@@ -446,7 +450,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_start( solv_start );
 #pragma omp simd
     for(INT_MESH i=0; i<sysn; i++){
-      S->sys_p[i] = S->sys_r[i] + beta * S->sys_p[i];
+      S->sys_p[i] = S->sys_r[i]*S->sys_d[i] + beta * S->sys_p[i];
     }
     time_accum( my_solv_count, solv_start );
   }
@@ -469,7 +473,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 }
 #endif
 }// end iter parallel region
-  this->glob_res2 = glob_sum3;
-  this->glob_chk2 = glob_sum3;
+  this->glob_res2 = glob_sum5;
+  this->glob_chk2 = glob_sum5;
   return 0;
 }
