@@ -75,6 +75,7 @@ int NCG::Init(){// printf("*** NCG::Init() ***\n");
 #pragma omp simd
   for(uint i=0; i<sysn; i++){
     //this->sys_b[i] -= this->sys_f[i]*this->sys_d[i];
+    this->old_r[i] = 0.0;
     this->sys_b[i]*= sys_d[i];
     this->sys_f[i]*= sys_d[i];
     this->sys_p[i] = this->sys_b[i] - this->sys_f[i];//*this->sys_d[i];//FIXME sign?
@@ -260,7 +261,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 #ifdef _OPENMP
   const int comp_n = this->comp_n;
 #endif
-  FLOAT_SOLV glob_sum1=0.0, glob_sum2=0.0, glob_sum3=0.0;
+  FLOAT_SOLV glob_sum1=0.0, glob_sum2=0.0, glob_sum3=0.0, glob_sum4=0.0;
   FLOAT_SOLV glob_r2a = this->glob_res2;
 #pragma omp parallel num_threads(comp_n)
 {// iter parallel region
@@ -336,25 +337,21 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     E->do_halo=false; Y->ElemLinear( E, S->sys_g, S->sys_q );
     time_accum( my_phys_count, phys_start );
     //--------------------------------------------- Done compute and sync sys_g
-//  }
-//#pragma omp for schedule(OMP_SCHEDULE) reduction(+:glob_sum1,glob_sum2)
-//  for(int part_i=part_0; part_i<part_o; part_i++){
-//    std::tie(E,Y,S)=P[part_i];
-//    const auto sysn = S->udof_n,hl0=S->halo_loca_0;
     time_start( solv_start );
 #pragma omp simd
     for(INT_MESH i=0; i<sysn; i++){
       S->sys_g[i] *= S->sys_d[i];
       //S->sys_g[i] = S->sys_b[i] - S->sys_g[i] * S->sys_d[i];
     }
+  //------------------------------------------------------- Secant method alpha
+  // Assumes constant RHS
 #pragma omp simd reduction(+:glob_sum1,glob_sum2)
     for(INT_MESH i=hl0; i<sysn; i++){
-      glob_sum1 += S->sys_p[i] * S->sys_r[i];// alpha numerator
-      glob_sum2 += S->sys_p[i] * ( S->sys_g[i] - S->sys_f[i] );// alpha denominator
+      glob_sum1+= S->sys_p[i] * S->sys_r[i];// alpha numerator
+      glob_sum2+= S->sys_p[i] *(S->sys_g[i] - S->sys_f[i]);// alpha denominator
     }
     time_accum( my_solv_count, solv_start );//FIXME?
   }
-  //----------------------------------------------------------- Calculate alpha
   const FLOAT_SOLV alpha = glob_sum1 / glob_sum2;// 1 FLOP
   //printf("ALPHA:%+9.2e\n",alpha);
   //----------------------------------------------------- Update solution sys_u
@@ -403,7 +400,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     }
     time_accum( my_gat1_count, gath_start );
   }// End halo_vals sum; now scatter back to elems
-#pragma omp for schedule(OMP_SCHEDULE) reduction(+:glob_sum3)
+#pragma omp for schedule(OMP_SCHEDULE) reduction(+:glob_sum3,glob_sum4)
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=P[part_i];
     const INT_MESH Dn=uint(Y->node_d);
@@ -426,14 +423,21 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 #pragma omp simd
     for(INT_MESH i=0; i<sysn; i++){
       S->sys_f[i] *= S->sys_d[i];
+      S->old_r[i]  = S->sys_r[i];
       S->sys_r[i]  = S->sys_b[i] - S->sys_f[i]; }
-#pragma omp simd reduction(+:glob_sum3)
-    for(INT_MESH i=hl0; i<sysn; i++){// Reduce residual norm
-      glob_sum3 += S->sys_r[i] * S->sys_r[i]; }
+#pragma omp simd reduction(+:glob_sum3,glob_sum4)
+    for(INT_MESH i=hl0; i<sysn; i++){// Reduce residual norms
+      glob_sum3 += S->sys_r[i] * S->sys_r[i];
+      glob_sum4 += S->sys_r[i] * S->old_r[i];
+    }
     time_accum( my_solv_count, solv_start );
   }
   //-------------------------------------------------------------- Compute beta
+#if 1
+  const FLOAT_SOLV beta =( glob_sum3 - glob_sum4 )/ glob_r2a;
+#else
   const FLOAT_SOLV beta = glob_sum3 / glob_r2a;// this R2 / last R2
+#endif
   //--------------------------------------------- Update search direction sys_p
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
