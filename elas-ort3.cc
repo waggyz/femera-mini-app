@@ -127,7 +127,7 @@ int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
     0.0,0.0,0.0,0.0,0.0,mtrl_matc[8]*2.0 };
   const FLOAT_PHYS scal_disp = udof_magn[0] ;
   FLOAT_PHYS scal_ther;
-  if(Dn>Dm){ scal_ther = udof_magn[3] * 1e-3; }//4e-4
+  if(Dn>Dm){ scal_ther = udof_magn[3]; }// * 1e-3; }//4e-4
   //if(Dn>Dm){ scal_ther = udof_magn[3] *1e-2; }
   else{ scal_ther=1.0; }
 #if VERB_MAX>10
