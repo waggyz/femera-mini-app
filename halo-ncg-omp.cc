@@ -45,7 +45,7 @@ int NCG::BC0(Elem* E, Phys* Y ){// printf("*** NCG::BC0(E,Y) ***\n");
   for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
     this->sys_d[Dn* n+uint(f)]=0.0;
     this->sys_0[Dn* n+uint(f)]=0.0;
-    this->sys_f[Dn* n+uint(f)]=0.0;//FIXME apply to sys_b?
+    //this->sys_f[Dn* n+uint(f)]=0.0;//FIXME apply to sys_b?
   }
   for(auto t : E->bc0_nf   ){ std::tie(n,f)=t;
     this->sys_d[Dn* n+uint(f)]=0.0;
@@ -76,13 +76,15 @@ int NCG::Init(){// printf("*** NCG::Init() ***\n");
 #pragma omp simd
   for(uint i=0; i<sysn; i++){
     this->old_r[i] = 0.0;
+    this->sys_f[i] = this->sys_f[i] * this->sys_0[i];//TESTING
     // Initial search (p) is preconditioned grad descent of (r)
+    // this->sys_r[i] =(this->sys_b[i] - this->sys_f[i]) * this->sys_0[i];
     this->sys_r[i] = this->sys_b[i] - this->sys_f[i];
     this->sys_p[i] = this->sys_r[i] * this->sys_d[i];
   }
 #pragma omp simd reduction(+:R2)
   for(uint i=sumi0; i<sysn; i++){
-    R2 += this->sys_r[i]*this->sys_r[i];}// *this->sys_0[i]; }//FIXME div out precond
+    R2 += this->sys_r[i]*this->sys_r[i] * this->sys_0[i]; }//FIXED div out precond
   this->loca_res2=R2;
   this->loca_rto2 = this->loca_rtol*loca_rtol *loca_res2;//FIXME Move this somewhere.
   return(0);
@@ -338,12 +340,17 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_accum( my_phys_count, phys_start );
     //--------------------------------------------- Done compute and sync sys_g
     time_start( solv_start );
-  //------------------------------------------------------- Actual method alpha
-  // Equivalent to secant for constant RHS
+    //----------------------------------------------------- Actual method alpha
+    // Equivalent to secant for constant RHSG
+#pragma omp simd
+    for(INT_MESH i=0; i<sysn; i++){
+      S->sys_f[i] = S->sys_f[i] * S->sys_0[i];//TESTING
+      S->sys_g[i] = S->sys_g[i] * S->sys_0[i];//TESTING
+    }
 #pragma omp simd reduction(+:glob_sum1,glob_sum2)
     for(INT_MESH i=hl0; i<sysn; i++){
       glob_sum1+= S->sys_p[i] * S->sys_0[i] * S->sys_r[i];// alpha numerator
-      glob_sum2+= S->sys_p[i] * S->sys_0[i] *(S->sys_g[i] - S->sys_f[i]);// alpha denominator
+      glob_sum2+= S->sys_p[i] * S->sys_0[i] *(S->sys_g[i] - S->sys_f[i]);//denom
     }
     time_accum( my_solv_count, solv_start );//FIXME?
   }
@@ -417,7 +424,6 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     const INT_MESH hl0=S->halo_loca_0,sysn=S->udof_n;
 #pragma omp simd
     for(INT_MESH i=0; i<sysn; i++){
-      //S->sys_f[i] *= S->sys_d[i];
       S->old_r[i] = S->sys_r[i];
       S->sys_r[i] = S->sys_b[i] - S->sys_f[i]; }
 #pragma omp simd reduction(+:glob_sum3,glob_sum4,glob_sum5)
@@ -450,7 +456,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_start( solv_start );
 #pragma omp simd
     for(INT_MESH i=0; i<sysn; i++){
-      S->sys_p[i] = S->sys_r[i]*S->sys_d[i] + beta * S->sys_p[i];
+      S->sys_p[i] = S->sys_r[i] * S->sys_d[i] + beta * S->sys_p[i];
     }
     time_accum( my_solv_count, solv_start );
   }
