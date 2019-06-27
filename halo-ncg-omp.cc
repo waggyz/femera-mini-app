@@ -306,6 +306,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
   const int part_n = int(P.size())-part_0;
   const int part_o = part_n+part_0;
   Elem* E; Phys* Y; Solv* S;// Seems to be faster to reuse these.
+  //FLOAT_SOLV* halov = &this->halo_val[0];
   // Timing variables (used when verbosity > 1)
   long int my_phys_count=0, my_scat_count=0, my_solv_count=0,
     my_gat0_count=0,my_gat1_count=0;
@@ -340,9 +341,9 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     }
     time_accum( my_gat0_count, gath_start );
   }
-//FIXME Race condition here...atomic doesn't work?
-//#pragma omp for schedule(OMP_SCHEDULE)
-#pragma omp single
+//FIXME Race condition here...atomic and critical don't help much...?
+//#pragma omp single
+#pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=P[part_i];
     time_start( gath_start );
@@ -352,7 +353,8 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
       const auto f = Dn* E->node_haid[i];
       for( uint j=0; j<Dn; j++){
 #pragma omp atomic update
-        this->halo_val[f+j]+= S->sys_g[Dn* i+j]; }
+       this->halo_val[f+j]+= S->sys_g[Dn* i+j]; }
+//       halov[f+j]+= S->sys_g[Dn* i+j]; }
     }
     time_accum( my_gat1_count, gath_start );
   }// End halo_vals sum; now scatter back to elems
@@ -403,7 +405,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
       S->sys_u[i] += alpha * S->sys_p[i]; }//* S->sys_d[i]; }
     time_accum( my_solv_count, solv_start );
   }
-  //--------------------------------------------- Compute and sync forces sys_f
+  //--------------------------------------------- Compute and sync forces 
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=P[part_i];
@@ -425,8 +427,8 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_accum( my_gat0_count, gath_start );
   }
 //FIXME Race condition here...atomic doesn't work & critical doesn't work?
-//#pragma omp for schedule(OMP_SCHEDULE)
-#pragma omp single
+//#pragma omp single
+#pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=P[part_i];
     time_start( gath_start );
@@ -437,8 +439,9 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 //#pragma omp critical
 //{
       for( uint j=0; j<Dn; j++){
-//#pragma omp atomic update
+#pragma omp atomic update
         this->halo_val[f+j]+= S->sys_f[Dn* i+j];
+//        halov[f+j]+= S->sys_f[Dn* i+j];
       }
 //}
     }
