@@ -342,8 +342,8 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
   // Equivalent to secant for constant RHS
 #pragma omp simd reduction(+:glob_sum1,glob_sum2)
     for(INT_MESH i=hl0; i<sysn; i++){
-      glob_sum1+= S->sys_p[i] * S->sys_d[i] * S->sys_r[i];// alpha numerator
-      glob_sum2+= S->sys_p[i] * S->sys_d[i] *(S->sys_g[i] - S->sys_f[i]);// alpha denominator
+      glob_sum1+= S->sys_p[i] * S->sys_0[i] * S->sys_r[i];// alpha numerator
+      glob_sum2+= S->sys_p[i] * S->sys_0[i] *(S->sys_g[i] - S->sys_f[i]);// alpha denominator
     }
     time_accum( my_solv_count, solv_start );//FIXME?
   }
@@ -426,12 +426,12 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
       // FletcherReeves
       glob_sum3 += S->sys_r[i] * S->sys_d[i] * S->sys_r[i];
       glob_sum4 += S->old_r[i] * S->sys_d[i] * S->old_r[i];
-      glob_sum5 += S->sys_r[i] * S->sys_r[i] * S->sys_0[i];//FIXME div out prec
+      glob_sum5 += S->sys_r[i] * S->sys_r[i] * S->sys_0[i];//FIXED div out prec
 #else
-      // PolakRibiere
+      // PolakRibiere (SM default)
       glob_sum3 += S->sys_r[i] * S->sys_d[i] *(S->sys_r[i] - S->old_r[i]);
       glob_sum4 += S->old_r[i] * S->sys_d[i] * S->old_r[i];
-      glob_sum5 += S->sys_r[i] * S->sys_r[i] * S->sys_0[i];//FIXME div out precond
+      glob_sum5 += S->sys_r[i] * S->sys_r[i] * S->sys_0[i];//FIXED div out precond
 #endif
     }
     time_accum( my_solv_count, solv_start );
