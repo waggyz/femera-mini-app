@@ -76,10 +76,12 @@ int NCG::Init(){// printf("*** NCG::Init() ***\n");
 #pragma omp simd
   for(uint i=0; i<sysn; i++){
     this->old_r[i] = 0.0;
-    this->sys_f[i] = this->sys_f[i] * this->sys_0[i];//TESTING
-    // Initial search (p) is preconditioned grad descent of (r)
+#if 0
+    //this->sys_f[i] = this->sys_f[i] * this->sys_0[i];//TESTING
     // this->sys_r[i] =(this->sys_b[i] - this->sys_f[i]) * this->sys_0[i];
+#endif
     this->sys_r[i] = this->sys_b[i] - this->sys_f[i];
+    // Initial search (p) is preconditioned grad descent of (r)
     this->sys_p[i] = this->sys_r[i] * this->sys_d[i];
   }
 #pragma omp simd reduction(+:R2)
@@ -152,14 +154,16 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
       Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
       if(E->node_haid.size()==0){ E->node_haid.resize(E->halo_node_n); }
     }
-#pragma omp for schedule(OMP_SCHEDULE)
+//#pragma omp for schedule(OMP_SCHEDULE)
+//FIXME Race condition here
+#pragma omp single
     for(int part_i=part_0; part_i<part_o; part_i++){
       Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
       //if(E->node_haid.size()==0){ E->node_haid.resize(E->halo_node_n); };
       const INT_MESH d=uint(Y->node_d);
+//#pragma omp critical(halomap)
+//{//FIXME critical section here doesn't work?
       for(INT_MESH i=0; i<E->halo_node_n; i++){
-#pragma omp critical(halomap)
-{//FIXME critical section here?
       INT_MESH g=E->node_glid[i];
       if(this->halo_map.count(g)==0){// Initialize halo_map
         this->halo_map[g]=halo_n;
@@ -171,13 +175,13 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
         E->node_haid[i]=this->halo_map[g];
         if(this->solv_cond == Solv::COND_NONE){
           for( uint j=0; j<d; j++){
-            this->halo_val[d*E->node_haid[i]+j] = S->sys_d[d*i +j]; } }
+            this->halo_val[d*E->node_haid[i]+j]*= S->sys_d[d*i +j]; } }
         else{
           for( uint j=0; j<d; j++){
             this->halo_val[d*E->node_haid[i]+j]+= S->sys_d[d*i +j]; } }
+//}
       }
-}
-    }// End halo_map loop
+      }// End halo_map loop
     }// End sys_d gather parts
     time_reset( my_gmap_count, start );
 #pragma omp for schedule(OMP_SCHEDULE)
@@ -206,7 +210,9 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   time_reset( my_gat0_count, start );//FIXME wtf?
 #pragma omp single
 {   this->halo_val = 0.0; }// serial halo_vals zero
-#pragma omp for schedule(OMP_SCHEDULE)
+//#pragma omp for schedule(OMP_SCHEDULE)
+//FIXME Race condition here...atomic doesn't work?
+#pragma omp single
   for(int part_i=part_0; part_i<part_o; part_i++){// --------------- sync sys_f
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH d=uint(Y->node_d);
@@ -218,7 +224,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     }
   }// End halo_vals
   time_reset( my_gat1_count, start );
-#pragma omp for schedule(OMP_SCHEDULE) reduction(+:glob_r2a)
+#pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH d=uint(Y->node_d);
@@ -229,9 +235,35 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
         S->sys_f[d*i +j] = this->halo_val[f+j]; }
     }
   time_reset( my_scat_count, start );// ----------------------- Done sys_f sync
+#if 0
 #pragma omp critical(init)
 { S->Init(); }// Initial residual //FIXME Why is this serialized?
-  glob_r2a += S->loca_res2;// global initial residual reduction
+  glob_r2a += S->loca_res2;
+#else
+//FIXME Took this out of S->Init()
+  }
+#pragma omp for schedule(OMP_SCHEDULE) reduction(+:glob_r2a)
+  for(int part_i=part_0; part_i<part_o; part_i++){
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+    const uint sysn=S->udof_n;// loca_res2 is a member variable.
+    const uint sumi0=S->halo_loca_0;
+#pragma omp simd
+    for(uint i=0; i<sysn; i++){
+      S->old_r[i] = 0.0;// S->sys_b[i] = 0.0;
+      S->sys_r[i] = S->sys_b[i] - S->sys_f[i];
+      // Initial search (p) is preconditioned grad descent of (r)
+      S->sys_p[i] = S->sys_r[i] * S->sys_d[i];
+    }
+    //FLOAT_SOLV R2=0.0;
+#pragma omp simd reduction(+:glob_r2a)
+    for(uint i=sumi0; i<sysn; i++){
+      glob_r2a += S->sys_r[i]*S->sys_r[i] * S->sys_0[i]; }//FIXED div out precond
+#if 0
+    S->loca_res2=R2;
+    S->loca_rto2 = S->loca_rtol*S->loca_rtol *S->loca_res2;
+    glob_r2a += R2;// global initial residual reduction
+#endif
+#endif
   }
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
@@ -257,7 +289,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   this->glob_chk2 = glob_r2a;
   this->glob_rto2 = glob_to2;// / ((FLOAT_SOLV)this->udof_n);
   return 0;
-}
+}//======================================================== End HaloNCG::Init()
 int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 #ifdef _OPENMP
   const int comp_n = this->comp_n;
@@ -308,7 +340,9 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     }
     time_accum( my_gat0_count, gath_start );
   }
-#pragma omp for schedule(OMP_SCHEDULE)
+//FIXME Race condition here...atomic doesn't work?
+//#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp single
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=P[part_i];
     time_start( gath_start );
@@ -341,12 +375,14 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     //--------------------------------------------- Done compute and sync sys_g
     time_start( solv_start );
     //----------------------------------------------------- Actual method alpha
-    // Equivalent to secant for constant RHSG
+#if 0
 #pragma omp simd
     for(INT_MESH i=0; i<sysn; i++){
       S->sys_f[i] = S->sys_f[i] * S->sys_0[i];//TESTING
       S->sys_g[i] = S->sys_g[i] * S->sys_0[i];//TESTING
     }
+#endif
+    // Equivalent to secant for constant RHS
 #pragma omp simd reduction(+:glob_sum1,glob_sum2)
     for(INT_MESH i=hl0; i<sysn; i++){
       glob_sum1+= S->sys_p[i] * S->sys_0[i] * S->sys_r[i];// alpha numerator
@@ -388,7 +424,9 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     }
     time_accum( my_gat0_count, gath_start );
   }
-#pragma omp for schedule(OMP_SCHEDULE)
+//FIXME Race condition here...atomic doesn't work & critical doesn't work?
+//#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp single
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=P[part_i];
     time_start( gath_start );
@@ -396,9 +434,13 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     const INT_MESH hrn=E->halo_remo_n;
     for(INT_MESH i=0; i<hrn; i++){
       const auto f = Dn* E->node_haid[i];
+//#pragma omp critical
+//{
       for( uint j=0; j<Dn; j++){
-#pragma omp atomic update
-        this->halo_val[f+j]+= S->sys_f[Dn* i+j]; }
+//#pragma omp atomic update
+        this->halo_val[f+j]+= S->sys_f[Dn* i+j];
+      }
+//}
     }
     time_accum( my_gat1_count, gath_start );
   }// End halo_vals sum; now scatter back to elems
