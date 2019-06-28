@@ -34,7 +34,7 @@ Then, try a 1 MDOF thermoelastic model.
 C=4 ; P=2 ; H=38 ; N=16
 CPUMODEL=`./cpumodel.sh`
 gmsh -setnumber p $P -setnumber h $H -setnumber n $N -nt $C geo/unst-cube.geo -
-./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu0.001 -t444 -Tu 10 -M0 -E100e9 -N0.3 -N0.3 -A20e-6 -K250 -R -v2 -ap "cube/unst"$H"p"$P"n"$N
+./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu0.001 -t444 -Tu 10 -M0 -E100e9 -N0.3 -A20e-6 -K250 -R -v2 -ap "cube/unst"$H"p"$P"n"$N
 ./femera-$CPUMODEL -v2 -c $C -p "cube/unst"$H"p"$P"n"$N
 ```
 
