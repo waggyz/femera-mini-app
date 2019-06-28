@@ -297,6 +297,9 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
   FLOAT_SOLV glob_sum1=0.0, glob_sum2=0.0, glob_sum3=0.0, glob_sum4=0.0,
     glob_sum5=0.0;
   //FLOAT_SOLV glob_r2a = this->glob_res2;
+#if 1
+  FLOAT_SOLV halov[this->halo_val.size()];
+#endif
 #pragma omp parallel num_threads(comp_n)
 {// iter parallel region
 // not needed anymore,since P is threadprivate
@@ -306,7 +309,9 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
   const int part_n = int(P.size())-part_0;
   const int part_o = part_n+part_0;
   Elem* E; Phys* Y; Solv* S;// Seems to be faster to reuse these.
+#if 0
   volatile FLOAT_SOLV* halov = &this->halo_val[0];
+#endif
   // Timing variables (used when verbosity > 1)
   long int my_phys_count=0, my_scat_count=0, my_solv_count=0,
     my_gat0_count=0,my_gat1_count=0;
@@ -335,15 +340,20 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
     for(INT_MESH i=hrn; i<hnn; i++){//NOTE memcpy apparently not critical
       std::memcpy(
-        & this->halo_val[Dn* E->node_haid[i]],
+        //& this->halo_val[Dn* E->node_haid[i]],
+        & halov[Dn* E->node_haid[i]],
         & S->sys_g[Dn* i],
         Dn*sizeof(FLOAT_PHYS) );
     }
     time_accum( my_gat0_count, gath_start );
   }
 //FIXME Race condition here...atomic and critical don't help much...?
-//#pragma omp single
+#define HALO_SUM_SER
+#ifdef HALO_SUM_SER
+#pragma omp single
+#else
 #pragma omp for schedule(OMP_SCHEDULE)
+#endif
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=P[part_i];
     time_start( gath_start );
@@ -367,7 +377,8 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     for(INT_MESH i=0; i<hnn; i++){//NOTE appears not to be critical
       std::memcpy(
         & S->sys_g[Dn* i],
-        & this->halo_val[Dn* E->node_haid[i]],
+        //& this->halo_val[Dn* E->node_haid[i]],
+        & halov[Dn* E->node_haid[i]],
         Dn*sizeof(FLOAT_PHYS) );
     }
     time_accum( my_scat_count, scat_start );
@@ -420,7 +431,8 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
     for(INT_MESH i=hrn; i<hnn; i++){//NOTE memcpy apparently not critical
       std::memcpy(
-        & this->halo_val[Dn* E->node_haid[i]],
+        //& this->halo_val[Dn* E->node_haid[i]],
+        & halov[Dn* E->node_haid[i]],
         & S->sys_f[Dn* i],
         Dn*sizeof(FLOAT_PHYS) );
     }
@@ -428,7 +440,11 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
   }
 //FIXME Race condition here...atomic doesn't work & critical doesn't work?
 //#pragma omp single
+#ifdef HALO_SUM_SER
+#pragma omp single
+#else
 #pragma omp for schedule(OMP_SCHEDULE)
+#endif
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=P[part_i];
     time_start( gath_start );
@@ -456,7 +472,8 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     for(INT_MESH i=0; i<hnn; i++){//NOTE appears not to be critical
       std::memcpy(
         & S->sys_f[Dn* i],
-        & this->halo_val[Dn* E->node_haid[i]],
+        //& this->halo_val[Dn* E->node_haid[i]],
+        & halov[Dn* E->node_haid[i]],
         Dn*sizeof(FLOAT_PHYS) );
     }
     time_accum( my_scat_count, scat_start );
