@@ -331,6 +331,8 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
 #endif
   FLOAT_SOLV glob_sum1=0.0, glob_sum2=0.0;
   FLOAT_SOLV glob_r2a = this->glob_res2;
+  FLOAT_SOLV halo_vals[this->halo_val.size()];// Put this on the stack.
+  //FIXME don't need M->halo_val member variable now.
 #pragma omp parallel num_threads(comp_n)
 {// iter parallel region
 // not needed anymore,since P is threadprivate
@@ -361,7 +363,7 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
     for(INT_MESH i=hrn; i<hnn; i++){//NOTE memcpy apparently not critical
       std::memcpy(
-        & this->halo_val[Dn* E->node_haid[i]],
+        & halo_vals[Dn* E->node_haid[i]],
         & S->sys_f[Dn* i],
         Dn*sizeof(FLOAT_PHYS) );
     };
@@ -377,7 +379,7 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
       const auto f = Dn* E->node_haid[i];
       for( uint j=0; j<Dn; j++){
 #pragma omp atomic update
-        this->halo_val[f+j]+= S->sys_f[Dn* i+j]; };
+        halo_vals[f+j]+= S->sys_f[Dn* i+j]; };
     };
     time_accum( my_gat1_count, gath_start );
   };// End halo_vals sum; now scatter back to elems
@@ -390,7 +392,7 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
     for(INT_MESH i=0; i<hnn; i++){//NOTE appears not to be critical
       std::memcpy(
         & S->sys_f[Dn* i],
-        & this->halo_val[Dn* E->node_haid[i]],
+        & halo_vals[Dn* E->node_haid[i]],
         Dn*sizeof(FLOAT_PHYS) );
     };
     time_accum( my_scat_count, scat_start );

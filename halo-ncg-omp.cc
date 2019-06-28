@@ -304,11 +304,11 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     glob_sum5=0.0;
   //FLOAT_SOLV glob_r2a = this->glob_res2;
   FLOAT_SOLV halo_vals[this->halo_val.size()];// Put this on the stack.
+  //FIXME don't need M->halo_val member variable now.
 #ifdef HALO_SUM_CHK
   FLOAT_SOLV halo_sers[this->halo_val.size()];
   FLOAT_SOLV halo_min= 9e9, halo_max=-9e9;//, halo_avg=0.0;
 #endif
-  //FIXME don't need M->halo_val member variable now.
 #pragma omp parallel num_threads(comp_n)
 {// iter parallel region
 // not needed anymore,since P is threadprivate
