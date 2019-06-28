@@ -65,7 +65,7 @@ int NCG::Setup( Elem* E, Phys* Y ){// printf("*** NCG::Setup(E,Y) ***\n");
   this->halo_loca_0 = E->halo_remo_n * Y->node_d;
   this->RHS( E,Y );
   this->BCS( E,Y );// Sync max Y->udof_magn before Precond()
-  Y->tens_flop*=2;// 2 evals/iter
+  Y->tens_flop*=2;Y->tens_band*=2;// 2 evals/iter
   E->do_halo=true ; Y->ElemLinear( E,this->sys_f,this->sys_u );
   E->do_halo=false; Y->ElemLinear( E,this->sys_f,this->sys_u );
   return(0);
