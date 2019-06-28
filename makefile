@@ -131,7 +131,7 @@ gmsh2fmr-ser:
 	$(CXX) $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(FEMERA_MINI_CC) gmsh2.cc gmsh2fmr.cc -o gmsh2fmr ;
 	./gmsh2fmr -t666 -x0 -t111 -z0 -t333 -y0 -t444 -xu 0.001 \
-	-M1 -E100e9 -N0.3 -A20e-6 -K100e-6 \
+	-M1 -E100e9 -N0.3 -A20e-6 -K100e-6 -Z1 -X0 -Z0 \
 	-M2 -E100e9 -N0.3 -Z1 -X0 -Z0 \
 	-v3 -ap cube/unit1p2n2;
 	./gmsh2fmr -t666 -x0 -t333 -y0 -t111 -z0 -t444 -xu 0.001 -t444 -Tu 10 \
