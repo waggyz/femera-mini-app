@@ -134,7 +134,7 @@ gmsh2fmr-ser:
 	-M1 -E100e9 -N0.3 -A20e-6 -K100e-6 \
 	-M2 -E100e9 -N0.3 -Z1 -X0 -Z0 \
 	-v3 -ap cube/unit1p2n2;
-	./gmsh2fmr -t666 -x0 -t333 -y0 -t111 -z0 -t444 -xu 0.001 -t444 -Tu 100 \
+	./gmsh2fmr -t666 -x0 -t333 -y0 -t111 -z0 -t444 -xu 0.001 -t444 -Tu 10 \
 	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 -R \
 	-v3 -ap cube/unit1p2n2;
 
