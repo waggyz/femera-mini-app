@@ -297,9 +297,8 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
   FLOAT_SOLV glob_sum1=0.0, glob_sum2=0.0, glob_sum3=0.0, glob_sum4=0.0,
     glob_sum5=0.0;
   //FLOAT_SOLV glob_r2a = this->glob_res2;
-#if 1
-  FLOAT_SOLV halov[this->halo_val.size()];
-#endif
+  FLOAT_SOLV halov[this->halo_val.size()];// Put this on the stack.
+  //FIXME don't need M->halo_val member variable now.
 #pragma omp parallel num_threads(comp_n)
 {// iter parallel region
 // not needed anymore,since P is threadprivate
@@ -309,9 +308,6 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
   const int part_n = int(P.size())-part_0;
   const int part_o = part_n+part_0;
   Elem* E; Phys* Y; Solv* S;// Seems to be faster to reuse these.
-#if 0
-  volatile FLOAT_SOLV* halov = &this->halo_val[0];
-#endif
   // Timing variables (used when verbosity > 1)
   long int my_phys_count=0, my_scat_count=0, my_solv_count=0,
     my_gat0_count=0,my_gat1_count=0;
@@ -348,7 +344,8 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_accum( my_gat0_count, gath_start );
   }
 //FIXME Race condition here...atomic and critical don't help much...?
-#define HALO_SUM_SER
+//#define HALO_SUM_SER
+#undef HALO_SUM_SER
 #ifdef HALO_SUM_SER
 #pragma omp single
 #else
