@@ -224,7 +224,6 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     const INT_MESH d=uint(Y->node_d);
     for(INT_MESH i=0; i<E->halo_node_n; i++){
       auto f = d* E->node_haid[i];
-#pragma omp simd
       for( uint j=0; j<d; j++){
 #pragma omp atomic update
         this->halo_val[f+j] += S->sys_f[d*i +j]; }
@@ -371,7 +370,6 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     const INT_MESH hrn=E->halo_remo_n;
     for(INT_MESH i=0; i<hrn; i++){
       const auto f = Dn* E->node_haid[i];
-#pragma omd simd
       for( uint j=0; j<Dn; j++){
 #pragma omp atomic update
        halo_vals[f+j]+= S->sys_g[Dn* i+j]; }
@@ -387,7 +385,6 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     const INT_MESH hrn=E->halo_remo_n;
     for(INT_MESH i=0; i<hrn; i++){
       const auto f = Dn* E->node_haid[i];
-#pragma omd simd
       for( uint j=0; j<Dn; j++){
 #pragma omp atomic update
        halo_sers[f+j]+= S->sys_g[Dn* i+j]; }
@@ -490,7 +487,6 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     const INT_MESH hrn=E->halo_remo_n;
     for(INT_MESH i=0; i<hrn; i++){
       const auto f = Dn* E->node_haid[i];
-#pragma omd simd
       for( uint j=0; j<Dn; j++){
 #pragma omp atomic update
         halo_vals[f+j]+= S->sys_f[Dn* i+j];
