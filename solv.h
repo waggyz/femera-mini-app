@@ -218,5 +218,4 @@ inline Solv::valign Solv::align_resize(RESTRICT Solv::vals &v,
 };
 #endif
 
-
 #endif

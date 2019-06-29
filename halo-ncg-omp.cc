@@ -417,22 +417,18 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_start( solv_start );
     //----------------------------------------------------- Actual method alpha
 #if 0
-#pragma omp simd
     for(INT_MESH i=0; i<sysn; i++){
-      S->sys_f[i] = S->sys_f[i] * S->sys_0[i];//TESTING
-      S->sys_g[i] = S->sys_g[i] * S->sys_0[i];//TESTING
+      S->sys_f[i] = S->sys_f[i] * S->sys_0[i];
+      S->sys_g[i] = S->sys_g[i] * S->sys_0[i];// sys_g is only used once
     }
 #endif
-    // Equivalent to secant for constant RHS
+    // Actual method is equivalent to secant for constant RHS
 #pragma omp simd reduction(+:glob_sum1,glob_sum2)
     for(INT_MESH i=hl0; i<sysn; i++){
-      S->sys_g[i]*= S->sys_0[i];
-      //glob_sum1+= S->sys_p[i] * S->sys_0[i] * S->sys_r[i];// alpha numerator
-      //glob_sum2+= S->sys_p[i] * S->sys_0[i] *(S->sys_g[i] - S->sys_f[i]);//denom
       glob_sum1+= S->sys_p[i] * S->sys_r[i];// alpha numerator
-      glob_sum2+= S->sys_p[i] *(S->sys_g[i] - S->sys_f[i]);//denom
+      glob_sum2+= S->sys_p[i] * S->sys_0[i]*(S->sys_g[i] - S->sys_f[i]);//denom
     }//                                                              (6*N FLOP)
-    time_accum( my_solv_count, solv_start );//FIXME?
+    time_accum( my_solv_count, solv_start );
   }
   const FLOAT_SOLV alpha = glob_sum1 / glob_sum2;//                    (1 FLOP)
   //printf("ALPHA:%+9.2e\n",alpha);
@@ -444,6 +440,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_start( solv_start );
 #pragma omp simd
     for(INT_MESH i=0; i<sysn; i++){
+      S->sys_f[i]=0.0;
       S->sys_u[i] += alpha * S->sys_p[i]; }//* S->sys_d[i]; }//      (2*N FLOP)
     time_accum( my_solv_count, solv_start );//FIXED Merge with next loop
 #if 0
@@ -456,8 +453,8 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     //------------------------------------------------- Compute and sync forces
     const INT_MESH Dn=uint(Y->node_d);
     time_start( phys_start );
-#pragma omp simd
-    for(uint i=0;i<sysn;i++){ S->sys_f[i]=0.0; }
+//#pragma omp simd
+//    for(uint i=0;i<sysn;i++){ S->sys_f[i]=0.0; }
     E->do_halo=true; Y->ElemLinear( E, S->sys_f, S->sys_u );
     time_accum( my_phys_count, phys_start );
     time_start( gath_start );
@@ -506,21 +503,22 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 #pragma omp simd
     for(INT_MESH i=0; i<sysn; i++){
       S->old_r[i] = S->sys_r[i];
-      S->sys_f[i]*= S->sys_0[i];
-      S->sys_r[i] = S->sys_b[i] - S->sys_f[i]; }//                   (2*N FLOP)
+#if 0
+      S->sys_f[i]*= S->sys_0[i];// better to apply where used
+#endif
+      S->sys_r[i] = S->sys_b[i] - S->sys_0[i] * S->sys_f[i]; }//     (2*N FLOP)
 #pragma omp simd reduction(+:glob_sum3,glob_sum4,glob_sum5)
     for(INT_MESH i=hl0; i<sysn; i++){//------------------ Reduce residual norms
 #if 0
       // FletcherReeves
       glob_sum3 += S->sys_r[i] * S->sys_d[i] * S->sys_r[i];
       glob_sum4 += S->old_r[i] * S->sys_d[i] * S->old_r[i];
-      glob_sum5 += S->sys_r[i] * S->sys_r[i] * S->sys_0[i];//FIXED div out prec
+      glob_sum5 += S->sys_r[i] * S->sys_r[i];
 #else
       // PolakRibiere (SM default)
       glob_sum3 += S->sys_r[i] * S->sys_d[i] *(S->sys_r[i] - S->old_r[i]);
       glob_sum4 += S->old_r[i] * S->sys_d[i] * S->old_r[i];
       glob_sum5 += S->sys_r[i] * S->sys_r[i];
-      //glob_sum5 += S->sys_r[i] * S->sys_r[i] * S->sys_0[i];//FIXED div out precond
 #endif
     }//                                                              (9*N FLOP)
     time_accum( my_solv_count, solv_start );
