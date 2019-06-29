@@ -336,7 +336,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_start( solv_start );
 #pragma omp simd
     for(uint i=0;i<sysn;i++){// Compute sys_q = sys_u + sys_p
-      S->sys_q[i] = S->sys_u[i] + S->sys_p[i]; }
+      S->sys_q[i] = S->sys_u[i] + S->sys_p[i]; }//                   (1*N FLOP)
     time_accum( my_solv_count, solv_start );
     time_start( phys_start );
 #pragma omp simd
@@ -346,17 +346,12 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_start( gath_start );
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
     for(INT_MESH i=hrn; i<hnn; i++){//NOTE memcpy apparently not critical
-      std::memcpy(
-        //& this->halo_val[Dn* E->node_haid[i]],
-        & halo_vals[Dn* E->node_haid[i]],
-        & S->sys_g[Dn* i],
-        Dn*sizeof(FLOAT_PHYS) );
-    }
+      std::memcpy(& halo_vals[Dn* E->node_haid[i]], & S->sys_g[Dn* i],
+        Dn*sizeof(FLOAT_PHYS) ); }
     time_accum( my_gat0_count, gath_start );
   }
 #ifdef HALO_SUM_CHK
-  std::memcpy(& halo_sers[0],
-              & halo_vals[0],
+  std::memcpy(& halo_sers[0],& halo_vals[0],
               this->halo_val.size()*sizeof(FLOAT_PHYS) );
 #endif
 #ifdef HALO_SUM_SER
@@ -374,7 +369,6 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
       for( uint j=0; j<Dn; j++){
 #pragma omp atomic update
        halo_vals[f+j]+= S->sys_g[Dn* i+j]; }
-//       this->halo_val[f+j]+= S->sys_g[Dn* i+j]; }
     }
     time_accum( my_gat1_count, gath_start );
   }// End halo_vals sum; now scatter back to elems
@@ -413,12 +407,8 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_start( scat_start );
     const INT_MESH hnn=E->halo_node_n,hl0=S->halo_loca_0,sysn=S->udof_n;
     for(INT_MESH i=0; i<hnn; i++){//NOTE appears not to be critical
-      std::memcpy(
-        & S->sys_g[Dn* i],
-        //& this->halo_val[Dn* E->node_haid[i]],
-        & halo_vals[Dn* E->node_haid[i]],
-        Dn*sizeof(FLOAT_PHYS) );
-    }
+      std::memcpy(& S->sys_g[Dn* i],& halo_vals[Dn* E->node_haid[i]],
+        Dn*sizeof(FLOAT_PHYS) ); }
     time_accum( my_scat_count, scat_start );
     time_start( phys_start );
     E->do_halo=false; Y->ElemLinear( E, S->sys_g, S->sys_q );
@@ -436,31 +426,36 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     // Equivalent to secant for constant RHS
 #pragma omp simd reduction(+:glob_sum1,glob_sum2)
     for(INT_MESH i=hl0; i<sysn; i++){
-      glob_sum1+= S->sys_p[i] * S->sys_0[i] * S->sys_r[i];// alpha numerator
-      glob_sum2+= S->sys_p[i] * S->sys_0[i] *(S->sys_g[i] - S->sys_f[i]);//denom
-    }
+      S->sys_g[i]*= S->sys_0[i];
+      //glob_sum1+= S->sys_p[i] * S->sys_0[i] * S->sys_r[i];// alpha numerator
+      //glob_sum2+= S->sys_p[i] * S->sys_0[i] *(S->sys_g[i] - S->sys_f[i]);//denom
+      glob_sum1+= S->sys_p[i] * S->sys_r[i];// alpha numerator
+      glob_sum2+= S->sys_p[i] *(S->sys_g[i] - S->sys_f[i]);//denom
+    }//                                                              (6*N FLOP)
     time_accum( my_solv_count, solv_start );//FIXME?
   }
-  const FLOAT_SOLV alpha = glob_sum1 / glob_sum2;// 1 FLOP
+  const FLOAT_SOLV alpha = glob_sum1 / glob_sum2;//                    (1 FLOP)
   //printf("ALPHA:%+9.2e\n",alpha);
   //----------------------------------------------------- Update solution sys_u
 #pragma omp for schedule(OMP_SCHEDULE)
-  for(int part_i=part_0; part_i<part_o; part_i++){//FIXME Merge with next loop
+  for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=P[part_i];
     const auto sysn = S->udof_n;
     time_start( solv_start );
 #pragma omp simd
     for(INT_MESH i=0; i<sysn; i++){
-      S->sys_u[i] += alpha * S->sys_p[i]; }//* S->sys_d[i]; }
-    time_accum( my_solv_count, solv_start );
+      S->sys_u[i] += alpha * S->sys_p[i]; }//* S->sys_d[i]; }//      (2*N FLOP)
+    time_accum( my_solv_count, solv_start );//FIXED Merge with next loop
+#if 0
   }
-  //--------------------------------------------- Compute and sync forces 
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=P[part_i];
+    const auto sysn = S->udof_n;
+#endif
+    //------------------------------------------------- Compute and sync forces
     const INT_MESH Dn=uint(Y->node_d);
     time_start( phys_start );
-    const auto sysn = S->udof_n;
 #pragma omp simd
     for(uint i=0;i<sysn;i++){ S->sys_f[i]=0.0; }
     E->do_halo=true; Y->ElemLinear( E, S->sys_f, S->sys_u );
@@ -468,12 +463,8 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_start( gath_start );
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
     for(INT_MESH i=hrn; i<hnn; i++){//NOTE memcpy apparently not critical
-      std::memcpy(
-        //& this->halo_val[Dn* E->node_haid[i]],
-        & halo_vals[Dn* E->node_haid[i]],
-        & S->sys_f[Dn* i],
-        Dn*sizeof(FLOAT_PHYS) );
-    }
+      std::memcpy(& halo_vals[Dn* E->node_haid[i]],& S->sys_f[Dn* i],
+        Dn*sizeof(FLOAT_PHYS) ); }
     time_accum( my_gat0_count, gath_start );
   }
 #ifdef HALO_SUM_SER
@@ -491,7 +482,6 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
       for( uint j=0; j<Dn; j++){
 #pragma omp atomic update
         halo_vals[f+j]+= S->sys_f[Dn* i+j];
-//        this->halo_val[f+j]+= S->sys_f[Dn* i+j];
       }
     }
     time_accum( my_gat1_count, gath_start );
@@ -501,14 +491,10 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     std::tie(E,Y,S)=P[part_i];
     const INT_MESH Dn=uint(Y->node_d);
     time_start( scat_start );
-    const INT_MESH hnn=E->halo_node_n;//,hl0=S->halo_loca_0,sysn=S->udof_n;
+    const INT_MESH hnn=E->halo_node_n;
     for(INT_MESH i=0; i<hnn; i++){//NOTE appears not to be critical
-      std::memcpy(
-        & S->sys_f[Dn* i],
-        //& this->halo_val[Dn* E->node_haid[i]],
-        & halo_vals[Dn* E->node_haid[i]],
-        Dn*sizeof(FLOAT_PHYS) );
-    }
+      std::memcpy(& S->sys_f[Dn* i],& halo_vals[Dn* E->node_haid[i]],
+        Dn*sizeof(FLOAT_PHYS) ); }
     time_accum( my_scat_count, scat_start );
     time_start( phys_start );
     E->do_halo=false; Y->ElemLinear( E, S->sys_f, S->sys_u );
@@ -520,9 +506,10 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 #pragma omp simd
     for(INT_MESH i=0; i<sysn; i++){
       S->old_r[i] = S->sys_r[i];
-      S->sys_r[i] = S->sys_b[i] - S->sys_f[i]; }
+      S->sys_f[i]*= S->sys_0[i];
+      S->sys_r[i] = S->sys_b[i] - S->sys_f[i]; }//                   (2*N FLOP)
 #pragma omp simd reduction(+:glob_sum3,glob_sum4,glob_sum5)
-    for(INT_MESH i=hl0; i<sysn; i++){// Reduce residual norms
+    for(INT_MESH i=hl0; i<sysn; i++){//------------------ Reduce residual norms
 #if 0
       // FletcherReeves
       glob_sum3 += S->sys_r[i] * S->sys_d[i] * S->sys_r[i];
@@ -532,29 +519,28 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
       // PolakRibiere (SM default)
       glob_sum3 += S->sys_r[i] * S->sys_d[i] *(S->sys_r[i] - S->old_r[i]);
       glob_sum4 += S->old_r[i] * S->sys_d[i] * S->old_r[i];
-      glob_sum5 += S->sys_r[i] * S->sys_r[i] * S->sys_0[i];//FIXED div out precond
+      glob_sum5 += S->sys_r[i] * S->sys_r[i];
+      //glob_sum5 += S->sys_r[i] * S->sys_r[i] * S->sys_0[i];//FIXED div out precond
 #endif
-    }
+    }//                                                              (9*N FLOP)
     time_accum( my_solv_count, solv_start );
   }
-  //-------------------------------------------------------------- Compute beta
+  //----------------------------------------------------- Compute beta (1 FLOP)
 #if 1
   const FLOAT_SOLV beta = glob_sum3 / glob_sum4;
 #else
   const FLOAT_SOLV beta = glob_sum3 / glob_r2a;// this R2 / last R2
 #endif
-  //--------------------------------------------- Update search direction sys_p
 #pragma omp for schedule(OMP_SCHEDULE)
-  for(int part_i=part_0; part_i<part_o; part_i++){
+  for(int part_i=part_0; part_i<part_o; part_i++){// Update search direction
     std::tie(E,Y,S)=P[part_i];
     const INT_MESH sysn=S->udof_n;
     time_start( solv_start );
 #pragma omp simd
     for(INT_MESH i=0; i<sysn; i++){
-      S->sys_p[i] = S->sys_r[i] * S->sys_d[i] + beta * S->sys_p[i];
-    }
+      S->sys_p[i] = S->sys_r[i] * S->sys_d[i] + beta * S->sys_p[i]; }
     time_accum( my_solv_count, solv_start );
-  }
+  }//                                                                (3*N FLOP)
 #if VERB_MAX>1
   iter_done  = std::chrono::high_resolution_clock::now();
   //auto solv_time  = std::chrono::duration_cast<std::chrono::nanoseconds>

@@ -184,8 +184,8 @@ public:
     sys_g.resize(udof_n,0.0);// residual grad. of perturbed sol. g = A q -b
     old_r.resize(udof_n,0.0);
 #endif
-    udof_flop = 0;//*elem_n
-    udof_band = 0*sizeof(FLOAT_SOLV);//*udof_n + 2
+    udof_flop = 23;//*elem_n
+    udof_band = 10*sizeof(FLOAT_SOLV);//*udof_n + 2
   };
   //NCG( ):Solv(12,11){};
   int Solve( Elem*, Phys* ) final;
