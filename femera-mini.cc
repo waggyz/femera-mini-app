@@ -389,7 +389,7 @@ int main( int argc, char** argv ){
       //}; M->Init();
 #if VERB_MAX>1
       if(verbosity>1){
-      if(!((iter) % iter_info_n) ){
+      if(!((iter) % iter_info_n) | (iter<2)){
         float iter_sec=M->time_secs[5];
         printf("%9i ||R||%9.2e @ %.0f iter/s\n",
           iter, std::sqrt(M->glob_chk2),

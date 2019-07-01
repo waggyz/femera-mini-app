@@ -90,7 +90,6 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   j0 = _mm256_loadu_pd(&jac[0]);  // j0 = [j3 j2 j1 j0]
   j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
   j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
-  
   for(int ip=0; ip<intp_n; ip++){
       { // begin scoping unit
         __m256d u0,u1,u2,u3,u4,u5,u6,u7,u8,g0,g1,g2;

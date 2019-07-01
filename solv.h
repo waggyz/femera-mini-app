@@ -32,6 +32,7 @@ public:
   valign sys_r;// Residuals
   valign sys_b;// RHS
   valign sys_0;// Dirichlet (fixed to zero) BCs
+  valign sys_1;// Fixed nonzero BCs
   //NOTE Additional working vectors needed are defined in each solver subclass
   //FIXME Moved them back here for now
   valign sys_d;//FIXME diagonal preconditioner w/ fixed BC DOFs set to zero
@@ -43,6 +44,7 @@ public:
   Solv::vals dat_b;// RHS
   Solv::vals dat_d;
   Solv::vals dat_0;
+  Solv::vals dat_1;
   Solv::vals dat_p, dat_q, dat_g, dat_o;
   //
   std::string meth_name="";
@@ -75,7 +77,8 @@ protected:
     sys_u = align_resize( dat_u, udof_n, valign_byte );// solution
     sys_r = align_resize( dat_r, udof_n, valign_byte );// residuals
     sys_d = align_resize( dat_d, udof_n, valign_byte );// Preconditioner
-    sys_0 = align_resize( dat_0, udof_n, valign_byte );
+    sys_0 = align_resize( dat_0, udof_n, valign_byte );// Dirichlet (fix 0) BC
+    sys_1 = align_resize( dat_1, udof_n, valign_byte );// Fixed nonzero BC
     for(INT_MESH i=0; i<udof_n; i++){ sys_0[i]=1.0; }
 #else
     sys_u.resize(udof_n,0.0);// Initial Solution Guess
