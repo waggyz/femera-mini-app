@@ -33,6 +33,7 @@ endif
 
 NCPU:=$(shell ./cpucount.sh)
 CPUMODEL:=$(shell ./cpumodel.sh)-$(CPUSTR)
+HOST2C:=$(hostname | cut -c1-2)
 
 #-O3 -ftree-vectorize -ffast-math -march=native
 # -funsafe-loop-optimizations
@@ -44,9 +45,12 @@ CPUMODEL:=$(shell ./cpumodel.sh)-$(CPUSTR)
 FEMERA_COMMON = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
  halo-pcg-omp.cc halo-ncg-omp.cc halo-pcr-dummy.cc \
  elas-iso3.cc elas-ort3.cc elas-ther-ort3.cc\
-
-FEMERA_MINI_CC = $(FEMERA_COMMON)\
- elas-iso3-vect.cc elas-ort3-vec2.cc elas-ther-ort3-vec2.cc
+ 
+ifeq ($(HOST2C), k2 )
+FEMERA_MINI_CC = $(FEMERA_COMMON) elas-iso3-base.cc elas-ort3-bas2.cc elas-ther-ort3-bas2.cc
+else
+FEMERA_MINI_CC = $(FEMERA_COMMON) elas-iso3-vect.cc elas-ort3-vec2.cc elas-ther-ort3-vec2.cc
+endif
 
 FEMERA_BASE_CC = $(FEMERA_COMMON)\
  elas-iso3-base.cc elas-ort3-bas2.cc elas-ther-ort3-bas2.cc
