@@ -7,6 +7,7 @@
 
 // Vectorize f calculation
 #define VECTORIZED
+#undef VECT_C
 // Fetch next u within G,H loop nest
 #undef FETCH_U_EARLY
 //
@@ -61,9 +62,12 @@ int ElastIso3D::ElemLinear( Elem* E,
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
   std::copy( &this->mtrl_matc[0], &this->mtrl_matc[this->mtrl_matc.size()], C );
-#if 0
+#ifdef VECT_C
   __m256d c0,c1,c2,c3;
-  c0 = _mm256_set_pd(0.,C[5],C[3],C[0]); c1 = _mm256_set_pd(0.,C[4],C[1],C[3]); c2 = _mm256_set_pd(0.,C[2],C[4],C[5]); c3 = _mm256_set_pd(0.,C[7],C[8],C[6]);
+  c0 = _mm256_set_pd(0.,C[1],C[1],C[0]);
+  c1 = _mm256_set_pd(0.,C[1],C[0],C[1]);
+  c2 = _mm256_set_pd(0.,C[0],C[1],C[1]);
+  c3 = _mm256_set_pd(0.,C[2],C[2],C[2]);
 #endif
 #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
@@ -223,9 +227,11 @@ int ElastIso3D::ElemLinear( Elem* E,
         }
       }// end elem_p switch
 #endif
+#if 1
       _mm256_store_pd(&H[0],a036);
       _mm256_store_pd(&H[4],a147);
       _mm256_store_pd(&H[8],a258);
+#endif
       }//end register scope
 #else
 #ifdef __INTEL_COMPILER
@@ -280,14 +286,20 @@ int ElastIso3D::ElemLinear( Elem* E,
 #endif
       } }
 #if 0
-//FIXME change C indices for iso
+//FIXME this doesn't work here in iso
       { // Scope vector registers
         __m256d s048;
-        s048= _mm256_mul_pd(_mm256_set1_pd(dw), _mm256_add_pd(_mm256_mul_pd(c0,_mm256_set1_pd(H[0])), _mm256_add_pd(_mm256_mul_pd(c1,_mm256_set1_pd(H[5])), _mm256_mul_pd(c2,_mm256_set1_pd(H[10])))));
+        s048= _mm256_mul_pd(_mm256_set1_pd(dw),
+              _mm256_add_pd(_mm256_mul_pd(c0,
+              _mm256_set1_pd(H[0])),
+              _mm256_add_pd(_mm256_mul_pd(c1,
+              _mm256_set1_pd(H[5])),
+              _mm256_mul_pd(c2,
+              _mm256_set1_pd(H[10])))));
               _mm256_store_pd(&S[0], s048);
-        S[4]=(H[1] + H[4])*C[6]*dw; // S[1]
-        S[5]=(H[2] + H[8])*C[8]*dw; // S[2]
-        S[6]=(H[6] + H[9])*C[7]*dw; // S[5]
+        S[4]=(H[1] + H[4])*C[2]*dw; // S[1]
+        S[5]=(H[2] + H[8])*C[2]*dw; // S[2]
+        S[6]=(H[6] + H[9])*C[2]*dw; // S[5]
       } // end scoping unit
 #else
       S[ 0]=(C[0]* H[0] + C[1]* H[5] + C[1]* H[10])*dw;//Sxx
