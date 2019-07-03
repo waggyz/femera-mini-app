@@ -1,5 +1,6 @@
 #ifndef INCLUDED_PHYS_H
 #define INCLUDED_PHYS_H
+#include <iostream>
 
 class Phys{
 public:
@@ -29,6 +30,7 @@ public:
   virtual int ElemStrain(Elem*, FLOAT_SOLV* )=0;// Applied Element Strain Preconditioner
   virtual int ElemLinear( Elem* )=0;//FIXME OLD
   virtual int ElemJacobi( Elem* )=0;//FIXME old
+  virtual int ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*)=0;
   //
   virtual inline int MtrlProp2MatC( )=0;//why does this inline?
   virtual Phys::vals MtrlLinear(//FIXME Not used for 3D yet
@@ -120,6 +122,7 @@ public: ElastIso2D(FLOAT_PHYS young, FLOAT_PHYS poiss, FLOAT_PHYS thick) :
   int ElemLinear( Elem* ) final;
   int ElemJacobi( Elem* ) final;
   int ElemStiff ( Elem* ) final;// Used for testing traditional EBE
+  int ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*) final;
   inline int MtrlProp2MatC()final{//why does this inline?
     const FLOAT_PHYS E=mtrl_prop[0];
     const FLOAT_PHYS n=mtrl_prop[1];
@@ -161,6 +164,7 @@ public: ElastIso3D(FLOAT_PHYS young, FLOAT_PHYS poiss ) :
   int ElemLinear( Elem* ) final;
   int ElemJacobi( Elem* ) final;
   int ElemStiff ( Elem* ) final;
+  int ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*) final;
   inline int MtrlProp2MatC()final{//why does this inline?
     const FLOAT_PHYS E =mtrl_prop[0];
     const FLOAT_PHYS nu=mtrl_prop[1];
@@ -242,6 +246,7 @@ public:
   int ElemLinear( Elem* ) final;
   int ElemJacobi( Elem* ) final;
   int ElemStiff ( Elem* ) final;
+  int ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*) final;
   inline int MtrlProp2MatC()final{
     const FLOAT_PHYS z1=mtrl_dirs[0];// Rotation about z (radians)
     const FLOAT_PHYS x2=mtrl_dirs[1];// Rotation about x (radians)
@@ -417,6 +422,7 @@ public:
   int ElemLinear( Elem* ) final;
   int ElemJacobi( Elem* ) final;
   int ElemStiff ( Elem* ) final;
+  int ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*) final;
   inline int MtrlProp2MatC()final{
     // First, set the elastic-only part
     auto Y = new ElastOrtho3D(this->mtrl_prop,this->mtrl_dirs);

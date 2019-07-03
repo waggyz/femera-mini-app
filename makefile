@@ -102,7 +102,7 @@ mini-ser:
 	-DVERB_MAX=4 -DHAS_TEST -DFETCH_JAC \
 	$(FEMERA_MINI_CC) test.cc femera-mini.cc -o femser-$(CPUMODEL) $(CPPLOG);\
 	./femser-$(CPUMODEL) -v2 -p cube/unit1p1n2 ;\
-	./femser-$(CPUMODEL) -v3 -p cube/unit1p2n2 ;
+	#./femser-$(CPUMODEL) -v3 -p cube/unit1p2n2 ;
 
 mini-seq:
 	mv -f femseq-$(CPUMODEL) femseq.old 2>/dev/null ; \

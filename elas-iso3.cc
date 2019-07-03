@@ -8,8 +8,11 @@ int ElastIso3D::ElemLinear( Elem* ){ return 1; }//FIXME
 int ElastIso3D::ElemJacobi( Elem* ){ return 1; }//FIXME
 int ElastIso3D::BlocLinear( Elem* ,
   RESTRICT Phys::vals &, const RESTRICT Solv::vals & ){
-  return 0;
+  return 1;
   }
+int ElastIso3D::ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*){
+  return 1;
+}
 int ElastIso3D::ElemStiff(Elem* E  ){
   //FIXME Doesn't do rotation yet
   const uint Dm = 3;//E->mesh_d

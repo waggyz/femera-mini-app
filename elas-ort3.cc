@@ -7,7 +7,156 @@
 int ElastOrtho3D::ElemLinear( Elem* ){ return 1; }//FIXME
 int ElastOrtho3D::ElemJacobi( Elem* ){ return 1; }//FIXME
 int ElastOrtho3D::BlocLinear( Elem* ,
-  RESTRICT Phys::vals &, const RESTRICT Solv::vals & ){
+  RESTRICT Phys::vals &, const RESTRICT Solv::vals & ){ return 1; }
+//
+int ElastOrtho3D::ElemStrainStress(std::ostream& of,
+  Elem* E, FLOAT_SOLV* sys_u) {
+  //FIXME Cleanup local variables.
+  const int Dm = 3;//E->mesh_d;// Node (mesh) Dimension FIXME should be elem_d?
+  const int Dn = 3;//this->node_d;// this->node_d DOF/node
+  const int Nj = 10;//Dm*Dm+1;// Jac inv & det
+  const int Nc = E->elem_conn_n;// Number of nodes/element
+  const int Ne = Dn*Nc;
+  const INT_MESH elem_n =E->elem_n;
+  const int intp_n = int(E->gaus_n);
+  //
+  INT_MESH e0=0, ee=elem_n;
+  //if(E->do_halo==true){ e0=0; ee=E->halo_elem_n;
+  //}else{ e0=E->halo_elem_n; ee=elem_n; };
+  //
+#if VERB_MAX>11
+  printf("Meshd: %i, Noded: %i, Elems:%i, IntPts:%i, Nodes/elem:%i\n",
+    (int)Dm,(int)Dn,(int)elem_n,(int)intp_n,(int)Nc);
+#endif
+  FLOAT_MESH jac[Nj];//, det;
+  FLOAT_PHYS u[Ne], uR[Ne];
+  FLOAT_PHYS G[Dm*Nc], H[Dm*Dn], S[Dm*Dn];//FIXME wrong sizes?
+  //FIXME
+  FLOAT_PHYS intp_shpf[intp_n*Nc];
+  // Make local copies of constant data structures
+  //if(has_therm){
+  std::copy( &E->intp_shpf[0],
+             &E->intp_shpf[intp_n*Nc], intp_shpf );
+  //}
+  FLOAT_PHYS intp_shpg[intp_n*Dm*Nc];
+  std::copy( &E->intp_shpg[0],
+             &E->intp_shpg[intp_n*Dm*Nc], intp_shpg );
+  //FLOAT_PHYS wgt[intp_n];
+  //std::copy( &E->gaus_weig[0],
+  //           &E->gaus_weig[intp_n], wgt );
+  FLOAT_PHYS C[this->mtrl_matc.size()];
+  std::copy( &this->mtrl_matc[0],
+             &this->mtrl_matc[this->mtrl_matc.size()], C );
+  FLOAT_PHYS R[9] = {
+    mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
+    mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
+    mtrl_rotc[6],mtrl_rotc[7],mtrl_rotc[8]};
+#if VERB_MAX>10
+  printf( "Material [%u]:", (uint)mtrl_matc.size() );
+  for(uint j=0;j<mtrl_matc.size();j++){
+    if(j%Dm==0){printf("\n");}
+    printf("%+9.2e ",C[j]);
+  }; printf("\n");
+#endif
+  const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
+  const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
+  const FLOAT_SOLV* RESTRICT sysu  = &sys_u[0];
+#if VERB_MAX>10
+    printf( "Displacements:");// (Elem: %u):", ie );
+  for(int j=0;j<Ne;j++){
+      if(j%Dn==0){printf("\n");}
+      printf("%+9.2e ",u[j]);
+    } printf("\n");
+#endif
+  for(INT_MESH ie=e0;ie<ee;ie++){//=============================== Element Loop
+    // Transpose R
+    std::swap(R[1],R[3]); std::swap(R[2],R[6]); std::swap(R[5],R[7]);
+    for (int i=0; i<Nc; i++){
+      std::memcpy(&u[Dn*i],&sysu[Econn[Nc*ie+i]*Dn],sizeof(FLOAT_SOLV)*Dn);
+    }
+    std::memcpy( &jac , &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
+    for(int i=0; i<Nc; i++){// Rotate vectors in u
+      for(int k=0; k<Dm; k++){ uR[(Dn* i+k) ]=0.0;
+        for(int j=0; j<Dm; j++){
+          uR[(Dn* i+k) ] += u[(Dn* i+j) ] * R[(Dm* j+k) ];
+    } } }
+    for(int ip=0; ip<intp_n; ip++){//=================== Integration Point Loop
+      of << E->elem_glid[ie] <<","<< ip+1;
+      of <<",";
+      //FIXME Int pt coords.
+      //
+      //
+      //
+      //G = MatMul3x3xN( jac,shg );
+      for(int i=0; i<(Dm*Dn); i++){ H[i]=0.0; };
+      for(int i=0; i<Nc; i++){
+        for(int k=0; k<Dm ; k++){ G[Dm* i+k ]=0.0;
+          for(int j=0; j<Dm ; j++){
+            G[Dm* i+k ] += intp_shpg[ip*Dm*Nc+ Dm* i+j ] * jac[Dm* j+k ];
+          }
+          for(int j=0; j<Dn ; j++){// Unsymmetric small strain tensor
+            H[Dm* j+k ] += G[Dm* i+k ] * uR[Dn* i+j ];
+          }
+        }
+      }
+      FLOAT_PHYS strain[Dm*Dm];
+      for(int i=0; i<(Dm*Dn); i++){ strain[i]=0.0; }
+      for(int i=0; i<Dm; i++){// un-rotate strains
+        for(int k=0; k<Dm ; k++){
+          for(int j=0; j<Dm ; j++){
+            for(int l=0; l<Dm ; l++){
+              strain[Dm* i+l ] +=  R[Dm* i+j ] * H[Dm* j+k ] * R[Dm* l+k ];
+            }
+          }
+        }
+      }
+      of<< strain[0] <<","<< strain[4] <<","<< strain[8] <<","
+        << strain[1]+strain[3] <<","
+        << strain[5]+strain[7] <<","
+        << strain[2]+strain[6];
+      of<< ",";
+#if VERB_MAX>11
+      printf( "Small Strains (Elem: %i):", ie );
+      for(int j=0;j<(Dm*Dn);j++){
+        if(j%Dm==0){printf("\n");}
+        printf("%+9.2e ",strain[j]);
+      } printf("\n");
+#endif
+      // Elastic material response
+      S[0]=(C[0]* H[0] + C[3]* H[4] + C[5]* H[8]);//Sxx
+      S[4]=(C[3]* H[0] + C[1]* H[4] + C[4]* H[8]);//Syy
+      S[8]=(C[5]* H[0] + C[4]* H[4] + C[2]* H[8]);//Szz
+      //
+      S[1]=( H[1] + H[3] )*C[6];// S[3]= S[1];//Sxy Syx
+      S[5]=( H[5] + H[7] )*C[7];// S[7]= S[5];//Syz Szy
+      S[2]=( H[2] + H[6] )*C[8];// S[6]= S[2];//Sxz Szx
+      S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
+      FLOAT_PHYS stress[Dm*Dm];
+      for(int i=0; i<(Dm*Dn); i++){ stress[i]=0.0; }
+      for(int i=0; i<Dm; i++){
+        for(int k=0; k<Dm ; k++){
+          for(int j=0; j<Dm ; j++){
+            for(int l=0; l<Dm ; l++){
+              stress[Dm* i+l ] +=  R[Dm* i+j ] * S[Dm* j+k ] * R[Dm* l+k ];
+            }
+          }
+        }
+      }
+      of<< stress[0] <<","<< stress[4] <<","<< stress[8] <<","
+        <<(stress[1]+stress[3])*0.5 <<","
+        <<(stress[5]+stress[7])*0.5 <<","
+        <<(stress[2]+stress[6])*0.5;
+      of<< '\n';
+#if VERB_MAX>11
+      printf( "Stress:");
+      for(int j=0;j<(Dn*Dm);j++){
+        if(j%Dm==0){printf("\n");}
+        printf("%+9.2e ",stress[j]);
+      } printf("\n");
+#endif
+    }//========================================================== End intp loop
+  std::swap(R[1],R[3]); std::swap(R[2],R[6]); std::swap(R[5],R[7]);
+  }//============================================================ End elem loop
   return 0;
 }
 int ElastOrtho3D::ElemStiff(Elem* E  ){

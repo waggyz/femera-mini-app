@@ -15,6 +15,9 @@ int ThermElastOrtho3D::ElemStiff( Elem* ){ return 1; };//FIXME
 int ThermElastOrtho3D::BlocLinear( Elem* ,
   RESTRICT Phys::vals &, const RESTRICT Solv::vals & ){ return 1; };
 int ThermElastOrtho3D::ElemStrain( Elem* ,FLOAT_SOLV*  ){ return 1; }
+int ThermElastOrtho3D::ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*){
+  return 1;
+}
 //
 int ThermElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
   //FIXME Doesn't do rotation yet

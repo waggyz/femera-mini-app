@@ -475,6 +475,22 @@ int main( int argc, char** argv ){
     };
 #endif
   }// end iter scope
+#if 0
+// Output integration point strains and stresses =====================
+#pragma omp parallel
+{  std::vector<Mesh::part> P;
+   P.resize(M->mesh_part.size());
+   std::copy(M->mesh_part.begin(), M->mesh_part.end(), P.begin());
+#pragma omp for schedule(static)
+    for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
+      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+#pragma omp critical(minmax)
+{
+    Y->ElemStrainStress( std::cout, E, S->sys_u );
+}
+    }//end part loop
+}
+#endif
 #ifdef HAS_TEST
     // Check solution ===============================================
 #if VERB_MAX>1
