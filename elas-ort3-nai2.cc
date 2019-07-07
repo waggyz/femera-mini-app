@@ -1,12 +1,10 @@
 #if VERB_MAX > 10
 #include <iostream>
-#endif
-#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
+#endif
 #include <ctype.h>
-#include <cstring>// std::memcpy
 #include "femera.h"
 //
 int ElastOrtho3D::Setup( Elem* E ){
@@ -29,49 +27,27 @@ int ElastOrtho3D::Setup( Elem* E ){
 int ElastOrtho3D::ElemLinear( Elem* E,
   FLOAT_SOLV *sys_f, const FLOAT_SOLV* sys_u ){
   //FIXME Cleanup local variables.
-  const int Dm = 3;//E->mesh_d;// Node (mesh) Dimension FIXME should be elem_d?
-  const int Dn = 3;//this->node_d;// this->node_d DOF/node
-  const int Nj = 10;//Dm*Dm+1;// Jac inv & det
+  const int Dm = E->mesh_d;// Node (mesh) Dimension FIXME should be elem_d?
+  const int Dn = this->node_d;// this->node_d DOF/node
+  const int Nj = Dm*Dm+1;// Jac inv & det
   const int Nc = E->elem_conn_n;// Number of nodes/element
   const int Ne = Dn*Nc;
   const INT_MESH elem_n =E->elem_n;
-  const int intp_n = int(E->gaus_n);
+  //const int intp_n = int(E->gaus_n);
   //
   INT_MESH e0=0, ee=elem_n;
   if(E->do_halo==true){ e0=0; ee=E->halo_elem_n;
   }else{ e0=E->halo_elem_n; ee=elem_n; }
   //
-#if VERB_MAX>11
-  printf("Dim: %i, Elems:%i, IntPts:%i, Nodes/elem:%i\n",
-    (int)mesh_d,(int)elem_n,(int)intp_n,(int)Nc);
-#endif
   FLOAT_PHYS dw, G[Ne], u[Ne],f[Ne];
-  //FLOAT_PHYS det,
-  FLOAT_PHYS H[9], S[9], A[9];//, B[9];
-  //
-  //const FLOAT_PHYS* RESTRICT intp_shpg = &E->intp_shpg[0];
-  //const FLOAT_PHYS* RESTRICT       wgt = &E->gaus_weig[0];
-  //const FLOAT_PHYS* RESTRICT         C = &this->mtrl_matc[0];
-  //const FLOAT_PHYS* RESTRICT         R = &this->mtrl_rotc[0];
-#if VERB_MAX>10
-  printf( "Material [%u]:", (uint)mtrl_matc.size() );
-  for(uint j=0;j<mtrl_matc.size();j++){
-    //if(j%mesh_d==0){printf("\n");}
-    printf("%+9.2e ",C[j]);
-  } printf("\n");
-#endif
-  //const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
-  //const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
-  //const FLOAT_SOLV* RESTRICT sysu  = &sys_u[0];
-  //      FLOAT_SOLV* RESTRICT sysf  = &sys_f[0];
+  FLOAT_PHYS H[9], S[9], A[9];
   for(INT_MESH ie=e0;ie<ee;ie++){
-    //const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     for (uint i=0; i<uint(Nc); i++){
       for (uint j=0; j<uint(Dn); j++){
         u[Dn*i+j] = sys_u[E->elem_conn[Nc*ie+i]*Dn+j];
       } }
     for (int i=0; i<Ne; i++){ f[i]=0.0; }
-    for(int ip=0; ip<intp_n; ip++){
+    for(int ip=0; ip<E->gaus_n; ip++){
       for(int i=0; i< 9 ; i++){ H[i]=0.0; A[i]=0.0; }
       for(int i=0; i<Ne ; i++){ G[i]=0.0; }
       //G = MatMul3x3xN( jac,shg );
@@ -86,13 +62,6 @@ int ElastOrtho3D::ElemLinear( Elem* E,
           for(int j=0; j<Dm ; j++){
             A[Dm* i+j ] += G[Dm* k+i ] * u[Dn* k+j ];
           } } }//------------------------------------------ N*3*6*2 = 36*N FLOP
-#if VERB_MAX>10
-      printf( "Small Strains (Elem: %i):", ie );
-      for(int j=0;j<HH.size();j++){
-        if(j%mesh_d==0){printf("\n"); }
-        printf("%+9.2e ",H[j]);
-      }; printf("\n");
-#endif
       dw = E->elip_jacs[Nj*ie+ 9 ] * E->gaus_weig[ip];
       // [H] Small deformation tensor
       // [H][RT] : matmul3x3x3T
@@ -100,9 +69,14 @@ int ElastOrtho3D::ElemLinear( Elem* E,
         for(int k=0; k<3; k++){ H[3* i+k ]=0.0;
           for(int j=0; j<3; j++){
             H[(3* i+k) ] += A[(3* i+j)] * this->mtrl_rotc[3* k+j ];
-      } } }//----------------------------------------------- 27*2 =      54 FLOP
-      //det=jac[9 +Nj*l]; FLOAT_PHYS w = det * wgt[ip];
-      //
+      } } }//---------------------------------------------- 27*2 =      54 FLOP
+#if VERB_MAX>10
+      printf( "Small Strains (Elem: %i):", ie );
+      for(int j=0;j<9;j++){
+        if(j%mesh_d==0){printf("\n"); }
+        printf("%+9.2e ",H[j]);
+      }; printf("\n");
+#endif
       S[0]=(this->mtrl_matc[0]* H[0] + this->mtrl_matc[3]* H[4] + this->mtrl_matc[5]* H[8])*dw;//Sxx
       S[4]=(this->mtrl_matc[3]* H[0] + this->mtrl_matc[1]* H[4] + this->mtrl_matc[4]* H[8])*dw;//Syy
       S[8]=(this->mtrl_matc[5]* H[0] + this->mtrl_matc[4]* H[4] + this->mtrl_matc[2]* H[8])*dw;//Szz
@@ -123,9 +97,8 @@ int ElastOrtho3D::ElemLinear( Elem* E,
       for(int i=0; i<9; i++){ A[i]=0.0; };
       for(int i=0; i<3; i++){
         for(int k=0; k<3; k++){
-          for(int j=0; j<3; j++){
-            //A[3* i+k ] += S[3* i+j ] * R[3* j+k ];
-            A[(3* k+i) ] += S[3* i+j ] * this->mtrl_rotc[3* j+k ];// A is transposed
+          for(int j=0; j<3; j++){// A is transposed
+            A[(3* k+i) ] += S[3* i+j ] * this->mtrl_rotc[3* j+k ];
       };};};//-------------------------------------------------- 27*2 = 54 FLOP
       //NOTE [A] is not symmetric Cauchy stress.
       //NOTE Cauchy stress is ( A + AT ) /2
@@ -142,24 +115,10 @@ int ElastOrtho3D::ElemLinear( Elem* E,
           for(int j=0; j<3; j++){
             f[(3* i+k) ] += G[(3* i+j) ] * A[(3* k+j) ];
       } } }//------------------------------------------------ N*3*6 = 18*N FLOP
-      // This is way slower:
-      //for(int i=0; i<Nc; i++){
-      //  for(int k=0; k<3 ; k++){
-      //    for(int j=0; j<3 ; j++){
-      //    for(int l=0; l<3 ; l++){
-      //      f[3* i+l ] += G[3* i+j ] * S[3* j+k ] * R[3* k+l ];
-      //};};};};
-#if VERB_MAX>10
-      printf( "ff:");
-      for(int j=0;j<Ne;j++){
-        if(j%mesh_d==0){printf("\n");}
-        printf("%+9.2e ",f[j]);
-      }; printf("\n");
-#endif
     }//end intp loop
     for (uint i=0; i<uint(Nc); i++){
       for (uint j=0; j<uint(Dn); j++){
-        sys_f[E->elem_conn[Nc*ie+i]*Dn+j] += f[Dn*i+j]; } }//------------------------ 3*N FLOP
+        sys_f[E->elem_conn[Nc*ie+i]*Dn+j] += f[Dn*i+j]; } }//--------- 3*N FLOP
   }//end elem loop
   return 0;
 }
