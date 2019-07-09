@@ -581,7 +581,7 @@ int main( int argc, char** argv ){
         coor[i+0]-=minx; coor[i+1]-=miny; coor[i+2]-=minz;
         coor[i+0]*=scax; coor[i+1]*=scay; coor[i+2]*=scaz;
       }
-      test_u=Y->udof_magn[0]; FLOAT_PHYS test_T=Y->udof_magn[3];
+      test_u=Y->udof_magn[test_dir]; FLOAT_PHYS test_T=Y->udof_magn[3];
       //
       Solv::vals norm_u(Nn*Dn);
       if(Dn<4){
