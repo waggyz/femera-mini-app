@@ -541,13 +541,13 @@ int main( int argc, char** argv ){
       A=(Y->mtrl_matc[0]+Y->mtrl_matc[1]+Y->mtrl_matc[2])/3.0;
       B=(Y->mtrl_matc[3]+Y->mtrl_matc[4]+Y->mtrl_matc[5])/3.0;
       C=(Y->mtrl_matc[6]+Y->mtrl_matc[7]+Y->mtrl_matc[8])/3.0;
-    };
+    }
     youn_voig=(A-B+3.0*C)*(A+2.0*B)/(2.0*A+3.0*B+C);
     //printf("c11:%e, c12:%e, c44:%e\n",A,B,C);
     //printf("ELEM NODES: %u\n",uint(E->elem_conn_n));
     //printf("mtrl_prop size: %u\n",uint(Y->mtrl_prop.size()));
 }
-    };
+    }
 #pragma omp single
 {
     //scale = 1.0/(smax-smin);
@@ -576,10 +576,11 @@ int main( int argc, char** argv ){
         break;}
       case(0):
       default:{ coor = E->vert_coor; break;}
-      };
+      }
       for(uint i=0;i<(Nn*Dm);i+=Dm){
-        coor[i+0]*=scax; coor[i+1]*=scay; coor[i+2]*=scaz; };
-      //
+        coor[i+0]-=minx; coor[i+1]-=miny; coor[i+2]-=minz;
+        coor[i+0]*=scax; coor[i+1]*=scay; coor[i+2]*=scaz;
+      }
       test_u=Y->udof_magn[0]; FLOAT_PHYS test_T=Y->udof_magn[3];
       //
       Solv::vals norm_u(Nn*Dn);
@@ -688,11 +689,11 @@ int main( int argc, char** argv ){
     printf("          %9.2e  ||R||\n",
       std::sqrt(errtot[errtot.size()-1]) );
 }
-      };
+      }
 #endif
-    };//end parallel for
+    }//end parallel for
 }//end parallel region
-    for(int i= 4; i< 2*(node_d+1); i++){ errtot[i]/=part_n; };
+    for(int i= 4; i< 2*(node_d+1); i++){ errtot[i]/=part_n; }
     printf(" ux        uy        uz        mag       ");
     //printf("Normalized Error in %i Partitions", part_n );
     if(node_d>3){ printf("Temp      Normalized Error in %i Parts", part_n ); }
@@ -703,9 +704,9 @@ int main( int argc, char** argv ){
         else if(i==2*(node_d+1)){ printf(" Avg"); }
         else if(i==3*(node_d+1)){ printf(" Max"); }
         else if(i!=0){ printf("    "); }
-        printf("\n"); };
+        printf("\n"); }
       printf("%+9.2e ",errtot[i]);
-    };
+    }
     printf(" R2       ");
     if(node_d>3){ printf("          "); }
     printf("          %9.2e  ||R||\n",
@@ -731,9 +732,9 @@ int main( int argc, char** argv ){
       auto f = Dn* E->node_haid[i];
       for(uint j=0; j<Dn; j++){
 #pragma omp atomic write
-        M->halo_val[f+j] = S->sys_f[Dn* i+j]; };
-    };
-  };
+        M->halo_val[f+j] = S->sys_f[Dn* i+j]; }
+    }
+  }
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
@@ -743,9 +744,9 @@ int main( int argc, char** argv ){
       auto f = Dn* E->node_haid[i];
       for( uint j=0; j<Dn; j++){
 #pragma omp atomic update
-        M->halo_val[f+j]+= S->sys_f[Dn* i+j]; };
-    };
-  };// finished gather, now scatter back to elems
+        M->halo_val[f+j]+= S->sys_f[Dn* i+j]; }
+    }
+  }// finished gather, now scatter back to elems
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
@@ -755,10 +756,10 @@ int main( int argc, char** argv ){
       auto f = Dn* E->node_haid[i];
       for( uint j=0; j<Dn; j++){//NOTE appears not to be critical
 //#pragma omp atomic read
-        S->sys_f[Dn* i+j] = M->halo_val[f+j]; };
-    };
+        S->sys_f[Dn* i+j] = M->halo_val[f+j]; }
+    }
     E->do_halo=false; Y->ElemLinear( E, S->sys_f, S->sys_u );
-  };
+  }
   // Now, sum the reactions on BCS fixed-displacemnt nodes in the x-direction.
   // Also, compute the polycrystal effective Young's modulus
 #pragma omp for schedule(static) reduction(+:reac_x)
@@ -771,9 +772,9 @@ int main( int argc, char** argv ){
     for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
       // Don't duplicate halo nodes
       if(n>=r){ if(f==0){ reac_x+=S->sys_f[Dn* n+dof]; } }
-    };
-  };
-  }// end parallel 
+    }
+  }
+  }// end parallel
   //FLOAT_PHYS A=1.0/(scale*scale);
   FLOAT_PHYS A=1.0/(scay*scaz);
   FLOAT_PHYS reac_ther = ther_pres * A;
@@ -792,10 +793,10 @@ int main( int argc, char** argv ){
   { float e=( (reac_x+reac_ther)/A/(test_u*scax))/youn_voig -1.0;
   //{ float e=( reac_x/A/(test_u*scale))/youn_voig -1.0;
   printf("        Modulus Error:");
-  if( std::abs(e)<test_u ){ printf(" %+9.2e\n",e); 
-  }else{ printf("%+6.2f%%\n",100.*e); };
+  if( std::abs(e)<test_u ){ printf(" %+9.2e\n",e);
+  }else{ printf("%+6.2f%%\n",100.*e); }
   }
-    };
+    }//end if verbosity > 1
 #endif
 #endif //HAS_TEST
   return 0;
