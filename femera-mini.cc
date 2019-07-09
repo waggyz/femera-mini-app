@@ -780,12 +780,18 @@ int main( int argc, char** argv ){
     INT_MESH r=E->halo_remo_n;
     for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
       // Don't duplicate halo nodes
-      if(n>=r){ if(f==0){ reac_x+=S->sys_f[Dn* n+dof]; } }
+      if(n>=r){ if(f==test_dir){ reac_x+=S->sys_f[Dn* n+dof]; } }
     }
   }
   }// end parallel
+  FLOAT_PHYS A=1.0, len=1.0;
   //FLOAT_PHYS A=1.0/(scale*scale);
-  FLOAT_PHYS A=1.0/(scay*scaz);
+  switch(test_dir){
+    case(1): A=1.0/(scax*scaz); len=scay; break;
+    case(2): A=1.0/(scax*scay); len=scaz; break;
+    case(0):
+    default: A=1.0/(scay*scaz); len=scax;
+  }
   FLOAT_PHYS reac_ther = ther_pres * A;
   printf("Model Response\n");
   printf("        Load / Area  : %+9.2e /%9.2e  N/m2 = %+9.2e Pa\n",
@@ -794,12 +800,12 @@ int main( int argc, char** argv ){
   printf("Thermal Load / Area  : %+9.2e /%9.2e  N/m2 = %+9.2e Pa\n",
     reac_ther, A, reac_ther/A ); }
   printf("Displacement / Length: %+9.2e /%9.2e  m/m  = %+9.2e strain\n",
-    test_u, 1.0/scax, test_u*scax );
+    test_u, 1.0/len, test_u*len );
     //test_u, 1.0/scale, test_u*scale );
   printf("              Modulus: %9.2e /%9.2e Pa/Pa Voigt Average\n",
-    (reac_x+reac_ther)/A/(test_u*scax), youn_voig );
+    (reac_x+reac_ther)/A/(test_u*len), youn_voig );
     //reac_x/A/(test_u*scale), youn_voig );
-  { float e=( (reac_x+reac_ther)/A/(test_u*scax))/youn_voig -1.0;
+  { float e=( (reac_x+reac_ther)/A/(test_u*len))/youn_voig -1.0;
   //{ float e=( reac_x/A/(test_u*scale))/youn_voig -1.0;
   printf("        Modulus Error:");
   if( std::abs(e)<test_u ){ printf(" %+9.2e\n",e);
