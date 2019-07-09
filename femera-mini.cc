@@ -508,7 +508,7 @@ int main( int argc, char** argv ){
     FLOAT_PHYS scax=1.0,minx= 99e9,maxx=-99e9;
     FLOAT_PHYS scay=1.0,miny= 99e9,maxy=-99e9;
     FLOAT_PHYS scaz=1.0,minz= 99e9,maxz=-99e9;
-    FLOAT_PHYS youn_voig=0.0, ther_pres=0.0;;
+    FLOAT_PHYS youn_voig=0.0, ther_pres=0.0, test_amt=0.0;
 #pragma omp parallel
 {  std::vector<Mesh::part> P;
    P.resize(M->mesh_part.size());
@@ -530,6 +530,13 @@ int main( int argc, char** argv ){
       minz=std::min(minz, t.min() );
       maxz=std::max(maxz, t.max() );
 }
+  INT_MESH n; INT_DOF f; FLOAT_PHYS v;
+  for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
+    if( (f<3) & (std::abs(v) > std::abs(test_amt)) ){
+#pragma omp critical(bcs)
+{     test_dir = f; test_amt = v; }
+    }
+  }
 #pragma omp critical(youngs)
 {
     FLOAT_PHYS A=0.0,B=0.0,C=0.0;
@@ -581,7 +588,9 @@ int main( int argc, char** argv ){
         coor[i+0]-=minx; coor[i+1]-=miny; coor[i+2]-=minz;
         coor[i+0]*=scax; coor[i+1]*=scay; coor[i+2]*=scaz;
       }
-      test_u=Y->udof_magn[test_dir]; FLOAT_PHYS test_T=Y->udof_magn[3];
+      test_u=test_amt;
+      //test_u=Y->udof_magn[test_dir];
+      FLOAT_PHYS test_T=Y->udof_magn[3];
       //
       Solv::vals norm_u(Nn*Dn);
       if(Dn<4){
