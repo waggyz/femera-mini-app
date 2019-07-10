@@ -44,6 +44,9 @@ RenumberMeshElements;
 
 Mesh.ElementOrder             = p;
 Mesh.SecondOrderIncomplete    = 1;
+If(p>2)
+Mesh.SecondOrderIncomplete    = 0;
+EndIf
 Mesh.SecondOrderLinear        = 1;
 
 Mesh.CharacteristicLengthFromPoints=1;
