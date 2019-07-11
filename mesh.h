@@ -51,6 +51,12 @@ public:
   INT_MESH ort3_part_n=0;
   INT_MESH ther_part_n=0;
   //
+  //FLOAT_MESH glob_bbox[6]={0.0,0.0,0.0, 1.0,1.0,1.0};
+  FLOAT_MESH glob_bbox[6]={9e9,9e9,9e9 , -9e9,-9e9,-9e9};
+  //
+  FLOAT_SOLV cube_init=0.0;// Start u0 at scaled iso cube exact solution
+  //FIXME Should only be in Solv* objects?
+  //
   //FIXME Consider moving these to Test*
   float phys_flop=0, phys_band=0;
   float solv_flop=0, solv_band=0;

@@ -58,12 +58,36 @@ int PCG::Setup( Elem* E, Phys* Y ){// printf("*** Setup(E,Y) ***\n");
   this->halo_loca_0 = E->halo_remo_n * Y->node_d;
   this->RHS( E,Y );
   this->BCS( E,Y );// Sync max Y->udof_magn before Precond()
-  E->do_halo=true ; Y->ElemLinear( E,this->sys_f,this->sys_u );
-  E->do_halo=false; Y->ElemLinear( E,this->sys_f,this->sys_u );
+  //
+  //FIXME Sync boundary box bbox and compute initial sys_u before these
+  //E->do_halo=true ; Y->ElemLinear( E,this->sys_f,this->sys_u );
+  //E->do_halo=false; Y->ElemLinear( E,this->sys_f,this->sys_u );
   return(0);
 };
 int PCG::Init( Elem* E, Phys* Y ){// printf("*** Init(E,Y) ***\n");
   this->BC0( E,Y );
+#if 1
+  //FIXME Move this somewhere
+#if 0
+#pragma omp critical
+{ for(uint j=0; j<6; j++){printf("%f ",E->glob_bbox[j]); } printf("\n"); }
+#endif
+  if(this->cube_init!=0.0){
+    const INT_MESH Nn=E->node_n, Dm=E->mesh_d;
+    const FLOAT_SOLV ci=this->cube_init;
+    const FLOAT_SOLV u[3]={1.0,-0.3,-0.3};//FIXME 
+    for(uint i=0; i<Nn; i++){
+      for(uint j=0; j<Dm; j++){
+        this->sys_u[Dm* i+j ] = ci * u[j] * 0.001//Y->udof_magn[j]
+        //* E->vert_coor[Dm* i+j ];
+        * (E->vert_coor[Dm* i+j ]-E->glob_bbox[j])
+        / (E->glob_bbox[3+j] - E->glob_bbox[j]); 
+      }
+    }
+  }
+#endif
+  E->do_halo=true ; Y->ElemLinear( E,this->sys_f,this->sys_u );
+  E->do_halo=false; Y->ElemLinear( E,this->sys_f,this->sys_u );
   return 0;
 };
 int PCG::Init(){// printf("*** Init() ***\n");
@@ -267,6 +291,8 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH sysn=S->udof_n;
     for(uint i=0;i<sysn;i++){ S->sys_d[i]=FLOAT_SOLV(1.0)/S->sys_d[i]; };
+    // Sync global bounding box.
+    for(int i=0; i<6; i++){ E->glob_bbox[i]=this->glob_bbox[i]; }
     S->Init( E,Y );// Zeros boundary conditions
   };
   time_reset( my_solv_count, start );

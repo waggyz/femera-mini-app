@@ -319,6 +319,12 @@ int Mesh::Setup(){
   //for(uint i=0; i<M->list_elem.size(); i++){
   for(uint i=0; i<this->mesh_part.size(); i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=this->mesh_part[i];
+#if 0
+    // Sync global bounding box.
+    for(int i=0; i<6; i++){ E->glob_bbox[i]=this->glob_bbox[i];
+      //printf(" %f",E->glob_bbox[i]);
+    }
+#endif
     //std::cout << "Partition " << i ;
     if(verbosity>2){ printf("Partition %u", i); }
     if( E == NULL ){
@@ -412,7 +418,7 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
   Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P;
   INT_ORDER pord=1;
   E = new Tet(pord);//FIXME
-  E->simd_n = this->simd_n;
+  E->simd_n = this->simd_n;//FIXME
   //
   std::string s; if(is_bin){ s="binary";}else{s="ASCII";};
   if(is_bin){
@@ -420,6 +426,8 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
       << "ERROR Femera (fmr) "<< s <<" format not yet supported." <<'\n';
     return 0;
   }
+  //FLOAT_MESH bbox[6]={9e9,9e9,9e9 , -9e9,-9e9,-9e9};// global bounding box
+  //FLOAT_MESH minx=9e9, miny=9e9, minz=9e9, maxx=-9e9,maxy=-9e9,maxz=-9e9;
   std::string fmrstring;
   std::ifstream fmrfile(fname);//return 0;
   Phys::vals t_mtrl_prop={},t_mtrl_dirs={}, t_ther_cond={},t_ther_expa={};
@@ -484,13 +492,34 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
     if(fmrstring=="$VertCoor"){
       E->vert_coor.resize(uint(E->mesh_d)*E->node_n);//FIXME vert_n
       E->node_glid.resize(E->node_n);
+      FLOAT_MESH x=0.0;
       for(INT_MESH i=0; i<E->node_n; i++){//FIXME vert_n
         fmrfile >> E->node_glid[i];
         E->node_loid[E->node_glid[i]] = i;
         for(uint j=0; j<(uint)E->mesh_d; j++){
-          fmrfile >> E->vert_coor[E->mesh_d *i+j]; };
-      };
-    };
+          fmrfile >> x;
+          E->vert_coor[E->mesh_d *i+j]=x;
+          if(x<E->loca_bbox[  j]){E->loca_bbox[  j]=x;}
+          if(x>E->loca_bbox[3+j]){E->loca_bbox[3+j]=x;}
+        }
+      }
+#if 1
+      //printf("Bounds: ");
+      for(uint i=0; i<3; i++){
+#pragma omp critical
+{
+          if(E->loca_bbox[i]<this->glob_bbox[i]){
+            this->glob_bbox[i]=E->loca_bbox[i];}
+          if(E->loca_bbox[3+i]>this->glob_bbox[3+i]){
+            this->glob_bbox[3+i]=E->loca_bbox[3+i];}
+}
+      }
+        //E->loca_bbox[i]=bbox[i]; }
+      //  printf(" %f",bbox[i]);
+      //}
+      //printf("\n");
+#endif
+    }
     if(fmrstring=="$BC0"){ INT_MESH n,f,m;
       fmrfile >> m;
       for(INT_MESH i=0; i<m; i++){
@@ -608,12 +637,14 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
     default:{ S=new PCG(E->node_n * Y->node_d, this->iter_max, glob_rtol );  }
   };
   //S->tol = this->glob_rtol;
+  S->cube_init=this->cube_init;
   //if(dots_mod>0){
   //  if((part_i%dots_mod)==0){ std::cout <<"."; fflush(stdout); }; };
   E->Setup();
-  Y->Setup( E );;// Applies material rotations & sets Y->elem_flop and elem_band
-  S->Setup( E,Y );// Applies BCs & sets S->udof_flop and 
+  Y->Setup( E );// Applies material rotations & sets Y->elem_flop and elem_band
+  S->Setup( E,Y );// Applies BCs & sets S->udof_flop and
   // For PCR, also computes diagonal of K for Jacobi preconditioner
+  //FIXME AND does the initial ElemLinear
   //
   Mesh::part tP(E,Y,S); P=tP;
   //

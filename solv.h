@@ -26,6 +26,8 @@ public:
   FLOAT_SOLV resi_maxi;// Current maximum residual force
   FLOAT_SOLV resi_rtol;// Max residual relative convergence tolerance
   //
+  FLOAT_SOLV cube_init=0.0;// Start u0 at scaled iso cube exact solution
+  //
   // Pointers to memory-aligned vanilla C arrays
   valign sys_f;// f=[A]{u}//FIXME Move to Phys*?
   valign sys_u;// solution

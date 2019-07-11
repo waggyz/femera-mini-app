@@ -77,6 +77,12 @@ public:
     halo_node_n=0, halo_loca_n=0, halo_remo_n=0, halo_elem_n=0;
   // Local halo and system sizes.
   // Halo nodes are [0...halo_n-1]; interior nodes are [halo_n...node_n-1].
+  //
+  //FLOAT_MESH loca_bbox[6]={0.0,0.0,0.0 , 1.0,1.0,1.0};
+  //FLOAT_MESH glob_bbox[6]={0.0,0.0,0.0 , 1.0,1.0,1.0};
+  FLOAT_MESH loca_bbox[6]={9e9,9e9,9e9 , -9e9,-9e9,-9e9};
+  FLOAT_MESH glob_bbox[6]={9e9,9e9,9e9 , -9e9,-9e9,-9e9};
+  //
   Mesh::vals intp_shpf={};
   Mesh::vals intp_shpg={};
   Mesh::ints elem_conn={};// Grouped so halo nodes come first.
