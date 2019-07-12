@@ -306,7 +306,7 @@ int main( int argc, char** argv ){
   for(int i=0; i<3; i++){ std::cout<<M->glob_bbox[i]; if(i<2){std::cout<<",";} }
   std::cout <<"] [";
   for(int i=3; i<6; i++){ std::cout<<M->glob_bbox[i]; if(i<5){std::cout<<",";} }
-  std::cout <<"]" <<'\n';
+  std::cout<<"]"<<'\n';
   printf("Read and set up                         in %f s\n", read_sec );
   if(verbosity>1){
     std::cout<< "  Initializing: ";
@@ -372,17 +372,21 @@ int main( int argc, char** argv ){
       printf("%9.0f %s  %6.2f%% Init Sync and Overhead Time\n",
         (init_sec-work_sec/float(comp_n))/sc, ss,
         (init_sec-work_sec/float(comp_n))/init_sec*pct );
-    };
+    }
 #endif
 #if VERB_MAX>1
     if(verbosity>1){
-    std::cout<< "   Starting at: ";
+    std::cout << "   Starting at: ";
     if(M->cube_init==0.0){ std::cout<<"zero,"; }
     else if(M->cube_init==1.0){ std::cout<<"isotropic block solution,"; }
-    else{std::cout<<M->cube_init<<" times the isotropic block solution,"; }
-    std::cout<<'\n';
-    std::cout<< "  Iterating to: "<<rtol<<" relative tolerance,"<<'\n'
-      <<"or stopping at: "<<iter_max<<" "<<M->meth_name<<" iterations..."<<'\n';
+    else{std::cout<<M->cube_init<<" times isotropic block solution,"; }
+    std::cout <<" with boundary at [";
+    //FIXME Should include thermal, too
+    for(int i=0; i<3; i++){ std::cout<<M->glob_bmax[i]; if(i<2){std::cout<<",";} }
+    std::cout <<"],"<<'\n';
+    std::cout << "  Iterating to: "<<rtol<<" relative tolerance,";
+    std::cout <<'\n';
+    std::cout <<"or stopping at: "<<iter_max<<" "<<M->meth_name<<" iterations..."<<'\n';
     std::cout <<"Solving..."<<'\n';
     const char* c="=";
     if(M->glob_chk2 < M->glob_rto2){ c="<"; }
