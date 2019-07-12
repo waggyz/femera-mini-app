@@ -53,6 +53,7 @@ public:
   //
   //FLOAT_MESH glob_bbox[6]={0.0,0.0,0.0, 1.0,1.0,1.0};
   FLOAT_MESH glob_bbox[6]={9e9,9e9,9e9 , -9e9,-9e9,-9e9};
+  FLOAT_SOLV glob_bmax[4]={0.0,0.0,0.0,0.0};
   //
   FLOAT_SOLV cube_init=0.0;// Start u0 at scaled iso cube exact solution
   //FIXME Should only be in Solv* objects?

@@ -35,6 +35,7 @@ int PCG::BCS(Elem* E, Phys* Y ){// printf("*** BCS(E,Y) ***\n");
     //printf("FIX ID %i, DOF %i, val %+9.2e\n",i,E->bcs_vals[i].first,E->bcs_vals[i].second);
     this->sys_u[Dn* n+uint(f)] = v;
     if(std::abs(v) > Y->udof_magn[f]){ Y->udof_magn[f] = std::abs(v); }
+    if(std::abs(v) > std::abs(this->loca_bmax[f])){ this->loca_bmax[f] = v; }
   };
   return(0);
 };
@@ -70,14 +71,28 @@ int PCG::Init( Elem* E, Phys* Y ){// printf("*** Init(E,Y) ***\n");
 #if 0
 #pragma omp critical
 { for(uint j=0; j<6; j++){printf("%f ",E->glob_bbox[j]); } printf("\n"); }
+#pragma omp critical
+{ for(uint j=0; j<4; j++){printf("%f ",this->glob_bmax[j]); } printf("\n"); }
 #endif
   if(this->cube_init!=0.0){
     const INT_MESH Nn=E->node_n, Dm=E->mesh_d;
     const FLOAT_SOLV ci=this->cube_init;
-    const FLOAT_SOLV u[3]={1.0,-0.3,-0.3};//FIXME Generalize
+    FLOAT_SOLV u[3]={1.0,-0.3,-0.3};
+    FLOAT_SOLV umax=0.0;
+    for(int i=0; i<3; i++){
+      if(std::abs(this->glob_bmax[i])>std::abs(umax)){
+        umax=this->glob_bmax[i]; } }
+    for(int i=0; i<3; i++){
+      if(this->glob_bmax[i]==umax){ u[i]=umax; }
+      else{ u[i] = -umax*0.3; }//FIXME Generalize for nu used.
+    }
+#if 0
+#pragma omp critical
+{ for(uint j=0; j<3; j++){printf("%f ",u[j]); } printf("\n"); }
+#endif
     for(uint i=0; i<Nn; i++){
       for(uint j=0; j<Dm; j++){
-        this->sys_u[Dm* i+j ] = ci * u[j] * Y->udof_magn[j]
+        this->sys_u[Dm* i+j ] = ci * u[j]// * this->glob_bmax[j]//Y->udof_magn[j]
         //* E->vert_coor[Dm* i+j ];
         * ( E->vert_coor[Dm* i+j ] - E->glob_bbox[j] )
         / ( E->glob_bbox[   Dm+j ] - E->glob_bbox[j] );
@@ -220,6 +235,9 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
 //#pragma omp atomic write
         bcmax[i]=Y->udof_magn[i];
       }
+      if(std::abs(S->loca_bmax[i]) > std::abs(this->glob_bmax[i])){
+        this->glob_bmax[i] = S->loca_bmax[i];
+      }
     }
   }
 #pragma omp single
@@ -244,6 +262,7 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
 //#pragma omp atomic read
       Y->udof_magn[i] = bcmax[i];
       //printf("Sync MAX BC[%u]: %f\n",i,Y->udof_magn[i]);
+      S->glob_bmax[i] = this->glob_bmax[i];
     }
     S->Precond( E,Y );
   }
