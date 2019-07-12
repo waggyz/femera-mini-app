@@ -74,10 +74,10 @@ int PCG::Init( Elem* E, Phys* Y ){// printf("*** Init(E,Y) ***\n");
   if(this->cube_init!=0.0){
     const INT_MESH Nn=E->node_n, Dm=E->mesh_d;
     const FLOAT_SOLV ci=this->cube_init;
-    const FLOAT_SOLV u[3]={1.0,-0.3,-0.3};//FIXME 
+    const FLOAT_SOLV u[3]={1.0,-0.3,-0.3};//FIXME Generalize
     for(uint i=0; i<Nn; i++){
       for(uint j=0; j<Dm; j++){
-        this->sys_u[Dm* i+j ] = ci * u[j] * 0.001//Y->udof_magn[j]
+        this->sys_u[Dm* i+j ] = ci * u[j] * Y->udof_magn[j]
         //* E->vert_coor[Dm* i+j ];
         * ( E->vert_coor[Dm* i+j ] - E->glob_bbox[j] )
         / ( E->glob_bbox[   Dm+j ] - E->glob_bbox[j] );

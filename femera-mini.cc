@@ -376,6 +376,11 @@ int main( int argc, char** argv ){
 #endif
 #if VERB_MAX>1
     if(verbosity>1){
+    std::cout<< "   Starting at: ";
+    if(M->cube_init==0.0){ std::cout<<"zero,"; }
+    else if(M->cube_init==1.0){ std::cout<<"isotropic block solution,"; }
+    else{std::cout<<M->cube_init<<" times the isotropic block solution,"; }
+    std::cout<<'\n';
     std::cout<< "  Iterating to: "<<rtol<<" relative tolerance,"<<'\n'
       <<"or stopping at: "<<iter_max<<" "<<M->meth_name<<" iterations..."<<'\n';
     std::cout <<"Solving..."<<'\n';
