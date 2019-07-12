@@ -65,7 +65,6 @@ int PCG::Setup( Elem* E, Phys* Y ){// printf("*** Setup(E,Y) ***\n");
   return(0);
 };
 int PCG::Init( Elem* E, Phys* Y ){// printf("*** Init(E,Y) ***\n");
-  this->BC0( E,Y );
 #if 1
   //FIXME Move this somewhere
 #if 0
@@ -80,38 +79,48 @@ int PCG::Init( Elem* E, Phys* Y ){// printf("*** Init(E,Y) ***\n");
       for(uint j=0; j<Dm; j++){
         this->sys_u[Dm* i+j ] = ci * u[j] * 0.001//Y->udof_magn[j]
         //* E->vert_coor[Dm* i+j ];
-        * (E->vert_coor[Dm* i+j ]-E->glob_bbox[j])
-        / (E->glob_bbox[3+j] - E->glob_bbox[j]); 
+        * ( E->vert_coor[Dm* i+j ] - E->glob_bbox[j] )
+        / ( E->glob_bbox[   Dm+j ] - E->glob_bbox[j] );
       }
     }
+  this->BCS( E,Y );//FIXME repeated in Setup(E,Y)
   }
+  this->BC0( E,Y );
 #endif
   E->do_halo=true ; Y->ElemLinear( E,this->sys_f,this->sys_u );
   E->do_halo=false; Y->ElemLinear( E,this->sys_f,this->sys_u );
+#if 0
+  const uint sysn=this->udof_n;
+  for(uint i=0; i<sysn; i++){
+    this->sys_u[i] = 0.0; }
+#endif
   return 0;
-};
+}
 int PCG::Init(){// printf("*** Init() ***\n");
   const uint sysn=this->udof_n;// loca_res2 is a member variable.
   const uint sumi0=this->halo_loca_0;
+#pragma omp simd
   for(uint i=0; i<sysn; i++){
-      this->sys_r[i] -= this->sys_f[i];
-  };
+    this->sys_r[i] -= this->sys_f[i];
+  }
   //sys_r  = sys_b - sys_f;
   //sys_z  = sys_d * sys_r;// This is merged where it's used (2x/iter)
   //sys_p  = sys_z;
 #pragma omp simd
   for(INT_MESH i=0; i<sysn; i++){
-    sys_p[i]  = sys_d[i] * sys_r[i]; };
+    sys_p[i]  = sys_d[i] * sys_r[i];
+    //this->sys_u[i] -= this->sys_p[i];
+  }
   //loca_res2    = inner_product( sys_r,sys_z );
   //loca_res2    = inner_product( sys_r,sys_d * sys_r );
   FLOAT_SOLV R2=0.0;
 #pragma omp simd reduction(+:R2)
   for(uint i=sumi0; i<sysn; i++){
-    R2 += sys_r[i] * sys_r[i] * sys_d[i]; };
+    R2 += sys_r[i] * sys_r[i] * sys_d[i]; }
   this->loca_res2 = R2;
   this->loca_rto2 = this->loca_rtol*loca_rtol *loca_res2;//FIXME Move this somewhere.
   return(0);
-};
+}
 int PCG::Iter(){// printf("*** Iter() ***\n");// 2 FLOP + 12 FLOP/DOF, 14 float/DOF
 #if 0
   //NOTE Compute current sys_f=[k][p] before iterating with this.
@@ -237,13 +246,13 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
       //printf("Sync MAX BC[%u]: %f\n",i,Y->udof_magn[i]);
     }
     S->Precond( E,Y );
-  };
+  }
   // Sync sys_d [this inits M->halo_map and E->node_haid]//FIXME separate
   time_reset( my_prec_count, start );
 #pragma omp for schedule(OMP_SCHEDULE)
     for(int part_i=part_0; part_i<part_o; part_i++){
       Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
-      if(E->node_haid.size()==0){ E->node_haid.resize(E->halo_node_n); };
+      if(E->node_haid.size()==0){ E->node_haid.resize(E->halo_node_n); }
     }
     //-------------------------------------------------------------- Sync sys_d
 #pragma omp for schedule(OMP_SCHEDULE)
@@ -282,19 +291,19 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
         auto f = d* E->node_haid[i];
         for( uint j=0; j<d; j++){
 #pragma omp atomic read
-          S->sys_d[d*i +j] = this->halo_val[f+j]; };
-      };
-    };// end sys_d scatter
+          S->sys_d[d*i +j] = this->halo_val[f+j]; }
+      }
+    }// end sys_d scatter
   time_reset( my_scat_count, start );
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){//-------------- Invert sys_d
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH sysn=S->udof_n;
-    for(uint i=0;i<sysn;i++){ S->sys_d[i]=FLOAT_SOLV(1.0)/S->sys_d[i]; };
+    for(uint i=0;i<sysn;i++){ S->sys_d[i]=FLOAT_SOLV(1.0)/S->sys_d[i]; }
     // Sync global bounding box.
     for(int i=0; i<6; i++){ E->glob_bbox[i]=this->glob_bbox[i]; }
     S->Init( E,Y );// Zeros boundary conditions
-  };
+  }
   time_reset( my_solv_count, start );
 #pragma omp single
 {   this->halo_val = 0.0; }// serial halo_vals zero
@@ -307,9 +316,9 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic update
-        this->halo_val[f+j] += S->sys_f[d*i +j]; };
-    };
-  };// End halo_vals
+        this->halo_val[f+j] += S->sys_f[d*i +j]; }
+    }
+  }// End halo_vals
   time_reset( my_gat1_count, start );
 #pragma omp for schedule(OMP_SCHEDULE) reduction(+:glob_r2a)
   for(int part_i=part_0; part_i<part_o; part_i++){
@@ -319,20 +328,20 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic read
-        S->sys_f[d*i +j] = this->halo_val[f+j]; };
-    };
+        S->sys_f[d*i +j] = this->halo_val[f+j]; }
+    }
   time_reset( my_scat_count, start );// ------------------- finished sys_f sync
 #pragma omp critical(init)
 { S->Init(); }//FIXME Why is this serialized?
   glob_r2a += S->loca_res2;
-  };
+  }
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     S->loca_rto2 = S->loca_rtol*S->loca_rtol *glob_r2a;
 #pragma omp atomic write
     glob_to2 = S->loca_rto2;// Pass the relative tolerance out.
-  };
+  }
   time_reset( my_solv_count, start );
 #if VERB_MAX>1
 #pragma omp critical(time)
@@ -350,7 +359,7 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
   this->glob_chk2 = glob_r2a;
   this->glob_rto2 = glob_to2;// / ((FLOAT_SOLV)this->udof_n);
   return 0;
-};
+}
 int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
 #ifdef _OPENMP
   const int comp_n = this->comp_n;
@@ -364,7 +373,7 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
 // not needed anymore,since P is threadprivate
 //  std::vector<part> P; P.resize(this->mesh_part.size());
 //  std::copy(this->mesh_part.begin(), this->mesh_part.end(), P.begin());
-  int part_0=0; if(std::get<0>( P[0] )==NULL){ part_0=1; };
+  int part_0=0; if(std::get<0>( P[0] )==NULL){ part_0=1; }
   const int part_n = int(P.size())-part_0;
   const int part_o = part_n+part_0;
   Elem* E; Phys* Y; Solv* S;// Seems to be faster to reuse these.

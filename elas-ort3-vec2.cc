@@ -49,11 +49,11 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
   std::copy( &this->mtrl_matc[0], &this->mtrl_matc[this->mtrl_matc.size()], C );
-  __m256d c0,c1,c2,c3;
+  __m256d c0,c1,c2;//,c3;
   c0 = _mm256_set_pd(0.,C[5],C[3],C[0]);
   c1 = _mm256_set_pd(0.,C[4],C[1],C[3]);
   c2 = _mm256_set_pd(0.,C[2],C[4],C[5]);
-  c3 = _mm256_set_pd(0.,C[7],C[8],C[6]);
+  //c3 = _mm256_set_pd(0.,C[7],C[8],C[6]);
   const FLOAT_PHYS __attribute__((aligned(32))) R[9+1] = {
     mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
     mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],

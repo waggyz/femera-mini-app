@@ -283,10 +283,10 @@ int main( int argc, char** argv ){
   }else if( M->udof_n>int(1e4) ){ iter_info_n = 100;// sugg_max =M->udof_n/10;
   }else if( M->udof_n>int(1e2) ){ iter_info_n =  10;// sugg_max =M->udof_n/10;
   }else                         { iter_info_n =   1;// sugg_max =M->udof_n; 
-  };
+  }
   if(iter_max<0){
     iter_max=M->udof_n/iter_info_n*10;
-    if(iter_max>int(M->udof_n)){ iter_max=M->udof_n; }; };
+    if(iter_max>int(M->udof_n)){ iter_max=M->udof_n; } }
   }// end variable scope
 //endif
 #if VERB_MAX>0
@@ -295,13 +295,18 @@ int main( int argc, char** argv ){
     (setu_done-read_start);
   read_sec=float(read_time.count())*1e-9;
   if(verbosity==1){
-  std::cout << M->elem_n<<","<<M->node_n<<","<<M->udof_n<<","<<(part_n-part_0+1);
-  };
+  std::cout<< M->elem_n<<","<<M->node_n<<","<<M->udof_n<<","<<(part_n-part_0+1);
+  }
 #endif
 #if VERB_MAX>1
   if(verbosity>1){
   std::cout <<"System:     "<<M->elem_n<<" Elems, "
     <<M->node_n<<" Nodes, "<<M->udof_n<<" DOF "<<'\n';
+  std::cout <<"Bounds:    [";
+  for(int i=0; i<3; i++){ std::cout<<M->glob_bbox[i]; if(i<2){std::cout<<",";} }
+  std::cout <<"] [";
+  for(int i=3; i<6; i++){ std::cout<<M->glob_bbox[i]; if(i<5){std::cout<<",";} }
+  std::cout <<"]" <<'\n';
   printf("Read and set up                         in %f s\n", read_sec );
   if(verbosity>1){
     std::cout<< "  Initializing: ";
@@ -311,10 +316,10 @@ int main( int argc, char** argv ){
       case(Solv::COND_ROW1): std::cout<< "element row one-norm"; break;
       case(Solv::COND_STRA): std::cout<< "element strain"; break;
       default: std::cout<< "unknown";
-    };
+    }
     std::cout<< " preconditioner..." <<'\n';
-  };
-  };
+  }
+  }
 #endif
   // Solve parallel =================================================
   bool halo_update=true;
@@ -322,7 +327,7 @@ int main( int argc, char** argv ){
 #if VERB_MAX>2
   if(halo_mod!=1){
     std::cout<<"with halo updates every "
-    <<halo_mod<< " iterations..."<<'\n'; };
+    <<halo_mod<< " iterations..."<<'\n'; }
     //<<comp_n<< " compute and " <<numa_n<< " NUMA threads." <<'\n';
 #endif
 #endif
@@ -335,7 +340,7 @@ int main( int argc, char** argv ){
     init_done = std::chrono::high_resolution_clock::now();
     init_time = std::chrono::duration_cast<std::chrono::nanoseconds>
       (init_done-setu_done);
-    };
+    }
     init_sec =float(init_time.count())*ns;
 #endif
 #if VERB_MAX>2
@@ -349,7 +354,7 @@ int main( int argc, char** argv ){
     //
     float sc = ms; const char* ss="ms";
     if( work_sec < 100.0*ms ){ sc=us; ss="μs"; }// U+03BC
-    else if( work_sec > 100.0*sec ){sc=sec; ss=" s"; };
+    else if( work_sec > 100.0*sec ){sc=sec; ss=" s"; }
     //
     if(verbosity>2){
       if(prec_sec/init_sec/float(comp_n)*pct > 0.03){//FIXME
