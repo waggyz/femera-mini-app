@@ -15,22 +15,21 @@ public:
   INT_ORDER elem_p=1;
   INT_ORDER gaus_p=1; INT_ORDER gaus_n=1;
   INT_ORDER jacs_f=mesh_d*elem_d + 1;// size of jac matrix + det
-  INT_ORDER     elem_jacs_n=1;//1 for tri & tet, 3? for qua, 4? for bri
+  INT_ORDER elem_jacs_n=1;//1 for tri & tet, 3? for qua, 4? for bri
   INT_ELEM_NODE elem_vert_n;// Size of one linear element connectivity
   INT_ELEM_NODE elem_edge_n;// Edges of one element
   INT_ELEM_NODE elem_face_n;// Faces of one element containing a node
   INT_ELEM_NODE elem_conn_n;
-  uint simd_n=1;
-  //INT_MESH  jacs_n=0;//=elem_n * elem_jacs_n;
-  //FIXME Use this instead of gauss_n*elem_n*(d^2+1)
-  // = elem_vert_n + (elem_p-1)*elem_edge_n + elem_face_n
   INT_MESH elem_n=0, vert_n=0, node_n=0, jacs_n=0,
     halo_node_n=0, halo_loca_n=0, halo_remo_n=0, halo_elem_n=0;
   // Local halo and system sizes.
   // Halo nodes are [0...halo_n-1]; interior nodes are [halo_n...node_n-1].
+  uint simd_n=1;
+  bool do_halo;//=true;// false: do_interior //FIXME Remove.
+  //FIXME Replace with loop bounds passed as parameters to Phys::ElemLinear()
   //
-  FLOAT_MESH loca_bbox[6]={9e9,9e9,9e9 , -9e9,-9e9,-9e9};
-  FLOAT_MESH glob_bbox[6]={9e9,9e9,9e9 , -9e9,-9e9,-9e9};
+  FLOAT_MESH loca_bbox[6]={ 9e9,9e9,9e9 ,-9e9,-9e9,-9e9 };
+  FLOAT_MESH glob_bbox[6]={ 9e9,9e9,9e9 ,-9e9,-9e9,-9e9 };
   //
   Mesh::vals intp_shpf={};
   Mesh::vals intp_shpg={};
@@ -61,7 +60,6 @@ public:
   std::vector<int> remo_glid ={};
   //NOTE Global node numbers are 1-indexed.
   //NOTE Local (partition) node numbers are 0-indexed.
-  bool do_halo;//=true;// false: do_interior
   //
   // Local boundary conditions [were in Mesh]
   Mesh::nfvals rhs_vals={};// Nodal forces applied (nonzeros)
