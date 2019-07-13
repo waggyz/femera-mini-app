@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <omp.h>
 #include "femera.h"
-std::vector<Mesh::part> HaloPCG::P;
+std::vector<Mesh::part> HaloPCG::priv_part;
 //std::vector<Mesh::part> HaloPCG::Ptoto;
 
 
@@ -219,16 +219,16 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
   long int my_scat_count=0, my_prec_count=0,
     my_gat0_count=0,my_gat1_count=0, my_gmap_count=0, my_solv_count=0;
   auto start = std::chrono::high_resolution_clock::now();
-  // Make thread-local copies of mesh_part into threadprivate P.
-  P.resize(this->mesh_part.size());
-  std::copy(this->mesh_part.begin(), this->mesh_part.end(), P.begin());
-  int part_0=0; if(std::get<0>( P[0] )==NULL){ part_0=1; };
-  const int part_n = int(P.size())-part_0;
+  // Make thread-local copies of mesh_part into threadprivate HaloPCG::priv_part.
+  priv_part.resize(this->mesh_part.size());
+  std::copy(this->mesh_part.begin(), this->mesh_part.end(), priv_part.begin());
+  int part_0=0; if(std::get<0>( priv_part[0] )==NULL){ part_0=1; };
+  const int part_n = int(priv_part.size())-part_0;
   const int part_o = part_n+part_0;
   // Sync max Y->udof_magn
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     for(uint i=0;i<Y->udof_magn.size();i++){
       //printf("GLOBAL MAX BC[%u]: %f\n",i,bcmax[i]);
       if(Y->udof_magn[i] > bcmax[i]){//FIXME Atomic read?
@@ -256,7 +256,7 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
 }
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     S->solv_cond=this->solv_cond;
     for(uint i=0;i<Y->udof_magn.size();i++){
 //#pragma omp atomic read
@@ -270,13 +270,13 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
   time_reset( my_prec_count, start );
 #pragma omp for schedule(OMP_SCHEDULE)
     for(int part_i=part_0; part_i<part_o; part_i++){
-      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
       if(E->node_haid.size()==0){ E->node_haid.resize(E->halo_node_n); }
     }
     //-------------------------------------------------------------- Sync sys_d
 #pragma omp for schedule(OMP_SCHEDULE)
     for(int part_i=part_0; part_i<part_o; part_i++){
-      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
       //if(E->node_haid.size()==0){ E->node_haid.resize(E->halo_node_n); };
       const INT_MESH d=uint(Y->node_d);
       for(INT_MESH i=0; i<E->halo_node_n; i++){
@@ -304,7 +304,7 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
     time_reset( my_gmap_count, start );
 #pragma omp for schedule(OMP_SCHEDULE)
     for(int part_i=part_0; part_i<part_o; part_i++){
-      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
       const INT_MESH d=uint(Y->node_d);
       for(INT_MESH i=0; i<E->halo_node_n; i++){
         auto f = d* E->node_haid[i];
@@ -316,7 +316,7 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
   time_reset( my_scat_count, start );
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){//-------------- Invert sys_d
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH sysn=S->udof_n;
     for(uint i=0;i<sysn;i++){ S->sys_d[i]=FLOAT_SOLV(1.0)/S->sys_d[i]; }
     // Sync global bounding box.
@@ -329,7 +329,7 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
   time_reset( my_gat0_count, start );// ---------------------------  Sync sys_f
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH d=uint(Y->node_d);
     for(INT_MESH i=0; i<E->halo_node_n; i++){
       auto f = d* E->node_haid[i];
@@ -341,7 +341,7 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
   time_reset( my_gat1_count, start );
 #pragma omp for schedule(OMP_SCHEDULE) reduction(+:glob_r2a)
   for(int part_i=part_0; part_i<part_o; part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH d=uint(Y->node_d);
     for(INT_MESH i=0; i<E->halo_node_n; i++){
       auto f = d* E->node_haid[i];
@@ -356,7 +356,7 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
   }
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     S->loca_rto2 = S->loca_rtol*S->loca_rtol *glob_r2a;
 #pragma omp atomic write
     glob_to2 = S->loca_rto2;// Pass the relative tolerance out.
@@ -389,11 +389,9 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
   //FIXME don't need M->halo_val member variable now.
 #pragma omp parallel num_threads(comp_n)
 {// iter parallel region
-// not needed anymore,since P is threadprivate
-//  std::vector<part> P; P.resize(this->mesh_part.size());
-//  std::copy(this->mesh_part.begin(), this->mesh_part.end(), P.begin());
-  int part_0=0; if(std::get<0>( P[0] )==NULL){ part_0=1; }
-  const int part_n = int(P.size())-part_0;
+  // HaloPCG::priv_part is a threadprivate global variable
+  int part_0=0; if(std::get<0>( priv_part[0] )==NULL){ part_0=1; }
+  const int part_n = int(priv_part.size())-part_0;
   const int part_o = part_n+part_0;
   Elem* E; Phys* Y; Solv* S;// Seems to be faster to reuse these.
   // Timing variables (used when verbosity > 1)
@@ -406,7 +404,7 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
   time_start( iter_start );
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
-    std::tie(E,Y,S)=P[part_i];
+    std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH Dn=uint(Y->node_d);
     time_start( phys_start );
     const auto sysn = S->udof_n;
@@ -425,7 +423,7 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
   };
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
-    std::tie(E,Y,S)=P[part_i];
+    std::tie(E,Y,S)=priv_part[part_i];
     time_start( gath_start );
     const INT_MESH Dn=uint(Y->node_d);
     const INT_MESH hrn=E->halo_remo_n;
@@ -439,7 +437,7 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
   };// End halo_vals sum; now scatter back to elems
 #pragma omp for schedule(OMP_SCHEDULE) reduction(+:glob_sum1)
   for(int part_i=part_0; part_i<part_o; part_i++){
-    std::tie(E,Y,S)=P[part_i];
+    std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH Dn=uint(Y->node_d);
     time_start( scat_start );
     const INT_MESH hnn=E->halo_node_n,hl0=S->halo_loca_0,sysn=S->udof_n;
@@ -465,7 +463,7 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
   //printf("ALPHA:%+9.2e\n",alpha);
 #pragma omp for schedule(OMP_SCHEDULE) reduction(+:glob_sum2)
   for(int part_i=part_0; part_i<part_o; part_i++){// ? FLOP/DOF
-    std::tie(E,Y,S)=P[part_i];
+    std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH hl0=S->halo_loca_0,sysn=S->udof_n;
 #pragma omp simd
     for(INT_MESH i=0; i<hl0; i++){
@@ -479,7 +477,7 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
   const FLOAT_PHYS beta = glob_sum2 / glob_r2a;// 1 FLOP
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
-    std::tie(E,Y,S)=P[part_i];
+    std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH sysn=S->udof_n;
     //sys_p  = sys_d * sys_r + (r2b/ra)*sys_p;
     //S->r2a = glob_sum2;// Update member residual (squared)
