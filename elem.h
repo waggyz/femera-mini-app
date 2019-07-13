@@ -25,7 +25,6 @@ public:
   inline int Jac3Inv(RESTRICT Mesh::vals&, const FLOAT_MESH);
   inline int Jac2Tnv(RESTRICT Mesh::vals&, const FLOAT_MESH);
   inline int Jac3Tnv(RESTRICT Mesh::vals&, const FLOAT_MESH);
-  //inline RESTRICT Mesh::vals JacInElem(RESTRICT const Mesh::vals&);
   //
   int Jac1Dets( );
   int Jac2Dets( );
@@ -87,7 +86,6 @@ public:
   Mesh::vals intp_shpg={};
   Mesh::ints elem_conn={};// Grouped so halo nodes come first.
   //FIXME Should be conn_node or elem_node?
-  //RESTRICT Mesh::vals elem_vert={};// Fill w/ Elem::ScatterVert2Elem(Mesh*)
   //(mesh_d*elem_vert_n*elem_n) used for jac calc
   Mesh::vals elip_jacs={};
   //FIXME Change to elem_jacs, size: jacs_f * jacs_n
@@ -116,23 +114,16 @@ public:
   //NOTE Local (partition) node numbers are 0-indexed.
   bool do_halo;//=true;// false: do_interior
   //
-  //typedef std::set<INT_MESH> elemset;//FIXED REMOVE
-  //std::vector<elemset> elem_sets;//FIXED REMOVE [used for coloring]
-  //std::vector<Mesh::ints> conn_color;
   // Local boundary conditions [were in Mesh]
   Mesh::nfvals rhs_vals={};// Nodal forces applied (nonzeros)
   Mesh::nfvals bcs_vals={};// Dirichlet bundary conditions (nonzeros)
   Mesh::nflist bc0_nf  ={};// Essential (u=0) Dirichlet BCs (node_id,dof_id)
-  //
-  //Mesh* in_mesh;//FIXED OLD: contains the nodes
 protected:
   Elem( INT_ORDER d, INT_MESH vn, INT_MESH en, INT_ORDER p, INT_MESH e ) :
     elem_d(d), elem_p(p), elem_vert_n(vn), elem_edge_n(en),
     elem_conn_n(vn+(p-1)*en), elem_n(e){// Elem Constructor
       gaus_p=p;
       elem_conn.resize( elem_n* elem_conn_n );
-      //elem_vert.resize( elem_n*elem_d* elem_vert_n );
-      //elip_jacs.resize( elem_n* (elem_d*elem_d+1) );
       elem_glid.resize( elem_n );
     };//FIXME Remove this one?
   Elem( INT_ORDER d, INT_MESH vn, INT_MESH en, INT_MESH ef,
@@ -140,16 +131,12 @@ protected:
     elem_d(d), elem_p(p), gaus_p(gp), elem_vert_n(vn),
     elem_edge_n(en), elem_face_n(ef), elem_conn_n(vn+(p-1)*en+ef), elem_n(e){
       elem_conn.resize( elem_n* elem_conn_n );
-      //elem_vert.resize( elem_n*elem_d* elem_vert_n );
-      //GaussLegendre( gp );// sets this->guass_n
-      //elip_jacs.resize( elem_n* (elem_d*elem_d+1) * gaus_n );
       elem_glid.resize( elem_n );
     };
 private:
 };
 class Bar final: public Elem{
 public: Bar(INT_ORDER p) : Elem(1,2,1,p,1){}// Set properties in base Elem class
-  //Elem(elem_d, elem_n, elem_vert_n, elem_edge_n , elem_p)
   const Mesh::vals ShapeFunction(const INT_ORDER, const FLOAT_MESH p[1])final;
   const Mesh::vals ShapeGradient(const INT_ORDER, const FLOAT_MESH  [1])final;
   const Mesh::vals GaussLegendre(const INT_ORDER p )final;
@@ -207,7 +194,6 @@ private:
 };
 class Tet final: public Elem{
 public:
-  //Tet(INT_ORDER p) : Elem(3,4,6,p,1){ this->gaus_p=p; };//FIXME Remove?
   Tet(INT_ORDER p) : Elem(3,4,6,((p<3)?0:4),p,p,1){  };//FIXME Remove?
   Tet(INT_ORDER p, INT_MESH e) : Elem(3,4,6,((p<3)?0:4),p,p,e){};
   const Mesh::vals ShapeFunction(const INT_ORDER, const FLOAT_MESH p[3])final;
@@ -290,7 +276,6 @@ inline FLOAT_MESH Elem::Jac2Det(const RESTRICT Mesh::vals& m){
 };
 inline int Elem::Jac2Inv( FLOAT_MESH* m, const FLOAT_MESH jacdet){
   if(jacdet==0){return 1;}
-  //RESTRICT Mesh::vals minv(4);
   FLOAT_MESH minv[4]; FLOAT_MESH dinv=static_cast<FLOAT_MESH>(1.0)/jacdet;
   for(int i=0;i<4;i++){ minv[i]=dinv; };
   minv[JD*0+ 0]*= m[JD*1+ 1] ;
@@ -338,7 +323,6 @@ inline FLOAT_MESH Elem::Jac3Det(RESTRICT const Mesh::vals& m){
 inline int Elem::Jac3Inv( FLOAT_MESH* m, const FLOAT_MESH jacdet){
   if(jacdet==0){return 1;}
   //returns inverse in m
-  //RESTRICT Mesh::vals minv(static_cast<FLOAT_MESH>(1.0)/jacdet,9);
   FLOAT_MESH minv[9]; FLOAT_MESH dinv=static_cast<FLOAT_MESH>(1.0)/jacdet;
   for(int i=0;i<9;i++){ minv[i]=dinv; };
   //
@@ -379,7 +363,8 @@ inline int Elem::Jac3Inv(RESTRICT Mesh::vals& m, const FLOAT_MESH jacdet){
 inline int Elem::Jac3Tnv(RESTRICT Mesh::vals& m, const FLOAT_MESH jacdet){
   if(jacdet==0){return 1;}
   //returns transposed inverse in m
-  RESTRICT Mesh::vals minv(static_cast<FLOAT_MESH>(1.0)/jacdet,9);// minv= 1 / jacdet; // inverse of matrix m
+  RESTRICT Mesh::vals minv(static_cast<FLOAT_MESH>(1.0)/jacdet,9);
+  // minv= 1 / jacdet; // inverse of matrix m
   //
   minv[JD*0+ 0]*= (m[JD*1+ 1] * m[JD*2+ 2] - m[JD*2+ 1] * m[JD*1+ 2]) ;
   minv[JD*0+ 1]*= (m[JD*1+ 2] * m[JD*2+ 0] - m[JD*1+ 0] * m[JD*2+ 2]) ;

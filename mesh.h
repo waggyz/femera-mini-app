@@ -6,7 +6,6 @@
 #include <unordered_map>
 #include <array>
 //
-
 class Mesh{
 public:
   // valarray: variable-length numerical c++ type
@@ -25,15 +24,8 @@ public:
   typedef std::tuple<Elem*,Phys*,Solv*> part;
   //
   vals vert_coor={};//NOTE May not be populated (stored in elem->vert_coor)
-  //vals side_coor={};//NOTE Normally not populated (calculated when needed)
-  //
-  //FIXME Not needed? Mesh partitioning local part & node number xref lookup tables.
-  //ints node_part    ={};// xref of which partition a global node is in
-  //ints node_part_id ={};// xref from global to local node number
-  // local_id=node_part_id[global_id];
   //NOTE Global node numbers are 1-indexed.
   //NOTE Local (partition) node numbers are 0-indexed.
-  //
   //
   INT_DIM  mesh_d=3;// Mesh Dimension (usually max of elem_d)
   INT_MESH vert_n=0;// Total number of element vertex nodes
@@ -51,7 +43,6 @@ public:
   INT_MESH ort3_part_n=0;
   INT_MESH ther_part_n=0;
   //
-  //FLOAT_MESH glob_bbox[6]={0.0,0.0,0.0, 1.0,1.0,1.0};
   FLOAT_MESH glob_bbox[6]={9e9,9e9,9e9 , -9e9,-9e9,-9e9};
   FLOAT_SOLV glob_bmax[4]={0.0,0.0,0.0,0.0};
   //
@@ -64,9 +55,7 @@ public:
   //
   int iter_max=0;
   FLOAT_SOLV glob_rtol=0.0, glob_rto2=0.0, glob_chk2=0.0, glob_res2=0.0;
-  //FLOAT_SOLV solv_rtol=0.0, rtol_pow2=0.0, resi_chk2=0.0, resi_pow2=0.0;//, resb_pow2;
   //
-  //FIXED Change these to < node_id, dof_id, value >  and < node_id, dof_id >:
   //FIXME Move these into Elem?
   //NOTE These are by global ID
   nfvals rhs_vals={};// Nodal forces applied (nonzeros)
@@ -75,11 +64,9 @@ public:
   //*****************************************************************
   std::vector<Elem*> list_elem={};//FIXME Remove.
   std::vector<part>  mesh_part={};
-  //std::unordered_map<int,std::array<FLOAT_MESH,3>> halo_coor;
-  // Used by Sync/Gather/ScatterHaloCoor
   //
   std::unordered_map<INT_MESH,INT_MESH> halo_map;
-  std::valarray<FLOAT_SOLV> halo_val={};//(node_d*halo_loca_tot);
+  std::valarray<FLOAT_SOLV> halo_val={};
   std::valarray<float> time_secs={};
   //
   std::string base_name = "";// base of partitioned mesh filename (without _i)
@@ -87,14 +74,6 @@ public:
   //
   int SavePartFMR( part&, const char* bname, bool is_bin );//FIXME ASCII/Binary file format
   int ReadPartFMR( part&, const char* bname, bool is_bin );
-  //int InitPCG();
-  //int IterPCG();
-  //int InitPCR();
-  //int IterPCR();
-  //
-  //int GatherHaloCoor();
-  //int ScatterHaloCoor();
-  //int SyncHaloCoor();
   //
   int Setup();//FIXME Not yet used?
   virtual int Init()=0;
@@ -172,6 +151,7 @@ private:
   static std::vector<part> priv_part;
 #pragma omp threadprivate(priv_part)
 };
+#if 0
 //Elem* Mesh::ReadFile( const char* fname, INT_ORDER pord ){};
 /*
 class Msh final: public Mesh{
@@ -191,8 +171,6 @@ protected:
 private:
 };
 */
-
-
-
+#endif
 
 #endif
