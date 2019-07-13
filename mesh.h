@@ -131,7 +131,7 @@ public:
   int Iter() final;
 protected:
 private:
-  static std::vector<part> priv_part;//FIXME Change this name
+  static std::vector<part> priv_part;
 #pragma omp threadprivate(priv_part)
 };
 class HaloPCR final: public Mesh{
@@ -150,6 +150,8 @@ public:
   int Iter() final;
 protected:
 private:
+  static std::vector<part> priv_part;
+#pragma omp threadprivate(priv_part)
 };
 class HaloNCG final: public Mesh{
 // Preconditioned Conjugate Gradient Kernel ----------------------------
