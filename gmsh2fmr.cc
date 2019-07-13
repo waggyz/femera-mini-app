@@ -488,7 +488,7 @@ int main( int argc, char** argv ) {
       uint d=uint(E->mesh_d);
       //if(hasther){ d+=1; };//FIXME mesh_d remains 3?, udof_n=4?
       E->vert_n=E->node_n;
-      E->vert_coor.resize(d*E->vert_n);
+      E->node_coor.resize(d*E->vert_n);
       E->node_glid.resize(E->node_n);
       //for(INT_MESH i=0; i<node_n; i++){ node_glid[i]=; };
       for( auto pr : E->node_loid ){
@@ -497,7 +497,7 @@ int main( int argc, char** argv ) {
         E->node_glid[l]=glid;
         INT_MESH e0=E0->node_loid[glid];
         for(uint i=0;i<d;i++){
-          E->vert_coor[d* l+i ]=E0->vert_coor[d* e0+i ]; };
+          E->node_coor[d* l+i ]=E0->node_coor[d* e0+i ]; };
       };
       partlist.push_back(E);
     };
@@ -527,13 +527,13 @@ int main( int argc, char** argv ) {
       uint d=uint(E->mesh_d);
       for( auto pr : E->node_loid ){ std::tie(glid,loid)=pr;
         for(auto tp : bc0_at){ std::tie(f,g,loc)=tp;
-          if(std::abs(E->vert_coor[d* loid+f ]-loc)<eps_find){
+          if(std::abs(E->node_coor[d* loid+f ]-loc)<eps_find){
             E->bc0_nf.insert(Mesh::nfitem(loid,g)); }; };
         for(auto tp : bcs_at){ std::tie(f,g,loc,amt)=tp;
-          if(std::abs(E->vert_coor[d* loid+f ]-loc)<eps_find){
+          if(std::abs(E->node_coor[d* loid+f ]-loc)<eps_find){
             E->bcs_vals.insert(Mesh::nfval(loid,g,amt)); }; };
         for(auto tp : rhs_at){ std::tie(f,g,loc,amt)=tp;
-          if(std::abs(E->vert_coor[d* loid+f ]-loc)<eps_find){
+          if(std::abs(E->node_coor[d* loid+f ]-loc)<eps_find){
             E->rhs_vals.insert(Mesh::nfval(loid,g,amt)); }; };
       };
     };
@@ -549,16 +549,16 @@ int main( int argc, char** argv ) {
     }else{
       E=M->list_elem[i];
       std::cout << ": " << E->node_n << " Nodes ["
-        << E->vert_coor.size()<<"], "
+        << E->node_coor.size()<<"], "
         << E->elem_n << " Elems ["
         << E->elem_conn.size()<<"].";
       std::cout <<'\n' ;
 #if VERB_MAX>3
     if(verbosity>3){
       printf("Nodes:");
-      for(uint j=0;j<E->vert_coor.size();j++){
+      for(uint j=0;j<E->node_coor.size();j++){
         if(!(j%3)){printf("\n%3u(%3u):",j/3,E->node_glid[j/3]);};
-        printf(" %9.2e",E->vert_coor[j]);
+        printf(" %9.2e",E->node_coor[j]);
       };printf("\n");
       printf("Elements:");
       auto ecn=uint(E->elem_conn_n);
@@ -717,7 +717,7 @@ int main( int argc, char** argv ) {
       for(uint n=E->halo_remo_n; n<E->node_n; n++){
         abqfile << E->node_glid[n];
         for(uint i=0;i<E->mesh_d;i++){
-          abqfile << "," << E->vert_coor[E->mesh_d*n+i]; };
+          abqfile << "," << E->node_coor[E->mesh_d*n+i]; };
         abqfile << '\n';
       };
     };

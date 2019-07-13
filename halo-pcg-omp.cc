@@ -93,8 +93,8 @@ int PCG::Init( Elem* E, Phys* Y ){// printf("*** Init(E,Y) ***\n");
     for(uint i=0; i<Nn; i++){
       for(uint j=0; j<Dm; j++){
         this->sys_u[Dm* i+j ] = ci * u[j]// * this->glob_bmax[j]//Y->udof_magn[j]
-        //* E->vert_coor[Dm* i+j ];
-        * ( E->vert_coor[Dm* i+j ] - E->glob_bbox[j] )
+        //* E->node_coor[Dm* i+j ];
+        * ( E->node_coor[Dm* i+j ] - E->glob_bbox[j] )
         / ( E->glob_bbox[   Dm+j ] - E->glob_bbox[j] );
       }
     }

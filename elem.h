@@ -92,7 +92,7 @@ public:
   //FIXME Broke 2D physics
   Mesh::vals gaus_weig={};
   //
-  Mesh::vals vert_coor={};// Local element vertices.
+  Mesh::vals node_coor={};// Local element vertices.
   //FIXME contains all nodal coordinates, not just vertices
   // Nodes are grouped:
   // 0           .. (halo_remo_n-1) [Ghost nodes]
@@ -148,7 +148,7 @@ public: Bar(INT_ORDER p) : Elem(1,2,1,p,1){}// Set properties in base Elem class
 protected:
   const Mesh::ints vert_conn={ 0,1 };
   const Mesh::ints vert_edge={ 0,1 };// Bar2 connectivity of 3 sides
-  const Mesh::vals vert_coor={-1.0,1.0};
+  const Mesh::vals node_coor={-1.0,1.0};
 private: 
 };
 class Tri final: public Elem{
@@ -164,7 +164,7 @@ public: Tri(INT_ORDER p) : Elem(2,3,3,p,1){}// Set properties in base Elem class
 protected:
   const Mesh::ints vert_conn={ 0,1,2 };
   const Mesh::ints vert_edge={ 0,1, 1,2, 2,0 };// Bar2 connectivity of 3 sides
-  const Mesh::vals vert_coor={
+  const Mesh::vals node_coor={
     0.0, 0.0,
     1.0, 0.0,
     0.0, 1.0};
@@ -183,7 +183,7 @@ public: Qua(INT_ORDER p) : Elem(2,4,4,p,1){}
 protected:
   const Mesh::ints vert_conn={ 0,1,2,3 };
   const Mesh::ints vert_edge={ 0,1, 1,2, 2,3, 3,0 };// Bar2 connectivity of 3 sides
-  const Mesh::vals vert_coor={
+  const Mesh::vals node_coor={
     -1.0,-1.0,
      1.0,-1.0,
      1.0, 1.0,
@@ -211,7 +211,7 @@ protected:
   //NOTE The following match gmsh convention for quadratic tets
   const Mesh::ints vert_edge={ 0,1, 1,2, 2,0, 0,3, 2,3, 1,3 };
   const Mesh::ints vert_face={ 0,1,2, 0,1,3, 0,3,2, 1,2,3 };
-  const Mesh::vals vert_coor={
+  const Mesh::vals node_coor={
     0.0, 0.0, 0.0,
     1.0, 0.0, 0.0,
     0.0, 1.0, 0.0,
@@ -238,7 +238,7 @@ protected:
     ={ 0,1, 1,2, 2,3,3,0, 4,5,5,6,6,7,7,4, 0,4,1,5,2,6,3,7 };
   const Mesh::ints vert_face
     ={ 0,1,2,3, 7,6,5,4, 0,4,5,1, 2,3,7,6, 0,3,7,4, 1,5,6,2 };
-  const Mesh::vals vert_coor={
+  const Mesh::vals node_coor={
                    //       7---------6
      0.0, 0.0, 0.0,//      /|        /|
      1.0, 0.0, 0.0,//     / |       / |

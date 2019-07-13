@@ -29,7 +29,7 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
   int physical_tag=0;
   INT_MESH elxx_n=0;
   std::vector<INT_MESH> tet_conn  ={};
-  RESTRICT Mesh::vals vert_coor ={}; int mesh_d=3;
+  RESTRICT Mesh::vals node_coor ={}; int mesh_d=3;
   RESTRICT Mesh::ints node_glid ={};// xref from local to global node number
   std::vector<INT_MESH> elem_glid ={};// xref from local to global element number
   std::unordered_map<int,INT_MESH> node_loid;
@@ -55,7 +55,7 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
     };// Done reading header
     if(mshstring=="$Nodes"){//---------------------------------------
       mshfile >> number_of_nodes ; node_n=(INT_MESH)number_of_nodes;
-      vert_coor.resize(node_n*mesh_d);
+      node_coor.resize(node_n*mesh_d);
       node_glid.resize(node_n);
 #if VERB_MAX>3
       if(verbosity>3){
@@ -68,9 +68,9 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
 #endif
         node_glid[i]=(INT_MESH)node_number;
         node_loid[node_number]=i;
-        vert_coor[mesh_d* i+0]=x;
-        vert_coor[mesh_d* i+1]=y;
-        vert_coor[mesh_d* i+2]=z;
+        node_coor[mesh_d* i+0]=x;
+        node_coor[mesh_d* i+1]=y;
+        node_coor[mesh_d* i+2]=z;
       };
     };// Done reading nodes
     if(mshstring=="$Elements"){//------------------------------------
@@ -173,12 +173,12 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
         E->mesh_d=mesh_d;
         E->node_n=node_n;
         E->vert_n=node_n;
-        E->vert_coor.resize(vert_coor.size());
-        E->vert_coor=vert_coor;
-        //E->vert_coor.resize(vert_coor.size());//FIXED Try simple assignment?
-        //std::copy(&vert_coor[0   ],
-        //          &vert_coor[mesh_d*node_n],
-        //          &E->vert_coor[0] );
+        E->node_coor.resize(node_coor.size());
+        E->node_coor=node_coor;
+        //E->node_coor.resize(node_coor.size());//FIXED Try simple assignment?
+        //std::copy(&node_coor[0   ],
+        //          &node_coor[mesh_d*node_n],
+        //          &E->node_coor[0] );
         E->node_glid.resize(node_glid.size());
         E->node_glid=node_glid;
         E->node_loid=node_loid;

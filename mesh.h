@@ -23,7 +23,7 @@ public:
   //-----------------------------------------------------------------
   typedef std::tuple<Elem*,Phys*,Solv*> part;
   //
-  vals vert_coor={};//NOTE May not be populated (stored in elem->vert_coor)
+  vals node_coor={};//NOTE May not be populated (stored in elem->node_coor)
   //NOTE Global node numbers are 1-indexed.
   //NOTE Local (partition) node numbers are 0-indexed.
   //

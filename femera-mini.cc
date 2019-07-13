@@ -536,15 +536,15 @@ int main( int argc, char** argv ){
       Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
 #pragma omp critical(minmax)
 {
-      //smin=std::min( smin, E->vert_coor.min() );
-      //smax=std::max( smax, E->vert_coor.max() );
-      Phys::vals t = E->vert_coor[std::slice(0,E->node_n,3)];
+      //smin=std::min( smin, E->node_coor.min() );
+      //smax=std::max( smax, E->node_coor.max() );
+      Phys::vals t = E->node_coor[std::slice(0,E->node_n,3)];
       minx=std::min(minx, t.min() );
       maxx=std::max(maxx, t.max() );
-      t = E->vert_coor[std::slice(1,E->node_n,3)];
+      t = E->node_coor[std::slice(1,E->node_n,3)];
       miny=std::min(miny, t.min() );
       maxy=std::max(maxy, t.max() );
-      t = E->vert_coor[std::slice(2,E->node_n,3)];
+      t = E->node_coor[std::slice(2,E->node_n,3)];
       minz=std::min(minz, t.min() );
       maxz=std::max(maxz, t.max() );
 }
@@ -586,21 +586,21 @@ int main( int argc, char** argv ){
       const int Dm=3; const int Dn=Y->node_d;
       Phys::vals errors;
       FLOAT_PHYS nu=Y->mtrl_prop[1];
-      Phys::vals coor(E->vert_coor.size());
+      Phys::vals coor(E->node_coor.size());
       const auto Nn=E->node_n;
       switch(test_dir){
       case(1):{
-        coor[std::slice(0,Nn,Dm)]=E->vert_coor[std::slice(1,Nn,Dm)];
-        coor[std::slice(1,Nn,Dm)]=E->vert_coor[std::slice(2,Nn,Dm)];
-        coor[std::slice(2,Nn,Dm)]=E->vert_coor[std::slice(0,Nn,Dm)];
+        coor[std::slice(0,Nn,Dm)]=E->node_coor[std::slice(1,Nn,Dm)];
+        coor[std::slice(1,Nn,Dm)]=E->node_coor[std::slice(2,Nn,Dm)];
+        coor[std::slice(2,Nn,Dm)]=E->node_coor[std::slice(0,Nn,Dm)];
         break;}
       case(2):{
-        coor[std::slice(0,Nn,Dm)]=E->vert_coor[std::slice(2,Nn,Dm)];
-        coor[std::slice(1,Nn,Dm)]=E->vert_coor[std::slice(0,Nn,Dm)];
-        coor[std::slice(2,Nn,Dm)]=E->vert_coor[std::slice(1,Nn,Dm)];
+        coor[std::slice(0,Nn,Dm)]=E->node_coor[std::slice(2,Nn,Dm)];
+        coor[std::slice(1,Nn,Dm)]=E->node_coor[std::slice(0,Nn,Dm)];
+        coor[std::slice(2,Nn,Dm)]=E->node_coor[std::slice(1,Nn,Dm)];
         break;}
       case(0):
-      default:{ coor = E->vert_coor; break;}
+      default:{ coor = E->node_coor; break;}
       }
       for(uint i=0;i<(Nn*Dm);i+=Dm){
         coor[i+0]-=minx; coor[i+1]-=miny; coor[i+2]-=minz;
@@ -653,7 +653,7 @@ int main( int argc, char** argv ){
           if(Dn>3){ printf("  Temperature"); }
           printf("\n");
           for(uint i=0;i<Nn;i++){
-            for(int j=0;j<Dm;j++){ printf("%+9.2e ",E->vert_coor[Dm* i+j]); }
+            for(int j=0;j<Dm;j++){ printf("%+9.2e ",E->node_coor[Dm* i+j]); }
             printf(" | ");
             for(int j=0;j<Dm;j++){ printf("%+9.2e ",S->sys_u[Dn* i+j]); }
             if(Dn>Dm){ printf("  %+9.2e",S->sys_u[Dn* i+Dm]); }//FIXME Temperature
@@ -685,7 +685,7 @@ int main( int argc, char** argv ){
           if(Dn>3){ printf("  Temperature"); }
           printf("\n");
           for(uint i=0;i<Nn;i++){
-            for(int j=0;j<Dm;j++){ printf("%+9.2e ",E->vert_coor[Dm* i+j]); }
+            for(int j=0;j<Dm;j++){ printf("%+9.2e ",E->node_coor[Dm* i+j]); }
             printf(" | ");
             for(int j=0;j<Dm;j++){ printf("%+9.2e ",S->sys_d[Dn* i+j]); }
             if(Dn>Dm){ printf("  %+9.2e",S->sys_d[Dn* i+Dm]); }

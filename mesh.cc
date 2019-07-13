@@ -218,17 +218,17 @@ int Mesh::SyncIDs(){//FIXME Not parallelized
 #endif
       {// scope
       auto g=E->node_glid;
-      auto v=E->vert_coor;
-      //Mesh::vals v;//=E->vert_coor;// copy this?
-      //v.resize(E->vert_coor.size());
-      //std::copy(&E->vert_coor[0], &E->vert_coor[E->vert_coor.size()],
+      auto v=E->node_coor;
+      //Mesh::vals v;//=E->node_coor;// copy this?
+      //v.resize(E->node_coor.size());
+      //std::copy(&E->node_coor[0], &E->node_coor[E->node_coor.size()],
       //  &v[0] );
       for(INT_MESH j=0; j<E->node_n; j++){
         E->node_glid[ nnew[j] ] = g[j];
         E->node_loid[ g[j] ] = nnew[j];
-        E->vert_coor[ E->mesh_d* nnew[j]+0 ]=v[ E->mesh_d* j+0 ];
-        E->vert_coor[ E->mesh_d* nnew[j]+1 ]=v[ E->mesh_d* j+1 ];
-        E->vert_coor[ E->mesh_d* nnew[j]+2 ]=v[ E->mesh_d* j+2 ];
+        E->node_coor[ E->mesh_d* nnew[j]+0 ]=v[ E->mesh_d* j+0 ];
+        E->node_coor[ E->mesh_d* nnew[j]+1 ]=v[ E->mesh_d* j+1 ];
+        E->node_coor[ E->mesh_d* nnew[j]+2 ]=v[ E->mesh_d* j+2 ];
       }; }// end scope
       // Can just clear existing BCs and reapply nodal vals.
       E->rhs_vals={}; E->bcs_vals={}; E->bc0_nf={};
@@ -490,7 +490,7 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
     };
 #endif
     if(fmrstring=="$VertCoor"){
-      E->vert_coor.resize(uint(E->mesh_d)*E->node_n);//FIXME vert_n
+      E->node_coor.resize(uint(E->mesh_d)*E->node_n);//FIXME vert_n
       E->node_glid.resize(E->node_n);
       FLOAT_MESH x=0.0;
       for(INT_MESH i=0; i<E->node_n; i++){//FIXME vert_n
@@ -498,7 +498,7 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
         E->node_loid[E->node_glid[i]] = i;
         for(uint j=0; j<(uint)E->mesh_d; j++){
           fmrfile >> x;
-          E->vert_coor[E->mesh_d *i+j]=x;
+          E->node_coor[E->mesh_d *i+j]=x;
           if(x<E->loca_bbox[  j]){E->loca_bbox[  j]=x;}
           if(x>E->loca_bbox[3+j]){E->loca_bbox[3+j]=x;}
         }
@@ -704,7 +704,7 @@ int Mesh::SavePartFMR( part& P, const char* fname, bool is_bin ){
   for(INT_MESH i=0; i<E->vert_n; i++){
     fmrfile << E->node_glid[i];
     for(uint j=0; j<(uint)E->mesh_d; j++){
-      fmrfile <<" "<< E->vert_coor[E->mesh_d* i+j]; };
+      fmrfile <<" "<< E->node_coor[E->mesh_d* i+j]; };
     fmrfile <<'\n';
   };
   if(E->bc0_nf.size()>0){

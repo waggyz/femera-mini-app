@@ -19,7 +19,7 @@ int Elem::ScatterVert2Elem(  ){
   for (size_t i=0; i<n; i++){
     int ic=(i/elem_vert_n)*elem_conn_n*d + i%elem_vert_n;
     elem_vert[std::slice(ic,d,elem_vert_n)]
-      =vert_coor[std::slice(elem_conn[i]*d,d,1)];
+      =node_coor[std::slice(elem_conn[i]*d,d,1)];
   };
   return 0;
 };
@@ -30,7 +30,7 @@ int Elem::ScatterVert2Elem( Mesh* M ){//FIXME Deprecated?
   for (size_t i=0; i<n; i++){
     int ic=(i/elem_vert_n)*elem_conn_n*elem_d + i%elem_vert_n;
     elem_vert[std::slice(ic,elem_d,elem_vert_n)]//FIXME Should be mesh_d
-      =M->vert_coor[std::slice(elem_conn[i]*elem_d,elem_d,1)];
+      =M->node_coor[std::slice(elem_conn[i]*elem_d,elem_d,1)];
   };
   return 0;
 };*/
@@ -115,7 +115,7 @@ int Elem::Jac1Dets(){//FIXME 1D can be optimized
     RESTRICT Mesh::vals vert(vn*d);
     for(uint i=0; i<vn; i++){ uint n=elem_conn[cn* ie+i];
       for(uint j=0;j<d;j++){
-        vert[vn* j+i]=vert_coor[d* n+j]; }; };
+        vert[vn* j+i]=node_coor[d* n+j]; }; };
     for(int ip=0; ip<np; ip++){
       //RESTRICT Mesh::vals jac=MatMul2xNx2T(
       RESTRICT Mesh::vals jac={inner_product( vert,
@@ -159,8 +159,8 @@ int Elem::Jac2Dets(){
     //RESTRICT Mesh::vals vert(vn*d);
     for(uint i=0; i<vn; i++){ uint n=elem_conn[cn* ie+i];
       for(uint j=0;j<d;j++){
-        vert[vn* j+i]=vert_coor[d* n+j]; }; };
-        //vert[d* i+j]=vert_coor[d* n+j]; }; };
+        vert[vn* j+i]=node_coor[d* n+j]; }; };
+        //vert[d* i+j]=node_coor[d* n+j]; }; };
     for(int ip=0; ip<np; ip++){
       //RESTRICT Mesh::vals jac(d2);
       //for( int i=0;i<d2;i++){ jac[i]=0.0; };
@@ -214,8 +214,8 @@ int Elem::Jac3Dets(){
     //RESTRICT Mesh::vals vert(vn*d);
     for(uint i=0; i<vn; i++){ uint n=elem_conn[cn* ie+i];
       for(uint j=0;j<d;j++){
-        vert[vn* j+i]=vert_coor[d* n+j]; }; };
-        //vert[d* i+j]=vert_coor[d* n+j]; }; };
+        vert[vn* j+i]=node_coor[d* n+j]; }; };
+        //vert[d* i+j]=node_coor[d* n+j]; }; };
     for(uint ip=0; ip<np; ip++){//printf("ELEM:%u, INTPT: %i\n",ie,ip);
       //RESTRICT Mesh::vals jac(0.0,d2);
       //for( int i=0;i<d2;i++){ jac[i]=0.0; };
