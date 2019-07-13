@@ -2,7 +2,6 @@
 #define INCLUDED_ELEM_H
 #include <vector>
 #include <set>
-//#include <map>
 #include <unordered_map>
 class Elem {
 public:
@@ -11,6 +10,64 @@ public:
     //ELEM_TET=34, ELEM_BRI=38, ELEM_PRI=36, ELEM_PYR=35 };
     ELEM_SCA=0, ELEM_VEC=1, ELEM_BAR=2, ELEM_TRI=3, ELEM_QUA=4,
     ELEM_TET=5, ELEM_PYR=6, ELEM_PRI=7, ELEM_BRI=8 };
+  INT_ORDER mesh_d=3;// Mesh dimension
+  INT_ORDER elem_d=3;// Element dimension
+  INT_ORDER elem_p=1;
+  INT_ORDER gaus_p=1; INT_ORDER gaus_n=1;
+  INT_ORDER jacs_f=mesh_d*elem_d + 1;// size of jac matrix + det
+  INT_ORDER     elem_jacs_n=1;//1 for tri & tet, 3? for qua, 4? for bri
+  INT_ELEM_NODE elem_vert_n;// Size of one linear element connectivity
+  INT_ELEM_NODE elem_edge_n;// Edges of one element
+  INT_ELEM_NODE elem_face_n;// Faces of one element containing a node
+  INT_ELEM_NODE elem_conn_n;
+  uint simd_n=1;
+  //INT_MESH  jacs_n=0;//=elem_n * elem_jacs_n;
+  //FIXME Use this instead of gauss_n*elem_n*(d^2+1)
+  // = elem_vert_n + (elem_p-1)*elem_edge_n + elem_face_n
+  INT_MESH elem_n=0, vert_n=0, node_n=0, jacs_n=0,
+    halo_node_n=0, halo_loca_n=0, halo_remo_n=0, halo_elem_n=0;
+  // Local halo and system sizes.
+  // Halo nodes are [0...halo_n-1]; interior nodes are [halo_n...node_n-1].
+  //
+  FLOAT_MESH loca_bbox[6]={9e9,9e9,9e9 , -9e9,-9e9,-9e9};
+  FLOAT_MESH glob_bbox[6]={9e9,9e9,9e9 , -9e9,-9e9,-9e9};
+  //
+  Mesh::vals intp_shpf={};
+  Mesh::vals intp_shpg={};
+  Mesh::ints elem_conn={};// Grouped so halo nodes come first.
+  //FIXME Should be conn_node or elem_node?
+  //(mesh_d*elem_vert_n*elem_n) used for jac calc
+  Mesh::vals elip_jacs={};
+  //FIXME Change to elem_jacs, size: jacs_f * jacs_n
+  //FIXME Broke 2D physics
+  Mesh::vals gaus_weig={};
+  //
+  Mesh::vals node_coor={};// Local element nodal coordinates.
+  // Nodes are grouped:
+  // 0           .. (halo_remo_n-1) [Ghost nodes]
+  // halo_remo_n .. (halo_node_n-1) [There are halo_loca_n of these.]
+  // halo_node_n .. (     node_n-1) [Interior nodes]
+  //
+  Mesh::ints elem_glid ={};// xref from local to global element number
+  //FIXME Should be <int> to match Gmsh tags
+  Mesh::ints node_glid ={};// xref from local to global node number
+  // global_id=node_glid[local_id];
+  Mesh::ints node_haid ={};// xref from local to halo node number
+  // M->node_halo_id = E->node_haid[ node_part_id ]
+  std::unordered_map<int,INT_MESH> elem_loid;
+  std::unordered_map<int,INT_MESH> node_loid;
+  std::vector<int> halo_glid ={};// = loca_glid U remo_glid
+  std::vector<int> loca_glid ={};
+  std::vector<int> remo_glid ={};
+  //NOTE Global node numbers are 1-indexed.
+  //NOTE Local (partition) node numbers are 0-indexed.
+  bool do_halo;//=true;// false: do_interior
+  //
+  // Local boundary conditions [were in Mesh]
+  Mesh::nfvals rhs_vals={};// Nodal forces applied (nonzeros)
+  Mesh::nfvals bcs_vals={};// Dirichlet bundary conditions (nonzeros)
+  Mesh::nflist bc0_nf  ={};// Essential (u=0) Dirichlet BCs (node_id,dof_id)
+  //
   inline FLOAT_MESH Jac1Det( const FLOAT_MESH  );
   inline FLOAT_MESH Jac2Det( const FLOAT_MESH* );
   inline FLOAT_MESH Jac3Det( const FLOAT_MESH* );
@@ -40,7 +97,6 @@ public:
   // Shape Function Bulk Eval -----------------------------
   const Mesh::vals ShapeFunction(const INT_ORDER, RESTRICT Mesh::vals);
   const Mesh::vals ShapeGradient(const INT_ORDER, const RESTRICT Mesh::vals);
-  //FIXME need to handle higher-order elements
   // Shape Function Kernels -------------------------------
   //FIXME virtual functions are difficult to inline...how to fix?
   virtual const Mesh::vals ShapeFunction(const INT_ORDER, const FLOAT_MESH[])=0;
@@ -58,66 +114,6 @@ public:
   virtual Mesh* Mesh1Natu( )=0;//FIXME These are defined in patch.cc
   virtual Mesh* MeshPatch( )=0;//FIXME Only first order
 #endif
-  INT_ORDER mesh_d=3;// Mesh dimension
-  INT_ORDER elem_d=3;// Element dimension
-  INT_ORDER elem_p=1;
-  INT_ORDER gaus_p=1; INT_ORDER gaus_n=1;
-  INT_ORDER jacs_f=mesh_d*elem_d + 1;// size of jac matrix + det
-  INT_ORDER     elem_jacs_n=1;//1 for tri & tet, 3? for qua, 4? for bri
-  INT_ELEM_NODE elem_vert_n;// Size of one linear element connectivity
-  INT_ELEM_NODE elem_edge_n;// Edges of one element
-  INT_ELEM_NODE elem_face_n;// Faces of one element containing a node
-  INT_ELEM_NODE elem_conn_n;
-  uint simd_n=1;
-  //INT_MESH  jacs_n=0;//=elem_n * elem_jacs_n;
-  //FIXME Use this instead of gauss_n*elem_n*(d^2+1)
-  // = elem_vert_n + (elem_p-1)*elem_edge_n + elem_face_n
-  INT_MESH elem_n=0, vert_n=0, node_n=0, jacs_n=0,
-    halo_node_n=0, halo_loca_n=0, halo_remo_n=0, halo_elem_n=0;
-  // Local halo and system sizes.
-  // Halo nodes are [0...halo_n-1]; interior nodes are [halo_n...node_n-1].
-  //
-  //FLOAT_MESH loca_bbox[6]={0.0,0.0,0.0 , 1.0,1.0,1.0};
-  //FLOAT_MESH glob_bbox[6]={0.0,0.0,0.0 , 1.0,1.0,1.0};
-  FLOAT_MESH loca_bbox[6]={9e9,9e9,9e9 , -9e9,-9e9,-9e9};
-  FLOAT_MESH glob_bbox[6]={9e9,9e9,9e9 , -9e9,-9e9,-9e9};
-  //
-  Mesh::vals intp_shpf={};
-  Mesh::vals intp_shpg={};
-  Mesh::ints elem_conn={};// Grouped so halo nodes come first.
-  //FIXME Should be conn_node or elem_node?
-  //(mesh_d*elem_vert_n*elem_n) used for jac calc
-  Mesh::vals elip_jacs={};
-  //FIXME Change to elem_jacs, size: jacs_f * jacs_n
-  //FIXME Broke 2D physics
-  Mesh::vals gaus_weig={};
-  //
-  Mesh::vals node_coor={};// Local element vertices.
-  //FIXME contains all nodal coordinates, not just vertices
-  // Nodes are grouped:
-  // 0           .. (halo_remo_n-1) [Ghost nodes]
-  // halo_remo_n .. (halo_node_n-1) [There are halo_loca_n of these.]
-  // halo_node_n .. (     node_n-1) [Interior nodes]
-  //
-  Mesh::ints elem_glid ={};// xref from local to global element number
-  //FIXME Should be <int> to match Gmsh tags
-  Mesh::ints node_glid ={};// xref from local to global node number
-  // global_id=node_glid[local_id];
-  Mesh::ints node_haid ={};// xref from local to halo node number
-  // M->node_halo_id = E->node_haid[ node_part_id ]
-  std::unordered_map<int,INT_MESH> elem_loid;
-  std::unordered_map<int,INT_MESH> node_loid;
-  std::vector<int> halo_glid ={};// = loca_glid U remo_glid
-  std::vector<int> loca_glid ={};
-  std::vector<int> remo_glid ={};
-  //NOTE Global node numbers are 1-indexed.
-  //NOTE Local (partition) node numbers are 0-indexed.
-  bool do_halo;//=true;// false: do_interior
-  //
-  // Local boundary conditions [were in Mesh]
-  Mesh::nfvals rhs_vals={};// Nodal forces applied (nonzeros)
-  Mesh::nfvals bcs_vals={};// Dirichlet bundary conditions (nonzeros)
-  Mesh::nflist bc0_nf  ={};// Essential (u=0) Dirichlet BCs (node_id,dof_id)
 protected:
   Elem( INT_ORDER d, INT_MESH vn, INT_MESH en, INT_ORDER p, INT_MESH e ) :
     elem_d(d), elem_p(p), elem_vert_n(vn), elem_edge_n(en),
