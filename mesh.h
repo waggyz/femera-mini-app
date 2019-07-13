@@ -167,10 +167,10 @@ public:
   };
   int Init() final;
   int Iter() final;
-  static std::vector<part> P;//FIXME Change this name
-#pragma omp threadprivate(P)
 protected:
 private:
+  static std::vector<part> priv_part;
+#pragma omp threadprivate(priv_part)
 };
 //Elem* Mesh::ReadFile( const char* fname, INT_ORDER pord ){};
 /*
