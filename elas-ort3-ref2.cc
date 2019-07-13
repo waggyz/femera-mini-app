@@ -24,7 +24,7 @@ int ElastOrtho3D::Setup( Elem* E ){
     +sizeof(INT_MESH) *uint(E->elem_conn_n) );
   return 0;
 }
-int ElastOrtho3D::ElemLinear( Elem* E,
+int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   FLOAT_SOLV *sys_f, const FLOAT_SOLV* sys_u ){
   //FIXME Cleanup local variables.
   const int Dm = 3;//E->mesh_d;// Node (mesh) Dimension FIXME should be elem_d?
@@ -32,13 +32,7 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   const int Nj = 10;//Dm*Dm+1;// Jac inv & det
   const int Nc = E->elem_conn_n;// Number of nodes/element
   const int Ne = Dn*Nc;
-  const INT_MESH elem_n =E->elem_n;
   const int intp_n = int(E->gaus_n);
-  //
-  INT_MESH e0=0, ee=elem_n;
-  if(E->do_halo==true){ e0=0; ee=E->halo_elem_n;
-  }else{ e0=E->halo_elem_n; ee=elem_n; }
-  //
 #if VERB_MAX>11
   printf("Dim: %i, Elems:%i, IntPts:%i, Nodes/elem:%i\n",
     (int)mesh_d,(int)elem_n,(int)intp_n,(int)Nc);

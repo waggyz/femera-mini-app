@@ -102,8 +102,9 @@ int PCG::Init( Elem* E, Phys* Y ){// printf("*** Init(E,Y) ***\n");
   }
   this->BC0( E,Y );
 #endif
-  E->do_halo=true ; Y->ElemLinear( E,this->sys_f,this->sys_u );
-  E->do_halo=false; Y->ElemLinear( E,this->sys_f,this->sys_u );
+  //E->do_halo=true ; 
+  Y->ElemLinear( E,0,E->elem_n,this->sys_f,this->sys_u );
+  //E->do_halo=false; Y->ElemLinear( E,this->sys_f,this->sys_u );
 #if 0
   const uint sysn=this->udof_n;
   for(uint i=0; i<sysn; i++){
@@ -409,7 +410,8 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
     time_start( phys_start );
     const auto sysn = S->udof_n;
     for(uint i=0;i<sysn;i++){ S->sys_f[i]=0.0; };
-    E->do_halo=true; Y->ElemLinear( E, S->sys_f, S->sys_p );
+    //E->do_halo=true;
+    Y->ElemLinear( E,0,E->halo_elem_n, S->sys_f, S->sys_p );
     time_accum( my_phys_count, phys_start );
     time_start( gath_start );
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
@@ -449,7 +451,8 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
     };
     time_accum( my_scat_count, scat_start );
     time_start( phys_start );
-    E->do_halo=false; Y->ElemLinear( E, S->sys_f, S->sys_p );
+    //E->do_halo=false;
+    Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->sys_f, S->sys_p );
     time_accum( my_phys_count, phys_start );
     time_start( solv_start );
 #pragma omp simd reduction(+:glob_sum1)

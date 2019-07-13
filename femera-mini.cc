@@ -751,7 +751,8 @@ int main( int argc, char** argv ){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const auto n = S->udof_n;
     for(uint i=0;i<n;i++){ S->sys_f[i]=0.0; }
-    E->do_halo=true; Y->ElemLinear( E, S->sys_f, S->sys_u );
+    //E->do_halo=true;
+    Y->ElemLinear( E,0,E->halo_elem_n, S->sys_f, S->sys_u );
     // sync sys_f
     const INT_MESH Dn=uint(Y->node_d);
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
@@ -785,7 +786,8 @@ int main( int argc, char** argv ){
 //#pragma omp atomic read
         S->sys_f[Dn* i+j] = M->halo_val[f+j]; }
     }
-    E->do_halo=false; Y->ElemLinear( E, S->sys_f, S->sys_u );
+    //E->do_halo=false;
+    Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->sys_f, S->sys_u );
   }
   // Now, sum the reactions on BCS fixed-displacemnt nodes in the x-direction.
   // Also, compute the polycrystal effective Young's modulus

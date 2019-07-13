@@ -25,7 +25,7 @@ public:
   // Local halo and system sizes.
   // Halo nodes are [0...halo_n-1]; interior nodes are [halo_n...node_n-1].
   uint simd_n=1;
-  bool do_halo;//=true;// false: do_interior //FIXME Remove.
+  //bool do_halo;//=true;// false: do_interior //FIXME Remove.
   //FIXME Replace with loop bounds passed as parameters to Phys::ElemLinear()
   //
   FLOAT_MESH loca_bbox[6]={ 9e9,9e9,9e9 ,-9e9,-9e9,-9e9 };

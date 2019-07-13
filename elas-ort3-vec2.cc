@@ -16,7 +16,7 @@ int ElastOrtho3D::Setup( Elem* E ){
   this->stif_band = uint(E->elem_n) *( sizeof(FLOAT_PHYS)* 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) -1+3) +sizeof(INT_MESH) *uint(E->elem_conn_n) );
   return 0;
 }
-int ElastOrtho3D::ElemLinear( Elem* E,
+int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   FLOAT_SOLV *sys_f, const FLOAT_SOLV* sys_u ){
   //FIXME Cleanup local variables.
   const int Nd = 3;//this->node_d
@@ -25,14 +25,8 @@ int ElastOrtho3D::ElemLinear( Elem* E,
   const int Nc = E->elem_conn_n;// Number of Nodes/Element
   const int Ne = Nf*Nc;
   const int Nt =  4*Nc;
-  const INT_MESH elem_n = E->elem_n;
   const int intp_n = int(E->gaus_n);
   const INT_ORDER elem_p =E->elem_p;
-  //
-  INT_MESH e0=0, ee=elem_n;
-  if(E->do_halo==true){ e0=0; ee=E->halo_elem_n;
-  }else{ e0=E->halo_elem_n; ee=elem_n; }
-  //
 #if VERB_MAX>11
   printf("Elems:%i, IntPts:%i, Nodes/elem:%i\n",
       (int)elem_n,(int)intp_n,(int)Nc);

@@ -28,7 +28,7 @@ int ElastIso3D::Setup( Elem* E ){
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) +2);
   return 0;
 }
-int ElastIso3D::ElemLinear( Elem* E,
+int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   FLOAT_SOLV* sys_f, const FLOAT_SOLV* sys_u ){
   //FIXME Clean up local variables.
   //const int De = 3;// Element Dimension
@@ -37,12 +37,7 @@ int ElastIso3D::ElemLinear( Elem* E,
   const int Nj = Nd*Nd+1;
   const int Nc = E->elem_conn_n;// Number of nodes/element
   const int Ne = Nf*Nc;
-  const INT_MESH elem_n =E->elem_n;
   const int intp_n = int(E->gaus_n);
-  //
-  INT_MESH e0=0, ee=elem_n;
-  if(E->do_halo==true){ e0=0; ee=E->halo_elem_n;
-  }else{ e0=E->halo_elem_n; ee=elem_n;};
 #if VERB_MAX>11
   printf("DOF: %u, Elems:%u, IntPts:%u, Nodes/elem:%u\n",
     (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
