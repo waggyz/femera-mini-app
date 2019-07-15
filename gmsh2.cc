@@ -117,9 +117,18 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
         for(int j=0; j<number_of_tags; j++){
           mshfile >> tag;
           if(j==0){ physical_tag = tag;
-            if(is_volu){ this->elms_phid[tag].push_back(elm_number); };
-          };//FIXME Is this always true?
-        };
+            if(is_volu){ this->elms_phid[tag].push_back(elm_number); }
+          }//FIXME Is this always true?
+#if 0
+          else if(j==(number_of_tags-1)){//FIXME this replaces phys with part tag
+            if(is_volu){
+              this->elms_phid[physical_tag].pop_back();
+              if(this->elms_phid[physical_tag].size()==0){//FIXME inefficient
+                this->elms_phid.erase(physical_tag); }
+              this->elms_phid[tag].push_back(elm_number); }
+          }//FIXME Is thie last tage the partition number?
+#endif
+        }
 #if VERB_MAX>3
       if(verbosity>3){
         std::cout << elm_number <<" ["<< physical_tag <<"]: "; };

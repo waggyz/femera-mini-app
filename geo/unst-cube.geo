@@ -16,7 +16,7 @@ If(h==0)
   h=10;
 EndIf
 If(n==0)
-  n=4;
+  n=1;
 EndIf
 N=h+1;
 
@@ -53,7 +53,7 @@ Mesh.CharacteristicLengthFromPoints=1;
 Mesh.PartitionSplitMeshFiles  = 1 ;
 Mesh.PartitionCreatePhysicals = 0 ;//FIXME Is this useful?
 Mesh.PartitionCreateTopology  = 1 ;
-Mesh.PartitionCreateGhostCells= 1 ;
+Mesh.PartitionCreateGhostCells= 0 ;// Is this necessary?
 Mesh.SaveAll                  = 0 ;// Includes 2d surfaces
 
 Mesh.Algorithm  =3;// Chosen for less regular mesh
@@ -69,9 +69,9 @@ RecombineAll=0;// Only make tets
 Mesh 3;
 RenumberMeshNodes;
 RenumberMeshElements;
-
-PartitionMesh n;
-
+If(n>1)
+  PartitionMesh n;
+EndIf
 Save Sprintf("../cube/unst%gp%gn%g.msh2",h,p,n);
 
 //FIXME These are probably not needed
