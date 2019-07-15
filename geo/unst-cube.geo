@@ -73,7 +73,13 @@ If(n>1)
   PartitionMesh n;
 EndIf
 Save Sprintf("../cube/unst%gp%gn%g.msh2",h,p,n);
+/*
+C=40;P=2;H=2;N=1;
+gmsh -v 2 -setnumber p $P -setnumber h $H -setnumber n 1 -nt $C geo/unst-cube.geo -
 
+gmsh -v 2 -part $N -nt $C -format msh2 -o "cube/unst"$H"p"$P"n"$N".msh" "cube/unst"$H"p"$P"n1.msh2" -
+./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu0.001 -M0 -E100e9 -N0.3 -R -v2 -a "cube/unst"$H"p"$P"n"$N
+*/
 //FIXME These are probably not needed
 //Coherence Mesh;
 //RenumberMeshNodes;

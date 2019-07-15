@@ -116,9 +116,20 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
         }
         for(int j=0; j<number_of_tags; j++){
           mshfile >> tag;
+          if(number_of_tags>3){//FIXME This is the partition number
+            if(j==3){physical_tag = tag;
+              if(is_volu){ this->elms_phid[tag].push_back(elm_number); }
+            }//FIXME Is this always true?
+          }else{
+            if(j==0){physical_tag = tag;
+              if(is_volu){ this->elms_phid[tag].push_back(elm_number); }
+            }//FIXME Is this always true?
+          }
+#if 0
           if(j==0){ physical_tag = tag;
             if(is_volu){ this->elms_phid[tag].push_back(elm_number); }
           }//FIXME Is this always true?
+#endif
 #if 0
           else if(j==(number_of_tags-1)){//FIXME this replaces phys with part tag
             if(is_volu){
