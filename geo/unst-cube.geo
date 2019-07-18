@@ -59,8 +59,9 @@ Mesh.SaveAll                  = 0 ;// Includes 2d surfaces
 Mesh.Algorithm  =3;// Chosen for less regular mesh
 // 1: MeshAdapt, 2: Automatic, 5: Delaunay, 6: Frontal, 7: BAMG, 8: DelQuad
 
-Mesh.Algorithm3D=1;
-//1: Delaunay, 4: Frontal, 5: Frontal Delaunay, 6: Frontal Hex, 7: MMG3D, 9: R-tree, 10: HXT
+Mesh.Algorithm3D=10;// WAS 1
+// 1: Delaunay, 4: Frontal, 5: Frontal Delaunay, 6: Frontal Hex, 7: MMG3D,
+// 9: R-tree, 10: HXT
 
 Mesh.Optimize=0;
 
@@ -72,20 +73,21 @@ RenumberMeshElements;
 If(n>1)
   PartitionMesh n;
 EndIf
-Save Sprintf("../cube/unst%gp%gn%g.msh2",h,p,n);
+Save Sprintf("../cube/uhxt%gp%gn%g.msh2",h,p,n);
 /*
-C=2;P=2;H=2;N=3;
+C=2; P=2; H=2; N=2;
+
 gmsh -v 4 -setnumber p $P -setnumber h $H -setnumber n 1 -nt $C\
  geo/unst-cube.geo -
 
-gmsh -v 4 -part $N -nt $C -format msh2 -o "cube/unst"$H"p"$P"n"$N".msh"\
- "cube/unst"$H"p"$P"n1.msh2" -
+gmsh -v 4 -part $N -nt $C -format msh2 -o "cube/uhxt"$H"p"$P"n"$N".msh"\
+ "cube/uhxt"$H"p"$P"n1.msh2" -
 
 ./gmsh2fmr -v3 -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001\
- -M0 -E100e9 -N0.3 -R -a "cube/unst"$H"p"$P"n"$N
+ -M0 -E100e9 -N0.3 -R -a "cube/uhxt"$H"p"$P"n"$N
+
+CPUMODEL=`./cpumodel.sh`; CSTR=gcc
+
+./femera-$CPUMODEL-$CSTR -v2 -p "cube/uhxt"$H"p"$P"n"$N
 */
-//FIXME These are probably not needed
-//Coherence Mesh;
-//RenumberMeshNodes;
-//RenumberMeshElements;
 

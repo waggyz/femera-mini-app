@@ -119,13 +119,14 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
           if(is_volu){
             if(number_of_tags>3){
               if(j==3){//FIXME This is the partition number
+                //FIXME Is this always true?
                 physical_tag = tag;
                 this->elms_phid[tag].push_back(elm_number);
               }
             }else if(j==0){
                 physical_tag = tag;
                 this->elms_phid[tag].push_back(elm_number);
-              }//FIXME Is this always true?
+              }
           }else if(j==0){// not a volume element
             physical_tag = tag;
           }
