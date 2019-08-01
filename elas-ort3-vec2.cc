@@ -154,7 +154,13 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     // [H][RT] : matmul3x3x3T
     { // begin scoping unit
     __m256d s048;
-    s048= _mm256_mul_pd(_mm256_set1_pd(dw), _mm256_add_pd(_mm256_mul_pd(c0,_mm256_set1_pd(H[0])), _mm256_add_pd(_mm256_mul_pd(c1,_mm256_set1_pd(H[5])), _mm256_mul_pd(c2,_mm256_set1_pd(H[10])))));
+    s048= _mm256_mul_pd(_mm256_set1_pd(dw),
+                        _mm256_add_pd(_mm256_mul_pd(c0,
+                        _mm256_set1_pd(H[0])),
+                        _mm256_add_pd(_mm256_mul_pd(c1,
+                        _mm256_set1_pd(H[5])),
+                        _mm256_mul_pd(c2,
+                        _mm256_set1_pd(H[10])))));
           _mm256_store_pd(&S[0], s048);
     S[4]=(H[1] + H[4])*C[6]*dw; // S[1]
     S[5]=(H[2] + H[8])*C[8]*dw; // S[2]

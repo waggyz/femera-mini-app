@@ -17,25 +17,25 @@ If you have [Gmsh 4](http://gmsh.info/ "Gmsh Website") installed, try making and
 
  * Set `C` to the total number of physical cores in your machine.
  * Set `P` to 2 for qaudratic tets.
- * Set `H` to 42 elements (43 nodes) along each edge of the modeled cube.
+ * Set `H` to 33 elements (34 nodes) along each edge of the modeled cube.
  * Set `N` to the number of partitions desired (N>=C); try 4xC to 16xC.
 
 ```bash
-C=4 ; P=2 ; H=42 ; N=16
+C=4 ; P=2 ; H=33 ; N=16
 CPUMODEL=`./cpumodel.sh`
 gmsh -setnumber p $P -setnumber h $H -setnumber n $N -nt $C geo/unst-cube.geo -
 ./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu0.001 -M0 -E100e9 -N0.3 -R -v2 -ap "cube/unst"$H"p"$P"n"$N
-./femera-$CPUMODEL -v2 -c $C -p "cube/unst"$H"p"$P"n"$N
+./femera-$CPUMODEL -v2 -c $C -p "cube/uhxt"$H"p"$P"n"$N
 ```
 
 Then, try a 1 MDOF thermoelastic model.
 
 ```bash
-C=4 ; P=2 ; H=38 ; N=16
+C=4 ; P=2 ; H=?? ; N=16
 CPUMODEL=`./cpumodel.sh`
 gmsh -setnumber p $P -setnumber h $H -setnumber n $N -nt $C geo/unst-cube.geo -
 ./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu0.001 -t444 -Tu 10 -M0 -E100e9 -N0.3 -A20e-6 -K250 -R -v2 -ap "cube/unst"$H"p"$P"n"$N
-./femera-$CPUMODEL -v2 -c $C -p "cube/unst"$H"p"$P"n"$N
+./femera-$CPUMODEL -v2 -c $C -p "cube/uhxt"$H"p"$P"n"$N
 ```
 
 If you have [Neper](http://neper.sourceforge.net/ "Neper Website") installed, try making and solving a microstructure model.

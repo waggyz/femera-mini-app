@@ -7,7 +7,7 @@
 
 // Vectorize f calculation
 #define VECTORIZED
-#undef VECT_C
+#define VECT_C
 // Fetch next u within G,H loop nest
 #undef FETCH_U_EARLY
 //
@@ -58,11 +58,16 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
   std::copy( &this->mtrl_matc[0], &this->mtrl_matc[this->mtrl_matc.size()], C );
 #ifdef VECT_C
-  __m256d c0,c1,c2,c3;
+  //FLOAT_PHYS __attribute__((aligned(32))) C[9]
+  //  ={D[0],D[0],D[0],D[1],D[1],D[1],D[2],D[2],D[2]};
+  __m256d c0,c1,c2;
+  //c0 = _mm256_set_pd(0.,C[5],C[3],C[0]);
+  //c1 = _mm256_set_pd(0.,C[4],C[1],C[3]);
+  //c2 = _mm256_set_pd(0.,C[2],C[4],C[5]);
   c0 = _mm256_set_pd(0.,C[1],C[1],C[0]);
   c1 = _mm256_set_pd(0.,C[1],C[0],C[1]);
   c2 = _mm256_set_pd(0.,C[0],C[1],C[1]);
-  c3 = _mm256_set_pd(0.,C[2],C[2],C[2]);
+  //__m256d c3; c3 = _mm256_set_pd(0.,C[2],C[2],C[2]);
 #endif
 #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
@@ -260,7 +265,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
       for(int j=0;j<H.size();j++){
-        if(j%mesh_d==0){printf("\n");}
+        if(j%Nd==0){printf("\n");}
         printf("%+9.2e ",H[j]);
       }; printf("\n");
 #endif
@@ -280,8 +285,8 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
           std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj );
 #endif
       } }
-#if 0
-//FIXME this doesn't work here in iso
+#ifdef VECT_C
+      //Vectorized calc for diagonal of S
       { // Scope vector registers
         __m256d s048;
         s048= _mm256_mul_pd(_mm256_set1_pd(dw),
@@ -292,10 +297,22 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
               _mm256_mul_pd(c2,
               _mm256_set1_pd(H[10])))));
               _mm256_store_pd(&S[0], s048);
-        S[4]=(H[1] + H[4])*C[2]*dw; // S[1]
-        S[5]=(H[2] + H[8])*C[2]*dw; // S[2]
-        S[6]=(H[6] + H[9])*C[2]*dw; // S[5]
       } // end scoping unit
+      S[5]=S[1]; S[10]=S[2];// Move the diagonal to their correct locations
+      // Then, do the rest. Dunno if this is faster...
+      S[1]=( H[1] + H[4] )*C[2]*dw;// S[3]= S[1];//Sxy Syx
+      S[2]=( H[2] + H[8] )*C[2]*dw;// S[6]= S[2];//Sxz Szx
+      S[6]=( H[6] + H[9] )*C[2]*dw;// S[7]= S[5];//Syz Szy
+      S[4]=S[1]; S[9]=S[6]; S[8]=S[2];
+#if VERB_MAX>10
+      if(ie==4){
+        printf( "S[%u]:", ie );
+        for(uint j=0;j<12;j++){
+          if(j%4==0){printf("\n");}
+          printf("%+9.2e ",S[j]);
+        } printf("\n");
+      }
+#endif
 #else
       S[ 0]=(C[0]* H[0] + C[1]* H[5] + C[1]* H[10])*dw;//Sxx
       S[ 5]=(C[1]* H[0] + C[0]* H[5] + C[1]* H[10])*dw;//Syy
@@ -305,6 +322,15 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       S[2]=( H[2] + H[8] )*C[2]*dw;// S[6]= S[2];//Sxz Szx
       S[6]=( H[6] + H[9] )*C[2]*dw;// S[7]= S[5];//Syz Szy
       S[4]=S[1]; S[9]=S[6]; S[8]=S[2];
+#if VERB_MAX>10
+      if(ie==4){
+        printf( "S[%u]:", ie );
+        for(uint j=0;j<12;j++){
+          if(j%4==0){printf("\n");}
+          printf("%+9.2e ",S[j]);
+        } printf("\n");
+      }
+#endif
 #endif
       //------------------------------------------------------- 18+9 = 27 FLOP
 #ifdef VECTORIZED
