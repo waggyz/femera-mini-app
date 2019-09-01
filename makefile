@@ -45,7 +45,7 @@ HOST2CHAR:=$(shell hostname | cut -c1-2 )
 
 FEMERA_COMMON = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
  halo-pcg-omp.cc halo-ncg-omp.cc halo-pcr-dummy.cc \
- elas-iso3.cc elas-ort3.cc elas-ther-ort3.cc\
+ elas-iso3.cc elas-ort3.cc elas-ther-ort3.cc
 
 ifeq ($(HOST2CHAR), k2)
 FEMERA_MINI_C = $(FEMERA_COMMON) elas-iso3-base.cc elas-ort3-bas2.cc elas-ther-ort3-bas2.cc
@@ -62,16 +62,27 @@ FEMERA_REF_C = $(FEMERA_COMMON)\
 FEMERA_NAIV_C = $(FEMERA_COMMON)\
  elas-iso3-ref.cc elas-ort3-nai2.cc elas-ther-ort3-ref2.cc
 
+
+HYBRID_GCC_C = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
+ halo-pcg-omp.cc halo-ncg-omp.cc halo-pcr-dummy.cc\
+ elas-iso3.cc elas-ort3.cc elas-ther-ort3.cc
+
+HYBRID_ICC_C = elas-iso3-vect.cc elas-ort3-vec2.cc elas-ther-ort3-vec2.cc
+
 CEXT = cc
 ODIR = mini.o
 
 OEXT = $(CPUMODEL).$(CSTR).o
 QEXT = quiet.$(CPUMODEL).$(CSTR).o
 SEXT = ser.$(CPUMODEL).$(CSTR).o
+IEXT = ser.$(CPUMODEL).icc.o
+GEXT = ser.$(CPUMODEL).gcc.o
 
 OBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(OEXT)))
 QBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(QEXT)))
 SBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(SEXT)))
+GBJS:= $(patsubst %,$(ODIR)/%,$(HYBRID_GCC_C:.$(CEXT)=.$(GEXT)))
+IBJS:= $(patsubst %,$(ODIR)/%,$(HYBRID_ICC_C:.$(CEXT)=.$(IEXT)))
 
 all : gmsh2fmr-ser mini-omp mini-omq
 
@@ -104,6 +115,14 @@ $(ODIR)/%.$(SEXT) : %.h
 	$(CXX) -c $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DFETCH_JAC \
 	$< -o $@
+
+hybr-omp : $(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
+	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
+	$(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT) \
+	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
+	-o femera-$(CPUMODEL)-hyb $(CPPLOG);\
+	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
+	command /usr/bin/time -v ./femera-$(CPUMODEL)-hyb -v2 -c$(NCPU) -p cube/unst19p1n16 ;
 
 mini-omp : $(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
