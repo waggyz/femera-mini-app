@@ -116,7 +116,7 @@ $(ODIR)/%.$(SEXT) : %.h
 	-DFETCH_JAC \
 	$< -o $@
 
-hybr-omp : $(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
+mini-hyb: $(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT) \
 	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
