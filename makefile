@@ -75,8 +75,8 @@ ODIR = mini.o
 OEXT = $(CPUMODEL).$(CSTR).o
 QEXT = qui.$(CPUMODEL).$(CSTR).o
 SEXT = ser.$(CPUMODEL).$(CSTR).o
-IEXT = ser.$(CPUMODEL).icc.o
-GEXT = ser.$(CPUMODEL).gcc.o
+IEXT = $(CPUMODEL).icc.o
+GEXT = $(CPUMODEL).gcc.o
 
 OBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(OEXT)))
 QBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(QEXT)))
