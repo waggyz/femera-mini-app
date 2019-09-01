@@ -73,7 +73,7 @@ CEXT = cc
 ODIR = mini.o
 
 OEXT = $(CPUMODEL).$(CSTR).o
-QEXT = quiet.$(CPUMODEL).$(CSTR).o
+QEXT = qui.$(CPUMODEL).$(CSTR).o
 SEXT = ser.$(CPUMODEL).$(CSTR).o
 IEXT = ser.$(CPUMODEL).icc.o
 GEXT = ser.$(CPUMODEL).gcc.o
