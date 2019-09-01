@@ -119,7 +119,7 @@ mini-omq : $(QBJS) $(ODIR)/femera-mini.$(QEXT)
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	command /usr/bin/time -v ./femerq-$(CPUMODEL)-$(CSTR) -v1 -c$(NCPU) -p cube/unst19p1n16 ;
 
-gmsh2fmr-ser: $(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT)
+gmsh2fmr-ser : $(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT)
 	$(CXX) $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT) \
 	-o gmsh2fmr-$(CPUSTR)-$(CSTR) ;
@@ -131,6 +131,6 @@ gmsh2fmr-ser: $(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT)
 	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 -R \
 	-v3 -ap cube/unit1p2n2;
 
-clean:
-	rm $(ODIR)/*$(CPUMODEL)*;
-	rm *-$(CPUMODEL)-*;
+clean :
+	-rm $(ODIR)/*$(CPUMODEL)*;
+	-rm *-$(CPUMODEL)-*;
