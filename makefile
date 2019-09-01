@@ -48,28 +48,30 @@ FEMERA_COMMON = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
  elas-iso3.cc elas-ort3.cc elas-ther-ort3.cc\
 
 ifeq ($(HOST2CHAR), k2)
-FEMERA_MINI_O = $(FEMERA_COMMON) elas-iso3-base.cc elas-ort3-bas2.cc elas-ther-ort3-bas2.cc
+FEMERA_MINI_C = $(FEMERA_COMMON) elas-iso3-base.cc elas-ort3-bas2.cc elas-ther-ort3-bas2.cc
 else
-FEMERA_MINI_O = $(FEMERA_COMMON) elas-iso3-vect.cc elas-ort3-vec2.cc elas-ther-ort3-vec2.cc
+FEMERA_MINI_C = $(FEMERA_COMMON) elas-iso3-vect.cc elas-ort3-vec2.cc elas-ther-ort3-vec2.cc
 endif
 
-FEMERA_BASE_O = $(FEMERA_COMMON)\
+FEMERA_BASE_C = $(FEMERA_COMMON)\
  elas-iso3-base.cc elas-ort3-bas2.cc elas-ther-ort3-bas2.cc
  
-FEMERA_REF_O = $(FEMERA_COMMON)\
+FEMERA_REF_C = $(FEMERA_COMMON)\
  elas-iso3-ref.cc elas-ort3-ref2.cc elas-ther-ort3-ref2.cc
 
-FEMERA_NAIV_O = $(FEMERA_COMMON)\
+FEMERA_NAIV_C = $(FEMERA_COMMON)\
  elas-iso3-ref.cc elas-ort3-nai2.cc elas-ther-ort3-ref2.cc
 
 CEXT = cc
 ODIR = mini.o
+
 OEXT = $(CPUMODEL).$(CSTR).o
 QEXT = quiet.$(CPUMODEL).$(CSTR).o
 SEXT = ser.$(CPUMODEL).$(CSTR).o
-OBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_O:.$(CEXT)=.$(OEXT)))
-QBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_O:.$(CEXT)=.$(QEXT)))
-SBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_O:.$(CEXT)=.$(SEXT)))
+
+OBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(OEXT)))
+QBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(QEXT)))
+SBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(SEXT)))
 
 all : gmsh2fmr-ser mini-omp mini-omq
 
