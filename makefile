@@ -122,12 +122,12 @@ mini-omq : $(QBJS) $(ODIR)/femera-mini.$(QEXT)
 gmsh2fmr-ser : $(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT)
 	$(CXX) $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT) \
-	-o gmsh2fmr-$(CPUSTR)-$(CSTR) ;
-	./gmsh2fmr-$(CPUSTR)-$(CSTR) -t666 -x0 -t111 -z0 -t333 -y0 -t444 -xu 0.001 \
+	-o gmsh2fmr-$(CPUMODEL)-$(CSTR) ;
+	./gmsh2fmr-$(CPUMODEL)-$(CSTR) -t666 -x0 -t111 -z0 -t333 -y0 -t444 -xu 0.001 \
 	-M1 -E100e9 -N0.3 -A20e-6 -K100e-6 -Z1 -X0 -Z0 \
 	-M2 -E100e9 -N0.3 -Z1 -X0 -Z0 \
 	-v3 -ap cube/unit1p2n2;
-	./gmsh2fmr-$(CPUSTR)-$(CSTR) -t666 -x0 -t333 -y0 -t111 -z0 -t444 -xu 0.001 -t444 -Tu 10 \
+	./gmsh2fmr-$(CPUMODEL)-$(CSTR) -t666 -x0 -t333 -y0 -t111 -z0 -t444 -xu 0.001 -t444 -Tu 10 \
 	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 -R \
 	-v3 -ap cube/unit1p2n2;
 
