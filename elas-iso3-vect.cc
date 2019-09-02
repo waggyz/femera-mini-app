@@ -95,15 +95,24 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     for (int i=0; i<Nc; i++){
       std::memcpy( & u[Nf*i],&sysu[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf );}
   }
+  {// Scope f registers
+#ifdef VECTORIZED
+  __m256d f0,f1,f2,f3;
+  __m256d f4,f5,f6,f7,f8,f9;
+  __m256d f10,f11,f12,f13,f14,f15,f16,f17,f18,f19;
+  {// scope zs register
+  __m256d zs={0.0,0.0,0.0,0.0};
+  f0=zs,f1=zs,f2=zs,f3=zs;
+  f4=zs,f5=zs,f6=zs,f7=zs,f8=zs,f9=zs;
+  f10=zs,f11=zs,f12=zs,f13=zs,f14=zs,f15=zs,f16=zs,f17=zs,f18=zs,f19=zs;
+  }
+#endif
   for(INT_MESH ie=e0;ie<ee;ie++){//================================== Elem loop
 #ifndef FETCH_JAC
       std::memcpy( &jac, &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
 #endif
     const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
-#ifdef VECTORIZED
-    __m256d f0,f1,f2,f3, f4,f5,f6,f7,f8,f9;
-    __m256d f10,f11,f12,f13, f14,f15,f16,f17,f18,f19;
-#else
+#ifndef VECTORIZED
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
 #else
@@ -494,6 +503,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       for(int j=0; j<3; j++){
         sys_f[3* conn[i]+j ] = f[4* i+j ]; } }
   }//============================================================ end elem loop
+  }// end f register scope
   return 0;
 }
 #undef VECTORIZED
