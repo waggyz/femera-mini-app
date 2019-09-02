@@ -84,6 +84,8 @@ SBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(SEXT)))
 GBJS:= $(patsubst %,$(ODIR)/%,$(HYBRID_GCC_C:.$(CEXT)=.$(GEXT)))
 IBJS:= $(patsubst %,$(ODIR)/%,$(HYBRID_ICC_C:.$(CEXT)=.$(IEXT)))
 
+# SILENT 
+
 all : gmsh2fmr-ser mini-omp mini-omq
 
 $(ODIR)/%.$(OEXT) : %.cc
@@ -153,5 +155,8 @@ gmsh2fmr-ser : $(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT)
 	-v3 -ap cube/unit1p2n2;
 
 clean :
+	-rm $(ODIR)/*$(CPUMODEL)*;
+
+cleaner :
 	-rm $(ODIR)/*$(CPUMODEL)*;
 	-rm *-$(CPUMODEL)-*;
