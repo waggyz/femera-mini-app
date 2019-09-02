@@ -136,7 +136,8 @@ mini-omp : $(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT) \
 	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
-	-o femera-$(CPUMODELC) $(CPPLOG); $(AUTOVEC_SUMMARY)\
+	-o femera-$(CPUMODELC) $(CPPLOG); $(AUTOVEC_SUMMARY)
+	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
 	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
@@ -146,7 +147,8 @@ mini-omq : $(QBJS) $(ODIR)/femera-mini.$(QEXT)
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(QBJS) $(ODIR)/femera-mini.$(QEXT) \
 	-DOMP_SCHEDULE=static -DFETCH_JAC -DVERB_MAX=1 \
-	-o femerq-$(CPUMODELC) $(CPPLOG);\
+	-o femerq-$(CPUMODELC) $(CPPLOG);
+	echo ./femerq-$(CPUMODELC) -v1 -c$(NCPU) -p cube/unst19p1n16
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
 	./femerq-$(CPUMODELC) -v1 -c$(NCPU) -p cube/unst19p1n16
@@ -156,7 +158,8 @@ base-omp : $(BBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(BBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT) \
 	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
-	-o femerb-$(CPUMODELC) $(CPPLOG);\
+	-o femerb-$(CPUMODELC) $(CPPLOG);
+	echo ./femerb-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
 	./femerb-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
@@ -166,7 +169,8 @@ mini-hyb: $(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT) \
 	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
-	-o femera-$(CPUMODEL)-hyb $(CPPLOG);\
+	-o femera-$(CPUMODEL)-hyb $(CPPLOG);
+	echo ./femera-$(CPUMODEL)-hyb -v2 -c$(NCPU) -p cube/unst19p1n16
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
 	./femera-$(CPUMODEL)-hyb -v2 -c$(NCPU) -p cube/unst19p1n16
