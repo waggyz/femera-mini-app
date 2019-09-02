@@ -85,41 +85,48 @@ SBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(SEXT)))
 GBJS:= $(patsubst %,$(ODIR)/%,$(HYBRID_GCC_C:.$(CEXT)=.$(GEXT)))
 IBJS:= $(patsubst %,$(ODIR)/%,$(HYBRID_ICC_C:.$(CEXT)=.$(IEXT)))
 
-# SILENT 
+.SILENT :
 
 all : gmsh2fmr-ser mini-omp mini-omq
 
 $(ODIR)/%.$(OEXT) : %.cc
+	echo $(CXX) ... -o $@
 	$(CXX) -c $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DOMP_SCHEDULE=static -DFETCH_JAC -DHAS_TEST \
 	$< -o $@
 
 $(ODIR)/%.$(OEXT) : %.h
+	echo $(CXX) ... -o $@
 	$(CXX) -c $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DOMP_SCHEDULE=static -DFETCH_JAC -DHAS_TEST \
 	$< -o $@
 
 $(ODIR)/%.$(QEXT) : %.cc
+	echo $(CXX) ... -o $@
 	$(CXX) -c $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DOMP_SCHEDULE=static -DFETCH_JAC -DVERB_MAX=1 \
 	$< -o $@
 
 $(ODIR)/%.$(QEXT) : %.h
+	echo $(CXX) ... -o $@
 	$(CXX) -c $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DOMP_SCHEDULE=static -DFETCH_JAC -DVERB_MAX=1 \
 	$< -o $@
 
 $(ODIR)/%.$(SEXT) : %.cc
+	echo $(CXX) ... -o $@
 	$(CXX) -c $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DFETCH_JAC \
 	$< -o $@
 
 $(ODIR)/%.$(SEXT) : %.h
+	echo $(CXX) ... -o $@
 	$(CXX) -c $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DFETCH_JAC \
 	$< -o $@
 
 mini-omp : $(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
+	echo $(CXX) ... -o femera-$(CPUMODEL)-$(CSTR)
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT) \
 	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
@@ -128,6 +135,7 @@ mini-omp : $(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	command /usr/bin/time -v ./femera-$(CPUMODEL)-$(CSTR) -v2 -c$(NCPU) -p cube/unst19p1n16 ;
 
 mini-omq : $(QBJS) $(ODIR)/femera-mini.$(QEXT)
+	echo $(CXX) ... -o femerq-$(CPUMODEL)-$(CSTR)
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(QBJS) $(ODIR)/femera-mini.$(QEXT) \
 	-DOMP_SCHEDULE=static -DFETCH_JAC -DVERB_MAX=1 \
@@ -136,6 +144,7 @@ mini-omq : $(QBJS) $(ODIR)/femera-mini.$(QEXT)
 	command /usr/bin/time -v ./femerq-$(CPUMODEL)-$(CSTR) -v1 -c$(NCPU) -p cube/unst19p1n16 ;
 
 base-omp : $(BBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
+	echo $(CXX) ... -o femerb-$(CPUMODEL)-$(CSTR)
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(BBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT) \
 	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
@@ -144,6 +153,7 @@ base-omp : $(BBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	command /usr/bin/time -v ./femerb-$(CPUMODEL)-$(CSTR) -v2 -c$(NCPU) -p cube/unst19p1n16 ;
 
 mini-hyb: $(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
+	echo $(CXX) ... -o femera-$(CPUMODEL)-hyb
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT) \
 	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
@@ -152,6 +162,7 @@ mini-hyb: $(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	command /usr/bin/time -v ./femera-$(CPUMODEL)-hyb -v2 -c$(NCPU) -p cube/unst19p1n16 ;
 
 gmsh2fmr-ser : $(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT)
+	echo $(CXX) ... -o gmsh2fmr-$(CPUMODEL)-$(CSTR)
 	$(CXX) $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT) \
 	-o gmsh2fmr-$(CPUMODEL)-$(CSTR) ;
