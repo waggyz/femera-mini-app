@@ -386,7 +386,7 @@ int main( int argc, char** argv ){
     std::cout <<"],"<<'\n';
     std::cout << "  Iterating to: "<<rtol<<" relative tolerance,";
     std::cout <<'\n';
-    std::cout <<"Or Stopping at: "<<iter_max<<" "<<M->meth_name<<" iterations..."<<'\n';
+    std::cout <<"or Stopping at: "<<iter_max<<" "<<M->meth_name<<" iterations..."<<'\n';
     std::cout <<"Solving..."<<'\n';
     const char* c="=";
     if(M->glob_chk2 < M->glob_rto2){ c="<"; }
