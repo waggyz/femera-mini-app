@@ -89,7 +89,7 @@ SBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(SEXT)))
 GBJS:= $(patsubst %,$(ODIR)/%,$(HYBRID_GCC_C:.$(CEXT)=.$(GEXT)))
 IBJS:= $(patsubst %,$(ODIR)/%,$(HYBRID_ICC_C:.$(CEXT)=.$(IEXT)))
 
-_dummy := $(shell mkdir -p obj)
+_dummy := $(shell mkdir -p mini.o)
 
 .SILENT :
 
