@@ -2,6 +2,8 @@
 *.old
 *.tmp
 *.cpy
+*.log
+*.err
 
 # Prerequisites
 *.d
@@ -40,4 +42,5 @@ femera-*
 femerq*
 femser*
 femseq*
+femerb*
 gmsh2fmr
