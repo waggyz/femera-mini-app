@@ -78,6 +78,7 @@ SEXT = ser.$(CPUMODEL).$(CSTR).o
 IEXT = $(CPUMODEL).icc.o
 GEXT = $(CPUMODEL).gcc.o
 
+BBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_BASE_C:.$(CEXT)=.$(OEXT)))
 OBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(OEXT)))
 QBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(QEXT)))
 SBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(SEXT)))
@@ -118,14 +119,6 @@ $(ODIR)/%.$(SEXT) : %.h
 	-DFETCH_JAC \
 	$< -o $@
 
-mini-hyb: $(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
-	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
-	$(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT) \
-	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
-	-o femera-$(CPUMODEL)-hyb $(CPPLOG);\
-	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
-	command /usr/bin/time -v ./femera-$(CPUMODEL)-hyb -v2 -c$(NCPU) -p cube/unst19p1n16 ;
-
 mini-omp : $(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT) \
@@ -141,6 +134,22 @@ mini-omq : $(QBJS) $(ODIR)/femera-mini.$(QEXT)
 	-o femerq-$(CPUMODEL)-$(CSTR) $(CPPLOG);\
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	command /usr/bin/time -v ./femerq-$(CPUMODEL)-$(CSTR) -v1 -c$(NCPU) -p cube/unst19p1n16 ;
+
+base-omp : $(BBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
+	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
+	$(BBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT) \
+	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
+	-o femerb-$(CPUMODEL)-$(CSTR) $(CPPLOG);\
+	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
+	command /usr/bin/time -v ./femerb-$(CPUMODEL)-$(CSTR) -v2 -c$(NCPU) -p cube/unst19p1n16 ;
+
+mini-hyb: $(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
+	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
+	$(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT) \
+	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
+	-o femera-$(CPUMODEL)-hyb $(CPPLOG);\
+	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
+	command /usr/bin/time -v ./femera-$(CPUMODEL)-hyb -v2 -c$(NCPU) -p cube/unst19p1n16 ;
 
 gmsh2fmr-ser : $(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT)
 	$(CXX) $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
