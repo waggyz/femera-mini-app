@@ -82,12 +82,16 @@ SEXT = ser.$(CPUMODEL).$(CSTR).o
 IEXT = $(CPUMODEL).icc.o
 GEXT = $(CPUMODEL).gcc.o
 
-BBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_BASE_C:.$(CEXT)=.$(OEXT)))
 OBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(OEXT)))
+BBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_BASE_C:.$(CEXT)=.$(OEXT)))
 QBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(QEXT)))
 SBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(SEXT)))
 GBJS:= $(patsubst %,$(ODIR)/%,$(HYBRID_GCC_C:.$(CEXT)=.$(GEXT)))
 IBJS:= $(patsubst %,$(ODIR)/%,$(HYBRID_ICC_C:.$(CEXT)=.$(IEXT)))
+
+PASS_COLOR = \e[92m
+FAIL_COLOR = \e[91m\e[1m\e[7m
+NORM_COLOR = \e[0m
 
 _dummy := $(shell mkdir -p mini.o)
 
@@ -101,19 +105,7 @@ $(ODIR)/%.$(OEXT) : %.cc
 	-DOMP_SCHEDULE=static -DFETCH_JAC -DHAS_TEST \
 	$< -o $@ $(CPPLOG)
 
-$(ODIR)/%.$(OEXT) : %.h
-	echo $(CXX) ... -o $@
-	$(CXX) -c $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
-	-DOMP_SCHEDULE=static -DFETCH_JAC -DHAS_TEST \
-	$< -o $@ $(CPPLOG)
-
 $(ODIR)/%.$(QEXT) : %.cc
-	echo $(CXX) ... -o $@
-	$(CXX) -c $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
-	-DOMP_SCHEDULE=static -DFETCH_JAC -DVERB_MAX=1 \
-	$< -o $@ $(CPPLOG)
-
-$(ODIR)/%.$(QEXT) : %.h
 	echo $(CXX) ... -o $@
 	$(CXX) -c $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DOMP_SCHEDULE=static -DFETCH_JAC -DVERB_MAX=1 \
@@ -125,13 +117,17 @@ $(ODIR)/%.$(SEXT) : %.cc
 	-DFETCH_JAC \
 	$< -o $@ $(CPPLOG)
 
-$(ODIR)/%.$(SEXT) : %.h
-	echo $(CXX) ... -o $@
-	$(CXX) -c $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
-	-DFETCH_JAC \
-	$< -o $@ $(CPPLOG)
+mini-omp : femera-$(CPUMODELC)
 
-mini-omp : $(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
+mini-omq : femerq-$(CPUMODELC)
+
+base-omp : femerb-$(CPUMODELC)
+
+mini-hyb : femera-$(CPUMODEL)-hyb
+
+gmsh2fmr-ser : gmsh2fmr-$(CPUMODELC)
+
+femera-$(CPUMODELC) : $(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	echo $(CXX) ... -o femera-$(CPUMODELC)
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT) \
@@ -142,7 +138,7 @@ mini-omp : $(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
 	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
 
-mini-omq : $(QBJS) $(ODIR)/femera-mini.$(QEXT)
+femerq-$(CPUMODELC) : $(QBJS) $(ODIR)/femera-mini.$(QEXT)
 	echo $(CXX) ... -o femerq-$(CPUMODELC)
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(QBJS) $(ODIR)/femera-mini.$(QEXT) \
@@ -153,7 +149,7 @@ mini-omq : $(QBJS) $(ODIR)/femera-mini.$(QEXT)
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
 	./femerq-$(CPUMODELC) -v1 -c$(NCPU) -p cube/unst19p1n16
 
-base-omp : $(BBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
+femerb-$(CPUMODELC) : $(BBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	echo $(CXX) ... -o femerb-$(CPUMODELC)
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(BBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT) \
@@ -164,7 +160,7 @@ base-omp : $(BBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
 	./femerb-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
 
-mini-hyb: $(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
+femera-$(CPUMODEL)-hyb : $(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	echo $(CXX) ... -o femera-$(CPUMODEL)-hyb
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT) \
@@ -175,7 +171,7 @@ mini-hyb: $(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
 	./femera-$(CPUMODEL)-hyb -v2 -c$(NCPU) -p cube/unst19p1n16
 
-gmsh2fmr-ser : $(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT)
+gmsh2fmr-$(CPUMODELC) : $(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT)
 	echo $(CXX) ... -o gmsh2fmr-$(CPUMODELC)
 	$(CXX) $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT) \
@@ -188,11 +184,20 @@ gmsh2fmr-ser : $(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT)
 	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 -R \
 	-v3 -ap cube/unit1p2n2;
 
+unit-test : unit-test/cpucount.sh.log unit-test/cpumodel.sh.log
+
+unit-test/%.sh.log : %.sh unit-test/%.sh.chk
+	unit-test/$<.chk > unit-test/$<.log ;
+	unit-test/print-test-results.sh "$<" "unit-test/$<.log"
+
+clean-test :
+	-rm -f unit-test/*.log
+
 clean :
-	-rm $(ODIR)/*$(CPUMODEL)*;
-	-rm $(CPUMODELC).err
-	-rm $(CPUMODELC).log
+	-rm -f $(ODIR)/*$(CPUMODEL)*;
+	-rm -f $(CPUMODELC).err
+	-rm -f $(CPUMODELC).log
 
 cleaner :
-	-rm $(ODIR)/*$(CPUMODEL)*;
-	-rm *-$(CPUMODEL)-*;
+	-rm -f $(ODIR)/*$(CPUMODEL)*;
+	-rm -f *-$(CPUMODEL)-*;
