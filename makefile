@@ -91,9 +91,10 @@ SBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(SEXT)))
 GBJS:= $(patsubst %,$(ODIR)/%,$(HYBRID_GCC_C:.$(CEXT)=.$(GEXT)))
 IBJS:= $(patsubst %,$(ODIR)/%,$(HYBRID_ICC_C:.$(CEXT)=.$(IEXT)))
 
-TESTDIR = unit-test/$(CPUMODEL)
+TESTDIR = test/$(CPUMODEL)
+PROFDIR = test/$(CPUMODEL)
 
-_dummy := $(shell mkdir -p mini.o $(TESTDIR))
+_dummy := $(shell mkdir -p mini.o test $(TESTDIR) $(PROFDIR))
 
 .SILENT :
 
@@ -184,14 +185,27 @@ gmsh2fmr-$(CPUMODELC) : $(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT)
 	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 -R \
 	-v3 -ap cube/unit1p2n2;
 
+profile : profile-size profile-small profile-large
+
+profile-size : mini-omq gmsh2fmr-ser
+	./profile-size.sh > $(PROFDIR)/size.log
+
+profile-small : mini-omq gmsh2fmr-ser
+	./profile-small.sh > $(PROFDIR)/small.log
+
+profile-large : mini-omq gmsh2fmr-ser
+	./profile-large.sh > $(PROFDIR)/large.log
+
+unit-test : test-scripts test-gmsh
+
 test-scripts : $(TESTDIR)/cpucount.sh.err $(TESTDIR)/cpumodel.sh.err \
 $(TESTDIR)/cpusimd.sh.err
-
-unit-test : test-scripts $(TESTDIR)/test-gmsh.err
 
 $(TESTDIR)/%.sh.err : %.sh unit-test/%.sh.chk
 	unit-test/$<.chk > $(TESTDIR)/$<.err ;
 	unit-test/print-test-results.sh "$<" "$(TESTDIR)/$<.err"
+
+test-gmsh : $(TESTDIR)/test-gmsh.err
 
 $(TESTDIR)/test-gmsh.err : unit-test/test-gmsh.sh geo/unst-cube.geo
 	unit-test/test-gmsh.sh > $(TESTDIR)/test-gmsh.err

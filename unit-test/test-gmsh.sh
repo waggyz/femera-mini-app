@@ -12,9 +12,9 @@ NOTE="$NOTE_COLOR Note $NORM_COLOR"
 WARN="$WARN_COLOR WARN $NORM_COLOR"
 FAIL="$FAIL_COLOR FAIL $NORM_COLOR"
 #
-
+CPUCOUNT=`./cpucount.sh`
 CPUMODEL=`./cpumodel.sh`
-TESTDIR="unit-test/$CPUMODEL"
+TESTDIR="test/$CPUMODEL"
 #
 echo 0 $0 exists.
 ME=$(basename -- "$0")
@@ -42,13 +42,13 @@ else
 fi
 #
 for N in 1 4; do
-  P=2 ; H=9 ; C=`./cpucount.sh`
+  P=2 ; H=9 ;
   FILE="cube/uhxt"$H"p"$P"n"$N
   rm -f $FILE".msh2"
   rm -f $FILE"_*.msh"
   LOGFILE="$TESTDIR/gmsh.log"
   ERRFILE="$TESTDIR/gmsh.err"
-  gmsh -setnumber p $P -setnumber h $H -setnumber n $N -nt $C geo/unst-cube.geo -\
+  gmsh -setnumber p $P -setnumber h $H -setnumber n $N -nt $CPUCOUNT geo/unst-cube.geo -\
    > $LOGFILE 2>$ERRFILE
   #
   ERR=`grep -i error $ERRFILE`
@@ -90,8 +90,12 @@ done
 STR=`grep -ioE -m1 '[0-9]+ thread' $LOGFILE`
 NT=`echo $STR | sed 's@^[^0-9]*\([0-9]\+\).*@\1@'`
 if [ $NT -le 1 ]; then
-  printf "0 $ME:${LINENO}$NOTE""Gmsh is using only $STR.\n"
-  printf "0 $ME:${LINENO}$INFO""Compile gmsh with OpenMP for parallel meshing.\n"
+  if [ $CPUCOUNT -gt 1  ]; then
+    printf "0 $ME:${LINENO}$NOTE""Gmsh is using only $STR.\n"
+    printf "0 $ME:${LINENO}$INFO""Compile gmsh with OpenMP for parallel meshing.\n"
+  else
+    printf "0 $ME:${LINENO} Gmsh is using $STR.\n"
+  fi
 else
   echo "0 $ME:${LINENO} Gmsh will use up to "$STR"s."
 fi
