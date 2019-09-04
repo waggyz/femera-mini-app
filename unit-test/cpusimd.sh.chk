@@ -1,0 +1,26 @@
+#!/bin/bash
+PASS_COLOR="\e[92m"
+INFO_COLOR="\e[94m"
+NOTE_COLOR="\e[96m"
+WARN_COLOR="\e[93m\e[1m"
+FAIL_COLOR="\e[91m\e[1m\e[7m"
+NORM_COLOR="\e[0m"
+#
+PASS="$PASS_COLOR Pass $NORM_COLOR"
+INFO="$INFO_COLOR Info $NORM_COLOR"
+NOTE="$NOTE_COLOR Note $NORM_COLOR"
+WARN="$WARN_COLOR WARN $NORM_COLOR"
+FAIL="$FAIL_COLOR FAIL $NORM_COLOR"
+#
+CPUSIMD=`./cpusimd.sh`
+if [ -z "$CPUSIMD" ]; then
+  printf "0$WARN"; echo "No CPU SIMD capabilities found."
+  printf "0$INFO"; echo "Only scalar Femera drivers are available"
+  else
+  if [[ $CPUSIMD =~ "AVX" ]]; then
+    echo "0 CPU SIMD capabilities include AVX: $CPUSIMD." 
+  else
+    printf "0$WARN"; echo "AVX not supported, only: $CPUSIMD."
+    printf "0$INFO"; echo "Only scalar Femera drivers are available"
+  fi
+fi
