@@ -12,6 +12,10 @@ NOTE="$NOTE_COLOR Note $NORM_COLOR"
 WARN="$WARN_COLOR WARN $NORM_COLOR"
 FAIL="$FAIL_COLOR FAIL $NORM_COLOR"
 #
+
+CPUMODEL=`./cpumodel.sh`
+TESTDIR="unit-test/$CPUMODEL"
+#
 echo 0 $0 exists.
 ME=$(basename -- "$0")
 #
@@ -42,8 +46,8 @@ for N in 1 4; do
   FILE="cube/uhxt"$H"p"$P"n"$N
   rm -f $FILE".msh2"
   rm -f $FILE"_*.msh"
-  LOGFILE="unit-test/gmsh.log"
-  ERRFILE="unit-test/gmsh.err"
+  LOGFILE="$TESTDIR/gmsh.log"
+  ERRFILE="$TESTDIR/gmsh.err"
   gmsh -setnumber p $P -setnumber h $H -setnumber n $N -nt $C geo/unst-cube.geo -\
    > $LOGFILE 2>$ERRFILE
   #
@@ -89,7 +93,7 @@ if [ $NT -le 1 ]; then
   printf "0 $ME:${LINENO}$NOTE""Gmsh is using only $STR.\n"
   printf "0 $ME:${LINENO}$INFO""Compile gmsh with OpenMP for parallel meshing.\n"
 else
-  echo "0 $ME:${LINENO} Gmsh can use up to "$STR"s."
+  echo "0 $ME:${LINENO} Gmsh will use up to "$STR"s."
 fi
 #
 

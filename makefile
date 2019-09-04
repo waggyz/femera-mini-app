@@ -91,11 +91,9 @@ SBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(SEXT)))
 GBJS:= $(patsubst %,$(ODIR)/%,$(HYBRID_GCC_C:.$(CEXT)=.$(GEXT)))
 IBJS:= $(patsubst %,$(ODIR)/%,$(HYBRID_ICC_C:.$(CEXT)=.$(IEXT)))
 
-PASS_COLOR = \e[92m
-FAIL_COLOR = \e[91m\e[1m\e[7m
-NORM_COLOR = \e[0m
+TESTDIR = unit-test/$(CPUMODEL)
 
-_dummy := $(shell mkdir -p mini.o)
+_dummy := $(shell mkdir -p mini.o $(TESTDIR))
 
 .SILENT :
 
@@ -186,22 +184,22 @@ gmsh2fmr-$(CPUMODELC) : $(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT)
 	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 -R \
 	-v3 -ap cube/unit1p2n2;
 
-test-scripts : unit-test/cpucount.sh.err unit-test/cpumodel.sh.err \
-unit-test/cpusimd.sh.err
+test-scripts : $(TESTDIR)/cpucount.sh.err $(TESTDIR)/cpumodel.sh.err \
+$(TESTDIR)/cpusimd.sh.err
 
-unit-test : test-scripts unit-test/test-gmsh.err
+unit-test : test-scripts $(TESTDIR)/test-gmsh.err
 
-unit-test/%.sh.err : %.sh unit-test/%.sh.chk
-	unit-test/$<.chk > unit-test/$<.err ;
-	unit-test/print-test-results.sh "$<" "unit-test/$<.err"
+$(TESTDIR)/%.sh.err : %.sh unit-test/%.sh.chk
+	unit-test/$<.chk > $(TESTDIR)/$<.err ;
+	unit-test/print-test-results.sh "$<" "$(TESTDIR)/$<.err"
 
-unit-test/test-gmsh.err : unit-test/test-gmsh.sh geo/unst-cube.geo
-	unit-test/test-gmsh.sh > unit-test/test-gmsh.err
-	unit-test/print-test-results.sh "" unit-test/test-gmsh.err
+$(TESTDIR)/test-gmsh.err : unit-test/test-gmsh.sh geo/unst-cube.geo
+	unit-test/test-gmsh.sh > $(TESTDIR)/test-gmsh.err
+	unit-test/print-test-results.sh "" $(TESTDIR)/test-gmsh.err
 
 clean-test :
-	-rm -f unit-test/*.err
-	-rm -f unit-test/*.log
+	-rm -f $(TESTDIR)/*.err
+	-rm -f $(TESTDIR)/*.log
 
 clean :
 	-rm -f $(ODIR)/*$(CPUMODEL)*;
