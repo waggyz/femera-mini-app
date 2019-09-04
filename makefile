@@ -92,9 +92,9 @@ GBJS:= $(patsubst %,$(ODIR)/%,$(HYBRID_GCC_C:.$(CEXT)=.$(GEXT)))
 IBJS:= $(patsubst %,$(ODIR)/%,$(HYBRID_ICC_C:.$(CEXT)=.$(IEXT)))
 
 TESTDIR = test/$(CPUMODEL)
-PROFDIR = test/$(CPUMODEL)
+PERFDIR = perf
 
-_dummy := $(shell mkdir -p mini.o test $(TESTDIR) $(PROFDIR))
+_dummy := $(shell mkdir -p mini.o test $(TESTDIR) $(PERFDIR))
 
 .SILENT :
 
@@ -188,13 +188,13 @@ gmsh2fmr-$(CPUMODELC) : $(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT)
 profile : profile-size profile-small profile-large
 
 profile-size : mini-omq gmsh2fmr-ser
-	./profile-size.sh > $(PROFDIR)/size.log
+	./profile-size.sh > $(PERFDIR)/profile-size-$(CPUMODELC).log
 
 profile-small : mini-omq gmsh2fmr-ser
-	./profile-small.sh > $(PROFDIR)/small.log
+	./profile-small.sh > $(PERFDIR)/profile-small-$(CPUMODELC).log
 
 profile-large : mini-omq gmsh2fmr-ser
-	./profile-large.sh > $(PROFDIR)/large.log
+	./profile-large.sh > $(PERFDIR)/profile-large-$(CPUMODELC).log
 
 unit-test : test-scripts test-gmsh
 
@@ -215,11 +215,17 @@ clean-test :
 	-rm -f $(TESTDIR)/*.err
 	-rm -f $(TESTDIR)/*.log
 
+clean-perf :
+	-rm -r $(PERFDIR)/*-$(CPUMODELC).log
+	-rm -r $(PERFDIR)/*-$(CPUMODELC).csv
+
 clean :
-	-rm -f $(ODIR)/*$(CPUMODEL)*;
+	-rm -f $(ODIR)/*-$(CPUMODEL)*;
 	-rm -f $(CPUMODELC).err
 	-rm -f $(CPUMODELC).log
 
-cleaner :
-	-rm -f $(ODIR)/*$(CPUMODEL)*;
+cleaner : clean clean-test
 	-rm -f *-$(CPUMODEL)-*;
+
+cleanest : cleaner clean-perf
+	-rm -r $(PERFDIR)/*-$(CPUMODELC)*
