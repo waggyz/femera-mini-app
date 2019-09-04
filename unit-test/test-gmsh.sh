@@ -89,7 +89,7 @@ if [ $NT -le 1 ]; then
   printf "0 $ME:${LINENO}$NOTE""Gmsh is using only $STR.\n"
   printf "0 $ME:${LINENO}$INFO""Compile gmsh with OpenMP for parallel meshing.\n"
 else
-  echo "0 Gmsh can use up to "$STR"s."
+  echo "0 $ME:${LINENO} Gmsh can use up to "$STR"s."
 fi
 #
 
