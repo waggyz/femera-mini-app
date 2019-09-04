@@ -83,7 +83,7 @@ for N in 1 4; do
   fi
 done
 #
-STR=`grep -ioE '[0-9]+ thread' $LOGFILE`
+STR=`grep -ioE -m1 '[0-9]+ thread' $LOGFILE`
 NT=`echo $STR | sed 's@^[^0-9]*\([0-9]\+\).*@\1@'`
 if [ $NT -le 1 ]; then
   printf "0 $ME:${LINENO}$NOTE""Gmsh is using only $STR.\n"
