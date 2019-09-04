@@ -1,0 +1,8 @@
+#!/bin/bash
+CPUMODEL=`./cpumodel.sh`
+CHARCOUNT=`echo $CPUMODEL | sed -n '1h;1!H;${;g;s/[^0-9a-zA-Z]//g;p;}' | wc -c`
+if [ $CHARCOUNT -gt 3 ]; then
+  echo 0 $CPUMODEL has at least four alphanumeric characters.
+else
+  echo 1 $CPUMODEL has less than four alphanumeric characters.
+fi
