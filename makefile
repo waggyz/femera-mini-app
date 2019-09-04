@@ -184,13 +184,18 @@ gmsh2fmr-$(CPUMODELC) : $(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT)
 	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 -R \
 	-v3 -ap cube/unit1p2n2;
 
-unit-test : unit-test/cpucount.sh.log unit-test/cpumodel.sh.log
+unit-test : unit-test/cpucount.sh.err unit-test/cpumodel.sh.err unit-test/test-gmsh.err
 
-unit-test/%.sh.log : %.sh unit-test/%.sh.chk
-	unit-test/$<.chk > unit-test/$<.log ;
-	unit-test/print-test-results.sh "$<" "unit-test/$<.log"
+unit-test/%.sh.err : %.sh unit-test/%.sh.chk
+	unit-test/$<.chk > unit-test/$<.err ;
+	unit-test/print-test-results.sh "$<" "unit-test/$<.err"
+
+unit-test/test-gmsh.err : unit-test/test-gmsh.sh
+	unit-test/test-gmsh.sh > unit-test/test-gmsh.err
+	unit-test/print-test-results.sh "" unit-test/test-gmsh.err
 
 clean-test :
+	-rm -f unit-test/*.err
 	-rm -f unit-test/*.log
 
 clean :
