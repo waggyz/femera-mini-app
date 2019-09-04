@@ -1,5 +1,6 @@
 NCPU:=$(shell ./cpucount.sh)
 CPUMODEL:=$(shell ./cpumodel.sh)
+CPUSIMD:=$(shell ./cpusimd.sh)
 HOST2CHAR:=$(shell hostname | cut -c1-2 )
 # Defaults: use g++
 CSTR=gcc
@@ -49,16 +50,17 @@ FEMERA_COMMON = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
  halo-pcg-omp.cc halo-ncg-omp.cc halo-pcr-dummy.cc \
  elas-iso3.cc elas-ort3.cc elas-ther-ort3.cc
 
-ifeq ($(HOST2CHAR), k2)
-FEMERA_MINI_C = $(FEMERA_COMMON)\
- elas-iso3-base.cc elas-ort3-bas2.cc elas-ther-ort3-bas2.cc
-else
-FEMERA_MINI_C = $(FEMERA_COMMON)\
- elas-iso3-vect.cc elas-ort3-vec2.cc elas-ther-ort3-vec2.cc
-endif
 
 FEMERA_BASE_C = $(FEMERA_COMMON)\
  elas-iso3-base.cc elas-ort3-bas2.cc elas-ther-ort3-bas2.cc
+
+# ifeq ($(HOST2CHAR), k2)
+ifneq (,$(findstring AVX,$(CPUSIMD)))
+FEMERA_MINI_C = $(FEMERA_COMMON)\
+ elas-iso3-vect.cc elas-ort3-vec2.cc elas-ther-ort3-vec2.cc
+else
+FEMERA_MINI_C = $(FEMERA_BASE_C)
+endif
  
 FEMERA_REF_C = $(FEMERA_COMMON)\
  elas-iso3-ref.cc elas-ort3-ref2.cc elas-ther-ort3-ref2.cc
@@ -117,15 +119,15 @@ $(ODIR)/%.$(SEXT) : %.cc
 	-DFETCH_JAC \
 	$< -o $@ $(CPPLOG)
 
-mini-omp : femera-$(CPUMODELC)
+mini-omp : test-scripts femera-$(CPUMODELC)
 
-mini-omq : femerq-$(CPUMODELC)
+mini-omq : test-scripts femerq-$(CPUMODELC)
 
-base-omp : femerb-$(CPUMODELC)
+base-omp : test-scripts femerb-$(CPUMODELC)
 
-mini-hyb : femera-$(CPUMODEL)-hyb
+mini-hyb : test-scripts femera-$(CPUMODEL)-hyb
 
-gmsh2fmr-ser : gmsh2fmr-$(CPUMODELC)
+gmsh2fmr-ser : gmsh2fmr-$(CPUMODELC) test-scripts
 
 femera-$(CPUMODELC) : $(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	echo $(CXX) ... -o femera-$(CPUMODELC)
@@ -184,13 +186,16 @@ gmsh2fmr-$(CPUMODELC) : $(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT)
 	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 -R \
 	-v3 -ap cube/unit1p2n2;
 
-unit-test : unit-test/cpucount.sh.err unit-test/cpumodel.sh.err unit-test/test-gmsh.err
+test-scripts : unit-test/cpucount.sh.err unit-test/cpumodel.sh.err \
+unit-test/cpusimd.sh.err
+
+unit-test : test-scripts unit-test/test-gmsh.err
 
 unit-test/%.sh.err : %.sh unit-test/%.sh.chk
 	unit-test/$<.chk > unit-test/$<.err ;
 	unit-test/print-test-results.sh "$<" "unit-test/$<.err"
 
-unit-test/test-gmsh.err : unit-test/test-gmsh.sh
+unit-test/test-gmsh.err : unit-test/test-gmsh.sh geo/unst-cube.geo
 	unit-test/test-gmsh.sh > unit-test/test-gmsh.err
 	unit-test/print-test-results.sh "" unit-test/test-gmsh.err
 
