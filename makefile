@@ -220,12 +220,12 @@ clean-perf :
 	-rm -r $(PERFDIR)/*-$(CPUMODELC).csv
 
 clean :
-	-rm -f $(ODIR)/*-$(CPUMODEL)*;
+	-rm -f *-$(CPUMODEL)-*;
+	-rm -f $(ODIR)/*.$(CPUMODEL)*;
 	-rm -f $(CPUMODELC).err
 	-rm -f $(CPUMODELC).log
 
 cleaner : clean clean-test
-	-rm -f *-$(CPUMODEL)-*;
 
 cleanest : cleaner clean-perf
 	-rm -r $(PERFDIR)/*-$(CPUMODELC)*
