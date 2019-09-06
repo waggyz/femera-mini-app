@@ -8,6 +8,7 @@ GMSH2FMR=gmsh2fmr-$CPUMODEL-$CSTR
 #MESHDIR=/hpnobackup1/dwagner5/femera-test/cube
 MESHDIR=cube
 #
+HAS_GNUPLOT=`which gnuplot`
 MEM=`free -b  | grep Mem | awk '{print $7}'`
 echo `free -g  | grep Mem | awk '{print $7}'` GB Available Memory
 #
@@ -23,7 +24,7 @@ NOMI_UDOF=(1000 2500 5000 10000 25000\
  1500000 2500000 5000000 10000000 25000000\
  50000000 100000000 250000000 500000000 1000000000)
 #TRY_H='';
-TRY_COUNT=-1;
+TRY_COUNT=0;
 for I in $(seq 0 19); do
   if [ ${NOMI_UDOF[I]} -lt $UDOF_MAX ]; then
     TRY_COUNT=$(( $TRY_COUNT + 1))
@@ -43,8 +44,8 @@ if [ ! -f $PROFILE ];then
   # First, get a rough idea of DOF/sec to estimate time
   # with 10 iterations of the second-to-largest model
   if [ ! -f $CSVFILE ]; then
-    MESH=$MESHDIR"/uhxt"$H"p"$P"/uhxt"$H"p"$P"n"$N
     ITERS=10; H=${LIST_H[$(( $TRY_COUNT - 2 ))]};
+    MESH=$MESHDIR"/uhxt"$H"p"$P"/uhxt"$H"p"$P"n"$N
     echo Running $ITERS iterations of $MESH...
     $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR"
     $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
@@ -68,3 +69,21 @@ if [ ! -f $PROFILE ];then
 else
   echo "Reading profile "$PROFILE"..."
 fi
+if [ ! -z "$HAS_GNUPLOT" ]; then
+gnuplot -e  "\
+set terminal dumb enhanced;\
+set datafile separator ',';\
+set autoscale fix;\
+set xrange [1e3:1e9];\
+set yrange [0:30e6];\
+set key outside bottom center;\
+set title 'Femera Performance using 2 Partitions';\
+set xlabel 'System Size [DOF]';\
+set logscale x;\
+plot 'perf/uhxt-tet10-elas-ort-i5-7300U-gcc.csv' using 3:13\
+ with points pointtype 24 \
+ title 'Performance';"
+fi
+#
+#
+#
