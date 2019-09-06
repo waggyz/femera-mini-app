@@ -5,8 +5,11 @@ CSTR=gcc
 EXEDIR="."
 GMSH2FMR=gmsh2fmr-$CPUMODEL-$CSTR
 #
-#MESHDIR=/hpnobackup1/dwagner5/femera-test/cube
-MESHDIR=cube
+if [ -d /hpnobackup1/dwagner5/femera-test/cube ];then
+  MESHDIR=/hpnobackup1/dwagner5/femera-test/cube
+else
+  MESHDIR=cube
+fi
 #
 HAS_GNUPLOT=`which gnuplot`
 MEM=`free -b  | grep Mem | awk '{print $7}'`
@@ -32,7 +35,7 @@ for I in $(seq 0 19); do
 done
 #
 PERFDIR="perf"
-PROFILE=$PERFDIR/"uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv"
+PROFILE=$PERFDIR/"uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".pro"
 CSVFILE=$PERFDIR/"uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv"
 #
 if [ ! -f $PROFILE ];then
@@ -67,22 +70,23 @@ if [ ! -f $PROFILE ];then
     done
   done
 else
-  echo "Reading profile "$PROFILE"..."
+  echo "Reading profile: "$PROFILE"..."
 fi
 if [ ! -z "$HAS_GNUPLOT" ]; then
+  echo "Reading basiic profile data: "$CSVFILE"..."
 gnuplot -e  "\
-set terminal dumb enhanced;\
+set terminal dumb enhanced size 79,25;\
 set datafile separator ',';\
-set autoscale fix;\
-set xrange [1e3:1.02e9];\
-set yrange [0:30e6];\
+set xrange [1e3:1.05e9];\
+set tics scale 0,0;\
 set key outside bottom center;\
-set title 'Femera Performance using 2 Partitions';\
+set key inside top right;\
+set title 'Femera Performance ["$CPUCOUNT" Partitions]';\
 set xlabel 'System Size [DOF]';\
 set logscale x;\
-plot 'perf/uhxt-tet10-elas-ort-i5-7300U-gcc.csv' using 3:13\
+plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv' using 3:13\
  with points pointtype 24 \
- title 'Performance';"
+ title 'Performance [DOF/s]';"
 fi
 #
 #
