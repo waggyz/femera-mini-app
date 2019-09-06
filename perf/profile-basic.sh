@@ -5,7 +5,7 @@ CSTR=gcc
 EXEDIR="."
 GMSH2FMR=gmsh2fmr-$CPUMODEL-$CSTR
 #
-if [ -d /hpnobackup1/dwagner5/femera-test/cube ];then
+if [ -d "/hpnobackup1/dwagner5/femera-test/cube" ];then
   MESHDIR=/hpnobackup1/dwagner5/femera-test/cube
 else
   MESHDIR=cube
@@ -77,13 +77,13 @@ if [ ! -z "$HAS_GNUPLOT" ]; then
 gnuplot -e  "\
 set terminal dumb enhanced size 79,25;\
 set datafile separator ',';\
-set xrange [1e3:1.05e9];\
 set tics scale 0,0;\
-set key outside bottom center;\
+set logscale x;\
+set xrange [1e3:1.05e9];\
+set yrange [0:];\
 set key inside top right;\
 set title 'Femera Performance ["$CPUCOUNT" Partitions]';\
 set xlabel 'System Size [DOF]';\
-set logscale x;\
 plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv' using 3:13\
  with points pointtype 24 \
  title 'Performance [DOF/s]';"
