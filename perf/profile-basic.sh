@@ -75,7 +75,7 @@ fi
 if [ ! -z "$HAS_GNUPLOT" ]; then
   echo "Reading basiic profile data: "$CSVFILE"..."
 gnuplot -e  "\
-set terminal dumb enhanced size 79,25;\
+set terminal dumb noenhanced size 79,25;\
 set datafile separator ',';\
 set tics scale 0,0;\
 set logscale x;\
