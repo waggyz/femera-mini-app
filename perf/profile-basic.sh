@@ -77,10 +77,10 @@ if [ ! -z "$HAS_GNUPLOT" ]; then
 gnuplot -e  "\
 set terminal dumb enhanced size 79,25;\
 set datafile separator ',';\
-set tics scale 0,0;\
 set logscale x;\
 set xrange [1e3:1.05e9];\
 set yrange [0:];\
+set tics scale 0,0;\
 set key inside top right;\
 set title 'Femera Performance ["$CPUCOUNT" Partitions]';\
 set xlabel 'System Size [DOF]';\
