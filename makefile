@@ -185,16 +185,16 @@ gmsh2fmr-$(CPUMODELC) : $(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT)
 	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 -R \
 	-v3 -ap cube/unit1p2n2;
 
-profile : profile-size profile-small profile-large
+profile : profile-basic profile-small profile-large
 
-profile-size : mini-omq gmsh2fmr-ser
-	./profile-size.sh > $(PERFDIR)/profile-size-$(CPUMODELC).log
+profile-basic : mini-omq gmsh2fmr-ser
+	$(PERFDIR)/profile-basic.sh > $(PERFDIR)/profile-basic-$(CPUMODELC).log
 
 profile-small : mini-omq gmsh2fmr-ser
-	./profile-small.sh > $(PERFDIR)/profile-small-$(CPUMODELC).log
+	$(PERFDIR)/profile-small.sh > $(PERFDIR)/profile-small-$(CPUMODELC).log
 
 profile-large : mini-omq gmsh2fmr-ser
-	./profile-large.sh > $(PERFDIR)/profile-large-$(CPUMODELC).log
+	$(PERFDIR)/profile-large.sh > $(PERFDIR)/profile-large-$(CPUMODELC).log
 
 unit-test : test-scripts test-gmsh
 
