@@ -464,11 +464,11 @@ int main( int argc, char** argv ){
       gat0_sec /sc, ss, gat0_sec/iter_sec *pct );
     printf("%9.0f %s  %6.2f%% Combined Halo Gather Summation Time\n",
       gat1_sec /sc, ss, gat1_sec/iter_sec *pct );
-    printf("%9.0f %s  %6.2f%% Combined Thread Halo Scatter Time\n",
+    printf("%9.0f %s  %6.2f%% Combined Halo Scatter Time\n",
       scat_sec /sc, ss, scat_sec/iter_sec *pct );
-    printf("%9.0f %s  %6.2f%% Combined Thread Solve Time\n",
+    printf("%9.0f %s  %6.2f%% Combined Solve Time\n",
       solv_sec /sc, ss, solv_sec/iter_sec *pct );
-    printf("%9.0f %s  %6.2f%% Combined Thread Work Time\n",
+    printf("%9.0f %s  %6.2f%% Combined Work Time\n",
       iter_sec /sc, ss, (phys_sec+gat0_sec+gat1_sec+scat_sec+solv_sec)
       /iter_sec *pct );
     printf("%9.0f %s  %6.2f%% Combined Sync and Overhead Time\n",
