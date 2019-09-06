@@ -362,10 +362,10 @@ int main( int argc, char** argv ){
         prec_sec/sc, ss, prec_sec/init_sec/float(comp_n)*pct); };
       printf("%9.0f %s  %6.2f%% Combined Global Node ID Map Init Time\n",
         gmap_sec/sc, ss, gmap_sec/init_sec/float(comp_n)*pct );
-      printf("%9.0f %s  %6.2f%% Combined Thread Gather Time\n",
+      printf("%9.0f %s  %6.2f%% Combined Gather Time\n",
         (gat0_sec+gat1_sec)/sc, ss,
         (gat0_sec+gat1_sec)/init_sec/float(comp_n)*pct );
-      printf("%9.0f %s  %6.2f%% Combined Thread Scatter Time\n",
+      printf("%9.0f %s  %6.2f%% Combined Scatter Time\n",
         scat_sec/sc, ss, scat_sec/init_sec/float(comp_n)*pct );
       printf("%9.0f %s  %6.2f%% Combined Physics and Solve Init Time\n",
         solv_sec/sc, ss, solv_sec/init_sec/float(comp_n)*pct );
