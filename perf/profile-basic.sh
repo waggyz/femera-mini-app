@@ -90,8 +90,9 @@ set title 'Femera Performance [MDOF/s]';\
 set xlabel 'System Size [DOF]';\
 plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
  using 3:(\$13/1e6)\
- with points pointtype 0 \
- title '"$CPUCOUNT" Partitions';"
+ with points pointtype 0\
+ title '"$CPUCOUNT" Partitions';"\
+ | grep --no-group-separator -C25 --color=always '\.'
 fi
 #
 #
