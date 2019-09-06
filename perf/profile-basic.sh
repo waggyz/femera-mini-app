@@ -57,6 +57,7 @@ if [ ! -f $PROFILE ];then
     -p $MESH >> $CSVFILE
   fi
   DOFS=`head -n1 $CSVFILE | awk -F, '{ print $13 }'`
+  DOFS=`printf '%f' $DOFS`
   echo Performance is about $(( $DOFS / 1000000  )) MDOF/s.
   for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
     H=${LIST_H[I]}
