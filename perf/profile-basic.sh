@@ -74,7 +74,7 @@ gnuplot -e  "\
 set terminal dumb enhanced;\
 set datafile separator ',';\
 set autoscale fix;\
-set xrange [1e3:1e9];\
+set xrange [1e3:1.02e9];\
 set yrange [0:30e6];\
 set key outside bottom center;\
 set title 'Femera Performance using 2 Partitions';\
