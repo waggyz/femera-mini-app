@@ -49,6 +49,8 @@ if [ ! -f $PROFILE ];then
   if [ ! -f $CSVFILE ]; then
     ITERS=10; H=${LIST_H[$(( $TRY_COUNT - 2 ))]};
     MESH=$MESHDIR"/uhxt"$H"p"$P"/uhxt"$H"p"$P"n"$N
+    echo Estimating performance at\
+ $(( ${NOMI_UDOF[$(( $TRY_COUNT - 2 ))]} /1000000 )) MDOF...
     $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR"
     echo Running $ITERS iterations of $MESH...
     $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
