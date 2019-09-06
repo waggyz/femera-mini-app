@@ -38,7 +38,7 @@ PERFDIR="perf"
 PROFILE=$PERFDIR/"uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".pro"
 CSVFILE=$PERFDIR/"uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv"
 #
-if [  -f $PROFILE ];then
+if [ ! -f $PROFILE ];then
   P=2; C=$CPUCOUNT; N=$C; RTOL=1e-24;
   TARGET_TEST_S=6;# Try for S sec/run
   REPEAT_TEST_N=5;# Repeat each test N times
@@ -68,7 +68,6 @@ if [  -f $PROFILE ];then
       $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
       -p $MESH >> $CSVFILE
     done
-  exit
   done
 else
   echo "Reading profile: "$PROFILE"..."
