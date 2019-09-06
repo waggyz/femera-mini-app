@@ -49,8 +49,8 @@ if [ ! -f $PROFILE ];then
   if [ ! -f $CSVFILE ]; then
     ITERS=10; H=${LIST_H[$(( $TRY_COUNT - 2 ))]};
     MESH=$MESHDIR"/uhxt"$H"p"$P"/uhxt"$H"p"$P"n"$N
-    echo Running $ITERS iterations of $MESH...
     $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR"
+    echo Running $ITERS iterations of $MESH...
     $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
     -p $MESH >> $CSVFILE
   fi
@@ -73,7 +73,7 @@ else
   echo "Reading profile: "$PROFILE"..."
 fi
 if [ ! -z "$HAS_GNUPLOT" ]; then
-  echo "Reading basiic profile data: "$CSVFILE"..."
+  echo "Reading basic profile data: "$CSVFILE"..."
 gnuplot -e  "\
 set terminal dumb noenhanced size 79,25;\
 set datafile separator ',';\
@@ -86,7 +86,7 @@ set title 'Femera Performance ["$CPUCOUNT" Partitions]';\
 set xlabel 'System Size [DOF]';\
 plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
  using 3:(\$13/1e6)\
- with points pointtype 24 \
+ with points pointtype 0 \
  title '[MDOF/s]';"
 fi
 #
