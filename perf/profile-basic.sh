@@ -50,13 +50,14 @@ if [ ! -f $PROFILE ];then
     ITERS=10; H=${LIST_H[$(( $TRY_COUNT - 2 ))]};
     MESH=$MESHDIR"/uhxt"$H"p"$P"/uhxt"$H"p"$P"n"$N
     echo Estimating performance at\
- $(( ${NOMI_UDOF[$(( $TRY_COUNT - 2 ))]} /1000000 )) MDOF...
+ $(( ${NOMI_UDOF[$(( $TRY_COUNT - 2 ))]} / 1000000 )) MDOF...
     $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR"
     echo Running $ITERS iterations of $MESH...
     $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
     -p $MESH >> $CSVFILE
   fi
   DOFS=`head -n1 $CSVFILE | awk -F, '{ print $13 }'`
+  echo Performance is about $(( $DOFS / 1000000  )) MDOF/s.
   for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
     H=${LIST_H[I]}
     MESH=$MESHDIR"/uhxt"$H"p"$P"/uhxt"$H"p"$P"n"$N
@@ -88,7 +89,7 @@ set title 'Femera Performance [MDOF/s]';\
 set xlabel 'System Size [DOF]';\
 plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
  using 3:(\$13/1e6)\
- with points pointtype -3 \
+ with points pointtype 0 \
  title '"$CPUCOUNT" Partitions';"
 fi
 #
