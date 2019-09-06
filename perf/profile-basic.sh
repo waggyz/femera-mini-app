@@ -73,7 +73,7 @@ else
   echo "Reading profile: "$PROFILE"..."
 fi
 if [ ! -z "$HAS_GNUPLOT" ]; then
-  echo "Reading basic profile data: "$CSVFILE"..."
+  echo "Plotting basic profile data: "$CSVFILE"..."
 gnuplot -e  "\
 set terminal dumb noenhanced size 79,25;\
 set datafile separator ',';\
@@ -82,12 +82,12 @@ set logscale x;\
 set xrange [1e3:1.05e9];\
 set yrange [0:];\
 set key inside top right;\
-set title 'Femera Performance ["$CPUCOUNT" Partitions]';\
+set title 'Femera Performance [MDOF/s]';\
 set xlabel 'System Size [DOF]';\
 plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
  using 3:(\$13/1e6)\
- with points pointtype 0 \
- title '[MDOF/s]';"
+ with points pointtype -3 \
+ title '"$CPUCOUNT" Partitions';"
 fi
 #
 #
