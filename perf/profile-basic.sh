@@ -20,15 +20,15 @@ NODE_MAX=$(( $UDOF_MAX / 3))
 TET10_MAX=$(( $UDOF_MAX / 4 ))
 echo Max. Model: $TET10_MAX Tet10, $NODE_MAX Nodes, $UDOF_MAX Elastic DOF
 #
-MESH_N=20
-LIST_H=(3 4 5 7 9   12 15 21 26 33   38 45 56 72 96   123 156 205 265 336)
-NOMI_UDOF=(1000 2500 5000 10000 25000\
+MESH_N=21
+LIST_H=(2 3 4 5 7 9   12 15 21 26 33   38 45 56 72 96   123 156 205 265 336)
+NOMI_UDOF=(500 1000 2500 5000 10000 25000\
  50000 100000 250000 500000 1000000\
  1500000 2500000 5000000 10000000 25000000\
  50000000 100000000 250000000 500000000 1000000000)
 #TRY_H='';
 TRY_COUNT=0;
-for I in $(seq 0 19); do
+for I in $(seq 0 20); do
   if [ ${NOMI_UDOF[I]} -lt $UDOF_MAX ]; then
     TRY_COUNT=$(( $TRY_COUNT + 1))
   fi
@@ -38,7 +38,7 @@ PERFDIR="perf"
 PROFILE=$PERFDIR/"uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".pro"
 CSVFILE=$PERFDIR/"uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv"
 #
-if [ ! -f $PROFILE ];then
+if [  -f $PROFILE ];then
   P=2; C=$CPUCOUNT; N=$C; RTOL=1e-24;
   TARGET_TEST_S=6;# Try for S sec/run
   REPEAT_TEST_N=5;# Repeat each test N times
@@ -68,6 +68,7 @@ if [ ! -f $PROFILE ];then
       $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
       -p $MESH >> $CSVFILE
     done
+  exit
   done
 else
   echo "Reading profile: "$PROFILE"..."
@@ -77,16 +78,16 @@ if [ ! -z "$HAS_GNUPLOT" ]; then
 gnuplot -e  "\
 set terminal dumb enhanced size 79,25;\
 set datafile separator ',';\
+set tics scale 0,0;\
 set logscale x;\
 set xrange [1e3:1.05e9];\
 set yrange [0:];\
-set tics scale 0,0;\
 set key inside top right;\
 set title 'Femera Performance ["$CPUCOUNT" Partitions]';\
 set xlabel 'System Size [DOF]';\
 plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv' using 3:13\
  with points pointtype 24 \
- title 'Performance [DOF/s]';"
+ title '[DOF/s]';"
 fi
 #
 #
