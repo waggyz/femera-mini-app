@@ -85,7 +85,6 @@ set key inside top right;\
 set title 'Femera Performance ["$CPUCOUNT" Partitions]';\
 set xlabel 'System Size [DOF]';\
 plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv' using 3:13\
- with points pointtype 24 \
  title '[DOF/s]';"
 fi
 #
