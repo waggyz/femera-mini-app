@@ -167,7 +167,7 @@ if ! grep -q -i "partitioning" $PROFILE; then
       MESHNAME="uhxt"$H"p"$P"/uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/"$MESHNAME
       echo "Partitioning and converting "$MESHNAME", if necessary..."
-      echo $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR"
+      $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR"
       echo "Running "$ITERS" iterations of "$MESHNAME" ("$NDOF" DOF), "\
         $REPEAT_TEST_N" times..."
       for I in $(seq 1 $REPEAT_TEST_N ); do
