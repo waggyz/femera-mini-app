@@ -168,7 +168,7 @@ if ! grep -q -i "partitioning" $PROFILE; then
       MESH=$MESHDIR"/"$MESHNAME
       echo "Partitioning and converting "$MESHNAME", if necessary..."
       $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR"
-      echo "Running "$ITERS" iterations of "$MESHNAME" ("$NUDOF" DOF), "\
+      echo "Running "$ITERS" iterations of "$MESHNAME" ("$MUDOF" MDOF), "\
         $REPEAT_TEST_N" times..."
       for I in $(seq 1 $REPEAT_TEST_N ); do
         $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
