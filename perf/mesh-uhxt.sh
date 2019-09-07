@@ -5,6 +5,8 @@ C=`./cpucount.sh`
 DIR=$MESHDIR"/uhxt"$H"p"$P
 if [ ! -d $DIR ]; then
     mkdir $DIR
+if [ -f $MESHDIR"/uhxt"$H"p"$P"n1.msh2" ]; then
+  mv $MESHDIR"/uhxt"$H"p"$P"n"* $DIR
 fi
 if [ ! -f $DIR"/uhxt"$H"p"$P"n1.msh2" ]; then
   gmsh -v 2 -setnumber p $P -setnumber h $H -setnumber n 1 -nt $C geo/unst-cube.geo -
