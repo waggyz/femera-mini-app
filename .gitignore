@@ -4,6 +4,7 @@
 *.cpy
 *.log
 *.err
+*.csv
 
 # Prerequisites
 *.d
