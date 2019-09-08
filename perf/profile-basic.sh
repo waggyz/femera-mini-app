@@ -146,6 +146,7 @@ if [ -f $CSVFILE ]; then
     | tee -a $PROFILE | grep --no-group-separator -C25 --color=always '\.'
   fi
 fi
+echo "partitioning" >> $PROFILE
 #FIXME Change to check if any CSV lines have N != C
 if ! grep -q -i "partitioning" $PROFILE; then
   H=${LIST_H[$(( $TRY_COUNT - 2 ))]};
@@ -166,6 +167,7 @@ if ! grep -q -i "partitioning" $PROFILE; then
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
       echo "Partitioning and converting "$MESHNAME", if necessary..."
+      exit
       $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR"
       echo "Running "$ITERS" iterations of "$MESHNAME" ("$MUDOF" MDOF), "\
         $REPEAT_TEST_N" times..."
@@ -193,7 +195,7 @@ if grep -q -i "partitioning" $PROFILE; then
     set title 'Femera Elastic Performance Partitioning Tests [MDOF/s]';\
     set xlabel 'Partition Size [elem/part]';\
     plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
-    using (\$1/\$4):(\$4 eq $\$9 ? 1/0:\$13/1e6)\
+    using (\$1/\$4):(\$4 == \$9 ? 1/0:\$13/1e6)\
     with points pointtype 0\
     title '"$CPUCOUNT" Partitions';"\
     | tee -a $PROFILE | grep --no-group-separator -C25 --color=always '\.'
