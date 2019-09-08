@@ -189,7 +189,7 @@ if [ -n "$CSV_HAS_PART_TEST" ]; then
     set terminal dumb noenhanced size 79,25;\
     set datafile separator ',';\
     set tics scale 0,0;\
-    set key outside top;\
+    set key outside top center;\
     set title 'Femera Elastic Performance Partitioning Tests [MDOF/s]';\
     set xlabel 'Partition Size [elem/part]';\
     plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
