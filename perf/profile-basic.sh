@@ -183,7 +183,7 @@ if [ -z "$CSV_HAS_PART_TEST" ]; then
 fi
 if [ -n "$CSV_HAS_PART_TEST" ]; then
   if [ ! -z "$HAS_GNUPLOT" ]; then
-    MUDOF=$(( `head -n1 $CSVFILE | awk -F, '{ print $3/1000000 }'` / 1))
+    MUDOF=`head -n1 $CSVFILE | awk -F, '{ print $3/1000000 }'`
     echo "Plotting partitioning profile data: "$CSVFILE"..."
     gnuplot -e  "\
     set terminal dumb noenhanced size 79,25;\
