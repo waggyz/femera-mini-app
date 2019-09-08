@@ -146,8 +146,7 @@ if [ -f $CSVFILE ]; then
     | tee -a $PROFILE | grep --no-group-separator -C25 --color=always '\.'
   fi
 fi
-#FIXME Change to check if any CSV lines have N != C
-#if ! grep -q -i "partitioning" $PROFILE; then
+# Check if any CSV lines have N != C
 CSV_HAS_PART_TEST=`awk -F, '$4!=$9{print $4; exit}' $CSVFILE`
 if [ -z "$CSV_HAS_PART_TEST" ]; then
   H=${LIST_H[$(( $TRY_COUNT - 2 ))]};
@@ -184,6 +183,7 @@ if [ -z "$CSV_HAS_PART_TEST" ]; then
 fi
 if [ -n "$CSV_HAS_PART_TEST" ]; then
   if [ ! -z "$HAS_GNUPLOT" ]; then
+    MUDOF=`head -n1 $CSVFILE | awk -F, '{ print $3/1000000 }'`
     echo "Plotting partitioning profile data: "$CSVFILE"..."
     gnuplot -e  "\
     set terminal dumb noenhanced size 79,25;\
@@ -195,7 +195,7 @@ if [ -n "$CSV_HAS_PART_TEST" ]; then
     plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
     using (\$1/\$4):(\$4 == \$9 ? 1/0:\$13/1e6)\
     with points pointtype 0\
-    title '"$CPUCOUNT" Partitions';"\
+    title 'Performance at $MUDOF MDOF';"\
     | tee -a $PROFILE | grep --no-group-separator -C25 --color=always '\.'
   fi
 fi
