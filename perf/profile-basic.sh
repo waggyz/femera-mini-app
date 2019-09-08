@@ -12,6 +12,7 @@ ITERS_MIN=10;
 #
 PERFDIR="perf"
 PROFILE=$PERFDIR/"uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".pro"
+LOGFILE=$PERFDIR/"uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".log"
 CSVFILE=$PERFDIR/"uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv"
 #
 if [ -d "/hpnobackup1/dwagner5/femera-test/cube" ]; then
@@ -59,7 +60,7 @@ if [ ! -f $PROFILE ]; then
     MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
     echo Estimating performance at\
       $(( ${NOMI_UDOF[$(( $TRY_COUNT - 2 ))]} / 1000000 )) MDOF...
-    $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR"
+    $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
     echo Running $ITERS iterations of $MESHNAME...
     $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
       -p $MESH >> $CSVFILE
@@ -79,7 +80,7 @@ if [ "$CSVLINES" -lt "$BASIC_TEST_N" ]; then
     MESHNAME="uhxt"$H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
     echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
-    $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR"
+    $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
     NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
     NDOF=$(( $NNODE * 3 ))
     ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $DOFS $NDOF | bc`
@@ -167,8 +168,7 @@ if [ -z "$CSV_HAS_PART_TEST" ]; then
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
       echo "Partitioning and converting "$MESHNAME", if necessary..."
-      exit
-      $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR"
+      $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
       echo "Running "$ITERS" iterations of "$MESHNAME" ("$MUDOF" MDOF), "\
         $REPEAT_TEST_N" times..."
       for I in $(seq 1 $REPEAT_TEST_N ); do
@@ -182,6 +182,11 @@ if [ -z "$CSV_HAS_PART_TEST" ]; then
   echo "Partitioning Profile" >> $PROFILE
 fi
 if [ -n "$CSV_HAS_PART_TEST" ]; then
+  SIZE_PERF_MAX=`awk -F, -v max=0\
+    '($13>max)&&($4>$9){max=$13;perf=$13/1e6;size=$1/$4}END{print size,perf}'\
+    $CSVFILE`
+  echo Maximum large model performance is ${SIZE_PERF_MAX##* }" MDOF/s"\
+  at ${SIZE_PERF_MAX%% *}" elem/part."
   if [ ! -z "$HAS_GNUPLOT" ]; then
     MUDOF=`head -n1 $CSVFILE | awk -F, '{ print $3/1000000 }'`
     echo "Plotting partitioning profile data: "$CSVFILE"..."
@@ -198,10 +203,5 @@ if [ -n "$CSV_HAS_PART_TEST" ]; then
     title 'Performance at $MUDOF MDOF';"\
     | tee -a $PROFILE | grep --no-group-separator -C25 --color=always '\.'
   fi
-  SIZE_PERF_MAX=`awk -F, -v max=0\
-    '($13>max)&&($4>$9){max=$13;perf=$13/1e6;size=$1/$4}END{print size,perf}'\
-    $CSVFILE`
-  echo Maximum performance is ${SIZE_PERF_MAX##* }" MDOF/s "\
-  at ${SIZE_PERF_MAX%% *}" elem/part."
 fi
 #
