@@ -218,6 +218,7 @@ clean-test :
 clean-perf :
 	-rm -r $(PERFDIR)/*-$(CPUMODELC).log
 	-rm -r $(PERFDIR)/*-$(CPUMODELC).csv
+	-rm -r $(PERFDIR)/*-$(CPUMODELC).pro
 
 clean :
 	-rm -f *-$(CPUMODEL)-*;
