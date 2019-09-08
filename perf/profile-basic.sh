@@ -36,7 +36,7 @@ else
   TET10_MAX=$(( $UDOF_MAX / 4 ))
 fi
 MDOF_MAX=$(( $UDOF_MAX / 1000000 ))
-echo Max. Model: $TET10_MAX Tet10, $NODE_MAX Nodes, $MDOF_MAX MDOF
+echo Largest Test Model: $TET10_MAX Tet10, $NODE_MAX Nodes, $MDOF_MAX MDOF
 #
 MESH_N=21
 LIST_H=(2 3 4 5 7 9   12 15 21 26 33   38 45 56 72 96   123 156 205 265 336)
@@ -129,7 +129,7 @@ if [ -f $CSVFILE ]; then
   printf "%6i     : Minimum iterations\n" $ITERS_MIN >> $PROFILE
   printf "     %5.0e : Relative residual tolerance\n" $RTOL >> $PROFILE
   if [ ! -z "$HAS_GNUPLOT" ]; then
-    echo "Plotting basic profile data: "$CSVFILE"..."
+    echo "Plotting basic profile data: "$CSVFILE"..." >> $LOGFILE
     gnuplot -e  "\
     set terminal dumb noenhanced size 79,25;\
     set datafile separator ',';\
@@ -189,7 +189,7 @@ if [ -n "$CSV_HAS_PART_TEST" ]; then
   at ${SIZE_PERF_MAX%% *}" elem/part."
   if [ ! -z "$HAS_GNUPLOT" ]; then
     MUDOF=`head -n1 $CSVFILE | awk -F, '{ print $3/1000000 }'`
-    echo "Plotting partitioning profile data: "$CSVFILE"..."
+    echo "Plotting partitioning profile data: "$CSVFILE"..." >> $LOGFILE
     gnuplot -e  "\
     set terminal dumb noenhanced size 79,25;\
     set datafile separator ',';\
