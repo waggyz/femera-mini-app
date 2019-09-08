@@ -198,7 +198,7 @@ if [ -n "$CSV_HAS_PART_TEST" ]; then
     title 'Performance at $MUDOF MDOF';"\
     | tee -a $PROFILE | grep --no-group-separator -C25 --color=always '\.'
   fi
-  MAX=`awk '{if(max<$13){max=$13;perf=$13/1e6;size=$1/$4}}END{print size perf  }' CSVFILE`
+  MAX=`awk '{if(max<$13){max=$13;perf=$13/1e6;size=$1/$4}}END{print size perf  }' $CSVFILE`
   echo Maximum performance is $MAX
 fi
 #
