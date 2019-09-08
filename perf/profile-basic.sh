@@ -140,7 +140,7 @@ if [ -f $CSVFILE ]; then
     set title 'Femera Elastic Performance Basic Tests [MDOF/s]';\
     set xlabel 'System Size [DOF]';\
     plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
-    using 3:(\$13/1e6)\
+    using 3:(\$4 != \$9 ? 1/0:\$13/1e6)\
     with points pointtype 0\
     title '"$CPUCOUNT" Partitions';"\
     | tee -a $PROFILE | grep --no-group-separator -C25 --color=always '\.'
