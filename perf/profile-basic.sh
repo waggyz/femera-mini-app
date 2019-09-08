@@ -149,7 +149,7 @@ fi
 #FIXME Change to check if any CSV lines have N != C
 #if ! grep -q -i "partitioning" $PROFILE; then
 CSV_HAS_PART_TEST=`awk -F, '$4!=$9{print $4; exit}' $CSVFILE`
-if [ ! -z "$CSV_HAS_PART_TEST" ]; then
+if [ -z "$CSV_HAS_PART_TEST" ]; then
   H=${LIST_H[$(( $TRY_COUNT - 2 ))]};
   # Assume the first line contains the correct problem size
   NELEM=`head -n1 $CSVFILE | awk -F, '{ print $1 }'`
@@ -182,7 +182,7 @@ if [ ! -z "$CSV_HAS_PART_TEST" ]; then
   done
   echo "Partitioning Profile" >> $PROFILE
 fi
-if grep -q -i "partitioning" $PROFILE; then
+if [ -n "$CSV_HAS_PART_TEST" ]; then
   if [ ! -z "$HAS_GNUPLOT" ]; then
     echo "Plotting partitioning profile data: "$CSVFILE"..."
     gnuplot -e  "\
