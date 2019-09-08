@@ -146,7 +146,6 @@ if [ -f $CSVFILE ]; then
     | tee -a $PROFILE | grep --no-group-separator -C25 --color=always '\.'
   fi
 fi
-echo "partitioning" >> $PROFILE
 #FIXME Change to check if any CSV lines have N != C
 if ! grep -q -i "partitioning" $PROFILE; then
   H=${LIST_H[$(( $TRY_COUNT - 2 ))]};
@@ -179,11 +178,11 @@ if ! grep -q -i "partitioning" $PROFILE; then
     ELEM_PER_PART=$(( $ELEM_PER_PART + 1000 ))
     if [[ $ELEM_PER_PART -ge 20000 ]]; then FINISHED=TRUE; fi
   done
-  echo "Partioning Profile" >> $PROFILE
+  echo "Partitioning Profile" >> $PROFILE
 fi
 if grep -q -i "partitioning" $PROFILE; then
   if [ ! -z "$HAS_GNUPLOT" ]; then
-    echo "Plotting partioning profile data: "$CSVFILE"..."
+    echo "Plotting partitioning profile data: "$CSVFILE"..."
     gnuplot -e  "\
     set terminal dumb noenhanced size 79,25;\
     set datafile separator ',';\
