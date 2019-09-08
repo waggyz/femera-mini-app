@@ -147,7 +147,8 @@ if [ -f $CSVFILE ]; then
   fi
 fi
 #FIXME Change to check if any CSV lines have N != C
-if ! grep -q -i "partitioning" $PROFILE; then
+#if ! grep -q -i "partitioning" $PROFILE; then
+if awk -F, '$4!=$9{print $4}' $CSVFILE | head; then
   H=${LIST_H[$(( $TRY_COUNT - 2 ))]};
   # Assume the first line contains the correct problem size
   NELEM=`head -n1 $CSVFILE | awk -F, '{ print $1 }'`
