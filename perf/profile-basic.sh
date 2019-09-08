@@ -189,7 +189,6 @@ if grep -q -i "partitioning" $PROFILE; then
     set datafile separator ',';\
     set tics scale 0,0;\
     set logscale x;\
-    set xrange [1e3:1.05e9];\
     set yrange [0:];\
     set key inside top right;\
     set title 'Femera Elastic Performance Partitioning Tests [MDOF/s]';\
