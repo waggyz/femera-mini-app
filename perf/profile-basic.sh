@@ -5,7 +5,8 @@ CSTR=gcc
 EXEDIR="."
 GMSH2FMR=gmsh2fmr-$CPUMODEL-$CSTR
 #
-P=2; C=$CPUCOUNT; N=$C; RTOL=1e-24;
+P=2; DOF_PER_ELEM=4;
+C=$CPUCOUNT; N=$C; RTOL=1e-24;
 TARGET_TEST_S=6;# Try for S sec/run
 REPEAT_TEST_N=5;# Repeat each test N times
 ITERS_MIN=10;
@@ -136,8 +137,8 @@ if [ -f $CSVFILE ]; then
     $CSVFILE`
   MAX_MDOFS=${SIZE_PERF_MAX##* }
   MAX_SIZE=${SIZE_PERF_MAX%% *}
-  echo "Maximum performance: "${SIZE_PERF_MAX##* }" MDOF/s"\
-  at ${SIZE_PERF_MAX%% *}" DOF."
+  echo "Maximum basic performance: "${SIZE_PERF_MAX##* }" MDOF/s"\
+  at ${SIZE_PERF_MAX%% *}" DOF, parts = cores = "$CPUCOUNT"."
   #
   if [ ! -z "$HAS_GNUPLOT" ]; then
     echo "Plotting basic profile data: "$CSVFILE"..." >> $LOGFILE
@@ -202,7 +203,8 @@ if [ -n "$CSV_HAS_PART_TEST" ]; then
   LARGE_MDOFS=${SIZE_PERF_MAX##* }
   LARGE_ELEM_PART=${SIZE_PERF_MAX%% *}
   echo "Large model size initial estimate:"\
-    ">"$(( $LARGE_ELEM_PART * $CPUCOUNT ))" DOF."
+    ">"$(( $LARGE_ELEM_PART * $CPUCOUNT ))" elem,"\
+    $(( $LARGE_ELEM_PART * $CPUCOUNT * $DOF_PER_ELEM ))" DOF."
   echo "Large model performance peak: "$LARGE_MDOFS" MDOF/s"\
     "at "$LARGE_ELEM_PART" elem/part."
   if [ ! -z "$HAS_GNUPLOT" ]; then
