@@ -123,7 +123,7 @@ if [ -f $CSVFILE ]; then
   #echo "Mesh            : " FIXME Put initial mesh filename here
   #
   echo >> $PROFILE
-  echo "     Performance Profile Basic Test Parameters" >> $PROFILE
+  echo "     Basic Performance Profile Test Parameters" >> $PROFILE
   echo "  ------------------------------------------------" >> $PROFILE
   printf "%6i     : Partitions = Threads = Physical Cores\n" $CPUCOUNT >> $PROFILE
   printf "%6i     : Test repeats\n" $REPEAT_TEST_N >> $PROFILE
@@ -150,7 +150,7 @@ if [ -f $CSVFILE ]; then
     set xrange [1e3:1.05e9];\
     set yrange [0:];\
     set key inside top right;\
-    set title 'Femera Elastic Performance Basic Tests [MDOF/s]';\
+    set title 'Femera Basic Elastic Performance Tests [MDOF/s]';\
     set xlabel 'System Size [DOF]';\
     set label at "$MAX_SIZE", "$MAX_MDOFS" \"* Max\";\
     plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
@@ -170,9 +170,16 @@ if [ -z "$CSV_HAS_PART_TEST" ]; then
   NUDOF=`head -n1 $CSVFILE | awk -F, '{ print $3 }'`
   MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
   MDOFS=`head -n1 $CSVFILE | awk -F, '{ print int(($13+5e6)/1e6) }'`
-  #
   ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $MDOFS $MUDOF | bc`
   if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
+  echo >> $PROFILE
+  echo "  Large Model Partitioning Test Parameters" >> $PROFILE
+  echo "  ----------------------------------------" >> $PROFILE
+  printf "%6i     : Large Model Size [MDOF]\n" $MUDOF >> $PROFILE
+  printf "%6i     : Test repeats\n" $REPEAT_TEST_N >> $PROFILE
+  printf "%6i     : Solver Iterations\n" $ITERS >> $PROFILE
+  #
+  #
   ELEM_PER_PART=1000
   FINISHED=""
   while [ ! $FINISHED ]; do
@@ -192,21 +199,21 @@ if [ -z "$CSV_HAS_PART_TEST" ]; then
     ELEM_PER_PART=$(( $ELEM_PER_PART + 1000 ))
     if [[ $ELEM_PER_PART -ge 20000 ]]; then FINISHED=TRUE; fi
   done
-  echo "Partitioning Profile" >> $PROFILE
+  echo "Large Model Partitioning Profile" >> $PROFILE
 fi
 CSV_HAS_PART_TEST=`awk -F, '$4!=$9{print $4; exit}' $CSVFILE`
 if [ -n "$CSV_HAS_PART_TEST" ]; then
   SIZE_PERF_MAX=`awk -F, -v max=0\
-    '($13>max)&&($4>$9){max=$13;perf=$13/1e6;size=$1/$4}\
+    '($4>$9)&&($13>max){max=$13;perf=$13/1e6;size=$1/$4}\
     END{print int((size+50)/100)*100,int(perf+0.5)}'\
     $CSVFILE`
   LARGE_MDOFS=${SIZE_PERF_MAX##* }
   LARGE_ELEM_PART=${SIZE_PERF_MAX%% *}
+  echo "Large model performance peak: "$LARGE_MDOFS" MDOF/s"\
+    "at "$LARGE_ELEM_PART" elem/part."
   echo "Large model size initial estimate:"\
     ">"$(( $LARGE_ELEM_PART * $CPUCOUNT ))" elem,"\
     $(( $LARGE_ELEM_PART * $CPUCOUNT * $DOF_PER_ELEM ))" DOF."
-  echo "Large model performance peak: "$LARGE_MDOFS" MDOF/s"\
-    "at "$LARGE_ELEM_PART" elem/part."
   if [ ! -z "$HAS_GNUPLOT" ]; then
     MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
     echo "Plotting partitioning profile data: "$CSVFILE"..." >> $LOGFILE
@@ -215,7 +222,7 @@ if [ -n "$CSV_HAS_PART_TEST" ]; then
     set datafile separator ',';\
     set tics scale 0,0;\
     set key inside bottom center;\
-    set title 'Femera Elastic Performance Partitioning Tests [MDOF/s]';\
+    set title 'Femera Large Elastic Model Partitioning Tests [MDOF/s]';\
     set xlabel 'Partition Size [elem/part]';\
     set label at "$LARGE_ELEM_PART", "$LARGE_MDOFS" \"* Max\";\
     plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
