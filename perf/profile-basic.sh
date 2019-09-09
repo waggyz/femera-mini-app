@@ -102,10 +102,10 @@ if [ -f $CSVFILE ]; then
   MEM_GB="`free -g  | grep Mem | awk '{print $2}'`"
   printf "      %6i\t: GB Memory\n" $MEM_GB >> $PROFILE
   #
-  MDOFS=`head -n1 $CSVFILE | awk -F, '{ print $13/1000000 }'`
+  MDOFS=`head -n1 $CSVFILE | awk -F, '{ print $13/1e6 }'`
   NELEM=`head -n1 $CSVFILE | awk -F, '{ print $1 }'`
   NNODE=`head -n1 $CSVFILE | awk -F, '{ print $2 }'`
-  MUDOF=`head -n1 $CSVFILE | awk -F, '{ print $3/1000000 }'`
+  MUDOF=`head -n1 $CSVFILE | awk -F, '{ print $3/1e6 }'`
   NPART=`head -n1 $CSVFILE | awk -F, '{ print $4 }'`
   ITERS=`head -n1 $CSVFILE | awk -F, '{ print $5 }'`
   NCPUS=`head -n1 $CSVFILE | awk -F, '{ print $9 }'`
@@ -131,7 +131,7 @@ if [ -f $CSVFILE ]; then
   printf "     %5.0e : Relative residual tolerance\n" $RTOL >> $PROFILE
   #
   SIZE_PERF_MAX=`awk -F, -v max=0\
-    '($13>max)&&($4==$9){max=$13;perf=$13/1e6;size=$3}\
+    '($13>max)&&($4==$9){max=$13;perf=int(($13+5e5)/1e6);size=$3}\
     END{print int((size+50)/100)*100,int(perf+0.5)}'\
     $CSVFILE`
   echo Maximum performance is ${SIZE_PERF_MAX##* }" MDOF/s"\
@@ -202,7 +202,7 @@ if [ -n "$CSV_HAS_PART_TEST" ]; then
     "at "$LARGE_ELEM_PART" elem/part."
   echo "Large model size is >"$(( $LARGE_ELEM_PART * $CPUCOUNT ))" MDOF."
   if [ ! -z "$HAS_GNUPLOT" ]; then
-    MUDOF=`head -n1 $CSVFILE | awk -F, '{ print ($3+5e5)/1e6 }'`
+    MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
     echo "Plotting partitioning profile data: "$CSVFILE"..." >> $LOGFILE
     gnuplot -e  "\
     set terminal dumb noenhanced size 79,25;\
