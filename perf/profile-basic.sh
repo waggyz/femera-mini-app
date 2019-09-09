@@ -205,7 +205,7 @@ fi
 CSV_HAS_PART_TEST=`awk -F, '$4!=$9{print $4; exit}' $CSVFILE`
 if [ -n "$CSV_HAS_PART_TEST" ]; then
   SIZE_PERF_MAX=`awk -F, -v max=0\
-    '($3==)&&($4>$9)&&($13>max){max=$13;perf=$13/1e6;size=$1/$4}\
+    '($4>$9)&&($13>max){max=$13;perf=$13/1e6;size=$1/$4}\
     END{print int((size+50)/100)*100,int(perf+0.5)}'\
     $CSVFILE`
   LARGE_MDOFS=${SIZE_PERF_MAX##* }
