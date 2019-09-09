@@ -106,6 +106,7 @@ if [ -f $CSVFILE ]; then
   MDOFS=`head -n1 $CSVFILE | awk -F, '{ print $13/1e6 }'`
   NELEM=`head -n1 $CSVFILE | awk -F, '{ print $1 }'`
   NNODE=`head -n1 $CSVFILE | awk -F, '{ print $2 }'`
+  NUDOF=`head -n1 $CSVFILE | awk -F, '{ print $3 }'`
   MUDOF=`head -n1 $CSVFILE | awk -F, '{ print $3/1e6 }'`
   NPART=`head -n1 $CSVFILE | awk -F, '{ print $4 }'`
   ITERS=`head -n1 $CSVFILE | awk -F, '{ print $5 }'`
@@ -162,11 +163,11 @@ if [ -f $CSVFILE ]; then
     echo >> $PROFILE
   fi
   # Assume the first line contains the correct problem size
-  NELEM=`head -n1 $CSVFILE | awk -F, '{ print $1 }'`
-  NNODE=`head -n1 $CSVFILE | awk -F, '{ print $2 }'`
-  NUDOF=`head -n1 $CSVFILE | awk -F, '{ print $3 }'`
-  MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
-  MDOFS=`head -n1 $CSVFILE | awk -F, '{ print int(($13+5e6)/1e6) }'`
+  #NELEM=`head -n1 $CSVFILE | awk -F, '{ print $1 }'`
+  #NNODE=`head -n1 $CSVFILE | awk -F, '{ print $2 }'`
+  #NUDOF=`head -n1 $CSVFILE | awk -F, '{ print $3 }'`
+  #MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
+  #MDOFS=`head -n1 $CSVFILE | awk -F, '{ print int(($13+5e6)/1e6) }'`
   ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $MDOFS $MUDOF | bc`
   if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
   echo "Writing partitioning profile data: "$PROFILE"..." >> $LOGFILE
@@ -204,7 +205,7 @@ fi
 CSV_HAS_PART_TEST=`awk -F, '$4!=$9{print $4; exit}' $CSVFILE`
 if [ -n "$CSV_HAS_PART_TEST" ]; then
   SIZE_PERF_MAX=`awk -F, -v max=0\
-    '($4>$9)&&($13>max){max=$13;perf=$13/1e6;size=$1/$4}\
+    '($3==)&&($4>$9)&&($13>max){max=$13;perf=$13/1e6;size=$1/$4}\
     END{print int((size+50)/100)*100,int(perf+0.5)}'\
     $CSVFILE`
   LARGE_MDOFS=${SIZE_PERF_MAX##* }
@@ -234,8 +235,8 @@ if [ -n "$CSV_HAS_PART_TEST" ]; then
   else
     echo >> $PROFILE
   fi
-  echo "     Large Model Partitioning Test Results" >> $PROFILE
-  echo "  -------------------------------------------" >> $PROFILE
+  echo "      Large Model Partitioning Test Results" >> $PROFILE
+  echo "  ---------------------------------------------" >> $PROFILE
   printf " %9i : Large Model Size Estimate [DOF]\n" $LARGE_UDOF >> $PROFILE
   printf " %9i : Optimal Partition Size [elem/part]\n" $LARGE_ELEM_PART\
     >> $PROFILE
