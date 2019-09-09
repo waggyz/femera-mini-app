@@ -179,7 +179,6 @@ if [ -z "$CSV_HAS_PART_TEST" ]; then
   printf "%6i     : Test repeats\n" $REPEAT_TEST_N >> $PROFILE
   printf "%6i     : Solver Iterations\n" $ITERS >> $PROFILE
   #
-  #
   ELEM_PER_PART=1000
   FINISHED=""
   while [ ! $FINISHED ]; do
@@ -211,9 +210,30 @@ if [ -n "$CSV_HAS_PART_TEST" ]; then
   LARGE_ELEM_PART=${SIZE_PERF_MAX%% *}
   echo "Large model performance peak: "$LARGE_MDOFS" MDOF/s"\
     "at "$LARGE_ELEM_PART" elem/part."
+  LARGE_ELEM=$(( $LARGE_ELEM_PART * $CPUCOUNT ))
+  LARGE_UDOF=$(( $LARGE_ELEM * $DOF_PER_ELEM ))
   echo "Large model size initial estimate:"\
-    ">"$(( $LARGE_ELEM_PART * $CPUCOUNT ))" elem,"\
-    $(( $LARGE_ELEM_PART * $CPUCOUNT * $DOF_PER_ELEM ))" DOF."
+    ">"$LARGE_ELEM" elem,"$LARGE_UDOF" DOF."
+  # Assume the first line contains the correct problem size
+  NELEM=`head -n1 $CSVFILE | awk -F, '{ print $1 }'`
+  NNODE=`head -n1 $CSVFILE | awk -F, '{ print $2 }'`
+  NUDOF=`head -n1 $CSVFILE | awk -F, '{ print $3 }'`
+  MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
+  MDOFS=`head -n1 $CSVFILE | awk -F, '{ print int(($13+5e6)/1e6) }'`
+  ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $MDOFS $MUDOF | bc`
+  if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
+  echo "Writing partitioning profile data: "$PROFILE"..." >> $LOGFILE
+  echo >> $PROFILE
+  echo "  Large Model Partitioning Test Parameters" >> $PROFILE
+  echo "  ----------------------------------------" >> $PROFILE
+  printf "%6i     : Test Model Size [MDOF]\n" $MUDOF >> $PROFILE
+  printf "%6i     : Test repeats\n" $REPEAT_TEST_N >> $PROFILE
+  printf "%6i     : Solver Iterations\n" $ITERS >> $PROFILE
+  echo >> $PROFILE
+  echo "   Large Model Partitioning Test Results" >> $PROFILE
+  echo "  ---------------------------------------" >> $PROFILE
+  printf "%9i  : Large Model Size Estimate [DOF]\n" $LARGE_UDOF >> $PROFILE
+  printf "%9i  : Partition Size [elem/part]\n" $LARGE_ELEM_PART >> $PROFILE
   if [ ! -z "$HAS_GNUPLOT" ]; then
     MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
     echo "Plotting partitioning profile data: "$CSVFILE"..." >> $LOGFILE
