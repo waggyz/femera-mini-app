@@ -134,7 +134,9 @@ if [ -f $CSVFILE ]; then
     '($13>max)&&($4==$9){max=$13;perf=int(($13+5e5)/1e6);size=$3}\
     END{print int((size+50)/100)*100,int(perf+0.5)}'\
     $CSVFILE`
-  echo Maximum performance is ${SIZE_PERF_MAX##* }" MDOF/s"\
+  MAX_MDOFS=${SIZE_PERF_MAX##* }
+  MAX_SIZE=${SIZE_PERF_MAX%% *}
+  echo "Maximum performance: "${SIZE_PERF_MAX##* }" MDOF/s"\
   at ${SIZE_PERF_MAX%% *}" DOF."
   #
   if [ ! -z "$HAS_GNUPLOT" ]; then
@@ -149,6 +151,7 @@ if [ -f $CSVFILE ]; then
     set key inside top right;\
     set title 'Femera Elastic Performance Basic Tests [MDOF/s]';\
     set xlabel 'System Size [DOF]';\
+    set label at "$MAX_SIZE", "$MAX_MDOFS" \"*\";\
     plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
     using 3:(\$4 != \$9 ? 1/0:\$13/1e6)\
     with points pointtype 0\
@@ -198,9 +201,10 @@ if [ -n "$CSV_HAS_PART_TEST" ]; then
     $CSVFILE`
   LARGE_MDOFS=${SIZE_PERF_MAX##* }
   LARGE_ELEM_PART=${SIZE_PERF_MAX%% *}
-  echo "Large model performance is "$LARGE_MDOFS" MDOF/s"\
+  echo "Large model size initial estimate:""\
+    >"$(( $LARGE_ELEM_PART * $CPUCOUNT ))" DOF."
+  echo "Large model performance peak: "$LARGE_MDOFS" MDOF/s"\
     "at "$LARGE_ELEM_PART" elem/part."
-  echo "Large model size is >"$(( $LARGE_ELEM_PART * $CPUCOUNT ))" MDOF."
   if [ ! -z "$HAS_GNUPLOT" ]; then
     MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
     echo "Plotting partitioning profile data: "$CSVFILE"..." >> $LOGFILE
@@ -211,6 +215,7 @@ if [ -n "$CSV_HAS_PART_TEST" ]; then
     set key inside bottom center;\
     set title 'Femera Elastic Performance Partitioning Tests [MDOF/s]';\
     set xlabel 'Partition Size [elem/part]';\
+    set label at "$LARGE_ELEM_PART", "$LARGE_MDOFS" \"*\";\
     plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
     using (\$1/\$4):(\$4 == \$9 ? 1/0:\$13/1e6)\
     with points pointtype 0\
