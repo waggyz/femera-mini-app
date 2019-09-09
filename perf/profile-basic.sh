@@ -111,8 +111,8 @@ if [ -f $CSVFILE ]; then
   ITERS=`head -n1 $CSVFILE | awk -F, '{ print $5 }'`
   NCPUS=`head -n1 $CSVFILE | awk -F, '{ print $9 }'`
   echo >> $PROFILE
-  echo "  Initial Elastic Performance Estimate" >> $PROFILE
-  echo "  ------------------------------------" >> $PROFILE
+  echo "  Initial Elastic Model Performance Estimate" >> $PROFILE
+  echo "  ------------------------------------------" >> $PROFILE
   printf "        %6.1f : Performance [MDOF/s]\n" $MDOFS >> $PROFILE
   printf "        %6.1f : System Size [MDOF]\n" $MUDOF >> $PROFILE
   printf "%12i   : Nodes\n" $NNODE >> $PROFILE
@@ -159,11 +159,6 @@ if [ -f $CSVFILE ]; then
     title '"$CPUCOUNT" Partitions';"\
     | tee -a $PROFILE | grep --no-group-separator -C25 --color=always '\*'
   fi
-fi
-# Check if any CSV lines have N != C
-CSV_HAS_PART_TEST=`awk -F, '$4!=$9{print $4; exit}' $CSVFILE`
-if [ -z "$CSV_HAS_PART_TEST" ]; then
-  H=${LIST_H[$(( $TRY_COUNT - 2 ))]};
   # Assume the first line contains the correct problem size
   NELEM=`head -n1 $CSVFILE | awk -F, '{ print $1 }'`
   NNODE=`head -n1 $CSVFILE | awk -F, '{ print $2 }'`
@@ -172,13 +167,17 @@ if [ -z "$CSV_HAS_PART_TEST" ]; then
   MDOFS=`head -n1 $CSVFILE | awk -F, '{ print int(($13+5e6)/1e6) }'`
   ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $MDOFS $MUDOF | bc`
   if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
-  echo >> $PROFILE
+  echo "Writing partitioning profile data: "$PROFILE"..." >> $LOGFILE
   echo "  Large Model Partitioning Test Parameters" >> $PROFILE
   echo "  ----------------------------------------" >> $PROFILE
-  printf "%6i     : Large Model Size [MDOF]\n" $MUDOF >> $PROFILE
-  printf "%6i     : Test repeats\n" $REPEAT_TEST_N >> $PROFILE
-  printf "%6i     : Solver Iterations\n" $ITERS >> $PROFILE
-  #
+  printf " %9i : Test Model Size [MDOF]\n" $MUDOF >> $PROFILE
+  printf " %9i : Test repeats\n" $REPEAT_TEST_N >> $PROFILE
+  printf " %9i : Solver Iterations\n" $ITERS >> $PROFILE
+fi
+# Check if any CSV lines have N != C
+CSV_HAS_PART_TEST=`awk -F, '$4!=$9{print $4; exit}' $CSVFILE`
+if [ -z "$CSV_HAS_PART_TEST" ]; then
+  H=${LIST_H[$(( $TRY_COUNT - 2 ))]};
   ELEM_PER_PART=1000
   FINISHED=""
   while [ ! $FINISHED ]; do
@@ -198,7 +197,7 @@ if [ -z "$CSV_HAS_PART_TEST" ]; then
     ELEM_PER_PART=$(( $ELEM_PER_PART + 1000 ))
     if [[ $ELEM_PER_PART -ge 20000 ]]; then FINISHED=TRUE; fi
   done
-  echo "Large Model Partitioning Profile" >> $PROFILE
+  # echo "Large Model Partitioning Profile" >> $PROFILE
 fi
 CSV_HAS_PART_TEST=`awk -F, '$4!=$9{print $4; exit}' $CSVFILE`
 if [ -n "$CSV_HAS_PART_TEST" ]; then
@@ -214,26 +213,11 @@ if [ -n "$CSV_HAS_PART_TEST" ]; then
   LARGE_UDOF=$(( $LARGE_ELEM * $DOF_PER_ELEM ))
   echo "Large model size initial estimate:"\
     ">"$LARGE_ELEM" elem,"$LARGE_UDOF" DOF."
-  # Assume the first line contains the correct problem size
-  NELEM=`head -n1 $CSVFILE | awk -F, '{ print $1 }'`
-  NNODE=`head -n1 $CSVFILE | awk -F, '{ print $2 }'`
-  NUDOF=`head -n1 $CSVFILE | awk -F, '{ print $3 }'`
-  MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
-  MDOFS=`head -n1 $CSVFILE | awk -F, '{ print int(($13+5e6)/1e6) }'`
-  ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $MDOFS $MUDOF | bc`
-  if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
-  echo "Writing partitioning profile data: "$PROFILE"..." >> $LOGFILE
   echo >> $PROFILE
-  echo "  Large Model Partitioning Test Parameters" >> $PROFILE
-  echo "  ----------------------------------------" >> $PROFILE
-  printf "%6i     : Test Model Size [MDOF]\n" $MUDOF >> $PROFILE
-  printf "%6i     : Test repeats\n" $REPEAT_TEST_N >> $PROFILE
-  printf "%6i     : Solver Iterations\n" $ITERS >> $PROFILE
-  echo >> $PROFILE
-  echo "   Large Model Partitioning Test Results" >> $PROFILE
-  echo "  ---------------------------------------" >> $PROFILE
-  printf "%9i  : Large Model Size Estimate [DOF]\n" $LARGE_UDOF >> $PROFILE
-  printf "%9i  : Partition Size [elem/part]\n" $LARGE_ELEM_PART >> $PROFILE
+  echo "     Large Model Partitioning Test Results" >> $PROFILE
+  echo "  -------------------------------------------" >> $PROFILE
+  printf " %9i : Large Model Size Estimate [DOF]\n" $LARGE_UDOF >> $PROFILE
+  printf " %9i : Optimum Partition Size [elem/part]\n" $LARGE_ELEM_PART >> $PROFILE
   if [ ! -z "$HAS_GNUPLOT" ]; then
     MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
     echo "Plotting partitioning profile data: "$CSVFILE"..." >> $LOGFILE
