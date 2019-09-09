@@ -158,6 +158,8 @@ if [ -f $CSVFILE ]; then
     with points pointtype 0\
     title '"$CPUCOUNT" Partitions';"\
     | tee -a $PROFILE | grep --no-group-separator -C25 --color=always '\*'
+  else
+    echo >> $PROFILE
   fi
   # Assume the first line contains the correct problem size
   NELEM=`head -n1 $CSVFILE | awk -F, '{ print $1 }'`
@@ -213,11 +215,6 @@ if [ -n "$CSV_HAS_PART_TEST" ]; then
   LARGE_UDOF=$(( $LARGE_ELEM * $DOF_PER_ELEM ))
   echo "Large model size initial estimate:"\
     ">"$LARGE_ELEM" elem,"$LARGE_UDOF" DOF."
-  echo >> $PROFILE
-  echo "     Large Model Partitioning Test Results" >> $PROFILE
-  echo "  -------------------------------------------" >> $PROFILE
-  printf " %9i : Large Model Size Estimate [DOF]\n" $LARGE_UDOF >> $PROFILE
-  printf " %9i : Optimum Partition Size [elem/part]\n" $LARGE_ELEM_PART >> $PROFILE
   if [ ! -z "$HAS_GNUPLOT" ]; then
     MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
     echo "Plotting partitioning profile data: "$CSVFILE"..." >> $LOGFILE
@@ -234,6 +231,13 @@ if [ -n "$CSV_HAS_PART_TEST" ]; then
     with points pointtype 0\
     title 'Performance at $MUDOF MDOF';"\
     | tee -a $PROFILE | grep --no-group-separator -C25 --color=always '\*'
+  else
+    echo >> $PROFILE
   fi
+  echo "     Large Model Partitioning Test Results" >> $PROFILE
+  echo "  -------------------------------------------" >> $PROFILE
+  printf " %9i : Large Model Size Estimate [DOF]\n" $LARGE_UDOF >> $PROFILE
+  printf " %9i : Optimal Partition Size [elem/part]\n" $LARGE_ELEM_PART\
+    >> $PROFILE
 fi
 #
