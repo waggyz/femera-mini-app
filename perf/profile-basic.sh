@@ -132,8 +132,8 @@ if [ -f $CSVFILE ]; then
   printf "%6i     : Minimum iterations\n" $ITERS_MIN >> $PROFILE
   printf "     %5.0e : Relative residual tolerance\n" $RTOL >> $PROFILE
   #
-  SIZE_PERF_MAX=`awk -F, -v max=0\
-    '($13>max)&&($4==$9){max=$13;perf=int(($13+5e5)/1e6);size=$3}\
+  SIZE_PERF_MAX=`awk -F, -v elem=$NELEM -v max=0\
+    '($1==elem)&&($13>max)&&($4==$9){max=$13;perf=int(($13+5e5)/1e6);size=$3}\
     END{print int((size+50)/100)*100,int(perf+0.5)}'\
     $CSVFILE`
   MAX_MDOFS=${SIZE_PERF_MAX##* }
@@ -204,8 +204,8 @@ if [ -z "$CSV_HAS_PART_TEST" ]; then
 fi
 CSV_HAS_PART_TEST=`awk -F, '$4!=$9{print $4; exit}' $CSVFILE`
 if [ -n "$CSV_HAS_PART_TEST" ]; then
-  SIZE_PERF_MAX=`awk -F, -v max=0\
-    '($4>$9)&&($13>max){max=$13;perf=$13/1e6;size=$1/$4}\
+  SIZE_PERF_MAX=`awk -F, -v elem=$NELEM -v max=0\
+    '($1==elem)&&($4>$9)&&($13>max){max=$13;perf=$13/1e6;size=$1/$4}\
     END{print int((size+50)/100)*100,int(perf+0.5)}'\
     $CSVFILE`
   LARGE_MDOFS=${SIZE_PERF_MAX##* }
