@@ -196,11 +196,13 @@ if [ -n "$CSV_HAS_PART_TEST" ]; then
     '($13>max)&&($4>$9){max=$13;perf=$13/1e6;size=$1/$4}\
     END{print int((size+50)/100)*100,int(perf+0.5)}'\
     $CSVFILE`
-  echo Large model size is  MDOF.
-  echo Large model performance is ${SIZE_PERF_MAX##* }" MDOF/s"\
-  at ${SIZE_PERF_MAX%% *}" elem/part."
+  LARGE_MDOFS=${SIZE_PERF_MAX##* }
+  LARGE_ELEM_PART=${SIZE_PERF_MAX%% *}
+  echo "Large model performance is "$LARGE_MDOFS" MDOF/s"\
+    "at "$LARGE_ELEM_PART" elem/part."
+  echo "Large model size is >"$(( $LARGE_ELEM_PART * $CPUCOUNT ))" MDOF."
   if [ ! -z "$HAS_GNUPLOT" ]; then
-    MUDOF=`head -n1 $CSVFILE | awk -F, '{ print $3/1000000 }'`
+    MUDOF=`head -n1 $CSVFILE | awk -F, '{ print ($3+5e5)/1e6 }'`
     echo "Plotting partitioning profile data: "$CSVFILE"..." >> $LOGFILE
     gnuplot -e  "\
     set terminal dumb noenhanced size 79,25;\
