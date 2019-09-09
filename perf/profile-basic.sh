@@ -151,12 +151,12 @@ if [ -f $CSVFILE ]; then
     set key inside top right;\
     set title 'Femera Elastic Performance Basic Tests [MDOF/s]';\
     set xlabel 'System Size [DOF]';\
-    set label at "$MAX_SIZE", "$MAX_MDOFS" \"*\";\
+    set label at "$MAX_SIZE", "$MAX_MDOFS" \"* Max\";\
     plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
     using 3:(\$4 != \$9 ? 1/0:\$13/1e6)\
     with points pointtype 0\
     title '"$CPUCOUNT" Partitions';"\
-    | tee -a $PROFILE | grep --no-group-separator -C25 --color=always '\.'
+    | tee -a $PROFILE | grep --no-group-separator -C25 --color=always '\*'
   fi
 fi
 # Check if any CSV lines have N != C
@@ -215,12 +215,12 @@ if [ -n "$CSV_HAS_PART_TEST" ]; then
     set key inside bottom center;\
     set title 'Femera Elastic Performance Partitioning Tests [MDOF/s]';\
     set xlabel 'Partition Size [elem/part]';\
-    set label at "$LARGE_ELEM_PART", "$LARGE_MDOFS" \"*\";\
+    set label at "$LARGE_ELEM_PART", "$LARGE_MDOFS" \"* Max\";\
     plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
     using (\$1/\$4):(\$4 == \$9 ? 1/0:\$13/1e6)\
     with points pointtype 0\
     title 'Performance at $MUDOF MDOF';"\
-    | tee -a $PROFILE | grep --no-group-separator -C25 --color=always '\.'
+    | tee -a $PROFILE | grep --no-group-separator -C25 --color=always '\*'
   fi
 fi
 #
