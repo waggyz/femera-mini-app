@@ -201,8 +201,8 @@ if [ -n "$CSV_HAS_PART_TEST" ]; then
     $CSVFILE`
   LARGE_MDOFS=${SIZE_PERF_MAX##* }
   LARGE_ELEM_PART=${SIZE_PERF_MAX%% *}
-  echo "Large model size initial estimate:""\
-    >"$(( $LARGE_ELEM_PART * $CPUCOUNT ))" DOF."
+  echo "Large model size initial estimate:"\
+    ">"$(( $LARGE_ELEM_PART * $CPUCOUNT ))" DOF."
   echo "Large model performance peak: "$LARGE_MDOFS" MDOF/s"\
     "at "$LARGE_ELEM_PART" elem/part."
   if [ ! -z "$HAS_GNUPLOT" ]; then
