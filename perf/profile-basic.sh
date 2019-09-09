@@ -60,15 +60,16 @@ if [ ! -f $PROFILE ]; then
     MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
     echo Estimating performance at\
       $(( ${NOMI_UDOF[$(( $TRY_COUNT - 2 ))]} / 1000000 )) MDOF...
+    echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
     $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
     echo Running $ITERS iterations of $MESHNAME...
     $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
       -p $MESH >> $CSVFILE
   fi
 fi
-MUDOF=`head -n1 $CSVFILE | awk -F, '{ print $3/1000000 }'`
-MDOFS=`head -n1 $CSVFILE | awk -F, '{ print $13/1000000 }'`
-DOFS=`head -n1 $CSVFILE | awk -F, '{ print $13 }'`
+MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
+MDOFS=`head -n1 $CSVFILE | awk -F, '{ print int(($13+5e5)/1e6) }'`
+DOFS=`head -n1 $CSVFILE | awk -F, '{ print int($13+0.5) }'`
 echo "Initial performance estimate: "$MDOFS" MDOF/s at "$MUDOF" MDOF"
 #
 ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $MDOFS $MUDOF | bc`
@@ -128,6 +129,14 @@ if [ -f $CSVFILE ]; then
   printf "  %6.1f   : Each test solve time [sec]\n" $TARGET_TEST_S>>$PROFILE
   printf "%6i     : Minimum iterations\n" $ITERS_MIN >> $PROFILE
   printf "     %5.0e : Relative residual tolerance\n" $RTOL >> $PROFILE
+  #
+  SIZE_PERF_MAX=`awk -F, -v max=0\
+    '($13>max)&&($4==$9){max=$13;perf=$13/1e6;size=$3}\
+    END{print int((size+50)/100)*100,int(perf+0.5)}'\
+    $CSVFILE`
+  echo Maximum performance is ${SIZE_PERF_MAX##* }" MDOF/s"\
+  at ${SIZE_PERF_MAX%% *}" DOF."
+  #
   if [ ! -z "$HAS_GNUPLOT" ]; then
     echo "Plotting basic profile data: "$CSVFILE"..." >> $LOGFILE
     gnuplot -e  "\
@@ -155,8 +164,8 @@ if [ -z "$CSV_HAS_PART_TEST" ]; then
   NELEM=`head -n1 $CSVFILE | awk -F, '{ print $1 }'`
   NNODE=`head -n1 $CSVFILE | awk -F, '{ print $2 }'`
   NUDOF=`head -n1 $CSVFILE | awk -F, '{ print $3 }'`
-  MUDOF=`head -n1 $CSVFILE | awk -F, '{ print $3/1000000 }'`
-  MDOFS=`head -n1 $CSVFILE | awk -F, '{ print $13/1000000 }'`
+  MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
+  MDOFS=`head -n1 $CSVFILE | awk -F, '{ print int(($13+5e6)/1e6) }'`
   #
   ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $MDOFS $MUDOF | bc`
   if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
@@ -181,11 +190,14 @@ if [ -z "$CSV_HAS_PART_TEST" ]; then
   done
   echo "Partitioning Profile" >> $PROFILE
 fi
+CSV_HAS_PART_TEST=`awk -F, '$4!=$9{print $4; exit}' $CSVFILE`
 if [ -n "$CSV_HAS_PART_TEST" ]; then
   SIZE_PERF_MAX=`awk -F, -v max=0\
-    '($13>max)&&($4>$9){max=$13;perf=$13/1e6;size=$1/$4}END{print size,perf}'\
+    '($13>max)&&($4>$9){max=$13;perf=$13/1e6;size=$1/$4}\
+    END{print int((size+50)/100)*100,int(perf+0.5)}'\
     $CSVFILE`
-  echo Maximum large model performance is ${SIZE_PERF_MAX##* }" MDOF/s"\
+  echo Large model size is  MDOF.
+  echo Large model performance is ${SIZE_PERF_MAX##* }" MDOF/s"\
   at ${SIZE_PERF_MAX%% *}" elem/part."
   if [ ! -z "$HAS_GNUPLOT" ]; then
     MUDOF=`head -n1 $CSVFILE | awk -F, '{ print $3/1000000 }'`
