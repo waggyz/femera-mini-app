@@ -132,8 +132,8 @@ if [ -f $CSVFILE ]; then
   printf "%6i     : Minimum iterations\n" $ITERS_MIN >> $PROFILE
   printf "     %5.0e : Relative residual tolerance\n" $RTOL >> $PROFILE
   #
-  SIZE_PERF_MAX=`awk -F, -v elem=$NELEM -v max=0\
-    '($1==elem)&&($13>max)&&($4==$9){max=$13;perf=int(($13+5e5)/1e6);size=$3}\
+  SIZE_PERF_MAX=`awk -F, -v max=0\
+    '($13>max)&&($4==$9){max=$13;perf=int(($13+5e5)/1e6);size=$3}\
     END{print int((size+50)/100)*100,int(perf+0.5)}'\
     $CSVFILE`
   MAX_MDOFS=${SIZE_PERF_MAX##* }
@@ -174,8 +174,8 @@ if [ -f $CSVFILE ]; then
   echo "  Large Model Partitioning Test Parameters" >> $PROFILE
   echo "  ----------------------------------------" >> $PROFILE
   printf " %9.1f : Test Model Size [MDOF]\n" $MUDOF >> $PROFILE
-  printf " %9i : Test repeats\n" $REPEAT_TEST_N >> $PROFILE
-  printf " %9i : Solver Iterations\n" $ITERS >> $PROFILE
+  printf " %7i   : Test repeats\n" $REPEAT_TEST_N >> $PROFILE
+  printf " %7i   : Solver Iterations\n" $ITERS >> $PROFILE
 fi
 # Check if any CSV lines have N != C
 CSV_HAS_PART_TEST=`awk -F, '$4!=$9{print $4; exit}' $CSVFILE`
