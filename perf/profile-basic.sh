@@ -173,7 +173,7 @@ if [ -f $CSVFILE ]; then
   echo "Writing partitioning profile data: "$PROFILE"..." >> $LOGFILE
   echo "  Large Model Partitioning Test Parameters" >> $PROFILE
   echo "  ----------------------------------------" >> $PROFILE
-  printf " %9i : Test Model Size [MDOF]\n" $MUDOF >> $PROFILE
+  printf " %9.1f : Test Model Size [MDOF]\n" $MUDOF >> $PROFILE
   printf " %9i : Test repeats\n" $REPEAT_TEST_N >> $PROFILE
   printf " %9i : Solver Iterations\n" $ITERS >> $PROFILE
 fi
