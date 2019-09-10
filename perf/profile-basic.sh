@@ -96,7 +96,7 @@ if [ "$CSVLINES" -lt "$BASIC_TEST_N" ]; then
   done
 fi
 if [ -f $CSVFILE ]; then
-  echo "Writing basic profile: "$PROFILE"..."
+  echo "Writing basic profile: "$PROFILE"..." >> $LOGFILE
   echo "Femera Performance Profile" > $PROFILE
   echo "femerq-"$CPUMODEL"-"$CSTR >> $PROFILE
   grep -m1 -i "model name" /proc/cpuinfo >> $PROFILE
@@ -112,28 +112,28 @@ if [ -f $CSVFILE ]; then
   ITERS=`head -n1 $CSVFILE | awk -F, '{ print $5 }'`
   NCPUS=`head -n1 $CSVFILE | awk -F, '{ print $9 }'`
   echo >> $PROFILE
-  echo "  Initial Elastic Model Performance Estimate" >> $PROFILE
-  echo "  ------------------------------------------" >> $PROFILE
-  printf "        %6.1f : Performance [MDOF/s]\n" $MDOFS >> $PROFILE
-  printf "        %6.1f : System Size [MDOF]\n" $MUDOF >> $PROFILE
-  printf "%12i   : Nodes\n" $NNODE >> $PROFILE
-  printf "%12i   : Tet10 Elements\n" $NELEM >> $PROFILE
-  printf "%12i   : Partitions\n" $NPART >> $PROFILE
-  printf "%12i   : Threads\n" $NCPUS >> $PROFILE
-  printf "%12i   : Iterations\n" $ITERS >> $PROFILE
+  echo "     Initial Elastic Model Performance Estimate" >> $PROFILE
+  echo "  ------------------------------------------------" >> $PROFILE
+  printf "        %6.1f : Initial test performance [MDOF/s]\n" $MDOFS >> $PROFILE
+  printf "        %6.1f : Initial test system Size [MDOF]\n" $MUDOF >> $PROFILE
+  printf "%12i   : Initial model nodes\n" $NNODE >> $PROFILE
+  printf "%12i   : Initial tet10 Elements\n" $NELEM >> $PROFILE
+  printf "%12i   : Initial test partitions\n" $NPART >> $PROFILE
+  printf "%12i   : Initial test threads\n" $NCPUS >> $PROFILE
+  printf "%12i   : Initial test iterations\n" $ITERS >> $PROFILE
   #echo "Mesh            : " FIXME Put initial mesh filename here
   #
   echo >> $PROFILE
   echo "     Basic Performance Profile Test Parameters" >> $PROFILE
   echo "  ------------------------------------------------" >> $PROFILE
   printf "%6i     : Partitions = Threads = Physical Cores\n" $CPUCOUNT >> $PROFILE
-  printf "%6i     : Test repeats\n" $REPEAT_TEST_N >> $PROFILE
-  printf "  %6.1f   : Each test solve time [sec]\n" $TARGET_TEST_S>>$PROFILE
-  printf "%6i     : Minimum iterations\n" $ITERS_MIN >> $PROFILE
-  printf "     %5.0e : Relative residual tolerance\n" $RTOL >> $PROFILE
+  printf "%6i     : Basic test repeats\n" $REPEAT_TEST_N >> $PROFILE
+  printf "  %6.1f   : Basic test solve time [sec]\n" $TARGET_TEST_S>>$PROFILE
+  printf "%6i     : Basic Minimum iterations\n" $ITERS_MIN >> $PROFILE
+  printf "     %5.0e : Basic relative residual tolerance\n" $RTOL >> $PROFILE
   #
-  SIZE_PERF_MAX=`awk -F, -v max=0\
-    '($13>max)&&($4==$9){max=$13;perf=int(($13+5e5)/1e6);size=$3}\
+  SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
+    '($9==c)&&($13>max)&&($4==$9){max=$13;perf=int(($13+5e5)/1e6);size=$3}\
     END{print int((size+50)/100)*100,int(perf+0.5)}'\
     $CSVFILE`
   MAX_MDOFS=${SIZE_PERF_MAX##* }
@@ -141,6 +141,12 @@ if [ -f $CSVFILE ]; then
   echo "Maximum basic performance: "${SIZE_PERF_MAX##* }" MDOF/s"\
   at ${SIZE_PERF_MAX%% *}" DOF, parts = cores = "$CPUCOUNT"."
   #
+  NODE_ELEM_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
+    '($9==c)&&($13>max)&&($4==$9){max=$13;nelem=$1;nnode=$2}\
+    END{print nelem,nnode}'\
+    $CSVFILE`
+  MAX_ELEMS=${NODE_ELEM_MAX##* }
+  MAX_NODES=${NODE_ELEM_MAX%% *}
   if [ ! -z "$HAS_GNUPLOT" ]; then
     echo "Plotting basic profile data: "$CSVFILE"..." >> $LOGFILE
     gnuplot -e  "\
@@ -162,6 +168,13 @@ if [ -f $CSVFILE ]; then
   else
     echo >> $PROFILE
   fi
+  echo "Writing basic profile results: "$PROFILE"..." >> $LOGFILE
+  echo "        Basic Performance Profile Test Results" >> $PROFILE
+  echo "  --------------------------------------------------" >> $PROFILE
+  printf "        %6.1f : Basic performance maximum [MDOF/s]\n" $MAX_MDOFS >> $PROFILE
+  printf "%12i   : Basic system Size [DOF]\n" $MAX_SIZE >> $PROFILE
+  printf "%12i   : Basic model nodes\n" $MAX_NODES >> $PROFILE
+  printf "%12i   : Basic tet10 Elements\n" $MAX_ELEMS >> $PROFILE
   # Assume the first line contains the correct problem size
   #NELEM=`head -n1 $CSVFILE | awk -F, '{ print $1 }'`
   #NNODE=`head -n1 $CSVFILE | awk -F, '{ print $2 }'`
@@ -170,15 +183,16 @@ if [ -f $CSVFILE ]; then
   #MDOFS=`head -n1 $CSVFILE | awk -F, '{ print int(($13+5e6)/1e6) }'`
   ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $MDOFS $MUDOF | bc`
   if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
-  echo "Writing partitioning profile data: "$PROFILE"..." >> $LOGFILE
+  echo "Writing large model partitioning test parameters: "$PROFILE"..." >> $LOGFILE
+  echo >> $PROFILE
   echo "  Large Model Partitioning Test Parameters" >> $PROFILE
   echo "  ----------------------------------------" >> $PROFILE
-  printf " %9.1f : Test Model Size [MDOF]\n" $MUDOF >> $PROFILE
-  printf " %7i   : Test repeats\n" $REPEAT_TEST_N >> $PROFILE
-  printf " %7i   : Solver Iterations\n" $ITERS >> $PROFILE
+  printf " %9.1f : Large model size [MDOF]\n" $MUDOF >> $PROFILE
+  printf " %7i   : Large model test repeats\n" $REPEAT_TEST_N >> $PROFILE
+  printf " %7i   : Large model iterations\n" $ITERS >> $PROFILE
 fi
-# Check if any CSV lines have N != C
-CSV_HAS_PART_TEST=`awk -F, '$4!=$9{print $4; exit}' $CSVFILE`
+# Check if any CSV lines have N > C
+CSV_HAS_PART_TEST=`awk -F, -v c=$CPUCOUNT '($9==c)&&($4>$9){print $4; exit}' $CSVFILE`
 if [ -z "$CSV_HAS_PART_TEST" ]; then
   H=${LIST_H[$(( $TRY_COUNT - 3 ))]};
   ELEM_PER_PART=1000
@@ -202,10 +216,10 @@ if [ -z "$CSV_HAS_PART_TEST" ]; then
   done
   # echo "Large Model Partitioning Profile" >> $PROFILE
 fi
-CSV_HAS_PART_TEST=`awk -F, '$4!=$9{print $4; exit}' $CSVFILE`
+CSV_HAS_PART_TEST=`awk -F, -v c=$CPUCOUNT '($9==c)&&($4>$9){print $4; exit}' $CSVFILE`
 if [ -n "$CSV_HAS_PART_TEST" ]; then
-  SIZE_PERF_MAX=`awk -F, -v elem=$NELEM -v max=0\
-    '($1==elem)&&($4>$9)&&($13>max){max=$13;perf=$13/1e6;size=$1/$4}\
+  SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v elem=$NELEM -v max=0\
+    '($9==c)&&($1==elem)&&($4>$9)&&($13>max){max=$13;perf=$13/1e6;size=$1/$4}\
     END{print int((size+50)/100)*100,int(perf+0.5)}'\
     $CSVFILE`
   LARGE_MDOFS=${SIZE_PERF_MAX##* }
@@ -235,10 +249,11 @@ if [ -n "$CSV_HAS_PART_TEST" ]; then
   else
     echo >> $PROFILE
   fi
-  echo "      Large Model Partitioning Test Results" >> $PROFILE
-  echo "  ---------------------------------------------" >> $PROFILE
-  printf " %9i : Large Model Size Estimate [DOF]\n" $LARGE_UDOF >> $PROFILE
-  printf " %9i : Optimal Partition Size [elem/part]\n" $LARGE_ELEM_PART\
+  echo "Writing large model partitioning test results: "$PROFILE"..." >> $LOGFILE
+  echo "        Large Model Partitioning Test Results" >> $PROFILE
+  echo "  -------------------------------------------------" >> $PROFILE
+  printf " %9i : Large model size estimate [DOF]\n" $LARGE_UDOF >> $PROFILE
+  printf " %9i : Large model partition size [elem/part]\n" $LARGE_ELEM_PART\
     >> $PROFILE
 fi
 #
