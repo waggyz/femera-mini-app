@@ -267,6 +267,7 @@ if [ -n "$CSV_HAS_PART_TEST" ]; then
     set tics scale 0,0;\
     set key inside bottom center;\
     set title 'Femera Large Elastic Model Partitioning Tests [MDOF/s]';\
+    set xrange [0:20000];\
     set xlabel 'Partition Size [elem/part]';\
     set label at "$LARGE_ELEM_PART", "$LARGE_MDOFS" \"* Max\";\
     plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
