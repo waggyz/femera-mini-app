@@ -222,15 +222,15 @@ fi
 CSV_HAS_MEDIUM_PART_TEST=`awk -F, -v e=$MED_NELEM -v c=$CPUCOUNT\
   '($1==e)&&($9==c)&&($4>$9){print $4; exit}' $CSVFILE`
 if [ -z "$CSV_HAS_MEDIUM_PART_TEST" ]; then
-  for N in $(seq $CPUCOUNT $CPUCOUNT $(( $CPUCOUNT * 40 )) ); do
+  for N in $(seq $CPUCOUNT $CPUCOUNT $(( $CPUCOUNT * 20 )) ); do
     MESHNAME="uhxt"$MED_H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$MED_H"p"$P/$MESHNAME
     echo "Partitioning and converting "$MESHNAME", if necessary..."
     $PERFDIR/mesh-uhxt.sh $MED_H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
-    echo "Running "$ITERS" iterations of "$MESHNAME" ("$MED_NUDOF" DOF), "\
+    echo "Running "$MED_ITERS" iterations of "$MESHNAME" ("$MED_NUDOF" DOF), "\
       $REPEAT_TEST_N" times..."
     for I in $(seq 1 $REPEAT_TEST_N ); do
-      $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
+      $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$MED_ITERS -r$RTOL\
         -p $MESH >> $CSVFILE
     done
   done
