@@ -188,11 +188,11 @@ if [ -f $CSVFILE ]; then
     fi
   done
   #
-  MED_NELEM=`awk -F, -v n=$CHECK_NNODE '($2==n){ print $1; exit }' $CSVFILE` 
-  MED_NNODE=`awk -F, -v n=$CHECK_NNODE '($2==n){ print $2; exit }' $CSVFILE`
-  MED_NUDOF=`awk -F, -v n=$CHECK_NNODE '($2==n){ print $3; exit }' $CSVFILE`
-  MED_MUDOF=`awk -F, -v n=$CHECK_NNODE '($2==n){ print int($3/1e6); exit }' $CSVFILE`
-  MED_MDOFS=`awk -F, -v n=$CHECK_NNODE '($2==n){ print int(($13+5e6)/1e6); exit }' $CSVFILE`
+  MED_NELEM=`awk -F, -v n=$MAX_NODES '($2==n){ print $1; exit }' $CSVFILE` 
+  MED_NNODE=`awk -F, -v n=$MAX_NODES '($2==n){ print $2; exit }' $CSVFILE`
+  MED_NUDOF=`awk -F, -v n=$MAX_NODES '($2==n){ print $3; exit }' $CSVFILE`
+  MED_MUDOF=`awk -F, -v n=$MAX_NODES '($2==n){ print int($3/1e6); exit }' $CSVFILE`
+  MED_MDOFS=`awk -F, -v n=$MAX_NODES '($2==n){ print int(($13+5e6)/1e6); exit }' $CSVFILE`
   #
   MED_ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $MED_MDOFS $MED_MUDOF | bc`
   if [ $MED_ITERS -lt $ITERS_MIN ]; then MED_ITERS=10; fi
