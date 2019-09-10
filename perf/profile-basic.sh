@@ -257,7 +257,8 @@ if [ -n "$CSV_HAS_MEDIUM_PART_TEST" ]; then
     set tics scale 0,0;\
     set key inside bottom center;\
     set title 'Femera Medium Elastic Model Partitioning Tests [MDOF/s]';\
-    set xlabel 'Partition Size [elem/part]';\
+    set xrange [0:$(($CPUCOUNT * 20 ))];\
+    set xlabel 'Number of Partitions [elem]';\
     set label at "$MED_PART", "$MED_MDOFS" \"* Max\";\
     plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
     using (\$4):(( \$1 == $MED_NELEM ) ? \$13/1e6:1/0)\
