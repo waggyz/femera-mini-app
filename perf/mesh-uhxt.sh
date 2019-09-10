@@ -7,7 +7,8 @@ if [ ! -d $DIR ]; then
     mkdir $DIR
 fi
 if [ -f $MESHDIR"/uhxt"$H"p"$P"n1.msh2" ]; then
-  mv $MESHDIR"/uhxt"$H"p"$P"n"* $DIR
+  #mv $MESHDIR"/uhxt"$H"p"$P"n"* $DIR
+  echo $MESHDIR"/uhxt"$H"p"$P"n"* | xargs mv -t $DIR
 fi
 if [ ! -f $DIR"/uhxt"$H"p"$P"n1.msh2" ]; then
   gmsh -v 3 -setnumber p $P -setnumber h $H -setnumber n 1 -nt $C geo/unst-cube.geo -
