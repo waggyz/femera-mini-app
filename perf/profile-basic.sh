@@ -270,7 +270,7 @@ if [ -n "$CSV_HAS_PART_TEST" ]; then
     set xlabel 'Partition Size [elem/part]';\
     set label at "$LARGE_ELEM_PART", "$LARGE_MDOFS" \"* Max\";\
     plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
-    using (\$1/\$4):((\$4 > \$9)&&( \$1 == $LARGE_ELEM ) ? \$13/1e6:1/0)\
+    using (\$1/\$4):((\$4 > \$9)&&( \$1 == $NELEM ) ? \$13/1e6:1/0)\
     with points pointtype 0\
     title 'Performance at $MUDOF MDOF';"\
     | tee -a $PROFILE | grep --no-group-separator -C25 --color=always '\*'
