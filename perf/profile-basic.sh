@@ -7,8 +7,8 @@ GMSH2FMR=gmsh2fmr-$CPUMODEL-$CSTR
 #
 P=2; DOF_PER_ELEM=4;
 C=$CPUCOUNT; N=$C; RTOL=1e-24;
-TARGET_TEST_S=6;# Try for S sec/run
-REPEAT_TEST_N=5;# Repeat each test N times
+TARGET_TEST_S=10;# Try for S sec/run
+REPEAT_TEST_N=6;# Repeat each test N times
 ITERS_MIN=10;
 #
 PERFDIR="perf"
@@ -175,6 +175,36 @@ if [ -f $CSVFILE ]; then
   printf "%12i   : Basic system Size [DOF]\n" $MAX_SIZE >> $PROFILE
   printf "%12i   : Basic model nodes\n" $MAX_NODES >> $PROFILE
   printf "%12i   : Basic tet10 Elements\n" $MAX_ELEMS >> $PROFILE
+  #
+  #
+  #
+  #
+  for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
+    H=${LIST_H[I]}
+    MESHNAME="uhxt"$H"p"$P"n"$N
+    MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
+    CHECK_NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
+    echo $H $CHECK_NNODE $MAX_NODES
+    if [ $CHECK_NNODE -eq $MAX_NODES ]; then
+      echo $MESH
+    fi
+  done
+  #
+  #
+  exit
+  #
+  #
+  ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $MDOFS $MUDOF | bc`
+  if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
+  echo "Writing medium model partitioning test parameters: "$PROFILE"..." >> $LOGFILE
+  echo >> $PROFILE
+  echo "  Medium Model Partitioning Test Parameters" >> $PROFILE
+  echo "  -----------------------------------------" >> $PROFILE
+  printf " %9.1f : Medium model size [MDOF]\n" $MUDOF >> $PROFILE
+  printf " %7i   : Medium model test repeats\n" $REPEAT_TEST_N >> $PROFILE
+  printf " %7i   : Medium model iterations\n" $ITERS >> $PROFILE
+  #
+  #
   # Assume the first line contains the correct problem size
   #NELEM=`head -n1 $CSVFILE | awk -F, '{ print $1 }'`
   #NNODE=`head -n1 $CSVFILE | awk -F, '{ print $2 }'`
