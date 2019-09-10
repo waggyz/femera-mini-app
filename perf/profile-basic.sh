@@ -188,11 +188,11 @@ if [ -f $CSVFILE ]; then
     fi
   done
   #
-  MED_NELEM=`awk -F, -v n=$CHECK_NNODE '($2==n){ print $1 }' $CSVFILE | head -n1` 
-  MED_NNODE=`awk -F, -v n=$CHECK_NNODE '($2==n){ print $2 }' $CSVFILE | head -n1`
-  MED_NUDOF=`awk -F, -v n=$CHECK_NNODE '($2==n){ print $3 }' $CSVFILE | head -n1`
-  MED_MUDOF=`awk -F, -v n=$CHECK_NNODE '($2==n){ print int($3/1e6) }' $CSVFILE | head -n1`
-  MED_MDOFS=`awk -F, -v n=$CHECK_NNODE '($2==n){ print int(($13+5e6)/1e6) }' $CSVFILE | head -n1`
+  MED_NELEM=`awk -F, -v n=$CHECK_NNODE '($2==n){ print $1; exit }' $CSVFILE` 
+  MED_NNODE=`awk -F, -v n=$CHECK_NNODE '($2==n){ print $2; exit }' $CSVFILE`
+  MED_NUDOF=`awk -F, -v n=$CHECK_NNODE '($2==n){ print $3; exit }' $CSVFILE`
+  MED_MUDOF=`awk -F, -v n=$CHECK_NNODE '($2==n){ print int($3/1e6); exit }' $CSVFILE`
+  MED_MDOFS=`awk -F, -v n=$CHECK_NNODE '($2==n){ print int(($13+5e6)/1e6); exit }' $CSVFILE`
   #
   MED_ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $MED_MDOFS $MED_MUDOF | bc`
   if [ $MED_ITERS -lt $ITERS_MIN ]; then MED_ITERS=10; fi
@@ -218,7 +218,6 @@ if [ -f $CSVFILE ]; then
 fi
   #
   #
-  exit
 # Check if any CSV lines have N > C
 CSV_HAS_PART_TEST=`awk -F, -v e=$NELEM -v c=$CPUCOUNT\
   '($1==e)&&($9==c)&&($4>$9){print $4; exit}' $CSVFILE`
@@ -261,7 +260,7 @@ if [ -n "$CSV_HAS_PART_TEST" ]; then
     ">"$LARGE_ELEM" elem,"$LARGE_UDOF" DOF."
   if [ ! -z "$HAS_GNUPLOT" ]; then
     MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
-    echo "Plotting partitioning profile data: "$CSVFILE"..." >> $LOGFILE
+    echo "Plotting large model partitioning profile data: "$CSVFILE"..." >> $LOGFILE
     gnuplot -e  "\
     set terminal dumb noenhanced size 79,25;\
     set datafile separator ',';\
@@ -271,7 +270,7 @@ if [ -n "$CSV_HAS_PART_TEST" ]; then
     set xlabel 'Partition Size [elem/part]';\
     set label at "$LARGE_ELEM_PART", "$LARGE_MDOFS" \"* Max\";\
     plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
-    using (\$1/\$4):(\$4 == \$9 ? 1/0:\$13/1e6)\
+    using (\$1/\$4):((\$4 > \$9)&&( \$1 == $LARGE_ELEM ) ? \$13/1e6:1/0)\
     with points pointtype 0\
     title 'Performance at $MUDOF MDOF';"\
     | tee -a $PROFILE | grep --no-group-separator -C25 --color=always '\*'
