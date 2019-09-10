@@ -185,6 +185,7 @@ if [ -f $CSVFILE ]; then
     if [ $CHECK_NNODE -eq $MAX_NODES ]; then
       MED_MESHNAME=$MESHNAME
       MED_MESH=$MESH
+      MED_H=$H
     fi
   done
   #
@@ -216,12 +217,64 @@ if [ -f $CSVFILE ]; then
   printf " %7i   : Large model test repeats\n" $REPEAT_TEST_N >> $PROFILE
   printf " %7i   : Large model iterations\n" $ITERS >> $PROFILE
 fi
-  #
-  #
-# Check if any CSV lines have N > C
-CSV_HAS_PART_TEST=`awk -F, -v e=$NELEM -v c=$CPUCOUNT\
+#
+# Check if any medium model CSV lines have N > C
+CSV_HAS_MEDIUM_PART_TEST=`awk -F, -v e=$MED_NELEM -v c=$CPUCOUNT\
   '($1==e)&&($9==c)&&($4>$9){print $4; exit}' $CSVFILE`
-if [ -z "$CSV_HAS_PART_TEST" ]; then
+if [ -z "$CSV_HAS_MEDIUM_PART_TEST" ]; then
+  for N in $(seq $CPUCOUNT $CPUCOUNT $(( $CPUCOUNT * 40 )) ); do
+    MESHNAME="uhxt"$MED_H"p"$P"n"$N
+    MESH=$MESHDIR"/uhxt"$MED_H"p"$P/$MESHNAME
+    echo "Partitioning and converting "$MESHNAME", if necessary..."
+    $PERFDIR/mesh-uhxt.sh $MED_H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
+    echo "Running "$ITERS" iterations of "$MESHNAME" ("$MED_NUDOF" DOF), "\
+      $REPEAT_TEST_N" times..."
+    for I in $(seq 1 $REPEAT_TEST_N ); do
+      $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
+        -p $MESH >> $CSVFILE
+    done
+  done
+fi
+# Check if any medium model CSV lines have N > C
+CSV_HAS_MEDIUM_PART_TEST=`awk -F, -v e=$MED_NELEM -v c=$CPUCOUNT\
+  '($1==e)&&($9==c){print $4; exit}' $CSVFILE`
+if [ -n "$CSV_HAS_MEDIUM_PART_TEST" ]; then
+  SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v elem=$MED_NELEM -v max=0\
+    '($9==c)&&($1==elem)&&($13>max){max=$13;perf=$13/1e6;size=$4}\
+    END{print size,int(perf+0.5)}'\
+    $CSVFILE`
+  MED_MDOFS=${SIZE_PERF_MAX##* }
+  MED_PART=${SIZE_PERF_MAX%% *}
+  echo "Medium model performance peak: "$MED_MDOFS" MDOF/s"\
+    "at "$MED_PART" parts."
+  if [ ! -z "$HAS_GNUPLOT" ]; then
+    #MED_MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
+    echo "Plotting large model partitioning profile data: "$CSVFILE"..." >> $LOGFILE
+    gnuplot -e  "\
+    set terminal dumb noenhanced size 79,25;\
+    set datafile separator ',';\
+    set tics scale 0,0;\
+    set key inside bottom center;\
+    set title 'Femera Medium Elastic Model Partitioning Tests [MDOF/s]';\
+    set xlabel 'Partition Size [elem/part]';\
+    set label at "$MED_PART", "$MED_MDOFS" \"* Max\";\
+    plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
+    using (\$4):(( \$1 == $MED_NELEM ) ? \$13/1e6:1/0)\
+    with points pointtype 0\
+    title 'Performance at $MED_NUDOF DOF';"\
+    | tee -a $PROFILE | grep --no-group-separator -C25 --color=always '\*'
+  else
+    echo >> $PROFILE
+  fi
+fi
+
+
+exit
+
+# Check if any large model CSV lines have N > C
+CSV_HAS_LARGE_PART_TEST=`awk -F, -v e=$NELEM -v c=$CPUCOUNT\
+  '($1==e)&&($9==c)&&($4>$9){print $4; exit}' $CSVFILE`
+if [ -z "$CSV_HAS_LARGE_PART_TEST" ]; then
   H=${LIST_H[$(( $TRY_COUNT - 3 ))]};
   ELEM_PER_PART=1000
   FINISHED=""
@@ -244,8 +297,9 @@ if [ -z "$CSV_HAS_PART_TEST" ]; then
   done
   # echo "Large Model Partitioning Profile" >> $PROFILE
 fi
-CSV_HAS_PART_TEST=`awk -F, -v c=$CPUCOUNT '($9==c)&&($4>$9){print $4; exit}' $CSVFILE`
-if [ -n "$CSV_HAS_PART_TEST" ]; then
+CSV_HAS_LARGE_PART_TEST=`awk -F, -v c=$CPUCOUNT -v elem=$NELEM \
+  '($9==c)&&($1==elem)&&($4>$9){print $4; exit}' $CSVFILE`
+if [ -n "$CSV_HAS_LARGE_PART_TEST" ]; then
   SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v elem=$NELEM -v max=0\
     '($9==c)&&($1==elem)&&($4>$9)&&($13>max){max=$13;perf=$13/1e6;size=$1/$4}\
     END{print int((size+50)/100)*100,int(perf+0.5)}'\
