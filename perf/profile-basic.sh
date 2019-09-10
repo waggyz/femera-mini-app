@@ -188,19 +188,19 @@ if [ -f $CSVFILE ]; then
     fi
   done
   #
-  MED_NELEM=`awk -F, -v n=$MAX_NODES '($2==n){ print $1; exit }' $CSVFILE` 
+  MED_NELEM=`awk -F, -v n=$MAX_NODES '($2==n){ print $1; exit }' $CSVFILE`
   MED_NNODE=`awk -F, -v n=$MAX_NODES '($2==n){ print $2; exit }' $CSVFILE`
   MED_NUDOF=`awk -F, -v n=$MAX_NODES '($2==n){ print $3; exit }' $CSVFILE`
-  MED_MUDOF=`awk -F, -v n=$MAX_NODES '($2==n){ print int($3/1e6); exit }' $CSVFILE`
+  #MED_MUDOF=`awk -F, -v n=$MAX_NODES '($2==n){ print int($3/1e6); exit }' $CSVFILE`
   MED_MDOFS=`awk -F, -v n=$MAX_NODES '($2==n){ print int(($13+5e6)/1e6); exit }' $CSVFILE`
   #
-  MED_ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $MED_MDOFS $MED_MUDOF | bc`
+  MED_ITERS=`printf '%f*%f/%f*1000000\n' $TARGET_TEST_S $MED_MDOFS $MED_NUDOF | bc`
   if [ $MED_ITERS -lt $ITERS_MIN ]; then MED_ITERS=10; fi
   echo "Writing medium model partitioning test parameters: "$PROFILE"..." >> $LOGFILE
   echo >> $PROFILE
   echo "  Medium Model Partitioning Test Parameters" >> $PROFILE
   echo "  -----------------------------------------" >> $PROFILE
-  printf "   %9.1f : Medium model size [MDOF]\n" $MED_MUDOF >> $PROFILE
+  printf " %9i   : Medium model size [DOF]\n" $MED_NUDOF >> $PROFILE
   printf " %9i   : Medium model nodes\n" $MED_NNODE >> $PROFILE
   printf " %9i   : Medium tet10 Elements\n" $MED_NELEM >> $PROFILE
   printf " %9i   : Medium model test repeats\n" $REPEAT_TEST_N >> $PROFILE
