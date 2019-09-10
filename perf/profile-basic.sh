@@ -145,8 +145,8 @@ if [ -f $CSVFILE ]; then
     '($9==c)&&($13>max)&&($4==$9){max=$13;nelem=$1;nnode=$2}\
     END{print nelem,nnode}'\
     $CSVFILE`
-  MAX_ELEMS=${NODE_ELEM_MAX##* }
-  MAX_NODES=${NODE_ELEM_MAX%% *}
+  MAX_ELEMS=${NODE_ELEM_MAX%% *}
+  MAX_NODES=${NODE_ELEM_MAX##* }
   if [ ! -z "$HAS_GNUPLOT" ]; then
     echo "Plotting basic profile data: "$CSVFILE"..." >> $LOGFILE
     gnuplot -e  "\
@@ -176,41 +176,36 @@ if [ -f $CSVFILE ]; then
   printf "%12i   : Basic model nodes\n" $MAX_NODES >> $PROFILE
   printf "%12i   : Basic tet10 Elements\n" $MAX_ELEMS >> $PROFILE
   #
-  #
-  #
-  #
+  # Find the max. performing model
   for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
     H=${LIST_H[I]}
     MESHNAME="uhxt"$H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
     CHECK_NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
-    echo $H $CHECK_NNODE $MAX_NODES
     if [ $CHECK_NNODE -eq $MAX_NODES ]; then
-      echo $MESH
+      MED_MESHNAME=$MESHNAME
+      MED_MESH=$MESH
     fi
   done
   #
+  MED_NELEM=`awk -F, -v n=$CHECK_NNODE '($2==n){ print $1 }' $CSVFILE | head -n1` 
+  MED_NNODE=`awk -F, -v n=$CHECK_NNODE '($2==n){ print $2 }' $CSVFILE | head -n1`
+  MED_NUDOF=`awk -F, -v n=$CHECK_NNODE '($2==n){ print $3 }' $CSVFILE | head -n1`
+  MED_MUDOF=`awk -F, -v n=$CHECK_NNODE '($2==n){ print int($3/1e6) }' $CSVFILE | head -n1`
+  MED_MDOFS=`awk -F, -v n=$CHECK_NNODE '($2==n){ print int(($13+5e6)/1e6) }' $CSVFILE | head -n1`
   #
-  exit
-  #
-  #
-  ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $MDOFS $MUDOF | bc`
-  if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
+  MED_ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $MED_MDOFS $MED_MUDOF | bc`
+  if [ $MED_ITERS -lt $ITERS_MIN ]; then MED_ITERS=10; fi
   echo "Writing medium model partitioning test parameters: "$PROFILE"..." >> $LOGFILE
   echo >> $PROFILE
   echo "  Medium Model Partitioning Test Parameters" >> $PROFILE
   echo "  -----------------------------------------" >> $PROFILE
-  printf " %9.1f : Medium model size [MDOF]\n" $MUDOF >> $PROFILE
-  printf " %7i   : Medium model test repeats\n" $REPEAT_TEST_N >> $PROFILE
-  printf " %7i   : Medium model iterations\n" $ITERS >> $PROFILE
+  printf "   %9.1f : Medium model size [MDOF]\n" $MED_MUDOF >> $PROFILE
+  printf " %9i   : Medium model nodes\n" $MED_NNODE >> $PROFILE
+  printf " %9i   : Medium tet10 Elements\n" $MED_NELEM >> $PROFILE
+  printf " %9i   : Medium model test repeats\n" $REPEAT_TEST_N >> $PROFILE
+  printf " %9i   : Medium model iterations\n" $MED_ITERS >> $PROFILE
   #
-  #
-  # Assume the first line contains the correct problem size
-  #NELEM=`head -n1 $CSVFILE | awk -F, '{ print $1 }'`
-  #NNODE=`head -n1 $CSVFILE | awk -F, '{ print $2 }'`
-  #NUDOF=`head -n1 $CSVFILE | awk -F, '{ print $3 }'`
-  #MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
-  #MDOFS=`head -n1 $CSVFILE | awk -F, '{ print int(($13+5e6)/1e6) }'`
   ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $MDOFS $MUDOF | bc`
   if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
   echo "Writing large model partitioning test parameters: "$PROFILE"..." >> $LOGFILE
@@ -221,8 +216,12 @@ if [ -f $CSVFILE ]; then
   printf " %7i   : Large model test repeats\n" $REPEAT_TEST_N >> $PROFILE
   printf " %7i   : Large model iterations\n" $ITERS >> $PROFILE
 fi
+  #
+  #
+  exit
 # Check if any CSV lines have N > C
-CSV_HAS_PART_TEST=`awk -F, -v c=$CPUCOUNT '($9==c)&&($4>$9){print $4; exit}' $CSVFILE`
+CSV_HAS_PART_TEST=`awk -F, -v e=$NELEM -v c=$CPUCOUNT\
+  '($1==e)&&($9==c)&&($4>$9){print $4; exit}' $CSVFILE`
 if [ -z "$CSV_HAS_PART_TEST" ]; then
   H=${LIST_H[$(( $TRY_COUNT - 3 ))]};
   ELEM_PER_PART=1000
