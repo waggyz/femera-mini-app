@@ -54,13 +54,13 @@ done
 #
 if [ ! -f $PROFILE ]; then
   # First, get a rough idea of DOF/sec to estimate time
-  # with 10 iterations of the second-to-largest model
+  # with 10 iterations of the third-to-largest model
   if [ ! -f $CSVFILE ]; then
-    ITERS=10; H=${LIST_H[$(( $TRY_COUNT - 2 ))]};
+    ITERS=10; H=${LIST_H[$(( $TRY_COUNT - 3 ))]};
     MESHNAME="uhxt"$H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
     echo Estimating performance at\
-      $(( ${NOMI_UDOF[$(( $TRY_COUNT - 2 ))]} / 1000000 )) MDOF...
+      $(( ${NOMI_UDOF[$(( $TRY_COUNT - 3 ))]} / 1000000 )) MDOF...
     echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
     $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
     echo Running $ITERS iterations of $MESHNAME...
@@ -180,7 +180,7 @@ fi
 # Check if any CSV lines have N != C
 CSV_HAS_PART_TEST=`awk -F, '$4!=$9{print $4; exit}' $CSVFILE`
 if [ -z "$CSV_HAS_PART_TEST" ]; then
-  H=${LIST_H[$(( $TRY_COUNT - 2 ))]};
+  H=${LIST_H[$(( $TRY_COUNT - 3 ))]};
   ELEM_PER_PART=1000
   FINISHED=""
   while [ ! $FINISHED ]; do
