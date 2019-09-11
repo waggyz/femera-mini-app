@@ -174,7 +174,7 @@ if [ -f $CSVFILE ]; then
     using 3:(\$4 != \$9 ? 1/0:\$13/1e6)\
     with points pointtype 0\
     title '"$CPUCOUNT" Partitions';"\
-    | tee -a $PROFILE | grep --no-group-separator -C25 --color=always '\*'
+    | tee -a $PROFILE ;#| grep --no-group-separator -C25 --color=always '\*'
   else
     echo >> $PROFILE
   fi
@@ -274,10 +274,17 @@ if [ -n "$CSV_HAS_MEDIUM_PART_TEST" ]; then
     using (\$4):(( \$1 == $MED_NELEM ) ? \$13/1e6:1/0)\
     with points pointtype 0\
     title 'Performance at $MED_NUDOF DOF';"\
-    | tee -a $PROFILE | grep --no-group-separator -C25 --color=always '\*'
+    | tee -a $PROFILE;# | grep --no-group-separator -C25 --color=always '\*'
   else
     echo >> $PROFILE
   fi
+  echo "Writing medium model partitioning test results: "$PROFILE"..." >> $LOGFILE
+  echo "        Medium Model Partitioning Test Results" >> $PROFILE
+  echo "  -------------------------------------------------" >> $PROFILE
+  printf " %9i : Medium model partitions [part]\n" $MED_PART >> $PROFILE
+  printf " %9i : Medium model size [DOF]\n" $MED_NUDOF >> $PROFILE
+  printf " %9i : Medium model performance [MDOF/s]\n" $MED_MDOFS >> $PROFILE
+    >> $PROFILE
 fi
 # Check if any large model CSV lines have N > C
 LARGE_NELEM=`head -n1 $CSVFILE | awk -F, '{ print $1 }'`
@@ -338,15 +345,16 @@ if [ -n "$CSV_HAS_LARGE_PART_TEST" ]; then
     using (\$1/\$4):((\$4 > \$9)&&( \$1 == $LARGE_NELEM ) ? \$13/1e6:1/0)\
     with points pointtype 0\
     title 'Performance at $MUDOF MDOF';"\
-    | tee -a $PROFILE | grep --no-group-separator -C25 --color=always '\*'
+    | tee -a $PROFILE;# | grep --no-group-separator -C25 --color=always '\*'
   else
     echo >> $PROFILE
   fi
   echo "Writing large model partitioning test results: "$PROFILE"..." >> $LOGFILE
   echo "        Large Model Partitioning Test Results" >> $PROFILE
   echo "  -------------------------------------------------" >> $PROFILE
-  printf " %9i : Large model size estimate [DOF]\n" $LARGE_UDOF >> $PROFILE
   printf " %9i : Large model partition size [elem/part]\n" $LARGE_ELEM_PART\
     >> $PROFILE
+  printf " %9i : Large model size [DOF]\n" $LARGE_UDOF >> $PROFILE
+  printf " %9i : Medium model performance [MDOF/s]\n" $LARGE_MDOFS >> $PROFILE
 fi
 #
