@@ -349,11 +349,15 @@ if [ -n "$CSV_HAS_LARGE_PART_TEST" ]; then
   else
     echo >> $PROFILE
   fi
+  LARGE_ELEM_MIN=$(( $MED_PART * $LARGE_ELEM_PART ))
+  LARGE_UDOF_MIN=$(( $LARGE_ELEM_MIN * $DOF_PER_ELEM ))
+  LARGE_MDOF_MIN=$(( $LARGE_UDOF_MIN / 1000000 ))
   echo "Writing large model partitioning test results: "$PROFILE"..." >> $LOGFILE
   echo "        Large Model Partitioning Test Results" >> $PROFILE
   echo "  -------------------------------------------------" >> $PROFILE
   printf " %9i : Large model partition size [elem/part]\n" $LARGE_ELEM_PART\
     >> $PROFILE
+  printf " %9i : Large model minimum size [MDOF]\n" $LARGE_MDOF_MIN >> $PROFILE
   printf " %9i : Large model test size [MDOF]\n" $LARGE_UDOF >> $PROFILE
   printf " %9i : Large model performance [MDOF/s]\n" $LARGE_MDOFS >> $PROFILE
 fi
