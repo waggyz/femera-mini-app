@@ -282,7 +282,7 @@ if [ -n "$CSV_HAS_MEDIUM_PART_TEST" ]; then
   echo "        Medium Model Partitioning Test Results" >> $PROFILE
   echo "  -------------------------------------------------" >> $PROFILE
   printf " %9i : Medium model partitions [part]\n" $MED_PART >> $PROFILE
-  printf " %9i : Medium model size [DOF]\n" $MED_NUDOF >> $PROFILE
+  printf " %9i : Medium model test size [DOF]\n" $MED_NUDOF >> $PROFILE
   printf " %9i : Medium model performance [MDOF/s]\n" $MED_MDOFS >> $PROFILE
     >> $PROFILE
 fi
@@ -354,7 +354,7 @@ if [ -n "$CSV_HAS_LARGE_PART_TEST" ]; then
   echo "  -------------------------------------------------" >> $PROFILE
   printf " %9i : Large model partition size [elem/part]\n" $LARGE_ELEM_PART\
     >> $PROFILE
-  printf " %9i : Large model size [DOF]\n" $LARGE_UDOF >> $PROFILE
-  printf " %9i : Medium model performance [MDOF/s]\n" $LARGE_MDOFS >> $PROFILE
+  printf " %9i : Large model test size [MDOF]\n" $LARGE_UDOF >> $PROFILE
+  printf " %9i : Large model performance [MDOF/s]\n" $LARGE_MDOFS >> $PROFILE
 fi
 #
