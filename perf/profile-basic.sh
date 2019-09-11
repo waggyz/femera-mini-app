@@ -24,7 +24,11 @@ fi
 echo "Mesh Directory: "$MESHDIR"/"
 #
 HAS_GNUPLOT=`which gnuplot`
-MEM=`free -b  | grep Mem | awk '{print $7}'`
+if [[ `hostname` == k3* ]]; then # Nasty little hack
+  MEM=30000000000
+else
+  MEM=`free -b  | grep Mem | awk '{print $7}'`
+fi
 echo `free -g  | grep Mem | awk '{print $7}'` GB Available Memory
 #
 if [ -f $PROFILE ]; then
@@ -351,14 +355,14 @@ if [ -n "$CSV_HAS_LARGE_PART_TEST" ]; then
   fi
   LARGE_ELEM_MIN=$(( $MED_PART * $LARGE_ELEM_PART ))
   LARGE_UDOF_MIN=$(( $LARGE_ELEM_MIN * $DOF_PER_ELEM ))
-  LARGE_MDOF_MIN=$(( $LARGE_UDOF_MIN / 1000000 ))
+  #LARGE_MDOF_MIN=$(( $LARGE_UDOF_MIN / 1000000 ))
   echo "Writing large model partitioning test results: "$PROFILE"..." >> $LOGFILE
   echo "        Large Model Partitioning Test Results" >> $PROFILE
   echo "  -------------------------------------------------" >> $PROFILE
   printf " %9i : Large model partition size [elem/part]\n" $LARGE_ELEM_PART\
     >> $PROFILE
-  printf " %9i : Large model minimum size [MDOF]\n" $LARGE_MDOF_MIN >> $PROFILE
-  printf " %9i : Large model test size [MDOF]\n" $LARGE_UDOF >> $PROFILE
-  printf " %9i : Large model performance [MDOF/s]\n" $LARGE_MDOFS >> $PROFILE
+  printf " %9i : Large model minimum size [DOF]\n" $LARGE_UDOF_MIN >> $PROFILE
+  printf " %9i : Large test model size [DOF]\n" $LARGE_UDOF >> $PROFILE
+  printf " %9i : Large test model performance [MDOF/s]\n" $LARGE_MDOFS >> $PROFILE
 fi
 #
