@@ -68,35 +68,7 @@ if [ ! -f $PROFILE ]; then
       -p $MESH >> $CSVFILE
   fi
 fi
-MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
-MDOFS=`head -n1 $CSVFILE | awk -F, '{ print int(($13+5e5)/1e6) }'`
-DOFS=`head -n1 $CSVFILE | awk -F, '{ print int($13+0.5) }'`
-echo "Initial performance estimate: "$MDOFS" MDOF/s at "$MUDOF" MDOF"
-#
-ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $MDOFS $MUDOF | bc`
-CSVLINES=`wc -l < $CSVFILE`
-BASIC_TEST_N=$(( $TRY_COUNT * $REPEAT_TEST_N + 1 ))
-if [ "$CSVLINES" -lt "$BASIC_TEST_N" ]; then
-  for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
-    H=${LIST_H[I]}
-    MESHNAME="uhxt"$H"p"$P"n"$N
-    MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
-    echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
-    $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
-    NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
-    NDOF=$(( $NNODE * 3 ))
-    ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $DOFS $NDOF | bc`
-    if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
-    echo "Running "$ITERS" iterations of "$MESHNAME" ("$NDOF" DOF), "\
-      $REPEAT_TEST_N" times..."
-    for I in $(seq 1 $REPEAT_TEST_N ); do
-      $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
-      -p $MESH >> $CSVFILE
-    done
-  done
-fi
 if [ -f $CSVFILE ]; then
-  echo "Writing basic profile: "$PROFILE"..." >> $LOGFILE
   echo "Femera Performance Profile" > $PROFILE
   echo "femerq-"$CPUMODEL"-"$CSTR >> $PROFILE
   grep -m1 -i "model name" /proc/cpuinfo >> $PROFILE
@@ -111,6 +83,7 @@ if [ -f $CSVFILE ]; then
   NPART=`head -n1 $CSVFILE | awk -F, '{ print $4 }'`
   ITERS=`head -n1 $CSVFILE | awk -F, '{ print $5 }'`
   NCPUS=`head -n1 $CSVFILE | awk -F, '{ print $9 }'`
+  echo "Writing initial performance estimate: "$PROFILE"..." >> $LOGFILE
   echo >> $PROFILE
   echo "     Initial Elastic Model Performance Estimate" >> $PROFILE
   echo "  ------------------------------------------------" >> $PROFILE
@@ -122,7 +95,14 @@ if [ -f $CSVFILE ]; then
   printf "%12i   : Initial test threads\n" $NCPUS >> $PROFILE
   printf "%12i   : Initial test iterations\n" $ITERS >> $PROFILE
   #echo "Mesh            : " FIXME Put initial mesh filename here
+fi
+if [ -f $CSVFILE ]; then
+  INIT_MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
+  INIT_MDOFS=`head -n1 $CSVFILE | awk -F, '{ print int(($13+5e5)/1e6) }'`
+  INIT_DOFS=`head -n1 $CSVFILE | awk -F, '{ print int($13+0.5) }'`
+  echo "Initial performance estimate: "$INIT_MDOFS" MDOF/s at "$INIT_MUDOF" MDOF"
   #
+  echo "Writing basic profile test parameters: "$PROFILE"..." >> $LOGFILE
   echo >> $PROFILE
   echo "     Basic Performance Profile Test Parameters" >> $PROFILE
   echo "  ------------------------------------------------" >> $PROFILE
@@ -132,6 +112,36 @@ if [ -f $CSVFILE ]; then
   printf "%6i     : Basic Minimum iterations\n" $ITERS_MIN >> $PROFILE
   printf "     %5.0e : Basic relative residual tolerance\n" $RTOL >> $PROFILE
   #
+  ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_MDOFS $INIT_MUDOF | bc`
+  CSVLINES=`wc -l < $CSVFILE`
+  BASIC_TEST_N=$(( $TRY_COUNT * $REPEAT_TEST_N + 1 ))
+  if [ "$CSVLINES" -lt "$BASIC_TEST_N" ]; then
+    echo Running basic profile tests...
+    for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
+      H=${LIST_H[I]}
+      MESHNAME="uhxt"$H"p"$P"n"$N
+      MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
+      echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
+      $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
+      NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
+      NDOF=$(( $NNODE * 3 ))
+      ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
+      if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
+      if [ $I -eq 0 ]; then
+        echo Warming up...
+        for I in $(seq 1 $REPEAT_TEST_N ); do
+          $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
+          -p $MESH > /dev/null
+        done
+      fi
+      echo "Running "$ITERS" iterations of "$MESHNAME" ("$NDOF" DOF), "\
+        $REPEAT_TEST_N" times..."
+      for I in $(seq 1 $REPEAT_TEST_N ); do
+        $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
+        -p $MESH >> $CSVFILE
+      done
+    done
+  fi
   SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
     '($9==c)&&($13>max)&&($4==$9){max=$13;perf=int(($13+5e5)/1e6);size=$3}\
     END{print int((size+50)/100)*100,int(perf+0.5)}'\
@@ -188,7 +198,6 @@ if [ -f $CSVFILE ]; then
       MED_H=$H
     fi
   done
-  #
   MED_NELEM=$MAX_ELEMS;#`awk -F, -v n=$MAX_NODES '($2==n){ print $1; exit }' $CSVFILE`
   MED_NNODE=$MAX_NODES;#`awk -F, -v n=$MAX_NODES '($2==n){ print $2; exit }' $CSVFILE`
   MED_NUDOF=$(( $MAX_NODES * 3 ));#`awk -F, -v n=$MAX_NODES '($2==n){ print $3; exit }' $CSVFILE`
@@ -197,7 +206,7 @@ if [ -f $CSVFILE ]; then
   MED_MDOFS=$MAX_MDOFS
   #
   MED_ITERS=`printf '%f*%f*1000000/%f\n' $TARGET_TEST_S $MED_MDOFS $MED_NUDOF | bc`
-if [ $MED_ITERS -lt $ITERS_MIN ]; then MED_ITERS=10; fi
+  if [ $MED_ITERS -lt $ITERS_MIN ]; then MED_ITERS=10; fi
   echo "Writing medium model partitioning test parameters: "$PROFILE"..." >> $LOGFILE
   echo >> $PROFILE
   echo "  Medium Model Partitioning Test Parameters" >> $PROFILE
@@ -223,6 +232,7 @@ fi
 CSV_HAS_MEDIUM_PART_TEST=`awk -F, -v e=$MED_NELEM -v c=$CPUCOUNT\
   '($1==e)&&($9==c)&&($4>$9){print $4; exit}' $CSVFILE`
 if [ -z "$CSV_HAS_MEDIUM_PART_TEST" ]; then
+  echo Running medium model partitioning tests...
   for N in $(seq $CPUCOUNT $CPUCOUNT $(( $CPUCOUNT * 20 )) ); do
     MESHNAME="uhxt"$MED_H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$MED_H"p"$P/$MESHNAME
@@ -269,19 +279,17 @@ if [ -n "$CSV_HAS_MEDIUM_PART_TEST" ]; then
     echo >> $PROFILE
   fi
 fi
-
-
-exit
-
 # Check if any large model CSV lines have N > C
-CSV_HAS_LARGE_PART_TEST=`awk -F, -v e=$NELEM -v c=$CPUCOUNT\
+LARGE_NELEM=`head -n1 $CSVFILE | awk -F, '{ print $1 }'`
+CSV_HAS_LARGE_PART_TEST=`awk -F, -v e=$LARGE_NELEM -v c=$CPUCOUNT\
   '($1==e)&&($9==c)&&($4>$9){print $4; exit}' $CSVFILE`
 if [ -z "$CSV_HAS_LARGE_PART_TEST" ]; then
+  echo Running large model partitioning tests...
   H=${LIST_H[$(( $TRY_COUNT - 3 ))]};
   ELEM_PER_PART=1000
   FINISHED=""
   while [ ! $FINISHED ]; do
-    N=$(( $NELEM / $ELEM_PER_PART / $C * $C ))
+    N=$(( $LARGE_NELEM / $ELEM_PER_PART / $C * $C ))
     if [ "$N" -le 50000 ]; then
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
@@ -299,10 +307,10 @@ if [ -z "$CSV_HAS_LARGE_PART_TEST" ]; then
   done
   # echo "Large Model Partitioning Profile" >> $PROFILE
 fi
-CSV_HAS_LARGE_PART_TEST=`awk -F, -v c=$CPUCOUNT -v elem=$NELEM \
+CSV_HAS_LARGE_PART_TEST=`awk -F, -v c=$CPUCOUNT -v elem=$LARGE_NELEM \
   '($9==c)&&($1==elem)&&($4>$9){print $4; exit}' $CSVFILE`
 if [ -n "$CSV_HAS_LARGE_PART_TEST" ]; then
-  SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v elem=$NELEM -v max=0\
+  SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v elem=$LARGE_NELEM -v max=0\
     '($9==c)&&($1==elem)&&($4>$9)&&($13>max){max=$13;perf=$13/1e6;size=$1/$4}\
     END{print int((size+50)/100)*100,int(perf+0.5)}'\
     $CSVFILE`
@@ -327,7 +335,7 @@ if [ -n "$CSV_HAS_LARGE_PART_TEST" ]; then
     set xlabel 'Partition Size [elem/part]';\
     set label at "$LARGE_ELEM_PART", "$LARGE_MDOFS" \"* Max\";\
     plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
-    using (\$1/\$4):((\$4 > \$9)&&( \$1 == $NELEM ) ? \$13/1e6:1/0)\
+    using (\$1/\$4):((\$4 > \$9)&&( \$1 == $LARGE_NELEM ) ? \$13/1e6:1/0)\
     with points pointtype 0\
     title 'Performance at $MUDOF MDOF';"\
     | tee -a $PROFILE | grep --no-group-separator -C25 --color=always '\*'
