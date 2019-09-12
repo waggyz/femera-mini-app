@@ -267,7 +267,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
     #echo $(( $NDOF * $X )) '<' $(( $MAX_SIZE ))
     S=$(( 100 * 1000 / $NDOF ))
     if (( $S < 1 ));then S=1; fi
-    while [ $(( $NDOF * $X )) -gt $(( $MAX_SIZE )) ]; do
+    while (( $NDOF * $X > $MAX_SIZE && $X > 0 )); do
       XIX=$(( $XIX + 1 ));
       X=${ARRAY_X[XIX]}
       if [ -z "$X" ];then X=0; fi
