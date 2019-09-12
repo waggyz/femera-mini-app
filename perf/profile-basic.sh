@@ -233,7 +233,6 @@ if [ -f $CSVFILE ]; then
   printf " %7i   : Large test model test repeats\n" $REPEAT_TEST_N >> $PROFILE
   printf " %7i   : Large test iterations\n" $ITERS >> $PROFILE
 fi
-
 if false; then rm $CSVSMALL; fi
 if [ ! -f $CSVSMALL ]; then # Run small model tests
   P=2;
@@ -242,7 +241,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
   # Get all factors of the number of cores
   IX=0;
   for I in $(seq $CPUCOUNT -1 1); do
-    [ $(expr $CPUCOUNT / $I \* $I) == $CPUCOUNT ] && LIST_C=$LIST_C" "$I
+    #[ $(expr $CPUCOUNT / $I \* $I) == $CPUCOUNT ] && LIST_C=$LIST_C" "$I
     [ $(expr $CPUCOUNT / $I \* $I) == $CPUCOUNT ] && ARRAY_X[$IX]=$I
     [ $(expr $CPUCOUNT / $I \* $I) == $CPUCOUNT ] && IX=$(( $IX + 1 ))
   done
@@ -282,8 +281,8 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
       if [ $(( $NDOF * $X )) -lt $(( $MAX_SIZE )) ]; then
       if [ -f $MESH"_1.fmr" ]; then
         EXE=$EXEDIR"/femerq-"$CPUMODEL"-"$CSTR" -c"$C" -r"$RTOL" -p "$MESH
-        echo "Running "$REPEAT_TEST_N" repeats of "$S"x"$X" concurrent "$NDOF" NDOF models..."
-        echo $EXE
+        echo "Running "$REPEAT_TEST_N" repeats of "$S"x"$X" concurrent "$DOF" NDOF models..."
+        #echo $EXE
         #START=`date +%s.%N`
         for I in $(seq 1 $REPEAT_TEST_N ); do
           for IX in $( seq 1 $X ); do
@@ -304,13 +303,34 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
         SOLVE_MDOFS=`awk -F, -v nnode=$NNODE -v c=$C -v nrun=0 -v mdofs=0 -v x=$X\
         '($2==nnode)&&($9==c){nrun=nrun+1;mdofs=mdofs+$13;}\
           END{print mdofs/nrun/1000000*x;}' $CSVSMALL`
-        echo " Solver: "$SOLVE_MDOFS" MDOF/s at "$X"x concurrent "$NDOF" DOF models..." 
+        echo " Solver: "$SOLVE_MDOFS" MDOF/s at "$X"x "$NDOF\
+          "= "$(( $X * $NDOF ))" DOF models..." 
       fi
       fi
     fi
     HIX=$(( $HIX + 1 ))
   done
   fi
+fi
+if [ -f $CSVSMALL ]; then
+  for H in $LIST_HH; do
+    X="XXX"
+    N=1;
+    MESHNAME="uhxt"$H"p"$P"n"$N
+    MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
+    if [ -f $MESH".msh2" ]; then
+      NNODE=`grep -m1 -A1 -i node $MESH".msh2" | tail -n1`
+      NDOF=$(( $NNODE * 3 ))
+      SOLVE_MDOFS=`awk -F, -v nnode=$NNODE -v nrun=0 -v mdofs=0 -v c=$CPUCOUNT\
+      '($2==nnode){nrun=nrun+1;mdofs=mdofs+$13;}\
+        END{print mdofs/(nrun==0?1:nrun)/1000000*c/($9==0?1:$9);}' $CSVSMALL`
+      if false; then
+      if [ "$SOLVE_MDOFS" != "0" ]; then
+        echo " Solver: "$SOLVE_MDOFS" MDOF/s with "$NDOF" DOF models..."
+      fi
+      fi
+    fi
+  done;
 fi
 # Check if any medium model CSV lines have N > C
 CSV_HAS_MEDIUM_PART_TEST=`awk -F, -v e=$MED_NELEM -v c=$CPUCOUNT\
