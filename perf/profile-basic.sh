@@ -233,71 +233,85 @@ if [ -f $CSVFILE ]; then
   printf " %7i   : Large test model test repeats\n" $REPEAT_TEST_N >> $PROFILE
   printf " %7i   : Large test iterations\n" $ITERS >> $PROFILE
 fi
-# Small model tests
-P=2;
-S=100; X=2; N=1;
-HIX=0; CIX=0;
-#LIST_C=(16 8 4 2 1)
 
-# Get all factors of the number of cores
-for I in $(seq $CPUCOUNT -1 1); do
- [ $(expr $CPUCOUNT / $I \* $I) == $CPUCOUNT ] && LIST_C=$LIST_C" "$I
-done
-#for C in $LIST_C; do echo C is $C; done
-#for H in $LIST_HH; do echo H is $H; done
-#exit
-if true; then
-if [ -f $CSVSMALL ]; then rm $CSVSMALL; fi
-while (( NDOF < MAX_SIZE && X > 1 )); do
-  H=${LIST_H[HIX]}
-  X=$CPUCOUNT;
-  C=$(( $CPUCOUNT / X ))
-  N=$C;
-  MESHNAME="uhxt"$H"p"$P"n"$N
-  MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
-  echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
-  $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
-  NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
-  NDOF=$(( $NNODE * 3 ))
-  #ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
-  #if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
-  #echo $(( $NDOF * $X )) '<' $(( $MAX_SIZE ))
-  S=$(( 100 * 1000 / $NDOF ))
-  if (( $S < 1 ));then S=1; fi
-  if [ $(( $NDOF * $X )) -lt $(( $MAX_SIZE )) ]; then
-  if [ -f $MESH"_1.fmr" ]; then
-    EXE=$EXEDIR"/femerq-"$CPUMODEL"-"$CSTR" -c"$C" -r"$RTOL" -p "$MESH
-    echo $REPEAT_TEST_N" repeats of "$X"x"$S $EXE
-    #START=`date +%s.%N`
-    for I in $(seq 1 $REPEAT_TEST_N ); do
-      for IX in $( seq 1 $X ); do
-        perf/exe_seq.sh $S "$EXE" >>$CSVSMALL &
-      done
-      wait
+if true; then rm $CSVSMALL; fi
+if [ ! -f $CSVSMALL ]; then # Run small model tests
+  P=2;
+  S=100; X=2; N=1;
+  #LIST_C=(16 8 4 2 1)
+  # Get all factors of the number of cores
+  IX=0;
+  for I in $(seq $CPUCOUNT -1 1); do
+    [ $(expr $CPUCOUNT / $I \* $I) == $CPUCOUNT ] && LIST_C=$LIST_C" "$I
+    [ $(expr $CPUCOUNT / $I \* $I) == $CPUCOUNT ] && ARRAY_X[$IX]=$I
+    [ $(expr $CPUCOUNT / $I \* $I) == $CPUCOUNT ] && IX=$(( $IX + 1 ))
+  done
+  #for C in $LIST_C; do echo C is $C; done
+  #for H in $LIST_HH; do echo H is $H; done
+  #for XIX in $(seq 0 3); do echo C is ${ARRAY_C[XIX]}; done
+  HIX=0; XIX=0;
+  if true; then
+  while (( NDOF < MAX_SIZE && X > 1 )); do
+    H=${LIST_H[HIX]}
+    X=${ARRAY_X[XIX]}
+    C=$(( $CPUCOUNT / $X ))
+    N=$C;
+    MESHNAME="uhxt"$H"p"$P"n"$N
+    MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
+    echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
+    $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
+    NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
+    NDOF=$(( $NNODE * 3 ))
+    #ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
+    #if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
+    #echo $(( $NDOF * $X )) '<' $(( $MAX_SIZE ))
+    S=$(( 100 * 1000 / $NDOF ))
+    if (( $S < 1 ));then S=1; fi
+    while [ $(( $NDOF * $X )) -gt $(( $MAX_SIZE )) ]; do
+      XIX=$(( $XIX + 1 ));
+      X=${ARRAY_X[XIX]}
+      if [ -z "$X" ];then X=0; fi
     done
-    #STOP=`date +%s.%N`
-    #TIME_SEC=`printf "%f-%f\n" $STOP $START | bc`
-    #
-    #MDOF_TOTAL=`awk -F, -v n=$NNODE -v c=$N -v dof=0\
-    #'($2==n)&&($9==c){dof=dof+$3*$5;}\
-    #  END{print dof/1000000;}' $CSVSMALL`
-    #TOTAL_MDOFS=`printf "%f/%f\n" $MDOF_TOTAL $TIME_SEC | bc`
-    #echo "Overall: "$TOTAL_MDOFS" MDOF/s ("$MDOF_TOTAL\
-    #"MDOF in "$TIME_SEC" sec)"
-    #
-    SOLVE_MDOFS=`awk -F, -v nnode=$NNODE -v c=$C -v nrun=0 -v mdofs=0 -v x=$X\
-    '($2==nnode)&&($9==c){nrun=nrun+1;mdofs=mdofs+$13;}\
-      END{print mdofs/nrun/1000000*x;}' $CSVSMALL`
-    echo " Solver: "$SOLVE_MDOFS" MDOF/s at "$X"x" $NDOF" DOF concurrent models..." 
+    if [ $(( $NDOF * $X )) -gt 1 ]; then
+      C=$(( $CPUCOUNT / $X ))
+      N=$C;
+      MESHNAME="uhxt"$H"p"$P"n"$N
+      MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
+      echo "Partitioning, and converting "$MESHNAME", if necessary..."
+      $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
+      if [ $(( $NDOF * $X )) -lt $(( $MAX_SIZE )) ]; then
+      if [ -f $MESH"_1.fmr" ]; then
+        EXE=$EXEDIR"/femerq-"$CPUMODEL"-"$CSTR" -c"$C" -r"$RTOL" -p "$MESH
+        echo "Running "$REPEAT_TEST_N" repeats of "$S"x"$X" concurrent "$NDOF" NDOF models..."
+        echo $EXE
+        #START=`date +%s.%N`
+        for I in $(seq 1 $REPEAT_TEST_N ); do
+          for IX in $( seq 1 $X ); do
+            perf/exe_seq.sh $S "$EXE" >>$CSVSMALL &
+          done
+          wait
+        done
+        #STOP=`date +%s.%N`
+        #TIME_SEC=`printf "%f-%f\n" $STOP $START | bc`
+        #
+        #MDOF_TOTAL=`awk -F, -v n=$NNODE -v c=$N -v dof=0\
+        #'($2==n)&&($9==c){dof=dof+$3*$5;}\
+        #  END{print dof/1000000;}' $CSVSMALL`
+        #TOTAL_MDOFS=`printf "%f/%f\n" $MDOF_TOTAL $TIME_SEC | bc`
+        #echo "Overall: "$TOTAL_MDOFS" MDOF/s ("$MDOF_TOTAL\
+        #"MDOF in "$TIME_SEC" sec)"
+        #
+        SOLVE_MDOFS=`awk -F, -v nnode=$NNODE -v c=$C -v nrun=0 -v mdofs=0 -v x=$X\
+        '($2==nnode)&&($9==c){nrun=nrun+1;mdofs=mdofs+$13;}\
+          END{print mdofs/nrun/1000000*x;}' $CSVSMALL`
+        echo " Solver: "$SOLVE_MDOFS" MDOF/s at "$X"x concurrent "$NDOF" DOF models..." 
+      fi
+      fi
+    fi
+    HIX=$(( $HIX + 1 ))
+  done
   fi
-  fi
-  HIX=$(( $HIX + 1 ))
-done
 fi
-#
-#
-#
-#
 # Check if any medium model CSV lines have N > C
 CSV_HAS_MEDIUM_PART_TEST=`awk -F, -v e=$MED_NELEM -v c=$CPUCOUNT\
   '($1==e)&&($9==c)&&($4>$9){print $4; exit}' $CSVFILE`
