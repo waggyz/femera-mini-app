@@ -15,6 +15,7 @@ PERFDIR="perf"
 PROFILE=$PERFDIR/"uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".pro"
 LOGFILE=$PERFDIR/"uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".log"
 CSVFILE=$PERFDIR/"uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv"
+CSVSMALL=$PERFDIR/"small-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv"
 #
 if [ -d "/hpnobackup1/dwagner5/femera-test/cube" ]; then
   MESHDIR=/hpnobackup1/dwagner5/femera-test/cube
@@ -24,7 +25,7 @@ fi
 echo "Mesh Directory: "$MESHDIR"/"
 #
 HAS_GNUPLOT=`which gnuplot`
-if [[ `hostname` == k3* ]]; then # Nasty little hack
+if [[ `hostname` == k3* ]]; then #FIXME Nasty little hack
   MEM=30000000000
 else
   MEM=`free -b  | grep Mem | awk '{print $7}'`
@@ -45,6 +46,7 @@ echo Largest Test Model: $TET10_MAX Tet10, $NODE_MAX Nodes, $MDOF_MAX MDOF
 #
 MESH_N=21
 LIST_H=(2 3 4 5 7 9   12 15 21 26 33   38 45 56 72 96   123 156 205 265 336)
+LIST_HH="2 3 4 5 7 9   12 15 21 26 33   38 45 56 72 96   123 156 205 265 336"
 NOMI_UDOF=(500 1000 2500 5000 10000 25000\
  50000 100000 250000 500000 1000000\
  1500000 2500000 5000000 10000000 25000000\
@@ -186,7 +188,7 @@ if [ -f $CSVFILE ]; then
   echo "        Basic Performance Profile Test Results" >> $PROFILE
   echo "  --------------------------------------------------" >> $PROFILE
   printf "        %6.1f : Basic performance maximum [MDOF/s]\n" $MAX_MDOFS >> $PROFILE
-  printf "%12i   : Basic system Size [DOF]\n" $MAX_SIZE >> $PROFILE
+  printf "%12i   : Basic system size [DOF]\n" $MAX_SIZE >> $PROFILE
   printf "%12i   : Basic model nodes\n" $MAX_NODES >> $PROFILE
   printf "%12i   : Basic tet10 Elements\n" $MAX_ELEMS >> $PROFILE
   #
@@ -215,22 +217,79 @@ if [ -f $CSVFILE ]; then
   echo >> $PROFILE
   echo "  Medium Model Partitioning Test Parameters" >> $PROFILE
   echo "  -----------------------------------------" >> $PROFILE
-  printf " %9i   : Medium model size [DOF]\n" $MED_NUDOF >> $PROFILE
-  printf " %9i   : Medium model nodes\n" $MED_NNODE >> $PROFILE
-  printf " %9i   : Medium tet10 Elements\n" $MED_NELEM >> $PROFILE
-  printf " %9i   : Medium model test repeats\n" $REPEAT_TEST_N >> $PROFILE
-  printf " %9i   : Medium model iterations\n" $MED_ITERS >> $PROFILE
+  printf " %9i   : Medium test model size [DOF]\n" $MED_NUDOF >> $PROFILE
+  printf " %9i   : Medium test model nodes\n" $MED_NNODE >> $PROFILE
+  printf " %9i   : Medium test tet10 Elements\n" $MED_NELEM >> $PROFILE
+  printf " %9i   : Medium test iterations\n" $MED_ITERS >> $PROFILE
+  printf " %9i   : Medium test repeats\n" $REPEAT_TEST_N >> $PROFILE
   #
   ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $MDOFS $MUDOF | bc`
   if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
   echo "Writing large model partitioning test parameters: "$PROFILE"..." >> $LOGFILE
   echo >> $PROFILE
-  echo "  Large Model Partitioning Test Parameters" >> $PROFILE
-  echo "  ----------------------------------------" >> $PROFILE
-  printf " %9.1f : Large model size [MDOF]\n" $MUDOF >> $PROFILE
-  printf " %7i   : Large model test repeats\n" $REPEAT_TEST_N >> $PROFILE
-  printf " %7i   : Large model iterations\n" $ITERS >> $PROFILE
+  echo "    Large Model Partitioning Test Parameters" >> $PROFILE
+  echo "  --------------------------------------------" >> $PROFILE
+  printf " %9.1f : Large test model size [MDOF]\n" $MUDOF >> $PROFILE
+  printf " %7i   : Large test model test repeats\n" $REPEAT_TEST_N >> $PROFILE
+  printf " %7i   : Large test iterations\n" $ITERS >> $PROFILE
 fi
+# Small model tests
+P=2;
+S=100; X=2; N=1;
+HIX=0; CIX=0;
+#LIST_C=(16 8 4 2 1)
+
+# Get all factors of the number of cores
+for I in $(seq $CPUCOUNT -1 1); do
+ [ $(expr $CPUCOUNT / $I \* $I) == $CPUCOUNT ] && LIST_C=$LIST_C" "$I
+done
+for C in $LIST_C; do echo C is $C; done
+for H in $LIST_HH; do echo H is $H; done
+exit
+while (( NDOF < MAX_SIZE && C > 1 )); do
+  H=${LIST_H[HIX]}
+  MESHNAME="uhxt"$H"p"$P"n"$N
+  MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
+  echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
+  $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
+  NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
+  NDOF=$(( $NNODE * 3 ))
+  #ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
+  #if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
+  #echo $(( $NDOF * $X )) '<' $(( $MAX_SIZE ))
+  if [ $(( $NDOF * $X )) -lt $(( $MAX_SIZE )) ]; then
+  if [ -f $MESH"_1.fmr" ]; then
+    EXE=$EXEDIR"/femerq-"$CPUMODEL"-"$CSTR" -c"$N" -r"$RTOL" -p "$MESH
+    echo $X"x"$S $EXE
+    #START=`date +%s.%N`
+    for I in $(seq 1 $REPEAT_TEST_N ); do
+      for IX in $( seq 1 $X ); do
+        perf/exe_seq.sh $S "$EXE" >>$CSVSMALL &
+      done
+      wait
+    done
+    #STOP=`date +%s.%N`
+    #TIME_SEC=`printf "%f-%f\n" $STOP $START | bc`
+    #
+    #MDOF_TOTAL=`awk -F, -v n=$NNODE -v c=$N -v dof=0\
+    #'($2==n)&&($9==c){dof=dof+$3*$5;}\
+    #  END{print dof/1000000;}' $CSVSMALL`
+    #TOTAL_MDOFS=`printf "%f/%f\n" $MDOF_TOTAL $TIME_SEC | bc`
+    #echo "Overall: "$TOTAL_MDOFS" MDOF/s ("$MDOF_TOTAL\
+    #"MDOF in "$TIME_SEC" sec)"
+    #
+    SOLVE_MDOFS=`awk -F, -v n=$NNODE -v c=$N -v N=0 -v mdofs=0 -v x=$X\
+    '($2==n)&&($9==c){N=N+1;mdofs=mdofs+$13;}\
+      END{print mdofs/N/1000000*x;}' $CSVSMALL`
+    echo " Solver: "$SOLVE_MDOFS" MDOF/s"
+  fi
+  fi
+done
+exit
+#
+#
+#
+#
 #
 # Check if any medium model CSV lines have N > C
 CSV_HAS_MEDIUM_PART_TEST=`awk -F, -v e=$MED_NELEM -v c=$CPUCOUNT\
@@ -329,10 +388,15 @@ if [ -n "$CSV_HAS_LARGE_PART_TEST" ]; then
   LARGE_ELEM_PART=${SIZE_PERF_MAX%% *}
   echo "Large model performance peak: "$LARGE_MDOFS" MDOF/s"\
     "at "$LARGE_ELEM_PART" elem/part."
-  LARGE_ELEM=$(( $LARGE_ELEM_PART * $CPUCOUNT ))
-  LARGE_UDOF=$(( $LARGE_ELEM * $DOF_PER_ELEM ))
+  #LARGE_ELEM=$(( $LARGE_ELEM_PART * $CPUCOUNT ))
+  #LARGE_UDOF=$(( $LARGE_ELEM * $DOF_PER_ELEM ))
+  #echo "Large model size initial estimate:"\
+  #  ">"$LARGE_ELEM" elem,"$LARGE_UDOF" DOF."
+  LARGE_ELEM_MIN=$(( $MED_PART * $LARGE_ELEM_PART ))
+  LARGE_UDOF_MIN=$(( $LARGE_ELEM_MIN * $DOF_PER_ELEM ))
+  #LARGE_MDOF_MIN=$(( $LARGE_UDOF_MIN / 1000000 ))
   echo "Large model size initial estimate:"\
-    ">"$LARGE_ELEM" elem,"$LARGE_UDOF" DOF."
+    ">"$LARGE_ELEM_MIN" elem,"$LARGE_UDOF_MIN" DOF."
   if [ ! -z "$HAS_GNUPLOT" ]; then
     MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
     echo "Plotting large model partitioning profile data: "$CSVFILE"..." >> $LOGFILE
@@ -353,9 +417,6 @@ if [ -n "$CSV_HAS_LARGE_PART_TEST" ]; then
   else
     echo >> $PROFILE
   fi
-  LARGE_ELEM_MIN=$(( $MED_PART * $LARGE_ELEM_PART ))
-  LARGE_UDOF_MIN=$(( $LARGE_ELEM_MIN * $DOF_PER_ELEM ))
-  #LARGE_MDOF_MIN=$(( $LARGE_UDOF_MIN / 1000000 ))
   echo "Writing large model partitioning test results: "$PROFILE"..." >> $LOGFILE
   echo "        Large Model Partitioning Test Results" >> $PROFILE
   echo "  -------------------------------------------------" >> $PROFILE
