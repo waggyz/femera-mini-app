@@ -250,7 +250,9 @@ if true; then
 if [ -f $CSVSMALL ]; then rm $CSVSMALL; fi
 while (( NDOF < MAX_SIZE && X > 1 )); do
   H=${LIST_H[HIX]}
-  C=1; X=2;
+  X=$CPUCOUNT;
+  C=$(( $CPUCOUNT / X ))
+  N=$C;
   MESHNAME="uhxt"$H"p"$P"n"$N
   MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
   echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
@@ -261,10 +263,11 @@ while (( NDOF < MAX_SIZE && X > 1 )); do
   #if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
   #echo $(( $NDOF * $X )) '<' $(( $MAX_SIZE ))
   S=$(( 100 * 1000 / $NDOF ))
+  if (( $S < 1 ));then S=1; fi
   if [ $(( $NDOF * $X )) -lt $(( $MAX_SIZE )) ]; then
   if [ -f $MESH"_1.fmr" ]; then
-    EXE=$EXEDIR"/femerq-"$CPUMODEL"-"$CSTR" -c"$N" -r"$RTOL" -p "$MESH
-    echo $X"x"$S $EXE
+    EXE=$EXEDIR"/femerq-"$CPUMODEL"-"$CSTR" -c"$C" -r"$RTOL" -p "$MESH
+    echo $REPEAT_TEST_N" repeats of "$X"x"$S $EXE
     #START=`date +%s.%N`
     for I in $(seq 1 $REPEAT_TEST_N ); do
       for IX in $( seq 1 $X ); do
