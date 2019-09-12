@@ -234,7 +234,7 @@ if [ -f $CSVFILE ]; then
   printf " %7i   : Large test iterations\n" $ITERS >> $PROFILE
 fi
 
-if true; then rm $CSVSMALL; fi
+if false; then rm $CSVSMALL; fi
 if [ ! -f $CSVSMALL ]; then # Run small model tests
   P=2;
   S=100; X=2; N=1;
@@ -265,14 +265,14 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
     #ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
     #if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
     #echo $(( $NDOF * $X )) '<' $(( $MAX_SIZE ))
-    S=$(( 100 * 1000 / $NDOF ))
+    S=$(( 50 * 1000 / $NDOF ))
     if (( $S < 1 ));then S=1; fi
     while (( $NDOF * $X > $MAX_SIZE && $X > 0 )); do
       XIX=$(( $XIX + 1 ));
       X=${ARRAY_X[XIX]}
       if [ -z "$X" ];then X=0; fi
     done
-    if [ $(( $NDOF * $X )) -gt 1 ]; then
+    if [ $X -gt 1 ]; then
       C=$(( $CPUCOUNT / $X ))
       N=$C;
       MESHNAME="uhxt"$H"p"$P"n"$N
