@@ -246,9 +246,11 @@ done
 #for C in $LIST_C; do echo C is $C; done
 #for H in $LIST_HH; do echo H is $H; done
 #exit
-if false; then
-while (( NDOF < MAX_SIZE && C > 1 )); do
+if true; then
+if [ -f $CSVSMALL ]; then rm $CSVSMALL; fi
+while (( NDOF < MAX_SIZE && X > 1 )); do
   H=${LIST_H[HIX]}
+  C=1; X=2;
   MESHNAME="uhxt"$H"p"$P"n"$N
   MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
   echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
@@ -258,10 +260,11 @@ while (( NDOF < MAX_SIZE && C > 1 )); do
   #ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
   #if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
   #echo $(( $NDOF * $X )) '<' $(( $MAX_SIZE ))
+  S=$(( 100 * 1000 / $NDOF ))
   if [ $(( $NDOF * $X )) -lt $(( $MAX_SIZE )) ]; then
   if [ -f $MESH"_1.fmr" ]; then
     EXE=$EXEDIR"/femerq-"$CPUMODEL"-"$CSTR" -c"$N" -r"$RTOL" -p "$MESH
-#    echo $X"x"$S $EXE
+    echo $X"x"$S $EXE
     #START=`date +%s.%N`
     for I in $(seq 1 $REPEAT_TEST_N ); do
       for IX in $( seq 1 $X ); do
@@ -279,12 +282,13 @@ while (( NDOF < MAX_SIZE && C > 1 )); do
     #echo "Overall: "$TOTAL_MDOFS" MDOF/s ("$MDOF_TOTAL\
     #"MDOF in "$TIME_SEC" sec)"
     #
-    SOLVE_MDOFS=`awk -F, -v n=$NNODE -v c=$N -v N=0 -v mdofs=0 -v x=$X\
-    '($2==n)&&($9==c){N=N+1;mdofs=mdofs+$13;}\
-      END{print mdofs/N/1000000*x;}' $CSVSMALL`
-    echo " Solver: "$SOLVE_MDOFS" MDOF/s"
+    SOLVE_MDOFS=`awk -F, -v nnode=$NNODE -v c=$C -v nrun=0 -v mdofs=0 -v x=$X\
+    '($2==nnode)&&($9==c){nrun=nrun+1;mdofs=mdofs+$13;}\
+      END{print mdofs/nrun/1000000*x;}' $CSVSMALL`
+    echo " Solver: "$SOLVE_MDOFS" MDOF/s at "$X"x" $NDOF" DOF concurrent models..." 
   fi
   fi
+  HIX=$(( $HIX + 1 ))
 done
 fi
 #
