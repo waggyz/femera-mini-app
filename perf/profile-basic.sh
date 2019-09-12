@@ -243,9 +243,10 @@ HIX=0; CIX=0;
 for I in $(seq $CPUCOUNT -1 1); do
  [ $(expr $CPUCOUNT / $I \* $I) == $CPUCOUNT ] && LIST_C=$LIST_C" "$I
 done
-for C in $LIST_C; do echo C is $C; done
-for H in $LIST_HH; do echo H is $H; done
-exit
+#for C in $LIST_C; do echo C is $C; done
+#for H in $LIST_HH; do echo H is $H; done
+#exit
+if false; then
 while (( NDOF < MAX_SIZE && C > 1 )); do
   H=${LIST_H[HIX]}
   MESHNAME="uhxt"$H"p"$P"n"$N
@@ -260,7 +261,7 @@ while (( NDOF < MAX_SIZE && C > 1 )); do
   if [ $(( $NDOF * $X )) -lt $(( $MAX_SIZE )) ]; then
   if [ -f $MESH"_1.fmr" ]; then
     EXE=$EXEDIR"/femerq-"$CPUMODEL"-"$CSTR" -c"$N" -r"$RTOL" -p "$MESH
-    echo $X"x"$S $EXE
+#    echo $X"x"$S $EXE
     #START=`date +%s.%N`
     for I in $(seq 1 $REPEAT_TEST_N ); do
       for IX in $( seq 1 $X ); do
@@ -285,8 +286,7 @@ while (( NDOF < MAX_SIZE && C > 1 )); do
   fi
   fi
 done
-exit
-#
+fi
 #
 #
 #
