@@ -335,7 +335,7 @@ if [ -f $CSVSMALL ]; then
           ($2==nnode){nrun+=1;t10+=$10;t11+=$11;t12+=$12;mdofs+=$13;\
             e=$1;n=$2;f=$3;p=$4;i1=$5;i2=$6;r1=$7;r2=$8;cc=$9;}\
           END{print e,n,f,p,i1,i2,r1,r2,cc,t10/nrun,t11/nrun,t12/nrun,\
-          mdofs/(nrun==0?1:nrun)*c/($9==0?1:$9)}'\
+          mdofs/(nrun==0?1:nrun)*c/(cc==0?1:cc)}'\
           $CSVSMALL >> $CSVPROFILE
       fi
     fi
