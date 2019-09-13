@@ -324,15 +324,15 @@ if [ -f $CSVSMALL ]; then
       NNODE=`grep -m1 -A1 -i node $MESH".msh2" | tail -n1`
       NDOF=$(( $NNODE * 3 ))
       SOLVE_MDOFS=`awk -F, -v nnode=$NNODE -v nrun=0 -v mdofs=0 -v c=$CPUCOUNT\
-      '($2==nnode){nrun=nrun+1;mdofs+=$13;}\
-        END{print mdofs/(nrun==0?1:nrun)/1000000*c/($9==0?1:$9);}' $CSVSMALL`
+      '($2==nnode){nrun=nrun+1;mdofs+=$13;cc=$9;}\
+        END{print mdofs/(nrun==0?1:nrun)/1000000*c/(cc==0?1:cc);}' $CSVSMALL`
       if [ "$SOLVE_MDOFS" != "0" ]; then
         if true; then
           echo "Average: "$SOLVE_MDOFS" MDOF/s with "$NDOF" DOF models..."
         fi
         awk -F, -v nnode=$NNODE -v nrun=0 -v mdofs=0 -v c=$CPUCOUNT\
           'BEGIN{OFS=",";t10=0;t11=0;t12=0;}\
-          ($2==nnode){nrun+=1;t10+=$10;t11+=$11;t12+=$12;mdofs+=$13;\
+          ($2==nnode)&&($9<c){nrun+=1;t10+=$10;t11+=$11;t12+=$12;mdofs+=$13;\
             e=$1;n=$2;f=$3;p=$4;i1=$5;i2=$6;r1=$7;r2=$8;cc=$9;}\
           END{print e,n,f,p,i1,i2,r1,r2,cc,t10/nrun,t11/nrun,t12/nrun,\
           mdofs/(nrun==0?1:nrun)*c/(cc==0?1:cc)}'\
