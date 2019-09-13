@@ -180,7 +180,8 @@ if [ -f $CSVFILE ]; then
     plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
     using 3:(\$4 != \$9 ? 1/0:\$13/1e6)\
     with points pointtype 0\
-    title '"$CPUCOUNT" Partitions';"\
+    title '"$CPUCOUNT" Partitions';\
+    "\
     | tee -a $PROFILE ;#| grep --no-group-separator -C25 --color=always '\*'
   else
     echo >> $PROFILE
@@ -351,14 +352,16 @@ if [ -f $CSVSMALL ]; then
     set key inside top right;\
     set title 'Femera Small Model Elastic Performance Tests [MDOF/s]';\
     set xlabel 'System Size [DOF]';\
-    plot '"$CSVSMALL"'\
-    using 3:((\$4*\$9)<$CPUCOUNT""?"$CPUCOUNT"/\$9*\$13/1e6:1/0)\
-    with points pointtype 0\
-    title 'Performance';\
-    plot '"$CSVPROFILE"'\
+    plot \
+    '"$CSVPROFILE"'\
     using 3:(\$13/1e6)\
     with points pointtype 19\
-    title 'Average';"\
+    title 'Average',\
+    '"$CSVSMALL"'\
+    using 3:((\$4*\$9)<$CPUCOUNT""?"$CPUCOUNT"/\$9*\$13/1e6:1/0)\
+    with points pointtype 0\
+    title 'Tests';\
+    "\
     | tee -a $PROFILE ;#| grep --no-group-separator -C25 --color=always '\*'
   else
     echo >> $PROFILE
