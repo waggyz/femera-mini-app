@@ -16,6 +16,7 @@ PROFILE=$PERFDIR/"uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".pro"
 LOGFILE=$PERFDIR/"uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".log"
 CSVFILE=$PERFDIR/"uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv"
 CSVSMALL=$PERFDIR/"small-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv"
+CSVPROFILE=$PERFDIR/"profile-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv"
 #
 if [ -d "/hpnobackup1/dwagner5/femera-test/cube" ]; then
   MESHDIR=/hpnobackup1/dwagner5/femera-test/cube
@@ -322,15 +323,46 @@ if [ -f $CSVSMALL ]; then
       NNODE=`grep -m1 -A1 -i node $MESH".msh2" | tail -n1`
       NDOF=$(( $NNODE * 3 ))
       SOLVE_MDOFS=`awk -F, -v nnode=$NNODE -v nrun=0 -v mdofs=0 -v c=$CPUCOUNT\
-      '($2==nnode){nrun=nrun+1;mdofs=mdofs+$13;}\
+      '($2==nnode){nrun=nrun+1;mdofs+=$13;}\
         END{print mdofs/(nrun==0?1:nrun)/1000000*c/($9==0?1:$9);}' $CSVSMALL`
-      if false; then
       if [ "$SOLVE_MDOFS" != "0" ]; then
-        echo " Solver: "$SOLVE_MDOFS" MDOF/s with "$NDOF" DOF models..."
-      fi
+        if true; then
+          echo "Average: "$SOLVE_MDOFS" MDOF/s with "$NDOF" DOF models..."
+        fi
+        awk -F, -v nnode=$NNODE -v nrun=0 -v mdofs=0 -v c=$CPUCOUNT\
+          'BEGIN{OFS=",";t10=0;t11=0;t12=0;}\
+          ($2==nnode){nrun+=1;t10+=$10;t11+=$11;t12+=$12;mdofs+=$13;\
+            e=$1;n=$2;f=$3;p=$4;i1=$5;i2=$6;r1=$7;r2=$8;cc=$9;}\
+          END{print e,n,f,p,i1,i2,r1,r2,cc,t10/nrun,t11/nrun,t12/nrun,\
+          mdofs/(nrun==0?1:nrun)*c/($9==0?1:$9)}'\
+          $CSVSMALL >> $CSVPROFILE
       fi
     fi
   done;
+  if [ ! -z "$HAS_GNUPLOT" ]; then
+    echo "Plotting small model profile data: "$CSVSMALL"..." >> $LOGFILE
+    gnuplot -e  "\
+    set terminal dumb noenhanced size 79,25;\
+    set datafile separator ',';\
+    set tics scale 0,0;\
+    set logscale x;\
+    set xrange [1e3:1.05e9];\
+    set yrange [0:];\
+    set key inside top right;\
+    set title 'Femera Small Model Elastic Performance Tests [MDOF/s]';\
+    set xlabel 'System Size [DOF]';\
+    plot '"$CSVSMALL"'\
+    using 3:((\$4*\$9)<$CPUCOUNT""?"$CPUCOUNT"/\$9*\$13/1e6:1/0)\
+    with points pointtype 0\
+    title 'Performance';\
+    plot '"$CSVPROFILE"'\
+    using 3:(\$13/1e6)\
+    with points pointtype 19\
+    title 'Average';"\
+    | tee -a $PROFILE ;#| grep --no-group-separator -C25 --color=always '\*'
+  else
+    echo >> $PROFILE
+  fi
 fi
 # Check if any medium model CSV lines have N > C
 CSV_HAS_MEDIUM_PART_TEST=`awk -F, -v e=$MED_NELEM -v c=$CPUCOUNT\
@@ -361,10 +393,10 @@ if [ -n "$CSV_HAS_MEDIUM_PART_TEST" ]; then
   MED_MDOFS=${SIZE_PERF_MAX##* }
   MED_PART=${SIZE_PERF_MAX%% *}
   echo "Medium model performance peak: "$MED_MDOFS" MDOF/s"\
-    "at "$MED_PART" parts."
+    "with "$MED_PART" partitions."
   if [ ! -z "$HAS_GNUPLOT" ]; then
     #MED_MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
-    echo "Plotting large model partitioning profile data: "$CSVFILE"..." >> $LOGFILE
+    echo "Plotting medium model partitioning profile data: "$CSVFILE"..." >> $LOGFILE
     gnuplot -e  "\
     set terminal dumb noenhanced size 79,25;\
     set datafile separator ',';\
@@ -390,6 +422,7 @@ if [ -n "$CSV_HAS_MEDIUM_PART_TEST" ]; then
   printf " %9i : Medium model performance [MDOF/s]\n" $MED_MDOFS >> $PROFILE
     >> $PROFILE
 fi
+#if (( $MED_PART > $CPUCOUNT ));then
 # Check if any large model CSV lines have N > C
 LARGE_NELEM=`head -n1 $CSVFILE | awk -F, '{ print $1 }'`
 CSV_HAS_LARGE_PART_TEST=`awk -F, -v e=$LARGE_NELEM -v c=$CPUCOUNT\
@@ -428,7 +461,7 @@ if [ -n "$CSV_HAS_LARGE_PART_TEST" ]; then
   LARGE_MDOFS=${SIZE_PERF_MAX##* }
   LARGE_ELEM_PART=${SIZE_PERF_MAX%% *}
   echo "Large model performance peak: "$LARGE_MDOFS" MDOF/s"\
-    "at "$LARGE_ELEM_PART" elem/part."
+    "with "$LARGE_ELEM_PART" elem/part."
   #LARGE_ELEM=$(( $LARGE_ELEM_PART * $CPUCOUNT ))
   #LARGE_UDOF=$(( $LARGE_ELEM * $DOF_PER_ELEM ))
   #echo "Large model size initial estimate:"\
@@ -467,4 +500,5 @@ if [ -n "$CSV_HAS_LARGE_PART_TEST" ]; then
   printf " %9i : Large test model size [DOF]\n" $LARGE_UDOF >> $PROFILE
   printf " %9i : Large test model performance [MDOF/s]\n" $LARGE_MDOFS >> $PROFILE
 fi
+#fi
 #
