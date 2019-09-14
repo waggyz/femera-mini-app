@@ -503,7 +503,7 @@ if [ -n "$CSV_HAS_LARGE_PART_TEST" ]; then
   printf " %9i : Large test model size [DOF]\n" $LARGE_UDOF >> $PROFILE
   printf " %9i : Large test model performance [MDOF/s]\n" $LARGE_MDOFS >> $PROFILE
 fi
-CSV_HAS_FINAL_TEST="true"
+CSV_HAS_FINAL_TEST=""
 if [ -n "$CSV_HAS_FINAL_TEST" ]; then
   echo Running final profile tests...
   for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
@@ -534,7 +534,7 @@ if [ -n "$CSV_HAS_FINAL_TEST" ]; then
   done
 fi
 CSV_HAS_FINAL_TEST=""
-if [ "$CSV_HAS_FINAL_TEST" ]; then
+if [ -n "$CSV_HAS_FINAL_TEST" ]; then
   for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
     C=$CPUCOUNT
     H=${LIST_H[I]}
