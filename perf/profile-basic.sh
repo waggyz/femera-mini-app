@@ -506,13 +506,14 @@ fi
 if true; then
   echo Running final profile tests...
   for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
+    C=$CPUCOUNT
     H=${LIST_H[I]}
     N=1;
     MESHNAME="uhxt"$H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
     NELEM=`grep -m1 -A1 -i elem $MESH".msh2" | tail -n1`
     if (( $NELEM > $MED_NELEM )); then
-      N=$(( $NELEM / $LARGE_ELEM_PART ))
+      N=$(( $NELEM / $LARGE_ELEM_PART / $C * $C ))
       if (( $N < $MED_PART )); then N=$MED_PART; fi
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
@@ -533,12 +534,13 @@ if true; then
 fi
 if true; then
   for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
+    C=$CPUCOUNT
     H=${LIST_H[I]}
     N=1;
     MESHNAME="uhxt"$H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
     NELEM=`grep -m1 -A1 -i elem $MESH".msh2" | tail -n1`
-    N=$(( $NELEM / $LARGE_ELEM_PART ))
+    N=$(( $NELEM / $LARGE_ELEM_PART / $C * $C ))
     if (( $N < $MED_PART )); then N=$MED_PART; fi
     awk -F, -v nelem=$NELEM -v parts=$N\
       'BEGIN{OFS=",";dofs=0;}\
