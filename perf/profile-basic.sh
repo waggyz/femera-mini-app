@@ -315,7 +315,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
   fi
 fi
 if [ -f $CSVSMALL ]; then
-  if [-f $CSVPROFILE ]; then rm $CSVPROFILE; fi
+  if [ -f $CSVPROFILE ]; then rm $CSVPROFILE; fi
   for H in $LIST_HH; do
     X="XXX"
     N=1;
