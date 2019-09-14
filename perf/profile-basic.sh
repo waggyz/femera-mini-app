@@ -315,6 +315,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
   fi
 fi
 if [ -f $CSVSMALL ]; then
+  if [-f $CSVPROFILE ]; then rm $CSVPROFILE; fi
   for H in $LIST_HH; do
     X="XXX"
     N=1;
@@ -533,7 +534,7 @@ if [ -n "$CSV_HAS_FINAL_TEST" ]; then
     fi
   done
 fi
-CSV_HAS_FINAL_TEST=""
+CSV_HAS_FINAL_TEST="true"
 if [ -n "$CSV_HAS_FINAL_TEST" ]; then
   for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
     C=$CPUCOUNT
