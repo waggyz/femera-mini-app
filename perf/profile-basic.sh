@@ -462,7 +462,7 @@ if [ -n "$CSV_HAS_LARGE_PART_TEST" ]; then
     END{print int((size+50)/100)*100,int(perf+0.5)}'\
     $CSVFILE`
   LARGE_MDOFS=${SIZE_PERF_MAX##* }
-  LARGE_ELEM_PART=${SIZE_PERF_MAX%% *}
+  LARGE_ELEM_PART=$(( ${SIZE_PERF_MAX%% *} /1000 *1000 ))
   echo "Large model performance peak: "$LARGE_MDOFS" MDOF/s"\
     "with "$LARGE_ELEM_PART" elem/part."
   #LARGE_ELEM=$(( $LARGE_ELEM_PART * $CPUCOUNT ))
