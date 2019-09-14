@@ -503,7 +503,8 @@ if [ -n "$CSV_HAS_LARGE_PART_TEST" ]; then
   printf " %9i : Large test model size [DOF]\n" $LARGE_UDOF >> $PROFILE
   printf " %9i : Large test model performance [MDOF/s]\n" $LARGE_MDOFS >> $PROFILE
 fi
-if true; then
+CSV_HAS_FINAL_TEST="true"
+if [ -n "$CSV_HAS_FINAL_TEST" ]; then
   echo Running final profile tests...
   for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
     C=$CPUCOUNT
@@ -532,7 +533,8 @@ if true; then
     fi
   done
 fi
-if true; then
+CSV_HAS_FINAL_TEST=""
+if [ "$CSV_HAS_FINAL_TEST" ]; then
   for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
     C=$CPUCOUNT
     H=${LIST_H[I]}
@@ -563,11 +565,15 @@ if [ ! -z "$HAS_GNUPLOT" ]; then
   set key inside top right;\
   set title 'Femera Elastic Performance Tests [MDOF/s]';\
   set xlabel 'System Size [DOF]';\
-  plot \
-  '"$CSVPROFILE"'\
-  using 3:(\$13/1e6)\
-  with points pointtype 24\
-  title 'Performance';\
+  plot\
+  '"$CSVPROFILE"' using 3:(\$4==\$9)?(\$13/1e6):0/1\
+    with points pointtype 0 title 'C=N="$CPUCOUNT"',\
+  '"$CSVPROFILE"' using 3:(\$9<$CPUCOUNT)?(\$13/1e6):0/1\
+    with points pointtype 12 title 'Small',\
+  '"$CSVPROFILE"' using 3:(\$4==$MED_PART)?(\$13/1e6):0/1\
+    with points pointtype 12 title 'Medium',\
+  '"$CSVPROFILE"' using 3:(\$4>$MED_PART)?(\$13/1e6):0/1\
+    with points pointtype 11 title 'Large';\
   "\
   | tee -a $PROFILE ;#| grep --no-group-separator -C25 --color=always '\*'
 else
