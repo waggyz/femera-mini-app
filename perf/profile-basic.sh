@@ -567,12 +567,12 @@ if [ ! -z "$HAS_GNUPLOT" ]; then
   set xlabel 'System Size [DOF]';\
   plot\
   '"$CSVPROFILE"' using 3:(\$9<$CPUCOUNT)?(\$13/1e6):0/1\
-    with points pointtype 19 title 'Small',\
+    with points pointtype 19 title 'Concurrent Small Models',\
   '"$CSVPROFILE"' using 3:(\$4==$MED_PART)?(\$13/1e6):0/1\
-    with points pointtype 13 title 'Medium',\
+    with points pointtype 13 title 'Medium Model',\
   '"$CSVPROFILE"' using 3:(\$4>$MED_PART)?(\$13/1e6):0/1\
-    with points pointtype 12 title 'Large',\
-  '"$CSVPROFILE"' using 3:(\$4==\$9)?(\$13/1e6):0/1\
+    with points pointtype 12 title 'Large Model',\
+  '"$CSVPROFILE"' using 3:(\$4==\$9)&&(\$9==$CPUCOUNT)?(\$13/1e6):0/1\
     with points pointtype 0 title 'C=N="$CPUCOUNT"';\
   "\
   | tee -a $PROFILE ;#| grep --no-group-separator -C25 --color=always '\*'
