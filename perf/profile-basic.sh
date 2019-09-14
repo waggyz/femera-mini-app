@@ -237,6 +237,7 @@ if [ -f $CSVFILE ]; then
 fi
 if false; then rm $CSVSMALL; fi
 if [ ! -f $CSVSMALL ]; then # Run small model tests
+  echo Running concurrent small model tests...
   P=2;
   S=100; X=2; N=1;
   #LIST_C=(16 8 4 2 1)
@@ -252,6 +253,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
   #for XIX in $(seq 0 3); do echo C is ${ARRAY_C[XIX]}; done
   HIX=0; XIX=0;
   if true; then
+  NDOF=0
   while (( NDOF < MAX_SIZE && X > 1 )); do
     H=${LIST_H[HIX]}
     X=${ARRAY_X[XIX]}
@@ -283,7 +285,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
       if [ $(( $NDOF * $X )) -lt $(( $MAX_SIZE )) ]; then
       if [ -f $MESH"_1.fmr" ]; then
         EXE=$EXEDIR"/femerq-"$CPUMODEL"-"$CSTR" -c"$C" -r"$RTOL" -p "$MESH
-        echo "Running "$REPEAT_TEST_N" repeats of "$S"x"$X" concurrent "$DOF" NDOF models..."
+        echo "Running "$REPEAT_TEST_N" repeats of "$S"x"$X" concurrent "$NDOF" DOF models..."
         #echo $EXE
         #START=`date +%s.%N`
         for I in $(seq 1 $REPEAT_TEST_N ); do
