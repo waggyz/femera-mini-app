@@ -327,7 +327,7 @@ if [ -f $CSVSMALL ]; then
       '($2==nnode){nrun=nrun+1;mdofs+=$13;cc=$9;}\
         END{print mdofs/(nrun==0?1:nrun)/1000000*c/(cc==0?1:cc);}' $CSVSMALL`
       if [ "$SOLVE_MDOFS" != "0" ]; then
-        if true; then
+        if false; then
           echo "Average: "$SOLVE_MDOFS" MDOF/s with "$NDOF" DOF models..."
         fi
         awk -F, -v nnode=$NNODE -v nrun=0 -v mdofs=0 -v c=$CPUCOUNT\
@@ -356,11 +356,11 @@ if [ -f $CSVSMALL ]; then
     '"$CSVPROFILE"'\
     using 3:(\$13/1e6)\
     with points pointtype 19\
-    title 'Average',\
+    title 'Small Model Average',\
     '"$CSVSMALL"'\
-    using 3:((\$4*\$9)<$CPUCOUNT""?"$CPUCOUNT"/\$9*\$13/1e6:1/0)\
+    using 3:(\$9<$CPUCOUNT""?"$CPUCOUNT"/\$9*\$13/1e6:1/0)\
     with points pointtype 0\
-    title 'Tests';\
+    title 'Small Model Tests';\
     "\
     | tee -a $PROFILE ;#| grep --no-group-separator -C25 --color=always '\*'
   else
@@ -503,5 +503,72 @@ if [ -n "$CSV_HAS_LARGE_PART_TEST" ]; then
   printf " %9i : Large test model size [DOF]\n" $LARGE_UDOF >> $PROFILE
   printf " %9i : Large test model performance [MDOF/s]\n" $LARGE_MDOFS >> $PROFILE
 fi
-#fi
+if true; then
+  echo Running final profile tests...
+  for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
+    H=${LIST_H[I]}
+    N=1;
+    MESHNAME="uhxt"$H"p"$P"n"$N
+    MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
+    NELEM=`grep -m1 -A1 -i elem $MESH".msh2" | tail -n1`
+    if (( $NELEM > $MED_NELEM )); then
+      N=$(( $NELEM / $LARGE_ELEM_PART ))
+      if (( $N < $MED_PART )); then N=$MED_PART; fi
+      MESHNAME="uhxt"$H"p"$P"n"$N
+      MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
+      echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
+      $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
+      NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
+      NDOF=$(( $NNODE * 3 ))
+      ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
+      if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
+      echo "Running "$ITERS" iterations of "$MESHNAME" ("$NDOF" DOF), "\
+        $REPEAT_TEST_N" times..."
+      for I in $(seq 1 $REPEAT_TEST_N ); do
+        $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
+          -p $MESH >> $CSVFILE
+      done
+    fi
+  done
+fi
+if true; then
+  for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
+    H=${LIST_H[I]}
+    N=1;
+    MESHNAME="uhxt"$H"p"$P"n"$N
+    MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
+    NELEM=`grep -m1 -A1 -i elem $MESH".msh2" | tail -n1`
+    N=$(( $NELEM / $LARGE_ELEM_PART ))
+    if (( $N < $MED_PART )); then N=$MED_PART; fi
+    awk -F, -v nelem=$NELEM -v parts=$N\
+      'BEGIN{OFS=",";dofs=0;}\
+      ($1==nelem)&&($4==parts)&&($13>dofs){\
+        e=$1;n=$2;f=$3;p=$4;i1=$5;i2=$6;r1=$7;r2=$8;cc=$9;}\
+        t10=$10;t11=$11;t12=$12;dofs=$13;\
+      END{print e,n,f,p,i1,i2,r1,r2,cc,t10,t11,t12,dofs}'\
+      $CSVFILE >> $CSVPROFILE
+  done
+fi
+if [ ! -z "$HAS_GNUPLOT" ]; then
+  echo "Plotting profile data: "$CSVSMALL"..." >> $LOGFILE
+  gnuplot -e  "\
+  set terminal dumb noenhanced size 79,25;\
+  set datafile separator ',';\
+  set tics scale 0,0;\
+  set logscale x;\
+  set xrange [1e3:1.05e9];\
+  set yrange [0:];\
+  set key inside top right;\
+  set title 'Femera Elastic Performance Tests [MDOF/s]';\
+  set xlabel 'System Size [DOF]';\
+  plot \
+  '"$CSVPROFILE"'\
+  using 3:(\$13/1e6)\
+  with points pointtype 24\
+  title 'Performance';\
+  "\
+  | tee -a $PROFILE ;#| grep --no-group-separator -C25 --color=always '\*'
+else
+  echo >> $PROFILE
+fi
 #
