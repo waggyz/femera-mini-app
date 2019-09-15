@@ -1,7 +1,17 @@
 #!/bin/bash
-CPUMODEL=`./cpumodel.sh`
-CPUCOUNT=`./cpucount.sh`
-CSTR=gcc
+if [ -n $1 ]; then MEM=$(( $1 * 1000000000 ));
+else MEM=`free -b  | grep Mem | awk '{print $7}'`; fi
+if [ -n $2 ]; then CPUMODEL=$2; else CPUMODEL=`./cpumodel.sh`; fi
+if [ -n $3 ]; then CPUCOUNT=$3; else CPUCOUNT=`./cpucount.sh`; fi
+if [ -n $4 ]; then CSTR=$4; else CSTR=gcc; fi
+#
+if [[ `hostname` == k3* ]]; then #FIXME Nasty little hack
+  MEM=30000000000
+#else
+#  MEM=`free -b  | grep Mem | awk '{print $7}'`
+fi
+echo `free -g  | grep Mem | awk '{print $7}'` GB Available Memory
+#
 EXEDIR="."
 GMSH2FMR=gmsh2fmr-$CPUMODEL-$CSTR
 #
@@ -26,12 +36,6 @@ fi
 echo "Mesh Directory: "$MESHDIR"/"
 #
 HAS_GNUPLOT=`which gnuplot`
-if [[ `hostname` == k3* ]]; then #FIXME Nasty little hack
-  MEM=30000000000
-else
-  MEM=`free -b  | grep Mem | awk '{print $7}'`
-fi
-echo `free -g  | grep Mem | awk '{print $7}'` GB Available Memory
 #
 if [ -f $PROFILE ]; then
   NODE_MAX=`grep -m1 -i nodes $PROFILE | awk '{print $1}'`
@@ -251,10 +255,12 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
   #for C in $LIST_C; do echo C is $C; done
   #for H in $LIST_HH; do echo H is $H; done
   #for XIX in $(seq 0 3); do echo C is ${ARRAY_C[XIX]}; done
-  HIX=0; XIX=0;
+  for SIZE_MULT in 1 2 4 8; do
+  THIS_MAX=$(( $MAX_SIZE * $SIZE_MULT / 2 ))
+  HIX=0; XIX=0; X=2;
   if true; then
   NDOF=0
-  while (( NDOF < MAX_SIZE && X > 1 )); do
+  while (( $NDOF < $THIS_MAX && $X > 1 )); do
     H=${LIST_H[HIX]}
     X=${ARRAY_X[XIX]}
     C=$(( $CPUCOUNT / $X ))
@@ -267,10 +273,10 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
     NDOF=$(( $NNODE * 3 ))
     #ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
     #if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
-    #echo $(( $NDOF * $X )) '<' $(( $MAX_SIZE ))
+    #echo $(( $NDOF * $X )) '<' $(( $THIS_MAX ))
     S=$(( 50 * 1000 / $NDOF ))
     if (( $S < 1 ));then S=1; fi
-    while (( $NDOF * $X > $MAX_SIZE && $X > 0 )); do
+    while (( $NDOF * $X > $THIS_MAX && $X > 0 )); do
       XIX=$(( $XIX + 1 ));
       X=${ARRAY_X[XIX]}
       if [ -z "$X" ];then X=0; fi
@@ -282,7 +288,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
       MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
       echo "Partitioning, and converting "$MESHNAME", if necessary..."
       $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
-      if [ $(( $NDOF * $X )) -lt $(( $MAX_SIZE )) ]; then
+      if [ $(( $NDOF * $X )) -lt $(( $THIS_MAX )) ]; then
       if [ -f $MESH"_1.fmr" ]; then
         EXE=$EXEDIR"/femerq-"$CPUMODEL"-"$CSTR" -c"$C" -r"$RTOL" -p "$MESH
         echo "Running "$REPEAT_TEST_N" repeats of "$S"x"$X" concurrent "$NDOF" DOF models..."
@@ -315,11 +321,11 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
     HIX=$(( $HIX + 1 ))
   done
   fi
+  done
 fi
 if [ -f $CSVSMALL ]; then
   if [ -f $CSVPROFILE ]; then rm $CSVPROFILE; fi
   for H in $LIST_HH; do
-    X="XXX"
     N=1;
     MESHNAME="uhxt"$H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
@@ -333,6 +339,7 @@ if [ -f $CSVSMALL ]; then
         if false; then
           echo "Average: "$SOLVE_MDOFS" MDOF/s with "$NDOF" DOF models..."
         fi
+  #FIXME Change to loop through unique CSV col 1 values
         awk -F, -v nnode=$NNODE -v nrun=0 -v mdofs=0 -v c=$CPUCOUNT\
           'BEGIN{OFS=",";t10=0;t11=0;t12=0;}\
           ($2==nnode)&&($9<c){nrun+=1;t10+=$10;t11+=$11;t12+=$12;mdofs+=$13;\
@@ -410,7 +417,7 @@ if [ -n "$CSV_HAS_MEDIUM_PART_TEST" ]; then
     set key inside bottom center;\
     set title 'Femera Medium Elastic Model Partitioning Tests [MDOF/s]';\
     set xrange [0:$(($CPUCOUNT * 20 ))];\
-    set xlabel 'Number of Partitions [elem]';\
+    set xlabel 'Number of Partitions';\
     set label at "$MED_PART", "$MED_MDOFS" \"* Max\";\
     plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
     using (\$4):(( \$1 == $MED_NELEM ) ? \$13/1e6:1/0)\
@@ -460,8 +467,8 @@ fi
 CSV_HAS_LARGE_PART_TEST=`awk -F, -v c=$CPUCOUNT -v elem=$LARGE_NELEM \
   '($9==c)&&($1==elem)&&($4>$9){print $4; exit}' $CSVFILE`
 if [ -n "$CSV_HAS_LARGE_PART_TEST" ]; then
-  SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v elem=$LARGE_NELEM -v max=0\
-    '($9==c)&&($1==elem)&&($4>$9)&&($13>max){max=$13;perf=$13/1e6;size=$1/$4}\
+  SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v elem=$LARGE_NELEM -v max=0.0\
+    '($9==c)&&($1==elem)&&($4>$9){if($13>max)max=$13;perf=$13/1e6;size=$1/$4}\
     END{print int((size+50)/100)*100,int(perf+0.5)}'\
     $CSVFILE`
   LARGE_MDOFS=${SIZE_PERF_MAX##* }
@@ -476,7 +483,7 @@ if [ -n "$CSV_HAS_LARGE_PART_TEST" ]; then
   LARGE_UDOF_MIN=$(( $LARGE_ELEM_MIN * $DOF_PER_ELEM ))
   #LARGE_MDOF_MIN=$(( $LARGE_UDOF_MIN / 1000000 ))
   echo "Large model size initial estimate:"\
-    ">"$LARGE_ELEM_MIN" elem,"$LARGE_UDOF_MIN" DOF."
+    ">"$LARGE_ELEM_MIN" elem, >"$LARGE_UDOF_MIN" DOF."
   if [ ! -z "$HAS_GNUPLOT" ]; then
     MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
     echo "Plotting large model partitioning profile data: "$CSVFILE"..." >> $LOGFILE
@@ -506,6 +513,7 @@ if [ -n "$CSV_HAS_LARGE_PART_TEST" ]; then
   printf " %9i : Large test model size [DOF]\n" $LARGE_UDOF >> $PROFILE
   printf " %9i : Large test model performance [MDOF/s]\n" $LARGE_MDOFS >> $PROFILE
 fi
+#FIXME
 CSV_HAS_FINAL_TEST=""
 if [ -n "$CSV_HAS_FINAL_TEST" ]; then
   echo Running final profile tests...
@@ -536,8 +544,10 @@ if [ -n "$CSV_HAS_FINAL_TEST" ]; then
     fi
   done
 fi
+#FIXME
 CSV_HAS_FINAL_TEST="true"
 if [ -n "$CSV_HAS_FINAL_TEST" ]; then
+  #FIXME Change to loop through unique CSV col 1 values
   for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
     C=$CPUCOUNT
     H=${LIST_H[I]}
@@ -549,9 +559,9 @@ if [ -n "$CSV_HAS_FINAL_TEST" ]; then
     if (( $N < $MED_PART )); then N=$MED_PART; fi
     awk -F, -v nelem=$NELEM -v parts=$N\
       'BEGIN{OFS=",";dofs=0;}\
-      ($1==nelem)&&($4==parts)&&($13>dofs){\
+      ($1==nelem)&&($4==parts){\
         e=$1;n=$2;f=$3;p=$4;i1=$5;i2=$6;r1=$7;r2=$8;cc=$9;}\
-        t10=$10;t11=$11;t12=$12;dofs=$13;\
+        t10=$10;t11=$11;t12=$12;if($13>dofs+0)dofs=$13;\
       END{print e,n,f,p,i1,i2,r1,r2,cc,t10,t11,t12,dofs}'\
       $CSVFILE >> $CSVPROFILE
   done
