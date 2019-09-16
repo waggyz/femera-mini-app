@@ -1,9 +1,9 @@
 #!/bin/bash
-if [ -n $1 ]; then MEM=$(( $1 * 1000000000 ));
+if [ ! -e $1 ]; then MEM=$(( $1 * 1000000000 ));
 else MEM=`free -b  | grep Mem | awk '{print $7}'`; fi
-if [ -n $2 ]; then CPUMODEL=$2; else CPUMODEL=`./cpumodel.sh`; fi
-if [ -n $3 ]; then CPUCOUNT=$3; else CPUCOUNT=`./cpucount.sh`; fi
-if [ -n $4 ]; then CSTR=$4; else CSTR=gcc; fi
+if [ ! -e $2 ]; then CPUMODEL=$2; else CPUMODEL=`./cpumodel.sh`; fi
+if [ ! -e $3 ]; then CPUCOUNT=$3; else CPUCOUNT=`./cpucount.sh`; fi
+if [ ! -e $4 ]; then CSTR=$4; else CSTR=gcc; fi
 #
 if [[ `hostname` == k3* ]]; then #FIXME Nasty little hack
   MEM=30000000000
@@ -11,6 +11,7 @@ if [[ `hostname` == k3* ]]; then #FIXME Nasty little hack
 #  MEM=`free -b  | grep Mem | awk '{print $7}'`
 fi
 echo `free -g  | grep Mem | awk '{print $7}'` GB Available Memory
+echo $MEM byte Assumed Memory
 #
 EXEDIR="."
 GMSH2FMR=gmsh2fmr-$CPUMODEL-$CSTR
@@ -284,11 +285,14 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
     if [ $X -gt 1 ]; then
       C=$(( $CPUCOUNT / $X ))
       N=$C;
+      if [ $(( $NDOF * $X )) -lt $(( $THIS_MAX )) ]; then
+      ALREADY_TESTED=`awk -F, -v n=$NNODE -v c=$C\
+        '($2==n)&&($9==c){print $4; exit}' $CSVSMALL`
+      if [ -n $ALREADY_TESTED ]; then
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
-      echo "Partitioning, and converting "$MESHNAME", if necessary..."
+      echo "Partitioning and converting "$MESHNAME", if necessary..."
       $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
-      if [ $(( $NDOF * $X )) -lt $(( $THIS_MAX )) ]; then
       if [ -f $MESH"_1.fmr" ]; then
         EXE=$EXEDIR"/femerq-"$CPUMODEL"-"$CSTR" -c"$C" -r"$RTOL" -p "$MESH
         echo "Running "$REPEAT_TEST_N" repeats of "$S"x"$X" concurrent "$NDOF" DOF models..."
@@ -315,6 +319,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
           END{print mdofs/nrun/1000000*x;}' $CSVSMALL`
         echo " Solver: "$SOLVE_MDOFS" MDOF/s at "$X"x "$NDOF\
           "= "$(( $X * $NDOF ))" DOF models..." 
+      fi
       fi
       fi
     fi
