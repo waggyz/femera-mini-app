@@ -284,9 +284,14 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
     if [ $X -gt 1 ]; then
       C=$(( $CPUCOUNT / $X ))
       N=$C;
-      if [ $(( $NDOF * $X )) -lt $(( $THIS_MAX )) ]; then
-      ALREADY_TESTED=`awk -F, -v n=$NNODE -v c=$C\
-        '($2==n)&&($9==c){print $4; exit}' $CSVSMALL`
+      if [ -f $CSVSMALL ]; then
+        if [ $(( $NDOF * $X )) -lt $(( $THIS_MAX )) ]; then
+        ALREADY_TESTED=`awk -F, -v n=$NNODE -v c=$C\
+          '($2==n)&&($9==c){print $4; exit}' $CSVSMALL`
+        fi
+      else
+        ALREADY_TESTED=""
+      fi
       if [ -n $ALREADY_TESTED ]; then
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
@@ -318,7 +323,6 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
           END{print mdofs/nrun/1000000*x;}' $CSVSMALL`
         echo " Solver: "$SOLVE_MDOFS" MDOF/s at "$X"x "$NDOF\
           "= "$(( $X * $NDOF ))" DOF models..." 
-      fi
       fi
       fi
     fi
@@ -478,7 +482,7 @@ fi
 CSV_HAS_LARGE_PART_TEST=`awk -F, -v c=$CPUCOUNT -v elem=$LARGE_NELEM \
   '($9==c)&&($1==elem)&&($4>$9){print $4; exit}' $CSVFILE`
 if [ ! -z "$CSV_HAS_LARGE_PART_TEST" ]; then
-  SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v elem=$LARGE_NELEM -v max=0.0\
+  SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v elem=$LARGE_NELEM -v max=0\
     '($9==c)&&($1==elem)&&($4>$9){if($13>max)max=$13;perf=$13/1e6;size=$1/$4}\
     END{print int((size+500)/1000)*1000,int(perf+0.5)}'\
     $CSVFILE`
