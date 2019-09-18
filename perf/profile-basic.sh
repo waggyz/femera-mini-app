@@ -50,9 +50,12 @@ fi
 MDOF_MAX=$(( $UDOF_MAX / 1000000 ))
 echo Largest Test Model: $TET10_MAX Tet10, $NODE_MAX Nodes, $MDOF_MAX MDOF
 #
-LIST_H=(2 3 4 5 7 9 12 15 21 26 33 38 45 56 72 96 123 156 205 265 336)
+LIST_H=(2 3 4 5 7 9   12 15 21 26 33   38 45 56 72 96   123 156 205 265 336)
 LIST_HH="2 3 4 5 7 9   12 15 21 26 33   38 45 56 72 96   123 156 205 265 336"
-NOMI_UDOF=(500 1000 2500 5000 10000 25000 50000 100000 250000 500000 1000000 1500000 2500000 5000000 10000000 25000000 50000000 100000000 250000000 500000000 1000000000)
+NOMI_UDOF=(500 1000 2500 5000 10000 25000 \
+ 50000 100000 250000 500000 1000000\
+  1500000 2500000 5000000 10000000 25000000\
+  50000000 100000000 250000000 500000000 1000000000)
 TRY_COUNT=0;
 for I in $(seq 0 20); do
   if [ ${NOMI_UDOF[I]} -lt $UDOF_MAX ]; then
@@ -272,11 +275,11 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
     #if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
     #echo $(( $NDOF * $X )) '<' $(( $THIS_MAX ))
     S=$(( 50 * 1000 / $NDOF ))
-    if (( $S < 1 ));then S=1; fi
+    if (( $S < 1 )); then S=1; fi
     while (( $NDOF * $X > $THIS_MAX && $X > 0 )); do
       XIX=$(( $XIX + 1 ));
       X=${ARRAY_X[XIX]}
-      if [ -z "$X" ];then X=0; fi
+      if [ -z "$X" ]; then X=0; fi
     done
     if [ $X -gt 1 ]; then
       C=$(( $CPUCOUNT / $X ))
@@ -388,6 +391,11 @@ if [ -z "$CSV_HAS_MEDIUM_PART_TEST" ]; then
     MESH=$MESHDIR"/uhxt"$MED_H"p"$P/$MESHNAME
     echo "Partitioning and converting "$MESHNAME", if necessary..."
     $PERFDIR/mesh-uhxt.sh $MED_H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
+    if (( $N == $CPUCOUNT )); then
+      echo "Warming up..."
+      $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$MED_ITERS -r$RTOL\
+        -p $MESH >> /dev/null
+    fi
     echo "Running "$MED_ITERS" iterations of "$MESHNAME" ("$MED_NUDOF" DOF), "\
       $REPEAT_TEST_N" times..."
     for I in $(seq 1 $REPEAT_TEST_N ); do
