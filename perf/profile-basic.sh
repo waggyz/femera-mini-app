@@ -68,6 +68,7 @@ if [ ! -f $PROFILE ]; then
   # with 10 iterations of the third-to-largest model
   if [ ! -f $CSVFILE ]; then
     ITERS=10; H=${LIST_H[$(( $TRY_COUNT - 3 ))]};
+    C=$CPUCOUNT
     MESHNAME="uhxt"$H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
     echo Estimating performance at\
@@ -129,6 +130,7 @@ if [ -f $CSVFILE ]; then
   if [ "$CSVLINES" -lt "$BASIC_TEST_N" ]; then
     echo Running basic profile tests...
     for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
+      C=$CPUCOUNT
       H=${LIST_H[I]}
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
@@ -330,7 +332,6 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
   done
   fi
   done
-  C=$CPUCOUNT
 fi
 if [ -f $CSVSMALL ]; then
   if [ -f $CSVPROFILE ]; then rm $CSVPROFILE; fi
@@ -391,6 +392,7 @@ CSV_HAS_MEDIUM_PART_TEST=`awk -F, -v e=$MED_NELEM -v c=$CPUCOUNT\
   '($1==e)&&($9==c)&&($4>$9){print $4; exit}' $CSVFILE`
 if [ -z "$CSV_HAS_MEDIUM_PART_TEST" ]; then
   echo Running medium model partitioning tests...
+  C=$CPUCOUNT
   for N in $(seq $CPUCOUNT $CPUCOUNT $(( $CPUCOUNT * 20 )) ); do
     MESHNAME="uhxt"$MED_H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$MED_H"p"$P/$MESHNAME
@@ -456,6 +458,7 @@ CSV_HAS_LARGE_PART_TEST=`awk -F, -v e=$LARGE_NELEM -v c=$CPUCOUNT\
   '($1==e)&&($9==c)&&($4>$9){print $4; exit}' $CSVFILE`
 if [ -z "$CSV_HAS_LARGE_PART_TEST" ]; then
   echo Running large model partitioning tests...
+  C=$CPUCOUNT
   H=${LIST_H[$(( $TRY_COUNT - 3 ))]};
   ELEM_PER_PART=1000
   FINISHED=""
@@ -482,7 +485,7 @@ CSV_HAS_LARGE_PART_TEST=`awk -F, -v c=$CPUCOUNT -v elem=$LARGE_NELEM \
   '($9==c)&&($1==elem)&&($4>$9){print $4; exit}' $CSVFILE`
 if [ ! -z "$CSV_HAS_LARGE_PART_TEST" ]; then
   SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v elem=$LARGE_NELEM -v max=0\
-    '($9==c)&&($1==elem)&&($4>$9){if($13>max)max=$13;perf=$13/1e6;size=$1/$4}\
+    '($9==c)&&($1==elem){if($13>max)max=$13;perf=$13/1e6;size=$1/$4}\
     END{print int((size+50)/100)*100,int(perf+0.5)}'\
     $CSVFILE`
   LARGE_MDOFS=${SIZE_PERF_MAX##* }
