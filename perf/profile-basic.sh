@@ -388,6 +388,8 @@ fi
 # Check if any medium model CSV lines have N > C
 CSV_HAS_MEDIUM_PART_TEST=`awk -F, -v e=$MED_NELEM -v c=$CPUCOUNT\
   '($1==e)&&($9==c)&&($4>$9){print $4; exit}' $CSVFILE`
+echo awk -F, -v e=$MED_NELEM -v c=$CPUCOUNT\
+  '($1==e)&&($9==c)&&($4>$9){print $4; exit}' $CSVFILE
 echo CSV_HAS_MEDIUM_PART_TEST $CSV_HAS_MEDIUM_PART_TEST
 if [ -z "$CSV_HAS_MEDIUM_PART_TEST" ]; then
   echo Running medium model partitioning tests...
@@ -453,6 +455,8 @@ fi
 #if (( $MED_PART > $CPUCOUNT ));then
 # Check if any large model CSV lines have N > C
 LARGE_NELEM=`head -n1 $CSVFILE | awk -F, '{ print $1 }'`
+echo awk -F, -v e=$LARGE_NELEM -v c=$CPUCOUNT\
+  '($1==e)&&($9==c)&&($4>$9){print $4; exit}' $CSVFILE
 CSV_HAS_LARGE_PART_TEST=`awk -F, -v e=$LARGE_NELEM -v c=$CPUCOUNT\
   '($1==e)&&($9==c)&&($4>$9){print $4; exit}' $CSVFILE`
 echo CSV_HAS_LARGE_PART_TEST $CSV_HAS_LARGE_PART_TEST
