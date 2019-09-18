@@ -44,4 +44,5 @@ femerq*
 femser*
 femseq*
 femerb*
-gmsh2fmr
+gmsh2fmr*
+!gmsh2fmr.cc
