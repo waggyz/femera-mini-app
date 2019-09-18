@@ -485,7 +485,7 @@ CSV_HAS_LARGE_PART_TEST=`awk -F, -v c=$CPUCOUNT -v elem=$LARGE_NELEM \
   '($9==c)&&($1==elem)&&($4>$9){print $4; exit}' $CSVFILE`
 if [ ! -z "$CSV_HAS_LARGE_PART_TEST" ]; then
   SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v elem=$LARGE_NELEM -v max=0\
-    '($9==c)&&($1==elem){if($13>max)max=$13;perf=$13/1e6;size=$1/$4}\
+    '($9==c)&&($1==elem)&&($13>max){max=$13;perf=$13/1e6;size=$1/$4}\
     END{print int((size+50)/100)*100,int(perf+0.5)}'\
     $CSVFILE`
   LARGE_MDOFS=${SIZE_PERF_MAX##* }
