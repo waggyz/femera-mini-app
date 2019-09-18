@@ -403,7 +403,8 @@ fi
 # Check if any medium model CSV lines have N > C
 CSV_HAS_MEDIUM_PART_TEST=`awk -F, -v e=$MED_NELEM -v c=$CPUCOUNT\
   '($1==e)&&($9==c){print $4; exit}' $CSVFILE`
-if [ -n "$CSV_HAS_MEDIUM_PART_TEST" ]; then
+echo CSV_HAS_MEDIUM_PART_TEST $CSV_HAS_MEDIUM_PART_TEST
+if [ ! -z "$CSV_HAS_MEDIUM_PART_TEST" ]; then
   SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v elem=$MED_NELEM -v max=0\
     '($9==c)&&($1==elem)&&($13>max){max=$13;perf=$13/1e6;size=$4}\
     END{print size,int(perf+0.5)}'\
@@ -446,6 +447,7 @@ LARGE_NELEM=`head -n1 $CSVFILE | awk -F, '{ print $1 }'`
 CSV_HAS_LARGE_PART_TEST=`awk -F, -v e=$LARGE_NELEM -v c=$CPUCOUNT\
   '($1==e)&&($9==c)&&($4>$9){print $4; exit}' $CSVFILE`
 if [ -z "$CSV_HAS_LARGE_PART_TEST" ]; then
+echo CSV_HAS_LARGE_PART_TEST $CSV_HAS_LARGE_PART_TEST
   echo Running large model partitioning tests...
   H=${LIST_H[$(( $TRY_COUNT - 3 ))]};
   ELEM_PER_PART=1000
@@ -471,7 +473,7 @@ if [ -z "$CSV_HAS_LARGE_PART_TEST" ]; then
 fi
 CSV_HAS_LARGE_PART_TEST=`awk -F, -v c=$CPUCOUNT -v elem=$LARGE_NELEM \
   '($9==c)&&($1==elem)&&($4>$9){print $4; exit}' $CSVFILE`
-if [ -n "$CSV_HAS_LARGE_PART_TEST" ]; then
+if [ ! -z "$CSV_HAS_LARGE_PART_TEST" ]; then
   SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v elem=$LARGE_NELEM -v max=0.0\
     '($9==c)&&($1==elem)&&($4>$9){if($13>max)max=$13;perf=$13/1e6;size=$1/$4}\
     END{print int((size+50)/100)*100,int(perf+0.5)}'\
