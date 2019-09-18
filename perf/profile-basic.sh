@@ -485,11 +485,12 @@ CSV_HAS_LARGE_PART_TEST=`awk -F, -v c=$CPUCOUNT -v elem=$LARGE_NELEM \
   '($9==c)&&($1==elem)&&($4>$9){print $4; exit}' $CSVFILE`
 if [ ! -z "$CSV_HAS_LARGE_PART_TEST" ]; then
   SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v elem=$LARGE_NELEM -v max=0\
-    '($9==c)&&($1==elem)&&($13>max){max=$13;perf=$13/1e6;size=$1/$4}\
-    END{print int((size+50)/100)*100,int(perf+0.5)}'\
+    '($9==c)&&($1==elem)&&($13>max+0){max=$13;perf=$13/1e6;size=$1/$4}\
+    END{print int((size+500)/1000)*1000,int(perf+0.5)}'\
     $CSVFILE`
   LARGE_MDOFS=${SIZE_PERF_MAX##* }
-  LARGE_ELEM_PART=$(( ${SIZE_PERF_MAX%% *} /1000 *1000 ))
+  LARGE_ELEM_PART=${SIZE_PERF_MAX%% *}
+  #LARGE_ELEM_PART=$(( ${SIZE_PERF_MAX%% *} /1000 *1000 ))
   echo "Large model performance peak: "$LARGE_MDOFS" MDOF/s"\
     "with "$LARGE_ELEM_PART" elem/part."
   #LARGE_ELEM=$(( $LARGE_ELEM_PART * $CPUCOUNT ))
@@ -576,9 +577,9 @@ if [ ! -z "$CSV_HAS_FINAL_TEST" ]; then
     if (( $N < $MED_PART )); then N=$MED_PART; fi
     awk -F, -v nelem=$NELEM -v parts=$N\
       'BEGIN{OFS=",";dofs=0;}\
-      ($1==nelem)&&($4==parts){\
+      ($1==nelem)&&($4==parts)&&($13>dofs+0){\
         e=$1;n=$2;f=$3;p=$4;i1=$5;i2=$6;r1=$7;r2=$8;cc=$9;}\
-        t10=$10;t11=$11;t12=$12;if($13>dofs+0)dofs=$13;\
+        t10=$10;t11=$11;t12=$12;dofs=$13;\
       END{print e,n,f,p,i1,i2,r1,r2,cc,t10,t11,t12,dofs}'\
       $CSVFILE >> $CSVPROFILE
   done
