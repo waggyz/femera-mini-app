@@ -1,17 +1,24 @@
 # Femera
-Femera is an open-source finite element-by-element (EBE) matrix-free implementation that can be tuned for performance across a wide range of problem sizes and HPC architectures. It is implemented in a C++ framework, but computational kernels are coded as vanilla C for better performance.
+Femera is an open-source finite element-by-element (EBE) matrix-free implementation that can be tuned for performance across a wide range of problem sizes and HPC architectures. It is implemented in a C++ framework, but computational kernels are coded as vanilla C with vectorfor better performance.
 
 # Femera Mini-App
 The Femera Mini-App is a minimal implentation with limited element and mesh format support.
 
 ## Quick Start
-Build and check the executable `femera-<cpumodel>`. *Make a note of the name of the executable built.*
+Run some system tests.
 
- * `make mini-omp` 
+ * `make unit-test`
 
-If you have Gmsh 2.x mesh files of your models, you'll need a mesh file format converter. *WARNING* The OpenMP version does not work (race conditions). Instead, compile the single-core serial converter.
+Build and check the executable `femera-<cpumodel>-gcc` using the make target `femera-mini`.  If you have Gmsh 2.x mesh files of your models, you'll need a mesh file format converter. *WARNING* The OpenMP converter does not work (race conditions). Instead, compile the single-core serial converter `gmsh2fmr-ser`. These, and a minimal, quiet version of femera, `femerq`,  can be built with:
 
- *  `make gmsh2fmr-ser`
+
+```bash
+# Set `C` to the total number of physical cores in your machine.
+C=4;
+`make -j$C all`
+``` 
+
+*Make a note of the name of the executables built.*
 
 If you have [Gmsh 4](http://gmsh.info/ "Gmsh Website") installed, try making and solving a one million degree of freedom (MDOF) quadratic tetrahedron model.
 
@@ -21,20 +28,20 @@ If you have [Gmsh 4](http://gmsh.info/ "Gmsh Website") installed, try making and
  * Set `N` to the number of partitions desired (N>=C); try 4xC to 16xC.
 
 ```bash
-C=4 ; P=2 ; H=33 ; N=16
+C=4; P=2; H=33; N=16
 CPUMODEL=`./cpumodel.sh`
 gmsh -setnumber p $P -setnumber h $H -setnumber n $N -nt $C geo/unst-cube.geo -
-./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu0.001 -M0 -E100e9 -N0.3 -R -v2 -ap "cube/unst"$H"p"$P"n"$N
+./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu0.001 -M0 -E100e9 -N0.3 -R -v2 -ap "cube/uhxt"$H"p"$P"n"$N
 ./femera-$CPUMODEL -v2 -c $C -p "cube/uhxt"$H"p"$P"n"$N
 ```
 
-Then, try a 1 MDOF thermoelastic model.
+Then, try a 1.3 MDOF quadratic tet thermoelastic model.
 
 ```bash
-C=4 ; P=2 ; H=?? ; N=16
+C=4 ; P=2 ; H=33 ; N=16
 CPUMODEL=`./cpumodel.sh`
 gmsh -setnumber p $P -setnumber h $H -setnumber n $N -nt $C geo/unst-cube.geo -
-./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu0.001 -t444 -Tu 10 -M0 -E100e9 -N0.3 -A20e-6 -K250 -R -v2 -ap "cube/unst"$H"p"$P"n"$N
+./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu0.001 -t444 -Tu 10 -M0 -E100e9 -N0.3 -A20e-6 -K250 -R -v2 -ap "cube/uhxt"$H"p"$P"n"$N
 ./femera-$CPUMODEL -v2 -c $C -p "cube/uhxt"$H"p"$P"n"$N
 ```
 
@@ -69,9 +76,9 @@ gmsh -refine -o "neper/cubic"$N"s1p1.msh2" "neper/cubic"$N".msh"
 
 ## Mini-App Files
 
-`femera.h` `femera-mini.cc` Set compile-time constants in the header file (though most of these don't work). The femera-mini executable parses a partitioned set of .fmr files having the provided base name.  It supports a few command line options.
+`femera.h` `femera-mini.cc` Set compile-time constants in the header file (though most of these don't work). The femera-mini executable parses a partitioned set of `.fmr` files having the provided base name.  It supports a few command line options.
 
- * `-p <str>` Find and read partitioned `<str>_?.fmr` files in parallel. *Required.*
+ * `-p <str>` Read partitioned `<str>_#.fmr` finite element model files in parallel. *Required.*
  * `-v <int>` Verbosity level [default: 1]; `-v2` is good.
  * `-c <uint>` Number of parallel compute threads.
  * `-d <int>` Choose a diagonal preconditioner:
@@ -80,27 +87,29 @@ gmsh -refine -o "neper/cubic"$N"s1p1.msh2" "neper/cubic"$N".msh"
    * `-d3` for Jacobi [default].
  * `-s <int>` Choose a solver:
    * `-s1` for conjugate gradient [default], or
-   * `-s2` for conjugate residual.
+   * `-s2` for nonlinear conjugate gradient [experimental].
  * `-r <float>` Solution tolerance.
  * `-i <int>` Maximum number of iterations.
 
-`mesh.h` `mesh.cc` An instance of this class contains global mesh information.
+`mesh.h` `mesh.cc` An instance of this class contains global model information.
 
 `elem.h` `elem.cc` `elem-tet.cc` An Elem instance contains a single mesh partition. The mini-app only supports first- and second-order tetrahedral elements at present.
 
-`phys.h` `phys.cc` `numa-elast-iso3.cc` `numa-elas-ort3.cc` Two linear-elastic models, implementing both tensor train and (eventually) the more traditional local matrix evaluation approaches. Two preconditioners are also provided.
+`phys.h` `phys.cc` `elas-iso3.cc` `elas-ort3.cc` `elas-ther-iso3.cc` `elas-ther-ort3.cc` Linear-elastic and thermoelastic models implement both tensor train and (eventually) the more traditional local matrix evaluation approaches. Two preconditioners are also provided. Reference, optimized, and vectorized (AVX, non-thermo only) versions are available. 
 
-`solv.h` `solv.cc` `tens-numa-halo-pcg.cc` `tens-numa-halo-pcr.cc` Implements preconditioned conjugate gradient and cojugate residual solvers.
+`solv.h` `solv.cc` `halo-pcg-omp.cc` `halo-ncg-omp.cc` Implement preconditioned conjugate gradient and an experimental nonlinear cojugate gradient solver.
+
+`align.h` This implements a hacky way to align data structures for better vector performance. Valgrind doesn't like it.
 
 ## Mini-App Accesories
 These are not necessary for compiling the Mini-App.
 
 `test.h` `test.cc` These provide reference solutions for the test problems.
 
-`gmsh.h` `gmsh2.cc` `gmsh2fmr.cc` The mesh file converter command line tool `gmsh2fmr` also encodes boundary conditions, loads, and elastic material properties in the `*_?.fmr` partitioned mesh files created. It only supports Gmsh `*.msh` version 2 ASCII mesh files. Note that [Gmsh 4](http://gmsh.info/ "Gmsh Website") is needed to create partitioned `*_?.msh` mesh format 2 files, though `gmsh2fmr` can also partition meshes by volume physical IDs.
+`gmsh.h` `gmsh2.cc` `gmsh2fmr.cc` The mesh file converter command line tool `gmsh2fmr` also encodes boundary conditions, loads, and elastic material properties in the `*_#.fmr` partitioned mesh files created. It only supports Gmsh `*.msh` version 2 ASCII mesh files. Note that [Gmsh 4](http://gmsh.info/ "Gmsh Website") is needed to create partitioned `*_#.msh` mesh format 2 files, though `gmsh2fmr` can also partition meshes by gmsh volume physical IDs.
 
- * `-a <str>` Read Gmsh file `<str>.msh` or `<str>.msh2`, partition the mesh by volume physical IDs, and save the partitions as ASCII files `<str>_?.fmr`.
- * `-ap <str>` Read partitioned Gmsh files `<str>_?.msh`, and save the partitions as ASCII files `<str>_?.fmr`.
+ * `-a <str>` Read Gmsh file `<str>.msh` or `<str>.msh2`, partition the mesh by volume physical IDs, and save the partitions as ASCII files `<str>_#.fmr`.
+ * `-ap <str>` Read partitioned Gmsh files `<str>_#.msh`, and save the partitions as ASCII files `<str>_?.fmr`.
  * `-v<int>` Verbosity level [default: 1]; set higher to see details of each partition.
 
  Boundary conditions may be applied to nodes specified by node number, Gmsh physical ID of linear or surface elements, or by location within a plane.

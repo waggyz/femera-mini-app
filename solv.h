@@ -11,7 +11,7 @@ public:
   const uint valign_byte = 64;
 #endif
   enum Meth {
-    SOLV_GD=0, SOLV_CG=1, SOLV_CR=2, SOLV_NG=3
+    SOLV_GD=0, SOLV_CG=1, SOLV_NG=2, SOLV_CR=3
   };
   enum Cond {
     COND_NONE=0, COND_JACO=3, COND_ROW1=1, COND_STRA=4
