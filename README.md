@@ -93,7 +93,7 @@ gmsh -refine -o "neper/cubic"$N"s1p1.msh2" "neper/cubic"$N".msh"
 
 `mesh.h` `mesh.cc` An instance of this class contains global model information.
 
-`elem.h` `elem.cc` `elem-tet.cc` An Elem instance contains a single mesh partition. The mini-app only supports first- and second-order tetrahedral elements at present.
+`elem.h` `elem.cc` `elem-tet.cc` An Elem instance contains a single mesh partition. The mini-app only supports first-, second-, and 20-node incomplete third- order tetrahedral elements at present.
 
 `phys.h` `phys.cc` `elas-iso3.cc` `elas-ort3.cc` `elas-ther-iso3.cc` `elas-ther-ort3.cc` Linear-elastic and thermoelastic models implement both tensor train and (eventually) the more traditional local matrix evaluation approaches. Two preconditioners are also provided. Reference, optimized, and vectorized (AVX, non-thermo only) versions are available. 
 
