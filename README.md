@@ -18,7 +18,7 @@ C=4;
 make -j$C all
 ``` 
 
-*Make a note of the name of the executables built.* The following examples assume you're using the Gnu compiler collection (gcc).
+*Make a note of the name of the executables built.* The examples here assume you're using the Gnu compiler collection (gcc).
 
 If you have [Gmsh 4](http://gmsh.info/ "Gmsh Website") installed, try making and solving a one million degree of freedom (MDOF) quadratic tetrahedron model.
 
@@ -92,7 +92,7 @@ gmsh -refine -o "neper/cubic"$N"s1p1.msh2" "neper/cubic"$N".msh"
 
 `elem.h` `elem.cc` `elem-tet.cc` An Elem instance contains a single mesh partition. The mini-app only supports first-, second-, and 20-node incomplete third- order tetrahedral elements at present.
 
-`phys.h` `phys.cc` `elas-iso3.cc` `elas-ort3.cc` `elas-ther-iso3.cc` `elas-ther-ort3.cc` Linear-elastic and thermoelastic models implement both tensor train and (eventually) the more traditional local matrix evaluation approaches. Two preconditioners are also provided. Reference, optimized, and vectorized (AVX, non-thermo only) versions are available. 
+`phys.h` `phys.cc` `elas-iso3*.cc` `elas-ort3*.cc` `elas-ther-iso3*.cc` `elas-ther-ort3*.cc` Linear-elastic and thermoelastic models implement both tensor train and (eventually) the more traditional local matrix evaluation approaches. Two preconditioners are also provided. Reference, optimized, and vectorized (AVX, non-thermo only) versions are available. 
 
 `solv.h` `solv.cc` `halo-pcg-omp.cc` `halo-ncg-omp.cc` Implement preconditioned conjugate gradient and an experimental nonlinear cojugate gradient solver.
 
