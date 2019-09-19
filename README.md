@@ -5,20 +5,20 @@ Femera is an open-source finite element-by-element (EBE) matrix-free implementat
 The Femera Mini-App is a minimal implentation with limited element and mesh format support.
 
 ## Quick Start
-Run some system tests.
+First, run some system tests.
 
  * `make unit-test`
 
-Build and check the executable `femera-<cpumodel>-gcc` using the make target `femera-mini`.  If you have Gmsh 2.x mesh files of your models, you'll need a mesh file format converter. *WARNING* The OpenMP converter does not work (race conditions). Instead, compile the single-core serial converter `gmsh2fmr-ser`. These, and a minimal, quiet version of femera, `femerq`,  can be built with:
+Then, build and check the executable `femera-<cpumodel>-gcc` using the make target `femera-mini`.  If you have Gmsh 2.x mesh files of your models, you'll need a mesh file format converter. *WARNING* The OpenMP converter does not work (race conditions). Instead, compile the single-core serial converter `gmsh2fmr-ser`. These, and a minimal, quiet version of femera, `femerq`,  can be built with:
 
 
 ```bash
 # Set `C` to the total number of physical cores in your machine.
 C=4;
-`make -j$C all`
+make -j$C all
 ``` 
 
-*Make a note of the name of the executables built.*
+*Make a note of the name of the executables built.* The following examples assume you're using the Gnu compiler collection (gcc).
 
 If you have [Gmsh 4](http://gmsh.info/ "Gmsh Website") installed, try making and solving a one million degree of freedom (MDOF) quadratic tetrahedron model.
 
@@ -28,21 +28,18 @@ If you have [Gmsh 4](http://gmsh.info/ "Gmsh Website") installed, try making and
  * Set `N` to the number of partitions desired (N>=C); try 4xC to 16xC.
 
 ```bash
-C=4; P=2; H=33; N=16
-CPUMODEL=`./cpumodel.sh`
-gmsh -setnumber p $P -setnumber h $H -setnumber n $N -nt $C geo/unst-cube.geo -
-./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu0.001 -M0 -E100e9 -N0.3 -R -v2 -ap "cube/uhxt"$H"p"$P"n"$N
-./femera-$CPUMODEL -v2 -c $C -p "cube/uhxt"$H"p"$P"n"$N
-```
-
-Then, try a 1.3 MDOF quadratic tet thermoelastic model.
-
-```bash
 C=4 ; P=2 ; H=33 ; N=16
 CPUMODEL=`./cpumodel.sh`
 gmsh -setnumber p $P -setnumber h $H -setnumber n $N -nt $C geo/unst-cube.geo -
+./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu0.001 -M0 -E100e9 -N0.3 -R -v2 -ap "cube/uhxt"$H"p"$P"n"$N
+./femera-$CPUMODEL-gcc -v2 -c $C -p "cube/uhxt"$H"p"$P"n"$N
+```
+
+Then, try converting the mesh to a 1.3 MDOF quadratic tet thermoelastic model.
+
+```bash
 ./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu0.001 -t444 -Tu 10 -M0 -E100e9 -N0.3 -A20e-6 -K250 -R -v2 -ap "cube/uhxt"$H"p"$P"n"$N
-./femera-$CPUMODEL -v2 -c $C -p "cube/uhxt"$H"p"$P"n"$N
+./femera-$CPUMODEL-gcc -v2 -c $C -p "cube/uhxt"$H"p"$P"n"$N
 ```
 
 If you have [Neper](http://neper.sourceforge.net/ "Neper Website") installed, try making and solving a microstructure model.
@@ -53,7 +50,7 @@ CPUMODEL=`./cpumodel.sh`
 neper -T -reg 1 -n $N -o "neper/n"$N"-id1"
 neper -M "neper/n"$N"-id1.tess"
 ./gmsh2fmr -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -M0 -E100e9 -N0.3 -R -v1 -a "neper/n"$N"-id1"
-./femera-$CPUMODEL -v2 -c $C -s1 -p "neper/n"$N"-id1"
+./femera-$CPUMODEL-gcc -v2 -c $C -s1 -p "neper/n"$N"-id1"
 ```
 
 To generate a PNG of the model:
@@ -71,7 +68,7 @@ neper -V "neper/cubic"$N".tess" -datacellcol id -print "neper/cubic"$N
 neper -M "neper/cubic"$N".tess"
 gmsh -refine -o "neper/cubic"$N"s1p1.msh2" "neper/cubic"$N".msh"
 ./gmsh2fmr -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 "-x@"$L -xu0.001 -M0 -E136.31e9 -N0.37 -G127.40e9 -R -v1 -a "neper/cubic"$N"s1p1"
-./femera-$CPUMODEL -v2 -c $C -s1 -p "neper/cubic"$N"s1p1"
+./femera-$CPUMODEL-gcc -v2 -c $C -s1 -p "neper/cubic"$N"s1p1"
 ```
 
 ## Mini-App Files
@@ -88,7 +85,7 @@ gmsh -refine -o "neper/cubic"$N"s1p1.msh2" "neper/cubic"$N".msh"
  * `-s <int>` Choose a solver:
    * `-s1` for conjugate gradient [default], or
    * `-s2` for nonlinear conjugate gradient [experimental].
- * `-r <float>` Solution tolerance.
+ * `-r <float>` Solution tolerance  [default: 0.0001].
  * `-i <int>` Maximum number of iterations.
 
 `mesh.h` `mesh.cc` An instance of this class contains global model information.
