@@ -48,25 +48,28 @@ CPUMODELC:=$(CPUMODEL)-$(CSTR)
 
 FEMERA_COMMON = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
  halo-pcg-omp.cc halo-ncg-omp.cc halo-pcr-dummy.cc \
- elas-iso3.cc elas-ort3.cc elas-ther-ort3.cc
+ elas-iso3.cc elas-ort3.cc elas-plj2-iso3.cc elas-ther-ort3.cc
 
 
 FEMERA_BASE_C = $(FEMERA_COMMON)\
  elas-iso3-base.cc elas-ort3-bas2.cc elas-ther-ort3-bas2.cc
 
-# ifeq ($(HOST2CHAR), k2)
 ifneq (,$(findstring AVX,$(CPUSIMD)))
 FEMERA_MINI_C = $(FEMERA_COMMON)\
  elas-iso3-vect.cc elas-ort3-vec2.cc elas-ther-ort3-vec2.cc
 else
 FEMERA_MINI_C = $(FEMERA_BASE_C)
 endif
- 
+
 FEMERA_REF_C = $(FEMERA_COMMON)\
- elas-iso3-ref.cc elas-ort3-ref2.cc elas-ther-ort3-ref2.cc
+ elas-iso3-ref.cc elas-ort3-ref2.cc elas-ther-ort3-ref2.cc elas-plj2-iso3-ref.cc
 
 FEMERA_NAIV_C = $(FEMERA_COMMON)\
  elas-iso3-ref.cc elas-ort3-nai2.cc elas-ther-ort3-ref2.cc
+
+
+#FIXME Using reference versions for initial development
+FEMERA_MINI_C = $(FEMERA_REF_C)
 
 
 HYBRID_GCC_C = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
