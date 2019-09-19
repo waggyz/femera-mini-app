@@ -25,6 +25,8 @@ public:
   //
   virtual int BlocLinear( Elem*,RESTRICT Solv::vals&,const RESTRICT Solv::vals&)=0;
   virtual int ElemLinear( Elem*,const INT_MESH,const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*)=0;
+  virtual int ElemNonLinear( Elem*,const INT_MESH,const INT_MESH,
+    FLOAT_SOLV*,const FLOAT_SOLV*,const FLOAT_SOLV*)=0;
   virtual int ElemJacobi( Elem*,FLOAT_SOLV* )=0;// Jacobi Preconditioner
   virtual int ElemRowSumAbs(Elem*, FLOAT_SOLV* )=0;// Row Norm Preconditioner
   virtual int ElemStrain(Elem*, FLOAT_SOLV* )=0;// Applied Element Strain Preconditioner
@@ -115,7 +117,10 @@ public: ElastIso2D(FLOAT_PHYS young, FLOAT_PHYS poiss, FLOAT_PHYS thick) :
 #endif
   int Setup( Elem* )final;
   int BlocLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
-  int ElemLinear( Elem*,const INT_MESH,const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemLinear( Elem*,const INT_MESH,
+    const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemNonLinear( Elem*,const INT_MESH,const INT_MESH,
+    FLOAT_SOLV*,const FLOAT_SOLV*,const FLOAT_SOLV*) final;
   int ElemJacobi( Elem*,FLOAT_SOLV* ) final;
   int ElemRowSumAbs(Elem*, FLOAT_SOLV* ) final;
   int ElemStrain(Elem*, FLOAT_SOLV* ) final;
@@ -157,7 +162,10 @@ public: ElastIso3D(FLOAT_PHYS young, FLOAT_PHYS poiss ) :
   int Setup( Elem* )final;
   //int ElemLinear( std::vector<Elem*>,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
   int BlocLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
-  int ElemLinear( Elem*,const INT_MESH,const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemLinear( Elem*,const INT_MESH,
+    const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemNonLinear( Elem*,const INT_MESH,
+    const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*,const FLOAT_SOLV*) final;
   int ElemJacobi( Elem*,FLOAT_SOLV* ) final;
   int ElemRowSumAbs(Elem*, FLOAT_SOLV* ) final;
   int ElemStrain(Elem*, FLOAT_SOLV* ) final;
@@ -239,7 +247,10 @@ public:
   int Setup( Elem* )final;
   //int ElemLinear( std::vector<Elem*>,RESTRICT Phys::vals&,const RESTRICT Phys::vals&)
   int BlocLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
-  int ElemLinear( Elem*,const INT_MESH,const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemLinear( Elem*,const INT_MESH,
+    const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemNonLinear( Elem*,const INT_MESH,
+    const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*,const FLOAT_SOLV*) final;
   int ElemJacobi( Elem*,FLOAT_SOLV* ) final;
   int ElemRowSumAbs(Elem*, FLOAT_SOLV* ) final;
   int ElemStrain(Elem*, FLOAT_SOLV* ) final;
@@ -413,7 +424,10 @@ public: ElastPlastJ2Iso3D(FLOAT_PHYS young, FLOAT_PHYS poiss ) :
   int Setup( Elem* )final;
   //int ElemLinear( std::vector<Elem*>,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
   int BlocLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
-  int ElemLinear( Elem*,const INT_MESH,const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemLinear( Elem*,const INT_MESH,
+    const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemNonLinear( Elem*,const INT_MESH,
+    const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*,const FLOAT_SOLV*) final;
   int ElemJacobi( Elem*,FLOAT_SOLV* ) final;
   int ElemRowSumAbs(Elem*, FLOAT_SOLV* ) final;
   int ElemStrain(Elem*, FLOAT_SOLV* ) final;
@@ -467,7 +481,10 @@ public:
   int Setup( Elem* )final;
   //int ElemLinear( std::vector<Elem*>,RESTRICT Phys::vals&,const RESTRICT Phys::vals&)
   int BlocLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
-  int ElemLinear( Elem*,const INT_MESH,const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemLinear( Elem*,const INT_MESH,
+    const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemNonLinear( Elem*,const INT_MESH,
+    const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*,const FLOAT_SOLV*) final;
   int ElemJacobi( Elem*,FLOAT_SOLV* ) final;
   int ElemRowSumAbs(Elem*, FLOAT_SOLV* ) final;
   int ElemStrain(Elem*, FLOAT_SOLV* ) final;

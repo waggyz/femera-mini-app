@@ -6,8 +6,12 @@
 //
 int ElastPlastJ2Iso3D::ElemLinear( Elem* ){ return 1; }//FIXME
 int ElastPlastJ2Iso3D::ElemJacobi( Elem* ){ return 1; }//FIXME
-int ElastPlastJ2Iso3D::BlocLinear( Elem* ,
+int ElastPlastJ2Iso3D::BlocLinear( Elem*,
   RESTRICT Phys::vals &, const RESTRICT Solv::vals & ){
+  return 1;
+  }
+int ElastPlastJ2Iso3D::ElemLinear( Elem*, const INT_MESH, const INT_MESH,
+  FLOAT_SOLV*, const FLOAT_SOLV* ){
   return 1;
   }
 int ElastPlastJ2Iso3D::ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*){

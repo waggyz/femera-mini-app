@@ -28,8 +28,8 @@ int ElastPlastJ2Iso3D::Setup( Elem* E ){
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) +2);
   return 0;
 }
-int ElastPlastJ2Iso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
-  FLOAT_SOLV* sys_f, const FLOAT_SOLV* sys_u ){
+int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
+  FLOAT_SOLV* sys_f, const FLOAT_SOLV* sys_u, const FLOAT_SOLV* sys_p ){
   //FIXME Clean up local variables.
   //const int De = 3;// Element Dimension
   const int Nd = 3;// Node (mesh) Dimension
@@ -117,7 +117,7 @@ int ElastPlastJ2Iso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee
         stress_v[i] =0.0;
         for(int j=0; j<6; j++){
           stress_v[i] += dde_dds[6* i+j] * strain_v[j];
-        } }
+      } }
       // Convert stress Voigt vector to Cauchy stress tensor.
       S[0]=stress_v[0]; S[4]=stress_v[1]; S[8]=stress_v[2];
       S[1]=stress_v[3]; S[5]=stress_v[4]; S[2]=stress_v[5];
