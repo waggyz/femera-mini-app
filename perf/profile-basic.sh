@@ -21,6 +21,9 @@ C=$CPUCOUNT; N=$C; RTOL=1e-24;
 TARGET_TEST_S=10;# Try for S sec/run
 REPEAT_TEST_N=6;# Repeat each test N times
 ITERS_MIN=10;
+export OMP_SCHEDULE=static
+export OMP_PLACES=cores
+export OMP_PROC_BIND=spread
 #
 PERFDIR="perf"
 PROFILE=$PERFDIR/"uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".pro"
@@ -67,6 +70,7 @@ if [ ! -f $PROFILE ]; then
   # First, get a rough idea of DOF/sec to estimate time
   # with 10 iterations of the third-to-largest model
   if [ ! -f $CSVFILE ]; then
+    export OMP_PROC_BIND=spread
     ITERS=10; H=${LIST_H[$(( $TRY_COUNT - 3 ))]};
     C=$CPUCOUNT
     MESHNAME="uhxt"$H"p"$P"n"$N
@@ -82,6 +86,14 @@ if [ ! -f $PROFILE ]; then
 fi
 if [ -f $CSVFILE ]; then
   echo "Femera Performance Profile" > $PROFILE
+  echo "Writing maximum problem size estimate: "$PROFILE"..." >> $LOGFILE
+  echo >> $PROFILE
+  echo "        Maximum Elastic Model Size Estimate" >> $PROFILE
+  echo "  ------------------------------------------------" >> $PROFILE
+  printf "     %9i : Maximum Elements\n" $TET10_MAX >> $PROFILE
+  printf "     %9i : Maximum Nodes\n" $NODE_MAX >> $PROFILE
+  printf "    %9.0f  : Maximum MDOF\n" $MDOF_MAX >> $PROFILE
+  #
   echo "femerq-"$CPUMODEL"-"$CSTR >> $PROFILE
   grep -m1 -i "model name" /proc/cpuinfo >> $PROFILE
   MEM_GB="`free -g  | grep Mem | awk '{print $2}'`"
@@ -129,8 +141,9 @@ if [ -f $CSVFILE ]; then
   BASIC_TEST_N=$(( $TRY_COUNT * $REPEAT_TEST_N + 1 ))
   if [ "$CSVLINES" -lt "$BASIC_TEST_N" ]; then
     echo Running basic profile tests...
+    C=$CPUCOUNT
+    export OMP_PROC_BIND=spread
     for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
-      C=$CPUCOUNT
       H=${LIST_H[I]}
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
@@ -244,6 +257,10 @@ fi
 if false; then rm $CSVSMALL; fi
 if [ ! -f $CSVSMALL ]; then # Run small model tests
   echo Running concurrent small model tests...
+  #FIXME Check OpenMP process bindings for these tests
+  #export OMP_SCHEDULE=static
+  #export OMP_PLACES=cores
+  #export OMP_PROC_BIND=close
   P=2;
   S=100; X=2; N=1;
   #LIST_C=(16 8 4 2 1)
@@ -393,6 +410,7 @@ CSV_HAS_MEDIUM_PART_TEST=`awk -F, -v e=$MED_NELEM -v c=$CPUCOUNT\
 if [ -z "$CSV_HAS_MEDIUM_PART_TEST" ]; then
   echo Running medium model partitioning tests...
   C=$CPUCOUNT
+  export OMP_PROC_BIND=spread
   for N in $(seq $CPUCOUNT $CPUCOUNT $(( $CPUCOUNT * 20 )) ); do
     MESHNAME="uhxt"$MED_H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$MED_H"p"$P/$MESHNAME
@@ -458,6 +476,7 @@ CSV_HAS_LARGE_PART_TEST=`awk -F, -v e=$LARGE_NELEM -v c=$CPUCOUNT\
   '($1==e)&&($9==c)&&($4>$9){print $4; exit}' $CSVFILE`
 if [ -z "$CSV_HAS_LARGE_PART_TEST" ]; then
   echo Running large model partitioning tests...
+  export OMP_PROC_BIND=spread
   C=$CPUCOUNT
   H=${LIST_H[$(( $TRY_COUNT - 3 ))]};
   ELEM_PER_PART=1000
@@ -535,8 +554,9 @@ fi
 CSV_HAS_FINAL_TEST=""
 if [ -z "$CSV_HAS_FINAL_TEST" ]; then
   echo Running final profile tests...
+  export OMP_PROC_BIND=spread
+  C=$CPUCOUNT
   for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
-    C=$CPUCOUNT
     H=${LIST_H[I]}
     N=1;
     MESHNAME="uhxt"$H"p"$P"n"$N
