@@ -42,8 +42,8 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E, const INT_MESH e0, const INT_MESH
   printf("DOF: %u, Elems:%u, IntPts:%u, Nodes/elem:%u\n",
     (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
 #endif
-  FLOAT_PHYS dw, G[Ne], u[Ne], f[Ne];
-  FLOAT_PHYS H[Nd*Nf], S[Nd*Nf];
+  FLOAT_PHYS dw, G[Ne], u[Ne], p[Ne], f[Ne];
+  FLOAT_PHYS H[Nd*Nf], S[Nd*Nf], P[Nd*Nf];
   //
   const FLOAT_PHYS* RESTRICT intp_shpg = &E->intp_shpg[0];
   const FLOAT_PHYS* RESTRICT       wgt = &E->gaus_weig[0];
@@ -58,17 +58,20 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E, const INT_MESH e0, const INT_MESH
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
   const FLOAT_SOLV* RESTRICT sysu  = &sys_u[0];
+  const FLOAT_SOLV* RESTRICT sysp  = &sys_p[0];
         FLOAT_SOLV* RESTRICT sysf  = &sys_f[0];
   for(INT_MESH ie=e0;ie<ee;ie++){
     const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     for (uint i=0; i<uint(Nc); i++){
       for (uint j=0; j<uint(Nf); j++){
         u[Nf*i+j] = sysu[conn[i]*Nf+j];
+        p[Nf*i+j] = sysp[conn[i]*Nf+j];
     } }
     for(int i=0; i<Ne; i++){ f[i]=0.0; }
     for(int ip=0; ip<intp_n; ip++){
-      for(int i=0; i< 9 ; i++){ H[i]=0.0; }
       for(int i=0; i<Ne ; i++){ G[i]=0.0; }
+      for(int i=0; i< 9 ; i++){ H[i]=0.0; }
+      for(int i=0; i< 9 ; i++){ P[i]=0.0; }
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       for(int i=0; i<Nc; i++){
@@ -80,6 +83,7 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E, const INT_MESH e0, const INT_MESH
         for(int k=0; k<Nf ; k++){
           for(int j=0; j<Nf ; j++){
             H[Nf* k+j ] += G[Nf* i+k ] * u[Nf* i+j ];
+            P[Nf* k+j ] += G[Nf* i+k ] * p[Nf* i+j ];
       } } }//---------------------------------------------- N*3*6*2 = 36*N FLOP
 #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
@@ -88,12 +92,8 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E, const INT_MESH e0, const INT_MESH
         printf("%+9.2e ",H[j]);
       } printf("\n");
 #endif
-#if 1
-      {// scope j2 stuff
-      const FLOAT_PHYS strain_v[6]={ H[0], H[4], H[8],
-        H[1]+H[3], H[5]+H[7], H[2]+H[6] };
-      FLOAT_PHYS stress_v[6];
-      FLOAT_PHYS dde_dds[36]={// Initialized to linear-elastic isotropic
+      {// scope D-matrix
+      FLOAT_PHYS dde_dds[36]={// Initialize to linear-elastic isotropic
         C[0],C[1],C[1],0.0 ,0.0 ,0.0,
         C[1],C[0],C[1],0.0 ,0.0 ,0.0,
         C[1],C[1],C[0],0.0 ,0.0 ,0.0,
@@ -107,33 +107,35 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E, const INT_MESH e0, const INT_MESH
       const FLOAT_PHYS saturation_stress = this->mtrl_prop[3];
       const FLOAT_PHYS hardness_modulus  = this->mtrl_prop[4];
       const FLOAT_PHYS j2_beta           = this->mtrl_prop[5];
+      FLOAT_PHYS strain_v[6]={ H[0], H[4], H[8],
+        H[1]+H[3], H[5]+H[7], H[2]+H[6] };
       //
       //
-      //
-      //
-      }//======================================================= end UMAT scope
-      // Evaluate conjugate stress from conjugate strain.
+      // Calculate stress from strain.
+      FLOAT_PHYS stress_v[6];
       for(int i=0; i<6; i++){
         stress_v[i] =0.0;
         for(int j=0; j<6; j++){
           stress_v[i] += dde_dds[6* i+j] * strain_v[j];
       } }
-      // Convert stress Voigt vector to Cauchy stress tensor.
-      S[0]=stress_v[0]; S[4]=stress_v[1]; S[8]=stress_v[2];
-      S[1]=stress_v[3]; S[5]=stress_v[4]; S[2]=stress_v[5];
-      S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
-      }//end j2 scope
-#else
-      S[0]=(C[0]* H[0] + C[1]* H[4] + C[1]* H[8]);//Sxx
-      S[4]=(C[1]* H[0] + C[0]* H[4] + C[1]* H[8]);//Syy
-      S[8]=(C[1]* H[0] + C[1]* H[4] + C[0]* H[8]);//Szz
       //
-      S[1]=( H[1] + H[3] )*C[2];// S[3]= S[1];//Sxy Syx
-      S[5]=( H[5] + H[7] )*C[2];// S[7]= S[5];//Syz Szy
-      S[2]=( H[2] + H[6] )*C[2];// S[6]= S[2];//Sxz Szx
+      //
+      }//======================================================= end UMAT scope
+      // Calculate conjugate stress from conjugate strain.
+      const FLOAT_PHYS strain_p[6]={ P[0], P[4], P[8],
+        P[1]+P[3], P[5]+P[7], P[2]+P[6] };
+      FLOAT_PHYS stress_p[6];
+      for(int i=0; i<6; i++){
+        stress_p[i] =0.0;
+        for(int j=0; j<6; j++){
+          stress_p[i] += dde_dds[6* i+j] * strain_p[j];
+      } }
+      // Convert conjugate stress Voigt vector to Cauchy stress tensor.
+      S[0]=stress_p[0]; S[4]=stress_p[1]; S[8]=stress_p[2];
+      S[1]=stress_p[3]; S[5]=stress_p[4]; S[2]=stress_p[5];
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
-      // 18+9 = 27 FLOP
-#endif
+      }//end D-matrix scope
+      // Accumulate elemental nodal forces
       dw = Ejacs[Nj*ie+ 9] * wgt[ip];
       for(int i=0; i<Nc; i++){
         for(int k=0; k<Nf; k++){
