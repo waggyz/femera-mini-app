@@ -26,6 +26,8 @@ int ElastPlastJ2Iso3D::Setup( Elem* E ){
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) );
   this->stif_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) +2);
+  //
+  this->elem_vars.resize(elem_n*intp_n* 3, 0.0 );
   return 0;
 }
 int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,

@@ -42,6 +42,7 @@ public:
   INT_MESH iso3_part_n=0;
   INT_MESH ort3_part_n=0;
   INT_MESH ther_part_n=0;
+  INT_MESH plas_part_n=0;
   //
   FLOAT_MESH glob_bbox[6]={9e9,9e9,9e9 , -9e9,-9e9,-9e9};
   FLOAT_SOLV glob_bmax[4]={0.0,0.0,0.0,0.0};

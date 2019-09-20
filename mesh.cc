@@ -393,6 +393,7 @@ int Mesh::Setup(){
         if(iso3_part_n>0){ printf("%10u iso",iso3_part_n); }
         if(ort3_part_n>0){ printf("%10u ortho",ort3_part_n); }
         if(ther_part_n>0){ printf(" (%u thermo)",ther_part_n); }
+        if(plas_part_n>0){ printf(" (%u plastic)",plas_part_n); }
         printf("\n");
       }
 #endif
@@ -430,7 +431,8 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
   //FLOAT_MESH minx=9e9, miny=9e9, minz=9e9, maxx=-9e9,maxy=-9e9,maxz=-9e9;
   std::string fmrstring;
   std::ifstream fmrfile(fname);//return 0;
-  Phys::vals t_mtrl_prop={},t_mtrl_dirs={}, t_ther_cond={},t_ther_expa={};
+  Phys::vals t_mtrl_prop={},t_mtrl_dirs={}, t_ther_cond={},t_ther_expa={},
+    t_plas_prop={};
   while( fmrfile >> fmrstring ){// std::cout <<fmrstring;//printf("%s ",fmrstring.c_str());
     if(fmrstring=="$Femera"){
       std::string line;
@@ -567,6 +569,13 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
         for(int i=0; i<s; i++){ fmrfile >> t_mtrl_prop[i]; }
       }
     }
+    if(fmrstring=="$Plastic"){
+      int s=0; fmrfile >> s;
+      if(s>0){
+        t_plas_prop.resize(s);
+        for(int i=0; i<s; i++){ fmrfile >> t_plas_prop[i]; }
+      }
+    }
     if(fmrstring=="$ThermalExpansion"){
       int s=0; fmrfile >> s;
       t_ther_expa.resize(s);
@@ -591,8 +600,9 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
     //std::cout <<"*" << fmrstring <<"*" ;
 #endif
   }//EOF
-  bool has_therm=false;
+  bool has_therm=false, has_plas=false;
   if( (t_ther_expa.size()>0) | (t_ther_cond.size()>0) ){ has_therm=true; }
+  if(  t_plas_prop.size()>0 ){ has_plas=true; }
   if( has_therm ){
     if(t_mtrl_dirs.size()<3){
       Y = new ElastIso3D(t_mtrl_prop[0],t_mtrl_prop[1]);//FIXME
@@ -609,6 +619,22 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
       this->ther_part_n+=1;
 #endif
     }
+  }else if( has_plas ){
+    if(t_plas_prop.size()<5){
+      Y = new ElastPlastJ2Iso3D(t_mtrl_prop[0],t_mtrl_prop[1]);
+#if VERB_MAX>1
+#pragma omp atomic update
+      this->iso3_part_n+=1;
+      this->plas_part_n+=1;
+#endif
+    }//else{
+//      Y = new ElastPlastJ2Ort3D(t_mtrl_prop,t_mtrl_dirs);
+//#if VERB_MAX>1
+//#pragma omp atomic update
+//      this->ort3_part_n+=1;
+//      this->plas_part_n+=1;
+//#endif
+//    }
   }else{
     if(t_mtrl_dirs.size()<3){
       Y = new ElastIso3D(t_mtrl_prop[0],t_mtrl_prop[1]);
