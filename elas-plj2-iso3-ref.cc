@@ -92,45 +92,50 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E, const INT_MESH e0, const INT_MESH
         printf("%+9.2e ",H[j]);
       } printf("\n");
 #endif
-      {// scope D-matrix
-      FLOAT_PHYS dde_dds[36]={// Initialize to linear-elastic isotropic
+      {// Scope D-matrix and local copy of integration point state variables
+      FLOAT_PHYS D[36]={// Initialize to linear-elastic isotropic
         C[0],C[1],C[1],0.0 ,0.0 ,0.0,
         C[1],C[0],C[1],0.0 ,0.0 ,0.0,
         C[1],C[1],C[0],0.0 ,0.0 ,0.0,
         0.0 ,0.0 ,0.0 ,C[2],0.0 ,0.0,
         0.0 ,0.0 ,0.0 ,0.0 ,C[2],0.0,
         0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,C[2] };
+      FLOAT_PHYS plastic_shear_strain[3];
+      for(int i=0; i<3; i++){
+        plastic_shear_strain[i] = this->elem_vars[3*(intp_n*ie+ip) +i]; }
       {//====================================================== Scope UMAT calc
-      const FLOAT_PHYS youngs_modulus    = this->mtrl_prop[0];
-      const FLOAT_PHYS poissons_ratio    = this->mtrl_prop[1];
-      const FLOAT_PHYS yield_stress      = this->mtrl_prop[2];
-      const FLOAT_PHYS saturation_stress = this->mtrl_prop[3];
-      const FLOAT_PHYS hardness_modulus  = this->mtrl_prop[4];
-      const FLOAT_PHYS j2_beta           = this->mtrl_prop[5];
-      FLOAT_PHYS strain_v[6]={ H[0], H[4], H[8],
-        H[1]+H[3], H[5]+H[7], H[2]+H[6] };
+      const FLOAT_PHYS youngs_modulus   =this->mtrl_prop[0];
+      const FLOAT_PHYS poissons_ratio   =this->mtrl_prop[1];
+      const FLOAT_PHYS yield_stress     =this->mtrl_prop[2];
+      const FLOAT_PHYS saturation_stress=this->mtrl_prop[3];
+      const FLOAT_PHYS hardness_modulus =this->mtrl_prop[4];
+      const FLOAT_PHYS j2_beta          =this->mtrl_prop[5];
+            FLOAT_PHYS strain_v[6]      ={ H[0], H[4], H[8],
+                                           H[1]+H[3], H[5]+H[7], H[2]+H[6] };
+            FLOAT_PHYS stress_v[6];
       //
       //
       // Calculate stress from strain.
-      FLOAT_PHYS stress_v[6];
-      for(int i=0; i<6; i++){
-        stress_v[i] =0.0;
+      for(int i=0; i<6; i++){ stress_v[i] =0.0;
         for(int j=0; j<6; j++){
-          stress_v[i] += dde_dds[6* i+j] * strain_v[j];
+          stress_v[i] += D[6* i+j ] * strain_v[ j ];
       } }
       //
       //
       }//======================================================= end UMAT scope
+      //Save element state
+      for(int i=0; i<3; i++){
+        this->elem_vars[3*(intp_n*ie+ip) +i ] = plastic_shear_strain[ i ];
+      }
       // Calculate conjugate stress from conjugate strain.
       const FLOAT_PHYS strain_p[6]={ P[0], P[4], P[8],
         P[1]+P[3], P[5]+P[7], P[2]+P[6] };
       FLOAT_PHYS stress_p[6];
-      for(int i=0; i<6; i++){
-        stress_p[i] =0.0;
+      for(int i=0; i<6; i++){ stress_p[i] =0.0;
         for(int j=0; j<6; j++){
-          stress_p[i] += dde_dds[6* i+j] * strain_p[j];
+          stress_p[i] += D[6* i+j ] * strain_p[ j ];
       } }
-      // Convert conjugate stress Voigt vector to Cauchy stress tensor.
+      // Convert conjugate stress Voigt vector to conjugate stress tensor.
       S[0]=stress_p[0]; S[4]=stress_p[1]; S[8]=stress_p[2];
       S[1]=stress_p[3]; S[5]=stress_p[4]; S[2]=stress_p[5];
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
