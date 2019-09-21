@@ -108,10 +108,10 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E, const INT_MESH e0, const INT_MESH
       {//====================================================== Scope UMAT calc
       const FLOAT_PHYS youngs_modulus   =this->mtrl_prop[0];
       const FLOAT_PHYS poissons_ratio   =this->mtrl_prop[1];
-      const FLOAT_PHYS yield_stress     =this->mtrl_prop[2];
-      const FLOAT_PHYS saturation_stress=this->mtrl_prop[3];
-      const FLOAT_PHYS hardness_modulus =this->mtrl_prop[4];
-      const FLOAT_PHYS j2_beta          =this->mtrl_prop[5];
+      const FLOAT_PHYS yield_stress     =this->plas_prop[0];
+      const FLOAT_PHYS saturation_stress=this->plas_prop[1];
+      const FLOAT_PHYS hardness_modulus =this->plas_prop[2];
+      const FLOAT_PHYS j2_beta          =this->plas_prop[3];
             FLOAT_PHYS strain_v[6]      ={ H[0], H[4], H[8],
                                            H[1]+H[3], H[5]+H[7], H[2]+H[6] };
             FLOAT_PHYS stress_v[6];
@@ -153,7 +153,7 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E, const INT_MESH e0, const INT_MESH
       }
 }
 #endif
-#if VERB_MAX>10
+#if VERB_MAX>1
 #pragma omp single
 {
       printf("el:%u,gp:%i Plastic Shear Strain:                 ",ie,ip);

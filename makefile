@@ -127,7 +127,7 @@ plastic : all
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
 	-M0 -E100e9 -N0.3 -J1.1 -J2.2 -J3.3 -J4.4 \
 	-v3 -ap cube/unit1p1n2;
-	echo ./femera-$(CPUMODELC) -v3 -c$(NCPU) -p cube/unit1p1n2
+	echo ./femera-$(CPUMODELC) -v3 -s2 -c$(NCPU) -p cube/unit1p1n2
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
 	./femera-$(CPUMODELC) -v3 -s2 -c$(NCPU) -p cube/unit1p1n2
