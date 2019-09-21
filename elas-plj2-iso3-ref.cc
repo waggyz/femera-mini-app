@@ -129,7 +129,7 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E, const INT_MESH e0, const INT_MESH
 #pragma omp single
 {
       printf("el:%u,gp:%i Strain: ",ie,ip);
-      for(int i=0; i<6; i++){ printf("%+9.2e ",strain_v[i]); }
+      for(int i=0; i<6; i++){ printf("%+9.2e ", strain_v[i] ); }
       printf("\n");
 }
 #endif
@@ -137,7 +137,7 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E, const INT_MESH e0, const INT_MESH
 #pragma omp single
 {
       printf("el:%u,gp:%i Stress: ",ie,ip);
-      for(int i=0; i<6; i++){ printf("%+9.2e ",stress_v[i]); }
+      for(int i=0; i<6; i++){ printf("%+9.2e ", stress_v[i] ); }
       printf("\n");
 }
 #endif
@@ -148,16 +148,16 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E, const INT_MESH e0, const INT_MESH
       printf("el:%u,gp:%i D:     ",ie,ip);
       for(int i=0; i<36; i++){
         if(!(i%6)&(i>0)){ printf("                 "); }
-        printf(" %+9.2e",D[i]);
+        printf(" %+9.2e", D[i] );
         if((i%6)==5){ printf("\n"); }
       }
 }
 #endif
-#if VERB_MAX>1
+#if VERB_MAX>10
 #pragma omp single
 {
       printf("el:%u,gp:%i Plastic Shear Strain:                 ",ie,ip);
-      for(int i=0; i<3; i++){ printf("%+9.2e ",plastic_shear_strain[i]); }
+      for(int i=0; i<3; i++){ printf("%+9.2e ", plastic_shear_strain[i] ); }
       printf("\n");
 }
 #endif
