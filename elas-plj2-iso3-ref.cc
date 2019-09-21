@@ -31,7 +31,7 @@ int ElastPlastJ2Iso3D::Setup( Elem* E ){
   return 0;
 }
 int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
-  FLOAT_SOLV* sys_f, const FLOAT_SOLV* sys_u, const FLOAT_SOLV* sys_p ){
+  FLOAT_SOLV* sys_f, const FLOAT_SOLV* sys_p, const FLOAT_SOLV* sys_u ){
   //FIXME Clean up local variables.
   //const int De = 3;// Element Dimension
   const int Nd = 3;// Node (mesh) Dimension
@@ -50,7 +50,7 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E, const INT_MESH e0, const INT_MESH
   const FLOAT_PHYS* RESTRICT intp_shpg = &E->intp_shpg[0];
   const FLOAT_PHYS* RESTRICT       wgt = &E->gaus_weig[0];
   const FLOAT_PHYS* RESTRICT         C = &this->mtrl_matc[0];
-#if VERB_MAX>10
+#if VERB_MAX>11
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
   for(uint j=0;j<mtrl_matc.size();j++){
     //if(j%mesh_d==0){printf("\n");}

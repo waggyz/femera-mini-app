@@ -68,7 +68,8 @@ int NCG::Setup( Elem* E, Phys* Y ){// printf("*** NCG::Setup(E,Y) ***\n");
   this->RHS( E,Y );
   this->BCS( E,Y );// Sync max Y->udof_magn before Precond()
   Y->tens_flop*=2;Y->tens_band*=2;Y->stif_flop*=2;Y->stif_band*=2;// 2 evals/iter
-  Y->ElemLinear( E,0,E->elem_n,this->sys_f,this->sys_u );
+  Y->ElemLinear( E,0,E->elem_n, this->sys_f, this->sys_u );
+  Y->ElemNonLinear( E,0,E->elem_n, this->sys_f, this->sys_u, this->sys_u );
   return(0);
 }
 int NCG::Init( Elem* E, Phys* Y ){// printf("*** NCG::Init(E,Y) ***\n");
@@ -345,6 +346,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 #pragma omp simd
     for(uint i=0;i<sysn;i++){ S->sys_g[i]=0.0; }
     Y->ElemLinear( E,0,E->halo_elem_n, S->sys_g, S->sys_q );
+    Y->ElemNonLinear( E,0,E->halo_elem_n, S->sys_g, S->sys_q, S->sys_u );
     time_accum( my_phys_count, phys_start );
     time_start( gath_start );
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
@@ -415,6 +417,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_accum( my_scat_count, scat_start );
     time_start( phys_start );
     Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->sys_g, S->sys_q );
+    Y->ElemNonLinear( E,E->halo_elem_n,E->halo_elem_n, S->sys_g, S->sys_q, S->sys_u );
     time_accum( my_phys_count, phys_start );
     //--------------------------------------------- Done compute and sync sys_g
     time_start( solv_start );
@@ -457,6 +460,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     const INT_MESH Dn=uint(Y->node_d);
     time_start( phys_start );
     Y->ElemLinear( E,0,E->halo_elem_n, S->sys_f, S->sys_u );
+    Y->ElemNonLinear( E,0,E->halo_elem_n, S->sys_f, S->sys_u, S->sys_u );
     time_accum( my_phys_count, phys_start );
     time_start( gath_start );
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
@@ -496,6 +500,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_accum( my_scat_count, scat_start );
     time_start( phys_start );
     Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->sys_f, S->sys_u );
+    Y->ElemNonLinear( E,E->halo_elem_n,E->elem_n, S->sys_f, S->sys_u, S->sys_u );
     time_accum( my_phys_count, phys_start );
     //--------------------------------------------- Done compute and sync sys_f
     //-------------------------------------- Calculate negative residuals sys_r

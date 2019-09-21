@@ -148,8 +148,8 @@ int main( int argc, char** argv ) {
         fprintf (stderr,"ERROR Specify only material properties:\n");
         fprintf (stderr,"      -E<Young's modulus> -N<Poisson's ratio>\n");
         fprintf (stderr,"      -G<shear modulus>\n");
-        fprintf (stderr,"      -A<Thermal expansion> -K<thermal conductivity>...\n");
-        fprintf (stderr,"      -J<Plasticity parameter>\n");
+        fprintf (stderr,"      -A<Thermal expansion> -K<thermal conductivity>\n");
+        fprintf (stderr,"      -J<Plasticity parameter>...\n");
         fprintf (stderr,"   OR material response matrix values:\n");
         fprintf (stderr,"      -C<c11>...\n");
         return 1; };
@@ -671,29 +671,42 @@ int main( int argc, char** argv ) {
 #endif
         if(tcon_part[part_i].size()>0){
           if(verbosity>1){
-            std::cout << "Setting thermal conductivity..." <<'\n'; }
+            std::cout << "Setting partition thermal conductivities..." <<'\n'; }
           Y->ther_cond.resize(tcon_part[part_i].size());
           for(uint i=0; i<tcon_part[part_i].size(); i++){
             Y->ther_cond[i] = tcon_part[part_i][i]; }
         }else if(tcon_part[0].size()>0){
           if(verbosity>1){
-            std::cout << "Setting default thermal conductivity..." <<'\n'; }
+            std::cout << "Setting model thermal conductivity..." <<'\n'; }
           Y->ther_cond.resize(tcon_part[0].size());
           for(uint i=0; i<tcon_part[0].size(); i++){
             Y->ther_cond[i] = tcon_part[0][i]; }
         }
         if(texp_part[part_i].size()>0){
           if(verbosity>1){
-            std::cout << "Setting thermal expansion..." <<'\n'; }
+            std::cout << "Setting partition thermal expansions..." <<'\n'; }
           Y->ther_expa.resize(texp_part[part_i].size());
           for(uint i=0; i<texp_part[part_i].size(); i++){
             Y->ther_expa[i] = texp_part[part_i][i]; }
         }else if(texp_part[0].size()>0){
           if(verbosity>1){
-            std::cout << "Setting default thermal expansion..." <<'\n'; }
+            std::cout << "Setting model thermal expansion..." <<'\n'; }
           Y->ther_expa.resize(texp_part[0].size());
           for(uint i=0; i<texp_part[0].size(); i++){
             Y->ther_expa[i] = texp_part[0][i]; }
+        }
+        if(plas_part[part_i].size()>0){
+          if(verbosity>1){
+            std::cout << "Setting partition plasticities..." <<'\n'; }
+          Y->plas_prop.resize(plas_part[part_i].size());
+          for(uint i=0; i<plas_part[part_i].size(); i++){
+            Y->plas_prop[i] = plas_part[part_i][i]; }
+        }else if(plas_part[0].size()>0){
+          if(verbosity>1){
+            std::cout << "Setting model plasticity..." <<'\n'; }
+          Y->plas_prop.resize(plas_part[0].size());
+          for(uint i=0; i<plas_part[0].size(); i++){
+            Y->plas_prop[i] = plas_part[0][i]; }
         }
         Solv* S;
         Mesh::part t(M->list_elem[part_i],Y,S);

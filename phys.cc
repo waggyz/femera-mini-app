@@ -124,7 +124,7 @@ int Phys::JacT  ( Elem* E ){
 //-------------------------------------------------------------------
 
 int Phys::ReadPartFMR( const char* fname, bool is_bin ){
-  //FIXME This is not used. It's done in Elem::ReadPartFMR...
+  //FIXME This is not used. It's done in Mesh::ReadPartFMR...
   std::string s; if(is_bin){ s="binary";}else{s="ASCII";}
   if(is_bin){
     std::cout << "ERROR Could not open "<< fname << " for reading." <<'\n'
@@ -198,7 +198,7 @@ int Phys::SavePartFMR( const char* fname, bool is_bin ){
     fmrfile <<'\n';
   }
 #endif
-  // Replace $ElasticProperties with these
+  // Replaced $ElasticProperties with these
   if(mtrl_dirs.size()>0){
     fmrfile << "$Orientation" <<'\n';
     fmrfile << mtrl_dirs.size();
@@ -211,12 +211,6 @@ int Phys::SavePartFMR( const char* fname, bool is_bin ){
     for(uint i=0;i<elas_prop.size();i++){ fmrfile <<" "<< elas_prop[i]; }
     fmrfile << '\n';
   }
-  if(plas_prop.size()>0){
-    fmrfile << "$Plastic" <<'\n';
-    fmrfile << plas_prop.size();
-    for(uint i=0;i<plas_prop.size();i++){ fmrfile <<" "<< plas_prop[i]; }
-    fmrfile << '\n';
-  }
   if(ther_expa.size()>0){
     fmrfile << "$ThermalExpansion" <<'\n';
     fmrfile << ther_expa.size();
@@ -227,6 +221,12 @@ int Phys::SavePartFMR( const char* fname, bool is_bin ){
     fmrfile << "$ThermalConductivity" <<'\n';
     fmrfile << ther_cond.size();
     for(uint i=0;i<ther_cond.size();i++){ fmrfile <<" "<< ther_cond[i]; }
+    fmrfile << '\n';
+  }
+  if(plas_prop.size()>0){
+    fmrfile << "$Plastic" <<'\n';
+    fmrfile << plas_prop.size();
+    for(uint i=0;i<plas_prop.size();i++){ fmrfile <<" "<< plas_prop[i]; }
     fmrfile << '\n';
   }
   return 0;

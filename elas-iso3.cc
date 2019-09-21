@@ -338,7 +338,7 @@ int ElastIso3D::ElemStrain( Elem* E,FLOAT_SOLV* sys_f ){
   };
 #if 0
 int ElastIso3D::ReadPartFMR( const char* fname, bool is_bin ){
-  //FIXME This is not used. It's done in Elem::ReadPartFMR...
+  //FIXME This is not used. It's done in Mesh::ReadPartFMR...
   std::string s; if(is_bin){ s="binary";}else{s="ASCII";}
   if(is_bin){
     std::cout << "ERROR Could not open "<< fname << " for reading." <<'\n'

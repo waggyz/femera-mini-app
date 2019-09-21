@@ -361,6 +361,12 @@ int Mesh::Setup(){
           printf("%9.2e",Y->ther_cond[i]); }
         printf("\n");
       }
+      if(Y->plas_prop.size()>0){
+        printf("         Plasticity:");
+        for(uint i=0; i<Y->plas_prop.size(); i++){
+          printf("%9.2e",Y->plas_prop[i]); }
+        printf("\n");
+      }
       printf("   Tensor Constants:");
       for(uint i=0; i<Y->mtrl_matc.size(); i++){
         printf("%9.2e",Y->mtrl_matc[i]);
@@ -569,13 +575,6 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
         for(int i=0; i<s; i++){ fmrfile >> t_mtrl_prop[i]; }
       }
     }
-    if(fmrstring=="$Plastic"){
-      int s=0; fmrfile >> s;
-      if(s>0){
-        t_plas_prop.resize(s);
-        for(int i=0; i<s; i++){ fmrfile >> t_plas_prop[i]; }
-      }
-    }
     if(fmrstring=="$ThermalExpansion"){
       int s=0; fmrfile >> s;
       t_ther_expa.resize(s);
@@ -586,7 +585,12 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
       t_ther_cond.resize(s);
       for(int i=0; i<s; i++){ fmrfile >> t_ther_cond[i]; }
     }
-    //FIXME Add ThermalElastic section
+    if(fmrstring=="$Plastic"){// Plasticity Constants
+      int s=0; fmrfile >> s;
+      t_plas_prop.resize(s);
+      for(int i=0; i<s; i++){ fmrfile >> t_plas_prop[i]; }
+    }
+    //FIXME Add ThermalElastic section?
 #if 0
     //if(fmrstring=="$Physics"){ //FIXME
     if(fmrstring=="$ElasticIsotropic"){ //FIXME
@@ -616,15 +620,20 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
 #if VERB_MAX>1
 #pragma omp atomic update
       this->ort3_part_n+=1;
+#pragma omp atomic update
       this->ther_part_n+=1;
 #endif
     }
   }else if( has_plas ){
-    if(t_plas_prop.size()<5){
+    if(t_plas_prop.size() < 5){
       Y = new ElastPlastJ2Iso3D(t_mtrl_prop[0],t_mtrl_prop[1]);
+      Y->plas_prop.resize(t_plas_prop.size());
+      for(uint i=0; i<t_plas_prop.size(); i++){
+        Y->plas_prop[i] = t_plas_prop[i]; }
 #if VERB_MAX>1
 #pragma omp atomic update
       this->iso3_part_n+=1;
+#pragma omp atomic update
       this->plas_part_n+=1;
 #endif
     }//else{
@@ -632,6 +641,7 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
 //#if VERB_MAX>1
 //#pragma omp atomic update
 //      this->ort3_part_n+=1;
+//#pragma omp atomic update
 //      this->plas_part_n+=1;
 //#endif
 //    }
