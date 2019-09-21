@@ -138,12 +138,12 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   auto m=bcmax[0];
   for(uint i=1;i<3;i++){ if(bcmax[0] > m){ m=bcmax[i]; } }
   for(uint i=0;i<3;i++){ bcmax[i]=m; }
+  //NOTE Nonlinear physics needs unscaled sys_u.
 #if 1
-  //NOTE Nonlinear physics needs unscaled sys_u
-  //FIXME Check that sys_u is unscaled
+  //FIXME Check that sys_u is unscaled in this solver.
   for(uint i=0;i<bcmax.size();i++){ if(bcmax[i]<=0.0){ bcmax[i]=1.0; } }
 #else
-  // Set all DOF scales to unity
+  // Set all DOF scales to unity.
   for(uint i=0;i<bcmax.size();i++){ bcmax[i]=1.0; }
 #endif
 #if VERB_MAX>2
