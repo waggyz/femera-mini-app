@@ -20,7 +20,7 @@ int ElastPlastJ2Iso3D::Setup( Elem* E ){
     *( uint(E->elem_conn_n)* (54) + 27 );
   this->tens_band = elem_n *(
      sizeof(FLOAT_SOLV)*(3*conn_n*3+ jacs_n*10)// Main mem
-    +sizeof(INT_MESH)*conn_n // Main mem ints
+    +sizeof(INT_MESH)*conn_n// Main mem ints
     +sizeof(FLOAT_PHYS)*(3*intp_n*conn_n +3+1 ) );// Stack (assumes read once)
   this->stif_flop = uint(E->elem_n)
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) );
@@ -30,7 +30,8 @@ int ElastPlastJ2Iso3D::Setup( Elem* E ){
   this->elem_vars.resize(elem_n*intp_n* 3, 0.0 );
   return 0;
 }
-int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
+int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E,
+  const INT_MESH e0,const INT_MESH ee,
   FLOAT_SOLV* sys_f, const FLOAT_SOLV* sys_p, const FLOAT_SOLV* sys_u ){
   //FIXME Clean up local variables.
   //const int De = 3;// Element Dimension
@@ -101,24 +102,25 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E, const INT_MESH e0, const INT_MESH
         C[1],C[1],C[0],0.0 ,0.0 ,0.0,
         0.0 ,0.0 ,0.0 ,C[2],0.0 ,0.0,
         0.0 ,0.0 ,0.0 ,0.0 ,C[2],0.0,
-        0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,C[2] };
+        0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,C[2]
+      };
       FLOAT_PHYS plastic_shear_strain[3];
       for(int i=0; i<3; i++){
         plastic_shear_strain[i] = this->elem_vars[3*(intp_n*ie+ip) +i]; }
       {//====================================================== Scope UMAT calc
-      const FLOAT_PHYS youngs_modulus   =this->mtrl_prop[0];
-      const FLOAT_PHYS poissons_ratio   =this->mtrl_prop[1];
-      const FLOAT_PHYS yield_stress     =this->plas_prop[0];
-      const FLOAT_PHYS saturation_stress=this->plas_prop[1];
-      const FLOAT_PHYS hardness_modulus =this->plas_prop[2];
-      const FLOAT_PHYS j2_beta          =this->plas_prop[3];
-            FLOAT_PHYS strain_v[6]      ={ H[0], H[4], H[8],
-                                           H[1]+H[3], H[5]+H[7], H[2]+H[6] };
+      const FLOAT_PHYS youngs_modulus    =this->mtrl_prop[0];
+      const FLOAT_PHYS poissons_ratio    =this->mtrl_prop[1];
+      const FLOAT_PHYS yield_stress      =this->plas_prop[0];
+      const FLOAT_PHYS saturation_stress =this->plas_prop[1];
+      const FLOAT_PHYS hardness_modulus  =this->plas_prop[2];
+      const FLOAT_PHYS j2_beta           =this->plas_prop[3];
+            FLOAT_PHYS strain_v[6]       ={ H[0], H[4], H[8],
+                                            H[1]+H[3], H[5]+H[7], H[2]+H[6] };
             FLOAT_PHYS stress_v[6];
       //
       //
       // Calculate stress from strain.
-      for(int i=0; i<6; i++){ stress_v[i] =0.0;
+      for(int i=0; i<6; i++){ stress_v[i]=0.0;
         for(int j=0; j<6; j++){
           stress_v[i] += D[6* i+j ] * strain_v[ j ];
       } }
