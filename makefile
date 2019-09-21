@@ -103,19 +103,48 @@ _dummy := $(shell mkdir -p mini.o test $(TESTDIR) $(PERFDIR))
 
 all : gmsh2fmr-ser mini-omp mini-omq
 
-$(ODIR)/%.$(OEXT) : %.cc
+test : all
+	./gmsh2fmr-$(CPUMODELC) \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
+	-M1 -E100e9 -N0.3 -A20e-6 -K100e-6 -Z1 -X0 -Z0 \
+	-M2 -E100e9 -N0.3 -Z1 -X0 -Z0 \
+	-v3 -ap cube/unit1p2n2;
+	./gmsh2fmr-$(CPUMODELC) \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 -Tu10 \
+	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 -R \
+	-v3 -ap cube/unit1p2n2;
+	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
+	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
+	command /usr/bin/time -v --append -o $(CPUMODELC).log \
+	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
+	echo ./femerq-$(CPUMODELC) -v1 -c$(NCPU) -p cube/unst19p1n16
+	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
+	command /usr/bin/time -v --append -o $(CPUMODELC).log \
+	./femerq-$(CPUMODELC) -v1 -c$(NCPU) -p cube/unst19p1n16
+
+plastic : all
+	./gmsh2fmr-$(CPUMODELC) \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
+	-M0 -E100e9 -N0.3 -J1.1 -J2.2 -J3.3 -J4.4 \
+	-v3 -ap cube/unit1p1n2;
+	echo ./femera-$(CPUMODELC) -v3 -c$(NCPU) -p cube/unit1p1n2
+	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
+	command /usr/bin/time -v --append -o $(CPUMODELC).log \
+	./femera-$(CPUMODELC) -v3 -s2 -c$(NCPU) -p cube/unit1p1n2
+
+$(ODIR)/%.$(OEXT) : %.cc *.h
 	echo $(CXX) ... -o $@
 	$(CXX) -c $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DOMP_SCHEDULE=static -DFETCH_JAC -DHAS_TEST \
 	$< -o $@ $(CPPLOG)
 
-$(ODIR)/%.$(QEXT) : %.cc
+$(ODIR)/%.$(QEXT) : %.cc *.h
 	echo $(CXX) ... -o $@
 	$(CXX) -c $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DOMP_SCHEDULE=static -DFETCH_JAC -DVERB_MAX=1 \
 	$< -o $@ $(CPPLOG)
 
-$(ODIR)/%.$(SEXT) : %.cc
+$(ODIR)/%.$(SEXT) : %.cc *.h
 	echo $(CXX) ... -o $@
 	$(CXX) -c $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DFETCH_JAC \
@@ -137,10 +166,6 @@ femera-$(CPUMODELC) : $(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	$(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT) \
 	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
 	-o femera-$(CPUMODELC) $(CPPLOG); $(AUTOVEC_SUMMARY)
-	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
-	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
-	command /usr/bin/time -v --append -o $(CPUMODELC).log \
-	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
 
 femerq-$(CPUMODELC) : $(QBJS) $(ODIR)/femera-mini.$(QEXT)
 	echo $(CXX) ... -o femerq-$(CPUMODELC)
@@ -148,10 +173,6 @@ femerq-$(CPUMODELC) : $(QBJS) $(ODIR)/femera-mini.$(QEXT)
 	$(QBJS) $(ODIR)/femera-mini.$(QEXT) \
 	-DOMP_SCHEDULE=static -DFETCH_JAC -DVERB_MAX=1 \
 	-o femerq-$(CPUMODELC) $(CPPLOG);
-	echo ./femerq-$(CPUMODELC) -v1 -c$(NCPU) -p cube/unst19p1n16
-	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
-	command /usr/bin/time -v --append -o $(CPUMODELC).log \
-	./femerq-$(CPUMODELC) -v1 -c$(NCPU) -p cube/unst19p1n16
 
 femerb-$(CPUMODELC) : $(BBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	echo $(CXX) ... -o femerb-$(CPUMODELC)
@@ -180,13 +201,6 @@ gmsh2fmr-$(CPUMODELC) : $(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT)
 	$(CXX) $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT) \
 	-o gmsh2fmr-$(CPUMODELC) ;
-	./gmsh2fmr-$(CPUMODELC) -t666 -x0 -t111 -z0 -t333 -y0 -t444 -xu 0.001 \
-	-M1 -E100e9 -N0.3 -A20e-6 -K100e-6 -Z1 -X0 -Z0 \
-	-M2 -E100e9 -N0.3 -Z1 -X0 -Z0 \
-	-v3 -ap cube/unit1p2n2;
-	./gmsh2fmr-$(CPUMODELC) -t666 -x0 -t333 -y0 -t111 -z0 -t444 -xu 0.001 -t444 -Tu 10 \
-	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 -R \
-	-v3 -ap cube/unit1p2n2;
 
 profile : profile-basic profile-small profile-large
 
