@@ -115,6 +115,16 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E, const INT_MESH e0, const INT_MESH
             FLOAT_PHYS strain_v[6]      ={ H[0], H[4], H[8],
                                            H[1]+H[3], H[5]+H[7], H[2]+H[6] };
             FLOAT_PHYS stress_v[6];
+      //
+      //
+      // Calculate stress from strain.
+      for(int i=0; i<6; i++){ stress_v[i] =0.0;
+        for(int j=0; j<6; j++){
+          stress_v[i] += D[6* i+j ] * strain_v[ j ];
+      } }
+      //
+      //
+      //------------------------------------------------------ Debugging output
 #if VERB_MAX>10
 #pragma omp single
 {
@@ -123,24 +133,6 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E, const INT_MESH e0, const INT_MESH
       printf("\n");
 }
 #endif
-      //
-      //
-#if VERB_MAX>10
-#pragma omp single
-{
-      printf("el:%u,gp:%i D:",ie,ip);
-      for(int i=0; i<36; i++){
-        if(!(i%6)&(i>0)){ printf("            "); }
-        printf(" %+9.2e",D[i]);
-        if((i%6)==5){ printf("\n"); }
-      }
-}
-#endif
-      // Calculate stress from strain.
-      for(int i=0; i<6; i++){ stress_v[i] =0.0;
-        for(int j=0; j<6; j++){
-          stress_v[i] += D[6* i+j ] * strain_v[ j ];
-      } }
 #if VERB_MAX>10
 #pragma omp single
 {
@@ -149,10 +141,18 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E, const INT_MESH e0, const INT_MESH
       printf("\n");
 }
 #endif
-      //
-      //
-      //
       }//======================================================= end UMAT scope
+#if VERB_MAX>10
+#pragma omp single
+{
+      printf("el:%u,gp:%i D:     ",ie,ip);
+      for(int i=0; i<36; i++){
+        if(!(i%6)&(i>0)){ printf("                 "); }
+        printf(" %+9.2e",D[i]);
+        if((i%6)==5){ printf("\n"); }
+      }
+}
+#endif
 #if VERB_MAX>10
 #pragma omp single
 {
