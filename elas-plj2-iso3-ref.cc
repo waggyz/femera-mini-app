@@ -128,7 +128,7 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E,
       //
       //------------------------------------------------------ Debugging output
 #if VERB_MAX>10
-#pragma omp critical
+#pragma omp critical(debug)
 {
       printf("el:%u,gp:%i Strain: ",ie,ip);
       for(int i=0; i<6; i++){ printf("%+9.2e ", strain_v[i] ); }
@@ -136,7 +136,7 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E,
 }
 #endif
 #if VERB_MAX>10
-#pragma omp critical
+#pragma omp critical(debug)
 {
       printf("el:%u,gp:%i Stress: ",ie,ip);
       for(int i=0; i<6; i++){ printf("%+9.2e ", stress_v[i] ); }
@@ -145,7 +145,7 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E,
 #endif
       }//======================================================= end UMAT scope
 #if VERB_MAX>10
-#pragma omp critical
+#pragma omp critical(debug)
 {
       printf("el:%u,gp:%i D:     ",ie,ip);
       for(int i=0; i<36; i++){
@@ -156,7 +156,7 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E,
 }
 #endif
 #if VERB_MAX>10
-#pragma omp critical
+#pragma omp critical(debug)
 {
       printf("el:%u,gp:%i Plastic Shear Strain:                 ",ie,ip);
       for(int i=0; i<3; i++){ printf("%+9.2e ", plastic_shear_strain[i] ); }
