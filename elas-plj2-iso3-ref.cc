@@ -177,7 +177,7 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E, const INT_MESH e0, const INT_MESH
       S[0]=stress_p[0]; S[4]=stress_p[1]; S[8]=stress_p[2];
       S[1]=stress_p[3]; S[5]=stress_p[4]; S[2]=stress_p[5];
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
-      }//end D-matrix scope
+      }//end D-matrix and local state varible scope
       // Accumulate elemental nodal forces
       dw = Ejacs[Nj*ie+ 9] * wgt[ip];
       for(int i=0; i<Nc; i++){
