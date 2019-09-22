@@ -35,7 +35,7 @@ gmsh -setnumber p $P -setnumber h $H -setnumber n $N -nt $C geo/unst-cube.geo -
 ./femera-$CPUMODEL-gcc -v2 -c $C -p "cube/uhxt"$H"p"$P"n"$N
 ```
 
-Then, try converting the mesh to a 1.3 MDOF quadratic tet thermoelastic model.
+Then, try converting it to a 1.3 MDOF quadratic tet thermoelastic model.
 
 ```bash
 ./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu0.001 -t444 -Tu 10 -M0 -E100e9 -N0.3 -A20e-6 -K250 -R -v2 -ap "cube/uhxt"$H"p"$P"n"$N

@@ -100,19 +100,19 @@ _dummy := $(shell mkdir -p mini.o test $(TESTDIR) $(PERFDIR))
 
 all : gmsh2fmr-ser mini-omp mini-omq
 
-$(ODIR)/%.$(OEXT) : %.cc
+$(ODIR)/%.$(OEXT) : %.cc *.h
 	echo $(CXX) ... -o $@
 	$(CXX) -c $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DOMP_SCHEDULE=static -DFETCH_JAC -DHAS_TEST \
 	$< -o $@ $(CPPLOG)
 
-$(ODIR)/%.$(QEXT) : %.cc
+$(ODIR)/%.$(QEXT) : %.cc *.h
 	echo $(CXX) ... -o $@
 	$(CXX) -c $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DOMP_SCHEDULE=static -DFETCH_JAC -DVERB_MAX=1 \
 	$< -o $@ $(CPPLOG)
 
-$(ODIR)/%.$(SEXT) : %.cc
+$(ODIR)/%.$(SEXT) : %.cc *.h
 	echo $(CXX) ... -o $@
 	$(CXX) -c $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DFETCH_JAC \
