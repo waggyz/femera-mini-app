@@ -48,25 +48,28 @@ CPUMODELC:=$(CPUMODEL)-$(CSTR)
 
 FEMERA_COMMON = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
  halo-pcg-omp.cc halo-ncg-omp.cc halo-pcr-dummy.cc \
- elas-iso3.cc elas-ort3.cc elas-ther-ort3.cc
+ elas-iso3.cc elas-ort3.cc elas-plj2-iso3.cc elas-ther-ort3.cc
 
 
 FEMERA_BASE_C = $(FEMERA_COMMON)\
  elas-iso3-base.cc elas-ort3-bas2.cc elas-ther-ort3-bas2.cc
 
-# ifeq ($(HOST2CHAR), k2)
 ifneq (,$(findstring AVX,$(CPUSIMD)))
 FEMERA_MINI_C = $(FEMERA_COMMON)\
  elas-iso3-vect.cc elas-ort3-vec2.cc elas-ther-ort3-vec2.cc
 else
 FEMERA_MINI_C = $(FEMERA_BASE_C)
 endif
- 
+
 FEMERA_REF_C = $(FEMERA_COMMON)\
- elas-iso3-ref.cc elas-ort3-ref2.cc elas-ther-ort3-ref2.cc
+ elas-iso3-ref.cc elas-ort3-ref2.cc elas-ther-ort3-ref2.cc elas-plj2-iso3-ref.cc
 
 FEMERA_NAIV_C = $(FEMERA_COMMON)\
  elas-iso3-ref.cc elas-ort3-nai2.cc elas-ther-ort3-ref2.cc
+
+
+#FIXME Using reference versions for initial development
+FEMERA_MINI_C = $(FEMERA_REF_C)
 
 
 HYBRID_GCC_C = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
@@ -99,6 +102,35 @@ _dummy := $(shell mkdir -p mini.o test $(TESTDIR) $(PERFDIR))
 .SILENT :
 
 all : gmsh2fmr-ser mini-omp mini-omq
+
+test : all
+	./gmsh2fmr-$(CPUMODELC) -v3 \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
+	-M1 -E100e9 -N0.3 -A20e-6 -K100e-6 -Z1 -X0 -Z0 \
+	-M2 -E100e9 -N0.3 -Z1 -X0 -Z0 \
+	-ap cube/unit1p2n2;
+	./gmsh2fmr-$(CPUMODELC) -v3 \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 -Tu10 \
+	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 -R \
+	-ap cube/unit1p2n2;
+	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
+	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
+	command /usr/bin/time -v --append -o $(CPUMODELC).log \
+	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
+	echo ./femerq-$(CPUMODELC) -v1 -c$(NCPU) -p cube/unst19p1n16
+	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
+	command /usr/bin/time -v --append -o $(CPUMODELC).log \
+	./femerq-$(CPUMODELC) -v1 -c$(NCPU) -p cube/unst19p1n16
+
+test-plastic : all
+	./gmsh2fmr-$(CPUMODELC) -v3 \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.01 \
+	-M0 -E66.2e9 -N0.33 -J305e6 -J2.0 -J100e6 -J4.0 \
+	-ap cube/unit1p1n2;
+	echo ./femera-$(CPUMODELC) -v3 -s2 -c$(NCPU) -p cube/unit1p1n2
+	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
+	command /usr/bin/time -v --append -o $(CPUMODELC).log \
+	./femera-$(CPUMODELC) -v3 -s2 -c$(NCPU) -p cube/unit1p1n2
 
 $(ODIR)/%.$(OEXT) : %.cc *.h
 	echo $(CXX) ... -o $@
@@ -134,10 +166,6 @@ femera-$(CPUMODELC) : $(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	$(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT) \
 	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
 	-o femera-$(CPUMODELC) $(CPPLOG); $(AUTOVEC_SUMMARY)
-	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
-	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
-	command /usr/bin/time -v --append -o $(CPUMODELC).log \
-	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
 
 femerq-$(CPUMODELC) : $(QBJS) $(ODIR)/femera-mini.$(QEXT)
 	echo $(CXX) ... -o femerq-$(CPUMODELC)
@@ -145,10 +173,6 @@ femerq-$(CPUMODELC) : $(QBJS) $(ODIR)/femera-mini.$(QEXT)
 	$(QBJS) $(ODIR)/femera-mini.$(QEXT) \
 	-DOMP_SCHEDULE=static -DFETCH_JAC -DVERB_MAX=1 \
 	-o femerq-$(CPUMODELC) $(CPPLOG);
-	echo ./femerq-$(CPUMODELC) -v1 -c$(NCPU) -p cube/unst19p1n16
-	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
-	command /usr/bin/time -v --append -o $(CPUMODELC).log \
-	./femerq-$(CPUMODELC) -v1 -c$(NCPU) -p cube/unst19p1n16
 
 femerb-$(CPUMODELC) : $(BBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	echo $(CXX) ... -o femerb-$(CPUMODELC)
@@ -177,13 +201,6 @@ gmsh2fmr-$(CPUMODELC) : $(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT)
 	$(CXX) $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT) \
 	-o gmsh2fmr-$(CPUMODELC) ;
-	./gmsh2fmr-$(CPUMODELC) -t666 -x0 -t111 -z0 -t333 -y0 -t444 -xu 0.001 \
-	-M1 -E100e9 -N0.3 -A20e-6 -K100e-6 -Z1 -X0 -Z0 \
-	-M2 -E100e9 -N0.3 -Z1 -X0 -Z0 \
-	-v3 -ap cube/unit1p2n2;
-	./gmsh2fmr-$(CPUMODELC) -t666 -x0 -t333 -y0 -t111 -z0 -t444 -xu 0.001 -t444 -Tu 10 \
-	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 -R \
-	-v3 -ap cube/unit1p2n2;
 
 profile : profile-basic profile-small profile-large
 

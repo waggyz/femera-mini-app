@@ -25,6 +25,8 @@ public:
   //
   virtual int BlocLinear( Elem*,RESTRICT Solv::vals&,const RESTRICT Solv::vals&)=0;
   virtual int ElemLinear( Elem*,const INT_MESH,const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*)=0;
+  virtual int ElemNonLinear( Elem*,const INT_MESH,const INT_MESH,
+    FLOAT_SOLV*,const FLOAT_SOLV*,const FLOAT_SOLV*)=0;
   virtual int ElemJacobi( Elem*,FLOAT_SOLV* )=0;// Jacobi Preconditioner
   virtual int ElemRowSumAbs(Elem*, FLOAT_SOLV* )=0;// Row Norm Preconditioner
   virtual int ElemStrain(Elem*, FLOAT_SOLV* )=0;// Applied Element Strain Preconditioner
@@ -64,12 +66,16 @@ public:
   // (Young's, Poisson's, etc.)
   Phys::vals mtrl_dirs;// Orientation [x,z,x]
   //
-  Phys::vals mtrl_matc;// Unique D-matrix values
+  Phys::vals mtrl_matc;// Unique D-matrix values? FIXME Change to mtrl_coef?
   Phys::vals mtrl_rotc;
   //
+  //FIXME Replace these with enumerator keys for mtrl_prop or mtrl_matc?
   Phys::vals elas_prop;
   Phys::vals ther_expa;//FIXME Hacked thermal constants into these
   Phys::vals ther_cond;
+  Phys::vals plas_prop;//FIXME Hacked plastiicity properties into this
+  //
+  Phys::vals elem_vars;// Element state variables
   //
   Phys::vals elem_inout;// Elemental nodal value workspace (serial)
   // Fill w/ Phys::ScatterNode2Elem(...),ElemLinear(Elem*),ElemJacobi(),...
@@ -115,7 +121,10 @@ public: ElastIso2D(FLOAT_PHYS young, FLOAT_PHYS poiss, FLOAT_PHYS thick) :
 #endif
   int Setup( Elem* )final;
   int BlocLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
-  int ElemLinear( Elem*,const INT_MESH,const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemLinear( Elem*,const INT_MESH,
+    const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemNonLinear( Elem*,const INT_MESH,const INT_MESH,
+    FLOAT_SOLV*,const FLOAT_SOLV*,const FLOAT_SOLV*) final;
   int ElemJacobi( Elem*,FLOAT_SOLV* ) final;
   int ElemRowSumAbs(Elem*, FLOAT_SOLV* ) final;
   int ElemStrain(Elem*, FLOAT_SOLV* ) final;
@@ -157,7 +166,10 @@ public: ElastIso3D(FLOAT_PHYS young, FLOAT_PHYS poiss ) :
   int Setup( Elem* )final;
   //int ElemLinear( std::vector<Elem*>,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
   int BlocLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
-  int ElemLinear( Elem*,const INT_MESH,const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemLinear( Elem*,const INT_MESH,
+    const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemNonLinear( Elem*,const INT_MESH,
+    const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*,const FLOAT_SOLV*) final;
   int ElemJacobi( Elem*,FLOAT_SOLV* ) final;
   int ElemRowSumAbs(Elem*, FLOAT_SOLV* ) final;
   int ElemStrain(Elem*, FLOAT_SOLV* ) final;
@@ -176,7 +188,7 @@ public: ElastIso3D(FLOAT_PHYS young, FLOAT_PHYS poiss ) :
     //return( Phys::vals {C11,C12,C44} );
     mtrl_matc.resize(3); mtrl_matc={ (1.0-nu)*d,nu*d,(1.0-2.0*nu)*d*0.5};
     return 0;
-  };
+  }
   Phys::vals MtrlLinear( const RESTRICT Phys::vals &e)final{
     //FIXME Doesn't inline
     //const Phys::vals e=Tens3VoigtEng(strain_tensor);
@@ -190,7 +202,7 @@ public: ElastIso3D(FLOAT_PHYS young, FLOAT_PHYS poiss ) :
     s[5]= mtrl_matc[2]*e[2] +mtrl_matc[2]*e[6];
     //FIXME Tensor form: http://solidmechanics.org/text/Chapter3_2/Chapter3_2.htm
     return s;
-  };
+  }
 protected:
 private:
 };
@@ -239,7 +251,10 @@ public:
   int Setup( Elem* )final;
   //int ElemLinear( std::vector<Elem*>,RESTRICT Phys::vals&,const RESTRICT Phys::vals&)
   int BlocLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
-  int ElemLinear( Elem*,const INT_MESH,const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemLinear( Elem*,const INT_MESH,
+    const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemNonLinear( Elem*,const INT_MESH,
+    const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*,const FLOAT_SOLV*) final;
   int ElemJacobi( Elem*,FLOAT_SOLV* ) final;
   int ElemRowSumAbs(Elem*, FLOAT_SOLV* ) final;
   int ElemStrain(Elem*, FLOAT_SOLV* ) final;
@@ -415,7 +430,10 @@ public:
   int Setup( Elem* )final;
   //int ElemLinear( std::vector<Elem*>,RESTRICT Phys::vals&,const RESTRICT Phys::vals&)
   int BlocLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
-  int ElemLinear( Elem*,const INT_MESH,const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemLinear( Elem*,const INT_MESH,
+    const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemNonLinear( Elem*,const INT_MESH,
+    const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*,const FLOAT_SOLV*) final;
   int ElemJacobi( Elem*,FLOAT_SOLV* ) final;
   int ElemRowSumAbs(Elem*, FLOAT_SOLV* ) final;
   int ElemStrain(Elem*, FLOAT_SOLV* ) final;
@@ -457,6 +475,61 @@ public:
     return 0;
   }
   Phys::vals MtrlLinear(const RESTRICT Phys::vals &e)final{ return e; }// dummy
+protected:
+private:
+};
+class ElastPlastJ2Iso3D final: public Phys{
+public: ElastPlastJ2Iso3D(FLOAT_PHYS young, FLOAT_PHYS poiss ) :
+  Phys((Phys::vals){young,poiss}){
+    this->node_d = 3;
+    //this->elem_flop = 225;//FIXME Tensor eval for linear tet
+    // calc stiff_flop from (node_d*E->elem_node_n)*(node_d*E->elem_node_n-1.0)
+    ElastPlastJ2Iso3D::MtrlProp2MatC();
+  };
+#if 0
+  int SavePartFMR( const char* bname, bool is_bin ) final;
+  int ReadPartFMR( const char* bname, bool is_bin ) final;
+#endif
+  int Setup( Elem* )final;
+  //int ElemLinear( std::vector<Elem*>,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
+  int BlocLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
+  int ElemLinear( Elem*,const INT_MESH,
+    const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemNonLinear( Elem*,const INT_MESH,
+    const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemJacobi( Elem*,FLOAT_SOLV* ) final;
+  int ElemRowSumAbs(Elem*, FLOAT_SOLV* ) final;
+  int ElemStrain(Elem*, FLOAT_SOLV* ) final;
+  int ElemLinear( Elem* ) final;
+  int ElemJacobi( Elem* ) final;
+  int ElemStiff ( Elem* ) final;
+  int ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*) final;
+  inline int MtrlProp2MatC()final{//why does this inline?
+    const FLOAT_PHYS E =mtrl_prop[0];
+    const FLOAT_PHYS nu=mtrl_prop[1];
+    const FLOAT_PHYS d =E/((1.0+nu)*(1.0-2.0*nu));
+    //const FLOAT_PHYS C11=(1.0-n)*d;
+    //const FLOAT_PHYS C12=n*d ;
+    //const FLOAT_PHYS C44=(1.0-2.0*n)*d*0.5;
+    ////const Phys::vals C={C11,C12,C44};
+    //return( Phys::vals {C11,C12,C44} );
+    mtrl_matc.resize(3); mtrl_matc={ (1.0-nu)*d,nu*d,(1.0-2.0*nu)*d*0.5};
+    return 0;
+  }
+  Phys::vals MtrlLinear( const RESTRICT Phys::vals &e)final{
+    //FIXME Doesn't inline
+    //const Phys::vals e=Tens3VoigtEng(strain_tensor);
+    RESTRICT Phys::vals s(0.0,6);
+    s[0]= mtrl_matc[0]*e[0] +mtrl_matc[1]*e[4] +mtrl_matc[1]*e[8];
+    s[1]= mtrl_matc[1]*e[0] +mtrl_matc[0]*e[4] +mtrl_matc[1]*e[8];
+    s[2]= mtrl_matc[1]*e[0] +mtrl_matc[1]*e[4] +mtrl_matc[0]*e[8];
+    // Fused multiply-add probably better
+    s[3]= mtrl_matc[2]*e[1] +mtrl_matc[2]*e[3];
+    s[4]= mtrl_matc[2]*e[5] +mtrl_matc[2]*e[7];
+    s[5]= mtrl_matc[2]*e[2] +mtrl_matc[2]*e[6];
+    //FIXME Tensor form: http://solidmechanics.org/text/Chapter3_2/Chapter3_2.htm
+    return s;
+  }
 protected:
 private:
 };

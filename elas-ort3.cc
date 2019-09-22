@@ -8,6 +8,10 @@ int ElastOrtho3D::ElemLinear( Elem* ){ return 1; }//FIXME
 int ElastOrtho3D::ElemJacobi( Elem* ){ return 1; }//FIXME
 int ElastOrtho3D::BlocLinear( Elem* ,
   RESTRICT Phys::vals &, const RESTRICT Solv::vals & ){ return 1; }
+int ElastOrtho3D::ElemNonLinear( Elem*, const INT_MESH, const INT_MESH,
+  FLOAT_SOLV*, const FLOAT_SOLV*, const FLOAT_SOLV* ){
+  return 1;
+  }
 //
 int ElastOrtho3D::ElemStrainStress(std::ostream& of,
   Elem* E, FLOAT_SOLV* sys_u) {
@@ -553,7 +557,7 @@ int ElastOrtho3D::ElemStrain( Elem* E,FLOAT_SOLV* sys_f ){
   };
 #if 0
 int ElastOrtho3D::ReadPartFMR( const char* fname, bool is_bin ){
-  //FIXME This is not used. It's done in Elem::ReadPartFMR...
+  //FIXME This is not used. It's done in Mesh::ReadPartFMR...
   std::string s; if(is_bin){ s="binary";}else{s="ASCII";}
   if(is_bin){
     std::cout << "ERROR Could not open "<< fname << " for reading." <<'\n'

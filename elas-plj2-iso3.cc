@@ -4,20 +4,20 @@
 #include <cstring>// std::memcpy
 #include "femera.h"
 //
-int ElastIso3D::ElemLinear( Elem* ){ return 1; }//FIXME
-int ElastIso3D::ElemJacobi( Elem* ){ return 1; }//FIXME
-int ElastIso3D::BlocLinear( Elem* ,
+int ElastPlastJ2Iso3D::ElemLinear( Elem* ){ return 1; }//FIXME
+int ElastPlastJ2Iso3D::ElemJacobi( Elem* ){ return 1; }//FIXME
+int ElastPlastJ2Iso3D::BlocLinear( Elem*,
   RESTRICT Phys::vals &, const RESTRICT Solv::vals & ){
   return 1;
   }
-int ElastIso3D::ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*){
-  return 1;
-}
-int ElastIso3D::ElemNonLinear( Elem*, const INT_MESH, const INT_MESH,
-  FLOAT_SOLV*, const FLOAT_SOLV*, const FLOAT_SOLV* ){
+int ElastPlastJ2Iso3D::ElemLinear( Elem*, const INT_MESH, const INT_MESH,
+  FLOAT_SOLV*, const FLOAT_SOLV* ){
   return 1;
   }
-int ElastIso3D::ElemStiff(Elem* E  ){
+int ElastPlastJ2Iso3D::ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*){
+  return 1;
+}
+int ElastPlastJ2Iso3D::ElemStiff(Elem* E  ){
   //FIXME Doesn't do rotation yet
   const uint Dm = 3;//E->mesh_d
   const uint Dn = this->node_d;
@@ -97,7 +97,7 @@ int ElastIso3D::ElemStiff(Elem* E  ){
   }// End elem loop
   return 0;
 }//============================================================== End ElemStiff
-int ElastIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
+int ElastPlastJ2Iso3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
   const uint ndof   = 3;//this->node_d
   const uint  Nj = 10,d2=9;
   const uint  Nc = E->elem_conn_n;
@@ -171,7 +171,7 @@ int ElastIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
   }
   return 0;
 }
-int ElastIso3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* sys_d ){
+int ElastPlastJ2Iso3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* sys_d ){
   const uint ndof   = 3;//this->node_d
   const uint elem_n = E->elem_n;
   const uint  Nc = E->elem_conn_n;
@@ -252,7 +252,7 @@ int ElastIso3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* sys_d ){
   };
   return 0;
 };
-int ElastIso3D::ElemStrain( Elem* E,FLOAT_SOLV* sys_f ){
+int ElastPlastJ2Iso3D::ElemStrain( Elem* E,FLOAT_SOLV* sys_f ){
   //FIXME Clean up local variables.
   const uint ndof= 3;//this->node_d
   const uint  Nj =10;//,d2=9;//mesh_d*mesh_d;
@@ -336,77 +336,3 @@ int ElastIso3D::ElemStrain( Elem* E,FLOAT_SOLV* sys_f ){
   };//end elem loop
   return 0;
   };
-#if 0
-int ElastIso3D::ReadPartFMR( const char* fname, bool is_bin ){
-  //FIXME This is not used. It's done in Mesh::ReadPartFMR...
-  std::string s; if(is_bin){ s="binary";}else{s="ASCII";}
-  if(is_bin){
-    std::cout << "ERROR Could not open "<< fname << " for reading." <<'\n'
-      << "ERROR Femera (fmr) "<< s <<" format not yet supported." <<'\n';
-    return 1;
-  }
-  std::string fmrstring;
-  std::ifstream fmrfile(fname);
-  while( fmrfile >> fmrstring ){
-    if(fmrstring=="$ElasticProperties"){//FIXME Deprecated
-      int s=0; fmrfile >> s;
-      mtrl_prop.resize(s);
-      for(int i=0; i<s; i++){ fmrfile >> mtrl_prop[i]; }
-      //this->MtrlProp2MatC();
-      s=0; fmrfile >> s;
-      if(s>0){
-        mtrl_dirs.resize(s);
-      for(int i=0; i<s; i++){ fmrfile >> mtrl_dirs[i]; mtrl_dirs[i]*=(PI/180.0) ;}
-      }
-    }
-    if(fmrstring=="$Orientation"){// Material orientation (radians)
-      int s=0; fmrfile >> s;
-      if(s>0){
-        mtrl_dirs.resize(s);
-        for(int i=0; i<s; i++){ fmrfile >> mtrl_dirs[i]; mtrl_dirs[i]*=(PI/180.0) ;}
-      }
-    }
-    //FIXME This parsing requires properties in a specific order
-    auto tprop = mtrl_prop; auto tsz=tprop.size();
-    if(fmrstring=="$Elastic"){// Elastic Constants
-      int s=0; fmrfile >> s;
-      mtrl_prop.resize(tsz+s);
-      mtrl_prop[std::slice(tsz,tsz+s,1)] = tprop;
-      for(int i=0; i<s; i++){ fmrfile >> mtrl_prop[i+tprop.size()]; }
-    }
-    if(fmrstring=="$ThermalExpansion"){// Thermal expansion
-      int s=0; fmrfile >> s;
-      mtrl_prop.resize(s + tprop.size());
-      mtrl_prop[std::slice(tsz,tsz+s,1)] = tprop;
-      for(int i=0; i<s; i++){ fmrfile >> mtrl_prop[i+tprop.size()]; }
-    }
-    if(fmrstring=="$ThermalConductivity"){// Thermal conductivity
-      int s=0; fmrfile >> s;
-      mtrl_prop.resize(s + tprop.size());
-      mtrl_prop[std::slice(tsz,tsz+s,1)] = tprop;
-      for(int i=0; i<s; i++){ fmrfile >> mtrl_prop[i+tprop.size()]; }
-    }
-  }
-  return 0;
-}
-int ElastIso3D::SavePartFMR( const char* fname, bool is_bin ){
-  std::string s; if(is_bin){ s="binary";}else{s="ASCII";};
-  if(is_bin){
-    std::cout << "ERROR Could not append "<< fname << "." <<'\n'
-      << "ERROR Femera (fmr) "<< s <<" format not yet supported." <<'\n';
-    return 1;
-  };
-  std::ofstream fmrfile;
-  fmrfile.open(fname, std::ios_base::app);
-  //
-  fmrfile << "$ElasticProperties" <<'\n';
-  fmrfile << mtrl_prop.size();
-  for(uint i=0;i<mtrl_prop.size();i++){ fmrfile <<" "<< mtrl_prop[i]; };
-  fmrfile << '\n';
-  if(mtrl_dirs.size()>0){
-    fmrfile << mtrl_dirs.size();
-    for(uint i=0;i<mtrl_dirs.size();i++){ fmrfile <<" "<< mtrl_dirs[i]; };
-  }; fmrfile <<'\n';
-  return 0;
-};
-#endif

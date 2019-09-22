@@ -649,7 +649,7 @@ int main( int argc, char** argv ){
 #if VERB_MAX > 2
       if(verbosity>2){
         if(S->udof_n<300){
-          printf("------- Node Coordinates --------------- Displacements -------");
+          printf("------ Node Coordinates ---------------- Displacements -------");
           if(Dn>3){ printf("  Temperature"); }
           printf("\n");
           for(uint i=0;i<Nn;i++){
@@ -752,6 +752,7 @@ int main( int argc, char** argv ){
     const auto n = S->udof_n;
     for(uint i=0;i<n;i++){ S->sys_f[i]=0.0; }
     Y->ElemLinear( E,0,E->halo_elem_n, S->sys_f, S->sys_u );
+    Y->ElemNonLinear( E,0,E->halo_elem_n, S->sys_f, S->sys_u, S->sys_u );
     // sync sys_f
     const INT_MESH Dn=uint(Y->node_d);
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
@@ -786,6 +787,7 @@ int main( int argc, char** argv ){
         S->sys_f[Dn* i+j] = M->halo_val[f+j]; }
     }
     Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->sys_f, S->sys_u );
+    Y->ElemNonLinear( E,E->halo_elem_n,E->elem_n, S->sys_f, S->sys_u, S->sys_u );
   }
   // Now, sum the reactions on BCS fixed-displacemnt nodes in the x-direction.
   // Also, compute the polycrystal effective Young's modulus

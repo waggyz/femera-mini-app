@@ -41,7 +41,7 @@ int main( int argc, char** argv ) {
   bool save_asc=false, save_bin=false, save_csv=false, save_abq=false;
   bool is_part=false;
   std::unordered_map<int,std::vector<FLOAT_PHYS>>
-    mtrl_part, tcon_part, texp_part;//  mtrl_volu, tcon_volu, texp_volu;
+    mtrl_part, tcon_part, texp_part, plas_part;//  mtrl_volu, tcon_volu, texp_volu;
   bool rotfile=false, allrand=false;// Random orientations
   //bool hasther=false;
   FLOAT_MESH eps_find=1e-6;
@@ -60,17 +60,18 @@ int main( int argc, char** argv ) {
     std::vector<int>  parttags={}, axislist={},parttmp={};
     std::vector<FLOAT_PHYS> younlist={}, poislist={}, smodlist={},
       matclist={}, rdeglist={}, avallist={},
-      tconlist={}, texplist={};// therlist={},
+      tconlist={}, texplist={}, plaslist={};// therlist={},
     //  younlist, poislist, smodlist, matclist, rdeglist;
     //std::unordered_map<int,std::vector<int>> axislist;
     //int volutag=0, parttag=0;
     double uval=0.0, fval=0.0;
     bool fix0=false, load=false, disp=false;
     bool hasmatp=false, hasmatc=false, rotrand=false, mtrldone=true;
+   // bool hasplas=false;
     //
     opterr = 0; int c;
     while ((c = getopt (argc, argv,
-      "abcqo:pv:wt:n:@:xyzT0u:f:M:X:Y:Z:E:N:G:A:K:C:B:O:R")) != -1){
+      "abcqo:pv:wt:n:@:xyzT0u:f:M:X:Y:Z:E:N:G:A:K:J:C:B:O:R")) != -1){
       // x:  x requires an argument
       mtrldone=true;
       switch (c) {
@@ -113,6 +114,7 @@ int main( int argc, char** argv ) {
         case 'G':{ smodlist.push_back(atof(optarg)); hasmatp=true; mtrldone=false;break; }
         case 'A':{ texplist.push_back(atof(optarg)); hasmatp=true; mtrldone=false;break; }
         case 'K':{ tconlist.push_back(atof(optarg)); hasmatp=true; mtrldone=false;break; }
+        case 'J':{ plaslist.push_back(atof(optarg)); hasmatp=true; mtrldone=false;break; }
         //case 'H':{ therlist.push_back(atof(optarg)); hasmatp=true; mtrldone=false;break; }
         case 'X':{ axislist.push_back(0); rdeglist.push_back(atof(optarg)); mtrldone=false;break; }
         case 'Y':{ axislist.push_back(1); rdeglist.push_back(atof(optarg)); mtrldone=false;break; }
@@ -146,7 +148,8 @@ int main( int argc, char** argv ) {
         fprintf (stderr,"ERROR Specify only material properties:\n");
         fprintf (stderr,"      -E<Young's modulus> -N<Poisson's ratio>\n");
         fprintf (stderr,"      -G<shear modulus>\n");
-        fprintf (stderr,"      -A<Thermal expansion> -K<thermal conductivity>...\n");
+        fprintf (stderr,"      -A<Thermal expansion> -K<thermal conductivity>\n");
+        fprintf (stderr,"      -J<Plasticity parameter>...\n");
         fprintf (stderr,"   OR material response matrix values:\n");
         fprintf (stderr,"      -C<c11>...\n");
         return 1; };
@@ -237,6 +240,9 @@ int main( int argc, char** argv ) {
         std::cout << "Thermal conductivity:";
           for(FLOAT_PHYS v : tconlist ){ std::cout << " " << v; };
         std::cout << std::endl;
+        std::cout << "Plasticity parameters:";
+          for(FLOAT_PHYS v : plaslist ){ std::cout << " " << v; };
+        std::cout << std::endl;
         std::cout << " matC:";
           for(FLOAT_PHYS v : matclist ){ std::cout << " " << v; };
         std::cout << std::endl;
@@ -262,6 +268,7 @@ int main( int argc, char** argv ) {
           for(FLOAT_PHYS v : younlist ){ mtrl_part[p].push_back(v); };
           for(FLOAT_PHYS v : poislist ){ mtrl_part[p].push_back(v); };
           for(FLOAT_PHYS v : smodlist ){ mtrl_part[p].push_back(v); };
+          for(FLOAT_PHYS v : plaslist ){ plas_part[p].push_back(v); };
           for(FLOAT_PHYS v : texplist ){ texp_part[p].push_back(v); };
           for(FLOAT_PHYS v : tconlist ){ tcon_part[p].push_back(v); };
         };
@@ -664,29 +671,42 @@ int main( int argc, char** argv ) {
 #endif
         if(tcon_part[part_i].size()>0){
           if(verbosity>1){
-            std::cout << "Setting thermal conductivity..." <<'\n'; }
+            std::cout << "Setting partition thermal conductivities..." <<'\n'; }
           Y->ther_cond.resize(tcon_part[part_i].size());
           for(uint i=0; i<tcon_part[part_i].size(); i++){
             Y->ther_cond[i] = tcon_part[part_i][i]; }
         }else if(tcon_part[0].size()>0){
           if(verbosity>1){
-            std::cout << "Setting default thermal conductivity..." <<'\n'; }
+            std::cout << "Setting model thermal conductivity..." <<'\n'; }
           Y->ther_cond.resize(tcon_part[0].size());
           for(uint i=0; i<tcon_part[0].size(); i++){
             Y->ther_cond[i] = tcon_part[0][i]; }
         }
         if(texp_part[part_i].size()>0){
           if(verbosity>1){
-            std::cout << "Setting thermal expansion..." <<'\n'; }
+            std::cout << "Setting partition thermal expansions..." <<'\n'; }
           Y->ther_expa.resize(texp_part[part_i].size());
           for(uint i=0; i<texp_part[part_i].size(); i++){
             Y->ther_expa[i] = texp_part[part_i][i]; }
         }else if(texp_part[0].size()>0){
           if(verbosity>1){
-            std::cout << "Setting default thermal expansion..." <<'\n'; }
+            std::cout << "Setting model thermal expansion..." <<'\n'; }
           Y->ther_expa.resize(texp_part[0].size());
           for(uint i=0; i<texp_part[0].size(); i++){
             Y->ther_expa[i] = texp_part[0][i]; }
+        }
+        if(plas_part[part_i].size()>0){
+          if(verbosity>1){
+            std::cout << "Setting partition plasticities..." <<'\n'; }
+          Y->plas_prop.resize(plas_part[part_i].size());
+          for(uint i=0; i<plas_part[part_i].size(); i++){
+            Y->plas_prop[i] = plas_part[part_i][i]; }
+        }else if(plas_part[0].size()>0){
+          if(verbosity>1){
+            std::cout << "Setting model plasticity..." <<'\n'; }
+          Y->plas_prop.resize(plas_part[0].size());
+          for(uint i=0; i<plas_part[0].size(); i++){
+            Y->plas_prop[i] = plas_part[0][i]; }
         }
         Solv* S;
         Mesh::part t(M->list_elem[part_i],Y,S);
