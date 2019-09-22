@@ -30,7 +30,7 @@ int ElastPlastJ2Iso3D::Setup( Elem* E ){
   this->elem_vars.resize(elem_n*intp_n* 3, 0.0 );
   return 0;
 }
-int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E,
+int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
   const INT_MESH e0,const INT_MESH ee,
   FLOAT_SOLV* sys_f, const FLOAT_SOLV* sys_p, const FLOAT_SOLV* sys_u ){
   //FIXME Clean up local variables.
