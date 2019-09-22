@@ -119,16 +119,18 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E,
         FLOAT_PHYS stress_v[6];// sxx, syy, szz,  sxy, syz, sxz
         FLOAT_PHYS strain_v[6] // exx, eyy, ezz,  exy, eyz, exz
           ={ H[0], H[4], H[8],  H[1]+H[3], H[5]+H[7], H[2]+H[6] };
-      //
-      //
-      // Calculate stress from strain.
-      for(int i=0; i<6; i++){ stress_v[i]=0.0;
-        for(int j=0; j<6; j++){
-          stress_v[ i ] += D[6* i+j ] * strain_v[ j ];
-      } }
-      //
-      //
-      //------------------------------------------------------ Debugging output
+        //
+        // Do some calculations.
+        //
+        // Calculate stress from strain.
+        for(int i=0; i<6; i++){ stress_v[i]=0.0;
+          for(int j=0; j<6; j++){
+            stress_v[ i ] += D[6* i+j ] * strain_v[ j ];
+        } }
+        //
+        // Do some more calculations.
+        //
+//------------------------------------------------------------ Debugging output
 #if VERB_MAX>10
 #pragma omp critical(print)
 {
@@ -179,7 +181,7 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E,
       printf("\n");
 }
 #endif
-      //-------------------------------------------------- End debugging output
+//-------------------------------------------------------- End debugging output
       // Save element state.
       for(int i=0; i<3; i++){
         this->elem_vars[3*(intp_n*ie+ip) +i ] = plastic_shear_strain[ i ];
