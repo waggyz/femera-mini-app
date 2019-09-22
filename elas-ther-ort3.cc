@@ -18,7 +18,7 @@ int ThermElastOrtho3D::ElemStrain( Elem* ,FLOAT_SOLV*  ){ return 1; }
 int ThermElastOrtho3D::ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*){
   return 1;
 }
-int ThermElastOrtho3D::ElemNonLinear( Elem*, const INT_MESH, const INT_MESH,
+int ThermElastOrtho3D::ElemNonlinear( Elem*, const INT_MESH, const INT_MESH,
   FLOAT_SOLV*, const FLOAT_SOLV*, const FLOAT_SOLV* ){
   return 1;
   }

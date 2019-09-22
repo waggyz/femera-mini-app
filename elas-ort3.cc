@@ -8,7 +8,7 @@ int ElastOrtho3D::ElemLinear( Elem* ){ return 1; }//FIXME
 int ElastOrtho3D::ElemJacobi( Elem* ){ return 1; }//FIXME
 int ElastOrtho3D::BlocLinear( Elem* ,
   RESTRICT Phys::vals &, const RESTRICT Solv::vals & ){ return 1; }
-int ElastOrtho3D::ElemNonLinear( Elem*, const INT_MESH, const INT_MESH,
+int ElastOrtho3D::ElemNonlinear( Elem*, const INT_MESH, const INT_MESH,
   FLOAT_SOLV*, const FLOAT_SOLV*, const FLOAT_SOLV* ){
   return 1;
   }

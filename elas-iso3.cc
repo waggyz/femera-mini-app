@@ -13,7 +13,7 @@ int ElastIso3D::BlocLinear( Elem* ,
 int ElastIso3D::ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*){
   return 1;
 }
-int ElastIso3D::ElemNonLinear( Elem*, const INT_MESH, const INT_MESH,
+int ElastIso3D::ElemNonlinear( Elem*, const INT_MESH, const INT_MESH,
   FLOAT_SOLV*, const FLOAT_SOLV*, const FLOAT_SOLV* ){
   return 1;
   }
