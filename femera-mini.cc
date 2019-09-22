@@ -649,7 +649,7 @@ int main( int argc, char** argv ){
 #if VERB_MAX > 2
       if(verbosity>2){
         if(S->udof_n<300){
-          printf("------- Node Coordinates --------------- Displacements -------");
+          printf("------ Node Coordinates ---------------- Displacements -------");
           if(Dn>3){ printf("  Temperature"); }
           printf("\n");
           for(uint i=0;i<Nn;i++){

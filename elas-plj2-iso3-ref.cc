@@ -103,8 +103,8 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E,
         printf("%+9.2e ",H[j]);
       } printf("\n");
 #endif
-      {// Scope D-matrix and local copy of integration point state variables
-      FLOAT_PHYS D[36]={// Initialize to linear-elastic isotropic
+      {// Scope D-matrix and local copy of integration point state variables.
+      FLOAT_PHYS D[36]={// Initialize to linear-elastic isotropic.
         C[0],C[1],C[1],0.0 ,0.0 ,0.0,
         C[1],C[0],C[1],0.0 ,0.0 ,0.0,
         C[1],C[1],C[0],0.0 ,0.0 ,0.0,
@@ -113,11 +113,11 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E,
         0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,C[2]
       };
       FLOAT_PHYS plastic_shear_strain[3];
-      for(int i=0; i<3; i++){
+      for(int i=0; i<3; i++){// Make local copy of element state.
         plastic_shear_strain[i] = this->elem_vars[3*(intp_n*ie+ip) +i ]; }
       {//====================================================== Scope UMAT calc
-        FLOAT_PHYS stress_v[6];
-        FLOAT_PHYS strain_v[6]// exx, eyy, ezz,  exy, eyz, exz
+        FLOAT_PHYS stress_v[6];// sxx, syy, szz,  sxy, syz, sxz
+        FLOAT_PHYS strain_v[6] // exx, eyy, ezz,  exy, eyz, exz
           ={ H[0], H[4], H[8],  H[1]+H[3], H[5]+H[7], H[2]+H[6] };
       //
       //
@@ -132,14 +132,14 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E,
 #if VERB_MAX>10
 #pragma omp critical(print)
 {
-      if( (ie==0)&(ip==0) ){
-        // Local copie of material variables are set before the element loop.
-        printf("Young's modulus    :%9.2e\n", youngs_modulus    );
-        printf("Poisson's ratio    :%9.2e\n", poissons_ratio    );
-        printf("Yield Stress       :%9.2e\n", yield_stress      );
-        printf("Saturation Stress  :%9.2e\n", saturation_stress );
-        printf("Hardness modulus   :%9.2e\n", hardness_modulus  );
-        printf("J2 Plasticity Beta :%9.2e\n", j2_beta           );
+      if( (ie==0) & (ip==0) ){
+        // Local copies of material variables are set before the element loop.
+        printf("    Young's modulus :%9.2e\n", youngs_modulus    );
+        printf("    Poisson's ratio :%9.2e\n", poissons_ratio    );
+        printf("       Yield Stress :%9.2e\n", yield_stress      );
+        printf("  Saturation Stress :%9.2e\n", saturation_stress );
+        printf("   Hardness modulus :%9.2e\n", hardness_modulus  );
+        printf(" J2 Plasticity Beta :%9.2e\n", j2_beta           );
       }
 }
 #endif
@@ -179,7 +179,8 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E,
       printf("\n");
 }
 #endif
-      //Save element state
+      //-------------------------------------------------- End debugging output
+      // Save element state.
       for(int i=0; i<3; i++){
         this->elem_vars[3*(intp_n*ie+ip) +i ] = plastic_shear_strain[ i ];
       }
@@ -195,8 +196,8 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E,
       S[0]=stress_p[0]; S[4]=stress_p[1]; S[8]=stress_p[2];
       S[1]=stress_p[3]; S[5]=stress_p[4]; S[2]=stress_p[5];
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
-      }//end D-matrix and local state varible scope
-      // Accumulate elemental nodal forces
+      }// End D-matrix and local state varible scope.
+      // Accumulate elemental nodal forces.
       dw = Ejacs[Nj*ie+ 9] * wgt[ip];
       for(int i=0; i<Nc; i++){
         for(int k=0; k<Nf; k++){
@@ -210,11 +211,11 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E,
         printf("%+9.2e ",f[j]);
       } printf("\n");
 #endif
-    }//end intp loop
+    }// End intp loop.
     for (uint i=0; i<uint(Nc); i++){
       for (uint j=0; j<uint(Nf); j++){
         sysf[conn[i]*Nf+j] += f[Nf*i+j];
     } }//------------------------------------------------------------- 3*n FLOP
-  }//end elem loop
+  }// Rnd elem loop.
   return 0;
   }
