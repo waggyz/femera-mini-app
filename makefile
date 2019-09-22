@@ -124,7 +124,7 @@ test : all
 
 test-plastic : all
 	./gmsh2fmr-$(CPUMODELC) -v3 \
-	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.01 \
 	-M0 -E66.2e9 -N0.33 -J305e6 -J2.0 -J100e6 -J4.0 \
 	-ap cube/unit1p1n2;
 	echo ./femera-$(CPUMODELC) -v3 -s2 -c$(NCPU) -p cube/unit1p1n2

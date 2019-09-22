@@ -41,6 +41,14 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E,
   const int Nc = E->elem_conn_n;// Number of nodes/element
   const int Ne = Nf*Nc;
   const int intp_n = int(E->gaus_n);
+  //
+  const FLOAT_PHYS youngs_modulus    =this->mtrl_prop[0];
+  const FLOAT_PHYS poissons_ratio    =this->mtrl_prop[1];
+  const FLOAT_PHYS yield_stress      =this->plas_prop[0];
+  const FLOAT_PHYS saturation_stress =this->plas_prop[1];
+  const FLOAT_PHYS hardness_modulus  =this->plas_prop[2];
+  const FLOAT_PHYS j2_beta           =this->plas_prop[3];
+  //
 #if VERB_MAX>11
   printf("DOF: %u, Elems:%u, IntPts:%u, Nodes/elem:%u\n",
     (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
@@ -106,27 +114,35 @@ int ElastPlastJ2Iso3D::ElemNonLinear( Elem* E,
       };
       FLOAT_PHYS plastic_shear_strain[3];
       for(int i=0; i<3; i++){
-        plastic_shear_strain[i] = this->elem_vars[3*(intp_n*ie+ip) +i]; }
+        plastic_shear_strain[i] = this->elem_vars[3*(intp_n*ie+ip) +i ]; }
       {//====================================================== Scope UMAT calc
-      const FLOAT_PHYS youngs_modulus    =this->mtrl_prop[0];
-      const FLOAT_PHYS poissons_ratio    =this->mtrl_prop[1];
-      const FLOAT_PHYS yield_stress      =this->plas_prop[0];
-      const FLOAT_PHYS saturation_stress =this->plas_prop[1];
-      const FLOAT_PHYS hardness_modulus  =this->plas_prop[2];
-      const FLOAT_PHYS j2_beta           =this->plas_prop[3];
-            FLOAT_PHYS strain_v[6]       ={ H[0], H[4], H[8],
-                                            H[1]+H[3], H[5]+H[7], H[2]+H[6] };
-            FLOAT_PHYS stress_v[6];
+        FLOAT_PHYS stress_v[6];
+        FLOAT_PHYS strain_v[6]// exx, eyy, ezz,  exy, eyz, exz
+          ={ H[0], H[4], H[8],  H[1]+H[3], H[5]+H[7], H[2]+H[6] };
       //
       //
       // Calculate stress from strain.
       for(int i=0; i<6; i++){ stress_v[i]=0.0;
         for(int j=0; j<6; j++){
-          stress_v[i] += D[6* i+j ] * strain_v[ j ];
+          stress_v[ i ] += D[6* i+j ] * strain_v[ j ];
       } }
       //
       //
       //------------------------------------------------------ Debugging output
+#if VERB_MAX>10
+#pragma omp critical(print)
+{
+      if( (ie==0)&(ip==0) ){
+        // Local copie of material variables are set before the element loop.
+        printf("Young's modulus    :%9.2e\n", youngs_modulus    );
+        printf("Poisson's ratio    :%9.2e\n", poissons_ratio    );
+        printf("Yield Stress       :%9.2e\n", yield_stress      );
+        printf("Saturation Stress  :%9.2e\n", saturation_stress );
+        printf("Hardness modulus   :%9.2e\n", hardness_modulus  );
+        printf("J2 Plasticity Beta :%9.2e\n", j2_beta           );
+      }
+}
+#endif
 #if VERB_MAX>10
 #pragma omp critical(print)
 {
