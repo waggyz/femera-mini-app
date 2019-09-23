@@ -539,7 +539,8 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_accum( my_solv_count, solv_start );
   }
   //----------------------------------------------------- Compute beta (1 FLOP)
-  const FLOAT_SOLV beta = glob_sum3 / glob_sum4;
+  const FLOAT_SOLV beta = std::max(0.0, glob_sum3 / glob_sum4 );
+  //NOTE the max provides a direction reset automatically.
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){// Update search direction
     std::tie(E,Y,S)=priv_part[part_i];
