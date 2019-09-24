@@ -109,7 +109,6 @@ _dummy := $(shell mkdir -p mini.o test $(TESTDIR) $(PERFDIR))
 .SILENT :
 
 all : gmsh2fmr-ser mini-omp mini-omq
-	echo HAS_PRGAMA_SIMD $(HAS_PRGAMA_SIMD)
 
 test : all
 	./gmsh2fmr-$(CPUMODELC) -v3 \
