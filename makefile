@@ -111,7 +111,7 @@ _dummy := $(shell mkdir -p mini.o test $(TESTDIR) $(PERFDIR))
 all : gmsh2fmr-ser mini-omp mini-omq
 
 test : all
-	./gmsh2fmr-$(CPUMODis ELC) -v3 \
+	./gmsh2fmr-$(CPUMODELC) -v3 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
 	-M1 -E100e9 -N0.3 -A20e-6 -K100e-6 -Z1 -X0 -Z0 \
 	-M2 -E100e9 -N0.3 -Z1 -X0 -Z0 \

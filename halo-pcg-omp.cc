@@ -114,6 +114,7 @@ int PCG::Init(){// printf("*** Init() ***\n");
   const uint sysn=this->udof_n;// loca_res2 is a member variable.
   const uint sumi0=this->halo_loca_0;
 #ifdef HAS_PRAGMA_SIMD
+  printf("**** HAS_PRAGMA_SIMD ****\n");
 #pragma omp simd
 #endif
   for(uint i=0; i<sysn; i++){
