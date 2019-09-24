@@ -44,6 +44,13 @@ SERFLAGS=-fno-alias -diag-disable 3180
 NUMA=6
 endif
 
+# Check if pragma omp simd is supported.
+HAS_PRGAMA_SIMD:=$(shell $(CXX) -Wunknown-pragmas unit-test/test-pragma-simd.c\
+ -o /dev/null >& /dev/stdout | grep -i ignoring )
+ifeq ($(strip $(HAS_PRGAMA_SIMD)),)
+OMPFLAGS:=$(OMPFLAGS) -DHAS_PRAGMA_SIMD
+endif
+
 CPUMODELC:=$(CPUMODEL)-$(CSTR)
 
 FEMERA_COMMON = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
@@ -104,7 +111,7 @@ _dummy := $(shell mkdir -p mini.o test $(TESTDIR) $(PERFDIR))
 all : gmsh2fmr-ser mini-omp mini-omq
 
 test : all
-	./gmsh2fmr-$(CPUMODELC) -v3 \
+	./gmsh2fmr-$(CPUMODis ELC) -v3 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
 	-M1 -E100e9 -N0.3 -A20e-6 -K100e-6 -Z1 -X0 -Z0 \
 	-M2 -E100e9 -N0.3 -Z1 -X0 -Z0 \
