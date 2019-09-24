@@ -15,7 +15,7 @@ Then, build and check the executable `femera-<cpumodel>-gcc` using the make targ
 ```bash
 # Set `C` to the total number of physical cores in your machine.
 C=4;
-make -j$C all
+make -j$C test
 ``` 
 
 *Make a note of the name of the executables built.* The examples here assume you're using the Gnu compiler collection (gcc).
