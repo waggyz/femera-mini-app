@@ -5,6 +5,56 @@
 #include "femera.h"
 #include <immintrin.h>
 //
+inline void compute_g_h(
+  FLOAT_PHYS* G, FLOAT_PHYS* H,
+  const int Ne, const __m256d j0,const __m256d j1,const __m256d j2,
+  const FLOAT_PHYS* isp, const FLOAT_PHYS* R, const FLOAT_PHYS* u ){
+  //FLOAT_PHYS* RESTRICT isp = &intp_shpg[ip*Ne];
+  __m256d a036=_mm256_set1_pd(0.0), a147=_mm256_set1_pd(0.0), a258=_mm256_set1_pd(0.0);
+  int ig=0;
+  for(int i= 0; i<Ne; i+=9){
+    __m256d u0,u1,u2,u3,u4,u5,u6,u7,u8,g0,g1,g2;
+    __m256d is0,is1,is2,is3,is4,is5,is6,is7,is8;
+    is0= _mm256_set1_pd(isp[i+0]); is1= _mm256_set1_pd(isp[i+1]); is2= _mm256_set1_pd(isp[i+2]);
+    u0 = _mm256_set1_pd(  u[i+0]); u1 = _mm256_set1_pd(  u[i+1]); u2 = _mm256_set1_pd(  u[i+2]);
+    g0 = _mm256_add_pd(_mm256_mul_pd(j0,is0), _mm256_add_pd(_mm256_mul_pd(j1,is1),_mm256_mul_pd(j2,is2)));
+    a036= _mm256_add_pd(a036, _mm256_mul_pd(g0,u0)); a147 = _mm256_add_pd(a147, _mm256_mul_pd(g0,u1)); a258 = _mm256_add_pd(a258, _mm256_mul_pd(g0,u2));
+          _mm256_store_pd(&G[ig],g0);
+    ig+=4;
+    if((i+5)<Ne){
+      is3= _mm256_set1_pd(isp[i+3]); is4= _mm256_set1_pd(isp[i+4]); is5= _mm256_set1_pd(isp[i+5]);
+      u3 = _mm256_set1_pd(  u[i+3]); u4 = _mm256_set1_pd(  u[i+4]); u5 = _mm256_set1_pd(  u[i+5]);
+      g1 = _mm256_add_pd(_mm256_mul_pd(j0,is3), _mm256_add_pd(_mm256_mul_pd(j1,is4),_mm256_mul_pd(j2,is5)));
+      a036= _mm256_add_pd(a036, _mm256_mul_pd(g1,u3)); a147 = _mm256_add_pd(a147, _mm256_mul_pd(g1,u4)); a258 = _mm256_add_pd(a258, _mm256_mul_pd(g1,u5));
+            _mm256_store_pd(&G[ig],g1);
+      ig+=4;
+    }if((i+8)<Ne){
+      is6= _mm256_set1_pd(isp[i+6]); is7= _mm256_set1_pd(isp[i+7]); is8= _mm256_set1_pd(isp[i+8]);
+      u6 = _mm256_set1_pd(  u[i+6]); u7 = _mm256_set1_pd(  u[i+7]); u8 = _mm256_set1_pd(  u[i+8]);
+      g2 = _mm256_add_pd(_mm256_mul_pd(j0,is6), _mm256_add_pd(_mm256_mul_pd(j1,is7),_mm256_mul_pd(j2,is8)));
+      a036= _mm256_add_pd(a036, _mm256_mul_pd(g2,u6)); a147 = _mm256_add_pd(a147, _mm256_mul_pd(g2,u7)); a258 = _mm256_add_pd(a258, _mm256_mul_pd(g2,u8));
+            _mm256_store_pd(&G[ig],g2);
+      ig+=4;
+    }
+  }
+  {// scope vector registers
+  __m256d h036,h147,h258;
+  {
+  __m256d r0,r1,r2,r3,r4,r5,r6,r7,r8;
+  r0 = _mm256_set1_pd(R[0]); r1 = _mm256_set1_pd(R[1]); r2 = _mm256_set1_pd(R[2]);
+  r3 = _mm256_set1_pd(R[3]); r4 = _mm256_set1_pd(R[4]); r5 = _mm256_set1_pd(R[5]);
+  r6 = _mm256_set1_pd(R[6]); r7 = _mm256_set1_pd(R[7]); r8 = _mm256_set1_pd(R[8]);
+  h036 = _mm256_add_pd(_mm256_mul_pd(r0,a036), _mm256_add_pd(_mm256_mul_pd(r1,a147),_mm256_mul_pd(r2,a258)));
+  h147 = _mm256_add_pd(_mm256_mul_pd(r3,a036), _mm256_add_pd(_mm256_mul_pd(r4,a147),_mm256_mul_pd(r5,a258)));
+  h258 = _mm256_add_pd(_mm256_mul_pd(r6,a036), _mm256_add_pd(_mm256_mul_pd(r7,a147),_mm256_mul_pd(r8,a258)));
+  }
+  // Take advantage of the fact that the pattern of usage is invariant with respect to transpose _MM256_TRANSPOSE3_PD(h036,h147,h258);
+  _mm256_storeu_pd(&H[0],h036);
+  _mm256_storeu_pd(&H[4],h147);
+  _mm256_storeu_pd(&H[8],h258);
+  }
+}
+//
 int ElastOrtho3D::Setup( Elem* E ){
   JacRot( E );
   JacT  ( E );
@@ -98,8 +148,11 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   for(int ip=0; ip<intp_n; ip++){
     //G = MatMul3x3xN( jac,shg );
     //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
+#if 1
+    compute_g_h(&G[0],&H[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne],&R[0], &u[0] );
+#else
     {// scope vector registers
-      double * RESTRICT isp = &intp_shpg[ip*Ne];
+      const double * RESTRICT isp = &intp_shpg[ip*Ne];
       __m256d a036=_mm256_set1_pd(0.0), a147=_mm256_set1_pd(0.0), a258=_mm256_set1_pd(0.0);
       int ig=0;
       for(int i= 0; i<Ne; i+=9){
@@ -144,6 +197,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       _mm256_storeu_pd(&H[8],h258);
       }
     }//end register scope
+#endif
 #if VERB_MAX>12
     printf( "Small Strains (Elem: %i):", ie );
     for(uint j=0;j<H.size();j++){
