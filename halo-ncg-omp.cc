@@ -269,7 +269,6 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #ifdef HAS_PRAGMA_SIMD
 #pragma omp simd
 #endif
-#pragma omp 
     for(uint i=0; i<sysn; i++){
       S->old_r[i] = 0.0;// S->sys_b[i] = 0.0;
       //S->sys_r[i] = S->sys_b[i] - S->sys_f[i];
