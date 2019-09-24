@@ -458,7 +458,6 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
     time_accum( my_phys_count, phys_start );
     time_start( solv_start );
 #ifdef HAS_PRAGMA_SIMD
-  printf("**** HAS_PRAGMA_SIMD ****\n");
 #pragma omp simd reduction(+:glob_sum1)
 #endif
     for(INT_MESH i=hl0; i<sysn; i++){
