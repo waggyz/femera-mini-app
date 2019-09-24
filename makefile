@@ -45,7 +45,7 @@ NUMA=6
 endif
 
 # Check if pragma omp simd is supported.
-HAS_PRGAMA_SIMD:=$(shell $(CXX) -Wunknown-pragmas unit-test/test-pragma-simd.c\
+HAS_PRGAMA_SIMD:=$(shell $(CXX) $(OMPFLAGS) -Wunknown-pragmas unit-test/test-pragma-simd.c\
  -o /dev/null >& /dev/stdout | grep -i ignoring )
 ifeq ($(strip $(HAS_PRGAMA_SIMD)),)
 OMPFLAGS:=$(OMPFLAGS) -DHAS_PRAGMA_SIMD
