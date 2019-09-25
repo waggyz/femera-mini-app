@@ -534,11 +534,11 @@ public: ElastPlastJ2Iso3D(FLOAT_PHYS young, FLOAT_PHYS poiss ) :
 protected:
 private:
 };
-
+//FIXME These inline intrinsics functions should be in the class where used.
 inline void accumulate_f( __m256d* vf,
   const __m256d* a, const FLOAT_PHYS* G, const int elem_p ){
   __m256d a036=a[0];__m256d a147=a[1];__m256d a258=a[2];
-#if 1
+#if 0
   for(int i=0; i<2; i++){
     __m256d g0,g1,g2, g3,g4,g5;
     g0 = _mm256_set1_pd(G[8*i  ]);
