@@ -5,7 +5,7 @@ HOST2CHAR:=$(shell hostname | cut -c1-2 )
 # Defaults: use g++
 CSTR=gcc
 CPPFLAGS=-std=c++11 -Wall -Wextra -g -Ofast -ftree-vectorize -march=native \
- -mtune=native -funroll-loops -fno-builtin-sin -fno-builtin-cos
+ -mtune=native -fno-builtin-sin -fno-builtin-cos
 #FIXME -mtune=core-avx2 when -mtune=native doesn't work
 OMPFLAGS=-fopenmp
 SERFLAGS=-Wno-unknown-pragmas

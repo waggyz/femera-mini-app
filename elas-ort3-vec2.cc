@@ -5,7 +5,6 @@
 #include "femera.h"
 #include <immintrin.h>
 //
-__attribute__((optimize("unroll-loops")))
 inline void accumulate_f( __m256d* vf,
   const __m256d* a, const FLOAT_PHYS* G, const int elem_p ){
   __m256d a036=a[0];__m256d a147=a[1];__m256d a258=a[2];
