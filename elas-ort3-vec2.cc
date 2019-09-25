@@ -153,25 +153,35 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     }
   }
   {// Scope f registers
-#if 0
-  FLOAT_PHYS __m256d f[Nc];
+#define TEST_F_VARRAY
+#ifdef TEST_F_VARRAY
+  //FLOAT_PHYS __attribute__((aligned(32))) sf[Nt];
+  //__m256d vf[Nc];
 #else
   FLOAT_PHYS __attribute__((aligned(32))) f[Nt];
   __m256d f0,f1,f2,f3;
   __m256d f4,f5,f6,f7,f8,f9;
   __m256d f10,f11,f12,f13,f14,f15,f16,f17,f18,f19;
 #endif
+#ifdef TEST_F_VARRAY
+  //for(int i=0; i<Nc; i++){const __m256d zs={0.0,0.0,0.0,0.0}; vf[i]=zs; }
+#else
   {// scope zs register
-  __m256d zs={0.0,0.0,0.0,0.0};
+  const __m256d zs={0.0,0.0,0.0,0.0};
   f0=zs,f1=zs,f2=zs,f3=zs;
   f4=zs,f5=zs,f6=zs,f7=zs,f8=zs,f9=zs;
   f10=zs,f11=zs,f12=zs,f13=zs,f14=zs,f15=zs,f16=zs,f17=zs,f18=zs,f19=zs;
   }
+#endif
   for(INT_MESH ie=e0;ie<ee;ie++){
 #ifndef FETCH_JAC
       std::memcpy( &jac, &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
 #endif
   const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
+#ifdef TEST_F_VARRAY
+  FLOAT_PHYS __attribute__((aligned(32))) sf[Nt];
+  __m256d __attribute__((aligned(32))) vf[Nc];
+#endif
 
   __m256d j0,j1,j2;//FIXME should these be assigns instead?
   j0 = _mm256_load_pd(&jac[0]);  // j0 = [j3 j2 j1 j0]
@@ -219,6 +229,11 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     rotate_s( &a[0], &R[0], &S[0] );
     a036=a[0]; a147=a[1]; a258=a[2];
     }
+#ifdef TEST_F_VARRAY
+    if(ip==0){
+      for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
+    }
+#else
     if(ip==0){
       f0 = _mm256_loadu_pd(&sys_f[3*conn[ 0]]);
       f1 = _mm256_loadu_pd(&sys_f[3*conn[ 1]]);
@@ -245,6 +260,14 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       f19 = _mm256_loadu_pd(&sys_f[3*conn[19]]);
       }
     }
+#endif
+#ifdef TEST_F_VARRAY
+    for(int i=0; i<Nc; i++){
+      __m256d g0,g1,g2;
+      g0 = _mm256_set1_pd(G[4*i])  ; g1 = _mm256_set1_pd(G[4*i+1])  ; g2 = _mm256_set1_pd(G[4*i+2]);
+      vf[i]= _mm256_add_pd(vf[i], _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
+    }
+#else
     {
       __m256d g0,g1,g2,g3,g4,g5,g6,g7,g8,g9,g10,g11;
       g0 = _mm256_set1_pd(G[0])  ; g1 = _mm256_set1_pd(G[1])  ; g2 = _mm256_set1_pd(G[2]);
@@ -309,8 +332,14 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       f19 = _mm256_add_pd(f19, _mm256_add_pd(_mm256_mul_pd(g9,a036), _mm256_add_pd(_mm256_mul_pd(g10,a147),_mm256_mul_pd(g11,a258))));
     }
     }
+#endif
     } // end variable scope
     }//end intp loop
+#ifdef TEST_F_VARRAY
+    for(int i=0; i<Nc; i++){
+      _mm256_store_pd(&sf[4*i],vf[i]);
+    }
+#else
     _mm256_store_pd(&f[ 0],f0);
     _mm256_store_pd(&f[ 4],f1);
     _mm256_store_pd(&f[ 8],f2);
@@ -335,6 +364,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     _mm256_store_pd(&f[72],f18);
     _mm256_store_pd(&f[76],f19);
     }
+#endif
 #if VERB_MAX>12
     printf( "ff:");
     for(uint j=0;j<Ne;j++){
@@ -350,7 +380,11 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #pragma vector unaligned
 #endif
       for(int j=0; j<3; j++){
+#ifdef TEST_F_VARRAY
+        sys_f[3*conn[i]+j] = sf[4*i+j];
+#else
         sys_f[3*conn[i]+j] = f[4*i+j];
+#endif
       } }//--------------------------------------------------- N*3 =  3*N FLOP
   }// end elem loop
   }// end f register scope
