@@ -137,7 +137,8 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     __m256d a[3];
     rotate_s( &a[0], &R[0], &S[0] );
     // initialize element f
-#if 1
+#if 0
+    // Hmm... switch case is slower...
     if(ip==0){
       switch(elem_p){
       case(1):

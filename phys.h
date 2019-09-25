@@ -595,8 +595,8 @@ inline void accumulate_f( __m256d* vf,
     }
   }
 #else
-  switch(elem_p){
-    case(1):
+//  switch(elem_p){
+//    case(1):
   for(int i=0; i<4; i++){
     __m256d g0,g1,g2;
     g0 = _mm256_set1_pd(G[4*i  ]);
@@ -607,10 +607,10 @@ inline void accumulate_f( __m256d* vf,
         _mm256_add_pd(_mm256_mul_pd(g1,a147),
           _mm256_mul_pd(g2,a258))));
   }
-  break;
-    case(2): for(int i=0; i<10; i++){
-  //if(elem_p>1){
-  //  for(int i=4; i<10; i++){
+//  break;
+//    case(2): for(int i=0; i<10; i++){
+  if(elem_p>1){
+    for(int i=4; i<10; i++){
       __m256d g0,g1,g2;
       g0 = _mm256_set1_pd(G[4*i]);
       g1 = _mm256_set1_pd(G[4*i+1]);
@@ -620,22 +620,22 @@ inline void accumulate_f( __m256d* vf,
           _mm256_add_pd(_mm256_mul_pd(g1,a147),
             _mm256_mul_pd(g2,a258))));
     }
-  //}
-  break;
-    case(3): for(int i=0; i<20; i++){
-  //if(elem_p>2){
-  //  for(int i=10; i<20; i++){
-      __m256d g0,g1,g2;
-      g0 = _mm256_set1_pd(G[4*i]);
-      g1 = _mm256_set1_pd(G[4*i+1]);
-      g2 = _mm256_set1_pd(G[4*i+2]);
-      vf[i]= _mm256_add_pd(vf[i],
-        _mm256_add_pd(_mm256_mul_pd(g0,a036),
-          _mm256_add_pd(_mm256_mul_pd(g1,a147),
-            _mm256_mul_pd(g2,a258))));
-    }
-  //}
   }
+//  break;
+//    case(3): for(int i=0; i<20; i++){
+  if(elem_p>2){
+    for(int i=10; i<20; i++){
+      __m256d g0,g1,g2;
+      g0 = _mm256_set1_pd(G[4*i]);
+      g1 = _mm256_set1_pd(G[4*i+1]);
+      g2 = _mm256_set1_pd(G[4*i+2]);
+      vf[i]= _mm256_add_pd(vf[i],
+        _mm256_add_pd(_mm256_mul_pd(g0,a036),
+          _mm256_add_pd(_mm256_mul_pd(g1,a147),
+            _mm256_mul_pd(g2,a258))));
+    }
+  }
+//  }
 #endif
 }
 inline void rotate_s( __m256d* a,
