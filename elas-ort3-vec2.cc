@@ -9,8 +9,7 @@
 //  const FLOAT_PHYS* sys_f, const MESH_INT* conn, 
 //  const FLOAT_PHYS* R, const FLOAT_PHYS* S, const FLOAT_PHYS* G ){
 //}
-#if 1
-inline void rotate_3x3( __m256d* a,
+inline void rotate_3v3( __m256d* a,
   const FLOAT_PHYS* R, const FLOAT_PHYS* S ){
   __m256d s0,s1,s2,s4,s5,s8;
   __m256d r0,r3,r6;
@@ -21,7 +20,6 @@ inline void rotate_3x3( __m256d* a,
   a[1]=_mm256_add_pd(_mm256_mul_pd(r0,s1), _mm256_add_pd(_mm256_mul_pd(r3,s4),_mm256_mul_pd(r6,s5)));
   a[2]=_mm256_add_pd(_mm256_mul_pd(r0,s2), _mm256_add_pd(_mm256_mul_pd(r3,s5),_mm256_mul_pd(r6,s8)));
 }
-#endif
 inline void compute_s(FLOAT_PHYS* S, const FLOAT_PHYS* H,
   const FLOAT_PHYS* C, const __m256d c0,const __m256d c1,const __m256d c2,
   const FLOAT_PHYS dw){
@@ -214,26 +212,12 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     // [S][R] : matmul3x3x3, R is transposed
     //accumulate_f( &f[0], &sys_f[0], &conn[0], &R[0], &S[0], &G[0] );
     {// begin scoping unit
-#if 1
     __m256d a036, a147, a258;
     {
     __m256d a[3];
-    rotate_3x3( &a[0], &R[0], &S[0] );
+    rotate_3v3( &a[0], &R[0], &S[0] );
     a036=a[0]; a147=a[1]; a258=a[2];
     }
-#else
-    __m256d a036, a147, a258;
-    {
-    __m256d s0,s1,s2,s4,s5,s8;
-    __m256d r0,r3,r6;
-    r0  = _mm256_loadu_pd(&R[0]); r3 = _mm256_loadu_pd(&R[3]); r6 = _mm256_loadu_pd(&R[6]);
-    s0  = _mm256_set1_pd(S[0])  ; s1 = _mm256_set1_pd(S[4])  ; s2 = _mm256_set1_pd(S[5]);
-    s4  = _mm256_set1_pd(S[1])  ; s5 = _mm256_set1_pd(S[6])  ; s8 = _mm256_set1_pd(S[2]);
-    a036=_mm256_add_pd(_mm256_mul_pd(r0,s0), _mm256_add_pd(_mm256_mul_pd(r3,s1),_mm256_mul_pd(r6,s2)));
-    a147=_mm256_add_pd(_mm256_mul_pd(r0,s1), _mm256_add_pd(_mm256_mul_pd(r3,s4),_mm256_mul_pd(r6,s5)));
-    a258=_mm256_add_pd(_mm256_mul_pd(r0,s2), _mm256_add_pd(_mm256_mul_pd(r3,s5),_mm256_mul_pd(r6,s8)));
-    }
-#endif
     if(ip==0){
       f0 = _mm256_loadu_pd(&sys_f[3*conn[ 0]]);
       f1 = _mm256_loadu_pd(&sys_f[3*conn[ 1]]);
