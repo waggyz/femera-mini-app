@@ -230,6 +230,34 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     a036=a[0]; a147=a[1]; a258=a[2];
     }
 #ifdef TEST_F_VARRAY
+#if 0
+    if(ip==0){
+      vf[0] = _mm256_loadu_pd(&sys_f[3*conn[ 0]]);
+      vf[1] = _mm256_loadu_pd(&sys_f[3*conn[ 1]]);
+      vf[2] = _mm256_loadu_pd(&sys_f[3*conn[ 2]]);
+      vf[3] = _mm256_loadu_pd(&sys_f[3*conn[ 3]]);
+      if(elem_p>1){
+      vf[4] = _mm256_loadu_pd(&sys_f[3*conn[ 4]]);
+      vf[5] = _mm256_loadu_pd(&sys_f[3*conn[ 5]]);
+      vf[6] = _mm256_loadu_pd(&sys_f[3*conn[ 6]]);
+      vf[7] = _mm256_loadu_pd(&sys_f[3*conn[ 7]]);
+      vf[8] = _mm256_loadu_pd(&sys_f[3*conn[ 8]]);
+      vf[9] = _mm256_loadu_pd(&sys_f[3*conn[ 9]]);
+      }
+      if(elem_p>2){
+      vf[10] = _mm256_loadu_pd(&sys_f[3*conn[10]]);
+      vf[11] = _mm256_loadu_pd(&sys_f[3*conn[11]]);
+      vf[12] = _mm256_loadu_pd(&sys_f[3*conn[12]]);
+      vf[13] = _mm256_loadu_pd(&sys_f[3*conn[13]]);
+      vf[14] = _mm256_loadu_pd(&sys_f[3*conn[14]]);
+      vf[15] = _mm256_loadu_pd(&sys_f[3*conn[15]]);
+      vf[16] = _mm256_loadu_pd(&sys_f[3*conn[16]]);
+      vf[17] = _mm256_loadu_pd(&sys_f[3*conn[17]]);
+      vf[18] = _mm256_loadu_pd(&sys_f[3*conn[18]]);
+      vf[19] = _mm256_loadu_pd(&sys_f[3*conn[19]]);
+      }
+    }
+#else
     if(ip==0){
       for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
       if(elem_p>1){
@@ -239,6 +267,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
         for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
       }
     }
+#endif
 #else
     if(ip==0){
       f0 = _mm256_loadu_pd(&sys_f[3*conn[ 0]]);
@@ -268,10 +297,24 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     }
 #endif
 #ifdef TEST_F_VARRAY
-    for(int i=0; i<Nc; i++){
+    for(int i=0; i<4; i++){
       __m256d g0,g1,g2;
-      g0 = _mm256_set1_pd(G[4*i])  ; g1 = _mm256_set1_pd(G[4*i+1])  ; g2 = _mm256_set1_pd(G[4*i+2]);
+      g0 = _mm256_set1_pd(G[4*i]); g1 = _mm256_set1_pd(G[4*i+1]); g2 = _mm256_set1_pd(G[4*i+2]);
       vf[i]= _mm256_add_pd(vf[i], _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
+    }
+    if(elem_p>1){
+      for(int i=4; i<10; i++){
+        __m256d g0,g1,g2;
+        g0 = _mm256_set1_pd(G[4*i]); g1 = _mm256_set1_pd(G[4*i+1]); g2 = _mm256_set1_pd(G[4*i+2]);
+        vf[i]= _mm256_add_pd(vf[i], _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
+      }
+    }
+    if(elem_p>2){
+      for(int i=10; i<20; i++){
+        __m256d g0,g1,g2;
+        g0 = _mm256_set1_pd(G[4*i]); g1 = _mm256_set1_pd(G[4*i+1]); g2 = _mm256_set1_pd(G[4*i+2]);
+        vf[i]= _mm256_add_pd(vf[i], _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
+      }
     }
 #else
     {
