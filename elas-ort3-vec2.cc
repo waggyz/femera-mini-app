@@ -24,14 +24,10 @@ inline void compute_s(FLOAT_PHYS* S, const FLOAT_PHYS* H,
   const FLOAT_PHYS* C, const __m256d c0,const __m256d c1,const __m256d c2,
   const FLOAT_PHYS dw){
     __m256d s048 =
-      _mm256_mul_pd(
-      _mm256_set1_pd(dw),
-      _mm256_add_pd(_mm256_mul_pd(c0,
-      _mm256_set1_pd(H[0])),
-      _mm256_add_pd(_mm256_mul_pd(c1,
-      _mm256_set1_pd(H[5])),
-      _mm256_mul_pd(c2,
-      _mm256_set1_pd(H[10])))));
+      _mm256_mul_pd(_mm256_set1_pd(dw),
+        _mm256_add_pd(_mm256_mul_pd(c0,_mm256_set1_pd(H[0])),
+          _mm256_add_pd(_mm256_mul_pd(c1,_mm256_set1_pd(H[5])),
+            _mm256_mul_pd(c2,_mm256_set1_pd(H[10])))));
     _mm256_store_pd(&S[0], s048);
     S[4]=(H[1] + H[4])*C[6]*dw; // S[1]
     S[5]=(H[2] + H[8])*C[8]*dw; // S[2]
@@ -125,9 +121,9 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
   std::copy( &this->mtrl_matc[0], &this->mtrl_matc[this->mtrl_matc.size()], C );
   __m256d c0,c1,c2;//,c3;
-  c0 = _mm256_set_pd(0.,C[5],C[3],C[0]);
-  c1 = _mm256_set_pd(0.,C[4],C[1],C[3]);
-  c2 = _mm256_set_pd(0.,C[2],C[4],C[5]);
+  c0 = _mm256_set_pd(0.0,C[5],C[3],C[0]);
+  c1 = _mm256_set_pd(0.0,C[4],C[1],C[3]);
+  c2 = _mm256_set_pd(0.0,C[2],C[4],C[5]);
   //c3 = _mm256_set_pd(0.,C[7],C[8],C[6]);
   const FLOAT_PHYS __attribute__((aligned(32))) R[9+1] = {
     mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
@@ -207,7 +203,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     for(uint j=0;j<9;j++){
       if(j%3==0){printf("\n");}
       printf("%+9.2e ",S[j]);
-    }; printf("\n");
+    } printf("\n");
 #endif
     // [S][R] : matmul3x3x3, R is transposed
     //accumulate_f( &f[0], &sys_f[0], &conn[0], &R[0], &S[0], &G[0] );
@@ -351,7 +347,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       for(int j=0; j<3; j++){
         sys_f[3*conn[i]+j] = f[4*i+j];
       } }//--------------------------------------------------- N*3 =  3*N FLOP
-}// end elem loop
-}// end f register scope
+  }// end elem loop
+  }// end f register scope
 return 0;
 }

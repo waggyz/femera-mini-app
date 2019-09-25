@@ -101,7 +101,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   __m256d f4,f5,f6,f7,f8,f9;
   __m256d f10,f11,f12,f13,f14,f15,f16,f17,f18,f19;
   {// scope zs register
-  __m256d zs={0.0,0.0,0.0,0.0};
+  const __m256d zs={0.0,0.0,0.0,0.0};
   f0=zs,f1=zs,f2=zs,f3=zs;
   f4=zs,f5=zs,f6=zs,f7=zs,f8=zs,f9=zs;
   f10=zs,f11=zs,f12=zs,f13=zs,f14=zs,f15=zs,f16=zs,f17=zs,f18=zs,f19=zs;
