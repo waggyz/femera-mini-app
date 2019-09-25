@@ -1,6 +1,7 @@
 #ifndef INCLUDED_PHYS_H
 #define INCLUDED_PHYS_H
 #include <iostream>
+#include <immintrin.h>
 
 class Phys{
 public:
@@ -533,7 +534,6 @@ public: ElastPlastJ2Iso3D(FLOAT_PHYS young, FLOAT_PHYS poiss ) :
 protected:
 private:
 };
-
 
 
 #endif
