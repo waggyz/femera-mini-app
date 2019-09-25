@@ -203,7 +203,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   {// Scope f registers
 #define TEST_F_VARRAY
 #ifdef TEST_F_VARRAY
-  FLOAT_PHYS __attribute__((aligned(32))) sf[Nt];
+  //FLOAT_PHYS __attribute__((aligned(32))) sf[Nt];
   __m256d vf[Nc];
 #else
   FLOAT_PHYS __attribute__((aligned(32))) f[Nt];
@@ -420,6 +420,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     } // end variable scope
     }//end intp loop
 #ifdef TEST_F_VARRAY
+#if 0
     for(int i=0; i<4; i++){_mm256_store_pd(&sf[4*i],vf[i]); }
     if(elem_p>1){
       for(int i=4; i<10; i++){_mm256_store_pd(&sf[4*i],vf[i]); }
@@ -427,6 +428,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     if(elem_p>2){
       for(int i=10; i<20; i++){_mm256_store_pd(&sf[4*i],vf[i]); }
     }
+#endif
 #else
     _mm256_store_pd(&f[ 0],f0);
     _mm256_store_pd(&f[ 4],f1);
@@ -469,7 +471,9 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
       for(int j=0; j<3; j++){
 #ifdef TEST_F_VARRAY
-        sys_f[3*conn[i]+j] = sf[4*i+j];
+        double __attribute__((aligned(32))) sf[4];
+        _mm256_store_pd(&sf[0],vf[i]);
+        sys_f[3*conn[i]+j] = sf[j];
 #else
         sys_f[3*conn[i]+j] = f[4*i+j];
 #endif
