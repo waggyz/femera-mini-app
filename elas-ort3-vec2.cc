@@ -5,6 +5,23 @@
 #include "femera.h"
 #include <immintrin.h>
 //
+//inline void accumulate_f( FLOAT_PHYS* f,
+//  const FLOAT_PHYS* sys_f, const MESH_INT* conn, 
+//  const FLOAT_PHYS* R, const FLOAT_PHYS* S, const FLOAT_PHYS* G ){
+//}
+#if 1
+inline void rotate_3x3( __m256d* a,
+  const FLOAT_PHYS* R, const FLOAT_PHYS* S ){
+  __m256d s0,s1,s2,s4,s5,s8;
+  __m256d r0,r3,r6;
+  r0  = _mm256_loadu_pd(&R[0]); r3 = _mm256_loadu_pd(&R[3]); r6 = _mm256_loadu_pd(&R[6]);
+  s0  = _mm256_set1_pd(S[0])  ; s1 = _mm256_set1_pd(S[4])  ; s2 = _mm256_set1_pd(S[5]);
+  s4  = _mm256_set1_pd(S[1])  ; s5 = _mm256_set1_pd(S[6])  ; s8 = _mm256_set1_pd(S[2]);
+  a[0]=_mm256_add_pd(_mm256_mul_pd(r0,s0), _mm256_add_pd(_mm256_mul_pd(r3,s1),_mm256_mul_pd(r6,s2)));
+  a[1]=_mm256_add_pd(_mm256_mul_pd(r0,s1), _mm256_add_pd(_mm256_mul_pd(r3,s4),_mm256_mul_pd(r6,s5)));
+  a[2]=_mm256_add_pd(_mm256_mul_pd(r0,s2), _mm256_add_pd(_mm256_mul_pd(r3,s5),_mm256_mul_pd(r6,s8)));
+}
+#endif
 inline void compute_s(FLOAT_PHYS* S, const FLOAT_PHYS* H,
   const FLOAT_PHYS* C, const __m256d c0,const __m256d c1,const __m256d c2,
   const FLOAT_PHYS dw){
@@ -164,56 +181,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   for(int ip=0; ip<intp_n; ip++){
     //G = MatMul3x3xN( jac,shg );
     //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
-#if 1
-    compute_g_h(&G[0],&H[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne],&R[0], &u[0] );
-#else
-    {// scope vector registers
-      const double * RESTRICT isp = &intp_shpg[ip*Ne];
-      __m256d a036=_mm256_set1_pd(0.0), a147=_mm256_set1_pd(0.0), a258=_mm256_set1_pd(0.0);
-      int ig=0;
-      for(int i= 0; i<Ne; i+=9){
-        __m256d u0,u1,u2,u3,u4,u5,u6,u7,u8,g0,g1,g2;
-        __m256d is0,is1,is2,is3,is4,is5,is6,is7,is8;
-        is0= _mm256_set1_pd(isp[i+0]); is1= _mm256_set1_pd(isp[i+1]); is2= _mm256_set1_pd(isp[i+2]);
-        u0 = _mm256_set1_pd(  u[i+0]); u1 = _mm256_set1_pd(  u[i+1]); u2 = _mm256_set1_pd(  u[i+2]);
-        g0 = _mm256_add_pd(_mm256_mul_pd(j0,is0), _mm256_add_pd(_mm256_mul_pd(j1,is1),_mm256_mul_pd(j2,is2)));
-        a036= _mm256_add_pd(a036, _mm256_mul_pd(g0,u0)); a147 = _mm256_add_pd(a147, _mm256_mul_pd(g0,u1)); a258 = _mm256_add_pd(a258, _mm256_mul_pd(g0,u2));
-              _mm256_store_pd(&G[ig],g0);
-        ig+=4;
-        if((i+5)<Ne){
-          is3= _mm256_set1_pd(isp[i+3]); is4= _mm256_set1_pd(isp[i+4]); is5= _mm256_set1_pd(isp[i+5]);
-          u3 = _mm256_set1_pd(  u[i+3]); u4 = _mm256_set1_pd(  u[i+4]); u5 = _mm256_set1_pd(  u[i+5]);
-          g1 = _mm256_add_pd(_mm256_mul_pd(j0,is3), _mm256_add_pd(_mm256_mul_pd(j1,is4),_mm256_mul_pd(j2,is5)));
-          a036= _mm256_add_pd(a036, _mm256_mul_pd(g1,u3)); a147 = _mm256_add_pd(a147, _mm256_mul_pd(g1,u4)); a258 = _mm256_add_pd(a258, _mm256_mul_pd(g1,u5));
-                _mm256_store_pd(&G[ig],g1);
-          ig+=4;
-        }if((i+8)<Ne){
-          is6= _mm256_set1_pd(isp[i+6]); is7= _mm256_set1_pd(isp[i+7]); is8= _mm256_set1_pd(isp[i+8]);
-          u6 = _mm256_set1_pd(  u[i+6]); u7 = _mm256_set1_pd(  u[i+7]); u8 = _mm256_set1_pd(  u[i+8]);
-          g2 = _mm256_add_pd(_mm256_mul_pd(j0,is6), _mm256_add_pd(_mm256_mul_pd(j1,is7),_mm256_mul_pd(j2,is8)));
-          a036= _mm256_add_pd(a036, _mm256_mul_pd(g2,u6)); a147 = _mm256_add_pd(a147, _mm256_mul_pd(g2,u7)); a258 = _mm256_add_pd(a258, _mm256_mul_pd(g2,u8));
-                _mm256_store_pd(&G[ig],g2);
-          ig+=4;
-        }
-      }
-      {// scope vector registers
-      __m256d h036,h147,h258;
-      {
-      __m256d r0,r1,r2,r3,r4,r5,r6,r7,r8;
-      r0 = _mm256_set1_pd(R[0]); r1 = _mm256_set1_pd(R[1]); r2 = _mm256_set1_pd(R[2]);
-      r3 = _mm256_set1_pd(R[3]); r4 = _mm256_set1_pd(R[4]); r5 = _mm256_set1_pd(R[5]);
-      r6 = _mm256_set1_pd(R[6]); r7 = _mm256_set1_pd(R[7]); r8 = _mm256_set1_pd(R[8]);
-      h036 = _mm256_add_pd(_mm256_mul_pd(r0,a036), _mm256_add_pd(_mm256_mul_pd(r1,a147),_mm256_mul_pd(r2,a258)));
-      h147 = _mm256_add_pd(_mm256_mul_pd(r3,a036), _mm256_add_pd(_mm256_mul_pd(r4,a147),_mm256_mul_pd(r5,a258)));
-      h258 = _mm256_add_pd(_mm256_mul_pd(r6,a036), _mm256_add_pd(_mm256_mul_pd(r7,a147),_mm256_mul_pd(r8,a258)));
-      }
-      // Take advantage of the fact that the pattern of usage is invariant with respect to transpose _MM256_TRANSPOSE3_PD(h036,h147,h258);
-      _mm256_storeu_pd(&H[0],h036);
-      _mm256_storeu_pd(&H[4],h147);
-      _mm256_storeu_pd(&H[8],h258);
-      }
-    }//end register scope
-#endif
+    compute_g_h( &G[0],&H[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne],&R[0], &u[0] );
 #if VERB_MAX>12
     printf( "Small Strains (Elem: %i):", ie );
     for(uint j=0;j<H.size();j++){
@@ -235,24 +203,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     } }
     // [H] Small deformation tensor
     // [H][RT] : matmul3x3x3T
-#if 1
-    compute_s(&S[0], &H[0],&C[0],c0,c1,c2, dw);
-#else
-    {// begin scoping unit
-    __m256d s048;
-    s048= _mm256_mul_pd(_mm256_set1_pd(dw),
-                        _mm256_add_pd(_mm256_mul_pd(c0,
-                        _mm256_set1_pd(H[0])),
-                        _mm256_add_pd(_mm256_mul_pd(c1,
-                        _mm256_set1_pd(H[5])),
-                        _mm256_mul_pd(c2,
-                        _mm256_set1_pd(H[10])))));
-          _mm256_store_pd(&S[0], s048);
-    S[4]=(H[1] + H[4])*C[6]*dw; // S[1]
-    S[5]=(H[2] + H[8])*C[8]*dw; // S[2]
-    S[6]=(H[6] + H[9])*C[7]*dw; // S[5]
-    } // end scoping unit
-#endif
+    compute_s( &S[0], &H[0],&C[0],c0,c1,c2, dw );
 #if VERB_MAX>12
     printf( "Stress (Natural Coords):");
     for(uint j=0;j<9;j++){
@@ -261,7 +212,16 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     }; printf("\n");
 #endif
     // [S][R] : matmul3x3x3, R is transposed
+    //accumulate_f( &f[0], &sys_f[0], &conn[0], &R[0], &S[0], &G[0] );
     {// begin scoping unit
+#if 1
+    __m256d a036, a147, a258;
+    {
+    __m256d a[3];
+    rotate_3x3( &a[0], &R[0], &S[0] );
+    a036=a[0]; a147=a[1]; a258=a[2];
+    }
+#else
     __m256d a036, a147, a258;
     {
     __m256d s0,s1,s2,s4,s5,s8;
@@ -273,6 +233,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     a147=_mm256_add_pd(_mm256_mul_pd(r0,s1), _mm256_add_pd(_mm256_mul_pd(r3,s4),_mm256_mul_pd(r6,s5)));
     a258=_mm256_add_pd(_mm256_mul_pd(r0,s2), _mm256_add_pd(_mm256_mul_pd(r3,s5),_mm256_mul_pd(r6,s8)));
     }
+#endif
     if(ip==0){
       f0 = _mm256_loadu_pd(&sys_f[3*conn[ 0]]);
       f1 = _mm256_loadu_pd(&sys_f[3*conn[ 1]]);
@@ -364,13 +325,6 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     }
     }
     } // end variable scope
-#if VERB_MAX>12
-    printf( "ff:");
-    for(uint j=0;j<Ne;j++){
-      if(j%mesh_d==0){printf("\n"); }
-      printf("%+9.2e ",f[j]);
-    } printf("\n");
-#endif
     }//end intp loop
     _mm256_store_pd(&f[ 0],f0);
     _mm256_store_pd(&f[ 4],f1);
@@ -396,6 +350,13 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     _mm256_store_pd(&f[72],f18);
     _mm256_store_pd(&f[76],f19);
     }
+#if VERB_MAX>12
+    printf( "ff:");
+    for(uint j=0;j<Ne;j++){
+      if(j%mesh_d==0){printf("\n"); }
+      printf("%+9.2e ",f[j]);
+    } printf("\n");
+#endif
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
 #endif
