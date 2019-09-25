@@ -200,42 +200,38 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       std::memcpy( & u[Nf*i], &sysu[c[i]*Nf], sizeof(FLOAT_SOLV)*Nf );
     }
   }
-  {// Scope f registers
-#define TEST_F_VARRAY
-#ifdef TEST_F_VARRAY
-  //FLOAT_PHYS __attribute__((aligned(32))) sf[Nt];
+  {// Scope vf registers
   __m256d vf[Nc];
-#else
-  FLOAT_PHYS __attribute__((aligned(32))) f[Nt];
-  __m256d f0,f1,f2,f3;
-  __m256d f4,f5,f6,f7,f8,f9;
-  __m256d f10,f11,f12,f13,f14,f15,f16,f17,f18,f19;
-#endif
-#ifdef TEST_F_VARRAY
   //for(int i=0; i<Nc; i++){const __m256d zs={0.0,0.0,0.0,0.0}; vf[i]=zs; }
-#else
-  {// scope zs register
-  const __m256d zs={0.0,0.0,0.0,0.0};
-  f0=zs,f1=zs,f2=zs,f3=zs;
-  f4=zs,f5=zs,f6=zs,f7=zs,f8=zs,f9=zs;
-  f10=zs,f11=zs,f12=zs,f13=zs,f14=zs,f15=zs,f16=zs,f17=zs,f18=zs,f19=zs;
-  }
-#endif
   for(INT_MESH ie=e0;ie<ee;ie++){
 #ifndef FETCH_JAC
       std::memcpy( &jac, &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
 #endif
   const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
-#ifdef TEST_F_VARRAY
-  //FLOAT_PHYS __attribute__((aligned(32))) sf[Nt];
-  //__m256d __attribute__((aligned(32))) vf[Nc];
-#endif
 
   __m256d j0,j1,j2;//FIXME should these be assigns instead?
   j0 = _mm256_load_pd(&jac[0]);  // j0 = [j3 j2 j1 j0]
   j1 = _mm256_loadu_pd(&jac[3]); // j1 = [j6 j5 j4 j3]
   j2 = _mm256_loadu_pd(&jac[6]); // j2 = [j9 j8 j7 j6]
+      for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
+      if(elem_p>1){
+        for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
+      }
+      if(elem_p>2){
+        for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
+      }
   for(int ip=0; ip<intp_n; ip++){
+#if 0
+    if(ip==0){// initialize element f
+      for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
+      if(elem_p>1){
+        for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
+      }
+      if(elem_p>2){
+        for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
+      }
+    }
+#endif
     //G = MatMul3x3xN( jac,shg );
     //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
     compute_g_h( &G[0],&H[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne], &R[0], &u[0] );
@@ -271,190 +267,11 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     // [S][R] : matmul3x3x3, R is transposed
     //accumulate_f( &f[0], &sys_f[0], &conn[0], &R[0], &S[0], &G[0] );
     {// begin scoping unit
-#ifdef TEST_F_VARRAY
     __m256d a[3];
     rotate_s( &a[0], &R[0], &S[0] );
-#else
-    __m256d a036, a147, a258;
-    {
-    __m256d a[3];
-    rotate_s( &a[0], &R[0], &S[0] );
-    a036=a[0]; a147=a[1]; a258=a[2];
-    }
-#endif
-#ifdef TEST_F_VARRAY
-#if 1
-    if(ip==0){
-      for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
-      if(elem_p>1){
-        for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
-      }
-      if(elem_p>2){
-        for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
-      }
-    }
-#else
-    if(ip==0){
-      vf[0] = _mm256_loadu_pd(&sys_f[3*conn[ 0]]);
-      vf[1] = _mm256_loadu_pd(&sys_f[3*conn[ 1]]);
-      vf[2] = _mm256_loadu_pd(&sys_f[3*conn[ 2]]);
-      vf[3] = _mm256_loadu_pd(&sys_f[3*conn[ 3]]);
-      if(elem_p>1){
-      vf[4] = _mm256_loadu_pd(&sys_f[3*conn[ 4]]);
-      vf[5] = _mm256_loadu_pd(&sys_f[3*conn[ 5]]);
-      vf[6] = _mm256_loadu_pd(&sys_f[3*conn[ 6]]);
-      vf[7] = _mm256_loadu_pd(&sys_f[3*conn[ 7]]);
-      vf[8] = _mm256_loadu_pd(&sys_f[3*conn[ 8]]);
-      vf[9] = _mm256_loadu_pd(&sys_f[3*conn[ 9]]);
-      }
-      if(elem_p>2){
-      vf[10] = _mm256_loadu_pd(&sys_f[3*conn[10]]);
-      vf[11] = _mm256_loadu_pd(&sys_f[3*conn[11]]);
-      vf[12] = _mm256_loadu_pd(&sys_f[3*conn[12]]);
-      vf[13] = _mm256_loadu_pd(&sys_f[3*conn[13]]);
-      vf[14] = _mm256_loadu_pd(&sys_f[3*conn[14]]);
-      vf[15] = _mm256_loadu_pd(&sys_f[3*conn[15]]);
-      vf[16] = _mm256_loadu_pd(&sys_f[3*conn[16]]);
-      vf[17] = _mm256_loadu_pd(&sys_f[3*conn[17]]);
-      vf[18] = _mm256_loadu_pd(&sys_f[3*conn[18]]);
-      vf[19] = _mm256_loadu_pd(&sys_f[3*conn[19]]);
-      }
-    }
-#endif
-#else
-    if(ip==0){
-      f0 = _mm256_loadu_pd(&sys_f[3*conn[ 0]]);
-      f1 = _mm256_loadu_pd(&sys_f[3*conn[ 1]]);
-      f2 = _mm256_loadu_pd(&sys_f[3*conn[ 2]]);
-      f3 = _mm256_loadu_pd(&sys_f[3*conn[ 3]]);
-      if(elem_p>1){
-      f4 = _mm256_loadu_pd(&sys_f[3*conn[ 4]]);
-      f5 = _mm256_loadu_pd(&sys_f[3*conn[ 5]]);
-      f6 = _mm256_loadu_pd(&sys_f[3*conn[ 6]]);
-      f7 = _mm256_loadu_pd(&sys_f[3*conn[ 7]]);
-      f8 = _mm256_loadu_pd(&sys_f[3*conn[ 8]]);
-      f9 = _mm256_loadu_pd(&sys_f[3*conn[ 9]]);
-      }
-      if(elem_p>2){
-      f10 = _mm256_loadu_pd(&sys_f[3*conn[10]]);
-      f11 = _mm256_loadu_pd(&sys_f[3*conn[11]]);
-      f12 = _mm256_loadu_pd(&sys_f[3*conn[12]]);
-      f13 = _mm256_loadu_pd(&sys_f[3*conn[13]]);
-      f14 = _mm256_loadu_pd(&sys_f[3*conn[14]]);
-      f15 = _mm256_loadu_pd(&sys_f[3*conn[15]]);
-      f16 = _mm256_loadu_pd(&sys_f[3*conn[16]]);
-      f17 = _mm256_loadu_pd(&sys_f[3*conn[17]]);
-      f18 = _mm256_loadu_pd(&sys_f[3*conn[18]]);
-      f19 = _mm256_loadu_pd(&sys_f[3*conn[19]]);
-      }
-    }
-#endif
-#ifdef TEST_F_VARRAY
     accumulate_f( &vf[0], &a[0], &G[0], elem_p );
-#else
-    {
-      __m256d g0,g1,g2,g3,g4,g5,g6,g7,g8,g9,g10,g11;
-      g0 = _mm256_set1_pd(G[0])  ; g1 = _mm256_set1_pd(G[1])  ; g2 = _mm256_set1_pd(G[2]);
-      f0 = _mm256_add_pd(f0, _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
-
-      g3 = _mm256_set1_pd(G[4])  ; g4 = _mm256_set1_pd(G[5])  ; g5 = _mm256_set1_pd(G[6]);
-      f1 = _mm256_add_pd(f1, _mm256_add_pd(_mm256_mul_pd(g3,a036), _mm256_add_pd(_mm256_mul_pd(g4,a147),_mm256_mul_pd(g5,a258))));
-
-      g6 = _mm256_set1_pd(G[8])  ; g7 = _mm256_set1_pd(G[9])  ; g8 = _mm256_set1_pd(G[10]);
-      f2 = _mm256_add_pd(f2, _mm256_add_pd(_mm256_mul_pd(g6,a036), _mm256_add_pd(_mm256_mul_pd(g7,a147),_mm256_mul_pd(g8,a258))));
-
-      g9 = _mm256_set1_pd(G[12]) ; g10= _mm256_set1_pd(G[13]) ; g11= _mm256_set1_pd(G[14]);
-      f3 = _mm256_add_pd(f3, _mm256_add_pd(_mm256_mul_pd(g9,a036), _mm256_add_pd(_mm256_mul_pd(g10,a147),_mm256_mul_pd(g11,a258))));
-    if(elem_p>1){
-      g0 = _mm256_set1_pd(G[16]) ; g1 = _mm256_set1_pd(G[17]) ; g2 = _mm256_set1_pd(G[18]);
-      f4 = _mm256_add_pd(f4, _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
-
-      g3 = _mm256_set1_pd(G[20]) ; g4 = _mm256_set1_pd(G[21]) ; g5 = _mm256_set1_pd(G[22]);
-      f5 = _mm256_add_pd(f5, _mm256_add_pd(_mm256_mul_pd(g3,a036), _mm256_add_pd(_mm256_mul_pd(g4,a147),_mm256_mul_pd(g5,a258))));
-
-      g6 = _mm256_set1_pd(G[24]) ; g7 = _mm256_set1_pd(G[25]) ; g8 = _mm256_set1_pd(G[26]);
-      f6 = _mm256_add_pd(f6, _mm256_add_pd(_mm256_mul_pd(g6,a036), _mm256_add_pd(_mm256_mul_pd(g7,a147),_mm256_mul_pd(g8,a258))));
-
-      g9 = _mm256_set1_pd(G[28]) ; g10= _mm256_set1_pd(G[29]) ; g11= _mm256_set1_pd(G[30]);
-      f7 = _mm256_add_pd(f7, _mm256_add_pd(_mm256_mul_pd(g9,a036), _mm256_add_pd(_mm256_mul_pd(g10,a147),_mm256_mul_pd(g11,a258))));
-
-      g0 = _mm256_set1_pd(G[32]) ; g1 = _mm256_set1_pd(G[33]) ; g2 = _mm256_set1_pd(G[34]);
-      f8 = _mm256_add_pd(f8, _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
-
-      g3 = _mm256_set1_pd(G[36]) ; g4 = _mm256_set1_pd(G[37]) ; g5 = _mm256_set1_pd(G[38]);
-      f9 = _mm256_add_pd(f9, _mm256_add_pd(_mm256_mul_pd(g3,a036), _mm256_add_pd(_mm256_mul_pd(g4,a147),_mm256_mul_pd(g5,a258))));
-    }
-    if(elem_p>2){
-      g6 = _mm256_set1_pd(G[40]) ; g7 = _mm256_set1_pd(G[41]) ; g8 = _mm256_set1_pd(G[42]);
-      f10 = _mm256_add_pd(f10, _mm256_add_pd(_mm256_mul_pd(g6,a036), _mm256_add_pd(_mm256_mul_pd(g7,a147),_mm256_mul_pd(g8,a258))));
-
-      g9 = _mm256_set1_pd(G[44]) ; g10= _mm256_set1_pd(G[45]) ; g11= _mm256_set1_pd(G[46]);
-      f11 = _mm256_add_pd(f11, _mm256_add_pd(_mm256_mul_pd(g9,a036), _mm256_add_pd(_mm256_mul_pd(g10,a147),_mm256_mul_pd(g11,a258))));
-
-      g0 = _mm256_set1_pd(G[48]) ; g1 = _mm256_set1_pd(G[49]) ; g2 = _mm256_set1_pd(G[50]);
-      f12 = _mm256_add_pd(f12, _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
-
-      g3 = _mm256_set1_pd(G[52]) ; g4 = _mm256_set1_pd(G[53]) ; g5 = _mm256_set1_pd(G[54]);
-      f13 = _mm256_add_pd(f13, _mm256_add_pd(_mm256_mul_pd(g3,a036), _mm256_add_pd(_mm256_mul_pd(g4,a147),_mm256_mul_pd(g5,a258))));
-
-      g6 = _mm256_set1_pd(G[56]) ; g7 = _mm256_set1_pd(G[57]) ; g8 = _mm256_set1_pd(G[58]);
-      f14 = _mm256_add_pd(f14, _mm256_add_pd(_mm256_mul_pd(g6,a036), _mm256_add_pd(_mm256_mul_pd(g7,a147),_mm256_mul_pd(g8,a258))));
-
-      g9 = _mm256_set1_pd(G[60]) ; g10= _mm256_set1_pd(G[61]) ; g11= _mm256_set1_pd(G[62]);
-      f15 = _mm256_add_pd(f15, _mm256_add_pd(_mm256_mul_pd(g9,a036), _mm256_add_pd(_mm256_mul_pd(g10,a147),_mm256_mul_pd(g11,a258))));
-
-      g0 = _mm256_set1_pd(G[64]) ; g1 = _mm256_set1_pd(G[65]) ; g2 = _mm256_set1_pd(G[66]);
-      f16 = _mm256_add_pd(f16, _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
-
-      g3 = _mm256_set1_pd(G[68]) ; g4 = _mm256_set1_pd(G[69]) ; g5 = _mm256_set1_pd(G[70]);
-      f17 = _mm256_add_pd(f17, _mm256_add_pd(_mm256_mul_pd(g3,a036), _mm256_add_pd(_mm256_mul_pd(g4,a147),_mm256_mul_pd(g5,a258))));
-
-      g6 = _mm256_set1_pd(G[72]) ; g7 = _mm256_set1_pd(G[73]) ; g8 = _mm256_set1_pd(G[74]);
-      f18 = _mm256_add_pd(f18, _mm256_add_pd(_mm256_mul_pd(g6,a036), _mm256_add_pd(_mm256_mul_pd(g7,a147),_mm256_mul_pd(g8,a258))));
-
-      g9 = _mm256_set1_pd(G[76]) ; g10= _mm256_set1_pd(G[77]) ; g11= _mm256_set1_pd(G[78]);
-      f19 = _mm256_add_pd(f19, _mm256_add_pd(_mm256_mul_pd(g9,a036), _mm256_add_pd(_mm256_mul_pd(g10,a147),_mm256_mul_pd(g11,a258))));
-    }
-    }
-#endif
     } // end variable scope
     }//end intp loop
-#ifdef TEST_F_VARRAY
-#if 0
-    for(int i=0; i<4; i++){_mm256_store_pd(&sf[4*i],vf[i]); }
-    if(elem_p>1){
-      for(int i=4; i<10; i++){_mm256_store_pd(&sf[4*i],vf[i]); }
-    }
-    if(elem_p>2){
-      for(int i=10; i<20; i++){_mm256_store_pd(&sf[4*i],vf[i]); }
-    }
-#endif
-#else
-    _mm256_store_pd(&f[ 0],f0);
-    _mm256_store_pd(&f[ 4],f1);
-    _mm256_store_pd(&f[ 8],f2);
-    _mm256_store_pd(&f[12],f3);
-    if(elem_p>1){
-    _mm256_store_pd(&f[16],f4);
-    _mm256_store_pd(&f[20],f5);
-    _mm256_store_pd(&f[24],f6);
-    _mm256_store_pd(&f[28],f7);
-    _mm256_store_pd(&f[32],f8);
-    _mm256_store_pd(&f[36],f9);
-    }
-    if(elem_p>2){
-    _mm256_store_pd(&f[40],f10);
-    _mm256_store_pd(&f[44],f11);
-    _mm256_store_pd(&f[48],f12);
-    _mm256_store_pd(&f[52],f13);
-    _mm256_store_pd(&f[56],f14);
-    _mm256_store_pd(&f[60],f15);
-    _mm256_store_pd(&f[64],f16);
-    _mm256_store_pd(&f[68],f17);
-    _mm256_store_pd(&f[72],f18);
-    _mm256_store_pd(&f[76],f19);
-    }
-#endif
 #if VERB_MAX>12
     printf( "ff:");
     for(uint j=0;j<Ne;j++){
@@ -470,13 +287,9 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #pragma vector unaligned
 #endif
       for(int j=0; j<3; j++){
-#ifdef TEST_F_VARRAY
         double __attribute__((aligned(32))) sf[4];
         _mm256_store_pd(&sf[0],vf[i]);
         sys_f[3*conn[i]+j] = sf[j];
-#else
-        sys_f[3*conn[i]+j] = f[4*i+j];
-#endif
       } }//--------------------------------------------------- N*3 =  3*N FLOP
   }// end elem loop
   }// end f register scope
