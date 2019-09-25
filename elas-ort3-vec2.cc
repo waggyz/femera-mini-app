@@ -69,6 +69,8 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
   const FLOAT_SOLV* RESTRICT sysu  = &sys_u[0];
   //      FLOAT_SOLV* RESTRICT sysf  = &sys_f[0];
+  {// Scope vf registers
+  __m256d vf[Nc];
   if(e0<ee){
 #ifdef FETCH_JAC
     std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
@@ -79,10 +81,12 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
     for (int i=0; i<Nc; i++){
       std::memcpy( & u[Nf*i], &sysu[c[i]*Nf], sizeof(FLOAT_SOLV)*Nf );
+#if 0
+         vf[i]=_mm256_loadu_pd(&sys_f[3*c[i]]);
+#endif
     }
   }
-  {// Scope vf registers
-  __m256d vf[Nc];
+  //for(int i=0; i<Nc; i++){const vf[i]=_mm256_set1_pd(0.0); }
   //for(int i=0; i<Nc; i++){const __m256d zs={0.0,0.0,0.0,0.0}; vf[i]=zs; }
   for(INT_MESH ie=e0;ie<ee;ie++){
 #ifndef FETCH_JAC
@@ -132,6 +136,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     {// begin scoping unit
     __m256d a[3];
     rotate_s( &a[0], &R[0], &S[0] );
+#if 1
     if(ip==0){// initialize element f
       for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
       if(elem_p>1){
@@ -141,6 +146,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
         for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
       }
     }
+#endif
     accumulate_f( &vf[0], &a[0], &G[0], elem_p );
     } // end variable scope
     }//end intp loop
@@ -162,7 +168,13 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
         double __attribute__((aligned(32))) sf[4];
         _mm256_store_pd(&sf[0],vf[i]);
         sys_f[3*conn[i]+j] = sf[j];
-      } }//--------------------------------------------------- N*3 =  3*N FLOP
+      }
+#if 0
+      if( (ie+1) < ee ){
+         vf[i]=_mm256_loadu_pd(&sys_f[3*conn[Nc+ i]]);
+      }
+#endif
+    }//--------------------------------------------------- N*3 =  3*N FLOP
   }// end elem loop
   }// end f register scope
 return 0;

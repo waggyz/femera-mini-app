@@ -279,13 +279,13 @@ public:
         for(int j=0;j<3;j++){
           for(int k=0;k<3;k++){
             mtrl_rotc[3* i+l ] += Z1[3* i+j ] * X2[3* j+k ] * Z3[3* k+l ];
-    };};};};
+    } } } }
     #if VERBOSITY_MAX>10
     printf("Material Tensor Rotation:");
     for(size_t i=0; i<mtrl_rotc.size(); i++){
       if(!(i%3)){printf("\n");};
       printf("%10.3e ",mtrl_rotc[i]);
-    }; printf("\n");
+    } printf("\n");
    #endif
     mtrl_matc.resize(9);// Material Matrix Entries {C11,,,C12,,,C44,,} ;
     switch(mtrl_prop.size()){
@@ -296,7 +296,7 @@ public:
         const FLOAT_PHYS d =E/((1.0+nu)*(1.0-2.0*nu));
         mtrl_matc={(1.0-nu)*d,(1.0-nu)*d,(1.0-nu)*d, nu*d,nu*d,nu*d,
           0.5*G,0.5*G,0.5*G};//*0.5};
-      break;};
+      break;}
       case(3):{// Cubic
         const FLOAT_PHYS E =mtrl_prop[0];
         const FLOAT_PHYS nu=mtrl_prop[1];
@@ -304,7 +304,7 @@ public:
         const FLOAT_PHYS d =E/((1.0+nu)*(1.0-2.0*nu));
         mtrl_matc={(1.0-nu)*d,(1.0-nu)*d,(1.0-nu)*d, nu*d,nu*d,nu*d,
           0.5*G,0.5*G,0.5*G};//*0.5};
-      break;};
+      break;}
       case(5):{//Transversely Isotropic
         const FLOAT_PHYS Ex  = mtrl_prop[0];// Ey=Ex=Ep
         const FLOAT_PHYS Ez  = mtrl_prop[1];
@@ -319,7 +319,7 @@ public:
         const FLOAT_PHYS C13 = d* (nxz+nxy*nxz)/(Ex*Ex);//mtrl_prop[3];
         const FLOAT_PHYS C44 = Gxz;//mtrl_prop[4];
         mtrl_matc={C11,C11,C33, C12,C13,C13, C44,C44,(C11-C12)*0.5};
-      break;};
+      break;}
       case(9):{// Orthotropic
         //FIXME need conventional material properties
         //const FLOAT_PHYS C11 =mtrl_prop[0];
@@ -332,8 +332,8 @@ public:
         //const FLOAT_PHYS C55 =mtrl_prop[7];
         //const FLOAT_PHYS C66 =mtrl_prop[8];
         mtrl_matc=mtrl_prop;
-      break;};
-    };// mtrl_prop cubic,transverse,ortho
+      break;}
+    }// mtrl_prop cubic,transverse,ortho
     return 0;
   };
   //FLOAT_PHYS* MtrlLinear(FLOAT_PHYS e[9])final{
@@ -351,15 +351,15 @@ public:
     #if VERBOSITY_MAX>10
     printf("Tensor Rotation:");
     for(size_t i=0; i<mtrl_rotc.size(); i++){
-      if(!(i%3)){printf("\n");};
+      if(!(i%3)){printf("\n");}
       printf("%10.3e ",mtrl_rotc[i]);
-    }; printf("\n");
+    } printf("\n");
     //
     printf("Strain (Global):");
     for(size_t i=0; i<9; i++){
-      if(!(i%3)){printf("\n");};
+      if(!(i%3)){printf("\n");}
       printf("%10.3e ",e[i]);
-    }; printf("\n");
+    } printf("\n");
     #endif
     //
     //const RESTRICT Phys::vals E = MatMul3x3xN( mtrl_rotc,e );
@@ -368,14 +368,14 @@ public:
       for(int j=0;j<3;j++){
         for(int k=0;k<3;k++){
           E[3* i+k ] += mtrl_rotc[3* i+j ] * e[3* j+k ];
-    };};};
+    } } }
     //
     #if VERBOSITY_MAX>10
     printf("Strain (Material):");
     for(size_t i=0; i<9; i++){
-      if(!(i%3)){printf("\n");};
+      if(!(i%3)){printf("\n");}
       printf("%10.3e ",E[i]);
-    }; printf("\n");
+    } printf("\n");
     #endif
     S[0]= mtrl_matc[0]*E[0] +mtrl_matc[1]*E[4] +mtrl_matc[1]*E[8];
     S[4]= mtrl_matc[1]*E[0] +mtrl_matc[0]*E[4] +mtrl_matc[1]*E[8];
@@ -390,7 +390,7 @@ public:
     for(size_t i=0; i<9; i++){
       if(!(i%3)){printf("\n");};
       printf("%10.3e ",S[i]);
-    }; printf("\n");
+    } printf("\n");
     #endif
     //const RESTRICT Phys::vals s = MatMul3x3xNT( mtrl_rotc,S );//FIXME
     RESTRICT Phys::vals s(9);
@@ -398,17 +398,17 @@ public:
       for(int k=0;k<3;k++){
         for(int j=0;j<3;j++){
           s[3* i+k ] += mtrl_rotc[3* i+j ] * S[3* k+j ];
-    };};};
+    } } }
     //
     #if VERBOSITY_MAX>10
     printf("Stress (Global):");
     for(size_t i=0; i<9; i++){
-      if(!(i%3)){printf("\n");};
+      if(!(i%3)){printf("\n");}
       printf("%10.3e ",S[i]);
-    }; printf("\n");
+    } printf("\n");
     #endif
     //
-    return {s[0],s[4],s[8], s[1],s[5],s[2]};
+    return { s[0],s[4],s[8], s[1],s[5],s[2] };
     //return s;
   };
 protected:
@@ -662,7 +662,7 @@ inline void compute_s(FLOAT_PHYS* S, const FLOAT_PHYS* H,
         _mm256_add_pd(_mm256_mul_pd(c0,_mm256_set1_pd(H[0])),
           _mm256_add_pd(_mm256_mul_pd(c1,_mm256_set1_pd(H[5])),
             _mm256_mul_pd(c2,_mm256_set1_pd(H[10])))));
-    _mm256_store_pd(&S[0], s048);
+    _mm256_store_pd( &S[0], s048 );
     S[4]=(H[1] + H[4])*C[6]*dw; // S[1]
     S[5]=(H[2] + H[8])*C[8]*dw; // S[2]
     S[6]=(H[6] + H[9])*C[7]*dw; // S[5]
@@ -685,8 +685,9 @@ inline void compute_g_h(
     u1 = _mm256_set1_pd(  u[i+1]);
     u2 = _mm256_set1_pd(  u[i+2]);
     g0 = _mm256_add_pd(_mm256_mul_pd(j0,is0),
-      _mm256_add_pd(_mm256_mul_pd(j1,is1),_mm256_mul_pd(j2,is2)));
-    a036= _mm256_add_pd(a036, _mm256_mul_pd(g0,u0));
+      _mm256_add_pd(_mm256_mul_pd(j1,is1),
+        _mm256_mul_pd(j2,is2)));
+    a036 = _mm256_add_pd(a036, _mm256_mul_pd(g0,u0));
     a147 = _mm256_add_pd(a147, _mm256_mul_pd(g0,u1));
     a258 = _mm256_add_pd(a258, _mm256_mul_pd(g0,u2));
     _mm256_store_pd(&G[ig],g0);
@@ -699,8 +700,9 @@ inline void compute_g_h(
       u4 = _mm256_set1_pd(  u[i+4]);
       u5 = _mm256_set1_pd(  u[i+5]);
       g1 = _mm256_add_pd(_mm256_mul_pd(j0,is3),
-        _mm256_add_pd(_mm256_mul_pd(j1,is4),_mm256_mul_pd(j2,is5)));
-      a036= _mm256_add_pd(a036, _mm256_mul_pd(g1,u3));
+        _mm256_add_pd(_mm256_mul_pd(j1,is4),
+          _mm256_mul_pd(j2,is5)));
+      a036 = _mm256_add_pd(a036, _mm256_mul_pd(g1,u3));
       a147 = _mm256_add_pd(a147, _mm256_mul_pd(g1,u4));
       a258 = _mm256_add_pd(a258, _mm256_mul_pd(g1,u5));
       _mm256_store_pd(&G[ig],g1);
@@ -713,8 +715,9 @@ inline void compute_g_h(
       u7 = _mm256_set1_pd(  u[i+7]);
       u8 = _mm256_set1_pd(  u[i+8]);
       g2 = _mm256_add_pd(_mm256_mul_pd(j0,is6),
-        _mm256_add_pd(_mm256_mul_pd(j1,is7),_mm256_mul_pd(j2,is8)));
-      a036= _mm256_add_pd(a036, _mm256_mul_pd(g2,u6));
+        _mm256_add_pd(_mm256_mul_pd(j1,is7),
+          _mm256_mul_pd(j2,is8)));
+      a036 = _mm256_add_pd(a036, _mm256_mul_pd(g2,u6));
       a147 = _mm256_add_pd(a147, _mm256_mul_pd(g2,u7));
       a258 = _mm256_add_pd(a258, _mm256_mul_pd(g2,u8));
       _mm256_store_pd(&G[ig],g2);
