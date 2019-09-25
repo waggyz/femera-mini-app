@@ -5,10 +5,29 @@
 #include "femera.h"
 #include <immintrin.h>
 //
-//inline void accumulate_f( FLOAT_PHYS* f,
-//  const FLOAT_PHYS* sys_f, const MESH_INT* conn, 
-//  const FLOAT_PHYS* R, const FLOAT_PHYS* S, const FLOAT_PHYS* G ){
-//}
+inline void accumulate_f( __m256d* vf,
+  const __m256d* a, const FLOAT_PHYS* G, const int elem_p ){
+  __m256d a036=a[0];__m256d a147=a[1];__m256d a258=a[2];
+  for(int i=0; i<4; i++){
+    __m256d g0,g1,g2;
+    g0 = _mm256_set1_pd(G[4*i]); g1 = _mm256_set1_pd(G[4*i+1]); g2 = _mm256_set1_pd(G[4*i+2]);
+    vf[i]= _mm256_add_pd(vf[i], _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
+  }
+  if(elem_p>1){
+    for(int i=4; i<10; i++){
+      __m256d g0,g1,g2;
+      g0 = _mm256_set1_pd(G[4*i]); g1 = _mm256_set1_pd(G[4*i+1]); g2 = _mm256_set1_pd(G[4*i+2]);
+      vf[i]= _mm256_add_pd(vf[i], _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
+    }
+  }
+  if(elem_p>2){
+    for(int i=10; i<20; i++){
+      __m256d g0,g1,g2;
+      g0 = _mm256_set1_pd(G[4*i]); g1 = _mm256_set1_pd(G[4*i+1]); g2 = _mm256_set1_pd(G[4*i+2]);
+      vf[i]= _mm256_add_pd(vf[i], _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
+    }
+  }
+}
 inline void rotate_s( __m256d* a,
   const FLOAT_PHYS* R, const FLOAT_PHYS* S ){
   __m256d s0,s1,s2,s4,s5,s8;
@@ -223,14 +242,29 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     // [S][R] : matmul3x3x3, R is transposed
     //accumulate_f( &f[0], &sys_f[0], &conn[0], &R[0], &S[0], &G[0] );
     {// begin scoping unit
+#ifdef TEST_F_VARRAY
+    __m256d a[3];
+    rotate_s( &a[0], &R[0], &S[0] );
+#else
     __m256d a036, a147, a258;
     {
     __m256d a[3];
     rotate_s( &a[0], &R[0], &S[0] );
     a036=a[0]; a147=a[1]; a258=a[2];
     }
+#endif
 #ifdef TEST_F_VARRAY
-#if 0
+#if 1
+    if(ip==0){
+      for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
+      if(elem_p>1){
+        for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
+      }
+      if(elem_p>2){
+        for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
+      }
+    }
+#else
     if(ip==0){
       vf[0] = _mm256_loadu_pd(&sys_f[3*conn[ 0]]);
       vf[1] = _mm256_loadu_pd(&sys_f[3*conn[ 1]]);
@@ -255,16 +289,6 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       vf[17] = _mm256_loadu_pd(&sys_f[3*conn[17]]);
       vf[18] = _mm256_loadu_pd(&sys_f[3*conn[18]]);
       vf[19] = _mm256_loadu_pd(&sys_f[3*conn[19]]);
-      }
-    }
-#else
-    if(ip==0){
-      for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
-      if(elem_p>1){
-        for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
-      }
-      if(elem_p>2){
-        for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
       }
     }
 #endif
@@ -297,25 +321,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     }
 #endif
 #ifdef TEST_F_VARRAY
-    for(int i=0; i<4; i++){
-      __m256d g0,g1,g2;
-      g0 = _mm256_set1_pd(G[4*i]); g1 = _mm256_set1_pd(G[4*i+1]); g2 = _mm256_set1_pd(G[4*i+2]);
-      vf[i]= _mm256_add_pd(vf[i], _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
-    }
-    if(elem_p>1){
-      for(int i=4; i<10; i++){
-        __m256d g0,g1,g2;
-        g0 = _mm256_set1_pd(G[4*i]); g1 = _mm256_set1_pd(G[4*i+1]); g2 = _mm256_set1_pd(G[4*i+2]);
-        vf[i]= _mm256_add_pd(vf[i], _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
-      }
-    }
-    if(elem_p>2){
-      for(int i=10; i<20; i++){
-        __m256d g0,g1,g2;
-        g0 = _mm256_set1_pd(G[4*i]); g1 = _mm256_set1_pd(G[4*i+1]); g2 = _mm256_set1_pd(G[4*i+2]);
-        vf[i]= _mm256_add_pd(vf[i], _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
-      }
-    }
+    accumulate_f( &vf[0], &a[0], &G[0], elem_p );
 #else
     {
       __m256d g0,g1,g2,g3,g4,g5,g6,g7,g8,g9,g10,g11;
