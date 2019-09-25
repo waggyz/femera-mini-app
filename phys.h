@@ -600,8 +600,8 @@ inline void accumulate_f( __m256d* vf,
   for(int i=0; i<4; i++){
     __m256d g0,g1,g2;
     g0 = _mm256_set1_pd(G[4*i  ]);
-    g1 = _mm256_set1_pd(G[4*i+1]); g2
-    = _mm256_set1_pd(G[4*i+2]);
+    g1 = _mm256_set1_pd(G[4*i+1]);
+    g2 = _mm256_set1_pd(G[4*i+2]);
     vf[i]= _mm256_add_pd(vf[i],
       _mm256_add_pd(_mm256_mul_pd(g0,a036),
         _mm256_add_pd(_mm256_mul_pd(g1,a147),
@@ -612,7 +612,20 @@ inline void accumulate_f( __m256d* vf,
   if(elem_p>1){
     for(int i=4; i<10; i++){
       __m256d g0,g1,g2;
-      g0 = _mm256_set1_pd(G[4*i]);
+      g0 = _mm256_set1_pd(G[4*i  ]);
+      g1 = _mm256_set1_pd(G[4*i+1]);
+      g2 = _mm256_set1_pd(G[4*i+2]);
+      vf[i]= _mm256_add_pd(vf[i],
+        _mm256_add_pd(_mm256_mul_pd(g0,a036),
+          _mm256_add_pd(_mm256_mul_pd(g1,a147),
+            _mm256_mul_pd(g2,a258))));
+    }
+//  break;
+//    case(3): for(int i=0; i<20; i++){
+  if(elem_p>2){
+    for(int i=10; i<20; i++){
+      __m256d g0,g1,g2;
+      g0 = _mm256_set1_pd(G[4*i  ]);
       g1 = _mm256_set1_pd(G[4*i+1]);
       g2 = _mm256_set1_pd(G[4*i+2]);
       vf[i]= _mm256_add_pd(vf[i],
@@ -621,19 +634,6 @@ inline void accumulate_f( __m256d* vf,
             _mm256_mul_pd(g2,a258))));
     }
   }
-//  break;
-//    case(3): for(int i=0; i<20; i++){
-  if(elem_p>2){
-    for(int i=10; i<20; i++){
-      __m256d g0,g1,g2;
-      g0 = _mm256_set1_pd(G[4*i]);
-      g1 = _mm256_set1_pd(G[4*i+1]);
-      g2 = _mm256_set1_pd(G[4*i+2]);
-      vf[i]= _mm256_add_pd(vf[i],
-        _mm256_add_pd(_mm256_mul_pd(g0,a036),
-          _mm256_add_pd(_mm256_mul_pd(g1,a147),
-            _mm256_mul_pd(g2,a258))));
-    }
   }
 //  }
 #endif
@@ -642,13 +642,13 @@ inline void rotate_s( __m256d* a,
   const FLOAT_PHYS* R, const FLOAT_PHYS* S ){
   __m256d s0,s1,s2,s4,s5,s8;
   __m256d r0,r3,r6;
-  r0  = _mm256_loadu_pd(&R[0]);
+  r0 = _mm256_loadu_pd(&R[0]);
   r3 = _mm256_loadu_pd(&R[3]);
   r6 = _mm256_loadu_pd(&R[6]);
-  s0  = _mm256_set1_pd(S[0]);
+  s0 = _mm256_set1_pd(S[0]);
   s1 = _mm256_set1_pd(S[4]);
   s2 = _mm256_set1_pd(S[5]);
-  s4  = _mm256_set1_pd(S[1]);
+  s4 = _mm256_set1_pd(S[1]);
   s5 = _mm256_set1_pd(S[6]);
   s8 = _mm256_set1_pd(S[2]);
   a[0]=_mm256_add_pd(_mm256_mul_pd(r0,s0),
