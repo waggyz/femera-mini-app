@@ -136,14 +136,29 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     {// begin scoping unit
     __m256d a[3];
     rotate_s( &a[0], &R[0], &S[0] );
+    // initialize element f
 #if 1
-    if(ip==0){// initialize element f
-      for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
+    if(ip==0){
+      switch(elem_p){
+      case(1):
+        for(int i=0; i< 4; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[i]]); }
+        break;
+      case(2):
+        for(int i=0; i<10; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[i]]); }
+        break;
+      case(3):
+        for(int i=0; i<20; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[i]]); }
+        break;
+      }
+    }
+#else
+    if(ip==0){
+      for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[i]]); }
       if(elem_p>1){
-        for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
+        for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[i]]); }
       }
       if(elem_p>2){
-        for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
+        for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[i]]); }
       }
     }
 #endif
@@ -171,7 +186,8 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       }
 #if 0
       if( (ie+1) < ee ){
-         vf[i]=_mm256_loadu_pd(&sys_f[3*conn[Nc+ i]]);
+      const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
+         vf[i]=_mm256_loadu_pd(&sys_f[3*c[i]]);
       }
 #endif
     }//--------------------------------------------------- N*3 =  3*N FLOP
