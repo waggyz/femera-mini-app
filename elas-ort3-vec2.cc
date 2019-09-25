@@ -9,7 +9,7 @@
 //  const FLOAT_PHYS* sys_f, const MESH_INT* conn, 
 //  const FLOAT_PHYS* R, const FLOAT_PHYS* S, const FLOAT_PHYS* G ){
 //}
-inline void rotate_3v3( __m256d* a,
+inline void rotate_s( __m256d* a,
   const FLOAT_PHYS* R, const FLOAT_PHYS* S ){
   __m256d s0,s1,s2,s4,s5,s8;
   __m256d r0,r3,r6;
@@ -80,12 +80,11 @@ inline void compute_g_h(
   h258 = _mm256_add_pd(_mm256_mul_pd(r6,a036), _mm256_add_pd(_mm256_mul_pd(r7,a147),_mm256_mul_pd(r8,a258)));
   }
   // Take advantage of the fact that the pattern of usage is invariant with respect to transpose _MM256_TRANSPOSE3_PD(h036,h147,h258);
-  _mm256_storeu_pd(&H[0],h036);
-  _mm256_storeu_pd(&H[4],h147);
-  _mm256_storeu_pd(&H[8],h258);
+  _mm256_store_pd(&H[0],h036);
+  _mm256_store_pd(&H[4],h147);
+  _mm256_store_pd(&H[8],h258);
   }
 }
-//
 int ElastOrtho3D::Setup( Elem* E ){
   JacRot( E );
   JacT  ( E );
@@ -172,7 +171,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
   const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
 
-  __m256d j0,j1,j2;//FIXME should these be aligned _load_ instead?
+  __m256d j0,j1,j2;//FIXME should these be assigns instead?
   j0 = _mm256_load_pd(&jac[0]);  // j0 = [j3 j2 j1 j0]
   j1 = _mm256_loadu_pd(&jac[3]); // j1 = [j6 j5 j4 j3]
   j2 = _mm256_loadu_pd(&jac[6]); // j2 = [j9 j8 j7 j6]
@@ -215,7 +214,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     __m256d a036, a147, a258;
     {
     __m256d a[3];
-    rotate_3v3( &a[0], &R[0], &S[0] );
+    rotate_s( &a[0], &R[0], &S[0] );
     a036=a[0]; a147=a[1]; a258=a[2];
     }
     if(ip==0){
