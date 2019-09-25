@@ -110,7 +110,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
   FLOAT_PHYS dw;
   FLOAT_MESH __attribute__((aligned(32))) jac[Nj];
-  FLOAT_PHYS __attribute__((aligned(32))) G[Nt], u[Ne],f[Nt];
+  FLOAT_PHYS __attribute__((aligned(32))) G[Nt], u[Ne];//,f[Nt];
   FLOAT_PHYS __attribute__((aligned(32))) H[12], S[9];//FIXME S[7]
   // Make local copies
   FLOAT_PHYS __attribute__((aligned(32))) intp_shpg[intp_n*Ne];
@@ -153,9 +153,14 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     }
   }
   {// Scope f registers
+#if 0
+  FLOAT_PHYS __m256d f[Nc];
+#else
+  FLOAT_PHYS __attribute__((aligned(32))) f[Nt];
   __m256d f0,f1,f2,f3;
   __m256d f4,f5,f6,f7,f8,f9;
   __m256d f10,f11,f12,f13,f14,f15,f16,f17,f18,f19;
+#endif
   {// scope zs register
   __m256d zs={0.0,0.0,0.0,0.0};
   f0=zs,f1=zs,f2=zs,f3=zs;
