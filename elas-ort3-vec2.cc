@@ -342,8 +342,12 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     } // end variable scope
     }//end intp loop
 #ifdef TEST_F_VARRAY
-    for(int i=0; i<Nc; i++){
-      _mm256_store_pd(&sf[4*i],vf[i]);
+    for(int i=0; i<4; i++){_mm256_store_pd(&sf[4*i],vf[i]); }
+    if(elem_p>1){
+      for(int i=4; i<10; i++){_mm256_store_pd(&sf[4*i],vf[i]); }
+    }
+    if(elem_p>2){
+      for(int i=10; i<20; i++){_mm256_store_pd(&sf[4*i],vf[i]); }
     }
 #else
     _mm256_store_pd(&f[ 0],f0);
