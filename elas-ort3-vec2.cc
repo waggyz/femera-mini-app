@@ -172,10 +172,10 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
   const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
 
-  __m256d j0,j1,j2;//FIXME should these be _load_ instead?
-  j0 = _mm256_loadu_pd(&jac[0]);  // j0 = [j3 j2 j1 j0]
-  j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
-  j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
+  __m256d j0,j1,j2;//FIXME should these be aligned _load_ instead?
+  j0 = _mm256_load_pd(&jac[0]);  // j0 = [j3 j2 j1 j0]
+  j1 = _mm256_load_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
+  j2 = _mm256_load_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
   for(int ip=0; ip<intp_n; ip++){
     //G = MatMul3x3xN( jac,shg );
     //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
