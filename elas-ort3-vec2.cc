@@ -155,8 +155,8 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   {// Scope f registers
 #define TEST_F_VARRAY
 #ifdef TEST_F_VARRAY
-  //FLOAT_PHYS __attribute__((aligned(32))) sf[Nt];
-  //__m256d vf[Nc];
+  FLOAT_PHYS __attribute__((aligned(32))) sf[Nt];
+  __m256d vf[Nc];
 #else
   FLOAT_PHYS __attribute__((aligned(32))) f[Nt];
   __m256d f0,f1,f2,f3;
@@ -179,8 +179,8 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
   const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
 #ifdef TEST_F_VARRAY
-  FLOAT_PHYS __attribute__((aligned(32))) sf[Nt];
-  __m256d __attribute__((aligned(32))) vf[Nc];
+  //FLOAT_PHYS __attribute__((aligned(32))) sf[Nt];
+  //__m256d __attribute__((aligned(32))) vf[Nc];
 #endif
 
   __m256d j0,j1,j2;//FIXME should these be assigns instead?
