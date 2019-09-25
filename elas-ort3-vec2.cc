@@ -213,25 +213,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   j0 = _mm256_load_pd(&jac[0]);  // j0 = [j3 j2 j1 j0]
   j1 = _mm256_loadu_pd(&jac[3]); // j1 = [j6 j5 j4 j3]
   j2 = _mm256_loadu_pd(&jac[6]); // j2 = [j9 j8 j7 j6]
-      for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
-      if(elem_p>1){
-        for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
-      }
-      if(elem_p>2){
-        for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
-      }
   for(int ip=0; ip<intp_n; ip++){
-#if 0
-    if(ip==0){// initialize element f
-      for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
-      if(elem_p>1){
-        for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
-      }
-      if(elem_p>2){
-        for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
-      }
-    }
-#endif
     //G = MatMul3x3xN( jac,shg );
     //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
     compute_g_h( &G[0],&H[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne], &R[0], &u[0] );
@@ -269,6 +251,15 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     {// begin scoping unit
     __m256d a[3];
     rotate_s( &a[0], &R[0], &S[0] );
+    if(ip==0){// initialize element f
+      for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
+      if(elem_p>1){
+        for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
+      }
+      if(elem_p>2){
+        for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[ i]]); }
+      }
+    }
     accumulate_f( &vf[0], &a[0], &G[0], elem_p );
     } // end variable scope
     }//end intp loop
