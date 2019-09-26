@@ -592,7 +592,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 }
 #endif
 }// end iter parallel region
-  this->glob_res2 = glob_sum5;
+  this->glob_res2 = glob_sum3;
   this->glob_chk2 = glob_sum5;
   return 0;
 }

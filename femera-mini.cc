@@ -411,8 +411,11 @@ int main( int argc, char** argv ){
         float iter_sec=M->time_secs[5];
         printf("%9i ||R||%9.2e @ %.0f iter/s\n",
           iter, std::sqrt(M->glob_chk2),
-          float(iter)/iter_sec*float(comp_n) ); };
-      };
+          float(iter)/iter_sec*float(comp_n) ); }
+        if(M->glob_res2 <= 0.0){
+          printf("%9i ||R|| %9.2e NCG Restart\n",iter,std::sqrt(M->glob_chk2));
+        }
+      }
 #endif
 #if VERB_MAX>10
     // Partition Residuals
