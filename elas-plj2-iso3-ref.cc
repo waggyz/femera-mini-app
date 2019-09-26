@@ -27,7 +27,7 @@ int ElastPlastJ2Iso3D::Setup( Elem* E ){
   this->stif_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) +2);
   //
-  this->elem_vars.resize(elem_n*intp_n* 3, 0.0 );
+  this->elem_vars.resize(elem_n*intp_n* 7, 0.0 );
   return 0;
 }
 int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
@@ -45,8 +45,8 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
   const FLOAT_PHYS youngs_modulus    =this->mtrl_prop[0];
   const FLOAT_PHYS poissons_ratio    =this->mtrl_prop[1];
   const FLOAT_PHYS yield_stress      =this->plas_prop[0];
-  const FLOAT_PHYS saturation_stress =this->plas_prop[1];
-  const FLOAT_PHYS hardness_modulus  =this->plas_prop[2];
+  const FLOAT_PHYS hardness_modulus  =this->plas_prop[1];
+  const FLOAT_PHYS saturation_stress =this->plas_prop[2];
   const FLOAT_PHYS j2_beta           =this->plas_prop[3];
   //
 #if VERB_MAX>11
@@ -112,9 +112,10 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
         0.0 ,0.0 ,0.0 ,0.0 ,C[2],0.0,
         0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,C[2]
       };
-      FLOAT_PHYS plastic_shear_strain[3];
-      for(int i=0; i<3; i++){// Make local copy of element state.
-        plastic_shear_strain[ i ] = this->elem_vars[3*(intp_n*ie+ip) +i ]; }
+      FLOAT_PHYS plastic_strain[6];
+      for(int i=0; i<6; i++){// Make local copy of element state.
+        plastic_strain[ i ] = this->elem_vars[7*(intp_n*ie+ip) +i ]; }
+      FLOAT_PHYS equivalent_strain = this->elem_vars[7*(intp_n*ie+ip) +6 ];
       {//====================================================== Scope UMAT calc
       FLOAT_PHYS stress_v[6];// sxx, syy, szz,  sxy, syz, sxz
       FLOAT_PHYS strain_v[6] // exx, eyy, ezz,  exy, eyz, exz
@@ -130,6 +131,8 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
       //
       // Do some more calculations.
       //
+      // The D-matrix and plastic_shear_strain computations at this
+      // intergration point should be complete before exiting this region.
 //------------------------------------------------------------ Debugging output
 #if VERB_MAX>10
 #pragma omp critical(print)
@@ -138,10 +141,10 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
         // Local copies of material variables are set before the element loop.
         printf("    Young's modulus :%9.2e\n", youngs_modulus    );
         printf("    Poisson's ratio :%9.2e\n", poissons_ratio    );
-        printf("       Yield Stress :%9.2e\n", yield_stress      );
-        printf("  Saturation Stress :%9.2e\n", saturation_stress );
+        printf("       Yield stress :%9.2e\n", yield_stress      );
         printf("   Hardness modulus :%9.2e\n", hardness_modulus  );
-        printf(" J2 Plasticity Beta :%9.2e\n", j2_beta           );
+        printf("  Saturation stress :%9.2e\n", saturation_stress );
+        printf(" J2 Plasticity beta :%9.2e\n", j2_beta           );
       }
 }
 #endif
@@ -176,16 +179,19 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
 #if VERB_MAX>10
 #pragma omp critical(print)
 {
-      printf("el:%u,gp:%i Plastic Shear Strain:                 ",ie,ip);
-      for(int i=0; i<3; i++){ printf("%+9.2e ", plastic_shear_strain[i] ); }
+      printf("el:%u,gp:%i Plastic       Strain:                 ",ie,ip);
+      for(int i=0; i<7; i++){ printf("%+9.2e ", plastic_strain[i] ); }
       printf("\n");
+      printf("el:%u,gp:%i Equivalent Plastic Strain:            %+9.2e",
+        ie,ip,equivalent_strain);
 }
 #endif
 //-------------------------------------------------------- End debugging output
       // Save element state.
-      for(int i=0; i<3; i++){
-        this->elem_vars[3*(intp_n*ie+ip) +i ] = plastic_shear_strain[ i ];
+      for(int i=0; i<6; i++){
+        this->elem_vars[7*(intp_n*ie+ip) +i ] = plastic_strain[ i ];
       }
+      this->elem_vars[7*(intp_n*ie+ip) +6 ] = equivalent_strain;
       // Calculate conjugate stress from conjugate strain.
       const FLOAT_PHYS strain_p[6]={ P[0], P[4], P[8],
         P[1]+P[3], P[5]+P[7], P[2]+P[6] };

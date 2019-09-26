@@ -82,7 +82,9 @@ int NCG::Init(){// printf("*** NCG::Init() ***\n");
   const uint sysn=this->udof_n;// loca_res2 is a member variable.
   const uint sumi0=this->halo_loca_0;
   FLOAT_SOLV R2=0.0;
+#ifdef HAS_PRAGMA_SIMD
 #pragma omp simd
+#endif
   for(uint i=0; i<sysn; i++){
     this->old_r[i] = 0.0;
 #if 0
@@ -93,7 +95,9 @@ int NCG::Init(){// printf("*** NCG::Init() ***\n");
     // Initial search (p) is preconditioned grad descent of (r)
     this->sys_p[i] = this->sys_r[i] * this->sys_d[i];
   }
+#ifdef HAS_PRAGMA_SIMD
 #pragma omp simd reduction(+:R2)
+#endif
   for(uint i=sumi0; i<sysn; i++){
     R2 += this->sys_r[i]*this->sys_r[i] * this->sys_0[i]; }//FIXED div out precond
   this->loca_res2=R2;
@@ -262,7 +266,9 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     const uint sysn=S->udof_n;// loca_res2 is a member variable.
     const uint sumi0=S->halo_loca_0;
+#ifdef HAS_PRAGMA_SIMD
 #pragma omp simd
+#endif
     for(uint i=0; i<sysn; i++){
       S->old_r[i] = 0.0;// S->sys_b[i] = 0.0;
       //S->sys_r[i] = S->sys_b[i] - S->sys_f[i];
@@ -275,7 +281,9 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #endif
     }
     //FLOAT_SOLV R2=0.0;
+#ifdef HAS_PRAGMA_SIMD
 #pragma omp simd reduction(+:glob_r2a)
+#endif
     for(uint i=sumi0; i<sysn; i++){
       glob_r2a += S->sys_r[i]*S->sys_r[i] * S->sys_0[i]; }//FIXED div out precond
 #if 0
@@ -345,12 +353,16 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     const INT_MESH Dn=uint(Y->node_d);
     const auto sysn = S->udof_n;
     time_start( solv_start );
+#ifdef HAS_PRAGMA_SIMD
 #pragma omp simd
+#endif
     for(uint i=0;i<sysn;i++){// Compute sys_q = sys_u + sys_p
       S->sys_q[i] = S->sys_u[i] + S->sys_p[i]; }//                   (1*N FLOP)
     time_accum( my_solv_count, solv_start );
     time_start( phys_start );
+#ifdef HAS_PRAGMA_SIMD
 #pragma omp simd
+#endif
     for(uint i=0;i<sysn;i++){ S->sys_g[i]=0.0; }
     Y->ElemLinear( E,0,E->halo_elem_n, S->sys_g, S->sys_q );
     Y->ElemNonlinear( E,0,E->halo_elem_n, S->sys_g, S->sys_q, S->sys_u );
@@ -436,7 +448,9 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     }
 #endif
     // Actual method is equivalent to secant for constant RHS
+#ifdef HAS_PRAGMA_SIMD
 #pragma omp simd reduction(+:glob_sum1,glob_sum2)
+#endif
     for(INT_MESH i=hl0; i<sysn; i++){
       glob_sum1+= S->sys_p[i] * S->sys_r[i];// alpha numerator
       glob_sum2+= S->sys_p[i] * S->sys_0[i]*(S->sys_g[i] - S->sys_f[i]);//denom
@@ -451,7 +465,9 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     std::tie(E,Y,S)=priv_part[part_i];
     const auto sysn = S->udof_n;
     time_start( solv_start );
+#ifdef HAS_PRAGMA_SIMD
 #pragma omp simd
+#endif
     for(INT_MESH i=0; i<sysn; i++){
       S->sys_f[i]=0.0;
       S->sys_u[i]+=alpha * S->sys_p[i]; }//* S->sys_d[i]; }//      (2*N FLOP)
@@ -513,7 +529,9 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     //-------------------------------------- Calculate negative residuals sys_r
     time_start( solv_start );
     const INT_MESH hl0=S->halo_loca_0,sysn=S->udof_n;
+#ifdef HAS_PRAGMA_SIMD
 #pragma omp simd
+#endif
     for(INT_MESH i=0; i<sysn; i++){
       S->old_r[i] = S->sys_r[i];
 #if 0
@@ -522,7 +540,9 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
       //S->sys_r[i] = S->sys_b[i] - S->sys_f[i]; }
       S->sys_r[i] = S->sys_0[i] *(S->sys_b[i] - S->sys_f[i]); }
       //S->sys_r[i] = S->sys_b[i] - S->sys_0[i] - S->sys_f[i]; }
+#ifdef HAS_PRAGMA_SIMD
 #pragma omp simd reduction(+:glob_sum3,glob_sum4,glob_sum5)
+#endif
     for(INT_MESH i=hl0; i<sysn; i++){//------------------ Reduce residual norms
 #if 0
       // FletcherReeves
@@ -540,13 +560,15 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
   }
   //----------------------------------------------------- Compute beta (1 FLOP)
   const FLOAT_SOLV beta = std::max(0.0, glob_sum3 / glob_sum4 );
-  //NOTE the max provides a direction reset automatically.
+  //NOTE the max provides a search direction reset automatically.
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){// Update search direction
     std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH sysn=S->udof_n;
     time_start( solv_start );
+#ifdef HAS_PRAGMA_SIMD
 #pragma omp simd
+#endif
     for(INT_MESH i=0; i<sysn; i++){
       S->sys_p[i] = S->sys_r[i] * S->sys_d[i] + beta * S->sys_p[i]; }
     time_accum( my_solv_count, solv_start );

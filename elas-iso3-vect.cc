@@ -445,7 +445,9 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
 #else
+#ifdef HAS_PRAGMA_SIMD
 #pragma omp simd
+#endif
 #endif
       for(int i=0; i<Nc; i++){
 #ifdef __INTEL_COMPILER

@@ -113,14 +113,18 @@ int PCG::Init( Elem* E, Phys* Y ){// printf("*** Init(E,Y) ***\n");
 int PCG::Init(){// printf("*** Init() ***\n");
   const uint sysn=this->udof_n;// loca_res2 is a member variable.
   const uint sumi0=this->halo_loca_0;
+#ifdef HAS_PRAGMA_SIMD
 #pragma omp simd
+#endif
   for(uint i=0; i<sysn; i++){
     this->sys_r[i] -= this->sys_f[i];
   }
   //sys_r  = sys_b - sys_f;
   //sys_z  = sys_d * sys_r;// This is merged where it's used (2x/iter)
   //sys_p  = sys_z;
+#ifdef HAS_PRAGMA_SIMD
 #pragma omp simd
+#endif
   for(INT_MESH i=0; i<sysn; i++){
     sys_p[i]  = sys_d[i] * sys_r[i];
     //this->sys_u[i] -= this->sys_p[i];
@@ -128,7 +132,9 @@ int PCG::Init(){// printf("*** Init() ***\n");
   //loca_res2    = inner_product( sys_r,sys_z );
   //loca_res2    = inner_product( sys_r,sys_d * sys_r );
   FLOAT_SOLV R2=0.0;
+#ifdef HAS_PRAGMA_SIMD
 #pragma omp simd reduction(+:R2)
+#endif
   for(uint i=sumi0; i<sysn; i++){
     R2 += sys_r[i] * sys_r[i] * sys_d[i]; }
   this->loca_res2 = R2;
@@ -451,7 +457,9 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
     Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->sys_f, S->sys_p );
     time_accum( my_phys_count, phys_start );
     time_start( solv_start );
+#ifdef HAS_PRAGMA_SIMD
 #pragma omp simd reduction(+:glob_sum1)
+#endif
     for(INT_MESH i=hl0; i<sysn; i++){
         glob_sum1 += S->sys_p[i] * S->sys_f[i];
     };
@@ -464,11 +472,15 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
   for(int part_i=part_0; part_i<part_o; part_i++){// ? FLOP/DOF
     std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH hl0=S->halo_loca_0,sysn=S->udof_n;
+#ifdef HAS_PRAGMA_SIMD
 #pragma omp simd
+#endif
     for(INT_MESH i=0; i<hl0; i++){
       S->sys_r[i] -= alpha * S->sys_f[i];// Update force residuals
     };
+#ifdef HAS_PRAGMA_SIMD
 #pragma omp simd reduction(+:glob_sum2)
+#endif
     for(INT_MESH i=hl0; i<sysn; i++){
       S->sys_r[i] -= alpha * S->sys_f[i];
       glob_sum2   += S->sys_r[i] * S->sys_r[i] * S->sys_d[i]; };
@@ -480,7 +492,9 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
     const INT_MESH sysn=S->udof_n;
     //sys_p  = sys_d * sys_r + (r2b/ra)*sys_p;
     //S->r2a = glob_sum2;// Update member residual (squared)
+#ifdef HAS_PRAGMA_SIMD
 #pragma omp simd
+#endif
     for(INT_MESH i=0; i<sysn; i++){// ? FLOP/DOF
       S->sys_u[i] += S->sys_p[i] * alpha;// better data locality here
       S->sys_p[i]  = S->sys_d[i] * S->sys_r[i] + beta*S->sys_p[i]; };
