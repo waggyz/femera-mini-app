@@ -436,7 +436,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_accum( my_scat_count, scat_start );
     time_start( phys_start );
     Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->sys_g, S->sys_q );
-    Y->ElemNonlinear( E,E->halo_elem_n,E->halo_elem_n, S->sys_g, S->sys_q, S->sys_u );
+    Y->ElemNonlinear( E,E->halo_elem_n,E->elem_n, S->sys_g, S->sys_q, S->sys_u );
     time_accum( my_phys_count, phys_start );
     //--------------------------------------------- Done compute and sync sys_g
     time_start( solv_start );
@@ -592,7 +592,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 }
 #endif
 }// end iter parallel region
-  this->glob_res2 = glob_sum5;
+  this->glob_res2 = glob_sum3;
   this->glob_chk2 = glob_sum5;
   return 0;
 }

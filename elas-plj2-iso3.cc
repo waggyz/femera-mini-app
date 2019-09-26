@@ -88,7 +88,7 @@ int ElastPlastJ2Iso3D::ElemStiff(Elem* E  ){
 #endif
       FLOAT_PHYS w = det * E->gaus_weig[ip];
       for(uint i=0; i<Ne; i++){
-      for(uint l=0; l<Ne; l++){
+      for(uint l=0; l<Ne; l++){ elem_stiff[Nk*ie +Nr* i+l ] = 0.0;
       for(uint k=0; k<6 ; k++){
       for(uint j=0; j<6 ; j++){
         elem_stiff[Nk*ie +Nr* i+l ]+=B[Ne* i+j ] * D[6* k+j ] * B[Ne* k+l ] * w;

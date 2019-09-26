@@ -45,9 +45,11 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
   const FLOAT_PHYS youngs_modulus    =this->mtrl_prop[0];
   const FLOAT_PHYS poissons_ratio    =this->mtrl_prop[1];
   const FLOAT_PHYS yield_stress      =this->plas_prop[0];
-  const FLOAT_PHYS saturation_stress =this->plas_prop[1];
-  const FLOAT_PHYS hardness_modulus  =this->plas_prop[2];
+  const FLOAT_PHYS hardness_modulus  =this->plas_prop[1];
+#if 0
+  const FLOAT_PHYS saturation_stress =this->plas_prop[2];
   const FLOAT_PHYS j2_beta           =this->plas_prop[3];
+#endif
   //
 #if VERB_MAX>11
   printf("DOF: %u, Elems:%u, IntPts:%u, Nodes/elem:%u\n",
@@ -108,20 +110,21 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
         C[0],C[1],C[1],0.0 ,0.0 ,0.0,
         C[1],C[0],C[1],0.0 ,0.0 ,0.0,
         C[1],C[1],C[0],0.0 ,0.0 ,0.0,
-        0.0 ,0.0 ,0.0 ,C[2],0.0 ,0.0,
-        0.0 ,0.0 ,0.0 ,0.0 ,C[2],0.0,
-        0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,C[2]
+        0.0 ,0.0 ,0.0 ,C[2]*2.0,0.0 ,0.0,
+        0.0 ,0.0 ,0.0 ,0.0 ,C[2]*2.0,0.0,
+        0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,C[2]*2.0
       };
       FLOAT_PHYS plastic_strain[6];
       for(int i=0; i<6; i++){// Make local copy of element state.
         plastic_strain[ i ] = this->elem_vars[7*(intp_n*ie+ip) +i ]; }
       FLOAT_PHYS equivalent_strain = this->elem_vars[7*(intp_n*ie+ip) +6 ];
+      FLOAT_PHYS alpha[6]={0.0,0.0,0.0 ,0.0,0.0,0.0};
       {//====================================================== Scope UMAT calc
       FLOAT_PHYS stress_v[6];// sxx, syy, szz,  sxy, syz, sxz
       FLOAT_PHYS strain_v[6] // exx, eyy, ezz,  exy, eyz, exz
         ={ H[0], H[4], H[8],  H[1]+H[3], H[5]+H[7], H[2]+H[6] };
       //
-      // Do some calculations.
+      // Rotate stresses and strains for finite strain simulations.
       //
       // Calculate stress from strain.
       for(int i=0; i<6; i++){ stress_v[i]=0.0;
@@ -129,7 +132,74 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
           stress_v[ i ] += D[6* i+j ] * strain_v[ j ];
       } }
       //
-      // Do some more calculations.
+      FLOAT_PHYS mises=0.0;
+      {
+      FLOAT_PHYS m[3];//FIXME Loop and vectorize
+      m[0] = stress_v[0] - alpha[0] - stress_v[1] + alpha[1];
+      m[1] = stress_v[1] - alpha[1] - stress_v[2] + alpha[2];
+      m[2] = stress_v[2] - alpha[2] - stress_v[0] + alpha[0];
+      for(int i=0;i<3;i++){ mises += m[i]*m[i]; }
+      }
+      for(int i=3;i<6;i++){
+        mises+= 6.0*( stress_v[i] - alpha[i] )*( stress_v[i] - alpha[i] );
+      }
+      mises = std::sqrt(mises);
+      if( mises > yield_stress ){
+        FLOAT_PHYS hydro_stress=0.0, flow[6], elastic_strain[6];
+        //FLOAT_PHYS mises_inv = 1.0/mises;
+        for(int i=0;i<3;i++){ hydro_stress+= stress_v[i]*0.333333333333333; }
+        for(int i=0;i<6;i++){ flow[i] = stress_v[i]-alpha[i]; }
+        for(int i=0;i<3;i++){ flow[i]-= hydro_stress; }
+        for(int i=0;i<6;i++){ flow[i]*= 1.0/mises; }
+        //
+        FLOAT_PHYS delta_equiv
+          = ( mises - yield_stress )
+          / ( 1.5*mtrl_matc[2] + hardness_modulus );
+        for(int i=0;i<3;i++){
+          alpha[i]+= hardness_modulus * flow[i] * delta_equiv;
+          plastic_strain[i]+= 1.5 * flow[i] * delta_equiv;
+          elastic_strain[i]-= 1.5 * flow[i] * delta_equiv;
+          stress_v[i] = alpha[i] + flow[i] * yield_stress + hydro_stress;
+        }
+        for(int i=3;i<6;i++){
+          alpha[i]+= hardness_modulus * flow[i] * delta_equiv;
+          plastic_strain[i]+= 3.0 * flow[i] * delta_equiv;
+          elastic_strain[i]-= 3.0 * flow[i] * delta_equiv;
+          stress_v[i] = alpha[i] + flow[i] * yield_stress;
+        }
+#if 0
+        FLOAT_PHYS plas_diss =0.0;
+        for(int i=0;i<6;i++){ plas_diss+= 0.5 * (stress_v[i] + stress_old[i])
+          * (plastic_strain[i]-plastic_strain_old[i] ); }
+#endif
+        FLOAT_PHYS bulk_modulus = youngs_modulus / (1.0-2.0*poissons_ratio);
+        FLOAT_PHYS EG = mtrl_matc[2];
+        FLOAT_PHYS EFFG = EG*(yield_stress +hardness_modulus*delta_equiv)/mises;
+        FLOAT_PHYS EFFLAM = (bulk_modulus - 2.0*EFFG)*0.333333333333333;
+        FLOAT_PHYS EFFHARD = 3.0*EG*hardness_modulus/(3.0*EG+hardness_modulus)
+          -3.0*EFFG;
+        for(int i=0;i<3;i++){
+          for(int j=0;j<3;j++){
+            D[6* i+j ] = EFFLAM;
+          }
+          D[6* i+i ] = 2.0*EFFG + EFFLAM;
+        }
+        for(int i=3;i<6;i++){
+          D[6* i+i ] = EFFG;
+        }
+        for(int i=0;i<6;i++){
+          for(int j=0;j<6;j++){
+            D[6* i+j ]+= EFFHARD * flow[i] * flow[j];
+          }
+        }
+#if 0
+        for(int i=0;i<6;i++){
+          elem_vars[    i ]=elastic_strain[i];
+          elem_vars[ 0+ i ]=plastic_strain[i];
+          elem_vars[ 6+ i ]=alpha[i];
+        }
+#endif
+      }
       //
 //------------------------------------------------------------ Debugging output
 #if VERB_MAX>10
@@ -140,9 +210,11 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
         printf("    Young's modulus :%9.2e\n", youngs_modulus    );
         printf("    Poisson's ratio :%9.2e\n", poissons_ratio    );
         printf("       Yield Stress :%9.2e\n", yield_stress      );
-        printf("  Saturation Stress :%9.2e\n", saturation_stress );
         printf("   Hardness modulus :%9.2e\n", hardness_modulus  );
+#if 0
+        printf("  Saturation Stress :%9.2e\n", saturation_stress );
         printf(" J2 Plasticity Beta :%9.2e\n", j2_beta           );
+#endif
       }
 }
 #endif
@@ -162,6 +234,12 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
       printf("\n");
 }
 #endif
+#if VERB_MAX>10
+#pragma omp critical(print)
+{
+      printf("el:%u,gp:%i Von Mises Stress: %9.2e\n",ie,ip,mises );
+}
+#endif
       }//======================================================= end UMAT scope
 #if VERB_MAX>10
 #pragma omp critical(print)
@@ -177,11 +255,11 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
 #if VERB_MAX>10
 #pragma omp critical(print)
 {
-      printf("el:%u,gp:%i Plastic       Strain:                 ",ie,ip);
-      for(int i=0; i<7; i++){ printf("%+9.2e ", plastic_strain[i] ); }
+      printf("el:%u,gp:%i Pl.Strain:",ie,ip);
+      for(int i=0; i<6; i++){ printf("%+9.2e ", plastic_strain[i] ); }
       printf("\n");
-      printf("el:%u,gp:%i Equivalent Plastic Strain:            %+9.2e",
-        ie,ip,equivalent_strain);
+      //printf("el:%u,gp:%i Equivalent Plastic Strain:            %+9.2e",
+      //  ie,ip,equivalent_strain);
 }
 #endif
 //-------------------------------------------------------- End debugging output
