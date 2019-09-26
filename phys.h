@@ -77,6 +77,7 @@ public:
   Phys::vals plas_prop;//FIXME Hacked plastiicity properties into this
   //
   Phys::vals elem_vars;// Element state variables
+  Phys::vals elgp_vars;// Element integration point state variables
   //
   Phys::vals elem_inout;// Elemental nodal value workspace (serial)
   // Fill w/ Phys::ScatterNode2Elem(...),ElemLinear(Elem*),ElemJacobi(),...

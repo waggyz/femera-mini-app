@@ -407,25 +407,28 @@ int main( int argc, char** argv ){
       //}; M->Init();
 #if VERB_MAX>1
       if(verbosity>1){
-      if(!((iter) % iter_info_n) | (iter<2)){
-        float iter_sec=M->time_secs[5];
-        printf("%9i ||R||%9.2e @ %.0f iter/s\n",
-          iter, std::sqrt(M->glob_chk2),
-          float(iter)/iter_sec*float(comp_n) ); }
+        if(!((iter) % iter_info_n) | (iter<2)){
+          float iter_sec=M->time_secs[5];
+          printf("%9i ||R||%9.2e @ %.0f iter/s\n",
+            iter, std::sqrt(M->glob_chk2),
+            float(iter)/iter_sec*float(comp_n) );
+        }
         if(M->glob_res2 <= 0.0){
-          printf("%9i ||R|| %9.2e NCG Restart\n",iter,std::sqrt(M->glob_chk2));
+            printf("%9i ||R||%9.2e NCG Restart\n",
+              iter, std::sqrt(M->glob_chk2) );
         }
       }
 #endif
 #if VERB_MAX>10
-    // Partition Residuals
-    if(!((iter) % iter_info_n) ){
-      for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
-        Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->mesh_part[part_i];
-        printf("Part %4i ||R||%9.2e\n", part_i, std::sqrt(S->loca_res2));
-      }; };
+      // Partition Residuals
+      if(!((iter) % iter_info_n) ){
+        for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
+          Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->mesh_part[part_i];
+          printf("Part %4i ||R||%9.2e\n", part_i, std::sqrt(S->loca_res2));
+        }; };
 #endif
-    }while( ( (iter < iter_max) & (M->glob_chk2 > M->glob_rto2) ) | !halo_update );
+    }while( ( (iter < iter_max) & (M->glob_chk2 > M->glob_rto2) )
+      | !halo_update );
     // End iteration loop ===========================================
 #if VERB_MAX>0
     auto loop_done = std::chrono::high_resolution_clock::now();
