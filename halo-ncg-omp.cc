@@ -436,7 +436,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_accum( my_scat_count, scat_start );
     time_start( phys_start );
     Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->sys_g, S->sys_q );
-    Y->ElemNonlinear( E,E->halo_elem_n,E->halo_elem_n, S->sys_g, S->sys_q, S->sys_u );
+    Y->ElemNonlinear( E,E->halo_elem_n,E->elem_n, S->sys_g, S->sys_q, S->sys_u );
     time_accum( my_phys_count, phys_start );
     //--------------------------------------------- Done compute and sync sys_g
     time_start( solv_start );
