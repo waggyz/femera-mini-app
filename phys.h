@@ -662,18 +662,19 @@ inline void rotate_s( __m256d* a,
     _mm256_add_pd(_mm256_mul_pd(r3,s5),
       _mm256_mul_pd(r6,s8)));
 }
-inline void compute_s(FLOAT_PHYS* S, const FLOAT_PHYS* H,
+inline void compute_ort_s(FLOAT_PHYS* S, const FLOAT_PHYS* H,
   const FLOAT_PHYS* C, const __m256d c0,const __m256d c1,const __m256d c2,
   const FLOAT_PHYS dw){
-    __m256d s048 =
-      _mm256_mul_pd(_mm256_set1_pd(dw),
-        _mm256_add_pd(_mm256_mul_pd(c0,_mm256_set1_pd(H[0])),
-          _mm256_add_pd(_mm256_mul_pd(c1,_mm256_set1_pd(H[5])),
-            _mm256_mul_pd(c2,_mm256_set1_pd(H[10])))));
-    _mm256_store_pd( &S[0], s048 );
-    S[4]=(H[1] + H[4])*C[6]*dw; // S[1]
-    S[5]=(H[2] + H[8])*C[8]*dw; // S[2]
-    S[6]=(H[6] + H[9])*C[7]*dw; // S[5]
+  //Vectorized calc for diagonal of S
+  __m256d s048 =
+    _mm256_mul_pd(_mm256_set1_pd(dw),
+      _mm256_add_pd(_mm256_mul_pd(c0,_mm256_set1_pd(H[0])),
+        _mm256_add_pd(_mm256_mul_pd(c1,_mm256_set1_pd(H[5])),
+          _mm256_mul_pd(c2,_mm256_set1_pd(H[10])))));
+  _mm256_store_pd( &S[0], s048 );
+  S[4]=(H[1] + H[4])*C[6]*dw; // S[1]
+  S[5]=(H[2] + H[8])*C[8]*dw; // S[2]
+  S[6]=(H[6] + H[9])*C[7]*dw; // S[5]
 }
 inline void compute_g_h(
   FLOAT_PHYS* G, FLOAT_PHYS* H,
@@ -788,5 +789,26 @@ inline void compute_g_h(
   _mm256_store_pd(&H[0],a036);
   _mm256_store_pd(&H[4],a147);
   _mm256_store_pd(&H[8],a258);
+}
+inline void compute_iso_s(FLOAT_PHYS* S, const FLOAT_PHYS* H,
+  const FLOAT_PHYS* C, const __m256d c0,const __m256d c1,const __m256d c2,
+  const FLOAT_PHYS dw){
+  { // Scope vector registers
+    __m256d s048;
+    s048= _mm256_mul_pd(_mm256_set1_pd(dw),
+          _mm256_add_pd(_mm256_mul_pd(c0,
+          _mm256_set1_pd(H[0])),
+          _mm256_add_pd(_mm256_mul_pd(c1,
+          _mm256_set1_pd(H[5])),
+          _mm256_mul_pd(c2,
+          _mm256_set1_pd(H[10])))));
+          _mm256_store_pd(&S[0], s048);
+  } // end scoping unit
+  S[5]=S[1]; S[10]=S[2];// Move the diagonal to their correct locations
+  // Then, do the rest. Dunno if this is faster...
+  S[1]=( H[1] + H[4] )*C[2]*dw;// S[3]= S[1];//Sxy Syx
+  S[2]=( H[2] + H[8] )*C[2]*dw;// S[6]= S[2];//Sxz Szx
+  S[6]=( H[6] + H[9] )*C[2]*dw;// S[7]= S[5];//Syz Szy
+  S[4]=S[1]; S[9]=S[6]; S[8]=S[2];
 }
 #endif

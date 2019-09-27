@@ -123,7 +123,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     } }
     // [H] Small deformation tensor
     // [H][RT] : matmul3x3x3T
-    compute_s( &S[0], &H[0],&C[0],c0,c1,c2, dw );
+    compute_ort_s( &S[0], &H[0],&C[0],c0,c1,c2, dw );
 #if VERB_MAX>12
     printf( "Stress (Natural Coords):");
     for(uint j=0;j<9;j++){
