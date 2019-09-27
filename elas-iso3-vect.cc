@@ -47,7 +47,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
   FLOAT_PHYS dw;
   FLOAT_MESH __attribute__((aligned(32))) jac[Nj];
-  FLOAT_PHYS __attribute__((aligned(32))) G[Nt], u[Ne];//, f[Nt];
+  FLOAT_PHYS __attribute__((aligned(32))) G[Nt], u[Ne];
   FLOAT_PHYS __attribute__((aligned(32))) H[Nd*4], S[Nd*4];//FIXME S size
   //
   FLOAT_PHYS __attribute__((aligned(32))) intp_shpg[intp_n*Ne];
@@ -77,7 +77,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #ifndef VECTORIZED
         FLOAT_SOLV* RESTRICT sysf  = &sys_f[0];
 #endif
-  //{// Scope vf registers
+  {// Scope vf registers
   __m256d vf[Nc];
   if(e0<ee){
 #ifdef FETCH_JAC
@@ -92,20 +92,6 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     for (int i=0; i<Nc; i++){
       std::memcpy( & u[Nf*i],&sysu[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf );}
   }
-  {// Scope f registers
-#ifdef VECTORIZED
-#if 0
-  __m256d f0,f1,f2,f3;
-  __m256d f4,f5,f6,f7,f8,f9;
-  __m256d f10,f11,f12,f13,f14,f15,f16,f17,f18,f19;
-  {// scope zs register
-  const __m256d zs={0.0,0.0,0.0,0.0};
-  f0=zs,f1=zs,f2=zs,f3=zs;
-  f4=zs,f5=zs,f6=zs,f7=zs,f8=zs,f9=zs;
-  f10=zs,f11=zs,f12=zs,f13=zs,f14=zs,f15=zs,f16=zs,f17=zs,f18=zs,f19=zs;
-  }
-#endif
-#endif
   for(INT_MESH ie=e0;ie<ee;ie++){//================================== Elem loop
 #ifndef FETCH_JAC
       std::memcpy( &jac, &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
@@ -227,104 +213,6 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     a[1] = _mm256_load_pd(&S[4]); // [a6 a5 a4 a3]
     a[2] = _mm256_load_pd(&S[8]); // [a9 a8 a7 a6]
     accumulate_f( &vf[0], &a[0], &G[0], elem_p );
-#if 0
-      {// Scope variables
-        __m256d a036, a147, a258;
-      a036 = _mm256_load_pd(&S[0]); // [a3 a2 a1 a0]
-      a147 = _mm256_load_pd(&S[4]); // [a6 a5 a4 a3]
-      a258 = _mm256_load_pd(&S[8]); // [a9 a8 a7 a6]
-        if(ip==0){
-          f0 = _mm256_loadu_pd(&sys_f[3*conn[ 0]]);
-          f1 = _mm256_loadu_pd(&sys_f[3*conn[ 1]]);
-          f2 = _mm256_loadu_pd(&sys_f[3*conn[ 2]]);
-          f3 = _mm256_loadu_pd(&sys_f[3*conn[ 3]]);
-          if(elem_p>1){
-          f4 = _mm256_loadu_pd(&sys_f[3*conn[ 4]]);
-          f5 = _mm256_loadu_pd(&sys_f[3*conn[ 5]]);
-          f6 = _mm256_loadu_pd(&sys_f[3*conn[ 6]]);
-          f7 = _mm256_loadu_pd(&sys_f[3*conn[ 7]]);
-          f8 = _mm256_loadu_pd(&sys_f[3*conn[ 8]]);
-          f9 = _mm256_loadu_pd(&sys_f[3*conn[ 9]]);
-          }
-          if(elem_p>2){
-          f10 = _mm256_loadu_pd(&sys_f[3*conn[10]]);
-          f11 = _mm256_loadu_pd(&sys_f[3*conn[11]]);
-          f12 = _mm256_loadu_pd(&sys_f[3*conn[12]]);
-          f13 = _mm256_loadu_pd(&sys_f[3*conn[13]]);
-          f14 = _mm256_loadu_pd(&sys_f[3*conn[14]]);
-          f15 = _mm256_loadu_pd(&sys_f[3*conn[15]]);
-          f16 = _mm256_loadu_pd(&sys_f[3*conn[16]]);
-          f17 = _mm256_loadu_pd(&sys_f[3*conn[17]]);
-          f18 = _mm256_loadu_pd(&sys_f[3*conn[18]]);
-          f19 = _mm256_loadu_pd(&sys_f[3*conn[19]]);
-          }
-        }
-        {
-        __m256d g0,g1,g2,g3,g4,g5,g6,g7,g8,g9,g10,g11;
-          g0 = _mm256_set1_pd(G[0])  ; g1 = _mm256_set1_pd(G[1])  ; g2 = _mm256_set1_pd(G[2]);
-          f0 = _mm256_add_pd(f0, _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
-
-          g3 = _mm256_set1_pd(G[4])  ; g4 = _mm256_set1_pd(G[5])  ; g5 = _mm256_set1_pd(G[6]);
-          f1 = _mm256_add_pd(f1, _mm256_add_pd(_mm256_mul_pd(g3,a036), _mm256_add_pd(_mm256_mul_pd(g4,a147),_mm256_mul_pd(g5,a258))));
-
-          g6 = _mm256_set1_pd(G[8])  ; g7 = _mm256_set1_pd(G[9])  ; g8 = _mm256_set1_pd(G[10]);
-          f2 = _mm256_add_pd(f2, _mm256_add_pd(_mm256_mul_pd(g6,a036), _mm256_add_pd(_mm256_mul_pd(g7,a147),_mm256_mul_pd(g8,a258))));
-
-          g9 = _mm256_set1_pd(G[12]) ; g10= _mm256_set1_pd(G[13]) ; g11= _mm256_set1_pd(G[14]);
-          f3 = _mm256_add_pd(f3, _mm256_add_pd(_mm256_mul_pd(g9,a036), _mm256_add_pd(_mm256_mul_pd(g10,a147),_mm256_mul_pd(g11,a258))));
-        if(elem_p>1){
-          g0 = _mm256_set1_pd(G[16]) ; g1 = _mm256_set1_pd(G[17]) ; g2 = _mm256_set1_pd(G[18]);
-          f4 = _mm256_add_pd(f4, _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
-
-          g3 = _mm256_set1_pd(G[20]) ; g4 = _mm256_set1_pd(G[21]) ; g5 = _mm256_set1_pd(G[22]);
-          f5 = _mm256_add_pd(f5, _mm256_add_pd(_mm256_mul_pd(g3,a036), _mm256_add_pd(_mm256_mul_pd(g4,a147),_mm256_mul_pd(g5,a258))));
-
-          g6 = _mm256_set1_pd(G[24]) ; g7 = _mm256_set1_pd(G[25]) ; g8 = _mm256_set1_pd(G[26]);
-          f6 = _mm256_add_pd(f6, _mm256_add_pd(_mm256_mul_pd(g6,a036), _mm256_add_pd(_mm256_mul_pd(g7,a147),_mm256_mul_pd(g8,a258))));
-
-          g9 = _mm256_set1_pd(G[28]) ; g10= _mm256_set1_pd(G[29]) ; g11= _mm256_set1_pd(G[30]);
-          f7 = _mm256_add_pd(f7, _mm256_add_pd(_mm256_mul_pd(g9,a036), _mm256_add_pd(_mm256_mul_pd(g10,a147),_mm256_mul_pd(g11,a258))));
-
-          g0 = _mm256_set1_pd(G[32]) ; g1 = _mm256_set1_pd(G[33]) ; g2 = _mm256_set1_pd(G[34]);
-          f8 = _mm256_add_pd(f8, _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
-
-          g3 = _mm256_set1_pd(G[36]) ; g4 = _mm256_set1_pd(G[37]) ; g5 = _mm256_set1_pd(G[38]);
-          f9 = _mm256_add_pd(f9, _mm256_add_pd(_mm256_mul_pd(g3,a036), _mm256_add_pd(_mm256_mul_pd(g4,a147),_mm256_mul_pd(g5,a258))));
-        }
-        if(elem_p>2){
-          g6 = _mm256_set1_pd(G[40]) ; g7 = _mm256_set1_pd(G[41]) ; g8 = _mm256_set1_pd(G[42]);
-          f10 = _mm256_add_pd(f10, _mm256_add_pd(_mm256_mul_pd(g6,a036), _mm256_add_pd(_mm256_mul_pd(g7,a147),_mm256_mul_pd(g8,a258))));
-
-          g9 = _mm256_set1_pd(G[44]) ; g10= _mm256_set1_pd(G[45]) ; g11= _mm256_set1_pd(G[46]);
-          f11 = _mm256_add_pd(f11, _mm256_add_pd(_mm256_mul_pd(g9,a036), _mm256_add_pd(_mm256_mul_pd(g10,a147),_mm256_mul_pd(g11,a258))));
-
-          g0 = _mm256_set1_pd(G[48]) ; g1 = _mm256_set1_pd(G[49]) ; g2 = _mm256_set1_pd(G[50]);
-          f12 = _mm256_add_pd(f12, _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
-
-          g3 = _mm256_set1_pd(G[52]) ; g4 = _mm256_set1_pd(G[53]) ; g5 = _mm256_set1_pd(G[54]);
-          f13 = _mm256_add_pd(f13, _mm256_add_pd(_mm256_mul_pd(g3,a036), _mm256_add_pd(_mm256_mul_pd(g4,a147),_mm256_mul_pd(g5,a258))));
-
-          g6 = _mm256_set1_pd(G[56]) ; g7 = _mm256_set1_pd(G[57]) ; g8 = _mm256_set1_pd(G[58]);
-          f14 = _mm256_add_pd(f14, _mm256_add_pd(_mm256_mul_pd(g6,a036), _mm256_add_pd(_mm256_mul_pd(g7,a147),_mm256_mul_pd(g8,a258))));
-
-          g9 = _mm256_set1_pd(G[60]) ; g10= _mm256_set1_pd(G[61]) ; g11= _mm256_set1_pd(G[62]);
-          f15 = _mm256_add_pd(f15, _mm256_add_pd(_mm256_mul_pd(g9,a036), _mm256_add_pd(_mm256_mul_pd(g10,a147),_mm256_mul_pd(g11,a258))));
-
-          g0 = _mm256_set1_pd(G[64]) ; g1 = _mm256_set1_pd(G[65]) ; g2 = _mm256_set1_pd(G[66]);
-          f16 = _mm256_add_pd(f16, _mm256_add_pd(_mm256_mul_pd(g0,a036), _mm256_add_pd(_mm256_mul_pd(g1,a147),_mm256_mul_pd(g2,a258))));
-
-          g3 = _mm256_set1_pd(G[68]) ; g4 = _mm256_set1_pd(G[69]) ; g5 = _mm256_set1_pd(G[70]);
-          f17 = _mm256_add_pd(f17, _mm256_add_pd(_mm256_mul_pd(g3,a036), _mm256_add_pd(_mm256_mul_pd(g4,a147),_mm256_mul_pd(g5,a258))));
-
-          g6 = _mm256_set1_pd(G[72]) ; g7 = _mm256_set1_pd(G[73]) ; g8 = _mm256_set1_pd(G[74]);
-          f18 = _mm256_add_pd(f18, _mm256_add_pd(_mm256_mul_pd(g6,a036), _mm256_add_pd(_mm256_mul_pd(g7,a147),_mm256_mul_pd(g8,a258))));
-
-          g9 = _mm256_set1_pd(G[76]) ; g10= _mm256_set1_pd(G[77]) ; g11= _mm256_set1_pd(G[78]);
-          f19 = _mm256_add_pd(f19, _mm256_add_pd(_mm256_mul_pd(g9,a036), _mm256_add_pd(_mm256_mul_pd(g10,a147),_mm256_mul_pd(g11,a258))));
-        }
-        }
-      } // end variable scope
-#endif
 #else
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
@@ -353,34 +241,6 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       } printf("\n");
 #endif
     }//========================================================== end intp loop
-#ifdef VECTORIZED
-#if 0
-    _mm256_store_pd(&f[ 0],f0);
-    _mm256_store_pd(&f[ 4],f1);
-    _mm256_store_pd(&f[ 8],f2);
-    _mm256_store_pd(&f[12],f3);
-    if(elem_p>1){
-    _mm256_store_pd(&f[16],f4);
-    _mm256_store_pd(&f[20],f5);
-    _mm256_store_pd(&f[24],f6);
-    _mm256_store_pd(&f[28],f7);
-    _mm256_store_pd(&f[32],f8);
-    _mm256_store_pd(&f[36],f9);
-    }
-    if(elem_p>2){
-    _mm256_store_pd(&f[40],f10);
-    _mm256_store_pd(&f[44],f11);
-    _mm256_store_pd(&f[48],f12);
-    _mm256_store_pd(&f[52],f13);
-    _mm256_store_pd(&f[56],f14);
-    _mm256_store_pd(&f[60],f15);
-    _mm256_store_pd(&f[64],f16);
-    _mm256_store_pd(&f[68],f17);
-    _mm256_store_pd(&f[72],f18);
-    _mm256_store_pd(&f[76],f19);
-    }
-#endif
-#endif
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
 #endif
@@ -389,16 +249,11 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #pragma vector unaligned
 #endif
       for(int j=0; j<3; j++){
-#if 1
         double __attribute__((aligned(32))) sf[4];
         _mm256_store_pd(&sf[0],vf[i]);
-        sys_f[3*conn[i]+j] = sf[j];
-#else
-        sys_f[3* conn[i]+j ] = f[4* i+j ];
-#endif
-    } }
+        sys_f[3*conn[i]+j] = sf[j]; } }
   }//============================================================ end elem loop
-  }// end f register scope
+  }// end vf register scope
   return 0;
 }
 #undef VECTORIZED
