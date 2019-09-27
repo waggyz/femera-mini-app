@@ -140,7 +140,7 @@ test-plastic : all
 	echo ./femera-$(CPUMODELC) -v2 -s2 -c$(NCPU) -p cube/unst19p1n16
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
-	./femera-$(CPUMODELC) -v1 -s2 -c$(NCPU) -p cube/unst19p1n16
+	./femera-$(CPUMODELC) -v2 -s2 -c$(NCPU) -p cube/unst19p1n16
 
 $(ODIR)/%.$(OEXT) : %.cc *.h
 	echo $(CXX) ... -o $@
