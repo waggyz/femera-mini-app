@@ -47,7 +47,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
   FLOAT_PHYS dw;
   FLOAT_MESH __attribute__((aligned(32))) jac[Nj];
-  FLOAT_PHYS __attribute__((aligned(32))) G[Nt], u[Ne], f[Nt];
+  FLOAT_PHYS __attribute__((aligned(32))) G[Nt], u[Ne];//, f[Nt];
   FLOAT_PHYS __attribute__((aligned(32))) H[Nd*4], S[Nd*4];//FIXME S size
   //
   FLOAT_PHYS __attribute__((aligned(32))) intp_shpg[intp_n*Ne];
@@ -77,6 +77,8 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #ifndef VECTORIZED
         FLOAT_SOLV* RESTRICT sysf  = &sys_f[0];
 #endif
+  //{// Scope vf registers
+  __m256d vf[Nc];
   if(e0<ee){
 #ifdef FETCH_JAC
     std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
@@ -92,6 +94,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   }
   {// Scope f registers
 #ifdef VECTORIZED
+#if 0
   __m256d f0,f1,f2,f3;
   __m256d f4,f5,f6,f7,f8,f9;
   __m256d f10,f11,f12,f13,f14,f15,f16,f17,f18,f19;
@@ -101,6 +104,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   f4=zs,f5=zs,f6=zs,f7=zs,f8=zs,f9=zs;
   f10=zs,f11=zs,f12=zs,f13=zs,f14=zs,f15=zs,f16=zs,f17=zs,f18=zs,f19=zs;
   }
+#endif
 #endif
   for(INT_MESH ie=e0;ie<ee;ie++){//================================== Elem loop
 #ifndef FETCH_JAC
@@ -209,6 +213,21 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
       //------------------------------------------------------- 18+9 = 27 FLOP
 #ifdef VECTORIZED
+    if(ip==0){
+      for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[i]]); }
+      if(elem_p>1){
+        for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[i]]); }
+      if(elem_p>2){
+        for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[i]]); }
+      }
+      }
+    }
+    __m256d a[3];
+    a[0] = _mm256_load_pd(&S[0]); // [a3 a2 a1 a0]
+    a[1] = _mm256_load_pd(&S[4]); // [a6 a5 a4 a3]
+    a[2] = _mm256_load_pd(&S[8]); // [a9 a8 a7 a6]
+    accumulate_f( &vf[0], &a[0], &G[0], elem_p );
+#if 0
       {// Scope variables
         __m256d a036, a147, a258;
       a036 = _mm256_load_pd(&S[0]); // [a3 a2 a1 a0]
@@ -305,6 +324,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
         }
         }
       } // end variable scope
+#endif
 #else
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
@@ -334,6 +354,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
     }//========================================================== end intp loop
 #ifdef VECTORIZED
+#if 0
     _mm256_store_pd(&f[ 0],f0);
     _mm256_store_pd(&f[ 4],f1);
     _mm256_store_pd(&f[ 8],f2);
@@ -359,6 +380,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     _mm256_store_pd(&f[76],f19);
     }
 #endif
+#endif
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
 #endif
@@ -367,7 +389,14 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #pragma vector unaligned
 #endif
       for(int j=0; j<3; j++){
-        sys_f[3* conn[i]+j ] = f[4* i+j ]; } }
+#if 1
+        double __attribute__((aligned(32))) sf[4];
+        _mm256_store_pd(&sf[0],vf[i]);
+        sys_f[3*conn[i]+j] = sf[j];
+#else
+        sys_f[3* conn[i]+j ] = f[4* i+j ];
+#endif
+    } }
   }//============================================================ end elem loop
   }// end f register scope
   return 0;
