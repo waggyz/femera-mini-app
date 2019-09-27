@@ -43,12 +43,12 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
   const int Ne = Nf*Nc;
   const int intp_n = int(E->gaus_n);
   //
-  const FLOAT_PHYS youn_modu   = this->mtrl_prop[0];
-  const FLOAT_PHYS poiss_ratio = this->mtrl_prop[1];
-  const FLOAT_PHYS stress_y    = this->plas_prop[0];
-  const FLOAT_PHYS hard_modu   = this->plas_prop[1];
-  const FLOAT_PHYS bulk_modu   = youn_modu / (1.0-2.0*poiss_ratio);
-  const FLOAT_PHYS shear_modu  = 2.0*mtrl_matc[2];
+  const FLOAT_PHYS youn_modu    = this->mtrl_prop[0];
+  const FLOAT_PHYS poiss_ratio  = this->mtrl_prop[1];
+  const FLOAT_PHYS stress_yield = this->plas_prop[0];
+  const FLOAT_PHYS hard_modu    = this->plas_prop[1];
+  const FLOAT_PHYS bulk_modu    = youn_modu / (1.0-2.0*poiss_ratio);
+  const FLOAT_PHYS shear_modu   = 2.0*mtrl_matc[2];
 #if 0
   const FLOAT_PHYS saturation_stress =this->plas_prop[2];
   const FLOAT_PHYS j2_beta           =this->plas_prop[3];
@@ -108,7 +108,7 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
         printf("%+9.2e ",H[j]);
       } printf("\n");
 #endif
-      {// Scope D-matrix and local copy of integration point state variables.
+      {// Scope D-matrix and local copies of integration point state variables.
       FLOAT_PHYS D[36]={// Initialize to linear-elastic isotropic.
         C[0],C[1],C[1],0.0 ,0.0 ,0.0,
         C[1],C[0],C[1],0.0 ,0.0 ,0.0,
@@ -117,20 +117,21 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
         0.0 ,0.0 ,0.0 ,0.0 ,C[2]*2.0,0.0,
         0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,C[2]*2.0
       };
-      FLOAT_PHYS alpha[6];//strain_elas[6], strain_plas[6], 
       // Copy initial element state.
+      FLOAT_PHYS alpha[6];
+      for(int i=0; i<6; i++){
+        alpha[ i ] = this->elgp_vars[this->gvar_d*(intp_n*ie+ip) +i ]; }
 #if 0
       // not needed to solve
-      for(int i=0; i<6; i++){
-        strain_elas[ i ] = this->elgp_vars[this->gvar_d*(intp_n*ie+ip) +i ]; }
-      for(int i=0; i<6; i++){
-        strain_plas[ i ] = this->elgp_vars[this->gvar_d*(intp_n*ie+ip) +i+0 ]; }
+      FLOAT_PHYS strain_elas[6], strain_plas[6], 
+      for(int i=0; i<6; i++){ strain_elas[ i ]
+        = this->elgp_vars[this->gvar_d*(intp_n*ie+ip) +i + 6 ]; }
+      for(int i=0; i<6; i++){ strain_plas[ i ]
+        = this->elgp_vars[this->gvar_d*(intp_n*ie+ip) +i +12 ]; }
 #endif
-      for(int i=0; i<6; i++){
-        alpha[ i ] = this->elgp_vars[this->gvar_d*(intp_n*ie+ip) +i+0 ]; }
       {//====================================================== Scope UMAT calc
       FLOAT_PHYS stress_v[6];// sxx, syy, szz,  sxy, syz, sxz
-      FLOAT_PHYS strain_v[6] // exx, eyy, ezz,  exy, eyz, exz
+      const FLOAT_PHYS strain_v[6] // exx, eyy, ezz,  exy, eyz, exz
         ={ H[0], H[4], H[8],  H[1]+H[3], H[5]+H[7], H[2]+H[6] };
       //
       //[Rotate stresses and strains for finite strain simulations.]
@@ -141,7 +142,6 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
         for(int j=0; j<6; j++){
           stress_v[ i ]+= D[6* i+j ] * strain_v[ j ];
       } }
-      //
       FLOAT_PHYS stress_mises=0.0;
       {
       FLOAT_PHYS m[3];//FIXME Loop and vectorize
@@ -151,32 +151,38 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
       for(int i=0;i<3;i++){ stress_mises += m[i]*m[i]; }
       }
       for(int i=3;i<6;i++){
-        stress_mises+= 6.0*(stress_v[i] - alpha[i])*(stress_v[i] - alpha[i]);
+        const FLOAT_PHYS m = stress_v[i] - alpha[i];
+        stress_mises+= 6.0*m*m;
       }
-      if( stress_mises > (stress_y*stress_y) ){
+      if( stress_mises > (stress_yield*stress_yield) ){
         stress_mises = std::sqrt(stress_mises);
-        FLOAT_PHYS stress_hydro=0.0, plas_flow[6];
-        for(int i=0;i<3;i++){ stress_hydro+= stress_v[i]*0.333333333333333; }
+        const FLOAT_PHYS delta_equiv = ( stress_mises - stress_yield )
+          / ( 1.5*shear_modu + hard_modu );
+        const FLOAT_PHYS inv_mises = 1.0/stress_mises;
+        const FLOAT_PHYS shear_eff
+          = shear_modu * (stress_yield + hard_modu*delta_equiv) * inv_mises;
+        const FLOAT_PHYS third = 0.333333333333333;
+        const FLOAT_PHYS hard_eff = shear_modu * hard_modu
+          / (shear_modu + hard_modu*third) -3.0*shear_eff;
+        const FLOAT_PHYS lambda_eff = (bulk_modu - 2.0*shear_eff)*third;
+        FLOAT_PHYS plas_flow[6];
+        {
+        FLOAT_PHYS stress_hydro=0.0;
+        for(int i=0;i<3;i++){ stress_hydro+= stress_v[i]*third; }
         for(int i=0;i<6;i++){ plas_flow[i] = stress_v[i]-alpha[i]; }
         for(int i=0;i<3;i++){ plas_flow[i]-= stress_hydro; }
-        for(int i=0;i<6;i++){ plas_flow[i]*= 1.0/stress_mises; }
-        //
-        FLOAT_PHYS delta_equiv
-          = ( stress_mises - stress_y ) / ( 1.5*shear_modu + hard_modu );
-        for(int i=0;i<6;i++){
-          alpha[i]+= hard_modu * plas_flow[i] * delta_equiv;
-        }
+        for(int i=0;i<6;i++){ plas_flow[i]*= inv_mises; }
 #if 0
         //NOTE None of this is needed to solve.
         for(int i=0;i<3;i++){
           strain_plas[i]+= 1.5 * plas_flow[i] * delta_equiv;
           strain_elas[i]-= 1.5 * plas_flow[i] * delta_equiv;
-          stress_v[i] = alpha[i] + plas_flow[i] * stress_y + stress_hydro;
+          stress_v[i] = alpha[i] + plas_flow[i] * stress_yield + stress_hydro;
         }
         for(int i=3;i<6;i++){
           strain_plas[i]+= 3.0 * plas_flow[i] * delta_equiv;
           strain_elas[i]-= 3.0 * plas_flow[i] * delta_equiv;
-          stress_v[i] = alpha[i] + plas_flow[i] * stress_y;
+          stress_v[i] = alpha[i] + plas_flow[i] * stress_yield;
         }
 #endif
 #if 0
@@ -185,16 +191,12 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
           += 0.5 * (stress_v[i] + stress_old[i])
             * (strain_plas[i]-strain_plas_old[i] ); }
 #endif
-        FLOAT_PHYS shear_eff = shear_modu * (stress_y + hard_modu*delta_equiv)
-          / stress_mises;
-        FLOAT_PHYS lambda_eff = (bulk_modu - 2.0*shear_eff)*0.333333333333333;
-        FLOAT_PHYS hard_eff = 3.0*shear_modu * hard_modu
-          / (3.0*shear_modu + hard_modu) -3.0*shear_eff;
+        }
         for(int i=0;i<3;i++){
           for(int j=0;j<3;j++){
             D[6* i+j ] = lambda_eff;
           }
-          D[6* i+i ] = 2.0*shear_eff + lambda_eff;
+          D[6* i+i ]+= 2.0*shear_eff;
         }
         for(int i=3;i<6;i++){
           D[6* i+i ] = shear_eff;
@@ -204,18 +206,30 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
             D[6* i+j ]+= hard_eff * plas_flow[i] * plas_flow[j];
           }
         }
-      }
-      //
+        //------------------------------------------------- Save element state.
+#if 0
+        // not needed to solve
+        for(int i=0; i<6; i++){
+          this->elgp_vars[gvar_d*(intp_n*ie+ip) +i + 6 ] = strain_elas[ i ]; }
+        for(int i=0; i<6; i++){
+          this->elgp_vars[gvar_d*(intp_n*ie+ip) +i +12 ] = strain_plas[ i ]; }
+#endif
+        // Update state variable alpha.
+        for(int i=0; i<6; i++){
+          this->elgp_vars[gvar_d*(intp_n*ie+ip) +i ]
+            += hard_modu * plas_flow[i] * delta_equiv;
+        }
+      }//end plasticity stuff
 //------------------------------------------------------------ Debugging output
 #if VERB_MAX>10
 #pragma omp critical(print)
 {
       if( (ie==0) & (ip==0) ){
         // Local copies of material variables are set before the element loop.
-        printf("    Young's modulus :%9.2e\n", youn_modu   );
-        printf("    Poisson's ratio :%9.2e\n", poiss_ratio );
-        printf("       Yield Stress :%9.2e\n", stress_y    );
-        printf("   Hardness modulus :%9.2e\n", hard_modu   );
+        printf("    Young's modulus :%9.2e\n", youn_modu    );
+        printf("    Poisson's ratio :%9.2e\n", poiss_ratio  );
+        printf("       Yield Stress :%9.2e\n", stress_yield );
+        printf("   Hardness modulus :%9.2e\n", hard_modu    );
 #if 0
         printf("  Saturation Stress :%9.2e\n", saturation_stress );
         printf(" J2 Plasticity Beta :%9.2e\n", j2_beta           );
@@ -242,7 +256,7 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
 #if VERB_MAX>10
 #pragma omp critical(print)
 {
-      printf("el:%u,gp:%i Von stress_mises Stress: %9.2e\n",ie,ip,stress_mises );
+      printf("el:%u,gp:%i Von Mises Stress: %9.2e\n",ie,ip,stress_mises );
 }
 #endif
       }//======================================================= end UMAT scope
@@ -260,24 +274,17 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
 #if VERB_MAX>10
 #pragma omp critical(print)
 {
-      printf("el:%u,gp:%i Pl.Strain:",ie,ip);
-      for(int i=0; i<6; i++){ printf("%+9.2e ", strain_plas[i] ); }
+      if( (ie==0) & (ip==0) ){
+      printf("el:%u,gp:%i Back stress (alpha):",ie,ip);
+      for(int i=0; i<6; i++){
+        printf("%+9.2e ", this->elgp_vars[gvar_d*(intp_n*ie+ip) +i ] ); }
       printf("\n");
       //printf("el:%u,gp:%i Equivalent Plastic Strain:            %+9.2e",
       //  ie,ip,strain_equiv);
+      }
 }
 #endif
 //-------------------------------------------------------- End debugging output
-      // Save element state.
-#if 0
-      // not needed to solve
-      for(int i=0; i<6; i++){
-        this->elgp_vars[gvar_d*(intp_n*ie+ip) +i ] = strain_elas[ i ]; }
-      for(int i=0; i<6; i++){
-        this->elgp_vars[gvar_d*(intp_n*ie+ip) +i+0 ] = strain_plas[ i ]; }
-#endif
-      for(int i=0; i<6; i++){
-        this->elgp_vars[gvar_d*(intp_n*ie+ip) +i+0 ] = alpha[ i ]; }
       // Calculate conjugate stress from conjugate strain.
       const FLOAT_PHYS strain_p[6]={ P[0], P[4], P[8],
         P[1]+P[3], P[5]+P[7], P[2]+P[6] };
