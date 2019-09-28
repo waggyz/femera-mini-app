@@ -309,7 +309,7 @@ int main( int argc, char** argv ){
   std::cout<<"]"<<'\n';
   printf("Read and set up                         in %f s\n", read_sec );
   if(verbosity>1){
-    std::cout<< "  Initializing: ";
+    std::cout<< " Initializing:  ";
     switch(solv_cond){
       case(Solv::COND_NONE): std::cout<< "no"; break;
       case(Solv::COND_JACO): std::cout<< "Jacobi"; break;
@@ -376,17 +376,17 @@ int main( int argc, char** argv ){
 #endif
 #if VERB_MAX>1
     if(verbosity>1){
-    std::cout << "   Starting at: ";
+    std::cout << "  Starting at:  ";
     if(M->cube_init==0.0){ std::cout<<"zero,"; }
     else if(M->cube_init==1.0){ std::cout<<"isotropic block solution,"; }
     else{ std::cout<<M->cube_init<<" times isotropic block solution,"; }
-    std::cout <<" with"<<'\n'<<"   Boundary at:[";
+    std::cout <<" with"<<'\n'<<"  Boundary at: [";
     //FIXME Should include thermal, too
     for(int i=0; i<3; i++){ std::cout<<M->glob_bmax[i]; if(i<2){std::cout<<",";} }
     std::cout <<"], then"<<'\n';
-    std::cout << "  Iterating to:<"<<rtol<<" relative tolerance, or";
+    std::cout << " Iterating to: <"<<rtol<<" relative tolerance, or";
     std::cout <<'\n';
-    std::cout <<"   Stopping at: "<<iter_max<<" "<<M->meth_name<<" iterations..."<<'\n';
+    std::cout <<"  Stopping at:  "<<iter_max<<" "<<M->meth_name<<" iterations..."<<'\n';
     std::cout <<"Solving..."<<'\n';
     const char* c="=";
     if(M->glob_chk2 < M->glob_rto2){ c="<"; }
