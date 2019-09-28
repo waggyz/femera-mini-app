@@ -377,14 +377,14 @@ int main( int argc, char** argv ){
 #if VERB_MAX>1
     if(verbosity>1){
     std::cout << "  Starting at:  ";
-    if(M->cube_init==0.0){ std::cout<<"zero,"; }
-    else if(M->cube_init==1.0){ std::cout<<"isotropic block solution,"; }
-    else{ std::cout<<M->cube_init<<" times isotropic block solution,"; }
+    if(M->cube_init==0.0){ std::cout<<"zero"; }
+    else if(M->cube_init==1.0){ std::cout<<"isotropic block solution"; }
+    else{ std::cout<<M->cube_init<<" times isotropic block solution"; }
     std::cout <<" with"<<'\n'<<"  Boundary at: [";
     //FIXME Should include thermal, too
     for(int i=0; i<3; i++){ std::cout<<M->glob_bmax[i]; if(i<2){std::cout<<",";} }
     std::cout <<"], then"<<'\n';
-    std::cout << " Iterating to: <"<<rtol<<" relative tolerance, or";
+    std::cout << " Iterating to: <"<<rtol<<" relative tolerance or";
     std::cout <<'\n';
     std::cout <<"  Stopping at:  "<<iter_max<<" "<<M->meth_name<<" iterations..."<<'\n';
     std::cout <<"Solving..."<<'\n';

@@ -100,7 +100,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           for(int j=0; j<Nf ; j++){
             H[Nf* k+j ] += G[Nf* i+k ] * u[Nf* i+j ];
             P[Nf* k+j ] += G[Nf* i+k ] * p[Nf* i+j ];
-      } } }//---------------------------------------------- N*3*6*2 = 36*N FLOP
+      } } }//---------------------------------------------- N*3*9*2 = 54*N FLOP
 #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
       for(int j=0;j<9;j++){
@@ -113,9 +113,9 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         C[0],C[1],C[1],0.0 ,0.0 ,0.0,
         C[1],C[0],C[1],0.0 ,0.0 ,0.0,
         C[1],C[1],C[0],0.0 ,0.0 ,0.0,
-        0.0 ,0.0 ,0.0 ,C[2]*1.0,0.0 ,0.0,
-        0.0 ,0.0 ,0.0 ,0.0 ,C[2]*1.0,0.0,
-        0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,C[2]*1.0
+        0.0 ,0.0 ,0.0 ,C[2],0.0 ,0.0,
+        0.0 ,0.0 ,0.0 ,0.0 ,C[2],0.0,
+        0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,C[2]
       };
       // Copy initial element state.
       FLOAT_PHYS back_v[6];
@@ -132,7 +132,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       {//====================================================== Scope UMAT calc
       FLOAT_PHYS stress_v[6];// sxx, syy, szz,  sxy, syz, sxz
       const FLOAT_PHYS strain_v[6] // exx, eyy, ezz,  exy, eyz, exz
-        ={ H[0], H[4], H[8],  H[1]+H[3], H[5]+H[7], H[2]+H[6] };
+        ={ H[0], H[4], H[8],  H[1]+H[3], H[5]+H[7], H[2]+H[6] };//------ 3 FLOP
       //
       //[Rotate stresses and strains for finite strain simulations.]
       //
@@ -141,7 +141,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         //strain_elas[i]+= strain_v[i];
         for(int j=0; j<6; j++){
           stress_v[ i ]+= D[6* i+j ] * strain_v[ j ];
-      } }
+      } }//------------------------------------------------------------ 12 FLOP
 #if VERB_MAX>10
       printf( "Stress Voigt Vector (Elem: %i):\n", ie );
       for(int j=0;j<6;j++){
@@ -151,33 +151,32 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       FLOAT_PHYS stress_mises=0.0;
       {
       FLOAT_PHYS m[3];//FIXME Loop and vectorize
-      m[0] = stress_v[0] - back_v[0] - stress_v[1] + back_v[1];
-      m[1] = stress_v[1] - back_v[1] - stress_v[2] + back_v[2];
-      m[2] = stress_v[2] - back_v[2] - stress_v[0] + back_v[0];
-      for(int i=0;i<3;i++){ stress_mises += m[i]*m[i]; }
+      m[0] = stress_v[0] - back_v[0] - stress_v[1] + back_v[1];//------- 3 FLOP
+      m[1] = stress_v[1] - back_v[1] - stress_v[2] + back_v[2];//------- 3 FLOP
+      m[2] = stress_v[2] - back_v[2] - stress_v[0] + back_v[0];//------- 3 FLOP
+      for(int i=0;i<3;i++){ stress_mises += m[i]*m[i]; }//-------------- 3 FLOP
       }
       for(int i=3;i<6;i++){
         const FLOAT_PHYS m = stress_v[i] - back_v[i];
-        stress_mises+= 6.0*m*m;
-      }
-      if( stress_mises > (stress_yield*stress_yield) ){
-        stress_mises = std::sqrt(stress_mises);
+        stress_mises+= 6.0*m*m; }//------------------------------------- 6 FLOP
+      if( stress_mises > (stress_yield*stress_yield) ){//--------------- 1 FLOP
+        stress_mises = std::sqrt(stress_mises);//----------------------- 1 SQRT
         const FLOAT_PHYS delta_equiv = ( stress_mises - stress_yield )
-          / ( 1.5*shear_modu + hard_modu );
-        const FLOAT_PHYS inv_mises = 1.0/stress_mises;
-        const FLOAT_PHYS shear_eff
+          / ( 1.5*shear_modu + hard_modu );//--------------------------- 4 FLOP
+        const FLOAT_PHYS inv_mises = 1.0/stress_mises;//---------------- 1 FLOP
+        const FLOAT_PHYS shear_eff//------------------------------------ 3 FLOP
           = shear_modu * (stress_yield + hard_modu*delta_equiv) * inv_mises;
         const FLOAT_PHYS third = 0.333333333333333;
         const FLOAT_PHYS hard_eff = shear_modu * hard_modu
-          / (shear_modu + hard_modu*third) -3.0*shear_eff;
-        const FLOAT_PHYS lambda_eff = (bulk_modu - 2.0*shear_eff)*third;
+          / (shear_modu + hard_modu*third) -3.0*shear_eff;//------------ 6 FLOP
+        const FLOAT_PHYS lambda_eff =(bulk_modu - 2.0*shear_eff)*third;//3 FLOP
         FLOAT_PHYS plas_flow[6];
         {
         FLOAT_PHYS stress_hydro=0.0;
-        for(int i=0;i<3;i++){ stress_hydro+= stress_v[i]*third; }
-        for(int i=0;i<6;i++){ plas_flow[i] = stress_v[i]-back_v[i]; }
-        for(int i=0;i<3;i++){ plas_flow[i]-= stress_hydro; }
-        for(int i=0;i<6;i++){ plas_flow[i]*= inv_mises; }
+        for(int i=0;i<3;i++){ stress_hydro+= stress_v[i]*third; }//----- 6 FLOP
+        for(int i=0;i<6;i++){ plas_flow[i] = stress_v[i]-back_v[i]; }//- 6 FLOP
+        for(int i=0;i<3;i++){ plas_flow[i]-= stress_hydro; }//---------- 3 FLOP
+        for(int i=0;i<6;i++){ plas_flow[i]*= inv_mises; }//------------- 6 FLOP
 #if 0
         //NOTE None of this is needed to solve.
         for(int i=0;i<3;i++){
@@ -202,7 +201,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           for(int j=0;j<3;j++){
             D[6* i+j ] = lambda_eff;
           }
-          D[6* i+i ]+= 2.0*shear_eff;
+          D[6* i+i ]+= 2.0*shear_eff;//--------------------------------- 3 FLOP
         }
         for(int i=3;i<6;i++){
           D[6* i+i ] = shear_eff;
@@ -211,7 +210,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           for(int j=0;j<6;j++){
             D[6* i+j ]+= hard_eff * plas_flow[i] * plas_flow[j];
           }
-        }
+        }//--------------------------------------------------- 3*6*6 = 108 FLOP
         //------------------------------------------------- Save element state.
 #if 0
         // not needed to solve
@@ -224,7 +223,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         for(int i=0; i<6; i++){
           this->elgp_vars[gvar_d*(intp_n*ie+ip) +i ]
             += hard_modu * plas_flow[i] * delta_equiv;
-        }
+        }//------------------------------------------------------------ 18 FLOP
       }//end plasticity stuff
 //------------------------------------------------------------ Debugging output
 #if VERB_MAX>10
@@ -293,24 +292,24 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 //-------------------------------------------------------- End debugging output
       // Calculate conjugate stress from conjugate strain.
       const FLOAT_PHYS strain_p[6]={ P[0], P[4], P[8],
-        P[1]+P[3], P[5]+P[7], P[2]+P[6] };
+        P[1]+P[3], P[5]+P[7], P[2]+P[6] };//---------------------------- 3 FLOP
       FLOAT_PHYS stress_p[6];
       for(int i=0; i<6; i++){ stress_p[i] =0.0;
         for(int j=0; j<6; j++){
           stress_p[i] += D[6* i+j ] * strain_p[ j ];
-      } }
+      } }//------------------------------------------------------------ 72 FLOP
       // Convert conjugate stress Voigt vector to conjugate stress tensor.
       S[0]=stress_p[0]; S[4]=stress_p[1]; S[8]=stress_p[2];
       S[1]=stress_p[3]; S[5]=stress_p[4]; S[2]=stress_p[5];
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
       }// End D-matrix and local state varible scope.
       // Accumulate elemental nodal forces.
-      dw = Ejacs[Nj*ie+ 9] * wgt[ip];
+      dw = Ejacs[Nj*ie+ 9] * wgt[ip];//--------------------------------- 1 FLOP
       for(int i=0; i<Nc; i++){
         for(int k=0; k<Nf; k++){
           for(int j=0; j<Nf; j++){
             f[Nf* i+k ] += G[Nf* i+j ] * S[Nf* j+k ] * dw;
-      } } }//------------------------------------------------- N*3*6 = 18*N FMA
+      } } }//----------------------------------------------- N*3*12 = 36*N FLOP
 #if VERB_MAX>10
       printf( "f:");
       for(int j=0;j<Ne;j++){
@@ -322,7 +321,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
     for (uint i=0; i<uint(Nc); i++){
       for (uint j=0; j<uint(Nf); j++){
         sysf[conn[i]*Nf+j] += f[Nf*i+j];
-    } }//------------------------------------------------------------- 3*n FLOP
+    } }//------------------------------------------------------------- 3*N FLOP
   }// Rnd elem loop.
   return 0;
   }
