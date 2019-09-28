@@ -4,20 +4,20 @@
 #include <cstring>// std::memcpy
 #include "femera.h"
 //
-int ElastPlastJ2Iso3D::ElemLinear( Elem* ){ return 1; }//FIXME
-int ElastPlastJ2Iso3D::ElemJacobi( Elem* ){ return 1; }//FIXME
-int ElastPlastJ2Iso3D::BlocLinear( Elem*,
+int ElastPlastKHIso3D::ElemLinear( Elem* ){ return 1; }//FIXME
+int ElastPlastKHIso3D::ElemJacobi( Elem* ){ return 1; }//FIXME
+int ElastPlastKHIso3D::BlocLinear( Elem*,
   RESTRICT Phys::vals &, const RESTRICT Solv::vals & ){
   return 1;
   }
-int ElastPlastJ2Iso3D::ElemLinear( Elem*, const INT_MESH, const INT_MESH,
+int ElastPlastKHIso3D::ElemLinear( Elem*, const INT_MESH, const INT_MESH,
   FLOAT_SOLV*, const FLOAT_SOLV* ){
   return 1;
   }
-int ElastPlastJ2Iso3D::ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*){
+int ElastPlastKHIso3D::ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*){
   return 1;
 }
-int ElastPlastJ2Iso3D::ElemStiff(Elem* E  ){
+int ElastPlastKHIso3D::ElemStiff(Elem* E  ){
   //FIXME Doesn't do rotation yet
   const uint Dm = 3;//E->mesh_d
   const uint Dn = this->node_d;
@@ -97,7 +97,7 @@ int ElastPlastJ2Iso3D::ElemStiff(Elem* E  ){
   }// End elem loop
   return 0;
 }//============================================================== End ElemStiff
-int ElastPlastJ2Iso3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
+int ElastPlastKHIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
   const uint ndof   = 3;//this->node_d
   const uint  Nj = 10,d2=9;
   const uint  Nc = E->elem_conn_n;
@@ -171,7 +171,7 @@ int ElastPlastJ2Iso3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
   }
   return 0;
 }
-int ElastPlastJ2Iso3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* sys_d ){
+int ElastPlastKHIso3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* sys_d ){
   const uint ndof   = 3;//this->node_d
   const uint elem_n = E->elem_n;
   const uint  Nc = E->elem_conn_n;
@@ -252,7 +252,7 @@ int ElastPlastJ2Iso3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* sys_d ){
   };
   return 0;
 };
-int ElastPlastJ2Iso3D::ElemStrain( Elem* E,FLOAT_SOLV* sys_f ){
+int ElastPlastKHIso3D::ElemStrain( Elem* E,FLOAT_SOLV* sys_f ){
   //FIXME Clean up local variables.
   const uint ndof= 3;//this->node_d
   const uint  Nj =10;//,d2=9;//mesh_d*mesh_d;
