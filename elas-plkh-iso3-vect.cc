@@ -194,7 +194,6 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         for(int i=3;i<6;i++){
           D[6* i+i ] = shear_eff;
         }
-#pragma omp simd
         for(int i=0;i<6;i++){
           for(int j=0;j<6;j++){
             D[6* i+j ]+= hard_eff * plas_flow[i] * plas_flow[j];
