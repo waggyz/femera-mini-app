@@ -384,7 +384,7 @@ int main( int argc, char** argv ){
     //FIXME Should include thermal, too
     for(int i=0; i<3; i++){ std::cout<<M->glob_bmax[i]; if(i<2){std::cout<<",";} }
     std::cout <<"], then"<<'\n';
-    std::cout << "  Iterating to: "<<rtol<<" relative tolerance, or";
+    std::cout << "  Iterating to:<"<<rtol<<" relative tolerance, or";
     std::cout <<'\n';
     std::cout <<"   Stopping at: "<<iter_max<<" "<<M->meth_name<<" iterations..."<<'\n';
     std::cout <<"Solving..."<<'\n';
