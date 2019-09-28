@@ -177,27 +177,20 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         for(int i=0;i<3;i++){ plas_flow[i]-= stress_hydro; }
         for(int i=0;i<6;i++){ plas_flow[i]*= inv_mises; }
         }
-        FLOAT_PHYS __attribute__((aligned(32))) D[36]={
-          0.0,0.0,0.0,0.0,0.0,0.0,
-          0.0,0.0,0.0,0.0,0.0,0.0,
-          0.0,0.0,0.0,0.0,0.0,0.0,
-          0.0,0.0,0.0,0.0,0.0,0.0,
-          0.0,0.0,0.0,0.0,0.0,0.0,
-          0.0,0.0,0.0,0.0,0.0,0.0 };
-//#pragma omp simd
+        FLOAT_PHYS __attribute__((aligned(32))) D[36];
+        for(int i=0;i<6;i++){
+          for(int j=0;j<6;j++){
+            D[6* i+j ] = hard_eff * plas_flow[i] * plas_flow[j];
+          }
+        }
         for(int i=0;i<3;i++){
           for(int j=0;j<3;j++){
-            D[6* i+j ] = lambda_eff;
+            D[6* i+j ]+= lambda_eff;
           }
           D[6* i+i ]+= 2.0*shear_eff;
         }
         for(int i=3;i<6;i++){
-          D[6* i+i ] = shear_eff;
-        }
-        for(int i=0;i<6;i++){
-          for(int j=0;j<6;j++){
-            D[6* i+j ]+= hard_eff * plas_flow[i] * plas_flow[j];
-          }
+          D[6* i+i ]+= shear_eff;
         }
         //------------------------------------------------- Save element state.
         // Update state variable back_v.
