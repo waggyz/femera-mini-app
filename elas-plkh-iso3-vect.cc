@@ -97,9 +97,9 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
     const __m256d j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
     const __m256d j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
-      FLOAT_PHYS alpha[6];//FIXME Consider prefetching...
+      FLOAT_PHYS back_v[6];//FIXME Consider prefetching...
       for(int i=0; i<6; i++){// Copy initial element state.
-        alpha[ i ] = this->elgp_vars[this->gvar_d*(intp_n*ie+ip) +i ]; }
+        back_v[ i ] = this->elgp_vars[this->gvar_d*(intp_n*ie+ip) +i ]; }
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       compute_g_p_h( &G[0],&P[0],&H[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne],
@@ -148,13 +148,13 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
       FLOAT_PHYS stress_mises=0.0;
       {
       FLOAT_PHYS m[3];//FIXME Loop and vectorize
-      m[0] = stress_v[0] - alpha[0] - stress_v[1] + alpha[1];
-      m[1] = stress_v[1] - alpha[1] - stress_v[2] + alpha[2];
-      m[2] = stress_v[2] - alpha[2] - stress_v[0] + alpha[0];
+      m[0] = stress_v[0] - back_v[0] - stress_v[1] + back_v[1];
+      m[1] = stress_v[1] - back_v[1] - stress_v[2] + back_v[2];
+      m[2] = stress_v[2] - back_v[2] - stress_v[0] + back_v[0];
       for(int i=0;i<3;i++){ stress_mises += m[i]*m[i]; }
       }
       for(int i=3;i<6;i++){
-        const FLOAT_PHYS m = stress_v[i] - alpha[i];
+        const FLOAT_PHYS m = stress_v[i] - back_v[i];
         stress_mises+= 6.0*m*m;
       }
       __m256d s[3];
@@ -173,7 +173,7 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
         {
         FLOAT_PHYS stress_hydro=0.0;
         for(int i=0;i<3;i++){ stress_hydro+= stress_v[i]*third; }
-        for(int i=0;i<6;i++){ plas_flow[i] = stress_v[i]-alpha[i]; }
+        for(int i=0;i<6;i++){ plas_flow[i] = stress_v[i]-back_v[i]; }
         for(int i=0;i<3;i++){ plas_flow[i]-= stress_hydro; }
         for(int i=0;i<6;i++){ plas_flow[i]*= inv_mises; }
         }
@@ -200,7 +200,7 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
           }
         }
         //------------------------------------------------- Save element state.
-        // Update state variable alpha.
+        // Update state variable back_v.
         for(int i=0; i<6; i++){
           this->elgp_vars[gvar_d*(intp_n*ie+ip) +i ]
             += hard_modu * plas_flow[i] * delta_equiv;

@@ -118,9 +118,9 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
         0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,C[2]*1.0
       };
       // Copy initial element state.
-      FLOAT_PHYS alpha[6];
+      FLOAT_PHYS back_v[6];
       for(int i=0; i<6; i++){
-        alpha[ i ] = this->elgp_vars[this->gvar_d*(intp_n*ie+ip) +i ]; }
+        back_v[ i ] = this->elgp_vars[this->gvar_d*(intp_n*ie+ip) +i ]; }
 #if 0
       // not needed to solve
       FLOAT_PHYS strain_elas[6], strain_plas[6], 
@@ -151,13 +151,13 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
       FLOAT_PHYS stress_mises=0.0;
       {
       FLOAT_PHYS m[3];//FIXME Loop and vectorize
-      m[0] = stress_v[0] - alpha[0] - stress_v[1] + alpha[1];
-      m[1] = stress_v[1] - alpha[1] - stress_v[2] + alpha[2];
-      m[2] = stress_v[2] - alpha[2] - stress_v[0] + alpha[0];
+      m[0] = stress_v[0] - back_v[0] - stress_v[1] + back_v[1];
+      m[1] = stress_v[1] - back_v[1] - stress_v[2] + back_v[2];
+      m[2] = stress_v[2] - back_v[2] - stress_v[0] + back_v[0];
       for(int i=0;i<3;i++){ stress_mises += m[i]*m[i]; }
       }
       for(int i=3;i<6;i++){
-        const FLOAT_PHYS m = stress_v[i] - alpha[i];
+        const FLOAT_PHYS m = stress_v[i] - back_v[i];
         stress_mises+= 6.0*m*m;
       }
       if( stress_mises > (stress_yield*stress_yield) ){
@@ -175,7 +175,7 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
         {
         FLOAT_PHYS stress_hydro=0.0;
         for(int i=0;i<3;i++){ stress_hydro+= stress_v[i]*third; }
-        for(int i=0;i<6;i++){ plas_flow[i] = stress_v[i]-alpha[i]; }
+        for(int i=0;i<6;i++){ plas_flow[i] = stress_v[i]-back_v[i]; }
         for(int i=0;i<3;i++){ plas_flow[i]-= stress_hydro; }
         for(int i=0;i<6;i++){ plas_flow[i]*= inv_mises; }
 #if 0
@@ -183,12 +183,12 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
         for(int i=0;i<3;i++){
           strain_plas[i]+= 1.5 * plas_flow[i] * delta_equiv;
           strain_elas[i]-= 1.5 * plas_flow[i] * delta_equiv;
-          stress_v[i] = alpha[i] + plas_flow[i] * stress_yield + stress_hydro;
+          stress_v[i] = back_v[i] + plas_flow[i] * stress_yield + stress_hydro;
         }
         for(int i=3;i<6;i++){
           strain_plas[i]+= 3.0 * plas_flow[i] * delta_equiv;
           strain_elas[i]-= 3.0 * plas_flow[i] * delta_equiv;
-          stress_v[i] = alpha[i] + plas_flow[i] * stress_yield;
+          stress_v[i] = back_v[i] + plas_flow[i] * stress_yield;
         }
 #endif
 #if 0
@@ -220,7 +220,7 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
         for(int i=0; i<6; i++){
           this->elgp_vars[gvar_d*(intp_n*ie+ip) +i +12 ] = strain_plas[ i ]; }
 #endif
-        // Update state variable alpha.
+        // Update state variable back_v.
         for(int i=0; i<6; i++){
           this->elgp_vars[gvar_d*(intp_n*ie+ip) +i ]
             += hard_modu * plas_flow[i] * delta_equiv;
