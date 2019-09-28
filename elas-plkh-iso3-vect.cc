@@ -8,7 +8,7 @@
 // Fetch next u within G,H loop nest
 #undef FETCH_U_EARLY
 //
-int ElastPlastJ2Iso3D::Setup( Elem* E ){
+int ElastPlastKHIso3D::Setup( Elem* E ){
   JacT  ( E );
   const uint elem_n = uint(E->elem_n);
   const uint jacs_n = uint(E->elip_jacs.size()/elem_n/ 10);
@@ -29,7 +29,7 @@ int ElastPlastJ2Iso3D::Setup( Elem* E ){
   this->elgp_vars.resize(elem_n*intp_n* this->gvar_d, 0.0 );
   return 0;
 }
-int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
+int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   const INT_MESH e0,const INT_MESH ee,
   FLOAT_SOLV* sys_f, const FLOAT_SOLV* sys_p, const FLOAT_SOLV* sys_u ){
   //FIXME Clean up local variables.

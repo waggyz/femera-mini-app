@@ -362,7 +362,7 @@ int Mesh::Setup(){
         printf("\n");
       }
       if(Y->plas_prop.size()>0){
-        printf("         J2 Plastic:");
+        printf("         Plasticity:");
         for(uint i=0; i<Y->plas_prop.size(); i++){
           printf("%9.2e",Y->plas_prop[i]); }
         printf("\n");
@@ -625,8 +625,8 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
 #endif
     }
   }else if( has_plas ){
-    if(t_plas_prop.size() < 5){
-      Y = new ElastPlastJ2Iso3D(t_mtrl_prop[0],t_mtrl_prop[1]);
+    if(t_plas_prop.size() < 3){
+      Y = new ElastPlastKHIso3D(t_mtrl_prop[0],t_mtrl_prop[1]);
       Y->plas_prop.resize(t_plas_prop.size());
       for(uint i=0; i<t_plas_prop.size(); i++){
         Y->plas_prop[i] = t_plas_prop[i]; }
@@ -637,7 +637,7 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
       this->plas_part_n+=1;
 #endif
     }//else{
-//      Y = new ElastPlastJ2Ort3D(t_mtrl_prop,t_mtrl_dirs);
+//      Y = new ElastPlastKHOrt3D(t_mtrl_prop,t_mtrl_dirs);
 //#if VERB_MAX>1
 //#pragma omp atomic update
 //      this->ort3_part_n+=1;

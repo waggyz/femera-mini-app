@@ -480,13 +480,13 @@ public:
 protected:
 private:
 };
-class ElastPlastJ2Iso3D final: public Phys{
-public: ElastPlastJ2Iso3D(FLOAT_PHYS young, FLOAT_PHYS poiss ) :
+class ElastPlastKHIso3D final: public Phys{
+public: ElastPlastKHIso3D(FLOAT_PHYS young, FLOAT_PHYS poiss ) :
   Phys((Phys::vals){young,poiss}){
     this->node_d = 3;
     //this->elem_flop = 225;//FIXME Tensor eval for linear tet
     // calc stiff_flop from (node_d*E->elem_node_n)*(node_d*E->elem_node_n-1.0)
-    ElastPlastJ2Iso3D::MtrlProp2MatC();
+    ElastPlastKHIso3D::MtrlProp2MatC();
   };
 #if 0
   int SavePartFMR( const char* bname, bool is_bin ) final;
