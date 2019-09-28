@@ -173,7 +173,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         {
         FLOAT_PHYS stress_hydro=0.0;
         for(int i=0;i<3;i++){ stress_hydro+= stress_v[i]*third; }
-        for(int i=0;i<6;i++){ plas_flow[i] = stress_v[i]-back_v[i]; }
+        for(int i=0;i<6;i++){ plas_flow[i] = stress_v[i] - back_v[i]; }
         for(int i=0;i<3;i++){ plas_flow[i]-= stress_hydro; }
         for(int i=0;i<6;i++){ plas_flow[i]*= inv_mises; }
         }
@@ -182,22 +182,17 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           for(int j=0;j<6;j++){
             D[6* i+j ] = hard_eff * plas_flow[i] * plas_flow[j];
           }
-        }
-        for(int i=0;i<3;i++){
-          for(int j=0;j<3;j++){
-            D[6* i+j ]+= lambda_eff;
-          }
-          D[6* i+i ]+= 2.0*shear_eff;
-        }
-        for(int i=3;i<6;i++){
           D[6* i+i ]+= shear_eff;
         }
-        //------------------------------------------------- Save element state.
-        // Update state variable back_v.
-        for(int i=0; i<6; i++){
-          this->elgp_vars[gvar_d*(intp_n*ie+ip) +i ]
-            += hard_modu * plas_flow[i] * delta_equiv;
+        for(int i=0;i<3;i++){
+          D[6* i+i ]+= shear_eff;
+          for(int j=0;j<3;j++){
+            D[6* i+j ]+= lambda_eff; }
         }
+        //------------------------------------------------- Save element state.
+        for(int i=0; i<6; i++){// Update state variable back_v.
+          this->elgp_vars[gvar_d*(intp_n*ie+ip) +i ]
+            += hard_modu * plas_flow[i] * delta_equiv; }
         //======================================================= end UMAT scope
         // Calculate conjugate stress from conjugate strain.
         const FLOAT_PHYS strain_p[6]={
