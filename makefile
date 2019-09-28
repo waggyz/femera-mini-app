@@ -117,6 +117,10 @@ test : gmsh2fmr-ser mini-omp
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 -Tu10 \
 	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 -R \
 	-ap cube/unit1p2n2;
+	./gmsh2fmr-$(CPUMODELC) -v1 \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 \
+	-M0 -E100e9 -N0.3 -R \
+	-ap cube/unst19p1n16;
 	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
