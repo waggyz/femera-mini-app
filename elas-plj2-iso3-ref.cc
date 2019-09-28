@@ -103,8 +103,8 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
       } } }//---------------------------------------------- N*3*6*2 = 36*N FLOP
 #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
-      for(int j=0;j<H.size();j++){
-        if(j%mesh_d==0){printf("\n"); }
+      for(int j=0;j<9;j++){
+        if(j%Nd==0){printf("\n"); }
         printf("%+9.2e ",H[j]);
       } printf("\n");
 #endif
@@ -113,9 +113,9 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
         C[0],C[1],C[1],0.0 ,0.0 ,0.0,
         C[1],C[0],C[1],0.0 ,0.0 ,0.0,
         C[1],C[1],C[0],0.0 ,0.0 ,0.0,
-        0.0 ,0.0 ,0.0 ,C[2]*2.0,0.0 ,0.0,
-        0.0 ,0.0 ,0.0 ,0.0 ,C[2]*2.0,0.0,
-        0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,C[2]*2.0
+        0.0 ,0.0 ,0.0 ,C[2]*1.0,0.0 ,0.0,
+        0.0 ,0.0 ,0.0 ,0.0 ,C[2]*1.0,0.0,
+        0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,C[2]*1.0
       };
       // Copy initial element state.
       FLOAT_PHYS alpha[6];
@@ -142,6 +142,12 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
         for(int j=0; j<6; j++){
           stress_v[ i ]+= D[6* i+j ] * strain_v[ j ];
       } }
+#if VERB_MAX>10
+      printf( "Stress Voigt Vector (Elem: %i):\n", ie );
+      for(int j=0;j<6;j++){
+        printf("%+9.2e ",stress_v[j]);
+      } printf("\n");
+#endif
       FLOAT_PHYS stress_mises=0.0;
       {
       FLOAT_PHYS m[3];//FIXME Loop and vectorize

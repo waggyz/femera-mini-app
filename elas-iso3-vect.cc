@@ -58,10 +58,9 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
   std::copy( &this->mtrl_matc[0], &this->mtrl_matc[this->mtrl_matc.size()], C );
 #ifdef VECT_C
-  __m256d c0,c1,c2;
-  c0 = _mm256_set_pd(0.0,C[1],C[1],C[0]);
-  c1 = _mm256_set_pd(0.0,C[1],C[0],C[1]);
-  c2 = _mm256_set_pd(0.0,C[0],C[1],C[1]);
+  const __m256d c0 = _mm256_set_pd(0.0,C[1],C[1],C[0]);
+  const __m256d c1 = _mm256_set_pd(0.0,C[1],C[0],C[1]);
+  const __m256d c2 = _mm256_set_pd(0.0,C[0],C[1],C[1]);
   //__m256d c3; c3 = _mm256_set_pd(0.0,C[2],C[2],C[2]);
 #endif
 #if VERB_MAX>10
@@ -168,7 +167,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
       } }
 #ifdef VECT_C
-      compute_iso_s( &S[0], &H[0],&C[0],c0,c1,c2, dw );
+      compute_iso_s( &S[0], &H[0],C[2],c0,c1,c2, dw );
 #if VERB_MAX>10
       if(ie==4){
         printf( "S[%u]:", ie );

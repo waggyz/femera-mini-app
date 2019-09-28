@@ -765,24 +765,24 @@ inline void compute_g_h(
     __m256d u0,u1,u2,u3,u4,u5,u6,u7,u8,g0,g1,g2;
     __m256d is0,is1,is2,is3,is4,is5,is6,is7,is8;
     is0= _mm256_set1_pd(isp[i+0]); is1= _mm256_set1_pd(isp[i+1]); is2= _mm256_set1_pd(isp[i+2]);
-    u0 = _mm256_set1_pd(  u[i+0]); u1 = _mm256_set1_pd(  u[i+1]); u2 = _mm256_set1_pd(  u[i+2]);
     g0 = _mm256_add_pd(_mm256_mul_pd(j0,is0), _mm256_add_pd(_mm256_mul_pd(j1,is1),_mm256_mul_pd(j2,is2)));
+    u0 = _mm256_set1_pd(  u[i+0]); u1 = _mm256_set1_pd(  u[i+1]); u2 = _mm256_set1_pd(  u[i+2]);
     a036= _mm256_add_pd(a036, _mm256_mul_pd(g0,u0)); a147 = _mm256_add_pd(a147, _mm256_mul_pd(g0,u1)); a258 = _mm256_add_pd(a258, _mm256_mul_pd(g0,u2));
-          _mm256_store_pd(&G[ig],g0);
+    _mm256_store_pd(&G[ig],g0);
     ig+=4;
     if((i+5)<Ne){
       is3= _mm256_set1_pd(isp[i+3]); is4= _mm256_set1_pd(isp[i+4]); is5= _mm256_set1_pd(isp[i+5]);
-      u3 = _mm256_set1_pd(  u[i+3]); u4 = _mm256_set1_pd(  u[i+4]); u5 = _mm256_set1_pd(  u[i+5]);
       g1 = _mm256_add_pd(_mm256_mul_pd(j0,is3), _mm256_add_pd(_mm256_mul_pd(j1,is4),_mm256_mul_pd(j2,is5)));
+      u3 = _mm256_set1_pd(  u[i+3]); u4 = _mm256_set1_pd(  u[i+4]); u5 = _mm256_set1_pd(  u[i+5]);
       a036= _mm256_add_pd(a036, _mm256_mul_pd(g1,u3)); a147 = _mm256_add_pd(a147, _mm256_mul_pd(g1,u4)); a258 = _mm256_add_pd(a258, _mm256_mul_pd(g1,u5));
-            _mm256_store_pd(&G[ig],g1);
+      _mm256_store_pd(&G[ig],g1);
       ig+=4;
     }if((i+8)<Ne){
       is6= _mm256_set1_pd(isp[i+6]); is7= _mm256_set1_pd(isp[i+7]); is8= _mm256_set1_pd(isp[i+8]);
-      u6 = _mm256_set1_pd(  u[i+6]); u7 = _mm256_set1_pd(  u[i+7]); u8 = _mm256_set1_pd(  u[i+8]);
       g2 = _mm256_add_pd(_mm256_mul_pd(j0,is6), _mm256_add_pd(_mm256_mul_pd(j1,is7),_mm256_mul_pd(j2,is8)));
+      u6 = _mm256_set1_pd(  u[i+6]); u7 = _mm256_set1_pd(  u[i+7]); u8 = _mm256_set1_pd(  u[i+8]);
       a036= _mm256_add_pd(a036, _mm256_mul_pd(g2,u6)); a147 = _mm256_add_pd(a147, _mm256_mul_pd(g2,u7)); a258 = _mm256_add_pd(a258, _mm256_mul_pd(g2,u8));
-            _mm256_store_pd(&G[ig],g2);
+      _mm256_store_pd(&G[ig],g2);
       ig+=4;
     }
   }
@@ -790,8 +790,54 @@ inline void compute_g_h(
   _mm256_store_pd(&H[4],a147);
   _mm256_store_pd(&H[8],a258);
 }
+inline void compute_g_p_h(
+  FLOAT_PHYS* G, FLOAT_PHYS* P, FLOAT_PHYS* H,
+  const int Ne, const __m256d j0,const __m256d j1,const __m256d j2,
+  const FLOAT_PHYS* isp, const FLOAT_PHYS* p, const FLOAT_PHYS* u ){
+  __m256d a036=_mm256_set1_pd(0.0), a147=_mm256_set1_pd(0.0), a258=_mm256_set1_pd(0.0);
+  __m256d b036=_mm256_set1_pd(0.0), b147=_mm256_set1_pd(0.0), b258=_mm256_set1_pd(0.0);
+  int ig=0;
+  for(int i= 0; i<Ne; i+=9){
+    __m256d p0,p1,p2,p3,p4,p5,p6,p7,p8;
+    __m256d u0,u1,u2,u3,u4,u5,u6,u7,u8,g0,g1,g2;
+    __m256d is0,is1,is2,is3,is4,is5,is6,is7,is8;
+    is0= _mm256_set1_pd(isp[i+0]); is1= _mm256_set1_pd(isp[i+1]); is2= _mm256_set1_pd(isp[i+2]);
+    g0 = _mm256_add_pd(_mm256_mul_pd(j0,is0), _mm256_add_pd(_mm256_mul_pd(j1,is1),_mm256_mul_pd(j2,is2)));
+    u0 = _mm256_set1_pd(  u[i+0]); u1 = _mm256_set1_pd(  u[i+1]); u2 = _mm256_set1_pd(  u[i+2]);
+    a036= _mm256_add_pd(a036, _mm256_mul_pd(g0,u0)); a147 = _mm256_add_pd(a147, _mm256_mul_pd(g0,u1)); a258 = _mm256_add_pd(a258, _mm256_mul_pd(g0,u2));
+    p0 = _mm256_set1_pd(  p[i+0]); p1 = _mm256_set1_pd(  p[i+1]); p2 = _mm256_set1_pd(  p[i+2]);
+    b036= _mm256_add_pd(b036, _mm256_mul_pd(g0,p0)); b147 = _mm256_add_pd(b147, _mm256_mul_pd(g0,p1)); b258 = _mm256_add_pd(b258, _mm256_mul_pd(g0,p2));
+    _mm256_store_pd(&G[ig],g0);
+    ig+=4;
+    if((i+5)<Ne){
+      is3= _mm256_set1_pd(isp[i+3]); is4= _mm256_set1_pd(isp[i+4]); is5= _mm256_set1_pd(isp[i+5]);
+      g1 = _mm256_add_pd(_mm256_mul_pd(j0,is3), _mm256_add_pd(_mm256_mul_pd(j1,is4),_mm256_mul_pd(j2,is5)));
+      u3 = _mm256_set1_pd(  u[i+3]); u4 = _mm256_set1_pd(  u[i+4]); u5 = _mm256_set1_pd(  u[i+5]);
+      a036= _mm256_add_pd(a036, _mm256_mul_pd(g1,u3)); a147 = _mm256_add_pd(a147, _mm256_mul_pd(g1,u4)); a258 = _mm256_add_pd(a258, _mm256_mul_pd(g1,u5));
+      p3 = _mm256_set1_pd(  p[i+3]); p4 = _mm256_set1_pd(  p[i+4]); p5 = _mm256_set1_pd(  p[i+5]);
+      b036= _mm256_add_pd(b036, _mm256_mul_pd(g1,p3)); b147 = _mm256_add_pd(b147, _mm256_mul_pd(g1,p4)); b258 = _mm256_add_pd(b258, _mm256_mul_pd(g1,p5));
+      _mm256_store_pd(&G[ig],g1);
+      ig+=4;
+    }if((i+8)<Ne){
+      is6= _mm256_set1_pd(isp[i+6]); is7= _mm256_set1_pd(isp[i+7]); is8= _mm256_set1_pd(isp[i+8]);
+      g2 = _mm256_add_pd(_mm256_mul_pd(j0,is6), _mm256_add_pd(_mm256_mul_pd(j1,is7),_mm256_mul_pd(j2,is8)));
+      u6 = _mm256_set1_pd(  u[i+6]); u7 = _mm256_set1_pd(  u[i+7]); u8 = _mm256_set1_pd(  u[i+8]);
+      a036= _mm256_add_pd(a036, _mm256_mul_pd(g2,u6)); a147 = _mm256_add_pd(a147, _mm256_mul_pd(g2,u7)); a258 = _mm256_add_pd(a258, _mm256_mul_pd(g2,u8));
+      p6 = _mm256_set1_pd(  p[i+6]); p7 = _mm256_set1_pd(  p[i+7]); p8 = _mm256_set1_pd(  p[i+8]);
+      b036= _mm256_add_pd(b036, _mm256_mul_pd(g2,p6)); b147 = _mm256_add_pd(b147, _mm256_mul_pd(g2,p7)); b258 = _mm256_add_pd(b258, _mm256_mul_pd(g2,p8));
+      _mm256_store_pd(&G[ig],g2);
+      ig+=4;
+    }
+  }
+  _mm256_store_pd(&H[0],a036);
+  _mm256_store_pd(&H[4],a147);
+  _mm256_store_pd(&H[8],a258);
+  _mm256_store_pd(&P[0],b036);
+  _mm256_store_pd(&P[4],b147);
+  _mm256_store_pd(&P[8],b258);
+}
 inline void compute_iso_s(FLOAT_PHYS* S, const FLOAT_PHYS* H,
-  const FLOAT_PHYS* C, const __m256d c0,const __m256d c1,const __m256d c2,
+  const FLOAT_PHYS C2, const __m256d c0,const __m256d c1,const __m256d c2,
   const FLOAT_PHYS dw){
   { // Scope vector registers
     __m256d s048;
@@ -806,9 +852,9 @@ inline void compute_iso_s(FLOAT_PHYS* S, const FLOAT_PHYS* H,
   } // end scoping unit
   S[5]=S[1]; S[10]=S[2];// Move the diagonal to their correct locations
   // Then, do the rest. Dunno if this is faster...
-  S[1]=( H[1] + H[4] )*C[2]*dw;// S[3]= S[1];//Sxy Syx
-  S[2]=( H[2] + H[8] )*C[2]*dw;// S[6]= S[2];//Sxz Szx
-  S[6]=( H[6] + H[9] )*C[2]*dw;// S[7]= S[5];//Syz Szy
+  S[1]=( H[1] + H[4] )*C2*dw;// S[3]= S[1];//Sxy Syx
+  S[2]=( H[2] + H[8] )*C2*dw;// S[6]= S[2];//Sxz Szx
+  S[6]=( H[6] + H[9] )*C2*dw;// S[7]= S[5];//Syz Szy
   S[4]=S[1]; S[9]=S[6]; S[8]=S[2];
 }
 #endif

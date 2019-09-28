@@ -63,7 +63,7 @@ FEMERA_BASE_C = $(FEMERA_COMMON)\
 
 ifneq (,$(findstring AVX,$(CPUSIMD)))
 FEMERA_MINI_C = $(FEMERA_COMMON)\
- elas-iso3-vect.cc elas-ort3-vec2.cc elas-ther-ort3-vec2.cc elas-plj2-iso3-ref.cc
+ elas-iso3-vect.cc elas-ort3-vec2.cc elas-ther-ort3-vec2.cc elas-plj2-iso3-vect.cc
 else
 FEMERA_MINI_C = $(FEMERA_BASE_C)
 endif
@@ -86,6 +86,7 @@ ODIR = mini.o
 OEXT = $(CPUMODEL).$(CSTR).o
 QEXT = qui.$(CPUMODEL).$(CSTR).o
 SEXT = ser.$(CPUMODEL).$(CSTR).o
+REXT = ref.$(CPUMODEL).$(CSTR).o
 IEXT = $(CPUMODEL).icc.o
 GEXT = $(CPUMODEL).gcc.o
 
@@ -93,6 +94,7 @@ OBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(OEXT)))
 BBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_BASE_C:.$(CEXT)=.$(OEXT)))
 QBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(QEXT)))
 SBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(SEXT)))
+RBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_REF_C:.$(CEXT)=.$(REXT)))
 GBJS:= $(patsubst %,$(ODIR)/%,$(HYBRID_GCC_C:.$(CEXT)=.$(GEXT)))
 IBJS:= $(patsubst %,$(ODIR)/%,$(HYBRID_ICC_C:.$(CEXT)=.$(IEXT)))
 
@@ -125,7 +127,7 @@ test : gmsh2fmr-ser mini-omp
 	./femerq-$(CPUMODELC) -v1 -c$(NCPU) -p cube/unst19p1n16
 
 test-plastic : all
-	./gmsh2fmr-$(CPUMODELC) -v3 \
+	./gmsh2fmr-$(CPUMODELC) -v1 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.005 \
 	-M0 -E66.2e9 -N0.33 -J305e6 -J100e6 -J0.0 -J0.0 \
 	-ap cube/unit1p1n2;
@@ -133,6 +135,18 @@ test-plastic : all
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
 	./femera-$(CPUMODELC) -v3 -s2 -c$(NCPU) -p cube/unit1p1n2
+
+ref-plastic : gmsh2fmr-ser mini-ref
+	./gmsh2fmr-$(CPUMODELC) -v1 \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.005 \
+	-M0 -E66.2e9 -N0.33 -J305e6 -J100e6 -J0.0 -J0.0 \
+	-ap cube/unit1p1n2;
+	echo ./femera-$(CPUMODELC) -v3 -s2 -c$(NCPU) -p cube/unit1p1n2
+	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
+	command /usr/bin/time -v --append -o $(CPUMODELC).log \
+	./refera-$(CPUMODELC) -v3 -s2 -c$(NCPU) -p cube/unit1p1n2
+
+placeholder :
 	./gmsh2fmr-$(CPUMODELC) -v1 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.002 \
 	-M0 -E66.2e9 -N0.33 -J100e6 -J0.0 -J0.0 \
@@ -160,9 +174,17 @@ $(ODIR)/%.$(SEXT) : %.cc *.h
 	-DFETCH_JAC \
 	$< -o $@ $(CPPLOG)
 
+$(ODIR)/%.$(REXT) : %.cc *.h
+	echo $(CXX) ... -o $@
+	$(CXX) -c $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
+	-DOMP_SCHEDULE=static -DHAS_TEST \
+	$< -o $@ $(CPPLOG)
+
 mini-omp : test-scripts femera-$(CPUMODELC)
 
 mini-omq : test-scripts femerq-$(CPUMODELC)
+
+mini-ref : test-scripts refera-$(CPUMODELC)
 
 base-omp : test-scripts femerb-$(CPUMODELC)
 
@@ -194,6 +216,13 @@ femerb-$(CPUMODELC) : $(BBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
 	./femerb-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
+
+refera-$(CPUMODELC) : $(RBJS) $(ODIR)/test.$(REXT) $(ODIR)/femera-mini.$(REXT)
+	echo $(CXX) ... -o femera-$(CPUMODELC)
+	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
+	$(RBJS) $(ODIR)/test.$(REXT) $(ODIR)/femera-mini.$(REXT) \
+	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
+	-o refera-$(CPUMODELC) $(CPPLOG); $(AUTOVEC_SUMMARY)
 
 femera-$(CPUMODEL)-hyb : $(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	echo $(CXX) ... -o femera-$(CPUMODEL)-hyb
