@@ -97,7 +97,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
     const __m256d j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
     const __m256d j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
-      FLOAT_PHYS back_v[6];//FIXME Consider prefetching...
+      FLOAT_PHYS __attribute__((aligned(32))) back_v[6];//FIXME Consider prefetching...
       for(int i=0; i<6; i++){// Copy initial element state.
         back_v[ i ] = this->elgp_vars[this->gvar_d*(intp_n*ie+ip) +i ]; }
       //G = MatMul3x3xN( jac,shg );
@@ -136,7 +136,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         printf("%+9.2e ",S[j]);
       } printf("\n");
 #endif
-      const FLOAT_PHYS stress_v[6]={// sxx, syy, szz,  sxy, syz, sxz
+      const FLOAT_PHYS __attribute__((aligned(32))) stress_v[6]={// sxx, syy, szz,  sxy, syz, sxz
         S[0], S[5], S[10], S[1], S[6], S[2] };
 #if VERB_MAX>10
       printf( "Stress Voigt Vector (Elem: %i):\n", ie );
@@ -147,7 +147,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       //====================================================== Scope UMAT calc
       FLOAT_PHYS stress_mises=0.0;
       {
-      FLOAT_PHYS m[3];//FIXME Loop and vectorize
+      FLOAT_PHYS __attribute__((aligned(32))) m[3];//FIXME Loop and vectorize
       m[0] = stress_v[0] - back_v[0] - stress_v[1] + back_v[1];
       m[1] = stress_v[1] - back_v[1] - stress_v[2] + back_v[2];
       m[2] = stress_v[2] - back_v[2] - stress_v[0] + back_v[0];
@@ -169,7 +169,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         const FLOAT_PHYS hard_eff = shear_modu * hard_modu
           / (shear_modu + hard_modu*third) -3.0*shear_eff;
         const FLOAT_PHYS lambda_eff = (bulk_modu - 2.0*shear_eff)*third;
-        FLOAT_PHYS plas_flow[6];
+        FLOAT_PHYS __attribute__((aligned(32))) plas_flow[6];
         {
         FLOAT_PHYS stress_hydro=0.0;
         for(int i=0;i<3;i++){ stress_hydro+= stress_v[i]*third; }
@@ -195,13 +195,13 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
             += hard_modu * plas_flow[i] * delta_equiv; }
         //======================================================= end UMAT scope
         // Calculate conjugate stress from conjugate strain.
-        const FLOAT_PHYS strain_p[6]={
+        const FLOAT_PHYS __attribute__((aligned(32))) strain_p[6]={
           P[0], P[5], P[10], P[1]+P[4], P[6]+P[9], P[2]+P[8] };
-        FLOAT_PHYS stress_p[6];
+        FLOAT_PHYS __attribute__((aligned(32))) stress_p[6];
         for(int i=0; i<6; i++){ stress_p[i] =0.0;
           for(int j=0; j<6; j++){
             stress_p[i] += D[6* i+j ] * strain_p[ j ];
-            }
+          }
           stress_p[i]*= dw;
         }
         S[0]=stress_p[0]; S[1]=stress_p[3]; S[2]=stress_p[5]; S[3]=stress_p[3];
