@@ -300,9 +300,9 @@ int main( int argc, char** argv ){
 #endif
 #if VERB_MAX>1
   if(verbosity>1){
-  std::cout <<"System:     "<<M->elem_n<<" Elems, "
+  std::cout <<"System:    "<<M->elem_n<<" Elems, "
     <<M->node_n<<" Nodes, "<<M->udof_n<<" DOF "<<'\n';
-  std::cout <<"Bounds:    [";
+  std::cout <<"Bounds:   [";
   for(int i=0; i<3; i++){ std::cout<<M->glob_bbox[i]; if(i<2){std::cout<<",";} }
   std::cout <<"] [";
   for(int i=3; i<6; i++){ std::cout<<M->glob_bbox[i]; if(i<5){std::cout<<",";} }
