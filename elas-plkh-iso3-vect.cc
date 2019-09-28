@@ -177,14 +177,9 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         for(int i=0;i<3;i++){ plas_flow[i]-= stress_hydro; }
         for(int i=0;i<6;i++){ plas_flow[i]*= inv_mises; }
         }
-        FLOAT_PHYS D[36]={// Initialize to linear-elastic isotropic.
-          C[0],C[1],C[1],0.0 ,0.0 ,0.0,
-          C[1],C[0],C[1],0.0 ,0.0 ,0.0,
-          C[1],C[1],C[0],0.0 ,0.0 ,0.0,
-          0.0 ,0.0 ,0.0 ,C[2]*1.0,0.0 ,0.0,
-          0.0 ,0.0 ,0.0 ,0.0 ,C[2]*1.0,0.0,
-          0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,C[2]*1.0
-        };
+        FLOAT_PHYS __attribute__((aligned(32))) D[36];
+#pragma omp simd
+        for(int i=0;i<36;i++){ D[i]=0.0; }
         for(int i=0;i<3;i++){
           for(int j=0;j<3;j++){
             D[6* i+j ] = lambda_eff;
