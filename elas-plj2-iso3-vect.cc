@@ -93,10 +93,9 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
       std::memcpy( &jac, &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
 #endif
     const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
-    __m256d j0,j1,j2;
-    j0 = _mm256_load_pd (&jac[0]);  // j0 = [j3 j2 j1 j0]
-    j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
-    j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
+    const __m256d j0 = _mm256_load_pd (&jac[0]);  // j0 = [j3 j2 j1 j0]
+    const __m256d j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
+    const __m256d j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
       FLOAT_PHYS alpha[6];//FIXME Consider prefetching...
       for(int i=0; i<6; i++){// Copy initial element state.
@@ -210,9 +209,6 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
         // Calculate conjugate stress from conjugate strain.
         const FLOAT_PHYS strain_p[6]={
           P[0], P[5], P[10], P[1]+P[4], P[6]+P[9], P[2]+P[8] };
-      // H[0],h036
-      // H[4],H147
-      // H[8],H258
         FLOAT_PHYS stress_p[6];
         for(int i=0; i<6; i++){ stress_p[i] =0.0;
           for(int j=0; j<6; j++){
@@ -223,15 +219,15 @@ int ElastPlastJ2Iso3D::ElemNonlinear( Elem* E,
         S[0]=stress_p[0]; S[1]=stress_p[3]; S[2]=stress_p[5]; S[3]=stress_p[3];
         S[4]=stress_p[3]; S[5]=stress_p[1]; S[6]=stress_p[4]; S[7]=stress_p[5];
         S[8]=stress_p[5]; S[9]=stress_p[4]; S[10]=stress_p[2];S[11]=0.0;
-        s[0] = _mm256_load_pd(&S[0]); // [s3 s2 s1 s0]
-        s[1] = _mm256_load_pd(&S[4]); // [s6 s5 s4 s3]
-        s[2] = _mm256_load_pd(&S[8]); // [s9 s8 s7 s6]
+        s[0] = _mm256_load_pd(&S[0]);
+        s[1] = _mm256_load_pd(&S[4]);
+        s[2] = _mm256_load_pd(&S[8]);
       }// if plastic
       else{
         compute_iso_s( &S[0], &P[0],C[2],c0,c1,c2, dw );// Linear conj response
-        s[0] = _mm256_load_pd(&S[0]); // [s3 s2 s1 s0]
-        s[1] = _mm256_load_pd(&S[4]); // [s6 s5 s4 s3]
-        s[2] = _mm256_load_pd(&S[8]); // [s9 s8 s7 s6]
+        s[0] = _mm256_load_pd(&S[0]);
+        s[1] = _mm256_load_pd(&S[4]);
+        s[2] = _mm256_load_pd(&S[8]);
       }
       if(ip==0){
         for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[i]]); }

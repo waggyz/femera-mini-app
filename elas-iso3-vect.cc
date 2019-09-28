@@ -105,10 +105,9 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     for (int i=0; i<Nc; i++){
       std::memcpy( & f[4*i],& sysf[conn[i]*3], sizeof(FLOAT_SOLV)*Nf ); }
 #endif
-    __m256d j0,j1,j2;
-    j0 = _mm256_load_pd (&jac[0]);  // j0 = [j3 j2 j1 j0]
-    j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
-    j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
+    const __m256d j0 = _mm256_load_pd (&jac[0]);  // j0 = [j3 j2 j1 j0]
+    const __m256d j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
+    const __m256d j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
