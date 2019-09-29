@@ -609,7 +609,7 @@ int main( int argc, char** argv ){
 }//end parallel region
     if( M->load_step==1 ){
     printf("Solution Error (Compared to Isotropic)\n");
-    Test* T = new Test();
+    Test* T = new Test();//FIXME should this be inside the parallel region?
 #pragma omp parallel
 {   std::vector<Mesh::part> P;
     P.resize(M->mesh_part.size());
