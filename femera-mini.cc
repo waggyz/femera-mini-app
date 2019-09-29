@@ -49,29 +49,29 @@ int main( int argc, char** argv ){
   while ((c = getopt (argc, argv, "v:pP:h:c:m:s:i:r:x:y:z:V:d:u:")) != -1){
     // x:  -x requires an argument
     switch (c) {
-      case 'c':{ comp_n   = atoi(optarg); break;}
-      case 'v':{ verbosity= atoi(optarg); break;}
-      case 'V':{ simd_n   = atoi(optarg); break;}
+      case 'c':{ comp_n   = atoi(optarg); break; }
+      case 'v':{ verbosity= atoi(optarg); break; }
+      case 'V':{ simd_n   = atoi(optarg); break; }
 #ifdef _OPENMP
-      case 'm':{ numa_n   = atoi(optarg); break;}//FIXME Not yet used.
+      case 'm':{ numa_n   = atoi(optarg); break; }//FIXME Not yet used.
 #if VERB_MAX>1
-      case 'h':{ halo_mod = atoi(optarg); break;}
+      case 'h':{ halo_mod = atoi(optarg); break; }
 #endif
 #endif
-      case 'i':{ iter_max = atoi(optarg); break;}
-      case 'r':{ rtol     = atof(optarg); break;}
-      case 's':{ solv_meth= atoi(optarg); break;}
-      case 'd':{ solv_cond= atoi(optarg); break;}
-      case 'u':{ solv_init= atof(optarg); break;}
+      case 'i':{ iter_max = atoi(optarg); break; }
+      case 'r':{ rtol     = atof(optarg); break; }
+      case 's':{ solv_meth= atoi(optarg); break; }
+      case 'd':{ solv_cond= atoi(optarg); break; }
+      case 'u':{ solv_init= atof(optarg); break; }
 #if VERB_MAX>1
       // Cube test applied displacement
       // FIXME These are not needed
-      case 'x':{ test_u   = atof(optarg); test_dir=0; break;}
-      case 'y':{ test_u   = atof(optarg); test_dir=1; break;}
-      case 'z':{ test_u   = atof(optarg); test_dir=2; break;}
+      case 'x':{ test_u   = atof(optarg); test_dir=0; break; }
+      case 'y':{ test_u   = atof(optarg); test_dir=1; break; }
+      case 'z':{ test_u   = atof(optarg); test_dir=2; break; }
 #endif
       case 'p':{ is_part  = true; break;}
-      case 'P':{ is_part  = true; part_n = atoi(optarg); break;}// pstr = optarg;
+      case 'P':{ is_part  = true; part_n = atoi(optarg); break; }
       case '?':{
         if (optopt == 'P'){// specify number of partitions
           //FIXME Does nothing.
@@ -81,42 +81,42 @@ int main( int argc, char** argv ){
           fprintf (stderr,
             "ERROR unknown command line option `-%c'.\n",
             //"WARNING Ignoring unknown command line option `-%c'.\n",
-            optopt); return 1;}//FIXME segfaults if continued
+            optopt); return 1; }//FIXME segfaults if continued
         else{
           fprintf(stderr,
             "ERROR unknown command line option character `\\x%x'.\n",
             //"WARNING Ignoring unknown command line option character `\\x%x'.\n",
-            optopt); return 1;}
+            optopt); return 1; }
         //return 1;
       }
-      default:{ abort();}
-    };
-  };
+      default:{ abort(); }
+    }
+  }
   for (int i = optind; i < argc; i++){
     if(i<(argc-1)){
-    fprintf (stderr, "WARNING Ignoring command line option: %s.\n", argv[i]);
+      fprintf (stderr, "WARNING Ignoring command line option: %s.\n", argv[i]);
     }else{
-    bname = argv[i];
-    };
-  };// Done parsing command line options.
+      bname = argv[i];
+    }
+  }// Done parsing command line options.
   // Print Info =====================================================
   if( verbosity > 2 ){// Print compile-time information
     //std::vector<int> p={sizeof(FLOAT_MESH),sizeof(FLOAT_PHYS),sizeof(FLOAT_SOLV)};
     for(uint i=0;i<3;i++){
       std::string ps,ns; int p;
       switch(i){
-        case(0):{ns="Mesh";p=sizeof(FLOAT_MESH); break;}
-        case(1):{ns="Solv";p=sizeof(FLOAT_SOLV); break;}
-        case(2):{ns="Phys";p=sizeof(FLOAT_PHYS); break;}
-      };
+        case(0):{ns="Mesh";p=sizeof(FLOAT_MESH); break; }
+        case(1):{ns="Solv";p=sizeof(FLOAT_SOLV); break; }
+        case(2):{ns="Phys";p=sizeof(FLOAT_PHYS); break; }
+      }
       switch(p){
-        case( 2):{ps="half"  ; break;}
-        case( 4):{ps="single"; break;}
-        case( 8):{ps="double"; break;}
-        case(16):{ps="quad"  ; break;}
-      };
+        case( 2):{ps="half"  ; break; }
+        case( 4):{ps="single"; break; }
+        case( 8):{ps="double"; break; }
+        case(16):{ps="quad"  ; break; }
+      }
       std::cout << ns << ": " << ps << " precision" <<'\n';
-    };
+    }
     std::cout << "Maximum Elements and Nodes: "
       << std::numeric_limits<INT_MESH>::max() <<'\n';
     std::cout << "Maximum Mesh Partitions: "
@@ -126,23 +126,23 @@ int main( int argc, char** argv ){
     std::cout << "Maximum DOFs/Node: "
       << size_t(std::numeric_limits<INT_DOF>::max()) <<'\n';
     std::cout <<"Verbosity: "<<verbosity<<" / "<< VERB_MAX <<" maximum "<<'\n';
-  };
+  }
   if( verbosity > VERB_MAX ){
     std::cout <<"WARNING Verbosity "<< verbosity
     <<" requested is more than compiled verbosity maximum "
     << VERB_MAX <<". Downgrading to "<<VERB_MAX <<"."<<'\n';
     verbosity=VERB_MAX;
-  };
+  }
   // Find Mesh Files ================================================
   if(bname == NULL){
     std::cerr << "ERROR Mesh partition base filename not provided." << '\n';
-    return 1;}
+    return 1; }
   else{
     if(is_part){
 #if VERB_MAX>1
-     if(verbosity>1){
-     printf ("Looking for Femera partitions of %s...\n", bname);
-     };
+    if(verbosity>1){
+      printf ("Looking for Femera partitions of %s...\n", bname);
+    }
 #endif
     bool fok=true; INT_MESH_PART part_i=1;
     while( fok ){
@@ -159,12 +159,12 @@ int main( int argc, char** argv ){
         part_i++; iname=bname;
 #if VERB_MAX>3
         if(verbosity>3){
-        std::cout << "Found " << pname << "..." <<'\n';
-        };
+          std::cout << "Found " << pname << "..." <<'\n';
+        }
 #endif
         fclose (pfile);
-        };
-      };
+        }
+      }
     part_n = part_i-1;
     }else{
       std::stringstream ss;
@@ -187,30 +187,30 @@ int main( int argc, char** argv ){
           };
 #endif
           iname = pname.c_str();
-          fclose (pfile); };
+          fclose (pfile); }
       }else{
         part_n=1; iname=pname.c_str();
 #if VERB_MAX>3
         if(verbosity>3){
         std::cout << "Found " << pname << "..." << '\n';
-        };
+        }
 #endif
         fclose (pfile);
-        };
-      };
-    };
+        }
+      }
+    }
   if(part_n>0){
     if(part_n>1){
 #if VERB_MAX>1
   if(verbosity>1){
-    printf ("Found %u mesh partitions.\n", part_n);};
+    printf ("Found %u mesh partitions.\n", part_n); }
 #endif
     };
   }else{
     std::cerr << "ERROR No mesh partition files could be opened for reading."
       << '\n'; 
     return 1;
-  };
+  }
   // Read and Setup =============================================
   int iter=0;
 #if VERB_MAX>0
@@ -218,39 +218,39 @@ int main( int argc, char** argv ){
 #endif
   int iter_info_n = 1;
 #ifdef _OPENMP
-  if( comp_n <1){ comp_n = omp_get_max_threads(); };//omp_get_max_threads();
-  if( numa_n==0){ numa_n = comp_n / 2; };//FIXME just a guess...and not yet used
-  if( numa_n <2 ){ numa_n=2; };
-  if( comp_n >int(part_n) ){ comp_n=int(part_n); };
-  if( numa_n >int(part_n) ){ numa_n=int(part_n); };
+  if( comp_n <1){ comp_n = omp_get_max_threads(); }//omp_get_max_threads();
+  if( numa_n==0){ numa_n = comp_n / 2; }//FIXME just a guess...and not yet used
+  if( numa_n <2 ){ numa_n=2; }
+  if( comp_n >int(part_n) ){ comp_n=int(part_n); }
+  if( numa_n >int(part_n) ){ numa_n=int(part_n); }
 #if VERB_MAX>1
   if(verbosity>1){
   std::cout <<"Parallel OpenMP " << "using "  <<comp_n<< " threads";
     if(auto c=std::getenv("OMP_PROC_BIND")){ std::cout <<" "<< c; }
     if(auto c=std::getenv("OMP_PLACES")){ std::cout << " to " <<c; }
-  if(simd_n>1){std::cout <<" and starting physics block width of "<<simd_n;};
+  if(simd_n>1){std::cout <<" and starting physics block width of "<<simd_n; }
   std::cout  <<"..."<<'\n';
     //<<comp_n<< " compute and "<<numa_n<<" NUMA threads..."<<'\n';
-  };
+  }
 #endif
 #endif
-  if(comp_n<1){ comp_n = 1; };
+  if(comp_n<1){ comp_n = 1; }
   int part_0=1;//FIXME unpartitioned mesh in mesh_part[0]
 #if VERB_MAX>1
   if(verbosity>1){
     std::cout << "Reading and setting up "<<(part_n-part_0+1)<<" partitions";
-  if(verbosity!=2){ std::cout <<"..." <<'\n'; };
-  };
+  if(verbosity!=2){ std::cout <<"..." <<'\n'; }
+  }
 #endif
   //printf("****** SOLVER: %i: %i,%i,%i\n",solv_meth,
   //  Solv::SOLV_GD,Solv::SOLV_CG,Solv::SOLV_CR);
   Mesh* M;
   switch( solv_meth ){
-    case(Solv::SOLV_CG):{ M=new HaloPCG(part_n+part_0,iter_max,rtol); break;}
-    case(Solv::SOLV_CR):{ M=new HaloPCR(part_n+part_0,iter_max,rtol); break;}
-    case(Solv::SOLV_NG):{ M=new HaloNCG(part_n+part_0,iter_max,rtol); break;}
+    case(Solv::SOLV_CG):{ M=new HaloPCG(part_n+part_0,iter_max,rtol); break; }
+    case(Solv::SOLV_CR):{ M=new HaloPCR(part_n+part_0,iter_max,rtol); break; }
+    case(Solv::SOLV_NG):{ M=new HaloNCG(part_n+part_0,iter_max,rtol); break; }
     default            :{ M=new HaloPCG(part_n+part_0,iter_max,rtol); }
-  };
+  }
   M->solv_cond=solv_cond;
   M->cube_init=solv_init;
   M->base_name=iname;
@@ -322,7 +322,6 @@ int main( int argc, char** argv ){
   }
 #endif
   // Solve parallel =================================================
-  bool halo_update=true;
 #ifdef _OPENMP
 #if VERB_MAX>2
   if(halo_mod!=1){
@@ -382,29 +381,31 @@ int main( int argc, char** argv ){
     else{ std::cout<<M->cube_init<<" times isotropic block solution"; }
     std::cout <<" with"<<'\n'<<"  Boundary at: [";
     //FIXME Should include thermal, too
-    for(int i=0; i<3; i++){ std::cout<<M->glob_bmax[i]; if(i<2){std::cout<<",";} }
+    for(int i=0; i<3; i++){
+      std::cout<<M->glob_bmax[i]; if(i<2){std::cout<<","; } }
     std::cout <<"], then"<<'\n';
     std::cout << " Iterating to: <"<<rtol<<" relative tolerance or";
     std::cout <<'\n';
-    std::cout <<"  Stopping at:  "<<iter_max<<" "<<M->meth_name<<" iterations..."<<'\n';
+    std::cout <<"  Stopping at:  "<<iter_max
+      <<" "<<M->meth_name<<" iterations..."<<'\n';
     std::cout <<"Solving..."<<'\n';
     const char* c="=";
     if(M->glob_chk2 < M->glob_rto2){ c="<"; }
     else if(M->glob_chk2 > M->glob_rto2){ c=">"; }
     printf("     init ||R||%9.2e %s%9.2e tol in %f s\n",
       std::sqrt(M->glob_chk2), c, std::sqrt(M->glob_rto2),init_sec );
-    };
+    }
 #endif
   }// end init scope
   {// iter scope
-    M->time_secs=0.0;//FIXME conditional?
+    M->time_secs=0.0;
     // Iterate ------------------------------------------------------
     auto loop_start = std::chrono::high_resolution_clock::now();
     do{ M->Iter(); iter++;
       //for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
       //  Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->mesh_part[part_i];
       //  S->Init(); S->Iter();
-      //}; M->Init();
+      //} M->Init();
 #if VERB_MAX>1
       if(verbosity>1){
         if(!((iter) % iter_info_n) | (iter<2)){
@@ -420,15 +421,13 @@ int main( int argc, char** argv ){
       }
 #endif
 #if VERB_MAX>10
-      // Partition Residuals
-      if(!((iter) % iter_info_n) ){
+      if(!((iter) % iter_info_n) ){// Print partition Residuals
         for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
           Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->mesh_part[part_i];
           printf("Part %4i ||R||%9.2e\n", part_i, std::sqrt(S->loca_res2));
-        }; };
+        } }
 #endif
-    }while( ( (iter < iter_max) & (M->glob_chk2 > M->glob_rto2) )
-      | !halo_update );
+    }while( (iter < iter_max) & (M->glob_chk2 > M->glob_rto2) );
     // End iteration loop ===========================================
 #if VERB_MAX>0
     auto loop_done = std::chrono::high_resolution_clock::now();
@@ -441,19 +440,19 @@ int main( int argc, char** argv ){
     std::cout <<","<<comp_n;
     std::cout <<","<<read_sec<<","<<init_sec<<","<<loop_sec;
     std::cout <<","<<float(M->udof_n)*float(iter)/loop_sec<<'\n';
-    };
+    }
 #endif
 #if VERB_MAX>1
     float sc = ms; const char* ss="ms";
     if(verbosity>1){
     if( loop_sec < 100.0*ms ){ sc=us; ss="μs"; }
-    else if( loop_sec > 100.0*sec ){sc=sec; ss=" s"; };
+    else if( loop_sec > 100.0*sec ){sc=sec; ss=" s"; }
     const char* c="=";
     if(M->glob_chk2 < M->glob_rto2){ c="<"; }
     else if(M->glob_chk2 > M->glob_rto2){ c=">"; }
     printf("%9i ||R||%9.2e %s%9.2e tol in %f s\nDone.\n", iter,
       std::sqrt(M->glob_chk2), c, std::sqrt(M->glob_rto2), loop_sec );
-    };
+    }
 #endif
 #if VERB_MAX>1
     if(verbosity>1){
@@ -496,7 +495,7 @@ int main( int argc, char** argv ){
     //
     printf("Performance:%8.2f  MDOF/s\n",
       float(M->udof_n)*float(iter)/loop_sec /Meg );
-    };
+    }
 #endif
   }// end iter scope
 #if 0
@@ -524,8 +523,8 @@ int main( int argc, char** argv ){
     auto tY = std::get<1>(M->mesh_part[1]);
     if(tY->ther_cond.size()>0){ node_d=4; }
     errtot.resize(3*(node_d+1)+1); errtot=0.0;// printf("NODED: %i\n",node_d);
-    for(int i= 0; i< 1*(node_d+1); i++){ errtot[i] = 99e99; };
-    for(int i= 2*(node_d+1); i< 3*(node_d+1); i++){ errtot[i] =-99e99; };
+    for(int i= 0; i< 1*(node_d+1); i++){ errtot[i] = 99e99; }
+    for(int i= 2*(node_d+1); i< 3*(node_d+1); i++){ errtot[i] =-99e99; }
     printf("Solution Error (Compared to Isotropic)\n");
     Test* T = new Test();
     //FLOAT_PHYS scale=1.0,smin= 99e9,smax=-99e9;//FIXME only works for cubes
@@ -789,13 +788,15 @@ int main( int argc, char** argv ){
     for(INT_MESH i=0; i<hnn; i++){
       auto f = Dn* E->node_haid[i];
       for( uint j=0; j<Dn; j++){//NOTE appears not to be critical
-//#pragma omp atomic read
+#if 0
+#pragma omp atomic read
+#endif
         S->sys_f[Dn* i+j] = M->halo_val[f+j]; }
     }
     Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->sys_f, S->sys_u );
     Y->ElemNonlinear( E,E->halo_elem_n,E->elem_n, S->sys_f, S->sys_u, S->sys_u );
   }
-  // Now, sum the reactions on BCS fixed-displacemnt nodes in the x-direction.
+  // Now, sum the reactions on BCS fixed-displacemnt nodes in the test direction.
   // Also, compute the polycrystal effective Young's modulus
 #pragma omp for schedule(static) reduction(+:reac_x)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
@@ -841,4 +842,4 @@ int main( int argc, char** argv ){
 #endif
 #endif //HAS_TEST
   return 0;
-};
+}

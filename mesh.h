@@ -37,7 +37,7 @@ public:
   //
   int comp_n=1, numa_n=1;
   int solv_meth=Solv::SOLV_CG, solv_cond=Solv::COND_JACO, verbosity=1;
-  int hown_meth=2;
+  int hown_meth=2;// Halo node ownership method
   //
   INT_MESH iso3_part_n=0;
   INT_MESH ort3_part_n=0;
@@ -50,12 +50,15 @@ public:
   FLOAT_SOLV cube_init=0.0;// Start u0 at scaled iso cube exact solution
   //FIXME Should only be in Solv* objects?
   //
+  int iter_max=0;
+  int load_step_n=1, load_step=1;
+  FLOAT_SOLV load_scal = 1.0;
+  //
+  FLOAT_SOLV glob_rtol=0.0, glob_rto2=0.0, glob_chk2=0.0, glob_res2=0.0;
+  //
   //FIXME Consider moving these to Test*
   float phys_flop=0, phys_band=0;
   float solv_flop=0, solv_band=0;
-  //
-  int iter_max=0;
-  FLOAT_SOLV glob_rtol=0.0, glob_rto2=0.0, glob_chk2=0.0, glob_res2=0.0;
   //
   //FIXME Move these into Elem?
   //NOTE These are by global ID
