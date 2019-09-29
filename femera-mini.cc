@@ -288,8 +288,10 @@ int main( int argc, char** argv ){
   }else                         { iter_info_n =   1;// sugg_max =M->udof_n; 
   }
   if(iter_max<0){
-    iter_max=M->udof_n/iter_info_n*10;
-    if(iter_max>int(M->udof_n)){ iter_max=M->udof_n; } }
+    iter_max = M->udof_n / iter_info_n *10;
+    if( iter_max > int(M->udof_n) ){ iter_max=M->udof_n; }
+    iter_max*= M->load_step_n;
+  }
   }// end variable scope
 //endif
 #if VERB_MAX>0
