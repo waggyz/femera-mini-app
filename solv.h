@@ -18,6 +18,7 @@ public:
   };
   INT_MESH iter=0, iter_max=0;
   INT_MESH uinp_n,udof_n;
+  FLOAT_SOLV load_scal=1.0;
   FLOAT_SOLV loca_rtol=0.0;
   FLOAT_SOLV loca_delu=0.0, rtol_delu=0.0;// Cauchy convergence check
   //

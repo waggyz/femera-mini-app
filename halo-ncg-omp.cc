@@ -33,12 +33,14 @@ int NCG::RHS(Elem* E, Phys* Y ){// printf("*** NCG::RHS(E,Y) ***\n");
   }
   return(0);
 }
-int NCG::BCS(Elem* E, Phys* Y ){// printf("*** NCG::BCS(E,Y) ***\n");
+int NCG::BCS(Elem* E, Phys* Y ){
+  //printf("*** NCG::BCS(E,Y) scale: %f ***\n",this->load_scal);
   uint Dn=uint(Y->node_d);
   INT_MESH n; INT_DOF f; FLOAT_PHYS v;
   for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
-    //printf("FIX ID %i, DOF %i, val %+9.2e\n",i,E->bcs_vals[i].first,E->bcs_vals[i].second);
-    this->sys_u[Dn* n+uint(f)] = v;
+    //printf("FIX ID %i, DOF %i, val %+9.2e\n",
+    //  i,E->bcs_vals[i].first,E->bcs_vals[i].second);
+    this->sys_u[Dn* n+uint(f)] = v * this->load_scal;
     if(std::abs(v) > Y->udof_magn[f]){ Y->udof_magn[f] = std::abs(v); }
     if(std::abs(v) > std::abs(this->loca_bmax[f])){ this->loca_bmax[f] = v; }
   }
@@ -64,17 +66,18 @@ int NCG::BC0(Elem* E, Phys* Y ){// printf("*** NCG::BC0(E,Y) ***\n");
   return(0);
 }
 int NCG::Setup( Elem* E, Phys* Y ){// printf("*** NCG::Setup(E,Y) ***\n");
-  //this->meth_name="preconditioned conjugate gradient";
   this->halo_loca_0 = E->halo_remo_n * Y->node_d;
+#if 1
   this->RHS( E,Y );
   this->BCS( E,Y );// Sync max Y->udof_magn before Precond()
   Y->tens_flop*=2;Y->tens_band*=2;Y->stif_flop*=2;Y->stif_band*=2;// 2 evals/iter
   Y->ElemLinear( E,0,E->elem_n, this->sys_f, this->sys_u );
   Y->ElemNonlinear( E,0,E->elem_n, this->sys_f, this->sys_u, this->sys_u );
+#endif
   return(0);
 }
 int NCG::Init( Elem* E, Phys* Y ){// printf("*** NCG::Init(E,Y) ***\n");
-  if(this->cube_init!=0.0){//FIXME I don;t think this is working
+  if(this->cube_init!=0.0){//FIXME I don't know if this is working
     const INT_MESH Nn=E->node_n, Dm=E->mesh_d;
     const FLOAT_SOLV ci=this->cube_init;
     FLOAT_SOLV u[3]={1.0,-0.3,-0.3};
@@ -98,8 +101,9 @@ int NCG::Init( Elem* E, Phys* Y ){// printf("*** NCG::Init(E,Y) ***\n");
         / ( E->glob_bbox[   Dm+j ] - E->glob_bbox[j] );
       }
     }
-  this->BCS( E,Y );//FIXME repeated in Setup(E,Y)
+    //this->BCS( E,Y );//FIXME repeated in Setup(E,Y)
   }
+  this->BCS( E,Y );//FIXME repeated in Setup(E,Y)
   this->BC0( E,Y );
   //FIXME Check if the following need to be here.
   Y->ElemLinear( E,0,E->elem_n,this->sys_f,this->sys_u );
@@ -143,6 +147,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   // Local copies for atomic ops and reduction
   //FLOAT_SOLV glob_r2a = this->glob_res2, glob_to2 = this->glob_rto2;
   FLOAT_SOLV glob_r2a = 0.0, glob_to2 = this->glob_rto2;
+  const FLOAT_SOLV load_scal=this->step_scal * FLOAT_SOLV(this->load_step);
   Phys::vals bcmax={0.0,0.0,0.0,0.0};
 #pragma omp parallel num_threads(comp_n)
 {// parallel init region
@@ -159,6 +164,8 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
+    S->load_scal=load_scal;
+    //S->Init(E,Y);
     for(uint i=0;i<Y->udof_magn.size();i++){
       //printf("GLOBAL MAX BC[%u]: %f\n",i,bcmax[i]);
       if(Y->udof_magn[i] > bcmax[i]){

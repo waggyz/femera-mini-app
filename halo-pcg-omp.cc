@@ -33,7 +33,7 @@ int PCG::BCS(Elem* E, Phys* Y ){// printf("*** BCS(E,Y) ***\n");
   INT_MESH n; INT_DOF f; FLOAT_PHYS v;
   for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
     //printf("FIX ID %i, DOF %i, val %+9.2e\n",i,E->bcs_vals[i].first,E->bcs_vals[i].second);
-    this->sys_u[Dn* n+uint(f)] = v;
+    this->sys_u[Dn* n+uint(f)] = v * this->load_scal;
     if(std::abs(v) > Y->udof_magn[f]){ Y->udof_magn[f] = std::abs(v); }
     if(std::abs(v) > std::abs(this->loca_bmax[f])){ this->loca_bmax[f] = v; }
   };
@@ -98,7 +98,7 @@ int PCG::Init( Elem* E, Phys* Y ){// printf("*** Init(E,Y) ***\n");
         / ( E->glob_bbox[   Dm+j ] - E->glob_bbox[j] );
       }
     }
-  this->BCS( E,Y );//FIXME repeated in Setup(E,Y)
+    this->BCS( E,Y );//FIXME repeated in Setup(E,Y)
   }
   this->BC0( E,Y );
 #endif
@@ -218,6 +218,7 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
   INT_MESH halo_n=0;
   // Local copies for atomic ops and reduction
   FLOAT_SOLV glob_r2a = this->glob_res2, glob_to2 = this->glob_rto2;
+  const FLOAT_SOLV load_scal=this->step_scal * FLOAT_SOLV(this->load_step);
   Phys::vals bcmax={0.0,0.0,0.0,0.0};
 #pragma omp parallel num_threads(comp_n)
 {// parallel init region
@@ -234,6 +235,7 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
+    S->load_scal=load_scal;
     for(uint i=0;i<Y->udof_magn.size();i++){
       //printf("GLOBAL MAX BC[%u]: %f\n",i,bcmax[i]);
       if(Y->udof_magn[i] > bcmax[i]){//FIXME Atomic read?

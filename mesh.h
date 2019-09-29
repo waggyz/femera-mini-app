@@ -51,8 +51,8 @@ public:
   //FIXME Should only be in Solv* objects?
   //
   int iter_max=0;
-  int load_step_n=1, load_step=1;
-  FLOAT_SOLV load_scal = 1.0;
+  int load_step=1, load_step_n=1;
+  FLOAT_SOLV step_scal = 1.0;
   //
   FLOAT_SOLV glob_rtol=0.0, glob_rto2=0.0, glob_chk2=0.0, glob_res2=0.0;
   //

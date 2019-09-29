@@ -24,6 +24,7 @@ int main( int argc, char** argv ){
   // defaults
   int comp_n     = 0;//, numa_n=0;
   int verbosity  = 1;
+  int step_n     = 1;
   int iter_max   =-1;
   FLOAT_SOLV rtol= 1e-4;
   int solv_meth  = Solv::SOLV_CG;
@@ -46,7 +47,7 @@ int main( int argc, char** argv ){
   // Parse Command Line =============================================
   //FIXME Consider using C++ for parsing command line options.
   opterr = 0; int c;
-  while ((c = getopt (argc, argv, "v:pP:h:c:m:s:i:r:x:y:z:V:d:u:")) != -1){
+  while ((c = getopt (argc, argv, "v:pP:h:c:m:s:I:i:r:x:y:z:V:d:u:")) != -1){
     // x:  -x requires an argument
     switch (c) {
       case 'c':{ comp_n   = atoi(optarg); break; }
@@ -58,6 +59,7 @@ int main( int argc, char** argv ){
       case 'h':{ halo_mod = atoi(optarg); break; }
 #endif
 #endif
+      case 'I':{ step_n   = atoi(optarg); break; }
       case 'i':{ iter_max = atoi(optarg); break; }
       case 'r':{ rtol     = atof(optarg); break; }
       case 's':{ solv_meth= atoi(optarg); break; }
@@ -259,6 +261,7 @@ int main( int argc, char** argv ){
   //M->glob_rtol = rtol;
   M->verbosity=verbosity;
   M->time_secs.resize(10);
+  M->load_step_n=step_n; M->step_scal=1.0/FLOAT_SOLV(step_n);
 #if VERB_MAX>0
   std::chrono::high_resolution_clock::time_point
     read_start, setu_done, init_done;
@@ -331,9 +334,15 @@ int main( int argc, char** argv ){
 #endif
 #endif
   // Initialize ---------------------------------------------------
+  {// load step scope
+  int step_n=M->load_step_n;//NOTE M->load_step is 1-indexed
+  for(M->load_step=1; M->load_step <= step_n; M->load_step++){
   {// init scope
-    M->time_secs=0.0;//FIXME conditional?
-    M->Init();
+    M->time_secs=0.0;
+    M->Init();//FIXME BCS called from M->Setup?
+    if( step_n > 1 ){
+      printf("Load Step %i: %f\n",
+        M->load_step ,M->step_scal * FLOAT_SOLV(M->load_step) ); }
 #if VERB_MAX>0
     if(verbosity>0){
     init_done = std::chrono::high_resolution_clock::now();
@@ -611,7 +620,7 @@ int main( int argc, char** argv ){
         coor[i+0]-=minx; coor[i+1]-=miny; coor[i+2]-=minz;
         coor[i+0]*=scax; coor[i+1]*=scay; coor[i+2]*=scaz;
       }
-      test_u=test_amt;
+      test_u=test_amt * S->load_scal;
       //test_u=Y->udof_magn[test_dir];
       FLOAT_PHYS test_T=Y->udof_magn[3];
       //
@@ -841,5 +850,7 @@ int main( int argc, char** argv ){
     }//end if verbosity > 1
 #endif
 #endif //HAS_TEST
+  }//load step loop
+  }//load step scope
   return 0;
 }
