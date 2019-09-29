@@ -290,7 +290,9 @@ int main( int argc, char** argv ){
   if(iter_max<0){
     iter_max = M->udof_n / iter_info_n *10;
     if( iter_max > int(M->udof_n) ){ iter_max=M->udof_n; }
+#if 0
     iter_max*= M->load_step_n;
+#endif
   }
   }// end variable scope
 //endif
@@ -339,12 +341,16 @@ int main( int argc, char** argv ){
   {// load step scope
   int step_n=M->load_step_n;//NOTE M->load_step is 1-indexed
   for(M->load_step=1; M->load_step <= step_n; M->load_step++){
+    iter=0;
   {// init scope
+    if( M->load_step > 1 ){
+      setu_done=std::chrono::high_resolution_clock::now(); }
     M->time_secs=0.0;
     M->Init();//FIXME BCS called from M->Setup?
     if( step_n > 1 ){
-      printf("Load Step %i: %f\n",
-        M->load_step ,M->step_scal * FLOAT_SOLV(M->load_step) ); }
+      printf("    Load Step:  %i of %i scaled by%5.2f and\n",
+        M->load_step, M->load_step_n,
+        M->step_scal * FLOAT_SOLV(M->load_step) ); }
 #if VERB_MAX>0
     if(verbosity>0){
     init_done = std::chrono::high_resolution_clock::now();
@@ -387,13 +393,18 @@ int main( int argc, char** argv ){
 #if VERB_MAX>1
     if(verbosity>1){
     std::cout << "  Starting at:  ";
-    if(M->cube_init==0.0){ std::cout<<"zero"; }
-    else if(M->cube_init==1.0){ std::cout<<"isotropic block solution"; }
-    else{ std::cout<<M->cube_init<<" times isotropic block solution"; }
+    if(M->load_step >1){
+      std::cout<<"previous load step solution";
+    }else{
+      if(M->cube_init==0.0){ std::cout<<"zero"; }
+      else if(M->cube_init==1.0){ std::cout<<"isotropic block solution"; }
+      else{ std::cout<<M->cube_init<<" times isotropic block solution"; }
+    }
     std::cout <<" with"<<'\n'<<"  Boundary at: [";
     //FIXME Should include thermal, too
     for(int i=0; i<3; i++){
-      std::cout<<M->glob_bmax[i]; if(i<2){std::cout<<","; } }
+      std::cout<< M->glob_bmax[i] * M->step_scal * FLOAT_SOLV(M->load_step);
+      if(i<2){std::cout<<","; } }
     std::cout <<"], then"<<'\n';
     std::cout << " Iterating to: <"<<rtol<<" relative tolerance or";
     std::cout <<'\n';
@@ -528,7 +539,7 @@ int main( int argc, char** argv ){
 #ifdef HAS_TEST
     // Check solution ===============================================
 #if VERB_MAX>1
-    if(verbosity>1){
+    if( verbosity>1 ){
     // Displacement errors ------------------------------------------
     Phys::vals errtot; int node_d=3;
     auto tY = std::get<1>(M->mesh_part[1]);
@@ -571,6 +582,7 @@ int main( int argc, char** argv ){
 {     test_dir = f; test_amt = v; }
     }
   }
+      test_u=test_amt * S->load_scal;
 #pragma omp critical(youngs)
 {
     FLOAT_PHYS A=0.0,B=0.0,C=0.0;
@@ -596,6 +608,11 @@ int main( int argc, char** argv ){
     scay = 1.0/(maxy-miny);
     scaz = 1.0/(maxz-minz);
 }
+}//end parallel region
+      if( M->load_step==1 ){
+{  std::vector<Mesh::part> P;
+   P.resize(M->mesh_part.size());
+   std::copy(M->mesh_part.begin(), M->mesh_part.end(), P.begin());
 #pragma omp for schedule(static)
     for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
       Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
@@ -622,7 +639,6 @@ int main( int argc, char** argv ){
         coor[i+0]-=minx; coor[i+1]-=miny; coor[i+2]-=minz;
         coor[i+0]*=scax; coor[i+1]*=scay; coor[i+2]*=scaz;
       }
-      test_u=test_amt * S->load_scal;
       //test_u=Y->udof_magn[test_dir];
       FLOAT_PHYS test_T=Y->udof_magn[3];
       //
@@ -754,6 +770,7 @@ int main( int argc, char** argv ){
     if(node_d>3){ printf("          "); }
     printf("          %9.2e  ||R||\n",
       std::sqrt(errtot[errtot.size()-1]) );
+    }//end if load_step==1
     // Effective modulus --------------------------------------------
     // Calculate nodal forces from displacement solution
     FLOAT_PHYS reac_x=0.0;// polycrystal approx.

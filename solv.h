@@ -32,6 +32,7 @@ public:
   FLOAT_SOLV glob_bmax[4]={0.0,0.0,0.0,0.0};
   //
   // Pointers to memory-aligned vanilla C arrays
+  //FIXME Rename to part_*
   valign sys_f;// f=[A]{u}//FIXME Move to Phys*?
   valign sys_u;// solution
   valign sys_r;// Residuals
@@ -43,6 +44,7 @@ public:
   valign sys_d;//FIXME diagonal preconditioner w/ fixed BC DOFs set to zero
   valign sys_p, sys_q, sys_g, old_r;//FIXME working vectors specific to method
   // The data is actually stored in corresponding C++ objects.
+  //FIXME Rename to data_*
   Solv::vals dat_f;
   Solv::vals dat_u;
   Solv::vals dat_r;// Force residuals (PCG)

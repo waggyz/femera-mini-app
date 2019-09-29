@@ -98,8 +98,11 @@ int PCG::Init( Elem* E, Phys* Y ){// printf("*** Init(E,Y) ***\n");
         / ( E->glob_bbox[   Dm+j ] - E->glob_bbox[j] );
       }
     }
+#if 0
     this->BCS( E,Y );//FIXME repeated in Setup(E,Y)
+#endif
   }
+  this->BCS( E,Y );//FIXME repeated in Setup(E,Y)
   this->BC0( E,Y );
 #endif
   Y->ElemLinear( E,0,E->elem_n,this->sys_f,this->sys_u );

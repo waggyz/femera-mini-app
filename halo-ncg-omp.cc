@@ -78,6 +78,7 @@ int NCG::Setup( Elem* E, Phys* Y ){// printf("*** NCG::Setup(E,Y) ***\n");
 }
 int NCG::Init( Elem* E, Phys* Y ){// printf("*** NCG::Init(E,Y) ***\n");
   if(this->cube_init!=0.0){//FIXME I don't know if this is working
+    // printf("*** NCG::Init(E,Y)...cube_init ***\n");
     const INT_MESH Nn=E->node_n, Dm=E->mesh_d;
     const FLOAT_SOLV ci=this->cube_init;
     FLOAT_SOLV u[3]={1.0,-0.3,-0.3};
