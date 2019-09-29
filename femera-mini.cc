@@ -547,8 +547,6 @@ int main( int argc, char** argv ){
     errtot.resize(3*(node_d+1)+1); errtot=0.0;// printf("NODED: %i\n",node_d);
     for(int i= 0; i< 1*(node_d+1); i++){ errtot[i] = 99e99; }
     for(int i= 2*(node_d+1); i< 3*(node_d+1); i++){ errtot[i] =-99e99; }
-    printf("Solution Error (Compared to Isotropic)\n");
-    Test* T = new Test();
     //FLOAT_PHYS scale=1.0,smin= 99e9,smax=-99e9;//FIXME only works for cubes
     FLOAT_PHYS scax=1.0,minx= 99e9,maxx=-99e9;
     FLOAT_PHYS scay=1.0,miny= 99e9,maxy=-99e9;
@@ -609,10 +607,13 @@ int main( int argc, char** argv ){
     scaz = 1.0/(maxz-minz);
 }
 }//end parallel region
-      if( M->load_step==1 ){
-{  std::vector<Mesh::part> P;
-   P.resize(M->mesh_part.size());
-   std::copy(M->mesh_part.begin(), M->mesh_part.end(), P.begin());
+    if( M->load_step==1 ){
+    printf("Solution Error (Compared to Isotropic)\n");
+    Test* T = new Test();
+#pragma omp parallel
+{   std::vector<Mesh::part> P;
+    P.resize(M->mesh_part.size());
+    std::copy(M->mesh_part.begin(), M->mesh_part.end(), P.begin());
 #pragma omp for schedule(static)
     for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
       Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
