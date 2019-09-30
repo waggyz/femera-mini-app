@@ -42,7 +42,7 @@ public:
   //NOTE Additional working vectors needed are defined in each solver subclass
   //FIXME Moved them back here for now
   valign sys_d;//FIXME diagonal preconditioner w/ fixed BC DOFs set to zero
-  valign sys_p, sys_q, sys_g, old_r;//FIXME working vectors specific to method
+  valign sys_p, sys_q, sys_g, old_r, last_u;//FIXME working vectors specific to method
   // The data is actually stored in corresponding C++ objects.
   //FIXME Rename to data_*
   Solv::vals dat_f;
@@ -52,7 +52,7 @@ public:
   Solv::vals dat_d;
   Solv::vals dat_0;
   Solv::vals dat_1;
-  Solv::vals dat_p, dat_q, dat_g, dat_o;
+  Solv::vals dat_p, dat_q, dat_g, dat_o, data_l;
   //
   std::string meth_name="";
   //
@@ -182,6 +182,7 @@ public:
     sys_g = align_resize( dat_g, udof_n, valign_byte );
     sys_q = align_resize( dat_q, udof_n, valign_byte );
     old_r = align_resize( dat_o, udof_n, valign_byte );
+    last_u = align_resize( data_l, udof_n, valign_byte );
 #else
     // sys_d : diagonal preconditioner
     // sys_b : RHS
@@ -193,6 +194,7 @@ public:
     sys_q.resize(udof_n,0.0);// perturbed solution gradient: q = u + alpha*p
     sys_g.resize(udof_n,0.0);// residual grad. of perturbed sol. g = A q -b
     old_r.resize(udof_n,0.0);
+    last_u.resize(udof_n,0.0);
 #endif
     udof_flop = 23;//*elem_n
     udof_band = 10*sizeof(FLOAT_SOLV);//*udof_n + 2

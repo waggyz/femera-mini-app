@@ -30,8 +30,8 @@ int ElastPlastKHIso3D::Setup( Elem* E ){
   return 0;
 }
 int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
-  const INT_MESH e0,const INT_MESH ee,
-  FLOAT_SOLV* sys_f, const FLOAT_SOLV* sys_p, const FLOAT_SOLV* sys_u ){
+  const INT_MESH e0,const INT_MESH ee, FLOAT_SOLV* sys_f, const FLOAT_SOLV* sys_p,\
+  const FLOAT_SOLV* sys_u, bool save_state ){
   //FIXME Clean up local variables.
   //const int De = 3;// Element Dimension
   const int Nd = 3;// Node (mesh) Dimension
@@ -192,10 +192,34 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
             D[6* i+j ]+= lambda_eff; }
         }
         //------------------------------------------------- Save element state.
+        if( save_state ){
         for(int i=0; i<6; i++){// Update state variable back_v.
           this->elgp_vars[gvar_d*(intp_n*ie+ip) +i ]
-            += hard_modu * plas_flow[i] * delta_equiv; }
+            += plas_flow[i] * hard_modu * delta_equiv; }
+        }
         //======================================================= end UMAT scope
+#if VERB_MAX>10
+#pragma omp critical(print)
+{
+      if( (ie==0) & (ip==0) ){
+      printf("el:%u,gp:%i Back stress (alpha):",ie,ip);
+      for(int i=0; i<6; i++){
+        printf("%+9.2e ", this->elgp_vars[gvar_d*(intp_n*ie+ip) +i ] ); }
+      printf("\n");
+      }
+}
+#endif
+#if VERB_MAX>10
+#pragma omp critical(print)
+{
+      printf("el:%u,gp:%i D:     ",ie,ip);
+      for(int i=0; i<36; i++){
+        if(!(i%6)&(i>0)){ printf("                 "); }
+        printf(" %+9.2e", D[i] );
+        if((i%6)==5){ printf("\n"); }
+      }
+}
+#endif
         // Calculate conjugate stress from conjugate strain.
         const FLOAT_PHYS __attribute__((aligned(32))) strain_p[6]={
           P[0], P[5], P[10], P[1]+P[4], P[6]+P[9], P[2]+P[8] };

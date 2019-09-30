@@ -72,7 +72,7 @@ int NCG::Setup( Elem* E, Phys* Y ){// printf("*** NCG::Setup(E,Y) ***\n");
   this->BCS( E,Y );// Sync max Y->udof_magn before Precond()
   Y->tens_flop*=2;Y->tens_band*=2;Y->stif_flop*=2;Y->stif_band*=2;// 2 evals/iter
   Y->ElemLinear( E,0,E->elem_n, this->sys_f, this->sys_u );
-  Y->ElemNonlinear( E,0,E->elem_n, this->sys_f, this->sys_u, this->sys_u );
+  Y->ElemNonlinear( E,0,E->elem_n, this->sys_f, this->sys_u, this->sys_u, false );
 #endif
   return(0);
 }
@@ -108,7 +108,7 @@ int NCG::Init( Elem* E, Phys* Y ){// printf("*** NCG::Init(E,Y) ***\n");
   this->BC0( E,Y );
   //FIXME Check if the following need to be here.
   Y->ElemLinear( E,0,E->elem_n,this->sys_f,this->sys_u );
-  Y->ElemNonlinear( E,0,E->elem_n,this->sys_f,this->sys_u,this->sys_u );
+  Y->ElemNonlinear( E,0,E->elem_n,this->sys_f,this->sys_u,this->sys_u, false );
   return 0;
 }
 int NCG::Init(){// printf("*** NCG::Init() ***\n");
@@ -202,6 +202,16 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
+#if 0
+    // Predict next solution
+    const INT_MESH sysn=S->udof_n;
+#pragma omp simd
+    for(uint i=0;i<sysn;i++){
+      auto t=S->sys_u[i];
+      S->sys_u[i] = 2.0*S->sys_u[i] - S->last_u[i];
+      S->last_u[i]=t;
+    }
+#endif
     S->solv_cond=this->solv_cond;
     for(uint i=0;i<Y->udof_magn.size();i++){
 //#pragma omp atomic read
@@ -407,7 +417,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 #endif
     for(uint i=0;i<sysn;i++){ S->sys_g[i]=0.0; }
     Y->ElemLinear( E,0,E->halo_elem_n, S->sys_g, S->sys_q );
-    Y->ElemNonlinear( E,0,E->halo_elem_n, S->sys_g, S->sys_q, S->sys_u );
+    Y->ElemNonlinear( E,0,E->halo_elem_n, S->sys_g, S->sys_q, S->sys_u, false );
     time_accum( my_phys_count, phys_start );
     time_start( gath_start );
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
@@ -478,7 +488,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_accum( my_scat_count, scat_start );
     time_start( phys_start );
     Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->sys_g, S->sys_q );
-    Y->ElemNonlinear( E,E->halo_elem_n,E->elem_n, S->sys_g, S->sys_q, S->sys_u );
+    Y->ElemNonlinear( E,E->halo_elem_n,E->elem_n, S->sys_g, S->sys_q, S->sys_u, false );
     time_accum( my_phys_count, phys_start );
     //--------------------------------------------- Done compute and sync sys_g
     time_start( solv_start );
@@ -525,7 +535,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     const INT_MESH Dn=uint(Y->node_d);
     time_start( phys_start );
     Y->ElemLinear( E,0,E->halo_elem_n, S->sys_f, S->sys_u );
-    Y->ElemNonlinear( E,0,E->halo_elem_n, S->sys_f, S->sys_u, S->sys_u );
+    Y->ElemNonlinear( E,0,E->halo_elem_n, S->sys_f, S->sys_u, S->sys_u, true );
     time_accum( my_phys_count, phys_start );
     time_start( gath_start );
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
@@ -565,7 +575,8 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_accum( my_scat_count, scat_start );
     time_start( phys_start );
     Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->sys_f, S->sys_u );
-    Y->ElemNonlinear( E,E->halo_elem_n,E->elem_n, S->sys_f, S->sys_u, S->sys_u );
+    Y->ElemNonlinear( E,E->halo_elem_n,E->elem_n, S->sys_f, S->sys_u,
+                      S->sys_u, true );
     time_accum( my_phys_count, phys_start );
     //--------------------------------------------- Done compute and sync sys_f
     //-------------------------------------- Calculate negative residuals sys_r
@@ -601,8 +612,14 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_accum( my_solv_count, solv_start );
   }
   //----------------------------------------------------- Compute beta (1 FLOP)
+#if 1
+  // I think this is the SM restart criterion.
+  FLOAT_SOLV beta = glob_sum3 / glob_sum4;
+  beta *= FLOAT_SOLV(beta>0.1);
+#else
   const FLOAT_SOLV beta = std::max(0.0, glob_sum3 / glob_sum4 );
   //NOTE the max provides a search direction reset automatically.
+#endif
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){// Update search direction
     std::tie(E,Y,S)=priv_part[part_i];

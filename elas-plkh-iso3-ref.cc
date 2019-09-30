@@ -32,8 +32,8 @@ int ElastPlastKHIso3D::Setup( Elem* E ){
   return 0;
 }
 int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
-  const INT_MESH e0,const INT_MESH ee,
-  FLOAT_SOLV* sys_f, const FLOAT_SOLV* sys_p, const FLOAT_SOLV* sys_u ){
+  const INT_MESH e0,const INT_MESH ee, FLOAT_SOLV* sys_f, const FLOAT_SOLV* sys_p,
+  const FLOAT_SOLV* sys_u, bool save_state ){
   //FIXME Clean up local variables.
   //const int De = 3;// Element Dimension
   const int Nd = 3;// Node (mesh) Dimension
@@ -221,11 +221,13 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         for(int i=0; i<6; i++){
           this->elgp_vars[gvar_d*(intp_n*ie+ip) +i +12 ] = strain_plas[ i ]; }
 #endif
+        if( save_state ){
         // Update state variable back_v.
         for(int i=0; i<6; i++){
           this->elgp_vars[gvar_d*(intp_n*ie+ip) +i ]
             += hard_modu * plas_flow[i] * delta_equiv;
         }//------------------------------------------------------------ 18 FLOP
+        }
       }//end plasticity stuff
 //------------------------------------------------------------ Debugging output
 #if VERB_MAX>10

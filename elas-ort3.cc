@@ -9,9 +9,10 @@ int ElastOrtho3D::ElemJacobi( Elem* ){ return 1; }//FIXME
 int ElastOrtho3D::BlocLinear( Elem* ,
   RESTRICT Phys::vals &, const RESTRICT Solv::vals & ){ return 1; }
 int ElastOrtho3D::ElemNonlinear( Elem*, const INT_MESH, const INT_MESH,
-  FLOAT_SOLV*, const FLOAT_SOLV*, const FLOAT_SOLV* ){
-  return 1;
-  }
+  FLOAT_SOLV*, const FLOAT_SOLV*, const FLOAT_SOLV*, bool ){
+  return 1; }
+int ElastOrtho3D::ElemJacobi( Elem*, FLOAT_SOLV*, const FLOAT_SOLV* ){
+  return 1; }
 //
 int ElastOrtho3D::ElemStrainStress(std::ostream& of,
   Elem* E, FLOAT_SOLV* sys_u) {

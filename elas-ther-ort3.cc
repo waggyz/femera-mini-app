@@ -19,9 +19,11 @@ int ThermElastOrtho3D::ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*){
   return 1;
 }
 int ThermElastOrtho3D::ElemNonlinear( Elem*, const INT_MESH, const INT_MESH,
-  FLOAT_SOLV*, const FLOAT_SOLV*, const FLOAT_SOLV* ){
+  FLOAT_SOLV*, const FLOAT_SOLV*, const FLOAT_SOLV*, bool ){
   return 1;
   }
+int ThermElastOrtho3D::ElemJacobi( Elem*, FLOAT_SOLV*, const FLOAT_SOLV* ){
+  return 1; }
 //
 int ThermElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
   //FIXME Doesn't do rotation yet

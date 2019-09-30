@@ -12,6 +12,7 @@ int Solv::Precond(Elem* E, Phys* Y){// Jacobi Preconditioner
     for(uint i=0; i<this->udof_n; i++){ this->sys_d[i]=1.0; }; break;}
   case(Solv::COND_JACO):{
     Y->ElemJacobi( E, this->sys_d );
+    Y->ElemJacobi( E, this->sys_d, this->sys_u );
     for(uint i=0; i<this->udof_n; i++){
       if(this->sys_d[i]<0.0){ bad_d++;
         this->sys_d[i]=std::abs(this->sys_d[i]);

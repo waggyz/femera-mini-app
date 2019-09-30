@@ -26,7 +26,7 @@ int main( int argc, char** argv ){
   int verbosity  = 1;
   int step_n     = 1;
   int iter_max   =-1;
-  FLOAT_SOLV rtol= 1e-4;
+  FLOAT_SOLV rtol= 1e-4, atol=-1.0;
   int solv_meth  = Solv::SOLV_CG;
   int solv_cond  = Solv::COND_JACO;
   FLOAT_SOLV solv_init= 0.0;// Start at u = solv_init * exact iso cube solution
@@ -47,7 +47,7 @@ int main( int argc, char** argv ){
   // Parse Command Line =============================================
   //FIXME Consider using C++ for parsing command line options.
   opterr = 0; int c;
-  while ((c = getopt (argc, argv, "v:pP:h:c:m:s:I:i:r:x:y:z:V:d:u:")) != -1){
+  while ((c = getopt (argc, argv, "v:pP:h:c:m:s:I:i:r:a:x:y:z:V:d:u:")) != -1){
     // x:  -x requires an argument
     switch (c) {
       case 'c':{ comp_n   = atoi(optarg); break; }
@@ -62,6 +62,7 @@ int main( int argc, char** argv ){
       case 'I':{ step_n   = atoi(optarg); break; }
       case 'i':{ iter_max = atoi(optarg); break; }
       case 'r':{ rtol     = atof(optarg); break; }
+      case 'a':{ atol     = atof(optarg); break; }
       case 's':{ solv_meth= atoi(optarg); break; }
       case 'd':{ solv_cond= atoi(optarg); break; }
       case 'u':{ solv_init= atof(optarg); break; }
@@ -258,7 +259,7 @@ int main( int argc, char** argv ){
   M->base_name=iname;
   M->comp_n=comp_n;
   M->simd_n=simd_n;
-  //M->glob_rtol = rtol;
+  M->glob_atol = atol; M->glob_ato2 = atol*atol;
   M->verbosity=verbosity;
   M->time_secs.resize(10);
   M->load_step_n=step_n; M->step_scal=1.0/FLOAT_SOLV(step_n);
@@ -347,6 +348,7 @@ int main( int argc, char** argv ){
       setu_done=std::chrono::high_resolution_clock::now(); }
     M->time_secs=0.0;
     M->Init();//FIXME BCS called from M->Setup?
+    if( M->glob_atol>0.0 ){ M->glob_rto2=M->glob_ato2; }//FIXME Move to Init?
     if( step_n > 1 ){
       printf("    Load Step:  %i of %i scaled by%5.2f and\n",
         M->load_step, M->load_step_n,
@@ -405,9 +407,13 @@ int main( int argc, char** argv ){
     for(int i=0; i<3; i++){
       std::cout<< M->glob_bmax[i] * M->step_scal * FLOAT_SOLV(M->load_step);
       if(i<2){std::cout<<","; } }
-    std::cout <<"], then"<<'\n';
-    std::cout << " Iterating to: <"<<rtol<<" relative tolerance or";
-    std::cout <<'\n';
+    std::cout <<"], then"<<'\n' << " Iterating to: <";
+    if( M->glob_atol > 0.0 ){
+       std::cout <<atol<<" absolute ";
+    }else{
+       std::cout <<rtol<<" relative ";
+    }
+    std::cout <<"tolerance or"<<'\n';
     std::cout <<"  Stopping at:  "<<iter_max
       <<" "<<M->meth_name<<" iterations..."<<'\n';
     std::cout <<"Solving..."<<'\n';
@@ -786,7 +792,7 @@ int main( int argc, char** argv ){
     const auto n = S->udof_n;
     for(uint i=0;i<n;i++){ S->sys_f[i]=0.0; }
     Y->ElemLinear( E,0,E->halo_elem_n, S->sys_f, S->sys_u );
-    Y->ElemNonlinear( E,0,E->halo_elem_n, S->sys_f, S->sys_u, S->sys_u );
+    Y->ElemNonlinear( E,0,E->halo_elem_n, S->sys_f, S->sys_u, S->sys_u, false );
     // sync sys_f
     const INT_MESH Dn=uint(Y->node_d);
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
@@ -823,7 +829,7 @@ int main( int argc, char** argv ){
         S->sys_f[Dn* i+j] = M->halo_val[f+j]; }
     }
     Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->sys_f, S->sys_u );
-    Y->ElemNonlinear( E,E->halo_elem_n,E->elem_n, S->sys_f, S->sys_u, S->sys_u );
+    Y->ElemNonlinear( E,E->halo_elem_n,E->elem_n, S->sys_f, S->sys_u, S->sys_u, false );
   }
   // Now, sum the reactions on BCS fixed-displacemnt nodes in the test direction.
   // Also, compute the polycrystal effective Young's modulus

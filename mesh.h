@@ -44,9 +44,6 @@ public:
   INT_MESH ther_part_n=0;
   INT_MESH plas_part_n=0;
   //
-  FLOAT_MESH glob_bbox[6]={9e9,9e9,9e9 , -9e9,-9e9,-9e9};
-  FLOAT_SOLV glob_bmax[4]={0.0,0.0,0.0,0.0};
-  //
   FLOAT_SOLV cube_init=0.0;// Start u0 at scaled iso cube exact solution
   //FIXME Should only be in Solv* objects?
   //
@@ -54,11 +51,15 @@ public:
   int load_step=1, load_step_n=1;
   FLOAT_SOLV step_scal = 1.0;
   //
-  FLOAT_SOLV glob_rtol=0.0, glob_rto2=0.0, glob_chk2=0.0, glob_res2=0.0;
+  FLOAT_SOLV glob_rtol= 0.0, glob_rto2=0.0, glob_chk2=0.0, glob_res2=0.0;
+  FLOAT_SOLV glob_atol=-1.0, glob_ato2=0.0;
   //
   //FIXME Consider moving these to Test*
   float phys_flop=0, phys_band=0;
   float solv_flop=0, solv_band=0;
+  //
+  FLOAT_MESH glob_bbox[6]={9e9,9e9,9e9 , -9e9,-9e9,-9e9};
+  FLOAT_SOLV glob_bmax[4]={0.0,0.0,0.0,0.0};
   //
   //FIXME Move these into Elem?
   //NOTE These are by global ID

@@ -14,9 +14,11 @@ int ElastIso3D::ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*){
   return 1;
 }
 int ElastIso3D::ElemNonlinear( Elem*, const INT_MESH, const INT_MESH,
-  FLOAT_SOLV*, const FLOAT_SOLV*, const FLOAT_SOLV* ){
+  FLOAT_SOLV*, const FLOAT_SOLV*, const FLOAT_SOLV*, bool ){
   return 1;
   }
+int ElastIso3D::ElemJacobi( Elem*, FLOAT_SOLV*, const FLOAT_SOLV* ){
+  return 1; }
 int ElastIso3D::ElemStiff(Elem* E  ){
   //FIXME Doesn't do rotation yet
   const uint Dm = 3;//E->mesh_d
