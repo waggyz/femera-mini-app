@@ -48,7 +48,9 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   const FLOAT_PHYS stress_yield = this->plas_prop[0];
   const FLOAT_PHYS hard_modu    = this->plas_prop[1];
   const FLOAT_PHYS bulk_modu    = youn_modu / (1.0-2.0*poiss_ratio);
-  const FLOAT_PHYS shear_modu   = 2.0*mtrl_matc[2];
+  const FLOAT_PHYS shear_modu   = mtrl_matc[2];
+  const FLOAT_PHYS yield_tol2   =
+    (stress_yield*(1.0+1e-6))*(stress_yield*(1.0+1e-6));
 #if 0
   const FLOAT_PHYS saturation_stress =this->plas_prop[2];
   const FLOAT_PHYS j2_beta           =this->plas_prop[3];
@@ -154,15 +156,15 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       m[0] = stress_v[0] - back_v[0] - stress_v[1] + back_v[1];//------- 3 FLOP
       m[1] = stress_v[1] - back_v[1] - stress_v[2] + back_v[2];//------- 3 FLOP
       m[2] = stress_v[2] - back_v[2] - stress_v[0] + back_v[0];//------- 3 FLOP
-      for(int i=0;i<3;i++){ stress_mises += m[i]*m[i]; }//-------------- 3 FLOP
+      for(int i=0;i<3;i++){ stress_mises += 0.5*m[i]*m[i]; }//---------- 9 FLOP
       }
       for(int i=3;i<6;i++){
-        const FLOAT_PHYS m = stress_v[i] - back_v[i];
-        stress_mises+= 6.0*m*m; }//------------------------------------- 6 FLOP
-      if( stress_mises > (stress_yield*stress_yield) ){//--------------- 1 FLOP
+        const FLOAT_PHYS m = stress_v[i] - back_v[i];//----------------- 3 FLOP
+        stress_mises+= 3.0*m*m; }//------------------------------------- 3 FLOP
+      if( stress_mises > yield_tol2 ){
         stress_mises = std::sqrt(stress_mises);//----------------------- 1 SQRT
         const FLOAT_PHYS delta_equiv = ( stress_mises - stress_yield )
-          / ( 1.5*shear_modu + hard_modu );//--------------------------- 4 FLOP
+          / ( 3.0*shear_modu + hard_modu );//--------------------------- 4 FLOP
         const FLOAT_PHYS inv_mises = 1.0/stress_mises;//---------------- 1 FLOP
         const FLOAT_PHYS shear_eff//------------------------------------ 3 FLOP
           = shear_modu * (stress_yield + hard_modu*delta_equiv) * inv_mises;

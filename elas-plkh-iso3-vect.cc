@@ -48,7 +48,9 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   const FLOAT_PHYS stress_yield = this->plas_prop[0];
   const FLOAT_PHYS hard_modu    = this->plas_prop[1];
   const FLOAT_PHYS bulk_modu    = youn_modu / (1.0-2.0*poiss_ratio);
-  const FLOAT_PHYS shear_modu   = 2.0*mtrl_matc[2];
+  const FLOAT_PHYS shear_modu   = mtrl_matc[2];
+  const FLOAT_PHYS yield_tol2   =
+    (stress_yield*(1.0+1e-6))*(stress_yield*(1.0+1e-6));
 #if VERB_MAX>11
   printf("DOF: %u, Elems:%u, IntPts:%u, Nodes/elem:%u\n",
     (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
@@ -151,17 +153,17 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       m[0] = stress_v[0] - back_v[0] - stress_v[1] + back_v[1];
       m[1] = stress_v[1] - back_v[1] - stress_v[2] + back_v[2];
       m[2] = stress_v[2] - back_v[2] - stress_v[0] + back_v[0];
-      for(int i=0;i<3;i++){ stress_mises += m[i]*m[i]; }
+      for(int i=0;i<3;i++){ stress_mises += 0.5*m[i]*m[i]; }
       }
       for(int i=3;i<6;i++){
         const FLOAT_PHYS m = stress_v[i] - back_v[i];
-        stress_mises+= 6.0*m*m;
+        stress_mises+= 3.0*m*m;
       }
       __m256d s[3];
-      if( stress_mises > (stress_yield*stress_yield) ){
+      if( stress_mises > yield_tol2 ){
         stress_mises = std::sqrt(stress_mises);
         const FLOAT_PHYS delta_equiv = ( stress_mises - stress_yield )
-          / ( 1.5*shear_modu + hard_modu );
+          / ( 3.0*shear_modu + hard_modu );
         const FLOAT_PHYS inv_mises = 1.0/stress_mises;
         const FLOAT_PHYS shear_eff
           = shear_modu * (stress_yield + hard_modu*delta_equiv) * inv_mises;

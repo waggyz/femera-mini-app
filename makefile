@@ -132,7 +132,7 @@ test : gmsh2fmr-ser mini-omp
 
 test-plastic : all
 	./gmsh2fmr-$(CPUMODELC) -v1 \
-	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.005 \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
 	-M0 -E66.2e9 -N0.33 -J305e6 -J100e-6 \
 	-ap cube/unit1p1n2;
 	echo ./femera-$(CPUMODELC) -v3 -s2 -c$(NCPU) -p cube/unit1p1n2
