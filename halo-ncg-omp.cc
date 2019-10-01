@@ -166,7 +166,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     S->load_scal=load_scal;
-    //S->Init(E,Y);
+    S->Init(E,Y);
     for(uint i=0;i<Y->udof_magn.size();i++){
       //printf("GLOBAL MAX BC[%u]: %f\n",i,bcmax[i]);
       if(Y->udof_magn[i] > bcmax[i]){
@@ -202,7 +202,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
-#if 0
+#if 1
     // Predict next solution
     const INT_MESH sysn=S->udof_n;
 #pragma omp simd
@@ -270,10 +270,9 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH sysn=S->udof_n;
     for(uint i=0;i<sysn;i++){ S->sys_d[i] = FLOAT_SOLV(1.0) / S->sys_d[i]; }
-//#pragma omp critical
-//{
-    S->Init( E,Y );// Zeros boundary conditions
-//}
+    //S->Init( E,Y );// Zeros boundary conditions
+    //S->BCS( E,Y );
+    S->BC0( E,Y );
   }
   time_reset( my_solv_count, start );//FIXME wtf?
   time_reset( my_gat0_count, start );//FIXME wtf?

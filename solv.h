@@ -63,6 +63,7 @@ public:
   //virtual int RHS( Mesh* )=0;
   //virtual int BC( Mesh* )=0;
   virtual int Init( Elem*, Phys* )=0;
+  virtual int BC0( Elem*, Phys* )=0;
   virtual int Init()=0;
   virtual int Iter()=0;
   //virtual int Iter (Elem*, Phys*)=0;
@@ -126,6 +127,7 @@ public:
   //FIXME Make the rest private or protected later?
   //RESTRICT Solv::vals sys_d;//FIXME diagonal preconditioner w/ fixed BC DOFs set to zero
   //RESTRICT Solv::vals sys_p;// [sys_z no longer needed]
+  int BC0( Elem*, Phys* Y ) final;
 protected:
 private:
   //int Precond( Elem*, Phys*);
@@ -133,7 +135,6 @@ private:
   int BC ( Mesh* );//FIXME Remove?
   int RHS( Elem*, Phys* Y );
   int BCS( Elem*, Phys* Y );
-  int BC0( Elem*, Phys* Y );
 };
 class PCR final: public Solv{
 // Preconditioned Conjugate Residual Kernel ----------------------------
@@ -163,6 +164,7 @@ public:
   //FIXME Make the rest private or protected later?
   //RESTRICT Solv::vals sys_d;//FIXME diagonal preconditioner w/ fixed BC DOFs set to zero
   //RESTRICT Solv::vals sys_g;// [f]=[A][r], [g]=[A][p]
+  int BC0( Elem*, Phys* Y ) final;
 protected:
 private:
   //int Precond( Elem*, Phys*);
@@ -170,7 +172,6 @@ private:
   int BC ( Mesh* );//FIXME Remove?
   int RHS( Elem*, Phys* Y );
   int BCS( Elem*, Phys* Y );
-  int BC0( Elem*, Phys* Y );
 };
 class NCG final: public Solv{// Nonlinear Conjugate Gradient Kernel -----------
 public:
@@ -209,6 +210,7 @@ public:
   //FIXME Make the rest private or protected later?
   //RESTRICT Solv::vals sys_d;//FIXME diagonal preconditioner w/ fixed BC DOFs set to zero
   //RESTRICT Solv::vals sys_p;// [sys_z no longer needed]
+  int BC0( Elem*, Phys* Y ) final;
 protected:
 private:
   //int Precond( Elem*, Phys*);
@@ -216,7 +218,6 @@ private:
   int BC ( Mesh* );//FIXME Remove?
   int RHS( Elem*, Phys* Y );
   int BCS( Elem*, Phys* Y );
-  int BC0( Elem*, Phys* Y );
 };
 //============= Inline Function Definitions ===============
 #ifdef ALIGN_SYS
