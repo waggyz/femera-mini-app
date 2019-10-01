@@ -165,8 +165,13 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
+    const uint sysn=S->udof_n;
     S->load_scal=load_scal;
     S->Init(E,Y);
+#ifdef HAS_SIMD
+#pragma omp simd
+#endif
+    for(INT_MESH i=1; i<sysn; i++){ S->sys_f[i]=0.0; }
     Y->ElemLinear( E,0,E->elem_n,S->sys_f,S->sys_u );
     Y->ElemNonlinear( E,0,E->elem_n,S->sys_f,S->sys_u,S->sys_u, true );
     for(uint i=0;i<Y->udof_magn.size();i++){
