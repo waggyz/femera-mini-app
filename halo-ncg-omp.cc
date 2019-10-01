@@ -171,6 +171,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #endif
     for(INT_MESH i=1; i<sysn; i++){ S->sys_f[i]=0.0; }
     Y->ElemLinear( E,0,E->elem_n,S->sys_f,S->sys_u );
+    // Save state variables.
     Y->ElemNonlinear( E,0,E->elem_n,S->sys_f,S->sys_u,S->sys_u, true );
     for(uint i=0;i<Y->udof_magn.size();i++){
       //printf("GLOBAL MAX BC[%u]: %f\n",i,bcmax[i]);
@@ -182,8 +183,6 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
         this->glob_bmax[i] = S->loca_bmax[i];
       }
     }
-    S->load_scal=load_scal;
-    S->Init(E,Y);
   }
 #pragma omp single
 {
@@ -227,6 +226,8 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
       Y->udof_magn[i] = bcmax[i];
       S->glob_bmax[i] = this->glob_bmax[i];
     }
+    S->load_scal=load_scal;
+    S->Init(E,Y);
     S->Precond( E,Y );
   }
   time_reset( my_prec_count, start );
