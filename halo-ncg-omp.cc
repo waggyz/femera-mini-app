@@ -206,6 +206,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
       printf("\n");
     }
 #endif
+  this->halo_val=0.0;
 }
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
@@ -232,7 +233,6 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   }
   time_reset( my_prec_count, start );
   //----------------------------- Sync sys_d
-  this->halo_val=0.0;
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
