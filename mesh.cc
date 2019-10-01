@@ -317,8 +317,11 @@ int Mesh::Setup(){
 }
   }// End parallel read & setup loop ====================================
   // Make thread-local copies of mesh_part into threadprivate priv_part.
+#pragma omp critical
+{
   priv_part.resize(this->mesh_part.size());
   std::copy(this->mesh_part.begin(), this->mesh_part.end(), priv_part.begin());
+}
   const int part_o = part_n+part_0;
 #pragma omp for schedule(OMP_SCHEDULE)
     for(int part_i=part_0; part_i<part_o; part_i++){
