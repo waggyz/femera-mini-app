@@ -166,8 +166,6 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     const uint sysn=S->udof_n;
-    S->load_scal=load_scal;
-    S->Init(E,Y);
 #ifdef HAS_SIMD
 #pragma omp simd
 #endif
@@ -184,6 +182,8 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
         this->glob_bmax[i] = S->loca_bmax[i];
       }
     }
+    S->load_scal=load_scal;
+    S->Init(E,Y);
   }
 #pragma omp single
 {

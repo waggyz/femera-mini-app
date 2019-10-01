@@ -343,7 +343,7 @@ int main( int argc, char** argv ){
     if( M->load_step > 1 ){
       setu_done=std::chrono::high_resolution_clock::now(); }
     M->time_secs=0.0;
-    M->Init();//FIXME BCS called from M->Setup?
+    M->Init();
     if( M->glob_atol>0.0 ){ M->glob_rto2=M->glob_ato2; }//FIXME Move to Init?
 #if VERB_MAX>1
     if( verbosity > 1 ){ if( step_n > 1 ){
