@@ -108,7 +108,7 @@ int NCG::Init( Elem* E, Phys* Y ){// printf("*** NCG::Init(E,Y) ***\n");
   this->BC0( E,Y );
   //FIXME Check if the following need to be here.
   Y->ElemLinear( E,0,E->elem_n,this->sys_f,this->sys_u );
-  Y->ElemNonlinear( E,0,E->elem_n,this->sys_f,this->sys_u,this->sys_u, false );
+  Y->ElemNonlinear( E,0,E->elem_n,this->sys_f,this->sys_u,this->sys_u, true );
   return 0;
 }
 int NCG::Init(){// printf("*** NCG::Init() ***\n");
@@ -488,7 +488,8 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_accum( my_scat_count, scat_start );
     time_start( phys_start );
     Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->sys_g, S->sys_q );
-    Y->ElemNonlinear( E,E->halo_elem_n,E->elem_n, S->sys_g, S->sys_q, S->sys_u, false );
+    Y->ElemNonlinear( E,E->halo_elem_n,E->elem_n, S->sys_g, S->sys_q,
+                      S->sys_u, false );
     time_accum( my_phys_count, phys_start );
     //--------------------------------------------- Done compute and sync sys_g
     time_start( solv_start );
@@ -535,7 +536,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     const INT_MESH Dn=uint(Y->node_d);
     time_start( phys_start );
     Y->ElemLinear( E,0,E->halo_elem_n, S->sys_f, S->sys_u );
-    Y->ElemNonlinear( E,0,E->halo_elem_n, S->sys_f, S->sys_u, S->sys_u, true );
+    Y->ElemNonlinear( E,0,E->halo_elem_n, S->sys_f, S->sys_u, S->sys_u, false );
     time_accum( my_phys_count, phys_start );
     time_start( gath_start );
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
@@ -576,7 +577,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_start( phys_start );
     Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->sys_f, S->sys_u );
     Y->ElemNonlinear( E,E->halo_elem_n,E->elem_n, S->sys_f, S->sys_u,
-                      S->sys_u, true );
+                      S->sys_u, false );
     time_accum( my_phys_count, phys_start );
     //--------------------------------------------- Done compute and sync sys_f
     //-------------------------------------- Calculate negative residuals sys_r
@@ -614,6 +615,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
   //----------------------------------------------------- Compute beta (1 FLOP)
 #if 1
   // I think this is the SM restart criterion.
+  // The value of glob_sum3 / glob_sum4 measures non-orthogonality.
   FLOAT_SOLV beta = glob_sum3 / glob_sum4;
   beta *= FLOAT_SOLV(beta>0.1);
 #else
