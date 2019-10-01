@@ -90,6 +90,8 @@ public:
   //virtual Elem* ReadFile( const char* fname, INT_ORDER pord )=0;
   //
 protected:
+  static std::vector<part> priv_part;
+#pragma omp threadprivate(priv_part)
   Mesh( Solv::Meth m ) : solv_meth(m){};
   Mesh( Solv::Meth m, INT_MESH i, FLOAT_PHYS r ) :
     solv_meth(m),iter_max(i),glob_rtol(r){};
@@ -115,8 +117,8 @@ public:
   int Iter() final;
 protected:
 private:
-  static std::vector<part> priv_part;
-#pragma omp threadprivate(priv_part)
+//  static std::vector<part> priv_part;
+//#pragma omp threadprivate(priv_part)
 };
 class HaloPCR final: public Mesh{
 // Preconditioned Conjugate Residual Kernel ----------------------------
@@ -134,8 +136,8 @@ public:
   int Iter() final;
 protected:
 private:
-  static std::vector<part> priv_part;
-#pragma omp threadprivate(priv_part)
+//  static std::vector<part> priv_part;
+//#pragma omp threadprivate(priv_part)
 };
 class HaloNCG final: public Mesh{
 // Preconditioned Conjugate Gradient Kernel ----------------------------
@@ -153,8 +155,8 @@ public:
   int Iter() final;
 protected:
 private:
-  static std::vector<part> priv_part;
-#pragma omp threadprivate(priv_part)
+//  static std::vector<part> priv_part;
+//#pragma omp threadprivate(priv_part)
 };
 #if 0
 //Elem* Mesh::ReadFile( const char* fname, INT_ORDER pord ){};

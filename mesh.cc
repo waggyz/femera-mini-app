@@ -15,6 +15,9 @@
 #if VERB_MAX > 0
 #include <stdio.h>
 #endif
+
+std::vector<Mesh::part> Mesh::priv_part;
+
 //FIXME Remove unneeded includes
 int Mesh::GatherGlobalIDs(){ return 0; };
 int Mesh::ScatterHaloIDs(){
@@ -264,6 +267,7 @@ int Mesh::Setup(){
   INT_MESH node_tot=0, halo_node_tot=0,halo_remo_tot=0,halo_loca_tot=0;
   INT_MESH halo_udof_tot=0;
   std::string solv_name="";
+  INT_MESH halo_n=0;
 #pragma omp parallel num_threads(comp_n)
   {
 #pragma omp for schedule(static)
@@ -312,6 +316,36 @@ int Mesh::Setup(){
     this->phys_band += float(Y->tens_band);
 }
   }// End parallel read & setup loop ====================================
+  // Make thread-local copies of mesh_part into threadprivate priv_part.
+  priv_part.resize(this->mesh_part.size());
+  std::copy(this->mesh_part.begin(), this->mesh_part.end(), priv_part.begin());
+  //int part_0=0; if(std::get<0>( priv_part[0] )==NULL){ part_0=1; }
+  //const int part_n = int(priv_part.size())-part_0;
+  const int part_o = part_n+part_0;
+#pragma omp for schedule(OMP_SCHEDULE)
+    for(int part_i=part_0; part_i<part_o; part_i++){
+      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
+      if(E->node_haid.size()==0){ E->node_haid.resize(E->halo_node_n); }
+    }
+    //----------------------------------------------------------- Sync halo_map
+#pragma omp for schedule(OMP_SCHEDULE)
+    for(int part_i=part_0; part_i<part_o; part_i++){
+      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
+#pragma omp critical(halomap)
+{//FIXME critical section here?
+      if(E->node_haid.size()==0){ E->node_haid.resize(E->halo_node_n); };
+      for(INT_MESH i=0; i<E->halo_node_n; i++){
+      INT_MESH g=E->node_glid[i];
+      if(this->halo_map.count(g)==0){// Initialize halo_map
+        this->halo_map[g]=halo_n;
+        E->node_haid[i]=halo_n;
+        halo_n++;
+      }else{// Add in the rest.
+        E->node_haid[i]=this->halo_map[g];
+      }
+}
+    }
+    }// End halo map init
 }// End parallel region ==================================================
   //this->udof_n = sys_udof_n;
   //read_done = std::chrono::high_resolution_clock::now();

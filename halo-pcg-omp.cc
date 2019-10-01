@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <omp.h>
 #include "femera.h"
-std::vector<Mesh::part> HaloPCG::priv_part;
+//std::vector<Mesh::part> HaloPCG::priv_part;
 //std::vector<Mesh::part> HaloPCG::Ptoto;
 
 
@@ -218,7 +218,6 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
 #ifdef _OPENMP
   const int comp_n = this->comp_n;
 #endif
-  INT_MESH halo_n=0;
   // Local copies for atomic ops and reduction
   FLOAT_SOLV glob_r2a = this->glob_res2, glob_to2 = this->glob_rto2;
   const FLOAT_SOLV load_scal=this->step_scal * FLOAT_SOLV(this->load_step);
@@ -226,11 +225,13 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
 #pragma omp parallel num_threads(comp_n)
 {// parallel init region
   long int my_scat_count=0, my_prec_count=0,
-    my_gat0_count=0,my_gat1_count=0, my_gmap_count=0, my_solv_count=0;
+    my_gat0_count=0,my_gat1_count=0, my_solv_count=0;
   auto start = std::chrono::high_resolution_clock::now();
+#if 0
   // Make thread-local copies of mesh_part into threadprivate HaloPCG::priv_part.
   priv_part.resize(this->mesh_part.size());
   std::copy(this->mesh_part.begin(), this->mesh_part.end(), priv_part.begin());
+#endif
   int part_0=0; if(std::get<0>( priv_part[0] )==NULL){ part_0=1; };
   const int part_n = int(priv_part.size())-part_0;
   const int part_o = part_n+part_0;
@@ -276,53 +277,37 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
     }
     S->Precond( E,Y );
   }
-  // Sync sys_d [this inits M->halo_map and E->node_haid]//FIXME separate
   time_reset( my_prec_count, start );
+  // ---------------------------  Sync sys_d
+  this->halo_val=0.0;
 #pragma omp for schedule(OMP_SCHEDULE)
-    for(int part_i=part_0; part_i<part_o; part_i++){
-      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
-      if(E->node_haid.size()==0){ E->node_haid.resize(E->halo_node_n); }
-    }
-    //-------------------------------------------------------------- Sync sys_d
-#pragma omp for schedule(OMP_SCHEDULE)
-    for(int part_i=part_0; part_i<part_o; part_i++){
-      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
-      //if(E->node_haid.size()==0){ E->node_haid.resize(E->halo_node_n); };
-      const INT_MESH d=uint(Y->node_d);
+  for(int part_i=part_0; part_i<part_o; part_i++){
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
+    const INT_MESH d=uint(Y->node_d);
+    if(this->solv_cond == Solv::COND_NONE){
       for(INT_MESH i=0; i<E->halo_node_n; i++){
-#pragma omp critical(halomap)
-{//FIXME critical section here?
-      INT_MESH g=E->node_glid[i];
-      if(this->halo_map.count(g)==0){// Initialize halo_map
-        this->halo_map[g]=halo_n;
-        E->node_haid[i]=halo_n;
         for( uint j=0; j<d; j++){
-          this->halo_val[d*E->node_haid[i]+j]  = S->sys_d[d*i +j]; }
-        halo_n++;
-      }else{// Add in the rest.
-        E->node_haid[i]=this->halo_map[g];
-        if(this->solv_cond == Solv::COND_NONE){
-          for( uint j=0; j<d; j++){
-            this->halo_val[d*E->node_haid[i]+j] = S->sys_d[d*i +j]; } }
-        else{
-          for( uint j=0; j<d; j++){
-            this->halo_val[d*E->node_haid[i]+j]+= S->sys_d[d*i +j]; } }
-      }
-}
-    }
-    }// End sys_d gather
-    time_reset( my_gmap_count, start );
-#pragma omp for schedule(OMP_SCHEDULE)
-    for(int part_i=part_0; part_i<part_o; part_i++){
-      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
-      const INT_MESH d=uint(Y->node_d);
+#pragma omp atomic write
+          this->halo_val[d*E->node_haid[i]+j] = S->sys_d[d*i +j]; } }
+    }else{
       for(INT_MESH i=0; i<E->halo_node_n; i++){
-        auto f = d* E->node_haid[i];
         for( uint j=0; j<d; j++){
+#pragma omp atomic update
+          this->halo_val[d*E->node_haid[i]+j]+= S->sys_d[d*i +j]; } }
+    }
+  }
+  time_reset( my_gat1_count, start );
+#pragma omp for schedule(OMP_SCHEDULE)
+  for(int part_i=part_0; part_i<part_o; part_i++){
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
+    const INT_MESH d=uint(Y->node_d);
+    for(INT_MESH i=0; i<E->halo_node_n; i++){
+      auto f = d* E->node_haid[i];
+      for( uint j=0; j<d; j++){
 #pragma omp atomic read
-          S->sys_d[d*i +j] = this->halo_val[f+j]; }
-      }
-    }// end sys_d scatter
+        S->sys_d[d*i +j] = this->halo_val[f+j]; }
+    }
+  }
   time_reset( my_scat_count, start );
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){//-------------- Invert sys_d
@@ -376,7 +361,7 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
 #pragma omp critical(time)
 {
   this->time_secs[0]+=float(my_prec_count)*1e-9;
-  this->time_secs[1]+=float(my_gmap_count)*1e-9;
+  //this->time_secs[1]+=float(my_gmap_count)*1e-9;
   this->time_secs[2]+=float(my_gat0_count)*1e-9;
   this->time_secs[3]+=float(my_gat1_count)*1e-9;
   this->time_secs[4]+=float(my_scat_count)*1e-9;
