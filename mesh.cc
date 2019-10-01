@@ -322,30 +322,24 @@ int Mesh::Setup(){
   priv_part.resize(this->mesh_part.size());
   std::copy(this->mesh_part.begin(), this->mesh_part.end(), priv_part.begin());
 }
-  const int part_o = part_n+part_0;
-#pragma omp for schedule(OMP_SCHEDULE)
-    for(int part_i=part_0; part_i<part_o; part_i++){
-      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
-      if(E->node_haid.size()==0){ E->node_haid.resize(E->halo_node_n); }
-    }
     //----------------------------------------------------------- Sync halo_map
 #pragma omp for schedule(OMP_SCHEDULE)
-    for(int part_i=part_0; part_i<part_o; part_i++){
+    for(int part_i=part_0; part_i<(part_n+part_0); part_i++){
       Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
 #pragma omp critical(halomap)
 {//FIXME critical section here?
       if(E->node_haid.size()==0){ E->node_haid.resize(E->halo_node_n); };
       for(INT_MESH i=0; i<E->halo_node_n; i++){
-      INT_MESH g=E->node_glid[i];
-      if(this->halo_map.count(g)==0){// Initialize halo_map
-        this->halo_map[g]=halo_n;
-        E->node_haid[i]=halo_n;
-        halo_n++;
-      }else{// Add in the rest.
-        E->node_haid[i]=this->halo_map[g];
+        INT_MESH g=E->node_glid[i];
+        if(this->halo_map.count(g)==0){// Initialize halo_map
+          this->halo_map[g]=halo_n;
+          E->node_haid[i]=halo_n;
+          halo_n++;
+        }else{// Add in the rest.
+          E->node_haid[i]=this->halo_map[g];
+        }
       }
 }
-    }
     }// End halo map init
 }// End parallel region ==================================================
   //this->udof_n = sys_udof_n;
