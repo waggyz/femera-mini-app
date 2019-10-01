@@ -152,7 +152,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp parallel num_threads(comp_n)
 {// parallel init region
   long int my_scat_count=0, my_prec_count=0,
-    my_gat0_count=0,my_gat1_count=0, my_gmap_count=0, my_solv_count=0;
+    my_gat0_count=0,my_gat1_count=0, my_solv_count=0;
   auto start = std::chrono::high_resolution_clock::now();
 #if 0
   // Make thread-local copies of mesh_part into threadprivate priv_part.
@@ -261,18 +261,6 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
         S->sys_d[d*i +j] = this->halo_val[f+j]; }
     }
   }
-    time_reset( my_gmap_count, start );
-#pragma omp for schedule(OMP_SCHEDULE)
-    for(int part_i=part_0; part_i<part_o; part_i++){
-      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
-      const INT_MESH d=uint(Y->node_d);
-      for(INT_MESH i=0; i<E->halo_node_n; i++){
-        auto f = d* E->node_haid[i];
-        for( uint j=0; j<d; j++){
-#pragma omp atomic read
-          S->sys_d[d*i +j] = this->halo_val[f+j]; }
-      }
-    }// end sys_d scatter parts
   time_reset( my_scat_count, start );// sys_d sync -----
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){// ------------- Invert sys_d
@@ -365,7 +353,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp critical(time)
 {
   this->time_secs[0]+=float(my_prec_count)*1e-9;
-  this->time_secs[1]+=float(my_gmap_count)*1e-9;
+  //this->time_secs[1]+=float(my_gmap_count)*1e-9;
   this->time_secs[2]+=float(my_gat0_count)*1e-9;
   this->time_secs[3]+=float(my_gat1_count)*1e-9;
   this->time_secs[4]+=float(my_scat_count)*1e-9;
