@@ -349,10 +349,13 @@ int main( int argc, char** argv ){
     M->time_secs=0.0;
     M->Init();//FIXME BCS called from M->Setup?
     if( M->glob_atol>0.0 ){ M->glob_rto2=M->glob_ato2; }//FIXME Move to Init?
-    if( step_n > 1 ){
+#if VERB_MAX>1
+    if( verbosity > 1 ){ if( step_n > 1 ){
       printf("    Load Step:  %i of %i scaled by%5.2f and\n",
         M->load_step, M->load_step_n,
         M->step_scal * FLOAT_SOLV(M->load_step) ); }
+    }
+#endif
 #if VERB_MAX>0
     if(verbosity>0){
     init_done = std::chrono::high_resolution_clock::now();

@@ -70,13 +70,6 @@ int NCG::Setup( Elem* E, Phys* Y ){// printf("*** NCG::Setup(E,Y) ***\n");
 #if 1
   this->RHS( E,Y );
   this->BCS( E,Y );// Sync max Y->udof_magn before Precond()
-  Y->tens_flop*=2;Y->tens_band*=2;Y->stif_flop*=2;Y->stif_band*=2;// 2 evals/iter
-  Y->ElemLinear( E,0,E->elem_n, this->sys_f, this->sys_u );
-  Y->ElemNonlinear( E,0,E->elem_n, this->sys_f, this->sys_u, this->sys_u, false );
-#endif
-  return(0);
-}
-int NCG::Init( Elem* E, Phys* Y ){// printf("*** NCG::Init(E,Y) ***\n");
   if(this->cube_init!=0.0){//FIXME I don't know if this is working
     // printf("*** NCG::Init(E,Y)...cube_init ***\n");
     const INT_MESH Nn=E->node_n, Dm=E->mesh_d;
@@ -104,11 +97,18 @@ int NCG::Init( Elem* E, Phys* Y ){// printf("*** NCG::Init(E,Y) ***\n");
     }
     //this->BCS( E,Y );//FIXME repeated in Setup(E,Y)
   }
+  Y->tens_flop*=2;Y->tens_band*=2;Y->stif_flop*=2;Y->stif_band*=2;// 2 evals/iter
+  Y->ElemLinear( E,0,E->elem_n, this->sys_f, this->sys_u );
+  Y->ElemNonlinear( E,0,E->elem_n, this->sys_f, this->sys_u, this->sys_u, false );
+#endif
+  return(0);
+}
+int NCG::Init( Elem* E, Phys* Y ){// printf("*** NCG::Init(E,Y) ***\n");
   this->BCS( E,Y );//FIXME repeated in Setup(E,Y)
   this->BC0( E,Y );
   //FIXME Check if the following need to be here.
-  Y->ElemLinear( E,0,E->elem_n,this->sys_f,this->sys_u );
-  Y->ElemNonlinear( E,0,E->elem_n,this->sys_f,this->sys_u,this->sys_u, true );
+  //Y->ElemLinear( E,0,E->elem_n,this->sys_f,this->sys_u );
+  //Y->ElemNonlinear( E,0,E->elem_n,this->sys_f,this->sys_u,this->sys_u, true );
   return 0;
 }
 int NCG::Init(){// printf("*** NCG::Init() ***\n");
@@ -167,6 +167,8 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     S->load_scal=load_scal;
     S->Init(E,Y);
+    Y->ElemLinear( E,0,E->elem_n,S->sys_f,S->sys_u );
+    Y->ElemNonlinear( E,0,E->elem_n,S->sys_f,S->sys_u,S->sys_u, true );
     for(uint i=0;i<Y->udof_magn.size();i++){
       //printf("GLOBAL MAX BC[%u]: %f\n",i,bcmax[i]);
       if(Y->udof_magn[i] > bcmax[i]){
@@ -222,6 +224,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   }
   // Sync sys_d [this inits M->halo_map and E->node_haid]//FIXME separate
   time_reset( my_prec_count, start );//----------- Init halo map and sync sys_d
+  //FIXME Move halo map init to Mesh::Setup()?
 #pragma omp for schedule(OMP_SCHEDULE)
     for(int part_i=part_0; part_i<part_o; part_i++){
       Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
@@ -270,9 +273,9 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH sysn=S->udof_n;
     for(uint i=0;i<sysn;i++){ S->sys_d[i] = FLOAT_SOLV(1.0) / S->sys_d[i]; }
-    //S->Init( E,Y );// Zeros boundary conditions
+    S->Init( E,Y );// Zeros boundary conditions
     //S->BCS( E,Y );
-    S->BC0( E,Y );
+    //S->BC0( E,Y );
   }
   time_reset( my_solv_count, start );//FIXME wtf?
   time_reset( my_gat0_count, start );//FIXME wtf?
