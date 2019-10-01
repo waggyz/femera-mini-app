@@ -531,7 +531,7 @@ int main( int argc, char** argv ){
   }// end iter scope
 #if 0
 // Output integration point strains and stresses =====================
-#pragma omp parallel
+#pragma omp parallel num_threads(comp_n)
 {  std::vector<Mesh::part> P;
    P.resize(M->mesh_part.size());
    std::copy(M->mesh_part.begin(), M->mesh_part.end(), P.begin());
@@ -561,7 +561,7 @@ int main( int argc, char** argv ){
     FLOAT_PHYS scay=1.0,miny= 99e9,maxy=-99e9;
     FLOAT_PHYS scaz=1.0,minz= 99e9,maxz=-99e9;
     FLOAT_PHYS youn_voig=0.0, ther_pres=0.0, test_amt=0.0;
-#pragma omp parallel
+#pragma omp parallel num_threads(comp_n)
 {  std::vector<Mesh::part> P;
    P.resize(M->mesh_part.size());
    std::copy(M->mesh_part.begin(), M->mesh_part.end(), P.begin());
@@ -619,7 +619,7 @@ int main( int argc, char** argv ){
     if( M->load_step==1 ){
     printf("Solution Error (Compared to Isotropic)\n");
     Test* T = new Test();//FIXME should this be inside the parallel region?
-#pragma omp parallel
+#pragma omp parallel num_threads(comp_n)
 {   std::vector<Mesh::part> P;
     P.resize(M->mesh_part.size());
     std::copy(M->mesh_part.begin(), M->mesh_part.end(), P.begin());

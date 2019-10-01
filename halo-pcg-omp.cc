@@ -171,7 +171,7 @@ int PCG::Iter(){// printf("*** Iter() ***\n");// 2 FLOP + 12 FLOP/DOF, 14 float/
   for(uint i=0;i<sysn;i++){
       sys_r[i] -= alpha * sys_f[i];
   };
-#pragma omp parallel for reduction(+:r2b)
+#pragma omp parallel for num_threads(comp_n) reduction(+:r2b)
   for(uint i=sumi0; i<sysn; i++){
     r2b += sys_r[i] * sys_r[i] * sys_d[i];// 3 FLOP/DOF, 2 read =2/DOF
   };
@@ -179,7 +179,7 @@ int PCG::Iter(){// printf("*** Iter() ***\n");// 2 FLOP + 12 FLOP/DOF, 14 float/
   //sys_p  = sys_d * sys_r + (r2b/ra)*sys_p;
   const FLOAT_PHYS beta = r2b/ra;//  1 FLOP
   this->loca_res2 = r2b;// Update member residual (squared)
-#pragma omp parallel for
+#pragma omp parallel for num_threads(comp_n)
   for(uint i=0; i<sysn; i++){// 3 FLOP/DOF, 3 read + 1 write =4/DOF
     sys_p[i] = sys_d[i] * sys_r[i] + beta * sys_p[i];
   };
