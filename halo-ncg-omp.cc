@@ -14,11 +14,8 @@
 #include <omp.h>
 #include "femera.h"
 //
-#undef  HALO_SUM_SER
+#undef HALO_SUM_SER
 #undef HALO_SUM_CHK
-//
-//std::vector<Mesh::part> HaloNCG::priv_part;
-//std::vector<Mesh::part> HaloNCG::Ptoto;
 //
 int NCG::BC (Mesh* ){return 1;}
 int NCG::RHS(Mesh* ){return 1;}
@@ -211,7 +208,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
-#if 1
+#if 0
     // Predict next solution
     const INT_MESH sysn=S->udof_n;
 #ifdef HAS_SIMD

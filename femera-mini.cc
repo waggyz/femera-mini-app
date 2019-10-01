@@ -275,10 +275,6 @@ int main( int argc, char** argv ){
   read_start = std::chrono::high_resolution_clock::now();
 #endif
   M->Setup();
-#if 0
-  std::vector<Mesh::part> P_in_main( M->mesh_part.size() );
-  std::copy( M->mesh_part.begin(), M->mesh_part.end(), P_in_main.begin());
-#endif
 //if VERB_MAX>1
   {// scope local variables
   //int sugg_max=3000;
@@ -532,12 +528,9 @@ int main( int argc, char** argv ){
 #if 0
 // Output integration point strains and stresses =====================
 #pragma omp parallel num_threads(comp_n)
-{  std::vector<Mesh::part> P;
-   P.resize(M->mesh_part.size());
-   std::copy(M->mesh_part.begin(), M->mesh_part.end(), P.begin());
-#pragma omp for schedule(static)
+{
     for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
-      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->priv_part[part_i];
 #pragma omp critical(minmax)
 {
     Y->ElemStrainStress( std::cout, E, S->sys_u );
@@ -562,12 +555,10 @@ int main( int argc, char** argv ){
     FLOAT_PHYS scaz=1.0,minz= 99e9,maxz=-99e9;
     FLOAT_PHYS youn_voig=0.0, ther_pres=0.0, test_amt=0.0;
 #pragma omp parallel num_threads(comp_n)
-{  std::vector<Mesh::part> P;
-   P.resize(M->mesh_part.size());
-   std::copy(M->mesh_part.begin(), M->mesh_part.end(), P.begin());
+{
 #pragma omp for schedule(static)
     for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
-      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->priv_part[part_i];
 #pragma omp critical(minmax)
 {
       //smin=std::min( smin, E->node_coor.min() );
@@ -620,12 +611,10 @@ int main( int argc, char** argv ){
     printf("Solution Error (Compared to Isotropic)\n");
     Test* T = new Test();//FIXME should this be inside the parallel region?
 #pragma omp parallel num_threads(comp_n)
-{   std::vector<Mesh::part> P;
-    P.resize(M->mesh_part.size());
-    std::copy(M->mesh_part.begin(), M->mesh_part.end(), P.begin());
+{
 #pragma omp for schedule(static)
     for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
-      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->priv_part[part_i];
       const int Dm=3; const int Dn=Y->node_d;
       Phys::vals errors;
       FLOAT_PHYS nu=Y->mtrl_prop[1];
@@ -787,11 +776,9 @@ int main( int argc, char** argv ){
     //FIXME should do this only for elems with prescribed BCS
 #pragma omp parallel num_threads(comp_n)
 {
-  std::vector<Mesh::part> P;  P.resize(M->mesh_part.size());
-  std::copy(M->mesh_part.begin(), M->mesh_part.end(), P.begin());
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->priv_part[part_i];
     const auto n = S->udof_n;
     for(uint i=0;i<n;i++){ S->sys_f[i]=0.0; }
     Y->ElemLinear( E,0,E->halo_elem_n, S->sys_f, S->sys_u );
@@ -808,7 +795,7 @@ int main( int argc, char** argv ){
   }
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->priv_part[part_i];
     const INT_MESH Dn=uint(Y->node_d);
     const INT_MESH hrn=E->halo_remo_n;
     for(INT_MESH i=0; i<hrn; i++){
@@ -820,7 +807,7 @@ int main( int argc, char** argv ){
   }// finished gather, now scatter back to elems
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->priv_part[part_i];
     const INT_MESH Dn=uint(Y->node_d);
     const INT_MESH hnn=E->halo_node_n;
     for(INT_MESH i=0; i<hnn; i++){
@@ -838,7 +825,7 @@ int main( int argc, char** argv ){
   // Also, compute the polycrystal effective Young's modulus
 #pragma omp for schedule(static) reduction(+:reac_x)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
-    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->priv_part[part_i];
     const INT_MESH Dn=uint(Y->node_d);
     uint dof=test_dir;
     INT_MESH n,f; FLOAT_MESH v;

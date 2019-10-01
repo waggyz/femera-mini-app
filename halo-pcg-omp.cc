@@ -13,9 +13,6 @@
 #include <stdio.h>
 #include <omp.h>
 #include "femera.h"
-//std::vector<Mesh::part> HaloPCG::priv_part;
-//std::vector<Mesh::part> HaloPCG::Ptoto;
-
 
 int PCG::BC (Mesh* ){return 1;};
 int PCG::RHS(Mesh* ){return 1;};

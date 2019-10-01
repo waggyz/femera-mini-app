@@ -89,9 +89,9 @@ public:
   //
   //virtual Elem* ReadFile( const char* fname, INT_ORDER pord )=0;
   //
-protected:
   static std::vector<part> priv_part;
 #pragma omp threadprivate(priv_part)
+protected:
   Mesh( Solv::Meth m ) : solv_meth(m){};
   Mesh( Solv::Meth m, INT_MESH i, FLOAT_PHYS r ) :
     solv_meth(m),iter_max(i),glob_rtol(r){};
