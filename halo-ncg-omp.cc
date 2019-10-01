@@ -231,7 +231,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   }
   time_reset( my_prec_count, start );
   //----------------------------- Sync sys_d
-#pragma omp master
+#pragma omp single
 {  this->halo_val=0.0; }
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
@@ -273,7 +273,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   }
   time_reset( my_solv_count, start );//FIXME wtf?
   time_reset( my_gat0_count, start );//FIXME wtf?
-#pragma omp master
+#pragma omp single
 {   this->halo_val = 0.0; }// serial halo_vals zero
 #ifdef HALO_SUM_SER
 #pragma omp single
