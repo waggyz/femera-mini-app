@@ -282,7 +282,12 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #endif
   for(int part_i=part_0; part_i<part_o; part_i++){// --------------- sync sys_f
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
+    const INT_MESH sysn=S->udof_n;
     const INT_MESH d=uint(Y->node_d);
+  //FIXME Put the element response calcs into the halo ops properly
+    for(INT_MESH i=1; i<sysn; i++){ S->sys_f[i]=0.0; }
+    Y->ElemLinear( E,0,E->elem_n,S->sys_f,S->sys_u );
+    Y->ElemNonlinear( E,0,E->elem_n,S->sys_f,S->sys_u,S->sys_u, false );
     for(INT_MESH i=0; i<E->halo_node_n; i++){
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
