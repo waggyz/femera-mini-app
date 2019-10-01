@@ -18,13 +18,14 @@ int PCG::BC (Mesh* ){return 1;};
 int PCG::RHS(Mesh* ){return 1;};
 //
 int PCG::RHS(Elem* E, Phys* Y ){// printf("*** RHS(E,Y) ***\n");
+  this->dat_b=0.0;
   const uint Dn=uint(Y->node_d);
   INT_MESH n; INT_DOF f; FLOAT_PHYS v;
   for(auto t : E->rhs_vals ){ std::tie(n,f,v)=t;
     this->sys_r[Dn* n+uint(f)]+= v;
-  };
+  }
   return(0);
-};
+}
 int PCG::BCS(Elem* E, Phys* Y ){// printf("*** BCS(E,Y) ***\n");
   uint Dn=uint(Y->node_d);
   INT_MESH n; INT_DOF f; FLOAT_PHYS v;
@@ -33,24 +34,24 @@ int PCG::BCS(Elem* E, Phys* Y ){// printf("*** BCS(E,Y) ***\n");
     this->sys_u[Dn* n+uint(f)] = v * this->load_scal;
     if(std::abs(v) > Y->udof_magn[f]){ Y->udof_magn[f] = std::abs(v); }
     if(std::abs(v) > std::abs(this->loca_bmax[f])){ this->loca_bmax[f] = v; }
-  };
+  }
   return(0);
-};
+}
 int PCG::BC0(Elem* E, Phys* Y ){// printf("*** BC0(E,Y) ***\n");
   uint Dn=uint(Y->node_d);
   INT_MESH n; INT_DOF f; FLOAT_PHYS v;
   for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
     this->sys_d[Dn* n+uint(f)]=0.0;
     this->sys_f[Dn* n+uint(f)]=0.0;
-  };
+  }
   for(auto t : E->bc0_nf   ){ std::tie(n,f)=t;
     this->sys_d[Dn* n+uint(f)]=0.0;
     #if VERB_MAX>10
     printf("BC0: [%i]:0\n",E->bc0_nf[i]);
     #endif
-  };
+  }
   return(0);
-};
+}
 int PCG::Setup( Elem* E, Phys* Y ){// printf("*** Setup(E,Y) ***\n");
   //this->meth_name="preconditioned conjugate gradient";
   this->halo_loca_0 = E->halo_remo_n * Y->node_d;
@@ -61,7 +62,7 @@ int PCG::Setup( Elem* E, Phys* Y ){// printf("*** Setup(E,Y) ***\n");
   //E->do_halo=true ; Y->ElemLinear( E,this->sys_f,this->sys_u );
   //E->do_halo=false; Y->ElemLinear( E,this->sys_f,this->sys_u );
   return(0);
-};
+}
 int PCG::Init( Elem* E, Phys* Y ){// printf("*** Init(E,Y) ***\n");
 #if 1
   //FIXME Move this somewhere
@@ -102,6 +103,7 @@ int PCG::Init( Elem* E, Phys* Y ){// printf("*** Init(E,Y) ***\n");
   this->BCS( E,Y );//FIXME repeated in Setup(E,Y)
   this->BC0( E,Y );
 #endif
+  this->dat_f=0.0;
   Y->ElemLinear( E,0,E->elem_n,this->sys_f,this->sys_u );
 #if 0
   const uint sysn=this->udof_n;
@@ -261,7 +263,6 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
       printf("\n");
     }
 #endif
-  this->halo_val=0.0;
 }
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
@@ -277,6 +278,10 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
   }
   time_reset( my_prec_count, start );
   // ---------------------------  Sync sys_d
+#pragma omp master
+{
+  this->halo_val=0.0;
+}
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];

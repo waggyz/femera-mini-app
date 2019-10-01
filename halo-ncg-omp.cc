@@ -23,6 +23,7 @@ int NCG::Iter(){return 1;}
 int NCG::Solve( Elem*, Phys* ){return 1;}
 //
 int NCG::RHS(Elem* E, Phys* Y ){// printf("*** NCG::RHS(E,Y) ***\n");
+  this->dat_b=0.0;
   const uint Dn=uint(Y->node_d);
   INT_MESH n; INT_DOF f; FLOAT_PHYS v;
   for(auto t : E->rhs_vals ){ std::tie(n,f,v)=t;
@@ -95,6 +96,7 @@ int NCG::Setup( Elem* E, Phys* Y ){// printf("*** NCG::Setup(E,Y) ***\n");
     //this->BCS( E,Y );//FIXME repeated in Setup(E,Y)
   }
   Y->tens_flop*=2;Y->tens_band*=2;Y->stif_flop*=2;Y->stif_band*=2;// 2 evals/iter
+  this->dat_f=0.0;
   Y->ElemLinear( E,0,E->elem_n, this->sys_f, this->sys_u );
   Y->ElemNonlinear( E,0,E->elem_n, this->sys_f, this->sys_u, this->sys_u, false );
 #endif
@@ -203,12 +205,11 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
       printf("\n");
     }
 #endif
-  this->halo_val=0.0;
 }
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
-#if 0
+#if 1
     // Predict next solution
     const INT_MESH sysn=S->udof_n;
 #ifdef HAS_SIMD
@@ -230,6 +231,8 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   }
   time_reset( my_prec_count, start );
   //----------------------------- Sync sys_d
+#pragma omp master
+{  this->halo_val=0.0; }
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
@@ -270,7 +273,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   }
   time_reset( my_solv_count, start );//FIXME wtf?
   time_reset( my_gat0_count, start );//FIXME wtf?
-#pragma omp single
+#pragma omp master
 {   this->halo_val = 0.0; }// serial halo_vals zero
 #ifdef HALO_SUM_SER
 #pragma omp single
