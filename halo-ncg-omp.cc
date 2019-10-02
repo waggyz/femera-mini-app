@@ -143,7 +143,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   Phys::vals bcmax={0.0,0.0,0.0,0.0};
 #pragma omp parallel num_threads(comp_n)
 {// parallel init region
-  long int my_scat_count=0, my_prec_count=0,
+  long int my_scat_count=0, my_prec_count=0,//FIXME These times are messed up
     my_gat0_count=0,my_gat1_count=0, my_solv_count=0;
   auto start = std::chrono::high_resolution_clock::now();
 #if 0
@@ -194,7 +194,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   }
 #pragma omp single
 {
-  auto m=bcmax[0];//FIXME Move to after Init, below?
+  auto m=bcmax[0];
   for(uint i=1;i<3;i++){ if(bcmax[0] > m){ m=bcmax[i]; } }
   for(uint i=0;i<3;i++){ bcmax[i]=m; }
   //NOTE Nonlinear physics needs unscaled part_u.

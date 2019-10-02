@@ -58,8 +58,8 @@ public:
   float phys_flop=0, phys_band=0;
   float solv_flop=0, solv_band=0;
   //
-  FLOAT_MESH glob_bbox[6]={9e9,9e9,9e9 , -9e9,-9e9,-9e9};
-  FLOAT_SOLV glob_bmax[4]={0.0,0.0,0.0,0.0};
+  FLOAT_MESH glob_bbox[6]={9e9,9e9,9e9 , -9e9,-9e9,-9e9};// Bounding box
+  FLOAT_SOLV glob_bmax[4]={0.0,0.0,0.0,0.0};// Boundary conditions max magnitude
   //
   //FIXME Move these into Elem?
   //NOTE These are by global ID
