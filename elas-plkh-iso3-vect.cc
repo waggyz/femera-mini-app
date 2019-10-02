@@ -57,7 +57,6 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   printf("DOF: %u, Elems:%u, IntPts:%u, Nodes/elem:%u\n",
     (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
 #endif
-  FLOAT_PHYS dw;
   FLOAT_MESH VECALIGNED jac[Nj];
   FLOAT_PHYS VECALIGNED G[Nt], u[Ne], p[Ne];
   FLOAT_PHYS VECALIGNED H[Nd*4],P[Nd*4], S[Nd*4];//FIXME S size
@@ -65,7 +64,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
   FLOAT_PHYS VECALIGNED wgt[intp_n];
   FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
-  FLOAT_PHYS VECALIGNED back_v[6];
+  FLOAT_PHYS VECALIGNED back_v[Ns];
   //
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
@@ -103,9 +102,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
     const __m256d j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
     const __m256d j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
-      //for(int i=0; i<6; i++){// Copy initial element state.
-      //  back_v[ i ] = this->elgp_vars[this->gvar_d*(intp_n*ie+ip) +i ]; }
-      std::memcpy( &back_v, &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*6 );
+      std::memcpy( &back_v, &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       compute_g_p_h( &G[0],&P[0],&H[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne],
@@ -117,7 +114,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         printf("%+9.2e ",H[j]);
       } printf("\n");
 #endif
-      dw = jac[9] * wgt[ip];
+      const FLOAT_PHYS dw = jac[9] * wgt[ip];
       if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
 #ifndef FETCH_U_EARLY
         const INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
@@ -198,9 +195,8 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         //------------------------------------------------- Save element state.
         if( save_state ){
         for(int i=0; i<6; i++){// Update state variable back_v.
-          this->elgp_vars[gvar_d*(intp_n*ie+ip) +i ]
-            += plas_flow[i] * hard_modu * delta_equiv; }
-        }
+          state[Ns*(intp_n*ie+ip) +i ]
+            += plas_flow[i] * hard_modu * delta_equiv; } }
         //======================================================= end UMAT scope
 #if VERB_MAX>10
 #pragma omp critical(print)

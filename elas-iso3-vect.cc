@@ -45,7 +45,6 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   printf("DOF: %u, Elems:%u, IntPts:%u, Nodes/elem:%u\n",
     (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
 #endif
-  FLOAT_PHYS dw;
   FLOAT_MESH VECALIGNED jac[Nj];
   FLOAT_PHYS VECALIGNED G[Nt], u[Ne];
   FLOAT_PHYS VECALIGNED H[Nd*4], S[Nd*4];//FIXME S size
@@ -146,7 +145,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
         printf("%+9.2e ",H[j]);
       }; printf("\n");
 #endif
-      dw = jac[9] * wgt[ip];
+      const FLOAT_PHYS dw = jac[9] * wgt[ip];
       if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
 #ifndef FETCH_U_EARLY
         const INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];

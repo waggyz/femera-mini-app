@@ -37,7 +37,6 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   printf("Elems:%i, IntPts:%i, Nodes/elem:%i\n",
       (int)elem_n,(int)intp_n,(int)Nc);
 #endif
-  FLOAT_PHYS dw;
   FLOAT_MESH VECALIGNED jac[Nj];
   FLOAT_PHYS VECALIGNED G[Nt], u[Ne];//,f[Nt];
   FLOAT_PHYS VECALIGNED H[12], S[9];//FIXME S[7]
@@ -101,7 +100,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       printf("%+9.2e ",H[j]);
     }; printf("\n");
 #endif
-    dw = jac[9] * wgt[ip];
+    const FLOAT_PHYS dw = jac[9] * wgt[ip];
     if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
 #ifdef FETCH_JAC
       std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
