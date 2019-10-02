@@ -44,6 +44,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   const int intp_n = int(E->gaus_n);
   const INT_ORDER elem_p =E->elem_p;
   //
+  const int        Ns           = this->gvar_d;// Number of state variables/ip
   const FLOAT_PHYS youn_modu    = this->mtrl_prop[0];
   const FLOAT_PHYS poiss_ratio  = this->mtrl_prop[1];
   const FLOAT_PHYS bulk_modu    = youn_modu / (1.0-2.0*poiss_ratio);
@@ -73,6 +74,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
   const FLOAT_SOLV* RESTRICT C     = &matc[0];
+        FLOAT_SOLV* RESTRICT state = &this->elgp_vars[0];
   const __m256d c0 = _mm256_set_pd(0.0,C[1],C[1],C[0]);
   const __m256d c1 = _mm256_set_pd(0.0,C[1],C[0],C[1]);
   const __m256d c2 = _mm256_set_pd(0.0,C[0],C[1],C[1]);
@@ -103,7 +105,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
       //for(int i=0; i<6; i++){// Copy initial element state.
       //  back_v[ i ] = this->elgp_vars[this->gvar_d*(intp_n*ie+ip) +i ]; }
-      std::copy( &this->elgp_vars[this->gvar_d*(intp_n*ie+ip)], 6, back_v );
+      std::memcpy( &back_v, &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*6 );
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       compute_g_p_h( &G[0],&P[0],&H[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne],
