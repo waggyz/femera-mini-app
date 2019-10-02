@@ -47,8 +47,12 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   const int        Ns           = this->gvar_d;// Number of state variables/ip
   const FLOAT_PHYS youn_modu    = this->mtrl_prop[0];
   const FLOAT_PHYS poiss_ratio  = this->mtrl_prop[1];
-  const FLOAT_PHYS bulk_modu    = youn_modu / (1.0-2.0*poiss_ratio);
+  const FLOAT_PHYS bulk_mod3    = youn_modu / (1.0-2.0*poiss_ratio);
+#if 0
+  const FLOAT_PHYS shear_modu   = 0.5*youn_modu/(1.0+poiss_ratio);
+#else
   const FLOAT_PHYS shear_modu   = this->mtrl_matc[2];
+#endif
   const FLOAT_PHYS stress_yield = this->plas_prop[0];
   const FLOAT_PHYS hard_modu    = this->plas_prop[1];
   const FLOAT_PHYS yield_tol2   =
@@ -64,7 +68,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
   FLOAT_PHYS VECALIGNED wgt[intp_n];
   FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
-  FLOAT_PHYS VECALIGNED back_v[Ns];
+  FLOAT_PHYS VECALIGNED back_v[Ns+2];// padded to 8 doubles
   //
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
@@ -106,7 +110,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       compute_g_p_h( &G[0],&P[0],&H[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne],
-                     &p[0], &u[0] );
+                     &p[0],&u[0] );
 #if VERB_MAX>10
       printf( "Small Strains Transposed (Elem: %i):", ie );
       for(int j=0;j<12;j++){
@@ -149,7 +153,19 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #endif
       //====================================================== Scope UMAT calc
       FLOAT_PHYS stress_mises=0.0;
+#if 1
       {
+      FLOAT_PHYS VECALIGNED m[6]; FLOAT_PHYS h=0.0;
+      for(int i=0;i<6;i++){ m[i] = stress_v[i] - back_v[i]; }
+      for(int i=0;i<3;i++){ h+=m[i]; }
+      h *= 0.333333333333;
+      for(int i=0;i<3;i++){ m[i]-=h; stress_mises += m[i]*m[i]*1.5; }
+      for(int i=3;i<6;i++){ stress_mises += m[i]*m[i]*3.0; }
+      }/// FIXME *3.0?
+      //for(int i=0;i<6;i++){ printf("%+9.2e ", stress_v[i]); }
+      //printf("mises: %+9.2e\n",std::sqrt(stress_mises));
+#else
+      { stress_mises=0.0;
       FLOAT_PHYS VECALIGNED m[3];//FIXME Loop and vectorize
       m[0] = stress_v[0] - back_v[0] - stress_v[1] + back_v[1];
       m[1] = stress_v[1] - back_v[1] - stress_v[2] + back_v[2];
@@ -157,9 +173,11 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       for(int i=0;i<3;i++){ stress_mises += 0.5*m[i]*m[i]; }
       }
       for(int i=3;i<6;i++){
-        const FLOAT_PHYS m = stress_v[i] - back_v[i];
-        stress_mises+= 3.0*m*m;
+        const FLOAT_PHYS mm = stress_v[i] - back_v[i];
+        stress_mises+= 3.0*mm*mm;
       }
+      //printf("old: %+9.2e; ",stress_mises);
+#endif
       __m256d s[3];
       if( stress_mises > yield_tol2 ){
         stress_mises = std::sqrt(stress_mises);
@@ -168,14 +186,14 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         const FLOAT_PHYS inv_mises = 1.0/stress_mises;
         const FLOAT_PHYS shear_eff
           = shear_modu * (stress_yield + hard_modu*delta_equiv) * inv_mises;
-        const FLOAT_PHYS third = 0.333333333333333;
+        const FLOAT_PHYS one_third = 0.333333333333333;
         const FLOAT_PHYS hard_eff = shear_modu * hard_modu
-          / (shear_modu + hard_modu*third) -3.0*shear_eff;
-        const FLOAT_PHYS lambda_eff = (bulk_modu - 2.0*shear_eff)*third;
+          / (shear_modu + hard_modu*one_third) -3.0*shear_eff;
+        const FLOAT_PHYS lambda_eff = (bulk_mod3 - 2.0*shear_eff)*one_third;
         FLOAT_PHYS VECALIGNED plas_flow[6];
         {
         FLOAT_PHYS stress_hydro=0.0;
-        for(int i=0;i<3;i++){ stress_hydro+= stress_v[i]*third; }
+        for(int i=0;i<3;i++){ stress_hydro+= stress_v[i]*one_third; }
         for(int i=0;i<6;i++){ plas_flow[i] = stress_v[i] - back_v[i]; }
         for(int i=0;i<3;i++){ plas_flow[i]-= stress_hydro; }
         for(int i=0;i<6;i++){ plas_flow[i]*= inv_mises; }
@@ -240,9 +258,9 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         S[0]=stress_p[0]; S[1]=stress_p[3]; S[2]=stress_p[5]; S[3]=stress_p[3];
         S[4]=stress_p[3]; S[5]=stress_p[1]; S[6]=stress_p[4]; S[7]=stress_p[5];
         S[8]=stress_p[5]; S[9]=stress_p[4]; S[10]=stress_p[2];S[11]=0.0;
-        s[0] = _mm256_load_pd(&S[0]);
-        s[1] = _mm256_load_pd(&S[4]);
-        s[2] = _mm256_load_pd(&S[8]);
+        s[0] = _mm256_load_pd(&S[0]);// sxx sxy sxz | sxy
+        s[1] = _mm256_load_pd(&S[4]);// sxy syy syz | sxz
+        s[2] = _mm256_load_pd(&S[8]);// sxz syz szz | 0.0
       }// if plastic
       else{
         compute_iso_s( &S[0], &P[0],C[2],c0,c1,c2, dw );// Linear conj response
