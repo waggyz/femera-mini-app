@@ -56,13 +56,13 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
     (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
 #endif
   FLOAT_PHYS dw;
-  FLOAT_MESH __attribute__((aligned(32))) jac[Nj];
-  FLOAT_PHYS __attribute__((aligned(32))) G[Nt], u[Ne], p[Ne];
-  FLOAT_PHYS __attribute__((aligned(32))) H[Nd*4],P[Nd*4], S[Nd*4];//FIXME S size
+  FLOAT_MESH VECALIGNED jac[Nj];
+  FLOAT_PHYS VECALIGNED G[Nt], u[Ne], p[Ne];
+  FLOAT_PHYS VECALIGNED H[Nd*4],P[Nd*4], S[Nd*4];//FIXME S size
   //
-  FLOAT_PHYS __attribute__((aligned(32))) intp_shpg[intp_n*Ne];
-  FLOAT_PHYS __attribute__((aligned(32))) wgt[intp_n];
-  FLOAT_PHYS __attribute__((aligned(32))) C[this->mtrl_matc.size()];
+  FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
+  FLOAT_PHYS VECALIGNED wgt[intp_n];
+  FLOAT_PHYS VECALIGNED C[this->mtrl_matc.size()];
   //
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
@@ -99,7 +99,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
     const __m256d j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
     const __m256d j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
-      FLOAT_PHYS __attribute__((aligned(32))) back_v[6];//FIXME Consider prefetching...
+      FLOAT_PHYS VECALIGNED back_v[6];//FIXME Consider prefetching...
       for(int i=0; i<6; i++){// Copy initial element state.
         back_v[ i ] = this->elgp_vars[this->gvar_d*(intp_n*ie+ip) +i ]; }
       //G = MatMul3x3xN( jac,shg );
@@ -138,7 +138,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         printf("%+9.2e ",S[j]);
       } printf("\n");
 #endif
-      const FLOAT_PHYS __attribute__((aligned(32))) stress_v[6]={// sxx, syy, szz,  sxy, syz, sxz
+      const FLOAT_PHYS VECALIGNED stress_v[6]={// sxx, syy, szz,  sxy, syz, sxz
         S[0], S[5], S[10], S[1], S[6], S[2] };
 #if VERB_MAX>10
       printf( "Stress Voigt Vector (Elem: %i):\n", ie );
@@ -149,7 +149,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       //====================================================== Scope UMAT calc
       FLOAT_PHYS stress_mises=0.0;
       {
-      FLOAT_PHYS __attribute__((aligned(32))) m[3];//FIXME Loop and vectorize
+      FLOAT_PHYS VECALIGNED m[3];//FIXME Loop and vectorize
       m[0] = stress_v[0] - back_v[0] - stress_v[1] + back_v[1];
       m[1] = stress_v[1] - back_v[1] - stress_v[2] + back_v[2];
       m[2] = stress_v[2] - back_v[2] - stress_v[0] + back_v[0];
@@ -171,7 +171,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         const FLOAT_PHYS hard_eff = shear_modu * hard_modu
           / (shear_modu + hard_modu*third) -3.0*shear_eff;
         const FLOAT_PHYS lambda_eff = (bulk_modu - 2.0*shear_eff)*third;
-        FLOAT_PHYS __attribute__((aligned(32))) plas_flow[6];
+        FLOAT_PHYS VECALIGNED plas_flow[6];
         {
         FLOAT_PHYS stress_hydro=0.0;
         for(int i=0;i<3;i++){ stress_hydro+= stress_v[i]*third; }
@@ -179,7 +179,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         for(int i=0;i<3;i++){ plas_flow[i]-= stress_hydro; }
         for(int i=0;i<6;i++){ plas_flow[i]*= inv_mises; }
         }
-        FLOAT_PHYS __attribute__((aligned(32))) D[36];
+        FLOAT_PHYS VECALIGNED D[36];
         for(int i=0;i<6;i++){
           for(int j=0;j<6;j++){
             D[6* i+j ] = hard_eff * plas_flow[i] * plas_flow[j];
@@ -221,9 +221,9 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 }
 #endif
         // Calculate conjugate stress from conjugate strain.
-        const FLOAT_PHYS __attribute__((aligned(32))) strain_p[6]={
+        const FLOAT_PHYS VECALIGNED strain_p[6]={
           P[0], P[5], P[10], P[1]+P[4], P[6]+P[9], P[2]+P[8] };
-        FLOAT_PHYS __attribute__((aligned(32))) stress_p[6];
+        FLOAT_PHYS VECALIGNED stress_p[6];
         for(int i=0; i<6; i++){ stress_p[i] =0.0;
           for(int j=0; j<6; j++){
             stress_p[i] += D[6* i+j ] * strain_p[ j ];
@@ -262,7 +262,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #pragma vector unaligned
 #endif
         for(int j=0; j<3; j++){
-          double __attribute__((aligned(32))) sf[4];
+          double VECALIGNED sf[4];
           _mm256_store_pd(&sf[0],vf[i]);
           sys_f[3*conn[i]+j] = sf[j]; } }
   }//============================================================ end elem loop

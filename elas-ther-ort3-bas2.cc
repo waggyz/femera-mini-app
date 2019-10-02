@@ -43,14 +43,14 @@ int ThermElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee
   //INT_MESH   conn[Nc];
   //FLOAT_MESH jac[Nj];
   FLOAT_PHYS dw;
-  FLOAT_PHYS __attribute__((aligned(64))) G[Ng], u[Ne],f[Ne];
-  FLOAT_PHYS __attribute__((aligned(64))) S[Dm*Dm], H[Dm*Dm], A[Dm*Dn];
+  FLOAT_PHYS VECALIGNED G[Ng], u[Ne],f[Ne];
+  FLOAT_PHYS VECALIGNED S[Dm*Dm], H[Dm*Dm], A[Dm*Dn];
   //
   // Make local copies of constant data structures
-  FLOAT_PHYS __attribute__((aligned(64))) intp_shpf[intp_n*Nc];
-  FLOAT_PHYS __attribute__((aligned(64))) intp_shpg[intp_n*Ng];
-  FLOAT_PHYS __attribute__((aligned(64))) wgt[intp_n];
-  FLOAT_PHYS __attribute__((aligned(64))) C[this->mtrl_matc.size()];
+  FLOAT_PHYS VECALIGNED intp_shpf[intp_n*Nc];
+  FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ng];
+  FLOAT_PHYS VECALIGNED wgt[intp_n];
+  FLOAT_PHYS VECALIGNED C[this->mtrl_matc.size()];
   //
   std::copy( &E->intp_shpf[0], &E->intp_shpf[intp_n*Nc], intp_shpf );
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ng], intp_shpg );
@@ -61,7 +61,7 @@ int ThermElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee
   FLOAT_PHYS gamma[3];// gamma = alpha * E/(1-2*nu), thermoelastic effect
   for(int i=0; i<Dm; i++){ gamma[i] = 1.0/(C[i] * C[9+i]); }//FIXME may be 1.0/this
 #endif
-  const FLOAT_PHYS __attribute__((aligned(64))) R[9] = {
+  const FLOAT_PHYS VECALIGNED R[9] = {
     mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
     mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
     mtrl_rotc[6],mtrl_rotc[7],mtrl_rotc[8]};

@@ -46,13 +46,13 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
 #endif
   FLOAT_PHYS dw;
-  FLOAT_MESH __attribute__((aligned(32))) jac[Nj];
-  FLOAT_PHYS __attribute__((aligned(32))) G[Nt], u[Ne];
-  FLOAT_PHYS __attribute__((aligned(32))) H[Nd*4], S[Nd*4];//FIXME S size
+  FLOAT_MESH VECALIGNED jac[Nj];
+  FLOAT_PHYS VECALIGNED G[Nt], u[Ne];
+  FLOAT_PHYS VECALIGNED H[Nd*4], S[Nd*4];//FIXME S size
   //
-  FLOAT_PHYS __attribute__((aligned(32))) intp_shpg[intp_n*Ne];
-  FLOAT_PHYS __attribute__((aligned(32))) wgt[intp_n];
-  FLOAT_PHYS __attribute__((aligned(32))) C[this->mtrl_matc.size()];
+  FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
+  FLOAT_PHYS VECALIGNED wgt[intp_n];
+  FLOAT_PHYS VECALIGNED C[this->mtrl_matc.size()];
   //
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
@@ -247,7 +247,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #pragma vector unaligned
 #endif
       for(int j=0; j<3; j++){
-        double __attribute__((aligned(32))) sf[4];
+        double VECALIGNED sf[4];
         _mm256_store_pd(&sf[0],vf[i]);
         sys_f[3*conn[i]+j] = sf[j]; } }
   }//============================================================ end elem loop

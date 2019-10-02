@@ -31,12 +31,9 @@
 // Solver precision
 #define ALIGN_SYS
 // align system vectors
-//FIXME I don't think the following are needed...
-#define VOIGT_FRUP 0,4,8, 5,2,1// Extract from upper-triangular part of
-//symmetric 3x3 stress or strain tensor
-#define VOIGT_FRLO 0,4,8, 7,6,3// Voigt: sxx,syy,szz, syz,sxz,sxy;
-//or exx,eyy,ezz, 2eyz,2exz,2exy
-#define VOIGT_TOFU 0,5,4, 5,1,3, 4,3,2// Voigt vector to full symmetric 3x3 tensor
+#define SYSALIGN_BYTE 64
+#define VECALIGN_BYTE 32
+#define VECALIGNED __attribute__((aligned(32)))
 //
 // Integer return values
 #define SOLV_CNVG_PTOL 1// Preconditioned norm

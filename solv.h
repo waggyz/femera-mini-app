@@ -8,7 +8,7 @@ public:
   typedef std::valarray<FLOAT_SOLV> vals;
   typedef FLOAT_SOLV* valign;// memory-aligned vals
 #ifdef ALIGN_SYS
-  const uint valign_byte = 64;
+  const uint valign_byte = SYSALIGN_BYTE;
 #endif
   enum Meth {
     SOLV_GD=0, SOLV_CG=1, SOLV_NG=2, SOLV_CR=3

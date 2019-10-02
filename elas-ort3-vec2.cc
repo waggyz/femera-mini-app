@@ -38,13 +38,13 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       (int)elem_n,(int)intp_n,(int)Nc);
 #endif
   FLOAT_PHYS dw;
-  FLOAT_MESH __attribute__((aligned(32))) jac[Nj];
-  FLOAT_PHYS __attribute__((aligned(32))) G[Nt], u[Ne];//,f[Nt];
-  FLOAT_PHYS __attribute__((aligned(32))) H[12], S[9];//FIXME S[7]
+  FLOAT_MESH VECALIGNED jac[Nj];
+  FLOAT_PHYS VECALIGNED G[Nt], u[Ne];//,f[Nt];
+  FLOAT_PHYS VECALIGNED H[12], S[9];//FIXME S[7]
   // Make local copies
-  FLOAT_PHYS __attribute__((aligned(32))) intp_shpg[intp_n*Ne];
-  FLOAT_PHYS __attribute__((aligned(32))) wgt[intp_n];
-  FLOAT_PHYS __attribute__((aligned(32))) C[this->mtrl_matc.size()];
+  FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
+  FLOAT_PHYS VECALIGNED wgt[intp_n];
+  FLOAT_PHYS VECALIGNED C[this->mtrl_matc.size()];
   //
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
@@ -53,7 +53,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   const __m256d c1 = _mm256_set_pd(0.0,C[4],C[1],C[3]);
   const __m256d c2 = _mm256_set_pd(0.0,C[2],C[4],C[5]);
   //c3 = _mm256_set_pd(0.,C[7],C[8],C[6]);
-  const FLOAT_PHYS __attribute__((aligned(32))) R[9+1] = {
+  const FLOAT_PHYS VECALIGNED R[9+1] = {
     mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
     mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
     mtrl_rotc[6],mtrl_rotc[7],mtrl_rotc[8],0.0};
@@ -178,7 +178,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #pragma vector unaligned
 #endif
       for(int j=0; j<3; j++){
-        double __attribute__((aligned(32))) sf[4];
+        double VECALIGNED sf[4];
         _mm256_store_pd(&sf[0],vf[i]);
         sys_f[3*conn[i]+j] = sf[j];
       }
