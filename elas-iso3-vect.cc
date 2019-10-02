@@ -30,7 +30,7 @@ int ElastIso3D::Setup( Elem* E ){
   return 0;
 }
 int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
-  FLOAT_SOLV* sys_f, const FLOAT_SOLV* sys_u ){
+  FLOAT_SOLV* part_f, const FLOAT_SOLV* part_u ){
   //FIXME Clean up local variables.
   //const int De = 3;// Element Dimension
   const int Nd = 3;// Node (mesh) Dimension
@@ -72,9 +72,9 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
-  const FLOAT_SOLV* RESTRICT sysu  = &sys_u[0];
+  const FLOAT_SOLV* RESTRICT sysu  = &part_u[0];
 #ifndef VECTORIZED
-        FLOAT_SOLV* RESTRICT sysf  = &sys_f[0];
+        FLOAT_SOLV* RESTRICT sysf  = &part_f[0];
 #endif
   {// Scope vf registers
   __m256d vf[Nc];
@@ -198,11 +198,11 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       //------------------------------------------------------- 18+9 = 27 FLOP
 #ifdef VECTORIZED
     if(ip==0){
-      for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[i]]); }
+      for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
       if(elem_p>1){
-        for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[i]]); }
+        for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
       if(elem_p>2){
-        for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[i]]); }
+        for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
       }
       }
     }
@@ -249,7 +249,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       for(int j=0; j<3; j++){
         double VECALIGNED sf[4];
         _mm256_store_pd(&sf[0],vf[i]);
-        sys_f[3*conn[i]+j] = sf[j]; } }
+        part_f[3*conn[i]+j] = sf[j]; } }
   }//============================================================ end elem loop
   }// end vf register scope
   return 0;

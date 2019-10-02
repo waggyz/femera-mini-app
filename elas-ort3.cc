@@ -15,7 +15,7 @@ int ElastOrtho3D::ElemJacobi( Elem*, FLOAT_SOLV*, const FLOAT_SOLV* ){
   return 1; }
 //
 int ElastOrtho3D::ElemStrainStress(std::ostream& of,
-  Elem* E, FLOAT_SOLV* sys_u) {
+  Elem* E, FLOAT_SOLV* part_u) {
   //FIXME Cleanup local variables.
   const int Dm = 3;//E->mesh_d;// Node (mesh) Dimension FIXME should be elem_d?
   const int Dn = 3;//this->node_d;// this->node_d DOF/node
@@ -65,7 +65,7 @@ int ElastOrtho3D::ElemStrainStress(std::ostream& of,
 #endif
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
-  const FLOAT_SOLV* RESTRICT sysu  = &sys_u[0];
+  const FLOAT_SOLV* RESTRICT sysu  = &part_u[0];
 #if VERB_MAX>10
     printf( "Displacements:");// (Elem: %u):", ie );
   for(int j=0;j<Ne;j++){
@@ -245,7 +245,7 @@ int ElastOrtho3D::ElemStiff(Elem* E  ){
       if(Dn>Dm){//FIXME
         for(uint i=0; i<Nc; i++){
           for(uint k=0; k<Dm ; k++){
-            sys_d[E->elem_conn[Nc*ie+i]*Dn+Dm] +=// 1e-4* //1e-3 ok
+            part_d[E->elem_conn[Nc*ie+i]*Dn+Dm] +=// 1e-4* //1e-3 ok
               //G[Nc* k+i] * mtrl_matc[12+k] * G[Nc* k+i] * this->udof_magn[j] * w;
               G[Nc* 0+i] * G[Nc* k+i]*mtrl_matc[12+0] * w
              +G[Nc* 1+i] * G[Nc* k+i]*mtrl_matc[12+1] * w
@@ -257,7 +257,7 @@ int ElastOrtho3D::ElemStiff(Elem* E  ){
   }//end elem loop
   return 0;
 }//============================================================== End ElemStiff
-int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
+int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* part_d ){
   //FIXME Doesn't do rotation yet
   const uint Dm = 3;//E->mesh_d
   const uint Dn = this->node_d;
@@ -346,7 +346,7 @@ int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
       if(Dn>Dm){
         for(uint i=0; i<Nc; i++){
           for(uint k=0; k<Dm; k++){
-            sys_d[E->elem_conn[Nc*ie+i]*Dn+Dm] +=
+            part_d[E->elem_conn[Nc*ie+i]*Dn+Dm] +=
               G[Nc* 0+i] * G[Nc* k+i]*mtrl_matc[12+0] * scal_ther * w
              +G[Nc* 1+i] * G[Nc* k+i]*mtrl_matc[12+1] * scal_ther * w
              +G[Nc* 2+i] * G[Nc* k+i]*mtrl_matc[12+2] * scal_ther * w;
@@ -357,16 +357,16 @@ int ElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
     for (uint i=0; i<Nc; i++){
       //int c=E->elem_conn[Nc*ie+i]*3;
       for(uint j=0; j<Dm; j++){
-        sys_d[E->elem_conn[Nc*ie+i]*Dn+j] += elem_diag[Dm*i+j];
-        //sys_d[E->elem_conn[Nc*ie+i]*Dn+j] += std::abs(elem_diag[Dm*i+j]);
+        part_d[E->elem_conn[Nc*ie+i]*Dn+j] += elem_diag[Dm*i+j];
+        //part_d[E->elem_conn[Nc*ie+i]*Dn+j] += std::abs(elem_diag[Dm*i+j]);
       }
-      //for(uint j=3; j<Dn; j++){ sys_d[E->elem_conn[Nc*ie+i]*Dn+j] = 1.0; }
+      //for(uint j=3; j<Dn; j++){ part_d[E->elem_conn[Nc*ie+i]*Dn+j] = 1.0; }
     }
     //elem_diag=0.0;
   }
   return 0;
 }
-int ElastOrtho3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* sys_d ){
+int ElastOrtho3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* part_d ){
   //FIXME Doesn't do rotation yet
   const uint ndof   = 3;//this->node_d
   //const int mesh_d = E->elem_d;
@@ -448,13 +448,13 @@ int ElastOrtho3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* sys_d ){
       };};
     for (uint i=0; i<Nc; i++){
       for(uint j=0; j<3; j++){
-        sys_d[E->elem_conn[Nc*ie+i]*3+j] += elem_sum[3*i+j];
+        part_d[E->elem_conn[Nc*ie+i]*3+j] += elem_sum[3*i+j];
       };};
     //K=0.0; elem_sum=0.0;
   };
   return 0;
 };
-int ElastOrtho3D::ElemStrain( Elem* E,FLOAT_SOLV* sys_f ){
+int ElastOrtho3D::ElemStrain( Elem* E,FLOAT_SOLV* part_f ){
   //FIXME Clean up local variables.
   const uint ndof= 3;//this->node_d
   const uint  Nj =10;//,d2=9;//mesh_d*mesh_d;
@@ -550,8 +550,8 @@ int ElastOrtho3D::ElemStrain( Elem* E,FLOAT_SOLV* sys_f ){
     };//end intp loop
     for (uint i=0; i<Nc; i++){
       for(uint j=0; j<3; j++){
-        //sys_f[3*conn[i]+j] +=f[(3*i+j)];
-        sys_f[4*conn[i]+j] += std::abs( f[(3*i+j)] );
+        //part_f[3*conn[i]+j] +=f[(3*i+j)];
+        part_f[4*conn[i]+j] += std::abs( f[(3*i+j)] );
     }; };//--------------------------------------------------- N*3 =  3*N FLOP
   };//end elem loop
   return 0;

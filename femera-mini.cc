@@ -533,7 +533,7 @@ int main( int argc, char** argv ){
       Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->priv_part[part_i];
 #pragma omp critical(minmax)
 {
-    Y->ElemStrainStress( std::cout, E, S->sys_u );
+    Y->ElemStrainStress( std::cout, E, S->part_u );
 }
     }//end part loop
 }
@@ -645,7 +645,7 @@ int main( int argc, char** argv ){
       if(Dn<4){
         for(INT_MESH i=0;i<Nn;i++){
           for(int j=0;j<Dn;j++){
-            norm_u[Dn* i+j] = S->sys_u[Dn* i+j] / FLOAT_SOLV(test_u);
+            norm_u[Dn* i+j] = S->part_u[Dn* i+j] / FLOAT_SOLV(test_u);
           }
         }
       }else{// Adjust for thermal expansion
@@ -657,16 +657,16 @@ int main( int argc, char** argv ){
         //printf("KAPPA: %f, THERU: %f, THERP: %f\n", kappa,ther_u,ther_pres);
         for(INT_MESH i=0;i<Nn;i++){
           // Don't adjust x displacements
-          norm_u[Dn* i+0] = S->sys_u[Dn* i+0] / FLOAT_SOLV(test_u);
+          norm_u[Dn* i+0] = S->part_u[Dn* i+0] / FLOAT_SOLV(test_u);
           // Adjust transverse displacements
           for(int j=1;j<Dm;j++){
             norm_u[Dn* i+j] =(
-              S->sys_u[Dn* i+j]
+              S->part_u[Dn* i+j]
               - kappa * test_T * coor[Dm* i+j]// thermal expansion
               - nu * ther_pres / youn_voig * coor[Dm* i+j]//pressure-induced expansion
               )/ FLOAT_SOLV(test_u);
           }
-          norm_u[Dn* i+Dm] = S->sys_u[Dn* i+Dm] / FLOAT_SOLV(test_T);
+          norm_u[Dn* i+Dm] = S->part_u[Dn* i+Dm] / FLOAT_SOLV(test_T);
         }
       }
       //errors.resize(3*(Dn+1)+1); errors=0.0;
@@ -686,8 +686,8 @@ int main( int argc, char** argv ){
           for(uint i=0;i<Nn;i++){
             for(int j=0;j<Dm;j++){ printf("%+9.2e ",E->node_coor[Dm* i+j]); }
             printf(" | ");
-            for(int j=0;j<Dm;j++){ printf("%+9.2e ",S->sys_u[Dn* i+j]); }
-            if(Dn>Dm){ printf("  %+9.2e",S->sys_u[Dn* i+Dm]); }//FIXME Temperature
+            for(int j=0;j<Dm;j++){ printf("%+9.2e ",S->part_u[Dn* i+j]); }
+            if(Dn>Dm){ printf("  %+9.2e",S->part_u[Dn* i+Dm]); }//FIXME Temperature
             printf("\n");
           }
         }
@@ -703,7 +703,7 @@ int main( int argc, char** argv ){
             for(int j=0;j<Dm;j++){ printf("%+9.2e ",coor[Dm* i+j]); }
             printf(" | ");
             for(int j=0;j<Dm;j++){ printf("%+9.2e ",norm_u[Dn* i+j]); }
-            if(Dn>Dm){ printf("  %+9.2e",S->sys_u[Dn* i+Dm]/test_T); }
+            if(Dn>Dm){ printf("  %+9.2e",S->part_u[Dn* i+Dm]/test_T); }
             printf("\n");
           }
         }
@@ -718,8 +718,8 @@ int main( int argc, char** argv ){
           for(uint i=0;i<Nn;i++){
             for(int j=0;j<Dm;j++){ printf("%+9.2e ",E->node_coor[Dm* i+j]); }
             printf(" | ");
-            for(int j=0;j<Dm;j++){ printf("%+9.2e ",S->sys_d[Dn* i+j]); }
-            if(Dn>Dm){ printf("  %+9.2e",S->sys_d[Dn* i+Dm]); }
+            for(int j=0;j<Dm;j++){ printf("%+9.2e ",S->part_d[Dn* i+j]); }
+            if(Dn>Dm){ printf("  %+9.2e",S->part_d[Dn* i+Dm]); }
             printf("\n");
           }
         }
@@ -780,17 +780,17 @@ int main( int argc, char** argv ){
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->priv_part[part_i];
     const auto n = S->udof_n;
-    for(uint i=0;i<n;i++){ S->sys_f[i]=0.0; }
-    Y->ElemLinear( E,0,E->halo_elem_n, S->sys_f, S->sys_u );
-    Y->ElemNonlinear( E,0,E->halo_elem_n, S->sys_f, S->sys_u, S->sys_u, false );
-    // sync sys_f
+    for(uint i=0;i<n;i++){ S->part_f[i]=0.0; }
+    Y->ElemLinear( E,0,E->halo_elem_n, S->part_f, S->part_u );
+    Y->ElemNonlinear( E,0,E->halo_elem_n, S->part_f, S->part_u, S->part_u, false );
+    // sync part_f
     const INT_MESH Dn=uint(Y->node_d);
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
     for(INT_MESH i=hrn; i<hnn; i++){
       auto f = Dn* E->node_haid[i];
       for(uint j=0; j<Dn; j++){
 #pragma omp atomic write
-        M->halo_val[f+j] = S->sys_f[Dn* i+j]; }
+        M->halo_val[f+j] = S->part_f[Dn* i+j]; }
     }
   }
 #pragma omp for schedule(static)
@@ -802,7 +802,7 @@ int main( int argc, char** argv ){
       auto f = Dn* E->node_haid[i];
       for( uint j=0; j<Dn; j++){
 #pragma omp atomic update
-        M->halo_val[f+j]+= S->sys_f[Dn* i+j]; }
+        M->halo_val[f+j]+= S->part_f[Dn* i+j]; }
     }
   }// finished gather, now scatter back to elems
 #pragma omp for schedule(static)
@@ -816,10 +816,10 @@ int main( int argc, char** argv ){
 #if 0
 #pragma omp atomic read
 #endif
-        S->sys_f[Dn* i+j] = M->halo_val[f+j]; }
+        S->part_f[Dn* i+j] = M->halo_val[f+j]; }
     }
-    Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->sys_f, S->sys_u );
-    Y->ElemNonlinear( E,E->halo_elem_n,E->elem_n, S->sys_f, S->sys_u, S->sys_u, false );
+    Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->part_f, S->part_u );
+    Y->ElemNonlinear( E,E->halo_elem_n,E->elem_n, S->part_f, S->part_u, S->part_u, false );
   }
   // Now, sum the reactions on BCS fixed-displacemnt nodes in the test direction.
   // Also, compute the polycrystal effective Young's modulus
@@ -832,7 +832,7 @@ int main( int argc, char** argv ){
     INT_MESH r=E->halo_remo_n;
     for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
       // Don't duplicate halo nodes
-      if(n>=r){ if(f==dof){ reac_x+=S->sys_f[Dn* n+dof]; } }
+      if(n>=r){ if(f==dof){ reac_x+=S->part_f[Dn* n+dof]; } }
     }
   }
   }// end parallel

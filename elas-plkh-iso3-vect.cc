@@ -30,8 +30,8 @@ int ElastPlastKHIso3D::Setup( Elem* E ){
   return 0;
 }
 int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
-  const INT_MESH e0,const INT_MESH ee, FLOAT_SOLV* sys_f, const FLOAT_SOLV* sys_p,\
-  const FLOAT_SOLV* sys_u, bool save_state ){
+  const INT_MESH e0,const INT_MESH ee, FLOAT_SOLV* part_f, const FLOAT_SOLV* part_p,\
+  const FLOAT_SOLV* part_u, bool save_state ){
   //FIXME Clean up local variables.
   //const int De = 3;// Element Dimension
   const int Nd = 3;// Node (mesh) Dimension
@@ -72,8 +72,8 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   const __m256d c2 = _mm256_set_pd(0.0,C[0],C[1],C[1]);
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
-  const FLOAT_SOLV* RESTRICT sysu  = &sys_u[0];
-  const FLOAT_SOLV* RESTRICT sysp  = &sys_p[0];
+  const FLOAT_SOLV* RESTRICT sysu  = &part_u[0];
+  const FLOAT_SOLV* RESTRICT sysp  = &part_p[0];
   {// Scope vf registers
   __m256d vf[Nc];
   if(e0<ee){
@@ -244,11 +244,11 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         s[2] = _mm256_load_pd(&S[8]);
       }
       if(ip==0){
-        for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[i]]); }
+        for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
         if(elem_p>1){
-          for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[i]]); }
+          for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
         if(elem_p>2){
-          for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[i]]); }
+          for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
         }
         }
       }
@@ -264,7 +264,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         for(int j=0; j<3; j++){
           double VECALIGNED sf[4];
           _mm256_store_pd(&sf[0],vf[i]);
-          sys_f[3*conn[i]+j] = sf[j]; } }
+          part_f[3*conn[i]+j] = sf[j]; } }
   }//============================================================ end elem loop
   }// end vf register scope
   return 0;

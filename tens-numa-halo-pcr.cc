@@ -20,7 +20,7 @@ int PCR::RHS(Elem* E, Phys* Y ){
   uint d=uint(Y->node_d);
   INT_MESH n; INT_DOF f; FLOAT_PHYS v;
   for(auto t : E->rhs_vals ){ std::tie(n,f,v)=t;
-    this->sys_r[d* n+uint(f)]+= v;
+    this->part_r[d* n+uint(f)]+= v;
   };
   return(0);
 };
@@ -28,7 +28,7 @@ int PCR::BCS(Elem* E, Phys* Y ){
   uint d=uint(Y->node_d);
   INT_MESH n; INT_DOF f; FLOAT_PHYS v;
   for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
-    this->sys_u[d* n+uint(f)] = v;
+    this->part_u[d* n+uint(f)] = v;
   };
   return(0);
 };
@@ -36,11 +36,11 @@ int PCR::BC0(Elem* E, Phys* Y ){
   uint d=uint(Y->node_d);
   INT_MESH n; INT_DOF f; FLOAT_PHYS v;
   for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
-    this->sys_d[d* n+uint(f)]=0.0;
-    this->sys_f[d* n+uint(f)]=0.0;
+    this->part_d[d* n+uint(f)]=0.0;
+    this->part_f[d* n+uint(f)]=0.0;
   };
   for(auto t : E->bc0_nf   ){ std::tie(n,f)=t;
-    this->sys_d[d* n+uint(f)]=0.0;
+    this->part_d[d* n+uint(f)]=0.0;
     #if VERB_MAX>10
     printf("BC0: [%i]:0\n",E->bc0_nf[i]);
     #endif
@@ -54,47 +54,47 @@ int PCR::Setup( Elem* E, Phys* Y ){
   //this->udof_flop = 14;//*elem_n
   //this->udof_band = 17*sizeof(FLOAT_SOLV);//*udof_n + 2
   //this->Setup();
-  //sys_u.resize(udof_n,0.0);// Initial Solution Guess
-  //sys_f.resize(udof_n,0.0);// CR response vector f=Ar
-  //if(sys_d.size()<udof_n){ sys_d.resize(udof_n,1.0); };
+  //part_u.resize(udof_n,0.0);// Initial Solution Guess
+  //part_f.resize(udof_n,0.0);// CR response vector f=Ar
+  //if(part_d.size()<udof_n){ part_d.resize(udof_n,1.0); };
   // Default Diagonal Preconditioner
-  //sys_r.resize(udof_n,0.0);// Residuals
-  //sys_p.resize(udof_n,0.0);// CR working vector
-  //sys_g.resize(udof_n,0.0);// CR response vector g=Ap
+  //part_r.resize(udof_n,0.0);// Residuals
+  //part_p.resize(udof_n,0.0);// CR working vector
+  //part_g.resize(udof_n,0.0);// CR response vector g=Ap
   //
-  //sys_d=0.0; Y->ElemJacobi( E, this->sys_d );
+  //part_d=0.0; Y->ElemJacobi( E, this->part_d );
   //this->Precond( E,Y );//FIXME Precond doesn't rotate yet
   //FIXME Report returned int: negative values corrected.
-  //NOTE sync sys_d before inverting it.
+  //NOTE sync part_d before inverting it.
   //
-  this->RHS( E,Y );// Sets sys_r to RHS
+  this->RHS( E,Y );// Sets part_r to RHS
   this->BCS( E,Y );
   E->do_halo=true;
-  Y->ElemLinear( E,this->sys_f,this->sys_u );
+  Y->ElemLinear( E,this->part_f,this->part_u );
   E->do_halo=false;
-  Y->ElemLinear( E,this->sys_f,this->sys_u );
+  Y->ElemLinear( E,this->part_f,this->part_u );
   return(0);
 };
 int PCR::Init( Elem* E, Phys* Y ){
-  this->sys_d = FLOAT_SOLV(1.0) / this->sys_d;
+  this->part_d = FLOAT_SOLV(1.0) / this->part_d;
   this->BC0( E,Y );
-  this->sys_r -= this->sys_f;
-  sys_r *= sys_d;
-  sys_f=0.0;
+  this->part_r -= this->part_f;
+  part_r *= part_d;
+  part_f=0.0;
   E->do_halo=true;
-  Y->ElemLinear( E,this->sys_f,this->sys_r );
+  Y->ElemLinear( E,this->part_f,this->part_r );
   E->do_halo=false;
-  Y->ElemLinear( E,this->sys_f,this->sys_r );
+  Y->ElemLinear( E,this->part_f,this->part_r );
   return 0;
 };
 int PCR::Init(){
-  const uint n=sys_u.size();
+  const uint n=part_u.size();
   const uint sumi0=this->halo_loca_0;// *this->node_d;
-  sys_g = sys_f;
-  sys_p = sys_r;
+  part_g = part_f;
+  part_p = part_r;
   FLOAT_SOLV s=0.0;
   for(uint i=sumi0; i<n; i++){// 2 FLOP/DOF, 2 read = 2/DOF
-    s += sys_r[i] * sys_f[i]; };
+    s += part_r[i] * part_f[i]; };
   this->loca_res2=s;
   //this->to2 = this->tol*tol *loca_res2;//FIXED Move this somewhere.
   this->loca_rto2 = loca_rtol*loca_rtol *loca_res2;//FIXME Move this somewhere.
@@ -105,51 +105,51 @@ int PCR::Init(){
 };
 //int PCR::Iter(Elem* E,Phys* Y){// 2 FLOP + 14 FLOP/DOF
 int PCR::Iter(){// 2 FLOP + 14 FLOP/DOF, 17 mem/DOF
-  //NOTE Compute initial sys_f=sys_g=[k][r] before iterating with this?
-  //FIXME Compute current sys_f before iterating with this?
-  const uint n=sys_u.size();
+  //NOTE Compute initial part_f=part_g=[k][r] before iterating with this?
+  //FIXME Compute current part_f before iterating with this?
+  const uint n=part_u.size();
   const uint sumi0=this->halo_loca_0;// *this->node_d;//FIXME Magic number
   //const auto ra=this->loca_res2;// Make a local version of this member variable
   //--------------------------------------------
   //FLOAT_SOLV s=0.0;
   //for(uint i=sumi0; i<n; i++){
-  //  s += sys_d[i] * sys_g[i] * sys_g[i];
+  //  s += part_d[i] * part_g[i] * part_g[i];
   //};//printf("||r|| %9.2e\n",std::sqrt(s) );
   //const FLOAT_SOLV alpha  = loca_res2 / s;// 1 DIV FLOP
   //
   //for(uint i=0; i<n; i++){
-  //  sys_u[i] += alpha * sys_p[i];
-  //  sys_r[i] -= alpha * sys_d[i] * sys_g[i];
+  //  part_u[i] += alpha * part_p[i];
+  //  part_r[i] -= alpha * part_d[i] * part_g[i];
   //};
   //if( loca_res2 < to2 ){ return(SOLV_CNVG_PTOL); };
   //--------------------------------------------
-  //this->sys_f = 0.0;
+  //this->part_f = 0.0;
   //E->do_halo=true;
-  //Y->ElemLinear( E,this->sys_f,this->sys_r );
+  //Y->ElemLinear( E,this->part_f,this->part_r );
   //E->do_halo=false;
-  //Y->ElemLinear( E,this->sys_f,this->sys_r );
+  //Y->ElemLinear( E,this->part_f,this->part_r );
   //
   FLOAT_SOLV r2b=0.0;
   for(uint i=sumi0; i<n; i++){// 2 FLOP/DOF, 2 read =2/DOF
-    r2b += sys_r[i] * sys_f[i];
+    r2b += part_r[i] * part_f[i];
   };
   const FLOAT_PHYS beta = r2b/loca_rto2;//  1 DIV FLOP
   this->loca_rto2=r2b;
   //
   for(uint i=0; i<n; i++){// 4 FLOP/DOF, 4 read +2 write =6/DOF
-     sys_p[i] = sys_r[i] + beta * sys_p[i];
-     sys_g[i] = sys_f[i] + beta * sys_g[i];
+     part_p[i] = part_r[i] + beta * part_p[i];
+     part_g[i] = part_f[i] + beta * part_g[i];
   };
   //NOTE Rearranged algorithm to do ElemLinear first, and converge check last
   FLOAT_SOLV s=0.0;
   for(uint i=sumi0; i<n; i++){// 3 FLOP/DOF, 2 read =2/DOF
-    s += sys_d[i] * sys_g[i] * sys_g[i];
+    s += part_d[i] * part_g[i] * part_g[i];
   };//printf("||r|| %9.2e\n",std::sqrt(s) );
   const FLOAT_SOLV alpha  = loca_rto2 / s;// 1 DIV FLOP
   //
   for(uint i=0; i<n; i++){// 5 FLOP/DOF, 5 read +2 write =7/DOF
-    sys_u[i] += alpha * sys_p[i];//FIXME This may be one update too many
-    sys_r[i] -= alpha * sys_d[i] * sys_g[i];
+    part_u[i] += alpha * part_p[i];//FIXME This may be one update too many
+    part_r[i] -= alpha * part_d[i] * part_g[i];
   };
   if( loca_rto2 < loca_rto2 ){ return(SOLV_CNVG_PTOL); }
   else{ return(0); };
@@ -159,29 +159,29 @@ int PCR::Solve( Elem* E, Phys* Y ){//FIXME Redo this
   this->Init( E,Y );
   if( !this->Init() ){//============ Solve ================
     // The following is needed here to rearrange 
-    const uint n=sys_u.size();
+    const uint n=part_u.size();
     const uint sumi0=this->halo_loca_0;
     FLOAT_SOLV s=0.0;
     for(uint i=sumi0; i<n; i++){
-      s += sys_d[i] * sys_g[i] * sys_g[i];
+      s += part_d[i] * part_g[i] * part_g[i];
     };//printf("||r|| %9.2e\n",std::sqrt(s) );
     const FLOAT_SOLV alpha  = loca_res2 / s;
     for(uint i=0; i<n; i++){
-      sys_u[i] += alpha * sys_p[i];
-      sys_r[i] -= alpha * sys_d[i] * sys_g[i];
+      part_u[i] += alpha * part_p[i];
+      part_r[i] -= alpha * part_d[i] * part_g[i];
     };
     if( loca_res2 < loca_rto2 ){ return(SOLV_CNVG_PTOL); }
     //printf("SER INIT loca_res2:%9.2e /%9.2e\n",this->loca_res2,this->to2);
     printf("SER INIT ||R|:%9.2e /%9.2e\n",
       std::sqrt(this->loca_res2),std::sqrt(this->loca_rto2) );
     for(this->iter=0; this->iter < this->iter_max; this->iter++){
-      this->sys_f=0.0;
-      //FIXME HALO SYNC this->sys_f
+      this->part_f=0.0;
+      //FIXME HALO SYNC this->part_f
       //if( this->Iter(E,Y) ){ break ;};// CR Iteration
       E->do_halo=true;
-      Y->ElemLinear( E,this->sys_f,this->sys_r );
+      Y->ElemLinear( E,this->part_f,this->part_r );
       E->do_halo=false;
-      Y->ElemLinear( E,this->sys_f,this->sys_r );
+      Y->ElemLinear( E,this->part_f,this->part_r );
       if( this->Iter() ){ break ;};// CR Iteration
 #if VERB_MAX>1
       if(!((iter+1) % 100) ){
@@ -208,7 +208,7 @@ int HaloPCR::Init(){// Preconditioned Conjugate Residual
   long int my_scat_count=0, my_prec_count=0,
     my_gat0_count=0,my_gat1_count=0, my_gmap_count=0, my_solv_count=0;
   auto start = std::chrono::high_resolution_clock::now();
-  // Sync sys_d [this inits halo_map]
+  // Sync part_d [this inits halo_map]
   auto dur = std::chrono::duration_cast<std::chrono::nanoseconds>
     (std::chrono::high_resolution_clock::now()-start);
   my_prec_count += dur.count();
@@ -235,16 +235,16 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
         this->halo_map[g]=halo_n;
         E->node_haid[i]=halo_n;
         for( uint j=0; j<d; j++){
-          this->halo_val[d*E->node_haid[i]+j]  = S->sys_d[d*i +j]; };
+          this->halo_val[d*E->node_haid[i]+j]  = S->part_d[d*i +j]; };
         halo_n++;
       }else{// Add in the rest.
         E->node_haid[i]=this->halo_map[g];
         for( uint j=0; j<d; j++){
-          this->halo_val[d*E->node_haid[i]+j] += S->sys_d[d*i +j]; };
+          this->halo_val[d*E->node_haid[i]+j] += S->part_d[d*i +j]; };
       };
 }
     };
-  };// End sys_d gather
+  };// End part_d gather
   dur = std::chrono::duration_cast<std::chrono::nanoseconds>
     (std::chrono::high_resolution_clock::now()-start);
   my_gmap_count += dur.count();
@@ -257,9 +257,9 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic read
-        S->sys_d[d*i +j] = this->halo_val[f+j]; };
+        S->part_d[d*i +j] = this->halo_val[f+j]; };
     };
-  };// end sys_d scatter, now sync sys_f
+  };// end part_d scatter, now sync part_f
   dur = std::chrono::duration_cast<std::chrono::nanoseconds>
     (std::chrono::high_resolution_clock::now()-start);
   my_scat_count += dur.count();
@@ -278,7 +278,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic update
-        this->halo_val[f+j] += S->sys_f[d*i +j]; };
+        this->halo_val[f+j] += S->part_f[d*i +j]; };
     };
   };
   dur = std::chrono::duration_cast<std::chrono::nanoseconds>
@@ -293,13 +293,13 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic read
-        S->sys_f[d*i +j] = this->halo_val[f+j]; };
+        S->part_f[d*i +j] = this->halo_val[f+j]; };
     };
   };
   dur = std::chrono::duration_cast<std::chrono::nanoseconds>
     (std::chrono::high_resolution_clock::now()-start);
   my_scat_count += dur.count();
-  // Done syncing sys_f, now invert sys_d and apply zero BCs
+  // Done syncing part_f, now invert part_d and apply zero BCs
   start = std::chrono::high_resolution_clock::now();
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
@@ -310,7 +310,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
   dur = std::chrono::duration_cast<std::chrono::nanoseconds>
     (std::chrono::high_resolution_clock::now()-start);
   my_solv_count += dur.count();
-  // sync sys_f=Kr
+  // sync part_f=Kr
   start = std::chrono::high_resolution_clock::now();
 #pragma omp single
 {   this->halo_val = 0.0; }// serial halo_vals zero
@@ -326,7 +326,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic update
-        this->halo_val[f+j] += S->sys_f[d*i +j]; };
+        this->halo_val[f+j] += S->part_f[d*i +j]; };
     };
   };
   dur = std::chrono::duration_cast<std::chrono::nanoseconds>
@@ -341,7 +341,7 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic read
-        S->sys_f[d*i +j] = this->halo_val[f+j]; };
+        S->part_f[d*i +j] = this->halo_val[f+j]; };
     };
 //#pragma omp critical(init)
   S->Init();// looks like not critical
@@ -353,8 +353,8 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH hl0=S->halo_loca_0,sysn=S->udof_n;
     for(INT_MESH i=hl0; i<sysn; i++){
-      glob_sum1 += S->sys_d[i] * S->sys_g[i] * S->sys_g[i];
-      //glob_chk2 += S->sys_r[i] * S->sys_r[i];
+      glob_sum1 += S->part_d[i] * S->part_g[i] * S->part_g[i];
+      //glob_chk2 += S->part_r[i] * S->part_r[i];
     };
   };
 #pragma omp single
@@ -364,8 +364,8 @@ for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH sysn=S->udof_n;
     for(INT_MESH i=0; i<sysn; i++){
-      S->sys_u[i] += alpha * S->sys_p[i];
-      S->sys_r[i] -= alpha * S->sys_d[i] * S->sys_g[i];
+      S->part_u[i] += alpha * S->part_p[i];
+      S->part_r[i] -= alpha * S->part_d[i] * S->part_g[i];
     };
 //#pragma omp atomic read
     S->loca_rto2 = S->loca_rtol*S->loca_rtol *glob_r2a;
@@ -417,9 +417,9 @@ int HaloPCR::Iter(){//-----------------------------------------------
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH d=uint(Y->node_d);
     start = std::chrono::high_resolution_clock::now();
-    S->sys_f=0.0;
+    S->part_f=0.0;
     E->do_halo=true;
-    Y->ElemLinear( E, S->sys_f, S->sys_r );
+    Y->ElemLinear( E, S->part_f, S->part_r );
     dur = std::chrono::duration_cast<std::chrono::nanoseconds>
       (std::chrono::high_resolution_clock::now()-start);
     my_phys_count += dur.count();
@@ -429,7 +429,7 @@ int HaloPCR::Iter(){//-----------------------------------------------
       auto f = d* E->node_haid[i];
       for(uint j=0; j<d; j++){
 #pragma omp atomic write
-        this->halo_val[f+j] = S->sys_f[d* i+j]; };
+        this->halo_val[f+j] = S->part_f[d* i+j]; };
     };
     dur= std::chrono::duration_cast<std::chrono::nanoseconds>
       (std::chrono::high_resolution_clock::now()-start);
@@ -445,7 +445,7 @@ int HaloPCR::Iter(){//-----------------------------------------------
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic update
-        this->halo_val[f+j]+= S->sys_f[d* i+j]; };
+        this->halo_val[f+j]+= S->part_f[d* i+j]; };
     };
   };// End halo_vals sum; now scatter back to elems
   dur= std::chrono::duration_cast<std::chrono::nanoseconds>
@@ -461,14 +461,14 @@ int HaloPCR::Iter(){//-----------------------------------------------
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){//NOTE appears not to be critical
 #pragma omp atomic read
-        S->sys_f[d* i+j] = this->halo_val[f+j]; };// CHECK PRAGMA
+        S->part_f[d* i+j] = this->halo_val[f+j]; };// CHECK PRAGMA
     };
     dur= std::chrono::duration_cast<std::chrono::nanoseconds>
       (std::chrono::high_resolution_clock::now()-start);
     my_scat_count += dur.count();
     start = std::chrono::high_resolution_clock::now();
     E->do_halo=false;
-    Y->ElemLinear( E, S->sys_f, S->sys_r );
+    Y->ElemLinear( E, S->part_f, S->part_r );
     dur= std::chrono::duration_cast<std::chrono::nanoseconds>
       (std::chrono::high_resolution_clock::now()-start);
     my_phys_count += dur.count();
@@ -479,7 +479,7 @@ int HaloPCR::Iter(){//-----------------------------------------------
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH hl0=S->halo_loca_0,sysn=S->udof_n;
     for(INT_MESH i=hl0; i<sysn; i++){
-      glob_sum1 += S->sys_r[i] * S->sys_f[i];
+      glob_sum1 += S->part_r[i] * S->part_f[i];
     };
   };
 #pragma omp single
@@ -492,14 +492,14 @@ int HaloPCR::Iter(){//-----------------------------------------------
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH hl0=S->halo_loca_0,sysn=S->udof_n;
     for(INT_MESH i=0; i<hl0; i++){
-      S->sys_p[i] = S->sys_r[i] + beta * S->sys_p[i];
-      S->sys_g[i] = S->sys_f[i] + beta * S->sys_g[i];
+      S->part_p[i] = S->part_r[i] + beta * S->part_p[i];
+      S->part_g[i] = S->part_f[i] + beta * S->part_g[i];
     };
     for(INT_MESH i=hl0; i<sysn; i++){
-      S->sys_p[i] = S->sys_r[i] + beta * S->sys_p[i];
-      S->sys_g[i] = S->sys_f[i] + beta * S->sys_g[i];
-      glob_sum2  += S->sys_d[i] * S->sys_g[i] * S->sys_g[i];
-      //glob_chk2  += S->sys_r[i] * S->sys_r[i];
+      S->part_p[i] = S->part_r[i] + beta * S->part_p[i];
+      S->part_g[i] = S->part_f[i] + beta * S->part_g[i];
+      glob_sum2  += S->part_d[i] * S->part_g[i] * S->part_g[i];
+      //glob_chk2  += S->part_r[i] * S->part_r[i];
     };
   };
 #pragma omp single
@@ -509,8 +509,8 @@ int HaloPCR::Iter(){//-----------------------------------------------
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=P[part_i];
     const INT_MESH sysn=S->udof_n;
     for(INT_MESH i=0; i<sysn; i++){
-      S->sys_u[i] += alpha * S->sys_p[i];
-      S->sys_r[i] -= alpha * S->sys_d[i] * S->sys_g[i]; };
+      S->part_u[i] += alpha * S->part_p[i];
+      S->part_r[i] -= alpha * S->part_d[i] * S->part_g[i]; };
   };
   dur= std::chrono::duration_cast<std::chrono::nanoseconds>
     (std::chrono::high_resolution_clock::now()-start);

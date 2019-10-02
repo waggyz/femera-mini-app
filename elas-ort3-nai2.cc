@@ -25,7 +25,7 @@ int ElastOrtho3D::Setup( Elem* E ){
   return 0;
 }
 int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
-  FLOAT_SOLV *sys_f, const FLOAT_SOLV* sys_u ){
+  FLOAT_SOLV *part_f, const FLOAT_SOLV* part_u ){
   //FIXME Cleanup local variables.
   const int Dm = E->mesh_d;// Node (mesh) Dimension FIXME should be elem_d?
   const int Dn = this->node_d;// this->node_d DOF/node
@@ -37,7 +37,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   for(INT_MESH ie=e0;ie<ee;ie++){
     for (uint i=0; i<uint(Nc); i++){
       for (uint j=0; j<uint(Dn); j++){
-        u[Dn*i+j] = sys_u[E->elem_conn[Nc*ie+i]*Dn+j];
+        u[Dn*i+j] = part_u[E->elem_conn[Nc*ie+i]*Dn+j];
       } }
     for (int i=0; i<Ne; i++){ f[i]=0.0; }
     for(int ip=0; ip<E->gaus_n; ip++){
@@ -111,7 +111,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     }//end intp loop
     for (uint i=0; i<uint(Nc); i++){
       for (uint j=0; j<uint(Dn); j++){
-        sys_f[E->elem_conn[Nc*ie+i]*Dn+j] += f[Dn*i+j]; } }//--------- 3*N FLOP
+        part_f[E->elem_conn[Nc*ie+i]*Dn+j] += f[Dn*i+j]; } }//--------- 3*N FLOP
   }//end elem loop
   return 0;
 }

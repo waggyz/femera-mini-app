@@ -296,7 +296,7 @@ int Mesh::Setup(){
     for(INT_MESH i=0; i<E->node_n; i++){
       std::cout << E->node_glid[i] <<":";
       for(uint j=0; j<d; j++){
-        std::cout <<" "<< S->sys_d[d* i+j];
+        std::cout <<" "<< S->part_d[d* i+j];
       } std::cout <<'\n';
     }
 }
@@ -342,7 +342,7 @@ int Mesh::Setup(){
 }
     }// End halo map init
 }// End parallel region ==================================================
-  //this->udof_n = sys_udof_n;
+  //this->udof_n = part_udof_n;
   //read_done = std::chrono::high_resolution_clock::now();
   if(dots_mod>0){ std::cout <<'\n'; };
   //for(uint i=0; i<M->list_elem.size(); i++){
@@ -407,7 +407,7 @@ int Mesh::Setup(){
       printf("            Rotated: [%+6.2f,%+6.2f,%+6.2f] rad around [z,x,z].\n",
         Y->mtrl_dirs[0],Y->mtrl_dirs[1],Y->mtrl_dirs[2] ); }
       //std::cout <<"  Preconditioner: ";
-      //for(size_t i=0;i<S->sys_d.size();i++){ std::cout << S->sys_d[i] <<" ";};
+      //for(size_t i=0;i<S->part_d.size();i++){ std::cout << S->part_d[i] <<" ";};
       //std::cout <<'\n';
     }
 #endif

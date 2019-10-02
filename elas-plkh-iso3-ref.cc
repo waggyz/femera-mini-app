@@ -32,8 +32,8 @@ int ElastPlastKHIso3D::Setup( Elem* E ){
   return 0;
 }
 int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
-  const INT_MESH e0,const INT_MESH ee, FLOAT_SOLV* sys_f, const FLOAT_SOLV* sys_p,
-  const FLOAT_SOLV* sys_u, bool save_state ){
+  const INT_MESH e0,const INT_MESH ee, FLOAT_SOLV* part_f, const FLOAT_SOLV* part_p,
+  const FLOAT_SOLV* part_u, bool save_state ){
   //FIXME Clean up local variables.
   //const int De = 3;// Element Dimension
   const int Nd = 3;// Node (mesh) Dimension
@@ -75,9 +75,9 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #endif
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
-  const FLOAT_SOLV* RESTRICT sysu  = &sys_u[0];
-  const FLOAT_SOLV* RESTRICT sysp  = &sys_p[0];
-        FLOAT_SOLV* RESTRICT sysf  = &sys_f[0];
+  const FLOAT_SOLV* RESTRICT sysu  = &part_u[0];
+  const FLOAT_SOLV* RESTRICT sysp  = &part_p[0];
+        FLOAT_SOLV* RESTRICT sysf  = &part_f[0];
   for(INT_MESH ie=e0;ie<ee;ie++){
     const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     for (uint i=0; i<uint(Nc); i++){

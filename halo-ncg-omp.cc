@@ -23,11 +23,11 @@ int NCG::Iter(){return 1;}
 int NCG::Solve( Elem*, Phys* ){return 1;}
 //
 int NCG::RHS(Elem* E, Phys* Y ){// printf("*** NCG::RHS(E,Y) ***\n");
-  this->dat_b=0.0;
+  this->data_b=0.0;
   const uint Dn=uint(Y->node_d);
   INT_MESH n; INT_DOF f; FLOAT_PHYS v;
   for(auto t : E->rhs_vals ){ std::tie(n,f,v)=t;
-    this->sys_b[Dn* n+uint(f)]+= v;
+    this->part_b[Dn* n+uint(f)]+= v;
   }
   return(0);
 }
@@ -38,7 +38,7 @@ int NCG::BCS(Elem* E, Phys* Y ){
   for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
     //printf("FIX ID %i, DOF %i, val %+9.2e\n",
     //  i,E->bcs_vals[i].first,E->bcs_vals[i].second);
-    this->sys_u[Dn* n+uint(f)] = v * this->load_scal;
+    this->part_u[Dn* n+uint(f)] = v * this->load_scal;
     if(std::abs(v) > Y->udof_magn[f]){ Y->udof_magn[f] = std::abs(v); }
     if(std::abs(v) > std::abs(this->loca_bmax[f])){ this->loca_bmax[f] = v; }
   }
@@ -48,15 +48,15 @@ int NCG::BC0(Elem* E, Phys* Y ){// printf("*** NCG::BC0(E,Y) ***\n");
   uint Dn=uint(Y->node_d);
   INT_MESH n; INT_DOF f; FLOAT_PHYS v;
   for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
-    this->sys_1[Dn* n+uint(f)]=1.0;//FIXME replace w/ 1.0-sys_0?
-    this->sys_d[Dn* n+uint(f)]=0.0;
-    this->sys_0[Dn* n+uint(f)]=0.0;
-    //this->sys_f[Dn* n+uint(f)]=0.0;//FIXME apply to sys_b?
+    this->part_1[Dn* n+uint(f)]=1.0;//FIXME replace w/ 1.0-part_0?
+    this->part_d[Dn* n+uint(f)]=0.0;
+    this->part_0[Dn* n+uint(f)]=0.0;
+    //this->part_f[Dn* n+uint(f)]=0.0;//FIXME apply to part_b?
   }
   for(auto t : E->bc0_nf   ){ std::tie(n,f)=t;
-    this->sys_1[Dn* n+uint(f)]=1.0;
-    this->sys_d[Dn* n+uint(f)]=0.0;
-    this->sys_0[Dn* n+uint(f)]=0.0;
+    this->part_1[Dn* n+uint(f)]=1.0;
+    this->part_d[Dn* n+uint(f)]=0.0;
+    this->part_0[Dn* n+uint(f)]=0.0;
     #if VERB_MAX>10
     printf("BC0: [%i]:0\n",E->bc0_nf[i]);
     #endif
@@ -87,7 +87,7 @@ int NCG::Setup( Elem* E, Phys* Y ){// printf("*** NCG::Setup(E,Y) ***\n");
 #endif
     for(uint i=0; i<Nn; i++){
       for(uint j=0; j<Dm; j++){
-        this->sys_u[Dm* i+j ] = ci * u[j]// * this->glob_bmax[j]//Y->udof_magn[j]
+        this->part_u[Dm* i+j ] = ci * u[j]// * this->glob_bmax[j]//Y->udof_magn[j]
         //* E->node_coor[Dm* i+j ];
         * ( E->node_coor[Dm* i+j ] - E->glob_bbox[j] )
         / ( E->glob_bbox[   Dm+j ] - E->glob_bbox[j] );
@@ -96,9 +96,9 @@ int NCG::Setup( Elem* E, Phys* Y ){// printf("*** NCG::Setup(E,Y) ***\n");
     //this->BCS( E,Y );//FIXME repeated in Setup(E,Y)
   }
   Y->tens_flop*=2;Y->tens_band*=2;Y->stif_flop*=2;Y->stif_band*=2;// 2 evals/iter
-  this->dat_f=0.0;
-  Y->ElemLinear( E,0,E->elem_n, this->sys_f, this->sys_u );
-  Y->ElemNonlinear( E,0,E->elem_n, this->sys_f, this->sys_u, this->sys_u, false );
+  this->data_f=0.0;
+  Y->ElemLinear( E,0,E->elem_n, this->part_f, this->part_u );
+  Y->ElemNonlinear( E,0,E->elem_n, this->part_f, this->part_u, this->part_u, false );
 #endif
   return(0);
 }
@@ -106,8 +106,8 @@ int NCG::Init( Elem* E, Phys* Y ){// printf("*** NCG::Init(E,Y) ***\n");
   this->BCS( E,Y );//FIXME repeated in Setup(E,Y)
   this->BC0( E,Y );
   //FIXME Check if the following need to be here.
-  //Y->ElemLinear( E,0,E->elem_n,this->sys_f,this->sys_u );
-  //Y->ElemNonlinear( E,0,E->elem_n,this->sys_f,this->sys_u,this->sys_u, true );
+  //Y->ElemLinear( E,0,E->elem_n,this->part_f,this->part_u );
+  //Y->ElemNonlinear( E,0,E->elem_n,this->part_f,this->part_u,this->part_u, true );
   return 0;
 }
 int NCG::Init(){// printf("*** NCG::Init() ***\n");
@@ -122,18 +122,18 @@ int NCG::Init(){// printf("*** NCG::Init() ***\n");
   for(uint i=0; i<sysn; i++){
     this->old_r[i] = 0.0;
 #if 0
-    //this->sys_f[i] = this->sys_f[i] * this->sys_0[i];//TESTING
-    // this->sys_r[i] =(this->sys_b[i] - this->sys_f[i]) * this->sys_0[i];
+    //this->part_f[i] = this->part_f[i] * this->part_0[i];//TESTING
+    // this->part_r[i] =(this->part_b[i] - this->part_f[i]) * this->part_0[i];
 #endif
-    this->sys_r[i] = this->sys_b[i] - this->sys_f[i];
+    this->part_r[i] = this->part_b[i] - this->part_f[i];
     // Initial search (p) is preconditioned grad descent of (r)
-    this->sys_p[i] = this->sys_r[i] * this->sys_d[i];
+    this->part_p[i] = this->part_r[i] * this->part_d[i];
   }
 #ifdef HAS_PRAGMA_SIMD
 #pragma omp simd reduction(+:R2)
 #endif
   for(uint i=sumi0; i<sysn; i++){
-    R2 += this->sys_r[i]*this->sys_r[i] * this->sys_0[i]; }//FIXED div out precond
+    R2 += this->part_r[i]*this->part_r[i] * this->part_0[i]; }//FIXED div out precond
   this->loca_res2=R2;
   this->loca_rto2 = this->loca_rtol*loca_rtol *loca_res2;//FIXME Move this somewhere.
 #endif
@@ -169,10 +169,10 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #ifdef HAS_SIMD
 #pragma omp simd
 #endif
-    for(INT_MESH i=1; i<sysn; i++){ S->sys_f[i]=0.0; }
-    Y->ElemLinear( E,0,E->elem_n,S->sys_f,S->sys_u );
+    for(INT_MESH i=1; i<sysn; i++){ S->part_f[i]=0.0; }
+    Y->ElemLinear( E,0,E->elem_n,S->part_f,S->part_u );
     // Save state variables.
-    Y->ElemNonlinear( E,0,E->elem_n,S->sys_f,S->sys_u,S->sys_u, true );
+    Y->ElemNonlinear( E,0,E->elem_n,S->part_f,S->part_u,S->part_u, true );
     for(uint i=0;i<Y->udof_magn.size();i++){
       //printf("GLOBAL MAX BC[%u]: %f\n",i,bcmax[i]);
       if(Y->udof_magn[i] > bcmax[i]){
@@ -189,9 +189,9 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   auto m=bcmax[0];
   for(uint i=1;i<3;i++){ if(bcmax[0] > m){ m=bcmax[i]; } }
   for(uint i=0;i<3;i++){ bcmax[i]=m; }
-  //NOTE Nonlinear physics needs unscaled sys_u.
+  //NOTE Nonlinear physics needs unscaled part_u.
 #if 1
-  //NOTE sys_u is unscaled in this solver.
+  //NOTE part_u is unscaled in this solver.
   for(uint i=0;i<bcmax.size();i++){ if(bcmax[i]<=0.0){ bcmax[i]=1.0; } }
 #else
   // Set all DOF scales to unity.
@@ -215,8 +215,8 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp simd
 #endif
     for(uint i=0;i<sysn;i++){
-      auto t=S->sys_u[i];
-      S->sys_u[i] = 2.0*S->sys_u[i] - S->last_u[i];
+      auto t=S->part_u[i];
+      S->part_u[i] = 2.0*S->part_u[i] - S->last_u[i];
       S->last_u[i]=t;
     }
 #endif
@@ -231,7 +231,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     S->Precond( E,Y );
   }
   time_reset( my_prec_count, start );
-  //----------------------------- Sync sys_d
+  //----------------------------- Sync part_d
 #pragma omp single
 {  this->halo_val=0.0; }
 #pragma omp for schedule(OMP_SCHEDULE)
@@ -242,12 +242,12 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
       for(INT_MESH i=0; i<E->halo_node_n; i++){
         for( uint j=0; j<d; j++){
 #pragma omp atomic write
-          this->halo_val[d*E->node_haid[i]+j] = S->sys_d[d*i +j]; } }
+          this->halo_val[d*E->node_haid[i]+j] = S->part_d[d*i +j]; } }
     }else{
       for(INT_MESH i=0; i<E->halo_node_n; i++){
         for( uint j=0; j<d; j++){
 #pragma omp atomic update
-          this->halo_val[d*E->node_haid[i]+j]+= S->sys_d[d*i +j]; } }
+          this->halo_val[d*E->node_haid[i]+j]+= S->part_d[d*i +j]; } }
     }
   }
   time_reset( my_gat1_count, start );
@@ -259,15 +259,15 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic read
-        S->sys_d[d*i +j] = this->halo_val[f+j]; }
+        S->part_d[d*i +j] = this->halo_val[f+j]; }
     }
   }
-  time_reset( my_scat_count, start );// sys_d sync -----
+  time_reset( my_scat_count, start );// part_d sync -----
 #pragma omp for schedule(OMP_SCHEDULE)
-  for(int part_i=part_0; part_i<part_o; part_i++){// ------------- Invert sys_d
+  for(int part_i=part_0; part_i<part_o; part_i++){// ------------- Invert part_d
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH sysn=S->udof_n;
-    for(uint i=0;i<sysn;i++){ S->sys_d[i] = FLOAT_SOLV(1.0) / S->sys_d[i]; }
+    for(uint i=0;i<sysn;i++){ S->part_d[i] = FLOAT_SOLV(1.0) / S->part_d[i]; }
     S->Init( E,Y );// Zeros boundary conditions
     //S->BCS( E,Y );
     //S->BC0( E,Y );
@@ -281,19 +281,19 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #else
 #pragma omp for schedule(OMP_SCHEDULE)
 #endif
-  for(int part_i=part_0; part_i<part_o; part_i++){// --------------- sync sys_f
+  for(int part_i=part_0; part_i<part_o; part_i++){// --------------- sync part_f
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH sysn=S->udof_n;
     const INT_MESH d=uint(Y->node_d);
   //FIXME Put the element response calcs into the halo ops properly
-    for(INT_MESH i=1; i<sysn; i++){ S->sys_f[i]=0.0; }
-    Y->ElemLinear( E,0,E->elem_n,S->sys_f,S->sys_u );
-    Y->ElemNonlinear( E,0,E->elem_n,S->sys_f,S->sys_u,S->sys_u, false );
+    for(INT_MESH i=1; i<sysn; i++){ S->part_f[i]=0.0; }
+    Y->ElemLinear( E,0,E->elem_n,S->part_f,S->part_u );
+    Y->ElemNonlinear( E,0,E->elem_n,S->part_f,S->part_u,S->part_u, false );
     for(INT_MESH i=0; i<E->halo_node_n; i++){
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic update
-        this->halo_val[f+j] += S->sys_f[d*i +j]; }
+        this->halo_val[f+j] += S->part_f[d*i +j]; }
     }
   }// End halo_vals
   time_reset( my_gat1_count, start );
@@ -305,9 +305,9 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic read
-        S->sys_f[d*i +j] = this->halo_val[f+j]; }
+        S->part_f[d*i +j] = this->halo_val[f+j]; }
     }
-  time_reset( my_scat_count, start );// ----------------------- Done sys_f sync
+  time_reset( my_scat_count, start );// ----------------------- Done part_f sync
 #if 0
 #pragma omp critical(init)
 { S->Init(); }// Initial residual //FIXME Why is this serialized?
@@ -324,14 +324,14 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp simd
 #endif
     for(uint i=0; i<sysn; i++){
-      S->old_r[i] = 0.0;// S->sys_b[i] = 0.0;
-      //S->sys_r[i] = S->sys_b[i] - S->sys_f[i];
-      S->sys_b[i]-= S->sys_f[i] * S->sys_1[i];
-      S->sys_r[i] = S->sys_b[i] - S->sys_f[i];
+      S->old_r[i] = 0.0;// S->part_b[i] = 0.0;
+      //S->part_r[i] = S->part_b[i] - S->part_f[i];
+      S->part_b[i]-= S->part_f[i] * S->part_1[i];
+      S->part_r[i] = S->part_b[i] - S->part_f[i];
       // Initial search (p) is preconditioned grad descent of (r)
-      S->sys_p[i] = S->sys_r[i] * S->sys_d[i];
+      S->part_p[i] = S->part_r[i] * S->part_d[i];
 #if 0
-      if(S->sys_d[i]==0.0){S->sys_0[i]=0.0;}else{S->sys_0[i]=1.0;}
+      if(S->part_d[i]==0.0){S->part_0[i]=0.0;}else{S->part_0[i]=1.0;}
 #endif
     }
     //FLOAT_SOLV R2=0.0;
@@ -339,7 +339,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp simd reduction(+:glob_r2a)
 #endif
     for(uint i=sumi0; i<sysn; i++){
-      glob_r2a += S->sys_r[i]*S->sys_r[i] * S->sys_0[i]; }//FIXED div out precond
+      glob_r2a += S->part_r[i]*S->part_r[i] * S->part_0[i]; }//FIXED div out precond
 #if 0
     S->loca_res2=R2;
     S->loca_rto2 = S->loca_rtol*S->loca_rtol *S->loca_res2;
@@ -400,7 +400,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
   std::chrono::high_resolution_clock::time_point
     gath_start, scat_start, phys_start;
   time_start( iter_start );
-  //------------------------------------------- Compute and sync sys_g = K( q )
+  //------------------------------------------- Compute and sync part_g = K( q )
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=priv_part[part_i];
@@ -410,21 +410,21 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 #ifdef HAS_PRAGMA_SIMD
 #pragma omp simd
 #endif
-    for(uint i=0;i<sysn;i++){// Compute sys_q = sys_u + sys_p
-      S->sys_q[i] = S->sys_u[i] + S->sys_p[i]; }//                   (1*N FLOP)
+    for(uint i=0;i<sysn;i++){// Compute part_q = part_u + part_p
+      S->part_q[i] = S->part_u[i] + S->part_p[i]; }//                   (1*N FLOP)
     time_accum( my_solv_count, solv_start );
     time_start( phys_start );
 #ifdef HAS_PRAGMA_SIMD
 #pragma omp simd
 #endif
-    for(uint i=0;i<sysn;i++){ S->sys_g[i]=0.0; }
-    Y->ElemLinear( E,0,E->halo_elem_n, S->sys_g, S->sys_q );
-    Y->ElemNonlinear( E,0,E->halo_elem_n, S->sys_g, S->sys_q, S->sys_u, false );
+    for(uint i=0;i<sysn;i++){ S->part_g[i]=0.0; }
+    Y->ElemLinear( E,0,E->halo_elem_n, S->part_g, S->part_q );
+    Y->ElemNonlinear( E,0,E->halo_elem_n, S->part_g, S->part_q, S->part_u, false );
     time_accum( my_phys_count, phys_start );
     time_start( gath_start );
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
     for(INT_MESH i=hrn; i<hnn; i++){//NOTE memcpy apparently not critical
-      std::memcpy(& halo_vals[Dn* E->node_haid[i]], & S->sys_g[Dn* i],
+      std::memcpy(& halo_vals[Dn* E->node_haid[i]], & S->part_g[Dn* i],
         Dn*sizeof(FLOAT_PHYS) ); }
     time_accum( my_gat0_count, gath_start );
   }
@@ -446,7 +446,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
       const auto f = Dn* E->node_haid[i];
       for( uint j=0; j<Dn; j++){
 #pragma omp atomic update
-       halo_vals[f+j]+= S->sys_g[Dn* i+j]; }
+       halo_vals[f+j]+= S->part_g[Dn* i+j]; }
     }
     time_accum( my_gat1_count, gath_start );
   }// End halo_vals sum; now scatter back to elems
@@ -460,13 +460,13 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
       const auto f = Dn* E->node_haid[i];
       for( uint j=0; j<Dn; j++){
 #pragma omp atomic update
-       halo_sers[f+j]+= S->sys_g[Dn* i+j]; }
+       halo_sers[f+j]+= S->part_g[Dn* i+j]; }
     }
   }// End serial halo_vals sum;
 #pragma omp single
 {// Report discrepancies
   INT_MESH s = this->halo_val.size();
-  printf("sys_g halo[%u] errors: ",s);
+  printf("part_g halo[%u] errors: ",s);
   for(INT_MESH i=0; i<s; i++){
     FLOAT_SOLV e = halo_vals[i]-halo_sers[i];
     if( e < halo_min ){ halo_min=e; }
@@ -485,21 +485,21 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_start( scat_start );
     const INT_MESH hnn=E->halo_node_n,hl0=S->halo_loca_0,sysn=S->udof_n;
     for(INT_MESH i=0; i<hnn; i++){//NOTE appears not to be critical
-      std::memcpy(& S->sys_g[Dn* i],& halo_vals[Dn* E->node_haid[i]],
+      std::memcpy(& S->part_g[Dn* i],& halo_vals[Dn* E->node_haid[i]],
         Dn*sizeof(FLOAT_PHYS) ); }
     time_accum( my_scat_count, scat_start );
     time_start( phys_start );
-    Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->sys_g, S->sys_q );
-    Y->ElemNonlinear( E,E->halo_elem_n,E->elem_n, S->sys_g, S->sys_q,
-                      S->sys_u, false );
+    Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->part_g, S->part_q );
+    Y->ElemNonlinear( E,E->halo_elem_n,E->elem_n, S->part_g, S->part_q,
+                      S->part_u, false );
     time_accum( my_phys_count, phys_start );
-    //--------------------------------------------- Done compute and sync sys_g
+    //--------------------------------------------- Done compute and sync part_g
     time_start( solv_start );
     //----------------------------------------------------- Actual method alpha
 #if 0
     for(INT_MESH i=0; i<sysn; i++){
-      S->sys_f[i] = S->sys_f[i] * S->sys_0[i];
-      S->sys_g[i] = S->sys_g[i] * S->sys_0[i];// sys_g is only used once
+      S->part_f[i] = S->part_f[i] * S->part_0[i];
+      S->part_g[i] = S->part_g[i] * S->part_0[i];// part_g is only used once
     }
 #endif
     // Actual method is equivalent to secant for constant RHS
@@ -507,14 +507,14 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 #pragma omp simd reduction(+:glob_sum1,glob_sum2)
 #endif
     for(INT_MESH i=hl0; i<sysn; i++){
-      glob_sum1+= S->sys_p[i] * S->sys_r[i];// alpha numerator
-      glob_sum2+= S->sys_p[i] * S->sys_0[i]*(S->sys_g[i] - S->sys_f[i]);//denom
+      glob_sum1+= S->part_p[i] * S->part_r[i];// alpha numerator
+      glob_sum2+= S->part_p[i] * S->part_0[i]*(S->part_g[i] - S->part_f[i]);//denom
     }//                                                              (6*N FLOP)
     time_accum( my_solv_count, solv_start );
   }
   const FLOAT_SOLV alpha = glob_sum1 / glob_sum2;//                    (1 FLOP)
   //printf("ALPHA:%+9.2e\n",alpha);
-  //----------------------------------------------------- Update solution sys_u
+  //----------------------------------------------------- Update solution part_u
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=priv_part[part_i];
@@ -524,8 +524,8 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 #pragma omp simd
 #endif
     for(INT_MESH i=0; i<sysn; i++){
-      S->sys_f[i]=0.0;
-      S->sys_u[i]+=alpha * S->sys_p[i]; }//* S->sys_d[i]; }//      (2*N FLOP)
+      S->part_f[i]=0.0;
+      S->part_u[i]+=alpha * S->part_p[i]; }//* S->part_d[i]; }//      (2*N FLOP)
     time_accum( my_solv_count, solv_start );//FIXED Merge with next loop
 #if 0
   }
@@ -537,13 +537,13 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     //------------------------------------------------- Compute and sync forces
     const INT_MESH Dn=uint(Y->node_d);
     time_start( phys_start );
-    Y->ElemLinear( E,0,E->halo_elem_n, S->sys_f, S->sys_u );
-    Y->ElemNonlinear( E,0,E->halo_elem_n, S->sys_f, S->sys_u, S->sys_u, false );
+    Y->ElemLinear( E,0,E->halo_elem_n, S->part_f, S->part_u );
+    Y->ElemNonlinear( E,0,E->halo_elem_n, S->part_f, S->part_u, S->part_u, false );
     time_accum( my_phys_count, phys_start );
     time_start( gath_start );
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
     for(INT_MESH i=hrn; i<hnn; i++){//NOTE memcpy apparently not critical
-      std::memcpy(& halo_vals[Dn* E->node_haid[i]],& S->sys_f[Dn* i],
+      std::memcpy(& halo_vals[Dn* E->node_haid[i]],& S->part_f[Dn* i],
         Dn*sizeof(FLOAT_PHYS) ); }
     time_accum( my_gat0_count, gath_start );
   }
@@ -561,7 +561,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
       const auto f = Dn* E->node_haid[i];
       for( uint j=0; j<Dn; j++){
 #pragma omp atomic update
-        halo_vals[f+j]+= S->sys_f[Dn* i+j];
+        halo_vals[f+j]+= S->part_f[Dn* i+j];
       }
     }
     time_accum( my_gat1_count, gath_start );
@@ -573,43 +573,43 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_start( scat_start );
     const INT_MESH hnn=E->halo_node_n;
     for(INT_MESH i=0; i<hnn; i++){//NOTE appears not to be critical
-      std::memcpy(& S->sys_f[Dn* i],& halo_vals[Dn* E->node_haid[i]],
+      std::memcpy(& S->part_f[Dn* i],& halo_vals[Dn* E->node_haid[i]],
         Dn*sizeof(FLOAT_PHYS) ); }
     time_accum( my_scat_count, scat_start );
     time_start( phys_start );
-    Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->sys_f, S->sys_u );
-    Y->ElemNonlinear( E,E->halo_elem_n,E->elem_n, S->sys_f, S->sys_u,
-                      S->sys_u, false );
+    Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->part_f, S->part_u );
+    Y->ElemNonlinear( E,E->halo_elem_n,E->elem_n, S->part_f, S->part_u,
+                      S->part_u, false );
     time_accum( my_phys_count, phys_start );
-    //--------------------------------------------- Done compute and sync sys_f
-    //-------------------------------------- Calculate negative residuals sys_r
+    //--------------------------------------------- Done compute and sync part_f
+    //-------------------------------------- Calculate negative residuals part_r
     time_start( solv_start );
     const INT_MESH hl0=S->halo_loca_0,sysn=S->udof_n;
 #ifdef HAS_PRAGMA_SIMD
 #pragma omp simd
 #endif
     for(INT_MESH i=0; i<sysn; i++){
-      S->old_r[i] = S->sys_r[i];
+      S->old_r[i] = S->part_r[i];
 #if 0
-      S->sys_f[i]*= S->sys_0[i];// better to apply where used
+      S->part_f[i]*= S->part_0[i];// better to apply where used
 #endif
-      //S->sys_r[i] = S->sys_b[i] - S->sys_f[i]; }
-      S->sys_r[i] = S->sys_0[i] *(S->sys_b[i] - S->sys_f[i]); }
-      //S->sys_r[i] = S->sys_b[i] - S->sys_0[i] - S->sys_f[i]; }
+      //S->part_r[i] = S->part_b[i] - S->part_f[i]; }
+      S->part_r[i] = S->part_0[i] *(S->part_b[i] - S->part_f[i]); }
+      //S->part_r[i] = S->part_b[i] - S->part_0[i] - S->part_f[i]; }
 #ifdef HAS_PRAGMA_SIMD
 #pragma omp simd reduction(+:glob_sum3,glob_sum4,glob_sum5)
 #endif
     for(INT_MESH i=hl0; i<sysn; i++){//------------------ Reduce residual norms
 #if 0
       // FletcherReeves
-      glob_sum3 += S->sys_r[i] * S->sys_d[i] * S->sys_r[i];
-      glob_sum4 += S->old_r[i] * S->sys_d[i] * S->old_r[i];
-      glob_sum5 += S->sys_r[i] * S->sys_r[i];
+      glob_sum3 += S->part_r[i] * S->part_d[i] * S->part_r[i];
+      glob_sum4 += S->old_r[i] * S->part_d[i] * S->old_r[i];
+      glob_sum5 += S->part_r[i] * S->part_r[i];
 #else
       // PolakRibiere (SM default)
-      glob_sum3 += S->sys_r[i] * S->sys_d[i] *(S->sys_r[i] - S->old_r[i]);
-      glob_sum4 += S->old_r[i] * S->sys_d[i] * S->old_r[i];
-      glob_sum5 += S->sys_r[i] * S->sys_r[i];
+      glob_sum3 += S->part_r[i] * S->part_d[i] *(S->part_r[i] - S->old_r[i]);
+      glob_sum4 += S->old_r[i] * S->part_d[i] * S->old_r[i];
+      glob_sum5 += S->part_r[i] * S->part_r[i];
 #endif
     }//                                                              (9*N FLOP)
     time_accum( my_solv_count, solv_start );
@@ -633,7 +633,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 #pragma omp simd
 #endif
     for(INT_MESH i=0; i<sysn; i++){
-      S->sys_p[i] = S->sys_r[i] * S->sys_d[i] + beta * S->sys_p[i]; }
+      S->part_p[i] = S->part_r[i] * S->part_d[i] + beta * S->part_p[i]; }
     time_accum( my_solv_count, solv_start );
   }//                                                                (3*N FLOP)
 #if VERB_MAX>1

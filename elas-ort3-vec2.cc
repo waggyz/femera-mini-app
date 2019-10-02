@@ -23,7 +23,7 @@ int ElastOrtho3D::Setup( Elem* E ){
   return 0;
 }
 int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
-  FLOAT_SOLV *sys_f, const FLOAT_SOLV* sys_u ){
+  FLOAT_SOLV *part_f, const FLOAT_SOLV* part_u ){
   //FIXME Cleanup local variables.
   const int Nd = 3;//this->node_d
   const int Nf = 3;// this->node_d DOF/node
@@ -66,8 +66,8 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
-  const FLOAT_SOLV* RESTRICT sysu  = &sys_u[0];
-  //      FLOAT_SOLV* RESTRICT sysf  = &sys_f[0];
+  const FLOAT_SOLV* RESTRICT sysu  = &part_u[0];
+  //      FLOAT_SOLV* RESTRICT sysf  = &part_f[0];
   {// Scope vf registers
   __m256d vf[Nc];
   if(e0<ee){
@@ -81,7 +81,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     for (int i=0; i<Nc; i++){
       std::memcpy( & u[Nf*i], &sysu[c[i]*Nf], sizeof(FLOAT_SOLV)*Nf );
 #if 0
-         vf[i]=_mm256_loadu_pd(&sys_f[3*c[i]]);
+         vf[i]=_mm256_loadu_pd(&part_f[3*c[i]]);
 #endif
     }
   }
@@ -129,7 +129,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     } printf("\n");
 #endif
     // [S][R] : matmul3x3x3, R is transposed
-    //accumulate_f( &f[0], &sys_f[0], &conn[0], &R[0], &S[0], &G[0] );
+    //accumulate_f( &f[0], &part_f[0], &conn[0], &R[0], &S[0], &G[0] );
     {// begin scoping unit
     __m256d a[3];
     rotate_s( &a[0], &R[0], &S[0] );
@@ -139,23 +139,23 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     if(ip==0){
       switch(elem_p){
       case(1):
-        for(int i=0; i< 4; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[i]]); }
+        for(int i=0; i< 4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
         break;
       case(2):
-        for(int i=0; i<10; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[i]]); }
+        for(int i=0; i<10; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
         break;
       case(3):
-        for(int i=0; i<20; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[i]]); }
+        for(int i=0; i<20; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
         break;
       }
     }
 #else
     if(ip==0){
-      for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[i]]); }
+      for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
       if(elem_p>1){
-        for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[i]]); }
+        for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
       if(elem_p>2){
-        for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&sys_f[3*conn[i]]); }
+        for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
       }
       }
     }
@@ -180,12 +180,12 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       for(int j=0; j<3; j++){
         double VECALIGNED sf[4];
         _mm256_store_pd(&sf[0],vf[i]);
-        sys_f[3*conn[i]+j] = sf[j];
+        part_f[3*conn[i]+j] = sf[j];
       }
 #if 0
       if( (ie+1) < ee ){
       const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
-         vf[i]=_mm256_loadu_pd(&sys_f[3*c[i]]);
+         vf[i]=_mm256_loadu_pd(&part_f[3*c[i]]);
       }
 #endif
     }//--------------------------------------------------- N*3 =  3*N FLOP

@@ -10,9 +10,9 @@ public:
   // 1 for thermal, 2 for elastic 2D, 3 for elastic 3D, 4 for thermoelastic 3D
 #if 0
   // The followig are stored interleaved in the system vectors
-  INT_DIM ninp_d=3;// Inputs/node (defines size of sys_u,p?)
+  INT_DIM ninp_d=3;// Inputs/node (defines size of part_u,p?)
   //                  usually ndof_d + user-defined nodal field and state vars
-  INT_DIM ndof_d=3;// Unknowns/node (defines size of sys_f?)
+  INT_DIM ndof_d=3;// Unknowns/node (defines size of part_f?)
 #endif
   //FIXME The followig will be stored in blocks, some in other arrays
   INT_DIM nvar_d=0;// Inputs/node: user-defined nodal state vars

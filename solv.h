@@ -32,27 +32,25 @@ public:
   FLOAT_SOLV glob_bmax[4]={0.0,0.0,0.0,0.0};
   //
   // Pointers to memory-aligned vanilla C arrays
-  //FIXME Rename to part_*
-  valign sys_f;// f=[A]{u}//FIXME Move to Phys*?
-  valign sys_u;// solution
-  valign sys_r;// Residuals
-  valign sys_b;// RHS
-  valign sys_0;// Dirichlet (fixed to zero) BCs
-  valign sys_1;// Fixed nonzero BCs
+  valign part_f;// f=[A]{u}//FIXME Move to Phys*?
+  valign part_u;// solution
+  valign part_r;// Residuals
+  valign part_b;// RHS
+  valign part_0;// Dirichlet (fixed to zero) BCs
+  valign part_1;// Fixed nonzero BCs
   //NOTE Additional working vectors needed are defined in each solver subclass
   //FIXME Moved them back here for now
-  valign sys_d;//FIXME diagonal preconditioner w/ fixed BC DOFs set to zero
-  valign sys_p, sys_q, sys_g, old_r, last_u;//FIXME working vectors specific to method
+  valign part_d;//FIXME diagonal preconditioner w/ fixed BC DOFs set to zero
+  valign part_p, part_q, part_g, old_r, last_u;//FIXME working vectors specific to method
   // The data is actually stored in corresponding C++ objects.
-  //FIXME Rename to data_*
-  Solv::vals dat_f;
-  Solv::vals dat_u;
-  Solv::vals dat_r;// Force residuals (PCG)
-  Solv::vals dat_b;// RHS
-  Solv::vals dat_d;
-  Solv::vals dat_0;
-  Solv::vals dat_1;
-  Solv::vals dat_p, dat_q, dat_g, dat_o, data_l;
+  Solv::vals data_f;
+  Solv::vals data_u;
+  Solv::vals data_r;// Force residuals (PCG)
+  Solv::vals data_b;// RHS
+  Solv::vals data_d;
+  Solv::vals data_0;
+  Solv::vals data_1;
+  Solv::vals data_p, data_q, data_g, data_o, data_l;
   //
   std::string meth_name="";
   //
@@ -81,22 +79,22 @@ protected:
     iter_max(i), udof_n(n), loca_rtol(r){
     loca_rto2=loca_rtol*loca_rtol;
 #ifdef ALIGN_SYS
-    sys_f = align_resize( dat_f, udof_n, valign_byte );// f=Au
-    sys_u = align_resize( dat_u, udof_n, valign_byte );// solution
-    sys_r = align_resize( dat_r, udof_n, valign_byte );// residuals
-    sys_d = align_resize( dat_d, udof_n, valign_byte );// Preconditioner
-    sys_0 = align_resize( dat_0, udof_n, valign_byte );// Dirichlet (fix 0) BC
-    sys_1 = align_resize( dat_1, udof_n, valign_byte );// Fixed nonzero BC
-    for(INT_MESH i=0; i<udof_n; i++){ sys_0[i]=1.0; }
+    part_f = align_resize( data_f, udof_n, valign_byte );// f=Au
+    part_u = align_resize( data_u, udof_n, valign_byte );// solution
+    part_r = align_resize( data_r, udof_n, valign_byte );// residuals
+    part_d = align_resize( data_d, udof_n, valign_byte );// Preconditioner
+    part_0 = align_resize( data_0, udof_n, valign_byte );// Dirichlet (fix 0) BC
+    part_1 = align_resize( data_1, udof_n, valign_byte );// Fixed nonzero BC
+    for(INT_MESH i=0; i<udof_n; i++){ part_0[i]=1.0; }
 #else
-    sys_u.resize(udof_n,0.0);// Initial Solution Guess
-    sys_r.resize(udof_n,0.0);// Residuals
-    sys_d.resize(udof_n,0.0);// Diagonal Preconditioner
-    sys_0.resize(udof_n,1.0);
+    part_u.resize(udof_n,0.0);// Initial Solution Guess
+    part_r.resize(udof_n,0.0);// Residuals
+    part_d.resize(udof_n,0.0);// Diagonal Preconditioner
+    part_0.resize(udof_n,1.0);
 #endif
 #if VERB_MAX > 13
-    std::cout << valign_byte "-byte aligned pointer to sys_f[0]: "
-      << &sys_f[0] <<'\n';
+    std::cout << valign_byte "-byte aligned pointer to part_f[0]: "
+      << &part_f[0] <<'\n';
 #endif
   };
 private:
@@ -110,9 +108,9 @@ public:
   PCG( INT_MESH n, INT_MESH i, FLOAT_PHYS r ) : Solv(n,i,r){
     meth_name="preconditioned cojugate gradient";
 #ifdef ALIGN_SYS
-    sys_p = align_resize( dat_p, udof_n, valign_byte );
+    part_p = align_resize( data_p, udof_n, valign_byte );
 #else
-    sys_p.resize(udof_n,0.0);// CG working vector
+    part_p.resize(udof_n,0.0);// CG working vector
 #endif
     udof_flop = 12;//*elem_n
     udof_band = 14*sizeof(FLOAT_SOLV);//*udof_n + 2
@@ -125,8 +123,8 @@ public:
   int Iter () final;
   //int Iter (Elem*, Phys*) final;
   //FIXME Make the rest private or protected later?
-  //RESTRICT Solv::vals sys_d;//FIXME diagonal preconditioner w/ fixed BC DOFs set to zero
-  //RESTRICT Solv::vals sys_p;// [sys_z no longer needed]
+  //RESTRICT Solv::vals part_d;//FIXME diagonal preconditioner w/ fixed BC DOFs set to zero
+  //RESTRICT Solv::vals part_p;// [part_z no longer needed]
   int BC0( Elem*, Phys* Y ) final;
 protected:
 private:
@@ -145,11 +143,11 @@ public:
   PCR( INT_MESH n, INT_MESH i, FLOAT_PHYS r ) : Solv(n,i,r){
     meth_name="preconditioned cojugate residual";
 #ifdef ALIGN_SYS
-    sys_p = align_resize( dat_p, udof_n, valign_byte );
-    sys_g = align_resize( dat_g, udof_n, valign_byte );
+    part_p = align_resize( data_p, udof_n, valign_byte );
+    part_g = align_resize( data_g, udof_n, valign_byte );
 #else
-    sys_p.resize(udof_n,0.0);// CR working vector
-    sys_g.resize(udof_n,0.0);// CR working vector
+    part_p.resize(udof_n,0.0);// CR working vector
+    part_g.resize(udof_n,0.0);// CR working vector
 #endif
     udof_flop = 14;//*elem_n
     udof_band = 17*sizeof(FLOAT_SOLV);//*udof_n +?
@@ -162,8 +160,8 @@ public:
   int Iter () final;
   //int Iter (Elem*, Phys*) final;
   //FIXME Make the rest private or protected later?
-  //RESTRICT Solv::vals sys_d;//FIXME diagonal preconditioner w/ fixed BC DOFs set to zero
-  //RESTRICT Solv::vals sys_g;// [f]=[A][r], [g]=[A][p]
+  //RESTRICT Solv::vals part_d;//FIXME diagonal preconditioner w/ fixed BC DOFs set to zero
+  //RESTRICT Solv::vals part_g;// [f]=[A][r], [g]=[A][p]
   int BC0( Elem*, Phys* Y ) final;
 protected:
 private:
@@ -178,22 +176,22 @@ public:
   NCG( INT_MESH n, INT_MESH i, FLOAT_PHYS r ) : Solv(n,i,r){
     meth_name="nonlinear cojugate gradient";
 #ifdef ALIGN_SYS
-    sys_b = align_resize( dat_b, udof_n, valign_byte );
-    sys_p = align_resize( dat_p, udof_n, valign_byte );
-    sys_g = align_resize( dat_g, udof_n, valign_byte );
-    sys_q = align_resize( dat_q, udof_n, valign_byte );
-    old_r = align_resize( dat_o, udof_n, valign_byte );
+    part_b = align_resize( data_b, udof_n, valign_byte );
+    part_p = align_resize( data_p, udof_n, valign_byte );
+    part_g = align_resize( data_g, udof_n, valign_byte );
+    part_q = align_resize( data_q, udof_n, valign_byte );
+    old_r = align_resize( data_o, udof_n, valign_byte );
     last_u = align_resize( data_l, udof_n, valign_byte );
 #else
-    // sys_d : diagonal preconditioner
-    // sys_b : RHS
-    // sys_u : solution
-    // sys_f : solution forces f = A u
-    // sys_r : force (gradient) residuals  r = A u - b
-    sys_b.resize(udof_n,0.0);// RHS
-    sys_p.resize(udof_n,0.0);// Search direction
-    sys_q.resize(udof_n,0.0);// perturbed solution gradient: q = u + alpha*p
-    sys_g.resize(udof_n,0.0);// residual grad. of perturbed sol. g = A q -b
+    // part_d : diagonal preconditioner
+    // part_b : RHS
+    // part_u : solution
+    // part_f : solution forces f = A u
+    // part_r : force (gradient) residuals  r = A u - b
+    part_b.resize(udof_n,0.0);// RHS
+    part_p.resize(udof_n,0.0);// Search direction
+    part_q.resize(udof_n,0.0);// perturbed solution gradient: q = u + alpha*p
+    part_g.resize(udof_n,0.0);// residual grad. of perturbed sol. g = A q -b
     old_r.resize(udof_n,0.0);
     last_u.resize(udof_n,0.0);
 #endif
@@ -208,8 +206,8 @@ public:
   int Iter () final;
   //int Iter (Elem*, Phys*) final;
   //FIXME Make the rest private or protected later?
-  //RESTRICT Solv::vals sys_d;//FIXME diagonal preconditioner w/ fixed BC DOFs set to zero
-  //RESTRICT Solv::vals sys_p;// [sys_z no longer needed]
+  //RESTRICT Solv::vals part_d;//FIXME diagonal preconditioner w/ fixed BC DOFs set to zero
+  //RESTRICT Solv::vals part_p;// [part_z no longer needed]
   int BC0( Elem*, Phys* Y ) final;
 protected:
 private:
@@ -223,7 +221,7 @@ private:
 #ifdef ALIGN_SYS
 inline Solv::valign Solv::align_resize(RESTRICT Solv::vals &v,
   INT_MESH n, const uint bytes){
-  //FIXME Hack to align sys_f
+  //FIXME Hack to align part_f
   v.resize( n + bytes/sizeof(FLOAT_SOLV),0.0);
   intptr_t ptr = reinterpret_cast<intptr_t>(&v[0]);
   const auto offset = bytes - ( ptr % bytes );

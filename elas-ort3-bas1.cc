@@ -30,7 +30,7 @@ int ElastOrtho3D::Setup( Elem* E ){
   return 0;
 };
 int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
-  FLOAT_SOLV *sys_f, const FLOAT_SOLV* sys_u ){
+  FLOAT_SOLV *part_f, const FLOAT_SOLV* part_u ){
   //FIXME Cleanup local variables.
   const int Dm = 3;//E->mesh_d;// Node (mesh) Dimension FIXME should be elem_d?
   const int Dn = 3;//this->node_d;// this->node_d DOF/node
@@ -92,8 +92,8 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
-  const FLOAT_SOLV* RESTRICT sysu  = &sys_u[0];
-        FLOAT_SOLV* RESTRICT sysf  = &sys_f[0];
+  const FLOAT_SOLV* RESTRICT sysu  = &part_u[0];
+        FLOAT_SOLV* RESTRICT sysf  = &part_f[0];
   if(e0<ee){// Fetch first element data
     for (int i=0; i<Nc; i++){
       std::memcpy( &   u[Dn*i], &sysu[Econn[Nc*e0+i]*Dn],

@@ -99,7 +99,7 @@ int ElastIso3D::ElemStiff(Elem* E  ){
   }// End elem loop
   return 0;
 }//============================================================== End ElemStiff
-int ElastIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
+int ElastIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* part_d ){
   const uint ndof   = 3;//this->node_d
   const uint  Nj = 10,d2=9;
   const uint  Nc = E->elem_conn_n;
@@ -167,13 +167,13 @@ int ElastIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
     }//end intp loop
     for (uint i=0; i<Nc; i++){
       for(uint j=0; j<3; j++){
-        sys_d[E->elem_conn[Nc*ie+i]*3+j] += elem_diag[3*i+j];
+        part_d[E->elem_conn[Nc*ie+i]*3+j] += elem_diag[3*i+j];
       } }
     elem_diag=0.0;
   }
   return 0;
 }
-int ElastIso3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* sys_d ){
+int ElastIso3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* part_d ){
   const uint ndof   = 3;//this->node_d
   const uint elem_n = E->elem_n;
   const uint  Nc = E->elem_conn_n;
@@ -248,13 +248,13 @@ int ElastIso3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* sys_d ){
       };};
     for (uint i=0; i<Nc; i++){
       for(uint j=0; j<3; j++){
-        sys_d[E->elem_conn[Nc*ie+i]*3+j] += elem_sum[3*i+j];
+        part_d[E->elem_conn[Nc*ie+i]*3+j] += elem_sum[3*i+j];
       };};
     K=0.0; elem_sum=0.0;
   };
   return 0;
 };
-int ElastIso3D::ElemStrain( Elem* E,FLOAT_SOLV* sys_f ){
+int ElastIso3D::ElemStrain( Elem* E,FLOAT_SOLV* part_f ){
   //FIXME Clean up local variables.
   const uint ndof= 3;//this->node_d
   const uint  Nj =10;//,d2=9;//mesh_d*mesh_d;
@@ -332,8 +332,8 @@ int ElastIso3D::ElemStrain( Elem* E,FLOAT_SOLV* sys_f ){
     };//end intp loop
     for (uint i=0; i<Nc; i++){
       for(uint j=0; j<3; j++){
-        //sys_f[3*conn[i]+j] += f[(3*i+j)];
-        sys_f[4*conn[i]+j] += std::abs( f[(3*i+j)] );
+        //part_f[3*conn[i]+j] += f[(3*i+j)];
+        part_f[4*conn[i]+j] += std::abs( f[(3*i+j)] );
     }; };//--------------------------------------------------- N*3 =  3*N FLOP
   };//end elem loop
   return 0;

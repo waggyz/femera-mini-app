@@ -25,7 +25,7 @@ int ThermElastOrtho3D::ElemNonlinear( Elem*, const INT_MESH, const INT_MESH,
 int ThermElastOrtho3D::ElemJacobi( Elem*, FLOAT_SOLV*, const FLOAT_SOLV* ){
   return 1; }
 //
-int ThermElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
+int ThermElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* part_d ){
   //FIXME Doesn't do rotation yet
   const uint Dm = 3;//this->mesh_d
   const uint Dn = this->node_d;
@@ -113,7 +113,7 @@ int ThermElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
       //if(Dn>Dm){
         for(uint i=0; i<Nc; i++){
           for(uint k=0; k<Dm ; k++){
-            sys_d[E->elem_conn[Nc*ie+i]*Dn+Dm] +=// 1e-4* //1e-3 ok
+            part_d[E->elem_conn[Nc*ie+i]*Dn+Dm] +=// 1e-4* //1e-3 ok
               //G[Nc* k+i] * mtrl_matc[12+k] * G[Nc* k+i] * this->udof_magn[j] * w;
               G[Nc* 0+i] * G[Nc* k+i]*mtrl_matc[12+0] * scal_ther * w
              +G[Nc* 1+i] * G[Nc* k+i]*mtrl_matc[12+1] * scal_ther * w
@@ -130,14 +130,14 @@ int ThermElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* sys_d ){
     for (uint i=0; i<Nc; i++){
       //int c=E->elem_conn[Nc*ie+i]*3;
       for(uint j=0; j<Dm; j++){
-        sys_d[E->elem_conn[Nc*ie+i]*Dn+j] += elem_diag[Dm*i+j];
+        part_d[E->elem_conn[Nc*ie+i]*Dn+j] += elem_diag[Dm*i+j];
       }
     }
   };
   return 0;
 };
 
-int ThermElastOrtho3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* sys_d ){
+int ThermElastOrtho3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* part_d ){
   //FIXME Doesn't do rotation yet
   const uint ndof   = 3;//this->node_d
   //const int mesh_d = E->elem_d;
@@ -219,7 +219,7 @@ int ThermElastOrtho3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* sys_d ){
       };};
     for (uint i=0; i<Nc; i++){
       for(uint j=0; j<3; j++){
-        sys_d[E->elem_conn[Nc*ie+i]*3+j] += elem_sum[3*i+j];
+        part_d[E->elem_conn[Nc*ie+i]*3+j] += elem_sum[3*i+j];
       };};
     //K=0.0; elem_sum=0.0;
   };

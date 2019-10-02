@@ -27,7 +27,7 @@ int ElastOrtho3D::Setup( Elem* E ){
   return 0;
 };
 int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
-  FLOAT_SOLV *sys_f, const FLOAT_SOLV* sys_u ){
+  FLOAT_SOLV *part_f, const FLOAT_SOLV* part_u ){
   //FIXME Cleanup local variables.
   const int Dm = 3;//E->mesh_d;// Node (mesh) Dimension FIXME should be elem_d?
   const int Dn = 3;//this->node_d;// this->node_d DOF/node
@@ -71,8 +71,8 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
-  const FLOAT_SOLV* RESTRICT sysu  = &sys_u[0];
-        FLOAT_SOLV* RESTRICT sysf  = &sys_f[0];
+  const FLOAT_SOLV* RESTRICT sysu  = &part_u[0];
+        FLOAT_SOLV* RESTRICT sysf  = &part_f[0];
   if(e0<ee){// Fetch first element data
     for (int i=0; i<Nc; i++){
       std::memcpy( &u[Dn*i], &sysu[Econn[Nc*e0+i]*Dn], sizeof(FLOAT_SOLV)*Dn );
@@ -99,7 +99,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     //           &Ejacs[Nj*ie+Nj], jac );// det=jac[9];
     for (int i=0; i<(Nc); i++){
       std::memcpy( &    u[Dn*i],
-                   //&sys_u[Econn[Nc*ie+i]*Dn], sizeof(FLOAT_SOLV)*Dn ); };
+                   //&part_u[Econn[Nc*ie+i]*Dn], sizeof(FLOAT_SOLV)*Dn ); };
                    &sysu[conn[i]*Dn], sizeof(FLOAT_SOLV)*Dn ); };
     for(int i=0;i<(Ne);i++){ f[i]=0.0; };
 #endif
@@ -220,7 +220,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #else
     for (int i=0; i<Nc; i++){
       for(int j=0; j<3; j++){
-        //sys_f[3*Econn[Nc*ie+i]+j] += f[(3*i+j)];
+        //part_f[3*Econn[Nc*ie+i]+j] += f[(3*i+j)];
         sysf[3*conn[i]+j] += f[(3*i+j)];
     }; };//--------------------------------------------------- N*3 =  3*N FLOP
 #endif

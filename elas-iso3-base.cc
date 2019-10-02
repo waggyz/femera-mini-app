@@ -29,7 +29,7 @@ int ElastIso3D::Setup( Elem* E ){
   return 0;
 };
 int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
-  FLOAT_SOLV* sys_f, const FLOAT_SOLV* sys_u ){
+  FLOAT_SOLV* part_f, const FLOAT_SOLV* part_u ){
   //FIXME Clean up local variables.
   //const int De = 3;// Element Dimension
   const int Nd = 3;// Node (mesh) Dimension
@@ -66,8 +66,8 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
-  const FLOAT_SOLV* RESTRICT sysu  = &sys_u[0];
-        FLOAT_SOLV* RESTRICT sysf  = &sys_f[0];
+  const FLOAT_SOLV* RESTRICT sysu  = &part_u[0];
+        FLOAT_SOLV* RESTRICT sysf  = &part_f[0];
   if(e0<ee){
 #ifdef FETCH_JAC
     std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
@@ -159,7 +159,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       if( n >=my_node_start ){
         for(uint j=0;j<3;j++){
           this->part_sum1+= f[Nf* i+j ] * sysu[Nf* n+j ];
-          //FIXME u already contains next elem sys_u
+          //FIXME u already contains next elem part_u
           //this->part_sum1+= f[Nf* i+j ] * u[Nf* i+j];
         };
       };
