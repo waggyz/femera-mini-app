@@ -45,10 +45,10 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   //
   const FLOAT_PHYS youn_modu    = this->mtrl_prop[0];
   const FLOAT_PHYS poiss_ratio  = this->mtrl_prop[1];
+  const FLOAT_PHYS bulk_modu    = youn_modu / (1.0-2.0*poiss_ratio);
+  const FLOAT_PHYS shear_modu   = this->mtrl_matc[2];
   const FLOAT_PHYS stress_yield = this->plas_prop[0];
   const FLOAT_PHYS hard_modu    = this->plas_prop[1];
-  const FLOAT_PHYS bulk_modu    = youn_modu / (1.0-2.0*poiss_ratio);
-  const FLOAT_PHYS shear_modu   = mtrl_matc[2];
   const FLOAT_PHYS yield_tol2   =
     (stress_yield*(1.0+1e-6))*(stress_yield*(1.0+1e-6));
 #if VERB_MAX>11
@@ -62,20 +62,19 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   //
   FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
   FLOAT_PHYS VECALIGNED wgt[intp_n];
-  FLOAT_PHYS VECALIGNED C[this->mtrl_matc.size()];
+  FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
   //
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
-  std::copy( &this->mtrl_matc[0], &this->mtrl_matc[this->mtrl_matc.size()], C );
+  std::copy( &this->mtrl_matc[0], &this->mtrl_matc[mtrl_matc.size()],matc );
+  const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
+  const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
+  const FLOAT_SOLV* RESTRICT partu = &part_u[0];//FIXME Redundant to arg?
+  const FLOAT_SOLV* RESTRICT partp = &part_p[0];//FIXME Redundant to arg?
+  const FLOAT_SOLV* RESTRICT C     = &matc[0];
   const __m256d c0 = _mm256_set_pd(0.0,C[1],C[1],C[0]);
   const __m256d c1 = _mm256_set_pd(0.0,C[1],C[0],C[1]);
   const __m256d c2 = _mm256_set_pd(0.0,C[0],C[1],C[1]);
-  const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
-  const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
-  const FLOAT_SOLV* RESTRICT sysu  = &part_u[0];
-  const FLOAT_SOLV* RESTRICT sysp  = &part_p[0];
-  {// Scope vf registers
-  __m256d vf[Nc];
   if(e0<ee){
 #ifdef FETCH_JAC
     std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
@@ -87,9 +86,11 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 //#pragma omp simd
 #endif
     for (int i=0; i<Nc; i++){
-      std::memcpy( & u[Nf*i],&sysu[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf );
-      std::memcpy( & p[Nf*i],&sysp[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf ); }
+      std::memcpy( & u[Nf*i],&partu[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf );
+      std::memcpy( & p[Nf*i],&partp[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf ); }
   }
+  {// Scope vf registers
+  __m256d vf[Nc];
   for(INT_MESH ie=e0;ie<ee;ie++){//================================== Elem loop
 #ifndef FETCH_JAC
       std::memcpy( &jac, &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
@@ -123,8 +124,8 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 //#pragma omp simd
 #endif
         for (int i=0; i<Nc; i++){
-          std::memcpy(& u[Nf*i],& sysu[c[i]*Nf], sizeof(FLOAT_SOLV)*Nf );
-          std::memcpy(& p[Nf*i],& sysp[c[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
+          std::memcpy(& u[Nf*i],& partu[c[i]*Nf], sizeof(FLOAT_SOLV)*Nf );
+          std::memcpy(& p[Nf*i],& partp[c[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
 #endif
 #ifdef FETCH_JAC
           std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj );

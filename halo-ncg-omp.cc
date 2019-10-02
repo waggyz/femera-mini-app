@@ -81,22 +81,16 @@ int NCG::Setup( Elem* E, Phys* Y ){// printf("*** NCG::Setup(E,Y) ***\n");
       if(this->glob_bmax[i]==umax){ u[i]=umax; }
       else{ u[i] = -umax*0.3; }//FIXME Generalize for nu used.
     }
-#if 0
-#pragma omp critical
-{ for(uint j=0; j<3; j++){printf("%f ",u[j]); } printf("\n"); }
-#endif
     for(uint i=0; i<Nn; i++){
       for(uint j=0; j<Dm; j++){
-        this->part_u[Dm* i+j ] = ci * u[j]// * this->glob_bmax[j]//Y->udof_magn[j]
-        //* E->node_coor[Dm* i+j ];
-        * ( E->node_coor[Dm* i+j ] - E->glob_bbox[j] )
-        / ( E->glob_bbox[   Dm+j ] - E->glob_bbox[j] );
+        this->part_u[Dm* i+j ] = ci * u[j]
+          * ( E->node_coor[Dm* i+j ] - E->glob_bbox[j] )
+          / ( E->glob_bbox[   Dm+j ] - E->glob_bbox[j] );
       }
     }
-    //this->BCS( E,Y );//FIXME repeated in Setup(E,Y)
   }
   Y->tens_flop*=2;Y->tens_band*=2;Y->stif_flop*=2;Y->stif_band*=2;// 2 evals/iter
-  this->data_f=0.0;
+  this->data_f=0.0;//FIXME Why is this here?
   Y->ElemLinear( E,0,E->elem_n, this->part_f, this->part_u );
   Y->ElemNonlinear( E,0,E->elem_n, this->part_f, this->part_u, this->part_u, false );
 #endif
@@ -146,7 +140,6 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   // Local copies for atomic ops and reduction
   //FLOAT_SOLV glob_r2a = this->glob_res2, glob_to2 = this->glob_rto2;
   FLOAT_SOLV glob_r2a = 0.0, glob_to2 = this->glob_rto2;
-  const FLOAT_SOLV load_scal=this->step_scal * FLOAT_SOLV(this->load_step);
   Phys::vals bcmax={0.0,0.0,0.0,0.0};
 #pragma omp parallel num_threads(comp_n)
 {// parallel init region
@@ -173,10 +166,25 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     Y->ElemLinear( E,0,E->elem_n,S->part_f,S->part_u );
     // Save state variables.
     Y->ElemNonlinear( E,0,E->elem_n,S->part_f,S->part_u,S->part_u, true );
+#if 1
+    // Predict next solution
+    //const INT_MESH sysn=S->udof_n;
+#ifdef HAS_SIMD
+#pragma omp simd
+#endif
+    for(uint i=0;i<sysn;i++){
+      auto t=S->part_u[i];
+      S->part_u[i] = 2.0*S->part_u[i] - S->last_u[i];
+      S->last_u[i]=t;
+    }
+#endif
+    S->load_scal=this->step_scal * FLOAT_SOLV(this->load_step);
+    S->Init(E,Y);
     for(uint i=0;i<Y->udof_magn.size();i++){
+      //FIXME move after BCS applied
       //printf("GLOBAL MAX BC[%u]: %f\n",i,bcmax[i]);
       if(Y->udof_magn[i] > bcmax[i]){
-//#pragma omp atomic write
+#pragma omp atomic write
         bcmax[i]=Y->udof_magn[i];
       }
       if(std::abs(S->loca_bmax[i]) > std::abs(this->glob_bmax[i])){
@@ -186,7 +194,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   }
 #pragma omp single
 {
-  auto m=bcmax[0];
+  auto m=bcmax[0];//FIXME Move to after Init, below?
   for(uint i=1;i<3;i++){ if(bcmax[0] > m){ m=bcmax[i]; } }
   for(uint i=0;i<3;i++){ bcmax[i]=m; }
   //NOTE Nonlinear physics needs unscaled part_u.
@@ -208,26 +216,13 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
-#if 1
-    // Predict next solution
-    const INT_MESH sysn=S->udof_n;
-#ifdef HAS_SIMD
-#pragma omp simd
-#endif
-    for(uint i=0;i<sysn;i++){
-      auto t=S->part_u[i];
-      S->part_u[i] = 2.0*S->part_u[i] - S->last_u[i];
-      S->last_u[i]=t;
-    }
-#endif
     S->solv_cond=this->solv_cond;
     for(uint i=0;i<Y->udof_magn.size();i++){
 //#pragma omp atomic read
       Y->udof_magn[i] = bcmax[i];
       S->glob_bmax[i] = this->glob_bmax[i];
     }
-    S->load_scal=load_scal;
-    S->Init(E,Y);
+    //S->Init(E,Y);
     S->Precond( E,Y );
   }
   time_reset( my_prec_count, start );

@@ -44,11 +44,15 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   // Make local copies
   FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
   FLOAT_PHYS VECALIGNED wgt[intp_n];
-  FLOAT_PHYS VECALIGNED C[this->mtrl_matc.size()];
+  FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
   //
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
-  std::copy( &this->mtrl_matc[0], &this->mtrl_matc[this->mtrl_matc.size()], C);
+  std::copy( &this->mtrl_matc[0], &this->mtrl_matc[mtrl_matc.size()], matc);
+  const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
+  const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
+  const FLOAT_SOLV* RESTRICT partu = &part_u[0];//FIXME Redundant to arg?
+  const FLOAT_SOLV* RESTRICT C     = &matc[0];
   const __m256d c0 = _mm256_set_pd(0.0,C[5],C[3],C[0]);
   const __m256d c1 = _mm256_set_pd(0.0,C[4],C[1],C[3]);
   const __m256d c2 = _mm256_set_pd(0.0,C[2],C[4],C[5]);
@@ -57,6 +61,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
     mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
     mtrl_rotc[6],mtrl_rotc[7],mtrl_rotc[8],0.0};
+  //      FLOAT_SOLV* RESTRICT sysf  = &part_f[0];
 #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
   for(uint j=0;j<mtrl_matc.size();j++){
@@ -64,12 +69,6 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     printf("%+9.2e ",C[j]);
   }; printf("\n");
 #endif
-  const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
-  const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
-  const FLOAT_SOLV* RESTRICT sysu  = &part_u[0];
-  //      FLOAT_SOLV* RESTRICT sysf  = &part_f[0];
-  {// Scope vf registers
-  __m256d vf[Nc];
   if(e0<ee){
 #ifdef FETCH_JAC
     std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
@@ -79,14 +78,11 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #pragma vector unaligned
 #endif
     for (int i=0; i<Nc; i++){
-      std::memcpy( & u[Nf*i], &sysu[c[i]*Nf], sizeof(FLOAT_SOLV)*Nf );
-#if 0
-         vf[i]=_mm256_loadu_pd(&part_f[3*c[i]]);
-#endif
+      std::memcpy( & u[Nf*i], &partu[c[i]*Nf], sizeof(FLOAT_SOLV)*Nf );
     }
   }
-  //for(int i=0; i<Nc; i++){const vf[i]=_mm256_set1_pd(0.0); }
-  //for(int i=0; i<Nc; i++){const __m256d zs={0.0,0.0,0.0,0.0}; vf[i]=zs; }
+  {// Scope vf registers
+  __m256d vf[Nc];
   for(INT_MESH ie=e0;ie<ee;ie++){
 #ifndef FETCH_JAC
       std::memcpy( &jac, &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
@@ -116,7 +112,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #pragma vector unaligned
 #endif
       for (int i=0; i<Nc; i++){
-        std::memcpy( &u[Nd*i], &sysu[c[i]*Nd], sizeof(FLOAT_SOLV)*Nd ); }
+        std::memcpy( &u[Nd*i], &partu[c[i]*Nd], sizeof(FLOAT_SOLV)*Nd ); }
     } }
     // [H] Small deformation tensor
     // [H][RT] : matmul3x3x3T
