@@ -193,10 +193,17 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
             D[6* i+j ]+= lambda_eff; }
         }
         //------------------------------------------------- Save element state.
-        if( save_state ){
-        for(int i=0; i<6; i++){// Update state variable back_v.
-          state[Ns*(intp_n*ie+ip) +i ]
-            += plas_flow[i] * hard_modu * delta_equiv; } }
+        if( save_state ){// Update state variable back_v.
+#if 1
+          for(int i=0; i<6; i++){
+            back_v[i] += plas_flow[i] * hard_modu * delta_equiv; }
+          std::memcpy(&state[Ns*(intp_n*ie+ip)],&back_v,sizeof(FLOAT_SOLV)*Ns);
+#else
+          for(int i=0; i<6; i++){
+            state[Ns*(intp_n*ie+ip) +i ]
+              += plas_flow[i] * hard_modu * delta_equiv; }
+#endif
+        }
         //======================================================= end UMAT scope
 #if VERB_MAX>10
 #pragma omp critical(print)
