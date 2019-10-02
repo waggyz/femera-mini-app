@@ -67,7 +67,7 @@ int NCG::Setup( Elem* E, Phys* Y ){// printf("*** NCG::Setup(E,Y) ***\n");
   this->halo_loca_0 = E->halo_remo_n * Y->node_d;
 #if 1
   this->RHS( E,Y );
-  this->BCS( E,Y );// Sync max Y->udof_magn before Precond()
+  //this->BCS( E,Y );// Sync max Y->udof_magn before Precond()
   if(this->cube_init!=0.0){//FIXME I don't know if this is working
     // printf("*** NCG::Init(E,Y)...cube_init ***\n");
     const INT_MESH Nn=E->node_n, Dm=E->mesh_d;

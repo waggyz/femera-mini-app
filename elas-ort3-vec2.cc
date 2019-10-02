@@ -23,7 +23,7 @@ int ElastOrtho3D::Setup( Elem* E ){
   return 0;
 }
 int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
-  FLOAT_SOLV *part_f, const FLOAT_SOLV* part_u ){
+  FLOAT_SOLV* part_f, const FLOAT_SOLV* part_u ){
   //FIXME Cleanup local variables.
   const int Nd = 3;//this->node_d
   const int Nf = 3;// this->node_d DOF/node
