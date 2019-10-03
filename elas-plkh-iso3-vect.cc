@@ -294,18 +294,16 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #endif
         // Calculate conjugate stress from conjugate strain.
         // Start with the elastic response, scaled by elas_part.
-        compute_iso_s( &S[0], &P[0],C[2],c0,c1,c2, dw*elas_part );
-        s[0] = _mm256_load_pd(&S[0]);// Linear conjugate response
-        s[1] = _mm256_load_pd(&S[4]);
-        s[2] = _mm256_load_pd(&S[8]);
+        compute_iso_s( &S[0], &P[0],C[2],c0,c1,c2, dw * elas_part );
+        //s[0] = _mm256_load_pd(&S[0]);// Linear conjugate response
+        //s[1] = _mm256_load_pd(&S[4]);
+        //s[2] = _mm256_load_pd(&S[8]);
         // Add in the plastic response.
         const FLOAT_PHYS VECALIGNED strain_p[6]={
           P[0], P[5], P[10], P[1]+P[4], P[6]+P[9], P[2]+P[8] };
         FLOAT_PHYS VECALIGNED stress_p[6];
         for(int i=0; i<6; i++){ stress_p[i] =0.0;
-          for(int j=0; j<6; j++){
-            stress_p[i] += D[6* i+j ] * strain_p[ j ];
-          }
+          for(int j=0; j<6; j++){ stress_p[i] += D[6* i+j ] * strain_p[ j ]; }
           stress_p[i]*= dw;
         }
         S[0]+=stress_p[0]; S[1]+=stress_p[3]; S[2]+=stress_p[5];// S[3]=stress_p[3];
