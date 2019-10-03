@@ -197,6 +197,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #if 0
         FLOAT_PHYS elas_part = stress_yield / stress_mises;
 #else
+        // This one looks like it's correct.
         FLOAT_PHYS elas_mises=0.0;
         {
         FLOAT_PHYS VECALIGNED m[6]; FLOAT_PHYS h=0.0;

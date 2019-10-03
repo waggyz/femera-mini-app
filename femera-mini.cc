@@ -339,12 +339,16 @@ int main( int argc, char** argv ){
   int step_n=M->load_step_n;//NOTE M->load_step is 1-indexed
   for(M->load_step=1; M->load_step <= step_n; M->load_step++){
     iter=0;
-  {// init scope
+  {// load step init scope
     if( M->load_step > 1 ){
       setu_done=std::chrono::high_resolution_clock::now(); }
     M->time_secs=0.0;
     M->Init();
-    if( M->glob_atol>0.0 ){ M->glob_rto2=M->glob_ato2; }//FIXME Move to Init?
+    if( (step_n > 1) & (M->load_step == 1) & (M->glob_atol<=0.0) ){
+      M->glob_atol = std::sqrt(M->glob_rto2);
+      M->glob_ato2 = M->glob_rto2; }// Stick with initial relative tolerance
+    if( M->glob_atol>0.0 ){//FIXME Move to Init?
+      M->glob_rto2=M->glob_ato2; }
 #if VERB_MAX>1
     if( verbosity > 1 ){ if( step_n > 1 ){
       printf("    Load Step:  %i of %i scaled by%5.2f and\n",
@@ -408,9 +412,9 @@ int main( int argc, char** argv ){
       if(i<2){std::cout<<","; } }
     std::cout <<"], then"<<'\n' << " Iterating to: <";
     if( M->glob_atol > 0.0 ){
-       std::cout <<atol<<" absolute ";
+       std::cout <<M->glob_atol<<" absolute ";
     }else{
-       std::cout <<rtol<<" relative ";
+       std::cout <<M->glob_rtol<<" relative ";
     }
     std::cout <<"tolerance or"<<'\n';
     std::cout <<"  Stopping at:  "<<iter_max
