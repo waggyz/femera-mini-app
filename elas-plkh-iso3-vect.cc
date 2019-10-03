@@ -95,8 +95,6 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       std::memcpy( & u[Nf*i],&part_u[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf );
       std::memcpy( & p[Nf*i],&part_p[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf ); }
   }
-  {// Scope vf registers
-  __m256d vf[Nc];
   for(INT_MESH ie=e0;ie<ee;ie++){//================================== Elem loop
 #ifndef FETCH_JAC
       std::memcpy( &jac, &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
@@ -105,6 +103,8 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
     const __m256d j0 = _mm256_load_pd (&jac[0]);  // j0 = [j3 j2 j1 j0]
     const __m256d j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
     const __m256d j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
+  {// Scope vf registers
+  __m256d vf[Nc];
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
       std::memcpy( &back_v, &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
       //G = MatMul3x3xN( jac,shg );
@@ -136,12 +136,34 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #endif
       } }
       compute_iso_s( &S[0], &H[0],C[2],c0,c1,c2, 1.0 );// Linear stress response
-#if VERB_MAX>10
-      printf( "Cauchy Stress (Elem: %i):", ie );
+
+
+
+#if 0
+#if VERB_MAX>1
+      printf( "Cauchy Stress Before (Elem: %i):", ie );
       for(int j=0;j<12;j++){
         if(j%4==0){printf("\n"); }
         printf("%+9.2e ",S[j]);
       } printf("\n");
+#endif
+      double VECALIGNED SS[4];
+      {__m256d ss[3];
+      ss[0] = _mm256_load_pd(&SS[0]);
+      ss[1] = _mm256_load_pd(&SS[4]);
+      ss[2] = _mm256_load_pd(&SS[8]);
+      //_mm256_sld(ss[0]);
+      _mm256_store_pd(&SS[0],ss[0]);
+      }
+#if VERB_MAX>1
+      printf( "Cauchy Stress After  (Elem: %i):", ie );
+      for(int j=0;j<12;j++){
+        if(j%4==0){printf("\n"); }
+        printf("%+9.2e ",S[j]);
+      } printf("\n");
+#endif
+
+
 #endif
       const FLOAT_PHYS VECALIGNED stress_v[6]={// sxx, syy, szz,  sxy, syz, sxz
         S[0], S[5], S[10], S[1], S[6], S[2] };
@@ -155,13 +177,16 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       FLOAT_PHYS stress_mises=0.0;
 #if 1
       {
+      //FIXME m here is (I think) plas_flow * stress_mises...
+      //NOTE back_v is only deviatoric,
+      //     so only stress_v hydro needs to be removed?
       FLOAT_PHYS VECALIGNED m[6]; FLOAT_PHYS h=0.0;
       for(int i=0;i<6;i++){ m[i] = stress_v[i] - back_v[i]; }
       for(int i=0;i<3;i++){ h+=m[i]; }
       h *= 0.333333333333;
       for(int i=0;i<3;i++){ m[i]-=h; stress_mises += m[i]*m[i]*1.5; }
       for(int i=3;i<6;i++){ stress_mises += m[i]*m[i]*3.0; }
-      }/// FIXME *3.0?
+      }// FIXME *3.0?
       //for(int i=0;i<6;i++){ printf("%+9.2e ", stress_v[i]); }
       //printf("mises: %+9.2e\n",std::sqrt(stress_mises));
 #else
@@ -198,6 +223,25 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         for(int i=0;i<3;i++){ plas_flow[i]-= stress_hydro; }
         for(int i=0;i<6;i++){ plas_flow[i]*= inv_mises; }
         }
+#if 1
+        FLOAT_PHYS elas_part = stress_yield / stress_mises;
+#else
+        FLOAT_PHYS elas_mises=0.0;
+        {
+        FLOAT_PHYS VECALIGNED m[6]; FLOAT_PHYS h=0.0;
+        for(int i=0;i<6;i++){ m[i] = stress_v[i]; }
+        for(int i=0;i<3;i++){ h+=m[i]; }
+        h *= 0.333333333333;
+        for(int i=0;i<3;i++){ m[i]-=h; elas_mises += m[i]*m[i]*1.5; }
+        for(int i=3;i<6;i++){ elas_mises += m[i]*m[i]*3.0; }
+        }// FIXME *3.0?
+        elas_mises = std::sqrt(elas_mises);
+        // FLOAT_PHYS elas_part = (elas_mises-stress_mises) / elas_mises;
+        FLOAT_PHYS elas_part = stress_yield / elas_mises;
+#endif
+        // Add elas_part * elastic D-matrix?
+        //FIXME Does this calculate the secant modulus?
+        //Secant modulus response: this stress plus elastic response at yield
         FLOAT_PHYS VECALIGNED D[36];
         for(int i=0;i<6;i++){
           for(int j=0;j<6;j++){
@@ -206,9 +250,10 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           D[6* i+i ]+= shear_eff;
         }
         for(int i=0;i<3;i++){
-          D[6* i+i ]+= shear_eff;
+          D[6* i+i ]+= shear_eff + (mtrl_matc[0]-mtrl_matc[1])*elas_part;
+          D[6* (i+3)+i+3 ]+= mtrl_matc[2]*elas_part;
           for(int j=0;j<3;j++){
-            D[6* i+j ]+= lambda_eff; }
+            D[6* i+j ]+= lambda_eff + mtrl_matc[1]*elas_part; }
         }
         //------------------------------------------------- Save element state.
         if( save_state ){// Update state variable back_v.
@@ -283,15 +328,15 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #pragma vector unaligned
 #endif
       for (int i=0; i<Nc; i++){
+        double VECALIGNED sf[4];
+        _mm256_store_pd(&sf[0],vf[i]);
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
 #endif
         for(int j=0; j<3; j++){
-          double VECALIGNED sf[4];
-          _mm256_store_pd(&sf[0],vf[i]);
           part_f[3*conn[i]+j] = sf[j]; } }
-  }//============================================================ end elem loop
   }// end vf register scope
+  }//============================================================ end elem loop
   return 0;
 }
 #undef VECTORIZED

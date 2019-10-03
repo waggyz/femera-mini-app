@@ -79,8 +79,6 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       std::memcpy( & u[Nf*i], &part_u[c[i]*Nf], sizeof(FLOAT_SOLV)*Nf );
     }
   }
-  {// Scope vf registers
-  __m256d vf[Nc];
   for(INT_MESH ie=e0;ie<ee;ie++){
 #ifndef FETCH_JAC
       std::memcpy( &jac, &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
@@ -89,6 +87,8 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   const __m256d j0 = _mm256_load_pd(&jac[0]);  // j0 = [j3 j2 j1 j0]
   const __m256d j1 = _mm256_loadu_pd(&jac[3]); // j1 = [j6 j5 j4 j3]
   const __m256d j2 = _mm256_loadu_pd(&jac[6]); // j2 = [j9 j8 j7 j6]
+  {// Scope vf registers
+  __m256d vf[Nc];
   for(int ip=0; ip<intp_n; ip++){
     //G = MatMul3x3xN( jac,shg );
     //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
@@ -168,12 +168,12 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #pragma vector unaligned
 #endif
     for (int i=0; i<Nc; i++){
+      double VECALIGNED sf[4];
+      _mm256_store_pd(&sf[0],vf[i]);
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
 #endif
       for(int j=0; j<3; j++){
-        double VECALIGNED sf[4];
-        _mm256_store_pd(&sf[0],vf[i]);
         part_f[3*conn[i]+j] = sf[j];
       }
 #if 0
@@ -183,7 +183,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       }
 #endif
     }//--------------------------------------------------- N*3 =  3*N FLOP
-  }// end elem loop
   }// end f register scope
+  }// end elem loop
 return 0;
 }
