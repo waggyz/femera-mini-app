@@ -223,6 +223,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         for(int i=0;i<3;i++){ plas_flow[i]-= stress_hydro; }
         for(int i=0;i<6;i++){ plas_flow[i]*= inv_mises; }
         }
+        //FIXME Maybe one of these is correct...
 #if 1
         FLOAT_PHYS elas_part = stress_yield / stress_mises;
 #else
@@ -250,10 +251,11 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           D[6* i+i ]+= shear_eff;
         }
         for(int i=0;i<3;i++){
-          D[6* i+i ]+= shear_eff + (mtrl_matc[0]-mtrl_matc[1])*elas_part;
-          D[6* (i+3)+i+3 ]+= mtrl_matc[2]*elas_part;
+          D[6* i+i ]+= shear_eff;// + (C[0]-C[1])*elas_part;
+          //D[6* (i+3)+i+3 ]+= C[2]*elas_part;
           for(int j=0;j<3;j++){
-            D[6* i+j ]+= lambda_eff + mtrl_matc[1]*elas_part; }
+            D[6* i+j ]+= lambda_eff;// + C[1]*elas_part;
+          }
         }
         //------------------------------------------------- Save element state.
         if( save_state ){// Update state variable back_v.
@@ -291,6 +293,12 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 }
 #endif
         // Calculate conjugate stress from conjugate strain.
+        // Start with the elastic response, scaled by elas_part.
+        compute_iso_s( &S[0], &P[0],C[2],c0,c1,c2, dw*elas_part );
+        s[0] = _mm256_load_pd(&S[0]);// Linear conjugate response
+        s[1] = _mm256_load_pd(&S[4]);
+        s[2] = _mm256_load_pd(&S[8]);
+        // Add in the plastic response.
         const FLOAT_PHYS VECALIGNED strain_p[6]={
           P[0], P[5], P[10], P[1]+P[4], P[6]+P[9], P[2]+P[8] };
         FLOAT_PHYS VECALIGNED stress_p[6];
@@ -300,9 +308,9 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           }
           stress_p[i]*= dw;
         }
-        S[0]=stress_p[0]; S[1]=stress_p[3]; S[2]=stress_p[5]; S[3]=stress_p[3];
-        S[4]=stress_p[3]; S[5]=stress_p[1]; S[6]=stress_p[4]; S[7]=stress_p[5];
-        S[8]=stress_p[5]; S[9]=stress_p[4]; S[10]=stress_p[2];S[11]=0.0;
+        S[0]+=stress_p[0]; S[1]+=stress_p[3]; S[2]+=stress_p[5];// S[3]=stress_p[3];
+        S[4]+=stress_p[3]; S[5]+=stress_p[1]; S[6]+=stress_p[4];// S[7]=stress_p[5];
+        S[8]+=stress_p[5]; S[9]+=stress_p[4]; S[10]+=stress_p[2];// S[11]=0.0;
         s[0] = _mm256_load_pd(&S[0]);// sxx sxy sxz | sxy
         s[1] = _mm256_load_pd(&S[4]);// sxy syy syz | sxz
         s[2] = _mm256_load_pd(&S[8]);// sxz syz szz | 0.0
