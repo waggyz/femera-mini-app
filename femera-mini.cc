@@ -517,7 +517,7 @@ int main( int argc, char** argv ){
       (iter_sec-(phys_sec+gat0_sec+gat1_sec+scat_sec+solv_sec)) /sc, ss,
       (iter_sec-(phys_sec+gat0_sec+gat1_sec+scat_sec+solv_sec))
       / iter_sec*pct );
-    printf("%9.0f %s  %6.2f%% Wall Clock Solve Time and Load Balance (%)\n",
+    printf("%9.0f %s  %6.2f%% Wall Clock Solve Time and Load Balance Percentage\n",
       loop_sec /sc, ss, (iter_sec/comp_n)/loop_sec *pct );
     //
     //printf("Effective FPU Performance\n");
