@@ -49,7 +49,7 @@ public:
   //
   int iter_max=0;
   int load_step=1, load_step_n=1;
-  FLOAT_SOLV step_scal = 1.0;
+  FLOAT_SOLV step_scal = 1.0, next_scal=1.0;
   //
   FLOAT_SOLV glob_rtol= 0.0, glob_rto2=0.0, glob_chk2=0.0, glob_res2=0.0;
   FLOAT_SOLV glob_atol=-1.0, glob_ato2=0.0;
@@ -76,8 +76,8 @@ public:
   //
   std::string base_name = "";// base of partitioned mesh filename (without _i)
   std::string meth_name = "";// solution method name
-  //
-  int SavePartFMR( part&, const char* bname, bool is_bin );//FIXME ASCII/Binary file format
+  //FIXME ASCII/Binary file format
+  int SavePartFMR( part&, const char* bname, bool is_bin );
   int ReadPartFMR( part&, const char* bname, bool is_bin );
   //
   int Setup();//FIXME Not yet used?

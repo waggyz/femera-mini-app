@@ -399,7 +399,13 @@ int main( int argc, char** argv ){
     if(verbosity>1){
     std::cout << "  Starting at:  ";
     if(M->load_step >1){
-      std::cout<<"previous load step solution";
+      if( M->next_scal > 0.0 ){
+        if( M->next_scal == 1.0 ){
+          std::cout<<"previous solution linear extrapolation"; }
+        else{
+          std::cout<<M->next_scal<<"x from the previous load step"; }
+      }else{
+        std::cout<<"previous load step solution"; }
     }else{
       if(M->cube_init==0.0){ std::cout<<"zero"; }
       else if(M->cube_init==1.0){ std::cout<<"isotropic block solution"; }

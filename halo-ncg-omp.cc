@@ -166,18 +166,18 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     Y->ElemLinear( E,0,E->elem_n,S->part_f,S->part_u );
     // Save state variables.
     Y->ElemNonlinear( E,0,E->elem_n,S->part_f,S->part_u,S->part_u, true );
-#if 1
-    // Predict next solution
-    //const INT_MESH sysn=S->udof_n;
+    if( this->next_scal > 0.0 ){
+      // Predict next solution
+      //const INT_MESH sysn=S->udof_n;
 #ifdef HAS_SIMD
 #pragma omp simd
 #endif
-    for(uint i=0;i<sysn;i++){
-      auto t=S->part_u[i];
-      S->part_u[i] = 2.0*S->part_u[i] - S->last_u[i];
-      S->last_u[i]=t;
+      for(uint i=0;i<sysn;i++){
+        auto t=S->part_u[i];
+        S->part_u[i] = 2.0*S->part_u[i] - S->last_u[i];
+        S->last_u[i]=t;
+      }
     }
-#endif
     S->load_scal=this->step_scal * FLOAT_SOLV(this->load_step);
     S->Init(E,Y);
     for(uint i=0;i<Y->udof_magn.size();i++){
