@@ -4,7 +4,7 @@
 #include <cstring>// std::memcpy
 #include "femera.h"
 #include <immintrin.h>
-
+//
 // Fetch next u within G,H loop nest
 #undef FETCH_U_EARLY
 //
@@ -136,35 +136,6 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #endif
       } }
       compute_iso_s( &S[0], &H[0],C[2],c0,c1,c2, 1.0 );// Linear stress response
-
-
-
-#if 0
-#if VERB_MAX>1
-      printf( "Cauchy Stress Before (Elem: %i):", ie );
-      for(int j=0;j<12;j++){
-        if(j%4==0){printf("\n"); }
-        printf("%+9.2e ",S[j]);
-      } printf("\n");
-#endif
-      double VECALIGNED SS[4];
-      {__m256d ss[3];
-      ss[0] = _mm256_load_pd(&SS[0]);
-      ss[1] = _mm256_load_pd(&SS[4]);
-      ss[2] = _mm256_load_pd(&SS[8]);
-      //_mm256_sld(ss[0]);
-      _mm256_store_pd(&SS[0],ss[0]);
-      }
-#if VERB_MAX>1
-      printf( "Cauchy Stress After  (Elem: %i):", ie );
-      for(int j=0;j<12;j++){
-        if(j%4==0){printf("\n"); }
-        printf("%+9.2e ",S[j]);
-      } printf("\n");
-#endif
-
-
-#endif
       const FLOAT_PHYS VECALIGNED stress_v[6]={// sxx, syy, szz,  sxy, syz, sxz
         S[0], S[5], S[10], S[1], S[6], S[2] };
 #if VERB_MAX>10
@@ -173,10 +144,9 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         printf("%+9.2e ",stress_v[j]);
       } printf("\n");
 #endif
-      //====================================================== Scope UMAT calc
       FLOAT_PHYS stress_mises=0.0;
 #if 1
-      {
+      {//====================================================== Scope UMAT calc
       //FIXME m here is (I think) plas_flow * stress_mises...
       //NOTE back_v is only deviatoric,
       //     so only stress_v hydro needs to be removed?
@@ -305,9 +275,9 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         S[0]+=stress_p[0]; S[1]+=stress_p[3]; S[2]+=stress_p[5];// S[3]=stress_p[3];
         S[4]+=stress_p[3]; S[5]+=stress_p[1]; S[6]+=stress_p[4];// S[7]=stress_p[5];
         S[8]+=stress_p[5]; S[9]+=stress_p[4]; S[10]+=stress_p[2];// S[11]=0.0;
-        s[0] = _mm256_load_pd(&S[0]);// sxx sxy sxz | sxy
-        s[1] = _mm256_load_pd(&S[4]);// sxy syy syz | sxz
-        s[2] = _mm256_load_pd(&S[8]);// sxz syz szz | 0.0
+        s[0] = _mm256_load_pd(&S[0]);// sxx sxy sxz | x
+        s[1] = _mm256_load_pd(&S[4]);// sxy syy syz | x
+        s[2] = _mm256_load_pd(&S[8]);// sxz syz szz | x
       }// if plastic ----------------------------------------------------------
       else{// Linear-elastic conj response only
         compute_iso_s( &S[0], &P[0],C[2],c0,c1,c2, dw );
