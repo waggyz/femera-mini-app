@@ -268,8 +268,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
             state[Ns*(intp_n*ie+ip) +i ]
               += plas_flow[i] * hard_modu * delta_equiv; }
 #endif
-        }
-        //======================================================= end UMAT scope
+        }//===================================================== end UMAT scope
 #if VERB_MAX>10
 #pragma omp critical(print)
 {
@@ -293,11 +292,8 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 }
 #endif
         // Calculate conjugate stress from conjugate strain.
-        // Start with the elastic response, scaled by elas_part.
+        // Start with the linear-elastic response, scaled by elas_part.
         compute_iso_s( &S[0], &P[0],C[2],c0,c1,c2, dw * elas_part );
-        //s[0] = _mm256_load_pd(&S[0]);// Linear conjugate response
-        //s[1] = _mm256_load_pd(&S[4]);
-        //s[2] = _mm256_load_pd(&S[8]);
         // Add in the plastic response.
         const FLOAT_PHYS VECALIGNED strain_p[6]={
           P[0], P[5], P[10], P[1]+P[4], P[6]+P[9], P[2]+P[8] };
@@ -312,9 +308,9 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         s[0] = _mm256_load_pd(&S[0]);// sxx sxy sxz | sxy
         s[1] = _mm256_load_pd(&S[4]);// sxy syy syz | sxz
         s[2] = _mm256_load_pd(&S[8]);// sxz syz szz | 0.0
-      }// if plastic
-      else{
-        compute_iso_s( &S[0], &P[0],C[2],c0,c1,c2, dw );// Linear conj response
+      }// if plastic ----------------------------------------------------------
+      else{// Linear-elastic conj response only
+        compute_iso_s( &S[0], &P[0],C[2],c0,c1,c2, dw );
         s[0] = _mm256_load_pd(&S[0]);
         s[1] = _mm256_load_pd(&S[4]);
         s[2] = _mm256_load_pd(&S[8]);
