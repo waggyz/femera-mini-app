@@ -194,7 +194,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         for(int i=0;i<6;i++){ plas_flow[i]*= inv_mises; }
         }
         //FIXME Maybe one of these is correct...
-#if 1
+#if 0
         FLOAT_PHYS elas_part = stress_yield / stress_mises;
 #else
         FLOAT_PHYS elas_mises=0.0;
