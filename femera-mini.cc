@@ -846,12 +846,12 @@ int main( int argc, char** argv ){
   }
   FLOAT_PHYS reac_ther = ther_pres * A;
   printf("Model Response\n");
-  printf("        Load / Area  : %+9.2e /%9.2e  N/m2 = %+9.2e Pa\n",
+  printf("        Load / Area  : %+9.2e /%9.2e  N/m2 = %+12.5e Pa\n",
     reac_x, A, reac_x/A );
   if(reac_ther!=0.0){
-  printf("Thermal Load / Area  : %+9.2e /%9.2e  N/m2 = %+9.2e Pa\n",
+  printf("Thermal Load / Area  : %+9.2e /%9.2e  N/m2 = %+12.5e Pa\n",
     reac_ther, A, reac_ther/A ); }
-  printf("Displacement / Length: %+9.2e /%9.2e  m/m  = %+9.2e strain\n",
+  printf("Displacement / Length: %+9.2e /%9.2e  m/m  = %+12.5e strain\n",
     test_u, 1.0/L, test_u*L );
     //test_u, 1.0/scale, test_u*scale );
   printf("              Modulus: %9.2e /%9.2e Pa/Pa Voigt Average\n",
