@@ -184,7 +184,6 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       }
       //for(int i=0;i<6;i++){ printf("%+9.2e ", elas_v[i]); }
       //printf("mises: %+9.2e\n",sqrt(stress_mises));
-      __m256d s[3];
       if( stress_mises > yield_tol2 ){
         stress_mises = sqrt(stress_mises);
         const FLOAT_PHYS inv_mises = 1.0/stress_mises;
@@ -296,10 +295,13 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         }
         }
       }
+      {
+      __m256d s[3];
       s[0] = _mm256_load_pd(&S[0]);// sxx sxy sxz | x
       s[1] = _mm256_load_pd(&S[4]);// sxy syy syz | x
       s[2] = _mm256_load_pd(&S[8]);// sxz syz szz | x
       accumulate_f( &vf[0], &s[0], &G[0], elem_p );
+      }
       }//======================================================== end intp loop
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
@@ -459,7 +461,6 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
       }
       //for(int i=0;i<6;i++){ printf("%+9.2e ", elas_v[i]); }
       //printf("mises: %+9.2e\n",sqrt(stress_mises));
-      __m256d s[3];
       if( stress_mises > yield_tol2 ){
         stress_mises = sqrt(stress_mises);
         const FLOAT_PHYS inv_mises = 1.0/stress_mises;
@@ -537,15 +538,9 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
         S[0]+=stress_p[0]; S[1]+=stress_p[3]; S[2]+=stress_p[5];// S[3]=stress_p[3];
         S[4]+=stress_p[3]; S[5]+=stress_p[1]; S[6]+=stress_p[4];// S[7]=stress_p[5];
         S[8]+=stress_p[5]; S[9]+=stress_p[4]; S[10]+=stress_p[2];// S[11]=0.0;
-        s[0] = _mm256_load_pd(&S[0]);// sxx sxy sxz | x
-        s[1] = _mm256_load_pd(&S[4]);// sxy syy syz | x
-        s[2] = _mm256_load_pd(&S[8]);// sxz syz szz | x
       }// if plastic ----------------------------------------------------------
       else{// Linear-elastic conj response only
         for(int i=0; i<12; i++){ S[i]*= dw; }
-        s[0] = _mm256_load_pd(&S[0]);
-        s[1] = _mm256_load_pd(&S[4]);
-        s[2] = _mm256_load_pd(&S[8]);
       }
       if(ip==0){
         for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
@@ -556,7 +551,13 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
         }
         }
       }
+      {
+      __m256d s[3];
+      s[0] = _mm256_load_pd(&S[0]);// sxx sxy sxz | x
+      s[1] = _mm256_load_pd(&S[4]);// sxy syy syz | x
+      s[2] = _mm256_load_pd(&S[8]);// sxz syz szz | x
       accumulate_f( &vf[0], &s[0], &G[0], elem_p );
+      }
       }//======================================================== end intp loop
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
