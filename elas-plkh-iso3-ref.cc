@@ -7,7 +7,6 @@
 //
 // Fetch next u within G,H loop nest
 #undef FETCH_U_EARLY
-#undef PREFETCH_STATE
 #define COMPRESS_STATE
 //NOTE Prefetch state only works when compressed.
 //
@@ -53,7 +52,11 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   const int intp_n = int(E->gaus_n);
   const INT_ORDER elem_p =E->elem_p;
   //
-  const int        Ns           = this->gvar_d;// Number of state variables/ip
+#ifdef COMPRESS_STATE
+  const int        Ns           = 5;// Number of state variables/ip
+#else
+  const int        Ns           = 6;
+#endif
   const FLOAT_PHYS youn_modu    = this->mtrl_prop[0];
   const FLOAT_PHYS poiss_ratio  = this->mtrl_prop[1];
   const FLOAT_PHYS bulk_mod3    = youn_modu / (1.0-2.0*poiss_ratio);
@@ -78,11 +81,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   FLOAT_PHYS VECALIGNED wgt[intp_n];
   FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
 #ifdef COMPRESS_STATE
-#ifdef PREFETCH_STATE
-  FLOAT_PHYS VECALIGNED back_v[8]; bac5_v[Ns];// back_v padded to 8 doubles
-#else
   FLOAT_PHYS VECALIGNED back_v[6];
-#endif
 #else
   FLOAT_PHYS VECALIGNED back_v[8];// back_v padded to 8 doubles?
 #endif
@@ -111,9 +110,6 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
     for (int i=0; i<Nc; i++){
       std::memcpy( & u[Nf*i],&part_u[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf );
       std::memcpy( & p[Nf*i],&part_p[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf ); }
-#ifdef PREFETCH_STATE
-    std::memcpy(&bac5_v, &state[Ns*(intp_n*e0+0)], sizeof(FLOAT_PHYS)*Ns);
-#endif
   }
   for(INT_MESH ie=e0;ie<ee;ie++){//================================== Elem loop
 #ifndef FETCH_JAC
@@ -126,12 +122,10 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   {// Scope vf registers
   __m256d vf[Nc];
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
-#ifndef PREFETCH_STATE
 #ifdef COMPRESS_STATE
       std::memcpy( &back_v[1], &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
 #else
       std::memcpy( &back_v, &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
-#endif
 #endif
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
@@ -174,7 +168,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       //====================================================== UMAT calc
         const FLOAT_PHYS one_third = 0.333333333333333;
       //NOTE back_v, elas_devi_v, and plas_flow are deviatoric (trace zero),
-      // with only 5 independent terms.
+      //     with only 5 independent terms.
       //NOTE back_v is only deviatoric,
       //     so only elas_v hydro needs to be removed.
       {
@@ -185,15 +179,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       FLOAT_PHYS stress_mises=0.0;
       FLOAT_PHYS VECALIGNED plas_flow[6];
 #ifdef COMPRESS_STATE
-#ifdef PREFETCH_STATE
-      for(int i=0; i<5; i++){ back_v[i+1]=bac5_v[i]; }
-      back_v[0] = 0.0-bac5_v[0]-bac5_v[1];
-      if( ((ip+1)<intp_n) | ((ie+1)<ee) ){
-        std::memcpy(&bac5_v, &state[Ns*(intp_n*ie+ip+1)], sizeof(FLOAT_PHYS)*Ns);
-      }
-#else
       back_v[0] = 0.0-back_v[1]-back_v[2];
-#endif
 #endif
       {
       for(int i=0;i<6;i++){ plas_flow[i] = elas_devi_v[i] - back_v[i]; }
@@ -202,27 +188,29 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       }
       //for(int i=0;i<6;i++){ printf("%+9.2e ", elas_v[i]); }
       //printf("mises: %+9.2e\n",sqrt(stress_mises));
-      __m256d s[3];
       if( stress_mises > yield_tol2 ){
         stress_mises = sqrt(stress_mises);
+        const FLOAT_PHYS inv_mises = 1.0/stress_mises;
+#if 0
         const FLOAT_PHYS delta_equiv = ( stress_mises - stress_yield )
           / ( 3.0*shear_modu + hard_modu );
-        const FLOAT_PHYS inv_mises = 1.0/stress_mises;
+        // delta_equiv is always used as delta_equiv * hard_modu
+#endif
+        const FLOAT_PHYS delta_hard = ( stress_mises - stress_yield )
+          / ( 3.0*shear_modu + hard_modu ) * hard_modu;
         const FLOAT_PHYS shear_eff
-          = shear_modu * (stress_yield + hard_modu*delta_equiv) * inv_mises;
+          = shear_modu * (stress_yield + delta_hard) * inv_mises;
         const FLOAT_PHYS hard_eff = shear_modu * hard_modu
           / (shear_modu + hard_modu*one_third) - 3.0*shear_eff;
         const FLOAT_PHYS lambda_eff = (bulk_mod3 - 2.0*shear_eff)*one_third;
         for(int i=0;i<6;i++){ plas_flow[i]*= inv_mises; }
         if( save_state ){// Update state variable back_v.
-#if 1
-          for(int i=0; i<5; i++){
-            back_v[i] += plas_flow[i+1] * hard_modu * delta_equiv; }
-          std::memcpy(&state[Ns*(intp_n*ie+ip)],&back_v,sizeof(FLOAT_SOLV)*Ns);
+          for(int i=0; i<6; i++){//FIXME can be from i=1
+            back_v[i] += plas_flow[i] * delta_hard; }
+#ifdef COMPRESS_STATE
+          std::memcpy(&state[Ns*(intp_n*ie+ip)],&back_v[1],sizeof(FLOAT_SOLV)*Ns);
 #else
-          for(int i=0; i<6; i++){
-            state[Ns*(intp_n*ie+ip) +i ]
-              += plas_flow[i] * hard_modu * delta_equiv; }
+          std::memcpy(&state[Ns*(intp_n*ie+ip)],&back_v,sizeof(FLOAT_SOLV)*Ns);
 #endif
         }
         FLOAT_PHYS elas_mises=0.0;
@@ -253,8 +241,13 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #pragma omp critical(print)
 {
       if( (ie==0) & (ip==0) ){
-      printf("el:%u,gp:%i Back stress (alpha):",ie,ip);
-      for(int i=0; i<6; i++){
+      printf("el:%u,gp:%i back_v: ",ie,ip);
+#ifdef COMPRESS_STATE
+      printf("%+9.2e ", 0.0 -this->elgp_vars[gvar_d*(intp_n*ie+ip) +0 ]
+        -this->elgp_vars[gvar_d*(intp_n*ie+ip) +1 ]
+      );
+#endif
+      for(int i=0; i<gvar_d; i++){
         printf("%+9.2e ", this->elgp_vars[gvar_d*(intp_n*ie+ip) +i ] ); }
       printf("\n");
       }
@@ -286,15 +279,19 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         S[0]+=stress_p[0]; S[1]+=stress_p[3]; S[2]+=stress_p[5];// S[3]=stress_p[3];
         S[4]+=stress_p[3]; S[5]+=stress_p[1]; S[6]+=stress_p[4];// S[7]=stress_p[5];
         S[8]+=stress_p[5]; S[9]+=stress_p[4]; S[10]+=stress_p[2];// S[11]=0.0;
+#if 0
         s[0] = _mm256_load_pd(&S[0]);// sxx sxy sxz | x
         s[1] = _mm256_load_pd(&S[4]);// sxy syy syz | x
         s[2] = _mm256_load_pd(&S[8]);// sxz syz szz | x
+#endif
       }// if plastic ----------------------------------------------------------
       else{// Linear-elastic conj response only
         compute_iso_s( &S[0], &P[0],C[2],c0,c1,c2, dw );
+#if 0
         s[0] = _mm256_load_pd(&S[0]);
         s[1] = _mm256_load_pd(&S[4]);
         s[2] = _mm256_load_pd(&S[8]);
+#endif
       }
       if(ip==0){
         for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
@@ -305,13 +302,19 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         }
         }
       }
+      {
+      __m256d s[3];
+      s[0] = _mm256_load_pd(&S[0]);// sxx sxy sxz | x
+      s[1] = _mm256_load_pd(&S[4]);// sxy syy syz | x
+      s[2] = _mm256_load_pd(&S[8]);// sxz syz szz | x
       accumulate_f( &vf[0], &s[0], &G[0], elem_p );
+      }
       }//======================================================== end intp loop
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
 #endif
       for (int i=0; i<Nc; i++){
-        double VECALIGNED sf[4];
+        FLOAT_SOLV VECALIGNED sf[4];
         _mm256_store_pd(&sf[0],vf[i]);
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
@@ -336,7 +339,12 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
   const int intp_n = int(E->gaus_n);
   const INT_ORDER elem_p =E->elem_p;
   //
-  const int        Ns           = this->gvar_d;// Number of state variables/ip
+  //const int        Ns           = this->gvar_d;// Number of state variables/ip
+#ifdef COMPRESS_STATE
+  const int        Ns           = 5;// Number of state variables/ip
+#else
+  const int        Ns           = 6;
+#endif
   const FLOAT_PHYS youn_modu    = this->mtrl_prop[0];
   const FLOAT_PHYS poiss_ratio  = this->mtrl_prop[1];
   const FLOAT_PHYS bulk_mod3    = youn_modu / (1.0-2.0*poiss_ratio);
@@ -361,11 +369,7 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
   FLOAT_PHYS VECALIGNED wgt[intp_n];
   FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
 #ifdef COMPRESS_STATE
-#ifdef PREFETCH_STATE
-  FLOAT_PHYS VECALIGNED back_v[8]; bac5_v[Ns];// back_v padded to 8 doubles
-#else
   FLOAT_PHYS VECALIGNED back_v[6];
-#endif
 #else
   FLOAT_PHYS VECALIGNED back_v[8];// back_v padded to 8 doubles?
 #endif
@@ -393,9 +397,6 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
 #endif
     for (int i=0; i<Nc; i++){
       std::memcpy( & u[Nf*i],&part_u[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf ); }
-#ifdef PREFETCH_STATE
-    std::memcpy(&bac5_v, &state[Ns*(intp_n*e0+0)], sizeof(FLOAT_PHYS)*Ns);
-#endif
   }
   for(INT_MESH ie=e0;ie<ee;ie++){//================================== Elem loop
 #ifndef FETCH_JAC
@@ -408,12 +409,10 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
   {// Scope vf registers
   __m256d vf[Nc];
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
-#ifndef PREFETCH_STATE
 #ifdef COMPRESS_STATE
       std::memcpy( &back_v[1], &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
 #else
       std::memcpy( &back_v, &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
-#endif
 #endif
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
@@ -465,15 +464,7 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
       FLOAT_PHYS stress_mises=0.0;
       FLOAT_PHYS VECALIGNED plas_flow[6];
 #ifdef COMPRESS_STATE
-#ifdef PREFETCH_STATE
-      for(int i=0; i<5; i++){ back_v[i+1]=bac5_v[i]; }
-      back_v[0] = 0.0-bac5_v[0]-bac5_v[1];
-      if( ((ip+1)<intp_n) | ((ie+1)<ee) ){
-        std::memcpy(&bac5_v, &state[Ns*(intp_n*ie+ip+1)], sizeof(FLOAT_PHYS)*Ns);
-      }
-#else
       back_v[0] = 0.0-back_v[1]-back_v[2];
-#endif
 #endif
       {
       for(int i=0;i<6;i++){ plas_flow[i] = elas_devi_v[i] - back_v[i]; }
@@ -482,14 +473,18 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
       }
       //for(int i=0;i<6;i++){ printf("%+9.2e ", elas_v[i]); }
       //printf("mises: %+9.2e\n",sqrt(stress_mises));
-      __m256d s[3];
       if( stress_mises > yield_tol2 ){
         stress_mises = sqrt(stress_mises);
+        const FLOAT_PHYS inv_mises = 1.0/stress_mises;
+#if 0
         const FLOAT_PHYS delta_equiv = ( stress_mises - stress_yield )
           / ( 3.0*shear_modu + hard_modu );
-        const FLOAT_PHYS inv_mises = 1.0/stress_mises;
+        // delta_equiv is always used as delta_equiv * hard_modu
+#endif
+        const FLOAT_PHYS delta_hard = ( stress_mises - stress_yield )
+          / ( 3.0*shear_modu + hard_modu ) * hard_modu;
         const FLOAT_PHYS shear_eff
-          = shear_modu * (stress_yield + hard_modu*delta_equiv) * inv_mises;
+          = shear_modu * (stress_yield + delta_hard) * inv_mises;
         const FLOAT_PHYS hard_eff = shear_modu * hard_modu
           / (shear_modu + hard_modu*one_third) - 3.0*shear_eff;
         const FLOAT_PHYS lambda_eff = (bulk_mod3 - 2.0*shear_eff)*one_third;
@@ -555,15 +550,9 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
         S[0]+=stress_p[0]; S[1]+=stress_p[3]; S[2]+=stress_p[5];// S[3]=stress_p[3];
         S[4]+=stress_p[3]; S[5]+=stress_p[1]; S[6]+=stress_p[4];// S[7]=stress_p[5];
         S[8]+=stress_p[5]; S[9]+=stress_p[4]; S[10]+=stress_p[2];// S[11]=0.0;
-        s[0] = _mm256_load_pd(&S[0]);// sxx sxy sxz | x
-        s[1] = _mm256_load_pd(&S[4]);// sxy syy syz | x
-        s[2] = _mm256_load_pd(&S[8]);// sxz syz szz | x
       }// if plastic ----------------------------------------------------------
       else{// Linear-elastic conj response only
         for(int i=0; i<12; i++){ S[i]*= dw; }
-        s[0] = _mm256_load_pd(&S[0]);
-        s[1] = _mm256_load_pd(&S[4]);
-        s[2] = _mm256_load_pd(&S[8]);
       }
       if(ip==0){
         for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
@@ -574,13 +563,19 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
         }
         }
       }
+      {
+      __m256d s[3];
+      s[0] = _mm256_load_pd(&S[0]);// sxx sxy sxz | x
+      s[1] = _mm256_load_pd(&S[4]);// sxy syy syz | x
+      s[2] = _mm256_load_pd(&S[8]);// sxz syz szz | x
       accumulate_f( &vf[0], &s[0], &G[0], elem_p );
+      }
       }//======================================================== end intp loop
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
 #endif
       for (int i=0; i<Nc; i++){
-        double VECALIGNED sf[4];
+        FLOAT_SOLV VECALIGNED sf[4];
         _mm256_store_pd(&sf[0],vf[i]);
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
