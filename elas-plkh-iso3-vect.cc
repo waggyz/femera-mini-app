@@ -25,7 +25,7 @@ int ElastPlastKHIso3D::Setup( Elem* E ){
   this->stif_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) +2);
   //
-  this->gvar_d = 1*6;
+  this->gvar_d = 1*6-1;
   this->elgp_vars.resize(elem_n*intp_n* this->gvar_d, 0.0 );
   return 0;
 }
@@ -68,7 +68,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
   FLOAT_PHYS VECALIGNED wgt[intp_n];
   FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
-  FLOAT_PHYS VECALIGNED back_v[Ns+2];// padded to 8 doubles
+  FLOAT_PHYS VECALIGNED back_v[Ns+3], bac5_v[Ns];// back_v padded to 8 doubles
   //
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
@@ -94,6 +94,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
     for (int i=0; i<Nc; i++){
       std::memcpy( & u[Nf*i],&part_u[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf );
       std::memcpy( & p[Nf*i],&part_p[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf ); }
+    std::memcpy(&bac5_v, &state[Ns*(intp_n*e0+0)], sizeof(FLOAT_PHYS)*Ns);
   }
   for(INT_MESH ie=e0;ie<ee;ie++){//================================== Elem loop
 #ifndef FETCH_JAC
@@ -106,7 +107,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   {// Scope vf registers
   __m256d vf[Nc];
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
-      std::memcpy( &back_v, &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
+//      std::memcpy( &back_v, &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       compute_g_p_h( &G[0],&P[0],&H[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne],
@@ -158,6 +159,14 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       }
       FLOAT_PHYS stress_mises=0.0;
       FLOAT_PHYS VECALIGNED plas_flow[6];
+      //for(int i=0; i<Ns; i++){back_v[i]=bac5_v[i];}
+      //back_v={ 0.0-bac5_v[0]-bac5_v[1],bac5_v[0],bac5_v[1],
+      //  bac5_v[2],bac5_v[3],bac5_v[4] };
+      for(int i=0; i<5; i++){ back_v[i+1]=bac5_v[i]; }
+      back_v[0] = 0.0-bac5_v[0]-bac5_v[1];
+      if( ((ip+1)<intp_n) | ((ie+1)<ee) ){
+        std::memcpy(&bac5_v, &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns);
+      }
       {
       for(int i=0;i<6;i++){ plas_flow[i] = elas_devi_v[i] - back_v[i]; }
       for(int i=0;i<3;i++){ stress_mises+= plas_flow[i]*plas_flow[i]*1.5; }
@@ -179,8 +188,8 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         for(int i=0;i<6;i++){ plas_flow[i]*= inv_mises; }
         if( save_state ){// Update state variable back_v.
 #if 1
-          for(int i=0; i<6; i++){
-            back_v[i] += plas_flow[i] * hard_modu * delta_equiv; }
+          for(int i=0; i<5; i++){
+            back_v[i] += plas_flow[i+1] * hard_modu * delta_equiv; }
           std::memcpy(&state[Ns*(intp_n*ie+ip)],&back_v,sizeof(FLOAT_SOLV)*Ns);
 #else
           for(int i=0; i<6; i++){
@@ -235,9 +244,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 }
 #endif
         // Calculate conjugate stress from conjugate strain.
-        // Start with the linear-elastic response, scaled by elas_part.
-        compute_iso_s( &S[0], &P[0],C[2],c0,c1,c2, dw * elas_part );
-        // Add in the plastic response.
+        // Compute the plastic response.
         const FLOAT_PHYS VECALIGNED strain_p[6]={
           P[0], P[5], P[10], P[1]+P[4], P[6]+P[9], P[2]+P[8] };
         FLOAT_PHYS VECALIGNED stress_p[6];
@@ -245,6 +252,9 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           for(int j=0; j<6; j++){ stress_p[i] += D[6* i+j ] * strain_p[ j ]; }
           stress_p[i]*= dw;
         }
+        // Compute the linear-elastic response, scaled by elas_part.
+        compute_iso_s( &S[0], &P[0],C[2],c0,c1,c2, dw * elas_part );
+        // Sum them.
         S[0]+=stress_p[0]; S[1]+=stress_p[3]; S[2]+=stress_p[5];// S[3]=stress_p[3];
         S[4]+=stress_p[3]; S[5]+=stress_p[1]; S[6]+=stress_p[4];// S[7]=stress_p[5];
         S[8]+=stress_p[5]; S[9]+=stress_p[4]; S[10]+=stress_p[2];// S[11]=0.0;
