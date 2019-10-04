@@ -590,6 +590,5 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
   }// end vf register scope
   }//============================================================ end elem loop
   return 0;
-  }
-  //
-#undef VECTORIZED
+}
+//
