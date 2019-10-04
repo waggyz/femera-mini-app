@@ -8,7 +8,7 @@
 // Fetch next u within G,H loop nest
 #undef FETCH_U_EARLY
 #undef PREFETCH_STATE
-#undef COMPRESS_STATE
+#define COMPRESS_STATE
 //NOTE Prefetch state only works when compressed.
 //
 int ElastPlastKHIso3D::Setup( Elem* E ){
@@ -76,7 +76,11 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   FLOAT_PHYS VECALIGNED wgt[intp_n];
   FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
 #ifdef COMPRESS_STATE
+#ifdef PREFETCH_STATE
   FLOAT_PHYS VECALIGNED back_v[8]; bac5_v[Ns];// back_v padded to 8 doubles
+#else
+  FLOAT_PHYS VECALIGNED back_v[8];
+#endif
 #else
   FLOAT_PHYS VECALIGNED back_v[8];// back_v padded to 8 doubles
 #endif
@@ -122,7 +126,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
 #ifndef PREFETCH_STATE
 #ifdef COMPRESS_STATE
-      std::memcpy( &bac5_v, &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
+      std::memcpy( &back_v[1], &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
 #else
       std::memcpy( &back_v, &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
 #endif
@@ -179,12 +183,14 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       FLOAT_PHYS stress_mises=0.0;
       FLOAT_PHYS VECALIGNED plas_flow[6];
 #ifdef COMPRESS_STATE
+#ifdef PREFETCH_STATE
       for(int i=0; i<5; i++){ back_v[i+1]=bac5_v[i]; }
       back_v[0] = 0.0-bac5_v[0]-bac5_v[1];
-#ifdef PREFETCH_STATE
       if( ((ip+1)<intp_n) | ((ie+1)<ee) ){
         std::memcpy(&bac5_v, &state[Ns*(intp_n*ie+ip+1)], sizeof(FLOAT_PHYS)*Ns);
       }
+#else
+      back_v[0] = 0.0-back_v[1]-back_v[2];
 #endif
 #endif
       {
