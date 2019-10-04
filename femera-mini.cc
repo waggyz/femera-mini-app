@@ -341,7 +341,9 @@ int main( int argc, char** argv ){
     iter=0;
   {// load step init scope
     if( M->load_step > 1 ){
-      setu_done=std::chrono::high_resolution_clock::now(); }
+      setu_done=std::chrono::high_resolution_clock::now();
+      read_sec=0.0;
+    }
     M->time_secs=0.0;
     M->Init();
     if( (step_n > 1) & (M->load_step == 1) & (M->glob_atol<=0.0) ){
