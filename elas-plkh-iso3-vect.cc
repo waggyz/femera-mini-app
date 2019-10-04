@@ -132,16 +132,17 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           std::memcpy(& p[Nf*i],& part_p[c[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
 #endif
 #ifdef FETCH_JAC
-          std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj );
+          std::memcpy(& jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj );
 #endif
       } }
       compute_iso_s( &S[0], &H[0],C[2],c0,c1,c2, 1.0 );// Linear stress response
-      const FLOAT_PHYS VECALIGNED elas_v[6]={// sxx, syy, szz,  sxy, syz, sxz
-        S[0], S[5], S[10], S[1], S[6], S[2] };
+      //NOTE Only the deviatoric part of elas_v is used.
+      FLOAT_PHYS VECALIGNED elas_devi_v[6]={
+        S[0], S[5], S[10], S[1], S[6], S[2] };// sxx, syy, szz,  sxy, syz, sxz
 #if VERB_MAX>10
       printf( "Stress Voigt Vector (Elem: %i):\n", ie );
       for(int j=0;j<6;j++){
-        printf("%+9.2e ",elas_v[j]);
+        printf("%+9.2e ",elas_devi_v[j]);
       } printf("\n");
 #endif
       //====================================================== UMAT calc
@@ -150,21 +151,17 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       // with only 5 independent terms.
       //NOTE back_v is only deviatoric,
       //     so only elas_v hydro needs to be removed.
-      //NOTE Only the deviatoric part of elas_v is used,
-      //     so take it out now.
-      FLOAT_PHYS VECALIGNED elas_devi_v[6]={ elas_v[0],elas_v[1],elas_v[2],
-        elas_v[3],elas_v[4],elas_v[5]};
       {
       FLOAT_PHYS elas_hydr=0.0;
-      for(int i=0;i<3;i++){ elas_hydr+= elas_v[i]*one_third; }
-      for(int i=0;i<3;i++){ elas_devi_v[i] -= elas_hydr; }
+      for(int i=0;i<3;i++){ elas_hydr+= elas_devi_v[i]*one_third; }
+      for(int i=0;i<3;i++){ elas_devi_v[i]-= elas_hydr; }
       }
       FLOAT_PHYS stress_mises=0.0;
       FLOAT_PHYS VECALIGNED plas_flow[6];
       {
       for(int i=0;i<6;i++){ plas_flow[i] = elas_devi_v[i] - back_v[i]; }
-      for(int i=0;i<3;i++){ stress_mises += plas_flow[i]*plas_flow[i]*1.5; }
-      for(int i=3;i<6;i++){ stress_mises += plas_flow[i]*plas_flow[i]*3.0; }
+      for(int i=0;i<3;i++){ stress_mises+= plas_flow[i]*plas_flow[i]*1.5; }
+      for(int i=3;i<6;i++){ stress_mises+= plas_flow[i]*plas_flow[i]*3.0; }
       }
       //for(int i=0;i<6;i++){ printf("%+9.2e ", elas_v[i]); }
       //printf("mises: %+9.2e\n",std::sqrt(stress_mises));
