@@ -183,10 +183,10 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       for(int i=3;i<6;i++){ stress_mises+= plas_flow[i]*plas_flow[i]*3.0; }
       }
       //for(int i=0;i<6;i++){ printf("%+9.2e ", elas_v[i]); }
-      //printf("mises: %+9.2e\n",std::sqrt(stress_mises));
+      //printf("mises: %+9.2e\n",sqrt(stress_mises));
       __m256d s[3];
       if( stress_mises > yield_tol2 ){
-        stress_mises = std::sqrt(stress_mises);
+        stress_mises = sqrt(stress_mises);
         const FLOAT_PHYS inv_mises = 1.0/stress_mises;
         const FLOAT_PHYS delta_equiv = ( stress_mises - stress_yield )
           / ( 3.0*shear_modu + hard_modu );
@@ -212,7 +212,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         for(int i=0;i<3;i++){ elas_mises += elas_devi_v[i]*elas_devi_v[i]*1.5; }
         for(int i=3;i<6;i++){ elas_mises += elas_devi_v[i]*elas_devi_v[i]*3.0; }
         }
-        elas_mises = std::sqrt(elas_mises);
+        elas_mises = sqrt(elas_mises);
         const FLOAT_PHYS elas_part = stress_yield / elas_mises;
         // Add elas_part * elastic D-matrix?
         // Secant modulus response: this stress plus elastic response at yield
@@ -446,10 +446,10 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
       for(int i=3;i<6;i++){ stress_mises+= plas_flow[i]*plas_flow[i]*3.0; }
       }
       //for(int i=0;i<6;i++){ printf("%+9.2e ", elas_v[i]); }
-      //printf("mises: %+9.2e\n",std::sqrt(stress_mises));
+      //printf("mises: %+9.2e\n",sqrt(stress_mises));
       __m256d s[3];
       if( stress_mises > yield_tol2 ){
-        stress_mises = std::sqrt(stress_mises);
+        stress_mises = sqrt(stress_mises);
         const FLOAT_PHYS inv_mises = 1.0/stress_mises;
         const FLOAT_PHYS delta_equiv = ( stress_mises - stress_yield )
           / ( 3.0*shear_modu + hard_modu );
@@ -464,7 +464,7 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
         for(int i=0;i<3;i++){ elas_mises += elas_devi_v[i]*elas_devi_v[i]*1.5; }
         for(int i=3;i<6;i++){ elas_mises += elas_devi_v[i]*elas_devi_v[i]*3.0; }
         }
-        elas_mises = std::sqrt(elas_mises);
+        elas_mises = sqrt(elas_mises);
         const FLOAT_PHYS elas_part = stress_yield / elas_mises;
         // Add elas_part * elastic D-matrix?
         // Secant modulus response: this stress plus elastic response at yield
