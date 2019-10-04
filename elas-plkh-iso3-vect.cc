@@ -7,6 +7,7 @@
 //
 // Fetch next u within G,H loop nest
 #undef FETCH_U_EARLY
+#undef PREFETCH_STATE
 //
 int ElastPlastKHIso3D::Setup( Elem* E ){
   JacT  ( E );
@@ -94,7 +95,9 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
     for (int i=0; i<Nc; i++){
       std::memcpy( & u[Nf*i],&part_u[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf );
       std::memcpy( & p[Nf*i],&part_p[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf ); }
+#ifdef PREFETCH_STATE
     std::memcpy(&bac5_v, &state[Ns*(intp_n*e0+0)], sizeof(FLOAT_PHYS)*Ns);
+#endif
   }
   for(INT_MESH ie=e0;ie<ee;ie++){//================================== Elem loop
 #ifndef FETCH_JAC
@@ -107,7 +110,9 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   {// Scope vf registers
   __m256d vf[Nc];
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
-//      std::memcpy( &back_v, &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
+#ifndef PREFETCH_STATE
+      std::memcpy( &bac5_v, &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
+#endif
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       compute_g_p_h( &G[0],&P[0],&H[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne],
@@ -161,9 +166,11 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       FLOAT_PHYS VECALIGNED plas_flow[6];
       for(int i=0; i<5; i++){ back_v[i+1]=bac5_v[i]; }
       back_v[0] = 0.0-bac5_v[0]-bac5_v[1];
+#ifdef PREFETCH_STATE
       if( ((ip+1)<intp_n) | ((ie+1)<ee) ){
         std::memcpy(&bac5_v, &state[Ns*(intp_n*ie+ip+1)], sizeof(FLOAT_PHYS)*Ns);
       }
+#endif
       {
       for(int i=0;i<6;i++){ plas_flow[i] = elas_devi_v[i] - back_v[i]; }
       for(int i=0;i<3;i++){ stress_mises+= plas_flow[i]*plas_flow[i]*1.5; }
