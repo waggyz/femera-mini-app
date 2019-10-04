@@ -159,13 +159,10 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       }
       FLOAT_PHYS stress_mises=0.0;
       FLOAT_PHYS VECALIGNED plas_flow[6];
-      //for(int i=0; i<Ns; i++){back_v[i]=bac5_v[i];}
-      //back_v={ 0.0-bac5_v[0]-bac5_v[1],bac5_v[0],bac5_v[1],
-      //  bac5_v[2],bac5_v[3],bac5_v[4] };
       for(int i=0; i<5; i++){ back_v[i+1]=bac5_v[i]; }
       back_v[0] = 0.0-bac5_v[0]-bac5_v[1];
       if( ((ip+1)<intp_n) | ((ie+1)<ee) ){
-        std::memcpy(&bac5_v, &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns);
+        std::memcpy(&bac5_v, &state[Ns*(intp_n*ie+ip+1)], sizeof(FLOAT_PHYS)*Ns);
       }
       {
       for(int i=0;i<6;i++){ plas_flow[i] = elas_devi_v[i] - back_v[i]; }
