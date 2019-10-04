@@ -792,7 +792,6 @@ int main( int argc, char** argv ){
     const auto n = S->udof_n;
     for(uint i=0;i<n;i++){ S->part_f[i]=0.0; }
     Y->ElemLinear( E,0,E->halo_elem_n, S->part_f, S->part_u );
-    //Y->ElemNonlinear( E,0,E->halo_elem_n, S->part_f, S->part_u, S->part_u, false );
     // sync part_f
     const INT_MESH Dn=uint(Y->node_d);
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
@@ -828,8 +827,7 @@ int main( int argc, char** argv ){
 #endif
         S->part_f[Dn* i+j] = M->halo_val[f+j]; }
     }
-    Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->part_f, S->part_u );
-    //Y->ElemNonlinear( E,E->halo_elem_n,E->elem_n, S->part_f, S->part_u, S->part_u, false );
+    Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->part_f, S->part_u );;
   }
   // Now, sum the reactions on BCS fixed-displacemnt nodes in the test direction.
   // Also, compute the polycrystal effective Young's modulus
