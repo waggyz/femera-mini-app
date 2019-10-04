@@ -29,6 +29,8 @@ int ElastPlastKHIso3D::Setup( Elem* E ){
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) +2);
   //
 #ifdef COMPRESS_STATE
+  // The state variable is deviatoric, so drop the first component.
+  // Load this starting at state[1], then state[0]=0.0-state[1]-state[2]
   this->gvar_d = 5;
 #else
   this->gvar_d = 6;
@@ -79,10 +81,10 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #ifdef PREFETCH_STATE
   FLOAT_PHYS VECALIGNED back_v[8]; bac5_v[Ns];// back_v padded to 8 doubles
 #else
-  FLOAT_PHYS VECALIGNED back_v[8];
+  FLOAT_PHYS VECALIGNED back_v[6];
 #endif
 #else
-  FLOAT_PHYS VECALIGNED back_v[8];// back_v padded to 8 doubles
+  FLOAT_PHYS VECALIGNED back_v[8];// back_v padded to 8 doubles?
 #endif
   //
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
