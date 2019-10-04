@@ -452,7 +452,7 @@ int main( int argc, char** argv ){
             float(iter)/iter_sec*float(comp_n) );
         }
         if(M->glob_res2 <= 0.0){
-            printf("%9i ||R||%9.2e NCG Restart\n",
+            printf("%9i ||R||%9.2e NCG Reset\n",
               iter, std::sqrt(M->glob_chk2) );
         }
       }

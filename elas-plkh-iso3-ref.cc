@@ -143,7 +143,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         //strain_elas[i]+= strain_v[i];
         for(int j=0; j<6; j++){
           stress_v[ i ]+= D[6* i+j ] * strain_v[ j ];
-      } }//------------------------------------------------------------ 12 FLOP
+      } }//------------------------------------------------------------ 72 FLOP
 #if VERB_MAX>10
       printf( "Stress Voigt Vector (Elem: %i):\n", ie );
       for(int j=0;j<6;j++){
@@ -151,16 +151,32 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       } printf("\n");
 #endif
       FLOAT_PHYS stress_mises=0.0;
+#if 1
+      {//FIXME m here is (I think) plas_flow * stress_mises...
+      //NOTE back_v is only deviatoric,
+      //     so only stress_v hydro needs to be removed?
+      FLOAT_PHYS VECALIGNED m[6]; FLOAT_PHYS h=0.0;
+      for(int i=0;i<6;i++){ m[i] = stress_v[i] - back_v[i]; }// 6
+      for(int i=0;i<3;i++){ h+=m[i]; }// 3
+      h *= 0.333333333333;// 1
+      for(int i=0;i<3;i++){ m[i]-=h; stress_mises += m[i]*m[i]*1.5; }// 12
+      for(int i=3;i<6;i++){ stress_mises += m[i]*m[i]*3.0; }// 9
+      }//                                                               31 FLOP
+      //for(int i=0;i<6;i++){ printf("%+9.2e ", stress_v[i]); }
+      //printf("mises: %+9.2e\n",std::sqrt(stress_mises));
+#else
       {
       FLOAT_PHYS m[3];//FIXME Loop and vectorize
-      m[0] = stress_v[0] - back_v[0] - stress_v[1] + back_v[1];//------- 3 FLOP
-      m[1] = stress_v[1] - back_v[1] - stress_v[2] + back_v[2];//------- 3 FLOP
-      m[2] = stress_v[2] - back_v[2] - stress_v[0] + back_v[0];//------- 3 FLOP
-      for(int i=0;i<3;i++){ stress_mises += 0.5*m[i]*m[i]; }//---------- 9 FLOP
+      m[0] = stress_v[0] - back_v[0] - stress_v[1] + back_v[1];
+      m[1] = stress_v[1] - back_v[1] - stress_v[2] + back_v[2];
+      m[2] = stress_v[2] - back_v[2] - stress_v[0] + back_v[0];
+      for(int i=0;i<3;i++){ stress_mises += 0.5*m[i]*m[i]; }
       }
       for(int i=3;i<6;i++){
-        const FLOAT_PHYS m = stress_v[i] - back_v[i];//----------------- 3 FLOP
-        stress_mises+= 3.0*m*m; }//------------------------------------- 3 FLOP
+        const FLOAT_PHYS m = stress_v[i] - back_v[i];
+        stress_mises+= 3.0*m*m; }
+      // was 30 flop
+#endif
       if( stress_mises > yield_tol2 ){
         stress_mises = std::sqrt(stress_mises);//----------------------- 1 SQRT
         const FLOAT_PHYS delta_equiv = ( stress_mises - stress_yield )
