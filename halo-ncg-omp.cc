@@ -92,7 +92,7 @@ int NCG::Setup( Elem* E, Phys* Y ){// printf("*** NCG::Setup(E,Y) ***\n");
   Y->tens_flop*=2;Y->tens_band*=2;Y->stif_flop*=2;Y->stif_band*=2;// 2 evals/iter
   this->data_f=0.0;//FIXME Why is this here?
   Y->ElemLinear( E,0,E->elem_n, this->part_f, this->part_u );
-  Y->ElemNonlinear( E,0,E->elem_n, this->part_f, this->part_u, this->part_u, false );
+  //Y->ElemNonlinear( E,0,E->elem_n, this->part_f, this->part_u, this->part_u, false );
 #endif
   return(0);
 }
@@ -163,7 +163,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp simd
 #endif
     for(INT_MESH i=1; i<sysn; i++){ S->part_f[i]=0.0; }
-    Y->ElemLinear( E,0,E->elem_n,S->part_f,S->part_u );
+    //Y->ElemLinear( E,0,E->elem_n,S->part_f,S->part_u );
     // Save state variables.
     Y->ElemNonlinear( E,0,E->elem_n,S->part_f,S->part_u,S->part_u, true );
     if( this->next_scal > 0.0 ){
@@ -283,7 +283,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   //FIXME Put the element response calcs into the halo ops properly
     for(INT_MESH i=1; i<sysn; i++){ S->part_f[i]=0.0; }
     Y->ElemLinear( E,0,E->elem_n,S->part_f,S->part_u );
-    Y->ElemNonlinear( E,0,E->elem_n,S->part_f,S->part_u,S->part_u, false );
+    //Y->ElemNonlinear( E,0,E->elem_n,S->part_f,S->part_u,S->part_u, false );
     for(INT_MESH i=0; i<E->halo_node_n; i++){
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
@@ -413,7 +413,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 #pragma omp simd
 #endif
     for(uint i=0;i<sysn;i++){ S->part_g[i]=0.0; }
-    Y->ElemLinear( E,0,E->halo_elem_n, S->part_g, S->part_q );
+    //Y->ElemLinear( E,0,E->halo_elem_n, S->part_g, S->part_q );
     Y->ElemNonlinear( E,0,E->halo_elem_n, S->part_g, S->part_q, S->part_u, false );
     time_accum( my_phys_count, phys_start );
     time_start( gath_start );
@@ -484,7 +484,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
         Dn*sizeof(FLOAT_PHYS) ); }
     time_accum( my_scat_count, scat_start );
     time_start( phys_start );
-    Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->part_g, S->part_q );
+    //Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->part_g, S->part_q );
     Y->ElemNonlinear( E,E->halo_elem_n,E->elem_n, S->part_g, S->part_q,
                       S->part_u, false );
     time_accum( my_phys_count, phys_start );
@@ -533,7 +533,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     const INT_MESH Dn=uint(Y->node_d);
     time_start( phys_start );
     Y->ElemLinear( E,0,E->halo_elem_n, S->part_f, S->part_u );
-    Y->ElemNonlinear( E,0,E->halo_elem_n, S->part_f, S->part_u, S->part_u, false );
+    //Y->ElemNonlinear( E,0,E->halo_elem_n, S->part_f, S->part_u, S->part_u, false );
     time_accum( my_phys_count, phys_start );
     time_start( gath_start );
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
@@ -573,8 +573,8 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_accum( my_scat_count, scat_start );
     time_start( phys_start );
     Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->part_f, S->part_u );
-    Y->ElemNonlinear( E,E->halo_elem_n,E->elem_n, S->part_f, S->part_u,
-                      S->part_u, false );
+    //Y->ElemNonlinear( E,E->halo_elem_n,E->elem_n, S->part_f, S->part_u,
+    //                  S->part_u, false );
     time_accum( my_phys_count, phys_start );
     //--------------------------------------------- Done compute and sync part_f
     //-------------------------------------- Calculate negative residuals part_r

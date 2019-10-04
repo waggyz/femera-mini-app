@@ -10,10 +10,6 @@ int ElastPlastKHIso3D::BlocLinear( Elem*,
   RESTRICT Phys::vals &, const RESTRICT Solv::vals & ){
   return 1;
   }
-int ElastPlastKHIso3D::ElemLinear( Elem*, const INT_MESH, const INT_MESH,
-  FLOAT_SOLV*, const FLOAT_SOLV* ){
-  return 1;
-  }
 int ElastPlastKHIso3D::ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*){
   return 1;
 }

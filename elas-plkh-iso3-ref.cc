@@ -31,6 +31,10 @@ int ElastPlastKHIso3D::Setup( Elem* E ){
   this->elgp_vars.resize(elem_n*intp_n* this->gvar_d, 0.0 );
   return 0;
 }
+int ElastPlastKHIso3D::ElemLinear( Elem*, const INT_MESH, const INT_MESH,
+  FLOAT_SOLV*, const FLOAT_SOLV* ){
+  return 1;
+  }//FIXME
 int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   const INT_MESH e0,const INT_MESH ee, FLOAT_SOLV* part_f, const FLOAT_SOLV* part_p,
   const FLOAT_SOLV* part_u, bool save_state ){
