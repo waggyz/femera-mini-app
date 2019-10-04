@@ -52,7 +52,11 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   const int intp_n = int(E->gaus_n);
   const INT_ORDER elem_p =E->elem_p;
   //
-  const int        Ns           = this->gvar_d;// Number of state variables/ip
+#ifdef COMPRESS_STATE
+  const int        Ns           = 5;// Number of state variables/ip
+#else
+  const int        Ns           = 6;
+#endif
   const FLOAT_PHYS youn_modu    = this->mtrl_prop[0];
   const FLOAT_PHYS poiss_ratio  = this->mtrl_prop[1];
   const FLOAT_PHYS bulk_mod3    = youn_modu / (1.0-2.0*poiss_ratio);
@@ -201,13 +205,11 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         const FLOAT_PHYS lambda_eff = (bulk_mod3 - 2.0*shear_eff)*one_third;
         for(int i=0;i<6;i++){ plas_flow[i]*= inv_mises; }
         if( save_state ){// Update state variable back_v.
-#ifdef COMPRESS_STATE
-          for(int i=0; i<5; i++){
-            back_v[i] += plas_flow[i+1] * delta_hard; }
-          std::memcpy(&state[Ns*(intp_n*ie+ip)],&back_v,sizeof(FLOAT_SOLV)*Ns);
-#else
-          for(int i=0; i<6; i++){
+          for(int i=0; i<6; i++){//FIXME can be from i=1
             back_v[i] += plas_flow[i] * delta_hard; }
+#ifdef COMPRESS_STATE
+          std::memcpy(&state[Ns*(intp_n*ie+ip)],&back_v[1],sizeof(FLOAT_SOLV)*Ns);
+#else
           std::memcpy(&state[Ns*(intp_n*ie+ip)],&back_v,sizeof(FLOAT_SOLV)*Ns);
 #endif
         }
@@ -239,8 +241,13 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #pragma omp critical(print)
 {
       if( (ie==0) & (ip==0) ){
-      printf("el:%u,gp:%i Back stress (alpha):",ie,ip);
-      for(int i=0; i<6; i++){
+      printf("el:%u,gp:%i back_v: ",ie,ip);
+#ifdef COMPRESS_STATE
+      printf("%+9.2e ", 0.0 -this->elgp_vars[gvar_d*(intp_n*ie+ip) +0 ]
+        -this->elgp_vars[gvar_d*(intp_n*ie+ip) +1 ]
+      );
+#endif
+      for(int i=0; i<gvar_d; i++){
         printf("%+9.2e ", this->elgp_vars[gvar_d*(intp_n*ie+ip) +i ] ); }
       printf("\n");
       }
@@ -307,7 +314,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #pragma vector unaligned
 #endif
       for (int i=0; i<Nc; i++){
-        double VECALIGNED sf[4];
+        FLOAT_SOLV VECALIGNED sf[4];
         _mm256_store_pd(&sf[0],vf[i]);
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
@@ -332,7 +339,12 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
   const int intp_n = int(E->gaus_n);
   const INT_ORDER elem_p =E->elem_p;
   //
-  const int        Ns           = this->gvar_d;// Number of state variables/ip
+  //const int        Ns           = this->gvar_d;// Number of state variables/ip
+#ifdef COMPRESS_STATE
+  const int        Ns           = 5;// Number of state variables/ip
+#else
+  const int        Ns           = 6;
+#endif
   const FLOAT_PHYS youn_modu    = this->mtrl_prop[0];
   const FLOAT_PHYS poiss_ratio  = this->mtrl_prop[1];
   const FLOAT_PHYS bulk_mod3    = youn_modu / (1.0-2.0*poiss_ratio);
@@ -563,7 +575,7 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
 #pragma vector unaligned
 #endif
       for (int i=0; i<Nc; i++){
-        double VECALIGNED sf[4];
+        FLOAT_SOLV VECALIGNED sf[4];
         _mm256_store_pd(&sf[0],vf[i]);
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
