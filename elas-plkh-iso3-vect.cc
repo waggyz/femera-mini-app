@@ -8,6 +8,8 @@
 // Fetch next u within G,H loop nest
 #undef FETCH_U_EARLY
 #undef PREFETCH_STATE
+#undef COMPRESS_STATE
+//NOTE Prefetch state only works when compressed.
 //
 int ElastPlastKHIso3D::Setup( Elem* E ){
   JacT  ( E );
@@ -26,7 +28,11 @@ int ElastPlastKHIso3D::Setup( Elem* E ){
   this->stif_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) +2);
   //
-  this->gvar_d = 1*6-1;
+#ifdef COMPRESS_STATE
+  this->gvar_d = 5;
+#else
+  this->gvar_d = 6;
+#endif
   this->elgp_vars.resize(elem_n*intp_n* this->gvar_d, 0.0 );
   return 0;
 }
@@ -69,7 +75,11 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
   FLOAT_PHYS VECALIGNED wgt[intp_n];
   FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
-  FLOAT_PHYS VECALIGNED back_v[Ns+3], bac5_v[Ns];// back_v padded to 8 doubles
+#ifdef COMPRESS_STATE
+  FLOAT_PHYS VECALIGNED back_v[8]; bac5_v[Ns];// back_v padded to 8 doubles
+#else
+  FLOAT_PHYS VECALIGNED back_v[8];// back_v padded to 8 doubles
+#endif
   //
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
@@ -111,7 +121,11 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   __m256d vf[Nc];
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
 #ifndef PREFETCH_STATE
+#ifdef COMPRESS_STATE
       std::memcpy( &bac5_v, &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
+#else
+      std::memcpy( &back_v, &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
+#endif
 #endif
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
@@ -164,12 +178,14 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       }
       FLOAT_PHYS stress_mises=0.0;
       FLOAT_PHYS VECALIGNED plas_flow[6];
+#ifdef COMPRESS_STATE
       for(int i=0; i<5; i++){ back_v[i+1]=bac5_v[i]; }
       back_v[0] = 0.0-bac5_v[0]-bac5_v[1];
 #ifdef PREFETCH_STATE
       if( ((ip+1)<intp_n) | ((ie+1)<ee) ){
         std::memcpy(&bac5_v, &state[Ns*(intp_n*ie+ip+1)], sizeof(FLOAT_PHYS)*Ns);
       }
+#endif
 #endif
       {
       for(int i=0;i<6;i++){ plas_flow[i] = elas_devi_v[i] - back_v[i]; }
