@@ -188,10 +188,15 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       if( stress_mises > yield_tol2 ){
         stress_mises = sqrt(stress_mises);
         const FLOAT_PHYS inv_mises = 1.0/stress_mises;
+#if 0
         const FLOAT_PHYS delta_equiv = ( stress_mises - stress_yield )
           / ( 3.0*shear_modu + hard_modu );
+        // delta_equiv is always used as delta_equiv * hard_modu
+#endif
+        const FLOAT_PHYS delta_hard = ( stress_mises - stress_yield )
+          / ( 3.0*shear_modu + hard_modu ) * hard_modu;
         const FLOAT_PHYS shear_eff
-          = shear_modu * (stress_yield + hard_modu*delta_equiv) * inv_mises;
+          = shear_modu * (stress_yield + delta_hard) * inv_mises;
         const FLOAT_PHYS hard_eff = shear_modu * hard_modu
           / (shear_modu + hard_modu*one_third) - 3.0*shear_eff;
         const FLOAT_PHYS lambda_eff = (bulk_mod3 - 2.0*shear_eff)*one_third;
@@ -199,11 +204,11 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         if( save_state ){// Update state variable back_v.
 #ifdef COMPRESS_STATE
           for(int i=0; i<5; i++){
-            back_v[i] += plas_flow[i+1] * hard_modu * delta_equiv; }
+            back_v[i] += plas_flow[i+1] * delta_hard; }
           std::memcpy(&state[Ns*(intp_n*ie+ip)],&back_v,sizeof(FLOAT_SOLV)*Ns);
 #else
           for(int i=0; i<6; i++){
-            back_v[i] += plas_flow[i] * hard_modu * delta_equiv; }
+            back_v[i] += plas_flow[i] * delta_hard; }
           std::memcpy(&state[Ns*(intp_n*ie+ip)],&back_v,sizeof(FLOAT_SOLV)*Ns);
 #endif
         }
@@ -451,10 +456,15 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
       if( stress_mises > yield_tol2 ){
         stress_mises = sqrt(stress_mises);
         const FLOAT_PHYS inv_mises = 1.0/stress_mises;
+#if 0
         const FLOAT_PHYS delta_equiv = ( stress_mises - stress_yield )
           / ( 3.0*shear_modu + hard_modu );
+        // delta_equiv is always used as delta_equiv * hard_modu
+#endif
+        const FLOAT_PHYS delta_hard = ( stress_mises - stress_yield )
+          / ( 3.0*shear_modu + hard_modu ) * hard_modu;
         const FLOAT_PHYS shear_eff
-          = shear_modu * (stress_yield + hard_modu*delta_equiv) * inv_mises;
+          = shear_modu * (stress_yield + delta_hard) * inv_mises;
         const FLOAT_PHYS hard_eff = shear_modu * hard_modu
           / (shear_modu + hard_modu*one_third) - 3.0*shear_eff;
         const FLOAT_PHYS lambda_eff = (bulk_mod3 - 2.0*shear_eff)*one_third;
