@@ -543,7 +543,7 @@ protected:
 private:
 };
 //FIXME These inline intrinsics functions should be in the class where used.
-inline void accumulate_f( __m256d* vf,
+static inline void accumulate_f( __m256d* vf,
   const __m256d* a, const FLOAT_PHYS* G, const int elem_p ){
   __m256d a036=a[0];__m256d a147=a[1];__m256d a258=a[2];
 #if 0
@@ -646,7 +646,7 @@ inline void accumulate_f( __m256d* vf,
 //  }
 #endif
 }
-inline void rotate_s( __m256d* a,
+static inline void rotate_s( __m256d* a,
   const FLOAT_PHYS* R, const FLOAT_PHYS* S ){
   __m256d s0,s1,s2,s4,s5,s8;
   __m256d r0,r3,r6;
@@ -669,7 +669,7 @@ inline void rotate_s( __m256d* a,
     _mm256_add_pd(_mm256_mul_pd(r3,s5),
       _mm256_mul_pd(r6,s8)));
 }
-inline void compute_ort_s(FLOAT_PHYS* S, const FLOAT_PHYS* H,
+static inline void compute_ort_s(FLOAT_PHYS* S, const FLOAT_PHYS* H,
   const FLOAT_PHYS* C, const __m256d c0,const __m256d c1,const __m256d c2,
   const FLOAT_PHYS dw){
   //Vectorized calc for diagonal of S
@@ -683,7 +683,7 @@ inline void compute_ort_s(FLOAT_PHYS* S, const FLOAT_PHYS* H,
   S[5]=(H[2] + H[8])*C[8]*dw; // S[2]
   S[6]=(H[6] + H[9])*C[7]*dw; // S[5]
 }
-inline void compute_g_h(
+static inline void compute_g_h(
   FLOAT_PHYS* G, FLOAT_PHYS* H,
   const int Ne, const __m256d j0,const __m256d j1,const __m256d j2,
   const FLOAT_PHYS* isp, const FLOAT_PHYS* R, const FLOAT_PHYS* u ){
@@ -762,7 +762,7 @@ inline void compute_g_h(
   }
 }
 // Isotropic intrinsics -------------------------------------------------------
-inline void compute_g_h(
+static inline void compute_g_h(
   FLOAT_PHYS* G, FLOAT_PHYS* H,
   const int Ne, const __m256d j0,const __m256d j1,const __m256d j2,
   const FLOAT_PHYS* isp, const FLOAT_PHYS* u ){
@@ -822,7 +822,7 @@ inline void compute_g_h(
   _mm256_store_pd(&H[4],a147);
   _mm256_store_pd(&H[8],a258);
 }
-inline void compute_g_p_h(
+static inline void compute_g_p_h(
   FLOAT_PHYS* G, FLOAT_PHYS* P, FLOAT_PHYS* H,
   const int Ne, const __m256d j0,const __m256d j1,const __m256d j2,
   const FLOAT_PHYS* isp, const FLOAT_PHYS* p, const FLOAT_PHYS* u ){
@@ -905,7 +905,7 @@ inline void compute_g_p_h(
   _mm256_store_pd(&P[4],b147);
   _mm256_store_pd(&P[8],b258);
 }
-inline void compute_iso_s(FLOAT_PHYS* S, const FLOAT_PHYS* H,
+static inline void compute_iso_s(FLOAT_PHYS* S, const FLOAT_PHYS* H,
   const FLOAT_PHYS C2, const __m256d c0,const __m256d c1,const __m256d c2,
   const FLOAT_PHYS dw){
   { // Scope vector registers
