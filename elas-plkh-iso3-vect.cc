@@ -117,6 +117,13 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
     const __m256d j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
   {// Scope vf registers
   __m256d vf[Nc];
+        for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+        if(elem_p>1){
+          for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+        if(elem_p>2){
+          for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+        }
+        }
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
 #ifdef COMPRESS_STATE
       std::memcpy( &back_v[1], &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
@@ -286,6 +293,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         s[2] = _mm256_load_pd(&S[8]);
 #endif
       }
+#if 0
       if(ip==0){
         for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
         if(elem_p>1){
@@ -295,6 +303,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         }
         }
       }
+#endif
       {
       __m256d s[3];
       s[0] = _mm256_load_pd(&S[0]);// sxx sxy sxz | x
@@ -396,6 +405,13 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
     const __m256d j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
   {// Scope vf registers
   __m256d vf[Nc];
+        for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+        if(elem_p>1){
+          for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+        if(elem_p>2){
+          for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+        }
+        }
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
 #ifdef COMPRESS_STATE
       std::memcpy( &back_v[1], &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
@@ -542,6 +558,7 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
       else{// Linear-elastic conj response only
         for(int i=0; i<12; i++){ S[i]*= dw; }
       }
+#if 0
       if(ip==0){
         for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
         if(elem_p>1){
@@ -551,6 +568,7 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
         }
         }
       }
+#endif
       {
       __m256d s[3];
       s[0] = _mm256_load_pd(&S[0]);// sxx sxy sxz | x
