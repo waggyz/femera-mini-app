@@ -179,7 +179,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       FLOAT_PHYS stress_mises=0.0;
       FLOAT_PHYS VECALIGNED plas_flow[6];
 #ifdef COMPRESS_STATE
-      back_v[0] = 0.0-back_v[1]-back_v[2];
+      back_v[0] = -back_v[1]-back_v[2];
 #endif
       {
       for(int i=0;i<6;i++){ plas_flow[i] = elas_devi_v[i] - back_v[i]; }
@@ -464,7 +464,7 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
       FLOAT_PHYS stress_mises=0.0;
       FLOAT_PHYS VECALIGNED plas_flow[6];
 #ifdef COMPRESS_STATE
-      back_v[0] = 0.0-back_v[1]-back_v[2];
+      back_v[0] = -back_v[1]-back_v[2];
 #endif
       {
       for(int i=0;i<6;i++){ plas_flow[i] = elas_devi_v[i] - back_v[i]; }
