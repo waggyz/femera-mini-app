@@ -136,38 +136,37 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #endif
       } }
       compute_iso_s( &S[0], &H[0],C[2],c0,c1,c2, 1.0 );// Linear stress response
-      const FLOAT_PHYS VECALIGNED stress_v[6]={// sxx, syy, szz,  sxy, syz, sxz
+      const FLOAT_PHYS VECALIGNED elas_v[6]={// sxx, syy, szz,  sxy, syz, sxz
         S[0], S[5], S[10], S[1], S[6], S[2] };
 #if VERB_MAX>10
       printf( "Stress Voigt Vector (Elem: %i):\n", ie );
       for(int j=0;j<6;j++){
-        printf("%+9.2e ",stress_v[j]);
+        printf("%+9.2e ",elas_v[j]);
       } printf("\n");
 #endif
       //====================================================== UMAT calc
         const FLOAT_PHYS one_third = 0.333333333333333;
-      //NOTE back_v, stress_d, and plas_flow are deviatoric (trace zero),
+      //NOTE back_v, elas_devi_v, and plas_flow are deviatoric (trace zero),
       // with only 5 independent terms.
       //NOTE back_v is only deviatoric,
-      //     so only stress_v hydro needs to be removed.
-      //NOTE Only the deviatoric part of stress_v is used,
+      //     so only elas_v hydro needs to be removed.
+      //NOTE Only the deviatoric part of elas_v is used,
       //     so take it out now.
-      FLOAT_PHYS VECALIGNED stress_d[6]={ stress_v[0],stress_v[1],stress_v[2],
-        stress_v[3],stress_v[4],stress_v[5]};
+      FLOAT_PHYS VECALIGNED elas_devi_v[6]={ elas_v[0],elas_v[1],elas_v[2],
+        elas_v[3],elas_v[4],elas_v[5]};
       {
-      FLOAT_PHYS stress_hydro=0.0;
-      for(int i=0;i<3;i++){ stress_hydro+= stress_v[i]*one_third; }
-      for(int i=0;i<3;i++){ stress_d[i] -= stress_hydro; }
+      FLOAT_PHYS elas_hydr=0.0;
+      for(int i=0;i<3;i++){ elas_hydr+= elas_v[i]*one_third; }
+      for(int i=0;i<3;i++){ elas_devi_v[i] -= elas_hydr; }
       }
       FLOAT_PHYS stress_mises=0.0;
       FLOAT_PHYS VECALIGNED plas_flow[6];
       {
-      for(int i=0;i<6;i++){ plas_flow[i] = stress_d[i] - back_v[i]; }
-      for(int i=0;i<3;i++){
-        stress_mises += plas_flow[i]*plas_flow[i]*1.5; }
+      for(int i=0;i<6;i++){ plas_flow[i] = elas_devi_v[i] - back_v[i]; }
+      for(int i=0;i<3;i++){ stress_mises += plas_flow[i]*plas_flow[i]*1.5; }
       for(int i=3;i<6;i++){ stress_mises += plas_flow[i]*plas_flow[i]*3.0; }
       }
-      //for(int i=0;i<6;i++){ printf("%+9.2e ", stress_v[i]); }
+      //for(int i=0;i<6;i++){ printf("%+9.2e ", elas_v[i]); }
       //printf("mises: %+9.2e\n",std::sqrt(stress_mises));
       __m256d s[3];
       if( stress_mises > yield_tol2 ){
@@ -178,7 +177,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         const FLOAT_PHYS shear_eff
           = shear_modu * (stress_yield + hard_modu*delta_equiv) * inv_mises;
         const FLOAT_PHYS hard_eff = shear_modu * hard_modu
-          / (shear_modu + hard_modu*one_third) -3.0*shear_eff;
+          / (shear_modu + hard_modu*one_third) - 3.0*shear_eff;
         const FLOAT_PHYS lambda_eff = (bulk_mod3 - 2.0*shear_eff)*one_third;
         for(int i=0;i<6;i++){ plas_flow[i]*= inv_mises; }
         if( save_state ){// Update state variable back_v.
@@ -193,19 +192,10 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #endif
         }
         FLOAT_PHYS elas_mises=0.0;
-#if 1
-        for(int i=0;i<3;i++){ elas_mises += stress_d[i]*stress_d[i]*1.5; }
-        for(int i=3;i<6;i++){ elas_mises += stress_d[i]*stress_d[i]*3.0; }
-#else
         {
-        FLOAT_PHYS VECALIGNED m[6]; FLOAT_PHYS h=0.0;
-        for(int i=0;i<6;i++){ m[i] = stress_v[i]; }
-        for(int i=0;i<3;i++){ h+=m[i]; }
-        h *= one_third;
-        for(int i=0;i<3;i++){ m[i]-=h; elas_mises += m[i]*m[i]*1.5; }
-        for(int i=3;i<6;i++){ elas_mises += m[i]*m[i]*3.0; }
+        for(int i=0;i<3;i++){ elas_mises += elas_devi_v[i]*elas_devi_v[i]*1.5; }
+        for(int i=3;i<6;i++){ elas_mises += elas_devi_v[i]*elas_devi_v[i]*3.0; }
         }
-#endif
         elas_mises = std::sqrt(elas_mises);
         const FLOAT_PHYS elas_part = stress_yield / elas_mises;
         // Add elas_part * elastic D-matrix?
