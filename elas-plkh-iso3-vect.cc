@@ -560,7 +560,7 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
         s[2] = _mm256_load_pd(&S[8]);// sxz syz szz | x
       }// if plastic ----------------------------------------------------------
       else{// Linear-elastic conj response only
-        compute_iso_s( &S[0], &H[0],C[2],c0,c1,c2, dw );//FIXME Redundant?
+        for(int i=0; i<12; i++){ S[i]*= dw; }
         s[0] = _mm256_load_pd(&S[0]);
         s[1] = _mm256_load_pd(&S[4]);
         s[2] = _mm256_load_pd(&S[8]);
