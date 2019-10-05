@@ -172,6 +172,7 @@ int ElastPlastKHIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* part_d ){
   return 0;
 }
 #endif
+#define COMPRESS_STATE
 int ElastPlastKHIso3D::ElemJacobi( Elem* E,
   FLOAT_SOLV* part_d, const FLOAT_SOLV* part_u ){
   //printf("**** Preconditioner ****\n");
@@ -182,11 +183,36 @@ int ElastPlastKHIso3D::ElemJacobi( Elem* E,
   const uint elem_n = E->elem_n;
   const uint intp_n = E->gaus_n;
   //
-  FLOAT_PHYS det;
-  RESTRICT Phys::vals elem_diag(Ne);
-  FLOAT_PHYS B[Ne*6];// 6 rows, Ne cols
-  FLOAT_PHYS G[Ne],jac[Nj];//,elem_diag[Ne];
-  for(uint j=0; j<(Ne*6); j++){ B[j]=0.0; }
+#ifdef COMPRESS_STATE
+  const int        Ns           = 5;// Number of state variables/ip
+#else
+  const int        Ns           = 6;
+#endif
+  const FLOAT_PHYS youn_modu    = this->mtrl_prop[0];
+  const FLOAT_PHYS poiss_ratio  = this->mtrl_prop[1];
+  const FLOAT_PHYS bulk_mod3    = youn_modu / (1.0-2.0*poiss_ratio);
+#if 0
+  const FLOAT_PHYS shear_modu   = 0.5*youn_modu/(1.0+poiss_ratio);
+#else
+  const FLOAT_PHYS shear_modu   = this->mtrl_matc[2];
+#endif
+  const FLOAT_PHYS stress_yield = this->plas_prop[0];
+  const FLOAT_PHYS hard_modu    = this->plas_prop[1];
+  const FLOAT_PHYS yield_tol2   =
+    (stress_yield*(1.0+1e-6))*(stress_yield*(1.0+1e-6));
+  //
+  //FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
+#ifdef COMPRESS_STATE
+  FLOAT_PHYS VECALIGNED back_v[6];
+#else
+  FLOAT_PHYS VECALIGNED back_v[8];// back_v padded to 8 doubles?
+#endif
+  //
+  //std::copy( &this->mtrl_matc[0], &this->mtrl_matc[mtrl_matc.size()], matc );
+  //
+  //const FLOAT_SOLV* RESTRICT C     = &matc[0];
+        FLOAT_SOLV* RESTRICT state = &this->elgp_vars[0];
+  //
   const FLOAT_PHYS D[]={
     mtrl_matc[0],mtrl_matc[1],mtrl_matc[1],0.0,0.0,0.0,
     mtrl_matc[1],mtrl_matc[0],mtrl_matc[1],0.0,0.0,0.0,
@@ -194,10 +220,23 @@ int ElastPlastKHIso3D::ElemJacobi( Elem* E,
     0.0,0.0,0.0,mtrl_matc[2],0.0,0.0,
     0.0,0.0,0.0,0.0,mtrl_matc[2],0.0,
     0.0,0.0,0.0,0.0,0.0,mtrl_matc[2] };
+  FLOAT_PHYS VECALIGNED Dpl[36];
+  FLOAT_PHYS det;
+  RESTRICT Phys::vals elem_diag(Ne);
+  FLOAT_PHYS B[Ne*6];// 6 rows, Ne cols
+  FLOAT_PHYS G[Ne],jac[Nj];//,elem_diag[Ne];
+  for(uint j=0; j<(Ne*6); j++){ B[j]=0.0; }
   for(uint ie=0;ie<elem_n;ie++){
     uint ij=Nj*ie;//FIXME only good for tets
     std::copy( &E->elip_jacs[ij], &E->elip_jacs[ij+Nj], jac ); det=jac[d2];
     for(uint ip=0;ip<intp_n;ip++){
+#ifdef COMPRESS_STATE
+      std::memcpy( &back_v[1], &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
+#else
+      std::memcpy( &back_v, &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
+#endif
+      FLOAT_PHYS elas_part=1.0;
+      for(int i=0; i<36; i++){ Dpl[i]=0.0; }
       uint ig=ip*Ne;
       for(uint i=0;i<Ne;i++){ G[i]=0.0; }
       for(uint k=0;k<Nc;k++){
@@ -226,18 +265,91 @@ int ElastPlastKHIso3D::ElemJacobi( Elem* E,
         B[Ne*5 + 0+j*ndof] = G[Nc*2+j];
         B[Ne*5 + 2+j*ndof] = G[Nc*0+j];
       }
-      #if VERB_MAX>10
+#if VERB_MAX>10
       printf( "[B]:");
       for(uint j=0;j<B.size();j++){
         if(j%Ne==0){printf("\n"); }
         printf("%+9.2e ",B[j]);
       } printf("\n");
-      #endif
+#endif
+      FLOAT_PHYS elas_strain[6],elas_devi_v[6];
+        const FLOAT_PHYS one_third = 0.333333333333333;
+      //NOTE back_v, elas_devi_v, and plas_flow are deviatoric (trace zero),
+      //     with only 5 independent terms.
+      //NOTE back_v is only deviatoric,
+      //     so only elas_v hydro needs to be removed.
+      for(uint i=0;i<6;i++){ elas_strain[ i ]=0.0;
+        for(uint j=0;j<Ne;j++){
+          elas_strain[ i ]+= B[Ne* i+j ] * part_u[ j ];
+        } }
+      for(uint i=0;i<6;i++){ elas_devi_v[ i ]=0.0;
+        for(uint j=0;j<6;j++){
+          elas_devi_v[ i ]+= D[6* i+j ] * elas_strain[ j ];
+        } }
+      {
+      FLOAT_PHYS elas_hydr=0.0;
+      for(int i=0;i<3;i++){ elas_hydr+= elas_devi_v[i]*one_third; }
+      for(int i=0;i<3;i++){ elas_devi_v[i]-= elas_hydr; }
+      }
+      FLOAT_PHYS stress_mises=0.0;
+      FLOAT_PHYS VECALIGNED plas_flow[6];
+#ifdef COMPRESS_STATE
+      back_v[0] = -back_v[1]-back_v[2];
+#endif
+      {
+      for(int i=0;i<6;i++){ plas_flow[i] = elas_devi_v[i] - back_v[i]; }
+      for(int i=0;i<3;i++){ stress_mises+= plas_flow[i]*plas_flow[i]*1.5; }
+      for(int i=3;i<6;i++){ stress_mises+= plas_flow[i]*plas_flow[i]*3.0; }
+      }
+      //for(int i=0;i<6;i++){ printf("%+9.2e ", elas_v[i]); }
+      //printf("Mises: %+9.2e\n",sqrt(stress_mises));
+      //printf("*** Nonlinear Preconditioner ***\n");
+      if( stress_mises > yield_tol2 ){//---------------------------------------
+        //printf("*** Preconditioner Plastic ***\n");
+        stress_mises = sqrt(stress_mises);
+        const FLOAT_PHYS inv_mises = 1.0/stress_mises;
+#if 0
+        const FLOAT_PHYS delta_equiv = ( stress_mises - stress_yield )
+          / ( 3.0*shear_modu + hard_modu );
+        // delta_equiv is always used as delta_equiv * hard_modu
+#endif
+        const FLOAT_PHYS delta_hard = ( stress_mises - stress_yield )
+          / ( 3.0*shear_modu + hard_modu ) * hard_modu;
+        const FLOAT_PHYS shear_eff
+          = shear_modu * (stress_yield + delta_hard) * inv_mises;
+        const FLOAT_PHYS hard_eff = shear_modu * hard_modu
+          / (shear_modu + hard_modu*one_third) - 3.0*shear_eff;
+        const FLOAT_PHYS lambda_eff = (bulk_mod3 - 2.0*shear_eff)*one_third;
+        for(int i=0;i<6;i++){ plas_flow[i]*= inv_mises; }
+        FLOAT_PHYS elas_mises=0.0;
+        {
+        for(int i=0;i<3;i++){ elas_mises += elas_devi_v[i]*elas_devi_v[i]*1.5; }
+        for(int i=3;i<6;i++){ elas_mises += elas_devi_v[i]*elas_devi_v[i]*3.0; }
+        }
+        elas_mises = sqrt(elas_mises);
+        elas_part = stress_yield / elas_mises;
+        // Add elas_part * elastic D-matrix?
+        // Secant modulus response: this stress plus elastic response at yield
+        for(int i=0;i<6;i++){
+          for(int j=0;j<6;j++){
+            Dpl[6* i+j ] = hard_eff * plas_flow[i] * plas_flow[j];
+          }
+          Dpl[6* i+i ]+= shear_eff;
+        }
+        for(int i=0;i<3;i++){
+          Dpl[6* i+i ]+= shear_eff;// + (C[0]-C[1])*elas_part;
+          //Dpl[6* (i+3)+i+3 ]+= C[2]*elas_part;
+          for(int j=0;j<3;j++){
+            Dpl[6* i+j ]+= lambda_eff;// + C[1]*elas_part;
+          }
+        }
+      }//end if plastic -------------------------------------------------------
       FLOAT_PHYS w = det * E->gaus_weig[ip];
       for(uint i=0; i<Ne; i++){
       for(uint k=0; k<6 ; k++){
       for(uint j=0; j<6 ; j++){
-        elem_diag[i]+=(B[Ne*j + i] * D[6*j + k] * B[Ne*k + i])*w;
+        elem_diag[i]+=(B[Ne* j+i] * ( elas_part*D[6* j+k] + Dpl[6* j+k] )
+          * B[Ne* k+i])*w;
       } } }
     }//end intp loop
     for (uint i=0; i<Nc; i++){
