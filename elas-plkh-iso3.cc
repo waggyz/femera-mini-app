@@ -273,7 +273,7 @@ int ElastPlastKHIso3D::ElemJacobi( Elem* E,
       } printf("\n");
 #endif
       FLOAT_PHYS elas_strain[6],elas_devi_v[6];
-        const FLOAT_PHYS one_third = 0.333333333333333;
+      const FLOAT_PHYS one_third = 0.333333333333333;
       //NOTE back_v, elas_devi_v, and plas_flow are deviatoric (trace zero),
       //     with only 5 independent terms.
       //NOTE back_v is only deviatoric,
@@ -328,7 +328,6 @@ int ElastPlastKHIso3D::ElemJacobi( Elem* E,
         }
         elas_mises = sqrt(elas_mises);
         elas_part = stress_yield / elas_mises;
-        // Add elas_part * elastic D-matrix?
         // Secant modulus response: this stress plus elastic response at yield
         for(int i=0;i<6;i++){
           for(int j=0;j<6;j++){
@@ -344,12 +343,12 @@ int ElastPlastKHIso3D::ElemJacobi( Elem* E,
           }
         }
       }//end if plastic -------------------------------------------------------
-      FLOAT_PHYS w = det * E->gaus_weig[ip];
+      const FLOAT_PHYS w = det * E->gaus_weig[ip];
       for(uint i=0; i<Ne; i++){
       for(uint k=0; k<6 ; k++){
       for(uint j=0; j<6 ; j++){
-        elem_diag[i]+=(B[Ne* j+i] * ( elas_part*D[6* j+k] + Dpl[6* j+k] )
-          * B[Ne* k+i])*w;
+        elem_diag[i]+=( B[Ne* j+i] * ( elas_part*D[6* j+k] + Dpl[6* j+k] )
+          * B[Ne* k+i] )*w;
       } } }
     }//end intp loop
     for (uint i=0; i<Nc; i++){

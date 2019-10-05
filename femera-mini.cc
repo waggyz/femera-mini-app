@@ -403,7 +403,7 @@ int main( int argc, char** argv ){
     if(M->load_step >1){
       if( M->next_scal > 0.0 ){
         if( M->next_scal == 1.0 ){
-          std::cout<<"previous solution linear extrapolation"; }
+          std::cout<<"linear extrapolation of previous solution"; }
         else{
           std::cout<<M->next_scal<<"x from the previous load step"; }
       }else{
