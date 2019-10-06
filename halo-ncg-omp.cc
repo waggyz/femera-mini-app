@@ -298,9 +298,9 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     for(uint i=0; i<sysn; i++){
       //S->prev_r[i] = 0.0;// S->part_b[i] = 0.0;
       //S->part_r[i] = S->part_b[i] - S->part_f[i];
-      //S->part_b[i]-= S->part_f[i] * S->part_1[i];// * (1.0-S->part_0[i]);
-      S->part_b[i]-= S->part_f[i];//FIXME Weird. this was r =b-f-f
-      S->part_r[i] = S->part_b[i];// - S->part_f[i];
+      S->part_b[i]-= S->part_f[i] *  (1.0-S->part_0[i]);//S->part_1[i] *
+      //S->part_b[i]-= S->part_f[i];
+      S->part_r[i] = S->part_b[i] - S->part_f[i];//FIXME Weird: r = b-f-f
       // Initial search (p) is preconditioned grad descent of (r)
       S->part_p[i] = S->part_r[i] * S->part_d[i];
 #if 0
