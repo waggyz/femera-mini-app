@@ -187,7 +187,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
       printf("\n"); }
 #endif
 }
-# if 1
+# if 0
   if( true ){//FIXME make this an option
 #else
   if( this->load_step==1 ){// prconditioner update check ----------------------
