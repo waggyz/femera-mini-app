@@ -188,6 +188,11 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     }
 #endif
 }
+# if 0
+  if( true ){//FIXME make this an option
+#else
+  if( this->load_step==1 ){// prconditioner update check ----------------------
+#endif
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
@@ -243,6 +248,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     //S->BCS( E,Y );
     //S->BC0( E,Y );
   }
+  }// end prconditioner update check ------------------------------------------
   time_reset( my_solv_count, start );//FIXME wtf?
   time_reset( my_gat0_count, start );//FIXME wtf?
 #pragma omp single
