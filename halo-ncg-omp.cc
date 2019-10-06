@@ -146,7 +146,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
       for(uint i=0;i<sysn;i++){
         const FLOAT_PHYS s = this->next_scal;
         const FLOAT_PHYS s1= 1.0+s;
-        S->part_u[i] *= S->part_0[i];
+        //S->part_u[i] *= S->part_0[i];
         auto u=S->part_u[i];
         //S->part_u[i] = 2.0*S->part_u[i] - S->prev_u[i];
         //S->part_u[i] = S->part_u[i] + s*(S->part_u[i]- S->prev_u[i]);
@@ -298,9 +298,13 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp simd
 #endif
     for(uint i=0; i<sysn; i++){
+#if 1
+      S->part_r[i] = (S->part_b[i] - S->part_f[i]) * S->part_0[i];
+#else
       //S->part_b[i]-= S->part_f[i] * (1.0-S->part_0[i]);//S->part_1[i] *
       S->part_b[i]-= S->part_f[i] - S->part_f[i] * S->part_0[i];
       S->part_r[i] = S->part_b[i] - S->part_f[i];//FIXME Weird: r = b-f-f
+#endif
       // Initial search (p) is preconditioned grad descent of (r)
       S->part_p[i] = S->part_r[i] * S->part_d[i];
 #if 0
