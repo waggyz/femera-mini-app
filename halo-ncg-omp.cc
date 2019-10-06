@@ -301,6 +301,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #if 1
       S->part_r[i] = (S->part_b[i] - S->part_f[i]) * S->part_0[i];
 #else
+      // I don't think this is necessary.
       //S->part_b[i]-= S->part_f[i] * (1.0-S->part_0[i]);//S->part_1[i] *
       S->part_b[i]-= S->part_f[i] - S->part_f[i] * S->part_0[i];
       S->part_r[i] = S->part_b[i] - S->part_f[i];//FIXME Weird: r = b-f-f
