@@ -89,17 +89,17 @@ int NCG::Setup( Elem* E, Phys* Y ){// printf("*** NCG::Setup(E,Y) ***\n");
       }
     }
   }
-  Y->tens_flop*=2;Y->tens_band*=2;Y->stif_flop*=2;Y->stif_band*=2;// 2 evals/iter
-  this->data_f=0.0;//FIXME Why is this here?
+  Y->tens_flop*=2;Y->tens_band*=2;Y->stif_flop*=2;Y->stif_band*=2;
+  //FIXME 2 evals/iter, but only some have plasticity calcs...
+  this->data_f=0.0;
   Y->ElemLinear( E,0,E->elem_n, this->part_f, this->part_u );
 #endif
   return(0);
 }
-int NCG::Init( Elem* E, Phys* Y ){// printf("*** NCG::Init(E,Y) ***\n");
+int NCG::Init( Elem* E, Phys* Y ){//FIXME what is the point of this method?
+  // printf("*** NCG::Init(E,Y) ***\n");
   this->BCS( E,Y );//FIXME repeated in Setup(E,Y)
   this->BC0( E,Y );
-  //FIXME Check if the following should be here.
-  //Y->ElemLinear( E,0,E->elem_n,this->part_f,this->part_u );
   return 0;
 }
 int NCG::Init(){// printf("*** NCG::Init() ***\n");
@@ -139,6 +139,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     Y->ElemNonlinear( E,0,E->elem_n,S->part_f,S->part_u,S->part_u, true );
     if( this->next_scal > 0.0 ){
       // Predict next solution
+      //FIXME Better to use last_u + 1/step_n * tangent modulus (only) response?
       //const INT_MESH sysn=S->udof_n;
 #ifdef HAS_SIMD
 #pragma omp simd
@@ -154,9 +155,8 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
       }
     }
     S->load_scal=this->step_scal * FLOAT_SOLV(this->load_step);
-    S->Init(E,Y);
+    S->Init(E,Y);// FIXME repeated twice here
     for(uint i=0;i<Y->udof_magn.size();i++){
-      //FIXME move after BCS applied
       //printf("GLOBAL MAX BC[%u]: %f\n",i,bcmax[i]);
       if(Y->udof_magn[i] > bcmax[i]){
 #pragma omp atomic write
@@ -198,6 +198,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
       S->glob_bmax[i] = this->glob_bmax[i];
     }
     //S->Init(E,Y);
+    for(uint i=0; i<S->udof_n; i++){ S->part_d[i]=0.0; };
     S->Precond( E,Y );
   }
   time_reset( my_prec_count, start );

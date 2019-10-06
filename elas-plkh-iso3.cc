@@ -97,7 +97,7 @@ int ElastPlastKHIso3D::ElemStiff(Elem* E  ){
 int ElastPlastKHIso3D::ElemJacobi(Elem*, FLOAT_SOLV* ){ return 0; }
 #else
 int ElastPlastKHIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* part_d ){
-  //printf("**** Preconditioner ****\n");
+  //printf("**** Preconditioner 1 ****\n");
   const uint ndof   = 3;//this->node_d
   const uint  Nj = 10,d2=9;
   const uint  Nc = E->elem_conn_n;
@@ -175,7 +175,7 @@ int ElastPlastKHIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* part_d ){
 #define COMPRESS_STATE
 int ElastPlastKHIso3D::ElemJacobi( Elem* E,
   FLOAT_SOLV* part_d, const FLOAT_SOLV* part_u ){
-  //printf("**** Preconditioner ****\n");
+  //printf("**** Preconditioner 2 ****\n");
   const uint ndof   = 3;//this->node_d
   const uint  Nj = 10,d2=9;
   const uint  Nc = E->elem_conn_n;

@@ -708,12 +708,12 @@ int main( int argc, char** argv ) {
           for(uint i=0; i<plas_part[0].size(); i++){
             Y->plas_prop[i] = plas_part[0][i]; }
         }
-        Solv* S;
+        Solv* S=new PCG(0, 0, 0.0);
         Mesh::part t(M->list_elem[part_i],Y,S);
         M->SavePartFMR( t, pname.c_str(), false );
         if(verbosity>1){
           std::cout << "Appending physics to " << pname << "..." <<'\n'; }
-        Y->SavePartFMR( pname.c_str(), false );//FIXME Move into M->SavePartFMR()
+        Y->SavePartFMR( pname.c_str(), false );//FIXME Move to M->SavePartFMR()
       }
     }
   }
