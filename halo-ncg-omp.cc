@@ -232,7 +232,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     for(INT_MESH i=0; i<E->halo_node_n; i++){
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
-#pragma omp atomic read
+//#pragma omp atomic read
         S->part_d[d*i +j] = this->halo_val[f+j]; }
     }
   }
@@ -242,9 +242,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH sysn=S->udof_n;
     for(uint i=0;i<sysn;i++){ S->part_d[i] = FLOAT_SOLV(1.0) / S->part_d[i]; }
-    S->Init( E,Y );// Zeros boundary conditions
-    //S->BCS( E,Y );
-    //S->BC0( E,Y );
+    S->Init( E,Y );// Zeros boundary conditions and sets RHS
   }
   }// end prconditioner update check ------------------------------------------
   time_reset( my_solv_count, start );//FIXME wtf?
@@ -278,7 +276,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     for(INT_MESH i=0; i<E->halo_node_n; i++){
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
-#pragma omp atomic read
+//#pragma omp atomic read
         S->part_f[d*i +j] = this->halo_val[f+j]; }
     }
   time_reset( my_scat_count, start );// ----------------------- Done part_f sync
@@ -298,21 +296,9 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp simd
 #endif
     for(uint i=0; i<sysn; i++){
-#if 1
-      //S->part_r[i] = (S->part_b[i] - S->part_f[i]) * S->part_0[i];
-      //S->part_r[i] = S->part_b[i]*S->part_0[i] - S->part_f[i]*S->part_0[i];
       S->part_r[i] = S->part_b[i] - S->part_f[i];
-#else
-      // I don't think this is necessary.
-      //S->part_b[i]-= S->part_f[i] * (1.0-S->part_0[i]);//S->part_1[i] *
-      S->part_b[i]-= S->part_f[i] - S->part_f[i] * S->part_0[i];
-      S->part_r[i] = S->part_b[i] - S->part_f[i];//FIXME Weird: r = b-f-f
-#endif
       // Initial search (p) is preconditioned grad descent of (r)
       S->part_p[i] = S->part_r[i] * S->part_d[i];
-#if 0
-      if(S->part_d[i]==0.0){S->part_0[i]=0.0;}else{S->part_0[i]=1.0;}
-#endif
     }
     //FLOAT_SOLV R2=0.0;
 #ifdef HAS_PRAGMA_SIMD
