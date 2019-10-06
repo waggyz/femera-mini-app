@@ -64,7 +64,7 @@ int NCG::BC0(Elem* E, Phys* Y ){// printf("*** NCG::BC0(E,Y) ***\n");
 int NCG::Setup( Elem* E, Phys* Y ){// printf("*** NCG::Setup(E,Y) ***\n");
   this->halo_loca_0 = E->halo_remo_n * Y->node_d;
 #if 1
-  this->RHS( E,Y );
+  //this->RHS( E,Y );
   //this->BCS( E,Y );// Sync max Y->udof_magn before Precond()
   if(this->cube_init!=0.0){//FIXME I don't know if this is working
     // printf("*** NCG::Init(E,Y)...cube_init ***\n");
@@ -96,6 +96,7 @@ int NCG::Setup( Elem* E, Phys* Y ){// printf("*** NCG::Setup(E,Y) ***\n");
 }
 int NCG::Init( Elem* E, Phys* Y ){//FIXME what is the point of this method?
   // printf("*** NCG::Init(E,Y) ***\n");
+  this->RHS(E,Y);
   this->BCS( E,Y );//FIXME repeated in Setup(E,Y)
   this->BC0( E,Y );
   return 0;
