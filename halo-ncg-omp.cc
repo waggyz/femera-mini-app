@@ -50,11 +50,13 @@ int NCG::BC0(Elem* E, Phys* Y ){// printf("*** NCG::BC0(E,Y) ***\n");
   for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
     this->part_d[Dn* n+uint(f)]=0.0;
     this->part_0[Dn* n+uint(f)]=0.0;
+    this->part_b[Dn* n+uint(f)]=0.0;
     //this->part_f[Dn* n+uint(f)]=0.0;//FIXME apply to part_b?
   }
   for(auto t : E->bc0_nf   ){ std::tie(n,f)=t;
     this->part_d[Dn* n+uint(f)]=0.0;
     this->part_0[Dn* n+uint(f)]=0.0;
+    this->part_b[Dn* n+uint(f)]=0.0;
     #if VERB_MAX>10
     printf("BC0: [%i]:0\n",E->bc0_nf[i]);
     #endif
@@ -154,7 +156,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
       }
     }
     S->load_scal=this->step_scal * FLOAT_SOLV(this->load_step);
-    //S->Init(E,Y);// FIXED repeated twice here
+    //S->Init(E,Y);//FIXED repeated twice here
     for(uint i=0;i<Y->udof_magn.size();i++){
       //printf("GLOBAL MAX BC[%u]: %f\n",i,bcmax[i]);
       if(Y->udof_magn[i] > bcmax[i]){
