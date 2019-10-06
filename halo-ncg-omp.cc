@@ -50,13 +50,12 @@ int NCG::BC0(Elem* E, Phys* Y ){// printf("*** NCG::BC0(E,Y) ***\n");
   for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
     this->part_d[Dn* n+uint(f)]=0.0;
     this->part_0[Dn* n+uint(f)]=0.0;
-    this->part_b[Dn* n+uint(f)]=0.0;
-    //this->part_f[Dn* n+uint(f)]=0.0;//FIXME apply to part_b?
+    //this->part_b[Dn* n+uint(f)]=0.0;//FIXME apply to part_b?
   }
   for(auto t : E->bc0_nf   ){ std::tie(n,f)=t;
     this->part_d[Dn* n+uint(f)]=0.0;
     this->part_0[Dn* n+uint(f)]=0.0;
-    this->part_b[Dn* n+uint(f)]=0.0;
+    //this->part_b[Dn* n+uint(f)]=0.0;
     #if VERB_MAX>10
     printf("BC0: [%i]:0\n",E->bc0_nf[i]);
     #endif
@@ -66,8 +65,7 @@ int NCG::BC0(Elem* E, Phys* Y ){// printf("*** NCG::BC0(E,Y) ***\n");
 int NCG::Setup( Elem* E, Phys* Y ){// printf("*** NCG::Setup(E,Y) ***\n");
   this->halo_loca_0 = E->halo_remo_n * Y->node_d;
 #if 1
-  //this->RHS( E,Y );
-  //this->BCS( E,Y );// Sync max Y->udof_magn before Precond()
+  // Sync max Y->udof_magn before Precond()
   if(this->cube_init!=0.0){//FIXME I don't know if this is working
     // printf("*** NCG::Init(E,Y)...cube_init ***\n");
     const INT_MESH Nn=E->node_n, Dm=E->mesh_d;
@@ -148,6 +146,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
       for(uint i=0;i<sysn;i++){
         const FLOAT_PHYS s = this->next_scal;
         const FLOAT_PHYS s1= 1.0+s;
+        S->part_u[i] *= S->part_0[i];
         auto u=S->part_u[i];
         //S->part_u[i] = 2.0*S->part_u[i] - S->prev_u[i];
         //S->part_u[i] = S->part_u[i] + s*(S->part_u[i]- S->prev_u[i]);
