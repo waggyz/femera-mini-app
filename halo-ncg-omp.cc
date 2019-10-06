@@ -296,10 +296,8 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp simd
 #endif
     for(uint i=0; i<sysn; i++){
-      //S->prev_r[i] = 0.0;// S->part_b[i] = 0.0;
-      //S->part_r[i] = S->part_b[i] - S->part_f[i];
-      S->part_b[i]-= S->part_f[i] *  (1.0-S->part_0[i]);//S->part_1[i] *
-      //S->part_b[i]-= S->part_f[i];
+      //S->part_b[i]-= S->part_f[i] * (1.0-S->part_0[i]);//S->part_1[i] *
+      S->part_b[i]-= S->part_f[i] - S->part_f[i] * S->part_0[i];
       S->part_r[i] = S->part_b[i] - S->part_f[i];//FIXME Weird: r = b-f-f
       // Initial search (p) is preconditioned grad descent of (r)
       S->part_p[i] = S->part_r[i] * S->part_d[i];
@@ -560,9 +558,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 #if 0
       S->part_f[i]*= S->part_0[i];// better to apply where used
 #endif
-      //S->part_r[i] = S->part_b[i] - S->part_f[i]; }
       S->part_r[i] = S->part_0[i] *(S->part_b[i] - S->part_f[i]); }
-      //S->part_r[i] = S->part_b[i] - S->part_0[i] - S->part_f[i]; }
 #ifdef HAS_PRAGMA_SIMD
 #pragma omp simd reduction(+:glob_sum3,glob_sum4,glob_sum5)
 #endif
