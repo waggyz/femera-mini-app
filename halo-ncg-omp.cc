@@ -48,13 +48,11 @@ int NCG::BC0(Elem* E, Phys* Y ){// printf("*** NCG::BC0(E,Y) ***\n");
   uint Dn=uint(Y->node_d);
   INT_MESH n; INT_DOF f; FLOAT_PHYS v;
   for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
-    this->part_1[Dn* n+uint(f)]=1.0;//FIXME replace w/ 1.0-part_0?
     this->part_d[Dn* n+uint(f)]=0.0;
     this->part_0[Dn* n+uint(f)]=0.0;
     //this->part_f[Dn* n+uint(f)]=0.0;//FIXME apply to part_b?
   }
   for(auto t : E->bc0_nf   ){ std::tie(n,f)=t;
-    this->part_1[Dn* n+uint(f)]=1.0;
     this->part_d[Dn* n+uint(f)]=0.0;
     this->part_0[Dn* n+uint(f)]=0.0;
     #if VERB_MAX>10
@@ -181,14 +179,13 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   for(uint i=0;i<bcmax.size();i++){ bcmax[i]=1.0; }
 #endif
 #if VERB_MAX>2
-    if(verbosity>2){
+    if( verbosity > 2 ){
       printf("    DOF Scales:");
-      for(uint i=0;i<bcmax.size();i++){ printf(" %g",bcmax[i]); }
-      printf("\n");
-    }
+      for(uint i=0;i<bcmax.size();i++){ printf(" %g", bcmax[i]); }
+      printf("\n"); }
 #endif
 }
-# if 0
+# if 1
   if( true ){//FIXME make this an option
 #else
   if( this->load_step==1 ){// prconditioner update check ----------------------
@@ -203,13 +200,12 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
       S->glob_bmax[i] = this->glob_bmax[i];
     }
     //S->Init(E,Y);
-    for(uint i=0; i<S->udof_n; i++){ S->part_d[i]=0.0; };
+    for(uint i=0; i<S->udof_n; i++){ S->part_d[i]=0.0; }
     S->Precond( E,Y );
   }
   time_reset( my_prec_count, start );
-  //----------------------------- Sync part_d
 #pragma omp single
-{  this->halo_val=0.0; }
+{  this->halo_val=0.0; }//----------------------------- Sync part_d
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
@@ -300,10 +296,11 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp simd
 #endif
     for(uint i=0; i<sysn; i++){
-      S->prev_r[i] = 0.0;// S->part_b[i] = 0.0;
+      //S->prev_r[i] = 0.0;// S->part_b[i] = 0.0;
       //S->part_r[i] = S->part_b[i] - S->part_f[i];
-      S->part_b[i]-= S->part_f[i] * S->part_1[i];
-      S->part_r[i] = S->part_b[i] - S->part_f[i];
+      //S->part_b[i]-= S->part_f[i] * S->part_1[i];// * (1.0-S->part_0[i]);
+      S->part_b[i]-= S->part_f[i];//FIXME Weird. this was r =b-f-f
+      S->part_r[i] = S->part_b[i];// - S->part_f[i];
       // Initial search (p) is preconditioned grad descent of (r)
       S->part_p[i] = S->part_r[i] * S->part_d[i];
 #if 0
