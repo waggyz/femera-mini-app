@@ -299,7 +299,9 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #endif
     for(uint i=0; i<sysn; i++){
 #if 1
-      S->part_r[i] = (S->part_b[i] - S->part_f[i]) * S->part_0[i];
+      //S->part_r[i] = (S->part_b[i] - S->part_f[i]) * S->part_0[i];
+      //S->part_r[i] = S->part_b[i]*S->part_0[i] - S->part_f[i]*S->part_0[i];
+      S->part_r[i] = S->part_b[i] - S->part_f[i];
 #else
       // I don't think this is necessary.
       //S->part_b[i]-= S->part_f[i] * (1.0-S->part_0[i]);//S->part_1[i] *
@@ -317,7 +319,8 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp simd reduction(+:glob_r2a)
 #endif
     for(uint i=sumi0; i<sysn; i++){
-      glob_r2a += S->part_r[i]*S->part_r[i] * S->part_0[i]; }//FIXED div out precond
+      glob_r2a += S->part_r[i]*S->part_r[i]; }// * S->part_0[i]; }
+      //FIXED div out precond
 #if 0
     S->loca_res2=R2;
     S->loca_rto2 = S->loca_rtol*S->loca_rtol *S->loca_res2;
