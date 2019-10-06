@@ -139,7 +139,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     Y->ElemNonlinear( E,0,E->elem_n,S->part_f,S->part_u,S->part_u, true );
     if( this->next_scal > 0.0 ){
       // Predict next solution
-      //FIXME Better to use last_u + 1/step_n * tangent modulus (only) response?
+      //FIXME Better to use prev_u + 1/step_n * tangent modulus (only) response?
       //const INT_MESH sysn=S->udof_n;
 #ifdef HAS_SIMD
 #pragma omp simd
@@ -148,10 +148,10 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
         const FLOAT_PHYS s = this->next_scal;
         const FLOAT_PHYS s1= 1.0+s;
         auto u=S->part_u[i];
-        //S->part_u[i] = 2.0*S->part_u[i] - S->last_u[i];
-        //S->part_u[i] = S->part_u[i] + s*(S->part_u[i]- S->last_u[i]);
-        S->part_u[i] = s1*S->part_u[i] - s*S->last_u[i];
-        S->last_u[i]=u;
+        //S->part_u[i] = 2.0*S->part_u[i] - S->prev_u[i];
+        //S->part_u[i] = S->part_u[i] + s*(S->part_u[i]- S->prev_u[i]);
+        S->part_u[i] = s1*S->part_u[i] - s*S->prev_u[i];
+        S->prev_u[i]=u;
       }
     }
     S->load_scal=this->step_scal * FLOAT_SOLV(this->load_step);
@@ -294,7 +294,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp simd
 #endif
     for(uint i=0; i<sysn; i++){
-      S->old_r[i] = 0.0;// S->part_b[i] = 0.0;
+      S->prev_r[i] = 0.0;// S->part_b[i] = 0.0;
       //S->part_r[i] = S->part_b[i] - S->part_f[i];
       S->part_b[i]-= S->part_f[i] * S->part_1[i];
       S->part_r[i] = S->part_b[i] - S->part_f[i];
@@ -339,7 +339,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 }// end init parallel region
   this->glob_res2 = glob_r2a;
   this->glob_chk2 = glob_r2a;
-  this->glob_rto2 = glob_to2;// / ((FLOAT_SOLV)this->udof_n);
+  this->glob_rto2 = glob_to2;
   return 0;
 }//======================================================== End HaloNCG::Init()
 int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
@@ -348,7 +348,6 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 #endif
   FLOAT_SOLV glob_sum1=0.0, glob_sum2=0.0, glob_sum3=0.0, glob_sum4=0.0,
     glob_sum5=0.0;
-  //FLOAT_SOLV glob_r2a = this->glob_res2;
   FLOAT_SOLV halo_vals[this->halo_val.size()];// Put this on the stack.
   //FIXME don't need M->halo_val member variable now.
 #ifdef HALO_SUM_CHK
@@ -554,7 +553,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 #pragma omp simd
 #endif
     for(INT_MESH i=0; i<sysn; i++){
-      S->old_r[i] = S->part_r[i];
+      S->prev_r[i] = S->part_r[i];
 #if 0
       S->part_f[i]*= S->part_0[i];// better to apply where used
 #endif
@@ -568,12 +567,12 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 #if 0
       // FletcherReeves
       glob_sum3 += S->part_r[i] * S->part_d[i] * S->part_r[i];
-      glob_sum4 += S->old_r[i] * S->part_d[i] * S->old_r[i];
+      glob_sum4 += S->prev_r[i] * S->part_d[i] * S->prev_r[i];
       glob_sum5 += S->part_r[i] * S->part_r[i];
 #else
       // PolakRibiere (SM default)
-      glob_sum3 += S->part_r[i] * S->part_d[i] *(S->part_r[i] - S->old_r[i]);
-      glob_sum4 += S->old_r[i] * S->part_d[i] * S->old_r[i];
+      glob_sum3 += S->part_r[i] * S->part_d[i] *(S->part_r[i] - S->prev_r[i]);
+      glob_sum4 += S->prev_r[i] * S->part_d[i] * S->prev_r[i];
       glob_sum5 += S->part_r[i] * S->part_r[i];
 #endif
     }//                                                              (9*N FLOP)
