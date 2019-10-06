@@ -96,7 +96,7 @@ int NCG::Setup( Elem* E, Phys* Y ){// printf("*** NCG::Setup(E,Y) ***\n");
 }
 int NCG::Init( Elem* E, Phys* Y ){//FIXME what is the point of this method?
   // printf("*** NCG::Init(E,Y) ***\n");
-  this->RHS(E,Y);
+  this->RHS( E,Y );//FIXME Where does this belong?
   this->BCS( E,Y );//FIXME repeated in Setup(E,Y)
   this->BC0( E,Y );
   return 0;
@@ -154,7 +154,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
       }
     }
     S->load_scal=this->step_scal * FLOAT_SOLV(this->load_step);
-    S->Init(E,Y);// FIXME repeated twice here
+    //S->Init(E,Y);// FIXED repeated twice here
     for(uint i=0;i<Y->udof_magn.size();i++){
       //printf("GLOBAL MAX BC[%u]: %f\n",i,bcmax[i]);
       if(Y->udof_magn[i] > bcmax[i]){
