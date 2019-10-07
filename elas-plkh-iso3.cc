@@ -179,7 +179,9 @@ int ElastPlastKHIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* part_d ){
 // the first linear load step.
 int ElastPlastKHIso3D::ElemJacobi( Elem* E,
   FLOAT_SOLV* part_d, const FLOAT_SOLV* part_u ){
-  //printf("**** Preconditioner 2 ****\n");
+#if VERB_MAX>10
+  printf("**** Preconditioner B: %i ****\n",this->solv_cond);
+#endif
   const uint ndof   = 3;//this->node_d
   const uint  Nj = 10,d2=9;
   const uint  Nc = E->elem_conn_n;

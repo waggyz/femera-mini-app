@@ -78,7 +78,6 @@ gmsh -refine -o "neper/cubic"$N"s1p1.msh2" "neper/cubic"$N".msh"
  * `-p <str>` Read partitioned `<str>_#.fmr` finite element model files in parallel. *Required.*
  * `-v <int>` Verbosity level [default: 1]; `-v2` is good.
  * `-c <uint>` Number of parallel compute threads.
- * `-S <uint>` Number of load steps.
  * `-s <int>` Choose a solver:
    * `-s1` for conjugate gradient [default], or
    * `-s2` for nonlinear conjugate gradient [experimental].
@@ -86,8 +85,10 @@ gmsh -refine -o "neper/cubic"$N"s1p1.msh2" "neper/cubic"$N".msh"
    * `-d0` for none,
    * `-d1` for Jacobi [default], or
    * `-d2` for tangent Jacobi (nonlinear).
- * `-r <float>` Solution tolerance  [default: 0.0001].
- * `-i <int>` Maximum number of iterations.
+ * `-r <float>` Relative solution tolerance  [default: 0.0001].
+ * `-a <float>` Absolute solution tolerance  [default: 0.0001].
+ * `-I <uint>` Number of load steps [default: 1].
+ * `-i <int>` Maximum number of iterations per load step.
 
 `mesh.h` `mesh.cc` An instance of this class contains global model information.
 

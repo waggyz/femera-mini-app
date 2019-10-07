@@ -10,7 +10,8 @@ int Solv::Precond(Elem* E, Phys* Y){// Jacobi Preconditioner
   switch(this->solv_cond){
   case(Solv::COND_NONE):{
     for(uint i=0; i<this->udof_n; i++){ this->part_d[i]=1.0; }; break;}
-  case(Solv::COND_JACO):{
+  case(Solv::COND_JACO):
+  case(Solv::COND_TANG):{
     Y->ElemJacobi( E, this->part_d );
     Y->ElemJacobi( E, this->part_d, this->part_u );
     for(uint i=0; i<this->udof_n; i++){
