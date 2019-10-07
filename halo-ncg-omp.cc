@@ -203,7 +203,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     //S->Init(E,Y);
   }
   // preconditioner update check ----------------------
-# if 1
+# if 0
   if( this->solv_cond != Solv::COND_NONE ){//FIXME make this an option
 #else
   if( (this->load_step==1) & (this->solv_cond != Solv::COND_NONE) ){
