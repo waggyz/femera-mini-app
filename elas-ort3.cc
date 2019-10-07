@@ -8,12 +8,13 @@ int ElastOrtho3D::ElemLinear( Elem* ){ return 1; }//FIXME
 int ElastOrtho3D::ElemJacobi( Elem* ){ return 1; }//FIXME
 int ElastOrtho3D::BlocLinear( Elem* ,
   RESTRICT Phys::vals &, const RESTRICT Solv::vals & ){ return 1; }
-int ElastOrtho3D::ElemNonlinear( Elem*, const INT_MESH, const INT_MESH,
-  FLOAT_SOLV*, const FLOAT_SOLV*, const FLOAT_SOLV*, bool ){
-  return 1; }
 int ElastOrtho3D::ElemJacobi( Elem*, FLOAT_SOLV*, const FLOAT_SOLV* ){
   return 1; }
 //
+int ElastOrtho3D::ElemNonlinear( Elem* E, const INT_MESH e0, const INT_MESH e1,
+  FLOAT_SOLV* part_f, const FLOAT_SOLV* part_u, const FLOAT_SOLV*, bool ){
+  return this->ElemLinear( E, e0,e1, part_f, part_u );
+  }
 int ElastOrtho3D::ElemStrainStress(std::ostream& of,
   Elem* E, FLOAT_SOLV* part_u) {
   //FIXME Cleanup local variables.
