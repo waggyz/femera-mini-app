@@ -144,7 +144,6 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     Y->ElemNonlinear( E,0,E->elem_n,S->part_f,S->part_u,S->part_u, true );
     if( this->next_scal > 0.0 ){// Predict next solution
       //FIXME Better to use prev_u + 1/step_n * tangent modulus (only) response?
-      //const INT_MESH sysn=S->udof_n;
 #ifdef HAS_SIMD
 #pragma omp simd
 #endif
