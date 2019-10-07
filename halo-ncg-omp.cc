@@ -206,7 +206,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 # if 1
   if( this->solv_cond != Solv::COND_NONE ){//FIXME make this an option
 #else
-  if( (this->load_step==1) &(this->solv_cond != Solv::COND_NONE) ){
+  if( (this->load_step==1) & (this->solv_cond != Solv::COND_NONE) ){
 #endif
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
@@ -221,6 +221,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 {  this->halo_val=0.0; }
 #else
   int n=this->halo_val.size();
+#pragma omp single
   for(int i=0; i<n; i++){ halo_vals[i]=0.0; }
 #endif
 #pragma omp for schedule(OMP_SCHEDULE)
@@ -260,6 +261,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 {   this->halo_val = 0.0; }// serial halo_vals zero
 #else
   int n=this->halo_val.size();
+#pragma omp single
   for(int i=0; i<n; i++){ halo_vals[i]=0.0; }
 #endif
 #ifdef HALO_SUM_SER
