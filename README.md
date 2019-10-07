@@ -78,13 +78,14 @@ gmsh -refine -o "neper/cubic"$N"s1p1.msh2" "neper/cubic"$N".msh"
  * `-p <str>` Read partitioned `<str>_#.fmr` finite element model files in parallel. *Required.*
  * `-v <int>` Verbosity level [default: 1]; `-v2` is good.
  * `-c <uint>` Number of parallel compute threads.
- * `-d <int>` Choose a diagonal preconditioner:
-   * `-d0` for none,
-   * `-d1` for element row one-norm sum, or
-   * `-d3` for Jacobi [default].
+ * `-S <uint>` Number of load steps.
  * `-s <int>` Choose a solver:
    * `-s1` for conjugate gradient [default], or
    * `-s2` for nonlinear conjugate gradient [experimental].
+ * `-d <int>` Choose a diagonal preconditioner:
+   * `-d0` for none,
+   * `-d1` for Jacobi [default], or
+   * `-d2` for tangent Jacobi (nonlinear).
  * `-r <float>` Solution tolerance  [default: 0.0001].
  * `-i <int>` Maximum number of iterations.
 

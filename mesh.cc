@@ -286,6 +286,7 @@ int Mesh::Setup(){
     Mesh::part t;
     this->ReadPartFMR(t,pname.c_str(),false);
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=t;
+    Y->solv_cond = this->solv_cond;
     if(dots_mod>0){
       if((part_i%dots_mod)==0){ std::cout <<"."; fflush(stdout); } }
 #if VERB_MAX>10

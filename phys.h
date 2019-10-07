@@ -19,6 +19,8 @@ public:
   INT_DIM evar_d=0;// Inputs/element: user-defined elemental state vars
   INT_DIM gvar_d=0;// Inputs/gauss point: user-defined state vars
   //
+  int solv_cond=Solv::COND_JACO;
+  //
   FLOAT_PHYS part_sum1=0.0;
   //
   Phys::vals udof_magn={0.0,0.0,0.0,0.0};//1e-3,1e-3,1e-3,100.0};
