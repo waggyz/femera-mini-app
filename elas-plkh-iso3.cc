@@ -194,13 +194,14 @@ int ElastPlastKHIso3D::ElemJacobi( Elem* E,
 #else
   const int        Ns           = 6;
 #endif
+#if 1
+  const FLOAT_PHYS shear_modu   = this->mtrl_matc[2];
+  const FLOAT_PHYS bulk_mod3    = 3.0*this->mtrl_matc[1] + 2.0*shear_modu;
+#else
   const FLOAT_PHYS youn_modu    = this->mtrl_prop[0];
   const FLOAT_PHYS poiss_ratio  = this->mtrl_prop[1];
-  const FLOAT_PHYS bulk_mod3    = youn_modu / (1.0-2.0*poiss_ratio);
-#if 0
   const FLOAT_PHYS shear_modu   = 0.5*youn_modu/(1.0+poiss_ratio);
-#else
-  const FLOAT_PHYS shear_modu   = this->mtrl_matc[2];
+  const FLOAT_PHYS bulk_mod3    = youn_modu / (1.0-2.0*poiss_ratio);
 #endif
   const FLOAT_PHYS stress_yield = this->plas_prop[0];
   const FLOAT_PHYS hard_modu    = this->plas_prop[1];
