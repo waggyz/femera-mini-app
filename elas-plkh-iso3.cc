@@ -173,6 +173,7 @@ int ElastPlastKHIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* part_d ){
 }
 #endif
 #define COMPRESS_STATE
+#define PRECOND_TANGENT
 int ElastPlastKHIso3D::ElemJacobi( Elem* E,
   FLOAT_SOLV* part_d, const FLOAT_SOLV* part_u ){
   //printf("**** Preconditioner 2 ****\n");
@@ -327,7 +328,11 @@ int ElastPlastKHIso3D::ElemJacobi( Elem* E,
         for(int i=3;i<6;i++){ elas_mises += elas_devi_v[i]*elas_devi_v[i]*3.0; }
         }
         elas_mises = sqrt(elas_mises);
+#ifdef PRECOND_TANGENT
+        elas_part=0.0;
+#else
         elas_part = stress_yield / elas_mises;
+#endif
         // Secant modulus response: this stress plus elastic response at yield
         for(int i=0;i<6;i++){
           for(int j=0;j<6;j++){
@@ -342,15 +347,30 @@ int ElastPlastKHIso3D::ElemJacobi( Elem* E,
             Dpl[6* i+j ]+= lambda_eff;// + C[1]*elas_part;
           }
         }
-        elas_part=0.0;
       }//end if plastic -------------------------------------------------------
       const FLOAT_PHYS w = det * E->gaus_weig[ip];
+#ifdef PRECOND_TANGENT
+      if( elas_part > 0.0 ){// it's actually 1.0
+        for(uint i=0; i<Ne; i++){
+        for(uint k=0; k<6 ; k++){
+        for(uint j=0; j<6 ; j++){
+          elem_diag[i]+=( B[Ne* j+i] * D[6* j+k] * B[Ne* k+i] )*w;
+      } } }
+      }else{// elas_part==0.0
+        for(uint i=0; i<Ne; i++){
+        for(uint k=0; k<6 ; k++){
+        for(uint j=0; j<6 ; j++){
+          elem_diag[i]+=( B[Ne* j+i] * Dpl[6* j+k] * B[Ne* k+i] )*w;
+        } } }
+      }
+#else
       for(uint i=0; i<Ne; i++){
       for(uint k=0; k<6 ; k++){
       for(uint j=0; j<6 ; j++){
         elem_diag[i]+=( B[Ne* j+i] * ( elas_part*D[6* j+k] + Dpl[6* j+k] )
           * B[Ne* k+i] )*w;
       } } }
+#endif
     }//end intp loop
     for (uint i=0; i<Nc; i++){
       for(uint j=0; j<3; j++){
