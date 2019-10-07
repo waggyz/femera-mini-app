@@ -342,6 +342,7 @@ int ElastPlastKHIso3D::ElemJacobi( Elem* E,
             Dpl[6* i+j ]+= lambda_eff;// + C[1]*elas_part;
           }
         }
+        elas_part=0.0;
       }//end if plastic -------------------------------------------------------
       const FLOAT_PHYS w = det * E->gaus_weig[ip];
       for(uint i=0; i<Ne; i++){
