@@ -50,12 +50,12 @@ int NCG::BC0(Elem* E, Phys* Y ){// printf("*** NCG::BC0(E,Y) ***\n");
   for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
     this->part_d[Dn* n+uint(f)]=0.0;
     this->part_0[Dn* n+uint(f)]=0.0;
-    //this->part_b[Dn* n+uint(f)]=0.0;//FIXME apply to part_b?
+    this->part_b[Dn* n+uint(f)]=0.0;//FIXME apply to part_b?
   }
   for(auto t : E->bc0_nf   ){ std::tie(n,f)=t;
     this->part_d[Dn* n+uint(f)]=0.0;
     this->part_0[Dn* n+uint(f)]=0.0;
-    //this->part_b[Dn* n+uint(f)]=0.0;
+    this->part_b[Dn* n+uint(f)]=0.0;
     #if VERB_MAX>10
     printf("BC0: [%i]:0\n",E->bc0_nf[i]);
     #endif
@@ -70,7 +70,7 @@ int NCG::Setup( Elem* E, Phys* Y ){// printf("*** NCG::Setup(E,Y) ***\n");
     // printf("*** NCG::Init(E,Y)...cube_init ***\n");
     const INT_MESH Nn=E->node_n, Dm=E->mesh_d;
     const FLOAT_SOLV ci=this->cube_init;
-    FLOAT_SOLV u[3]={1.0,-0.3,-0.3};
+    FLOAT_SOLV u[3]={1.0,-0.3,-0.3};//FIXME Generalize for nu used.
     FLOAT_SOLV umax=0.0;
     for(int i=0; i<3; i++){
       if(std::abs(this->glob_bmax[i])>std::abs(umax)){
@@ -89,8 +89,13 @@ int NCG::Setup( Elem* E, Phys* Y ){// printf("*** NCG::Setup(E,Y) ***\n");
   }
   Y->tens_flop*=2;Y->tens_band*=2;Y->stif_flop*=2;Y->stif_band*=2;
   //FIXME 2 evals/iter, but only some have plasticity calcs...
-  this->data_f=0.0;
-  Y->ElemLinear( E,0,E->elem_n, this->part_f, this->part_u );
+  this->data_f=0.0;//FIXME Why is this zeroed here?
+#if 0
+  //FIXME Is this call needed here?
+  //Y->ElemLinear( E,0,E->elem_n, this->part_f, this->part_u );
+  Y->ElemNonlinear( E,0,E->elem_n,this->part_f,this->part_u,
+    this->part_u, true );
+#endif
 #endif
   return(0);
 }
@@ -112,6 +117,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   //FLOAT_SOLV glob_r2a = this->glob_res2, glob_to2 = this->glob_rto2;
   FLOAT_SOLV glob_r2a = 0.0, glob_to2 = this->glob_rto2;
   Phys::vals bcmax={0.0,0.0,0.0,0.0};
+  FLOAT_SOLV halo_vals[this->halo_val.size()];// Put this on the stack.
 #pragma omp parallel num_threads(comp_n)
 {// parallel init region
   long int my_scat_count=0, my_prec_count=0,//FIXME These times are messed up
@@ -136,8 +142,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     for(INT_MESH i=1; i<sysn; i++){ S->part_f[i]=0.0; }
     // Initialize state variables.
     Y->ElemNonlinear( E,0,E->elem_n,S->part_f,S->part_u,S->part_u, true );
-    if( this->next_scal > 0.0 ){
-      // Predict next solution
+    if( this->next_scal > 0.0 ){// Predict next solution
       //FIXME Better to use prev_u + 1/step_n * tangent modulus (only) response?
       //const INT_MESH sysn=S->udof_n;
 #ifdef HAS_SIMD
@@ -187,11 +192,6 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
       printf("\n"); }
 #endif
 }
-# if 0
-  if( true ){//FIXME make this an option
-#else
-  if( this->load_step==1 ){// prconditioner update check ----------------------
-#endif
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
@@ -202,27 +202,36 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
       S->glob_bmax[i] = this->glob_bmax[i];
     }
     //S->Init(E,Y);
+  }
+  // preconditioner update check ----------------------
+# if 1
+  if( this->solv_cond != Solv::COND_NONE ){//FIXME make this an option
+#else
+  if( (this->load_step==1) &(this->solv_cond != Solv::COND_NONE) ){
+#endif
+#pragma omp for schedule(OMP_SCHEDULE)
+  for(int part_i=part_0; part_i<part_o; part_i++){
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     for(uint i=0; i<S->udof_n; i++){ S->part_d[i]=0.0; }
     S->Precond( E,Y );
   }
   time_reset( my_prec_count, start );
+  //----------------------------- Sync part_d
+#if 0
 #pragma omp single
-{  this->halo_val=0.0; }//----------------------------- Sync part_d
+{  this->halo_val=0.0; }
+#else
+  int n=this->halo_val.size();
+  for(int i=0; i<n; i++){ halo_vals[i]=0.0; }
+#endif
 #pragma omp for schedule(OMP_SCHEDULE)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH d=uint(Y->node_d);
-    if(this->solv_cond == Solv::COND_NONE){
-      for(INT_MESH i=0; i<E->halo_node_n; i++){
-        for( uint j=0; j<d; j++){
-#pragma omp atomic write
-          this->halo_val[d*E->node_haid[i]+j] = S->part_d[d*i +j]; } }
-    }else{
-      for(INT_MESH i=0; i<E->halo_node_n; i++){
-        for( uint j=0; j<d; j++){
+    for(INT_MESH i=0; i<E->halo_node_n; i++){
+      for( uint j=0; j<d; j++){
 #pragma omp atomic update
-          this->halo_val[d*E->node_haid[i]+j]+= S->part_d[d*i +j]; } }
-    }
+        halo_vals[d*E->node_haid[i]+j]+= S->part_d[d*i +j]; } }
   }
   time_reset( my_gat1_count, start );
 #pragma omp for schedule(OMP_SCHEDULE)
@@ -233,7 +242,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 //#pragma omp atomic read
-        S->part_d[d*i +j] = this->halo_val[f+j]; }
+        S->part_d[d*i +j] = halo_vals[f+j]; }
     }
   }
   time_reset( my_scat_count, start );// part_d sync -----
@@ -244,11 +253,16 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     for(uint i=0;i<sysn;i++){ S->part_d[i] = FLOAT_SOLV(1.0) / S->part_d[i]; }
     S->Init( E,Y );// Zeros boundary conditions and sets RHS
   }
-  }// end prconditioner update check ------------------------------------------
+  }// end preconditioner update check ------------------------------------------
   time_reset( my_solv_count, start );//FIXME wtf?
   time_reset( my_gat0_count, start );//FIXME wtf?
+#if 0
 #pragma omp single
 {   this->halo_val = 0.0; }// serial halo_vals zero
+#else
+  int n=this->halo_val.size();
+  for(int i=0; i<n; i++){ halo_vals[i]=0.0; }
+#endif
 #ifdef HALO_SUM_SER
 #pragma omp single
 #else
@@ -265,7 +279,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic update
-        this->halo_val[f+j] += S->part_f[d*i +j]; }
+        halo_vals[f+j] += S->part_f[d*i +j]; }
     }
   }// End halo_vals
   time_reset( my_gat1_count, start );
@@ -277,7 +291,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 //#pragma omp atomic read
-        S->part_f[d*i +j] = this->halo_val[f+j]; }
+        S->part_f[d*i +j] = halo_vals[f+j]; }
     }
   time_reset( my_scat_count, start );// ----------------------- Done part_f sync
 #if 0
@@ -296,7 +310,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp simd
 #endif
     for(uint i=0; i<sysn; i++){
-      S->part_r[i] = S->part_b[i] - S->part_f[i];
+      S->part_r[i] = S->part_b[i] - S->part_0[i] * S->part_f[i];
       // Initial search (p) is preconditioned grad descent of (r)
       S->part_p[i] = S->part_r[i] * S->part_d[i];
     }
@@ -305,7 +319,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp simd reduction(+:glob_r2a)
 #endif
     for(uint i=sumi0; i<sysn; i++){
-      glob_r2a += S->part_r[i]*S->part_r[i]; }// * S->part_0[i]; }
+      glob_r2a += S->part_r[i] * S->part_r[i]; }// * S->part_0[i]; }
       //FIXED div out precond
 #if 0
     S->loca_res2=R2;
@@ -554,7 +568,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 #if 0
       S->part_f[i]*= S->part_0[i];// better to apply where used
 #endif
-      S->part_r[i] = S->part_0[i] *(S->part_b[i] - S->part_f[i]); }
+      S->part_r[i] = S->part_b[i] - S->part_0[i] * S->part_f[i]; }
 #ifdef HAS_PRAGMA_SIMD
 #pragma omp simd reduction(+:glob_sum3,glob_sum4,glob_sum5)
 #endif
