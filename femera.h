@@ -32,8 +32,8 @@
 #define ALIGN_SYS
 // align system vectors
 #define SYSALIGN_BYTE 64
-#define VECALIGN_BYTE 64
-#define VECALIGNED __attribute__((aligned(64)))
+#define VECALIGN_BYTE 32
+#define VECALIGNED __attribute__((aligned(32)))
 //
 // Integer return values
 #define SOLV_CNVG_PTOL 1// Preconditioned norm

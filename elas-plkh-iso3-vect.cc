@@ -128,7 +128,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #ifdef COMPRESS_STATE
       std::memcpy( &back_v[1], &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
 #else
-      std::memcpy( &back_v, &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
+      std::memcpy( &back_v[0], &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
 #endif
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
@@ -181,7 +181,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       //     so only elas_v hydro needs to be removed.
       {
       FLOAT_PHYS elas_hydr=0.0;
-      for(int i=0;i<Nv;i++){ elas_hydr+= elas_devi_v[i]*one_third; }
+      for(int i=0;i<Nw;i++){ elas_hydr+= elas_devi_v[i]*one_third; }
       for(int i=0;i<3;i++){ elas_devi_v[i]-= elas_hydr; }
       }
       FLOAT_PHYS stress_mises=0.0;
@@ -207,6 +207,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         for(int i=0 ;i<Nw;i++){ elas_mises += elas_devi_v[i]*elas_devi_v[i]*1.5; }
         for(int i=Nw;i<Nv;i++){ elas_mises += elas_devi_v[i]*elas_devi_v[i]*3.0; }
         }
+        // scalar ops ------------------------------
         elas_mises = sqrt(elas_mises);
         const FLOAT_PHYS elas_part = stress_yield / elas_mises;
         stress_mises = sqrt(stress_mises);
@@ -214,7 +215,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #if 0
         const FLOAT_PHYS delta_equiv = ( stress_mises - stress_yield )
           / ( 3.0*shear_modu + hard_modu );
-        // delta_equiv is always used as delta_equiv * hard_modu
+        // delta_equiv is only used as delta_equiv * hard_modu
 #endif
         const FLOAT_PHYS delta_hard = ( stress_mises - stress_yield )
           / ( 3.0*shear_modu + hard_modu ) * hard_modu;
@@ -223,7 +224,8 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         const FLOAT_PHYS hard_eff = shear_modu * hard_modu
           / ( shear_modu + hard_modu*one_third ) - 3.0*shear_eff;
         const FLOAT_PHYS lambda_eff = ( bulk_mod3 - 2.0*shear_eff )*one_third;
-        for(int i=0;i<Nv;i++){ plas_flow[i]*= inv_mises; }
+        // end scalar ops -------------------------
+        for(int i=0;i<Nv;i++){ plas_flow[i] *= inv_mises; }
         if( save_state ){// Update state variable back_v.
           for(int i=0; i<Nv; i++){//FIXME can be from i=1
             back_v[i] += plas_flow[i] * delta_hard; }
@@ -256,8 +258,10 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           d6=_mm256_set1_pd( 0.0 )   , d7=_mm256_load_pd( &D[28] ),
           d8=_mm256_set1_pd( 0.0 )   , d9=_mm256_load_pd( &D[36] ),
           d10=_mm256_set1_pd(0.0 )   , d11=_mm256_load_pd(&D[44] );
+        {
         const __m256d le={lambda_eff,lambda_eff,lambda_eff,0.0};
         d0+=le; d2+=le; d4+=le;
+        }
         {
         const __m256d he=_mm256_set1_pd( hard_eff );
         //FIXME Next one should be aligned load.
@@ -266,36 +270,36 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         const __m256d f0=_mm256_load_pd( &plas_flow[0] ) * he;
         const __m256d f1=_mm256_load_pd( &plas_flow[4] ) * he;
         __m256d frow;
-          frow=_mm256_set1_pd( plas_flow[0] );
-          d0 += f0 * frow; d1 += f1 * frow ;
-          frow=_mm256_set1_pd( plas_flow[1] );
-          d2 += f0 * frow; d3 += f1 * frow;
-          frow=_mm256_set1_pd( plas_flow[2] );
-          d4 += f0 * frow; d5 += f1 * frow;
-          frow=_mm256_set1_pd( plas_flow[4] );
-          d6 += f0 * frow; d7 += f1 * frow;
-          frow=_mm256_set1_pd( plas_flow[5] );
-          d8 += f0 * frow; d9 += f1 * frow;
-          frow=_mm256_set1_pd( plas_flow[6] );
-          d10 += f0 * frow; d11 += f1 * frow;
+        frow=_mm256_set1_pd( plas_flow[0] );
+        d0 += f0 * frow; d1 += f1 * frow ;
+        frow=_mm256_set1_pd( plas_flow[1] );
+        d2 += f0 * frow; d3 += f1 * frow;
+        frow=_mm256_set1_pd( plas_flow[2] );
+        d4 += f0 * frow; d5 += f1 * frow;
+        frow=_mm256_set1_pd( plas_flow[4] );
+        d6 += f0 * frow; d7 += f1 * frow;
+        frow=_mm256_set1_pd( plas_flow[5] );
+        d8 += f0 * frow; d9 += f1 * frow;
+        frow=_mm256_set1_pd( plas_flow[6] );
+        d10 += f0 * frow; d11 += f1 * frow;
         }
-      _mm256_store_pd( &D[ 0], d0 ); _mm256_store_pd( &D[ 4], d1 );
-      _mm256_store_pd( &D[ 8], d2 ); _mm256_store_pd( &D[12], d3 );
-      _mm256_store_pd( &D[16], d4 ); _mm256_store_pd( &D[20], d5 );
-      _mm256_store_pd( &D[24], d6 ); _mm256_store_pd( &D[28], d7 );
-      _mm256_store_pd( &D[32], d8 ); _mm256_store_pd( &D[36], d9 );
-      _mm256_store_pd( &D[40], d10); _mm256_store_pd( &D[44], d11);
+        _mm256_store_pd( &D[ 0], d0 ); _mm256_store_pd( &D[ 4], d1 );
+        _mm256_store_pd( &D[ 8], d2 ); _mm256_store_pd( &D[12], d3 );
+        _mm256_store_pd( &D[16], d4 ); _mm256_store_pd( &D[20], d5 );
+        _mm256_store_pd( &D[24], d6 ); _mm256_store_pd( &D[28], d7 );
+        _mm256_store_pd( &D[32], d8 ); _mm256_store_pd( &D[36], d9 );
+        _mm256_store_pd( &D[40], d10); _mm256_store_pd( &D[44], d11);
 #if VERB_MAX>11
 #pragma omp critical(print)
 {
-      //FLOAT_PHYS VECALIGNED dd[48];
-      //for(int i=0;i<12;i++){ _mm256_store_pd( &dd[i*4], d[i] ); }
-      printf("el:%u,gp:%i d:     \n",ie,ip);
-      for(int i=0; i<(6*Nv); i++){
-        //if(!(i%6)&(i>0)){ printf("                 "); }
-        printf(" %+9.2e",D[i] );
-        if((i%Nv)==(Nv-1)){ printf("\n"); }
-      }
+        //FLOAT_PHYS VECALIGNED dd[48];
+        //for(int i=0;i<12;i++){ _mm256_store_pd( &dd[i*4], d[i] ); }
+        printf("el:%u,gp:%i d:     \n",ie,ip);
+        for(int i=0; i<(6*Nv); i++){
+          //if(!(i%6)&(i>0)){ printf("                 "); }
+          printf(" %+9.2e",D[i] );
+          if((i%Nv)==(Nv-1)){ printf("\n"); }
+        }
 }
 #endif
         }
@@ -328,28 +332,28 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #if VERB_MAX>10
 #pragma omp critical(print)
 {
-      if( (ie==0) & (ip==0) ){
-      printf("el:%u,gp:%i back_v: ",ie,ip);
+        if( (ie==0) & (ip==0) ){
+        printf("el:%u,gp:%i back_v: ",ie,ip);
 #ifdef COMPRESS_STATE
-      printf("%+9.2e ", 0.0 -this->elgp_vars[gvar_d*(intp_n*ie+ip) +0 ]
-        -this->elgp_vars[gvar_d*(intp_n*ie+ip) +1 ]
-      );
+        printf("%+9.2e ", 0.0 -this->elgp_vars[gvar_d*(intp_n*ie+ip) +0 ]
+          -this->elgp_vars[gvar_d*(intp_n*ie+ip) +1 ]
+        );
 #endif
-      for(int i=0; i<gvar_d; i++){
-        printf("%+9.2e ", this->elgp_vars[gvar_d*(intp_n*ie+ip) +i ] ); }
-      printf("\n");
-      }
+        for(int i=0; i<gvar_d; i++){
+          printf("%+9.2e ", this->elgp_vars[gvar_d*(intp_n*ie+ip) +i ] ); }
+        printf("\n");
+        }
 }
 #endif
 #if VERB_MAX>11
 #pragma omp critical(print)
 {
-      printf("el:%u,gp:%i D:     \n",ie,ip);
-      for(int i=0; i<(6*Nv); i++){
-        //if(!(i%6)&(i>0)){ printf("                 "); }
-        printf(" %+9.2e", D[i] );
-        if((i%Nv)==(Nv-1)){ printf("\n"); }
-      }
+        printf("el:%u,gp:%i D:     \n",ie,ip);
+        for(int i=0; i<(6*Nv); i++){
+          //if(!(i%6)&(i>0)){ printf("                 "); }
+          printf(" %+9.2e", D[i] );
+          if((i%Nv)==(Nv-1)){ printf("\n"); }
+        }
 }
 #endif
         // Calculate conjugate stress from conjugate strain.
@@ -369,8 +373,8 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         for(int i=0; i<6; i++){ stress_p[i]=0.0;
           for(int j=0; j<Nv; j++){
             stress_p[i] += D[Nv* i+j ] * strain_p[ j ]; }
+          stress_p[i] *= dw;
         }
-        for(int i=0; i<6; i++){ stress_p[i]*= dw; }
         // Compute the linear-elastic conjugate response, scaled by elas_part.
         compute_iso_s( &S[0], &P[0],C[2],c0,c1,c2, dw * elas_part );
         // Sum them.
