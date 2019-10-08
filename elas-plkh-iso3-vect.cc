@@ -8,6 +8,7 @@
 // Fetch next u within G,H loop nest
 #undef FETCH_U_EARLY
 #define COMPRESS_STATE
+#undef HAS_AVX
 //NOTE Prefetch state only works when compressed.
 //
 int ElastPlastKHIso3D::Setup( Elem* E ){
@@ -49,6 +50,13 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   const int Nc = E->elem_conn_n;// Number of nodes/element
   const int Ne = Nf*Nc;
   const int Nt = 4*Nc;
+#ifdef HAS_AVX
+  const int Nv = 8;
+  const int Nw = 4;
+#else
+  const int Nv = 6;
+  const int Nw = 3;
+#endif
   const int intp_n = int(E->gaus_n);
   const INT_ORDER elem_p =E->elem_p;
   //
@@ -80,16 +88,11 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
   FLOAT_PHYS VECALIGNED wgt[intp_n];
   FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
-#ifdef COMPRESS_STATE
-  FLOAT_PHYS VECALIGNED back_v[6];
-#else
-  FLOAT_PHYS VECALIGNED back_v[8];// back_v padded to 8 doubles?
-#endif
+  FLOAT_PHYS VECALIGNED back_v[Nv];
   //
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
   std::copy( &this->mtrl_matc[0], &this->mtrl_matc[mtrl_matc.size()], matc );
-  //std::copy( &this->elgp_vars[0], 6, back_v );
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
   const FLOAT_SOLV* RESTRICT C     = &matc[0];
@@ -157,8 +160,13 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       } }
       compute_iso_s( &S[0], &H[0],C[2],c0,c1,c2, 1.0 );// Linear stress response
       //NOTE Only the deviatoric part of elas_v is used.
+#ifdef HAS_AVX
+      FLOAT_PHYS VECALIGNED elas_devi_v[8]={
+        S[0], S[5], S[10],0.0, S[1], S[6], S[2],0.0 };
+#else
       FLOAT_PHYS VECALIGNED elas_devi_v[6]={
         S[0], S[5], S[10], S[1], S[6], S[2] };// sxx, syy, szz,  sxy, syz, sxz
+#endif
 #if VERB_MAX>10
       printf( "Stress Voigt Vector (Elem: %i):\n", ie );
       for(int j=0;j<6;j++){
@@ -173,18 +181,23 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       //     so only elas_v hydro needs to be removed.
       {
       FLOAT_PHYS elas_hydr=0.0;
-      for(int i=0;i<3;i++){ elas_hydr+= elas_devi_v[i]*one_third; }
+      for(int i=0;i<Nv;i++){ elas_hydr+= elas_devi_v[i]*one_third; }
       for(int i=0;i<3;i++){ elas_devi_v[i]-= elas_hydr; }
       }
       FLOAT_PHYS stress_mises=0.0;
-      FLOAT_PHYS VECALIGNED plas_flow[6];
+      FLOAT_PHYS VECALIGNED plas_flow[Nv];
 #ifdef COMPRESS_STATE
       back_v[0] = -back_v[1]-back_v[2];
+#ifdef HAS_AVX
+      back_v[7]=0.0;
+      back_v[6]=back_v[5]; back_v[5]=back_v[4]; back_v[4]=back_v[3];
+      back_v[3]=0.0;
+#endif
 #endif
       {
-      for(int i=0;i<6;i++){ plas_flow[i] = elas_devi_v[i] - back_v[i]; }
-      for(int i=0;i<3;i++){ stress_mises+= plas_flow[i]*plas_flow[i]*1.5; }
-      for(int i=3;i<6;i++){ stress_mises+= plas_flow[i]*plas_flow[i]*3.0; }
+      for(int i=0 ;i<Nv;i++){ plas_flow[i] = elas_devi_v[i] - back_v[i]; }
+      for(int i=0 ;i<Nw;i++){ stress_mises+= plas_flow[i]*plas_flow[i]*1.5; }
+      for(int i=Nw;i<Nv;i++){ stress_mises+= plas_flow[i]*plas_flow[i]*3.0; }
       }
       //for(int i=0;i<6;i++){ printf("%+9.2e ", elas_v[i]); }
       //printf("mises: %+9.2e\n",sqrt(stress_mises));
@@ -203,10 +216,13 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         const FLOAT_PHYS hard_eff = shear_modu * hard_modu
           / (shear_modu + hard_modu*one_third) - 3.0*shear_eff;
         const FLOAT_PHYS lambda_eff = (bulk_mod3 - 2.0*shear_eff)*one_third;
-        for(int i=0;i<6;i++){ plas_flow[i]*= inv_mises; }
+        for(int i=0;i<Nv;i++){ plas_flow[i]*= inv_mises; }
         if( save_state ){// Update state variable back_v.
-          for(int i=0; i<6; i++){//FIXME can be from i=1
+          for(int i=0; i<Nv; i++){//FIXME can be from i=1
             back_v[i] += plas_flow[i] * delta_hard; }
+#ifdef HAS_AVX
+          back_v[3]=back_v[4]; back_v[4]=back_v[5]; back_v[5]=back_v[6];
+#endif
 #ifdef COMPRESS_STATE
           std::memcpy(&state[Ns*(intp_n*ie+ip)],&back_v[1],sizeof(FLOAT_SOLV)*Ns);
 #else
@@ -215,25 +231,35 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         }
         FLOAT_PHYS elas_mises=0.0;
         {
-        for(int i=0;i<3;i++){ elas_mises += elas_devi_v[i]*elas_devi_v[i]*1.5; }
-        for(int i=3;i<6;i++){ elas_mises += elas_devi_v[i]*elas_devi_v[i]*3.0; }
+        for(int i=0 ;i<Nw;i++){ elas_mises += elas_devi_v[i]*elas_devi_v[i]*1.5; }
+        for(int i=Nw;i<Nv;i++){ elas_mises += elas_devi_v[i]*elas_devi_v[i]*3.0; }
         }
         elas_mises = sqrt(elas_mises);
         const FLOAT_PHYS elas_part = stress_yield / elas_mises;
         // Add elas_part * elastic D-matrix?
         // Secant modulus response: this stress plus elastic response at yield
-        FLOAT_PHYS VECALIGNED D[36];
-        for(int i=0;i<6;i++){
-          for(int j=0;j<6;j++){
-            D[6* i+j ] = hard_eff * plas_flow[i] * plas_flow[j];
+        FLOAT_PHYS VECALIGNED D[6*Nv];
+        for(int i=0;i<3;i++){
+          for(int j=0;j<Nw;j++){// top left side
+            D[Nv* i+j ] = hard_eff * plas_flow[i] * plas_flow[j];
           }
-          D[6* i+i ]+= shear_eff;
+          for(int j=Nw;j<Nv;j++){// top right side
+            D[Nv* i+j ] = hard_eff * plas_flow[i] * plas_flow[j];
+          }
         }
         for(int i=0;i<3;i++){
-          D[6* i+i ]+= shear_eff;// + (C[0]-C[1])*elas_part;
-          //D[6* (i+3)+i+3 ]+= C[2]*elas_part;
-          for(int j=0;j<3;j++){
-            D[6* i+j ]+= lambda_eff;// + C[1]*elas_part;
+          for(int j=0;j<Nw;j++){// bottom left side
+            D[Nv* i+j +3*Nv] = hard_eff * plas_flow[i+Nw] * plas_flow[j];
+          }
+          for(int j=Nw;j<Nv;j++){// bottom right side
+            D[Nv* i+j +3*Nv] = hard_eff * plas_flow[i+Nw] * plas_flow[j];
+          }
+        }
+        for(int i=0 ;i<3;i++){ D[Nv* i+i   ]+= shear_eff*2.0; }
+        for(int i=0 ;i<3;i++){ D[3*Nv+Nw + (Nv+1)*i]+= shear_eff; }
+        for(int i=0 ;i<3;i++){
+          for(int j=0 ;j<3;j++){
+            D[Nv* i+j ]+= lambda_eff;
           }
         }
         //===================================================== end UMAT
@@ -266,11 +292,16 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #endif
         // Calculate conjugate stress from conjugate strain.
         // Compute the plastic conjugate response.
+#ifdef HAS_AVX
+        const FLOAT_PHYS VECALIGNED strain_p[8]={
+          P[0], P[5], P[10],0.0, P[1]+P[4], P[6]+P[9], P[2]+P[8],0.0 };
+#else
         const FLOAT_PHYS VECALIGNED strain_p[6]={
           P[0], P[5], P[10], P[1]+P[4], P[6]+P[9], P[2]+P[8] };
-        FLOAT_PHYS VECALIGNED stress_p[6];
-        for(int i=0; i<6; i++){ stress_p[i] =0.0;
-          for(int j=0; j<6; j++){ stress_p[i] += D[6* i+j ] * strain_p[ j ]; }
+#endif
+        FLOAT_PHYS VECALIGNED stress_p[Nv];
+        for(int i=0; i<6; i++){ stress_p[i] =0.0;//FIXME Transpose D
+          for(int j=0; j<Nv; j++){ stress_p[i] += D[Nv* i+j ] * strain_p[ j ]; }
           stress_p[i]*= dw;
         }
         // Compute the linear-elastic conjugate response, scaled by elas_part.
