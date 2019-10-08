@@ -244,41 +244,36 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         for(int i=0; i<(6*Nv); i++){ D[i]=0.0; }
         D[ 0]=2.0*shear_eff; D[ 9]=2.0*shear_eff; D[18]=2.0*shear_eff;
         D[28]=    shear_eff; D[37]=    shear_eff; D[46]=    shear_eff;
-        //__m256d d[12];
         __m256d
-        d0=_mm256_load_pd( &D[ 0] ), d1=_mm256_set1_pd( 0.0 ),
-        d2=_mm256_load_pd( &D[ 8] ), d3=_mm256_set1_pd( 0.0 ),
-        d4=_mm256_load_pd( &D[16] ), d5=_mm256_set1_pd( 0.0 ),
-        d6=_mm256_set1_pd( 0.0 )   , d7=_mm256_load_pd( &D[28] ),
-        d8=_mm256_set1_pd( 0.0 )   , d9=_mm256_load_pd( &D[36] ),
-        d10=_mm256_set1_pd(0.0 )   , d11=_mm256_load_pd(&D[44] );
+          d0=_mm256_load_pd( &D[ 0] ), d1=_mm256_set1_pd( 0.0 ),
+          d2=_mm256_load_pd( &D[ 8] ), d3=_mm256_set1_pd( 0.0 ),
+          d4=_mm256_load_pd( &D[16] ), d5=_mm256_set1_pd( 0.0 ),
+          d6=_mm256_set1_pd( 0.0 )   , d7=_mm256_load_pd( &D[28] ),
+          d8=_mm256_set1_pd( 0.0 )   , d9=_mm256_load_pd( &D[36] ),
+          d10=_mm256_set1_pd(0.0 )   , d11=_mm256_load_pd(&D[44] );
         const __m256d l={lambda_eff,lambda_eff,lambda_eff,0.0};
         d0+=l; d2+=l; d4+=l;
-        const __m256d h=_mm256_set1_pd( hard_eff );
+        {
+        const __m256d he=_mm256_set1_pd( hard_eff );
         //FIXME Next one should be aligned load.
         //const __m256d f[2]={plas_flow[0],plas_flow[1],plas_flow[2],plas_flow[3],
         //  plas_flow[4],plas_flow[5],plas_flow[6],plas_flow[7] };
-        const __m256d f0=_mm256_load_pd( &plas_flow[0] );
-        const __m256d f1=_mm256_load_pd( &plas_flow[4] );
-        //for(int i=0; i<3; i++){// First three rows
+        const __m256d f0=_mm256_load_pd( &plas_flow[0] ) * he;
+        const __m256d f1=_mm256_load_pd( &plas_flow[4] ) * he;
         __m256d frow;
           frow=_mm256_set1_pd( plas_flow[0] );
-          d0 += f0 * frow * h; d1 += f1 * frow * h;
+          d0 += f0 * frow; d1 += f1 * frow ;
           frow=_mm256_set1_pd( plas_flow[1] );
-          d2 += f0 * frow * h; d3 += f1 * frow * h;
+          d2 += f0 * frow; d3 += f1 * frow;
           frow=_mm256_set1_pd( plas_flow[2] );
-          d4 += f0 * frow * h; d5 += f1 * frow * h;
-        //}
-        //for(int i=0; i<3; i++){// Second three rows
-         // const __m256d frow=_mm256_set1_pd( plas_flow[i+4] );
+          d4 += f0 * frow; d5 += f1 * frow;
           frow=_mm256_set1_pd( plas_flow[4] );
-          d6 += f0 * frow * h; d7 += f1 * frow * h;
+          d6 += f0 * frow; d7 += f1 * frow;
           frow=_mm256_set1_pd( plas_flow[5] );
-          d8 += f0 * frow * h; d9 += f1 * frow * h;
+          d8 += f0 * frow; d9 += f1 * frow;
           frow=_mm256_set1_pd( plas_flow[6] );
-          d10 += f0 * frow * h; d11 += f1 * frow * h;
-        //}
-      //for(int i=0;i<12;i++){ _mm256_store_pd( &D[i*4], d[i] ); }
+          d10 += f0 * frow; d11 += f1 * frow;
+        }
       _mm256_store_pd( &D[ 0], d0 ); _mm256_store_pd( &D[ 4], d1 );
       _mm256_store_pd( &D[ 8], d2 ); _mm256_store_pd( &D[12], d3 );
       _mm256_store_pd( &D[16], d4 ); _mm256_store_pd( &D[20], d5 );
