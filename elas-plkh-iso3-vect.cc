@@ -292,7 +292,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #endif
         // Calculate conjugate stress from conjugate strain.
         // Compute the plastic conjugate response.
-#if 0
+#ifdef HAS_AVX
         const FLOAT_PHYS VECALIGNED strain_p[8]={
           P[0], P[5], P[10],0.0, P[1]+P[4], P[6]+P[9], P[2]+P[8],0.0 };
 #else
@@ -306,13 +306,13 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #endif
         for(int i=0; i<6; i++){// stress_p[i] =0.0;//FIXME Transpose D
           for(int j=0; j<Nv; j++){
-            stress_p[j] += D[Nv* i+j ] * strain_p[ i ] *dw ; }
+            stress_p[i] += D[Nv* i+j ] * strain_p[ j ] *dw ; }
         }
         //for(int i=0; i<Nv; i++){ stress_p[i]*= dw; }
         // Compute the linear-elastic conjugate response, scaled by elas_part.
         compute_iso_s( &S[0], &P[0],C[2],c0,c1,c2, dw * elas_part );
         // Sum them.
-#ifdef HAS_AVX
+#if 0
         S[0]+=stress_p[0]; S[1]+=stress_p[4]; S[2]+=stress_p[6];// S[3]=stress_p[3];
         S[4]+=stress_p[4]; S[5]+=stress_p[1]; S[6]+=stress_p[5];// S[7]=stress_p[5];
         S[8]+=stress_p[6]; S[9]+=stress_p[5]; S[10]+=stress_p[2];// S[11]=0.0;
