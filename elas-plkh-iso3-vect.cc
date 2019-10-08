@@ -239,6 +239,47 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         // Add elas_part * elastic D-matrix?
         // Secant modulus response: this stress plus elastic response at yield
         FLOAT_PHYS VECALIGNED D[6*Nv];
+#ifdef HAS_AVX
+        {
+        const __m256d l={lambda_eff,lambda_eff,lambda_eff,0.0};
+        const __m256d f[2]={plas_flow[0],plas_flow[1],plas_flow[2],plas_flow[3],
+          plas_flow[4],plas_flow[5],plas_flow[6],plas_flow[7] };
+        __m256d d[12]={
+          shear_eff*2.0,0.0,0.0,  0.0,  0.0,0.0,0.0,  0.0,
+          0.0,shear_eff*2.0,0.0,  0.0,  0.0,0.0,0.0,  0.0,
+          0.0,0.0,shear_eff*2.0,  0.0,  0.0,0.0,0.0,  0.0,
+          0.0,0.0,0.0,  0.0,  shear_eff,0.0,0.0,  0.0,
+          0.0,0.0,0.0,  0.0,  0.0,shear_eff,0.0,  0.0,
+          0.0,0.0,0.0,  0.0,  0.0,0.0,shear_eff,  0.0
+        };
+        d[0]+=l; d[2]+=l; d[4]+=l;
+        const __m256d h=_mm256_set1_pd(hard_eff);
+        for(int i=0; i<3; i++){// First three rows
+          const __m256d frow=_mm256_set1_pd(plas_flow[i]);
+          d[2*i  ] += f[0] * frow * h;
+          d[2*i+1] += f[1] * frow * h;
+        }
+        for(int i=0; i<3; i++){// Second three rows
+          const __m256d frow=_mm256_set1_pd(plas_flow[i+4]);
+          d[2*i+6] += f[0] * frow * h;
+          d[2*i+7] += f[1] * frow * h;
+        }
+      for(int i=0;i<12;i++){ _mm256_store_pd( &D[i*4], d[i] ); }
+#if VERB_MAX>11
+#pragma omp critical(print)
+{
+      FLOAT_PHYS dd[48];
+      for(int i=0;i<12;i++){ _mm256_store_pd( &dd[i*4], d[i] ); }
+      printf("el:%u,gp:%i d:     \n",ie,ip);
+      for(int i=0; i<(6*Nv); i++){
+        //if(!(i%6)&(i>0)){ printf("                 "); }
+        printf(" %+9.2e",dd[i] );
+        if((i%Nv)==(Nv-1)){ printf("\n"); }
+      }
+}
+#endif
+        }
+#else
         for(int i=0;i<3;i++){
           for(int j=0;j<Nw;j++){// top left side
             D[Nv* i+j ] = hard_eff * plas_flow[i] * plas_flow[j];
@@ -262,6 +303,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
             D[Nv* i+j ]+= lambda_eff;
           }
         }
+#endif
         //===================================================== end UMAT
 #if VERB_MAX>10
 #pragma omp critical(print)
@@ -279,7 +321,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       }
 }
 #endif
-#if VERB_MAX>10
+#if VERB_MAX>11
 #pragma omp critical(print)
 {
       printf("el:%u,gp:%i D:     \n",ie,ip);
@@ -304,7 +346,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #else
         FLOAT_PHYS VECALIGNED stress_p[Nv]={0.0,0.0,0.0, 0.0,0.0,0.0};
 #endif
-        for(int i=0; i<6; i++){// stress_p[i] =0.0;//FIXME Transpose D
+        for(int i=0; i<6; i++){
           for(int j=0; j<Nv; j++){
             stress_p[i] += D[Nv* i+j ] * strain_p[ j ] *dw ; }
         }
