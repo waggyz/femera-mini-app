@@ -227,18 +227,18 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         if( save_state ){// Update state variable back_v.
           for(int i=0; i<Nv; i++){//FIXME can be from i=1
             back_v[i] += plas_flow[i] * delta_hard; }
-          FLOAT_PHYS back_t[6];
+          //FLOAT_PHYS back_t[6];
 #ifdef TEST_AVX
-          //back_v[3]=back_v[4]; back_v[4]=back_v[5]; back_v[5]=back_v[6];
-          back_t[0]=back_v[0]; back_t[1]=back_v[1]; back_t[2]=back_v[2];
-          back_t[3]=back_v[4]; back_t[4]=back_v[5]; back_t[5]=back_v[6];
-#else
-          for(int i=0; i<6; i++){ back_t[i]=back_v[i]; }
-#endif
+          back_v[3]=back_v[4]; back_v[4]=back_v[5]; back_v[5]=back_v[6];
+          //back_t[0]=back_v[0]; back_t[1]=back_v[1]; back_t[2]=back_v[2];
+          //back_t[3]=back_v[4]; back_t[4]=back_v[5]; back_t[5]=back_v[6];
+//#else
+//          for(int i=0; i<6; i++){ back_t[i]=back_v[i]; }
+//#endif
 #ifdef COMPRESS_STATE
-          std::memcpy(&state[Ns*(intp_n*ie+ip)],&back_t[1],sizeof(FLOAT_SOLV)*Ns);
+          std::memcpy(&state[Ns*(intp_n*ie+ip)],&back_v[1],sizeof(FLOAT_SOLV)*Ns);
 #else
-          std::memcpy(&state[Ns*(intp_n*ie+ip)],&back_t,sizeof(FLOAT_SOLV)*Ns);
+          std::memcpy(&state[Ns*(intp_n*ie+ip)],&back_v[0],sizeof(FLOAT_SOLV)*Ns);
 #endif
         }
         // Add elas_part * elastic D-matrix?
