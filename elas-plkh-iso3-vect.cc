@@ -453,8 +453,8 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
       //====================================================== UMAT calc
         const FLOAT_PHYS one_third = 0.333333333333333;
       //NOTE back_v, elas_devi_v, and plas_flow are deviatoric (trace zero),
-      // with only 5 independent terms.
-      //NOTE back_v is only deviatoric,
+      //     with only 5 independent terms.
+      //NOTE back_v is incompressive (deviatoric),
       //     so only elas_v hydro needs to be removed.
       {
       FLOAT_PHYS elas_hydr=0.0;
@@ -497,24 +497,24 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
         const FLOAT_PHYS hard_eff = shear_modu * hard_modu
           / ( shear_modu + hard_modu*one_third ) - 3.0*shear_eff;
         const FLOAT_PHYS lambda_eff = ( bulk_mod3 - 2.0*shear_eff )*one_third;
-        // end scalar ops -------------------
+        // end scalar ops -------------------// 20 scalar FLOP
         for(int i=0;i<6;i++){ plas_flow[i]*= inv_mises; }
         // Add elas_part * elastic D-matrix?
         // Secant modulus response: this stress plus elastic response at yield
         FLOAT_PHYS VECALIGNED D[36];
         for(int i=0;i<6;i++){
           for(int j=0;j<6;j++){
-            D[6* i+j ] = hard_eff * plas_flow[i] * plas_flow[j];
+            D[6* i+j ] = hard_eff * plas_flow[i] * plas_flow[j];// 72 FLOP
           }
-          D[6* i+i ]+= shear_eff;
+          D[6* i+i ]+= shear_eff;// 6 FLOP
         }
         for(int i=0;i<3;i++){
-          D[6* i+i ]+= shear_eff;// + (C[0]-C[1])*elas_part;
+          D[6* i+i ]+= shear_eff;// + (C[0]-C[1])*elas_part;// 3 FLOP
           //D[6* (i+3)+i+3 ]+= C[2]*elas_part;
           for(int j=0;j<3;j++){
-            D[6* i+j ]+= lambda_eff;// + C[1]*elas_part;
+            D[6* i+j ]+= lambda_eff;// + C[1]*elas_part; // 9 FLOP
           }
-        }
+        }// TOTAL: 90 scalar FLOP
         //===================================================== end UMAT
 #if VERB_MAX>10
 #pragma omp critical(print)
