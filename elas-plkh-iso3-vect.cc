@@ -202,6 +202,13 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       //for(int i=0;i<6;i++){ printf("%+9.2e ", elas_v[i]); }
       //printf("mises: %+9.2e\n",sqrt(stress_mises));
       if( stress_mises > yield_tol2 ){
+        FLOAT_PHYS elas_mises=0.0;
+        {
+        for(int i=0 ;i<Nw;i++){ elas_mises += elas_devi_v[i]*elas_devi_v[i]*1.5; }
+        for(int i=Nw;i<Nv;i++){ elas_mises += elas_devi_v[i]*elas_devi_v[i]*3.0; }
+        }
+        elas_mises = sqrt(elas_mises);
+        const FLOAT_PHYS elas_part = stress_yield / elas_mises;
         stress_mises = sqrt(stress_mises);
         const FLOAT_PHYS inv_mises = 1.0/stress_mises;
 #if 0
@@ -229,13 +236,6 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           std::memcpy(&state[Ns*(intp_n*ie+ip)],&back_v,sizeof(FLOAT_SOLV)*Ns);
 #endif
         }
-        FLOAT_PHYS elas_mises=0.0;
-        {
-        for(int i=0 ;i<Nw;i++){ elas_mises += elas_devi_v[i]*elas_devi_v[i]*1.5; }
-        for(int i=Nw;i<Nv;i++){ elas_mises += elas_devi_v[i]*elas_devi_v[i]*3.0; }
-        }
-        elas_mises = sqrt(elas_mises);
-        const FLOAT_PHYS elas_part = stress_yield / elas_mises;
         // Add elas_part * elastic D-matrix?
         // Secant modulus response: this stress plus elastic response at yield
         FLOAT_PHYS VECALIGNED D[6*Nv];
@@ -251,8 +251,8 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           d6=_mm256_set1_pd( 0.0 )   , d7=_mm256_load_pd( &D[28] ),
           d8=_mm256_set1_pd( 0.0 )   , d9=_mm256_load_pd( &D[36] ),
           d10=_mm256_set1_pd(0.0 )   , d11=_mm256_load_pd(&D[44] );
-        const __m256d l={lambda_eff,lambda_eff,lambda_eff,0.0};
-        d0+=l; d2+=l; d4+=l;
+        const __m256d le={lambda_eff,lambda_eff,lambda_eff,0.0};
+        d0+=le; d2+=le; d4+=le;
         {
         const __m256d he=_mm256_set1_pd( hard_eff );
         //FIXME Next one should be aligned load.
@@ -283,12 +283,12 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #if VERB_MAX>11
 #pragma omp critical(print)
 {
-      FLOAT_PHYS VECALIGNED dd[48];
-      for(int i=0;i<12;i++){ _mm256_store_pd( &dd[i*4], d[i] ); }
+      //FLOAT_PHYS VECALIGNED dd[48];
+      //for(int i=0;i<12;i++){ _mm256_store_pd( &dd[i*4], d[i] ); }
       printf("el:%u,gp:%i d:     \n",ie,ip);
       for(int i=0; i<(6*Nv); i++){
         //if(!(i%6)&(i>0)){ printf("                 "); }
-        printf(" %+9.2e",dd[i] );
+        printf(" %+9.2e",D[i] );
         if((i%Nv)==(Nv-1)){ printf("\n"); }
       }
 }
@@ -457,7 +457,7 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
   FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
   FLOAT_PHYS VECALIGNED wgt[intp_n];
   FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
-#ifdef COMPRESS_STATE
+#if 1
   FLOAT_PHYS VECALIGNED back_v[6];
 #else
   FLOAT_PHYS VECALIGNED back_v[8];// back_v padded to 8 doubles?
