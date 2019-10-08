@@ -234,7 +234,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           //back_t[3]=back_v[4]; back_t[4]=back_v[5]; back_t[5]=back_v[6];
 //#else
 //          for(int i=0; i<6; i++){ back_t[i]=back_v[i]; }
-//#endif
+#endif
 #ifdef COMPRESS_STATE
           std::memcpy(&state[Ns*(intp_n*ie+ip)],&back_v[1],sizeof(FLOAT_SOLV)*Ns);
 #else
