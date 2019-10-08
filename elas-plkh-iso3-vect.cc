@@ -241,9 +241,6 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         FLOAT_PHYS VECALIGNED D[6*Nv];
 #ifdef HAS_AVX
         {
-        const __m256d l={lambda_eff,lambda_eff,lambda_eff,0.0};
-        const __m256d f[2]={plas_flow[0],plas_flow[1],plas_flow[2],plas_flow[3],
-          plas_flow[4],plas_flow[5],plas_flow[6],plas_flow[7] };
         __m256d d[12]={
           shear_eff*2.0,0.0,0.0,  0.0,  0.0,0.0,0.0,  0.0,
           0.0,shear_eff*2.0,0.0,  0.0,  0.0,0.0,0.0,  0.0,
@@ -252,17 +249,23 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           0.0,0.0,0.0,  0.0,  0.0,shear_eff,0.0,  0.0,
           0.0,0.0,0.0,  0.0,  0.0,0.0,shear_eff,  0.0
         };
+        const __m256d l={lambda_eff,lambda_eff,lambda_eff,0.0};
         d[0]+=l; d[2]+=l; d[4]+=l;
-        const __m256d h=_mm256_set1_pd(hard_eff);
+        const __m256d h=_mm256_set1_pd( hard_eff );
+        //FIXME Next one should be aligned load.
+        //const __m256d f[2]={plas_flow[0],plas_flow[1],plas_flow[2],plas_flow[3],
+        //  plas_flow[4],plas_flow[5],plas_flow[6],plas_flow[7] };
+        const __m256d f0=_mm256_load_pd(&plas_flow[0]);;
+        const __m256d f1=_mm256_load_pd(&plas_flow[4]);
         for(int i=0; i<3; i++){// First three rows
-          const __m256d frow=_mm256_set1_pd(plas_flow[i]);
-          d[2*i  ] += f[0] * frow * h;
-          d[2*i+1] += f[1] * frow * h;
+          const __m256d frow=_mm256_set1_pd( plas_flow[i] );
+          d[2*i  ] += f0 * frow * h;
+          d[2*i+1] += f1 * frow * h;
         }
         for(int i=0; i<3; i++){// Second three rows
-          const __m256d frow=_mm256_set1_pd(plas_flow[i+4]);
-          d[2*i+6] += f[0] * frow * h;
-          d[2*i+7] += f[1] * frow * h;
+          const __m256d frow=_mm256_set1_pd( plas_flow[i+4] );
+          d[2*i+6] += f0 * frow * h;
+          d[2*i+7] += f1 * frow * h;
         }
       for(int i=0;i<12;i++){ _mm256_store_pd( &D[i*4], d[i] ); }
 #if VERB_MAX>11
