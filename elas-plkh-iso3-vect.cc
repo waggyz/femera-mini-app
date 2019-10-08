@@ -368,9 +368,9 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #endif
         for(int i=0; i<6; i++){ stress_p[i]=0.0;
           for(int j=0; j<Nv; j++){
-            stress_p[i] += D[Nv* i+j ] * strain_p[ j ] *dw ; }
+            stress_p[i] += D[Nv* i+j ] * strain_p[ j ]; }
         }
-        //for(int i=0; i<Nv; i++){ stress_p[i]*= dw; }
+        for(int i=0; i<6; i++){ stress_p[i]*= dw; }
         // Compute the linear-elastic conjugate response, scaled by elas_part.
         compute_iso_s( &S[0], &P[0],C[2],c0,c1,c2, dw * elas_part );
         // Sum them.
