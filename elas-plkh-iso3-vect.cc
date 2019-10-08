@@ -304,8 +304,8 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #else
         FLOAT_PHYS VECALIGNED stress_p[Nv]={0.0,0.0,0.0, 0.0,0.0,0.0};
 #endif
-          for(int j=0; j<Nv; j++){
         for(int i=0; i<6; i++){// stress_p[i] =0.0;//FIXME Transpose D
+          for(int j=0; j<Nv; j++){
             stress_p[j] += D[Nv* i+j ] * strain_p[ i ] *dw ; }
         }
         //for(int i=0; i<Nv; i++){ stress_p[i]*= dw; }
