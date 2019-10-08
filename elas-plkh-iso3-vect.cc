@@ -267,7 +267,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           d[2*i+6] += f0 * frow * h;
           d[2*i+7] += f1 * frow * h;
         }
-      for(int i=0;i<12;i++){ _mm256_store_pd( &D[i*4], d[i] ); }
+      for(int i=0;i<12;i++){ _mm256_storeu_pd( &D[i*4], d[i] ); }
 #if VERB_MAX>11
 #pragma omp critical(print)
 {
