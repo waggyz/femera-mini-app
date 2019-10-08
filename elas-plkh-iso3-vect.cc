@@ -255,8 +255,8 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         //FIXME Next one should be aligned load.
         //const __m256d f[2]={plas_flow[0],plas_flow[1],plas_flow[2],plas_flow[3],
         //  plas_flow[4],plas_flow[5],plas_flow[6],plas_flow[7] };
-        const __m256d f0=_mm256_load_pd(&plas_flow[0]);;
-        const __m256d f1=_mm256_load_pd(&plas_flow[4]);
+        const __m256d f0=_mm256_load_pd( &plas_flow[0] );;
+        const __m256d f1=_mm256_load_pd( &plas_flow[4] );
         for(int i=0; i<3; i++){// First three rows
           const __m256d frow=_mm256_set1_pd( plas_flow[i] );
           d[2*i  ] += f0 * frow * h;
