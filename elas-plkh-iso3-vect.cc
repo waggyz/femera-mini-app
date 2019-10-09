@@ -9,6 +9,7 @@
 #undef FETCH_U_EARLY
 #define COMPRESS_STATE
 #define TEST_AVX
+#define TEST_AVX2
 //NOTE Prefetch state only works when compressed.
 //
 int ElastPlastKHIso3D::Setup( Elem* E ){
@@ -246,18 +247,33 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         // Secant modulus response: this stress plus elastic response at yield
 #ifdef TEST_AVX
         __m256d d0,d1,d2,d3,d4,d5,d6,d7,d8,d9,d10,d11;
+#ifdef TEST_AVX2
+        d7=_mm256_set_pd( 0.0,0.0,0.0,shear_eff );
+        d9=_mm256_permute4x64_pd( d7, _MM_SHUFFLE(3,2,0,1) );
+        d11=_mm256_permute4x64_pd( d7, _MM_SHUFFLE(3,0,2,1) );
+        d0=d7*2.0;
+        d2=d9*2.0;
+        d4=d11*2.0;
+        d1=_mm256_setzero_pd();
+        d3=_mm256_setzero_pd();
+        d5=_mm256_setzero_pd();
+        d6=_mm256_setzero_pd();
+        d8=_mm256_setzero_pd();
+        d10=_mm256_setzero_pd();
+#else
         {
         const FLOAT_PHYS VECALIGNED se[12]={
           shear_eff,0.0,0.0,0.0,
           0.0,shear_eff,0.0,0.0,
           0.0,0.0,shear_eff,0.0 };
-          d0=_mm256_load_pd( &se[0] )*2.0; d1=_mm256_set1_pd( 0.0 );
-          d2=_mm256_load_pd( &se[4] )*2.0; d3=_mm256_set1_pd( 0.0 );
-          d4=_mm256_load_pd( &se[8] )*2.0; d5=_mm256_set1_pd( 0.0 );
-          d6=_mm256_set1_pd( 0.0 ); d7=_mm256_load_pd( &se[0] );
-          d8=_mm256_set1_pd( 0.0 ); d9=_mm256_load_pd( &se[4] );
-          d10=_mm256_set1_pd(0.0 ); d11=_mm256_load_pd(&se[8] );
+        d0=_mm256_load_pd( &se[0] )*2.0; d1=_mm256_set1_pd( 0.0 );
+        d2=_mm256_load_pd( &se[4] )*2.0; d3=_mm256_set1_pd( 0.0 );
+        d4=_mm256_load_pd( &se[8] )*2.0; d5=_mm256_set1_pd( 0.0 );
+        d6=_mm256_set1_pd( 0.0 ); d7=_mm256_load_pd( &se[0] );
+        d8=_mm256_set1_pd( 0.0 ); d9=_mm256_load_pd( &se[4] );
+        d10=_mm256_set1_pd(0.0 ); d11=_mm256_load_pd(&se[8] );
         }
+#endif
         {
         //const __m256d le={lambda_eff,lambda_eff,lambda_eff,0.0};// Doesn't work?
         const FLOAT_PHYS VECALIGNED l4[4]={lambda_eff,lambda_eff,lambda_eff,0.0};
@@ -266,9 +282,6 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         }
         {
         const __m256d he=_mm256_set1_pd( hard_eff );
-        //FIXME Next one should be aligned load.
-        //const __m256d f[2]={plas_flow[0],plas_flow[1],plas_flow[2],plas_flow[3],
-        //  plas_flow[4],plas_flow[5],plas_flow[6],plas_flow[7] };
         const __m256d f0=_mm256_load_pd( &plas_flow[0] ) * he;
         const __m256d f1=_mm256_load_pd( &plas_flow[4] ) * he;
         __m256d frow;
