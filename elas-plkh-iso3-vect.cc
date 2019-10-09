@@ -259,7 +259,9 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           d8=_mm256_set1_pd( 0.0 )   , d9=_mm256_load_pd( &D[36] ),
           d10=_mm256_set1_pd(0.0 )   , d11=_mm256_load_pd(&D[44] );
         {
-        const __m256d le={lambda_eff,lambda_eff,lambda_eff,0.0};
+        //const __m256d le={lambda_eff,lambda_eff,lambda_eff,0.0};
+        const FLOAT_PHYS VECALIGNED l4[4]={lambda_eff,lambda_eff,lambda_eff,0.0};
+        const __m256d le=_mm256_load_pd( &l4[0] );
         d0+=le; d2+=le; d4+=le;
         }
         {
