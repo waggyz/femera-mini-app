@@ -248,6 +248,23 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         FLOAT_PHYS VECALIGNED D[6*Nv];
 #ifdef TEST_AVX
         {
+#if 1
+        const FLOAT_PHYS VECALIGNED se[12]={
+          shear_eff,0.0,0.0,0.0,
+          0.0,shear_eff,0.0,0.0,
+          0.0,0.0,shear_eff,0.0};
+        //const FLOAT_PHYS VECALIGNED s2[12]={
+        //  shear_eff*2.0,0.0,0.0,0.0,
+        //  0.0,shear_eff*2.0,0.0,0.0,
+        //  0.0,0.0,shear_eff*2.0,0.0};
+        __m256d
+          d0=_mm256_load_pd( &se[0] )*2.0, d1=_mm256_set1_pd( 0.0 ),
+          d2=_mm256_load_pd( &se[4] )*2.0, d3=_mm256_set1_pd( 0.0 ),
+          d4=_mm256_load_pd( &se[8] )*2.0, d5=_mm256_set1_pd( 0.0 ),
+          d6=_mm256_set1_pd( 0.0 )   , d7=_mm256_load_pd( &se[0] ),
+          d8=_mm256_set1_pd( 0.0 )   , d9=_mm256_load_pd( &se[4] ),
+          d10=_mm256_set1_pd(0.0 )   , d11=_mm256_load_pd(&se[8] );
+#else
         for(int i=0; i<(6*Nv); i++){ D[i]=0.0; }
         D[ 0]=2.0*shear_eff; D[ 9]=2.0*shear_eff; D[18]=2.0*shear_eff;
         D[28]=    shear_eff; D[37]=    shear_eff; D[46]=    shear_eff;
@@ -258,6 +275,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           d6=_mm256_set1_pd( 0.0 )   , d7=_mm256_load_pd( &D[28] ),
           d8=_mm256_set1_pd( 0.0 )   , d9=_mm256_load_pd( &D[36] ),
           d10=_mm256_set1_pd(0.0 )   , d11=_mm256_load_pd(&D[44] );
+#endif
         {
         //const __m256d le={lambda_eff,lambda_eff,lambda_eff,0.0};// Doesn't work?
         const FLOAT_PHYS VECALIGNED l4[4]={lambda_eff,lambda_eff,lambda_eff,0.0};
