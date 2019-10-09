@@ -289,7 +289,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         _mm256_store_pd( &D[24], d6 ); _mm256_store_pd( &D[28], d7 );
         _mm256_store_pd( &D[32], d8 ); _mm256_store_pd( &D[36], d9 );
         _mm256_store_pd( &D[40], d10); _mm256_store_pd( &D[44], d11);
-#if VERB_MAX>11
+#if VERB_MAX>1
 #pragma omp critical(print)
 {
         //FLOAT_PHYS VECALIGNED dd[48];
@@ -303,7 +303,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 }
 #endif
         }
-#else
+//#else
         for(int i=0;i<3;i++){
           for(int j=0;j<Nw;j++){// top left side
             D[Nv* i+j ] = hard_eff * plas_flow[i] * plas_flow[j];
@@ -345,7 +345,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         }
 }
 #endif
-#if VERB_MAX>11
+#if VERB_MAX>1
 #pragma omp critical(print)
 {
         printf("el:%u,gp:%i D:     \n",ie,ip);
@@ -625,10 +625,9 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
       }
 }
 #endif
-#if VERB_MAX>10
+#if VERB_MAX>11
 #pragma omp critical(print)
-{
-      printf("el:%u,gp:%i D:     ",ie,ip);
+      printf("el:%u,gp:%i D:     \n",ie,ip);
       for(int i=0; i<36; i++){
         if(!(i%6)&(i>0)){ printf("                 "); }
         printf(" %+9.2e", D[i] );
@@ -636,11 +635,11 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
       }
 }
 #endif
-        // Calculate conjugate stress from conjugate strain.
-        // Compute the plastic response.
+        // Calculate stress from strain.
         const FLOAT_PHYS VECALIGNED strain_p[6]={
           H[0], H[5], H[10], H[1]+H[4], H[6]+H[9], H[2]+H[8] };
         FLOAT_PHYS VECALIGNED stress_p[6];
+        // Compute the plastic response.
         for(int i=0; i<6; i++){ stress_p[i] =0.0;
           for(int j=0; j<6; j++){ stress_p[i] += D[6* i+j ] * strain_p[ j ]; }
           stress_p[i]*= dw;
@@ -652,7 +651,7 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
         S[4]+=stress_p[3]; S[5]+=stress_p[1]; S[6]+=stress_p[4];// S[7]=stress_p[5];
         S[8]+=stress_p[5]; S[9]+=stress_p[4]; S[10]+=stress_p[2];// S[11]=0.0;
       }// if plastic ----------------------------------------------------------
-      else{// Linear-elastic conj response only
+      else{// Linear-elastic response only
         for(int i=0; i<12; i++){ S[i]*= dw; }
       }
       if(ip==0){
