@@ -259,7 +259,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           d8=_mm256_set1_pd( 0.0 )   , d9=_mm256_load_pd( &D[36] ),
           d10=_mm256_set1_pd(0.0 )   , d11=_mm256_load_pd(&D[44] );
         {
-        //const __m256d le={lambda_eff,lambda_eff,lambda_eff,0.0};
+        //const __m256d le={lambda_eff,lambda_eff,lambda_eff,0.0};// Doesn't work?
         const FLOAT_PHYS VECALIGNED l4[4]={lambda_eff,lambda_eff,lambda_eff,0.0};
         const __m256d le=_mm256_load_pd( &l4[0] );
         d0+=le; d2+=le; d4+=le;
@@ -291,7 +291,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         _mm256_store_pd( &D[24], d6 ); _mm256_store_pd( &D[28], d7 );
         _mm256_store_pd( &D[32], d8 ); _mm256_store_pd( &D[36], d9 );
         _mm256_store_pd( &D[40], d10); _mm256_store_pd( &D[44], d11);
-#if VERB_MAX>1
+#if VERB_MAX>10
 #pragma omp critical(print)
 {
         //FLOAT_PHYS VECALIGNED dd[48];
@@ -305,7 +305,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 }
 #endif
         }
-//#else
+#else
         for(int i=0;i<3;i++){
           for(int j=0;j<Nw;j++){// top left side
             D[Nv* i+j ] = hard_eff * plas_flow[i] * plas_flow[j];
@@ -347,7 +347,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         }
 }
 #endif
-#if VERB_MAX>1
+#if VERB_MAX>10
 #pragma omp critical(print)
 {
         printf("el:%u,gp:%i D:     \n",ie,ip);
