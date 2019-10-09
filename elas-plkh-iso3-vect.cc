@@ -243,20 +243,12 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           std::memcpy(&state[Ns*(intp_n*ie+ip)],&back_v[0],sizeof(FLOAT_SOLV)*Ns);
 #endif
         }
-        // Add elas_part * elastic D-matrix?
         // Secant modulus response: this stress plus elastic response at yield
-        FLOAT_PHYS VECALIGNED D[6*Nv];
 #ifdef TEST_AVX
-        {
-#if 1
         const FLOAT_PHYS VECALIGNED se[12]={
           shear_eff,0.0,0.0,0.0,
           0.0,shear_eff,0.0,0.0,
           0.0,0.0,shear_eff,0.0};
-        //const FLOAT_PHYS VECALIGNED s2[12]={
-        //  shear_eff*2.0,0.0,0.0,0.0,
-        //  0.0,shear_eff*2.0,0.0,0.0,
-        //  0.0,0.0,shear_eff*2.0,0.0};
         __m256d
           d0=_mm256_load_pd( &se[0] )*2.0, d1=_mm256_set1_pd( 0.0 ),
           d2=_mm256_load_pd( &se[4] )*2.0, d3=_mm256_set1_pd( 0.0 ),
@@ -264,18 +256,6 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           d6=_mm256_set1_pd( 0.0 )   , d7=_mm256_load_pd( &se[0] ),
           d8=_mm256_set1_pd( 0.0 )   , d9=_mm256_load_pd( &se[4] ),
           d10=_mm256_set1_pd(0.0 )   , d11=_mm256_load_pd(&se[8] );
-#else
-        for(int i=0; i<(6*Nv); i++){ D[i]=0.0; }
-        D[ 0]=2.0*shear_eff; D[ 9]=2.0*shear_eff; D[18]=2.0*shear_eff;
-        D[28]=    shear_eff; D[37]=    shear_eff; D[46]=    shear_eff;
-        __m256d
-          d0=_mm256_load_pd( &D[ 0] ), d1=_mm256_set1_pd( 0.0 ),
-          d2=_mm256_load_pd( &D[ 8] ), d3=_mm256_set1_pd( 0.0 ),
-          d4=_mm256_load_pd( &D[16] ), d5=_mm256_set1_pd( 0.0 ),
-          d6=_mm256_set1_pd( 0.0 )   , d7=_mm256_load_pd( &D[28] ),
-          d8=_mm256_set1_pd( 0.0 )   , d9=_mm256_load_pd( &D[36] ),
-          d10=_mm256_set1_pd(0.0 )   , d11=_mm256_load_pd(&D[44] );
-#endif
         {
         //const __m256d le={lambda_eff,lambda_eff,lambda_eff,0.0};// Doesn't work?
         const FLOAT_PHYS VECALIGNED l4[4]={lambda_eff,lambda_eff,lambda_eff,0.0};
@@ -303,17 +283,17 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         frow=_mm256_set1_pd( plas_flow[6] );
         d10 += f0 * frow; d11 += f1 * frow;
         }
+#if 0
         _mm256_store_pd( &D[ 0], d0 ); _mm256_store_pd( &D[ 4], d1 );
         _mm256_store_pd( &D[ 8], d2 ); _mm256_store_pd( &D[12], d3 );
         _mm256_store_pd( &D[16], d4 ); _mm256_store_pd( &D[20], d5 );
         _mm256_store_pd( &D[24], d6 ); _mm256_store_pd( &D[28], d7 );
         _mm256_store_pd( &D[32], d8 ); _mm256_store_pd( &D[36], d9 );
         _mm256_store_pd( &D[40], d10); _mm256_store_pd( &D[44], d11);
+#endif
 #if VERB_MAX>10
 #pragma omp critical(print)
 {
-        //FLOAT_PHYS VECALIGNED dd[48];
-        //for(int i=0;i<12;i++){ _mm256_store_pd( &dd[i*4], d[i] ); }
         printf("el:%u,gp:%i d:     \n",ie,ip);
         for(int i=0; i<(6*Nv); i++){
           //if(!(i%6)&(i>0)){ printf("                 "); }
@@ -322,8 +302,8 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         }
 }
 #endif
-        }
 #else
+        FLOAT_PHYS VECALIGNED D[6*Nv];
         for(int i=0;i<3;i++){
           for(int j=0;j<Nw;j++){// top left side
             D[Nv* i+j ] = hard_eff * plas_flow[i] * plas_flow[j];
@@ -377,28 +357,44 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 }
 #endif
         // Calculate conjugate stress from conjugate strain.
-#ifdef TEST_AVX
+#if 0
         const FLOAT_PHYS VECALIGNED strain_p[8]={
           P[0], P[5], P[10],0.0, P[1]+P[4], P[6]+P[9], P[2]+P[8],0.0 };
 #else
         const FLOAT_PHYS VECALIGNED strain_p[6]={
           P[0], P[5], P[10], P[1]+P[4], P[6]+P[9], P[2]+P[8] };
 #endif
-#if 0
-        FLOAT_PHYS VECALIGNED stress_p[8]={0.0,0.0,0.0,0.0, 0.0,0.0,0.0,0.0};
+#ifdef TEST_AVX
+        FLOAT_PHYS VECALIGNED stress_p[8];//={0.0,0.0,0.0,0.0, 0.0,0.0,0.0,0.0};
 #else
         FLOAT_PHYS VECALIGNED stress_p[6];//={0.0,0.0,0.0, 0.0,0.0,0.0};
 #endif
         // Compute the plastic conjugate response.
+#ifdef TEST_AVX
+        {
+        const __m256d w =_mm256_set1_pd( dw );
+        __m256d s0,s1;
+        __m256d erow;
+        erow=_mm256_set1_pd( strain_p[0] )*w; s0 =d0*erow; s1 =d1*erow;
+        erow=_mm256_set1_pd( strain_p[1] )*w; s0+=d2*erow; s1+=d3*erow;
+        erow=_mm256_set1_pd( strain_p[2] )*w; s0+=d4*erow; s1+=d5*erow;
+        erow=_mm256_set1_pd( strain_p[3] )*w; s0+=d6*erow; s1+=d7*erow;
+        erow=_mm256_set1_pd( strain_p[4] )*w; s0+=d8*erow; s1+=d9*erow;
+        erow=_mm256_set1_pd( strain_p[5] )*w; s0+=d10*erow; s1+=d11*erow;
+        _mm256_store_pd(&stress_p[0],s0);
+        _mm256_store_pd(&stress_p[4],s1);
+        }
+#else
         for(int i=0; i<6; i++){ stress_p[i]=0.0;
           for(int j=0; j<Nv; j++){
             stress_p[i] += D[Nv* i+j ] * strain_p[ j ]; }
           stress_p[i] *= dw;
         }
+#endif
         // Compute the linear-elastic conjugate response, scaled by elas_part.
         compute_iso_s( &S[0], &P[0],C[2],c0,c1,c2, dw * elas_part );
         // Sum them.
-#if 0
+#ifdef TEST_AVX
         S[0]+=stress_p[0]; S[1]+=stress_p[4]; S[2]+=stress_p[6];// S[3]+=stress_p[3];
         S[4]+=stress_p[4]; S[5]+=stress_p[1]; S[6]+=stress_p[5];// S[7]+=stress_p[5];
         S[8]+=stress_p[6]; S[9]+=stress_p[5]; S[10]+=stress_p[2];// S[11]=0.0;
