@@ -243,61 +243,53 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #else
           std::memcpy(&state[Ns*(intp_n*ie+ip)],&back_v[0],sizeof(FLOAT_SOLV)*Ns);
 #endif
-        }
+        }// done if save_state
         // Secant modulus response: this stress plus elastic response at yield
 #ifdef TEST_AVX
         __m256d d0,d1,d2,d3,d4,d5,d6,d7,d8,d9,d10,d11;
-#ifdef TEST_AVX2
-        d7=_mm256_set_pd( 0.0,0.0,0.0,shear_eff );
-        d9=_mm256_permute4x64_pd( d7, _MM_SHUFFLE(3,2,0,1) );
-        d11=_mm256_permute4x64_pd( d7, _MM_SHUFFLE(3,0,2,1) );
-        d0=d7*2.0;
-        d2=d9*2.0;
-        d4=d11*2.0;
-        d1=_mm256_setzero_pd();
-        d3=_mm256_setzero_pd();
-        d5=_mm256_setzero_pd();
-        d6=_mm256_setzero_pd();
-        d8=_mm256_setzero_pd();
-        d10=_mm256_setzero_pd();
-#else
-        {
-        const FLOAT_PHYS VECALIGNED se[12]={
-          shear_eff,0.0,0.0,0.0,
-          0.0,shear_eff,0.0,0.0,
-          0.0,0.0,shear_eff,0.0 };
-        d0=_mm256_load_pd( &se[0] )*2.0; d1=_mm256_set1_pd( 0.0 );
-        d2=_mm256_load_pd( &se[4] )*2.0; d3=_mm256_set1_pd( 0.0 );
-        d4=_mm256_load_pd( &se[8] )*2.0; d5=_mm256_set1_pd( 0.0 );
-        d6=_mm256_set1_pd( 0.0 ); d7=_mm256_load_pd( &se[0] );
-        d8=_mm256_set1_pd( 0.0 ); d9=_mm256_load_pd( &se[4] );
-        d10=_mm256_set1_pd(0.0 ); d11=_mm256_load_pd(&se[8] );
-        }
-#endif
-        {
-        //const __m256d le={lambda_eff,lambda_eff,lambda_eff,0.0};// Doesn't work?
-        const FLOAT_PHYS VECALIGNED l4[4]={lambda_eff,lambda_eff,lambda_eff,0.0};
-        const __m256d le=_mm256_load_pd( &l4[0] );
-        d0+=le; d2+=le; d4+=le;
-        }
         {
         const __m256d he=_mm256_set1_pd( hard_eff );
         const __m256d f0=_mm256_load_pd( &plas_flow[0] ) * he;
         const __m256d f1=_mm256_load_pd( &plas_flow[4] ) * he;
         __m256d frow;
         frow=_mm256_set1_pd( plas_flow[0] );
-        d0 += f0 * frow; d1 += f1 * frow ;
+        d0 = f0 * frow; d1 = f1 * frow ;
         frow=_mm256_set1_pd( plas_flow[1] );
-        d2 += f0 * frow; d3 += f1 * frow;
+        d2 = f0 * frow; d3 = f1 * frow;
         frow=_mm256_set1_pd( plas_flow[2] );
-        d4 += f0 * frow; d5 += f1 * frow;
+        d4 = f0 * frow; d5 = f1 * frow;
         frow=_mm256_set1_pd( plas_flow[4] );
-        d6 += f0 * frow; d7 += f1 * frow;
+        d6 = f0 * frow; d7 = f1 * frow;
         frow=_mm256_set1_pd( plas_flow[5] );
-        d8 += f0 * frow; d9 += f1 * frow;
+        d8 = f0 * frow; d9 = f1 * frow;
         frow=_mm256_set1_pd( plas_flow[6] );
-        d10 += f0 * frow; d11 += f1 * frow;
+        d10 = f0 * frow; d11 = f1 * frow;
         }
+        {
+        const __m256d le=_mm256_set_pd( 0.0,lambda_eff,lambda_eff,lambda_eff );
+        d0+=le; d2+=le; d4+=le;
+        }
+#ifdef TEST_AVX2
+        d7+=_mm256_set_pd( 0.0,0.0,0.0,shear_eff );
+        d9+=_mm256_permute4x64_pd( d7, _MM_SHUFFLE(3,2,0,1) );
+        d11+=_mm256_permute4x64_pd( d7, _MM_SHUFFLE(3,0,2,1) );
+        d0+=d7*2.0;
+        d2+=d9*2.0;
+        d4+=d11*2.0;
+#else
+        {
+        const FLOAT_PHYS VECALIGNED se[12]={
+          shear_eff,0.0,0.0,0.0,
+          0.0,shear_eff,0.0,0.0,
+          0.0,0.0,shear_eff,0.0 };
+        d0+=_mm256_load_pd( &se[0] )*2.0;
+        d2+=_mm256_load_pd( &se[4] )*2.0;
+        d4+=_mm256_load_pd( &se[8] )*2.0;
+        d7+=_mm256_load_pd( &se[0] );
+        d9+=_mm256_load_pd( &se[4] );
+        d11+=_mm256_load_pd(&se[8] );
+        }
+#endif
 #if 0
         _mm256_store_pd( &D[ 0], d0 ); _mm256_store_pd( &D[ 4], d1 );
         _mm256_store_pd( &D[ 8], d2 ); _mm256_store_pd( &D[12], d3 );
