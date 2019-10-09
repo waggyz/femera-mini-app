@@ -245,17 +245,19 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         }
         // Secant modulus response: this stress plus elastic response at yield
 #ifdef TEST_AVX
+        __m256d d0,d1,d2,d3,d4,d5,d6,d7,d8,d9,d10,d11;
+        {
         const FLOAT_PHYS VECALIGNED se[12]={
           shear_eff,0.0,0.0,0.0,
           0.0,shear_eff,0.0,0.0,
-          0.0,0.0,shear_eff,0.0};
-        __m256d
-          d0=_mm256_load_pd( &se[0] )*2.0, d1=_mm256_set1_pd( 0.0 ),
-          d2=_mm256_load_pd( &se[4] )*2.0, d3=_mm256_set1_pd( 0.0 ),
-          d4=_mm256_load_pd( &se[8] )*2.0, d5=_mm256_set1_pd( 0.0 ),
-          d6=_mm256_set1_pd( 0.0 )   , d7=_mm256_load_pd( &se[0] ),
-          d8=_mm256_set1_pd( 0.0 )   , d9=_mm256_load_pd( &se[4] ),
-          d10=_mm256_set1_pd(0.0 )   , d11=_mm256_load_pd(&se[8] );
+          0.0,0.0,shear_eff,0.0 };
+          d0=_mm256_load_pd( &se[0] )*2.0; d1=_mm256_set1_pd( 0.0 );
+          d2=_mm256_load_pd( &se[4] )*2.0; d3=_mm256_set1_pd( 0.0 );
+          d4=_mm256_load_pd( &se[8] )*2.0; d5=_mm256_set1_pd( 0.0 );
+          d6=_mm256_set1_pd( 0.0 ); d7=_mm256_load_pd( &se[0] );
+          d8=_mm256_set1_pd( 0.0 ); d9=_mm256_load_pd( &se[4] );
+          d10=_mm256_set1_pd(0.0 ); d11=_mm256_load_pd(&se[8] );
+        }
         {
         //const __m256d le={lambda_eff,lambda_eff,lambda_eff,0.0};// Doesn't work?
         const FLOAT_PHYS VECALIGNED l4[4]={lambda_eff,lambda_eff,lambda_eff,0.0};
@@ -373,9 +375,18 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         erow=_mm256_set1_pd( P[ 0] ); s0 =d0*erow; s1 =d1*erow;
         erow=_mm256_set1_pd( P[ 5] ); s0+=d2*erow; s1+=d3*erow;
         erow=_mm256_set1_pd( P[10] ); s0+=d4*erow; s1+=d5*erow;
+#if 1
+        erow=_mm256_set1_pd( P[1] )+_mm256_set1_pd( P[4] );
+        s0+=d6*erow; s1+=d7*erow;
+        erow=_mm256_set1_pd( P[6] )+_mm256_set1_pd( P[9] );
+        s0+=d8*erow; s1+=d9*erow;
+        erow=_mm256_set1_pd( P[2] )+_mm256_set1_pd( P[8] );
+        s0+=d10*erow;s1+=d11*erow;
+#else
         erow=_mm256_set1_pd( P[1]+P[4] ); s0+=d6*erow; s1+=d7*erow;
         erow=_mm256_set1_pd( P[6]+P[9] ); s0+=d8*erow; s1+=d9*erow;
         erow=_mm256_set1_pd( P[2]+P[8] ); s0+=d10*erow;s1+=d11*erow;
+#endif
 #else
         const FLOAT_PHYS VECALIGNED strain_p[6]={
           P[0], P[5], P[10], P[1]+P[4], P[6]+P[9], P[2]+P[8] };
