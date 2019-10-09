@@ -365,7 +365,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           P[0], P[5], P[10], P[1]+P[4], P[6]+P[9], P[2]+P[8] };
 #endif
 #ifdef TEST_AVX
-        FLOAT_PHYS VECALIGNED stress_p[8];//={0.0,0.0,0.0,0.0, 0.0,0.0,0.0,0.0};
+        FLOAT_PHYS VECALIGNED stress_p[7];//={0.0,0.0,0.0,0.0, 0.0,0.0,0.0,0.0};
 #else
         FLOAT_PHYS VECALIGNED stress_p[6];//={0.0,0.0,0.0, 0.0,0.0,0.0};
 #endif
@@ -375,14 +375,14 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         const __m256d w =_mm256_set1_pd( dw );
         __m256d s0,s1;
         __m256d erow;
-        erow=_mm256_set1_pd( strain_p[0] )*w; s0 =d0*erow; s1 =d1*erow;
-        erow=_mm256_set1_pd( strain_p[1] )*w; s0+=d2*erow; s1+=d3*erow;
-        erow=_mm256_set1_pd( strain_p[2] )*w; s0+=d4*erow; s1+=d5*erow;
-        erow=_mm256_set1_pd( strain_p[3] )*w; s0+=d6*erow; s1+=d7*erow;
-        erow=_mm256_set1_pd( strain_p[4] )*w; s0+=d8*erow; s1+=d9*erow;
-        erow=_mm256_set1_pd( strain_p[5] )*w; s0+=d10*erow; s1+=d11*erow;
-        _mm256_store_pd(&stress_p[0],s0);
-        _mm256_store_pd(&stress_p[4],s1);
+        erow=_mm256_set1_pd( strain_p[0] ); s0 =d0*erow; s1 =d1*erow;
+        erow=_mm256_set1_pd( strain_p[1] ); s0+=d2*erow; s1+=d3*erow;
+        erow=_mm256_set1_pd( strain_p[2] ); s0+=d4*erow; s1+=d5*erow;
+        erow=_mm256_set1_pd( strain_p[3] ); s0+=d6*erow; s1+=d7*erow;
+        erow=_mm256_set1_pd( strain_p[4] ); s0+=d8*erow; s1+=d9*erow;
+        erow=_mm256_set1_pd( strain_p[5] ); s0+=d10*erow; s1+=d11*erow;
+        _mm256_store_pd( &stress_p[0],s0*w);
+        _mm256_storeu_pd(&stress_p[3],s1*w);
         }
 #else
         for(int i=0; i<6; i++){ stress_p[i]=0.0;
@@ -394,7 +394,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         // Compute the linear-elastic conjugate response, scaled by elas_part.
         compute_iso_s( &S[0], &P[0],C[2],c0,c1,c2, dw * elas_part );
         // Sum them.
-#ifdef TEST_AVX
+#if 0
         S[0]+=stress_p[0]; S[1]+=stress_p[4]; S[2]+=stress_p[6];// S[3]+=stress_p[3];
         S[4]+=stress_p[4]; S[5]+=stress_p[1]; S[6]+=stress_p[5];// S[7]+=stress_p[5];
         S[8]+=stress_p[6]; S[9]+=stress_p[5]; S[10]+=stress_p[2];// S[11]=0.0;
