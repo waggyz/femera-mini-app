@@ -8,8 +8,8 @@
 // Fetch next u within G,H loop nest
 #undef FETCH_U_EARLY
 #define COMPRESS_STATE
-#define TEST_AVX
-#define TEST_AVX2
+#undef TEST_AVX
+#undef TEST_AVX2
 //NOTE Prefetch state only works when compressed.
 //
 int ElastPlastKHIso3D::Setup( Elem* E ){
