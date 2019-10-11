@@ -192,8 +192,6 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       for(int i=0 ;i<Nw;i++){ stress_mises+= plas_flow[i]*plas_flow[i]*1.5; }
       for(int i=Nw;i<Nv;i++){ stress_mises+= plas_flow[i]*plas_flow[i]*3.0; }
       }
-      //for(int i=0;i<6;i++){ printf("%+9.2e ", elas_v[i]); }
-      //printf("mises: %+9.2e\n",sqrt(stress_mises));
       if( stress_mises > yield_tol2 ){
         FLOAT_PHYS elas_mises=0.0;
         {
@@ -241,6 +239,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         }
 }
 #endif
+#if 0
         FLOAT_PHYS VECALIGNED D[6*Nv];
         for(int i=0;i<3;i++){
           for(int j=0;j<Nw;j++){// top left side
@@ -257,6 +256,20 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           }
           D[3*Nv+Nw + (Nv+1)*i]+= shear_eff;
         }
+#else
+        for(int i=0;i<6;i++){
+          for(int j=0;j<6;j++){
+            D[6* i+j ] = hard_eff * plas_flow[i] * plas_flow[j];
+          }
+          D[6* i+i ]+= shear_eff;
+        }
+        for(int i=0;i<3;i++){
+          D[6* i+i ]+= shear_eff;
+          for(int j=0;j<3;j++){
+            D[6* i+j ]+= lambda_eff;
+          }
+        }
+#endif
         //===================================================== end UMAT
 #if VERB_MAX>10
 #pragma omp critical(print)
