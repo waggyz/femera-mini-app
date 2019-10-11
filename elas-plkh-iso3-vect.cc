@@ -550,6 +550,7 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
         for(int i=0;i<6;i++){ plas_flow[i]*= inv_mises; }
         // Add elas_part * elastic D-matrix?
         // Secant modulus response: this stress plus elastic response at yield
+#if 0
         FLOAT_PHYS VECALIGNED D[36];
         for(int i=0;i<6;i++){
           for(int j=0;j<6;j++){
@@ -564,6 +565,7 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
             D[6* i+j ]+= lambda_eff;// + C[1]*elas_part; // 9 FLOP
           }
         }// TOTAL: 90 scalar FLOP
+#endif
         //===================================================== end UMAT
 #if VERB_MAX>10
 #pragma omp critical(print)
@@ -588,6 +590,7 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
 }
 #endif
         // Calculate stress from strain.
+#if 0
         const FLOAT_PHYS VECALIGNED strain_p[6]={
           H[0], H[5], H[10], H[1]+H[4], H[6]+H[9], H[2]+H[8] };
         FLOAT_PHYS VECALIGNED stress_p[6];
@@ -597,11 +600,27 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
           stress_p[i]*= dw;
         }
         // Compute the linear-elastic response, scaled by elas_part.
-        compute_iso_s( &S[0], &H[0], C[1],C[2], dw * elas_part );
+        //compute_iso_s( &S[0], &H[0], C[1],C[2], dw * elas_part );
+        for(int i=0; i<12; i++){ S[i]*= dw * elas_part; }
         // Sum them.
         S[0]+=stress_p[0]; S[1]+=stress_p[3]; S[2]+=stress_p[5];// S[3]=stress_p[3];
         S[4]+=stress_p[3]; S[5]+=stress_p[1]; S[6]+=stress_p[4];// S[7]=stress_p[5];
         S[8]+=stress_p[5]; S[9]+=stress_p[4]; S[10]+=stress_p[2];// S[11]=0.0;
+#else
+        // Calculate stress from strain.
+        // Compute the plastic response.
+        FLOAT_PHYS VECALIGNED T[Nd*4];
+        compute_iso_s( &T[0], &H[0], lambda_eff,shear_eff, dw );
+        FLOAT_PHYS F[12]={
+          plas_flow[0], plas_flow[3], plas_flow[5], 0.0,
+          plas_flow[3], plas_flow[1], plas_flow[4], 0.0,
+          plas_flow[5], plas_flow[4], plas_flow[2], 0.0 };
+        for(int i=0;i<(Nd*4);i++){
+          // Scale the linear-elastic  response by elas_part.
+          S[i] = S[i] * dw * elas_part + T[i];
+          for(int k=0;k<(Nd*4);k++){
+            S[i] += F[i] * F[k] * H[k] * hard_eff * dw; } }
+#endif
       }// if plastic ----------------------------------------------------------
       else{// Linear-elastic response only
         for(int i=0; i<12; i++){ S[i]*= dw; }
