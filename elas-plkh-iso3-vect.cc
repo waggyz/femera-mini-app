@@ -318,34 +318,21 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           plas_flow[3], plas_flow[1], plas_flow[4], 0.0,
           plas_flow[5], plas_flow[4], plas_flow[2], 0.0 };
 #if 0
-        for(int i=0;i<3;i++){
-          for(int j=0;j<4;j++){
-            S[4* i+j ]+=T[4* i+j ];
-            for(int k=0;k<3;k++){
-              for(int l=0;l<4;l++){
-                S[4* i+j ]+= F[4* i+j ] * F[4* k+l ] * P[4* k+l ] * hard_eff*dw;
-              }
-            }
-          }
-        }
-#else
-#if 0
         for(int i=0;i<(Nd*4);i++){
           S[i] += T[i];
           for(int k=0;k<(Nd*4);k++){
             S[i] += F[i] * F[k] * P[k] * hard_eff*dw; } }
 #else
-      {
-      const __m256d he=_mm256_set1_pd(hard_eff) * _mm256_set1_pd(dw);
+      {//FIXME Double shear terms?
+      const __m256d he=_mm256_set1_pd( hard_eff * dw );
       for(int i=0;i<12;i+=4){
-        const __m256d f = _mm256_load_pd(&F[i]);
-        __m256d s = _mm256_load_pd(&S[i]) + _mm256_load_pd(&T[i]);
-        for(int j=0;j<12;j++){
-          s += f *_mm256_set1_pd(F[j] * P[j]) * he; }
-        _mm256_store_pd(&S[i],s);
+        const __m256d f = _mm256_load_pd( &F[i] );
+        __m256d s = _mm256_load_pd( &S[i] ) + _mm256_load_pd( &T[i] );
+        for(int j=0;j<11;j++){
+          s += f *_mm256_set1_pd( F[j] * P[j] ) * he; }
+        _mm256_store_pd( &S[i], s );
       }
       }
-#endif
 #endif
         //for(int i=0;i<(Nd*4);i++){ S[i]+=T[i]; }
 #endif
@@ -636,17 +623,17 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
             S[i] += F[i] * F[k] * H[k] * hard_eff * dw;
           } }
 #else
-      {
-      const __m256d ep=_mm256_set1_pd(elas_part*dw);
-      const __m256d he=_mm256_set1_pd(hard_eff*dw);
+      {//FIXME Double shear terms?
+      const __m256d ep=_mm256_set1_pd( elas_part * dw );
+      const __m256d he=_mm256_set1_pd( hard_eff * dw );
       for(int i=0;i<12;i+=4){
-        const __m256d f =_mm256_load_pd(&F[i]);
-        __m256d s = _mm256_setzero_pd();
-        for(int j=0;j<12;j++){
+        const __m256d f =_mm256_load_pd( &F[i] );
+        __m256d s=_mm256_setzero_pd();
+        for(int j=0;j<11;j++){
           s += f *_mm256_set1_pd( F[j] * H[j] );
         }
-        _mm256_store_pd(&S[i], s*he + _mm256_load_pd( &S[i] )*ep
-          + _mm256_load_pd(&T[i]) );
+        _mm256_store_pd( &S[i], s*he + _mm256_load_pd( &S[i] )*ep
+          + _mm256_load_pd( &T[i] ) );
       }
       }
 #endif
