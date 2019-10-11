@@ -329,7 +329,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           }
         }
 #else
-#if 0
+#if 1
         for(int i=0;i<(Nd*4);i++){
           S[i] += T[i];
           for(int k=0;k<(Nd*4);k++){
@@ -628,7 +628,7 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
           plas_flow[0], plas_flow[3], plas_flow[5], 0.0,
           plas_flow[3], plas_flow[1], plas_flow[4], 0.0,
           plas_flow[5], plas_flow[4], plas_flow[2], 0.0 };
-#if 0
+#if 1
         for(int i=0;i<(Nd*4);i++){
           // Scale the linear-elastic  response by elas_part.
           S[i] = S[i] * dw * elas_part + T[i];
