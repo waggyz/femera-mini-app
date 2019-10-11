@@ -928,7 +928,6 @@ static inline void compute_iso_s(FLOAT_PHYS* S, const FLOAT_PHYS* H,
 static inline void compute_iso_s(FLOAT_PHYS* S, const FLOAT_PHYS* H,
   const FLOAT_PHYS lambda, const FLOAT_PHYS mu, const FLOAT_PHYS dw){
   // S = mu * (H+H^T) + lambda * I * ( H[0]+H[5]+H[10] )
-  //FIXME Vectorize this. It's about the same speed as above, slower than ortho.
 #if 0
   for(int i=0; i<3; i++){
     for(int j=0; j<4; j++){ S[4* i+j] = H[4* i+j] * mu * dw; } }
@@ -939,12 +938,12 @@ static inline void compute_iso_s(FLOAT_PHYS* S, const FLOAT_PHYS* H,
   S[6]+= S[9];
   S[4]=S[1]; S[9]=S[6]; S[8]=S[2];
 #else
-  const FLOAT_PHYS tr = (H[0]+H[5]+H[10]) * lambda * dw;
+  //FIXME These are all about the same speed as above, slower than ortho.
   const __m256d m= _mm256_set1_pd(dw) * _mm256_set1_pd(mu);
   _mm256_store_pd( &S[0], m * _mm256_load_pd(&H[0]) );
   _mm256_store_pd( &S[4], m * _mm256_load_pd(&H[4]) );
   _mm256_store_pd( &S[8], m * _mm256_load_pd(&H[8]) );
-  //const __m256d l= d * _mm256_set1_pd(lambda);
+  const FLOAT_PHYS tr = (H[0]+H[5]+H[10]) * lambda * dw;
   S[0]=2.0*S[0]+tr; S[5]=2.0*S[5]+tr; S[10]=2.0*S[10]+tr;
   S[1]+= S[4];
   S[2]+= S[8];
