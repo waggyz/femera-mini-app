@@ -239,24 +239,9 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         }
 }
 #endif
+#if 0
         FLOAT_PHYS VECALIGNED D[6*Nv];
 #if 0
-        for(int i=0;i<3;i++){
-          for(int j=0;j<Nw;j++){// top left side
-            D[Nv* i+j ] = hard_eff * plas_flow[i] * plas_flow[j] + lambda_eff;
-          }
-          D[(Nv+1)* i ]+= shear_eff*2.0;
-          for(int j=Nw;j<Nv;j++){// top right side
-            D[Nv* i+j ] = hard_eff * plas_flow[i] * plas_flow[j];
-          }
-        }
-        for(int i=0;i<3;i++){
-          for(int j=0;j<Nv;j++){// bottom left and right sides
-            D[Nv* i+j +3*Nv] = hard_eff * plas_flow[i+Nw] * plas_flow[j];
-          }
-          D[3*Nv+Nw + (Nv+1)*i]+= shear_eff;
-        }
-#else
         for(int i=0;i<6;i++){
           for(int j=0;j<6;j++){
             D[6* i+j ] = hard_eff * plas_flow[i] * plas_flow[j];
@@ -269,7 +254,15 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
             D[6* i+j ]+= lambda_eff;
           }
         }
+#else
+        for(int i=0;i<6;i++){
+          for(int j=0;j<6;j++){
+            D[6* i+j ] = hard_eff * plas_flow[i] * plas_flow[j];
+          }
+        }
 #endif
+#endif
+        // Pass lambda_eff,shear_eff out
         //===================================================== end UMAT
 #if VERB_MAX>10
 #pragma omp critical(print)
@@ -299,23 +292,45 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 }
 #endif
         // Calculate conjugate stress from conjugate strain.
-        FLOAT_PHYS VECALIGNED stress_p[6];
+        // Compute the linear-elastic conjugate response, scaled by elas_part.
+        compute_iso_s( &S[0], &P[0], C[1],C[2], dw * elas_part );
         // Compute the plastic conjugate response.
+        FLOAT_PHYS VECALIGNED T[Nd*4];
+        compute_iso_s( &T[0], &P[0], lambda_eff,shear_eff, dw );
+#if 0
+        FLOAT_PHYS VECALIGNED stress_p[6];
         {
         const FLOAT_PHYS VECALIGNED strain_p[6]={
           P[0], P[5], P[10], P[1]+P[4], P[6]+P[9], P[2]+P[8] };
         for(int i=0; i<6; i++){ stress_p[i]=0.0;
           for(int j=0; j<Nv; j++){
             stress_p[i] += D[Nv* i+j ] * strain_p[ j ]; }
-          stress_p[i] *= dw;
+          stress_p[i] *= dw; }
         }
-        }
-        // Compute the linear-elastic conjugate response, scaled by elas_part.
-        compute_iso_s( &S[0], &P[0], C[1],C[2], dw * elas_part );
+        for(int i=0;i<(Nd*4);i++){ S[i]+=T[i]; }
         // Sum them.
         S[0]+=stress_p[0]; S[1]+=stress_p[3]; S[2]+=stress_p[5];// S[3]+=stress_p[3];
         S[4]+=stress_p[3]; S[5]+=stress_p[1]; S[6]+=stress_p[4];// S[7]+=stress_p[5];
         S[8]+=stress_p[5]; S[9]+=stress_p[4]; S[10]+=stress_p[2];// S[11]=0.0;
+#else
+        FLOAT_PHYS F[12]={
+          plas_flow[0], plas_flow[3], plas_flow[5], 0.0,
+          plas_flow[3], plas_flow[1], plas_flow[4], 0.0,
+          plas_flow[5], plas_flow[4], plas_flow[2], 0.0 };
+#ifdef HAS_PRAGMA_SIMD
+#pragma omp simd
+#endif
+        for(int i=0;i<3;i++){
+          for(int j=0;j<4;j++){
+            for(int k=0;k<3;k++){
+              for(int l=0;l<4;l++){
+                T[4* i+j ]+= F[4* i+j ] * F[4* k+l ] * P[4* k+l ] * hard_eff*dw;
+              }
+            }
+          }
+        }
+        for(int i=0;i<(Nd*4);i++){ S[i]+=T[i]; }
+#endif
       }// if plastic ----------------------------------------------------------
       else{// Linear-elastic conj response only
         compute_iso_s( &S[0], &P[0], C[1],C[2], dw );
