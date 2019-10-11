@@ -311,6 +311,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 }
 #endif
 #else
+#if 0
         FLOAT_PHYS VECALIGNED D[6*Nv];
         for(int i=0;i<3;i++){
           for(int j=0;j<Nw;j++){// top left side
@@ -328,13 +329,34 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
             D[Nv* i+j +3*Nv] = hard_eff * plas_flow[i+Nw] * plas_flow[j];
           }
         }
-        for(int i=0 ;i<3;i++){ D[Nv* i+i   ]+= shear_eff*2.0; }
-        for(int i=0 ;i<3;i++){ D[3*Nv+Nw + (Nv+1)*i]+= shear_eff; }
-        for(int i=0 ;i<3;i++){
+        for(int i=0 ;i<3;i++){ D[Nv* i+i   ]+= shear_eff*2.0; }// Top-left
+        for(int i=0 ;i<3;i++){ D[3*Nv+Nw + (Nv+1)*i]+= shear_eff; }// Bot-right
+        for(int i=0 ;i<3;i++){// top-left
           for(int j=0 ;j<3;j++){
             D[Nv* i+j ]+= lambda_eff;
           }
         }
+#else
+        FLOAT_PHYS VECALIGNED D[6*Nv];
+        for(int i=0;i<3;i++){
+          for(int j=0;j<Nw;j++){// top left side
+            D[Nv* i+j ] = hard_eff * plas_flow[i] * plas_flow[j] + lambda_eff;
+          }
+          D[Nv* i+i ]+= shear_eff*2.0;
+          for(int j=Nw;j<Nv;j++){// top right side
+            D[Nv* i+j ] = hard_eff * plas_flow[i] * plas_flow[j];
+          }
+        }
+        for(int i=0;i<3;i++){
+          for(int j=0;j<Nw;j++){// bottom left side
+            D[Nv* i+j +3*Nv] = hard_eff * plas_flow[i+Nw] * plas_flow[j];
+          }
+          for(int j=Nw;j<Nv;j++){// bottom right side
+            D[Nv* i+j +3*Nv] = hard_eff * plas_flow[i+Nw] * plas_flow[j];
+          }
+          D[3*Nv+Nw + (Nv+1)*i]+= shear_eff;
+        }
+#endif
 #endif
         //===================================================== end UMAT
 #if VERB_MAX>10
