@@ -239,8 +239,8 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         }
 }
 #endif
-#if 0
         FLOAT_PHYS VECALIGNED D[6*Nv];
+#if 0
         for(int i=0;i<3;i++){
           for(int j=0;j<Nw;j++){// top left side
             D[Nv* i+j ] = hard_eff * plas_flow[i] * plas_flow[j] + lambda_eff;
