@@ -59,7 +59,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
   const FLOAT_SOLV* RESTRICT C     = &matc[0];
-#ifdef VECT_C
+#if 0
   const __m256d c0 = _mm256_set_pd(0.0,C[1],C[1],C[0]);
   const __m256d c1 = _mm256_set_pd(0.0,C[1],C[0],C[1]);
   const __m256d c2 = _mm256_set_pd(0.0,C[0],C[1],C[1]);
