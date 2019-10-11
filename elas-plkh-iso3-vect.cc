@@ -317,6 +317,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           plas_flow[0], plas_flow[3], plas_flow[5], 0.0,
           plas_flow[3], plas_flow[1], plas_flow[4], 0.0,
           plas_flow[5], plas_flow[4], plas_flow[2], 0.0 };
+#if 0
         for(int i=0;i<3;i++){
           for(int j=0;j<4;j++){
             S[4* i+j ]+=T[4* i+j ];
@@ -327,6 +328,12 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
             }
           }
         }
+#else
+        for(int i=0;i<(Nd*4);i++){
+          S[i] += T[i];
+          for(int k=0;k<(Nd*4);k++){
+            S[i] += F[i] * F[k] * P[k] * hard_eff*dw; } }
+#endif
         //for(int i=0;i<(Nd*4);i++){ S[i]+=T[i]; }
 #endif
       }// if plastic ----------------------------------------------------------
