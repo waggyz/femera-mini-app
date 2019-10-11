@@ -353,12 +353,11 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       const __m256d he=_mm256_set1_pd(hard_eff) * _mm256_set1_pd(dw);
       for(int i=0;i<12;i+=4){
         const __m256d f = _mm256_load_pd(&F[i]);
-        __m256d s = _mm256_setzero_pd();
+        __m256d s = _mm256_load_pd(&S[i]) + _mm256_load_pd(&T[i]);
         for(int j=0;j<12;j++){
-          s += f *_mm256_set1_pd(F[j]) *_mm256_set1_pd(P[j]) ;
+          s += f *_mm256_set1_pd(F[j] * P[j]) * he;
         }
-        _mm256_store_pd(&S[i], s*he 
-          + _mm256_load_pd(&S[i]) + _mm256_load_pd(&T[i]));
+        _mm256_store_pd(&S[i],s);
       }
 #endif
 #endif
