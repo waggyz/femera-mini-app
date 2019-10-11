@@ -335,6 +335,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           for(int k=0;k<(Nd*4);k++){
             S[i] += F[i] * F[k] * P[k] * hard_eff*dw; } }
 #else
+      {
       const __m256d he=_mm256_set1_pd(hard_eff) * _mm256_set1_pd(dw);
       for(int i=0;i<12;i+=4){
         const __m256d f = _mm256_load_pd(&F[i]);
@@ -342,6 +343,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         for(int j=0;j<12;j++){
           s += f *_mm256_set1_pd(F[j] * P[j]) * he; }
         _mm256_store_pd(&S[i],s);
+      }
       }
 #endif
 #endif
@@ -634,17 +636,18 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
             S[i] += F[i] * F[k] * H[k] * hard_eff * dw;
           } }
 #else
-      const __m256d d1=_mm256_set1_pd(dw);
-      const __m256d ep=_mm256_set1_pd(elas_part);
-      const __m256d he=_mm256_set1_pd(hard_eff);
+      {
+      const __m256d ep=_mm256_set1_pd(elas_part*dw);
+      const __m256d he=_mm256_set1_pd(hard_eff*dw);
       for(int i=0;i<12;i+=4){
         const __m256d f =_mm256_load_pd(&F[i]);
         __m256d s = _mm256_setzero_pd();
         for(int j=0;j<12;j++){
           s += f *_mm256_set1_pd( F[j] * H[j] );
         }
-        _mm256_store_pd(&S[i], d1 * ( s*he + _mm256_load_pd( &S[i] )*ep )
+        _mm256_store_pd(&S[i], s*he + _mm256_load_pd( &S[i] )*ep
           + _mm256_load_pd(&T[i]) );
+      }
       }
 #endif
 #endif
