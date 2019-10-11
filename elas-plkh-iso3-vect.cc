@@ -317,19 +317,17 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           plas_flow[0], plas_flow[3], plas_flow[5], 0.0,
           plas_flow[3], plas_flow[1], plas_flow[4], 0.0,
           plas_flow[5], plas_flow[4], plas_flow[2], 0.0 };
-#ifdef HAS_PRAGMA_SIMD
-#pragma omp simd
-#endif
         for(int i=0;i<3;i++){
           for(int j=0;j<4;j++){
+            S[4* i+j ]+=T[4* i+j ];
             for(int k=0;k<3;k++){
               for(int l=0;l<4;l++){
-                T[4* i+j ]+= F[4* i+j ] * F[4* k+l ] * P[4* k+l ] * hard_eff*dw;
+                S[4* i+j ]+= F[4* i+j ] * F[4* k+l ] * P[4* k+l ] * hard_eff*dw;
               }
             }
           }
         }
-        for(int i=0;i<(Nd*4);i++){ S[i]+=T[i]; }
+        //for(int i=0;i<(Nd*4);i++){ S[i]+=T[i]; }
 #endif
       }// if plastic ----------------------------------------------------------
       else{// Linear-elastic conj response only
