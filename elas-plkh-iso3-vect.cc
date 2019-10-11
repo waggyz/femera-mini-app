@@ -273,6 +273,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         d7+=_mm256_set_pd( 0.0,0.0,0.0,shear_eff );
         d9+=_mm256_permute4x64_pd( d7, _MM_SHUFFLE(3,2,0,1) );
         d11+=_mm256_permute4x64_pd( d7, _MM_SHUFFLE(3,0,2,1) );
+        //d11+=_mm256_permute4x64_pd( d7, _MM_SHUFFLE(1,0,3,2) );//FIXME Better?
         d0+=d7*2.0;
         d2+=d9*2.0;
         d4+=d11*2.0;

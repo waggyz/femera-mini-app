@@ -49,12 +49,12 @@ int NCG::BC0(Elem* E, Phys* Y ){// printf("*** NCG::BC0(E,Y) ***\n");
   INT_MESH n; INT_DOF f; FLOAT_PHYS v;
   for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
     this->part_d[Dn* n+uint(f)]=0.0;
-    this->part_0[Dn* n+uint(f)]=0.0;
+    //this->part_0[Dn* n+uint(f)]=0.0;
     this->part_b[Dn* n+uint(f)]=0.0;//FIXME apply to part_b?
   }
   for(auto t : E->bc0_nf   ){ std::tie(n,f)=t;
     this->part_d[Dn* n+uint(f)]=0.0;
-    this->part_0[Dn* n+uint(f)]=0.0;
+    //this->part_0[Dn* n+uint(f)]=0.0;
     this->part_b[Dn* n+uint(f)]=0.0;
     #if VERB_MAX>10
     printf("BC0: [%i]:0\n",E->bc0_nf[i]);
@@ -307,7 +307,8 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp simd
 #endif
     for(uint i=0; i<sysn; i++){
-      S->part_r[i] = S->part_b[i] - S->part_0[i] * S->part_f[i];
+      //S->part_r[i] = S->part_b[i] - S->part_0[i] * S->part_f[i];
+      S->part_r[i] = S->part_b[i] - (S->part_d[i]!=0.0) * S->part_f[i];
       // Initial search (p) is preconditioned grad descent of (r)
       S->part_p[i] = S->part_r[i] * S->part_d[i];
     }
@@ -482,8 +483,15 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 #pragma omp simd reduction(+:glob_sum1,glob_sum2)
 #endif
     for(INT_MESH i=hl0; i<sysn; i++){
-      glob_sum1+= S->part_p[i] * S->part_r[i];// alpha numerator
-      glob_sum2+= S->part_p[i] * S->part_0[i]*(S->part_g[i] - S->part_f[i]);//denom
+      glob_sum1+= S->part_p[i] * S->part_r[i];// alpha numerator; denom below
+      //glob_sum2+= S->part_p[i] * S->part_0[i]*(S->part_g[i] - S->part_f[i]);
+      glob_sum2+= S->part_p[i] * (S->part_d[i]!=0.0)*(S->part_g[i] - S->part_f[i]);
+#if VERB_MAX>11
+#pragma omp critical(print)
+      //printf(" %g:%9.2e ",S->part_0[i],S->part_d[i]);
+      printf("%i",(std::abs(S->part_0[i])<1e-60) == ( std::abs(S->part_d[i]) <1e-60 ) );
+      if(i==(sysn-1)){ printf("\n"); }
+#endif
     }//                                                              (6*N FLOP)
     time_accum( my_solv_count, solv_start );
   }
@@ -565,7 +573,8 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 #if 0
       S->part_f[i]*= S->part_0[i];// better to apply where used
 #endif
-      S->part_r[i] = S->part_b[i] - S->part_0[i] * S->part_f[i]; }
+      //S->part_r[i] = S->part_b[i] - S->part_0[i] * S->part_f[i]; }
+      S->part_r[i] = S->part_b[i] - (S->part_d[i]!=0.0) * S->part_f[i]; }
 #ifdef HAS_PRAGMA_SIMD
 #pragma omp simd reduction(+:glob_sum3,glob_sum4,glob_sum5)
 #endif
