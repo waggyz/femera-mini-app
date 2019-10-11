@@ -925,4 +925,16 @@ static inline void compute_iso_s(FLOAT_PHYS* S, const FLOAT_PHYS* H,
   S[6]=( H[6] + H[9] )*C2*dw;// S[7]= S[5];//Syz Szy
   S[4]=S[1]; S[9]=S[6]; S[8]=S[2];
 }
+static inline void compute_iso_s(FLOAT_PHYS* S, const FLOAT_PHYS* H,
+  const FLOAT_PHYS lambda, const FLOAT_PHYS mu, const FLOAT_PHYS dw){
+  // S = mu * (H+H^T) + lambda * I * ( H[0]+H[5]+H[10] )
+  for(int i=0; i<3; i++){
+    for(int j=0; j<4; j++){ S[4* i+j] = H[4* i+j] * mu * dw; } }
+  const FLOAT_PHYS tr = (H[0]+H[5]+H[10]) * lambda * dw;
+  S[0]=2.0*S[0]+tr; S[5]=2.0*S[5]+tr; S[10]=2.0*S[10]+tr;
+  S[1]+= H[4];
+  S[2]+= H[8];
+  S[6]+= H[9];
+  S[4]=S[1]; S[9]=S[6]; S[8]=S[2];
+}
 #endif
