@@ -586,15 +586,15 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
       glob_sum5 += S->part_r[i] * S->part_r[i];
 #else
       // PolakRibiere (SM default)
-#if 1
+#if 0
+      glob_sum3 += S->part_r[i] * S->part_d[i] *(S->part_r[i] - S->prev_r[i]);
+      glob_sum4 += S->prev_r[i] * S->part_d[i] * S->prev_r[i];
+      glob_sum5 += S->part_r[i] * S->part_r[i];
+#else
       const FLOAT_SOLV r2 =  S->part_r[i] * S->part_r[i];
       glob_sum5 += r2;
       glob_sum3 += S->part_d[i] * ( r2 - S->part_r[i] * S->prev_r[i] );
       glob_sum4 += S->prev_r[i] * S->part_d[i] * S->prev_r[i];
-#else
-      glob_sum3 += S->part_r[i] * S->part_d[i] *(S->part_r[i] - S->prev_r[i]);
-      glob_sum4 += S->prev_r[i] * S->part_d[i] * S->prev_r[i];
-      glob_sum5 += S->part_r[i] * S->part_r[i];
 #endif
 #endif
     }//                                                              (9*N FLOP)
