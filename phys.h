@@ -927,8 +927,8 @@ static inline void compute_iso_s(FLOAT_PHYS* S, const FLOAT_PHYS* H,
 }
 static inline void compute_iso_s(FLOAT_PHYS* S, const FLOAT_PHYS* H,
   const FLOAT_PHYS lambda, const FLOAT_PHYS mu, const FLOAT_PHYS dw){
+  //FIXME This is slower...
   // S = mu * (H+H^T) + lambda * I * ( H[0]+H[5]+H[10] )
-#pragma omp simd
   for(int i=0; i<3; i++){
     for(int j=0; j<4; j++){ S[4* i+j] = H[4* i+j] * mu * dw *2.0; } }
   const FLOAT_PHYS tr = (H[0]+H[5]+H[10]) * lambda * dw;

@@ -159,8 +159,8 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           std::memcpy(& jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj );
 #endif
       } }
-      //compute_iso_s( &S[0], &H[0],C[2],c0,c1,c2, 1.0 );// Linear stress response
-      compute_iso_s( &S[0], &H[0], C[1],C[2], 1.0 );
+      compute_iso_s( &S[0], &H[0],C[2],c0,c1,c2, 1.0 );// Linear stress response
+      //compute_iso_s( &S[0], &H[0], C[1],C[2], 1.0 );
       //NOTE Only the deviatoric part of elas_v is used.
 #ifdef TEST_AVX
       FLOAT_PHYS VECALIGNED elas_devi_v[8]={
@@ -446,8 +446,8 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #endif
         }
         // Compute the linear-elastic conjugate response, scaled by elas_part.
-        //compute_iso_s( &S[0], &P[0],C[2],c0,c1,c2, dw * elas_part );
-        compute_iso_s( &S[0], &P[0], C[1],C[2], dw * elas_part );
+        compute_iso_s( &S[0], &P[0],C[2],c0,c1,c2, dw * elas_part );
+        //compute_iso_s( &S[0], &P[0], C[1],C[2], dw * elas_part );
         // Sum them.
 #if 0
         S[0]+=stress_p[0]; S[1]+=stress_p[4]; S[2]+=stress_p[6];// S[3]+=stress_p[3];
@@ -460,8 +460,8 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #endif
       }// if plastic ----------------------------------------------------------
       else{// Linear-elastic conj response only
-        //compute_iso_s( &S[0], &P[0],C[2],c0,c1,c2, dw );
-        compute_iso_s( &S[0], &P[0], C[1],C[2], dw );
+        compute_iso_s( &S[0], &P[0],C[2],c0,c1,c2, dw );
+        //compute_iso_s( &S[0], &P[0], C[1],C[2], dw );
       }
       if(ip==0){
         for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
@@ -610,8 +610,8 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
           std::memcpy(& jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj );
 #endif
       } }
-      //compute_iso_s( &S[0], &H[0],C[2],c0,c1,c2, 1.0 );// Linear stress response
-      compute_iso_s( &S[0], &H[0], C[1],C[2], 1.0 );
+      compute_iso_s( &S[0], &H[0],C[2],c0,c1,c2, 1.0 );// Linear stress response
+      //compute_iso_s( &S[0], &H[0], C[1],C[2], 1.0 );
       //NOTE Only the deviatoric part of elas_v is used.
       FLOAT_PHYS VECALIGNED elas_devi_v[6]={
         S[0], S[5], S[10], S[1], S[6], S[2] };// sxx, syy, szz,  sxy, syz, sxz
@@ -718,8 +718,8 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
           stress_p[i]*= dw;
         }
         // Compute the linear-elastic response, scaled by elas_part.
-        //compute_iso_s( &S[0], &H[0],C[2],c0,c1,c2, dw * elas_part );
-        compute_iso_s( &S[0], &H[0], C[1],C[2], dw * elas_part );
+        compute_iso_s( &S[0], &H[0],C[2],c0,c1,c2, dw * elas_part );
+        //compute_iso_s( &S[0], &H[0], C[1],C[2], dw * elas_part );
         // Sum them.
         S[0]+=stress_p[0]; S[1]+=stress_p[3]; S[2]+=stress_p[5];// S[3]=stress_p[3];
         S[4]+=stress_p[3]; S[5]+=stress_p[1]; S[6]+=stress_p[4];// S[7]=stress_p[5];
