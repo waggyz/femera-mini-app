@@ -163,7 +163,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       } }
 #ifdef VECT_C
       //compute_iso_s( &S[0], &H[0],C[2],c0,c1,c2, dw );
-      compute_iso_s( &S[0], &H[0], C[1],C[2], dw );
+      compute_iso_s( &S[0], &H[0], C[1]*dw,C[2]*dw );
 #if VERB_MAX>10
       if(ie==4){
         printf( "S[%u]:", ie );
