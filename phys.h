@@ -549,118 +549,16 @@ private:
 //FIXME These inline intrinsics functions should be in the class where used.
 static inline void accumulate_f( __m256d* vf,
   const __m256d* a, const FLOAT_PHYS* G, const int Nc ){
-  //FIXME Replace elem_p with Nc (number of nodes)
-  const __m256d a036=a[0];const __m256d a147=a[1];const __m256d a258=a[2];
   for(int i=0; i<Nc; i++){
     __m256d g0,g1,g2;
     g0 = _mm256_set1_pd(G[4*i  ]);
     g1 = _mm256_set1_pd(G[4*i+1]);
     g2 = _mm256_set1_pd(G[4*i+2]);
     vf[i]= _mm256_add_pd(vf[i],
-      _mm256_add_pd(_mm256_mul_pd(g0,a036),
-        _mm256_add_pd(_mm256_mul_pd(g1,a147),
-          _mm256_mul_pd(g2,a258))));
+      _mm256_add_pd(_mm256_mul_pd(g0,a[0]),
+        _mm256_add_pd(_mm256_mul_pd(g1,a[1]),
+          _mm256_mul_pd(g2,a[2]))));
   }
-#if 0
-  for(int i=0; i<2; i++){
-    __m256d g0,g1,g2, g3,g4,g5;
-    g0 = _mm256_set1_pd(G[8*i  ]);
-    g1 = _mm256_set1_pd(G[8*i+1]);
-    g2 = _mm256_set1_pd(G[8*i+2]);
-    vf[2*i]= _mm256_add_pd(vf[2*i],
-      _mm256_add_pd(_mm256_mul_pd(g0,a036),
-        _mm256_add_pd(_mm256_mul_pd(g1,a147),
-          _mm256_mul_pd(g2,a258))));
-    g3 = _mm256_set1_pd(G[8*i+4]);
-    g4 = _mm256_set1_pd(G[8*i+5]);
-    g5 = _mm256_set1_pd(G[8*i+6]);
-    vf[2*i+1]= _mm256_add_pd(vf[2*i+1],
-      _mm256_add_pd(_mm256_mul_pd(g3,a036),
-        _mm256_add_pd(_mm256_mul_pd(g4,a147),
-          _mm256_mul_pd(g5,a258))));
-  }
-  if(elem_p>1){
-    for(int i=2; i<5; i++){
-    __m256d g0,g1,g2, g3,g4,g5;
-    g0 = _mm256_set1_pd(G[8*i  ]);
-    g1 = _mm256_set1_pd(G[8*i+1]);
-    g2 = _mm256_set1_pd(G[8*i+2]);
-    vf[2*i]= _mm256_add_pd(vf[2*i],
-      _mm256_add_pd(_mm256_mul_pd(g0,a036),
-        _mm256_add_pd(_mm256_mul_pd(g1,a147),
-          _mm256_mul_pd(g2,a258))));
-    g3 = _mm256_set1_pd(G[8*i+4]);
-    g4 = _mm256_set1_pd(G[8*i+5]);
-    g5 = _mm256_set1_pd(G[8*i+6]);
-    vf[2*i+1]= _mm256_add_pd(vf[2*i+1],
-      _mm256_add_pd(_mm256_mul_pd(g3,a036),
-        _mm256_add_pd(_mm256_mul_pd(g4,a147),
-          _mm256_mul_pd(g5,a258))));
-    }
-  }
-  if(elem_p>2){
-    for(int i=5; i<10; i++){
-    __m256d g0,g1,g2, g3,g4,g5;
-    g0 = _mm256_set1_pd(G[8*i  ]);
-    g1 = _mm256_set1_pd(G[8*i+1]);
-    g2 = _mm256_set1_pd(G[8*i+2]);
-    vf[2*i]= _mm256_add_pd(vf[2*i],
-      _mm256_add_pd(_mm256_mul_pd(g0,a036),
-        _mm256_add_pd(_mm256_mul_pd(g1,a147),
-          _mm256_mul_pd(g2,a258))));
-    g3 = _mm256_set1_pd(G[8*i+4]);
-    g4 = _mm256_set1_pd(G[8*i+5]);
-    g5 = _mm256_set1_pd(G[8*i+6]);
-    vf[2*i+1]= _mm256_add_pd(vf[2*i+1],
-      _mm256_add_pd(_mm256_mul_pd(g3,a036),
-        _mm256_add_pd(_mm256_mul_pd(g4,a147),
-          _mm256_mul_pd(g5,a258))));
-    }
-  }
-#endif
-#if 0
-//  switch(elem_p){
-//    case(1):
-  for(int i=0; i<4; i++){
-    __m256d g0,g1,g2;
-    g0 = _mm256_set1_pd(G[4*i  ]);
-    g1 = _mm256_set1_pd(G[4*i+1]);
-    g2 = _mm256_set1_pd(G[4*i+2]);
-    vf[i]= _mm256_add_pd(vf[i],
-      _mm256_add_pd(_mm256_mul_pd(g0,a036),
-        _mm256_add_pd(_mm256_mul_pd(g1,a147),
-          _mm256_mul_pd(g2,a258))));
-  }
-//  break;
-//    case(2): for(int i=0; i<10; i++){
-  if(elem_p>1){
-    for(int i=4; i<10; i++){
-      __m256d g0,g1,g2;
-      g0 = _mm256_set1_pd(G[4*i  ]);
-      g1 = _mm256_set1_pd(G[4*i+1]);
-      g2 = _mm256_set1_pd(G[4*i+2]);
-      vf[i]= _mm256_add_pd(vf[i],
-        _mm256_add_pd(_mm256_mul_pd(g0,a036),
-          _mm256_add_pd(_mm256_mul_pd(g1,a147),
-            _mm256_mul_pd(g2,a258))));
-    }
-//  break;
-//    case(3): for(int i=0; i<20; i++){
-  if(elem_p>2){
-    for(int i=10; i<20; i++){
-      __m256d g0,g1,g2;
-      g0 = _mm256_set1_pd(G[4*i  ]);
-      g1 = _mm256_set1_pd(G[4*i+1]);
-      g2 = _mm256_set1_pd(G[4*i+2]);
-      vf[i]= _mm256_add_pd(vf[i],
-        _mm256_add_pd(_mm256_mul_pd(g0,a036),
-          _mm256_add_pd(_mm256_mul_pd(g1,a147),
-            _mm256_mul_pd(g2,a258))));
-    }
-  }
-  }
-//  }
-#endif
 }
 static inline void rotate_s( __m256d* a,
   const FLOAT_PHYS* R, const FLOAT_PHYS* S ){
