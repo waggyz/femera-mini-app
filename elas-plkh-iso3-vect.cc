@@ -373,7 +373,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       else{// Linear-elastic conj response only
         compute_iso_s( &vS[0], &vP[0], C[1]*dw,C[2]*dw );
       }
-      if(ip==0){
+      if(ip==0){//FIXME Unroll this for Nc=4,10,20 for better performance?
         for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
       }
       accumulate_f( &vf[0], &vS[0], &G[0], Nc );

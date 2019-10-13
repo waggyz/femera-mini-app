@@ -549,15 +549,54 @@ private:
 //FIXME These inline intrinsics functions should be in the class where used.
 static inline void accumulate_f( __m256d* vf,
   const __m256d* a, const FLOAT_PHYS* G, const int Nc ){
-  for(int i=0; i<Nc; i++){
-    __m256d g0,g1,g2;
-    g0 = _mm256_set1_pd(G[4*i  ]);
-    g1 = _mm256_set1_pd(G[4*i+1]);
-    g2 = _mm256_set1_pd(G[4*i+2]);
-    vf[i]= _mm256_add_pd(vf[i],
-      _mm256_add_pd(_mm256_mul_pd(g0,a[0]),
-        _mm256_add_pd(_mm256_mul_pd(g1,a[1]),
-          _mm256_mul_pd(g2,a[2]))));
+  switch(Nc){
+    case( 4):
+      for(int i=0; i< 4; i++){
+        __m256d g0,g1,g2;
+        g0 = _mm256_set1_pd(G[4*i  ]);
+        g1 = _mm256_set1_pd(G[4*i+1]);
+        g2 = _mm256_set1_pd(G[4*i+2]);
+        vf[i]= _mm256_add_pd(vf[i],
+          _mm256_add_pd(_mm256_mul_pd(g0,a[0]),
+            _mm256_add_pd(_mm256_mul_pd(g1,a[1]),
+              _mm256_mul_pd(g2,a[2]))));
+      }
+      break;
+    case(10):
+      for(int i=0; i<10; i++){
+        __m256d g0,g1,g2;
+        g0 = _mm256_set1_pd(G[4*i  ]);
+        g1 = _mm256_set1_pd(G[4*i+1]);
+        g2 = _mm256_set1_pd(G[4*i+2]);
+        vf[i]= _mm256_add_pd(vf[i],
+          _mm256_add_pd(_mm256_mul_pd(g0,a[0]),
+            _mm256_add_pd(_mm256_mul_pd(g1,a[1]),
+              _mm256_mul_pd(g2,a[2]))));
+      }
+      break;
+    case(20):
+      for(int i=0; i<20; i++){
+        __m256d g0,g1,g2;
+        g0 = _mm256_set1_pd(G[4*i  ]);
+        g1 = _mm256_set1_pd(G[4*i+1]);
+        g2 = _mm256_set1_pd(G[4*i+2]);
+        vf[i]= _mm256_add_pd(vf[i],
+          _mm256_add_pd(_mm256_mul_pd(g0,a[0]),
+            _mm256_add_pd(_mm256_mul_pd(g1,a[1]),
+              _mm256_mul_pd(g2,a[2]))));
+      }
+      break;
+    default:
+      for(int i=0; i<Nc; i++){
+        __m256d g0,g1,g2;
+        g0 = _mm256_set1_pd(G[4*i  ]);
+        g1 = _mm256_set1_pd(G[4*i+1]);
+        g2 = _mm256_set1_pd(G[4*i+2]);
+        vf[i]= _mm256_add_pd(vf[i],
+          _mm256_add_pd(_mm256_mul_pd(g0,a[0]),
+            _mm256_add_pd(_mm256_mul_pd(g1,a[1]),
+              _mm256_mul_pd(g2,a[2]))));
+    }
   }
 }
 static inline void rotate_s( __m256d* a,
