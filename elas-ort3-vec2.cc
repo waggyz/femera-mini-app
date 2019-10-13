@@ -59,6 +59,10 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
     mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
     mtrl_rotc[6],mtrl_rotc[7],mtrl_rotc[8],0.0};
+  const __m256d vR[3]={
+    _mm256_load_pd(&R[0]),
+    _mm256_loadu_pd(&R[3]),
+    _mm256_loadu_pd(&R[6]) };
   //      FLOAT_SOLV* RESTRICT sysf  = &part_f[0];
 #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
@@ -84,15 +88,22 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       std::memcpy( &jac, &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
 #endif
   const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
-  const __m256d j0 = _mm256_load_pd(&jac[0]);  // j0 = [j3 j2 j1 j0]
-  const __m256d j1 = _mm256_loadu_pd(&jac[3]); // j1 = [j6 j5 j4 j3]
-  const __m256d j2 = _mm256_loadu_pd(&jac[6]); // j2 = [j9 j8 j7 j6]
+#if 0
+    const __m256d j0 = _mm256_load_pd (&jac[0]);  // j0 = [j3 j2 j1 j0]
+    const __m256d j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
+    const __m256d j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
+#else
+    const __m256d vJ[3]={
+      _mm256_load_pd(&jac[0]),
+      _mm256_loadu_pd(&jac[3]),
+      _mm256_loadu_pd(&jac[6]) };
+#endif
   {// Scope vf registers
   __m256d vf[Nc];
   for(int ip=0; ip<intp_n; ip++){
     //G = MatMul3x3xN( jac,shg );
     //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
-    rotate_g_h( &G[0],&H[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne], &R[0], &u[0] );
+    rotate_g_h( &G[0],&H[0], Ne, &vJ[0], &intp_shpg[ip*Ne], &R[0], &u[0] );
     const FLOAT_PHYS dw = jac[9] * wgt[ip];
     if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
 #ifdef FETCH_JAC
@@ -109,10 +120,9 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     // [H][RT] : matmul3x3x3T
     compute_ort_s_voigt( &S[0], &H[0],&C[0],c0,c1,c2, dw );
     // [S][R] : matmul3x3x3, R is transposed
-    //accumulate_f( &f[0], &part_f[0], &conn[0], &R[0], &S[0], &G[0] );
     {// begin scoping unit
     __m256d vS[3];
-    rotate_s_voigt( &vS[0], &R[0], &S[0] );
+    rotate_s_voigt( &vS[0], &vR[0], &S[0] );
     // initialize element f
 #if 0
     // Hmm... switch case is slower...

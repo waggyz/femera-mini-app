@@ -120,9 +120,16 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       std::memcpy( &jac, &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
 #endif
     const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
+#if 0
     const __m256d j0 = _mm256_load_pd (&jac[0]);  // j0 = [j3 j2 j1 j0]
     const __m256d j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
     const __m256d j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
+#else
+    const __m256d vJ[3]={
+      _mm256_load_pd(&jac[0]),
+      _mm256_loadu_pd(&jac[3]),
+      _mm256_loadu_pd(&jac[6]) };
+#endif
   {// Scope vf registers
   __m256d vf[Nc];
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
@@ -135,7 +142,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #endif
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
-      compute_g_p_h( &G[0],&vP[0],&vH[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne],
+      compute_g_p_h( &G[0],&vP[0],&vH[0], Ne, &vJ[0], &intp_shpg[ip*Ne],
                      &p[0],&u[0] );
 #if 0
       _mm256_store_pd(&H[0],vH[0]);
@@ -471,9 +478,16 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
       std::memcpy( &jac, &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
 #endif
     const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
+#if 0
     const __m256d j0 = _mm256_load_pd (&jac[0]);  // j0 = [j3 j2 j1 j0]
     const __m256d j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
     const __m256d j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
+#else
+    const __m256d vJ[3]={
+      _mm256_load_pd(&jac[0]),
+      _mm256_loadu_pd(&jac[3]),
+      _mm256_loadu_pd(&jac[6]) };
+#endif
   {// Scope vf registers
   __m256d vf[Nc];
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
@@ -486,7 +500,7 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
 #endif
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
-      compute_g_h( &G[0],&vH[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne],&u[0] );
+      compute_g_h( &G[0],&vH[0], Ne, &vJ[0], &intp_shpg[ip*Ne],&u[0] );
       _mm256_store_pd(&H[0],vH[0]);
       _mm256_store_pd(&H[4],vH[1]);
       _mm256_store_pd(&H[8],vH[2]);
