@@ -8,6 +8,7 @@
 // Fetch next u within G,H loop nest
 #undef FETCH_U_EARLY
 #define COMPRESS_STATE
+//
 #undef TEST_AVX
 //NOTE Prefetch state only works when compressed.
 //
@@ -83,8 +84,6 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #endif
   FLOAT_MESH VECALIGNED jac[Nj];
   FLOAT_PHYS VECALIGNED G[Nt], u[Ne], p[Ne];
-  FLOAT_PHYS VECALIGNED H[Nd*4],P[Nd*4], S[Nd*4];//FIXME S size
-  //
   FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
   FLOAT_PHYS VECALIGNED wgt[intp_n];
   FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
@@ -125,7 +124,8 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
     const __m256d j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
     const __m256d j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
   {// Scope vf registers
-  __m256d vf[Nc];//, vP[3], vH[3];
+  __m256d vf[Nc], vH[Nd], vP[Nd], vS[Nd];
+  FLOAT_PHYS VECALIGNED P[Nd*4], S[Nd*4];//FIXME Factor these out
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
 #ifdef COMPRESS_STATE
       std::memcpy( &back_v[1], &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
@@ -134,9 +134,16 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #endif
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
-      compute_g_p_h( &G[0],&P[0],&H[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne],
+      compute_g_p_h( &G[0],&vP[0],&vH[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne],
                      &p[0],&u[0] );
-      //H[0]=vH[0]; H[4]=vH[1]; H[8]=vH[2];
+#if 0
+      _mm256_store_pd(&H[0],vH[0]);
+      _mm256_store_pd(&H[4],vH[1]);
+      _mm256_store_pd(&H[8],vH[2]);
+#endif
+      _mm256_store_pd(&P[0],vP[0]);
+      _mm256_store_pd(&P[4],vP[1]);
+      _mm256_store_pd(&P[8],vP[2]);
 #if VERB_MAX>10
       printf( "Small Strains Transposed (Elem: %i):", ie );
       for(int j=0;j<12;j++){
@@ -161,7 +168,10 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           std::memcpy(& jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj );
 #endif
       } }
-      compute_iso_s( &S[0], &H[0], C[1],C[2] );// Linear stress response
+      compute_iso_s( &vS[0], &vH[0], C[1],C[2] );// Linear stress response
+      _mm256_store_pd(&S[0],vS[0]);
+      _mm256_store_pd(&S[4],vS[1]);
+      _mm256_store_pd(&S[8],vS[2]);
       //NOTE Only the deviatoric part of elas_v is used.
       FLOAT_PHYS VECALIGNED elas_devi_v[6]={
         S[0], S[5], S[10], S[1], S[6], S[2] };// sxx, syy, szz,  sxy, syz, sxz
@@ -293,10 +303,18 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #endif
         // Calculate conjugate stress from conjugate strain.
         // Compute the linear-elastic conjugate response, scaled by elas_part.
-        compute_iso_s( &S[0], &P[0], C[1]*elas_part*dw, C[2]*elas_part*dw );
+        compute_iso_s( &vS[0], &vP[0], C[1]*elas_part*dw, C[2]*elas_part*dw );
         // Compute the plastic conjugate response.
-        FLOAT_PHYS VECALIGNED T[Nd*4];
-        compute_iso_s( &T[0], &P[0], lambda_eff*dw, shear_eff*dw );
+        __m256d vT[Nd];
+        compute_iso_s( &vT[0], &vP[0], lambda_eff*dw, shear_eff*dw );
+#if 0
+      _mm256_store_pd(&S[0],vS[0]);
+      _mm256_store_pd(&S[4],vS[1]);
+      _mm256_store_pd(&S[8],vS[2]);
+      _mm256_store_pd(&T[0],vT[0]);
+      _mm256_store_pd(&T[4],vT[1]);
+      _mm256_store_pd(&T[8],vT[2]);
+#endif
 #if 0
         FLOAT_PHYS VECALIGNED stress_p[6];
         {
@@ -323,6 +341,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           for(int k=0;k<(Nd*4);k++){
             S[i] += F[i] * F[k] * P[k] * hard_eff*dw; } }
 #else
+#if 0
       {//FIXME Double or halve shear terms?
       const __m256d he=_mm256_set1_pd( hard_eff * dw );
       for(int i=0;i<12;i+=4){
@@ -332,12 +351,26 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           s += f *_mm256_set1_pd( F[j] * P[j] ) * he; }
         _mm256_store_pd( &S[i], s ); }
       }
+      vS[0]= _mm256_load_pd( &S[0] );
+      vS[1]= _mm256_load_pd( &S[4] );
+      vS[2]= _mm256_load_pd( &S[8] );
+#else
+      {//FIXME Double or halve shear terms?
+      const __m256d he=_mm256_set1_pd( hard_eff * dw );
+      for(int i=0;i<3;i++){
+        const __m256d f = _mm256_load_pd( &F[4*i] );
+        __m256d s = vS[i] + vT[i];
+        for(int j=0;j<11;j++){
+          s += f *_mm256_set1_pd( F[j] * P[j] ) * he; }
+        vS[i] = s; }
+      }
+#endif
 #endif
         //for(int i=0;i<(Nd*4);i++){ S[i]+=T[i]; }
 #endif
       }// if plastic ----------------------------------------------------------
       else{// Linear-elastic conj response only
-        compute_iso_s( &S[0], &P[0], C[1]*dw,C[2]*dw );
+        compute_iso_s( &vS[0], &vP[0], C[1]*dw,C[2]*dw );
       }
       if(ip==0){
         for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
@@ -349,11 +382,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         }
       }
       {
-      __m256d s[3];
-      s[0] = _mm256_load_pd(&S[0]);// sxx sxy sxz | sxy
-      s[1] = _mm256_load_pd(&S[4]);// sxy syy syz | sxz
-      s[2] = _mm256_load_pd(&S[8]);// sxz syz szz | ---
-      accumulate_f( &vf[0], &s[0], &G[0], elem_p );
+      accumulate_f( &vf[0], &vS[0], &G[0], elem_p );
       }
       }//======================================================== end intp loop
 #ifdef __INTEL_COMPILER
@@ -409,8 +438,6 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
 #endif
   FLOAT_MESH VECALIGNED jac[Nj];
   FLOAT_PHYS VECALIGNED G[Nt], u[Ne];
-  FLOAT_PHYS VECALIGNED H[Nd*4], S[Nd*4];//FIXME S size
-  //
   FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
   FLOAT_PHYS VECALIGNED wgt[intp_n];
   FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
@@ -455,7 +482,8 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
     const __m256d j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
     const __m256d j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
   {// Scope vf registers
-  __m256d vf[Nc];
+  __m256d vf[Nc], vH[Nd], vS[Nd];
+  FLOAT_PHYS VECALIGNED H[Nd*4], S[Nd*4];
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
 #ifdef COMPRESS_STATE
       std::memcpy( &back_v[1], &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
@@ -464,7 +492,10 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
 #endif
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
-      compute_g_h( &G[0],&H[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne],&u[0] );
+      compute_g_h( &G[0],&vH[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne],&u[0] );
+      _mm256_store_pd(&H[0],vH[0]);
+      _mm256_store_pd(&H[4],vH[1]);
+      _mm256_store_pd(&H[8],vH[2]);
 #if VERB_MAX>10
       printf( "Small Strains Transposed (Elem: %i):", ie );
       for(int j=0;j<12;j++){
@@ -488,7 +519,10 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
           std::memcpy(& jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj );
 #endif
       } }
-      compute_iso_s( &S[0], &H[0], C[1],C[2] );// Linear stress response
+      compute_iso_s( &vS[0], &vH[0], C[1],C[2] );// Linear stress response
+      _mm256_store_pd(&S[0],vS[0]);
+      _mm256_store_pd(&S[4],vS[1]);
+      _mm256_store_pd(&S[8],vS[2]);
       //NOTE Only the deviatoric part of elas_v is used.
       FLOAT_PHYS VECALIGNED elas_devi_v[6]={
         S[0], S[5], S[10], S[1], S[6], S[2] };// sxx, syy, szz,  sxy, syz, sxz
@@ -608,8 +642,16 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
 #else
         // Calculate stress from strain.
         // Compute the plastic response.
-        FLOAT_PHYS VECALIGNED T[Nd*4];
-        compute_iso_s( &T[0], &H[0], lambda_eff*dw, shear_eff*dw );
+        __m256d VECALIGNED vT[Nd];
+        compute_iso_s( &vT[0], &vH[0], lambda_eff*dw, shear_eff*dw );
+#if 0
+      _mm256_store_pd(&S[0],vS[0]);
+      _mm256_store_pd(&S[4],vS[1]);
+      _mm256_store_pd(&S[8],vS[2]);
+      _mm256_store_pd(&T[0],vT[0]);
+      _mm256_store_pd(&T[4],vT[1]);
+      _mm256_store_pd(&T[8],vT[2]);
+#endif
         FLOAT_PHYS F[12]={
           plas_flow[0], plas_flow[3], plas_flow[5], 0.0,
           plas_flow[3], plas_flow[1], plas_flow[4], 0.0,
@@ -622,24 +664,22 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
             S[i] += F[i] * F[k] * H[k] * hard_eff * dw;
           } }
 #else
-      {//FIXME Double shear terms?
-      const __m256d ep=_mm256_set1_pd( elas_part * dw );
-      const __m256d he=_mm256_set1_pd( hard_eff * dw );
-      for(int i=0;i<12;i+=4){
-        const __m256d f =_mm256_load_pd( &F[i] );
+      for(int i=0;i<3;i++){//FIXME Double shear terms?
+        const __m256d ep=_mm256_set1_pd( elas_part * dw );
+        const __m256d he=_mm256_set1_pd( hard_eff * dw );
+        const __m256d f =_mm256_load_pd( &F[4*i] );
         __m256d s=_mm256_setzero_pd();
         for(int j=0;j<11;j++){
           s += f *_mm256_set1_pd( F[j] * H[j] );
         }
-        _mm256_store_pd( &S[i], s*he + _mm256_load_pd( &S[i] )*ep
-          + _mm256_load_pd( &T[i] ) );
-      }
+        vS[i]= s*he + vS[i]*ep + vT[i] ;
       }
 #endif
 #endif
       }// if plastic ----------------------------------------------------------
       else{// Linear-elastic response only
-        for(int i=0; i<12; i++){ S[i]*= dw; }
+        //for(int i=0; i<12; i++){ S[i]*= dw; }
+        for(int i=0; i<3; i++){ vS[i]*= dw; }
       }
       if(ip==0){
         for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
@@ -651,11 +691,7 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
         }
       }
       {
-      __m256d s[3];
-      s[0] = _mm256_load_pd(&S[0]);// sxx sxy sxz | x
-      s[1] = _mm256_load_pd(&S[4]);// sxy syy syz | x
-      s[2] = _mm256_load_pd(&S[8]);// sxz syz szz | x
-      accumulate_f( &vf[0], &s[0], &G[0], elem_p );
+      accumulate_f( &vf[0], &vS[0], &G[0], elem_p );
       }
       }//======================================================== end intp loop
 #ifdef __INTEL_COMPILER
