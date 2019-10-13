@@ -842,19 +842,21 @@ static inline void compute_iso_s(__m256d* vS, const __m256d* vH,
   // sxx sxy sxz | sxy
   // sxy syy syz | sxz
   // sxz syz szz | ---
+  __m256d Ssum=_mm256_setzero_pd();
+  {
   const __m256d z0 =_mm256_set_pd(0.0,1.0,1.0,1.0);
   const __m256d ml =_mm256_set_pd(lambda,mu,mu,mu);
-  __m256d Ssum=_mm256_setzero_pd();
   vS[0]=_mm256_permute4x64_pd( vH[0]*z0, _MM_SHUFFLE(0,2,3,1) );
   Ssum+= vS[0]*ml;
   vS[1]=_mm256_permute4x64_pd( vH[1]*z0, _MM_SHUFFLE(1,3,2,0) );
   Ssum+= vS[1]*ml;
   vS[2]=_mm256_permute4x64_pd( vH[2]*z0, _MM_SHUFFLE(2,0,1,3) );
   Ssum+= vS[2]*ml;
-  //      3   2   1   0
-  //     sxy 0.0 sxz sxx
-  //     sxy syz 0.0 syy
-  //     0.0 syz sxz szz
+  }
+  //  3   2   1   0
+  // sxy 0.0 sxz sxx
+  // sxy syz 0.0 syy
+  // 0.0 syz sxz szz
   //
   // mu*(sxy syz sxz)trace(H)*l : Ssum
 #if 0
@@ -865,6 +867,7 @@ static inline void compute_iso_s(__m256d* vS, const __m256d* vH,
   printf("Ssum\n");
   print_m256( Ssum );
 #endif
+  {
   const __m256d m2=_mm256_set_pd(2.0*mu,0.0,0.0,0.0);
 #if 0
   vS[0]= Ssum + vS[0]*m2;
@@ -882,6 +885,7 @@ static inline void compute_iso_s(__m256d* vS, const __m256d* vH,
   vS[0]=_mm256_permute4x64_pd( Ssum + vS[0]*m2, _MM_SHUFFLE(3,2,0,3) );
   vS[1]=_mm256_permute4x64_pd( Ssum + vS[1]*m2, _MM_SHUFFLE(3,1,3,0) );
   vS[2]=_mm256_permute4x64_pd( Ssum + vS[2]*m2, _MM_SHUFFLE(3,3,1,2) );
+  }
 #if 0
   printf("S step 3\n");
   print_m256( S[0] ); print_m256( S[1] ); print_m256( S[2] );
@@ -892,10 +896,12 @@ static inline void compute_iso_s(__m256d* vS, const __m256d* vH,
   _mm256_store_pd(&fH[0],vH[0]);
   _mm256_store_pd(&fH[4],vH[1]);
   _mm256_store_pd(&fH[8],vH[2]);
+  {
   const __m256d mw= _mm256_set1_pd(mu);
   _mm256_store_pd( &fS[0], mw * _mm256_load_pd(&fH[0]) );// sxx sxy sxz | sxy
   _mm256_store_pd( &fS[4], mw * _mm256_load_pd(&fH[4]) );// sxy syy syz | sxz
   _mm256_store_pd( &fS[8], mw * _mm256_load_pd(&fH[8]) );// sxz syz szz | ---
+  }
   const FLOAT_PHYS tr = (fH[0]+fH[5]+fH[10]) * lambda;
   fS[0]=2.0*fS[0]+tr; fS[5]=2.0*fS[5]+tr; fS[10]=2.0*fS[10]+tr;
   fS[1]+= fS[4];
