@@ -47,7 +47,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   FLOAT_MESH VECALIGNED jac[Nj];
   FLOAT_PHYS VECALIGNED G[Nt], u[Ne];
 #ifndef HAS_AVX
-  FLOAT_PHYS VECALIGNED H[Nd*4], S[Nd*4];//FIXME S size
+  FLOAT_PHYS VECALIGNED H[Nd*4], S[Nd*4];
 #endif
   //
   FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
@@ -106,10 +106,10 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   {// Scope vf registers
   __m256d vf[Nc];
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
-      __m256d vS[3], vH[3];
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
 #ifdef HAS_AVX
+      __m256d vH[3];
       compute_g_h( &G[0],&vH[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne], &u[0] );
 #else
 #ifdef __INTEL_COMPILER
@@ -164,17 +164,8 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
       } }
 #ifdef HAS_AVX
-#if 0
-      FLOAT_PHYS X[12]={
-        11.0,12.0,13.0,99.0,
-        12.0,22.0,23.0,99.0,
-        13.0,23.0,33.0,99.0 };
-      __m256d vX[3];
-      vX[0] = _mm256_load_pd(&X[0]);
-      vX[1] = _mm256_load_pd(&X[4]);
-      vX[2] = _mm256_load_pd(&X[8]);
-      compute_iso_s( &vS[0], &vX[0], 100.0,10.0 );
-#endif
+      {// vector register scope
+      __m256d vS[3];
       compute_iso_s( &vS[0], &vH[0], C[1]*dw,C[2]*dw );
 #if VERB_MAX>10
       if(ie==4){
@@ -216,6 +207,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       }
     }
     accumulate_f( &vf[0], &vS[0], &G[0], elem_p );
+    }// end vS register scope
 #else
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned

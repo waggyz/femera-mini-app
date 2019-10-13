@@ -768,7 +768,7 @@ static inline void compute_g_h(
   FLOAT_PHYS* G, __m256d* H,
   const int Ne, const __m256d j0,const __m256d j1,const __m256d j2,
   const FLOAT_PHYS* isp, const FLOAT_PHYS* u ){
-  H[0]=_mm256_setzero_pd(), H[1]=_mm256_setzero_pd(), H[2]=_mm256_setzero_pd();
+  H[0]=_mm256_setzero_pd(); H[1]=_mm256_setzero_pd(); H[2]=_mm256_setzero_pd();
   int ig=0;
   for(int i= 0; i<Ne; i+=9){
     __m256d u0,u1,u2,u3,u4,u5,u6,u7,u8,g0,g1,g2;
@@ -782,7 +782,7 @@ static inline void compute_g_h(
     u0 = _mm256_set1_pd(  u[i+0]);
     u1 = _mm256_set1_pd(  u[i+1]);
     u2 = _mm256_set1_pd(  u[i+2]);
-    H[0]= _mm256_add_pd(H[0], _mm256_mul_pd(g0,u0));
+    H[0] = _mm256_add_pd(H[0], _mm256_mul_pd(g0,u0));
     H[1] = _mm256_add_pd(H[1], _mm256_mul_pd(g0,u1));
     H[2] = _mm256_add_pd(H[2], _mm256_mul_pd(g0,u2));
     _mm256_store_pd(&G[ig],g0);
@@ -797,7 +797,7 @@ static inline void compute_g_h(
       u3 = _mm256_set1_pd(  u[i+3]);
       u4 = _mm256_set1_pd(  u[i+4]);
       u5 = _mm256_set1_pd(  u[i+5]);
-      H[0]= _mm256_add_pd(H[0], _mm256_mul_pd(g1,u3));
+      H[0] = _mm256_add_pd(H[0], _mm256_mul_pd(g1,u3));
       H[1] = _mm256_add_pd(H[1], _mm256_mul_pd(g1,u4));
       H[2] = _mm256_add_pd(H[2], _mm256_mul_pd(g1,u5));
       _mm256_store_pd(&G[ig],g1);

@@ -124,9 +124,10 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
     const __m256d j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
     const __m256d j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
   {// Scope vf registers
-  __m256d vf[Nc], vH[Nd], vP[Nd], vS[Nd];
-  FLOAT_PHYS VECALIGNED P[Nd*4], S[Nd*4];//FIXME Factor these out
+  __m256d vf[Nc];
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
+      __m256d vH[Nd], vP[Nd], vS[Nd];
+      FLOAT_PHYS VECALIGNED P[Nd*4], S[Nd*4];//FIXME Factor these out
 #ifdef COMPRESS_STATE
       std::memcpy( &back_v[1], &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
 #else
@@ -482,9 +483,10 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
     const __m256d j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
     const __m256d j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
   {// Scope vf registers
-  __m256d vf[Nc], vH[Nd], vS[Nd];
-  FLOAT_PHYS VECALIGNED H[Nd*4], S[Nd*4];
+  __m256d vf[Nc];
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
+      __m256d vH[Nd], vS[Nd];
+      FLOAT_PHYS VECALIGNED H[Nd*4], S[Nd*4];
 #ifdef COMPRESS_STATE
       std::memcpy( &back_v[1], &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
 #else
