@@ -6,8 +6,7 @@
 #include <immintrin.h>
 
 // Vectorize f calculation
-#define VECTORIZED
-#define VECT_C
+#define HAS_AVX
 // Fetch next u within G,H loop nest
 #undef FETCH_U_EARLY
 //
@@ -47,7 +46,9 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
   FLOAT_MESH VECALIGNED jac[Nj];
   FLOAT_PHYS VECALIGNED G[Nt], u[Ne];
+#ifndef HAS_AVX
   FLOAT_PHYS VECALIGNED H[Nd*4], S[Nd*4];//FIXME S size
+#endif
   //
   FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
   FLOAT_PHYS VECALIGNED wgt[intp_n];
@@ -90,7 +91,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       std::memcpy( &jac, &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
 #endif
     const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
-#ifndef VECTORIZED
+#ifndef HAS_AVX
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
 #else
@@ -105,10 +106,11 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   {// Scope vf registers
   __m256d vf[Nc];
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
+      __m256d vS[3], vH[3];
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
-#ifdef VECTORIZED
-      compute_g_h( &G[0],&H[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne], &u[0] );
+#ifdef HAS_AVX
+      compute_g_h( &G[0],&vH[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne], &u[0] );
 #else
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
@@ -161,9 +163,19 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
           std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj );
 #endif
       } }
-#ifdef VECT_C
-      //compute_iso_s( &S[0], &H[0],C[2],c0,c1,c2, dw );
-      compute_iso_s( &S[0], &H[0], C[1]*dw,C[2]*dw );
+#ifdef HAS_AVX
+#if 0
+      FLOAT_PHYS X[12]={
+        11.0,12.0,13.0,99.0,
+        12.0,22.0,23.0,99.0,
+        13.0,23.0,33.0,99.0 };
+      __m256d vX[3];
+      vX[0] = _mm256_load_pd(&X[0]);
+      vX[1] = _mm256_load_pd(&X[4]);
+      vX[2] = _mm256_load_pd(&X[8]);
+      compute_iso_s( &vS[0], &vX[0], 100.0,10.0 );
+#endif
+      compute_iso_s( &vS[0], &vH[0], C[1]*dw,C[2]*dw );
 #if VERB_MAX>10
       if(ie==4){
         printf( "S[%u]:", ie );
@@ -193,7 +205,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
 #endif
       //------------------------------------------------------- 18+9 = 27 FLOP
-#ifdef VECTORIZED
+#ifdef HAS_AVX
     if(ip==0){
       for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
       if(elem_p>1){
@@ -203,11 +215,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       }
       }
     }
-    __m256d a[3];
-    a[0] = _mm256_load_pd(&S[0]); // [a3 a2 a1 a0]
-    a[1] = _mm256_load_pd(&S[4]); // [a6 a5 a4 a3]
-    a[2] = _mm256_load_pd(&S[8]); // [a9 a8 a7 a6]
-    accumulate_f( &vf[0], &a[0], &G[0], elem_p );
+    accumulate_f( &vf[0], &vS[0], &G[0], elem_p );
 #else
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
@@ -251,4 +259,4 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   }//============================================================ end elem loop
   return 0;
 }
-#undef VECTORIZED
+#undef HAS_AVX

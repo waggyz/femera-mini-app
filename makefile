@@ -131,6 +131,13 @@ test : all
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
 	./femerq-$(CPUMODELC) -v1 -c$(NCPU) -p cube/unst19p1n16
 
+test-iso : mini-omp
+	./gmsh2fmr-$(CPUMODELC) -v1 \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 \
+	-M0 -E100e9 -N0.3 -ap cube/unst19p1n16;
+	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
+	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
+
 test-plastic : gmsh2fmr-ser mini-omp
 	./gmsh2fmr-$(CPUMODELC) -v1 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.005 \

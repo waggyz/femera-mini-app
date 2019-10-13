@@ -9,7 +9,6 @@
 #undef FETCH_U_EARLY
 #define COMPRESS_STATE
 #undef TEST_AVX
-#undef TEST_AVX2
 //NOTE Prefetch state only works when compressed.
 //
 int ElastPlastKHIso3D::Setup( Elem* E ){
@@ -126,7 +125,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
     const __m256d j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
     const __m256d j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
   {// Scope vf registers
-  __m256d vf[Nc];
+  __m256d vf[Nc];//, vP[3], vH[3];
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
 #ifdef COMPRESS_STATE
       std::memcpy( &back_v[1], &state[Ns*(intp_n*ie+ip)], sizeof(FLOAT_PHYS)*Ns );
@@ -137,6 +136,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       compute_g_p_h( &G[0],&P[0],&H[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne],
                      &p[0],&u[0] );
+      //H[0]=vH[0]; H[4]=vH[1]; H[8]=vH[2];
 #if VERB_MAX>10
       printf( "Small Strains Transposed (Elem: %i):", ie );
       for(int j=0;j<12;j++){
@@ -330,8 +330,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         __m256d s = _mm256_load_pd( &S[i] ) + _mm256_load_pd( &T[i] );
         for(int j=0;j<11;j++){
           s += f *_mm256_set1_pd( F[j] * P[j] ) * he; }
-        _mm256_store_pd( &S[i], s );
-      }
+        _mm256_store_pd( &S[i], s ); }
       }
 #endif
         //for(int i=0;i<(Nd*4);i++){ S[i]+=T[i]; }
@@ -345,15 +344,15 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         if(elem_p>1){
           for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
         if(elem_p>2){
-          for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+          for(int i=10;i<20; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
         }
         }
       }
       {
       __m256d s[3];
-      s[0] = _mm256_load_pd(&S[0]);// sxx sxy sxz | x
-      s[1] = _mm256_load_pd(&S[4]);// sxy syy syz | x
-      s[2] = _mm256_load_pd(&S[8]);// sxz syz szz | x
+      s[0] = _mm256_load_pd(&S[0]);// sxx sxy sxz | sxy
+      s[1] = _mm256_load_pd(&S[4]);// sxy syy syz | sxz
+      s[2] = _mm256_load_pd(&S[8]);// sxz syz szz | ---
       accumulate_f( &vf[0], &s[0], &G[0], elem_p );
       }
       }//======================================================== end intp loop
