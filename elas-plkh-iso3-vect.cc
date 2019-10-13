@@ -59,7 +59,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   const int Nw = 3;
 #endif
   const int intp_n = int(E->gaus_n);
-  const INT_ORDER elem_p =E->elem_p;
+  //const INT_ORDER elem_p =E->elem_p;
   //
 #ifdef COMPRESS_STATE
   const int        Ns           = 5;// Number of state variables/ip
@@ -374,17 +374,9 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         compute_iso_s( &vS[0], &vP[0], C[1]*dw,C[2]*dw );
       }
       if(ip==0){
-        for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
-        if(elem_p>1){
-          for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
-        if(elem_p>2){
-          for(int i=10;i<20; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
-        }
-        }
+        for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
       }
-      {
-      accumulate_f( &vf[0], &vS[0], &G[0], elem_p );
-      }
+      accumulate_f( &vf[0], &vS[0], &G[0], Nc );
       }//======================================================== end intp loop
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
@@ -413,7 +405,7 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
   const int Ne = Nf*Nc;
   const int Nt = 4*Nc;
   const int intp_n = int(E->gaus_n);
-  const INT_ORDER elem_p =E->elem_p;
+  //const INT_ORDER elem_p =E->elem_p;
   //
   //const int        Ns           = this->gvar_d;// Number of state variables/ip
 #ifdef COMPRESS_STATE
@@ -684,17 +676,9 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
         for(int i=0; i<3; i++){ vS[i]*= dw; }
       }
       if(ip==0){
-        for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
-        if(elem_p>1){
-          for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
-        if(elem_p>2){
-          for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
-        }
-        }
+        for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
       }
-      {
-      accumulate_f( &vf[0], &vS[0], &G[0], elem_p );
-      }
+      accumulate_f( &vf[0], &vS[0], &G[0], Nc );
       }//======================================================== end intp loop
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned

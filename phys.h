@@ -548,8 +548,19 @@ private:
 };
 //FIXME These inline intrinsics functions should be in the class where used.
 static inline void accumulate_f( __m256d* vf,
-  const __m256d* a, const FLOAT_PHYS* G, const int elem_p ){
+  const __m256d* a, const FLOAT_PHYS* G, const int Nc ){
+  //FIXME Replace elem_p with Nc (number of nodes)
   const __m256d a036=a[0];const __m256d a147=a[1];const __m256d a258=a[2];
+  for(int i=0; i<Nc; i++){
+    __m256d g0,g1,g2;
+    g0 = _mm256_set1_pd(G[4*i  ]);
+    g1 = _mm256_set1_pd(G[4*i+1]);
+    g2 = _mm256_set1_pd(G[4*i+2]);
+    vf[i]= _mm256_add_pd(vf[i],
+      _mm256_add_pd(_mm256_mul_pd(g0,a036),
+        _mm256_add_pd(_mm256_mul_pd(g1,a147),
+          _mm256_mul_pd(g2,a258))));
+  }
 #if 0
   for(int i=0; i<2; i++){
     __m256d g0,g1,g2, g3,g4,g5;
@@ -606,7 +617,8 @@ static inline void accumulate_f( __m256d* vf,
           _mm256_mul_pd(g5,a258))));
     }
   }
-#else
+#endif
+#if 0
 //  switch(elem_p){
 //    case(1):
   for(int i=0; i<4; i++){
@@ -685,7 +697,7 @@ static inline void compute_ort_s(FLOAT_PHYS* S, const FLOAT_PHYS* H,
   S[5]=(H[2] + H[8])*C[8]*dw; // S[2]
   S[6]=(H[6] + H[9])*C[7]*dw; // S[5]
 }
-static inline void compute_g_h(
+static inline void rotate_g_h(
   FLOAT_PHYS* G, FLOAT_PHYS* H,
   const int Ne, const __m256d j0,const __m256d j1,const __m256d j2,
   const FLOAT_PHYS* isp, const FLOAT_PHYS* R, const FLOAT_PHYS* u ){

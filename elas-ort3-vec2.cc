@@ -32,7 +32,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   const int Ne = Nf*Nc;
   const int Nt =  4*Nc;
   const int intp_n = int(E->gaus_n);
-  const INT_ORDER elem_p =E->elem_p;
+  //const INT_ORDER elem_p =E->elem_p;
 #if VERB_MAX>11
   printf("Elems:%i, IntPts:%i, Nodes/elem:%i\n",
       (int)elem_n,(int)intp_n,(int)Nc);
@@ -92,14 +92,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   for(int ip=0; ip<intp_n; ip++){
     //G = MatMul3x3xN( jac,shg );
     //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
-    compute_g_h( &G[0],&H[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne], &R[0], &u[0] );
-#if VERB_MAX>12
-    printf( "Small Strains (Elem: %i):", ie );
-    for(uint j=0;j<H.size();j++){
-      if(j%mesh_d==0){printf("\n");}
-      printf("%+9.2e ",H[j]);
-    }; printf("\n");
-#endif
+    rotate_g_h( &G[0],&H[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne], &R[0], &u[0] );
     const FLOAT_PHYS dw = jac[9] * wgt[ip];
     if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
 #ifdef FETCH_JAC
@@ -115,18 +108,11 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     // [H] Small deformation tensor
     // [H][RT] : matmul3x3x3T
     compute_ort_s( &S[0], &H[0],&C[0],c0,c1,c2, dw );
-#if VERB_MAX>12
-    printf( "Stress (Natural Coords):");
-    for(uint j=0;j<9;j++){
-      if(j%3==0){printf("\n");}
-      printf("%+9.2e ",S[j]);
-    } printf("\n");
-#endif
     // [S][R] : matmul3x3x3, R is transposed
     //accumulate_f( &f[0], &part_f[0], &conn[0], &R[0], &S[0], &G[0] );
     {// begin scoping unit
-    __m256d a[3];
-    rotate_s( &a[0], &R[0], &S[0] );
+    __m256d vS[3];
+    rotate_s( &vS[0], &R[0], &S[0] );
     // initialize element f
 #if 0
     // Hmm... switch case is slower...
@@ -144,6 +130,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       }
     }
 #else
+#if 0
     if(ip==0){
       for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
       if(elem_p>1){
@@ -153,8 +140,13 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       }
       }
     }
+#else
+    if(ip==0){
+      for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+    }
 #endif
-    accumulate_f( &vf[0], &a[0], &G[0], elem_p );
+#endif
+    accumulate_f( &vf[0], &vS[0], &G[0], Nc );
     } // end variable scope
     }//end intp loop
 #if VERB_MAX>12

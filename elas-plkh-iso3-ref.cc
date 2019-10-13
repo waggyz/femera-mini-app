@@ -50,7 +50,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   const int Ne = Nf*Nc;
   const int Nt = 4*Nc;
   const int intp_n = int(E->gaus_n);
-  const INT_ORDER elem_p =E->elem_p;
+  //const INT_ORDER elem_p =E->elem_p;
   //
 #ifdef COMPRESS_STATE
   const int        Ns           = 5;// Number of state variables/ip
@@ -294,20 +294,14 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
 #endif
       }
       if(ip==0){
-        for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
-        if(elem_p>1){
-          for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
-        if(elem_p>2){
-          for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
-        }
-        }
+        for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
       }
       {
       __m256d s[3];
       s[0] = _mm256_load_pd(&S[0]);// sxx sxy sxz | x
       s[1] = _mm256_load_pd(&S[4]);// sxy syy syz | x
       s[2] = _mm256_load_pd(&S[8]);// sxz syz szz | x
-      accumulate_f( &vf[0], &s[0], &G[0], elem_p );
+      accumulate_f( &vf[0], &s[0], &G[0], Nc );
       }
       }//======================================================== end intp loop
 #ifdef __INTEL_COMPILER
@@ -558,20 +552,14 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
         for(int i=0; i<12; i++){ S[i]*= dw; }
       }
       if(ip==0){
-        for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
-        if(elem_p>1){
-          for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
-        if(elem_p>2){
-          for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
-        }
-        }
+        for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
       }
       {
       __m256d s[3];
       s[0] = _mm256_load_pd(&S[0]);// sxx sxy sxz | x
       s[1] = _mm256_load_pd(&S[4]);// sxy syy syz | x
       s[2] = _mm256_load_pd(&S[8]);// sxz syz szz | x
-      accumulate_f( &vf[0], &s[0], &G[0], elem_p );
+      accumulate_f( &vf[0], &s[0], &G[0], Nc );
       }
       }//======================================================== end intp loop
 #ifdef __INTEL_COMPILER

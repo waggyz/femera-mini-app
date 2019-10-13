@@ -39,7 +39,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   const int Ne = Nf*Nc;
   const int Nt = 4*Nc;
   const int intp_n = int(E->gaus_n);
-  const INT_ORDER elem_p =E->elem_p;
+  //const INT_ORDER elem_p =E->elem_p;
 #if VERB_MAX>11
   printf("DOF: %u, Elems:%u, IntPts:%u, Nodes/elem:%u\n",
     (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
@@ -198,15 +198,9 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       //------------------------------------------------------- 18+9 = 27 FLOP
 #ifdef HAS_AVX
     if(ip==0){
-      for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
-      if(elem_p>1){
-        for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
-      if(elem_p>2){
-        for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
-      }
-      }
+      for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
     }
-    accumulate_f( &vf[0], &vS[0], &G[0], elem_p );
+    accumulate_f( &vf[0], &vS[0], &G[0], Nc );
     }// end vS register scope
 #else
 #ifdef __INTEL_COMPILER
