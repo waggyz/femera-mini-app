@@ -93,9 +93,14 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     for (int i=0; i<Nc; i++){
       std::memcpy( & f[4*i],& part_f[conn[i]*3], sizeof(FLOAT_SOLV)*Nf ); }
 #endif
+#if 0
     const __m256d j0 = _mm256_load_pd (&jac[0]);  // j0 = [j3 j2 j1 j0]
     const __m256d j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
     const __m256d j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
+#else
+    const __m256d vJ[3]
+      ={_mm256_load_pd(&jac[0]),_mm256_loadu_pd(&jac[3]),_mm256_loadu_pd(&jac[6])};
+#endif
   {// Scope vf registers
   __m256d vf[Nc];
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
@@ -103,7 +108,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
 #ifdef HAS_AVX
       __m256d vH[3];
-      compute_g_h( &G[0],&vH[0], Ne, j0,j1,j2, &intp_shpg[ip*Ne], &u[0] );
+      compute_g_h( &G[0],&vH[0], Ne, &vJ[0], &intp_shpg[ip*Ne], &u[0] );
 #else
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned

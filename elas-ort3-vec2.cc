@@ -107,12 +107,12 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     } }
     // [H] Small deformation tensor
     // [H][RT] : matmul3x3x3T
-    compute_ort_s( &S[0], &H[0],&C[0],c0,c1,c2, dw );
+    compute_ort_s_voigt( &S[0], &H[0],&C[0],c0,c1,c2, dw );
     // [S][R] : matmul3x3x3, R is transposed
     //accumulate_f( &f[0], &part_f[0], &conn[0], &R[0], &S[0], &G[0] );
     {// begin scoping unit
     __m256d vS[3];
-    rotate_s( &vS[0], &R[0], &S[0] );
+    rotate_s_voigt( &vS[0], &R[0], &S[0] );
     // initialize element f
 #if 0
     // Hmm... switch case is slower...
