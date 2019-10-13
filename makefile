@@ -52,6 +52,10 @@ ifeq ($(strip $(HAS_PRGAMA_SIMD)),)
 OMPFLAGS:=$(OMPFLAGS) -DHAS_PRAGMA_SIMD
 endif
 
+ifneq (,$(findstring AVX2,$(CPUSIMD)))
+CPPFLAGS:=$(CPPFLAGS) -DHAS_AVX2
+endif
+
 CPUMODELC:=$(CPUMODEL)-$(CSTR)
 
 FEMERA_COMMON = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\

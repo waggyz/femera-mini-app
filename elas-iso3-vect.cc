@@ -5,10 +5,9 @@
 #include "femera.h"
 #include <immintrin.h>
 
-// Vectorize f calculation
-#define HAS_AVX
 // Fetch next u within G,H loop nest
 #undef FETCH_U_EARLY
+#define HAS_AVX
 //
 int ElastIso3D::Setup( Elem* E ){
   JacT  ( E );
@@ -245,4 +244,3 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   }//============================================================ end elem loop
   return 0;
 }
-#undef HAS_AVX

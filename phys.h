@@ -3,8 +3,6 @@
 #include <iostream>
 #include <immintrin.h>
 
-#define HAS_AVX2
-
 class Phys{
 public:
   typedef std::valarray<FLOAT_PHYS> vals;

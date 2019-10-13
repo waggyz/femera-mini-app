@@ -220,6 +220,13 @@ int main( int argc, char** argv ){
   float read_sec=0.0,init_sec=0.0,loop_sec=0.0;
 #endif
   int iter_info_n = 1;
+#ifdef HAS_AVX2
+#if VERB_MAX>1
+  if(verbosity>1){
+    std::cout << "Using AVX2 vector extensions...\n";
+  }
+#endif
+#endif
 #ifdef _OPENMP
   if( comp_n <1){ comp_n = omp_get_max_threads(); }//omp_get_max_threads();
   if( numa_n==0){ numa_n = comp_n / 2; }//FIXME just a guess...and not yet used
