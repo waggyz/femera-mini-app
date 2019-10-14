@@ -94,7 +94,6 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       _mm256_loadu_pd(&jac[6]) };
     {// Scope vf registers
     __m256d vf[Nc];
-        for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
     for(int ip=0; ip<intp_n; ip++){
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
@@ -147,9 +146,9 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
         }
       }
 #else
-//      if(ip==0){
-//        for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
-//      }
+      if(ip==0){
+        for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+      }
 #endif
 #endif
       accumulate_f( &vf[0], &vS[0], &G[0], Nc );

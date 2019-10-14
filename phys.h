@@ -690,15 +690,15 @@ static inline void rotate_s_voigt( __m256d* vS, const __m256d* vR ){
   const __m256d s0 = _mm256_set1_pd(S[0]);
   const __m256d s1 = _mm256_set1_pd(S[4]);
   const __m256d s2 = _mm256_set1_pd(S[5]);
-  const __m256d s4 = _mm256_set1_pd(S[1]);
-  const __m256d s5 = _mm256_set1_pd(S[6]);
-  const __m256d s8 = _mm256_set1_pd(S[2]);
   vS[0]=_mm256_add_pd(_mm256_mul_pd(vR[0],s0),
     _mm256_add_pd(_mm256_mul_pd(vR[1],s1),
       _mm256_mul_pd(vR[2],s2)));
+  const __m256d s4 = _mm256_set1_pd(S[1]);
+  const __m256d s5 = _mm256_set1_pd(S[6]);
   vS[1]=_mm256_add_pd(_mm256_mul_pd(vR[0],s1),
     _mm256_add_pd(_mm256_mul_pd(vR[1],s4),
       _mm256_mul_pd(vR[2],s5)));
+  const __m256d s8 = _mm256_set1_pd(S[2]);
   vS[2]=_mm256_add_pd(_mm256_mul_pd(vR[0],s2),
     _mm256_add_pd(_mm256_mul_pd(vR[1],s5),
       _mm256_mul_pd(vR[2],s8)));
