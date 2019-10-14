@@ -659,7 +659,7 @@ static inline void rotate_g_h(
 }
 static inline void compute_ort_s_voigt(__m256d* vS, const __m256d* vH,
   const __m256d* vC, const FLOAT_PHYS dw){
-  FLOAT_PHYS VECALIGNED H[12];//FIXME use initializer?
+  FLOAT_PHYS VECALIGNED H[12];
   _mm256_store_pd( &H[0], vH[0] );
   _mm256_store_pd( &H[4], vH[1] );
   _mm256_store_pd( &H[8], vH[2] );
@@ -677,14 +677,14 @@ static inline void compute_ort_s_voigt(__m256d* vS, const __m256d* vH,
 #else
   FLOAT_PHYS VECALIGNED c678[4];
   _mm256_store_pd( &c678[0], vC[3] );
-  vS[1]=_mm256_set_pd(0.0,
-  (H[6] + H[9])*c678[1]*dw,  // S[5]
-  (H[2] + H[8])*c678[2]*dw,  // S[2]
-  (H[1] + H[4])*c678[0]*dw );// S[1]
+  vS[1]=_mm256_set_pd( 0.0,
+    (H[6] + H[9])*c678[1]*dw,  // S[5]
+    (H[2] + H[8])*c678[2]*dw,  // S[2]
+    (H[1] + H[4])*c678[0]*dw );// S[1]
 #endif
 }
 static inline void rotate_s_voigt( __m256d* vS, const __m256d* vR ){
-  FLOAT_PHYS VECALIGNED S[8];//FIXME use initializer?
+  FLOAT_PHYS VECALIGNED S[8];
   _mm256_store_pd( &S[0], vS[0] );
   _mm256_store_pd( &S[4], vS[1] );
   const __m256d s0 = _mm256_set1_pd(S[0]);

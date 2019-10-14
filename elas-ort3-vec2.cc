@@ -45,20 +45,20 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   // Make local copies
   FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
   FLOAT_PHYS VECALIGNED wgt[intp_n];
-  FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
+  //FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
   //
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
-  std::copy( &this->mtrl_matc[0], &this->mtrl_matc[mtrl_matc.size()], matc );
+  //std::copy( &this->mtrl_matc[0], &this->mtrl_matc[mtrl_matc.size()], matc );
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
-  const FLOAT_SOLV* RESTRICT C     = &matc[0];
+  //const FLOAT_SOLV* RESTRICT C     = &matc[0];
 #if 1
   const __m256d vC[4] ={
-    C[0],C[3],C[5],0.0,
-    C[3],C[1],C[4],0.0,
-    C[5],C[4],C[2],0.0,
-    C[6],C[7],C[8],0.0 };
+    mtrl_matc[0],mtrl_matc[3],mtrl_matc[5],0.0,
+    mtrl_matc[3],mtrl_matc[1],mtrl_matc[4],0.0,
+    mtrl_matc[5],mtrl_matc[4],mtrl_matc[2],0.0,
+    mtrl_matc[6],mtrl_matc[7],mtrl_matc[8],0.0 };
 #else
   const __m256d vC[3] ={
     C[0],C[3],C[5],0.0,
@@ -95,81 +95,81 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   }
   for(INT_MESH ie=e0;ie<ee;ie++){
 #ifndef FETCH_JAC
-      std::memcpy( &jac, &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
+    std::memcpy( &jac, &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
 #endif
-  const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
+    const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
 #if 0
     const __m256d j0 = _mm256_load_pd (&jac[0]);  // j0 = [j3 j2 j1 j0]
     const __m256d j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
     const __m256d j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
 #else
     const __m256d vJ[3]={
-      _mm256_load_pd(&jac[0]),
+      _mm256_load_pd (&jac[0]),
       _mm256_loadu_pd(&jac[3]),
       _mm256_loadu_pd(&jac[6]) };
 #endif
-  {// Scope vf registers
-  __m256d vf[Nc];
-  for(int ip=0; ip<intp_n; ip++){
-    //G = MatMul3x3xN( jac,shg );
-    //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
-    __m256d vH[Nd];
-    rotate_g_h( &G[0],&vH[0], Ne, &vJ[0], &intp_shpg[ip*Ne], &R[0], &u[0] );
-    //rotate_g_h( &G[0],&H[0], Ne, &vJ[0], &intp_shpg[ip*Ne], &R[0], &u[0] );
-    const FLOAT_PHYS dw = jac[9] * wgt[ip];
-    if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
+    {// Scope vf registers
+    __m256d vf[Nc];
+    for(int ip=0; ip<intp_n; ip++){
+      //G = MatMul3x3xN( jac,shg );
+      //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
+      __m256d vH[Nd];
+      rotate_g_h( &G[0],&vH[0], Ne, &vJ[0], &intp_shpg[ip*Ne], &R[0], &u[0] );
+      //rotate_g_h( &G[0],&H[0], Ne, &vJ[0], &intp_shpg[ip*Ne], &R[0], &u[0] );
+      const FLOAT_PHYS dw = jac[9] * wgt[ip];
+      if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
 #ifdef FETCH_JAC
-      std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
+        std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
 #endif
-      const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
+        const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
 #endif
-      for (int i=0; i<Nc; i++){
-        std::memcpy( &u[Nd*i], &part_u[c[i]*Nd], sizeof(FLOAT_SOLV)*Nd ); }
-    } }
-    // [H] Small deformation tensor
-    // [H][RT] : matmul3x3x3T
-    {// begin scoping unit
-    __m256d vS[3];
-    compute_ort_s_voigt( &vS[0], &vH[0], &vC[0], dw );
-    rotate_s_voigt( &vS[0], &vR[0] );
-    // [S][R] : matmul3x3x3, R is transposed
-    // initialize element f
+        for (int i=0; i<Nc; i++){
+          std::memcpy( &u[Nd*i], &part_u[c[i]*Nd], sizeof(FLOAT_SOLV)*Nd ); }
+      } }
+      // [H] Small deformation tensor
+      // [H][RT] : matmul3x3x3T
+      {// begin scoping unit
+      __m256d vS[3];
+      compute_ort_s_voigt( &vS[0], &vH[0], &vC[0], dw );
+      rotate_s_voigt( &vS[0], &vR[0] );
+      // [S][R] : matmul3x3x3, R is transposed
+      // initialize element f
 #if 0
-    // Hmm... switch case is slower...
-    if(ip==0){
-      switch(elem_p){
-      case(1):
-        for(int i=0; i< 4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
-        break;
-      case(2):
-        for(int i=0; i<10; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
-        break;
-      case(3):
-        for(int i=0; i<20; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
-        break;
+      // Hmm... switch case is slower...
+      if(ip==0){
+        switch(elem_p){
+        case(1):
+          for(int i=0; i< 4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+          break;
+        case(2):
+          for(int i=0; i<10; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+          break;
+        case(3):
+          for(int i=0; i<20; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+          break;
+        }
       }
-    }
 #else
 #if 0
-    if(ip==0){
-      for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
-      if(elem_p>1){
-        for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
-      if(elem_p>2){
-        for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+      if(ip==0){
+        for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+        if(elem_p>1){
+          for(int i=4; i<10; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+        if(elem_p>2){
+          for(int i=10; i<20; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+        }
+        }
       }
-      }
-    }
 #else
-    if(ip==0){
-      for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
-    }
+      if(ip==0){
+        for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+      }
 #endif
 #endif
-    accumulate_f( &vf[0], &vS[0], &G[0], Nc );
-    } // end variable scope
+      accumulate_f( &vf[0], &vS[0], &G[0], Nc );
+      } // end variable scope
     }//end intp loop
 #if VERB_MAX>12
     printf( "ff:");
@@ -186,18 +186,18 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       _mm256_store_pd(&sf[0],vf[i]);
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
-#endif
+  #endif
       for(int j=0; j<3; j++){
         part_f[3*conn[i]+j] = sf[j];
       }
 #if 0
-      if( (ie+1) < ee ){
-      const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
-         vf[i]=_mm256_loadu_pd(&part_f[3*c[i]]);
-      }
+    if( (ie+1) < ee ){
+    const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
+        vf[i]=_mm256_loadu_pd(&part_f[3*c[i]]);
+    }
 #endif
     }//--------------------------------------------------- N*3 =  3*N FLOP
-  }// end f register scope
+    }// end f register scope
   }// end elem loop
 return 0;
 }
