@@ -46,10 +46,12 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
   FLOAT_PHYS VECALIGNED wgt[intp_n];
   FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
+  FLOAT_PHYS VECALIGNED rotc[this->mtrl_rotc.size()];
   //
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
   std::copy( &this->mtrl_matc[0], &this->mtrl_matc[mtrl_matc.size()], matc );
+  std::copy( &this->mtrl_rotc[0], &this->mtrl_rotc[mtrl_rotc.size()], rotc );
   //
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
@@ -59,9 +61,9 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     matc[5],matc[4],matc[2],0.0,
     matc[6],matc[7],matc[8],0.0 };
   const FLOAT_PHYS VECALIGNED R[9+1] = {
-    mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
-    mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
-    mtrl_rotc[6],mtrl_rotc[7],mtrl_rotc[8],0.0};
+    rotc[0],rotc[1],rotc[2],
+    rotc[3],rotc[4],rotc[5],
+    rotc[6],rotc[7],rotc[8],0.0};
   const __m256d vR[3]={
     _mm256_load_pd(&R[0]),
     _mm256_loadu_pd(&R[3]),
