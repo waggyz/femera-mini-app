@@ -88,16 +88,10 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     std::memcpy( &jac, &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
 #endif
     const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
-#if 0
-    const __m256d j0 = _mm256_load_pd (&jac[0]);  // j0 = [j3 j2 j1 j0]
-    const __m256d j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
-    const __m256d j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
-#else
     const __m256d vJ[3]={
       _mm256_load_pd (&jac[0]),
       _mm256_loadu_pd(&jac[3]),
       _mm256_loadu_pd(&jac[6]) };
-#endif
     {// Scope vf registers
     __m256d vf[Nc];
     for(int ip=0; ip<intp_n; ip++){
@@ -105,7 +99,6 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       __m256d vH[Nd];
       rotate_g_h( &G[0],&vH[0], Ne, &vJ[0], &intp_shpg[ip*Ne], &R[0], &u[0] );
-      //rotate_g_h( &G[0],&H[0], Ne, &vJ[0], &intp_shpg[ip*Ne], &R[0], &u[0] );
       const FLOAT_PHYS dw = jac[9] * wgt[ip];
       if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
 #ifdef FETCH_JAC
