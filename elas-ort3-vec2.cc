@@ -39,7 +39,9 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
   FLOAT_MESH VECALIGNED jac[Nj];
   FLOAT_PHYS VECALIGNED G[Nt], u[Ne];//,f[Nt];
-  FLOAT_PHYS VECALIGNED H[12], S[9];//FIXME S[7]
+#ifndef HAS_AVX2
+  FLOAT_PHYS VECALIGNED H[12], S[9];
+#endif
   // Make local copies
   FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
   FLOAT_PHYS VECALIGNED wgt[intp_n];
@@ -51,10 +53,22 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
   const FLOAT_SOLV* RESTRICT C     = &matc[0];
-  const __m256d c0 = _mm256_set_pd(0.0,C[5],C[3],C[0]);
-  const __m256d c1 = _mm256_set_pd(0.0,C[4],C[1],C[3]);
-  const __m256d c2 = _mm256_set_pd(0.0,C[2],C[4],C[5]);
+#ifdef HAS_AVX2
+  const __m256d vC[4] ={
+    C[0],C[3],C[5],0.0,
+    C[3],C[1],C[4],0.0,
+    C[5],C[4],C[2],0.0,
+    C[6],C[7],C[8],0.0 };
+  //const __m256d c0 = _mm256_set_pd(0.0,C[5],C[3],C[0]);
+  //const __m256d c1 = _mm256_set_pd(0.0,C[4],C[1],C[3]);
+  //const __m256d c2 = _mm256_set_pd(0.0,C[2],C[4],C[5]);
   //c3 = _mm256_set_pd(0.,C[7],C[8],C[6]);
+#else
+  const __m256d vC[3] ={
+    C[0],C[3],C[5],0.0,
+    C[3],C[1],C[4],0.0,
+    C[5],C[4],C[2],0.0 };
+#endif
   const FLOAT_PHYS VECALIGNED R[9+1] = {
     mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
     mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
@@ -103,7 +117,9 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   for(int ip=0; ip<intp_n; ip++){
     //G = MatMul3x3xN( jac,shg );
     //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
-    rotate_g_h( &G[0],&H[0], Ne, &vJ[0], &intp_shpg[ip*Ne], &R[0], &u[0] );
+    __m256d vH[Nd];
+    rotate_g_h( &G[0],&vH[0], Ne, &vJ[0], &intp_shpg[ip*Ne], &R[0], &u[0] );
+    //rotate_g_h( &G[0],&H[0], Ne, &vJ[0], &intp_shpg[ip*Ne], &R[0], &u[0] );
     const FLOAT_PHYS dw = jac[9] * wgt[ip];
     if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
 #ifdef FETCH_JAC
@@ -118,11 +134,26 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     } }
     // [H] Small deformation tensor
     // [H][RT] : matmul3x3x3T
-    compute_ort_s_voigt( &S[0], &H[0],&C[0],c0,c1,c2, dw );
-    // [S][R] : matmul3x3x3, R is transposed
     {// begin scoping unit
     __m256d vS[3];
+#ifdef HAS_AVX2
+    compute_ort_s_voigt( &vS[0], &vH[0], &vC[0], dw );
+    //
+    //rotate_s_voigt( &vS[0], &vR[0] );
+    //
+    //_mm256_store_pd( &S[0], vS[0] );
+    //_mm256_store_pd( &S[4], vS[1] );
+    rotate_s_voigt( &vS[0], &vR[0] );
+#else
+    _mm256_store_pd( &H[0], vH[0] );
+    _mm256_store_pd( &H[4], vH[1] );
+    _mm256_store_pd( &H[8], vH[2] );
+    compute_ort_s_voigt( &S[0], &H[0],&C[0],&vC[0], dw );
+    vS[0]=_mm256_load_pd(&S[0]);
+    vS[1]=_mm256_load_pd(&S[4]);
     rotate_s_voigt( &vS[0], &vR[0], &S[0] );
+#endif
+    // [S][R] : matmul3x3x3, R is transposed
     // initialize element f
 #if 0
     // Hmm... switch case is slower...
