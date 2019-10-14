@@ -116,9 +116,9 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 //      {// begin scoping unit
       __m256d vS[Nd];
       {
-      __m256d vSvoigt[2];
-      compute_ort_s_voigt( &vSvoigt[0], &vH[0], &vC[0], dw );
-      rotate_s_voigt( &vS[0], &vSvoigt[0], &vR[0] );
+      FLOAT_PHYS VECALIGNED Svoigt[6];
+      compute_ort_s_voigt( &Svoigt[0], &vH[0], &vC[0], dw );
+      rotate_s_voigt( &vS[0], &Svoigt[0], &vR[0] );
       }
       // [S][R] : matmul3x3x3, R is transposed
       // initialize element f

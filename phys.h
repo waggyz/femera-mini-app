@@ -657,23 +657,25 @@ static inline void rotate_g_h(
   // with respect to transpose _MM256_TRANSPOSE3_PD(h036,h147,h258);
   }
 }
-static inline void compute_ort_s_voigt(__m256d* vS, const __m256d* vH,
+static inline void compute_ort_s_voigt(FLOAT_PHYS* S, const __m256d* vH,
   const __m256d* vC, const FLOAT_PHYS dw){
   FLOAT_PHYS VECALIGNED H[12];
   _mm256_store_pd( &H[0], vH[0] );
   _mm256_store_pd( &H[4], vH[1] );
   _mm256_store_pd( &H[8], vH[2] );
-  vS[0] =//Vectorized calc for diagonal of S
+  __m256d s048 =//Vectorized calc for diagonal of S
     _mm256_mul_pd(_mm256_set1_pd(dw),
       _mm256_add_pd(_mm256_mul_pd(vC[0],_mm256_set1_pd(H[0])),
         _mm256_add_pd(_mm256_mul_pd(vC[1],_mm256_set1_pd(H[5])),
           _mm256_mul_pd(vC[2],_mm256_set1_pd(H[10]))
         )));
-#if 0
+#if 1
   _mm256_store_pd( &S[0], s048 );
-  S[4]=(H[1] + H[4])*C[6]*dw;// S[1]
-  S[5]=(H[2] + H[8])*C[8]*dw;// S[2]
-  S[6]=(H[6] + H[9])*C[7]*dw;// S[5]
+  FLOAT_PHYS VECALIGNED c678[4];
+  _mm256_store_pd( &c678[0], vC[3] );
+  S[4]=(H[1] + H[4])*c678[0]*dw;// S[1]
+  S[5]=(H[2] + H[8])*c678[2]*dw;// S[2]
+  S[6]=(H[6] + H[9])*c678[1]*dw;// S[5]
 #else
   FLOAT_PHYS VECALIGNED c678[4];
   _mm256_store_pd( &c678[0], vC[3] );
@@ -684,10 +686,10 @@ static inline void compute_ort_s_voigt(__m256d* vS, const __m256d* vH,
 #endif
 }
 static inline void rotate_s_voigt( __m256d* vS,
-    const __m256d* vSv, const __m256d* vR ){
-  FLOAT_PHYS VECALIGNED S[8];
-  _mm256_store_pd( &S[0], vSv[0] );
-  _mm256_store_pd( &S[4], vSv[1] );
+    const FLOAT_PHYS* S, const __m256d* vR ){
+  //FLOAT_PHYS VECALIGNED S[8];
+  //_mm256_store_pd( &S[0], vSv[0] );
+  //_mm256_store_pd( &S[4], vSv[1] );
   const __m256d s0 = _mm256_set1_pd(S[0]);
   const __m256d s1 = _mm256_set1_pd(S[4]);
   const __m256d s2 = _mm256_set1_pd(S[5]);
