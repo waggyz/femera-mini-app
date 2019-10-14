@@ -118,7 +118,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       } }
       // [H] Small deformation tensor
       // [H][RT] : matmul3x3x3T
-//      {// begin scoping unit
+      {// begin scoping unit
       __m256d vS[Nd];
       {//FIXME revert Svoigt[6] to __m256d Svoigt[2]?
       FLOAT_PHYS VECALIGNED Svoigt[6];
@@ -160,7 +160,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
 #endif
       accumulate_f( &vf[0], &vS[0], &G[0], Nc );
-//      } // end variable scope
+      } // end variable scope
     }//end intp loop
 #if VERB_MAX>12
     printf( "ff:");
