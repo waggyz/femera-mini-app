@@ -45,26 +45,16 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   // Make local copies
   FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
   FLOAT_PHYS VECALIGNED wgt[intp_n];
-  //FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
   //
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
-  //std::copy( &this->mtrl_matc[0], &this->mtrl_matc[mtrl_matc.size()], matc );
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
-  //const FLOAT_SOLV* RESTRICT C     = &matc[0];
-#if 1
   const __m256d vC[4] ={
     mtrl_matc[0],mtrl_matc[3],mtrl_matc[5],0.0,
     mtrl_matc[3],mtrl_matc[1],mtrl_matc[4],0.0,
     mtrl_matc[5],mtrl_matc[4],mtrl_matc[2],0.0,
     mtrl_matc[6],mtrl_matc[7],mtrl_matc[8],0.0 };
-#else
-  const __m256d vC[3] ={
-    C[0],C[3],C[5],0.0,
-    C[3],C[1],C[4],0.0,
-    C[5],C[4],C[2],0.0 };
-#endif
   const FLOAT_PHYS VECALIGNED R[9+1] = {
     mtrl_rotc[0],mtrl_rotc[1],mtrl_rotc[2],
     mtrl_rotc[3],mtrl_rotc[4],mtrl_rotc[5],
