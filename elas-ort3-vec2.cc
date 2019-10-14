@@ -113,8 +113,8 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       } }
       // [H] Small deformation tensor
       // [H][RT] : matmul3x3x3T
-      {// begin scoping unit
-      __m256d vS[3];
+//      {// begin scoping unit
+      __m256d vS[Nd];
       compute_ort_s_voigt( &vS[0], &vH[0], &vC[0], dw );
       rotate_s_voigt( &vS[0], &vR[0] );
       // [S][R] : matmul3x3x3, R is transposed
@@ -152,7 +152,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
 #endif
       accumulate_f( &vf[0], &vS[0], &G[0], Nc );
-      } // end variable scope
+//      } // end variable scope
     }//end intp loop
 #if VERB_MAX>12
     printf( "ff:");
