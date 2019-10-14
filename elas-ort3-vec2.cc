@@ -139,19 +139,17 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     {// begin scoping unit
     __m256d vS[3];
 #ifdef USE_AVX2
-    compute_ort_s_voigt( &vS[0], &vH[0], &vC[0], dw );
-#if 0
+    FLOAT_PHYS VECALIGNED H[12], S[8];
+    _mm256_store_pd( &H[0], vH[0] );
+    _mm256_store_pd( &H[4], vH[1] );
+    _mm256_store_pd( &H[8], vH[2] );
+    compute_ort_s_voigt( &S[0], &H[0],&C[0],&vC[0], dw );
+    vS[0]=_mm256_load_pd(&S[0]);
+    vS[1]=_mm256_load_pd(&S[4]);
+    //compute_ort_s_voigt( &vS[0], &vH[0], &vC[0], dw );
     rotate_s_voigt( &vS[0], &vR[0] );// Hmmm
 #else
-    {
-    FLOAT_PHYS VECALIGNED S[8];
-    _mm256_store_pd( &S[0], vS[0] );
-    _mm256_store_pd( &S[4], vS[1] );
-    rotate_s_voigt( &vS[0], &vR[0], &S[0] );
-    }
-#endif
-#else
-    FLOAT_PHYS VECALIGNED H[12], S[9];
+    FLOAT_PHYS VECALIGNED H[12], S[8];
     _mm256_store_pd( &H[0], vH[0] );
     _mm256_store_pd( &H[4], vH[1] );
     _mm256_store_pd( &H[8], vH[2] );
