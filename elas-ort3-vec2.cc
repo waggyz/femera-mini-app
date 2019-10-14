@@ -5,8 +5,6 @@
 #include "femera.h"
 #include <immintrin.h>
 //
-#undef USE_AVX2
-//
 int ElastOrtho3D::Setup( Elem* E ){
   JacRot( E );
   JacT  ( E );
@@ -55,16 +53,12 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
   const FLOAT_SOLV* RESTRICT C     = &matc[0];
-#ifdef USE_AVX2
+#if 1
   const __m256d vC[4] ={
     C[0],C[3],C[5],0.0,
     C[3],C[1],C[4],0.0,
     C[5],C[4],C[2],0.0,
     C[6],C[7],C[8],0.0 };
-  //const __m256d c0 = _mm256_set_pd(0.0,C[5],C[3],C[0]);
-  //const __m256d c1 = _mm256_set_pd(0.0,C[4],C[1],C[3]);
-  //const __m256d c2 = _mm256_set_pd(0.0,C[2],C[4],C[5]);
-  //c3 = _mm256_set_pd(0.,C[7],C[8],C[6]);
 #else
   const __m256d vC[3] ={
     C[0],C[3],C[5],0.0,
@@ -138,21 +132,8 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     // [H][RT] : matmul3x3x3T
     {// begin scoping unit
     __m256d vS[3];
-#ifdef USE_AVX2
     compute_ort_s_voigt( &vS[0], &vH[0], &vC[0], dw );
-    rotate_s_voigt( &vS[0], &vR[0] );// Hmmm
-#else
-    {
-    FLOAT_PHYS VECALIGNED H[12], S[8];
-    _mm256_store_pd( &H[0], vH[0] );
-    _mm256_store_pd( &H[4], vH[1] );
-    _mm256_store_pd( &H[8], vH[2] );
-    compute_ort_s_voigt( &S[0], &H[0],&C[0],&vC[0], dw );
-    vS[0]=_mm256_load_pd(&S[0]);
-    vS[1]=_mm256_load_pd(&S[4]);
-    rotate_s_voigt( &vS[0], &vR[0], &S[0] );
-    }
-#endif
+    rotate_s_voigt( &vS[0], &vR[0] );
     // [S][R] : matmul3x3x3, R is transposed
     // initialize element f
 #if 0
