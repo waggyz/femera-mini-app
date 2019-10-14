@@ -683,10 +683,11 @@ static inline void compute_ort_s_voigt(__m256d* vS, const __m256d* vH,
     (H[1] + H[4])*c678[0]*dw );// S[1]
 #endif
 }
-static inline void rotate_s_voigt( __m256d* vS, const __m256d* vR ){
+static inline void rotate_s_voigt( __m256d* vS,
+    const __m256d* vSv, const __m256d* vR ){
   FLOAT_PHYS VECALIGNED S[8];
-  _mm256_store_pd( &S[0], vS[0] );
-  _mm256_store_pd( &S[4], vS[1] );
+  _mm256_store_pd( &S[0], vSv[0] );
+  _mm256_store_pd( &S[4], vSv[1] );
   const __m256d s0 = _mm256_set1_pd(S[0]);
   const __m256d s1 = _mm256_set1_pd(S[4]);
   const __m256d s2 = _mm256_set1_pd(S[5]);
