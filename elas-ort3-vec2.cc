@@ -52,7 +52,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
   std::copy( &this->mtrl_matc[0], &this->mtrl_matc[mtrl_matc.size()], matc );
   std::copy( &this->mtrl_rotc[0], &this->mtrl_rotc[mtrl_rotc.size()], rotc );
-  //
+  //FIXME Try to remove these extra copies of matc and rotc.
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
   const __m256d vC[4] ={
@@ -120,7 +120,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       // [H][RT] : matmul3x3x3T
 //      {// begin scoping unit
       __m256d vS[Nd];
-      {
+      {//FIXME revert Svoigt[6] to __m256d Svoigt[2]?
       FLOAT_PHYS VECALIGNED Svoigt[6];
       compute_ort_s_voigt( &Svoigt[0], &vH[0], &vC[0], dw );
       rotate_s_voigt( &vS[0], &Svoigt[0], &vR[0] );
