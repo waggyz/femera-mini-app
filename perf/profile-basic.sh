@@ -70,6 +70,8 @@ if [ ! -f $PROFILE ]; then
   # First, get a rough idea of DOF/sec to estimate time
   # with 10 iterations of the third-to-largest model
   if [ ! -f $CSVFILE ]; then
+    export OMP_SCHEDULE=static
+    export OMP_PLACES=cores
     export OMP_PROC_BIND=spread
     ITERS=10; H=${LIST_H[$(( $TRY_COUNT - 3 ))]};
     C=$CPUCOUNT
@@ -142,6 +144,8 @@ if [ -f $CSVFILE ]; then
   if [ "$CSVLINES" -lt "$BASIC_TEST_N" ]; then
     echo Running basic profile tests...
     C=$CPUCOUNT
+    export OMP_SCHEDULE=static
+    export OMP_PLACES=cores
     export OMP_PROC_BIND=spread
     for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
       H=${LIST_H[I]}
@@ -414,6 +418,8 @@ if [ -z "$CSV_HAS_MEDIUM_PART_TEST" ]; then
   echo Running medium model partitioning tests...
   C=$CPUCOUNT
   export OMP_PROC_BIND=spread
+  export OMP_SCHEDULE=static
+  export OMP_PLACES=cores
   for N in $(seq $CPUCOUNT $CPUCOUNT $(( $CPUCOUNT * 20 )) ); do
     MESHNAME="uhxt"$MED_H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$MED_H"p"$P/$MESHNAME
@@ -479,6 +485,8 @@ CSV_HAS_LARGE_PART_TEST=`awk -F, -v e=$LARGE_NELEM -v c=$CPUCOUNT\
   '($1==e)&&($9==c)&&($4>$9){print $4; exit}' $CSVFILE`
 if [ -z "$CSV_HAS_LARGE_PART_TEST" ]; then
   echo Running large model partitioning tests...
+  export OMP_SCHEDULE=static
+  export OMP_PLACES=cores
   export OMP_PROC_BIND=spread
   C=$CPUCOUNT
   H=${LIST_H[$(( $TRY_COUNT - 3 ))]};
@@ -557,6 +565,8 @@ fi
 CSV_HAS_FINAL_TEST=""
 if [ -z "$CSV_HAS_FINAL_TEST" ]; then
   echo Running final profile tests...
+  export OMP_SCHEDULE=static
+  export OMP_PLACES=cores
   export OMP_PROC_BIND=spread
   C=$CPUCOUNT
   for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
