@@ -21,6 +21,7 @@ C=$CPUCOUNT; N=$C; RTOL=1e-24;
 TARGET_TEST_S=10;# Try for S sec/run
 REPEAT_TEST_N=6;# Repeat each test N times
 ITERS_MIN=10;
+LARGE_PART_MAX_MUDOF=27;
 export OMP_SCHEDULE=static
 export OMP_PLACES=cores
 export OMP_PROC_BIND=spread
@@ -228,6 +229,13 @@ if [ -f $CSVFILE ]; then
       MED_MESH=$MESH
       MED_H=$H
     fi
+    # Find a representative large model
+    if [ $(( $CHECK_NNODE * 3 / 1000000 )) -le $LARGE_PART_MAX_MUDOF ]; then
+      LRG_MUDOF=$((CHECK_NNODE * 3 / 1000000 ));
+      LRG_MESHNAME=$MESHNAME
+      LRG_MESH=$MESH
+      LRG_H=$H
+    fi
   done
   MED_NELEM=$MAX_ELEMS;#`awk -F, -v n=$MAX_NODES '($2==n){ print $1; exit }' $CSVFILE`
   MED_NNODE=$MAX_NODES;#`awk -F, -v n=$MAX_NODES '($2==n){ print $2; exit }' $CSVFILE`
@@ -248,20 +256,24 @@ if [ -f $CSVFILE ]; then
   printf " %9i   : Medium test iterations\n" $MED_ITERS >> $PROFILE
   printf " %9i   : Medium test repeats\n" $REPEAT_TEST_N >> $PROFILE
   #
-  ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $MDOFS $MUDOF | bc`
+  #if [ $MUDOF -gt $LARGE_PART_MAX_MUDOF ];
+  #  then LRG_MUDOF=$LARGE_PART_MAX_MUDOF;
+  #  else LRG_MUDOF=$MUDOF;
+  #fi
+  ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $MDOFS $LRG_MUDOF | bc`
   if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
   echo "Writing large model partitioning test parameters: "$PROFILE"..." >> $LOGFILE
   echo >> $PROFILE
   echo "    Large Model Partitioning Test Parameters" >> $PROFILE
   echo "  --------------------------------------------" >> $PROFILE
-  printf " %9.1f : Large test model size [MDOF]\n" $MUDOF >> $PROFILE
+  printf " %9.1f : Large test model size [MDOF]\n" $LRG_MUDOF >> $PROFILE
   printf " %7i   : Large test model test repeats\n" $REPEAT_TEST_N >> $PROFILE
   printf " %7i   : Large test iterations\n" $ITERS >> $PROFILE
 fi
 if false; then rm $CSVSMALL; fi
 if [ ! -f $CSVSMALL ]; then # Run small model tests
   echo Running concurrent small model tests...
-  #FIXME Check OpenMP process bindings for these tests
+  #FIXME OpenMP process bindings should be set for each test set
   #export OMP_SCHEDULE=static
   #export OMP_PLACES=cores
   #export OMP_PROC_BIND=close
@@ -489,17 +501,20 @@ if [ -z "$CSV_HAS_LARGE_PART_TEST" ]; then
   export OMP_PLACES=cores
   export OMP_PROC_BIND=spread
   C=$CPUCOUNT
-  H=${LIST_H[$(( $TRY_COUNT - 3 ))]};
+  #H=${LIST_H[$(( $TRY_COUNT - 3 ))]};
   ELEM_PER_PART=1000
   FINISHED=""
   while [ ! $FINISHED ]; do
-    N=$(( $LARGE_NELEM / $ELEM_PER_PART / $C * $C ))
+    NC=$(( $LARGE_NELEM / $ELEM_PER_PART / $C ))
+    N=$(( $NC * $C ))
     if [ "$N" -le 50000 ]; then
-      MESHNAME="uhxt"$H"p"$P"n"$N
-      MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
+      #MESHNAME="uhxt"$H"p"$P"n"$N
+      #MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
+      MESHNAME="uhxt"$LRG_H"p"$P"n"$N
+      MESH=$MESHDIR"/uhxt"$LRG_H"p"$P/$MESHNAME
       echo "Partitioning and converting "$MESHNAME", if necessary..."
-      $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
-      echo "Running "$ITERS" iterations of "$MESHNAME" ("$MUDOF" MDOF), "\
+      $PERFDIR/mesh-uhxt.sh $LRG_H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
+      echo "Running "$ITERS" iterations of "$MESHNAME" ("$LRG_MUDOF" MDOF), "\
         $REPEAT_TEST_N" times..."
       for I in $(seq 1 $REPEAT_TEST_N ); do
         $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
@@ -533,7 +548,10 @@ if [ ! -z "$CSV_HAS_LARGE_PART_TEST" ]; then
   echo "Large model size initial estimate:"\
     ">"$LARGE_ELEM_MIN" elem, >"$LARGE_UDOF_MIN" DOF."
   if [ ! -z "$HAS_GNUPLOT" ]; then
-    MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
+    #LRG_MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
+    #if [ $LRG_MUDOF -gt $LARGE_PART_MAX_MUDOF ];
+    #  then LRG_MUDOF=$LARGE_PART_MAX_MUDOF;
+    #fi
     echo "Plotting large model partitioning profile data: "$CSVFILE"..." >> $LOGFILE
     gnuplot -e  "\
     set terminal dumb noenhanced size 79,25;\
@@ -547,7 +565,7 @@ if [ ! -z "$CSV_HAS_LARGE_PART_TEST" ]; then
     plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
     using (\$1/\$4):((\$4 > \$9)&&( \$1 == $LARGE_NELEM ) ? \$13/1e6:1/0)\
     with points pointtype 0\
-    title 'Performance at $MUDOF MDOF';"\
+    title 'Performance at $LRG_MUDOF MDOF';"\
     | tee -a $PROFILE;# | grep --no-group-separator -C25 --color=always '\*'
   else
     echo >> $PROFILE
