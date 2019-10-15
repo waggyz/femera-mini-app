@@ -579,7 +579,6 @@ if [ ! -z "$CSV_HAS_LARGE_PART_TEST" ]; then
   printf " %9i : Large test model size [DOF]\n" $LARGE_UDOF >> $PROFILE
   printf " %9i : Large test model performance [MDOF/s]\n" $LARGE_MDOFS >> $PROFILE
 fi
-#FIXME
 CSV_HAS_FINAL_TEST=""
 if [ -z "$CSV_HAS_FINAL_TEST" ]; then
   echo Running final profile tests...
