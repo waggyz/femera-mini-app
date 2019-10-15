@@ -261,6 +261,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
   #export OMP_SCHEDULE=static
   #export OMP_PLACES=cores
   #export OMP_PROC_BIND=close
+  unset OMP_SCHEDULE
   unset OMP_PROC_BIND
   P=2;
   S=100; X=2; N=1;
