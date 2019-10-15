@@ -48,7 +48,6 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #ifndef HAS_AVX
   FLOAT_PHYS VECALIGNED H[Nd*4], S[Nd*4];
 #endif
-  //
   FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
   FLOAT_PHYS VECALIGNED wgt[intp_n];
   FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
@@ -56,6 +55,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
   std::copy( &this->mtrl_matc[0], &this->mtrl_matc[mtrl_matc.size()], matc );
+  //
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
   const FLOAT_SOLV* RESTRICT C     = &matc[0];

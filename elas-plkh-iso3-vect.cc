@@ -69,11 +69,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
   const FLOAT_PHYS youn_modu    = this->mtrl_prop[0];
   const FLOAT_PHYS poiss_ratio  = this->mtrl_prop[1];
   const FLOAT_PHYS bulk_mod3    = youn_modu / (1.0-2.0*poiss_ratio);
-#if 0
-  const FLOAT_PHYS shear_modu   = 0.5*youn_modu/(1.0+poiss_ratio);
-#else
   const FLOAT_PHYS shear_modu   = this->mtrl_matc[2];
-#endif
   const FLOAT_PHYS stress_yield = this->plas_prop[0];
   const FLOAT_PHYS hard_modu    = this->plas_prop[1];
   const FLOAT_PHYS yield_tol2   =
@@ -143,7 +139,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       compute_g_p_h( &G[0],&vP[0],&vH[0], Ne, &vJ[0], &intp_shpg[ip*Ne],
-                     &p[0],&u[0] );
+                           & p[0],& u[0] );
 #if 0
       _mm256_store_pd(&H[0],vH[0]);
       _mm256_store_pd(&H[4],vH[1]);
@@ -221,11 +217,6 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         const FLOAT_PHYS elas_part = stress_yield / elas_mises;
         stress_mises = sqrt(stress_mises);
         const FLOAT_PHYS inv_mises = 1.0/stress_mises;
-#if 0
-        const FLOAT_PHYS delta_equiv = ( stress_mises - stress_yield )
-          / ( 3.0*shear_modu + hard_modu );
-        // delta_equiv is only used as delta_equiv * hard_modu
-#endif
         const FLOAT_PHYS delta_hard = ( stress_mises - stress_yield )
           / ( 3.0*shear_modu + hard_modu ) * hard_modu;
         const FLOAT_PHYS shear_eff
@@ -238,7 +229,6 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
         if( save_state ){// Update state variable back_v.
           for(int i=0; i<Nv; i++){//FIXME can be from i=1
             back_v[i] += plas_flow[i] * delta_hard; }
-          //FLOAT_PHYS back_t[6];
 #ifdef COMPRESS_STATE
           std::memcpy(&state[Ns*(intp_n*ie+ip)],&back_v[1],sizeof(FLOAT_SOLV)*Ns);
 #else
@@ -256,29 +246,6 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
           if((i%Nv)==(Nv-1)){ printf("\n"); }
         }
 }
-#endif
-#if 0
-        FLOAT_PHYS VECALIGNED D[6*Nv];
-#if 0
-        for(int i=0;i<6;i++){
-          for(int j=0;j<6;j++){
-            D[6* i+j ] = hard_eff * plas_flow[i] * plas_flow[j];
-          }
-          D[6* i+i ]+= shear_eff;
-        }
-        for(int i=0;i<3;i++){
-          D[6* i+i ]+= shear_eff;
-          for(int j=0;j<3;j++){
-            D[6* i+j ]+= lambda_eff;
-          }
-        }
-#else
-        for(int i=0;i<6;i++){
-          for(int j=0;j<6;j++){
-            D[6* i+j ] = hard_eff * plas_flow[i] * plas_flow[j];
-          }
-        }
-#endif
 #endif
         // Pass lambda_eff,shear_eff out
         //===================================================== end UMAT
@@ -484,7 +451,7 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
     const __m256d j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
 #else
     const __m256d vJ[3]={
-      _mm256_load_pd(&jac[0]),
+      _mm256_load_pd (&jac[0]),
       _mm256_loadu_pd(&jac[3]),
       _mm256_loadu_pd(&jac[6]) };
 #endif
@@ -660,17 +627,17 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
       _mm256_store_pd(&T[4],vT[1]);
       _mm256_store_pd(&T[8],vT[2]);
 #endif
-        FLOAT_PHYS F[12]={
-          plas_flow[0], plas_flow[3], plas_flow[5], 0.0,
-          plas_flow[3], plas_flow[1], plas_flow[4], 0.0,
-          plas_flow[5], plas_flow[4], plas_flow[2], 0.0 };
+      const FLOAT_PHYS F[12]={
+        plas_flow[0], plas_flow[3], plas_flow[5], 0.0,
+        plas_flow[3], plas_flow[1], plas_flow[4], 0.0,
+        plas_flow[5], plas_flow[4], plas_flow[2], 0.0 };
 #if 0
-        for(int i=0;i<(Nd*4);i++){
-          // Scale the linear-elastic  response by elas_part.
-          S[i] = S[i] * dw * elas_part + T[i];
-          for(int k=0;k<(Nd*4);k++){
-            S[i] += F[i] * F[k] * H[k] * hard_eff * dw;
-          } }
+      for(int i=0;i<(Nd*4);i++){
+        // Scale the linear-elastic  response by elas_part.
+        S[i] = S[i] * dw * elas_part + T[i];
+        for(int k=0;k<(Nd*4);k++){
+          S[i] += F[i] * F[k] * H[k] * hard_eff * dw;
+        } }
 #else
       for(int i=0;i<3;i++){//FIXME Double shear terms?
         const __m256d ep=_mm256_set1_pd( elas_part * dw );

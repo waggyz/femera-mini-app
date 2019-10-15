@@ -45,14 +45,22 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   // Make local copies
   FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
   FLOAT_PHYS VECALIGNED wgt[intp_n];
-  FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
-  FLOAT_PHYS VECALIGNED rotc[this->mtrl_rotc.size()];
-  //
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
+  //
+#if 0
+  FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
+  FLOAT_PHYS VECALIGNED rotc[this->mtrl_rotc.size()];
   std::copy( &this->mtrl_matc[0], &this->mtrl_matc[mtrl_matc.size()], matc );
   std::copy( &this->mtrl_rotc[0], &this->mtrl_rotc[mtrl_rotc.size()], rotc );
+#else
   //FIXME Try to remove these extra copies of matc and rotc.
+  const FLOAT_PHYS* VECALIGNED matc
+  = &this->mtrl_matc[0];
+  const FLOAT_PHYS* VECALIGNED rotc
+  = &mtrl_rotc[0];
+#endif
+  //
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
   const __m256d vC[4] ={
