@@ -48,7 +48,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
   //
-#if 0
+#if 1
   //NOTE Tried to remove these extra copies of matc and rotc,
   //     but performance regresses 4%.
   FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
