@@ -563,7 +563,8 @@ if [ -z "$CSV_HAS_FINAL_TEST" ]; then
     MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
     NELEM=`grep -m1 -A1 -i elem $MESH".msh2" | tail -n1`
     if (( $NELEM > $MED_NELEM )); then
-      N=$(( $NELEM / $LARGE_ELEM_PART / $C * $C ))
+      NC=$(( $NELEM / $LARGE_ELEM_PART / $C ))
+      N=$(( $NC * $C ))
       if (( $N < $MED_PART )); then N=$MED_PART; fi
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
