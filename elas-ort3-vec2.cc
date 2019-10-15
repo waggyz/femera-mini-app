@@ -49,12 +49,13 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
   //
 #if 0
+  //NOTE Tried to remove these extra copies of matc and rotc,
+  //     but performance regresses 4%.
   FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
   FLOAT_PHYS VECALIGNED rotc[this->mtrl_rotc.size()];
   std::copy( &this->mtrl_matc[0], &this->mtrl_matc[mtrl_matc.size()], matc );
   std::copy( &this->mtrl_rotc[0], &this->mtrl_rotc[mtrl_rotc.size()], rotc );
 #else
-  //FIXME Try to remove these extra copies of matc and rotc.
   const FLOAT_PHYS* VECALIGNED matc
   = &this->mtrl_matc[0];
   const FLOAT_PHYS* VECALIGNED rotc
