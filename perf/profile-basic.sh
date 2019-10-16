@@ -603,7 +603,7 @@ if [ -z "$CSV_HAS_FINAL_TEST" ]; then
     MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
     NELEM=`grep -m1 -A1 -i elem $MESH".msh2" | tail -n1`
     NNODE=`grep -m1 -A1 -i node $MESH".msh2" | tail -n1`
-    MN=$(( 0.9 * $MED_NELEM ))
+    MN=$(( $MED_NELEM * 9 / 10 ))
     if (( $NELEM > $MN )); then
       NC=$(( $NELEM / $LARGE_ELEM_PART / $C ))
       N=$(( $NC * $C ))
