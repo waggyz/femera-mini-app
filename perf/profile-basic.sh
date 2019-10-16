@@ -608,7 +608,8 @@ if [ -z "$CSV_HAS_FINAL_TEST" ]; then
       if (( $N < $MED_PART )); then N=$MED_PART; fi
       HAS_TEST=`awk -F, -v e=$NELEM -v n=$N\
         '($1==e)&&($4==n){print $4; exit}' $CSVFILE`
-      if [ ! -z "$HAS_TEST" ]; then
+      echo "Checking for test with "$NELEM" elements and "$N" partitions..."$HAS_TEST
+      if [ -z "$HAS_TEST" ]; then
         MESHNAME="uhxt"$H"p"$P"n"$N
         MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
         echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
