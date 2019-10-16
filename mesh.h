@@ -53,6 +53,7 @@ public:
   //
   FLOAT_SOLV glob_rtol= 0.0, glob_rto2=0.0, glob_chk2=0.0, glob_res2=0.0;
   FLOAT_SOLV glob_atol=-1.0, glob_ato2=0.0;
+  FLOAT_SOLV glob_otol= 0.1;// Sierra Mechanics (non)orthogonality tolerance
   //
   //FIXME Consider moving these to Test*
   float phys_flop=0, phys_band=0;

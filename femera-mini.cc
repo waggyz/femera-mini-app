@@ -27,6 +27,7 @@ int main( int argc, char** argv ){
   int step_n     = 1;
   int iter_max   =-1;
   FLOAT_SOLV rtol= 1e-4, atol=-1.0;
+  FLOAT_SOLV otol= 0.1;// Sierra default (non)orthogonality tolerance.
   int solv_meth  = Solv::SOLV_CG;
   int solv_cond  = Solv::COND_JACO;
   FLOAT_SOLV solv_init= 0.0;// Start at u = solv_init * exact iso cube solution
@@ -47,7 +48,7 @@ int main( int argc, char** argv ){
   // Parse Command Line =============================================
   //FIXME Consider using C++ for parsing command line options.
   opterr = 0; int c;
-  while ((c = getopt (argc, argv, "v:pP:h:c:m:s:I:i:r:a:x:y:z:V:d:u:")) != -1){
+  while ((c = getopt (argc, argv, "v:pP:h:c:m:s:I:i:r:a:o:x:y:z:V:d:u:")) != -1){
     // x:  -x requires an argument
     switch (c) {
       case 'c':{ comp_n   = atoi(optarg); break; }
@@ -63,6 +64,7 @@ int main( int argc, char** argv ){
       case 'i':{ iter_max = atoi(optarg); break; }
       case 'r':{ rtol     = atof(optarg); break; }
       case 'a':{ atol     = atof(optarg); break; }
+      case 'o':{ otol     = atof(optarg); break; }
       case 's':{ solv_meth= atoi(optarg); break; }
       case 'd':{ solv_cond= atoi(optarg); break; }
       case 'u':{ solv_init= atof(optarg); break; }
@@ -267,6 +269,7 @@ int main( int argc, char** argv ){
   M->comp_n=comp_n;
   M->simd_n=simd_n;
   M->glob_atol = atol; M->glob_ato2 = atol*atol;
+  M->glob_otol = otol;
   M->verbosity=verbosity;
   M->time_secs.resize(10);
   M->load_step_n=step_n; M->step_scal=1.0/FLOAT_SOLV(step_n);
@@ -462,8 +465,8 @@ int main( int argc, char** argv ){
             float(iter)/iter_sec*float(comp_n) );
         }
         if(M->glob_res2 <= 0.0){
-            printf("%9i ||R||%9.2e NCG Reset\n",
-              iter, std::sqrt(M->glob_chk2) );
+            printf("%9i ||R||%9.2e NCG Reset: >%g Non-orthogonal\n",
+              iter, std::sqrt(M->glob_chk2), M->glob_otol );
         }
       }
 #endif

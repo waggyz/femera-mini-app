@@ -590,7 +590,8 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
   // I think this is the SM reset criterion.
   // The value of glob_sum3 / glob_sum4 measures non-orthogonality.
   FLOAT_SOLV beta = glob_sum3 / glob_sum4;
-  beta *= FLOAT_SOLV(beta>0.1);
+  //glob_sum3 *= FLOAT_SOLV( beta > this->glob_otol );
+  beta *= FLOAT_SOLV( beta > this->glob_otol );
 #else
   const FLOAT_SOLV beta = std::max(0.0, glob_sum3 / glob_sum4 );
   //NOTE the max provides a search direction reset automatically.
