@@ -386,6 +386,9 @@ if [ -f $CSVSMALL ]; then
           echo "Average: "$SOLVE_MDOFS" MDOF/s with "$NDOF" DOF models..."
         fi
         for C in $(seq 1 $(( $CPUCOUNT / 2 )) ); do
+          ALREADY_TESTED=`awk -F, -v n=$NNODE -v c=$C\
+            '($2==n)&&($9==c){print $4; exit}' $CSVSMALL`
+          if [ ! -z "$ALREADY_TESTED" ]; then
           awk -F, -v nnode=$NNODE -v nrun=0 -v mdofs=0 -v c=$C\
             'BEGIN{OFS=",";t10=0;t11=0;t12=0;}\
             ($2==nnode)&&($9==c){nrun+=1;t10+=$10;t11+=$11;t12+=$12;mdofs+=$13;\
@@ -393,6 +396,7 @@ if [ -f $CSVSMALL ]; then
             END{print e,n,f,p,i1,i2,r1,r2,cc,t10/nrun,t11/nrun,t12/nrun,\
             mdofs/(nrun==0?1:nrun)*c/(cc==0?1:cc)}'\
             $CSVSMALL >> $CSVPROFILE
+          fi
         done
       fi
     fi
