@@ -607,8 +607,8 @@ if [ -z "$CSV_HAS_FINAL_TEST" ]; then
       NC=$(( $NELEM / $LARGE_ELEM_PART / $C ))
       N=$(( $NC * $C ))
       if (( $N < $MED_PART )); then N=$MED_PART; fi
-      HAS_TEST=`awk -F, -v n=$NNODE -v n=$N\
-        '($2==n)&&($4==n){print $4; exit}' $CSVFILE`
+      HAS_TEST=`awk -F, -v n=$NNODE -v p=$N\
+        '($2==n)&&($4==p){print $4; exit}' $CSVFILE`
       if [ -z "$HAS_TEST" ]; then
         MESHNAME="uhxt"$H"p"$P"n"$N
         MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
