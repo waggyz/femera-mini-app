@@ -330,7 +330,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
       else
         ALREADY_TESTED=""
       fi
-      if [ -n $ALREADY_TESTED ]; then
+      if [ ! -z "$ALREADY_TESTED" ]; then
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
       echo "Partitioning and converting "$MESHNAME", if necessary..."
@@ -385,14 +385,15 @@ if [ -f $CSVSMALL ]; then
         if false; then
           echo "Average: "$SOLVE_MDOFS" MDOF/s with "$NDOF" DOF models..."
         fi
-  #FIXME Change to loop through unique CSV col 1 values
-        awk -F, -v nnode=$NNODE -v nrun=0 -v mdofs=0 -v c=$CPUCOUNT\
-          'BEGIN{OFS=",";t10=0;t11=0;t12=0;}\
-          ($2==nnode)&&($9<c){nrun+=1;t10+=$10;t11+=$11;t12+=$12;mdofs+=$13;\
-            e=$1;n=$2;f=$3;p=$4;i1=$5;i2=$6;r1=$7;r2=$8;cc=$9;}\
-          END{print e,n,f,p,i1,i2,r1,r2,cc,t10/nrun,t11/nrun,t12/nrun,\
-          mdofs/(nrun==0?1:nrun)*c/(cc==0?1:cc)}'\
-          $CSVSMALL >> $CSVPROFILE
+        for C in $(seq 1 $(( $CPUCOUNT / 2 )) ); do
+          awk -F, -v nnode=$NNODE -v nrun=0 -v mdofs=0 -v c=$C\
+            'BEGIN{OFS=",";t10=0;t11=0;t12=0;}\
+            ($2==nnode)&&($9==c){nrun+=1;t10+=$10;t11+=$11;t12+=$12;mdofs+=$13;\
+              e=$1;n=$2;f=$3;p=$4;i1=$5;i2=$6;r1=$7;r2=$8;cc=$9;}\
+            END{print e,n,f,p,i1,i2,r1,r2,cc,t10/nrun,t11/nrun,t12/nrun,\
+            mdofs/(nrun==0?1:nrun)*c/(cc==0?1:cc)}'\
+            $CSVSMALL >> $CSVPROFILE
+        done
       fi
     fi
   done;
@@ -624,7 +625,8 @@ if [ ! -z "$CSV_HAS_FINAL_TEST" ]; then
     MESHNAME="uhxt"$H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
     NELEM=`grep -m1 -A1 -i elem $MESH".msh2" | tail -n1`
-    N=$(( $NELEM / $LARGE_ELEM_PART / $C * $C ))
+    NC=$(( $NELEM / $LARGE_ELEM_PART / $C ))
+    N=$(( $NC * $C ))
     if (( $N < $MED_PART )); then N=$MED_PART; fi
     awk -F, -v nelem=$NELEM -v parts=$N\
       'BEGIN{OFS=",";dofs=0;}\
@@ -658,6 +660,8 @@ if [ ! -z "$HAS_GNUPLOT" ]; then
     with points pointtype 0 title 'C=N="$CPUCOUNT"';\
   "\
   | tee -a $PROFILE ;#| grep --no-group-separator -C25 --color=always '\*'
+  #FIXME Removed small model profile because it's wrong.
+  #FIXME I think some tests are repeated, and not accounted for correctly.
 else
   echo >> $PROFILE
 fi
