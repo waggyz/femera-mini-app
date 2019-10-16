@@ -389,12 +389,12 @@ if [ -f $CSVSMALL ]; then
           ALREADY_TESTED=`awk -F, -v n=$NNODE -v c=$C\
             '($2==n)&&($9==c){print $4; exit}' $CSVSMALL`
           if [ ! -z "$ALREADY_TESTED" ]; then
-          awk -F, -v nnode=$NNODE -v nrun=0 -v mdofs=0 -v c=$C\
+          awk -F, -v nnode=$NNODE -v nrun=0E -v c=$C -v mdofs=0 -v ctot=$CPUCOUNT\
             'BEGIN{OFS=",";t10=0;t11=0;t12=0;}\
             ($2==nnode)&&($9==c){nrun+=1;t10+=$10;t11+=$11;t12+=$12;mdofs+=$13;\
               e=$1;n=$2;f=$3;p=$4;i1=$5;i2=$6;r1=$7;r2=$8;cc=$9;}\
             END{print e,n,f,p,i1,i2,r1,r2,cc,t10/nrun,t11/nrun,t12/nrun,\
-            mdofs/(nrun==0?1:nrun)*c/(cc==0?1:cc)}'\
+            mdofs/(nrun==0?1:nrun)*ctot/(cc==0?1:cc)}'\
             $CSVSMALL >> $CSVPROFILE
           fi
         done
