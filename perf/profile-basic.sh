@@ -580,7 +580,7 @@ if [ ! -z "$CSV_HAS_LARGE_PART_TEST" ]; then
   printf " %9i : Large test model size [DOF]\n" $LARGE_UDOF >> $PROFILE
   printf " %9i : Large test model performance [MDOF/s]\n" $LARGE_MDOFS >> $PROFILE
 fi
-CSV_HAS_FINAL_TEST=""
+CSV_HAS_FINAL_TEST="true"
 if [ -z "$CSV_HAS_FINAL_TEST" ]; then
   echo Running final profile tests...
   export OMP_SCHEDULE=static
