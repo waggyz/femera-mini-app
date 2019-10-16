@@ -602,19 +602,19 @@ if [ -z "$CSV_HAS_FINAL_TEST" ]; then
     MESHNAME="uhxt"$H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
     NELEM=`grep -m1 -A1 -i elem $MESH".msh2" | tail -n1`
+    NNODE=`grep -m1 -A1 -i node $MESH".msh2" | tail -n1`
     if (( $NELEM > $MED_NELEM )); then
       NC=$(( $NELEM / $LARGE_ELEM_PART / $C ))
       N=$(( $NC * $C ))
       if (( $N < $MED_PART )); then N=$MED_PART; fi
-      HAS_TEST=`awk -F, -v e=$NELEM -v n=$N\
-        '($1==e)&&($4==n){print $4; exit}' $CSVFILE`
-      echo "Checking for test with "$NELEM" elements and "$N" partitions..."$HAS_TEST
+      HAS_TEST=`awk -F, -v n=$NELEM -v n=$N\
+        '($2==n)&&($4==n){print $4; exit}' $CSVFILE`
       if [ -z "$HAS_TEST" ]; then
         MESHNAME="uhxt"$H"p"$P"n"$N
         MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
         echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
         $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
-        NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
+        #NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
         NDOF=$(( $NNODE * 3 ))
         ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
         if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
