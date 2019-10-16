@@ -324,13 +324,13 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
       N=$C;
       if [ -f $CSVSMALL ]; then
         if [ $(( $NDOF * $X )) -lt $(( $THIS_MAX )) ]; then
-        ALREADY_TESTED=`awk -F, -v n=$NNODE -v c=$C\
+        HAS_TEST=`awk -F, -v n=$NNODE -v c=$C\
           '($2==n)&&($9==c){print $4; exit}' $CSVSMALL`
         fi
       else
-        ALREADY_TESTED=""
+        HAS_TEST=""
       fi
-      if [ ! -z "$ALREADY_TESTED" ]; then
+      if [ ! -z "$HAS_TEST" ]; then
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
       echo "Partitioning and converting "$MESHNAME", if necessary..."
@@ -386,9 +386,9 @@ if [ -f $CSVSMALL ]; then
           echo "Average: "$SOLVE_MDOFS" MDOF/s with "$NDOF" DOF models..."
         fi
         for C in $(seq 1 $(( $CPUCOUNT / 2 )) ); do
-          ALREADY_TESTED=`awk -F, -v n=$NNODE -v c=$C\
+          HAS_TEST=`awk -F, -v n=$NNODE -v c=$C\
             '($2==n)&&($9==c){print $4; exit}' $CSVSMALL`
-          if [ ! -z "$ALREADY_TESTED" ]; then
+          if [ ! -z "$HAS_TEST" ]; then
           awk -F, -v nnode=$NNODE -v nrun=0E -v c=$C -v mdofs=0 -v ctot=$CPUCOUNT\
             'BEGIN{OFS=",";t10=0;t11=0;t12=0;}\
             ($2==nnode)&&($9==c){nrun+=1;t10+=$10;t11+=$11;t12+=$12;mdofs+=$13;\
@@ -584,7 +584,12 @@ if [ ! -z "$CSV_HAS_LARGE_PART_TEST" ]; then
   printf " %9i : Large test model size [DOF]\n" $LARGE_UDOF >> $PROFILE
   printf " %9i : Large test model performance [MDOF/s]\n" $LARGE_MDOFS >> $PROFILE
 fi
-CSV_HAS_FINAL_TEST="true"
+if [ -f $CSVFILE ]; then
+  CSV_HAS_FINAL_TEST=`awk -F, -v e=$LARGE_NELEM -v c=$CPUCOUNT\
+    '($1>(e*1.5))&&($9>c){print $4; exit}' $CSVFILE`
+else
+  CSV_HAS_FINAL_TEST=""
+fi
 if [ -z "$CSV_HAS_FINAL_TEST" ]; then
   echo Running final profile tests...
   export OMP_SCHEDULE=static
@@ -601,20 +606,24 @@ if [ -z "$CSV_HAS_FINAL_TEST" ]; then
       NC=$(( $NELEM / $LARGE_ELEM_PART / $C ))
       N=$(( $NC * $C ))
       if (( $N < $MED_PART )); then N=$MED_PART; fi
-      MESHNAME="uhxt"$H"p"$P"n"$N
-      MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
-      echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
-      $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
-      NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
-      NDOF=$(( $NNODE * 3 ))
-      ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
-      if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
-      echo "Running "$ITERS" iterations of "$MESHNAME" ("$NDOF" DOF), "\
-        $REPEAT_TEST_N" times..."
-      for I in $(seq 1 $REPEAT_TEST_N ); do
-        $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
-          -p $MESH >> $CSVFILE
-      done
+      HAS_TEST=`awk -F, -v e=$NELEM -v n=$N\
+        '($1==e)&&($4==n){print $4; exit}' $CSVSMALL`
+      if [ -z "$HAS_TEST" ]; then
+        MESHNAME="uhxt"$H"p"$P"n"$N
+        MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
+        echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
+        $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
+        NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
+        NDOF=$(( $NNODE * 3 ))
+        ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
+        if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
+        echo "Running "$ITERS" iterations of "$MESHNAME" ("$NDOF" DOF), "\
+          $REPEAT_TEST_N" times..."
+        for I in $(seq 1 $REPEAT_TEST_N ); do
+          $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
+            -p $MESH >> $CSVFILE
+        done
+      fi
     fi
   done
 fi
