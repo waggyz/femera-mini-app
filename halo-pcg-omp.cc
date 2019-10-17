@@ -112,7 +112,7 @@ int PCG::Init( Elem* E, Phys* Y ){// printf("*** Init(E,Y) ***\n");
 #endif
   return 0;
 }
-int PCG::Init(){// printf("*** Init() ***\n");
+int PCG::Init(){// printf("*** PCG::Init() ***\n");
   const uint sysn=this->udof_n;// loca_res2 is a member variable.
   const uint sumi0=this->halo_loca_0;
 #ifdef HAS_PRAGMA_SIMD
@@ -213,7 +213,7 @@ int PCG::Solve( Elem*, Phys* ){// printf("*** Solve(E,Y) ***\n");//FIXME Redo th
 #endif
   return 1;//FIXME
 }
-int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjugate Gradient
+int HaloPCG::Init(){// printf("*** HaloPCG M->Init() ***\n");// Preconditioned Conjugate Gradient
 #ifdef _OPENMP
   const int comp_n = this->comp_n;
 #endif
@@ -226,8 +226,9 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
   long int my_scat_count=0, my_prec_count=0,
     my_gat0_count=0,my_gat1_count=0, my_solv_count=0;
   auto start = std::chrono::high_resolution_clock::now();
-#if 0
-  // Make thread-local copies of mesh_part into threadprivate HaloPCG::priv_part.
+#if OMP_NESTED==true
+  // Make thread-local copies of mesh_part into priv_part.
+  std::vector<part> priv_part;
   priv_part.resize(this->mesh_part.size());
   std::copy(this->mesh_part.begin(), this->mesh_part.end(), priv_part.begin());
 #endif
@@ -235,7 +236,7 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
   const int part_n = int(priv_part.size())-part_0;
   const int part_o = part_n+part_0;
   // Sync max Y->udof_magn
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     S->load_scal=load_scal;
@@ -264,7 +265,7 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
     }
 #endif
 }
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     S->solv_cond=this->solv_cond;
@@ -280,7 +281,7 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
   // ---------------------------  Sync part_d
 #pragma omp single
 { this->halo_val=0.0; }
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH d=uint(Y->node_d);
@@ -297,7 +298,7 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
     }
   }
   time_reset( my_gat1_count, start );
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH d=uint(Y->node_d);
@@ -309,7 +310,7 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
     }
   }
   time_reset( my_scat_count, start );
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){//-------------- Invert part_d
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH sysn=S->udof_n;
@@ -322,7 +323,7 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
 #pragma omp single
 {   this->halo_val = 0.0; }// serial halo_vals zero
   time_reset( my_gat0_count, start );// ---------------------------  Sync part_f
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH d=uint(Y->node_d);
@@ -334,7 +335,7 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
     }
   }// End halo_vals
   time_reset( my_gat1_count, start );
-#pragma omp for schedule(OMP_SCHEDULE) reduction(+:glob_r2a)
+#pragma omp for schedule(static) reduction(+:glob_r2a)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH d=uint(Y->node_d);
@@ -349,7 +350,7 @@ int HaloPCG::Init(){// printf("*** Halo Init() ***\n");// Preconditioned Conjuga
 { S->Init(); }//FIXME Why is this serialized?
   glob_r2a += S->loca_res2;
   }
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     S->loca_rto2 = S->loca_rtol*S->loca_rtol *glob_r2a;
@@ -384,6 +385,12 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
   //FIXME don't need M->halo_val member variable now.
 #pragma omp parallel num_threads(comp_n)
 {// iter parallel region
+#if OMP_NESTED==true
+  // Make thread-local copies of mesh_part into threadprivate HaloPCG::priv_part.
+  std::vector<part> priv_part;
+  priv_part.resize(this->mesh_part.size());
+  std::copy(this->mesh_part.begin(), this->mesh_part.end(), priv_part.begin());
+#endif
   // HaloPCG::priv_part is a threadprivate global variable
   int part_0=0; if(std::get<0>( priv_part[0] )==NULL){ part_0=1; }
   const int part_n = int(priv_part.size())-part_0;
@@ -397,7 +404,7 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
   std::chrono::high_resolution_clock::time_point
     gath_start, scat_start, phys_start;
   time_start( iter_start );
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH Dn=uint(Y->node_d);
@@ -416,7 +423,7 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
     };
     time_accum( my_gat0_count, gath_start );
   };
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=priv_part[part_i];
     time_start( gath_start );
@@ -430,7 +437,7 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
     };
     time_accum( my_gat1_count, gath_start );
   };// End halo_vals sum; now scatter back to elems
-#pragma omp for schedule(OMP_SCHEDULE) reduction(+:glob_sum1)
+#pragma omp for schedule(static) reduction(+:glob_sum1)
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH Dn=uint(Y->node_d);
@@ -458,7 +465,7 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
   time_start( solv_start );
   const FLOAT_SOLV alpha = glob_r2a / glob_sum1;// 1 FLOP
   //printf("ALPHA:%+9.2e\n",alpha);
-#pragma omp for schedule(OMP_SCHEDULE) reduction(+:glob_sum2)
+#pragma omp for schedule(static) reduction(+:glob_sum2)
   for(int part_i=part_0; part_i<part_o; part_i++){// ? FLOP/DOF
     std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH hl0=S->halo_loca_0,sysn=S->udof_n;
@@ -476,7 +483,7 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
       glob_sum2   += S->part_r[i] * S->part_r[i] * S->part_d[i]; };
   };
   const FLOAT_PHYS beta = glob_sum2 / glob_r2a;// 1 FLOP
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH sysn=S->udof_n;

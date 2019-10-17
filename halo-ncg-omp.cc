@@ -121,8 +121,8 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   long int my_scat_count=0, my_prec_count=0,//FIXME These times are messed up
     my_gat0_count=0,my_gat1_count=0, my_solv_count=0;
   auto start = std::chrono::high_resolution_clock::now();
-#if 0
-  // Make thread-local copies of mesh_part into threadprivate priv_part.
+#if OMP_NESTED==true
+  std::vector<part> priv_part;
   priv_part.resize(this->mesh_part.size());
   std::copy(this->mesh_part.begin(), this->mesh_part.end(), priv_part.begin());
 #endif
@@ -130,7 +130,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   const int part_n = int(priv_part.size())-part_0;
   const int part_o = part_n+part_0;
   // Sync max Y->udof_magn
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     const uint sysn=S->udof_n;
@@ -186,7 +186,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
       printf("\n"); }
 #endif
 }
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     S->solv_cond=this->solv_cond;
@@ -199,7 +199,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   }
   // preconditioner update check ----------------------
   if( (this->load_step==1) | (this->solv_cond == Solv::COND_TANG) ){
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     for(uint i=0; i<S->udof_n; i++){ S->part_d[i]=0.0; }
@@ -215,7 +215,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp single
   for(int i=0; i<n; i++){ halo_vals[i]=0.0; }
 #endif
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH d=uint(Y->node_d);
@@ -225,7 +225,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
         halo_vals[d*E->node_haid[i]+j]+= S->part_d[d*i +j]; } }
   }
   time_reset( my_gat1_count, start );
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH d=uint(Y->node_d);
@@ -237,7 +237,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     }
   }
   time_reset( my_scat_count, start );// part_d sync -----
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){// ------------- Invert part_d
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH sysn=S->udof_n;
@@ -258,7 +258,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #ifdef HALO_SUM_SER
 #pragma omp single
 #else
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
 #endif
   for(int part_i=part_0; part_i<part_o; part_i++){// --------------- sync part_f
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
@@ -275,7 +275,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
     }
   }// End halo_vals
   time_reset( my_gat1_count, start );
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH d=uint(Y->node_d);
@@ -293,7 +293,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #else
 //FIXME Took this out of S->Init()
   }
-#pragma omp for schedule(OMP_SCHEDULE) reduction(+:glob_r2a)
+#pragma omp for schedule(static) reduction(+:glob_r2a)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     const uint sysn=S->udof_n;// loca_res2 is a member variable.
@@ -319,7 +319,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #endif
 #endif
   }
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     S->loca_rto2 = S->loca_rtol*S->loca_rtol *glob_r2a;//FIXME wtf?
@@ -358,6 +358,11 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 #endif
 #pragma omp parallel num_threads(comp_n)
 {// iter parallel region
+#if OMP_NESTED==true
+  std::vector<part> priv_part;
+  priv_part.resize(this->mesh_part.size());
+  std::copy(this->mesh_part.begin(), this->mesh_part.end(), priv_part.begin());
+#endif
   // HaloNCG::priv_part is a global threadprivate variable
   int part_0=0; if(std::get<0>( priv_part[0] )==NULL){ part_0=1; };
   const int part_n = int(priv_part.size())-part_0;
@@ -372,7 +377,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     gath_start, scat_start, phys_start;
   time_start( iter_start );
   //------------------------------------------- Compute and sync part_g = K( q )
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH Dn=uint(Y->node_d);
@@ -405,7 +410,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 #ifdef HALO_SUM_SER
 #pragma omp single
 #else
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
 #endif
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=priv_part[part_i];
@@ -448,7 +453,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
   printf("\n");
 }
 #endif
-#pragma omp for schedule(OMP_SCHEDULE) reduction(+:glob_sum1,glob_sum2)
+#pragma omp for schedule(static) reduction(+:glob_sum1,glob_sum2)
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH Dn=uint(Y->node_d);
@@ -484,7 +489,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
   const FLOAT_SOLV alpha = glob_sum1 / glob_sum2;//                    (1 FLOP)
   //printf("ALPHA:%+9.2e\n",alpha);
   //----------------------------------------------------- Update solution part_u
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=priv_part[part_i];
     const auto sysn = S->udof_n;
@@ -498,7 +503,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     time_accum( my_solv_count, solv_start );//FIXED Merge with next loop
 #if 0
   }
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=priv_part[part_i];
     const auto sysn = S->udof_n;
@@ -518,7 +523,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 #ifdef HALO_SUM_SER
 #pragma omp single
 #else
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
 #endif
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=priv_part[part_i];
@@ -534,7 +539,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
     }
     time_accum( my_gat1_count, gath_start );
   }// End halo_vals sum; now scatter back to elems
-#pragma omp for schedule(OMP_SCHEDULE) reduction(+:glob_sum3,glob_sum4,glob_sum5)
+#pragma omp for schedule(static) reduction(+:glob_sum3,glob_sum4,glob_sum5)
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH Dn=uint(Y->node_d);
@@ -596,7 +601,7 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
   const FLOAT_SOLV beta = std::max(0.0, glob_sum3 / glob_sum4 );
   //NOTE the max provides a search direction reset automatically.
 #endif
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){// Update search direction
     std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH sysn=S->udof_n;

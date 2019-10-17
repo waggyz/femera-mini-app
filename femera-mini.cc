@@ -22,7 +22,7 @@ int main( int argc, char** argv ){
   const float sec=1.0, ms=1e-3,us=1e-6, Meg=1e6, pct=100.0;// k=1e3,Gig=1e9,
 #endif
   // defaults
-  int comp_n     = 0;//, numa_n=0;
+  int comp_n     = 0;
   int verbosity  = 1;
   int step_n     = 1;
   int iter_max   =-1;
@@ -33,7 +33,10 @@ int main( int argc, char** argv ){
   FLOAT_SOLV solv_init= 0.0;// Start at u = solv_init * exact iso cube solution
   uint simd_n    = 1;
 #ifdef _OPENMP
-  int numa_n     = 0;
+#if OMP_NESTED==true
+  int mesh_n     = 1;// Total number of models to run
+  int mult_n     = 1;// Number of concurrent models
+#endif
 #if VERB_MAX>1
   int halo_mod   = 1;
 #endif
@@ -48,14 +51,17 @@ int main( int argc, char** argv ){
   // Parse Command Line =============================================
   //FIXME Consider using C++ for parsing command line options.
   opterr = 0; int c;
-  while ((c = getopt (argc, argv, "v:pP:h:c:m:s:I:i:r:a:o:x:y:z:V:d:u:")) != -1){
+  while ((c = getopt (argc, argv, "v:pP:h:c:m:n:s:I:i:r:a:o:x:y:z:V:d:u:")) != -1){
     // x:  -x requires an argument
     switch (c) {
-      case 'c':{ comp_n   = atoi(optarg); break; }
       case 'v':{ verbosity= atoi(optarg); break; }
       case 'V':{ simd_n   = atoi(optarg); break; }
 #ifdef _OPENMP
-      case 'm':{ numa_n   = atoi(optarg); break; }//FIXME Not yet used.
+#if OMP_NESTED==true
+      case 'm':{ mesh_n   = atoi(optarg); break; }// Total number of models
+      case 'n':{ mult_n   = atoi(optarg); break; }// Number of concurrent models
+#endif
+      case 'c':{ comp_n   = atoi(optarg); break; }// Threads/model
 #if VERB_MAX>1
       case 'h':{ halo_mod = atoi(optarg); break; }
 #endif
@@ -135,19 +141,17 @@ int main( int argc, char** argv ){
   if( verbosity > VERB_MAX ){
     std::cout <<"WARNING Verbosity "<< verbosity
     <<" requested is more than compiled verbosity maximum "
-    << VERB_MAX <<". Downgrading to "<<VERB_MAX <<"."<<'\n';
+    << VERB_MAX <<". Downgrading to verbosity "<<VERB_MAX <<"."<<'\n';
     verbosity=VERB_MAX;
   }
   // Find Mesh Files ================================================
   if(bname == NULL){
     std::cerr << "ERROR Mesh partition base filename not provided." << '\n';
     return 1; }
-  else{
     if(is_part){
 #if VERB_MAX>1
     if(verbosity>1){
-      printf ("Looking for Femera partitions of %s...\n", bname);
-    }
+      printf ("Looking for Femera partitions of %s...\n", bname); }
 #endif
     bool fok=true; INT_MESH_PART part_i=1;
     while( fok ){
@@ -203,7 +207,6 @@ int main( int argc, char** argv ){
         fclose (pfile);
         }
       }
-    }
   if(part_n>0){
     if(part_n>1){
 #if VERB_MAX>1
@@ -216,6 +219,10 @@ int main( int argc, char** argv ){
       << '\n'; 
     return 1;
   }
+#if OMP_NESTED==true
+#pragma omp parallel for num_threads(mult_n)
+  for(int mesh_i=0;mesh_i<mesh_n; mesh_i++){
+#endif
   // Read and Setup =============================================
   int iter=0;
 #if VERB_MAX>0
@@ -231,10 +238,7 @@ int main( int argc, char** argv ){
 #endif
 #ifdef _OPENMP
   if( comp_n <1){ comp_n = omp_get_max_threads(); }//omp_get_max_threads();
-  if( numa_n==0){ numa_n = comp_n / 2; }//FIXME just a guess...and not yet used
-  if( numa_n <2 ){ numa_n=2; }
   if( comp_n >int(part_n) ){ comp_n=int(part_n); }
-  if( numa_n >int(part_n) ){ numa_n=int(part_n); }
 #if VERB_MAX>1
   if(verbosity>1){
   std::cout <<"Parallel OpenMP " << "using "  <<comp_n<< " threads";
@@ -342,7 +346,6 @@ int main( int argc, char** argv ){
   if(halo_mod!=1){
     std::cout<<"with halo updates every "
     <<halo_mod<< " iterations..."<<'\n'; }
-    //<<comp_n<< " compute and " <<numa_n<< " NUMA threads." <<'\n';
 #endif
 #endif
   // Initialize ---------------------------------------------------
@@ -355,8 +358,8 @@ int main( int argc, char** argv ){
       setu_done=std::chrono::high_resolution_clock::now();
       read_sec=0.0;
     }
-    M->time_secs=0.0;
-    M->Init();
+    M->time_secs=0.0;//printf("**** Going to M->Init() ****\n");
+    M->Init();//printf("**** Hello Mini! ****\n");
     if( (step_n > 1) & (M->load_step == 1) & (M->glob_atol<=0.0) ){
       M->glob_atol = std::sqrt(M->glob_rto2);
       M->glob_ato2 = M->glob_rto2; }// Stick with initial relative tolerance
@@ -579,9 +582,18 @@ int main( int argc, char** argv ){
     FLOAT_PHYS youn_voig=0.0, ther_pres=0.0, test_amt=0.0;
 #pragma omp parallel num_threads(comp_n)
 {
+#if OMP_NESTED==true
+  std::vector<Mesh::part> priv_part;
+  priv_part.resize(M->mesh_part.size());
+  std::copy(M->mesh_part.begin(), M->mesh_part.end(), priv_part.begin());
+#endif
 #pragma omp for schedule(static)
     for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
-      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->priv_part[part_i];
+#if OMP_NESTED==true
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
+#else
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->priv_part[part_i];
+#endif
 #pragma omp critical(minmax)
 {
       //smin=std::min( smin, E->node_coor.min() );
@@ -635,9 +647,18 @@ int main( int argc, char** argv ){
     Test* T = new Test();//FIXME should this be inside the parallel region?
 #pragma omp parallel num_threads(comp_n)
 {
+#if OMP_NESTED==true
+  std::vector<Mesh::part> priv_part;
+  priv_part.resize(M->mesh_part.size());
+  std::copy(M->mesh_part.begin(), M->mesh_part.end(), priv_part.begin());
+#endif
 #pragma omp for schedule(static)
     for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
-      Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->priv_part[part_i];
+#if OMP_NESTED==true
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
+#else
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->priv_part[part_i];
+#endif
       const int Dm=3; const int Dn=Y->node_d;
       Phys::vals errors;
       FLOAT_PHYS nu=Y->mtrl_prop[1];
@@ -799,9 +820,18 @@ int main( int argc, char** argv ){
     //FIXME should do this only for elems with prescribed BCS
 #pragma omp parallel num_threads(comp_n)
 {
+#if OMP_NESTED==true
+  std::vector<Mesh::part> priv_part;
+  priv_part.resize(M->mesh_part.size());
+  std::copy(M->mesh_part.begin(), M->mesh_part.end(), priv_part.begin());
+#endif
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
+#if OMP_NESTED==true
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
+#else
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->priv_part[part_i];
+#endif
     const auto n = S->udof_n;
     for(uint i=0;i<n;i++){ S->part_f[i]=0.0; }
     Y->ElemLinear( E,0,E->halo_elem_n, S->part_f, S->part_u );
@@ -817,7 +847,11 @@ int main( int argc, char** argv ){
   }
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
+#if OMP_NESTED==true
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
+#else
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->priv_part[part_i];
+#endif
     const INT_MESH Dn=uint(Y->node_d);
     const INT_MESH hrn=E->halo_remo_n;
     for(INT_MESH i=0; i<hrn; i++){
@@ -829,7 +863,11 @@ int main( int argc, char** argv ){
   }// finished gather, now scatter back to elems
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
+#if OMP_NESTED==true
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
+#else
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->priv_part[part_i];
+#endif
     const INT_MESH Dn=uint(Y->node_d);
     const INT_MESH hnn=E->halo_node_n;
     for(INT_MESH i=0; i<hnn; i++){
@@ -846,7 +884,11 @@ int main( int argc, char** argv ){
   // Also, compute the polycrystal effective Young's modulus
 #pragma omp for schedule(static) reduction(+:reac_x)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
+#if OMP_NESTED==true
+    Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
+#else
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->priv_part[part_i];
+#endif
     const INT_MESH Dn=uint(Y->node_d);
     uint dof=test_dir;
     INT_MESH n,f; FLOAT_MESH v;
@@ -889,5 +931,8 @@ int main( int argc, char** argv ){
 #endif //HAS_TEST
   }//load step loop
   }//load step scope
+#if OMP_NESTED==true
+  }// end omp parallel multi-model outer loop
+#endif
   return 0;
 }

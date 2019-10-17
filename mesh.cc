@@ -16,7 +16,9 @@
 #include <stdio.h>
 #endif
 
+#if OMP_NESTED!=true
 std::vector<Mesh::part> Mesh::priv_part;
+#endif
 
 //FIXME Remove unneeded includes
 int Mesh::GatherGlobalIDs(){ return 0; };
@@ -317,14 +319,20 @@ int Mesh::Setup(){
     this->phys_band += float(Y->tens_band);
 }
   }// End parallel read & setup loop ====================================
+#if OMP_NESTED==true
+  std::vector<part> priv_part;
+  priv_part.resize(this->mesh_part.size());
+  std::copy(this->mesh_part.begin(), this->mesh_part.end(), priv_part.begin());
+#else
   // Make thread-local copies of mesh_part into threadprivate priv_part.
 #pragma omp critical
 {
   priv_part.resize(this->mesh_part.size());
   std::copy(this->mesh_part.begin(), this->mesh_part.end(), priv_part.begin());
 }
+#endif
     //----------------------------------------------------------- Sync halo_map
-#pragma omp for schedule(OMP_SCHEDULE)
+#pragma omp for schedule(static)
     for(int part_i=part_0; part_i<(part_n+part_0); part_i++){
       Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
 #pragma omp critical(halomap)

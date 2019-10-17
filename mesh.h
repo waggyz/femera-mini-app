@@ -35,7 +35,7 @@ public:
   //
   uint     simd_n=1;//FIXME Remove? Initial vectorization width
   //
-  int comp_n=1, numa_n=1;
+  int comp_n=1;
   int solv_meth=Solv::SOLV_CG, solv_cond=Solv::COND_JACO, verbosity=1;
   int hown_meth=2;// Halo node ownership method
   //
@@ -90,8 +90,10 @@ public:
   //
   //virtual Elem* ReadFile( const char* fname, INT_ORDER pord )=0;
   //
+#if OMP_NESTED!=true
   static std::vector<part> priv_part;
 #pragma omp threadprivate(priv_part)
+#endif
 protected:
   Mesh( Solv::Meth m ) : solv_meth(m){};
   Mesh( Solv::Meth m, INT_MESH i, FLOAT_PHYS r ) :
@@ -118,8 +120,6 @@ public:
   int Iter() final;
 protected:
 private:
-//  static std::vector<part> priv_part;
-//#pragma omp threadprivate(priv_part)
 };
 class HaloPCR final: public Mesh{
 // Preconditioned Conjugate Residual Kernel ----------------------------
@@ -137,8 +137,6 @@ public:
   int Iter() final;
 protected:
 private:
-//  static std::vector<part> priv_part;
-//#pragma omp threadprivate(priv_part)
 };
 class HaloNCG final: public Mesh{
 // Preconditioned Conjugate Gradient Kernel ----------------------------
@@ -156,8 +154,6 @@ public:
   int Iter() final;
 protected:
 private:
-//  static std::vector<part> priv_part;
-//#pragma omp threadprivate(priv_part)
 };
 #if 0
 //Elem* Mesh::ReadFile( const char* fname, INT_ORDER pord ){};
