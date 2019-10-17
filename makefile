@@ -116,7 +116,7 @@ _dummy := $(shell mkdir -p mini.o test $(TESTDIR) $(PERFDIR))
 
 .SILENT :
 
-all : gmsh2fmr-ser mini-omp mini-omq
+all : gmsh2fmr-ser mini-omp mini-omq mini-mmp mini-mmq
 
 test : all
 	./gmsh2fmr-$(CPUMODELC) -v3 \
@@ -146,10 +146,13 @@ test-iso : mini-omp
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 \
 	-M0 -E100e9 -N0.3 -ap cube/unst19p1n16;
 	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
+	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
 
 test-mmp : mini-mmp
 	echo ./femera-mmp-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
+	export OMP_PLACES=cores; export OMP_PROC_BIND=spread,close; \
+	export OMP_NESTED=true; export OMP_MAX_ACTIVE_LEVELS=2; \
 	./femera-mmp-$(CPUMODELC) -v2 -m8 -n2 -c2 \
 	-p cube/unst19p1n16
 
