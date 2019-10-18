@@ -331,7 +331,10 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
         HAS_TEST=""
       fi
       if [ -z "$HAS_TEST" ]; then
-      M=$(( $S * $X ))
+      SITERS=$ITERS
+      SS=$(( $S / $X ))
+      if [ $SS -lt 1 ]; then SS=$1; SITERS=$(( $ITERS * $S / $X )); fi
+      M=$(( $SS * $X ))
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
       echo "Partitioning and converting "$MESHNAME", if necessary..."
@@ -349,7 +352,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
           #done
           #wait
           $EXEDIR"/femera-mmq-"$CPUMODEL"-"$CSTR -v1 -m$M -n$X -c$N \
-            -i$ITERS -r$RTOL -p $MESH >> $CSVSMALL
+            -i$SITERS -r$RTOL -p $MESH >> $CSVSMALL
         done
         #
         #
