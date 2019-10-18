@@ -80,7 +80,7 @@ if [ ! -f $PROFILE ]; then
     MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
     echo Estimating performance at\
       $(( ${NOMI_UDOF[$(( $TRY_COUNT - 3 ))]} / 1000000 )) MDOF...
-    echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
+    #echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
     $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
     echo Running $ITERS iterations of $MESHNAME...
     $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
@@ -152,7 +152,7 @@ if [ -f $CSVFILE ]; then
       H=${LIST_H[I]}
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
-      echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
+      #echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
       $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
       NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
       NDOF=$(( $NNODE * 3 ))
@@ -302,7 +302,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
     N=$C;
     MESHNAME="uhxt"$H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
-    echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
+    #echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
     $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
     NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
     NDOF=$(( $NNODE * 3 ))
@@ -316,11 +316,12 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
     #S=$(( $TARGET_TEST_S * $INIT_DOFS / $NDOF / $ITERS))
     S=`printf '%f*%f/%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF $ITERS | bc`
     #S=$(( $S / 2 ))
-    SITERS=$ITERS
     if (( $S < 1 )); then
       S=1;
-      SITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
+      ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
     fi
+    if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
+    if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
     while (( $NDOF * $X > $THIS_MAX && $X > 0 )); do
       XIX=$(( $XIX + 1 ));
       X=${ARRAY_X[XIX]}
@@ -338,43 +339,34 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
         HAS_TEST=""
       fi
       if [ -z "$HAS_TEST" ]; then
-      #SS=$(( $S / $X ))
-      #if [ $SS -lt 1 ]; then S=$1; SITERS=$(( $ITERS * $S / $X )); fi
       M=$(( $S * $X ))
       if [ $M -gt 10000 ]; then
-        M=$(( 10000 / $CPUCOUNT * $CPUCOUNT ));
+        MC=$(( 10000 / $CPUCOUNT ))
+        M=$(( $MC * $CPUCOUNT ));
         S=$(( $M / $X ))
       fi
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
-      echo "Partitioning and converting "$MESHNAME", if necessary..."
+      #echo "Partitioning and converting "$MESHNAME", if necessary..."
       $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
       if [ -f $MESH"_1.fmr" ]; then
-        #EXE=$EXEDIR"/femerq-"$CPUMODEL"-"$CSTR" -c"$C" -r"$RTOL" -p "$MESH
         echo "Running "$REPEAT_TEST_N" repeats of "$S"x"$X" concurrent "$NDOF" DOF models..."
-        #echo $EXE
-        #START=`date +%s.%N`
-        #
+        START=`date +%s.%N`
         #
         for I in $(seq 1 $REPEAT_TEST_N ); do
-          #for IX in $( seq 1 $X ); do
-          #  perf/exe_seq.sh $S "$EXE" >>$CSVSMALL &
-          #done
-          #wait
           $EXEDIR"/femera-mmq-"$CPUMODEL"-"$CSTR -v1 -m$M -n$X -c$N \
-            -i$SITERS -r$RTOL -p $MESH >> $CSVSMALL
+            -i$ITERS -r$RTOL -p $MESH >> $CSVSMALL
         done
         #
+        STOP=`date +%s.%N`
+        TIME_SEC=`printf "%f-%f\n" $STOP $START | bc`
         #
-        #STOP=`date +%s.%N`
-        #TIME_SEC=`printf "%f-%f\n" $STOP $START | bc`
-        #
-        #MDOF_TOTAL=`awk -F, -v n=$NNODE -v c=$N -v dof=0\
-        #'($2==n)&&($9==c){dof=dof+$3*$5;}\
-        #  END{print dof/1000000;}' $CSVSMALL`
-        #TOTAL_MDOFS=`printf "%f/%f\n" $MDOF_TOTAL $TIME_SEC | bc`
-        #echo "Overall: "$TOTAL_MDOFS" MDOF/s ("$MDOF_TOTAL\
-        #"MDOF in "$TIME_SEC" sec)"
+        MDOF_TOTAL=`awk -F, -v n=$NNODE -v c=$N -v dof=0\
+        '($2==n)&&($9==c){dof=dof+$3*$5;}\
+          END{print dof/1000000;}' $CSVSMALL`
+        TOTAL_MDOFS=`printf "%f/%f\n" $MDOF_TOTAL $TIME_SEC | bc`
+        echo "Overall: "$TOTAL_MDOFS" MDOF/s ("$MDOF_TOTAL\
+        "MDOF in "$TIME_SEC" sec)"
         #
         SOLVE_MDOFS=`awk -F, -v nnode=$NNODE -v c=$C -v nrun=0 -v mdofs=0 -v x=$X\
         '($2==nnode)&&($9==c){nrun=nrun+1;mdofs=mdofs+$13;}\
@@ -460,7 +452,7 @@ if [ -z "$CSV_HAS_MEDIUM_PART_TEST" ]; then
   for N in $(seq $CPUCOUNT $CPUCOUNT $(( $CPUCOUNT * 20 )) ); do
     MESHNAME="uhxt"$MED_H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$MED_H"p"$P/$MESHNAME
-    echo "Partitioning and converting "$MESHNAME", if necessary..."
+    #echo "Partitioning and converting "$MESHNAME", if necessary..."
     $PERFDIR/mesh-uhxt.sh $MED_H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
     if (( $N == $CPUCOUNT )); then
       echo "Warming up..."
@@ -537,7 +529,7 @@ if [ -z "$CSV_HAS_LARGE_PART_TEST" ]; then
       #MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
       MESHNAME="uhxt"$LRG_H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$LRG_H"p"$P/$MESHNAME
-      echo "Partitioning and converting "$MESHNAME", if necessary..."
+      #echo "Partitioning and converting "$MESHNAME", if necessary..."
       $PERFDIR/mesh-uhxt.sh $LRG_H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
       echo "Running "$ITERS" iterations of "$MESHNAME" ("$LRG_MUDOF" MDOF), "\
         $REPEAT_TEST_N" times..."
@@ -633,7 +625,7 @@ if [ -z "$CSV_HAS_FINAL_TEST" ]; then
       if [ -z "$HAS_TEST" ]; then
         MESHNAME="uhxt"$H"p"$P"n"$N
         MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
-        echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
+        #echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
         $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
         #NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
         NDOF=$(( $NNODE * 3 ))
