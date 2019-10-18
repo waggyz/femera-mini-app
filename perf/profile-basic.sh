@@ -331,21 +331,28 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
         HAS_TEST=""
       fi
       if [ ! -z "$HAS_TEST" ]; then
+      $M=$(( $S * $X ))
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
       echo "Partitioning and converting "$MESHNAME", if necessary..."
       $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
       if [ -f $MESH"_1.fmr" ]; then
-        EXE=$EXEDIR"/femerq-"$CPUMODEL"-"$CSTR" -c"$C" -r"$RTOL" -p "$MESH
+        #EXE=$EXEDIR"/femerq-"$CPUMODEL"-"$CSTR" -c"$C" -r"$RTOL" -p "$MESH
         echo "Running "$REPEAT_TEST_N" repeats of "$S"x"$X" concurrent "$NDOF" DOF models..."
         #echo $EXE
         #START=`date +%s.%N`
+        #
+        #
         for I in $(seq 1 $REPEAT_TEST_N ); do
-          for IX in $( seq 1 $X ); do
-            perf/exe_seq.sh $S "$EXE" >>$CSVSMALL &
-          done
-          wait
+          #for IX in $( seq 1 $X ); do
+          #  perf/exe_seq.sh $S "$EXE" >>$CSVSMALL &
+          #done
+          #wait
+          $EXEDIR"/femera-mmq-"$CPUMODEL"-"$CSTR -v1 -m $M -n$X -c$N \
+            -i$ITERS -r$RTOL -p $MESH >> $CSVFILE
         done
+        #
+        #
         #STOP=`date +%s.%N`
         #TIME_SEC=`printf "%f-%f\n" $STOP $START | bc`
         #

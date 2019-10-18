@@ -312,9 +312,9 @@ int main( int argc, char** argv ){
   read_time = std::chrono::duration_cast<std::chrono::nanoseconds>
     (setu_done-read_start);
   read_sec=float(read_time.count())*1e-9;
-  if(verbosity==1){
-  std::cout<< M->elem_n<<","<<M->node_n<<","<<M->udof_n<<","<<(part_n-part_0+1);
-  }
+  //if(verbosity==1){
+  //std::cout<< M->elem_n<<","<<M->node_n<<","<<M->udof_n<<","<<(part_n-part_0+1);
+ // }
 #endif
 #if VERB_MAX>1
   if(verbosity>1){
@@ -324,19 +324,19 @@ int main( int argc, char** argv ){
   for(int i=0; i<3; i++){ std::cout<<M->glob_bbox[i]; if(i<2){std::cout<<",";} }
   std::cout <<"] [";
   for(int i=3; i<6; i++){ std::cout<<M->glob_bbox[i]; if(i<5){std::cout<<",";} }
-  std::cout<<"]"<<'\n';
+  std::cout <<"]"<<'\n';
   printf("Read and set up                         in %f s\n", read_sec );
   if(verbosity>1){
-    std::cout<< "  Initializing: ";
+    std::cout << "  Initializing: ";
     switch(solv_cond){
-      case(Solv::COND_NONE): std::cout<< "no"; break;
-      case(Solv::COND_JACO): std::cout<< "Jacobi"; break;
-      case(Solv::COND_TANG): std::cout<< "Tangent Jacobi"; break;
-      case(Solv::COND_ROW1): std::cout<< "element row one-norm"; break;
-      case(Solv::COND_STRA): std::cout<< "element strain"; break;
-      default: std::cout<< "unknown";
+      case(Solv::COND_NONE): std::cout << "no"; break;
+      case(Solv::COND_JACO): std::cout << "Jacobi"; break;
+      case(Solv::COND_TANG): std::cout << "Tangent Jacobi"; break;
+      case(Solv::COND_ROW1): std::cout << "element row one-norm"; break;
+      case(Solv::COND_STRA): std::cout << "element strain"; break;
+      default: std::cout << "unknown";
     }
-    std::cout<< " preconditioner..." <<'\n';
+    std::cout << " preconditioner..." <<'\n';
   }
   }
 #endif
@@ -344,8 +344,8 @@ int main( int argc, char** argv ){
 #ifdef _OPENMP
 #if VERB_MAX>2
   if(halo_mod!=1){
-    std::cout<<"with halo updates every "
-    <<halo_mod<< " iterations..."<<'\n'; }
+    std::cout << "with halo updates every "
+      << halo_mod << " iterations..." <<'\n'; }
 #endif
 #endif
   // Initialize ---------------------------------------------------
@@ -488,11 +488,13 @@ int main( int argc, char** argv ){
       (loop_done - loop_start);
     loop_sec=float(loop_time.count())*ns;
     if(verbosity==1){
-    std::cout <<","<<iter<<","<<iter_max;
-    std::cout <<","<<std::sqrt(M->glob_chk2)<<","<< std::sqrt(M->glob_rto2);
-    std::cout <<","<<comp_n;
-    std::cout <<","<<read_sec<<","<<init_sec<<","<<loop_sec;
-    std::cout <<","<<float(M->udof_n)*float(iter)/loop_sec<<'\n';
+      std::cout<< M->elem_n<<","<<M->node_n<<","<<M->udof_n<<","
+        <<(part_n-part_0+1)
+        <<","<<iter<<","<<iter_max
+        <<","<<std::sqrt(M->glob_chk2)<<","<< std::sqrt(M->glob_rto2)
+        <<","<<comp_n
+        <<","<<read_sec<<","<<init_sec<<","<<loop_sec
+        <<","<<float(M->udof_n)*float(iter)/loop_sec<<'\n';
     }
 #endif
 #if VERB_MAX>1
