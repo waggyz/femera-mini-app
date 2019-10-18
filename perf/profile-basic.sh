@@ -273,13 +273,8 @@ fi
 if false; then rm $CSVSMALL; fi
 if [ ! -f $CSVSMALL ]; then # Run small model tests
   echo Running concurrent small model tests...
-  #FIXME OpenMP process bindings should be set for each test set
-  #export OMP_SCHEDULE=static
-  #export OMP_PLACES=cores
-  #export OMP_PROC_BIND=close
-  unset OMP_SCHEDULE
-  unset OMP_PROC_BIND
-  unset OMP_PLACES
+  export OMP_PLACES=cores; export OMP_PROC_BIND=spread,close; \
+  export OMP_NESTED=true; export OMP_MAX_ACTIVE_LEVELS=2; \
   P=2;
   S=100; X=2; N=1;
   #LIST_C=(16 8 4 2 1)
