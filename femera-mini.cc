@@ -488,6 +488,7 @@ int main( int argc, char** argv ){
       (loop_done - loop_start);
     loop_sec=float(loop_time.count())*ns;
     if(verbosity==1){
+#if 0
       std::cout<< M->elem_n<<","<<M->node_n<<","<<M->udof_n<<","
         <<(part_n-part_0+1)
         <<","<<iter<<","<<iter_max
@@ -495,6 +496,13 @@ int main( int argc, char** argv ){
         <<","<<comp_n
         <<","<<read_sec<<","<<init_sec<<","<<loop_sec
         <<","<<float(M->udof_n)*float(iter)/loop_sec<<'\n';
+#else
+      printf("%i,%i,%i,%i,%i,%i,%g,%g,%i,%g,%g,%g,%g\n",
+        M->elem_n, M->node_n, M->udof_n, part_n-part_0+1, iter, iter_max,
+        std::sqrt(M->glob_chk2), std::sqrt(M->glob_rto2),
+        comp_n,
+        read_sec, init_sec, loop_sec, float(M->udof_n)*float(iter)/loop_sec);
+#endif
     }
 #endif
 #if VERB_MAX>1
