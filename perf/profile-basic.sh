@@ -304,10 +304,15 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
     $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
     NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
     NDOF=$(( $NNODE * 3 ))
-    #ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
-    #if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
+    NDOF90=$(( $NDOF * 9 / 10 ))
+    ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
+    if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
+    if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
     #echo $(( $NDOF * $X )) '<' $(( $THIS_MAX ))
-    S=$(( 500000 / $NDOF ))
+    #S=$(( 500000 / $NDOF ))
+    #M100S=$(( $MDOF_MAX * $TARGET_TEST_S * 100 ))
+    #S=$(( $TARGET_TEST_S * $INIT_DOFS / $NDOF / $ITERS))
+    S=`printf '%f*%f/%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF $ITERS | bc`
     if (( $S < 1 )); then S=1; fi
     while (( $NDOF * $X > $THIS_MAX && $X > 0 )); do
       XIX=$(( $XIX + 1 ));
@@ -362,7 +367,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
         '($2==nnode)&&($9==c){nrun=nrun+1;mdofs=mdofs+$13;}\
           END{print mdofs/nrun/1000000*x;}' $CSVSMALL`
         echo " Solver: "$SOLVE_MDOFS" MDOF/s at "$X"x "$NDOF\
-          "= "$(( $X * $NDOF ))" DOF models..." 
+          " models ("$(( $X * $NDOF ))" DOF concurrent)..." 
       fi
       fi
     fi
