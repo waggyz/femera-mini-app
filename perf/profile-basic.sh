@@ -339,7 +339,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
       #SS=$(( $S / $X ))
       #if [ $SS -lt 1 ]; then S=$1; SITERS=$(( $ITERS * $S / $X )); fi
       M=$(( $S * $X ))
-      if [ $M -gt 1000 ]; then M=1000; fi
+      if [ $M -gt 1000 ]; then M=$(( 1000 / $CPUCOUNT * $CPUCOUNT )); fi
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
       echo "Partitioning and converting "$MESHNAME", if necessary..."
