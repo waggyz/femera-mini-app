@@ -150,7 +150,7 @@ test-iso : mini-omp
 	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
 
 test-mmp : mini-mmp
-	echo ./femera-mmp-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
+	echo ./femera-mmp-$(CPUMODELC) -v2  -m8 -n2 -c2 -p cube/unst19p1n16
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread,close; \
 	export OMP_NESTED=true; export OMP_MAX_ACTIVE_LEVELS=2; \
 	./femera-mmp-$(CPUMODELC) -v2 -m8 -n2 -c2 \

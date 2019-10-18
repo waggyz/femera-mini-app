@@ -326,7 +326,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
         HAS_TEST=""
       fi
       if [ ! -z "$HAS_TEST" ]; then
-      $M=$(( $S * $X ))
+      M=$(( $S * $X ))
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
       echo "Partitioning and converting "$MESHNAME", if necessary..."
