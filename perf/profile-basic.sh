@@ -74,7 +74,7 @@ if [ ! -f $PROFILE ]; then
     export OMP_SCHEDULE=static
     export OMP_PLACES=cores
     export OMP_PROC_BIND=spread
-    ITERS=10; H=${LIST_H[$(( $TRY_COUNT - 3 ))]};
+    ITERS=$ITERS_MIN; H=${LIST_H[$(( $TRY_COUNT - 3 ))]};
     C=$CPUCOUNT
     MESHNAME="uhxt"$H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
@@ -156,8 +156,10 @@ if [ -f $CSVFILE ]; then
       $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
       NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
       NDOF=$(( $NNODE * 3 ))
+      NDOF90=$(( $NDOF * 9 / 10 ))
       ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
-      if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
+      if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
+      if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
       if [ $I -eq 0 ]; then
         echo Warming up...
         for I in $(seq 1 $REPEAT_TEST_N ); do
@@ -261,7 +263,7 @@ if [ -f $CSVFILE ]; then
   #  else LRG_MUDOF=$MUDOF;
   #fi
   ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $MDOFS $LRG_MUDOF | bc`
-  if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
+  if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
   echo "Writing large model partitioning test parameters: "$PROFILE"..." >> $LOGFILE
   echo >> $PROFILE
   echo "    Large Model Partitioning Test Parameters" >> $PROFILE
@@ -635,8 +637,10 @@ if [ -z "$CSV_HAS_FINAL_TEST" ]; then
         $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
         #NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
         NDOF=$(( $NNODE * 3 ))
+        NDOF90=$(( $NDOF * 9 / 10 ))
         ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
-        if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
+        if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
+        if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
         echo "Running "$ITERS" iterations of "$MESHNAME" ("$NDOF" DOF), "\
           $REPEAT_TEST_N" times..."
         for I in $(seq 1 $REPEAT_TEST_N ); do
