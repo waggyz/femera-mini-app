@@ -313,6 +313,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
     #M100S=$(( $MDOF_MAX * $TARGET_TEST_S * 100 ))
     #S=$(( $TARGET_TEST_S * $INIT_DOFS / $NDOF / $ITERS))
     S=`printf '%f*%f/%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF $ITERS | bc`
+    echo S is $S
     SITERS=$ITERS
     if (( $S < 1 )); then
       S=1;
@@ -345,7 +346,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
       $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
       if [ -f $MESH"_1.fmr" ]; then
         #EXE=$EXEDIR"/femerq-"$CPUMODEL"-"$CSTR" -c"$C" -r"$RTOL" -p "$MESH
-        echo "Running "$REPEAT_TEST_N" repeats of "$SS"x"$X" concurrent "$NDOF" DOF models..."
+        echo "Running "$REPEAT_TEST_N" repeats of "$S"x"$X" concurrent "$NDOF" DOF models..."
         #echo $EXE
         #START=`date +%s.%N`
         #
