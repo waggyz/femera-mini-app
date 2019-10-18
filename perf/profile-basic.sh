@@ -339,7 +339,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
       #SS=$(( $S / $X ))
       #if [ $SS -lt 1 ]; then S=$1; SITERS=$(( $ITERS * $S / $X )); fi
       M=$(( $S * $X ))
-      if [ $M -gt 1000 ]; then
+      if [ $M -gt 10000 ]; then
         M=$(( 10000 / $CPUCOUNT * $CPUCOUNT ));
         S=$(( $M / $X ))
       fi
@@ -377,8 +377,8 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
         SOLVE_MDOFS=`awk -F, -v nnode=$NNODE -v c=$C -v nrun=0 -v mdofs=0 -v x=$X\
         '($2==nnode)&&($9==c){nrun=nrun+1;mdofs=mdofs+$13;}\
           END{print mdofs/nrun/1000000*x;}' $CSVSMALL`
-        echo " Solver: "$SOLVE_MDOFS" MDOF/s at "$X"x "$NDOF\
-          " models ("$(( $X * $NDOF ))" DOF concurrent)..." 
+        echo " Solver: "$SOLVE_MDOFS" MDOF/s at "$X"x "$NDOF" DOF"\
+          "models ("$(( $X * $NDOF ))" DOF concurrent)..." 
       fi
       fi
     fi
