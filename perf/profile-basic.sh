@@ -167,7 +167,7 @@ if [ -f $CSVFILE ]; then
           -p $MESH > /dev/null
         done
       fi
-      echo "Running "$ITERS" iterations of "$MESHNAME" ("$NDOF" DOF), "\
+      echo "Running "$ITERS" iterations of "$MESHNAME" ("$NDOF" DOF),"\
         $REPEAT_TEST_N" times..."
       for I in $(seq 1 $REPEAT_TEST_N ); do
         $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
@@ -459,7 +459,7 @@ if [ -z "$CSV_HAS_MEDIUM_PART_TEST" ]; then
       $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$MED_ITERS -r$RTOL\
         -p $MESH >> /dev/null
     fi
-    echo "Running "$MED_ITERS" iterations of "$MESHNAME" ("$MED_NUDOF" DOF), "\
+    echo "Running "$MED_ITERS" iterations of "$MESHNAME" ("$MED_NUDOF" DOF),"\
       $REPEAT_TEST_N" times..."
     for I in $(seq 1 $REPEAT_TEST_N ); do
       $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$MED_ITERS -r$RTOL\
@@ -519,6 +519,8 @@ if [ -z "$CSV_HAS_LARGE_PART_TEST" ]; then
   export OMP_PROC_BIND=spread
   C=$CPUCOUNT
   #H=${LIST_H[$(( $TRY_COUNT - 3 ))]};
+  ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $MDOFS $LRG_MUDOF | bc`
+  if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
   ELEM_PER_PART=1000
   FINISHED=""
   while [ ! $FINISHED ]; do
@@ -531,7 +533,7 @@ if [ -z "$CSV_HAS_LARGE_PART_TEST" ]; then
       MESH=$MESHDIR"/uhxt"$LRG_H"p"$P/$MESHNAME
       #echo "Partitioning and converting "$MESHNAME", if necessary..."
       $PERFDIR/mesh-uhxt.sh $LRG_H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
-      echo "Running "$ITERS" iterations of "$MESHNAME" ("$LRG_MUDOF" MDOF), "\
+      echo "Running "$ITERS" iterations of "$MESHNAME" ("$LRG_MUDOF" MDOF),"\
         $REPEAT_TEST_N" times..."
       for I in $(seq 1 $REPEAT_TEST_N ); do
         $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
@@ -633,7 +635,7 @@ if [ -z "$CSV_HAS_FINAL_TEST" ]; then
         ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
         if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
         if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
-        echo "Running "$ITERS" iterations of "$MESHNAME" ("$NDOF" DOF), "\
+        echo "Running "$ITERS" iterations of "$MESHNAME" ("$NDOF" DOF),"\
           $REPEAT_TEST_N" times..."
         for I in $(seq 1 $REPEAT_TEST_N ); do
           $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
