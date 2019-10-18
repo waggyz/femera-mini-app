@@ -313,8 +313,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
     #M100S=$(( $MDOF_MAX * $TARGET_TEST_S * 100 ))
     #S=$(( $TARGET_TEST_S * $INIT_DOFS / $NDOF / $ITERS))
     S=`printf '%f*%f/%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF $ITERS | bc`
-    echo S is $S
-    SITERS=$ITERS
+    S=$(( $S / 10 ))
     if (( $S < 1 )); then
       S=1;
       SITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
