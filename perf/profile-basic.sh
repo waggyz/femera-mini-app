@@ -307,7 +307,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
     #ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
     #if [ $ITERS -lt $ITERS_MIN ]; then ITERS=10; fi
     #echo $(( $NDOF * $X )) '<' $(( $THIS_MAX ))
-    S=$(( 50 * 1000 / $NDOF ))
+    S=$(( 500000 / $NDOF ))
     if (( $S < 1 )); then S=1; fi
     while (( $NDOF * $X > $THIS_MAX && $X > 0 )); do
       XIX=$(( $XIX + 1 ));
