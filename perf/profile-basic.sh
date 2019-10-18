@@ -343,8 +343,8 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
           #  perf/exe_seq.sh $S "$EXE" >>$CSVSMALL &
           #done
           #wait
-          $EXEDIR"/femera-mmq-"$CPUMODEL"-"$CSTR -v1 -m $M -n$X -c$N \
-            -i$ITERS -r$RTOL -p $MESH >> $CSVFILE
+          $EXEDIR"/femera-mmq-"$CPUMODEL"-"$CSTR -v1 -m$M -n$X -c$N \
+            -i$ITERS -r$RTOL -p $MESH >> $CSVSMALL
         done
         #
         #
