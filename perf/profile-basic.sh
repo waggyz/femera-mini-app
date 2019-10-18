@@ -341,7 +341,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
       $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" >> $LOGFILE
       if [ -f $MESH"_1.fmr" ]; then
         #EXE=$EXEDIR"/femerq-"$CPUMODEL"-"$CSTR" -c"$C" -r"$RTOL" -p "$MESH
-        echo "Running "$REPEAT_TEST_N" repeats of "$S"x"$X" concurrent "$NDOF" DOF models..."
+        echo "Running "$REPEAT_TEST_N" repeats of "$SS"x"$X" concurrent "$NDOF" DOF models..."
         #echo $EXE
         #START=`date +%s.%N`
         #
