@@ -313,7 +313,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
     #M100S=$(( $MDOF_MAX * $TARGET_TEST_S * 100 ))
     #S=$(( $TARGET_TEST_S * $INIT_DOFS / $NDOF / $ITERS))
     S=`printf '%f*%f/%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF $ITERS | bc`
-    S=$(( $S / 2 ))
+    #S=$(( $S / 2 ))
     SITERS=$ITERS
     if (( $S < 1 )); then
       S=1;
@@ -339,6 +339,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
       #SS=$(( $S / $X ))
       #if [ $SS -lt 1 ]; then S=$1; SITERS=$(( $ITERS * $S / $X )); fi
       M=$(( $S * $X ))
+      if [ $M -gt 1000 ]; then M=1000; fi
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
       echo "Partitioning and converting "$MESHNAME", if necessary..."
