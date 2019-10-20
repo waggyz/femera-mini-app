@@ -1,7 +1,7 @@
 #!/bin/bash
 H=$1; P=$2; N=$3; MESHDIR=$4; GMSH2FMR=$5;
-if [ ! -e $6 ]; then PHYS=$6; else PHYS=elas-ort; fi
-if [ ! -e $7 ]; then LOGFILE=$7; else LOGFILE=""; fi
+if [ -n "$6" ]; then PHYS=$6; else PHYS=elas-ort; fi
+if [ -n "$7" ]; then LOGFILE=$7; else LOGFILE=""; fi
 C=`./cpucount.sh`
 VERB=1
 #
