@@ -1,28 +1,38 @@
 #!/bin/bash
-#FIXME Check all -e (file exists) uses.
-if [ ! -e $1 ]; then P=$1; else P=2; fi
-if [ ! -e $2 ]; then PHYS=$2; else PHYS=elas-ort; fi
-if [ ! -e $3 ]; then CSTR=$3; else CSTR=gcc; fi
-if [ ! -e $4 ]; then MEM=$(( $4 * 1000000000 ));
+if [ -n "$1" ]; then P=$1; else P=2; fi
+if [ -n "$2" ]; then PHYS=$2; else PHYS=elas-ort; fi
+if [ -n "$3" ]; then CSTR=$3; else CSTR=gcc; fi
+if [ -n "$4" ]; then MEM=$(( $4 * 1000000000 ));
   else MEM=`free -b  | grep Mem | awk '{print $7}'`; fi
-if [ ! -e $5 ]; then CPUMODEL=$5; else CPUMODEL=`./cpumodel.sh`; fi
-if [ ! -e $6 ]; then CPUCOUNT=$6; else CPUCOUNT=`./cpucount.sh`; fi
+if [ -n "$5" ]; then CPUMODEL=$5; else CPUMODEL=`./cpumodel.sh`; fi
+if [ -n "$6" ]; then CPUCOUNT=$6; else CPUCOUNT=`./cpucount.sh`; fi
 #
 EXEDIR="."
 GMSH2FMR=gmsh2fmr-$CPUMODEL-$CSTR
 #
-if [[ `hostname` == k3* ]]; then #FIXME Nasty little hack
+if [ -d "/hpnobackup1/dwagner5/femera-test/cube" ]; then
+  MESHDIR=/hpnobackup1/dwagner5/femera-test/cube
+else
+  MESHDIR=cube
+fi
+echo "Mesh Directory: "$MESHDIR"/"
+#
+if [[ `hostname` == k3* ]]; then #FIXME Silly little hack
   MEM=30000000000
-#else
-#  MEM=`free -b  | grep Mem | awk '{print $7}'`
+  module add gnuplot_5.0.5
+fi
+if [[ `hostname` == k4* ]]; then #FIXME Silly little hack
+  module add gnuplot_5.0.5
 fi
 echo `free -g  | grep Mem | awk '{print $7}'` GB Available Memory
 echo $(( $MEM / 1000000000 )) GB Assumed Memory
 #
+HAS_GNUPLOT=`which gnuplot`
+#
 case $P in
-1) DOF_PER_ELEM=0.5; PSTR=tet4;  ;;
-2) DOF_PER_ELEM=4;   PSTR=tet10; ;;
-3) DOF_PER_ELEM=14;  PSTR=tet20; ;;
+1) DOF_PER_ELEM=0.5; BYTE_PER_DOF=340; PSTR=tet4;  ;;
+2) DOF_PER_ELEM=4;   BYTE_PER_DOF=120; PSTR=tet10; ;;
+3) DOF_PER_ELEM=14;  BYTE_PER_DOF=100; PSTR=tet20; ;;
 esac
 #
 C=$CPUCOUNT; N=$C; RTOL=1e-24;
@@ -41,23 +51,14 @@ CSVFILE=$PERFDIR/"uhxt-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
 CSVSMALL=$PERFDIR/"small-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
 CSVPROFILE=$PERFDIR/"profile-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
 #
-if [ -d "/hpnobackup1/dwagner5/femera-test/cube" ]; then
-  MESHDIR=/hpnobackup1/dwagner5/femera-test/cube
-else
-  MESHDIR=cube
-fi
-echo "Mesh Directory: "$MESHDIR"/"
-#
-HAS_GNUPLOT=`which gnuplot`
-#
 if [ -f $PROFILE ]; then
   NODE_MAX=`grep -m1 -i nodes $PROFILE | awk '{print $1}'`
   UDOF_MAX=$(( $NODE_MAX * 3 ))
   TET10_MAX=`grep -m1 -i elements $PROFILE | awk '{print $1}'`
 else
-  UDOF_MAX=$(( $MEM / 120 ))
+  UDOF_MAX=$(( $MEM / $BYTE_PER_DOF ))
   NODE_MAX=$(( $UDOF_MAX / 3))
-  TET10_MAX=$(( $UDOF_MAX / 4 ))
+  TET10_MAX=$(( $UDOF_MAX / $DOF_PER_ELEM ))
 fi
 MDOF_MAX=$(( $UDOF_MAX / 1000000 ))
 echo Largest Test Model: $TET10_MAX $PSTR, $NODE_MAX Nodes, $MDOF_MAX MDOF

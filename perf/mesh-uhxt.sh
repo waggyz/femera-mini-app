@@ -27,7 +27,7 @@ if [ ! -f $DIR"/uhxt"$H"p"$P"n"$N".msh" ]; then
   if [ -n "$LOGFILE" ]; then 
     echo "Partitioning to "$DIR"/uhxt"$H"p"$P"n"$N".msh..." >> "$LOGFILE"
   else
-    echo "Partitioning to "$DIR"/uhxt"$H"p"$P"n"$N".msh..." "$LOGFILE"
+    echo "Partitioning to "$DIR"/uhxt"$H"p"$P"n"$N".msh..."
   fi
   gmsh -v $VERB -part $N -nt $C -format msh2 -o $DIR"/uhxt"$H"p"$P"n"$N".msh" $DIR"/uhxt"$H"p"$P"n1.msh2" -
 fi
