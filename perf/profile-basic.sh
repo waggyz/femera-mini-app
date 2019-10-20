@@ -97,7 +97,8 @@ for I in $(seq 0 $NOMI_N); do
   if [ ${NOMI_UDOF[I]} -lt $UDOF_MAX ]; then
     TRY_COUNT=$(( $TRY_COUNT + 1))
   fi
-  if [ ${NOMI_UDOF[I]} -lt $LARGE_PART_MAX_MUDOF ]; then
+  LP=$(( $LARGE_PART_MAX_MUDOF * 1000000 ))
+  if [ ${NOMI_UDOF[I]} -lt $LP ]; then
     H=${LIST_H[I]}
     FIRST_UDOF=${NOMI_UDOF[I]}
   fi
