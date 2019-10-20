@@ -97,21 +97,25 @@ for I in $(seq 0 $NOMI_N); do
   if [ ${NOMI_UDOF[I]} -lt $UDOF_MAX ]; then
     TRY_COUNT=$(( $TRY_COUNT + 1))
   fi
+  if [ ${NOMI_UDOF[I]} -lt $LARGE_PART_MAX_MUDOF ]; then
+    H=${LIST_H[I]}
+    FIRST_UDOF=${NOMI_UDOF[I]}
+  fi
 done
 #
 if [ ! -f $PROFILE ]; then
   # First, get a rough idea of DOF/sec to estimate time
-  # with 10 iterations of the third-to-largest model
   if [ ! -f $CSVFILE ]; then
     export OMP_SCHEDULE=static
     export OMP_PLACES=cores
     export OMP_PROC_BIND=spread
-    ITERS=$ITERS_MIN; H=${LIST_H[$(( $TRY_COUNT - 3 ))]};
+    ITERS=$ITERS_MIN;# H=${LIST_H[$(( $TRY_COUNT - 3 ))]};
     C=$CPUCOUNT
     MESHNAME="uhxt"$H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
     echo Estimating performance at\
-      $(( ${NOMI_UDOF[$(( $TRY_COUNT - 3 ))]} / 1000000 )) MDOF...
+      $(( $FIRST_UDOF / 1000000 )) MDOF...
+    #  $(( ${NOMI_UDOF[$(( $TRY_COUNT - 3 ))]} / 1000000 )) MDOF...
     #echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
     $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS $LOGFILE
     echo Running $ITERS iterations of $MESHNAME...

@@ -91,9 +91,9 @@ else
   fi
   if [ $IS_PHYS != $PHYS ]; then
     if [ -n "$LOGFILE" ]; then
-      echo "Converting to "$PHYS" physics..." "$LOGFILE" >> "$LOGFILE"
+      echo "Converting to "$PHYS" physics..." >> "$LOGFILE"
     else
-      echo "Converting to "$PHYS" physics..." "$LOGFILE"
+      echo "Converting to "$PHYS" physics..."
     fi
     #FIXME replace this with shell scripts to modify physics blocks.
     case $PHYS in
