@@ -1,9 +1,15 @@
 #!/bin/bash
-if [ ! -e $1 ]; then MEM=$(( $1 * 1000000000 ));
-else MEM=`free -b  | grep Mem | awk '{print $7}'`; fi
-if [ ! -e $2 ]; then CPUMODEL=$2; else CPUMODEL=`./cpumodel.sh`; fi
-if [ ! -e $3 ]; then CPUCOUNT=$3; else CPUCOUNT=`./cpucount.sh`; fi
-if [ ! -e $4 ]; then CSTR=$4; else CSTR=gcc; fi
+#FIXME Check all -e (file exists) uses.
+if [ ! -e $1 ]; then P=$1; else P=2; fi
+if [ ! -e $2 ]; then PHYS=$2; else PHYS=elas-ort; fi
+if [ ! -e $3 ]; then CSTR=$3; else CSTR=gcc; fi
+if [ ! -e $4 ]; then MEM=$(( $4 * 1000000000 ));
+  else MEM=`free -b  | grep Mem | awk '{print $7}'`; fi
+if [ ! -e $5 ]; then CPUMODEL=$5; else CPUMODEL=`./cpumodel.sh`; fi
+if [ ! -e $6 ]; then CPUCOUNT=$6; else CPUCOUNT=`./cpucount.sh`; fi
+#
+EXEDIR="."
+GMSH2FMR=gmsh2fmr-$CPUMODEL-$CSTR
 #
 if [[ `hostname` == k3* ]]; then #FIXME Nasty little hack
   MEM=30000000000
@@ -11,12 +17,14 @@ if [[ `hostname` == k3* ]]; then #FIXME Nasty little hack
 #  MEM=`free -b  | grep Mem | awk '{print $7}'`
 fi
 echo `free -g  | grep Mem | awk '{print $7}'` GB Available Memory
-echo $MEM byte Assumed Memory
+echo $(( $MEM / 1000000000 )) GB Assumed Memory
 #
-EXEDIR="."
-GMSH2FMR=gmsh2fmr-$CPUMODEL-$CSTR
+case $P in
+1) DOF_PER_ELEM=0.5; PSTR=tet4;  ;;
+2) DOF_PER_ELEM=4;   PSTR=tet10; ;;
+3) DOF_PER_ELEM=14;  PSTR=tet20; ;;
+esac
 #
-P=2; DOF_PER_ELEM=4;
 C=$CPUCOUNT; N=$C; RTOL=1e-24;
 TARGET_TEST_S=10;# Try for S sec/run
 REPEAT_TEST_N=6;# Repeat each test N times
@@ -27,11 +35,11 @@ export OMP_PLACES=cores
 export OMP_PROC_BIND=spread
 #
 PERFDIR="perf"
-PROFILE=$PERFDIR/"uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".pro"
-LOGFILE=$PERFDIR/"uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".log"
-CSVFILE=$PERFDIR/"uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv"
-CSVSMALL=$PERFDIR/"small-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv"
-CSVPROFILE=$PERFDIR/"profile-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv"
+PROFILE=$PERFDIR/"uhxt-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".pro"
+LOGFILE=$PERFDIR/"uhxt-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".log"
+CSVFILE=$PERFDIR/"uhxt-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
+CSVSMALL=$PERFDIR/"small-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
+CSVPROFILE=$PERFDIR/"profile-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
 #
 if [ -d "/hpnobackup1/dwagner5/femera-test/cube" ]; then
   MESHDIR=/hpnobackup1/dwagner5/femera-test/cube
@@ -52,16 +60,39 @@ else
   TET10_MAX=$(( $UDOF_MAX / 4 ))
 fi
 MDOF_MAX=$(( $UDOF_MAX / 1000000 ))
-echo Largest Test Model: $TET10_MAX Tet10, $NODE_MAX Nodes, $MDOF_MAX MDOF
+echo Largest Test Model: $TET10_MAX $PSTR, $NODE_MAX Nodes, $MDOF_MAX MDOF
 #
-LIST_H=(2 3 4 5 7 9   12 15 21 26 33   38 45 56 72 96   123 156 205 265 336)
-LIST_HH="2 3 4 5 7 9   12 15 21 26 33   38 45 56 72 96   123 156 205 265 336"
-NOMI_UDOF=(500 1000 2500 5000 10000 25000 \
- 50000 100000 250000 500000 1000000\
-  1500000 2500000 5000000 10000000 25000000\
-  50000000 100000000 250000000 500000000 1000000000)
+case $P in
+1)
+  NOMI_N=20
+  NOMI_UDOF=(500 1000 2000 5000 10000 25000 \
+  50000 100000 250000 500000 1000000\
+    1500000 2500000 5000000 10000000 25000000\
+    50000000 100000000 250000000 500000000 1000000000)
+  LIST_H=(4 6 8 10 14 19  24 30 41 52 66  91 114 144 195  246 310 421 531 669)
+  LIST_HH="4 6 8 10 14 19  24 30 41 52 66  77 91 114 144 195  246 310 421 531 669"
+  ;;
+2)
+  NOMI_N=20
+  NOMI_UDOF=(500 1000 2500 5000 10000 25000 \
+  50000 100000 250000 500000 1000000\
+    1500000 2500000 5000000 10000000 25000000\
+    50000000 100000000 250000000 500000000 1000000000)
+  LIST_H=(2 3 4 5 7 9   12 15 21 26 33   38 45 56 72 96   123 156 205 265 336)
+  LIST_HH="2 3 4 5 7 9   12 15 21 26 33   38 45 56 72 96   123 156 205 265 336"
+  ;;
+3)
+  NOMI_N=19
+  NOMI_UDOF=(500 2000 5000 10000 25000 \
+  50000 100000 250000 500000 1000000\
+    1500000 2500000 5000000 10000000 25000000\
+    50000000 100000000 250000000 500000000 1000000000)
+  LIST_H=(1 2 3 4 6   7 9 13 17 21  29 37 46 63   80 101 138 174 220)
+  LIST_HH="1 2 3 4 6   7 9 13 17 21  24 29 37 46 63   80 101 138 174 220"
+  ;;
+esac
 TRY_COUNT=0;
-for I in $(seq 0 20); do
+for I in $(seq 0 $NOMI_N); do
   if [ ${NOMI_UDOF[I]} -lt $UDOF_MAX ]; then
     TRY_COUNT=$(( $TRY_COUNT + 1))
   fi
@@ -81,7 +112,7 @@ if [ ! -f $PROFILE ]; then
     echo Estimating performance at\
       $(( ${NOMI_UDOF[$(( $TRY_COUNT - 3 ))]} / 1000000 )) MDOF...
     #echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
-    $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $LOGFILE
+    $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS $LOGFILE
     echo Running $ITERS iterations of $MESHNAME...
     $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
       -p $MESH >> $CSVFILE
@@ -93,7 +124,7 @@ if [ -f $CSVFILE ]; then
   echo >> $PROFILE
   echo "        Maximum Elastic Model Size Estimate" >> $PROFILE
   echo "  ------------------------------------------------" >> $PROFILE
-  printf "     %9i : Maximum Elements\n" $TET10_MAX >> $PROFILE
+  printf "     %9i : Maximum "$PSTR" Elements\n" $TET10_MAX >> $PROFILE
   printf "     %9i : Maximum Nodes\n" $NODE_MAX >> $PROFILE
   printf "    %9.0f  : Maximum MDOF\n" $MDOF_MAX >> $PROFILE
   #
@@ -117,7 +148,7 @@ if [ -f $CSVFILE ]; then
   printf "        %6.1f : Initial test performance [MDOF/s]\n" $MDOFS >> $PROFILE
   printf "        %6.1f : Initial test system Size [MDOF]\n" $MUDOF >> $PROFILE
   printf "%12i   : Initial model nodes\n" $NNODE >> $PROFILE
-  printf "%12i   : Initial tet10 Elements\n" $NELEM >> $PROFILE
+  printf "%12i   : Initial "$PSTR" Elements\n" $NELEM >> $PROFILE
   printf "%12i   : Initial test partitions\n" $NPART >> $PROFILE
   printf "%12i   : Initial test threads\n" $NCPUS >> $PROFILE
   printf "%12i   : Initial test iterations\n" $ITERS >> $PROFILE
@@ -203,7 +234,7 @@ if [ -f $CSVFILE ]; then
     set title 'Femera Basic Elastic Performance Tests [MDOF/s]';\
     set xlabel 'System Size [DOF]';\
     set label at "$MAX_SIZE", "$MAX_MDOFS" \"* Max\";\
-    plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
+    plot 'perf/uhxt-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv'\
     using 3:(\$4 != \$9 ? 1/0:\$13/1e6)\
     with points pointtype 0\
     title '"$CPUCOUNT" Partitions';\
@@ -218,7 +249,7 @@ if [ -f $CSVFILE ]; then
   printf "        %6.1f : Basic performance maximum [MDOF/s]\n" $MAX_MDOFS >> $PROFILE
   printf "%12i   : Basic system size [DOF]\n" $MAX_SIZE >> $PROFILE
   printf "%12i   : Basic model nodes\n" $MAX_NODES >> $PROFILE
-  printf "%12i   : Basic tet10 Elements\n" $MAX_ELEMS >> $PROFILE
+  printf "%12i   : Basic "$PSTR" Elements\n" $MAX_ELEMS >> $PROFILE
   #
   # Find the max. performing model
   for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
@@ -254,7 +285,7 @@ if [ -f $CSVFILE ]; then
   echo "  -----------------------------------------" >> $PROFILE
   printf " %9i   : Medium test model size [DOF]\n" $MED_NUDOF >> $PROFILE
   printf " %9i   : Medium test model nodes\n" $MED_NNODE >> $PROFILE
-  printf " %9i   : Medium test tet10 Elements\n" $MED_NELEM >> $PROFILE
+  printf " %9i   : Medium test "$PSTR" Elements\n" $MED_NELEM >> $PROFILE
   printf " %9i   : Medium test iterations\n" $MED_ITERS >> $PROFILE
   printf " %9i   : Medium test repeats\n" $REPEAT_TEST_N >> $PROFILE
   #
@@ -303,7 +334,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
     MESHNAME="uhxt"$H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
     #echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
-    $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $LOGFILE
+    $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS $LOGFILE
     NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
     NDOF=$(( $NNODE * 3 ))
     NDOF90=$(( $NDOF * 9 / 10 ))
@@ -348,7 +379,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
       #echo "Partitioning and converting "$MESHNAME", if necessary..."
-      $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $LOGFILE
+      $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS $LOGFILE
       if [ -f $MESH"_1.fmr" ]; then
         echo "Running "$REPEAT_TEST_N" repeats of "$S"x"$X" concurrent "$NDOF" DOF models..."
         START=`date +%s.%N`
@@ -453,7 +484,7 @@ if [ -z "$CSV_HAS_MEDIUM_PART_TEST" ]; then
     MESHNAME="uhxt"$MED_H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$MED_H"p"$P/$MESHNAME
     #echo "Partitioning and converting "$MESHNAME", if necessary..."
-    $PERFDIR/mesh-uhxt.sh $MED_H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $LOGFILE
+    $PERFDIR/mesh-uhxt.sh $MED_H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS $LOGFILE
     if (( $N == $CPUCOUNT )); then
       echo "Warming up..."
       $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$MED_ITERS -r$RTOL\
@@ -491,7 +522,7 @@ if [ ! -z "$CSV_HAS_MEDIUM_PART_TEST" ]; then
     set xrange [0:$(($CPUCOUNT * 20 ))];\
     set xlabel 'Number of Partitions';\
     set label at "$MED_PART", "$MED_MDOFS" \"* Max\";\
-    plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
+    plot 'perf/uhxt-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv'\
     using (\$4):(( \$1 == $MED_NELEM ) ? \$13/1e6:1/0)\
     with points pointtype 0\
     title 'Performance at $MED_NUDOF DOF';"\
@@ -532,7 +563,7 @@ if [ -z "$CSV_HAS_LARGE_PART_TEST" ]; then
       MESHNAME="uhxt"$LRG_H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$LRG_H"p"$P/$MESHNAME
       #echo "Partitioning and converting "$MESHNAME", if necessary..."
-      $PERFDIR/mesh-uhxt.sh $LRG_H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $LOGFILE
+      $PERFDIR/mesh-uhxt.sh $LRG_H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS $LOGFILE
       echo "Running "$ITERS" iterations of "$MESHNAME\
         "("$ELEM_PER_PARTF" elem/part),"\
         $REPEAT_TEST_N" times..."
@@ -582,7 +613,7 @@ if [ ! -z "$CSV_HAS_LARGE_PART_TEST" ]; then
     set xrange [0:20000];\
     set xlabel 'Partition Size [elem/part]';\
     set label at "$LARGE_ELEM_PART", "$LARGE_MDOFS" \"* Max\";\
-    plot 'perf/uhxt-tet10-elas-ort-"$CPUMODEL"-"$CSTR".csv'\
+    plot 'perf/uhxt-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv'\
     using (\$1/\$4):((\$4 > \$9)&&( \$1 == $LARGE_NELEM ) ? \$13/1e6:1/0)\
     with points pointtype 0\
     title 'Performance at $LRG_MUDOF MDOF';"\
@@ -629,7 +660,7 @@ if [ -z "$CSV_HAS_FINAL_TEST" ]; then
         MESHNAME="uhxt"$H"p"$P"n"$N
         MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
         #echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
-        $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $LOGFILE
+        $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS $LOGFILE
         #NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
         NDOF=$(( $NNODE * 3 ))
         NDOF90=$(( $NDOF * 9 / 10 ))
