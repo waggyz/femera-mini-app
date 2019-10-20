@@ -88,7 +88,7 @@ case $P in
   50000 100000 250000 500000 1000000\
     1500000 2500000 5000000 10000000 25000000\
     50000000 100000000 250000000 500000000 1000000000)
-  LIST_H=(1 2 3 4 6   7 9 13 17 21  29 37 46 63   80 101 138 174 220)
+  LIST_H=(1 2 3 4 6   7 9 13 17 21  24 29 37 46 63   80 101 138 174 220)
   LIST_HH="1 2 3 4 6   7 9 13 17 21  24 29 37 46 63   80 101 138 174 220"
   ;;
 esac
@@ -190,7 +190,7 @@ if [ -f $CSVFILE ]; then
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
       #echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
-      $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $LOGFILE
+      $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS $LOGFILE
       NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
       NDOF=$(( $NNODE * 3 ))
       NDOF90=$(( $NDOF * 9 / 10 ))
