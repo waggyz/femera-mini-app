@@ -422,6 +422,7 @@ fi
 if [ -f $CSVSMALL ]; then
   if [ -f $CSVPROFILE ]; then rm $CSVPROFILE; fi
   NODE_ARRAY=($( cut -d',' -f1 $CSVSMALL | uniq ))
+  echo $NODE_ARRAY
   for NNODE in "${NODE_ARRAY[@]}"; do
   #for H in $LIST_HH; do
     #N=1;
@@ -434,7 +435,7 @@ if [ -f $CSVSMALL ]; then
       '($2==nnode){nrun=nrun+1;mdofs+=$13;cc=$9;}\
         END{print mdofs/(nrun==0?1:nrun)/1000000*c/(cc==0?1:cc);}' $CSVSMALL`
       if [ "$SOLVE_MDOFS" != "0" ]; then
-        if false; then
+        if true; then
           echo "Average: "$SOLVE_MDOFS" MDOF/s with "$NDOF" DOF models..."
         fi
         for C in $(seq 1 $(( $CPUCOUNT / 2 )) ); do
