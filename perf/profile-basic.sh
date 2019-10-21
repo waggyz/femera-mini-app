@@ -421,12 +421,14 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
 fi
 if [ -f $CSVSMALL ]; then
   if [ -f $CSVPROFILE ]; then rm $CSVPROFILE; fi
-  for H in $LIST_HH; do
-    N=1;
-    MESHNAME="uhxt"$H"p"$P"n"$N
-    MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
-    if [ -f $MESH".msh2" ]; then
-      NNODE=`grep -m1 -A1 -i node $MESH".msh2" | tail -n1`
+  NODE_ARRAY=($( cut -d',' -f1 $CSVSMALL | uniq ))
+  for NNODE in "${NODE_ARRAY[@]}"; do
+  #for H in $LIST_HH; do
+    #N=1;
+    #MESHNAME="uhxt"$H"p"$P"n"$N
+    #MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
+    #if [ -f $MESH".msh2" ]; then
+      #NNODE=`grep -m1 -A1 -i node $MESH".msh2" | tail -n1`
       NDOF=$(( $NNODE * 3 ))
       SOLVE_MDOFS=`awk -F, -v nnode=$NNODE -v nrun=0 -v mdofs=0 -v c=$CPUCOUNT\
       '($2==nnode){nrun=nrun+1;mdofs+=$13;cc=$9;}\
@@ -449,7 +451,7 @@ if [ -f $CSVSMALL ]; then
           fi
         done
       fi
-    fi
+    #fi
   done;
   if [ ! -z "$HAS_GNUPLOT" ]; then
     echo "Plotting small model profile data: "$CSVSMALL"..." >> $LOGFILE
