@@ -422,8 +422,8 @@ fi
 if [ -f $CSVSMALL ]; then
   if [ -f $CSVPROFILE ]; then rm $CSVPROFILE; fi
   NODE_ARRAY=($( cut -d',' -f1 $CSVSMALL | uniq ))
-  echo $NODE_ARRAY
   for NNODE in "${NODE_ARRAY[@]}"; do
+  echo $NNODE
   #for H in $LIST_HH; do
     #N=1;
     #MESHNAME="uhxt"$H"p"$P"n"$N
