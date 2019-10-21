@@ -423,7 +423,6 @@ if [ -f $CSVSMALL ]; then
   if [ -f $CSVPROFILE ]; then rm $CSVPROFILE; fi
   NODE_ARRAY=($( cut -d',' -f1 $CSVSMALL | uniq ))
   for NNODE in "${NODE_ARRAY[@]}"; do
-  echo $NNODE
   #for H in $LIST_HH; do
     #N=1;
     #MESHNAME="uhxt"$H"p"$P"n"$N
@@ -448,7 +447,7 @@ if [ -f $CSVSMALL ]; then
               e=$1;n=$2;f=$3;p=$4;i1=$5;i2=$6;r1=$7;r2=$8;cc=$9;}\
             END{print e,n,f,p,i1,i2,r1,r2,cc,t10/nrun,t11/nrun,t12/nrun,\
             mdofs/(nrun==0?1:nrun)*ctot/(cc==0?1:cc)}'\
-            $CSVSMALL >> $CSVPROFILE
+            $CSVSMALL > $CSVPROFILE
           fi
         done
       fi
