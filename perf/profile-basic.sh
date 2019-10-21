@@ -39,7 +39,8 @@ C=$CPUCOUNT; N=$C; RTOL=1e-24;
 TARGET_TEST_S=10;# Try for S sec/run
 REPEAT_TEST_N=6;# Repeat each test N times
 ITERS_MIN=10;
-LARGE_PART_MAX_MUDOF=27;
+#LARGE_PART_MAX_MUDOF=27;
+LARGE_PART_MAX_MUDOF=55;
 export OMP_SCHEDULE=static
 export OMP_PLACES=cores
 export OMP_PROC_BIND=spread
@@ -113,12 +114,12 @@ if [ ! -f $PROFILE ]; then
     ITERS=$ITERS_MIN;# H=${LIST_H[$(( $TRY_COUNT - 3 ))]};
     C=$CPUCOUNT
     MESHNAME="uhxt"$H"p"$P"n"$N
-    MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
+    MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
     echo Estimating performance at\
       $(( $FIRST_UDOF / 1000000 )) MDOF...
     #  $(( ${NOMI_UDOF[$(( $TRY_COUNT - 3 ))]} / 1000000 )) MDOF...
     #echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
-    $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS $LOGFILE
+    $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
     echo Running $ITERS iterations of $MESHNAME...
     $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
       -p $MESH >> $CSVFILE
@@ -190,7 +191,7 @@ if [ -f $CSVFILE ]; then
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
       #echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
-      $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS $LOGFILE
+      $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
       NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
       NDOF=$(( $NNODE * 3 ))
       NDOF90=$(( $NDOF * 9 / 10 ))
@@ -340,7 +341,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
     MESHNAME="uhxt"$H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
     #echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
-    $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS $LOGFILE
+    $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
     NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
     NDOF=$(( $NNODE * 3 ))
     NDOF90=$(( $NDOF * 9 / 10 ))
@@ -385,7 +386,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
       #echo "Partitioning and converting "$MESHNAME", if necessary..."
-      $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS $LOGFILE
+      $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
       if [ -f $MESH"_1.fmr" ]; then
         echo "Running "$REPEAT_TEST_N" repeats of "$S"x"$X" concurrent "$NDOF" DOF models..."
         START=`date +%s.%N`
@@ -490,7 +491,7 @@ if [ -z "$CSV_HAS_MEDIUM_PART_TEST" ]; then
     MESHNAME="uhxt"$MED_H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$MED_H"p"$P/$MESHNAME
     #echo "Partitioning and converting "$MESHNAME", if necessary..."
-    $PERFDIR/mesh-uhxt.sh $MED_H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS $LOGFILE
+    $PERFDIR/mesh-uhxt.sh $MED_H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
     if (( $N == $CPUCOUNT )); then
       echo "Warming up..."
       $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$MED_ITERS -r$RTOL\
@@ -569,7 +570,7 @@ if [ -z "$CSV_HAS_LARGE_PART_TEST" ]; then
       MESHNAME="uhxt"$LRG_H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$LRG_H"p"$P/$MESHNAME
       #echo "Partitioning and converting "$MESHNAME", if necessary..."
-      $PERFDIR/mesh-uhxt.sh $LRG_H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS $LOGFILE
+      $PERFDIR/mesh-uhxt.sh $LRG_H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
       echo "Running "$ITERS" iterations of "$MESHNAME\
         "("$ELEM_PER_PARTF" elem/part),"\
         $REPEAT_TEST_N" times..."
@@ -666,7 +667,7 @@ if [ -z "$CSV_HAS_FINAL_TEST" ]; then
         MESHNAME="uhxt"$H"p"$P"n"$N
         MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
         #echo "Meshing, partitioning, and converting "$MESHNAME", if necessary..."
-        $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS $LOGFILE
+        $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
         #NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
         NDOF=$(( $NNODE * 3 ))
         NDOF90=$(( $NDOF * 9 / 10 ))

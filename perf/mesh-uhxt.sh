@@ -16,26 +16,26 @@ fi
 #fi
 if [ ! -f $DIR"/uhxt"$H"p"$P"n1.msh2" ]; then
   if [ -n "$LOGFILE" ]; then
-    echo "Meshing "$DIR"/uhxt"$H"p"$P"n1.msh2..." >> "$LOGFILE"
+    echo "Meshing uhxt"$H"p"$P"n1.msh2..." >> "$LOGFILE"
   else
-    echo "Meshing "$DIR"/uhxt"$H"p"$P"n1.msh2..."
+    echo "Meshing uhxt"$H"p"$P"n1.msh2..."
   fi
   gmsh -v $VERB -setnumber p $P -setnumber h $H -setnumber n 1 -nt $C geo/unst-cube.geo -
   mv "cube/uhxt"$H"p"$P"n1.msh2" $DIR"/uhxt"$H"p"$P"n1.msh2"
 fi
 if [ ! -f $DIR"/uhxt"$H"p"$P"n"$N".msh" ]; then
   if [ -n "$LOGFILE" ]; then 
-    echo "Partitioning to "$DIR"/uhxt"$H"p"$P"n"$N".msh..." >> "$LOGFILE"
+    echo "Partitioning to uhxt"$H"p"$P"n"$N".msh..." >> "$LOGFILE"
   else
-    echo "Partitioning to "$DIR"/uhxt"$H"p"$P"n"$N".msh..."
+    echo "Partitioning to uhxt"$H"p"$P"n"$N".msh..."
   fi
   gmsh -v $VERB -part $N -nt $C -format msh2 -o $DIR"/uhxt"$H"p"$P"n"$N".msh" $DIR"/uhxt"$H"p"$P"n1.msh2" -
 fi
 if [ ! -f $DIR"/uhxt"$H"p"$P"n"$N"_1.fmr" ]; then
   if [ ! -n "$LOGFILE" ]; then
-    echo "Converting to "$DIR"/uhxt"$H"p"$P"n"$N"_x.fmr..." >> "$LOGFILE"
+    echo "Converting to uhxt"$H"p"$P"n"$N"_x.fmr..." >> "$LOGFILE"
   else
-    echo "Converting to "$DIR"/uhxt"$H"p"$P"n"$N"_x.fmr..."
+    echo "Converting to uhxt"$H"p"$P"n"$N"_x.fmr..."
   fi
   case $PHYS in
   elas-iso)
@@ -85,9 +85,9 @@ else
     fi
   fi
   if [ -n "$LOGFILE" ]; then
-    echo $DIR"/uhxt"$H"p"$P"n"$N"_1.fmr physics is "$IS_PHYS"." >> "$LOGFILE"
+    echo "uhxt"$H"p"$P"n"$N"_1.fmr physics is "$IS_PHYS"." >> "$LOGFILE"
   else
-    echo $DIR"/uhxt"$H"p"$P"n"$N"_1.fmr physics is "$IS_PHYS"."
+    echo "uhxt"$H"p"$P"n"$N"_1.fmr physics is "$IS_PHYS"."
   fi
   if [ $IS_PHYS != $PHYS ]; then
     if [ -n "$LOGFILE" ]; then
