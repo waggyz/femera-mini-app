@@ -4,10 +4,10 @@ If(n<=0)
   n=1;
 EndIf
 
-If( (n>1) & (n<500) )
+If( (n>1) & (n<1000) )
   PartitionMesh n;
 EndIf
-If ( n>=500
+If ( n>=1000
   If( n<4000 )
     sx = 10;
     sy = 10;
