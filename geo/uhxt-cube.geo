@@ -63,7 +63,7 @@ Mesh.Algorithm3D=10;// WAS 1
 
 Mesh.Optimize=0;
 
-//SetOrder p;
+SetOrder p;
 RecombineAll=0;// Only make tets
 
 Mesh 3;
