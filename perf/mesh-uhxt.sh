@@ -14,14 +14,17 @@ fi
 #  #echo $MESHDIR"/uhxt"$H"p"$P"n"* | xargs mv -t $DIR
 #  find $MESHDIR -mindepth 1 -maxdepth 1 -name "uhxt$Hp$Pn*" -exec mv -t $DIR {} +
 #fi
+if [ -f $DIR"/uhxt"$H"p"$P"n1.msh2" ]; then
+  mv $DIR"/uhxt"$H"p"$P"n1.msh2" $DIR"/uhxt"$H"p"$P"n1.msh"
+fi
 if [ ! -f $DIR"/uhxt"$H"p"$P"n1.msh" ]; then
   if [ -n "$LOGFILE" ]; then
     echo "Meshing uhxt"$H"p"$P"n1.msh..." >> "$LOGFILE"
   else
     echo "Meshing uhxt"$H"p"$P"n1.msh..."
   fi
-  gmsh -nt $C -v $VERB -setnumber p $P -setnumber h $H -setnumber n 1 \
-    -3 -format msh2 -o $DIR"/uhxt"$H"p"$P"n1.msh" -save geo/uhxt-cube.geo
+  gmsh -nt $C -v $VERB -setnumber p $P -setnumber h $H -setnumber n 1 -3 \
+    -format msh2 -o $DIR"/uhxt"$H"p"$P"n1.msh" -save geo/uhxt-cube.geo
 fi
 if [ ! -f $DIR"/uhxt"$H"p"$P"n"$N".msh" ]; then
   if [ -n "$LOGFILE" ]; then 
@@ -29,8 +32,8 @@ if [ ! -f $DIR"/uhxt"$H"p"$P"n"$N".msh" ]; then
   else
     echo "Partitioning to uhxt"$H"p"$P"n"$N".msh..."
   fi
-  gmsh -v $VERB -nt $C -setnumber n $N -format msh2 \
-    -o $DIR"/uhxt"$H"p"$P"n"$N".msh" \
+  gmsh -v $VERB -nt $C -setnumber n $N \
+    -format msh2 -o $DIR"/uhxt"$H"p"$P"n"$N".msh" \
     -merge $DIR"/uhxt"$H"p"$P"n1.msh" -save geo/simplepart.geo
 fi
 if [ ! -f $DIR"/uhxt"$H"p"$P"n"$N"_1.fmr" ]; then
