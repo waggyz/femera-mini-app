@@ -48,7 +48,7 @@ EndIf
 Mesh.SecondOrderLinear        = 1;
 
 Mesh.CharacteristicLengthFromPoints=1;
-Mesh.PartitionSplitMeshFiles  = 1 ;
+Mesh.PartitionSplitMeshFiles  = 0 ;//1 ;
 Mesh.PartitionCreatePhysicals = 0 ;//FIXME Is this useful?
 Mesh.PartitionCreateTopology  = 1 ;
 Mesh.PartitionCreateGhostCells= 0 ;// Is this necessary?
@@ -65,29 +65,18 @@ Mesh.Optimize=0;
 
 //SetOrder p;
 RecombineAll=0;// Only make tets
-Mesh 3;
-RenumberMeshNodes;
-RenumberMeshElements;
 
-If( n>1 )
+Mesh 3;
+//RenumberMeshNodes;
+//RenumberMeshElements;
+
+If( (n>1) & (n<2000) )
   PartitionMesh n;
 EndIf
-
-Save Sprintf("../cube/uhxt%gp%gn%g.msh2",h,p,n);
-/*
-C=2; P=2; H=2; N=2;
-
-gmsh -v 4 -setnumber p $P -setnumber h $H -setnumber n 1 -nt $C\
- geo/unst-cube.geo -
-
-gmsh -v 4 -part $N -nt $C -format msh2 -o "cube/uhxt"$H"p"$P"n"$N".msh"\
- "cube/uhxt"$H"p"$P"n1.msh2" -
-
-./gmsh2fmr -v3 -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001\
- -M0 -E100e9 -N0.3 -R -a "cube/uhxt"$H"p"$P"n"$N
-
-CPUMODEL=`./cpumodel.sh`; CSTR=gcc
-
-./femera-$CPUMODEL-$CSTR -v2 -p "cube/uhxt"$H"p"$P"n"$N
-*/
+If( n>=2000 )
+  Plugin(SimplePartition).NumSlicesX = 20;
+  Plugin(SimplePartition).NumSlicesY = 25;
+  Plugin(SimplePartition).NumSlicesZ = Round( n/20/25 );
+  Plugin(SimplePartition).Run;
+EndIf
 
