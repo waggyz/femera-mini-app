@@ -17,6 +17,9 @@ fi
 if [ -f $DIR"/uhxt"$H"p"$P"n1.msh2" ]; then
   mv $DIR"/uhxt"$H"p"$P"n1.msh2" $DIR"/uhxt"$H"p"$P"n1.msh"
 fi
+if [ -f $DIR"/uhxt"$H"p"$P"n"$N".msh2" ]; then
+  mv $DIR"/uhxt"$H"p"$P"n"$N".msh2" $DIR"/uhxt"$H"p"$P"n"$N".msh"
+fi
 if [ ! -f $DIR"/uhxt"$H"p"$P"n1.msh" ]; then
   if [ -n "$LOGFILE" ]; then
     echo "Meshing uhxt"$H"p"$P"n1.msh..." >> "$LOGFILE"
