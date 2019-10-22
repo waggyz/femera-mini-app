@@ -7,15 +7,19 @@ EndIf
 If( (n>1) & (n<500) )
   PartitionMesh n;
 EndIf
-If( (n>=500) & (n<4000) )
-  Plugin(SimplePartition).NumSlicesX = 10;
-  Plugin(SimplePartition).NumSlicesY = 10;
-  Plugin(SimplePartition).NumSlicesZ = Round( n/10/10 );
-  Plugin(SimplePartition).Run;
-EndIf
-If( n>=4000 )
-  Plugin(SimplePartition).NumSlicesX = 20;
-  Plugin(SimplePartition).NumSlicesY = 25;
-  Plugin(SimplePartition).NumSlicesZ = Round( n/20/25 );
+If ( n>=500
+  If( n<4000 )
+    sx = 10;
+    sy = 10;
+    sz = Round( n/10/10 );
+  EndIf
+  If( n>=4000 )
+    sx = 20;
+    sy = 25;
+    sz = Round( n/20/25 );
+  EndIf
+  Plugin(SimplePartition).NumSlicesX = sx;
+  Plugin(SimplePartition).NumSlicesY = sy;
+  Plugin(SimplePartition).NumSlicesZ = sz;
   Plugin(SimplePartition).Run;
 EndIf
