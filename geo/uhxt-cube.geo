@@ -9,13 +9,13 @@ Geometry.CopyMeshingMethod = 1;
 
 //porder=1;
 
-If(p==0)
+If(p<=0)
   p=1;
 EndIf
-If(h==0)
+If(h<=0)
   h=10;
 EndIf
-If(n==0)
+If(n<=0)
   n=1;
 EndIf
 N=h+1;
@@ -70,10 +70,16 @@ Mesh 3;
 //RenumberMeshNodes;
 //RenumberMeshElements;
 
-If( (n>1) & (n<2000) )
+If( (n>1) & (n<500) )
   PartitionMesh n;
 EndIf
-If( n>=2000 )
+If( (n>=500) & (n<4000) )
+  Plugin(SimplePartition).NumSlicesX = 10;
+  Plugin(SimplePartition).NumSlicesY = 10;
+  Plugin(SimplePartition).NumSlicesZ = Round( n/10/10 );
+  Plugin(SimplePartition).Run;
+EndIf
+If( n>=4000 )
   Plugin(SimplePartition).NumSlicesX = 20;
   Plugin(SimplePartition).NumSlicesY = 25;
   Plugin(SimplePartition).NumSlicesZ = Round( n/20/25 );
