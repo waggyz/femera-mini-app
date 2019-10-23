@@ -1,25 +1,22 @@
-/* Divides into n partitions.
-*/
+/* Divides into n partitions. */
+/*
 If( n<=0 )
   n=1;
 EndIf
-
 If( (n>1) & (n<1000) )
   PartitionMesh n;
 EndIf
-If( n>=1000 )
-  If( n<4000 )
-    sx = 10;
-    sy = 10;
-    sz = Floor( n/10/10 /2)*2;
-  EndIf
-  If( n>=4000 )
-    sx = 20;
-    sy = 25;
-    sz = Floor( n/20/25 /2)*2;
-  EndIf
+*/
+//If( n>=1000 )
+  /*
+  * C,N,X,Y,Z are integers; N>>C, both given
+  * for C=40: (5*X) * (8*Y) * Z approx N
+  *
+  * try: X=Y=Z=S: (8*S) * (10*S) * (4..20)*S approx N
+  * try: X=Y=Z=S: (5*S) * (8*S) * (3..16)*S approx N
+  */
   Plugin(SimplePartition).NumSlicesX = sx;
   Plugin(SimplePartition).NumSlicesY = sy;
   Plugin(SimplePartition).NumSlicesZ = sz;
   Plugin(SimplePartition).Run;
-EndIf
+//EndIf

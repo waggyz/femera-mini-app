@@ -559,6 +559,12 @@ if [ -z "$CSV_HAS_LARGE_PART_TEST" ]; then
   while [ ! $FINISHED ]; do
     NC=$(( $LARGE_NELEM / $ELEM_PER_PART / $C ))
     N=$(( $NC * $C ))
+    if (( $N >= 1000 )); then
+      N=$(( $N / 200 * 200 ))
+    fi
+    if (( $N >= 10000 )); then
+      N=$(( $N / 1000 * 1000 ))
+    fi
     if [ "$N" -le 50000 ]; then
       #MESHNAME="uhxt"$H"p"$P"n"$N
       #MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
@@ -655,6 +661,12 @@ if [ -z "$CSV_HAS_FINAL_TEST" ]; then
     if (( $NELEM > $MN )); then
       NC=$(( $NELEM / $LARGE_ELEM_PART / $C ))
       N=$(( $NC * $C ))
+      if (( $N >= 1000 )); then
+        N=$(( $N / 200 * 200 ))
+      fi
+      if (( $N >= 10000 )); then
+        N=$(( $N / 1000 * 1000 ))
+      fi
       if (( $N < $MED_PART )); then N=$MED_PART; fi
       HAS_TEST=`awk -F, -v n=$NNODE -v p=$N\
         '($2==n)&&($4==p){print $4; exit}' $CSVFILE`

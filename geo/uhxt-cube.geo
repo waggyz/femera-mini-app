@@ -70,9 +70,10 @@ Mesh 3;
 //RenumberMeshNodes;
 //RenumberMeshElements;
 
-If( (n>1) & (n<1000) )
+If( (n>1) )
   PartitionMesh n;
 EndIf
+/*
 If ( n>=1000 )
   If( n<4000 )
     sx = 10;
@@ -89,3 +90,4 @@ If ( n>=1000 )
   Plugin(SimplePartition).NumSlicesZ = sz;
   Plugin(SimplePartition).Run;
 EndIf
+*/
