@@ -181,7 +181,7 @@ if [ -f $CSVFILE ]; then
     echo Removing old partitioned meshes...
     for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
       H=${LIST_H[I]}
-      echo $MESHDIR"/uhxt"$H"p"$P"/*.msh2, n??*.msh, *.fmr"
+      echo $MESHDIR"/uhxt"$H"p"$P"/*.msh2, n????*.msh, *.fmr"
       #
       rm $MESHDIR"/uhxt"$H"p"$P"/*.msh2"
       rm $MESHDIR"/uhxt"$H"p"$P"/uhxt"$H"p"$P"n????*.msh"
