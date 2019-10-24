@@ -29,11 +29,11 @@ if [ ! -f $DIR"/uhxt"$H"p"$P"n1.msh" ]; then
   gmsh -nt $C -v $VERB -setnumber p $P -setnumber h $H -setnumber n 1 -3 \
     -format msh2 -o $DIR"/uhxt"$H"p"$P"n1.msh" -save geo/uhxt-cube.geo
 fi
+if [ $N -ge 1000 ]; then
+  NXYZ=($(python perf/part_slice_xyz.py -n $N -c $C))
+  N=${NXYZ[0]}
+fi
 if [ ! -f $DIR"/uhxt"$H"p"$P"n"$N".msh" ]; then
-  if [ $N -ge 1000 ]; then
-    NXYZ=($(python perf/part_slice_xyz.py -n $N -c $C))
-    N=${NXYZ[0]}
-  fi
   if [ -n "$LOGFILE" ]; then
     echo "Partitioning to uhxt"$H"p"$P"n"$N".msh..." >> "$LOGFILE"
   else
