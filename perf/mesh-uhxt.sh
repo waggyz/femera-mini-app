@@ -45,7 +45,7 @@ if [ ! -f $DIR"/uhxt"$H"p"$P"n"$N".msh" ]; then
       $DIR"/uhxt"$H"p"$P"n1.msh"
   else
     gmsh -v $VERB -nt $C -setnumber n $N \
-      -setnumber sx ${NXYZ[1]}  -setnumber sy ${NXYZ[2]} -setnumber sz ${NXYZ[3]} \
+      -setnumber sx ${NXYZ[1]} -setnumber sy ${NXYZ[2]} -setnumber sz ${NXYZ[3]} \
       -format msh2 -o $DIR"/uhxt"$H"p"$P"n"$N".msh" \
       -merge $DIR"/uhxt"$H"p"$P"n1.msh" -save geo/simplepart.geo
   fi

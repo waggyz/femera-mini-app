@@ -482,7 +482,7 @@ if [ -z "$CSV_HAS_MEDIUM_PART_TEST" ]; then
   export OMP_PROC_BIND=spread
   export OMP_SCHEDULE=static
   export OMP_PLACES=cores
-  for N in $(seq $CPUCOUNT $CPUCOUNT $(( $CPUCOUNT * 20 )) ); do
+  for N in $(seq $CPUCOUNT $(( $CPUCOUNT * 2 )) $(( $CPUCOUNT * 16 )) ); do
     MESHNAME="uhxt"$MED_H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$MED_H"p"$P/$MESHNAME
     #echo "Partitioning and converting "$MESHNAME", if necessary..."
@@ -521,7 +521,7 @@ if [ ! -z "$CSV_HAS_MEDIUM_PART_TEST" ]; then
     set tics scale 0,0;\
     set key inside bottom center;\
     set title 'Femera Medium Elastic Model Partitioning Tests [MDOF/s]';\
-    set xrange [0:$(($CPUCOUNT * 20 ))];\
+    set xrange [0:$(($CPUCOUNT * 16 ))];\
     set xlabel 'Number of Partitions';\
     set label at "$MED_PART", "$MED_MDOFS" \"* Max\";\
     plot 'perf/uhxt-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv'\
@@ -544,7 +544,7 @@ fi
 # Check if any large model CSV lines have N > C
 LARGE_NELEM=`head -n1 $CSVFILE | awk -F, '{ print $1 }'`
 CSV_HAS_LARGE_PART_TEST=`awk -F, -v e=$LARGE_NELEM -v c=$CPUCOUNT\
-  '($1==e)&&($9==c)&&($4>$9){print $4; exit}' $CSVFILE`
+  '($1>=e)&&($9==c)&&($4>$9){print $4; exit}' $CSVFILE`
 if [ -z "$CSV_HAS_LARGE_PART_TEST" ]; then
   echo "Running large ("$LRG_MUDOF" MDOF) model partitioning tests..."
   export OMP_SCHEDULE=static
@@ -557,31 +557,30 @@ if [ -z "$CSV_HAS_LARGE_PART_TEST" ]; then
   ELEM_PER_PART=1000
   FINISHED=""
   while [ ! $FINISHED ]; do
-    NC=$(( $LARGE_NELEM / $ELEM_PER_PART / $C ))
-    N=$(( $NC * $C ))
-    if (( $N >= 1000 )); then
-      N=$(( $N / 200 * 200 ))
+    Ntarget=$(( $LARGE_NELEM / $ELEM_PER_PART ))
+    if [ $Ntarget -ge 1000 ]; then
+      NXYZ=($(python perf/part_slice_xyz.py -n $Ntarget -c $C))
+      N=${NXYZ[0]}
+    else
+      N=$Ntarget
     fi
-    if (( $N >= 10000 )); then
-      N=$(( $N / 1000 * 1000 ))
-    fi
-    if [ "$N" -le 50000 ]; then
-      #MESHNAME="uhxt"$H"p"$P"n"$N
-      #MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
-      MESHNAME="uhxt"$LRG_H"p"$P"n"$N
+    #if [ "$N" -le 50000 ]; then
+      MESHNAME="uhxt"$LRG_H"p"$P"n"$Ntarget
       MESH=$MESHDIR"/uhxt"$LRG_H"p"$P/$MESHNAME
       #echo "Partitioning and converting "$MESHNAME", if necessary..."
-      $PERFDIR/mesh-uhxt.sh $LRG_H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
+      $PERFDIR/mesh-uhxt.sh $LRG_H $P $Ntarget "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
       echo "Running "$ITERS" iterations of "$MESHNAME\
-        "("$ELEM_PER_PARTF" elem/part),"\
+        "("$ELEM_PER_PART" elem/part),"\
         $REPEAT_TEST_N" times..."
       for I in $(seq 1 $REPEAT_TEST_N ); do
         $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
           -p $MESH >> $CSVFILE
       done
-    fi
+    #fi
     ELEM_PER_PART=$(( $ELEM_PER_PART + 1000 ))
-    if [[ $ELEM_PER_PART -ge 20000 ]]; then FINISHED=TRUE; fi
+    #if [[ $ELEM_PER_PART -gt 20000 ]]; then FINISHED=TRUE; fi
+    if [[ $N -lt $(( $MED_PART / 2 )) ]]; then FINISHED=TRUE; fi
+    if [[ $N -lt $(( $C )) ]]; then FINISHED=TRUE; fi
   done
   # echo "Large Model Partitioning Profile" >> $PROFILE
 fi
@@ -604,7 +603,7 @@ if [ ! -z "$CSV_HAS_LARGE_PART_TEST" ]; then
   LARGE_ELEM_MIN=$(( $MED_PART * $LARGE_ELEM_PART ))
   LARGE_UDOF_MIN=$(( $LARGE_ELEM_MIN * $DOF_PER_ELEM ))
   #LARGE_MDOF_MIN=$(( $LARGE_UDOF_MIN / 1000000 ))
-  echo "Large model size initial estimate:"\
+  echo "Large model size estimate:"\
     ">"$LARGE_ELEM_MIN" elem, >"$LARGE_UDOF_MIN" DOF."
   if [ ! -z "$HAS_GNUPLOT" ]; then
     #LRG_MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
