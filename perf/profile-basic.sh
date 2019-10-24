@@ -183,9 +183,9 @@ if [ -f $CSVFILE ]; then
       H=${LIST_H[I]}
       echo $MESHDIR"/uhxt"$H"p"$P"/*.msh2, n??*.msh, *.fmr"
       #
-      rm $MESHDIR"/uhxt"$H"p"$P"/*.msh2" 2> /dev/null
-      rm $MESHDIR"/uhxt"$H"p"$P"/uhxt"$H"p"$P"n??*.msh" 2> /dev/null
-      rm $MESHDIR"/uhxt"$H"p"$P"/*.fmr" 2> /dev/null
+      rm $MESHDIR"/uhxt"$H"p"$P"/*.msh2"
+      rm $MESHDIR"/uhxt"$H"p"$P"/uhxt"$H"p"$P"n????*.msh"
+      rm $MESHDIR"/uhxt"$H"p"$P"/*.fmr"
     done
   fi
 exit 0
