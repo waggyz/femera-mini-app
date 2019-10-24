@@ -52,9 +52,9 @@ if [ ! -f $DIR"/uhxt"$H"p"$P"n"$N".msh" ]; then
 fi
 if [ ! -f $DIR"/uhxt"$H"p"$P"n"$N"_1.fmr" ]; then
   if [ -n "$LOGFILE" ]; then
-    echo "Converting to uhxt"$H"p"$P"n"$N"_x.fmr..." >> "$LOGFILE"
+    echo "Converting to uhxt"$H"p"$P"n"$N"_*.fmr..." >> "$LOGFILE"
   else
-    echo "Converting to uhxt"$H"p"$P"n"$N"_x.fmr..."
+    echo "Converting to uhxt"$H"p"$P"n"$N"_*.fmr..."
   fi
   case $PHYS in
   elas-iso)

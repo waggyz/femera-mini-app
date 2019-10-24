@@ -443,6 +443,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
   done
 fi
 if [ -f $CSVSMALL ]; then
+  echo Processing small model test results... >> $LOGFILE
   if [ -f $CSVPROFILE ]; then rm $CSVPROFILE; fi
   NODE_ARRAY=($( cut -d',' -f2 $CSVSMALL | uniq ))
   for NNODE in "${NODE_ARRAY[@]}"; do
@@ -591,7 +592,9 @@ if [ -z "$CSV_HAS_LARGE_PART_TEST" ]; then
       MESHNAME="uhxt"$LRG_H"p"$P"n"$Ntarget
       MESH=$MESHDIR"/uhxt"$LRG_H"p"$P/$MESHNAME
       #echo "Partitioning and converting "$MESHNAME", if necessary..."
-      $PERFDIR/mesh-uhxt.sh $LRG_H $P $Ntarget "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
+      $PERFDIR/mesh-uhxt.sh $LRG_H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
+      MESHNAME="uhxt"$LRG_H"p"$P"n"$Ntarget
+      MESH=$MESHDIR"/uhxt"$LRG_H"p"$P/$MESHNAME
       echo "Running "$ITERS" iterations of "$MESHNAME\
         "("$ELEM_PER_PART" elem/part),"\
         $REPEAT_TEST_N" times..."
