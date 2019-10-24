@@ -177,17 +177,17 @@ if [ -f $CSVFILE ]; then
   printf "%6i     : Basic Minimum iterations\n" $ITERS_MIN >> $PROFILE
   printf "     %5.0e : Basic relative residual tolerance\n" $RTOL >> $PROFILE
   #
-  #
-  echo Removing old partitioned meshes...
-  for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
-    H=${LIST_H[I]}
-    echo $MESHDIR"/uhxt"$H"p"$P"*.msh2, n??*.msh, *.fmr"
-    #
-    rm $MESHDIR"/uhxt"$H"p"$P/"*.msh2" 2> /dev/null
-    rm $MESHDIR"/uhxt"$H"p"$P/"uhxt"$H"p"$P"n??*.msh" 2> /dev/null
-    rm $MESHDIR"/uhxt"$H"p"$P/"*.fmr" 2> /dev/null
-  done
-  #
+  if false; then
+    echo Removing old partitioned meshes...
+    for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
+      H=${LIST_H[I]}
+      echo $MESHDIR"/uhxt"$H"p"$P"*.msh2, n??*.msh, *.fmr"
+      #
+      rm $MESHDIR"/uhxt"$H"p"$P/"*.msh2" 2> /dev/null
+      rm $MESHDIR"/uhxt"$H"p"$P/"uhxt"$H"p"$P"n??*.msh" 2> /dev/null
+      rm $MESHDIR"/uhxt"$H"p"$P/"*.fmr" 2> /dev/null
+    done
+  fi
   #
   ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_MDOFS $INIT_MUDOF | bc`
   CSVLINES=`wc -l < $CSVFILE`
