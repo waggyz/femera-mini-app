@@ -177,18 +177,18 @@ if [ -f $CSVFILE ]; then
   printf "%6i     : Basic Minimum iterations\n" $ITERS_MIN >> $PROFILE
   printf "     %5.0e : Basic relative residual tolerance\n" $RTOL >> $PROFILE
   #
-  if false; then
+  if true; then
     echo Removing old partitioned meshes...
     for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
       H=${LIST_H[I]}
-      echo $MESHDIR"/uhxt"$H"p"$P"*.msh2, n??*.msh, *.fmr"
+      echo $MESHDIR"/uhxt"$H"p"$P"/*.msh2, n??*.msh, *.fmr"
       #
-      rm $MESHDIR"/uhxt"$H"p"$P/"*.msh2" 2> /dev/null
-      rm $MESHDIR"/uhxt"$H"p"$P/"uhxt"$H"p"$P"n??*.msh" 2> /dev/null
-      rm $MESHDIR"/uhxt"$H"p"$P/"*.fmr" 2> /dev/null
+      rm $MESHDIR"/uhxt"$H"p"$P"/*.msh2" 2> /dev/null
+      rm $MESHDIR"/uhxt"$H"p"$P"/uhxt"$H"p"$P"n??*.msh" 2> /dev/null
+      rm $MESHDIR"/uhxt"$H"p"$P"/*.fmr" 2> /dev/null
     done
   fi
-  #
+exit 0
   ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_MDOFS $INIT_MUDOF | bc`
   CSVLINES=`wc -l < $CSVFILE`
   BASIC_TEST_N=$(( $TRY_COUNT * $REPEAT_TEST_N + 1 ))
@@ -201,7 +201,7 @@ if [ -f $CSVFILE ]; then
     for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
       H=${LIST_H[I]}
       MESHNAME="uhxt"$H"p"$P"n"$N
-      MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
+      MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
       $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
       NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
       NDOF=$(( $NNODE * 3 ))
