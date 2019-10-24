@@ -505,7 +505,7 @@ if [ -z "$CSV_HAS_MEDIUM_PART_TEST" ]; then
   export OMP_PROC_BIND=spread
   export OMP_SCHEDULE=static
   export OMP_PLACES=cores
-  for N in $(seq $CPUCOUNT $(( $CPUCOUNT * 2 )) $(( $CPUCOUNT * 16 )) ); do
+  for N in $(seq $(( $CPUCOUNT * 2 )) $CPUCOUNT $(( $CPUCOUNT * 16 )) ); do
     MESHNAME="uhxt"$MED_H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$MED_H"p"$P/$MESHNAME
     #echo "Partitioning and converting "$MESHNAME", if necessary..."
