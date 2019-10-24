@@ -592,8 +592,8 @@ if [ -z "$CSV_HAS_LARGE_PART_TEST" ]; then
       MESHNAME="uhxt"$LRG_H"p"$P"n"$Ntarget
       MESH=$MESHDIR"/uhxt"$LRG_H"p"$P/$MESHNAME
       #echo "Partitioning and converting "$MESHNAME", if necessary..."
-      $PERFDIR/mesh-uhxt.sh $LRG_H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
-      MESHNAME="uhxt"$LRG_H"p"$P"n"$Ntarget
+      $PERFDIR/mesh-uhxt.sh $LRG_H $P $Ntarget "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
+      MESHNAME="uhxt"$LRG_H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$LRG_H"p"$P/$MESHNAME
       echo "Running "$ITERS" iterations of "$MESHNAME\
         "("$ELEM_PER_PART" elem/part),"\
