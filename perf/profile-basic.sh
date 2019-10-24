@@ -177,7 +177,7 @@ if [ -f $CSVFILE ]; then
   printf "%6i     : Basic Minimum iterations\n" $ITERS_MIN >> $PROFILE
   printf "     %5.0e : Basic relative residual tolerance\n" $RTOL >> $PROFILE
   #
-  if true; then
+  if false; then
     echo Removing old partitioned meshes...
     for PP in $(seq 1 3 ); do
     for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
@@ -189,8 +189,8 @@ if [ -f $CSVFILE ]; then
       find $MESHDIR"/uhxt"$H"p"$PP -maxdepth 1 -type f -name *.fmr -delete
     done
     done
+    #exit 0
   fi
-exit 0
   ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_MDOFS $INIT_MUDOF | bc`
   CSVLINES=`wc -l < $CSVFILE`
   BASIC_TEST_N=$(( $TRY_COUNT * $REPEAT_TEST_N + 1 ))
