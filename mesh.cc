@@ -33,10 +33,10 @@ int Mesh::ScatterHaloIDs(){
 };
 int Mesh::SyncIDs(){//FIXME Not parallelized
   //GatherGlobalIDs();
-  //std::unordered_map<int,INT_MESH_PART> node_glid_count;// #parts having this node
+  //std::unordered_map<int,INT_PART> node_glid_count;// #parts having this node
   //FIXME can use node_glid_parts.size()
-  std::unordered_map<int,INT_MESH_PART> node_glid_owner;
-  std::unordered_map<int,std::vector<INT_MESH_PART>> node_glid_parts;
+  std::unordered_map<int,INT_PART> node_glid_owner;
+  std::unordered_map<int,std::vector<INT_PART>> node_glid_parts;
   //
   for(uint i=0; i<this->list_elem.size(); i++){
     if(this->list_elem[i]!=NULL){
@@ -98,7 +98,7 @@ int Mesh::SyncIDs(){//FIXME Not parallelized
 #endif
   //ScatterHaloIDs();//----------------------------------------------
   for(auto t : node_glid_parts){
-    int n; std::vector<INT_MESH_PART> ps;
+    int n; std::vector<INT_PART> ps;
     std::tie( n, ps)=t;
     auto o=node_glid_owner[n];
 #if VERB_MAX>3

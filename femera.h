@@ -6,8 +6,7 @@
 #endif
 // Maximum verbosity supported by executable
 // 0:none, 1:CSV line output, 2: timing, 3: status //11:debug level
-//FIXME Change the next to INT_PART
-#define INT_MESH_PART int
+#define INT_PART int
 // Mesh Partition ID (user-defined?)
 //#define INT_MESH unsigned int// Element Numbers
 //#define INT_ELEM_COLOR unsigned char// Color numbers
@@ -21,8 +20,13 @@
 #define INT_DOF unsigned short int
 // char DOF id number
 //
-// Node, Element, DOF Numbers
+// Partion Node, Element, DOF Numbers
 #define INT_MESH unsigned int
+//
+// Global Node, Element, DOF Numbers
+//FIXME Not yet used
+#define INT_GLOB unsigned int
+//
 #define FLOAT_MESH double
 // Mesh precision
 #define FLOAT_PHYS double

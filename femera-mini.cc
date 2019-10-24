@@ -45,7 +45,7 @@ int main( int argc, char** argv ){
   FLOAT_SOLV test_u=0.001; INT_DOF test_dir=0;
 #endif
   bool is_part    = false;
-  INT_MESH_PART part_n=0;
+  INT_PART part_n=0;
   char* bname      = NULL;//FIXME Store this in Femera or Mesh instance?
   const char* iname= NULL;
   // Parse Command Line =============================================
@@ -131,7 +131,7 @@ int main( int argc, char** argv ){
     std::cout << "Maximum Elements and Nodes: "
       << std::numeric_limits<INT_MESH>::max() <<'\n';
     std::cout << "Maximum Mesh Partitions: "
-      << (std::numeric_limits<INT_MESH_PART>::max()-1) <<'\n';
+      << (std::numeric_limits<INT_PART>::max()-1) <<'\n';
     std::cout << "Maximum Nodes/Element: "
       << size_t(std::numeric_limits<INT_ELEM_NODE>::max()) <<'\n';
     std::cout << "Maximum DOFs/Node: "
@@ -153,7 +153,7 @@ int main( int argc, char** argv ){
     if(verbosity>1){
       printf ("Looking for Femera partitions of %s...\n", bname); }
 #endif
-    bool fok=true; INT_MESH_PART part_i=1;
+    bool fok=true; INT_PART part_i=1;
     while( fok ){
     //for(int part_i=1; part_i<(part_n+1);part_i++){
       std::stringstream ss;

@@ -36,7 +36,7 @@ int main( int argc, char** argv ) {
   const char* bname=NULL;//FIXME Store this in Femera or Mesh instance?
   const char* iname=NULL; std::string file_ext=".msh";
   std::string pname,oriname;
-  INT_MESH_PART part_0=0, part_n=0;
+  INT_PART part_0=0, part_n=0;
   Gmsh* M = new Gmsh();
   bool save_asc=false, save_bin=false, save_csv=false, save_abq=false;
   bool is_part=false;
@@ -352,7 +352,7 @@ int main( int argc, char** argv ) {
         if(verbosity>0){
       printf ("Looking for Gmsh partitions of %s...\n", bname); };
 #endif
-      bool fok=true; INT_MESH_PART part_i=1;
+      bool fok=true; INT_PART part_i=1;
       while( fok ){
       //for(int part_i=1; part_i<(part_n+1);part_i++){
         std::stringstream ss;
@@ -462,7 +462,7 @@ int main( int argc, char** argv ) {
   };
   if(!is_part){ is_part=true;//part_0=1;//FIXME This determines first saved file.
     // Partition M[0] based on physical IDs...
-    //std::unordered_map<int,INT_MESH_PART> glel_part;
+    //std::unordered_map<int,INT_PART> glel_part;
     auto E0=partlist[0];
     uint cn =uint(E0->elem_conn_n);//printf("**** %u ****",cn);
         if(verbosity>0){

@@ -265,11 +265,21 @@ if [ -f $CSVFILE ]; then
     MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
     CHECK_NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
     if [ $CHECK_NNODE -eq $MAX_NODES ]; then
+      MED_UDOF=$((CHECK_NNODE * 3 ));
       MED_MESHNAME=$MESHNAME
       MED_MESH=$MESH
       MED_H=$H
     fi
-    # Find a representative large model
+  done
+  # Find a representative large model
+  if [ $(( $MED_UDOF * 3 * 20  )) -lt $LARGE_PART_MAX_MUDOF ]; then
+    LARGE_PART_MAX_MUDOF=$(( $MED_UDOF * 3 * 20 / 1000000 ))
+  fi
+  for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
+    H=${LIST_H[I]}
+    MESHNAME="uhxt"$H"p"$P"n"$N
+    MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
+    CHECK_NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
     if [ $(( $CHECK_NNODE * 3 / 1000000 )) -le $LARGE_PART_MAX_MUDOF ]; then
       LRG_MUDOF=$((CHECK_NNODE * 3 / 1000000 ));
       LRG_MESHNAME=$MESHNAME
