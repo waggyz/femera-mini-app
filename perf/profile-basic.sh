@@ -313,8 +313,9 @@ if [ -f $CSVFILE ]; then
     MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
     CHECK_NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
     if [ $(( $CHECK_NNODE * 3 / 1000000 )) -le $LARGE_PART_MAX_MUDOF ]; then
+      LRG_NNODE=$(( CHECK_NNODE  ));
       LRG_MUDOF=$(( CHECK_NNODE * 3 / 1000000 ));
-      LRG_NELEM=`grep -m1 -A1 -i elem $MESH".msh" | tail -n1`
+      #LRG_NELEM=`grep -m1 -A1 -i elem $MESH".msh" | tail -n1`
       LRG_MESHNAME=$MESHNAME
       LRG_MESH=$MESH
       LRG_H=$H
@@ -568,6 +569,8 @@ fi
 #  '($1>=e)&&($9==c)&&($4>$9){print $4; exit}' $CSVFILE`
 #if [ -z "$CSV_HAS_LARGE_PART_TEST" ]; then
   echo "Checking for large ("$LRG_MUDOF" MDOF) model partitioning tests..."
+  LRG_NELEM=`awk -F, -v n=$LRG_NNODE \
+    '($2==n){print $1; exit}' $CSVFILE`
   export OMP_SCHEDULE=static
   export OMP_PLACES=cores
   export OMP_PROC_BIND=spread
@@ -585,8 +588,9 @@ fi
     else
       N=$(( $NTARGET / $C * $C ))
     fi
-    HAS_TEST=`awk -F, -v e=$LRG_NELEM -v c=$CPUCOUNT -v n=$N \
-      '($1==e)&&($9==c)&&($4==n){print $4; exit}' $CSVFILE`
+    #FIXME The test below doesn't seem to work.
+    HAS_TEST=`awk -F, -v n=$LRG_NUDOF -v c=$CPUCOUNT -v n=$N \
+      '($2==e)&&($9==c)&&($4==n){print $4; exit}' $CSVFILE`
     if [ -z "$HAS_TEST" ]; then
       $PERFDIR/mesh-uhxt.sh $LRG_H $P $NTARGET "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
       MESHNAME="uhxt"$LRG_H"p"$P"n"$N
@@ -601,7 +605,7 @@ fi
     fi
     ELEM_PER_PART=$(( $ELEM_PER_PART + 1000 ))
     #if [[ $ELEM_PER_PART -gt 20000 ]]; then FINISHED=TRUE; fi
-    if [[ $N -lt $(( $MED_PART / 2 )) ]]; then FINISHED=TRUE; fi
+    if [[ $N -lt $(( $MED_PART * 2 )) ]]; then FINISHED=TRUE; fi
     if [[ $N -lt $(( $C )) ]]; then FINISHED=TRUE; fi
   done
   # echo "Large Model Partitioning Profile" >> $PROFILE
@@ -609,8 +613,8 @@ fi
 CSV_HAS_LARGE_PART_TEST=`awk -F, -v c=$CPUCOUNT -v elem=$LRG_NELEM \
   '($9==c)&&($1==elem)&&($4>$9){print $4; exit}' $CSVFILE`
 if [ ! -z "$CSV_HAS_LARGE_PART_TEST" ]; then
-  SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v elem=$LRG_NELEM -v max=0\
-    '($9==c)&&($1==elem)&&($13>max+0){max=$13;perf=$13/1e6;size=$1/$4}\
+  SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v elem=$LRG_NELEM -v pmax=0\
+    '($9==c)&&($1==elem)&&($13>pmax+0){pmax=$13;perf=$13/1e6;size=$1/$4}\
     END{print int((size+500)/1000)*1000,int(perf+0.5)}'\
     $CSVFILE`
   LARGE_MDOFS=${SIZE_PERF_MAX##* }
@@ -618,20 +622,11 @@ if [ ! -z "$CSV_HAS_LARGE_PART_TEST" ]; then
   #LARGE_ELEM_PART=$(( ${SIZE_PERF_MAX%% *} /1000 *1000 ))
   echo "Large model performance peak: "$LARGE_MDOFS" MDOF/s"\
     "with "$LARGE_ELEM_PART" elem/part."
-  #LARGE_ELEM=$(( $LARGE_ELEM_PART * $CPUCOUNT ))
-  #LARGE_UDOF=$(( $LARGE_ELEM * $DOF_PER_ELEM ))
-  #echo "Large model size initial estimate:"\
-  #  ">"$LARGE_ELEM" elem,"$LARGE_UDOF" DOF."
   LARGE_ELEM_MIN=$(( $MED_PART * $LARGE_ELEM_PART ))
   LARGE_UDOF_MIN=$(( $LARGE_ELEM_MIN * $DOF_PER_ELEM ))
-  #LARGE_MDOF_MIN=$(( $LARGE_UDOF_MIN / 1000000 ))
   echo "Large model size estimate:"\
     ">"$LARGE_ELEM_MIN" elem, >"$LARGE_UDOF_MIN" DOF."
   if [ ! -z "$HAS_GNUPLOT" ]; then
-    #LRG_MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
-    #if [ $LRG_MUDOF -gt $LARGE_PART_MAX_MUDOF ];
-    #  then LRG_MUDOF=$LARGE_PART_MAX_MUDOF;
-    #fi
     echo "Plotting large model partitioning profile data: "$CSVFILE"..." >> $LOGFILE
     gnuplot -e  "\
     set terminal dumb noenhanced size 79,25;\
