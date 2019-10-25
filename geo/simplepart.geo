@@ -6,6 +6,10 @@ EndIf
 If( (n>1) & (n<1000) )
   PartitionMesh n;
 EndIf
+Mesh.PartitionSplitMeshFiles  = 0 ;//1 ;
+Mesh.PartitionCreatePhysicals = 0 ;//FIXME Is this useful?
+Mesh.PartitionCreateTopology  = 1 ;
+Mesh.PartitionCreateGhostCells= 0 ;// Is this necessary?
 */
 //If( n>=1000 )
   /*
