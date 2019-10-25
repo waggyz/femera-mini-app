@@ -588,9 +588,8 @@ fi
     else
       N=$(( $NTARGET / $C * $C ))
     fi
-    #FIXME The test below doesn't seem to work.
-    HAS_TEST=`awk -F, -v n=$LRG_NUDOF -v c=$CPUCOUNT -v n=$N \
-      '($2==e)&&($9==c)&&($4==n){print $4; exit}' $CSVFILE`
+    HAS_TEST=`awk -F, -v n=$LRG_NNODE -v c=$CPUCOUNT -v n=$N \
+      '($2==n)&&($9==c)&&($4==n){print $4; exit}' $CSVFILE`
     if [ -z "$HAS_TEST" ]; then
       $PERFDIR/mesh-uhxt.sh $LRG_H $P $NTARGET "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
       MESHNAME="uhxt"$LRG_H"p"$P"n"$N
