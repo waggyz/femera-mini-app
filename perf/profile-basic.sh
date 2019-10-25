@@ -586,7 +586,7 @@ fi
       N=$Ntarget
     fi
     HAS_TEST=`awk -F, -v e=$LRG_NELEM -v c=$CPUCOUNT -v n=$N \
-      '($1>=e)&&($9==c)&&($4==n){print $4; exit}' $CSVFILE`
+      '($1==e)&&($9==c)&&($4==n){print $4; exit}' $CSVFILE`
     if [ -z "$HAS_TEST" ]; then
       $PERFDIR/mesh-uhxt.sh $LRG_H $P $Ntarget "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
       MESHNAME="uhxt"$LRG_H"p"$P"n"$N
