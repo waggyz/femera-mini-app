@@ -29,15 +29,22 @@ if [ ! -f $DIR"/uhxt"$H"p"$P"n1.msh" ]; then
   gmsh -nt $C -v $VERB -setnumber p $P -setnumber h $H -setnumber n 1 -3 \
     -format msh2 -o $DIR"/uhxt"$H"p"$P"n1.msh" -save geo/uhxt-cube.geo
 fi
-if [ $N -ge 1000 ]; then
+PARTSTR="METIS"
+if [ $N -lte 1000 ]; then
+  N=$(( $N / $C * $C ))
+else
   NXYZ=($(python perf/part_slice_xyz.py -n $N -c $C))
   N=${NXYZ[0]}
+  SX=${NXYZ[1]}
+  SY=${NXYZ[2]}
+  SZ=${NXYZ[3]}
+  PARTSTR="slicing "$SX"x"$SY"x"$SZ""
 fi
 if [ ! -f $DIR"/uhxt"$H"p"$P"n"$N".msh" ]; then
   if [ -n "$LOGFILE" ]; then
-    echo "Partitioning to uhxt"$H"p"$P"n"$N".msh..." >> "$LOGFILE"
+    echo "Partitioning to uhxt"$H"p"$P"n"$N".msh ("$PARTSTR")..." >> "$LOGFILE"
   else
-    echo "Partitioning to uhxt"$H"p"$P"n"$N".msh..."
+    echo "Partitioning to uhxt"$H"p"$P"n"$N".msh ("$PARTSTR")..."
   fi
   if [ $N -lt 1000 ]; then
     gmsh -v $VERB -nt $C -part $N \
@@ -45,7 +52,7 @@ if [ ! -f $DIR"/uhxt"$H"p"$P"n"$N".msh" ]; then
       $DIR"/uhxt"$H"p"$P"n1.msh"
   else
     gmsh -v $VERB -nt $C -setnumber n $N \
-      -setnumber sx ${NXYZ[1]} -setnumber sy ${NXYZ[2]} -setnumber sz ${NXYZ[3]} \
+      -setnumber sx $SX -setnumber sy $SY -setnumber sz $SZ \
       -format msh2 -o $DIR"/uhxt"$H"p"$P"n"$N".msh" \
       -merge $DIR"/uhxt"$H"p"$P"n1.msh" -save geo/simplepart.geo
   fi

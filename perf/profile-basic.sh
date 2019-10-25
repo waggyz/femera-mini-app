@@ -578,17 +578,17 @@ fi
   ELEM_PER_PART=1000
   FINISHED=""
   while [ ! $FINISHED ]; do
-    Ntarget=$(( $LRG_NELEM / $ELEM_PER_PART ))
-    if [ $Ntarget -ge 1000 ]; then
-      NXYZ=($(python perf/part_slice_xyz.py -n $Ntarget -c $C))
+    NTARGET=$(( $LRG_NELEM / $ELEM_PER_PART ))
+    if [ $NTARGET -ge 1000 ]; then
+      NXYZ=($(python perf/part_slice_xyz.py -n $NTARGET -c $C))
       N=${NXYZ[0]}
     else
-      N=$Ntarget
+      N=$(( $NTARGET / $C * $C ))
     fi
     HAS_TEST=`awk -F, -v e=$LRG_NELEM -v c=$CPUCOUNT -v n=$N \
       '($1==e)&&($9==c)&&($4==n){print $4; exit}' $CSVFILE`
     if [ -z "$HAS_TEST" ]; then
-      $PERFDIR/mesh-uhxt.sh $LRG_H $P $Ntarget "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
+      $PERFDIR/mesh-uhxt.sh $LRG_H $P $NTARGET "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
       MESHNAME="uhxt"$LRG_H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$LRG_H"p"$P/$MESHNAME
       echo "Running "$ITERS" iterations of "$MESHNAME\
@@ -680,13 +680,12 @@ if [ -z "$CSV_HAS_FINAL_TEST" ]; then
     NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
     MN=$(( $MED_NELEM * 4 / 10 ))
     if (( $NELEM > $MN )); then
-      NC=$(( $NELEM / $LARGE_ELEM_PART / $C ))
-      N=$(( $NC * $C ))
-      if (( $N >= 1000 )); then
-        N=$(( $N / 200 * 200 ))
-      fi
-      if (( $N >= 10000 )); then
-        N=$(( $N / 1000 * 1000 ))
+      NTARGET=$(( $NELEM / $LARGE_ELEM_PART ))
+      if [ $NTARGET -ge 1000 ]; then
+        NXYZ=($(python perf/part_slice_xyz.py -n $NTARGET -c $C))
+        N=${NXYZ[0]}
+      else
+        N=$(( $NTARGET / $C * $C ))
       fi
       if (( $N < $MED_PART )); then N=$MED_PART; fi
       HAS_TEST=`awk -F, -v n=$NNODE -v p=$N\
