@@ -495,6 +495,7 @@ if [ -f $CSVSMALL ]; then
     echo >> $PROFILE
   fi
 fi
+echo "Checking for medium ("$MED_MUDOF" MDOF) model partitioning tests..."
 # Check if any medium model CSV lines have N > C
 CSV_HAS_MEDIUM_PART_TEST=`awk -F, -v e=$MED_NELEM -v c=$CPUCOUNT\
   '($1==e)&&($9==c)&&($4>$9){print $4; exit}' $CSVFILE`
@@ -588,8 +589,8 @@ fi
     else
       N=$(( $NTARGET / $C * $C ))
     fi
-    HAS_TEST=`awk -F, -v n=$LRG_NNODE -v c=$CPUCOUNT -v n=$N \
-      '($2==n)&&($9==c)&&($4==n){print $4; exit}' $CSVFILE`
+    HAS_TEST=`awk -F, -v nn=$LRG_NNODE -v c=$CPUCOUNT -v n=$N \
+      '($2==nn)&&($4==n)&&($9==c){print $4; exit}' $CSVFILE`
     if [ -z "$HAS_TEST" ]; then
       $PERFDIR/mesh-uhxt.sh $LRG_H $P $NTARGET "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
       MESHNAME="uhxt"$LRG_H"p"$P"n"$N
