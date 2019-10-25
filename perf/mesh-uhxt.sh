@@ -30,7 +30,7 @@ if [ ! -f $DIR"/uhxt"$H"p"$P"n1.msh" ]; then
     -format msh2 -o $DIR"/uhxt"$H"p"$P"n1.msh" -save geo/uhxt-cube.geo
 fi
 PARTSTR="METIS"
-if [ $N -lte 1000 ]; then
+if [ $N -lt 1000 ]; then
   N=$(( $N / $C * $C ))
 else
   NXYZ=($(python perf/part_slice_xyz.py -n $N -c $C))
