@@ -505,7 +505,7 @@ int main( int argc, char** argv ) {
       uint Dm=E0->mesh_d;
       //std::cout <<"Elements: "<<E0->elem_n<<", Dimension: "<<Dm<<'\n';
       for(INT_MESH ie=0; ie < E0->elem_n; ie++){
-        std::valarray<FLOAT_MESH> c(3);// Centroid of element
+        std::valarray<FLOAT_MESH> c(Dm);// Centroid of element
         for(uint i=0;i<4;i++){// mean of 4 corner nodes
           INT_MESH n0 = E0->elem_conn[Nc* ie+i ];
           for(uint j=0;j<3;j++){
@@ -516,9 +516,9 @@ int main( int argc, char** argv ) {
           + INT_PART( fmod(c[0],1.0/sx)*sx*sx )
           + INT_PART( fmod(c[1],1.0/sy)*sy*sy )*svallist[0]
           + INT_PART( fmod(c[2],1.0/sz)*sz*sz )*svallist[0]*svallist[1];
-        //std::cout << part_i <<" ";
+        std::cout << part_i <<" ";
       }
-      //std::cout <<'\n';
+      std::cout <<'\n';
       if(true){ std::cerr << "ERROR Slicing not yet implemented.\n"; return 1; }
     }// Done partitioning by slicing.
     else{
