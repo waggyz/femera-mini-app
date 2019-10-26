@@ -23,12 +23,13 @@ std::vector<Mesh::part> Mesh::priv_part;
 //FIXME Remove unneeded includes
 int Mesh::GatherGlobalIDs(){ return 0; };
 int Mesh::ScatterHaloIDs(){
-  /*
+#if 0
   for(uint i=0; i<this->list_elem.size(); i++){
     if(this->list_elem[i]!=NULL){
       Elem* E=this->list_elem[i];
       //FIXME
-  }; };*/
+  } }
+#endif
   return 0;
 };
 int Mesh::SyncIDs(){//FIXME Not parallelized

@@ -17,6 +17,7 @@ int main( int argc, char** argv ) {
   typedef std::tuple<INT_DOF,INT_DOF,FLOAT_MESH,FLOAT_MESH> atv;
   typedef std::set<ati> atiset;
   typedef std::set<atv> atvset;
+  atiset sli_at={};
   atiset bc0_at={};// ati(0,0,0.0), ati(1,1,0.0), ati(2,2,0.0) };
   atvset bcs_at={};// atv(0,0,1.0,0.001) };
   atvset rhs_at={};
@@ -47,6 +48,7 @@ int main( int argc, char** argv ) {
   FLOAT_MESH eps_find=1e-6;
   FLOAT_PHYS oriunit=1.0;
   std::vector<FLOAT_PHYS> orislist={};
+  std::vector<int> svallist={1,1,1};
   //int hown_meth = 2;// Algorithm to balance halo node owner
   // 0: first touch (lowest partition number)
   // 1: partition with fewest nodes, first touch tiebreaker (original optimize)
@@ -65,13 +67,14 @@ int main( int argc, char** argv ) {
     //std::unordered_map<int,std::vector<int>> axislist;
     //int volutag=0, parttag=0;
     double uval=0.0, fval=0.0;
-    bool fix0=false, load=false, disp=false;
+    int sval=1;
+    bool fix0=false, load=false, disp=false, slic=false;
     bool hasmatp=false, hasmatc=false, rotrand=false, mtrldone=true;
    // bool hasplas=false;
     //
     opterr = 0; int c;
     while ((c = getopt (argc, argv,
-      "abcqo:pv:wt:n:@:xyzT0u:f:M:X:Y:Z:E:N:G:A:K:J:C:B:O:R")) != -1){
+      "abcqo:pv:wt:n:@:xyzT0u:f:S:M:X:Y:Z:E:N:G:A:K:J:C:B:O:R")) != -1){
       // x:  x requires an argument
       mtrldone=true;
       switch (c) {
@@ -87,9 +90,9 @@ int main( int argc, char** argv ) {
         case 'c':{ save_csv=true; break; }
         case 'q':{ save_abq=true; break; }
         // Boundary Conditions
-        case 'n':{ nodelist.push_back(atoi(optarg)); uval=0.0; fval=0.0; break; }
-        case 't':{ tagslist.push_back(atoi(optarg)); uval=0.0; fval=0.0; break; }
-        case '@':{ avallist.push_back(atof(optarg)); uval=0.0; fval=0.0; break; }
+        case 'n':{ nodelist.push_back(atoi(optarg)); uval=0.0; fval=0.0; sval=1; break; }
+        case 't':{ tagslist.push_back(atoi(optarg)); uval=0.0; fval=0.0; sval=1; break; }
+        case '@':{ avallist.push_back(atof(optarg)); uval=0.0; fval=0.0; sval=1; break; }
         case 'x':{ dofslist.push_back(0); break; }
         case 'y':{ dofslist.push_back(1); break; }
         case 'z':{ dofslist.push_back(2); break; }
@@ -97,6 +100,7 @@ int main( int argc, char** argv ) {
         case '0':{ fix0=true; break; }
         case 'u':{ disp=true; uval=atof(optarg); break; }
         case 'f':{ load=true; fval=atof(optarg); break; }
+        case 'S':{ slic=true; sval=atoi(optarg); break; }
         // Physics
         //case 'T':{ // Gmsh volume physical ID tag
         //  if(hasmatc|hasmatp){ volutmp.push_back(atoi(optarg));
@@ -143,7 +147,7 @@ int main( int argc, char** argv ) {
           //return 1;
         }
         default:{ abort();}
-      };
+      }
       if( hasmatp & hasmatc){
         fprintf (stderr,"ERROR Specify only material properties:\n");
         fprintf (stderr,"      -E<Young's modulus> -N<Poisson's ratio>\n");
@@ -152,126 +156,149 @@ int main( int argc, char** argv ) {
         fprintf (stderr,"      -J<Plasticity parameter>...\n");
         fprintf (stderr,"   OR material response matrix values:\n");
         fprintf (stderr,"      -C<c11>...\n");
-        return 1; };
-#if VERB_MAX>3
-      if(fix0){
-        printf("Tags:");
-        for(size_t i=0;i<tagslist.size();i++){ printf(" %i",tagslist[i]); };
-        printf(", Nodes:");
-        for(size_t i=0;i<nodelist.size();i++){ printf(" %i",nodelist[i]); };
-        printf(", @:");
-        for(size_t i=0;i<avallist.size();i++){ printf(" %f",avallist[i]); };
-        printf(" DOFs:");
-        for(size_t i=0;i<dofslist.size();i++){ printf(" %i",dofslist[i]); };
-        printf(", Displacement/temperature fixed zero\n");
-      };
-      if(disp){
-        printf("Tags:");
-        for(size_t i=0;i<tagslist.size();i++){ printf(" %i",tagslist[i]); };
-        printf(", Nodes:");
-        for(size_t i=0;i<nodelist.size();i++){ printf(" %i",nodelist[i]); };
-        printf(", @:");
-        for(size_t i=0;i<avallist.size();i++){ printf(" %f",avallist[i]); };
-        printf(" DOFs:");
-        for(size_t i=0;i<dofslist.size();i++){ printf(" %i",dofslist[i]); };
-        printf(", Displacement/temperature: %+9.2e\n",uval);
-      };
-      if(load){
-        printf("Tags:");
-        for(size_t i=0;i<tagslist.size();i++){ printf(" %i",tagslist[i]); };
-        printf(", Nodes:");
-        for(size_t i=0;i<nodelist.size();i++){ printf(" %i",nodelist[i]); };
-        printf(", @:");
-        for(size_t i=0;i<avallist.size();i++){ printf(" %f",avallist[i]); };
-        printf(" DOFs:");
-        for(size_t i=0;i<dofslist.size();i++){ printf(" %i",dofslist[i]); };
-        printf(", Load: %+9.2e\n",fval);
-      };
+        return 1; }
+#if VERB_MAX > 11
+        if(fix0){
+          printf("Tags:");
+          for(size_t i=0;i<tagslist.size();i++){ printf(" %i",tagslist[i]); }
+          printf(", Nodes:");
+          for(size_t i=0;i<nodelist.size();i++){ printf(" %i",nodelist[i]); }
+          printf(", @:");
+          for(size_t i=0;i<avallist.size();i++){ printf(" %f",avallist[i]); }
+          printf(" DOFs:");
+          for(size_t i=0;i<dofslist.size();i++){ printf(" %i",dofslist[i]); }
+          printf(", Displacement/temperature fixed zero\n");
+        }
+        if(disp){
+          printf("Tags:");
+          for(size_t i=0;i<tagslist.size();i++){ printf(" %i",tagslist[i]); }
+          printf(", Nodes:");
+          for(size_t i=0;i<nodelist.size();i++){ printf(" %i",nodelist[i]); }
+          printf(", @:");
+          for(size_t i=0;i<avallist.size();i++){ printf(" %f",avallist[i]); }
+          printf(" DOFs:");
+          for(size_t i=0;i<dofslist.size();i++){ printf(" %i",dofslist[i]); }
+          printf(", Displacement/temperature: %+9.2e\n",uval);
+        }
+        if(load){
+          printf("Tags:");
+          for(size_t i=0;i<tagslist.size();i++){ printf(" %i",tagslist[i]); }
+          printf(", Nodes:");
+          for(size_t i=0;i<nodelist.size();i++){ printf(" %i",nodelist[i]); }
+          printf(", @:");
+          for(size_t i=0;i<avallist.size();i++){ printf(" %f",avallist[i]); }
+          printf(" DOFs:");
+          for(size_t i=0;i<dofslist.size();i++){ printf(" %i",dofslist[i]); }
+          printf(", Load: %+9.2e\n",fval);
+        }
+        if(slic){
+#if 0
+          printf("Tags:");
+          for(size_t i=0;i<tagslist.size();i++){ printf(" %i",tagslist[i]); }
+          printf(", Nodes:");
+          for(size_t i=0;i<nodelist.size();i++){ printf(" %i",nodelist[i]); }
+          printf(", @:");
+          for(size_t i=0;i<avallist.size();i++){ printf(" %f",avallist[i]); }
+          printf(" DOFs:");
+#endif
+          for(size_t i=0;i<dofslist.size();i++){ printf(" %i",dofslist[i]); }
+          printf(", Slices: %i\n",sval);
+          for(size_t i=0;i<svallist.size();i++){ printf(" %i",svallist[i]); }
+          printf(", Slices: %i\n",sval);
+        }
 #endif
       if( fix0 | disp | load ){
         for(size_t f=avallist.size();f<dofslist.size();f++){
           for(size_t i=0;i<nodelist.size();i++){
-            if(fix0){ M->bc0_nnf.push_back(Gmsh::tfitem(nodelist[i],dofslist[f])); };
-            if(disp){ M->bcs_nvals.push_back(Gmsh::tfval(nodelist[i],dofslist[f],uval)); };
-            if(load){ M->rhs_nvals.push_back(Gmsh::tfval(nodelist[i],dofslist[f],fval)); };
-          };
+            if(fix0){ M->bc0_nnf.push_back(Gmsh::tfitem(nodelist[i],dofslist[f])); }
+            if(disp){ M->bcs_nvals.push_back(Gmsh::tfval(nodelist[i],dofslist[f],uval)); }
+            if(load){ M->rhs_nvals.push_back(Gmsh::tfval(nodelist[i],dofslist[f],fval)); }
+          }
           for(size_t i=0;i<tagslist.size();i++){
-            if(fix0){ M->bc0_tnf.push_back(Gmsh::tfitem(tagslist[i],dofslist[f])); };
-            if(disp){ M->bcs_tvals.push_back(Gmsh::tfval(tagslist[i],dofslist[f],uval)); };
-            if(load){ M->rhs_tvals.push_back(Gmsh::tfval(tagslist[i],dofslist[f],fval)); };
-          };
+            if(fix0){ M->bc0_tnf.push_back(Gmsh::tfitem(tagslist[i],dofslist[f])); }
+            if(disp){ M->bcs_tvals.push_back(Gmsh::tfval(tagslist[i],dofslist[f],uval)); }
+            if(load){ M->rhs_tvals.push_back(Gmsh::tfval(tagslist[i],dofslist[f],fval)); }
+          }
           for(size_t i=0;i<avallist.size();i++){
             if(fix0){ bc0_at.insert(
-              ati((INT_DOF)dofslist[i],(INT_DOF)dofslist[f],avallist[i])); };
+              ati((INT_DOF)dofslist[i],(INT_DOF)dofslist[f],avallist[i])); }
             if(disp){ bcs_at.insert(
-              atv((INT_DOF)dofslist[i],(INT_DOF)dofslist[f],avallist[i],uval)); };
+              atv((INT_DOF)dofslist[i],(INT_DOF)dofslist[f],avallist[i],uval)); }
             if(load){ rhs_at.insert(
-              atv((INT_DOF)dofslist[i],(INT_DOF)dofslist[f],avallist[i],fval)); };
-          };
-        };
-      };
-      if(fix0){ nodelist={};tagslist={};dofslist={};avallist={}; fix0=false; };
-      if(disp){ nodelist={};tagslist={};dofslist={};avallist={}; disp=false; };
-      if(load){ nodelist={};tagslist={};dofslist={};avallist={}; load=false; };
+              atv((INT_DOF)dofslist[i],(INT_DOF)dofslist[f],avallist[i],fval)); }
+          }
+        }
+      }
+      if(slic){
+        for(size_t f=0;f<dofslist.size();f++){
+          svallist[(INT_DOF)dofslist[f]] = sval;
+          if( verbosity > 4 ){
+            printf("DOF %i Slices: %i\n", dofslist[f], sval ); }
+        }
+      }
+      if(fix0){ nodelist={};tagslist={};dofslist={};avallist={}; fix0=false; }
+      if(disp){ nodelist={};tagslist={};dofslist={};avallist={}; disp=false; }
+      if(load){ nodelist={};tagslist={};dofslist={};avallist={}; load=false; }
+      if(slic){ nodelist={};tagslist={};dofslist={};avallist={}; slic=false; }
       //
       //if( mtrldone & ((volutags.size()+parttags.size()) > 0) ){
       if( mtrldone & (parttags.size() > 0) ){
 #if VERB_MAX>4
         if(verbosity>4){
         //std::cout << "Volume tags:";
-        //  for(int v : volutags ){ std::cout << " " << v; };
+        //  for(int v : volutags ){ std::cout << " " << v; }
         std::cout << ", ";
         std::cout << "Partitions:";
-          for(int v : parttags ){ std::cout << " " << v; };
+          for(int v : parttags ){ std::cout << " " << v; }
         std::cout << std::endl;
         //
         std::cout << "Young:";
-          for(FLOAT_PHYS v : younlist ){ std::cout << " " << v; };
+          for(FLOAT_PHYS v : younlist ){ std::cout << " " << v; }
         std::cout << std::endl;
         std::cout << "Poiss:";
-          for(FLOAT_PHYS v : poislist ){ std::cout << " " << v; };
+          for(FLOAT_PHYS v : poislist ){ std::cout << " " << v; }
         std::cout << std::endl;
         std::cout << "Shear:";
-          for(FLOAT_PHYS v : smodlist ){ std::cout << " " << v; };
+          for(FLOAT_PHYS v : smodlist ){ std::cout << " " << v; }
         std::cout << std::endl;
         std::cout << "Thermal expansion:";
-          for(FLOAT_PHYS v : texplist ){ std::cout << " " << v; };
+          for(FLOAT_PHYS v : texplist ){ std::cout << " " << v; }
         std::cout << std::endl;
         std::cout << "Thermal conductivity:";
-          for(FLOAT_PHYS v : tconlist ){ std::cout << " " << v; };
+          for(FLOAT_PHYS v : tconlist ){ std::cout << " " << v; }
         std::cout << std::endl;
         std::cout << "Plasticity parameters:";
-          for(FLOAT_PHYS v : plaslist ){ std::cout << " " << v; };
+          for(FLOAT_PHYS v : plaslist ){ std::cout << " " << v; }
         std::cout << std::endl;
         std::cout << " matC:";
-          for(FLOAT_PHYS v : matclist ){ std::cout << " " << v; };
+          for(FLOAT_PHYS v : matclist ){ std::cout << " " << v; }
         std::cout << std::endl;
         std::cout << " Rdeg:";
-          for(FLOAT_PHYS v : rdeglist ){ std::cout << " " << v; };
+          for(FLOAT_PHYS v : rdeglist ){ std::cout << " " << v; }
         std::cout << std::endl;
         std::cout << "RAxes:";
-          for(int v : axislist ){ std::cout << " " << v; };
+          for(int v : axislist ){ std::cout << " " << v; }
         std::cout << std::endl;
-        };
+        }
 #endif
         {uint n= uint(3)-rdeglist.size();
         if(rotrand){ for(uint i=0; i<n; i++){
           rdeglist.push_back(FLOAT_PHYS(std::rand())/(FLOAT_PHYS(RAND_MAX)+1.0)
             * 2.0*PI );//FIXME These are overwritten later if allrand==true.
-          if(n==3){allrand=true;};//FIXME Not quite the way to do this
-          }; }; }
-        if(rotfile){ rdeglist={0.0,0.0,0.0};};
+          if(n==3){allrand=true;}//FIXME Not quite the way to do this
+          } } }
+        if(rotfile){ rdeglist={0.0,0.0,0.0};}
         if(( smodlist.size()>0 ) & ( rdeglist.size()==0 ) ){
-          rdeglist={0.0,0.0,0.0};};
+          rdeglist={0.0,0.0,0.0};}
         for(int p : parttags ){
-          for(FLOAT_PHYS v : rdeglist ){ mtrl_part[p].push_back(v); };
-          for(FLOAT_PHYS v : younlist ){ mtrl_part[p].push_back(v); };
-          for(FLOAT_PHYS v : poislist ){ mtrl_part[p].push_back(v); };
-          for(FLOAT_PHYS v : smodlist ){ mtrl_part[p].push_back(v); };
-          for(FLOAT_PHYS v : plaslist ){ plas_part[p].push_back(v); };
-          for(FLOAT_PHYS v : texplist ){ texp_part[p].push_back(v); };
-          for(FLOAT_PHYS v : tconlist ){ tcon_part[p].push_back(v); };
-        };
+          for(FLOAT_PHYS v : rdeglist ){ mtrl_part[p].push_back(v); }
+          for(FLOAT_PHYS v : younlist ){ mtrl_part[p].push_back(v); }
+          for(FLOAT_PHYS v : poislist ){ mtrl_part[p].push_back(v); }
+          for(FLOAT_PHYS v : smodlist ){ mtrl_part[p].push_back(v); }
+          for(FLOAT_PHYS v : plaslist ){ plas_part[p].push_back(v); }
+          for(FLOAT_PHYS v : texplist ){ texp_part[p].push_back(v); }
+          for(FLOAT_PHYS v : tconlist ){ tcon_part[p].push_back(v); }
+        }
         //for(int p : volutags ){
         //  for(FLOAT_PHYS v : rdeglist ){ mtrl_volu[p].push_back(v); };
         //  for(FLOAT_PHYS v : younlist ){ mtrl_volu[p].push_back(v); };
@@ -439,7 +466,7 @@ int main( int argc, char** argv ) {
   //=================================================================
   // Read gmsh files.
   //INT_ORDER pord=1; 
-  //int part_0=1;//FIXME unpartitioned meshes in list_elem[1]
+  //int part_0=1;//FIXME unpartitioned mesh in list_elem[1]
   //FIXME unpartitioned mesh should be in list_elem[0]
   //if( part_n>1 ){ part_0=1; }else{ part_0=0; };
   //FIXME Does not work in parallel
@@ -451,64 +478,90 @@ int main( int argc, char** argv ) {
     std::stringstream ss;
       ss << iname;  ss << "_" << part_i << ".msh" ;
       pname = ss.str();
-    };
+    }
 #if VERB_MAX>3
         if(verbosity>3){
-    std::cout << "Reading " << pname << "..." <<'\n'; };
+    std::cout << "Reading " << pname << "..." <<'\n'; }
 #endif
     E=M->ReadMsh2( pname.c_str() );
 #pragma omp atomic write
     partlist[part_i]=E;
-  };
+  }
   if(!is_part){ is_part=true;//part_0=1;//FIXME This determines first saved file.
     // Partition M[0] based on physical IDs...
-    //std::unordered_map<int,INT_PART> glel_part;
     auto E0=partlist[0];
-    uint cn =uint(E0->elem_conn_n);//printf("**** %u ****",cn);
-        if(verbosity>0){
-    std::cout << "Partitioning " << pname << " by " << M->elms_phid.size()
-      <<" Gmsh volume physical IDs..." <<'\n'; };
-    for(auto pr : M->elms_phid){ part_n++;
-      Elem* E = new Tet( E0->elem_p, pr.second.size());
-      //printf("elem_glid[%u]\n",uint(E->elem_glid.size()));
-      //E->elem_glid=pr.second;
-      //INT_MESH node_i=0;
+    uint Nc =uint(E0->elem_conn_n);//printf("**** %u ****",Nc);
+    //FIXME check if partition by slicing.
+    INT_PART slic_n = svallist[0]*svallist[1]*svallist[2];
+    if( slic_n > 1 ){
+      if(verbosity>0){
+        std::cout << "Partitioning " << pname << " by " << slic_n
+          <<" ("<<svallist[0]<<"x"<<svallist[1]<<"x"<<svallist[2]<<""
+          <<") slices..." <<'\n';
+      }
+      
+      FLOAT_MESH sx =(FLOAT_MESH)svallist[0];
+      FLOAT_MESH sy =(FLOAT_MESH)svallist[1];
+      FLOAT_MESH sz =(FLOAT_MESH)svallist[2];
+      std::valarray<FLOAT_MESH> c(3);// Centroid of element
+      
+      int Dm=E0->mesh_d;
+      //std::cout <<"Elements: "<<E0->elem_n<<", Dimension: "<<Dm<<'\n';
+      for(INT_MESH ie=0; ie < E0->elem_n; ie++){
+        for(uint i=0;i<4;i++){// mean of 4 corner nodes
+          INT_MESH n0 = E0->elem_conn[Nc* ie+i ];
+          for(uint j=0;j<3;j++){
+            c[j] += E0->node_coor[Dm* n0+j ] *0.25;
+          }
+        }
+        INT_PART part_i = 1//FIXME Assumes xyz bounds are (0,1)
+          + INT_PART( fmod(c[0],1.0/sx)*sx*sx )
+          + INT_PART( fmod(c[1],1.0/sy)*sy*sy )*svallist[0]
+          + INT_PART( fmod(c[2],1.0/sz)*sz*sz )*svallist[0]*svallist[1];
+        //std::cout << part_i <<" ";
+      }
+      //std::cout <<'\n';
+      if(true){ std::cerr << "ERROR Slicing not yet implemented.\n"; return 1; }
+    }// Done partitioning by slicing.
+    else{
+      if(verbosity>0){
+          std::cout << "Partitioning " << pname << " by " << M->elms_phid.size()
+            <<" Gmsh volume physical IDs..." <<'\n';
+      }
+      for(auto pr : M->elms_phid){ part_n++;
+        Elem* E = new Tet( E0->elem_p, pr.second.size());
+        //printf("elem_glid[%u]\n",uint(E->elem_glid.size()));
         if(verbosity>2){
-      std::cout << "Making partition " << (part_n-1) <<"..."<<std::endl; };
-      E->node_n=0;
-      for(INT_MESH e=0;e<E->elem_n;e++){
-        auto glel=pr.second[e];
-        E->elem_glid[e]=glel;
-        auto loe0=E0->elem_loid[glel];
-        //printf("%u : %u\n",glel,loe0);
-        //glel_part[pr.second[e]] = part_n;
-        //uint(cn)=uint(E->elem_conn_n);
-        for(uint n=0;n<cn;n++){//printf("%u ",e);
-          auto glno = E0->node_glid[E0->elem_conn[cn* loe0+n]];
-          //E->elem_conn[cn* e+n] = glno;
-          if( E->node_loid.count(glno)==0 ){
-            E->node_loid[glno]=E->node_n; E->node_n++; };
-          E->elem_conn[cn* e+n] = E->node_loid[glno];
-        };
-      };
-      //E->node_n=999;
-      uint d=uint(E->mesh_d);
-      //if(hasther){ d+=1; };//FIXME mesh_d remains 3?, udof_n=4?
-      E->vert_n=E->node_n;
-      E->node_coor.resize(d*E->vert_n);
-      E->node_glid.resize(E->node_n);
-      //for(INT_MESH i=0; i<node_n; i++){ node_glid[i]=; };
-      for( auto pr : E->node_loid ){
-        int glid; INT_MESH l;
-        std::tie(glid,l)=pr;// printf("%u:%i\n",glid,l);
-        E->node_glid[l]=glid;
-        INT_MESH e0=E0->node_loid[glid];
-        for(uint i=0;i<d;i++){
-          E->node_coor[d* l+i ]=E0->node_coor[d* e0+i ]; };
-      };
-      partlist.push_back(E);
-    };
-  };// end partition by gmsh volume physical IDs.
+          std::cout << "Making partition " << (part_n-1) <<"..."<<std::endl; }
+        E->node_n=0;
+        for(INT_MESH e=0;e<E->elem_n;e++){
+          auto glel=pr.second[e];
+          E->elem_glid[e]=glel;
+          auto loe0=E0->elem_loid[glel];
+          //printf("%u : %u\n",glel,loe0);
+          for(uint n=0;n<Nc;n++){//printf("%u ",e);
+            auto glno = E0->node_glid[E0->elem_conn[Nc* loe0+n]];
+            if( E->node_loid.count(glno)==0 ){
+              E->node_loid[glno]=E->node_n; E->node_n++; }
+            E->elem_conn[Nc* e+n] = E->node_loid[glno];
+          }
+        }
+        uint d=uint(E->mesh_d);
+        E->vert_n=E->node_n;
+        E->node_coor.resize(d*E->vert_n);
+        E->node_glid.resize(E->node_n);
+        for( auto pr : E->node_loid ){
+          int glid; INT_MESH l;
+          std::tie(glid,l)=pr;// printf("%u:%i\n",glid,l);
+          E->node_glid[l]=glid;
+          INT_MESH n0=E0->node_loid[glid];
+          for(uint i=0;i<d;i++){
+            E->node_coor[d* l+i ]=E0->node_coor[d* n0+i ]; }
+        }
+        partlist.push_back(E);
+      }
+    }// Done partitioning by gmsh volume physical IDs.
+  }
   M->list_elem = partlist;
   //
 #if VERB_MAX>1

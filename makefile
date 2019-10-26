@@ -186,6 +186,13 @@ ref-plastic : gmsh2fmr-ser mini-ref
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
 	./refera-$(CPUMODELC) -v3 -s2 -c$(NCPU) -p cube/unit1p1n2
 
+test-slice : gmsh2fmr-ser
+	./gmsh2fmr-$(CPUMODELC) -v4 \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 \
+	-xS3 -yzS2 \
+	-M0 -E100e9 -N0.3 -R \
+	-a cube/uhxt10p2/uhxt10p2n;
+
 $(ODIR)/%.$(OEXT) : %.cc *.h
 	echo $(CXX) ... -o $@
 	$(CXX) -c $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
