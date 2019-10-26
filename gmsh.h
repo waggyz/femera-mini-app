@@ -72,7 +72,11 @@ public: Gmsh() : Mesh(Solv::SOLV_CG){
   //  1,// point
   //  8,20,15,13,// more second order
   //  9,10,12,15,15,21,4,5,6,20,35,56 };
-  std::unordered_map<int,std::vector<int>> elms_phid;// elms_phid[physical_id]={el1,el2,...};
+  //
+  // elms_phid[physical_id]={el1,el2,...};
+  std::unordered_map<int,std::vector<int>> elms_phid;
+  std::unordered_map<int,std::vector<int>> elms_slid;// slice ids
+  ints part_slic={1,1,1};
   /*
   typeEleNodes[ 1]= 2;// Linear Bar
   typeEleNodes[ 2]= 3;// Linear Triangle

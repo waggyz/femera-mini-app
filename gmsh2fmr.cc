@@ -48,7 +48,7 @@ int main( int argc, char** argv ) {
   FLOAT_MESH eps_find=1e-6;
   FLOAT_PHYS oriunit=1.0;
   std::vector<FLOAT_PHYS> orislist={};
-  std::vector<int> svallist={1,1,1};
+  //std::vector<int> svallist={1,1,1};
   //int hown_meth = 2;// Algorithm to balance halo node owner
   // 0: first touch (lowest partition number)
   // 1: partition with fewest nodes, first touch tiebreaker (original optimize)
@@ -203,8 +203,8 @@ int main( int argc, char** argv ) {
 #endif
           for(size_t i=0;i<dofslist.size();i++){ printf(" %i",dofslist[i]); }
           printf(", Slices: %i\n",sval);
-          for(size_t i=0;i<svallist.size();i++){ printf(" %i",svallist[i]); }
-          printf(", Slices: %i\n",sval);
+          //for(size_t i=0;i<svallist.size();i++){ printf(" %i",svallist[i]); }
+          //printf(", Slices: %i\n",sval);
         }
 #endif
       if( fix0 | disp | load ){
@@ -231,7 +231,8 @@ int main( int argc, char** argv ) {
       }
       if(slic){
         for(size_t f=0;f<dofslist.size();f++){
-          svallist[(INT_DOF)dofslist[f]] = sval;
+          //svallist[(INT_DOF)dofslist[f]] = sval;
+          M->part_slic[(INT_DOF)dofslist[f]] = sval;
           if( verbosity > 4 ){
             printf("DOF %i Slices: %i\n", dofslist[f], sval ); }
         }
@@ -300,10 +301,10 @@ int main( int argc, char** argv ) {
           for(FLOAT_PHYS v : tconlist ){ tcon_part[p].push_back(v); }
         }
         //for(int p : volutags ){
-        //  for(FLOAT_PHYS v : rdeglist ){ mtrl_volu[p].push_back(v); };
-        //  for(FLOAT_PHYS v : younlist ){ mtrl_volu[p].push_back(v); };
-        //  for(FLOAT_PHYS v : poislist ){ mtrl_volu[p].push_back(v); };
-        //  for(FLOAT_PHYS v : smodlist ){ mtrl_volu[p].push_back(v); };
+        //  for(FLOAT_PHYS v : rdeglist ){ mtrl_volu[p].push_back(v); }
+        //  for(FLOAT_PHYS v : younlist ){ mtrl_volu[p].push_back(v); }
+        //  for(FLOAT_PHYS v : poislist ){ mtrl_volu[p].push_back(v); }
+        //  for(FLOAT_PHYS v : smodlist ){ mtrl_volu[p].push_back(v); }
         //};
         //
         mtrldone=true; hasmatc=false; hasmatp=false; rotrand=false;//, hasther=false;
@@ -311,28 +312,28 @@ int main( int argc, char** argv ) {
         younlist={}; poislist={}; smodlist={}; matclist={};
         tconlist={}; texplist={};
         rdeglist={}; axislist={};
-         parttmp={};// volutmp={};
-      };// Done getting material property set
+        parttmp ={};// volutmp={};
+      }// Done getting material property set
       //
-    };// end argument parsing loop
+    }// end argument parsing loop
 #if VERB_MAX>2
     if(verbosity>2){
       if(mtrl_part.size()>0){
         std::cout << "Partition Physics: "<< std::endl;;
         for (std::pair<int,std::vector<FLOAT_PHYS>> pr : mtrl_part){
           std::cout << "["<< pr.first <<"]";
-          for(FLOAT_PHYS v : pr.second ){ std::cout <<" "<<v; };
+          for(FLOAT_PHYS v : pr.second ){ std::cout <<" "<<v; }
           std::cout << std::endl;
-        }; };
+        } }
         //FIXME add thermal here
 #if 0
     if(mtrl_volu.size()>0){
       std::cout << "Tagged Volume Physics:" << std::endl;
       for (std::pair<int,std::vector<FLOAT_PHYS>> pr : mtrl_volu){
         std::cout << "["<< pr.first <<"]";
-        for(FLOAT_PHYS v : pr.second ){ std::cout <<" "<<v; };
+        for(FLOAT_PHYS v : pr.second ){ std::cout <<" "<<v; }
         std::cout << std::endl;
-      }; };
+      } }
 #endif
     };
 #endif
@@ -343,8 +344,8 @@ int main( int argc, char** argv ) {
       fprintf (stderr, "WARNING Ignoring command line option: %s.\n", argv[i]);
       }else{
       bname = argv[i];
-      };
-    };
+      }
+    }
     if(rotfile){
       //FILE* ofile;
       //ofile = fopen(oriname.c_str(),"r");
@@ -488,20 +489,20 @@ int main( int argc, char** argv ) {
     partlist[part_i]=E;
   }
   if(!is_part){ is_part=true;//part_0=1;//FIXME This determines first saved file.
-    // Partition M[0] based on physical IDs...
+    // Partition M[0] based on physical IDs or slice it...
     auto E0=partlist[0];
     uint Nc =uint(E0->elem_conn_n);//printf("**** %u ****",Nc);
-    //FIXME check if partition by slicing.
-    const INT_PART slic_n = svallist[0]*svallist[1]*svallist[2];
+    // Check if partition by slicing.
+    const INT_PART slic_n = M->part_slic[0]*M->part_slic[1]*M->part_slic[2];
     if( slic_n > 1 ){
       if(verbosity>0){
         std::cout << "Partitioning " << pname << " by " << slic_n
-          <<" ("<<svallist[0]<<"x"<<svallist[1]<<"x"<<svallist[2]<<""
+          <<" ("<<M->part_slic[0]<<"x"<<M->part_slic[1]<<"x"<<M->part_slic[2]<<""
           <<") slices..." <<'\n';
       }
-      const FLOAT_MESH sx =(FLOAT_MESH)svallist[0];
-      const FLOAT_MESH sy =(FLOAT_MESH)svallist[1];
-      const FLOAT_MESH sz =(FLOAT_MESH)svallist[2];
+      const FLOAT_MESH sx =(FLOAT_MESH)M->part_slic[0];
+      const FLOAT_MESH sy =(FLOAT_MESH)M->part_slic[1];
+      const FLOAT_MESH sz =(FLOAT_MESH)M->part_slic[2];
       uint Dm=E0->mesh_d;
       //std::cout <<"Elements: "<<E0->elem_n<<", Dimension: "<<Dm<<'\n';
       for(INT_MESH ie=0; ie < E0->elem_n; ie++){
@@ -514,8 +515,8 @@ int main( int argc, char** argv ) {
         }
         const INT_PART part_i = 1//FIXME Assumes xyz bounds are (0,1)
           + INT_PART( fmod(c[0],1.0/sx)*sx*sx )
-          + INT_PART( fmod(c[1],1.0/sy)*sy*sy )*svallist[0]
-          + INT_PART( fmod(c[2],1.0/sz)*sz*sz )*svallist[0]*svallist[1];
+          + INT_PART( fmod(c[1],1.0/sy)*sy*sy )*M->part_slic[0]
+          + INT_PART( fmod(c[2],1.0/sz)*sz*sz )*M->part_slic[0]*M->part_slic[1];
         //std::cout << part_i <<" ";
       }
       //std::cout <<'\n';
