@@ -516,9 +516,9 @@ int main( int argc, char** argv ) {
           + INT_PART( fmod(c[0],1.0/sx)*sx*sx )
           + INT_PART( fmod(c[1],1.0/sy)*sy*sy )*svallist[0]
           + INT_PART( fmod(c[2],1.0/sz)*sz*sz )*svallist[0]*svallist[1];
-        std::cout << part_i <<" ";
+        //std::cout << part_i <<" ";
       }
-      std::cout <<'\n';
+      //std::cout <<'\n';
       if(true){ std::cerr << "ERROR Slicing not yet implemented.\n"; return 1; }
     }// Done partitioning by slicing.
     else{
