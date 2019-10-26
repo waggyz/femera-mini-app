@@ -492,27 +492,27 @@ int main( int argc, char** argv ) {
     auto E0=partlist[0];
     uint Nc =uint(E0->elem_conn_n);//printf("**** %u ****",Nc);
     //FIXME check if partition by slicing.
-    INT_PART slic_n = svallist[0]*svallist[1]*svallist[2];
+    const INT_PART slic_n = svallist[0]*svallist[1]*svallist[2];
     if( slic_n > 1 ){
       if(verbosity>0){
         std::cout << "Partitioning " << pname << " by " << slic_n
           <<" ("<<svallist[0]<<"x"<<svallist[1]<<"x"<<svallist[2]<<""
           <<") slices..." <<'\n';
       }
-      FLOAT_MESH sx =(FLOAT_MESH)svallist[0];
-      FLOAT_MESH sy =(FLOAT_MESH)svallist[1];
-      FLOAT_MESH sz =(FLOAT_MESH)svallist[2];
+      const FLOAT_MESH sx =(FLOAT_MESH)svallist[0];
+      const FLOAT_MESH sy =(FLOAT_MESH)svallist[1];
+      const FLOAT_MESH sz =(FLOAT_MESH)svallist[2];
       uint Dm=E0->mesh_d;
       //std::cout <<"Elements: "<<E0->elem_n<<", Dimension: "<<Dm<<'\n';
       for(INT_MESH ie=0; ie < E0->elem_n; ie++){
         std::valarray<FLOAT_MESH> c(Dm);// Centroid of element
         for(uint i=0;i<4;i++){// mean of 4 corner nodes
-          INT_MESH n0 = E0->elem_conn[Nc* ie+i ];
+          const INT_MESH n0 = E0->elem_conn[Nc* ie+i ];
           for(uint j=0;j<3;j++){
             c[j] += E0->node_coor[Dm* n0+j ] *0.25;
           }
         }
-        INT_PART part_i = 1//FIXME Assumes xyz bounds are (0,1)
+        const INT_PART part_i = 1//FIXME Assumes xyz bounds are (0,1)
           + INT_PART( fmod(c[0],1.0/sx)*sx*sx )
           + INT_PART( fmod(c[1],1.0/sy)*sy*sy )*svallist[0]
           + INT_PART( fmod(c[2],1.0/sz)*sz*sz )*svallist[0]*svallist[1];
