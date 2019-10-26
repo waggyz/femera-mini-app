@@ -499,15 +499,13 @@ int main( int argc, char** argv ) {
           <<" ("<<svallist[0]<<"x"<<svallist[1]<<"x"<<svallist[2]<<""
           <<") slices..." <<'\n';
       }
-      
       FLOAT_MESH sx =(FLOAT_MESH)svallist[0];
       FLOAT_MESH sy =(FLOAT_MESH)svallist[1];
       FLOAT_MESH sz =(FLOAT_MESH)svallist[2];
-      std::valarray<FLOAT_MESH> c(3);// Centroid of element
-      
-      int Dm=E0->mesh_d;
+      uint Dm=E0->mesh_d;
       //std::cout <<"Elements: "<<E0->elem_n<<", Dimension: "<<Dm<<'\n';
       for(INT_MESH ie=0; ie < E0->elem_n; ie++){
+        std::valarray<FLOAT_MESH> c(3);// Centroid of element
         for(uint i=0;i<4;i++){// mean of 4 corner nodes
           INT_MESH n0 = E0->elem_conn[Nc* ie+i ];
           for(uint j=0;j<3;j++){
