@@ -668,9 +668,13 @@ if [ -z "$CSV_HAS_FINAL_TEST" ]; then
   C=$CPUCOUNT
   for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
     H=${LIST_H[I]}
-    N=1;
+    N="";
     MESHNAME="uhxt"$H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
+    if [ -f $MESHDIR"/uhxt"$H"p"$P"/uhxt"$H"p"$P"n1.msh" ]; then
+      mv $MESHDIR"/uhxt"$H"p"$P"/uhxt"$H"p"$P"n1.msh" \
+      $MESHDIR"/uhxt"$H"p"$P"/uhxt"$H"p"$P"n.msh"
+    fi
     NELEM=`grep -m1 -A1 -i elem $MESH".msh" | tail -n1`
     NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
     MN=$(( $MED_NELEM * 4 / 10 ))
@@ -713,9 +717,13 @@ if [ ! -z "$CSV_HAS_FINAL_TEST" ]; then
   for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
     C=$CPUCOUNT
     H=${LIST_H[I]}
-    N=1;
+    N="";
     MESHNAME="uhxt"$H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
+    if [ -f $MESHDIR"/uhxt"$H"p"$P"/uhxt"$H"p"$P"n1.msh" ]; then
+      mv $MESHDIR"/uhxt"$H"p"$P"/uhxt"$H"p"$P"n1.msh" \
+      $MESHDIR"/uhxt"$H"p"$P"/uhxt"$H"p"$P"n.msh"
+    fi
     NELEM=`grep -m1 -A1 -i elem $MESH".msh" | tail -n1`
     NC=$(( $NELEM / $LARGE_ELEM_PART / $C ))
     N=$(( $NC * $C ))
