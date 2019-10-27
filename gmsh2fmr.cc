@@ -536,7 +536,7 @@ int main( int argc, char** argv ) {
       //printf("elem_glid[%u]\n",uint(E->elem_glid.size()));
       if(verbosity>2){
         std::cout << "Making partition " << part_n
-        <<" with "<< pr.second.size() << "elements"
+        <<" with "<< pr.second.size() << " elements"
         <<"..."<<std::endl; }
       part_n++;
       E->node_n=0;

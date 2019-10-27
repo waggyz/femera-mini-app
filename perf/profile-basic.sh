@@ -596,13 +596,18 @@ fi
       $PERFDIR/mesh-uhxt.sh $LRG_H $P $NTARGET "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
       MESHNAME="uhxt"$LRG_H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$LRG_H"p"$P/$MESHNAME
-      echo "Running "$ITERS" iterations of "$MESHNAME\
-        "("$ELEM_PER_PART" elem/part),"\
-        $REPEAT_TEST_N" times..."
-      for I in $(seq 1 $REPEAT_TEST_N ); do
-        $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
-          -p $MESH >> $CSVFILE
-      done
+      if [ -f $MESH"_"$N".fmr" ]; then
+        echo "Running "$ITERS" iterations of "$MESHNAME\
+          "("$ELEM_PER_PART" elem/part),"\
+          $REPEAT_TEST_N" times..."
+        for I in $(seq 1 $REPEAT_TEST_N ); do
+          $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
+            -p $MESH >> $CSVFILE
+        done
+      else
+        echo ERROR gmsh2fmr failed. Try it again with more memory:
+        echo $PERFDIR/mesh-uhxt.sh $LRG_H $P $NTARGET "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
+      fi
     fi
     ELEM_PER_PART=$(( $ELEM_PER_PART + 1000 ))
     #if [[ $ELEM_PER_PART -gt 20000 ]]; then FINISHED=TRUE; fi
