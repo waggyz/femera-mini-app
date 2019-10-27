@@ -52,16 +52,16 @@ CSVFILE=$PERFDIR/"uhxt-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
 CSVSMALL=$PERFDIR/"small-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
 CSVPROFILE=$PERFDIR/"profile-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
 #
-if [ -f $PROFILE ]; then
-  NODE_MAX=`grep -m1 -i nodes $PROFILE | awk '{print $1}'`
-  UDOF_MAX=$(( $NODE_MAX * 3 ))
-  TET10_MAX=`grep -m1 -i elements $PROFILE | awk '{print $1}'`
-else
+#if [ -f $PROFILE ]; then
+#  NODE_MAX=`grep -m1 -i nodes $PROFILE | awk '{print $1}'`
+#  UDOF_MAX=$(( $NODE_MAX * 3 ))
+#  TET10_MAX=`grep -m1 -i elements $PROFILE | awk '{print $1}'`
+#else
   #FIXME Partitioner uses too much RAM.
-  UDOF_MAX=$(( $MEM / $BYTE_PER_DOF / 2 ))
+  UDOF_MAX=$(( $MEM / $BYTE_PER_DOF / 4 ))
   NODE_MAX=$(( $UDOF_MAX / 3))
   TET10_MAX=$(( $UDOF_MAX / $DOF_PER_ELEM ))
-fi
+#fi
 MDOF_MAX=$(( $UDOF_MAX / 1000000 ))
 echo Largest Test Model: $TET10_MAX $PSTR, $NODE_MAX Nodes, $MDOF_MAX MDOF
 #
