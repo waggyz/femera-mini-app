@@ -657,8 +657,8 @@ int main( int argc, char** argv ) {
   };
 #endif
   if(save_asc | save_bin){
-    if(verbosity==1){ 
-      printf("Saving and appending physics to partitions...\n"); };
+    if(verbosity==1){
+      printf("Saving and appending physics to partitions...\n"); }
 #pragma omp parallel for schedule(static)
     for(int part_i=part_0;part_i<(part_n+part_0);part_i++){
       Phys::vals props={100e9,0.3};//FIXME Should not have defaults here...
@@ -667,11 +667,16 @@ int main( int argc, char** argv ) {
       auto m0=mtrl_part[0];
       std::stringstream ss;
       ss << bname;
-      if(is_part){ ss << "_" << part_i ;};
+      if(is_part){
+        const INT_PART slic_n
+          = M->part_slic[0]*M->part_slic[1]*M->part_slic[2];
+        if( slic_n > 1 ){ ss << slic_n; }
+        ss << "_" << part_i ;
+      }
       ss << ".fmr";
       std::string pname = ss.str();
       if(verbosity>1){
-      std::cout << "Saving part " << pname << "..." <<'\n'; };
+      std::cout << "Saving part " << pname << "..." <<'\n'; }
       //if(save_bin){
       //  M->list_elem[part_i]->SavePartFMR( pname.c_str(), true  ); };
       if(save_asc){
