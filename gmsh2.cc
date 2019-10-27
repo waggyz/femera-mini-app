@@ -51,7 +51,7 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
 #endif
       if(file_type==1){
       std::cout << "WARNING Gmsh binary file format not supported.";
-      mshfile >> onendian; };// Detect binary file endianness
+      mshfile >> onendian; }// Detect binary file endianness
     };// Done reading header
     if(mshstring=="$Nodes"){//---------------------------------------
       mshfile >> number_of_nodes ; node_n=(INT_MESH)number_of_nodes;
@@ -59,7 +59,7 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
       node_glid.resize(node_n);
 #if VERB_MAX>3
       if(verbosity>3){
-      std::cout << "Reading " << number_of_nodes << " nodes..." <<'\n'; };
+      std::cout << "Reading " << number_of_nodes << " nodes..." <<'\n'; }
 #endif
       for(int i=0; i<number_of_nodes; i++){
         mshfile >> node_number >> x>>y>>z ;
@@ -71,8 +71,8 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
         node_coor[mesh_d* i+0]=x;
         node_coor[mesh_d* i+1]=y;
         node_coor[mesh_d* i+2]=z;
-      };
-    };// Done reading nodes
+      }
+    }// Done reading nodes
     if(mshstring=="$Elements"){//------------------------------------
       bool is_volu=false,is_line=false,is_surf=false;
       INT_MESH elxx_i=0;
@@ -137,38 +137,41 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
 #endif
         }
 #if VERB_MAX>3
-      if(verbosity>3){
-        std::cout << elm_number <<" ["<< physical_tag <<"]: "; }
+        if(verbosity>3){
+          std::cout << elm_number <<" ["<< physical_tag <<"]: "; }
 #endif
         for(uint j=0; j<this->typeEleNodes[elm_type]; j++){
           mshfile >> node_number;
 #if VERB_MAX>3
-      if(verbosity>3){ std::cout << node_number <<" "; }
+          if(verbosity>3){ std::cout << node_number <<" "; }
 #endif
           if(is_line){line_nodes_tagged[physical_tag].insert(node_number); }
           if(is_surf){surf_nodes_tagged[physical_tag].insert(node_number); }
           if(is_volu){tet_conn.push_back((INT_MESH)node_number);
           }
         }
-        const INT_PART slic_n
-          = this->part_slic[0]*this->part_slic[1]*this->part_slic[2];
-        if( slic_n > 0 ){
-          const FLOAT_MESH sx =(FLOAT_MESH)M->part_slic[0];
-          const FLOAT_MESH sy =(FLOAT_MESH)M->part_slic[1];
-          const FLOAT_MESH sz =(FLOAT_MESH)M->part_slic[2];
-          uint Dm=3;//E0->mesh_d;
-          INT_MESH ie = tet_conn.size() - this->typeEleNodes[elm_type];
-          std::valarray<FLOAT_MESH> c(Dm);// Centroid of element
-          for(uint i=0;i<4;i++){// mean of 4 corner nodes
-            const INT_MESH n0 = tet_conn[Nc* ie+i ];
-            for(uint j=0;j<3;j++){
-              c[j] += node_coor[Dm* n0+j ] *0.25;
+        if( is_volu ){
+          const INT_PART slic_n
+            = this->part_slic[0]*this->part_slic[1]*this->part_slic[2];
+          if( slic_n > 1 ){
+            const FLOAT_MESH sx =(FLOAT_MESH)this->part_slic[0];
+            const FLOAT_MESH sy =(FLOAT_MESH)this->part_slic[1];
+            const FLOAT_MESH sz =(FLOAT_MESH)this->part_slic[2];
+            uint Dm=mesh_d;
+            std::valarray<FLOAT_MESH> c(Dm);// Centroid of element
+            INT_MESH e = tet_conn.size() - this->typeEleNodes[elm_type];
+            for(uint i=0;i<4;i++){// mean of 4 corner nodes
+              const INT_MESH n = node_loid[ tet_conn[ e+i ] ];
+              for(uint j=0;j<Dm;j++){
+                c[j] += node_coor[Dm* n+j ] *0.25;
+              }
             }
             const INT_PART part_i = 1//FIXME Assumes xyz bounds are (0,1)
               + INT_PART( fmod(c[0],1.0/sx)*sx*sx )
               + INT_PART( fmod(c[1],1.0/sy)*sy*sy )*this->part_slic[0]
               + INT_PART( fmod(c[2],1.0/sz)*sz*sz )
                 *this->part_slic[0]*this->part_slic[1];
+              this->elms_slid[part_i].push_back(elm_number);
           }
         }
         if(this->calc_band && is_volu){//FIXME build row-col index of node nonzeros

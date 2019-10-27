@@ -500,6 +500,7 @@ int main( int argc, char** argv ) {
           <<" ("<<M->part_slic[0]<<"x"<<M->part_slic[1]<<"x"<<M->part_slic[2]<<""
           <<") slices..." <<'\n';
       }
+#if 0
       const FLOAT_MESH sx =(FLOAT_MESH)M->part_slic[0];
       const FLOAT_MESH sy =(FLOAT_MESH)M->part_slic[1];
       const FLOAT_MESH sz =(FLOAT_MESH)M->part_slic[2];
@@ -520,6 +521,7 @@ int main( int argc, char** argv ) {
         //std::cout << part_i <<" ";
       }
       //std::cout <<'\n';
+#endif
       if(true){ std::cerr << "ERROR Slicing not yet implemented.\n"; return 1; }
     }// Done partitioning by slicing.
     else{
