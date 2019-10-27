@@ -492,14 +492,15 @@ int main( int argc, char** argv ) {
     // Partition M[0] based on physical IDs or slice it...
     auto E0=partlist[0];
     uint Nc =uint(E0->elem_conn_n);//printf("**** %u ****",Nc);
+    std::unordered_map<int,std::vector<int>> part_by;
     // Check if partition by slicing.
     const INT_PART slic_n = M->part_slic[0]*M->part_slic[1]*M->part_slic[2];
     if( slic_n > 1 ){
+      part_by=M->elms_slid;
       if(verbosity>0){
         std::cout << "Partitioning " << pname << " by " << slic_n
           <<" ("<<M->part_slic[0]<<"x"<<M->part_slic[1]<<"x"<<M->part_slic[2]<<""
-          <<") slices..." <<'\n';
-      }
+          <<") slices..." <<'\n'; }
 #if 0
       const FLOAT_MESH sx =(FLOAT_MESH)M->part_slic[0];
       const FLOAT_MESH sy =(FLOAT_MESH)M->part_slic[1];
@@ -521,48 +522,48 @@ int main( int argc, char** argv ) {
         //std::cout << part_i <<" ";
       }
       //std::cout <<'\n';
-#endif
       if(true){ std::cerr << "ERROR Slicing not yet implemented.\n"; return 1; }
     }// Done partitioning by slicing.
-    else{
+#endif
+    }else{
+      part_by=M->elms_phid;
       if(verbosity>0){
           std::cout << "Partitioning " << pname << " by " << M->elms_phid.size()
-            <<" Gmsh volume physical IDs..." <<'\n';
-      }
-      for(auto pr : M->elms_phid){ part_n++;
-        Elem* E = new Tet( E0->elem_p, pr.second.size());
-        //printf("elem_glid[%u]\n",uint(E->elem_glid.size()));
-        if(verbosity>2){
-          std::cout << "Making partition " << (part_n-1) <<"..."<<std::endl; }
-        E->node_n=0;
-        for(INT_MESH e=0;e<E->elem_n;e++){
-          auto glel=pr.second[e];
-          E->elem_glid[e]=glel;
-          auto loe0=E0->elem_loid[glel];
-          //printf("%u : %u\n",glel,loe0);
-          for(uint n=0;n<Nc;n++){//printf("%u ",e);
-            auto glno = E0->node_glid[E0->elem_conn[Nc* loe0+n]];
-            if( E->node_loid.count(glno)==0 ){
-              E->node_loid[glno]=E->node_n; E->node_n++; }
-            E->elem_conn[Nc* e+n] = E->node_loid[glno];
-          }
+            <<" Gmsh volume physical IDs..." <<'\n'; }
+    }
+    for(auto pr : part_by ){ part_n++;
+      Elem* E = new Tet( E0->elem_p, pr.second.size());
+      //printf("elem_glid[%u]\n",uint(E->elem_glid.size()));
+      if(verbosity>2){
+        std::cout << "Making partition " << (part_n-1) <<"..."<<std::endl; }
+      E->node_n=0;
+      for(INT_MESH e=0;e<E->elem_n;e++){
+        auto glel=pr.second[e];
+        E->elem_glid[e]=glel;
+        auto loe0=E0->elem_loid[glel];
+        //printf("%u : %u\n",glel,loe0);
+        for(uint n=0;n<Nc;n++){//printf("%u ",e);
+          auto glno = E0->node_glid[E0->elem_conn[Nc* loe0+n]];
+          if( E->node_loid.count(glno)==0 ){
+            E->node_loid[glno]=E->node_n; E->node_n++; }
+          E->elem_conn[Nc* e+n] = E->node_loid[glno];
         }
-        uint d=uint(E->mesh_d);
-        E->vert_n=E->node_n;
-        E->node_coor.resize(d*E->vert_n);
-        E->node_glid.resize(E->node_n);
-        for( auto pr : E->node_loid ){
-          int glid; INT_MESH l;
-          std::tie(glid,l)=pr;// printf("%u:%i\n",glid,l);
-          E->node_glid[l]=glid;
-          INT_MESH n0=E0->node_loid[glid];
-          for(uint i=0;i<d;i++){
-            E->node_coor[d* l+i ]=E0->node_coor[d* n0+i ]; }
-        }
-        partlist.push_back(E);
       }
-    }// Done partitioning by gmsh volume physical IDs.
-  }
+      uint d=uint(E->mesh_d);
+      E->vert_n=E->node_n;
+      E->node_coor.resize(d*E->vert_n);
+      E->node_glid.resize(E->node_n);
+      for( auto pr : E->node_loid ){
+        int glid; INT_MESH l;
+        std::tie(glid,l)=pr;// printf("%u:%i\n",glid,l);
+        E->node_glid[l]=glid;
+        INT_MESH n0=E0->node_loid[glid];
+        for(uint i=0;i<d;i++){
+          E->node_coor[d* l+i ]=E0->node_coor[d* n0+i ]; }
+      }
+      partlist.push_back(E);
+    }
+  }// Done partitioning by gmsh slices or volume physical IDs.
   M->list_elem = partlist;
   //
 #if VERB_MAX>1
