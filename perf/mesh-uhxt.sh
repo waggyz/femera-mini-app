@@ -7,7 +7,7 @@ VERB=1
 #
 DIR=$MESHDIR"/uhxt"$H"p"$P
 if [ ! -d $DIR ]; then
-    mkdir $DIR
+  mkdir $DIR
 fi
 #if [ -f $MESHDIR"/uhxt"$H"p"$P"n1.msh2" ]; then
 #  #mv $MESHDIR"/uhxt"$H"p"$P"n"* $DIR
@@ -21,7 +21,12 @@ fi
 #  mv $DIR"/uhxt"$H"p"$P"n"$N".msh2" $DIR"/uhxt"$H"p"$P"n"$N".msh"
 #fi
 if [ -f $DIR"/uhxt"$H"p"$P"n1.msh" ]; then
-  mv $DIR"/uhxt"$H"p"$P"n1.msh" $DIR"/uhxt"$H"p"$P"n.msh"
+  if [ ! -f $DIR"/uhxt"$H"p"$P"n.msh" ]; then
+    mv $DIR"/uhxt"$H"p"$P"n1.msh" $DIR"/uhxt"$H"p"$P"n.msh"
+  fi
+fi
+if [ ! -f $DIR"/uhxt"$H"p"$P"n1.msh" ]; then
+  cp $DIR"/uhxt"$H"p"$P"n.msh" $DIR"/uhxt"$H"p"$P"n1.msh"
 fi
 if [ ! -f $DIR"/uhxt"$H"p"$P"n.msh" ]; then
   if [ -n "$LOGFILE" ]; then
