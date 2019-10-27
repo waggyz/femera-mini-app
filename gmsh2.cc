@@ -76,6 +76,8 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
     if(mshstring=="$Elements"){//------------------------------------
       bool is_volu=false,is_line=false,is_surf=false;
       INT_MESH elxx_i=0;
+      const INT_PART slic_n
+        = this->part_slic[0]*this->part_slic[1]*this->part_slic[2];
       mshfile >> number_of_elements ;
 #if VERB_MAX>3
       if(verbosity>3){
@@ -117,15 +119,18 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
         for(int j=0; j<number_of_tags; j++){
           mshfile >> tag;
           if(is_volu){
+            // Try to save memory by not setting elms_phid when slicing.
             if(number_of_tags>3){
               if(j==3){//FIXME This is the partition number
                 //FIXME Is this always true?
                 physical_tag = tag;
-                this->elms_phid[tag].push_back(elm_number);
+                if(slic_n<2){
+                  this->elms_phid[tag].push_back(elm_number); }
               }
             }else if(j==0){
                 physical_tag = tag;
-                this->elms_phid[tag].push_back(elm_number);
+                if(slic_n<2){
+                  this->elms_phid[tag].push_back(elm_number); }
               }
           }else if(j==0){// not a volume element
             physical_tag = tag;
@@ -151,8 +156,6 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
           }
         }
         if( is_volu ){
-          const INT_PART slic_n
-            = this->part_slic[0]*this->part_slic[1]*this->part_slic[2];
           if( slic_n > 1 ){
             const FLOAT_MESH sx =(FLOAT_MESH)this->part_slic[0];
             const FLOAT_MESH sy =(FLOAT_MESH)this->part_slic[1];

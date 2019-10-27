@@ -58,7 +58,7 @@ if [ -f $PROFILE ]; then
   TET10_MAX=`grep -m1 -i elements $PROFILE | awk '{print $1}'`
 else
   #FIXME Partitioner uses too much RAM.
-  UDOF_MAX=$(( $MEM / $BYTE_PER_DOF / 2 ))
+  UDOF_MAX=$(( $MEM / $BYTE_PER_DOF ))
   NODE_MAX=$(( $UDOF_MAX / 3))
   TET10_MAX=$(( $UDOF_MAX / $DOF_PER_ELEM ))
 fi
