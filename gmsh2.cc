@@ -138,28 +138,49 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
         }
 #if VERB_MAX>3
       if(verbosity>3){
-        std::cout << elm_number <<" ["<< physical_tag <<"]: "; };
+        std::cout << elm_number <<" ["<< physical_tag <<"]: "; }
 #endif
         for(uint j=0; j<this->typeEleNodes[elm_type]; j++){
           mshfile >> node_number;
 #if VERB_MAX>3
-      if(verbosity>3){ std::cout << node_number <<" "; };
+      if(verbosity>3){ std::cout << node_number <<" "; }
 #endif
-          if(is_line){line_nodes_tagged[physical_tag].insert(node_number); };
-          if(is_surf){surf_nodes_tagged[physical_tag].insert(node_number); };
+          if(is_line){line_nodes_tagged[physical_tag].insert(node_number); }
+          if(is_surf){surf_nodes_tagged[physical_tag].insert(node_number); }
           if(is_volu){tet_conn.push_back((INT_MESH)node_number);
-          };
-        };
+          }
+        }
+        const INT_PART slic_n
+          = this->part_slic[0]*this->part_slic[1]*this->part_slic[2];
+        if( slic_n > 0 ){
+          const FLOAT_MESH sx =(FLOAT_MESH)M->part_slic[0];
+          const FLOAT_MESH sy =(FLOAT_MESH)M->part_slic[1];
+          const FLOAT_MESH sz =(FLOAT_MESH)M->part_slic[2];
+          uint Dm=3;//E0->mesh_d;
+          INT_MESH ie = tet_conn.size() - this->typeEleNodes[elm_type];
+          std::valarray<FLOAT_MESH> c(Dm);// Centroid of element
+          for(uint i=0;i<4;i++){// mean of 4 corner nodes
+            const INT_MESH n0 = tet_conn[Nc* ie+i ];
+            for(uint j=0;j<3;j++){
+              c[j] += node_coor[Dm* n0+j ] *0.25;
+            }
+            const INT_PART part_i = 1//FIXME Assumes xyz bounds are (0,1)
+              + INT_PART( fmod(c[0],1.0/sx)*sx*sx )
+              + INT_PART( fmod(c[1],1.0/sy)*sy*sy )*this->part_slic[0]
+              + INT_PART( fmod(c[2],1.0/sz)*sz*sz )
+                *this->part_slic[0]*this->part_slic[1];
+          }
+        }
         if(this->calc_band && is_volu){//FIXME build row-col index of node nonzeros
-          INT_MESH e = tet_conn.size() - this->typeEleNodes[elm_type];
+          const INT_MESH e = tet_conn.size() - this->typeEleNodes[elm_type];
           for(uint j=0;j<this->typeEleNodes[elm_type]; j++){
-            INT_MESH nj = tet_conn[e+j];
+            const INT_MESH nj = tet_conn[e+j];
             for(uint k=0;k<this->typeEleNodes[elm_type]; k++){
-              INT_MESH nk = tet_conn[e+k];
+              const INT_MESH nk = tet_conn[e+k];
               conn_sets_glid[nj].insert(nk);
               //std::cout << nj <<":"<< nk << "(" << conn_sets_glid.size() << ")" <<'\n';
-            }; };
-        };
+            } }
+        }
 #if VERB_MAX>3
       if(verbosity>3){ std::cout << '\n'; };
 #endif
