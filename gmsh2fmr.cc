@@ -529,13 +529,16 @@ int main( int argc, char** argv ) {
       part_by=M->elms_phid;
       if(verbosity>0){
           std::cout << "Partitioning " << pname << " by " << M->elms_phid.size()
-            <<" Gmsh volume physical IDs..." <<'\n'; }
+            <<" Gmsh volume IDs..." <<'\n'; }
     }
-    for(auto pr : part_by ){ part_n++;
+    for(auto pr : part_by ){
       Elem* E = new Tet( E0->elem_p, pr.second.size());
       //printf("elem_glid[%u]\n",uint(E->elem_glid.size()));
       if(verbosity>2){
-        std::cout << "Making partition " << (part_n-1) <<"..."<<std::endl; }
+        std::cout << "Making partition " << part_n
+        <<" with "<< pr.second.size() << "elements"
+        <<"..."<<std::endl; }
+      part_n++;
       E->node_n=0;
       for(INT_MESH e=0;e<E->elem_n;e++){
         auto glel=pr.second[e];
