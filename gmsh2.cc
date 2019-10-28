@@ -87,32 +87,33 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
         mshfile >> elm_number >> elm_type >> number_of_tags;
         is_volu=false; is_line=false; is_surf=false;
         switch(elm_type){
-          case( 4):{pord=1; is_volu=true; elxx_i++;
-            elem_loid[elm_number]=elem_glid.size();
-            elem_glid.push_back(elm_number);
-            break;}
-          case( 2):{pord=1; is_line=true; break;}
-          case( 3):{pord=1; is_surf=true; break;}
+          // Limear elements
+          case( 4):{ pord=1; is_volu=true; elxx_i++;
+            elem_loid[ elm_number ] = elem_glid.size();
+            elem_glid.push_back( elm_number );
+            break; }
+          case( 2):{ pord=1; is_line=true; break; }
+          case( 3):{ pord=1; is_surf=true; break; }
           // Quadratic elements
-          case(11):{pord=2; is_volu=true; elxx_i++;
-            elem_loid[elm_number]=elem_glid.size();
-            elem_glid.push_back(elm_number);
-            break;}
-          case( 8):{pord=2; is_line=true; break;}
-          case( 9):{pord=2; is_surf=true; break;}
+          case(11):{ pord=2; is_volu=true; elxx_i++;
+            elem_loid[ elm_number ] = elem_glid.size();
+            elem_glid.push_back( elm_number );
+            break; }
+          case( 8):{ pord=2; is_line=true; break; }
+          case( 9):{ pord=2; is_surf=true; break; }
           // Cubic elements
-          case(29):{pord=3; is_volu=true; elxx_i++;
-            elem_loid[elm_number]=elem_glid.size();
-            elem_glid.push_back(elm_number);
-            break;}
-          case(26):{pord=3; is_line=true; break;}
-          case(20):{pord=3; is_surf=true; break;}
-          case(21):{pord=3; is_surf=true; break;}
+          case(29):{ pord=3; is_volu=true; elxx_i++;
+            elem_loid[ elm_number ] = elem_glid.size();
+            elem_glid.push_back( elm_number );
+            break; }
+          case(26):{ pord=3; is_line=true; break; }
+          case(20):{ pord=3; is_surf=true; break ;}
+          case(21):{ pord=3; is_surf=true; break; }
 #if 0
-          case(137):{pord=3; is_volu=true; elxx_i++;
+          case(137):{ pord=3; is_volu=true; elxx_i++;
             elem_loid[elm_number]=elem_glid.size();
             elem_glid.push_back(elm_number);
-            break;}
+            break; }
 #endif
           default:{}
         }
@@ -147,8 +148,7 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
 #endif
           if(is_line){line_nodes_tagged[physical_tag].insert(node_number); }
           if(is_surf){surf_nodes_tagged[physical_tag].insert(node_number); }
-          if(is_volu){tet_conn.push_back((INT_MESH)node_number);
-          }
+          if(is_volu){tet_conn.push_back((INT_MESH)node_number); }
         }
         if( (slic_n > 1) && is_volu ){
           uint Dm=mesh_d;
