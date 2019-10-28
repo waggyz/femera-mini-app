@@ -337,7 +337,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
   echo Running concurrent small model tests...
   export OMP_PLACES=cores; export OMP_PROC_BIND=spread,close; \
   export OMP_NESTED=true; export OMP_MAX_ACTIVE_LEVELS=2; \
-  P=2;
+  # if [ -n "$1" ]; then P=$1; else P=2; fi
   S=100; X=2; N=1;
   #LIST_C=(16 8 4 2 1)
   # Get all factors of the number of cores
