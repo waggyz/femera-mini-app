@@ -39,7 +39,9 @@ if [ ! -f $DIR"/uhxt"$H"p"$P"n.msh" ]; then
 fi
 PARTSTR="METIS"
 if [ $N -lt 1000 ]; then
-  N=$(( $N / $C * $C ))
+  if [ $N -gt $C ]; then
+    N=$(( $N / $C * $C ))
+  fi
   NN=$N
   SLICEARG=""
 else
