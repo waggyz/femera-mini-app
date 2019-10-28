@@ -11,8 +11,8 @@
 #include <set>// This is ordered
 #include <vector>
 #include "gmsh.h"
-int Gmsh::Init(){ return 1; };
-int Gmsh::Iter(){ return 1; };
+int Gmsh::Init(){ return 1; }
+int Gmsh::Iter(){ return 1; }
 Elem* Gmsh::ReadMsh2( const char* fname ){
   INT_ORDER pord=1;
   //std::vector<Elem*> elist;
@@ -47,12 +47,12 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
       if(verbosity>2){
         std::cout << "Reading Gmsh " << version << " "
           << file_type_name[file_type] << " file "<< fname <<"..." <<'\n';
-      };
+      }
 #endif
       if(file_type==1){
       std::cout << "WARNING Gmsh binary file format not supported.";
       mshfile >> onendian; }// Detect binary file endianness
-    };// Done reading header
+    }// Done reading header
     if(mshstring=="$Nodes"){//---------------------------------------
       mshfile >> number_of_nodes ; node_n=(INT_MESH)number_of_nodes;
       node_coor.resize(node_n*mesh_d);
@@ -78,15 +78,15 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
       INT_MESH elxx_i=0;
       const INT_PART slic_n
         = this->part_slic[0]*this->part_slic[1]*this->part_slic[2];
-      mshfile >> number_of_elements ;
+      mshfile >> number_of_elements;
 #if VERB_MAX>3
       if(verbosity>3){
-      std::cout << "Reading " << number_of_elements << " elements..." <<'\n'; };
+      std::cout << "Reading " << number_of_elements << " elements..." <<'\n'; }
 #endif
       //FIXME row-col index of node nonzeros
       std::unordered_map<int,std::set<INT_MESH>> conn_sets_glid;//FIXME
       for(int i=0; i<number_of_elements; i++){
-        mshfile >> elm_number >> elm_type >> number_of_tags ;
+        mshfile >> elm_number >> elm_type >> number_of_tags;
         is_volu=false; is_line=false; is_surf=false;
         switch(elm_type){
           case( 4):{pord=1; is_volu=true; elxx_i++;
@@ -154,10 +154,10 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
           uint Dm=mesh_d;
           Mesh::vals c(0.0,Dm);// Centroid of element
           const INT_MESH e = tet_conn.size() - this->typeEleNodes[elm_type];
-          for(uint i=0;i<4;i++){// mean of 4 corner nodes
+          for(uint i=0;i<4;i++){// Mean of 4 corner nodes
             const INT_MESH n = node_loid[ tet_conn[ e+i ] ];
             for(uint j=0;j<Dm;j++){
-              c[j] += node_coor[Dm* n+j ] *0.25;
+              c[j] += node_coor[Dm* n+j ] * 0.25;
             }
           }
           const FLOAT_MESH sx =(FLOAT_MESH)this->part_slic[0];
@@ -180,21 +180,21 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
             } }
         }
 #if VERB_MAX>3
-      if(verbosity>3){ std::cout << '\n'; };
+      if(verbosity>3){ std::cout << '\n'; }
 #endif
       }// end element loop
       elxx_n=elxx_i;
       if(this->calc_band){//FIXME calculate and report average matrix bandwidth
         FLOAT_MESH nzbw=0.0;
         long int n=0,t=0;
-        for(auto s : conn_sets_glid){ t+=1; n += s.second.size(); };
+        for(auto s : conn_sets_glid){ t+=1; n += s.second.size(); }
         nzbw = FLOAT_MESH(n) / FLOAT_MESH(t);
         std::cout << "Average Node Connectivity: " << (nzbw) << "." <<'\n';
         std::cout << "Average Matrix Bandwidth : " << (3.0*nzbw) << "." <<'\n';
       }
 #if VERB_MAX>3
       if(verbosity>3){
-      std::cout << "Found " << elxx_n << " Tet Elements." <<'\n'; };
+      std::cout << "Found " << elxx_n << " Tet Elements." <<'\n'; }
 #endif
       if(elxx_n>0){
         E = new Tet(pord,elxx_n);
@@ -222,30 +222,30 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
         std::copy(&elem_glid[0   ],
                   &elem_glid[elem_glid.size()],
                   &E->elem_glid[0] );
-      };
-    };// Done reading elements
+      }
+    }// Done reading elements
 #if VERB_MAX>3
     if(verbosity>3){
     // Not supported ------------------------------------------------
-    if(mshstring=="$PhyscialNames"){std::cout << mshstring <<'\n';};
-    if(mshstring=="$Periodic"){std::cout << mshstring <<'\n';};
-    if(mshstring=="$NodeData"){std::cout << mshstring <<'\n';};
-    if(mshstring=="$ElementData"){std::cout << mshstring <<'\n';};
-    if(mshstring=="$ElementNodeData"){std::cout << mshstring <<'\n';};
-    if(mshstring=="$InterpolationScheme"){std::cout << mshstring <<'\n';};
+    if(mshstring=="$PhyscialNames"){std::cout << mshstring <<'\n';}
+    if(mshstring=="$Periodic"){std::cout << mshstring <<'\n';}
+    if(mshstring=="$NodeData"){std::cout << mshstring <<'\n';}
+    if(mshstring=="$ElementData"){std::cout << mshstring <<'\n';}
+    if(mshstring=="$ElementNodeData"){std::cout << mshstring <<'\n';}
+    if(mshstring=="$InterpolationScheme"){std::cout << mshstring <<'\n';}
     //
-    if(mshstring=="$EndMeshFormat"){std::cout << mshstring <<'\n';};
-    if(mshstring=="$EndPhysicalNames"){std::cout << mshstring <<'\n';};
-    if(mshstring=="$EndNodes"){std::cout << mshstring <<'\n';};
-    if(mshstring=="$EndElements"){std::cout << mshstring <<'\n';};
-    if(mshstring=="$EndPeriodic"){std::cout << mshstring <<'\n';};
-    if(mshstring=="$EndNodeData"){std::cout << mshstring <<'\n';};
-    if(mshstring=="$EndElementData"){std::cout << mshstring <<'\n';};
-    if(mshstring=="$EndElementNodeData"){std::cout << mshstring <<'\n';};
-    if(mshstring=="$EndInterpolationScheme"){std::cout << mshstring <<'\n';};
-    };
+    if(mshstring=="$EndMeshFormat"){std::cout << mshstring <<'\n';}
+    if(mshstring=="$EndPhysicalNames"){std::cout << mshstring <<'\n';}
+    if(mshstring=="$EndNodes"){std::cout << mshstring <<'\n';}
+    if(mshstring=="$EndElements"){std::cout << mshstring <<'\n';}
+    if(mshstring=="$EndPeriodic"){std::cout << mshstring <<'\n';}
+    if(mshstring=="$EndNodeData"){std::cout << mshstring <<'\n';}
+    if(mshstring=="$EndElementData"){std::cout << mshstring <<'\n';}
+    if(mshstring=="$EndElementNodeData"){std::cout << mshstring <<'\n';}
+    if(mshstring=="$EndInterpolationScheme"){std::cout << mshstring <<'\n';}
+    }
 #endif
-  };// EOF ==========================================================
+  }// EOF ==========================================================
   {// Scope these local variables
   int n,t; INT_DOF f; FLOAT_SOLV v;
   //
@@ -253,16 +253,16 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
   for( auto r : this->rhs_nvals){// Specific nodes getting nodal forces
     std::tie(n,f,v) = r;
     E->rhs_vals.insert(nfval(E->node_loid[n],f,v));
-  };
+  }
   for( auto r : this->bcs_nvals){// Specific nodes getting fixed u
     std::tie(n,f,v) = r;
     E->bcs_vals.insert(nfval(E->node_loid[n],f,v));
-  };
+  }
   for( auto r : this->bc0_nnf){// Specific nodes getting u=0
     std::tie(n,f) = r;
     //E->bc0_nf.push_back(nfitem(node_glob2loca[n],f));
     E->bc0_nf.insert(nfitem(E->node_loid[n],f));
-  };
+  }
   // Nodes in tagged surfaces/lines (//FIXME check if lines break something
   for( auto r : this->rhs_tvals){// Tagged nodes getting nodal forces
     std::tie(t,f,v) = r;
@@ -270,32 +270,32 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
       E->rhs_vals.insert(nfval(E->node_loid[tn],f,v));
       //std::cout << "tag: " << t << " node: " << n << " dof: " << uint(f)
       //  << " val: " << v <<'\n';
-    };
+    }
     for(auto tn : line_nodes_tagged[t]){
       E->rhs_vals.insert(nfval(E->node_loid[tn],f,v));
-    };
-  };
+    }
+  }
   for( auto r : this->bcs_tvals){// Tagged nodes getting fixed u
     std::tie(t,f,v) = r;
     for(auto tn : surf_nodes_tagged[t]){
       E->bcs_vals.insert(nfval(E->node_loid[tn],f,v));
-    };
+    }
     for(auto tn : line_nodes_tagged[t]){
       E->bcs_vals.insert(nfval(E->node_loid[tn],f,v));
-    };
-  };
+    }
+  }
   for( auto r : this->bc0_tnf){// Tagged nodes getting fixed u
     std::tie(t,f) = r;// std::cout <<"*** I AM HERE ***";
     for(auto tn : surf_nodes_tagged[t]){// std::cout <<"*** and ***";
       //std::cout << tn <<":"<< E->node_loid[tn] <<" ";
       //E->bc0_nf.push_back(nfitem(tn,f));
       E->bc0_nf.insert(nfitem(E->node_loid[tn],f));
-    };
+    }
     for(auto tn : line_nodes_tagged[t]){
       E->bc0_nf.insert(nfitem(E->node_loid[tn],f));
-    };
-  };
+    }
+  }
   }//end scope ======================================================
   //
   return E;
-};
+}
