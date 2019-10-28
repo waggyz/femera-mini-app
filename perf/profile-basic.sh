@@ -582,7 +582,20 @@ fi
   #H=${LIST_H[$(( $TRY_COUNT - 3 ))]};
   ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $MDOFS $LRG_MUDOF | bc`
   if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
+  case $P in
+  1)
   ELEM_PER_PART=1000
+  ELEM_DELTA=1000
+  ;;
+  2)
+  ELEM_PER_PART=1000
+  ELEM_DELTA=1000
+  ;;
+  3)
+  ELEM_PER_PART=500
+  ELEM_DELTA=500
+  ;;
+  esac
   FINISHED=""
   while [ ! $FINISHED ]; do
     NTARGET=$(( $LRG_NELEM / $ELEM_PER_PART ))
@@ -611,9 +624,9 @@ fi
         echo $PERFDIR/mesh-uhxt.sh $LRG_H $P $NTARGET "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
       fi
     fi
-    ELEM_PER_PART=$(( $ELEM_PER_PART + 1000 ))
+    ELEM_PER_PART=$(( $ELEM_PER_PART + $ELEM_DELTA ))
     #if [[ $ELEM_PER_PART -gt 20000 ]]; then FINISHED=TRUE; fi
-    if [[ $N -lt $(( $MED_PART * 2 )) ]]; then FINISHED=TRUE; fi
+    if [[ $N -lt $(( $MED_PART * 3 / 2 )) ]]; then FINISHED=TRUE; fi
     if [[ $N -lt $(( $C )) ]]; then FINISHED=TRUE; fi
   done
   # echo "Large Model Partitioning Profile" >> $PROFILE
