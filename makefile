@@ -116,7 +116,7 @@ _dummy := $(shell mkdir -p mini.o test $(TESTDIR) $(PERFDIR))
 
 .SILENT :
 
-all : gmsh2fmr-ser mini-omp mini-omq mini-mmp mini-mmq
+all : gmsh2fmr mini-omp mini-omq mini-mmp mini-mmq
 
 test : all
 	./gmsh2fmr-$(CPUMODELC) -v3 \
@@ -141,7 +141,7 @@ test : all
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
 	./femerq-$(CPUMODELC) -v1 -c$(NCPU) -p cube/unst19p1n16
 
-test-iso : mini-omp
+test-iso : mini-omp gmsh2fmr
 	./gmsh2fmr-$(CPUMODELC) -v1 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 \
 	-M0 -E100e9 -N0.3 -ap cube/unst19p1n16;
@@ -156,7 +156,7 @@ test-mmp : mini-mmp
 	./femera-mmp-$(CPUMODELC) -v2 -m8 -n2 -c2 \
 	-p cube/unst19p1n16
 
-test-plastic : gmsh2fmr-ser mini-omp
+test-plastic :  gmsh2fmr mini-omp
 	./gmsh2fmr-$(CPUMODELC) -v1 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.005 \
 	-M0 -E66.2e9 -N0.33 -J305e6 -J100e6 \
@@ -166,7 +166,7 @@ test-plastic : gmsh2fmr-ser mini-omp
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
 	./femera-$(CPUMODELC) -v3 -s2 -c1 -p cube/unit1p1n2
 
-test-plastic-20 : gmsh2fmr-ser mini-omp
+test-plastic-20 :  gmsh2fmr mini-omp
 	./gmsh2fmr-$(CPUMODELC) -v1 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.02 \
 	-M0 -E66.2e9 -N0.33 -J305e6 -J100e6 \
@@ -176,7 +176,7 @@ test-plastic-20 : gmsh2fmr-ser mini-omp
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
 	./femera-$(CPUMODELC) -v2 -s2 -d2 -I20 -c$(NCPU) -p cube/unst19p1n16
 
-ref-plastic : gmsh2fmr-ser mini-ref
+ref-plastic :  gmsh2fmr mini-ref
 	./gmsh2fmr-$(CPUMODELC) -v1 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.005 \
 	-M0 -E66.2e9 -N0.33 -J305e6 -J100e6 \
@@ -186,7 +186,7 @@ ref-plastic : gmsh2fmr-ser mini-ref
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
 	./refera-$(CPUMODELC) -v3 -s2 -c$(NCPU) -p cube/unit1p1n2
 
-test-slice : gmsh2fmr-ser mini-omp
+test-slice :  gmsh2fmr mini-omp
 	./gmsh2fmr-$(CPUMODELC) -v4 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 \
 	-xS3 -yzS2 \
@@ -246,7 +246,10 @@ base-omp : test-scripts femerb-$(CPUMODELC)
 
 mini-hyb : test-scripts femera-$(CPUMODEL)-hyb
 
-gmsh2fmr-ser : gmsh2fmr-$(CPUMODELC) test-scripts
+gmsh2fmr : gmsh2fmr-ser-$(CPUMODELC)
+	cp gmsh2fmr-ser-$(CPUMODELC) gmsh2fmr-$(CPUMODELC)
+
+gmsh2fmr-ser : test-scripts gmsh2fmr-ser-$(CPUMODELC)
 
 femera-$(CPUMODELC) : $(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	echo $(CXX) ... -o femera-$(CPUMODELC)
@@ -305,27 +308,33 @@ femera-$(CPUMODEL)-hyb : $(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-min
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
 	./femera-$(CPUMODEL)-hyb -v2 -c$(NCPU) -p cube/unst19p1n16
 
-gmsh2fmr-$(CPUMODELC) : $(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT)
+gmsh2fmr-BROKEN-$(CPUMODELC) : $(OBJS) $(ODIR)/gmsh2.$(OEXT) $(ODIR)/gmsh2fmr.$(OEXT)
 	echo $(CXX) ... -o gmsh2fmr-$(CPUMODELC)
+	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
+	$(OBJS) $(ODIR)/gmsh2.$(OEXT) $(ODIR)/gmsh2fmr.$(OEXT) \
+	-DOMP_SCHEDULE=static -DOMP_NESTED=true \
+	-o gmsh2fmr-$(CPUMODELC) ;
+
+gmsh2fmr-ser-$(CPUMODELC) : $(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT)
+	echo $(CXX) ... -o gmsh2fmr-ser-$(CPUMODELC)
 	$(CXX) $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT) \
-	-o gmsh2fmr-$(CPUMODELC) ;
+	-o gmsh2fmr-ser-$(CPUMODELC) ;
 
 profile : profile-basic profile-small profile-large
 
-profile-basic : mini-omq gmsh2fmr-ser
+profile-basic : mini-omq gmsh2fmr
 	$(PERFDIR)/profile-basic.sh > $(PERFDIR)/profile-basic-$(CPUMODELC).log
 
-profile-small : mini-omq gmsh2fmr-ser
+profile-small : mini-omq gmsh2fmr
 	$(PERFDIR)/profile-small.sh > $(PERFDIR)/profile-small-$(CPUMODELC).log
 
-profile-large : mini-omq gmsh2fmr-ser
+profile-large : mini-omq gmsh2fmr
 	$(PERFDIR)/profile-large.sh > $(PERFDIR)/profile-large-$(CPUMODELC).log
 
 unit-test : test-scripts test-gmsh
 
-test-scripts : $(TESTDIR)/cpucount.sh.err $(TESTDIR)/cpumodel.sh.err \
-$(TESTDIR)/cpusimd.sh.err
+test-scripts : $(TESTDIR)/cpucount.sh.err $(TESTDIR)/cpumodel.sh.err $(TESTDIR)/cpusimd.sh.err
 
 $(TESTDIR)/%.sh.err : %.sh unit-test/%.sh.chk
 	unit-test/$<.chk > $(TESTDIR)/$<.err ;

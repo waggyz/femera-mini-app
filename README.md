@@ -9,7 +9,7 @@ First, run some system tests.
 
  * `make unit-test`
 
-Then, build and check the executable `femera-<cpumodel>-gcc` using the make target `femera-mini`.  If you have Gmsh 2.x mesh files of your models, you'll need a mesh file format converter. *WARNING* The OpenMP converter does not work (race conditions). Instead, compile the single-core serial converter `gmsh2fmr-ser`. These, and a minimal, quiet version of femera, `femerq`,  can be built with:
+Then, build and check the executable `femera-<cpumodel>-gcc` using the make target `femera-mini`.  If you have Gmsh 2.x mesh files of your models, you'll need a mesh file format converter. *WARNING* The OpenMP converter does not work (race conditions). Instead, compile the single-core serial converter `gmsh2fmr`. These, a minimal, quiet version of femera, `femerq`, can be built with:
 
 
 ```bash
