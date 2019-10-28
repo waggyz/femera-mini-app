@@ -26,7 +26,9 @@ if [ -f $DIR"/uhxt"$H"p"$P"n1.msh" ]; then
   fi
 fi
 if [ ! -f $DIR"/uhxt"$H"p"$P"n1.msh" ]; then
-  cp $DIR"/uhxt"$H"p"$P"n.msh" $DIR"/uhxt"$H"p"$P"n1.msh"
+  if [ -f $DIR"/uhxt"$H"p"$P"n.msh" ]; then
+    cp $DIR"/uhxt"$H"p"$P"n.msh" $DIR"/uhxt"$H"p"$P"n1.msh"
+  fi
 fi
 if [ ! -f $DIR"/uhxt"$H"p"$P"n.msh" ]; then
   if [ -n "$LOGFILE" ]; then
