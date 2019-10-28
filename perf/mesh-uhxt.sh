@@ -51,6 +51,9 @@ else
   PARTSTR="slicing "$SX"x"$SY"x"$SZ""
   NN=""
   SLICEARG="-xS"$SX" -yS"$SY" -zS"$SZ
+  if [ -f $DIR"/uhxt"$H"p"$P"n"$N"_1.fmr" ]; then
+    find $DIR -name "uhxt"$H"p"$P"n"$N"*.fmr" ! -newermt 2019-10-28 ! -type d -delete
+  fi
 fi
 if [ ! -f $DIR"/uhxt"$H"p"$P"n"$N".msh" ]; then
   if [ $N -lt 1000 ]; then
