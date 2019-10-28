@@ -163,10 +163,10 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
           const FLOAT_MESH sx =(FLOAT_MESH)this->part_slic[0];
           const FLOAT_MESH sy =(FLOAT_MESH)this->part_slic[1];
           const FLOAT_MESH sz =(FLOAT_MESH)this->part_slic[2];
-          const INT_PART part_i = 1//FIXME Assumes xyz bounds are (0,1)
-            + INT_PART( c[0]*sx)
-            + INT_PART( c[1]*sy)*this->part_slic[0]
-            + INT_PART( c[2]*sz)*this->part_slic[0]*this->part_slic[1];
+          const INT_PART part_i = 1
+            + INT_PART( c[0]*sx )//FIXME Assumes xyz bounds are [0,1]
+            + INT_PART( c[1]*sy )*this->part_slic[0]
+            + INT_PART( c[2]*sz )*this->part_slic[0]*this->part_slic[1];
             this->elms_slid[part_i].push_back(elm_number);
         }
         if(this->calc_band && is_volu){//FIXME build row-col index of node nonzeros
