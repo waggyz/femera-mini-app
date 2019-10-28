@@ -15,7 +15,6 @@ int Gmsh::Init(){ return 1; }
 int Gmsh::Iter(){ return 1; }
 Elem* Gmsh::ReadMsh2( const char* fname ){
   INT_ORDER pord=1;
-  //std::vector<Elem*> elist;
   Elem* E=new Tet(1);// This should be re-newed before being returned.
   //
   // Parse the file into these variables.
@@ -36,8 +35,7 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
   std::unordered_map<int,INT_MESH> elem_loid;
   //
   std::unordered_map<int, std::set<int>>
-    line_nodes_tagged, surf_nodes_tagged;//, volu_nodes_tagged,
-  //  volu_elems_tagged, volu_elems_parted;
+    line_nodes_tagged, surf_nodes_tagged;
   //
   std::ifstream mshfile(fname);
   while( mshfile >> mshstring ){//===================================
@@ -110,10 +108,12 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
           case(26):{pord=3; is_line=true; break;}
           case(20):{pord=3; is_surf=true; break;}
           case(21):{pord=3; is_surf=true; break;}
-          //case(137):{pord=3; is_volu=true; elxx_i++;
-          //  elem_loid[elm_number]=elem_glid.size();
-          //  elem_glid.push_back(elm_number);
-          //  break;}
+#if 0
+          case(137):{pord=3; is_volu=true; elxx_i++;
+            elem_loid[elm_number]=elem_glid.size();
+            elem_glid.push_back(elm_number);
+            break;}
+#endif
           default:{}
         }
         for(int j=0; j<number_of_tags; j++){
@@ -198,22 +198,14 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
 #endif
       if(elxx_n>0){
         E = new Tet(pord,elxx_n);
-        //std::copy(&tet_conn[0   ],
-        //          &tet_conn[elxx_n*E->elem_conn_n],
-        //          &E->elem_conn[0] );
         for(INT_MESH i=0; i<tet_conn.size(); i++){
           E->elem_conn[i]=node_loid[tet_conn[i]];
         }
-        //
         E->mesh_d=mesh_d;
         E->node_n=node_n;
         E->vert_n=node_n;
         E->node_coor.resize(node_coor.size());
         E->node_coor=node_coor;
-        //E->node_coor.resize(node_coor.size());//FIXED Try simple assignment?
-        //std::copy(&node_coor[0   ],
-        //          &node_coor[mesh_d*node_n],
-        //          &E->node_coor[0] );
         E->node_glid.resize(node_glid.size());
         E->node_glid=node_glid;
         E->node_loid=node_loid;
@@ -260,7 +252,6 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
   }
   for( auto r : this->bc0_nnf){// Specific nodes getting u=0
     std::tie(n,f) = r;
-    //E->bc0_nf.push_back(nfitem(node_glob2loca[n],f));
     E->bc0_nf.insert(nfitem(E->node_loid[n],f));
   }
   // Nodes in tagged surfaces/lines (//FIXME check if lines break something
@@ -288,7 +279,6 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
     std::tie(t,f) = r;// std::cout <<"*** I AM HERE ***";
     for(auto tn : surf_nodes_tagged[t]){// std::cout <<"*** and ***";
       //std::cout << tn <<":"<< E->node_loid[tn] <<" ";
-      //E->bc0_nf.push_back(nfitem(tn,f));
       E->bc0_nf.insert(nfitem(E->node_loid[tn],f));
     }
     for(auto tn : line_nodes_tagged[t]){
