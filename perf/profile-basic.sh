@@ -390,7 +390,7 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
     if [ $X -gt 1 ]; then
       C=$(( $CPUCOUNT / $X ))
       N=$C;
-      if [ $N -gt 0 ]
+      if [ $N -gt 0 ]; then
         if [ -f $CSVSMALL ]; then
           if [ $(( $NDOF * $X )) -lt $(( $THIS_MAX )) ]; then
           HAS_TEST=`awk -F, -v n=$NNODE -v c=$C\
