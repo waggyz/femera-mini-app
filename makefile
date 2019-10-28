@@ -191,10 +191,10 @@ test-slice : gmsh2fmr-ser mini-omp
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 \
 	-xS3 -yzS2 \
 	-M0 -E100e9 -N0.3 -R \
-	-a cube/uhxt10p2/uhxt10p2n;
-	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/uhxt10p2/uhxt10p2n12
+	-a cube/uhxt26p2/uhxt26p2n;
+	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/uhxt26p2/uhxt26p2n12
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
-	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/uhxt10p2/uhxt10p2n12
+	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/uhxt26p2/uhxt26p2n12
 
 $(ODIR)/%.$(OEXT) : %.cc *.h
 	echo $(CXX) ... -o $@

@@ -135,11 +135,6 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
           }else if(j==0){// not a volume element
             physical_tag = tag;
           }
-#if 0
-          if(j==0){ physical_tag = tag;
-            if(is_volu){ this->elms_phid[tag].push_back(elm_number); }
-          }//FIXME Is this always true?
-#endif
         }
 #if VERB_MAX>3
         if(verbosity>3){
@@ -155,27 +150,24 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
           if(is_volu){tet_conn.push_back((INT_MESH)node_number);
           }
         }
-        if( is_volu ){
-          if( slic_n > 1 ){
-            const FLOAT_MESH sx =(FLOAT_MESH)this->part_slic[0];
-            const FLOAT_MESH sy =(FLOAT_MESH)this->part_slic[1];
-            const FLOAT_MESH sz =(FLOAT_MESH)this->part_slic[2];
-            uint Dm=mesh_d;
-            std::valarray<FLOAT_MESH> c(Dm);// Centroid of element
-            INT_MESH e = tet_conn.size() - this->typeEleNodes[elm_type];
-            for(uint i=0;i<4;i++){// mean of 4 corner nodes
-              const INT_MESH n = node_loid[ tet_conn[ e+i ] ];
-              for(uint j=0;j<Dm;j++){
-                c[j] += node_coor[Dm* n+j ] *0.25;
-              }
+        if( (slic_n > 1) && is_volu ){
+          uint Dm=mesh_d;
+          Mesh::vals c(0.0,Dm);// Centroid of element
+          const INT_MESH e = tet_conn.size() - this->typeEleNodes[elm_type];
+          for(uint i=0;i<4;i++){// mean of 4 corner nodes
+            const INT_MESH n = node_loid[ tet_conn[ e+i ] ];
+            for(uint j=0;j<Dm;j++){
+              c[j] += node_coor[Dm* n+j ] *0.25;
             }
-            const INT_PART part_i = 1//FIXME Assumes xyz bounds are (0,1)
-              + INT_PART( fmod(c[0],1.0/sx)*sx*sx )
-              + INT_PART( fmod(c[1],1.0/sy)*sy*sy )*this->part_slic[0]
-              + INT_PART( fmod(c[2],1.0/sz)*sz*sz )
-                *this->part_slic[0]*this->part_slic[1];
-              this->elms_slid[part_i].push_back(elm_number);
           }
+          const FLOAT_MESH sx =(FLOAT_MESH)this->part_slic[0];
+          const FLOAT_MESH sy =(FLOAT_MESH)this->part_slic[1];
+          const FLOAT_MESH sz =(FLOAT_MESH)this->part_slic[2];
+          const INT_PART part_i = 1//FIXME Assumes xyz bounds are (0,1)
+            + INT_PART( c[0]*sx)
+            + INT_PART( c[1]*sy)*this->part_slic[0]
+            + INT_PART( c[2]*sz)*this->part_slic[0]*this->part_slic[1];
+            this->elms_slid[part_i].push_back(elm_number);
         }
         if(this->calc_band && is_volu){//FIXME build row-col index of node nonzeros
           const INT_MESH e = tet_conn.size() - this->typeEleNodes[elm_type];
@@ -190,7 +182,7 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
 #if VERB_MAX>3
       if(verbosity>3){ std::cout << '\n'; };
 #endif
-      };// end element loop
+      }// end element loop
       elxx_n=elxx_i;
       if(this->calc_band){//FIXME calculate and report average matrix bandwidth
         FLOAT_MESH nzbw=0.0;
@@ -199,7 +191,7 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
         nzbw = FLOAT_MESH(n) / FLOAT_MESH(t);
         std::cout << "Average Node Connectivity: " << (nzbw) << "." <<'\n';
         std::cout << "Average Matrix Bandwidth : " << (3.0*nzbw) << "." <<'\n';
-      };
+      }
 #if VERB_MAX>3
       if(verbosity>3){
       std::cout << "Found " << elxx_n << " Tet Elements." <<'\n'; };
@@ -211,7 +203,7 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
         //          &E->elem_conn[0] );
         for(INT_MESH i=0; i<tet_conn.size(); i++){
           E->elem_conn[i]=node_loid[tet_conn[i]];
-        };
+        }
         //
         E->mesh_d=mesh_d;
         E->node_n=node_n;

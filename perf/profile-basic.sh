@@ -390,49 +390,51 @@ if [ ! -f $CSVSMALL ]; then # Run small model tests
     if [ $X -gt 1 ]; then
       C=$(( $CPUCOUNT / $X ))
       N=$C;
-      if [ -f $CSVSMALL ]; then
-        if [ $(( $NDOF * $X )) -lt $(( $THIS_MAX )) ]; then
-        HAS_TEST=`awk -F, -v n=$NNODE -v c=$C\
-          '($2==n)&&($9==c){print $4; exit}' $CSVSMALL`
+      if [ $N -gt 0 ]
+        if [ -f $CSVSMALL ]; then
+          if [ $(( $NDOF * $X )) -lt $(( $THIS_MAX )) ]; then
+          HAS_TEST=`awk -F, -v n=$NNODE -v c=$C\
+            '($2==n)&&($9==c){print $4; exit}' $CSVSMALL`
+          fi
+        else
+          HAS_TEST=""
         fi
-      else
-        HAS_TEST=""
-      fi
-      if [ -z "$HAS_TEST" ]; then
-        M=$(( $S * $X ))
-        if [ $M -gt 10000 ]; then
-          MC=$(( 10000 / $CPUCOUNT ))
-          M=$(( $MC * $CPUCOUNT ));
-          S=$(( $M / $X ))
-        fi
-        MESHNAME="uhxt"$H"p"$P"n"$N
-        MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
-        #echo "Partitioning and converting "$MESHNAME", if necessary..."
-        $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
-        if [ -f $MESH"_1.fmr" ]; then
-          echo "Running "$REPEAT_TEST_N" repeats of "$S"x"$X" concurrent "$NDOF" DOF models..."
-          START=`date +%s.%N`
-          #
-          for I in $(seq 1 $REPEAT_TEST_N ); do
-            $EXEDIR"/femera-mmq-"$CPUMODEL"-"$CSTR -v1 -m$M -n$X -c$N \
-              -i$ITERS -r$RTOL -p $MESH >> $CSVSMALL
-          done
-          #
-          STOP=`date +%s.%N`
-          TIME_SEC=`printf "%f-%f\n" $STOP $START | bc`
-          #
-          MDOF_TOTAL=`awk -F, -v n=$NNODE -v c=$N -v dof=0\
-          '($2==n)&&($9==c){dof=dof+$3*$5;}\
-            END{print dof/1000000;}' $CSVSMALL`
-          TOTAL_MDOFS=`printf "%f/%f\n" $MDOF_TOTAL $TIME_SEC | bc`
-          echo "Overall: "$TOTAL_MDOFS" MDOF/s ("$MDOF_TOTAL\
-          "MDOF in "$TIME_SEC" sec)"
-          #
-          SOLVE_MDOFS=`awk -F, -v nnode=$NNODE -v c=$C -v nrun=0 -v mdofs=0 -v x=$X\
-          '($2==nnode)&&($9==c){nrun=nrun+1;mdofs=mdofs+$13;}\
-            END{print mdofs/nrun/1000000*x;}' $CSVSMALL`
-          echo " Solver: "$SOLVE_MDOFS" MDOF/s at "$X"x "$NDOF" DOF"\
-            "models ("$(( $X * $NDOF ))" DOF concurrent)..." 
+        if [ -z "$HAS_TEST" ]; then
+          M=$(( $S * $X ))
+          if [ $M -gt 10000 ]; then
+            MC=$(( 10000 / $CPUCOUNT ))
+            M=$(( $MC * $CPUCOUNT ));
+            S=$(( $M / $X ))
+          fi
+          MESHNAME="uhxt"$H"p"$P"n"$N
+          MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
+          #echo "Partitioning and converting "$MESHNAME", if necessary..."
+          $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
+          if [ -f $MESH"_1.fmr" ]; then
+            echo "Running "$REPEAT_TEST_N" repeats of "$S"x"$X" concurrent "$NDOF" DOF models..."
+            START=`date +%s.%N`
+            #
+            for I in $(seq 1 $REPEAT_TEST_N ); do
+              $EXEDIR"/femera-mmq-"$CPUMODEL"-"$CSTR -v1 -m$M -n$X -c$N \
+                -i$ITERS -r$RTOL -p $MESH >> $CSVSMALL
+            done
+            #
+            STOP=`date +%s.%N`
+            TIME_SEC=`printf "%f-%f\n" $STOP $START | bc`
+            #
+            MDOF_TOTAL=`awk -F, -v n=$NNODE -v c=$N -v dof=0\
+            '($2==n)&&($9==c){dof=dof+$3*$5;}\
+              END{print dof/1000000;}' $CSVSMALL`
+            TOTAL_MDOFS=`printf "%f/%f\n" $MDOF_TOTAL $TIME_SEC | bc`
+            echo "Overall: "$TOTAL_MDOFS" MDOF/s ("$MDOF_TOTAL\
+            "MDOF in "$TIME_SEC" sec)"
+            #
+            SOLVE_MDOFS=`awk -F, -v nnode=$NNODE -v c=$C -v nrun=0 -v mdofs=0 -v x=$X\
+            '($2==nnode)&&($9==c){nrun=nrun+1;mdofs=mdofs+$13;}\
+              END{print mdofs/nrun/1000000*x;}' $CSVSMALL`
+            echo " Solver: "$SOLVE_MDOFS" MDOF/s at "$X"x "$NDOF" DOF"\
+              "models ("$(( $X * $NDOF ))" DOF concurrent)..." 
+          fi
         fi
       fi
     fi
