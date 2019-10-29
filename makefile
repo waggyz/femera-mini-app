@@ -258,8 +258,8 @@ base-omp : test-scripts femerb-$(CPUMODELC)
 
 mini-hyb : test-scripts femera-$(CPUMODEL)-hyb
 
-gmsh2fmr : gmsh2fmr-omp
-	echo ok.
+gmsh2fmr : gmsh2fmr-ser
+	cp gmsh2fmr-ser-$(CPUMODELC) gmsh2fmr-$(CPUMODELC)
 
 femera-$(CPUMODELC) : $(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	echo $(CXX) ... -o femera-$(CPUMODELC)
@@ -327,7 +327,7 @@ gmsh2fmr-omp-$(CPUMODELC) : $(OBJS) $(ODIR)/gmsh2.$(OEXT) $(ODIR)/gmsh2fmr.$(OEX
 	echo $(CXX) ... -o gmsh2fmr-$(CPUMODELC)
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(OBJS) $(ODIR)/gmsh2.$(OEXT) $(ODIR)/gmsh2fmr.$(OEXT) \
-	-o gmsh2fmr-$(CPUMODELC) ;
+	-o gmsh2fmr-omp-$(CPUMODELC) ;
 
 gmsh2fmr-ser-$(CPUMODELC) : $(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT)
 	echo $(CXX) ... -o gmsh2fmr-ser-$(CPUMODELC)
