@@ -40,7 +40,7 @@ TARGET_TEST_S=10;# Try for S sec/run
 REPEAT_TEST_N=6;# Repeat each test N times
 ITERS_MIN=10;
 #LARGE_PART_MAX_MUDOF=27;
-LARGE_PART_MAX_MUDOF=55;
+#LARGE_PART_MAX_MUDOF=55;
 export OMP_SCHEDULE=static
 export OMP_PLACES=cores
 export OMP_PROC_BIND=spread
@@ -65,6 +65,7 @@ fi
 MDOF_MAX=$(( $UDOF_MAX / 1000000 ))
 echo Largest Test Model: $TET10_MAX $PSTR, $NODE_MAX Nodes, $MDOF_MAX MDOF
 #
+LARGE_PART_MAX_MUDOF=$(( MDOF_MAX / 10 ));
 case $P in
 1)
   NOMI_N=20
