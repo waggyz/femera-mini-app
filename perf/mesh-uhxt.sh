@@ -9,27 +9,22 @@ DIR=$MESHDIR"/uhxt"$H"p"$P
 if [ ! -d $DIR ]; then
   mkdir $DIR
 fi
-#if [ -f $MESHDIR"/uhxt"$H"p"$P"n1.msh2" ]; then
-#  #mv $MESHDIR"/uhxt"$H"p"$P"n"* $DIR
-#  #echo $MESHDIR"/uhxt"$H"p"$P"n"* | xargs mv -t $DIR
-#  find $MESHDIR -mindepth 1 -maxdepth 1 -name "uhxt$Hp$Pn*" -exec mv -t $DIR {} +
-#fi
-#if [ -f $DIR"/uhxt"$H"p"$P"n1.msh2" ]; then
-#  mv $DIR"/uhxt"$H"p"$P"n1.msh2" $DIR"/uhxt"$H"p"$P"n1.msh"
-#fi
-#if [ -f $DIR"/uhxt"$H"p"$P"n"$N".msh2" ]; then
-#  mv $DIR"/uhxt"$H"p"$P"n"$N".msh2" $DIR"/uhxt"$H"p"$P"n"$N".msh"
-#fi
 if [ -f $DIR"/uhxt"$H"p"$P"n1.msh" ]; then
   if [ ! -f $DIR"/uhxt"$H"p"$P"n.msh" ]; then
     mv $DIR"/uhxt"$H"p"$P"n1.msh" $DIR"/uhxt"$H"p"$P"n.msh"
   fi
 fi
-if [ ! -f $DIR"/uhxt"$H"p"$P"n1.msh" ]; then
-  if [ -f $DIR"/uhxt"$H"p"$P"n.msh" ]; then
-    cp $DIR"/uhxt"$H"p"$P"n.msh" $DIR"/uhxt"$H"p"$P"n1.msh"
+if [ $H -lt 75 ]; then
+  if [ ! -f $DIR"/uhxt"$H"p"$P"n1.msh" ]; then
+    if [ -f $DIR"/uhxt"$H"p"$P"n.msh" ]; then
+      cp $DIR"/uhxt"$H"p"$P"n.msh" $DIR"/uhxt"$H"p"$P"n1.msh"
+    fi
   fi
 fi
+export OMP_SCHEDULE=static
+export OMP_PLACES=cores
+export OMP_PROC_BIND=spread
+export OMP_NUM_THREADS=$C
 if [ ! -f $DIR"/uhxt"$H"p"$P"n.msh" ]; then
   if [ -n "$LOGFILE" ]; then
     echo "Meshing uhxt"$H"p"$P"n.msh..." >> "$LOGFILE"
@@ -55,9 +50,6 @@ else
   PARTSTR="slicing "$SX"x"$SY"x"$SZ""
   NN=""
   SLICEARG="-xS"$SX" -yS"$SY" -zS"$SZ
-  if [ -f $DIR"/uhxt"$H"p"$P"n"$N"_1.fmr" ]; then
-    find $DIR -name "uhxt"$H"p"$P"n"$N"*.fmr" ! -newermt 2019-10-28 ! -type d -delete
-  fi
 fi
 if [ ! -f $DIR"/uhxt"$H"p"$P"n"$N".msh" ]; then
   if [ $N -lt 1000 ]; then

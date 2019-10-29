@@ -488,17 +488,21 @@ int main( int argc, char** argv ) {
           std::cout << "Partitioning " << pname << " by " << M->elms_phid.size()
             <<" Gmsh volume IDs..." <<'\n'; }
     }
-    for(auto pr : part_by ){
-      Elem* E = new Tet( E0->elem_p, pr.second.size());
+#pragma omp parallel for schedule(static)
+    for(uint p=0; p<part_by.size(); p++ ){
+      auto pr = part_by[p];
+    //for(auto pr : part_by ){
+      Elem* E = new Tet( E0->elem_p, pr.size());
       //printf("elem_glid[%u]\n",uint(E->elem_glid.size()));
       if(verbosity>2){
+#pragma omp critical(print)
+        {
         std::cout << "Making partition " << part_n
-        <<" with "<< pr.second.size() << " elements"
-        <<"..."<<std::endl; }
-      part_n++;
+        <<" with "<< pr.size() << " elements"
+        <<"..."<<std::endl; } }
       E->node_n=0;
-      for(INT_MESH e=0;e<E->elem_n;e++){
-        auto glel=pr.second[e];
+      for(INT_MESH e=0; e<E->elem_n; e++){
+        auto glel=pr[e];
         E->elem_glid[e]=glel;
         auto loe0=E0->elem_loid[glel];
         //printf("%u : %u\n",glel,loe0);
@@ -521,7 +525,11 @@ int main( int argc, char** argv ) {
         for(uint i=0;i<d;i++){
           E->node_coor[d* l+i ]=E0->node_coor[d* n0+i ]; }
       }
+#pragma omp critical
+{
+      part_n++;
       partlist.push_back(E);
+}
     }
   }// Done partitioning by gmsh slices or volume physical IDs.
   M->list_elem = partlist;
@@ -540,9 +548,10 @@ int main( int argc, char** argv ) {
 #endif
   if( (bc0_at.size()+bcs_at.size()+rhs_at.size()) >0 ){
     // Boundary conditions @
-    int glid; INT_MESH loid;
-    FLOAT_MESH loc,amt; INT_DOF f,g;
+#pragma omp parallel for schedule(static)
     for(uint e=1; e<M->list_elem.size(); e++){
+      int glid; INT_MESH loid;
+      FLOAT_MESH loc,amt; INT_DOF f,g;
       Elem* E=M->list_elem[e];
       uint d=uint(E->mesh_d);
       for( auto pr : E->node_loid ){ std::tie(glid,loid)=pr;
@@ -616,6 +625,10 @@ int main( int argc, char** argv ) {
   if(save_asc | save_bin){
     if(verbosity==1){
       printf("Saving and appending physics to partitions...\n"); }
+#ifdef _OPENMP
+    if(verbosity>0){
+      printf("Saving %ix parallel...\n",omp_get_max_threads()); }
+#endif
 #pragma omp parallel for schedule(static)
     for(int part_i=part_0;part_i<(part_n+part_0);part_i++){
       Phys::vals props={100e9,0.3};//FIXME Should not have defaults here...
@@ -633,7 +646,7 @@ int main( int argc, char** argv ) {
       ss << ".fmr";
       std::string pname = ss.str();
       if(verbosity>1){
-      std::cout << "Saving part " << pname << "..." <<'\n'; }
+        std::cout << "Saving part " << pname << "..." <<'\n'; }
       //if(save_bin){
       //  M->list_elem[part_i]->SavePartFMR( pname.c_str(), true  ); }
       if(save_asc){

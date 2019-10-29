@@ -90,8 +90,8 @@ case $P in
   50000 100000 250000 500000 1000000\
     1500000 2500000 5000000 10000000 25000000\
     50000000 100000000 250000000 500000000 1000000000)
-  LIST_H=(1 2 3 4 6   7 9 13 17 21  24 29 37 46 63   80 101 138 174 220)
-  LIST_HH="1 2 3 4 6   7 9 13 17 21  24 29 37 46 63   80 101 138 174 220"
+  LIST_H=(1 2 3 4 6   7 9 13 17 22  24 29 37 46 63   80 101 138 174 220)
+  LIST_HH="1 2 3 4 6   7 9 13 17 22  24 29 37 46 63   80 101 138 174 220"
   ;;
 esac
 TRY_COUNT=0;
@@ -501,7 +501,7 @@ fi
 echo "Checking for medium ("$MED_MUDOF" MDOF) model partitioning tests..."
 # Check if any medium model CSV lines have N > C
 CSV_HAS_MEDIUM_PART_TEST=`awk -F, -v e=$MED_NELEM -v c=$CPUCOUNT\
-  '($1==e)&&($9==c)&&($4>$9){print $4; exit}' $CSVFILE`
+  '($1==e)&&($9==c)&&($4>c){print $4; exit}' $CSVFILE`
 if [ -z "$CSV_HAS_MEDIUM_PART_TEST" ]; then
   echo Running medium model partitioning tests...
   C=$CPUCOUNT
@@ -526,9 +526,9 @@ if [ -z "$CSV_HAS_MEDIUM_PART_TEST" ]; then
     done
   done
 fi
-# Check if any medium model CSV lines have N > C
+# Check if any CSV lines have N > C
 CSV_HAS_MEDIUM_PART_TEST=`awk -F, -v e=$MED_NELEM -v c=$CPUCOUNT\
-  '($1==e)&&($9==c){print $4; exit}' $CSVFILE`
+  '($1==e)&&($9==c)&&($4>c){print $4; exit}' $CSVFILE`
 if [ ! -z "$CSV_HAS_MEDIUM_PART_TEST" ]; then
   SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v elem=$MED_NELEM -v max=0\
     '($9==c)&&($1==elem)&&($13>max){max=$13;perf=$13/1e6;size=$4}\

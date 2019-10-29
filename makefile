@@ -9,6 +9,7 @@ CPPFLAGS=-std=c++11 -Wall -Wextra -g -Ofast -ftree-vectorize -march=native \
  -fno-builtin-sin -fno-builtin-cos
 #FIXME -mtune=core-avx2 when -mtune=native doesn't work
 OMPFLAGS=-fopenmp -D_GLIBCXX_PARALLEL
+# -DOMP_PLACES=cores -DOMP_PROC_BIND=spread -DOMP_NUM_THREADS=$(NCPU)
 SERFLAGS=-Wno-unknown-pragmas
 # CPPLOG=-fopt-info-vec-optimized 2>>$(CPUMODEL)-$(CSTR).err
 # AUTOVEC_SUMMARY=grep -i vectorized $(CPUMODEL)-$(CSTR).err | grep -v " 0 ";
@@ -176,7 +177,7 @@ test-plastic-20 :  gmsh2fmr mini-omp
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
 	./femera-$(CPUMODELC) -v2 -s2 -d2 -I20 -c$(NCPU) -p cube/unst19p1n16
 
-ref-plastic :  gmsh2fmr mini-ref
+ref-plastic : gmsh2fmr mini-ref
 	./gmsh2fmr-$(CPUMODELC) -v1 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.005 \
 	-M0 -E66.2e9 -N0.33 -J305e6 -J100e6 \
@@ -186,7 +187,7 @@ ref-plastic :  gmsh2fmr mini-ref
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
 	./refera-$(CPUMODELC) -v3 -s2 -c$(NCPU) -p cube/unit1p1n2
 
-test-slice :  gmsh2fmr mini-omp
+test-slice : gmsh2fmr mini-omp
 	./gmsh2fmr-$(CPUMODELC) -v4 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 \
 	-xS3 -yzS2 \
@@ -195,6 +196,17 @@ test-slice :  gmsh2fmr mini-omp
 	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/uhxt26p2/uhxt26p2n12
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/uhxt26p2/uhxt26p2n12
+
+test-gmsh2fmr : gmsh2fmr
+	export OMP_SCHEDULE=static;\
+	export OMP_PLACES=cores;\
+	export OMP_PROC_BIND=spread;\
+	export OMP_NUM_THREADS=$(NCPU);\
+	./gmsh2fmr-$(CPUMODELC) -v3 \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
+	-M1 -E100e9 -N0.3 -A20e-6 -K100e-6 -Z1 -X0 -Z0 \
+	-M2 -E100e9 -N0.3 -Z1 -X0 -Z0 \
+	-ap cube/unit1p2n2;
 
 $(ODIR)/%.$(OEXT) : %.cc *.h
 	echo $(CXX) ... -o $@
@@ -246,10 +258,8 @@ base-omp : test-scripts femerb-$(CPUMODELC)
 
 mini-hyb : test-scripts femera-$(CPUMODEL)-hyb
 
-gmsh2fmr : gmsh2fmr-ser-$(CPUMODELC)
-	cp gmsh2fmr-ser-$(CPUMODELC) gmsh2fmr-$(CPUMODELC)
-
-gmsh2fmr-ser : test-scripts gmsh2fmr-ser-$(CPUMODELC)
+gmsh2fmr : gmsh2fmr-omp
+	echo ok.
 
 femera-$(CPUMODELC) : $(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	echo $(CXX) ... -o femera-$(CPUMODELC)
@@ -308,11 +318,15 @@ femera-$(CPUMODEL)-hyb : $(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-min
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
 	./femera-$(CPUMODEL)-hyb -v2 -c$(NCPU) -p cube/unst19p1n16
 
-gmsh2fmr-BROKEN-$(CPUMODELC) : $(OBJS) $(ODIR)/gmsh2.$(OEXT) $(ODIR)/gmsh2fmr.$(OEXT)
+
+gmsh2fmr-ser : test-scripts gmsh2fmr-ser-$(CPUMODELC)
+
+gmsh2fmr-omp : test-scripts gmsh2fmr-omp-$(CPUMODELC)
+
+gmsh2fmr-omp-$(CPUMODELC) : $(OBJS) $(ODIR)/gmsh2.$(OEXT) $(ODIR)/gmsh2fmr.$(OEXT)
 	echo $(CXX) ... -o gmsh2fmr-$(CPUMODELC)
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(OBJS) $(ODIR)/gmsh2.$(OEXT) $(ODIR)/gmsh2fmr.$(OEXT) \
-	-DOMP_SCHEDULE=static -DOMP_NESTED=true \
 	-o gmsh2fmr-$(CPUMODELC) ;
 
 gmsh2fmr-ser-$(CPUMODELC) : $(SBJS) $(ODIR)/gmsh2.$(SEXT) $(ODIR)/gmsh2fmr.$(SEXT)
