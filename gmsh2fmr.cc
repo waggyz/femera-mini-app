@@ -488,28 +488,21 @@ int main( int argc, char** argv ) {
           std::cout << "Partitioning " << pname << " by " << M->elms_phid.size()
             <<" Gmsh volume IDs..." <<'\n'; }
     }
-    //M->list_elem.resize(part_by.size()+1); part_n=part_by.size()+1;
-    //M->list_elem[0]=NULL;
 #pragma omp parallel for schedule(static)
-    for(uint p=0; p<part_by.size(); p++){
+    for(uint p=0; p<part_by.size(); p++ ){
+      auto pr = part_by[p];
     //for(auto pr : part_by ){
-      auto pr=part_by.begin(); std::advance(pr, p);
-      Elem* EE;
-      //Elem* E = new Tet( E0->elem_p, pr->second.size());
-      //printf("elem_glid[%u]\n",uint(E->elem_glid.size()));
-#pragma omp critical
-{
-      partlist.push_back( new Tet( E0->elem_p, pr->second.size()) );
+      Elem* EE = new Tet( E0->elem_p, pr.size());
+      //printf("elem_glid[%u]\n",uint(EE->elem_glid.size()));
       if(verbosity>2){
-        std::cout << "Making partition " << (p)
-        <<" with "<< pr->second.size() << " elements"
-        <<"..."<<std::endl; 
-}
-      EE=partlist[partlist.size()];
-      }
+#pragma omp critical(print)
+        {
+        std::cout << "Making partition " << part_n
+        <<" with "<< pr.size() << " elements"
+        <<"..."<<std::endl; } }
       EE->node_n=0;
       for(INT_MESH e=0; e<EE->elem_n; e++){
-        auto glel=pr->second[e];
+        auto glel=pr[e];
         EE->elem_glid[e]=glel;
         auto loe0=E0->elem_loid[glel];
         //printf("%u : %u\n",glel,loe0);
@@ -534,9 +527,8 @@ int main( int argc, char** argv ) {
       }
 #pragma omp critical
 {
-      //M->list_elem[part_n]=E;
       part_n++;
-      partlist.push_back(E);
+      partlist.push_back(EE);
 }
     }
   }// Done partitioning by gmsh slices or volume physical IDs.
@@ -575,8 +567,7 @@ int main( int argc, char** argv ) {
       }
     }
   }// end applying BC@
-  M->list_elem[0]=NULL;
-  if(part_0==0){ part_0=1; part_n-=1; }//FIXME
+  M->list_elem[0]=NULL; if(part_0==0){ part_0=1; part_n-=1; }//FIXME
   M->SyncIDs();//FIXME need to skip [0] when syncing
 #if VERB_MAX>2
   if(verbosity>2){
