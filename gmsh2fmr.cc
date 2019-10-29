@@ -489,20 +489,20 @@ int main( int argc, char** argv ) {
             <<" Gmsh volume IDs..." <<'\n'; }
     }
 #pragma omp parallel for schedule(static)
-    for(uint p=0; p<part_by.size(); p++ ){
-      auto pr = part_by[p];
+    for(uint i=0; i<part_by.size(); i++){
     //for(auto pr : part_by ){
-      Elem* E = new Tet( E0->elem_p, pr.size());
+      auto pr=part_by.begin(); std::advance(pr, i);
+      Elem* E = new Tet( E0->elem_p, pr->second.size());
       //printf("elem_glid[%u]\n",uint(E->elem_glid.size()));
       if(verbosity>2){
 #pragma omp critical(print)
         {
         std::cout << "Making partition " << part_n
-        <<" with "<< pr.size() << " elements"
+        <<" with "<< pr->second.size() << " elements"
         <<"..."<<std::endl; } }
       E->node_n=0;
       for(INT_MESH e=0; e<E->elem_n; e++){
-        auto glel=pr[e];
+        auto glel=pr->second[e];
         E->elem_glid[e]=glel;
         auto loe0=E0->elem_loid[glel];
         //printf("%u : %u\n",glel,loe0);
