@@ -429,9 +429,9 @@ int main( int argc, char** argv ) {
   // Read gmsh files.
   //FIXME Does not work in parallel
   std::vector<Elem*> partlist(part_n+part_0);
-  Elem* E;// Gmsh* G;
 //#pragma omp parallel for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
+    //Elem* E;// Gmsh* G;
     if(is_part){
     std::stringstream ss;
       ss << iname;  ss << "_" << part_i << ".msh" ;
@@ -441,7 +441,7 @@ int main( int argc, char** argv ) {
         if(verbosity>3){
     std::cout << "Reading " << pname << "..." <<'\n'; }
 #endif
-    E=M->ReadMsh2( pname.c_str() );
+    Elem* E=M->ReadMsh2( pname.c_str() );
 //#pragma omp atomic write
     partlist[part_i]=E;
   }
@@ -566,7 +566,7 @@ int main( int argc, char** argv ) {
     std::cout << "Mesh Partition " << i ;
     if(M->list_elem[i]==NULL){std::cout << " is null.\n";
     }else{
-      E=M->list_elem[i];
+      Elem* E=M->list_elem[i];
       std::cout << ": " << E->node_n << " Nodes ["
         << E->node_coor.size()<<"], "
         << E->elem_n << " Elems ["

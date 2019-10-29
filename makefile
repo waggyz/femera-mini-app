@@ -188,20 +188,23 @@ ref-plastic : gmsh2fmr mini-ref
 	./refera-$(CPUMODELC) -v3 -s2 -c$(NCPU) -p cube/unit1p1n2
 
 test-slice : gmsh2fmr mini-omp
+	gmsh -v 3 -nt $(NCPU) -part 8 \
+	-format msh2 -o cube/uhxt10p2/uhxt10p2n8.msh \
+	cube/uhxt10p2/uhxt10p2n.msh -
 	./gmsh2fmr-$(CPUMODELC) -v4 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 \
-	-xS3 -yzS2 \
-	-M0 -E100e9 -N0.3 -R \
-	-a cube/uhxt26p2/uhxt26p2n;
-	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/uhxt26p2/uhxt26p2n12
-	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
-	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/uhxt26p2/uhxt26p2n12
-
-test-gmsh2fmr : gmsh2fmr
+	-M0 -E100e9 -N0.3 -a cube/uhxt10p2/uhxt10p2n8;
+	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/uhxt10p2/uhxt10p2n8
 	export OMP_SCHEDULE=static;\
 	export OMP_PLACES=cores;\
 	export OMP_PROC_BIND=spread;\
 	export OMP_NUM_THREADS=$(NCPU);\
+	./gmsh2fmr-$(CPUMODELC) -v4 \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 \
+	-M0 -E100e9 -N0.3 -xyzS2 -a cube/uhxt10p2/uhxt10p2n;
+	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/uhxt10p2/uhxt10p2n8
+
+test-gmsh2fmr : gmsh2fmr
 	./gmsh2fmr-$(CPUMODELC) -v3 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
 	-M1 -E100e9 -N0.3 -A20e-6 -K100e-6 -Z1 -X0 -Z0 \
