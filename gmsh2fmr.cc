@@ -488,45 +488,53 @@ int main( int argc, char** argv ) {
           std::cout << "Partitioning " << pname << " by " << M->elms_phid.size()
             <<" Gmsh volume IDs..." <<'\n'; }
     }
+    //M->list_elem.resize(part_by.size()+1); part_n=part_by.size()+1;
+    //M->list_elem[0]=NULL;
 #pragma omp parallel for schedule(static)
-    for(uint i=0; i<part_by.size(); i++){
+    for(uint p=0; p<part_by.size(); p++){
     //for(auto pr : part_by ){
-      auto pr=part_by.begin(); std::advance(pr, i);
-      Elem* E = new Tet( E0->elem_p, pr->second.size());
+      auto pr=part_by.begin(); std::advance(pr, p);
+      Elem* EE;
+      //Elem* E = new Tet( E0->elem_p, pr->second.size());
       //printf("elem_glid[%u]\n",uint(E->elem_glid.size()));
+#pragma omp critical
+{
+      partlist.push_back( new Tet( E0->elem_p, pr->second.size()) );
       if(verbosity>2){
-#pragma omp critical(print)
-        {
-        std::cout << "Making partition " << part_n
+        std::cout << "Making partition " << (p)
         <<" with "<< pr->second.size() << " elements"
-        <<"..."<<std::endl; } }
-      E->node_n=0;
-      for(INT_MESH e=0; e<E->elem_n; e++){
+        <<"..."<<std::endl; 
+}
+      EE=partlist[partlist.size()];
+      }
+      EE->node_n=0;
+      for(INT_MESH e=0; e<EE->elem_n; e++){
         auto glel=pr->second[e];
-        E->elem_glid[e]=glel;
+        EE->elem_glid[e]=glel;
         auto loe0=E0->elem_loid[glel];
         //printf("%u : %u\n",glel,loe0);
         for(uint n=0;n<Nc;n++){//printf("%u ",e);
           auto glno = E0->node_glid[E0->elem_conn[Nc* loe0+n]];
-          if( E->node_loid.count(glno)==0 ){
-            E->node_loid[glno]=E->node_n; E->node_n++; }
-          E->elem_conn[Nc* e+n] = E->node_loid[glno];
+          if( EE->node_loid.count(glno)==0 ){
+            EE->node_loid[glno]=EE->node_n; EE->node_n++; }
+          EE->elem_conn[Nc* e+n] = EE->node_loid[glno];
         }
       }
-      uint d=uint(E->mesh_d);
-      E->vert_n=E->node_n;
-      E->node_coor.resize(d*E->vert_n);
-      E->node_glid.resize(E->node_n);
-      for( auto pr : E->node_loid ){
+      uint d=uint(EE->mesh_d);
+      EE->vert_n=EE->node_n;
+      EE->node_coor.resize(d*EE->vert_n);
+      EE->node_glid.resize(EE->node_n);
+      for( auto pr : EE->node_loid ){
         int glid; INT_MESH l;
         std::tie(glid,l)=pr;// printf("%u:%i\n",glid,l);
-        E->node_glid[l]=glid;
+        EE->node_glid[l]=glid;
         INT_MESH n0=E0->node_loid[glid];
         for(uint i=0;i<d;i++){
-          E->node_coor[d* l+i ]=E0->node_coor[d* n0+i ]; }
+          EE->node_coor[d* l+i ]=E0->node_coor[d* n0+i ]; }
       }
 #pragma omp critical
 {
+      //M->list_elem[part_n]=E;
       part_n++;
       partlist.push_back(E);
 }
@@ -552,22 +560,23 @@ int main( int argc, char** argv ) {
     for(uint e=1; e<M->list_elem.size(); e++){
       int glid; INT_MESH loid;
       FLOAT_MESH loc,amt; INT_DOF f,g;
-      Elem* E=M->list_elem[e];
-      uint d=uint(E->mesh_d);
-      for( auto pr : E->node_loid ){ std::tie(glid,loid)=pr;
+      Elem* EE=M->list_elem[e];
+      uint d=uint(EE->mesh_d);
+      for( auto pr : EE->node_loid ){ std::tie(glid,loid)=pr;
         for(auto tp : bc0_at){ std::tie(f,g,loc)=tp;
-          if(std::abs(E->node_coor[d* loid+f ]-loc)<eps_find){
-            E->bc0_nf.insert(Mesh::nfitem(loid,g)); } }
+          if(std::abs(EE->node_coor[d* loid+f ]-loc)<eps_find){
+            EE->bc0_nf.insert(Mesh::nfitem(loid,g)); } }
         for(auto tp : bcs_at){ std::tie(f,g,loc,amt)=tp;
-          if(std::abs(E->node_coor[d* loid+f ]-loc)<eps_find){
-            E->bcs_vals.insert(Mesh::nfval(loid,g,amt)); } }
+          if(std::abs(EE->node_coor[d* loid+f ]-loc)<eps_find){
+            EE->bcs_vals.insert(Mesh::nfval(loid,g,amt)); } }
         for(auto tp : rhs_at){ std::tie(f,g,loc,amt)=tp;
-          if(std::abs(E->node_coor[d* loid+f ]-loc)<eps_find){
-            E->rhs_vals.insert(Mesh::nfval(loid,g,amt)); } }
+          if(std::abs(EE->node_coor[d* loid+f ]-loc)<eps_find){
+            EE->rhs_vals.insert(Mesh::nfval(loid,g,amt)); } }
       }
     }
   }// end applying BC@
-  M->list_elem[0]=NULL; if(part_0==0){ part_0=1; part_n-=1; }//FIXME
+  M->list_elem[0]=NULL;
+  if(part_0==0){ part_0=1; part_n-=1; }//FIXME
   M->SyncIDs();//FIXME need to skip [0] when syncing
 #if VERB_MAX>2
   if(verbosity>2){
