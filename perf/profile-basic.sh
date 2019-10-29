@@ -657,6 +657,7 @@ if [ ! -z "$CSV_HAS_LARGE_PART_TEST" ]; then
     set tics scale 0,0;\
     set key inside bottom center;\
     set title 'Femera Large Elastic Model Partitioning Tests [MDOF/s]';\
+    set xrange [0:$(( $LRG_NELEM / $MED_PART ))];\
     set xlabel 'Partition Size [elem/part]';\
     set label at "$LARGE_ELEM_PART", "$LARGE_MDOFS" \"* Max\";\
     plot '"$CSVFILE"'\
