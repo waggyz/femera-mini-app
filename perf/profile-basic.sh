@@ -638,7 +638,7 @@ CSV_HAS_LARGE_PART_TEST=`awk -F, -v c=$CPUCOUNT -v elem=$LRG_NELEM \
 if [ ! -z "$CSV_HAS_LARGE_PART_TEST" ]; then
   SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v elem=$LRG_NELEM -v pmax=0\
     '($9==c)&&($1==elem)&&($13>pmax+0){pmax=$13;perf=$13/1e6;size=$1/$4}\
-    END{print int((size+500)/1000)*1000,int(perf+0.5)}'\
+    END{print int((size+250)/500)*500,int(perf+0.5)}'\
     $CSVFILE`
   LARGE_MDOFS=${SIZE_PERF_MAX##* }
   LARGE_ELEM_PART=${SIZE_PERF_MAX%% *}
@@ -657,7 +657,6 @@ if [ ! -z "$CSV_HAS_LARGE_PART_TEST" ]; then
     set tics scale 0,0;\
     set key inside bottom center;\
     set title 'Femera Large Elastic Model Partitioning Tests [MDOF/s]';\
-    set xrange [0:20000];\
     set xlabel 'Partition Size [elem/part]';\
     set label at "$LARGE_ELEM_PART", "$LARGE_MDOFS" \"* Max\";\
     plot '"$CSVFILE"'\
