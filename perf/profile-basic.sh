@@ -500,7 +500,7 @@ if [ -f $CSVSMALL ]; then
     echo >> $PROFILE
   fi
 fi
-echo "Checking for medium ("$MED_MUDOF" MDOF) model partitioning tests..."
+echo "Checking for medium ("$MED_NUDOF" DOF) model partitioning tests..."
 # Check if any medium model CSV lines have N > C
 CSV_HAS_MEDIUM_PART_TEST=`awk -F, -v e=$MED_NELEM -v c=$CPUCOUNT\
   '($1==e)&&($9==c)&&($4>c){print $4; exit}' $CSVFILE`
