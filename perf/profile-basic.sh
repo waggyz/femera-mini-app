@@ -30,7 +30,7 @@ echo $(( $MEM / 1000000000 )) GB Assumed Memory
 HAS_GNUPLOT=`which gnuplot`
 #
 case $P in
-1) DOF_PER_ELEM=0.5; BYTE_PER_DOF=340; PSTR=tet4;  ;;
+1) DOF_PER_ELEM=" 1 / 2 "; BYTE_PER_DOF=340; PSTR=tet4;  ;;
 2) DOF_PER_ELEM=4;   BYTE_PER_DOF=120; PSTR=tet10; ;;
 3) DOF_PER_ELEM=14;  BYTE_PER_DOF=100; PSTR=tet20; ;;
 esac
