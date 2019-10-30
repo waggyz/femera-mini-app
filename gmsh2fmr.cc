@@ -323,7 +323,6 @@ int main( int argc, char** argv ) {
 #endif
     }
 #endif
-    //FIXME Does not yet read unpartitioned meshes.
     for (int i = optind; i < argc; i++){
       if(i<(argc-1)){
       fprintf (stderr, "WARNING Ignoring command line option: %s.\n", argv[i]);
@@ -446,7 +445,7 @@ int main( int argc, char** argv ) {
   }
   if(!is_part){ is_part=true;//part_0=1;//FIXME This determines first saved file.
     // Partition M[0] based on physical IDs or slice it...
-    auto E0=partlist[0];
+    Elem* E0=partlist[0];
     uint Nc =uint(E0->elem_conn_n);//printf("**** %u ****",Nc);
     std::unordered_map<int,std::vector<int>> part_by;
     // Check if partition by slicing.
@@ -570,8 +569,8 @@ int main( int argc, char** argv ) {
         printf(" %9.2e",E->node_coor[j]);
       } printf("\n");
       printf("Elements:");
-      auto ecn=uint(E->elem_conn_n);
-      for(uint j=0;j<E->elem_conn.size();j++){
+      INT_MESH ecn=E->elem_conn_n;
+      for(INT_MESH j=0;j<E->elem_conn.size();j++){
         if(!(j%ecn)){printf("\n%3u(%3u):",j/ecn,E->elem_glid[j/ecn]); }
         printf(" %3u",E->elem_conn[j]);
       } printf("\n");
@@ -615,8 +614,7 @@ int main( int argc, char** argv ) {
       std::stringstream ss;
       ss << bname;
       if(is_part){
-        const INT_PART slic_n
-          = M->part_slic[0]*M->part_slic[1]*M->part_slic[2];
+        const INT_PART slic_n = M->part_slic[0]*M->part_slic[1]*M->part_slic[2];
         if( slic_n > 1 ){ ss << slic_n; }
         ss << "_" << part_i ;
       }
@@ -627,23 +625,22 @@ int main( int argc, char** argv ) {
       Phys* Y=new ElastIso3D(1.0,0.3);//FIXME
 #pragma omp critical
 {//FIXME why critical?
-      auto mp=mtrl_part[part_i];
-      if(mp.size()>0){
-        props.resize(mp.size());
-        for(uint i=0;i<mp.size();i++){ props[i]=mp[i]; }
-      }else if(m0.size()>0){
-        props.resize(m0.size());
-        for(uint i=0;i<m0.size();i++){ props[i]=m0[i]; }
-        if(allrand &(props.size()>3)){
+      if( mtrl_part.count( part_i ) >0 ){
+        auto mp=mtrl_part[ part_i ];
+        props.resize( mp.size() );
+        for(uint i=0; i<mp.size(); i++){ props[i]=mp[i]; }
+      }else if( m0.size() >0 ){
+        props.resize( m0.size() );
+        for(uint i=0; i<m0.size(); i++){ props[i]=m0[i]; }
+        if(allrand &( props.size()>3 )){
           for(uint i=0; i<3; i++){
-            props[i]=FLOAT_PHYS(std::rand())/(FLOAT_PHYS(RAND_MAX)+1.)*2.*PI;
+            props[i]=FLOAT_PHYS(std::rand())/(FLOAT_PHYS(RAND_MAX)+1.0)*2.0*PI;
             }
         }
         if(rotfile &(props.size()>3)){
           //FIXME Does not work unless -X0 -Z0 -X0 specified
           for(uint i=0; i<3; i++){
-            props[i]=orislist[3* (part_i-part_0)+i ];
-            }
+            props[i]=orislist[3* (part_i-part_0)+i ]; }
         }
       }
       if(props.size()>3){
@@ -720,7 +717,7 @@ int main( int argc, char** argv ) {
     // Append nodes
     abqfile << "*NODE" <<'\n';
     for(int part_i=part_0;part_i<(part_n+part_0);part_i++){
-      auto E=M->list_elem[part_i];
+      Elem* E=M->list_elem[part_i];
       for(uint n=E->halo_remo_n; n<E->node_n; n++){
         abqfile << E->node_glid[n];
         for(uint i=0;i<E->mesh_d;i++){
@@ -735,7 +732,7 @@ int main( int argc, char** argv ) {
     //abqfile << "*ELEMENT, TYPE=C3D"<< c <<", ELSET=ALLTETS"<<'\n';
     for(int part_i=part_0;part_i<(part_n+part_0);part_i++){
       abqfile << "*ELEMENT, TYPE=C3D"<< c <<", ELSET=Volume" << part_i <<'\n';
-      auto E=M->list_elem[part_i];
+      Elem* E=M->list_elem[part_i];
       uint Nc=E->elem_conn_n;
       for(uint e=0; e<E->elem_n; e++){
         abqfile << E->elem_glid[e];
@@ -754,7 +751,7 @@ int main( int argc, char** argv ) {
     }
     // Node sets for Sai's ScIFEN converter
     //for(int part_i=part_0;part_i<(part_n+part_0);part_i++){
-    //  auto E=M->list_elem[part_i];
+    //  Elem*to E=M->list_elem[part_i];
     //  abqfile << "*NODESET,NODESET=n_POLYCRYSTAL-"<< part_i;
     //  for(uint e=0; e<E->elem_n; e++){
     //    if( (e%40)==0){ abqfile<<'\n'; }else{ abqfile<<","; }
@@ -765,7 +762,7 @@ int main( int argc, char** argv ) {
     //}
     // Element sets for Sai's ScIFEN converter
     for(int part_i=part_0;part_i<(part_n+part_0);part_i++){
-      auto E=M->list_elem[part_i];
+      Elem* E=M->list_elem[part_i];
       //abqfile << "*ELSET,ELSET=Part_"<< part_i;
       abqfile << "*ELSET,ELSET=PhysicalVolume"<< part_i;
       for(uint e=0; e<E->elem_n; e++){

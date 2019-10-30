@@ -62,7 +62,6 @@ public:
   FLOAT_MESH glob_bbox[6]={9e9,9e9,9e9 , -9e9,-9e9,-9e9};// Bounding box
   FLOAT_SOLV glob_bmax[4]={0.0,0.0,0.0,0.0};// Boundary conditions max magnitude
   //
-  //FIXME Move these into Elem?
   //NOTE These are by global ID
   nfvals rhs_vals={};// Nodal forces applied (nonzeros)
   nfvals bcs_vals={};// Dirichlet boundary conditions (nonzeros)
