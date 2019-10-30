@@ -726,7 +726,7 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
   return 0;
 }
 //-------------------------------------------------------------------
-int Mesh::SavePartFMR( part& P, const char* fname, bool is_bin ){
+int Mesh::SavePartFMR( const part& P, const char* fname, bool is_bin ){
   Elem* E; Phys* Y; Solv* S;
   std::tie(E,Y,S)=P;
   //
