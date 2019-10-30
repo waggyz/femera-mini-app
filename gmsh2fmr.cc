@@ -695,8 +695,8 @@ int main( int argc, char** argv ) {
 }
       //Solv* S=new PCG(0, 0, 0.0);
       //Mesh::part t(M->list_elem[part_i],Y,S);
-      Mesh::part t(M->list_elem[part_i],Y,new PCG(0, 0, 0.0));
-      M->SavePartFMR( t, pname.c_str(), false );
+      Mesh::part Ptmp(M->list_elem[part_i],Y,new PCG(0, 0, 0.0));
+      M->SavePartFMR( Ptmp, pname.c_str(), false );
     }//end saving parts loop
   }//end if ascii output
   if(save_abq){//FIXME Move to a method
