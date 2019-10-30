@@ -427,7 +427,6 @@ int main( int argc, char** argv ) {
   }//End scope of command line parsing variables
   //=================================================================
   // Read gmsh files.
-  //FIXME Does not work in parallel
   std::vector<Elem*> partlist(part_n+part_0);
 //#pragma omp parallel for schedule(static)
   for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
@@ -435,15 +434,15 @@ int main( int argc, char** argv ) {
     if(is_part){
     std::stringstream ss;
       ss << iname;  ss << "_" << part_i << ".msh" ;
-      pname = ss.str();
+      pname = ss.str();//FIXME Does not work in parallel
     }
 #if VERB_MAX>3
-        if(verbosity>3){
-    std::cout << "Reading " << pname << "..." <<'\n'; }
+    if(verbosity>3){
+      std::cout << "Reading " << pname << "..." <<'\n'; }
 #endif
-    Elem* E=M->ReadMsh2( pname.c_str() );
+    //Elem* E=M->ReadMsh2( pname.c_str() );
 //#pragma omp atomic write
-    partlist[part_i]=E;
+    partlist[part_i]=M->ReadMsh2( pname.c_str() );
   }
   if(!is_part){ is_part=true;//part_0=1;//FIXME This determines first saved file.
     // Partition M[0] based on physical IDs or slice it...
@@ -458,51 +457,32 @@ int main( int argc, char** argv ) {
         std::cout << "Partitioning " << pname << " by " << slic_n
           <<" ("<<M->part_slic[0]<<"x"<<M->part_slic[1]<<"x"<<M->part_slic[2]<<""
           <<") slices..." <<'\n'; }
-#if 0
-      const FLOAT_MESH sx =(FLOAT_MESH)M->part_slic[0];
-      const FLOAT_MESH sy =(FLOAT_MESH)M->part_slic[1];
-      const FLOAT_MESH sz =(FLOAT_MESH)M->part_slic[2];
-      uint Dm=E0->mesh_d;
-      //std::cout <<"Elements: "<<E0->elem_n<<", Dimension: "<<Dm<<'\n';
-      for(INT_MESH ie=0; ie < E0->elem_n; ie++){
-        std::valarray<FLOAT_MESH> c(Dm);// Centroid of element
-        for(uint i=0;i<4;i++){// mean of 4 corner nodes
-          const INT_MESH n0 = E0->elem_conn[Nc* ie+i ];
-          for(uint j=0;j<3;j++){
-            c[j] += E0->node_coor[Dm* n0+j ] *0.25;
-          }
-        }
-        const INT_PART part_i = 1//FIXME Assumes xyz bounds are (0,1)
-          + INT_PART( fmod(c[0],1.0/sx)*sx*sx )
-          + INT_PART( fmod(c[1],1.0/sy)*sy*sy )*M->part_slic[0]
-          + INT_PART( fmod(c[2],1.0/sz)*sz*sz )*M->part_slic[0]*M->part_slic[1];
-        //std::cout << part_i <<" ";
-      }
-      //std::cout <<'\n';
-      if(true){ std::cerr << "ERROR Slicing not yet implemented.\n"; return 1; }
-    }// Done partitioning by slicing.
-#endif
     }else{
       part_by=M->elms_phid;
       if(verbosity>0){
           std::cout << "Partitioning " << pname << " by " << M->elms_phid.size()
             <<" Gmsh volume IDs..." <<'\n'; }
     }
-    for(auto pr : part_by ){
-      Elem* E = new Tet( E0->elem_p, pr.second.size());
-      //printf("elem_glid[%u]\n",uint(E->elem_glid.size()));
+    //for(auto pr : part_by ){
+#pragma omp parallel for schedule(static)
+    for(uint p=0; p<part_by.size(); p++){
+      auto pr=part_by.begin(); std::advance(pr, p);
+      Elem* E = new Tet( E0->elem_p, pr->second.size());
+#pragma omp critical
+{
       if(verbosity>2){
-        std::cout << "Making partition " << part_n
-        <<" with "<< pr.second.size() << " elements"
-        <<"..."<<std::endl; }
-      part_n++;
+        std::cout << "Making partition " << partlist.size()
+          <<" with "<< pr->second.size() << " elements"
+          <<"..."<<std::endl; }
+      //part_n++;
+      partlist.push_back(E);
+}
       E->node_n=0;
       for(INT_MESH e=0;e<E->elem_n;e++){
-        auto glel=pr.second[e];
+        auto glel=pr->second[e];
         E->elem_glid[e]=glel;
         auto loe0=E0->elem_loid[glel];
-        //printf("%u : %u\n",glel,loe0);
-        for(uint n=0;n<Nc;n++){//printf("%u ",e);
+        for(uint n=0;n<Nc;n++){
           auto glno = E0->node_glid[E0->elem_conn[Nc* loe0+n]];
           if( E->node_loid.count(glno)==0 ){
             E->node_loid[glno]=E->node_n; E->node_n++; }
@@ -515,16 +495,20 @@ int main( int argc, char** argv ) {
       E->node_glid.resize(E->node_n);
       for( auto pr : E->node_loid ){
         int glid; INT_MESH l;
-        std::tie(glid,l)=pr;// printf("%u:%i\n",glid,l);
+        std::tie(glid,l)=pr;
         E->node_glid[l]=glid;
         INT_MESH n0=E0->node_loid[glid];
         for(uint i=0;i<d;i++){
           E->node_coor[d* l+i ]=E0->node_coor[d* n0+i ]; }
       }
-      partlist.push_back(E);
     }
   }// Done partitioning by gmsh slices or volume physical IDs.
   M->list_elem = partlist;
+  part_n = partlist.size()-1;
+#if 0
+  std::cout << "Made " << part_n <<":"<<M->list_elem.size()
+    <<" partitions."<<std::endl;
+#endif
 #if VERB_MAX>1
   if(verbosity>0){
     printf("Applying boundary conditions...\n");
@@ -538,12 +522,13 @@ int main( int argc, char** argv ) {
       printf("RHS @DOF %u == %f: set DOF %u = %f.\n", uint(f),loc,uint(g),amt); }
     } }
 #endif
-  if( (bc0_at.size()+bcs_at.size()+rhs_at.size()) >0 ){
+  if( (bc0_at.size()+bcs_at.size()+rhs_at.size()) > 0 ){
     // Boundary conditions @
-    int glid; INT_MESH loid;
-    FLOAT_MESH loc,amt; INT_DOF f,g;
+#pragma omp parallel for schedule(static)
     for(uint e=1; e<M->list_elem.size(); e++){
       Elem* E=M->list_elem[e];
+      int glid; INT_MESH loid;
+      FLOAT_MESH loc,amt; INT_DOF f,g;
       uint d=uint(E->mesh_d);
       for( auto pr : E->node_loid ){ std::tie(glid,loid)=pr;
         for(auto tp : bc0_at){ std::tie(f,g,loc)=tp;
@@ -558,6 +543,7 @@ int main( int argc, char** argv ) {
       }
     }
   }// end applying BC@
+  //FIXME Destroy M->list_elem[0]?
   M->list_elem[0]=NULL; if(part_0==0){ part_0=1; part_n-=1; }//FIXME
   M->SyncIDs();//FIXME need to skip [0] when syncing
 #if VERB_MAX>2
@@ -633,7 +619,7 @@ int main( int argc, char** argv ) {
       ss << ".fmr";
       std::string pname = ss.str();
       if(verbosity>1){
-      std::cout << "Saving part " << pname << "..." <<'\n'; }
+        std::cout << "Saving part " << pname << "..." <<'\n'; }
       //if(save_bin){
       //  M->list_elem[part_i]->SavePartFMR( pname.c_str(), true  ); }
       if(save_asc){
