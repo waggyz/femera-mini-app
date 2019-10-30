@@ -730,12 +730,12 @@ int Mesh::SavePartFMR( const part& P, const char* fname, bool is_bin ){
   Elem* E; Phys* Y; Solv* S;
   std::tie(E,Y,S)=P;
   //
-  std::string s; if(is_bin){ s="binary";}else{s="ASCII";};
+  std::string s; if(is_bin){ s="binary"; }else{ s="ASCII"; }
   if(is_bin){
     std::cout << "ERROR Could not save "<< fname << "." <<'\n'
       << "ERROR Femera (fmr) "<< s <<" format not yet supported." <<'\n';
-    return 1;}
-  //
+    return 1;
+  }
   int eltype=4;//FIXME element type id
   //int elem_p=pord;//FIXME
   //
@@ -755,9 +755,9 @@ int Mesh::SavePartFMR( const part& P, const char* fname, bool is_bin ){
     fmrfile << E->elem_glid[i];
     for(uint j=0; j<uint(E->elem_conn_n); j++){
       fmrfile << " " << E->elem_conn[uint(E->elem_conn_n)*i +j];
-    };
+    }
     fmrfile<<'\n';
-  };
+  }
   fmrfile << "$Node" <<'\n';
   fmrfile <<""<< int(E->mesh_d) <<" "<< E->vert_n <<" "<< E->node_n
     <<" "<< E->halo_node_n <<" "<< E->halo_remo_n<<" "<< E->halo_loca_n <<'\n';
@@ -765,40 +765,39 @@ int Mesh::SavePartFMR( const part& P, const char* fname, bool is_bin ){
   if(node_glid.size()>0){//E->halo_node_n){
     fmrfile << "$HaloNodeID" ;
     for(size_t i=0; i<node_glid.size(); i++){
-      if(!(i%20)){ fmrfile<<'\n'; };
-      fmrfile << " " << node_glid[i]; }; fmrfile<<'\n';
-  };
+      if(!(i%20)){ fmrfile<<'\n'; }
+      fmrfile << " " << node_glid[i]; } fmrfile<<'\n';
+  }
   if(halo_loca.size()>0){
     fmrfile << "$HaloLocal" ;
     for(size_t i=0; i<halo_loca.size(); i++){
-      if(!(i%20)){ fmrfile<<'\n'; };
-      fmrfile << " " << halo_loca[i]; }; fmrfile<<'\n';
-  };
+      if(!(i%20)){ fmrfile<<'\n'; }
+      fmrfile << " " << halo_loca[i]; } fmrfile<<'\n';
+  }
 #endif
   fmrfile << "$VertCoor"<<'\n';;
   for(INT_MESH i=0; i<E->vert_n; i++){
     fmrfile << E->node_glid[i];
     for(uint j=0; j<(uint)E->mesh_d; j++){
-      fmrfile <<" "<< E->node_coor[E->mesh_d* i+j]; };
+      fmrfile <<" "<< E->node_coor[E->mesh_d* i+j]; }
     fmrfile <<'\n';
-  };
+  }
   if(E->bc0_nf.size()>0){
     fmrfile << "$BC0" <<'\n'<<""<< E->bc0_nf.size() <<'\n';
     for(auto i : E->bc0_nf ){ int n,f; std::tie(n,f)=i;
-      fmrfile << "" << n <<" "<< f <<'\n'; };
-  };
+      fmrfile << "" << n <<" "<< f <<'\n'; }
+  }
   if(E->bcs_vals.size()>0){
     fmrfile << "$BCS" <<'\n'<<""<< E->bcs_vals.size() <<'\n';
     for(auto i : E->bcs_vals ){ int n,f; FLOAT_MESH v; std::tie(n,f,v)=i;
-      fmrfile << "" << n <<" "<< f <<" "<< v <<'\n'; };
-  };
+      fmrfile << "" << n <<" "<< f <<" "<< v <<'\n'; }
+  }
   if(E->rhs_vals.size()>0){
     fmrfile << "$RHS" <<'\n'<<""<< E->rhs_vals.size() <<'\n';
     for(auto i : E->rhs_vals ){ int n,f; FLOAT_MESH v; std::tie(n,f,v)=i;
-      fmrfile << "" << n <<" "<< f <<" "<< v <<'\n'; };
-  };
-  //
+      fmrfile << "" << n <<" "<< f <<" "<< v <<'\n'; }
+  }
   fmrfile.close();
-  //};
-  return 0;}
+  return 0;
+}
 //-------------------------------------------------------------------
