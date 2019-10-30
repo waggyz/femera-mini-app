@@ -502,9 +502,9 @@ int main( int argc, char** argv ) {
           E->node_coor[d* l+i ]=E0->node_coor[d* n0+i ]; }
       }
     }
+  part_n = partlist.size()-1;
   }// Done partitioning by gmsh slices or volume physical IDs.
   M->list_elem = partlist;
-  part_n = partlist.size()-1;
 #if 0
   std::cout << "Made " << part_n <<":"<<M->list_elem.size()
     <<" partitions."<<std::endl;
@@ -525,7 +525,7 @@ int main( int argc, char** argv ) {
   if( (bc0_at.size()+bcs_at.size()+rhs_at.size()) > 0 ){
     // Boundary conditions @
 #pragma omp parallel for schedule(static)
-    for(uint e=1; e<M->list_elem.size(); e++){
+    for(uint e=1; e<M->list_elem.size(); e++){//FIXME Merge with loops above?
       Elem* E=M->list_elem[e];
       int glid; INT_MESH loid;
       FLOAT_MESH loc,amt; INT_DOF f,g;
