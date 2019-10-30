@@ -653,39 +653,39 @@ int main( int argc, char** argv ) {
         for(uint i=0;i<props.size();i++){ prop[i]=props[i]; }
         Y=new ElastIso3D(prop[0],prop[1]);
       }
-      if(tcon_part[part_i].size()>0){
+      if(tcon_part.count(part_i)>0){
         if(verbosity>1){
           std::cout << "Setting partition thermal conductivities..." <<'\n'; }
         Y->ther_cond.resize(tcon_part[part_i].size());
         for(uint i=0; i<tcon_part[part_i].size(); i++){
           Y->ther_cond[i] = tcon_part[part_i][i]; }
-      }else if(tcon_part[0].size()>0){
+      }else if(tcon_part.count(0)>0){
         if(verbosity>1){
           std::cout << "Setting model thermal conductivity..." <<'\n'; }
         Y->ther_cond.resize(tcon_part[0].size());
         for(uint i=0; i<tcon_part[0].size(); i++){
           Y->ther_cond[i] = tcon_part[0][i]; }
       }
-      if(texp_part[part_i].size()>0){
+      if(texp_part.count(part_i)>0){
         if(verbosity>1){
           std::cout << "Setting partition thermal expansions..." <<'\n'; }
         Y->ther_expa.resize(texp_part[part_i].size());
         for(uint i=0; i<texp_part[part_i].size(); i++){
           Y->ther_expa[i] = texp_part[part_i][i]; }
-      }else if(texp_part[0].size()>0){
+      }else if(texp_part.count(0)>0){
         if(verbosity>1){
           std::cout << "Setting model thermal expansion..." <<'\n'; }
         Y->ther_expa.resize(texp_part[0].size());
         for(uint i=0; i<texp_part[0].size(); i++){
           Y->ther_expa[i] = texp_part[0][i]; }
       }
-      if(plas_part[part_i].size()>0){
+      if(plas_part.count(part_i)>0){
         if(verbosity>1){
           std::cout << "Setting partition plasticities..." <<'\n'; }
         Y->plas_prop.resize(plas_part[part_i].size());
         for(uint i=0; i<plas_part[part_i].size(); i++){
           Y->plas_prop[i] = plas_part[part_i][i]; }
-      }else if(plas_part[0].size()>0){
+      }else if(plas_part.count(0)>0){
         if(verbosity>1){
           std::cout << "Setting model plasticity..." <<'\n'; }
         Y->plas_prop.resize(plas_part[0].size());
@@ -697,9 +697,6 @@ int main( int argc, char** argv ) {
       //Mesh::part t(M->list_elem[part_i],Y,S);
       Mesh::part t(M->list_elem[part_i],Y,new PCG(0, 0, 0.0));
       M->SavePartFMR( t, pname.c_str(), false );
-      //if(verbosity>1){
-      //  std::cout << "Appending physics to " << pname << "..." <<'\n'; }
-      //Y->SavePartFMR( pname.c_str(), false );//FIXME Move to M->SavePartFMR()
     }//end saving parts loop
   }//end if ascii output
   if(save_abq){//FIXME Move to a method
