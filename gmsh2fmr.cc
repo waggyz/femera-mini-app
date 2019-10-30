@@ -440,9 +440,9 @@ int main( int argc, char** argv ) {
     if(verbosity>3){
       std::cout << "Reading " << pname << "..." <<'\n'; }
 #endif
-    //Elem* E=M->ReadMsh2( pname.c_str() );
+    Elem* E=M->ReadMsh2( pname.c_str() );
 //#pragma omp atomic write
-    partlist[part_i]=M->ReadMsh2( pname.c_str() );
+    partlist[part_i]=E;
   }
   if(!is_part){ is_part=true;//part_0=1;//FIXME This determines first saved file.
     // Partition M[0] based on physical IDs or slice it...
@@ -463,6 +463,10 @@ int main( int argc, char** argv ) {
           std::cout << "Partitioning " << pname << " by " << M->elms_phid.size()
             <<" Gmsh volume IDs..." <<'\n'; }
     }
+#ifdef _OPENMP
+    if(verbosity>0){
+      printf("Partitioning and saving %ix parallel...\n",omp_get_max_threads()); }
+#endif
     //for(auto pr : part_by ){
 #pragma omp parallel for schedule(static)
     for(uint p=0; p<part_by.size(); p++){
@@ -502,7 +506,7 @@ int main( int argc, char** argv ) {
           E->node_coor[d* l+i ]=E0->node_coor[d* n0+i ]; }
       }
     }
-  part_n = partlist.size()-1;
+  part_n = partlist.size();//-1;
   }// Done partitioning by gmsh slices or volume physical IDs.
   M->list_elem = partlist;
 #if 0
