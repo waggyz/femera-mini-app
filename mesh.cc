@@ -798,6 +798,7 @@ int Mesh::SavePartFMR( const part& P, const char* fname, bool is_bin ){
       fmrfile << "" << n <<" "<< f <<" "<< v <<'\n'; }
   }
   fmrfile.close();
+  Y->SavePartFMR( fname, is_bin );
   return 0;
 }
 //-------------------------------------------------------------------

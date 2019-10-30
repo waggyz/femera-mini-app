@@ -693,12 +693,13 @@ int main( int argc, char** argv ) {
           Y->plas_prop[i] = plas_part[0][i]; }
       }
 }
-      Solv* S=new PCG(0, 0, 0.0);
-      Mesh::part t(M->list_elem[part_i],Y,S);
+      //Solv* S=new PCG(0, 0, 0.0);
+      //Mesh::part t(M->list_elem[part_i],Y,S);
+      Mesh::part t(M->list_elem[part_i],Y,new PCG(0, 0, 0.0));
       M->SavePartFMR( t, pname.c_str(), false );
-      if(verbosity>1){
-        std::cout << "Appending physics to " << pname << "..." <<'\n'; }
-      Y->SavePartFMR( pname.c_str(), false );//FIXME Move to M->SavePartFMR()
+      //if(verbosity>1){
+      //  std::cout << "Appending physics to " << pname << "..." <<'\n'; }
+      //Y->SavePartFMR( pname.c_str(), false );//FIXME Move to M->SavePartFMR()
     }//end saving parts loop
   }//end if ascii output
   if(save_abq){//FIXME Move to a method
