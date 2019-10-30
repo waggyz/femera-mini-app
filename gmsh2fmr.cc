@@ -465,7 +465,7 @@ int main( int argc, char** argv ) {
     }
 #ifdef _OPENMP
     if(verbosity>0){
-      printf("Partitioning and saving %ix parallel...\n",omp_get_max_threads()); }
+      printf("Partitioning %ix parallel...\n",omp_get_max_threads()); }
 #endif
     //for(auto pr : part_by ){
 #pragma omp parallel for schedule(static)
@@ -624,87 +624,84 @@ int main( int argc, char** argv ) {
       std::string pname = ss.str();
       if(verbosity>1){
         std::cout << "Saving part " << pname << "..." <<'\n'; }
-      //if(save_bin){
-      //  M->list_elem[part_i]->SavePartFMR( pname.c_str(), true  ); }
-      if(save_asc){
-        //M->list_elem[part_i]->SavePartFMR( pname.c_str(), false );
-        //M->SavePartFMR( M->mesh_part[part_i], pname.c_str(), false );
-        Phys* Y;
-        auto mp=mtrl_part[part_i];
-        if(mp.size()>0){
-          props.resize(mp.size());
-          for(uint i=0;i<mp.size();i++){ props[i]=mp[i]; }
-        }else if(m0.size()>0){
-          props.resize(m0.size());
-          for(uint i=0;i<m0.size();i++){ props[i]=m0[i]; }
-          if(allrand &(props.size()>3)){
-            for(uint i=0; i<3; i++){
-              props[i]=FLOAT_PHYS(std::rand())/(FLOAT_PHYS(RAND_MAX)+1.)*2.*PI;
-              }
-          }
-          if(rotfile &(props.size()>3)){
-            //FIXME Does not work unless -X0 -Z0 -X0 specified
-            for(uint i=0; i<3; i++){
-              props[i]=orislist[3* (part_i-part_0)+i ];
-              }
-          }
+      Phys* Y=new ElastIso3D(1.0,0.3);//FIXME
+#pragma omp critical
+{//FIXME why critical?
+      auto mp=mtrl_part[part_i];
+      if(mp.size()>0){
+        props.resize(mp.size());
+        for(uint i=0;i<mp.size();i++){ props[i]=mp[i]; }
+      }else if(m0.size()>0){
+        props.resize(m0.size());
+        for(uint i=0;i<m0.size();i++){ props[i]=m0[i]; }
+        if(allrand &(props.size()>3)){
+          for(uint i=0; i<3; i++){
+            props[i]=FLOAT_PHYS(std::rand())/(FLOAT_PHYS(RAND_MAX)+1.)*2.*PI;
+            }
         }
-        if(props.size()>3){
-          for(uint i=0;i<3;i++){ dirs[i]=props[i]; }
-          prop.resize(props.size()-3);
-          for(uint i=3;i<props.size();i++){ prop[i-3]=props[i]; }
-          Y=new ElastOrtho3D(prop,dirs);
-        }else{
-          prop.resize(props.size());
-          for(uint i=0;i<props.size();i++){ prop[i]=props[i]; }
-          Y=new ElastIso3D(prop[0],prop[1]);
+        if(rotfile &(props.size()>3)){
+          //FIXME Does not work unless -X0 -Z0 -X0 specified
+          for(uint i=0; i<3; i++){
+            props[i]=orislist[3* (part_i-part_0)+i ];
+            }
         }
-        if(tcon_part[part_i].size()>0){
-          if(verbosity>1){
-            std::cout << "Setting partition thermal conductivities..." <<'\n'; }
-          Y->ther_cond.resize(tcon_part[part_i].size());
-          for(uint i=0; i<tcon_part[part_i].size(); i++){
-            Y->ther_cond[i] = tcon_part[part_i][i]; }
-        }else if(tcon_part[0].size()>0){
-          if(verbosity>1){
-            std::cout << "Setting model thermal conductivity..." <<'\n'; }
-          Y->ther_cond.resize(tcon_part[0].size());
-          for(uint i=0; i<tcon_part[0].size(); i++){
-            Y->ther_cond[i] = tcon_part[0][i]; }
-        }
-        if(texp_part[part_i].size()>0){
-          if(verbosity>1){
-            std::cout << "Setting partition thermal expansions..." <<'\n'; }
-          Y->ther_expa.resize(texp_part[part_i].size());
-          for(uint i=0; i<texp_part[part_i].size(); i++){
-            Y->ther_expa[i] = texp_part[part_i][i]; }
-        }else if(texp_part[0].size()>0){
-          if(verbosity>1){
-            std::cout << "Setting model thermal expansion..." <<'\n'; }
-          Y->ther_expa.resize(texp_part[0].size());
-          for(uint i=0; i<texp_part[0].size(); i++){
-            Y->ther_expa[i] = texp_part[0][i]; }
-        }
-        if(plas_part[part_i].size()>0){
-          if(verbosity>1){
-            std::cout << "Setting partition plasticities..." <<'\n'; }
-          Y->plas_prop.resize(plas_part[part_i].size());
-          for(uint i=0; i<plas_part[part_i].size(); i++){
-            Y->plas_prop[i] = plas_part[part_i][i]; }
-        }else if(plas_part[0].size()>0){
-          if(verbosity>1){
-            std::cout << "Setting model plasticity..." <<'\n'; }
-          Y->plas_prop.resize(plas_part[0].size());
-          for(uint i=0; i<plas_part[0].size(); i++){
-            Y->plas_prop[i] = plas_part[0][i]; }
-        }
-        Solv* S=new PCG(0, 0, 0.0);
-        Mesh::part t(M->list_elem[part_i],Y,S);
-        M->SavePartFMR( t, pname.c_str(), false );
-        if(verbosity>1){
-          std::cout << "Appending physics to " << pname << "..." <<'\n'; }
-        Y->SavePartFMR( pname.c_str(), false );//FIXME Move to M->SavePartFMR()
       }
+      if(props.size()>3){
+        for(uint i=0;i<3;i++){ dirs[i]=props[i]; }
+        prop.resize(props.size()-3);
+        for(uint i=3;i<props.size();i++){ prop[i-3]=props[i]; }
+        Y=new ElastOrtho3D(prop,dirs);
+      }else{
+        prop.resize(props.size());
+        for(uint i=0;i<props.size();i++){ prop[i]=props[i]; }
+        Y=new ElastIso3D(prop[0],prop[1]);
+      }
+      if(tcon_part[part_i].size()>0){
+        if(verbosity>1){
+          std::cout << "Setting partition thermal conductivities..." <<'\n'; }
+        Y->ther_cond.resize(tcon_part[part_i].size());
+        for(uint i=0; i<tcon_part[part_i].size(); i++){
+          Y->ther_cond[i] = tcon_part[part_i][i]; }
+      }else if(tcon_part[0].size()>0){
+        if(verbosity>1){
+          std::cout << "Setting model thermal conductivity..." <<'\n'; }
+        Y->ther_cond.resize(tcon_part[0].size());
+        for(uint i=0; i<tcon_part[0].size(); i++){
+          Y->ther_cond[i] = tcon_part[0][i]; }
+      }
+      if(texp_part[part_i].size()>0){
+        if(verbosity>1){
+          std::cout << "Setting partition thermal expansions..." <<'\n'; }
+        Y->ther_expa.resize(texp_part[part_i].size());
+        for(uint i=0; i<texp_part[part_i].size(); i++){
+          Y->ther_expa[i] = texp_part[part_i][i]; }
+      }else if(texp_part[0].size()>0){
+        if(verbosity>1){
+          std::cout << "Setting model thermal expansion..." <<'\n'; }
+        Y->ther_expa.resize(texp_part[0].size());
+        for(uint i=0; i<texp_part[0].size(); i++){
+          Y->ther_expa[i] = texp_part[0][i]; }
+      }
+      if(plas_part[part_i].size()>0){
+        if(verbosity>1){
+          std::cout << "Setting partition plasticities..." <<'\n'; }
+        Y->plas_prop.resize(plas_part[part_i].size());
+        for(uint i=0; i<plas_part[part_i].size(); i++){
+          Y->plas_prop[i] = plas_part[part_i][i]; }
+      }else if(plas_part[0].size()>0){
+        if(verbosity>1){
+          std::cout << "Setting model plasticity..." <<'\n'; }
+        Y->plas_prop.resize(plas_part[0].size());
+        for(uint i=0; i<plas_part[0].size(); i++){
+          Y->plas_prop[i] = plas_part[0][i]; }
+      }
+}
+      Solv* S=new PCG(0, 0, 0.0);
+      Mesh::part t(M->list_elem[part_i],Y,S);
+      M->SavePartFMR( t, pname.c_str(), false );
+      if(verbosity>1){
+        std::cout << "Appending physics to " << pname << "..." <<'\n'; }
+      Y->SavePartFMR( pname.c_str(), false );//FIXME Move to M->SavePartFMR()
     }//end saving parts loop
   }//end if ascii output
   if(save_abq){//FIXME Move to a method
