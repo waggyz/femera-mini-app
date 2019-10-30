@@ -464,7 +464,7 @@ int main( int argc, char** argv ) {
     }
 #ifdef _OPENMP
     if(verbosity>0){
-      printf("Partitioning %ix parallel...\n",omp_get_max_threads()); }
+      printf("Splitting %ix parallel...\n",omp_get_max_threads()); }
 #endif
     //for(auto pr : part_by ){
 #pragma omp parallel for schedule(static)
