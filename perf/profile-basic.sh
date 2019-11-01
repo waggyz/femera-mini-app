@@ -307,8 +307,8 @@ if [ -f $CSVFILE ]; then
   printf " %9i   : Medium test repeats\n" $REPEAT_TEST_N >> $PROFILE
   #
   # Find a representative large model
-  if [ $(( $MED_UDOF * 40 / 1000000 )) -lt $LARGE_PART_MAX_MUDOF ]; then
-    LARGE_PART_MAX_MUDOF=$(( $MED_UDOF * 40 / 1000000 ))
+  if [ $(( $MED_UDOF * 50 / 1000000 )) -lt $LARGE_PART_MAX_MUDOF ]; then
+    LARGE_PART_MAX_MUDOF=$(( $MED_UDOF * 50 / 1000000 ))
   fi
   for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
     H=${LIST_H[I]}

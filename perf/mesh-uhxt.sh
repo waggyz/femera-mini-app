@@ -9,11 +9,6 @@ DIR=$MESHDIR"/uhxt"$H"p"$P
 if [ ! -d $DIR ]; then
   mkdir $DIR
 fi
-if [ -f $DIR"/uhxt"$H"p"$P"n1.msh" ]; then
-  if [ ! -f $DIR"/uhxt"$H"p"$P"n.msh" ]; then
-    mv $DIR"/uhxt"$H"p"$P"n1.msh" $DIR"/uhxt"$H"p"$P"n.msh"
-  fi
-fi
 if [ $H -lt 75 ]; then
   if [ ! -f $DIR"/uhxt"$H"p"$P"n1.msh" ]; then
     if [ -f $DIR"/uhxt"$H"p"$P"n.msh" ]; then
