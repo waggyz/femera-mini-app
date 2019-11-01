@@ -586,8 +586,8 @@ fi
   if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
   case $P in
   1)
-  ELEM_PER_PART=2000
-  ELEM_DELTA=2000
+  ELEM_PER_PART=5000
+  ELEM_DELTA=5000
   ;;
   2)
   ELEM_PER_PART=1000
