@@ -422,6 +422,63 @@ public:
 protected:
 private:
 };
+class ThermElastIso3D final: public Phys{
+public:
+  ThermElastIso3D(// Orthotropic Material Constructor
+    Phys::vals prop, Phys::vals dirs, Phys::vals expa, Phys::vals cond ) :
+    Phys( prop,dirs ){
+      node_d = 4;
+      ther_expa.resize(expa.size()); ther_expa=expa;
+      ther_cond.resize(cond.size()); ther_cond=cond;
+      ThermElastIso3D::MtrlProp2MatC(); 
+    }
+#if 0
+  int SavePartFMR( const char* bname, bool is_bin ) final;
+  int ReadPartFMR( const char* bname, bool is_bin ) final;
+#endif
+  int Setup( Elem* )final;
+  //int ElemLinear( std::vector<Elem*>,RESTRICT Phys::vals&,const RESTRICT Phys::vals&)
+  int BlocLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
+  int ElemLinear( Elem*,const INT_MESH,
+    const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemNonlinear( Elem*,const INT_MESH,
+    const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*,const FLOAT_SOLV*, bool) final;
+  int ElemJacobi( Elem*,FLOAT_SOLV* ) final;
+  int ElemJacobi( Elem*,FLOAT_SOLV*,const FLOAT_SOLV* ) final;
+  int ElemRowSumAbs(Elem*, FLOAT_SOLV* ) final;
+  int ElemStrain(Elem*, FLOAT_SOLV* ) final;
+  int ElemLinear( Elem* ) final;
+  int ElemJacobi( Elem* ) final;
+  int ElemStiff ( Elem* ) final;
+  int ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*) final;
+  inline int MtrlProp2MatC()final{
+    // First, set the elastic-only part
+    auto Y = new ElastIso3D(this->mtrl_prop[0],this->mtrl_prop[1]);
+    Y->MtrlProp2MatC();
+    auto n = Y->mtrl_matc.size();
+    this->mtrl_matc.resize(n+3);
+    for(uint i=0; i<n; i++){ this->mtrl_matc[i]=Y->mtrl_matc[i]; }
+    //delete Y;
+    // now set the thermal part
+    if(this->ther_expa.size()>0){ mtrl_matc[3]=ther_expa[0]; }
+    if(this->ther_cond.size()>0){ mtrl_matc[4]=ther_cond[0]; }
+#if 0
+      //FIXME Scaling applied here for conditioning the system
+      auto s = mtrl_matc[0] / mtrl_matc[N];
+      for(uint i=0;i<1;i++){ mtrl_matc[N+i] *= s; }
+      //FIXME Need to store this scaling factor in Phys* to adjust reactions
+#endif
+    // gamma = alpha * E/(1-2*nu), thermoelastic effect
+    //FIXME may be 1.0/this
+    mtrl_matc[5] = 1.0/(mtrl_matc[0] * mtrl_matc[3]);
+    //FIXME should read from .fmr file first
+    //FIXME
+    return 0;
+  }
+  Phys::vals MtrlLinear(const RESTRICT Phys::vals &e)final{ return e; }// dummy
+protected:
+private:
+};
 class ThermElastOrtho3D final: public Phys{
 public:
   ThermElastOrtho3D(// Orthotropic Material Constructor
