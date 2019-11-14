@@ -10,6 +10,8 @@ int ElastOrtho3D::BlocLinear( Elem* ,
   RESTRICT Phys::vals &, const RESTRICT Solv::vals & ){ return 1; }
 int ElastOrtho3D::ElemJacobi( Elem*, FLOAT_SOLV*, const FLOAT_SOLV* ){
   return 1; }
+int ElastOrtho3D::ElemJacNode(Elem*, FLOAT_SOLV* ){
+  return 1; }
 //
 int ElastOrtho3D::ElemNonlinear( Elem* E, const INT_MESH e0, const INT_MESH e1,
   FLOAT_SOLV* part_f, const FLOAT_SOLV* part_u, const FLOAT_SOLV*, bool ){

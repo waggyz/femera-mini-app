@@ -123,9 +123,9 @@ int ThermElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       S[2] =(H[2] + H[6])*C[2];// S[6]= S[2];//Sxz Szx
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];//------------------------------ 21 FLOP
       // Apply thermal conductivity, storing heat flux in the last ROW of S
-      S[ 9] = S[Dn* 0+Dm] * C[4];
-      S[10] = S[Dn* 1+Dm] * C[4];
-      S[11] = S[Dn* 2+Dm] * C[4];//------------------------------------ 3 FLOP
+      S[ 9] = H[Dn* 0+Dm] * C[4];
+      S[10] = H[Dn* 1+Dm] * C[4];
+      S[11] = H[Dn* 2+Dm] * C[4];//------------------------------------ 3 FLOP
 #if 1
       // Calculate volumetric thermoelastic effect temperature change
       // Small and neglected for quasi-static (high-cycle?) fatigue loading

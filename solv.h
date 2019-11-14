@@ -14,7 +14,8 @@ public:
     SOLV_GD=0, SOLV_CG=1, SOLV_NG=2, SOLV_CR=3
   };
   enum Cond {
-    COND_NONE=0, COND_JACO=1, COND_TANG=2, COND_ROW1=11, COND_STRA=12
+    COND_NONE= 0, COND_JACO= 1, COND_TANG= 2, COND_JAC3= 3,
+    COND_ROW1=11, COND_STRA=12
   };
   INT_MESH iter=0, iter_max=0;
   INT_MESH uinp_n,udof_n;

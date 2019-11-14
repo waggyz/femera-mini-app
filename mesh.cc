@@ -648,11 +648,12 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
   if(  t_plas_prop.size()>0 ){ has_plas=true; }
   if( has_therm ){
     if(t_mtrl_dirs.size()<3){
-      Y = new ElastIso3D(t_mtrl_prop[0],t_mtrl_prop[1]);//FIXME
+      Y = new ThermElastIso3D(t_mtrl_prop,t_mtrl_dirs,t_ther_expa,t_ther_cond);
 #if VERB_MAX>1
 #pragma omp atomic update
       this->iso3_part_n+=1;
-      //this->ther_part_n+=1;
+#pragma omp atomic update
+      this->ther_part_n+=1;
 #endif
     }else{
       Y = new ThermElastOrtho3D(t_mtrl_prop,t_mtrl_dirs,t_ther_expa,t_ther_cond);

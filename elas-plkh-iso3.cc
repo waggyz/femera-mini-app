@@ -13,6 +13,8 @@ int ElastPlastKHIso3D::BlocLinear( Elem*,
 int ElastPlastKHIso3D::ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*){
   return 1;
 }
+int ElastPlastKHIso3D::ElemJacNode(Elem*, FLOAT_SOLV* ){
+  return 1; }
 int ElastPlastKHIso3D::ElemStiff(Elem* E  ){
   //FIXME Doesn't do rotation yet
   const uint Dm = 3;//E->mesh_d

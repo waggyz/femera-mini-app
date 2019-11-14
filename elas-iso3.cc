@@ -15,6 +15,8 @@ int ElastIso3D::ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*){
 }
 int ElastIso3D::ElemJacobi( Elem*, FLOAT_SOLV*, const FLOAT_SOLV* ){
   return 1; }
+int ElastIso3D::ElemJacNode(Elem*, FLOAT_SOLV* ){
+  return 1; }
 //
 int ElastIso3D::ElemNonlinear( Elem* E, const INT_MESH e0, const INT_MESH e1,
   FLOAT_SOLV* part_f, const FLOAT_SOLV* part_u, const FLOAT_SOLV*, bool ){

@@ -62,31 +62,37 @@ MMPFLAGS = -DOMP_NESTED=true -DOMP_PROC_BIND=spread,close
 CPUMODELC:=$(CPUMODEL)-$(CSTR)
 
 FEMERA_COMMON = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
- halo-pcg-omp.cc halo-ncg-omp.cc halo-pcr-dummy.cc \
- elas-iso3.cc elas-ort3.cc elas-plkh-iso3.cc elas-ther-ort3.cc
+ halo-pcg-omp.cc halo-ncg-omp.cc halo-pcr-dummy.cc\
+ elas-iso3.cc elas-ort3.cc elas-plkh-iso3.cc elas-ther-iso3.cc elas-ther-ort3.cc
 
 
 FEMERA_BASE_C = $(FEMERA_COMMON)\
- elas-iso3-base.cc elas-ort3-bas2.cc elas-ther-ort3-bas2.cc elas-plkh-iso3-ref.cc
+ elas-iso3-base.cc elas-ort3-bas2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-bas2.cc\
+ elas-plkh-iso3-ref.cc
 
 ifneq (,$(findstring AVX,$(CPUSIMD)))
 FEMERA_MINI_C = $(FEMERA_COMMON)\
- elas-iso3-vect.cc elas-ort3-vec2.cc elas-ther-ort3-vec2.cc elas-plkh-iso3-vect.cc
+ elas-iso3-vect.cc elas-ort3-vec2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-vec2.cc\
+ elas-plkh-iso3-vect.cc
 else
 FEMERA_MINI_C = $(FEMERA_BASE_C)
 endif
 
 FEMERA_REF_C = $(FEMERA_COMMON)\
- elas-iso3-ref.cc elas-ort3-ref2.cc elas-ther-ort3-ref2.cc elas-plkh-iso3-ref.cc
+ elas-iso3-ref.cc elas-ort3-ref2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-ref2.cc\
+ elas-plkh-iso3-ref.cc
 
 FEMERA_NAIV_C = $(FEMERA_COMMON)\
- elas-iso3-ref.cc elas-ort3-nai2.cc elas-ther-ort3-ref2.cc elas-plkh-iso3-ref.cc
+ elas-iso3-ref.cc elas-ort3-nai2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-ref2.cc\
+ elas-plkh-iso3-ref.cc
 
 HYBRID_GCC_C = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
  halo-pcg-omp.cc halo-ncg-omp.cc halo-pcr-dummy.cc\
- elas-iso3.cc elas-ort3.cc elas-ther-ort3.cc
+ elas-iso3.cc elas-ort3.cc elas-ther-iso3.cc elas-ther-ort3.cc
 
-HYBRID_ICC_C = elas-iso3-vect.cc elas-ort3-vec2.cc elas-ther-ort3-vec2.cc  elas-plkh-iso3-ref.cc
+HYBRID_ICC_C = elas-iso3-vect.cc elas-ort3-vec2.cc\
+ elas-ther-iso3-bas2.cc elas-ther-ort3-vec2.cc\
+ elas-plkh-iso3-ref.cc
 
 CEXT = cc
 ODIR = mini.o
@@ -151,11 +157,29 @@ test-iso : mini-omp gmsh2fmr
 	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
 
 test-mmp : mini-mmp
-	echo ./femera-mmp-$(CPUMODELC) -v2  -m8 -n2 -c2 -p cube/unst19p1n16
+	echo ./femera-mmp-$(CPUMODELC) -v2 -m8 -n2 -c2 -p cube/unst19p1n16
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread,close; \
 	export OMP_NESTED=true; export OMP_MAX_ACTIVE_LEVELS=2; \
 	./femera-mmp-$(CPUMODELC) -v2 -m8 -n2 -c2 \
 	-p cube/unst19p1n16
+
+test-thermal : mini-omp gmsh2fmr
+	./gmsh2fmr-$(CPUMODELC) -v3 \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 -Tu10 \
+	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 -R \
+	-ap cube/unit1p1n2;
+	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unit1p2n2
+	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
+	command /usr/bin/time -v --append -o $(CPUMODELC).log \
+	./femera-$(CPUMODELC) -v3 -c1 -d1 -p cube/unit1p2n2
+	./gmsh2fmr-$(CPUMODELC) -v3 \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 -Tu10 \
+	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 \
+	-ap cube/unit1p1n2;
+	echo ./femerq-$(CPUMODELC) -v1 -c$(NCPU) -p cube/unit1p1n2
+	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
+	command /usr/bin/time -v --append -o $(CPUMODELC).log \
+	./femera-$(CPUMODELC) -v2 -c$(NCPU) -d1 -r1e-6 -p cube/unit1p1n2
 
 test-plastic :  gmsh2fmr mini-omp
 	./gmsh2fmr-$(CPUMODELC) -v1 \

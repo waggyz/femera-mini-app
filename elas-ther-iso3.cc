@@ -9,25 +9,25 @@
 #include <cstring>// std::memcpy
 #include "femera.h"
 //
-int ThermElastOrtho3D::ElemLinear( Elem* ){ return 1; };//FIXME
-int ThermElastOrtho3D::ElemJacobi( Elem* ){ return 1; };//FIXME
-int ThermElastOrtho3D::ElemStiff( Elem* ){ return 1; };//FIXME
-int ThermElastOrtho3D::BlocLinear( Elem* ,
+int ThermElastIso3D::ElemLinear( Elem* ){ return 1; };//FIXME
+int ThermElastIso3D::ElemJacobi( Elem* ){ return 1; };//FIXME
+int ThermElastIso3D::ElemStiff( Elem* ){ return 1; };//FIXME
+int ThermElastIso3D::BlocLinear( Elem* ,
   RESTRICT Phys::vals &, const RESTRICT Solv::vals & ){ return 1; };
-int ThermElastOrtho3D::ElemStrain( Elem* ,FLOAT_SOLV*  ){ return 1; }
-int ThermElastOrtho3D::ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*){
+int ThermElastIso3D::ElemStrain( Elem* ,FLOAT_SOLV*  ){ return 1; }
+int ThermElastIso3D::ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*){
   return 1;
 }
-int ThermElastOrtho3D::ElemJacobi( Elem*, FLOAT_SOLV*, const FLOAT_SOLV* ){
+int ThermElastIso3D::ElemJacobi( Elem*, FLOAT_SOLV*, const FLOAT_SOLV* ){
   return 1; }
-int ThermElastOrtho3D::ElemJacNode(Elem*, FLOAT_SOLV* ){
+int ThermElastIso3D::ElemJacNode(Elem*, FLOAT_SOLV* ){
   return 1; }
 //
-int ThermElastOrtho3D::ElemNonlinear( Elem* E, const INT_MESH e0, const INT_MESH e1,
+int ThermElastIso3D::ElemNonlinear( Elem* E, const INT_MESH e0, const INT_MESH e1,
   FLOAT_SOLV* part_f, const FLOAT_SOLV* part_u, const FLOAT_SOLV*, bool ){
   return this->ElemLinear( E, e0,e1, part_f, part_u );
   }
-int ThermElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* part_d ){
+int ThermElastIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* part_d ){
   //FIXME Doesn't do rotation yet
   const uint Dm = 3;//this->mesh_d
   const uint Dn = this->node_d;
@@ -44,16 +44,15 @@ int ThermElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* part_d ){
   FLOAT_PHYS G[Ne],jac[Nj];
   for(uint j=0; j<(Ne*6); j++){ B[j]=0.0; };
   const FLOAT_PHYS D[]={
-    mtrl_matc[0],mtrl_matc[3],mtrl_matc[5],0.0,0.0,0.0,
-    mtrl_matc[3],mtrl_matc[1],mtrl_matc[4],0.0,0.0,0.0,
-    mtrl_matc[5],mtrl_matc[4],mtrl_matc[2],0.0,0.0,0.0,
-    0.0,0.0,0.0,mtrl_matc[6]*2.0,0.0,0.0,
-    0.0,0.0,0.0,0.0,mtrl_matc[7]*2.0,0.0,
-    0.0,0.0,0.0,0.0,0.0,mtrl_matc[8]*2.0};
+    mtrl_matc[0],mtrl_matc[1],mtrl_matc[1],0.0,0.0,0.0,
+    mtrl_matc[1],mtrl_matc[0],mtrl_matc[1],0.0,0.0,0.0,
+    mtrl_matc[1],mtrl_matc[1],mtrl_matc[0],0.0,0.0,0.0,
+    0.0,0.0,0.0,mtrl_matc[2]*2.0,0.0,0.0,
+    0.0,0.0,0.0,0.0,mtrl_matc[2]*2.0,0.0,
+    0.0,0.0,0.0,0.0,0.0,mtrl_matc[2]*2.0};
   const FLOAT_PHYS scal_disp = udof_magn[0] ;
   FLOAT_PHYS scal_ther = udof_magn[3] * 5e-4;//FIXME magic number
 #if VERB_MAX>10
-  printf("Jacobi Preconditioner\n");
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
   for(uint j=0;j<mtrl_matc.size();j++){
     if(j%Dm==0){printf("\n");}
@@ -118,9 +117,9 @@ int ThermElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* part_d ){
           for(uint k=0; k<Dm ; k++){
             part_d[E->elem_conn[Nc*ie+i]*Dn+Dm] +=// 1e-4* //1e-3 ok
               //G[Nc* k+i] * mtrl_matc[12+k] * G[Nc* k+i] * this->udof_magn[j] * w;
-              G[Nc* 0+i] * G[Nc* k+i]*mtrl_matc[12+0] * scal_ther * w
-             +G[Nc* 1+i] * G[Nc* k+i]*mtrl_matc[12+1] * scal_ther * w
-             +G[Nc* 2+i] * G[Nc* k+i]*mtrl_matc[12+2] * scal_ther * w;
+              G[Nc* 0+i] * G[Nc* k+i]*mtrl_matc[4] * scal_ther * w
+             +G[Nc* 1+i] * G[Nc* k+i]*mtrl_matc[4] * scal_ther * w
+             +G[Nc* 2+i] * G[Nc* k+i]*mtrl_matc[4] * scal_ther * w;
           }
         }
       //}
@@ -140,7 +139,7 @@ int ThermElastOrtho3D::ElemJacobi(Elem* E, FLOAT_SOLV* part_d ){
   return 0;
 };
 
-int ThermElastOrtho3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* part_d ){
+int ThermElastIso3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* part_d ){
   //FIXME Doesn't do rotation yet
   const uint ndof   = 3;//this->node_d
   //const int mesh_d = E->elem_d;
