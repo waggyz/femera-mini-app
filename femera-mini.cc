@@ -141,7 +141,7 @@ int main( int argc, char** argv ){
   if( verbosity > VERB_MAX ){
     std::cout <<"WARNING Verbosity "<< verbosity
     <<" requested is more than compiled verbosity maximum "
-    << VERB_MAX <<". Downgrading to verbosity "<<VERB_MAX <<"."<<'\n';
+    << VERB_MAX <<"."<<'\n'<<"WARNING Downgrading to verbosity "<<VERB_MAX <<"."<<'\n';
     verbosity=VERB_MAX;
   }
   // Find Mesh Files ================================================
