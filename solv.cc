@@ -22,6 +22,7 @@ int Solv::Precond(Elem* E, Phys* Y){// Jacobi Preconditioner
 #endif
     break; }
   case(Solv::COND_JAC3):{
+    part_d = align_resize( data_d, 3*udof_n, valign_byte );//FIXME Resized after init
     Y->ElemJacNode( E, this->part_d );
 #if 0
     Y->ElemJacNode( E, this->part_d, this->part_u );

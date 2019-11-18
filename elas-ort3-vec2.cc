@@ -108,7 +108,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #ifdef FETCH_JAC
         std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
 #endif
-        const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
+        const INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
 #endif
@@ -117,6 +117,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       } }
       // [H] Small deformation tensor
       // [H][RT] : matmul3x3x3T
+#if 0
       {// begin scoping unit
       __m256d vS[Nd];
       {//FIXME revert Svoigt[6] to __m256d Svoigt[2]?
@@ -124,6 +125,14 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       compute_ort_s_voigt( &Svoigt[0], &vH[0], &vC[0], dw );
       rotate_s_voigt( &vS[0], &Svoigt[0], &vR[0] );
       }
+#else
+      // Reuse vH instead of new vS
+      {//FIXME revert Svoigt[6] to __m256d Svoigt[2]?
+      FLOAT_PHYS VECALIGNED Svoigt[6];
+      compute_ort_s_voigt( &Svoigt[0], &vH[0], &vC[0], dw );
+      rotate_s_voigt( &vH[0], &Svoigt[0], &vR[0] );
+      }
+#endif
       // [S][R] : matmul3x3x3, R is transposed
       // initialize element f
 #if 0
@@ -158,8 +167,12 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       }
 #endif
 #endif
+#if 0
       accumulate_f( &vf[0], &vS[0], &G[0], Nc );
       } // end variable scope
+#else
+      accumulate_f( &vf[0], &vH[0], &G[0], Nc );
+#endif
     }//end intp loop
 #if VERB_MAX>12
     printf( "ff:");
