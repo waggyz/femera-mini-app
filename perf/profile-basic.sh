@@ -631,6 +631,8 @@ fi
           echo $PERFDIR/mesh-uhxt.sh $LRG_H $P $NTARGET "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
         fi
       fi
+    else
+      N=$NTARGET
     fi
     ELEM_PER_PART=$(( $ELEM_PER_PART + $ELEM_DELTA ))
     #if [[ $ELEM_PER_PART -gt 20000 ]]; then FINISHED=TRUE; fi
