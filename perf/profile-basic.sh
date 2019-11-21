@@ -601,8 +601,9 @@ fi
   TEST_PART_MIN=1000
   FINISHED=""
   while [ ! $FINISHED ]; do
-    if [ $NTARGET -ge TEST_PART_MIN ]; then
+    #FIXME This should fix skylake profiles, but may break others
     NTARGET=$(( $LRG_NELEM / $ELEM_PER_PART ))
+    if [ $NTARGET -ge TEST_PART_MIN ]; then
     if [ $NTARGET -ge 1000 ]; then
       NXYZ=($(python perf/part_slice_xyz.py -n $NTARGET -c $C))
       N=${NXYZ[0]}
