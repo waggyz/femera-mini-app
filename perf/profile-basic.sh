@@ -601,34 +601,34 @@ fi
   TEST_PART_MIN=1000
   FINISHED=""
   while [ ! $FINISHED ]; do
-    #FIXME This should fix skylake profiles, but may break others
     NTARGET=$(( $LRG_NELEM / $ELEM_PER_PART ))
-    if [ $NTARGET -ge TEST_PART_MIN ]; then
-    if [ $NTARGET -ge 1000 ]; then
-      NXYZ=($(python perf/part_slice_xyz.py -n $NTARGET -c $C))
-      N=${NXYZ[0]}
-    else
-      N=$(( $NTARGET / $C * $C ))
-    fi
-    HAS_TEST=`awk -F, -v nn=$LRG_NNODE -v c=$CPUCOUNT -v n=$N \
-      '($2==nn)&&($4==n)&&($9==c){print $4; exit}' $CSVFILE`
-    if [ -z "$HAS_TEST" ]; then
-      $PERFDIR/mesh-uhxt.sh $LRG_H $P $NTARGET "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
-      MESHNAME="uhxt"$LRG_H"p"$P"n"$N
-      MESH=$MESHDIR"/uhxt"$LRG_H"p"$P/$MESHNAME
-      if [ -f $MESH"_"$N".fmr" ]; then
-        echo "Running "$ITERS" iterations of "$MESHNAME\
-          "("$ELEM_PER_PART" elem/part),"\
-          $REPEAT_TEST_N" times..."
-        for I in $(seq 1 $REPEAT_TEST_N ); do
-          $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
-            -p $MESH >> $CSVFILE
-        done
+    if [ $NTARGET -ge $TEST_PART_MIN ]; then
+      #FIXME This should fix skylake profiles, but may break others
+      if [ $NTARGET -ge 1000 ]; then
+        NXYZ=($(python perf/part_slice_xyz.py -n $NTARGET -c $C))
+        N=${NXYZ[0]}
       else
-        echo ERROR gmsh2fmr failed. Try it again with more memory:
-        echo $PERFDIR/mesh-uhxt.sh $LRG_H $P $NTARGET "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
+        N=$(( $NTARGET / $C * $C ))
       fi
-    fi
+      HAS_TEST=`awk -F, -v nn=$LRG_NNODE -v c=$CPUCOUNT -v n=$N \
+        '($2==nn)&&($4==n)&&($9==c){print $4; exit}' $CSVFILE`
+      if [ -z "$HAS_TEST" ]; then
+        $PERFDIR/mesh-uhxt.sh $LRG_H $P $NTARGET "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
+        MESHNAME="uhxt"$LRG_H"p"$P"n"$N
+        MESH=$MESHDIR"/uhxt"$LRG_H"p"$P/$MESHNAME
+        if [ -f $MESH"_"$N".fmr" ]; then
+          echo "Running "$ITERS" iterations of "$MESHNAME\
+            "("$ELEM_PER_PART" elem/part),"\
+            $REPEAT_TEST_N" times..."
+          for I in $(seq 1 $REPEAT_TEST_N ); do
+            $EXEDIR"/femerq-"$CPUMODEL"-"$CSTR -v1 -c$C -i$ITERS -r$RTOL\
+              -p $MESH >> $CSVFILE
+          done
+        else
+          echo ERROR gmsh2fmr failed. Try it again with more memory:
+          echo $PERFDIR/mesh-uhxt.sh $LRG_H $P $NTARGET "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
+        fi
+      fi
     fi
     ELEM_PER_PART=$(( $ELEM_PER_PART + $ELEM_DELTA ))
     #if [[ $ELEM_PER_PART -gt 20000 ]]; then FINISHED=TRUE; fi
