@@ -598,8 +598,10 @@ fi
   ELEM_DELTA=500
   ;;
   esac
+  TEST_PART_MIN=1000
   FINISHED=""
   while [ ! $FINISHED ]; do
+    if [ $NTARGET -ge TEST_PART_MIN ]; then
     NTARGET=$(( $LRG_NELEM / $ELEM_PER_PART ))
     if [ $NTARGET -ge 1000 ]; then
       NXYZ=($(python perf/part_slice_xyz.py -n $NTARGET -c $C))
@@ -625,6 +627,7 @@ fi
         echo ERROR gmsh2fmr failed. Try it again with more memory:
         echo $PERFDIR/mesh-uhxt.sh $LRG_H $P $NTARGET "$MESHDIR" "$EXEDIR/$GMSH2FMR" $PHYS
       fi
+    fi
     fi
     ELEM_PER_PART=$(( $ELEM_PER_PART + $ELEM_DELTA ))
     #if [[ $ELEM_PER_PART -gt 20000 ]]; then FINISHED=TRUE; fi
