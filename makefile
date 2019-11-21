@@ -156,6 +156,14 @@ test-iso : mini-omp gmsh2fmr
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
 
+test-ort : mini-omp gmsh2fmr
+	./gmsh2fmr-$(CPUMODELC) -v1 \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 \
+	-M0 -E100e9 -N0.3 -R -ap cube/unst19p1n16;
+	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
+	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
+	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
+
 test-mmp : mini-mmp
 	echo ./femera-mmp-$(CPUMODELC) -v2 -m8 -n2 -c2 -p cube/unst19p1n16
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread,close; \
