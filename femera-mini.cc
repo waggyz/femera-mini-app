@@ -139,9 +139,9 @@ int main( int argc, char** argv ){
     std::cout <<"Verbosity: "<<verbosity<<" / "<< VERB_MAX <<" maximum "<<'\n';
   }
   if( verbosity > VERB_MAX ){
-    std::cout <<"WARNING Verbosity "<< verbosity
-    <<" requested is more than compiled verbosity maximum "
-    << VERB_MAX <<"."<<'\n'<<"WARNING Downgrading to verbosity "<<VERB_MAX <<"."<<'\n';
+    std::cout <<"WARNING Verbosity "<<verbosity
+    <<" requested is more than compiled verbosity maximum "<<VERB_MAX<<"."<<'\n'
+    <<"WARNING Downgrading to verbosity "<<VERB_MAX<<"."<<'\n';
     verbosity=VERB_MAX;
   }
   // Find Mesh Files ================================================
@@ -237,7 +237,7 @@ int main( int argc, char** argv ){
 #endif
 #endif
 #ifdef _OPENMP
-  if( comp_n <1){ comp_n = omp_get_max_threads(); }//omp_get_max_threads();
+  if( comp_n <1){ comp_n = omp_get_max_threads(); }
   if( comp_n >int(part_n) ){ comp_n=int(part_n); }
 #if VERB_MAX>1
   if(verbosity>1){
