@@ -611,26 +611,26 @@ private:
 };
 //FIXME These inline intrinsics functions should be in the class where used.
 static inline void accumulate_f( __m256d* vf,
-  const __m256d* a, const FLOAT_PHYS* G, const int Nc ){
+  const __m256d* vS, const FLOAT_PHYS* G, const int Nc ){
   for(int i= 0; i< 4; i++){
     vf[i]
-      +=a[0] *_mm256_set1_pd(G[4*i  ])
-      + a[1] *_mm256_set1_pd(G[4*i+1])
-      + a[2] *_mm256_set1_pd(G[4*i+2]);
+      +=vS[0] *_mm256_set1_pd(G[4*i  ])
+      + vS[1] *_mm256_set1_pd(G[4*i+1])
+      + vS[2] *_mm256_set1_pd(G[4*i+2]);
   }
   if(Nc>4){
     for(int i= 4; i<10; i++){
     vf[i]
-      +=a[0] *_mm256_set1_pd(G[4*i  ])
-      + a[1] *_mm256_set1_pd(G[4*i+1])
-      + a[2] *_mm256_set1_pd(G[4*i+2]);
+      +=vS[0] *_mm256_set1_pd(G[4*i  ])
+      + vS[1] *_mm256_set1_pd(G[4*i+1])
+      + vS[2] *_mm256_set1_pd(G[4*i+2]);
     }
     if(Nc>10){
       for(int i=10; i<20; i++){
       vf[i]
-        +=a[0] *_mm256_set1_pd(G[4*i  ])
-        + a[1] *_mm256_set1_pd(G[4*i+1])
-        + a[2] *_mm256_set1_pd(G[4*i+2]);
+        +=vS[0] *_mm256_set1_pd(G[4*i  ])
+        + vS[1] *_mm256_set1_pd(G[4*i+1])
+        + vS[2] *_mm256_set1_pd(G[4*i+2]);
       }
     }
   }
