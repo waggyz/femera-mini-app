@@ -855,33 +855,44 @@ static inline void compute_g_h(
   H[0]=_mm256_setzero_pd(); H[1]=_mm256_setzero_pd(); H[2]=_mm256_setzero_pd();
   int ig=0;
   for(int i= 0; i<Ne; i+=9){
-    { const __m256d g0 =
-	_mm256_add_pd(_mm256_mul_pd(J[0],_mm256_set1_pd(isp[i+0])),
-	  _mm256_add_pd(_mm256_mul_pd(J[1],_mm256_set1_pd(isp[i+1])),
-	    _mm256_mul_pd(J[2],_mm256_set1_pd(isp[i+2]))));
+    {
+#if 0
+      const __m256d g0 =
+        _mm256_add_pd(_mm256_mul_pd(J[0],_mm256_set1_pd(isp[i+0])),
+          _mm256_add_pd(_mm256_mul_pd(J[1],_mm256_set1_pd(isp[i+1])),
+            _mm256_mul_pd(J[2],_mm256_set1_pd(isp[i+2]))));
       H[0] = _mm256_add_pd(H[0],_mm256_mul_pd(g0,_mm256_set1_pd( u[i+0])));
       H[1] = _mm256_add_pd(H[1],_mm256_mul_pd(g0,_mm256_set1_pd( u[i+1])));
       H[2] = _mm256_add_pd(H[2],_mm256_mul_pd(g0,_mm256_set1_pd( u[i+2])));
+#else
+      const __m256d g0
+        = J[0] *_mm256_set1_pd(isp[i+0])
+        + J[1] *_mm256_set1_pd(isp[i+1])
+        + J[2] *_mm256_set1_pd(isp[i+2]);
+      H[0]+=g0 *_mm256_set1_pd(  u[i+0]);
+      H[1]+=g0 *_mm256_set1_pd(  u[i+1]);
+      H[2]+=g0 *_mm256_set1_pd(  u[i+2]);
+#endif
     _mm256_store_pd(&G[ig],g0);
     ig+=4;
     }if((i+5)<Ne){
-      const __m256d g1 =
-	_mm256_add_pd(_mm256_mul_pd(J[0],_mm256_set1_pd(isp[i+3])),
-	  _mm256_add_pd(_mm256_mul_pd(J[1],_mm256_set1_pd(isp[i+4])),
-	    _mm256_mul_pd(J[2],_mm256_set1_pd(isp[i+5]))));
-      H[0] = _mm256_add_pd(H[0],_mm256_mul_pd(g1,_mm256_set1_pd( u[i+3])));
-      H[1] = _mm256_add_pd(H[1],_mm256_mul_pd(g1,_mm256_set1_pd( u[i+4])));
-      H[2] = _mm256_add_pd(H[2],_mm256_mul_pd(g1,_mm256_set1_pd( u[i+5])));
+      const __m256d g1
+        = J[0] *_mm256_set1_pd(isp[i+3])
+        + J[1] *_mm256_set1_pd(isp[i+4])
+        + J[2] *_mm256_set1_pd(isp[i+5]);
+      H[0]+=g1 *_mm256_set1_pd(  u[i+3]);
+      H[1]+=g1 *_mm256_set1_pd(  u[i+4]);
+      H[2]+=g1 *_mm256_set1_pd(  u[i+5]);
       _mm256_store_pd(&G[ig],g1);
       ig+=4;
     }if((i+8)<Ne){
-      const __m256d g2 =
-	_mm256_add_pd(_mm256_mul_pd(J[0],_mm256_set1_pd(isp[i+6])),
-	  _mm256_add_pd(_mm256_mul_pd(J[1],_mm256_set1_pd(isp[i+7])),
-	    _mm256_mul_pd(J[2],_mm256_set1_pd(isp[i+8]))));
-      H[0] = _mm256_add_pd(H[0],_mm256_mul_pd(g2,_mm256_set1_pd( u[i+6])));
-      H[1] = _mm256_add_pd(H[1],_mm256_mul_pd(g2,_mm256_set1_pd( u[i+7])));
-      H[2] = _mm256_add_pd(H[2],_mm256_mul_pd(g2,_mm256_set1_pd( u[i+8])));
+      const __m256d g2
+        = J[0] *_mm256_set1_pd(isp[i+6])
+        + J[1] *_mm256_set1_pd(isp[i+7])
+        + J[2] *_mm256_set1_pd(isp[i+8]);
+      H[0]+=g2 *_mm256_set1_pd(  u[i+6]);
+      H[1]+=g2 *_mm256_set1_pd(  u[i+7]);
+      H[2]+=g2 *_mm256_set1_pd(  u[i+8]);
       _mm256_store_pd(&G[ig],g2);
       ig+=4;
     }
