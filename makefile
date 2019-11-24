@@ -21,7 +21,7 @@ CXX=icc
 CSTR=icc
 CPPFLAGS=-std=c++11 -Wall -Wextra -Ofast -xHost -axSKYLAKE-AVX512 \
  -ffast-math -no-fast-transcendentals \
- -no-inline-max-size -no-inline-max-total-size -g
+ -no-inline-max-size -no-inline-max-total-size -qoverride-limits -g
 # -march=native
 SERFLAGS=-fno-alias -diag-disable 3180
 NUMA=2
@@ -33,7 +33,7 @@ CXX=icc
 CSTR=icc
 CPPFLAGS=-restrict -std=c++11 -Wall -Wextra -O2 -ansi-alias\
  -ffast-math -no-fast-transcendentals\
- -no-inline-max-size -no-inline-max-total-size -xSKYLAKE-AVX512 -g
+ -no-inline-max-size -no-inline-max-total-size -qoverride-limits -xSKYLAKE-AVX512 -g
 SERFLAGS=-fno-alias -diag-disable 3180
 # CPPLOG="-Wsuggest-final-types -Wsuggest-final-methods\
 #  -fopt-info-vec-optimized 2>>$(CPUMODEL)-$(CSTR).err;
