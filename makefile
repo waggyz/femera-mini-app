@@ -54,7 +54,7 @@ OMPFLAGS:=$(OMPFLAGS) -DHAS_PRAGMA_SIMD
 endif
 
 ifneq (,$(findstring AVX2,$(CPUSIMD)))
-CPPFLAGS:=$(CPPFLAGS) -DHAS_AVX2
+ CPPFLAGS:=$(CPPFLAGS) -DHAS_AVX2
 endif
 
 MMPFLAGS = -DOMP_NESTED=true -DOMP_PROC_BIND=spread,close
@@ -70,13 +70,13 @@ FEMERA_BASE_C = $(FEMERA_COMMON)\
  elas-iso3-base.cc elas-ort3-bas2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-bas2.cc\
  elas-plkh-iso3-ref.cc
 
- # ifneq (,$(findstring AVX,$(CPUSIMD)))
- FEMERA_MINI_C = $(FEMERA_COMMON)\
-  elas-iso3-vect.cc elas-ort3-vec2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-vec2.cc\
-  elas-plkh-iso3-vect.cc
-# else
-# FEMERA_MINI_C = $(FEMERA_BASE_C)
-# endif
+ifneq (,$(findstring AVX,$(CPUSIMD)))
+FEMERA_MINI_C = $(FEMERA_COMMON)\
+ elas-iso3-vect.cc elas-ort3-vec2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-vec2.cc\
+ elas-plkh-iso3-vect.cc
+else
+FEMERA_MINI_C = $(FEMERA_BASE_C)
+endif
 
 FEMERA_REF_C = $(FEMERA_COMMON)\
  elas-iso3-ref.cc elas-ort3-ref2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-ref2.cc\
@@ -243,37 +243,37 @@ test-gmsh2fmr : gmsh2fmr
 	-M2 -E100e9 -N0.3 -Z1 -X0 -Z0 \
 	-ap cube/unit1p2n2;
 
-$(ODIR)/%.$(OEXT) : %.cc *.h
+$(ODIR)/%.$(OEXT) : %.cc *.h  phys-inline.cc
 	echo $(CXX) ... -o $@
 	$(CXX) -c $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DOMP_SCHEDULE=static -DFETCH_JAC -DHAS_TEST \
 	$< -o $@ $(CPPLOG)
 
-$(ODIR)/%.$(QEXT) : %.cc *.h
+$(ODIR)/%.$(QEXT) : %.cc *.h  phys-inline.cc
 	echo $(CXX) ... -o $@
 	$(CXX) -c $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DOMP_SCHEDULE=static -DFETCH_JAC -DVERB_MAX=1 \
 	$< -o $@ $(CPPLOG)
 
-$(ODIR)/%.$(MEXT) : %.cc *.h
+$(ODIR)/%.$(MEXT) : %.cc *.h  phys-inline.cc
 	echo $(CXX) ... -o $@
 	$(CXX) -c $(OMPFLAGS) $(MMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DOMP_SCHEDULE=static -DFETCH_JAC -DHAS_TEST \
 	$< -o $@ $(CPPLOG)
 
-$(ODIR)/%.$(KEXT) : %.cc *.h
+$(ODIR)/%.$(KEXT) : %.cc *.h  phys-inline.cc
 	echo $(CXX) ... -o $@
 	$(CXX) -c $(OMPFLAGS) $(MMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DOMP_SCHEDULE=static -DFETCH_JAC -DHAS_TEST -DVERB_MAX=1 \
 	$< -o $@ $(CPPLOG)
 
-$(ODIR)/%.$(SEXT) : %.cc *.h
+$(ODIR)/%.$(SEXT) : %.cc *.h  phys-inline.cc
 	echo $(CXX) ... -o $@
 	$(CXX) -c $(SERFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DFETCH_JAC \
 	$< -o $@ $(CPPLOG)
 
-$(ODIR)/%.$(REXT) : %.cc *.h
+$(ODIR)/%.$(REXT) : %.cc *.h  phys-inline.cc
 	echo $(CXX) ... -o $@
 	$(CXX) -c $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DOMP_SCHEDULE=static -DHAS_TEST \
