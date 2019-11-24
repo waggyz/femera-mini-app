@@ -654,7 +654,7 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
       }// if plastic ----------------------------------------------------------
       else{// Linear-elastic response only
         //for(int i=0; i<12; i++){ S[i]*= dw; }
-        for(int i=0; i<3; i++){ vS[i]*= dw; }
+        for(int i=0; i<3; i++){ vS[i]*= _mm256_set1_pd( dw ); }
       }
       if(ip==0){
         for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }

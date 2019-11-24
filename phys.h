@@ -9,12 +9,12 @@ public:
   INT_DIM node_d;// Degrees of freedom per node://WAS ndof_n
   // 1 for thermal, 2 for elastic 2D, 3 for elastic 3D, 4 for thermoelastic 3D
 #if 0
-  // The followig are stored interleaved in the system vectors
+  // The following are stored interleaved in the system vectors
   INT_DIM ninp_d=3;// Inputs/node (defines size of part_u,p?)
   //                  usually ndof_d + user-defined nodal field and state vars
   INT_DIM ndof_d=3;// Unknowns/node (defines size of part_f?)
 #endif
-  //FIXME The followig will be stored in blocks, some in other arrays
+  //FIXME The following will be stored in blocks.
   INT_DIM nvar_d=0;// Inputs/node: user-defined nodal state vars
   INT_DIM evar_d=0;// Inputs/element: user-defined elemental state vars
   INT_DIM gvar_d=0;// Inputs/gauss point: user-defined state vars
@@ -28,18 +28,18 @@ public:
   //FIXME should be in Mesh* or Solv*
   //
   virtual int BlocLinear( Elem*,RESTRICT Solv::vals&,const RESTRICT Solv::vals&)=0;
-  virtual int ElemLinear( Elem*,const INT_MESH,const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*)=0;
+  virtual int ElemLinear( Elem*,const INT_MESH,const INT_MESH,
+    FLOAT_SOLV*,const FLOAT_SOLV* )=0;
   virtual int ElemNonlinear( Elem*,const INT_MESH,const INT_MESH,
-    FLOAT_SOLV*,const FLOAT_SOLV*,const FLOAT_SOLV*, bool)=0;
+    FLOAT_SOLV*,const FLOAT_SOLV*,const FLOAT_SOLV*, bool )=0;
   virtual int ElemJacobi( Elem*, FLOAT_SOLV* )=0;// Jacobi Preconditioner
   virtual int ElemJacobi( Elem*, FLOAT_SOLV*, const FLOAT_SOLV* )=0;// Nonlinear Jacobi
-  virtual int ElemJacNode( Elem*, FLOAT_SOLV* )=0;// Jacobi Preconditioner
-  //virtual int ElemJacobi( Elem*, FLOAT_SOLV*,const FLOAT_SOLV* )=0;// Nonlinear Jacobi
-  virtual int ElemRowSumAbs(Elem*, FLOAT_SOLV* )=0;// Row Norm Preconditioner
-  virtual int ElemStrain(Elem*, FLOAT_SOLV* )=0;// Applied Element Strain Preconditioner
+  virtual int ElemJacNode( Elem*, FLOAT_SOLV* )=0;// Node block Jacobi Preconditioner
+  virtual int ElemRowSumAbs( Elem*, FLOAT_SOLV* )=0;// Row Norm Preconditioner
+  virtual int ElemStrain( Elem*, FLOAT_SOLV* )=0;// Applied Strain Preconditioner
   virtual int ElemLinear( Elem* )=0;//FIXME OLD
-  virtual int ElemJacobi( Elem* )=0;//FIXME old
-  virtual int ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*)=0;
+  virtual int ElemJacobi( Elem* )=0;//FIXME OLD
+  virtual int ElemStrainStress( std::ostream&, Elem*, FLOAT_SOLV* )=0;
   //
   virtual inline int MtrlProp2MatC( )=0;//why does this inline?
   virtual Phys::vals MtrlLinear(//FIXME Not used for 3D yet
@@ -80,7 +80,7 @@ public:
   Phys::vals elas_prop;
   Phys::vals ther_expa;//FIXME Hacked thermal constants into these
   Phys::vals ther_cond;
-  Phys::vals plas_prop;//FIXME Hacked plastiicity properties into this
+  Phys::vals plas_prop;//FIXME Hacked plasticity properties into this
   //
   Phys::vals elem_vars;// Element state variables
   Phys::vals elgp_vars;// Element integration point state variables
