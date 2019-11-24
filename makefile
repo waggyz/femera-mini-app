@@ -70,13 +70,13 @@ FEMERA_BASE_C = $(FEMERA_COMMON)\
  elas-iso3-base.cc elas-ort3-bas2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-bas2.cc\
  elas-plkh-iso3-ref.cc
 
-ifneq (,$(findstring AVX,$(CPUSIMD)))
-FEMERA_MINI_C = $(FEMERA_COMMON)\
- elas-iso3-vect.cc elas-ort3-vec2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-vec2.cc\
- elas-plkh-iso3-vect.cc
-else
-FEMERA_MINI_C = $(FEMERA_BASE_C)
-endif
+ # ifneq (,$(findstring AVX,$(CPUSIMD)))
+ FEMERA_MINI_C = $(FEMERA_COMMON)\
+  elas-iso3-vect.cc elas-ort3-vec2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-vec2.cc\
+  elas-plkh-iso3-vect.cc
+# else
+# FEMERA_MINI_C = $(FEMERA_BASE_C)
+# endif
 
 FEMERA_REF_C = $(FEMERA_COMMON)\
  elas-iso3-ref.cc elas-ort3-ref2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-ref2.cc\
