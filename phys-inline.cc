@@ -345,7 +345,7 @@ static inline void rotate_s_voigt( __m256d* vS, const __m256d* vR ){
 }
 #endif
 
-
+# if 0
 //FIXME Remove these later ====================================================
 //FIXME These are used by elas-plkh-iso3-ref
 //FIXME Refactor stress and strain tensors from double* to __m256d*
@@ -538,6 +538,7 @@ static inline void compute_g_h(
   _mm256_store_pd(&H[4],a147);
   _mm256_store_pd(&H[8],a258);
 }
+#endif
 
 
 
