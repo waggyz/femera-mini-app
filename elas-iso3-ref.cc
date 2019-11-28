@@ -72,7 +72,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       for(int i=0; i<Nc; i++){
-        for(int k=0; k<Nf ; k++){ 
+        for(int k=0; k<Nf ; k++){
           for(int j=0; j<Nd ; j++){
             G[Nf* i+k ] += intp_shpg[ip*Ne+ Nd* i+j ] * Ejacs[Nj*ie+ Nd* j+k ];
       } } }
