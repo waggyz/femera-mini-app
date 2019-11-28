@@ -103,7 +103,9 @@ int PCG::Init( Elem* E, Phys* Y ){// printf("*** Init(E,Y) ***\n");
   this->BCS( E,Y );//FIXME repeated in Setup(E,Y)
   this->BC0( E,Y );
 #endif
-  this->data_f=0.0;
+  //this->data_f=0.0;
+  const uint sysn=this->udof_n;
+  for(uint i=0; i<sysn; i++){ this->part_f[i] = 0.0; }
   Y->ElemLinear( E,0,E->elem_n,this->part_f,this->part_u );
 #if 0
   const uint sysn=this->udof_n;
