@@ -76,7 +76,7 @@ protected:
     iter_max(i), udof_n(n), loca_rtol(r){
     loca_rto2=loca_rtol*loca_rtol;
 #ifdef ALIGN_SYS
-    part_f = align_resize( data_f, udof_n+8, valign_byte );// f=Au
+    part_f = align_resize( data_f, udof_n, valign_byte );// f=Au
     part_u = align_resize( data_u, udof_n, valign_byte );// solution
     part_r = align_resize( data_r, udof_n, valign_byte );// residuals
     part_d = align_resize( data_d, udof_n, valign_byte );// Preconditioner
@@ -102,7 +102,7 @@ public:
   PCG( INT_MESH n, INT_MESH i, FLOAT_PHYS r ) : Solv(n,i,r){
     meth_name="preconditioned cojugate gradient";
 #ifdef ALIGN_SYS
-    part_p = align_resize( data_p, udof_n+8, valign_byte );
+    part_p = align_resize( data_p, udof_n, valign_byte );
 #else
     part_p.resize(udof_n,0.0);// CG working vector
 #endif
