@@ -75,16 +75,17 @@ protected:
   Solv( INT_MESH n, INT_MESH i, FLOAT_PHYS r ) :
     iter_max(i), udof_n(n), loca_rtol(r){
     loca_rto2=loca_rtol*loca_rtol;
+    //FIXME part_X vectors padded to allow simd access when node_d=simd_n-1.
 #ifdef ALIGN_SYS
-    part_f = align_resize( data_f, udof_n, valign_byte );// f=Au
-    part_u = align_resize( data_u, udof_n, valign_byte );// solution
-    part_r = align_resize( data_r, udof_n, valign_byte );// residuals
-    part_d = align_resize( data_d, udof_n, valign_byte );// Preconditioner
+    part_f = align_resize( data_f, udof_n+1, valign_byte );// f=Au
+    part_u = align_resize( data_u, udof_n+1, valign_byte );// solution
+    part_r = align_resize( data_r, udof_n+1, valign_byte );// residuals
+    part_d = align_resize( data_d, udof_n+1, valign_byte );// Preconditioner
     //for(INT_MESH i=0; i<udof_n; i++){ part_0[i]=1.0; }
 #else
-    part_u.resize(udof_n,0.0);// Initial Solution Guess
-    part_r.resize(udof_n,0.0);// Residuals
-    part_d.resize(udof_n,0.0);// Diagonal Preconditioner
+    part_u.resize(udof_n+1,0.0);// Initial Solution Guess
+    part_r.resize(udof_n+1,0.0);// Residuals
+    part_d.resize(udof_n+1,0.0);// Diagonal Preconditioner
 #endif
 #if VERB_MAX > 13
     std::cout << valign_byte "-byte aligned pointer to part_f[0]: "
@@ -102,9 +103,9 @@ public:
   PCG( INT_MESH n, INT_MESH i, FLOAT_PHYS r ) : Solv(n,i,r){
     meth_name="preconditioned cojugate gradient";
 #ifdef ALIGN_SYS
-    part_p = align_resize( data_p, udof_n, valign_byte );
+    part_p = align_resize( data_p, udof_n+1, valign_byte );
 #else
-    part_p.resize(udof_n,0.0);// CG working vector
+    part_p.resize(udof_n+1,0.0);// CG working vector
 #endif
     udof_flop = 12;//*elem_n
     udof_band = 14*sizeof(FLOAT_SOLV);//*udof_n + 2
@@ -137,11 +138,11 @@ public:
   PCR( INT_MESH n, INT_MESH i, FLOAT_PHYS r ) : Solv(n,i,r){
     meth_name="preconditioned cojugate residual";
 #ifdef ALIGN_SYS
-    part_p = align_resize( data_p, udof_n, valign_byte );
-    part_g = align_resize( data_g, udof_n, valign_byte );
+    part_p = align_resize( data_p, udof_n+1, valign_byte );
+    part_g = align_resize( data_g, udof_n+1, valign_byte );
 #else
-    part_p.resize(udof_n,0.0);// CR working vector
-    part_g.resize(udof_n,0.0);// CR working vector
+    part_p.resize(udof_n+1,0.0);// CR working vector
+    part_g.resize(udof_n+1,0.0);// CR working vector
 #endif
     udof_flop = 14;//*elem_n
     udof_band = 17*sizeof(FLOAT_SOLV);//*udof_n +?
@@ -170,24 +171,24 @@ public:
   NCG( INT_MESH n, INT_MESH i, FLOAT_PHYS r ) : Solv(n,i,r){
     meth_name="nonlinear cojugate gradient";
 #ifdef ALIGN_SYS
-    part_b = align_resize( data_b, udof_n, valign_byte );
-    part_p = align_resize( data_p, udof_n, valign_byte );
-    part_g = align_resize( data_g, udof_n, valign_byte );
-    part_q = align_resize( data_q, udof_n, valign_byte );
-    prev_r = align_resize( data_o, udof_n, valign_byte );
-    prev_u = align_resize( data_l, udof_n, valign_byte );
+    part_b = align_resize( data_b, udof_n+1, valign_byte );
+    part_p = align_resize( data_p, udof_n+1, valign_byte );
+    part_g = align_resize( data_g, udof_n+1, valign_byte );
+    part_q = align_resize( data_q, udof_n+1, valign_byte );
+    prev_r = align_resize( data_o, udof_n+1, valign_byte );
+    prev_u = align_resize( data_l, udof_n+1, valign_byte );
 #else
     // part_d : diagonal preconditioner
     // part_b : RHS
     // part_u : solution
     // part_f : solution forces f = A u
     // part_r : force (gradient) residuals  r = A u - b
-    part_b.resize(udof_n,0.0);// RHS
-    part_p.resize(udof_n,0.0);// Search direction
-    part_q.resize(udof_n,0.0);// perturbed solution gradient: q = u + alpha*p
-    part_g.resize(udof_n,0.0);// residual grad. of perturbed sol. g = A q -b
-    prev_r.resize(udof_n,0.0);
-    prev_u.resize(udof_n,0.0);
+    part_b.resize(udof_n+1,0.0);// RHS
+    part_p.resize(udof_n+1,0.0);// Search direction
+    part_q.resize(udof_n+1,0.0);// perturbed solution gradient: q = u + alpha*p
+    part_g.resize(udof_n+1,0.0);// residual grad. of perturbed sol. g = A q -b
+    prev_r.resize(udof_n+1,0.0);
+    prev_u.resize(udof_n+1,0.0);
 #endif
     udof_flop = 23;//*elem_n
     udof_band = 10*sizeof(FLOAT_SOLV);//*udof_n + 2
