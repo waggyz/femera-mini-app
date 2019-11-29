@@ -181,9 +181,9 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       printf("%+9.2e ",f[j]);
     } printf("\n");
 #endif
-#ifdef __INTEL_COMPILER
-#pragma vector unaligned
-#endif
+//#ifdef __INTEL_COMPILER
+//#pragma vector unaligned
+//#endif
     for (int i=0; i<Nc; i++){
       double VECALIGNED sf[4];
       _mm256_store_pd(&sf[0],vf[i]);
