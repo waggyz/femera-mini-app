@@ -187,6 +187,9 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     for (int i=0; i<Nc; i++){
       double VECALIGNED sf[4];
       _mm256_store_pd(&sf[0],vf[i]);
+#if 1
+      std::memcpy( &part_f[3*conn[i]], &sf[0], sizeof(FLOAT_SOLV)*Nd );
+#else
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
 #endif
@@ -194,6 +197,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 //#pragma omp atomic write
         part_f[3*conn[i]+j] = sf[j];
       }
+#endif
 #if 0
     if( (ie+1) < ee ){
     const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
