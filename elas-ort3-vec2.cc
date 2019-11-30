@@ -151,7 +151,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
         }
       }
 #else
-#if 1
+#ifdef __INTEL_COMPILER
       if(ip==0){
         for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
         if(Nc>4){
