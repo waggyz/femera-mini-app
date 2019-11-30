@@ -103,8 +103,8 @@ SEXT = ser.$(CPUMODEL).$(CSTR).o
 REXT = ref.$(CPUMODEL).$(CSTR).o
 IEXT = $(CPUMODEL).icc.o
 GEXT = $(CPUMODEL).gcc.o
-MEXT = mmp.$(CPUMODEL).gcc.o
-KEXT = mmq.$(CPUMODEL).gcc.o
+MEXT = mmp.$(CPUMODEL).$(CSTR).o
+KEXT = mmq.$(CPUMODEL).$(CSTR).o
 
 OBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(OEXT)))
 QBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(QEXT)))
