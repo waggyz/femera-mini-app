@@ -152,6 +152,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       }
 #else
 #ifdef __INTEL_COMPILER
+      //FIXME For some reason, this doesn't segfault with icc
       if(ip==0){
         for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
         if(Nc>4){
@@ -184,12 +185,9 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     for (int i=0; i<Nc; i++){
       double VECALIGNED sf[4];
       _mm256_store_pd(&sf[0],vf[i]);
-#if 1
+#ifdef __INTEL_COMPILER
       std::memcpy( &part_f[3*conn[i]], &sf[0], sizeof(FLOAT_SOLV)*Nd );
 #else
-#ifdef __INTEL_COMPILER
-#pragma vector unaligned
-#endif
       for(int j=0; j<3; j++){
 #if 0
 #pragma omp atomic write
