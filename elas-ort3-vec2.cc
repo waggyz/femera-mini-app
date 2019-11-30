@@ -32,13 +32,16 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   const int Ne = Nf*Nc;
   const int Nt =  4*Nc;
   const int intp_n = int(E->gaus_n);
-  //const INT_ORDER elem_p =E->elem_p;
+#if 0
+  const INT_ORDER elem_p =E->elem_p;
+#endif
 #if VERB_MAX>11
   printf("Elems:%i, IntPts:%i, Nodes/elem:%i\n",
       (int)elem_n,(int)intp_n,(int)Nc);
 #endif
   FLOAT_MESH VECALIGNED jac[Nj];
-  FLOAT_PHYS VECALIGNED G[Nt], u[Ne];//,f[Nt];
+  FLOAT_PHYS VECALIGNED G[Nt];
+  FLOAT_SOLV VECALIGNED u[Ne];
 #if 0
   FLOAT_PHYS VECALIGNED H[12], S[9];
 #endif
@@ -67,24 +70,23 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     _mm256_load_pd(&R[0]),
     _mm256_loadu_pd(&R[3]),
     _mm256_loadu_pd(&R[6]) };
-  //      FLOAT_SOLV* RESTRICT sysf  = &part_f[0];
 #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
   for(uint j=0;j<mtrl_matc.size();j++){
     //if(j%mesh_d==0){printf("\n");}
     printf("%+9.2e ",C[j]);
-  }; printf("\n");
+  } printf("\n");
 #endif
   if(e0<ee){
 #ifdef FETCH_JAC
     std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
 #endif
-    const   INT_MESH* RESTRICT c = &Econn[Nc*e0];
+    const INT_MESH* RESTRICT conn = &Econn[Nc*e0];
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
 #endif
     for (int i=0; i<Nc; i++){
-      std::memcpy( & u[Nf*i], &part_u[c[i]*Nf], sizeof(FLOAT_SOLV)*Nf );
+      std::memcpy( &u[Nf*i], &part_u[conn[i]*Nf], sizeof(FLOAT_SOLV)*Nf );
     }
   }
   for(INT_MESH ie=e0;ie<ee;ie++){
@@ -95,7 +97,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     const __m256d vJ[3]={
       _mm256_load_pd (&jac[0]),
       _mm256_loadu_pd(&jac[3]),
-      _mm256_loadu_pd(&jac[6]) };
+      _mm256_loadu_pd(&jac[6])};
     {// Scope vf registers
     __m256d vf[Nc];
     for(int ip=0; ip<intp_n; ip++){
@@ -108,12 +110,12 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #ifdef FETCH_JAC
         std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
 #endif
-        const INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
+        const INT_MESH* RESTRICT cnext = &Econn[Nc*(ie+1)];
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
 #endif
         for (int i=0; i<Nc; i++){
-          std::memcpy( &u[Nd*i], &part_u[c[i]*Nd], sizeof(FLOAT_SOLV)*Nd ); }
+          std::memcpy( &u[Nd*i], &part_u[cnext[i]*Nd], sizeof(FLOAT_SOLV)*Nd );}
       } }
       // [H] Small deformation tensor
       // [H][RT] : matmul3x3x3T
@@ -136,7 +138,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       // [S][R] : matmul3x3x3, R is transposed
       // initialize element f
 #if 0
-      // Hmm... switch case is slower...
+      // Switch case is slower.
       if(ip==0){
         switch(elem_p){
         case(1):
@@ -152,7 +154,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       }
 #else
 #ifdef __INTEL_COMPILER
-      //FIXME For some reason, this doesn't segfault with icc
+      //FIXME For some reason, this doesn't segfault with icc.
       if(ip==0){
         for(int i=0; i<4; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
         if(Nc>4){
@@ -183,11 +185,12 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     } printf("\n");
 #endif
     for (int i=0; i<Nc; i++){
-      double VECALIGNED sf[4];
+      FLOAT_SOLV VECALIGNED sf[4];
       _mm256_store_pd(&sf[0],vf[i]);
 #ifdef __INTEL_COMPILER
       std::memcpy( &part_f[3*conn[i]], &sf[0], sizeof(FLOAT_SOLV)*Nd );
 #else
+      //FIXME For some reason, this doesn't converge with icc.
       for(int j=0; j<3; j++){
 #if 0
 #pragma omp atomic write
