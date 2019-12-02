@@ -27,16 +27,16 @@ int ElastIso3D::Setup( Elem* E ){
   this->stif_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) +2);
   return 0;
-};
+}
 int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   FLOAT_SOLV* part_f, const FLOAT_SOLV* part_u ){
   //FIXME Clean up local variables.
   //const int De = 3;// Element Dimension
-  const int Nd = 3;// Node (mesh) Dimension
-  const int Nf = 3;// this->node_d DOF/node
-  const int Nj = Nd*Nd+1;
+  const int Dm = 3;// Mesh Dimension
+  const int Dn = 3;// this->node_d DOF/node
+  const int Nj = Dm*Dm+1;
   const int Nc = E->elem_conn_n;// Number of nodes/element
-  const int Ne = Nf*Nc;
+  const int Ne = Dn*Nc;
   const int intp_n = int(E->gaus_n);
 #if VERB_MAX>11
   printf("DOF: %u, Elems:%u, IntPts:%u, Nodes/elem:%u\n",
@@ -46,7 +46,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   FLOAT_PHYS jac[Nj];
 #endif
   FLOAT_PHYS dw, G[Ne], u[Ne], f[Ne];
-  FLOAT_PHYS H[Nd*Nf], S[Nd*Nf];
+  FLOAT_PHYS H[Dm*Dn], S[Dm*Dn];
   //
   FLOAT_PHYS intp_shpg[intp_n*Ne];
   std::copy( &E->intp_shpg[0],
@@ -62,7 +62,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   for(uint j=0;j<mtrl_matc.size();j++){
     //if(j%mesh_d==0){printf("\n");}
     printf("%+9.2e ",C[j]);
-  }; printf("\n");
+  } printf("\n");
 #endif
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
@@ -74,62 +74,50 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
 #if 1
     for (int i=0; i<Nc; i++){
-      std::memcpy( & u[Nf*i],& sysu[Econn[Nc*e0+i]*Nf],
-        sizeof(FLOAT_SOLV)*Nf ); };
+      std::memcpy( & u[Dn*i],& sysu[Econn[Nc*e0+i]*Dn],
+        sizeof(FLOAT_SOLV)*Dn ); }
 #endif
-  };
+  }
   for(INT_MESH ie=e0;ie<ee;ie++){
     const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     for (int i=0; i<Nc; i++){
-      std::memcpy( & f[Nf*i],& sysf[conn[i]*3], sizeof(FLOAT_SOLV)*Nf ); }
+      std::memcpy( & f[Dn*i],& sysf[conn[i]*3], sizeof(FLOAT_SOLV)*Dn ); }
     for(int ip=0; ip<intp_n; ip++){
-      const bool fetch_next = (ip==(intp_n-1)) & ((ie+1)<ee);
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
-      for(int i=0; i< 9 ; i++){ H[i]=0.0; };
-      for(int i=0; i<Nc; i++){
-        for(int k=0; k<Nf ; k++){ G[Nf* i+k ]=0.0;
-          for(int j=0; j<Nd ; j++){
-            G[Nf* i+k ] += intp_shpg[ip*Ne+ Nd* i+j ]
-#ifdef FETCH_JAC
-              * jac[Nd* j+k ];
+      for(int i=0; i<(Dm*Dm) ; i++){ H[i]=0.0; }
+//#pragma omp simd
+      for(int k=0; k<Nc; k++){
+        for(int i=0; i<Dm ; i++){ G[Dm* k+i ]=0.0;
+          for(int j=0; j<Dm ; j++){
+#if 0
+            G[Dm* k+i ] += jac[Dm* j+i ] * intp_shpg[ip*Ne+ Dm* k+j ];
 #else
-              * Ejacs[Nj*ie+ Nd* j+k ];
+            G[Dm* k+i ] += Ejacs[Nj*ie+ Dm* j+i ] * intp_shpg[ip*Ne+ Dm* k+j ];
 #endif
           }
-          for(int j=0; j<Nf ; j++){
-            H[Nf* k+j ] += G[Nf* i+k ] * u[Nf* i+j ];
+          for(int j=0; j<Dm ; j++){
+            H[Dm* i+j ] += G[Dm* k+i ] * u[Dn* k+j ];
           }
         }
-#if 1
-        if(fetch_next){// Fetch u for the next iteration
-          std::memcpy(& u[Nf*i],& sysu[Econn[Nc*(ie+1)+i]*Nf],
-            sizeof(FLOAT_SOLV)*Nf );
+      }//------------------------------------------------- N*3*6*2 = 36*N FLOP
+      if(ip==(intp_n-1)){
+        if((ie+1)<ee){// Fetch stuff for the next iteration
+          const INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
+          for (int i=0; i<Nc; i++){
+            //std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
+            std::memcpy(&u[Dn*i],&sysu[c[i]*Dn], sizeof(FLOAT_SOLV)*Dn);
           }
-#endif
-      }//-------------------------------------------------- N*3*6*2 = 36*N FLOP
+        }// Done fetching next iter stuff
+      }
 #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
       for(int j=0;j<H.size();j++){
         if(j%mesh_d==0){printf("\n");}
         printf("%+9.2e ",H[j]);
-      }; printf("\n");
+      } printf("\n");
 #endif
-#ifdef FETCH_JAC
-      dw = jac[9] * wgt[ip];
-#else
-      dw = Ejacs[Nj*ie+ 9] * wgt[ip];
-#endif
-      if(fetch_next){// Fetch stuff for the next iteration
-#if 0
-        const INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
-        for (int i=0; i<Nc; i++){
-          std::memcpy(& u[Nf*i],& sysu[c[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); };
-#endif
-#ifdef FETCH_JAC
-        std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
-#endif
-      }
+      dw = Ejacs[Nj*ie+ 9 ] * wgt[ip];
       //
       S[0]=(C[0]* H[0] + C[1]* H[4] + C[1]* H[8])*dw;//Sxx
       S[4]=(C[1]* H[0] + C[0]* H[4] + C[1]* H[8])*dw;//Syy
@@ -141,30 +129,31 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
       //------------------------------------------------------- 18+9 = 27 FLOP
       for(int i=0; i<Nc; i++){
-        for(int k=0; k<Nf; k++){
-          for(int j=0; j<Nf; j++){
-            f[Nf* i+k ] += G[Nf* i+j ] * S[Nf* j+k ];// 18*N FMA FLOP
-      };};};//---------------------------------------------- N*3*6 = 18*N FLOP
+        for(int k=0; k<Dn; k++){
+          for(int j=0; j<Dn; j++){
+            //f[Dn* i+k ] += G[Dn* i+j ] * S[Dn* j+k ];// 18*N FMA FLOP
+            f[Dn* i+k ] += G[Dm* i+j ] * S[Dn* k+j ];// 18*N FMA FLOP
+      } } }//----------------------------------------------- N*3*6 = 18*N FLOP
 #if VERB_MAX>10
       printf( "f:");
       for(int j=0;j<Ne;j++){
         if(j%ndof==0){printf("\n");}
         printf("%+9.2e ",f[j]);
-      }; printf("\n");
+      } printf("\n");
 #endif
-    };//end intp loop
+    }//end intp loop
     for (uint i=0; i<uint(Nc); i++){
-      std::memcpy(& sysf[conn[i]*Nf],& f[Nf*i], sizeof(FLOAT_SOLV)*Nf );
+      std::memcpy(& sysf[conn[i]*Dn],& f[Dn*i], sizeof(FLOAT_SOLV)*Dn );
 #if 0
       if( n >=my_node_start ){
         for(uint j=0;j<3;j++){
-          this->part_sum1+= f[Nf* i+j ] * sysu[Nf* n+j ];
+          this->part_sum1+= f[Dn* i+j ] * sysu[Dn* n+j ];
           //FIXME u already contains next elem part_u
-          //this->part_sum1+= f[Nf* i+j ] * u[Nf* i+j];
+          //this->part_sum1+= f[Dn* i+j ] * u[Dn* i+j];
         };
       };
 #endif
-    };
-  };//end elem loop
+    }
+  }//end elem loop
   return 0;
-  };
+  }
