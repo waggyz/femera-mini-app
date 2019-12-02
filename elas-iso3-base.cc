@@ -137,7 +137,6 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       for(int i=0; i<Nc; i++){
         for(int k=0; k<Dn; k++){
           for(int j=0; j<Dn; j++){
-            //f[Dn* i+k ] += G[Dn* i+j ] * S[Dn* j+k ];// 18*N FMA FLOP
             f[Dn* i+k ] += G[Dm* i+j ] * S[Dn* k+j ];// 18*N FMA FLOP
       } } }//----------------------------------------------- N*3*6 = 18*N FLOP
 #if VERB_MAX>10
