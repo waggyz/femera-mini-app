@@ -78,8 +78,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
 #if 1
     for (int i=0; i<Nc; i++){
-      std::memcpy( & u[Dn*i],& sysu[Econn[Nc*e0+i]*Dn],
-        sizeof(FLOAT_SOLV)*Dn ); }
+      std::memcpy( & u[Dn*i],& sysu[Econn[Nc*e0+i]*Dn], sizeof(FLOAT_SOLV)*Dn ); }
 #endif
   }
   for(INT_MESH ie=e0;ie<ee;ie++){
@@ -124,14 +123,15 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       } printf("\n");
 #endif
       const FLOAT_PHYS dw = Ejacs[Nj*ie+ 9 ] * wgt[ip];
+      const FLOAT_PHYS Cdw[3] = { C[0]*dw, C[1]*dw, C[2]*dw };
       //
-      S[0]=(C[0]* H[0] + C[1]* H[4] + C[1]* H[8])*dw;//Sxx
-      S[4]=(C[1]* H[0] + C[0]* H[4] + C[1]* H[8])*dw;//Syy
-      S[8]=(C[1]* H[0] + C[1]* H[4] + C[0]* H[8])*dw;//Szz
+      S[0]= Cdw[0]* H[0] + Cdw[1]* H[4] + Cdw[1]* H[8];//Sxx
+      S[4]= Cdw[1]* H[0] + Cdw[0]* H[4] + Cdw[1]* H[8];//Syy
+      S[8]= Cdw[1]* H[0] + Cdw[1]* H[4] + Cdw[0]* H[8];//Szz
       //
-      S[1]=( H[1] + H[3] )*C[2]*dw;// S[3]= S[1];//Sxy Syx
-      S[5]=( H[5] + H[7] )*C[2]*dw;// S[7]= S[5];//Syz Szy
-      S[2]=( H[2] + H[6] )*C[2]*dw;// S[6]= S[2];//Sxz Szx
+      S[1]=( H[1] + H[3] )*Cdw[2];// S[3]= S[1];//Sxy Syx
+      S[5]=( H[5] + H[7] )*Cdw[2];// S[7]= S[5];//Syz Szy
+      S[2]=( H[2] + H[6] )*Cdw[2];// S[6]= S[2];//Sxz Szx
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
       //------------------------------------------------------- 18+9 = 27 FLOP
       for(int i=0; i<Nc; i++){
