@@ -42,8 +42,10 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   printf("DOF: %u, Elems:%u, IntPts:%u, Nodes/elem:%u\n",
     (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
 #endif
+#if 0
 #ifdef FETCH_JAC
   FLOAT_PHYS jac[Nj];
+#endif
 #endif
   FLOAT_PHYS dw, G[Ne], u[Ne], f[Ne];
   FLOAT_PHYS H[Dm*Dn], S[Dm*Dn];
@@ -69,8 +71,10 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   const FLOAT_SOLV* RESTRICT sysu  = &part_u[0];
         FLOAT_SOLV* RESTRICT sysf  = &part_f[0];
   if(e0<ee){
+#if 0
 #ifdef FETCH_JAC
     std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
+#endif
 #endif
 #if 1
     for (int i=0; i<Nc; i++){
