@@ -145,7 +145,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       for(int j=0;j<H.size();j++){
         if(j%Nd==0){printf("\n");}
         printf("%+9.2e ",H[j]);
-      }; printf("\n");
+      } printf("\n");
 #endif
       const FLOAT_PHYS dw = jac[9] * wgt[ip];
       if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
@@ -177,13 +177,16 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       }
 #endif
 #else
-      S[ 0]=(C[0]* H[0] + C[1]* H[5] + C[1]* H[10])*dw;//Sxx
-      S[ 5]=(C[1]* H[0] + C[0]* H[5] + C[1]* H[10])*dw;//Syy
-      S[10]=(C[1]* H[0] + C[1]* H[5] + C[0]* H[10])*dw;//Szz
+      {
+      const FLOAT_PHYS Cdw[3] = { C[0]*dw, C[1]*dw, C[2]*dw };
+      S[ 0]= Cdw[0]* H[0] + Cdw[1]* H[5] + Cdw[1]* H[10];//Sxx
+      S[ 5]= Cdw[1]* H[0] + Cdw[0]* H[5] + Cdw[1]* H[10];//Syy
+      S[10]= Cdw[1]* H[0] + Cdw[1]* H[5] + Cdw[0]* H[10];//Szz
 
-      S[1]=( H[1] + H[4] )*C[2]*dw;// S[3]= S[1];//Sxy Syx
-      S[2]=( H[2] + H[8] )*C[2]*dw;// S[6]= S[2];//Sxz Szx
-      S[6]=( H[6] + H[9] )*C[2]*dw;// S[7]= S[5];//Syz Szy
+      S[1]=( H[1] + H[4] )*Cdw[2];// S[3]= S[1];//Sxy Syx
+      S[2]=( H[2] + H[8] )*Cdw[2];// S[6]= S[2];//Sxz Szx
+      S[6]=( H[6] + H[9] )*Cdw[2];// S[7]= S[5];//Syz Szy
+      }
       S[4]=S[1]; S[9]=S[6]; S[8]=S[2];
 #if VERB_MAX>10
       if(ie==4){
