@@ -47,7 +47,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   FLOAT_PHYS jac[Nj];
 #endif
 #endif
-  FLOAT_PHYS dw, G[Ne], u[Ne], f[Ne];
+  FLOAT_PHYS G[Ne], u[Ne], f[Ne];
   FLOAT_PHYS H[Dm*Dn], S[Dm*Dn];
   //
   FLOAT_PHYS intp_shpg[intp_n*Ne];
@@ -83,9 +83,11 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
   }
   for(INT_MESH ie=e0;ie<ee;ie++){
+#if 0
     const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
+#endif
     for (int i=0; i<Nc; i++){
-      std::memcpy( & f[Dn*i],& sysf[conn[i]*3], sizeof(FLOAT_SOLV)*Dn ); }
+      std::memcpy( & f[Dn*i],& sysf[Econn[Nc*ie+i]*3], sizeof(FLOAT_SOLV)*Dn ); }
     for(int ip=0; ip<intp_n; ip++){
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
@@ -121,7 +123,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
         printf("%+9.2e ",H[j]);
       } printf("\n");
 #endif
-      dw = Ejacs[Nj*ie+ 9 ] * wgt[ip];
+      const FLOAT_PHYS dw = Ejacs[Nj*ie+ 9 ] * wgt[ip];
       //
       S[0]=(C[0]* H[0] + C[1]* H[4] + C[1]* H[8])*dw;//Sxx
       S[4]=(C[1]* H[0] + C[0]* H[4] + C[1]* H[8])*dw;//Syy
@@ -147,7 +149,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
     }//end intp loop
     for (uint i=0; i<uint(Nc); i++){
-      std::memcpy(& sysf[conn[i]*Dn],& f[Dn*i], sizeof(FLOAT_SOLV)*Dn );
+      std::memcpy(& sysf[Econn[Nc*ie+i]*Dn],& f[Dn*i], sizeof(FLOAT_SOLV)*Dn );
 #if 0
       if( n >=my_node_start ){
         for(uint j=0;j<3;j++){

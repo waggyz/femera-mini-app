@@ -45,7 +45,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   FLOAT_MESH* jac[Nj];
 #endif
 #endif
-  FLOAT_PHYS dw, G[Ne], u[Ne],f[Ne];
+  FLOAT_PHYS G[Ne], u[Ne],f[Ne];
   //FLOAT_PHYS det,
   FLOAT_PHYS H[9], S[9], A[9];//, B[9];
   //
@@ -147,7 +147,6 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
           }
         }// Done fetching next iter stuff
       }
-      dw = Ejacs[Nj*ie+ 9 ] * wgt[ip];
       // [H] Small deformation tensor
       // [H][RT] : matmul3x3x3T
 //#pragma omp simd
@@ -156,7 +155,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
           for(int j=0; j<3; j++){
             H[3* i+k ] += A[3* i+j ] * R[3* k+j ];
       } } }//----------------------------------------------- 27*2 =      54 FLOP
-      //det=jac[9 +Nj*l]; FLOAT_PHYS w = det * wgt[ip];
+      const FLOAT_PHYS dw = Ejacs[Nj*ie+ 9 ] * wgt[ip];
       //
       S[0]=(C[0]* H[0] + C[3]* H[4] + C[5]* H[8])*dw;//Sxx
       S[4]=(C[3]* H[0] + C[1]* H[4] + C[4]* H[8])*dw;//Syy
