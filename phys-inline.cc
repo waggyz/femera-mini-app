@@ -182,18 +182,18 @@ static inline void compute_iso_s(__m256d* vS, const __m256d* vH,
 #endif
 #else
 // Does not have avx2 support
-  FLOAT_PHYS VECALIGNED fH[12], fS[12];
-  _mm256_store_pd(&fH[0],vH[0]);
-  _mm256_store_pd(&fH[4],vH[1]);
-  _mm256_store_pd(&fH[8],vH[2]);
+  FLOAT_PHYS VECALIGNED fS[12];
+  _mm256_store_pd(&fS[0],vH[0]);
+  _mm256_store_pd(&fS[4],vH[1]);
+  _mm256_store_pd(&fS[8],vH[2]);
   {
+  const FLOAT_PHYS tr = (fS[0]+fS[5]+fS[10]) * lambda;
   const __m256d mw= _mm256_set1_pd(mu);
-  _mm256_store_pd( &fS[0], mw * _mm256_load_pd(&fH[0]) );// sxx sxy sxz | sxy
-  _mm256_store_pd( &fS[4], mw * _mm256_load_pd(&fH[4]) );// sxy syy syz | sxz
-  _mm256_store_pd( &fS[8], mw * _mm256_load_pd(&fH[8]) );// sxz syz szz | ---
-  }
-  const FLOAT_PHYS tr = (fH[0]+fH[5]+fH[10]) * lambda;
+  _mm256_store_pd( &fS[0], mw * vH[0] );// sxx sxy sxz | sxy
+  _mm256_store_pd( &fS[4], mw * vH[1] );// sxy syy syz | sxz
+  _mm256_store_pd( &fS[8], mw * vH[2] );// sxz syz szz | ---
   fS[0]=2.0*fS[0]+tr; fS[5]=2.0*fS[5]+tr; fS[10]=2.0*fS[10]+tr;
+  }
   fS[1]+= fS[4];
   fS[2]+= fS[8];
   fS[6]+= fS[9];

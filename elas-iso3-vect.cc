@@ -150,14 +150,14 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       const FLOAT_PHYS dw = jac[9] * wgt[ip];
       if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
 #ifndef FETCH_U_EARLY
-        const INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
+        const INT_MESH* RESTRICT cnxt = &Econn[Nc*(ie+1)];
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
 #else
 //#pragma omp simd
 #endif
         for (int i=0; i<Nc; i++){
-          std::memcpy(& u[Nf*i],& sys_u[c[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
+          std::memcpy(& u[Nf*i],& sys_u[cnxt[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
 #endif
 #ifdef FETCH_JAC
           std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj );
