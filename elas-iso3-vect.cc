@@ -130,6 +130,16 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
           std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj );
 #endif
       } }
+#if 1
+// Reuse vH instead of new vS
+      compute_iso_s( &vH[0], &vH[0], C[1]*dw,C[2]*dw );
+#ifndef FETCH_F_EARLY
+      if(ip==0){
+        for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+      }
+#endif
+      accumulate_f( &vf[0], &vH[0], &G[0], Nc );
+#else
       {// vector register scope
       __m256d vS[3];
       compute_iso_s( &vS[0], &vH[0], C[1]*dw,C[2]*dw );
@@ -149,6 +159,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
       accumulate_f( &vf[0], &vS[0], &G[0], Nc );
       }// end vS register scope
+#endif
     }//========================================================== end intp loop
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
