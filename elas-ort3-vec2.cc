@@ -198,12 +198,6 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
         part_f[3*conn[i]+j] = sf[j];
       }
 #endif
-#if 0
-    if( (ie+1) < ee ){
-    const   INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
-        vf[i]=_mm256_loadu_pd(&part_f[3*c[i]]);
-    }
-#endif
     }//--------------------------------------------------- N*3 =  3*N FLOP
     }// end f register scope
   }// end elem loop
