@@ -189,9 +189,9 @@ static inline void compute_iso_s(__m256d* vS, const __m256d* vH,
   {
   const FLOAT_PHYS tr = (fS[0]+fS[5]+fS[10]) * lambda;
   const __m256d mw= _mm256_set1_pd(mu);
-  _mm256_store_pd( &fS[0], mw * vH[0] );// sxx sxy sxz | sxy
-  _mm256_store_pd( &fS[4], mw * vH[1] );// sxy syy syz | sxz
-  _mm256_store_pd( &fS[8], mw * vH[2] );// sxz syz szz | ---
+  _mm256_store_pd( &fS[0], mw * vH[0] );// sxx sxy sxz | syx
+  _mm256_store_pd( &fS[4], mw * vH[1] );// syx syy syz | szx
+  _mm256_store_pd( &fS[8], mw * vH[2] );// szx szy szz | ---
   fS[0]=2.0*fS[0]+tr; fS[5]=2.0*fS[5]+tr; fS[10]=2.0*fS[10]+tr;
   }
   fS[1]+= fS[4];

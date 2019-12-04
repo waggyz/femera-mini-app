@@ -8,6 +8,10 @@
 // Fetch next u within G,H loop nest
 #undef FETCH_U_EARLY
 #define HAS_AVX
+#ifdef FETCH_JAC
+#define THIS_FETCH_JAC
+#endif
+#undef THIS_FETCH_JAC
 //
 int ElastIso3D::Setup( Elem* E ){
   JacT  ( E );
@@ -67,7 +71,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   } printf("\n");
 #endif
   if(e0<ee){
-#ifdef FETCH_JAC
+#ifdef THIS_FETCH_JAC
     std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
 #endif
     const INT_MESH* RESTRICT c = &Econn[Nc*e0];
@@ -80,9 +84,9 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       std::memcpy( & u[Nf*i],&sys_u[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf );}
   }
   for(INT_MESH ie=e0;ie<ee;ie++){//================================== Elem loop
-#ifndef FETCH_JAC
-      std::memcpy( &jac, &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
-#endif
+//#ifndef THIS_FETCH_JAC
+//      std::memcpy( &jac, &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
+//#endif
     const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
 #ifndef HAS_AVX
 #ifdef __INTEL_COMPILER
@@ -93,15 +97,17 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     for (int i=0; i<Nc; i++){
       std::memcpy( & f[4*i],& part_f[conn[i]*3], sizeof(FLOAT_SOLV)*Nf ); }
 #endif
-#if 0
-    const __m256d j0 = _mm256_load_pd (&jac[0]);  // j0 = [j3 j2 j1 j0]
-    const __m256d j1 = _mm256_loadu_pd(&jac[3]);  // j1 = [j6 j5 j4 j3]
-    const __m256d j2 = _mm256_loadu_pd(&jac[6]);  // j2 = [j9 j8 j7 j6]
+#ifdef THIS_FETCH_JAC
+    const __m256d vJ[3]={
+      _mm256_load_pd(&jac[0]),   // j0 = [j3 j2 j1 j0]
+      _mm256_loadu_pd(&jac[3]),  // j1 = [j6 j5 j4 j3]
+      _mm256_loadu_pd(&jac[6]) };// j2 = [j9 j8 j7 j6]
 #else
     const __m256d vJ[3]={
-      _mm256_load_pd(&jac[0]),
-      _mm256_loadu_pd(&jac[3]),
-      _mm256_loadu_pd(&jac[6]) };
+      _mm256_loadu_pd(&Ejacs[Nj*ie  ]),  // j0 = [j3 j2 j1 j0]
+      _mm256_loadu_pd(&Ejacs[Nj*ie+3]),  // j1 = [j6 j5 j4 j3]
+      _mm256_loadu_pd(&Ejacs[Nj*ie+6]) };// j2 = [j9 j8 j7 j6]
+    const FLOAT_MESH det=Ejacs[Nj*ie+9];
 #endif
   {// Scope vf registers
   __m256d vf[Nc];
@@ -147,7 +153,11 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
         printf("%+9.2e ",H[j]);
       } printf("\n");
 #endif
+#ifdef THIS_FETCH_JAC
       const FLOAT_PHYS dw = jac[9] * wgt[ip];
+#else
+      const FLOAT_PHYS dw = det * wgt[ip];
+#endif
       if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
 #ifndef FETCH_U_EARLY
         const INT_MESH* RESTRICT cnxt = &Econn[Nc*(ie+1)];
@@ -159,7 +169,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
         for (int i=0; i<Nc; i++){
           std::memcpy(& u[Nf*i],& sys_u[cnxt[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
 #endif
-#ifdef FETCH_JAC
+#ifdef THIS_FETCH_JAC
           std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj );
 #endif
       } }
