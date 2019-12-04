@@ -7,6 +7,7 @@
 
 // Fetch next u within G,H loop nest
 #undef FETCH_U_EARLY
+#define FETCH_F_EARLY
 #ifdef FETCH_JAC
 #define THIS_FETCH_JAC
 #endif
@@ -81,9 +82,6 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       std::memcpy( & u[Nf*i],&sys_u[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf ); }
   }
   for(INT_MESH ie=e0;ie<ee;ie++){//================================== Elem loop
-//#ifndef THIS_FETCH_JAC
-//      std::memcpy( &jac, &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
-//#endif
 #ifdef THIS_FETCH_JAC
     const __m256d vJ[3]={
       _mm256_load_pd(&jac[0]),   // j0 = [j3 j2 j1 j0]
@@ -99,12 +97,14 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
     {// Scope vf registers
     __m256d vf[Nc];
+#ifdef FETCH_F_EARLY
+        for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+#endif
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       __m256d vH[3];
       compute_g_h( &G[0],&vH[0], Ne, &vJ[0], &intp_shpg[ip*Ne], &u[0] );
-      //-------------------------------------------------- N*3*6*2 = 36*N FLOP
 #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
       for(int j=0;j<H.size();j++){
@@ -122,8 +122,6 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
         const INT_MESH* RESTRICT cnxt = &Econn[Nc*(ie+1)];
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
-#else
-//#pragma omp simd
 #endif
         for (int i=0; i<Nc; i++){
           std::memcpy(& u[Nf*i],& sys_u[cnxt[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
@@ -144,10 +142,11 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
         } printf("\n");
       }
 #endif
-      //------------------------------------------------------- 18+9 = 27 FLOP
+#ifndef FETCH_F_EARLY
       if(ip==0){
         for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
       }
+#endif
       accumulate_f( &vf[0], &vS[0], &G[0], Nc );
       }// end vS register scope
     }//========================================================== end intp loop
