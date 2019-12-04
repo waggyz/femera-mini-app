@@ -7,7 +7,7 @@
 
 // Fetch next u within G,H loop nest
 #undef FETCH_U_EARLY
-#define FETCH_F_EARLY
+#undef FETCH_F_EARLY
 #ifdef FETCH_JAC
 #define THIS_FETCH_JAC
 #endif
