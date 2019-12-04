@@ -132,7 +132,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       } }
 #if 1
 // Reuse vH instead of new vS
-      compute_iso_s( &vH[0], &vH[0], C[1]*dw,C[2]*dw );
+      compute_iso_s( &vH[0], C[1]*dw,C[2]*dw );
 #ifndef FETCH_F_EARLY
       if(ip==0){
         for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }

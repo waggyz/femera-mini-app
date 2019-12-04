@@ -123,7 +123,73 @@ static inline void rotate_s_voigt( __m256d* vS,
   vS[2] = s2 * vR[0] + s5 * vR[1] + s8 * vR[2];
 }
 // Isotropic intrinsics -------------------------------------------------------
-static inline void compute_iso_s(__m256d* vS, const __m256d* vH,
+static inline void compute_iso_s(__m256d* vA,// in-place version
+  const FLOAT_PHYS lambda, const FLOAT_PHYS mu ){
+#ifdef HAS_AVX2
+  // S = mu * (H+H^T) + lambda * I * ( H[0]+H[5]+H[10] )
+  // Structure of S and H
+  //  3   2   1     0
+  // sxx sxy sxz | sxy
+  // sxy syy syz | sxz
+  // sxz syz szz | ---
+  __m256d Ssum=_mm256_setzero_pd();
+  {
+  const __m256d z0 =_mm256_set_pd(0.0,1.0,1.0,1.0);
+  const __m256d ml =_mm256_set_pd(lambda,mu,mu,mu);
+  vA[0]=_mm256_permute4x64_pd( vA[0]*z0, _MM_SHUFFLE(0,2,3,1) );
+  Ssum+= vA[0]*ml;
+  vA[1]=_mm256_permute4x64_pd( vA[1]*z0, _MM_SHUFFLE(1,3,2,0) );
+  Ssum+= vA[1]*ml;
+  vA[2]=_mm256_permute4x64_pd( vA[2]*z0, _MM_SHUFFLE(2,0,1,3) );
+  Ssum+= vA[2]*ml;
+  }
+  //      3   2   1   0
+  //     sxy 0.0 sxz sxx
+  //     sxy syz 0.0 syy
+  //     0.0 syz sxz szz
+  //
+  // mu*(sxy syz sxz)trace(H)*lambda : Ssum
+  {
+  const __m256d m2=_mm256_set_pd(2.0*mu,0.0,0.0,0.0);
+  //      3   2   1   0
+  // mu*(sxy 0.0 sxz)sxx*2*mu+lambda*trace(H)
+  // mu*(sxy syz 0.0)syy*2*mu+lambda*trace(H)
+  // mu*(0.0 syz sxz)szz*2*mu+lambda*trace(H)
+#if 0
+  printf("S step 2\n");
+  print_m256( S[0] ); print_m256( S[1] ); print_m256( S[2] );
+#endif
+  vA[0]=_mm256_permute4x64_pd( Ssum + vA[0]*m2, _MM_SHUFFLE(3,2,0,3) );
+  vA[1]=_mm256_permute4x64_pd( Ssum + vA[1]*m2, _MM_SHUFFLE(3,1,3,0) );
+  vA[2]=_mm256_permute4x64_pd( Ssum + vA[2]*m2, _MM_SHUFFLE(3,3,1,2) );
+  }
+#if 0
+  printf("S step 3\n");
+  print_m256( S[0] ); print_m256( S[1] ); print_m256( S[2] );
+#endif
+#else
+// Does not have avx2 support
+  FLOAT_PHYS VECALIGNED fS[12];
+  _mm256_store_pd(&fS[0],vA[0]);
+  _mm256_store_pd(&fS[4],vA[1]);
+  _mm256_store_pd(&fS[8],vA[2]);
+  {
+  const FLOAT_PHYS tr = (fS[0]+fS[5]+fS[10]) * lambda;
+  const __m256d mw= _mm256_set1_pd(mu);
+  _mm256_store_pd( &fS[0], mw * vA[0] );// sxx sxy sxz | syx
+  _mm256_store_pd( &fS[4], mw * vA[1] );// syx syy syz | szx
+  _mm256_store_pd( &fS[8], mw * vA[2] );// szx szy szz | ---
+  fS[0]=2.0*fS[0]+tr; fS[5]=2.0*fS[5]+tr; fS[10]=2.0*fS[10]+tr;
+  }
+  fS[1]+= fS[4];
+  fS[2]+= fS[8];
+  fS[6]+= fS[9];
+  fS[4]=fS[1]; fS[9]=fS[6]; fS[8]=fS[2];
+  vA[0] = _mm256_load_pd(&fS[0]); // [a3 a2 a1 a0]
+  vA[1] = _mm256_load_pd(&fS[4]); // [a6 a5 a4 a3]
+  vA[2] = _mm256_load_pd(&fS[8]); // [a9 a8 a7 a6]
+#endif
+}static inline void compute_iso_s(__m256d* vS, const __m256d* vH,
   const FLOAT_PHYS lambda, const FLOAT_PHYS mu ){
 #ifdef HAS_AVX2
   // S = mu * (H+H^T) + lambda * I * ( H[0]+H[5]+H[10] )
