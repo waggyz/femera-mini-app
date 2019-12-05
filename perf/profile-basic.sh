@@ -20,7 +20,7 @@ echo "Mesh Directory: "$MESHDIR"/"
 if [[ `hostname` == k2* ]]; then #FIXME Silly little hack
   if [ "$P" -eq 1 ]; then
     MEM=16000000000
-  else;
+  else
     MEM=23000000000
   fi
   module add gnuplot_5.0.5
