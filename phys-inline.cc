@@ -136,11 +136,11 @@ static inline void compute_iso_s(__m256d* vA,// in-place version
   {
   const __m256d z0 =_mm256_set_pd(0.0,1.0,1.0,1.0);
   const __m256d ml =_mm256_set_pd(lambda,mu,mu,mu);
-  vA[0]=_mm256_permute4x64_pd( vA[0]*z0, _MM_SHUFFLE(0,2,3,1) );
+  vA[0]=_mm256_permute4x64_pd( vA[0]*z0,_MM_SHUFFLE(0,2,3,1) );
   Ssum+= vA[0]*ml;
-  vA[1]=_mm256_permute4x64_pd( vA[1]*z0, _MM_SHUFFLE(1,3,2,0) );
+  vA[1]=_mm256_permute4x64_pd( vA[1]*z0,_MM_SHUFFLE(1,3,2,0) );
   Ssum+= vA[1]*ml;
-  vA[2]=_mm256_permute4x64_pd( vA[2]*z0, _MM_SHUFFLE(2,0,1,3) );
+  vA[2]=_mm256_permute4x64_pd( vA[2]*z0,_MM_SHUFFLE(2,0,1,3) );
   Ssum+= vA[2]*ml;
   }
   //      3   2   1   0
@@ -159,9 +159,9 @@ static inline void compute_iso_s(__m256d* vA,// in-place version
   printf("S step 2\n");
   print_m256( S[0] ); print_m256( S[1] ); print_m256( S[2] );
 #endif
-  vA[0]=_mm256_permute4x64_pd( Ssum + vA[0]*m2, _MM_SHUFFLE(3,2,0,3) );
-  vA[1]=_mm256_permute4x64_pd( Ssum + vA[1]*m2, _MM_SHUFFLE(3,1,3,0) );
-  vA[2]=_mm256_permute4x64_pd( Ssum + vA[2]*m2, _MM_SHUFFLE(3,3,1,2) );
+  vA[0]=_mm256_permute4x64_pd( Ssum + vA[0]*m2,_MM_SHUFFLE(3,2,0,3) );
+  vA[1]=_mm256_permute4x64_pd( Ssum + vA[1]*m2,_MM_SHUFFLE(3,1,3,0) );
+  vA[2]=_mm256_permute4x64_pd( Ssum + vA[2]*m2,_MM_SHUFFLE(3,3,1,2) );
   }
 #if 0
   printf("S step 3\n");
