@@ -470,20 +470,32 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
 #pragma omp for schedule(static) reduction(+:glob_sum2)
   for(int part_i=part_0; part_i<part_o; part_i++){// ? FLOP/DOF
     std::tie(E,Y,S)=priv_part[part_i];
-    const INT_MESH hl0=S->halo_loca_0,sysn=S->udof_n;
+    const INT_MESH hl0=S->halo_loca_0, sysn=S->udof_n;
+#if 0
 #ifdef HAS_PRAGMA_SIMD
 #pragma omp simd
 #endif
     for(INT_MESH i=0; i<hl0; i++){
-      S->part_r[i] -= alpha * S->part_f[i];// Update force residuals
-    };
+      S->part_r[i] -= alpha * S->part_f[i];
+    }
 #ifdef HAS_PRAGMA_SIMD
 #pragma omp simd reduction(+:glob_sum2)
 #endif
     for(INT_MESH i=hl0; i<sysn; i++){
       S->part_r[i] -= alpha * S->part_f[i];
-      glob_sum2   += S->part_r[i] * S->part_r[i] * S->part_d[i]; };
-  };
+      glob_sum2   += S->part_r[i] * S->part_r[i] * S->part_d[i]; }
+#else
+// Merge into 1 loop
+#ifdef HAS_PRAGMA_SIMD
+#pragma omp simd reduction(+:glob_sum2)
+#endif
+    for(INT_MESH i=0; i<sysn; i++){
+      S->part_r[i] -= alpha * S->part_f[i];// Update force residuals
+      glob_sum2   += S->part_r[i] * S->part_r[i] * S->part_d[i]
+        *(FLOAT_SOLV( i>=hl0 ));
+    }
+#endif
+  }
   const FLOAT_PHYS beta = glob_sum2 / glob_r2a;// 1 FLOP
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
