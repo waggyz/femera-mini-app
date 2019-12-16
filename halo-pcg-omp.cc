@@ -14,8 +14,8 @@
 #include <omp.h>
 #include "femera.h"
 
-int PCG::BC (Mesh* ){return 1;};
-int PCG::RHS(Mesh* ){return 1;};
+int PCG::BC (Mesh* ){return 1;}
+int PCG::RHS(Mesh* ){return 1;}
 //
 int PCG::RHS(Elem* E, Phys* Y ){// printf("*** RHS(E,Y) ***\n");
   this->data_b=0.0;
@@ -234,7 +234,7 @@ int HaloPCG::Init(){// printf("*** HaloPCG M->Init() ***\n");// Preconditioned C
   priv_part.resize(this->mesh_part.size());
   std::copy(this->mesh_part.begin(), this->mesh_part.end(), priv_part.begin());
 #endif
-  int part_0=0; if(std::get<0>( priv_part[0] )==NULL){ part_0=1; };
+  int part_0=0; if(std::get<0>( priv_part[0] )==NULL){ part_0=1; }
   const int part_n = int(priv_part.size())-part_0;
   const int part_o = part_n+part_0;
   // Sync max Y->udof_magn
@@ -412,7 +412,7 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
     const INT_MESH Dn=uint(Y->node_d);
     time_start( phys_start );
     const auto sysn = S->udof_n;
-    for(uint i=0;i<sysn;i++){ S->part_f[i]=0.0; };
+    for(uint i=0;i<sysn;i++){ S->part_f[i]=0.0; }
     Y->ElemLinear( E,0,E->halo_elem_n, S->part_f, S->part_p );
     time_accum( my_phys_count, phys_start );
     time_start( gath_start );
@@ -422,9 +422,9 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
         & halo_vals[Dn* E->node_haid[i]],
         & S->part_f[Dn* i],
         Dn*sizeof(FLOAT_PHYS) );
-    };
+    }
     time_accum( my_gat0_count, gath_start );
-  };
+  }
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=priv_part[part_i];
@@ -435,10 +435,10 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
       const auto f = Dn* E->node_haid[i];
       for( uint j=0; j<Dn; j++){
 #pragma omp atomic update
-        halo_vals[f+j]+= S->part_f[Dn* i+j]; };
-    };
+        halo_vals[f+j]+= S->part_f[Dn* i+j]; }
+    }
     time_accum( my_gat1_count, gath_start );
-  };// End halo_vals sum; now scatter back to elems
+  }// End halo_vals sum; now scatter back to elems
 #pragma omp for schedule(static) reduction(+:glob_sum1)
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=priv_part[part_i];
@@ -450,7 +450,7 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
         & S->part_f[Dn* i],
         & halo_vals[Dn* E->node_haid[i]],
         Dn*sizeof(FLOAT_PHYS) );
-    };
+    }
     time_accum( my_scat_count, scat_start );
     time_start( phys_start );
     Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->part_f, S->part_p );
@@ -461,9 +461,9 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
 #endif
     for(INT_MESH i=hl0; i<sysn; i++){
         glob_sum1 += S->part_p[i] * S->part_f[i];
-    };
+    }
     time_accum( my_solv_count, solv_start );
-  };
+  }
   time_start( solv_start );
   const FLOAT_SOLV alpha = glob_r2a / glob_sum1;// 1 FLOP
   //printf("ALPHA:%+9.2e\n",alpha);
@@ -490,8 +490,8 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
 #pragma omp simd reduction(+:glob_sum2)
 #endif
     for(INT_MESH i=0; i<sysn; i++){
-      S->part_r[i] -= alpha * S->part_f[i];// Update force residuals
-      glob_sum2   += S->part_r[i] * S->part_r[i] * S->part_d[i]
+      S->part_r[i] -= S->part_f[i] * alpha;// Update force residuals
+      glob_sum2    += S->part_r[i] * S->part_r[i] * S->part_d[i]
         *(FLOAT_SOLV( i>=hl0 ));
     }
 #endif
@@ -508,8 +508,8 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
 #endif
     for(INT_MESH i=0; i<sysn; i++){// ? FLOP/DOF
       S->part_u[i] += S->part_p[i] * alpha;// better data locality here
-      S->part_p[i]  = S->part_d[i] * S->part_r[i] + beta*S->part_p[i]; };
-  };
+      S->part_p[i]  = S->part_d[i] * S->part_r[i] + beta*S->part_p[i]; }
+  }
 //#pragma omp single nowait
 //{ glob_r2a = glob_sum2; }// Update residual (squared)
 #if VERB_MAX>1
@@ -533,4 +533,4 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
   this->glob_res2 = glob_sum2;
   this->glob_chk2 = glob_sum2;
   return 0;
-};
+}
