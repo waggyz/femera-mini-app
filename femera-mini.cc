@@ -12,11 +12,17 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
+#ifdef __INTEL_COMPILER
+#include <ittnotify.h>
+#endif
 #include "femera.h"
 #ifdef HAS_TEST
 #include "test.h"
 #endif
 int main( int argc, char** argv ){
+#ifdef __INTEL_COMPILER
+  __itt_pause();
+#endif
   const float ns=1e-9;
 #if VERB_MAX>1
   const float sec=1.0, ms=1e-3,us=1e-6, Meg=1e6, pct=100.0;// k=1e3,Gig=1e9,
@@ -455,6 +461,9 @@ int main( int argc, char** argv ){
     M->time_secs=0.0;
     // Iterate ------------------------------------------------------
     auto loop_start = std::chrono::high_resolution_clock::now();
+#ifdef __INTEL_COMPILER
+    __itt_resume();
+#endif
     do{ M->Iter(); iter++;
       //for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
       //  Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->mesh_part[part_i];
@@ -482,6 +491,9 @@ int main( int argc, char** argv ){
         } }
 #endif
     }while( (iter < iter_max) & (M->glob_chk2 > M->glob_rto2) );
+#ifdef __INTEL_COMPILER
+    __itt_pause();
+#endif
     // End iteration loop ===========================================
 #if VERB_MAX>0
     auto loop_done = std::chrono::high_resolution_clock::now();

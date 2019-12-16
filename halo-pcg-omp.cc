@@ -508,7 +508,7 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
 #endif
     for(INT_MESH i=0; i<sysn; i++){// ? FLOP/DOF
       S->part_u[i] += S->part_p[i] * alpha;// better data locality here
-      S->part_p[i]  = S->part_d[i] * S->part_r[i] + beta*S->part_p[i]; }
+      S->part_p[i]  = S->part_d[i] * S->part_r[i] + S->part_p[i] * beta; }
   }
 //#pragma omp single nowait
 //{ glob_r2a = glob_sum2; }// Update residual (squared)
