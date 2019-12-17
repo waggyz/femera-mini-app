@@ -39,7 +39,8 @@ CPPFLAGS=-restrict -std=c++11 -Wall -Wextra -O2 -ansi-alias\
  -ffast-math -no-fast-transcendentals\
  -no-inline-max-size -no-inline-max-total-size -qoverride-limits -g
 ifneq (,$(findstring 512,$(CPUSIMD)))
- CPPFLAGS:=$(CPPFLAGS) -qopt-zmm-usage=high -xSKYLAKE-AVX512
+ CPPFLAGS:=$(CPPFLAGS) -xSKYLAKE-AVX512
+ # -qopt-zmm-usage=high degrades performance
 else
  CPPFLAGS:=$(CPPFLAGS) -xHost
 endif
@@ -236,7 +237,7 @@ test-slice : gmsh2fmr mini-omp
 	-format msh2 -o cube/uhxt10p2/uhxt10p2n8.msh \
 	cube/uhxt10p2/uhxt10p2n.msh -
 	./gmsh2fmr-$(CPUMODELC) -v4 \
-	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
 	-M0 -E100e9 -N0.3 -a cube/uhxt10p2/uhxt10p2n8;
 	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/uhxt10p2/uhxt10p2n8
 	export OMP_SCHEDULE=static;\
@@ -244,7 +245,7 @@ test-slice : gmsh2fmr mini-omp
 	export OMP_PROC_BIND=spread;\
 	export OMP_NUM_THREADS=$(NCPU);\
 	./gmsh2fmr-$(CPUMODELC) -v4 \
-	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
 	-M0 -E100e9 -N0.3 -xyzS2 -a cube/uhxt10p2/uhxt10p2n;
 	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/uhxt10p2/uhxt10p2n8
 

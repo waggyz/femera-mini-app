@@ -61,13 +61,13 @@ esac
 case "$YSTR" in
   iso)
     $XDIR/"gmsh2fmr-"$CPUMODEL"-gcc" -v1 \
-    -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 $SSTR \
+    -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 $SSTR \
     -M0 -E100e9 -N0.3 \
     -a $MDIR/$MSTR/$GSTR
     ;;
   ort)
     $XDIR/"gmsh2fmr-"$CPUMODEL"-gcc" -v1 \
-    -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 $SSTR \
+    -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 $SSTR \
     -M0 -E100e9 -N0.3 -R \
     -a $MDIR/$MSTR/$GSTR
     ;;
