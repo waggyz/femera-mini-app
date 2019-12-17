@@ -12,7 +12,7 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
-#ifdef FIXME__INTEL_COMPILER
+#ifdef __INTEL_COMPILER
 #include <ittnotify.h>
 #endif
 #include "femera.h"
@@ -20,7 +20,7 @@
 #include "test.h"
 #endif
 int main( int argc, char** argv ){
-#ifdef FIXME__INTEL_COMPILER
+#ifdef __INTEL_COMPILER
   __itt_pause();
 #endif
   const float ns=1e-9;
@@ -461,7 +461,7 @@ int main( int argc, char** argv ){
     M->time_secs=0.0;
     // Iterate ------------------------------------------------------
     auto loop_start = std::chrono::high_resolution_clock::now();
-#ifdef FIXME__INTEL_COMPILER
+#ifdef __INTEL_COMPILER
     __itt_resume();
 #endif
     do{ M->Iter(); iter++;
@@ -491,7 +491,7 @@ int main( int argc, char** argv ){
         } }
 #endif
     }while( (iter < iter_max) & (M->glob_chk2 > M->glob_rto2) );
-#ifdef FIXME__INTEL_COMPILER
+#ifdef __INTEL_COMPILER
     __itt_pause();
 #endif
     // End iteration loop ===========================================
