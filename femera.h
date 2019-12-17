@@ -1,5 +1,9 @@
 #ifndef INCLUDED_FEMERA_H
 #define INCLUDED_FEMERA_H
+#ifdef __INTEL_COMPILER
+// # INTEL_NO_ITTNOTIFY_API
+#include <ittnotify.h>
+#endif
 // Conditional Compiling
 #ifndef VERB_MAX
 #define VERB_MAX 3
