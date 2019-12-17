@@ -1,6 +1,7 @@
 #ifndef INCLUDED_PHYS_INLINE_C
 #define INCLUDED_PHYS_INLINE_C
 #include <immintrin.h>
+#include "femera.h"
 //FIXME These inline intrinsics functions should be in the class where used.
 #if 0
 static inline void print_m256(const __m256d v){// Debugging register print
