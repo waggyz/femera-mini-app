@@ -129,7 +129,7 @@ PERFDIR = perf
 
 _dummy := $(shell mkdir -p mini.o test $(TESTDIR) $(PERFDIR))
 
-# .SILENT :
+.SILENT :
 
 all : mini-all gmsh2fmr
 
