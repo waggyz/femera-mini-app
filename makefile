@@ -44,7 +44,7 @@ else
  CPPFLAGS:=$(CPPFLAGS) -xHost
 endif
 CPPFLAGS:=$(CPPFLAGS) -I$(VTUNE_AMPLIFIER_XE_2019_DIR)/include
-CPPFLAGS:=$(CPPFLAGS) -L$(VTUNE_AMPLIFIER_XE_2019_DIR)/lib64 -littnotify
+CPPFLAGS:=$(CPPFLAGS) -L$(VTUNE_AMPLIFIER_XE_2019_DIR)/lib64 -llibittnotify
 
 #  -axSKYLAKE-AVX512 can run out of memory
 # CPPLOG="-Wsuggest-final-types -Wsuggest-final-methods\
