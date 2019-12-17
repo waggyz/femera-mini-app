@@ -39,10 +39,12 @@ CPPFLAGS=-restrict -std=c++11 -Wall -Wextra -O2 -ansi-alias\
  -ffast-math -no-fast-transcendentals\
  -no-inline-max-size -no-inline-max-total-size -qoverride-limits -g
 ifneq (,$(findstring 512,$(CPUSIMD)))
- CPPFLAGS:=$(CPPFLAGS) -xSKYLAKE-AVX512
+ CPPFLAGS:=$(CPPFLAGS) -qopt-zmm-usage=high -xSKYLAKE-AVX512
 else
  CPPFLAGS:=$(CPPFLAGS) -xHost
 endif
+
+CPPFLAGS:=$(CPPFLAGS) -DCOLLECT_VTUNE_DATA
 LDFLAGS:=$(LDFLAGS) -I$(VTUNE_AMPLIFIER_XE_2019_DIR)/include
 LDFLAGS:=$(LDFLAGS) -L$(VTUNE_AMPLIFIER_XE_2019_DIR)/lib64 -littnotify
 

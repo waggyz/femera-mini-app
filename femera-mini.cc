@@ -17,8 +17,10 @@
 #include "test.h"
 #endif
 int main( int argc, char** argv ){
+#ifdef COLLECT_VTUNE_DATA
 #ifdef __INTEL_COMPILER
   __itt_pause();
+#endif
 #endif
   const float ns=1e-9;
 #if VERB_MAX>1
@@ -458,8 +460,10 @@ int main( int argc, char** argv ){
     M->time_secs=0.0;
     // Iterate ------------------------------------------------------
     auto loop_start = std::chrono::high_resolution_clock::now();
+#ifdef COLLECT_VTUNE_DATA
 #ifdef __INTEL_COMPILER
     __itt_resume();
+#endif
 #endif
     do{ M->Iter(); iter++;
       //for(int part_i=part_0; part_i < (part_n+part_0); part_i++){
@@ -488,8 +492,10 @@ int main( int argc, char** argv ){
         } }
 #endif
     }while( (iter < iter_max) & (M->glob_chk2 > M->glob_rto2) );
+#ifdef COLLECT_VTUNE_DATA
 #ifdef __INTEL_COMPILER
     __itt_pause();
+#endif
 #endif
     // End iteration loop ===========================================
 #if VERB_MAX>0
