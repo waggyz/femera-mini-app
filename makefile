@@ -43,8 +43,8 @@ ifneq (,$(findstring 512,$(CPUSIMD)))
 else
  CPPFLAGS:=$(CPPFLAGS) -xHost
 endif
-CPPFLAGS:=$(CPPFLAGS) -I/$(VTUNE_AMPLIFIER_XE_2019_DIR)/include
-CPPFLAGS:=$(CPPFLAGS) -L/usr/local/pkgs-modules/intel/vtune_amplifier/lib64
+CPPFLAGS:=$(CPPFLAGS) -I$(VTUNE_AMPLIFIER_XE_2019_DIR)/include
+CPPFLAGS:=$(CPPFLAGS) -L$(VTUNE_AMPLIFIER_XE_2019_DIR)/vtune_amplifier/lib64
 
 #  -axSKYLAKE-AVX512 can run out of memory
 # CPPLOG="-Wsuggest-final-types -Wsuggest-final-methods\
@@ -129,7 +129,7 @@ PERFDIR = perf
 
 _dummy := $(shell mkdir -p mini.o test $(TESTDIR) $(PERFDIR))
 
-.SILENT :
+# .SILENT :
 
 all : mini-all gmsh2fmr
 
