@@ -43,6 +43,9 @@ ifneq (,$(findstring 512,$(CPUSIMD)))
 else
  CPPFLAGS:=$(CPPFLAGS) -xHost
 endif
+CPPFLAGS:=$(CPPFLAGS) -I/$(VTUNE_AMPLIFIER_XE_2019_DIR)/include
+CPPFLAGS:=$(CPPFLAGS) -L/usr/local/pkgs-modules/intel/vtune_amplifier/lib64
+
 #  -axSKYLAKE-AVX512 can run out of memory
 # CPPLOG="-Wsuggest-final-types -Wsuggest-final-methods\
 #  -fopt-info-vec-optimized 2>>$(CPUMODEL)-$(CSTR).err;
