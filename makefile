@@ -76,31 +76,31 @@ FEMERA_COMMON = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
 
 FEMERA_BASE_C = $(FEMERA_COMMON)\
  elas-iso3-base.cc elas-ort3-bas2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-bas2.cc\
- elas-plkh-iso3-dum.cc $(LDFLAGS)
+ elas-plkh-iso3-dum.cc
 
 ifneq (,$(findstring AVX,$(CPUSIMD)))
 FEMERA_MINI_C = $(FEMERA_COMMON)\
  elas-iso3-vect.cc elas-ort3-vec2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-vec2.cc\
- elas-plkh-iso3-vect.cc $(LDFLAGS)
+ elas-plkh-iso3-vect.cc
 else
 FEMERA_MINI_C = $(FEMERA_BASE_C)
 endif
 
 FEMERA_REF_C = $(FEMERA_COMMON)\
  elas-iso3-ref.cc elas-ort3-ref2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-ref2.cc\
- elas-plkh-iso3-ref.cc $(LDFLAGS)
+ elas-plkh-iso3-ref.cc
 
 FEMERA_NAIV_C = $(FEMERA_COMMON)\
  elas-iso3-ref.cc elas-ort3-nai2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-ref2.cc\
- elas-plkh-iso3-ref.cc $(LDFLAGS)
+ elas-plkh-iso3-ref.cc
 
 HYBRID_GCC_C = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
  halo-pcg-omp.cc halo-ncg-omp.cc halo-pcr-dummy.cc\
- elas-iso3.cc elas-ort3.cc elas-ther-iso3.cc elas-ther-ort3.cc $(LDFLAGS)
+ elas-iso3.cc elas-ort3.cc elas-ther-iso3.cc elas-ther-ort3.cc
 
 HYBRID_ICC_C = elas-iso3-vect.cc elas-ort3-vec2.cc\
  elas-ther-iso3-bas2.cc elas-ther-ort3-vec2.cc\
- elas-plkh-iso3-ref.cc $(LDFLAGS)
+ elas-plkh-iso3-ref.cc
 
 CEXT = cc
 ODIR = mini.o
@@ -310,35 +310,35 @@ gmsh2fmr : gmsh2fmr-omp
 femera-$(CPUMODELC) : $(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	echo $(CXX) ... -o femera-$(CPUMODELC)
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
-	$(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT) \
+	$(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT) $(LDFLAGS) \
 	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
 	-o femera-$(CPUMODELC) $(CPPLOG); $(AUTOVEC_SUMMARY)
 
 femerq-$(CPUMODELC) : $(QBJS) $(ODIR)/femera-mini.$(QEXT)
 	echo $(CXX) ... -o femerq-$(CPUMODELC)
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
-	$(QBJS) $(ODIR)/femera-mini.$(QEXT) \
+	$(QBJS) $(ODIR)/femera-mini.$(QEXT) $(LDFLAGS) \
 	-DOMP_SCHEDULE=static -DFETCH_JAC -DVERB_MAX=1 \
 	-o femerq-$(CPUMODELC) $(CPPLOG);
 
 femera-mmp-$(CPUMODELC) : $(MBJS) $(ODIR)/test.$(MEXT) $(ODIR)/femera-mini.$(MEXT)
 	echo $(CXX) ... -o femera-mmp-$(CPUMODELC)
 	$(CXX) $(OMPFLAGS) -DOMP_NESTED=true $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
-	$(MBJS) $(ODIR)/test.$(MEXT) $(ODIR)/femera-mini.$(MEXT) \
+	$(MBJS) $(ODIR)/test.$(MEXT) $(ODIR)/femera-mini.$(MEXT) $(LDFLAGS) \
 	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
 	-o femera-mmp-$(CPUMODELC) $(CPPLOG); $(AUTOVEC_SUMMARY)
 
 femera-mmq-$(CPUMODELC) : $(KBJS) $(ODIR)/test.$(KEXT) $(ODIR)/femera-mini.$(KEXT)
 	echo $(CXX) ... -o femera-mmq-$(CPUMODELC)
 	$(CXX) $(OMPFLAGS) -DOMP_NESTED=true $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
-	$(KBJS) $(ODIR)/test.$(KEXT) $(ODIR)/femera-mini.$(KEXT) \
+	$(KBJS) $(ODIR)/test.$(KEXT) $(ODIR)/femera-mini.$(KEXT) $(LDFLAGS) \
 	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
 	-o femera-mmq-$(CPUMODELC) $(CPPLOG); $(AUTOVEC_SUMMARY)
 
 femerb-$(CPUMODELC) : $(BBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	echo $(CXX) ... -o femerb-$(CPUMODELC)
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
-	$(BBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT) \
+	$(BBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT) $(LDFLAGS) \
 	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
 	-o femerb-$(CPUMODELC) $(CPPLOG);
 	echo ./femerb-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
@@ -349,14 +349,14 @@ femerb-$(CPUMODELC) : $(BBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 refera-$(CPUMODELC) : $(RBJS) $(ODIR)/test.$(REXT) $(ODIR)/femera-mini.$(REXT)
 	echo $(CXX) ... -o femera-$(CPUMODELC)
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
-	$(RBJS) $(ODIR)/test.$(REXT) $(ODIR)/femera-mini.$(REXT) \
+	$(RBJS) $(ODIR)/test.$(REXT) $(ODIR)/femera-mini.$(REXT) $(LDFLAGS) \
 	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
 	-o refera-$(CPUMODELC) $(CPPLOG); $(AUTOVEC_SUMMARY)
 
 femera-$(CPUMODEL)-hyb : $(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	echo $(CXX) ... -o femera-$(CPUMODEL)-hyb
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
-	$(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT) \
+	$(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT) $(LDFLAGS) \
 	-DOMP_SCHEDULE=static -DHAS_TEST -DFETCH_JAC \
 	-o femera-$(CPUMODEL)-hyb $(CPPLOG);
 	echo ./femera-$(CPUMODEL)-hyb -v2 -c$(NCPU) -p cube/unst19p1n16
