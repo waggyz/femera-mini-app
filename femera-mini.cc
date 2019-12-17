@@ -9,11 +9,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#ifdef __INTEL_COMPILER
+// # INTEL_NO_ITTNOTIFY_API
+#include <ittnotify.h>
+#endif
 #ifdef _OPENMP
 #include <omp.h>
-#endif
-#ifdef __INTEL_COMPILER
-#include <ittnotify.h>
 #endif
 #include "femera.h"
 #ifdef HAS_TEST
