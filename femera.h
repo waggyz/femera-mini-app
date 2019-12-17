@@ -1,9 +1,5 @@
 #ifndef INCLUDED_FEMERA_H
 #define INCLUDED_FEMERA_H
-#ifdef __INTEL_COMPILER
-// # INTEL_NO_ITTNOTIFY_API
-#include <ittnotify.h>
-#endif
 // Conditional Compiling
 #ifndef VERB_MAX
 #define VERB_MAX 3
@@ -54,6 +50,10 @@
 // #define HAS_PATCH //Set this as a compiler option: -DHAS_PATCH
 // #define HAS_TEST  //Set this as a compiler option: -DHAS_TEST
 //FIXME Remove unneeded headers:
+#ifdef __INTEL_COMPILER
+// # INTEL_NO_ITTNOTIFY_API
+#include <ittnotify.h>
+#endif
 #include <valarray>
 #include <deque>
 #include <utility>// std::pair

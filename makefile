@@ -43,8 +43,8 @@ ifneq (,$(findstring 512,$(CPUSIMD)))
 else
  CPPFLAGS:=$(CPPFLAGS) -xHost
 endif
-CPPFLAGS:=$(CPPFLAGS) -I$(VTUNE_AMPLIFIER_XE_2019_DIR)/include
-CPPFLAGS:=$(CPPFLAGS) -L$(VTUNE_AMPLIFIER_XE_2019_DIR)/lib64 -littnotify
+LDFLAGS:=$(LDFLAGS) -I$(VTUNE_AMPLIFIER_XE_2019_DIR)/include
+LDFLAGS:=$(LDFLAGS) -L$(VTUNE_AMPLIFIER_XE_2019_DIR)/lib64 -littnotify
 
 #  -axSKYLAKE-AVX512 can run out of memory
 # CPPLOG="-Wsuggest-final-types -Wsuggest-final-methods\
@@ -76,31 +76,31 @@ FEMERA_COMMON = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
 
 FEMERA_BASE_C = $(FEMERA_COMMON)\
  elas-iso3-base.cc elas-ort3-bas2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-bas2.cc\
- elas-plkh-iso3-dum.cc
+ elas-plkh-iso3-dum.cc $(LDFLAGS)
 
 ifneq (,$(findstring AVX,$(CPUSIMD)))
 FEMERA_MINI_C = $(FEMERA_COMMON)\
  elas-iso3-vect.cc elas-ort3-vec2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-vec2.cc\
- elas-plkh-iso3-vect.cc
+ elas-plkh-iso3-vect.cc $(LDFLAGS)
 else
 FEMERA_MINI_C = $(FEMERA_BASE_C)
 endif
 
 FEMERA_REF_C = $(FEMERA_COMMON)\
  elas-iso3-ref.cc elas-ort3-ref2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-ref2.cc\
- elas-plkh-iso3-ref.cc
+ elas-plkh-iso3-ref.cc $(LDFLAGS)
 
 FEMERA_NAIV_C = $(FEMERA_COMMON)\
  elas-iso3-ref.cc elas-ort3-nai2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-ref2.cc\
- elas-plkh-iso3-ref.cc
+ elas-plkh-iso3-ref.cc $(LDFLAGS)
 
 HYBRID_GCC_C = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
  halo-pcg-omp.cc halo-ncg-omp.cc halo-pcr-dummy.cc\
- elas-iso3.cc elas-ort3.cc elas-ther-iso3.cc elas-ther-ort3.cc
+ elas-iso3.cc elas-ort3.cc elas-ther-iso3.cc elas-ther-ort3.cc $(LDFLAGS)
 
 HYBRID_ICC_C = elas-iso3-vect.cc elas-ort3-vec2.cc\
  elas-ther-iso3-bas2.cc elas-ther-ort3-vec2.cc\
- elas-plkh-iso3-ref.cc
+ elas-plkh-iso3-ref.cc $(LDFLAGS)
 
 CEXT = cc
 ODIR = mini.o
