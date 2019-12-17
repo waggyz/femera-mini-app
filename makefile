@@ -2,10 +2,11 @@ NCPU:=$(shell ./cpucount.sh)
 CPUMODEL:=$(shell ./cpumodel.sh)
 CPUSIMD:=$(shell ./cpusimd.sh)
 HOST2CHAR:=$(shell hostname | cut -c1-2 )
-# Defaults: use g++
+
+# Defaults use g++
 CSTR=gcc
-CPPFLAGS=-std=c++11 -Wall -Wextra -g -Ofast -ftree-vectorize -march=native \
- -mtune=native -flto -fearly-inlining -funroll-loops \
+CPPFLAGS=-std=c++11 -Wall -Wextra -g -Ofast -ftree-vectorize -march=native\
+ -mtune=native -flto -fearly-inlining -funroll-loops\
  -fno-builtin-sin -fno-builtin-cos
 #FIXME -mtune=core-avx2 when -mtune=native doesn't work
 OMPFLAGS=-fopenmp -D_GLIBCXX_PARALLEL
@@ -13,46 +14,50 @@ OMPFLAGS=-fopenmp -D_GLIBCXX_PARALLEL
 SERFLAGS=-Wno-unknown-pragmas
 # CPPLOG=-fopt-info-vec-optimized 2>>$(CPUMODEL)-$(CSTR).err
 # AUTOVEC_SUMMARY=grep -i vectorized $(CPUMODEL)-$(CSTR).err | grep -v " 0 ";
-NUMA=2
+
+#-O3 -ftree-vectorize -ffast-math -march=native
+# -funsafe-loop-optimizations
+# -fopt-info-vec-optimized -missed -all
+# -ffunction-sections -fdata-sections -W1, --gc-sections
 
 # Check for intel compiler
 ifdef INTEL_LICENSE_FILE
 CXX=icc
 CSTR=icc
-CPPFLAGS=-std=c++11 -Wall -Wextra -Ofast -xHost -axSKYLAKE-AVX512 \
- -ffast-math -no-fast-transcendentals \
+CPPFLAGS=-std=-restrict c++11 -Wall -Wextra -Ofast -xHost\
+ -ffast-math -no-fast-transcendentals\
  -no-inline-max-size -no-inline-max-total-size -qoverride-limits -g
-# -march=native
-SERFLAGS=-fno-alias -diag-disable 3180
-NUMA=2
+SERFLAGS=-fno-alias -diag-disable 3180 -g
 endif
 
 # Check if using intel compiler on k3 or k4
 ifdef INTEL_PYTHONHOME
 CXX=icc
 CSTR=icc
+SERFLAGS=-fno-alias -diag-disable 3180 -g
 CPPFLAGS=-restrict -std=c++11 -Wall -Wextra -O2 -ansi-alias\
  -ffast-math -no-fast-transcendentals\
- -no-inline-max-size -no-inline-max-total-size -qoverride-limits -xSKYLAKE-AVX512 -g
-SERFLAGS=-fno-alias -diag-disable 3180
+ -no-inline-max-size -no-inline-max-total-size -qoverride-limits -g
+ifneq (,$(findstring 512,$(CPUSIMD)))
+ CPPFLAGS:=$(CPPFLAGS) -xSKYLAKE-AVX512
+else
+ CPPFLAGS:=$(CPPFLAGS) -xHost
+endif
+#  -axSKYLAKE-AVX512 can run out of memory
 # CPPLOG="-Wsuggest-final-types -Wsuggest-final-methods\
 #  -fopt-info-vec-optimized 2>>$(CPUMODEL)-$(CSTR).err;
-
-#-O3 -ftree-vectorize -ffast-math -march=native
-# -funsafe-loop-optimizations
-# -fopt-info-vec-optimized -missed -all
-# -ffunction-sections -fdata-sections -W1, --gc-sections
 # -Wsuggest-final-types -Wsuggest-final-methods -O3 -flto
-NUMA=6
 endif
 
 # Check if pragma omp simd is supported.
-HAS_PRGAMA_SIMD:=$(shell $(CXX) $(OMPFLAGS) -Wunknown-pragmas unit-test/test-pragma-simd.c\
+HAS_PRGAMA_SIMD:=$(shell $(CXX) $(OMPFLAGS)\
+ -Wunknown-pragmas unit-test/test-pragma-simd.c\
  -o /dev/null >& /dev/stdout | grep -i ignoring )
 ifeq ($(strip $(HAS_PRGAMA_SIMD)),)
-OMPFLAGS:=$(OMPFLAGS) -DHAS_PRAGMA_SIMD
+ OMPFLAGS:=$(OMPFLAGS) -DHAS_PRAGMA_SIMD
 endif
 
+# Check if AVX2 is supported.
 ifneq (,$(findstring AVX2,$(CPUSIMD)))
  CPPFLAGS:=$(CPPFLAGS) -DHAS_AVX2
 endif
@@ -123,7 +128,9 @@ _dummy := $(shell mkdir -p mini.o test $(TESTDIR) $(PERFDIR))
 
 .SILENT :
 
-all : gmsh2fmr mini-omp mini-omq mini-mmp mini-mmq
+all : mini-all gmsh2fmr
+
+mini-all : mini-omp mini-omq mini-mmp mini-mmq
 
 test : all
 	./gmsh2fmr-$(CPUMODELC) -v3 \
