@@ -40,7 +40,7 @@ CPPFLAGS=-restrict -std=c++11 -Wall -Wextra -O2 -ansi-alias\
  -no-inline-max-size -no-inline-max-total-size -qoverride-limits -g
 ifneq (,$(findstring 512,$(CPUSIMD)))
  CPPFLAGS:=$(CPPFLAGS) -xSKYLAKE-AVX512
- # -qopt-zmm-usage=high degrades performance
+ # -qopt-zmm-usage=high degrades performance 20%
 else
  CPPFLAGS:=$(CPPFLAGS) -xHost
 endif

@@ -467,34 +467,24 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
   time_start( solv_start );
   const FLOAT_SOLV alpha = glob_r2a / glob_sum1;// 1 FLOP
   //printf("ALPHA:%+9.2e\n",alpha);
+#define REUSE_F_FOR_RD
 #pragma omp for schedule(static) reduction(+:glob_sum2)
   for(int part_i=part_0; part_i<part_o; part_i++){// ? FLOP/DOF
     std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH hl0=S->halo_loca_0, sysn=S->udof_n;
-#if 0
-#ifdef HAS_PRAGMA_SIMD
-#pragma omp simd
-#endif
-    for(INT_MESH i=0; i<hl0; i++){
-      S->part_r[i] -= alpha * S->part_f[i];
-    }
-#ifdef HAS_PRAGMA_SIMD
-#pragma omp simd reduction(+:glob_sum2)
-#endif
-    for(INT_MESH i=hl0; i<sysn; i++){
-      S->part_r[i] -= alpha * S->part_f[i];
-      glob_sum2   += S->part_r[i] * S->part_r[i] * S->part_d[i]; }
-#else
-// Merge into 1 loop
 #ifdef HAS_PRAGMA_SIMD
 #pragma omp simd reduction(+:glob_sum2)
 #endif
     for(INT_MESH i=0; i<sysn; i++){
       S->part_r[i] -= S->part_f[i] * alpha;// Update force residuals
+#ifdef REUSE_F_FOR_RD
+      S->part_f[i]  = S->part_r[i] * S->part_d[i];//NOTE Can be precon. function.
+      glob_sum2    += S->part_r[i] * S->part_f[i] *(FLOAT_SOLV( i>=hl0 ));
+#else
       glob_sum2    += S->part_r[i] * S->part_r[i] * S->part_d[i]
         *(FLOAT_SOLV( i>=hl0 ));
-    }
 #endif
+    }
   }
   const FLOAT_PHYS beta = glob_sum2 / glob_r2a;// 1 FLOP
 #pragma omp for schedule(static)
@@ -508,7 +498,12 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
 #endif
     for(INT_MESH i=0; i<sysn; i++){// ? FLOP/DOF
       S->part_u[i] += S->part_p[i] * alpha;// better data locality here
-      S->part_p[i]  = S->part_d[i] * S->part_r[i] + S->part_p[i] * beta; }
+#ifdef REUSE_F_FOR_RD
+      S->part_p[i]  = S->part_f[i] + S->part_p[i] * beta;
+#else
+      S->part_p[i]  = S->part_d[i] * S->part_r[i] + S->part_p[i] * beta;
+#endif
+    }
   }
 //#pragma omp single nowait
 //{ glob_r2a = glob_sum2; }// Update residual (squared)
