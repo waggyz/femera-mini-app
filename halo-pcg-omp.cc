@@ -14,6 +14,8 @@
 #include <omp.h>
 #include "femera.h"
 
+#define REUSE_F_FOR_RD
+
 int PCG::BC (Mesh* ){return 1;}
 int PCG::RHS(Mesh* ){return 1;}
 //
@@ -467,7 +469,6 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
   time_start( solv_start );
   const FLOAT_SOLV alpha = glob_r2a / glob_sum1;// 1 FLOP
   //printf("ALPHA:%+9.2e\n",alpha);
-#define REUSE_F_FOR_RD
 #pragma omp for schedule(static) reduction(+:glob_sum2)
   for(int part_i=part_0; part_i<part_o; part_i++){// ? FLOP/DOF
     std::tie(E,Y,S)=priv_part[part_i];
