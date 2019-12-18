@@ -12,8 +12,8 @@ export OMP_NUM_THREADS=$CPUCOUNT
 
 module purge
 module load gcc_8.3.0
-makw clean
-make -j$CPUCOUNT mini-all
+make clean
+make -j$CPUCOUNT all
 module load intel
 make -j$CPUCOUNT mini-all
 
@@ -22,10 +22,10 @@ MDIR=/hpnobackup1/dwagner5/femera-test/cube
 
 #CSTR=icc
 #YSTR=iso
-for YSTR in iso ort;
 
 for CSTR in icc; do
-for SIZE in medium large; do
+for SIZE in large medium; do
+for YSTR in iso ort; do
 
 case "$SIZE" in
   small)
