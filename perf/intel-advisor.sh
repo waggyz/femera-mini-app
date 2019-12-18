@@ -12,7 +12,7 @@ export OMP_NUM_THREADS=$CPUCOUNT
 
 module purge
 module load gcc_8.3.0
-make clean
+#make clean
 make -j$CPUCOUNT all
 module load intel
 make -j$CPUCOUNT mini-all
@@ -23,9 +23,9 @@ MDIR=/hpnobackup1/dwagner5/femera-test/cube
 #CSTR=icc
 #YSTR=iso
 
-for CSTR in icc; do
-for SIZE in p3-medium p3-large; do
-for YSTR in iso; do
+for CSTR in icc; do # icc gcc
+for SIZE in p2-medium; do
+for YSTR in iso; do # iso ort
 
 #FIXME These are for 6148...
 case "$SIZE" in
@@ -35,7 +35,28 @@ case "$SIZE" in
     MSTR=uhxt52p1
     PART=240
     NMODEL=1
-    ITER=3000
+    ITER=10000
+    GSTR=$MSTR"n"$PART
+    SSTR=""
+    ;;
+  p2-medium)
+    ESTR=tet10
+    ZSTR=500kdof
+    MSTR=uhxt26p2
+    PART=240
+    NMODEL=1
+    ITER=10000
+    GSTR=$MSTR"n"$PART
+    SSTR=""
+    ;;
+  p3-medium)
+    ESTR=tet20
+    ZSTR=500kdof
+    MSTR=uhxt17p3
+    PART=240
+    # or PART=400 (ort optimum)
+    NMODEL=1
+    ITER=10000
     GSTR=$MSTR"n"$PART
     SSTR=""
     ;;
@@ -45,7 +66,28 @@ case "$SIZE" in
     MSTR=uhxt246p1
     PART=1920
     NMODEL=1
-    ITER=60
+    ITER=100
+    GSTR=$MSTR"n"
+    SSTR="-xS16 -yS12 -zS10"
+    ;;
+  p2-large)
+    ESTR=tet10
+    ZSTR=50mdof
+    MSTR=uhxt123p2
+    PART=1920
+    NMODEL=1
+    ITER=100
+    GSTR=$MSTR"n"
+    SSTR="-xS16 -yS12 -zS10"
+    ;;
+  p3-large)
+    ESTR=tet20
+    ZSTR=50mdof
+    MSTR=uhxt80p3
+    PART=1920
+    # optimal: 900-1500
+    NMODEL=1
+    ITER=100
     GSTR=$MSTR"n"
     SSTR="-xS16 -yS12 -zS10"
     ;;
@@ -60,48 +102,6 @@ case "$SIZE" in
     ITER=2000
     GSTR=$MSTR"n"$PART
     SSTR=""
-    ;;
-  p2-medium)
-    ESTR=tet10
-    ZSTR=1mdof
-    MSTR=uhxt33p2
-    PART=240
-    NMODEL=1
-    ITER=5000
-    GSTR=$MSTR"n"$PART
-    SSTR=""
-    ;;
-  p2-large)
-    ESTR=tet10
-    ZSTR=50mdof
-    MSTR=uhxt123p2
-    PART=1920
-    NMODEL=1
-    ITER=100
-    GSTR=$MSTR"n"
-    SSTR="-xS16 -yS12 -zS10"
-    ;;
-  p3-medium)
-    ESTR=tet20
-    ZSTR=500kdof
-    MSTR=uhxt17p3
-    PART=240
-    # or PART=400 (ort optimum)
-    NMODEL=1
-    ITER=5000
-    GSTR=$MSTR"n"$PART
-    SSTR=""
-    ;;
-  p3-large)
-    ESTR=tet20
-    ZSTR=50mdof
-    MSTR=uhxt80p3
-    PART=1920
-    # optimal: 900-1500
-    NMODEL=1
-    ITER=100
-    GSTR=$MSTR"n"
-    SSTR="-xS16 -yS12 -zS10"
     ;;
 esac
 case "$YSTR" in
