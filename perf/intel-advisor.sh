@@ -24,9 +24,10 @@ MDIR=/hpnobackup1/dwagner5/femera-test/cube
 #YSTR=iso
 
 for CSTR in icc; do
-for SIZE in p1-large p1-medium p3-large p3-medium; do
-for YSTR in iso ort; do
+for SIZE in p3-medium p3-large; do
+for YSTR in iso; do
 
+#FIXME These are for 6148...
 case "$SIZE" in
   p1-medium)
     ESTR=tet4
