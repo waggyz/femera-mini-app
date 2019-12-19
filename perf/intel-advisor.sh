@@ -12,7 +12,7 @@ export OMP_NUM_THREADS=$CPUCOUNT
 
 module purge
 module load gcc_8.3.0
-#make clean
+make clean
 make -j$CPUCOUNT all
 module load intel
 make -j$CPUCOUNT mini-all
@@ -20,90 +20,74 @@ make -j$CPUCOUNT mini-all
 XDIR=/u/dwagner5/femera-mini-develop
 MDIR=/hpnobackup1/dwagner5/femera-test/cube
 
-#CSTR=icc
-#YSTR=iso
+CSTR=icc
+YSTR=iso
 
-for CSTR in icc; do # icc gcc
-for SIZE in p2-medium; do
-for YSTR in iso; do # iso ort
+#for CSTR in icc; do # icc gcc
+#for YSTR in iso; do # iso ort
+for SIZE in medium large; do
+for PORD in p1 p2 p3; do
 
-#FIXME These are for 6148...
 case "$SIZE" in
-  p1-medium)
-    ESTR=tet4
-    ZSTR=500kdof
+medium)
+  NMODEL=1
+  ITER=10000
+  ZSTR=500kdof
+  PART=$(( 6 * $CPUCOUNT ))
+  case "$PORD" in
+  1)
+  ESTR=tet4
     MSTR=uhxt52p1
-    PART=240
-    NMODEL=1
-    ITER=10000
-    GSTR=$MSTR"n"$PART
-    SSTR=""
     ;;
-  p2-medium)
-    ESTR=tet10
-    ZSTR=500kdof
+  2)
+  ESTR=tet10
     MSTR=uhxt26p2
-    PART=240
-    NMODEL=1
-    ITER=10000
-    GSTR=$MSTR"n"$PART
-    SSTR=""
     ;;
-  p3-medium)
-    ESTR=tet20
-    ZSTR=500kdof
+  3)
+  ESTR=tet20
     MSTR=uhxt17p3
-    PART=240
-    # or PART=400 (ort optimum)
-    NMODEL=1
-    ITER=10000
-    GSTR=$MSTR"n"$PART
-    SSTR=""
     ;;
-  p1-large)
+  esac
+  GSTR=$MSTR"n"$PART
+  SSTR=""
+  ;;
+large)
+  NMODEL=1
+  ITER=100
+  ZSTR=50mdof
+  PART=3360
+  case "$PORD" in
+  1)
     ESTR=tet4
-    ZSTR=50mdof
     MSTR=uhxt246p1
-    PART=1920
-    NMODEL=1
-    ITER=100
-    GSTR=$MSTR"n"
-    SSTR="-xS16 -yS12 -zS10"
+    #NOTE May be too big for (meshing? partitioning?) tet4 on westmere k2 nodes
     ;;
-  p2-large)
+  2)
     ESTR=tet10
-    ZSTR=50mdof
     MSTR=uhxt123p2
-    PART=1920
-    NMODEL=1
-    ITER=100
-    GSTR=$MSTR"n"
-    SSTR="-xS16 -yS12 -zS10"
     ;;
-  p3-large)
+  3)
     ESTR=tet20
-    ZSTR=50mdof
     MSTR=uhxt80p3
-    PART=1920
-    # optimal: 900-1500
-    NMODEL=1
-    ITER=100
-    GSTR=$MSTR"n"
-    SSTR="-xS16 -yS12 -zS10"
     ;;
-  p2-small)
-    #FIXME This will not work with ittnotify around the iter loop.
-    ESTR=tet10
-    ZSTR=3kdof
-    MSTR=uhxt4p2
-    # PART must be 1
-    PART=1
-    NMODEL=1000
-    ITER=2000
-    GSTR=$MSTR"n"$PART
-    SSTR=""
-    ;;
+  esac
+  GSTR=$MSTR"n"
+  SSTR="-xS12 -yS14 -zS20"
+  ;;
+smallFIXME)
+  #FIXME This will not work with ittnotify around the iter loop.
+  NMODEL=$(( 12 * $CPUCOUNT ))
+  ITER=4000
+  ESTR=tet10
+  ZSTR=5kdof
+  MSTR=uhxtFIXMEp2
+  PART=1
+  GSTR=$MSTR"n"$PART
+  SSTR=""
+  ;;
 esac
+
+if [ 1==1 ];then
 case "$YSTR" in
   iso)
     $XDIR/"gmsh2fmr-"$CPUMODEL"-gcc" -v1 \
@@ -118,6 +102,7 @@ case "$YSTR" in
     -a $MDIR/$MSTR/$GSTR
     ;;
 esac
+fi
 if [ "$NMODEL" == "1" ]; then
   EXESTR=$XDIR/"femerq-"$CPUMODEL"-"$CSTR" -c"$CPUCOUNT" -r0 -i"$ITER\
 " -p "$MDIR/$MSTR/$MSTR"n"$PART
@@ -132,7 +117,5 @@ advixe-cl --collect survey\
 advixe-cl --collect tripcounts --flop --stacks\
   --project-dir /u/dwagner5/intel/advixe/projects/"femera-"$ZSTR"-"$ESTR"-"$YSTR"-"$CPUMODEL"-"$CSTR --\
   $EXESTR
-
-done
 done
 done
