@@ -82,6 +82,7 @@ FEMERA_BASE_C = $(FEMERA_COMMON)\
  elas-plkh-iso3-dum.cc
 
 ifneq (,$(findstring AVX,$(CPUSIMD)))
+ CPPFLAGS:=$(CPPFLAGS) -DHAS_AVX
 FEMERA_MINI_C = $(FEMERA_COMMON)\
  elas-iso3-vect.cc elas-ort3-vec2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-vec2.cc\
  elas-plkh-iso3-vect.cc

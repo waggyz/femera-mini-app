@@ -87,7 +87,6 @@ smallFIXME)
   ;;
 esac
 
-if [ 1==1 ];then
 case "$YSTR" in
   iso)
     $XDIR/"gmsh2fmr-"$CPUMODEL"-gcc" -v1 \
@@ -102,7 +101,6 @@ case "$YSTR" in
     -a $MDIR/$MSTR/$GSTR
     ;;
 esac
-fi
 if [ "$NMODEL" == "1" ]; then
   EXESTR=$XDIR/"femerq-"$CPUMODEL"-"$CSTR" -c"$CPUCOUNT" -r0 -i"$ITER\
 " -p "$MDIR/$MSTR/$MSTR"n"$PART
