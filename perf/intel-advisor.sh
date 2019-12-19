@@ -61,6 +61,7 @@ large)
     ESTR=tet4
     MSTR=uhxt246p1
     #NOTE May be too big for (meshing? partitioning?) tet4 on westmere k2 nodes
+    #     but femera runs it.
     ;;
   2)
     ESTR=tet10

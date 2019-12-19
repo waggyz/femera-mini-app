@@ -38,12 +38,14 @@ SERFLAGS=-fno-alias -diag-disable 3180 -g
 CPPFLAGS=-restrict -std=c++11 -Wall -Wextra -O2 -ansi-alias\
  -ffast-math -no-fast-transcendentals\
  -no-inline-max-size -no-inline-max-total-size -qoverride-limits -g
-ifneq (,$(findstring 512,$(CPUSIMD)))
- CPPFLAGS:=$(CPPFLAGS) -xSKYLAKE-AVX512
- # -qopt-zmm-usage=high degrades performance 20%
-else
+
+#ifneq (,$(findstring 512,$(CPUSIMD)))
+# CPPFLAGS:=$(CPPFLAGS) -xSKYLAKE-AVX512
+# Does not work for KNL
+# # -qopt-zmm-usage=high degrades performance 20%
+#else
  CPPFLAGS:=$(CPPFLAGS) -xHost
-endif
+#endif
 
 CPPFLAGS:=$(CPPFLAGS) -DCOLLECT_VTUNE_DATA
 LDFLAGS:=$(LDFLAGS) -I$(VTUNE_AMPLIFIER_XE_2019_DIR)/include
