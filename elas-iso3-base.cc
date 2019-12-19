@@ -141,8 +141,8 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       //------------------------------------------------------- 18+9 = 27 FLOP
 #ifdef HAS_PRAGMA_SIMD
 #ifndef HAS_AVX
-#pragma omp simd
       // May be slower for >=AVX
+#pragma omp simd
 #endif
 #endif
       for(int i=0; i<Nc; i++){
