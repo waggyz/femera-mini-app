@@ -26,7 +26,7 @@ YSTR=iso
 #for CSTR in icc; do # icc gcc
 #for YSTR in iso; do # iso ort
 for SIZE in medium large; do
-for PORD in p1 p2 p3; do
+for PORD in 1 2 3; do
 
 case "$SIZE" in
 medium)
