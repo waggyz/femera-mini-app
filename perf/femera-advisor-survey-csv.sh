@@ -21,7 +21,7 @@ for CSTR in icc; do
   ADIR=$ADVDIR"/femera-"$NAME
   ACSV=$PERFDIR"/survey-"$NAME".csv"
   if [ -d "$ADIR" ]; then
-    EXE="advixe-cl --report survey --show-all-columns --no-show-all-rows --format=csv"
+    EXE="advixe-cl --report survey --show-all-columns --format=csv"
     EXE=$EXE" --csv-delimiter=tab --project-dir "$ADIR" --report-output="$ACSV
     #
     PCSV=$PERFDIR"/advixe-"$NAME".csv"
@@ -30,9 +30,9 @@ for CSTR in icc; do
     cut -f 1,7,9,10,11,28,49,50,51,52,64,65,70,71 --output-delimiter=,\
     $ACSV |  sed  '/[apq]/d' | sed 's/[s<"]//g' | sed '/^$/d' > $PCSV
     #
-    # ID,Total Time,Self Time,Total Elapsed Time,Self Elapsed Time,Line,
-    # Self GFLOPS,Total GFLOPS,Self AI,Total Arithmetic Intensity,
-    # Self GFLOP,Total GFLOP,Self Memory GB,Total Memory GB
+    # ID, Total Time, Self Time, Total Elapsed Time, Self Elapsed Time,
+    # Line, Self GFLOPS, Total GFLOPS, Self AI, Total Arithmetic Intensity,
+    # Self GFLOP, Total GFLOP, Self Memory GB, Total Memory GB
   fi
 done
 done
