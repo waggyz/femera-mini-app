@@ -5,7 +5,10 @@ ADVDIR="/u/dwagner5/intel/advixe/projects"
 PERFDIR="/u/dwagner5/femera-mini-develop/perf"
 #
 #
-module load intel
+module load intel Python_3.7.1
+
+#PYTHONPATH=$PREFIX_PATH
+#pip install --target="$PREFIX_PATH" csvfilter
 #
 for SIZE in 500kdof 50mdof; do
 for ESTR in tet4 tet10 tet20; do
@@ -22,13 +25,13 @@ for CSTR in icc; do
   ACSV=$PERFDIR"/survey-"$NAME".csv"
   if [ -d "$ADIR" ]; then
     EXE="advixe-cl --report survey --show-all-columns --no-show-all-rows --format=csv"
-    EXE=$EXE" --project-dir "$ADIR" --report-output="$ACSV
+    EXE=$EXE" --csv-delimiter=tab --project-dir "$ADIR" --report-output="$ACSV
     #
     #echo $EXE
     PCSV=$PERFDIR"/advixe-"$NAME".csv"
     echo "Extracting "$ADIR" to "$PCSV"..."
     $EXE
-    awk  -F'","', '{print $1 $7 $9 $28 $49 $50 $51 $52 $61 $62 $64 $66 $68 $70 $72}' $ACSV > $PCSV
+    cut -f 1,7,9,28,49,50,51,52,61,62,64,66,68,70,72 $ACSV > $PCSV
   fi
 done
 done
