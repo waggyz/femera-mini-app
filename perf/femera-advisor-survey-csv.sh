@@ -22,7 +22,7 @@ for CSTR in icc; do
   CSV=$PERFDIR"/survey-"$NAME".csv"
   if [ -d "$ADIR" ]; then
     EXE="advixe-cl --report survey --show-all-columns --no-show-all-rows --format=csv"
-    EXE=$EXE" --project-dir "$ADIR" --report-output=$CSV
+    EXE=$EXE" --project-dir "$ADIR" --report-output="$CSV
     #
     echo $EXE
     $EXE
