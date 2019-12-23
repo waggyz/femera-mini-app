@@ -13,7 +13,7 @@ module load intel Python_3.7.1
 for SIZE in 500kdof 50mdof; do
 for ESTR in tet4 tet10 tet20; do
 for YSTR in iso; do
-for NSTR in "X5675-6148" X5675 6148 E5-2640 E5-2650 E5-2670 7210; do
+for NSTR in "X5675-6148" "X5675" "6148" "E5-2640" "E5-2650" "E5-2670" "7210"; do
 #for NSTR in "X5675-6148"; do
 for CSTR in icc; do
   if [ $NSTR=="" ]; then
@@ -37,7 +37,6 @@ for CSTR in icc; do
     # ID,Total Time,Self Time,Total Elapsed Time,Self Elapsed Time,Line,
     # Self GFLOPS,Total GFLOPS,Self AI,Total Arithmetic Intensity,
     # Self GFLOP,Total GFLOP,Self Memory GB,Total Memory GB
-    #
   fi
 done
 done
