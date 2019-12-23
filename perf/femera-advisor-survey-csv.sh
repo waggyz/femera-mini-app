@@ -21,7 +21,8 @@ for CSTR in icc; do
   ADIR=$ADVDIR"/femera-"$NAME
   ACSV=$PERFDIR"/survey-"$NAME".csv"
   if [ -d "$ADIR" ]; then
-    EXE="advixe-cl --report survey --show-all-columns --format=csv"
+    EXE="advixe-cl --report survey --format=csv"
+    EXE=$EXE" --show-functions --show-all-columns --no-show-all-rows"
     EXE=$EXE" --csv-delimiter=tab --project-dir "$ADIR" --report-output="$ACSV
     #
     PCSV=$PERFDIR"/advixe-"$NAME".csv"
