@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #
-ADVDIR=/u/dwagner5/intel/advixe/projects/
+ADVDIR=/u/dwagner5/intel/advixe/projects
 #
 #
 module load intel
@@ -12,14 +12,13 @@ for YSTR in iso; do
 #for NSTR in "X5675-6148" X5675 6148 E5-2640 E5-2650 E5-2670 7210; do
 for NSTR in "X5675-6148"; do
 for CSTR in icc; do
-  echo $NSTR
   if [ $NSTR=="" ]; then
     NAME=$SIZE"-"$ESTR"-"$YSTR"-"$NSTR
   else
     NAME=$SIZE"-"$ESTR"-"$YSTR"-"$NSTR"-"$CSTR
   fi
   ADIR=$ADVDIR"/femera-"$NAME
-  if [ -d "$DIR" ]; then
+  if [ -d "$ADIR" ]; then
     EXE="advixe-cl --report survey --show-all-columns --no-show-all-rows --format=csv"
     EXE=$EXE" --project-dir" $ADIR "--report-output=survey-"$NAME".csv"
     #
