@@ -20,7 +20,7 @@ for CSTR in icc; do
   ADIR=$ADVDIR"/femera-"$NAME
   if [ -d "$ADIR" ]; then
     EXE="advixe-cl --report survey --show-all-columns --no-show-all-rows --format=csv"
-    EXE=$EXE" --project-dir" $ADIR "--report-output=survey-"$NAME".csv"
+    EXE=$EXE" --project-dir "$ADIR" --report-output=survey-"$NAME".csv"
     #
     echo $EXE
     $EXE
