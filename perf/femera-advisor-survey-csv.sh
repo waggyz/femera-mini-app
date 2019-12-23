@@ -1,7 +1,8 @@
 #!/bin/bash
 #
 #
-ADVDIR=/u/dwagner5/intel/advixe/projects
+ADVDIR="/u/dwagner5/intel/advixe/projects"
+PERFDIR="/u/dwagner5/femera-mini-develop/perf"
 #
 #
 module load intel
@@ -18,9 +19,10 @@ for CSTR in icc; do
     NAME=$SIZE"-"$ESTR"-"$YSTR"-"$NSTR"-"$CSTR
   fi
   ADIR=$ADVDIR"/femera-"$NAME
+  CSV=$PERFDIR"/survey-"$NAME".csv"
   if [ -d "$ADIR" ]; then
     EXE="advixe-cl --report survey --show-all-columns --no-show-all-rows --format=csv"
-    EXE=$EXE" --project-dir "$ADIR" --report-output=survey-"$NAME".csv"
+    EXE=$EXE" --project-dir "$ADIR" --report-output=$CSV
     #
     echo $EXE
     $EXE
