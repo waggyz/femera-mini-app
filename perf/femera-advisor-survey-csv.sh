@@ -28,7 +28,7 @@ for CSTR in icc; do
     PCSV=$PERFDIR"/advixe-"$NAME".csv"
     echo "Extracting "$ADIR" to "$PCSV"..."
     $EXE
-    awk '{print $3 $7 $9 $28 $49 $51 $61 $62 $64 $66 $68 $70 $72}' $ACSV > $PCSV
+    awk  -F, '{print $1 $7 $9 $28 $49 $51 $61 $62 $64 $66 $68 $70 $72}' $ACSV > $PCSV
   fi
 done
 done
