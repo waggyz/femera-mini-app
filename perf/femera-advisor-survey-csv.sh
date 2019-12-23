@@ -31,8 +31,8 @@ for CSTR in icc; do
     PCSV=$PERFDIR"/advixe-"$NAME".csv"
     echo "Extracting "$ADIR" to "$PCSV"..."
     $EXE
-    cut -f 1,7,9,28,49,50,51,52,61,62,64,66,68,70,72 --output-delimiter=,\
-    $ACSV |  sed  '/[apq]/d' | sed 's/[s<"]//g' > $PCSV
+    cut -f 1,7,9,10,11,28,49,50,51,52,61,62,64,66,68,70,72 --output-delimiter=,\
+    $ACSV |  sed  '/[apq]/d' | sed 's/[s<"]//g' | sed '/^$/d' > $PCSV
 
   fi
 done
