@@ -19,13 +19,16 @@ for CSTR in icc; do
     NAME=$SIZE"-"$ESTR"-"$YSTR"-"$NSTR"-"$CSTR
   fi
   ADIR=$ADVDIR"/femera-"$NAME
-  CSV=$PERFDIR"/survey-"$NAME".csv"
+  ACSV=$PERFDIR"/survey-"$NAME".csv"
   if [ -d "$ADIR" ]; then
     EXE="advixe-cl --report survey --show-all-columns --no-show-all-rows --format=csv"
-    EXE=$EXE" --project-dir "$ADIR" --report-output="$CSV
+    EXE=$EXE" --project-dir "$ADIR" --report-output="$ACSV
     #
-    echo $EXE
+    #echo $EXE
+    PCSV=$PERFDIR"/advixe-"$NAME".csv"
+    echo "Extracting "$ADIR" to "$PCSV"..."
     $EXE
+    awk '{print $3 $7 $9 $28 $49 $51 $61 $62 $64 $66 $68 $70 $72}' $CSV > $PCSV
   fi
 done
 done
