@@ -31,11 +31,12 @@ for CSTR in icc; do
     PCSV=$PERFDIR"/advixe-"$NAME".csv"
     echo "Extracting "$ADIR" to "$PCSV"..."
     $EXE
+    cut -f 1,7,9,10,11,28,49,50,51,52,64,65,70,71 --output-delimiter=,\
+    $ACSV |  sed  '/[apq]/d' | sed 's/[s<"]//g' | sed '/^$/d' > $PCSV
+    #
     # ID,Total Time,Self Time,Total Elapsed Time,Self Elapsed Time,Line,
     # Self GFLOPS,Total GFLOPS,Self AI,Total Arithmetic Intensity,
     # Self GFLOP,Total GFLOP,Self Memory GB,Total Memory GB
-    cut -f 1,7,9,10,11,28,49,50,51,52,64,65,70,71 --output-delimiter=,\
-    $ACSV |  sed  '/[apq]/d' | sed 's/[s<"]//g' | sed '/^$/d' > $PCSV
     #
   fi
 done
