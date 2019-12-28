@@ -136,13 +136,14 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       S[1]=( H[1] + H[3] )*Cdw[2];// S[3]= S[1];//Sxy Syx
       S[5]=( H[5] + H[7] )*Cdw[2];// S[7]= S[5];//Syz Szy
       S[2]=( H[2] + H[6] )*Cdw[2];// S[6]= S[2];//Sxz Szx
-      }
+      }//------------------------------------------------------- 18+9 = 27 FLOP
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
-      //------------------------------------------------------- 18+9 = 27 FLOP
+#if 0
 #ifdef HAS_PRAGMA_SIMD
 #ifndef HAS_AVX
-      // May be slower for >=AVX
+      // May be slower for >=AVX, not much faster 40% efficient) otherwise...
 #pragma omp simd
+#endif
 #endif
 #endif
       for(int i=0; i<Nc; i++){

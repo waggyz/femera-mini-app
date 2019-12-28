@@ -25,7 +25,8 @@ YSTR=iso
 
 #for CSTR in icc; do # icc gcc
 #for YSTR in iso; do # iso ort
-for SIZE in medium large; do
+#for SIZE in medium large largeminpart; do
+for SIZE in largeminpart; do
 for PORD in 1 2 3; do
 
 case "$SIZE" in
@@ -74,6 +75,28 @@ large)
   esac
   GSTR=$MSTR"n"
   SSTR="-xS12 -yS14 -zS20"
+  ;;
+largeminpart)
+  NMODEL=1
+  ITER=100
+  ZSTR=50mminpart
+  PART=$CPUCOUNT
+  case "$PORD" in
+  1)
+    ESTR=tet4
+    MSTR=uhxt246p1
+    ;;
+  2)
+    ESTR=tet10
+    MSTR=uhxt123p2
+    ;;
+  3)
+    ESTR=tet20
+    MSTR=uhxt80p3
+    ;;
+  esac
+  GSTR=$MSTR"n"$PART
+  SSTR=""
   ;;
 smallFIXME)
   #FIXME This will not work with ittnotify around the iter loop.

@@ -54,7 +54,7 @@ static inline void rotate_g_h(
       a258+= g *_mm256_set1_pd(  u[i+2]);
     _mm256_store_pd(&G[ig],g);
     ig+=4;
-    }if((i+5)<Ne){
+    }if(i<(Ne-5)){
       const __m256d g
         = J[0] *_mm256_set1_pd(isp[i+3])
         + J[1] *_mm256_set1_pd(isp[i+4])
@@ -64,7 +64,7 @@ static inline void rotate_g_h(
       a258+= g *_mm256_set1_pd(  u[i+5]);
       _mm256_store_pd(&G[ig],g);
       ig+=4;
-    }if((i+8)<Ne){
+    }if(i<(Ne-8)){
       const __m256d g
         = J[0] *_mm256_set1_pd(isp[i+6])
         + J[1] *_mm256_set1_pd(isp[i+7])
@@ -295,7 +295,7 @@ static inline void compute_g_h( FLOAT_PHYS* G, __m256d* H,
 #endif
     _mm256_store_pd(&G[ig],g);
     ig+=4;
-    }if((i+5)<Ne){
+    }if(i<(Ne-5)){
       const __m256d g
         = J[0] *_mm256_set1_pd(isp[i+3])
         + J[1] *_mm256_set1_pd(isp[i+4])
@@ -305,7 +305,7 @@ static inline void compute_g_h( FLOAT_PHYS* G, __m256d* H,
       H[2]+= g *_mm256_set1_pd(  u[i+5]);
       _mm256_store_pd(&G[ig],g);
       ig+=4;
-    }if((i+8)<Ne){
+    }if(i<(Ne-8)){
       const __m256d g
         = J[0] *_mm256_set1_pd(isp[i+6])
         + J[1] *_mm256_set1_pd(isp[i+7])
@@ -339,7 +339,7 @@ static inline void compute_g_p_h(
       P[2]+= g *_mm256_set1_pd(  p[i+2]);
     _mm256_store_pd(&G[ig],g);
     ig+=4;
-    }if((i+5)<Ne){
+    }if(i<(Ne-5)){
       const __m256d g
         = J[0] *_mm256_set1_pd(isp[i+3])
         + J[1] *_mm256_set1_pd(isp[i+4])
@@ -352,7 +352,7 @@ static inline void compute_g_p_h(
       P[2]+= g *_mm256_set1_pd(  p[i+5]);
       _mm256_store_pd(&G[ig],g);
       ig+=4;
-    }if((i+8)<Ne){
+    }if(i<(Ne-8)){
       const __m256d g
         = J[0] *_mm256_set1_pd(isp[i+6])
         + J[1] *_mm256_set1_pd(isp[i+7])

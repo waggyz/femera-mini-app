@@ -154,8 +154,8 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
         for(int k=0; k<3; k++){ H[3* i+k ]=0.0;
           for(int j=0; j<3; j++){
             H[3* i+k ] += A[3* i+j ] * R[3* k+j ];
-      } } }//----------------------------------------------- 27*2 =      54 FLOP
-      const FLOAT_PHYS dw = Ejacs[Nj*ie+ 9 ] * wgt[ip];
+      } } }//----------------------------------------------- 27*2 =     54 FLOP
+      {const FLOAT_PHYS dw = Ejacs[Nj*ie+ 9 ] * wgt[ip];
       //
       S[0]=(C[0]* H[0] + C[3]* H[4] + C[5]* H[8])*dw;//Sxx
       S[4]=(C[3]* H[0] + C[1]* H[4] + C[4]* H[8])*dw;//Syy
@@ -164,6 +164,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       S[1]=( H[1] + H[3] )*C[6]*dw;// S[3]= S[1];//Sxy Syx
       S[5]=( H[5] + H[7] )*C[7]*dw;// S[7]= S[5];//Syz Szy
       S[2]=( H[2] + H[6] )*C[8]*dw;// S[6]= S[2];//Sxz Szx
+      }//-------------------------------------------------------- 18+9= 27 FLOP
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
 #if VERB_MAX>10
       printf( "Stress (Natural Coords):");
@@ -172,7 +173,6 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
         printf("%+9.2e ",S[j]);
       } printf("\n");
 #endif
-      //--------------------------------------------------------- 18+9= 27 FLOP
       // [S][R] : matmul3x3x3, R is transposed
       //for(int i=0; i<9; i++){ A[i]=0.0; };
 //#pragma omp simd

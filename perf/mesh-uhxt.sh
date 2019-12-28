@@ -27,7 +27,7 @@ if [ ! -f $DIR"/uhxt"$H"p"$P"n.msh" ]; then
     echo "Meshing uhxt"$H"p"$P"n.msh..."
   fi
   gmsh -nt $C -v $VERB -setnumber p $P -setnumber h $H -setnumber n 1 -3 \
-    -format msh2 -o $DIR"/uhxt"$H"p"$P"n.msh" -save geo/uhxt-cube.geo
+    -format msh2 -o $DIR"/uhxt"$H"p"$P"n.msh" -save geo/uhxt-cube.geo -save
 fi
 PARTSTR="METIS"
 if [ $N -lt 1000 ]; then
@@ -55,12 +55,12 @@ if [ ! -f $DIR"/uhxt"$H"p"$P"n"$N".msh" ]; then
     fi
     gmsh -v $VERB -nt $C -part $N \
       -format msh2 -o $DIR"/uhxt"$H"p"$P"n"$N".msh" \
-      $DIR"/uhxt"$H"p"$P"n.msh"
+      $DIR"/uhxt"$H"p"$P"n.msh" -save
   #else
   #  gmsh -v $VERB -nt $C -setnumber n $N \
   #    -setnumber sx $SX -setnumber sy $SY -setnumber sz $SZ \
   #    -format msh2 -o $DIR"/uhxt"$H"p"$P"n"$N".msh" \
-  #    -merge $DIR"/uhxt"$H"p"$P"n.msh" -save geo/simplepart.geo
+  #    -merge $DIR"/uhxt"$H"p"$P"n.msh" -save geo/simplepart.geo -save
   fi
 fi
 if [ ! -f $DIR"/uhxt"$H"p"$P"n"$N"_1.fmr" ]; then
