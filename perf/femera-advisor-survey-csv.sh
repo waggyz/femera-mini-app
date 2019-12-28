@@ -5,7 +5,7 @@ ADVDIR="/u/dwagner5/intel/advixe/projects"
 PERFDIR="/u/dwagner5/femera-mini-develop/perf"
 #
 #
-module load intel Python_3.7.1
+module load intel
 #
 #for NSTR in "X5675-6148"; do
 for NSTR in "X5675-6148" "X5675" "6148" "E5-2640" "E5-2650" "E5-2670" "7210"; do
