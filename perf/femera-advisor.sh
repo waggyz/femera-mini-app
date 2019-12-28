@@ -139,8 +139,8 @@ advixe-cl --collect survey\
 advixe-cl --collect tripcounts --flop --stacks\
   --project-dir /u/dwagner5/intel/advixe/projects/"femera-"$ZSTR"-"$ESTR"-"$YSTR"-"$CPUMODEL"-"$CSTR --\
   $EXESTR
-advixe-cl --report survey --show-all-columns --no-show-all-rows --format=csv\
- --project-dir /u/dwagner5/intel/advixe/projects/"femera-"$ZSTR"-"$ESTR"-"$YSTR"-"$CPUMODEL"-"$CSTR
+#advixe-cl --report survey --show-all-columns --no-show-all-rows --format=csv\
+# --project-dir /u/dwagner5/intel/advixe/projects/"femera-"$ZSTR"-"$ESTR"-"$YSTR"-"$CPUMODEL"-"$CSTR
 
 done
 done
