@@ -25,15 +25,15 @@ YSTR=iso
 
 #for CSTR in icc; do # icc gcc
 #for YSTR in iso; do # iso ort
-#for SIZE in medium large largeminpart; do
-for SIZE in largeminpart; do
+#for SIZE in largeminpart; do
+for SIZE in medium large largeminpart small; do
 for PORD in 1 2 3; do
 
 case "$SIZE" in
 medium)
+  ZSTR=500kdof
   NMODEL=1
   ITER=10000
-  ZSTR=500kdof
   PART=$(( 6 * $CPUCOUNT ))
   case "$PORD" in
   1)
@@ -53,9 +53,9 @@ medium)
   SSTR=""
   ;;
 large)
+  ZSTR=50mdof
   NMODEL=1
   ITER=100
-  ZSTR=50mdof
   PART=3360
   case "$PORD" in
   1)
@@ -77,9 +77,9 @@ large)
   SSTR="-xS12 -yS14 -zS20"
   ;;
 largeminpart)
+  ZSTR=50mminpart
   NMODEL=1
   ITER=100
-  ZSTR=50mminpart
   PART=$CPUCOUNT
   case "$PORD" in
   1)
@@ -98,13 +98,36 @@ largeminpart)
   GSTR=$MSTR"n"$PART
   SSTR=""
   ;;
-smallFIXME)
-  #FIXME This will not work with ittnotify around the iter loop.
-  NMODEL=$(( 12 * $CPUCOUNT ))
-  ITER=4000
-  ESTR=tet10
+small)
+  #FIXED This does not work with ittnotify around the iter loop.
+  #
   ZSTR=5kdof
-  MSTR=uhxtFIXMEp2
+  #
+  #NMODEL=$(( 12 * $CPUCOUNT ))
+  #FIXME Should set total model count constant?
+  # NMODEL = 250 = 100/4000 * 50e6/5e3 = 10000/4000 * 500e3/5e3
+  # NMODEL = 240 = 100/4167 * 50e6/5e3 = 10000/4167 * 500e3/5e3
+  if [ "$CPUMODEL" == "E7-4830" ]; then
+    NMODEL=280
+    ITER=3571
+  else
+    NMODEL=240
+    ITER=4167
+  fi
+  case "$PORD" in
+  1)
+    ESTR=tet4
+    MSTR=uhxt11p1
+    ;;
+  2)
+    ESTR=tet10
+    MSTR=uhxt5p2
+    ;;
+  3)
+    ESTR=tet20
+    MSTR=uhxt3p3
+    ;;
+  esac
   PART=1
   GSTR=$MSTR"n"$PART
   SSTR=""
@@ -125,7 +148,7 @@ case "$YSTR" in
     -a $MDIR/$MSTR/$GSTR
     ;;
 esac
-if [ "$NMODEL" == "1" ]; then
+if [ $NMODEL -eq 1 ]; then
   EXESTR=$XDIR/"femerq-"$CPUMODEL"-"$CSTR" -c"$CPUCOUNT" -r0 -i"$ITER\
 " -p "$MDIR/$MSTR/$MSTR"n"$PART
 else

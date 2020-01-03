@@ -225,6 +225,11 @@ int main( int argc, char** argv ){
     return 1;
   }
 #if OMP_NESTED==true
+#ifdef COLLECT_VTUNE_DATA
+#ifdef __INTEL_COMPILER
+  if( mult_n > 1 ){__itt_resume();}
+#endif
+#endif
 #pragma omp parallel for num_threads(mult_n)
   for(int mesh_i=0;mesh_i<mesh_n; mesh_i++){
 #endif
@@ -462,7 +467,7 @@ int main( int argc, char** argv ){
     auto loop_start = std::chrono::high_resolution_clock::now();
 #ifdef COLLECT_VTUNE_DATA
 #ifdef __INTEL_COMPILER
-    __itt_resume();
+    if( mult_n <=1 ){__itt_resume();}
 #endif
 #endif
     do{ M->Iter(); iter++;
@@ -494,7 +499,7 @@ int main( int argc, char** argv ){
     }while( (iter < iter_max) & (M->glob_chk2 > M->glob_rto2) );
 #ifdef COLLECT_VTUNE_DATA
 #ifdef __INTEL_COMPILER
-    __itt_pause();
+  if( mult_n <=1 ){__itt_pause();}
 #endif
 #endif
     // End iteration loop ===========================================
@@ -949,6 +954,11 @@ int main( int argc, char** argv ){
   }//load step scope
 #if OMP_NESTED==true
   }// end omp parallel multi-model outer loop
+#ifdef COLLECT_VTUNE_DATA
+#ifdef __INTEL_COMPILER
+  if( mult_n > 1 ){__itt_pause();}
+#endif
+#endif
 #endif
   return 0;
 }

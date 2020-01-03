@@ -9,7 +9,7 @@ module load intel
 #
 for NSTR in "6148"; do
 #for NSTR in "X5675-6148" "X5675" "6148" "E5-2640" "E5-2650" "E5-2670" "7210"; do
-for SIZE in 500kdof 50mdof 50mminpart; do
+for SIZE in 500kdof 50mdof 50mminpart small; do
 for ESTR in tet4 tet10 tet20; do
 for YSTR in iso; do
 for CSTR in icc; do

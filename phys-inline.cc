@@ -52,8 +52,8 @@ static inline void rotate_g_h(
       a036+= g *_mm256_set1_pd(  u[i+0]);
       a147+= g *_mm256_set1_pd(  u[i+1]);
       a258+= g *_mm256_set1_pd(  u[i+2]);
-    _mm256_store_pd(&G[ig],g);
-    ig+=4;
+      _mm256_store_pd(&G[ig],g);
+      ig+=4;
     }if(i<(Ne-5)){
       const __m256d g
         = J[0] *_mm256_set1_pd(isp[i+3])
@@ -293,8 +293,8 @@ static inline void compute_g_h( FLOAT_PHYS* G, __m256d* H,
       H[1]+= g *_mm256_set1_pd(  u[i+1]);
       H[2]+= g *_mm256_set1_pd(  u[i+2]);
 #endif
-    _mm256_store_pd(&G[ig],g);
-    ig+=4;
+      _mm256_store_pd(&G[ig],g);
+      ig+=4;
     }if(i<(Ne-5)){
       const __m256d g
         = J[0] *_mm256_set1_pd(isp[i+3])
@@ -337,8 +337,8 @@ static inline void compute_g_p_h(
       P[0]+= g *_mm256_set1_pd(  p[i+0]);
       P[1]+= g *_mm256_set1_pd(  p[i+1]);
       P[2]+= g *_mm256_set1_pd(  p[i+2]);
-    _mm256_store_pd(&G[ig],g);
-    ig+=4;
+      _mm256_store_pd(&G[ig],g);
+      ig+=4;
     }if(i<(Ne-5)){
       const __m256d g
         = J[0] *_mm256_set1_pd(isp[i+3])
