@@ -31,14 +31,14 @@ If you have [Gmsh 4](http://gmsh.info/ "Gmsh Website") installed, try making and
 C=4 ; P=2 ; H=33 ; N=16
 CPUMODEL=`./cpumodel.sh`
 gmsh -setnumber p $P -setnumber h $H -setnumber n $N -nt $C geo/unst-cube.geo -
-./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu0.001 -M0 -E100e9 -N0.3 -R -v2 -ap "cube/uhxt"$H"p"$P"n"$N
+./gmsh2fmr-$CPUMODEL-gcc -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu0.001 -M0 -E100e9 -N0.3 -R -v2 -ap "cube/uhxt"$H"p"$P"n"$N
 ./femera-$CPUMODEL-gcc -v2 -c $C -p "cube/uhxt"$H"p"$P"n"$N
 ```
 
 Then, try converting it to a 1.3 MDOF quadratic tet thermoelastic model.
 
 ```bash
-./gmsh2fmr -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu0.001 -t444 -Tu 10 -M0 -E100e9 -N0.3 -A20e-6 -K250 -R -v2 -ap "cube/uhxt"$H"p"$P"n"$N
+./gmsh2fmr-$CPUMODEL-gcc -t111 -z0 -t666 -x0 -t333 -y0 -t444 -xu0.001 -t444 -Tu 10 -M0 -E100e9 -N0.3 -A20e-6 -K250 -R -v2 -ap "cube/uhxt"$H"p"$P"n"$N
 ./femera-$CPUMODEL-gcc -v2 -c $C -p "cube/uhxt"$H"p"$P"n"$N
 ```
 
@@ -49,7 +49,7 @@ C=4 ; N=16
 CPUMODEL=`./cpumodel.sh`
 neper -T -reg 1 -n $N -o "neper/n"$N"-id1"
 neper -M "neper/n"$N"-id1.tess"
-./gmsh2fmr -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -M0 -E100e9 -N0.3 -R -v1 -a "neper/n"$N"-id1"
+./gmsh2fmr-$CPUMODEL-gcc -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -M0 -E100e9 -N0.3 -R -v1 -a "neper/n"$N"-id1"
 ./femera-$CPUMODEL-gcc -v2 -c $C -s1 -p "neper/n"$N"-id1"
 ```
 
@@ -67,7 +67,7 @@ neper -T -reg 1 -morpho graingrowth -oricrysym cubic -ori uniform -domain "cube(
 neper -V "neper/cubic"$N".tess" -datacellcol id -print "neper/cubic"$N
 neper -M "neper/cubic"$N".tess"
 gmsh -refine -o "neper/cubic"$N"s1p1.msh2" "neper/cubic"$N".msh"
-./gmsh2fmr -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 "-x@"$L -xu0.001 -M0 -E136.31e9 -N0.37 -G127.40e9 -R -v1 -a "neper/cubic"$N"s1p1"
+./gmsh2fmr-$CPUMODEL-gcc -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 "-x@"$L -xu0.001 -M0 -E136.31e9 -N0.37 -G127.40e9 -R -v1 -a "neper/cubic"$N"s1p1"
 ./femera-$CPUMODEL-gcc -v2 -c $C -s1 -p "neper/cubic"$N"s1p1"
 ```
 
