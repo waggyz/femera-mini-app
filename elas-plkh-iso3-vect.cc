@@ -467,7 +467,7 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
 #endif
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
-      compute_g_h( &G[0],&vH[0], Ne, &vJ[0], &intp_shpg[ip*Ne],&u[0] );
+      compute_g_h( &G[0],&vH[0], Nc, &vJ[0], &intp_shpg[ip*Ne],&u[0] );
       _mm256_store_pd(&H[0],vH[0]);
       _mm256_store_pd(&H[4],vH[1]);
       _mm256_store_pd(&H[8],vH[2]);

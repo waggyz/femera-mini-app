@@ -424,7 +424,7 @@ int ElastPlastKHIso3D::ElemLinear( Elem* E,
 #endif
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
-      compute_g_h( &G[0],&H[0], Ne, &vJ[0], &intp_shpg[ip*Ne],&u[0] );
+      compute_g_h( &G[0],&H[0], Nc, &vJ[0], &intp_shpg[ip*Ne],&u[0] );
 #if VERB_MAX>10
       printf( "Small Strains Transposed (Elem: %i):", ie );
       for(int j=0;j<12;j++){

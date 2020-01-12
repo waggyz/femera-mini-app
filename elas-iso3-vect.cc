@@ -104,7 +104,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       __m256d vH[3];
-      compute_g_h( &G[0],&vH[0], Ne, &vJ[0], &intp_shpg[ip*Ne], &u[0] );
+      compute_g_h( &G[0],&vH[0], Nc, &vJ[0], &intp_shpg[ip*Ne], &u[0] );
 #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
       for(int j=0;j<H.size();j++){
