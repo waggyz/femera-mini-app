@@ -142,7 +142,8 @@ int PCG::Init(){// printf("*** PCG::Init() ***\n");
 #pragma omp simd reduction(+:R2)
 #endif
   for(uint i=sumi0; i<sysn; i++){
-    R2 += part_r[i] * part_r[i] * part_d[i]; }
+    R2 += part_r[i] * part_p[i]; }
+    //R2 += part_r[i] * part_r[i] * part_d[i]; }
   this->loca_res2 = R2;
   this->loca_rto2 = this->loca_rtol*loca_rtol *loca_res2;//FIXME Move this somewhere.
   return(0);

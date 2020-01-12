@@ -92,8 +92,8 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       for(int i=0; i<(Dm*Dm) ; i++){ H[i]=0.0; }
 #if 0
-#pragma omp simd
 // Degrades performance using SSE, AVX, etc.
+#pragma omp simd
 #endif
       for(int k=0; k<Nc; k++){
         for(int i=0; i<Dm ; i++){ G[Dm* k+i ]=0.0;
@@ -103,7 +103,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #else
             G[Dm* k+i ] += Ejacs[Nj*ie+ Dm* j+i ] * intp_shpg[ip*Ne+ Dm* k+j ];
 #endif
-          }
+          } } for(int i=0; i<Dm ; i++){//FIXME Testing different merge for SSE
           for(int j=0; j<Dm ; j++){
             H[Dm* i+j ] += G[Dm* k+i ] * u[Dn* k+j ];
           }
