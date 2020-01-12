@@ -12,7 +12,7 @@ CPPFLAGS=-std=c++11 -Wall -Wextra -g -Ofast -ftree-vectorize -march=native\
 OMPFLAGS=-fopenmp -D_GLIBCXX_PARALLEL
 # -DOMP_PLACES=cores -DOMP_PROC_BIND=spread -DOMP_NUM_THREADS=$(NCPU)
 SERFLAGS=-Wno-unknown-pragmas
-CPPLOG=-fopt-info-vec-optimized 2>>$(CPUMODEL)-$(CSTR).err
+# CPPLOG=-fopt-info-vec-optimized 2>>$(CPUMODEL)-$(CSTR).err
 # AUTOVEC_SUMMARY=grep -i vectorized $(CPUMODEL)-$(CSTR).err | grep -v " 0 ";
 
 #-O3 -ftree-vectorize -ffast-math -march=native
