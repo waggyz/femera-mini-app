@@ -92,7 +92,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       for(int i=0; i<(Dm*Dm) ; i++){ H[i]=0.0; }
 #if 0
-// Outer loop SIMD degrades performance using SSE, AVX, etc. Check with icc.
+// Outer loop SIMD degrades performance using SSE, AVX, etc.
 #pragma omp simd
 #endif
       for(int k=0; k<Nc; k++){
