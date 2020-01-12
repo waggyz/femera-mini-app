@@ -273,16 +273,16 @@ static inline void compute_iso_s(__m256d* vA,// in-place version
 static inline void compute_g_h( FLOAT_PHYS* G, __m256d* H,
   const int Nc, const __m256d* J, const FLOAT_PHYS* isp, const FLOAT_PHYS* u ){
   H[0]=_mm256_setzero_pd(); H[1]=_mm256_setzero_pd(); H[2]=_mm256_setzero_pd();
-  //int Nc=Ne/3;//int ig=0; FIXME Change call to pass Nc instead of Ne.
+  //int Nc=Ne/3;//int ig=0; FIXED Change calls to pass Nc instead of Ne.
   for(int i= 0; i<Nc; i++){// i<Ne; i+=9){// line 277
 #if 1
       const __m256d g
         = J[0] *_mm256_set1_pd(isp[3*i+0])
         + J[1] *_mm256_set1_pd(isp[3*i+1])
-        + J[2] *_mm256_set1_pd(isp[3*i+2]);
+        + J[2] *_mm256_set1_pd(isp[3*i+2]);_mm256_store_pd(&G[4*i],g);
       H[0]+= g *_mm256_set1_pd(  u[3*i+0]);
       H[1]+= g *_mm256_set1_pd(  u[3*i+1]);
-      H[2]+= g *_mm256_set1_pd(  u[3*i+2]);_mm256_store_pd(&G[4*i],g);
+      H[2]+= g *_mm256_set1_pd(  u[3*i+2]);
 #else
     {
       const __m256d g// line 288
