@@ -103,7 +103,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #else
             G[Dm* k+i ] += Ejacs[Nj*ie+ Dm* j+i ] * intp_shpg[ip*Ne+ Dm* k+j ];
 #endif
-          } } for(int i=0; i<Dm ; i++){//FIXME Testing different merge for SSE
+          }
           for(int j=0; j<Dm ; j++){
             H[Dm* i+j ] += G[Dm* k+i ] * u[Dn* k+j ];
           }
