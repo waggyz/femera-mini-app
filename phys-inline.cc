@@ -279,10 +279,10 @@ static inline void compute_g_h( FLOAT_PHYS* G, __m256d* H,
       const __m256d g
         = J[0] *_mm256_set1_pd(isp[3*i+0])
         + J[1] *_mm256_set1_pd(isp[3*i+1])
-        + J[2] *_mm256_set1_pd(isp[3*i+2]);_mm256_store_pd(&G[4*i],g);
+        + J[2] *_mm256_set1_pd(isp[3*i+2]);
       H[0]+= g *_mm256_set1_pd(  u[3*i+0]);
       H[1]+= g *_mm256_set1_pd(  u[3*i+1]);
-      H[2]+= g *_mm256_set1_pd(  u[3*i+2]);
+      H[2]+= g *_mm256_set1_pd(  u[3*i+2]);_mm256_store_pd(&G[4*i],g);
 #else
     {
       const __m256d g// line 288
