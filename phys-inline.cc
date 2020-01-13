@@ -37,7 +37,7 @@ static inline void accumulate_f( __m256d* vf,
   }
 }
 // Orthotropic intrinsics -----------------------------------------------------
-static inline void rotate_g_h(
+static inline void rotate_g_h(// line 40
   FLOAT_PHYS* G, __m256d* vH,
   const int Nc, const __m256d* J,
   const FLOAT_PHYS* sg, const FLOAT_PHYS* R, const FLOAT_PHYS* u ){
@@ -90,7 +90,7 @@ static inline void rotate_g_h(
     + a258 * _mm256_set1_pd(R[8]);
   // Take advantage of the fact that the pattern of usage is invariant
   // with respect to transpose _MM256_TRANSPOSE3_PD(h036,h147,h258);
-}
+}// line 93
 static inline void compute_ort_s_voigt(FLOAT_PHYS* S, const __m256d* vH,
   const __m256d* vC, const FLOAT_PHYS dw){// line 95
   FLOAT_PHYS VECALIGNED H[12];
@@ -270,12 +270,32 @@ static inline void compute_iso_s(__m256d* vA,// in-place version
   vS[2] = _mm256_load_pd(&fS[8]); // [a9 a8 a7 a6]
 #endif
 }
-static inline void compute_g_h( FLOAT_PHYS* G, __m256d* H,
+static inline void compute_g_h( FLOAT_PHYS* G, __m256d* H,// line 273
   const int Nc, const __m256d* J, const FLOAT_PHYS* sg, const FLOAT_PHYS* u ){
   H[0]=_mm256_setzero_pd(); H[1]=_mm256_setzero_pd(); H[2]=_mm256_setzero_pd();
-  //FIXED Change calls to pass Nc instead of Ne.
+#if 0
   for(int i= 0; i<Nc; i++){// line 277
-#if 1
+    const __m256d g
+      = J[0] *_mm256_set1_pd( sg[3* i+0 ])
+      + J[1] *_mm256_set1_pd( sg[3* i+1 ])
+      + J[2] *_mm256_set1_pd( sg[3* i+2 ]);
+    H[0]+= g *_mm256_set1_pd(  u[3* i+0 ]);
+    H[1]+= g *_mm256_set1_pd(  u[3* i+1 ]);
+    H[2]+= g *_mm256_set1_pd(  u[3* i+2 ]);
+    _mm256_store_pd(& G[4* i ], g );
+  }
+#else
+  for(int i= 0; i< 4; i++){
+    const __m256d g
+      = J[0] *_mm256_set1_pd( sg[3* i+0 ])
+      + J[1] *_mm256_set1_pd( sg[3* i+1 ])
+      + J[2] *_mm256_set1_pd( sg[3* i+2 ]);
+    H[0]+= g *_mm256_set1_pd(  u[3* i+0 ]);
+    H[1]+= g *_mm256_set1_pd(  u[3* i+1 ]);
+    H[2]+= g *_mm256_set1_pd(  u[3* i+2 ]);
+    _mm256_store_pd(& G[4* i ], g ); }
+  if( Nc> 4 ){
+    for(int i= 4; i<10; i++){
       const __m256d g
         = J[0] *_mm256_set1_pd( sg[3* i+0 ])
         + J[1] *_mm256_set1_pd( sg[3* i+1 ])
@@ -283,40 +303,20 @@ static inline void compute_g_h( FLOAT_PHYS* G, __m256d* H,
       H[0]+= g *_mm256_set1_pd(  u[3* i+0 ]);
       H[1]+= g *_mm256_set1_pd(  u[3* i+1 ]);
       H[2]+= g *_mm256_set1_pd(  u[3* i+2 ]);
-      _mm256_store_pd(& G[4* i ], g );
-#else
-    { const __m256d g// line 288
-        = J[0] *_mm256_set1_pd(isp[i+0])
-        + J[1] *_mm256_set1_pd(isp[i+1])
-        + J[2] *_mm256_set1_pd(isp[i+2]);
-      H[0]+= g *_mm256_set1_pd(  u[i+0]);
-      H[1]+= g *_mm256_set1_pd(  u[i+1]);
-      H[2]+= g *_mm256_set1_pd(  u[i+2]);
-      _mm256_store_pd(&G[ig],g);
-      ig+=4;
-    }if(i<(Ne-5)){
-      const __m256d g
-        = J[0] *_mm256_set1_pd(isp[i+3])
-        + J[1] *_mm256_set1_pd(isp[i+4])
-        + J[2] *_mm256_set1_pd(isp[i+5]);
-      H[0]+= g *_mm256_set1_pd(  u[i+3]);
-      H[1]+= g *_mm256_set1_pd(  u[i+4]);
-      H[2]+= g *_mm256_set1_pd(  u[i+5]);
-      _mm256_store_pd(&G[ig],g);
-      ig+=4;
-    }if(i<(Ne-8)){
-      const __m256d g
-        = J[0] *_mm256_set1_pd(isp[i+6])
-        + J[1] *_mm256_set1_pd(isp[i+7])
-        + J[2] *_mm256_set1_pd(isp[i+8]);
-      H[0]+= g *_mm256_set1_pd(  u[i+6]);
-      H[1]+= g *_mm256_set1_pd(  u[i+7]);
-      H[2]+= g *_mm256_set1_pd(  u[i+8]);
-      _mm256_store_pd(&G[ig],g);
-      ig+=4;
+      _mm256_store_pd(& G[4* i ], g ); }
+    if( Nc>10 ){
+      for(int i=10; i<20; i++){
+        const __m256d g
+          = J[0] *_mm256_set1_pd( sg[3* i+0 ])
+          + J[1] *_mm256_set1_pd( sg[3* i+1 ])
+          + J[2] *_mm256_set1_pd( sg[3* i+2 ]);
+        H[0]+= g *_mm256_set1_pd(  u[3* i+0 ]);
+        H[1]+= g *_mm256_set1_pd(  u[3* i+1 ]);
+        H[2]+= g *_mm256_set1_pd(  u[3* i+2 ]);
+        _mm256_store_pd(& G[4* i ], g ); }
     }
-#endif
   }
+#endif
 }// line 320
 // Nonlinear isotropic intrinsics ---------------------------------------------
 static inline void compute_g_p_h(
