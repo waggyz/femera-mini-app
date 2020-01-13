@@ -13,7 +13,7 @@ static inline void print_m256(const __m256d v){// Debugging register print
 // Physics Intrinsics ---------------------------------------------------------
 static inline void accumulate_f( __m256d* vf,
   const __m256d* vS, const FLOAT_PHYS* G, const int Nc ){
-  for(int i= 0; i< 4; i++){
+  for(int i= 0; i< 4; i++){// This is a little faster unrolled.
     vf[i]
       +=vS[0] *_mm256_set1_pd(G[4*i  ])
       + vS[1] *_mm256_set1_pd(G[4*i+1])
@@ -273,7 +273,7 @@ static inline void compute_iso_s(__m256d* vA,// in-place version
 static inline void compute_g_h( FLOAT_PHYS* G, __m256d* H,// line 273
   const int Nc, const __m256d* J, const FLOAT_PHYS* sg, const FLOAT_PHYS* u ){
   H[0]=_mm256_setzero_pd(); H[1]=_mm256_setzero_pd(); H[2]=_mm256_setzero_pd();
-#if 0
+#if 1
   for(int i= 0; i<Nc; i++){// line 277
     const __m256d g
       = J[0] *_mm256_set1_pd( sg[3* i+0 ])
@@ -285,7 +285,7 @@ static inline void compute_g_h( FLOAT_PHYS* G, __m256d* H,// line 273
     _mm256_store_pd(& G[4* i ], g );
   }
 #else
-  for(int i= 0; i< 4; i++){
+  for(int i= 0; i< 4; i++){// Unrolled runs a bit slower.
     const __m256d g
       = J[0] *_mm256_set1_pd( sg[3* i+0 ])
       + J[1] *_mm256_set1_pd( sg[3* i+1 ])
