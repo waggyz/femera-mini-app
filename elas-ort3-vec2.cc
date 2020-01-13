@@ -104,7 +104,7 @@ int ElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       __m256d vH[Nd];
-      rotate_g_h( &G[0],&vH[0], Ne, &vJ[0], &intp_shpg[ip*Ne], &R[0], &u[0] );
+      rotate_g_h( &G[0],&vH[0], Nc, &vJ[0], &intp_shpg[ip*Ne], &R[0], &u[0] );
       const FLOAT_PHYS dw = jac[9] * wgt[ip];
       if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
 #ifdef FETCH_JAC

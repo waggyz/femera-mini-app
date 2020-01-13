@@ -39,43 +39,43 @@ static inline void accumulate_f( __m256d* vf,
 // Orthotropic intrinsics -----------------------------------------------------
 static inline void rotate_g_h(
   FLOAT_PHYS* G, __m256d* vH,
-  const int Ne, const __m256d* J,
-  const FLOAT_PHYS* isp, const FLOAT_PHYS* R, const FLOAT_PHYS* u ){
+  const int Nc, const __m256d* J,
+  const FLOAT_PHYS* sg, const FLOAT_PHYS* R, const FLOAT_PHYS* u ){
   __m256d a036=_mm256_setzero_pd(), a147=_mm256_setzero_pd(),
     a258=_mm256_setzero_pd();
-  int ig=0;
-  for(int i= 0; i<Ne; i+=9){
-    { const __m256d g
-        = J[0] *_mm256_set1_pd(isp[i+0])
-        + J[1] *_mm256_set1_pd(isp[i+1])
-        + J[2] *_mm256_set1_pd(isp[i+2]);
-      a036+= g *_mm256_set1_pd(  u[i+0]);
-      a147+= g *_mm256_set1_pd(  u[i+1]);
-      a258+= g *_mm256_set1_pd(  u[i+2]);
-      _mm256_store_pd(&G[ig],g);
-      ig+=4;
-    }if(i<(Ne-5)){
+#if 1
+  for(int i= 0; i<Nc; i++){
       const __m256d g
-        = J[0] *_mm256_set1_pd(isp[i+3])
-        + J[1] *_mm256_set1_pd(isp[i+4])
-        + J[2] *_mm256_set1_pd(isp[i+5]);
-      a036+= g *_mm256_set1_pd(  u[i+3]);
-      a147+= g *_mm256_set1_pd(  u[i+4]);
-      a258+= g *_mm256_set1_pd(  u[i+5]);
-      _mm256_store_pd(&G[ig],g);
-      ig+=4;
-    }if(i<(Ne-8)){
-      const __m256d g
-        = J[0] *_mm256_set1_pd(isp[i+6])
-        + J[1] *_mm256_set1_pd(isp[i+7])
-        + J[2] *_mm256_set1_pd(isp[i+8]);
-      a036+= g *_mm256_set1_pd(  u[i+6]);
-      a147+= g *_mm256_set1_pd(  u[i+7]);
-      a258+= g *_mm256_set1_pd(  u[i+8]);
-      _mm256_store_pd(&G[ig],g);
-      ig+=4;
-    }
-  }
+        = J[0] *_mm256_set1_pd( sg[3* i+0 ])
+        + J[1] *_mm256_set1_pd( sg[3* i+1 ])
+        + J[2] *_mm256_set1_pd( sg[3* i+2 ]);
+      a036+= g *_mm256_set1_pd(  u[3* i+0 ]);
+      a147+= g *_mm256_set1_pd(  u[3* i+1 ]);
+      a258+= g *_mm256_set1_pd(  u[3* i+2 ]);
+      _mm256_store_pd(& G[4* i ], g );
+#else
+  /* Keep line numbers for now to match old intel advisor results.
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   */
+#endif
+  }// line 78
   vH[0]
     = a036 * _mm256_set1_pd(R[0])
     + a147 * _mm256_set1_pd(R[1])
@@ -92,7 +92,7 @@ static inline void rotate_g_h(
   // with respect to transpose _MM256_TRANSPOSE3_PD(h036,h147,h258);
 }
 static inline void compute_ort_s_voigt(FLOAT_PHYS* S, const __m256d* vH,
-  const __m256d* vC, const FLOAT_PHYS dw){
+  const __m256d* vC, const FLOAT_PHYS dw){// line 95
   FLOAT_PHYS VECALIGNED H[12];
   _mm256_store_pd( &H[0], vH[0] );
   _mm256_store_pd( &H[4], vH[1] );
@@ -271,21 +271,21 @@ static inline void compute_iso_s(__m256d* vA,// in-place version
 #endif
 }
 static inline void compute_g_h( FLOAT_PHYS* G, __m256d* H,
-  const int Nc, const __m256d* J, const FLOAT_PHYS* isp, const FLOAT_PHYS* u ){
+  const int Nc, const __m256d* J, const FLOAT_PHYS* sg, const FLOAT_PHYS* u ){
   H[0]=_mm256_setzero_pd(); H[1]=_mm256_setzero_pd(); H[2]=_mm256_setzero_pd();
-  //int Nc=Ne/3;//int ig=0; FIXED Change calls to pass Nc instead of Ne.
-  for(int i= 0; i<Nc; i++){// i<Ne; i+=9){// line 277
+  //FIXED Change calls to pass Nc instead of Ne.
+  for(int i= 0; i<Nc; i++){// line 277
 #if 1
       const __m256d g
-        = J[0] *_mm256_set1_pd(isp[3*i+0])
-        + J[1] *_mm256_set1_pd(isp[3*i+1])
-        + J[2] *_mm256_set1_pd(isp[3*i+2]);
-      H[0]+= g *_mm256_set1_pd(  u[3*i+0]);
-      H[1]+= g *_mm256_set1_pd(  u[3*i+1]);
-      H[2]+= g *_mm256_set1_pd(  u[3*i+2]);_mm256_store_pd(&G[4*i],g);
+        = J[0] *_mm256_set1_pd( sg[3* i+0 ])
+        + J[1] *_mm256_set1_pd( sg[3* i+1 ])
+        + J[2] *_mm256_set1_pd( sg[3* i+2 ]);
+      H[0]+= g *_mm256_set1_pd(  u[3* i+0 ]);
+      H[1]+= g *_mm256_set1_pd(  u[3* i+1 ]);
+      H[2]+= g *_mm256_set1_pd(  u[3* i+2 ]);
+      _mm256_store_pd(& G[4* i ], g );
 #else
-    {
-      const __m256d g// line 288
+    { const __m256d g// line 288
         = J[0] *_mm256_set1_pd(isp[i+0])
         + J[1] *_mm256_set1_pd(isp[i+1])
         + J[2] *_mm256_set1_pd(isp[i+2]);
@@ -321,51 +321,23 @@ static inline void compute_g_h( FLOAT_PHYS* G, __m256d* H,
 // Nonlinear isotropic intrinsics ---------------------------------------------
 static inline void compute_g_p_h(
   FLOAT_PHYS* G, __m256d* P, __m256d* H,
-  const int Ne, const  __m256d* J,
-  const FLOAT_PHYS* isp, const FLOAT_PHYS* p, const FLOAT_PHYS* u ){
+  const int Nc, const  __m256d* J,
+  const FLOAT_PHYS* sg, const FLOAT_PHYS* p, const FLOAT_PHYS* u ){
   H[0]=_mm256_setzero_pd(); H[1]=_mm256_setzero_pd(); H[2]=_mm256_setzero_pd(),
   P[0]=_mm256_setzero_pd(); P[1]=_mm256_setzero_pd(); P[2]=_mm256_setzero_pd();
-  int ig=0;
-  for(int i=0; i<Ne; i+=9){
-    { const __m256d g
-        = J[0] *_mm256_set1_pd(isp[i+0])
-        + J[1] *_mm256_set1_pd(isp[i+1])
-        + J[2] *_mm256_set1_pd(isp[i+2]);
-      H[0]+= g *_mm256_set1_pd(  u[i+0]);
-      H[1]+= g *_mm256_set1_pd(  u[i+1]);
-      H[2]+= g *_mm256_set1_pd(  u[i+2]);
-      P[0]+= g *_mm256_set1_pd(  p[i+0]);
-      P[1]+= g *_mm256_set1_pd(  p[i+1]);
-      P[2]+= g *_mm256_set1_pd(  p[i+2]);
-      _mm256_store_pd(&G[ig],g);
-      ig+=4;
-    }if(i<(Ne-5)){
+  //
+  for(int i= 0; i<Nc; i++){// line 329
       const __m256d g
-        = J[0] *_mm256_set1_pd(isp[i+3])
-        + J[1] *_mm256_set1_pd(isp[i+4])
-        + J[2] *_mm256_set1_pd(isp[i+5]);
-      H[0]+= g *_mm256_set1_pd(  u[i+3]);
-      H[1]+= g *_mm256_set1_pd(  u[i+4]);
-      H[2]+= g *_mm256_set1_pd(  u[i+5]);
-      P[0]+= g *_mm256_set1_pd(  p[i+3]);
-      P[1]+= g *_mm256_set1_pd(  p[i+4]);
-      P[2]+= g *_mm256_set1_pd(  p[i+5]);
-      _mm256_store_pd(&G[ig],g);
-      ig+=4;
-    }if(i<(Ne-8)){
-      const __m256d g
-        = J[0] *_mm256_set1_pd(isp[i+6])
-        + J[1] *_mm256_set1_pd(isp[i+7])
-        + J[2] *_mm256_set1_pd(isp[i+8]);
-      H[0]+= g *_mm256_set1_pd(  u[i+6]);
-      H[1]+= g *_mm256_set1_pd(  u[i+7]);
-      H[2]+= g *_mm256_set1_pd(  u[i+8]);
-      P[0]+= g *_mm256_set1_pd(  p[i+6]);
-      P[1]+= g *_mm256_set1_pd(  p[i+7]);
-      P[2]+= g *_mm256_set1_pd(  p[i+8]);
-      _mm256_store_pd(&G[ig],g);
-      ig+=4;
-    }
+        = J[0] *_mm256_set1_pd( sg[3* i+0 ])
+        + J[1] *_mm256_set1_pd( sg[3* i+1 ])
+        + J[2] *_mm256_set1_pd( sg[3* i+2 ]);
+      H[0]+= g *_mm256_set1_pd(  u[3* i+0 ]);
+      H[1]+= g *_mm256_set1_pd(  u[3* i+1 ]);
+      H[2]+= g *_mm256_set1_pd(  u[3* i+2 ]);
+      P[0]+= g *_mm256_set1_pd(  p[3* i+0 ]);
+      P[1]+= g *_mm256_set1_pd(  p[3* i+1 ]);
+      P[2]+= g *_mm256_set1_pd(  p[3* i+2 ]);
+      _mm256_store_pd(& G[4* i ], g );
   }
 }
 //FIXME Remove these later ====================================================
