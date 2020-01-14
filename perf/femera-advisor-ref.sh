@@ -5,6 +5,9 @@ cd /u/dwagner5/femera-mini-develop
 CPUMODEL=`./cpumodel.sh`
 CPUCOUNT=`./cpucount.sh`
 
+REFMODEL=X5675
+REFCOUNT=12
+
 module purge
 module load gcc_8.3.0
 make clean
@@ -15,7 +18,7 @@ make -j$CPUCOUNT mini-all
 XDIR=/u/dwagner5/femera-mini-develop
 MDIR=/hpnobackup1/dwagner5/femera-test/cube
 
-CSTR=icc
+CSTR=gcc
 YSTR=iso
 
 #for CSTR in icc; do # icc gcc
@@ -27,14 +30,15 @@ for PORD in 1 2 3; do
 export OMP_SCHEDULE=static
 export OMP_PLACES=cores
 export OMP_PROC_BIND=spread
-export OMP_NUM_THREADS=$CPUCOUNT
+export OMP_NUM_THREADS=$REFCOUNT
+export OMP_NESTED=false
 
 case "$SIZE" in
 medium)
   ZSTR=500kdof
   NMODEL=1
   ITER=10000
-  PART=$(( 6 * $CPUCOUNT ))
+  PART=$(( 6 * $REFCOUNT ))
   case "$PORD" in
   1)
   ESTR=tet4
@@ -80,7 +84,7 @@ largeminpart)
   ZSTR=50mminpart
   NMODEL=1
   ITER=100
-  PART=$CPUCOUNT
+  PART=$REFCOUNT
   case "$PORD" in
   1)
     ESTR=tet4
@@ -110,10 +114,10 @@ small)
   export OMP_SCHEDULE=static
   export OMP_PLACES=cores
   export OMP_PROC_BIND=spread,close
-  export OMP_NUM_THREADS=$CPUCOUNT
+  export OMP_NUM_THREADS=$REFCOUNT
   export OMP_NESTED=true;
   export OMP_MAX_ACTIVE_LEVELS=2
-  if [ "$CPUMODEL" == "E7-4830" ]; then
+  if [ "$REFMODEL" == "E7-4830" ]; then
     NMODEL=280
     ITER=3571
   else
@@ -139,7 +143,6 @@ small)
   SSTR=""
   ;;
 esac
-
 if [ 0 ] ; then
 case "$YSTR" in
   iso)
@@ -157,20 +160,23 @@ case "$YSTR" in
 esac
 fi
 if [ $NMODEL -eq 1 ]; then
-  EXESTR=$XDIR/"femerq-"$CPUMODEL"-"$CSTR" -c"$CPUCOUNT" -r0 -i"$ITER\
+  EXESTR=$XDIR/"femerq-"$REFMODEL"-"$CSTR" -c"$REFCOUNT" -r0 -i"$ITER\
 " -p "$MDIR/$MSTR/$MSTR"n"$PART
 else
-  EXESTR=$XDIR/"femera-mmq-"$CPUMODEL"-"$CSTR" -c"$PART" -n"$CPUCOUNT" -m"$NMODEL\
+  EXESTR=$XDIR/"femera-mmq-"$REFMODEL"-"$CSTR" -c"$PART" -n"$REFCOUNT" -m"$NMODEL\
 " -r0 -i"$ITER" -p "$MDIR/$MSTR/$MSTR"n"$PART
 fi
 
-advixe-cl --collect survey\
-  --project-dir /u/dwagner5/intel/advixe/projects/"femera-"$ZSTR"-"$ESTR"-"$YSTR"-"$CPUMODEL"-"$CSTR --\
-  $EXESTR
-
-advixe-cl --collect tripcounts --flop --stacks\
-  --project-dir /u/dwagner5/intel/advixe/projects/"femera-"$ZSTR"-"$ESTR"-"$YSTR"-"$CPUMODEL"-"$CSTR --\
-  $EXESTR
+if [ "$CPUMODEL" == "$REFMODEL" ]; then
+  ADVDIR=/u/dwagner5/intel/advixe/projects/"femera-"$ZSTR"-"$ESTR"-"$YSTR\
+"-"$CPUMODEL"-"$CSTR
+  advixe-cl --collect survey --project-dir $ADVDIR -- $EXESTR
+else
+  ADVDIR=/u/dwagner5/intel/advixe/projects/"femera-"$ZSTR"-"$ESTR"-"$YSTR\
+"-"$REFMODEL"-"$CPUMODEL"-"$CSTR
+  advixe-cl --collect survey --project-dir $ADVDIR -- $EXESTR
+  advixe-cl --collect tripcounts --flop --stacks --project-dir $ADVDIR -- $EXESTR
+fi
 
 #advixe-cl --report survey --show-all-columns --no-show-all-rows --format=csv\
 # --project-dir /u/dwagner5/intel/advixe/projects/"femera-"$ZSTR"-"$ESTR"-"$YSTR"-"$CPUMODEL"-"$CSTR
