@@ -298,7 +298,7 @@ int main( int argc, char** argv ){
   }
   read_start = std::chrono::high_resolution_clock::now();
 #endif
-  M->Setup();
+  M->Setup(); fflush(stdout);
 //if VERB_MAX>1
   {// scope local variables
   //int sugg_max=3000;
@@ -306,7 +306,7 @@ int main( int argc, char** argv ){
   if      ( M->udof_n>long(1e8) ){ iter_info_n =1000;// sugg_max =M->udof_n/1000;
   }else if( M->udof_n>long(1e4) ){ iter_info_n = 100;// sugg_max =M->udof_n/10;
   }else if( M->udof_n>long(1e2) ){ iter_info_n =  10;// sugg_max =M->udof_n/10;
-  }else                         { iter_info_n =   1;// sugg_max =M->udof_n; 
+  }else                          { iter_info_n =   1;// sugg_max =M->udof_n; 
   }
   if(iter_max<0){
     iter_max = M->udof_n / iter_info_n *10;

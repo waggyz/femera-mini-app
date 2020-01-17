@@ -70,7 +70,7 @@ public:
   inline FLOAT_MESH Jac1Det( const RESTRICT Mesh::vals&);
   inline FLOAT_MESH Jac2Det( const RESTRICT Mesh::vals&);
   inline FLOAT_MESH Jac3Det( const RESTRICT Mesh::vals&);
-  inline int Jac1Inv( FLOAT_MESH  , const FLOAT_MESH);
+  inline int Jac1Inv( FLOAT_MESH , const FLOAT_MESH);
   inline int Jac2Inv( FLOAT_MESH*, const FLOAT_MESH);
   inline int Jac3Inv( FLOAT_MESH*, const FLOAT_MESH);
   inline int Jac1Inv(RESTRICT Mesh::vals&, const FLOAT_MESH);
