@@ -263,7 +263,7 @@ int Mesh::Setup(){
   //
   int dots_mod=0;
   if(verbosity==2){ dots_mod=1;
-    if( part_n>(comp_n*4) ){ dots_mod=comp_n; }
+    if( part_n>(comp_n*4) ){ dots_mod=part_n; }
   }
   //
   INT_MESH elem_tot=0, halo_elem_tot=0;
