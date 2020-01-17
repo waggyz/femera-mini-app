@@ -298,8 +298,8 @@ int main( int argc, char** argv ){
   }
   read_start = std::chrono::high_resolution_clock::now();
 #endif
-  M->Setup(); fflush(stdout);
-//if VERB_MAX>1
+  M->Setup();
+  fflush(stdout);
   {// scope local variables
   //int sugg_max=3000;
   iter_info_n =   1;// sugg_max = M->udof_n;
@@ -457,7 +457,7 @@ int main( int argc, char** argv ){
     if(M->glob_chk2 < M->glob_rto2){ c="<"; }
     else if(M->glob_chk2 > M->glob_rto2){ c=">"; }
     printf("     init ||R||%9.2e %s%9.2e tol in %f s\n",
-      std::sqrt(M->glob_chk2), c, std::sqrt(M->glob_rto2),init_sec );
+      std::sqrt(M->glob_chk2), c, std::sqrt(M->glob_rto2),init_sec ); fflush(stdout);
     }
 #endif
   }// end init scope
@@ -481,11 +481,11 @@ int main( int argc, char** argv ){
           float iter_sec=M->time_secs[5];
           printf("%9i ||R||%9.2e @ %.0f iter/s\n",
             iter, std::sqrt(M->glob_chk2),
-            float(iter)/iter_sec*float(comp_n) );
+            float(iter)/iter_sec*float(comp_n) ); fflush(stdout);
         }
         if(M->glob_res2 <= 0.0){
             printf("%9i ||R||%9.2e NCG Reset: >%g Non-orthogonal\n",
-              iter, std::sqrt(M->glob_chk2), M->glob_otol );
+              iter, std::sqrt(M->glob_chk2), M->glob_otol ); fflush(stdout);
         }
       }
 #endif
@@ -526,7 +526,7 @@ int main( int argc, char** argv ){
     else if(M->glob_chk2 > M->glob_rto2){ c=">"; }
     printf("%9i ||R||%9.2e %s%9.2e tol in %f s\nDone.\n", iter,
       std::sqrt(M->glob_chk2), c, std::sqrt(M->glob_rto2), loop_sec );
-    }
+    } fflush(stdout);
 #endif
 #if VERB_MAX>1
     if(verbosity>1){
@@ -569,7 +569,7 @@ int main( int argc, char** argv ){
     //
     printf("Performance:%8.2f  MDOF/s\n",
       float(M->udof_n)*float(iter)/loop_sec /Meg );
-    }
+    } fflush(stdout);
 #endif
   }// end iter scope
 #if 0
@@ -833,7 +833,7 @@ int main( int argc, char** argv ){
     printf(" R2       ");
     if(node_d>3){ printf("          "); }
     printf("          %9.2e  ||R||\n",
-      std::sqrt(errtot[errtot.size()-1]) );
+      std::sqrt(errtot[errtot.size()-1]) ); fflush(stdout);
     }//end if load_step==1
     // Effective modulus --------------------------------------------
     // Calculate nodal forces from displacement solution
@@ -947,7 +947,7 @@ int main( int argc, char** argv ){
   if( std::abs(e)<test_u ){ printf(" %+9.2e\n",e);
   }else{ printf("%+6.2f%%\n",100.*e); }
   }
-    }//end if verbosity > 1
+    fflush(stdout); }//end if verbosity > 1
 #endif
 #endif //HAS_TEST
   }//load step loop
