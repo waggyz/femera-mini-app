@@ -303,14 +303,14 @@ int main( int argc, char** argv ){
   {// scope local variables
   //int sugg_max=3000;
   iter_info_n =   1;// sugg_max = M->udof_n;
-  if      ( M->udof_n>int(1e8) ){ iter_info_n =1000;// sugg_max =M->udof_n/1000;
-  }else if( M->udof_n>int(1e4) ){ iter_info_n = 100;// sugg_max =M->udof_n/10;
-  }else if( M->udof_n>int(1e2) ){ iter_info_n =  10;// sugg_max =M->udof_n/10;
+  if      ( M->udof_n>long(1e8) ){ iter_info_n =1000;// sugg_max =M->udof_n/1000;
+  }else if( M->udof_n>long(1e4) ){ iter_info_n = 100;// sugg_max =M->udof_n/10;
+  }else if( M->udof_n>long(1e2) ){ iter_info_n =  10;// sugg_max =M->udof_n/10;
   }else                         { iter_info_n =   1;// sugg_max =M->udof_n; 
   }
   if(iter_max<0){
     iter_max = M->udof_n / iter_info_n *10;
-    if( iter_max > int(M->udof_n) ){ iter_max=M->udof_n; }
+    if( long(iter_max) > long(M->udof_n) ){ iter_max=int(M->udof_n); }
 #if 0
     iter_max*= M->load_step_n;
 #endif
@@ -509,7 +509,7 @@ int main( int argc, char** argv ){
       (loop_done - loop_start);
     loop_sec=float(loop_time.count())*ns;
     if(verbosity==1){
-      printf("%i,%i,%i,%i,%i,%i,%g,%g,%i,%g,%g,%g,%g\n",
+      printf("%i,%i,%ld,%i,%i,%i,%g,%g,%i,%g,%g,%g,%g\n",
         M->elem_n, M->node_n, M->udof_n, part_n-part_0+1, iter, iter_max,
         std::sqrt(M->glob_chk2), std::sqrt(M->glob_rto2),
         comp_n,

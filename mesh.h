@@ -27,11 +27,11 @@ public:
   //NOTE Global node numbers are 1-indexed.
   //NOTE Local (partition) node numbers are 0-indexed.
   //
-  INT_DIM  mesh_d=3;// Mesh Dimension (usually max of elem_d)
-  INT_MESH vert_n=0;// Total number of element vertex nodes
-  INT_MESH node_n=0;// Total number of nodes
-  INT_MESH elem_n=0;// Total number of nodes
-  INT_MESH udof_n=0;// Total number of solution values (size of system)
+  INT_DIM   mesh_d=3;// Mesh Dimension (usually max of elem_d)
+  INT_MESH  vert_n=0;// Total number of element vertex nodes
+  INT_MESH  node_n=0;// Total number of nodes
+  INT_MESH  elem_n=0;// Total number of nodes
+  long udof_n=0;// Total number of solution values (size of system)
   //
   uint     simd_n=1;//FIXME Remove? Initial vectorization width
   //

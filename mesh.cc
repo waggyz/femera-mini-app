@@ -313,7 +313,7 @@ int Mesh::Setup(){
     //M->list_elem[part_i] = E;
     this->elem_n += E->elem_n;
     this->node_n += E->node_n - E->halo_remo_n;
-    this->udof_n += uint(Y->node_d) * (E->node_n - E->halo_remo_n);
+    this->udof_n += long(Y->node_d) * long(E->node_n - E->halo_remo_n);
     this->solv_flop += float(S->udof_flop *uint(Y->node_d) * (E->node_n - E->halo_remo_n));
     this->solv_band += float(S->udof_band *uint(Y->node_d) * (E->node_n - E->halo_remo_n));
     this->phys_flop += float(Y->tens_flop);
