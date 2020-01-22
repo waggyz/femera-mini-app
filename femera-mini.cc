@@ -37,9 +37,9 @@ int main( int argc, char** argv ){
   int solv_cond  = Solv::COND_JACO;
   FLOAT_SOLV solv_init= 0.0;// Start at u = solv_init * exact iso cube solution
   uint simd_n    = 1;
-  int mult_n     = 1;// Number of concurrent models
 #ifdef _OPENMP
 #if OMP_NESTED==true
+  int mult_n     = 1;// Number of concurrent models
   int mesh_n     = 1;// Total number of models to run
 #endif
 #if VERB_MAX>1
