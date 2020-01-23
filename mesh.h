@@ -73,7 +73,6 @@ public:
   std::vector<part>  mesh_part={};
   //
   std::unordered_map<INT_MESH,INT_MESH> halo_map;
-  //std::valarray<FLOAT_SOLV> halo_val={};
   std::valarray<float> time_secs={};
   //
   std::string base_name = "";// base of partitioned mesh filename (without _i)

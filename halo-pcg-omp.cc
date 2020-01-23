@@ -302,9 +302,7 @@ int HaloPCG::Init(){// printf("*** HaloPCG M->Init() ***\n");// Preconditioned C
   time_reset( my_prec_count, start );
   // ---------------------------  Sync part_d
 #pragma omp single
-{ //this->halo_val=0.0;
   for(INT_MESH i=0; i<halo_cond_n; i++){ halo_vals[i]=0.0; };
-}
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
@@ -361,13 +359,7 @@ int HaloPCG::Init(){// printf("*** HaloPCG M->Init() ***\n");// Preconditioned C
   }
   time_reset( my_solv_count, start );
 #pragma omp single
-{ // serial halo_vals zero
-  //FIXME halo_val can be resized (smaller) after syncing part_d.
-  //if(this->solv_cond==Solv::COND_JAC3){
-  //  this->halo_val.resize(halo_val.size()/3); }
-  //this->halo_val = 0.0;
-  for(INT_MESH i=0; i<halo_cond_n; i++){ halo_vals[i]=0.0; }
-}
+  for(INT_MESH i=0; i<halo_cond_n; i++){ halo_vals[i]=0.0; }// serial halo_vals zero
   time_reset( my_gat0_count, start );// ---------------------------  Sync part_f
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
@@ -428,9 +420,6 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
   FLOAT_SOLV glob_sum1=0.0, glob_sum2=0.0;
   FLOAT_SOLV glob_r2a = this->glob_res2;
   FLOAT_SOLV halo_vals[this->halo_vals_n];// Put this on the stack.
-  //FLOAT_SOLV halo_vals[this->halo_val.size()];// Put this on the stack.
-  //FIXME don't need M->halo_val member variable now.
-  //this->halo_val.resize(0);
 #pragma omp parallel num_threads(comp_n)
 {// iter parallel region
 #if OMP_NESTED==true
