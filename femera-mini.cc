@@ -839,6 +839,7 @@ int main( int argc, char** argv ){
     // Calculate nodal forces from displacement solution
     FLOAT_PHYS reac_x=0.0;// polycrystal approx.
     //FIXME should do this only for elems with prescribed BCS
+    FLOAT_SOLV halo_vals[M->halo_vals_n];
 #pragma omp parallel num_threads(comp_n)
 {
 #if OMP_NESTED==true
@@ -863,7 +864,7 @@ int main( int argc, char** argv ){
       auto f = Dn* E->node_haid[i];
       for(uint j=0; j<Dn; j++){
 #pragma omp atomic write
-        M->halo_val[f+j] = S->part_f[Dn* i+j]; }
+        halo_vals[f+j] = S->part_f[Dn* i+j]; }
     }
   }
 #pragma omp for schedule(static)
@@ -879,7 +880,7 @@ int main( int argc, char** argv ){
       auto f = Dn* E->node_haid[i];
       for( uint j=0; j<Dn; j++){
 #pragma omp atomic update
-        M->halo_val[f+j]+= S->part_f[Dn* i+j]; }
+        halo_vals[f+j]+= S->part_f[Dn* i+j]; }
     }
   }// finished gather, now scatter back to elems
 #pragma omp for schedule(static)
@@ -897,7 +898,7 @@ int main( int argc, char** argv ){
 #if 0
 #pragma omp atomic read
 #endif
-        S->part_f[Dn* i+j] = M->halo_val[f+j]; }
+        S->part_f[Dn* i+j] = halo_vals[f+j]; }
     }
     Y->ElemLinear( E,E->halo_elem_n,E->elem_n, S->part_f, S->part_u );;
   }

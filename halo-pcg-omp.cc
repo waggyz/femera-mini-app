@@ -14,8 +14,6 @@
 #include <omp.h>
 #include "femera.h"
 
-#define REUSE_F_FOR_RD
-
 int PCG::BC (Mesh* ){return 1;}
 int PCG::RHS(Mesh* ){return 1;}
 //
@@ -40,14 +38,15 @@ int PCG::BCS(Elem* E, Phys* Y ){// printf("*** BCS(E,Y) ***\n");
   return(0);
 }
 int PCG::BC0(Elem* E, Phys* Y ){// printf("*** BC0(E,Y) ***\n");
-  uint Dn=uint(Y->node_d);
+  const INT_MESH Dn=(INT_MESH) Y->node_d;
+  const INT_MESH Nb = this->cond_bloc_n;
   INT_MESH n; INT_DOF f; FLOAT_PHYS v;
   for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
-    this->part_d[Dn* n+uint(f)]=0.0;
+    for(INT_MESH i=0;i<Nb;i++){ this->part_d[Nb*(Dn*n+uint(f)) +i]=0.0; }
     this->part_f[Dn* n+uint(f)]=0.0;
   }
   for(auto t : E->bc0_nf   ){ std::tie(n,f)=t;
-    this->part_d[Dn* n+uint(f)]=0.0;
+    for(INT_MESH i=0;i<Nb;i++){ this->part_d[Nb*(Dn*n+uint(f)) +i]=0.0; }
     #if VERB_MAX>10
     printf("BC0: [%i]:0\n",E->bc0_nf[i]);
     #endif
@@ -131,9 +130,26 @@ int PCG::Init(){// printf("*** PCG::Init() ***\n");
 #ifdef HAS_PRAGMA_SIMD
 #pragma omp simd
 #endif
-  for(INT_MESH i=0; i<sysn; i++){
-    part_p[i]  = part_d[i] * part_r[i];
-    //this->part_u[i] -= this->part_p[i];
+  switch( this->cond_bloc_n ){
+    case(3):{
+        INT_MESH s=sysn/3;
+        for(INT_MESH i=0; i<s; i++){
+          for(INT_MESH j=0; j<3; j++){
+            //NOTE Can be precon. function.
+            INT_MESH n=9*i+3*j;
+            part_p[3* i+j ]  = part_r[3* i   ] * part_d[n    ];
+            part_p[3* i+j ] += part_r[3* i+1 ] * part_d[n +1 ];
+            part_p[3* i+j ] += part_r[3* i+2 ] * part_d[n +2 ];
+            //printf("%9.3f %9.3f %9.3f\n",part_d[n],part_d[n+1],part_d[n+2]);
+          }
+        }
+    break; }
+    default:{
+      for(INT_MESH i=0; i<sysn; i++){
+        part_p[i]  = part_d[i] * part_r[i];
+        //this->part_u[i] -= this->part_p[i];
+      }
+    }
   }
   //loca_res2    = inner_product( part_r,part_z );
   //loca_res2    = inner_product( part_r,part_d * part_r );
@@ -226,6 +242,7 @@ int HaloPCG::Init(){// printf("*** HaloPCG M->Init() ***\n");// Preconditioned C
   FLOAT_SOLV glob_r2a = this->glob_res2, glob_to2 = this->glob_rto2;
   const FLOAT_SOLV load_scal=this->step_scal * FLOAT_SOLV(this->load_step);
   Phys::vals bcmax={0.0,0.0,0.0,0.0};
+  FLOAT_SOLV halo_vals[this->halo_cond_n];
 #pragma omp parallel num_threads(comp_n)
 {// parallel init region
   long int my_scat_count=0, my_prec_count=0,
@@ -273,7 +290,7 @@ int HaloPCG::Init(){// printf("*** HaloPCG M->Init() ***\n");// Preconditioned C
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
-    S->solv_cond=this->solv_cond;
+    //S->solv_cond=this->solv_cond;
     for(uint i=0;i<Y->udof_magn.size();i++){
 //#pragma omp atomic read
       Y->udof_magn[i] = bcmax[i];
@@ -285,33 +302,36 @@ int HaloPCG::Init(){// printf("*** HaloPCG M->Init() ***\n");// Preconditioned C
   time_reset( my_prec_count, start );
   // ---------------------------  Sync part_d
 #pragma omp single
-{ this->halo_val=0.0; }
+{ //this->halo_val=0.0;
+  for(INT_MESH i=0; i<halo_cond_n; i++){ halo_vals[i]=0.0; };
+}
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
-    const INT_MESH d=uint(Y->node_d);
+    const INT_MESH d = (INT_MESH) Y->node_d * S->cond_bloc_n;
     if(this->solv_cond == Solv::COND_NONE){
       for(INT_MESH i=0; i<E->halo_node_n; i++){
         for( uint j=0; j<d; j++){
 #pragma omp atomic write
-          this->halo_val[d*E->node_haid[i]+j] = S->part_d[d*i +j]; } }
+          halo_vals[d*E->node_haid[i]+j] = S->part_d[d*i +j]; } }
     }else{
       for(INT_MESH i=0; i<E->halo_node_n; i++){
         for( uint j=0; j<d; j++){
 #pragma omp atomic update
-          this->halo_val[d*E->node_haid[i]+j]+= S->part_d[d*i +j]; } }
+          halo_vals[d*E->node_haid[i]+j]+= S->part_d[d*i +j]; } }
     }
   }
   time_reset( my_gat1_count, start );
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
-    const INT_MESH d=uint(Y->node_d);
+    const INT_MESH d = (INT_MESH) Y->node_d * S->cond_bloc_n;
     for(INT_MESH i=0; i<E->halo_node_n; i++){
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic read
-        S->part_d[d*i +j] = this->halo_val[f+j]; }
+        S->part_d[d*i +j] = halo_vals[f+j];
+      }
     }
   }
   time_reset( my_scat_count, start );
@@ -319,14 +339,35 @@ int HaloPCG::Init(){// printf("*** HaloPCG M->Init() ***\n");// Preconditioned C
   for(int part_i=part_0; part_i<part_o; part_i++){//-------------- Invert part_d
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH sysn=S->udof_n;
-    for(uint i=0;i<sysn;i++){ S->part_d[i]=FLOAT_SOLV(1.0)/S->part_d[i]; }
+    // Invert preconditioner
+    switch( S->cond_bloc_n ){
+      case(3):{//FIXME Invert and transpose 3x3 blocks
+        for(uint n=0;n<(sysn/3);n++ ){
+          for(uint i=0;i<3;i++){
+            for(uint j=0;j<3;j++){
+               S->part_d[9*n+3*i+j]=(FLOAT_SOLV)(i==j);
+                 //* FLOAT_SOLV(1.0) / S->part_d[9*n+3*i+j];
+            }
+          }
+        }
+      break; }
+      default:{// Diagonal preconditioner
+        for(uint i=0;i<sysn;i++){ S->part_d[i] = FLOAT_SOLV(1.0) / S->part_d[i]; }
+      }
+    }
     // Sync global bounding box.
     for(int i=0; i<6; i++){ E->glob_bbox[i]=this->glob_bbox[i]; }
     S->Init( E,Y );// Zeros boundary conditions
   }
   time_reset( my_solv_count, start );
 #pragma omp single
-{   this->halo_val = 0.0; }// serial halo_vals zero
+{ // serial halo_vals zero
+  //FIXME halo_val can be resized (smaller) after syncing part_d.
+  //if(this->solv_cond==Solv::COND_JAC3){
+  //  this->halo_val.resize(halo_val.size()/3); }
+  //this->halo_val = 0.0;
+  for(INT_MESH i=0; i<halo_cond_n; i++){ halo_vals[i]=0.0; }
+}
   time_reset( my_gat0_count, start );// ---------------------------  Sync part_f
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
@@ -336,7 +377,7 @@ int HaloPCG::Init(){// printf("*** HaloPCG M->Init() ***\n");// Preconditioned C
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic update
-        this->halo_val[f+j] += S->part_f[d*i +j]; }
+        halo_vals[f+j] += S->part_f[d*i +j]; }
     }
   }// End halo_vals
   time_reset( my_gat1_count, start );
@@ -348,7 +389,7 @@ int HaloPCG::Init(){// printf("*** HaloPCG M->Init() ***\n");// Preconditioned C
       auto f = d* E->node_haid[i];
       for( uint j=0; j<d; j++){
 #pragma omp atomic read
-        S->part_f[d*i +j] = this->halo_val[f+j]; }
+        S->part_f[d*i +j] = halo_vals[f+j]; }
     }
   time_reset( my_scat_count, start );// ------------------- finished part_f sync
 #pragma omp critical(init)
@@ -386,8 +427,10 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
 #endif
   FLOAT_SOLV glob_sum1=0.0, glob_sum2=0.0;
   FLOAT_SOLV glob_r2a = this->glob_res2;
-  FLOAT_SOLV halo_vals[this->halo_val.size()];// Put this on the stack.
+  FLOAT_SOLV halo_vals[this->halo_vals_n];// Put this on the stack.
+  //FLOAT_SOLV halo_vals[this->halo_val.size()];// Put this on the stack.
   //FIXME don't need M->halo_val member variable now.
+  //this->halo_val.resize(0);
 #pragma omp parallel num_threads(comp_n)
 {// iter parallel region
 #if OMP_NESTED==true
@@ -477,15 +520,32 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
 #ifdef HAS_PRAGMA_SIMD
 #pragma omp simd reduction(+:glob_sum2)
 #endif
-    for(INT_MESH i=0; i<sysn; i++){
-      S->part_r[i] -= S->part_f[i] * alpha;// Update force residuals
-#ifdef REUSE_F_FOR_RD
-      S->part_f[i]  = S->part_r[i] * S->part_d[i];//NOTE Can be precon. function.
-      glob_sum2    += S->part_r[i] * S->part_f[i] *(FLOAT_SOLV( i>=hl0 ));
-#else
-      glob_sum2    += S->part_r[i] * S->part_r[i] * S->part_d[i]
-        *(FLOAT_SOLV( i>=hl0 ));
-#endif
+    switch( S->cond_bloc_n ){
+      case(3):{
+        INT_MESH s=sysn/3;
+        for(INT_MESH i=0; i<s; i++){
+          for(INT_MESH j=0; j<3; j++){
+            S->part_r[3* i+j ] -= S->part_f[3* i+j ] * alpha;// Update force residuals
+            // Reuse part_f to store z = r*d.
+            //NOTE Can be precon. function.
+            INT_MESH n=9*i+3*j;
+            S->part_f[3* i+j ]  = S->part_r[3* i   ] * S->part_d[n    ];
+            S->part_f[3* i+j ] += S->part_r[3* i+1 ] * S->part_d[n +1 ];
+            S->part_f[3* i+j ] += S->part_r[3* i+2 ] * S->part_d[n +2 ];
+          glob_sum2 += S->part_r[3* i+j ] * S->part_f[3* i+j ]
+            *(FLOAT_SOLV( (3*i)>=hl0 ));
+          }
+        }
+      break; }
+      default:{// Diagonal
+        for(INT_MESH i=0; i<sysn; i++){
+          S->part_r[i] -= S->part_f[i] * alpha;// Update force residuals
+          // Reuse part_f to store z = r*d.
+          //NOTE Can be precon. function.
+          S->part_f[i]  = S->part_r[i] * S->part_d[i];
+          glob_sum2    += S->part_r[i] * S->part_f[i] *(FLOAT_SOLV( i>=hl0 ));
+        }
+      }
     }
   }
   const FLOAT_PHYS beta = glob_sum2 / glob_r2a;// 1 FLOP
@@ -500,11 +560,8 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
 #endif
     for(INT_MESH i=0; i<sysn; i++){// ? FLOP/DOF
       S->part_u[i] += S->part_p[i] * alpha;// better data locality here
-#ifdef REUSE_F_FOR_RD
+      // Reuse part_f to store z = r*d.
       S->part_p[i]  = S->part_f[i] + S->part_p[i] * beta;
-#else
-      S->part_p[i]  = S->part_d[i] * S->part_r[i] + S->part_p[i] * beta;
-#endif
     }
   }
 //#pragma omp single nowait

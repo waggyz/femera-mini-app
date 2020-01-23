@@ -115,7 +115,8 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
   //FLOAT_SOLV glob_r2a = this->glob_res2, glob_to2 = this->glob_rto2;
   FLOAT_SOLV glob_r2a = 0.0, glob_to2 = this->glob_rto2;
   Phys::vals bcmax={0.0,0.0,0.0,0.0};
-  FLOAT_SOLV halo_vals[this->halo_val.size()];// Put this on the stack.
+  //FLOAT_SOLV halo_vals[this->halo_val.size()];// Put this on the stack.
+  FLOAT_SOLV halo_vals[this->halo_cond_n];
 #pragma omp parallel num_threads(comp_n)
 {// parallel init region
   long int my_scat_count=0, my_prec_count=0,//FIXME These times are messed up
@@ -189,7 +190,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
-    S->solv_cond=this->solv_cond;
+    //S->solv_cond=this->solv_cond;
     for(uint i=0;i<Y->udof_magn.size();i++){
 //#pragma omp atomic read
       Y->udof_magn[i] = bcmax[i];
@@ -211,7 +212,8 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp single
 {  this->halo_val=0.0; }
 #else
-  int n=this->halo_val.size();
+  //int n=this->halo_val.size();
+  int n=this->halo_cond_n;
 #pragma omp single
   for(int i=0; i<n; i++){ halo_vals[i]=0.0; }
 #endif
@@ -251,7 +253,8 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp single
 {   this->halo_val = 0.0; }// serial halo_vals zero
 #else
-  int n=this->halo_val.size();
+  //int n=this->halo_val.size();
+  int n=this->halo_vals_n;
 #pragma omp single
   for(int i=0; i<n; i++){ halo_vals[i]=0.0; }
 #endif
@@ -350,10 +353,12 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
 #endif
   FLOAT_SOLV glob_sum1=0.0, glob_sum2=0.0, glob_sum3=0.0, glob_sum4=0.0,
     glob_sum5=0.0;
-  FLOAT_SOLV halo_vals[this->halo_val.size()];// Put this on the stack.
+  //FLOAT_SOLV halo_vals[this->halo_val.size()];// Put this on the stack.
+  FLOAT_SOLV halo_vals[this->halo_vals_n];// Put this on the stack.
   //FIXME don't need M->halo_val member variable now.
 #ifdef HALO_SUM_CHK
-  FLOAT_SOLV halo_sers[this->halo_val.size()];
+  //FLOAT_SOLV halo_sers[this->halo_val.size()];
+  FLOAT_SOLV halo_sers[this->halo_vals_n];
   FLOAT_SOLV halo_min= 9e9, halo_max=-9e9;//, halo_avg=0.0;
 #endif
 #pragma omp parallel num_threads(comp_n)
@@ -405,7 +410,8 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
   }
 #ifdef HALO_SUM_CHK
   std::memcpy(& halo_sers[0],& halo_vals[0],
-              this->halo_val.size()*sizeof(FLOAT_PHYS) );
+              this->halo_vals_n*sizeof(FLOAT_PHYS) );
+              //this->halo_val.size()*sizeof(FLOAT_PHYS) );
 #endif
 #ifdef HALO_SUM_SER
 #pragma omp single
@@ -440,7 +446,8 @@ int HaloNCG::Iter(){// printf("*** HaloNCG::Iter() ***\n");
   }// End serial halo_vals sum;
 #pragma omp single
 {// Report discrepancies
-  INT_MESH s = this->halo_val.size();
+  //INT_MESH s = this->halo_val.size();
+  INT_MESH s = this->halo_vals_n;
   printf("part_g halo[%u] errors: ",s);
   for(INT_MESH i=0; i<s; i++){
     FLOAT_SOLV e = halo_vals[i]-halo_sers[i];

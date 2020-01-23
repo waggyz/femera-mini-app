@@ -43,6 +43,8 @@ public:
   INT_MESH ort3_part_n=0;
   INT_MESH ther_part_n=0;
   INT_MESH plas_part_n=0;
+  INT_MESH halo_vals_n=0;
+  INT_MESH halo_cond_n=0;
   //
   FLOAT_SOLV cube_init=0.0;// Start u0 at scaled iso cube exact solution
   //FIXME Should only be in Solv* objects?
@@ -71,7 +73,7 @@ public:
   std::vector<part>  mesh_part={};
   //
   std::unordered_map<INT_MESH,INT_MESH> halo_map;
-  std::valarray<FLOAT_SOLV> halo_val={};
+  //std::valarray<FLOAT_SOLV> halo_val={};
   std::valarray<float> time_secs={};
   //
   std::string base_name = "";// base of partitioned mesh filename (without _i)

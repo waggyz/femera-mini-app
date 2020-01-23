@@ -6,9 +6,12 @@ int Solv::Precond(Elem* E, Phys* Y){// Jacobi Preconditioner
   int bad_d=0;
   switch(this->solv_cond){
   case(Solv::COND_NONE):{
-    for(uint i=0; i<this->udof_n; i++){ this->part_d[i]=1.0; };    break; }
+    part_d=align_resize( data_d, udof_n+1, valign_byte );
+    for(uint i=0; i<this->udof_n; i++){ this->part_d[i]=1.0; };
+    break; }
   case(Solv::COND_JACO):
   case(Solv::COND_TANG):{
+    part_d=align_resize( data_d, udof_n+1, valign_byte );
     Y->ElemJacobi( E, this->part_d );
     Y->ElemJacobi( E, this->part_d, this->part_u );
     for(uint i=0; i<this->udof_n; i++){
@@ -22,16 +25,24 @@ int Solv::Precond(Elem* E, Phys* Y){// Jacobi Preconditioner
 #endif
     break; }
   case(Solv::COND_JAC3):{
-    part_d = align_resize( data_d, 3*udof_n, valign_byte );//FIXME Resized after init
+    this->cond_bloc_n = 3;
+    part_d = align_resize( data_d, 3*udof_n+1, valign_byte );
+    //FIXME Resized after init
     Y->ElemJacNode( E, this->part_d );
 #if 0
     Y->ElemJacNode( E, this->part_d, this->part_u );
 #endif
     //FIXME Handle negative diagonals.
     break; }
-  case(Solv::COND_ROW1):{ Y->ElemRowSumAbs( E, this->part_d ); break;}
-  case(Solv::COND_STRA):{ Y->ElemStrain( E, this->part_d ); break;}
-  default:{ for(uint i=0; i<this->udof_n; i++){ this->part_d[i]=1.0; }; break;}
+  case(Solv::COND_ROW1):{
+    part_d=align_resize( data_d, udof_n+1, valign_byte );
+    Y->ElemRowSumAbs( E, this->part_d ); break;}
+  case(Solv::COND_STRA):{ 
+    part_d=align_resize( data_d, udof_n+1, valign_byte );
+    Y->ElemStrain( E, this->part_d ); break;}
+  default:{ 
+    part_d=align_resize( data_d, udof_n+1, valign_byte );
+    for(uint i=0; i<this->udof_n; i++){ this->part_d[i]=1.0; }; break;}
   }
 #if VERB_MAX>10
   printf("System Preconditioner [%i]",(int)this->udof_n);

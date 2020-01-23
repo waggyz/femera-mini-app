@@ -18,7 +18,8 @@ public:
     COND_ROW1=11, COND_STRA=12
   };
   INT_MESH iter=0, iter_max=0;
-  INT_MESH uinp_n,udof_n;
+  INT_MESH uinp_n,udof_n,cond_bloc_n=1;
+  //
   FLOAT_SOLV load_scal=1.0;
   FLOAT_SOLV loca_rtol=0.0;
   FLOAT_SOLV loca_delu=0.0, rtol_delu=0.0;// Cauchy convergence check
@@ -80,7 +81,8 @@ protected:
     part_f = align_resize( data_f, udof_n+1, valign_byte );// f=Au
     part_u = align_resize( data_u, udof_n+1, valign_byte );// solution
     part_r = align_resize( data_r, udof_n+1, valign_byte );// residuals
-    part_d = align_resize( data_d, udof_n+1, valign_byte );// Preconditioner
+    //part_d = align_resize( data_d, 3*udof_n+1, valign_byte );// Preconditioner
+    //FIXME Make this the right size
     //for(INT_MESH i=0; i<udof_n; i++){ part_0[i]=1.0; }
 #else
     part_u.resize(udof_n+1,0.0);// Initial Solution Guess

@@ -268,7 +268,7 @@ int Mesh::Setup(){
   //
   INT_MESH elem_tot=0, halo_elem_tot=0;
   INT_MESH node_tot=0, halo_node_tot=0,halo_remo_tot=0,halo_loca_tot=0;
-  INT_MESH halo_udof_tot=0;
+  INT_MESH halo_udof_tot=0; INT_MESH halo_cond_tot=0;
   std::string solv_name="";
   INT_MESH halo_n=0;
 #pragma omp parallel num_threads(comp_n)
@@ -290,6 +290,8 @@ int Mesh::Setup(){
     this->ReadPartFMR(t,pname.c_str(),false);
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=t;
     Y->solv_cond = this->solv_cond;
+    S->solv_cond = this->solv_cond;
+    if(S->solv_cond==Solv::COND_JAC3){ S->cond_bloc_n=3; };
     if(dots_mod>0){
       if((part_i%dots_mod)==0){ std::cout <<"."; fflush(stdout); } }
 #if VERB_MAX>10
@@ -428,10 +430,14 @@ int Mesh::Setup(){
     halo_node_tot += E->halo_node_n;
     halo_remo_tot += E->halo_remo_n;
     halo_loca_tot += E->halo_loca_n;
-    halo_udof_tot += E->halo_node_n * Y->node_d;
+    halo_udof_tot += E->halo_node_n * Y->node_d ;
+    halo_cond_tot += E->halo_node_n * Y->node_d * S->cond_bloc_n ;
+    //std::cout << "Point block size: " << S->cond_bloc_n <<'\n';
     }
   }//end serial partition loop
-  this->halo_val.resize(halo_udof_tot);//node_d*halo_loca_tot);
+  this->halo_vals_n=halo_udof_tot;
+  this->halo_cond_n=halo_cond_tot;
+  //this->halo_val.resize(halo_cond_tot);//node_d*halo_loca_tot);
 #if VERB_MAX > 1
       if(verbosity>1){
         printf(" Parts:");
