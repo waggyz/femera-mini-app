@@ -53,7 +53,7 @@ int ElastIso3D::ElemJacNode(Elem* E, FLOAT_SOLV* part_d ){
       for(uint k=0; k<Nc; k++){
         for(uint i=0; i<Dm ; i++){ G[Nc* i+k ]=0.0;
           for(uint j=0; j<Dm ; j++){
-            G[Nc* i+k ] += jac[Dm* i+i ] * E->intp_shpg[ip*Ne+ Dm* k+j ];
+            G[Nc* i+k ] += jac[Dm* j+i ] * E->intp_shpg[ip*Ne+ Dm* k+j ];
       } } }
 #else
       uint ig=ip*Ne;

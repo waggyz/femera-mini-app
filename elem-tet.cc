@@ -48,8 +48,8 @@ const RESTRICT Mesh::vals Tet::GaussLegendre(const INT_ORDER p ){
       b,b,a, 56./2250.}; break;}
 #endif
   case(3):{ this->gaus_n=10;
-    //From Lee Shunn, Frank Ham, Symmetric quadrature rules for tetrahedra
-    //  based on a cubic close-packed lattice arrangement, 2012
+    // From Lee Shunn, Frank Ham, Symmetric quadrature rules for tetrahedra
+    // based on a cubic close-packed lattice arrangement, 2012
     const FLOAT_MESH w0=0.0476331348432089/6.0, w1=0.1349112434378610/6.0,
       a0=0.0738349017262234, a1=0.7784952948213300,
       b0=0.0937556561159491, b1=0.4062443438840510;
