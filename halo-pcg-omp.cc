@@ -134,9 +134,10 @@ int PCG::Init(){// printf("*** PCG::Init() ***\n");
       for(INT_MESH i=0; i<s; i++){
         for(INT_MESH j=0; j<3; j++){
           INT_MESH n=9*i+3*j;
-          part_p[3* i+j ]  = part_r[3* i   ] * part_d[n    ];
-          part_p[3* i+j ] += part_r[3* i+1 ] * part_d[n +1 ];
-          part_p[3* i+j ] += part_r[3* i+2 ] * part_d[n +2 ];
+          part_p[3* i+j ]
+            = part_r[3* i   ] * part_d[n    ]
+            + part_r[3* i+1 ] * part_d[n +1 ]
+            + part_r[3* i+2 ] * part_d[n +2 ];
           //printf("%9.3f %9.3f %9.3f\n",part_d[n],part_d[n+1],part_d[n+2]);
         }
       }
@@ -235,7 +236,8 @@ int HaloPCG::Init(){// printf("*** HaloPCG M->Init() ***\n");// Preconditioned C
   const int comp_n = this->comp_n;
 #endif
   // Local copies for atomic ops and reduction
-  FLOAT_SOLV glob_r2a = this->glob_res2, glob_to2 = this->glob_rto2;
+  FLOAT_SOLV glob_r2a = 0.0, glob_to2 = this->glob_rto2;
+  //FLOAT_SOLV glob_r2a = this->glob_res2, glob_to2 = this->glob_rto2;
   const FLOAT_SOLV load_scal=this->step_scal * FLOAT_SOLV(this->load_step);
   Phys::vals bcmax={0.0,0.0,0.0,0.0};
   FLOAT_SOLV halo_vals[this->halo_cond_n];
@@ -407,6 +409,7 @@ int HaloPCG::Init(){// printf("*** HaloPCG M->Init() ***\n");// Preconditioned C
   time_reset( my_scat_count, start );// ------------------- finished part_f sync
 #pragma omp critical(init)
 { S->Init(); }//FIXME Why is this serialized?
+#pragma omp atomic update
   glob_r2a += S->loca_res2;
   }
 #pragma omp for schedule(static)
@@ -540,9 +543,10 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
             // Reuse part_f to store z = r*d.
             //NOTE Can be precon. function.
             INT_MESH n=9*i+3*j;
-            S->part_f[3* i+j ]  = S->part_r[3* i   ] * S->part_d[n    ];
-            S->part_f[3* i+j ] += S->part_r[3* i+1 ] * S->part_d[n +1 ];
-            S->part_f[3* i+j ] += S->part_r[3* i+2 ] * S->part_d[n +2 ];
+            S->part_f[3* i+j ]
+              = S->part_r[3* i   ] * S->part_d[n    ]
+              + S->part_r[3* i+1 ] * S->part_d[n +1 ]
+              + S->part_r[3* i+2 ] * S->part_d[n +2 ];
             glob_sum2 += S->part_r[3* i+j ] * S->part_f[3* i+j ]
               *(FLOAT_SOLV( (3* i+j)>=hl0 ));
           }
