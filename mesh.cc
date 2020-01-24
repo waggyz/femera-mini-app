@@ -437,7 +437,6 @@ int Mesh::Setup(){
   }//end serial partition loop
   this->halo_vals_n=halo_udof_tot;
   this->halo_cond_n=halo_cond_tot;
-  //this->halo_val.resize(halo_cond_tot);//node_d*halo_loca_tot);
 #if VERB_MAX > 1
       if(verbosity>1){
         printf(" Parts:");

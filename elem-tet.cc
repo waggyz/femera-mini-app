@@ -31,7 +31,6 @@ const RESTRICT Mesh::vals Tet::GaussLegendre(const INT_ORDER p ){
       1./6., 0.5  , 1./6., 9./120.,
       1./6., 1./6., 0.5  , 9./120.,
       1./6., 1./6., 1./6., 9./120.}; break;}
-#endif
   case(3):{ this->gaus_n=11;//FIXME This converges tet20 meshes
     const FLOAT_MESH a=0.3994035761667992;// (1.+std::sqrt(5./14.))/4.;
     const FLOAT_MESH b=0.1005964238332008;// (1.-std::sqrt(5./14.))/4.;
@@ -47,8 +46,24 @@ const RESTRICT Mesh::vals Tet::GaussLegendre(const INT_ORDER p ){
       b,a,a, 56./2250.,
       b,a,b, 56./2250.,
       b,b,a, 56./2250.}; break;}
-  default :{ return Mesh::vals{};}
-  };
+#endif
+  case(3):{ this->gaus_n=10;//From 
+    const FLOAT_MESH w0=0.0476331348432089, w1=0.1349112434378610,
+      a0=0.0738349017262234, a1=0.7784952948213300,
+      b0=0.0937556561159491, b1=0.4062443438840510;
+    return Mesh::vals{
+      a1,a0,a0, w0,
+      a0,a1,a0, w0,
+      a0,a0,a1, w0,
+      a0,a0,a0, w0,
+      b1,b1,b0, w1,
+      b1,b0,b1, w1,
+      b1,b0,b0, w1,
+      b0,b1,b1, w1,
+      b0,b1,b0, w1,
+      b0,b0,b1, w1}; break;}
+  default :{ return Mesh::vals{}; }
+  }
 };
 const RESTRICT Mesh::vals Tet::ShapeFunction(
   const INT_ORDER p, const FLOAT_MESH x[3]){

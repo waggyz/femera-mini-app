@@ -775,7 +775,8 @@ int main( int argc, char** argv ){
       }
 #endif
 #if VERB_MAX > 3
-      if(verbosity>3){
+      if(verbosity>(3)){
+        int Nb=S->cond_bloc_n;
         if(S->udof_n<300){
           printf("------- Node Coordinates -------------- Preconditioner -------");
           if(Dn>3){ printf("  Temperature"); }
@@ -783,7 +784,9 @@ int main( int argc, char** argv ){
           for(uint i=0;i<Nn;i++){
             for(int j=0;j<Dm;j++){ printf("%+9.2e ",E->node_coor[Dm* i+j]); }
             printf(" | ");
-            for(int j=0;j<Dm;j++){ printf("%+9.2e ",S->part_d[Dn* i+j]); }
+            for(int j=0;j<Dm;j++){
+              for(int k=0;k<Nb;k++){
+                printf("%+9.2e ",S->part_d[Nb*(Dn* i+j)+k]); } }
             if(Dn>Dm){ printf("  %+9.2e",S->part_d[Dn* i+Dm]); }
             printf("\n");
           }

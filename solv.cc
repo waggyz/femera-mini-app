@@ -28,6 +28,7 @@ int Solv::Precond(Elem* E, Phys* Y){// Jacobi Preconditioner
     this->cond_bloc_n = 3;
     part_d = align_resize( data_d, 3*udof_n+1, valign_byte );
     //FIXME Resized after init
+    for(INT_MESH i=0; i<data_d.size(); i++){ data_d[i]=0.0; }
     Y->ElemJacNode( E, this->part_d );
 #if 0
     Y->ElemJacNode( E, this->part_d, this->part_u );

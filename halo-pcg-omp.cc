@@ -125,41 +125,40 @@ int PCG::Init(){// printf("*** PCG::Init() ***\n");
     this->part_r[i] -= this->part_f[i];
   }
   //part_r  = part_b - part_f;
-  //part_z  = part_d * part_r;// This is merged where it's used (2x/iter)
+  //part_z  = part_d * part_r;// This was merged where it's used (2x/iter)
   //part_p  = part_z;
+  FLOAT_SOLV R2=0.0;
+  switch( this->cond_bloc_n ){
+    case(3):{
+      INT_MESH s=sysn/3;
+      for(INT_MESH i=0; i<s; i++){
+        for(INT_MESH j=0; j<3; j++){
+          INT_MESH n=9*i+3*j;
+          part_p[3* i+j ]  = part_r[3* i   ] * part_d[n    ];
+          part_p[3* i+j ] += part_r[3* i+1 ] * part_d[n +1 ];
+          part_p[3* i+j ] += part_r[3* i+2 ] * part_d[n +2 ];
+          //printf("%9.3f %9.3f %9.3f\n",part_d[n],part_d[n+1],part_d[n+2]);
+        }
+      }
+    break; }
+    default:{
 #ifdef HAS_PRAGMA_SIMD
 #pragma omp simd
 #endif
-  switch( this->cond_bloc_n ){
-    case(3):{
-        INT_MESH s=sysn/3;
-        for(INT_MESH i=0; i<s; i++){
-          for(INT_MESH j=0; j<3; j++){
-            //NOTE Can be precon. function.
-            INT_MESH n=9*i+3*j;
-            part_p[3* i+j ]  = part_r[3* i   ] * part_d[n    ];
-            part_p[3* i+j ] += part_r[3* i+1 ] * part_d[n +1 ];
-            part_p[3* i+j ] += part_r[3* i+2 ] * part_d[n +2 ];
-            //printf("%9.3f %9.3f %9.3f\n",part_d[n],part_d[n+1],part_d[n+2]);
-          }
-        }
-    break; }
-    default:{
       for(INT_MESH i=0; i<sysn; i++){
         part_p[i]  = part_d[i] * part_r[i];
         //this->part_u[i] -= this->part_p[i];
       }
-    }
   }
-  //loca_res2    = inner_product( part_r,part_z );
-  //loca_res2    = inner_product( part_r,part_d * part_r );
-  FLOAT_SOLV R2=0.0;
 #ifdef HAS_PRAGMA_SIMD
 #pragma omp simd reduction(+:R2)
 #endif
   for(uint i=sumi0; i<sysn; i++){
     R2 += part_r[i] * part_p[i]; }
     //R2 += part_r[i] * part_r[i] * part_d[i]; }
+  }
+  //loca_res2    = inner_product( part_r,part_z );
+  //loca_res2    = inner_product( part_r,part_d * part_r );
   this->loca_res2 = R2;
   this->loca_rto2 = this->loca_rtol*loca_rtol *loca_res2;//FIXME Move this somewhere.
   return(0);
@@ -336,26 +335,51 @@ int HaloPCG::Init(){// printf("*** HaloPCG M->Init() ***\n");// Preconditioned C
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){//-------------- Invert part_d
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
-    const INT_MESH sysn=S->udof_n;
     // Invert preconditioner
     switch( S->cond_bloc_n ){
-      case(3):{//FIXME Invert and transpose 3x3 blocks
-        for(uint n=0;n<(sysn/3);n++ ){
+      case(3):{
+        //for(uint i=0; i<(sysn*3);i++){printf("%9.2e ",S->part_d[i]);} printf("\n");
+#if 1
+        // Invert 3x3 blocks. The inverse is also symmetric, so no need to transpose.
+        for(INT_MESH n=0;n<E->node_n;n++){
+#if 1
+          E->Jac3Inv( &S->part_d[9*n],E->Jac3Det( &S->part_d[9*n] ));
+#else
+          FLOAT_MESH det = E->Jac3Det( &S->part_d[9*n] );
+          E->Jac3Inv( &S->part_d[9*n],det*1e-9);
+#endif
+        }
+#else
+        // Use only the inverted diagonal for testing.
+        for(INT_MESH n=0;n<E->node_n;n++){
           for(uint i=0;i<3;i++){
             for(uint j=0;j<3;j++){
-               S->part_d[9*n+3*i+j]=(FLOAT_SOLV)(i==j);
-                 //* FLOAT_SOLV(1.0) / S->part_d[9*n+3*i+j];
-            }
+               printf("%9.2e ",S->part_d[9*n+3*i+j]);
+               if(i==j){S->part_d[9*n+3*i+j]=FLOAT_SOLV(1.0) / S->part_d[9*n+3*i+j];
+               }else{S->part_d[9*n+3*i+j]=0.0; }
+            } printf("\n");
           }
         }
+#endif
       break; }
       default:{// Diagonal preconditioner
+        const INT_MESH sysn=S->udof_n;
+        //for(uint i=0; i<(sysn);i++){printf("%9.2e ",S->part_d[i]);} printf("\n");
         for(uint i=0;i<sysn;i++){ S->part_d[i] = FLOAT_SOLV(1.0) / S->part_d[i]; }
       }
     }
     // Sync global bounding box.
     for(int i=0; i<6; i++){ E->glob_bbox[i]=this->glob_bbox[i]; }
     S->Init( E,Y );// Zeros boundary conditions
+#if 0
+    for(INT_MESH n=0;n<E->node_n;n++){
+      for(uint i=0;i<3;i++){
+        for(uint j=0;j<3;j++){
+            printf("%9.2e ",S->part_d[9*n+3*i+j]);
+        } printf("\n");
+      }
+    }
+#endif
   }
   time_reset( my_solv_count, start );
 #pragma omp single
@@ -506,27 +530,36 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
   for(int part_i=part_0; part_i<part_o; part_i++){// ? FLOP/DOF
     std::tie(E,Y,S)=priv_part[part_i];
     const INT_MESH hl0=S->halo_loca_0, sysn=S->udof_n;
-#ifdef HAS_PRAGMA_SIMD
-#pragma omp simd reduction(+:glob_sum2)
-#endif
     switch( S->cond_bloc_n ){
       case(3):{
+#ifdef HAS_PRAGMA_SIMD
+#pragma omp simd
+#endif
+        for(INT_MESH i=0; i<sysn; i++){
+            S->part_r[i] -= S->part_f[i] * alpha; }// Update force residuals
         INT_MESH s=sysn/3;
         for(INT_MESH i=0; i<s; i++){
           for(INT_MESH j=0; j<3; j++){
-            S->part_r[3* i+j ] -= S->part_f[3* i+j ] * alpha;// Update force residuals
             // Reuse part_f to store z = r*d.
             //NOTE Can be precon. function.
             INT_MESH n=9*i+3*j;
             S->part_f[3* i+j ]  = S->part_r[3* i   ] * S->part_d[n    ];
             S->part_f[3* i+j ] += S->part_r[3* i+1 ] * S->part_d[n +1 ];
             S->part_f[3* i+j ] += S->part_r[3* i+2 ] * S->part_d[n +2 ];
-          glob_sum2 += S->part_r[3* i+j ] * S->part_f[3* i+j ]
-            *(FLOAT_SOLV( (3*i)>=hl0 ));
+            glob_sum2 += S->part_r[3* i+j ] * S->part_f[3* i+j ]
+              *(FLOAT_SOLV( (3* i+j)>=hl0 ));
           }
         }
+//#ifdef HAS_PRAGMA_SIMD
+//#pragma omp simd reduction(+:glob_sum2)
+//#endif
+//        for(INT_MESH i=hl0; i<sysn; i++){
+//          glob_sum2    += S->part_r[i] * S->part_f[i]; }
       break; }
       default:{// Diagonal
+#ifdef HAS_PRAGMA_SIMD
+#pragma omp simd reduction(+:glob_sum2)
+#endif
         for(INT_MESH i=0; i<sysn; i++){
           S->part_r[i] -= S->part_f[i] * alpha;// Update force residuals
           // Reuse part_f to store z = r*d.
