@@ -12,21 +12,26 @@
 int ElastIso3D::Setup( Elem* E ){
   JacT  ( E );
   const uint elem_n = uint(E->elem_n);
-  const uint jacs_n = uint(E->elip_jacs.size()/elem_n/ 10) ;
-  const uint intp_n = uint(E->gaus_n);
   const uint conn_n = uint(E->elem_conn_n);
   this->elem_stiff.resize(elem_n*conn_n*conn_n*node_d*node_d);
   ElemStiff( E );
+  this->stif_flop = uint(E->elem_n)
+    * 3*uint(E->elem_conn_n) * 3*uint(E->elem_conn_n) *2;
+  this->stif_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
+    *(3*uint(E->elem_conn_n) * 3*uint(E->elem_conn_n) +2);
+#if 1
+  this->tens_flop = this->stif_flop;//FIXME
+  this->tens_band = this->stif_band;
+#else
+  const uint jacs_n = uint(E->elip_jacs.size()/elem_n/ 10) ;
+  const uint intp_n = uint(E->gaus_n);
   this->tens_flop = uint(E->elem_n) * intp_n
     *( uint(E->elem_conn_n)* (54) + 27 );
   this->tens_band = elem_n *(
      sizeof(FLOAT_SOLV)*(3*conn_n*3+ jacs_n*10)// Main mem
     +sizeof(INT_MESH)*conn_n // Main mem ints
     +sizeof(FLOAT_PHYS)*(3*intp_n*conn_n +3+1 ) );// Stack (assumes read once)
-  this->stif_flop = uint(E->elem_n)
-    * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) ) *2;
-  this->stif_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
-    * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) +2);
+#endif
   return 0;
 }
 int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,

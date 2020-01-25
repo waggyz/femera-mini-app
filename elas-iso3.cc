@@ -37,9 +37,9 @@ int ElastIso3D::ElemJacNode(Elem* E, FLOAT_SOLV* part_d ){
     mtrl_matc[0],mtrl_matc[1],mtrl_matc[1],0.0,0.0,0.0,
     mtrl_matc[1],mtrl_matc[0],mtrl_matc[1],0.0,0.0,0.0,
     mtrl_matc[1],mtrl_matc[1],mtrl_matc[0],0.0,0.0,0.0,
-    0.0,0.0,0.0,mtrl_matc[2]*2.0,0.0,0.0,
-    0.0,0.0,0.0,0.0,mtrl_matc[2]*2.0,0.0,
-    0.0,0.0,0.0,0.0,0.0,mtrl_matc[2]*2.0 };
+    0.0,0.0,0.0,mtrl_matc[2],0.0,0.0,//FIXME Check these shear values.
+    0.0,0.0,0.0,0.0,mtrl_matc[2],0.0,
+    0.0,0.0,0.0,0.0,0.0,mtrl_matc[2] };
   for(uint ie=0;ie<elem_n;ie++){
 #ifdef DIAG_FROM_STIFF
     for(uint i=0;i<Nk;i++){ elem_stiff[i]=0.0; }
@@ -130,7 +130,6 @@ int ElastIso3D::ElemNonlinear( Elem* E, const INT_MESH e0, const INT_MESH e1,
   return this->ElemLinear( E, e0,e1, part_f, part_u );
   }
 int ElastIso3D::ElemStiff(Elem* E ){//FIXME should be ScatterStiff()
-  //FIXME Doesn't do rotation yet
   const uint Dm = 3;//E->mesh_d
   const uint Dn = this->node_d;
   const uint Nj = 10;//,d2=9;
@@ -149,9 +148,9 @@ int ElastIso3D::ElemStiff(Elem* E ){//FIXME should be ScatterStiff()
     mtrl_matc[0],mtrl_matc[1],mtrl_matc[1],0.0,0.0,0.0,
     mtrl_matc[1],mtrl_matc[0],mtrl_matc[1],0.0,0.0,0.0,
     mtrl_matc[1],mtrl_matc[1],mtrl_matc[0],0.0,0.0,0.0,
-    0.0,0.0,0.0,mtrl_matc[2]*2.0,0.0,0.0,
-    0.0,0.0,0.0,0.0,mtrl_matc[2]*2.0,0.0,
-    0.0,0.0,0.0,0.0,0.0,mtrl_matc[2]*2.0 };
+    0.0,0.0,0.0,mtrl_matc[2],0.0,0.0,//FIXME Check these shear values.
+    0.0,0.0,0.0,0.0,mtrl_matc[2],0.0,
+    0.0,0.0,0.0,0.0,0.0,mtrl_matc[2] };
 #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
   for(uint j=0;j<mtrl_matc.size();j++){
@@ -225,9 +224,9 @@ int ElastIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* part_d ){
     mtrl_matc[0],mtrl_matc[1],mtrl_matc[1],0.0,0.0,0.0,
     mtrl_matc[1],mtrl_matc[0],mtrl_matc[1],0.0,0.0,0.0,
     mtrl_matc[1],mtrl_matc[1],mtrl_matc[0],0.0,0.0,0.0,
-    0.0,0.0,0.0,mtrl_matc[2]*2.0,0.0,0.0,
-    0.0,0.0,0.0,0.0,mtrl_matc[2]*2.0,0.0,
-    0.0,0.0,0.0,0.0,0.0,mtrl_matc[2]*2.0 };
+    0.0,0.0,0.0,mtrl_matc[2],0.0,0.0,//FIXME Check these shear values.
+    0.0,0.0,0.0,0.0,mtrl_matc[2],0.0,
+    0.0,0.0,0.0,0.0,0.0,mtrl_matc[2] };
   for(uint ie=0;ie<elem_n;ie++){
     for(uint ip=0;ip<intp_n;ip++){
       uint ig=ip*Ne;
