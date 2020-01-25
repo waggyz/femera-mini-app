@@ -67,10 +67,11 @@ class Mesh;
 class Elem;
 class Phys;
 class Solv;
+//FIXME The order of these is important.
 #include "solv.h"
+#include "phys.h"
 #include "mesh.h"
 #include "elem.h"
-#include "phys.h"
 //
 class Femera{
 public:

@@ -16,23 +16,20 @@ int ElastIso3D::ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*){
 int ElastIso3D::ElemJacobi( Elem*, FLOAT_SOLV*, const FLOAT_SOLV* ){
   return 1; }
 int ElastIso3D::ElemJacNode(Elem* E, FLOAT_SOLV* part_d ){
+#undef DIAG_FROM_STIFF
   const uint  Dm   = 3;
-  const uint  Nj = 10,d2=9;
+  const uint  Nj = 10;
   const uint  Nc = E->elem_conn_n;
-  const uint  Ne = uint(Dm*Nc);
+  const uint  Ne = uint(Dm*Nc);// One row of stiffness matrix
   const uint elem_n = E->elem_n;
   const uint intp_n = E->gaus_n;
-  //
-#define DIAG_FROM_STIFF
+  // const uint Dn = this->node_d;
 #ifdef DIAG_FROM_STIFF
-  const uint Dn = this->node_d;
-  const uint Nr = Dn*Nc;// One row of stiffness matrix
-  const uint Nk = Nr*Nr;// Elements of stiffness matrix
+  const uint Nk = Ne*Ne;// Elements of stiffness matrix
   FLOAT_PHYS elem_stiff[Nk];
 #else
-  RESTRICT Phys::vals elem_diag(Ne*Dm);
+  //RESTRICT Phys::vals elem_diag(Ne*Dm);
 #endif
-  RESTRICT Phys::vals elem_diag(Ne*Dm);
   FLOAT_PHYS B[Ne*6];// 6 rows, Ne cols
   FLOAT_PHYS G[Ne];//,jac[Nj];//,elem_diag[Ne];
   for(uint j=0; j<(Ne*6); j++){ B[j]=0.0; }
@@ -44,7 +41,9 @@ int ElastIso3D::ElemJacNode(Elem* E, FLOAT_SOLV* part_d ){
     0.0,0.0,0.0,0.0,mtrl_matc[2]*2.0,0.0,
     0.0,0.0,0.0,0.0,0.0,mtrl_matc[2]*2.0 };
   for(uint ie=0;ie<elem_n;ie++){
+#ifdef DIAG_FROM_STIFF
     for(uint i=0;i<Nk;i++){ elem_stiff[i]=0.0; }
+#endif
     for(uint ip=0;ip<intp_n;ip++){
 #if 1
       for(uint k=0; k<Nc; k++){
@@ -64,7 +63,7 @@ int ElastIso3D::ElemJacNode(Elem* E, FLOAT_SOLV* part_d ){
 #endif
       #if VERB_MAX>10
       printf( "Jacobian Inverse & Determinant:");
-      for(uint j=0;j<d2;j++){
+      for(uint j=0;j<9;j++){
         if(j%3==0){printf("\n"); }
         printf("%+9.2e",jac[j]);
       } printf(" det:%+9.2e\n",det);
@@ -91,26 +90,36 @@ int ElastIso3D::ElemJacNode(Elem* E, FLOAT_SOLV* part_d ){
         printf("%+9.2e ",B[j]);
       } printf("\n");
       #endif
-      FLOAT_PHYS w = E->elip_jacs[Nj*ie+9] * E->gaus_weig[ip];
+      FLOAT_PHYS dw = E->elip_jacs[Nj*ie+9] * E->gaus_weig[ip];
 #ifdef DIAG_FROM_STIFF
       for(uint i=0; i<Ne; i++){
       for(uint l=0; l<Ne; l++){
       for(uint k=0; k<6 ; k++){
       for(uint j=0; j<6 ; j++){
-        elem_stiff[Nr* i+l ]+=B[Ne* j+i ] * D[6* k+j ] * B[Ne* k+l ] * w;
+        elem_stiff[Ne* i+l ] += B[Ne* j+i ] * D[6* k+j ] * B[Ne* k+l ] * dw;
       } } } }
 #else
-        elem_diag[Dm* i+l ]+=B[Ne* j+i ] * D[6* k+j ] * B[Ne* k+l ] * w;
+      for(uint n=0; n<Nc; n++){
+      for(uint m=0; m<3 ; m++){ uint i=3*n+m;
+      for(uint o=0; o<3 ; o++){ uint l=3*n+o;
+      for(uint k=0; k<6 ; k++){
+      for(uint j=0; j<6 ; j++){
+        part_d[E->elem_conn[Nc*ie+n]*9+ 3* m+o ]
+          += B[Ne* j+i ] * D[6* k+j ] * B[Ne* k+l ] * dw
+#if 0
+          *((m==o)?1.0:-1.0)
+#endif
+          ;
+      } } } } }
 #endif
     }//end intp loop
 #ifdef DIAG_FROM_STIFF
-    for (uint i=0; i<Nc; i++){
-      for(uint k=0; k<3; k++){
-      for(uint j=0; j<3; j++){
-        part_d[E->elem_conn[Nc*ie+i]*d2 +3*k+j] += elem_stiff[3*Nr*i +3*i +Nr*k +j];
-      } } }
-#else
-    elem_diag=0.0;
+    for(uint i=0; i<Nc; i++){
+    for(uint k=0; k<3 ; k++){
+    for(uint j=0; j<3 ; j++){
+      part_d[E->elem_conn[Nc*ie+i]*9+ 3* k+j ]
+        += elem_stiff[3*Ne*i +3*i   +Ne* k+j ];
+    } } }
 #endif
   }//end elem loop
   return 0;
@@ -120,7 +129,7 @@ int ElastIso3D::ElemNonlinear( Elem* E, const INT_MESH e0, const INT_MESH e1,
   FLOAT_SOLV* part_f, const FLOAT_SOLV* part_u, const FLOAT_SOLV*, bool ){
   return this->ElemLinear( E, e0,e1, part_f, part_u );
   }
-int ElastIso3D::ElemStiff(Elem* E ){
+int ElastIso3D::ElemStiff(Elem* E ){//FIXME should be ScatterStiff()
   //FIXME Doesn't do rotation yet
   const uint Dm = 3;//E->mesh_d
   const uint Dn = this->node_d;

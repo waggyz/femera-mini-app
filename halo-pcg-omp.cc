@@ -76,14 +76,14 @@ int PCG::Init( Elem* E, Phys* Y ){// printf("*** Init(E,Y) ***\n");
   if(this->cube_init!=0.0){
     const INT_MESH Nn=E->node_n, Dm=E->mesh_d;
     const FLOAT_SOLV ci=this->cube_init;
-    FLOAT_SOLV u[3]={1.0,-0.3,-0.3};
+    FLOAT_SOLV u[3]={1.0,-Y->mtrl_prop[1],-Y->mtrl_prop[1]};
     FLOAT_SOLV umax=0.0;
     for(int i=0; i<3; i++){
       if(std::abs(this->glob_bmax[i])>std::abs(umax)){
         umax=this->glob_bmax[i]; } }
     for(int i=0; i<3; i++){
       if(this->glob_bmax[i]==umax){ u[i]=umax; }
-      else{ u[i] = -umax*0.3; }//FIXME Generalize for nu used.
+      else{ u[i] = -umax*Y->mtrl_prop[1]; }//FIXED Generalized for nu used.
     }
 #if 0
 #pragma omp critical
@@ -127,7 +127,6 @@ int PCG::Init(){// printf("*** PCG::Init() ***\n");
   //part_r  = part_b - part_f;
   //part_z  = part_d * part_r;// This was merged where it's used (2x/iter)
   //part_p  = part_z;
-  FLOAT_SOLV R2=0.0;
   switch( this->cond_bloc_n ){
     case(3):{
       INT_MESH s=sysn/3;
@@ -135,9 +134,9 @@ int PCG::Init(){// printf("*** PCG::Init() ***\n");
         for(INT_MESH j=0; j<3; j++){
           INT_MESH n=9*i+3*j;
           part_p[3* i+j ]
-            = part_r[3* i   ] * part_d[n    ]
-            + part_r[3* i+1 ] * part_d[n +1 ]
-            + part_r[3* i+2 ] * part_d[n +2 ];
+            = part_d[n    ] * part_r[3* i   ]
+            + part_d[n +1 ] * part_r[3* i+1 ]
+            + part_d[n +2 ] * part_r[3* i+2 ];
           //printf("%9.3f %9.3f %9.3f\n",part_d[n],part_d[n+1],part_d[n+2]);
         }
       }
@@ -152,6 +151,7 @@ int PCG::Init(){// printf("*** PCG::Init() ***\n");
       }
     }
   }
+  FLOAT_SOLV R2=0.0;
 #ifdef HAS_PRAGMA_SIMD
 #pragma omp simd reduction(+:R2)
 #endif
@@ -307,14 +307,16 @@ int HaloPCG::Init(){// printf("*** HaloPCG M->Init() ***\n");// Preconditioned C
     const INT_MESH d = (INT_MESH) Y->node_d * S->cond_bloc_n;
     if(this->solv_cond == Solv::COND_NONE){
       for(INT_MESH i=0; i<E->halo_node_n; i++){
+      auto f = d* E->node_haid[i];
         for( uint j=0; j<d; j++){
 #pragma omp atomic write
-          halo_vals[d*E->node_haid[i]+j] = S->part_d[d*i +j]; } }
+          halo_vals[f+j] = S->part_d[d*i +j]; } }
     }else{
       for(INT_MESH i=0; i<E->halo_node_n; i++){
+      auto f = d* E->node_haid[i];
         for( uint j=0; j<d; j++){
 #pragma omp atomic update
-          halo_vals[d*E->node_haid[i]+j]+= S->part_d[d*i +j]; } }
+          halo_vals[f+j]+= S->part_d[d*i +j]; } }
     }
   }
   time_reset( my_gat1_count, start );
@@ -341,22 +343,17 @@ int HaloPCG::Init(){// printf("*** HaloPCG M->Init() ***\n");// Preconditioned C
 #if 1
         // Invert 3x3 blocks. The inverse is also symmetric, so no need to transpose.
         for(INT_MESH n=0;n<E->node_n;n++){
-#if 1
           E->Jac3Inv( &S->part_d[9*n],E->Jac3Det( &S->part_d[9*n] ));
-#else
-          FLOAT_MESH det = E->Jac3Det( &S->part_d[9*n] );
-          E->Jac3Inv( &S->part_d[9*n],det*1e-9);
-#endif
         }
 #else
         // Use only the inverted diagonal for testing.
         for(INT_MESH n=0;n<E->node_n;n++){
           for(uint i=0;i<3;i++){
-            for(uint j=0;j<3;j++){
-               printf("%9.2e ",S->part_d[9*n+3*i+j]);
-               if(i==j){S->part_d[9*n+3*i+j]=FLOAT_SOLV(1.0) / S->part_d[9*n+3*i+j];
-               }else{S->part_d[9*n+3*i+j]=0.0; }
-            } printf("\n");
+            for(uint j=0;j<3;j++){ auto d=9*n+3*i+j;
+               //printf("%9.2e ",S->part_d[d]);
+               if(i==j){S->part_d[d]=FLOAT_SOLV(1.0) / S->part_d[d];
+               }else{S->part_d[d]=0.0; }
+            }// printf("\n");
           }
         }
 #endif
@@ -540,22 +537,22 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
         INT_MESH s=sysn/3;
         for(INT_MESH i=0; i<s; i++){
           for(INT_MESH j=0; j<3; j++){
-            // Reuse part_f to store z = r*d.
-            //NOTE Can be precon. function.
+            // Reuse part_f to store z = d*r.
+            //NOTE Can be precon. inline function.
             INT_MESH n=9*i+3*j;
             S->part_f[3* i+j ]
-              = S->part_r[3* i   ] * S->part_d[n    ]
-              + S->part_r[3* i+1 ] * S->part_d[n +1 ]
-              + S->part_r[3* i+2 ] * S->part_d[n +2 ];
-            glob_sum2 += S->part_r[3* i+j ] * S->part_f[3* i+j ]
-              *(FLOAT_SOLV( (3* i+j)>=hl0 ));
+              = S->part_d[n    ] * S->part_r[3* i   ]
+              + S->part_d[n +1 ] * S->part_r[3* i+1 ]
+              + S->part_d[n +2 ] * S->part_r[3* i+2 ];
+            //glob_sum2 += S->part_r[3* i+j ] * S->part_f[3* i+j ]
+            //  *(FLOAT_SOLV( (3* i+j)>=hl0 ));
           }
         }
-//#ifdef HAS_PRAGMA_SIMD
-//#pragma omp simd reduction(+:glob_sum2)
-//#endif
-//        for(INT_MESH i=hl0; i<sysn; i++){
-//          glob_sum2    += S->part_r[i] * S->part_f[i]; }
+#ifdef HAS_PRAGMA_SIMD
+#pragma omp simd reduction(+:glob_sum2)
+#endif
+        for(INT_MESH i=hl0; i<sysn; i++){
+          glob_sum2    += S->part_r[i] * S->part_f[i]; }
       break; }
       default:{// Diagonal
 #ifdef HAS_PRAGMA_SIMD
@@ -563,9 +560,8 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
 #endif
         for(INT_MESH i=0; i<sysn; i++){
           S->part_r[i] -= S->part_f[i] * alpha;// Update force residuals
-          // Reuse part_f to store z = r*d.
-          //NOTE Can be precon. function.
-          S->part_f[i]  = S->part_r[i] * S->part_d[i];
+          // Reuse part_f to store z = d*r.
+          S->part_f[i]  = S->part_d[i] * S->part_r[i];
           glob_sum2    += S->part_r[i] * S->part_f[i] *(FLOAT_SOLV( i>=hl0 ));
         }
       }
@@ -583,7 +579,7 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
 #endif
     for(INT_MESH i=0; i<sysn; i++){// ? FLOP/DOF
       S->part_u[i] += S->part_p[i] * alpha;// better data locality here
-      // Reuse part_f to store z = r*d.
+      // Reuse part_f to store z = d*r.
       S->part_p[i]  = S->part_f[i] + S->part_p[i] * beta;
     }
   }

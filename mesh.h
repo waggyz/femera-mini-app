@@ -37,6 +37,7 @@ public:
   //
   int comp_n=1;
   int solv_meth=Solv::SOLV_CG, solv_cond=Solv::COND_JACO, verbosity=1;
+  int phys_eval=Phys::EBE_TTE;
   int hown_meth=2;// Halo node ownership method
   //
   INT_MESH iso3_part_n=0;

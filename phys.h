@@ -6,6 +6,9 @@
 class Phys{
 public:
   typedef std::valarray<FLOAT_PHYS> vals;
+  enum Eval {
+    EBE_TTE=0, EBE_LMS=1
+  };
   INT_DIM node_d;// Degrees of freedom per node://WAS ndof_n
   // 1 for thermal, 2 for elastic 2D, 3 for elastic 3D, 4 for thermoelastic 3D
 #if 0
@@ -20,6 +23,7 @@ public:
   INT_DIM gvar_d=0;// Inputs/gauss point: user-defined state vars
   //
   int solv_cond=Solv::COND_JACO;
+  int phys_eval=Phys::EBE_TTE;
   //
   FLOAT_PHYS part_sum1=0.0;
   //

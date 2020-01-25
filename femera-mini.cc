@@ -24,9 +24,10 @@ int main( int argc, char** argv ){
 #endif
   const float ns=1e-9;
 #if VERB_MAX>1
-  const float sec=1.0, ms=1e-3,us=1e-6, Meg=1e6, pct=100.0;// k=1e3,Gig=1e9,
+  const float sec=1.0, ms=1e-3, us=1e-6, Meg=1e6, pct=100.0;// k=1e3,Gig=1e9,
 #endif
   // defaults
+  Phys::Eval phys_eval = Phys::EBE_TTE;
   int comp_n     = 0;
   int verbosity  = 1;
   int step_n     = 1;
@@ -56,7 +57,8 @@ int main( int argc, char** argv ){
   // Parse Command Line =============================================
   //FIXME Consider using C++ for parsing command line options.
   opterr = 0; int c;
-  while ((c = getopt (argc, argv, "v:pP:h:c:m:n:s:I:i:r:a:o:x:y:z:V:d:u:")) != -1){
+  while ((c = getopt (argc, argv, "v:pP:h:c:m:n:s:I:i:r:a:o:x:y:z:V:d:u:"))
+    != -1){
     // x:  -x requires an argument
     switch (c) {
       case 'v':{ verbosity= atoi(optarg); break; }
@@ -70,6 +72,9 @@ int main( int argc, char** argv ){
 #if VERB_MAX>1
       case 'h':{ halo_mod = atoi(optarg); break; }
 #endif
+#endif
+#if 0
+      case 'k':{ phys_eval= Phys::EBE_LMS;break; }
 #endif
       case 'I':{ step_n   = atoi(optarg); break; }
       case 'i':{ iter_max = atoi(optarg); break; }
@@ -239,12 +244,21 @@ int main( int argc, char** argv ){
   float read_sec=0.0,init_sec=0.0,loop_sec=0.0;
 #endif
   int iter_info_n = 1;
-#ifdef HAS_AVX2
 #if VERB_MAX>1
   if(verbosity>1){
-    std::cout << "Using AVX2 vector extensions...\n";
-  }
+    if(phys_eval==Phys::EBE_LMS){
+    std::cout <<
+      "**NOTE: Using stored element stiffness matrix physics evaluation...\n";
+    }else{
+#ifdef HAS_AVX
+#ifdef HAS_AVX2
+    std::cout << "Using AVX2 vector intrinsics...\n";
+#else
+    std::cout << "Using AVX vector intrinsics...\n";
 #endif
+#endif
+    }
+  }
 #endif
 #ifdef _OPENMP
   if( comp_n <1){ comp_n = omp_get_max_threads(); }
@@ -277,6 +291,7 @@ int main( int argc, char** argv ){
     case(Solv::SOLV_NG):{ M=new HaloNCG(part_n+part_0,iter_max,rtol); break; }
     default            :{ M=new HaloPCG(part_n+part_0,iter_max,rtol); }
   }
+  M->phys_eval=phys_eval;
   M->solv_cond=solv_cond;
   M->cube_init=solv_init;
   M->base_name=iname;
