@@ -17,21 +17,18 @@ int ElastIso3D::ElemJacobi( Elem*, FLOAT_SOLV*, const FLOAT_SOLV* ){
   return 1; }
 int ElastIso3D::ElemJacNode(Elem* E, FLOAT_SOLV* part_d ){
 #undef DIAG_FROM_STIFF
-  const uint  Dm   = 3;
-  const uint  Nj = 10;
-  const uint  Nc = E->elem_conn_n;
-  const uint  Ne = uint(Dm*Nc);// One row of stiffness matrix
+  const uint Dm = 3;
+  const uint Nj = 10;
+  const uint Nc = E->elem_conn_n;
+  const uint Ne = uint(Dm*Nc);// One row of stiffness matrix
   const uint elem_n = E->elem_n;
   const uint intp_n = E->gaus_n;
-  // const uint Dn = this->node_d;
 #ifdef DIAG_FROM_STIFF
   const uint Nk = Ne*Ne;// Elements of stiffness matrix
   FLOAT_PHYS elem_stiff[Nk];
-#else
-  //RESTRICT Phys::vals elem_diag(Ne*Dm);
 #endif
   FLOAT_PHYS B[Ne*6];// 6 rows, Ne cols
-  FLOAT_PHYS G[Ne];//,jac[Nj];//,elem_diag[Ne];
+  FLOAT_PHYS G[Ne];
   for(uint j=0; j<(Ne*6); j++){ B[j]=0.0; }
   const FLOAT_PHYS D[]={
     mtrl_matc[0],mtrl_matc[1],mtrl_matc[1],0.0,0.0,0.0,
@@ -61,13 +58,6 @@ int ElastIso3D::ElemJacNode(Elem* E, FLOAT_SOLV* part_d ){
         G[Nc* i+k] += E->elip_jacs[Nj*ie+3* j+i] * E->intp_shpg[ig+3* k+j];
       } } }
 #endif
-      #if VERB_MAX>10
-      printf( "Jacobian Inverse & Determinant:");
-      for(uint j=0;j<9;j++){
-        if(j%3==0){printf("\n"); }
-        printf("%+9.2e",jac[j]);
-      } printf(" det:%+9.2e\n",det);
-      #endif
       for(uint j=0; j<Nc; j++){
       // xx yy zz
         B[Ne*0 + 0+j*Dm] = G[Nc*0+j];
@@ -83,13 +73,6 @@ int ElastIso3D::ElemJacNode(Elem* E, FLOAT_SOLV* part_d ){
         B[Ne*5 + 0+j*Dm] = G[Nc*2+j];
         B[Ne*5 + 2+j*Dm] = G[Nc*0+j];
       }
-      #if VERB_MAX>10
-      printf( "[B]:");
-      for(uint j=0;j<B.size();j++){
-        if(j%Ne==0){printf("\n"); }
-        printf("%+9.2e ",B[j]);
-      } printf("\n");
-      #endif
       FLOAT_PHYS dw = E->elip_jacs[Nj*ie+9] * E->gaus_weig[ip];
 #ifdef DIAG_FROM_STIFF
       for(uint i=0; i<Ne; i++){
@@ -129,10 +112,10 @@ int ElastIso3D::ElemNonlinear( Elem* E, const INT_MESH e0, const INT_MESH e1,
   FLOAT_SOLV* part_f, const FLOAT_SOLV* part_u, const FLOAT_SOLV*, bool ){
   return this->ElemLinear( E, e0,e1, part_f, part_u );
   }
-int ElastIso3D::ElemStiff(Elem* E ){//FIXME should be ScatterStiff()
+int ElastIso3D::ElemStiff(Elem* E ){//FIXME should be ScatterStiff( E )
   const uint Dm = 3;//E->mesh_d
-  const uint Dn = this->node_d;
-  const uint Nj = 10;//,d2=9;
+  const uint Dn = 3;//this->node_d;
+  const uint Nj = 10;
   const uint Nc = E->elem_conn_n;
   const uint Ne = Dm*Nc;
   const uint Nr = Dn*Nc;// One row of stiffness matrix
@@ -140,9 +123,8 @@ int ElastIso3D::ElemStiff(Elem* E ){//FIXME should be ScatterStiff()
   const uint elem_n = E->elem_n;
   const uint intp_n = uint(E->gaus_n);
   //
-  //FLOAT_PHYS det;
   FLOAT_PHYS B[Ne*6];// 6 rows, Ne cols
-  FLOAT_PHYS G[Ne];//,jac[Nj];
+  FLOAT_PHYS G[Ne];
   for(uint j=0; j<(Ne*6); j++){ B[j]=0.0; }
   const FLOAT_PHYS D[]={
     mtrl_matc[0],mtrl_matc[1],mtrl_matc[1],0.0,0.0,0.0,
@@ -151,13 +133,6 @@ int ElastIso3D::ElemStiff(Elem* E ){//FIXME should be ScatterStiff()
     0.0,0.0,0.0,mtrl_matc[2],0.0,0.0,//FIXME Check these shear values.
     0.0,0.0,0.0,0.0,mtrl_matc[2],0.0,
     0.0,0.0,0.0,0.0,0.0,mtrl_matc[2] };
-#if VERB_MAX>10
-  printf( "Material [%u]:", (uint)mtrl_matc.size() );
-  for(uint j=0;j<mtrl_matc.size();j++){
-    if(j%Dm==0){printf("\n"); }
-    printf("%+9.2e ",mtrl_matc[j]);
-  } printf("\n");
-#endif
   for(uint ie=0;ie<elem_n;ie++){
     for(uint ip=0;ip<intp_n;ip++){
       uint ig=ip*Ne;
@@ -167,13 +142,6 @@ int ElastIso3D::ElemStiff(Elem* E ){//FIXME should be ScatterStiff()
       for(uint j=0;j<3;j++){
         G[Nc* i+k] += E->elip_jacs[Nj*ie+3* j+i ] * E->intp_shpg[ig+3* k+j ];
       } } }
-#if VERB_MAX>10
-      printf( "Jacobian Inverse & Determinant:");
-      for(uint j=0;j<d2;j++){
-        if(j%3==0){printf("\n"); }
-        printf("%+9.2e",jac[j]);
-      } printf(" det:%+9.2e\n",det);
-#endif
       for(uint j=0; j<Nc; j++){
       // xx yy zz
         B[Ne*0 + 0+j*Dm] = G[Nc*0+j];
@@ -209,16 +177,15 @@ int ElastIso3D::ElemStiff(Elem* E ){//FIXME should be ScatterStiff()
 }//============================================================== End ElemStiff
 int ElastIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* part_d ){
   const uint ndof   = 3;//this->node_d
-  const uint  Nj = 10;//,d2=9;
+  const uint  Nj = 10;
   const uint  Nc = E->elem_conn_n;
   const uint  Ne = uint(ndof*Nc);
   const uint elem_n = E->elem_n;
   const uint intp_n = E->gaus_n;
   //
-  //FLOAT_PHYS det;
   RESTRICT Phys::vals elem_diag(Ne);
   FLOAT_PHYS B[Ne*6];// 6 rows, Ne cols
-  FLOAT_PHYS G[Ne];//,jac[Nj];//,elem_diag[Ne];
+  FLOAT_PHYS G[Ne];
   for(uint j=0; j<(Ne*6); j++){ B[j]=0.0; }
   const FLOAT_PHYS D[]={
     mtrl_matc[0],mtrl_matc[1],mtrl_matc[1],0.0,0.0,0.0,
@@ -235,13 +202,6 @@ int ElastIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* part_d ){
       for(uint i=0;i< 3;i++){
       for(uint j=0;j< 3;j++){
         G[Nc* i+k] += E->elip_jacs[Nj*ie+3* j+i] * E->intp_shpg[ig+3* k+j]; } } }
-      #if VERB_MAX>10
-      printf( "Jacobian Inverse & Determinant:");
-      for(uint j=0;j<d2;j++){
-        if(j%3==0){printf("\n"); }
-        printf("%+9.2e",jac[j]);
-      } printf(" det:%+9.2e\n",det);
-      #endif
       for(uint j=0; j<Nc; j++){
       // xx yy zz
         B[Ne*0 + 0+j*ndof] = G[Nc*0+j];
@@ -257,13 +217,6 @@ int ElastIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* part_d ){
         B[Ne*5 + 0+j*ndof] = G[Nc*2+j];
         B[Ne*5 + 2+j*ndof] = G[Nc*0+j];
       }
-      #if VERB_MAX>10
-      printf( "[B]:");
-      for(uint j=0;j<B.size();j++){
-        if(j%Ne==0){printf("\n"); }
-        printf("%+9.2e ",B[j]);
-      } printf("\n");
-      #endif
       FLOAT_PHYS w = E->elip_jacs[Nj*ie+9] * E->gaus_weig[ip];
       for(uint i=0; i<Ne; i++){
       for(uint k=0; k<6 ; k++){
@@ -283,15 +236,14 @@ int ElastIso3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* part_d ){
   const uint ndof   = 3;//this->node_d
   const uint elem_n = E->elem_n;
   const uint  Nc = E->elem_conn_n;
-  const uint  Nj = 10;//,d2=9;
+  const uint  Nj = 10;
   const uint  Ne = uint(ndof*Nc);
   const uint intp_n = E->gaus_n;
   //
-  //FLOAT_PHYS det;
   RESTRICT Phys::vals elem_sum(Ne);
   RESTRICT Phys::vals K(Ne*Ne);
   FLOAT_PHYS B[Ne*6];//6 rows, Ne cols
-  FLOAT_PHYS G[Ne];//,jac[Nj];
+  FLOAT_PHYS G[Ne];
   for(uint j=0; j<(Ne*6); j++){ B[j]=0.0; };
   const FLOAT_PHYS D[]={
     mtrl_matc[0],mtrl_matc[1],mtrl_matc[1],0.0,0.0,0.0,
@@ -301,9 +253,6 @@ int ElastIso3D::ElemRowSumAbs(Elem* E, FLOAT_SOLV* part_d ){
     0.0,0.0,0.0,0.0,mtrl_matc[2]*2.0,0.0,
     0.0,0.0,0.0,0.0,0.0,mtrl_matc[2]*2.0};
   for(uint ie=0;ie<elem_n;ie++){
-    //uint ij=Nj*ie;//FIXME only good for tets
-    //std::copy( &E->elip_jacs[ij],
-    //           &E->elip_jacs[ij+Nj], jac ); det=jac[d2];
     for(uint ip=0;ip<intp_n;ip++){
       uint ig=ip*Ne;
       for(uint i=0;i<Ne;i++){ G[i]=0.0; };
