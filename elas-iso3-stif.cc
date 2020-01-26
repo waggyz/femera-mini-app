@@ -36,7 +36,7 @@ int ElastIso3D::Setup( Elem* E ){
 }
 int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   FLOAT_SOLV* part_f, const FLOAT_SOLV* part_u ){
-#undef FETCH_F
+#define FETCH_F
   const int Dn = 3;// this->node_d DOF/node
   const int Nc = E->elem_conn_n;// Number of nodes/element
   const int Ne = Dn*Nc, Nk=Ne*Ne;
