@@ -66,27 +66,27 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     printf("%+9.2e ",C[j]);
   } printf("\n");
 #endif
-  const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
-  const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
-  const FLOAT_SOLV* RESTRICT sysu  = &part_u[0];
-        FLOAT_SOLV* RESTRICT sysf  = &part_f[0];
+  const   INT_MESH* RESTRICT E_c = &E->elem_conn[0];
+  const FLOAT_MESH* RESTRICT E_j = &E->elip_jacs[0];
+  const FLOAT_SOLV* RESTRICT S_u = &part_u[0];
+        FLOAT_SOLV* RESTRICT S_f = &part_f[0];
   if(e0<ee){
 #if 0
 #ifdef FETCH_JAC
-    std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
+    std::memcpy( &jac , &E_j[Nj*e0], sizeof(FLOAT_MESH)*Nj);
 #endif
 #endif
 #if 1
     for (int i=0; i<Nc; i++){
-      std::memcpy( & u[Dn*i],& sysu[Econn[Nc*e0+i]*Dn], sizeof(FLOAT_SOLV)*Dn ); }
+      std::memcpy( & u[Dn*i],& S_u[E_c[Nc*e0+i]*Dn], sizeof(FLOAT_SOLV)*Dn ); }
 #endif
   }
   for(INT_MESH ie=e0;ie<ee;ie++){
 #if 0
-    const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
+    const INT_MESH* RESTRICT conn = &E_c[Nc*ie];
 #endif
     for (int i=0; i<Nc; i++){
-      std::memcpy( & f[Dn*i],& sysf[Econn[Nc*ie+i]*3], sizeof(FLOAT_SOLV)*Dn ); }
+      std::memcpy( & f[Dn*i],& S_f[E_c[Nc*ie+i]*3], sizeof(FLOAT_SOLV)*Dn ); }
     for(int ip=0; ip<intp_n; ip++){
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
@@ -101,7 +101,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #if 0
             G[Dm* k+i ] += jac[Dm* j+i ] * intp_shpg[ip*Ne+ Dm* k+j ];
 #else
-            G[Dm* k+i ] += Ejacs[Nj*ie+ Dm* j+i ] * intp_shpg[ip*Ne+ Dm* k+j ];
+            G[Dm* k+i ] += E_j[Nj*ie+ Dm* j+i ] * intp_shpg[ip*Ne+ Dm* k+j ];
 #endif
           }// } for(int i=0; i<Dm ; i++){// Use this to match intrinsics loop.
           for(int j=0; j<Dm ; j++){
@@ -111,10 +111,10 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       }//------------------------------------------------- N*3*6*2 = 36*N FLOP
       if(ip==(intp_n-1)){
         if((ie+1)<ee){// Fetch stuff for the next iteration
-          const INT_MESH* RESTRICT c = &Econn[Nc*(ie+1)];
+          const INT_MESH* RESTRICT c = &E_c[Nc*(ie+1)];
           for (int i=0; i<Nc; i++){
-            //std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
-            std::memcpy(&u[Dn*i],&sysu[c[i]*Dn], sizeof(FLOAT_SOLV)*Dn);
+            //std::memcpy( &jac, &E_j[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
+            std::memcpy(&u[Dn*i],&S_u[c[i]*Dn], sizeof(FLOAT_SOLV)*Dn);
           }
         }// Done fetching next iter stuff
       }
@@ -126,7 +126,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       } printf("\n");
 #endif
       {
-      const FLOAT_PHYS dw = Ejacs[Nj*ie+ 9 ] * wgt[ip];
+      const FLOAT_PHYS dw = E_j[Nj*ie+ 9 ] * wgt[ip];
       const FLOAT_PHYS Cdw[3] = { C[0]*dw, C[1]*dw, C[2]*dw };
       //
       S[0]= Cdw[0]* H[0] + Cdw[1]* H[4] + Cdw[1]* H[8];//Sxx
@@ -160,11 +160,11 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
     }//end intp loop
     for (uint i=0; i<uint(Nc); i++){
-      std::memcpy(& sysf[Econn[Nc*ie+i]*Dn],& f[Dn*i], sizeof(FLOAT_SOLV)*Dn );
+      std::memcpy(& S_f[E_c[Nc*ie+i]*Dn],& f[Dn*i], sizeof(FLOAT_SOLV)*Dn );
 #if 0
       if( n >=my_node_start ){
         for(uint j=0;j<3;j++){
-          this->part_sum1+= f[Dn* i+j ] * sysu[Dn* n+j ];
+          this->part_sum1+= f[Dn* i+j ] * S_u[Dn* n+j ];
           //FIXME u already contains next elem part_u
           //this->part_sum1+= f[Dn* i+j ] * u[Dn* i+j];
         };
