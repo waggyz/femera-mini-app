@@ -36,14 +36,12 @@ int ElastIso3D::Setup( Elem* E ){
 }
 int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   FLOAT_SOLV* part_f, const FLOAT_SOLV* part_u ){
-#define FETCH_F
+#undef FETCH_F
   const int Dn = 3;// this->node_d DOF/node
   const int Nc = E->elem_conn_n;// Number of nodes/element
   const int Ne = Dn*Nc, Nk=Ne*Ne;
   FLOAT_PHYS u[Ne];
-#ifdef FETCH_F
   FLOAT_PHYS f[Ne];
-#endif
   const   INT_MESH* RESTRICT E_c = &E->elem_conn[0];
   const FLOAT_SOLV* RESTRICT E_k    = &this->elem_stiff[0];
   const FLOAT_SOLV* RESTRICT S_u  = &part_u[0];
@@ -63,15 +61,21 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       for(int j=0; j<Ne; j++){
         f[ i ] += E_k[Nk*ie+ Ne* i+j ] * u[ j ];
     } }
-    for (uint i=0; i<uint(Nc); i++){
+    for (int i=0; i<Nc; i++){
       std::memcpy(& S_f[Dn*E_c[Nc*ie+i]],& f[Dn*i], sizeof(FLOAT_SOLV)*Dn );
     }
 #else
-    for(int i=0; i<Ne; i++){
-      for(int j=0; j<Nc; j++){
-        for(int k=0; k<Dn; k++){
-          S_f[Dn*E_c[Nc*ie+j]+k ] += E_k[Nk*ie+ Ne* i+Dn* j+k ] * u[Dn* j+ k ];
-    } } }
+#ifdef HAS_PRAGMA_SIMD
+#pragma omp simd
+#endif
+    for(int i=0; i<Ne; i++){ f[i]=0.0;
+      for(int j=0; j<Ne; j++){
+        f[ i ] += E_k[Nk*ie+ Ne* i+j ] * u[ j ];
+    } }
+    for (int i=0; i<Nc; i++){
+      for(int j=0; j<Dn; j++){
+        S_f[Dn*E_c[Nc*ie+i]+j] += f[Dn* i+j ];
+    } }
 #endif
   }//end elem loop
 #undef FETCH_F
