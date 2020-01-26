@@ -39,18 +39,18 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #define FETCH_F
   const int Dn = 3;// this->node_d DOF/node
   const int Nc = E->elem_conn_n;// Number of nodes/element
-  const int Ne = Dn*Nc, Nk=Ne*Ne;
+  const int Ne = Dn * Nc, Nk = Ne * Ne;
   FLOAT_PHYS u[Ne];
   FLOAT_PHYS f[Ne];
-  const   INT_MESH* RESTRICT E_c = &E->elem_conn[0];
-  const FLOAT_SOLV* RESTRICT E_k    = &this->elem_stiff[0];
-  const FLOAT_SOLV* RESTRICT S_u  = &part_u[0];
-        FLOAT_SOLV* RESTRICT S_f  = &part_f[0];
-  for(INT_MESH ie=e0;ie<ee;ie++){
+  const   INT_MESH* RESTRICT E_c =& E->elem_conn[0];
+  const FLOAT_SOLV* RESTRICT E_k =& this->elem_stiff[0];
+  const FLOAT_SOLV* RESTRICT S_u =& part_u[0];
+        FLOAT_SOLV* RESTRICT S_f =& part_f[0];
+  for(INT_MESH ie=e0; ie<ee; ie++){
     for (int i=0; i<Nc; i++){
-      std::memcpy( & u[Dn*i],& S_u[E_c[Nc*ie+i]*Dn], sizeof(FLOAT_SOLV)*Dn );
+      std::memcpy( & u[Dn*i],& S_u[E_c[Nc*ie+i]*Dn], Dn * sizeof(FLOAT_SOLV) );
 #ifdef FETCH_F
-      std::memcpy( & f[Dn*i],& S_f[E_c[Nc*ie+i]*Dn], sizeof(FLOAT_SOLV)*Dn );
+      std::memcpy( & f[Dn*i],& S_f[E_c[Nc*ie+i]*Dn], Dn * sizeof(FLOAT_SOLV) );
 #endif
     }
 #ifdef FETCH_F
@@ -62,9 +62,10 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
         f[ i ] += E_k[Nk*ie+ Ne* i+j ] * u[ j ];
     } }
     for (int i=0; i<Nc; i++){
-      std::memcpy(& S_f[Dn*E_c[Nc*ie+i]],& f[Dn*i], sizeof(FLOAT_SOLV)*Dn );
+      std::memcpy(& S_f[Dn*E_c[Nc*ie+i]],& f[Dn*i], Dn * sizeof(FLOAT_SOLV) );
     }
 #else
+#if 0
 #ifdef HAS_PRAGMA_SIMD
 #pragma omp simd
 #endif
@@ -72,9 +73,31 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       for(int j=0; j<Ne; j++){
         f[ i ] += E_k[Nk*ie+ Ne* i+j ] * u[ j ];
     } }
+#else
+    switch(Ne){
+      case(12):{
+        for(int i=0; i<12; i++){ f[i]=0.0;
+          for(int j=0; j<12; j++){
+            f[ i ] += E_k[Nk*ie+ 12* i+j ] * u[ j ];
+        } }
+        break;}
+      case(30):{
+        for(int i=0; i<30; i++){ f[i]=0.0;
+          for(int j=0; j<30; j++){
+            f[ i ] += E_k[Nk*ie+ 30* i+j ] * u[ j ];
+        } }
+        break;}
+      case(60):{
+        for(int i=0; i<60; i++){ f[i]=0.0;
+          for(int j=0; j<60; j++){
+            f[ i ] += E_k[Nk*ie+ 60* i+j ] * u[ j ];
+        } }
+        break;}
+    }
+#endif
     for (int i=0; i<Nc; i++){
       for(int j=0; j<Dn; j++){
-        S_f[Dn*E_c[Nc*ie+i]+j] += f[Dn* i+j ];
+        S_f[Dn*E_c[Nc*ie+ i]+j ] += f[Dn* i+j ];
     } }
 #endif
   }//end elem loop
