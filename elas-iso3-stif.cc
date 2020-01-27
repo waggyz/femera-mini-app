@@ -9,7 +9,6 @@
 #include "femera.h"
 #ifdef __INTEL_COMPILER
 #include <mkl.h>
-//#include "mkl.h"
 #endif
 //
 int ElastIso3D::Setup( Elem* E ){
