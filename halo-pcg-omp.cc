@@ -300,14 +300,14 @@ int HaloPCG::Init(){// printf("*** HaloPCG M->Init() ***\n");// Preconditioned C
 #ifdef __INTEL_COMPILER
   const int Nr=3*int(E->elem_conn_n);
   int ik=0;
-  printf("Stiffness:\n);
+  printf("Stiffness:\n");
   for(int i=0;i<Nr;i++){
     for(int j=0;j<=(Nr-i);j++){
       printf( "%6.1e",Y->elem_stiff(ik));
       ik++;
     } printf("\n");
   }
-  printf("Block Diagonal:\n);
+  printf("Block Diagonal:\n");
   for(int i=0;i<int(E->elem_conn_n));i++){
     for(int j=0;j<3;j++){
       printf( "%6.1e",S->part_d(3*i+j));
