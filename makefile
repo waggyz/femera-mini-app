@@ -47,9 +47,11 @@ CPPFLAGS=-restrict -std=c++11 -Wall -Wextra -O2 -ansi-alias\
  CPPFLAGS:=$(CPPFLAGS) -xHost
 #endif
 
+#if 0
 CPPFLAGS:=$(CPPFLAGS) -DCOLLECT_VTUNE_DATA
 LDFLAGS:=$(LDFLAGS) -I$(VTUNE_AMPLIFIER_XE_2019_DIR)/include
 LDFLAGS:=$(LDFLAGS) -L$(VTUNE_AMPLIFIER_XE_2019_DIR)/lib64 -littnotify
+#endif
 
 #  -axSKYLAKE-AVX512 can run out of memory
 # CPPLOG="-Wsuggest-final-types -Wsuggest-final-methods\
