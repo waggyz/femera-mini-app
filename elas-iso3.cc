@@ -16,7 +16,7 @@ int ElastIso3D::ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*){
 int ElastIso3D::ElemJacobi( Elem*, FLOAT_SOLV*, const FLOAT_SOLV* ){
   return 1; }
 int ElastIso3D::ElemJacNode(Elem* E, FLOAT_SOLV* part_d ){
-#undef DIAG_FROM_STIFF
+#define DIAG_FROM_STIFF
   const uint Dm = 3;
   const uint Nj = 10;
   const uint Nc = E->elem_conn_n;
