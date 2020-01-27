@@ -18,10 +18,14 @@ int ElastIso3D::Setup( Elem* E ){
   const uint conn_n = uint(E->elem_conn_n);
   this->elem_stiff.resize(elem_n*conn_n*conn_n*node_d*node_d);
   ElemStiff( E );
-  this->stif_flop = uint(E->elem_n)
-    * 3*uint(E->elem_conn_n) * 3*uint(E->elem_conn_n) *2;
-  this->stif_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
-    *(3*uint(E->elem_conn_n) * 3*uint(E->elem_conn_n) +2);
+  const int Nr=3*uint(E->elem_conn_n) * 3*uint(E->elem_conn_n);
+#ifdef __INTEL_COMPILER
+  const int Nk =(Nr*(Nr + 1))/2;
+#else
+  const int Nk = Nr * Nr;
+#endif
+  this->stif_flop = uint(E->elem_n) * Nk *2;
+  this->stif_band = uint(E->elem_n) * sizeof(FLOAT_PHYS) * (Nk + Nr*2);
 #if 1
   this->tens_flop = this->stif_flop;//FIXME
   this->tens_band = this->stif_band;
@@ -67,7 +71,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #ifdef FETCH_F
 #ifdef __INTEL_COMPILER
     const FLOAT_SOLV* cu =& S_u[0];
-    cblas_dspmv (CblasRowMajor, CblasUpper, Ne,
+    cblas_dspmv (CblasRowMajor, CblasLower, Ne,
       1.0,& k[0],& cu[0], 1, 1.0,& f[0], 1);
 #else
     // Generic C matrix-vector multiply
