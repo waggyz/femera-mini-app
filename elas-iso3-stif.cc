@@ -1,12 +1,14 @@
 #if VERB_MAX > 10
 #include <iostream>
 #endif
-#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <ctype.h>
 #include <cstring>// std::memcpy
+#ifdef __INTEL_COMPILER
+#include <mkl.h>
+#endif
 #include "femera.h"
 //
 int ElastIso3D::Setup( Elem* E ){
@@ -37,23 +39,33 @@ int ElastIso3D::Setup( Elem* E ){
 int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   FLOAT_SOLV* part_f, const FLOAT_SOLV* part_u ){
 #define FETCH_F
-  const int Dn = 3;// this->node_d DOF/node
+  const int Dn = 3;// this->node_d DOF/node = mesh dimension
   const int Nc = E->elem_conn_n;// Number of nodes/element
-  const int Ne = Dn * Nc, Nk = Ne * Ne;
-  FLOAT_PHYS u[Ne];
-  FLOAT_PHYS f[Ne];
+  const int Ne = Dn * Nc;
+#ifdef __INTEL_COMPILER
+#define FETCH_F
+  const int Nk =(Ne*(Ne + 1))/2;
+#else
+  const int Nk = Ne * Ne;
+#endif
+  FLOAT_PHYS VECALIGNED u[Ne], f[Ne];
   const   INT_MESH* RESTRICT E_c =& E->elem_conn[0];
   const FLOAT_SOLV* RESTRICT E_k =& this->elem_stiff[0];
   const FLOAT_SOLV* RESTRICT S_u =& part_u[0];
         FLOAT_SOLV* RESTRICT S_f =& part_f[0];
   for(INT_MESH ie=e0; ie<ee; ie++){
     for (int i=0; i<Nc; i++){
-      std::memcpy( & u[Dn*i],& S_u[E_c[Nc*ie+i]*Dn], Dn * sizeof(FLOAT_SOLV) );
+      std::memcpy( & u[Dn*i],& S_u[E_c[Nc*ie+i]*Dn], Dn*sizeof(FLOAT_SOLV) );
 #ifdef FETCH_F
-      std::memcpy( & f[Dn*i],& S_f[E_c[Nc*ie+i]*Dn], Dn * sizeof(FLOAT_SOLV) );
+      std::memcpy( & f[Dn*i],& S_f[E_c[Nc*ie+i]*Dn], Dn*sizeof(FLOAT_SOLV) );
 #endif
     }
 #ifdef FETCH_F
+#ifdef __INTEL_COMPILER
+    cblas_dspmv (CblasRowMajor, CblasUpper, Ne,
+      1.0,& E_k[Nk*ie],& u, 1, 1.0,& f, 1);
+#else
+    // Generic C matrix-vector multiply
 #ifdef HAS_PRAGMA_SIMD
 #pragma omp simd
 #endif
@@ -61,11 +73,13 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       for(int j=0; j<Ne; j++){
         f[ i ] += E_k[Nk*ie+ Ne* i+j ] * u[ j ];
     } }
+#endif
     for (int i=0; i<Nc; i++){
-      std::memcpy(& S_f[Dn*E_c[Nc*ie+i]],& f[Dn*i], Dn * sizeof(FLOAT_SOLV) );
+      std::memcpy(& S_f[Dn*E_c[Nc*ie+i]],& f[Dn*i], Dn*sizeof(FLOAT_SOLV) );
     }
 #else
-#if 0
+// Do not fetch f first.
+#if 1
 #ifdef HAS_PRAGMA_SIMD
 #pragma omp simd
 #endif
@@ -99,6 +113,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       for(int j=0; j<Dn; j++){
         S_f[Dn*E_c[Nc*ie+ i]+j ] += f[Dn* i+j ];
     } }
+#endif
 #endif
   }//end elem loop
 #undef FETCH_F

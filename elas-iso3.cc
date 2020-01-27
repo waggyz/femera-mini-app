@@ -113,13 +113,19 @@ int ElastIso3D::ElemNonlinear( Elem* E, const INT_MESH e0, const INT_MESH e1,
   return this->ElemLinear( E, e0,e1, part_f, part_u );
   }
 int ElastIso3D::ElemStiff(Elem* E ){//FIXME should be ScatterStiff( E )
+  //FIXME Change to all ints?
   const uint Dm = 3;//E->mesh_d
   const uint Dn = 3;//this->node_d;
   const uint Nj = 10;
   const uint Nc = E->elem_conn_n;
   const uint Ne = Dm*Nc;
-  const uint Nr = Dn*Nc;// One row of stiffness matrix
-  const uint Nk = Nr*Nr;// Elements of stiffness matrix
+  const uint Nr = Dn*Nc;// One row/col of stiffness matrix
+#ifdef __INTEL_COMPILER
+  const int Nk =int(Nr*(Nr + 1))/2;
+#else
+  const uint Nk = Ne * Ne;
+  //const uint Nk = Nr*Nr;// Elements of stiffness matrix
+#endif
   const uint elem_n = E->elem_n;
   const uint intp_n = uint(E->gaus_n);
   //
@@ -165,11 +171,15 @@ int ElastIso3D::ElemStiff(Elem* E ){//FIXME should be ScatterStiff( E )
       } printf("\n");
 #endif
       FLOAT_PHYS w = E->elip_jacs[Nj*ie+9] * E->gaus_weig[ip];
-      for(uint i=0; i<Ne; i++){
-      for(uint l=0; l<Ne; l++){
+      for(uint i=0; i<Nr; i++){
+      for(uint l=0; l<Nr; l++){
       for(uint k=0; k<6 ; k++){
       for(uint j=0; j<6 ; j++){
+#ifdef __INTEL_COMPILER
+// Use packed symmmetric matrix storage.
+#else
         elem_stiff[Nk*ie +Nr* i+l ]+=B[Ne* j+i ] * D[6* k+j ] * B[Ne* k+l ] * w;
+#endif
       } } } }
     }// end intp loop
   }// End elem loop
