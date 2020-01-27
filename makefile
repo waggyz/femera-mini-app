@@ -24,7 +24,7 @@ SERFLAGS=-Wno-unknown-pragmas
 ifdef INTEL_LICENSE_FILE
 CXX=icc
 CSTR=icc
-CPPFLAGS=-std=-restrict c++11 -mkl -Wall -Wextra -Ofast -xHost\
+CPPFLAGS=-std=-restrict c++11 -Wall -Wextra -Ofast -xHost\
  -ffast-math -no-fast-transcendentals\
  -no-inline-max-size -no-inline-max-total-size -qoverride-limits -g
 SERFLAGS=-fno-alias -diag-disable 3180 -g
@@ -35,7 +35,7 @@ ifdef INTEL_PYTHONHOME
 CXX=icc
 CSTR=icc
 SERFLAGS=-fno-alias -diag-disable 3180 -g
-CPPFLAGS=-restrict -std=c++11 -mkl -Wall -Wextra -O2 -ansi-alias\
+CPPFLAGS=-restrict -std=c++11 -Wall -Wextra -O2 -ansi-alias\
  -ffast-math -no-fast-transcendentals\
  -no-inline-max-size -no-inline-max-total-size -qoverride-limits -g
 
@@ -276,8 +276,8 @@ $(ODIR)/%.$(OEXT) : %.cc *.h  phys-inline.cc
 	$< -o $@ $(CPPLOG)
 
 $(ODIR)/%.$(KEXT) : %.cc *.h  phys-inline.cc
-	echo $(CXX) ... -o $@
-	$(CXX) -c $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
+	echo $(CXX) -mkl ... -o $@
+	$(CXX) -mkl -c $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DOMP_SCHEDULE=static -DHAS_TEST \
 	$< -o $@ $(CPPLOG)
 
@@ -288,8 +288,8 @@ $(ODIR)/%.$(QEXT) : %.cc *.h  phys-inline.cc
 	$< -o $@ $(CPPLOG)
 
 $(ODIR)/%.$(LEXT) : %.cc *.h  phys-inline.cc
-	echo $(CXX) ... -o $@
-	$(CXX) -c $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
+	echo $(CXX) -mkl ... -o $@
+	$(CXX) -mkl -c $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DOMP_SCHEDULE=static -DVERB_MAX=1 \
 	$< -o $@ $(CPPLOG)
 
@@ -351,18 +351,18 @@ femerq-$(CPUMODELC) : $(QBJS) $(ODIR)/femera-mini.$(QEXT)
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(QBJS) $(ODIR)/femera-mini.$(QEXT) $(LDFLAGS) \
 	-DOMP_SCHEDULE=static -DFETCH_JAC -DVERB_MAX=1 \
-	-o femerk-$(CPUMODELC) $(CPPLOG);
+	-o femerq-$(CPUMODELC) $(CPPLOG);
 
 femerk-$(CPUMODELC) : $(KBJS) $(ODIR)/test.$(KEXT) $(ODIR)/femera-mini.$(KEXT)
-	echo $(CXX) ... -o femerk-$(CPUMODELC)
-	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
+	echo $(CXX) -mkl ... -o femerk-$(CPUMODELC)
+	$(CXX) -mkl $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(KBJS) $(ODIR)/test.$(KEXT) $(ODIR)/femera-mini.$(KEXT) $(LDFLAGS) \
 	-DOMP_SCHEDULE=static -DHAS_TEST \
 	-o femerk-$(CPUMODELC) $(CPPLOG);
 
 femeqk-$(CPUMODELC) : $(LBJS) $(ODIR)/femera-mini.$(LEXT)
-	echo $(CXX) ... -o femeqk-$(CPUMODELC)
-	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
+	echo $(CXX) -mkl ... -o femeqk-$(CPUMODELC)
+	$(CXX) -mkl $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(LBJS) $(ODIR)/femera-mini.$(LEXT) $(LDFLAGS) \
 	-DOMP_SCHEDULE=static -DVERB_MAX=1 \
 	-o femeqk-$(CPUMODELC) $(CPPLOG);
