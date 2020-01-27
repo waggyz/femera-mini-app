@@ -15,14 +15,14 @@ int ElastIso3D::Setup( Elem* E ){
   JacT  ( E );
   const uint elem_n = uint(E->elem_n);
   const uint conn_n = uint(E->elem_conn_n);
-  this->elem_stiff.resize(elem_n*conn_n*conn_n*node_d*node_d);
-  ElemStiff( E );
   const uint Nr=3*uint(E->elem_conn_n);
 #ifdef __INTEL_COMPILER
   const uint Nk =(Nr*(Nr + 1))/2;
 #else
   const uint Nk = Nr * Nr;
 #endif
+  this->elem_stiff.resize(elem_n*Nk);
+  ElemStiff( E );
   this->stif_flop = uint(E->elem_n) * Nk *2;
   this->stif_band = uint(E->elem_n) * sizeof(FLOAT_PHYS) * (Nk + Nr*2);
 #if 1
