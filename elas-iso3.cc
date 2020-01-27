@@ -173,7 +173,10 @@ int ElastIso3D::ElemStiff(Elem* E ){//FIXME should be ScatterStiff( E )
       int ik=-1;
 #endif
       for(int i=0; i<Nr; i++){
-      for(int l=0; l<Nr; l++){ ik=ik+int(i<=l);
+      for(int l=0; l<Nr; l++){
+#ifdef __INTEL_COMPILER
+        ik=ik+int(i<=l);
+#endif
       for(int k=0; k<6 ; k++){
       for(int j=0; j<6 ; j++){
 #ifdef __INTEL_COMPILER
