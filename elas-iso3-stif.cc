@@ -23,7 +23,7 @@ int ElastIso3D::Setup( Elem* E ){
 #endif
   this->elem_stiff.resize(elem_n*Nk);
   ElemStiff( E );
-  this->stif_flop = uint(E->elem_n) * Nk *2;
+  this->stif_flop = uint(E->elem_n) * Nr*Nr *2;
   this->stif_band = uint(E->elem_n) * sizeof(FLOAT_PHYS) * (Nk + Nr*2);
 #if 1
   this->tens_flop = this->stif_flop;//FIXME
