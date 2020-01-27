@@ -69,7 +69,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     }
 #ifdef FETCH_F
 #ifdef __INTEL_COMPILER
-    const FLOAT_SOLV* cu =& S_u[0];
+    const FLOAT_SOLV* VECALIGNED cu =& S_u[0];
     cblas_dspmv (CblasRowMajor, CblasUpper, Ne,
       1.0,& k[0],& cu[0], 1, 1.0,& f[0], 1);
 #else
