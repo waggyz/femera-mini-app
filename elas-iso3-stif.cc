@@ -65,9 +65,9 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     }
 #ifdef FETCH_F
 #ifdef __INTEL_COMPILER
-    const FLOAT_SOLV* RESTRICT cf =& S_f[0];
+    const FLOAT_SOLV* RESTRICT cu =& S_u[0];
     cblas_dspmv (CblasRowMajor, CblasUpper, Ne,
-      1.0,& k,& u, 1, 1.0,& cf, 1);
+      1.0,& k,& cu, 1, 1.0,& f, 1);
 #else
     // Generic C matrix-vector multiply
 #ifdef HAS_PRAGMA_SIMD
