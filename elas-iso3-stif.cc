@@ -6,10 +6,11 @@
 #include <string>
 #include <ctype.h>
 #include <cstring>// std::memcpy
-#ifdef __INTEL_COMPILER
-#include "mkl.h"
-#endif
 #include "femera.h"
+#ifdef __INTEL_COMPILER
+#include <mkl.h>
+//#include "mkl.h"
+#endif
 //
 int ElastIso3D::Setup( Elem* E ){
   JacT  ( E );
