@@ -170,10 +170,10 @@ int ElastIso3D::ElemStiff(Elem* E ){//FIXME should be ScatterStiff( E )
 #endif
       FLOAT_PHYS w = E->elip_jacs[Nj*ie+9] * E->gaus_weig[ip];
 #ifdef __INTEL_COMPILER
-      int ik=0;
+      int ik=-1;
 #endif
       for(int i=0; i<Nr; i++){
-      for(int l=0; l<Nr; l++){
+      for(int l=0; l<Nr; l++){ ik=ik+int(i<=l);
       for(int k=0; k<6 ; k++){
       for(int j=0; j<6 ; j++){
 #ifdef __INTEL_COMPILER
@@ -184,7 +184,7 @@ int ElastIso3D::ElemStiff(Elem* E ){//FIXME should be ScatterStiff( E )
 #else
         elem_stiff[Nk*ie +Nr* i+l ]+=B[Ne* j+i ] * D[6* k+j ] * B[Ne* k+l ] * w;
 #endif
-      } } ik=ik+int(i<=l); } }
+      } } } }
     }// end intp loop
   }// End elem loop
   return 0;
