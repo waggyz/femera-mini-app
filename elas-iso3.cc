@@ -171,12 +171,19 @@ int ElastIso3D::ElemStiff(Elem* E ){//FIXME should be ScatterStiff( E )
       } printf("\n");
 #endif
       FLOAT_PHYS w = E->elip_jacs[Nj*ie+9] * E->gaus_weig[ip];
+#ifdef __INTEL_COMPILER
+      int ik=0;
+#endif
       for(uint i=0; i<Nr; i++){
       for(uint l=0; l<Nr; l++){
       for(uint k=0; k<6 ; k++){
       for(uint j=0; j<6 ; j++){
 #ifdef __INTEL_COMPILER
 // Use packed symmmetric matrix storage.
+        if(i<=l){
+          elem_stiff[Nk*ie + ik ]+=B[Ne* j+i ] * D[6* k+j ] * B[Ne* k+l ] * w;
+          ik++;
+        }
 #else
         elem_stiff[Nk*ie +Nr* i+l ]+=B[Ne* j+i ] * D[6* k+j ] * B[Ne* k+l ] * w;
 #endif
