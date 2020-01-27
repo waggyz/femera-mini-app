@@ -227,6 +227,12 @@ int main( int argc, char** argv ){
       << '\n'; 
     return 1;
   }
+  if(verbosity>1){
+    if( (mesh_n>1) || (mult_n>1) ){
+      std::cout << "Solving " << mesh_n << " total models, "
+        << mult_n << " at a time..." << '\n';
+    }
+  }
 #if OMP_NESTED==true
 #ifdef COLLECT_VTUNE_DATA
 #ifdef __INTEL_COMPILER
