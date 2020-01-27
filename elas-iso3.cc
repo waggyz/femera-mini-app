@@ -181,7 +181,7 @@ int ElastIso3D::ElemStiff(Elem* E ){//FIXME should be ScatterStiff( E )
       for(int k=0; k<6 ; k++){
       for(int j=0; j<6 ; j++){
 #ifdef __INTEL_COMPILER
-// Use packed symmmetric matrix storage.
+        // Use packed symmmetric matrix storage.
           elem_stiff[Nk*ie + ik ]+=B[Ne* j+i ] * D[6* k+j ] * B[Ne* k+l ] * w;
         }
 #else

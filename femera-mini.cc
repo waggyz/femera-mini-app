@@ -318,7 +318,9 @@ int main( int argc, char** argv ){
   read_start = std::chrono::high_resolution_clock::now();
 #endif
   M->Setup();
-  fflush(stdout);
+#if VERB_MAX>1
+  if(verbosity>1){ fflush(stdout); }
+#endif
   {// scope local variables
   //int sugg_max=3000;
   iter_info_n =   1;// sugg_max = M->udof_n;
