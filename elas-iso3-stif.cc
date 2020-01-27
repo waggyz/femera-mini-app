@@ -114,7 +114,6 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
         S_f[Dn*E_c[Nc*ie+ i]+j ] += f[Dn* i+j ];
     } }
 #endif
-#endif
   }//end elem loop
 #undef FETCH_F
   return 0;
