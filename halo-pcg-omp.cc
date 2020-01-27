@@ -302,7 +302,7 @@ int HaloPCG::Init(){// printf("*** HaloPCG M->Init() ***\n");// Preconditioned C
   int ik=0;
   printf("Stiffness:\n");
   for(int i=0;i<Nr;i++){
-    for(int j=0;j<=(Nr-i);j++){
+    for(int j=0;j<(Nr-i);j++){
       printf(" %6.1e",Y->elem_stiff[ik]);
       ik++;
     } printf("\n");
