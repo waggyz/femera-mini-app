@@ -343,7 +343,14 @@ int HaloPCG::Init(){// printf("*** HaloPCG M->Init() ***\n");// Preconditioned C
 #if 1
         // Invert 3x3 blocks. The inverse is also symmetric, so no need to transpose.
         for(INT_MESH n=0;n<E->node_n;n++){
+#if 1
           E->Jac3Inv( &S->part_d[9*n],E->Jac3Det( &S->part_d[9*n] ));
+#else
+          FLOAT_MESH jac[9];
+          for(int i=0;i<9;i++){ jac[i]=S->part_d[9*n+i]; }
+          E->Jac3Inv( &jac[0], E->Jac3Det( &jac[0] ) );
+          for(int i=0;i<9;i++){ S->part_d[9*n+i]=jac[i]; }
+#endif
         }
 #else
         // Use only the inverted diagonal for testing.

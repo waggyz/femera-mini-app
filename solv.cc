@@ -52,7 +52,7 @@ int Solv::Precond(Elem* E, Phys* Y){// Jacobi Preconditioner
     printf("%+9.2e ",this->part_d[j]);
   } printf("\n");
 #endif
-  //NOTE part_d contains the inverse of the preconditioner at this point,
+  //NOTE part_d contains the non-inverted preconditioner at this point,
   //     because it needs to be synced before inverting.
   return( bad_d );
 };
