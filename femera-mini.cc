@@ -482,7 +482,13 @@ int main( int argc, char** argv ){
     auto loop_start = std::chrono::high_resolution_clock::now();
 #ifdef COLLECT_VTUNE_DATA
 #ifdef __INTEL_COMPILER
+#ifdef _OPENMP
+#if OMP_NESTED==true
     if( mult_n <=1 ){__itt_resume();}
+#else
+    __itt_resume();
+#endif
+#endif
 #endif
 #endif
     do{ M->Iter(); iter++;
