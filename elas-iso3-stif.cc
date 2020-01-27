@@ -67,7 +67,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #ifdef __INTEL_COMPILER
     const FLOAT_SOLV* cu =& S_u[0];
     cblas_dspmv (CblasRowMajor, CblasUpper, Ne,
-      1.0,& k,& cu, 1, 1.0,& f, 1);
+      1.0,& k[0],& cu[0], 1, 1.0,& f[0], 1);
 #else
     // Generic C matrix-vector multiply
 #ifdef HAS_PRAGMA_SIMD
