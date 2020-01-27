@@ -54,9 +54,9 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
   FLOAT_PHYS VECALIGNED u[Ne], f[Ne];
   const   INT_MESH* RESTRICT E_c =& E->elem_conn[0];
-  const FLOAT_SOLV* RESTRICT E_k =& this->elem_stiff[0];
-  const FLOAT_SOLV* RESTRICT S_u =& part_u[0];
-        FLOAT_SOLV* RESTRICT S_f =& part_f[0];
+  const FLOAT_SOLV*  E_k =& this->elem_stiff[0];
+  const FLOAT_SOLV*  S_u =& part_u[0];
+        FLOAT_SOLV*  S_f =& part_f[0];
   for(INT_MESH ie=e0; ie<ee; ie++){
 #ifdef __INTEL_COMPILER
     const FLOAT_SOLV* k =& E_k[Nk*ie];
