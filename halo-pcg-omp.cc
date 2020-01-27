@@ -308,7 +308,7 @@ int HaloPCG::Init(){// printf("*** HaloPCG M->Init() ***\n");// Preconditioned C
     } printf("\n");
   }
   printf("Block Diagonal:\n");
-  for(int i=0;i<int(E->elem_conn_n));i++){
+  for(int i=0;i<int(E->elem_conn_n);i++){
     for(int j=0;j<3;j++){
       printf( "%6.1e",S->part_d(3*i+j));
     } printf("\n");
