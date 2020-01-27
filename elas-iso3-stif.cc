@@ -55,7 +55,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
         FLOAT_SOLV* RESTRICT S_f =& part_f[0];
   for(INT_MESH ie=e0; ie<ee; ie++){
 #ifdef __INTEL_COMPILER
-    const FLOAT_SOLV* RESTRICT k =& E_k[Nk*ie];
+    const FLOAT_SOLV* k =& E_k[Nk*ie];
 #endif
     for (int i=0; i<Nc; i++){
       std::memcpy( & u[Dn*i],& S_u[E_c[Nc*ie+i]*Dn], Dn*sizeof(FLOAT_SOLV) );
@@ -65,7 +65,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     }
 #ifdef FETCH_F
 #ifdef __INTEL_COMPILER
-    const FLOAT_SOLV* RESTRICT cu =& S_u[0];
+    const FLOAT_SOLV* cu =& S_u[0];
     cblas_dspmv (CblasRowMajor, CblasUpper, Ne,
       1.0,& k,& cu, 1, 1.0,& f, 1);
 #else
