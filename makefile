@@ -338,14 +338,15 @@ mini-lmq : test-scripts femeqk-$(CPUMODELC)
 mini-hyb : test-scripts femera-$(CPUMODEL)-hyb
 
 ifeq ($(CSTR),gcc)
-gmsh2fmr : gmsh2fmr-omp
+gmsh2fmr : gmsh2fmr-$(CPUMODEL)
 
-gmsh2fmr-$(CPUMODEL) :
+gmsh2fmr-$(CPUMODEL) : gmsh2fmr-omp
 	rm -f gmsh2fmr-$(CPUMODELC) gmsh2fmr-$(CPUMODEL)
 	cp gmsh2fmr-omp-$(CPUMODELC) gmsh2fmr-$(CPUMODELC)
 	cp gmsh2fmr-omp-$(CPUMODELC) gmsh2fmr-$(CPUMODEL)
 else
 gmsh2fmr : gmsh2fmr-$(CPUMODEL)
+	echo ok.
 
 gmsh2fmr-$(CPUMODEL) :
 	echo Please use Gnu gcc to compile gmsh2fmr with OpenMP.
