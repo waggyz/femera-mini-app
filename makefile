@@ -24,7 +24,7 @@ SERFLAGS=-Wno-unknown-pragmas
 ifdef INTEL_LICENSE_FILE
 CXX=icc
 CSTR=icc
-CPPFLAGS=-std=-restrict c++11 -mkl -Wall -Wextra -Ofast -xHost\
+CPPFLAGS=-std=-restrict c++11 -mkl=sequential -Wall -Wextra -Ofast -xHost\
  -ffast-math -no-fast-transcendentals\
  -no-inline-max-size -no-inline-max-total-size -qoverride-limits -g\
  -DMKL_DIRECT_CALL_SEQ
@@ -36,7 +36,7 @@ ifdef INTEL_PYTHONHOME
 CXX=icc
 CSTR=icc
 SERFLAGS=-fno-alias -diag-disable 3180 -g
-CPPFLAGS=-restrict -std=c++11 -mkl -Wall -Wextra -O2 -ansi-alias\
+CPPFLAGS=-restrict -std=c++11 -mkl=sequential -Wall -Wextra -O2 -ansi-alias\
  -ffast-math -no-fast-transcendentals\
  -no-inline-max-size -no-inline-max-total-size -qoverride-limits -g\
  -DMKL_DIRECT_CALL_SEQ
