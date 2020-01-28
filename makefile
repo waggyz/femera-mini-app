@@ -342,7 +342,7 @@ gmsh2fmr : gmsh2fmr-omp
 	rm -f gmsh2fmr-$(CPUMODELC)
 	cp gmsh2fmr-omp-$(CPUMODELC) gmsh2fmr-$(CPUMODELC)
 else
-gmsh2fmr :
+gmsh2fmr : gmsh2fmr-$(CPUMODEL)-gcc
 	echo Please use Gnu gcc to compile gmsh2fmr with OpenMP.
 endif
 
