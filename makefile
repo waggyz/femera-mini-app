@@ -339,7 +339,8 @@ mini-hyb : test-scripts femera-$(CPUMODEL)-hyb
 
 ifeq ($(CSTR),gcc)
 gmsh2fmr : gmsh2fmr-omp
-	rm -f gmsh2fmr-$(CPUMODELC)
+	rm -f gmsh2fmr-$(CPUMODELC) gmsh2fmr-$(CPUMODEL)
+	cp gmsh2fmr-omp-$(CPUMODELC) gmsh2fmr-$(CPUMODELC)
 	cp gmsh2fmr-omp-$(CPUMODELC) gmsh2fmr-$(CPUMODEL)
 else
 gmsh2fmr : gmsh2fmr-$(CPUMODEL)
