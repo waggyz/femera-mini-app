@@ -339,6 +339,7 @@ mini-hyb : test-scripts femera-$(CPUMODEL)-hyb
 
 ifeq ($(CSTR),gcc)
 gmsh2fmr : gmsh2fmr-$(CPUMODEL)
+	echo ok.
 
 gmsh2fmr-$(CPUMODEL) : gmsh2fmr-omp-$(CPUMODELC)
 	rm -f gmsh2fmr-$(CPUMODELC) gmsh2fmr-$(CPUMODEL)
@@ -428,9 +429,8 @@ gmsh2fmr-ser : test-scripts gmsh2fmr-ser-$(CPUMODELC)
 
 gmsh2fmr-omp : test-scripts gmsh2fmr-omp-$(CPUMODELC)
 
-
 gmsh2fmr-omp-$(CPUMODELC) : $(OBJS) $(ODIR)/gmsh2.$(OEXT) $(ODIR)/gmsh2fmr.$(OEXT)
-	echo $(CXX) ... -o gmsh2fmr-$(CPUMODELC)
+	echo $(CXX) ... -o gmsh2fmr-omp-$(CPUMODELC)
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(OBJS) $(ODIR)/gmsh2.$(OEXT) $(ODIR)/gmsh2fmr.$(OEXT) \
 	-o gmsh2fmr-omp-$(CPUMODELC) ;
