@@ -337,9 +337,14 @@ mini-lmq : test-scripts femeqk-$(CPUMODELC)
 
 mini-hyb : test-scripts femera-$(CPUMODEL)-hyb
 
+ifeq ($(CSTR),gcc)
 gmsh2fmr : gmsh2fmr-omp
 	rm -f gmsh2fmr-$(CPUMODELC)
 	cp gmsh2fmr-omp-$(CPUMODELC) gmsh2fmr-$(CPUMODELC)
+else
+gmsh2fmr : gmsh2fmr-ser
+	echo Please use Gnu gcc to compile gmsh2fmr with OpenMP.
+endif
 
 femera-$(CPUMODELC) : $(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
 	echo $(CXX) ... -o femera-$(CPUMODELC)
@@ -416,12 +421,9 @@ femera-$(CPUMODEL)-hyb : $(GBJS) $(IBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-min
 gmsh2fmr-ser : test-scripts gmsh2fmr-ser-$(CPUMODELC)
 	echo ok.
 
-ifeq ($(CSTR),gcc)
 gmsh2fmr-omp : test-scripts gmsh2fmr-omp-$(CPUMODELC)
-else
-gmsh2fmr-omp : test-scripts
-	echo WARNING: Please use Gnu gcc to compile gmsh2fmr.
-endif
+	echo ok.
+
 
 gmsh2fmr-omp-$(CPUMODELC) : $(OBJS) $(ODIR)/gmsh2.$(OEXT) $(ODIR)/gmsh2fmr.$(OEXT)
 	echo $(CXX) ... -o gmsh2fmr-$(CPUMODELC)
