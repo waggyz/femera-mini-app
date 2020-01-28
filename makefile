@@ -346,7 +346,7 @@ gmsh2fmr-$(CPUMODEL) : gmsh2fmr-omp
 	cp gmsh2fmr-omp-$(CPUMODELC) gmsh2fmr-$(CPUMODEL)
 else
 gmsh2fmr : gmsh2fmr-$(CPUMODEL)
-	echo ok.
+	echo ok. > /dev/null
 
 gmsh2fmr-$(CPUMODEL) :
 	echo Please use Gnu gcc to compile gmsh2fmr with OpenMP.
@@ -482,7 +482,11 @@ clean :
 	-rm -f $(CPUMODELC).err
 	-rm -f $(CPUMODELC).log
 
-cleaner : clean clean-test
+cleaner : clean clean-test clean-gmsh2fmr
+
+clean-gmsh2fmr :
+	-rm -f gmsh2fmr-$(CPUMODEL)*
+	-rm -f gmsh2fmr*-$(CPUMODEL)-*;
 
 cleanest : cleaner clean-perf
 	-rm -r $(PERFDIR)/*-$(CPUMODELC)*
