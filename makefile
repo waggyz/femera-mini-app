@@ -154,16 +154,16 @@ all : mini-all gmsh2fmr
 mini-all : mini-omp mini-omq mini-mmp mini-mmq mini-lms mini-lmq
 
 test : all
-	./gmsh2fmr-$(CPUMODELC) -v3 \
+	./gmsh2fmr-$(CPUMODEL) -v3 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
 	-M1 -E100e9 -N0.3 -A20e-6 -K100e-6 -Z1 -X0 -Z0 \
 	-M2 -E100e9 -N0.3 -Z1 -X0 -Z0 \
 	-ap cube/unit1p2n2;
-	./gmsh2fmr-$(CPUMODELC) -v3 \
+	./gmsh2fmr-$(CPUMODEL) -v3 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 -Tu10 \
 	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 -R \
 	-ap cube/unit1p2n2;
-	./gmsh2fmr-$(CPUMODELC) -v1 \
+	./gmsh2fmr-$(CPUMODEL) -v1 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 \
 	-M0 -E100e9 -N0.3 -R \
 	-ap cube/unst19p1n16;
@@ -177,7 +177,7 @@ test : all
 	./femerq-$(CPUMODELC) -v1 -c$(NCPU) -p cube/unst19p1n16
 
 test-iso : mini-omp gmsh2fmr
-	./gmsh2fmr-$(CPUMODELC) -v1 \
+	./gmsh2fmr-$(CPUMODEL) -v1 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 \
 	-M0 -E100e9 -N0.3 -ap cube/unst19p1n16;
 	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
@@ -185,7 +185,7 @@ test-iso : mini-omp gmsh2fmr
 	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
 
 test-ort : mini-omp gmsh2fmr
-	./gmsh2fmr-$(CPUMODELC) -v1 \
+	./gmsh2fmr-$(CPUMODEL) -v1 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 \
 	-M0 -E100e9 -N0.3 -R -ap cube/unst19p1n16;
 	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
@@ -200,7 +200,7 @@ test-mmp : mini-mmp
 	-p cube/unst19p1n16
 
 test-thermal : mini-omp gmsh2fmr
-	./gmsh2fmr-$(CPUMODELC) -v3 \
+	./gmsh2fmr-$(CPUMODEL) -v3 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 -Tu10 \
 	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 -R \
 	-ap cube/unit1p1n2;
@@ -208,7 +208,7 @@ test-thermal : mini-omp gmsh2fmr
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
 	./femera-$(CPUMODELC) -v3 -c1 -d1 -p cube/unit1p2n2
-	./gmsh2fmr-$(CPUMODELC) -v3 \
+	./gmsh2fmr-$(CPUMODEL) -v3 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 -Tu10 \
 	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 \
 	-ap cube/unit1p1n2;
@@ -218,7 +218,7 @@ test-thermal : mini-omp gmsh2fmr
 	./femera-$(CPUMODELC) -v2 -c$(NCPU) -d1 -r1e-6 -p cube/unit1p1n2
 
 test-plastic :  gmsh2fmr mini-omp
-	./gmsh2fmr-$(CPUMODELC) -v1 \
+	./gmsh2fmr-$(CPUMODEL) -v1 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.005 \
 	-M0 -E66.2e9 -N0.33 -J305e6 -J100e6 \
 	-ap cube/unit1p1n2;
@@ -228,7 +228,7 @@ test-plastic :  gmsh2fmr mini-omp
 	./femera-$(CPUMODELC) -v3 -s2 -c1 -p cube/unit1p1n2
 
 test-plastic-20 :  gmsh2fmr mini-omp
-	./gmsh2fmr-$(CPUMODELC) -v1 \
+	./gmsh2fmr-$(CPUMODEL) -v1 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.02 \
 	-M0 -E66.2e9 -N0.33 -J305e6 -J100e6 \
 	-ap cube/unst19p1n16;
@@ -238,7 +238,7 @@ test-plastic-20 :  gmsh2fmr mini-omp
 	./femera-$(CPUMODELC) -v2 -s2 -d2 -I20 -c$(NCPU) -p cube/unst19p1n16
 
 ref-plastic : gmsh2fmr mini-ref
-	./gmsh2fmr-$(CPUMODELC) -v1 \
+	./gmsh2fmr-$(CPUMODEC) -v1 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.005 \
 	-M0 -E66.2e9 -N0.33 -J305e6 -J100e6 \
 	-ap cube/unit1p1n2;
@@ -251,7 +251,7 @@ test-slice : gmsh2fmr mini-omp
 	gmsh -v 3 -nt $(NCPU) -part 8 \
 	-format msh2 -o cube/uhxt10p2/uhxt10p2n8.msh \
 	cube/uhxt10p2/uhxt10p2n.msh -
-	./gmsh2fmr-$(CPUMODELC) -v4 \
+	./gmsh2fmr-$(CPUMODEL) -v4 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
 	-M0 -E100e9 -N0.3 -a cube/uhxt10p2/uhxt10p2n8;
 	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/uhxt10p2/uhxt10p2n8
@@ -259,13 +259,13 @@ test-slice : gmsh2fmr mini-omp
 	export OMP_PLACES=cores;\
 	export OMP_PROC_BIND=spread;\
 	export OMP_NUM_THREADS=$(NCPU);\
-	./gmsh2fmr-$(CPUMODELC) -v4 \
+	./gmsh2fmr-$(CPUMODEL) -v4 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
 	-M0 -E100e9 -N0.3 -xyzS2 -a cube/uhxt10p2/uhxt10p2n;
 	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/uhxt10p2/uhxt10p2n8
 
 test-gmsh2fmr : gmsh2fmr
-	./gmsh2fmr-$(CPUMODELC) -v3 \
+	./gmsh2fmr-$(CPUMODEL) -v3 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
 	-M1 -E100e9 -N0.3 -A20e-6 -K100e-6 -Z1 -X0 -Z0 \
 	-M2 -E100e9 -N0.3 -Z1 -X0 -Z0 \
@@ -340,9 +340,9 @@ mini-hyb : test-scripts femera-$(CPUMODEL)-hyb
 ifeq ($(CSTR),gcc)
 gmsh2fmr : gmsh2fmr-omp
 	rm -f gmsh2fmr-$(CPUMODELC)
-	cp gmsh2fmr-omp-$(CPUMODELC) gmsh2fmr-$(CPUMODELC)
+	cp gmsh2fmr-omp-$(CPUMODELC) gmsh2fmr-$(CPUMODEL)
 else
-gmsh2fmr : gmsh2fmr-$(CPUMODEL)-gcc
+gmsh2fmr : gmsh2fmr-$(CPUMODEL)
 	echo Please use Gnu gcc to compile gmsh2fmr with OpenMP.
 endif
 
