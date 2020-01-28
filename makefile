@@ -345,12 +345,14 @@ gmsh2fmr-$(CPUMODEL) : gmsh2fmr-omp-$(CPUMODELC)
 	rm -f gmsh2fmr-$(CPUMODELC) gmsh2fmr-$(CPUMODEL)
 	cp gmsh2fmr-omp-$(CPUMODELC) gmsh2fmr-$(CPUMODELC)
 	cp gmsh2fmr-omp-$(CPUMODELC) gmsh2fmr-$(CPUMODEL)
+
 else
 gmsh2fmr : gmsh2fmr-$(CPUMODEL)
-	echo ok.
+	echo ok. > /dev/null
 
 gmsh2fmr-$(CPUMODEL) :
-	echo Please use Gnu gcc to compile gmsh2fmr with OpenMP.
+	echo Please use Gnu gcc to compile gmsh2fmr.
+
 endif
 
 femera-$(CPUMODELC) : $(OBJS) $(ODIR)/test.$(OEXT) $(ODIR)/femera-mini.$(OEXT)
