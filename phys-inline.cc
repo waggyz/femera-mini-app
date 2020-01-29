@@ -38,19 +38,19 @@ static inline void accumulate_f( __m256d* vf,
 }
 // Orthotropic intrinsics -----------------------------------------------------
 static inline void rotate_g_h(FLOAT_PHYS* G,__m256d* vH,// was line 40
-  const int Nc, const __m256d* J,
+  const int Nc, const __m256d* vJ,
   const FLOAT_PHYS* sg, const FLOAT_PHYS* R, const FLOAT_PHYS* u ){
   __m256d a036=_mm256_setzero_pd(), a147=_mm256_setzero_pd(),
     a258=_mm256_setzero_pd();
   for(int i= 0; i<Nc; i++){
-      const __m256d g
-        = J[0] *_mm256_set1_pd( sg[3* i+0 ])
-        + J[1] *_mm256_set1_pd( sg[3* i+1 ])
-        + J[2] *_mm256_set1_pd( sg[3* i+2 ]);
-      a036+= g *_mm256_set1_pd(  u[3* i+0 ]);
-      a147+= g *_mm256_set1_pd(  u[3* i+1 ]);
-      a258+= g *_mm256_set1_pd(  u[3* i+2 ]);
-      _mm256_store_pd(& G[4* i ], g );
+      const __m256d vg
+        = vJ[0] *_mm256_set1_pd( sg[3* i+0 ])
+        + vJ[1] *_mm256_set1_pd( sg[3* i+1 ])
+        + vJ[2] *_mm256_set1_pd( sg[3* i+2 ]);
+      a036+= vg *_mm256_set1_pd(  u[3* i+0 ]);
+      a147+= vg *_mm256_set1_pd(  u[3* i+1 ]);
+      a258+= vg *_mm256_set1_pd(  u[3* i+2 ]);
+      _mm256_store_pd(& G[4* i ], vg );
   }// was line 78
   vH[0]
     = a036 * _mm256_set1_pd(R[0])
@@ -257,74 +257,74 @@ static inline void compute_iso_s(__m256d* vA,// in-place version
   vS[2] = _mm256_load_pd(&fS[8]); // [a9 a8 a7 a6]
 #endif
 }
-static inline void compute_g_h( FLOAT_PHYS* G, __m256d* H,// line 273
-  const int Nc, const __m256d* J, const FLOAT_PHYS* sg, const FLOAT_PHYS* u ){
-  H[0]=_mm256_setzero_pd(); H[1]=_mm256_setzero_pd(); H[2]=_mm256_setzero_pd();
+static inline void compute_g_h( FLOAT_PHYS* G, __m256d* vH,// line 273
+  const int Nc, const __m256d* vJ, const FLOAT_PHYS* sg, const FLOAT_PHYS* u ){
+  vH[0]=_mm256_setzero_pd(); vH[1]=_mm256_setzero_pd(); vH[2]=_mm256_setzero_pd();
 #if 1
   for(int i= 0; i<Nc; i++){// line 277
-    const __m256d g
-      = J[0] *_mm256_set1_pd( sg[3* i+0 ])
-      + J[1] *_mm256_set1_pd( sg[3* i+1 ])
-      + J[2] *_mm256_set1_pd( sg[3* i+2 ]);
-    H[0]+= g *_mm256_set1_pd(  u[3* i+0 ]);
-    H[1]+= g *_mm256_set1_pd(  u[3* i+1 ]);
-    H[2]+= g *_mm256_set1_pd(  u[3* i+2 ]);
-    _mm256_store_pd(& G[4* i ], g );
+    const __m256d vg
+      = vJ[0] *_mm256_set1_pd( sg[3* i+0 ])
+      + vJ[1] *_mm256_set1_pd( sg[3* i+1 ])
+      + vJ[2] *_mm256_set1_pd( sg[3* i+2 ]);
+    vH[0]+= vg *_mm256_set1_pd(  u[3* i+0 ]);
+    vH[1]+= vg *_mm256_set1_pd(  u[3* i+1 ]);
+    vH[2]+= vg *_mm256_set1_pd(  u[3* i+2 ]);
+    _mm256_store_pd(& G[4* i ], vg );
   }
 #else
   for(int i= 0; i< 4; i++){// Unrolled runs a bit slower.
-    const __m256d g
-      = J[0] *_mm256_set1_pd( sg[3* i+0 ])
-      + J[1] *_mm256_set1_pd( sg[3* i+1 ])
-      + J[2] *_mm256_set1_pd( sg[3* i+2 ]);
-    H[0]+= g *_mm256_set1_pd(  u[3* i+0 ]);
-    H[1]+= g *_mm256_set1_pd(  u[3* i+1 ]);
-    H[2]+= g *_mm256_set1_pd(  u[3* i+2 ]);
-    _mm256_store_pd(& G[4* i ], g ); }
+    const __m256d vg
+      = vJ[0] *_mm256_set1_pd( sg[3* i+0 ])
+      + vJ[1] *_mm256_set1_pd( sg[3* i+1 ])
+      + vJ[2] *_mm256_set1_pd( sg[3* i+2 ]);
+    vH[0]+= vg *_mm256_set1_pd(  u[3* i+0 ]);
+    vH[1]+= vg *_mm256_set1_pd(  u[3* i+1 ]);
+    vH[2]+= vg *_mm256_set1_pd(  u[3* i+2 ]);
+    _mm256_store_pd(& G[4* i ], vg ); }
   if( Nc> 4 ){
     for(int i= 4; i<10; i++){
-      const __m256d g
-        = J[0] *_mm256_set1_pd( sg[3* i+0 ])
-        + J[1] *_mm256_set1_pd( sg[3* i+1 ])
-        + J[2] *_mm256_set1_pd( sg[3* i+2 ]);
-      H[0]+= g *_mm256_set1_pd(  u[3* i+0 ]);
-      H[1]+= g *_mm256_set1_pd(  u[3* i+1 ]);
-      H[2]+= g *_mm256_set1_pd(  u[3* i+2 ]);
-      _mm256_store_pd(& G[4* i ], g ); }
+      const __m256d vg
+        = vJ[0] *_mm256_set1_pd( sg[3* i+0 ])
+        + vJ[1] *_mm256_set1_pd( sg[3* i+1 ])
+        + vJ[2] *_mm256_set1_pd( sg[3* i+2 ]);
+      vH[0]+= vg *_mm256_set1_pd(  u[3* i+0 ]);
+      vH[1]+= vg *_mm256_set1_pd(  u[3* i+1 ]);
+      vH[2]+= vg *_mm256_set1_pd(  u[3* i+2 ]);
+      _mm256_store_pd(& G[4* i ], vg ); }
     if( Nc>10 ){
       for(int i=10; i<20; i++){
-        const __m256d g
-          = J[0] *_mm256_set1_pd( sg[3* i+0 ])
-          + J[1] *_mm256_set1_pd( sg[3* i+1 ])
-          + J[2] *_mm256_set1_pd( sg[3* i+2 ]);
-        H[0]+= g *_mm256_set1_pd(  u[3* i+0 ]);
-        H[1]+= g *_mm256_set1_pd(  u[3* i+1 ]);
-        H[2]+= g *_mm256_set1_pd(  u[3* i+2 ]);
-        _mm256_store_pd(& G[4* i ], g ); }
+        const __m256d vg
+          = vJ[0] *_mm256_set1_pd( sg[3* i+0 ])
+          + vJ[1] *_mm256_set1_pd( sg[3* i+1 ])
+          + vJ[2] *_mm256_set1_pd( sg[3* i+2 ]);
+        vH[0]+= vg *_mm256_set1_pd(  u[3* i+0 ]);
+        vH[1]+= vg *_mm256_set1_pd(  u[3* i+1 ]);
+        vH[2]+= vg *_mm256_set1_pd(  u[3* i+2 ]);
+        _mm256_store_pd(& G[4* i ], vg ); }
     }
   }
 #endif
-}// was line 320
+}//was line 320
 // Nonlinear isotropic intrinsics ---------------------------------------------
 static inline void compute_g_p_h(
-  FLOAT_PHYS* G, __m256d* P, __m256d* H,
-  const int Nc, const  __m256d* J,
+  FLOAT_PHYS* G, __m256d* vP, __m256d* vH,
+  const int Nc, const  __m256d* vJ,
   const FLOAT_PHYS* sg, const FLOAT_PHYS* p, const FLOAT_PHYS* u ){
-  H[0]=_mm256_setzero_pd(); H[1]=_mm256_setzero_pd(); H[2]=_mm256_setzero_pd(),
-  P[0]=_mm256_setzero_pd(); P[1]=_mm256_setzero_pd(); P[2]=_mm256_setzero_pd();
+  vH[0]=_mm256_setzero_pd(); vH[1]=_mm256_setzero_pd(); vH[2]=_mm256_setzero_pd(),
+  vP[0]=_mm256_setzero_pd(); vP[1]=_mm256_setzero_pd(); vP[2]=_mm256_setzero_pd();
   //
-  for(int i= 0; i<Nc; i++){// line 329
-      const __m256d g
-        = J[0] *_mm256_set1_pd( sg[3* i+0 ])
-        + J[1] *_mm256_set1_pd( sg[3* i+1 ])
-        + J[2] *_mm256_set1_pd( sg[3* i+2 ]);
-      H[0]+= g *_mm256_set1_pd(  u[3* i+0 ]);
-      H[1]+= g *_mm256_set1_pd(  u[3* i+1 ]);
-      H[2]+= g *_mm256_set1_pd(  u[3* i+2 ]);
-      P[0]+= g *_mm256_set1_pd(  p[3* i+0 ]);
-      P[1]+= g *_mm256_set1_pd(  p[3* i+1 ]);
-      P[2]+= g *_mm256_set1_pd(  p[3* i+2 ]);
-      _mm256_store_pd(& G[4* i ], g );
+  for(int i= 0; i<Nc; i++){//was line 329
+      const __m256d vg
+        = vJ[0] *_mm256_set1_pd( sg[3* i+0 ])
+        + vJ[1] *_mm256_set1_pd( sg[3* i+1 ])
+        + vJ[2] *_mm256_set1_pd( sg[3* i+2 ]);
+      vH[0]+= vg *_mm256_set1_pd(  u[3* i+0 ]);
+      vH[1]+= vg *_mm256_set1_pd(  u[3* i+1 ]);
+      vH[2]+= vg *_mm256_set1_pd(  u[3* i+2 ]);
+      vP[0]+= vg *_mm256_set1_pd(  p[3* i+0 ]);
+      vP[1]+= vg *_mm256_set1_pd(  p[3* i+1 ]);
+      vP[2]+= vg *_mm256_set1_pd(  p[3* i+2 ]);
+      _mm256_store_pd(& G[4* i ], vg );
   }
 }
 #endif
