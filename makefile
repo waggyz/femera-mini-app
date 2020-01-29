@@ -54,7 +54,7 @@ ifdef COLLECT_VTUNE_DATA
 CPPFLAGS:=$(CPPFLAGS) -DCOLLECT_VTUNE_DATA
 LDFLAGS:=$(LDFLAGS) -I$(VTUNE_AMPLIFIER_XE_2019_DIR)/include
 LDFLAGS:=$(LDFLAGS) -L$(VTUNE_AMPLIFIER_XE_2019_DIR)/lib64 -littnotify
-@echo "NOTE Compiling to collect vector advisor data."
+$(warning Compiling to collect vector advisor data.)
 endif
 
 #  -axSKYLAKE-AVX512 can run out of memory
