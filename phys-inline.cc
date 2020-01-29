@@ -37,8 +37,7 @@ static inline void accumulate_f( __m256d* vf,
   }
 }
 // Orthotropic intrinsics -----------------------------------------------------
-static inline void rotate_g_h(// was line 40
-  FLOAT_PHYS* G, __m256d* vH,
+static inline void rotate_g_h(FLOAT_PHYS* G,__m256d* vH,// was line 40
   const int Nc, const __m256d* J,
   const FLOAT_PHYS* sg, const FLOAT_PHYS* R, const FLOAT_PHYS* u ){
   __m256d a036=_mm256_setzero_pd(), a147=_mm256_setzero_pd(),
@@ -102,7 +101,7 @@ static inline void rotate_s_voigt( __m256d* vS,
 }
 // Isotropic intrinsics -------------------------------------------------------
 static inline void compute_iso_s(FLOAT_PHYS* S,
-  const FLOAT_PHYS* H, const FLOAT_PHYS* C, const FLOAT_PHYS dw ){
+  const FLOAT_PHYS* H, const FLOAT_PHYS* C, const FLOAT_PHYS dw ){// Scalar ver.
   const FLOAT_PHYS Cdw[3] = { C[0]*dw, C[1]*dw, C[2]*dw };
   //
   S[0]= Cdw[0]* H[0] + Cdw[1]* H[4] + Cdw[1]* H[8];//Sxx
@@ -128,17 +127,14 @@ static inline void compute_iso_s(__m256d* vA,// in-place version
   {
   const __m256d z0 =_mm256_set_pd(0.0,1.0,1.0,1.0);
   const __m256d ml =_mm256_set_pd(lambda,mu,mu,mu);
-  vA[0]=_mm256_permute4x64_pd( vA[0]*z0,_MM_SHUFFLE(0,2,3,1) );
-  Ssum+= vA[0]*ml;
-  vA[1]=_mm256_permute4x64_pd( vA[1]*z0,_MM_SHUFFLE(1,3,2,0) );
-  Ssum+= vA[1]*ml;
-  vA[2]=_mm256_permute4x64_pd( vA[2]*z0,_MM_SHUFFLE(2,0,1,3) );
-  Ssum+= vA[2]*ml;
+  vA[0]=_mm256_permute4x64_pd( vA[0]*z0,_MM_SHUFFLE(0,2,3,1) ); Ssum+= vA[0]*ml;
+  vA[1]=_mm256_permute4x64_pd( vA[1]*z0,_MM_SHUFFLE(1,3,2,0) ); Ssum+= vA[1]*ml;
+  vA[2]=_mm256_permute4x64_pd( vA[2]*z0,_MM_SHUFFLE(2,0,1,3) ); Ssum+= vA[2]*ml;
   }
   //      3   2   1   0
   //     sxy 0.0 sxz sxx
-  //     sxy syz 0.0 syy
-  //     0.0 syz sxz szz
+  //     syx syz 0.0 syy
+  //     0.0 szy szx szz
   //
   // mu*(sxy syz sxz)trace(H)*lambda : Ssum
   {

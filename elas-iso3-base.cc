@@ -108,7 +108,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
             H[Dm* i+j ] += G[Dm* k+i ] * u[Dn* k+j ];
           }
         }
-      }//------------------------------------------------- N*3*6*2 = 36*N FLOP
+      }//-------------------------------------------------- N*3*6*2 = 36*N FLOP
       if(ip==(intp_n-1)){
         if((ie+1)<ee){// Fetch stuff for the next iteration
           const INT_MESH* RESTRICT c = &E_c[Nc*(ie+1)];
@@ -158,7 +158,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
         for(int k=0; k<Dn; k++){
           for(int j=0; j<Dn; j++){
             f[Dn* i+k ] += G[Dm* i+j ] * S[Dn* k+j ];// 18*N FMA FLOP
-      } } }//----------------------------------------------- N*3*6 = 18*N FLOP
+      } } }//------------------------------------------------ N*3*6 = 18*N FLOP
 #if VERB_MAX>10
       printf( "f:");
       for(int j=0;j<Ne;j++){
