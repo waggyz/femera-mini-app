@@ -74,19 +74,17 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     cblas_dspmv (CblasRowMajor, CblasUpper, Ne,
       1.0,& k[0],& cu[0], 1, 1.0,& f[0], 1);
 #else
+    const VECALIGNED FLOAT_SOLV* cu =& u[0];
     switch(Ne){// This seems slightly faster.
       case(12):{
-        const FLOAT_SOLV* VECALIGNED cu =& u[0];
         cblas_dspmv (CblasRowMajor, CblasUpper, 12,
           1.0,& k[0],& cu[0], 1, 1.0,& f[0], 1);
         break;}
       case(30):{
-        const FLOAT_SOLV* VECALIGNED cu =& u[0];
         cblas_dspmv (CblasRowMajor, CblasUpper, 30,
           1.0,& k[0],& cu[0], 1, 1.0,& f[0], 1);
         break;}
       case(60):{
-        const FLOAT_SOLV* VECALIGNED cu =& u[0];
         cblas_dspmv (CblasRowMajor, CblasUpper, 60,
           1.0,& k[0],& cu[0], 1, 1.0,& f[0], 1);
         break;}

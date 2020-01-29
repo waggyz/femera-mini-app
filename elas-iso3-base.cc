@@ -47,16 +47,16 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   FLOAT_PHYS jac[Nj];
 #endif
 #endif
-  FLOAT_PHYS G[Ne], u[Ne], f[Ne];
-  FLOAT_PHYS H[Dm*Dn], S[Dm*Dn];
+  FLOAT_PHYS VECALIGNED G[Ne], u[Ne], f[Ne];
+  FLOAT_PHYS VECALIGNED H[Dm*Dn], S[Dm*Dn];
   //
-  FLOAT_PHYS intp_shpg[intp_n*Ne];
+  FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
   std::copy( &E->intp_shpg[0],
              &E->intp_shpg[intp_n*Ne], intp_shpg );
-  FLOAT_PHYS wgt[intp_n];
+  FLOAT_PHYS VECALIGNED wgt[intp_n];
   std::copy( &E->gaus_weig[0],
              &E->gaus_weig[intp_n], wgt );
-  FLOAT_PHYS C[this->mtrl_matc.size()];
+  FLOAT_PHYS VECALIGNED C[this->mtrl_matc.size()];
   std::copy( &this->mtrl_matc[0],
              &this->mtrl_matc[this->mtrl_matc.size()], C );
 #if VERB_MAX>10
@@ -66,10 +66,10 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     printf("%+9.2e ",C[j]);
   } printf("\n");
 #endif
-  const   INT_MESH* RESTRICT E_c = &E->elem_conn[0];
-  const FLOAT_MESH* RESTRICT E_j = &E->elip_jacs[0];
-  const FLOAT_SOLV* RESTRICT S_u = &part_u[0];
-        FLOAT_SOLV* RESTRICT S_f = &part_f[0];
+  const    INT_MESH* RESTRICT E_c = &E->elem_conn[0];
+  const  FLOAT_MESH* RESTRICT E_j = &E->elip_jacs[0];
+  const  FLOAT_SOLV* RESTRICT S_u = &part_u[0];
+         FLOAT_SOLV* RESTRICT S_f = &part_f[0];
   if(e0<ee){
 #if 0
 #ifdef FETCH_JAC
@@ -125,9 +125,16 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
         printf("%+9.2e ",H[j]);
       } printf("\n");
 #endif
+#if 1
+      {
+      const FLOAT_SOLV* VECALIGNED cH =& H[0];
+      const FLOAT_PHYS dw = E_j[Nj*ie+ 9 ] * wgt[ip];
+      compute_iso_s(& S[0],& cH[0],& C[0], dw );
+      }
+#else
       {
       const FLOAT_PHYS dw = E_j[Nj*ie+ 9 ] * wgt[ip];
-      const FLOAT_PHYS Cdw[3] = { C[0]*dw, C[1]*dw, C[2]*dw };
+      //const FLOAT_PHYS Cdw[3] = { C[0]*dw, C[1]*dw, C[2]*dw };
       //
       S[0]= Cdw[0]* H[0] + Cdw[1]* H[4] + Cdw[1]* H[8];//Sxx
       S[4]= Cdw[1]* H[0] + Cdw[0]* H[4] + Cdw[1]* H[8];//Syy
@@ -138,6 +145,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       S[2]=( H[2] + H[6] )*Cdw[2];// S[6]= S[2];//Sxz Szx
       }//------------------------------------------------------- 18+9 = 27 FLOP
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];
+#endif
 #if 0
 #ifdef HAS_PRAGMA_SIMD
 #ifndef HAS_AVX
