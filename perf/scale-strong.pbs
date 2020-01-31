@@ -120,7 +120,7 @@ for P in 1 2 3; do
   # Warm up
   $EXE -c$CPUCOUNT -i1 -p $MESH > $CSV
   for C in $(seq 1 $C); do
-    if [ ( ($N/$C)*$C) -eq ($N) ]; then
+    if [ $(( $(( $N / $C )) * $C )) -eq $N ]; then
       for X in $(seq 1 $REPEAT); do
         $EXE -c$C -i$I -p $MESH >> $CSV
       done
