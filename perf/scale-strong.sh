@@ -9,8 +9,6 @@ MESHDIR=/hpnobackup1/dwagner5/femera-test/cube
 EXEDIR=/u/dwagner5/femera-mini-develop
 PERFDIR=$EXEDIR/perf
 #
-cd $EXEDIR
-#
 REPEAT=6
 I=10
 #
@@ -28,11 +26,11 @@ if [ $MEM > 100 ]; then
 else
   CPUNAMEC=$CPUMODEL"-"$CSTR
 fi
-CSV=$PERFDIR/"strong-500mdof-"$CPUNAMEC".csv"
 #
 module load gcc_8.3.0
 make clean
 make -j$CPUCOUNT all
+
 #
 export OMP_NUM_THREADS=$CPUCOUNT
 export OMP_SCHEDULE=static
@@ -40,11 +38,11 @@ export OMP_PLACES=cores
 export OMP_PROC_BIND=spread
 #
 for P in 1 2 3; do
-  case P in
+  case $P in
     1)
       H=531; N=3360; SLICE="-xS 12 -yS 14 -zS 20";
       DIR=$MESHDIR/"uhxt"$H"p"$P
-      $GMSH -nt $C -v1 -setnumber p $P -setnumber h $H -setnumber n 1 -3 \
+      $GMSH -nt $CPUCOUNT -v1 -setnumber p $P -setnumber h $H -setnumber n 1 -3 \
         -format msh2 -o $DIR/"uhxt"$H"p"$P"n.msh" -save $EXEDIR/geo/uhxt-cube.geo
       #NOTE Too big to slice in 90GB RAM.
       ;;
@@ -57,14 +55,15 @@ for P in 1 2 3; do
   esac
   MESH=$MESHDIR/"uhxt"$H"p"$P/"uhxt"$H"p"$P"n"$N
   if [ 1 -eq 1 ]; then
-    $EXEDIR/"gmsh2fmr-"$CPUMODEL"-gcc" -v1 \
+o    $EXEDIR/"gmsh2fmr-"$CPUMODEL"-gcc" -v1 \
      -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
       $SLICE -M0 -E100e9 -N0.3 -a $MESHDIR/"uhxt"$H"p"$P/"uhxt"$H"p"$P"n"
   fi
+  CSV=$PERFDIR/"strong-uhxt"$H"p"$P"-"$CPUNAMEC".csv"
   # Warm up
   $EXE -c$CPUCOUNT -i1 -p $MESH > $CSV
-  for C in $(seq 1 $C); do
-    if [ ( ($N/$C)*$C) -eq ($N) ]; then
+  for C in $(seq 1 $CPUCOUNT); do
+    if [ $(( $(($N / $C)) * $C)) -eq $N ]; then
       for X in $(seq 1 $REPEAT); do
         $EXE -c$C -i$I -p $MESH >> $CSV
       done
