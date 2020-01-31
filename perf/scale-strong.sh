@@ -10,7 +10,6 @@ EXEDIR=/u/dwagner5/femera-mini-develop
 PERFDIR=$EXEDIR/perf
 #
 REPEAT=6
-I=10
 #
 CSTR=gcc
 #
@@ -21,16 +20,15 @@ GMSH=`which gmsh`
 #
 CPUMODELC=$CPUMODEL"-"$CSTR
 EXE=$EXEDIR/femerq-$CPUMODELC
-if [ $MEM > 100 ]; then
+if [ $MEM -gt 100 ]; then
   CPUNAMEC=$CPUMODEL"b""-"$CSTR
 else
   CPUNAMEC=$CPUMODEL"-"$CSTR
 fi
 #
 module load gcc_8.3.0
-make clean
+#make clean
 make -j$CPUCOUNT all
-
 #
 export OMP_NUM_THREADS=$CPUCOUNT
 export OMP_SCHEDULE=static
@@ -40,18 +38,21 @@ export OMP_PROC_BIND=spread
 for SIZE in md lg; do
 for P in 1 2 3; do
   if [ $SIZE == "md" ]; then
+    I=10000
     case $P in
       1)
-        H=52; N=240;
+        H=52; N=240;# 500 kdof
         ;;
       2)
-        H=26; N=240;
+        H=26; N=240;# 500 kdof
         ;;
       3)
-        H=17; N=240;
+        H=17; N=240;# 500 kdof
         ;;
     esac
   else
+    # 500 Mdof
+    I=10
     case $P in
       1)
         H=531; N=3360; SLICE="-xS 12 -yS 14 -zS 20";
@@ -80,7 +81,7 @@ for P in 1 2 3; do
   for C in $(seq 1 $CPUCOUNT); do
     if [ $(( $(($N / $C)) * $C)) -eq $N ]; then
       for X in $(seq 1 $REPEAT); do
-        $EXE -c$C -i$I -p $MESH >> $CSV
+        $EXE -c$C -r0 -i$I -p $MESH >> $CSV
       done
     fi
   done
