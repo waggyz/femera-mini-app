@@ -50,7 +50,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #define FETCH_F
   const int Nk =(Ne*(Ne + 1))/2;
 #else
-  const int Nk = Ne * Ne;
+  const int Nk = Ne*Ne;
 #endif
   FLOAT_PHYS VECALIGNED u[Ne], f[Ne];
   const   INT_MESH* RESTRICT E_c =& E->elem_conn[0];
@@ -58,9 +58,6 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   const FLOAT_SOLV* RESTRICT S_u =& part_u[0];
         FLOAT_SOLV* RESTRICT S_f =& part_f[0];
   for(INT_MESH ie=e0; ie<ee; ie++){
-#ifdef __INTEL_COMPILER
-    const FLOAT_SOLV* k =& E_k[Nk*ie];
-#endif
     for (int i=0; i<Nc; i++){
       std::memcpy( & u[Dn*i],& S_u[E_c[Nc*ie+i]*Dn], Dn*sizeof(FLOAT_SOLV) );
 #ifdef FETCH_F
@@ -69,24 +66,24 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
     }
 #ifdef FETCH_F
 #ifdef __INTEL_COMPILER
-#if 0
+    const FLOAT_SOLV* ck =& E_k[Nk*ie];
     const FLOAT_SOLV* VECALIGNED cu =& u[0];
+#if 1
     cblas_dspmv (CblasRowMajor, CblasUpper, Ne,
-      1.0,& k[0],& cu[0], 1, 1.0,& f[0], 1);
+      1.0,& ck[0],& cu[0], 1, 1.0,& f[0], 1);
 #else
-    const VECALIGNED FLOAT_SOLV* cu =& u[0];
-    switch(Ne){// This seems slightly faster.
+    switch(Ne){// This seems slightly faster?
       case(12):{
         cblas_dspmv (CblasRowMajor, CblasUpper, 12,
-          1.0,& k[0],& cu[0], 1, 1.0,& f[0], 1);
+          1.0,& ck[0],& cu[0], 1, 1.0,& f[0], 1);
         break;}
       case(30):{
         cblas_dspmv (CblasRowMajor, CblasUpper, 30,
-          1.0,& k[0],& cu[0], 1, 1.0,& f[0], 1);
+          1.0,& ck[0],& cu[0], 1, 1.0,& f[0], 1);
         break;}
       case(60):{
         cblas_dspmv (CblasRowMajor, CblasUpper, 60,
-          1.0,& k[0],& cu[0], 1, 1.0,& f[0], 1);
+          1.0,& ck[0],& cu[0], 1, 1.0,& f[0], 1);
         break;}
     }
 #endif

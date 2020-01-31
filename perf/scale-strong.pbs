@@ -1,0 +1,135 @@
+#!/bin/bash
+
+### Set the job name (set this to your jobname)
+### PBS -N <jobname>
+#PBS -N femera-strong
+
+### Declare myprogram non-rerunable -- can't do this with job array
+#PBS -r n
+
+### Send email when the job (b)egins, (e)nds, (a)borted.
+### Please do not comment this out.
+#PBS -m abe
+#PBS -M david.wagner-1@nasa.gov 
+
+### Specify destinations for your program's output.  Specify 
+### localhost and an NFS filesystem to prevent file copy errors. 
+### You should replace <userid> with your username and <jobname>
+### with the name of your job.
+#PBS -e 127.0.0.1:/hpnobackup1/dwagner5/femera-strong.err 
+#PBS -o 127.0.0.1:/hpnobackup1/dwagner5/femera-strong.log 
+### join stderr and stdout in logs
+#PBS -j oe
+
+### Specify the queue in which to run: standard, debug
+####PBS -q K4-standard
+
+### Specify the number of cpus for your job. 
+### mpiprocs is important!
+###PBS -l select=1:ncpus=40:mpiprocs=1
+
+### You can override the default 1 hour real-world time limit.
+### -l walltime=HH:MM:SS
+###PBS -l min_walltime=48:00:00
+###PBS -l max_walltime=72:00:00
+
+#PBS -l walltime=48:00:00
+
+### Switch to the working directory; by default PBS launches processes 
+### from your home directory. 
+### Jobs should only be run from /u/<username> or /nobackup[12]/<username>;
+### PBS returns results via NFS. 
+export PBS_O_WORKDIR=/u/dwagner5/femera-mini-develop
+
+echo "Working directory is $PBS_O_WORKDIR"
+cd $PBS_O_WORKDIR
+echo "Running on host `hostname`"
+export MYSTART=`date`
+echo "Time is `date`"
+echo "Directory is `pwd`"
+echo "This job runs on the following processors: "
+echo "`cat $PBS_NODEFILE`"
+
+### Define number of processors 
+export NPROCS=`wc -l < $PBS_NODEFILE`
+
+echo "This job has allocated $NPROCS cpus"
+
+### Setup the modules package. Add the mpi module you want to use. 
+source /usr/local/pkgs/modules/init/bash
+#
+# 500 MDOF
+# tet4 : uhxt531p1n3360  (3520) parts  3*4 * 7*2 * 5*4
+# tet10: uhxt365p2n18480 (15360-20480) parts 4*5 * 4*7 * 3*11
+# tet20: uhxt174p3n9240  (8960-14040) 5*4 * 3*7 * 2*11
+#
+MESHDIR=/hpnobackup1/dwagner5/femera-test/cube
+EXEDIR=/u/dwagner5/femera-mini-develop
+PERFDIR=$EXEDIR/perf
+#
+REPEAT=6
+I=10
+#
+CSTR=gcc
+#
+MEM=`free -g  | grep Mem | awk '{print $7}'`
+CPUMODEL=`$EXEDIR/cpumodel.sh`
+CPUCOUNT=`$EXEDIR/cpucount.sh`
+GMSH=`which gmsh`
+#
+CPUMODELC=$CPUMODEL"-"$CSTR
+EXE=$EXEDIR/femerq-$CPUMODELC
+if [ $MEM > 100 ]; then
+  CPUNAMEC=$CPUMODEL"b""-"$CSTR
+else
+  CPUNAMEC=$CPUMODEL"-"$CSTR
+fi
+CSV=$PERFDIR/"strong-500mdof-"$CPUNAMEC".csv"
+#
+module load gcc_8.3.0
+make clean
+make -j$CPUCOUNT all
+#
+export OMP_NUM_THREADS=$CPUCOUNT
+export OMP_SCHEDULE=static
+export OMP_PLACES=cores
+export OMP_PROC_BIND=spread
+#
+for P in 1 2 3; do
+  case P in
+    1)
+      H=531; N=3360; SLICE="-xS 12 -yS 14 -zS 20";
+      DIR=$MESHDIR/"uhxt"$H"p"$P
+      $GMSH -nt $C -v1 -setnumber p $P -setnumber h $H -setnumber n 1 -3 \
+        -format msh2 -o $DIR/"uhxt"$H"p"$P"n.msh" -save $EXEDIR/geo/uhxt-cube.geo
+      #NOTE Too big to slice in 90GB RAM.
+      ;;
+    2)
+      H=265; N=18480; SLICE="-xS 20 -yS 28 -zS 33";
+      ;;
+    3)
+      H=174; N=9240; SLICE="-xS 20 -yS 21 -zS 22";
+      ;;
+  esac
+  MESH=$MESHDIR/"uhxt"$H"p"$P/"uhxt"$H"p"$P"n"$N
+  if [ 1 -eq 1 ]; then
+    $EXEDIR/"gmsh2fmr-"$CPUMODEL"-gcc" -v1 \
+     -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
+      $SLICE -M0 -E100e9 -N0.3 -a $MESHDIR/"uhxt"$H"p"$P/"uhxt"$H"p"$P"n"
+  fi
+  # Warm up
+  $EXE -c$CPUCOUNT -i1 -p $MESH > $CSV
+  for C in $(seq 1 $C); do
+    if [ ( ($N/$C)*$C) -eq ($N) ]; then
+      for X in $(seq 1 $REPEAT); do
+        $EXE -c$C -i$I -p $MESH >> $CSV
+      done
+    fi
+  done
+done
+#
+echo ""
+echo "Job started at $MYSTART"
+export MYEND=`date`
+echo "Job ended at $MYEND."
+echo ""
