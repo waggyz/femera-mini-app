@@ -57,7 +57,7 @@ for P in 1 2 3; do
   for C in $(seq 1 $CPUCOUNT); do
     if [ $(( $(($NMODEL / $C)) * $C)) -eq $NMODEL ]; then
       NC=$(( $NMODEL / $C ))
-      echo "Running "$IC" iterations of uhxt"$H"p"$P"n"$N" on "$C" cores, "$REPEAT" times..."
+      echo "Running "$I" iterations of uhxt"$H"p"$P"n"$N" on "$C" cores, "$REPEAT" times..."
       for X in $(seq 1 $REPEAT); do
         $EXE -c$C -n$C -m$NC -r0 -i$I -p $MESH >> $CSV
       done
