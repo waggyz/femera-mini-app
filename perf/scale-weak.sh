@@ -56,6 +56,7 @@ for P in 1 2 3; do
   $EXE -c$CPUCOUNT -n$CPUCOUNT -m$NMODEL  -i$I0 -p $MESH > $CSV
   for C in $(seq 1 $CPUCOUNT); do
     NC=$(( $NMODEL / $CPUCOUNT * $C ))
+    echo $REPEAT,$NC >> $CSV
     echo "Running "$I" iterations of $NC x uhxt"$H"p"$P"n"$N" on "$C" cores, "$REPEAT" times..."
     for X in $(seq 1 $REPEAT); do
       $EXE -c$C -n$C -m$NC -r0 -i$I -p $MESH >> $CSV
