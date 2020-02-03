@@ -34,7 +34,7 @@ export OMP_NESTED=false;
 for SIZE in sm; do # md lg; do
 for P in 1 2 3; do
   if [ $SIZE == "sm" ]; then
-    I=4000; N=1; NMODEL=240;
+    I=4000; I0=40; N=1; NMODEL=240;
     export OMP_PROC_BIND=spread,close
     export OMP_NESTED=true;
     export OMP_MAX_ACTIVE_LEVELS=2
