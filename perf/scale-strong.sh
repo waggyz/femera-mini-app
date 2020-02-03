@@ -77,7 +77,7 @@ for P in 1 2 3; do
     fi
   fi
   MESH=$MESHDIR/"uhxt"$H"p"$P/"uhxt"$H"p"$P"n"$N
-  CSV=$PERFDIR/"strong-uhxt"$H"p"$P"-"$YSTR"-"$CPUMODEL".csv"
+  CSV=$PERFDIR/"strong-uhxt"$H"p"$P"-"$YSTR"-"$CPUMODELC".csv"
   echo "Warming up..."
   $EXE -c$CPUCOUNT -i$I0 -p $MESH > $CSV
   for C in $(seq 1 $CPUCOUNT); do
