@@ -34,7 +34,7 @@ export OMP_NESTED=false;
 for SIZE in sm; do # md lg; do
 for P in 1 2 3; do
   if [ $SIZE == "sm" ]; then
-    I=4000; I0=40; N=1; NMODEL=240;
+    I=4000; I0=40; N=1; NMODEL=240;# Number of models using all cores
     export OMP_PROC_BIND=spread,close
     export OMP_NESTED=true;
     export OMP_MAX_ACTIVE_LEVELS=2
@@ -55,13 +55,11 @@ for P in 1 2 3; do
   echo "Warming up..."
   $EXE -c$CPUCOUNT -n$CPUCOUNT -m$NMODEL  -i$I0 -p $MESH > $CSV
   for C in $(seq 1 $CPUCOUNT); do
-    if [ $(( $(($NMODEL / $C)) * $C)) -eq $NMODEL ]; then
-      NC=$(( $NMODEL / $C ))
-      echo "Running "$I" iterations of $NC x uhxt"$H"p"$P"n"$N" on "$C" cores, "$REPEAT" times..."
-      for X in $(seq 1 $REPEAT); do
-        $EXE -c$C -n$C -m$NC -r0 -i$I -p $MESH >> $CSV
-      done
-    fi
+    NC=$(( $NMODEL / $CPUCOUNT * $C ))
+    echo "Running "$I" iterations of $NC x uhxt"$H"p"$P"n"$N" on "$C" cores, "$REPEAT" times..."
+    for X in $(seq 1 $REPEAT); do
+      $EXE -c$C -n$C -m$NC -r0 -i$I -p $MESH >> $CSV
+    done
   done
 done
 done
