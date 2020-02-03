@@ -40,7 +40,7 @@ for P in 1 2 3; do
     export OMP_MAX_ACTIVE_LEVELS=2
     case $P in
       1)
-        H=11;;# 5 kdof
+        H=11;# 5 kdof
         ;;
       2)
         H=5;# 5 kdof
