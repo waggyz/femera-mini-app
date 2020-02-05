@@ -2,7 +2,8 @@
 H=$1; P=$2; N=$3; MESHDIR=$4; GMSH2FMR=$5;
 if [ -n "$6" ]; then PHYS=$6; else PHYS=elas-iso; fi
 if [ -n "$7" ]; then LOGFILE=$7; else LOGFILE=""; fi
-C=`./cpucount.sh`
+if [ -n "$8" ]; then C=$8; else C=`./cpucount.sh`; fi
+#
 VERB=1
 #
 DIR=$MESHDIR"/uhxt"$H"p"$P
