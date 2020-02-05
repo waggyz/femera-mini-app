@@ -154,7 +154,7 @@ if [ 1 == 1 ]; then # Medium and Large Weak Scaling Tests
             ;;
           esac
           case $C in
-            10) SLICESTR="-xS 8 -yS 12 -zS 14" ;; # 1344 parts
+            16) SLICESTR="-xS 8 -yS 12 -zS 14" ;; # 1344 parts
             20) SLICESTR="-xS 10 -yS 12 -zS 14" ;; # 1680 parts
             30) SLICESTR="-xS 12 -yS 14 -zS 15" ;; # 2520 parts
             40) SLICESTR="-xS 14 -yS 15 -zS 16" ;; # 3360 parts
