@@ -20,6 +20,7 @@ GMSH=`which gmsh`
 #
 CPUMODELC=$CPUMODEL"-"$CSTR
 EXE=$EXEDIR/femera-mmq-$CPUMODELC
+GMSH2FMR=$EXEDIR/"gmsh2fmr-"$CPUMODEL"-gcc"
 #
 module load gcc_8.3.0
 #make clean
@@ -156,7 +157,7 @@ if [ 1 == 1 ]; then # Medium and Large Weak Scaling Tests
         esac
         MESH=$MESHDIR/"uhxt"$H"p"$P/"uhxt"$H"p"$P"n"$N
         CSV=$PERFDIR/"weak-"$SZSTR"-p"$P"-"$YSTR"-"$CPUMODELC".csv"
-        $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$EXEDIR/$GMSH2FMR" $C
+        $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$GMSH2FMR" $C
         echo "Warming up..."
         $EXE -c$C -i$I0 -p $MESH
         echo "Running "$I" iterations of uhxt"$H"p"$P"n"$N" on "$C" cores, "$REPEAT" times..."
