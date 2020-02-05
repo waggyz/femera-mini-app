@@ -1,8 +1,9 @@
 #!/bin/bash
 H=$1; P=$2; N=$3; MESHDIR=$4; GMSH2FMR=$5;
 if [ -n "$6" ]; then PHYS=$6; else PHYS=elas-iso; fi
-if [ -n "$7" ]; then LOGFILE=$7; else LOGFILE=""; fi
-if [ -n "$8" ]; then C=$8; else C=`./cpucount.sh`; fi
+if [ -n "$7" ]; then C=$7; else C=`./cpucount.sh`; fi
+#if [ -n "$7" ]; then LOGFILE=$7; else LOGFILE=""; fi
+CPUCOUNT=`./cpucount.sh`
 #
 VERB=1
 #
@@ -20,14 +21,14 @@ fi
 export OMP_SCHEDULE=static
 export OMP_PLACES=cores
 export OMP_PROC_BIND=spread
-export OMP_NUM_THREADS=$C
+export OMP_NUM_THREADS=$CPUCOUNT
 if [ ! -f $DIR"/uhxt"$H"p"$P"n.msh" ]; then
   if [ -n "$LOGFILE" ]; then
     echo "Meshing uhxt"$H"p"$P"n.msh..." >> "$LOGFILE"
   else
     echo "Meshing uhxt"$H"p"$P"n.msh..."
   fi
-  gmsh -nt $C -v $VERB -setnumber p $P -setnumber h $H -setnumber n 1 -3 \
+  gmsh -nt $CPUCOUNT -v $VERB -setnumber p $P -setnumber h $H -setnumber n 1 -3 \
     -format msh2 -o $DIR"/uhxt"$H"p"$P"n.msh" geo/uhxt-cube.geo -save
 fi
 PARTSTR="METIS"
