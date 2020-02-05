@@ -165,7 +165,7 @@ if [ 1 == 1 ]; then # Medium and Large Weak Scaling Tests
         esac
         MESH=$MESHDIR/"uhxt"$H"p"$P/"uhxt"$H"p"$P"n"$N
         CSV=$PERFDIR/"weak-"$SZSTR"-p"$P"-"$YSTR"-"$CPUMODELC".csv"
-        if [ -n $SLICESTR ]; then
+        if [ -n "$SLICESTR" ]; then
           $GMSH2FMR -v1  -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001\
           $SLICESTR -M0 -E100e9 -N0.3 -a $MESHDIR/"uhxt"$H"p"$P/"uhxt"$H"p"$P"n"
         else
