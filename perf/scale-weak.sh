@@ -153,11 +153,24 @@ if [ 1 == 1 ]; then # Medium and Large Weak Scaling Tests
               esac
             ;;
           esac
+          case $C in
+            10) SLICESTR="-xS 8 -yS 12 -zS 14" ;; # 1344 parts
+            20) SLICESTR="-xS 10 -yS 12 -zS 14" ;; # 1680 parts
+            30) SLICESTR="-xS 12 -yS 14 -zS 15" ;; # 2520 parts
+            40) SLICESTR="-xS 14 -yS 15 -zS 16" ;; # 3360 parts
+            *) unset SLICESTR
+            ;;
+          esac
           ;;
         esac
         MESH=$MESHDIR/"uhxt"$H"p"$P/"uhxt"$H"p"$P"n"$N
         CSV=$PERFDIR/"weak-"$SZSTR"-p"$P"-"$YSTR"-"$CPUMODELC".csv"
-        $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$GMSH2FMR" "elas-"$YSTR $C
+        if [ -n $SLICESTR ]; then
+          $GMSH2FMR -v1  -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001\
+          $SLICESTR -M0 -E100e9 -N0.3 -a $MESHDIR/"uhxt"$H"p"$P/"uhxt"$H"p"$P"n"
+        else
+          $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$GMSH2FMR" "elas-"$YSTR $C
+        fi
         echo "Warming up..."
         $EXE -c$C -i$I0 -p $MESH
         echo "Running "$I" iterations of uhxt"$H"p"$P"n"$N" on "$C" cores, "$REPEAT" times..."
