@@ -70,39 +70,70 @@ fi
 #
 if [ 1 == 1 ]; then # Medium and Large Weak Scaling Tests
   EXE=$EXEDIR/femerq-$CPUMODELC
-  I=100; I0=1;
   export OMP_PROC_BIND=spread
   export OMP_NESTED=false;
   unset OMP_MAX_ACTIVE_LEVELS
-  for SZSTR in 50mdof; do # 500kdof 50mdof; do
+  for SZSTR in 500kdof; do # 500kdof 50mdof; do
     for P in 2 3 1; do
       for C in 1 2 3 4 6 8 10 16 20 30 40; do
         case $SZSTR in
           500kdof)
           N=$(( 6 * $C ))
+          I=10000; I0=100;
           case $P in
             1) # P=1
               case $C in
-                1) H=11; ;; # 12.5 kdof
-                2) H=11; ;; # XXX kdof
+                1)  H=12; ;; #  12.5 kdof
+                2)  H=15; ;; #  25   kdof
+                3)  H=17; ;; #  37.5 kdof
+                4)  H=19; ;; #  50   kdof
+                6)  H=22; ;; #  75   kdof
+                8)  H=24; ;; # 100   kdof
+                10) H=26; ;; # 125   kdof
+                12) H=28; ;; # 150   kdof
+                16) H=31; ;; # 200   kdof
+                20) H=33; ;; # 250   kdof
+                30) H=38; ;; # 375   kdof
+                40) H=41; ;; # 500   kdof
               esac
             ;;
             2) # P=2
               case $C in
-                1) H=11; ;; # 12.5 kdof
-                2) H=11; ;; # XXX kdof
+                1)  H=7;  ;; #  12.5 kdof
+                2)  H=9;  ;; #  25   kdof
+                3)  H=10; ;; #  37.5 kdof
+                4)  H=11; ;; #  50   kdof
+                6)  H=13; ;; #  75   kdof
+                8)  H=15; ;; # 100   kdof
+                10) H=16; ;; # 125   kdof
+                12) H=17; ;; # 150   kdof
+                16) H=19; ;; # 200   kdof
+                20) H=21; ;; # 250   kdof
+                30) H=23; ;; # 375   kdof
+                40) H=26; ;; # 500   kdof
               esac
             ;;
             3) # P=3
               case $C in
-                1) H=11; ;; # 12.5 kdof
-                2) H=11; ;; # XXX kdof
+                1)  H=4;  ;; #  12.5 kdof
+                2)  H=6;  ;; #  25   kdof
+                3)  H=7;  ;; #  37.5 kdof
+                4)  H=8;  ;; #  50   kdof
+                6)  H=9;  ;; #  75   kdof
+                8)  H=10; ;; # 100   kdof
+                10) H=11; ;; # 125   kdof
+                12) H=12; ;; # 150   kdof
+                16) H=13; ;; # 200   kdof
+                20) H=14; ;; # 250   kdof
+                30) H=15; ;; # 375   kdof
+                40) H=17; ;; # 500   kdof
               esac
             ;;
           esac
           ;;
           50mdof)
           N=$(( 84 * $C ))
+          I=100; I0=1;
           case $P in
             1) # P=1
               case $C in
@@ -166,8 +197,10 @@ if [ 1 == 1 ]; then # Medium and Large Weak Scaling Tests
         MESH=$MESHDIR/"uhxt"$H"p"$P/"uhxt"$H"p"$P"n"$N
         CSV=$PERFDIR/"weak-"$SZSTR"-p"$P"-"$YSTR"-"$CPUMODELC".csv"
         if [ -n "$SLICESTR" ]; then
-          $GMSH2FMR -v1  -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001\
-          $SLICESTR -M0 -E100e9 -N0.3 -a $MESHDIR/"uhxt"$H"p"$P/"uhxt"$H"p"$P"n"
+          if [ 0 -eq 1 ];then
+            $GMSH2FMR -v1  -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001\
+            $SLICESTR -M0 -E100e9 -N0.3 -a $MESHDIR/"uhxt"$H"p"$P/"uhxt"$H"p"$P"n"
+          fi
         else
           $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$GMSH2FMR" "elas-"$YSTR $C
         fi
