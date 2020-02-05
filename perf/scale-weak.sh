@@ -69,13 +69,13 @@ fi
 #
 if [ 1 == 1 ]; then # Medium and Large Weak Scaling Tests
   EXE=$EXEDIR/femerq-$CPUMODELC
-  I=100; I0=10;
+  I=100; I0=1;
   export OMP_PROC_BIND=spread
   export OMP_NESTED=false;
   unset OMP_MAX_ACTIVE_LEVELS
   for SZSTR in 50mdof; do # 500kdof 50mdof; do
-    for P in 1 2 3; do
-      for C in 1 2 3 4 6 8 10 16 20 40; do
+    for P in 2 3 1; do
+      for C in 1 2 3 4 6 8 10 16 20 30 40; do
         case $SZSTR in
           500kdof)
           N=$(( 6 * $C ))
@@ -105,30 +105,34 @@ if [ 1 == 1 ]; then # Medium and Large Weak Scaling Tests
           case $P in
             1) # P=1
               case $C in
-                1)  H=72;  ;; # 1.25 Mdof
-                2)  H=91;  ;; # 2.5  Mdof
-                3)  H=102; ;; # 3.75 Mdof
-                4)  H=114; ;; # 5    Mdof
-                6)  H=xx; ;; # 7.5  Mdof
-                8)  H=144; ;; # 10   Mdof
-                10) H=xx; ;; # 12.5 Mdof
-                16) H=xx; ;; # 20   Mdof
-                20) H=195; ;; # 25   Mdof
-                40) H=246; ;; # 50   Mdof
+                1)  H=72;  ;; #  1.25 Mdof
+                2)  H=91;  ;; #  2.5  Mdof
+                3)  H=104; ;; #  3.75 Mdof
+                4)  H=113; ;; #  5    Mdof
+                6)  H=133; ;; #  7.5  Mdof
+                8)  H=141; ;; # 10    Mdof
+                10) H=154; ;; # 12.5  Mdof
+                12) H=167; ;; # 15    Mdof
+                16) H=183; ;; # 20    Mdof
+                20) H=195; ;; # 25    Mdof
+                30) H=222; ;; # 37.5  Mdof
+                40) H=246; ;; # 50    Mdof
               esac
             ;;
             2) # P=2
               case $C in
-                1)  H=35; ;;  # 1.25 Mdof
-                2)  H=45; ;;  # 2.5  Mdof
-                3)  H=xxx; ;;  # 3.75 Mdof
-                4)  H=56; ;;  # 5    Mdof
-                6)  H=64; ;;  # 7.5  Mdof
-                8)  H=72; ;;  # 10   Mdof
-                10) H=xxx; ;;  # 12.5 Mdof
-                16) H=90; ;;  # 20   Mdof
-                20) H=96; ;;  # 25   Mdof
-                40) H=123; ;; # 50   Mdof
+                1)  H=35;  ;; #  1.25 Mdof
+                2)  H=45;  ;; #  2.5  Mdof
+                3)  H=51;  ;; #  3.75 Mdof
+                4)  H=57;  ;; #  5    Mdof
+                6)  H=64;  ;; #  7.5  Mdof
+                8)  H=71;  ;; # 10    Mdof
+                10) H=77;  ;; # 12.5  Mdof
+                12) H=82;  ;; # 15    Mdof
+                16) H=90;  ;; # 20    Mdof
+                20) H=96;  ;; # 25    Mdof
+                30) H=112; ;; # 37.5  Mdof
+                40) H=121; ;; # 50    Mdof
               esac
             ;;
             3) # P=3
@@ -139,9 +143,11 @@ if [ 1 == 1 ]; then # Medium and Large Weak Scaling Tests
                 4)  H=37; ;; #  5    Mdof
                 6)  H=42; ;; #  7.5  Mdof
                 8)  H=46; ;; # 10    Mdof
-                10) H=49; ;; # 12.5  Mdof
-                16) H=29; ;; # 20    Mdof
+                10) H=51; ;; # 12.5  Mdof
+                12) H=54; ;; # 15    Mdof
+                16) H=61; ;; # 20    Mdof
                 20) H=63; ;; # 25    Mdof
+                30) H=73; ;; # 37.5  Mdof
                 40) H=80; ;; # 50    Mdof
               esac
             ;;
