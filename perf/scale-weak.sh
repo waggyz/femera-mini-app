@@ -157,7 +157,7 @@ if [ 1 == 1 ]; then # Medium and Large Weak Scaling Tests
         esac
         MESH=$MESHDIR/"uhxt"$H"p"$P/"uhxt"$H"p"$P"n"$N
         CSV=$PERFDIR/"weak-"$SZSTR"-p"$P"-"$YSTR"-"$CPUMODELC".csv"
-        $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$GMSH2FMR" "elas-iso" $C
+        $PERFDIR/mesh-uhxt.sh $H $P $N "$MESHDIR" "$GMSH2FMR" "elas-"$YSTR $C
         echo "Warming up..."
         $EXE -c$C -i$I0 -p $MESH
         echo "Running "$I" iterations of uhxt"$H"p"$P"n"$N" on "$C" cores, "$REPEAT" times..."
