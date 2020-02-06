@@ -42,7 +42,7 @@ if [ 1 == 0 ]; then # Small concurrent model tests
         export OMP_MAX_ACTIVE_LEVELS=2
         case $P in
           1)
-            H=11;# 5 kdof
+            H=10;# 5 kdof
             ;;
           2)
             H=5;# 5 kdof
@@ -67,14 +67,13 @@ if [ 1 == 0 ]; then # Small concurrent model tests
     done
   done
 fi
-#
 if [ 1 == 1 ]; then # Medium and Large Weak Scaling Tests
   EXE=$EXEDIR/femerq-$CPUMODELC
   export OMP_PROC_BIND=spread
   export OMP_NESTED=false;
   unset OMP_MAX_ACTIVE_LEVELS
   for SZSTR in 500kdof; do # 500kdof 50mdof; do
-    for P in 2 3 1; do
+    for P in 1; do
       for C in 1 2 3 4 6 8 10 16 20 30 40; do
         case $SZSTR in
           500kdof)
@@ -83,18 +82,18 @@ if [ 1 == 1 ]; then # Medium and Large Weak Scaling Tests
           case $P in
             1) # P=1
               case $C in
-                1)  H=12; ;; #  12.5 kdof
-                2)  H=15; ;; #  25   kdof
-                3)  H=17; ;; #  37.5 kdof
-                4)  H=19; ;; #  50   kdof
-                6)  H=22; ;; #  75   kdof
-                8)  H=24; ;; # 100   kdof
-                10) H=26; ;; # 125   kdof
-                12) H=28; ;; # 150   kdof
-                16) H=31; ;; # 200   kdof
-                20) H=33; ;; # 250   kdof
-                30) H=38; ;; # 375   kdof
-                40) H=41; ;; # 500   kdof
+                1)  H=15; ;; #  12.5 kdof
+                2)  H=19; ;; #  25   kdof
+                3)  H=21; ;; #  37.5 kdof
+                4)  H=23; ;; #  50   kdof
+                6)  H=27; ;; #  75   kdof
+                8)  H=30; ;; # 100   kdof
+                10) H=33; ;; # 125   kdof
+                12) H=35; ;; # 150   kdof
+                16) H=38; ;; # 200   kdof
+                20) H=41; ;; # 250   kdof
+                30) H=47; ;; # 375   kdof
+                40) H=52; ;; # 500   kdof
               esac
             ;;
             2) # P=2
