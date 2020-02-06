@@ -32,23 +32,26 @@ export OMP_PLACES=cores
 export OMP_PROC_BIND=spread
 export OMP_NESTED=false;
 #
-if [ 1 == 0 ]; then # Small concurrent model tests
+if [ 1 == 1 ]; then # Small concurrent model tests
   for SIZE in sm; do # md lg; do
     for P in 1 2 3; do
       if [ $SIZE == "sm" ]; then
-        I=4000; I0=40; N=1; NMODEL=240;# Number of models using all cores
+        I=1667; I0=40; N=1; NMODEL=240;# Number of models using all cores
         export OMP_PROC_BIND=spread,close
         export OMP_NESTED=true;
         export OMP_MAX_ACTIVE_LEVELS=2
         case $P in
           1)
-            H=10;# 5 kdof
+            #H=10;# 5 kdof
+            H=19;# 25 kdof
             ;;
           2)
-            H=5;# 5 kdof
+            #H=5;# 5 kdof
+            H=9;# 25 kdof
             ;;
           3)
-            H=3;# 5 kdof
+            #H=3;# 5 kdof
+            H=6;# 25 kdof
             ;;
         esac
       fi
