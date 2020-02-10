@@ -8,6 +8,7 @@ else
 fi
 EXEDIR=$( cd "$PERFDIR"; cd ../; pwd )
 #
+SZ=50MDOF
 REPEAT=6
 PHYS="elas-iso"
 CSTR=gcc
@@ -17,16 +18,32 @@ CPUCOUNT=`"$EXEDIR"/cpucount.sh`
 #
 CPUMODELC=$CPUMODEL"-"$CSTR
 C=$CPUCOUNT
+#
+module load gcc_8.3.0
+#make clean
+make -j$CPUCOUNT all
+#
 export OMP_SCHEDULE=static
 export OMP_PLACES=cores
 export OMP_PROC_BIND=spread
 export OMP_NUM_THREADS=$CPUCOUNT
 #
 for P in 2 3 2 1; do
-  case $P in
-    1) H=246; I=100; I0=1; ;;
-    2) H=121; I=100; I0=1; ;;
-    3) H=80;  I=100; I0=1; ;;
+  case $SZ in
+    50MDOF)
+      case $P in
+        1) H=246; I=100; I0=1; ;;
+        2) H=121; I=100; I0=1; ;;
+        3) H=80;  I=100; I0=1; ;;
+      esac
+    ;;
+    100MDOF)
+      case $P in
+        1) H=XXX; I=100; I0=1; ;;
+        2) H=XXX; I=100; I0=1; ;;
+        3) H=XXX; I=100; I0=1; ;;
+      esac
+    ;;
   esac
   CSVFILE=$PERFDIR/"part-uhxt"$H"p"$P"-"$CPUMODELC".csv"
   while IFS="," read -r N SX SY SZ REMAINDER; do
