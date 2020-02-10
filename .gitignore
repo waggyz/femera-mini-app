@@ -5,6 +5,7 @@
 *.log
 *.err
 *.csv
+!perf/part-slice.csv
 
 # Prerequisites
 *.d
@@ -40,6 +41,7 @@
 *.app
 femera-*
 !femera-mini.cc
+!femera-*.sh
 femerq*
 femser*
 femseq*
