@@ -28,7 +28,7 @@ for P in 2 3 2 1; do
     2) H=121; I=100; I0=1; ;;
     3) H=80;  I=100; I0=1; ;;
   esac
-  CSVFILE=$PERFDIR/"uhxt"$H"p"$P"-part-"$CPUMODELC".csv"
+  CSVFILE="part-"$PERFDIR/"uhxt"$H"p"$P"-"$CPUMODELC".csv"
   while IFS="," read -r N SX SY SZ REMAINDER; do
     # echo $N $SX $SY $SZ
     $PERFDIR/"mesh-part.sh" $H $P $SX $SY $SZ $PHYS $MESHDIR
