@@ -50,7 +50,7 @@ for P in 1 2 3; do
     #I=10; I0=1;# 500 Mdof
     case $P in
       1)
-        H=246; N=3360;# 50 Mdof
+        H=246; N=3360; # SLICE="-xS 14 -yS 15 -zS 16" # 50 Mdof 
         #H=531; N=3360; SLICE="-xS 12 -yS 14 -zS 20";
         if [ 1 -eq 0 ]; then
           O=$MESHDIR/"uhxt"$H"p"$P/"uhxt"$H"p"$P"n.msh"
