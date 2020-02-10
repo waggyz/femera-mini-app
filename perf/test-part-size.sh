@@ -21,7 +21,7 @@ export OMP_PLACES=cores
 export OMP_PROC_BIND=spread
 export OMP_NUM_THREADS=$CPUCOUNT
 #
-for $P in 2 3 2 1; do
+for P in 2 3 2 1; do
   case $P in
     1) H=246; I=100; I0=1; ;;
     2) H=121; I=100; I0=1; ;;
