@@ -8,6 +8,7 @@ else
 fi
 EXEDIR=$( cd "$PERFDIR"; cd ../; pwd )
 #
+REPEAT=6
 PHYS="elas-iso"
 CSTR=gcc
 #
@@ -33,7 +34,9 @@ for P in 2 3 2 1; do
     $PERFDIR/"mesh-part.sh" $H $P $SX $SY $SZ $PHYS $MESHDIR
     FMRNAME=$MESHDIR/"uhxt"$H"p"$P/"uhxt"$H"p"$P"n"$N
     $EXEDIR/"femerq-"$CPUMODELC -v1 -c$C -i$I0 -p $FMRNAME
-    $EXEDIR/"femerq-"$CPUMODELC -v1 -c$C -i$I -p $FMRNAME >> $CSVFILE
+    for X in $(seq 1 $REPEAT); do
+      $EXEDIR/"femerq-"$CPUMODELC -v1 -c$C -i$I -p $FMRNAME >> $CSVFILE
+    done;
   done < "$PERFDIR/part-slice.csv"
 done
 #
