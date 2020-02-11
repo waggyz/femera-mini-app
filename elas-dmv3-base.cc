@@ -147,19 +147,19 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       __m256d vS[3];
       // rearrange voigt vector [s0,s1] back to a padded tensor vS
       // Sxx Syy Szz Sxy Sxz Syz 0.0 0.0
-      //  3   2   1   0   7   6   5   4  : mask //FIXME May be backward
-      v4si shf0 = { 3,0,7, 4};
-      v4si shf1 = { 0,2,6, 4};
-      v4si shf2 = { 7,6,1, 4};
+      //  0   1   2   3   4   5   6   7  : mask //FIXME May be backward
+      __m256i shf0 = { 0,3,4, 7};
+      __m256i shf1 = { 3,1,5, 7};
+      __m256i shf2 = { 4,5,2, 7};
       vS[0] =__builtin_shuffle( s0,s1,shf0);
       vS[1] =__builtin_shuffle( s0,s1,shf1);
       vS[2] =__builtin_shuffle( s0,s1,shf2);
       //
-#if 1
+#if 0
       printf("vH:\n");
       print_m256(vH[0]); print_m256(vH[1]); print_m256(vH[2]);
       printf("s:\n"); print_m256(s0); print_m256(s1);
-      printf("vS:\n"); print_m256(vH[1]);
+      printf("vS:\n");
       print_m256(vS[0]); print_m256(vS[1]); print_m256(vS[2]);
 #endif
       if(ip==0){

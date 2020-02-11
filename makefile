@@ -203,10 +203,10 @@ test-ort : mini-omp gmsh2fmr
 test-dmv : mini-dmv gmsh2fmr
 	./gmsh2fmr-$(CPUMODEL) -v1 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 \
-	-M0 -E100e9 -N0.3 -R -ap cube/unit1p1n1;
-	echo ./femerd-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unit1p1n1
+	-M0 -E100e9 -N0.3 -ap cube/unit1p1n2;
+	echo ./femerd-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unit1p1n2
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
-	./femerd-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unit1p1n1
+	./femerd-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unit1p1n2
 
 test-mmp : mini-mmp
 	echo ./femera-mmp-$(CPUMODELC) -v2 -m8 -n2 -c2 -p cube/unst19p1n16
@@ -412,7 +412,7 @@ femerd-$(CPUMODELC) : $(DBJS) $(ODIR)/test.$(DEXT) $(ODIR)/femera-mini.$(DEXT)
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(DBJS) $(ODIR)/test.$(DEXT) $(ODIR)/femera-mini.$(DEXT) $(LDFLAGS) \
 	-DOMP_SCHEDULE=static -DHAS_TEST \
-	-o femerk-$(CPUMODELC) $(CPPLOG);
+	-o femerd-$(CPUMODELC) $(CPPLOG);
 
 femera-mmp-$(CPUMODELC) : $(MBJS) $(ODIR)/test.$(MEXT) $(ODIR)/femera-mini.$(MEXT)
 	echo $(CXX) ... -o femera-mmp-$(CPUMODELC)
