@@ -104,9 +104,9 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
         const INT_MESH* RESTRICT cnxt = &Econn[Nc*(ie+1)];
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
+#endif
         for (int i=0; i<Nc; i++){
           std::memcpy(& u[Nf*i],& sys_u[cnxt[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
-#endif
       } }
 #if 0
       //compute_dmv_s( &vH[0], &D[0], dw );
@@ -148,9 +148,12 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       // rearrange voigt vector [s0,s1] back to a padded tensor vS
       // Sxx Syy Szz Sxy Sxz Syz 0.0 0.0
       //  3   2   1   0   7   6   5   4  : mask //FIXME May be backward
-      vS[0] =__builtin_shuffle( s0,s1,_MM_SHUFFLE( 3,0,7, 4 ));
-      vS[1] =__builtin_shuffle( s0,s1,_MM_SHUFFLE( 0,2,6, 4 ));
-      vS[2] =__builtin_shuffle( s0,s1,_MM_SHUFFLE( 7,6,1, 4 ));
+      v4si shf0 = { 3,0,7, 4};
+      v4si shf1 = { 0,2,6, 4};
+      v4si shf2 = { 7,6,1, 4};
+      vS[0] =__builtin_shuffle( s0,s1,shf0);
+      vS[1] =__builtin_shuffle( s0,s1,shf1);
+      vS[2] =__builtin_shuffle( s0,s1,shf2);
       //
 #if 1
       printf("vH:\n");
