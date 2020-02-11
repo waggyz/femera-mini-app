@@ -52,16 +52,13 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
   FLOAT_PHYS VECALIGNED wgt[intp_n];
   FLOAT_PHYS VECALIGNED align_dmat[48];
-  //FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
   //
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
-  std::copy( & this->mtrl_dmat[0], & this->mtrl_dmat[47], align_dmat );
+  std::copy( &this->mtrl_dmat[0], &this->mtrl_dmat[47], align_dmat );
   //
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
-  //const VECALIGNED FLOAT_SOLV* RESTRICT C     = &matc[0];
-  //const FLOAT_SOLV* RESTRICT C     = &this->mtrl_matc[0];
   const FLOAT_SOLV* RESTRICT D     = &align_dmat[0];
 #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
