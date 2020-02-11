@@ -131,7 +131,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       h=_mm256_set1_pd( H[0] );// Sxx
       s0+=_mm256_load_pd(&D[0]) * h; s1+=_mm256_load_pd(&D[4]) * h;
       h=_mm256_set1_pd( H[5] );// Syy
-      s0+=_mm256_load_pd(&D[8]) * h; s1+=_mm256_load_pd(&D[12])] * h;
+      s0+=_mm256_load_pd(&D[8]) * h; s1+=_mm256_load_pd(&D[12]) * h;
       h=_mm256_set1_pd( H[10] );// Szz
       s0+=_mm256_load_pd(&D[16]) * h; s1+=_mm256_load_pd(&D[20]) * h;
       //
@@ -146,14 +146,14 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       // rearrange voigt vector [s0,s1] back to a padded tensor vS
       // Sxx Syy Szz Sxy Sxz Syz 0.0 0.0
       //  3   2   1   0   7   6   5   4  : mask
-      vS[0] =__builtin_shuffle( s0,s1,{ 3,0,7, 4 });//FIXME May be backward
-      vS[1] =__builtin_shuffle( s0,s1,{ 0,2,6, 4 });
-      vS[2] =__builtin_shuffle( s0,s1,{ 7,6,1, 4 });
+      vS[0] =__builtin_shuffle( s0,s1,_MM_SHUFFLE( 3,0,7, 4 ));//FIXME May be backward
+      vS[1] =__builtin_shuffle( s0,s1,_MM_SHUFFLE( 0,2,6, 4 ));
+      vS[2] =__builtin_shuffle( s0,s1,_MM_SHUFFLE( 7,6,1, 4 ));
       //
 #if 1
       printf("vH:\n");
       print_m256(vH[0]); print_m256(vH[1]); print_m256(vH[2]);
-      printf("s:\n"); print_m256(s1); print_m256(s2);
+      printf("s:\n"); print_m256(s0); print_m256(s1);
       printf("vS:\n"); print_m256(vH[1]);
       print_m256(vS[0]); print_m256(vS[1]); print_m256(vS[2]);
 #endif
