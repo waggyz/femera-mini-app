@@ -123,7 +123,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
          ;
 #endif
       //compute_dmv_s( &vS[0], &H[0], &D[0], dw );
-      __m256 s0=_mm256_setzero_pd(), s1=_mm256_setzero_pd(), h;
+      __m256d s0=_mm256_setzero_pd(), s1=_mm256_setzero_pd(), h;
       h=_mm256_set1_pd( H[0] );// Sxx
       s0+=_mm256_load_pd(&D[0]) * h; s1+=_mm256_load_pd(&D[4]) * h;
       h=_mm256_set1_pd( H[5] );// Syy
