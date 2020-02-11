@@ -141,6 +141,8 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       s0+=_mm256_load_pd(&D[32]) * h; s1+=_mm256_load_pd(&D[36]) * h;
       h=_mm256_set1_pd( H[6] )+_mm256_set1_pd( H[9] );// Syz + Szy
       s0+=_mm256_load_pd(&D[40]) * h; s1+=_mm256_load_pd(&D[44]) * h;
+      {// Scope vS
+      __m256d vS[3];
       // rearrange voigt vector [s0,s1] back to a padded tensor vS
       // Sxx Syy Szz Sxy Sxz Syz 0.0 0.0
       //  3   2   1   0   7   6   5   4  : mask
