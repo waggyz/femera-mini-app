@@ -136,6 +136,7 @@ NEXT = mmq.$(CPUMODEL).$(CSTR).o
 KEXT = lms.$(CPUMODEL).$(CSTR).o
 LEXT = lmq.$(CPUMODEL).$(CSTR).o
 DEXT = dmv.$(CPUMODEL).$(CSTR).o
+EEXT = dmq.$(CPUMODEL).$(CSTR).o
 
 OBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(OEXT)))
 QBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_MINI_C:.$(CEXT)=.$(QEXT)))
@@ -149,6 +150,7 @@ IBJS:= $(patsubst %,$(ODIR)/%,$(HYBRID_ICC_C:.$(CEXT)=.$(IEXT)))
 KBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_STIF_C:.$(CEXT)=.$(KEXT)))
 LBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_STIF_C:.$(CEXT)=.$(LEXT)))
 DBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_DMAT_C:.$(CEXT)=.$(DEXT)))
+EBJS:= $(patsubst %,$(ODIR)/%,$(FEMERA_DMAT_C:.$(CEXT)=.$(EEXT)))
 
 TESTDIR = test/$(CPUMODEL)
 PERFDIR = perf
@@ -159,7 +161,7 @@ _dummy := $(shell mkdir -p mini.o test $(TESTDIR) $(PERFDIR))
 
 all : mini-all gmsh2fmr
 
-mini-all : mini-omp mini-omq mini-mmp mini-mmq mini-lms mini-lmq
+mini-all : mini-omp mini-omq mini-mmp mini-mmq mini-lms mini-lmq mini-dmv mini-dmq
 
 test : all
 	./gmsh2fmr-$(CPUMODEL) -v3 \
@@ -203,10 +205,10 @@ test-ort : mini-omp gmsh2fmr
 test-dmv : mini-dmv gmsh2fmr
 	./gmsh2fmr-$(CPUMODEL) -v1 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 \
-	-M0 -E100e9 -N0.3 -ap cube/unit1p1n2;
-	echo ./femerd-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unit1p1n2
+	-M0 -E100e9 -N0.3 -ap cube/unst19p1n16;
+	echo ./femerd-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
-	./femerd-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unit1p1n2
+	./femerd-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
 
 test-mmp : mini-mmp
 	echo ./femera-mmp-$(CPUMODELC) -v2 -m8 -n2 -c2 -p cube/unst19p1n16
@@ -320,13 +322,19 @@ $(ODIR)/%.$(MEXT) : %.cc *.h  phys-inline.cc
 $(ODIR)/%.$(NEXT) : %.cc *.h  phys-inline.cc
 	echo $(CXX) ... -o $@
 	$(CXX) -c $(OMPFLAGS) $(MMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
-	-DOMP_SCHEDULE=static -DFETCH_JAC -DHAS_TEST -DVERB_MAX=1 \
+	-DOMP_SCHEDULE=static -DFETCH_JAC -DVERB_MAX=1 \
 	$< -o $@ $(CPPLOG)
 
 $(ODIR)/%.$(DEXT) : %.cc *.h  phys-inline.cc
 	echo $(CXX) ... -o $@
 	$(CXX) -c $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	-DOMP_SCHEDULE=static -DHAS_TEST \
+	$< -o $@ $(CPPLOG)
+
+$(ODIR)/%.$(EEXT) : %.cc *.h  phys-inline.cc
+	echo $(CXX) ... -o $@
+	$(CXX) -c $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
+	-DOMP_SCHEDULE=static -DVERB_MAX=1 \
 	$< -o $@ $(CPPLOG)
 
 $(ODIR)/%.$(SEXT) : %.cc *.h  phys-inline.cc
@@ -358,6 +366,8 @@ mini-lms : test-scripts femerk-$(CPUMODELC)
 mini-lmq : test-scripts femeqk-$(CPUMODELC)
 
 mini-dmv : test-scripts femerd-$(CPUMODELC)
+
+mini-dmq : test-scripts femeqd-$(CPUMODELC)
 
 mini-hyb : test-scripts femera-$(CPUMODEL)-hyb
 
@@ -413,6 +423,13 @@ femerd-$(CPUMODELC) : $(DBJS) $(ODIR)/test.$(DEXT) $(ODIR)/femera-mini.$(DEXT)
 	$(DBJS) $(ODIR)/test.$(DEXT) $(ODIR)/femera-mini.$(DEXT) $(LDFLAGS) \
 	-DOMP_SCHEDULE=static -DHAS_TEST \
 	-o femerd-$(CPUMODELC) $(CPPLOG);
+
+femeqd-$(CPUMODELC) : $(EBJS) $(ODIR)/femera-mini.$(EEXT)
+	echo $(CXX) ... -o femeqd-$(CPUMODELC)
+	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
+	$(EBJS) $(ODIR)/femera-mini.$(EEXT) $(LDFLAGS) \
+	-DOMP_SCHEDULE=static -DVERB_MAX=1 \
+	-o femeqd-$(CPUMODELC) $(CPPLOG);
 
 femera-mmp-$(CPUMODELC) : $(MBJS) $(ODIR)/test.$(MEXT) $(ODIR)/femera-mini.$(MEXT)
 	echo $(CXX) ... -o femera-mmp-$(CPUMODELC)
