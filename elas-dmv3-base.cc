@@ -11,9 +11,8 @@ int ElastIso3D::Setup( Elem* E ){
   const uint jacs_n = uint(E->elip_jacs.size()/elem_n/ 10);
   const uint intp_n = uint(E->gaus_n);
   const uint conn_n = uint(E->elem_conn_n);
-#if 0
   this->tens_flop = uint(E->elem_n) * intp_n
-    *( uint(E->elem_conn_n)* (54) + 27 );
+    *( uint(E->elem_conn_n)* (54) + 36*2 + 10 );
   this->tens_band = elem_n *(
      sizeof(FLOAT_SOLV)*(3*conn_n*3+ jacs_n*10)// Main mem
     +sizeof(INT_MESH)*conn_n // Main mem ints
@@ -22,7 +21,6 @@ int ElastIso3D::Setup( Elem* E ){
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) );
   this->stif_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) +2);
-#endif
   return 0;
 }
 int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
