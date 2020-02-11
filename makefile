@@ -386,7 +386,14 @@ gmsh2fmr : gmsh2fmr-$(CPUMODEL)
 	echo ok. > /dev/null
 
 gmsh2fmr-$(CPUMODEL) :
-	echo Please use Gnu gcc to compile gmsh2fmr.
+	echo Please use GNU gcc to compile gmsh2fmr.
+
+
+femerd-$(CPUMODEL)-icc :
+	echo Please use GNU gcc to compile DMAT driver.
+
+femeqd-$(CPUMODEL)-icc :
+	echo Please use GNU gcc to compile DMAT driver.
 
 endif
 
@@ -418,14 +425,14 @@ femeqk-$(CPUMODELC) : $(LBJS) $(ODIR)/femera-mini.$(LEXT)
 	-DOMP_SCHEDULE=static -DVERB_MAX=1 \
 	-o femeqk-$(CPUMODELC) $(CPPLOG);
 
-femerd-$(CPUMODELC) : $(DBJS) $(ODIR)/test.$(DEXT) $(ODIR)/femera-mini.$(DEXT)
+femerd-$(CPUMODEL)-gcc : $(DBJS) $(ODIR)/test.$(DEXT) $(ODIR)/femera-mini.$(DEXT)
 	echo $(CXX) ... -o femerd-$(CPUMODELC)
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(DBJS) $(ODIR)/test.$(DEXT) $(ODIR)/femera-mini.$(DEXT) $(LDFLAGS) \
 	-DOMP_SCHEDULE=static -DHAS_TEST \
 	-o femerd-$(CPUMODELC) $(CPPLOG);
 
-femeqd-$(CPUMODELC) : $(EBJS) $(ODIR)/femera-mini.$(EEXT)
+femeqd-$(CPUMODEL)-gcc : $(EBJS) $(ODIR)/femera-mini.$(EEXT)
 	echo $(CXX) ... -o femeqd-$(CPUMODELC)
 	$(CXX) $(OMPFLAGS) $(LDFLAGS) $(LDLIBS) $(CPPFLAGS) \
 	$(EBJS) $(ODIR)/femera-mini.$(EEXT) $(LDFLAGS) \
