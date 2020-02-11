@@ -21,6 +21,15 @@ int ElastIso3D::Setup( Elem* E ){
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) );
   this->stif_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) +2);
+  // Fill in some dmats for now.
+  const FLOAT_SOLV* RESTRICT C     = &this->mtrl_matc[0];
+  this->mtrl_dmat={
+    C[0],C[1],C[1],0.0,0.0,0.0, 0.0,0.0,
+    C[1],C[0],C[1],0.0,0.0,0.0, 0.0,0.0,
+    C[1],C[1],C[0],0.0,0.0,0.0, 0.0,0.0,
+    0.0,0.0,0.0,C[2],0.0,0.0, 0.0,0.0,
+    0.0,0.0,0.0,0.0,C[2],0.0, 0.0,0.0,
+    0.0,0.0,0.0,0.0,0.0,C[2], 0.0,0.0 };
   return 0;
 }
 int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
@@ -42,23 +51,18 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   FLOAT_PHYS VECALIGNED G[Nt], u[Ne];
   FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
   FLOAT_PHYS VECALIGNED wgt[intp_n];
+  FLOAT_PHYS VECALIGNED align_dmat[48];
   //FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
   //
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
-  //std::copy( &this->mtrl_matc[0], &this->mtrl_matc[mtrl_matc.size()], matc );
+  std::copy( & this->mtrl_dmat[0], & this->mtrl_dmat[47], align_dmat );
   //
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
   //const VECALIGNED FLOAT_SOLV* RESTRICT C     = &matc[0];
-  const FLOAT_SOLV* RESTRICT C     = &this->mtrl_matc[0];
-  const FLOAT_PHYS VECALIGNED D[48]={
-    C[0],C[1],C[1],0.0,0.0,0.0, 0.0,0.0,
-    C[1],C[0],C[1],0.0,0.0,0.0, 0.0,0.0,
-    C[1],C[1],C[0],0.0,0.0,0.0, 0.0,0.0,
-    0.0,0.0,0.0,C[2],0.0,0.0, 0.0,0.0,
-    0.0,0.0,0.0,0.0,C[2],0.0, 0.0,0.0,
-    0.0,0.0,0.0,0.0,0.0,C[2], 0.0,0.0 };
+  //const FLOAT_SOLV* RESTRICT C     = &this->mtrl_matc[0];
+  const FLOAT_SOLV* RESTRICT D     = &align_dmat[0];
 #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
   for(uint j=0;j<mtrl_matc.size();j++){

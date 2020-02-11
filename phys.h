@@ -79,6 +79,7 @@ public:
   //
   Phys::vals mtrl_matc;// Unique D-matrix values? FIXME Change to mtrl_coef?
   Phys::vals mtrl_rotc;
+  Phys::vals mtrl_dmat;// Conventional 6x6 DMAT, full storage, padded to 8 cols
   //
   //FIXME Replace these with enumerator keys for mtrl_prop or mtrl_matc?
   Phys::vals elas_prop;
