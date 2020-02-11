@@ -122,6 +122,10 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
          + __builtin_shuffle( vH[2],      { 0,1,3,3 } )
          ;
 #endif
+      FLOAT_PHYS VECALIGNED H[12];
+      _mm256_store_pd(&H[0],vH[0]);
+      _mm256_store_pd(&H[4],vH[1]);
+      _mm256_store_pd(&H[8],vH[2]);
       //compute_dmv_s( &vS[0], &H[0], &D[0], dw );
       __m256d s0=_mm256_setzero_pd(), s1=_mm256_setzero_pd(), h;
       h=_mm256_set1_pd( H[0] );// Sxx
