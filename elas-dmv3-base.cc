@@ -54,13 +54,13 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
   //const VECALIGNED FLOAT_SOLV* RESTRICT C     = &matc[0];
   const FLOAT_SOLV* RESTRICT C     = &this->mtrl_matc[0]
-  const FLOAT_PHYS VECALIGNED D[36]={
-    C[0],C[1],C[1],0.0,0.0,0.0,
-    C[1],C[0],C[1],0.0,0.0,0.0,
-    C[1],C[1],C[0],0.0,0.0,0.0,
-    0.0,0.0,0.0,C[2],0.0,0.0,
-    0.0,0.0,0.0,0.0,C[2],0.0,
-    0.0,0.0,0.0,0.0,0.0,C[2] };
+  const FLOAT_PHYS VECALIGNED D[48]={
+    C[0],C[1],C[1],0.0,0.0,0.0, 0.0,0.0,
+    C[1],C[0],C[1],0.0,0.0,0.0, 0.0,0.0,
+    C[1],C[1],C[0],0.0,0.0,0.0, 0.0,0.0,
+    0.0,0.0,0.0,C[2],0.0,0.0, 0.0,0.0,
+    0.0,0.0,0.0,0.0,C[2],0.0, 0.0,0.0,
+    0.0,0.0,0.0,0.0,0.0,C[2], 0.0,0.0 };
 #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
   for(uint j=0;j<mtrl_matc.size();j++){
@@ -108,12 +108,53 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
           std::memcpy(& u[Nf*i],& sys_u[cnxt[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
 #endif
       } }
-// Reuse vH instead of new vS
-      compute_dmv_s( &vH[0], &D[0], dw );
+#if 0
+      //compute_dmv_s( &vH[0], &D[0], dw );
+      __mm256 h0, h1;
+      // Rearrange vH[index](lane) into a voigt vector in v0,v1.
+      // v0 ={ vH[0](0), vH[1](1), vH[2](2), vH[0](1)+vH[1](0) }
+      // v1 ={ vH[0](2)+vH[2](0), vH[1](2)+vH[2](1) }
+      h0 = __builtin_shuffle( vH[0],vH[1],{ 0,3,3,5 } )
+         + __builtin_shuffle( vH[1],vH[0],{ 3,1,3,4 } )
+         + __builtin_shuffle( vH[2],      { 3,3,2,3 } )
+         ;
+      h1 = __builtin_shuffle( vH[0],vH[1],{ 2,6,3,3 } )
+         + __builtin_shuffle( vH[2],      { 0,1,3,3 } )
+         ;
+#endif
+      //compute_dmv_s( &vS[0], &H[0], &D[0], dw );
+      __mm256 s0=_mm256_setzero_pd(), s1=_mm256_setzero_pd(), h;
+      h=_mm256_set1_pd( H[0] );// Sxx
+      s0+=_mm256_load_pd(&D[0]) * h; s1+=_mm256_load_pd(&D[4]) * h;
+      h=_mm256_set1_pd( H[5] );// Syy
+      s0+=_mm256_load_pd(&D[8]) * h; s1+=_mm256_load_pd(&D[12])] * h;
+      h=_mm256_set1_pd( H[10] );// Szz
+      s0+=_mm256_load_pd(&D[16]) * h; s1+=_mm256_load_pd(&D[20]) * h;
+      //
+      h=_mm256_set1_pd( H[1] )+_mm256_set1_pd( H[4] );// Sxy + Syx
+      s0+=_mm256_load_pd(&D[24]) * h; s1+=_mm256_load_pd(&D[28]) * h;
+      h=_mm256_set1_pd( H[2] )+_mm256_set1_pd( H[8] );// Sxz + Szx
+      s0+=_mm256_load_pd(&D[32]) * h; s1+=_mm256_load_pd(&D[36]) * h;
+      h=_mm256_set1_pd( H[6] )+_mm256_set1_pd( H[9] );// Syz + Szy
+      s0+=_mm256_load_pd(&D[40]) * h; s1+=_mm256_load_pd(&D[44]) * h;
+      // rearrange voigt vector [s0,s1] back to a padded tensor vS
+      // Sxx Syy Szz Sxy Sxz Syz 0.0 0.0
+      //  3   2   1   0   7   6   5   4  : mask
+      vS[0] =__builtin_shuffle( s0,s1,{ 3,0,7, 4 });//FIXME May be backward
+      vS[1] =__builtin_shuffle( s0,s1,{ 0,2,6, 4 });
+      vS[2] =__builtin_shuffle( s0,s1,{ 7,6,1, 4 });
+      //
+#if 1
+      printf("vH:\n");
+      print_m256(vH[0]); print_m256(vH[1]); print_m256(vH[2]);
+      printf("s:\n"); print_m256(s1); print_m256(s2);
+      printf("vS:\n"); print_m256(vH[1]);
+      print_m256(vS[0]); print_m256(vS[1]); print_m256(vS[2]);
+#endif
       if(ip==0){
         for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
       }
-      accumulate_f( &vf[0], &vH[0], &G[0], Nc );
+      accumulate_f( &vf[0], &vS[0], &G[0], Nc );
       }// end vS register scope
     }//========================================================== end intp loop
 #ifdef __INTEL_COMPILER

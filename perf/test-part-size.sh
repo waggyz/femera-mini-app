@@ -45,7 +45,14 @@ for P in 2 3 2 1; do
       esac
     ;;
   esac
-  CSVFILE=$PERFDIR/"part-uhxt"$H"p"$P"-"$CPUMODELC".csv"
+  CSVFILE=$PERFDIR/"part-uhxt"$H"p"$P"-"$PHYS"-"$CPUMODELC".csv"
+  # Run at 1 part/core
+  $PERFDIR/"mesh-part.sh" $H $P $C $C $PHYS $MESHDIR
+  FMRNAME=$MESHDIR/"uhxt"$H"p"$P/"uhxt"$H"p"$P"n"$C
+  $EXEDIR/"femerq-"$CPUMODELC -v1 -c$C -i$I0 -p $FMRNAME
+  for X in $(seq 1 $REPEAT); do
+    $EXEDIR/"femerq-"$CPUMODELC -v1 -c$C -i$I -p $FMRNAME >> $CSVFILE
+  done
   while IFS="," read -r N SX SY SZ REMAINDER; do
     # echo $N $SX $SY $SZ
     $PERFDIR/"mesh-part.sh" $H $P $SX $SY $SZ $PHYS $MESHDIR
@@ -53,7 +60,7 @@ for P in 2 3 2 1; do
     $EXEDIR/"femerq-"$CPUMODELC -v1 -c$C -i$I0 -p $FMRNAME
     for X in $(seq 1 $REPEAT); do
       $EXEDIR/"femerq-"$CPUMODELC -v1 -c$C -i$I -p $FMRNAME >> $CSVFILE
-    done;
+    done
   done < "$PERFDIR/part-slice.csv"
 done
 #

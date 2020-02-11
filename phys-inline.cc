@@ -3,7 +3,7 @@
 #include "femera.h"
 #include <immintrin.h>
 //FIXME These inline intrinsics functions should be in the class where used.
-#if 0
+#if 1
 static inline void print_m256(const __m256d v){// Debugging register print
   double V[4];
   _mm256_store_pd(&V[0],v);
