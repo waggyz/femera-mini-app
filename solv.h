@@ -85,9 +85,9 @@ protected:
     //FIXME Make this the right size
     //for(INT_MESH i=0; i<udof_n; i++){ part_0[i]=1.0; }
 #else
+    part_f.resize(udof_n+1,0.0);
     part_u.resize(udof_n+1,0.0);// Initial Solution Guess
     part_r.resize(udof_n+1,0.0);// Residuals
-    part_d.resize(udof_n+1,0.0);// Diagonal Preconditioner
 #endif
 #if VERB_MAX > 13
     std::cout << valign_byte "-byte aligned pointer to part_f[0]: "
