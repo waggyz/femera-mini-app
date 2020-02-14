@@ -107,53 +107,8 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
         for (int i=0; i<Nc; i++){
           std::memcpy(& u[Nf*i],& sys_u[cnxt[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
       } }
-#if 0
-      //compute_dmv_s( &vH[0], &D[0], dw );
-      __mm256 h0, h1;
-      // Rearrange vH[index](lane) into a voigt vector in v0,v1.
-      // v0 ={ vH[0](0), vH[1](1), vH[2](2), vH[0](1)+vH[1](0) }
-      // v1 ={ vH[0](2)+vH[2](0), vH[1](2)+vH[2](1) }
-      h0 = __builtin_shuffle( vH[0],vH[1],{ 0,3,3,5 } )
-         + __builtin_shuffle( vH[1],vH[0],{ 3,1,3,4 } )
-         + __builtin_shuffle( vH[2],      { 3,3,2,3 } )
-         ;
-      h1 = __builtin_shuffle( vH[0],vH[1],{ 2,6,3,3 } )
-         + __builtin_shuffle( vH[2],      { 0,1,3,3 } )
-         ;
-#endif
-      FLOAT_PHYS VECALIGNED H[12];
-      _mm256_store_pd(&H[0],vH[0]);
-      _mm256_store_pd(&H[4],vH[1]);
-      _mm256_store_pd(&H[8],vH[2]);
-      //compute_dmv_s( &vS[0], &H[0], &D[0], dw );
-      __m256d s0=_mm256_setzero_pd(), s1=_mm256_setzero_pd(), h;
-      h=_mm256_set1_pd( H[0] );// Sxx
-      s0+=_mm256_load_pd(&D[0]) * h; s1+=_mm256_load_pd(&D[4]) * h;
-      h=_mm256_set1_pd( H[5] );// Syy
-      s0+=_mm256_load_pd(&D[8]) * h; s1+=_mm256_load_pd(&D[12]) * h;
-      h=_mm256_set1_pd( H[10] );// Szz
-      s0+=_mm256_load_pd(&D[16]) * h; s1+=_mm256_load_pd(&D[20]) * h;
-      //
-      h=_mm256_set1_pd( H[1] )+_mm256_set1_pd( H[4] );// Sxy + Syx
-      s0+=_mm256_load_pd(&D[24]) * h; s1+=_mm256_load_pd(&D[28]) * h;
-      h=_mm256_set1_pd( H[2] )+_mm256_set1_pd( H[8] );// Sxz + Szx
-      s0+=_mm256_load_pd(&D[32]) * h; s1+=_mm256_load_pd(&D[36]) * h;
-      h=_mm256_set1_pd( H[6] )+_mm256_set1_pd( H[9] );// Syz + Szy
-      s0+=_mm256_load_pd(&D[40]) * h; s1+=_mm256_load_pd(&D[44]) * h;
-      __m256d dw1=_mm256_set1_pd( dw );
-      s0*= dw1; s1*= dw1;
-      {// Scope vS
-      __m256d vS[3];
-      // rearrange voigt vector [s0,s1] back to a padded tensor vS
-      // Sxx Syy Szz Sxy Sxz Syz 0.0 0.0
-      //  0   1   2   3   4   5   6   7  : mask //FIXME May be backward
-      __m256i shf0 = { 0,3,4, 7};
-      __m256i shf1 = { 3,1,5, 7};
-      __m256i shf2 = { 4,5,2, 7};
-      vS[0] =__builtin_shuffle( s0,s1,shf0);
-      vS[1] =__builtin_shuffle( s0,s1,shf1);
-      vS[2] =__builtin_shuffle( s0,s1,shf2);
-      //
+      //compute_dmv_s( &vS[0], &vH[0], &D[0], dw );
+      compute_dmv_s( &vH[0], &D[0], dw );//FIXME Could be this.
 #if 0
       printf("vH:\n");
       print_m256(vH[0]); print_m256(vH[1]); print_m256(vH[2]);
@@ -164,8 +119,8 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       if(ip==0){
         for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
       }
-      accumulate_f( &vf[0], &vS[0], &G[0], Nc );
-      }// end vS register scope
+      accumulate_f( &vf[0], &vH[0], &G[0], Nc );
+      //}// end vS register scope
     }//========================================================== end intp loop
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned

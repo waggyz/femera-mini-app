@@ -305,6 +305,81 @@ static inline void compute_g_h( FLOAT_PHYS* G, __m256d* vH,// line 273
   }
 #endif
 }//was line 320
+// DMAT Driver
+static inline void compute_dmv_s(__m256d* vS,
+  const __m256d* vH,const FLOAT_PHYS* D,const FLOAT_PHYS dw ){
+  __m256d s0=_mm256_setzero_pd(), s1=_mm256_setzero_pd();
+  {// Scope H and h.
+  FLOAT_PHYS VECALIGNED H[12];
+  _mm256_store_pd(&H[0],vH[0]);
+  _mm256_store_pd(&H[4],vH[1]);
+  _mm256_store_pd(&H[8],vH[2]);
+  __m256d h;
+  h=_mm256_set1_pd( H[0] );// Sxx
+  s0+=_mm256_load_pd(&D[0]) * h; s1+=_mm256_load_pd(&D[4]) * h;
+  h=_mm256_set1_pd( H[5] );// Syy
+  s0+=_mm256_load_pd(&D[8]) * h; s1+=_mm256_load_pd(&D[12]) * h;
+  h=_mm256_set1_pd( H[10] );// Szz
+  s0+=_mm256_load_pd(&D[16]) * h; s1+=_mm256_load_pd(&D[20]) * h;
+  //
+  h=_mm256_set1_pd( H[1] )+_mm256_set1_pd( H[4] );// Sxy + Syx
+  s0+=_mm256_load_pd(&D[24]) * h; s1+=_mm256_load_pd(&D[28]) * h;
+  h=_mm256_set1_pd( H[2] )+_mm256_set1_pd( H[8] );// Sxz + Szx
+  s0+=_mm256_load_pd(&D[32]) * h; s1+=_mm256_load_pd(&D[36]) * h;
+  h=_mm256_set1_pd( H[6] )+_mm256_set1_pd( H[9] );// Syz + Szy
+  s0+=_mm256_load_pd(&D[40]) * h; s1+=_mm256_load_pd(&D[44]) * h;
+  }{//Scope dw1.
+  const __m256d dw1=_mm256_set1_pd( dw );
+  s0*= dw1; s1*= dw1;
+  }{// Scope shfX
+  // rearrange voigt vector [s0,s1] back to a padded tensor vS
+  // Sxx Syy Szz Sxy Sxz Syz 0.0 0.0
+  //  0   1   2   3   4   5   6   7  : mask //FIXME May be backward
+  const __m256i shf0 = { 0,3,4, 7};
+  const __m256i shf1 = { 3,1,5, 7};
+  const __m256i shf2 = { 4,5,2, 7};
+  vS[0] =__builtin_shuffle( s0,s1,shf0);
+  vS[1] =__builtin_shuffle( s0,s1,shf1);
+  vS[2] =__builtin_shuffle( s0,s1,shf2);
+  }
+}
+static inline void compute_dmv_s(__m256d* vA,
+  const FLOAT_PHYS* D,const FLOAT_PHYS dw ){
+  __m256d s0=_mm256_setzero_pd(), s1=_mm256_setzero_pd();
+  {// Scope H and h.
+  FLOAT_PHYS VECALIGNED H[12];
+  _mm256_store_pd(&H[0],vA[0]);
+  _mm256_store_pd(&H[4],vA[1]);
+  _mm256_store_pd(&H[8],vA[2]);
+  __m256d h;
+  h=_mm256_set1_pd( H[0] );// Sxx
+  s0+=_mm256_load_pd(&D[0]) * h; s1+=_mm256_load_pd(&D[4]) * h;
+  h=_mm256_set1_pd( H[5] );// Syy
+  s0+=_mm256_load_pd(&D[8]) * h; s1+=_mm256_load_pd(&D[12]) * h;
+  h=_mm256_set1_pd( H[10] );// Szz
+  s0+=_mm256_load_pd(&D[16]) * h; s1+=_mm256_load_pd(&D[20]) * h;
+  //
+  h=_mm256_set1_pd( H[1] )+_mm256_set1_pd( H[4] );// Sxy + Syx
+  s0+=_mm256_load_pd(&D[24]) * h; s1+=_mm256_load_pd(&D[28]) * h;
+  h=_mm256_set1_pd( H[2] )+_mm256_set1_pd( H[8] );// Sxz + Szx
+  s0+=_mm256_load_pd(&D[32]) * h; s1+=_mm256_load_pd(&D[36]) * h;
+  h=_mm256_set1_pd( H[6] )+_mm256_set1_pd( H[9] );// Syz + Szy
+  s0+=_mm256_load_pd(&D[40]) * h; s1+=_mm256_load_pd(&D[44]) * h;
+  }{//Scope dw1.
+  const __m256d dw1=_mm256_set1_pd( dw );
+  s0*= dw1; s1*= dw1;
+  }{// Scope shfX.
+  // rearrange voigt vector [s0,s1] back to a padded tensor vA
+  // Sxx Syy Szz Sxy Sxz Syz 0.0 0.0
+  //  0   1   2   3   4   5   6   7  : mask //FIXME May be backward
+  const __m256i shf0 = { 0,3,4, 7};
+  const __m256i shf1 = { 3,1,5, 7};
+  const __m256i shf2 = { 4,5,2, 7};
+  vA[0] =__builtin_shuffle( s0,s1,shf0);
+  vA[1] =__builtin_shuffle( s0,s1,shf1);
+  vA[2] =__builtin_shuffle( s0,s1,shf2);
+  }
+}
 // Nonlinear isotropic intrinsics ---------------------------------------------
 static inline void compute_g_p_h(
   FLOAT_PHYS* G, __m256d* vP, __m256d* vH,
