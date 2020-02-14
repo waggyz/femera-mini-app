@@ -107,8 +107,11 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
         for (int i=0; i<Nc; i++){
           std::memcpy(& u[Nf*i],& sys_u[cnxt[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
       } }
-      //compute_dmv_s( &vS[0], &vH[0], &D[0], dw );
-      compute_dmv_s( &vH[0], &D[0], dw );//FIXME Could be this.
+#if 0
+      __m256d vS[3]; compute_dmv_s( &vS[0], &vH[0], &D[0], dw );
+#else
+      compute_dmv_s( &vH[0], &D[0], dw );
+#endif
 #if 0
       printf("vH:\n");
       print_m256(vH[0]); print_m256(vH[1]); print_m256(vH[2]);
