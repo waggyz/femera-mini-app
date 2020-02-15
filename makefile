@@ -74,6 +74,8 @@ endif
 # Check if AVX2 is supported.
 ifneq (,$(findstring AVX2,$(CPUSIMD)))
   CPPFLAGS:=$(CPPFLAGS) -DHAS_AVX2
+  FEMERA_DMAT=elas-dmv3-base.cc
+  #FIXME Intel does not compile DMAT driver?
 endif
 
 OMPFLAGS:=$(OMPFLAGS) -DFETCH_JAC
@@ -82,11 +84,10 @@ MMPFLAGS = -DOMP_NESTED=true -DOMP_PROC_BIND=spread,close
 
 CPUMODELC:=$(CPUMODEL)-$(CSTR)
 
-FEMERA_COMMON = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
+FEMERA_COMMON = $(FEMERA_DMAT) mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
  halo-pcg-omp.cc halo-ncg-omp.cc halo-pcr-dummy.cc\
- elas-iso3.cc elas-ort3.cc elas-dmv3.cc elas-dmv3-base.cc\
+ elas-iso3.cc elas-ort3.cc elas-dmv3.cc\
  elas-plkh-iso3.cc elas-ther-iso3.cc elas-ther-ort3.cc
-
 
 FEMERA_BASE_C = $(FEMERA_COMMON)\
  elas-iso3-base.cc elas-ort3-bas2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-bas2.cc\
