@@ -63,6 +63,10 @@ endif
 # -Wsuggest-final-types -Wsuggest-final-methods -O3 -flto
 endif
 
+
+FEMERA_DMAT=elas-dmv3-base.cc
+#FIXME Intel does not compile DMAT driver?
+
 # Check if pragma omp simd is supported.
 HAS_PRGAMA_SIMD:=$(shell $(CXX) $(OMPFLAGS)\
  -Wunknown-pragmas unit-test/test-pragma-simd.c\
@@ -74,8 +78,6 @@ endif
 # Check if AVX2 is supported.
 ifneq (,$(findstring AVX2,$(CPUSIMD)))
   CPPFLAGS:=$(CPPFLAGS) -DHAS_AVX2
-  FEMERA_DMAT=elas-dmv3-base.cc
-  #FIXME Intel does not compile DMAT driver?
 endif
 
 OMPFLAGS:=$(OMPFLAGS) -DFETCH_JAC

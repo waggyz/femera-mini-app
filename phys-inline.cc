@@ -331,8 +331,9 @@ static inline void compute_dmv_s(__m256d* vS,
   }{//Scope dw1.
   const __m256d dw1=_mm256_set1_pd( dw );
   s0*= dw1; s1*= dw1;
-  }{// Scope shfX
+  }{// Scope shfX or V
   // rearrange voigt vector [s0,s1] back to a padded tensor vS
+#ifdef HAS_AVX2
   // Sxx Syy Szz Sxy Sxz Syz 0.0 0.0
   //  0   1   2   3   4   5   6   7  : mask //FIXME May be backward
   const __m256i shf0 = { 0,3,4, 7};
@@ -341,6 +342,14 @@ static inline void compute_dmv_s(__m256d* vS,
   vS[0] =__builtin_shuffle( s0,s1,shf0);
   vS[1] =__builtin_shuffle( s0,s1,shf1);
   vS[2] =__builtin_shuffle( s0,s1,shf2);
+#else
+  FLOAT_PHYS VECALIGNED V[8];
+  _mm256_store_pd(&V[0],s0);
+  _mm256_store_pd(&V[4],s1);
+  vS[0] =_mm256_set_pd(0.0, V[4],V[3],V[0]);
+  vS[1] =_mm256_set_pd(0.0, V[5],V[1],V[3]);
+  vS[2] =_mm256_set_pd(0.0, V[2],V[5],V[4]);
+#endif
   }
 }
 static inline void compute_dmv_s(__m256d* vA,
@@ -368,8 +377,9 @@ static inline void compute_dmv_s(__m256d* vA,
   }{//Scope dw1.
   const __m256d dw1=_mm256_set1_pd( dw );
   s0*= dw1; s1*= dw1;
-  }{// Scope shfX.
+  }{// Scope shfX or V.
   // rearrange voigt vector [s0,s1] back to a padded tensor vA
+#ifdef HAS_AVX2
   // Sxx Syy Szz Sxy Sxz Syz 0.0 0.0
   //  0   1   2   3   4   5   6   7  : mask //FIXME May be backward
   const __m256i shf0 = { 0,3,4, 7};
@@ -378,6 +388,14 @@ static inline void compute_dmv_s(__m256d* vA,
   vA[0] =__builtin_shuffle( s0,s1,shf0);
   vA[1] =__builtin_shuffle( s0,s1,shf1);
   vA[2] =__builtin_shuffle( s0,s1,shf2);
+#else
+  FLOAT_PHYS VECALIGNED V[8];
+  _mm256_store_pd(&V[0],s0);
+  _mm256_store_pd(&V[4],s1);
+  vA[0] =_mm256_set_pd(0.0, V[4],V[3],V[0]);
+  vA[1] =_mm256_set_pd(0.0, V[5],V[1],V[3]);
+  vA[2] =_mm256_set_pd(0.0, V[2],V[5],V[4]);
+#endif
   }
 }
 // Nonlinear isotropic intrinsics ---------------------------------------------
