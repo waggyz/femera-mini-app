@@ -40,7 +40,7 @@ int main( int argc, char** argv ) {
   INT_PART part_0=0, part_n=0;
   Gmsh* M = new Gmsh();
   bool save_asc=false, save_bin=false, save_csv=false, save_abq=false;
-  bool is_part=false;
+  bool is_part=false, usedmat=false;
   std::unordered_map<int,std::vector<FLOAT_PHYS>>
     mtrl_part, tcon_part, texp_part, plas_part;
   bool rotfile=false, allrand=false;// Random orientations
@@ -72,7 +72,7 @@ int main( int argc, char** argv ) {
     //
     opterr = 0; int c;
     while ((c = getopt (argc, argv,
-      "abcqo:pv:wt:n:@:xyzT0u:f:S:M:X:Y:Z:E:N:G:A:K:J:C:B:O:R")) != -1){
+      "abcqDo:pv:wt:n:@:xyzT0u:f:S:M:X:Y:Z:E:N:G:A:K:J:B:O:R")) != -1){
       // x:  x requires an argument
       mtrldone=true;
       switch (c) {
@@ -111,7 +111,9 @@ int main( int argc, char** argv ) {
           if(hasmatc|hasmatp){ parttmp.push_back(atoi(optarg));
           }else{mtrldone=false;parttags.push_back(atoi(optarg));
           };break; }// Mesh partition number
-        case 'C':{ matclist.push_back(atof(optarg)); hasmatc=true; mtrldone=false;break; }
+        case 'D':{ usedmat=true; break; }
+          //matclist.push_back(atof(optarg)); hasmatc=true; mtrldone=false; break; }
+//        case 'C':{ matclist.push_back(atof(optarg)); hasmatc=true; mtrldone=false;break; }
         case 'E':{ younlist.push_back(atof(optarg)); hasmatp=true; mtrldone=false;break; }
         case 'N':{ poislist.push_back(atof(optarg)); hasmatp=true; mtrldone=false;break; }
         case 'G':{ smodlist.push_back(atof(optarg)); hasmatp=true; mtrldone=false;break; }
@@ -643,15 +645,20 @@ int main( int argc, char** argv ) {
             props[i]=orislist[3* (part_i-part_0)+i ]; }
         }
       }
-      if(props.size()>3){
-        for(uint i=0;i<3;i++){ dirs[i]=props[i]; }
-        prop.resize(props.size()-3);
-        for(uint i=3;i<props.size();i++){ prop[i-3]=props[i]; }
-        Y=new ElastOrtho3D(prop,dirs);
+      if(usedmat){
+        dirs.resize(0);//FIXME Turn this back on later?
+        Y=new ElastDmv3D(props,dirs);
       }else{
-        prop.resize(props.size());
-        for(uint i=0;i<props.size();i++){ prop[i]=props[i]; }
-        Y=new ElastIso3D(prop[0],prop[1]);
+        if(props.size()>3){
+          for(uint i=0;i<3;i++){ dirs[i]=props[i]; }
+          prop.resize(props.size()-3);
+          for(uint i=3;i<props.size();i++){ prop[i-3]=props[i]; }
+          Y=new ElastOrtho3D(prop,dirs);
+        }else{
+          prop.resize(props.size());
+          for(uint i=0;i<props.size();i++){ prop[i]=props[i]; }
+          Y=new ElastIso3D(prop[0],prop[1]);
+        }
       }
       if(tcon_part.count(part_i)>0){
         if(verbosity>1){

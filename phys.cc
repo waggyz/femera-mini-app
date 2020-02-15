@@ -155,8 +155,13 @@ int Phys::ReadPartFMR( const char* fname, bool is_bin ){
     //FIXED This parsing no longer requires properties in a specific order
     if(fmrstring=="$Elastic"){// Elastic Constants
       int s=0; fmrfile >> s;
-      elas_prop.resize(s);
-      for(int i=0; i<s; i++){ fmrfile >> elas_prop[i]; }
+      if(s<21){
+        elas_prop.resize(s);
+        for(int i=0; i<s; i++){ fmrfile >> elas_prop[i]; }
+      }else{
+        mtrl_matc.resize(s);
+        for(int i=0; i<s; i++){ fmrfile >> mtrl_matc[i]; }
+      }
     }
     if(fmrstring=="$ThermalExpansion"){// Thermal expansion
       int s=0; fmrfile >> s;
@@ -205,7 +210,20 @@ int Phys::SavePartFMR( const char* fname, bool is_bin ){
     for(uint i=0;i<mtrl_dirs.size();i++){ fmrfile <<" "<< mtrl_dirs[i]; }
     fmrfile <<'\n';
   }
-  if(elas_prop.size()>0){
+  if(mtrl_dmat.size()>0){
+    fmrfile << "$Elastic" <<'\n';
+    if(mtrl_dmat.size()>36){
+      fmrfile << 36;
+      for(int i=0;i<6;i++){
+        for(int j=0;j<6;j++){
+          fmrfile <<" "<< mtrl_dmat[8*i+j]; } }
+    }else{
+      fmrfile << mtrl_dmat.size();
+      for(uint i=0;i<mtrl_dmat.size();i++){ fmrfile <<" "<< mtrl_dmat[i];
+    }
+    fmrfile << '\n';
+  } }
+  else if(elas_prop.size()>0){
     fmrfile << "$Elastic" <<'\n';
     fmrfile << elas_prop.size();
     for(uint i=0;i<elas_prop.size();i++){ fmrfile <<" "<< elas_prop[i]; }

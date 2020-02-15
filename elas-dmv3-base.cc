@@ -5,8 +5,19 @@
 #include "femera.h"
 #include <immintrin.h>
 //
-int ElastIso3D::Setup( Elem* E ){
+int ElastDmv3D::Setup( Elem* E ){
   JacT  ( E );
+#if 0
+  printf("\nelas_prop\n");
+  for(uint i=0;i<elas_prop.size();i++){ printf(" %7.1e",mtrl_matc[i]);
+    if(!((i+1)%8)){printf("\n");} }
+  printf("\nmtrl_matc\n");
+  for(uint i=0;i<mtrl_matc.size();i++){ printf(" %7.1e",mtrl_matc[i]);
+    if(!((i+1)%8)){printf("\n");} }
+  printf("\nmtrl_dmat\n");
+  for(uint i=0;i<mtrl_dmat.size();i++){ printf(" %7.1e",mtrl_dmat[i]);
+    if(!((i+1)%8)){printf("\n");} }
+#endif
   const uint elem_n = uint(E->elem_n);
   const uint jacs_n = uint(E->elip_jacs.size()/elem_n/ 10);
   const uint intp_n = uint(E->gaus_n);
@@ -21,6 +32,7 @@ int ElastIso3D::Setup( Elem* E ){
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) );
   this->stif_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) +2);
+#if 0
   // Fill in some dmats for now.
   const FLOAT_SOLV* RESTRICT C     = &this->mtrl_matc[0];
   this->mtrl_dmat={
@@ -30,9 +42,10 @@ int ElastIso3D::Setup( Elem* E ){
     0.0,0.0,0.0,C[2],0.0,0.0, 0.0,0.0,
     0.0,0.0,0.0,0.0,C[2],0.0, 0.0,0.0,
     0.0,0.0,0.0,0.0,0.0,C[2], 0.0,0.0 };
+#endif
   return 0;
 }
-int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
+int ElastDmv3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   FLOAT_SOLV* RESTRICT part_f, const FLOAT_SOLV* RESTRICT sys_u ){
   //FIXME Clean up local variables.
   //const int De = 3;// Element Dimension

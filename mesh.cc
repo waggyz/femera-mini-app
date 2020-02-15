@@ -440,6 +440,7 @@ int Mesh::Setup(){
 #if VERB_MAX > 1
       if(verbosity>1){
         printf(" Parts:");
+        if(dmv3_part_n>0){ printf("%10u DMAT",dmv3_part_n); }
         if(iso3_part_n>0){ printf("%10u iso",iso3_part_n); }
         if(ort3_part_n>0){ printf("%10u ortho",ort3_part_n); }
         if(ther_part_n>0){ printf(" (%u thermo)",ther_part_n); }
@@ -691,17 +692,25 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
 //#endif
 //    }
   }else{
-    if(t_mtrl_dirs.size()<3){
-      Y = new ElastIso3D(t_mtrl_prop[0],t_mtrl_prop[1]);
+    if(t_mtrl_prop.size()<21){
+      if(t_mtrl_dirs.size()<3){
+        Y = new ElastIso3D(t_mtrl_prop[0],t_mtrl_prop[1]);
 #if VERB_MAX>1
 #pragma omp atomic update
-      this->iso3_part_n+=1;
+        this->iso3_part_n+=1;
 #endif
-    }else{
-      Y = new ElastOrtho3D(t_mtrl_prop,t_mtrl_dirs);
+      }else{
+        Y = new ElastOrtho3D(t_mtrl_prop,t_mtrl_dirs);
 #if VERB_MAX>1
 #pragma omp atomic update
-      this->ort3_part_n+=1;
+        this->ort3_part_n+=1;
+#endif
+      }
+    }else{
+      Y = new ElastDmv3D(t_mtrl_prop,t_mtrl_dirs);
+#if VERB_MAX>1
+#pragma omp atomic update
+      this->dmv3_part_n+=1;
 #endif
     }
   }

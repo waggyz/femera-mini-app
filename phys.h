@@ -432,6 +432,160 @@ public:
 protected:
 private:
 };
+class ElastDmv3D final: public Phys{
+public: ElastDmv3D(Phys::vals prop, Phys::vals dirs ) :
+  Phys(prop,dirs){
+    this->node_d = 3;
+    if(prop.size()<21){
+      mtrl_prop.resize(prop.size()); mtrl_prop=prop;
+    }else{
+      mtrl_matc.resize(prop.size()); mtrl_matc=prop;
+    }
+    mtrl_dmat.resize(48);
+    ElastDmv3D::MtrlProp2MatC();
+  };
+#if 0
+  int SavePartFMR( const char* bname, bool is_bin ) final;
+  int ReadPartFMR( const char* bname, bool is_bin ) final;
+#endif
+  int Setup( Elem* )final;
+  //int ElemLinear( std::vector<Elem*>,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
+  int BlocLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
+  int ElemLinear( Elem*,const INT_MESH,
+    const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemNonlinear( Elem*,const INT_MESH,
+    const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*,const FLOAT_SOLV*, bool) final;
+  int ElemJacobi( Elem*,FLOAT_SOLV* ) final;
+  int ElemJacobi( Elem*,FLOAT_SOLV*,const FLOAT_SOLV* ) final;
+  int ElemJacNode( Elem*,FLOAT_SOLV* ) final;
+  int ElemRowSumAbs(Elem*, FLOAT_SOLV* ) final;
+  int ElemStrain(Elem*, FLOAT_SOLV* ) final;
+  int ElemLinear( Elem* ) final;
+  int ElemJacobi( Elem* ) final;
+  int ElemStiff ( Elem* ) final;
+  int ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*) final;
+  inline int MtrlProp2MatC()final{//why does this inline?
+    switch(mtrl_prop.size()){
+      case( 2):{// Build isotropic DMAT.
+        const FLOAT_PHYS E =mtrl_prop[0];
+        const FLOAT_PHYS nu=mtrl_prop[1];
+        const FLOAT_PHYS d =E/((1.0+nu)*(1.0-2.0*nu));
+        const FLOAT_PHYS C0 =(1.0-nu)*d;
+        const FLOAT_PHYS C1 =nu*d;
+        const FLOAT_PHYS C2 =(1.0-2.0*nu)*d*0.5;
+        const Phys::vals D={
+          C0,C1,C1,0.0,0.0,0.0, 0.0,0.0,
+          C1,C0,C1,0.0,0.0,0.0, 0.0,0.0,
+          C1,C1,C0,0.0,0.0,0.0, 0.0,0.0,
+          0.0,0.0,0.0,C2,0.0,0.0, 0.0,0.0,
+          0.0,0.0,0.0,0.0,C2,0.0, 0.0,0.0,
+          0.0,0.0,0.0,0.0,0.0,C2, 0.0,0.0 };
+        mtrl_dmat=D;
+        mtrl_matc.resize(3);
+        mtrl_matc[0]=C0; mtrl_matc[1]=C1; mtrl_matc[2]=C2;
+        break;}
+      case( 3):{// Build cubic DMAT.
+        const FLOAT_PHYS E =mtrl_prop[0];
+        const FLOAT_PHYS nu=mtrl_prop[1];
+        const FLOAT_PHYS d =E/((1.0+nu)*(1.0-2.0*nu));//FIXME Check these
+        const FLOAT_PHYS C0 =(1.0-nu)*d;
+        const FLOAT_PHYS C1 =nu*d;
+        const FLOAT_PHYS C2 =mtrl_prop[2];
+        const Phys::vals D={
+          C0,C1,C1,0.0,0.0,0.0, 0.0,0.0,
+          C1,C0,C1,0.0,0.0,0.0, 0.0,0.0,
+          C1,C1,C0,0.0,0.0,0.0, 0.0,0.0,
+          0.0,0.0,0.0,C2,0.0,0.0, 0.0,0.0,
+          0.0,0.0,0.0,0.0,C2,0.0, 0.0,0.0,
+          0.0,0.0,0.0,0.0,0.0,C2, 0.0,0.0 };
+        mtrl_dmat=D;
+        mtrl_matc.resize(3);
+        mtrl_matc[0]=C0; mtrl_matc[1]=C1; mtrl_matc[2]=C2;
+        break;}
+    }
+    switch(mtrl_matc.size()){//FIXME Should Lame constants?
+      case( 2):{// Build isotropic DMAT.
+        mtrl_prop.resize(2);
+        mtrl_prop=mtrl_matc;
+        const FLOAT_PHYS E =mtrl_matc[0];
+        const FLOAT_PHYS nu=mtrl_matc[1];
+        const FLOAT_PHYS d =E/((1.0+nu)*(1.0-2.0*nu));
+        const FLOAT_PHYS C0 =(1.0-nu)*d;
+        const FLOAT_PHYS C1 =nu*d;
+        const FLOAT_PHYS C2 =(1.0-2.0*nu)*d*0.5;
+        const Phys::vals D={
+          C0,C1,C1,0.0,0.0,0.0, 0.0,0.0,
+          C1,C0,C1,0.0,0.0,0.0, 0.0,0.0,
+          C1,C1,C0,0.0,0.0,0.0, 0.0,0.0,
+          0.0,0.0,0.0,C2,0.0,0.0, 0.0,0.0,
+          0.0,0.0,0.0,0.0,C2,0.0, 0.0,0.0,
+          0.0,0.0,0.0,0.0,0.0,C2, 0.0,0.0 };
+        mtrl_dmat=D;
+        mtrl_matc.resize(3);
+        mtrl_matc[0]=C0; mtrl_matc[1]=C1; mtrl_matc[2]=C2;
+        break;}
+      case( 3):{// Build cubic DMAT.
+        mtrl_prop.resize(3);
+        mtrl_prop=mtrl_matc;
+        const FLOAT_PHYS* RESTRICT C =& mtrl_matc[0];
+        const Phys::vals D={
+          C[0],C[1],C[1],0.0,0.0,0.0, 0.0,0.0,
+          C[1],C[0],C[1],0.0,0.0,0.0, 0.0,0.0,
+          C[1],C[1],C[0],0.0,0.0,0.0, 0.0,0.0,
+          0.0,0.0,0.0,C[2],0.0,0.0, 0.0,0.0,
+          0.0,0.0,0.0,0.0,C[2],0.0, 0.0,0.0,
+          0.0,0.0,0.0,0.0,0.0,C[2], 0.0,0.0 };
+        mtrl_dmat=D;
+        break;}
+      case(21):{// 21 values for symmetric 6x6.
+        const FLOAT_PHYS* RESTRICT C =& mtrl_matc[0];
+        mtrl_prop.resize(3);// Estimate isotropic properties
+        const FLOAT_PHYS C0=(C[ 0]+C[ 6]+C[11])/3.0;
+        const FLOAT_PHYS C1=(C[ 1]+C[ 2]+C[ 7])/3.0;
+        const FLOAT_PHYS C2=(C[15]+C[18]+C[20])/3.0;
+        const FLOAT_PHYS E =(C0-C1)*(2.0*C1+C0)/(C0+C1);
+        const FLOAT_PHYS nu= C1/(C0+C1);
+        mtrl_prop[0]=E; mtrl_prop[1]=nu; mtrl_prop[2]=C2;
+        const Phys::vals D={
+          C[ 0],C[ 1],C[ 2],C[ 3],C[ 4],C[ 5], 0.0,0.0,
+          C[ 1],C[ 6],C[ 7],C[ 8],C[ 9],C[10], 0.0,0.0,
+          C[ 2],C[ 7],C[11],C[12],C[13],C[14], 0.0,0.0,
+          C[ 3],C[ 8],C[12],C[15],C[16],C[17], 0.0,0.0,
+          C[ 4],C[ 9],C[13],C[16],C[18],C[19], 0.0,0.0,
+          C[ 5],C[10],C[14],C[17],C[19],C[20], 0.0,0.0 };
+        mtrl_dmat=D;
+        mtrl_matc.resize(3);
+        mtrl_matc[0]=C0; mtrl_matc[1]=C1; mtrl_matc[2]=C2;
+        break;}
+      case(36):{
+        const FLOAT_PHYS* RESTRICT C =& mtrl_matc[0];
+        mtrl_prop.resize(3);// Estimate isotropic properties
+        const FLOAT_PHYS C0=(C[ 0]+C[ 7]+C[14])/3.0;
+        const FLOAT_PHYS C1=(C[ 1]+C[ 2]+C[ 8])/3.0;
+        const FLOAT_PHYS C2=(C[21]+C[28]+C[35])/3.0;
+        const FLOAT_PHYS E =(C0-C1)*(2.0*C1+C0)/(C0+C1);
+        const FLOAT_PHYS nu= C1/(C0+C1);
+        mtrl_prop[0]=E; mtrl_prop[1]=nu; mtrl_prop[2]=C2;
+        const Phys::vals D={
+          C[ 0],C[ 1],C[ 2],C[ 3],C[ 4],C[ 5], 0.0,0.0,
+          C[ 6],C[ 7],C[ 8],C[ 9],C[10],C[11], 0.0,0.0,
+          C[12],C[13],C[14],C[15],C[16],C[17], 0.0,0.0,
+          C[18],C[19],C[20],C[21],C[22],C[23], 0.0,0.0,
+          C[24],C[25],C[26],C[27],C[28],C[29], 0.0,0.0,
+          C[30],C[31],C[32],C[33],C[34],C[35], 0.0,0.0 };
+        mtrl_dmat=D;
+        mtrl_matc.resize(3);
+        mtrl_matc[0]=C0; mtrl_matc[1]=C1; mtrl_matc[2]=C2;
+        break;}
+    }
+    return 0;
+  }
+  Phys::vals MtrlLinear( const RESTRICT Phys::vals &e)final{
+    return e;
+  }
+protected:
+private:
+};
 class ThermElastIso3D final: public Phys{
 public:
   ThermElastIso3D(// Orthotropic Material Constructor
