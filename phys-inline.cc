@@ -360,6 +360,12 @@ static inline void compute_dmv_s(__m256d* vS,
   }{// Scope shfX or V
   // rearrange voigt vector [s0,s1] back to a padded tensor vS
 #ifdef HAS_AVX2
+#ifdef __INTEL_COMPILER
+  // Should work for clang, too
+  vS[0] =__builtin_shuffle_vector( s0,s1,0,3,4, 7);
+  vS[1] =__builtin_shuffle_vector( s0,s1,3,1,5, 7);
+  vS[2] =__builtin_shuffle_vector( s0,s1,4,5,2, 7);
+#else
   // Sxx Syy Szz Sxy Sxz Syz 0.0 0.0
   //  0   1   2   3   4   5   6   7  : mask //FIXME May be backward
   const __m256i shf0 = { 0,3,4, 7};
@@ -368,6 +374,7 @@ static inline void compute_dmv_s(__m256d* vS,
   vS[0] =__builtin_shuffle( s0,s1,shf0);
   vS[1] =__builtin_shuffle( s0,s1,shf1);
   vS[2] =__builtin_shuffle( s0,s1,shf2);
+#endif
 #else
   FLOAT_PHYS VECALIGNED V[8];
   _mm256_store_pd(&V[0],s0);
