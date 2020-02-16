@@ -220,10 +220,10 @@ int Phys::SavePartFMR( const char* fname, bool is_bin ){
           fmrfile <<" "<< mtrl_dmat[8*i+j]; } }
     }else{
       fmrfile << mtrl_dmat.size();
-      for(uint i=0;i<mtrl_dmat.size();i++){ fmrfile <<" "<< mtrl_dmat[i];
+      for(uint i=0;i<mtrl_dmat.size();i++){ fmrfile <<" "<< mtrl_dmat[i]; }
     }
     fmrfile << '\n';
-  } }
+  }
   else if(elas_prop.size()>0){
     fmrfile << "$Elastic" <<'\n';
     fmrfile << elas_prop.size();
