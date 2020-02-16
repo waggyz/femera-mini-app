@@ -191,7 +191,8 @@ int Phys::SavePartFMR( const char* fname, bool is_bin ){
   std::ofstream fmrfile;
   fmrfile.open(fname, std::ios_base::app);
   //
-  elas_prop.resize(mtrl_prop.size()); elas_prop = mtrl_prop;
+  elas_prop.resize(mtrl_prop.size());
+  for(uint i=0;i<mtrl_prop.size();i++){elas_prop[i] = mtrl_prop[i];}
 #if 0
   fmrfile << "$ElasticProperties" <<'\n';//FIXME Deprecated
   fmrfile << mtrl_prop.size();
