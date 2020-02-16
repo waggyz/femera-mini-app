@@ -361,12 +361,14 @@ static inline void compute_dmv_s(__m256d* vS,
   // rearrange voigt vector [s0,s1] back to a padded tensor vS
 #ifdef HAS_AVX2
   // Sxx Syy Szz Sxy Sxz Syz 0.0 0.0
-  //  0   1   2   3   4   5   6   7  : mask //FIXME May be backward
+  //  0   1   2   3   4   5   6   7  : mask
 #ifdef __INTEL_COMPILER
-  // Should work for clang, too
-  vS[0] =__builtin_shuffle_vector( s0,s1,0,3,4, 7);
-  vS[1] =__builtin_shuffle_vector( s0,s1,3,1,5, 7);
-  vS[2] =__builtin_shuffle_vector( s0,s1,4,5,2, 7);
+  FLOAT_PHYS VECALIGNED V[8];
+  _mm256_store_pd(&V[0],s0);
+  _mm256_store_pd(&V[4],s1);
+  vS[0] =_mm256_set_pd(0.0, V[4],V[3],V[0]);
+  vS[1] =_mm256_set_pd(0.0, V[5],V[1],V[3]);
+  vS[2] =_mm256_set_pd(0.0, V[2],V[5],V[4]);
 #else
   const __m256i shf0 = { 0,3,4, 7};
   const __m256i shf1 = { 3,1,5, 7};
@@ -382,6 +384,12 @@ static inline void compute_dmv_s(__m256d* vS,
   vS[0] =_mm256_set_pd(0.0, V[4],V[3],V[0]);
   vS[1] =_mm256_set_pd(0.0, V[5],V[1],V[3]);
   vS[2] =_mm256_set_pd(0.0, V[2],V[5],V[4]);
+#endif
+#if 0
+  // Should work for clang
+  vS[0] =__builtin_shuffle_vector( s0,s1,0,3,4, 7);
+  vS[1] =__builtin_shuffle_vector( s0,s1,3,1,5, 7);
+  vS[2] =__builtin_shuffle_vector( s0,s1,4,5,2, 7);
 #endif
   }
 }
@@ -414,12 +422,14 @@ static inline void compute_dmv_s(__m256d* vA,// H in, S out
   // rearrange voigt vector [s0,s1] back to a padded tensor vA
 #ifdef HAS_AVX2
   // Sxx Syy Szz Sxy Sxz Syz 0.0 0.0
-  //  0   1   2   3   4   5   6   7  : mask //FIXME May be backward
+  //  0   1   2   3   4   5   6   7  : mask
 #ifdef __INTEL_COMPILER
-  // Should work for clang, too
-  vS[0] =__builtin_shuffle_vector( s0,s1,0,3,4, 7);
-  vS[1] =__builtin_shuffle_vector( s0,s1,3,1,5, 7);
-  vS[2] =__builtin_shuffle_vector( s0,s1,4,5,2, 7);
+  FLOAT_PHYS VECALIGNED V[8];
+  _mm256_store_pd(&V[0],s0);
+  _mm256_store_pd(&V[4],s1);
+  vA[0] =_mm256_set_pd(0.0, V[4],V[3],V[0]);
+  vA[1] =_mm256_set_pd(0.0, V[5],V[1],V[3]);
+  vA[2] =_mm256_set_pd(0.0, V[2],V[5],V[4]);
 #else
   const __m256i shf0 = { 0,3,4, 7};
   const __m256i shf1 = { 3,1,5, 7};
@@ -435,6 +445,12 @@ static inline void compute_dmv_s(__m256d* vA,// H in, S out
   vA[0] =_mm256_set_pd(0.0, V[4],V[3],V[0]);
   vA[1] =_mm256_set_pd(0.0, V[5],V[1],V[3]);
   vA[2] =_mm256_set_pd(0.0, V[2],V[5],V[4]);
+#endif
+#if 0
+  // Should work for clang
+  vS[0] =__builtin_shuffle_vector( s0,s1,0,3,4, 7);
+  vS[1] =__builtin_shuffle_vector( s0,s1,3,1,5, 7);
+  vS[2] =__builtin_shuffle_vector( s0,s1,4,5,2, 7);
 #endif
   }
 }
