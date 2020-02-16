@@ -1,25 +1,19 @@
 #if VERB_MAX > 10
 #include <iostream>
 #endif
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <ctype.h>
 #include <cstring>// std::memcpy
 #include "femera.h"
-#include <immintrin.h>
+//#define FETCH_JAC
 //
 int ElastDmv3D::Setup( Elem* E ){
   JacT  ( E );
-#if 0
-  printf("\nelas_prop\n");
-  for(uint i=0;i<elas_prop.size();i++){ printf(" %7.1e",mtrl_matc[i]);
-    if(!((i+1)%8)){printf("\n");} }
-  printf("\nmtrl_matc\n");
-  for(uint i=0;i<mtrl_matc.size();i++){ printf(" %7.1e",mtrl_matc[i]);
-    if(!((i+1)%8)){printf("\n");} }
-  printf("\nmtrl_dmat\n");
-  for(uint i=0;i<mtrl_dmat.size();i++){ printf(" %7.1e",mtrl_dmat[i]);
-    if(!((i+1)%8)){printf("\n");} }
-#endif
   const uint elem_n = uint(E->elem_n);
-  const uint jacs_n = uint(E->elip_jacs.size()/elem_n/ 10);
+  const uint jacs_n = uint(E->elip_jacs.size()/elem_n/ 10) ;
   const uint intp_n = uint(E->gaus_n);
   const uint conn_n = uint(E->elem_conn_n);
   this->tens_flop = uint(E->elem_n) * intp_n
@@ -32,124 +26,147 @@ int ElastDmv3D::Setup( Elem* E ){
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) );
   this->stif_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) +2);
-#if 0
-  // Fill in some dmats for now.
-  const FLOAT_SOLV* RESTRICT C     = &this->mtrl_matc[0];
-  this->mtrl_dmat={
-    C[0],C[1],C[1],0.0,0.0,0.0, 0.0,0.0,
-    C[1],C[0],C[1],0.0,0.0,0.0, 0.0,0.0,
-    C[1],C[1],C[0],0.0,0.0,0.0, 0.0,0.0,
-    0.0,0.0,0.0,C[2],0.0,0.0, 0.0,0.0,
-    0.0,0.0,0.0,0.0,C[2],0.0, 0.0,0.0,
-    0.0,0.0,0.0,0.0,0.0,C[2], 0.0,0.0 };
-#endif
   return 0;
 }
 int ElastDmv3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
-  FLOAT_SOLV* RESTRICT part_f, const FLOAT_SOLV* RESTRICT sys_u ){
+  FLOAT_SOLV* part_f, const FLOAT_SOLV* part_u ){
   //FIXME Clean up local variables.
   //const int De = 3;// Element Dimension
-  const int Nd = 3;// Node (mesh) Dimension
-  const int Nf = 3;// this->node_d DOF/node
-  const int Nj = Nd*Nd+1;
+  const int Dm = 3;// Mesh Dimension
+  const int Dn = 3;// this->node_d DOF/node
+  const int Nj = Dm*Dm+1;
   const int Nc = E->elem_conn_n;// Number of nodes/element
-  const int Ne = Nf*Nc;
-  const int Nt = 4*Nc;
+  const int Ne = Dn*Nc;
   const int intp_n = int(E->gaus_n);
-  //const INT_ORDER elem_p =E->elem_p;
 #if VERB_MAX>11
   printf("DOF: %u, Elems:%u, IntPts:%u, Nodes/elem:%u\n",
     (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
 #endif
-  FLOAT_PHYS VECALIGNED G[Nt], u[Ne];
+#if 0
+#ifdef FETCH_JAC
+  FLOAT_PHYS jac[Nj];
+#endif
+#endif
+  FLOAT_PHYS VECALIGNED G[Ne], u[Ne], f[Ne];
+  FLOAT_PHYS VECALIGNED H[Dm*Dn], S[Dm*Dn];
+  //
   FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
+  std::copy( &E->intp_shpg[0],
+             &E->intp_shpg[intp_n*Ne], intp_shpg );
   FLOAT_PHYS VECALIGNED wgt[intp_n];
-  FLOAT_PHYS VECALIGNED align_dmat[48];
-  //
-  std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
-  std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
-  std::copy( &this->mtrl_dmat[0], &this->mtrl_dmat[47], align_dmat );
-  //
-  const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
-  const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
-  const FLOAT_SOLV* RESTRICT D     = &align_dmat[0];
+  std::copy( &E->gaus_weig[0],
+             &E->gaus_weig[intp_n], wgt );
+  FLOAT_PHYS VECALIGNED D[this->mtrl_dmat.size()];
+  std::copy( &this->mtrl_dmat[0],
+             &this->mtrl_dmat[this->mtrl_dmat.size()], D );
 #if VERB_MAX>10
-  printf( "Material [%u]:", (uint)mtrl_matc.size() );
-  for(uint j=0;j<mtrl_matc.size();j++){
+  printf( "Material [%u]:", (uint)mtrl_dmat.size() );
+  for(uint j=0;j<mtrl_dmat.size();j++){
     //if(j%mesh_d==0){printf("\n");}
-    printf("%+9.2e ",C[j]);
+    printf("%+9.2e ",D[j]);
   } printf("\n");
 #endif
+  const    INT_MESH* RESTRICT E_c = &E->elem_conn[0];
+  const  FLOAT_MESH* RESTRICT E_j = &E->elip_jacs[0];
+  const  FLOAT_SOLV* RESTRICT S_u = &part_u[0];
+         FLOAT_SOLV* RESTRICT S_f = &part_f[0];
   if(e0<ee){
-    const INT_MESH* RESTRICT c = &Econn[Nc*e0];
-#ifdef __INTEL_COMPILER
-#pragma vector unaligned
-#else
-//#pragma omp simd
+#if 0
+#ifdef FETCH_JAC
+    std::memcpy( &jac , &E_j[Nj*e0], sizeof(FLOAT_MESH)*Nj);
+#endif
+#endif
+#if 1
+    for (int i=0; i<Nc; i++){
+      std::memcpy( & u[Dn*i],& S_u[E_c[Nc*e0+i]*Dn], sizeof(FLOAT_SOLV)*Dn ); }
+#endif
+  }
+  for(INT_MESH ie=e0;ie<ee;ie++){
+#if 0
+    const INT_MESH* RESTRICT conn = &E_c[Nc*ie];
 #endif
     for (int i=0; i<Nc; i++){
-      std::memcpy( & u[Nf*i],&sys_u[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf ); }
-  }
-  for(INT_MESH ie=e0;ie<ee;ie++){//================================== Elem loop
-    const __m256d vJ[3]={
-      _mm256_loadu_pd(&Ejacs[Nj*ie  ]),  // j0 = [j3 j2 j1 j0]
-      _mm256_loadu_pd(&Ejacs[Nj*ie+3]),  // j1 = [j6 j5 j4 j3]
-      _mm256_loadu_pd(&Ejacs[Nj*ie+6]) };// j2 = [j9 j8 j7 j6]
-    const FLOAT_MESH det=Ejacs[Nj*ie+9];
-    const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
-    {// Scope vf registers
-    __m256d vf[Nc];
-    for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
+      std::memcpy( & f[Dn*i],& S_f[E_c[Nc*ie+i]*3], sizeof(FLOAT_SOLV)*Dn ); }
+    for(int ip=0; ip<intp_n; ip++){
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
-      __m256d vH[3];
-      compute_g_h( &G[0],&vH[0], Nc, &vJ[0], &intp_shpg[ip*Ne], &u[0] );
+      for(int i=0; i<(Dm*Dm) ; i++){ H[i]=0.0; }
+#if 0
+// Outer loop SIMD degrades performance using SSE, AVX, etc.
+#pragma omp simd
+#endif
+      for(int k=0; k<Nc; k++){
+        for(int i=0; i<Dm ; i++){ G[Dm* k+i ]=0.0;
+          for(int j=0; j<Dm ; j++){
+#if 0
+            G[Dm* k+i ] += jac[Dm* j+i ] * intp_shpg[ip*Ne+ Dm* k+j ];
+#else
+            G[Dm* k+i ] += E_j[Nj*ie+ Dm* j+i ] * intp_shpg[ip*Ne+ Dm* k+j ];
+#endif
+          }
+#if 0
+// Use this to match intrinsics loop, but it's slower on westmere (gcc)
+        } for(int i=0; i<Dm ; i++){
+#endif
+          for(int j=0; j<Dm ; j++){
+            H[Dm* i+j ] += G[Dm* k+i ] * u[Dn* k+j ];
+          }
+        }
+      }//-------------------------------------------------- N*3*6*2 = 36*N FLOP
+      if(ip==(intp_n-1)){
+        if((ie+1)<ee){// Fetch stuff for the next iteration
+          const INT_MESH* RESTRICT c = &E_c[Nc*(ie+1)];
+          for (int i=0; i<Nc; i++){
+            //std::memcpy( &jac, &E_j[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj);
+            std::memcpy(&u[Dn*i],&S_u[c[i]*Dn], sizeof(FLOAT_SOLV)*Dn);
+          }
+        }// Done fetching next iter stuff
+      }
 #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
       for(int j=0;j<H.size();j++){
-        if(j%Nd==0){printf("\n");}
+        if(j%mesh_d==0){printf("\n");}
         printf("%+9.2e ",H[j]);
       } printf("\n");
 #endif
-      const FLOAT_PHYS dw = det * wgt[ip];
-      if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
-        const INT_MESH* RESTRICT cnxt = &Econn[Nc*(ie+1)];
-#ifdef __INTEL_COMPILER
-#pragma vector unaligned
-#endif
-        for (int i=0; i<Nc; i++){
-          std::memcpy(& u[Nf*i],& sys_u[cnxt[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
-      } }
-#if 0
-      __m256d vS[3]; compute_dmv_s( &vS[0], &vH[0], &D[0], dw );
-#else
-      compute_dmv_s( &vH[0], &D[0], dw );
-#endif
-#if 0
-      printf("vH:\n");
-      print_m256(vH[0]); print_m256(vH[1]); print_m256(vH[2]);
-      printf("s:\n"); print_m256(s0); print_m256(s1);
-      printf("vS:\n");
-      print_m256(vS[0]); print_m256(vS[1]); print_m256(vS[2]);
-#endif
-      if(ip==0){
-        for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+      {
+      const FLOAT_SOLV* VECALIGNED cH =& H[0];
+      const FLOAT_PHYS dw = E_j[Nj*ie+ 9 ] * wgt[ip];
+      compute_dmv_s(& S[0],& cH[0],& D[0], dw );
       }
-      accumulate_f( &vf[0], &vH[0], &G[0], Nc );
-      //}// end vS register scope
-    }//========================================================== end intp loop
-#ifdef __INTEL_COMPILER
-#pragma vector unaligned
+#if 0
+#ifdef HAS_PRAGMA_SIMD
+#ifndef HAS_AVX
+      // May be slower for >=AVX, not much faster 40% efficient) otherwise...
+#pragma omp simd
 #endif
-    for (int i=0; i<Nc; i++){
-      double VECALIGNED sf[4];
-      _mm256_store_pd(&sf[0],vf[i]);
-#ifdef __INTEL_COMPILER
-#pragma vector unaligned
 #endif
-      for(int j=0; j<3; j++){
-        part_f[3*conn[i]+j] = sf[j]; } }
-    }// end vf register scope
-  }//============================================================ end elem loop
+#endif
+      for(int i=0; i<Nc; i++){
+        for(int k=0; k<Dn; k++){
+          for(int j=0; j<Dn; j++){
+            f[Dn* i+k ] += G[Dm* i+j ] * S[Dn* k+j ];// 18*N FMA FLOP
+      } } }//------------------------------------------------ N*3*6 = 18*N FLOP
+#if VERB_MAX>10
+      printf( "f:");
+      for(int j=0;j<Ne;j++){
+        if(j%ndof==0){printf("\n");}
+        printf("%+9.2e ",f[j]);
+      } printf("\n");
+#endif
+    }//end intp loop
+    for (uint i=0; i<uint(Nc); i++){
+      std::memcpy(& S_f[E_c[Nc*ie+i]*Dn],& f[Dn*i], sizeof(FLOAT_SOLV)*Dn );
+#if 0
+      if( n >=my_node_start ){
+        for(uint j=0;j<3;j++){
+          this->part_sum1+= f[Dn* i+j ] * S_u[Dn* n+j ];
+          //FIXME u already contains next elem part_u
+          //this->part_sum1+= f[Dn* i+j ] * u[Dn* i+j];
+        };
+      };
+#endif
+    }
+  }//end elem loop
   return 0;
-}
+  }

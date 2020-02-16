@@ -306,6 +306,32 @@ static inline void compute_g_h( FLOAT_PHYS* G, __m256d* vH,// line 273
 #endif
 }//was line 320
 // DMAT Driver
+static inline void compute_dmv_s(FLOAT_PHYS* S,
+  const FLOAT_PHYS* H,const FLOAT_PHYS* D,const FLOAT_PHYS dw ){
+  FLOAT_PHYS HV[6], SV[6];
+  HV[0]=H[0];
+  HV[1]=H[4];
+  HV[2]=H[8];
+  HV[3]=H[1]+H[3];
+  HV[4]=H[2]+H[6];
+  HV[5]=H[5]+H[7];
+  for(int i=0;i<6;i++){ SV[i]=0;
+    for(int j=0;j<6;j++){
+      SV[i]+= D[8*i+j] * HV[j];
+    }
+    SV[i]*=dw;
+  }
+  //for(int i=0;i<6;i++){ SV[i]*=dw; }
+  S[0]=SV[0];
+  S[1]=SV[3];
+  S[2]=SV[4];
+  S[3]=SV[3];
+  S[4]=SV[1];
+  S[5]=SV[5];
+  S[6]=SV[4];
+  S[7]=SV[5];
+  S[8]=SV[2];
+}
 static inline void compute_dmv_s(__m256d* vS,
   const __m256d* vH,const FLOAT_PHYS* D,const FLOAT_PHYS dw ){
   __m256d s0=_mm256_setzero_pd(), s1=_mm256_setzero_pd();
@@ -352,7 +378,7 @@ static inline void compute_dmv_s(__m256d* vS,
 #endif
   }
 }
-static inline void compute_dmv_s(__m256d* vA,
+static inline void compute_dmv_s(__m256d* vA,// H in, S out
   const FLOAT_PHYS* D,const FLOAT_PHYS dw ){
   __m256d s0=_mm256_setzero_pd(), s1=_mm256_setzero_pd();
   {// Scope H and h.

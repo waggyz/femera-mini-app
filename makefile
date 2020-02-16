@@ -63,10 +63,6 @@ endif
 # -Wsuggest-final-types -Wsuggest-final-methods -O3 -flto
 endif
 
-
-FEMERA_DMAT=elas-dmv3-base.cc
-#FIXME Intel does not compile DMAT driver?
-
 # Check if pragma omp simd is supported.
 HAS_PRGAMA_SIMD:=$(shell $(CXX) $(OMPFLAGS)\
  -Wunknown-pragmas unit-test/test-pragma-simd.c\
@@ -86,35 +82,36 @@ MMPFLAGS = -DOMP_NESTED=true -DOMP_PROC_BIND=spread,close
 
 CPUMODELC:=$(CPUMODEL)-$(CSTR)
 
-FEMERA_COMMON = $(FEMERA_DMAT) mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
+FEMERA_COMMON = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
  halo-pcg-omp.cc halo-ncg-omp.cc halo-pcr-dummy.cc\
  elas-iso3.cc elas-ort3.cc elas-dmv3.cc\
  elas-plkh-iso3.cc elas-ther-iso3.cc elas-ther-ort3.cc
 
 FEMERA_BASE_C = $(FEMERA_COMMON)\
- elas-iso3-base.cc elas-ort3-bas2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-bas2.cc\
- elas-plkh-iso3-dum.cc
+ elas-iso3-base.cc elas-ort3-bas2.cc elas-dmv3-base.cc\
+ elas-plkh-iso3-dum.cc elas-ther-iso3-bas2.cc elas-ther-ort3-bas2.cc
 
 ifneq (,$(findstring AVX,$(CPUSIMD)))
  CPPFLAGS:=$(CPPFLAGS) -DHAS_AVX
 FEMERA_MINI_C = $(FEMERA_COMMON)\
- elas-iso3-vect.cc elas-ort3-vec2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-vec2.cc\
- elas-plkh-iso3-vect.cc
+ elas-iso3-vect.cc elas-ort3-vec2.cc elas-dmv3-vect.cc\
+ elas-plkh-iso3-vect.cc elas-ther-iso3-bas2.cc elas-ther-ort3-vec2.cc
 else
 FEMERA_MINI_C = $(FEMERA_BASE_C)
 endif
+#FIXME Intel does not compile DMAT driver?
 
 FEMERA_REF_C = $(FEMERA_COMMON)\
- elas-iso3-ref.cc elas-ort3-ref2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-ref2.cc\
- elas-plkh-iso3-ref.cc
+ elas-iso3-ref.cc elas-ort3-ref2.cc elas-dmv3-base.cc\
+ elas-plkh-iso3-ref.cc elas-ther-iso3-bas2.cc elas-ther-ort3-ref2.cc
 
 FEMERA_NAIV_C = $(FEMERA_COMMON)\
- elas-iso3-ref.cc elas-ort3-nai2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-ref2.cc\
- elas-plkh-iso3-ref.cc
+ elas-iso3-ref.cc elas-ort3-nai2.cc elas-dmv3-base.cc\
+ elas-plkh-iso3-ref.cc elas-ther-iso3-bas2.cc elas-ther-ort3-ref2.cc
 
 FEMERA_STIF_C = $(FEMERA_COMMON)\
- elas-lms3-base.cc elas-ort3-bas2.cc elas-ther-iso3-bas2.cc elas-ther-ort3-bas2.cc\
- elas-plkh-iso3-dum.cc
+ elas-lms3-base.cc elas-ort3-bas2.cc elas-dmv3-base.cc\
+ elas-plkh-iso3-dum.cc elas-ther-iso3-bas2.cc elas-ther-ort3-bas2.cc
 
 HYBRID_GCC_C = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
  halo-pcg-omp.cc halo-ncg-omp.cc halo-pcr-dummy.cc\
