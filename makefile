@@ -198,7 +198,7 @@ test-ort : mini-omp gmsh2fmr
 	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
 
 test-dmv : mini-omp gmsh2fmr
-	./gmsh2fmr-$(CPUMODEL) -v1 \
+	./gmsh2fmr-$(CPUMODEL)-gcc -v1 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 \
 	-M0 -D -E100e9 -N0.3 -ap cube/unst19p1n16;
 	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
