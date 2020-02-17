@@ -77,7 +77,7 @@ ifneq (,$(findstring AVX2,$(CPUSIMD)))
 endif
 
 OMPFLAGS:=$(OMPFLAGS) -DFETCH_JAC
- 
+
 MMPFLAGS = -DOMP_NESTED=true -DOMP_PROC_BIND=spread,close
 
 CPUMODELC:=$(CPUMODEL)-$(CSTR)

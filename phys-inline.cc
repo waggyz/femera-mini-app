@@ -2,7 +2,7 @@
 #define INCLUDED_PHYS_INLINE_C
 #include "femera.h"
 #include <immintrin.h>
-//FIXME These inline intrinsics functions should be in the class where used.
+//FIXME These inline functions should be in the class where used.
 #if 1
 static inline void print_m256(const __m256d v){// Debugging register print
   double V[4];
@@ -10,7 +10,7 @@ static inline void print_m256(const __m256d v){// Debugging register print
   printf("%9.2e %9.2e %9.2e %9.2e\n",V[0],V[1],V[2],V[3]);
 }
 #endif
-// Physics Intrinsics ---------------------------------------------------------
+// Physics --------------------------------------------------------------------
 static inline void accumulate_f( __m256d* vf,
   const __m256d* vS, const FLOAT_PHYS* G, const int Nc ){
   for(int i= 0; i< 4; i++){// This is a little faster unrolled.
@@ -36,7 +36,7 @@ static inline void accumulate_f( __m256d* vf,
     }
   }
 }
-// Orthotropic intrinsics -----------------------------------------------------
+// Orthotropic Elastic --------------------------------------------------------
 static inline void rotate_g_h(FLOAT_PHYS* G,__m256d* vH,// was line 40
   const int Nc, const __m256d* vJ,
   const FLOAT_PHYS* sg, const FLOAT_PHYS* R, const FLOAT_PHYS* u ){
@@ -99,7 +99,7 @@ static inline void rotate_s_voigt( __m256d* vS,
   const __m256d s8 = _mm256_set1_pd(S[2]);
   vS[2] = s2 * vR[0] + s5 * vR[1] + s8 * vR[2];
 }
-// Isotropic intrinsics -------------------------------------------------------
+// Isotropic Elastic ----------------------------------------------------------
 static inline void compute_iso_s(FLOAT_PHYS* S,
   const FLOAT_PHYS* H, const FLOAT_PHYS* C, const FLOAT_PHYS dw ){// Scalar ver.
   const FLOAT_PHYS Cdw[3] = { C[0]*dw, C[1]*dw, C[2]*dw };
@@ -305,7 +305,7 @@ static inline void compute_g_h( FLOAT_PHYS* G, __m256d* vH,// line 273
   }
 #endif
 }//was line 320
-// DMAT Driver
+// DMAT Elastic ---------------------------------------------------------------
 static inline void compute_dmv_s(FLOAT_PHYS* S,
   const FLOAT_PHYS* H,const FLOAT_PHYS* D,const FLOAT_PHYS dw ){
   FLOAT_PHYS HV[6], SV[6];
@@ -315,22 +315,15 @@ static inline void compute_dmv_s(FLOAT_PHYS* S,
   HV[3]=H[1]+H[3];
   HV[4]=H[2]+H[6];
   HV[5]=H[5]+H[7];
-  for(int i=0;i<6;i++){ SV[i]=0;
+  for(int i=0;i<6;i++){ SV[i]=0.0;
     for(int j=0;j<6;j++){
-      SV[i]+= D[8*i+j] * HV[j];
-    }
-    SV[i]*=dw;
+      SV[i]+= D[6*i+j] * HV[j];
+    } SV[i]*= dw;
   }
   //for(int i=0;i<6;i++){ SV[i]*=dw; }
-  S[0]=SV[0];
-  S[1]=SV[3];
-  S[2]=SV[4];
-  S[3]=SV[3];
-  S[4]=SV[1];
-  S[5]=SV[5];
-  S[6]=SV[4];
-  S[7]=SV[5];
-  S[8]=SV[2];
+  S[0]=SV[0]; S[1]=SV[3]; S[2]=SV[4];
+  S[3]=SV[3]; S[4]=SV[1]; S[5]=SV[5];
+  S[6]=SV[4]; S[7]=SV[5]; S[8]=SV[2];
 }
 static inline void compute_dmv_s(__m256d* vS,
   const __m256d* vH,const FLOAT_PHYS* D,const FLOAT_PHYS dw ){
@@ -454,7 +447,7 @@ static inline void compute_dmv_s(__m256d* vA,// H in, S out
 #endif
   }
 }
-// Nonlinear isotropic intrinsics ---------------------------------------------
+// Nonlinear isotropic Elastic ------------------------------------------------
 static inline void compute_g_p_h(
   FLOAT_PHYS* G, __m256d* vP, __m256d* vH,
   const int Nc, const  __m256d* vJ,

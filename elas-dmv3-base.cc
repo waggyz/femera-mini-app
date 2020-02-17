@@ -56,16 +56,17 @@ int ElastDmv3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   FLOAT_PHYS VECALIGNED wgt[intp_n];
   std::copy( &E->gaus_weig[0],
              &E->gaus_weig[intp_n], wgt );
-  FLOAT_PHYS VECALIGNED D[this->mtrl_dmat.size()];
+  FLOAT_PHYS VECALIGNED dmat[this->mtrl_dmat.size()];
   std::copy( &this->mtrl_dmat[0],
-             &this->mtrl_dmat[this->mtrl_dmat.size()], D );
+             &this->mtrl_dmat[this->mtrl_dmat.size()], dmat );
 #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_dmat.size() );
   for(uint j=0;j<mtrl_dmat.size();j++){
-    //if(j%mesh_d==0){printf("\n");}
+    if(j%6==0){printf("\n");}
     printf("%+9.2e ",D[j]);
   } printf("\n");
 #endif
+  const  FLOAT_PHYS* RESTRICT VECALIGNED D = &dmat[0];
   const    INT_MESH* RESTRICT E_c = &E->elem_conn[0];
   const  FLOAT_MESH* RESTRICT E_j = &E->elip_jacs[0];
   const  FLOAT_SOLV* RESTRICT S_u = &part_u[0];
@@ -132,7 +133,7 @@ int ElastDmv3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       {
       const FLOAT_SOLV* VECALIGNED cH =& H[0];
       const FLOAT_PHYS dw = E_j[Nj*ie+ 9 ] * wgt[ip];
-      compute_dmv_s(& S[0],& cH[0],& D[0], dw );
+      compute_dmv_s( S, cH,D,dw );
       }
 #if 0
 #ifdef HAS_PRAGMA_SIMD

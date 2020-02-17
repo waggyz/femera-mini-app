@@ -473,6 +473,7 @@ public: ElastDmv3D(Phys::vals prop, Phys::vals dirs ) :
         const FLOAT_PHYS C0 =(1.0-nu)*d;
         const FLOAT_PHYS C1 =nu*d;
         const FLOAT_PHYS C2 =(1.0-2.0*nu)*d*0.5;
+#ifdef HAS_AVX
         const Phys::vals D={
           C0,C1,C1,0.0,0.0,0.0, 0.0,0.0,
           C1,C0,C1,0.0,0.0,0.0, 0.0,0.0,
@@ -480,6 +481,15 @@ public: ElastDmv3D(Phys::vals prop, Phys::vals dirs ) :
           0.0,0.0,0.0,C2,0.0,0.0, 0.0,0.0,
           0.0,0.0,0.0,0.0,C2,0.0, 0.0,0.0,
           0.0,0.0,0.0,0.0,0.0,C2, 0.0,0.0 };
+#else
+        const Phys::vals D={
+          C0,C1,C1,0.0,0.0,0.0,
+          C1,C0,C1,0.0,0.0,0.0,
+          C1,C1,C0,0.0,0.0,0.0,
+          0.0,0.0,0.0,C2,0.0,0.0,
+          0.0,0.0,0.0,0.0,C2,0.0,
+          0.0,0.0,0.0,0.0,0.0,C2 };
+#endif
         mtrl_dmat=D;
         mtrl_matc.resize(3);
         mtrl_matc[0]=C0; mtrl_matc[1]=C1; mtrl_matc[2]=C2;
@@ -491,6 +501,7 @@ public: ElastDmv3D(Phys::vals prop, Phys::vals dirs ) :
         const FLOAT_PHYS C0 =(1.0-nu)*d;
         const FLOAT_PHYS C1 =nu*d;
         const FLOAT_PHYS C2 =mtrl_prop[2];
+#ifdef HAS_AVX
         const Phys::vals D={
           C0,C1,C1,0.0,0.0,0.0, 0.0,0.0,
           C1,C0,C1,0.0,0.0,0.0, 0.0,0.0,
@@ -498,6 +509,15 @@ public: ElastDmv3D(Phys::vals prop, Phys::vals dirs ) :
           0.0,0.0,0.0,C2,0.0,0.0, 0.0,0.0,
           0.0,0.0,0.0,0.0,C2,0.0, 0.0,0.0,
           0.0,0.0,0.0,0.0,0.0,C2, 0.0,0.0 };
+#else
+        const Phys::vals D={
+          C0,C1,C1,0.0,0.0,0.0,
+          C1,C0,C1,0.0,0.0,0.0,
+          C1,C1,C0,0.0,0.0,0.0,
+          0.0,0.0,0.0,C2,0.0,0.0,
+          0.0,0.0,0.0,0.0,C2,0.0,
+          0.0,0.0,0.0,0.0,0.0,C2 };
+#endif
         mtrl_dmat=D;
         mtrl_matc.resize(3);
         mtrl_matc[0]=C0; mtrl_matc[1]=C1; mtrl_matc[2]=C2;
@@ -513,6 +533,7 @@ public: ElastDmv3D(Phys::vals prop, Phys::vals dirs ) :
         const FLOAT_PHYS C0 =(1.0-nu)*d;
         const FLOAT_PHYS C1 =nu*d;
         const FLOAT_PHYS C2 =(1.0-2.0*nu)*d*0.5;
+#ifdef HAS_AVX
         const Phys::vals D={
           C0,C1,C1,0.0,0.0,0.0, 0.0,0.0,
           C1,C0,C1,0.0,0.0,0.0, 0.0,0.0,
@@ -520,6 +541,15 @@ public: ElastDmv3D(Phys::vals prop, Phys::vals dirs ) :
           0.0,0.0,0.0,C2,0.0,0.0, 0.0,0.0,
           0.0,0.0,0.0,0.0,C2,0.0, 0.0,0.0,
           0.0,0.0,0.0,0.0,0.0,C2, 0.0,0.0 };
+#else
+        const Phys::vals D={
+          C0,C1,C1,0.0,0.0,0.0,
+          C1,C0,C1,0.0,0.0,0.0,
+          C1,C1,C0,0.0,0.0,0.0,
+          0.0,0.0,0.0,C2,0.0,0.0,
+          0.0,0.0,0.0,0.0,C2,0.0,
+          0.0,0.0,0.0,0.0,0.0,C2 };
+#endif
         mtrl_dmat=D;
         mtrl_matc.resize(3);
         mtrl_matc[0]=C0; mtrl_matc[1]=C1; mtrl_matc[2]=C2;
@@ -528,6 +558,7 @@ public: ElastDmv3D(Phys::vals prop, Phys::vals dirs ) :
         mtrl_prop.resize(3);
         mtrl_prop=mtrl_matc;
         const FLOAT_PHYS* RESTRICT C =& mtrl_matc[0];
+#ifdef HAS_AVX
         const Phys::vals D={
           C[0],C[1],C[1],0.0,0.0,0.0, 0.0,0.0,
           C[1],C[0],C[1],0.0,0.0,0.0, 0.0,0.0,
@@ -535,6 +566,15 @@ public: ElastDmv3D(Phys::vals prop, Phys::vals dirs ) :
           0.0,0.0,0.0,C[2],0.0,0.0, 0.0,0.0,
           0.0,0.0,0.0,0.0,C[2],0.0, 0.0,0.0,
           0.0,0.0,0.0,0.0,0.0,C[2], 0.0,0.0 };
+#else
+        const Phys::vals D={
+          C[0],C[1],C[1],0.0,0.0,0.0,
+          C[1],C[0],C[1],0.0,0.0,0.0,
+          C[1],C[1],C[0],0.0,0.0,0.0,
+          0.0,0.0,0.0,C[2],0.0,0.0,
+          0.0,0.0,0.0,0.0,C[2],0.0,
+          0.0,0.0,0.0,0.0,0.0,C[2] };
+#endif
         mtrl_dmat=D;
         break;}
       case(21):{// 21 values for symmetric 6x6.
@@ -546,6 +586,7 @@ public: ElastDmv3D(Phys::vals prop, Phys::vals dirs ) :
         const FLOAT_PHYS E =(C0-C1)*(2.0*C1+C0)/(C0+C1);
         const FLOAT_PHYS nu= C1/(C0+C1);
         mtrl_prop[0]=E; mtrl_prop[1]=nu; mtrl_prop[2]=C2;
+#ifdef HAS_AVX
         const Phys::vals D={
           C[ 0],C[ 1],C[ 2],C[ 3],C[ 4],C[ 5], 0.0,0.0,
           C[ 1],C[ 6],C[ 7],C[ 8],C[ 9],C[10], 0.0,0.0,
@@ -553,6 +594,15 @@ public: ElastDmv3D(Phys::vals prop, Phys::vals dirs ) :
           C[ 3],C[ 8],C[12],C[15],C[16],C[17], 0.0,0.0,
           C[ 4],C[ 9],C[13],C[16],C[18],C[19], 0.0,0.0,
           C[ 5],C[10],C[14],C[17],C[19],C[20], 0.0,0.0 };
+#else
+        const Phys::vals D={
+          C[ 0],C[ 1],C[ 2],C[ 3],C[ 4],C[ 5],
+          C[ 1],C[ 6],C[ 7],C[ 8],C[ 9],C[10],
+          C[ 2],C[ 7],C[11],C[12],C[13],C[14],
+          C[ 3],C[ 8],C[12],C[15],C[16],C[17],
+          C[ 4],C[ 9],C[13],C[16],C[18],C[19],
+          C[ 5],C[10],C[14],C[17],C[19],C[20] };
+#endif
         mtrl_dmat=D;
         mtrl_matc.resize(3);
         mtrl_matc[0]=C0; mtrl_matc[1]=C1; mtrl_matc[2]=C2;
@@ -566,6 +616,7 @@ public: ElastDmv3D(Phys::vals prop, Phys::vals dirs ) :
         const FLOAT_PHYS E =(C0-C1)*(2.0*C1+C0)/(C0+C1);
         const FLOAT_PHYS nu= C1/(C0+C1);
         mtrl_prop[0]=E; mtrl_prop[1]=nu; mtrl_prop[2]=C2;
+#ifdef HAS_AVX
         const Phys::vals D={
           C[ 0],C[ 1],C[ 2],C[ 3],C[ 4],C[ 5], 0.0,0.0,
           C[ 6],C[ 7],C[ 8],C[ 9],C[10],C[11], 0.0,0.0,
@@ -573,6 +624,15 @@ public: ElastDmv3D(Phys::vals prop, Phys::vals dirs ) :
           C[18],C[19],C[20],C[21],C[22],C[23], 0.0,0.0,
           C[24],C[25],C[26],C[27],C[28],C[29], 0.0,0.0,
           C[30],C[31],C[32],C[33],C[34],C[35], 0.0,0.0 };
+#else
+        const Phys::vals D={
+          C[ 0],C[ 1],C[ 2],C[ 3],C[ 4],C[ 5],
+          C[ 6],C[ 7],C[ 8],C[ 9],C[10],C[11],
+          C[12],C[13],C[14],C[15],C[16],C[17],
+          C[18],C[19],C[20],C[21],C[22],C[23],
+          C[24],C[25],C[26],C[27],C[28],C[29],
+          C[30],C[31],C[32],C[33],C[34],C[35] };
+#endif
         mtrl_dmat=D;
         mtrl_matc.resize(3);
         mtrl_matc[0]=C0; mtrl_matc[1]=C1; mtrl_matc[2]=C2;

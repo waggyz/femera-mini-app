@@ -23,6 +23,11 @@ int ElastDmv3D::ElemJacNode(Elem* E, FLOAT_SOLV* part_d ){
   const uint Ne = uint(Dm*Nc);// One row of stiffness matrix
   const uint elem_n = E->elem_n;
   const uint intp_n = E->gaus_n;
+#ifdef HAS_AVX
+  const uint Dr = 8;
+#else
+  const uint Dr = 6;
+#endif
 #ifdef DIAG_FROM_STIFF
   const uint Nk = Ne*Ne;// Elements of stiffness matrix
   FLOAT_PHYS elem_stiff[Nk];
@@ -73,7 +78,7 @@ int ElastDmv3D::ElemJacNode(Elem* E, FLOAT_SOLV* part_d ){
       for(uint l=0; l<Ne; l++){
       for(uint k=0; k<6 ; k++){
       for(uint j=0; j<6 ; j++){
-        elem_stiff[Ne* i+l ] += B[Ne* j+i ] * D[8* k+j ] * B[Ne* k+l ] * dw;
+        elem_stiff[Ne* i+l ] += B[Ne* j+i ] * D[Dr* k+j ] * B[Ne* k+l ] * dw;
       } } } }
 #else
       for(uint n=0; n<Nc; n++){
@@ -82,7 +87,7 @@ int ElastDmv3D::ElemJacNode(Elem* E, FLOAT_SOLV* part_d ){
       for(uint k=0; k<6 ; k++){
       for(uint j=0; j<6 ; j++){
         part_d[E->elem_conn[Nc*ie+n]*9+ 3* m+o ]
-          += B[Ne* j+i ] * D[8* k+j ] * B[Ne* k+l ] * dw
+          += B[Ne* j+i ] * D[Dr* k+j ] * B[Ne* k+l ] * dw
 #if 0
           *((m==o)?1.0:-1.0)
 #endif
@@ -113,6 +118,11 @@ int ElastDmv3D::ElemStiff(Elem* E ){//FIXME should be ScatterStiff( E )
   const int Nc = int(E->elem_conn_n);
   const int Ne = Dm*Nc;
   const int Nr = Dn*Nc;// One row/col of stiffness matrix
+#ifdef HAS_AVX
+  const uint Dr = 8;
+#else
+  const uint Dr = 6;
+#endif
 #ifdef __INTEL_COMPILER
   const int Nk =int(Nr*(Nr + 1))/2;// Packed symmetric stiffness
 #else
@@ -170,10 +180,10 @@ int ElastDmv3D::ElemStiff(Elem* E ){//FIXME should be ScatterStiff( E )
       for(int j=0; j<6 ; j++){
 #ifdef __INTEL_COMPILER
         // Use packed symmmetric matrix storage.
-          elem_stiff[Nk*ie + ik ]+=B[Ne* j+i ] * D[8* k+j ] * B[Ne* k+l ] * w;
+          elem_stiff[Nk*ie + ik ]+=B[Ne* j+i ] * D[Dr* k+j ] * B[Ne* k+l ] * w;
         }
 #else
-        elem_stiff[Nk*ie +Nr* i+l ]+=B[Ne* j+i ] * D[8* k+j ] * B[Ne* k+l ] * w;
+        elem_stiff[Nk*ie +Nr* i+l ]+=B[Ne* j+i ] * D[Dr* k+j ] * B[Ne* k+l ] * w;
 #endif
       } } } }
     }// end intp loop
@@ -187,6 +197,11 @@ int ElastDmv3D::ElemJacobi(Elem* E, FLOAT_SOLV* part_d ){
   const uint  Ne = uint(ndof*Nc);
   const uint elem_n = E->elem_n;
   const uint intp_n = E->gaus_n;
+#ifdef HAS_AVX
+  const uint Dr = 8;
+#else
+  const uint Dr = 6;
+#endif
   //
   RESTRICT Phys::vals elem_diag(Ne);
   FLOAT_PHYS B[Ne*6];// 6 rows, Ne cols
@@ -223,7 +238,7 @@ int ElastDmv3D::ElemJacobi(Elem* E, FLOAT_SOLV* part_d ){
       for(uint i=0; i<Ne; i++){
       for(uint k=0; k<6 ; k++){
       for(uint j=0; j<6 ; j++){
-        elem_diag[i]+=(B[Ne*j + i] * D[8*j + k] * B[Ne*k + i])*w;
+        elem_diag[i]+=(B[Ne*j + i] * D[Dr*j + k] * B[Ne*k + i])*w;
       } } }
     }//end intp loop
     for (uint i=0; i<Nc; i++){
