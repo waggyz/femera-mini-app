@@ -93,9 +93,11 @@ int PCG::Init( Elem* E, Phys* Y ){// printf("*** Init(E,Y) ***\n");
         / ( E->glob_bbox[   Dm+j ] - E->glob_bbox[j] );
       }
     }
-  }
+  }// printf("this->BCS( E,Y )\n");
   this->BCS( E,Y );//FIXME repeated in Setup(E,Y)
+  //printf("this->BC0( E,Y )\n");
   this->BC0( E,Y );
+  //printf("Y->ElemLinear( E,... )\n");
 #endif
   const uint sysn=this->udof_n;
   for(uint i=0; i<sysn; i++){ this->part_f[i] = 0.0; }
@@ -208,8 +210,8 @@ int HaloPCG::Init(){// Preconditioned Conjugate Gradient
       Y->udof_magn[i] = bcmax[i];
       //printf("Sync MAX BC[%u]: %f\n",i,Y->udof_magn[i]);
       S->glob_bmax[i] = this->glob_bmax[i];
-    }
-    S->Precond( E,Y );
+    }// printf("S->Precond( E,Y )...\n");
+    S->Precond( E,Y );// printf("S->Precond( E,Y ) done.\n");
   }
   time_reset( my_prec_count, start );
   // ---------------------------  Sync part_d

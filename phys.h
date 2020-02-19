@@ -646,9 +646,107 @@ public: ElastDmv3D(Phys::vals prop, Phys::vals dirs ) :
 protected:
 private:
 };
+class ThermIso3D final: public Phys{
+public:
+  ThermIso3D( Phys::vals cond ) :// Constructor
+    Phys( cond ){
+      node_d = 1;
+      ther_cond.resize(cond.size()); ther_cond=cond;
+      ThermIso3D::MtrlProp2MatC(); 
+    }
+#if 0
+  int SavePartFMR( const char* bname, bool is_bin ) final;
+  int ReadPartFMR( const char* bname, bool is_bin ) final;
+#endif
+  int Setup( Elem* )final;
+  //int ElemLinear( std::vector<Elem*>,RESTRICT Phys::vals&,const RESTRICT Phys::vals&)
+  int BlocLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
+  int ElemLinear( Elem*,const INT_MESH,
+    const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*) final;
+  int ElemNonlinear( Elem*,const INT_MESH,
+    const INT_MESH,FLOAT_SOLV*,const FLOAT_SOLV*,const FLOAT_SOLV*, bool) final;
+  int ElemJacobi( Elem*,FLOAT_SOLV* ) final;
+  int ElemJacobi( Elem*,FLOAT_SOLV*,const FLOAT_SOLV* ) final;
+  int ElemJacNode( Elem*,FLOAT_SOLV* ) final;
+  int ElemRowSumAbs(Elem*, FLOAT_SOLV* ) final;
+  int ElemStrain(Elem*, FLOAT_SOLV* ) final;
+  int ElemLinear( Elem* ) final;
+  int ElemJacobi( Elem* ) final;
+  int ElemStiff ( Elem* ) final;
+  int ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*) final;
+  inline int MtrlProp2MatC()final{
+    mtrl_matc.resize(1);
+    if(this->ther_cond.size()>0){
+      mtrl_matc[0]=ther_cond[0];
+    }else{ mtrl_matc[0]=1.0; }
+    return 0;
+  }
+  Phys::vals MtrlLinear(const RESTRICT Phys::vals &e)final{ return e; }// dummy
+protected:
+private:
+};
+#if 0
+class ThermOrtho3D final: public Phys{
+public:
+  ThermIso3D( Phys::vals cond, Phys::vals dirs ) :// Constructor
+    Phys( cond,dirs ){
+      node_d = 1;
+      ther_cond.resize(cond.size()); ther_cond=cond;
+      ThermIso3D::MtrlProp2MatC(); 
+    }
+#if 0
+  int SavePartFMR( const char* bname, bool is_bin ) final;
+  int ReadPartFMR( const char* bname, bool is_bin ) final;
+#endif
+  int Setup( Elem* )final;
+  //int ElemLinear( std::vector<Elem*>,RESTRICT Phys::vals&,const RESTRICT Phys::vals&)
+  int BlocLinear( Elem*,RESTRICT Phys::vals&,const RESTRICT Phys::vals&) final;
+  int ElemLinear( Elem*, const INT_MESH, const INT_MESH,
+    FLOAT_SOLV*, const FLOAT_SOLV*) final;
+  int ElemNonlinear( Elem*, const INT_MESH, const INT_MESH,
+    FLOAT_SOLV*, const FLOAT_SOLV*, const FLOAT_SOLV*, bool) final;
+  int ElemJacobi( Elem*,FLOAT_SOLV* ) final;
+  int ElemJacobi( Elem*,FLOAT_SOLV*,const FLOAT_SOLV* ) final;
+  int ElemJacNode( Elem*,FLOAT_SOLV* ) final;
+  int ElemRowSumAbs(Elem*, FLOAT_SOLV* ) final;
+  int ElemStrain(Elem*, FLOAT_SOLV* ) final;
+  int ElemLinear( Elem* ) final;
+  int ElemJacobi( Elem* ) final;
+  int ElemStiff ( Elem* ) final;
+  int ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*) final;
+  inline int MtrlProp2MatC()final{
+    mtrl_matc.resize(3);
+    if(this->ther_cond.size()>0){ mtrl_matc[0]=ther_cond[0];
+      }else{ mtrl_matc[0]=1.0 }
+    if(this->ther_cond.size()>1){ mtrl_matc[1]=ther_cond[1];
+      }else{ mtrl_matc[1]=mtrl_matc[0] }
+    if(this->ther_cond.size()>2){ mtrl_matc[2]=ther_cond[2];
+      }else{ mtrl_matc[2]=mtrl_matc[1] }
+    this->mtrl_dmat.resize(9,0.0);
+    if(this->mtrl_rotc.size()>8){// Apply rotation matrix.
+      const FLOAT_PHYS* RESTRICT R =& this->mtrl_rotc[0];
+      for(int i=0;i<3;i++){
+      for(int j=0;j<3;j++){
+      for(int k=0;k<3;k++){
+      for(int l=0;l<3;l++){
+      for(int m=0;m<3;m++){
+        mtrl_dmat[3*i+m]+=R[3*j+i]*R[3*k+j]*mtrl_matc[k]*R[3*k+l]*R[3*l+m];
+      } } } } }
+    }else{// Set the diagonal (unrotated)
+      this->mtrl_dmat[0]=mtrl_matc[0];
+      this->mtrl_dmat[4]=mtrl_matc[1];
+      this->mtrl_dmat[8]=mtrl_matc[2];
+    }
+    return 0;
+  }
+  Phys::vals MtrlLinear(const RESTRICT Phys::vals &e)final{ return e; }// dummy
+protected:
+private:
+};
+#endif
 class ThermElastIso3D final: public Phys{
 public:
-  ThermElastIso3D(// Orthotropic Material Constructor
+  ThermElastIso3D(//FIXME Orthotropic Material Constructor
     Phys::vals prop, Phys::vals dirs, Phys::vals expa, Phys::vals cond ) :
     Phys( prop,dirs ){
       node_d = 4;

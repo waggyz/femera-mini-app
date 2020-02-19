@@ -609,7 +609,7 @@ int main( int argc, char** argv ) {
       printf("Saving and appending physics to partitions...\n"); }
 #pragma omp parallel for schedule(static)
     for(int part_i=part_0;part_i<(part_n+part_0);part_i++){
-      Phys::vals props={100e9,0.3};//FIXME Should not have defaults here...
+      Phys::vals props={};//100e9,0.3};//FIXME Should not have defaults here...
       Phys::vals dirs={0.0,0.0,0.0};// 
       Phys::vals prop={};
       auto m0=mtrl_part[0];
@@ -654,11 +654,11 @@ int main( int argc, char** argv ) {
           prop.resize(props.size()-3);
           for(uint i=3;i<props.size();i++){ prop[i-3]=props[i]; }
           Y=new ElastOrtho3D(prop,dirs);
-        }else{
+        }else if(props.size()>0){
           prop.resize(props.size());
           for(uint i=0;i<props.size();i++){ prop[i]=props[i]; }
           Y=new ElastIso3D(prop[0],prop[1]);
-        }
+        }else{ Y=new ThermIso3D( prop ); };//FIXME
       }
       if(tcon_part.count(part_i)>0){
         if(verbosity>1){

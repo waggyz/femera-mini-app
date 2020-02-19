@@ -99,6 +99,13 @@ static inline void rotate_s_voigt( __m256d* vS,
   const __m256d s8 = _mm256_set1_pd(S[2]);
   vS[2] = s2 * vR[0] + s5 * vR[1] + s8 * vR[2];
 }
+// Isotropic Thermal ----------------------------------------------------------
+static inline void thermal_iso_s(FLOAT_PHYS* A,
+  const FLOAT_PHYS Cdw ){
+      A[0]*= Cdw;//Sxx
+      A[1]*= Cdw;//Syy
+      A[2]*= Cdw;//Szz
+}
 // Isotropic Elastic ----------------------------------------------------------
 static inline void compute_iso_s(FLOAT_PHYS* S,
   const FLOAT_PHYS* H, const FLOAT_PHYS* C, const FLOAT_PHYS dw ){// Scalar ver.

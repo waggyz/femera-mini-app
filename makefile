@@ -85,7 +85,8 @@ CPUMODELC:=$(CPUMODEL)-$(CSTR)
 FEMERA_COMMON = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
  halo-pcg-omp.cc halo-ncg-omp.cc halo-pcr-dummy.cc\
  elas-iso3.cc elas-ort3.cc elas-dmv3.cc\
- elas-plkh-iso3.cc elas-ther-iso3.cc elas-ther-ort3.cc
+ elas-plkh-iso3.cc elas-ther-iso3.cc elas-ther-ort3.cc\
+ ther-iso3.cc ther-iso3-base.cc
 
 FEMERA_BASE_C = $(FEMERA_COMMON)\
  elas-iso3-base.cc elas-ort3-bas2.cc elas-dmv3-base.cc\
@@ -183,7 +184,7 @@ test : all
 
 test-iso : mini-omp gmsh2fmr
 	./gmsh2fmr-$(CPUMODEL) -v1 \
-	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
 	-M0 -E100e9 -N0.3 -ap cube/unst19p1n16;
 	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
@@ -212,15 +213,32 @@ test-mmp : mini-mmp
 	./femera-mmp-$(CPUMODELC) -v2 -m8 -n2 -c2 \
 	-p cube/unst19p1n16
 
+
 test-thermal : mini-omp gmsh2fmr
+	./gmsh2fmr-$(CPUMODEL) -v3 \
+	-x@0.0 -x0 -x@1.0 -xu10 \
+	-M0 -K100e-6 \
+	-ap cube/unit1p2n2;
+	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -d0 -p cube/unit1p2n2
+	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
+	./femera-$(CPUMODELC) -v3 -c1 -d0 -p cube/unit1p2n2
+	./gmsh2fmr-$(CPUMODEL) -v1 \
+	-x@0.0 -x0 -x@1.0 -xu10 \
+	-M0 -K100e-6 \
+	-ap cube/unst19p1n16;
+	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
+	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
+	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
+
+test-thermalelastic : mini-omp gmsh2fmr
 	./gmsh2fmr-$(CPUMODEL) -v3 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 -Tu10 \
 	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 -R \
 	-ap cube/unit1p1n2;
-	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unit1p2n2
+	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unit1p1n2
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
-	./femera-$(CPUMODELC) -v3 -c1 -d1 -p cube/unit1p2n2
+	./femera-$(CPUMODELC) -v3 -c1 -d1 -p cube/unit1p1n2
 	./gmsh2fmr-$(CPUMODEL) -v3 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 -Tu10 \
 	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 \

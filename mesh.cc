@@ -386,9 +386,12 @@ int Mesh::Setup(){
       if(Y->mtrl_prop.size()>2){
         printf("Orthotropic Elastic: E=%9.2e, nu=%4.2f, G:%9.2e\n",
           Y->mtrl_prop[0], Y->mtrl_prop[1], Y->mtrl_prop[2] );
-      }else{
+      }else if(Y->mtrl_prop.size()>1){
         printf("  Isotropic Elastic: E=%9.2e, nu=%4.2f, G:iso\n",
           Y->mtrl_prop[0], Y->mtrl_prop[1] );
+      }else{
+        printf("  Isotropic Thermal: K=%9.2e\n",
+          Y->mtrl_prop[0] );
       }
       if(Y->ther_expa.size()>0){
         printf("  Thermal Expansion:");
@@ -415,6 +418,7 @@ int Mesh::Setup(){
         if( i<(Y->mtrl_matc.size()-1) ){ printf("                    "); }
         }
       }
+      if(Y->mtrl_matc.size()<2){ printf("\n"); }
       if(Y->mtrl_dirs.size()>2){
       printf("            Rotated: [%+6.2f,%+6.2f,%+6.2f] rad around [z,x,z].\n",
         Y->mtrl_dirs[0],Y->mtrl_dirs[1],Y->mtrl_dirs[2] ); }
@@ -482,7 +486,7 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
   //FLOAT_MESH minx=9e9, miny=9e9, minz=9e9, maxx=-9e9,maxy=-9e9,maxz=-9e9;
   std::string fmrstring;
   std::ifstream fmrfile(fname);//return 0;
-  Phys::vals t_mtrl_prop={},t_mtrl_dirs={}, t_ther_cond={},t_ther_expa={},
+  Phys::vals t_elas_prop={},t_mtrl_dirs={}, t_ther_cond={},t_ther_expa={},
     t_plas_prop={};
   while( fmrfile >> fmrstring ){// std::cout <<fmrstring;//printf("%s ",fmrstring.c_str());
     if(fmrstring=="$Femera"){
@@ -595,10 +599,10 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
       };
     };
     if(fmrstring=="$ElasticProperties"){//FIXME Deprecated
-      if(t_mtrl_prop.size()==0){
+      if(t_elas_prop.size()==0){
         int s=0; fmrfile >> s;
-        t_mtrl_prop.resize(s);
-        for(int i=0; i<s; i++){ fmrfile >> t_mtrl_prop[i]; }
+        t_elas_prop.resize(s);
+        for(int i=0; i<s; i++){ fmrfile >> t_elas_prop[i]; }
         s=0; fmrfile >> s;
         if(s>0){
           t_mtrl_dirs.resize(s);
@@ -616,8 +620,8 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
     if(fmrstring=="$Elastic"){
       int s=0; fmrfile >> s;
       if(s>0){
-        t_mtrl_prop.resize(s);
-        for(int i=0; i<s; i++){ fmrfile >> t_mtrl_prop[i]; }
+        t_elas_prop.resize(s);
+        for(int i=0; i<s; i++){ fmrfile >> t_elas_prop[i]; }
       }
     }
     if(fmrstring=="$ThermalExpansion"){
@@ -649,30 +653,41 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
     //std::cout <<"*" << fmrstring <<"*" ;
 #endif
   }//EOF
-  bool has_therm=false, has_plas=false;
+  bool has_elas=false, has_therm=false, has_plas=false;
+  if(  t_elas_prop.size()>0 ){ has_elas=true; }
   if( (t_ther_expa.size()>0) | (t_ther_cond.size()>0) ){ has_therm=true; }
   if(  t_plas_prop.size()>0 ){ has_plas=true; }
-  if( has_therm ){
+  if( has_elas & has_therm ){
+#pragma omp atomic update
+    this->ther_part_n+=1;
     if(t_mtrl_dirs.size()<3){
-      Y = new ThermElastIso3D(t_mtrl_prop,t_mtrl_dirs,t_ther_expa,t_ther_cond);
+      Y = new ThermElastIso3D(t_elas_prop,t_mtrl_dirs,t_ther_expa,t_ther_cond);
 #if VERB_MAX>1
 #pragma omp atomic update
       this->iso3_part_n+=1;
-#pragma omp atomic update
-      this->ther_part_n+=1;
 #endif
     }else{
-      Y = new ThermElastOrtho3D(t_mtrl_prop,t_mtrl_dirs,t_ther_expa,t_ther_cond);
+      Y = new ThermElastOrtho3D(t_elas_prop,t_mtrl_dirs,t_ther_expa,t_ther_cond);
 #if VERB_MAX>1
 #pragma omp atomic update
       this->ort3_part_n+=1;
+#endif
+    }
+  }else if( has_therm & !has_elas ){// Thermal only
 #pragma omp atomic update
-      this->ther_part_n+=1;
+    this->ther_part_n+=1;
+    if(t_mtrl_dirs.size()<3){
+      Y = new ThermIso3D(t_ther_cond);
+    }else{//FIXME
+#if 0
+      Y = new ThermOrtho3D(t_ther_cond,t_mtrl_dirs);
+#else
+      Y = new ThermIso3D(t_ther_cond);
 #endif
     }
   }else if( has_plas ){
     if(t_plas_prop.size() < 3){
-      Y = new ElastPlastKHIso3D(t_mtrl_prop[0],t_mtrl_prop[1]);
+      Y = new ElastPlastKHIso3D(t_elas_prop[0],t_elas_prop[1]);
       Y->plas_prop.resize(t_plas_prop.size());
       for(uint i=0; i<t_plas_prop.size(); i++){
         Y->plas_prop[i] = t_plas_prop[i]; }
@@ -683,7 +698,7 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
       this->plas_part_n+=1;
 #endif
     }//else{
-//      Y = new ElastPlastKHOrt3D(t_mtrl_prop,t_mtrl_dirs);
+//      Y = new ElastPlastKHOrt3D(t_elas_prop,t_mtrl_dirs);
 //#if VERB_MAX>1
 //#pragma omp atomic update
 //      this->ort3_part_n+=1;
@@ -692,22 +707,22 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
 //#endif
 //    }
   }else{
-    if(t_mtrl_prop.size()<21){
+    if(t_elas_prop.size()<21){
       if(t_mtrl_dirs.size()<3){
-        Y = new ElastIso3D(t_mtrl_prop[0],t_mtrl_prop[1]);
+        Y = new ElastIso3D(t_elas_prop[0],t_elas_prop[1]);
 #if VERB_MAX>1
 #pragma omp atomic update
         this->iso3_part_n+=1;
 #endif
       }else{
-        Y = new ElastOrtho3D(t_mtrl_prop,t_mtrl_dirs);
+        Y = new ElastOrtho3D(t_elas_prop,t_mtrl_dirs);
 #if VERB_MAX>1
 #pragma omp atomic update
         this->ort3_part_n+=1;
 #endif
       }
     }else{
-      Y = new ElastDmv3D(t_mtrl_prop,t_mtrl_dirs);
+      Y = new ElastDmv3D(t_elas_prop,t_mtrl_dirs);
 #if VERB_MAX>1
 #pragma omp atomic update
       this->dmv3_part_n+=1;
