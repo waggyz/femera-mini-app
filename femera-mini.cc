@@ -613,7 +613,13 @@ int main( int argc, char** argv ){
     // Displacement errors ------------------------------------------
     Phys::vals errtot; int node_d=3;
     auto tY = std::get<1>(M->mesh_part[1]);
-    if(tY->ther_cond.size()>0){ node_d=4; }
+    if(tY->ther_cond.size()>0){
+      if(tY->elas_prop.size()>0){
+        node_d=4;
+      }else{
+        node_d=1;
+      }
+    }
     errtot.resize(3*(node_d+1)+1); errtot=0.0;// printf("NODED: %i\n",node_d);
     for(int i= 0; i< 1*(node_d+1); i++){ errtot[i] = 99e99; }
     for(int i= 2*(node_d+1); i< 3*(node_d+1); i++){ errtot[i] =-99e99; }
@@ -660,17 +666,25 @@ int main( int argc, char** argv ){
       test_u=test_amt * S->load_scal;
 #pragma omp critical(youngs)
 {
-    FLOAT_PHYS A=0.0,B=0.0,C=0.0;
-    //if(Y->mtrl_matc.size()==3){
-    if(Y->mtrl_dirs.size()==0){
-      A=Y->mtrl_matc[0]; B=Y->mtrl_matc[1]; C=Y->mtrl_matc[2];
-    //}else if(Y->mtrl_matc.size()==9){
-    }else{
-      A=(Y->mtrl_matc[0]+Y->mtrl_matc[1]+Y->mtrl_matc[2])/3.0;
-      B=(Y->mtrl_matc[3]+Y->mtrl_matc[4]+Y->mtrl_matc[5])/3.0;
-      C=(Y->mtrl_matc[6]+Y->mtrl_matc[7]+Y->mtrl_matc[8])/3.0;
+    if(Y->node_d>1){
+      FLOAT_PHYS A=0.0,B=0.0,C=0.0;
+      if(Y->mtrl_dirs.size()==0){
+        A=Y->mtrl_matc[0]; B=Y->mtrl_matc[1]; C=Y->mtrl_matc[2];
+      }else{
+        A=(Y->mtrl_matc[0]+Y->mtrl_matc[1]+Y->mtrl_matc[2])/3.0;
+        B=(Y->mtrl_matc[3]+Y->mtrl_matc[4]+Y->mtrl_matc[5])/3.0;
+        C=(Y->mtrl_matc[6]+Y->mtrl_matc[7]+Y->mtrl_matc[8])/3.0;
+      }
+      youn_voig=(A-B+3.0*C)*(A+2.0*B)/(2.0*A+3.0*B+C);
+    }else{// Thermal only
+      FLOAT_PHYS A=0.0;
+      if(Y->mtrl_dirs.size()==0){
+        A=Y->mtrl_matc[0];
+      }else{
+        A=(Y->mtrl_matc[0]+Y->mtrl_matc[1]+Y->mtrl_matc[2])/3.0;
+      }
+      youn_voig=A;
     }
-    youn_voig=(A-B+3.0*C)*(A+2.0*B)/(2.0*A+3.0*B+C);
     //printf("c11:%e, c12:%e, c44:%e\n",A,B,C);
     //printf("ELEM NODES: %u\n",uint(E->elem_conn_n));
     //printf("mtrl_prop size: %u\n",uint(Y->mtrl_prop.size()));
@@ -703,7 +717,8 @@ int main( int argc, char** argv ){
 #endif
       const int Dm=3; const int Dn=Y->node_d;
       Phys::vals errors;
-      FLOAT_PHYS nu=Y->mtrl_prop[1];
+      FLOAT_PHYS nu;
+      if(Dn>1){ nu=Y->mtrl_prop[1]; }else{ nu=0.0; }
       Phys::vals coor(E->node_coor.size());
       const auto Nn=E->node_n;
       switch(test_dir){
@@ -819,8 +834,10 @@ int main( int argc, char** argv ){
       if(verbosity>2){
 #pragma omp critical(print)
 {
-      printf(" ux        uy        uz        mag       ");
-      if(node_d>3){ printf("Temp      Normalized Error Part %i", part_i ); }
+      if(node_d>2){ printf(" ux        uy        uz        mag       "); }
+      if(node_d==1){ printf(" Temp      mag       "); }
+      if(node_d>3){
+        printf("Temp      Normalized Error Part %i", part_i ); }
       else{ printf("Normalized Error in Partition %i", part_i ); }
       for(int i=0;i<int(errors.size());i++){
         if(!(i%(node_d+1))){
@@ -841,9 +858,10 @@ int main( int argc, char** argv ){
     }//end parallel for
 }//end parallel region
     for(int i= 4; i< 2*(node_d+1); i++){ errtot[i]/=part_n; }
-    printf(" ux        uy        uz        mag       ");
+    if(node_d>2){ printf(" ux        uy        uz        mag       "); }
     //printf("Normalized Error in %i Partitions", part_n );
-    if(node_d>3){ printf("Temp      Normalized Error in %i Parts", part_n ); }
+      if(node_d==1){ printf(" Temp      mag       "); }
+      if(node_d>3){ printf("Temp      Normalized Error in %i Parts", part_n ); }
     else{ printf("Normalized Error in %i Partitions", part_n ); }
     for(int i=0;i<int(errtot.size());i++){
       if(!(i%(node_d+1))){
