@@ -98,11 +98,13 @@ if [ ! -f "$DIR""/uhxt"$H"p"$P"n"$N"_1.fmr" ]; then
       $SLICEARG -M0 -E100e9 -N0.3 -J300e6 -J100e6 -a "$DIR""/uhxt"$H"p"$P"n"$NN
   ;;
   ther-iso)
-    "$GMSH2FMR" -v$VERB -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -Tu10 \
+    export OMP_NUM_THREADS=1
+    "$GMSH2FMR" -v$VERB -x@0.0 -x0 -x@1.0 -xu10 \
       $SLICEARG -M0 -K100e-6 -a "$DIR""/uhxt"$H"p"$P"n"$NN
   ;;
   ther-ort)
-    "$GMSH2FMR" -v$VERB -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -Tu10 \
+    export OMP_NUM_THREADS=1
+    "$GMSH2FMR" -v$VERB -x@0.0 -x0 -x@1.0 -xu10 \
       $SLICEARG -M0 -K100e-6 -R -a "$DIR""/uhxt"$H"p"$P"n"$NN
   ;;
   *)
@@ -166,11 +168,13 @@ else
         $SLICEARG -M0 -E100e9 -N0.3 -A20e-6 -K100e-6 -R -a "$DIR""/uhxt"$H"p"$P"n"$NN
     ;;
     ther-iso)
-      "$GMSH2FMR" -v$VERB -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -Tu10 \
+    export OMP_NUM_THREADS=1
+      "$GMSH2FMR" -v$VERB -x@0.0 -x0 -x@1.0 -xu10 \
         $SLICEARG -M0 -K100e-6 -a "$DIR""/uhxt"$H"p"$P"n"$NN
     ;;
     ther-ort)
-      "$GMSH2FMR" -v$VERB -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -Tu10 \
+    export OMP_NUM_THREADS=1
+      "$GMSH2FMR" -v$VERB -x@0.0 -x0 -x@1.0 -xu10 \
         $SLICEARG -M0 -K100e-6 -R -a "$DIR""/uhxt"$H"p"$P"n"$NN
     ;;
     plas-iso)

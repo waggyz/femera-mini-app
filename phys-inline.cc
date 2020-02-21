@@ -11,7 +11,7 @@ static inline void print_m256(const __m256d v){// Debugging register print
 }
 #endif
 // Physics --------------------------------------------------------------------
-static inline void accumulate_f( __m256d* vf,
+static inline void accumulate_f(__m256d* vf,
   const __m256d* vS, const FLOAT_PHYS* G, const int Nc ){
   for(int i= 0; i< 4; i++){// This is a little faster unrolled.
     vf[i]
@@ -122,7 +122,7 @@ static inline void thermal_g_h( __m256d* vG, __m256d* vH,
 }
 static inline void accumulate_q( FLOAT_PHYS* q,
   const __m256d vS, const __m256d* vG, const int Nc ){
-#if 1
+#if 0
   for(int i= 0; i<Nc; i++){
     FLOAT_PHYS VECALIGNED SG[4];
     _mm256_store_pd( SG, vS * vG[ i ] );
@@ -130,7 +130,7 @@ static inline void accumulate_q( FLOAT_PHYS* q,
   }
 #else
   FLOAT_PHYS VECALIGNED SG[4];
-  for(int i= 0; i< 4; i++){//FIXME Check if faster unrolled.
+  for(int i= 0; i< 4; i++){// This may be a tiny bit faster unrolled.
     _mm256_store_pd( SG, vS * vG[ i ] );
     q[i]+= SG[0]+SG[1]+SG[2];
   }

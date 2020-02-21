@@ -220,16 +220,13 @@ test-mmp : mini-mmp
 
 
 test-thermal : mini-omp gmsh2fmr
-	./gmsh2fmr-$(CPUMODEL) -v3 \
-	-x@0.0 -x0 -x@1.0 -xu10 \
-	-M0 -K100e-6 \
+	./gmsh2fmr-$(CPUMODEL) -v3 -x@0.0 -x0 -x@1.0 -xu10 -M0 -K100e-6 \
 	-ap cube/unit1p2n2;
 	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -d0 -p cube/unit1p2n2
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
+	export OMP_NUM_THREADS=1;
 	./femera-$(CPUMODELC) -v3 -c1 -d0 -p cube/unit1p2n2
-	./gmsh2fmr-$(CPUMODEL) -v1 \
-	-x@0.0 -x0 -x@1.0 -xu10 \
-	-M0 -K100e-6 \
+	./gmsh2fmr-$(CPUMODEL) -v1 -x@0.0 -x0 -x@1.0 -xu10 -M0 -K100e-6 \
 	-ap cube/unst19p1n16;
 	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
