@@ -106,6 +106,48 @@ static inline void thermal_iso_s(FLOAT_PHYS* A,
       A[1]*= Cdw;//Syy
       A[2]*= Cdw;//Szz
 }
+static inline void thermal_iso_s(__m256d* A,
+  const FLOAT_PHYS Cdw ){
+      A[0]*=_mm256_set1_pd(Cdw);
+}
+static inline void thermal_g_h( __m256d* vG, __m256d* vH,
+  const int Nc, const __m256d* vJ, const FLOAT_PHYS* sg, const FLOAT_PHYS* u ){
+  for(int i= 0; i<Nc; i++){
+    vG[ i ]
+      = vJ[0] *_mm256_set1_pd( sg[3* i+0 ])
+      + vJ[1] *_mm256_set1_pd( sg[3* i+1 ])
+      + vJ[2] *_mm256_set1_pd( sg[3* i+2 ]);
+    vH[0]+= vG[ i ] *_mm256_set1_pd( u[ i ]);
+  }
+}
+static inline void accumulate_q( FLOAT_PHYS* q,
+  const __m256d vS, const __m256d* vG, const int Nc ){
+#if 1
+  for(int i= 0; i<Nc; i++){
+    FLOAT_PHYS VECALIGNED SG[4];
+    _mm256_store_pd( SG, vS * vG[ i ] );
+    q[i]+= SG[0]+SG[1]+SG[2];
+  }
+#else
+  FLOAT_PHYS VECALIGNED SG[4];
+  for(int i= 0; i< 4; i++){//FIXME Check if faster unrolled.
+    _mm256_store_pd( SG, vS * vG[ i ] );
+    q[i]+= SG[0]+SG[1]+SG[2];
+  }
+  if(Nc>4){
+    for(int i= 4; i<10; i++){
+      _mm256_store_pd( SG, vS * vG[ i ] );
+      q[i]+= SG[0]+SG[1]+SG[2];
+    }
+    if(Nc>10){
+      for(int i=10; i<20; i++){
+        _mm256_store_pd( SG, vS * vG[ i ] );
+        q[i]+= SG[0]+SG[1]+SG[2];
+      }
+    }
+  }
+#endif
+}
 // Isotropic Elastic ----------------------------------------------------------
 static inline void compute_iso_s(FLOAT_PHYS* S,
   const FLOAT_PHYS* H, const FLOAT_PHYS* C, const FLOAT_PHYS dw ){// Scalar ver.
