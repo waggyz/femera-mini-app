@@ -98,7 +98,10 @@ public:
   //size_t elem_linear_flop=0;
 protected:
   Phys( Phys::vals p ) : mtrl_prop(p){};
-  Phys( Phys::vals p, Phys::vals d ) : mtrl_prop(p),mtrl_dirs(d){};
+  Phys( Phys::vals p, Phys::vals d ) : mtrl_prop(p),mtrl_dirs(d){
+    elas_prop.resize(mtrl_prop.size());
+    elas_prop=mtrl_prop;
+  };
   //constructor computes material vals
   inline Phys::vals Tens2VoigtEng(const RESTRICT Phys::vals&);
   inline Phys::vals Tens3VoigtEng(const RESTRICT Phys::vals&);

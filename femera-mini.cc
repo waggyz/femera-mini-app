@@ -358,7 +358,7 @@ int main( int argc, char** argv ){
   std::cout <<"]"<<'\n';
   printf("Read and set up                         in %f s\n", read_sec );
   if(verbosity>1){
-    std::cout << " Initializing:  ";
+    std::cout << "  Initializing: ";
     switch(solv_cond){
       case(Solv::COND_NONE): std::cout << "no"; break;
       case(Solv::COND_JACO): std::cout << "Jacobi"; break;
@@ -613,13 +613,14 @@ int main( int argc, char** argv ){
     // Displacement errors ------------------------------------------
     Phys::vals errtot; int node_d=3;
     auto tY = std::get<1>(M->mesh_part[1]);
+    //printf("elas: %u, ther: %u\n",tY->elas_prop.size(),tY->ther_cond.size());
     if(tY->ther_cond.size()>0){
       if(tY->elas_prop.size()>0){
         node_d=4;
       }else{
         node_d=1;
       }
-    }
+    }//printf("******** FINDME node_d: %i\n",node_d);
     errtot.resize(3*(node_d+1)+1); errtot=0.0;// printf("NODED: %i\n",node_d);
     for(int i= 0; i< 1*(node_d+1); i++){ errtot[i] = 99e99; }
     for(int i= 2*(node_d+1); i< 3*(node_d+1); i++){ errtot[i] =-99e99; }
@@ -644,6 +645,7 @@ int main( int argc, char** argv ){
 #endif
 #pragma omp critical(minmax)
 {
+      //printf("elas: %u, ther: %u\n",Y->elas_prop.size(),Y->ther_cond.size());
       //smin=std::min( smin, E->node_coor.min() );
       //smax=std::max( smax, E->node_coor.max() );
       Phys::vals t = E->node_coor[std::slice(0,E->node_n,3)];
@@ -831,7 +833,7 @@ int main( int argc, char** argv ){
 #endif
 }
 #if VERB_MAX>2
-      if(verbosity>2){
+      if(verbosity>2){// Errors in each partition
 #pragma omp critical(print)
 {
       if(node_d>2){ printf(" ux        uy        uz        mag       "); }
@@ -857,7 +859,8 @@ int main( int argc, char** argv ){
 #endif
     }//end parallel for
 }//end parallel region
-    for(int i= 4; i< 2*(node_d+1); i++){ errtot[i]/=part_n; }
+    // Global errors
+    for(int i= 4; i< 2*(node_d+1); i++){ errtot[i]/=part_n; };
     if(node_d>2){ printf(" ux        uy        uz        mag       "); }
     //printf("Normalized Error in %i Partitions", part_n );
       if(node_d==1){ printf(" Temp      mag       "); }

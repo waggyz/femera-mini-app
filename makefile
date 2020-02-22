@@ -97,7 +97,7 @@ ifneq (,$(findstring AVX,$(CPUSIMD)))
  CPPFLAGS:=$(CPPFLAGS) -DHAS_AVX
 FEMERA_MINI_C = $(FEMERA_COMMON)\
  elas-iso3-vect.cc elas-ort3-vec2.cc elas-dmv3-vect.cc\
- elas-plkh-iso3-vect.cc elas-ther-iso3-bas2.cc elas-ther-ort3-vec2.cc\
+ elas-plkh-iso3-vect.cc elas-ther-iso3-bas2.cc elas-ther-ort3-bas2.cc\
  ther-iso3-vect.cc
 else
 FEMERA_MINI_C = $(FEMERA_BASE_C)
@@ -232,22 +232,22 @@ test-thermal : mini-omp gmsh2fmr
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
 
-test-thermalelastic : mini-omp gmsh2fmr
+test-thermelast : mini-omp gmsh2fmr
 	./gmsh2fmr-$(CPUMODEL) -v3 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 -Tu10 \
 	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 -R \
 	-ap cube/unit1p1n2;
-	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unit1p1n2
+	echo ./femera-$(CPUMODELC) -v3 -c$(NCPU) -p cube/unit1p1n2
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
-	command /usr/bin/time -v --append -o $(CPUMODELC).log \
-	./femera-$(CPUMODELC) -v3 -c1 -d1 -p cube/unit1p1n2
+	./femera-$(CPUMODELC) -v3 -c1 -d0 -p cube/unit1p1n2
+
+placeholder :
 	./gmsh2fmr-$(CPUMODEL) -v3 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 -Tu10 \
 	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 \
 	-ap cube/unit1p1n2;
-	echo ./femerq-$(CPUMODELC) -v1 -c$(NCPU) -p cube/unit1p1n2
+	echo ./femera-$(CPUMODELC) -v1 -c$(NCPU) -p cube/unit1p1n2
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
-	command /usr/bin/time -v --append -o $(CPUMODELC).log \
 	./femera-$(CPUMODELC) -v2 -c$(NCPU) -d1 -r1e-6 -p cube/unit1p1n2
 
 test-plastic :  gmsh2fmr mini-omp

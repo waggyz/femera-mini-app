@@ -315,9 +315,9 @@ static inline void compute_g_h( FLOAT_PHYS* G, __m256d* vH,// line 273
       = vJ[0] *_mm256_set1_pd( sg[3* i+0 ])
       + vJ[1] *_mm256_set1_pd( sg[3* i+1 ])
       + vJ[2] *_mm256_set1_pd( sg[3* i+2 ]);
-    vH[0]+= vg *_mm256_set1_pd(  u[3* i+0 ]);
-    vH[1]+= vg *_mm256_set1_pd(  u[3* i+1 ]);
-    vH[2]+= vg *_mm256_set1_pd(  u[3* i+2 ]);
+    vH[0]+= vg *_mm256_set1_pd( u[3* i+0 ]);
+    vH[1]+= vg *_mm256_set1_pd( u[3* i+1 ]);
+    vH[2]+= vg *_mm256_set1_pd( u[3* i+2 ]);
     _mm256_store_pd(& G[4* i ], vg );
   }
 #else
@@ -326,9 +326,9 @@ static inline void compute_g_h( FLOAT_PHYS* G, __m256d* vH,// line 273
       = vJ[0] *_mm256_set1_pd( sg[3* i+0 ])
       + vJ[1] *_mm256_set1_pd( sg[3* i+1 ])
       + vJ[2] *_mm256_set1_pd( sg[3* i+2 ]);
-    vH[0]+= vg *_mm256_set1_pd(  u[3* i+0 ]);
-    vH[1]+= vg *_mm256_set1_pd(  u[3* i+1 ]);
-    vH[2]+= vg *_mm256_set1_pd(  u[3* i+2 ]);
+    vH[0]+= vg *_mm256_set1_pd( u[3* i+0 ]);
+    vH[1]+= vg *_mm256_set1_pd( u[3* i+1 ]);
+    vH[2]+= vg *_mm256_set1_pd( u[3* i+2 ]);
     _mm256_store_pd(& G[4* i ], vg ); }
   if( Nc> 4 ){
     for(int i= 4; i<10; i++){
@@ -336,9 +336,9 @@ static inline void compute_g_h( FLOAT_PHYS* G, __m256d* vH,// line 273
         = vJ[0] *_mm256_set1_pd( sg[3* i+0 ])
         + vJ[1] *_mm256_set1_pd( sg[3* i+1 ])
         + vJ[2] *_mm256_set1_pd( sg[3* i+2 ]);
-      vH[0]+= vg *_mm256_set1_pd(  u[3* i+0 ]);
-      vH[1]+= vg *_mm256_set1_pd(  u[3* i+1 ]);
-      vH[2]+= vg *_mm256_set1_pd(  u[3* i+2 ]);
+      vH[0]+= vg *_mm256_set1_pd( u[3* i+0 ]);
+      vH[1]+= vg *_mm256_set1_pd( u[3* i+1 ]);
+      vH[2]+= vg *_mm256_set1_pd( u[3* i+2 ]);
       _mm256_store_pd(& G[4* i ], vg ); }
     if( Nc>10 ){
       for(int i=10; i<20; i++){
@@ -346,9 +346,9 @@ static inline void compute_g_h( FLOAT_PHYS* G, __m256d* vH,// line 273
           = vJ[0] *_mm256_set1_pd( sg[3* i+0 ])
           + vJ[1] *_mm256_set1_pd( sg[3* i+1 ])
           + vJ[2] *_mm256_set1_pd( sg[3* i+2 ]);
-        vH[0]+= vg *_mm256_set1_pd(  u[3* i+0 ]);
-        vH[1]+= vg *_mm256_set1_pd(  u[3* i+1 ]);
-        vH[2]+= vg *_mm256_set1_pd(  u[3* i+2 ]);
+        vH[0]+= vg *_mm256_set1_pd( u[3* i+0 ]);
+        vH[1]+= vg *_mm256_set1_pd( u[3* i+1 ]);
+        vH[2]+= vg *_mm256_set1_pd( u[3* i+2 ]);
         _mm256_store_pd(& G[4* i ], vg ); }
     }
   }
@@ -494,6 +494,26 @@ static inline void compute_dmv_s(__m256d* vA,// H in, S out
   vS[1] =__builtin_shuffle_vector( s0,s1,3,1,5, 7);
   vS[2] =__builtin_shuffle_vector( s0,s1,4,5,2, 7);
 #endif
+  }
+}
+// Isotropic Thermoelastic ----------------------------------------------------
+static inline void thermelast_g_h_t( FLOAT_PHYS* G, __m256d* vH,
+  const int Nc, const __m256d* vJ, const FLOAT_PHYS* sg, const FLOAT_PHYS* sf,
+  const FLOAT_PHYS* u ){
+  vH[0]=_mm256_setzero_pd(); vH[1]=_mm256_setzero_pd();
+  vH[2]=_mm256_setzero_pd(); vH[3]=_mm256_setzero_pd();
+  for(int i= 0; i<Nc; i++){
+    const __m256d vg
+      = vJ[0] *_mm256_set1_pd( sg[3* i+0 ])
+      + vJ[1] *_mm256_set1_pd( sg[3* i+1 ])
+      + vJ[2] *_mm256_set1_pd( sg[3* i+2 ]);
+    vH[0]+= vg *_mm256_set1_pd( u[4* i+0 ]);
+    vH[1]+= vg *_mm256_set1_pd( u[4* i+1 ]);
+    vH[2]+= vg *_mm256_set1_pd( u[4* i+2 ]);
+    _mm256_store_pd(& G[4* i ], vg );
+    //vH[3]+= _mm256_set_pd( G[4*i],G[4*i+1],G[4*i+2], sf[i] )
+    vH[3]+= _mm256_set_pd( sf[i], G[4*i+2],G[4*i+1],G[4*i] )
+          *_mm256_set1_pd( u[4* i+3 ] );// ( Tx,Ty,Tz, T )
   }
 }
 // Nonlinear isotropic Elastic ------------------------------------------------
