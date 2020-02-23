@@ -406,7 +406,7 @@ int Mesh::Setup(){
         printf("\n");
       }
       if(Y->plas_prop.size()>0){
-        printf("         Plasticity:");
+        printf("            Plastic:");
         for(uint i=0; i<Y->plas_prop.size(); i++){
           printf("%9.2e",Y->plas_prop[i]); }
         printf("\n");

@@ -181,7 +181,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #endif
 #if VERB_MAX>2
     if( verbosity > 2 ){
-      printf("    DOF Scales:");
+      printf("   DOF Scales: ");
       for(uint i=0;i<bcmax.size();i++){ printf(" %g", bcmax[i]); }
       printf("\n"); }
 #endif

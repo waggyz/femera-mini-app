@@ -237,18 +237,16 @@ test-thermelast : mini-omp gmsh2fmr
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 -Tu10 \
 	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 -R \
 	-ap cube/unit1p1n2;
-	echo ./femera-$(CPUMODELC) -v3 -c$(NCPU) -p cube/unit1p1n2
+	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -d0 -p cube/unit1p1n2
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
-	./femera-$(CPUMODELC) -v3 -c1 -d0 -p cube/unit1p1n2
-
-placeholder :
+	./femera-$(CPUMODELC) -v2 -c$(NCPU) -d0 -p cube/unit1p1n2
 	./gmsh2fmr-$(CPUMODEL) -v3 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 -Tu10 \
 	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 \
 	-ap cube/unit1p1n2;
-	echo ./femera-$(CPUMODELC) -v1 -c$(NCPU) -p cube/unit1p1n2
+	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -d0 -p cube/unit1p1n2
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
-	./femera-$(CPUMODELC) -v2 -c$(NCPU) -d1 -r1e-6 -p cube/unit1p1n2
+	./femera-$(CPUMODELC) -v2 -c$(NCPU) -d0 -p cube/unit1p1n2
 
 test-plastic :  gmsh2fmr mini-omp
 	./gmsh2fmr-$(CPUMODEL) -v1 \
@@ -275,7 +273,7 @@ ref-plastic : gmsh2fmr mini-ref
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.005 \
 	-M0 -E66.2e9 -N0.33 -J305e6 -J100e6 \
 	-ap cube/unit1p1n2;
-	echo ./femera-$(CPUMODELC) -v3 -s2 -c$(NCPU) -p cube/unit1p1n2
+	echo ./refera-$(CPUMODELC) -v3 -s2 -c$(NCPU) -p cube/unit1p1n2
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	command /usr/bin/time -v --append -o $(CPUMODELC).log \
 	./refera-$(CPUMODELC) -v3 -s2 -c$(NCPU) -p cube/unit1p1n2

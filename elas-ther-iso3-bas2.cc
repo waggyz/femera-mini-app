@@ -10,7 +10,7 @@
 #include "femera.h"
 //
 int ThermElastIso3D::Setup( Elem* E ){
-  JacRot( E );
+  //JacRot( E );
   JacT  ( E );
   const uint jacs_n = E->elip_jacs.size()/E->elem_n/ 10 ;
   const uint intp_n = E->gaus_n;
@@ -114,13 +114,13 @@ int ThermElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       // Apply thermal expansion to the volumetric (diagonal) strains
       H[0]-=Tip*C[3]; H[4]-=Tip*C[3]; H[8]-=Tip*C[3];//------------- 3 FLOP
       //
-      S[0] = C[0]* H[0] + C[1]* H[4] + C[1]* H[8];//Sxx
-      S[4] = C[1]* H[0] + C[0]* H[4] + C[1]* H[8];//Syy
-      S[8] = C[1]* H[0] + C[1]* H[4] + C[0]* H[8];//Szz
+      S[0] = C[0]* H[0] + C[1]* H[4+1] + C[1]* H[8+2];//Sxx
+      S[4] = C[1]* H[0] + C[0]* H[4+1] + C[1]* H[8+2];//Syy
+      S[8] = C[1]* H[0] + C[1]* H[4+1] + C[0]* H[8+2];//Szz
       //
-      S[1] =(H[1] + H[3])*C[2];// S[3]= S[1];//Sxy Syx
-      S[5] =(H[5] + H[7])*C[2];// S[7]= S[5];//Syz Szy
-      S[2] =(H[2] + H[6])*C[2];// S[6]= S[2];//Sxz Szx
+      S[1] =(H[1+0] + H[3+1])*C[2];// S[3]= S[1];//Sxy Syx
+      S[5] =(H[5+1] + H[7+2])*C[2];// S[7]= S[5];//Syz Szy
+      S[2] =(H[2+0] + H[6+2])*C[2];// S[6]= S[2];//Sxz Szx
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];//------------------------------ 21 FLOP
       // Apply thermal conductivity, storing heat flux in the last ROW of S
       S[ 9] = H[Dn* 0+Dm] * C[4];
