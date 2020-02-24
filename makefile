@@ -90,14 +90,14 @@ FEMERA_COMMON = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
 
 FEMERA_BASE_C = $(FEMERA_COMMON)\
  elas-iso3-base.cc elas-ort3-bas2.cc elas-dmv3-base.cc\
- elas-plkh-iso3-dum.cc elas-ther-iso3-bas2.cc elas-ther-ort3-bas2.cc\
+ elas-plkh-iso3-dum.cc elas-ther-iso3-base.cc elas-ther-ort3-bas2.cc\
  ther-iso3-base.cc
 
 ifneq (,$(findstring AVX,$(CPUSIMD)))
  CPPFLAGS:=$(CPPFLAGS) -DHAS_AVX
 FEMERA_MINI_C = $(FEMERA_COMMON)\
  elas-iso3-vect.cc elas-ort3-vec2.cc elas-dmv3-vect.cc\
- elas-plkh-iso3-vect.cc elas-ther-iso3-bas2.cc elas-ther-ort3-bas2.cc\
+ elas-plkh-iso3-vect.cc elas-ther-iso3-base.cc elas-ther-ort3-bas2.cc\
  ther-iso3-vect.cc
 else
 FEMERA_MINI_C = $(FEMERA_BASE_C)
@@ -106,17 +106,17 @@ endif
 
 FEMERA_REF_C = $(FEMERA_COMMON)\
  elas-iso3-ref.cc elas-ort3-ref2.cc elas-dmv3-base.cc\
- elas-plkh-iso3-ref.cc elas-ther-iso3-bas2.cc elas-ther-ort3-ref2.cc\
+ elas-plkh-iso3-ref.cc elas-ther-iso3-base.cc elas-ther-ort3-ref2.cc\
  ther-iso3-base.cc
 
 FEMERA_NAIV_C = $(FEMERA_COMMON)\
  elas-iso3-ref.cc elas-ort3-nai2.cc elas-dmv3-base.cc\
- elas-plkh-iso3-ref.cc elas-ther-iso3-bas2.cc elas-ther-ort3-ref2.cc\
+ elas-plkh-iso3-ref.cc elas-ther-iso3-base.cc elas-ther-ort3-ref2.cc\
  ther-iso3-base.cc
 
 FEMERA_STIF_C = $(FEMERA_COMMON)\
  elas-lms3-base.cc elas-ort3-bas2.cc elas-dmv3-base.cc\
- elas-plkh-iso3-dum.cc elas-ther-iso3-bas2.cc elas-ther-ort3-bas2.cc\
+ elas-plkh-iso3-dum.cc elas-ther-iso3-base.cc elas-ther-ort3-bas2.cc\
  ther-iso3-base.cc
 
 HYBRID_GCC_C = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
@@ -124,7 +124,7 @@ HYBRID_GCC_C = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
  elas-iso3.cc elas-ort3.cc elas-ther-iso3.cc elas-ther-ort3.cc
 
 HYBRID_ICC_C = elas-iso3-vect.cc elas-ort3-vec2.cc\
- elas-ther-iso3-bas2.cc elas-ther-ort3-vec2.cc\
+ elas-ther-iso3-base.cc elas-ther-ort3-vec2.cc\
  elas-plkh-iso3-ref.cc ther-iso3-vect.cc
 
 CEXT = cc
