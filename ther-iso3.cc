@@ -97,7 +97,7 @@ int ThermIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* part_d ){
       for(uint j=0;j<Dm;j++){
         G[Nc* i+k] += E->elip_jacs[Nj*ie+Dm* j+i] * E->intp_shpg[ig+Dm* k+j];
       } } }
-      FLOAT_PHYS Cdw = C * E->elip_jacs[Nj*ie+9] * E->gaus_weig[ip];
+      const FLOAT_PHYS Cdw = C * E->elip_jacs[Nj*ie+9] * E->gaus_weig[ip];
       for(uint i=0; i<Nc; i++){
       for(uint k=0; k<3 ; k++){
         elem_diag[i]+= G[Nc*k + i] * G[Nc*k + i] * Cdw;

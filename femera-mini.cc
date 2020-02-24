@@ -460,10 +460,10 @@ int main( int argc, char** argv ){
       else{ std::cout<<M->cube_init<<" times isotropic block solution"; }
     }
     std::cout <<" with"<<'\n'<<"  Boundary at: [";
-    //FIXME Should include thermal, too
-    for(int i=0; i<3; i++){
+    //FIXME Should adjust size for thermal, elast, thermelast.
+    for(int i=0; i<4; i++){
       std::cout<< M->glob_bmax[i] * M->step_scal * FLOAT_SOLV(M->load_step);
-      if(i<2){std::cout<<","; } }
+      if(i<3){std::cout<<","; } }
     std::cout <<"], then"<<'\n' << " Iterating to: <";
     if( M->glob_atol > 0.0 ){
        std::cout <<M->glob_atol<<" absolute ";

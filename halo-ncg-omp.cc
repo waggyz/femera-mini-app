@@ -201,7 +201,7 @@ int HaloNCG::Init(){// printf("*** HaloNCG::Init() ***\n");
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=priv_part[part_i];
-    for(uint i=0; i<S->udof_n; i++){ S->part_d[i]=0.0; }
+    //for(uint i=0; i<S->udof_n; i++){ S->part_d[i]=0.0; }
     S->Precond( E,Y );
   }
   time_reset( my_prec_count, start );

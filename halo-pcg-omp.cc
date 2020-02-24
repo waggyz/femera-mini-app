@@ -194,8 +194,8 @@ int HaloPCG::Init(){// Preconditioned Conjugate Gradient
   for(uint i=1;i<3;i++){ if(bcmax[0] > m){ m=bcmax[i]; } }
   for(uint i=0;i<3;i++){ bcmax[i]=m; }
   for(uint i=0;i<bcmax.size();i++){ if(bcmax[i]<=0.0){ bcmax[i]=1.0; } }
-#if VERB_MAX>2
-    if(verbosity>2){
+#if VERB_MAX>1
+    if(verbosity>1){
       printf("   DOF Scales: ");
       for(uint i=0;i<bcmax.size();i++){ printf(" %g",bcmax[i]); }
       printf("\n");

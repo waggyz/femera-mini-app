@@ -110,17 +110,17 @@ int ThermElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       FLOAT_PHYS Tip=0.0;// Zero the temperature at this integration point
       for(int i=0; i<Nc; i++){// Interpolate temperature
         Tip+= intp_shpf[Nc*ip +i] * u[Dn* i+Dm ];//----------------- 6*Nc FLOP
-      }
+      }// printf("Temp: %f\n",Tip);
       // Apply thermal expansion to the volumetric (diagonal) strains
       H[0]-=Tip*C[3]; H[4]-=Tip*C[3]; H[8]-=Tip*C[3];//------------- 3 FLOP
       //
-      S[0] = C[0]* H[0] + C[1]* H[4+1] + C[1]* H[8+2];//Sxx
-      S[4] = C[1]* H[0] + C[0]* H[4+1] + C[1]* H[8+2];//Syy
-      S[8] = C[1]* H[0] + C[1]* H[4+1] + C[0]* H[8+2];//Szz
+      S[0] = C[0]* H[0] + C[1]* H[5] + C[1]* H[10];//Sxx
+      S[4] = C[1]* H[0] + C[0]* H[5] + C[1]* H[10];//Syy
+      S[8] = C[1]* H[0] + C[1]* H[5] + C[0]* H[10];//Szz
       //
-      S[1] =(H[1+0] + H[3+1])*C[2];// S[3]= S[1];//Sxy Syx
-      S[5] =(H[5+1] + H[7+2])*C[2];// S[7]= S[5];//Syz Szy
-      S[2] =(H[2+0] + H[6+2])*C[2];// S[6]= S[2];//Sxz Szx
+      S[1] =(H[1] + H[4])*C[2];// S[3]= S[1];//Sxy Syx
+      S[5] =(H[6] + H[9])*C[2];// S[7]= S[5];//Syz Szy
+      S[2] =(H[2] + H[8])*C[2];// S[6]= S[2];//Sxz Szx
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];//------------------------------ 21 FLOP
       // Apply thermal conductivity, storing heat flux in the last ROW of S
       S[ 9] = H[Dn* 0+Dm] * C[4];

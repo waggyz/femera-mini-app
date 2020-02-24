@@ -125,7 +125,7 @@ int ThermElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee
       FLOAT_PHYS Tip=0.0;// Zero the temperature at this integration point
       for(int i=0; i<Nc; i++){// Interpolate temperature
         Tip += intp_shpf[Nc*ip +i] * u[Dn* i+Dm ];//----------------- 6*Nc FLOP
-      }
+      }// printf("Temp: %f\n",Tip);
       // Apply thermal expansion to the volumetric (diagonal) strains
       H[ 0]-=Tip*C[ 9]; H[ 4]-=Tip*C[10]; H[ 8]-=Tip*C[11];//----------- 3 FLOP
       //
@@ -141,7 +141,7 @@ int ThermElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee
       // Apply thermal conductivities, storing heat flux in the last ROW of S
       S[ 9]=A[Dn* 0+Dm]*C[12];
       S[10]=A[Dn* 1+Dm]*C[13];
-      S[11]=A[Dn* 2+Dm]*C[14];//---------------------------------------- 3 FLOP
+      S[11]=A[Dn* 2+Dm]*C[14];
 #else
       // Apply thermal conductivities, storing heat flux in the last ROW of A
       A[ 9]=A[Dn* 0+Dm]*C[12];
@@ -151,16 +151,22 @@ int ThermElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee
 #if 1
       // Calculate volumetric thermoelastic effect temperature change
       // Small and neglected for quasi-static (high-cycle?) fatigue loading
+#if 1
       A[ 9]-= S[0] * C[15];
       A[10]-= S[4] * C[16];
       A[11]-= S[8] * C[17];//------------------------------------------- 6 FLOP
+#else
+      S[0]-= A[ 9] / C[15];
+      S[4]-= A[10] / C[16];
+      S[8]-= A[11] / C[17];
+#endif
 #endif
 #if VERB_MAX>10
       printf( "Stress (Natural Coords):");
       for(int j=0;j<9;j++){
-        if(j%3==0){printf("\n");}
+        if(j%3==0){ printf("\n"); }
         printf("%+9.2e ",S[j]);
-      }; printf("\n");
+      } printf("\n");
 #endif
       // [S][R] : matmul3x3x3, R is transposed
       //for(int i=0; i<9; i++){ A[i]=0.0; };

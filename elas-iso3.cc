@@ -213,12 +213,12 @@ int ElastIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* part_d ){
     0.0,0.0,0.0,0.0,0.0,mtrl_matc[2] };
   for(uint ie=0;ie<elem_n;ie++){
     for(uint ip=0;ip<intp_n;ip++){
-      uint ig=ip*Ne;
       for(uint i=0;i<Ne;i++){ G[i]=0.0; }
       for(uint k=0;k<Nc;k++){
       for(uint i=0;i< 3;i++){
       for(uint j=0;j< 3;j++){
-        G[Nc* i+k] += E->elip_jacs[Nj*ie+3* j+i] * E->intp_shpg[ig+3* k+j]; } } }
+        G[Nc* i+k] += E->elip_jacs[Nj*ie+3* j+i] * E->intp_shpg[ip*Ne+3* k+j];
+      } } }
       for(uint j=0; j<Nc; j++){
       // xx yy zz
         B[Ne*0 + 0+j*ndof] = G[Nc*0+j];
@@ -234,11 +234,11 @@ int ElastIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* part_d ){
         B[Ne*5 + 0+j*ndof] = G[Nc*2+j];
         B[Ne*5 + 2+j*ndof] = G[Nc*0+j];
       }
-      FLOAT_PHYS w = E->elip_jacs[Nj*ie+9] * E->gaus_weig[ip];
+      const FLOAT_PHYS dw = E->elip_jacs[Nj*ie+9] * E->gaus_weig[ip];
       for(uint i=0; i<Ne; i++){
       for(uint k=0; k<6 ; k++){
       for(uint j=0; j<6 ; j++){
-        elem_diag[i]+=(B[Ne*j + i] * D[6*j + k] * B[Ne*k + i])*w;
+        elem_diag[i]+= B[Ne*j + i] * D[6*j + k] * B[Ne*k + i] * dw;
       } } }
     }//end intp loop
     for (uint i=0; i<Nc; i++){

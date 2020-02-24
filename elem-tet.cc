@@ -31,6 +31,8 @@ const RESTRICT Mesh::vals Tet::GaussLegendre(const INT_ORDER p ){
       1./6., 0.5  , 1./6., 9./120.,
       1./6., 1./6., 0.5  , 9./120.,
       1./6., 1./6., 1./6., 9./120.}; break;}
+#endif
+#if 0
   case(3):{ this->gaus_n=11;//FIXME This converges tet20 meshes
     const FLOAT_MESH a=0.3994035761667992;// (1.+std::sqrt(5./14.))/4.;
     const FLOAT_MESH b=0.1005964238332008;// (1.-std::sqrt(5./14.))/4.;
@@ -46,7 +48,7 @@ const RESTRICT Mesh::vals Tet::GaussLegendre(const INT_ORDER p ){
       b,a,a, 56./2250.,
       b,a,b, 56./2250.,
       b,b,a, 56./2250.}; break;}
-#endif
+#else
   case(3):{ this->gaus_n=10;
     // From Lee Shunn, Frank Ham, Symmetric quadrature rules for tetrahedra
     // based on a cubic close-packed lattice arrangement, 2012
@@ -64,6 +66,7 @@ const RESTRICT Mesh::vals Tet::GaussLegendre(const INT_ORDER p ){
       b0,b1,b1, w1,
       b0,b1,b0, w1,
       b0,b0,b1, w1}; break;}
+#endif
   default :{ return Mesh::vals{}; }
   }
 };
@@ -74,21 +77,21 @@ const RESTRICT Mesh::vals Tet::ShapeFunction(
   case(1): return Mesh::vals {v-v*x[0]-v*x[1]-v*x[2], v*x[0], v*x[1], v*x[2]};
   case(2):{ RESTRICT Mesh::vals f(10);
     const FLOAT_MESH L2=x[0]*v, L3=x[1]*v, L4=x[2]*v;
-    const FLOAT_MESH L1=(1.-L2-L3-L4);
+    const FLOAT_MESH L1=(v-L2-L3-L4);
     f[ 0] = 2.*L1*L1 - L1;// corner nodes
     f[ 1] = 2.*L2*L2 - L2;
     f[ 2] = 2.*L3*L3 - L3;
     f[ 3] = 2.*L4*L4 - L4;
-    f[ 4] = 4.*L2*L1 ;// Edge nodes
+    f[ 4] = 4.*L1*L2 ;// Edge nodes
     f[ 5] = 4.*L2*L3 ;
     f[ 6] = 4.*L3*L1 ;
-    f[ 7] = 4.*L4*L1 ;
+    f[ 7] = 4.*L1*L4 ;
     f[ 8] = 4.*L3*L4 ;
-    f[ 9] = 4.*L4*L2 ;
-    return f;}
+    f[ 9] = 4.*L2*L4 ;
+    return f; }
   case(3):{ RESTRICT Mesh::vals f(20);
     const FLOAT_MESH L2=x[0]*v, L3=x[1]*v, L4=x[2]*v;
-    const FLOAT_MESH L1=(1.-L2-L3-L4);
+    const FLOAT_MESH L1=(v-L2-L3-L4);
     f[ 0]= 0.5* L1 *(3.* L1 -1.)*(3* L1 -2.);// corner nodes;
     f[ 1]= 0.5* L2 *(3.* L2 -1.)*(3* L2 -2.);
     f[ 2]= 0.5* L3 *(3.* L3 -1.)*(3* L3 -2.);
@@ -136,7 +139,7 @@ const RESTRICT Mesh::vals Tet::ShapeGradient(
       -v, 0.0, 0.0, v }; break;}// dN/
   case(2):{ v=1.0;//FIXME?
     const FLOAT_MESH L2=x[0]*v, L3=x[1]*v, L4=x[2]*v;
-    const FLOAT_MESH L1=(1.-L2-L3-L4);
+    const FLOAT_MESH L1=(v-L2-L3-L4);
     // Term-by-term derivs
     const FLOAT_MESH L1r=-v, L2r=v , L3r=0., L4r=0.;
     const FLOAT_MESH L1s=-v, L2s=0., L3s=v , L4s=0.;
@@ -182,7 +185,7 @@ const RESTRICT Mesh::vals Tet::ShapeGradient(
     break;}
   case(3):{ v=1.0;
     const FLOAT_MESH L2=x[0]*v, L3=x[1]*v, L4=x[2]*v;
-    const FLOAT_MESH L1=(1.-L2-L3-L4);
+    const FLOAT_MESH L1=(v-L2-L3-L4);
     // Term-by-term derivs
     const FLOAT_MESH L1r=-v, L2r=v , L3r=0., L4r=0.;
     const FLOAT_MESH L1s=-v, L2s=0., L3s=v , L4s=0.;

@@ -444,11 +444,13 @@ int Mesh::Setup(){
 #if VERB_MAX > 1
       if(verbosity>1){
         printf(" Parts:");
-        if(dmv3_part_n>0){ printf("%10u DMAT",dmv3_part_n); }
         if(iso3_part_n>0){ printf("%10u iso",iso3_part_n); }
         if(ort3_part_n>0){ printf("%10u ortho",ort3_part_n); }
-        if(ther_part_n>0){ printf(" (%u thermo)",ther_part_n); }
-        if(plas_part_n>0){ printf(" (%u plastic)",plas_part_n); }
+        if(dmv3_part_n>0){ printf("%10u aniso (DMAT)",dmv3_part_n); }
+        if((iso3_part_n + ort3_part_n + dmv3_part_n)>0){
+          if(ther_part_n>0){ printf(" (%u thermo)",ther_part_n); }
+          if(plas_part_n>0){ printf(" (%u plastic)",plas_part_n); }
+        }else if(ther_part_n>0){ printf("%10u thermal",ther_part_n); }
         printf("\n");
       }
 #endif
