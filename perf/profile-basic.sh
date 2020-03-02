@@ -278,3 +278,4 @@ if [ -f $CSVFILE ]; then
   printf " %9i   : Medium test iterations\n" $MED_ITERS >> $PROFILE
   printf " %9i   : Medium test repeats\n" $REPEAT_TEST_N >> $PROFILE
   #
+fi
