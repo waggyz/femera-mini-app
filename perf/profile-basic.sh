@@ -80,7 +80,7 @@ case $P in
   HSEQ="5 6 10 17 23 30 38 52 65 84 113 141 183 246" # 310"
   # too big to part in 90 GB:  421 531 669 / 250000000 500000000 1000000000
   H_MD=52; H_MD_DOF="500 kDOF"
-  H_LG=246; H_LG_DOF="50 MDOF"
+  H_LG=113; H_LG_DOF="5 MDOF"
   ;;
 2)
   HSEQ="2 3 4 7 8 11";
@@ -88,12 +88,12 @@ case $P in
   # HSEQ=$HSEQ" 17 22 29 38 48 63 82 103 135"
   # HSEQ=$HSEQ" 195 265";
   H_MD=33; H_MD_DOF="1 MDOF"
-  H_LG=157; H_LG_DOF="100 MDOF"
+  H_LG=71; H_LG_DOF="10 MDOF"
   ;;
 3)
   HSEQ="1 2 3 4 6   8 10 13 17 23 28 39 48 61 80 100" # 138 174 220"
   H_MD=23; H_MD_DOF="1 MDOF"
-  H_LG=100; H_LG_DOF="100 MDOF"
+  H_LG=48; H_LG_DOF="10 MDOF"
   ;;
 esac
 #
@@ -104,7 +104,7 @@ if [ ! -f $PROFILE ]; then
     H=$H_LG
     MESHNAME="uhxt"$H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
-    echo Estimating performance at $H_MD_DOF...
+    echo Estimating performance at $H_LG_DOF...
     $PERFDIR/mesh-part.sh $H $P $N $C "$PHYS" "$MESHDIR"
     echo Running $ITERS_MIN iterations of $MESHNAME...
     $EXEFMR -v1 -c$C -i$ITERS_MIN -r$RTOL -p $MESH >> $CSVFILE
