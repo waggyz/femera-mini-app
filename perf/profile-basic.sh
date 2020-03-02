@@ -166,8 +166,7 @@ if [ -f $CSVFILE ]; then
   if false; then
     echo Removing old partitioned meshes...
     for PP in $(seq 1 3 ); do
-    for I in $(seq 0 $(( $TRY_COUNT - 1)) ); do
-      H=${LIST_H[I]}
+    for H in $HSEQ; do
       echo $MESHDIR"/uhxt"$H"p"$PP"/*.msh2, *n????*.msh, *.fmr"
       #
       find $MESHDIR"/uhxt"$H"p"$PP -maxdepth 1 -type f -name *.msh2 -delete
@@ -178,9 +177,9 @@ if [ -f $CSVFILE ]; then
     #exit 0
   fi
   ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_MDOFS $INIT_MUDOF | bc`
-  CSVLINES=`wc -l < $CSVFILE`
-  BASIC_TEST_N=$(( $TRY_COUNT * $REPEAT_TEST_N + 1 ))
-  if [ "$CSVLINES" -lt "$BASIC_TEST_N" ]; then
+  #CSVLINES=`wc -l < $CSVFILE`
+  #BASIC_TEST_N=$(( $TRY_COUNT * $REPEAT_TEST_N + 1 ))
+  #if [ "$CSVLINES" -lt "$BASIC_TEST_N" ]; then
     echo Running basic profile tests...
     C=$CPUCOUNT
     for H in $HSEQ; do
@@ -201,7 +200,7 @@ if [ -f $CSVFILE ]; then
         $EXEFMR -v1 -c$C -i$ITERS -r$RTOL -p $MESH >> $CSVFILE
       done
     done
-  fi
+  #fi
   SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
     '($9==c)&&($13>max)&&($4==$9){max=$13;perf=int(($13+5e5)/1e6);size=$3}\
     END{print int((size+50)/100)*100,int(perf+0.5)}'\
