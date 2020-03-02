@@ -18,8 +18,8 @@ int Solv::Precond(Elem* E, Phys* Y){// Jacobi Preconditioner
       if(this->part_d[i]<0.0){ bad_d++;
         this->part_d[i]=std::abs(this->part_d[i]);
       } }
-#if VERB_MAX>3
-    if( bad_d > 0 ){//FIXME Put this in calling method.
+#if VERB_MAX>10
+    if( bad_d > 0 ){//FIXME Put this in calling method. //FIXME After part_d sync?
       printf("WARNING: %i negative preconditioner values corrected.\n",
         bad_d); }
 #endif
@@ -41,7 +41,7 @@ int Solv::Precond(Elem* E, Phys* Y){// Jacobi Preconditioner
   case(Solv::COND_STRA):{ 
     part_d=align_resize( data_d, udof_n+1, valign_byte );
     Y->ElemStrain( E, this->part_d ); break;}
-  default:{ 
+  default:{
     part_d=align_resize( data_d, udof_n+1, valign_byte );
     for(uint i=0; i<this->udof_n; i++){ this->part_d[i]=1.0; }; break;}
   }

@@ -74,12 +74,12 @@ int ThermElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   for(INT_MESH ie=e0;ie<ee;ie++){//============================================
     const FLOAT_MESH* RESTRICT jac = &Ejacs[Nj*ie];
 #if 0
-    //std::memcpy( &conn, &Econn[Nc*ie], sizeof(  INT_MESH)*Nc);
-    //std::memcpy( &jac , &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
-    //std::copy( &Econn[Nc*ie],
-    //           &Econn[Nc*ie+Nc], conn );
-    //std::copy( &Ejacs[Nj*ie],
-    //           &Ejacs[Nj*ie+Nj], jac );// det=jac[9];
+    std::memcpy( &conn, &Econn[Nc*ie], sizeof(  INT_MESH)*Nc);
+    std::memcpy( &jac , &Ejacs[Nj*ie], sizeof(FLOAT_MESH)*Nj);
+    std::copy( &Econn[Nc*ie],
+               &Econn[Nc*ie+Nc], conn );
+    std::copy( &Ejacs[Nj*ie],
+               &Ejacs[Nj*ie+Nj], jac );// det=jac[9];
 #endif
     for (int i=0; i<Nc; i++){
       std::memcpy( &u[Dn*i], &sysu[Econn[Nc*ie+i]*Dn], sizeof(FLOAT_SOLV)*Dn );
@@ -123,15 +123,24 @@ int ThermElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       S[2] =(H[2] + H[8])*C[2];// S[6]= S[2];//Sxz Szx
       S[3]=S[1]; S[7]=S[5]; S[6]=S[2];//------------------------------ 21 FLOP
       // Apply thermal conductivity, storing heat flux in the last ROW of S
-      S[ 9] = H[Dn* 0+Dm] * C[4];
-      S[10] = H[Dn* 1+Dm] * C[4];
-      S[11] = H[Dn* 2+Dm] * C[4];//------------------------------------ 3 FLOP
+      S[ 9] = H[ 3] * C[4];
+      S[10] = H[ 7] * C[4];
+      S[11] = H[11] * C[4];//------------------------------------ 3 FLOP
 #if 1
       // Calculate volumetric thermoelastic effect temperature change
       // Small and neglected for quasi-static (high-cycle?) fatigue loading
+#if 1
+      S[ 0]-= C[5] * H[ 3] * C[4];//Does a symmetric operator make sense here?
+      S[ 4]-= C[5] * H[ 7] * C[4];//FIXME Signs?
+      S[ 8]-= C[5] * H[11] * C[4];
+      S[ 9]-= (C[0]* H[0] + C[1]* H[5] + C[1]* H[10]) * C[5];
+      S[10]-= (C[1]* H[0] + C[0]* H[5] + C[1]* H[10]) * C[5];
+      S[11]-= (C[1]* H[0] + C[0]* H[5] + C[1]* H[10]) * C[5];//----- XXX FLOP
+#else
       S[ 9]-= S[0] * C[5];
       S[10]-= S[4] * C[5];
-      S[11]-= S[8] * C[5];//------------------------------------------- 6 FLOP
+      S[11]-= S[8] * C[5];
+#endif
 #endif
 #if VERB_MAX>10
       printf( "Stress (Natural Coords):");

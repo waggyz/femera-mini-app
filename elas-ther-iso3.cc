@@ -50,8 +50,8 @@ int ThermElastIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* part_d ){
     0.0,0.0,0.0,mtrl_matc[2],0.0,0.0,
     0.0,0.0,0.0,0.0,mtrl_matc[2],0.0,
     0.0,0.0,0.0,0.0,0.0,mtrl_matc[2]};
-  const FLOAT_PHYS scal_disp = udof_magn[0];
-  const FLOAT_PHYS scal_ther = udof_magn[3];// * 5e-4;//FIXME magic number
+  const FLOAT_PHYS scal_disp = 1.0;//udof_magn[0];
+  const FLOAT_PHYS scal_ther = 1.0;//udof_magn[3];// * 5e-4;//FIXME magic number
 #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
   for(uint j=0;j<mtrl_matc.size();j++){
@@ -110,7 +110,7 @@ int ThermElastIso3D::ElemJacobi(Elem* E, FLOAT_SOLV* part_d ){
       for(uint i=0; i<Nc; i++){
       for(uint k=0; k<3 ; k++){
         part_d[E->elem_conn[Nc*ie+i]*Dn+Dm]
-          += G[Nc*k + i] * G[Nc*k + i] * Cdw;
+          += G[Nc*k + i] * G[Nc*k + i] * Cdw;// Negative?
       } }
 #else
       for(uint i=0; i<Nc; i++){

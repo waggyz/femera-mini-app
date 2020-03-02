@@ -439,7 +439,7 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
 #pragma omp simd reduction(+:glob_sum1)
 #endif
     for(INT_MESH i=hl0; i<sysn; i++){
-        glob_sum1 += S->part_p[i] * S->part_f[i];
+      glob_sum1 += S->part_p[i] * S->part_f[i];
     }
     time_accum( my_solv_count, solv_start );
   }
