@@ -56,7 +56,7 @@ export OMP_PLACES=cores
 export OMP_PROC_BIND=spread
 export OMP_NUM_THREADS=$CPUCOUNT
 #
-PROFILE=$PERFDIR/"profile-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".pro"
+PROFILE=$PERFDIR/"profile-basic-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".pro"
 #LOGFILE=$PERFDIR/"uhxt-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".log"
 CSVFILE=$PERFDIR/"profile-basic-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
 CSVSMALL=$PERFDIR/"small-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
@@ -101,12 +101,12 @@ if [ ! -f $PROFILE ]; then
   # First, get a rough idea of DOF/sec to estimate test time
   if [ ! -f $CSVFILE ]; then
     C=$CPUCOUNT
-    H=$H_MD
+    H=$H_LG
     MESHNAME="uhxt"$H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
     echo Estimating performance at $H_MD_DOF...
     $PERFDIR/mesh-part.sh $H $P $N $C "$PHYS" "$MESHDIR"
-    echo Running $ITERS iterations of $MESHNAME...
+    echo Running $ITERS_MIN iterations of $MESHNAME...
     $EXEFMR -v1 -c$C -i$ITERS_MIN -r$RTOL -p $MESH >> $CSVFILE
   fi
 fi
@@ -139,9 +139,9 @@ if [ -f $CSVFILE ]; then
   echo "     Initial Elastic Model Performance Estimate" >> $PROFILE
   echo "  ------------------------------------------------" >> $PROFILE
   printf "        %6.1f : Initial test performance [MDOF/s]\n" $MDOFS >> $PROFILE
-  printf "        %6.1f : Initial test system Size [MDOF]\n" $MUDOF >> $PROFILE
+  printf "        %6.1f : Initial test system size [MDOF]\n" $MUDOF >> $PROFILE
   printf "%12i   : Initial model nodes\n" $NNODE >> $PROFILE
-  printf "%12i   : Initial "$PSTR" Elements\n" $NELEM >> $PROFILE
+  printf "%12i   : Initial "$PSTR" elements\n" $NELEM >> $PROFILE
   printf "%12i   : Initial test partitions\n" $NPART >> $PROFILE
   printf "%12i   : Initial test threads\n" $NCPUS >> $PROFILE
   printf "%12i   : Initial test iterations\n" $ITERS >> $PROFILE
@@ -160,7 +160,7 @@ if [ -f $CSVFILE ]; then
   printf "%6i     : Partitions = Threads = Physical Cores\n" $CPUCOUNT >> $PROFILE
   printf "%6i     : Basic test repeats\n" $REPEAT_TEST_N >> $PROFILE
   printf "  %6.1f   : Basic test solve time [sec]\n" $TARGET_TEST_S>>$PROFILE
-  printf "%6i     : Basic Minimum iterations\n" $ITERS_MIN >> $PROFILE
+  printf "%6i     : Basic minimum iterations\n" $ITERS_MIN >> $PROFILE
   printf "     %5.0e : Basic relative residual tolerance\n" $RTOL >> $PROFILE
   #
   if false; then
