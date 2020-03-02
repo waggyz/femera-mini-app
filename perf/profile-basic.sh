@@ -105,7 +105,7 @@ if [ ! -f $PROFILE ]; then
     MESHNAME="uhxt"$H"p"$P"n"$N
     MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
     echo Estimating performance at $H_MD_DOF...
-    $PERFDIR/mesh-part.sh $H $P $N "$PHYS" "$MESHDIR"
+    $PERFDIR/mesh-part.sh $H $P $N $C "$PHYS" "$MESHDIR"
     echo Running $ITERS iterations of $MESHNAME...
     $EXEFMR -v1 -c$C -i$ITERS_MIN -r$RTOL -p $MESH >> $CSVFILE
   fi
@@ -185,7 +185,7 @@ if [ -f $CSVFILE ]; then
     for H in $HSEQ; do
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
-      $PERFDIR/mesh-part.sh $H $P $N "$PHYS" "$MESHDIR"
+      $PERFDIR/mesh-part.sh $H $P $N $C "$PHYS" "$MESHDIR"
       NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
       NDOF=$(( $NNODE * 3 ))
       NDOF90=$(( $NDOF * 9 / 10 ))
