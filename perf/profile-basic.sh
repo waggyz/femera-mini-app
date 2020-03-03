@@ -191,7 +191,6 @@ for P in $PLIST; do
       for H in $HSEQ; do
         MESHNAME="uhxt"$H"p"$P"n"
         MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
-        $PERFDIR/mesh-part.sh $H $P $N $C "$PHYS" "$MESHDIR"
         NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
         NDOF=$(( $NNODE * 3 ))
         NDOF90=$(( $NDOF * 9 / 10 ))
@@ -199,6 +198,7 @@ for P in $PLIST; do
         MESHNAME="uhxt"$H"p"$P"n"$N
         MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
         if [ $NDOF -lt $UDOF_MAX ]; then
+          $PERFDIR/mesh-part.sh $H $P $N $C "$PHYS" "$MESHDIR"
           TESTS_DONE=`grep -c ",$NNODE,$NDOF," $CSVFILE`
           if [ $TESTS_DONE -lt $REPEAT_TEST_N ]; then
             ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
