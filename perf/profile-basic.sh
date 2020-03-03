@@ -1,5 +1,5 @@
 #!/bin/bash
-if [ -n "$1" ]; then P=$1; else P=2; fi
+if [ -n "$1" ]; then PLIST=$1; else PLIST="2 3 1" ; fi
 if [ -n "$2" ]; then PHYS=$2; else PHYS=elas-iso; fi
 if [ -n "$3" ]; then CSTR=$3; else CSTR=gcc; fi
 if [ -n "$4" ]; then MEM=$(( $4 * 1000000000 ));
@@ -56,7 +56,7 @@ CSVFILE=$PERFDIR/"profile-basic-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
 CSVSMALL=$PERFDIR/"small-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
 CSVPROFILE=$PERFDIR/"profile-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
 #
-for P in 2 3 1; do
+for P in $PLIST; do
   case $P in
   1) DOF_PER_ELEM=" 1 / 2 "; BYTE_PER_DOF=340; PSTR=tet4;  ;; # FIXME bytes
   2) DOF_PER_ELEM=4;   BYTE_PER_DOF=105; PSTR=tet10; ;;
