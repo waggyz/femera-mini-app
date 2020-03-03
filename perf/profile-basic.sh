@@ -187,7 +187,7 @@ for P in $PLIST; do
     for H in $HSEQ; do
       MESHNAME="uhxt"$H"p"$P"n"
       MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
-      if [ -f $MESH".msh" ]; then;
+      if [ -f $MESH".msh" ]; then
         NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
         NDOF=$(( $NNODE * 3 ))
         NDOF90=$(( $NDOF * 9 / 10 ))
