@@ -182,39 +182,34 @@ for P in $PLIST; do
       done
       #exit 0
     fi
-    ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_MDOFS $INIT_MUDOF | bc`
-    #CSVLINES=`wc -l < $CSVFILE`
-    #BASIC_TEST_N=$(( $TRY_COUNT * $REPEAT_TEST_N + 1 ))
-    #if [ "$CSVLINES" -lt "$BASIC_TEST_N" ]; then
-      echo Running basic profile tests...
-      C=$CPUCOUNT
-      for H in $HSEQ; do
-        MESHNAME="uhxt"$H"p"$P"n"
-        MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
-        NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
-        NDOF=$(( $NNODE * 3 ))
-        NDOF90=$(( $NDOF * 9 / 10 ))
-        echo $MESHNAME has $NDOF DOF.
-        MESHNAME="uhxt"$H"p"$P"n"$N
-        MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
-        if [ $NDOF -lt $UDOF_MAX ]; then
-          $PERFDIR/mesh-part.sh $H $P $N $C "$PHYS" "$MESHDIR"
-          TESTS_DONE=`grep -c ",$NNODE,$NDOF," $CSVFILE`
-          if [ $TESTS_DONE -lt $REPEAT_TEST_N ]; then
-            ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
-            if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
-            if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
-            echo Warming up...
-              $EXEFMR -v1 -c$C -i$ITERS_MIN -r$RTOL -p $MESH # > /dev/null
-            echo "Running "$ITERS" iterations of "$MESHNAME" ("$NDOF" DOF),"\
-              $REPEAT_TEST_N" times..."
-            for I in $(seq 1 $REPEAT_TEST_N ); do
-              $EXEFMR -v1 -c$C -i$ITERS -r$RTOL -p $MESH >> $CSVFILE
-            done
-          fi
+    echo Running basic profile tests...
+    C=$CPUCOUNT
+    for H in $HSEQ; do
+      MESHNAME="uhxt"$H"p"$P"n"
+      MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
+      NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
+      NDOF=$(( $NNODE * 3 ))
+      NDOF90=$(( $NDOF * 9 / 10 ))
+      echo $MESHNAME has $NDOF DOF.
+      MESHNAME="uhxt"$H"p"$P"n"$N
+      MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
+      if [ $NDOF -lt $UDOF_MAX ]; then
+        $PERFDIR/mesh-part.sh $H $P $N $C "$PHYS" "$MESHDIR"
+        TESTS_DONE=`grep -c ",$NNODE,$NDOF," $CSVFILE`
+        if [ $TESTS_DONE -lt $REPEAT_TEST_N ]; then
+          ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
+          if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
+          if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
+          echo Warming up...
+            $EXEFMR -v1 -c$C -i$ITERS_MIN -r$RTOL -p $MESH # > /dev/null
+          echo "Running "$ITERS" iterations of "$MESHNAME" ("$NDOF" DOF),"\
+            $REPEAT_TEST_N" times..."
+          for I in $(seq 1 $REPEAT_TEST_N ); do
+            $EXEFMR -v1 -c$C -i$ITERS -r$RTOL -p $MESH >> $CSVFILE
+          done
         fi
-      done
-    #fi
+      fi
+    done
     SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
       '($9==c)&&($13>max)&&($4==$9){max=$13;perf=int(($13+5e5)/1e6);size=$3}\
       END{print int((size+50)/100)*100,int(perf+0.5)}'\
@@ -264,12 +259,14 @@ for P in $PLIST; do
     for I in $HSEQ; do
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P/$MESHNAME
-      CHECK_NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
-      if [ $CHECK_NNODE -eq $MAX_NODES ]; then
-        MED_UDOF=$(( $CHECK_NNODE * 3 ));
-        MED_MESHNAME=$MESHNAME
-        MED_MESH=$MESH
-        MED_H=$H
+      if [ -f $MESH ];then
+        CHECK_NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
+        if [ $CHECK_NNODE -eq $MAX_NODES ]; then
+          MED_UDOF=$(( $CHECK_NNODE * 3 ));
+          MED_MESHNAME=$MESHNAME
+          MED_MESH=$MESH
+          MED_H=$H
+        fi
       fi
     done
     MED_NELEM=$MAX_ELEMS;#`awk -F, -v n=$MAX_NODES '($2==n){ print $1; exit }' $CSVFILE`
