@@ -50,18 +50,19 @@ export OMP_PLACES=cores
 export OMP_PROC_BIND=spread
 export OMP_NUM_THREADS=$CPUCOUNT
 #
-PROFILE=$PERFDIR/"profile-basic-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".pro"
-#LOGFILE=$PERFDIR/"uhxt-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".log"
-CSVFILE=$PERFDIR/"profile-basic-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
-CSVSMALL=$PERFDIR/"small-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
-CSVPROFILE=$PERFDIR/"profile-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
-#
 for P in $PLIST; do
   case $P in
-  1) DOF_PER_ELEM=" 1 / 2 "; BYTE_PER_DOF=340; PSTR=tet4;  ;; # FIXME bytes
-  2) DOF_PER_ELEM=4;   BYTE_PER_DOF=105; PSTR=tet10; ;;
-  3) DOF_PER_ELEM=14;  BYTE_PER_DOF=100; PSTR=tet20; ;; # FIXME bytes
+  1) DOF_PER_ELEM=" 1 / 2 "; BYTE_PER_DOF=270; PSTR=tet4;  ;;
+  2) DOF_PER_ELEM=4;   BYTE_PER_DOF=100; PSTR=tet10; ;;
+  3) DOF_PER_ELEM=14;  BYTE_PER_DOF=80; PSTR=tet20; ;;
+  # Mem estimate is with 40 parts. Add about 5% for optimal partitioning.
   esac
+  #
+  PROFILE=$PERFDIR/"profile-basic-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".pro"
+  #LOGFILE=$PERFDIR/"uhxt-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".log"
+  CSVFILE=$PERFDIR/"profile-basic-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
+  CSVSMALL=$PERFDIR/"small-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
+  CSVPROFILE=$PERFDIR/"profile-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
   #
   # if [ -f $PROFILE ]; then
   #   NODE_MAX=`grep -m1 -i nodes $PROFILE | awk '{print $1}'`
@@ -87,8 +88,8 @@ for P in $PLIST; do
   2)
     HSEQ="2 3 4 7 8 11";
     HSEQ=$HSEQ" 15 19 26 33 42 57 71 90 121 157";
-    HSEQ=$HSEQ" 17 22 29 38 48 63 82 103 135";
-    HSEQ=$HSEQ" 195 265";
+    # HSEQ=$HSEQ" 17 22 29 38 48 63 82 103 135";
+    HSEQ=$HSEQ" 195 265 338";
     H_MD=33; H_MD_DOF="1 MDOF"
     H_LG=71; H_LG_DOF="10 MDOF"
     H_XL=157; H_XL_DOF="100 MDOF"
@@ -194,16 +195,21 @@ for P in $PLIST; do
         NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
         NDOF=$(( $NNODE * 3 ))
         NDOF90=$(( $NDOF * 9 / 10 ))
-        ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
-        if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
-        if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
-        echo Warming up...
-          $EXEFMR -v1 -c$C -i$ITERS_MIN -r$RTOL -p $MESH # > /dev/null
-        echo "Running "$ITERS" iterations of "$MESHNAME" ("$NDOF" DOF),"\
-          $REPEAT_TEST_N" times..."
-        for I in $(seq 1 $REPEAT_TEST_N ); do
-          $EXEFMR -v1 -c$C -i$ITERS -r$RTOL -p $MESH >> $CSVFILE
-        done
+        if [ $NDOF -lt $UDOF_MAX ]; then
+          TESTS_DONE=`grep -c ",$NNODE,$NDOF," $CSVFILE`
+          if [ $TESTS_DONE -lt $REPEAT_TEST_N ]; then
+            ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
+            if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
+            if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
+            echo Warming up...
+              $EXEFMR -v1 -c$C -i$ITERS_MIN -r$RTOL -p $MESH # > /dev/null
+            echo "Running "$ITERS" iterations of "$MESHNAME" ("$NDOF" DOF),"\
+              $REPEAT_TEST_N" times..."
+            for I in $(seq 1 $REPEAT_TEST_N ); do
+              $EXEFMR -v1 -c$C -i$ITERS -r$RTOL -p $MESH >> $CSVFILE
+            done
+          fi
+        fi
       done
     #fi
     SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
