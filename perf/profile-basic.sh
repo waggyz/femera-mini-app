@@ -122,15 +122,15 @@ for P in $PLIST; do
     echo >> $PROFILE
     echo "        Maximum Elastic Model Size Estimate" >> $PROFILE
     echo "  ------------------------------------------------" >> $PROFILE
-    printf "     %9i : Maximum "$PSTR" Elements\n" $ELEM_MAX >> $PROFILE
-    printf "     %9i : Maximum Nodes\n" $NODE_MAX >> $PROFILE
-    printf "    %9.0f  : Maximum MDOF\n" $MDOF_MAX >> $PROFILE
+    printf "     %9i : Maximum "$PSTR" elements\n" $ELEM_MAX >> $PROFILE
+    printf "     %9i : Maximum nodes\n" $NODE_MAX >> $PROFILE
+    printf "     %9i : Maximum MDOF\n" $MDOF_MAX >> $PROFILE
     #
     # echo "femerq-"$CPUMODEL"-"$CSTR >> $PROFILE
     # grep -m1 -i "model name" /proc/cpuinfo >> $PROFILE
     #
     MEM_GB="`free -g  | grep Mem | awk '{print $2}'`"
-    printf "      %6i\t: GB Memory\n" $MEM_GB >> $PROFILE
+    printf "     %9i : GB memory\n" $MEM_GB >> $PROFILE
     #
     MDOFS=`head -n1 $CSVFILE | awk -F, '{ print $13/1e6 }'`
     NELEM=`head -n1 $CSVFILE | awk -F, '{ print $1 }'`
@@ -189,12 +189,14 @@ for P in $PLIST; do
       echo Running basic profile tests...
       C=$CPUCOUNT
       for H in $HSEQ; do
-        MESHNAME="uhxt"$H"p"$P"n"$N
+        MESHNAME="uhxt"$H"p"$P"n"
         MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
         $PERFDIR/mesh-part.sh $H $P $N $C "$PHYS" "$MESHDIR"
         NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
         NDOF=$(( $NNODE * 3 ))
         NDOF90=$(( $NDOF * 9 / 10 ))
+        MESHNAME="uhxt"$H"p"$P"n"$N
+        MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
         if [ $NDOF -lt $UDOF_MAX ]; then
           TESTS_DONE=`grep -c ",$NNODE,$NDOF," $CSVFILE`
           if [ $TESTS_DONE -lt $REPEAT_TEST_N ]; then
@@ -284,7 +286,7 @@ for P in $PLIST; do
     echo "  -----------------------------------------" >> $PROFILE
     printf " %9i   : Medium test model size [DOF]\n" $MED_NUDOF >> $PROFILE
     printf " %9i   : Medium test model nodes\n" $MED_NNODE >> $PROFILE
-    printf " %9i   : Medium test "$PSTR" Elements\n" $MED_NELEM >> $PROFILE
+    printf " %9i   : Medium test "$PSTR" elements\n" $MED_NELEM >> $PROFILE
     printf " %9i   : Medium test iterations\n" $MED_ITERS >> $PROFILE
     printf " %9i   : Medium test repeats\n" $REPEAT_TEST_N >> $PROFILE
     #
