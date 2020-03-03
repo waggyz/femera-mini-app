@@ -82,7 +82,7 @@ for P in $PLIST; do
     # too big to part in 90 GB:  421 531 669 / 250000000 500000000 1000000000
     H_MD=52; H_MD_DOF="500 kDOF"
     H_LG=113; H_LG_DOF="5 MDOF"
-    H_XL=246; H_LG_DOF="50 MDOF"
+    H_XL=246; H_XL_DOF="50 MDOF"
     ;;
   2)
     HSEQ="2 3 4 7 8 11";
@@ -91,14 +91,14 @@ for P in $PLIST; do
     HSEQ=$HSEQ" 195 265";
     H_MD=33; H_MD_DOF="1 MDOF"
     H_LG=71; H_LG_DOF="10 MDOF"
-    H_XL=157; H_LG_DOF="100 MDOF"
+    H_XL=157; H_XL_DOF="100 MDOF"
     ;;
   3)
     HSEQ="1 2 3 4 6   8 10 13 17 23 28 39 48 61 80 100" # 138 174 220"
     HSEQ=$HSEQ" 133 175 222";
     H_MD=23; H_MD_DOF="1 MDOF"
     H_LG=48; H_LG_DOF="10 MDOF"
-    H_XL=100; H_LG_DOF="100 MDOF"
+    H_XL=100; H_XL_DOF="100 MDOF"
     ;;
   esac
   #
