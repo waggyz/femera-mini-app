@@ -167,8 +167,8 @@ for P in $PLIST; do
           C=$(( $CPUCOUNT / $X ))
           if [ $(( $C * $X )) -eq $CPUCOUNT ]; then
             CONCURRENT_DOF=$(( $X * $NDOF ))
-            #FIXME Add checks that MD_DOF/11 < CONCURRENT_DOF < 11 * MD_DOF
-            if [ $(( $MD_DOF / 11 )) -lt $CONCURRENT_DOF ];then
+            #FIXME Add checks that MD_DOF/51 < CONCURRENT_DOF < 11 * MD_DOF
+            if [ $(( $MD_DOF / 51 )) -lt $CONCURRENT_DOF ];then
             if [ $CONCURRENT_DOF -lt $(( $MD_DOF * 11 )) ];then
               MESHNAME="uhxt"$H"p"$P"n"$C
               MESH=$MESHDIR"/uhxt"$H"p"$P"/""$MESHNAME"
