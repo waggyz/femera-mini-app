@@ -78,16 +78,16 @@ for P in $PLIST; do
   case $P in
   1)
     HSEQ="5 6 10 17 23 30 38 52 65 84"
-    H_MD=52; H_MD_DOF="500 kDOF"
+    H_MD=52; H_MD_DOF="500 kDOF"; MD_DOF=500000
     ;;
   2)
     HSEQ="2 3 4 7 8 11 15 19 26 33 42";
     # HSEQ=$HSEQ" 17 22 29 38";
-    H_MD=33; H_MD_DOF="1 MDOF"
+    H_MD=33; H_MD_DOF="1 MDOF"; MD_DOF=1000000
     ;;
   3)
     HSEQ="1 2 3 4 6 7 8 10 13 17 23 28"
-    H_MD=23; H_MD_DOF="1 MDOF"
+    H_MD=23; H_MD_DOF="1 MDOF"; MD_DOF=1000000
     ;;
   esac
   #
@@ -153,6 +153,7 @@ for P in $PLIST; do
     # C * X = CPUCOUNT
     # S: Number of sequential models run by each core
     TOTAL_DOF=$(( $INIT_DOFS * $TARGET_TEST_S ))
+    echo Target $(( $TOTAL_DOF / 1000000 )) MDOF processed each test.
     for H in $HSEQ; do
       MESHNAME="uhxt"$H"p"$P"n"
       MESH=$MESHDIR"/uhxt"$H"p"$P"/""$MESHNAME"
@@ -166,41 +167,45 @@ for P in $PLIST; do
           C=$(( $CPUCOUNT / $X ))
           if [ $(( $C * $X )) -eq $CPUCOUNT ]; then
             CONCURRENT_DOF=$(( $X * $NDOF ))
-            #FIXME Add a check that CONCURRENT_DOF < 10 * MD_DOF
-            MESHNAME="uhxt"$H"p"$P"n"$C
-            MESH=$MESHDIR"/uhxt"$H"p"$P"/""$MESHNAME"
-            "$PERFDIR"/"mesh-part.sh" $H $P $C $CPUCOUNT "$PHYS" "$MESHDIR"
-            #
-            ITERS=$(( $INIT_DOFS * $TARGET_TEST_S / $NDOF ))
-            # ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
-            if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
-            if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
-            #
-            M=$(( $TOTAL_DOF / $NDOF / $ITERS ))
-            if [ $M -le $X ]; then M=$X; fi
-            S=$(( $M / $X ))
-            echo Warming up...
-              "$EXEFMR" -v1 -c$CPUCOUNT -m$N -n$X -i$ITERS_MIN -r$RTOL -p "$MESH" > /dev/null
-            echo "Running "$REPEAT_TEST_N" repeats of "$S"x"$X" concurrent "$NDOF" DOF models..."
-            START=`date +%s.%N`
-            for I in $(seq 1 $REPEAT_TEST_N ); do
-              "$EXEFMR" -v1 -c$CPUCOUNT -m$M -n$X -i$ITERS -r$RTOL -p "$MESH" >> "$CSVFILE"
-            done
-            STOP=`date +%s.%N`
-            TIME_SEC=`printf "%f-%f\n" $STOP $START | bc`
-            #
-            MDOF_TOTAL=`awk -F, -v n=$NNODE -v c=$C -v dof=0\
-            '($2==n)&&($9==c){dof=dof+$3*$5;}\
-              END{print dof/1000000;}' "$CSVFILE"`
-            TOTAL_MDOFS=`printf "%f/%f\n" $MDOF_TOTAL $TIME_SEC | bc`
-            echo "Overall: "$TOTAL_MDOFS" MDOF/s ("$MDOF_TOTAL\
-            "MDOF in "$TIME_SEC" sec)"
-            #
-            SOLVE_MDOFS=`awk -F, -v nnode=$NNODE -v c=$C -v nrun=0 -v mdofs=0 -v x=$N\
-            '($2==nnode)&&($9==c){nrun=nrun+1;mdofs=mdofs+$13;}\
-              END{print mdofs/nrun/1000000*x;}' "$CSVFILE"`
-            echo " Solver: "$SOLVE_MDOFS" MDOF/s at "$N"x "$NDOF" DOF"\
-              "models ("$(( $N * $NDOF ))" DOF concurrent)..."
+            #FIXME Add checks that MD_DOF/11 < CONCURRENT_DOF < 11 * MD_DOF
+            if [ $(( $MD_DOF / 11 )) -lt $CONCURRENT_DOF ];then
+            if [ $CONCURRENT_DOF -lt $(( $MD_DOF * 11 )) ];then
+              MESHNAME="uhxt"$H"p"$P"n"$C
+              MESH=$MESHDIR"/uhxt"$H"p"$P"/""$MESHNAME"
+              "$PERFDIR"/"mesh-part.sh" $H $P $C $CPUCOUNT "$PHYS" "$MESHDIR"
+              #
+              ITERS=$(( $INIT_DOFS * $TARGET_TEST_S / $NDOF ))
+              # ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
+              if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
+              if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
+              #
+              M=$(( $TOTAL_DOF / $NDOF / $ITERS ))
+              if [ $M -le $X ]; then M=$X; fi
+              S=$(( $M / $X ))
+              echo Warming up...
+                "$EXEFMR" -v1 -c$CPUCOUNT -m$N -n$X -i$ITERS_MIN -r$RTOL -p "$MESH" > /dev/null
+              echo "Running "$REPEAT_TEST_N" repeats of "$S"x"$X" concurrent "$NDOF" DOF models..."
+              START=`date +%s.%N`
+              for I in $(seq 1 $REPEAT_TEST_N ); do
+                "$EXEFMR" -v1 -c$CPUCOUNT -m$M -n$X -i$ITERS -r$RTOL -p "$MESH" >> "$CSVFILE"
+              done
+              STOP=`date +%s.%N`
+              TIME_SEC=`printf "%f-%f\n" $STOP $START | bc`
+              #
+              MDOF_TOTAL=`awk -F, -v n=$NNODE -v c=$C -v dof=0\
+              '($2==n)&&($9==c){dof=dof+$3*$5;}\
+                END{print dof/1000000;}' "$CSVFILE"`
+              TOTAL_MDOFS=`printf "%f/%f\n" $MDOF_TOTAL $TIME_SEC | bc`
+              echo "Overall: "$TOTAL_MDOFS" MDOF/s ("$MDOF_TOTAL\
+              "MDOF in "$TIME_SEC" sec)"
+              #
+              SOLVE_MDOFS=`awk -F, -v nnode=$NNODE -v c=$C -v nrun=0 -v mdofs=0 -v x=$N\
+              '($2==nnode)&&($9==c){nrun=nrun+1;mdofs=mdofs+$13;}\
+                END{print mdofs/nrun/1000000*x;}' "$CSVFILE"`
+              echo " Solver: "$SOLVE_MDOFS" MDOF/s at "$N"x "$NDOF" DOF"\
+                "models ("$(( $N * $NDOF ))" DOF concurrent)..."
+            fi
+            fi
           fi
         done;# X loop
       fi
