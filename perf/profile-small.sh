@@ -20,7 +20,7 @@ EXEFMR=$EXEDIR/"femera-mmq-"$CPUMODEL"-"$CSTR
 C=$CPUCOUNT; N=$C; RTOL=1e-80;
 TARGET_TEST_S=30;# Try for S sec/run
 REPEAT_TEST_N=10;# Repeat each test N times
-ITERS_MIN=10;
+ITERS_MIN=100;
 #
 if [ -d "/hpnobackup1/dwagner5/femera-test/cube" ]; then
   MESHDIR=/hpnobackup1/dwagner5/femera-test/cube
@@ -70,7 +70,7 @@ for P in $PLIST; do
   #CSVSMALL=$PERFDIR/"small-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
   CSVPROFILE=$PERFDIR/"profile-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
   #
-  if [ 1 -eq 0 ];then
+  if [ 1 -eq 1 ];then
     rm "$PROFILE"
     rm "$CSVFILE"
   fi
@@ -165,6 +165,8 @@ for P in $PLIST; do
         for X in $(seq 2 64); do
           C=$(( $CPUCOUNT / $X ))
           if [ $(( $C * $X )) -eq $CPUCOUNT ]; then
+            CONCURRENT_DOF=$(( $X * $NDOF ))
+            #FIXME Add a check that CONCURRENT_DOF < 10 * MD_DOF
             MESHNAME="uhxt"$H"p"$P"n"$C
             MESH=$MESHDIR"/uhxt"$H"p"$P"/""$MESHNAME"
             "$PERFDIR"/"mesh-part.sh" $H $P $C $CPUCOUNT "$PHYS" "$MESHDIR"
@@ -189,18 +191,18 @@ for P in $PLIST; do
             #
             MDOF_TOTAL=`awk -F, -v n=$NNODE -v c=$C -v dof=0\
             '($2==n)&&($9==c){dof=dof+$3*$5;}\
-              END{print dof/1000000;}' $CSVFILE`
+              END{print dof/1000000;}' "$CSVFILE"`
             TOTAL_MDOFS=`printf "%f/%f\n" $MDOF_TOTAL $TIME_SEC | bc`
             echo "Overall: "$TOTAL_MDOFS" MDOF/s ("$MDOF_TOTAL\
             "MDOF in "$TIME_SEC" sec)"
             #
             SOLVE_MDOFS=`awk -F, -v nnode=$NNODE -v c=$C -v nrun=0 -v mdofs=0 -v x=$N\
             '($2==nnode)&&($9==c){nrun=nrun+1;mdofs=mdofs+$13;}\
-              END{print mdofs/nrun/1000000*x;}' $CSVFILE`
+              END{print mdofs/nrun/1000000*x;}' "$CSVFILE"`
             echo " Solver: "$SOLVE_MDOFS" MDOF/s at "$N"x "$NDOF" DOF"\
               "models ("$(( $N * $NDOF ))" DOF concurrent)..."
           fi
-        done;# M loop
+        done;# X loop
       fi
     done;# H loop
   fi
