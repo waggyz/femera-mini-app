@@ -183,11 +183,11 @@ for P in $PLIST; do
               if [ $M -le $X ]; then M=$X; fi
               S=$(( $M / $X ))
               echo Warming up...
-                "$EXEFMR" -v1 -c$CPUCOUNT -m$N -n$X -i$ITERS_MIN -r$RTOL -p "$MESH" > /dev/null
+                "$EXEFMR" -v1 -c$C -m$(( $C * $X )) -n$X -i$ITERS_MIN -r$RTOL -p "$MESH" > /dev/null
               echo "Running "$REPEAT_TEST_N" repeats of "$S"x"$X" concurrent "$NDOF" DOF models..."
               START=`date +%s.%N`
               for I in $(seq 1 $REPEAT_TEST_N ); do
-                "$EXEFMR" -v1 -c$CPUCOUNT -m$M -n$X -i$ITERS -r$RTOL -p "$MESH" >> "$CSVFILE"
+                "$EXEFMR" -v1 -c$C -m$M -n$X -i$ITERS -r$RTOL -p "$MESH" >> "$CSVFILE"
               done
               STOP=`date +%s.%N`
               TIME_SEC=`printf "%f-%f\n" $STOP $START | bc`
@@ -199,11 +199,11 @@ for P in $PLIST; do
               echo "Overall: "$TOTAL_MDOFS" MDOF/s ("$MDOF_TOTAL\
               "MDOF in "$TIME_SEC" sec)"
               #
-              SOLVE_MDOFS=`awk -F, -v nnode=$NNODE -v c=$C -v nrun=0 -v mdofs=0 -v x=$N\
+              SOLVE_MDOFS=`awk -F, -v nnode=$NNODE -v c=$C -v nrun=0 -v mdofs=0 -v x=$X\
               '($2==nnode)&&($9==c){nrun=nrun+1;mdofs=mdofs+$13;}\
                 END{print mdofs/nrun/1000000*x;}' "$CSVFILE"`
-              echo " Solver: "$SOLVE_MDOFS" MDOF/s at "$N"x "$NDOF" DOF"\
-                "models ("$(( $N * $NDOF ))" DOF concurrent)..."
+              echo " Solver: "$SOLVE_MDOFS" MDOF/s at "$X"x "$NDOF" DOF"\
+                "models ("$(( $X * $NDOF ))" DOF concurrent)..."
             fi
             fi
           fi
