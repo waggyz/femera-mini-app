@@ -163,7 +163,7 @@ for P in $PLIST; do
     echo >> $PROFILE
     echo "     Basic Performance Profile Test Parameters" >> $PROFILE
     echo "  ------------------------------------------------" >> $PROFILE
-    printf "%6i     : Partitions = Threads = Physical Cores\n" $CPUCOUNT >> $PROFILE
+    printf "%6i     : Basic partitions = threads = physical cores\n" $CPUCOUNT >> $PROFILE
     printf "%6i     : Basic test repeats\n" $REPEAT_TEST_N >> $PROFILE
     printf "  %6.1f   : Basic test solve time [sec]\n" $TARGET_TEST_S>>$PROFILE
     printf "%6i     : Basic minimum iterations\n" $ITERS_MIN >> $PROFILE
