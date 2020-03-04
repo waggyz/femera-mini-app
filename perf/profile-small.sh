@@ -180,7 +180,12 @@ for P in $PLIST; do
               if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
               #
               M=$(( $TOTAL_DOF / $NDOF / $ITERS ))
-              if [ $M -le $X ]; then M=$X; fi
+              if [ $M -le $X ];then
+                M=$X;
+                ITERS=$(( $TOTAL_DOF / $NDOF / $M ))
+                if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
+                if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
+              fi
               S=$(( $M / $X ))
               echo Warming up...
                 "$EXEFMR" -v1 -c$C -m$(( $C * $X )) -n$X -i$ITERS_MIN -r$RTOL -p "$MESH" > /dev/null
