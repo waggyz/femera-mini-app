@@ -127,7 +127,7 @@ fi
     echo Finding maximum performance model size...
     SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
       '($9==c)&&($13>max)&&($4==$9){max=$13;perf=int(($13+5e5)/1e6);size=$3}\
-      END{print int((size+50)/100)*100,int(perf+0.5)}'\
+      END{print size,int(perf+0.5)}'\
       "$CSVBASIC"`
     MAX_MDOFS=${SIZE_PERF_MAX##* }
     MAX_SIZE=${SIZE_PERF_MAX%% *}
@@ -145,9 +145,9 @@ fi
       if [ -f $MESH".msh" ]; then
         NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
         NDOF=$(( $NNODE * 3 ))
-    SIZE_EXISTS=`awk -F, -v sz=$NDOF perf=$MAX_SIZE \
+    SIZE_EXISTS=`awk -F, -v sz=$NDOF -v perf=$MAX_SIZE \
       '($3==sz)&&($13>(0.9*perf)){print $3; exit}'\
-      "$CSVBASIC"`
+      $CSVBASIC`
       echo $SIZE_EXISTS
 #        if [ $NDOF -ge $NDOF_MIN ];then
 #        if [ $NDOF -le $NDOF_MAX ];then
@@ -177,6 +177,7 @@ fi
 #        fi
       fi
     done
+exit
     SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
       '($9==c)&&($13>max)&&($4==$9){max=$13;perf=int(($13+5e5)/1e6);size=$3}\
       END{print int((size+50)/100)*100,int(perf+0.5)}'\
