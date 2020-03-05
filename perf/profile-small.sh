@@ -167,7 +167,6 @@ for P in $PLIST; do
           C=$(( $CPUCOUNT / $X ))
           if [ $(( $C * $X )) -eq $CPUCOUNT ]; then
             CONCURRENT_DOF=$(( $X * $NDOF ))
-            #FIXME Add checks that MD_DOF/51 < CONCURRENT_DOF < 11 * MD_DOF
             if [ $(( $MD_DOF / 101 )) -lt $CONCURRENT_DOF ];then
             if [ $CONCURRENT_DOF -lt $(( $MD_DOF * 11 )) ];then
               MESHNAME="uhxt"$H"p"$P"n"$C
@@ -175,7 +174,6 @@ for P in $PLIST; do
               "$PERFDIR"/"mesh-part.sh" $H $P $C $CPUCOUNT "$PHYS" "$MESHDIR"
               #
               ITERS=$(( $INIT_DOFS * $TARGET_TEST_S / $NDOF ))
-              # ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
               if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
               if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
               #
@@ -186,16 +184,21 @@ for P in $PLIST; do
                 if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
                 if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
               fi
-              S=$(( $M / $X ))
-              echo Warming up...
-                "$EXEFMR" -v1 -c$C -m$(( $C * $X )) -n$X -i$ITERS_MIN -r$RTOL -p "$MESH" > /dev/null
-              echo "Running "$REPEAT_TEST_N" repeats of "$S"x"$X" concurrent "$NDOF" DOF models..."
-              START=`date +%s.%N`
-              for I in $(seq 1 $REPEAT_TEST_N ); do
-                "$EXEFMR" -v1 -c$C -m$M -n$X -i$ITERS -r$RTOL -p "$MESH" >> "$CSVFILE"
-              done
-              STOP=`date +%s.%N`
-              TIME_SEC=`printf "%f-%f\n" $STOP $START | bc`
+              MODELS_PER_TEST=$(( $C * $X ))
+              TOTAL_MODELS=$(( $MODELS_PER_TEST * $REPEAT_TEST_N ))
+              TESTS_DONE=`grep -c ",$NNODE,$NDOF,$C," $CSVFILE`
+              if [ $TESTS_DONE -lt $TOTAL_MODELS ];then
+                S=$(( $M / $X ))
+                echo Warming up...
+                  "$EXEFMR" -v1 -c$C -m$MODELS_PER_TEST -n$X -i$ITERS_MIN -r$RTOL -p "$MESH" > /dev/null
+                echo "Running "$REPEAT_TEST_N" repeats of "$S"x"$X" concurrent "$NDOF" DOF models..."
+                START=`date +%s.%N`
+                for I in $(seq 1 $REPEAT_TEST_N ); do
+                  "$EXEFMR" -v1 -c$C -m$M -n$X -i$ITERS -r$RTOL -p "$MESH" >> "$CSVFILE"
+                done
+                STOP=`date +%s.%N`
+                TIME_SEC=`printf "%f-%f\n" $STOP $START | bc`
+              fi
               #
               MDOF_TOTAL=`awk -F, -v n=$NNODE -v c=$C -v dof=0\
               '($2==n)&&($9==c){dof=dof+$3*$5;}\
