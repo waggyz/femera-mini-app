@@ -145,32 +145,33 @@ fi
       if [ -f $MESH".msh" ]; then
         NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
         NDOF=$(( $NNODE * 3 ))
-        SIZE_EXISTS=`awk -F, -v sz=$NDOF -v perf=$MAX_MDOFS \
+        TEST_SIZE=`awk -F, -v sz=$NDOF -v perf=$MAX_MDOFS \
           '($3==sz)&&($13>(0.9*perf*1e6)){print $3; exit}'\
           $CSVBASIC`
-        if [ "$SIZE_EXISTS" == "$NDOF" ];then
-          NDOF90=$(( $NDOF * 9 / 10 ))
+        if [ "$TEST_SIZE" == "$NDOF" ];then
           echo $MESHNAME has $NDOF DOF.
+          NDOF90=$(( $NDOF * 9 / 10 ))
+          ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
+          if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
+          if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
+          for NCin $(seq 2 12 ); do
+          N=$(( $NC * $CPUCOUNT ))
           MESHNAME="uhxt"$H"p"$P"n"$N
           MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
-if [ 1 -eq -0 ];then
-          if [ $NDOF -lt $UDOF_MAX ]; then
-            $PERFDIR/mesh-part.sh $H $P $N $C "$PHYS" "$MESHDIR"
-            TESTS_DONE=`grep -c ",$NNODE,$NDOF," $CSVFILE`
+            "$PERFDIR/mesh-part.sh" $H $P $N $C "$PHYS" "$MESHDIR"
+            TESTS_DONE=`grep -c ",$NNODE,$NDOF,$N," $CSVFILE`
             if [ $TESTS_DONE -lt $REPEAT_TEST_N ]; then
-              ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
-              if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
-              if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
               echo Warming up...
+if [ 1 -eq -0 ];then
                 $EXEFMR -v1 -c$C -i$ITERS_MIN -r$RTOL -p $MESH # > /dev/null
               echo "Running "$ITERS" iterations of "$MESHNAME" ("$NDOF" DOF),"\
                 $REPEAT_TEST_N" times..."
               for I in $(seq 1 $REPEAT_TEST_N ); do
                 $EXEFMR -v1 -c$C -i$ITERS -r$RTOL -p $MESH >> $CSVFILE
               done
-            fi
-          fi
 fi
+            fi
+          done
         fi
       fi
     done
