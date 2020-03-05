@@ -154,7 +154,7 @@ fi
           ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
           if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
           if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
-          for NCin $(seq 2 12 ); do
+          for NC in $(seq 2 12 ); do
           N=$(( $NC * $CPUCOUNT ))
           MESHNAME="uhxt"$H"p"$P"n"$N
           MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
