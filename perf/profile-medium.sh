@@ -69,6 +69,9 @@ for P in $PLIST; do
   CSVBASIC=$PERFDIR/"profile-basic-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
   CSVPROFILE=$PERFDIR/"profile-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
   #
+  if [ ! -f "$CSVFILE" ]; then
+    head -n1 "$CSVBASIC" > "$CSVFILE"
+  fi
   # if [ -f $PROFILE ]; then
   #   NODE_MAX=`grep -m1 -i nodes $PROFILE | awk '{print $1}'`
   #   UDOF_MAX=$(( $NODE_MAX * 3 ))
@@ -152,7 +155,6 @@ fi
           echo $MESHNAME has $NDOF DOF.
           NDOF90=$(( $NDOF * 9 / 10 ))
           ITERS=`printf '%f*%f*1000000/%f\n' $TARGET_TEST_S $MAX_MDOFS $NDOF | bc`
-          echo Iters $ITERS
           if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
           if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
           for NC in $(seq 2 $NX_MAX ); do
