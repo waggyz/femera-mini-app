@@ -158,21 +158,19 @@ fi
           if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
           if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
           for NC in $(seq 2 $NX_MAX ); do
-          N=$(( $NC * $CPUCOUNT ))
-          MESHNAME="uhxt"$H"p"$P"n"$N
-          MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
+            N=$(( $NC * $CPUCOUNT ))
+            MESHNAME="uhxt"$H"p"$P"n"$N
+            MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
             "$PERFDIR/mesh-part.sh" $H $P $N $C "$PHYS" "$MESHDIR"
             TESTS_DONE=`grep -c ",$NNODE,$NDOF,$N," $CSVFILE`
             if [ $TESTS_DONE -lt $REPEAT_TEST_N ]; then
               echo Warming up...
-if [ 1 -eq -0 ];then
                 $EXEFMR -v1 -c$C -i$ITERS_MIN -r$RTOL -p $MESH # > /dev/null
               echo "Running "$ITERS" iterations of "$MESHNAME" ("$NDOF" DOF),"\
                 $REPEAT_TEST_N" times..."
               for I in $(seq 1 $REPEAT_TEST_N ); do
                 $EXEFMR -v1 -c$C -i$ITERS -r$RTOL -p $MESH >> $CSVFILE
               done
-fi
             fi
           done
         fi
