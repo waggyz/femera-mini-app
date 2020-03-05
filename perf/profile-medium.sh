@@ -145,12 +145,10 @@ fi
       if [ -f $MESH".msh" ]; then
         NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
         NDOF=$(( $NNODE * 3 ))
-    SIZE_EXISTS=`awk -F, -v sz=$NDOF -v perf=$MAX_MDOFS \
-      '($3==sz)&&($13>(0.9*perf*1e6)){print $3; exit}'\
-      $CSVBASIC`
-      echo $SIZE_EXISTS
-#        if [ $NDOF -ge $NDOF_MIN ];then
-#        if [ $NDOF -le $NDOF_MAX ];then
+        SIZE_EXISTS=`awk -F, -v sz=$NDOF -v perf=$MAX_MDOFS \
+          '($3==sz)&&($13>(0.9*perf*1e6)){print $3; exit}'\
+          $CSVBASIC`
+        if [ -e $SIZE_EXISTS ];then
           NDOF90=$(( $NDOF * 9 / 10 ))
           echo $MESHNAME has $NDOF DOF.
           MESHNAME="uhxt"$H"p"$P"n"$N
@@ -173,8 +171,7 @@ if [ 1 -eq -0 ];then
             fi
           fi
 fi
-#        fi
-#        fi
+        fi
       fi
     done
 exit
