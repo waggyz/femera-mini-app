@@ -145,8 +145,8 @@ fi
       if [ -f $MESH".msh" ]; then
         NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
         NDOF=$(( $NNODE * 3 ))
-    SIZE_EXISTS=`awk -F, -v sz=$NDOF -v perf=$MAX_SIZE \
-      '($3==sz)&&($13>(0.9*perf)){print $3; exit}'\
+    SIZE_EXISTS=`awk -F, -v sz=$NDOF -v perf=$MAX_MDOFS \
+      '($3==sz)&&($13>(0.9*perf*1e6)){print $3; exit}'\
       $CSVBASIC`
       echo $SIZE_EXISTS
 #        if [ $NDOF -ge $NDOF_MIN ];then
