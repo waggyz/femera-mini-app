@@ -151,7 +151,7 @@ fi
         if [ "$TEST_SIZE" == "$NDOF" ];then
           echo $MESHNAME has $NDOF DOF.
           NDOF90=$(( $NDOF * 9 / 10 ))
-          ITERS=`printf '%f*%f*1e6/%f\n' $TARGET_TEST_S $MAX_MDOFS $NDOF | bc`
+          ITERS=`printf '%f*%f*1000000/%f\n' $TARGET_TEST_S $MAX_MDOFS $NDOF | bc`
           echo Iters $ITERS
           if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
           if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
