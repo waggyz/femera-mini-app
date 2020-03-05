@@ -130,16 +130,12 @@ fi
     echo Finding maximum performance model size...
     SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
       '($9==c)&&($13>max)&&($4==$9){max=$13;perf=int(($13+5e5)/1e6);size=$3}\
-      END{print size,int(perf+0.5)}'\
+      END{print size,perf}'\
       "$CSVBASIC"`
     MAX_MDOFS=${SIZE_PERF_MAX##* }
     MAX_SIZE=${SIZE_PERF_MAX%% *}
     echo "Maximum basic performance: "${SIZE_PERF_MAX##* }" MDOF/s"\
     at ${SIZE_PERF_MAX%% *}" DOF, parts = cores = "$CPUCOUNT"."
-#    echo Finding model sizes within 10 percent of peak basic performance...
-#exit
-#    
-#    echo Running medium profile tests of $NDOF_MIN to $NDOF_MAX DOF models...
     echo Running medium profile tests...
     C=$CPUCOUNT
     for H in $HSEQ; do
@@ -176,10 +172,28 @@ fi
         fi
       fi
     done
-exit
+    echo Finding maximum medium model partitioning...
+    SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
+      '($9==c)&&($13>max){max=$13;perf=int(($13+5e5)/1e6);size=$3}\
+      END{print size,perf)}'\
+      "$CSVFILE"`
+    MAX_MDOFS=${SIZE_PERF_MAX##* }
+    MAX_SIZE=${SIZE_PERF_MAX%% *}
+    ELEM_PART_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
+      '($9==c)&&($13>max){max=$13;nelem=$1;npart=$4}\
+      END{print nelem,npart'\
+      $CSVFILE`
+    MAX_ELEMS=${NODE_ELEM_MAX%% *}
+    MAX_PARTS=${NODE_ELEM_MAX##* }
+    echo "Maximum medium performance: "$MAX_MDOFS" MDOF/s"\
+    at $MAX_SIZE" DOF, "$MAX_PARTS" partitions."
+    
+    
+    
+if [ 1 -eq 0 ];then
     SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
       '($9==c)&&($13>max)&&($4==$9){max=$13;perf=int(($13+5e5)/1e6);size=$3}\
-      END{print int((size+50)/100)*100,int(perf+0.5)}'\
+      END{print int((size+50)/100)*100,int(perf)}'\
       $CSVFILE`
     MAX_MDOFS=${SIZE_PERF_MAX##* }
     MAX_SIZE=${SIZE_PERF_MAX%% *}
@@ -255,5 +269,5 @@ exit
     printf " %9i   : Medium test iterations\n" $MED_ITERS >> $PROFILE
     printf " %9i   : Medium test repeats\n" $REPEAT_TEST_N >> $PROFILE
     #
-#  fi
+fi
 done;# P loop
