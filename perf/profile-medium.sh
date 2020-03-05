@@ -152,9 +152,10 @@ fi
           echo $MESHNAME has $NDOF DOF.
           NDOF90=$(( $NDOF * 9 / 10 ))
           ITERS=`printf '%f*%f*1e6/%f\n' $TARGET_TEST_S $MAX_MDOFS $NDOF | bc`
+          echo Iters $ITERS
           if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
           if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
-          for NC in $(seq 2 12 ); do
+          for NC in $(seq 2 $NX_MAX ); do
           N=$(( $NC * $CPUCOUNT ))
           MESHNAME="uhxt"$H"p"$P"n"$N
           MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
