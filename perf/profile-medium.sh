@@ -107,59 +107,8 @@ for P in $PLIST; do
     H_XL=100; H_XL_DOF="100 MDOF"
     ;;
   esac
+#  if [ -f "$CSVBASIC" ]; then
 if [ 1 -eq 0 ];then
-  if [ ! -f "$PROFILE" ]; then
-    # First, get a rough idea of DOF/sec to estimate test time
-    if [ ! -f "$CSVFILE" ]; then
-      C=$CPUCOUNT
-      H=$H_MD
-      MESHNAME="uhxt"$H"p"$P"n"$N
-      MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
-      echo Estimating performance at $H_MD_DOF...
-      "$PERFDIR/mesh-part.sh" $H $P $N $C "$PHYS" "$MESHDIR"
-      echo Running $ITERS_MIN iterations of $MESHNAME...
-      "$EXEFMR" -v1 -c$C -i$ITERS_MIN -r$RTOL -p $MESH >> "$CSVFILE"
-    fi
-  fi
-  if [ -f "$CSVFILE" ]; then
-    echo "Femera Performance Profile" > "$PROFILE"
-  #  echo "Writing maximum problem size estimate: "$PROFILE"..." >> "$LOGFILE"
-    echo >> "$PROFILE"
-    echo "        Maximum Elastic Model Size Estimate" >> "$PROFILE"
-    echo "  ------------------------------------------------" >> $PROFILE
-    printf "     %9i : Maximum "$PSTR" elements\n" $ELEM_MAX >> $PROFILE
-    printf "     %9i : Maximum nodes\n" $NODE_MAX >> $PROFILE
-    printf "     %9i : Maximum MDOF\n" $MDOF_MAX >> $PROFILE
-    #
-    # echo "femerq-"$CPUMODEL"-"$CSTR >> $PROFILE
-    # grep -m1 -i "model name" /proc/cpuinfo >> $PROFILE
-    #
-    MEM_GB="`free -g  | grep Mem | awk '{print $2}'`"
-    printf "     %9i : GB memory\n" $MEM_GB >> $PROFILE
-    #
-    MDOFS=`head -n1 $CSVFILE | awk -F, '{ print $13/1e6 }'`
-    NELEM=`head -n1 $CSVFILE | awk -F, '{ print $1 }'`
-    NNODE=`head -n1 $CSVFILE | awk -F, '{ print $2 }'`
-    NUDOF=`head -n1 $CSVFILE | awk -F, '{ print $3 }'`
-    MUDOF=`head -n1 $CSVFILE | awk -F, '{ print $3/1e6 }'`
-    NPART=`head -n1 $CSVFILE | awk -F, '{ print $4 }'`
-    ITERS=`head -n1 $CSVFILE | awk -F, '{ print $5 }'`
-    NCPUS=`head -n1 $CSVFILE | awk -F, '{ print $9 }'`
-  #  echo "Writing initial performance estimate: "$PROFILE"..." >> $LOGFILE
-    echo >> $PROFILE
-    echo "     Initial Elastic Model Performance Estimate" >> $PROFILE
-    echo "  ------------------------------------------------" >> $PROFILE
-    printf "        %6.1f : Initial test performance [MDOF/s]\n" $MDOFS >> $PROFILE
-    printf "        %6.1f : Initial test system size [MDOF]\n" $MUDOF >> $PROFILE
-    printf "%12i   : Initial model nodes\n" $NNODE >> $PROFILE
-    printf "%12i   : Initial "$PSTR" elements\n" $NELEM >> $PROFILE
-    printf "%12i   : Initial test partitions\n" $NPART >> $PROFILE
-    printf "%12i   : Initial test threads\n" $NCPUS >> $PROFILE
-    printf "%12i   : Initial test iterations\n" $ITERS >> $PROFILE
-    #echo "Mesh            : " FIXME Put initial mesh filename here
-  fi
-fi
-  if [ -f "$CSVFILE" ]; then
     INIT_MUDOF=`head -n1 "$CSVFILE" | awk -F, '{ print int($3/1e6) }'`
     INIT_MDOFS=`head -n1 "$CSVFILE" | awk -F, '{ print int(($13+5e5)/1e6) }'`
     INIT_DOFS=`head -n1 "$CSVFILE" | awk -F, '{ print int($13+0.5) }'`
@@ -174,7 +123,7 @@ fi
     printf "  %6.1f   : Medium test solve time [sec]\n" $TARGET_TEST_S>>"$PROFILE"
     printf "%6i     : Medium minimum iterations\n" $ITERS_MIN >> "$PROFILE"
     printf "     %5.0e : Medium relative residual tolerance\n" $RTOL >> "$PROFILE"
-    #
+fi
     if false; then
       echo Removing old partitioned meshes...
       for PP in $(seq 1 3 ); do
@@ -313,5 +262,5 @@ exit
     printf " %9i   : Medium test iterations\n" $MED_ITERS >> $PROFILE
     printf " %9i   : Medium test repeats\n" $REPEAT_TEST_N >> $PROFILE
     #
-  fi
+#  fi
 done;# P loop
