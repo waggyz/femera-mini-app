@@ -81,7 +81,7 @@ for P in $PLIST; do
     H_MD=52; H_MD_DOF="500 kDOF"; MD_DOF=500000
     ;;
   2)
-    HSEQ="2 3 4 7 8 11 15 19 26 33 42";
+    HSEQ="2 3 4 7 8 11 15 19 22 26 33 42";
     # HSEQ=$HSEQ" 17 22 29 38";
     H_MD=33; H_MD_DOF="1 MDOF"; MD_DOF=1000000
     ;;
