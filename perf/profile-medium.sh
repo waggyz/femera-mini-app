@@ -148,7 +148,7 @@ fi
         SIZE_EXISTS=`awk -F, -v sz=$NDOF -v perf=$MAX_MDOFS \
           '($3==sz)&&($13>(0.9*perf*1e6)){print $3; exit}'\
           $CSVBASIC`
-        if [ -e $SIZE_EXISTS ];then
+        if [ "$SIZE_EXISTS" == "$NDOF" ];then
           NDOF90=$(( $NDOF * 9 / 10 ))
           echo $MESHNAME has $NDOF DOF.
           MESHNAME="uhxt"$H"p"$P"n"$N
