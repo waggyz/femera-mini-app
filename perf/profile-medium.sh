@@ -124,19 +124,6 @@ if [ 1 -eq 0 ];then
     printf "%6i     : Medium minimum iterations\n" $ITERS_MIN >> "$PROFILE"
     printf "     %5.0e : Medium relative residual tolerance\n" $RTOL >> "$PROFILE"
 fi
-    if false; then
-      echo Removing old partitioned meshes...
-      for PP in $(seq 1 3 ); do
-      for H in $HSEQ; do
-        echo $MESHDIR"/uhxt"$H"p"$PP"/*.msh2, *n????*.msh, *.fmr"
-        #
-        find $MESHDIR"/uhxt"$H"p"$PP -maxdepth 1 -type f -name *.msh2 -delete
-        find $MESHDIR"/uhxt"$H"p"$PP -maxdepth 1 -type f -name "uhxt"$H"p"$PP"n"????*.msh -delete
-        find $MESHDIR"/uhxt"$H"p"$PP -maxdepth 1 -type f -name *.fmr -delete
-      done
-      done
-      #exit 0
-    fi
     echo Finding maximum performance model size...
     SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
       '($9==c)&&($13>max)&&($4==$9){max=$13;perf=int(($13+5e5)/1e6);size=$3}\
@@ -146,11 +133,11 @@ fi
     MAX_SIZE=${SIZE_PERF_MAX%% *}
     echo "Maximum basic performance: "${SIZE_PERF_MAX##* }" MDOF/s"\
     at ${SIZE_PERF_MAX%% *}" DOF, parts = cores = "$CPUCOUNT"."
-exit
-    
-    echo Finding model sizes within 10 percent of peak basic performance...
-    
-    echo Running medium profile tests of $NDOF_MIN to $NDOF_MAX DOF models......
+#    echo Finding model sizes within 10 percent of peak basic performance...
+#exit
+#    
+#    echo Running medium profile tests of $NDOF_MIN to $NDOF_MAX DOF models...
+    echo Running medium profile tests...
     C=$CPUCOUNT
     for H in $HSEQ; do
       MESHNAME="uhxt"$H"p"$P"n"
@@ -158,12 +145,17 @@ exit
       if [ -f $MESH".msh" ]; then
         NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
         NDOF=$(( $NNODE * 3 ))
-        if [ $NDOF -ge $NDOF_MIN ];then
-        if [ $NDOF -le $NDOF_MAX ];then
+    SIZE_EXISTS=`awk -F, -v sz=$NDOF perf=$MAX_SIZE \
+      '($3==sz)&&($13>(0.9*perf)){print $3; exit}'\
+      "$CSVBASIC"`
+      echo $SIZE_EXISTS
+#        if [ $NDOF -ge $NDOF_MIN ];then
+#        if [ $NDOF -le $NDOF_MAX ];then
           NDOF90=$(( $NDOF * 9 / 10 ))
           echo $MESHNAME has $NDOF DOF.
           MESHNAME="uhxt"$H"p"$P"n"$N
           MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
+if [ 1 -eq -0 ];then
           if [ $NDOF -lt $UDOF_MAX ]; then
             $PERFDIR/mesh-part.sh $H $P $N $C "$PHYS" "$MESHDIR"
             TESTS_DONE=`grep -c ",$NNODE,$NDOF," $CSVFILE`
@@ -180,8 +172,9 @@ exit
               done
             fi
           fi
-        fi
-        fi
+fi
+#        fi
+#        fi
       fi
     done
     SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
