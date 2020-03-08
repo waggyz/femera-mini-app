@@ -192,7 +192,8 @@ for P in $PLIST; do
               if [ $TESTS_DONE -gt 0 ]; then
                 echo Found $TESTS_DONE of $TOTAL_MODELS solves...
               fi
-              if [ $TESTS_DONE -lt $(( $TOTAL_MODELS * 120 / 100 )) ];then
+              T=$(( $(( $TOTAL_MODELS * 120 )) / 100 ))
+              if [ $TESTS_DONE -lt $T ];then
                 S=$(( $M / $X ))
                 echo Warming up...
                   "$EXEFMR" -v1 -c$C -m$(( $C * $X )) -n$X -i$ITERS_MIN -r$RTOL -p "$MESH" > /dev/null

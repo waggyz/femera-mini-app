@@ -52,7 +52,7 @@ export OMP_NUM_THREADS=$CPUCOUNT
 #
 for P in $PLIST; do
   case $P in
-  1) DOF_PER_ELEM=" 1 / 2 "; BYTE_PER_DOF=270; PSTR=tet4;  ;;
+  1) DOF_PER_ELEM=" 1 / 2 "; BYTE_PER_DOF=270; PSTR=tet4; ;;
   2) DOF_PER_ELEM=4;   BYTE_PER_DOF=100; PSTR=tet10; ;;
   3) DOF_PER_ELEM=14;  BYTE_PER_DOF=80; PSTR=tet20; ;;
   # Mem estimate is with 40 parts. Add about 5% for optimal partitioning.
