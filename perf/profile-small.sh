@@ -187,7 +187,7 @@ for P in $PLIST; do
               MODELS_PER_TEST=$(( $C * $X ))
               TOTAL_MODELS=$(( $MODELS_PER_TEST * $REPEAT_TEST_N ))
               TESTS_DONE=`grep -c ",$NNODE,$NDOF,$C," $CSVFILE`
-              if [ $TESTS_DONE -lt $TOTAL_MODELS ];then
+              if [ $TESTS_DONE -lt $(( $TOTAL_MODELS * 120 / 100 )) ];then
                 S=$(( $M / $X ))
                 echo Warming up...
                   "$EXEFMR" -v1 -c$C -m$MODELS_PER_TEST -n$X -i$ITERS_MIN -r$RTOL -p "$MESH" > /dev/null

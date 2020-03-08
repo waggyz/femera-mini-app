@@ -183,7 +183,7 @@ fi
     done
     echo Finding maximum medium model partitioning...
     SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
-      '($9==c)&&($13>max){max=$13;perf=int(($13+500000)/1000000);size=$3}\
+      '($9==c)&&($13>max){max=$13;perf=int(($13+500e3)1e6);size=$3}\
       END{print size,perf}'\
       "$CSVFILE"`
     MAX_MDOFS=${SIZE_PERF_MAX##* }
@@ -201,7 +201,7 @@ fi
     
 if [ 1 -eq 0 ];then
     SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
-      '($9==c)&&($13>max)&&($4==$9){max=$13;perf=int(($13+500000)/1000000);size=$3}\
+      '($9==c)&&($13>max)&&($4==$9){max=$13;perf=int(($13+500e3)/1e6);size=$3}\
       END{print int((size+50)/100)*100,int(perf)}'\
       $CSVFILE`
     MAX_MDOFS=${SIZE_PERF_MAX##* }
