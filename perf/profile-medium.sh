@@ -87,24 +87,27 @@ for P in $PLIST; do
   #
   case $P in
   1)
-    HSEQ="5 6 10 17 23 30 38 52 65 84 113 141 183 246" # 310"
+    HMIN=5; HMAX=100;
+    # HSEQ="5 6 10 17 23 30 38 52 65 84 113 141 183 246" # 310"
     # too big to part in 90 GB:  421 531 669 / 250000000 500000000 1000000000
     H_MD=52; H_MD_DOF="500 kDOF"
     H_LG=113; H_LG_DOF="5 MDOF"
     H_XL=246; H_XL_DOF="50 MDOF"
     ;;
   2)
-    HSEQ="2 3 5 7 8 11";
-    HSEQ=$HSEQ" 15 19 26 33 42 57 71 90 121 157";
+    HMIN=2; HMAX=42;
+    # HSEQ="2 3 5 7 8 11";
+    # HSEQ=$HSEQ" 15 19 26 33 42 57 71 90 121 157";
     # HSEQ=$HSEQ" 17 22 29 38 48 63 82 103 135";
-    HSEQ=$HSEQ" 195 265 338";
+    # HSEQ=$HSEQ" 195 265 338";
     H_MD=33; H_MD_DOF="1 MDOF"
     H_LG=71; H_LG_DOF="10 MDOF"
     H_XL=157; H_XL_DOF="100 MDOF"
     ;;
   3)
-    HSEQ="1 2 3 4 6   8 10 13 17 23 28 39 48 61 80 100" # 138 174 220"
-    HSEQ=$HSEQ" 133 175 222";
+    HMIN=1; HMAX=28;
+    # HSEQ="1 2 3 4 6   8 10 13 17 23 28 39 48 61 80 100" # 138 174 220"
+    # HSEQ=$HSEQ" 133 175 222";
     H_MD=23; H_MD_DOF="1 MDOF"
     H_LG=48; H_LG_DOF="10 MDOF"
     H_XL=100; H_XL_DOF="100 MDOF"
@@ -134,41 +137,47 @@ fi
       "$CSVBASIC"`
     MAX_MDOFS=${SIZE_PERF_MAX##* }
     MAX_SIZE=${SIZE_PERF_MAX%% *}
-    echo "Maximum basic performance: "${SIZE_PERF_MAX##* }" MDOF/s"\
-    at ${SIZE_PERF_MAX%% *}" DOF, parts = cores = "$CPUCOUNT"."
-    echo Running medium profile tests...
+    echo "Maximum basic performance: "$MAX_MDOFS" MDOF/s"\
+    at $MAX_SIZE" DOF, parts = cores = "$CPUCOUNT"."
+    #
+    SIZE_MIN=`awk -F, -v perf=$MAX_MDOFS -v size=99e99 \
+      '($13>(0.9*perf*1e6)&&($3<size)){size=$3;}END{print size}'\
+      $CSVBASIC`
+    SIZE_MAX=`awk -F, -v perf=$MAX_MDOFS -v size=0 \
+      '($13>(0.9*perf*1e6)&&($3>size)){size=$3;}END{print size}'\
+      $CSVBASIC`
+    echo "Running medium profile tests ("$SIZE_MIN"-"$SIZE_MAX") DOF..."
     C=$CPUCOUNT
-    for H in $HSEQ; do
+    for H in $(seq $HMIN $HMAX ); do
       MESHNAME="uhxt"$H"p"$P"n"
       MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
       if [ -f $MESH".msh" ]; then
         NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
         NDOF=$(( $NNODE * 3 ))
-        TEST_SIZE=`awk -F, -v sz=$NDOF -v perf=$MAX_MDOFS \
-          '($3==sz)&&($13>(0.9*perf*1e6)){print $3; exit}'\
-          $CSVBASIC`
-        if [ "$TEST_SIZE" == "$NDOF" ];then
+        if [ "$NDOF" -ge "$SIZE_MIN" ]; then
+        if [ "$NDOF" -le "$SIZE_MAX" ]; then
           echo $MESHNAME has $NDOF DOF.
           NDOF90=$(( $NDOF * 9 / 10 ))
           ITERS=`printf '%f*%f*1000000/%f\n' $TARGET_TEST_S $MAX_MDOFS $NDOF | bc`
-          if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
-          if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
+          if [ "$ITERS" -lt "$ITERS_MIN" ]; then ITERS=$ITERS_MIN; fi
+          if [ "$ITERS" -gt "$NDOF90" ]; then ITERS=$NDOF90; fi
           for NC in $(seq 2 $NX_MAX ); do
             N=$(( $NC * $CPUCOUNT ))
             MESHNAME="uhxt"$H"p"$P"n"$N
             MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
             "$PERFDIR/mesh-part.sh" $H $P $N $C "$PHYS" "$MESHDIR"
             TESTS_DONE=`grep -c ",$NNODE,$NDOF,$N," $CSVFILE`
-            if [ $TESTS_DONE -lt $REPEAT_TEST_N ]; then
+            if [ "$TESTS_DONE" -lt "$REPEAT_TEST_N" ]; then
               echo Warming up...
-                $EXEFMR -v1 -c$C -i$ITERS_MIN -r$RTOL -p $MESH # > /dev/null
+                "$EXEFMR" -v1 -c$C -i$ITERS_MIN -r$RTOL -p $MESH # > /dev/null
               echo "Running "$ITERS" iterations of "$MESHNAME" ("$NDOF" DOF),"\
                 $REPEAT_TEST_N" times..."
               for I in $(seq 1 $REPEAT_TEST_N ); do
-                $EXEFMR -v1 -c$C -i$ITERS -r$RTOL -p $MESH >> $CSVFILE
+                "$EXEFMR" -v1 -c$C -i$ITERS -r$RTOL -p "$MESH" >> "$CSVFILE"
               done
             fi
           done
+        fi
         fi
       fi
     done
