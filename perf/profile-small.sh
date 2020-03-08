@@ -188,7 +188,8 @@ for P in $PLIST; do
               # TOTAL_MODELS=$(( $MODELS_PER_TEST * $REPEAT_TEST_N ))
               TOTAL_MODELS=$(( $M * $REPEAT_TEST_N ))
               TESTS_DONE=`grep -c ",$NNODE,$NDOF,$C," $CSVFILE`
-              echo Found $TESTS_DONE of $TOTAL_MODELS models solved...
+              echo ",$NNODE,$NDOF,$C,"
+              echo Found $TESTS_DONE of $TOTAL_MODELS solves...
               if [ $TESTS_DONE -lt $(( $TOTAL_MODELS * 120 / 100 )) ];then
                 S=$(( $M / $X ))
                 echo Warming up...
