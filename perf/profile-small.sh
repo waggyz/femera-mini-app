@@ -184,8 +184,9 @@ for P in $PLIST; do
                 if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
                 if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
               fi
-              MODELS_PER_TEST=$(( $C * $X ))
-              TOTAL_MODELS=$(( $MODELS_PER_TEST * $REPEAT_TEST_N ))
+              # MODELS_PER_TEST=$(( $C * $X ))
+              # TOTAL_MODELS=$(( $MODELS_PER_TEST * $REPEAT_TEST_N ))
+              TOTAL_MODELS=$(( $M * $REPEAT_TEST_N ))
               TESTS_DONE=`grep -c ",$NNODE,$NDOF,$C," $CSVFILE`
               if [ $TESTS_DONE -lt $(( $TOTAL_MODELS * 120 / 100 )) ];then
                 S=$(( $M / $X ))
