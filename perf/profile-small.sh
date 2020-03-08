@@ -192,7 +192,7 @@ for P in $PLIST; do
               if [ $TESTS_DONE -gt 0 ]; then
                 echo Found $TESTS_DONE of $TOTAL_MODELS solves...
               fi
-              T=$(( $TOTAL_MODELS * 120 / 100 ))
+              T=$(( $TOTAL_MODELS * 90 / 100 ))
               if [ $TESTS_DONE -lt $T ];then
                 S=$(( $M / $X ))
                 echo Warming up...
