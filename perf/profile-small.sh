@@ -204,15 +204,13 @@ for P in $PLIST; do
                 done
                 STOP=`date +%s.%N`
                 TIME_SEC=`printf "%f-%f\n" $STOP $START | bc`
+                MDOF_TOTAL=`awk -F, -v n=$NNODE -v c=$C -v dof=0\
+                '($2==n)&&($9==c){dof=dof+$3*$5;}\
+                  END{print dof/1000000;}' "$CSVFILE"`
+                TOTAL_MDOFS=`printf "%f/%f\n" $MDOF_TOTAL $TIME_SEC | bc`
+                echo "Overall: "$TOTAL_MDOFS" MDOF/s ("$MDOF_TOTAL\
+                "MDOF in "$TIME_SEC" sec)"
               fi
-              #
-              MDOF_TOTAL=`awk -F, -v n=$NNODE -v c=$C -v dof=0\
-              '($2==n)&&($9==c){dof=dof+$3*$5;}\
-                END{print dof/1000000;}' "$CSVFILE"`
-              TOTAL_MDOFS=`printf "%f/%f\n" $MDOF_TOTAL $TIME_SEC | bc`
-              echo "Overall: "$TOTAL_MDOFS" MDOF/s ("$MDOF_TOTAL\
-              "MDOF in "$TIME_SEC" sec)"
-              #
               SOLVE_MDOFS=`awk -F, -v nnode=$NNODE -v c=$C -v nrun=0 -v mdofs=0 -v x=$X\
               '($2==nnode)&&($9==c){nrun=nrun+1;mdofs=mdofs+$13;}\
                 END{print mdofs/nrun/1000000*x;}' "$CSVFILE"`
