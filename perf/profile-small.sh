@@ -70,7 +70,7 @@ for P in $PLIST; do
   #CSVSMALL=$PERFDIR/"small-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
   CSVPROFILE=$PERFDIR/"profile-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
   #
-  if [ 1 -eq 1 ];then
+  if [ 1 -eq 0 ];then
     rm "$PROFILE"
     rm "$CSVFILE"
   fi
@@ -188,8 +188,10 @@ for P in $PLIST; do
               # TOTAL_MODELS=$(( $MODELS_PER_TEST * $REPEAT_TEST_N ))
               TOTAL_MODELS=$(( $M * $REPEAT_TEST_N ))
               TESTS_DONE=`grep -c ",$NNODE,$NDOF,$C," $CSVFILE`
-              echo ",$NNODE,$NDOF,$C,"
-              echo Found $TESTS_DONE of $TOTAL_MODELS solves...
+              # echo ",$NNODE,$NDOF,$C,"
+              if [ $TESTS_DONE -gt 0 ]; then
+                echo Found $TESTS_DONE of $TOTAL_MODELS solves...
+              fi
               if [ $TESTS_DONE -lt $(( $TOTAL_MODELS * 120 / 100 )) ];then
                 S=$(( $M / $X ))
                 echo Warming up...
