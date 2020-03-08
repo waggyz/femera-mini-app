@@ -7,7 +7,11 @@ if [ -n "$4" ]; then MEM=$(( $4 * 1000000000 ));
 if [ -n "$5" ]; then CPUMODEL=$5; else CPUMODEL=`./cpumodel.sh`; fi
 if [ -n "$6" ]; then CPUCOUNT=$6; else CPUCOUNT=`./cpucount.sh`; fi
 #
-EXEDIR="/u/dwagner5/femera-mini-develop"
+if [ -d "/u/dwagner5" ]; then
+  EXEDIR="/u/dwagner5/femera-mini-develop"
+else
+  EXEDIR=`pwd`
+fi
 PERFDIR=$EXEDIR/"perf"
 #
 GMSH2FMR=$EXEDIR/"gmsh2fmr-"$CPUMODEL"-"$CSTR
@@ -16,7 +20,9 @@ EXEFMR=$EXEDIR/"femerq-"$CPUMODEL"-"$CSTR
 C=$CPUCOUNT; N=$C; RTOL=1e-80;
 TARGET_TEST_S=30;# Try for S sec/run
 REPEAT_TEST_N=10;# Repeat each test N times
-ITERS_MIN=10;
+ITERS_MIN=100;
+NX_MAX=16
+PART_MAX=$(( $CPUCOUNT * $NX_MAX ))
 #
 if [ -d "/hpnobackup1/dwagner5/femera-test/cube" ]; then
   MESHDIR=/hpnobackup1/dwagner5/femera-test/cube
@@ -58,12 +64,14 @@ for P in $PLIST; do
   # Mem estimate is with 40 parts. Add about 5% for optimal partitioning.
   esac
   #
-  PROFILE=$PERFDIR/"profile-basic-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".pro"
-  #LOGFILE=$PERFDIR/"uhxt-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".log"
-  CSVFILE=$PERFDIR/"profile-basic-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
-  CSVSMALL=$PERFDIR/"small-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
+  PROFILE=$PERFDIR/"profile-large-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".pro"
+  CSVFILE=$PERFDIR/"profile-large-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
+  CSVBASIC=$PERFDIR/"profile-basic-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
   CSVPROFILE=$PERFDIR/"profile-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
   #
+  if [ ! -f "$CSVFILE" ]; then
+    head -n1 "$CSVBASIC" > "$CSVFILE"
+  fi
   # if [ -f $PROFILE ]; then
   #   NODE_MAX=`grep -m1 -i nodes $PROFILE | awk '{print $1}'`
   #   UDOF_MAX=$(( $NODE_MAX * 3 ))
@@ -79,142 +87,107 @@ for P in $PLIST; do
   #
   case $P in
   1)
-    HSEQ="5 6 10 17 23 30 38 52 65 84 113 141 183 246" # 310"
     # too big to part in 90 GB:  421 531 669 / 250000000 500000000 1000000000
     H_MD=52; H_MD_DOF="500 kDOF"
     H_LG=113; H_LG_DOF="5 MDOF"
     H_XL=246; H_XL_DOF="50 MDOF"
     ;;
   2)
-    HSEQ="2 3 5 7 8 11";
-    HSEQ=$HSEQ" 15 19 26 33 42 57 71 90 121 157";
-    # HSEQ=$HSEQ" 17 22 29 38 48 63 82 103 135";
-    HSEQ=$HSEQ" 195 265 338";
     H_MD=33; H_MD_DOF="1 MDOF"
     H_LG=71; H_LG_DOF="10 MDOF"
     H_XL=157; H_XL_DOF="100 MDOF"
     ;;
   3)
-    HSEQ="1 2 3 4 6   8 10 13 17 23 28 39 48 61 80 100" # 138 174 220"
-    HSEQ=$HSEQ" 133 175 222";
     H_MD=23; H_MD_DOF="1 MDOF"
     H_LG=48; H_LG_DOF="10 MDOF"
     H_XL=100; H_XL_DOF="100 MDOF"
     ;;
   esac
-  #
-  if [ ! -f $PROFILE ]; then
-    # First, get a rough idea of DOF/sec to estimate test time
-    if [ ! -f $CSVFILE ]; then
-      C=$CPUCOUNT
-      H=$H_LG
-      MESHNAME="uhxt"$H"p"$P"n"$N
-      MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
-      echo Estimating performance at $H_LG_DOF...
-      $PERFDIR/mesh-part.sh $H $P $N $C "$PHYS" "$MESHDIR"
-      echo Running $ITERS_MIN iterations of $MESHNAME...
-      $EXEFMR -v1 -c$C -i$ITERS_MIN -r$RTOL -p $MESH >> $CSVFILE
-    fi
-  fi
-  if [ -f $CSVFILE ]; then
-    echo "Femera Performance Profile" > $PROFILE
-  #  echo "Writing maximum problem size estimate: "$PROFILE"..." >> $LOGFILE
-    echo >> $PROFILE
-    echo "        Maximum Elastic Model Size Estimate" >> $PROFILE
-    echo "  ------------------------------------------------" >> $PROFILE
-    printf "     %9i : Maximum "$PSTR" elements\n" $ELEM_MAX >> $PROFILE
-    printf "     %9i : Maximum nodes\n" $NODE_MAX >> $PROFILE
-    printf "     %9i : Maximum MDOF\n" $MDOF_MAX >> $PROFILE
-    #
-    # echo "femerq-"$CPUMODEL"-"$CSTR >> $PROFILE
-    # grep -m1 -i "model name" /proc/cpuinfo >> $PROFILE
-    #
-    MEM_GB="`free -g  | grep Mem | awk '{print $2}'`"
-    printf "     %9i : GB memory\n" $MEM_GB >> $PROFILE
-    #
-    MDOFS=`head -n1 $CSVFILE | awk -F, '{ print $13/1e6 }'`
-    NELEM=`head -n1 $CSVFILE | awk -F, '{ print $1 }'`
-    NNODE=`head -n1 $CSVFILE | awk -F, '{ print $2 }'`
-    NUDOF=`head -n1 $CSVFILE | awk -F, '{ print $3 }'`
-    MUDOF=`head -n1 $CSVFILE | awk -F, '{ print $3/1e6 }'`
-    NPART=`head -n1 $CSVFILE | awk -F, '{ print $4 }'`
-    ITERS=`head -n1 $CSVFILE | awk -F, '{ print $5 }'`
-    NCPUS=`head -n1 $CSVFILE | awk -F, '{ print $9 }'`
-  #  echo "Writing initial performance estimate: "$PROFILE"..." >> $LOGFILE
-    echo >> $PROFILE
-    echo "     Initial Elastic Model Performance Estimate" >> $PROFILE
-    echo "  ------------------------------------------------" >> $PROFILE
-    printf "        %6.1f : Initial test performance [MDOF/s]\n" $MDOFS >> $PROFILE
-    printf "        %6.1f : Initial test system size [MDOF]\n" $MUDOF >> $PROFILE
-    printf "%12i   : Initial model nodes\n" $NNODE >> $PROFILE
-    printf "%12i   : Initial "$PSTR" elements\n" $NELEM >> $PROFILE
-    printf "%12i   : Initial test partitions\n" $NPART >> $PROFILE
-    printf "%12i   : Initial test threads\n" $NCPUS >> $PROFILE
-    printf "%12i   : Initial test iterations\n" $ITERS >> $PROFILE
-    #echo "Mesh            : " FIXME Put initial mesh filename here
-  fi
-  if [ -f $CSVFILE ]; then
-    INIT_MUDOF=`head -n1 $CSVFILE | awk -F, '{ print int($3/1e6) }'`
-    INIT_MDOFS=`head -n1 $CSVFILE | awk -F, '{ print int(($13+5e5)/1e6) }'`
-    INIT_DOFS=`head -n1 $CSVFILE | awk -F, '{ print int($13+0.5) }'`
+#  if [ -f "$CSVBASIC" ]; then
+if [ 1 -eq 0 ];then
+    INIT_MUDOF=`head -n1 "$CSVFILE" | awk -F, '{ print int($3/1e6) }'`
+    INIT_MDOFS=`head -n1 "$CSVFILE" | awk -F, '{ print int(($13+5e5)/1e6) }'`
+    INIT_DOFS=`head -n1 "$CSVFILE" | awk -F, '{ print int($13+0.5) }'`
     echo "Initial performance estimate: "$INIT_MDOFS" MDOF/s at "$INIT_MUDOF" MDOF"
     #
-  #  echo "Writing basic profile test parameters: "$PROFILE"..." >> $LOGFILE
-    echo >> $PROFILE
-    echo "     Basic Performance Profile Test Parameters" >> $PROFILE
-    echo "  ------------------------------------------------" >> $PROFILE
-    printf "%6i     : Basic partitions = threads = physical cores\n" $CPUCOUNT >> $PROFILE
-    printf "%6i     : Basic test repeats\n" $REPEAT_TEST_N >> $PROFILE
-    printf "  %6.1f   : Basic test solve time [sec]\n" $TARGET_TEST_S>>$PROFILE
-    printf "%6i     : Basic minimum iterations\n" $ITERS_MIN >> $PROFILE
-    printf "     %5.0e : Basic relative residual tolerance\n" $RTOL >> $PROFILE
-    #
-    if false; then
-      echo Removing old partitioned meshes...
-      for PP in $(seq 1 3 ); do
-      for H in $HSEQ; do
-        echo $MESHDIR"/uhxt"$H"p"$PP"/*.msh2, *n????*.msh, *.fmr"
-        #
-        find $MESHDIR"/uhxt"$H"p"$PP -maxdepth 1 -type f -name *.msh2 -delete
-        find $MESHDIR"/uhxt"$H"p"$PP -maxdepth 1 -type f -name "uhxt"$H"p"$PP"n"????*.msh -delete
-        find $MESHDIR"/uhxt"$H"p"$PP -maxdepth 1 -type f -name *.fmr -delete
-      done
-      done
-      #exit 0
-    fi
-    echo Running basic profile tests...
+  #  echo "Writing medium profile test parameters: "$PROFILE"..." >> $LOGFILE
+    echo >> "$PROFILE"
+    echo "     Medium Performance Profile Test Parameters" >> "$PROFILE"
+    echo "  ------------------------------------------------" >> "$PROFILE"
+    printf "%6i     : Medium max partitions\n" $PART_MAX >> "$PROFILE"
+    printf "%6i     : Medium test repeats\n" $REPEAT_TEST_N >> "$PROFILE"
+    printf "  %6.1f   : Medium test solve time [sec]\n" $TARGET_TEST_S>>"$PROFILE"
+    printf "%6i     : Medium minimum iterations\n" $ITERS_MIN >> "$PROFILE"
+    printf "     %5.0e : Medium relative residual tolerance\n" $RTOL >> "$PROFILE"
+fi
+    echo Finding maximum performance model size...
+    SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
+      '($9==c)&&($13>max)&&($4==$9){max=$13;perf=int(($13+5e5)/1e6);size=$3}\
+      END{print size,perf}'\
+      "$CSVBASIC"`
+    MAX_MDOFS=${SIZE_PERF_MAX##* }
+    MAX_SIZE=${SIZE_PERF_MAX%% *}
+    echo "Maximum basic performance: "${SIZE_PERF_MAX##* }" MDOF/s"\
+    at ${SIZE_PERF_MAX%% *}" DOF, parts = cores = "$CPUCOUNT"."
+    echo Running medium profile tests...
     C=$CPUCOUNT
-    for H in $HSEQ; do
+#    for H in $HSEQ; do
+    H=$H_LG;
       MESHNAME="uhxt"$H"p"$P"n"
       MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
       if [ -f $MESH".msh" ]; then
         NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
         NDOF=$(( $NNODE * 3 ))
-        NDOF90=$(( $NDOF * 9 / 10 ))
-        echo $MESHNAME has $NDOF DOF.
-        MESHNAME="uhxt"$H"p"$P"n"$N
-        MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
-        if [ $NDOF -lt $UDOF_MAX ]; then
-          $PERFDIR/mesh-part.sh $H $P $N $C "$PHYS" "$MESHDIR"
-          TESTS_DONE=`grep -c ",$NNODE,$NDOF," $CSVFILE`
-          if [ $TESTS_DONE -lt $REPEAT_TEST_N ]; then
-            ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
-            if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
-            if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
-            echo Warming up...
-              $EXEFMR -v1 -c$C -i$ITERS_MIN -r$RTOL -p $MESH # > /dev/null
-            echo "Running "$ITERS" iterations of "$MESHNAME" ("$NDOF" DOF),"\
-              $REPEAT_TEST_N" times..."
-            for I in $(seq 1 $REPEAT_TEST_N ); do
-              $EXEFMR -v1 -c$C -i$ITERS -r$RTOL -p $MESH >> $CSVFILE
-            done
-          fi
+        TEST_SIZE=`awk -F, -v sz=$NDOF -v perf=$MAX_MDOFS \
+          '($3==sz)&&($13>(0.9*perf*1e6)){print $3; exit}'\
+          $CSVBASIC`
+        if [ "$TEST_SIZE" == "$NDOF" ];then
+          echo $MESHNAME has $NDOF DOF.
+          NDOF90=$(( $NDOF * 9 / 10 ))
+          ITERS=`printf '%f*%f*1000000/%f\n' $TARGET_TEST_S $MAX_MDOFS $NDOF | bc`
+          if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
+          if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
+          for NC in $(seq 2 $NX_MAX ); do
+            N=$(( $NC * $CPUCOUNT ))
+            MESHNAME="uhxt"$H"p"$P"n"$N
+            MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
+            "$PERFDIR/mesh-part.sh" $H $P $N $C "$PHYS" "$MESHDIR"
+            TESTS_DONE=`grep -c ",$NNODE,$NDOF,$N," $CSVFILE`
+            if [ $TESTS_DONE -lt $REPEAT_TEST_N ]; then
+              echo Warming up...
+                $EXEFMR -v1 -c$C -i$ITERS_MIN -r$RTOL -p $MESH # > /dev/null
+              echo "Running "$ITERS" iterations of "$MESHNAME" ("$NDOF" DOF),"\
+                $REPEAT_TEST_N" times..."
+              for I in $(seq 1 $REPEAT_TEST_N ); do
+                $EXEFMR -v1 -c$C -i$ITERS -r$RTOL -p $MESH >> $CSVFILE
+              done
+            fi
+          done
         fi
       fi
-    done
+#    done
+    echo Finding maximum medium model partitioning...
+    SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
+      '($9==c)&&($13>max){max=$13;perf=int(($13+5e5)/1e6);size=$3}\
+      END{print size,perf}'\
+      "$CSVFILE"`
+    MAX_MDOFS=${SIZE_PERF_MAX##* }
+    MAX_SIZE=${SIZE_PERF_MAX%% *}
+    NODE_ELEM_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
+      '($9==c)&&($13>max){max=$13;nelem=$1;npart=$4}\
+      END{print nelem,npart}'\
+      $CSVFILE`
+    MAX_ELEMS=${NODE_ELEM_MAX%% *}
+    MAX_PARTS=${NODE_ELEM_MAX##* }
+    echo "Maximum medium performance: "$MAX_MDOFS" MDOF/s"\
+    at $MAX_SIZE" DOF, "$MAX_PARTS" partitions."
+    
+    
+    
+if [ 1 -eq 0 ];then
     SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
       '($9==c)&&($13>max)&&($4==$9){max=$13;perf=int(($13+5e5)/1e6);size=$3}\
-      END{print int((size+50)/100)*100,int(perf+0.5)}'\
+      END{print int((size+50)/100)*100,int(perf)}'\
       $CSVFILE`
     MAX_MDOFS=${SIZE_PERF_MAX##* }
     MAX_SIZE=${SIZE_PERF_MAX%% *}
@@ -290,5 +263,5 @@ for P in $PLIST; do
     printf " %9i   : Medium test iterations\n" $MED_ITERS >> $PROFILE
     printf " %9i   : Medium test repeats\n" $REPEAT_TEST_N >> $PROFILE
     #
-  fi
+fi
 done;# P loop
