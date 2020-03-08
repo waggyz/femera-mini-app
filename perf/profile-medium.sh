@@ -15,7 +15,7 @@ fi
 PERFDIR=$EXEDIR/"perf"
 #
 GMSH2FMR=$EXEDIR/"gmsh2fmr-"$CPUMODEL"-"$CSTR
-EXEFMR=$EXEDIR/"femera-mmq-"$CPUMODEL"-"$CSTR
+EXEFMR=$EXEDIR/"femerq-"$CPUMODEL"-"$CSTR
 #
 C=$CPUCOUNT; N=$C; RTOL=1e-80;
 TARGET_TEST_S=30;# Try for S sec/run
