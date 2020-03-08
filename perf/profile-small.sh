@@ -190,7 +190,7 @@ for P in $PLIST; do
               if [ $TESTS_DONE -lt $(( $TOTAL_MODELS * 120 / 100 )) ];then
                 S=$(( $M / $X ))
                 echo Warming up...
-                  "$EXEFMR" -v1 -c$C -m$MODELS_PER_TEST -n$X -i$ITERS_MIN -r$RTOL -p "$MESH" > /dev/null
+                  "$EXEFMR" -v1 -c$C -m$(( $C * $X )) -n$X -i$ITERS_MIN -r$RTOL -p "$MESH" > /dev/null
                 echo "Running "$REPEAT_TEST_N" repeats of "$S"x"$X" concurrent "$NDOF" DOF models..."
                 START=`date +%s.%N`
                 for I in $(seq 1 $REPEAT_TEST_N ); do

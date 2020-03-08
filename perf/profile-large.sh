@@ -155,7 +155,7 @@ fi
             TESTS_DONE=`grep -c ",$NNODE,$NDOF,$N," $CSVFILE`
             if [ $TESTS_DONE -lt $REPEAT_TEST_N ]; then
               echo Warming up...
-                $EXEFMR -v1 -c$C -i$ITERS_MIN -r$RTOL -p $MESH # > /dev/null
+                $EXEFMR -v1 -c$C -i$ITERS_MIN -r$RTOL -p $MESH > /dev/null
               echo "Running "$ITERS" iterations of "$MESHNAME" ("$NDOF" DOF),"\
                 $REPEAT_TEST_N" times..."
               for I in $(seq 1 $REPEAT_TEST_N ); do

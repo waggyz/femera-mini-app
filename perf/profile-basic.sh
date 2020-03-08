@@ -202,7 +202,7 @@ for P in $PLIST; do
             if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
             if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
             echo Warming up...
-              $EXEFMR -v1 -c$C -i$ITERS_MIN -r$RTOL -p $MESH # > /dev/null
+              $EXEFMR -v1 -c$C -i$ITERS_MIN -r$RTOL -p $MESH > /dev/null
             echo "Running "$ITERS" iterations of "$MESHNAME" ("$NDOF" DOF),"\
               $REPEAT_TEST_N" times..."
             for I in $(seq 1 $REPEAT_TEST_N ); do
