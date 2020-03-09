@@ -151,7 +151,7 @@ fi
     if [ $SIZE_MAX -gt $(( 100 * $SIZE_MIN )) ]; then
       SIZE_MAX=$(( 100 * $SIZE_MIN ))
     fi
-    echo "Running medium profile tests: "$SIZE_MIN"-"$SIZE_MAX" DOF,"\
+    echo "Running medium partitioning tests: "$SIZE_MIN"-"$SIZE_MAX" DOF,"\
       $CPUCOUNT"-"$(( $CPUCOUNT * $NX_MAX ))" parts..."
     C=$CPUCOUNT
     # for H in $(seq $HMIN $HMAX ); do

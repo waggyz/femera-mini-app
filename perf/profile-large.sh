@@ -110,7 +110,7 @@ if [ 1 -eq 0 ];then
     INIT_DOFS=`head -n1 "$CSVFILE" | awk -F, '{ print int($13+0.5) }'`
     echo "Initial performance estimate: "$INIT_MDOFS" MDOF/s at "$INIT_MUDOF" MDOF"
     #
-  #  echo "Writing medium profile test parameters: "$PROFILE"..." >> $LOGFILE
+  #  echo "Writing large profile test parameters: "$PROFILE"..." >> $LOGFILE
     echo >> "$PROFILE"
     echo "     Medium Performance Profile Test Parameters" >> "$PROFILE"
     echo "  ------------------------------------------------" >> "$PROFILE"
@@ -127,14 +127,16 @@ fi
       "$CSVBASIC"`
     MAX_MDOFS=${SIZE_PERF_MAX##* }
     MAX_SIZE=${SIZE_PERF_MAX%% *}
-    echo "Maximum basic performance: "${SIZE_PERF_MAX##* }" MDOF/s"\
-    at ${SIZE_PERF_MAX%% *}" DOF, parts = cores = "$CPUCOUNT"."
-    echo Running medium profile tests...
+    echo "Maximum basic performance: "$MAX_MDOFS}" MDOF/s"\
+    at $MAX_SIZE" DOF, parts = cores = "$CPUCOUNT"."
+    echo "Running medium partitioning tests: "$SIZE_MIN"-"$SIZE_MAX" DOF,"\
+      $CPUCOUNT"-"$PART_MAX" parts..."
     C=$CPUCOUNT
-#    for H in $HSEQ; do
     H=$H_LG;
+    #for H in $HSEQ; do
       MESHNAME="uhxt"$H"p"$P"n"
       MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
+      "$PERFDIR/mesh-part.sh" $H $P $N $C "$PHYS" "$MESHDIR"
       if [ -f $MESH".msh" ]; then
         NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
         NDOF=$(( $NNODE * 3 ))
@@ -165,7 +167,7 @@ fi
           done
         fi
       fi
-#    done
+    #done
     echo Finding maximum medium model partitioning...
     SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
       '($9==c)&&($13>max){max=$13;perf=int(($13+5e5)/1e6);size=$3}\
