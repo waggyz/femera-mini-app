@@ -148,6 +148,9 @@ fi
     SIZE_MAX=`awk -F, -v perf=$MAX_MDOFS -v size=0 \
       '($13>(0.9*perf*1e6)&&($3>size)){size=$3;}END{print size}'\
       $CSVBASIC`
+    if [ $SIZE_MAX -gt $(( 100 * $SIZE_MIN )) ]; then
+      SIZE_MAX=$(( 100 * $SIZE_MIN ))
+    fi
     echo "Running medium profile tests ("$SIZE_MIN"-"$SIZE_MAX") DOF..."
     C=$CPUCOUNT
     # for H in $(seq $HMIN $HMAX ); do
