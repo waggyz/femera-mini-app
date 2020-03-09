@@ -178,8 +178,8 @@ for P in $PLIST; do
               if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
               #
               M=$(( $TOTAL_DOF / $NDOF / $ITERS ))
-              if [ $M -lt $CPUCOUNT ];then
-                M=$CPUCOUNT;
+              if [ $M -lt $X ];then
+                M=$X;
                 ITERS=$(( $TOTAL_DOF / $NDOF / $M ))
                 if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
                 if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
