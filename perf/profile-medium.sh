@@ -154,6 +154,7 @@ fi
     for H in $HSEQ; do
       MESHNAME="uhxt"$H"p"$P"n"
       MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
+      "$PERFDIR/mesh-part.sh" $H $P $C $C "$PHYS" "$MESHDIR"
       if [ -f $MESH".msh" ]; then
         NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
         NDOF=$(( $NNODE * 3 ))
@@ -166,11 +167,11 @@ fi
           if [ "$ITERS" -gt "$NDOF90" ]; then ITERS=$NDOF90; fi
           for NC in $(seq 1 $NX_MAX ); do
             N=$(( $NC * $CPUCOUNT ))
-            MESHNAME="uhxt"$H"p"$P"n"$N
-            MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
-            "$PERFDIR/mesh-part.sh" $H $P $N $C "$PHYS" "$MESHDIR"
             TESTS_DONE=`grep -c ",$NNODE,$NDOF,$N," $CSVFILE`
             if [ "$TESTS_DONE" -lt "$REPEAT_TEST_N" ]; then
+              MESHNAME="uhxt"$H"p"$P"n"$N
+              MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
+              "$PERFDIR/mesh-part.sh" $H $P $N $C "$PHYS" "$MESHDIR"
               echo Warming up...
                 "$EXEFMR" -v1 -c$C -i$ITERS_MIN -r$RTOL -p $MESH > /dev/null
               echo "Running "$ITERS" iterations of "$MESHNAME" ("$NDOF" DOF),"\
@@ -186,7 +187,7 @@ fi
     done
     echo Finding maximum medium model partitioning...
     SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
-      '($9==c)&&($13>max){max=$13;perf=int(($13+500e3)1e6);size=$3}\
+      '($9==c)&&($13>max){max=$13;perf=int(($13+500e3)/1e6);size=$3}\
       END{print size,perf}'\
       "$CSVFILE"`
     MAX_MDOFS=${SIZE_PERF_MAX##* }
