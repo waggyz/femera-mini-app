@@ -178,8 +178,8 @@ for P in $PLIST; do
               if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
               #
               M=$(( $TOTAL_DOF / $NDOF / $ITERS ))
-              if [ $M -le $X ];then
-                M=$X;
+              if [ $M -lt $CPUCOUNT ];then
+                M=$CPUCOUNT;
                 ITERS=$(( $TOTAL_DOF / $NDOF / $M ))
                 if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
                 if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
@@ -196,11 +196,11 @@ for P in $PLIST; do
               if [ $TESTS_DONE -lt $T ];then
                 S=$(( $M / $X ))
                 echo Warming up...
-                  "$EXEFMR" -v1 -c$C -m$CPUCOUNT -n$X -i$ITERS_MIN -r$RTOL -p "$MESH" > /dev/null
+                  "$EXEFMR" -v1 -c$C -m$X -n$X -i$ITERS_MIN -r$RTOL -p "$MESH" > /dev/null
                 echo "Running "$REPEAT_TEST_N" repeats of "$S"x"$X" concurrent "$NDOF" DOF models..."
                 START=`date +%s.%N`
                 for I in $(seq 1 $REPEAT_TEST_N ); do
-                  "$EXEFMR" -v1 -c$C -m$TOTAL_MODELS -n$X -i$ITERS -r$RTOL -p "$MESH" >> "$CSVFILE"
+                  "$EXEFMR" -v1 -c$C -m$M -n$X -i$ITERS -r$RTOL -p "$MESH" >> "$CSVFILE"
                 done
                 STOP=`date +%s.%N`
                 TIME_SEC=`printf "%f-%f\n" $STOP $START | bc`
