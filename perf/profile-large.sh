@@ -129,7 +129,7 @@ fi
     MAX_SIZE=${SIZE_PERF_MAX%% *}
     echo "Maximum basic performance: "$MAX_MDOFS}" MDOF/s"\
     at $MAX_SIZE" DOF, parts = cores = "$CPUCOUNT"."
-    echo "Running medium partitioning tests: "$SIZE_MIN"-"$SIZE_MAX" DOF,"\
+    echo "Running large partitioning tests: "$H_LG_DOF" DOF,"\
       $CPUCOUNT"-"$PART_MAX" parts..."
     C=$CPUCOUNT
     H=$H_LG;
