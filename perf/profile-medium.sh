@@ -87,27 +87,29 @@ for P in $PLIST; do
   #
   case $P in
   1)
-    HMIN=5; HMAX=100;
-    # HSEQ="5 6 10 17 23 30 38 52 65 84 113 141 183 246" # 310"
+    # HMIN=5; HMAX=95;
+    HSEQ="5 6 10 17 23 30 38 52 65 84 113 141 183 246" # 310"
+    HSEQ=$HSEQ" 8 12 15 20 26 34 45 60 75 95 105";
     # too big to part in 90 GB:  421 531 669 / 250000000 500000000 1000000000
     H_MD=52; H_MD_DOF="500 kDOF"
     H_LG=113; H_LG_DOF="5 MDOF"
     H_XL=246; H_XL_DOF="50 MDOF"
     ;;
   2)
-    HMIN=2; HMAX=42;
-    # HSEQ="2 3 5 7 8 11";
-    # HSEQ=$HSEQ" 15 19 26 33 42 57 71 90 121 157";
-    # HSEQ=$HSEQ" 17 22 29 38 48 63 82 103 135";
+    # HMIN=3; HMAX=43;
+    HSEQ="3 5 7 8 11";
+    HSEQ=$HSEQ" 15 19 26 33 42 57 71 90 121 157";
+    HSEQ=$HSEQ" 17 22 29 38 48 63 82 103 135";
+    # HSEQ=$HSEQ" 6 9 10 13 17";
     # HSEQ=$HSEQ" 195 265 338";
     H_MD=33; H_MD_DOF="1 MDOF"
     H_LG=71; H_LG_DOF="10 MDOF"
     H_XL=157; H_XL_DOF="100 MDOF"
     ;;
   3)
-    HMIN=1; HMAX=28;
-    # HSEQ="1 2 3 4 6   8 10 13 17 23 28 39 48 61 80 100" # 138 174 220"
-    # HSEQ=$HSEQ" 133 175 222";
+    # HMIN=1; HMAX=29;
+    HSEQ="1 2 3 4 6 8 10 13 17 23 28 39 48 61 80 100" # 138 174 220"
+    HSEQ=$HSEQ" 5 7 9 11 12 15 19 25 31 43 55";
     H_MD=23; H_MD_DOF="1 MDOF"
     H_LG=48; H_LG_DOF="10 MDOF"
     H_XL=100; H_XL_DOF="100 MDOF"
@@ -148,7 +150,8 @@ fi
       $CSVBASIC`
     echo "Running medium profile tests ("$SIZE_MIN"-"$SIZE_MAX") DOF..."
     C=$CPUCOUNT
-    for H in $(seq $HMIN $HMAX ); do
+    # for H in $(seq $HMIN $HMAX ); do
+    for H in $HSEQ; do
       MESHNAME="uhxt"$H"p"$P"n"
       MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
       if [ -f $MESH".msh" ]; then
@@ -161,7 +164,7 @@ fi
           ITERS=`printf '%f*%f*1000000/%f\n' $TARGET_TEST_S $MAX_MDOFS $NDOF | bc`
           if [ "$ITERS" -lt "$ITERS_MIN" ]; then ITERS=$ITERS_MIN; fi
           if [ "$ITERS" -gt "$NDOF90" ]; then ITERS=$NDOF90; fi
-          for NC in $(seq 2 $NX_MAX ); do
+          for NC in $(seq 1 $NX_MAX ); do
             N=$(( $NC * $CPUCOUNT ))
             MESHNAME="uhxt"$H"p"$P"n"$N
             MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
