@@ -129,10 +129,10 @@ fi
     MAX_SIZE=${SIZE_PERF_MAX%% *}
     echo "Maximum basic performance: "$MAX_MDOFS}" MDOF/s"\
     at $MAX_SIZE" DOF, parts = cores = "$CPUCOUNT"."
-    echo "Running large partitioning tests: "$H_LG_DOF" DOF,"\
+    echo "Running large partitioning tests: "$H_LG_DOF","\
       $CPUCOUNT"-"$PART_MAX" parts..."
     C=$CPUCOUNT
-    H=$H_LG;
+    H=$H_LG
     #for H in $HSEQ; do
       MESHNAME="uhxt"$H"p"$P"n"
       MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
@@ -155,6 +155,7 @@ fi
             MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
             "$PERFDIR/mesh-part.sh" $H $P $N $C "$PHYS" "$MESHDIR"
             TESTS_DONE=`grep -c ",$NNODE,$NDOF,$N," $CSVFILE`
+            echo $TESTS_DONE
             if [ $TESTS_DONE -lt $REPEAT_TEST_N ]; then
               echo Warming up...
                 $EXEFMR -v1 -c$C -i$ITERS_MIN -r$RTOL -p $MESH > /dev/null
