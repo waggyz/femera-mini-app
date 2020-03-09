@@ -97,7 +97,7 @@ for P in $PLIST; do
     ;;
   2)
     # HMIN=3; HMAX=43;
-    HSEQ="3 5 7 8 11";
+    HSEQ="2 3 5 7 8 11";
     HSEQ=$HSEQ" 15 19 26 33 42 57 71 90 121 157";
     HSEQ=$HSEQ" 17 22 29 38 48 63 82 103 135";
     # HSEQ=$HSEQ" 6 9 10 13 17";
@@ -151,7 +151,7 @@ fi
     if [ $SIZE_MAX -gt $(( 100 * $SIZE_MIN )) ]; then
       SIZE_MAX=$(( 100 * $SIZE_MIN ))
     fi
-    echo "Running medium profile tests: "$SIZE_MIN"-"$SIZE_MAX" DOF, "\
+    echo "Running medium profile tests: "$SIZE_MIN"-"$SIZE_MAX" DOF,"\
       $CPUCOUNT"-"$(( $CPUCOUNT * $NX_MAX ))" parts..."
     C=$CPUCOUNT
     # for H in $(seq $HMIN $HMAX ); do
