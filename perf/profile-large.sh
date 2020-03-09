@@ -127,7 +127,7 @@ fi
       "$CSVBASIC"`
     MAX_MDOFS=${SIZE_PERF_MAX##* }
     MAX_SIZE=${SIZE_PERF_MAX%% *}
-    echo "Maximum basic performance: "$MAX_MDOFS}" MDOF/s"\
+    echo "Maximum basic performance: "$MAX_MDOFS" MDOF/s"\
     at $MAX_SIZE" DOF, parts = cores = "$CPUCOUNT"."
     echo "Running large partitioning tests: "$H_LG_DOF","\
       $CPUCOUNT"-"$PART_MAX" parts..."
@@ -140,10 +140,10 @@ fi
       if [ -f $MESH".msh" ]; then
         NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
         NDOF=$(( $NNODE * 3 ))
-        TEST_SIZE=`awk -F, -v sz=$NDOF -v perf=$MAX_MDOFS \
-          '($3==sz)&&($13>(0.9*perf*1e6)){print $3; exit}'\
-          $CSVBASIC`
-        if [ "$TEST_SIZE" == "$NDOF" ];then
+        #TEST_SIZE=`awk -F, -v sz=$NDOF \
+        #  '($3==sz){print $3; exit}'\
+        #  $CSVBASIC`
+        #if [ "$TEST_SIZE" == "$NDOF" ];then
           echo $MESHNAME has $NDOF DOF.
           NDOF90=$(( $NDOF * 9 / 10 ))
           ITERS=`printf '%f*%f*1000000/%f\n' $TARGET_TEST_S $MAX_MDOFS $NDOF | bc`
@@ -166,7 +166,7 @@ fi
               done
             fi
           done
-        fi
+        #fi
       fi
     #done
     echo Finding maximum medium model partitioning...
