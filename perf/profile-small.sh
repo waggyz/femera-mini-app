@@ -105,7 +105,7 @@ for P in $PLIST; do
     fi
   fi
   if [ -f "$CSVFILE" ]; then
-    echo "Femera Performance Profile" > "$PROFILE"
+    echo "Femera Performance Profile" >> "$PROFILE"
     #
     MEM_GB="`free -g  | grep Mem | awk '{print $2}'`"
     printf "     %9i : GB memory\n" $MEM_GB >> "$PROFILE"

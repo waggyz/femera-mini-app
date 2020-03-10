@@ -70,7 +70,7 @@ for P in $PLIST; do
   CSVPROFILE=$PERFDIR/"profile-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
   #
   if [ ! -f "$CSVFILE" ]; then
-    head -n1 "$CSVBASIC" > "$CSVFILE"
+    head -n1 "$CSVBASIC" >> "$CSVFILE"
   fi
   # if [ -f $PROFILE ]; then
   #   NODE_MAX=`grep -m1 -i nodes $PROFILE | awk '{print $1}'`

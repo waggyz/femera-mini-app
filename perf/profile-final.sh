@@ -117,7 +117,7 @@ for P in $PLIST; do
   #
   if [ ! -f "$CSVFILE" ]; then
     if [ -f "$CSVBASIC" ]; then
-      head -n1 "$CSVBASIC" > "$CSVFILE"
+      head -n1 "$CSVBASIC" >> "$CSVFILE"
     else
       # Get a rough idea of DOF/sec to estimate test time
       C=$CPUCOUNT
@@ -147,8 +147,9 @@ for P in $PLIST; do
         NDOF90=$(( $NDOF * 9 / 10 ))
         echo $MESHNAME has $NDOF DOF.
         N=$(( $MINPART + $(( $NDOF / $DOF_PER_PART )) ))
-        N=$(( $(( $N / $C )) *$C ))
-        if [ $N -lt $C ]; then N=$CPUCOUNT; fi
+        N=$(( $(( $N / $C + $(( $C / 2 )) )) * $C ))
+        #NOTE Round up to nearest multiple of C
+        if [ $N -lt $MINPART ]; then N=$MINPART; fi
         MESHNAME="uhxt"$H"p"$P"n"$N
         MESH=$MESHDIR"/uhNDOFxt"$H"p"$P"/"$MESHNAME
         if [ $NDOF -lt $UDOF_MAX ]; then
