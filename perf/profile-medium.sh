@@ -21,7 +21,7 @@ C=$CPUCOUNT; N=$C; RTOL=1e-80;
 TARGET_TEST_S=30;# Try for S sec/run
 REPEAT_TEST_N=10;# Repeat each test N times
 ITERS_MIN=100;
-NX_MAX=16
+NX_MAX=24
 PART_MAX=$(( $CPUCOUNT * $NX_MAX ))
 #
 if [ -d "/hpnobackup1/dwagner5/femera-test/cube" ]; then
