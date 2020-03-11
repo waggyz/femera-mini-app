@@ -91,7 +91,7 @@ for P in $PLIST; do
     H_MD=52; H_MD_DOF="500 kDOF"
     H_LG=113; H_LG_DOF="5 MDOF"
     H_XL=246; H_XL_DOF="50 MDOF"
-    H_TEST=183; TEST_DOF="20 MDOF" NX_MIN=4; NX_MAX=32;
+    H_TEST=183; TEST_DOF="20 MDOF" NX_MIN=4; NX_MAX=48;
     ;;
   2)
     H_MD=33; H_MD_DOF="1 MDOF"
