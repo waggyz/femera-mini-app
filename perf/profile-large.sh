@@ -13,6 +13,7 @@ else
   EXEDIR=`pwd`
 fi
 PERFDIR=$EXEDIR/"perf"
+SLICEDIR=$PERFDIR/"../geo"
 #
 GMSH2FMR=$EXEDIR/"gmsh2fmr-"$CPUMODEL"-"$CSTR
 EXEFMR=$EXEDIR/"femerq-"$CPUMODEL"-"$CSTR
@@ -24,7 +25,9 @@ ITERS_MIN=100;
 # NX_MAX=32
 # PART_MAX=$(( $CPUCOUNT * $NX_MAX ))
 #
-if [ -d "/hpnobackup1/dwagner5/femera-test/cube" ]; then
+if [ -d "/hpnobackup1/dwagner5/femera-test/cube-slice" ]; then
+  MESHDIR=/hpnobackup1/dwagner5/femera-test/cube-slice
+elif [ -d "/hpnobackup1/dwagner5/femera-test/cube" ]; then
   MESHDIR=/hpnobackup1/dwagner5/femera-test/cube
 else
   MESHDIR=$EXEDIR/"cube"
@@ -56,6 +59,20 @@ export OMP_PLACES=cores
 export OMP_PROC_BIND=spread
 export OMP_NUM_THREADS=$CPUCOUNT
 #
+# This is for 50 MDOF
+case $CPUCOUNT in
+  2) SLICE_CSV=$SLICEDIR/"slice-8-504-9600.csv"; ;;
+  4) SLICE_CSV=$SLICEDIR/"slice-8-504-9600.csv"; ;;
+  6) SLICE_CSV=$SLICEDIR/"slice-6-504-9600.csv"; ;;
+  8) SLICE_CSV=$SLICEDIR/"slice-8-504-9600.csv"; ;;
+  12) SLICE_CSV=$SLICEDIR/"slice-12-504-9600.csv"; ;;
+  16) SLICE_CSV=$SLICEDIR/"slice-16-512-9600.csv"; ;;
+  24) SLICE_CSV=$SLICEDIR/"slice-24-504-9600.csv"; ;;
+  32) SLICE_CSV=$SLICEDIR/"slice-32-512-9600.csv"; ;;
+  40) SLICE_CSV=$SLICEDIR/"slice-40-560-9600.csv"; ;;
+  56) SLICE_CSV=$SLICEDIR/"slice-56-504-8400.csv"; ;;
+  *) SLICE_CSV=$SLICEDIR/"slice-16-512-9600.csv"; ;;
+esac
 for P in $PLIST; do
   case $P in
   1) DOF_PER_ELEM=" 1 / 2 "; BYTE_PER_DOF=270; PSTR=tet4;  ;;
@@ -85,25 +102,29 @@ for P in $PLIST; do
   MDOF_MAX=$(( $UDOF_MAX / 1000000 ))
   echo Largest Test Model: $ELEM_MAX $PSTR, $NODE_MAX Nodes, $MDOF_MAX MDOF
   #
+  # Target 5,000 to 100,000 DOF/part (maybe smaller for older archs)
   case $P in
   1)
     # too big to part in 90 GB:  421 531 669 / 250000000 500000000 1000000000
     H_MD=52; H_MD_DOF="500 kDOF"
     H_LG=113; H_LG_DOF="5 MDOF"
     H_XL=246; H_XL_DOF="50 MDOF"
-    H_TEST=183; TEST_DOF="20 MDOF"; NX_MIN=4; NX_MAX=48;
+    # H_TEST=183; TEST_DOF="20 MDOF"; NX_MIN=4; NX_MAX=48;
+    H_TEST=246; TEST_DOF="50 MDOF";# 500-10,000 parts
     ;;
   2)
     H_MD=33; H_MD_DOF="1 MDOF"
     H_LG=71; H_LG_DOF="10 MDOF"
     H_XL=157; H_XL_DOF="100 MDOF"
-    H_TEST=90; TEST_DOF="20 MDOF"; NX_MIN=4; NX_MAX=48;
+    # H_TEST=90; TEST_DOF="20 MDOF"; NX_MIN=4; NX_MAX=50;
+    H_TEST=121; TEST_DOF="50 MDOF";# 500-10,000 parts
     ;;
   3)
     H_MD=23; H_MD_DOF="1 MDOF"
     H_LG=48; H_LG_DOF="10 MDOF"
     H_XL=100; H_XL_DOF="100 MDOF"
-    H_TEST=61; TEST_DOF="20 MDOF"; NX_MIN=4; NX_MAX=48;
+    # H_TEST=61; TEST_DOF="20 MDOF"; NX_MIN=4; NX_MAX=50;
+    H_TEST=80; TEST_DOF="50 MDOF";# 500-10,000 parts
     ;;
   esac
   PART_MIN=$(( $CPUCOUNT * $NX_MIN ))
@@ -151,11 +172,13 @@ fi
         ITERS=`printf '%f*%f*1000000/%f\n' $TARGET_TEST_S $MAX_MDOFS $NDOF | bc`
         if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
         if [ $ITERS -gt $NDOF90 ]; then ITERS=$NDOF90; fi
-        for NC in $(seq $NX_MIN $NX_MAX ); do
-          N=$(( $NC * $CPUCOUNT ))
+        #for NC in $(seq $NX_MIN $NX_MAX ); do
+        #  N=$(( $NC * $CPUCOUNT ))
+        while IFS="," read -r N SX SY SZ REMAINDER; do
           MESHNAME="uhxt"$H"p"$P"n"$N
           MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
-          "$PERFDIR/mesh-part.sh" $H $P $N $C "$PHYS" "$MESHDIR"
+          # "$PERFDIR/mesh-part.sh" $H $P $N $C "$PHYS" "$MESHDIR"
+          $PERFDIR/"mesh-part.sh" $H $P $SX $SY $SZ $PHYS $MESHDIR
           TESTS_DONE=`grep -c ",$NNODE,$NDOF,$N," $CSVFILE`
           if [ $TESTS_DONE -lt $REPEAT_TEST_N ]; then
             echo Warming up...
@@ -166,7 +189,7 @@ fi
               $EXEFMR -v1 -c$C -i$ITERS -r$RTOL -p $MESH >> $CSVFILE
             done
           fi
-        done
+        done < "$SLICE_CSV"
       fi
     #done
     echo Finding maximum large model partitioning...
