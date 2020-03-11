@@ -43,7 +43,7 @@ if [ -n "$SX" ]; then
   NN=""
   SLICEARG="-xS"$SX" -yS"$SY" -zS"$SZ
 else
-  if [ $N -lt 1000 ]; then
+  if [ $N -lt 2000 ]; then
     PARTSTR="METIS"
     if [ $N -gt $C ]; then
       N=$(( $N / $C * $C ))
