@@ -179,7 +179,7 @@ fi
           MESHNAME="uhxt"$H"p"$P"n"$N
           MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
           # "$PERFDIR/mesh-part.sh" $H $P $N $C "$PHYS" "$MESHDIR"
-          $PERFDIR/"mesh-part.sh" $H $P $SX $SY $SZ $PHYS $MESHDIR
+          "$PERFDIR/mesh-part.sh" $H $P $SX $SY $SZ "$PHYS" "$MESHDIR"
           TESTS_DONE=`grep -c ",$NNODE,$NDOF,$N," $CSVFILE`
           if [ $TESTS_DONE -lt $REPEAT_TEST_N ]; then
             echo Warming up...

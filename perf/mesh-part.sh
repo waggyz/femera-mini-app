@@ -62,7 +62,7 @@ else
   fi
 fi
 if [ ! -f "$DIR""/uhxt"$H"p"$P"n"$N".msh" ]; then
-  if [ "$PARTSTR"=="METIS" ]; then
+  if [ "$PARTSTR" = "METIS" ]; then
     echo "Partitioning to uhxt"$H"p"$P"n"$N".msh ("$PARTSTR")..." "$LOGFILE"
     gmsh -v $VERB -nt $CPUCOUNT -part $N \
       -format msh2 -o "$DIR""/uhxt"$H"p"$P"n"$N".msh" \
