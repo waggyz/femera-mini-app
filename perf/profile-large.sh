@@ -127,8 +127,8 @@ for P in $PLIST; do
     H_TEST=80; TEST_DOF="50 MDOF";# 500-10,000 parts
     ;;
   esac
-  PART_MIN=$(( $CPUCOUNT * $NX_MIN ))
-  PART_MAX=$(( $CPUCOUNT * $NX_MAX ))
+#  PART_MIN=$(( $CPUCOUNT * $NX_MIN ))
+#  PART_MAX=$(( $CPUCOUNT * $NX_MAX ))
 #  if [ -f "$CSVBASIC" ]; then
 if [ 1 -eq 0 ];then
     INIT_MUDOF=`head -n1 "$CSVFILE" | awk -F, '{ print int($3/1e6) }'`
@@ -140,8 +140,8 @@ if [ 1 -eq 0 ];then
     echo >> "$PROFILE"
     echo "     Medium Performance Profile Test Parameters" >> "$PROFILE"
     echo "  ------------------------------------------------" >> "$PROFILE"
-    printf "%6i     : Medium min partitions\n" $PART_MIN >> "$PROFILE"
-    printf "%6i     : Medium max partitions\n" $PART_MAX >> "$PROFILE"
+#    printf "%6i     : Medium min partitions\n" $PART_MIN >> "$PROFILE"
+#    printf "%6i     : Medium max partitions\n" $PART_MAX >> "$PROFILE"
     printf "%6i     : Medium test repeats\n" $REPEAT_TEST_N >> "$PROFILE"
     printf "  %6.1f   : Medium test solve time [sec]\n" $TARGET_TEST_S>>"$PROFILE"
     printf "%6i     : Medium minimum iterations\n" $ITERS_MIN >> "$PROFILE"
@@ -156,8 +156,9 @@ fi
     MAX_SIZE=${SIZE_PERF_MAX%% *}
     echo "Maximum basic performance: "$MAX_MDOFS" MDOF/s"\
     at $MAX_SIZE" DOF, parts = cores = "$CPUCOUNT"."
-    echo "Running large partitioning tests: "$TEST_DOF","\
-      $PART_MIN"-"$PART_MAX" parts..."
+    echo "Running large partitioning tests..."
+#    echo "Running large partitioning tests: "$TEST_DOF","\
+#      $PART_MIN"-"$PART_MAX" parts..."
     C=$CPUCOUNT
     H=$H_TEST
     #for H in $HSEQ; do
