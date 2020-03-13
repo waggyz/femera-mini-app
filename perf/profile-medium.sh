@@ -21,8 +21,8 @@ C=$CPUCOUNT; N=$C; RTOL=1e-80;
 TARGET_TEST_S=30;# Try for S sec/run
 REPEAT_TEST_N=10;# Repeat each test N times
 ITERS_MIN=100;
-NX_MAX=24
-PART_MAX=$(( $CPUCOUNT * $NX_MAX ))
+PART_MAX=1000
+NX_MAX=$(( PART_MAX / $CPUCOUNT ))
 #
 if [ -d "/hpnobackup1/dwagner5/femera-test/cube" ]; then
   MESHDIR=/hpnobackup1/dwagner5/femera-test/cube
@@ -88,7 +88,8 @@ for P in $PLIST; do
   case $P in
   1)
     # HMIN=5; HMAX=95;
-    HSEQ="5 6 10 17 23 30 38 52 65 84 113 141 183 246" # 310"
+    HSEQ="5 6 10 17 23" # 310"
+    HSEQ=$HSEQ" 30 38 52 65 84 113 141 183 246"
     HSEQ=$HSEQ" 8 12 15 20 26 34 45 60 75 95 105";
     # too big to part in 90 GB:  421 531 669 / 250000000 500000000 1000000000
     H_MD=52; H_MD_DOF="500 kDOF"
@@ -108,7 +109,8 @@ for P in $PLIST; do
     ;;
   3)
     # HMIN=1; HMAX=29;
-    HSEQ="1 2 3 4 6 8 10 13 17 23 28 39 48 61 80 100" # 138 174 220"
+    HSEQ="1 2 3 4 6 8"
+    HSEQ=$HSEQ" 10 13 17 23 28 39 48 61 80 100" # 138 174 220"
     HSEQ=$HSEQ" 5 7 9 11 12 15 19 25 31 43 55";
     H_MD=23; H_MD_DOF="1 MDOF"
     H_LG=48; H_LG_DOF="10 MDOF"

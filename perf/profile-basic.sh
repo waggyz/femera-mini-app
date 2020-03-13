@@ -95,7 +95,7 @@ for P in $PLIST; do
     H_XL=157; H_XL_DOF="100 MDOF"
     ;;
   3)
-    HSEQ="1 2 3 4 6   8 10 13 17 23 28 39 48 61 80 100" # 138 174 220"
+    HSEQ="1 2 3 4 6 8 10 13 17 23 28 39 48 61 80 100" # 138 174 220"
     HSEQ=$HSEQ" 133 175";
     #HSEQ=$HSEQ" 222";# 222:1GDOF too big to part in 90 GB
     H_MD=23; H_MD_DOF="1 MDOF"

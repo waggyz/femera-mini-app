@@ -5,6 +5,7 @@
 *.log
 *.err
 *.csv
+!perf/slice-*.csv
 !perf/part-slice.csv
 
 # Prerequisites
