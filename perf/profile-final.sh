@@ -7,7 +7,11 @@ if [ -n "$4" ]; then MEM=$(( $4 * 1000000000 ));
 if [ -n "$5" ]; then CPUMODEL=$5; else CPUMODEL=`./cpumodel.sh`; fi
 if [ -n "$6" ]; then CPUCOUNT=$6; else CPUCOUNT=`./cpucount.sh`; fi
 #
-EXEDIR="/u/dwagner5/femera-mini-develop"
+if [ -d "/u/dwagner5/femera-mini-develop" ]; then
+  EXEDIR="/u/dwagner5/femera-mini-develop"
+else
+  EXEDIR=`pwd`
+fi
 PERFDIR=$EXEDIR/"perf"
 #
 GMSH2FMR=$EXEDIR/"gmsh2fmr-"$CPUMODEL"-"$CSTR
@@ -76,6 +80,7 @@ for P in $PLIST; do
     E5-2650) ;;
     E5-2670) MINSIZE_MD=141456; MINPART=64; ELEM_PER_PART=109000; DOF_PER_PART=52525 ;;
     X5675) ;;
+    *) MINSIZE_MD=480000; MINPART=240; ELEM_PER_PART=4584;  DOF_PER_PART=2000; ;;
     esac
     ;;
   2)
@@ -95,6 +100,7 @@ for P in $PLIST; do
     E5-2650) ;;
     E5-2670) MINSIZE_MD=324354; MINPART=160; ELEM_PER_PART=4584;  DOF_PER_PART=18336; ;;
     X5675) ;;
+    *) MINSIZE_MD=480000; MINPART=240; ELEM_PER_PART=4584;  DOF_PER_PART=2000; ;;
     esac
     ;;
   3)
@@ -111,6 +117,7 @@ for P in $PLIST; do
     E5-2650) ;;
     E5-2670) MINSIZE_MD=349863; MINPART=240; ELEM_PER_PART=1850; DOF_PER_PART=25164 ;;
     X5675) ;;
+    *) MINSIZE_MD=480000; MINPART=240; ELEM_PER_PART=4584;  DOF_PER_PART=2000; ;;
     esac
     ;;
   esac
@@ -122,20 +129,20 @@ for P in $PLIST; do
   #
   if [ ! -f "$CSVFILE" ]; then
     if [ -f "$CSVBASIC" ]; then
-      head -n1 "$CSVBASIC" >> "$CSVFILE"
+      head -n1 "$CSVBASIC" > "$CSVFILE"
     else
       # Get a rough idea of DOF/sec to estimate test time
       C=$CPUCOUNT
-      H=$H_LG
+      H=$H_MD
       MESHNAME="uhxt"$H"p"$P"n"$N
       MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
-      echo Estimating performance at $H_LG_DOF...
-      $PERFDIR/mesh-part.sh $H $P $N $C "$PHYS" "$MESHDIR"
+      echo Estimating performance at $H_MD_DOF...
+      "$PERFDIR"/"mesh-part.sh" $H $P $N $C "$PHYS" "$MESHDIR"
       echo Running $ITERS_MIN iterations of $MESHNAME...
-      $EXEFMR -v1 -c$C -i$ITERS_MIN -r$RTOL -p $MESH >> $CSVFILE
+      "$EXEFMR" -v1 -c$C -i$ITERS_MIN -r$RTOL -p "$MESH" > "$CSVFILE"
     fi
   fi
-  if [ -f $CSVFILE ]; then
+  if [ -f "$CSVFILE" ]; then
     INIT_MUDOF=`head -n1 "$CSVFILE" | awk -F, '{ print int($3/1e6) }'`
     INIT_MDOFS=`head -n1 "$CSVFILE" | awk -F, '{ print int(($13+5e5)/1e6) }'`
     INIT_DOFS=`head -n1 "$CSVFILE" | awk -F, '{ print int($13+0.5) }'`
@@ -144,22 +151,32 @@ for P in $PLIST; do
     C=$CPUCOUNT
     for H in $HSEQ; do
       MESHNAME="uhxt"$H"p"$P"n"
-      MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
-        "$PERFDIR"/"mesh-part.sh" $H $P $C $C "$PHYS" "$MESHDIR"
-      if [ -f $MESH".msh" ]; then
-        NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
+      MESH="$MESHDIR"/"uhxt"$H"p"$P"/"$MESHNAME
+      "$PERFDIR"/"mesh-part.sh" $H $P $C $C "$PHYS" "$MESHDIR"
+      if [ -f "$MESH"".msh" ]; then
+        NNODE=`grep -m1 -A1 -i node "$MESH"".msh" | tail -n1`
         NDOF=$(( $NNODE * 3 ))
         NDOF90=$(( $NDOF * 9 / 10 ))
-        echo $MESHNAME has $NDOF DOF.
-        N=$(( $MINPART + $(( $NDOF / $DOF_PER_PART )) ))
-        N=$(( $(( $N / $C + $(( $C / 2 )) )) * $C ))
-        #NOTE Round up to nearest multiple of C
-        if [ $N -lt $MINPART ]; then N=$MINPART; fi
-        MESHNAME="uhxt"$H"p"$P"n"$N
-        MESH=$MESHDIR"/uhNDOFxt"$H"p"$P"/"$MESHNAME
+        if [ $NDOF -gt $MINSIZE_MD ]; then
         if [ $NDOF -lt $UDOF_MAX ]; then
-          "$PERFDIR"/"mesh-part.sh" $H $P $N $C "$PHYS" "$MESHDIR"
-          TESTS_DONE=`grep -c ",$NNODE,$NDOF," $CSVFILE`
+          echo $MESHNAME has $NDOF DOF.
+          N=$(( $MINPART + $(( $NDOF / $DOF_PER_PART )) ))
+          N=$(( $(( $N / $C + $(( $C / 2 )) )) * $C ))
+          #NOTE Round up to nearest multiple of C
+          if [ $N -lt $MINPART ]; then N=$MINPART; fi
+          if [ $C -lt 4 ]; then CC=4; else CC=$C; fi
+          CSVSLICE="$PERFDIR"/"slice-"$CC".csv"
+          if [ -f "$CSVSLICE" ];then
+            SLICESTR=`awk -F, -v N=$N \
+              'BEGIN{OFS=",";} ($1>=N){print$1,$2,$3,$4;exit}' "$CSVSLICE"`
+            #echo $SLICESTR
+            IFS=, read N SX SY SZ <<< "$SLICESTR"
+            #echo Slice $N "(" $SX $SY $SZ ")"
+          fi
+          MESHNAME="uhxt"$H"p"$P"n"$N
+          MESH="$MESHDIR"/"uhxt"$H"p"$P"/"$MESHNAME
+           "$PERFDIR"/"mesh-part.sh" $H $P $SX $SY $SZ "$PHYS" "$MESHDIR"
+          TESTS_DONE=`grep -c ",$NNODE,$NDOF," "$CSVFILE"`
           if [ $TESTS_DONE -lt $REPEAT_TEST_N ]; then
             ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
             if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
@@ -173,12 +190,13 @@ for P in $PLIST; do
             done
           fi
         fi
+        fi
       fi
     done
     SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
       '($9==c)&&($13>max)&&($4==$9){max=$13;perf=int(($13+5e5)/1e6);size=$3}\
       END{print int((size+50)/100)*100,int(perf+0.5)}'\
-      $CSVFILE`
+      "$CSVFILE"`
     MAX_MDOFS=${SIZE_PERF_MAX##* }
     MAX_SIZE=${SIZE_PERF_MAX%% *}
     echo "Maximum final performance: "$MAX_MDOFS" MDOF/s"\
@@ -187,11 +205,11 @@ for P in $PLIST; do
     NODE_ELEM_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
       '($9==c)&&($13>max)&&($4==$9){max=$13;nelem=$1;nnode=$2}\
       END{print nelem,nnode}'\
-      $CSVFILE`
+      "$CSVFILE"`
     MAX_ELEMS=${NODE_ELEM_MAX%% *}
     MAX_NODES=${NODE_ELEM_MAX##* }
     if [ ! -z "$HAS_GNUPLOT" ]; then
-  #    echo "Plotting final profile data: "$CSVFILE"..." >> $LOGFILE
+    #    echo "Plotting final profile data: "$CSVFILE"..." >> $LOGFILE
       gnuplot -e  "\
       set terminal dumb noenhanced size 79,25;\
       set datafile separator ',';\
@@ -207,18 +225,18 @@ for P in $PLIST; do
       using 3:(\$4 != \$9 ? 1/0:\$13/1e6)\
       with points pointtype 0\
       title '"$CPUCOUNT" Partitions';\
-      " # \
-      # | tee -a $PROFILE ;#| grep --no-group-separator -C25 --color=always '\*'
+      " \
+       | tee -a "$PROFILE" ;#| grep --no-group-separator -C25 --color=always '\*'
     else
-      echo >> $PROFILE
+      echo >> "$PROFILE"
     fi
-  #  echo "Writing final profile results: "$PROFILE"..." >> $LOGFILE
-    echo "        Final Performance Profile Test Results" >> $PROFILE
-    echo "  --------------------------------------------------" >> $PROFILE
-    printf "        %6.1f : Final performance maximum [MDOF/s]\n" $MAX_MDOFS >> $PROFILE
-    printf "%12i   : Final system size [DOF]\n" $MAX_SIZE >> $PROFILE
-    printf "%12i   : Final model nodes\n" $MAX_NODES >> $PROFILE
-    printf "%12i   : Final "$PSTR" Elements\n" $MAX_ELEMS >> $PROFILE
+    #  echo "Writing final profile results: "$PROFILE"..." >> $LOGFILE
+    echo "        Final Performance Profile Test Results" >> "$PROFILE"
+    echo "  --------------------------------------------------" >> "$PROFILE"
+    printf "        %6.1f : Final performance maximum [MDOF/s]\n" $MAX_MDOFS >> "$PROFILE"
+    printf "%12i   : Final system size [DOF]\n" $MAX_SIZE >> "$PROFILE"
+    printf "%12i   : Final model nodes\n" $MAX_NODES >> "$PROFILE"
+    printf "%12i   : Final "$PSTR" Elements\n" $MAX_ELEMS >> "$PROFILE"
     #
   fi
 done;# P loop
