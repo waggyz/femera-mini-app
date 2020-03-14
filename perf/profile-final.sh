@@ -111,7 +111,7 @@ for P in $PLIST; do
   #
   if [ $CPUCOUNT -lt 4 ]; then NC=4; else NC=$CPUCOUNT; fi
   CSVSLICE="$PERFDIR"/"slice-"$NC".csv"
-  CSVPART=$PERFDIR/"profile-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
+  CSVPART=$PERFDIR/"profile-part-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
   #
   if [ -f "$CSVPART" ]; then
     # PARTLINE=`sed $P"q;d" "$CSVPART"`
