@@ -145,18 +145,20 @@ for P in $PLIST; do
     PERF_TOP=$(( $PERF_MD * 95 / 100 ))
     BEST_PERF=0
     for N in $(seq $C $C 2000 ); do
-      DOFPP=$(( $SIZE_LG / $(( $PART_LG - $N )) ))
-      PERF_AVG=`awk -F, -v perftop=$PERF_TOP -v ptmd=$N -v dofpp=$DOFPP -v c=$C \
-        'BEGIN{OFS=",";n=0;perf=0;} \
-        ( ($13>perftop) && ($4==(ptmd+int($3/dofpp/c)*c)) )\
-        {n=n+1; perf=perf+$13;} \
-        END{print int((n==0)?0:perf/n);}' "$CSVMEDIUM"`
-      #
-      if [ -n "$PERF_AVG" ]; then
-      if [ $PERF_AVG -gt $BEST_PERF ]; then
-        BEST_PERF=$PERF_AVG
-        MEDIUMPART=$N
-      fi
+      if [ $PART_LG -gt $N ]; then
+        DOFPP=$(( $SIZE_LG / $(( $PART_LG - $N )) ))
+        PERF_AVG=`awk -F, -v perftop=$PERF_TOP -v ptmd=$N -v dofpp=$DOFPP -v c=$C \
+          'BEGIN{OFS=",";n=0;perf=0;} \
+          ( ($13>perftop) && ($4==(ptmd+int($3/dofpp/c)*c)) )\
+          {n=n+1; perf=perf+$13;} \
+          END{print int((n==0)?0:perf/n);}' "$CSVMEDIUM"`
+        #
+        if [ -n "$PERF_AVG" ]; then
+        if [ $PERF_AVG -gt $BEST_PERF ]; then
+          BEST_PERF=$PERF_AVG
+          MEDIUMPART=$N
+        fi
+        fi
       fi
     done
     N=$(( $PART_LG - $MEDIUMPART ))
