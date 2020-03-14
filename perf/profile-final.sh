@@ -146,7 +146,7 @@ for P in $PLIST; do
       DOFPP=$(( $SIZE_LG / $(( $PART_LG - $N )) ))
       PERF_AVG=`awk -F, -v perftop=$PERF_TOP -v ptmd=$N -v dofpp=$DOFPP -v c=$C \
         'BEGIN{OFS=",";n=0;perf=0;} \
-        ( ($13>perftop) && ($4==(ptmd+floor($3/dofpp/c)*c)) )\
+        ( ($13>perftop) && ($4==(ptmd+int($3/dofpp/c)*c)) )\
         {n=n+1; perf=perf+$13;} \
         END{print int(perf/n);}' "$CSVMEDIUM"`
       #
