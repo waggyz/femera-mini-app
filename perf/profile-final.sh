@@ -107,7 +107,7 @@ for P in $PLIST; do
   CSVBASIC=$PERFDIR/"profile-basic-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
   CSVMEDIUM=$PERFDIR/"profile-medium-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
   CSVLARGE=$PERFDIR/"profile-large-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
-  CSVPROFILE=$PERFDIR/"profile-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
+  # CSVPROFILE=$PERFDIR/"profile-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
   #
   if [ $CPUCOUNT -lt 4 ]; then NC=4; else NC=$CPUCOUNT; fi
   CSVSLICE="$PERFDIR"/"slice-"$NC".csv"
@@ -119,7 +119,7 @@ for P in $PLIST; do
       'BEGIN{OFS=",";} ($1==N){print $2,$3,$4,$5,$6;exit}' "$CSVPART"`
     IFS=, read ELEM_PER_PART NODE_PER_PART DOF_PER_PART MEDIUMPART C <<< "$LINE"
   fi
-  if [ -n "$DOF_PER_PART" ]; then
+  if [ -e "$DOF_PER_PART" ]; then
   if [ -f "$CSVLARGE" ]; then
   if [ -f "$CSVMEDIUM" ]; then
     # Compute partitioning values
