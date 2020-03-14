@@ -131,6 +131,7 @@ for P in $PLIST; do
       ($13>perf){elem=$1;node=$2;size=$3; part=$4; perf=$13;} \
        END{print elem,node,size,part,int(perf)}' "$CSVLARGE"`
     IFS=, read ELEM_LG NODE_LG SIZE_LG PART_LG PERF_LG <<< "$LINE"
+    echo Large model peformance: $PERF_LG at $SIZE_LG dof, $PART_LG parts.
     #
     # Find best medium partition performance
     LINE=`awk -F, \
@@ -138,6 +139,7 @@ for P in $PLIST; do
       ($13>perf){elem=$1;node=$2;size=$3; part=$4; perf=$13;} \
        END{print elem,node,size,part,int(perf)}' "$CSVMEDIUM"`
     IFS=, read ELEM_MD NODE_MD SIZE_MD PART_MD PERF_MD <<< "$LINE"
+    echo Medium model peformance: $PERF_MD at $SIZE_MD dof, $PART_MD parts.
     #
     # Test all MED_PART
     PERF_TOP=$(( $PERF_MD * 95 / 100 ))
