@@ -129,14 +129,14 @@ for P in $PLIST; do
     LINE=`awk -F, \
       'BEGIN{OFS=",";perf=0;} \
       ($13>perf){elem=$1;node=$2;size=$3; part=$4; perf=$13;} \
-       END{print elem,node,size,part,perf}' "$CSVLARGE"`
+       END{print elem,node,size,part,int(perf)}' "$CSVLARGE"`
     IFS=, read ELEM_LG NODE_LG SIZE_LG PART_LG PERF_LG <<< "$LINE"
     #
     # Find best medium partition performance
     LINE=`awk -F, \
       'BEGIN{OFS=",";perf=0;} \
       ($13>perf){elem=$1;node=$2;size=$3; part=$4; perf=$13;} \
-       END{print elem,node,size,part,perf}' "$CSVMEDIUM"`
+       END{print elem,node,size,part,int(perf)}' "$CSVMEDIUM"`
     IFS=, read ELEM_MD NODE_MD SIZE_MD PART_MD PERF_MD <<< "$LINE"
     #
     # Test all MED_PART
@@ -148,7 +148,7 @@ for P in $PLIST; do
         'BEGIN{OFS=",";n=0;perf=0;} \
         ( ($13>perftop) && ($4==(ptmd+floor($3/dofpp/c)*c)) )\
         {n=n+1; perf=perf+$13;} \
-        END{print perf/n;}' "$CSVMEDIUM"`
+        END{print int(perf/n);}' "$CSVMEDIUM"`
       #
       if [ -n "$PERF_AVG" ]; then
       if [ $PERF_AVG -gt $BEST_PERF ]; then
