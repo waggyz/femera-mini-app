@@ -119,7 +119,7 @@ for P in $PLIST; do
       'BEGIN{OFS=",";} ($1==N){print $2,$3,$4,$5,$6;exit}' "$CSVPART"`
     IFS=, read ELEM_PER_PART NODE_PER_PART DOF_PER_PART MEDIUMPART C <<< "$LINE"
   fi
-  if [ -e "$DOF_PER_PART" ]; then
+  if [ ! -n "$DOF_PER_PART" ]; then
   if [ -f "$CSVLARGE" ]; then
   if [ -f "$CSVMEDIUM" ]; then
     # Compute partitioning values
