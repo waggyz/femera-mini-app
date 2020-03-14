@@ -163,10 +163,10 @@ for P in $PLIST; do
     DOF_PER_PART=$(( $SIZE_LG / $N ))
     echo $P","$ELEM_PER_PART","$NODE_PER_PART","$DOF_PER_PART","$MEDIUMPART","$C \
       >> "$CSVPART"
-    echo "Partitions: "$MEDIUMPART" + NDOF / "$DOF_PER_PART
   fi
   fi
   fi
+  echo "Partitions: "$MEDIUMPART" + NDOF / "$DOF_PER_PART
   if [ ! -f "$CSVFILE" ]; then
     if [ -f "$CSVBASIC" ]; then
       head -n1 "$CSVBASIC" > "$CSVFILE"
