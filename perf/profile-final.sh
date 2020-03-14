@@ -148,7 +148,7 @@ for P in $PLIST; do
         'BEGIN{OFS=",";n=0;perf=0;} \
         ( ($13>perftop) && ($4==(ptmd+int($3/dofpp/c)*c)) )\
         {n=n+1; perf=perf+$13;} \
-        END{print int(perf/n);}' "$CSVMEDIUM"`
+        END{print int((n==0)?0:perf/n);}' "$CSVMEDIUM"`
       #
       if [ -n "$PERF_AVG" ]; then
       if [ $PERF_AVG -gt $BEST_PERF ]; then
