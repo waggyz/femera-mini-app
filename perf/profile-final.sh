@@ -143,10 +143,10 @@ for P in $PLIST; do
     PERF_TOP=$(( $PERF_MD * 95 / 100 ))
     BEST_PERF=0
     for N in $(seq $C $C 2000 ); do
-      PERF_AVG=`awk -F, -v perftop=$PERF_TOP \
-        -v szlg=$SIZE_LG -v ptlg=$PERF_TOP -v ptmd=$N \
+      DOFPP=$(( $SIZE_LG / $(( $PART_LG - $N )) ))
+      PERF_AVG=`awk -F, -v perftop=$PERF_TOP -v ptmd=$N -v dofpp=$DOFPP -v c=$C \
         'BEGIN{OFS=",";n=0;perf=0;} \
-        (($13>perftop) && ($4=ptmd+floor($3/(szlg/(ptlg-ptmd)) /c)*c) )\
+        ( ($13>perftop) && ($4==(ptmd+floor($3/dofpp/c)*c)) )\
         {n=n+1; perf=perf+$13;} \
         END{print perf/n;}' "$CSVMEDIUM"`
       #
@@ -163,6 +163,7 @@ for P in $PLIST; do
     DOF_PER_PART=$(( $SIZE_LG / $N ))
     echo $P","$ELEM_PER_PART","$NODE_PER_PART","$DOF_PER_PART","$MEDIUMPART","$C \
       >> "$CSVPART"
+    echo "Partitions: "$MEDIUMPART" + NDOF / "$DOF_PER_PART
   fi
   fi
   fi
