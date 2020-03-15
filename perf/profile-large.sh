@@ -164,7 +164,7 @@ fi
     #for H in $HSEQ; do
       MESHNAME="uhxt"$H"p"$P"n"
       MESH=$MESHDIR"/uhxt"$H"p"$P"/"$MESHNAME
-      "$PERFDIR/mesh-part.sh" $H $P $C $C "$PHYS" "$MESHDIR"
+      "$PERFDIR/mesh-part.sh" $H $P "0" $C "$PHYS" "$MESHDIR"
       if [ -f $MESH".msh" ]; then
         NNODE=`grep -m1 -A1 -i node $MESH".msh" | tail -n1`
         NDOF=$(( $NNODE * 3 ))

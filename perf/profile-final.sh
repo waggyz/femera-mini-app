@@ -72,7 +72,8 @@ for P in $PLIST; do
     HSEQ="30 38 52 65 84 113 141 183 246 310"
     if [ $MEM -gt 100 ];then
       # too big to part in 90 GB: 250M 500M 1G
-      HSEQ=$HSEQ" 421 531 669"
+      HSEQ=$HSEQ" 421 531"
+      # HSEQ=$HSEQ" 669"; # 1 GDOF too big to mesh in 200 GB
     fi
     H_MD=52; H_MD_DOF="500 kDOF"
     H_LG=113; H_LG_DOF="5 MDOF"
@@ -111,20 +112,21 @@ for P in $PLIST; do
   #
   if [ $CPUCOUNT -lt 4 ]; then NC=4; else NC=$CPUCOUNT; fi
   CSVSLICE="$PERFDIR"/"slice-"$NC".csv"
-  CSVPART=$PERFDIR/"profile-part-"$PSTR"-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
+  CSVPART=$PERFDIR/"profile-part-"$PHYS"-"$CPUMODEL"-"$CSTR".csv"
   #
+  if [ 0 -eq 1 ]; then
   if [ -f "$CSVPART" ]; then
     # PARTLINE=`sed $P"q;d" "$CSVPART"`
     LINE=`awk -F, -v P=$P \
-      'BEGIN{OFS=",";} ($1==N){print $2,$3,$4,$5,$6;exit}' "$CSVPART"`
+      'BEGIN{OFS=",";} ($1==P){print $2,$3,$4,$5,$6;exit}' "$CSVPART"`
     IFS=, read ELEM_PER_PART NODE_PER_PART DOF_PER_PART MEDIUMPART C <<< "$LINE"
   fi
-  if [ ! -n "$DOF_PER_PART" ]; then
+  fi
+  #
   if [ -f "$CSVLARGE" ]; then
   if [ -f "$CSVMEDIUM" ]; then
-    # Compute partitioning values
     C=$CPUCOUNT
-    #
+    # Compute partitioning values
     # Find best large partition performance
     LINE=`awk -F, \
       'BEGIN{OFS=",";perf=0;} \
@@ -147,9 +149,11 @@ for P in $PLIST; do
     for N in $(seq $C $C 2000 ); do
       if [ $PART_LG -gt $N ]; then
         DOFPP=$(( $SIZE_LG / $(( $PART_LG - $N )) ))
-        PERF_AVG=`awk -F, -v perftop=$PERF_TOP -v ptmd=$N -v dofpp=$DOFPP -v c=$C \
+        #FIXME use minsz or not?
+        PERF_AVG=`awk -F, -v c=$C \
+          -v perftop=$PERF_TOP -v ptmd=$N -v dofpp=$DOFPP -v minsz=$SIZE_MD \
           'BEGIN{OFS=",";n=0;perf=0;} \
-          ( ($13>perftop) && ($4==(ptmd+int($3/dofpp/c)*c)) )\
+          ( ($3>=minsz) && ($13>perftop) && ($4==(ptmd+int($3/dofpp/c)*c)) )\
           {n=n+1; perf=perf+$13;} \
           END{print int((n==0)?0:perf/n);}' "$CSVMEDIUM"`
         #
@@ -167,7 +171,6 @@ for P in $PLIST; do
     DOF_PER_PART=$(( $SIZE_LG / $N ))
     echo $P","$ELEM_PER_PART","$NODE_PER_PART","$DOF_PER_PART","$MEDIUMPART","$C \
       >> "$CSVPART"
-  fi
   fi
   fi
   echo "Partitions: "$MEDIUMPART" + NDOF / "$DOF_PER_PART
@@ -210,14 +213,12 @@ for P in $PLIST; do
           if [ -f "$CSVSLICE" ];then
             SLICESTR=`awk -F, -v N=$N \
               'BEGIN{OFS=",";} ($1>=N){print $1,$2,$3,$4;exit}' "$CSVSLICE"`
-            #echo $SLICESTR
             IFS=, read N SX SY SZ <<< "$SLICESTR"
-            #echo Slice $N "(" $SX $SY $SZ ")"
           fi
           MESHNAME="uhxt"$H"p"$P"n"$N
           MESH="$MESHDIR"/"uhxt"$H"p"$P"/"$MESHNAME
            "$PERFDIR"/"mesh-part.sh" $H $P $SX $SY $SZ "$PHYS" "$MESHDIR"
-          TESTS_DONE=`grep -c ",$NNODE,$NDOF," "$CSVFILE"`
+          TESTS_DONE=`grep -c ",$NNODE,$NDOF,$N," "$CSVFILE"`
           if [ $TESTS_DONE -lt $REPEAT_TEST_N ]; then
             ITERS=`printf '%f*%f/%f\n' $TARGET_TEST_S $INIT_DOFS $NDOF | bc`
             if [ $ITERS -lt $ITERS_MIN ]; then ITERS=$ITERS_MIN; fi
@@ -234,7 +235,7 @@ for P in $PLIST; do
       fi
     done
     SIZE_PERF_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
-      '($9==c)&&($13>max)&&($4==$9){max=$13;perf=int(($13+5e5)/1e6);size=$3}\
+      '($9==c)&&($13>max){max=$13;perf=int(($13+5e5)/1e6);size=$3}\
       END{print int((size+50)/100)*100,int(perf+0.5)}'\
       "$CSVFILE"`
     MAX_MDOFS=${SIZE_PERF_MAX##* }
@@ -243,7 +244,7 @@ for P in $PLIST; do
     at $MAX_SIZE" DOF, parts = cores = "$CPUCOUNT"."
     #
     NODE_ELEM_MAX=`awk -F, -v c=$CPUCOUNT -v max=0\
-      '($9==c)&&($13>max)&&($4==$9){max=$13;nelem=$1;nnode=$2}\
+      '($9==c)&&($13>max){max=$13;nelem=$1;nnode=$2}\
       END{print nelem,nnode}'\
       "$CSVFILE"`
     MAX_ELEMS=${NODE_ELEM_MAX%% *}
@@ -262,9 +263,9 @@ for P in $PLIST; do
       set xlabel 'System Size [DOF]';\
       set label at "$MAX_SIZE", "$MAX_MDOFS" \"* Max\";\
       plot '"$CSVFILE"'\
-      using 3:(\$4 != \$9 ? 1/0:\$13/1e6)\
+      using 3:(\$13/1e6)\
       with points pointtype 0\
-      title '"$CPUCOUNT" Partitions';\
+      title 'Partitions: "$MEDIUMPART" + NDOF / "$DOF_PER_PART"';\
       " \
        | tee -a "$PROFILE" ;#| grep --no-group-separator -C25 --color=always '\*'
     else
@@ -279,4 +280,5 @@ for P in $PLIST; do
     printf "%12i   : Final "$PSTR" Elements\n" $MAX_ELEMS >> "$PROFILE"
     #
   fi
+  unset ELEM_PER_PART NODE_PER_PART DOF_PER_PART MEDIUMPART
 done;# P loop
