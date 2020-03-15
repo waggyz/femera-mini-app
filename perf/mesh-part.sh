@@ -37,7 +37,7 @@ if [ ! -f "$DIR""/uhxt"$H"p"$P"n.msh" ]; then
   echo "Meshing uhxt"$H"p"$P"n.msh..." "$LOGFILE"
   gmsh -nt $CPUCOUNT -v $VERB -setnumber p $P -setnumber h $H -setnumber n 1 -3 \
     -format msh2 -o "$DIR""/uhxt"$H"p"$P"n.msh" geo/uhxt-cube.geo -save
-#
+fi
 if [ $N -gt 0 ]; then
   if [ -n "$SX" ]; then
     PARTSTR="slicing "$SX"x"$SY"x"$SZ""
