@@ -172,6 +172,7 @@ for P in $PLIST; do
       IFS=, read ELEM_PER_PART NODE_PER_PART DOF_PER_PART MEDIUMPART C <<< "$LINE"
     fi
   fi
+  echo "("$DOF_PER_PART")("$MEDIUMPART")"
   if [ ! -e "$DOF_PER_PART" ]; then
   if [ ! -e "$MEDIUMPART" ]; then
     echo "Partitions: "$MEDIUMPART" + NDOF / "$DOF_PER_PART
