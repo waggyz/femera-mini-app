@@ -164,7 +164,7 @@ for P in $PLIST; do
       >> "$CSVPART"
   fi
   fi
-  if [ -e "$DOF_PER_PART" ]; then
+  if [ ! -n "$DOF_PER_PART" ]; then
     if [ -f "$CSVPART" ]; then
     echo Reading partitioning parameters...
       LINE=`awk -F, -v P=$P \
@@ -172,9 +172,8 @@ for P in $PLIST; do
       IFS=, read ELEM_PER_PART NODE_PER_PART DOF_PER_PART MEDIUMPART C <<< "$LINE"
     fi
   fi
-  echo "("$DOF_PER_PART")("$MEDIUMPART")"
-  if [ ! -e "$DOF_PER_PART" ]; then
-  if [ ! -e "$MEDIUMPART" ]; then
+  if [ -n "$DOF_PER_PART" ]; then
+  if [ -n "$MEDIUMPART" ]; then
     echo "Partitions: "$MEDIUMPART" + NDOF / "$DOF_PER_PART
     if [ ! -f "$CSVFILE" ]; then
       if [ -f "$CSVBASIC" ]; then
