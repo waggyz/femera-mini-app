@@ -88,8 +88,8 @@ for P in $PLIST; do
   case $P in
   1)
     # HMIN=5; HMAX=95;
-    HSEQ="5 6 10 17 23" # 310"
-    HSEQ=$HSEQ" 30 38 52 65 84 98 113 141 183 246"
+    HSEQ="5 6 10 13 17 23" # 310"
+    HSEQ=$HSEQ" 30 38 43 52 65 84 98 113 141 183 246"
     # HSEQ=$HSEQ" 8 12 15 20 26 34 45 60 75 95 105";
     # too big to part in 90 GB:  421 531 669 / 250000000 500000000 1000000000
     H_MD=52; H_MD_DOF="500 kDOF"
@@ -110,7 +110,7 @@ for P in $PLIST; do
   3)
     # HMIN=1; HMAX=29;
     HSEQ="1 2 3 4 6 8"
-    HSEQ=$HSEQ" 10 13 17 22 27 32 38 47 61 80 100";
+    HSEQ=$HSEQ" 10 13 15 17 22 27 32 38 47 61 80 100";
     # 138 174 220"
     # HSEQ=$HSEQ" 5 7 9 11 12 15 19 25 43 55"; #
     H_MD=22; H_MD_DOF="1 MDOF"

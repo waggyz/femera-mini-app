@@ -77,7 +77,7 @@ for P in $PLIST; do
   #
   case $P in
   1)
-    HSEQ="5 6 10 17 23 30 38 52 65 84"
+    HSEQ="5 6 10 13 17 23 30 38 43 52 65 84"
     H_MD=52; H_MD_DOF="500 kDOF"; MD_DOF=500000
     ;;
   2)
@@ -86,7 +86,7 @@ for P in $PLIST; do
     H_MD=33; H_MD_DOF="1 MDOF"; MD_DOF=1000000
     ;;
   3)
-    HSEQ="1 2 3 4 6 7 8 10 13 17 22 27"
+    HSEQ="1 2 3 4 6 7 8 10 13 15 17 22 27"
     H_MD=22; H_MD_DOF="1 MDOF"; MD_DOF=1000000
     ;;
   esac
