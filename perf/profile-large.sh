@@ -120,8 +120,8 @@ for P in $PLIST; do
     H_TEST=121; TEST_DOF="50 MDOF";# 500-10,000 parts
     ;;
   3)
-    H_MD=23; H_MD_DOF="1 MDOF"
-    H_LG=48; H_LG_DOF="10 MDOF"
+    H_MD=22; H_MD_DOF="1 MDOF"
+    H_LG=47; H_LG_DOF="10 MDOF"
     H_XL=100; H_XL_DOF="100 MDOF"
     # H_TEST=61; TEST_DOF="20 MDOF"; NX_MIN=4; NX_MAX=50;
     H_TEST=80; TEST_DOF="50 MDOF";# 500-10,000 parts

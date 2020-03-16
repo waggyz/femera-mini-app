@@ -81,8 +81,8 @@ for P in $PLIST; do
     ;;
   2)
     # HSEQ="2 3 5 7 8 11"
-    HSEQ="15 19 26 33 42 57 71 90 121 157"
-    # HSEQ=$HSEQ" 17 22 29 38 48 63 82 103 135"
+    HSEQ="15 19 26 33 42 48 57 71 90 98 121 157"
+    # HSEQ=$HSEQ" 17 22 29 38 63 82 103 135"
     HSEQ=$HSEQ" 195 265 338"
     H_MD=33; H_MD_DOF="1 MDOF"
     H_LG=71; H_LG_DOF="10 MDOF"
@@ -90,15 +90,15 @@ for P in $PLIST; do
     ;;
   3)
     # HSEQ="1 2 3 4 6 8"
-    HSEQ="10 13 17 23 28 39 48 61 80 100"
+    HSEQ="10 13 17 22 27 32 38 47 61 80 100"
     # 138 174
     HSEQ=$HSEQ" 133 175"
     if [ $MEM -gt 100 ];then
       # 1 GDOF too big to part in 90 GB
       HSEQ=$HSEQ" 222"
     fi
-    H_MD=23; H_MD_DOF="1 MDOF"
-    H_LG=48; H_LG_DOF="10 MDOF"
+    H_MD=22; H_MD_DOF="1 MDOF"
+    H_LG=47; H_LG_DOF="10 MDOF"
     H_XL=100; H_XL_DOF="100 MDOF"
     ;;
   esac
