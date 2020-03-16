@@ -110,7 +110,8 @@ for P in $PLIST; do
   3)
     # HMIN=1; HMAX=29;
     HSEQ="1 2 3 4 6 8"
-    HSEQ=$HSEQ" 10 13 17 22 27 32 38 47 61 80 100" # 138 174 220"
+    HSEQ=$HSEQ" 10 13 17 22 27 32 38 47 61 80 100";
+    # 138 174 220"
     # HSEQ=$HSEQ" 5 7 9 11 12 15 19 25 43 55"; #
     H_MD=22; H_MD_DOF="1 MDOF"
     H_LG=47; H_LG_DOF="10 MDOF"
