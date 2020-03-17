@@ -69,7 +69,7 @@ for P in $PLIST; do
   case $P in
   1)
     # HSEQ="5 6 10 13 17 23 "
-    HSEQ="30 38 43 52 65 84 113 141 183 246 310"
+    HSEQ="30 38 43 52 65 84 98 113 141 183 246 310"
     if [ $MEM -gt 100 ];then
       # too big to part in 90 GB: 250M 500M 1G
       HSEQ=$HSEQ" 421 531"
@@ -81,7 +81,7 @@ for P in $PLIST; do
     ;;
   2)
     # HSEQ="2 3 5 7 8 11"
-    HSEQ="15 19 26 33 42 48 57 71 90 98 121 157"
+    HSEQ="15 19 26 33 42 48 57 71 90 121 157"
     # HSEQ=$HSEQ" 17 22 29 38 63 82 103 135"
     HSEQ=$HSEQ" 195 265 338"
     H_MD=33; H_MD_DOF="1 MDOF"
