@@ -244,7 +244,7 @@ for P in $PLIST; do
       set logscale x;\
       set xrange [1e3:1.05e9];\
       set yrange [0:];\
-      set key inside top right;\
+      set key inside bottom right;\
       set title 'Femera Basic Elastic Performance Tests [MDOF/s]';\
       set xlabel 'System Size [DOF]';\
       set label at "$MAX_SIZE", "$MAX_MDOFS" \"* Max\";\
