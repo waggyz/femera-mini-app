@@ -186,7 +186,7 @@ int ElastPlastKHIso3D::ElemNonlinear( Elem* E,
       } printf("\n");
 #endif
       //====================================================== UMAT calc
-        const FLOAT_PHYS one_third = 0.333333333333333;
+      const FLOAT_PHYS one_third = 0.333333333333333;
       //NOTE back_v, elas_devi_v, and plas_flow are deviatoric (trace zero),
       //     with only 5 independent terms.
       //NOTE back_v is only deviatoric,

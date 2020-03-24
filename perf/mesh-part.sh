@@ -86,6 +86,10 @@ if [ $N -gt 0 ]; then
       "$GMSH2FMR" -v$VERB -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
         $SLICEARG -M0 -E100e9 -N0.3 -R -a "$DIR""/uhxt"$H"p"$P"n"$NN
     ;;
+    elas-dmv)
+      "$GMSH2FMR" -v$VERB -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
+        $SLICEARG -M0 -E100e9 -N0.3 -D -a "$DIR""/uhxt"$H"p"$P"n"$NN
+    ;;
     thel-iso)
       "$GMSH2FMR" -v$VERB -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 -Tu10 \
         $SLICEARG -M0 -E100e9 -N0.3 -A20e-6 -K100e-6 -a "$DIR""/uhxt"$H"p"$P"n"$NN
@@ -148,7 +152,7 @@ if [ $N -gt 0 ]; then
       fi
     fi
     echo "uhxt"$H"p"$P"n"$N"_1.fmr physics is "$IS_PHYS"." "$LOGFILE"
-    if [ $IS_PHYS != $PHYS ]; then
+    if [ "$IS_PHYS" != "$PHYS" ]; then
       echo "Converting to "$PHYS" physics..." "$LOGFILE"
       #FIXME replace this with shell scripts to modify physics blocks.
       case $PHYS in
@@ -159,6 +163,10 @@ if [ $N -gt 0 ]; then
       elas-ort)
         "$GMSH2FMR" -v$VERB -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
           $SLICEARG -M0 -E100e9 -N0.3 -R -a "$DIR""/uhxt"$H"p"$P"n"$NN
+      ;;
+      elas-dmv)
+        "$GMSH2FMR" -v$VERB -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
+          $SLICEARG -M0 -E100e9 -N0.3 -D -a "$DIR""/uhxt"$H"p"$P"n"$NN
       ;;
       thel-iso)
         "$GMSH2FMR" -v$VERB -x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 -Tu10 \
