@@ -33,7 +33,7 @@ SX=14; SY=15; SZ=16; N=$(( $SX * $SY * $SZ ));# 3360 parts
 CSV1="50mdof"
 CSV2=$CPUMODEL"-"$CSTR".csv"
 P=2; H=121;# 50 MDOF @ 3 DOF/node ---------------------------------------------
-MESHNAME="uhxt"$H"p"$P"n"$N
+MESHNAME="uhxt"$H"p"$P/"uhxt"$H"p"$P"n"$N
 #
 # plas-xxx Plasticity FIXME not vectorized yet
 #
@@ -85,7 +85,7 @@ done
 CSTR=gcc
 CSV2=$CPUMODEL"-"$CSTR".csv"
 P=2; H=178;# 50 MDOF @ 1 DOF/node ---------------------------------------------
-MESHNAME="uhxt"$H"p"$P"n"$N
+MESHNAME="uhxt"$H"p"$P/"uhxt"$H"p"$P"n"$N
 #FIXME Check the node count
 #
 PHYS=ther-iso;# Thermal
