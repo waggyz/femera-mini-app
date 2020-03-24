@@ -1,18 +1,21 @@
 #!/bin/bash
 # Large model physics evaluation profiling
 #
-CSTR=gcc
-#
 EXEDIR="/u/dwagner5/femera-mini-develop"
 PERFDIR=$EXEDIR/"perf"
 #
 CPUMODEL=`"$EXEDIR"/"cpumodel.sh"`
 CPUCOUNT=`"$EXEDIR"/"cpucount.sh"`
 #
+CSTR=gcc
+#
+module load gcc_8.3.0
+make -j$CPUCOUNT all
+module load intel_2019.4.243
 make -j$CPUCOUNT all
 #
 FMREXE=$EXEDIR/"femerq-"$CPUMODEL"-"$CSTR
-LMSEXE=$EXEDIR/"femeqk-"$CPUMODEL"-"$CSTR
+LMSEXE=$EXEDIR/"femeqk-"$CPUMODEL"-icc"
 #
 if [ -d "/hpnobackup1/dwagner5/femera-test/cube" ]; then
   MESHDIR="/hpnobackup1/dwagner5/femera-test/cube"
@@ -68,6 +71,8 @@ for I in $(seq 1 $REPEAT_TEST_N ); do
 done
 #
 # elas-lms Local matrix storage
+CSTR=icc
+CSV2=$CPUMODEL"-"$CSTR".csv"
 echo Warming up...
   "$LMSEXE" -v1 -c$C -r$RTOL -i$ITERS_MIN -p "$MESHDIR"/"$MESHNAME" > /dev/null
 echo "Running "$ITERS" iterations of "$MESHNAME" (elas-lms),"\
@@ -77,6 +82,8 @@ for I in $(seq 1 $REPEAT_TEST_N ); do
     >> $CSV1"-elas-lms-"$CSV2
 done
 #
+CSTR=gcc
+CSV2=$CPUMODEL"-"$CSTR".csv"
 P=2; H=178;# 50 MDOF @ 1 DOF/node ---------------------------------------------
 MESHNAME="uhxt"$H"p"$P"n"$N
 #FIXME Check the node count
