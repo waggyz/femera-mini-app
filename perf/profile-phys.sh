@@ -9,6 +9,11 @@ CPUCOUNT=`"$EXEDIR"/"cpucount.sh"`
 #
 CSTR=gcc
 #
+export OMP_SCHEDULE=static
+export OMP_PLACES=cores
+export OMP_PROC_BIND=spread
+export OMP_NUM_THREADS=$CPUCOUNT
+#
 module purge
 module load gcc_8.3.0
 make -j$CPUCOUNT all
@@ -31,7 +36,7 @@ RTOL=0; ITERS_MIN=10; ITERS=100;# 5 GDOF total @ 50 MDOF system size
 #
 SX=14; SY=15; SZ=16; N=$(( $SX * $SY * $SZ ));# 3360 parts
 #
-CSV1=$PERFDIR/"50mdof"
+CSV1=$PERFDIR/"50mdof-tet10"
 CSV2=$CPUMODEL"-"$CSTR".csv"
 C=$CPUCOUNT
 P=2; H=121;# 50 MDOF @ 3 DOF/node ---------------------------------------------
@@ -39,7 +44,7 @@ MESHNAME="uhxt"$H"p"$P/"uhxt"$H"p"$P"n"$N
 #
 # plas-xxx Plasticity FIXME not vectorized yet
 #
-PHYS=elas-dmv;# DMAT
+PHYS=elas-dmv;# DMAT in global coordinates
 "$PERFDIR"/"mesh-part.sh" $H $P $SX $SY $SZ $PHYS "$MESHDIR";
 echo Warming up...
   "$FMREXE" -v1 -c$C -r$RTOL -i$ITERS_MIN -p "$MESHDIR"/"$MESHNAME" > /dev/null
