@@ -9,6 +9,7 @@ CPUCOUNT=`"$EXEDIR"/"cpucount.sh"`
 #
 CSTR=gcc
 #
+module purge
 module load gcc_8.3.0
 make -j$CPUCOUNT all
 module load intel_2019.4.243
@@ -30,8 +31,9 @@ RTOL=0; ITERS_MIN=10; ITERS=100;# 5 GDOF total @ 50 MDOF system size
 #
 SX=14; SY=15; SZ=16; N=$(( $SX * $SY * $SZ ));# 3360 parts
 #
-CSV1="50mdof"
+CSV1=$PERFDIR/"50mdof"
 CSV2=$CPUMODEL"-"$CSTR".csv"
+C=$CPUCOUNT
 P=2; H=121;# 50 MDOF @ 3 DOF/node ---------------------------------------------
 MESHNAME="uhxt"$H"p"$P/"uhxt"$H"p"$P"n"$N
 #
