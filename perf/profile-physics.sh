@@ -54,7 +54,7 @@ for P in 2 3 1; do
     elas-dmv) # DMAT in global coordinates
       "$PERFDIR"/"mesh-part.sh" $H $P $SX $SY $SZ $PHYS "$MESHDIR";
       echo Warming up...
-        "$FMREXE" -v1 -c$C -r$RTOL -i$ITERS_MIN -p "$MESHDIR"/"$MESHNAME" > /dev/null
+        /bin/time "$FMREXE" -v1 -c$C -r$RTOL -i$ITERS_MIN -p "$MESHDIR"/"$MESHNAME" > /dev/null
       echo "Running "$ITERS" iterations of "$MESHNAME" ($PHYS),"\
         $REPEAT_TEST_N" times..."
       for I in $(seq 1 $REPEAT_TEST_N ); do
@@ -65,7 +65,7 @@ for P in 2 3 1; do
     elas-ort) # Orthotropic
       "$PERFDIR"/"mesh-part.sh" $H $P $SX $SY $SZ $PHYS "$MESHDIR";
       echo Warming up...
-        "$FMREXE" -v1 -c$C -r$RTOL -i$ITERS_MIN -p "$MESHDIR"/"$MESHNAME" > /dev/null
+        /bin/time "$FMREXE" -v1 -c$C -r$RTOL -i$ITERS_MIN -p "$MESHDIR"/"$MESHNAME" > /dev/null
       echo "Running "$ITERS" iterations of "$MESHNAME" ($PHYS),"\
         $REPEAT_TEST_N" times..."
       for I in $(seq 1 $REPEAT_TEST_N ); do
@@ -76,7 +76,7 @@ for P in 2 3 1; do
     elas-iso) # Isotropic
       "$PERFDIR"/"mesh-part.sh" $H $P $SX $SY $SZ $PHYS "$MESHDIR";
       echo Warming up...
-        "$FMREXE" -v1 -c$C -r$RTOL -i$ITERS_MIN -p "$MESHDIR"/"$MESHNAME" > /dev/null
+        /bin/time "$FMREXE" -v1 -c$C -r$RTOL -i$ITERS_MIN -p "$MESHDIR"/"$MESHNAME" > /dev/null
       echo "Running "$ITERS" iterations of "$MESHNAME" ($PHYS),"\
         $REPEAT_TEST_N" times..."
       for I in $(seq 1 $REPEAT_TEST_N ); do
@@ -88,7 +88,7 @@ for P in 2 3 1; do
       CSTR=icc
       CSV2=$CPUMODEL"-"$CSTR".csv"
       echo Warming up...
-        "$LMSEXE" -v1 -c$C -r$RTOL -i$ITERS_MIN -p "$MESHDIR"/"$MESHNAME" > /dev/null
+        /bin/time "$LMSEXE" -v1 -c$C -r$RTOL -i$ITERS_MIN -p "$MESHDIR"/"$MESHNAME" > /dev/null
       echo "Running "$ITERS" iterations of "$MESHNAME" (elas-lms),"\
         $REPEAT_TEST_N" times..."
       for I in $(seq 1 $REPEAT_TEST_N ); do
@@ -110,7 +110,7 @@ for P in 2 3 1; do
       #
       "$PERFDIR"/"mesh-part.sh" $H $P $SX $SY $SZ $PHYS "$MESHDIR";
       echo Warming up...
-        "$FMREXE" -v1 -c$C -r$RTOL -i$ITERS_MIN -p "$MESHDIR"/"$MESHNAME" > /dev/null
+        /bin/time "$FMREXE" -v1 -c$C -r$RTOL -i$ITERS_MIN -p "$MESHDIR"/"$MESHNAME" > /dev/null
       echo "Running "$ITERS" iterations of "$MESHNAME" ($PHYS),"\
         $REPEAT_TEST_N" times..."
       for I in $(seq 1 $REPEAT_TEST_N ); do
@@ -121,7 +121,7 @@ for P in 2 3 1; do
       CSTR=icc
       CSV2=$CPUMODEL"-"$CSTR".csv"
       echo Warming up...
-        "$LMSEXE" -v1 -c$C -r$RTOL -i$ITERS_MIN -p "$MESHDIR"/"$MESHNAME" > /dev/null
+        /bin/time "$LMSEXE" -v1 -c$C -r$RTOL -i$ITERS_MIN -p "$MESHDIR"/"$MESHNAME" > /dev/null
       echo "Running "$ITERS" iterations of "$MESHNAME" (ther-lms),"\
         $REPEAT_TEST_N" times..."
       for I in $(seq 1 $REPEAT_TEST_N ); do
