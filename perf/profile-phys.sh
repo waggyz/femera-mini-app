@@ -45,7 +45,7 @@ for P in 2 3 1; do
       2) H=121; ELSTR=tet10;  ;;
       3) H=80;  ELSTR=tet20;  ;;
     esac
-    CSV1=$PERFDIR/"50mdof-"$ELSTR
+    CSV1=$PERFDIR/"profile-"$ELSTR
     MESHNAME="uhxt"$H"p"$P/"uhxt"$H"p"$P"n"$N
     case $PHYS in
     # plas-xxx Plasticity FIXME not vectorized yet
@@ -105,7 +105,7 @@ for P in 2 3 1; do
         3) H=117; ELSTR=tet20; ;; # tried: 119:55685307
       esac
       #FIXME Check the node count
-      CSV1=$PERFDIR/"50mdof-"$ELSTR
+      CSV1=$PERFDIR/"profile-"$ELSTR
       MESHNAME="uhxt"$H"p"$P/"uhxt"$H"p"$P"n"$N
       #
       "$PERFDIR"/"mesh-part.sh" $H $P $SX $SY $SZ $PHYS "$MESHDIR";
