@@ -41,7 +41,7 @@ C=$CPUCOUNT
 for P in 2 3 1; do
   for PHYS in elas-dmv elas-ort elas-iso ther-iso; do
     case $P in
-      1) H=246; ELSTR=tet4; ;; # 50 MDOF @ 3 DOF/node -------------------------------------
+      1) H=246; ELSTR=tet4; ;; # 50 MDOF @ 3 DOF/node -------------------------
       2) H=121; ELSTR=tet10;  ;;
       3) H=80;  ELSTR=tet20;  ;;
     esac
@@ -100,9 +100,9 @@ for P in 2 3 1; do
       ;;
     ther-iso) # Thermal
       case $P in
-        1) H=343; ELSTR=tet4; ;; # 50 MDOF @ 1 DOF/node -----------------------------------
+        1) H=343; ELSTR=tet4; ;; # 50 MDOF @ 1 DOF/node -----------------------
         2) H=178; ELSTR=tet10; ;;
-        3) H=117; ELSTR=tet20; ;; # tried: 119:55685307
+        3) H=117; ELSTR=tet20; ;;
       esac
       #FIXME Check the node count
       CSV1=$PERFDIR/"profile-physics-"$ELSTR
