@@ -45,7 +45,7 @@ for P in 2 3 1; do
       2) H=121; ELSTR=tet10;  ;;
       3) H=80;  ELSTR=tet20;  ;;
     esac
-    CSV1=$PERFDIR/"profile-"$ELSTR
+    CSV1=$PERFDIR/"profile-physics-"$ELSTR
     MESHNAME="uhxt"$H"p"$P/"uhxt"$H"p"$P"n"$N
     case $PHYS in
     # plas-xxx Plasticity FIXME not vectorized yet
@@ -73,7 +73,7 @@ for P in 2 3 1; do
           >> $CSV1"-"$PHYS"-"$CSV2
       done
     ;;
-      elas-iso) # Isotropic
+    elas-iso) # Isotropic
       "$PERFDIR"/"mesh-part.sh" $H $P $SX $SY $SZ $PHYS "$MESHDIR";
       echo Warming up...
         "$FMREXE" -v1 -c$C -r$RTOL -i$ITERS_MIN -p "$MESHDIR"/"$MESHNAME" > /dev/null
@@ -100,12 +100,12 @@ for P in 2 3 1; do
       ;;
     ther-iso) # Thermal
       case $P in
-        1) H=270; ELSTR=tet4; ;; # 50 MDOF @ 1 DOF/node -----------------------------------
+        1) H=343; ELSTR=tet4; ;; # 50 MDOF @ 1 DOF/node -----------------------------------
         2) H=178; ELSTR=tet10; ;;
         3) H=117; ELSTR=tet20; ;; # tried: 119:55685307
       esac
       #FIXME Check the node count
-      CSV1=$PERFDIR/"profile-"$ELSTR
+      CSV1=$PERFDIR/"profile-physics-"$ELSTR
       MESHNAME="uhxt"$H"p"$P/"uhxt"$H"p"$P"n"$N
       #
       "$PERFDIR"/"mesh-part.sh" $H $P $SX $SY $SZ $PHYS "$MESHDIR";
