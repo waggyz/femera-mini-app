@@ -117,7 +117,7 @@ FEMERA_NAIV_C = $(FEMERA_COMMON)\
 FEMERA_STIF_C = $(FEMERA_COMMON)\
  elas-lms3-base.cc elas-ort3-bas2.cc elas-dmv3-base.cc\
  elas-plkh-iso3-dum.cc elas-ther-iso3-base.cc elas-ther-ort3-bas2.cc\
- ther-iso3-base.cc
+ ther-lms3-base.cc
 
 HYBRID_GCC_C = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
  halo-pcg-omp.cc halo-ncg-omp.cc halo-pcr-dummy.cc\
