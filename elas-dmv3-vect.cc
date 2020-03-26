@@ -7,6 +7,10 @@
 //
 int ElastDmv3D::Setup( Elem* E ){
   JacT  ( E );
+  IniRot();
+#if 0
+  MtrRot();// Assume these are already rotated in the input files.
+#endif
 #if 0
   printf("\nelas_prop\n");
   for(uint i=0;i<elas_prop.size();i++){ printf(" %7.1e",mtrl_matc[i]);

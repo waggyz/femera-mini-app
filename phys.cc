@@ -14,13 +14,13 @@ int Phys::ScatterNode2Elem(Elem* E,//FIXME
   const uint conn_n = E->elem_conn_n;
   const uint N      = elem_n*conn_n;
   const uint Nv     = elem_n*conn_n*this->node_d;
-  if(elem_v.size()!=Nv){ elem_v.resize(Nv); };//FIXME
+  if(elem_v.size()!=Nv){ elem_v.resize(Nv); }//FIXME
   for(uint i=0; i<N; i++){//FIXME replace elem_d with dofs_n
     elem_v[std::slice( i*this->node_d,this->node_d,1 )]
       =node_v[std::slice(E->elem_conn[i]*this->node_d,this->node_d,1)];
-  };
+  }
   return 0;
-};
+}
 int Phys::GatherElem2Node(Elem* E,
   RESTRICT const Phys::vals & elem_v,
   RESTRICT       Phys::vals & node_v ){
@@ -30,21 +30,21 @@ int Phys::GatherElem2Node(Elem* E,
   for (uint i=0; i<N; i++){
     node_v[std::slice(E->elem_conn[i]*this->node_d,this->node_d,1)]
       +=elem_v[std::slice( i*this->node_d,this->node_d,1 )];
-  };
+  }
   return 0;
-};
-int Phys::JacRot( Elem* E ){
-  static const int mesh_d = E->elem_d;;
+}
+int Phys::IniRot(){
+  static const int mesh_d = 3;
   #if VERB_MAX>10
   printf("Material Orientation (zxz) (rad):");
   for(uint i=0; i<mtrl_dirs.size(); i++){
     printf("%10.3e ",mtrl_dirs[i]);
-  };// printf("\n");
+  }// printf("\n");
   #endif
   if((mtrl_rotc.size()!=9) ){
     mtrl_rotc.resize(9);
     mtrl_rotc[std::slice(0,mesh_d,mesh_d+1)]=1.0;
-  };
+  }
   if(mtrl_dirs.size()==3){
     mtrl_rotc.resize(9);
     const FLOAT_PHYS z1=mtrl_dirs[0];// Rotation about z (radians)
@@ -52,23 +52,35 @@ int Phys::JacRot( Elem* E ){
     const FLOAT_PHYS z3=mtrl_dirs[2];// Rotation about z (radians)
     Phys::vals Z1={cos(z1),sin(z1),0.0, -sin(z1),cos(z1),0.0, 0.0,0.0,1.0};
     Phys::vals X2={1.0,0.0,0.0, 0.0,cos(x2),sin(x2), 0.0,-sin(x2),cos(x2)};
-    Phys::vals Z3={cos(z3),sin(z3),0, -sin(z3),cos(z3),0.0, 0.0,0.0,1.0};
+    Phys::vals Z3={cos(z3),sin(z3),0.0, -sin(z3),cos(z3),0.0, 0.0,0.0,1.0};
     //mtrl_rotc = MatMul3x3xN(Z1,MatMul3x3xN(X2,Z3));
     for(int i=0;i<3;i++){
       for(int l=0;l<3;l++){ mtrl_rotc[3* i+l ]=0.0;
         for(int j=0;j<3;j++){
           for(int k=0;k<3;k++){
             mtrl_rotc[3* i+l ] += Z1[3* i+j ] * X2[3* j+k ] * Z3[3* k+l ];
-    };};};};
+    } } } }
     //mtrl_rotc=MatMul3x3xN(R,R);
     #if VERB_MAX>10
     printf("Material Tensor Rotation:");
     for(uint i=0; i<mtrl_rotc.size(); i++){
-      if(!(i%3)){printf("\n");};
+      if(!(i%3)){printf("\n");}
       printf("%10.3e ",mtrl_rotc[i]);
-    }; printf("\n");
+    } printf("\n");
     #endif
-  };
+  return 0;
+  }
+  return 1;
+}
+int Phys::MtrRot(){
+  if(mtrl_rotc.size()==9){ if( mtrl_matc.size()>35 ){
+    //
+    // Vi = (i==j) ? i : 2+i+j;// Voigt vector index {xx,yy,zz,xy,xz,yz}
+  return 0;
+  } }
+  return 1;
+}
+int Phys::JacRot( Elem* E ){
   if(mtrl_rotc.size()==9){
     static const uint  Nj = 10,d2=9;
     const uint elem_n = E->elem_n;
@@ -81,29 +93,29 @@ int Phys::JacRot( Elem* E ){
         #if VERB_MAX>10
         printf("Jac:");
         for(uint i=0; i<9; i++){
-          if(!(i%3)){printf("\n");};
+          if(!(i%3)){printf("\n");}
           printf("%10.3e ",jac[i]);
-        }; printf("\n");
+        } printf("\n");
         #endif
         //J=MatMul3x3xN(mtrl_rotc,jac);
         for(int i=0;i<3;i++){
           for(int k=0;k<3;k++){ J[3* i+k ]=0.0;
             for(int j=0;j<3;j++){
               J[3* i+k ] += mtrl_rotc[3* i+j ] * jac[3* j+k ];
-        };};};
+        } } }
         #if VERB_MAX>10
         printf("Jac Rotated:");
         for(uint i=0; i<9; i++){
-          if(!(i%3)){printf("\n");};
+          if(!(i%3)){printf("\n");}
           printf("%10.3e ",J[i]);
-        }; printf("\n");
+        } printf("\n");
         #endif
         E->elip_jacs[std::slice(ie*intp_n*Nj+ip*Nj,d2,1)]=J;
-      };//end intp loop
-    };//end elem loop
+      }//end intp loop
+    }//end elem loop
     return 0;
-  }else{ return 1;};
-};
+  }else{ return 1;}
+}
 int Phys::JacT  ( Elem* E ){
   static const uint  Nj = 10,d2=9;//mesh_d*mesh_d;
   const uint elem_n = E->elem_n;
@@ -115,12 +127,12 @@ int Phys::JacT  ( Elem* E ){
                 &E->elip_jacs[ie*intp_n*Nj+ip*Nj+d2], &J[0] );
       for(int i=0;i<3;i++){
         for(int j=0;j<3;j++){
-          JT[3* i+j ] = J[3* j+i ]; }; };
+          JT[3* i+j ] = J[3* j+i ]; } }
       E->elip_jacs[std::slice(ie*intp_n*Nj+ip*Nj,d2,1)]=JT;
-    };
-  };
+    }
+  }
   return 0;
-};
+}
 //-------------------------------------------------------------------
 int Phys::ReadPartFMR( const char* fname, bool is_bin ){
   //FIXME This is not used. It's done in Mesh::ReadPartFMR...
@@ -181,7 +193,7 @@ int Phys::ReadPartFMR( const char* fname, bool is_bin ){
   return 0;
 }
 int Phys::SavePartFMR( const char* fname, bool is_bin ){
-  std::string s; if(is_bin){ s="binary";}else{s="ASCII";};
+  std::string s; if(is_bin){ s="binary";}else{s="ASCII";}
   if(is_bin){
     std::cout << "ERROR Could not append "<< fname << "." <<'\n'
       << "ERROR Femera (fmr) "<< s <<" format not yet supported." <<'\n';

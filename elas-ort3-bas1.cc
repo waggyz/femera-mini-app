@@ -10,6 +10,7 @@
 #include "femera.h"
 //
 int ElastOrtho3D::Setup( Elem* E ){
+  IniRot();
   JacRot( E );
   JacT  ( E );
   const uint elem_n = uint(E->elem_n);

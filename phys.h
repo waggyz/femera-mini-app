@@ -57,8 +57,10 @@ public:
           RESTRICT Solv::vals & node_v );
   //
   virtual int Setup( Elem* E )=0;
+  int IniRot();
   int JacRot( Elem* E );
   int JacT  ( Elem* E );
+  int MtrRot();
   //
   virtual int ElemStiff( Elem* )=0;
   //

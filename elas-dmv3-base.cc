@@ -12,6 +12,10 @@
 //
 int ElastDmv3D::Setup( Elem* E ){
   JacT  ( E );
+  IniRot();
+#if 0
+  MtrRot();// Assume these are already rotated in the input files.
+#endif
   const uint elem_n = uint(E->elem_n);
   const uint jacs_n = uint(E->elip_jacs.size()/elem_n/ 10) ;
   const uint intp_n = uint(E->gaus_n);

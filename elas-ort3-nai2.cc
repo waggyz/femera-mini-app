@@ -8,6 +8,7 @@
 #include "femera.h"
 //
 int ElastOrtho3D::Setup( Elem* E ){
+  IniRot();
   JacRot( E );
   JacT  ( E );
   const uint jacs_n = E->elip_jacs.size()/E->elem_n/ 10 ;
