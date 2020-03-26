@@ -60,8 +60,9 @@ public:
   int IniRot();
   int JacRot( Elem* E );
   int JacT  ( Elem* E );
-  int MtrRot();
-  //
+#if 0
+  int MtrRot();// Not yet needed
+#endif
   virtual int ElemStiff( Elem* )=0;
   //
 #if 0

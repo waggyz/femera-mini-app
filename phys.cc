@@ -72,14 +72,17 @@ int Phys::IniRot(){
   }
   return 1;
 }
+#if 0
 int Phys::MtrRot(){
   if(mtrl_rotc.size()==9){ if( mtrl_matc.size()>35 ){
     //
+    // inline function Voigt3Index( i,j );
     // Vi = (i==j) ? i : 2+i+j;// Voigt vector index {xx,yy,zz,xy,xz,yz}
   return 0;
   } }
   return 1;
 }
+#endif
 int Phys::JacRot( Elem* E ){
   if(mtrl_rotc.size()==9){
     static const uint  Nj = 10,d2=9;
