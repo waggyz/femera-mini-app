@@ -7,7 +7,11 @@ if [ -n "$4" ]; then MEM=$(( $4 * 1000000000 ));
 if [ -n "$5" ]; then CPUMODEL=$5; else CPUMODEL=`./cpumodel.sh`; fi
 if [ -n "$6" ]; then CPUCOUNT=$6; else CPUCOUNT=`./cpucount.sh`; fi
 #
-EXEDIR="/u/dwagner5/femera-mini-develop"
+if [ -d "/u/dwagner5" ]; then
+  EXEDIR="/u/dwagner5/femera-mini-develop"
+else
+  EXEDIR=`pwd`
+fi
 PERFDIR=$EXEDIR/"perf"
 #
 GMSH2FMR=$EXEDIR/"gmsh2fmr-"$CPUMODEL"-"$CSTR
