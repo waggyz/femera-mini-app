@@ -610,7 +610,7 @@ int main( int argc, char** argv ) {
 #pragma omp parallel for schedule(static)
     for(int part_i=part_0;part_i<(part_n+part_0);part_i++){
       Phys::vals props={};//100e9,0.3};//FIXME Should not have defaults here...
-      Phys::vals dirs={0.0,0.0,0.0};// 
+      Phys::vals dirs={0.0,0.0,0.0};
       Phys::vals prop={};
       auto m0=mtrl_part[0];
       std::stringstream ss;
@@ -624,8 +624,10 @@ int main( int argc, char** argv ) {
       std::string pname = ss.str();
       if(verbosity>1){
         std::cout << "Saving part " << pname << "..." <<'\n'; }
-      Phys* Y=new ElastIso3D(1.0,0.3);//FIXME
+      Phys* Y;//=new ElastIso3D(1.0,0.3);//FIXME
+#if 0
 #pragma omp critical
+#endif
 {//FIXME why critical?
       if( mtrl_part.count( part_i ) >0 ){
         auto mp=mtrl_part[ part_i ];
@@ -637,7 +639,7 @@ int main( int argc, char** argv ) {
         if(allrand &( props.size()>3 )){
           for(uint i=0; i<3; i++){
             props[i]=FLOAT_PHYS(std::rand())/(FLOAT_PHYS(RAND_MAX)+1.0)*2.0*PI;
-            }
+          }
         }
         if(rotfile &(props.size()>3)){
           //FIXME Does not work unless -X0 -Z0 -X0 specified
@@ -645,21 +647,30 @@ int main( int argc, char** argv ) {
             props[i]=orislist[3* (part_i-part_0)+i ]; }
         }
       }
-      if(usedmat){
-        dirs.resize(0);//FIXME Turn this back on later?
-        Y=new ElastDmv3D(props,dirs);
-      }else{
+//      if(usedmat){
+//        dirs.resize(0);//FIXME Turn this back on later?
+//        Y=new ElastDmv3D(props,dirs);
+//      }else{
         if(props.size()>3){
           for(uint i=0;i<3;i++){ dirs[i]=props[i]; }
           prop.resize(props.size()-3);
           for(uint i=3;i<props.size();i++){ prop[i-3]=props[i]; }
-          Y=new ElastOrtho3D(prop,dirs);
+          if(usedmat){
+            Y=new ElastDmv3D(props,dirs);
+          }else{
+            Y=new ElastOrtho3D(prop,dirs);
+          }
         }else if(props.size()>0){
           prop.resize(props.size());
           for(uint i=0;i<props.size();i++){ prop[i]=props[i]; }
-          Y=new ElastIso3D(prop[0],prop[1]);
-        }else{ Y=new ThermIso3D( prop ); };//FIXME
-      }
+          if(usedmat){
+            dirs.resize(0);//FIXME Turn this back on later?
+            Y=new ElastDmv3D(props,dirs);
+          }else{
+            Y=new ElastIso3D(prop[0],prop[1]);
+          }
+        }else{ Y=new ThermIso3D( prop ); }//FIXME
+//      }
       if(tcon_part.count(part_i)>0){
         if(verbosity>1){
           std::cout << "Setting partition thermal conductivities..." <<'\n'; }

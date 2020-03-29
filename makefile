@@ -175,7 +175,7 @@ test : all
 	-M0 -E100e9 -N0.3 -A20e-6 -K100e-6 -R \
 	-ap cube/unit1p2n2;
 	./gmsh2fmr-$(CPUMODEL) -v1 \
-	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
 	-M0 -E100e9 -N0.3 -R \
 	-ap cube/unst19p1n16;
 	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
@@ -197,7 +197,7 @@ test-iso : mini-omp gmsh2fmr
 
 test-ort : mini-omp gmsh2fmr
 	./gmsh2fmr-$(CPUMODEL) -v1 \
-	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
 	-M0 -E100e9 -N0.3 -R -ap cube/unst19p1n16;
 	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
@@ -205,8 +205,17 @@ test-ort : mini-omp gmsh2fmr
 
 test-dmv : mini-omp gmsh2fmr
 	./gmsh2fmr-$(CPUMODEL)-gcc -v1 \
-	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
 	-M0 -E100e9 -N0.3 -D -ap cube/unst19p1n16;
+	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
+	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
+	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
+
+test-cmv : mini-omp gmsh2fmr
+	$(warning * WARNING * gmsh2fmr does not work for elas-cmv.)
+	./gmsh2fmr-$(CPUMODEL)-gcc -v1 \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
+	-M0 -E100e9 -N0.3 -D -R -ap cube/unst19p1n16;
 	echo ./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
@@ -217,6 +226,14 @@ test-mmp : mini-mmp
 	export OMP_NESTED=true; export OMP_MAX_ACTIVE_LEVELS=2; \
 	./femera-mmp-$(CPUMODELC) -v2 -m8 -n2 -c2 \
 	-p cube/unst19p1n16
+
+test-lms : mini-lms gmsh2fmr
+	./gmsh2fmr-$(CPUMODEL) -v1 \
+	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 \
+	-M0 -E100e9 -N0.3 -ap cube/unst19p1n16;
+	echo ./femerk-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
+	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
+	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
 
 test-thermal : mini-omp gmsh2fmr
 	./gmsh2fmr-$(CPUMODEL) -v3 -x@0.0 -x0 -x@1.0 -xu10 -M0 -K100e-6 \

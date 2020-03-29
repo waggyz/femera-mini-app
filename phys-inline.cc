@@ -3,20 +3,27 @@
 #include "femera.h"
 #include <immintrin.h>
 //FIXME These inline functions should be in the class where used.
-static inline int Voigt2Index( int i, int j){
+static inline int Voigt2Index(int i,int j ){
   // 2D Voigt vector index {xx,yy,xy}
   // from tensor indices i,j
+#if 1
   return (i==j) ? i : 2;
+#else
+  return i + int( i!=j ) * (1+j);
+#endif
 }
-static inline int Voigt3Index( int i, int j){
+static inline int Voigt3Index(int i,int j ){
   // 3D Voigt vector index {xx,yy,zz,xy,xz,yz}//FIXME Check for consistent use.
   // from tensor indices i,j
+#if 0
   return (i==j) ? i : 2+i+j;
+#else
+  return i + int( i!=j ) * (2+j);
+#endif
 }
 #if 1
 static inline void print_m256(const __m256d v){// Debugging register print
-  double V[4];
-  _mm256_store_pd(&V[0],v);
+  double V[4];_mm256_store_pd(&V[0],v);
   printf("%9.2e %9.2e %9.2e %9.2e\n",V[0],V[1],V[2],V[3]);
 }
 #endif

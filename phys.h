@@ -106,25 +106,7 @@ protected:
     elas_prop=mtrl_prop;
   };
   //constructor computes material vals
-  inline Phys::vals Tens2VoigtEng(const RESTRICT Phys::vals&);
-  inline Phys::vals Tens3VoigtEng(const RESTRICT Phys::vals&);
-  inline Phys::vals Tens2VoigtEng(const FLOAT_PHYS H[4]);
-  inline Phys::vals Tens3VoigtEng(const FLOAT_PHYS H[9]);
 private:
-};
-// Inline Functions =======================================
-//
-inline Phys::vals Phys::Tens3VoigtEng(const RESTRICT Phys::vals &H){
-  return(Phys::vals { H[0],H[4],H[8], H[1]+H[3],H[5]+H[7],H[2]+H[6] });
-  // exx,eyy,ezz, exy,eyz,exz
-};
-inline Phys::vals Phys::Tens3VoigtEng(const FLOAT_PHYS H[9]){
-  return(Phys::vals { H[0],H[4],H[8], H[1]+H[3],H[5]+H[7],H[2]+H[6] });};
-  // exx,eyy,ezz, exy,eyz,exz
-inline Phys::vals Phys::Tens2VoigtEng(const RESTRICT Phys::vals &H){
-  return(Phys::vals { H[0],H[3], H[1]+H[2] });};
-inline Phys::vals Phys::Tens2VoigtEng(const FLOAT_PHYS H[4]){
-  return(Phys::vals { H[0],H[3], H[1]+H[2] });
 };
 // Physics Kernels: ---------------------------------------
 class ElastIso2D final: public Phys{
@@ -162,8 +144,8 @@ public: ElastIso2D(FLOAT_PHYS young, FLOAT_PHYS poiss, FLOAT_PHYS thick) :
     return 0;
   };
   Phys::vals MtrlLinear(//FIXME Doesn't inline
-    const RESTRICT Phys::vals &strain_tensor)final{//FIXME Plane Stress
-    const Phys::vals e=Tens2VoigtEng(strain_tensor);
+    const RESTRICT Phys::vals &H)final{//FIXME Plane Stress
+    const Phys::vals e={ H[0],H[3], H[1]+H[2] };
     return( Phys::vals {
       mtrl_matc[0]*e[0] +mtrl_matc[1]*e[1] ,
       mtrl_matc[1]*e[0] +mtrl_matc[0]*e[1] ,
