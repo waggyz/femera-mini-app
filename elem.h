@@ -253,7 +253,7 @@ protected:
   };               //   0---------1
 private:
 };
-//============= Inline Function Definitions ===============
+//======================== Inline Function Definitions ========================
 // JD is jacobian dimension (1-3)
 #define JD 1
 inline FLOAT_MESH Elem::Jac1Det(const FLOAT_MESH m){
@@ -382,42 +382,41 @@ inline int Elem::Jac3Tnv(RESTRICT Mesh::vals& m, const FLOAT_MESH jacdet){
   if(jacdet < 0){return -1;} else{return 0;}
 }
 #undef JD
-//============= Inline Template Definitions ===============
+//======================== Inline Template Definitions ========================
 template <typename F> static inline
   int part_resp_glob( Elem* E, Phys* Y, const INT_MESH e0, const INT_MESH ee,
   FLOAT_SOLV* RESTRICT part_f, const FLOAT_SOLV* RESTRICT part_u, F mtrl_resp ){
-  //FIXME Clean up local variables.
-  //const int De = 3;// Element Dimension
-  const int Nd = 3;// Node (mesh) Dimension
-  const int Nf = 3;// Y->node_d DOF/node
-  const int Nj = Nd*Nd+1;
+#if 0
+  const INT_ORDER elem_p =E->elem_p;
+  const int Dm = 3;// Node (mesh) Dimension
+  const int De = 3;// Element Dimension
+#endif
+  const int Dn = 3;// Y->node_d DOF/node
+  const int Nj = 10;
   const int Nc = E->elem_conn_n;// Number of nodes/element
-  const int Ne = Nf*Nc;
-  const int Nt = 4*Nc;
+  const int Ne = Dn*Nc;
   const int intp_n = int(E->gaus_n);
-  //const INT_ORDER elem_p =E->elem_p;
+  const uint matc_n=std::max( Y->mtrl_dmat.size(), Y->mtrl_matc.size() );//FIXME
+  //
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
 #ifdef THIS_FETCH_JAC
   FLOAT_MESH VECALIGNED jac[Nj];
 #endif
-  FLOAT_PHYS VECALIGNED G[Nt], u[Ne];
+  FLOAT_PHYS VECALIGNED G[4*Nc], u[Ne];
   //
   FLOAT_MESH VECALIGNED data_shpg[intp_n*Ne];
   FLOAT_PHYS VECALIGNED data_weig[intp_n];
-  uint s=( Y->mtrl_dmat.size() > Y->mtrl_matc.size() )
-    ? Y->mtrl_dmat.size() : Y->mtrl_matc.size() ;
-  FLOAT_PHYS VECALIGNED data_matc[s];
-  //FLOAT_PHYS VECALIGNED data_dmat[Y->mtrl_dmat.size()];
+  FLOAT_PHYS VECALIGNED data_matc[matc_n];
+  //FLOAT_PHYS VECALIGNED data_dmat[Y->mtrl_dmat.size()];//FIXME
   //
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], data_shpg );
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], data_weig );
-  if(s==48){
+  if(matc_n==48){//FIXME
     std::copy( &Y->mtrl_dmat[0], &Y->mtrl_dmat[Y->mtrl_dmat.size()], data_matc );
   }else{
     std::copy( &Y->mtrl_matc[0], &Y->mtrl_matc[Y->mtrl_matc.size()], data_matc );
   }
-  //
   const VECALIGNED FLOAT_MESH* RESTRICT shpg = &data_shpg[0];
   const VECALIGNED FLOAT_SOLV* RESTRICT wgt  = &data_weig[0];
   const VECALIGNED FLOAT_SOLV* RESTRICT C    = &data_matc[0];
@@ -433,14 +432,14 @@ template <typename F> static inline
 #ifdef THIS_FETCH_JAC
     std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
 #endif
-    const INT_MESH* RESTRICT c = &Econn[Nc*e0];
+    const INT_MESH* RESTRICT conn = &Econn[Nc*e0];
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
 #else
 //#pragma omp simd
 #endif
     for (int i=0; i<Nc; i++){
-      std::memcpy( & u[Nf*i],&part_u[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf ); }
+      std::memcpy( & u[Dn*i],&part_u[Dn*conn[i]],sizeof(FLOAT_SOLV)*Dn ); }
   }
   for(INT_MESH ie=e0;ie<ee;ie++){//================================== Elem loop
 #ifdef THIS_FETCH_JAC
@@ -459,7 +458,7 @@ template <typename F> static inline
     {// Scope vf registers
     __m256d vf[Nc];
 #ifdef FETCH_F_EARLY
-    for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+    for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[Dn*conn[i]]); }
 #endif
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
       //G = MatMul3x3xN( jac,shg );
@@ -469,7 +468,7 @@ template <typename F> static inline
 #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
       for(int j=0;j<H.size();j++){
-        if(j%Nd==0){printf("\n");}
+        if(j%Dm==0){printf("\n");}
         printf("%+9.2e ",H[j]);
       } printf("\n");
 #endif
@@ -485,7 +484,7 @@ template <typename F> static inline
 #pragma vector unaligned
 #endif
         for (int i=0; i<Nc; i++){
-          std::memcpy(& u[Nf*i],& part_u[cnxt[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
+          std::memcpy(& u[Dn*i],& part_u[Dn*cnxt[i]], sizeof(FLOAT_SOLV)*Dn ); }
 #endif
 #ifdef THIS_FETCH_JAC
           std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj );
@@ -498,7 +497,7 @@ template <typename F> static inline
 #endif
 #ifndef FETCH_F_EARLY
       if(ip==0){
-        for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+        for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[Dn*conn[i]]); }
       }
 #endif
       accumulate_f( &vf[0], &vH[0], &G[0], Nc );
@@ -512,13 +511,14 @@ template <typename F> static inline
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
 #endif
-      for(int j=0; j<3; j++){
-        part_f[3*conn[i]+j] = sf[j]; } }
+      for(int j=0; j<Dn; j++){
+        part_f[Dn*conn[i]+j] = sf[j]; } }
     }// end vf register scope
   }//============================================================ end elem loop
   return 0;
 }
 #if 0
+//NOTE Templating these does not seem to help the solver routines.
 template <typename F> static inline
   int part_loop( std::vector<Mesh::part> P, Elem* E, Phys* Y, Solv* S,
     FLOAT_SOLV* halo_vals,
