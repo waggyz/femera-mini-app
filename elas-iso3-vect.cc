@@ -34,13 +34,8 @@ int ElastIso3D::Setup( Elem* E ){
 int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   FLOAT_SOLV* RESTRICT part_f, const FLOAT_SOLV* RESTRICT part_u ){
   part_resp_glob( E, this, e0, ee, part_f, part_u,
-#if 1
     [](__m256d vH[3], const FLOAT_PHYS C[3], const FLOAT_PHYS dw){
       compute_iso_s(&vH[0], C[1]*dw,C[2]*dw);
-#else
-    [](__m256d vH[3], const FLOAT_PHYS C1dw, const FLOAT_PHYS C2dw){
-      compute_iso_s(&vH[0], C1dw,C2dw);
-#endif
       return 0;
       }
     );

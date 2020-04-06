@@ -225,5 +225,5 @@ inline Solv::valign Solv::align_resize(RESTRICT Solv::vals &v,
   return(&v[( offset % bytes )/sizeof(FLOAT_SOLV)]);
 };
 #endif
-
+//============= Inline Template Definitions ===============
 #endif

@@ -392,15 +392,7 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
     time_start( phys_start );
     const auto sysn = S->udof_n;
     for(uint i=0;i<sysn;i++){ S->part_f[i]=0.0; }
-#if 0
-  part_resp_glob( E, Y, 0, E->halo_elem_n, S->part_f, S->part_p,
-    [](__m256d vH[3], FLOAT_PHYS C1dw, FLOAT_PHYS C2dw){
-      compute_iso_s(&vH[0], C1dw,C2dw);return 0;
-      }
-    );
-#else
     Y->ElemLinear( E,0,E->halo_elem_n, S->part_f, S->part_p );
-#endif
     time_accum( my_phys_count, phys_start );
     time_start( gath_start );
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
@@ -491,23 +483,21 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
 #endif
         for(INT_MESH i=0; i<hl0; i++){
           S->part_r[i] -= S->part_f[i] * alpha;// Update force residuals
-          // Reuse part_f to store z = d*r.
-          S->part_f[i]  = S->part_d[i] * S->part_r[i];
-          //glob_sum2    += S->part_r[i] * S->part_f[i] *(FLOAT_SOLV( i>=hl0 ));
+          S->part_f[i]  = S->part_d[i] * S->part_r[i];// Reuse part_f for z = d*r.
         }
 #ifdef HAS_PRAGMA_SIMD
 #pragma omp simd reduction(+:glob_sum2)
 #endif
         for(INT_MESH i=hl0; i<sysn; i++){
           S->part_r[i] -= S->part_f[i] * alpha;// Update force residuals
-          // Reuse part_f to store z = d*r.
-          S->part_f[i]  = S->part_d[i] * S->part_r[i];
+          S->part_f[i]  = S->part_d[i] * S->part_r[i];// Reuse part_f for z = d*r.
           glob_sum2    += S->part_r[i] * S->part_f[i];// *(FLOAT_SOLV( i>=hl0 ));
         }
       }
     }
   }
   const FLOAT_PHYS beta = glob_sum2 / glob_r2a;// 1 FLOP
+#if 1
 #pragma omp for schedule(static)
   for(int part_i=part_0; part_i<part_o; part_i++){
     std::tie(E,Y,S)=priv_part[part_i];
@@ -523,6 +513,23 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
       S->part_p[i]  = S->part_f[i] + S->part_p[i] * beta;
     }
   }
+#else
+  //FIXME Templating does not seem to help.
+  part_loop( priv_part, E,Y,S, halo_vals, part_0, part_o,
+    [](Elem* E,Phys* Y,Solv* S, FLOAT_SOLV* halo_vals,
+       int Dm, int Dn, int hnn, int hl0, int sysn ){
+#ifdef HAS_PRAGMA_SIMD
+#pragma omp simd
+#endif
+    for(INT_MESH i=0; i<sysn; i++){// ? FLOP/DOF
+      S->part_u[i] += S->part_p[i] * alpha;// better data locality here
+      // Reuse part_f to store z = d*r.
+      S->part_p[i]  = S->part_f[i] + S->part_p[i] * beta;
+    }
+      return 0;
+      }
+    );
+#endif
 #if VERB_MAX>1
   iter_done  = std::chrono::high_resolution_clock::now();
   auto solv_time  = std::chrono::duration_cast<std::chrono::nanoseconds>

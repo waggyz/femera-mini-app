@@ -382,6 +382,7 @@ inline int Elem::Jac3Tnv(RESTRICT Mesh::vals& m, const FLOAT_MESH jacdet){
   if(jacdet < 0){return -1;} else{return 0;}
 }
 #undef JD
+//============= Inline Template Definitions ===============
 template <typename F> static inline
   int part_resp_glob( Elem* E, Phys* Y, const INT_MESH e0, const INT_MESH ee,
   FLOAT_SOLV* RESTRICT part_f, const FLOAT_SOLV* RESTRICT part_u, F mtrl_resp ){
@@ -458,7 +459,7 @@ template <typename F> static inline
     {// Scope vf registers
     __m256d vf[Nc];
 #ifdef FETCH_F_EARLY
-        for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+    for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
 #endif
     for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
       //G = MatMul3x3xN( jac,shg );
@@ -517,5 +518,35 @@ template <typename F> static inline
   }//============================================================ end elem loop
   return 0;
 }
+#if 0
+template <typename F> static inline
+  int part_loop( std::vector<Mesh::part> P, Elem* E, Phys* Y, Solv* S,
+    FLOAT_SOLV* halo_vals,
+    int part_0, int part_o, F solv_krnl ){
+#pragma omp for schedule(static)
+  for(int part_i=part_0; part_i<part_o; part_i++){
+    std::tie(E,Y,S)=P[part_i];
+    const INT_MESH Dm=uint(E->mesh_d);
+    const INT_MESH Dn=uint(Y->node_d);
+    const INT_MESH hnn=E->halo_node_n,hl0=S->halo_loca_0,sysn=S->udof_n;
+    solv_krnl( E,Y,S, halo_vals, Dm,Dn, hnn, hl0, sysn );
+  }
+  return 0;
+}
+template <typename F> static inline
+  int part_sum1( std::vector<Mesh::part> P, Elem* E, Phys* Y, Solv* S,
+    FLOAT_SOLV* halo_vals,
+    int part_0, int part_o, FLOAT_SOLV redu_summ, F solv_krnl ){
+#pragma omp for schedule(static) reduction(+:redu_summ)
+  for(int part_i=part_0; part_i<part_o; part_i++){
+    std::tie(E,Y,S)=P[part_i];
+    const INT_MESH Dm=uint(E->mesh_d);
+    const INT_MESH Dn=uint(Y->node_d);
+    const INT_MESH hnn=E->halo_node_n,hl0=S->halo_loca_0,sysn=S->udof_n;
+    solv_krnl( E,Y,S, halo_vals, Dm,Dn, hnn, hl0, sysn, redu_summ );
+  }
+  return 0;
+}
+#endif
 //
 #endif
