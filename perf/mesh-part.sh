@@ -16,7 +16,7 @@ EXEDIR=$( cd "$PERFDIR"; cd ../; pwd )
 CPUMODEL=`"$EXEDIR"/cpumodel.sh`
 CPUCOUNT=`"$EXEDIR"/cpucount.sh`
 GMSH2FMR="$EXEDIR"/"gmsh2fmr-"$CPUMODEL"-gcc"
-if [ -e "$C" ]; then C=$CPUCOUNT; fi
+if [ ! -n "$C" ]; then C=$CPUCOUNT; fi
 #
 DIR="$MESHDIR"/"uhxt"$H"p"$P
 if [ ! -d "$DIR" ]; then

@@ -30,6 +30,17 @@ int ElastIso3D::Setup( Elem* E ){
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) +2);
   return 0;
 }
+#if 1
+int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
+  FLOAT_SOLV* RESTRICT part_f, const FLOAT_SOLV* RESTRICT sys_u ){
+  part_resp_glob( E, this, e0, ee, part_f, sys_u,
+    [](__m256d vH[3], FLOAT_PHYS C1dw, FLOAT_PHYS C2dw){
+      compute_iso_s(&vH[0], C1dw,C2dw);return 0;
+      }
+    );
+  return 0;
+}
+#else
 int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   FLOAT_SOLV* RESTRICT part_f, const FLOAT_SOLV* RESTRICT sys_u ){
   //FIXME Clean up local variables.
@@ -46,21 +57,24 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   printf("DOF: %u, Elems:%u, IntPts:%u, Nodes/elem:%u\n",
     (uint)ndof,(uint)elem_n,(uint)intp_n,(uint)Nc );
 #endif
+  const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
+  const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
 #ifdef THIS_FETCH_JAC
   FLOAT_MESH VECALIGNED jac[Nj];
 #endif
   FLOAT_PHYS VECALIGNED G[Nt], u[Ne];
-  FLOAT_PHYS VECALIGNED intp_shpg[intp_n*Ne];
-  FLOAT_PHYS VECALIGNED wgt[intp_n];
-  FLOAT_PHYS VECALIGNED matc[this->mtrl_matc.size()];
   //
-  std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
-  std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
-  std::copy( &this->mtrl_matc[0], &this->mtrl_matc[mtrl_matc.size()], matc );
+  FLOAT_MESH VECALIGNED data_shpg[intp_n*Ne];
+  FLOAT_PHYS VECALIGNED data_weig[intp_n];
+  FLOAT_PHYS VECALIGNED data_matc[this->mtrl_matc.size()];
   //
-  const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
-  const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
-  const VECALIGNED FLOAT_SOLV* RESTRICT C     = &matc[0];
+  std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], data_shpg );
+  std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], data_weig );
+  std::copy( &this->mtrl_matc[0], &this->mtrl_matc[mtrl_matc.size()], data_matc );
+  //
+  const VECALIGNED FLOAT_MESH* RESTRICT shpg = &data_shpg[0];
+  const VECALIGNED FLOAT_SOLV* RESTRICT wgt  = &data_weig[0];
+  const VECALIGNED FLOAT_SOLV* RESTRICT C    = &data_matc[0];
 #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
   for(uint j=0;j<mtrl_matc.size();j++){
@@ -104,7 +118,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       __m256d vH[3];
-      compute_g_h( &G[0],&vH[0], Nc, &vJ[0], &intp_shpg[ip*Ne], &u[0] );
+      compute_g_h( &G[0],&vH[0], Nc, &vJ[0], &shpg[ip*Ne], &u[0] );
 #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
       for(int j=0;j<H.size();j++){
@@ -130,36 +144,13 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
           std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj );
 #endif
       } }
-#if 1
-      // Reuse vH instead of new vS
-      compute_iso_s( &vH[0], C[1]*dw,C[2]*dw );
+      compute_iso_s( &vH[0], C[1]*dw,C[2]*dw );// Reuse vH instead of new vS
 #ifndef FETCH_F_EARLY
       if(ip==0){
         for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
       }
 #endif
       accumulate_f( &vf[0], &vH[0], &G[0], Nc );
-#else
-      {// vector register scope
-      __m256d vS[3];
-      compute_iso_s( &vS[0], &vH[0], C[1]*dw,C[2]*dw );
-#if VERB_MAX>10
-      if(ie==4){
-        printf( "S[%u]:", ie );
-        for(uint j=0;j<12;j++){
-          if(j%4==0){printf("\n");}
-          printf("%+9.2e ",S[j]);
-        } printf("\n");
-      }
-#endif
-#ifndef FETCH_F_EARLY
-      if(ip==0){
-        for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
-      }
-#endif
-      accumulate_f( &vf[0], &vS[0], &G[0], Nc );
-      }// end vS register scope
-#endif
     }//========================================================== end intp loop
 #ifdef __INTEL_COMPILER
 #pragma vector unaligned
@@ -176,3 +167,4 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   }//============================================================ end elem loop
   return 0;
 }
+#endif

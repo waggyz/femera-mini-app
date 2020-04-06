@@ -64,6 +64,14 @@ public:
   Mesh::nfvals bcs_vals={};// Dirichlet bundary conditions (nonzeros)
   Mesh::nflist bc0_nf  ={};// Essential (u=0) Dirichlet BCs (node_id,dof_id)
   //
+#if 0
+  //template <typename F> static inline
+  template <typename F> inline
+    int part_resp_glob( F f, Phys* Y,
+    const INT_MESH e0, const INT_MESH ee,
+    FLOAT_SOLV* RESTRICT part_f, const FLOAT_SOLV* RESTRICT sys_u );
+#endif
+  //
   inline FLOAT_MESH Jac1Det( const FLOAT_MESH  );
   inline FLOAT_MESH Jac2Det( const FLOAT_MESH* );
   inline FLOAT_MESH Jac3Det( const FLOAT_MESH* );
@@ -375,6 +383,131 @@ inline int Elem::Jac3Tnv(RESTRICT Mesh::vals& m, const FLOAT_MESH jacdet){
 #undef JD
 
 
+#include <cstring>// std::memcpy
+template <typename F> static inline
+  int part_resp_glob( Elem* E, Phys* Y, const INT_MESH e0, const INT_MESH ee,
+  FLOAT_SOLV* RESTRICT part_f, const FLOAT_SOLV* RESTRICT sys_u, F f ){
+  //FIXME Clean up local variables.
+  //const int De = 3;// Element Dimension
+  const int Nd = 3;// Node (mesh) Dimension
+  const int Nf = 3;// Y->node_d DOF/node
+  const int Nj = Nd*Nd+1;
+  const int Nc = E->elem_conn_n;// Number of nodes/element
+  const int Ne = Nf*Nc;
+  const int Nt = 4*Nc;
+  const int intp_n = int(E->gaus_n);
+  //const INT_ORDER elem_p =E->elem_p;
+  const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
+  const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
+#ifdef THIS_FETCH_JAC
+  FLOAT_MESH VECALIGNED jac[Nj];
+#endif
+  FLOAT_PHYS VECALIGNED G[Nt], u[Ne];
+  //
+  FLOAT_MESH VECALIGNED data_shpg[intp_n*Ne];
+  FLOAT_PHYS VECALIGNED data_weig[intp_n];
+  FLOAT_PHYS VECALIGNED data_matc[Y->mtrl_matc.size()];
+  //
+  std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], data_shpg );
+  std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], data_weig );
+  std::copy( &Y->mtrl_matc[0], &Y->mtrl_matc[Y->mtrl_matc.size()], data_matc );
+  //
+  const VECALIGNED FLOAT_MESH* RESTRICT shpg = &data_shpg[0];
+  const VECALIGNED FLOAT_SOLV* RESTRICT wgt  = &data_weig[0];
+  const VECALIGNED FLOAT_SOLV* RESTRICT C    = &data_matc[0];
+#if VERB_MAX>11
+  printf( "Material [%u]:", (uint)Y->mtrl_matc.size() );
+  for(uint j=0;j<Y->mtrl_matc.size();j++){
+    //if(j%mesh_d==0){printf("\n");}
+    printf("%+9.2e ",C[j]);
+  } printf("\n");
+#endif
+  if(e0<ee){
+#ifdef THIS_FETCH_JAC
+    std::memcpy( &jac , &Ejacs[Nj*e0], sizeof(FLOAT_MESH)*Nj);
+#endif
+    const INT_MESH* RESTRICT c = &Econn[Nc*e0];
+#ifdef __INTEL_COMPILER
+#pragma vector unaligned
+#else
+//#pragma omp simd
+#endif
+    for (int i=0; i<Nc; i++){
+      std::memcpy( & u[Nf*i],&sys_u[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf ); }
+  }
+  for(INT_MESH ie=e0;ie<ee;ie++){//================================== Elem loop
+#ifdef THIS_FETCH_JAC
+    const __m256d vJ[3]={
+      _mm256_load_pd(&jac[0]),   // j0 = [j3 j2 j1 j0]
+      _mm256_loadu_pd(&jac[3]),  // j1 = [j6 j5 j4 j3]
+      _mm256_loadu_pd(&jac[6]) };// j2 = [j9 j8 j7 j6]
+#else
+    const __m256d vJ[3]={
+      _mm256_loadu_pd(&Ejacs[Nj*ie  ]),  // j0 = [j3 j2 j1 j0]
+      _mm256_loadu_pd(&Ejacs[Nj*ie+3]),  // j1 = [j6 j5 j4 j3]
+      _mm256_loadu_pd(&Ejacs[Nj*ie+6]) };// j2 = [j9 j8 j7 j6]
+    const FLOAT_MESH det=Ejacs[Nj*ie+9];
+#endif
+    const INT_MESH* RESTRICT conn = &Econn[Nc*ie];
+    {// Scope vf registers
+    __m256d vf[Nc];
+#ifdef FETCH_F_EARLY
+        for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+#endif
+    for(int ip=0; ip<intp_n; ip++){//============================== Int pt loop
+      //G = MatMul3x3xN( jac,shg );
+      //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
+      __m256d vH[3];
+      compute_g_h( &G[0],&vH[0], Nc, &vJ[0], &shpg[ip*Ne], &u[0] );
+#if VERB_MAX>10
+      printf( "Small Strains (Elem: %i):", ie );
+      for(int j=0;j<H.size();j++){
+        if(j%Nd==0){printf("\n");}
+        printf("%+9.2e ",H[j]);
+      } printf("\n");
+#endif
+#ifdef THIS_FETCH_JAC
+      const FLOAT_PHYS dw = jac[9] * wgt[ip];
+#else
+      const FLOAT_PHYS dw = det * wgt[ip];
+#endif
+      if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
+#ifndef FETCH_U_EARLY
+        const INT_MESH* RESTRICT cnxt = &Econn[Nc*(ie+1)];
+#ifdef __INTEL_COMPILER
+#pragma vector unaligned
+#endif
+        for (int i=0; i<Nc; i++){
+          std::memcpy(& u[Nf*i],& sys_u[cnxt[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
+#endif
+#ifdef THIS_FETCH_JAC
+          std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj );
+#endif
+      } }
+      //compute_iso_s( &vH[0], C[1]*dw,C[2]*dw );// Reuse vH instead of new vS
+      f( &vH[0], C[1]*dw,C[2]*dw );// Reuse vH instead of new vS
+#ifndef FETCH_F_EARLY
+      if(ip==0){
+        for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
+      }
+#endif
+      accumulate_f( &vf[0], &vH[0], &G[0], Nc );
+    }//========================================================== end intp loop
+#ifdef __INTEL_COMPILER
+#pragma vector unaligned
+#endif
+    for (int i=0; i<Nc; i++){
+      double VECALIGNED sf[4];
+      _mm256_store_pd(&sf[0],vf[i]);
+#ifdef __INTEL_COMPILER
+#pragma vector unaligned
+#endif
+      for(int j=0; j<3; j++){
+        part_f[3*conn[i]+j] = sf[j]; } }
+    }// end vf register scope
+  }//============================================================ end elem loop
+  return 0;
+};
 
 
 

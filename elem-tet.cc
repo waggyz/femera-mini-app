@@ -92,10 +92,10 @@ const RESTRICT Mesh::vals Tet::ShapeFunction(
   case(3):{ RESTRICT Mesh::vals f(20);
     const FLOAT_MESH L2=x[0]*v, L3=x[1]*v, L4=x[2]*v;
     const FLOAT_MESH L1=(v-L2-L3-L4);
-    f[ 0]= 0.5* L1 *(3.* L1 -1.)*(3* L1 -2.);// corner nodes;
-    f[ 1]= 0.5* L2 *(3.* L2 -1.)*(3* L2 -2.);
-    f[ 2]= 0.5* L3 *(3.* L3 -1.)*(3* L3 -2.);
-    f[ 3]= 0.5* L4 *(3.* L4 -1.)*(3* L4 -2.);
+    f[ 0]= 0.5* L1 *(3.* L1 -1.)*(3.* L1 -2.);// corner nodes;
+    f[ 1]= 0.5* L2 *(3.* L2 -1.)*(3.* L2 -2.);
+    f[ 2]= 0.5* L3 *(3.* L3 -1.)*(3.* L3 -2.);
+    f[ 3]= 0.5* L4 *(3.* L4 -1.)*(3.* L4 -2.);
     // edge nodes
     f[ 4]=4.5*( L1*L2 *(3.*L1 -1.) );
     f[ 5]=4.5*( L1*L2 *(3.*L2 -1.) );

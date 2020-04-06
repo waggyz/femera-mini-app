@@ -555,4 +555,8 @@ static inline void compute_g_p_h(
       _mm256_store_pd(& G[4* i ], vg );
   }
 }
+
+
+
+
 #endif

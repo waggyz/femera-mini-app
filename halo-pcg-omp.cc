@@ -392,7 +392,15 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
     time_start( phys_start );
     const auto sysn = S->udof_n;
     for(uint i=0;i<sysn;i++){ S->part_f[i]=0.0; }
+#if 0
+  part_resp_glob( E, Y, 0, E->halo_elem_n, S->part_f, S->part_p,
+    [](__m256d vH[3], FLOAT_PHYS C1dw, FLOAT_PHYS C2dw){
+      compute_iso_s(&vH[0], C1dw,C2dw);return 0;
+      }
+    );
+#else
     Y->ElemLinear( E,0,E->halo_elem_n, S->part_f, S->part_p );
+#endif
     time_accum( my_phys_count, phys_start );
     time_start( gath_start );
     const INT_MESH hnn=E->halo_node_n,hrn=E->halo_remo_n;
@@ -457,12 +465,12 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
 #endif
         for(INT_MESH i=0; i<sysn; i++){
             S->part_r[i] -= S->part_f[i] * alpha; }// Update force residuals
-        INT_MESH s=sysn/3;
+        const INT_MESH s=sysn/3;
         for(INT_MESH i=0; i<s; i++){
           for(INT_MESH j=0; j<3; j++){
             // Reuse part_f to store z = d*r.
             //NOTE Can be precon. inline function.
-            INT_MESH n=9*i+3*j;
+            const INT_MESH n=9*i+3*j;
             S->part_f[3* i+j ]
               = S->part_d[n    ] * S->part_r[3* i   ]
               + S->part_d[n +1 ] * S->part_r[3* i+1 ]
@@ -481,11 +489,20 @@ int HaloPCG::Iter(){// printf("*** Halo Iter() ***\n");
 #ifdef HAS_PRAGMA_SIMD
 #pragma omp simd reduction(+:glob_sum2)
 #endif
-        for(INT_MESH i=0; i<sysn; i++){
+        for(INT_MESH i=0; i<hl0; i++){
           S->part_r[i] -= S->part_f[i] * alpha;// Update force residuals
           // Reuse part_f to store z = d*r.
           S->part_f[i]  = S->part_d[i] * S->part_r[i];
-          glob_sum2    += S->part_r[i] * S->part_f[i] *(FLOAT_SOLV( i>=hl0 ));
+          //glob_sum2    += S->part_r[i] * S->part_f[i] *(FLOAT_SOLV( i>=hl0 ));
+        }
+#ifdef HAS_PRAGMA_SIMD
+#pragma omp simd reduction(+:glob_sum2)
+#endif
+        for(INT_MESH i=hl0; i<sysn; i++){
+          S->part_r[i] -= S->part_f[i] * alpha;// Update force residuals
+          // Reuse part_f to store z = d*r.
+          S->part_f[i]  = S->part_d[i] * S->part_r[i];
+          glob_sum2    += S->part_r[i] * S->part_f[i];// *(FLOAT_SOLV( i>=hl0 ));
         }
       }
     }
