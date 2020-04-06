@@ -39,7 +39,18 @@ int ElastDmv3D::Setup( Elem* E ){
   return 0;
 }
 int ElastDmv3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
-  FLOAT_SOLV* RESTRICT part_f, const FLOAT_SOLV* RESTRICT sys_u ){
+  FLOAT_SOLV* RESTRICT part_f, const FLOAT_SOLV* RESTRICT part_u ){
+  part_resp_glob( E, this, e0, ee, part_f, part_u,
+    [](__m256d vH[3], const FLOAT_PHYS D[48], const FLOAT_PHYS dw){
+      compute_dmv_s( &vH[0], &D[0], dw );
+      return 0;
+      }
+    );
+  return 0;
+}
+#if 0
+int ElastDmv3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
+  FLOAT_SOLV* RESTRICT part_f, const FLOAT_SOLV* RESTRICT part_u ){
   //FIXME Clean up local variables.
   //const int De = 3;// Element Dimension
   const int Nd = 3;// Node (mesh) Dimension
@@ -61,11 +72,11 @@ int ElastDmv3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   //
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], intp_shpg );
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], wgt );
-  std::copy( &this->mtrl_dmat[0], &this->mtrl_dmat[47], align_dmat );
+  std::copy( &this->mtrl_dmat[0], &this->mtrl_dmat[48], align_dmat );
   //
   const   INT_MESH* RESTRICT Econn = &E->elem_conn[0];
   const FLOAT_MESH* RESTRICT Ejacs = &E->elip_jacs[0];
-  const FLOAT_SOLV* RESTRICT D     = &align_dmat[0];
+  const FLOAT_PHYS* RESTRICT D     = &align_dmat[0];
 #if VERB_MAX>10
   printf( "Material [%u]:", (uint)mtrl_matc.size() );
   for(uint j=0;j<mtrl_matc.size();j++){
@@ -81,7 +92,7 @@ int ElastDmv3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 //#pragma omp simd
 #endif
     for (int i=0; i<Nc; i++){
-      std::memcpy( & u[Nf*i],&sys_u[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf ); }
+      std::memcpy( & u[Nf*i],&part_u[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf ); }
   }
   for(INT_MESH ie=e0;ie<ee;ie++){//================================== Elem loop
     const __m256d vJ[3]={
@@ -111,7 +122,7 @@ int ElastDmv3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #pragma vector unaligned
 #endif
         for (int i=0; i<Nc; i++){
-          std::memcpy(& u[Nf*i],& sys_u[cnxt[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
+          std::memcpy(& u[Nf*i],& part_u[cnxt[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
       } }
 #if 0
       __m256d vS[3]; compute_dmv_s( &vS[0], &vH[0], &D[0], dw );
@@ -146,3 +157,4 @@ int ElastDmv3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   }//============================================================ end elem loop
   return 0;
 }
+#endif

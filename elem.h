@@ -1,5 +1,6 @@
 #ifndef INCLUDED_ELEM_H
 #define INCLUDED_ELEM_H
+#include <cstring>// std::memcpy
 #include <vector>
 #include <set>
 #include <unordered_map>
@@ -69,7 +70,7 @@ public:
   template <typename F> inline
     int part_resp_glob( F f, Phys* Y,
     const INT_MESH e0, const INT_MESH ee,
-    FLOAT_SOLV* RESTRICT part_f, const FLOAT_SOLV* RESTRICT sys_u );
+    FLOAT_SOLV* RESTRICT part_f, const FLOAT_SOLV* RESTRICT part_u );
 #endif
   //
   inline FLOAT_MESH Jac1Det( const FLOAT_MESH  );
@@ -257,23 +258,23 @@ private:
 #define JD 1
 inline FLOAT_MESH Elem::Jac1Det(const FLOAT_MESH m){
   return( m );
-};
+}
 inline FLOAT_MESH Elem::Jac1Det(RESTRICT const Mesh::vals& m){
   return( m[0] );
-};
+}
 inline int Elem::Jac1Inv(RESTRICT Mesh::vals& m, const FLOAT_MESH jacdet){
   if(jacdet==0){return 1;}
   m= static_cast<FLOAT_MESH>(1.0)/jacdet;
   if(jacdet < 0){return -1;} else{return 0;}
-};
+}
 #undef JD
 #define JD 2
 inline FLOAT_MESH Elem::Jac2Det(const FLOAT_MESH* m){
   return( m[JD*0+ 0]*m[JD*1+ 1] - m[JD*0+ 1]*m[JD*1+ 0]);
-};
+}
 inline FLOAT_MESH Elem::Jac2Det(const RESTRICT Mesh::vals& m){
   return( m[JD*0+ 0]*m[JD*1+ 1] - m[JD*0+ 1]*m[JD*1+ 0]);
-};
+}
 inline int Elem::Jac2Inv( FLOAT_MESH* m, const FLOAT_MESH jacdet){
   if(jacdet==0){return 1;}
   FLOAT_MESH minv[4]; FLOAT_MESH dinv=static_cast<FLOAT_MESH>(1.0)/jacdet;
@@ -285,7 +286,7 @@ inline int Elem::Jac2Inv( FLOAT_MESH* m, const FLOAT_MESH jacdet){
   //m=minv*(static_cast<FLOAT_MESH>(1.0)/jacdet);
   for(int i=0;i<4;i++){ m[i]=minv[i]; };
   if(jacdet < 0){return -1;} else{return 0;}
-};
+}
 inline int Elem::Jac2Inv(RESTRICT Mesh::vals& m, const FLOAT_MESH jacdet){
   if(jacdet==0){return 1;}
   RESTRICT Mesh::vals minv(4);
@@ -295,7 +296,7 @@ inline int Elem::Jac2Inv(RESTRICT Mesh::vals& m, const FLOAT_MESH jacdet){
   minv[JD*1+ 1] = m[JD*0+ 0] ;
   m=minv*(static_cast<FLOAT_MESH>(1.0)/jacdet);
   if(jacdet < 0){return -1;} else{return 0;}
-};
+}
 inline int Elem::Jac2Tnv(RESTRICT Mesh::vals& m, const FLOAT_MESH jacdet){
   if(jacdet==0){return 1;}
   RESTRICT Mesh::vals minv(4);
@@ -305,7 +306,7 @@ inline int Elem::Jac2Tnv(RESTRICT Mesh::vals& m, const FLOAT_MESH jacdet){
   minv[JD*1+ 1] = m[JD*0+ 0] ;
   m=minv*(static_cast<FLOAT_MESH>(1.0)/jacdet);
   if(jacdet < 0){return -1;} else{return 0;}
-};
+}
 #undef JD
 #define JD 3
 inline FLOAT_MESH Elem::Jac3Det(const FLOAT_MESH* m ){
@@ -313,13 +314,13 @@ inline FLOAT_MESH Elem::Jac3Det(const FLOAT_MESH* m ){
       m[JD*0+ 0]*(m[JD*1+ 1] * m[JD*2+ 2] - m[JD*2+ 1] * m[JD*1+ 2])
     + m[JD*0+ 1]*(m[JD*1+ 2] * m[JD*2+ 0] - m[JD*2+ 2] * m[JD*1+ 0])
     + m[JD*0+ 2]*(m[JD*1+ 0] * m[JD*2+ 1] - m[JD*2+ 0] * m[JD*1+ 1]) );
-};
+}
 inline FLOAT_MESH Elem::Jac3Det(RESTRICT const Mesh::vals& m){
   return(
       m[JD*0+ 0]*(m[JD*1+ 1] * m[JD*2+ 2] - m[JD*2+ 1] * m[JD*1+ 2])
     + m[JD*0+ 1]*(m[JD*1+ 2] * m[JD*2+ 0] - m[JD*2+ 2] * m[JD*1+ 0])
     + m[JD*0+ 2]*(m[JD*1+ 0] * m[JD*2+ 1] - m[JD*2+ 0] * m[JD*1+ 1]) );
-};
+}
 inline int Elem::Jac3Inv( FLOAT_MESH* m, const FLOAT_MESH jacdet){
   if(jacdet==0){return 1;}
   //returns inverse in m
@@ -340,7 +341,7 @@ inline int Elem::Jac3Inv( FLOAT_MESH* m, const FLOAT_MESH jacdet){
   //m=minv;//*(static_cast<FLOAT_MESH>(1.0)/jacdet);
   for(int i=0;i<9;i++){ m[i]=minv[i]; };
   if(jacdet < 0){return -1;} else{return 0;}
-};
+}
 inline int Elem::Jac3Inv(RESTRICT Mesh::vals& m, const FLOAT_MESH jacdet){
   if(jacdet==0){return 1;}
   //returns inverse in m
@@ -359,7 +360,7 @@ inline int Elem::Jac3Inv(RESTRICT Mesh::vals& m, const FLOAT_MESH jacdet){
   minv[JD*2+ 2]*= (m[JD*0+ 0] * m[JD*1+ 1] - m[JD*1+ 0] * m[JD*0+ 1]) ;
   m=minv;//*(static_cast<FLOAT_MESH>(1.0)/jacdet);
   if(jacdet < 0){return -1;} else{return 0;}
-};
+}
 inline int Elem::Jac3Tnv(RESTRICT Mesh::vals& m, const FLOAT_MESH jacdet){
   if(jacdet==0){return 1;}
   //returns transposed inverse in m
@@ -379,14 +380,11 @@ inline int Elem::Jac3Tnv(RESTRICT Mesh::vals& m, const FLOAT_MESH jacdet){
   minv[JD*2+ 2]*= (m[JD*0+ 0] * m[JD*1+ 1] - m[JD*1+ 0] * m[JD*0+ 1]) ;
   m=minv;//*(static_cast<FLOAT_MESH>(1.0)/jacdet);
   if(jacdet < 0){return -1;} else{return 0;}
-};
+}
 #undef JD
-
-
-#include <cstring>// std::memcpy
 template <typename F> static inline
   int part_resp_glob( Elem* E, Phys* Y, const INT_MESH e0, const INT_MESH ee,
-  FLOAT_SOLV* RESTRICT part_f, const FLOAT_SOLV* RESTRICT sys_u, F f ){
+  FLOAT_SOLV* RESTRICT part_f, const FLOAT_SOLV* RESTRICT part_u, F mtrl_resp ){
   //FIXME Clean up local variables.
   //const int De = 3;// Element Dimension
   const int Nd = 3;// Node (mesh) Dimension
@@ -406,15 +404,23 @@ template <typename F> static inline
   //
   FLOAT_MESH VECALIGNED data_shpg[intp_n*Ne];
   FLOAT_PHYS VECALIGNED data_weig[intp_n];
-  FLOAT_PHYS VECALIGNED data_matc[Y->mtrl_matc.size()];
+  uint s=( Y->mtrl_dmat.size() > Y->mtrl_matc.size() )
+    ? Y->mtrl_dmat.size() : Y->mtrl_matc.size() ;
+  FLOAT_PHYS VECALIGNED data_matc[s];
+  //FLOAT_PHYS VECALIGNED data_dmat[Y->mtrl_dmat.size()];
   //
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], data_shpg );
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], data_weig );
-  std::copy( &Y->mtrl_matc[0], &Y->mtrl_matc[Y->mtrl_matc.size()], data_matc );
+  if(s==48){
+    std::copy( &Y->mtrl_dmat[0], &Y->mtrl_dmat[Y->mtrl_dmat.size()], data_matc );
+  }else{
+    std::copy( &Y->mtrl_matc[0], &Y->mtrl_matc[Y->mtrl_matc.size()], data_matc );
+  }
   //
   const VECALIGNED FLOAT_MESH* RESTRICT shpg = &data_shpg[0];
   const VECALIGNED FLOAT_SOLV* RESTRICT wgt  = &data_weig[0];
   const VECALIGNED FLOAT_SOLV* RESTRICT C    = &data_matc[0];
+  //
 #if VERB_MAX>11
   printf( "Material [%u]:", (uint)Y->mtrl_matc.size() );
   for(uint j=0;j<Y->mtrl_matc.size();j++){
@@ -433,7 +439,7 @@ template <typename F> static inline
 //#pragma omp simd
 #endif
     for (int i=0; i<Nc; i++){
-      std::memcpy( & u[Nf*i],&sys_u[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf ); }
+      std::memcpy( & u[Nf*i],&part_u[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf ); }
   }
   for(INT_MESH ie=e0;ie<ee;ie++){//================================== Elem loop
 #ifdef THIS_FETCH_JAC
@@ -478,14 +484,17 @@ template <typename F> static inline
 #pragma vector unaligned
 #endif
         for (int i=0; i<Nc; i++){
-          std::memcpy(& u[Nf*i],& sys_u[cnxt[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
+          std::memcpy(& u[Nf*i],& part_u[cnxt[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
 #endif
 #ifdef THIS_FETCH_JAC
           std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj );
 #endif
       } }
-      //compute_iso_s( &vH[0], C[1]*dw,C[2]*dw );// Reuse vH instead of new vS
-      f( &vH[0], C[1]*dw,C[2]*dw );// Reuse vH instead of new vS
+#if 0
+      compute_iso_s( &vH[0], C[1]*dw,C[2]*dw );// Reuse vH instead of new vS
+#else
+      mtrl_resp( &vH[0], &C[0], dw );// Reuse vH instead of new vS
+#endif
 #ifndef FETCH_F_EARLY
       if(ip==0){
         for(int i=0; i<Nc; i++){ vf[i]=_mm256_loadu_pd(&part_f[3*conn[i]]); }
@@ -507,10 +516,6 @@ template <typename F> static inline
     }// end vf register scope
   }//============================================================ end elem loop
   return 0;
-};
-
-
-
-
-
+}
+//
 #endif

@@ -32,17 +32,23 @@ int ElastIso3D::Setup( Elem* E ){
 }
 #if 1
 int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
-  FLOAT_SOLV* RESTRICT part_f, const FLOAT_SOLV* RESTRICT sys_u ){
-  part_resp_glob( E, this, e0, ee, part_f, sys_u,
-    [](__m256d vH[3], FLOAT_PHYS C1dw, FLOAT_PHYS C2dw){
-      compute_iso_s(&vH[0], C1dw,C2dw);return 0;
+  FLOAT_SOLV* RESTRICT part_f, const FLOAT_SOLV* RESTRICT part_u ){
+  part_resp_glob( E, this, e0, ee, part_f, part_u,
+#if 1
+    [](__m256d vH[3], const FLOAT_PHYS C[3], const FLOAT_PHYS dw){
+      compute_iso_s(&vH[0], C[1]*dw,C[2]*dw);
+#else
+    [](__m256d vH[3], const FLOAT_PHYS C1dw, const FLOAT_PHYS C2dw){
+      compute_iso_s(&vH[0], C1dw,C2dw);
+#endif
+      return 0;
       }
     );
   return 0;
 }
 #else
 int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
-  FLOAT_SOLV* RESTRICT part_f, const FLOAT_SOLV* RESTRICT sys_u ){
+  FLOAT_SOLV* RESTRICT part_f, const FLOAT_SOLV* RESTRICT part_u ){
   //FIXME Clean up local variables.
   //const int De = 3;// Element Dimension
   const int Nd = 3;// Node (mesh) Dimension
@@ -93,7 +99,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 //#pragma omp simd
 #endif
     for (int i=0; i<Nc; i++){
-      std::memcpy( & u[Nf*i],&sys_u[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf ); }
+      std::memcpy( & u[Nf*i],&part_u[c[i]*Nf],sizeof(FLOAT_SOLV)*Nf ); }
   }
   for(INT_MESH ie=e0;ie<ee;ie++){//================================== Elem loop
 #ifdef THIS_FETCH_JAC
@@ -138,7 +144,7 @@ int ElastIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #pragma vector unaligned
 #endif
         for (int i=0; i<Nc; i++){
-          std::memcpy(& u[Nf*i],& sys_u[cnxt[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
+          std::memcpy(& u[Nf*i],& part_u[cnxt[i]*Nf], sizeof(FLOAT_SOLV)*Nf ); }
 #endif
 #ifdef THIS_FETCH_JAC
           std::memcpy( &jac, &Ejacs[Nj*(ie+1)], sizeof(FLOAT_MESH)*Nj );
