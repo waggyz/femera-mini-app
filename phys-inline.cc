@@ -331,28 +331,13 @@ static inline void test_g_h( FLOAT_PHYS* G, __m256d* vH,// line 273
   const int Nc, const __m256d* vJ, const FLOAT_PHYS* pt, const FLOAT_PHYS* u ){
   vH[0]=_mm256_setzero_pd(); vH[1]=_mm256_setzero_pd(); vH[2]=_mm256_setzero_pd();
   if(Nc==10){
-#if 1
-    const FLOAT_PHYS L[4]={// 4*L
-      4.0*(1.0-pt[0]-pt[1]-pt[2]), 4.0*pt[0], 4.0*pt[1], 4.0*pt[2] };
-    // Gradient of L
-    const __m256d L0=_mm256_set_pd(0.0,-1.0,-1.0,-1.0 );
-    const __m256d L1=_mm256_set_pd(0.0, 0.0, 0.0, 1.0 );
-    const __m256d L2=_mm256_set_pd(0.0, 0.0, 1.0, 0.0 );
-    const __m256d L3=_mm256_set_pd(0.0, 1.0, 0.0, 0.0 );
-#else
     const FLOAT_PHYS L[4]={// 4*L
       4.0*(1.0-pt[0]-pt[1]-pt[2]), 4.0*pt[0], 4.0*pt[1], 4.0*pt[2] };
     // Gradient of L reversed
-    const __m256d L0=_mm256_set_pd(-1.0,-1.0,-1.0, 0.0 );
-    const __m256d L1=_mm256_set_pd( 1.0, 0.0, 0.0, 0.0 );
-    const __m256d L2=_mm256_set_pd( 0.0, 1.0, 0.0, 0.0 );
-    const __m256d L3=_mm256_set_pd( 0.0, 0.0, 1.0, 0.0 );
-#endif
-    
-    // j0 = [j3 j2 j1 j0]
-    // j1 = [j6 j5 j4 j3]
-    // j2 = [j9 j8 j7 j6]
-    
+    const __m256d L0=_mm256_set_pd(0.0,-1.0,-1.0,-1.0 );// j0 = [j3 j2 j1 j0]
+    const __m256d L1=_mm256_set_pd(0.0, 0.0, 0.0, 1.0 );// j1 = [j6 j5 j4 j3]
+    const __m256d L2=_mm256_set_pd(0.0, 0.0, 1.0, 0.0 );// j2 = [j9 j8 j7 j6]
+    const __m256d L3=_mm256_set_pd(0.0, 1.0, 0.0, 0.0 );
     FLOAT_PHYS sg[4];
     //
     // Corner Nodes
@@ -366,36 +351,35 @@ static inline void test_g_h( FLOAT_PHYS* G, __m256d* vH,// line 273
     __m256d vg
       = vJ[0] *_mm256_set1_pd( sg[0])
       + vJ[1] *_mm256_set1_pd( sg[1])
-      + vJ[2] *_mm256_set1_pd( sg[2]); int i=0;
+      + vJ[2] *_mm256_set1_pd( sg[2]);{ const int i=0;
     vH[0]+= vg *_mm256_set1_pd( u[3* i+0 ]);
     vH[1]+= vg *_mm256_set1_pd( u[3* i+1 ]);
     vH[2]+= vg *_mm256_set1_pd( u[3* i+2 ]);
-    _mm256_store_pd(& G[4* i ], vg );
+    _mm256_store_pd(& G[4* i ], vg ); }
     _mm256_store_pd(& sg[0],_mm256_set1_pd( L[1] ) * L1 - L1 );
     vg= vJ[0] *_mm256_set1_pd( sg[0])
       + vJ[1] *_mm256_set1_pd( sg[1])
-      + vJ[2] *_mm256_set1_pd( sg[2]); i++;
+      + vJ[2] *_mm256_set1_pd( sg[2]);{ const int i=1;
     vH[0]+= vg *_mm256_set1_pd( u[3* i+0 ]);
     vH[1]+= vg *_mm256_set1_pd( u[3* i+1 ]);
     vH[2]+= vg *_mm256_set1_pd( u[3* i+2 ]);
-    _mm256_store_pd(& G[4* i ], vg );
+    _mm256_store_pd(& G[4* i ], vg ); }
     _mm256_store_pd(& sg[0],_mm256_set1_pd( L[2] ) * L2 - L2 );
     vg= vJ[0] *_mm256_set1_pd( sg[0])
       + vJ[1] *_mm256_set1_pd( sg[1])
-      + vJ[2] *_mm256_set1_pd( sg[2]); i++;
+      + vJ[2] *_mm256_set1_pd( sg[2]);{ const int i=2;
     vH[0]+= vg *_mm256_set1_pd( u[3* i+0 ]);
     vH[1]+= vg *_mm256_set1_pd( u[3* i+1 ]);
     vH[2]+= vg *_mm256_set1_pd( u[3* i+2 ]);
-    _mm256_store_pd(& G[4* i ], vg );
+    _mm256_store_pd(& G[4* i ], vg ); }
     _mm256_store_pd(& sg[0],_mm256_set1_pd( L[3] ) * L3 - L3 );
     vg= vJ[0] *_mm256_set1_pd( sg[0])
       + vJ[1] *_mm256_set1_pd( sg[1])
-      + vJ[2] *_mm256_set1_pd( sg[2]); i++;
+      + vJ[2] *_mm256_set1_pd( sg[2]);{ const int i=3;
     vH[0]+= vg *_mm256_set1_pd( u[3* i+0 ]);
     vH[1]+= vg *_mm256_set1_pd( u[3* i+1 ]);
     vH[2]+= vg *_mm256_set1_pd( u[3* i+2 ]);
-    _mm256_store_pd(& G[4* i ], vg );
-    
+    _mm256_store_pd(& G[4* i ], vg ); }
     /*
     g[ 4] = 4.*L2*L1r + 4.*L2r*L1; 1,0// Edge nodes
     g[ 5] = 4.*L2*L3r + 4.*L2r*L3; 1,2
@@ -410,66 +394,61 @@ static inline void test_g_h( FLOAT_PHYS* G, __m256d* vH,// line 273
       _mm256_set1_pd( L[1] ) * L0 );
     vg= vJ[0] *_mm256_set1_pd( sg[0])
       + vJ[1] *_mm256_set1_pd( sg[1])
-      + vJ[2] *_mm256_set1_pd( sg[2]); i++;
+      + vJ[2] *_mm256_set1_pd( sg[2]);{ const int i=4;
     vH[0]+= vg *_mm256_set1_pd( u[3* i+0 ]);
     vH[1]+= vg *_mm256_set1_pd( u[3* i+1 ]);
     vH[2]+= vg *_mm256_set1_pd( u[3* i+2 ]);
-    _mm256_store_pd(& G[4* i ], vg );
+    _mm256_store_pd(& G[4* i ], vg ); }
     _mm256_store_pd(& sg[0],
       _mm256_set1_pd( L[1] ) * L2 +
       _mm256_set1_pd( L[2] ) * L1 );
     vg= vJ[0] *_mm256_set1_pd( sg[0])
       + vJ[1] *_mm256_set1_pd( sg[1])
-      + vJ[2] *_mm256_set1_pd( sg[2]); i++;
+      + vJ[2] *_mm256_set1_pd( sg[2]);{ const int i=5;
     vH[0]+= vg *_mm256_set1_pd( u[3* i+0 ]);
     vH[1]+= vg *_mm256_set1_pd( u[3* i+1 ]);
     vH[2]+= vg *_mm256_set1_pd( u[3* i+2 ]);
-    _mm256_store_pd(& G[4* i ], vg );
+    _mm256_store_pd(& G[4* i ], vg ); }
     _mm256_store_pd(& sg[0],
       _mm256_set1_pd( L[0] ) * L2 +
       _mm256_set1_pd( L[2] ) * L0 );
     vg= vJ[0] *_mm256_set1_pd( sg[0])
       + vJ[1] *_mm256_set1_pd( sg[1])
-      + vJ[2] *_mm256_set1_pd( sg[2]); i++;
+      + vJ[2] *_mm256_set1_pd( sg[2]);{ const int i=6;
     vH[0]+= vg *_mm256_set1_pd( u[3* i+0 ]);
     vH[1]+= vg *_mm256_set1_pd( u[3* i+1 ]);
     vH[2]+= vg *_mm256_set1_pd( u[3* i+2 ]);
-    _mm256_store_pd(& G[4* i ], vg );
+    _mm256_store_pd(& G[4* i ], vg ); }
     _mm256_store_pd(& sg[0],
       _mm256_set1_pd( L[0] ) * L3 +
       _mm256_set1_pd( L[3] ) * L0 );
     vg= vJ[0] *_mm256_set1_pd( sg[0])
       + vJ[1] *_mm256_set1_pd( sg[1])
-      + vJ[2] *_mm256_set1_pd( sg[2]); i++;
+      + vJ[2] *_mm256_set1_pd( sg[2]);{ const int i=7;
     vH[0]+= vg *_mm256_set1_pd( u[3* i+0 ]);
     vH[1]+= vg *_mm256_set1_pd( u[3* i+1 ]);
     vH[2]+= vg *_mm256_set1_pd( u[3* i+2 ]);
-    _mm256_store_pd(& G[4* i ], vg );
+    _mm256_store_pd(& G[4* i ], vg ); }
     _mm256_store_pd(& sg[0],
       _mm256_set1_pd( L[2] ) * L3 +
       _mm256_set1_pd( L[3] ) * L2 );
     vg= vJ[0] *_mm256_set1_pd( sg[0])
       + vJ[1] *_mm256_set1_pd( sg[1])
-      + vJ[2] *_mm256_set1_pd( sg[2]); i++;
+      + vJ[2] *_mm256_set1_pd( sg[2]);{ const int i=8;
     vH[0]+= vg *_mm256_set1_pd( u[3* i+0 ]);
     vH[1]+= vg *_mm256_set1_pd( u[3* i+1 ]);
     vH[2]+= vg *_mm256_set1_pd( u[3* i+2 ]);
-    _mm256_store_pd(& G[4* i ], vg );
+    _mm256_store_pd(& G[4* i ], vg ); }
     _mm256_store_pd(& sg[0],
       _mm256_set1_pd( L[1] ) * L3 +
       _mm256_set1_pd( L[3] ) * L1 );
     vg= vJ[0] *_mm256_set1_pd( sg[0])
       + vJ[1] *_mm256_set1_pd( sg[1])
-      + vJ[2] *_mm256_set1_pd( sg[2]); i++;
+      + vJ[2] *_mm256_set1_pd( sg[2]);{ const int i=9;
     vH[0]+= vg *_mm256_set1_pd( u[3* i+0 ]);
     vH[1]+= vg *_mm256_set1_pd( u[3* i+1 ]);
     vH[2]+= vg *_mm256_set1_pd( u[3* i+2 ]);
-    _mm256_store_pd(& G[4* i ], vg );
-    
-    
-    
-    
-    
+    _mm256_store_pd(& G[4* i ], vg ); }
   }else{
     const FLOAT_PHYS* sg=& pt[0];
     for(int i= 0; i<Nc; i++){
