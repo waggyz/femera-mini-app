@@ -382,7 +382,12 @@ inline int Elem::Jac3Tnv(RESTRICT Mesh::vals& m, const FLOAT_MESH jacdet){
   if(jacdet < 0){return -1;} else{return 0;}
 }
 #undef JD
+//FIXME Move this to a more appropriate place.
 //======================== Inline Template Definitions ========================
+//FIXME elem-tet-3d3g: tet in 3D mesh, 3 dof/node in global coords
+//FIXME elem-tet-3d3m: tet in 3D mesh, 3 dof/node in material coords
+//FIXME elem-tet-3d4mf: tet in 3D mesh, 4 dof/node mtrl coords, shpf available
+//      Hmmm... could put some comiler defs before the template instantiation?
 template <typename F> static inline
   int part_resp_glob( Elem* E, Phys* Y, const INT_MESH e0, const INT_MESH ee,
   FLOAT_SOLV* RESTRICT part_f, const FLOAT_SOLV* RESTRICT part_u, F mtrl_resp ){
@@ -412,11 +417,16 @@ template <typename F> static inline
   //
   std::copy( &E->intp_shpg[0], &E->intp_shpg[intp_n*Ne], data_shpg );
   std::copy( &E->gaus_weig[0], &E->gaus_weig[intp_n], data_weig );
-  if(matc_n==48){//FIXME
+  if(matc_n==48){//FIXME do this in init.
     std::copy( &Y->mtrl_dmat[0], &Y->mtrl_dmat[Y->mtrl_dmat.size()], data_matc );
   }else{
     std::copy( &Y->mtrl_matc[0], &Y->mtrl_matc[Y->mtrl_matc.size()], data_matc );
   }
+#if 0
+  FLOAT_PHYS VECALIGNED data_shpf[intp_n*Nc];
+  std::copy( &E->intp_shpf[0], &E->intp_shpf[intp_n*Nc], data_shpf );
+  const VECALIGNED FLOAT_MESH* RESTRICT shpf = &data_shpf[0];
+#endif
   const VECALIGNED FLOAT_MESH* RESTRICT shpg = &data_shpg[0];
   const VECALIGNED FLOAT_SOLV* RESTRICT wgt  = &data_weig[0];
   const VECALIGNED FLOAT_SOLV* RESTRICT C    = &data_matc[0];

@@ -36,6 +36,12 @@ int ElastDmv3D::Setup( Elem* E ){
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) );
   this->stif_band = uint(E->elem_n) * sizeof(FLOAT_PHYS)
     * 3*uint(E->elem_conn_n) *( 3*uint(E->elem_conn_n) +2);
+  //
+#if 0
+  this->mtrl_matc.resize(48);
+  std::copy( &this->mtrl_dmat[0], &this->mtrl_dmat[48], &this->mtrl_matc[0] );
+#endif
+  //
   return 0;
 }
 int ElastDmv3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,

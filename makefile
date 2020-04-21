@@ -248,7 +248,7 @@ test-thermal : mini-omp gmsh2fmr
 	export OMP_PLACES=cores; export OMP_PROC_BIND=spread; \
 	./femera-$(CPUMODELC) -v2 -c$(NCPU) -p cube/unst19p1n16
 
-test-thermelast : mini-omp gmsh2fmr
+test-thermelas : mini-omp gmsh2fmr
 	./gmsh2fmr-$(CPUMODEL) -v3 \
 	-x@0.0 -x0 -y@0.0 -y0 -z@0.0 -z0 -x@1.0 -xu0.001 -x@1.0 -Tu10 \
 	-M0 -E100e9 -N0.3 -A20e-6 -K10e3 \

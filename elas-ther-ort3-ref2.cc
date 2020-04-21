@@ -104,16 +104,9 @@ int ThermElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee
           }
           for(int j=0; j<Dn ; j++){
             A[Dn* i+j ] += G[Dm* k+i ] * u[Dn* k+j ];
-          }// The last COLUMMN A[3,7,11] has dT/dx
+          }// The last COLUMMN A[3,7,11] has dT/dr (rotation is in jac)
         }
       }//----------------------------------------------- N*3*(6+8) = 42*Nc FLOP
-#if VERB_MAX>10
-      printf( "Small Strains (Elem: %i):", ie );
-      for(int j=0;j<HH.size();j++){
-        if(j%mesh_d==0){ printf("\n"); }
-        printf("%+9.2e ",H[j]);
-      } printf("\n");
-#endif
       // [H] Small deformation tensor
       // [H][RT] : matmul3x3x3T
       dw = jac[9] * wgt[ip];//------------------------------------------ 1 FLOP
@@ -122,7 +115,13 @@ int ThermElastOrtho3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee
           for(int j=0; j<Dm; j++){
             H[Dm* i+k ] += A[Dn* i+j] * R[Dm* k+j ];
       } } }//---------------------------------------------- 27*2 =      54 FLOP
-      //
+#if VERB_MAX>10
+      printf( "Small Strains (Elem: %i):", ie );
+      for(int j=0;j<9;j++){
+        if(j%3==0){ printf("\n"); }
+        printf("%+9.2e ",H[j]);
+      } printf("\n");
+#endif
       FLOAT_PHYS Tip=0.0;// Zero the temperature at this integration point
       for(int i=0; i<Nc; i++){// Interpolate temperature
         Tip += intp_shpf[Nc*ip +i] * u[Dn* i+Dm ];//----------------- 6*Nc FLOP
