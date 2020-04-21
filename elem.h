@@ -409,6 +409,14 @@ template <typename F> static inline
   FLOAT_MESH VECALIGNED jac[Nj];
 #endif
   FLOAT_PHYS VECALIGNED G[4*Nc], u[Ne];
+  
+  const FLOAT_PHYS a=0.5854101966249685;// (5.0+3.0*std::sqrt(5.))/20.0;
+  const FLOAT_PHYS b=0.1381966011250105;// (5.0-std::sqrt(5.))/20.0;
+  const FLOAT_PHYS VECALIGNED gaus_ptwt[16]={
+    a,b,b, 0.25/6.0,
+    b,a,b, 0.25/6.0,
+    b,b,a, 0.25/6.0,
+    b,b,b, 0.25/6.0};
   //
   FLOAT_MESH VECALIGNED data_shpg[intp_n*Ne];
   FLOAT_PHYS VECALIGNED data_weig[intp_n];
@@ -474,7 +482,11 @@ template <typename F> static inline
       //G = MatMul3x3xN( jac,shg );
       //H = MatMul3xNx3T( G,u );// [H] Small deformation tensor
       __m256d vH[3];
-      compute_g_h( &G[0],&vH[0], Nc, &vJ[0], &shpg[ip*Ne], &u[0] );
+      if(intp_n==4){
+      test_g_h( &G[0],&vH[0], Nc, &vJ[0], &gaus_ptwt[4* ip ], &u[0] );
+      }else{
+      compute_g_h( &G[0],&vH[0], Nc, &vJ[0], &shpg[Ne* ip ], &u[0] );
+      }
 #if VERB_MAX>10
       printf( "Small Strains (Elem: %i):", ie );
       for(int j=0;j<H.size();j++){
