@@ -6,6 +6,7 @@
 #endif
 // Maximum verbosity supported by executable
 // 0:none, 1:CSV line output, 2: timing, 3: status //11:debug level
+#define STORE_SHAPE_GRAD
 #define INT_PART int
 // Mesh Partition ID (user-defined?)
 //#define INT_MESH unsigned int// Element Numbers

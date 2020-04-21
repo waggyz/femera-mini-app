@@ -326,7 +326,7 @@ static inline void compute_iso_s(__m256d* vA,// in-place version
 
 
 
-
+#ifndef STORE_SHAPE_GRAD
 static inline void test_g_h( FLOAT_PHYS* G, __m256d* vH,// line 273
   const int Nc, const __m256d* vJ, const FLOAT_PHYS* pt, const FLOAT_PHYS* u ){
   vH[0]=_mm256_setzero_pd(); vH[1]=_mm256_setzero_pd(); vH[2]=_mm256_setzero_pd();
@@ -463,10 +463,7 @@ static inline void test_g_h( FLOAT_PHYS* G, __m256d* vH,// line 273
     }
   }
 }
-
-
-
-
+#endif
 static inline void compute_g_h( FLOAT_PHYS* G, __m256d* vH,// line 273
   const int Nc, const __m256d* vJ, const FLOAT_PHYS* sg, const FLOAT_PHYS* u ){
   vH[0]=_mm256_setzero_pd(); vH[1]=_mm256_setzero_pd(); vH[2]=_mm256_setzero_pd();
