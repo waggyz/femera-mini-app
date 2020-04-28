@@ -323,9 +323,6 @@ static inline void compute_iso_s(__m256d* vA,// in-place version
   vS[2] = _mm256_load_pd(&fS[8]); // [a9 a8 a7 a6]
 #endif
 }
-
-
-
 #ifndef STORE_SHAPE_GRAD
 static inline void test_g_h( FLOAT_PHYS* G, __m256d* vH,// line 273
   const int Nc, const __m256d* vJ, const FLOAT_PHYS* pt, const FLOAT_PHYS* u ){
