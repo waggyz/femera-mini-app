@@ -1,0 +1,21 @@
+I have a (actual two similar) C++ template(s) in
+
+class Base{
+public:
+    template <typename W>
+    W* get_task (const int i ){
+      return dynamic_cast<W*>(this-> task->get_task (i) );
+    }
+}
+
+The member function this-> task->get_task (i) returns a pointer to an instance of Base, or a pointer to an instance of a class derived from Base, which has been stored as a Base* pointer (in a std::deque<Base*> in Base).
+
+I would like to have this defined generically (preferably only in Base, but ok if I just need a one-liner in each derived class header) for EVERY class derived from Base, so that this simple cast does not need to be declared and defined for every derived class (which is what I'm doing now).
+
+It should work like this:
+
+class Derived_1 : public Base{
+public:
+    typeof(this) Work::get_task (const int);// cast it as Derived_1
+}
+But, I can't do typeof(this) for template type matching, although the type of "this" (in the context of the definition of Derived_1) is always Derived_1*, and known at compile time.
