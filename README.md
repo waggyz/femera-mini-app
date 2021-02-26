@@ -7,24 +7,21 @@ sizes and HPC architectures.
 
 ## Femera data handling mini-app installation
 
-
-
 ### 1. Clone Femera with its required and optional external packages
 
 **Important** Do **not** build Femera in a location that has spaces in the path.
 
 ```bash
-git clone --recursive -b develop https://gitlab.larc.nasa.gov/dwagner5/Femera
+git clone --recursive -b data https://github.com/waggyz/femera-mini-app.git
 ```
 
 This populates external/ with:
-googletest (gtest), testy, HDF5, CGNS, gmsh, pybind11, PETSc,
-zyclops (when available)
+googletest (gtest), testy, HDF5, CGNS, gmsh, pybind11,(when available)
 
 These have several dependencies.
 
 * BLAS and LAPACK must be installed.
-* CMake 3.? required for several external packages.
+* CMake 3.? is required for several external packages.
 * Pybind11 requires boost 1.56.
 
 ### 2. Set up your Python environment
@@ -41,78 +38,40 @@ OpenMPI 2.1.1 and 3.1 have been tested.
 ### 4. Build external packages
 
 ```bash
-cd Femera
+cd femera-mini-app
 make external
 ```
 
-### 5. Set up your Python environment again
-
-[**NOTE** Skip this step for now]
-[**TODO**] Install mpi4py, pyhdf5, pycgns, pygmsh, pypetsc, etc.
-
-### 6. Set build options in config.local.
+### 5. Set build options in config.local.
 
 **TODO** See docs/install-femera.txt for details.
 
-### 7. Build Femera
+### 6. Build Femera
 
 **Important** Build Femera on the machine that you will use it on.
 ```bash
 make -j
 ```
-**TODO** make test
-**TODO** make -j install
 
-Tune Femera for your hardware.
+### 7. Try it
 
-**TODO** make tune
-
-**WARNING** This takes a while to run.
+```bash
+fmr1node build/femera/mini tests/mesh/cube-tet6*.* -o'build/femera/cube-tet6.cgn'
+```
 
 ## Femera command line interface
 
-Use femerea -h for a list of command line options.
+For a list of command line options, run:
 
+```bash
+build/femera/mini -h
+```
+You may also see GoogleTest options, if you built Femera with it.
 
 **TODO** Describe how to run some examples.
 
 
-
-## Femera mini-app quick start
-
-**WARNING** Use the Femera full installation instructions above during initial
-Femera 0.1 development.
-
-**TODO** Move this to the top when it works.
-
-The basic mini-app only requires bash, gmake, Python 2.7,
-and a compiler that supports C++11 and OpenMP.
-CMake 3.15, Python 3.6 (with pytest, pytest-check, and python-subunit
-modules), gtest, and gmsh are useful for development and performance
-optimization, but not required.
-
-```bash
-git clone https://github.com/waggyz/femera-mini-app
-
-#--or--
-
-git clone --recursive --branch mini https://gitlab.larc.nasa.gov/dwagner5/Femera
-```
-
-**Important** Build Femera on the machine that you will use it on.
-
-```bash
-make -j
-make test
-make -j install
-```
-
-Tune Femera for your hardware.
-```bash
-make tune
-```
-**Warning** This takes a while to run.
-# Notices:
+ Notices:
 Copyright 2018 United States Government as represented by the Administrator of
 the National Aeronautics and Space Administration. No copyright is claimed in
 the United States under Title 17, U.S. Code. All Other Rights Reserved.
