@@ -1887,10 +1887,6 @@ $VertCoor
 127 0.421053 1 1
 123 0.631579 1 1
 $Orientation
-3 3.4807 2.99957 3.95131
+3 1.5261 0.862251 5.05279
 $Elastic
 2 1e+11 0.3
-$ThermalExpansion
-1 2e-05
-$ThermalConductivity
-1 250

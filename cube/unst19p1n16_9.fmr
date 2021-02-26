@@ -2235,10 +2235,6 @@ $BC0
 438 0
 438 2
 $Orientation
-3 0.683666 6.27643 1.37135
+3 2.99957 3.22579 5.98304
 $Elastic
 2 1e+11 0.3
-$ThermalExpansion
-1 2e-05
-$ThermalConductivity
-1 250
