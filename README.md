@@ -5,7 +5,7 @@ application that can be tuned for performance across a wide range of problem
 sizes and HPC architectures.
 
 
-## Femera full installation
+## Femera data handling mini-app installation
 
 
 
