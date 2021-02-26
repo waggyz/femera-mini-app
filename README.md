@@ -55,6 +55,9 @@ make -j
 
 ### 7. Try it
 
+This version of the mini-app must be run under MPI.
+A bash script (fmr1node) is provided for single-node runs.
+
 ```bash
 fmr1node build/femera/mini tests/mesh/cube-tet6*.* -o'build/femera/cube-tet6.cgn'
 ```
