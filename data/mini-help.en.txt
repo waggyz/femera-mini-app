@@ -1,0 +1,53 @@
+Usage: femera [-options] [databases]
+
+Femera command line options override simulation settings in the database.
+
+Options in lower case do not modify a model, but can be used to get information
+   and set run time parameters.
+
+-h help by printing this, then exit.
+-v version number reported, then exit.
+-v<int> verbosity level, limited by compiled MAX_VERBOSITY (default 7)
+   NOTE: can slow run time if > 7
+   0 no information reported
+   1 Femera version and compile-time options
+   2 program run-time information and options
+   3 simulation info
+   4 load step info
+   5 Newton step info, if applicable
+   6 iteration info
+   7 partition info (default)
+   8 element info
+   9 integration point info
+  10 (reserved)
+ >10 debugging output
+-d detail level set to verbosity level
+-d<int> detailed information level cannot exceed verbosity level
+   NOTE: can slow simulation run time
+-d detail level set to verbosity level
+-t<int> timing detail level, limited by compiled MAX_TIMING_DETAIL (default 7)
+   NOTE: a high level of timing detail can slow overall run time
+-n number of threads to assign to each MPI process.
+   The default is OMP_NUM_THREADS or the number of logical cores
+-i<str> input file(s)
+-o<str> output file
+-m<str> model name(s)
+
+If no (-m) models are given, Femera will run every simulation found in the
+input (-i) files specified. If an output (-o) file is not provided, Femera
+appends results to the first input file containing previous solutions, or to the
+first file containing data for that model.
+
+Options in upper case are shortcuts to common modeling and simulation tasks.
+Most of these will update the simulation database if the task is out of date.
+They may be specified in any order, together or apart.
+
+
+
+Some options in upper case modify the behavior of the simulation task options
+above.
+
+-X<int> Repeat tasks <int> times. This is useful for performance testing.
+-D Defaults will be used when data not present. This is useful for testing.
+-T Testing enabled
+

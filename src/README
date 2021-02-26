@@ -1,0 +1,52 @@
+Source Code Content (src/)
+
+Source code file name conventions are adapted from Pitchfork examples. Unit
+tests are denoted *_test.* instead of *.test.* for compatibility with Python.
+
+src/phys.hpp            C++ header
+src/phys.cpp            C++ implementation
+src/phys_test.cpp       unit tests of phys.cpp, contains main()
+src/phys_perf.cpp       performance tests, append-logged to check for regression
+src/phys_mock.cpp       dummy phys code for testing (when needed).
+
+src/phys/func.c         some vanilla C, usually inline, support function.
+src/phys/func_test.cpp  unit tests for the C function (can be .c).
+src/phys/func_perf.cpp  performance tests, append-logged to check for regression
+
+src/phys.py             Python implementation of phys
+src/phys_test.py        Python script for unit tests of phys.py
+src/phys_perf.py        Python script for performance tests of phys.py
+
+Testing of the C++ code can also be done using python scripts. For example,
+The following could be used instead of, or along with, phys_test.cpp and
+phys_perf.cpp. Python tests are preferred, because they can also test python
+bindings.
+
+src/phys_test_cpp.py    Python script for unit tests of C++ phys.a
+src/phys_perf_cpp.py    Python script for performance tests of C++ phys.a
+
+
+The results of unit and performance tests are kept in the build/ directory,
+along with object files, executables, and other build artifacts.
+
+build/$CPUMODEL/$CXX/
+  phys.o                Object file
+  phys.a                Static library for Python linking
+  phys_test             Executable test
+  phys_perf             Executable built from src/phys_perf.cpp.
+  phys_test.stdout      Captures stdout from the test. (Temporary?)
+  phys_test.stderr      Captures stderr from the test. (Temporary?)
+  phys_test.return      Captures return value from the test? (Temporary?)
+  phys_test.ok          Do not rerun test if this is present and up to date.
+  phys_perf.out err ret These are logged in build/perf/$CPUMODEL/$CXX/,
+                        to monitor trends.
+
+build/perf/$CPUMODEL/$CXX/
+  phys_perf.log
+  phys_perf.csv
+  phys_test.py.ok       Exists if all tests done by python passed.
+
+# References
+
+[1] https://github.com/vector-of-bool/pitchfork
+[2] https://api.csswg.org/bikeshed/?force=1&url=https://raw.githubusercontent.com/vector-of-bool/pitchfork/develop/data/spec.bs

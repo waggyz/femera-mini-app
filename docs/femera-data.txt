@@ -1,0 +1,55 @@
+Femera data handling
+
+Data and file handling are done at the MPI process level, with at least one MPI
+communicator (each containing at least one MPI process) for each NUMA domain.
+
+
+     Model size : Tiny             Small          Medium          Large
+    Concurrency : ncpu sim/node    >1 sim/node     1 sim/node     >1 node/sim
+  MPI processes : >1 sim/MPI        1 MPI/sim     >1 MPI/sim      >1 MPI/sim
+ OpenMP threads :  1 OMP/sim       >1 OMP/MPI     >1 OMP/MPI      >1 OMP/MPI
+ Data instances :  1 data/cpu       1 data/MPI     1 data/node     1 data/sim
+Partition depth :  0-1 (merged)     1              1-2             2
+ Sim sync level :  0:none           1:OpenMP       2:MPI+OpenMP    2:MPI+OpenMP
+  Data parallel : serial           serial         collective      collective
+
+
+        Example : 40-core skylake, quadratic tetrahedra (estimated)
+     Model size : Tiny             Small          Medium          Large
+     Model size : <30 kdof         30-1000 kDOF    1-100 Mdof     >100 Mdof
+    Concurrency :  40 sim/node     20-2 sim/node   1 node/sim     >1 node/sim
+  MPI processes :   4 (10 sim/MPI) 1 MPI/sim       4 MPI/node      4 MPI/node
+ OpenMP threads :   1 OMP/sim      2-20 OMP/MPI   10 OMP/MPI      10 OMP/MPI
+
+All Work classes inherit the processing (Proc) and data (Data) environment
+created during Femera initialization.
+
+Work : Work for Femera to do
+       Proc : Processing environment
+       Data : Data sources and destinations, including optional
+              Save : Save or export data
+              Plot : Visualization methods
+       Post : Post-processing tasks
+
+
+Planned Data plugins
+
+Dcgn : CGNS mid-level interface to mesh and CFD data on mesh
+       Experimental support for cubic elements
+
+Dmsh : Gmsh high-level interface to mesh (.msh) and abstract (.geo) geometry
+       Supports several other mesh formats (.cgns, .mesh, etc.)
+       Supports high-order elements
+       Exports visualizations (EPS, PNG, MPG, etc.)
+
+Grid : Structured grid data generated at runtime
+
+Dinp : Abaqus-compatible ASCII input file
+
+Dmoa : MOAB low-level interface to mesh and data on mesh
+       Suppports HDF5 and several standard mesh formats (.cub, etc.)
+       Only linear and quadratic standard elements
+
+Vpvd : ParaView visualization
+
+Vpov : PovRay visualization

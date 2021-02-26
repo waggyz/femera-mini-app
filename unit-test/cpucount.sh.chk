@@ -1,7 +1,0 @@
-#!/bin/bash
-CPUCOUNT=`./cpucount.sh`
-if [ $CPUCOUNT -gt 0 ]; then
-  echo 0 counted $CPUCOUNT physical cores.
- else
-  echo 1 counted no cores.
-fi

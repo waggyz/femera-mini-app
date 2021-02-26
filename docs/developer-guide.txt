@@ -1,0 +1,238 @@
+# Femera devlopment guide
+
+Femera is implemented in a C++ framework, but computational kernels are coded as
+vanilla C for better performance.
+
+# Version number
+
+Version numbering complies with Semantic Versioning 2.0.
+See: https://semver.org/
+
+When Femera is built in a git clone of the repository, the version number format
+is:
+
+<major>.<minor>.(patch)[-<pre>]+(relase_commit_id)(-mod)
+
+The leading <major>.<minor> (in data/RELEASE_VERSION), matches the git tag
+(v<major>.<minor>).
+
+The (patch) number is the number of commits ahead of the last tag.
+
+The optional <pre>-release tag (in data/PRE_RELEASE) starts with "alpha",
+"beta", or "rc". The version number ends with -local if it is built dirty.
+
+When it is not built in a repository clone, the version number is:
+
+<major>.<minor>.(patch)[-<pre>][+<user_ver>](-mod)
+
+The (-mod) tag is added automatically. When working with a clone of the repo,
+this will be added if the local copy is dirty. When not in a git clone, i-mod
+will be added if any of the source code, data, or tests differ from the repo.
+
+# Makefile details
+
+## Standard make targets[3]
+
+make all
+make check
+make install
+make uninstall
+make clean
+
+These may be useful, too.
+make mostlyclean
+make dist      (often not needed if the git repository is the distribution.)
+make distclean
+make maintainer-clean
+
+## Other make targets
+
+make tdd       TODO Scans for the first failed tdd test.
+make test      TODO Runs unit, performance, and end-to-end integration tests
+make unit-test TODO runs unit tests
+make perf-test TODO Runs performance tests
+make tune      TODO Runs performance optimization tests (partition size)
+
+# Femera project directory structure
+
+This project uses Pitchfork[1] standard layout[2], with merged header and test
+code file placement. Everything in the following directories is under version
+control, though some of the directories and files may not be included in the
+user distribution. A developer distribution (git clone) probably includes
+everything.
+
+Hmm... Python standard practice is to place unit and integration tests into a
+root-level tests/ directory. This may be better, if it avoids cluttering src/
+with *.pyc and such. (But then tests/ will be cluttered.)
+
+src/        source code
+  Femera.hpp[F] Femera global settings
+  Data/     [D] Data I/O (storage, visualization)
+  Geom/     [G] Geometry (abstract, discretization, mesh, grid)
+[ Mesh/     [M] Mesh, grid, discretization, if does not work as Geom ]
+  Part/     [P] Partition
+  Phys/     [Y] Physics
+  Solv/     [S] Solver
+  Plot/     [V] Visualization
+  Work/     [W] Processing environment and tasks to do with them.
+  Test/     [T] Tests and test models
+docs/       documentation
+tests/      (non-unit) tests (performance, end-to-end) of Femera (make test).
+data/       data, graphics, etc. included in version control
+  geom/     Gmsh geometry files for tests
+  mesh/     small test meshes included in the distribution
+tools/      development and debugging tools, scripts, etc.
+examples/   samples and examples, can be disabled by user
+            perhaps NOT compiled by default. (use: make examples)
+  models/   sample models
+  plugins/  example user plugin source code
+extras/     source code for additional submodules building on main component(s)
+  python/   python bindings
+  gpu/      GPU sorce code (maybe accelerator/ or hardware/)
+  beta/     standard (beta) Femera plugin source code
+  plugins/  contributed (alpha) plugins
+  mpi/      additional source code needed for femera-mpi TODO needed?
+  paraview/ paraview bindings
+
+The content of two Femera root-level directories are NOT under version control.
+It should be possible for a user to populate external/mesh/* with large standard
+test meshes from a .gz, if desired.
+
+build/      object files (*.o); everything in here is .gitignored.
+  mesh/     test meshes generated during build, NOT under version control
+  perf/     performance data collected for regression tests (collated build/*_perf.out)
+external/   packages/projects used by Femera, but not edited as part of it
+  mesh/     test meshes (models?) extracted from a supplementary archive (LARGE)
+  zyclops/  hypercomplex library
+  hdf5/     data storage
+  cgns/     HDF5 data format (parallel access with MPI, but NOT OpenMP)
+  gmsh/     open-source mesher
+  metis/    metis or parmetis?
+  petsc/    PETSc data structures, preconditioners, and solvers
+  paraview/ visualizer TODO consider VTK
+  openmpi/  maybe not needed
+  itar/     placeholder for export-controlled submodules NOT in open-source
+  plugins/  users put their plugin source code here
+
+TODO Consider adding external: Dream3D, Neper
+
+Try to detect if an external package (MPI, PETSc, etc.) is already available in
+the build environment before populating external/*/ directories. If not already
+available, most of these are filled only if ENABLE_XXX is ON.
+
+Some file and directory names are reserved for local use only and are NOT in the
+repository.
+
+.tmp*
+.old*
+.new*
+*.tmp
+*.old
+*.new
+
+The Femera project root directory contains basic information and build tools.
+
+.gitignore  ignore: build/* external/* .old* *.old .tmp* *.tmp
+README      this file
+LICENSE
+Makefile
+
+
+
+# Source code file name conventions
+
+For better performance, the class structure has only single-inheretance
+virtual subclasses. This implies a shallow source code directory structure.
+
+## Headers
+
+
+
+
+## Full and mini-app variations
+
+When there are differences between full and mini-app implementations, divide the
+implementation into three parts.
+
+*.c
+*.cpp  Implements what is common between full and mini-app versions.
+
+*.full.c
+*.full.cpp  Implements the full version of what is not in *.c or *.cpp.
+
+*.mini.c
+*.mini.cpp  Implements a mini-app version of what is not in *.c or *.cpp.
+
+When an entire class is not needed in the mini-app, the common source may
+contain only a comment, and *.mini.* can contain only #include "Class.dumm.cpp",
+or other appropriate test helper type implementation from the next section.
+
+
+## Unit test and test helper targets
+
+*.test.py   Use python to test an executable, *.cpp, *.c, *.o, or *.a.
+
+*.gtst      Use gtest to make a test executable from *.c, *.cpp, *.o, or *.a
+
+*.dumm.c
+*.dumm.cpp  Dummies exit (return 1: not implemented) if any methods are called.
+
+*.noop.c
+*.noop.cpp  Noop implementations succeed, but do nothing.
+
+*.stub.c
+*.stub.cpp  Stubs provide hard-coded specific values to test *.c or *.cpp.
+
+*.fake.c
+*.fake.cpp  Fakes give fast, but approximate, unreliable, or too-specific data
+            to test *.c or *.cpp.
+
+*.mock.c
+*.mock.cpp  Mocks are fakes that check if they are called correctly by
+            *.c or *.cpp during tests.
+
+Namespaces
+
+The root ::Femera namespace is for the internal API. Classes are title case.
+
+The root ::fmr namespace is for the purely functional public API of libfemera.
+Functions are lowercase, and types are title case.
+
+The C library, libfemerc, contains functions and types in lowercase that
+correspond to the fmr namespace, with underscores replacing the '::' in the full
+namespace specification.
+
+For example,
+
+Femera::Perf::Meter defines a struct of the Perf class in the internal API.
+fmr::perf::Meter defines it in the public C++ API fmr::perf namespace.
+fmr_perf_meter defines it in the public C API.
+
+
+
+# Femera project variable name conventions
+
+*_p  Polynomial order of *
+*_d  Dimension of *
+*_n  Number of *
+*_i  Arbitrary (usually loop) index of *
+*_ix Lookup index of *
+*_id Unique identifier of *
+*_il Local identifier of *
+*_ig Global identifier of *
+*_sz Size of *
+
+
+
+
+# References
+[1] https://github.com/vector-of-bool/pitchfork
+[2] https://api.csswg.org/bikeshed/?force=1&url=https://raw.githubusercontent.com/vector-of-bool/pitchfork/develop/data/spec.bs
+[3] https://www.gnu.org/prep/standards/html_node/Standard-Targets.html
+[4] https://docs.python-guide.org/writing/structure/
+
+===============================================================================
+Notes about what did not work
+
+Boilermake does not work when paths have spaces.
+https://github.com/dmoulding/boilermake

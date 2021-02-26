@@ -1,0 +1,28 @@
+
+
+
+
+
+Multivariate interpolating polynomials
+0            poly : 1D P1: 2 terms Bars
+0            poly : 1D P2: 3 terms Bars
+0            poly : 1D P3: 4 terms Bars
+0            poly : 2D P1: 3 terms Tris
+0            poly : 2D P2: 6 terms Tris
+0            poly : 2D P3: 10 terms Tris
+0            poly : 2D B1: 4 terms Quad
+0            poly : 2D B2: 9 terms
+0            poly : 2D B3: 16 terms Quad
+0            poly : 2D S1: 4 terms
+0            poly : 2D S2: 8 terms Quad
+0            poly : 2D S3: 13 terms
+0            poly : 3D P1: 4 terms Tets
+0            poly : 3D P2: 10 terms Tets
+0            poly : 3D P3: 20 terms Tets Cube
+0            poly : 3D B1: 8 terms Cube, (Tets)
+0            poly : 3D B2: 27 terms
+0            poly : 3D B3: 64 terms
+0            poly : 3D S1: 8 terms
+0            poly : 3D S2: 26 terms Cube
+0            poly : 3D S3: 60 terms
+

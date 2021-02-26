@@ -1,53 +1,33 @@
+# Developer-only files
+tools/update-md5
+tools/testy
+
+# Standard Pitchfork .gitignore
+build
+external/*/*
+
 # Old, temporary, and extra files
 *.old
+old.*
+*.new
+new.*
 *.tmp
-*.cpy
-*.log
-*.err
-*.csv
-!perf/slice-*.csv
-!perf/part-slice.csv
+tmp.*
+*.bad
+bad.*
+*.local
+local.*
 
-# Prerequisites
-*.d
+# valgrind suppression files
+*.supp
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+# CI/CD stuff
+*.yml
 
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-femera-*
-!femera-mini.cc
-!femera-*.sh
-femerq*
-femser*
-femseq*
-femerb*
-femeqk*
-femerk*
-gmsh2fmr*
-!gmsh2fmr.cc
+# Auto-created directories and files
+*.kate-swp
+*.pyc
+__pycache__/
+*.py[cod]
+*$py.class
+cython_debug/

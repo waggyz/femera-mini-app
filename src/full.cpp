@@ -1,3 +1,10 @@
+//TODO #include "femera.h"
+#include "base.h"
+
+int main (int argc, char** argv){ int err=0;
+ return fmr::exit (err= fmr::init (&argc, argv) ? err : fmr::sims::run ());
+}
+/*
 Notices:
 Copyright 2018 United States Government as represented by the Administrator of
 the National Aeronautics and Space Administration. No copyright is claimed in
@@ -26,3 +33,4 @@ OF THE SUBJECT SOFTWARE, RECIPIENT SHALL INDEMNIFY AND HOLD HARMLESS THE UNITED
 STATES GOVERNMENT, ITS CONTRACTORS AND SUBCONTRACTORS, AS WELL AS ANY PRIOR
 RECIPIENT, TO THE EXTENT PERMITTED BY LAW.  RECIPIENT'S SOLE REMEDY FOR ANY SUCH
 MATTER SHALL BE THE IMMEDIATE, UNILATERAL TERMINATION OF THIS AGREEMENT.
+*/
