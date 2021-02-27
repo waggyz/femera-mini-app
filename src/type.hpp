@@ -11,14 +11,14 @@ namespace fmr {
   /* These typedefs, enums, and static maps are used throughout
    * fmr:: and Femera:: namespaces.
    */
-  // sizeof ( Dim_int <= Enum_int <= Local_int < Global_int )
-  // sizeof ( Dim_int <~ int ): relative (negative) Dim_int are int parameters
+  // sizeof (Dim_int <= Enum_int <= Local_int < Global_int)
+  // sizeof (Dim_int <~ int): relative (negative) Dim_int are int parameters
   typedef uint8_t      Dim_int;// dimensions, order, power, hierarchy lvls,...
   typedef uint16_t    Enum_int;
   typedef uint32_t   Local_int;
   typedef uint64_t  Global_int;//TODO signed?
-  typedef uint32_t ElemID_int;
-  //NOTE sizeof ( ElemID_int >= Enum_int + fmr::math::Poly + Dim_int )
+  typedef uint32_t Elemid_int;
+  //NOTE sizeof (Elemid_int >= Enum_int + fmr::math::Poly + Dim_int)
   //
   typedef double   Geom_float;
   typedef double   Phys_float;
