@@ -17,8 +17,8 @@ namespace fmr {
   typedef uint16_t    Enum_int;
   typedef uint32_t   Local_int;
   typedef uint64_t  Global_int;//TODO signed?
-  typedef uint32_t Elem_id_int;
-  //NOTE sizeof ( Elem_id_int >= Enum_int + fmr::math::Poly + Dim_int )
+  typedef uint32_t ElemID_int;
+  //NOTE sizeof ( ElemID_int >= Enum_int + fmr::math::Poly + Dim_int )
   //
   typedef double   Geom_float;
   typedef double   Phys_float;

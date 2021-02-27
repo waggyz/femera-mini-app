@@ -10,62 +10,65 @@
 
 namespace fmr {//TODO? namespace data {
   /* These typedefs, structs, and static stuff are used throughout
-   * fmr:: and Femera:: namespaces.
+   * fmr:: and Femera:: namespaces to manage data in memory and stored in files.
    * */
   typedef std::string Data_id;
   typedef std::vector<fmr::Local_int> Tree_path;
   enum class Tree_type : Enum_int {None=0, Error, Unknown,
     Mtrl, Sims, Gset, Part, Join_part, Mesh, Grid,
   end};
-  struct Math_size {// Size and algebra type of data.
-    size_t           size = 0;
-    math::Zomplex algebra = math::Real;
-    // constructor
-    Math_size (const math::Zomplex z, const size_t sz) : size(sz), algebra(z){}
-  };
   typedef std::unordered_map<Global_int,Local_int> Node_local_map;
   typedef std::unordered_map<Global_int,Local_int> Elem_local_map;
-  enum class Data : Enum_int {None=0, Error, Unknown,
-    // Homogeneous data types
+  enum class Data : Enum_int {None=0, Error, Unknown,// Homogeneous data types
+    Sims_n,                   // Local_int
+    // Geometry datatypes ----------------------------------------------------
+    Gset_n,                   // Local_int  [Sims_n]
+    Geom_d,                   // Dim_int    [Sims/Part/Mesh_n]
     //
-    Sims_type, Time_type,            // Enum_int
-    Sims_n,                          // Local_int
+    Part_n,                   // Local_int  [Sims/Part_n]
+    Part_conn_n,              // Local_int  [Sims/Part_n] shared surfaces
+    Mesh_conn_n,              // Local_int  [Part_n] shared surfaces
+    Grid_conn_n,              // Local_int  [Part_n] shared surfaces
     //
-    Phys_d,                          // Dim_int
-    Phys_type,                       // Enum_int [Mtrl_n]
-    Mtrl_n,                          // Local_int
+    // Data for both structured grids and unstructured meshes
+    Geom_n,                   // Local_int  [Part_n] Mesh_n+Grid_n
+    Axis_rots_type,           // Enum_int   [Geom_n]
+    Axis_rots,                // Geom_float [Geom_n,Geom_d] Euler angles
+    Axis_quat,                // Geom_float [Geom_n,4] unit quaternion
+    Node_n,                   // Local_int  [Geom_n]
+    Node_x, Node_y, Node_z,   // Geom_float [Node_n]
+    Node_coor,                // Geom_float [Node_n,Elem_d]
     //
-    Geom_d,                          // Dim_int
-    Gset_n,                          // Local_int
+    // Unstructured (finite element) mesh data
+    Mesh_n,                   // Local_int  [Part_n]
+    Elem_n,                   // Local_int  [Mesh_n]
+    Elem_d, Elem_p,           // Dim_int    [Mesh_n]
+    Elem_type, Elem_poly,     // Enum_int   [Mesh_n]
+    Elem_id,                  // ElemID_int [Mesh_n]
+    //                         make_elem_id (Elem_type, Elem_poly, Elem_p)
+    Jacs_type,                // Enum_int   [Mesh_n]
+    Elem_node_n, Elem_jacs_n, // Local_int  [Mesh_n]
+    Elem_jacs_sz,             // Dim_int    [Mesh_n] 1D:1, 2D:4, 3D:10
+    Jacs_dets,                // Geom_float [Elem_n,Elem_jacs_n,Elem_jacs_sz]
+    Node_global_id,           // Global_int [Node_n]
+    Elem_global_id,           // Global_int [Elem_n]
+    Elem_conn,                // Global/Local_int [Elem_n,Elem_node_n]
+    // Build Global_id <=> Local_id maps while reading Elem_conn<Global_int>.
     //
-    Part_n,                          // Local_int
-    Part_conn_n,                     // Local_int: shared surfaces
-    Mesh_conn_n,                     // Local_int [Part_n]: shared surfaces
-    //
-    // Unstructured (finite element) mesh
-    Mesh_n,                          // Local_int
-    Elem_d, Elem_jacs_sz, Elem_pord, // Dim_int    [Mesh_n]
-    Jacs_type, Elem_type, Elem_poly, // Enum_int   [Mesh_n]
-    Elem_node_n, Elem_jacs_n,        // Local_int  [Mesh_n]
-    Elem_n, Node_n,                  // Local_int  [Mesh_n]
-    Elem_conn,                       // Local_int  [Elem_n,Elem_node_n]
-    // Read as Global_ids and build Global_id <=> Local_id maps while reading.
-    Node_local_id,                   // Local_int  [Node_n]
-    Elem_local_id,                   // Local_int  [Elem_n]
-    Node_global_id,                  // Global_int [Node_n]
-    Elem_global_id,                  // Global_int [Elem_n]
-    //
-    // Structured grid
-    Grid_conn_n,                     // Local_int  [Part_n]: shared grid surfs
-    Grid_n,                          // Local_int
-    Cell_d,                          // Dim_int    [Grid_n]
-    Cell_type,                       // Enum_int   [Grid_n]
-    Grid_size,                       // Global_int [Cell_d]
-    //
-    Mesh_dirs,             // Geom_float [Mesh_n,4] unit quaternion orientation
-    Node_x, Node_y, Node_z,// Geom_float [Node_n]
-    Node_coor,             // Geom_float [Node_n,Elem_d]
-    Jacs_dets,             // Geom_float [Elem_n,Elem_jacs_n,Elem_jacs_sz]
+    // Structured grid data
+    Grid_n,                   // Local_int  [Part_n]
+    Cell_d,                   // Dim_int    [Grid_n]
+    Cell_type,                // Enum_int   [Grid_n]
+    Grid_cell_n,              // Local_int  [Grid_n,Cell_d]
+    Cell_size,                // Geom_float [Grid_n,Cell_d]
+    // Physics datatypes -----------------------------------------------------
+    Sims_type, Time_type,     // Enum_int   [Sims_n]
+    Phys_d,                   // Dim_int    [Sims/Part/Mesh_n]
+    Mtrl_n,                   // Local_int  [Sims/Part/Mesh_n]
+    Phys_type,                // Enum_int   [Mtrl_n]
+    // Load and boundary condition datatypes ---------------------------------
+    // Solver datatypes ------------------------------------------------------
+    // Post-processing datatypes ---------------------------------------------
 #if 1
     //TODO Remove heterogeneous data types. Add back if sync or distribution
     //     is needed.
@@ -74,20 +77,19 @@ namespace fmr {//TODO? namespace data {
     //
     Elem_ig, Node_ig,
     Geom_info,// Dim_int, Enum_int, Local_int vals
-    Phys_info,//TODO Combine with Geom_info as Part_info?
+    Phys_info,// Combine with Geom_info as Part_info?
 #endif
-    //
   end};// The last item is "end" to indicate size
-  typedef std::pair<std::string,std::string> Short_name;
-  static const std::map<Data,Short_name> Data_name {
-    {Data:: None     , Short_name{"data_none","no data"}},
-    {Data:: Error    , Short_name{"data_err" ,"data error"}},
-    {Data:: Unknown  , Short_name{"data_unk" ,"unknown data"}},
-    {Data:: Node_x   , Short_name{"node_x"   ,"node x-ordinates"}},// Geom_float
-    {Data:: Node_y   , Short_name{"node_y"   ,"node y-ordinates"}},// Geom_float
-    {Data:: Node_z   , Short_name{"node_z"   ,"node z-ordinates"}},// Geom_float
-    {Data:: Node_coor, Short_name{"node_coor","node coordinates"}},// Geom_float
-    {Data:: Jacs_dets, Short_name{
+  typedef std::pair<std::string,std::string> Name_pair;
+  static const std::map<Data,Name_pair> Data_name {
+    {Data:: None     , Name_pair{"data_none","no data"}},
+    {Data:: Error    , Name_pair{"data_err" ,"data error"}},
+    {Data:: Unknown  , Name_pair{"data_unk" ,"unknown data"}},
+    {Data:: Node_x   , Name_pair{"node_x"   ,"node x-ordinates"}},// Geom_float
+    {Data:: Node_y   , Name_pair{"node_y"   ,"node y-ordinates"}},// Geom_float
+    {Data:: Node_z   , Name_pair{"node_z"   ,"node z-ordinates"}},// Geom_float
+    {Data:: Node_coor, Name_pair{"node_coor","node coordinates"}},// Geom_float
+    {Data:: Jacs_dets, Name_pair{
       "jacs_dets","element jacobians and determinants"}},// Geom_float
   };
 #if 1
@@ -106,6 +108,12 @@ namespace fmr {//TODO? namespace data {
     Sim_time,// Enum_int
     Phys_d,  // Dim_int
   end};
+  struct Math_size {// Size and algebra type of data.
+    size_t           size = 0;
+    math::Zomplex algebra = math::Real;
+    // constructor
+    Math_size (const math::Zomplex z, const size_t sz) : size(sz), algebra(z){}
+  };
   //NOTE For compile-time lookup use Data_size.at(type),
   //     NOT Data_size[type] nor Data_size.find(type).
   static const std::map<Data, Math_size> Data_size {//TODO Remove.
@@ -114,51 +122,6 @@ namespace fmr {//TODO? namespace data {
     {Data::Phys_info, Math_size(math::Natural, enum2val (Phys_info::end))}
   };
 #endif
-#if 0
-    //TODO Remove heterogenous data types. Add back if sync is needed.
-  /* Almost no info is stored at the sims collection level in CGNS and Gmsh
-   * files. (But, a Gmsh parameterized .geo file could be considered a
-   * collection.) Typical single-file formats store a lot of info at individual
-   * sim level. The coll/sim/part/mesh/etc. level is encoded in the data_id
-   * associated (as the key of a Data->Data_*_vals map) with each Vals
-   * instance.
-   *
-   * Sims_size, Sims_info, Geom_size may be stored at root, sim, part, mesh, or
-   * grid level in a file hierarchy. They are populated by scan_file_data(..)
-   * and read_sims_info(..).//TODO or e.g. read_/get_data(..,Data::Sims_info)
-   *                                       read_/get_data(..,Data::Geom_size)
-   * Some of the data in the structures below are redundant, or can be
-   * calculated from other values. In most cases, only some of the fields will
-   * be populated, which fields depend on the associated data_id (e.g. a
-   * Part's Sims_size will be zero, and usually (but not always) have only one
-   * non-zero Part_n, Mesh_n, or Grid_n children.
-   */
-  enum class Sims_size : Enum_int {isok=0, // Pack as Local_int. Read first.
-    Mtrl_n, Gset_n, Part_n, Mesh_n, Grid_n,// Local_int scalar
-    Part_conn_n, Mesh_conn_n, Grid_conn_n, // Local_int scalar: shared surfaces
-  end};
-  enum class Sims_info : Enum_int {isok=0, // Pack as Enum_int.
-    Phys_d, Geom_d,                        // Dim_int  scalar
-    Sims_type, Time_type,                  // Enum_int scalar
-    Elem_d,                                // Dim_int  [Mesh_n]
-    Cell_d,                                // Dim_int  [Cell_n]
-    Phys_type,                             // Enum_int [Mtrl_n]
-    Cell_type,                             // Enum_int [Grid_n]
-    Jacs_type, Elem_type, Elem_poly,       // Enum_int [Mesh_n]
-    Elem_pord,                             // Dim_int  [Mesh_n]
-    Elem_node_n, Elem_jacs_n,              // Enum_int [Mesh_n]
-  end};
-  enum class Geom_size : Enum_int {isok=0, // Pack as Global_int.
-    Node_n, Elem_n, Elem_conn_n,           // Global_int scalar
-    Node_gd,                               // Global_int [Node_n]
-    Elem_gd,                               // Global_int [Elem_n]
-    Elem_conn,                             // Global_int [Elem_conn_n] *
-    Grid_dims,                             // Global_int [Cell_d] **
-    //  * Elem_conn_n = Elem_n * Elem_node_n
-    // ** Cell_d csn be inferred from data.size().
-  end};
-#endif
-  //
   enum class Elem : Enum_int {None=0, Error, Unknown,
     Bars,    // Beam,
     Tris,    // Quad,
@@ -167,36 +130,12 @@ namespace fmr {//TODO? namespace data {
     // Cell_FD, Cell_FV,
     // FD1D, FD2D, FD3D, FV1D, FV2D, FV3D, SG1D, SG2D, SG3D, // grid cell types
   end};
-#if 0
-  //TODO Change to std::array<Math_size,enum2val(Data::end)>?
-  static const std::array<Math_size,enum2val(Data::end)> Data_size_test {
-    this[enum2val (Data::Geom_info)]//TODO Does not work.
-      = Math_size(math::Natural, enum2val (Geom_info::end)),
-    this[enum2val (Data::Phys_info)]
-      = Math_size(math::Natural, enum2val (Phys_info::end))
-  };
-#endif
-  inline Elem_id_int make_elem_id (Elem e, fmr::math::Poly y, fmr::Dim_int p){
+  inline ElemID_int make_elem_id (Elem e, fmr::math::Poly y, fmr::Dim_int p){
     constexpr auto ysz = 8*sizeof(y), psz = 8*sizeof(p);
     return
-      ( (Elem_id_int(fmr::enum2val(e)) << (ysz+psz))
-      + (Elem_id_int(fmr::enum2val(y)) << (psz)) + p );
+      ( (ElemID_int(fmr::enum2val(e)) << (ysz+psz))
+      + (ElemID_int(fmr::enum2val(y)) << (psz)) + p );
   }
-#if 0
-  std::size_t hash_elem_id (Elem e, Poly y, fmr::Dim_int p){std::size_t id = 0;
-    constexpr int esz = sizeof(e), ysz = sizeof(y), psz = sizeof(p);
-    if ((esz + ysz + psz) <= sizeof(std::size_t) ){
-      id = std::hash<std::size_t>{}
-        ( (std::size_t(fmr::enum2val(e)) << (ysz+psz))
-        + (std::size_t(fmr::enum2val(y)) << (psz))
-        + p );
-    }else{
-      id = std::hash<std::string>{} (
-        std::to_string()+":"+std::to_string()+":"+std::to_str());
-    }
-    return id;
-  }
-#endif
 }//end fmr:: namespace -------------------------------------------------------
 namespace fmr {namespace data {//TODO Move to vals.hpp?
   struct State {

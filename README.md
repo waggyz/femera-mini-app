@@ -16,7 +16,7 @@ git clone --recursive -b data https://github.com/waggyz/femera-mini-app.git
 ```
 
 This populates external/ with:
-googletest (gtest), testy, HDF5, CGNS, gmsh, pybind11,(when available)
+googletest (gtest), testy, HDF5, CGNS, gmsh, pybind11 (when available)
 
 These have several dependencies.
 
@@ -29,7 +29,7 @@ These have several dependencies.
 [**NOTE** Skip this step for now]
 [**TODO**] Install pytest, pytest-check, and python-subunit in your environment.
 
- * PETSc installation requires the python module configure.
+* PETSc installation requires the python module configure.
 
 ### 3. Install MPI
 

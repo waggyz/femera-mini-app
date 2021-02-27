@@ -13,7 +13,7 @@ namespace fmr {namespace data {
     Fixed_half =-16, Fixed_single =-32, Fixed_double =-64
   };
   enum class Layout      : uint8_t { Unknown =0,//TODO Dim_int?
-    Inter=1, Block=2, Native=3 // Native is for built-in complex type
+    Vector=1, Block=2, Native=3 // Native is for built-in complex type
   };
 } }// end fmr::data namespace
 namespace fmr {namespace math {
@@ -80,6 +80,9 @@ namespace fmr {namespace math {
     = Zomplex (Algebra::Real, 0, fmr::data::Layout::Native);
   const static Zomplex Native_complex
     = Zomplex (Algebra::Complex, 1, fmr::data::Layout::Native);
+  const static Zomplex Unit_quaternion
+    = Zomplex (Algebra::Quat, 2, fmr::data::Layout::Vector);
+  //
   const static Zomplex Integer
     = Zomplex (Algebra::Int, 0, fmr::data::Layout::Native);
   const static Zomplex Natural
