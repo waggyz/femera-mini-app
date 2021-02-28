@@ -346,6 +346,8 @@ std::string Data::print_details (){
       sizeof (fmr::Geom_float), sizeof (fmr::Phys_float),
       sizeof (fmr::Solv_float), sizeof (fmr::Cond_float)
     );
+#if 0
+    //TODO turn back on if heterogenous data packing is used.
     log->label_printf ("Packed ints",//TODO Move to build details?
       "%i dims, %i enums, %i local, %i global scalar items each\n",
       8 * sizeof (fmr::Dim_int) -2,
@@ -356,6 +358,7 @@ std::string Data::print_details (){
       "%i single, %i double precision scalar items each\n",
       8 * sizeof (float) -2,
       8 * sizeof (double) -2);
+#endif
 #if 0
     for(int i=0; i<task_n; i++){
       Data* D = this->task.get<Data>(i);

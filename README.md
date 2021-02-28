@@ -4,6 +4,13 @@ Femera is an open-source finite element-by-element (EBE) matrix-free
 application that can be tuned for performance across a wide range of problem
 sizes and HPC architectures.
 
+This version (0.2) of the Femera mini-app is targeted at optimizing a modular
+software architecture for high-performance computing. The primary goal is to
+maintain the high level of performance demonstrated by version 0.1 while
+providing flexible data handling. This mini-app is intended to minimize the
+file/data conversion bottleneck that often limits the overall performance of
+finite element applications by developing efficient interfaces to libraries that can
+read and write several common file formats.
 
 ## Femera data handling mini-app installation
 
