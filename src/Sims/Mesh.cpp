@@ -14,12 +14,12 @@ namespace Femera {
     this->      meter_unit ="elem";
     this->      model_name ="(Mesh master)";
     this->       verblevel = 8;
-    this->            plan = F->dist_to_plan;//fmr::Schedule::List;
-    this->            cncr = F->dist_to_cncr;//fmr::Concurrency::Serial;
-    this->         hier_lv = F->dist_to_hier_lv;
-    this-> dist_to_hier_lv = hier_lv;
-    this->    dist_to_cncr = fmr::Concurrency::Serial;
-    this->    dist_to_plan = fmr::Schedule::List;
+    this->            plan = F->send_to_plan;//fmr::Schedule::List;
+    this->            cncr = F->send_to_cncr;//fmr::Concurrency::Serial;
+    this->         hier_lv = F->send_to_hier_lv;
+    this-> send_to_hier_lv = hier_lv;
+    this->    send_to_cncr = fmr::Concurrency::Serial;
+    this->    send_to_plan = fmr::Schedule::List;
     this->       part_algo = fmr::Partition::None;
   }
   int Mesh::chck (){

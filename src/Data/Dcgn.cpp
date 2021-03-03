@@ -54,7 +54,7 @@ namespace Femera {// header extension: needs cgnslib.h
   };
 }//end Femera namespace for header extension
 namespace Femera {
-  Dcgn::Dcgn (Proc* P,Data* D)noexcept:
+  Dcgn::Dcgn (Proc* P,Data* D) noexcept:
     format (Dcgn::File_format::Dcgn_HDF5),
     comm   (Proc::Team_id( MPI_COMM_WORLD )) {// changed in init_task(..)
     this->proc=P; this->data=D;
@@ -396,20 +396,21 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
     // Try reading basenames from the CGNS file.
     err= fmr::perf::time_activity<int> (&this->time,
       cg_nbases, info.file_cgid,& base_n);
-    if(!err) {this->time.bytes+= sizeof(base_n); }
-    if (err) {return info; }
-    if (false){//TODO (info.current_access != Data::Access::Read ){
+    if (err) {info.state.has_error=true; return info;}
+    else {this->time.bytes+= sizeof(base_n);}
+#if 0
+    if (info.current_access != Data::Access::Read ){//TODO
       if (base_n < 1){// Add a new base.
         //TODO Check if the cg_*_write routines are thread safe.
         int base_id=1;
         char cname[this->label_size+1]; ::strcpy (cname,"new_model_1");
         fmr::perf::timer_resume (&this->time);
         err= cg_base_write (info.file_cgid, cname, geom_d, phys_d,& base_id);
-        if (!err) {this->time.count += this->label_size; }
+        if (!err) {this->time.count += this->label_size;}
         fmr::perf::timer_pause (&this->time);
     } }
-    //TODO_FMR_PRAGMA_OMP(omp critical)// Check for use with OpenMP,
-    // but not MPI.
+#endif
+    //TODO_FMR_PRAGMA_OMP(omp critical)// Check use with OpenMP but not MPI.
     for (int base_i=1; base_i <= base_n; base_i++){
       int zone_n=0, gset_n=0, conn_n=0;
       fmr::Sim_time sim_time = fmr::Sim_time::Unknown;
@@ -421,20 +422,19 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
       this->sims_names.insert (std::string (data_id));
       //
       ::SimulationType_t sim_type_cg = ::SimulationTypeNull;
-      err= fmr::perf::time_activity<int> (& this->time,
+      err= fmr::perf::time_activity<int> (&this->time,
         cg_simulation_type_read, info.file_cgid, base_i, &sim_type_cg);
-      if (!err){ this->time.bytes += sizeof(sim_type_cg);
-        switch (sim_type_cg){
-          case ::SimulationTypeNull: sim_time= fmr::Sim_time::None    ;break;
-          case ::NonTimeAccurate   : sim_time= fmr::Sim_time::Implicit;break;
-          case ::TimeAccurate      : sim_time= fmr::Sim_time::Explicit;break;
-          case   CG_UserDefined    : sim_time= fmr::Sim_time::Plugin  ;break;
-          default                  : {}// do nothing
+      if (!err) {this->time.bytes += sizeof(sim_type_cg);
+        switch (sim_type_cg) {
+          case ::SimulationTypeNull: sim_time= fmr::Sim_time::None    ; break;
+          case ::NonTimeAccurate   : sim_time= fmr::Sim_time::Implicit; break;
+          case ::TimeAccurate      : sim_time= fmr::Sim_time::Explicit; break;
+          case   CG_UserDefined    : sim_time= fmr::Sim_time::Plugin  ; break;
+          default                  : {}// Do nothing.
         }
 #ifdef FMR_DEBUG
             this->proc->log->label_fprintf (this->proc->log->fmrout,
-              "CGNS*sim type","%s\n",
-              fmr::Sim_time_name.at(sim_time).c_str());
+              "CGNS*sim type","%s\n", fmr::Sim_time_name.at(sim_time).c_str());
 #endif
       }
       err= fmr::perf::time_activity<int> (&this->time,
@@ -473,10 +473,10 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
       //
       // Set cached data vals.
       const auto geomid = this->data->make_data_id (data_id,
-        fmr::Tree_type::Sims,{}, fmr::Data::Geom_info);
+        fmr::Data::Geom_info);
       const auto physid = this->data->make_data_id (data_id,
-        fmr::Tree_type::Sims,{}, fmr::Data::Phys_info);
-      for (Data* D : std::vector<Data*> ({this->data})){//TODO
+        fmr::Data::Phys_info);
+      for (Data* D : std::vector<Data*> ({this->data})) {//TODO
         const bool is_geomid_found = D->local_vals.count(geomid) > 0;
         if (!is_geomid_found) {
           D->local_vals[geomid] = fmr::Local_int_vals (fmr::Data::Geom_info,0);
@@ -497,11 +497,11 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
         }
         bool do_set_sim_time = false;
         switch (sim_time) {
-          case fmr::Sim_time::None     :
-          case fmr::Sim_time::Plugin   :// Fall through
-          case fmr::Sim_time::Explicit :// Fall through
+          case fmr::Sim_time::None     :// Fall through...
+          case fmr::Sim_time::Plugin   :// Fall through...
+          case fmr::Sim_time::Explicit :// Fall through...
           case fmr::Sim_time::Implicit : do_set_sim_time=true; break;
-          default : {}
+          default : {}// No action needed.
         }
         if (do_set_sim_time) {
           yvals[enum2val(fmr::Phys_info::Sim_time)]
@@ -518,8 +518,8 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
         gvals[enum2val(fmr::Geom_info::Part_n)]+= fmr::Local_int(zone_n);
         gisok[enum2val(fmr::Geom_info::Part_n)] |= zone_n > 0;
         //
-        gvals[enum2val(fmr::Geom_info::Part_conn_n)] += fmr::Local_int(conn_n);
-        gisok[enum2val(fmr::Geom_info::Part_conn_n)] |= conn_n > 0;
+        gvals[enum2val(fmr::Geom_info::Part_halo_n)] += fmr::Local_int(conn_n);
+        gisok[enum2val(fmr::Geom_info::Part_halo_n)] |= conn_n > 0;
     } }
     info.state.was_read = true;
   }

@@ -18,8 +18,8 @@ class Frun final : public Sims {//TODO Problably NOT derived from Sims or Work.
   public:
   protected:
   private:
-    fmr::Local_int sims_ix = 0;//TODO needed?
-    fmr::Dim_int   sims_lv = 1;
+    fmr::Local_int sims_ix = 0;// sim number
+    fmr::Dim_int   sims_lv = 1;// subsim hierarchy level
 #if 0
     fmr::Local_int gset_n =  0;
     fmr::Local_int part_n =  0;

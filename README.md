@@ -17,6 +17,8 @@ read and write several common file formats.
 ### 1. Clone Femera with its required and optional external packages
 
 **Important** Do **not** build Femera in a location that has spaces in the path.
+At least one external package will not compile if there are spaces in the build
+path.
 
 ```bash
 git clone --recursive -b data https://github.com/waggyz/femera-mini-app.git

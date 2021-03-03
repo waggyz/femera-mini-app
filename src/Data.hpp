@@ -33,8 +33,8 @@ class Data : public Work {//TODO change to File
     enum class Scan : fmr::Enum_int {None=0, All, Tree, Dims, Size, Name,
       Gset, Sims, Part, Mesh, Load, Boco, Mtrl
     };
-    typedef std::set<Scan> Scan_for;
 #if 0
+    typedef std::set<Scan> Scan_for;//TODO Needed?
     struct Data_file {
       Data*       data =nullptr;
       std::string name ="";// path/filename
@@ -60,27 +60,33 @@ class Data : public Work {//TODO change to File
         File_info            ()                 =default;
         File_info            (File_info const&) =default;// copyable
         File_info& operator= (const File_info&) =default;
-        virtual ~File_info   ()        noexcept =default;
+        virtual   ~File_info ()        noexcept =default;
         };
+    typedef std::unordered_map<fmr::Data_id, fmr::Dim_int_vals>
+      Data_dim_vals;// key: data ID
     typedef std::unordered_map<fmr::Data_id, fmr::Enum_int_vals>
       Data_enum_vals;// key: data ID
     typedef std::unordered_map<fmr::Data_id, fmr::Local_int_vals>
       Data_local_vals;// key: data ID
     typedef std::unordered_map<fmr::Data_id, fmr::Global_int_vals>
       Data_global_vals;// key: data ID
+    //TODO std::unordered_map is not thread safe!
   // member variables --------------------------------------------------------
   public:
     // fmr::perf::IOmeter  time_io = fmr::perf::IOmeter ();//TODO
     //
-    Data_enum_vals     enum_vals ={};//key:: data ID
+    Data_dim_vals       dim_vals ={};//key:: data ID
+    Data_enum_vals     enum_vals ={};
     Data_local_vals   local_vals ={};
     Data_global_vals global_vals ={};
-    // These are for caching data that does not yet have a destination.
+    // These are for caching data that does not yet have a destination,
+    // and to marshal data for distribution.
     // Use in Data classes to avoid multiple reads of the same data.
     // Use sparingly to avoid extra copies of the same data.
-    //TODO Must be public for access from derived classes?
-    //TODO private: variables; public: ptr/get/set/del, virtual read/save
-    //TODO std::unordered_map is not thread safe!
+    //TODO public: for access to/from derived classes?
+    //TODO private: with public: ptr/get/set/del, virtual read/save ?
+    // These are NOT thread safe. Should be private in derived classes,
+    // so each derived driver can access it's private variables safely?
   protected:
     std::string      default_file_name = "new-femera-data";
     std::vector<std::string> file_exts ={"csv"};
@@ -99,68 +105,66 @@ class Data : public Work {//TODO change to File
   // methods -----------------------------------------------------------------
   public:
     std::string print_details () final override;// Data handler information
-    //
     // file operations -------------------------------------------------------
+    int print_sims_file_info (const std::string sim_name);
+    // Keep most file handling operations hidden (protected or private).
     //TODO batch file operations?
-  // Keep most file handling operations hidden (protected or private).
     //
-    // All data source and destination (file) targets for this run.
+    virtual int close ();// Close all files.
+    int clear ();// Clear all file data.
+    //
+    // Data source and destination (file) targets for this run.
     int set_out_file (const std::string fname);//TODO data can go to >1 file
     int add_inp_file (const std::string fname);//TODO return File_info
     std::deque<std::string> get_inp_file_names ();
     std::deque<std::string> get_out_file_names ();
     //
-    int chck_file_names ();// Check if files are valid.
+    int chck_file_names ();// Check if files in this->chk_file_names are valid.
     int chck_file_names (const std::deque<std::string> file_names);
     //
-    // public interfaces to corresponding *(File_info,...) in derived classes
-    File_info get_file_info  (Data_file);// Does not open file.//TODO Name?
+    File_info get_file_info  (Data_file);// Does not open file.//TODO chk_?
     File_info scan_file_data (Data_file);// Root data: sims, gset, mtrl_defs,...
+    // public interfaces to corresponding *(File_info,...) in derived classes
+  protected:
+    // called from public *(Data_file) in base class
+    virtual File_info get_file_info (const std::string fname);
+    virtual File_info scan_file_data (const std::string fname);//TODO chk_?
     // Hierarchical data structures can then be accessed by data ops, below.
-    //
-    virtual int close ();// Close all files.
-    int clear ();// Clear all file data.
-    //
-    int print_sims_file_info (const std::string sim_name);
+  public:
     // simulation data handling ----------------------------------------------
-    fmr::Dim_int get_hier_max ();// Use to detect loops in a hierarchy.
     //TODO batch data operations?
+    fmr::Dim_int get_hier_max ();// Use to detect loops in a hierarchy.
     //
-#if 1
-    fmr::Data_id make_data_id (const fmr::Data_id tree_root,
-      const fmr::Tree_type, const fmr::Tree_path,
-      const fmr::Data=fmr::Data::None);
-    // above called by below
-    fmr::Data_id make_data_id (const fmr::Data_id tree_root,
-      const fmr::Data=fmr::Data::None);
-    //TODO replace below with above
-#endif
+    fmr::Data_id make_data_id (const fmr::Data_id base_path,
+      const fmr::Tree_type, const fmr::Tree_path branch_path,
+      const fmr::Data = fmr::Data::None);
+    // above called by abbreviated version below
+    fmr::Data_id make_data_id (const fmr::Data_id full_path,
+      const fmr::Data = fmr::Data::None);
+    //TODO should be S:<sims#>[:S<sims#...]:<sim_name>[:[P/G/...]<#>]... ?
     // Sims id : "<sim_name>[:<sim_name>,...]"
     // Part id : "<sim_name>:P<part#>[:P<part#>,...]"
     // Mesh id : "<sim_name>:P<part#>[:P<part#>,...]|M<mesh#>[|M<mesh#>,...]"
     // Gset id : "<sim_name>:G<gset#>[:G<gset#>,...]"// Geometry set
     // Data id : "<sim_name>:G<gset#>[...]:T<data type#>"
     //
+    // Below valid after scan_file_data(..).
     fmr::Local_int get_sims_n ();
-    virtual std::deque<std::string> get_sims_names ();//do after scan_file_data
+    virtual std::deque<std::string> get_sims_names ();
     //
-    // int scan (id, Scan_for={Scan::Part,...}, int depth=0);
+    // int scan (id, Scan_for={Scan::Part,...}, int depth=0);//TODO Needed?
     int get_local_vals (const fmr::Data_id id, fmr::Local_int_vals &);
     // int read_local_vals (const std::string id, fmr::Local_int_vals &);
     // int save_local_vals (const std::string id, fmr::Local_int_vals &);
     // int free_local_vals (const std::string id, fmr::Local_int_vals &);
-    //
   protected:// ---------------------------------------------------------------
+    //
     int init_task (int* argc, char** argv) override;
     int exit_task (int err) override;
     //
     Data* get_task_for_file (const std::string fname);//TODO replace w/next
     std::vector<Data*> get_tasks_for_file (const std::string fname);
     //virtual bool has_data_for (const Work_type);//TODO needed?
-    //
-    // called from public *(Data_file) in base class
-    virtual File_info get_file_info (const std::string fname);
-    virtual File_info scan_file_data (const std::string fname);
   private:
     int chck () final override;// Not yet used in Data classes.
     int prep () override;
@@ -176,8 +180,7 @@ class Data : public Work {//TODO change to File
     Data           ();// called implicitly by child constructors
 };
 }//end Femera namespace
-
-namespace fmr {namespace data {//TODO change all to to fmr::data:: in type.hpp
+namespace fmr {namespace data {//TODO change to fmr::data:: in type.hpp
   static const std::map<Femera::Data::Access,std::string> Access_name {
     {Femera::Data::Access:: Unknown,"uknown access"},//TODO makes sense?
     {Femera::Data::Access::   Error,"access error"},

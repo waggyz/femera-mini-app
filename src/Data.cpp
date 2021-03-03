@@ -140,10 +140,10 @@ int Data::close () {int err=0;
   } } }
   return err;
 }
-fmr::Data_id Data::make_data_id (const fmr::Data_id tree_root,
-  const fmr::Tree_type tree_type, const fmr::Tree_path path,
+fmr::Data_id Data::make_data_id (const fmr::Data_id base_path,
+  const fmr::Tree_type tree_type, const fmr::Tree_path branch,
   const fmr::Data data_type) {
-  fmr::Data_id id = tree_root;
+  fmr::Data_id id = base_path;
   if (tree_type == fmr::Tree_type::Join_part) {
     id += ":P0";
   }else{
@@ -159,18 +159,17 @@ fmr::Data_id Data::make_data_id (const fmr::Data_id tree_root,
         case fmr::Tree_type::Error: {path_sep="*ERR""OR*"; break;}
         default : {path_sep=":?";}
       }
-      for (size_t i=0; i<path.size(); i++){
-        id += path_sep + std::to_string (path[i]);
+      for (size_t i=0; i<branch.size(); i++){
+        id += path_sep + std::to_string (branch[i]);
   } } }
   if (data_type != fmr::Data::None) {
     id += ":T" + std::to_string (fmr::enum2val (data_type));
   }
   return id;
 }
-// above called by below
-fmr::Data_id Data::make_data_id (const fmr::Data_id tree_root,
-  const fmr::Data data_type){
-  return Data::make_data_id (tree_root, fmr::Tree_type::None,{}, data_type);
+fmr::Data_id Data::make_data_id (const fmr::Data_id path,//above called by this
+  const fmr::Data data_type) {
+  return Data::make_data_id (path, fmr::Tree_type::None,{}, data_type);
 }
 #if 0
 fmr::Data_id Data::get_id (){fmr::Data_id id = "";//TODO needed?

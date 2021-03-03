@@ -56,7 +56,7 @@ class Work {//TODO Refactor to the curiously recurrent template pattern (CRTP)
     // If a derived class does not override these, then,
     // e.g., a call to Derived::prep() will call Work::prep().
     virtual int prep ();//TODO or virtual int init() ?
-    virtual int chck ();
+    virtual int chck ();//TODO chk?
     virtual std::string print_summary ();
     virtual std::string print_details ();
   protected:

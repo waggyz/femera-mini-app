@@ -25,18 +25,18 @@ namespace fmr {//TODO? namespace data {
     Gset_n,                // Local_int  [Sims_n]
     Geom_d,                // Dim_int    [Sims/Part/Mesh_n] enclosing space dim
     Part_n,                // Local_int  [Sims/Part_n]
-    Part_conn_n,           // Local_int  [Sims/Part_n] shared surfaces
-    Mesh_conn_n,           // Local_int  [Part_n] shared surfaces
-    Grid_conn_n,           // Local_int  [Part_n] shared surfaces
+    Part_halo_n,           // Local_int  [Sims/Part_n] shared surfaces
+    Mesh_halo_n,           // Local_int  [Part_n] shared surfaces
+    Grid_halo_n,           // Local_int  [Part_n] shared surfaces
     //
     // Data for both unstructured meshes and structured grids
-    Geom_n,                // Local_int  [Part_n] Mesh_n+Grid_n
+    Geom_n,                // Local_int  [Part_n] Geom_n=Mesh_n+Grid_n
     Axis_rots_type,        // Enum_int   [Geom_n]
-    Axis_rots,             // Geom_float [Geom_n,1/3] Euler angle(s)
-    Axis_quat,             // Geom_float [Geom_n,4] fmr::math::Unit_quaternion
+    Axis_rots,             // Geom_float [Geom_n, 1/3] Euler angle(s)
+    Axis_quat,             // Geom_float [Geom_n, 4] fmr::math::Unit_quaternion
     Node_n,                // Local_int  [Geom_n]
     Node_x, Node_y, Node_z,// Geom_float [Node_n]
-    Node_coor,             // Geom_float [Node_n,Elem/Mesh_d]
+    Node_coor,             // Geom_float [Node_n, Elem/Mesh_d]
     //
     // Unstructured (finite element) mesh data //TODO boundary element method
     Mesh_n,                // Local_int  [Part_n]
@@ -45,22 +45,23 @@ namespace fmr {//TODO? namespace data {
     Elem_type, Elem_poly,  // Enum_int   [Mesh_n]
     // Elemid_int elem_id = make_elem_id (elem_type, elem_poly, elem_p);
     Elem_id,               // Elemid_int [Mesh_n]
-    Elem_node_n,           // Local_int  [Mesh_n]
+    Elem_vrtx_n,           // Dim_int    [Mesh_n]// only vertex (corner) nodes
+    Elem_node_n,           // Local_int  [Mesh_n]// vrtx+edge+face+body nodes
     Elem_jacs_n,           // Local_int  [Mesh_n]
     Jacs_type,             // Enum_int   [Mesh_n]
-    Elem_jacs_sz,          // Dim_int    [Mesh_n] typically 1D:1, 2D:4, 3D:10
-    Jacs_dets,             // Geom_float [Elem_n,Elem_jacs_n,Elem_jacs_sz]
+    Jacs_size_n,           // Dim_int    [Mesh_n] typically 1D:1, 2D:4, 3D:10
+    Jacs_dets,             // Geom_float [Elem_n, Elem_jacs_n, Jacs_size_n]
     Node_global_id,        // Global_int [Node_n]
     Elem_global_id,        // Global_int [Elem_n]
-    Elem_conn,             // Global/Local_int [Elem_n,Elem_node_n]
+    Elem_conn,             // Global/Local_int [Elem_n, Elem_node_n]
     // Build Global_id <=> Local_id maps while reading Elem_conn<Global_int>.
     //
     // Structured grid data
     Grid_n,                // Local_int  [Part_n]
     Cell_d,                // Dim_int    [Grid_n]
     Cell_type,             // Enum_int   [Grid_n]
-    Grid_cell_n,           // Local_int  [Grid_n,Cell_d]
-    Cell_size,             // Geom_float [Grid_n,Cell_d]
+    Grid_cell_n,           // Local_int  [Grid_n, Cell_d]
+    Cell_size,             // Geom_float [Grid_n, Cell_d]
     // Physics datatypes -----------------------------------------------------
     Sims_type, Time_type,  // Enum_int   [Sims_n]
     Phys_d,                // Dim_int    [Sims/Part/Mesh_n]
@@ -70,6 +71,7 @@ namespace fmr {//TODO? namespace data {
     // Solver datatypes ------------------------------------------------------
     // Post-processing datatypes ---------------------------------------------
 #if 1
+    // Heterogeneous datatypes -----------------------------------------------
     //TODO Remove heterogeneous data types. Add back if sync or distribution
     //     is needed.
     // Heterogenous data types: packed as Enum_int, Local_int, or Global_int.
@@ -100,7 +102,7 @@ namespace fmr {//TODO? namespace data {
   */
   enum class Geom_info : Enum_int {isok=0,// Use for Sims and Part data.
     Gset_n, Part_n, Mesh_n, Grid_n,       // Local_int
-    Part_conn_n, Mesh_conn_n, Grid_conn_n,// Local_int
+    Part_halo_n, Mesh_halo_n, Grid_halo_n,// Local_int
     Geom_d,                               // Dim_int
   end};
   enum class Phys_info : Enum_int {isok=0,

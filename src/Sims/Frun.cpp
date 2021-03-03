@@ -14,12 +14,12 @@ namespace Femera {
     this->       task_name ="Run sims";
     this->      model_name ="(master runner)";
     this->       verblevel = 7;
-    this->         hier_lv = F->dist_to_hier_lv;
-    this->            plan = F->dist_to_plan;//fmr::Schedule::List;
-    this->            cncr = F->dist_to_cncr;//fmr::Concurrency::Independent;
-    this-> dist_to_hier_lv = hier_lv;
-    this->    dist_to_plan = fmr::Schedule::Once;
-    this->    dist_to_cncr = fmr::Concurrency::Once;
+    this->         hier_lv = F->send_to_hier_lv;
+    this->            plan = F->send_to_plan;//fmr::Schedule::List;
+    this->            cncr = F->send_to_cncr;//fmr::Concurrency::Independent;
+    this-> send_to_hier_lv = hier_lv;
+    this->    send_to_plan = fmr::Schedule::Once;
+    this->    send_to_cncr = fmr::Concurrency::Once;
     this->       part_algo = fmr::Partition::Merge;
     this->      meter_unit ="sim";
     this->         sims_ix = F->get_sims_n();
@@ -50,7 +50,7 @@ namespace Femera {
     ix = fmr::enum2val(fmr::Geom_info::Part_n);
     if (ginfo[ix] && gisok[ix]) {
       part_ok=true; part_n  = fmr::Local_int (ginfo[ix]); }
-    ix = fmr::enum2val(fmr::Geom_info::Part_conn_n);
+    ix = fmr::enum2val(fmr::Geom_info::Part_halo_n);
     if (ginfo[ix] && gisok[ix]) {
       conn_ok=true; conn_n  = fmr::Local_int (ginfo[ix]); }
     ix = fmr::enum2val(fmr::Geom_info::Mesh_n);
@@ -142,13 +142,13 @@ namespace Femera {
     fmr::perf::timer_resume (& this->time);
     err= this->prep ();
     //
-    Proc* P = this->proc->hier[dist_to_hier_lv];
+    Proc* P = this->proc->hier[send_to_hier_lv];
     auto log = this->proc->log;
     if (log->detail >= this->verblevel) {if (P) {
       fmr::Local_int p = P->is_in_parallel () ? 1 : P->get_proc_n ();
       const int n = this->get_part_n ();
         fmr::Local_int c = 0;
-        switch(this->dist_to_cncr){
+        switch(this->send_to_cncr){
           case fmr::Concurrency::Once        :{ c = 1; break; }
           case fmr::Concurrency::Serial      :{ c = 1; break; }
           case fmr::Concurrency::Independent :{ c = p; break; }
@@ -160,8 +160,8 @@ namespace Femera {
         "%i %s %s / %i %s %s, %s\n",
         c, fmr::Partition_name.at(this->part_algo).c_str(), n==1 ?"part":"parts",
         p, P->task_name.c_str(),
-        fmr::Concurrency_name.at(this->dist_to_cncr).c_str(),
-        fmr::Schedule_name.at(this->dist_to_plan).c_str());
+        fmr::Concurrency_name.at(this->send_to_cncr).c_str(),
+        fmr::Schedule_name.at(this->send_to_plan).c_str());
     } }
     Sims* run0 = this->task.first<Sims> (Base_type::Part);
     if (run0) {

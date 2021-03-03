@@ -69,7 +69,7 @@ Mesh.Optimize=0;
 SetOrder p;
 RecombineAll=0;// Only make tets
 
-Mesh 3;
+//Mesh 3;
 //RenumberMeshNodes;
 //RenumberMeshElements;
 

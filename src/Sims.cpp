@@ -19,10 +19,10 @@ namespace Femera {
       std::vector<fmr::Local_int> path={};
       Sims* F=this;
       this->sims_lv = 0;
+        // Walk up the Sims hierarchy to the root Sims instance.
       while (F->work_type == work_cast(Base_type::Sims)
         && parent != this && parent != nullptr
         && this->sims_lv < this->data->get_hier_max()) {
-        // Walk up the Sims hierarchy to the root Sims instance.
         this->sims_lv++;
         path.push_back (F->sims_ix);
         F = F->parent;
@@ -160,13 +160,13 @@ namespace Femera {
     }
     //TODO prep?
     fmr::perf::timer_resume (& this->time);
-    Proc* P = this->proc->hier[dist_to_hier_lv];
+    Proc* P = this->proc->hier[send_to_hier_lv];
     if(P){
       fmr::Local_int m = fmr::Local_int (this->model_list.size ());
       if (this->proc->log->detail >= this->verblevel) {
         const int p = P->get_proc_n ();
         fmr::Local_int c = 0;
-        switch(this->dist_to_cncr){
+        switch(this->send_to_cncr){
           case fmr::Concurrency::Once        :{ c = 1; break; }
           case fmr::Concurrency::Serial      :{ c = 1; break; }
           case fmr::Concurrency::Independent :{ c = p; break; }
@@ -179,11 +179,11 @@ namespace Femera {
           c, (c==1) ? "sim":"sims",
           p, P->task_name.c_str(),
 #if 0
-          fmr::Concurrency_name[this->dist_to_cncr].c_str(),//TODO
-          fmr::Schedule_name[this->dist_to_plan].c_str());
+          fmr::Concurrency_name[this->send_to_cncr].c_str(),//TODO
+          fmr::Schedule_name[this->send_to_plan].c_str());
 #else
-          fmr::Concurrency_name.at(this->dist_to_cncr).c_str(),//TODO
-          fmr::Schedule_name.at(this->dist_to_plan).c_str());
+          fmr::Concurrency_name.at(this->send_to_cncr).c_str(),//TODO
+          fmr::Schedule_name.at(this->send_to_plan).c_str());
 #endif
       }
       fmr::perf::timer_pause  (& this->time, m);

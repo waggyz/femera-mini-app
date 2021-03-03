@@ -51,20 +51,20 @@ class Dcgn final : public Data {
           data_file   = df;
           encode      = Data::Encode::Binary;
         }
-        File_cgns (Data::File_info& in) {// Construct from base class instance.
-          data_file   = in.data_file;
+        File_cgns (Data::File_info& base) {// Construct from base instance.
+          data_file   = base.data_file  ;
           encode      = Data::Encode::Binary;
-          version     = in.version    ;
-          compress    = in.compress   ;
-          encode      = in.encode     ;
-          precision   = in.precision  ;
-          concurrency = in.concurrency;
-          access      = in.access     ;
-          state       = in.state      ;
+          version     = base.version    ;
+          compress    = base.compress   ;
+          encode      = base.encode     ;
+          precision   = base.precision  ;
+          concurrency = base.concurrency;
+          access      = base.access     ;
+          state       = base.state      ;
         }
         File_cgns            (File_cgns const&) =default;// copyable
         File_cgns& operator= (const File_cgns&) =default;
-        virtual ~File_cgns   ()        noexcept =default;
+        virtual   ~File_cgns ()        noexcept =default;
     };
   // Member variables --------------------------------------------------------
   private:
