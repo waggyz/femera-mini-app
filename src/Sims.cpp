@@ -166,25 +166,19 @@ namespace Femera {
       if (this->proc->log->detail >= this->verblevel) {
         const int p = P->get_proc_n ();
         fmr::Local_int c = 0;
-        switch(this->send_to_cncr){
-          case fmr::Concurrency::Once        :{ c = 1; break; }
-          case fmr::Concurrency::Serial      :{ c = 1; break; }
-          case fmr::Concurrency::Independent :{ c = p; break; }
-          case fmr::Concurrency::Collective  :{ c = p; break; }
-          default: {}
+        switch (this->send_to_cncr) {
+          case fmr::Concurrency::Once        :// Fall through.
+          case fmr::Concurrency::Serial      : c = 1; break;
+          case fmr::Concurrency::Independent :// Fall through.
+          case fmr::Concurrency::Collective  : c = p; break;
+          default: {}// Do nothing.
         }
         const std::string label = "Run "+std::to_string(m)+" sims";
         this->proc->log->label_fprintf (this->proc->log->fmrout, label.c_str(),
           "%i %s / %i %s %s, %s...\n",
-          c, (c==1) ? "sim":"sims",
-          p, P->task_name.c_str(),
-#if 0
-          fmr::Concurrency_name[this->send_to_cncr].c_str(),//TODO
-          fmr::Schedule_name[this->send_to_plan].c_str());
-#else
-          fmr::Concurrency_name.at(this->send_to_cncr).c_str(),//TODO
+          c, (c==1) ? "sim":"sims", p, P->task_name.c_str(),
+          fmr::Concurrency_name.at(this->send_to_cncr).c_str(),
           fmr::Schedule_name.at(this->send_to_plan).c_str());
-#endif
       }
       fmr::perf::timer_pause  (& this->time, m);
       fmr::perf::timer_resume (& this->time);
