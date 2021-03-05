@@ -34,8 +34,48 @@ namespace Femera {
   fmr::Data_id Sims::get_id (){
     return this->data_id;
   }
-  fmr::Local_int Sims::get_sims_n (){
-    return this->task.count (Base_type::Frun);// zero-indexed
+  fmr::Local_int Sims::get_sims_n () {// number of sim collections
+    // Valid after this->model_list has been populated.
+    bool is_new=false;
+    //TODO was: fmr::Local_int n = this->task.count (Base_type::Frun);
+    if (this->locals.count(fmr::Data::Sims_n)) {// already in map
+      auto item = & this->locals.at(fmr::Data::Sims_n);
+      if (item->data.size() < 1) {
+        is_new = true;
+        item->data.resize (1,fmr::Local_int (this->model_list.size ()));
+      }else{
+        if (item->data[0] <1) {
+          is_new = true;
+          item->data[0] = fmr::Local_int (this->model_list.size ());
+    } } }
+    else {// Add to map and initialize data.
+      is_new = true;
+      this->locals[fmr::Data::Sims_n].data.resize (1,//TODO allow >1 collection
+        fmr::Local_int (this->model_list.size ()));
+    }
+    const fmr::Local_int n = this->locals.at(fmr::Data::Sims_n).data[0];
+    if (is_new) {
+      auto store = & this->locals.at(fmr::Data::Sims_n).stored_state;
+      // number of sims in a collection not stored directly in a file
+      store->is_default = true;
+      store->can_write  = false;
+      store->can_read   = false;
+      store->was_read   = false;
+      store->was_checked= true;
+      store->has_changed= false;
+      store->do_save    = false;
+      store->has_error  = n < 1;
+      auto inmem = & this->locals.at(fmr::Data::Sims_n).memory_state;
+      inmem->is_default = true;
+      inmem->can_write  = false;//TODO change # sims dynamically?
+      inmem->can_read   = true;
+      inmem->was_read   = true;
+      inmem->was_checked= true;
+      inmem->has_changed= false;
+      inmem->do_save    = false;
+      inmem->has_error  = n < 1;
+    }
+    return n;// zero-indexed
   }
   fmr::Local_int Sims::get_part_n (){// zero-indexed
     this->part_dims.data[enum2val(fmr::Geom_info::Part_n)]
@@ -129,20 +169,20 @@ namespace Femera {
     return 0;
   }
 #endif
-  int Sims::chck (){
+  int Sims::chck () {
     return 0;
   }
-  int Sims::prep (){int err=0;
+  int Sims::prep () {int err=0;
     return err;
   }
-  int Sims::init_task (int*, char**){int err=0;
+  int Sims::init_task (int*, char**) {int err=0;
 #ifdef FMR_DEBUG
     printf ("*** Sims::init_task\n");
 #endif
     return err;
   }
-  int Sims::add (std::string name){int err=0;
-    if (this->model_list.size() == 0){// Add the first Frun
+  int Sims::add (std::string name) {int err=0;
+    if (this->model_list.size() == 0) {// Add the first Frun.
       // New instances made by add_new_task will be deleted in this->exit (err),
       // or before.
       err= fmr::detail::main->add_new_task (Femera::Base_type::Frun,this);
@@ -150,19 +190,33 @@ namespace Femera {
     this->model_list.push_back (name);
     return err;
   }
-  int Sims::clear (){
-    this->model_list={};
+  int Sims::clear () {
+    this->model_list ={};
+    this->globals = {};
+    this->locals = {};
+    this->enums = {};
+    this->dims = {};
+#if 0
+    if (this->locals.count(fmr::Data::Sims_n)) {// present in map
+      this->locals.at(fmr::Data::Sims_n)
+        = fmr::Local_int_vals(fmr::Data::Sims_n);
+    }
+#endif
     return 0;
   }
-  int Sims::run (){int err=0;
+  int Sims::run () {int err=0;
     if (this->proc->log->detail >= this->verblevel) {
       this->proc->log->print_heading ("Start");
     }
     //TODO prep?
     fmr::perf::timer_resume (& this->time);
     Proc* P = this->proc->hier[send_to_hier_lv];
-    if(P){
+    if (P) {
+#if 0
       fmr::Local_int m = fmr::Local_int (this->model_list.size ());
+#else
+      const fmr::Local_int m = this->get_sims_n ();
+#endif
       if (this->proc->log->detail >= this->verblevel) {
         const int p = P->get_proc_n ();
         fmr::Local_int c = 0;
@@ -194,11 +248,11 @@ namespace Femera {
   if (this->proc->log->detail >= this->verblevel) {
     this->proc->log->print_heading ("Finished");
   }
-  fmr::perf::timer_pause (& this->time, -err);//TODO fix return code handling
+  fmr::perf::timer_pause (& this->time, -err);//TODO Fix return code handling.
   //
   return this->exit (err);
 }
-  int Sims::exit_task (int err ){//TODO Why called twice?
+  int Sims::exit_task (int err) {//TODO Why called twice?
 #ifdef FMR_DEBUG
     printf ("*** Sims::exit_task\n");
 #endif

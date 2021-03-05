@@ -18,8 +18,10 @@ Partition depth :  0-1 (merged)     1              1-2             2
      Model size : Tiny             Small          Medium          Large
      Model size : <30 kdof         30-1000 kDOF    1-100 Mdof     >100 Mdof
     Concurrency :  40 sim/node     20-2 sim/node   1 node/sim     >1 node/sim
-  MPI processes :   4 (10 sim/MPI) 1 MPI/sim       4 MPI/node      4 MPI/node
- OpenMP threads :   1 OMP/sim      2-20 OMP/MPI   10 OMP/MPI      10 OMP/MPI
+  MPI processes :   4 (10 sim/MPI) 1 MPI/sim       4/8 MPI/node    4/8 MPI/node
+ OpenMP threads :   1 OMP/sim      2-20 OMP/MPI   10/5 OMP/MPI    10/5 OMP/MPI
+ LE Performance : 100-25k sim/s/node
+
 
 All Work classes inherit the processing (Proc) and data (Data) environment
 created during Femera initialization.
@@ -34,7 +36,7 @@ Work : Work for Femera to do
 
 Planned Data plugins
 
-Dcgn : CGNS mid-level interface to mesh and CFD data on mesh
+Dcgn : CGNS mid-level interface to mesh/grid and CFD data on mesh/grid
        Experimental support for cubic elements
 
 Dmsh : Gmsh high-level interface to mesh (.msh) and abstract (.geo) geometry

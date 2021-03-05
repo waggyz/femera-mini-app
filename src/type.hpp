@@ -2,62 +2,68 @@
 #define FMR_HAS_TYPE_HPP
 
 #include <typeinfo> // std::underlying_type
-#include <vector>
 #include <map>
 
 #define FMR_TOUCH_VALS_FIRST
 
 namespace fmr {
-  /* These typedefs, enums, and static maps are used throughout
+  /* These typedefs, enums, templates, and static maps can be used throughout
    * fmr:: and Femera:: namespaces.
+   *
+   * sizeof (Dim_int <= Enum_int <= Local_int < Global_int)
+   * sizeof (Elemid_int >= Enum_int + fmr::math::Poly + Dim_int)
    */
-  // sizeof (Dim_int <= Enum_int <= Local_int < Global_int)
-  // sizeof (Dim_int <~ int): relative (negative) Dim_int are int parameters
-  typedef uint8_t      Dim_int;// dimensions, order, power, hierarchy lvls,...
-  typedef uint16_t    Enum_int;
-  typedef uint32_t   Local_int;
-  typedef uint64_t  Global_int;//TODO signed?
-  typedef uint32_t Elemid_int;
-  //NOTE sizeof (Elemid_int >= Enum_int + fmr::math::Poly + Dim_int)
+  typedef uint8_t     Dim_int;// dimensions, order, power, hierarchy lvls,...
+  typedef uint16_t   Enum_int;
+  typedef uint32_t  Local_int;
+  typedef uint32_t Elemid_int;//(See above.)
+  typedef uint64_t Global_int;//TODO signed?
   //
-  typedef double   Geom_float;
+  typedef double   Geom_float;//TODO Try float.
   typedef double   Phys_float;
   typedef double   Solv_float;
-  typedef float    Cond_float;
+  typedef float    Cond_float;// Preconditioning and scaling
+  typedef float    Post_float;// Post-processing
+  typedef float    Plot_float;// Visualization
   //
+  template <typename E>// Cast enum to number: for enum index#, size, sync.
+  constexpr typename std::underlying_type<E>::type enum2val (E e) {
+    //use: const auto part_type_n = fmr::enum2val (fmr::Partition::end);
+    return static_cast<typename std::underlying_type<E>::type>(e);
+  }
   enum class Partition : Enum_int { None=0, Error, Unknown,
     Prepared,// Pre-partitioned
-       Merge,// Treat as single partitions, 1/elem type (XS models)
+       Merge,// Treat as single partition with 1 mesh/elem type (XS models)
         Mtrl,// One partition for each material
         Geom,// One partition for each element/cell type
         Elem,// Each partition is a sequential list of elements//TODO batch_sz
-        Grid,// Partition by a structured grid
-        Mesh,// Partition by a coarser mesh
+        Grid,// Partitioned by a structured grid
+        Mesh,// Partitioned by a coarser mesh
         Auto,//TODO
-      Plugin
-  };
-  //NOTE These string lookups do not need to be const for compile-time use
-  //     because they are only used for I/O operations. They could be
-  //     std::array, but std::map syntax is cleaner.
+      Plugin,
+  end};
+  //NOTE These string lookups do not need to be const (for compile-time
+  //     evaluation) because they are only used for I/O operations. They could
+  //     be std::array or std::unordered_map, but std::map syntax is cleaner.
   static const std::map<Partition,std::string> Partition_name {
-    {Partition::      None,"unpartitioned"},
-    {Partition::     Error,"partitioning error"},
-    {Partition::   Unknown,"unknown partitioning"},
-    {Partition::  Prepared,"pre-partitioned"},
-    {Partition::     Merge,"merged"},
-    {Partition::      Mtrl,"partition by material"},
-    {Partition::      Geom,"partition by element type"},
-    {Partition::      Elem,"partition by element id"},//TODO needs bin_size
-    {Partition::      Grid,"grid-partitioned"},
-    {Partition::      Mesh,"mesh-partitioned"},
-    {Partition::      Auto,"partition automatically"},
-    {Partition::    Plugin,"partitioner plugin"}
+    {Partition::     None,"unpartitioned"},
+    {Partition::    Error,"partitioning error"},
+    {Partition::  Unknown,"unknown partitioning"},
+    {Partition:: Prepared,"pre-partitioned"},
+    {Partition::    Merge,"merged"},
+    {Partition::     Mtrl,"partition by material"},
+    {Partition::     Geom,"partition by element type"},
+    {Partition::     Elem,"partition by element id"},//TODO needs bin_size
+    {Partition::     Grid,"grid-partitioned"},
+    {Partition::     Mesh,"mesh-partitioned"},
+    {Partition::     Auto,"partition automatically"},
+    {Partition::   Plugin,"partitioner plugin"}
   };
   enum class Schedule : Enum_int { None=0, Error, Unknown,
     Once, List, Fifo,
     Auto,
-    Plugin
-  };
+    Plugin,
+  end};
   //TODO Batches: distribute batch_sz objects at a time.
   //     Objects in a batch are run in a Serial List.
   static const std::map<Schedule,std::string> Schedule_name {
@@ -75,8 +81,8 @@ namespace fmr {
     Once,       // Distribute one object to one thread.
     Serial,     // Distribute and run all objects only on master thread.
     Independent,// Distribute and run different objs. on each lower thread.
-    Collective  // Distribute and run the same object on all lower threads.
-  };
+    Collective, // Distribute and run the same object on all lower threads.
+  end};
   static const std::map<Concurrency,std::string> Concurrency_name {
     {Concurrency::        None,"no concurrency"},//TODO makes sense?
     {Concurrency::       Error,"concurrency error"},
@@ -88,8 +94,8 @@ namespace fmr {
   };
    enum class Sim_time : Enum_int { None=0, Error, Unknown, Plugin,
     Explicit,// Time-accurate
-    Implicit // Not time-accurate
-  };
+    Implicit,// Not time-accurate
+  end};
   static const std::map<Sim_time,std::string> Sim_time_name {
     {Sim_time::     None,"no sim type"},//TODO makes sense?
     {Sim_time::    Error,"sim type error"},
@@ -98,11 +104,6 @@ namespace fmr {
     {Sim_time:: Explicit,"explicit"},
     {Sim_time:: Implicit,"implicit"}
   };
-  //
-  template <typename E>// Cast enum to integer value: for indexing and sizing.
-  constexpr typename std::underlying_type<E>::type enum2val (E e) {
-    return static_cast<typename std::underlying_type<E>::type>(e);
-  }
 #if 0
   enum class Distribute :fmr::Enum_int{ Unknown=-1, None=0, Automatic,
     Master, Here, One_per_core, To_all_cores,

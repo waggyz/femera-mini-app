@@ -16,6 +16,16 @@ namespace fmr {
     data::State memory_state = data::State()       ;
     bool isok [8*sizeof(T)];// state of heterogeneous data type items
     //TODO data.size = prod (dims) << order; // native complex is <<(order-1)
+#if 0
+    void clear (){
+      this->data.resize(0);
+           algebra = math::Real          ;
+              type = Data::Unknown       ;
+            layout = data::Layout::Block ;
+      stored_state = data::State()       ;
+      memory_state = data::State()       ;
+    }
+#endif
     // constructors
     Vals (){}
     Vals (const Data);

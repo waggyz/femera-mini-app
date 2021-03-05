@@ -40,13 +40,13 @@ class Sims : public Work {// simulation collection manager
   protected:
     // These data storage types are available to all derived classes.
     std::map<fmr::Data,fmr::Global_int_vals> globals ={};
-    std::map<fmr::Data,fmr::Local_int_vals> locals ={};
-    std::map<fmr::Data,fmr::Enum_int_vals> enums ={};
-    std::map<fmr::Data,fmr::Dim_int_vals> dims ={};
+    std::map<fmr::Data,fmr::Local_int_vals>   locals ={};
+    std::map<fmr::Data,fmr::Enum_int_vals>     enums ={};
+    std::map<fmr::Data,fmr::Dim_int_vals>       dims ={};
 #endif
   public://TODO protected:
     Sims* parent = nullptr;
-    std::string model_name="unnamed sim collection";
+    std::string model_name ="(unnamed sim collection)";
     std::deque<std::string> model_list ={};
     //
     int                   hier_lv = 1;// my processing hierarchy run level
@@ -57,8 +57,8 @@ class Sims : public Work {// simulation collection manager
     fmr::Schedule    send_to_plan = fmr::Schedule::Fifo;
     fmr::Concurrency send_to_cncr = fmr::Concurrency::Independent;
     //TODO Run in batches: get a list of bats_sz objects at a time.
-    //TODO change send_to_* to deal_* dest_* or bats_*:
-    //     deal_sz deal_hier_lv deal_plan deal_cncr
+    //TODO change send_to_* to dest_* or bats_*:
+    //     send_sz send_hier_lv send_plan send_cncr
   protected:
     fmr::Partition      part_algo = fmr::Partition::None;//TODO Needed here?
     //
