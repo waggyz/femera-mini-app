@@ -21,9 +21,6 @@ class Data : public Work {//TODO change to File
     enum class Encode : fmr::Enum_int {Unknown=0,
       ASCII, Binary
     };
-    enum class Access : fmr::Enum_int {Unknown=0, Error,//TODO to data::fmr::
-      New, Check, Read, Write, Modify, Close            //     in type.hpp
-    };//TODO Find, Scan?
     enum class Concurrency : fmr::Enum_int {Error=0, Serial,
       Independent, Collective
     };
@@ -54,7 +51,7 @@ class Data : public Work {//TODO change to File
         Data::Encode            encode = Data::Encode         :: ASCII       ;
         fmr::data::Precision precision = fmr::data::Precision :: Float_double;
         Data::Concurrency  concurrency = Data::Concurrency    :: Serial      ;
-        Data::Access            access = Data::Access         :: Check       ;
+        fmr::data::Access       access = fmr::data::Access    :: Check       ;
         fmr::data::State         state = fmr::data::State();// file state
       public:
         File_info            ()                 =default;
@@ -180,18 +177,7 @@ class Data : public Work {//TODO change to File
     Data           ();// called implicitly by child constructors
 };
 }//end Femera namespace
-namespace fmr {namespace data {//TODO change to fmr::data:: in type.hpp
-  static const std::map<Femera::Data::Access,std::string> Access_name {
-    {Femera::Data::Access:: Unknown,"uknown access"},//TODO makes sense?
-    {Femera::Data::Access::   Error,"access error"},
-    {Femera::Data::Access::     New,"new"},
-    {Femera::Data::Access::   Check,"check"},
-    {Femera::Data::Access::    Read,"read"},
-    {Femera::Data::Access::   Write,"write"},
-    {Femera::Data::Access::  Modify,"modify"},
-    {Femera::Data::Access::   Close,"close"}
-  };
-} }//end fmr::data:: namespace
+
 
 #undef FMR_DEBUG
 #endif

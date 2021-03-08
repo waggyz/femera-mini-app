@@ -101,7 +101,7 @@ Data::File_info Data::get_file_info (Data::Data_file data_file){
     return new_info;
   }
   new_info.state.has_error = false;
-  new_info.access = Data::Access::Check;
+  new_info.access = fmr::data::Access::Check;
   auto info= D->get_file_info (new_info.data_file.second);
   if (info.state.has_error){
     log->fprintf (log->fmrerr,"WARN""ING %s file may be corrupt: %s\n",
@@ -206,8 +206,8 @@ int Data::get_local_vals (std::string data_id, fmr::Local_int_vals& vals){
   }else{
 #if 0
     const bool w
-      = (info.access == Data::Access::Write
-      || info.access == Data::Access::Modify);
+      = (info.access == fmr::data::Access::Write
+      || info.access == fmr::data::Access::Modify);
     vals.stored_state.can_write   = w;//TODO
 #endif
     vals.stored_state.can_read    = true;
@@ -223,8 +223,8 @@ int Data::get_local_vals (std::string data_id, fmr::Local_int_vals& vals){
 int Data::get_global_vals (std::string name, fmr::Tree_path part_tree_id,
   std::vector<fmr::Global_int_vals*> V){int err=0;
   const bool w
-    = (this->current_access == Data::Access::Write
-    || this->current_access == Data::Access::Modify);
+    = (this->current_access == fmr::data::Access::Write
+    || this->current_access == fmr::data::Access::Modify);
   const size_t n = V.size();
   for (size_t i=0; i<n; i++) {
     bool item_err= false;
@@ -470,8 +470,8 @@ int Data::init_task (int* argc, char** argv){ int err=0;
   //     < Work_type, subtype, Data*, Access, file_name >
   // e.g.
   //  "new_model_1":
-  //     <Work_type::Phys, Elas_iso*, Dcgn*, Data::Access::Read, "new_model_1.cgns">
-  //     <Work_type::Mesh, Tet*     , Dcgn*, Data::Access::Read, "new_model_1.cgns">
+  //     <Work_type::Phys, Elas_iso*, Dcgn*, fmr::data::Access::Read, "new_model_1.cgns">
+  //     <Work_type::Mesh, Tet*     , Dcgn*, fmr::data::Access::Read, "new_model_1.cgns">
   err= this->chck_file_names ();//chk_file_names);
 #if 1
   for (auto model : this->sims_names){// Copy model names to the main queue
@@ -499,7 +499,7 @@ int Data::chck_file_names (std::deque<std::string> files){int err=0;
     }
   }
 //TODO  const auto this_access = (out_file_names.size() == 0)
-//TODO    ? Data::Access::Modify : Data::Access::Read;
+//TODO    ? Data::Access::Modify : fmr::data::Access::Read;
   //
   const fmr::Local_int fname_n = fmr::Local_int(files.size());
   const int dlevel = 0;

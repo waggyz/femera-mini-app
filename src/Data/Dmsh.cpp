@@ -124,7 +124,7 @@ Data::File_info Dmsh::get_file_info (const std::string fname) {
   return info;
 }
 Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
-  Data::Access for_access, Data::Concurrency for_cncr){
+  fmr::data::Access for_access, Data::Concurrency for_cncr){
   int err=0;//TODO This loads file data. Do not reload later.
 //  FMR_PRAGMA_OMP(omp critical) {//TODO use is_omp_parallel, like below.
   const auto fname = info.data_file.second;
@@ -132,7 +132,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
   try {gmsh::open (fname);}
   catch (int e) {
     fmr::perf::timer_pause (&this->time);
-    info.access = Data::Access::Error;
+    info.access = fmr::data::Access::Error;
     info.state.has_error = true;
     this->proc->log->printf_err ("WARN""ING Gmsh could not open %s\n",
       fname.c_str());
@@ -170,19 +170,19 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
   info.state.was_read   = true;
   info.state.is_default = false;
   switch (info.access) {
-    case Data::Access::Close :{
+    case fmr::data::Access::Close :{
       info.state.can_read  = false;
       info.state.can_write = false;
       break;}
-    case Data::Access::Read :{
+    case fmr::data::Access::Read :{
       info.state.can_read  = true;
       info.state.can_write = false;
       break;}
-    case Data::Access::Write :{
+    case fmr::data::Access::Write :{
       info.state.can_read  = false;
       info.state.can_write = true;
       break;}
-    case Data::Access::Modify :{
+    case fmr::data::Access::Modify :{
       info.state.can_read  = true;
       info.state.can_write = true;
       break;}
@@ -198,14 +198,14 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
   if (!info.state.was_read) {
     bool do_open = true;
     switch (info.access){// Check if already open.
-      case Data::Access::Read   :{}//valid open modes.
-      case Data::Access::Write  :{}
-      case Data::Access::Modify :{do_open = false; break;}
+      case fmr::data::Access::Read   :{}//valid open modes.
+      case fmr::data::Access::Write  :{}
+      case fmr::data::Access::Modify :{do_open = false; break;}
       default: {do_open = true;}
     }
     if (info.state.has_error) {do_open=true;}// Try to reopen.
     if (do_open) {
-      const auto inp_file_mode = Data::Access::Read;
+      const auto inp_file_mode = fmr::data::Access::Read;
       info = this->open (info, inp_file_mode, Data::Concurrency::Independent);
     }
     if (info.state.has_error) {

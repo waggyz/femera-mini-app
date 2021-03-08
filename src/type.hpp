@@ -98,15 +98,9 @@ namespace fmr {
     fmr::Concurrency cncr    = fmr::Concurrency::Once;
     fmr::Dim_int     hier_lv = 1;// processing hierarchy run level
     // constructor
-#if 0
-    Distribute (const fmr::Local_int b, const fmr::Schedule p,
-      const fmr::Concurrency c, fmr::Dim_int h)
-      : bats_sz(b), plan(p), cncr(c), hier_lv(h){}
-#else
     Distribute (const fmr::Dim_int h, const fmr::Schedule p,
       const fmr::Concurrency c, fmr::Local_int b=1)
       : bats_sz(b), plan(p), cncr(c), hier_lv(h){}
-#endif
   };
   enum class Sim_time : Enum_int { None=0, Error, Unknown, Plugin,
     Explicit,// Time-accurate
@@ -127,7 +121,6 @@ namespace fmr {
   };
 #endif
 }//end fmr:: namespace
-#if 0
 namespace fmr {namespace data {//TODO Fix and remove from Data.hpp
   enum class Access : fmr::Enum_int {Unknown=0, Error,//TODO remove from Data.hpp
     New, Check, Read, Write, Modify, Close            //     Femera::Data::Access
@@ -143,7 +136,6 @@ namespace fmr {namespace data {//TODO Fix and remove from Data.hpp
     {Access::   Close,"close"}
   };
 } }//end fmr::data:: namespace
-#endif
 #if 0
   //https://stackoverflow.com/questions/18837857/cant-use-enum-class-as-unordered-map-key
   struct int_enum_class_hash {//May not be needed for std::map *_name above.[1]

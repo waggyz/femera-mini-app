@@ -43,14 +43,14 @@ namespace Femera {// header extension: needs cgnslib.h
     { CG_FILE_HDF5, Dcgn::File_format:: Dcgn_HDF5 },
     { CG_FILE_ADF2, Dcgn::File_format:: Dcgn_ADF2 }
   };
-  static const std::map<Femera::Data::Access,int> dcgn_cg_open_mode ={
-    { Femera::Data::Access::    New, CG_MODE_WRITE  },
-    { Femera::Data::Access::  Check, CG_MODE_CLOSED },
-    { Femera::Data::Access::  Error, CG_MODE_CLOSED },
-    { Femera::Data::Access::  Close, CG_MODE_CLOSED },
-    { Femera::Data::Access::   Read, CG_MODE_READ   },
-    { Femera::Data::Access::  Write, CG_MODE_WRITE  },
-    { Femera::Data::Access:: Modify, CG_MODE_MODIFY }
+  static const std::map<fmr::data::Access,int> dcgn_cg_open_mode ={
+    { fmr::data::Access::    New, CG_MODE_WRITE  },
+    { fmr::data::Access::  Check, CG_MODE_CLOSED },
+    { fmr::data::Access::  Error, CG_MODE_CLOSED },
+    { fmr::data::Access::  Close, CG_MODE_CLOSED },
+    { fmr::data::Access::   Read, CG_MODE_READ   },
+    { fmr::data::Access::  Write, CG_MODE_WRITE  },
+    { fmr::data::Access:: Modify, CG_MODE_MODIFY }
   };
 }//end Femera namespace for header extension
 namespace Femera {
@@ -186,27 +186,27 @@ Dcgn::File_cgns Dcgn::close (const std::string fname){
   int err=0;
   fmr::perf::timer_resume (&this->time);
   switch (info.access){
-    case Data::Access::Read   :// Fall through.
-    case Data::Access::Write  :// Fall through.
-    case Data::Access::Modify :{err= cg_close (info.file_cgid); break;}
+    case fmr::data::Access::Read   :// Fall through.
+    case fmr::data::Access::Write  :// Fall through.
+    case fmr::data::Access::Modify :{err= cg_close (info.file_cgid); break;}
     default:{}// Do nothing.
   }
   fmr::perf::timer_pause (&this->time);
-  if (err) {info.access = Data::Access::Error; info.state.has_error = true;}
-  else {info.access = Data::Access::Close;}
+  if (err) {info.access = fmr::data::Access::Error; info.state.has_error = true;}
+  else {info.access = fmr::data::Access::Close;}
   this->file_info[fname] = info;
   return info;
 }
 Dcgn::File_cgns Dcgn::open (const std::string fname,
-  Data::Access for_access, Data::Concurrency for_concurrency){
+  fmr::data::Access for_access, Data::Concurrency for_concurrency){
   auto info = Dcgn::File_cgns (Data::Data_file (this,fname));
   info = this->file_info.count(fname) ? this->file_info.at(fname) : info;
   int err=0; auto log = this->proc->log;
   switch (for_access){
-    case Data::Access::Read   :// Fall through.
-    case Data::Access::Write  :// Fall through.
-    case Data::Access::Modify :// Fall through.
-    case Data::Access::New    :{err = 0; break;}// valid open modes
+    case fmr::data::Access::Read   :// Fall through.
+    case fmr::data::Access::Write  :// Fall through.
+    case fmr::data::Access::Modify :// Fall through.
+    case fmr::data::Access::New    :{err = 0; break;}// valid open modes
     default:{err = 1;}// not a valid open mode
   }
   if (err) {
@@ -227,11 +227,11 @@ Dcgn::File_cgns Dcgn::open (const std::string fname,
     info.state.has_error = false;
     const auto mode_cgns = dcgn_cg_open_mode.at(for_access);
     switch (info.access){// Close file if already open in the wrong mode.
-      case Data::Access::Read   :// Fall through.
-      case Data::Access::Write  :// Fall through.
-      case Data::Access::Modify :{
+      case fmr::data::Access::Read   :// Fall through.
+      case fmr::data::Access::Write  :// Fall through.
+      case fmr::data::Access::Modify :{
         err= cg_close (info.file_cgid);
-        if (!err) {info.access = Data::Access::Close;}
+        if (!err) {info.access = fmr::data::Access::Close;}
         break;}
       default:{}// Do nothing.
     }
@@ -252,16 +252,16 @@ Dcgn::File_cgns Dcgn::open (const std::string fname,
   fmr::perf::timer_pause (&this->time);
   if (err) {
     info.state.has_error = true;
-    info.access = Data::Access::Error;
+    info.access = fmr::data::Access::Error;
     this->file_info[fname] = info;
     return info;
   }
   else {info.access = for_access; info.concurrency = for_concurrency; };
   fmr::perf::timer_resume (&this->time);
-  if (for_access == Data::Access::New) {
+  if (for_access == fmr::data::Access::New) {
 #if 1
-    if (info.access == Data::Access::New
-      || for_access == Data::Access::New){//TODO
+    if (info.access == fmr::data::Access::New
+      || for_access == fmr::data::Access::New){//TODO
       struct ::stat st;// defined in sys/stat.h
       bool does_exist = ::stat (fname.c_str(), &st) == 0;
       if (does_exist){// already exists, so cannot create a new one
@@ -274,14 +274,14 @@ Dcgn::File_cgns Dcgn::open (const std::string fname,
             break; }
           default: log->printf_err (errmsg.c_str(), fname.c_str());
         }
-        info.access = Data::Access::Error;
+        info.access = fmr::data::Access::Error;
         info.state.has_error = true;
         return info;
     } }
 #endif
     // File creation: open in CGNS WRITE mode (done above),
     // then close the file and reopen in CGNS MODIFY mode.
-    for_access = Data::Access::Modify;
+    for_access = fmr::data::Access::Modify;
     const auto mode_cgns = dcgn_cg_open_mode.at(for_access);
     if (info.concurrency == Data::Concurrency::Collective) {
       FMR_PRAGMA_OMP(omp single nowait)
@@ -296,26 +296,26 @@ Dcgn::File_cgns Dcgn::open (const std::string fname,
   fmr::perf::timer_pause (&this->time);
   if (err) {
     info.state.has_error = true;
-    info.access = Data::Access::Error;
+    info.access = fmr::data::Access::Error;
     this->file_info[fname] = info;
     return info;
   }
   else {info.access = for_access;}
   info.state.is_default = false;
   switch (info.access) {
-    case Data::Access::Close :{
+    case fmr::data::Access::Close :{
       info.state.can_read  = false;
       info.state.can_write = false;
       break;}
-    case Data::Access::Read :{
+    case fmr::data::Access::Read :{
       info.state.can_read  = true;
       info.state.can_write = false;
       break;}
-    case Data::Access::Write :{
+    case fmr::data::Access::Write :{
       info.state.can_read  = false;
       info.state.can_write = true;
       break;}
-    case Data::Access::Modify :{
+    case fmr::data::Access::Modify :{
       info.state.can_read  = true;
       info.state.can_write = true;
       break;}
@@ -370,9 +370,9 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
   if (!info.state.was_read) {
     bool do_open = true;
     switch (info.access){// Check if already open.
-      case Data::Access::Read   :{}//valid open modes.
-      case Data::Access::Write  :{}
-      case Data::Access::Modify :{do_open = false; break;}
+      case fmr::data::Access::Read   :{}//valid open modes.
+      case fmr::data::Access::Write  :{}
+      case fmr::data::Access::Modify :{do_open = false; break;}
       default: {do_open = true;}
     }
     if (info.state.has_error) {do_open=true;}// Try to reopen.
@@ -381,9 +381,9 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
       //TODO if output files same as input, assume write back to input files
       const auto inp_file_mode
         = this->get_inp_file_names().size()==this->get_out_file_names().size()
-        ? Data::Access::Modify : Data::Access::Read;
+        ? fmr::data::Access::Modify : fmr::data::Access::Read;
 #else
-      const auto inp_file_mode = Data::Access::Read;
+      const auto inp_file_mode = fmr::data::Access::Read;
 #endif
       info = this->open (fname, inp_file_mode, Data::Concurrency::Independent);
     }
@@ -629,9 +629,9 @@ int Dcgn::close (){int err=0;
     auto fname = fi.first;
     auto info  = fi.second;
     switch (info.access) {
-      case Data::Access::Read   :{}//Fall through.
-      case Data::Access::Write  :{}//Fall through.
-      case Data::Access::Modify :{this->close (fname); break;}
+      case fmr::data::Access::Read   :{}//Fall through.
+      case fmr::data::Access::Write  :{}//Fall through.
+      case fmr::data::Access::Modify :{this->close (fname); break;}
       default :{}// Do nothing.
   } }
   fmr::perf::timer_pause (&this->time);

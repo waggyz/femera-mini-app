@@ -109,7 +109,8 @@ class Dcgn final : public Data {
     //
     std::deque<std::string> get_sims_names ()        final override;
     //
-    File_cgns open  (const std::string fname, Data::Access, Data::Concurrency);
+    File_cgns open  (const std::string fname,
+      fmr::data::Access, Data::Concurrency);
     File_cgns close (const std::string fname);
   public:
     Dcgn           (Proc*,Data*) noexcept;

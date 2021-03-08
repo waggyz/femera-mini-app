@@ -17,7 +17,7 @@ namespace Femera {
   }
   int Fake::prep (){
     if (true){//TODO Remove.
-      //info.access == Data::Access::Check){
+      //info.access == fmr::data::Access::Check){
       //TODO Move to chck()?
       const fmr::Local_int geom_d=3, gset_n=3, part_n=1, mesh_n=1, grid_n=0;
       const fmr::Local_int phys_d=3, mtrl_n=1;

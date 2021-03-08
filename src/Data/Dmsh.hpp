@@ -50,7 +50,7 @@ class Dmsh final : public Data {
     Data::File_info get_file_info (const std::string fname)  final override;
     Data::File_info scan_file_data (const std::string fname) final override;
     //
-    Dmsh::File_gmsh open (Dmsh::File_gmsh, Data::Access, Data::Concurrency);
+    Dmsh::File_gmsh open (Dmsh::File_gmsh, fmr::data::Access,Data::Concurrency);
   private:
     int prep  () final override;
     int close () final override;
