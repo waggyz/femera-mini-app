@@ -32,7 +32,7 @@ namespace fmr {namespace detail {//TODO move to Femera namespace?
     {Femera::Dcgn::File_format::    Dcgn_ADF1,"ADF"},
     {Femera::Dcgn::File_format::    Dcgn_HDF5,"HDF5"},
     {Femera::Dcgn::File_format::    Dcgn_ADF2,"ADF2"},
-    {Femera::Dcgn::File_format:: Dcgn_unknown,"uknown format"}
+    {Femera::Dcgn::File_format:: Dcgn_unknown,"unknown format"}
   };
 } }
 namespace Femera {// header extension: needs cgnslib.h

@@ -465,19 +465,10 @@ int Data::init_task (int* argc, char** argv){ int err=0;
     // Restore getopt variables.
     argc[0]=argc2;opterr=opterr2;optopt=optopt2;optind=optind2;optarg=optarg2;
   }//end non-threadsafe section
-  // simm_data:
-  //   sims_name:
-  //     < Work_type, subtype, Data*, Access, file_name >
-  // e.g.
-  //  "new_model_1":
-  //     <Work_type::Phys, Elas_iso*, Dcgn*, fmr::data::Access::Read, "new_model_1.cgns">
-  //     <Work_type::Mesh, Tet*     , Dcgn*, fmr::data::Access::Read, "new_model_1.cgns">
   err= this->chck_file_names ();//chk_file_names);
-#if 1
   for (auto model : this->sims_names){// Copy model names to the main queue
     fmr::sims::add (model);
   }
-#endif
   if (proc->log->detail >= this->verblevel){this->print_details (); }
   fmr::perf::timer_pause (&this->time);
   return err;
@@ -498,8 +489,8 @@ int Data::chck_file_names (std::deque<std::string> files){int err=0;
       }
     }
   }
-//TODO  const auto this_access = (out_file_names.size() == 0)
-//TODO    ? Data::Access::Modify : fmr::data::Access::Read;
+  //TODO  const auto this_access = (out_file_names.size() == 0)
+  //TODO    ? fmr::data::Access::Modify : fmr::data::Access::Read;
   //
   const fmr::Local_int fname_n = fmr::Local_int(files.size());
   const int dlevel = 0;

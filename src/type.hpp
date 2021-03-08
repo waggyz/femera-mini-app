@@ -121,12 +121,12 @@ namespace fmr {
   };
 #endif
 }//end fmr:: namespace
-namespace fmr {namespace data {//TODO Fix and remove from Data.hpp
-  enum class Access : fmr::Enum_int {Unknown=0, Error,//TODO remove from Data.hpp
-    New, Check, Read, Write, Modify, Close            //     Femera::Data::Access
-  };//TODO Find, Scan?
+namespace fmr {namespace data {
+  enum class Access : fmr::Enum_int {Unknown=0, Error,//TODO Find, Scan?
+    New, Check, Read, Write, Modify, Close
+  };
   static const std::map<Access,std::string> Access_name {
-    {Access:: Unknown,"uknown access"},//TODO makes sense?
+    {Access:: Unknown,"unknown access"},//TODO makes sense?
     {Access::   Error,"access error"},
     {Access::     New,"new"},
     {Access::   Check,"check"},
