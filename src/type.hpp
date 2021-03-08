@@ -77,7 +77,7 @@ namespace fmr {
     {Schedule::  Plugin,"scheduler plugin"}
     // * Once: batch size = 1
   };
-   enum class Concurrency : Enum_int { None=0, Error, Unknown,
+  enum class Concurrency : Enum_int { None=0, Error, Unknown,
     Once,       // Distribute one object to one thread.
     Serial,     // Distribute and run all objects only on master thread.
     Independent,// Distribute and run different objs. on each lower thread.
@@ -92,7 +92,23 @@ namespace fmr {
     {Concurrency:: Independent,"independently"},
     {Concurrency::  Collective,"collectively"}
   };
-   enum class Sim_time : Enum_int { None=0, Error, Unknown, Plugin,
+  struct Distribute {
+    fmr::Local_int   bats_sz = 1;
+    fmr::Schedule    plan    = fmr::Schedule::Once;
+    fmr::Concurrency cncr    = fmr::Concurrency::Once;
+    fmr::Dim_int     hier_lv = 1;// processing hierarchy run level
+    // constructor
+#if 0
+    Distribute (const fmr::Local_int b, const fmr::Schedule p,
+      const fmr::Concurrency c, fmr::Dim_int h)
+      : bats_sz(b), plan(p), cncr(c), hier_lv(h){}
+#else
+    Distribute (const fmr::Dim_int h, const fmr::Schedule p,
+      const fmr::Concurrency c, fmr::Local_int b=1)
+      : bats_sz(b), plan(p), cncr(c), hier_lv(h){}
+#endif
+  };
+  enum class Sim_time : Enum_int { None=0, Error, Unknown, Plugin,
     Explicit,// Time-accurate
     Implicit,// Not time-accurate
   end};

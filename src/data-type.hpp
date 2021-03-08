@@ -132,7 +132,8 @@ namespace fmr {//TODO? namespace data {
     // Cell_FD, Cell_FV,
     // FD1D, FD2D, FD3D, FV1D, FV2D, FV3D, SG1D, SG2D, SG3D, // grid cell types
   end};
-  inline Elemid_int make_elem_id (Elem e, fmr::math::Poly y, fmr::Dim_int p){
+  inline Elemid_int make_elem_id (//TODO Remove?
+    Elem e, fmr::math::Poly y, fmr::Dim_int p){
     constexpr auto ysz = 8*sizeof(y), psz = 8*sizeof(p);
     return
       ( (Elemid_int(fmr::enum2val(e)) << (ysz+psz))

@@ -29,9 +29,9 @@ namespace Femera{
   int Pomp::run (Sims* F){int err=0;//TODO fix err/return code handling.
     auto flog   = F->proc->log;
     auto parent_sims = F->parent;// parent sims is shared among OpenMP threads
-    if (!this->is_in_parallel () && this->get_hier_lv () >= F->hier_lv ){
+    if (!this->is_in_parallel () && this->get_hier_lv () >= F->from.hier_lv ){
       bool do_start_parallel = false;
-      switch (F->cncr){
+      switch (F->from.cncr){
         case fmr::Concurrency::Independent :{}// Fall through.
         case fmr::Concurrency::Collective  :{ do_start_parallel = true; break;}
         default: {}// Do nothing.
@@ -47,7 +47,7 @@ namespace Femera{
     else{
       fmr::Local_int pn  = 1;
       fmr::Local_int pid = 0;
-      switch (F->cncr){
+      switch (F->from.cncr){
         case fmr::Concurrency::Independent :{}// Fall through.
         case fmr::Concurrency::Collective  :{
           pn = this->get_proc_n  ();
@@ -57,7 +57,7 @@ namespace Femera{
       }
       const fmr::Local_int nmodel
         = fmr::Local_int (parent_sims->model_list.size ());
-      switch (F->plan){
+      switch (F->from.plan){
         case fmr::Schedule::Once :{}// Fall through.
         case fmr::Schedule::List :{
           for (fmr::Local_int i=pid+1; i<nmodel; i+=pn) {
@@ -104,7 +104,7 @@ namespace Femera{
         default:{
           flog->label_fprintf (flog->fmrerr, "* ERR""OR Pomp",
             "%s\n","run (Sims %s) unknown Schedule::%i",
-            F->task_name.c_str(),int(F->plan) );
+            F->task_name.c_str(),int(F->from.plan) );
         }
       }//end Schedule switch
      //...

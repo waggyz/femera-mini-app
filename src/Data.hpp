@@ -61,7 +61,7 @@ class Data : public Work {//TODO change to File
         File_info            (File_info const&) =default;// copyable
         File_info& operator= (const File_info&) =default;
         virtual   ~File_info ()        noexcept =default;
-        };
+    };
     typedef std::unordered_map<fmr::Data_id, fmr::Dim_int_vals>
       Data_dim_vals;// key: data ID
     typedef std::unordered_map<fmr::Data_id, fmr::Enum_int_vals>

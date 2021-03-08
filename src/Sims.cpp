@@ -34,7 +34,14 @@ namespace Femera {
   fmr::Data_id Sims::get_id (){
     return this->data_id;
   }
-  fmr::Local_int Sims::get_sims_n () {// number of sim collections
+  fmr::Local_int Sims::get_sims_n (){// zero-indexed
+    return this->task.count (Base_type::Sims);
+  }
+  fmr::Local_int Sims::get_part_n (){//TODO Remove.
+    return this->task.count (Base_type::Part);
+  }
+#if 0
+  fmr::Local_int Sims::get_sims_n () {// number of models in this collection
     // Valid after this->model_list has been populated.
     bool is_new=false;
     //TODO was: fmr::Local_int n = this->task.count (Base_type::Frun);
@@ -57,23 +64,23 @@ namespace Femera {
     if (is_new) {
       auto store = & this->locals.at(fmr::Data::Sims_n).stored_state;
       // number of sims in a collection not stored directly in a file
-      store->is_default = true;
-      store->can_write  = false;
-      store->can_read   = false;
-      store->was_read   = false;
-      store->was_checked= true;
-      store->has_changed= false;
-      store->do_save    = false;
-      store->has_error  = n < 1;
+      store->is_default  = true;
+      store->can_write   = false;
+      store->can_read    = false;
+      store->was_read    = false;
+      store->was_checked = true;
+      store->has_changed = false;
+      store->do_save     = false;
+      store->has_error   = n < 1;
       auto inmem = & this->locals.at(fmr::Data::Sims_n).memory_state;
-      inmem->is_default = true;
-      inmem->can_write  = false;//TODO change # sims dynamically?
-      inmem->can_read   = true;
-      inmem->was_read   = true;
-      inmem->was_checked= true;
-      inmem->has_changed= false;
-      inmem->do_save    = false;
-      inmem->has_error  = n < 1;
+      inmem->is_default  = true;
+      inmem->can_write   = false;//TODO change # sims dynamically?
+      inmem->can_read    = true;
+      inmem->was_read    = true;
+      inmem->was_checked = true;
+      inmem->has_changed = false;
+      inmem->do_save     = false;
+      inmem->has_error   = n < 1;
     }
     return n;// zero-indexed
   }
@@ -82,6 +89,7 @@ namespace Femera {
       = this->task.count (Base_type::Part);
     return this->part_dims.data[enum2val(fmr::Geom_info::Part_n)] ;
   }
+#endif
 #if 0
   fmr::Dim_int Sims::get_phys_d (std::string sim_name, fmr::Tree_path part){
     Sims* P=this;//TODO look up sim_name
@@ -182,20 +190,20 @@ namespace Femera {
     return err;
   }
   int Sims::add (std::string name) {int err=0;
-    if (this->model_list.size() == 0) {// Add the first Frun.
-      // New instances made by add_new_task will be deleted in this->exit (err),
+    if (this->model_list.size() == 0) {// Add the first Frun.//TODO Remove.
+      // New instances made by add_new_task will be deleted in this->exit(err),
       // or before.
-      err= fmr::detail::main->add_new_task (Femera::Base_type::Frun,this);
+      err= fmr::detail::main->add_new_task (Femera::Base_type::Frun, this);
     }
     this->model_list.push_back (name);
     return err;
   }
   int Sims::clear () {
     this->model_list ={};
-    this->globals = {};
-    this->locals = {};
-    this->enums = {};
-    this->dims = {};
+    this->globals ={};
+    this->locals ={};
+    this->enums ={};
+    this->dims ={};
 #if 0
     if (this->locals.count(fmr::Data::Sims_n)) {// present in map
       this->locals.at(fmr::Data::Sims_n)
@@ -205,22 +213,21 @@ namespace Femera {
     return 0;
   }
   int Sims::run () {int err=0;
-    if (this->proc->log->detail >= this->verblevel) {
-      this->proc->log->print_heading ("Start");
-    }
-    //TODO prep?
+    auto log = this->proc->log;
+    if (log->detail >= this->verblevel) {log->print_heading ("Start");}
+    //TODO this->prep() ?
     fmr::perf::timer_resume (& this->time);
-    Proc* P = this->proc->hier[send_to_hier_lv];
+    Proc* P = this->proc->hier[this->send.hier_lv];
     if (P) {
 #if 0
-      fmr::Local_int m = fmr::Local_int (this->model_list.size ());
-#else
       const fmr::Local_int m = this->get_sims_n ();
+#else
+      fmr::Local_int m = fmr::Local_int (this->model_list.size ());
 #endif
-      if (this->proc->log->detail >= this->verblevel) {
+      if (log->detail >= this->verblevel) {
         const int p = P->get_proc_n ();
         fmr::Local_int c = 0;
-        switch (this->send_to_cncr) {
+        switch (this->send.cncr) {
           case fmr::Concurrency::Once        :// Fall through.
           case fmr::Concurrency::Serial      : c = 1; break;
           case fmr::Concurrency::Independent :// Fall through.
@@ -228,11 +235,11 @@ namespace Femera {
           default: {}// Do nothing.
         }
         const std::string label = "Run "+std::to_string(m)+" sims";
-        this->proc->log->label_fprintf (this->proc->log->fmrout, label.c_str(),
+        log->label_fprintf (log->fmrout, label.c_str(),
           "%i %s / %i %s %s, %s...\n",
           c, (c==1) ? "sim":"sims", p, P->task_name.c_str(),
-          fmr::Concurrency_name.at(this->send_to_cncr).c_str(),
-          fmr::Schedule_name.at(this->send_to_plan).c_str());
+          fmr::Concurrency_name.at(this->send.cncr).c_str(),
+          fmr::Schedule_name.at(this->send.plan).c_str());
       }
       fmr::perf::timer_pause  (& this->time, m);
       fmr::perf::timer_resume (& this->time);
@@ -240,14 +247,12 @@ namespace Femera {
       if (run0) {
         err= P->run (run0);//TODO fix return code handling
       }else{
-        this->proc->log->label_fprintf (this->proc->log->fmrerr,"WARN""ING",
+        log->label_fprintf (log->fmrerr,"WARN""ING",
           "First Frun task in sims is null.\n");
     } }
     fmr::perf::timer_pause  (& this->time);
   //...
-  if (this->proc->log->detail >= this->verblevel) {
-    this->proc->log->print_heading ("Finished");
-  }
+  if (log->detail >= this->verblevel) {log->print_heading ("Finished"); }
   fmr::perf::timer_pause (& this->time, -err);//TODO Fix return code handling.
   //
   return this->exit (err);
@@ -257,8 +262,8 @@ namespace Femera {
     printf ("*** Sims::exit_task\n");
 #endif
 #if 0
-    if (this->proc->log->detail >= this->verblevel) {
-      this->proc->log->print_heading ("D_one");
+    if (log->detail >= this->verblevel) {
+      log->print_heading ("D_one");
     }
 #endif
     return err;

@@ -14,12 +14,8 @@ namespace Femera {
     this->      meter_unit ="cell";
     this->      model_name ="(Grid master)";
     this->       verblevel = 8;
-    this->            plan = F->send_to_plan;//fmr::Schedule::List;
-    this->            cncr = F->send_to_cncr;//fmr::Concurrency::Serial;
-    this->         hier_lv = F->send_to_hier_lv;
-    this-> send_to_hier_lv = hier_lv;
-    this->    send_to_cncr = fmr::Concurrency::Serial;
-    this->    send_to_plan = fmr::Schedule::List;
+    this->from = F->send;
+    this->send = {from.hier_lv, fmr::Schedule::List, fmr::Concurrency::Serial};
     this->       part_algo = fmr::Partition::None;
   }
   int Grid::chck (){

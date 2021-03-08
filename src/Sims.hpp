@@ -10,11 +10,11 @@
 #endif
 namespace Femera {
 class Sims : public Work {// simulation collection manager
-  /* This is the root simulation collection manager. There is usually only one
-   * of these, residing in the main task stack, and running at the default
+  /* This is the simulation collection manager. There is one of these for each
+   * collection, residing in the main task stack, and running at the default
    * (usually MPI world) processing level. It sets up its stack for serial runs
    * of sims at the same level, or for running sims in parallel at a deeper
-   * level (e.g. MPI team, OpenMP, or GPU).
+   * (e.g. MPI team, OpenMP, or GPU) level.
    */
   // typedefs ----------------------------------------------------------------
   // member variables --------------------------------------------------------
@@ -25,8 +25,7 @@ class Sims : public Work {// simulation collection manager
   public:
     virtual fmr::Data_id make_id ();
     virtual fmr::Data_id get_id ();
-    fmr::Local_int get_part_n ();//TODO Replace with get_data (..).data.size()?
-    fmr::Local_int get_sims_n ();//TODO Replace with get_data (..).data.size()?
+//    fmr::Local_int get_sims_ix (std::string sim_name);
 #endif
 #if 1
   protected:
@@ -44,28 +43,54 @@ class Sims : public Work {// simulation collection manager
     std::map<fmr::Data,fmr::Enum_int_vals>     enums ={};
     std::map<fmr::Data,fmr::Dim_int_vals>       dims ={};
 #endif
+#if 0
+    using Globals = fmr::Global_int_vals;
+    using Locals  = fmr::Local_int_vals;
+    using Enums   = fmr::Enum_int_vals;
+    using Dims    = fmr::Dim_int_vals;
+    /* The following have values for each sim in this collection,
+     * bundled for this->data->read_sims_data (&this->dims,&this->enums,...).
+     * i.e.    *.data.size() == this->get_sims_n().
+     * But, if *.data.size() == 0, assume 0 (or *::None) for all sims
+     * and, if *.data.size() == 1, apply the same value to all sims.
+     */
+    //TODO Initialize in constructors, or after sims_n is known.
+    std::map<fmr::Data,Globals> globals ={};
+    std::map<fmr::Data,Locals>  locals ={
+      {fmr::Data::Sims_n,       Locals (fmr::Data::Sims_n)},// child sims for
+      //                                                       each sim
+      {fmr::Data::Gset_n,       Locals (fmr::Data::Gset_n)},
+      {fmr::Data::Part_n,       Locals (fmr::Data::Part_n)},
+      {fmr::Data::Part_halo_n,  Locals (fmr::Data::Part_halo_n)},//shared surfs
+      {fmr::Data::Mtrl_n,       Locals (fmr::Data::Mtrl_n)}
+    };
+    std::map<fmr::Data,Enums>   enums ={
+      {fmr::Data::Sims_type,    Enums (fmr::Data::Sims_type)},
+      {fmr::Data::Time_type,    Enums (fmr::Data::Time_type)}
+    };
+    std::map<fmr::Data,Dims>    dims ={
+      {fmr::Data::Geom_d,       Dims (fmr::Data::Geom_d)},
+      {fmr::Data::Phys_d,       Dims (fmr::Data::Phys_d)}
+    };
+#endif
   public://TODO protected:
     Sims* parent = nullptr;
-    std::string model_name ="(unnamed sim collection)";
+    std::string model_name ="(unnamed model collection)";
     std::deque<std::string> model_list ={};
     //
-    int                   hier_lv = 1;// my processing hierarchy run level
-    fmr::Schedule            plan = fmr::Schedule::Once;
-    fmr::Concurrency         cncr = fmr::Concurrency::Once;
-    //
-    int           send_to_hier_lv = 2;
-    fmr::Schedule    send_to_plan = fmr::Schedule::Fifo;
-    fmr::Concurrency send_to_cncr = fmr::Concurrency::Independent;
-    //TODO Run in batches: get a list of bats_sz objects at a time.
-    //TODO change send_to_* to dest_* or bats_*:
-    //     send_sz send_hier_lv send_plan send_cncr
+    fmr::Distribute from = {1, fmr::Schedule::Once, fmr::Concurrency::Once};
+    fmr::Distribute send = {2, fmr::Schedule::Fifo,
+      fmr::Concurrency::Independent};
   protected:
-    fmr::Partition      part_algo = fmr::Partition::None;//TODO Needed here?
+    fmr::Partition  part_algo = fmr::Partition::None;
     //
     fmr::Local_int sims_ix = 0;// collection number
     fmr::Dim_int   sims_lv = 0;// independent sim collection depth
   // methods -----------------------------------------------------------------
   public:
+    virtual int add   (const std::string model_name);
+    virtual int run   ();//TODO or start () ?
+    virtual int clear ();
 #if 0
     fmr::Local_int get_part_n (std::string sim_name, fmr::Tree_path part);
     fmr::Dim_int   get_geom_d (std::string sim_name, fmr::Tree_path part);
@@ -73,9 +98,9 @@ class Sims : public Work {// simulation collection manager
     fmr::Local_int get_mtrl_n (std::string sim_name, fmr::Tree_path part);
 #endif
     //
-    virtual int add   (const std::string model_name);
-    virtual int run   ();//TODO or start () ?
-    virtual int clear ();
+    fmr::Local_int get_sims_n ();
+//    fmr::Local_int get_mtrl_n ();//TODO
+    fmr::Local_int get_part_n ();// used in derived classes
   protected:
     //TODO The following are run by this->run () ?
     int chck () override;//TODO Is this needed here?

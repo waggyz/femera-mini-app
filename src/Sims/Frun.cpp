@@ -14,12 +14,10 @@ namespace Femera {
     this->       task_name ="Run sims";
     this->      model_name ="(master runner)";
     this->       verblevel = 7;
-    this->         hier_lv = F->send_to_hier_lv;
-    this->            plan = F->send_to_plan;//fmr::Schedule::List;
-    this->            cncr = F->send_to_cncr;//fmr::Concurrency::Independent;
-    this-> send_to_hier_lv = hier_lv;
-    this->    send_to_plan = fmr::Schedule::Once;
-    this->    send_to_cncr = fmr::Concurrency::Once;
+    this->from = F->send;
+    this->send = {1, fmr::Schedule::Once, fmr::Concurrency::Once,
+      from.hier_lv
+    };
     this->       part_algo = fmr::Partition::Merge;
     this->      meter_unit ="sim";
     this->         sims_ix = F->get_sims_n();
@@ -41,24 +39,25 @@ namespace Femera {
     fmr::Local_int geom_d=0, gset_n=0, part_n=0, conn_n=0, mesh_n=0, grid_n=0;
     bool geod_ok=false, gset_ok=false, conn_ok=false, part_ok=false,
       mesh_ok=false, grid_ok=false;
+    //
     auto ix = fmr::enum2val(fmr::Geom_info::Geom_d);
     if (ginfo[ix] && gisok[ix]) {
-      geod_ok=true; geom_d  = fmr::Dim_int   (ginfo[ix]); }
+      geod_ok=true; geom_d = fmr::Dim_int   (ginfo[ix]); }
     ix = fmr::enum2val(fmr::Geom_info::Gset_n);
     if (ginfo[ix] && gisok[ix]) {
-      gset_ok=true; gset_n  = fmr::Local_int (ginfo[ix]); }
+      gset_ok=true; gset_n = fmr::Local_int (ginfo[ix]); }
     ix = fmr::enum2val(fmr::Geom_info::Part_n);
     if (ginfo[ix] && gisok[ix]) {
-      part_ok=true; part_n  = fmr::Local_int (ginfo[ix]); }
+      part_ok=true; part_n = fmr::Local_int (ginfo[ix]); }
     ix = fmr::enum2val(fmr::Geom_info::Part_halo_n);
     if (ginfo[ix] && gisok[ix]) {
-      conn_ok=true; conn_n  = fmr::Local_int (ginfo[ix]); }
+      conn_ok=true; conn_n = fmr::Local_int (ginfo[ix]); }
     ix = fmr::enum2val(fmr::Geom_info::Mesh_n);
     if (ginfo[ix] && gisok[ix]) {
-      mesh_ok=true; mesh_n  = fmr::Local_int (ginfo[ix]); }
+      mesh_ok=true; mesh_n = fmr::Local_int (ginfo[ix]); }
     ix = fmr::enum2val(fmr::Geom_info::Grid_n);
     if (ginfo[ix] && gisok[ix]) {
-      grid_ok=true; grid_n  = fmr::Local_int (ginfo[ix]); }
+      grid_ok=true; grid_n = fmr::Local_int (ginfo[ix]); }
     //
     fmr::Local_int phys_d=0, mtrl_n=0;
     fmr::Sim_time sim_time = fmr::Sim_time::Unknown;
@@ -142,26 +141,26 @@ namespace Femera {
     fmr::perf::timer_resume (& this->time);
     err= this->prep ();
     //
-    Proc* P = this->proc->hier[send_to_hier_lv];
+    Proc* P = this->proc->hier[send.hier_lv];
     auto log = this->proc->log;
     if (log->detail >= this->verblevel) {if (P) {
       fmr::Local_int p = P->is_in_parallel () ? 1 : P->get_proc_n ();
       const int n = this->get_part_n ();
         fmr::Local_int c = 0;
-        switch(this->send_to_cncr){
-          case fmr::Concurrency::Once        :{ c = 1; break; }
-          case fmr::Concurrency::Serial      :{ c = 1; break; }
-          case fmr::Concurrency::Independent :{ c = p; break; }
-          case fmr::Concurrency::Collective  :{ c = p; break; }
-          default: {}
+        switch(this->send.cncr){
+          case fmr::Concurrency::Once        :// Fall through.
+          case fmr::Concurrency::Serial      : c = 1; break;
+          case fmr::Concurrency::Independent :// Fall through.
+          case fmr::Concurrency::Collective  : c = p; break;
+          default: {}// Do nothing.
         }
       const std::string label = "Run "+std::to_string(n)+" part";
       log->label_fprintf (log->fmrout, label.c_str(),
         "%i %s %s / %i %s %s, %s\n",
-        c, fmr::Partition_name.at(this->part_algo).c_str(), n==1 ?"part":"parts",
+        c, fmr::Partition_name.at(this->part_algo).c_str(),n==1?"part":"parts",
         p, P->task_name.c_str(),
-        fmr::Concurrency_name.at(this->send_to_cncr).c_str(),
-        fmr::Schedule_name.at(this->send_to_plan).c_str());
+        fmr::Concurrency_name.at(this->send.cncr).c_str(),
+        fmr::Schedule_name.at(this->send.plan).c_str());
     } }
     Sims* run0 = this->task.first<Sims> (Base_type::Part);
     if (run0) {
