@@ -19,7 +19,6 @@ class Frun final : public Sims {//TODO Problably NOT derived from Sims or Work.
   protected:
   private:
     fmr::Local_int sims_ix = 0;// sim number
-    fmr::Dim_int   sims_lv = 1;// subsim hierarchy level
   // methods ----------------------------------------------------------------
   protected:
     int prep () final override;

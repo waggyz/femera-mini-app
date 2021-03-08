@@ -8,14 +8,14 @@
 namespace Femera {
   Geom::Geom (Sims* F) noexcept {
     this->proc=F->proc; this->data=F->data;
-    this->       work_type = work_cast (Base_type::Geom);
-//    this->base_type = work_cast (Base_type::Sims);// TODO Remove?
-    this->       task_name ="Geom";
-    this->      model_name ="(geometry master)";
-    this->       verblevel = 8;
     this->from = F->send;
     this->send = {from.hier_lv, fmr::Schedule::List, fmr::Concurrency::Serial};
-    this->       part_algo = fmr::Partition::Geom;
+    this-> work_type = work_cast (Base_type::Geom);
+//    this->base_type = work_cast (Base_type::Sims);// TODO Remove?
+    this-> task_name ="Geom";
+    this->model_name ="(geometry master)";
+    this-> verblevel = 8;
+    this-> part_algo = fmr::Partition::Geom;
   }
   int Geom::chck (){
     return 0;

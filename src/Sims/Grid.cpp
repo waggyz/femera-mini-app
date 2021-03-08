@@ -8,15 +8,15 @@
 namespace Femera {
   Grid::Grid (Sims* F) noexcept {
     this->proc=F->proc; this->data=F->data;
-    this->       work_type = work_cast (Plug_type::Grid);
-//    this->base_type = work_cast (Base_type::Geom);// TODO Remove?
-    this->       task_name ="Grid";
-    this->      meter_unit ="cell";
-    this->      model_name ="(Grid master)";
-    this->       verblevel = 8;
     this->from = F->send;
     this->send = {from.hier_lv, fmr::Schedule::List, fmr::Concurrency::Serial};
-    this->       part_algo = fmr::Partition::None;
+    this-> work_type = work_cast (Plug_type::Grid);
+//    this->base_type = work_cast (Base_type::Geom);// TODO Remove?
+    this-> task_name ="Grid";
+    this->meter_unit ="cell";
+    this->model_name ="(Grid master)";
+    this-> verblevel = 8;
+    this-> part_algo = fmr::Partition::None;
   }
   int Grid::chck (){
     return 0;

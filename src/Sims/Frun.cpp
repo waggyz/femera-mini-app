@@ -8,19 +8,17 @@
 namespace Femera {
   Frun::Frun (Sims* F) noexcept {//TODO Change derived class name. Fsim? Sim1?
     this->parent = F; this->proc=F->proc; this->data=F->data;
+    this->from = F->send;
+    this->send = {from.hier_lv, fmr::Schedule::Once, fmr::Concurrency::Once};
     //
     this->       work_type = work_cast (Base_type::Frun);
 //    this-> base_type = work_cast (Base_type::Sims);// TODO Remove?
-    this->       task_name ="Run sims";
-    this->      model_name ="(master runner)";
-    this->       verblevel = 7;
-    this->from = F->send;
-    this->send = {1, fmr::Schedule::Once, fmr::Concurrency::Once,
-      from.hier_lv
-    };
-    this->       part_algo = fmr::Partition::Merge;
-    this->      meter_unit ="sim";
-    this->         sims_ix = F->get_sims_n();
+    this-> task_name ="Run sims";
+    this->model_name ="(master runner)";
+    this-> verblevel = 7;
+    this-> part_algo = fmr::Partition::Merge;
+    this->meter_unit ="sim";
+    this->   sims_ix = F->get_sims_n();
   }
   int Frun::chck (){
     return 0;

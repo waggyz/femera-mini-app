@@ -8,17 +8,18 @@
 namespace Femera {
   Part::Part (Sims* F) noexcept {
     this->parent = F; this->proc=F->proc; this->data=F->data;
-    this->       work_type = work_cast (Base_type::Part);
-//    this->base_type = work_cast (Base_type::Sims);// TODO Remove?
-    this->       task_name ="Part";
-    this->      meter_unit ="part";
-    this->      model_name ="(partition master)";
-    this->       verblevel = 8;
     this->from = F->send;
     this->send = {from.hier_lv, fmr::Schedule::List, fmr::Concurrency::Serial};
-    this->       part_algo = fmr::Partition::Geom;// Meshes & Grids
-    this->         part_ix = F->get_part_n();
-    this->         data_id = this->make_id ();
+    this-> work_type = work_cast (Base_type::Part);
+//    this->base_type = work_cast (Base_type::Sims);// TODO Remove?
+    this-> task_name ="Part";
+    this->meter_unit ="part";
+    this->model_name ="(partition master)";
+    this-> verblevel = 8;
+    this-> part_algo = fmr::Partition::Geom;// Meshes & Grids
+    this->   tree_lv = 1;
+    this->   part_ix = F->get_part_n();
+    this->   data_id = this->make_id ();
   }
   int Part::run (){int err=0;
     this->prep ();
@@ -33,11 +34,11 @@ namespace Femera {
   fmr::Data_id Part::make_id (){
       std::vector<fmr::Local_int> path={};
       Sims* F=this; Part* P=this;
-      this->part_lv = 0;
+      this->tree_lv = 0;
       while (F->work_type == work_cast(Base_type::Part)
-        && this->part_lv < this->data->get_hier_max()) {
+        && this->tree_lv < this->data->get_hier_max()) {
         // Walk up the Part hierarchy to the root Sims.
-        this->part_lv++;
+        this->tree_lv++;
         path.push_back (P->part_ix);
         F = F->parent;
         P = FMR_CAST_TO_DERIVED<Part*>(F->parent);

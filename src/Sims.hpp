@@ -78,18 +78,18 @@ class Sims : public Work {// simulation collection manager
     std::string model_name ="(unnamed model collection)";
     std::deque<std::string> model_list ={};
     //
-    fmr::Distribute from = {1, fmr::Schedule::Once, fmr::Concurrency::Once};
-    fmr::Distribute send = {2, fmr::Schedule::Fifo,
-      fmr::Concurrency::Independent};
+    fmr::Distribute from ={1,fmr::Schedule::Once,fmr::Concurrency::Once};
+    //TODO from => here ?
+    fmr::Distribute send ={2,fmr::Schedule::Fifo,fmr::Concurrency::Independent};
   protected:
     fmr::Partition  part_algo = fmr::Partition::None;
     //
     fmr::Local_int sims_ix = 0;// collection number
-    fmr::Dim_int   sims_lv = 0;// independent sim collection depth
+    fmr::Dim_int   tree_lv = 0;// sim/sim collection depth
   // methods -----------------------------------------------------------------
   public:
     virtual int add   (const std::string model_name);
-    virtual int run   ();//TODO or start () ?
+    virtual int run   ();
     virtual int clear ();
 #if 0
     fmr::Local_int get_part_n (std::string sim_name, fmr::Tree_path part);
@@ -118,7 +118,7 @@ class Sims : public Work {// simulation collection manager
   // constructors and destructors --------------------------------------------
   public:
     virtual ~Sims  ()   noexcept =default;
-    Sims           (Proc*, Data*) noexcept;
+    Sims           (Proc*,Data*)  noexcept;
     Sims           (Sims const&) =delete;// not copyable
     Sims operator= (const Sims&) =delete;
   protected:

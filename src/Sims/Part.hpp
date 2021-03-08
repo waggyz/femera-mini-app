@@ -42,7 +42,6 @@ class Part final : public Sims {
   private:
 //    fmr::Data_id   part_id = "(unknown)";
     fmr::Local_int part_ix = 0;//TODO needed?
-    fmr::Dim_int   part_lv = 1;// Parent sim level is 0.
   // methods ----------------------------------------------------------------
   public:
     fmr::Data_id make_id() override;//TODO virtual Sims::make_id()
@@ -54,11 +53,11 @@ class Part final : public Sims {
     int exit_task (int  err) final override;
   private:
   public:
-    virtual ~Part ()    noexcept=default;// Virtual destructor for virtual class
-    Part (Sims*)        noexcept;
-    Part ()                     =delete;
-    Part (Part const&)          =delete;// not copyable
-    Part operator= (const Part&)=delete;
+    virtual ~Part  ()     noexcept=default;//Virtual destructor for virt. class
+    Part           (Sims*)noexcept;
+    Part           ()             =delete;
+    Part           (Part const&)  =delete;// not copyable
+    Part operator= (const Part&)  =delete;
 };
 }//end Femera namespace
 #else

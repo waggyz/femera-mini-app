@@ -13,17 +13,17 @@ namespace Femera {
     this->meter_unit="sim";
     //this-> parent = this;//TODO leave as nullptr?
 //    this->part_dims.memory_state.can_read = true;//TODO remove
-    this->         data_id = this->make_id ();
+    this->data_id = this->make_id ();
   }
   fmr::Data_id Sims::make_id (){
       std::vector<fmr::Local_int> path={};
       Sims* F=this;
-      this->sims_lv = 0;
+      this->tree_lv = 0;
         // Walk up the Sims hierarchy to the root Sims instance.
       while (F->work_type == work_cast(Base_type::Sims)
         && parent != this && parent != nullptr
-        && this->sims_lv < this->data->get_hier_max()) {
-        this->sims_lv++;
+        && this->tree_lv < this->data->get_hier_max()) {
+        this->tree_lv++;
         path.push_back (F->sims_ix);
         F = F->parent;
       }
