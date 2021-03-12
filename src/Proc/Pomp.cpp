@@ -8,8 +8,8 @@
 #include <cstdio>     // std::printf DEBUG
 #endif
 
-namespace Femera{
-  Pomp::Pomp (Proc* P,Data* D){this->proc=P; this->data=D; this->log=proc->log;
+namespace Femera {
+  Pomp::Pomp (Proc* P,Data* D) {this->proc=P; this->data=D; this->log=proc->log;
     this-> work_type = work_cast (Plug_type::Pomp);
 //    this-> base_type = work_cast (Base_type::Proc);
     this-> task_name ="OpenMP";
@@ -26,14 +26,14 @@ namespace Femera{
     //omp_get_max_threads () includes logical cores at this point
     return 0;
   }
-  int Pomp::run (Sims* F){int err=0;//TODO fix err/return code handling.
-    auto flog   = F->proc->log;
+  int Pomp::run (Sims* F) {int err=0;//TODO fix err/return code handling.
+    auto flog = F->proc->log;
     auto parent_sims = F->parent;// parent sims is shared among OpenMP threads
-    if (!this->is_in_parallel () && this->get_hier_lv () >= F->from.hier_lv ){
+    if (!this->is_in_parallel () && this->get_hier_lv () >= F->from.hier_lv) {
       bool do_start_parallel = false;
-      switch (F->from.cncr){
+      switch (F->from.cncr) {
         case fmr::Concurrency::Independent :{}// Fall through.
-        case fmr::Concurrency::Collective  :{ do_start_parallel = true; break;}
+        case fmr::Concurrency::Collective  :{do_start_parallel = true; break;}
         default: {}// Do nothing.
       }
       if (do_start_parallel) {
@@ -42,22 +42,22 @@ namespace Femera{
             "Starting %s parallel...\n", this->task_name.c_str());
         }
         FMR_PRAGMA_OMP(omp parallel reduction(+:err))
-        err+= this->run (F);//TODO or run (this)
+        { err+= this->run (F); }//TODO or run (this)?
     } }
     else{
       fmr::Local_int pn  = 1;
       fmr::Local_int pid = 0;
-      switch (F->from.cncr){
+      switch (F->from.cncr) {
         case fmr::Concurrency::Independent :{}// Fall through.
         case fmr::Concurrency::Collective  :{
           pn = this->get_proc_n  ();
           pid= this->get_proc_id ();
           break;}
-        default: {}// Do nothing.
+        default :{}// Do nothing.
       }
       const fmr::Local_int nmodel
         = fmr::Local_int (parent_sims->model_list.size ());
-      switch (F->from.plan){
+      switch (F->from.plan) {
         case fmr::Schedule::Once :{}// Fall through.
         case fmr::Schedule::List :{
           for (fmr::Local_int i=pid+1; i<nmodel; i+=pn) {

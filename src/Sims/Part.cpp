@@ -48,31 +48,28 @@ namespace Femera {
 //        = this->data->make_data_id (F->model_name, fmr::Tree_type::Part, path);
     return this->data_id;
   }
-  fmr::Data_id Part::get_id (){
+  fmr::Data_id Part::get_id () {
     return this->data_id;
   }
-  int Part::prep (){int err=0;
+  int Part::prep () {int err=0;
     auto log = this->proc->log;
     if (this->part_ix == 0) {// task[0] loads the parts
       if (log->detail >= this->verblevel) {
-        const std::string label = this->model_name.c_str();
-//          = this->task_name+" "+std::to_string(this->part_ix) +" prep";
+        const std::string label = "get geom";
         log->label_fprintf (log->fmrout,
-          label.c_str(),"%u/%u %s: getting geometry...\n",
-          this->part_ix, this->parent->get_part_n (), this->get_id().c_str());
+          label.c_str(),"%u/%u %s %s ...\n",
+          this->part_ix, this->parent->get_part_n (),
+          this->model_name.c_str(), this->get_id().c_str());
       }
       //TODO get Mesh, Grid Elem_types?
       // get_geom_size (..)//TODO Mesh, Grid sizes
       this->task.add (new Geom(this));//TODO Mesh, Grid
 #if 0
       Geom* G = new Geom(this);
-//      err= G->prep();
-      //this->geom->init (this->sims->task_name);
-      //
-        // geom_d, node_n, part_1d_n, part_1d_n, part_3d_n, phys_d, mtrl_n
+      // geom_d, node_n, part_1d_n, part_1d_n, part_3d_n, phys_d, mtrl_n
       //...
       //
-      if (G){ delete G; G=nullptr; }
+      if (G) {delete G; G=nullptr;}
 #endif
     }
     return err;
@@ -82,6 +79,6 @@ namespace Femera {
     return err;
   }
 #endif
-  int Part::exit_task (int err){ return err; }
+  int Part::exit_task (int err) {return err;}
 }// end Femera namespace
 #undef FMR_DEBUG

@@ -2,8 +2,10 @@
 #
 if [ -z "$1" ]; then
   MESHDIR=tests/mesh
+  FIGDIR=tests/fig
 else
   MESHDIR=$1
+  FIGDIR=$1
 fi
 # Looks like gmsh CGNS does not work under MPI.
 MPIEXEC=""
@@ -28,18 +30,20 @@ GMSH_OMP=""
 
 cp -f "tests/geo/cube-tet6p1n2-geo.geo" "$MESHDIR"
 if [ "$N" -eq 1 ]; then
-rm -f "$MESHDIR/cube-tet6p"$P"n"$N".msh2"
+EXT="msh2"
+rm -f "$MESHDIR/cube-tet6p"$P"n"$N"."$EXT
 # rm -f "$MESHDIR/cube-tet6p"$P"n"$N".inp"
 $MPIEXEC gmsh $GMSH_OMP -setnumber p $P -setnumber h 1 tests/geo/unit-cube.geo \
- -v 3 $PART -save -o "$MESHDIR/cube-tet6p"$P"n"$N".msh2" -3 2>/dev/null
+ -v 3 $PART -save -o "$MESHDIR/cube-tet6p"$P"n"$N"."$EXT -3 2>/dev/null
 # else
 # Hm, looks like gmsh can write, but not read .inp files...
 # $MPIEXEC gmsh $GMSH_OMP -setnumber p $P -setnumber h 1 tests/geo/unit-cube.geo \
 #  -v 3 $PART -save -o "$MESHDIR/cube-tet6p"$P"n"$N".inp" -3 2>/dev/null
 fi
-rm -f "$MESHDIR/cube-tet6p"$P"n"$N".cgns"
+EXT="cgns"
+rm -f "$MESHDIR/cube-tet6p"$P"n"$N"."$EXT
 gmsh $GMSH_OMP -setnumber p $P -setnumber h 1 tests/geo/unit-cube.geo \
- -v 3 $PART -save -o "$MESHDIR/cube-tet6p"$P"n"$N".cgns" -3
+ -v 3 $PART -save -o "$MESHDIR/cube-tet6p"$P"n"$N"."$EXT -3
 chmod -w "$MESHDIR/cube-tet6p"$P"n"$N"."*
 done
 done

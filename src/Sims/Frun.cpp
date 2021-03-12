@@ -13,7 +13,7 @@ namespace Femera {
     //
     this->       work_type = work_cast (Base_type::Frun);
 //    this-> base_type = work_cast (Base_type::Sims);// TODO Remove?
-    this-> task_name ="Run sims";
+    this-> task_name ="Run 1sim";
     this->model_name ="(master runner)";
     this-> verblevel = 7;
     this-> part_algo = fmr::Partition::Merge;
@@ -128,14 +128,14 @@ namespace Femera {
     this->task.add (new Part(this));
 #endif
     if (this->part_algo == fmr::Partition::Merge) {
-      this->model_list.push_front("Merged part");
+      this->model_list.push_front("(merged part)");
     }else{
-      this->model_list.push_front("Part 1");
+      this->model_list.push_front("(part 1)");
     }
     fmr::perf::timer_pause (& this->time);
     return err;
   }
-  int Frun::run (){int err=0;
+  int Frun::run () {int err=0;
     fmr::perf::timer_resume (& this->time);
     err= this->prep ();
     //
@@ -145,7 +145,7 @@ namespace Femera {
       fmr::Local_int p = P->is_in_parallel () ? 1 : P->get_proc_n ();
       const int n = this->get_part_n ();
         fmr::Local_int c = 0;
-        switch(this->send.cncr){
+        switch (this->send.cncr) {
           case fmr::Concurrency::Once        :// Fall through.
           case fmr::Concurrency::Serial      : c = 1; break;
           case fmr::Concurrency::Independent :// Fall through.
@@ -165,7 +165,7 @@ namespace Femera {
       err= P->run (run0);//TODO fix return code handling
     }else{
       log->label_fprintf (log->fmrerr,"WARN""ING",
-        "First Frun task in sims is null.\n");
+        "First Part task in sims is null.\n");
     }
     //...
     fmr::perf::timer_resume (& this->time);

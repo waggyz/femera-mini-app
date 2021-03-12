@@ -17,7 +17,7 @@ Data:: Data (Proc* P) {
   this-> task_name ="Data";
   this-> verblevel = 2;
 }
-int Data::print_sims_file_info (const std::string sim_name){
+int Data::print_sims_file_info (const std::string sim_name) {
   auto log = this->proc->log;
   if (log->detail >= this->verblevel) {
     std::string namelist ="";
@@ -28,16 +28,14 @@ int Data::print_sims_file_info (const std::string sim_name){
         Data* D; std::string name; std::tie(D,name)=data_names.at(i);
         namelist += name;
         if (i+1 < n) {namelist+=", ";}
-      } }else{
-        namelist = "No data files found.";
-      }
-    log->label_printf ("Sim file",
-      ("for "+sim_name+": "+namelist+"\n").c_str());
+      } }
+    else {namelist = "No data files found.";}
+    log->label_printf ("Sim file",("for "+sim_name+": "+namelist+"\n").c_str());
   } }
   return 0;
 }
-int Data::prep (){
-  if (this->task.get<Data>(0) != this) {this->task.add (this); }
+int Data::prep () {
+  if (this->task.get<Data>(0) != this) {this->task.add (this);}
   return 0;
 }
 int Data::add_inp_file (const std::string name) {
@@ -70,31 +68,31 @@ std::vector<Data*> Data::get_tasks_for_file (const std::string fname) {
   } } } }
   return v;
 }
-bool Data::is_this_type (const std::string){
+bool Data::is_this_type (const std::string) {
   return false;
 }
-Data::File_info Data::get_file_info (const std::string fname){
+Data::File_info Data::get_file_info (const std::string fname) {
   auto info = Data::File_info();
   info.data_file.second = fname;
   return info;
 }
-Data::File_info Data::scan_file_data (const std::string fname){
+Data::File_info Data::scan_file_data (const std::string fname) {
   auto info = Data::File_info();
   info.data_file.second = fname;
   return info;
 }
 #if 1
-Data::File_info Data::get_file_info (Data::Data_file data_file){
+Data::File_info Data::get_file_info (Data::Data_file data_file) {
   Data::File_info new_info = Data::File_info ();
   Data* D; std::string fname; std::tie (D,fname) = data_file;
-  if(!D){
+  if (!D) {
     new_info.state.has_error = true;
     D = this->get_task_for_file (fname);
     data_file.first = D;
   }
   new_info.data_file = data_file;
   auto log = this->proc->log;
-  if (D == nullptr){// Unknown file format.
+  if (D == nullptr) {// Unknown file format.
     new_info.state.has_error = true;
     log->fprintf (log->fmrerr,"WARN""ING Unrecognized file type: %s\n",
       fname.c_str());
@@ -103,7 +101,7 @@ Data::File_info Data::get_file_info (Data::Data_file data_file){
   new_info.state.has_error = false;
   new_info.access = fmr::data::Access::Check;
   auto info= D->get_file_info (new_info.data_file.second);
-  if (info.state.has_error){
+  if (info.state.has_error) {
     log->fprintf (log->fmrerr,"WARN""ING %s file may be corrupt: %s\n",
       D->task_name.c_str(), fname.c_str());
     return info;
@@ -111,7 +109,7 @@ Data::File_info Data::get_file_info (Data::Data_file data_file){
   return info;
 }
 #endif
-Data::File_info Data::scan_file_data (Data::Data_file df){
+Data::File_info Data::scan_file_data (Data::Data_file df) {
   auto info = this->get_file_info (df);
   if (info.state.has_error) {return info;}
   Data* D; std::string fname; std::tie (D,fname) = info.data_file;
@@ -495,9 +493,10 @@ int Data::chck_file_names (std::deque<std::string> files){int err=0;
   const fmr::Local_int fname_n = fmr::Local_int(files.size());
   const int dlevel = 0;
   const int thrd_n = this->proc->get_stat()[dlevel].thrd_n;//TODO get by level
-  // Input file chcking done parallel.
-  // Data info synchronization will be needed later for collective data access.
-  if (files.size()>0){
+  // Input file checking done parallel.
+  // Data info synchronization may be needed later for collective data access.
+  auto log = this->proc->log;
+  if (files.size() > 0) {
     FMR_PRAGMA_OMP(omp parallel)
     for (fmr::Local_int fname_i=this->proc->get_stat()[dlevel].thrd_id;
       fname_i<fname_n; fname_i += thrd_n){// static round-robin distribution
@@ -507,8 +506,7 @@ int Data::chck_file_names (std::deque<std::string> files){int err=0;
       this->proc->log-> fprintf(this->proc->log-> fmrout,"file[%i] %s...\n",
         fname_i,fname.c_str());
 #endif
-      auto log = this->proc->log;
-      struct ::stat s;// Check if file exists
+      struct ::stat s;// Check if file exists.
       FMR_PRAGMA_OMP(omp critical) //TODO try to (re)move this ?
       if (::stat (fname.c_str(), &s) != 0){// File not found.
         log->fprintf (log->fmrerr,
@@ -535,11 +533,11 @@ int Data::chck_file_names (std::deque<std::string> files){int err=0;
       } } } }
       this->get_sims_names();
   } }//end if input files given on command line
-  if (proc->log->verbosity >= this->verblevel){
-    proc->log->label_printf ("Input data","in %s\n",
+  if (log->verbosity >= this->verblevel){
+    log->label_printf ("Input data","in %s\n",
       inp_file_names.size() == 1 ? inp_file_names[0].c_str()
       : (std::to_string (inp_file_names.size())+" files").c_str());
-    proc->log->label_printf ("Output data","to %s\n",
+    log->label_printf ("Output data","to %s\n",
       out_file_names.size() == 1 ? out_file_names[0].c_str()
       : "each input file");
   }

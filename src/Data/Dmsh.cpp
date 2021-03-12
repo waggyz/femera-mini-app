@@ -156,7 +156,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
   //
   gmsh::option::getNumber ("Mesh.Format",optval);
   info.format = int(optval);
-  if (fmr::detail::format_gmsh_name.count (info.format)){
+  if (fmr::detail::format_gmsh_name.count (info.format)) {
     info.version = fmr::detail::format_gmsh_name.at (info.format)+" ";
     if (info.format == 1) {// .msh format
       std::string strval="";
@@ -186,7 +186,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
       info.state.can_read  = true;
       info.state.can_write = true;
       break;}
-    default:{}//do nothing
+    default :{}//do nothing
   }
   this->file_info[fname] = info;
   return info;

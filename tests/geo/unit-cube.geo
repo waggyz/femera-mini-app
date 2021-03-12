@@ -38,12 +38,12 @@ Transfinite Surface { S[1],V[0],V[2],V[3],V[4],V[5] };
 Transfinite Volume { V[1] };
 If(0==0)
 Physical Surface( 111 )={S[1]};// bottom xy plane, out normal:-z
-Physical Surface( 222 )={V[0]};// top    xy plane, out normal: z
-Physical Surface( 333 )={V[2]};// back   xz plane, out normal: y
-Physical Surface( 555 )={V[4]};// front  xz plane, out normal:-y
-Physical Surface( "fmr:Load:Dirichlet_x:0.001",444 )={V[3]};
+Physical Surface( 666 )={V[0]};// top    xy plane, out normal: z
+Physical Surface( 222 )={V[2]};// back   xz plane, out normal: y
+Physical Surface( 444 )={V[4]};// front  xz plane, out normal:-y
+Physical Surface( "fmr:Load:Dirichlet_x:0.001",333 )={V[3]};
 // right  yz plane, out normal: x
-Physical Surface( "fmr:Load:Fix_x",666 )={V[5]};
+Physical Surface( "fmr:Load:Fix_x",555 )={V[5]};
 // left   yz plane, out normal:-x
 
 Physical Volume ( "fmr:Material:Elastic",123 )={V[1]};
@@ -64,8 +64,26 @@ Mesh.PartitionCreateGhostCells= 0 ;// 0:requires coordinate sync in Femera.
 
 Mesh.SaveAll                  = 0 ;//
 
-//Mesh 3;
+/*
+Mesh 3;
 
+
+// display stl mesh of CAD surfaces
+Geometry.Surfaces = 1;
+Geometry.SurfaceType = 2;
+
+// display curves as 3D cylinders
+Geometry.LineType = 2;
+
+// specify model rotation using Euler angles
+General.Trackball = 0;
+General.RotationX = 45;
+General.RotationY = 30;
+General.RotationZ = -20;
+
+Print "tests/fig/test.eps";
+//Print Sprintf("tests/fig/cube-tet%gp%gn%g.pdf",h,p,N);
+*/
 //If( (n>1) )
 //  PartitionMesh n;
 //EndIf

@@ -180,9 +180,6 @@ namespace Femera {
   int Sims::chck () {
     return 0;
   }
-  int Sims::prep () {int err=0;
-    return err;
-  }
   int Sims::init_task (int*, char**) {int err=0;
 #ifdef FMR_DEBUG
     printf ("*** Sims::init_task\n");
@@ -212,11 +209,14 @@ namespace Femera {
 #endif
     return 0;
   }
+  int Sims::prep () {int err=0;
+    return err;
+  }
   int Sims::run () {int err=0;
     auto log = this->proc->log;
     if (log->detail >= this->verblevel) {log->print_heading ("Start");}
-    //TODO this->prep() ?
     fmr::perf::timer_resume (& this->time);
+    this->prep ();
     Proc* P = this->proc->hier[this->send.hier_lv];
     if (P) {
 #if 0
