@@ -11,35 +11,185 @@ namespace Femera {
     this->task_name ="Sims";
     this->verblevel = 6;
     this->meter_unit="sim";
-    //this-> parent = this;//TODO leave as nullptr?
-//    this->part_dims.memory_state.can_read = true;//TODO remove
-    this->data_id = this->make_id ();
+    //this-> parent = this;//TODO leave as nullptr or set to this?
   }
-  fmr::Data_id Sims::make_id (){
-      std::vector<fmr::Local_int> path={};
-      Sims* F=this;
-      this->tree_lv = 0;
-        // Walk up the Sims hierarchy to the root Sims instance.
-      while (F->work_type == work_cast(Base_type::Sims)
-        && parent != this && parent != nullptr
-        && this->tree_lv < this->data->get_hier_max()) {
-        this->tree_lv++;
-        path.push_back (F->sims_ix);
-        F = F->parent;
-      }
-      this->data_id
-        = this->data->make_data_id (F->model_name, fmr::Tree_type::Sims, path);
-    return this->data_id;
-  }
-  fmr::Data_id Sims::get_id (){
-    return this->data_id;
-  }
-  fmr::Local_int Sims::get_sims_n (){// zero-indexed
+  fmr::Local_int Sims::get_sims_n (){// number of collections loaded
     return this->task.count (Base_type::Sims);
+  }
+  fmr::Local_int Sims::get_frun_n (){// number of collections loaded
+    return this->task.count (Base_type::Frun);
   }
   fmr::Local_int Sims::get_part_n (){//TODO Remove.
     return this->task.count (Base_type::Part);
   }
+  int Sims::chck () {
+    return 0;
+  }
+  int Sims::init_task (int*, char**) {int err=0;
+#ifdef FMR_DEBUG
+    auto log = this->proc->log;
+    if (log->verbosity >= this->verblevel) {
+      std::string label = this->task_name+" init";
+      log->label_fprintf (log->fmrout, label.c_str(), "***\n");
+    }
+#endif
+    return err;
+  }
+  int Sims::add (std::string name) {int err=0;
+    this->model_list.push_back (name);
+#if 0
+    if (this->model_list.size() == 1) {// Add the first Frun.
+      err= fmr::detail::main->add_new_task (Femera::Base_type::Frun, this);
+      // New instances made by add_new_task will be deleted in this->exit(err),
+      // or before.
+    }
+#endif
+    return err;
+  }
+  int Sims::clear () {
+    this->model_list ={};
+    this->globals ={};
+    this->locals ={};
+    this->enums ={};
+    this->dims ={};
+#if 0
+    if (this->locals.count(fmr::Data::Sims_n)) {// present in map
+      this->locals.at(fmr::Data::Sims_n)
+        = fmr::Local_int_vals(fmr::Data::Sims_n);
+    }
+#endif
+    return 0;
+  }
+  int Sims::prep () {int err=0;
+    const auto log = this->proc->log;
+    const auto Pfrom = this->proc->hier[this->from.hier_lv];
+    const auto Psend = this->proc->hier[this->send.hier_lv];
+    if (Pfrom && Psend) {
+      fmr::perf::timer_resume (& this->time);
+      if (this->model_name.size() == 0) {
+      this->model_name = "fmr:Sims:"+ Pfrom->task_name +"_"
+        + std::to_string (Pfrom->get_proc_id ());
+      }
+      const auto sim_n = fmr::Local_int (this->model_list.size());
+      //
+      this->from.bats_sz = sim_n;//TODO for XS sims only?
+      //
+      const auto sendp = (this->send.hier_lv > this->from.hier_lv)
+        ? Psend->get_proc_n () : 1;       // # threads sent to
+      const auto bsz = this->send.bats_sz;// # items sent in each batch
+      fmr::Local_int sendn = 0;           // # items to run concurrently
+      switch (this->send.cncr) {
+        case fmr::Concurrency::Once        : sendn = 1;     break;
+        case fmr::Concurrency::Serial      : sendn = sendp; break;
+        case fmr::Concurrency::Independent : sendn = sendp; break;
+        case fmr::Concurrency::Collective  : sendn = 1;     break;
+        default :{}// Do nothing.
+      }
+      const auto send_type
+        = work_cast ((bsz>1) ? Base_type::Sims : Base_type::Frun);
+      for (fmr::Global_int i=0; i < (sendp*bsz); i++) {// add initial tasks
+        err= fmr::detail::main->add_new_task (send_type, this);
+      }
+      if (log->verbosity >= this->verblevel) {
+        fmr::perf::timer_pause (& this->time);
+        if (log->detail >= this->verblevel) {
+          std::string label ="";
+#if 0
+          label = this->task_name+" prep send";
+          log->label_fprintf (log->fmrout, label.c_str(),
+            "init %i sets, %i runs\n",this->get_sims_n (), this->get_frun_n ());
+#endif
+          const auto fromp = Pfrom->get_proc_n ();
+          fmr::Local_int fromn = 0;
+          switch (this->from.cncr) {
+            case fmr::Concurrency::Once        : fromn = 1;     break;
+            case fmr::Concurrency::Serial      : fromn = fromp; break;
+            case fmr::Concurrency::Independent : fromn = fromp; break;
+            case fmr::Concurrency::Collective  : fromn = 1;     break;
+            default :{}// Do nothing.
+          }
+          const fmr::Local_int bn = fmr::math::divide_ceil (sim_n, bsz);
+          label = this->task_name+" prep from";
+          const auto fbsz = this->from.bats_sz;
+          const fmr::Local_int fbn = fmr::math::divide_ceil (sim_n, fbsz);
+          log->label_fprintf (log->fmrout, label.c_str(),
+            "%i set%s /  %i %s %s, %s\n",
+            fromn, (fromn==1)?" ":"s", fromp, Pfrom->task_name.c_str(),
+            fmr::Concurrency_name.at (this->from.cncr).c_str(),
+            fmr::Schedule_name.at    (this->from.plan).c_str());
+          const auto szshort = fmr::Sim_size_short.at(this->sims_size);
+          if (fbsz>1) {
+            log->label_fprintf (log->fmrout, label.c_str(),
+              "%u set%s of %u %s sim%s in%s batch%s\n",
+              fbn, (fbn==1)?" ":"s", fbsz, szshort.c_str(),
+              (fbsz==1)?"":"s", (fbn<=1)?"":" each",
+              (fbn<=1)?(" "+this->model_name).c_str():"");
+          }else{
+            log->label_fprintf (log->fmrout, label.c_str(),
+              "%u %s sim%s in batch %s\n",
+              sim_n, szshort.c_str(), (sim_n==1)?" ":"s",
+              this->model_name.c_str());
+          }
+          label = this->task_name+" prep send";
+          if (bsz>1) {
+            log->label_fprintf (log->fmrout, label.c_str(),
+              "%u set%s of %u sim%s in each batch\n",
+              bn, (bn==1)?" ":"s", bsz, (bsz==1)?"":"s");
+          }
+          log->label_fprintf (log->fmrout, label.c_str(),
+            "%i %s%s /  %i %s %s, %s\n",
+            sendn, (bsz>1)?"set":"sim", (sendn==1)?" ":"s",
+            sendp, Psend->task_name.c_str(),
+            fmr::Concurrency_name.at (this->send.cncr).c_str(),
+            fmr::Schedule_name.at    (this->send.plan).c_str());
+        }
+        fmr::perf::timer_resume (& this->time);
+      }
+      fmr::perf::timer_pause (& this->time);
+    }
+    return err;
+  }
+  int Sims::run () {int err=0;
+    auto log = this->proc->log;
+    if (log->detail >= this->verblevel) {log->print_heading ("Start");}
+    this->prep ();
+    const auto Psend = this->proc->hier[this->send.hier_lv];
+    const auto sim_n = fmr::Local_int (this->model_list.size());
+    fmr::perf::timer_resume (& this->time);
+    FMR_PRAGMA_OMP(omp parallel reduction(+:err))
+    while (!this->model_list.empty()) {// TODO assumes XS sims, FIFO
+      const auto R = this->task.get<Sims>(Psend->get_proc_id());
+      // R is a sim (Frun) if bsz == 1, or a simset (Sims) if bsz > 1
+      FMR_PRAGMA_OMP(omp critical) {
+        R->model_name = this->model_list.front();
+        this->model_list.pop_front();
+      }
+      if (log->detail >= this->verblevel) {
+        std::string label = R->task_name;
+        log->label_fprintf (log->fmrout, label.c_str(),
+        "%s\n", R->model_name.c_str());
+      }
+      err += (R->run() > 0) ? 1 : 0;//TODO handle warnings (err<0)?
+    }
+    fmr::perf::timer_pause (& this->time, sim_n - err);
+    if (log->detail >= this->verblevel) {log->print_heading ("Finished"); }
+    return this->exit (err);
+  }
+  int Sims::exit_task (int err) {//TODO Why called twice?
+#ifdef FMR_DEBUG
+    printf ("*** Sims::exit_task\n");
+#endif
+#if 0
+    if (log->detail >= this->verblevel) {
+      log->print_heading ("D_one");
+    }
+#endif
+    return err;
+  }
+}// end Femera namespace
+#undef FMR_DEBUG
+
+
 #if 0
   fmr::Local_int Sims::get_sims_n () {// number of models in this collection
     // Valid after this->model_list has been populated.
@@ -177,96 +327,4 @@ namespace Femera {
     return 0;
   }
 #endif
-  int Sims::chck () {
-    return 0;
-  }
-  int Sims::init_task (int*, char**) {int err=0;
-#ifdef FMR_DEBUG
-    printf ("*** Sims::init_task\n");
-#endif
-    return err;
-  }
-  int Sims::add (std::string name) {int err=0;
-    if (this->model_list.size() == 0) {// Add the first Frun.//TODO Remove.
-      // New instances made by add_new_task will be deleted in this->exit(err),
-      // or before.
-      err= fmr::detail::main->add_new_task (Femera::Base_type::Frun, this);
-    }
-    this->model_list.push_back (name);
-    return err;
-  }
-  int Sims::clear () {
-    this->model_list ={};
-    this->globals ={};
-    this->locals ={};
-    this->enums ={};
-    this->dims ={};
-#if 0
-    if (this->locals.count(fmr::Data::Sims_n)) {// present in map
-      this->locals.at(fmr::Data::Sims_n)
-        = fmr::Local_int_vals(fmr::Data::Sims_n);
-    }
-#endif
-    return 0;
-  }
-  int Sims::prep () {int err=0;
-    return err;
-  }
-  int Sims::run () {int err=0;
-    auto log = this->proc->log;
-    if (log->detail >= this->verblevel) {log->print_heading ("Start");}
-    fmr::perf::timer_resume (& this->time);
-    this->prep ();
-    Proc* P = this->proc->hier[this->send.hier_lv];
-    if (P) {
-#if 0
-      const fmr::Local_int m = this->get_sims_n ();
-#else
-      fmr::Local_int m = fmr::Local_int (this->model_list.size ());
-#endif
-      if (log->detail >= this->verblevel) {
-        const int p = P->get_proc_n ();
-        fmr::Local_int c = 0;
-        switch (this->send.cncr) {
-          case fmr::Concurrency::Once        :// Fall through.
-          case fmr::Concurrency::Serial      : c = 1; break;
-          case fmr::Concurrency::Independent :// Fall through.
-          case fmr::Concurrency::Collective  : c = p; break;
-          default: {}// Do nothing.
-        }
-        const std::string label = "Run "+std::to_string(m)+" sims";
-        log->label_fprintf (log->fmrout, label.c_str(),
-          "%i %s / %i %s %s, %s...\n",
-          c, (c==1) ? "sim":"sims", p, P->task_name.c_str(),
-          fmr::Concurrency_name.at(this->send.cncr).c_str(),
-          fmr::Schedule_name.at(this->send.plan).c_str());
-      }
-      fmr::perf::timer_pause  (& this->time, m);
-      fmr::perf::timer_resume (& this->time);
-      Sims* run0 = this->task.first<Sims> (Base_type::Frun);
-      if (run0) {
-        err= P->run (run0);//TODO fix return code handling
-      }else{
-        log->label_fprintf (log->fmrerr,"WARN""ING",
-          "First Frun task in sims is null.\n");
-    } }
-    fmr::perf::timer_pause  (& this->time);
-  //...
-  if (log->detail >= this->verblevel) {log->print_heading ("Finished"); }
-  fmr::perf::timer_pause (& this->time, -err);//TODO Fix return code handling.
-  //
-  return this->exit (err);
-}
-  int Sims::exit_task (int err) {//TODO Why called twice?
-#ifdef FMR_DEBUG
-    printf ("*** Sims::exit_task\n");
-#endif
-#if 0
-    if (log->detail >= this->verblevel) {
-      log->print_heading ("D_one");
-    }
-#endif
-    return err;
-  }
-}// end Femera namespace
-#undef FMR_DEBUG
+

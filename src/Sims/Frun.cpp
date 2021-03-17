@@ -5,16 +5,19 @@
 #include <cstdio>     // std::printf
 #endif
 
+#include <unistd.h> //TODO Remove usleep.
+
 namespace Femera {
   Frun::Frun (Sims* F) noexcept {//TODO Change derived class name. Fsim? Sim1?
     this->parent = F; this->proc=F->proc; this->data=F->data;
     this->from = F->send;
     this->send = {from.hier_lv, fmr::Schedule::Once, fmr::Concurrency::Once};
+    this->sims_size = F->sims_size;
     //
     this->       work_type = work_cast (Base_type::Frun);
 //    this-> base_type = work_cast (Base_type::Sims);// TODO Remove?
     this-> task_name ="Run 1sim";
-    this->model_name ="(master runner)";
+    this->model_name ="(sim runner)";
     this-> verblevel = 7;
     this-> part_algo = fmr::Partition::Merge;
     this->meter_unit ="sim";
@@ -26,7 +29,7 @@ namespace Femera {
   int Frun::prep (){int err=0;
     fmr::perf::timer_resume (& this->time);
     //TODO new Geom, get mesh data
-    //
+#if 0
     this->data_id
       = this->data->make_data_id (this->model_name, fmr::Tree_type::Sims,{});
     const auto ginfo_id = this->data->make_data_id (this->data_id,
@@ -104,41 +107,27 @@ namespace Femera {
       txt += "\n";
       log->label_fprintf (this->proc->log->fmrout, label.c_str(), txt.c_str());
     }
-#if 0
-    Sims* run_sims = this;
-    if (this->sims) {if (this->sims->task.first (this->work_type) == this) {
-//      run_sims = new Frun (this->sims);
-//      this->sims->task.add (run_sims);
-//      int part_n = this->data->get_part_n (this->model_name);
-//      for (int i=0; i<part_n; i++){this->task.add (new Part);
-    }
-    } }
-    if (log->detail >= this->verblevel) {
-      log->label_fprintf (log->fmrout,"Run sim name",
-        "%s...\n", this->model_name.c_str() );
-    }
-#else
-    //...
-#endif
-#if 0
-    this->task.add (new Part(this, 0,
-      this->data->make_data_id (this->model_name, fmr::Tree_type,{0})));
-    // part[0] initializes all parts running under this Frun.
-#else
     this->task.add (new Part(this));
-#endif
     if (this->part_algo == fmr::Partition::Merge) {
       this->model_list.push_front("(merged part)");
     }else{
       this->model_list.push_front("(part 1)");
     }
+#endif
     fmr::perf::timer_pause (& this->time);
     return err;
   }
   int Frun::run () {int err=0;
     fmr::perf::timer_resume (& this->time);
     err= this->prep ();
-    //
+#if 1
+    // quick estimate of solve time
+    double dof   = 10e3;//TODO Get this from current sim
+    double iters = 0.01 * dof;
+    double speed =  1e9 / 40.0;// dof/s Skylake XS sim solve speed
+    usleep (int(1e6 * iters * dof / speed));
+#endif
+#if 0
     Proc* P = this->proc->hier[send.hier_lv];
     auto log = this->proc->log;
     if (log->detail >= this->verblevel) {if (P) {
@@ -167,6 +156,7 @@ namespace Femera {
       log->label_fprintf (log->fmrerr,"WARN""ING",
         "First Part task in sims is null.\n");
     }
+#endif
     //...
     fmr::perf::timer_resume (& this->time);
     return this->exit(err);

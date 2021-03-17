@@ -94,7 +94,7 @@ namespace Femera{
     Boco, Fix0, Diri, Neum,
     Elas, Ther,
     Cnd1, Cjac,// Preconditioners
-    Sgdm, Spcg, Sncg,// Solvers
+    Grad, Spcg, Sncg,// Solvers
     Mono, Halo,
 #ifdef FMR_HAS_TESTS
     Test,

@@ -9,7 +9,8 @@ namespace Femera {
   Geom::Geom (Sims* F) noexcept {
     this->proc=F->proc; this->data=F->data;
     this->from = F->send;
-    this->send = {from.hier_lv, fmr::Schedule::List, fmr::Concurrency::Serial};
+    this->send = {from.hier_lv, fmr::Schedule::Block, fmr::Concurrency::Serial};
+    this->sims_size = F->sims_size;
     this-> work_type = work_cast (Base_type::Geom);
 //    this->base_type = work_cast (Base_type::Sims);// TODO Remove?
     this-> task_name ="Geom";

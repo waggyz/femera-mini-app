@@ -60,21 +60,24 @@ namespace fmr {
     {Partition::   Plugin,"partitioner plugin"}
   };
   enum class Schedule : Enum_int { None=0, Error, Unknown,
-    Once, List, Fifo,
+    Once,
+    List, Block, Interleave, Fifo,
     Auto,
     Plugin,
   end};
   //TODO Batches: distribute batch_sz objects at a time.
   //     Objects in a batch are run in a Serial List.
   static const std::map<Schedule,std::string> Schedule_name {
-    {Schedule::    None,"no schedule"},
-    {Schedule::   Error,"schedule error"},
-    {Schedule:: Unknown,"unknown schedule"},
-    {Schedule::    Once,"alone"},// Sched. one object to run on one thread.*
-    {Schedule::    List,"preset schedule"},//TODO Close and Spread
-    {Schedule::    Fifo,"first in/first out"},
-    {Schedule::    Auto,"auto-schedule"},
-    {Schedule::  Plugin,"scheduler plugin"}
+    {Schedule::       None,"no schedule"},
+    {Schedule::      Error,"schedule error"},
+    {Schedule::    Unknown,"unknown schedule"},
+    {Schedule::       Once,"alone"},// Sched. one object to run on one thread.*
+    {Schedule::       List,"preset list"},
+    {Schedule::      Block,"block list"},
+    {Schedule:: Interleave,"interleaved list"},
+    {Schedule::       Fifo,"first in/first out"},
+    {Schedule::       Auto,"auto-schedule"},
+    {Schedule::     Plugin,"scheduler plugin"}
     // * Once: batch size = 1
   };
   enum class Concurrency : Enum_int { None=0, Error, Unknown,
@@ -113,6 +116,34 @@ namespace fmr {
     {Sim_time::   Plugin,"plugin"},
     {Sim_time:: Explicit,"explicit"},
     {Sim_time:: Implicit,"implicit"}
+  };
+  enum class Sim_size :fmr::Enum_int{ None=0, Error, Unknown, Plugin,
+    Automatic,
+    XS, SM, MD, LG, XL
+  };
+  static const std::map<Sim_size,std::string> Sim_size_name {
+    {Sim_size::      None,"no sims"},//TODO makes sense?
+    {Sim_size::     Error,"sim size error"},
+    {Sim_size::   Unknown,"unknown sim size"},
+    {Sim_size::    Plugin,"plugin sim size handler"},
+    {Sim_size:: Automatic,"automatic sim size handler"},
+    {Sim_size::        XS,"extra small"},
+    {Sim_size::        SM,"small"},
+    {Sim_size::        MD,"medium"},
+    {Sim_size::        LG,"large"},
+    {Sim_size::        XL,"extra large"}
+  };
+  static const std::map<Sim_size,std::string> Sim_size_short {
+    {Sim_size::      None,"none"},//TODO makes sense?
+    {Sim_size::     Error,"erro"},
+    {Sim_size::   Unknown,"unknown"},
+    {Sim_size::    Plugin,"plug"},
+    {Sim_size:: Automatic,"auto"},
+    {Sim_size::        XS,"XS"},
+    {Sim_size::        SM,"SM"},
+    {Sim_size::        MD,"MD"},
+    {Sim_size::        LG,"LG"},
+    {Sim_size::        XL,"XL"}
   };
 #if 0
   enum class Distribute :fmr::Enum_int{ Unknown=-1, None=0, Automatic,

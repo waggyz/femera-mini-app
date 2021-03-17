@@ -25,10 +25,6 @@ class Part final : public Sims {
   public:
   protected:
     // part_dims, phys_dims inherited from Sims
-    fmr::Enum_int_vals elem_type// size: mesh_n
-      = fmr::Enum_int_vals(fmr::Data::Elem_type,0);
-    fmr::Enum_int_vals cell_type// size: grid_n
-      = fmr::Enum_int_vals(fmr::Data::Cell_type,0);
 #if 0
     Sims* parent =nullptr;// parent sim/part
     Load* load =nullptr;
@@ -43,9 +39,6 @@ class Part final : public Sims {
 //    fmr::Data_id   part_id = "(unknown)";
     fmr::Local_int part_ix = 0;//TODO needed?
   // methods ----------------------------------------------------------------
-  public:
-    fmr::Data_id make_id() override;//TODO virtual Sims::make_id()
-    fmr::Data_id get_id() override;//TODOvirtual Sims::get_id()
   protected:
     int prep () final override;
     int chck () final override;

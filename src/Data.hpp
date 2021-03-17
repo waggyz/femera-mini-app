@@ -67,7 +67,7 @@ class Data : public Work {//TODO change to File
       Data_local_vals;// key: data ID
     typedef std::unordered_map<fmr::Data_id, fmr::Global_int_vals>
       Data_global_vals;// key: data ID
-    //TODO std::unordered_map is not thread safe!
+    //NOTE std::unordered_map is not thread safe.
   // member variables --------------------------------------------------------
   public:
     // fmr::perf::IOmeter  time_io = fmr::perf::IOmeter ();//TODO

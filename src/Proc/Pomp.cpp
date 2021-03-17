@@ -57,9 +57,26 @@ namespace Femera {
       }
       const fmr::Local_int nmodel
         = fmr::Local_int (parent_sims->model_list.size ());
+      std::string liststr = " block list";
       switch (F->from.plan) {
-        case fmr::Schedule::Once :{}// Fall through.
-        case fmr::Schedule::List :{
+        case fmr::Schedule::Once  : liststr=" one only";//nmodel=1;//Fall through.
+        case fmr::Schedule::List  : liststr=" preset list"; pn=1;//TODO Check.
+        case fmr::Schedule::Block :{
+          for (fmr::Local_int i=pid+1; i<nmodel; i+=pn) {
+            err= fmr::detail::main->add_new_task (F->work_type, parent_sims);
+          }
+          for (fmr::Local_int i=pid*pn; i<nmodel; i++) {
+            auto runner = parent_sims->task.get<Sims>(i); if (runner) {
+              runner->model_name = parent_sims->model_list[i];
+              if (flog->verbosity >= F->verblevel) {
+                flog->label_fprintf (flog->fmrout,
+                (runner->task_name+liststr).c_str(),
+                "%s...\n",runner->model_name.c_str());
+              }
+              err+= runner->run () ? 1 : 0;
+          } }
+          break; }
+        case fmr::Schedule::Interleave :{
           for (fmr::Local_int i=pid+1; i<nmodel; i+=pn) {
             err= fmr::detail::main->add_new_task (F->work_type, parent_sims);
           }
@@ -68,7 +85,7 @@ namespace Femera {
               runner->model_name = parent_sims->model_list[i];
               if (flog->verbosity >= F->verblevel) {
                 flog->label_fprintf (flog->fmrout,
-                (runner->task_name+" list").c_str(),
+                (runner->task_name+" interleaved list").c_str(),
                 "%s...\n",runner->model_name.c_str());
               }
               err+= runner->run () ? 1 : 0;

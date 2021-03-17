@@ -21,8 +21,8 @@ int Data::print_sims_file_info (const std::string sim_name) {
   auto log = this->proc->log;
   if (log->detail >= this->verblevel) {
     std::string namelist ="";
-    if (sims_data_file.count (sim_name)) {
-      const auto data_names = sims_data_file.at (sim_name);
+    if (this->sims_data_file.count (sim_name)) {
+      const auto data_names = this->sims_data_file.at (sim_name);
       const auto n = data_names.size ();
       if (n) {for (size_t i=0; i<n; i++) {
         Data* D; std::string name; std::tie(D,name)=data_names.at(i);
@@ -114,11 +114,11 @@ Data::File_info Data::scan_file_data (Data::Data_file df) {
   if (info.state.has_error) {return info;}
   Data* D; std::string fname; std::tie (D,fname) = info.data_file;
 //  if (!D) {D = this->get_task_for_file (fname); }//TODO Remove?
-  if (D){
+  if (D) {
     auto log = this->proc->log;
     info = D->scan_file_data (fname);// Call derived class handler.
     if (this->verblevel <= log->detail){
-      const std::string label = "sims info";
+      const std::string label = this->task_name+" scan file";
       const auto ver = info.version;
       log->label_fprintf (log->fmrout, label.c_str(),"%s %s (%s%s)\n",
         fmr::data::Access_name.at(info.access).c_str(), fname.c_str(),
@@ -399,6 +399,7 @@ int Data::init_task (int* argc, char** argv){ int err=0;
 #ifdef FMR_DEBUG
   std::printf("*** Data::init_task start...\n");
 #endif
+  auto log = this->proc->log;
   fmr::perf::timer_resume (&this->time);
 //  std::deque<std::string> chk_file_names ={};// all file names
   FMR_PRAGMA_OMP(omp master) {//NOTE getopt is NOT thread safe.
@@ -408,7 +409,7 @@ int Data::init_task (int* argc, char** argv){ int err=0;
     opterr = 0; int optchar;
 #if 0
     bool read_db_stdin = false, write_db_stdout = false;
-      this->proc->log-> fmrout = stdout;
+    log-> fmrout = stdout;
     bool is_read_only=false, has_one_dest=false; std::string one_dest_file("");
 #endif
     while ((optchar = getopt (argc[0], argv, ":i:o:m:")) != -1){
@@ -450,9 +451,9 @@ int Data::init_task (int* argc, char** argv){ int err=0;
     }
     if( write_db_stdout ){ file_name_queue.push_back( "+::stdout" ); }
     if( read_db_stdin ){ file_name_queue.push_back( "-::stdin" ); }
-    if( write_db_stdout ){ this->proc->log-> fmrout = stderr;
+    if( write_db_stdout ){ log-> fmrout = stderr;
       if(iprint){
-      this->proc->log->printf("NOTE Messages have been redirectd to stderr.\n"); } }
+      log->printf("NOTE Messages have been redirectd to stderr.\n"); } }
     // Redirect stdout msgs to stderr if write_db_stdout==true.
 #endif
     //std::queue<std::string> unk_file_names={};
@@ -467,18 +468,28 @@ int Data::init_task (int* argc, char** argv){ int err=0;
   for (auto model : this->sims_names){// Copy model names to the main queue
     fmr::sims::add (model);
   }
-  if (proc->log->detail >= this->verblevel){this->print_details (); }
+  if (log->detail >= this->verblevel){this->print_details (); }
   fmr::perf::timer_pause (&this->time);
   return err;
 }
 int Data::chck_file_names (){
+#if 1
+  auto log = this->proc->log;
+  if (log->verbosity >= this->verblevel){
+    log->label_printf ("Check stat","of %s\n",
+      chk_file_names.size() == 1 ? chk_file_names[0].c_str()
+      : (std::to_string (chk_file_names.size())+" files...").c_str());
+  }
+#endif
   return Data::chck_file_names (this->chk_file_names);
 }
 int Data::chck_file_names (std::deque<std::string> files){int err=0;
-  // Check files provided on the command line.
-  //
+  /* Check files in parallel to build a map between file storage and model data,
+   * caching data found while traversing file structures.
+   */
   const bool do_read_sims_info = true;//(sims_names.size() == 0);//TODO
-  for (std::string fname : out_file_names){// Check output file formats first.
+#if 0
+  for (std::string fname : this->out_file_names){// Check output files first.
     if( 0==0 ){//TODO File exists.
       //
       if( 0==0 ){//TODO err=chck (fname)
@@ -489,7 +500,7 @@ int Data::chck_file_names (std::deque<std::string> files){int err=0;
   }
   //TODO  const auto this_access = (out_file_names.size() == 0)
   //TODO    ? fmr::data::Access::Modify : fmr::data::Access::Read;
-  //
+#endif
   const fmr::Local_int fname_n = fmr::Local_int(files.size());
   const int dlevel = 0;
   const int thrd_n = this->proc->get_stat()[dlevel].thrd_n;//TODO get by level
@@ -514,31 +525,30 @@ int Data::chck_file_names (std::deque<std::string> files){int err=0;
           fname.c_str());
       }
       else if (do_read_sims_info) {
+        auto info = get_file_info (Data_file (nullptr,fname));
         if (fname_i==0) {if (log->verbosity >= this->verblevel) {
           std::string label = this->task_name +" info";
-          auto info = get_file_info (Data_file (nullptr,fname));
           if (log->detail >= this->verblevel) {
             const std::string mode = fmr::data::Access_name.at(info.access);
             log->label_fprintf (log->fmrout, label.c_str(),
               "%s %i file%s...\n",
               mode.c_str(), fname_n, (fname_n==1)?"":"s");
         } } }
-        auto info = get_file_info (Data_file (nullptr,fname));
         Data* D = info.data_file.first;
         if (D != nullptr) {// recognized file format
           if (!info.state.has_error) {
             info = this->scan_file_data (info.data_file);
             if (!info.state.has_error) {
-              inp_file_names.push_back (fname);
+              this->inp_file_names.push_back (fname);
       } } } }
       this->get_sims_names();
-  } }//end if input files given on command line
+  } }//end if files provided
   if (log->verbosity >= this->verblevel){
     log->label_printf ("Input data","in %s\n",
-      inp_file_names.size() == 1 ? inp_file_names[0].c_str()
-      : (std::to_string (inp_file_names.size())+" files").c_str());
+      this->inp_file_names.size() == 1 ? this->inp_file_names[0].c_str()
+      : (std::to_string (this->inp_file_names.size())+" files").c_str());
     log->label_printf ("Output data","to %s\n",
-      out_file_names.size() == 1 ? out_file_names[0].c_str()
+      this->out_file_names.size() == 1 ? this->out_file_names[0].c_str()
       : "each input file");
   }
   return err;

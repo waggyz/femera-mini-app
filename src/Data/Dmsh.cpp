@@ -284,6 +284,44 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
       isok[part_n_ix] |= part_n > 0;
       isok[mesh_n_ix] |= mesh_n > 0;
 #if 0
+      auto log = this->proc->log;
+      //TODO Remove; just checking element jacobians...
+      if (log->verbosity >= this->verblevel) {
+        const int dim = 3;
+        std::vector<int> elementTypes={};
+        gmsh::model::mesh::getElementTypes (elementTypes, dim);
+        const auto elem_n = elementTypes.size();//TODO NOT elem_n?
+        if (elem_n < 1 ) {
+          log->label_printf ("Gmsh elem","ERROR: %u elem\n",elem_n);
+        }else{
+          //const std::string integrationType ="Gauss1";
+          std::vector<double> intp={};// elem coor
+          std::vector<double> intw={};
+          gmsh::model::mesh::getIntegrationPoints (elementTypes[0],
+            "Gauss1",intp,intw);
+          if (intw.size() < 1){
+            log->label_printf ("Gmsh elem ptwt","ERROR: %u intpts\n",intw.size());
+          }else{
+            for (uint i=0; i<intw.size(); i++) {
+              log->label_printf ("Gmsh elem ptwt","%1.2f,%1.2f,%1.2f: %1.2f\n",
+                intp[3*i],intp[3*i+1],intp[3*i+2], intw[i]);
+            }
+            std::vector<double> jacs={};
+            std::vector<double> dets={};
+            std::vector<double> points={};// global coor
+            gmsh::model::mesh::getJacobians (elementTypes[0],
+              intp,jacs,dets,points);
+            const auto jacs_n =dets.size();
+            if (jacs_n > 0 ) {//(jacs_n == 5 )
+              for (uint j=0; j<jacs_n; j++) {
+                log->label_fprintf (log->fmrout,"Gmsh elem jacs",
+                  "%1.2f,%1.2f,%1.2f|%1.2f,%1.2f,%1.2f|%1.2f,%1.2f,%1.2f:%1.2f\n",
+                  jacs[9*j+0],jacs[9*j+1],jacs[9*j+2],
+                  jacs[3*j+9],jacs[9*j+4],jacs[9*j+5],
+                  jacs[3*j+9],jacs[9*j+7],jacs[9*j+8], dets[j]);
+      } } } } }
+#endif
+#if 0
       // Get material associations//TODO Do this somewhere else?
       // Assume materials are assigned to Gmsh physical tags with names.
       // The name of the tag identifies the material.
@@ -303,7 +341,8 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
       // Include a 1D bar mesh if it is tagged.//TODO Is this ok?
       if (has_1d_elem_tags){ vals[mesh_n_ix]+= 1; }
 #endif
-  } }
+    }
+  }
   fmr::perf::timer_pause (&this->time);
   info.state.was_checked  = true;
   this->file_info[fname] = info;
