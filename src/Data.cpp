@@ -292,10 +292,10 @@ std::deque<std::string> Data::get_sims_names () {
        if (D) {if (D != this) {
         auto names = D->get_sims_names();
         while (!names.empty()){
-          if (this->sims_names.insert(names.front()).second == false) {
-            model_names.push_back (names.front());
+          if (this->sims_names.insert(names.back()).second == false) {
+            model_names.push_back (names.back());
           }
-          names.pop_front();
+          names.pop_back();
   } } } } }
   return model_names;
 }
@@ -308,10 +308,10 @@ std::deque<std::string> Data::get_inp_file_names (){
 std::deque<std::string> Data::get_out_file_names (){
   return this->out_file_names;
 }
-Work_type Data::get_file_type (const std::string fname){
-  for (int i=0; i < this->task.count(); i++){
+Work_type Data::get_file_type (const std::string fname) {
+  for (int i=0; i < this->task.count(); i++) {
     Data* D=this->task.get<Data>(i);
-    if (D->is_this_type (fname)){ return D->work_type; }
+    if (D->is_this_type (fname)) {return D->work_type;}
   }
   return work_cast(Base_type::None);
 }

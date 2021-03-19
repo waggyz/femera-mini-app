@@ -205,9 +205,17 @@ namespace Femera {
         const auto R = this->task.get<Sims>(Psend->get_proc_id());
         // R is a sim (Frun) if bsz == 1, or a simset (Sims) if bsz > 1
         FMR_PRAGMA_OMP(omp critical) {
+#if 0
+          // first in/last out
           R->model_name = this->model_list.back();
           this->model_list.pop_back();
           sim_i = fmr::Local_int (this->model_list.size());
+#else
+          // first in/first out
+          sim_i = sim_n - fmr::Local_int (this->model_list.size());
+          R->model_name = this->model_list.front();
+          this->model_list.pop_front();
+#endif
           R->sims_ix = sim_i;
         }
         if (log->detail >= this->verblevel) {
@@ -215,9 +223,8 @@ namespace Femera {
           std::string label = "Model "+std::to_string(sim_i)+" "+R->task_name;
           const auto gset_n = this->locals.at (fmr::Data::Gset_n).data[sim_i];
           const auto part_n = this->locals.at (fmr::Data::Part_n).data[sim_i];
-          const auto grid_n = this->locals.at (fmr::Data::Grid_n).data[sim_i];
-//          const fmr::Local_int grid_n =111;
           const auto mesh_n = this->locals.at (fmr::Data::Mesh_n).data[sim_i];
+          const auto grid_n = this->locals.at (fmr::Data::Grid_n).data[sim_i];
           log->label_fprintf (log->fmrout, label.c_str(),
             "%s %u gset%s, %u part%s, %u grid%s, %u mesh%s\n",
             R->model_name.c_str(),
