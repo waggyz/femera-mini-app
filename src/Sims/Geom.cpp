@@ -16,7 +16,7 @@ namespace Femera {
     this-> task_name ="Geom";
     this->model_name ="(geometry master)";
     this-> verblevel = 8;
-    this-> part_algo = fmr::Partition::Geom;
+    this-> part_type = fmr::Partition::Geom;
   }
   int Geom::chck (){
     return 0;

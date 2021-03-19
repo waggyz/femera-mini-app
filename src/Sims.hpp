@@ -37,7 +37,7 @@ class Sims : public Work {// simulation collection manager
     //
     fmr::Sim_size sims_size = fmr::Sim_size::XS;//TODO fmr::Sim_size::Unknown
   protected:
-    fmr::Partition  part_algo = fmr::Partition::None;
+    fmr::Partition  part_type = fmr::Partition::None;
     //
     fmr::Local_int sims_ix = 0;// collection number
     fmr::Dim_int   tree_lv = 0;// sim/sim collection depth

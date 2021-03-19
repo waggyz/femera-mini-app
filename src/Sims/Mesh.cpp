@@ -17,7 +17,7 @@ namespace Femera {
     this->meter_unit ="elem";
     this->model_name ="(Mesh master)";
     this-> verblevel = 8;
-    this-> part_algo = fmr::Partition::None;
+    this-> part_type = fmr::Partition::None;
   }
   int Mesh::chck (){
     return 0;

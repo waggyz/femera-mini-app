@@ -18,7 +18,6 @@ class Frun final : public Sims {//TODO Problably NOT derived from Sims or Work.
   public:
   protected:
   private:
-    fmr::Local_int sims_ix = 0;// sim number
   // methods ----------------------------------------------------------------
   protected:
     int prep () final override;

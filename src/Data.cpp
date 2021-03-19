@@ -177,10 +177,47 @@ fmr::Data_id Data::get_id (){fmr::Data_id id = "";//TODO needed?
 fmr::Dim_int Data::get_hier_max (){
   return data_hier_max;
 }
-int Data::get_local_vals (std::string data_id, fmr::Local_int_vals& vals){
+int Data::get_local_vals (fmr::Data_id data_id, fmr::Local_int_vals& vals){
   int err= 0;
-  //fmr::Vals<uint32_t> vals_out = fmr::Vals<uint32_t>();
-  const bool is_found = this->local_vals.count(data_id) > 0;
+  auto log = this->proc->log;
+  bool is_found = this->local_vals.count (data_id) > 0;
+  if (is_found) {
+    vals = this->local_vals.at (data_id);
+    return err;
+  }
+  const auto names = this->get_sims_names();
+  fmr::Local_int name_i=0;
+  for (auto name : names) {
+    fmr::Data_id cache_id = this->make_data_id (name, fmr::Data::Geom_info);
+    if (this->local_vals.count (cache_id) > 0) {
+      const auto cached = this->local_vals.at (cache_id);
+      if (name_i < vals.data.size()) {
+        fmr::Local_int v=0;
+        switch (vals.type) {
+          case fmr::Data::Gset_n : is_found = true;
+            v = cached.data [enum2val (fmr::Geom_info::Gset_n)]; break;
+          case fmr::Data::Part_n : is_found = true;
+            v = cached.data [enum2val (fmr::Geom_info::Part_n)]; break;
+          case fmr::Data::Mesh_n : is_found = true;
+            v = cached.data [enum2val (fmr::Geom_info::Mesh_n)]; break;
+          case fmr::Data::Grid_n : is_found = true;
+            v = cached.data [enum2val (fmr::Geom_info::Grid_n)]; break;
+          default : is_found = false;
+        }
+        if (is_found) {vals.data [name_i] = v;}
+    } }
+    name_i++;
+  }
+  if (!is_found) {
+    std::string short_name = (fmr::Data_name.count(vals.type) > 0)
+      ? fmr::Data_name.at(vals.type).first
+      : "(unnamed type "+std::to_string(fmr::enum2val(vals.type))+")";
+    log->label_fprintf (log->fmrerr, "WARN""ING",
+      "Did not find %u %s vals for %s.\n",
+      vals.data.size(), short_name.c_str(), data_id.c_str());
+    return 1;
+  }
+#if 0
   //for (int i=1; 1<this->task.count();
 #if 0
   switch (vals.type) {//TODO is switch needed?
@@ -215,6 +252,7 @@ int Data::get_local_vals (std::string data_id, fmr::Local_int_vals& vals){
     vals.memory_state.can_read    = true;
     vals.memory_state.was_read    = true;
   }
+#endif
   return err;
 }
 #if 0
@@ -245,16 +283,16 @@ int Data::get_global_vals (std::string name, fmr::Tree_path part_tree_id,
   return err;
 }
 #endif
-std::deque<std::string> Data::get_sims_names (){
+std::deque<std::string> Data::get_sims_names () {
   std::deque<std::string> model_names={};
-  for (auto name : this->sims_names ){ model_names.push_back (name); }
-  if (this->work_type == work_cast(Base_type::Data)){
-    for (int i =0; i < this->task.count(); i++){
+  for (auto name : this->sims_names) {model_names.push_back (name);}
+  if (this->work_type == work_cast(Base_type::Data)) {
+    for (int i =0; i < this->task.count(); i++) {
       auto D = this->task.get<Data>(i);
-       if (D){ if (D != this){
+       if (D) {if (D != this) {
         auto names = D->get_sims_names();
-        while (! names.empty()){
-          if (this->sims_names.insert(names.front()).second == false){
+        while (!names.empty()){
+          if (this->sims_names.insert(names.front()).second == false) {
             model_names.push_back (names.front());
           }
           names.pop_front();
@@ -314,20 +352,23 @@ std::string Data::print_details (){
 #if 0
   ret += this->print_summary ();
 #endif
-  if (log->detail > this->verblevel){
+  if (log->detail > this->verblevel) {
     const int task_n = this->task.count();
     //TODO add the rest to the return string.
-    for (int i=0; i<task_n; i++){
+    for (int i=0; i<task_n; i++) {
       Data* D = this->task.get<Data>(i);
-      if (D->file_exts.size() > 0){// supported file extensions
+      if (D->file_exts.size() > 0) {// supported file extensions
         std::string exts("");
         for (uint j=0; j<D->file_exts.size(); j++){
           exts += D->file_exts[j];
-          if ((j+1) < D->file_exts.size()){ exts+=" "; }
+          if ((j+1) < D->file_exts.size()) {exts+=" ";}
         }
         std::string label = D->task_name+" exts";
         log->label_printf (label.c_str(),"%s\n",exts.c_str());
     } }
+    std::string label = this->task_name+" vals";
+    log->label_printf (label.c_str(),"%u built-in simulation variables\n",
+      fmr::enum2val (fmr::Data::end));
     log->label_printf ("Maximum ints",//TODO Move to build details?
       "%iD, %s, %s local, %s global\n",
       std::numeric_limits<fmr::Dim_int>::max(),
@@ -380,9 +421,10 @@ std::string Data::print_details (){
     }
     log->label_fprintf (log->fmrout,"Model data",
       "%lu input%s\n",fmr::Local_int(this->sims_names.size()), s.c_str());
-    s ="Model data";
+    fmr::Local_int imodel=0;
     for (auto model : this->sims_names){
-      proc->log->label_fprintf (log->fmrout,
+      s ="Model "+std::to_string(imodel)+" data"; imodel++;
+      log->label_fprintf (log->fmrout,
         s.c_str(),"%s\n", model.c_str());
   } }
   return ret ;
@@ -540,9 +582,10 @@ int Data::chck_file_names (std::deque<std::string> files){int err=0;
             info = this->scan_file_data (info.data_file);
             if (!info.state.has_error) {
               this->inp_file_names.push_back (fname);
-      } } } }
+      } } } } }
       this->get_sims_names();
-  } }//end if files provided
+//      this->sort_sims_data ();
+  }//end if files provided
   if (log->verbosity >= this->verblevel){
     log->label_printf ("Input data","in %s\n",
       this->inp_file_names.size() == 1 ? this->inp_file_names[0].c_str()

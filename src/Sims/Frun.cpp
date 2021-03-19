@@ -12,22 +12,32 @@ namespace Femera {
     this->parent = F; this->proc=F->proc; this->data=F->data;
     this->from = F->send;
     this->send = {from.hier_lv, fmr::Schedule::Once, fmr::Concurrency::Once};
-    this->sims_size = F->sims_size;
+    this->  sims_size = F->sims_size;
     //
-    this->       work_type = work_cast (Base_type::Frun);
+    this->  work_type = work_cast (Base_type::Frun);
 //    this-> base_type = work_cast (Base_type::Sims);// TODO Remove?
-    this-> task_name ="Run 1sim";
-    this->model_name ="(sim runner)";
-    this-> verblevel = 7;
-    this-> part_algo = fmr::Partition::Merge;
-    this->meter_unit ="sim";
-    this->   sims_ix = F->get_sims_n();
+    this->  task_name ="Frun";
+    this-> model_name ="(sim runner)";
+    this->  verblevel = 7;
+    this->  part_type = fmr::Partition::Merge;
+    this-> meter_unit ="sim";
   }
   int Frun::chck (){
     return 0;
   }
   int Frun::prep (){int err=0;
     fmr::perf::timer_resume (& this->time);
+#if 0
+    auto log = this->proc->log;
+    if (log->detail >= this->verblevel) {
+      fmr::perf::timer_pause (& this->time);
+      std::string label = this->task_name+" prep";
+      log->label_fprintf (log->fmrout, label.c_str(), "%s:%s_%u %s\n",
+        parent->model_name.c_str(), this->task_name.c_str(), this->sims_ix,
+        this->model_name.c_str());
+      fmr::perf::timer_resume (& this->time);
+    }
+#endif
     //TODO new Geom, get mesh data
 #if 0
     this->data_id
@@ -108,7 +118,7 @@ namespace Femera {
       log->label_fprintf (this->proc->log->fmrout, label.c_str(), txt.c_str());
     }
     this->task.add (new Part(this));
-    if (this->part_algo == fmr::Partition::Merge) {
+    if (this->part_type == fmr::Partition::Merge) {
       this->model_list.push_front("(merged part)");
     }else{
       this->model_list.push_front("(part 1)");
@@ -144,7 +154,7 @@ namespace Femera {
       const std::string label = "Run "+std::to_string(n)+" part";
       log->label_fprintf (log->fmrout, label.c_str(),
         "%i %s %s / %i %s %s, %s\n",
-        c, fmr::Partition_name.at(this->part_algo).c_str(),n==1?"part":"parts",
+        c, fmr::Partition_name.at(this->part_type).c_str(),n==1?"part":"parts",
         p, P->task_name.c_str(),
         fmr::Concurrency_name.at(this->send.cncr).c_str(),
         fmr::Schedule_name.at(this->send.plan).c_str());

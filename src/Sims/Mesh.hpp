@@ -28,10 +28,10 @@ class Mesh : public Geom {// Pure virtual? Mesh?
     std::unordered_map<fmr::Global_int, fmr::Local_int> local_elem_id ={};
     //
     fmr::Global_int_vals global_elem_id =// of each element in this part
-    fmr::Global_int_vals (fmr::Data::Elem_ig, fmr::math::Natural);
+    fmr::Global_int_vals (fmr::Data::Elem_id, fmr::math::Natural);
     //
     fmr::Global_int_vals global_node_id =// of each node in this part
-    fmr::Global_int_vals (fmr::Data::Node_ig, fmr::math::Natural);
+    fmr::Global_int_vals (fmr::Data::Node_id, fmr::math::Natural);
     //
     fmr::Local_int_vals  conn =//Elem_conn -> e.g. Conn_tet4
     fmr::Local_int_vals  (fmr::Data::Elem_conn, fmr::math::Natural);

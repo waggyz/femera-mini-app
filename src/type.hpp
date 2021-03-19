@@ -11,15 +11,15 @@ namespace fmr {
    * fmr:: and Femera:: namespaces.
    *
    * sizeof (Dim_int <= Enum_int <= Local_int < Global_int)
-   * sizeof (Elemid_int >= Enum_int + fmr::math::Poly + Dim_int)
+   * sizeof (Elid_int >= Enum_int + fmr::math::Poly + Dim_int)
    */
   typedef uint8_t     Dim_int;// dimensions, order, power, hierarchy lvls,...
   typedef uint16_t   Enum_int;
   typedef uint32_t  Local_int;
-  typedef uint32_t Elemid_int;//(See above.)
+  typedef uint32_t   Elid_int;//(See above.)
   typedef uint64_t Global_int;//TODO signed?
   //
-  typedef double   Geom_float;//TODO Try float.
+  typedef float    Geom_float;
   typedef double   Phys_float;
   typedef double   Solv_float;
   typedef float    Cond_float;// Preconditioning and scaling

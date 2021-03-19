@@ -17,7 +17,7 @@ namespace Femera {
     this->meter_unit ="part";
     this->model_name ="(partition master)";
     this-> verblevel = 8;
-    this-> part_algo = fmr::Partition::Geom;// Meshes & Grids
+    this-> part_type = fmr::Partition::Geom;// Meshes & Grids
     this->   tree_lv = 1;
     this->   part_ix = F->get_part_n();
   }

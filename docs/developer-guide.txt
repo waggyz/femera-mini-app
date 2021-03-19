@@ -216,10 +216,8 @@ fmr_perf_meter defines it in the public C API.
 *_d  Dimension of *
 *_n  Number of *
 *_i  Arbitrary (usually loop) index of *
-*_ix Lookup index of *
-*_id Unique identifier of *
-*_il Local identifier of *
-*_ig Global identifier of *
+*_ix Local lookup index of *
+*_id Global Unique identifier of *
 *_sz Size of *
 
 

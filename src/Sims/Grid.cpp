@@ -17,7 +17,7 @@ namespace Femera {
     this->meter_unit ="cell";
     this->model_name ="(Grid master)";
     this-> verblevel = 8;
-    this-> part_algo = fmr::Partition::None;
+    this-> part_type = fmr::Partition::None;
   }
   int Grid::chck (){
     return 0;

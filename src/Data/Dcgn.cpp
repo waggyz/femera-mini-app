@@ -411,7 +411,7 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
     } }
 #endif
     //TODO_FMR_PRAGMA_OMP(omp critical)// Check use with OpenMP but not MPI.
-    for (int base_i=1; base_i <= base_n; base_i++){
+    for (int base_i=1; base_i <= base_n; base_i++) {
       int zone_n=0, gset_n=0, conn_n=0;
       fmr::Sim_time sim_time = fmr::Sim_time::Unknown;
       char cname[this->label_size+1];
@@ -471,6 +471,26 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
       //TODO   err = cg_user_data_read(int Index, char *Name);
       //TODO ier = cg_unitsfull_read(MassUnits_t mass, LengthUnits_t,...);
       //
+      // Scan the first part hierarchy level...
+      // Element types are in sections.
+      // However, synchronization information (halo nodes, rind) is stored at
+      // the Part (CGNS Zone) level.
+      //NOTE This only needs to be read now for Partition::Merge
+      //TODO Move to get_info(part_id,..)
+      fmr::Local_int mesh_n=0, grid_n=0;
+      for(int zone_i=1; zone_i <= zone_n; zone_i++) {
+        ::ZoneType_t zone_type;// grid:structured or mesh:unstructured
+        err= fmr::perf::time_activity<int> (&this->time,
+          cg_zone_type, info.file_cgid, base_i, zone_i,& zone_type );
+        if (!err) {this->time.bytes+= sizeof(zone_type);}
+        int sect_n=0;// count grids/meshes
+        err= fmr::perf::time_activity<int> (&this->time,
+          cg_nsections, info.file_cgid, base_i, zone_i,& sect_n);
+        switch (zone_type) {
+          case ::Structured   : grid_n += sect_n; break;
+          case ::Unstructured : mesh_n += sect_n; break;
+          default : err=1;
+      } }
       // Set cached data vals.
       const auto geomid = this->data->make_data_id (data_id,
         fmr::Data::Geom_info);
@@ -520,6 +540,12 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
         //
         gvals[enum2val(fmr::Geom_info::Part_halo_n)] += fmr::Local_int(conn_n);
         gisok[enum2val(fmr::Geom_info::Part_halo_n)] |= conn_n > 0;
+        //
+        gvals[enum2val(fmr::Geom_info::Mesh_n)] += fmr::Local_int(mesh_n);
+        gisok[enum2val(fmr::Geom_info::Mesh_n)] |= conn_n > 0;
+        //
+        gvals[enum2val(fmr::Geom_info::Grid_n)] += fmr::Local_int(grid_n);
+        gisok[enum2val(fmr::Geom_info::Grid_n)] |= conn_n > 0;
     } }
     info.state.was_read = true;
   }
