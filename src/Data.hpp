@@ -149,11 +149,16 @@ class Data : public Work {//TODO change to File
     fmr::Local_int get_sims_n ();
     virtual std::deque<std::string> get_sims_names ();
     //
-    // int scan (id, Scan_for={Scan::Part,...}, int depth=0);//TODO Needed?
+    int get_dim_vals (const fmr::Data_id id, fmr::Dim_int_vals &);
+    int get_enum_vals (const fmr::Data_id id, fmr::Enum_int_vals &);
     int get_local_vals (const fmr::Data_id id, fmr::Local_int_vals &);
+#if 0
+    int get_global_vals (const fmr::Data_id id, fmr::global_int_vals &);
+#endif
     // int read_local_vals (const std::string id, fmr::Local_int_vals &);
     // int save_local_vals (const std::string id, fmr::Local_int_vals &);
     // int free_local_vals (const std::string id, fmr::Local_int_vals &);
+    // int scan (id, Scan_for={Scan::Part,...}, int depth=0);//TODO Needed?
   protected:// ---------------------------------------------------------------
     //
     int init_task (int* argc, char** argv) override;

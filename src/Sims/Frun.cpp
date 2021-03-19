@@ -25,14 +25,35 @@ namespace Femera {
   int Frun::chck (){
     return 0;
   }
-  int Frun::prep (){int err=0;
+  int Frun::prep () {int err=0;
     fmr::perf::timer_resume (& this->time);
-#if 0
     auto log = this->proc->log;
+    //
+    const std::string name = this->model_name;
+    auto mesh_n = parent->locals.at (fmr::Data::Mesh_n).data [this->sims_ix];
+    //
+#if 1
+    this->enums [fmr::Data::Elem_type]
+      = fmr::Enum_int_vals (fmr::Data::Elem_type, mesh_n,0);
+    this->data->get_enum_vals (name, this->enums.at (fmr::Data::Elem_type));
+    //
+    this->locals [fmr::Data::Node_n]
+      = fmr::Local_int_vals (fmr::Data::Node_n, mesh_n,0);
+    this->data->get_local_vals (name, this->locals.at (fmr::Data::Node_n));
+    //
+    this->locals [fmr::Data::Elem_n]
+      = fmr::Local_int_vals (fmr::Data::Elem_n, mesh_n,0);
+    this->data->get_local_vals (name, this->locals.at (fmr::Data::Elem_n));
+    //
+#endif
+    const auto geom_d
+      = parent->dims.at (fmr::Data::Geom_d).data [this->sims_ix];
+#if 1
     if (log->detail >= this->verblevel) {
       fmr::perf::timer_pause (& this->time);
-      std::string label = this->task_name+" prep";
-      log->label_fprintf (log->fmrout, label.c_str(), "%s:%s_%u %s\n",
+      std::string label = std::to_string(geom_d)+"D "+this->task_name+" prep";
+      log->label_fprintf (log->fmrout, label.c_str(),
+        "%s:%s_%u %s\n",
         parent->model_name.c_str(), this->task_name.c_str(), this->sims_ix,
         this->model_name.c_str());
       fmr::perf::timer_resume (& this->time);

@@ -177,6 +177,78 @@ fmr::Data_id Data::get_id (){fmr::Data_id id = "";//TODO needed?
 fmr::Dim_int Data::get_hier_max (){
   return data_hier_max;
 }
+int Data::get_dim_vals (fmr::Data_id data_id, fmr::Dim_int_vals& vals){
+  int err= 0;
+  auto log = this->proc->log;
+  bool is_found = this->dim_vals.count (data_id) > 0;
+  if (is_found) {
+    vals = this->dim_vals.at (data_id);
+    return err;
+  }
+  const auto names = this->get_sims_names();
+  fmr::Local_int name_i=0;
+  for (auto name : names) {
+    fmr::Data_id cache_id = this->make_data_id (name, fmr::Data::Geom_info);
+    if (this->local_vals.count (cache_id) > 0) {
+      const auto cached = this->local_vals.at (cache_id);
+      if (name_i < vals.data.size()) {
+        fmr::Local_int v=0;
+        switch (vals.type) {
+          case fmr::Data::Geom_d : is_found = true;
+            v = cached.data [enum2val (fmr::Geom_info::Geom_d)]; break;
+          default : is_found = false;
+        }
+        if (is_found) {vals.data [name_i] = fmr::Dim_int(v);}
+    } }
+    name_i++;
+  }
+  if (!is_found) {
+    std::string short_name = (fmr::Data_name.count(vals.type) > 0)
+      ? std::get<1>(fmr::Data_name.at(vals.type))
+      : "(unnamed type "+std::to_string(fmr::enum2val(vals.type))+")";
+    log->label_fprintf (log->fmrerr, "WARN""ING",
+      "Did not find %u %s dim vals for %s.\n",
+      vals.data.size(), short_name.c_str(), data_id.c_str());
+    return 1;
+  }
+  return err;
+}
+int Data::get_enum_vals (fmr::Data_id data_id, fmr::Enum_int_vals& vals){
+  int err= 0;
+  auto log = this->proc->log;
+  bool is_found = this->enum_vals.count (data_id) > 0;
+  if (is_found) {
+    vals = this->enum_vals.at (data_id);
+    return err;
+  }
+  const auto names = this->get_sims_names();
+  fmr::Local_int name_i=0;
+  for (auto name : names) {
+    fmr::Data_id cache_id = this->make_data_id (name, fmr::Data::Geom_info);
+    if (this->enum_vals.count (cache_id) > 0) {
+      const auto cached = this->enum_vals.at (cache_id);
+      if (name_i < vals.data.size()) {
+        fmr::Local_int v=0;
+        switch (vals.type) {
+//          case fmr::Data::Geom_d : is_found = true;
+//            v = cached.data [enum2val (fmr::Geom_info::Geom_d)]; break;
+          default : is_found = false;
+        }
+        if (is_found) {vals.data [name_i] = fmr::Enum_int(v);}
+    } }
+    name_i++;
+  }
+  if (!is_found) {
+    std::string short_name = (fmr::Data_name.count(vals.type) > 0)
+      ? std::get<1>(fmr::Data_name.at(vals.type))
+      : "(unnamed type "+std::to_string(fmr::enum2val(vals.type))+")";
+    log->label_fprintf (log->fmrerr, "WARN""ING",
+      "Did not find %u %s enum vals for %s.\n",
+      vals.data.size(), short_name.c_str(), data_id.c_str());
+    return 1;
+  }
+  return err;
+}
 int Data::get_local_vals (fmr::Data_id data_id, fmr::Local_int_vals& vals){
   int err= 0;
   auto log = this->proc->log;
@@ -210,13 +282,19 @@ int Data::get_local_vals (fmr::Data_id data_id, fmr::Local_int_vals& vals){
   }
   if (!is_found) {
     std::string short_name = (fmr::Data_name.count(vals.type) > 0)
-      ? fmr::Data_name.at(vals.type).first
+      ? std::get<1>(fmr::Data_name.at(vals.type))
       : "(unnamed type "+std::to_string(fmr::enum2val(vals.type))+")";
     log->label_fprintf (log->fmrerr, "WARN""ING",
-      "Did not find %u %s vals for %s.\n",
+      "Did not find %u %s local vals for %s.\n",
       vals.data.size(), short_name.c_str(), data_id.c_str());
     return 1;
   }
+#if 0
+int Data::get_global_vals (fmr::Data_id data_id, fmr::Global_int_vals& vals){
+  int err= 0;
+  return err;
+}
+#endif
 #if 0
   //for (int i=1; 1<this->task.count();
 #if 0

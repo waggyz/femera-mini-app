@@ -146,25 +146,25 @@ namespace Femera {
         fmr::perf::timer_resume (& this->time);
       }
       //TODO XS Data sizing
-      this->dims [fmr::Data::Geom_d] = fmr::Dim_int_vals
-        (fmr::Data::Geom_d, sim_n, 0);
-      this->enums [fmr::Data::Part_type] = fmr::Enum_int_vals (
-        fmr::Data::Part_type, sim_n, fmr::enum2val(this->part_type));
-      this->locals [fmr::Data::Gset_n] = fmr::Local_int_vals
-        (fmr::Data::Gset_n, sim_n,0);
-      this->locals [fmr::Data::Part_n] = fmr::Local_int_vals
-        (fmr::Data::Part_n, sim_n,0);
-      this->locals [fmr::Data::Mesh_n] = fmr::Local_int_vals
-        (fmr::Data::Mesh_n, sim_n,0);
-      this->locals [fmr::Data::Grid_n] = fmr::Local_int_vals
-        (fmr::Data::Grid_n, sim_n,0);
+      this->dims [fmr::Data::Geom_d]
+        = fmr::Dim_int_vals (fmr::Data::Geom_d, sim_n, 0);
+      this->enums [fmr::Data::Part_type] = fmr::Enum_int_vals
+        (fmr::Data::Part_type, sim_n, fmr::enum2val(this->part_type));
+      this->locals [fmr::Data::Gset_n]
+        = fmr::Local_int_vals (fmr::Data::Gset_n, sim_n,0);
+      this->locals [fmr::Data::Part_n]
+        = fmr::Local_int_vals (fmr::Data::Part_n, sim_n,0);
+      this->locals [fmr::Data::Mesh_n]
+        = fmr::Local_int_vals (fmr::Data::Mesh_n, sim_n,0);
+      this->locals [fmr::Data::Grid_n]
+        = fmr::Local_int_vals (fmr::Data::Grid_n, sim_n,0);
       //
-      this->dims [fmr::Data::Phys_d] = fmr::Dim_int_vals
-        (fmr::Data::Phys_d, sim_n,0);
+      this->dims [fmr::Data::Phys_d]
+        = fmr::Dim_int_vals (fmr::Data::Phys_d, sim_n,0);
       this->enums [fmr::Data::Time_type] = fmr::Enum_int_vals
         (fmr::Data::Time_type, sim_n, fmr::enum2val(fmr::Sim_time::Implicit));
-      this->locals [fmr::Data::Mtrl_n] = fmr::Local_int_vals
-        (fmr::Data::Mtrl_n, sim_n,0);
+      this->locals [fmr::Data::Mtrl_n]
+        = fmr::Local_int_vals (fmr::Data::Mtrl_n, sim_n,0);
 #if 0
       this->enums [fmr::Data::Sims_size] = fmr::Enum_int_vals (
         fmr::Data::Sims_size, sim_n, fmr::enum2val(this->sims_size));
@@ -190,54 +190,65 @@ namespace Femera {
         name.c_str());
       return 1;
     }
-#if 1
-    //data->get_dim_vals   (name, this->dims.at   (fmr::Data::Geom_d));
-    //data->get_enum_vals (name, this->locals.at (fmr::Data::Part_type));
-    data->get_local_vals (name, this->locals.at (fmr::Data::Gset_n));
-    data->get_local_vals (name, this->locals.at (fmr::Data::Part_n));
-    data->get_local_vals (name, this->locals.at (fmr::Data::Mesh_n));
-    data->get_local_vals (name, this->locals.at (fmr::Data::Grid_n));
-#endif
+    this->data->get_dim_vals   (name, this->dims.at   (fmr::Data::Geom_d));
+//    this->data->get_enum_vals  (name, this->enums.at  (fmr::Data::Part_type));
+    this->data->get_local_vals (name, this->locals.at (fmr::Data::Gset_n));
+    this->data->get_local_vals (name, this->locals.at (fmr::Data::Part_n));
+    this->data->get_local_vals (name, this->locals.at (fmr::Data::Mesh_n));
+    this->data->get_local_vals (name, this->locals.at (fmr::Data::Grid_n));
+    //
     FMR_PRAGMA_OMP(omp parallel reduction(+:err)) {
       //TODO Handle other sim sizes.
       fmr::Local_int sim_i=0;
-      while (!this->model_list.empty()) {// Run XS sims, FIFO.
+      while (!this->model_list.empty() && !err) {// Run XS sims, FIFO.
         const auto R = this->task.get<Sims>(Psend->get_proc_id());
-        // R is a sim (Frun) if bsz == 1, or a simset (Sims) if bsz > 1
         FMR_PRAGMA_OMP(omp critical) {
-#if 0
-          // first in/last out
-          R->model_name = this->model_list.back();
-          this->model_list.pop_back();
-          sim_i = fmr::Local_int (this->model_list.size());
-#else
-          // first in/first out
-          sim_i = sim_n - fmr::Local_int (this->model_list.size());
-          R->model_name = this->model_list.front();
-          this->model_list.pop_front();
-#endif
+          switch (this->send.plan) {
+            case fmr::Schedule::Fifo :// first in/first out
+              sim_i = sim_n - fmr::Local_int (this->model_list.size());
+              R->model_name = this->model_list.front();
+              this->model_list.pop_front();
+              break;
+            case fmr::Schedule::Filo :// first in/last out
+              R->model_name = this->model_list.back();
+              this->model_list.pop_back();
+              sim_i = fmr::Local_int (this->model_list.size());
+              break;
+            default : err=1;
+          }
+          if (err) {
+            const auto planstr = (fmr::Schedule_name.count(this->send.plan) > 0)
+              ? fmr::Schedule_name.at(this->send.plan)
+              : "unnamed fmr::Schedule "
+                + std::to_string(fmr::enum2val(this->send.plan));
+            log->printf_err (
+              "ERROR Sims distribution plan %s not yet implemented.\n",
+              planstr.c_str());
+          }
           R->sims_ix = sim_i;
         }
-        if (log->detail >= this->verblevel) {
-          fmr::perf::timer_pause (& this->time);
-          std::string label = "Model "+std::to_string(sim_i)+" "+R->task_name;
-          const auto gset_n = this->locals.at (fmr::Data::Gset_n).data[sim_i];
-          const auto part_n = this->locals.at (fmr::Data::Part_n).data[sim_i];
-          const auto mesh_n = this->locals.at (fmr::Data::Mesh_n).data[sim_i];
-          const auto grid_n = this->locals.at (fmr::Data::Grid_n).data[sim_i];
-          log->label_fprintf (log->fmrout, label.c_str(),
-            "%s %u gset%s, %u part%s, %u grid%s, %u mesh%s\n",
-            R->model_name.c_str(),
-            gset_n, (gset_n==1) ? "":"s",
-            part_n, (part_n==1) ? "":"s",
-            grid_n, (grid_n==1) ? "":"s",
-            mesh_n, (mesh_n==1) ? "":"es");
-          fmr::perf::timer_resume (& this->time);
-        }
-        //TODO Should this timing include lower-level runtime?
-        err+= (R->run() > 0) ? 1 : 0;//TODO handle warnings (err<0)?
-      }
-    }//end parallel region
+        if (!err) {
+          if (log->detail >= this->verblevel) {
+            fmr::perf::timer_pause (& this->time);
+            const auto geom_d = this->dims.at   (fmr::Data::Geom_d).data[sim_i];
+            const auto gset_n = this->locals.at (fmr::Data::Gset_n).data[sim_i];
+            const auto part_n = this->locals.at (fmr::Data::Part_n).data[sim_i];
+            const auto mesh_n = this->locals.at (fmr::Data::Mesh_n).data[sim_i];
+            const auto grid_n = this->locals.at (fmr::Data::Grid_n).data[sim_i];
+            std::string label = std::to_string(geom_d)+ "D "
+              + this->task_name+" "+R->task_name;
+            log->label_fprintf (log->fmrout, label.c_str(),
+              "%u:%s %u gset%s, %u part%s, %u grid%s, %u mesh%s\n",
+              sim_i, R->model_name.c_str(),
+              gset_n, (gset_n==1) ? "":"s",
+              part_n, (part_n==1) ? "":"s",
+              grid_n, (grid_n==1) ? "":"s",
+              mesh_n, (mesh_n==1) ? "":"es");
+            fmr::perf::timer_resume (& this->time);
+          }
+          //TODO Should this timing include lower-level runtime?
+          err+= (R->run() > 0) ? 1 : 0;//TODO handle warnings (err<0)?
+    } } }//end parallel region
     fmr::perf::timer_pause (& this->time, sim_n - err);
     if (log->detail >= this->verblevel) {log->print_heading ("Finished");}
     return this->exit (err);

@@ -31,6 +31,10 @@ namespace fmr {
     //use: const auto part_type_n = fmr::enum2val (fmr::Partition::end);
     return static_cast<typename std::underlying_type<E>::type>(e);
   }
+  enum class Valtype : Enum_int { None=0, Error, Unknown,
+    Dim, Enum, Local, Elid, Global,
+    Geom, Phys, Solve, Cond, Post, Plot,
+  end};
   enum class Partition : Enum_int { None=0, Error, Unknown,
     Prepared,// Pre-partitioned
        Merge,// Treat as single partition with 1 mesh/elem type (XS models)
@@ -61,7 +65,7 @@ namespace fmr {
   };
   enum class Schedule : Enum_int { None=0, Error, Unknown,
     Once,
-    List, Block, Interleave, Fifo,
+    List, Block, Interleave, Fifo, Filo,
     Auto,
     Plugin,
   end};
@@ -76,6 +80,7 @@ namespace fmr {
     {Schedule::      Block,"block list"},
     {Schedule:: Interleave,"interleaved list"},
     {Schedule::       Fifo,"first in/first out"},
+    {Schedule::       Filo,"first in/last out"},
     {Schedule::       Auto,"auto-schedule"},
     {Schedule::     Plugin,"scheduler plugin"}
     // * Once: batch size = 1

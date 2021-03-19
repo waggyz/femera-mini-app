@@ -24,11 +24,12 @@ inline int print_datatypes (){
       const auto npair = fmr::Data_name.at (dt);
       name_n++;
 #ifdef FMR_DEBUG
-      printf ("%u %-16s %s\n", i, npair.first.c_str(), npair.second.c_str());
+      printf ("%u %-16s %s\n",
+        i, std::get<1>(npair).c_str(), std::get<2>(npair).c_str());
 #else
       //TODO Write to file.
       fmr::detail::main->proc->log->printf ("%u %-16s %s\n",
-        i, npair.first.c_str(), npair.second.c_str());
+        i, std::get<1>(npair).c_str(), std::get<2>(npair).c_str());
 #endif
   } }
   return name_n;

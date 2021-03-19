@@ -489,8 +489,10 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
         switch (zone_type) {
           case ::Structured   : grid_n += sect_n; break;
           case ::Unstructured : mesh_n += sect_n; break;
-          default : err=1;
-      } }
+          default : err+=1;
+        }
+        //TODO Check for material properties?
+      }
       // Set cached data vals.
       const auto geomid = this->data->make_data_id (data_id,
         fmr::Data::Geom_info);
