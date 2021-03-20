@@ -19,7 +19,11 @@ namespace fmr {//TODO? namespace data {
   end};
   typedef std::unordered_map<Global_int,Local_int> Node_local_map;
   typedef std::unordered_map<Global_int,Local_int> Elem_local_map;
-  enum class Data : Enum_int {None=0, Error, Unknown,// Homogeneous data types
+  enum class Data : Enum_int {
+    None=0, Error, Unknown,
+    // included content from data/vals-type.csv using tools/vals-type.sh
+#include "data-enum.inc"
+#if 0
     Sims_n,                // Local_int
     // Geometry datatypes ----------------------------------------------------
     Gset_n,                // Local_int  [Sims_n]
@@ -42,6 +46,7 @@ namespace fmr {//TODO? namespace data {
     Elem_n,                // Local_int  [Mesh_n]
     Elem_type,             // Enum_int   [Mesh_n]
 #if 0
+    Elem_conn,             // Global/Local_int [Elem_n, Elem_node_n]
     Poly_type,             // Enum_int   [Mesh_n]
     Elem_d, Elem_p,        // Dim_int    [Mesh_n]
     // Elid_int elid = make_elid (elem_form, elem_poly, elem_p);//form is shape
@@ -55,7 +60,6 @@ namespace fmr {//TODO? namespace data {
     Jacs_dets,             // Geom_float [Elem_n, Elem_jacs_n, Jacs_size]
     Node_id,               // Global_int [Node_n]
     Elem_id,               // Global_int [Elem_n]
-    Elem_conn,             // Global/Local_int [Elem_n, Elem_node_n]
     // Build Global_id <=> Local_ix maps while reading Elem_conn<Global_int>.
     //
     // Structured grid data
@@ -63,7 +67,7 @@ namespace fmr {//TODO? namespace data {
     Cell_d,                // Dim_int    [Grid_n]
     Cell_type,             // Enum_int   [Grid_n]
     Grid_dims,             // Local_int  [Grid_n, Cell_d]
-    Cell_dims,             // Geom_float [Grid_n, Cell_d]
+    Cell_size,             // Geom_float [Grid_n, Cell_d]
     // Sync data
     Part_halo_n,           // Local_int  [Sims/Part_n] shared surfaces
     Mesh_halo_n,           // Local_int  [Part_n] shared surfaces
@@ -78,6 +82,7 @@ namespace fmr {//TODO? namespace data {
     // Load and boundary condition datatypes ---------------------------------
     // Solver datatypes ------------------------------------------------------
     // Post-processing datatypes ---------------------------------------------
+#endif
 #if 1
     // Heterogeneous datatypes -----------------------------------------------
     //TODO Remove heterogeneous data types. Add back if sync or distribution
@@ -90,45 +95,95 @@ namespace fmr {//TODO? namespace data {
 #endif
   end};// The last item is "end" to indicate number of enumerated values
 #if 1
-  typedef std::tuple<fmr::Valtype,std::string,std::string> Name_pair;
-#else
-  typedef std::pair<std::string,std::string> Name_pair;
-#endif
-  static const std::map<Data,Name_pair> Data_name {//TODO lowercase ?
-    {Data:: None     , Name_pair{fmr::Valtype::None,"data_none","no data"}},
-    {Data:: Error    , Name_pair{fmr::Valtype::Error,"data_err" ,"data error"}},
-    {Data:: Unknown  , Name_pair{fmr::Valtype::Unknown,"data_unk" ,"unknown data"}},
-    {Data:: Gset_n   , Name_pair{fmr::Valtype::Local,"gset_n"   ,"number of geometry sets"}},
-    {Data:: Geom_d   , Name_pair{fmr::Valtype::Dim,"geom_d"   ,"enclosing space dimension"}},
-    {Data:: Sims_size, Name_pair{fmr::Valtype::Enum,"sims_size","sim size type (enum)"}},
-    {Data:: Part_type, Name_pair{fmr::Valtype::Enum,"part_type","partitioning algorithm (enum)"}},
-    {Data:: Part_n   , Name_pair{fmr::Valtype::Local,"part_n"   ,"number of partititions"}},
-    {Data:: Geom_n   , Name_pair{fmr::Valtype::Local,"geom_n"   ,"number of meshes + grids"}},
-    {Data:: Node_n   , Name_pair{fmr::Valtype::Local,"node_n"   ,"number of nodes"}},
-    {Data:: Node_x   , Name_pair{fmr::Valtype::Geom,"node_x"   ,"node x-ordinates"}},
-    {Data:: Node_y   , Name_pair{fmr::Valtype::Geom,"node_y"   ,"node y-ordinates"}},
-    {Data:: Node_z   , Name_pair{fmr::Valtype::Geom,"node_z"   ,"node z-ordinates"}},
-    {Data:: Node_coor, Name_pair{fmr::Valtype::Geom,"node_coor","node coordinates"}},
-    {Data:: Rots_type, Name_pair{fmr::Valtype::Geom,"rots_type","Orientation type"}},
-    {Data:: Axis_rots, Name_pair{fmr::Valtype::Geom,"axis_rots","Euler angle(s)"}},
-    {Data:: Axis_quat, Name_pair{fmr::Valtype::Geom,"axis_quat","unit quaternian orientation"}},
-    {Data:: Mesh_n   , Name_pair{fmr::Valtype::Local,"mesh_n"   ,"number of unstructured meshes"}},
-    {Data:: Elem_n   , Name_pair{fmr::Valtype::Local,"elem_n"   ,"number of elements"}},
-    {Data:: Elem_type, Name_pair{fmr::Valtype::Enum,"elem_type","element type"}},
-    {Data:: Elem_node_n, Name_pair{fmr::Valtype::Local,"elem_node_n","number of nodes / elem"}},
-    // vrtx+edge+face+body nodes
-    {Data:: Elem_jacs_n, Name_pair{fmr::Valtype::Local,"elem_jacs_n","number of jacobians / elem"}},
-    {Data:: Jacs_type, Name_pair{fmr::Valtype::Enum,"jacs_type","jacobian type"}},
-    {Data:: Jacs_size, Name_pair{fmr::Valtype::Dim,"jacs_size",
-      "number of values in jacobian (including determinants)"}},
-    {Data:: Jacs_dets, Name_pair{fmr::Valtype::Geom,"jacs_dets",
-      "element jacobians and determinants"}},
-#if 0
-    //NOTE must list ALL enum items consecutively or .at lookup might segfault
-    {Data:: Grid_n   , Name_pair{"grid_n"   ,"number of structured grids"}},
-#endif
-    {Data:: end      , Name_pair{fmr::Valtype::None,"END"      ,"Data enum end marker"}}
+  static const std::vector<fmr::Vals_type> vals_type = {
+    fmr::Vals_type::None,
+    fmr::Vals_type::Error,
+    fmr::Vals_type::Unknown,
+#include "vals-type.inc"
+    fmr::Vals_type::Local,
+    fmr::Vals_type::Local,
+    fmr::Vals_type::None
   };
+  static const std::vector<std::string> vals_name = {
+    "data_none",
+    "data_err",
+    "data_unk",
+#include "vals-name.inc"
+    "Geom_info",
+    "Phys_info",
+    "END"
+  };
+  static const std::vector<std::string> vals_info = {
+    "no data",
+    "data error",
+    "unknown data",
+#include "vals-info.inc"
+    "Dim_int, Enum_int, Local_int vals",
+    "physics info",
+    "Data enum end marker"
+  };
+//#else
+  typedef std::tuple<fmr::Vals_type,std::string,std::string> Name_pair;
+  static const std::map<Data,Name_pair> Data_name {//TODO lowercase these maps?
+    {Data:: None        , Name_pair {fmr::Vals_type::None,
+           "data_none"  ,"no data"}},
+    {Data:: Error       , Name_pair {fmr::Vals_type::Error,
+           "data_err"   ,"data error"}},
+    {Data:: Unknown     , Name_pair {fmr::Vals_type::Unknown,
+           "data_unk"   ,"unknown data"}},
+    {Data:: Gset_n      , Name_pair {fmr::Vals_type::Local,
+           "gset_n"     ,"number of geometry sets"}},
+    {Data:: Geom_d      , Name_pair {fmr::Vals_type::Dim,
+           "geom_d"     ,"enclosing space dimension"}},
+    {Data:: Sims_size   , Name_pair {fmr::Vals_type::Enum,
+           "sims_size"  ,"sim size type (enum)"}},
+    {Data:: Part_type   , Name_pair {fmr::Vals_type::Enum,
+           "part_type"  ,"partitioning algorithm (enum)"}},
+    {Data:: Part_n      , Name_pair {fmr::Vals_type::Local,
+           "part_n"     ,"number of partititions"}},
+    {Data:: Geom_n      , Name_pair {fmr::Vals_type::Local,
+           "geom_n"     ,"number of meshes + grids"}},
+    {Data:: Node_n      , Name_pair {fmr::Vals_type::Local,
+           "node_n"     ,"number of nodes"}},
+    {Data:: Node_x      , Name_pair {fmr::Vals_type::Geom,
+           "node_x"     ,"node x-ordinates"}},
+    {Data:: Node_y      , Name_pair {fmr::Vals_type::Geom,
+           "node_y"     ,"node y-ordinates"}},
+    {Data:: Node_z      , Name_pair {fmr::Vals_type::Geom,
+           "node_z"     ,"node z-ordinates"}},
+    {Data:: Node_coor   , Name_pair {fmr::Vals_type::Geom,
+           "node_coor"  ,"node coordinates"}},
+    {Data:: Rots_type   , Name_pair {fmr::Vals_type::Geom,
+           "rots_type"  ,"Orientation type"}},
+    {Data:: Axis_rots   , Name_pair {fmr::Vals_type::Geom,
+           "axis_rots"  ,"Euler angle(s)"}},
+    {Data:: Axis_quat   , Name_pair {fmr::Vals_type::Geom,
+           "axis_quat"  ,"unit quaternian orientation"}},
+    {Data:: Mesh_n      , Name_pair {fmr::Vals_type::Local,
+           "mesh_n"     ,"number of unstructured meshes"}},
+    {Data:: Elem_n      , Name_pair {fmr::Vals_type::Local,
+           "elem_n"     ,"number of elements"}},
+    {Data:: Elem_type   , Name_pair {fmr::Vals_type::Enum,
+           "elem_type"  ,"element type"}},
+    {Data:: Elem_node_n , Name_pair {fmr::Vals_type::Local,
+           "elem_node_n","number of nodes / elem"}},// vrtx+edge+face+body nodes
+    {Data:: Elem_jacs_n , Name_pair {fmr::Vals_type::Local,
+           "elem_jacs_n","number of jacobians / elem"}},
+    {Data:: Jacs_type   , Name_pair {fmr::Vals_type::Enum
+          ,"jacs_type"  ,"jacobian type"}},
+    {Data:: Jacs_size   , Name_pair {fmr::Vals_type::Dim,
+           "jacs_size"  ,"element jacobians and determinants"}},
+    {Data:: Jacs_dets   , Name_pair {fmr::Vals_type::Geom,
+           "jacs_dets"  ,"element jacobian and determinant values"}},
+    {Data:: Node_id     , Name_pair {fmr::Vals_type::Global,
+           "node_id"    ,"node global id"}},
+    {Data:: Elem_id     , Name_pair {fmr::Vals_type::Global,
+           "elem_id"    ,"element global id"}},
+    //NOTE must list ALL enum items consecutively or .at lookup might segfault
+//    {Data:: Grid_n      , Name_pair{"grid_n"   ,"number of structured grids"}},
+    {Data:: end, Name_pair{fmr::Vals_type::None,"END","Data enum end marker"}}
+  };
+#endif
 #if 1
   //TODO Remove these heterogeneous data types. Add back if sync is needed.
   /* Human-readable (enum) index names for heterogenous data types above

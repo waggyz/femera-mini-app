@@ -33,8 +33,8 @@ class Mesh : public Geom {// Pure virtual? Mesh?
     fmr::Global_int_vals node_id// of each node in this part
       = fmr::Global_int_vals (fmr::Data::Node_id, fmr::math::Natural);
     //
-    fmr::Local_int_vals  conn//Elem_conn -> e.g. Conn_tet4
-      = fmr::Local_int_vals  (fmr::Data::Elem_conn, fmr::math::Natural);
+//    fmr::Local_int_vals  conn//Elem_conn -> e.g. Conn_tet4
+//      = fmr::Local_int_vals  (fmr::Data::Elem_conn, fmr::math::Natural);
     //
     fmr::Geom_float_vals jacs// element jacobian data (inverted, may have det)
       = fmr::Geom_float_vals (fmr::Data::Jacs_dets, fmr::math::Real);
@@ -53,11 +53,11 @@ class Mesh : public Geom {// Pure virtual? Mesh?
 #endif
   private:
   public:
-    virtual ~Mesh () noexcept=default;// Virtual destructor for virtual class
-    Mesh (Sims*) noexcept;
-    Mesh ()=delete;
-    Mesh (Mesh const&)=delete;// not copyable
-    Mesh operator= (const Mesh&)=delete;
+    virtual ~Mesh  ()      noexcept=default;
+    Mesh           (Sims*) noexcept;
+    Mesh           ()              =delete;
+    Mesh           (Mesh const&)   =delete;// not copyable
+    Mesh operator= (const Mesh&)   =delete;
 };
 }//end Femera namespace
 #else

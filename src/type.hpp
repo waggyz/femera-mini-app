@@ -31,7 +31,7 @@ namespace fmr {
     //use: const auto part_type_n = fmr::enum2val (fmr::Partition::end);
     return static_cast<typename std::underlying_type<E>::type>(e);
   }
-  enum class Valtype : Enum_int { None=0, Error, Unknown,
+  enum class Vals_type : Enum_int { None=0, Error, Unknown,
     Dim, Enum, Local, Elid, Global,
     Geom, Phys, Solve, Cond, Post, Plot,
   end};
