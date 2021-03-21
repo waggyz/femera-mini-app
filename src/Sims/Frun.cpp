@@ -130,7 +130,8 @@ namespace Femera {
       //TODO Get physics and mtrl props later?
       label = phyd_ok ? std::to_string(phys_d)+" dof " : "? dof ";
       label+="phys";
-      txt = this->model_name+": "+fmr::Sim_time_name.at(sim_time);
+      txt = this->model_name+": "+fmr::get_enum_string (
+        fmr::Sim_time_name, sim_time);
       if (time_ok) {txt+= " analysis";}
       c=", ";
       if (mtrl_ok) {
@@ -175,10 +176,10 @@ namespace Femera {
       const std::string label = "Run "+std::to_string(n)+" part";
       log->label_fprintf (log->fmrout, label.c_str(),
         "%i %s %s / %i %s %s, %s\n",
-        c, fmr::Partition_name.at(this->part_type).c_str(),n==1?"part":"parts",
-        p, P->task_name.c_str(),
-        fmr::Concurrency_name.at(this->send.cncr).c_str(),
-        fmr::Schedule_name.at(this->send.plan).c_str());
+        c, fmr::get_enum_string (fmr::Partition_name, this->part_type).c_str(),
+        n==1?"part":"parts", p, P->task_name.c_str(),
+        fmr::get_enum_string (fmr::Concurrency_name, this->send.cncr).c_str(),
+        fmr::get_enum_string (fmr::Schedule_name, this->send.plan).c_str());
     } }
     Sims* run0 = this->task.first<Sims> (Base_type::Part);
     if (run0) {

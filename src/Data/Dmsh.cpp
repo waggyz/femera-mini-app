@@ -158,6 +158,8 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
   info.format = int(optval);
   if (fmr::detail::format_gmsh_name.count (info.format)) {
     info.version = fmr::detail::format_gmsh_name.at (info.format)+" ";
+//    info.version = fmr::get_enum_string (//TODO Use this.
+//      fmr::detail::format_gmsh_name, info.format)+" ";
     if (info.format == 1) {// .msh format
       std::string strval="";
       gmsh::option::getString ("Mesh.MshFileVersion",strval);

@@ -174,7 +174,8 @@ Data::File_info Dcgn::get_file_info (const std::string fname) {int err=0;
   info.format = (dcgn_format_from_cgns.count (fmt)>0)
     ? dcgn_format_from_cgns.at (fmt) : Dcgn::File_format::Dcgn_unknown;
   info.version = info.version.size()
-    ? info.version : fmr::detail::format_cgns_name.at(info.format);
+    ? info.version
+    : fmr::get_enum_string(fmr::detail::format_cgns_name, info.format);
 //  FMR_PRAGMA_OMP(omp critical) {//TODO thread safety?
     this->file_info [fname] = info;
 //  }// end critical region
@@ -219,7 +220,8 @@ Dcgn::File_cgns Dcgn::open (const std::string fname,
     && !info.state.has_error){
 #if 0
     log->fprintf (log->fmrerr, "NOTE %s is already open in %s mode.\n",
-      fname.c_str(), fmr::data::Access_name.at(info.access).c_str());
+      fname.c_str(),
+      fmr::get_enum_string (fmr::data::Access_name, info.access).c_str());
 #else
     return info;// already open in correct modes
 #endif
@@ -342,7 +344,7 @@ Dcgn::File_cgns Dcgn::open (const std::string fname,
     std::vector<char> buf(16,0);
     std::snprintf (&buf[0],15,"%.1f", double(file_version_cgns));
     info.version = std::string (& buf[0])
-      +" "+fmr::detail::format_cgns_name.at(info.format);;
+      +" "+fmr::get_enum_string (fmr::detail::format_cgns_name, info.format);
     //
     // Get floating-point precision.
     int prec=0; err= cg_precision (info.file_cgid, &prec);
@@ -434,7 +436,8 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
         }
 #ifdef FMR_DEBUG
             this->proc->log->label_fprintf (this->proc->log->fmrout,
-              "CGNS*sim type","%s\n", fmr::Sim_time_name.at(sim_time).c_str());
+              "CGNS*sim type","%s\n",
+              fmr::get_enum_string (fmr::Sim_time_name, sim_time).c_str());
 #endif
       }
       err= fmr::perf::time_activity<int> (&this->time,

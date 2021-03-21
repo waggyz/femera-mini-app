@@ -121,8 +121,8 @@ Data::File_info Data::scan_file_data (Data::Data_file df) {
       const std::string label = this->task_name+" scan file";
       const auto ver = info.version;
       log->label_fprintf (log->fmrout, label.c_str(),"%s %s (%s%s)\n",
-        fmr::data::Access_name.at(info.access).c_str(), fname.c_str(),
-        D->task_name.c_str(), ver.size() ? (" "+ver).c_str() : "");
+        fmr::get_enum_string (fmr::data::Access_name, info.access).c_str(),
+        fname.c_str(), D->task_name.c_str(), ver.size()?(" "+ver).c_str():"");
   } }
   return info;
 }
@@ -177,7 +177,7 @@ fmr::Data_id Data::get_id (){fmr::Data_id id = "";//TODO needed?
 fmr::Dim_int Data::get_hier_max (){
   return data_hier_max;
 }
-int Data::get_dim_vals (fmr::Data_id data_id, fmr::Dim_int_vals& vals){
+int Data::get_dim_vals (fmr::Data_id data_id, fmr::Dim_int_vals& vals) {
   int err= 0;
   auto log = this->proc->log;
   bool is_found = this->dim_vals.count (data_id) > 0;
@@ -358,13 +358,13 @@ int Data::get_global_vals (std::string name, fmr::Tree_path part_tree_id,
 std::deque<std::string> Data::get_sims_names () {
   std::deque<std::string> model_names={};
   for (auto name : this->sims_names) {model_names.push_back (name);}
-  if (this->work_type == work_cast(Base_type::Data)) {
+  if (this->work_type == work_cast (Base_type::Data)) {
     for (int i =0; i < this->task.count(); i++) {
       auto D = this->task.get<Data>(i);
        if (D) {if (D != this) {
         auto names = D->get_sims_names();
         while (!names.empty()){
-          if (this->sims_names.insert(names.back()).second == false) {
+          if (this->sims_names.insert (names.back()).second == false) {
             model_names.push_back (names.back());
           }
           names.pop_back();
@@ -644,7 +644,8 @@ int Data::chck_file_names (std::deque<std::string> files){int err=0;
         if (fname_i==0) {if (log->verbosity >= this->verblevel) {
           std::string label = this->task_name +" info";
           if (log->detail >= this->verblevel) {
-            const std::string mode = fmr::data::Access_name.at(info.access);
+            const std::string mode = fmr::get_enum_string (
+              fmr::data::Access_name, info.access);
             log->label_fprintf (log->fmrout, label.c_str(),
               "%s %i file%s...\n",
               mode.c_str(), fname_n, (fname_n==1)?"":"s");
