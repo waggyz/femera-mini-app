@@ -29,7 +29,7 @@ namespace Femera {
     this-> file_exts ={};// filled in Dmsh::prep ()
     this-> task.add (this);
   }
-  int Dmsh::prep (){int err=0;
+  int Dmsh::prep () {int err=0;
     Dmsh::Optval optval = Dmsh::Optval(0);
 #if 0
     try {gmsh::option:: setNumber("General.AbortOnError",optval); }
@@ -53,7 +53,7 @@ namespace Femera {
         gmsh::option::setNumber ("General.NumThreads",n);
         if (this->proc->log->detail > this->verblevel){
           this->proc->log->label_printf ("Gmsh uses",
-            "up to %g OpenMP threads each\n",n);
+            "up to %g OpenMP threads each.\n",n);
     } } }
 #endif
     FMR_PRAGMA_OMP(omp master) {//TODO omp single nowait ?
@@ -78,8 +78,8 @@ namespace Femera {
     //
     return err;
   }
-  int Dmsh::init_task (int*,char**){int err=0;// init w/out cli args.
-    fmr::perf::timer_start (&this->time);
+  int Dmsh::init_task (int*,char**) {int err=0;// init w/out cli args.
+    fmr::perf::timer_start (& this->time);
     const bool read_gmsh_config = false;
     if (this->is_omp_parallel ()) {
       FMR_PRAGMA_OMP(omp master) {
@@ -89,13 +89,13 @@ namespace Femera {
       gmsh::initialize (0, nullptr, read_gmsh_config);// init w/out cli args.
     }
     this->is_init = true;
-    fmr::perf::timer_pause (&this->time);
+    fmr::perf::timer_pause (& this->time);
     this->prep ();
     return err;
   }
-  int Dmsh::exit_task(int err ){
-    fmr::perf::timer_pause (&this->time);
-    fmr::perf::timer_resume(&this->time);
+  int Dmsh::exit_task (int err){
+    fmr::perf::timer_pause (& this->time);
+    fmr::perf::timer_resume(& this->time);
     if (this->is_init){
       if (this->is_omp_parallel ()){
         FMR_PRAGMA_OMP(omp master) {
@@ -126,24 +126,25 @@ Data::File_info Dmsh::get_file_info (const std::string fname) {
 Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
   fmr::data::Access for_access, Data::Concurrency for_cncr) {
   int err=0;//TODO This loads file data. Do not reload later.
+  auto log = this->proc->log;
 //  FMR_PRAGMA_OMP(omp critical) {//TODO use is_omp_parallel, like below.
   const auto fname = info.data_file.second;
-  fmr::perf::timer_resume (&this->time);
+  fmr::perf::timer_resume (& this->time);
   try {gmsh::open (fname);}
   catch (int e) {
-    fmr::perf::timer_pause (&this->time);
+    fmr::perf::timer_pause (& this->time);
     info.access = fmr::data::Access::Error;
     info.state.has_error = true;
-    this->proc->log->printf_err ("WARN""ING Gmsh could not open %s\n",
+    log->printf_err ("WARN""ING Gmsh could not open %s\n",
       fname.c_str());
     this->file_info[fname] = info;
     return info;
   }
 #ifdef FMR_DEBUG
-  this->proc->log->printf_err ("*** Gmsh opened %s\n", fname.c_str());
+  log->printf_err ("*** Gmsh opened %s\n", fname.c_str());
 #endif
-  fmr::perf::timer_pause (&this->time);
-  if (this->verblevel <= this->proc->log->timing) {
+  fmr::perf::timer_pause (& this->time);
+  if (this->verblevel <= log->timing) {
     struct ::stat stat_buf;
     err = ::stat (fname.c_str(), &stat_buf);
     if (!err) {this->time.bytes += stat_buf.st_size;}
@@ -170,22 +171,22 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
   info.state.was_read   = true;
   info.state.is_default = false;
   switch (info.access) {
-    case fmr::data::Access::Close :{
+    case fmr::data::Access::Close :
       info.state.can_read  = false;
       info.state.can_write = false;
-      break;}
-    case fmr::data::Access::Read :{
+      break;
+    case fmr::data::Access::Read :
       info.state.can_read  = true;
       info.state.can_write = false;
-      break;}
-    case fmr::data::Access::Write :{
+      break;
+    case fmr::data::Access::Write :
       info.state.can_read  = false;
       info.state.can_write = true;
-      break;}
-    case fmr::data::Access::Modify :{
+      break;
+    case fmr::data::Access::Modify :
       info.state.can_read  = true;
       info.state.can_write = true;
-      break;}
+      break;
     default :{}//do nothing
   }
   this->file_info[fname] = info;
@@ -197,11 +198,11 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
 //  info.data_file.second = fname;//TODO redundant?
   if (!info.state.was_read) {
     bool do_open = true;
-    switch (info.access){// Check if already open.
-      case fmr::data::Access::Read   :{}//valid open modes.
-      case fmr::data::Access::Write  :{}
-      case fmr::data::Access::Modify :{do_open = false; break;}
-      default: {do_open = true;}
+    switch (info.access) {// Check if already open.
+      case fmr::data::Access::Read   :// Fall through valid open modes.
+      case fmr::data::Access::Write  :// Fall through....
+      case fmr::data::Access::Modify : do_open = false; break;
+      default : do_open = true;
     }
     if (info.state.has_error) {do_open=true;}// Try to reopen.
     if (do_open) {
