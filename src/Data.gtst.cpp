@@ -6,28 +6,25 @@
 #endif
 using namespace Femera;
 
-inline int check_named_type_size (){
+inline int check_named_type_size (){int err=0;
   const size_t enum_n = size_t (fmr::enum2val (fmr::Data::end));
   const size_t name_n = fmr::vals_name.size() - 1;
   const size_t info_n = fmr::vals_info.size() - 1;
-  if (name_n != enum_n) {
-    printf (//fmr::detail::main->proc->log->printf_err (
+  if (name_n != enum_n) {err+= 1;
+    printf (//fmr::detail::main->proc->log->printf_err (// stderr > /dev/null ?
       "ERROR The size of fmr::vals_name is %lu, but should be %lu.\n",
       name_n, enum_n);
-    return 1;
   }
-  if (name_n != info_n) {
-    printf (//fmr::detail::main->proc->log->printf_err (
+  if (name_n != info_n) {err+= 1;
+    printf (//fmr::detail::main->proc->log->printf_err (// stderr > /dev/null ?
       "ERROR The size of fmr::vals_info is %lu, but should be %lu.\n",
       info_n, enum_n);
-    return 1;
   }
-  return 0;
+  return err;
 }
-inline int print_datatypes (){
+inline fmr::Enum_int print_datatypes (){
   const fmr::Enum_int enum_n = fmr::enum2val (fmr::Data::end);
-  for (fmr::Enum_int i=0; i<enum_n; i++) {
-    if (enum_n>0) {
+  if (enum_n > 0) {for (fmr::Enum_int i=0; i<enum_n; i++) {
 #ifdef FMR_DEBUG
       printf (
 #else
