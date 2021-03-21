@@ -203,10 +203,10 @@ int Data::get_dim_vals (fmr::Data_id data_id, fmr::Dim_int_vals& vals){
     name_i++;
   }
   if (!is_found) {
-    std::string short_name = fmr::vals_name[fmr::enum2val(vals.type)];
+    const std::string namestr = fmr::get_enum_string (fmr::vals_name,vals.type);
     log->label_fprintf (log->fmrerr, "WARN""ING",
       "Did not find %u %s dim vals for %s.\n",
-      vals.data.size(), short_name.c_str(), data_id.c_str());
+      vals.data.size(), namestr.c_str(), data_id.c_str());
     return 1;
   }
   return err;

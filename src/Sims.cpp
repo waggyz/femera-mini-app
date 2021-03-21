@@ -115,9 +115,10 @@ namespace Femera {
           log->label_fprintf (log->fmrout, label.c_str(),
             "%i set%s /  %i %s %s, %s\n",
             fromn, (fromn==1)?" ":"s", fromp, Pfrom->task_name.c_str(),
-            fmr::Concurrency_name.at (this->from.cncr).c_str(),
-            fmr::Schedule_name.at    (this->from.plan).c_str());
-          const auto szshort = fmr::Sim_size_short.at(this->sims_size);
+            fmr::get_enum_string (fmr::Concurrency_name, from.cncr).c_str(),
+            fmr::get_enum_string (fmr::Schedule_name, this->from.plan).c_str());
+          const auto szshort = fmr::get_enum_string (fmr::Sim_size_short,
+            this->sims_size);
           if (fbsz>1) {
             log->label_fprintf (log->fmrout, label.c_str(),
               "%u set%s of %u %s sim%s in%s batch%s\n",
@@ -140,8 +141,8 @@ namespace Femera {
             "%i %s%s /  %i %s %s, %s\n",
             sendn, (bsz>1)?"set":"sim", (sendn==1)?" ":"s",
             sendp, Psend->task_name.c_str(),
-            fmr::Concurrency_name.at (this->send.cncr).c_str(),
-            fmr::Schedule_name.at    (this->send.plan).c_str());
+            fmr::get_enum_string (fmr::Concurrency_name, send.cncr).c_str(),
+            fmr::get_enum_string (fmr::Schedule_name, this->send.plan).c_str());
         }
         fmr::perf::timer_resume (& this->time);
       }
@@ -217,13 +218,9 @@ namespace Femera {
             default : err=1;
           }
           if (err) {
-            const auto planstr = (fmr::Schedule_name.count(this->send.plan) > 0)
-              ? fmr::Schedule_name.at(this->send.plan)
-              : "unnamed fmr::Schedule "
-                + std::to_string(fmr::enum2val(this->send.plan));
             log->printf_err (
               "ERROR Sims distribution plan %s not yet implemented.\n",
-              planstr.c_str());
+              get_enum_string(fmr::Schedule_name, this->send.plan).c_str());
           }
           R->sims_ix = sim_i;
         }

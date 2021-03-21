@@ -21,7 +21,7 @@ namespace fmr {//TODO? namespace data {
   typedef std::unordered_map<Global_int,Local_int> Elem_local_map;
   enum class Data : Enum_int {
     None=0, Error, Unknown,
-    // included content from data/vals-type.csv using tools/vals-type.sh
+    // included content is from data/vals-type.csv using tools/vals-type.sh
 #include "data-enum.inc"
 #if 1
     // Heterogeneous datatypes -----------------------------------------------

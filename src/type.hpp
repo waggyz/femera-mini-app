@@ -3,6 +3,7 @@
 
 #include <typeinfo> // std::underlying_type
 #include <map>
+#include <vector>
 
 #define FMR_TOUCH_VALS_FIRST
 
@@ -156,6 +157,17 @@ namespace fmr {
     By_size, XS, SM, MD, LG, XL
   };
 #endif
+  template <typename T> static const std::string get_enum_string
+    (const std::map<T,std::string> name_map, const T val) {
+    if (name_map.count(val) > 0) {return name_map.at(val);}
+    return "unnamed item "+std::to_string (fmr::enum2val (val));
+  }
+  template <typename T> static const std::string get_enum_string
+   (const std::vector<std::string> name_vec, const T val) {
+    const size_t v = enum2val (val);
+    if (v>=0 && v<name_vec.size()) {return name_vec[v];}
+    return "unnamed item "+std::to_string (v);
+  }
 }//end fmr:: namespace
 namespace fmr {namespace data {
   enum class Access : fmr::Enum_int {Unknown=0, Error,//TODO Find, Scan?
@@ -172,6 +184,7 @@ namespace fmr {namespace data {
     {Access::   Close,"close"}
   };
 } }//end fmr::data:: namespace
+
 #if 0
   //https://stackoverflow.com/questions/18837857/cant-use-enum-class-as-unordered-map-key
   struct int_enum_class_hash {//May not be needed for std::map *_name above.[1]
