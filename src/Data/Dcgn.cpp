@@ -34,7 +34,7 @@ namespace fmr {namespace detail {//TODO move to Femera namespace?
     {Femera::Dcgn::File_format::    Dcgn_ADF2,"ADF2"},
     {Femera::Dcgn::File_format:: Dcgn_unknown,"unknown format"}
   };
-} }
+} }//end fmr::detail:: namespace
 namespace Femera {// header extension: needs cgnslib.h
   //NOTE Use mapname.at(key) to get value, NOT mapname[key].
   static const std::map<int,Dcgn::File_format> dcgn_format_from_cgns ={

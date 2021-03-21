@@ -124,7 +124,7 @@ Data::File_info Dmsh::get_file_info (const std::string fname) {
   return info;
 }
 Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
-  fmr::data::Access for_access, Data::Concurrency for_cncr){
+  fmr::data::Access for_access, Data::Concurrency for_cncr) {
   int err=0;//TODO This loads file data. Do not reload later.
 //  FMR_PRAGMA_OMP(omp critical) {//TODO use is_omp_parallel, like below.
   const auto fname = info.data_file.second;
@@ -140,7 +140,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
     return info;
   }
 #ifdef FMR_DEBUG
-  this->proc->log->printf_err ("*** Gmsh opened %s\n",fname.c_str());
+  this->proc->log->printf_err ("*** Gmsh opened %s\n", fname.c_str());
 #endif
   fmr::perf::timer_pause (&this->time);
   if (this->verblevel <= this->proc->log->timing) {
@@ -149,20 +149,18 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
     if (!err) {this->time.bytes += stat_buf.st_size;}
   }
   Dmsh::Optval optval=Dmsh::Optval(0);
-  gmsh::option::getNumber ("Mesh.Binary",optval);
+  gmsh::option::getNumber ("Mesh.Binary", optval);
   info.encode = (optval > Dmsh::Optval(0))
     ? Data::Encode::Binary : Data::Encode::ASCII;
   std::string encstr = (optval > Dmsh::Optval(0)) ? "binary" : "ASCII";
   //
-  gmsh::option::getNumber ("Mesh.Format",optval);
+  gmsh::option::getNumber ("Mesh.Format", optval);
   info.format = int(optval);
-  if (fmr::detail::format_gmsh_name.count (info.format)) {
+  if (fmr::detail::format_gmsh_name.count (info.format) > 0) {
     info.version = fmr::detail::format_gmsh_name.at (info.format)+" ";
-//    info.version = fmr::get_enum_string (//TODO Use this.
-//      fmr::detail::format_gmsh_name, info.format)+" ";
     if (info.format == 1) {// .msh format
       std::string strval="";
-      gmsh::option::getString ("Mesh.MshFileVersion",strval);
+      gmsh::option::getString ("Mesh.MshFileVersion", strval);
       info.version += strval+" ";
   } }
   info.version += encstr;
