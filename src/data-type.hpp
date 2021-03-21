@@ -118,11 +118,11 @@ namespace fmr {//TODO? namespace data {
     "data error",
     "unknown data",
 #include "vals-info.inc"
-    "Dim_int, Enum_int, Local_int vals",
-    "physics info",
+    "geometry info (Dim_int, Enum_int, Local_int vals)",
+    "physics info (Dim_int, Enum_int, Local_int vals)",
     "Data enum end marker"
   };
-//#else
+#else
   typedef std::tuple<fmr::Vals_type,std::string,std::string> Name_pair;
   static const std::map<Data,Name_pair> Data_name {//TODO lowercase these maps?
     {Data:: None        , Name_pair {fmr::Vals_type::None,

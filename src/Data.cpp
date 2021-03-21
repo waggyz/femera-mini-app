@@ -203,9 +203,13 @@ int Data::get_dim_vals (fmr::Data_id data_id, fmr::Dim_int_vals& vals){
     name_i++;
   }
   if (!is_found) {
-    std::string short_name = (fmr::Data_name.count(vals.type) > 0)
-      ? std::get<1>(fmr::Data_name.at(vals.type))
+#if 0
+    std::string short_name = (fmr::Data__name.count(vals.type) > 0)
+      ? std::get<1>(fmr::Data__name.at(vals.type))
       : "(unnamed type "+std::to_string(fmr::enum2val(vals.type))+")";
+#else
+    std::string short_name = fmr::vals_name[fmr::enum2val(vals.type)];
+#endif
     log->label_fprintf (log->fmrerr, "WARN""ING",
       "Did not find %u %s dim vals for %s.\n",
       vals.data.size(), short_name.c_str(), data_id.c_str());
@@ -239,9 +243,13 @@ int Data::get_enum_vals (fmr::Data_id data_id, fmr::Enum_int_vals& vals){
     name_i++;
   }
   if (!is_found) {
-    std::string short_name = (fmr::Data_name.count(vals.type) > 0)
-      ? std::get<1>(fmr::Data_name.at(vals.type))
+#if 0
+    std::string short_name = (fmr::Data__name.count(vals.type) > 0)
+      ? std::get<1>(fmr::Data__name.at(vals.type))
       : "(unnamed type "+std::to_string(fmr::enum2val(vals.type))+")";
+#else
+    std::string short_name = fmr::vals_name[fmr::enum2val(vals.type)];
+#endif
     log->label_fprintf (log->fmrerr, "WARN""ING",
       "Did not find %u %s enum vals for %s.\n",
       vals.data.size(), short_name.c_str(), data_id.c_str());
@@ -281,9 +289,13 @@ int Data::get_local_vals (fmr::Data_id data_id, fmr::Local_int_vals& vals){
     name_i++;
   }
   if (!is_found) {
-    std::string short_name = (fmr::Data_name.count(vals.type) > 0)
-      ? std::get<1>(fmr::Data_name.at(vals.type))
+#if 0
+    std::string short_name = (fmr::Data__name.count(vals.type) > 0)
+      ? std::get<1>(fmr::Data__name.at(vals.type))
       : "(unnamed type "+std::to_string(fmr::enum2val(vals.type))+")";
+#else
+    std::string short_name = fmr::vals_name[fmr::enum2val(vals.type)];
+#endif
     log->label_fprintf (log->fmrerr, "WARN""ING",
       "Did not find %u %s local vals for %s.\n",
       vals.data.size(), short_name.c_str(), data_id.c_str());
@@ -445,7 +457,8 @@ std::string Data::print_details (){
         log->label_printf (label.c_str(),"%s\n",exts.c_str());
     } }
     std::string label = this->task_name+" vals";
-    log->label_printf (label.c_str(),"%u built-in simulation variables\n",
+    log->label_printf (label.c_str(),
+      "%u built-in simulation variables defined\n",
       fmr::enum2val (fmr::Data::end));
     log->label_printf ("Maximum ints",//TODO Move to build details?
       "%iD, %s, %s local, %s global\n",
