@@ -203,13 +203,7 @@ int Data::get_dim_vals (fmr::Data_id data_id, fmr::Dim_int_vals& vals){
     name_i++;
   }
   if (!is_found) {
-#if 0
-    std::string short_name = (fmr::Data__name.count(vals.type) > 0)
-      ? std::get<1>(fmr::Data__name.at(vals.type))
-      : "(unnamed type "+std::to_string(fmr::enum2val(vals.type))+")";
-#else
     std::string short_name = fmr::vals_name[fmr::enum2val(vals.type)];
-#endif
     log->label_fprintf (log->fmrerr, "WARN""ING",
       "Did not find %u %s dim vals for %s.\n",
       vals.data.size(), short_name.c_str(), data_id.c_str());
@@ -234,7 +228,7 @@ int Data::get_enum_vals (fmr::Data_id data_id, fmr::Enum_int_vals& vals){
       if (name_i < vals.data.size()) {
         fmr::Local_int v=0;
         switch (vals.type) {
-//          case fmr::Data::Geom_d : is_found = true;
+//          case fmr::Data::Geom_d : is_found = true;//TODO
 //            v = cached.data [enum2val (fmr::Geom_info::Geom_d)]; break;
           default : is_found = false;
         }
@@ -243,13 +237,7 @@ int Data::get_enum_vals (fmr::Data_id data_id, fmr::Enum_int_vals& vals){
     name_i++;
   }
   if (!is_found) {
-#if 0
-    std::string short_name = (fmr::Data__name.count(vals.type) > 0)
-      ? std::get<1>(fmr::Data__name.at(vals.type))
-      : "(unnamed type "+std::to_string(fmr::enum2val(vals.type))+")";
-#else
     std::string short_name = fmr::vals_name[fmr::enum2val(vals.type)];
-#endif
     log->label_fprintf (log->fmrerr, "WARN""ING",
       "Did not find %u %s enum vals for %s.\n",
       vals.data.size(), short_name.c_str(), data_id.c_str());
@@ -289,13 +277,7 @@ int Data::get_local_vals (fmr::Data_id data_id, fmr::Local_int_vals& vals){
     name_i++;
   }
   if (!is_found) {
-#if 0
-    std::string short_name = (fmr::Data__name.count(vals.type) > 0)
-      ? std::get<1>(fmr::Data__name.at(vals.type))
-      : "(unnamed type "+std::to_string(fmr::enum2val(vals.type))+")";
-#else
     std::string short_name = fmr::vals_name[fmr::enum2val(vals.type)];
-#endif
     log->label_fprintf (log->fmrerr, "WARN""ING",
       "Did not find %u %s local vals for %s.\n",
       vals.data.size(), short_name.c_str(), data_id.c_str());
