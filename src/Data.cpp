@@ -145,7 +145,7 @@ fmr::Data_id Data::make_data_id (const fmr::Data_id base_path,
   if (tree_type == fmr::Tree_type::Join_part) {
     id += ":P0";
   }else{
-    if(tree_type != fmr::Tree_type::None) {
+    if (tree_type != fmr::Tree_type::None) {
       fmr::Data_id path_sep ="";
       switch (tree_type) {
         case fmr::Tree_type::Mtrl : {path_sep=":C"; break;}
@@ -237,10 +237,10 @@ int Data::get_enum_vals (fmr::Data_id data_id, fmr::Enum_int_vals& vals){
     name_i++;
   }
   if (!is_found) {
-    std::string short_name = fmr::vals_name[fmr::enum2val(vals.type)];
+    const std::string name = fmr::get_enum_string (fmr::vals_name, vals.type);
     log->label_fprintf (log->fmrerr, "WARN""ING",
       "Did not find %u %s enum vals for %s.\n",
-      vals.data.size(), short_name.c_str(), data_id.c_str());
+      vals.data.size(), name.c_str(), data_id.c_str());
     return 1;
   }
   return err;
@@ -277,10 +277,10 @@ int Data::get_local_vals (fmr::Data_id data_id, fmr::Local_int_vals& vals){
     name_i++;
   }
   if (!is_found) {
-    std::string short_name = fmr::vals_name[fmr::enum2val(vals.type)];
+    const std::string name = fmr::get_enum_string (fmr::vals_name, vals.type);
     log->label_fprintf (log->fmrerr, "WARN""ING",
       "Did not find %u %s local vals for %s.\n",
-      vals.data.size(), short_name.c_str(), data_id.c_str());
+      vals.data.size(), name.c_str(), data_id.c_str());
     return 1;
   }
 #if 0
