@@ -83,7 +83,7 @@ Data::File_info Data::scan_file_data (const std::string fname) {
 }
 #if 1
 Data::File_info Data::get_file_info (Data::Data_file data_file) {
-  Data::File_info new_info = Data::File_info ();
+  Data::File_info new_info = Data::File_info ();//TODO get one batch.
   Data* D; std::string fname; std::tie (D,fname) = data_file;
   if (!D) {
     new_info.state.has_error = true;
@@ -117,7 +117,7 @@ Data::File_info Data::scan_file_data (Data::Data_file df) {
   if (D) {
     auto log = this->proc->log;
     info = D->scan_file_data (fname);// Call derived class handler.
-    if (this->verblevel <= log->detail){
+    if (this->verblevel <= log->detail) {
       const std::string label = this->task_name+" scan file";
       const auto ver = info.version;
       log->label_fprintf (log->fmrout, label.c_str(),"%s %s (%s%s)\n",
@@ -190,22 +190,23 @@ int Data::get_dim_vals (fmr::Data_id data_id, fmr::Dim_int_vals& vals) {
   for (auto name : names) {
     fmr::Data_id cache_id = this->make_data_id (name, fmr::Data::Geom_info);
     if (this->local_vals.count (cache_id) > 0) {
-      const auto cached = this->local_vals.at (cache_id);
       if (name_i < vals.data.size()) {
-        fmr::Local_int v=0;
+        fmr::Geom_info key = fmr::Geom_info(0);
+        is_found = true;
         switch (vals.type) {
-          case fmr::Data::Geom_d : is_found = true;
-            v = cached.data [enum2val (fmr::Geom_info::Geom_d)]; break;
+          case fmr::Data::Geom_d : key = fmr::Geom_info::Geom_d; break;
           default : is_found = false;
         }
-        if (is_found) {vals.data [name_i] = fmr::Dim_int(v);}
-    } }
+        if (is_found) {
+          const auto cached = this->local_vals.at (cache_id);
+          vals.data [name_i] = fmr::Dim_int(cached.data [enum2val (key)]);
+    } } }
     name_i++;
   }
   if (!is_found) {
     const std::string namestr = fmr::get_enum_string (fmr::vals_name,vals.type);
-    log->label_fprintf (log->fmrerr, "WARN""ING",
-      "Did not find %u %s dim vals for %s.\n",
+    log->label_fprintf (log->fmrerr, "WARN""ING Data",
+      "%u %s dim vals for %s not found.\n",
       vals.data.size(), namestr.c_str(), data_id.c_str());
     return 1;
   }
@@ -224,22 +225,23 @@ int Data::get_enum_vals (fmr::Data_id data_id, fmr::Enum_int_vals& vals){
   for (auto name : names) {
     fmr::Data_id cache_id = this->make_data_id (name, fmr::Data::Geom_info);
     if (this->enum_vals.count (cache_id) > 0) {
-      const auto cached = this->enum_vals.at (cache_id);
       if (name_i < vals.data.size()) {
-        fmr::Local_int v=0;
+        fmr::Geom_info key = fmr::Geom_info(0);
+        is_found = true;
         switch (vals.type) {
-//          case fmr::Data::Geom_d : is_found = true;//TODO
-//            v = cached.data [enum2val (fmr::Geom_info::Geom_d)]; break;
+//          case fmr::Data::Elem_type : key = fmr::Geom_info::Geom_d; break;
           default : is_found = false;
         }
-        if (is_found) {vals.data [name_i] = fmr::Enum_int(v);}
-    } }
+        if (is_found) {
+          const auto cached = this->enum_vals.at (cache_id);
+          vals.data [name_i] = cached.data [enum2val (key)];
+    } } }
     name_i++;
   }
   if (!is_found) {
     const std::string name = fmr::get_enum_string (fmr::vals_name, vals.type);
-    log->label_fprintf (log->fmrerr, "WARN""ING",
-      "Did not find %u %s enum vals for %s.\n",
+    log->label_fprintf (log->fmrerr, "WARN""ING Data",
+      "%u %s enum vals for %s not found.\n",
       vals.data.size(), name.c_str(), data_id.c_str());
     return 1;
   }
@@ -258,28 +260,26 @@ int Data::get_local_vals (fmr::Data_id data_id, fmr::Local_int_vals& vals){
   for (auto name : names) {
     fmr::Data_id cache_id = this->make_data_id (name, fmr::Data::Geom_info);
     if (this->local_vals.count (cache_id) > 0) {
-      const auto cached = this->local_vals.at (cache_id);
       if (name_i < vals.data.size()) {
-        fmr::Local_int v=0;
+        fmr::Geom_info key = fmr::Geom_info(0);
+        is_found = true;
         switch (vals.type) {
-          case fmr::Data::Gset_n : is_found = true;
-            v = cached.data [enum2val (fmr::Geom_info::Gset_n)]; break;
-          case fmr::Data::Part_n : is_found = true;
-            v = cached.data [enum2val (fmr::Geom_info::Part_n)]; break;
-          case fmr::Data::Mesh_n : is_found = true;
-            v = cached.data [enum2val (fmr::Geom_info::Mesh_n)]; break;
-          case fmr::Data::Grid_n : is_found = true;
-            v = cached.data [enum2val (fmr::Geom_info::Grid_n)]; break;
+          case fmr::Data::Gset_n : key = fmr::Geom_info::Gset_n; break;
+          case fmr::Data::Part_n : key = fmr::Geom_info::Part_n; break;
+          case fmr::Data::Mesh_n : key = fmr::Geom_info::Mesh_n; break;
+          case fmr::Data::Grid_n : key = fmr::Geom_info::Grid_n; break;
           default : is_found = false;
         }
-        if (is_found) {vals.data [name_i] = v;}
-    } }
+        if (is_found) {
+          const auto cached = this->local_vals.at (cache_id);
+          vals.data [name_i] = cached.data [enum2val (key)];
+    } } }
     name_i++;
   }
   if (!is_found) {
     const std::string name = fmr::get_enum_string (fmr::vals_name, vals.type);
-    log->label_fprintf (log->fmrerr, "WARN""ING",
-      "Did not find %u %s local vals for %s.\n",
+    log->label_fprintf (log->fmrerr, "WARN""ING Data",
+      "%u %s local vals for %s not found.\n",
       vals.data.size(), name.c_str(), data_id.c_str());
     return 1;
   }

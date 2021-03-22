@@ -193,13 +193,13 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
   return info;
 }
 Data::File_info Dmsh::scan_file_data (const std::string fname) {
-  auto info = Dmsh::File_gmsh (Data::Data_file (this,fname));
+  auto info = Dmsh::File_gmsh (Data::Data_file (this, fname));
   info = this->file_info.count (fname) ? this->file_info.at (fname) : info;
 //  info.data_file.second = fname;//TODO redundant?
   if (!info.state.was_read) {
     bool do_open = true;
     switch (info.access) {// Check if already open.
-      case fmr::data::Access::Read   :// Fall through valid open modes.
+      case fmr::data::Access::Read   :// Fall through valid open modes...
       case fmr::data::Access::Write  :// Fall through....
       case fmr::data::Access::Modify : do_open = false; break;
       default : do_open = true;

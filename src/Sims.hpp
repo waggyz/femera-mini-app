@@ -20,11 +20,25 @@ class Sims : public Work {// simulation collection manager
   // member variables --------------------------------------------------------
   // this->task contains Frun instances to run sims distributed by this Sims.
   public:
-    // These data storage types are available to all derived classes.
+#if 1
+    /* These data storage types are available to all derived classes.
+     *
+     * Each Sims     data.size = sims_bats_sz * N : N=1 scalars, or array size
+     *
+     * Frun geometry data.size = part_bats_sz * N : partitioned geometry
+     *               data.size = mesh_bats_sz * N : unpartitioned (merged) geom.
+     *
+     * Part geometry data.size = part_bats_sz * N : sub-partitioned geometry
+     *               data.size = mesh_bats_sz * N : terminal partition
+     *
+     * Mesh          data.size = elem_bats_sz * N : element data
+     *               data.size = node_bats_sz * N : node data
+     */
     std::map<fmr::Data,fmr::Dim_int_vals>       dims ={};
     std::map<fmr::Data,fmr::Enum_int_vals>     enums ={};
     std::map<fmr::Data,fmr::Local_int_vals>   locals ={};
     std::map<fmr::Data,fmr::Global_int_vals> globals ={};
+#endif
   public://TODO protected:
     Sims* parent = nullptr;
     std::string model_name ="";// Set in prep(), if not before.
