@@ -142,26 +142,32 @@ fmr::Data_id Data::make_data_id (const fmr::Data_id base_path,
   const fmr::Tree_type tree_type, const fmr::Tree_path branch,
   const fmr::Data data_type) {
   fmr::Data_id id = base_path;
+#if 0
   if (tree_type == fmr::Tree_type::Join_part) {
-    id += ":P0";
+    id += "/Join";
   }else{
+#else
+  if (tree_type != fmr::Tree_type::Join_part) {
+#endif
     if (tree_type != fmr::Tree_type::None) {
       fmr::Data_id path_sep ="";
       switch (tree_type) {
-        case fmr::Tree_type::Mtrl : {path_sep=":C"; break;}
-        case fmr::Tree_type::Sims : {path_sep=":S"; break;}
-        case fmr::Tree_type::Gset : {path_sep=":G"; break;}
-        case fmr::Tree_type::Part : {path_sep=":P"; break;}
-        case fmr::Tree_type::Mesh : {path_sep=":M"; break;}
-        case fmr::Tree_type::Grid : {path_sep=":D"; break;}
-        case fmr::Tree_type::Error: {path_sep="*ERR""OR*"; break;}
-        default : {path_sep=":?";}
+        case fmr::Tree_type::Mtrl  : {path_sep ="/Mtrl"; break;}
+        case fmr::Tree_type::Sims  : {path_sep ="/Sims"; break;}
+        case fmr::Tree_type::Gset  : {path_sep ="/Gset"; break;}
+        case fmr::Tree_type::Part  : {path_sep ="/Part"; break;}
+        case fmr::Tree_type::Mesh  : {path_sep ="/Mesh"; break;}
+        case fmr::Tree_type::Grid  : {path_sep ="/Grid"; break;}
+        case fmr::Tree_type::Error : {path_sep ="/*ERR""OR*"; break;}
+        default : {path_sep="/unknown_tree_type:";}
       }
-      for (size_t i=0; i<branch.size(); i++){
-        id += path_sep + std::to_string (branch[i]);
-  } } }
+      const auto n = branch.size();
+      if (n>0) {for (size_t i=0; i<n; i++) {
+        id += path_sep +":"+ std::to_string (branch[i]);
+        path_sep = "";
+  } } } }
   if (data_type != fmr::Data::None) {
-    id += ":T" + std::to_string (fmr::enum2val (data_type));
+    id += ":" + fmr::vals_name [fmr::enum2val (data_type)];
   }
   return id;
 }
@@ -206,8 +212,8 @@ int Data::get_dim_vals (fmr::Data_id data_id, fmr::Dim_int_vals& vals) {
   if (!is_found) {
     const std::string namestr = fmr::get_enum_string (fmr::vals_name,vals.type);
     log->label_fprintf (log->fmrerr, "WARN""ING Data",
-      "%u %s dim vals for %s not found.\n",
-      vals.data.size(), namestr.c_str(), data_id.c_str());
+      "%u %s:%s dim vals not found.\n",
+      vals.data.size(), data_id.c_str(), namestr.c_str());
     return 1;
   }
   return err;
@@ -241,8 +247,8 @@ int Data::get_enum_vals (fmr::Data_id data_id, fmr::Enum_int_vals& vals){
   if (!is_found) {
     const std::string name = fmr::get_enum_string (fmr::vals_name, vals.type);
     log->label_fprintf (log->fmrerr, "WARN""ING Data",
-      "%u %s enum vals for %s not found.\n",
-      vals.data.size(), name.c_str(), data_id.c_str());
+      "%u %s:%s enum vals not found.\n",
+      vals.data.size(), data_id.c_str(), name.c_str());
     return 1;
   }
   return err;
@@ -279,8 +285,8 @@ int Data::get_local_vals (fmr::Data_id data_id, fmr::Local_int_vals& vals){
   if (!is_found) {
     const std::string name = fmr::get_enum_string (fmr::vals_name, vals.type);
     log->label_fprintf (log->fmrerr, "WARN""ING Data",
-      "%u %s local vals for %s not found.\n",
-      vals.data.size(), name.c_str(), data_id.c_str());
+      "%u %s:%s local vals not found.\n",
+      vals.data.size(), data_id.c_str(), name.c_str());
     return 1;
   }
 #if 0

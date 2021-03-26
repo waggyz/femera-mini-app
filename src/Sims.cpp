@@ -9,7 +9,7 @@ namespace Femera {
   Sims::Sims (Proc* P, Data* D) noexcept{ this->proc=P; this->data=D;
     this->work_type = work_cast (Base_type::Sims);
     this->task_name ="Sims";
-    this->verblevel = 6;
+    this->verblevel = 2;
     this->meter_unit="sim";
     //this-> parent = this;//TODO leave as nullptr or set to this?
   }
@@ -146,34 +146,34 @@ namespace Femera {
         }
         fmr::perf::timer_resume (& this->time);
       }
-      //TODO XS Data sizing
-      this->dims [fmr::Data::Geom_d]
-        = fmr::Dim_int_vals (fmr::Data::Geom_d, sim_n, 0);
-      this->enums [fmr::Data::Part_type] = fmr::Enum_int_vals
-        (fmr::Data::Part_type, sim_n, fmr::enum2val(this->part_type));
-      this->locals [fmr::Data::Gset_n]
-        = fmr::Local_int_vals (fmr::Data::Gset_n, sim_n,0);
-      this->locals [fmr::Data::Part_n]
-        = fmr::Local_int_vals (fmr::Data::Part_n, sim_n,0);
-      this->locals [fmr::Data::Mesh_n]
-        = fmr::Local_int_vals (fmr::Data::Mesh_n, sim_n,0);
-      this->locals [fmr::Data::Grid_n]
-        = fmr::Local_int_vals (fmr::Data::Grid_n, sim_n,0);
-      //
-      this->dims [fmr::Data::Phys_d]
-        = fmr::Dim_int_vals (fmr::Data::Phys_d, sim_n,0);
-      this->enums [fmr::Data::Time_type] = fmr::Enum_int_vals
-        (fmr::Data::Time_type, sim_n, fmr::enum2val(fmr::Sim_time::Implicit));
-      this->locals [fmr::Data::Mtrl_n]
-        = fmr::Local_int_vals (fmr::Data::Mtrl_n, sim_n,0);
 #if 0
+      this->enums  [fmr::Data::Sims_type] = fmr::Enum_int_vals (//  Collection
+        fmr::Data::Sims_type, sims_n, enum2val (fmr::Sims_type::TODO));// type
+      //TODO XS Data sizing
       this->enums [fmr::Data::Sims_size] = fmr::Enum_int_vals (
-        fmr::Data::Sims_size, sim_n, fmr::enum2val(this->sims_size));
+        fmr::Data::Sims_size, sim_n, fmr::enum2val (this->sims_size));
       this->locals [fmr::Data::Part_halo_n] = fmr::Local_int_vals (
         fmr::Data::Part_halo_n, sim_n,0);
-      this->enums  [fmr::Data::Sims_type] = fmr::Enum_int_vals  (
-        fmr::Data::Sims_type, sim_n, enum2val(fmr::Sim_type::TODO));
 #endif
+      this->dims [fmr::Data::Geom_d]
+        = fmr::Dim_int_vals (fmr::Data::Geom_d, sim_n);
+      this->enums [fmr::Data::Part_type] = fmr::Enum_int_vals
+        (fmr::Data::Part_type, sim_n, fmr::enum2val (this->part_type));
+      this->locals [fmr::Data::Gset_n]
+        = fmr::Local_int_vals (fmr::Data::Gset_n, sim_n);
+      this->locals [fmr::Data::Part_n]
+        = fmr::Local_int_vals (fmr::Data::Part_n, sim_n);
+      this->locals [fmr::Data::Mesh_n]
+        = fmr::Local_int_vals (fmr::Data::Mesh_n, sim_n);
+      this->locals [fmr::Data::Grid_n]
+        = fmr::Local_int_vals (fmr::Data::Grid_n, sim_n);
+      //
+      this->dims [fmr::Data::Phys_d]
+        = fmr::Dim_int_vals (fmr::Data::Phys_d, sim_n);
+      this->enums [fmr::Data::Time_type] = fmr::Enum_int_vals
+        (fmr::Data::Time_type, sim_n, fmr::enum2val (fmr::Sim_time::Implicit));
+      this->locals [fmr::Data::Mtrl_n]
+        = fmr::Local_int_vals (fmr::Data::Mtrl_n, sim_n);
       fmr::perf::timer_pause (& this->time);
     }
     return err;
@@ -201,8 +201,10 @@ namespace Femera {
     FMR_PRAGMA_OMP(omp parallel reduction(+:err)) {
       //TODO Handle other sim sizes.
       fmr::Local_int sim_i=0;
-      while (!this->model_list.empty() && !err) {// Run XS sims, FIFO.
-        const auto R = this->task.get<Sims>(Psend->get_proc_id());
+      const auto R = this->task.get<Sims>(Psend->get_proc_id());
+      bool do_abort = false;
+      while (!this->model_list.empty() && !do_abort) {// Run XS sims, FIFO.
+        do_abort = false;
         FMR_PRAGMA_OMP(omp critical) {
           switch (this->send.plan) {
             case fmr::Schedule::Fifo :// first in/first out
@@ -215,16 +217,13 @@ namespace Femera {
               this->model_list.pop_back();
               sim_i = fmr::Local_int (this->model_list.size());
               break;
-            default : err=1;
-          }
-          if (err) {
-            log->printf_err (
-              "ERROR Sims distribution plan %s not yet implemented.\n",
-              get_enum_string(fmr::Schedule_name, this->send.plan).c_str());
-          }
+            default : do_abort = true;
+              log->printf_err (
+                "ERROR Sims distribution plan %s not yet implemented.\n",
+                get_enum_string(fmr::Schedule_name, this->send.plan).c_str());
+        } }//end critical region
+        if (!do_abort) {
           R->sims_ix = sim_i;
-        }
-        if (!err) {
           if (log->detail >= this->verblevel) {
             fmr::perf::timer_pause (& this->time);
             const auto geom_d = this->dims.at   (fmr::Data::Geom_d).data[sim_i];
@@ -243,12 +242,16 @@ namespace Femera {
               mesh_n, (mesh_n==1) ? "":"es");
             fmr::perf::timer_resume (& this->time);
           }
-          //TODO Should this timing include lower-level runtime?
-          err+= (R->run() > 0) ? 1 : 0;//TODO handle warnings (err<0)?
+        //TODO Should this timing include lower-level runtime?
+        err+= (R->run() > 0) ? 1 : 0;//TODO handle warnings (err<0)?
     } } }//end parallel region
     fmr::perf::timer_pause (& this->time, sim_n - err);
     if (log->detail >= this->verblevel) {log->print_heading ("Finished");}
-    return this->exit (err);
+#if 0
+    return err;
+#else
+    return this->exit (err);//TODO barrier?
+#endif
   }
   int Sims::exit_task (int err) {
 #ifdef FMR_DEBUG

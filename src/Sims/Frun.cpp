@@ -18,8 +18,8 @@ namespace Femera {
 //    this-> base_type = work_cast (Base_type::Sims);// TODO Remove?
     this->  task_name ="Frun";
     this-> model_name ="(sim runner)";
-    this->  verblevel = 7;
-    this->  part_type = fmr::Partition::Merge;
+    this->  verblevel = 3;
+    this->  part_type = fmr::Partition::Join;
     this-> meter_unit ="sim";
   }
   int Frun::chck (){
@@ -30,36 +30,42 @@ namespace Femera {
     auto log = this->proc->log;
     //
     const std::string name = this->model_name;
-    auto mesh_n = parent->locals.at (fmr::Data::Mesh_n).data [this->sims_ix];
-    //
 #if 1
-    this->enums [fmr::Data::Elem_type]
-      = fmr::Enum_int_vals (fmr::Data::Elem_type, mesh_n,0);
-    this->data->get_enum_vals (name, this->enums.at (fmr::Data::Elem_type));
-    //
-    this->locals [fmr::Data::Node_n]
-      = fmr::Local_int_vals (fmr::Data::Node_n, mesh_n,0);
-    this->data->get_local_vals (name, this->locals.at (fmr::Data::Node_n));
-    //
-    this->locals [fmr::Data::Elem_n]
-      = fmr::Local_int_vals (fmr::Data::Elem_n, mesh_n,0);
-    this->data->get_local_vals (name, this->locals.at (fmr::Data::Elem_n));
-    //
-#endif
     const auto geom_d
       = parent->dims.at (fmr::Data::Geom_d).data [this->sims_ix];
-#if 1
+    const auto time_type = fmr::Sim_time (
+      parent->enums.at (fmr::Data::Time_type).data [this->sims_ix]);
     if (log->detail >= this->verblevel) {
       fmr::perf::timer_pause (& this->time);
       std::string label = std::to_string(geom_d)+"D "+this->task_name+" prep";
       log->label_fprintf (log->fmrout, label.c_str(),
-        "%s:%s_%u %s\n",
+        "%s:%s_%u %s time-%s\n",
         parent->model_name.c_str(), this->task_name.c_str(), this->sims_ix,
-        this->model_name.c_str());
+        this->model_name.c_str(), fmr::Sim_time_name.at(time_type).c_str());
       fmr::perf::timer_resume (& this->time);
     }
 #endif
-    //TODO new Geom, get mesh data
+//TODO auto grid_n = parent->locals.at (fmr::Data::Grid_n).data [this->sims_ix];
+    auto mesh_n = parent->locals.at (fmr::Data::Mesh_n).data [this->sims_ix];
+    //
+    this->enums [fmr::Data::Elem_type]
+      = fmr::Enum_int_vals (fmr::Data::Elem_type, mesh_n);
+    this->data->get_enum_vals (name, this->enums.at (fmr::Data::Elem_type));
+    //
+    this->locals [fmr::Data::Node_n]
+      = fmr::Local_int_vals (fmr::Data::Node_n, mesh_n);
+    this->data->get_local_vals (name, this->locals.at (fmr::Data::Node_n));
+    //
+    this->locals [fmr::Data::Elem_n]
+      = fmr::Local_int_vals (fmr::Data::Elem_n, mesh_n);
+    this->data->get_local_vals (name, this->locals.at (fmr::Data::Elem_n));
+    //
+    //TODO new Geom/Mesh/Grid, get mesh data
+    if (mesh_n > 0) {
+      const auto send_type = work_cast (Plug_type::Mesh);
+      for (fmr::Local_int i=0; i < mesh_n; i++) {// add initial tasks
+        err= fmr::detail::main->add_new_task (send_type, this);
+    } }
 #if 0
     this->data_id
       = this->data->make_data_id (this->model_name, fmr::Tree_type::Sims,{});
@@ -140,7 +146,7 @@ namespace Femera {
       log->label_fprintf (this->proc->log->fmrout, label.c_str(), txt.c_str());
     }
     this->task.add (new Part(this));
-    if (this->part_type == fmr::Partition::Merge) {
+    if (this->part_type == fmr::Partition::Join) {
       this->model_list.push_front("(merged part)");
     }else{
       this->model_list.push_front("(part 1)");
@@ -151,12 +157,28 @@ namespace Femera {
   }
   int Frun::run () {int err=0;
     fmr::perf::timer_resume (& this->time);
+    const auto log = this->proc->log;
     err= this->prep ();
+    const auto send_type = work_cast (Plug_type::Mesh);
+    const auto mesh_n = this->task.count (send_type);
+    if (mesh_n > 0) {
+      for (int i=0; i < mesh_n; i++) {// Run serially.
+        const auto M = this->task.get<Mesh>(i);
+        if (M) {
+          M->sims_ix = i;
+          M->model_name
+            = this->model_name + ":" + M->task_name+"_"+std::to_string(i);
+          err= M->prep ();
+          err++;
+        }else{
+          log->printf_err("ERROR %s %s mesh %iis NULL.\n",
+            this->task_name.c_str(), this->model_name.c_str(), i);
+    } } }
 #if 1
-    // quick estimate of solve time
-    double dof   = 10e3;//TODO Get this from current sim
-    double iters = 0.01 * dof;
-    double speed =  1e9 / 40.0;// dof/s Skylake XS sim solve speed
+    // rough estimate of solve time
+    const double dof   = 10e3;//TODO Get this from current sim
+    const double iters = 0.01 * dof;
+    const double speed =  1e9 / 40.0;// dof/s Skylake XS sim solve speed
     usleep (int(1e6 * iters * dof / speed));
 #endif
 #if 0
@@ -190,8 +212,17 @@ namespace Femera {
     }
 #endif
     //...
+#if 1
+    if (mesh_n > 0) {
+      for (int i=0; i < mesh_n; i++) {//TODO need barrier before this?
+        const auto M = this->task.get<Mesh>(i);
+        if (M) {err= M->exit (err);}
+    } }
     fmr::perf::timer_resume (& this->time);
-    return this->exit(err);
+    return this->exit(err);//TODO need barrier before this?
+#else
+  return err;
+#endif
   }
 #if 0
   int Frun::init_task (int*, char**){int err=0;//TODO call this?

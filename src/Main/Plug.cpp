@@ -106,6 +106,9 @@ namespace Femera{
 //        Sims* F = static_cast<Sims*>(add_to);
 //        if (F) { W = new Part (F, F->get_part_n()); }
 //        break;}
+      case int(work_cast(Femera::Plug_type::Mesh)) :{
+        W = new Mesh (static_cast<Sims*>(add_to));
+        break;}
       default: {
         this->proc->log->label_fprintf(this->proc->log->fmrerr,"WARNING Plug",
           "add_new_task: unknown Work_type::%i\n", int(type));

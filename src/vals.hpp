@@ -29,11 +29,11 @@ namespace fmr {
     // constructors
     Vals (){}
     Vals (const Data);
-    Vals (const Data, T init_val);
-    Vals (const Data, const Global_int sz, T init_val);
+    Vals (const Data, Global_int size);
+    Vals (const Data, const Global_int size, T init_val);
     Vals (const Data, const math::Zomplex);
-    Vals (const Data, const math::Zomplex, const Global_int sz);
-    Vals (const Data, const math::Zomplex, const Global_int sz, const T init);
+    Vals (const Data, const math::Zomplex, const Global_int size);
+    Vals (const Data, const math::Zomplex, const Global_int size, const T init);
   };
   typedef struct Vals<Dim_int>       Dim_int_vals;
   typedef struct Vals<Enum_int>     Enum_int_vals;
@@ -54,35 +54,39 @@ namespace fmr {
   template <typename T> Vals<T>::Vals (const Data t)
   : type(t) {
     const bool was_found = Data_size.count(t) > 0;
-    algebra       = was_found ? Data_size.at(t).algebra : algebra;
+    algebra  = was_found ? Data_size.at(t).algebra : algebra;
     const auto sz = was_found ? Data_size.at(t).size : 0;
     if (sz>0) {
       const auto o = algebra.order
         -( algebra.algebra == fmr::math::Algebra::Complex
         && algebra.layout  == fmr::data::Layout::Native
         && algebra.order > 0 ) ? 1:0;
-      data.resize (sz << o);//TODO handle OTI sizing?
+      if (was_found) {
+        data.resize (sz << o, T(0));
+      }else{
+        data.resize (sz << o);//TODO handle OTI sizing?
 #ifdef FMR_TOUCH_VALS_FIRST
-      data[0]=T(0);
+        data[0]=T(0);
 #endif
-  } }
-  template <typename T> Vals<T>::Vals (const Data t, T init_val)
+  } } }
+  template <typename T> Vals<T>::Vals (const Data t, const Global_int sz)
   : type(t) {
     const bool was_found = Data_size.count(t) > 0;
-    algebra       = was_found ? Data_size.at(t).algebra : algebra;
-    const auto sz = was_found ? Data_size.at(t).size : 0;
-    if (sz>0) {
+    algebra  = was_found ? Data_size.at(t).algebra : algebra;
+    if (sz==0) {
+      data.resize (0);
+    }else{
       const auto o = algebra.order
         -( algebra.algebra == fmr::math::Algebra::Complex
         && algebra.layout  == fmr::data::Layout::Native
         && algebra.order > 0 ) ? 1:0;
-      data.resize (sz << o, init_val);
+      data.resize (sz << o);
   } }
-  template <typename T> Vals<T>::Vals (
-  const Data t, const Global_int sz, T init_val)
+  template <typename T> Vals<T>::Vals (const Data t,
+  const Global_int sz, T init_val)
   : type(t) {
     const bool was_found = Data_size.count(t) > 0;
-    algebra       = was_found ? Data_size.at(t).algebra : algebra;
+    algebra  = was_found ? Data_size.at(t).algebra : algebra;
     if (sz==0) {
       data.resize (0);
     }else{

@@ -225,7 +225,7 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
     //
     const bool is_found = data->local_vals.count(gid) > 0;
     if (!is_found) {
-      data->local_vals[gid] = fmr::Local_int_vals (fmr::Data::Geom_info,0);
+      data->local_vals[gid] = fmr::Local_int_vals (fmr::Data::Geom_info);
     }
 #if 0
     const auto physid = make_data_id (data_id,
@@ -243,7 +243,7 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
       auto geom_d = fmr::Local_int(gd);
       //
       fmr::Local_int mesh_n = 0;
-      // Each elem type is at least one different Femera mesh.
+      // Each elem type is at least one different Femera Mesh.
       //TODO What about 1D elements?
       gmsh::option::getNumber ("Mesh.NbTriangles", optval);// TODO cache these?
       mesh_n += (optval>Dmsh::Optval(0)) ? 1 : 0;

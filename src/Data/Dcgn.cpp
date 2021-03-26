@@ -478,7 +478,7 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
       // Element types are in sections.
       // However, synchronization information (halo nodes, rind) is stored at
       // the Part (CGNS Zone) level.
-      //NOTE This only needs to be read now for Partition::Merge
+      //NOTE This only needs to be read now for Partition::Join
       //TODO Move to get_info(part_id,..)
       fmr::Local_int mesh_n=0, grid_n=0;
       for(int zone_i=1; zone_i <= zone_n; zone_i++) {
@@ -504,11 +504,11 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
       for (Data* D : std::vector<Data*> ({this->data})) {//TODO
         const bool is_geomid_found = D->local_vals.count(geomid) > 0;
         if (!is_geomid_found) {
-          D->local_vals[geomid] = fmr::Local_int_vals (fmr::Data::Geom_info,0);
+          D->local_vals[geomid] = fmr::Local_int_vals (fmr::Data::Geom_info);
         }
         const bool is_physid_found = D->local_vals.count(physid) > 0;
         if (!is_physid_found) {
-          D->local_vals[physid] = fmr::Local_int_vals (fmr::Data::Phys_info,0);
+          D->local_vals[physid] = fmr::Local_int_vals (fmr::Data::Phys_info);
         }
         auto gvals =& D->local_vals[geomid].data[0];
         auto gisok =& D->local_vals[geomid].isok[0];

@@ -44,16 +44,16 @@ class Sims : public Work {// simulation collection manager
     std::string model_name ="";// Set in prep(), if not before.
     std::deque<std::string> model_list ={};
     //
-    fmr::Distribute from
-      ={1,fmr::Schedule::List,fmr::Concurrency::Independent};
-    //TODO from => here ?
-    fmr::Distribute send ={2,fmr::Schedule::Fifo,fmr::Concurrency::Independent};
+    fmr::Distribute from//TODO from => here ?
+      = {1, fmr::Schedule::List, fmr::Concurrency::Independent};
+    fmr::Distribute send
+      = {2, fmr::Schedule::Fifo, fmr::Concurrency::Independent};
     //
+    fmr::Local_int sims_ix = 0;// collection number
     fmr::Sim_size sims_size = fmr::Sim_size::XS;//TODO fmr::Sim_size::Unknown
   protected:
     fmr::Partition  part_type = fmr::Partition::None;
     //
-    fmr::Local_int sims_ix = 0;// collection number
     fmr::Dim_int   tree_lv = 0;// sim/sim collection depth
   // methods -----------------------------------------------------------------
   public:

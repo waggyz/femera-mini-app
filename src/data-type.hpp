@@ -6,6 +6,7 @@
 #include <valarray>
 #include <map>
 #include <unordered_map>
+#include <array>
 #include <functional>        // std::hash
 
 namespace fmr {//TODO? namespace data {
@@ -33,8 +34,8 @@ namespace fmr {//TODO? namespace data {
     Geom_info,// Dim_int, Enum_int, Local_int vals
     Phys_info,// Combine with Geom_info as Part_info?
 #endif
-  end};// The last item is "end" to indicate number of enumerated values
-  static const std::vector<fmr::Vals_type> vals_type = {
+  end};// The last item is "end" to indicate the number of enumerated values.
+  static const std::array<Vals_type,enum2val(Data::end)+1> vals_type ={
     fmr::Vals_type::None,
     fmr::Vals_type::Error,
     fmr::Vals_type::Unknown,
@@ -43,29 +44,30 @@ namespace fmr {//TODO? namespace data {
     fmr::Vals_type::Local,
     fmr::Vals_type::None
   };
-  static const std::vector<std::string> vals_name = {
+  static const std::array<std::string,enum2val(Data::end)+1> vals_name ={
     "data_none",
     "data_err",
     "data_unk",
 #include "vals-name.inc"
-    "Geom_info",
-    "Phys_info",
+    "Geom_info",//TODO Remove these heterogeneous data types.
+    "Phys_info",//     Add back if sync is needed.
     "END"
   };
-  static const std::vector<std::string> vals_info = {
+  static const std::array<std::string,enum2val(Data::end)+1> vals_info ={
     "no data",
     "data error",
     "unknown data",
 #include "vals-info.inc"
-    "geometry info (Dim_int, Enum_int, Local_int vals)",
-    "physics info (Dim_int, Enum_int, Local_int vals)",
+    "geometry info (Dim_int, Enum_int, Local_int) vals",
+    "physics info (Dim_int, Enum_int, Local_int) vals",
     "Data enum end marker"
   };
 #if 1
-  //TODO Remove these heterogeneous data types. Add back if sync is needed.
+  //TODO Remove these heterogeneous data types. Add back if needed.
   /* Human-readable (enum) index names for heterogenous data types above
-   * isok: for packing a bit array indicating which items have valid data
-   * The last item is always "end" to indicate size in the Data_size map below.
+   * isok: for packing a bit array indicating which items have valid data.
+   * The last item is always "end" to indicate the count of enum items for the
+   * Data_size map below.
   */
   enum class Geom_info : Enum_int {isok=0,// Use for Sims and Part data.
     Gset_n, Part_n, Mesh_n, Grid_n,       // Local_int
@@ -77,7 +79,7 @@ namespace fmr {//TODO? namespace data {
     Sim_time,// Enum_int
     Phys_d,  // Dim_int
   end};
-  struct Math_size {// Size and algebra type of data.
+  struct Math_size {// Size and algebra type of data elements.
     size_t           size = 0;
     math::Zomplex algebra = math::Real;
     // constructor
@@ -85,7 +87,7 @@ namespace fmr {//TODO? namespace data {
   };
   //NOTE For compile-time lookup use Data_size.at(type),
   //     NOT Data_size[type] nor Data_size.find(type).
-  static const std::map<Data, Math_size> Data_size {//TODO Remove.
+  static const std::map<Data,Math_size> Data_size {//TODO Remove.
     // for heterogeneous data
     {Data::Geom_info, Math_size(math::Natural, enum2val (Geom_info::end))},
     {Data::Phys_info, Math_size(math::Natural, enum2val (Phys_info::end))}

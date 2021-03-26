@@ -43,8 +43,9 @@ class Mesh : public Geom {// Pure virtual? Mesh?
       = fmr::Geom_float_vals (fmr::Data::Node_coor, fmr::math::Real);
   // methods ----------------------------------------------------------------
   public:
-    int chck () override;
-    int run  () override;
+    int prep () final override;
+    int chck () final override;
+    int run  () final override;
   protected:
 #if 0
     int prep () override;

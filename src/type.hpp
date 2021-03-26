@@ -38,7 +38,7 @@ namespace fmr {
   end};
   enum class Partition : Enum_int { None=0, Error, Unknown,
     Prepared,// Pre-partitioned
-       Merge,// Treat as single partition with 1 mesh/elem type (XS models)
+        Join,// Treat as single partition (XS models)
         Mtrl,// One partition for each material
         Geom,// One partition for each element/cell type
         Elem,// Each partition is a sequential list of elements//TODO batch_sz
@@ -55,7 +55,7 @@ namespace fmr {
     {Partition::    Error,"partitioning error"},
     {Partition::  Unknown,"unknown partitioning"},
     {Partition:: Prepared,"pre-partitioned"},
-    {Partition::    Merge,"merged"},
+    {Partition::     Join,"merged"},
     {Partition::     Mtrl,"partition by material"},
     {Partition::     Geom,"partition by element type"},
     {Partition::     Elem,"partition by element id"},//TODO needs bin_size
@@ -116,9 +116,9 @@ namespace fmr {
     Implicit,// Not time-accurate
   end};
   static const std::map<Sim_time,std::string> Sim_time_name {
-    {Sim_time::     None,"no sim type"},//TODO makes sense?
-    {Sim_time::    Error,"sim type error"},
-    {Sim_time::  Unknown,"unknown sim type"},
+    {Sim_time::     None,"no sim time type"},//TODO makes sense?
+    {Sim_time::    Error,"sim time type error"},
+    {Sim_time::  Unknown,"unknown sim time type"},
     {Sim_time::   Plugin,"plugin"},
     {Sim_time:: Explicit,"explicit"},
     {Sim_time:: Implicit,"implicit"}
@@ -162,10 +162,20 @@ namespace fmr {
     if (name_map.count(val) > 0) {return name_map.at(val);}
     return "unnamed item "+std::to_string (fmr::enum2val (val));
   }
+#if 0
   template <typename T> static const std::string get_enum_string
    (const std::vector<std::string> name_vec, const T val) {
     const size_t v = enum2val (val);
     if (v>=0 && v<name_vec.size()) {return name_vec[v];}
+    return "unnamed item "+std::to_string (v);
+  }
+#endif
+  template <typename T, typename C> static const std::string get_enum_string
+   (const C name_container, const T val) {
+    const size_t v = enum2val (val);
+    if (v>=0 && v<name_container.size()) {
+      return name_container[v];
+    }
     return "unnamed item "+std::to_string (v);
   }
 }//end fmr:: namespace

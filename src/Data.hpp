@@ -59,6 +59,7 @@ class Data : public Work {//TODO change to File
         File_info& operator= (const File_info&) =default;
         virtual   ~File_info ()        noexcept =default;
     };
+#if 1
     typedef std::unordered_map<fmr::Data_id, fmr::Dim_int_vals>
       Data_dim_vals;// key: data ID
     typedef std::unordered_map<fmr::Data_id, fmr::Enum_int_vals>
@@ -68,15 +69,24 @@ class Data : public Work {//TODO change to File
     typedef std::unordered_map<fmr::Data_id, fmr::Global_int_vals>
       Data_global_vals;// key: data ID
     //NOTE std::unordered_map is not thread safe.
-  // member variables --------------------------------------------------------
-  public:
-    // fmr::perf::IOmeter  time_io = fmr::perf::IOmeter ();//TODO
-    //
-    Data_dim_vals       dim_vals ={};//key:: data ID
+    Data_dim_vals       dim_vals ={};//key: data ID
     Data_enum_vals     enum_vals ={};
     Data_local_vals   local_vals ={};
     Data_global_vals global_vals ={};
-    // These are for caching data that does not yet have a destination,
+    //TODO Replace these with Dnew_*, below?
+#endif
+#if 0
+    typedef std::map<fmr::Data,fmr::Dim_int_vals>    Dnew_dim_vals;
+    typedef std::map<fmr::Data,fmr::Enum_int_vals>   Dnew_enum_vals;
+    typedef std::map<fmr::Data,fmr::Local_int_vals>  Dnew_local_vals;
+    typedef std::map<fmr::Data,fmr::Global_int_vals> Dnew_global_vals;
+    //
+    Dnew_dim_vals    dnew_dim_vals ={};//key: fmr::Data type
+    Dnew_enum_vals   dnew_enum_vals ={};
+    Dnew_local_vals  dnew_local_vals ={};
+    Dnew_global_vals dnew_global_vals ={};
+#endif
+    // These are for caching data that do not yet have a destination,
     // and to marshal data for distribution.
     // Use in Data classes to avoid multiple reads of the same data.
     // Use sparingly to avoid extra copies of the same data.
@@ -84,6 +94,9 @@ class Data : public Work {//TODO change to File
     //TODO private: with public: ptr/get/set/del, virtual read/save ?
     // These are NOT thread safe. Should be private in derived classes,
     // so each derived driver can access it's private variables safely?
+  public:
+  // member variables --------------------------------------------------------
+    // fmr::perf::IOmeter  time_io = fmr::perf::IOmeter ();//TODO
   protected:
     std::string      default_file_name = "new-femera-data";
     std::vector<std::string> file_exts ={"csv"};
