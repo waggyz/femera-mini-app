@@ -4,6 +4,7 @@
   "sim size type (enum)",
   "partitioning algorithm (enum)",
  "number of partititions",
+ "number of abstract geometry (CAD) models",
  "number of meshes + grids",
  "number of nodes",
   "node x-ordinates",

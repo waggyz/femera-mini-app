@@ -25,25 +25,18 @@ namespace Femera {
   int Mesh::prep () {int err=0;
     fmr::perf::timer_resume (& this->time);
     auto log = this->proc->log;
- //   const std::string name = this->model_name;
-    //
-    //
+    const std::string name = this->model_name;
     if (log->detail >= this->verblevel) {
       fmr::perf::timer_pause (& this->time);
       const std::string label = this->task_name+" prep";
-      log->label_fprintf (log->fmrout, label.c_str(),
-        "%s\n", this->model_name.c_str());
+      log->label_fprintf (log->fmrout, label.c_str(), "%s\n", name.c_str());
       fmr::perf::timer_resume (& this->time);
     }
     //
     return err;
   }
   int Mesh::run (){int err=0;
-#if 1
-    return this->exit (err);
-#else
   return err;
-#endif
   }
 #if 0
   int Mesh::prep (){

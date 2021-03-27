@@ -65,6 +65,7 @@ class Sims : public Work {// simulation collection manager
     fmr::Local_int get_frun_n ();
 //    fmr::Local_int get_mtrl_n ();//TODO
     fmr::Local_int get_part_n ();// used in derived classes
+    int prep () override;//TODO or virtual int init() ?
   protected:
     //TODO The following are run by this->run () ?
     int chck () override;//TODO Is this needed here?
@@ -79,7 +80,6 @@ class Sims : public Work {// simulation collection manager
     int exit_task (int err) override;
   private:
     int init_task (int* argc, char** argv) final override;//TODO called?
-    int prep () override;//TODO or virtual int init() ?
   // constructors and destructors --------------------------------------------
   public:
     virtual ~Sims  ()   noexcept =default;

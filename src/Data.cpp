@@ -274,6 +274,7 @@ int Data::get_local_vals (fmr::Data_id data_id, fmr::Local_int_vals& vals){
           case fmr::Data::Part_n : key = fmr::Geom_info::Part_n; break;
           case fmr::Data::Mesh_n : key = fmr::Geom_info::Mesh_n; break;
           case fmr::Data::Grid_n : key = fmr::Geom_info::Grid_n; break;
+          case fmr::Data::Gcad_n : key = fmr::Geom_info::Gcad_n; break;
           default : is_found = false;
         }
         if (is_found) {

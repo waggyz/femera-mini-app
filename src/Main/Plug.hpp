@@ -83,7 +83,7 @@ namespace Femera{
     Fake,//  // File type: default data for testing
     //
     Geom, // Move to base/core type?
-    Mesh, Grid,//TODO Gfem, Gfdm, Gfvm,// Geom types
+    Mesh, Grid, Gcad,//TODO Gfem, Gfdm, Gfvm,// Geom types
     Cell,// FD, FV, SG // staggered-grid
     Surf,// BEM surfaces
     Elem,// FEM low-order (p:1,2,3) elements

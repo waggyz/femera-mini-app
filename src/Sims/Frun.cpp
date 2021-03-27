@@ -45,25 +45,43 @@ namespace Femera {
       fmr::perf::timer_resume (& this->time);
     }
 #endif
-//TODO auto grid_n = parent->locals.at (fmr::Data::Grid_n).data [this->sims_ix];
-    auto mesh_n = parent->locals.at (fmr::Data::Mesh_n).data [this->sims_ix];
+    const auto gcad_n
+      = parent->locals.at (fmr::Data::Gcad_n).data [this->sims_ix];
+    const auto grid_n
+      = parent->locals.at (fmr::Data::Grid_n).data [this->sims_ix];
+    const auto mesh_n
+      = parent->locals.at (fmr::Data::Mesh_n).data [this->sims_ix];
+//    auto geom_n = gcad_n + grid_n + mesh_n;
     //
-    this->enums [fmr::Data::Elem_type]
-      = fmr::Enum_int_vals (fmr::Data::Elem_type, mesh_n);
-    this->data->get_enum_vals (name, this->enums.at (fmr::Data::Elem_type));
-    //
-    this->locals [fmr::Data::Node_n]
-      = fmr::Local_int_vals (fmr::Data::Node_n, mesh_n);
-    this->data->get_local_vals (name, this->locals.at (fmr::Data::Node_n));
-    //
-    this->locals [fmr::Data::Elem_n]
-      = fmr::Local_int_vals (fmr::Data::Elem_n, mesh_n);
-    this->data->get_local_vals (name, this->locals.at (fmr::Data::Elem_n));
-    //
-    //TODO new Geom/Mesh/Grid, get mesh data
+    // add initial tasks: new Gcad/Grid/Mesh
+#if 1
+    if (gcad_n > 0) {
+      const auto send_type = work_cast (Plug_type::Gcad);
+      for (fmr::Local_int i=0; i < gcad_n; i++) {
+        err= fmr::detail::main->add_new_task (send_type, this);
+    } }
+    if (grid_n > 0) {
+      //TODO cell_dims
+      const auto send_type = work_cast (Plug_type::Grid);
+      for (fmr::Local_int i=0; i < grid_n; i++) {
+        err= fmr::detail::main->add_new_task (send_type, this);
+    } }
+#endif
     if (mesh_n > 0) {
+      this->enums [fmr::Data::Elem_type]
+        = fmr::Enum_int_vals (fmr::Data::Elem_type, mesh_n);
+      this->data->get_enum_vals (name, this->enums.at (fmr::Data::Elem_type));
+      //
+      this->locals [fmr::Data::Node_n]
+        = fmr::Local_int_vals (fmr::Data::Node_n, mesh_n);
+      this->data->get_local_vals (name, this->locals.at (fmr::Data::Node_n));
+      //
+      this->locals [fmr::Data::Elem_n]
+        = fmr::Local_int_vals (fmr::Data::Elem_n, mesh_n);
+      this->data->get_local_vals (name, this->locals.at (fmr::Data::Elem_n));
+      //
       const auto send_type = work_cast (Plug_type::Mesh);
-      for (fmr::Local_int i=0; i < mesh_n; i++) {// add initial tasks
+      for (fmr::Local_int i=0; i < mesh_n; i++) {
         err= fmr::detail::main->add_new_task (send_type, this);
     } }
 #if 0
@@ -159,24 +177,29 @@ namespace Femera {
     fmr::perf::timer_resume (& this->time);
     const auto log = this->proc->log;
     err= this->prep ();
+//    if (err) {return err;}//TODO segfaults
+#if 0
     const auto send_type = work_cast (Plug_type::Mesh);
-    const auto mesh_n = this->task.count (send_type);
-    if (mesh_n > 0) {
-      for (int i=0; i < mesh_n; i++) {// Run serially.
-        const auto M = this->task.get<Mesh>(i);
-        if (M) {
-          M->sims_ix = i;
-          M->model_name
-            = this->model_name + ":" + M->task_name+"_"+std::to_string(i);
-          err= M->prep ();
-          err++;
+    const auto geom_n = this->task.count (send_type);
+#else
+    const auto geom_n = this->task.count ();
+#endif
+    if (geom_n > 0) {
+      for (int i=0; i < geom_n; i++) {// Run serially.
+        const auto G = this->task.get<Sims>(i);
+        if (G) {
+          G->sims_ix = i;
+          G->model_name
+            = this->model_name + ":" + G->task_name+"_"+std::to_string(i);
+          err+= (G->prep () > 0) ? 1 : 0 ;
         }else{
-          log->printf_err("ERROR %s %s mesh %iis NULL.\n",
+          err++;
+          log->printf_err ("ERROR %s %s mesh/grid/gcad %i is NULL.\n",
             this->task_name.c_str(), this->model_name.c_str(), i);
     } } }
 #if 1
     // rough estimate of solve time
-    const double dof   = 10e3;//TODO Get this from current sim
+    const double dof   = 10e3;//TODO Get this from current sim.
     const double iters = 0.01 * dof;
     const double speed =  1e9 / 40.0;// dof/s Skylake XS sim solve speed
     usleep (int(1e6 * iters * dof / speed));
@@ -212,17 +235,13 @@ namespace Femera {
     }
 #endif
     //...
-#if 1
-    if (mesh_n > 0) {
-      for (int i=0; i < mesh_n; i++) {//TODO need barrier before this?
-        const auto M = this->task.get<Mesh>(i);
-        if (M) {err= M->exit (err);}
+    if (geom_n > 0) {
+      for (int i=0; i < geom_n; i++) {//TODO need barrier before this?
+        const auto G = this->task.get<Sims>(i);
+        if (G) {err= G->exit (err);}
     } }
     fmr::perf::timer_resume (& this->time);
     return this->exit(err);//TODO need barrier before this?
-#else
-  return err;
-#endif
   }
 #if 0
   int Frun::init_task (int*, char**){int err=0;//TODO call this?

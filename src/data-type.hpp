@@ -69,10 +69,10 @@ namespace fmr {//TODO? namespace data {
    * The last item is always "end" to indicate the count of enum items for the
    * Data_size map below.
   */
-  enum class Geom_info : Enum_int {isok=0,// Use for Sims and Part data.
-    Gset_n, Part_n, Mesh_n, Grid_n,       // Local_int
-    Part_halo_n, Mesh_halo_n, Grid_halo_n,// Local_int
-    Geom_d,                               // Dim_int
+  enum class Geom_info : Enum_int {isok=0, // Use for Sims and Part data.
+    Gset_n, Part_n, Gcad_n, Mesh_n, Grid_n,// Local_int
+    Part_halo_n, Mesh_halo_n, Grid_halo_n, // Local_int
+    Geom_d,                                // Dim_int
   end};
   enum class Phys_info : Enum_int {isok=0,
     Mtrl_n,  // Local_int //TODO here?

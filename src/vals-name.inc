@@ -4,6 +4,7 @@
 "Sims_size",
 "Part_type",
 "Part_n",
+"Gcad_n",
 "Geom_n",
 "Node_n",
 "Node_x",

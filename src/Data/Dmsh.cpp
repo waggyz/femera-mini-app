@@ -259,6 +259,8 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
       mesh_n += (optval>Dmsh::Optval(0)) ? 1 : 0;
       gmsh::option::getNumber ("Mesh.NbHexahedra", optval);
       mesh_n += (optval>Dmsh::Optval(0)) ? 1 : 0;
+      // If no meshes exist yet, handle an abstract geometry (CAD) file.
+      const fmr::Local_int gcad_n = (mesh_n==0) ? 1 : 0;
       //
       gmsh::option::getNumber ("Mesh.NbPartitions", optval);//0: unpartitioned
       auto part_n = fmr::Local_int(optval);
@@ -274,16 +276,19 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
       const auto gset_n_ix = enum2val(fmr::Geom_info::Gset_n);
       const auto part_n_ix = enum2val(fmr::Geom_info::Part_n);
       const auto mesh_n_ix = enum2val(fmr::Geom_info::Mesh_n);
+      const auto gcad_n_ix = enum2val(fmr::Geom_info::Gcad_n);
       auto vals =& data->local_vals[gid].data[0];
       if (geom_d > vals[geom_d_ix]) {vals[geom_d_ix] = geom_d;}
       vals[gset_n_ix] += fmr::Local_int (dim_tag.size());
       vals[part_n_ix] += part_n;
       vals[mesh_n_ix] += mesh_n;
+      vals[gcad_n_ix] += gcad_n;
       auto isok =& data->local_vals[gid].isok[0];
       isok[geom_d_ix] |= vals[geom_d_ix] > 0;
       isok[gset_n_ix] |= dim_tag.size() > 0;
       isok[part_n_ix] |= part_n > 0;
       isok[mesh_n_ix] |= mesh_n > 0;
+      isok[gcad_n_ix] |= gcad_n > 0;
 #if 0
       auto log = this->proc->log;
       //TODO Remove; just checking element jacobians...

@@ -6,6 +6,7 @@
      fmr::Vals_type::Local,
      fmr::Vals_type::Local,
      fmr::Vals_type::Local,
+     fmr::Vals_type::Local,
      fmr::Vals_type::Geom,
      fmr::Vals_type::Geom,
      fmr::Vals_type::Geom,
