@@ -27,10 +27,11 @@ namespace Femera {
     auto log = this->proc->log;
     const std::string name = this->model_name;
     if (log->detail >= this->verblevel) {
-      const auto id = this->parent->model_name;//TODO XS sims only
-      const auto eid = this->data->make_data_id (id, fmr::Data::Elem_n);
-      const auto tid = this->data->make_data_id (id, fmr::Data::Elem_form);
-      bool is_found = this->data->local_vals.count(eid) > 0;
+      bool is_found=false;
+      const auto pid = this->parent->model_name;//TODO XS sims only
+      const auto eid = this->data->make_data_id (pid, fmr::Data::Elem_n);
+      const auto tid = this->data->make_data_id (pid, fmr::Data::Elem_form);
+      is_found = this->data->local_vals.count(eid) > 0;
       const auto els = is_found
         ? this->data->local_vals.at(eid).data[this->sims_ix] : 0;
       is_found = this->data->enum_vals.count(tid) > 0;
