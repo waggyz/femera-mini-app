@@ -27,16 +27,28 @@ namespace Femera {
     auto log = this->proc->log;
     const std::string name = this->model_name;
     if (log->detail >= this->verblevel) {
+      const auto id = this->parent->model_name;//TODO XS sims only
+      const auto eid = this->data->make_data_id (id, fmr::Data::Elem_n);
+      const auto tid = this->data->make_data_id (id, fmr::Data::Elem_form);
+      bool is_found = this->data->local_vals.count(eid) > 0;
+      const auto els = is_found
+        ? this->data->local_vals.at(eid).data[this->sims_ix] : 0;
+      is_found = this->data->enum_vals.count(tid) > 0;
+      const auto type = is_found
+        ? fmr::Elem_form(this->data->enum_vals.at(tid).data[this->sims_ix])
+        : fmr::Elem_form::Unknown;
       fmr::perf::timer_pause (& this->time);
       const std::string label = this->task_name+" prep";
-      log->label_fprintf (log->fmrout, label.c_str(), "%s\n", name.c_str());
+      log->label_fprintf (log->fmrout, label.c_str(), "%s: %u %s\n",
+        name.c_str(), els,
+        fmr::get_enum_string(fmr::elem_form_name,type).c_str());
       fmr::perf::timer_resume (& this->time);
     }
     //
     return err;
   }
   int Mesh::run (){int err=0;
-  return err;
+    return err;
   }
 #if 0
   int Mesh::prep (){

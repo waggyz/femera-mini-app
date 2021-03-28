@@ -93,8 +93,26 @@ namespace fmr {//TODO? namespace data {
     {Data::Phys_info, Math_size(math::Natural, enum2val (Phys_info::end))}
   };
 #endif
-  enum class Elem : Enum_int {None=0, Error, Unknown,
-    Bars,    // Beam,
+  enum class Elem_form : Enum_int {None=0, Error, Unknown,//TODO also Cell_form?
+    Line,    // Bars, Beam: not here,
+    Tris,    // Quad,
+    Tets,    // Pymd, Prsm, Cube
+  end};
+  static const std::array<std::string,enum2val(Elem_form::end)+1>
+    elem_form_name ={
+    "no element shape",
+    "element shape error",
+    "unknown element shape",
+    //
+    "Line",
+    "Tris",
+    "Tets",
+    //
+    "Elem_form end marker"
+  };
+#if 1
+  enum class Elem : Enum_int {None=0, Error, Unknown,//TODO
+    Bars,    // Beam
     Tris,    // Quad,
     Tets,    // Pymd, Prsm, Cube,
     // Mbrn, Shll_xxxx
@@ -108,6 +126,7 @@ namespace fmr {//TODO? namespace data {
       ( (Elid_int(fmr::enum2val(e)) << (ysz+psz))
       + (Elid_int(fmr::enum2val(y)) << (psz)) + p );
   }
+#endif
 }//end fmr:: namespace -------------------------------------------------------
 namespace fmr {namespace data {//TODO Move to vals.hpp?
   struct State {

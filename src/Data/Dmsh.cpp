@@ -193,6 +193,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
   return info;
 }
 Data::File_info Dmsh::scan_file_data (const std::string fname) {
+//  auto log = this->proc->log;
   auto info = Dmsh::File_gmsh (Data::Data_file (this, fname));
   info = this->file_info.count (fname) ? this->file_info.at (fname) : info;
 //  info.data_file.second = fname;//TODO redundant?
@@ -217,15 +218,15 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
     std::string data_id(""); gmsh::model::getCurrent (data_id);
     this->sims_names.insert (std::string (data_id));
     //
-    const auto gid = this->data->make_data_id (data_id,
+    const auto gid = this->make_data_id (data_id,
       fmr::Tree_type::Sims,{}, fmr::Data::Geom_info);
 //    std::valarray<bool> item_isok (false,fmr::Data::Geom_info::end);
     Dmsh::Optval optval=Dmsh::Optval(0);
     int err=0;
     //
-    const bool is_found = data->local_vals.count(gid) > 0;
+    bool is_found = this->data->local_vals.count(gid) > 0;
     if (!is_found) {
-      data->local_vals[gid] = fmr::Local_int_vals (fmr::Data::Geom_info);
+      this->data->local_vals[gid] = fmr::Local_int_vals (fmr::Data::Geom_info);
     }
 #if 0
     const auto physid = make_data_id (data_id,
@@ -242,24 +243,84 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
     if(!err){
       auto geom_d = fmr::Local_int(gd);
       //
-      fmr::Local_int mesh_n = 0;
       // Each elem type is at least one different Femera Mesh.
+      fmr::Local_int mesh_n=0,
+        tris_n=0, quad_n=0, corn_n=0, tets_n=0, pyrm_n=0, prsm_n=0, cube_n=0;
+      const auto zero = Dmsh::Optval(0);
       //TODO What about 1D elements?
-      gmsh::option::getNumber ("Mesh.NbTriangles", optval);// TODO cache these?
-      mesh_n += (optval>Dmsh::Optval(0)) ? 1 : 0;
+      gmsh::option::getNumber ("Mesh.NbTriangles", optval);
+      tris_n = fmr::Local_int(optval); mesh_n += (optval > zero) ? 1 : 0;
       gmsh::option::getNumber ("Mesh.NbQuadrangles", optval);
-      mesh_n += (optval>Dmsh::Optval(0)) ? 1 : 0;
+      quad_n = fmr::Local_int(optval); mesh_n += (optval > zero) ? 1 : 0;
       gmsh::option::getNumber ("Mesh.NbTrihedra", optval);// 3-plane inersect
-      mesh_n += (optval>Dmsh::Optval(0)) ? 1 : 0;
+      corn_n = fmr::Local_int(optval); mesh_n += (optval > zero) ? 1 : 0;
       gmsh::option::getNumber ("Mesh.NbTetrahedra", optval);
-      mesh_n += (optval>Dmsh::Optval(0)) ? 1 : 0;
+      tets_n = fmr::Local_int(optval); mesh_n += (optval > zero) ? 1 : 0;
       gmsh::option::getNumber ("Mesh.NbPyramids", optval);
-      mesh_n += (optval>Dmsh::Optval(0)) ? 1 : 0;
+      pyrm_n = fmr::Local_int(optval); mesh_n += (optval > zero) ? 1 : 0;
       gmsh::option::getNumber ("Mesh.NbPrisms", optval);
-      mesh_n += (optval>Dmsh::Optval(0)) ? 1 : 0;
+      prsm_n = fmr::Local_int(optval); mesh_n += (optval > zero) ? 1 : 0;
       gmsh::option::getNumber ("Mesh.NbHexahedra", optval);
-      mesh_n += (optval>Dmsh::Optval(0)) ? 1 : 0;
-      // If no meshes exist yet, handle an abstract geometry (CAD) file.
+      cube_n = fmr::Local_int(optval); mesh_n += (optval > zero) ? 1 : 0;
+      if (mesh_n > 0) {// Cache these. //TODO only when Partition::Join ?
+        const auto eid = this->make_data_id (data_id, fmr::Data::Elem_n);
+        const auto tid = this->make_data_id (data_id, fmr::Data::Elem_form);
+        {//TODO Refactor into a function. ------------------------------------
+          is_found = this->data->local_vals.count(eid) > 0;
+          if (!is_found) {this->data->local_vals[eid]
+            = fmr::Local_int_vals (fmr::Data::Elem_n, mesh_n);
+          }else if (this->data->local_vals[eid].data.size() < mesh_n) {
+            //TODO Resize if != mesh_n ?
+            this->data->local_vals[eid].data.resize (mesh_n);//TODO clears it
+          }
+#ifdef FMR_DEBUG
+          log->label_fprintf (log->fmrerr,"*** Dmsh","%s size is %u.\n",
+            eid.c_str(), this->data->local_vals[eid].data.size());
+#endif
+        }{//-------------------------------------------------------------------
+          is_found = this->data->enum_vals.count(tid) > 0;
+          if (!is_found) {this->data->enum_vals[tid]
+            = fmr::Enum_int_vals (fmr::Data::Elem_form, mesh_n);
+          }else if (this->data->enum_vals[tid].data.size() < mesh_n) {
+            this->data->enum_vals[tid].data.resize (mesh_n);
+          }
+        }//-------------------------------------------------------------------
+#if 0
+        gmsh::option::getNumber ("Mesh.ElementOrder", optval);
+        if (optval < Dmsh::Optval(1)) {
+          gmsh::model::mesh::setOrder (2);//TODO Default element order member.
+          gmsh::option::getNumber ("Mesh.ElementOrder", optval);
+          log->label_fprintf (log->fmrout,"NOTE Gmsh",
+            "Set element order in %s to %g.\n",eid.c_str(), optval);
+        }
+        if (optval > Dmsh::Optval(3)) {
+          log->label_fprintf (log->fmrerr,"ERROR Dmsh",
+            "Element order in %s is %g.\n",eid.c_str(), optval);
+          err= 1;
+        }
+        const auto elem_p = fmr::Dim_int(optval);
+#endif
+        auto elems =& this->data->local_vals[eid].data[0];
+        auto types =& this->data->enum_vals[tid].data[0];
+        fmr::Local_int i=0;
+        if (tris_n > 0) {
+          elems[i] = tris_n;
+          types[i] = fmr::enum2val(fmr::Elem_form::Tris); i++;
+        }
+        if (quad_n > 0) {elems[i] = quad_n; i++;}//TODO
+        if (corn_n > 0) {elems[i] = corn_n; i++;}//TODO
+        if (tets_n > 0) {
+          elems[i] = tets_n;
+          types[i] = fmr::enum2val(fmr::Elem_form::Tets); i++;
+        }
+        if (pyrm_n > 0) {elems[i] = pyrm_n; i++;}//TODO
+        if (prsm_n > 0) {elems[i] = prsm_n; i++;}//TODO
+        if (cube_n > 0) {elems[i] = cube_n; i++;}//TODO
+      }
+      //TODO gmsh::model::mesh::getNodesByElementType (..) to get node_n,
+      //     later because the function call (may?) copy node data.
+      //
+      // If no meshes exist yet, handle as an abstract geometry (CAD) file.
       const fmr::Local_int gcad_n = (mesh_n==0) ? 1 : 0;
       //
       gmsh::option::getNumber ("Mesh.NbPartitions", optval);//0: unpartitioned
@@ -277,13 +338,13 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
       const auto part_n_ix = enum2val(fmr::Geom_info::Part_n);
       const auto mesh_n_ix = enum2val(fmr::Geom_info::Mesh_n);
       const auto gcad_n_ix = enum2val(fmr::Geom_info::Gcad_n);
-      auto vals =& data->local_vals[gid].data[0];
+      auto vals =& this->data->local_vals[gid].data[0];
       if (geom_d > vals[geom_d_ix]) {vals[geom_d_ix] = geom_d;}
       vals[gset_n_ix] += fmr::Local_int (dim_tag.size());
       vals[part_n_ix] += part_n;
       vals[mesh_n_ix] += mesh_n;
       vals[gcad_n_ix] += gcad_n;
-      auto isok =& data->local_vals[gid].isok[0];
+      auto isok =& this->data->local_vals[gid].isok[0];
       isok[geom_d_ix] |= vals[geom_d_ix] > 0;
       isok[gset_n_ix] |= dim_tag.size() > 0;
       isok[part_n_ix] |= part_n > 0;

@@ -186,9 +186,10 @@ fmr::Dim_int Data::get_hier_max (){
 int Data::get_dim_vals (fmr::Data_id data_id, fmr::Dim_int_vals& vals) {
   int err= 0;
   auto log = this->proc->log;
-  bool is_found = this->dim_vals.count (data_id) > 0;
+  const auto vals_id = this->make_data_id (data_id, vals.type);
+  bool is_found = this->dim_vals.count (vals_id) > 0;
   if (is_found) {
-    vals = this->dim_vals.at (data_id);
+    vals = this->dim_vals.at (vals_id);
     return err;
   }
   const auto names = this->get_sims_names();
@@ -221,9 +222,10 @@ int Data::get_dim_vals (fmr::Data_id data_id, fmr::Dim_int_vals& vals) {
 int Data::get_enum_vals (fmr::Data_id data_id, fmr::Enum_int_vals& vals){
   int err= 0;
   auto log = this->proc->log;
-  bool is_found = this->enum_vals.count (data_id) > 0;
+  const auto vals_id = this->make_data_id (data_id, vals.type);
+  bool is_found = this->enum_vals.count (vals_id) > 0;
   if (is_found) {
-    vals = this->enum_vals.at (data_id);
+    vals = this->enum_vals.at (vals_id);
     return err;
   }
   const auto names = this->get_sims_names();
@@ -256,9 +258,10 @@ int Data::get_enum_vals (fmr::Data_id data_id, fmr::Enum_int_vals& vals){
 int Data::get_local_vals (fmr::Data_id data_id, fmr::Local_int_vals& vals){
   int err= 0;
   auto log = this->proc->log;
-  bool is_found = this->local_vals.count (data_id) > 0;
+  const auto vals_id = this->make_data_id (data_id, vals.type);
+  bool is_found = this->local_vals.count (vals_id) > 0;
   if (is_found) {
-    vals = this->local_vals.at (data_id);
+    vals = this->local_vals.at (vals_id);
     return err;
   }
   const auto names = this->get_sims_names();
