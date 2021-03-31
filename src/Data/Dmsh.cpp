@@ -193,7 +193,6 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
   return info;
 }
 Data::File_info Dmsh::scan_file_data (const std::string fname) {
-//  auto log = this->proc->log;
   auto info = Dmsh::File_gmsh (Data::Data_file (this, fname));
   info = this->file_info.count (fname) ? this->file_info.at (fname) : info;
 //  info.data_file.second = fname;//TODO redundant?
@@ -201,7 +200,7 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
     bool do_open = true;
     switch (info.access) {// Check if already open.
       case fmr::data::Access::Read   :// Fall through valid open modes...
-      case fmr::data::Access::Write  :// Fall through....
+      case fmr::data::Access::Write  :// Fall through...
       case fmr::data::Access::Modify : do_open = false; break;
       default : do_open = true;
     }
@@ -242,11 +241,33 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
     if (gd<1 || gd>3){err= 1;}
     if(!err){
       auto geom_d = fmr::Local_int(gd);
+#if 1
+      std::vector<int> elementTypes={};
+      gmsh::option::getNumber ("Mesh.NbNodes", optval);
+      const auto node_n = fmr::Global_int(optval);
+      const auto nid = this->make_data_id (data_id, fmr::Data::Node_sysn);
+      {//-------------------------------------------------------------------
+        is_found = this->data->global_vals.count(nid) > 0;
+        if (!is_found) {this->data->global_vals[nid]
+          = fmr::Global_int_vals (fmr::Data::Node_sysn, 1, node_n);
+        }else if (this->data->global_vals[nid].data.size() < 1) {
+          this->data->global_vals[nid].data.resize (1, node_n);
+        }else{
+          this->data->global_vals[nid].data[0] = node_n;
+        }
+      }//-------------------------------------------------------------------
+#ifdef FMR_DEBUG
+      auto log = this->proc->log;
+      log->label_fprintf (log->fmrerr,"*** Dmsh","%s[0] is %u.\n",
+        nid.c_str(), node_n);
+#endif
+#endif
       //
       // Each elem type is at least one different Femera Mesh.
       fmr::Local_int mesh_n=0,
         tris_n=0, quad_n=0, corn_n=0, tets_n=0, pyrm_n=0, prsm_n=0, cube_n=0;
       const auto zero = Dmsh::Optval(0);
+      //TODO should be Global_int ?
       //TODO What about 1D elements?
       gmsh::option::getNumber ("Mesh.NbTriangles", optval);
       tris_n = fmr::Local_int(optval); mesh_n += (optval > zero) ? 1 : 0;

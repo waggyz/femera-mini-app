@@ -165,13 +165,13 @@ class Data : public Work {//TODO change to File
     int get_dim_vals (const fmr::Data_id id, fmr::Dim_int_vals &);
     int get_enum_vals (const fmr::Data_id id, fmr::Enum_int_vals &);
     int get_local_vals (const fmr::Data_id id, fmr::Local_int_vals &);
+    int get_global_vals (const fmr::Data_id id, fmr::Global_int_vals &);
 #if 0
-    int get_global_vals (const fmr::Data_id id, fmr::global_int_vals &);
+    int read_local_vals (const std::string id, fmr::Local_int_vals &);
+    int save_local_vals (const std::string id, fmr::Local_int_vals &);
+    int free_local_vals (const std::string id, fmr::Local_int_vals &);
+    int scan (id, Scan_for={Scan::Part,...}, int depth=0);//TODO Needed?
 #endif
-    // int read_local_vals (const std::string id, fmr::Local_int_vals &);
-    // int save_local_vals (const std::string id, fmr::Local_int_vals &);
-    // int free_local_vals (const std::string id, fmr::Local_int_vals &);
-    // int scan (id, Scan_for={Scan::Part,...}, int depth=0);//TODO Needed?
   protected:// ---------------------------------------------------------------
     //
     int init_task (int* argc, char** argv) override;

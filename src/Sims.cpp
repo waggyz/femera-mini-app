@@ -168,6 +168,8 @@ namespace Femera {
         = fmr::Local_int_vals (fmr::Data::Grid_n, sim_n);
       this->locals [fmr::Data::Gcad_n]
         = fmr::Local_int_vals (fmr::Data::Gcad_n, sim_n);
+      this->globals [fmr::Data::Node_sysn]
+        = fmr::Global_int_vals (fmr::Data::Node_sysn, sim_n);
       //
       this->dims [fmr::Data::Phys_d]
         = fmr::Dim_int_vals (fmr::Data::Phys_d, sim_n);
@@ -199,6 +201,7 @@ namespace Femera {
     this->data->get_local_vals (name, this->locals.at (fmr::Data::Mesh_n));
     this->data->get_local_vals (name, this->locals.at (fmr::Data::Grid_n));
     this->data->get_local_vals (name, this->locals.at (fmr::Data::Gcad_n));
+    this->data->get_global_vals (name, this->globals.at (fmr::Data::Node_sysn));
     //
     if (this->send.hier_lv > this->from.hier_lv
       && Psend->task_name =="OpenMP") {
@@ -236,14 +239,17 @@ namespace Femera {
               const auto mesh_n =this->locals.at(fmr::Data::Mesh_n).data[sim_i];
               const auto grid_n =this->locals.at(fmr::Data::Grid_n).data[sim_i];
               const auto gcad_n =this->locals.at(fmr::Data::Gcad_n).data[sim_i];
+              const auto node_n
+                = this->globals.at(fmr::Data::Node_sysn).data[sim_i];
               std::string label = std::to_string(geom_d)+ "D "
                 + this->task_name+" "+R->task_name;
               log->label_fprintf (log->fmrout, label.c_str(),
-                "%u: %u gset%s, %u part%s, %u CAD%s, %u grid%s, %u mesh%s\n",
+                "%u: %u gset%s, %u part%s, %u CAD%s, %u grid%s, %u mesh%s, "
+                "%lu node%s\n",
                 sim_i,// R->model_name.c_str(),
-                gset_n, (gset_n==1) ? "":"s", part_n, (part_n==1) ? "":"s",
-                gcad_n, (gcad_n==1) ? "":"s",
-                grid_n, (grid_n==1) ? "":"s", mesh_n, (mesh_n==1) ? "":"es");
+                gset_n, (gset_n==1) ? "":"s",  part_n, (part_n==1) ? "":"s",
+                gcad_n, (gcad_n==1) ? "":"s",  grid_n, (grid_n==1) ? "":"s",
+                mesh_n, (mesh_n==1) ? "":"es", node_n, (node_n==1) ? "":"s");
               fmr::perf::timer_resume (& this->time);
             }
           //TODO Should this timing include lower-level runtime?

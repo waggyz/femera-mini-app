@@ -118,6 +118,7 @@ class Dcgn final : public Data {
     Dcgn           (Dcgn const&) =delete;// not copyable
     Dcgn operator= (const Dcgn&) =delete;
     ~Dcgn          ()   noexcept =default;
+  private:
 };
 }//end Femera namespace
 /*

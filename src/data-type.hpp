@@ -94,20 +94,26 @@ namespace fmr {//TODO? namespace data {
   };
 #endif
   enum class Elem_form : Enum_int {None=0, Error, Unknown,//TODO also Cell_form?
-    Line,    // Bars, Beam: not here,
-    Tris,    // Quad,
-    Tets,    // Pymd, Prsm, Cube
+    User,
+    Node,    // 0D
+    Line,    // 1D: Bars, Beam: not here,
+    Tris,    // 2D: Quad,
+    Tets,    // 3D: Pymd, Prsm,
+    Cube,
   end};
   static const std::array<std::string,enum2val(Elem_form::end)+1>
     elem_form_name ={
     "no element shape",
     "element shape error",
     "unknown element shape",
+    "user-defined element shape",
     //
+    "Node",
     "Line",
     "Tris",
     "Tets",
     //
+    "Cube",
     "Elem_form end marker"
   };
 #if 1

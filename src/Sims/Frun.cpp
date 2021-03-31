@@ -20,7 +20,7 @@ namespace Femera {
     this-> model_name ="(sim runner)";
     this->  verblevel = 3;
     this->  part_type = fmr::Partition::Join;
-    this-> meter_unit ="sim";
+    this-> meter_unit ="dof";
   }
   int Frun::chck (){
     return 0;
@@ -68,18 +68,14 @@ namespace Femera {
     } }
 #endif
     if (mesh_n > 0) {
-      this->enums [fmr::Data::Elem_type]
-        = fmr::Enum_int_vals (fmr::Data::Elem_type, mesh_n);
-      this->data->get_enum_vals (name, this->enums.at (fmr::Data::Elem_type));
-      //
-      this->locals [fmr::Data::Node_n]
-        = fmr::Local_int_vals (fmr::Data::Node_n, mesh_n);
-      this->data->get_local_vals (name, this->locals.at (fmr::Data::Node_n));
-      //
-      this->locals [fmr::Data::Elem_n]
-        = fmr::Local_int_vals (fmr::Data::Elem_n, mesh_n);
-      this->data->get_local_vals (name, this->locals.at (fmr::Data::Elem_n));
-      //
+      for (auto type : {fmr::Data::Elem_type}) {
+        this->enums [type] = fmr::Enum_int_vals (type, mesh_n);
+        this->data->get_enum_vals (name, this->enums.at (type));
+      }
+      for (auto type : {fmr::Data::Elem_n}) {
+        this->locals [type] = fmr::Local_int_vals (type, mesh_n);
+        this->data->get_local_vals (name, this->locals.at (type));
+      }
       const auto send_type = work_cast (Plug_type::Mesh);
       for (fmr::Local_int i=0; i < mesh_n; i++) {
         err= fmr::detail::main->add_new_task (send_type, this);
@@ -177,7 +173,7 @@ namespace Femera {
     fmr::perf::timer_resume (& this->time);
     const auto log = this->proc->log;
     err= this->prep ();
-//    if (err) {return err;}//TODO segfaults
+//    if (err) {return err;}//TODO early return segfaults
 #if 0
     const auto send_type = work_cast (Plug_type::Mesh);
     const auto geom_n = this->task.count (send_type);
@@ -198,11 +194,24 @@ namespace Femera {
             this->task_name.c_str(), this->model_name.c_str(), i);
     } } }
 #if 1
-    // rough estimate of solve time
-    const double dof   = 10e3;//TODO Get this from current sim.
-    const double iters = 0.01 * dof;
-    const double speed =  1e9 / 40.0;// dof/s Skylake XS sim solve speed
-    usleep (int(1e6 * iters * dof / speed));
+    if (geom_n > 0) {// Sleep for a rough estimate of solve time.
+      for (uint i=0; i < uint(geom_n); i++) {// mesh_n+grid_n+gcad_n
+        //TODO only run 3D elem meshes
+        double dof = 10e3;
+        if (this->locals.count (fmr::Data::Node_n) > 0) {
+          if (i < this->locals.at (fmr::Data::Node_n).data.size()) {
+            dof = 3.0 * double(this->locals.at (fmr::Data::Node_n).data [i]);
+        } }
+        const double iters = 0.01 * dof;
+        const double speed = 1e9 / 40.0;// dof/s Skylake XS sim solve speed
+        const double  secs = iters * dof / speed;
+#if 0
+        if (log->detail >= this->verblevel) {
+          log->label_fprintf(log->fmrout, "Frun zzzz", "%g s...\n", secs);
+        }
+#endif
+        usleep (int (1e6 * secs));
+    } }
 #endif
 #if 0
     Proc* P = this->proc->hier[send.hier_lv];

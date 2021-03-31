@@ -183,6 +183,36 @@ fmr::Data_id Data::get_id (){fmr::Data_id id = "";//TODO needed?
 fmr::Dim_int Data::get_hier_max (){
   return data_hier_max;
 }
+int Data::get_global_vals (fmr::Data_id data_id, fmr::Global_int_vals& vals){
+  int err= 0;
+  auto log = this->proc->log;
+  const auto vals_id = this->make_data_id (data_id, vals.type);
+  bool is_found = this->global_vals.count (vals_id) > 0;
+  if (is_found) {
+    vals = this->global_vals.at (vals_id);
+    return err;
+  }
+  const auto names = this->get_sims_names();
+  fmr::Local_int name_i=0;
+  for (auto name : names) {
+    fmr::Data_id cache_id = this->make_data_id (name, vals.type);
+    if (this->global_vals.count (cache_id) > 0) {
+      if (name_i < vals.data.size()) {
+        is_found = true;
+        const auto cached = this->global_vals.at (cache_id);
+        vals.data [name_i] = cached.data [0];
+    } }
+    name_i++;
+  }
+  if (!is_found) {
+    const std::string namestr = fmr::get_enum_string (fmr::vals_name,vals.type);
+    log->label_fprintf (log->fmrerr, "WARN""ING Data",
+      "%u %s:%s global vals not found.\n",
+      vals.data.size(), data_id.c_str(), namestr.c_str());
+    return 1;
+  }
+  return err;
+}
 int Data::get_dim_vals (fmr::Data_id data_id, fmr::Dim_int_vals& vals) {
   int err= 0;
   auto log = this->proc->log;

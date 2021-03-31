@@ -52,6 +52,47 @@ namespace Femera {// header extension: needs cgnslib.h
     { fmr::data::Access::  Write, CG_MODE_WRITE  },
     { fmr::data::Access:: Modify, CG_MODE_MODIFY }
   };
+  static const std::map<ElementType_t,fmr::Elem_form> dcgn_elem_form_from_cgns
+    ={
+    {ElementTypeNull, fmr::Elem_form::None},
+    {ElementTypeUserDefined, fmr::Elem_form::User},
+    {NODE    , fmr::Elem_form::Node},
+    //
+    {BAR_2   , fmr::Elem_form::Line},
+    {BAR_3   , fmr::Elem_form::Line},
+    {TRI_3   , fmr::Elem_form::Tris},
+    {TRI_6   , fmr::Elem_form::Tris},
+    //
+    {TETRA_4 , fmr::Elem_form::Tets},
+    {TETRA_10, fmr::Elem_form::Tets},
+    //TODO ...
+    {BAR_4   , fmr::Elem_form::Line},
+    {TRI_9   , fmr::Elem_form::Tris},
+    {TRI_10  , fmr::Elem_form::Tris},
+    //
+    {TETRA_16, fmr::Elem_form::Tets},
+    {TETRA_20, fmr::Elem_form::Tets},
+    //
+    {HEXA_64 , fmr::Elem_form::Cube}
+  };
+  /*
+    {PYRA_5  , fmr::Elem_form::Pyra},
+    {PYRA_14 , fmr::Elem_form::Pyra},
+    {PENTA_6 , fmr::Elem_form::Prsm},
+    {PENTA_15, fmr::Elem_form::Prsm},
+    {PENTA_18, fmr::Elem_form::Prsm},
+    {HEXA_8  , fmr::Elem_form::Cube},
+    {HEXA_20 , fmr::Elem_form::Cube},
+    {HEXA_27 , fmr::Elem_form::Cube},
+     ElementTypeNull, ElementTypeUserDefined, NODE, BAR_2, BAR_3,
+     TRI_3, TRI_6, QUAD_4, QUAD_8, QUAD_9,
+     TETRA_4, TETRA_10, PYRA_5, PYRA_14,
+     PENTA_6, PENTA_15, PENTA_18, HEXA_8, HEXA_20, HEXA_27,
+     MIXED, PYRA_13, NGON_n, NFACE_n,
+     BAR_4, TRI_9, TRI_10, QUAD_12, QUAD_16,
+     TETRA_16, TETRA_20, PYRA_21, PYRA_29, PYRA_30,
+     PENTA_24, PENTA_38, PENTA_40, HEXA_32, HEXA_56, HEXA_64
+     */
 }//end Femera namespace for header extension
 namespace Femera {
   Dcgn::Dcgn (Proc* P,Data* D) noexcept:
@@ -367,6 +408,7 @@ Dcgn::File_cgns Dcgn::open (const std::string fname,
   return info;
 }
 Data::File_info Dcgn::scan_file_data (const std::string fname) {
+  auto log = this->proc->log;
   auto info = Dcgn::File_cgns (Data::Data_file (this,fname));
   info = this->file_info.count(fname) ? this->file_info.at(fname) : info;
   if (!info.state.was_read) {
@@ -419,7 +461,12 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
       char cname[this->label_size+1];
       err= fmr::perf::time_activity<int> (&this->time,
         cg_base_read, info.file_cgid, base_i, cname, &geom_d, &phys_d);
-      if (!err) {this->time.bytes += this->label_size;}
+      if (err) {
+        log->label_fprintf (log->fmrerr,"ERR""OR Dcgn",
+        "could not read base %i in file %s.\n", base_i, fname.c_str());
+      }else{
+        this->time.bytes += this->label_size + sizeof(geom_d) + sizeof(phys_d);
+      }
       std::string data_id = std::string (cname);
       this->sims_names.insert (std::string (data_id));
       //
@@ -435,7 +482,7 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
           default                  : {}// Do nothing.
         }
 #ifdef FMR_DEBUG
-            this->proc->log->label_fprintf (this->proc->log->fmrout,
+            log->label_fprintf (log->fmrout,
               "CGNS*sim type","%s\n",
               fmr::get_enum_string (fmr::Sim_time_name, sim_time).c_str());
 #endif
@@ -489,13 +536,34 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
         int sect_n=0;// count grids/meshes
         err= fmr::perf::time_activity<int> (&this->time,
           cg_nsections, info.file_cgid, base_i, zone_i,& sect_n);
+//        if (err) {return err;}
         switch (zone_type) {
           case ::Structured   : grid_n += sect_n; break;
           case ::Unstructured : mesh_n += sect_n; break;
           default : err+=1;
         }
         //TODO Check for material properties?
-      }
+        // Scan for meshes. (Partition::Join)
+        // https://cgns.github.io/CGNS_docs_current/sids/gridflow.html#Elements
+        err= cg_goto (info.file_cgid, base_i, "Zone_t",zone_i, NULL);
+//        if (err) {return err;}
+        for (int sect_i=1; sect_i<=sect_n; sect_i++){
+          char sectname [this->label_size+1];//TODO Cache names now?
+          ElementType_t eltype; cgsize_t start,end;
+          int nbndry, parent_flag;
+          err= fmr::perf::time_activity<int> (&this->time,
+            cg_section_read, info.file_cgid, base_i, zone_i, sect_i,
+            sectname,& eltype,& start,& end,& nbndry,& parent_flag);
+          if (dcgn_elem_form_from_cgns.count (eltype) > 0) {
+            const auto form = dcgn_elem_form_from_cgns.at(eltype);
+            const auto str = fmr::get_enum_string (fmr::elem_form_name, form);
+#ifdef FMR_DEBUG
+            log->label_fprintf (log->fmrerr, "Dcgn mesh", "%s %u el:%i %s\n",
+              data_id.c_str(), end - start +1, eltype, str.c_str());
+#endif
+        } }
+      //
+      }//end zone loop
       // Set cached data vals.
       const auto geomid = this->data->make_data_id (data_id,
         fmr::Data::Geom_info);

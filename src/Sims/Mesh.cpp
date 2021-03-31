@@ -31,6 +31,12 @@ namespace Femera {
       const auto pid = this->parent->model_name;//TODO XS sims only
       const auto eid = this->data->make_data_id (pid, fmr::Data::Elem_n);
       const auto tid = this->data->make_data_id (pid, fmr::Data::Elem_form);
+#if 0
+      const auto nid = this->data->make_data_id (pid, fmr::Data::Node_n);
+      is_found = this->data->local_vals.count(nid) > 0;
+      const auto nds = is_found
+        ? this->data->local_vals.at(nid).data[this->sims_ix] : 0;
+#endif
       is_found = this->data->local_vals.count(eid) > 0;
       const auto els = is_found
         ? this->data->local_vals.at(eid).data[this->sims_ix] : 0;
