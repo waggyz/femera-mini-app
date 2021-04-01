@@ -425,51 +425,53 @@ int Proc:: init_task (int* argc, char** argv ){int err=0;
       // i:  -i requires an argument
       // v:: -v argument is optional NOTE gcc extension
       switch (optchar) {
-        // ignore --, so that --help does the same as -h
-        case '-':{ break; }// err = -1;
+        case '-': {break;}// ignore --, so that --help does the same as -h
 #if 0
         case '+':{ read_db_stdin = true; write_db_stdout = true;
           break; }// "-+" same as "-" "+"
 #endif
-        case 'd':{ this->log->detail = -1;
-          if( optarg!=nullptr ){ this->log->detail = atoi( optarg ); }
-          break; }
-        case 't':{ this->log->timing = -1;
-          if( optarg!=nullptr ){ this->log->timing = atoi( optarg ); }
-          break; }
-        case 'h':{
-          if(iprint){
+        case 'd': {
+          this->log->detail = -1;
+          if (optarg!=nullptr) {this->log->detail = atoi(optarg);}
+          break;}
+        case 't': {
+          this->log->timing = -1;
+          if (optarg!=nullptr) {this->log->timing = atoi(optarg);}
+          break;}
+        case 'h': {
+          if (iprint) {
             this->log->printf( build_info_txt );
             this->log->printf("\n");
             this->log->printf( help_txt );
           }
-          err=-1; break;}//return -1; }
+          err=-1; break;}
         case 'v':{
-          if( optarg==nullptr ){
-            if(iprint){
-              this->log->printf( FMR_VERSION"\n");
-              if( log->detail>0 ){
-                this->log->printf( build_info_txt );
-                if( strlen( built_by_txt ) > 0 ){
-                  this->log->printf( built_by_txt ); }
+          if (optarg==nullptr) {
+            if (iprint){
+              this->log->printf ( FMR_VERSION"\n");
+              if (log->detail>0) {
+                this->log->printf (build_info_txt);
+                if (strlen (built_by_txt) > 0) {
+                  this->log->printf (built_by_txt);
+                }
 #if 0
-                if( strlen( built_by_txt ) > 0 ){
+                if (strlen (built_by_txt ) > 0) {
                   this->log->printf( modification_txt );}
 #endif
-                this->log->printf( copyright_txt );
-                this->log->printf( build_detail_txt );
+                this->log->printf (copyright_txt);
+                this->log->printf (build_detail_txt);
               } }
-              err=-1; }//return -1; }
+              err=-1; }
           else{// handle --version like --help, but try to parse its arg to int
             char* p=nullptr;
-            const long v = strtol( optarg, &p, 10 );// base 10
-            if(* p ){// Argument is NOT an integer
-              if(iprint){ this->log->printf( FMR_VERSION"\n"); }
+            const long v = strtol (optarg, &p, 10);// base 10
+            if (*p) {// Argument is NOT an integer
+              if(iprint){ this->log->printf ( FMR_VERSION"\n"); }
               this->log->verbosity=0;
-              err=-1; }//return -1; }
+              err=-1; }
             else{// Argument is an integer
-              this->log->
-              verbosity = int( v ); } }
+              this->log->verbosity = int (v);
+            } }
           break;}
 #if 0
         // These are handled by other classes.
@@ -494,15 +496,15 @@ int Proc:: init_task (int* argc, char** argv ){int err=0;
               if (iprint){this->log->printf_err (
                 "ERROR unknown command line option character `\\x%x'.\n",
                 optopt); } }
-            err=-1;//return -1; }
+            err=-1;
           } break; }
-        default:{ break; }//return 1; }
+        default: {break;}
       }
     }// Done parsing command line options.
   // Restore getopt globals.
   argc[0]=argc2; opterr=opterr2; optopt=optopt2; optind=optind2; optarg=optarg2;
   }//end getopt omp master region
-  if (err) {return err; }
+  if (err) {return err;}
     //if( exit_now ){ return 0; }
     //NOTE Parsing non-option arguments is done by Data::int( argc,argv )/
 #if 0
@@ -528,7 +530,7 @@ int Proc:: init_task (int* argc, char** argv ){int err=0;
     // Done parsing command line.
 #endif
     // Do some sanity chcks on the options selected.
-    if (log->verbosity > FMR_VERBMAX ){
+    if (log->verbosity > FMR_VERBMAX ) {
       if (iprint){this->log->printf_err (
         "W""ARNING Requested verbosity -v%i exceeds FMR_VERBMAX %i.\n",
         log->verbosity, FMR_VERBMAX ); }
@@ -537,28 +539,31 @@ int Proc:: init_task (int* argc, char** argv ){int err=0;
         this->log->printf_err (
         "W""ARNING Set verbosity to %i.\n", FMR_VERBMAX ); }
     }
-    if (log->detail < 0 ){ log->detail = log->verbosity; }
+    if (log->detail < 0) {log->detail = log->verbosity;}
     if (log->detail > log->verbosity){
       if (iprint){this->log->printf_err (
         "W""ARNING Requested detail depth -d%i exceeds verbosity %i.\n",
-        log->detail, log->verbosity ); }
+        log->detail, log->verbosity); }
       log->detail = log->verbosity;
-      if (iprint){
+      if (iprint) {
         this->log->printf_err(
         "W""ARNING Set detail depth to %i.\n", log->verbosity); }
     }
+    if (log->timing < 0) {log->timing = log->verbosity;}
     if (log->timing > FMR_TIMELVL ){
       if (iprint){this->log->printf_err (
         "W""ARNING Requested timing depth -t%i exceeds FMR_TIMELVL %i.\n",
         log->timing, FMR_TIMELVL ); }
       log->timing = FMR_TIMELVL ;
-      if (iprint){
+      if (iprint) {
         this->log->printf_err (
         "W""ARNING Set timing detail depth to %i.\n", FMR_TIMELVL ); }
     }
 #if FMR_VERBMAX > 0
-    if (log->verbosity>0 && log->detail>0){this->log->print_heading ("Femera");}
-    if (log->verbosity>0){
+    if (log->verbosity>0 && log->detail>0) {
+      this->log->print_heading ("Femera");
+    }
+    if (log->verbosity>0) {
       std::istringstream input;
       input.str (build_info_txt);
       std::string line;
@@ -567,15 +572,16 @@ int Proc:: init_task (int* argc, char** argv ){int err=0;
       std::getline (input, line);
       this->log->label_printf ("Build info","built on %s\n",line.c_str());
     }
-    if (log->verbosity>0 && log->detail>0){
-      if (strlen (built_by_txt) > 0){
+    if (log->verbosity>0 && log->detail>0) {
+      if (strlen (built_by_txt) > 0) {
         this->log->label_printf ("Build info","%s\n",built_by_txt);
       }
       this->log->print_center ("Copyright");
       this->log->printf (copyright_txt);
       this->log->print_center ("Build details");
-      if (log->detail >= this->verblevel){this->log->printf (build_detail_txt);}
-    }
+      if (log->detail >= this->verblevel){
+        this->log->printf (build_detail_txt);
+    } }
     if (log->verbosity >= this->verblevel){
       std::string opts("");
 #ifdef FMR_HAS_HDF5
@@ -585,12 +591,12 @@ int Proc:: init_task (int* argc, char** argv ){int err=0;
       opts += " libnuma";
 #endif
       opts += "\n";
-      if (opts.size() > 1){
+      if (opts.size() > 1) {
         this->log->label_printf ("Femera opts", opts.substr(1).c_str());
     } }
 #endif
   if (!err){err= this->chck ();}
-  if (log->detail >= this->verblevel){this->print_details (); }
+  if (log->detail >= this->verblevel) {this->print_details ();}
   return err;
 }
 

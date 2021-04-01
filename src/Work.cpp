@@ -36,9 +36,9 @@ int Work::exit (int err){//TODO Why getting called a lot (after task empty)
 #ifdef FMR_DEBUG
   std::printf("*** Work::exit( %i ) %s...\n", err,this->task_name.c_str());
 #endif
+  this->print_task_time ("done");
   fmr::perf::timer_resume (&this->time);
-  if (this->task.count () > 0){
-    this->print_task_time ("done");
+  if (this->task.count () > 0) {
     err= this->task.exit_stack (err);
   }
   fmr::perf::timer_pause (&this->time);
@@ -47,22 +47,22 @@ int Work::exit (int err){//TODO Why getting called a lot (after task empty)
 std::string Work::print_summary (){
   std::string label, info("");
   const int n = this->task.count();
-  if (n == 0){
+  if (n == 0) {
     label = this->task_name+" mods";
     info  = "no modules loaded";
   }
-  for (int i=0; i<n; i++){
-    if (i==0){
+  for (int i=0; i<n; i++) {
+    if (i==0) {
       label = this->task.get<Work>(i)->task_name+" mods";
     }
     else{
       info += this->task.get<Work>(i)->task_name;
     }
-    if (this->task.get<Work>(i)->version.size()){
+    if (this->task.get<Work>(i)->version.size()) {
       info += std::string(" ");
       info += this->task.get<Work>(i)->version;
     }
-    if ((i>0) && (i+1 < n)){
+    if ((i>0) && (i+1 < n)) {
       info += std::string(", ");
   } }
   return this->proc->log->print_label_line (label, info);
@@ -70,23 +70,24 @@ std::string Work::print_summary (){
 std::string Work::print_details (){
   return this->print_summary ();
 }
-int Work::print_task_time (const std::string name_suffix){
-  if (this->proc->log->timing >= this->verblevel){
-    if (this->proc->log->verbosity >= this->verblevel){
+int Work::print_task_time (const std::string name_suffix) {
+  auto log = this->proc->log;
+  if (log->timing >= this->verblevel) {
+    if (log->verbosity >= this->verblevel) {
       const int n=this->task.count ();
-      if (this->proc->log->detail >= this->verblevel){
-        for (int i=n-1; i>=0; i--){
-          Work* W = this->task.get<Work>(i); if (W){
-            if (i>0) {fmr::perf::timer_resume (&W->time); }
+      if (log->detail >= this->verblevel) {
+        for (int i=n-1; i>=0; i--) {
+          Work* W = this->task.get<Work>(i); if (W) {
+            if (i>0) {fmr::perf::timer_resume (&W->time);}
             fmr::perf::timer_pause (&W->time);
-            std::string lab = W->task_name+" "+name_suffix;
-            this->proc->log->print_label_meter (lab, W->meter_unit, W->time);
-        } }
-      }else{
+            if (log->timing >= W->verblevel) {
+              std::string lab = W->task_name+" "+name_suffix;
+              W->proc->log->print_label_meter (lab, W->meter_unit, W->time);
+        } } } }else{
         fmr::perf::timer_resume (&this->time);
         std::string lab = this->task_name+" "+name_suffix;
-        this->proc->log->print_label_meter (lab, this->meter_unit, this->time);
-        fmr::perf::timer_pause  (&this->time);
+        log->print_label_meter (lab, this->meter_unit, this->time);
+        fmr::perf::timer_pause (&this->time);
   } } }
   return 0;
 }

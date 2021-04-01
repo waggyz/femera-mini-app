@@ -31,9 +31,7 @@ endif
 BUILD_TREE:= $(BUILD_DIR)/ $(STAGE_DIR)/ $(TEST_DIR)/
 ifndef TDD_FMRFILE
   # TDD_FMRFILE:=tests/mesh/cube-tet6p1n1.cgns
-  # TDD_FMRFILE:=tests/mesh/cube-tet6*.cgns tests/mesh/cube-tet6*.msh2 \
-  # -o'$(BUILD_DIR)/cube-tet6.cgn'
-  TDD_FMRFILE:=tests/mesh/cube-tet6*.* -o'$(BUILD_DIR)/cube-tet6.cgn'
+  TDD_FMRFILE:=tests/mesh/cube-tet?p*.* -o'$(BUILD_DIR)/cube-test.cgn'
 endif
 
 ifeq ($(shell which dot 2>/dev/null),"")# dot is part of graphviz
@@ -533,7 +531,7 @@ done : post-build-tests
 	$(info $(DONE) $(BUILT_BY_INFO_1))
 	$(info $(SPCS) $(BUILT_BY_INFO_2))
 	$(info $(SPCS) $(BUILT_BY_INFO_3))
-	$(info $(XMPL) $(MPIEXEC) "$(BUILD_DIR)/mini" -Dd \)# -n$(TDD_OMP_NP)
+	$(info $(XMPL) $(MPIEXEC) "$(BUILD_DIR)/mini" -d -t -D \)# -n$(TDD_OMP_NP)
 	$(info $(SPCS) $(TDD_FMRFILE))
 
 
