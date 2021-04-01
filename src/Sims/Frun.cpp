@@ -54,7 +54,6 @@ namespace Femera {
 //    auto geom_n = gcad_n + grid_n + mesh_n;
     //
     // add initial tasks: new Gcad/Grid/Mesh
-#if 1
     if (gcad_n > 0) {
       const auto send_type = work_cast (Plug_type::Gcad);
       for (fmr::Local_int i=0; i < gcad_n; i++) {
@@ -66,16 +65,22 @@ namespace Femera {
       for (fmr::Local_int i=0; i < grid_n; i++) {
         err= fmr::detail::main->add_new_task (send_type, this);
     } }
-#endif
     if (mesh_n > 0) {
       for (auto type : {fmr::Data::Elem_type}) {
         this->enums [type] = fmr::Enum_int_vals (type, mesh_n);
         this->data->get_enum_vals (name, this->enums.at (type));
       }
+#if 1
       for (auto type : {fmr::Data::Elem_n}) {
         this->locals [type] = fmr::Local_int_vals (type, mesh_n);
         this->data->get_local_vals (name, this->locals.at (type));
       }
+#else
+      for (auto type : {fmr::Data::Elem_sysn}) {
+        this->globals [type] = fmr::Global_int_vals (type, mesh_n);
+        this->data->get_global_vals (name, this->globals.at (type));
+      }
+#endif
       const auto send_type = work_cast (Plug_type::Mesh);
       for (fmr::Local_int i=0; i < mesh_n; i++) {
         err= fmr::detail::main->add_new_task (send_type, this);

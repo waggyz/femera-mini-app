@@ -284,8 +284,8 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
       gmsh::option::getNumber ("Mesh.NbHexahedra", optval);
       cube_n = fmr::Local_int(optval); mesh_n += (optval > zero) ? 1 : 0;
       if (mesh_n > 0) {// Cache these. //TODO only when Partition::Join ?
+#if 1
         const auto eid = this->make_data_id (data_id, fmr::Data::Elem_n);
-        const auto tid = this->make_data_id (data_id, fmr::Data::Elem_form);
         {//TODO Refactor into a function. ------------------------------------
           is_found = this->data->local_vals.count(eid) > 0;
           if (!is_found) {this->data->local_vals[eid]
@@ -294,11 +294,27 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
             //TODO Resize if != mesh_n ?
             this->data->local_vals[eid].data.resize (mesh_n);//TODO clears it
           }
+        }
+        auto elems =& this->data->local_vals[eid].data[0];
+#else
+        const auto sid = this->make_data_id (name, fmr::Data::Elem_sysn);
+        {
+          is_found = this->data->global_vals.count(sid) > 0;
+          if (!is_found) {this->data->global_vals[sid]
+            = fmr::Global_int_vals (fmr::Data::Elem_sysn, mesh_n);
+          }else if (this->data->global_vals[sid].data.size() < mesh_n) {
+            //TODO Resize if != mesh_n ?
+            this->data->global_vals[sid].data.resize (mesh_n);//TODO clears it
+          }
+        }
+        auto elall =& this->data->global_vals[sid].data[0];
+#endif
 #ifdef FMR_DEBUG
           log->label_fprintf (log->fmrerr,"*** Dmsh","%s size is %u.\n",
-            eid.c_str(), this->data->local_vals[eid].data.size());
+            eid.c_str(), this->data->global_vals[eid].data.size());
 #endif
-        }{//-------------------------------------------------------------------
+        const auto tid = this->make_data_id (data_id, fmr::Data::Elem_form);
+        {//-------------------------------------------------------------------
           is_found = this->data->enum_vals.count(tid) > 0;
           if (!is_found) {this->data->enum_vals[tid]
             = fmr::Enum_int_vals (fmr::Data::Elem_form, mesh_n);
@@ -321,7 +337,6 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
         }
         const auto elem_p = fmr::Dim_int(optval);
 #endif
-        auto elems =& this->data->local_vals[eid].data[0];
         auto types =& this->data->enum_vals[tid].data[0];
         fmr::Local_int i=0;
         if (tris_n > 0) {

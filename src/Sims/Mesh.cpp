@@ -29,26 +29,34 @@ namespace Femera {
     if (log->detail >= this->verblevel) {
       bool is_found=false;
       const auto pid = this->parent->model_name;//TODO XS sims only
-      const auto eid = this->data->make_data_id (pid, fmr::Data::Elem_n);
       const auto tid = this->data->make_data_id (pid, fmr::Data::Elem_form);
-#if 0
+#if 1
       const auto nid = this->data->make_data_id (pid, fmr::Data::Node_n);
       is_found = this->data->local_vals.count(nid) > 0;
       const auto nds = is_found
         ? this->data->local_vals.at(nid).data[this->sims_ix] : 0;
 #endif
+#if 1
+      const auto eid = this->data->make_data_id (pid, fmr::Data::Elem_n);
       is_found = this->data->local_vals.count(eid) > 0;
       const auto els = is_found
         ? this->data->local_vals.at(eid).data[this->sims_ix] : 0;
+#else
+      const auto sid = this->data->make_data_id (name, fmr::Data::Elem_sysn);
+      is_found = this->data->global_vals.count(sid) > 0;
+      const auto elall = is_found
+        ? this->data->global_vals.at(sid).data[this->sims_ix] : 0;
+#endif
       is_found = this->data->enum_vals.count(tid) > 0;
       const auto type = is_found
         ? fmr::Elem_form(this->data->enum_vals.at(tid).data[this->sims_ix])
         : fmr::Elem_form::Unknown;
       fmr::perf::timer_pause (& this->time);
       const std::string label = this->task_name+" prep";
-      log->label_fprintf (log->fmrout, label.c_str(), "%s: %u %s\n",
+      log->label_fprintf (log->fmrout, label.c_str(), "%s: %u %s, %u node%s\n",
         name.c_str(), els,
-        fmr::get_enum_string(fmr::elem_form_name,type).c_str());
+        fmr::get_enum_string(fmr::elem_form_name,type).c_str(),
+        nds, (nds==1)?"":"s");
       fmr::perf::timer_resume (& this->time);
     }
     //
