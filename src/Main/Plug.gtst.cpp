@@ -12,7 +12,7 @@ TEST( Sims, SizeofSimsGE224 ){
 }
 
 int main(int argc, char** argv ){
-  // gtest run_all_tests is done during frm::exit(err).
+  // gtest run_all_tests is done during fmr::exit(err).
   return fmr::exit (fmr::init (&argc,argv) );
 }
 #else

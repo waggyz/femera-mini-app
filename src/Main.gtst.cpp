@@ -125,7 +125,7 @@ TEST( ProcMPI, IntValarrayGatherTest ){
 #endif
 
 int main(int argc, char** argv ){int err=0;
-  // gtest run_all_tests is done during frm::exit(err).
+  // gtest run_all_tests is done during fmr::exit(err).
   err=fmr:: init (&argc,argv);
   fmr_proc = fmr::detail::main->proc;;
   return fmr:: exit ( err );
