@@ -14,7 +14,7 @@ Then, build and check the executable `femera-<cpumodel>-gcc` using the make targ
 
 ```bash
 make -j test
-``` 
+```
 
 *Make a note of the name of the executables built.* The examples here assume you're using the Gnu compiler collection (gcc).
 
@@ -69,6 +69,8 @@ gmsh -refine -o "neper/cubic"$N"s1p1.msh2" "neper/cubic"$N".msh"
 ./femera-$CPUMODEL-gcc -v2 -c $C -s1 -p "neper/cubic"$N"s1p1"
 ```
 
+Note that the reported modulus error represents the discrepency between the model response and and a theoretical estimate for an infinite polycrstal. It should go to zero in the limit as the number of grains approaches infiniity.
+
 ## Mini-App Files
 
 `femera.h` `femera-mini.cc` Set compile-time constants in the header file (though most of these don't work). The femera-mini executable parses a partitioned set of `.fmr` files having the provided base name.  It supports a few command line options.
@@ -92,7 +94,7 @@ gmsh -refine -o "neper/cubic"$N"s1p1.msh2" "neper/cubic"$N".msh"
 
 `elem.h` `elem.cc` `elem-tet.cc` An Elem instance contains a single mesh partition. The mini-app only supports first-, second-, and 20-node incomplete third- order tetrahedral elements at present.
 
-`phys.h` `phys.cc` `elas-iso3*.cc` `elas-ort3*.cc` `elas-ther-iso3*.cc` `elas-ther-ort3*.cc` Linear-elastic and thermoelastic models implement both tensor train and (eventually) the more traditional local matrix evaluation approaches. Two preconditioners are also provided. Reference, optimized, and vectorized (AVX, non-thermo only) versions are available. 
+`phys.h` `phys.cc` `elas-iso3*.cc` `elas-ort3*.cc` `elas-ther-iso3*.cc` `elas-ther-ort3*.cc` Linear-elastic and thermoelastic models implement both tensor train and (eventually) the more traditional local matrix evaluation approaches. Two preconditioners are also provided. Reference, optimized, and vectorized (AVX, non-thermo only) versions are available.
 
 `solv.h` `solv.cc` `halo-pcg-omp.cc` `halo-ncg-omp.cc` Implement preconditioned conjugate gradient and an experimental nonlinear cojugate gradient solver.
 
@@ -110,7 +112,7 @@ These are not necessary for compiling the Mini-App.
  * `-v<int>` Verbosity level [default: 1]; set higher to see details of each partition.
 
  Boundary conditions may be applied to nodes specified by node number, Gmsh physical ID of linear or surface elements, or by location within a plane.
- 
+
  * `-n<int>` Apply boundary condition or load to node with Gmsh ID `<int>`.  *IMPORTANT NOTE* not tested.
  * `-t<int>` Apply boundary condition or load to nodes that are in lines and surfaces tagged with Gmsh physical ID `<int>`.
  * `-x@<float>`  `-y@<float>`  `-z@<float>` Apply boundary condition or load to nodes located in a specified plane at, e.g., x=`<float>`.
