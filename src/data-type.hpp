@@ -116,6 +116,21 @@ namespace fmr {//TODO? namespace data {
     "Cube",
     "Elem_form end marker"
   };
+  static const std::array<fmr::Dim_int,enum2val(Elem_form::end)+1>
+    elem_form_d ={
+    0,//"no element shape",
+    0,//"element shape error",
+    0,//"unknown element shape",
+    0,//"user-defined element shape",
+    //
+    0,//"Node",
+    1,//"Line",
+    2,//"Tris",
+    3,//"Tets",
+    //
+    3,//"Cube",
+    0 //"Elem_form end marker"
+  };
 #if 1
   enum class Elem : Enum_int {None=0, Error, Unknown,//TODO
     Bars,    // Beam

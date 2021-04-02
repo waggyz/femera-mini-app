@@ -21,6 +21,7 @@
   fmr::Vals_type::Global,
      fmr::Vals_type::Local,
   fmr::Vals_type::Enum,
+fmr::Vals_type::Dim,
   fmr::Vals_type::Enum,
 fmr::Vals_type::Local,
 fmr::Vals_type::Local,

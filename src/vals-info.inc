@@ -21,6 +21,7 @@
 "total number of unstructured mesh elements",
  "local number of unstructured mesh elements",
   "element or cell shape (enum)",
+   "element shape function polynomial degree",
   "unstructured mesh element type (TODO elid)",
  "number of nodes / elem",
  "number of jacobians / elem",

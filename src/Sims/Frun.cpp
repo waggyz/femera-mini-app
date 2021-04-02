@@ -186,13 +186,33 @@ namespace Femera {
     const auto geom_n = this->task.count ();
 #endif
     if (geom_n > 0) {
+//      const auto frun_d
+//        = this->parent->dims.at (fmr::Data::Geom_d).data [this->sims_ix];
       for (int i=0; i < geom_n; i++) {// Run serially.
         const auto G = this->task.get<Sims>(i);
         if (G) {
           G->sims_ix = i;
           G->model_name
             = this->model_name + ":" + G->task_name+"_"+std::to_string(i);
+#if 0
+          // Initially, prep only meshes/grids/gcads matching the overall model
+          // dimension.
+          fmr::Dim_int geom_d=0;
+          if (this->enums.count (fmr::Data::Elem_form) > 0) {
+            const auto form_i = this->enums.at (fmr::Data::Elem_form).data [i];
+            geom_d = fmr::elem_form_d[form_i];
+#if 1 //def FMR_DEBUG
+            log->label_fprintf(log->fmrout, "**** Frun Geom",
+              "frun_d %u, geom_d %u, elem_form:%u\n", frun_d, geom_d, form_i);
+#endif
+          }
+          //TODO Handle grids and gcads.
+          if (geom_d == frun_d && geom_d > 0) {
+            err+= (G->prep () > 0) ? 1 : 0 ;
+          }
+#else
           err+= (G->prep () > 0) ? 1 : 0 ;
+#endif
         }else{
           err++;
           log->printf_err ("ERROR %s %s mesh/grid/gcad %i is NULL.\n",
