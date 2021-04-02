@@ -29,7 +29,6 @@ namespace Femera {
     if (log->detail >= this->verblevel) {
       bool is_found=false;
       const auto pid = this->parent->model_name;//TODO XS sims only
-      const auto tid = this->data->make_data_id (pid, fmr::Data::Elem_form);
 #if 1
       const auto nid = this->data->make_data_id (pid, fmr::Data::Node_n);
       is_found = this->data->local_vals.count(nid) > 0;
@@ -47,6 +46,7 @@ namespace Femera {
       const auto elall = is_found
         ? this->data->global_vals.at(sid).data[this->sims_ix] : 0;
 #endif
+      const auto tid = this->data->make_data_id (pid, fmr::Data::Elem_form);
       is_found = this->data->enum_vals.count(tid) > 0;
       const auto type = is_found
         ? fmr::Elem_form(this->data->enum_vals.at(tid).data[this->sims_ix])

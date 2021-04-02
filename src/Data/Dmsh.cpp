@@ -284,7 +284,6 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
       gmsh::option::getNumber ("Mesh.NbHexahedra", optval);
       cube_n = fmr::Local_int(optval); mesh_n += (optval > zero) ? 1 : 0;
       if (mesh_n > 0) {// Cache these. //TODO only when Partition::Join ?
-#if 1
         const auto eid = this->make_data_id (data_id, fmr::Data::Elem_n);
         {//TODO Refactor into a function. ------------------------------------
           is_found = this->data->local_vals.count(eid) > 0;
@@ -296,19 +295,6 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
           }
         }
         auto elems =& this->data->local_vals[eid].data[0];
-#else
-        const auto sid = this->make_data_id (name, fmr::Data::Elem_sysn);
-        {
-          is_found = this->data->global_vals.count(sid) > 0;
-          if (!is_found) {this->data->global_vals[sid]
-            = fmr::Global_int_vals (fmr::Data::Elem_sysn, mesh_n);
-          }else if (this->data->global_vals[sid].data.size() < mesh_n) {
-            //TODO Resize if != mesh_n ?
-            this->data->global_vals[sid].data.resize (mesh_n);//TODO clears it
-          }
-        }
-        auto elall =& this->data->global_vals[sid].data[0];
-#endif
 #ifdef FMR_DEBUG
           log->label_fprintf (log->fmrerr,"*** Dmsh","%s size is %u.\n",
             eid.c_str(), this->data->global_vals[eid].data.size());

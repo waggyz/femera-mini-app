@@ -199,24 +199,23 @@ namespace Femera {
             this->task_name.c_str(), this->model_name.c_str(), i);
     } } }
 #if 1
-    if (geom_n > 0) {// Sleep for a rough estimate of solve time.
-      for (uint i=0; i < uint(geom_n); i++) {// mesh_n+grid_n+gcad_n
-        //TODO only run 3D elem meshes
-        double dof = 10e3;
-        if (this->locals.count (fmr::Data::Node_n) > 0) {
-          if (i < this->locals.at (fmr::Data::Node_n).data.size()) {
-            dof = 3.0 * double(this->locals.at (fmr::Data::Node_n).data [i]);
-        } }
-        const double iters = 0.01 * dof;
-        const double speed = 1e9 / 40.0;// dof/s Skylake XS sim solve speed
-        const double  secs = iters * dof / speed;
-#if 0
-        if (log->detail >= this->verblevel) {
-          log->label_fprintf(log->fmrout, "Frun zzzz", "%g s...\n", secs);
-        }
-#endif
-        usleep (int (1e6 * secs));
+    double dof = 10e3;
+    if (this->parent->globals.count (fmr::Data::Node_sysn) > 0) {
+      if (this->sims_ix < this->parent->globals.at
+        (fmr::Data::Node_sysn).data.size()) {
+        dof = 3.0 * double(this->parent->globals.at
+          (fmr::Data::Node_sysn).data [this->sims_ix]);
     } }
+    const double iters = 0.01 * dof;
+    const double speed = 1e9 / 40.0;// dof/s Skylake XS sim solve speed
+    const double  secs = iters * dof / speed;
+#if 1
+    if (log->detail >= this->verblevel) {
+      log->label_fprintf(log->fmrout, "Frun ZZZZ", "%i: sleep %g s...\n",
+      this->sims_ix, secs);
+    }
+#endif
+    usleep (int (1e6 * secs));
 #endif
 #if 0
     Proc* P = this->proc->hier[send.hier_lv];
