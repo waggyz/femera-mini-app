@@ -69,7 +69,7 @@ gmsh -refine -o "neper/cubic"$N"s1p1.msh2" "neper/cubic"$N".msh"
 ./femera-$CPUMODEL-gcc -v2 -c $C -s1 -p "neper/cubic"$N"s1p1"
 ```
 
-Note that the reported modulus error represents the discrepency between the model response and and a theoretical estimate for an infinite polycrstal. It should go to zero in the limit as the number of grains approaches infiniity.
+Note that the reported modulus error represents the discrepancy between the model response and and a theoretical estimate for an infinite polycrystal. It should go to zero in the limit as the number of grains approaches infinity.
 
 ## Mini-App Files
 
