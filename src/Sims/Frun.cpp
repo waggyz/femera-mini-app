@@ -70,21 +70,42 @@ namespace Femera {
         this->enums [type] = fmr::Enum_int_vals (type, mesh_n);
         this->data->get_enum_vals (name, this->enums.at (type));
       }
-#if 1
       for (auto type : {fmr::Data::Elem_n}) {
         this->locals [type] = fmr::Local_int_vals (type, mesh_n);
         this->data->get_local_vals (name, this->locals.at (type));
       }
-#else
-      for (auto type : {fmr::Data::Elem_sysn}) {
-        this->globals [type] = fmr::Global_int_vals (type, mesh_n);
-        this->data->get_global_vals (name, this->globals.at (type));
-      }
+#if 0
+      if (submesh_n > 0) {
+        for (auto type : {fmr::Data::Node_sysn, fmr::Data::Elem_sysn}) {
+          this->globals [type] = fmr::Global_int_vals (type, mesh_n);
+          this->data->get_global_vals (name, this->globals.at (type));
+      } }
 #endif
       const auto send_type = work_cast (Plug_type::Mesh);
       for (fmr::Local_int i=0; i < mesh_n; i++) {
         err= fmr::detail::main->add_new_task (send_type, this);
     } }
+#if 0
+    const auto send_type = work_cast (Plug_type::Mesh);
+    const auto geom_n = this->task.count (send_type);
+#else
+    const auto geom_n = this->task.count ();
+#endif
+    if (geom_n > 0) {
+//      const auto frun_d
+//        = this->parent->dims.at (fmr::Data::Geom_d).data [this->sims_ix];
+      for (int i=0; i < geom_n; i++) {// Run serially.
+        const auto G = this->task.get<Sims>(i);
+        if (G) {
+          G->sims_ix = i;
+          G->model_name
+            = this->model_name + ":" + G->task_name+"_"+std::to_string(i);
+          err+= (G->prep () > 0) ? 1 : 0 ;
+        }else{
+          err++;
+          log->printf_err ("ERROR %s %s mesh/grid/gcad %i is NULL.\n",
+            this->task_name.c_str(), this->model_name.c_str(), i);
+    } } }
 #if 0
     this->data_id
       = this->data->make_data_id (this->model_name, fmr::Tree_type::Sims,{});
@@ -179,45 +200,6 @@ namespace Femera {
     const auto log = this->proc->log;
     err= this->prep ();
 //    if (err) {return err;}//TODO early return segfaults
-#if 0
-    const auto send_type = work_cast (Plug_type::Mesh);
-    const auto geom_n = this->task.count (send_type);
-#else
-    const auto geom_n = this->task.count ();
-#endif
-    if (geom_n > 0) {
-//      const auto frun_d
-//        = this->parent->dims.at (fmr::Data::Geom_d).data [this->sims_ix];
-      for (int i=0; i < geom_n; i++) {// Run serially.
-        const auto G = this->task.get<Sims>(i);
-        if (G) {
-          G->sims_ix = i;
-          G->model_name
-            = this->model_name + ":" + G->task_name+"_"+std::to_string(i);
-#if 0
-          // Initially, prep only meshes/grids/gcads matching the overall model
-          // dimension.
-          fmr::Dim_int geom_d=0;
-          if (this->enums.count (fmr::Data::Elem_form) > 0) {
-            const auto form_i = this->enums.at (fmr::Data::Elem_form).data [i];
-            geom_d = fmr::elem_form_d[form_i];
-#if 1 //def FMR_DEBUG
-            log->label_fprintf(log->fmrout, "**** Frun Geom",
-              "frun_d %u, geom_d %u, elem_form:%u\n", frun_d, geom_d, form_i);
-#endif
-          }
-          //TODO Handle grids and gcads.
-          if (geom_d == frun_d && geom_d > 0) {
-            err+= (G->prep () > 0) ? 1 : 0 ;
-          }
-#else
-          err+= (G->prep () > 0) ? 1 : 0 ;
-#endif
-        }else{
-          err++;
-          log->printf_err ("ERROR %s %s mesh/grid/gcad %i is NULL.\n",
-            this->task_name.c_str(), this->model_name.c_str(), i);
-    } } }
 #if 1
     double dof = 10e3;
     if (this->parent->globals.count (fmr::Data::Node_sysn) > 0) {
@@ -268,13 +250,16 @@ namespace Femera {
     }
 #endif
     //...
+#if 0
     if (geom_n > 0) {
       for (int i=0; i < geom_n; i++) {//TODO need barrier before this?
         const auto G = this->task.get<Sims>(i);
         if (G) {err= G->exit (err);}
     } }
+#else
     fmr::perf::timer_resume (& this->time);
     return this->exit(err);//TODO need barrier before this?
+#endif
   }
 #if 0
   int Frun::init_task (int*, char**){int err=0;//TODO call this?

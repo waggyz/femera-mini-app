@@ -17,6 +17,7 @@ class Sims : public Work {// simulation collection manager
    * (e.g. MPI team, OpenMP, or GPU) level.
    */
   // typedefs ----------------------------------------------------------------
+  typedef std::vector<fmr::Data> Data_list;
   // member variables --------------------------------------------------------
   // this->task contains Frun instances to run sims distributed by this Sims.
   public:
@@ -44,7 +45,7 @@ class Sims : public Work {// simulation collection manager
     std::string model_name ="";// Set in prep(), if not before.
     std::deque<std::string> model_list ={};
     //
-    fmr::Distribute from//TODO from => here ?
+    fmr::Distribute from//TODO chage "from" to "here" ?
       = {1, fmr::Schedule::List, fmr::Concurrency::Independent};
     fmr::Distribute send
       = {2, fmr::Schedule::Fifo, fmr::Concurrency::Independent};
@@ -52,9 +53,10 @@ class Sims : public Work {// simulation collection manager
     fmr::Local_int sims_ix = 0;// collection number
     fmr::Sim_size sims_size = fmr::Sim_size::XS;//TODO fmr::Sim_size::Unknown
   protected:
-    fmr::Partition  part_type = fmr::Partition::None;
+    Data_list data_list = {};
+    fmr::Partition part_type = fmr::Partition::None;
     //
-    fmr::Dim_int   tree_lv = 0;// sim/sim collection depth
+    fmr::Dim_int tree_lv = 0;// sim/sim collection depth
   // methods -----------------------------------------------------------------
   public:
     virtual int add   (const std::string model_name);

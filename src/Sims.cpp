@@ -12,6 +12,12 @@ namespace Femera {
     this->verblevel = 2;
     this->meter_unit="sim";
     //this-> parent = this;//TODO leave as nullptr or set to this?
+    this->data_list = {
+      fmr::Data::Geom_d,    fmr::Data::Phys_d,
+      fmr::Data::Gset_n,    fmr::Data::Part_n,    fmr::Data::Mesh_n,
+      fmr::Data::Grid_n,    fmr::Data::Gcad_n,    fmr::Data::Mtrl_n,
+      fmr::Data::Elem_sysn, fmr::Data::Node_sysn, fmr::Data::Dofs_sysn
+    };
   }
   fmr::Local_int Sims::get_sims_n (){// number of collections loaded
     return this->task.count (Base_type::Sims);
@@ -146,6 +152,24 @@ namespace Femera {
         }
         fmr::perf::timer_resume (& this->time);
       }
+      for (auto type : this->data_list) {
+        switch (fmr::vals_type [fmr::enum2val (type)]) {
+          case fmr::Vals_type::Dim :
+            this->dims [type] = fmr::Dim_int_vals (type, sim_n); break;
+          case fmr::Vals_type::Enum :
+            this->enums [type] = fmr::Enum_int_vals (type, sim_n); break;
+          case fmr::Vals_type::Local :
+            this->locals [type] = fmr::Local_int_vals (type, sim_n); break;
+          case fmr::Vals_type::Global :
+            this->globals [type] = fmr::Global_int_vals (type, sim_n); break;
+          default : {}//TODO Do nothing?
+      } }
+      this->enums [fmr::Data::Part_type] = fmr::Enum_int_vals
+        (fmr::Data::Part_type, sim_n, fmr::enum2val (this->part_type));
+      //this->data_list.push_back(fmr::Data::Part_type);
+      this->enums [fmr::Data::Time_type] = fmr::Enum_int_vals
+        (fmr::Data::Time_type, sim_n, fmr::enum2val (fmr::Sim_time::Implicit));
+      //this->data_list.push_back(fmr::Data::Time_type);
 #if 0
       this->enums  [fmr::Data::Sims_type] = fmr::Enum_int_vals (// Collection
         fmr::Data::Sims_type, sims_n, enum2val (fmr::Sims_type::TODO));// type
@@ -154,29 +178,7 @@ namespace Femera {
       this->locals [fmr::Data::Part_halo_n] = fmr::Local_int_vals (
         fmr::Data::Part_halo_n, sim_n,0);
 #endif
-      this->dims [fmr::Data::Geom_d]
-        = fmr::Dim_int_vals (fmr::Data::Geom_d, sim_n);
-      this->enums [fmr::Data::Part_type] = fmr::Enum_int_vals
-        (fmr::Data::Part_type, sim_n, fmr::enum2val (this->part_type));
-      this->locals [fmr::Data::Gset_n]
-        = fmr::Local_int_vals (fmr::Data::Gset_n, sim_n);
-      this->locals [fmr::Data::Part_n]
-        = fmr::Local_int_vals (fmr::Data::Part_n, sim_n);
-      this->locals [fmr::Data::Mesh_n]
-        = fmr::Local_int_vals (fmr::Data::Mesh_n, sim_n);
-      this->locals [fmr::Data::Grid_n]
-        = fmr::Local_int_vals (fmr::Data::Grid_n, sim_n);
-      this->locals [fmr::Data::Gcad_n]
-        = fmr::Local_int_vals (fmr::Data::Gcad_n, sim_n);
-      this->globals [fmr::Data::Node_sysn]
-        = fmr::Global_int_vals (fmr::Data::Node_sysn, sim_n);
       //
-      this->dims [fmr::Data::Phys_d]
-        = fmr::Dim_int_vals (fmr::Data::Phys_d, sim_n);
-      this->enums [fmr::Data::Time_type] = fmr::Enum_int_vals
-        (fmr::Data::Time_type, sim_n, fmr::enum2val (fmr::Sim_time::Implicit));
-      this->locals [fmr::Data::Mtrl_n]
-        = fmr::Local_int_vals (fmr::Data::Mtrl_n, sim_n);
       fmr::perf::timer_pause (& this->time);
     }
     return err;
@@ -194,6 +196,8 @@ namespace Femera {
         "ERR""OR Sims::run() no sims found in collection %s\n", name.c_str());
       return 1;
     }
+#if 0
+//TODO do this here or in prep?
     this->data->get_dim_vals   (name, this->dims.at   (fmr::Data::Geom_d));
 //    this->data->get_enum_vals  (name, this->enums.at  (fmr::Data::Part_type));
     this->data->get_local_vals (name, this->locals.at (fmr::Data::Gset_n));
@@ -201,8 +205,23 @@ namespace Femera {
     this->data->get_local_vals (name, this->locals.at (fmr::Data::Mesh_n));
     this->data->get_local_vals (name, this->locals.at (fmr::Data::Grid_n));
     this->data->get_local_vals (name, this->locals.at (fmr::Data::Gcad_n));
+    this->data->get_global_vals (name, this->globals.at (fmr::Data::Elem_sysn));
     this->data->get_global_vals (name, this->globals.at (fmr::Data::Node_sysn));
-    //
+    this->data->get_global_vals (name, this->globals.at (fmr::Data::Dofs_sysn));
+#else
+      for (auto type : this->data_list) {
+        switch (fmr::vals_type [fmr::enum2val (type)]) {
+          case fmr::Vals_type::Dim :
+            this->data->get_dim_vals (name, this->dims.at (type)); break;
+          case fmr::Vals_type::Enum :
+            this->data->get_enum_vals (name, this->enums.at (type)); break;
+          case fmr::Vals_type::Local :
+            this->data->get_local_vals (name, this->locals.at (type)); break;
+          case fmr::Vals_type::Global :
+            this->data->get_global_vals (name, this->globals.at (type)); break;
+          default : {}//TODO Do nothing?
+      } }
+#endif
     if (this->send.hier_lv > this->from.hier_lv
       && Psend->task_name =="OpenMP") {
       FMR_PRAGMA_OMP(omp parallel reduction(+:err)) {
@@ -233,23 +252,28 @@ namespace Femera {
             R->sims_ix = sim_i;
             if (log->detail >= this->verblevel) {
               fmr::perf::timer_pause (& this->time);
-              const auto geom_d =this->dims.at  (fmr::Data::Geom_d).data[sim_i];
-              const auto gset_n =this->locals.at(fmr::Data::Gset_n).data[sim_i];
-              const auto part_n =this->locals.at(fmr::Data::Part_n).data[sim_i];
-              const auto mesh_n =this->locals.at(fmr::Data::Mesh_n).data[sim_i];
-              const auto grid_n =this->locals.at(fmr::Data::Grid_n).data[sim_i];
-              const auto gcad_n =this->locals.at(fmr::Data::Gcad_n).data[sim_i];
-              const auto node_n
-                = this->globals.at(fmr::Data::Node_sysn).data[sim_i];
-              std::string label = std::to_string(geom_d)+ "D "
+              const auto geom_d = this->dims.at (fmr::Data::Geom_d).data[sim_i];
+              const auto gset_n = locals.at(fmr::Data::Gset_n).data[sim_i];
+              const auto part_n = locals.at(fmr::Data::Part_n).data[sim_i];
+              const auto mesh_n = locals.at(fmr::Data::Mesh_n).data[sim_i];
+              const auto grid_n = locals.at(fmr::Data::Grid_n).data[sim_i];
+              const auto gcad_n = locals.at(fmr::Data::Gcad_n).data[sim_i];
+              const auto elem_n = globals.at(fmr::Data::Elem_sysn).data[sim_i];
+              const auto node_n = globals.at(fmr::Data::Node_sysn).data[sim_i];
+              const auto dofs_n = globals.at(fmr::Data::Dofs_sysn).data[sim_i];
+              const std::string label = std::to_string(geom_d)+ "D "
                 + this->task_name+" "+R->task_name;
               log->label_fprintf (log->fmrout, label.c_str(),
-                "%u: %u gset%s, %u part%s, %u CAD%s, %u grid%s, %u mesh%s, "
-                "%lu node%s\n",
-                sim_i,// R->model_name.c_str(),
-                gset_n, (gset_n==1) ? "":"s",  part_n, (part_n==1) ? "":"s",
-                gcad_n, (gcad_n==1) ? "":"s",  grid_n, (grid_n==1) ? "":"s",
-                mesh_n, (mesh_n==1) ? "":"es", node_n, (node_n==1) ? "":"s");
+                "%u:sys %lu elem%s, %lu node%s, %lu DOF%s in %s\n",
+                sim_i,
+                elem_n,(elem_n==1) ? "":"s", node_n,(node_n==1) ? "":"s",
+                dofs_n,(dofs_n==1) ? "":"s", R->model_name.c_str());
+              log->label_fprintf (log->fmrout, label.c_str(),
+                "%u:run %u gset%s, %u part%s, %u CAD%s, %u grid%s, %u mesh%s\n",
+                sim_i,
+                gset_n, (gset_n==1) ? "":"s", part_n, (part_n==1) ? "":"s",
+                gcad_n, (gcad_n==1) ? "":"s", grid_n, (grid_n==1) ? "":"s",
+                mesh_n, (mesh_n==1) ? "":"es");
               fmr::perf::timer_resume (& this->time);
             }
           //TODO Should this timing include lower-level runtime?

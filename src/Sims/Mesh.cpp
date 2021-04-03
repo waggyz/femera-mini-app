@@ -48,17 +48,10 @@ namespace Femera {
         const auto nds = is_found
           ? this->data->local_vals.at(nid).data[this->sims_ix] : 0;
 #endif
-#if 1
         const auto eid = this->data->make_data_id (pid, fmr::Data::Elem_n);
         is_found = this->data->local_vals.count(eid) > 0;
         const auto els = is_found
           ? this->data->local_vals.at(eid).data[this->sims_ix] : 0;
-#else
-        const auto sid = this->data->make_data_id (name, fmr::Data::Elem_sysn);
-        is_found = this->data->global_vals.count(sid) > 0;
-        const auto elall = is_found
-          ? this->data->global_vals.at(sid).data[this->sims_ix] : 0;
-#endif
 //      const auto tid = this->data->make_data_id (pid, fmr::Data::Elem_form);
 //      is_found = this->data->enum_vals.count(tid) > 0;
 //      const auto form = is_found

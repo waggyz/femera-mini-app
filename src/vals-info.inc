@@ -43,3 +43,4 @@
    "degrees of freedom / node",
  "number of materials",
   "type of physics (enum)",
+"total degrees of freedom in the model",
