@@ -10,7 +10,7 @@
 namespace Femera {
 class Frun final : public Sims {//TODO Problably NOT derived from Sims or Work.
   //TODO Change Sims to Exec? Algo?
-  /* This simulation scheduler runs all of the sims that have been pre-loaded
+  /* This simulation scheduler runs all of the tasks that have been pre-loaded
    * into its task stack.
    */
   // typedefs ---------------------------------------------------------------

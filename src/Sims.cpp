@@ -196,32 +196,18 @@ namespace Femera {
         "ERR""OR Sims::run() no sims found in collection %s\n", name.c_str());
       return 1;
     }
-#if 0
-//TODO do this here or in prep?
-    this->data->get_dim_vals   (name, this->dims.at   (fmr::Data::Geom_d));
-//    this->data->get_enum_vals  (name, this->enums.at  (fmr::Data::Part_type));
-    this->data->get_local_vals (name, this->locals.at (fmr::Data::Gset_n));
-    this->data->get_local_vals (name, this->locals.at (fmr::Data::Part_n));
-    this->data->get_local_vals (name, this->locals.at (fmr::Data::Mesh_n));
-    this->data->get_local_vals (name, this->locals.at (fmr::Data::Grid_n));
-    this->data->get_local_vals (name, this->locals.at (fmr::Data::Gcad_n));
-    this->data->get_global_vals (name, this->globals.at (fmr::Data::Elem_sysn));
-    this->data->get_global_vals (name, this->globals.at (fmr::Data::Node_sysn));
-    this->data->get_global_vals (name, this->globals.at (fmr::Data::Dofs_sysn));
-#else
-      for (auto type : this->data_list) {
-        switch (fmr::vals_type [fmr::enum2val (type)]) {
-          case fmr::Vals_type::Dim :
-            this->data->get_dim_vals (name, this->dims.at (type)); break;
-          case fmr::Vals_type::Enum :
-            this->data->get_enum_vals (name, this->enums.at (type)); break;
-          case fmr::Vals_type::Local :
-            this->data->get_local_vals (name, this->locals.at (type)); break;
-          case fmr::Vals_type::Global :
-            this->data->get_global_vals (name, this->globals.at (type)); break;
-          default : {}//TODO Do nothing?
-      } }
-#endif
+    for (auto type : this->data_list) {
+      switch (fmr::vals_type [fmr::enum2val (type)]) {
+        case fmr::Vals_type::Dim :
+          this->data->get_dim_vals (name, this->dims.at (type)); break;
+        case fmr::Vals_type::Enum :
+          this->data->get_enum_vals (name, this->enums.at (type)); break;
+        case fmr::Vals_type::Local :
+          this->data->get_local_vals (name, this->locals.at (type)); break;
+        case fmr::Vals_type::Global :
+          this->data->get_global_vals (name, this->globals.at (type)); break;
+        default : {}//TODO Do nothing?
+    } }
     if (this->send.hier_lv > this->from.hier_lv
       && Psend->task_name =="OpenMP") {
       FMR_PRAGMA_OMP(omp parallel reduction(+:err)) {
@@ -229,7 +215,7 @@ namespace Femera {
         fmr::Local_int sim_i=0;
         const auto R = this->task.get<Sims>(Psend->get_proc_id());
         bool do_abort = false;
-        while (!this->model_list.empty() && !do_abort) {// Run XS sims, FIFO.
+        while (!this->model_list.empty() && !do_abort) {// Run XS sims
           do_abort = false;
           FMR_PRAGMA_OMP(omp critical) {
             switch (this->send.plan) {
@@ -252,7 +238,7 @@ namespace Femera {
             R->sims_ix = sim_i;
             if (log->detail >= this->verblevel) {
               fmr::perf::timer_pause (& this->time);
-              const auto geom_d = this->dims.at (fmr::Data::Geom_d).data[sim_i];
+              const auto  geo_d = this->dims.at (fmr::Data::Geom_d).data[sim_i];
               const auto gset_n = locals.at(fmr::Data::Gset_n).data[sim_i];
               const auto part_n = locals.at(fmr::Data::Part_n).data[sim_i];
               const auto mesh_n = locals.at(fmr::Data::Mesh_n).data[sim_i];
@@ -261,19 +247,21 @@ namespace Femera {
               const auto elem_n = globals.at(fmr::Data::Elem_sysn).data[sim_i];
               const auto node_n = globals.at(fmr::Data::Node_sysn).data[sim_i];
               const auto dofs_n = globals.at(fmr::Data::Dofs_sysn).data[sim_i];
-              const std::string label = std::to_string(geom_d)+ "D "
-                + this->task_name+" "+R->task_name;
+              const auto szshort = fmr::get_enum_string (fmr::Sim_size_short,
+                this->sims_size);
+              const std::string label = std::to_string(geo_d)+ "D "
+                + szshort+" " + this->task_name+" "+R->task_name;
               log->label_fprintf (log->fmrout, label.c_str(),
                 "%u:sys %lu elem%s, %lu node%s, %lu DOF%s in %s\n",
                 sim_i,
-                elem_n,(elem_n==1) ? "":"s", node_n,(node_n==1) ? "":"s",
-                dofs_n,(dofs_n==1) ? "":"s", R->model_name.c_str());
+                elem_n, (elem_n==1)?"":"s", node_n, (node_n==1)?"":"s",
+                dofs_n, (dofs_n==1)?"":"s", R->model_name.c_str());
               log->label_fprintf (log->fmrout, label.c_str(),
                 "%u:run %u gset%s, %u part%s, %u CAD%s, %u grid%s, %u mesh%s\n",
                 sim_i,
-                gset_n, (gset_n==1) ? "":"s", part_n, (part_n==1) ? "":"s",
-                gcad_n, (gcad_n==1) ? "":"s", grid_n, (grid_n==1) ? "":"s",
-                mesh_n, (mesh_n==1) ? "":"es");
+                gset_n, (gset_n==1)?"":"s", part_n, (part_n==1)?"":"s",
+                gcad_n, (gcad_n==1)?"":"s", grid_n, (grid_n==1)?"":"s",
+                mesh_n, (mesh_n==1)?"":"es");
               fmr::perf::timer_resume (& this->time);
             }
           //TODO Should this timing include lower-level runtime?
@@ -282,7 +270,7 @@ namespace Femera {
     }else{
       const auto Pfrom = this->proc->hier [this->from.hier_lv];
       log->printf_err (
-        "ERR""OR %s distribution from %u:%s to %u:%s not yet implemented.\n",
+        "ERR""OR %s distribute from %u:%s to %u:%s not yet implemented.\n",
         this->task_name.c_str(),
         this->from.hier_lv, Pfrom->task_name.c_str(),
         this->send.hier_lv, Psend->task_name.c_str());
@@ -290,7 +278,7 @@ namespace Femera {
     }
     fmr::perf::timer_pause (& this->time, sim_n - err);
     if (log->detail >= this->verblevel) {log->print_heading ("Finished");}
-    if (err>0) {
+    if (err > 0) {
       const std::string label = "WARN""ING "+this->task_name;;
       log->label_fprintf (log->fmrerr, label.c_str(), "%i/%u ran with %s.\n",
         err, sim_n, (err==1)?"an err""or":"err""ors");

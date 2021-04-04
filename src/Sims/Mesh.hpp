@@ -17,9 +17,9 @@ class Mesh : public Geom {// Pure virtual? Mesh?
   public:
   protected:
   private:
-    fmr::Dim_int mesh_d = 0;
-    fmr::Dim_int elem_d = 0;
-    //
+    // Finite element method variables
+    fmr::Local_int    elem_n = 0;
+    fmr::Dim_int      mesh_d = 0;
     fmr::Dim_int elem_conn_n = 0;
 //    fmr::Dim_int elem_jacs_n = 0;
     //

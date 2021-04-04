@@ -20,10 +20,15 @@ class Sims : public Work {// simulation collection manager
   typedef std::vector<fmr::Data> Data_list;
   // member variables --------------------------------------------------------
   // this->task contains Frun instances to run sims distributed by this Sims.
-  public:
-#if 1
-    /* These data storage types are available to all derived classes.
-     *
+  protected:
+    Data_list data_list = {};
+  public://TODO protected:
+    // These data storage types are available to all derived classes.
+    std::map<fmr::Data,fmr::Dim_int_vals>       dims ={};
+    std::map<fmr::Data,fmr::Enum_int_vals>     enums ={};
+    std::map<fmr::Data,fmr::Local_int_vals>   locals ={};
+    std::map<fmr::Data,fmr::Global_int_vals> globals ={};
+    /*
      * Each Sims     data.size = sims_bats_sz * N : N=1 scalars, or array size
      *
      * Frun geometry data.size = part_bats_sz * N : partitioned geometry
@@ -35,17 +40,11 @@ class Sims : public Work {// simulation collection manager
      * Mesh          data.size = elem_bats_sz * N : element data
      *               data.size = node_bats_sz * N : node data
      */
-    std::map<fmr::Data,fmr::Dim_int_vals>       dims ={};
-    std::map<fmr::Data,fmr::Enum_int_vals>     enums ={};
-    std::map<fmr::Data,fmr::Local_int_vals>   locals ={};
-    std::map<fmr::Data,fmr::Global_int_vals> globals ={};
-#endif
-  public://TODO protected:
     Sims* parent = nullptr;
     std::string model_name ="";// Set in prep(), if not before.
     std::deque<std::string> model_list ={};
     //
-    fmr::Distribute from//TODO chage "from" to "here" ?
+    fmr::Distribute from//TODO Change "from" to "here" ?
       = {1, fmr::Schedule::List, fmr::Concurrency::Independent};
     fmr::Distribute send
       = {2, fmr::Schedule::Fifo, fmr::Concurrency::Independent};
@@ -53,10 +52,10 @@ class Sims : public Work {// simulation collection manager
     fmr::Local_int sims_ix = 0;// collection number
     fmr::Sim_size sims_size = fmr::Sim_size::XS;//TODO fmr::Sim_size::Unknown
   protected:
-    Data_list data_list = {};
     fmr::Partition part_type = fmr::Partition::None;
-    //
     fmr::Dim_int tree_lv = 0;// sim/sim collection depth
+  public:
+    fmr::Dim_int geom_d =0;// used by inheriting classes
   // methods -----------------------------------------------------------------
   public:
     virtual int add   (const std::string model_name);

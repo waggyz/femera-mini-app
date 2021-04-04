@@ -34,39 +34,36 @@ namespace Femera {
       : fmr::Elem_form::Unknown;
     // Initially, prep only meshes matching the enclosing space dimension.
     this->mesh_d = fmr::elem_form_d[fmr::enum2val(form)];
-    this->geom_d = this->parent->parent->dims.at//TODO Fix grandparent ref.
-      (fmr::Data::Geom_d).data [this->parent->sims_ix];// to parent->geom_d
+    this->geom_d = this->parent->geom_d;
 #ifdef FMR_DEBUG
       log->label_fprintf(log->fmrout, "**** Frun Geom",
         "geom_d %u, geom_d %u\n", geom_d, mesh_d);
 #endif
+    const auto eid = this->data->make_data_id (pid, fmr::Data::Elem_n);
+    is_found = this->data->local_vals.count(eid) > 0;
+    this->elem_n = is_found
+      ? this->data->local_vals.at(eid).data[this->sims_ix] : 0;
     if (this->mesh_d == this->geom_d && this->mesh_d > 0) {
       if (log->detail >= this->verblevel) {
+        fmr::perf::timer_pause (& this->time);
 #if 1
         const auto nid = this->data->make_data_id (pid, fmr::Data::Node_n);
         is_found = this->data->local_vals.count(nid) > 0;
         const auto nds = is_found
           ? this->data->local_vals.at(nid).data[this->sims_ix] : 0;
 #endif
-        const auto eid = this->data->make_data_id (pid, fmr::Data::Elem_n);
-        is_found = this->data->local_vals.count(eid) > 0;
-        const auto els = is_found
-          ? this->data->local_vals.at(eid).data[this->sims_ix] : 0;
-//      const auto tid = this->data->make_data_id (pid, fmr::Data::Elem_form);
-//      is_found = this->data->enum_vals.count(tid) > 0;
-//      const auto form = is_found
-//        ? fmr::Elem_form(this->data->enum_vals.at(tid).data[this->sims_ix])
-//        : fmr::Elem_form::Unknown;
-        fmr::perf::timer_pause (& this->time);
-        const std::string label = this->task_name+" prep";
+        //
+        const std::string label = std::to_string(this->mesh_d)+"D "
+          + this->task_name+" prep";
         log->label_fprintf (log->fmrout, label.c_str(), "%s: %u %s, %u node%s\n",
-          name.c_str(), els,
+          name.c_str(), this->elem_n,
           fmr::get_enum_string(fmr::elem_form_name,form).c_str(),
           nds, (nds==1)?"":"s");
         fmr::perf::timer_resume (& this->time);
       }
     //
-    }//end if this needs prpped
+    }//end if this needs prepped
+    fmr::perf::timer_pause (& this->time, this->elem_n);
     return err;
   }
   int Mesh::run (){int err=0;
