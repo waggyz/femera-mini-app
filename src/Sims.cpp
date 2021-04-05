@@ -1,5 +1,7 @@
 #include "base.h"
 
+#include <unistd.h>   // getopt, optarg
+
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
 #include <cstdio>     // std::printf
@@ -13,16 +15,18 @@ namespace Femera {
     this->meter_unit="sim";
     //this-> parent = this;//TODO leave as nullptr or set to this?
     this->data_list = {
-      fmr::Data::Geom_d,    fmr::Data::Phys_d,
+      fmr::Data::Geom_d,
       fmr::Data::Gset_n,    fmr::Data::Part_n,    fmr::Data::Mesh_n,
-      fmr::Data::Grid_n,    fmr::Data::Gcad_n,    fmr::Data::Mtrl_n,
-      fmr::Data::Elem_sysn, fmr::Data::Node_sysn, fmr::Data::Dofs_sysn
+      fmr::Data::Grid_n,    fmr::Data::Gcad_n,
+      fmr::Data::Node_sysn//,
+//      fmr::Data::Phys_d,    fmr::Data::Mtrl_n,
+//      fmr::Data::Elem_sysn, fmr::Data::Dofs_sysn
     };
   }
   fmr::Local_int Sims::get_sims_n (){// number of collections loaded
     return this->task.count (Base_type::Sims);
   }
-  fmr::Local_int Sims::get_frun_n (){// number of collections loaded
+  fmr::Local_int Sims::get_frun_n (){// number of sims loaded
     return this->task.count (Base_type::Frun);
   }
   fmr::Local_int Sims::get_part_n (){//TODO Remove.
@@ -31,14 +35,54 @@ namespace Femera {
   int Sims::chck () {
     return 0;
   }
-  int Sims::init_task (int*, char**) {int err=0;
-#ifdef FMR_DEBUG
+  int Sims::init_task (int* argc, char** argv) {int err=0;
     auto log = this->proc->log;
+#ifdef FMR_DEBUG
     if (log->verbosity >= this->verblevel) {
-      std::string label = this->task_name+" init";
+      std::string label = this->task_name+" init_task";
       log->label_fprintf (log->fmrout, label.c_str(), "***\n");
     }
 #endif
+    fmr::perf::timer_resume (& this->time);
+    FMR_PRAGMA_OMP(omp master) {//NOTE getopt is NOT thread safe.
+      int argc2=argc[0];// Copy getopt variables.
+      auto opterr2=opterr; auto optopt2=optopt;
+      auto optind2=optind; auto optarg2=optarg;
+      opterr = 0; int optchar;
+      while ((optchar = getopt (argc[0], argv, ":S::M::L::X::")) != -1){
+        // x:  requires an argument
+        // x:: optional argument (Gnu compiler)
+        switch (optchar){
+          case 'S' : {this->proc->opt_add (optchar);
+            this->sims_size = fmr::Sim_size::SM;
+            break;}
+          case 'M' : {this->proc->opt_add (optchar);
+            this->sims_size = fmr::Sim_size::MD;
+            break;}
+          case 'L' : {this->proc->opt_add (optchar);
+            this->sims_size = fmr::Sim_size::LG;
+            break;}
+          case 'X' : {this->proc->opt_add (optchar);
+            if (optarg) {switch (optarg[0]) {
+              case 'S' : {this->sims_size = fmr::Sim_size::XS; break;}
+              case 'L' : {this->sims_size = fmr::Sim_size::XL; break;}
+              default : {}// Do nothing.
+            } }
+            break;}
+          default :{}// Do nothing.
+      } }
+      // Restore getopt variables.
+      argc[0]=argc2;opterr=opterr2;optopt=optopt2;optind=optind2;optarg=optarg2;
+    }//end non-threadsafe section
+    if (log->verbosity >= this->verblevel) {
+      const std::string szname = fmr::get_enum_string (fmr::Sim_size_name,
+        this->sims_size);
+      const std::string szshort = fmr::get_enum_string (fmr::Sim_size_short,
+        this->sims_size);
+      const std::string label = szshort+" "+this->task_name + " init";
+      log->label_printf (label.c_str(),"%s assumed sim size\n", szname.c_str());
+    }
+    fmr::perf::timer_pause (&this->time);
     return err;
   }
   int Sims::add (std::string name) {int err=0;
@@ -238,34 +282,39 @@ namespace Femera {
             R->sims_ix = sim_i;
             if (log->detail >= this->verblevel) {
               fmr::perf::timer_pause (& this->time);
-              const auto  geo_d = this->dims.at (fmr::Data::Geom_d).data[sim_i];
-              const auto gset_n = locals.at(fmr::Data::Gset_n).data[sim_i];
-              const auto part_n = locals.at(fmr::Data::Part_n).data[sim_i];
-              const auto mesh_n = locals.at(fmr::Data::Mesh_n).data[sim_i];
-              const auto grid_n = locals.at(fmr::Data::Grid_n).data[sim_i];
-              const auto gcad_n = locals.at(fmr::Data::Gcad_n).data[sim_i];
-              const auto elem_n = globals.at(fmr::Data::Elem_sysn).data[sim_i];
-              const auto node_n = globals.at(fmr::Data::Node_sysn).data[sim_i];
-              const auto dofs_n = globals.at(fmr::Data::Dofs_sysn).data[sim_i];
+              const auto  geo_d = this->get_dim_val (fmr::Data::Geom_d, sim_i);
+              const auto gset_n = this->get_local_val (fmr::Data::Gset_n,sim_i);
+              const auto part_n = this->get_local_val (fmr::Data::Part_n,sim_i);
+              const auto mesh_n = this->get_local_val (fmr::Data::Mesh_n,sim_i);
+              const auto grid_n = this->get_local_val (fmr::Data::Grid_n,sim_i);
+              const auto gcad_n = this->get_local_val (fmr::Data::Gcad_n,sim_i);
+              const auto node_n = get_global_val (fmr::Data::Node_sysn,sim_i);
+#if 0
+              const auto elem_n = get_global_val (fmr::Data::Elem_sysn,sim_i);
+              const auto dofs_n = get_global_val (fmr::Data::Dofs_sysn,sim_i);
+#else
+              const fmr::Global_int elem_n = 0;//TODO
+              const fmr::Global_int dofs_n = 0;//TODO
+#endif
               const auto szshort = fmr::get_enum_string (fmr::Sim_size_short,
                 this->sims_size);
-              const std::string label = std::to_string(geo_d)+ "D "
-                + szshort+" " + this->task_name+" "+R->task_name;
+              const std::string label = szshort+" "+std::to_string(geo_d)+ "D "
+                + this->task_name+" " + R->task_name;
               log->label_fprintf (log->fmrout, label.c_str(),
-                "%u:sys %lu elem%s, %lu node%s, %lu DOF%s in %s\n",
-                sim_i,
-                elem_n, (elem_n==1)?"":"s", node_n, (node_n==1)?"":"s",
-                dofs_n, (dofs_n==1)?"":"s", R->model_name.c_str());
-              log->label_fprintf (log->fmrout, label.c_str(),
-                "%u:run %u gset%s, %u part%s, %u CAD%s, %u grid%s, %u mesh%s\n",
+                "%u: %u gset%s, %u part%s, %u CAD%s, %u grid%s, %u mesh%s\n",
                 sim_i,
                 gset_n, (gset_n==1)?"":"s", part_n, (part_n==1)?"":"s",
                 gcad_n, (gcad_n==1)?"":"s", grid_n, (grid_n==1)?"":"s",
                 mesh_n, (mesh_n==1)?"":"es");
+              log->label_fprintf (log->fmrout, label.c_str(),
+                "%u: %lu elem%s, %lu node%s, %lu DOF%s totals in %s\n",
+                sim_i,
+                elem_n, (elem_n==1)?"":"s", node_n, (node_n==1)?"":"s",
+                dofs_n, (dofs_n==1)?"":"s", R->model_name.c_str());
               fmr::perf::timer_resume (& this->time);
             }
-          //TODO Should this timing include lower-level runtime?
-          err+= (R->run() > 0) ? 1 : 0;//TODO handle warnings (err<0)?
+            //TODO Should this timing include lower-level runtime?
+            err+= (R->run() > 0) ? 1 : 0;//TODO handle warnings (err<0)?
       } } }//end parallel region
     }else{
       const auto Pfrom = this->proc->hier [this->from.hier_lv];
@@ -284,6 +333,50 @@ namespace Femera {
         err, sim_n, (err==1)?"an err""or":"err""ors");
     }
     return this->exit (err);//TODO barrier?
+  }
+  fmr::Dim_int Sims::get_dim_val (fmr::Data dt, size_t ix) {
+    if (this->dims.count(dt) > 0) {
+      if (this->dims.at(dt).data.size() > ix) {
+        return this->dims.at(dt).data[ix];
+    } }
+    const std::string namestr = fmr::get_enum_string (fmr::vals_name,dt);
+    const std::string label = "WARN""ING "+this->task_name;;
+    this->proc->log->label_fprintf (this->proc->log->fmrerr, label.c_str(),
+      "%s[%lu] dim val not found.\n", namestr.c_str(), ix);
+    return 0;
+  }
+  fmr::Enum_int Sims::get_enum_val (fmr::Data dt, size_t ix) {
+    if (this->enums.count(dt) > 0) {
+      if (this->enums.at(dt).data.size() > ix) {
+        return this->enums.at(dt).data[ix];
+    } }
+    const std::string namestr = fmr::get_enum_string (fmr::vals_name,dt);
+    const std::string label = "WARN""ING "+this->task_name;;
+    this->proc->log->label_fprintf (this->proc->log->fmrerr, label.c_str(),
+      "%s[%lu] enum val not found.\n", namestr.c_str(), ix);
+    return 0;
+  }
+  fmr::Local_int Sims::get_local_val (fmr::Data dt, size_t ix) {
+    if (this->locals.count(dt) > 0) {
+      if (this->locals.at(dt).data.size() > ix) {
+        return this->locals.at(dt).data[ix];
+    } }
+    const std::string namestr = fmr::get_enum_string (fmr::vals_name,dt);
+    const std::string label = "WARN""ING "+this->task_name;;
+    this->proc->log->label_fprintf (this->proc->log->fmrerr, label.c_str(),
+      "%s[%lu] local val not found.\n", namestr.c_str(), ix);
+    return 0;
+  }
+  fmr::Global_int Sims::get_global_val (fmr::Data dt, size_t ix) {
+    if (this->globals.count(dt) > 0) {
+      if (this->globals.at(dt).data.size() > ix) {
+        return this->globals.at(dt).data[ix];
+    } }
+    const std::string namestr = fmr::get_enum_string (fmr::vals_name,dt);
+    const std::string label = "WARN""ING "+this->task_name;;
+    this->proc->log->label_fprintf (this->proc->log->fmrerr, label.c_str(),
+      "%s[%lu] global val not found.\n", namestr.c_str(), ix);
+    return 0;
   }
   int Sims::exit_task (int err) {
 #ifdef FMR_DEBUG

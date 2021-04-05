@@ -62,6 +62,11 @@ class Sims : public Work {// simulation collection manager
     virtual int run   ();
     virtual int clear ();
     //
+    fmr::Dim_int get_dim_val (const fmr::Data, const size_t ix);
+    fmr::Enum_int get_enum_val (const fmr::Data, const size_t ix);
+    fmr::Local_int get_local_val (const fmr::Data, const size_t ix);
+    fmr::Global_int get_global_val (const fmr::Data, const size_t ix);
+    //
     fmr::Local_int get_sims_n ();
     fmr::Local_int get_frun_n ();
 //    fmr::Local_int get_mtrl_n ();//TODO

@@ -32,6 +32,7 @@ Options in lower case do not modify a model, but can be used to get information
 -i<str> input file(s)
 -o<str> output file
 -m<str> model name(s)
+-x<int> Repeat tasks <int> times. This is useful for performance testing.
 
 If no (-m) models are given, Femera will run every simulation found in the
 input (-i) files specified. If an output (-o) file is not provided, Femera
@@ -42,12 +43,10 @@ Options in upper case are shortcuts to common modeling and simulation tasks.
 Most of these will update the simulation database if the task is out of date.
 They may be specified in any order, together or apart.
 
-
-
 Some options in upper case modify the behavior of the simulation task options
 above.
 
--X<int> Repeat tasks <int> times. This is useful for performance testing.
 -D Defaults will be used when data not present. This is useful for testing.
+-XS -SM -MD -LG -XL assumed simulation size
 -T Testing enabled
 

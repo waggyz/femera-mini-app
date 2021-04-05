@@ -30,29 +30,35 @@ namespace Femera {
     fmr::perf::timer_resume (& this->time);
     auto log = this->proc->log;
     //
-    this->geom_d = parent->dims.at (fmr::Data::Geom_d).data [this->sims_ix];
+    this->geom_d = parent->get_dim_val (fmr::Data::Geom_d, this->sims_ix);
     const std::string name = this->model_name;
     const auto time_type = fmr::Sim_time (
-      parent->enums.at (fmr::Data::Time_type).data [this->sims_ix]);
+      parent->get_enum_val (fmr::Data::Time_type, this->sims_ix));
     if (log->detail >= this->verblevel) {
       fmr::perf::timer_pause (& this->time);
+      const auto timestr = fmr::get_enum_string (fmr::Sim_time_name, time_type);
       const auto szshort = fmr::get_enum_string (fmr::Sim_size_short,
         this->sims_size);
-      std::string label = std::to_string(geom_d)+"D "
-        + szshort +" "+this->task_name +" prep";
+      std::string label = szshort +" "+std::to_string(geom_d)+"D "
+        + this->task_name +" prep";
       log->label_fprintf (log->fmrout, label.c_str(),
-        "%s:%s_%u %s time-%s\n",
+        "%s time, %s:%s_%u is %s\n", timestr.c_str(),
         parent->model_name.c_str(), this->task_name.c_str(), this->sims_ix,
-        this->model_name.c_str(), fmr::Sim_time_name.at(time_type).c_str());
+        this->model_name.c_str());
       fmr::perf::timer_resume (& this->time);
     }
+#if 0
     const auto gcad_n
       = parent->locals.at (fmr::Data::Gcad_n).data [this->sims_ix];
     const auto grid_n
       = parent->locals.at (fmr::Data::Grid_n).data [this->sims_ix];
     const auto mesh_n
       = parent->locals.at (fmr::Data::Mesh_n).data [this->sims_ix];
-    //
+#else
+    const auto gcad_n = parent->get_local_val (fmr::Data::Gcad_n,this->sims_ix);
+    const auto grid_n = parent->get_local_val (fmr::Data::Grid_n,this->sims_ix);
+    const auto mesh_n = parent->get_local_val (fmr::Data::Mesh_n,this->sims_ix);
+#endif
     // add tasks: new Gcad/Grid/Mesh //TODO only first batch ?
     if (grid_n > 0) {
       //TODO cell_dims

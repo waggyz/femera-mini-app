@@ -55,10 +55,10 @@ namespace Femera {
         //
         const std::string label = std::to_string(this->mesh_d)+"D "
           + this->task_name+" prep";
-        log->label_fprintf (log->fmrout, label.c_str(), "%s: %u %s, %u node%s\n",
-          name.c_str(), this->elem_n,
-          fmr::get_enum_string(fmr::elem_form_name,form).c_str(),
-          nds, (nds==1)?"":"s");
+        log->label_fprintf (log->fmrout, label.c_str(),
+          "%u %s, %u node%s in %s\n",
+          this->elem_n, fmr::get_enum_string(fmr::elem_form_name,form).c_str(),
+          nds, (nds==1)?"":"s", name.c_str());
         fmr::perf::timer_resume (& this->time);
       }
     //

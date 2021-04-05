@@ -420,7 +420,7 @@ int Proc:: init_task (int* argc, char** argv ){int err=0;
   auto optind2=optind; auto optarg2=optarg;
     opterr = 0; int optchar;
     while ( !err && (optchar = getopt( argc[0], argv,
-      "d::v::t::hi:o:m:n:X:TD+-"//TODO Handle unrecognized opts in the last init.
+      "d::v::t::hi:o:m:n:x:SMLXTD+-"//TODO Handle unrecognized opts in the last init.
       )) != -1){
       // i:  -i requires an argument
       // v:: -v argument is optional NOTE gcc extension
@@ -484,7 +484,7 @@ int Proc:: init_task (int* argc, char** argv ){int err=0;
         case '0':{ break; }
         case '1':{ break; }
 #endif
-        case 'X':{this->redo_n = atoi (optarg); break;}
+        case 'x':{this->redo_n = atoi (optarg); break;}
         // More cases
         case '?':{//TODO Handle unrecognized opts later.
           if (is_opt_handled (optopt)){ break; }

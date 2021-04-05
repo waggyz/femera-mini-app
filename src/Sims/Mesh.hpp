@@ -18,12 +18,8 @@ class Mesh : public Geom {// Pure virtual? Mesh?
   protected:
   private:
     // Finite element method variables
-    fmr::Local_int    elem_n = 0;
-    fmr::Dim_int      mesh_d = 0;
-    fmr::Dim_int elem_conn_n = 0;
-//    fmr::Dim_int elem_jacs_n = 0;
     //
-    // Unstructured meshes need a lot of lookup tables.
+    // Unstructured meshes need several lookup tables.
     std::unordered_map<fmr::Global_int, fmr::Local_int> local_node_id ={};
     std::unordered_map<fmr::Global_int, fmr::Local_int> local_elem_id ={};
     //
@@ -41,6 +37,12 @@ class Mesh : public Geom {// Pure virtual? Mesh?
     //
     fmr::Geom_float_vals node
       = fmr::Geom_float_vals (fmr::Data::Node_coor, fmr::math::Real);
+    //
+    fmr::Local_int    elem_n    = 0;
+    fmr::Dim_int each_conn_size = 0;// nodes/elem
+    fmr::Dim_int each_jacs_size = 0;// size of each jacs (4,10)
+    fmr::Dim_int elem_jacs_n    = 0;// jacs/elem
+    fmr::Dim_int      mesh_d    = 0;
   // methods ----------------------------------------------------------------
   public:
     int prep () final override;
