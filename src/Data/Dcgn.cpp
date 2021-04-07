@@ -52,7 +52,7 @@ namespace Femera {// header extension: needs cgnslib.h
     { fmr::data::Access::  Write, CG_MODE_WRITE  },
     { fmr::data::Access:: Modify, CG_MODE_MODIFY }
   };
-  static const std::map<ElementType_t,fmr::Elem_form> dcgn_elem_form_from_cgns
+  static const std::map<ElementType_t,fmr::Elem_form> elem_form_from_cgns
     ={
     {ElementTypeNull, fmr::Elem_form::None},
     {ElementTypeUserDefined, fmr::Elem_form::User},
@@ -463,11 +463,11 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
         cg_base_read, info.file_cgid, base_i, cname, &geom_d, &phys_d);
       if (err) {
         log->label_fprintf (log->fmrerr,"ERR""OR Dcgn",
-        "could not read base %i in file %s.\n", base_i, fname.c_str());
+          "could not read base %i in file %s.\n", base_i, fname.c_str());
       }else{
         this->time.bytes += this->label_size + sizeof(geom_d) + sizeof(phys_d);
       }
-      std::string data_id = std::string (cname);
+      const std::string data_id = std::string (cname);
       this->sims_names.insert (std::string (data_id));
       //
       ::SimulationType_t sim_type_cg = ::SimulationTypeNull;
@@ -482,9 +482,9 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
           default                  : {}// Do nothing.
         }
 #ifdef FMR_DEBUG
-            log->label_fprintf (log->fmrout,
-              "CGNS*sim type","%s\n",
-              fmr::get_enum_string (fmr::Sim_time_name, sim_time).c_str());
+        log->label_fprintf (log->fmrout,
+          "CGNS*sim type","%s\n",
+          fmr::get_enum_string (fmr::Sim_time_name, sim_time).c_str());
 #endif
       }
       err= fmr::perf::time_activity<int> (&this->time,
@@ -527,12 +527,31 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
       // the Part (CGNS Zone) level.
       //NOTE This only needs to be read now for Partition::Join
       //TODO Move to get_info(part_id,..)
+      //
       fmr::Local_int mesh_n=0, grid_n=0;
+      fmr::Global_int node_sysn=0, elem_sysn=0;
       for(int zone_i=1; zone_i <= zone_n; zone_i++) {
         ::ZoneType_t zone_type;// grid:structured or mesh:unstructured
         err= fmr::perf::time_activity<int> (&this->time,
-          cg_zone_type, info.file_cgid, base_i, zone_i,& zone_type );
+          cg_zone_type, info.file_cgid, base_i, zone_i,& zone_type);
         if (!err) {this->time.bytes+= sizeof(zone_type);}
+#if 1
+        char zonename [this->label_size+1];//TODO Cache names now?
+        auto zonesize = std::valarray<cgsize_t>(9);
+        err= fmr::perf::time_activity<int> (&this->time,
+          cg_zone_read, info.file_cgid, base_i, zone_i, zonename,& zonesize[0]);
+        if (!err) {this->time.bytes+= this->label_size;}
+        switch (zone_type) {
+          case ::Structured   : break;//TODO
+          case ::Unstructured :
+            if (!err) {this->time.bytes+= 3*sizeof(zonesize[0]);}
+            node_sysn += zonesize[0];// counts halo nodes more than once
+            break;
+          default : err+=1;
+        }
+#endif
+        //TODO Check for material properties?
+        //
         int sect_n=0;// count grids/meshes
         err= fmr::perf::time_activity<int> (&this->time,
           cg_nsections, info.file_cgid, base_i, zone_i,& sect_n);
@@ -542,29 +561,83 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
           case ::Unstructured : mesh_n += sect_n; break;
           default : err+=1;
         }
-        //TODO Check for material properties?
-        // Scan for meshes. (Partition::Join)
+#if 1
+        //TODO mesh_n is not always known yet.
+        const auto fid = this->make_data_id(data_id,fmr::Data::Elem_form);
+        {//--------------------------------------------------------------
+          const bool is_found = this->data->enum_vals.count(fid) > 0;
+          if (!is_found) {this->data->enum_vals[fid]
+            = fmr::Enum_int_vals (fmr::Data::Elem_form, mesh_n);
+          }else if (this->data->enum_vals[fid].data.size() < mesh_n) {
+            this->data->enum_vals[fid].data.resize (mesh_n);// clears data
+          }
+        }//--------------------------------------------------------------
+        const auto eid = this->make_data_id(data_id,fmr::Data::Elem_n);
+        {//--------------------------------------------------------------
+          const bool is_found = this->data->local_vals.count(eid) > 0;
+          if (!is_found) {this->data->local_vals[eid]
+            = fmr::Local_int_vals (fmr::Data::Elem_n, mesh_n);
+          }else if (this->data->local_vals[eid].data.size() < mesh_n) {
+            this->data->local_vals[eid].data.resize (mesh_n);// clears data
+          }
+        }//--------------------------------------------------------------
+#endif
+#if 1
+        // Scan meshes (CGNS sections) //TODO for Partition::Join only?
         // https://cgns.github.io/CGNS_docs_current/sids/gridflow.html#Elements
         err= cg_goto (info.file_cgid, base_i, "Zone_t",zone_i, NULL);
 //        if (err) {return err;}
-        for (int sect_i=1; sect_i<=sect_n; sect_i++){
+        for (int sect_i=1; sect_i<=sect_n; sect_i++) {
           char sectname [this->label_size+1];//TODO Cache names now?
           ElementType_t eltype; cgsize_t start,end;
           int nbndry, parent_flag;
           err= fmr::perf::time_activity<int> (&this->time,
             cg_section_read, info.file_cgid, base_i, zone_i, sect_i,
             sectname,& eltype,& start,& end,& nbndry,& parent_flag);
-          if (dcgn_elem_form_from_cgns.count (eltype) > 0) {
-            const auto form = dcgn_elem_form_from_cgns.at(eltype);
-            const auto str = fmr::get_enum_string (fmr::elem_form_name, form);
+          if (elem_form_from_cgns.count (eltype) > 0) {
+            const auto form = elem_form_from_cgns.at (eltype);
+            this->data->enum_vals[fid].data[sect_i-1] = fmr::enum2val (form);
+            if (fmr::elem_form_d [fmr::enum2val (form)] == geom_d) {
+              //count elements of the same dimension as enclosing space
+              elem_sysn += end - start +1;// counts all types of elements
+              this->data->local_vals[eid].data[sect_i-1]
+                = fmr::Local_int (elem_sysn);
 #ifdef FMR_DEBUG
-            log->label_fprintf (log->fmrerr, "Dcgn mesh", "%s %u el:%i %s\n",
-              data_id.c_str(), end - start +1, eltype, str.c_str());
+              const auto str = fmr::get_enum_string (fmr::elem_form_name, form);
+              log->label_fprintf (log->fmrerr, "*** Dcgn scan", "%s %lu %s\n",
+                data_id.c_str(), elem_sysn, str.c_str());
 #endif
-        } }
-      //
+        } } }
+#endif
       }//end zone loop
+#ifdef FMR_DEBUG
+      log->label_fprintf (log->fmrerr, "*** Dcgn scan",
+        "%s %lu elem_sysn, %lu node_sysn (halo duped)\n",
+        data_id.c_str(), elem_sysn, node_sysn);
+#endif
       // Set cached data vals.
+      {//-------------------------------------------------------------------
+        const auto id = this->make_data_id (data_id, fmr::Data::Node_sysn);
+        const bool is_found = this->data->global_vals.count(id) > 0;
+        if (!is_found) {this->data->global_vals[id]
+          = fmr::Global_int_vals (fmr::Data::Node_sysn, 1, node_sysn);
+        }else if (this->data->global_vals[id].data.size() < 1) {
+          this->data->global_vals[id].data.resize (1, node_sysn);
+        }else{
+          this->data->global_vals[id].data[0] = node_sysn;
+        }
+      }//-------------------------------------------------------------------
+      {//-------------------------------------------------------------------
+        const auto id = this->make_data_id (data_id, fmr::Data::Elem_sysn);
+        const bool is_found = this->data->global_vals.count(id) > 0;
+        if (!is_found) {this->data->global_vals[id]
+          = fmr::Global_int_vals (fmr::Data::Elem_sysn, 1, elem_sysn);
+        }else if (this->data->global_vals[id].data.size() < 1) {
+          this->data->global_vals[id].data.resize (1, elem_sysn);
+        }else{
+          this->data->global_vals[id].data[0] = elem_sysn;
+        }
+      }//-------------------------------------------------------------------
       const auto geomid = this->data->make_data_id (data_id,
         fmr::Data::Geom_info);
       const auto physid = this->data->make_data_id (data_id,

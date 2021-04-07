@@ -39,7 +39,7 @@ namespace Femera {
     auto log = this->proc->log;
 #ifdef FMR_DEBUG
     if (log->verbosity >= this->verblevel) {
-      std::string label = this->task_name+" init_task";
+      const auto label = this->task_name+" init_task";
       log->label_fprintf (log->fmrout, label.c_str(), "***\n");
     }
 #endif
@@ -75,11 +75,11 @@ namespace Femera {
       argc[0]=argc2;opterr=opterr2;optopt=optopt2;optind=optind2;optarg=optarg2;
     }//end non-threadsafe section
     if (log->verbosity >= this->verblevel) {
-      const std::string szname = fmr::get_enum_string (fmr::Sim_size_name,
+      const auto szname = fmr::get_enum_string (fmr::Sim_size_name,
         this->sims_size);
-      const std::string szshort = fmr::get_enum_string (fmr::Sim_size_short,
+      const auto szshort = fmr::get_enum_string (fmr::Sim_size_short,
         this->sims_size);
-      const std::string label = szshort+" "+this->task_name + " init";
+      const auto label = szshort+" "+this->task_name +" init";
       log->label_printf (label.c_str(),"%s assumed sim size\n", szname.c_str());
     }
     fmr::perf::timer_pause (&this->time);
@@ -307,7 +307,7 @@ namespace Femera {
                 gcad_n, (gcad_n==1)?"":"s", grid_n, (grid_n==1)?"":"s",
                 mesh_n, (mesh_n==1)?"":"es");
               log->label_fprintf (log->fmrout, label.c_str(),
-                "%u: %lu elem%s, %lu node%s, %lu DOF%s totals in %s\n",
+                "%u: %lu elem%s, %lu node%s, %lu DOF%s total in %s\n",
                 sim_i,
                 elem_n, (elem_n==1)?"":"s", node_n, (node_n==1)?"":"s",
                 dofs_n, (dofs_n==1)?"":"s", R->model_name.c_str());

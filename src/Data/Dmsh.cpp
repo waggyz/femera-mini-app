@@ -258,7 +258,7 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
       }//-------------------------------------------------------------------
 #ifdef FMR_DEBUG
       auto log = this->proc->log;
-      log->label_fprintf (log->fmrerr,"*** Dmsh","%s[0] is %u.\n",
+      log->label_fprintf (log->fmrerr,"*** Dmsh","%s[0] is %u nodes.\n",
         nid.c_str(), node_n);
 #endif
 #endif
