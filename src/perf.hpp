@@ -274,26 +274,26 @@ std::string format_count (const V val, const std::string unit) {// val >=1
 }
 template<typename V>
 std::string format_speed (const V val, std::string unit) {
-  if (unit.size() > 8) { unit = unit.substr (0,8); }
+  if (unit.size() > 8) {unit = unit.substr (0,8);}
   double v = double(val);
-  std::string time_str ="s"; std::string pre = " ";
+  std::string time_str ="s"; std::string pre=" ";
   const bool do_invert = std::abs (v) < 1.0;
   if (do_invert) {// format as time/unit
     v = 1.0 / v;
-    if (v > 600.0) { v /= 60.0; time_str="m"; }
-    if (v > 600.0) { v /= 60.0; time_str="h";
-      if (v > 240.0) { v /= 24.0; time_str="d"; }
+    if (v > 600.0) {v /= 60.0; time_str="m";}
+    if (v > 600.0) {v /= 60.0; time_str="h";
+      if (v > 240.0) {v /= 24.0; time_str="d";}
   } }else{// format as unit/time
     int log1000 = 0;
     if (std::abs (v) > 1e-24) {
       log1000 = int(std::log10 (std::abs(v)))/3 - (std::abs(v)<1 ? 1:0);
       v = double(val) * std::pow (10.0, double(-3 * log1000));
-      if (v<10.0) { v *= 1000.0; log1000 -= 1; }
+      if (v < 10.0) {v *= 1000.0; log1000 -= 1; }
     }
     const uint i = log1000 +6; pre = "?";
     const char prefix[]="afpnum kMGTPE";
-    if (i>=0 && i<std::strlen(prefix)) { pre = prefix[i]; }
-    if (pre=="u") { pre="\u00b5"; }//unicode micro \u00b5 (prefe Greek mu u03bc)
+    if (i>=0 && i<std::strlen(prefix)) {pre = prefix[i];}
+    if (pre=="u") {pre="\u00b5";}//unicode micro \u00b5 (prefer Greek mu u03bc)
   }
   std::vector<char> buf(16,0);
   if (do_invert) {
@@ -304,16 +304,21 @@ std::string format_speed (const V val, std::string unit) {
   }
   return std::string(&buf[0]);
 }
-static inline std::string format_time_units (Elapsed ns){
-  const double sec = double(ns)*1e-9;
-  std::string u = "s"; double t=sec;
-  if      (sec>24.0*60.0*60.0){ t=sec/(24.0*60.0*60.0); u="d"; }
-  else if (sec>     60.0*60.0){ t=sec/(     60.0*60.0); u="h"; }
-  else if (sec>          60.0){ t=sec/           60.0 ; u="m"; }
-  if (u=="s"){ return format_units (sec,"s"); }
+static inline std::string format_time_units (const double sec) {
+  std::string u="s"; double t=sec;
+  if      (sec>24.0*60.0*60.0) {t= sec/(24.0*60.0*60.0); u="d"; }
+  else if (sec>     60.0*60.0) {t= sec/(     60.0*60.0); u="h"; }
+  else if (sec>          60.0) {t= sec/           60.0 ; u="m"; }
+  if (u=="s") {return format_units (sec,"s"); }
   std::vector<char> buf(16,0);
-  std::snprintf (&buf[0],15,"%4.0f %s", t, u.c_str() );
-  return std::string(&buf[0]);
+  std::snprintf (&buf[0],15,"%4.0f %s", t, u.c_str());
+  return std::string (&buf[0]);
+}
+static inline std::string format_time_units (const float sec){
+  return format_time_units (double (sec));
+}
+static inline std::string format_time_units (const Elapsed ns){
+  return format_time_units (double (ns) * 1e-9);
 }
 } }//end fmr::perf namespace
 

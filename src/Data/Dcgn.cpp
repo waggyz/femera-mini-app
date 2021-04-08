@@ -624,7 +624,7 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
         }else if (this->data->global_vals[id].data.size() < 1) {
           this->data->global_vals[id].data.resize (1, node_sysn);
         }else{
-          this->data->global_vals[id].data[0] = node_sysn;
+          this->data->global_vals[id].data[0]+= node_sysn;
         }
       }//-------------------------------------------------------------------
       {//-------------------------------------------------------------------
@@ -635,7 +635,7 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
         }else if (this->data->global_vals[id].data.size() < 1) {
           this->data->global_vals[id].data.resize (1, elem_sysn);
         }else{
-          this->data->global_vals[id].data[0] = elem_sysn;
+          this->data->global_vals[id].data[0]+= elem_sysn;
         }
       }//-------------------------------------------------------------------
       const auto geomid = this->data->make_data_id (data_id,

@@ -35,15 +35,15 @@ namespace Femera {
     // Initially, prep only meshes matching the enclosing space dimension.
     this->mesh_d = fmr::elem_form_d[fmr::enum2val(form)];
     this->geom_d = this->parent->geom_d;
-#ifdef FMR_DEBUG
-      log->label_fprintf(log->fmrout, "**** Frun Geom",
-        "geom_d %u, geom_d %u\n", geom_d, mesh_d);
+#if 1 //def FMR_DEBUG
+      log->label_fprintf(log->fmrout, "**** Mesh prep",
+        "%s: %uD Mesh in %uD sim\n",this->model_name.c_str(), mesh_d, geom_d);
 #endif
     const auto eid = this->data->make_data_id (pid, fmr::Data::Elem_n);
     is_found = this->data->local_vals.count(eid) > 0;
     this->elem_n = is_found
       ? this->data->local_vals.at(eid).data[this->sims_ix] : 0;
-    if (this->mesh_d == this->geom_d && this->mesh_d > 0) {
+    if ((this->mesh_d == this->geom_d) && this->mesh_d > 0) {
       if (log->detail >= this->verblevel) {
         fmr::perf::timer_pause (& this->time);
 #if 1

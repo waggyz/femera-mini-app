@@ -94,8 +94,7 @@ namespace Femera {
         err= fmr::detail::main->add_new_task (send_type, this);
     } }
     const auto geom_n = this->task.count ();// grid_n + gcad_n + mesh_n
-    if (geom_n > 0) {
-      for (int i=0; i < geom_n; i++) {// Run serially.
+    if (geom_n > 0) {for (int i=0; i < geom_n; i++) {// Run serially.
         const auto G = this->task.get<Sims>(i);
         if (G) {
           G->sims_ix = i;
@@ -117,21 +116,24 @@ namespace Femera {
     err= this->prep ();
 //    if (err) {return err;}//TODO early return segfaults
 #if 1
-    double dof = 10e3;
+    double dof = 10e3; err= 1;
     if (this->parent->globals.count (fmr::Data::Node_sysn) > 0) {
       if (this->sims_ix < this->parent->globals.at
         (fmr::Data::Node_sysn).data.size()) {
         dof = 3.0 * double(this->parent->globals.at
           (fmr::Data::Node_sysn).data [this->sims_ix]);
+        err= 0;
     } }
-    const double iters = 0.01 * dof;
-    const double speed = 1e9 / 40.0;// dof/s Skylake XS sim solve speed
+    const double iters = (dof > 500.0 ? 0.01 : 0.1) * dof;
+    const double speed = 1e9 / 40.0;// dof/s Skylake XS sim solve speed/core
     const double  secs = iters * dof / speed;
 #if 1
     if (log->detail >= this->verblevel) {
+      const auto  secstr = fmr::perf::format_time_units (secs);
       const std::string label = this->task_name +" ZZZZ";
-      log->label_fprintf(log->fmrout, label.c_str(), "%i: sleep %.1g s...\n",
-        this->sims_ix, secs);
+      log->label_fprintf (log->fmrout, label.c_str(),
+        "%i: %u geom sleep %s...\n",
+        this->sims_ix, this->task.count (), secstr.c_str());
     }
 #endif
     usleep (int (1e6 * secs));
@@ -153,6 +155,6 @@ namespace Femera {
     return err;
   }
 #endif
-  int Frun::exit_task (int err ){return err; }
+  int Frun::exit_task (int err) {return err;}
 }// end Femera namespace
 #undef FMR_DEBUG

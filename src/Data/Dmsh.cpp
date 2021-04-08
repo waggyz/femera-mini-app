@@ -253,7 +253,7 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
         }else if (this->data->global_vals[nid].data.size() < 1) {
           this->data->global_vals[nid].data.resize (1, node_n);
         }else{
-          this->data->global_vals[nid].data[0] = node_n;
+          this->data->global_vals[nid].data[0]+= node_n;
         }
       }//-------------------------------------------------------------------
 #ifdef FMR_DEBUG
