@@ -563,8 +563,9 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
           default : err+=1;
         }
 #if 1
+        const auto fid = this->make_data_id(data_id,fmr::Data::Elem_form);
+        const auto eid = this->make_data_id(data_id,fmr::Data::Elem_n);
         if (mesh_n>0) {
-          const auto fid = this->make_data_id(data_id,fmr::Data::Elem_form);
           {//--------------------------------------------------------------
             const bool is_found = this->data->enum_vals.count(fid) > 0;
             if (!is_found) {this->data->enum_vals[fid]
@@ -573,10 +574,11 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
               const auto tmp = this->data->enum_vals[fid].data;
               this->data->enum_vals[fid].data.resize (mesh_n);// clears data
               const auto n = tmp.size();
+              //TODO memcpy
+              FMR_PRAGMA_OMP_SIMD
               for (size_t i=0; i<n; i++) {data->enum_vals[fid].data[i]=tmp[i];}
             }
           }//--------------------------------------------------------------
-          const auto eid = this->make_data_id(data_id,fmr::Data::Elem_n);
           {//--------------------------------------------------------------
             const bool is_found = this->data->local_vals.count(eid) > 0;
             if (!is_found) {this->data->local_vals[eid]
@@ -585,6 +587,8 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
               const auto tmp = this->data->local_vals[eid].data;
               this->data->local_vals[eid].data.resize (mesh_n);// clears data
               const auto n = tmp.size();
+              //TODO memcpy
+              FMR_PRAGMA_OMP_SIMD
               for (size_t i=0; i<n; i++) {data->local_vals[eid].data[i]=tmp[i];}
             }
           }//--------------------------------------------------------------
