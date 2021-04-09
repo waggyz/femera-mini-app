@@ -24,20 +24,21 @@ namespace Femera {
   }
   int Mesh::prep () {int err=0;
     fmr::perf::timer_resume (& this->time);
-    auto log = this->proc->log;
-    const std::string name = this->model_name;
+    const auto log = this->proc->log;
+    const auto name = this->model_name;
     const auto pid = this->parent->model_name;//TODO XS sims only
     const auto tid = this->data->make_data_id (pid, fmr::Data::Elem_form);
     bool is_found = this->data->enum_vals.count(tid) > 0;
     const auto form = is_found
       ? fmr::Elem_form(this->data->enum_vals.at(tid).data[this->sims_ix])
       : fmr::Elem_form::Unknown;
-    // Initially, prep only meshes matching the enclosing space dimension.
+    //TODO for now, prep only meshes matching the enclosing space dimension.
+    //TODO should prep all meshes with physics assigned.
     this->mesh_d = fmr::elem_form_d[fmr::enum2val(form)];
     this->geom_d = this->parent->geom_d;
 #ifdef FMR_DEBUG
       log->label_fprintf(log->fmrout, "**** Mesh prep",
-        "%s: %uD %s Mesh in %uD sim\n",
+        "%s: %uD %s mesh in %uD space\n",
         this->model_name.c_str(), mesh_d,
         fmr::get_enum_string(fmr::elem_form_name,form).c_str(),geom_d);
 #endif
@@ -46,29 +47,44 @@ namespace Femera {
     this->elem_n
       = is_found ? this->data->local_vals.at(eid).data[this->sims_ix] : 0;
     if ((this->mesh_d == this->geom_d) && this->mesh_d > 0) {
+      fmr::perf::timer_pause (& this->time, this->elem_n);//count elems prepped
+      if (log->timing >= this->verblevel) {
+        this->meter_unit = fmr::get_enum_string (fmr::elem_form_name, form);
+      }
       if (log->detail >= this->verblevel) {
-        fmr::perf::timer_pause (& this->time);
-#if 1
+#if 0
+        //TODO The local node count is not available in a Gmsh single file
+        //     and from the CGNS mid-level library. The local elem connectivity
+        //     needs to be scanned to find all of the unique local nodes.
         const auto nid = this->data->make_data_id (pid, fmr::Data::Node_n);
         is_found = this->data->local_vals.count(nid) > 0;
-        const auto nds = is_found
+        const auto node_n = is_found
           ? this->data->local_vals.at(nid).data[this->sims_ix] : 0;
 #endif
-        //
-        const std::string label = std::to_string(this->mesh_d)+"D "
+        const auto label = std::to_string(this->mesh_d)+"D "
           + this->task_name+" prep";
-        log->label_fprintf (log->fmrout, label.c_str(),
-          "%u %s, %u node%s in %s\n",
-          this->elem_n, fmr::get_enum_string(fmr::elem_form_name,form).c_str(),
-          nds, (nds==1)?"":"s", name.c_str());
-        fmr::perf::timer_resume (& this->time);
+        log->label_fprintf (log->fmrout, label.c_str(),"%u %s in %s\n",
+          this->elem_n, this->meter_unit.c_str(), name.c_str());
       }
-    //
+      fmr::perf::timer_resume (& this->time);
     }//end if this needs prepped
-    fmr::perf::timer_pause (& this->time, this->elem_n);
+    fmr::perf::timer_pause (& this->time);
     return err;
   }
   int Mesh::run (){int err=0;
+    const auto log = this->proc->log;
+    if (log->detail >= this->verblevel) {
+      const auto label = "run "+this->task_name;
+      log->label_fprintf(log->fmrout, label.c_str(),
+        "%s: %uD mesh in the %uD space of %s\n",
+        this->model_name.c_str(), this->mesh_d, this->geom_d,
+        this->parent->model_name.c_str());
+    }
+    fmr::perf::timer_resume (& this->time);
+    //
+    // this->data->make_mesh (this->parent->model_name);//TODO XS sims only
+    //
+    fmr::perf::timer_pause (& this->time);
     return err;
   }
 #if 0

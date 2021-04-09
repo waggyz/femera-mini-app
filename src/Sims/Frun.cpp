@@ -47,18 +47,9 @@ namespace Femera {
         this->model_name.c_str());
       fmr::perf::timer_resume (& this->time);
     }
-#if 0
-    const auto gcad_n
-      = parent->locals.at (fmr::Data::Gcad_n).data [this->sims_ix];
-    const auto grid_n
-      = parent->locals.at (fmr::Data::Grid_n).data [this->sims_ix];
-    const auto mesh_n
-      = parent->locals.at (fmr::Data::Mesh_n).data [this->sims_ix];
-#else
     const auto gcad_n = parent->get_local_val (fmr::Data::Gcad_n,this->sims_ix);
     const auto grid_n = parent->get_local_val (fmr::Data::Grid_n,this->sims_ix);
     const auto mesh_n = parent->get_local_val (fmr::Data::Mesh_n,this->sims_ix);
-#endif
     // add tasks: new Gcad/Grid/Mesh //TODO only first batch ?
     if (grid_n > 0) {
       //TODO cell_dims
@@ -72,26 +63,15 @@ namespace Femera {
         err= fmr::detail::main->add_new_task (send_type, this);
     } }
     if (mesh_n > 0) {
-      for (auto type : {fmr::Data::Elem_n}) {
-        this->locals [type] = fmr::Local_int_vals (type, mesh_n);
-        this->data->get_local_vals (name, this->locals.at (type));
-      }
-#if 0
-      for (auto type : {fmr::Data::Elem_type}) {//TODO Needed?
-        this->enums [type] = fmr::Enum_int_vals (type, mesh_n);
-        this->data->get_enum_vals (name, this->enums.at (type));
-      }
-#endif
-#if 0
-      if (submesh_n > 0) {
-        for (auto type : {fmr::Data::Node_sysn, fmr::Data::Elem_sysn}) {
-          this->globals [type] = fmr::Global_int_vals (type, mesh_n);
-          this->data->get_global_vals (name, this->globals.at (type));
-      } }
-#endif
       const auto send_type = work_cast (Plug_type::Mesh);
       for (fmr::Local_int i=0; i < mesh_n; i++) {
         err= fmr::detail::main->add_new_task (send_type, this);
+#if 0
+      for (auto type : {fmr::Data::Elem_n}) {//TODO needed here?
+        this->locals [type] = fmr::Local_int_vals (type, mesh_n);
+        this->data->get_local_vals (name, this->locals.at (type));
+      }
+#endif
     } }
     const auto geom_n = this->task.count ();// grid_n + gcad_n + mesh_n
     if (geom_n > 0) {for (int i=0; i < geom_n; i++) {// Run serially.
