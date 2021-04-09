@@ -530,6 +530,7 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
       //
       fmr::Local_int mesh_n=0, grid_n=0;
       fmr::Global_int node_sysn=0, elem_sysn=0;
+      int sect_0 = 0;
       for(int zone_i=1; zone_i <= zone_n; zone_i++) {
         ::ZoneType_t zone_type;// grid:structured or mesh:unstructured
         err= fmr::perf::time_activity<int> (&this->time,
@@ -552,7 +553,7 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
 #endif
         //TODO Check for material properties?
         //
-        int sect_n=0;// count grids/meshes
+        int sect_n=0;// Count grids & meshes in this zone.
         err= fmr::perf::time_activity<int> (&this->time,
           cg_nsections, info.file_cgid, base_i, zone_i,& sect_n);
 //        if (err) {return err;}
@@ -562,25 +563,32 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
           default : err+=1;
         }
 #if 1
-        //TODO mesh_n is not always known yet.
-        const auto fid = this->make_data_id(data_id,fmr::Data::Elem_form);
-        {//--------------------------------------------------------------
-          const bool is_found = this->data->enum_vals.count(fid) > 0;
-          if (!is_found) {this->data->enum_vals[fid]
-            = fmr::Enum_int_vals (fmr::Data::Elem_form, mesh_n);
-          }else if (this->data->enum_vals[fid].data.size() < mesh_n) {
-            this->data->enum_vals[fid].data.resize (mesh_n);// clears data
-          }
-        }//--------------------------------------------------------------
-        const auto eid = this->make_data_id(data_id,fmr::Data::Elem_n);
-        {//--------------------------------------------------------------
-          const bool is_found = this->data->local_vals.count(eid) > 0;
-          if (!is_found) {this->data->local_vals[eid]
-            = fmr::Local_int_vals (fmr::Data::Elem_n, mesh_n);
-          }else if (this->data->local_vals[eid].data.size() < mesh_n) {
-            this->data->local_vals[eid].data.resize (mesh_n);// clears data
-          }
-        }//--------------------------------------------------------------
+        if (mesh_n>0) {
+          const auto fid = this->make_data_id(data_id,fmr::Data::Elem_form);
+          {//--------------------------------------------------------------
+            const bool is_found = this->data->enum_vals.count(fid) > 0;
+            if (!is_found) {this->data->enum_vals[fid]
+              = fmr::Enum_int_vals (fmr::Data::Elem_form, mesh_n);
+            }else if (this->data->enum_vals[fid].data.size() < mesh_n) {
+              const auto tmp = this->data->enum_vals[fid].data;
+              this->data->enum_vals[fid].data.resize (mesh_n);// clears data
+              const auto n = tmp.size();
+              for (size_t i=0; i<n; i++) {data->enum_vals[fid].data[i]=tmp[i];}
+            }
+          }//--------------------------------------------------------------
+          const auto eid = this->make_data_id(data_id,fmr::Data::Elem_n);
+          {//--------------------------------------------------------------
+            const bool is_found = this->data->local_vals.count(eid) > 0;
+            if (!is_found) {this->data->local_vals[eid]
+              = fmr::Local_int_vals (fmr::Data::Elem_n, mesh_n);
+            }else if (this->data->local_vals[eid].data.size() < mesh_n) {
+              const auto tmp = this->data->local_vals[eid].data;
+              this->data->local_vals[eid].data.resize (mesh_n);// clears data
+              const auto n = tmp.size();
+              for (size_t i=0; i<n; i++) {data->local_vals[eid].data[i]=tmp[i];}
+            }
+          }//--------------------------------------------------------------
+        }
 #endif
 #if 1
         // Scan meshes (CGNS sections) //TODO for Partition::Join only?
@@ -596,18 +604,19 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
             sectname,& eltype,& start,& end,& nbndry,& parent_flag);
           if (elem_form_from_cgns.count (eltype) > 0) {
             const auto form = elem_form_from_cgns.at (eltype);
-            this->data->enum_vals[fid].data[sect_i-1] = fmr::enum2val (form);
+            const auto i = sect_0 + sect_i -1;
+            this->data->enum_vals[fid].data[i] = fmr::enum2val (form);
             if (fmr::elem_form_d [fmr::enum2val (form)] == geom_d) {
-              //count elements of the same dimension as enclosing space
-              elem_sysn += end - start +1;// counts all types of elements
-              this->data->local_vals[eid].data[sect_i-1]
-                = fmr::Local_int (elem_sysn);
+              // Count all elements of the same dimension as enclosing space.
+              elem_sysn += end - start +1;
+              this->data->local_vals[eid].data[i] = fmr::Local_int (elem_sysn);
 #ifdef FMR_DEBUG
               const auto str = fmr::get_enum_string (fmr::elem_form_name, form);
               log->label_fprintf (log->fmrerr, "*** Dcgn scan", "%s %lu %s\n",
                 data_id.c_str(), elem_sysn, str.c_str());
 #endif
         } } }
+        if (true) {sect_0 += sect_n;}//TODO Partition::Join only
 #endif
       }//end zone loop
 #ifdef FMR_DEBUG

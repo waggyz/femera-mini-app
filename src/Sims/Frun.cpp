@@ -130,7 +130,7 @@ namespace Femera {
 #if 1
     if (log->detail >= this->verblevel) {
       const auto  secstr = fmr::perf::format_time_units (secs);
-      const std::string label = this->task_name +" ZZZZ";
+      const std::string label = this->task_name +" Zzzz";
       log->label_fprintf (log->fmrout, label.c_str(),
         "%i: %u geom sleep %s...\n",
         this->sims_ix, this->task.count (), secstr.c_str());
