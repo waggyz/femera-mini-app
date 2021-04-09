@@ -610,10 +610,11 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
             const auto form = elem_form_from_cgns.at (eltype);
             const auto i = sect_0 + sect_i -1;
             this->data->enum_vals[fid].data[i] = fmr::enum2val (form);
+            const auto elem_n = fmr::Local_int (end - start +1);
+            this->data->local_vals[eid].data[i] = fmr::Local_int (elem_n);
             if (fmr::elem_form_d [fmr::enum2val (form)] == geom_d) {
               // Count all elements of the same dimension as enclosing space.
-              elem_sysn += end - start +1;
-              this->data->local_vals[eid].data[i] = fmr::Local_int (elem_sysn);
+              elem_sysn += elem_n;
 #ifdef FMR_DEBUG
               const auto str = fmr::get_enum_string (fmr::elem_form_name, form);
               log->label_fprintf (log->fmrerr, "*** Dcgn scan", "%s %lu %s\n",

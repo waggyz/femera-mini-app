@@ -240,7 +240,7 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
     auto gd = gmsh::model::getDimension();// return<0: File has no Gmsh model.
     if (gd<1 || gd>3){err= 1;}
     if(!err){
-      auto geom_d = fmr::Local_int(gd);
+      const auto geom_d = fmr::Local_int(gd);
 #if 1
       std::vector<int> elementTypes={};
       gmsh::option::getNumber ("Mesh.NbNodes", optval);
@@ -266,6 +266,7 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
       // Each elem type is at least one different Femera Mesh.
       fmr::Local_int mesh_n=0,
         tris_n=0, quad_n=0, corn_n=0, tets_n=0, pyrm_n=0, prsm_n=0, cube_n=0;
+      fmr::Global_int elem_sysn =0;
       const auto zero = Dmsh::Optval(0);
       //TODO should be Global_int ?
       //TODO What about 1D elements?
@@ -327,17 +328,34 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
         fmr::Local_int i=0;
         if (tris_n > 0) {
           elems[i] = tris_n;
-          types[i] = fmr::enum2val(fmr::Elem_form::Tris); i++;
-        }
+          types[i] = fmr::enum2val(fmr::Elem_form::Tris);
+          i++;}
         if (quad_n > 0) {elems[i] = quad_n; i++;}//TODO
         if (corn_n > 0) {elems[i] = corn_n; i++;}//TODO
         if (tets_n > 0) {
           elems[i] = tets_n;
-          types[i] = fmr::enum2val(fmr::Elem_form::Tets); i++;
-        }
+          types[i] = fmr::enum2val(fmr::Elem_form::Tets);
+          i++;}
         if (pyrm_n > 0) {elems[i] = pyrm_n; i++;}//TODO
         if (prsm_n > 0) {elems[i] = prsm_n; i++;}//TODO
         if (cube_n > 0) {elems[i] = cube_n; i++;}//TODO
+        const auto n = this->data->local_vals[eid].data.size();
+        for (i=0; i<n; i++) {
+          elem_sysn += (fmr::elem_form_d[types[i]] == geom_d) ? elems[i] : 0;
+        }
+      }//end if mesh_n>0
+      if (elem_sysn > 0) {
+        const auto id = this->make_data_id (data_id, fmr::Data::Elem_sysn);
+        {//-------------------------------------------------------------------
+          is_found = this->data->global_vals.count(id) > 0;
+          if (!is_found) {this->data->global_vals[id]
+            = fmr::Global_int_vals (fmr::Data::Elem_sysn, 1, elem_sysn);
+          }else if (this->data->global_vals[id].data.size() < 1) {
+            this->data->global_vals[id].data.resize (1, elem_sysn);
+          }else{
+            this->data->global_vals[id].data[0]+= elem_sysn;
+          }
+        }//-------------------------------------------------------------------
       }
       //TODO gmsh::model::mesh::getNodesByElementType (..) to get node_n,
       //     later because the function call (may?) copy node data.
@@ -430,8 +448,8 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
       // Include a 1D bar mesh if it is tagged.//TODO Is this ok?
       if (has_1d_elem_tags){ vals[mesh_n_ix]+= 1; }
 #endif
-    }
-  }
+    }//end if !err
+  }//end if !read
   fmr::perf::timer_pause (&this->time);
   info.state.was_checked  = true;
   this->file_info[fname] = info;

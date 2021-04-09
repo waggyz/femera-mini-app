@@ -18,9 +18,9 @@ namespace Femera {
       fmr::Data::Geom_d,
       fmr::Data::Gset_n,    fmr::Data::Part_n,    fmr::Data::Mesh_n,
       fmr::Data::Grid_n,    fmr::Data::Gcad_n,
-      fmr::Data::Node_sysn//,
+      fmr::Data::Node_sysn, fmr::Data::Elem_sysn//,
 //      fmr::Data::Phys_d,    fmr::Data::Mtrl_n,
-//      fmr::Data::Elem_sysn, fmr::Data::Dofs_sysn
+//      fmr::Data::Dofs_sysn
     };
   }
   fmr::Local_int Sims::get_sims_n (){// number of collections loaded
@@ -289,11 +289,10 @@ namespace Femera {
               const auto grid_n = this->get_local_val (fmr::Data::Grid_n,sim_i);
               const auto gcad_n = this->get_local_val (fmr::Data::Gcad_n,sim_i);
               const auto node_n = get_global_val (fmr::Data::Node_sysn,sim_i);
-#if 0
               const auto elem_n = get_global_val (fmr::Data::Elem_sysn,sim_i);
+#if 0
               const auto dofs_n = get_global_val (fmr::Data::Dofs_sysn,sim_i);
 #else
-              const fmr::Global_int elem_n = 0;//TODO
               const fmr::Global_int dofs_n = 0;//TODO
 #endif
               const auto szshort = fmr::get_enum_string (fmr::Sim_size_short,
