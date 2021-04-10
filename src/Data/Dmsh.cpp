@@ -136,6 +136,16 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int ix) {
         "generate %iD mesh of %s:%u returned %i.\n",
         geom_d, model.c_str(), ix, err);
   } }// }
+  if (!err) {
+    Dmsh::Optval optval=Dmsh::Optval(0);
+    gmsh::option::getNumber ("Mesh.NbPartitions", optval);//0: unpartitioned
+    if (optval > 1) {//TODO or >0 ?
+      try {gmsh::model::mesh::partition (int (optval));}
+      catch (int e) {err= e;
+        log->label_fprintf (log->fmrerr, warnlabel.c_str(),
+          "partition (%i) %s:%u returned %i.\n",
+        gmsh::option::setNumber ("Mesh.NbPartitions", 0.0);
+  } } }
   fmr::perf::timer_pause (& this->time);
 #ifdef FMR_DEBUG
   log->label_fprintf (log->fmrout, "**** Gmsh",
