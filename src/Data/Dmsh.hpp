@@ -53,6 +53,7 @@ class Dmsh final : public Data {
     //
     Dmsh::File_gmsh open (Dmsh::File_gmsh, fmr::data::Access,Data::Concurrency);
   private:
+    int scan_model (const std::string name);
     int prep  () final override;
     int close () final override;
     bool is_init = false;

@@ -140,7 +140,8 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int ix) {
   log->label_fprintf (log->fmrout, "**** Gmsh",
     "make_mesh %s:%u return %i...\n", model.c_str(), ix, err);
 #endif
-  return err;
+  if (err) {return err;}
+  return scan_model (model);;
 }
 bool Dmsh::is_omp_parallel (){ bool is_omp=false;
   Proc* P = this->proc->task.first<Proc> (Base_type::Pomp);
@@ -248,12 +249,20 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
     // Read Gmsh model name
     std::string data_id(""); gmsh::model::getCurrent (data_id);
     this->sims_names.insert (std::string (data_id));
-    // Factor out =============================================================
+    info.state.has_error = this->scan_model (data_id) > 0;
+  }//end if !read
+  fmr::perf::timer_pause (&this->time);
+  info.state.was_checked  = true;
+  this->file_info[fname] = info;
+  return info;
+  }
+  int Dmsh::scan_model (const std::string data_id) {int err=0;
+    fmr::perf::timer_resume (&this->time);
+    gmsh::model::setCurrent (data_id);//TODO catch error
     const auto gid = this->make_data_id (data_id,
       fmr::Tree_type::Sims,{}, fmr::Data::Geom_info);
 //    std::valarray<bool> item_isok (false,fmr::Data::Geom_info::end);
     Dmsh::Optval optval=Dmsh::Optval(0);
-    int err=0;
     //
     bool is_found = this->data->local_vals.count(gid) > 0;
     if (!is_found) {
@@ -481,14 +490,10 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
       if (has_1d_elem_tags){ vals[mesh_n_ix]+= 1; }
 #endif
     }//end if !err
-    // Factor out =============================================================
-  }//end if !read
   fmr::perf::timer_pause (&this->time);
-  info.state.was_checked  = true;
-  this->file_info[fname] = info;
-  return info;
-}
-int Dmsh::close (){
+  return err;
+  }
+int Dmsh::close () {
   fmr::perf::timer_resume(&this->time);
 #if 0
   if (this->is_omp_parallel ()){
