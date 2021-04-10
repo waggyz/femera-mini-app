@@ -144,6 +144,7 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int ix) {
       catch (int e) {err= e;
         log->label_fprintf (log->fmrerr, warnlabel.c_str(),
           "partition (%i) %s:%u returned %i.\n",
+          int (optval), model.c_str(), ix, err);
         gmsh::option::setNumber ("Mesh.NbPartitions", 0.0);
   } } }
   fmr::perf::timer_pause (& this->time);
