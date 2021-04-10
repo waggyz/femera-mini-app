@@ -129,19 +129,20 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int ix) {
         "can not make %iD mesh for %s:%u.\n", geom_d, model.c_str(), ix);
   } }
   if (!err) {
+//  FMR_PRAGMA_OMP(omp critical) {//TODO thread safety?
     try {gmsh::model::mesh::generate (geom_d);}
     catch (int e) {err= e;
       log->label_fprintf (log->fmrerr, warnlabel.c_str(),
         "generate %iD mesh of %s:%u returned %i.\n",
         geom_d, model.c_str(), ix, err);
-  } }
+  } }// }
   fmr::perf::timer_pause (& this->time);
 #ifdef FMR_DEBUG
   log->label_fprintf (log->fmrout, "**** Gmsh",
     "make_mesh %s:%u return %i...\n", model.c_str(), ix, err);
 #endif
-  if (err) {return err;}
-  return scan_model (model);;
+  if (err>0) {return err;}
+  return this->scan_model (model);;
 }
 bool Dmsh::is_omp_parallel (){ bool is_omp=false;
   Proc* P = this->proc->task.first<Proc> (Base_type::Pomp);
@@ -252,7 +253,7 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
     info.state.has_error = this->scan_model (data_id) > 0;
   }//end if !read
   fmr::perf::timer_pause (&this->time);
-  info.state.was_checked  = true;
+  info.state.was_checked = true;
   this->file_info[fname] = info;
   return info;
   }
@@ -299,7 +300,7 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
       }//-------------------------------------------------------------------
 #ifdef FMR_DEBUG
       auto log = this->proc->log;
-      log->label_fprintf (log->fmrerr,"*** Dmsh","%s[0] is %u nodes.\n",
+      log->label_fprintf (log->fmrerr,"*** Dmsh","%s[0] has %u nodes.\n",
         nid.c_str(), node_n);
 #endif
 #endif
@@ -421,10 +422,10 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
       const auto gcad_n_ix = enum2val(fmr::Geom_info::Gcad_n);
       auto vals =& this->data->local_vals[gid].data[0];
       if (geom_d > vals[geom_d_ix]) {vals[geom_d_ix] = geom_d;}
-      vals[gset_n_ix] += fmr::Local_int (dim_tag.size());
-      vals[part_n_ix] += part_n;
-      vals[mesh_n_ix] += mesh_n;
-      vals[gcad_n_ix] += gcad_n;
+      vals[gset_n_ix] = fmr::Local_int (dim_tag.size());
+      vals[part_n_ix] = part_n;
+      vals[mesh_n_ix] = mesh_n;
+      vals[gcad_n_ix] = gcad_n;
       auto isok =& this->data->local_vals[gid].isok[0];
       isok[geom_d_ix] |= vals[geom_d_ix] > 0;
       isok[gset_n_ix] |= dim_tag.size() > 0;

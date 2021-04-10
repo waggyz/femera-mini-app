@@ -227,6 +227,21 @@ namespace Femera {
     }
     return err;
   }
+  int Sims::get_data_vals (const std::string name, const Data_list list) {
+    for (auto type : list) {
+      switch (fmr::vals_type [fmr::enum2val (type)]) {
+        case fmr::Vals_type::Dim :
+          this->data->get_dim_vals (name, this->dims.at (type)); break;
+        case fmr::Vals_type::Enum :
+          this->data->get_enum_vals (name, this->enums.at (type)); break;
+        case fmr::Vals_type::Local :
+          this->data->get_local_vals (name, this->locals.at (type)); break;
+        case fmr::Vals_type::Global :
+          this->data->get_global_vals (name, this->globals.at (type)); break;
+        default : {}//TODO Do nothing?
+    } }
+    return 0;
+  }
   int Sims::run () {int err=0;
     auto log = this->proc->log;
     if (log->detail >= this->verblevel) {log->print_heading ("Start");}
@@ -240,18 +255,9 @@ namespace Femera {
         "ERR""OR Sims::run() no sims found in collection %s\n", name.c_str());
       return 1;
     }
-    for (auto type : this->data_list) {
-      switch (fmr::vals_type [fmr::enum2val (type)]) {
-        case fmr::Vals_type::Dim :
-          this->data->get_dim_vals (name, this->dims.at (type)); break;
-        case fmr::Vals_type::Enum :
-          this->data->get_enum_vals (name, this->enums.at (type)); break;
-        case fmr::Vals_type::Local :
-          this->data->get_local_vals (name, this->locals.at (type)); break;
-        case fmr::Vals_type::Global :
-          this->data->get_global_vals (name, this->globals.at (type)); break;
-        default : {}//TODO Do nothing?
-    } }
+    // *** HERE: get gcad_n for each sim in this batch and mesh them?
+    this->get_data_vals (name, this->data_list);
+    //
     if (this->send.hier_lv > this->from.hier_lv
       && Psend->task_name =="OpenMP") {
       FMR_PRAGMA_OMP(omp parallel reduction(+:err)) {
@@ -282,11 +288,12 @@ namespace Femera {
             R->sims_ix = sim_i;
             const auto  geo_d = this->get_dim_val (fmr::Data::Geom_d, sim_i);
             const auto gcad_n = this->get_local_val (fmr::Data::Gcad_n,sim_i);
-            if (gcad_n > 0) {
+            if (gcad_n > 0) {//TODO move to *** HERE?
               for (fmr::Local_int i=0; i<gcad_n; i++) {
                 err+= this->data->make_mesh (R->model_name, i);
-//                err+= this->data->make_mesh ("fmr:Sims:MPI_0:Run!_0", i);
-            } }
+              }
+              this->get_data_vals (name, this->data_list);//TODO only new vals
+            }
             if (log->detail >= this->verblevel) {
               fmr::perf::timer_pause (& this->time);
               const auto gset_n = this->get_local_val (fmr::Data::Gset_n,sim_i);

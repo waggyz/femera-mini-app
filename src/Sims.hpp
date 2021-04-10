@@ -54,6 +54,8 @@ class Sims : public Work {// simulation collection manager
   protected:
     fmr::Partition part_type = fmr::Partition::None;
     fmr::Dim_int tree_lv = 0;// sim/sim collection depth
+  private:
+    int get_data_vals (const std::string model_name, const Data_list list);
   public:
     fmr::Dim_int geom_d =0;// used by inheriting classes
   // methods -----------------------------------------------------------------
