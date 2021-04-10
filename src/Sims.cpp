@@ -280,14 +280,19 @@ namespace Femera {
           } }//end critical region
           if (!do_abort) {
             R->sims_ix = sim_i;
+            const auto  geo_d = this->get_dim_val (fmr::Data::Geom_d, sim_i);
+            const auto gcad_n = this->get_local_val (fmr::Data::Gcad_n,sim_i);
+            if (gcad_n > 0) {
+              for (fmr::Local_int i=0; i<gcad_n; i++) {
+                err+= this->data->make_mesh (R->model_name, i);
+//                err+= this->data->make_mesh ("fmr:Sims:MPI_0:Run!_0", i);
+            } }
             if (log->detail >= this->verblevel) {
               fmr::perf::timer_pause (& this->time);
-              const auto  geo_d = this->get_dim_val (fmr::Data::Geom_d, sim_i);
               const auto gset_n = this->get_local_val (fmr::Data::Gset_n,sim_i);
               const auto part_n = this->get_local_val (fmr::Data::Part_n,sim_i);
-              const auto mesh_n = this->get_local_val (fmr::Data::Mesh_n,sim_i);
               const auto grid_n = this->get_local_val (fmr::Data::Grid_n,sim_i);
-              const auto gcad_n = this->get_local_val (fmr::Data::Gcad_n,sim_i);
+              const auto mesh_n = this->get_local_val (fmr::Data::Mesh_n,sim_i);
               const auto node_n = get_global_val (fmr::Data::Node_sysn,sim_i);
               const auto elem_n = get_global_val (fmr::Data::Elem_sysn,sim_i);
 #if 0

@@ -161,6 +161,7 @@ class Data : public Work {//TODO change to File
     // Below valid after scan_file_data(..).
     fmr::Local_int get_sims_n ();
     virtual std::deque<std::string> get_sims_names ();
+    virtual int make_mesh (const std::string model, const fmr::Local_int ix);
     //
     int get_dim_vals (const fmr::Data_id id, fmr::Dim_int_vals &);
     int get_enum_vals (const fmr::Data_id id, fmr::Enum_int_vals &);

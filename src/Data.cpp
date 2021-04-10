@@ -115,7 +115,7 @@ Data::File_info Data::scan_file_data (Data::Data_file df) {
   Data* D; std::string fname; std::tie (D,fname) = info.data_file;
 //  if (!D) {D = this->get_task_for_file (fname); }//TODO Remove?
   if (D) {
-    auto log = this->proc->log;
+    const auto log = this->proc->log;
     info = D->scan_file_data (fname);// Call derived class handler.
     if (this->verblevel <= log->detail) {
       const std::string label = this->task_name+" scan file";
@@ -127,6 +127,63 @@ Data::File_info Data::scan_file_data (Data::Data_file df) {
   return info;
 }
 int Data::chck () {
+  return 0;
+}
+int Data::make_mesh (const std::string model, const fmr::Local_int ix) {
+  int err=0;
+  const auto log = this->proc->log;
+#ifdef FMR_DEBUG
+  log->label_fprintf (log->fmrout,"**** Data","meshing %s...\n",model.c_str());
+#endif
+  bool did_mesh = false;
+  const auto n = this->task.count ();
+  if (n>0) {for (int i=0; i<n; i++) {
+    Data* D = this->task.get<Data>(i);
+    if (D != nullptr && D != this) {
+      err = D->make_mesh (model, ix);
+      if (!err) {
+        did_mesh = true;
+        if (this->proc->log->verbosity >= this->verblevel) {
+          const auto label = this->task_name+" "+D->task_name;
+          log->label_fprintf (log->fmrout, label.c_str(),
+            "meshed %s:%u.\n", model.c_str(), ix);
+        return 0;
+    } } } }
+    if (!did_mesh) {
+      log->label_fprintf (log->fmrerr, "WARN""ING Data",
+        "did not mesh %s:%u.\n", model.c_str(), ix);
+      return 1;
+  } }
+#if 0
+  const auto warnlabel = "WARN""ING "+this->task_name;
+  if (this->sims_data_file.count (model) < 1) {
+    log->label_fprintf (log->fmrerr, warnlabel.c_str(),
+      "no data handler for %s\n", model.c_str());
+    return 1;
+  }
+  const auto df = this->sims_data_file.at (model);
+  const auto n  = df.size();
+  if (n < 1 ) {
+    log->label_fprintf (log->fmrerr, warnlabel.c_str(),
+      "no data handler for %s\n", model.c_str());
+    return 1;
+  }
+  for (size_t i=0; i<n; i++){
+    const auto D = df[i].first;
+    if (D == nullptr) {
+      log->label_fprintf (log->fmrerr, warnlabel.c_str(),
+        "data handler for %s is NULL.\n", model.c_str());
+      return (err > 0) ? err : 1;
+    }
+    if (D != this) {
+      if (this->proc->log->verbosity >= this->verblevel || true) {
+        const auto label = this->task_name+" "+D->task_name;
+        log->label_fprintf (log->fmrout, label.c_str(),
+          "meshing %s...\n", model.c_str());
+      }
+      err+= D->make_mesh (model, ix);
+  } }
+#endif
   return 0;
 }
 int Data::close () {int err=0;

@@ -110,6 +110,38 @@ std::deque<std::string> Dmsh::get_sims_names (){//TODO Remove?
   for (auto item : this->sims_names) {model_names.push_back (item); }
   return model_names;
 }
+int Dmsh::make_mesh (const std::string model, const fmr::Local_int ix) {
+  int err=0;
+  const auto log = this->proc->log;
+  const auto warnlabel = "WARN""ING "+this->task_name;
+  fmr::perf::timer_resume (& this->time);
+  try {gmsh::model::setCurrent (model);}
+  catch (int e) {err = e;
+    log->label_fprintf (log->fmrerr, warnlabel.c_str(),
+      "can not find %s.\n", model.c_str());
+  }
+  //TODO handle mesh index # to generate
+  int geom_d = 0;
+  if (!err) {
+  geom_d = gmsh::model::getDimension ();
+    if (geom_d < 1 || geom_d > 3) {err= 1;
+      log->label_fprintf (log->fmrerr, warnlabel.c_str(),
+        "can not make %iD mesh for %s:%u.\n", geom_d, model.c_str(), ix);
+  } }
+  if (!err) {
+    try {gmsh::model::mesh::generate (geom_d);}
+    catch (int e) {err= e;
+      log->label_fprintf (log->fmrerr, warnlabel.c_str(),
+        "generate %iD mesh of %s:%u returned %i.\n",
+        geom_d, model.c_str(), ix, err);
+  } }
+  fmr::perf::timer_pause (& this->time);
+#ifdef FMR_DEBUG
+  log->label_fprintf (log->fmrout, "**** Gmsh",
+    "make_mesh %s:%u return %i...\n", model.c_str(), ix, err);
+#endif
+  return err;
+}
 bool Dmsh::is_omp_parallel (){ bool is_omp=false;
   Proc* P = this->proc->task.first<Proc> (Base_type::Pomp);
   if (P) {is_omp = P->is_in_parallel ();}
@@ -216,7 +248,7 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
     // Read Gmsh model name
     std::string data_id(""); gmsh::model::getCurrent (data_id);
     this->sims_names.insert (std::string (data_id));
-    //
+    // Factor out =============================================================
     const auto gid = this->make_data_id (data_id,
       fmr::Tree_type::Sims,{}, fmr::Data::Geom_info);
 //    std::valarray<bool> item_isok (false,fmr::Data::Geom_info::end);
@@ -449,6 +481,7 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
       if (has_1d_elem_tags){ vals[mesh_n_ix]+= 1; }
 #endif
     }//end if !err
+    // Factor out =============================================================
   }//end if !read
   fmr::perf::timer_pause (&this->time);
   info.state.was_checked  = true;

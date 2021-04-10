@@ -198,6 +198,9 @@ bool Dcgn::is_this_type (const std::string fname) {int err;
     cg_is_cgns, fname.c_str(), &fmt);
   return err==0;
 }
+int Dcgn::make_mesh (const std::string, const fmr::Local_int) {
+  return 1;
+}
 Data::File_info Dcgn::get_file_info (const std::string fname) {int err=0;
   //TODO Dcgn::get_file_info (..) is NOT thread safe.
   auto info = Dcgn::File_cgns (Data::Data_file (this,fname));

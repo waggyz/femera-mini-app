@@ -47,6 +47,7 @@ class Dmsh final : public Data {
     std::deque<std::string> get_sims_names ()   final override;
     bool is_this_type (const std::string fname) final override;
     //
+    int make_mesh (const std::string, const fmr::Local_int) final override;
     Data::File_info get_file_info (const std::string fname)  final override;
     Data::File_info scan_file_data (const std::string fname) final override;
     //

@@ -29,11 +29,13 @@ namespace Femera {
   int Frun::prep () {int err=0;
     fmr::perf::timer_resume (& this->time);
     auto log = this->proc->log;
+    const std::string name = this->model_name;
     //
     this->geom_d = parent->get_dim_val (fmr::Data::Geom_d, this->sims_ix);
-    const std::string name = this->model_name;
     const auto time_type = fmr::Sim_time (
       parent->get_enum_val (fmr::Data::Time_type, this->sims_ix));
+    const auto grid_n = parent->get_local_val (fmr::Data::Grid_n,this->sims_ix);
+    const auto mesh_n = parent->get_local_val (fmr::Data::Mesh_n,this->sims_ix);
     if (log->detail >= this->verblevel) {
       fmr::perf::timer_pause (& this->time);
       const auto timestr = fmr::get_enum_string (fmr::Sim_time_name, time_type);
@@ -47,21 +49,20 @@ namespace Femera {
         this->model_name.c_str());
       fmr::perf::timer_resume (& this->time);
     }
-    const auto gcad_n = parent->get_local_val (fmr::Data::Gcad_n,this->sims_ix);
-    const auto grid_n = parent->get_local_val (fmr::Data::Grid_n,this->sims_ix);
-    const auto mesh_n = parent->get_local_val (fmr::Data::Mesh_n,this->sims_ix);
-    // add tasks: new Gcad/Grid/Mesh //TODO only first batch ?
     if (grid_n > 0) {
       //TODO cell_dims
       const auto send_type = work_cast (Plug_type::Grid);
       for (fmr::Local_int i=0; i < grid_n; i++) {
         err= fmr::detail::main->add_new_task (send_type, this);
     } }
+#if 0
+    const auto gcad_n = parent->get_local_val (fmr::Data::Gcad_n,this->sims_ix);
     if (gcad_n > 0) {
       const auto send_type = work_cast (Plug_type::Gcad);
       for (fmr::Local_int i=0; i < gcad_n; i++) {
         err= fmr::detail::main->add_new_task (send_type, this);
     } }
+#endif
     if (mesh_n > 0) {
       const auto send_type = work_cast (Plug_type::Mesh);
       for (fmr::Local_int i=0; i < mesh_n; i++) {
@@ -73,7 +74,7 @@ namespace Femera {
       }
 #endif
     } }
-    const auto geom_n = this->task.count ();// grid_n + gcad_n + mesh_n
+    const auto geom_n = this->task.count ();// grid_n + mesh_n
     if (geom_n > 0) {for (int i=0; i < geom_n; i++) {// Run serially.
         const auto G = this->task.get<Sims>(i);
         if (G) {
@@ -110,7 +111,7 @@ namespace Femera {
 #if 1
     if (log->detail >= this->verblevel) {
       const auto  secstr = fmr::perf::format_time_units (secs);
-      const std::string label = this->task_name +" Zzzz";
+      const auto label = this->task_name +" Zzzz";
       log->label_fprintf (log->fmrout, label.c_str(),
         "%i: %u geom sleep %s...\n",
         this->sims_ix, this->task.count (), secstr.c_str());
