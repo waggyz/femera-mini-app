@@ -41,7 +41,7 @@ conditions, one solution method, and a synchronizer.
 Frun-> part [part_id] = <Geom*, Phys*, Cond*, Load*, Solv*, Sync*, Post*>
 
 
-MPI+OpenMP simulation and partition distribution
+MPI+OpenMP simulation and partition processing distribution
 
 Assign at least 1 MPI rank/NUMA domain.
 
@@ -59,10 +59,10 @@ Size  Levels  Sim level  Sim dist.  Part level  Part dist.  Data level
  ^^ Each MPI team spans several nodes.
 
 
-Sim   Team size      MPI Team          OpenMP Team       Each Thread
+Sim   Teams          MPI Team          OpenMP Team       Each Thread
 Size  MPI    OMP     Obj. Concurrency  Obj. Concurrency  Obj. Conc.  Obj. Conc.
 --------------------------------------------------------------------------------
-  XS  --     1       --                Sims independent  Frun indp.  Part serial
+  XS  1/core  1      --                Sims independent  Frun indp.  Part serial
   SM  1*     >1/MPI  Sims independent  Frun independent  Part coll.  Elem serial
   MD  1/node >1/MPI  Sims independent  Frun collective   Part coll.  Elem serial
   LG  n**    >1/MPI  Sims independent  Frun collective   Part coll.  Elem serial

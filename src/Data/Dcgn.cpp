@@ -566,35 +566,11 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
           default : err+=1;
         }
 #if 1
-        const auto fid = this->make_data_id(data_id,fmr::Data::Elem_form);
-        const auto eid = this->make_data_id(data_id,fmr::Data::Elem_n);
+        const auto fid = this->make_data_id (data_id,fmr::Data::Elem_form);
+        const auto eid = this->make_data_id (data_id,fmr::Data::Elem_n);
         if (mesh_n>0) {
-          {//--------------------------------------------------------------
-            const bool is_found = this->data->enum_vals.count(fid) > 0;
-            if (!is_found) {this->data->enum_vals[fid]
-              = fmr::Enum_int_vals (fmr::Data::Elem_form, mesh_n);
-            }else if (this->data->enum_vals[fid].data.size() < mesh_n) {
-              const auto tmp = this->data->enum_vals[fid].data;
-              this->data->enum_vals[fid].data.resize (mesh_n);// clears data
-              const auto n = tmp.size();
-              //TODO memcpy
-              FMR_PRAGMA_OMP_SIMD
-              for (size_t i=0; i<n; i++) {data->enum_vals[fid].data[i]=tmp[i];}
-            }
-          }//--------------------------------------------------------------
-          {//--------------------------------------------------------------
-            const bool is_found = this->data->local_vals.count(eid) > 0;
-            if (!is_found) {this->data->local_vals[eid]
-              = fmr::Local_int_vals (fmr::Data::Elem_n, mesh_n);
-            }else if (this->data->local_vals[eid].data.size() < mesh_n) {
-              const auto tmp = this->data->local_vals[eid].data;
-              this->data->local_vals[eid].data.resize (mesh_n);// clears data
-              const auto n = tmp.size();
-              //TODO memcpy
-              FMR_PRAGMA_OMP_SIMD
-              for (size_t i=0; i<n; i++) {data->local_vals[eid].data[i]=tmp[i];}
-            }
-          }//--------------------------------------------------------------
+          this->new_enum_vals (fid, mesh_n);
+          this->new_local_vals (eid, mesh_n);
         }
 #endif
 #if 1
@@ -615,6 +591,13 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
             this->data->enum_vals[fid].data[i] = fmr::enum2val (form);
             const auto elem_n = fmr::Local_int (end - start +1);
             this->data->local_vals[eid].data[i] = fmr::Local_int (elem_n);
+            //
+            // Add empty Elem_conn for this mesh marked as not read yet.
+            const auto cid = this->make_data_id (
+              data_id + ":Mesh_" + std::to_string(i), fmr::Data::Elem_conn);
+            this->new_local_vals (cid, 0);
+            this->data->local_vals.at(cid).stored_state.was_read = false;
+            //
             if (fmr::elem_form_d [fmr::enum2val (form)] == geom_d) {
               // Count all elements of the same dimension as enclosing space.
               elem_sysn += elem_n;
@@ -633,7 +616,7 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
         data_id.c_str(), elem_sysn, node_sysn);
 #endif
       // Set cached data vals.
-      {//-------------------------------------------------------------------
+      {//-------------------------------------------------------------------v
         const auto id = this->make_data_id (data_id, fmr::Data::Node_sysn);
         const bool is_found = this->data->global_vals.count(id) > 0;
         if (!is_found) {this->data->global_vals[id]
@@ -643,8 +626,8 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
         }else{
           this->data->global_vals[id].data[0]+= node_sysn;
         }
-      }//-------------------------------------------------------------------
-      {//-------------------------------------------------------------------
+      }//-------------------------------------------------------------------^
+      {//-------------------------------------------------------------------v
         const auto id = this->make_data_id (data_id, fmr::Data::Elem_sysn);
         const bool is_found = this->data->global_vals.count(id) > 0;
         if (!is_found) {this->data->global_vals[id]
@@ -654,7 +637,7 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
         }else{
           this->data->global_vals[id].data[0]+= elem_sysn;
         }
-      }//-------------------------------------------------------------------
+      }//-------------------------------------------------------------------^
       const auto geomid = this->data->make_data_id (data_id,
         fmr::Data::Geom_info);
       const auto physid = this->data->make_data_id (data_id,

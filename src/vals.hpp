@@ -110,8 +110,8 @@ namespace fmr {
       data[0]=T(0);
 #endif
   } }
-  template <typename T> Vals<T>::Vals (
-    const Data t, const math::Zomplex z, const Global_int sz) {
+  template <typename T> Vals<T>::Vals (const Data t, const math::Zomplex z,
+    const Global_int sz) : algebra (z), type(t) {
     if (sz==0) {
       data.resize(0);
     }else{

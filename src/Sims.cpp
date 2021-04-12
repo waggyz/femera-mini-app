@@ -35,56 +35,6 @@ namespace Femera {
   int Sims::chck () {
     return 0;
   }
-  int Sims::init_task (int* argc, char** argv) {int err=0;
-    auto log = this->proc->log;
-#ifdef FMR_DEBUG
-    if (log->verbosity >= this->verblevel) {
-      const auto label = this->task_name+" init_task";
-      log->label_fprintf (log->fmrout, label.c_str(), "***\n");
-    }
-#endif
-    fmr::perf::timer_resume (& this->time);
-    FMR_PRAGMA_OMP(omp master) {//NOTE getopt is NOT thread safe.
-      int argc2=argc[0];// Copy getopt variables.
-      auto opterr2=opterr; auto optopt2=optopt;
-      auto optind2=optind; auto optarg2=optarg;
-      opterr = 0; int optchar;
-      while ((optchar = getopt (argc[0], argv, ":S::M::L::X::")) != -1){
-        // x:  requires an argument
-        // x:: optional argument (Gnu compiler)
-        switch (optchar){
-          case 'S' : {this->proc->opt_add (optchar);
-            this->sims_size = fmr::Sim_size::SM;
-            break;}
-          case 'M' : {this->proc->opt_add (optchar);
-            this->sims_size = fmr::Sim_size::MD;
-            break;}
-          case 'L' : {this->proc->opt_add (optchar);
-            this->sims_size = fmr::Sim_size::LG;
-            break;}
-          case 'X' : {this->proc->opt_add (optchar);
-            if (optarg) {switch (optarg[0]) {
-              case 'S' : {this->sims_size = fmr::Sim_size::XS; break;}
-              case 'L' : {this->sims_size = fmr::Sim_size::XL; break;}
-              default : {}// Do nothing.
-            } }
-            break;}
-          default :{}// Do nothing.
-      } }
-      // Restore getopt variables.
-      argc[0]=argc2;opterr=opterr2;optopt=optopt2;optind=optind2;optarg=optarg2;
-    }//end non-threadsafe section
-    if (log->verbosity >= this->verblevel) {
-      const auto szname = fmr::get_enum_string (fmr::Sim_size_name,
-        this->sims_size);
-      const auto szshort = fmr::get_enum_string (fmr::Sim_size_short,
-        this->sims_size);
-      const auto label = szshort+" "+this->task_name +" init";
-      log->label_printf (label.c_str(),"%s assumed sim size\n", szname.c_str());
-    }
-    fmr::perf::timer_pause (&this->time);
-    return err;
-  }
   int Sims::add (std::string name) {int err=0;
     this->model_list.push_back (name);
 #if 0
@@ -196,18 +146,7 @@ namespace Femera {
         }
         fmr::perf::timer_resume (& this->time);
       }
-      for (auto type : this->data_list) {
-        switch (fmr::vals_type [fmr::enum2val (type)]) {
-          case fmr::Vals_type::Dim :
-            this->dims [type] = fmr::Dim_int_vals (type, sim_n); break;
-          case fmr::Vals_type::Enum :
-            this->enums [type] = fmr::Enum_int_vals (type, sim_n); break;
-          case fmr::Vals_type::Local :
-            this->locals [type] = fmr::Local_int_vals (type, sim_n); break;
-          case fmr::Vals_type::Global :
-            this->globals [type] = fmr::Global_int_vals (type, sim_n); break;
-          default : {}//TODO Do nothing?
-      } }
+      this->ini_data_vals (this->data_list, sim_n);
       this->enums [fmr::Data::Part_type] = fmr::Enum_int_vals
         (fmr::Data::Part_type, sim_n, fmr::enum2val (this->part_type));
       //this->data_list.push_back(fmr::Data::Part_type);
@@ -227,7 +166,27 @@ namespace Femera {
     }
     return err;
   }
-  int Sims::get_data_vals (const std::string name, const Data_list list) {
+  int Sims::ini_data_vals (const Data_list list, const size_t n) {int err=0;
+    for (auto type : list) {
+      switch (fmr::vals_type [fmr::enum2val (type)]) {
+        case fmr::Vals_type::Dim :
+          this->dims [type] = fmr::Dim_int_vals (type, n); break;
+        case fmr::Vals_type::Enum :
+          this->enums [type] = fmr::Enum_int_vals (type, n); break;
+        case fmr::Vals_type::Local :
+          this->locals [type] = fmr::Local_int_vals (type, n); break;
+        case fmr::Vals_type::Global :
+          this->globals [type] = fmr::Global_int_vals (type, n); break;
+        default : {err= 1;//TODO Print error.
+          const auto log = this->proc->log;
+          const std::string namestr = fmr::get_enum_string (fmr::vals_name,type);
+          log->label_fprintf (log->fmrerr, "WARN""ING Sims",
+            "ini_data_vals (..) type of %s not handled.\n", namestr.c_str());
+    } } }
+    return err;
+  }
+  int Sims::get_data_vals (const fmr::Data_id name, const Data_list list) {
+    int err=0;
     for (auto type : list) {
       switch (fmr::vals_type [fmr::enum2val (type)]) {
         case fmr::Vals_type::Dim :
@@ -238,9 +197,13 @@ namespace Femera {
           this->data->get_local_vals (name, this->locals.at (type)); break;
         case fmr::Vals_type::Global :
           this->data->get_global_vals (name, this->globals.at (type)); break;
-        default : {}//TODO Do nothing?
-    } }
-    return 0;
+        default : {err= 1;//TODO Print error.
+          const auto log = this->proc->log;
+          const std::string namestr = fmr::get_enum_string (fmr::vals_name,type);
+          log->label_fprintf (log->fmrerr, "WARN""ING Sims",
+            "get_data_vals (..) type of %s not handled.\n", namestr.c_str());
+    } } }
+    return err;
   }
   int Sims::run () {int err=0;
     auto log = this->proc->log;
@@ -291,17 +254,18 @@ namespace Femera {
             if (gcad_n > 0) {//TODO move to *** HERE?
               for (fmr::Local_int i=0; i<gcad_n; i++) {
                 err+= this->data->make_mesh (R->model_name, i);
+                //TODO add R->model_name+"-"+std::to_str(i) to model_list ?
               }
               this->get_data_vals (name, this->data_list);//TODO only new vals
             }
             if (log->detail >= this->verblevel) {
               fmr::perf::timer_pause (& this->time);
-              const auto gset_n = this->get_local_val (fmr::Data::Gset_n,sim_i);
-              const auto part_n = this->get_local_val (fmr::Data::Part_n,sim_i);
-              const auto grid_n = this->get_local_val (fmr::Data::Grid_n,sim_i);
-              const auto mesh_n = this->get_local_val (fmr::Data::Mesh_n,sim_i);
-              const auto node_n = get_global_val (fmr::Data::Node_sysn,sim_i);
-              const auto elem_n = get_global_val (fmr::Data::Elem_sysn,sim_i);
+              const auto gset_n = this->get_local_val(fmr::Data::Gset_n, sim_i);
+              const auto part_n = this->get_local_val(fmr::Data::Part_n, sim_i);
+              const auto grid_n = this->get_local_val(fmr::Data::Grid_n, sim_i);
+              const auto mesh_n = this->get_local_val(fmr::Data::Mesh_n, sim_i);
+              const auto node_n = get_global_val (fmr::Data::Node_sysn, sim_i);
+              const auto elem_n = get_global_val (fmr::Data::Elem_sysn, sim_i);
 #if 0
               const auto dofs_n = get_global_val (fmr::Data::Dofs_sysn,sim_i);
 #else
@@ -398,6 +362,56 @@ namespace Femera {
       log->print_heading ("D_one");
     }
 #endif
+    return err;
+  }
+  int Sims::init_task (int* argc, char** argv) {int err=0;
+    auto log = this->proc->log;
+#ifdef FMR_DEBUG
+    if (log->verbosity >= this->verblevel) {
+      const auto label = this->task_name+" init_task";
+      log->label_fprintf (log->fmrout, label.c_str(), "***\n");
+    }
+#endif
+    fmr::perf::timer_resume (& this->time);
+    FMR_PRAGMA_OMP(omp master) {//NOTE getopt is NOT thread safe.
+      int argc2=argc[0];// Copy getopt variables.
+      auto opterr2=opterr; auto optopt2=optopt;
+      auto optind2=optind; auto optarg2=optarg;
+      opterr = 0; int optchar;
+      while ((optchar = getopt (argc[0], argv, ":S::M::L::X::")) != -1){
+        // x:  requires an argument
+        // x:: optional argument (Gnu compiler)
+        switch (optchar){
+          case 'S' : {this->proc->opt_add (optchar);
+            this->sims_size = fmr::Sim_size::SM;
+            break;}
+          case 'M' : {this->proc->opt_add (optchar);
+            this->sims_size = fmr::Sim_size::MD;
+            break;}
+          case 'L' : {this->proc->opt_add (optchar);
+            this->sims_size = fmr::Sim_size::LG;
+            break;}
+          case 'X' : {this->proc->opt_add (optchar);
+            if (optarg) {switch (optarg[0]) {
+              case 'S' : {this->sims_size = fmr::Sim_size::XS; break;}
+              case 'L' : {this->sims_size = fmr::Sim_size::XL; break;}
+              default : {}// Do nothing.
+            } }
+            break;}
+          default :{}// Do nothing.
+      } }
+      // Restore getopt variables.
+      argc[0]=argc2;opterr=opterr2;optopt=optopt2;optind=optind2;optarg=optarg2;
+    }//end non-threadsafe section
+    if (log->verbosity >= this->verblevel) {
+      const auto szname = fmr::get_enum_string (fmr::Sim_size_name,
+        this->sims_size);
+      const auto szshort = fmr::get_enum_string (fmr::Sim_size_short,
+        this->sims_size);
+      const auto label = szshort+" "+this->task_name +" init";
+      log->label_printf (label.c_str(),"%s assumed sim size\n", szname.c_str());
+    }
+    fmr::perf::timer_pause (&this->time);
     return err;
   }
 }// end Femera namespace

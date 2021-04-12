@@ -339,7 +339,7 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
       cube_n = fmr::Local_int(optval); mesh_n += (optval > zero) ? 1 : 0;
       if (mesh_n > 0) {// Cache these. //TODO only when Partition::Join ?
         const auto eid = this->make_data_id (data_id, fmr::Data::Elem_n);
-        {//TODO Refactor into a function. ------------------------------------
+        {//TODO Refactor into a function. -----------------------------------v
           is_found = this->data->local_vals.count(eid) > 0;
           if (!is_found) {this->data->local_vals[eid]
             = fmr::Local_int_vals (fmr::Data::Elem_n, mesh_n);
@@ -347,21 +347,21 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
             //TODO Resize if != mesh_n ?
             this->data->local_vals[eid].data.resize (mesh_n);//TODO clears it
           }
-        }
+        }//------------------------------------------------------------------^
         auto elems =& this->data->local_vals[eid].data[0];
 #ifdef FMR_DEBUG
           log->label_fprintf (log->fmrerr,"*** Dmsh","%s size is %u.\n",
             eid.c_str(), this->data->global_vals[eid].data.size());
 #endif
         const auto tid = this->make_data_id (data_id, fmr::Data::Elem_form);
-        {//-------------------------------------------------------------------
+        {//------------------------------------------------------------------v
           is_found = this->data->enum_vals.count(tid) > 0;
           if (!is_found) {this->data->enum_vals[tid]
             = fmr::Enum_int_vals (fmr::Data::Elem_form, mesh_n);
           }else if (this->data->enum_vals[tid].data.size() < mesh_n) {
             this->data->enum_vals[tid].data.resize (mesh_n);
           }
-        }//-------------------------------------------------------------------
+        }//------------------------------------------------------------------^
 #if 0
         gmsh::option::getNumber ("Mesh.ElementOrder", optval);
         if (optval < Dmsh::Optval(1)) {
@@ -418,7 +418,7 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
       //
       gmsh::option::getNumber ("Mesh.NbPartitions", optval);//0: unpartitioned
       auto part_n = fmr::Local_int(optval);
-      // A Gmsh physical group is a Femera geometry set (gset).
+      // Each Gmsh physical group is a Femera geometry set (gset).
       gmsh::vectorpair dim_tag ={};// vector of (dim, tag) integer pairs
       const int tag_d = -1;// <0 returns tags for all geometric dimensions
       gmsh::model::getPhysicalGroups (dim_tag, tag_d);
@@ -433,10 +433,10 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
       const auto gcad_n_ix = enum2val(fmr::Geom_info::Gcad_n);
       auto vals =& this->data->local_vals[gid].data[0];
       if (geom_d > vals[geom_d_ix]) {vals[geom_d_ix] = geom_d;}
-      vals[gset_n_ix] = fmr::Local_int (dim_tag.size());
-      vals[part_n_ix] = part_n;
-      vals[mesh_n_ix] = mesh_n;
-      vals[gcad_n_ix] = gcad_n;
+      vals[gset_n_ix] = fmr::Local_int (dim_tag.size());//TODO +=
+      vals[part_n_ix] = part_n;//TODO +=
+      vals[mesh_n_ix] = mesh_n;//TODO +=
+      vals[gcad_n_ix] = gcad_n;//TODO +=
       auto isok =& this->data->local_vals[gid].isok[0];
       isok[geom_d_ix] |= vals[geom_d_ix] > 0;
       isok[gset_n_ix] |= dim_tag.size() > 0;

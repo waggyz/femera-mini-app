@@ -98,26 +98,32 @@ namespace Femera {
 //    if (err) {return err;}//TODO early return segfaults
 #if 1
     double dof = 10e3; err= 1;
+    fmr::Global_int node_n = 0;
     if (this->parent->globals.count (fmr::Data::Node_sysn) > 0) {
       if (this->sims_ix < this->parent->globals.at
         (fmr::Data::Node_sysn).data.size()) {
-        dof = 3.0 * double(this->parent->globals.at
-          (fmr::Data::Node_sysn).data [this->sims_ix]);
+        node_n = this->parent->globals.at
+          (fmr::Data::Node_sysn).data [this->sims_ix];
+        dof = 3.0 * double(node_n);
         err= 0;
     } }
     const double iters = (dof > 500.0 ? 0.01 : 0.1) * dof;
     const double speed = 1e9 / 40.0;// dof/s Skylake XS sim solve speed/core
     const double  secs = iters * dof / speed;
-#if 1
-    if (log->detail >= this->verblevel) {
-      const auto  secstr = fmr::perf::format_time_units (secs);
+#if 0
+    usleep (int (1e6 * secs));
+#else
+    auto ret= usleep (int (1e6 * secs));
+    if (ret==0) { if(log->detail >= this->verblevel) {
+      const auto elem_n = this->parent->globals.at
+        (fmr::Data::Elem_sysn).data [this->sims_ix];
+      const auto secstr = fmr::perf::format_time_units (secs);
       const auto label = this->task_name +" Zzzz";
       log->label_fprintf (log->fmrout, label.c_str(),
-        "%i: %u geom sleep %s...\n",
-        this->sims_ix, this->task.count (), secstr.c_str());
-    }
+        "%i: %u geom, %lu elem, %lu node, %g DOF, sleep %s...\n", this->sims_ix,
+        this->task.count (), elem_n, node_n, dof, secstr.c_str());
+    } }
 #endif
-    usleep (int (1e6 * secs));
 #endif
     //...
 #if 0

@@ -32,8 +32,6 @@ namespace Femera {
     const auto form = is_found
       ? fmr::Elem_form(this->data->enum_vals.at(tid).data[this->sims_ix])
       : fmr::Elem_form::Unknown;
-    //TODO for now, prep only meshes matching the enclosing space dimension.
-    //TODO should prep all meshes with physics assigned.
     this->mesh_d = fmr::elem_form_d[fmr::enum2val(form)];
     this->geom_d = this->parent->geom_d;
 #ifdef FMR_DEBUG
@@ -47,6 +45,8 @@ namespace Femera {
     this->elem_n
       = is_found ? this->data->local_vals.at(eid).data[this->sims_ix] : 0;
     if ((this->mesh_d == this->geom_d) && this->mesh_d > 0) {
+    //TODO for now, prep only meshes matching the enclosing space dimension.
+    //TODO should prep all meshes with physics assigned.
       fmr::perf::timer_pause (& this->time, this->elem_n);//count elems prepped
       if (log->timing >= this->verblevel) {
         this->meter_unit = fmr::get_enum_string (fmr::elem_form_name, form);
@@ -56,10 +56,8 @@ namespace Femera {
         //TODO The local node count is not available in a Gmsh single file
         //     and from the CGNS mid-level library. The local elem connectivity
         //     needs to be scanned to find all of the unique local nodes.
-        const auto nid = this->data->make_data_id (pid, fmr::Data::Node_n);
-        is_found = this->data->local_vals.count(nid) > 0;
-        const auto node_n = is_found
-          ? this->data->local_vals.at(nid).data[this->sims_ix] : 0;
+        //     Or, an array of all nodes can be shared among meshes in
+        //     XS & SM simms, because each sim is contained in 1 NUMA domain.
 #endif
         const auto label = std::to_string(this->mesh_d)+"D "
           + this->task_name+" prep";
@@ -67,6 +65,20 @@ namespace Femera {
           this->elem_n, this->meter_unit.c_str(), name.c_str());
       }
       fmr::perf::timer_resume (& this->time);
+      this->ini_data_vals (this->data_list, 0);
+      if (true) {//TODO check element type
+        this->locals [fmr::Data::Elem_conn] = fmr::Local_int_vals
+          (fmr::Data::Elem_conn, this->elem_n * 4);//TODO * elem_vert_n(form)
+        this->data_list.push_back (fmr::Data::Elem_conn);//or elem_vert_n(form)?
+#if 0
+        // element jacobian data (inverted, may have det)
+        this->geoms [fmr::Data::Jacs_dets] = fmr::Geom_float_vals
+          (fmr::Data::Jacs_dets, this->math_type, this->elem_n * 10);
+          //TODO size: this->elem_n * elem_jacs_n (elem_form)
+        this->data_list.push_back(fmr::Data::Jacs_dets);
+#endif
+      }
+      this->get_data_vals (this->model_name, this->data_list);
     }//end if this needs prepped
     fmr::perf::timer_pause (& this->time);
     return err;

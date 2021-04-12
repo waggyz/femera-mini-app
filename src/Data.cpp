@@ -240,40 +240,10 @@ fmr::Data_id Data::get_id (){fmr::Data_id id = "";//TODO needed?
 fmr::Dim_int Data::get_hier_max (){
   return data_hier_max;
 }
-int Data::get_global_vals (fmr::Data_id data_id, fmr::Global_int_vals& vals){
+int Data::get_dim_vals (const fmr::Data_id id, fmr::Dim_int_vals& vals) {
   int err= 0;
   auto log = this->proc->log;
-  const auto vals_id = this->make_data_id (data_id, vals.type);
-  bool is_found = this->global_vals.count (vals_id) > 0;
-  if (is_found) {
-    vals = this->global_vals.at (vals_id);
-    return err;
-  }
-  const auto names = this->get_sims_names();
-  fmr::Local_int name_i=0;
-  for (auto name : names) {
-    fmr::Data_id cache_id = this->make_data_id (name, vals.type);
-    if (this->global_vals.count (cache_id) > 0) {
-      if (name_i < vals.data.size()) {
-        is_found = true;
-        const auto cached = this->global_vals.at (cache_id);
-        vals.data [name_i] = cached.data [0];
-    } }
-    name_i++;
-  }
-  if (!is_found) {
-    const std::string namestr = fmr::get_enum_string (fmr::vals_name,vals.type);
-    log->label_fprintf (log->fmrerr, "WARN""ING Data",
-      "%u %s:%s global vals not found.\n",
-      vals.data.size(), data_id.c_str(), namestr.c_str());
-    return 1;
-  }
-  return err;
-}
-int Data::get_dim_vals (fmr::Data_id data_id, fmr::Dim_int_vals& vals) {
-  int err= 0;
-  auto log = this->proc->log;
-  const auto vals_id = this->make_data_id (data_id, vals.type);
+  const auto vals_id = this->make_data_id (id, vals.type);
   bool is_found = this->dim_vals.count (vals_id) > 0;
   if (is_found) {
     vals = this->dim_vals.at (vals_id);
@@ -301,15 +271,15 @@ int Data::get_dim_vals (fmr::Data_id data_id, fmr::Dim_int_vals& vals) {
     const std::string namestr = fmr::get_enum_string (fmr::vals_name,vals.type);
     log->label_fprintf (log->fmrerr, "WARN""ING Data",
       "%u %s:%s dim vals not found.\n",
-      vals.data.size(), data_id.c_str(), namestr.c_str());
+      vals.data.size(), id.c_str(), namestr.c_str());
     return 1;
   }
   return err;
 }
-int Data::get_enum_vals (fmr::Data_id data_id, fmr::Enum_int_vals& vals){
+int Data::get_enum_vals (const fmr::Data_id id, fmr::Enum_int_vals& vals) {
   int err= 0;
   auto log = this->proc->log;
-  const auto vals_id = this->make_data_id (data_id, vals.type);
+  const auto vals_id = this->make_data_id (id, vals.type);
   bool is_found = this->enum_vals.count (vals_id) > 0;
   if (is_found) {
     vals = this->enum_vals.at (vals_id);
@@ -337,20 +307,28 @@ int Data::get_enum_vals (fmr::Data_id data_id, fmr::Enum_int_vals& vals){
     const std::string name = fmr::get_enum_string (fmr::vals_name, vals.type);
     log->label_fprintf (log->fmrerr, "WARN""ING Data",
       "%u %s:%s enum vals not found.\n",
-      vals.data.size(), data_id.c_str(), name.c_str());
+      vals.data.size(), id.c_str(), name.c_str());
     return 1;
   }
   return err;
 }
-int Data::get_local_vals (fmr::Data_id data_id, fmr::Local_int_vals& vals){
-  int err= 0;
+int Data::get_local_vals (const fmr::Data_id id, fmr::Local_int_vals& vals) {
+//  int err= 0;
   auto log = this->proc->log;
-  const auto vals_id = this->make_data_id (data_id, vals.type);
+  const auto vals_id = this->make_data_id (id, vals.type);
   bool is_found = this->local_vals.count (vals_id) > 0;
   if (is_found) {
     vals = this->local_vals.at (vals_id);
-    return err;
-  }
+    if (vals.stored_state.was_read) {
+      return vals.stored_state.has_error ? 1 : 0;
+    }else{
+#if 1//def FMR_DEBUG
+      const std::string name = fmr::get_enum_string (fmr::vals_name, vals.type);
+      log->label_fprintf (log->fmrerr, "read Data",
+        "%u %s:%s local vals...\n",
+        vals.data.size(), id.c_str(), name.c_str());
+#endif
+  } }
   const auto names = this->get_sims_names();
   fmr::Local_int name_i=0;
   for (auto name : names) {
@@ -377,31 +355,25 @@ int Data::get_local_vals (fmr::Data_id data_id, fmr::Local_int_vals& vals){
     const std::string name = fmr::get_enum_string (fmr::vals_name, vals.type);
     log->label_fprintf (log->fmrerr, "WARN""ING Data",
       "%u %s:%s local vals not found.\n",
-      vals.data.size(), data_id.c_str(), name.c_str());
+      vals.data.size(), id.c_str(), name.c_str());
     return 1;
   }
-#if 0
-int Data::get_global_vals (fmr::Data_id data_id, fmr::Global_int_vals& vals){
-  int err= 0;
-  return err;
-}
-#endif
 #if 0
   //for (int i=1; 1<this->task.count();
 #if 0
   switch (vals.type) {//TODO is switch needed?
     case fmr::Data::Geom_info :{
       if (is_found) {
-        vals.data = this->local_vals[data_id].data; }//TODO copies data?
+        vals.data = this->local_vals[id].data; }//TODO copies data?
       break;}
     case fmr::Data::Phys_info :{
       if (is_found) {
-        vals.data = this->local_vals[data_id].data; }//TODO copies data?
+        vals.data = this->local_vals[id].data; }//TODO copies data?
       break;}
     default: err= 1;
   }
 #else
-    if (is_found) {vals.data = this->local_vals[data_id].data; }//TODO copies?
+    if (is_found) {vals.data = this->local_vals[id].data; }//TODO copies?
     else {err= 1;}
 #endif
   if (err){
@@ -422,6 +394,66 @@ int Data::get_global_vals (fmr::Data_id data_id, fmr::Global_int_vals& vals){
     vals.memory_state.was_read    = true;
   }
 #endif
+  return vals.stored_state.has_error ? 1 : 0;;
+}
+int Data::get_global_vals (const fmr::Data_id id, fmr::Global_int_vals& vals) {
+  int err= 0;
+  auto log = this->proc->log;
+  const auto vals_id = this->make_data_id (id, vals.type);
+  bool is_found = this->global_vals.count (vals_id) > 0;
+  if (is_found) {
+    vals = this->global_vals.at (vals_id);
+    return err;
+  }
+  const auto names = this->get_sims_names();
+  fmr::Local_int name_i=0;
+  for (auto name : names) {
+    fmr::Data_id cache_id = this->make_data_id (name, vals.type);
+    if (this->global_vals.count (cache_id) > 0) {
+      if (name_i < vals.data.size()) {
+        is_found = true;
+        const auto cached = this->global_vals.at (cache_id);
+        vals.data [name_i] = cached.data [0];
+    } }
+    name_i++;
+  }
+  if (!is_found) {
+    const std::string namestr = fmr::get_enum_string (fmr::vals_name,vals.type);
+    log->label_fprintf (log->fmrerr, "WARN""ING Data",
+      "%u %s:%s global vals not found.\n",
+      vals.data.size(), id.c_str(), namestr.c_str());
+    return 1;
+  }
+  return err;
+}
+int Data::new_enum_vals (const fmr::Data_id data_id, const size_t nvals) {
+  int err=0;
+  const bool is_found = this->data->enum_vals.count(data_id) > 0;
+  if (!is_found) {this->data->enum_vals[data_id]
+    = fmr::Enum_int_vals (fmr::Data::Elem_form, nvals);
+  }else if (this->data->enum_vals[data_id].data.size() < nvals) {
+    const auto tmp = this->data->enum_vals[data_id].data;
+    this->data->enum_vals[data_id].data.resize (nvals);// clears data
+    const auto n = tmp.size();
+    //TODO replace loop below with memcpy
+    FMR_PRAGMA_OMP_SIMD
+    for (size_t i=0; i<n; i++) {data->enum_vals[data_id].data[i]=tmp[i];}
+  }
+  return err;
+}
+int Data::new_local_vals (const fmr::Data_id data_id, const size_t nvals) {
+  int err=0;
+  const bool is_found = this->data->local_vals.count(data_id) > 0;
+  if (!is_found) {this->data->local_vals[data_id]
+    = fmr::Local_int_vals (fmr::Data::Elem_form, nvals);
+  }else if (this->data->local_vals[data_id].data.size() < nvals) {
+    const auto tmp = this->data->local_vals[data_id].data;
+    this->data->local_vals[data_id].data.resize (nvals);// clears data
+    const auto n = tmp.size();
+    //TODO replace loop below with memcpy
+    FMR_PRAGMA_OMP_SIMD
+    for (size_t i=0; i<n; i++) {data->local_vals[data_id].data[i]=tmp[i];}
+  }
   return err;
 }
 #if 0

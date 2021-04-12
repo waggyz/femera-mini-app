@@ -163,10 +163,13 @@ class Data : public Work {//TODO change to File
     virtual std::deque<std::string> get_sims_names ();
     virtual int make_mesh (const std::string model, const fmr::Local_int ix);
     //
-    int get_dim_vals (const fmr::Data_id id, fmr::Dim_int_vals &);
-    int get_enum_vals (const fmr::Data_id id, fmr::Enum_int_vals &);
-    int get_local_vals (const fmr::Data_id id, fmr::Local_int_vals &);
-    int get_global_vals (const fmr::Data_id id, fmr::Global_int_vals &);
+    int get_dim_vals (const fmr::Data_id, fmr::Dim_int_vals &);
+    int get_enum_vals (const fmr::Data_id, fmr::Enum_int_vals &);
+    int get_local_vals (const fmr::Data_id, fmr::Local_int_vals &);
+    int get_global_vals (const fmr::Data_id, fmr::Global_int_vals &);
+    //
+    int new_enum_vals (const fmr::Data_id, const size_t nvals);
+    int new_local_vals (const fmr::Data_id, const size_t nvals);
 #if 0
     int read_local_vals (const std::string id, fmr::Local_int_vals &);
     int save_local_vals (const std::string id, fmr::Local_int_vals &);
