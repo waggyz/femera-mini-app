@@ -7,15 +7,17 @@
 
 namespace fmr {
   template <typename T> struct Vals {//TODO class?
-    std::valarray<T>    data ={}                   ;
+    std::valarray<T>      data ={}                   ;
+    math::Zomplex      algebra = math::Real          ;
+    Data                  type = Data::Unknown       ;
+    data::Layout        layout = data::Layout::Block ;
+    data::State   stored_state = data::State()       ;
+    data::State   memory_state = data::State()       ;
+    bool isok [8 * sizeof(T)];// state of heterogeneous data type items
+#if 0
     //TODO std::valarray<Dim_int> dims = {1};// array dimensions?
-    math::Zomplex    algebra = math::Real          ;
-    Data                type = Data::Unknown       ;
-    data::Layout      layout = data::Layout::Block ;
-    data::State stored_state = data::State()       ;
-    data::State memory_state = data::State()       ;
-    bool isok [8*sizeof(T)];// state of heterogeneous data type items
     //TODO data.size = prod (dims) << order; // native complex is <<(order-1)
+#endif
 #if 0
     void clear (){
       this->data.resize(0);
@@ -60,7 +62,7 @@ namespace fmr {
       const auto o = algebra.order
         -( algebra.algebra == fmr::math::Algebra::Complex
         && algebra.layout  == fmr::data::Layout::Native
-        && algebra.order > 0 ) ? 1:0;
+        && algebra.order > 0 ) ? 1 : 0;
       if (was_found) {
         data.resize (sz << o, T(0));
       }else{
@@ -79,7 +81,7 @@ namespace fmr {
       const auto o = algebra.order
         -( algebra.algebra == fmr::math::Algebra::Complex
         && algebra.layout  == fmr::data::Layout::Native
-        && algebra.order > 0 ) ? 1:0;
+        && algebra.order > 0 ) ? 1 : 0;
       data.resize (sz << o);
   } }
   template <typename T> Vals<T>::Vals (const Data t,
@@ -93,7 +95,7 @@ namespace fmr {
       const auto o = algebra.order
         -( algebra.algebra == fmr::math::Algebra::Complex
         && algebra.layout  == fmr::data::Layout::Native
-        && algebra.order > 0 ) ? 1:0;
+        && algebra.order > 0 ) ? 1 : 0;
       data.resize (sz << o, init_val);
   } }
   template <typename T> Vals<T>::Vals (const Data t, const math::Zomplex z)
@@ -104,7 +106,7 @@ namespace fmr {
       const auto o = algebra.order
         -( algebra.algebra == fmr::math::Algebra::Complex
         && algebra.layout  == fmr::data::Layout::Native
-        && algebra.order > 0 ) ? 1:0;
+        && algebra.order > 0 ) ? 1 : 0;
       data.resize (sz << o);
 #ifdef FMR_TOUCH_VALS_FIRST
       data[0]=T(0);
@@ -118,7 +120,7 @@ namespace fmr {
       const auto o = algebra.order
         -( algebra.algebra == fmr::math::Algebra::Complex
         && algebra.layout  == fmr::data::Layout::Native
-        && algebra.order > 0 ) ? 1:0;
+        && algebra.order > 0 ) ? 1 : 0;
       data.resize (sz << o);
 #ifdef FMR_TOUCH_VALS_FIRST
       data[0]=T(0);
@@ -133,7 +135,7 @@ namespace fmr {
       const auto o = algebra.order
         -( algebra.algebra == fmr::math::Algebra::Complex
         && algebra.layout  == fmr::data::Layout::Native
-        && algebra.order > 0 ) ? 1:0;
+        && algebra.order > 0 ) ? 1 : 0;
       data.resize (sz << o, init_val);
   } }
 }//end fmr:: namespace

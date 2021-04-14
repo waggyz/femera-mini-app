@@ -53,8 +53,8 @@ namespace Femera {
       }
       if (log->detail >= this->verblevel) {
 #if 0
-        //TODO The local node count is not available in a Gmsh single file
-        //     and from the CGNS mid-level library. The local elem connectivity
+        //TODO The local mesh node count is not available in a Gmsh single file
+        //     nor from the CGNS mid-level library. The local elem connectivity
         //     needs to be scanned to find all of the unique local nodes.
         //     Or, an array of all nodes can be shared among meshes in
         //     XS & SM simms, because each sim is contained in 1 NUMA domain.
@@ -78,6 +78,14 @@ namespace Femera {
         this->data_list.push_back(fmr::Data::Jacs_dets);
 #endif
       }
+#ifdef FMR_DEBUG
+      auto vals = this->locals [fmr::Data::Elem_conn];
+      const std::string tstr = fmr::get_enum_string (fmr::vals_name, vals.type);
+      log->label_fprintf (log->fmrerr, "****  get Mesh",
+        "%lu %s:%s vals...\n",
+        vals.data.size(),
+        name.c_str(), tstr.c_str());
+#endif
       this->get_data_vals (this->model_name, this->data_list);
     }//end if this needs prepped
     fmr::perf::timer_pause (& this->time);

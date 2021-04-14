@@ -12,7 +12,7 @@
 namespace Femera {
 Data:: Data () {meter_unit="W";}
 Data:: Data (Proc* P) {
-  this-> proc=P;
+  this-> proc=P; this->data=this;
   this-> work_type = work_cast (Base_type::Data);
   this-> task_name ="Data";
   this-> verblevel = 2;
@@ -240,6 +240,15 @@ fmr::Data_id Data::get_id (){fmr::Data_id id = "";//TODO needed?
 fmr::Dim_int Data::get_hier_max (){
   return data_hier_max;
 }
+int Data::add_data_file (const fmr::Data_id id, Data* D,
+  const std::string fname) {
+  if (this->sims_data_file.count (id) > 0) {
+    this->sims_data_file.at (id).push_back (Data_file (D,fname));
+  }else{
+    this->sims_data_file[id] = std::vector<Data_file>({Data_file(D,fname)});
+  }
+  return 0;
+}
 int Data::get_dim_vals (const fmr::Data_id id, fmr::Dim_int_vals& vals) {
   int err= 0;
   auto log = this->proc->log;
@@ -306,32 +315,55 @@ int Data::get_enum_vals (const fmr::Data_id id, fmr::Enum_int_vals& vals) {
   if (!is_found) {
     const std::string name = fmr::get_enum_string (fmr::vals_name, vals.type);
     log->label_fprintf (log->fmrerr, "WARN""ING Data",
-      "%u %s:%s enum vals not found.\n",
+      "%lu %s:%s enum vals not found.\n",
       vals.data.size(), id.c_str(), name.c_str());
     return 1;
   }
   return err;
 }
-int Data::get_local_vals (const fmr::Data_id id, fmr::Local_int_vals& vals) {
-//  int err= 0;
-  auto log = this->proc->log;
+int Data::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
+  int err= 0;
+  const auto log = this->proc->log;
+  if (log->detail >= this->verblevel) {
+    const std::string label = "read "+this->task_name;
+    log->label_fprintf (log->fmrerr, label.c_str(), "%lu %s local vals...\n",
+      vals.data.size(), id.c_str());
+  }
+  return err;
+}
+int Data::get_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
+  int err= 0;
+  const auto log = this->proc->log;
   const auto vals_id = this->make_data_id (id, vals.type);
+  // Check if data is in a homogeneous data array. ----------------------------
   bool is_found = this->local_vals.count (vals_id) > 0;
-  if (is_found) {
-    vals = this->local_vals.at (vals_id);
-    if (vals.stored_state.was_read) {
+  if (is_found) {// This data has already been located.
+    if (vals.stored_state.was_read) {// This data has been cached homogeneous.
+      vals = this->local_vals.at (vals_id);
       return vals.stored_state.has_error ? 1 : 0;
-    }else{
-#if 1//def FMR_DEBUG
-      const std::string name = fmr::get_enum_string (fmr::vals_name, vals.type);
-      log->label_fprintf (log->fmrerr, "read Data",
-        "%u %s:%s local vals...\n",
-        vals.data.size(), id.c_str(), name.c_str());
-#endif
   } }
+  // This data has not been cached, but maybe we know how to get it...
+  is_found = false;// Change to true if this data can be read by a data handler.
+  if (this->sims_data_file.count (vals_id) > 0) {
+    const auto data_files = this->sims_data_file.at (vals_id);
+    for (auto df : data_files) {
+      auto D = df.first;
+      if (D) {
+        err= D->read_local_vals (vals_id, vals);//FIXME IAMHERE
+        is_found = is_found | ((err==0) & vals.stored_state.was_read);
+  } } }
+  if (is_found) {return vals.stored_state.has_error ? 1 : 0;}
+#ifdef FMR_DEBUG
+  else{
+    log->label_fprintf (log->fmrerr, "**** Data",
+      "no file handler found to read %s local vals...\n", vals_id.c_str());
+  }
+#endif
+  // Check if data is cached in a heterogeneous data structure. ---------------
+  // TODO refactor as homogeneous data?
   const auto names = this->get_sims_names();
   fmr::Local_int name_i=0;
-  for (auto name : names) {
+  for (auto name : names) {//TODO not an efficient search
     fmr::Data_id cache_id = this->make_data_id (name, fmr::Data::Geom_info);
     if (this->local_vals.count (cache_id) > 0) {
       if (name_i < vals.data.size()) {
@@ -426,34 +458,38 @@ int Data::get_global_vals (const fmr::Data_id id, fmr::Global_int_vals& vals) {
   }
   return err;
 }
-int Data::new_enum_vals (const fmr::Data_id data_id, const size_t nvals) {
-  int err=0;
-  const bool is_found = this->data->enum_vals.count(data_id) > 0;
-  if (!is_found) {this->data->enum_vals[data_id]
-    = fmr::Enum_int_vals (fmr::Data::Elem_form, nvals);
-  }else if (this->data->enum_vals[data_id].data.size() < nvals) {
-    const auto tmp = this->data->enum_vals[data_id].data;
-    this->data->enum_vals[data_id].data.resize (nvals);// clears data
+int Data::new_enum_vals (const fmr::Data_id data_id,
+  const fmr::Data type, const size_t nvals) {int err=0;
+  const auto id = this->make_data_id (data_id, type);
+  const bool is_found = this->data->enum_vals.count(id) > 0;
+  if (!is_found) {this->data->enum_vals[id]
+    = fmr::Enum_int_vals (type, nvals);
+  }else if (this->data->enum_vals[id].data.size() < nvals) {
+    const auto tmp = this->data->enum_vals[id].data;
+    this->data->enum_vals[id].data.resize (nvals);// clears data
     const auto n = tmp.size();
-    //TODO replace loop below with memcpy
-    FMR_PRAGMA_OMP_SIMD
-    for (size_t i=0; i<n; i++) {data->enum_vals[data_id].data[i]=tmp[i];}
-  }
+    if (n>0) {
+      //TODO replace loop below with memcpy
+      FMR_PRAGMA_OMP_SIMD
+      for (size_t i=0; i<n; i++) {data->enum_vals[id].data[i] = tmp[i];}
+  } }
   return err;
 }
-int Data::new_local_vals (const fmr::Data_id data_id, const size_t nvals) {
-  int err=0;
-  const bool is_found = this->data->local_vals.count(data_id) > 0;
-  if (!is_found) {this->data->local_vals[data_id]
-    = fmr::Local_int_vals (fmr::Data::Elem_form, nvals);
-  }else if (this->data->local_vals[data_id].data.size() < nvals) {
-    const auto tmp = this->data->local_vals[data_id].data;
-    this->data->local_vals[data_id].data.resize (nvals);// clears data
+int Data::new_local_vals (const fmr::Data_id data_id,
+  const fmr::Data type, const size_t nvals) {int err=0;
+  const auto id = this->make_data_id (data_id, type);
+  const bool is_found = this->data->local_vals.count(id) > 0;
+  if (!is_found) {this->data->local_vals[id]
+    = fmr::Local_int_vals (type, nvals);
+  }else if (this->data->local_vals[id].data.size() < nvals) {
+    const auto tmp = this->data->local_vals[id].data;
+    this->data->local_vals[id].data.resize (nvals);// clears data
     const auto n = tmp.size();
-    //TODO replace loop below with memcpy
-    FMR_PRAGMA_OMP_SIMD
-    for (size_t i=0; i<n; i++) {data->local_vals[data_id].data[i]=tmp[i];}
-  }
+    if (n>0) {
+      //TODO replace loop below with memcpy
+      FMR_PRAGMA_OMP_SIMD
+      for (size_t i=0; i<n; i++) {data->local_vals[id].data[i] = tmp[i];}
+  } }
   return err;
 }
 #if 0

@@ -187,6 +187,13 @@ namespace Femera {
   }
   int Sims::get_data_vals (const fmr::Data_id name, const Data_list list) {
     int err=0;
+    const auto log = this->proc->log;
+#ifdef FMR_DEBUG
+    auto vals = this->locals [fmr::Data::Elem_conn];
+    const std::string tstr = fmr::get_enum_string (fmr::vals_name, vals.type);
+    log->label_fprintf (log->fmrerr, "****    1 Sims",
+      "%lu %s:%s local vals...\n",vals.data.size(),name.c_str(), tstr.c_str());
+#endif
     for (auto type : list) {
       switch (fmr::vals_type [fmr::enum2val (type)]) {
         case fmr::Vals_type::Dim :
@@ -198,11 +205,16 @@ namespace Femera {
         case fmr::Vals_type::Global :
           this->data->get_global_vals (name, this->globals.at (type)); break;
         default : {err= 1;//TODO Print error.
-          const auto log = this->proc->log;
           const std::string namestr = fmr::get_enum_string (fmr::vals_name,type);
           log->label_fprintf (log->fmrerr, "WARN""ING Sims",
-            "get_data_vals (..) type of %s not handled.\n", namestr.c_str());
+            "get_data_vals (..) Vals_type of %s not handled.\n",namestr.c_str());
     } } }
+#ifdef FMR_DEBUG
+    auto val2 = this->locals [fmr::Data::Elem_conn];
+    const std::string vstr = fmr::get_enum_string (fmr::vals_name, val2.type);
+    log->label_fprintf (log->fmrerr, "****    2 Sims",
+      "%lu %s:%s local vals...\n",val2.data.size(),name.c_str(), vstr.c_str());
+#endif
     return err;
   }
   int Sims::run () {int err=0;

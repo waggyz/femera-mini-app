@@ -95,7 +95,7 @@ namespace Femera {// header extension: needs cgnslib.h
      */
 }//end Femera namespace for header extension
 namespace Femera {
-  Dcgn::Dcgn (Proc* P,Data* D) noexcept:
+  Dcgn::Dcgn (Proc* P, Data* D) noexcept:
     format (Dcgn::File_format::Dcgn_HDF5),
     comm   (Proc::Team_id( MPI_COMM_WORLD )) {// changed in init_task(..)
     this->proc=P; this->data=D;
@@ -566,11 +566,9 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
           default : err+=1;
         }
 #if 1
-        const auto fid = this->make_data_id (data_id,fmr::Data::Elem_form);
-        const auto eid = this->make_data_id (data_id,fmr::Data::Elem_n);
         if (mesh_n>0) {
-          this->new_enum_vals (fid, mesh_n);
-          this->new_local_vals (eid, mesh_n);
+          this->new_enum_vals (data_id, fmr::Data::Elem_form, mesh_n);
+          this->new_local_vals (data_id, fmr::Data::Elem_n, mesh_n);
         }
 #endif
 #if 1
@@ -588,22 +586,38 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
           if (elem_form_from_cgns.count (eltype) > 0) {
             const auto form = elem_form_from_cgns.at (eltype);
             const auto i = sect_0 + sect_i -1;
+            const auto fid = this->make_data_id (data_id, fmr::Data::Elem_form);
+            const auto eid = this->make_data_id (data_id, fmr::Data::Elem_n);
             this->data->enum_vals[fid].data[i] = fmr::enum2val (form);
             const auto elem_n = fmr::Local_int (end - start +1);
             this->data->local_vals[eid].data[i] = fmr::Local_int (elem_n);
             //
-            // Add empty Elem_conn for this mesh marked as not read yet.
-            const auto cid = this->make_data_id (
-              data_id + ":Mesh_" + std::to_string(i), fmr::Data::Elem_conn);
-            this->new_local_vals (cid, 0);
-            this->data->local_vals.at(cid).stored_state.was_read = false;
+            if (elem_n > 0) {
+              const auto mesh_id = data_id + ":Mesh_" + std::to_string(i);
+              const auto cid = this->make_data_id(mesh_id,fmr::Data::Elem_conn);
+              this->data->add_data_file (cid, this, fname);
+#ifdef FMR_DEBUG
+              log->label_fprintf(log->fmrerr,"**** Dcgn add!","%s\n",cid.c_str());
+#endif
+#if 0
+              // Add empty Elem_conn for this mesh marked as not read yet.
+              const auto mesh_id = data_id + ":Mesh_" + std::to_string(i);
+#if 0
+              this->new_local_vals (mesh_id, fmr::Data::Elem_conn, 0);
+#else
+              this->data->new_local_vals (mesh_id, fmr::Data::Elem_conn, 0);
+#endif
+              const auto cid = this->make_data_id (mesh_id, fmr::Data::Elem_conn);
+              this->data->local_vals.at(cid).stored_state.was_read = false;
+#endif
+            }
             //
             if (fmr::elem_form_d [fmr::enum2val (form)] == geom_d) {
               // Count all elements of the same dimension as enclosing space.
               elem_sysn += elem_n;
 #ifdef FMR_DEBUG
               const auto str = fmr::get_enum_string (fmr::elem_form_name, form);
-              log->label_fprintf (log->fmrerr, "*** Dcgn scan", "%s %lu %s\n",
+              log->label_fprintf (log->fmrerr, "**** Dcgn scan", "%s %lu %s\n",
                 data_id.c_str(), elem_sysn, str.c_str());
 #endif
         } } }

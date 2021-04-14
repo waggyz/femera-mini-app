@@ -132,15 +132,9 @@ class Data : public Work {//TODO change to File
     int chck_file_names ();// Check if files in this->chk_file_names are valid.
     int chck_file_names (const std::deque<std::string> file_names);
     //
+    // public interfaces to corresponding *(File_info,...) in derived classes
     File_info get_file_info  (Data_file);// Does not open file.//TODO chk_?
     File_info scan_file_data (Data_file);// Root data: sims, gset, mtrl_defs,...
-    // public interfaces to corresponding *(File_info,...) in derived classes
-  protected:
-    // called from public *(Data_file) in base class
-    virtual File_info get_file_info (const std::string fname);
-    virtual File_info scan_file_data (const std::string fname);//TODO chk_?
-    // Hierarchical data structures can then be accessed by data ops, below.
-  public:
     // simulation data handling ----------------------------------------------
     //TODO batch data operations?
     fmr::Dim_int get_hier_max ();// Use to detect loops in a hierarchy.
@@ -161,42 +155,51 @@ class Data : public Work {//TODO change to File
     // Below valid after scan_file_data(..).
     fmr::Local_int get_sims_n ();
     virtual std::deque<std::string> get_sims_names ();
+    //
+    int add_data_file (const fmr::Data_id, Data*D, const std::string fname);
     virtual int make_mesh (const std::string model, const fmr::Local_int ix);
+    //
+    int new_enum_vals (const fmr::Data_id, const fmr::Data, const size_t);
+    int new_local_vals (const fmr::Data_id, const fmr::Data, const size_t);
     //
     int get_dim_vals (const fmr::Data_id, fmr::Dim_int_vals &);
     int get_enum_vals (const fmr::Data_id, fmr::Enum_int_vals &);
     int get_local_vals (const fmr::Data_id, fmr::Local_int_vals &);
     int get_global_vals (const fmr::Data_id, fmr::Global_int_vals &);
     //
-    int new_enum_vals (const fmr::Data_id, const size_t nvals);
-    int new_local_vals (const fmr::Data_id, const size_t nvals);
 #if 0
     int read_local_vals (const std::string id, fmr::Local_int_vals &);
     int save_local_vals (const std::string id, fmr::Local_int_vals &);
     int free_local_vals (const std::string id, fmr::Local_int_vals &);
     int scan (id, Scan_for={Scan::Part,...}, int depth=0);//TODO Needed?
 #endif
-  protected:// ---------------------------------------------------------------
+  private:// ---------------------------------------------------------------
+    int chck () final override;// Not yet used in Data classes.
+    int prep () override;
     //
+    Work_type   get_file_type (const std::string fname);
+    virtual bool is_this_type (const std::string fname);
+  protected:
     int init_task (int* argc, char** argv) override;
     int exit_task (int err) override;
     //
     Data* get_task_for_file (const std::string fname);//TODO replace w/next
     std::vector<Data*> get_tasks_for_file (const std::string fname);
     //virtual bool has_data_for (const Work_type);//TODO needed?
-  private:
-    int chck () final override;// Not yet used in Data classes.
-    int prep () override;
     //
-    Work_type   get_file_type (const std::string fname);
-    virtual bool is_this_type (const std::string fname);
+    // called from public *(Data_file) in base class
+    virtual File_info get_file_info (const std::string fname);
+    virtual File_info scan_file_data (const std::string fname);//TODO chk_?
+    // Hierarchical data structures can then be accessed by data ops, above.
+    //
+    virtual int read_local_vals (const fmr::Data_id, fmr::Local_int_vals &);
+    //
+    Data           ();// called implicitly by child constructors
   public:
     Data           (Proc*);
     Data           (Data const&) =delete;// not copyable
     Data operator= (const Data&) =delete;
     virtual ~Data  ()   noexcept =default;
-  protected:
-    Data           ();// called implicitly by child constructors
 };
 }//end Femera namespace
 
