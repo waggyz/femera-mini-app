@@ -66,9 +66,28 @@ class Dcgn final : public Data {
         File_cgns& operator= (const File_cgns&) =default;
         virtual   ~File_cgns ()        noexcept =default;
     };
+    struct Path_cgns {
+      Proc::Team_id comm = 0;
+      fmr::Data     type = fmr::Data::Unknown;
+      // the rest roughly matches signature of cg_where(..) and cg_golist(..)
+      Dcgn::File_cgid     file_cgid = 0;
+      int                      base = 0;
+      int                      deep = 0;
+      std::vector<char*>       labs ={};
+      std::vector<int>         inds ={};
+      std::vector<std::string> strs ={};
+#if 0
+      Path_cgns            (Path_cgns const&) =default;// copyable
+      Path_cgns& operator= (const Path_cgns&) =default;
+      virtual   ~Path_cgns ()        noexcept =default;
+#endif
+    };
   // Member variables --------------------------------------------------------
   private:
     std::unordered_map<std::string, File_cgns>file_info ={};// key: path/fname
+    std::unordered_map<fmr::Data_id, Path_cgns> data_path = {};
+    int add_cgns_here (const std::string fname, const fmr::Data_id cid,
+      const fmr::Data type);
     //
     // Defaults for new CGNS file.
     File_format             format = File_format::Dcgn_HDF5;
@@ -106,6 +125,8 @@ class Dcgn final : public Data {
     //
     Data::File_info get_file_info (const std::string fname)  final override;
     Data::File_info scan_file_data (const std::string fname) final override;
+    int read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals)
+      final override;
     //
     std::deque<std::string> get_sims_names ()        final override;
     //

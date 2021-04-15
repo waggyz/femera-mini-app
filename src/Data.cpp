@@ -146,7 +146,7 @@ int Data::make_mesh (const std::string model, const fmr::Local_int ix) {
         if (this->proc->log->verbosity >= this->verblevel) {
           const auto label = this->task_name+" "+D->task_name;
           log->label_fprintf (log->fmrout, label.c_str(),
-            "meshed %s:%u.\n", model.c_str(), ix);
+            "%u: meshed %s.\n", ix, model.c_str());
         return 0;
     } } } }
     if (!did_mesh) {
@@ -325,7 +325,7 @@ int Data::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
   int err= 0;
   const auto log = this->proc->log;
   if (log->detail >= this->verblevel) {
-    const std::string label = "read "+this->task_name;
+    const std::string label = this->task_name+" read";
     log->label_fprintf (log->fmrerr, label.c_str(), "%lu %s local vals...\n",
       vals.data.size(), id.c_str());
   }
@@ -337,12 +337,12 @@ int Data::get_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
   const auto vals_id = this->make_data_id (id, vals.type);
   // Check if data is in a homogeneous data array. ----------------------------
   bool is_found = this->local_vals.count (vals_id) > 0;
-  if (is_found) {// This data has already been located.
-    if (vals.stored_state.was_read) {// This data has been cached homogeneous.
+  if (is_found) {// The data might be cached already.
+    if (vals.stored_state.was_read) {// The data has been cached homogeneous.
       vals = this->local_vals.at (vals_id);
       return vals.stored_state.has_error ? 1 : 0;
   } }
-  // This data has not been cached, but maybe we know how to get it...
+  // The data has not been cached, but maybe we know how to get it...
   is_found = false;// Change to true if this data can be read by a data handler.
   if (this->sims_data_file.count (vals_id) > 0) {
     const auto data_files = this->sims_data_file.at (vals_id);

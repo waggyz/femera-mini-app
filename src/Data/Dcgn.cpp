@@ -410,6 +410,99 @@ Dcgn::File_cgns Dcgn::open (const std::string fname,
   this->file_info[fname] = info;
   return info;
 }
+int Dcgn::add_cgns_here (const std::string fname, const fmr::Data_id cid,
+  const fmr::Data type) {int err=0;
+  this->data_path [cid] = Path_cgns();// Add to map.
+  auto path = &this->data_path.at (cid);
+  path->comm = this->comm;
+  path->type = type;
+  fmr::perf::timer_resume (&this->time);
+  // Get tree depth.
+  err= cg_where (&path->file_cgid, &path->base, &path->deep,
+    nullptr, nullptr);//TODO handle err
+  fmr::perf::timer_pause (&this->time);
+  if (!err) {this->time.bytes += 3*sizeof(int);}
+#ifdef FMR_DEBUG
+  log->label_fprintf(log->fmrerr,"**** Dcgn deep","%u\n", path->deep);
+#endif
+  if (path->deep > 0) {
+    // Resize arrays.
+    const std::string null33 = std::string(33,'\0');
+    path->inds.resize (path->deep);
+    path->strs.resize (path->deep, null33);
+    path->labs.resize (0);
+    for (auto& str : path->strs) {// Set C-style char pointers.
+      path->labs.push_back (&str.front());
+  } }
+  fmr::perf::timer_resume (&this->time);
+  // Read tree directly into Femera:Data::Path_cgns struct.
+  err= cg_where (&path->file_cgid, &path->base, &path->deep,
+    path->labs.data(), path->inds.data());//TODO handle err
+  fmr::perf::timer_pause (&this->time);
+  if (!err) {this->time.bytes
+    += (3 + path->deep)*sizeof(int) + path->deep * 32*sizeof(char);
+  }
+  err= this->data->add_data_file (cid, this, fname);//TODO handle err
+  return err;
+}
+int Dcgn::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
+  int err=0;
+  auto log = this->proc->log;
+  Path_cgns* path = nullptr;
+  if (this->data_path.count(id) > 0) {
+    path = &this->data_path.at(id);
+    if (path == nullptr) {return 1;}//TODO set read err in vals.
+#ifdef FMR_DEBUG
+    if (path->inds.size() >= 2) {
+      log->label_fprintf(log->fmrerr,"**** Dcgn","%s: %s:%u/%s:%u\n",id.c_str(),
+        path->strs[0].c_str(),path->inds[0],
+        path->strs[1].c_str(),path->inds[1]);
+    }
+#endif
+#if 1
+    err= cg_golist (path->file_cgid, path->base, path->deep,
+      path->labs.data(), path->inds.data());
+    if (err) {return 1;}//TODO set read err in vals.
+#endif
+    //
+    //
+  }
+  switch (vals.type) {
+    case (fmr::Data::Elem_conn) :
+      //
+      //FIXME IAMHERE
+      //
+      if (path == nullptr) {return 1;}//TODO set read err in vals.
+      if (path->inds.size()==2) {
+        cgsize_t conn_sz =0;
+          FMR_PRAGMA_OMP(omp critical) {//TODO critical?
+            err= cg_golist (path->file_cgid, path->base, path->deep,
+              path->labs.data(), path->inds.data());
+            err= cg_ElementDataSize (path->file_cgid, path->base,
+              path->inds[0], path->inds[1], &conn_sz);
+          }
+        if (err) {return 1;}
+        if (conn_sz > 0) {
+          auto buf = std::vector<cgsize_t>(conn_sz);
+          if (vals.data.size() < size_t(conn_sz)) {vals.data.resize (conn_sz);}
+          FMR_PRAGMA_OMP(omp critical) {//TODO critical?
+            err= cg_golist (path->file_cgid, path->base, path->deep,
+              path->labs.data(), path->inds.data());
+            err+= cg_elements_read (path->file_cgid, path->base, path->inds[0],
+              path->inds[1], buf.data(), nullptr);//cgsize_t *ParentData
+          }
+          if (err) {return 1;}
+          //TODO next is for XS sims only.
+          for (cgsize_t i=0; i<conn_sz; i++) {
+            vals.data[i] = fmr::Local_int(buf[i]);
+      } } }
+      break;
+    default : {}//TODO Print warning.
+  }
+  err= Data::read_local_vals (id, vals);//TODO Remove this call?
+  if (err <= 0) {vals.stored_state.was_read = true;}
+  return err;
+}
 Data::File_info Dcgn::scan_file_data (const std::string fname) {
   auto log = this->proc->log;
   auto info = Dcgn::File_cgns (Data::Data_file (this,fname));
@@ -571,7 +664,6 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
           this->new_local_vals (data_id, fmr::Data::Elem_n, mesh_n);
         }
 #endif
-#if 1
         // Scan meshes (CGNS sections) //TODO for Partition::Join only?
         // https://cgns.github.io/CGNS_docs_current/sids/gridflow.html#Elements
         err= cg_goto (info.file_cgid, base_i, "Zone_t",zone_i, NULL);
@@ -591,11 +683,13 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
             this->data->enum_vals[fid].data[i] = fmr::enum2val (form);
             const auto elem_n = fmr::Local_int (end - start +1);
             this->data->local_vals[eid].data[i] = fmr::Local_int (elem_n);
-            //
             if (elem_n > 0) {
               const auto mesh_id = data_id + ":Mesh_" + std::to_string(i);
               const auto cid = this->make_data_id(mesh_id,fmr::Data::Elem_conn);
-              this->data->add_data_file (cid, this, fname);
+              // Log the location of this here, and in the general Data handler.
+              err= cg_goto (info.file_cgid, base_i,
+                "Zone_t",zone_i, "Elements_t",sect_i, NULL);
+              err= this->add_cgns_here (fname, cid, fmr::Data::Elem_conn);
 #ifdef FMR_DEBUG
               log->label_fprintf(log->fmrerr,"**** Dcgn add!","%s\n",cid.c_str());
 #endif
@@ -611,7 +705,6 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
               this->data->local_vals.at(cid).stored_state.was_read = false;
 #endif
             }
-            //
             if (fmr::elem_form_d [fmr::enum2val (form)] == geom_d) {
               // Count all elements of the same dimension as enclosing space.
               elem_sysn += elem_n;
@@ -622,7 +715,6 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
 #endif
         } } }
         if (true) {sect_0 += sect_n;}//TODO Partition::Join only
-#endif
       }//end zone loop
 #ifdef FMR_DEBUG
       log->label_fprintf (log->fmrerr, "*** Dcgn scan",
