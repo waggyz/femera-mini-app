@@ -144,9 +144,9 @@ int Data::make_mesh (const std::string model, const fmr::Local_int ix) {
       if (!err) {
         did_mesh = true;
         if (this->proc->log->verbosity >= this->verblevel) {
-          const auto label = this->task_name+" "+D->task_name;
+          const auto label = D->task_name+" mesh";
           log->label_fprintf (log->fmrout, label.c_str(),
-            "%u: meshed %s.\n", ix, model.c_str());
+            "%u: %s meshed in %s s.\n", ix, model.c_str(), "?");
         return 0;
     } } } }
     if (!did_mesh) {
@@ -326,7 +326,7 @@ int Data::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
   const auto log = this->proc->log;
   if (log->detail >= this->verblevel) {
     const std::string label = this->task_name+" read";
-    log->label_fprintf (log->fmrerr, label.c_str(), "%lu %s local vals...\n",
+    log->label_fprintf (log->fmrerr, label.c_str(), "%lu %s local vals.\n",
       vals.data.size(), id.c_str());
   }
   return err;

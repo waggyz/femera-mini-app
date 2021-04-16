@@ -34,12 +34,24 @@ class Dmsh final : public Data {
           state       = in.state      ;
         }
     };
+    struct Elem_gmsh_info {
+      std::vector<int> tags = {};
+      size_t           task = 0;
+      int              type = 0;
+      Elem_gmsh_info (const std::vector<int> tg, const size_t tk, const int ty)
+        : tags(tg), task(tk), type(ty) {};
+      Elem_gmsh_info                                 () =default;
+      Elem_gmsh_info            (Elem_gmsh_info const&) =default;// copyable
+      Elem_gmsh_info& operator= (const Elem_gmsh_info&) =default;
+      virtual ~Elem_gmsh_info               () noexcept =default;
+    };
   // Member variables ---------------------------------------------------------
   private:
     std::unordered_map<std::string,File_gmsh> file_info={};// key:path/filename
     // Defaults for new Gmsh file.
-    Data::Encode encode = Data::Encode::Binary;
+    std::unordered_map<fmr::Data_id, Elem_gmsh_info> elem_gmsh_info={};
     int format          = 1;// .msh (see fmr::detail::format_gmsh_name map)
+    Data::Encode encode = Data::Encode::Binary;
   // Methods ------------------------------------------------------------------
   protected:
     int init_task (int* argc, char** argv)      final override;
@@ -47,9 +59,11 @@ class Dmsh final : public Data {
     std::deque<std::string> get_sims_names ()   final override;
     bool is_this_type (const std::string fname) final override;
     //
-    int make_mesh (const std::string, const fmr::Local_int) final override;
-    Data::File_info get_file_info (const std::string fname)  final override;
+    Data::File_info get_file_info (const std::string fname) final override;
     Data::File_info scan_file_data (const std::string fname) final override;
+    int make_mesh (const std::string, const fmr::Local_int) final override;
+    int read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals)
+      final override;
     //
     Dmsh::File_gmsh open (Dmsh::File_gmsh, fmr::data::Access,Data::Concurrency);
   private:

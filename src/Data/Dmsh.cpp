@@ -237,6 +237,45 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
   this->file_info[fname] = info;
   return info;
 }
+int Dmsh::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
+  int err=0;
+  auto log = this->proc->log;
+#ifdef FMR_DEBUG
+  const auto label = this->task_name +" read";
+  log->label_fprintf (log->fmrerr, label.c_str(), "%s...\n", id.c_str());
+#endif
+  switch (vals.type) {
+    case (fmr::Data::Elem_conn) :
+      if (this->elem_gmsh_info.count(id) > 0) {
+        const auto info = this->elem_gmsh_info.at(id);
+        const auto n = info.tags.size();
+        if (n>1) {//TODO Not handled yet
+          log->printf_err (
+            "ERROR Dmsh::read_local_vals (..) multiple tag parts not done yet.");
+          return 1;
+        }
+        if (n>0) {
+          std::vector<std::size_t> elem={}, conn={};
+          std::size_t task_n = 1;//TODO for automatic partitioning by node #
+          for (size_t i=0; i<n; i++) {
+            gmsh::model::mesh::getElementsByType (info.type, elem, conn,
+              info.tags[i], info.task, task_n);
+          }
+          const auto esz = conn.size();
+          if (esz > 0) {
+            if (vals.data.size() < esz) {vals.data.resize(esz);}
+            for (size_t i=0; i<esz; i++) {
+              vals.data[i] = fmr::Local_int(conn[i]);//TODO XS only
+            }//TODO global_id == local_id is XS only
+            vals.stored_state.was_read = true;
+            //TODO cache elem tags?.
+        } } }
+      break;
+    default : {}//TODO Print warning.
+  }
+  err= Data::read_local_vals (id, vals);//TODO Remove this call?
+  return err;
+}
 Data::File_info Dmsh::scan_file_data (const std::string fname) {
   auto info = Dmsh::File_gmsh (Data::Data_file (this, fname));
   info = this->file_info.count (fname) ? this->file_info.at (fname) : info;
@@ -269,6 +308,7 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
   return info;
   }
   int Dmsh::scan_model (const std::string data_id) {int err=0;
+    auto log = this->proc->log;
     fmr::perf::timer_resume (&this->time);
     gmsh::model::setCurrent (data_id);//TODO catch error
     const auto gid = this->make_data_id (data_id,
@@ -291,11 +331,10 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
 #endif
     // this->chck();
     auto gd = gmsh::model::getDimension();// return<0: File has no Gmsh model.
-    if (gd<1 || gd>3){err= 1;}
+    if (gd<1 || gd>3) {err= 1;}
     if(!err){
       const auto geom_d = fmr::Local_int(gd);
 #if 1
-      std::vector<int> elementTypes={};
       gmsh::option::getNumber ("Mesh.NbNodes", optval);
       const auto node_n = fmr::Global_int(optval);
       const auto nid = this->make_data_id (data_id, fmr::Data::Node_sysn);
@@ -310,7 +349,6 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
         }
       }//-------------------------------------------------------------------
 #ifdef FMR_DEBUG
-      auto log = this->proc->log;
       log->label_fprintf (log->fmrerr,"*** Dmsh","%s[0] has %u nodes.\n",
         nid.c_str(), node_n);
 #endif
@@ -377,23 +415,83 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
         }
         const auto elem_p = fmr::Dim_int(optval);
 #endif
+        std::string fname ="";
+        gmsh::option::getString ("General.FileName", fname);
+        //
+        //
+        gmsh::option::getNumber ("Mesh.ElementOrder", optval);
+        //
+        std::vector<int> elementTypes={};// int dims=-1, tags=-1;
+        gmsh::model::mesh::getElementTypes (elementTypes);//, dims, tags);
+        //
+        //FIXME IAMHERE
+        //TODO Refactor below to loop through elementTypes for XS sims.
+        //
+#if 1//def FMR_DEBUG
+        log->label_fprintf (log->fmrerr,"Gmsh scan",
+          "scan_model %s (Gmsh types %i,%i)\n",
+          data_id.c_str(), elementTypes[0], elementTypes[1]);
+        if (elementTypes.size() > 2) {
+          log->label_fprintf (log->fmrerr,"Gmsh scan",
+            "scan_model %s (Gmsh type  %i)\n",
+            data_id.c_str(), elementTypes[2]);
+        }
+#endif
+        //
+        auto elem_pord = int (optval);
         auto types =& this->data->enum_vals[tid].data[0];
-        fmr::Local_int i=0;
+        fmr::Local_int mesh_i=0;
+        int elgmsh=0;
         if (tris_n > 0) {
-          elems[i] = tris_n;
-          types[i] = fmr::enum2val(fmr::Elem_form::Tris);
-          i++;}
-        if (quad_n > 0) {elems[i] = quad_n; i++;}//TODO
-        if (corn_n > 0) {elems[i] = corn_n; i++;}//TODO
+          elems[mesh_i] = tris_n;
+          types[mesh_i] = fmr::enum2val(fmr::Elem_form::Tris);
+          const auto id = data_id +":Mesh_"+ std::to_string(mesh_i);
+          const auto cid = this->make_data_id(id, fmr::Data::Elem_conn);
+          err= this->new_local_vals (id, fmr::Data::Elem_conn, 0);
+          err= this->data->add_data_file (cid, this, fname);//TODO handle err
+          const bool serendip = false;//TODO lookup
+          try {
+            elgmsh = gmsh::model::mesh::getElementType ("triangle",
+              elem_pord, serendip);// Gmsh element type 2,9,21 for p1,p2,p3
+          }
+          catch (int e) {err = e;
+            log->label_fprintf (log->fmrerr,"ERROR Gmsh tris",
+              "scan_model %s %s%i (Gmsh type %i)\n",
+              cid.c_str(), serendip?"S":"P",elem_pord, elgmsh);
+          }
+          elem_gmsh_info [cid] = Elem_gmsh_info ({-1},0,elgmsh);
+          mesh_i++;}
+        if (quad_n > 0) {elems[mesh_i] = quad_n; mesh_i++;}//TODO
+        if (corn_n > 0) {elems[mesh_i] = corn_n; mesh_i++;}//TODO
         if (tets_n > 0) {
-          elems[i] = tets_n;
-          types[i] = fmr::enum2val(fmr::Elem_form::Tets);
-          i++;}
-        if (pyrm_n > 0) {elems[i] = pyrm_n; i++;}//TODO
-        if (prsm_n > 0) {elems[i] = prsm_n; i++;}//TODO
-        if (cube_n > 0) {elems[i] = cube_n; i++;}//TODO
+          elems[mesh_i] = tets_n;
+          types[mesh_i] = fmr::enum2val(fmr::Elem_form::Tets);
+          const auto id = data_id +":Mesh_"+ std::to_string(mesh_i);
+          const auto cid = this->make_data_id(id, fmr::Data::Elem_conn);
+          err= this->new_local_vals (id, fmr::Data::Elem_conn, 0);
+          err= this->data->add_data_file (cid, this, fname);//TODO handle err
+          const bool serendip = (elem_pord == 3);//TODO lookup
+          try {
+            elgmsh = gmsh::model::mesh::getElementType ("tetrahedron",
+              elem_pord, serendip);// Gmsh element type 4,11,29 for p1,p2,s3
+          }
+          catch (int e) {err = e;
+            log->label_fprintf (log->fmrerr,"ERROR Gmsh tris",
+              "scan_model %s %s%i (Gmsh type %i)\n",
+              cid.c_str(), serendip?"S":"P",elem_pord, elgmsh);
+          }
+          elem_gmsh_info [cid] = Elem_gmsh_info ({-1},0,elgmsh);
+#if 1//def FMR_DEBUG
+          log->label_fprintf (log->fmrerr,"Gmsh tets",
+            "%s %s%i (Gmsh type %i)\n",
+            cid.c_str(), serendip?"S":"P",elem_pord, elgmsh);
+#endif
+          mesh_i++;}
+        if (pyrm_n > 0) {elems[mesh_i] = pyrm_n; mesh_i++;}//TODO
+        if (prsm_n > 0) {elems[mesh_i] = prsm_n; mesh_i++;}//TODO
+        if (cube_n > 0) {elems[mesh_i] = cube_n; mesh_i++;}//TODO
         const auto n = this->data->local_vals[eid].data.size();
-        for (i=0; i<n; i++) {
+        for (size_t i=0; i<n; i++) {
           elem_sysn += (fmr::elem_form_d[types[i]] == geom_d) ? elems[i] : 0;
         }
       }//end if mesh_n>0

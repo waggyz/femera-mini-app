@@ -68,7 +68,8 @@ namespace Femera {
       this->ini_data_vals (this->data_list, 0);
       if (true) {//TODO check element type for nodes/elem
         this->locals [fmr::Data::Elem_conn] = fmr::Local_int_vals
-          (fmr::Data::Elem_conn, this->elem_n * 4);//TODO * elem_vert_n(form)
+          (fmr::Data::Elem_conn, this->elem_n * 0);//TODO * elem_vert_n(form)
+          //                                      TODO or * each_conn_n(form)
         this->data_list.push_back (fmr::Data::Elem_conn);//or elem_vert_n(form)?
 #if 0
         // element jacobian data (inverted, may have det)

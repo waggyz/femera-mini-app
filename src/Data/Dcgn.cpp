@@ -447,39 +447,33 @@ int Dcgn::add_cgns_here (const std::string fname, const fmr::Data_id cid,
 }
 int Dcgn::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
   int err=0;
-  auto log = this->proc->log;
   Path_cgns* path = nullptr;
   if (this->data_path.count(id) > 0) {
     path = &this->data_path.at(id);
     if (path == nullptr) {return 1;}//TODO set read err in vals.
 #ifdef FMR_DEBUG
+    auto log = this->proc->log;
     if (path->inds.size() >= 2) {
-      log->label_fprintf(log->fmrerr,"**** Dcgn","%s: %s:%u/%s:%u\n",id.c_str(),
+      log->label_fprintf(log->fmrerr,"**** Dcgn","%s: %s:%i/%s:%i\n",id.c_str(),
         path->strs[0].c_str(),path->inds[0],
         path->strs[1].c_str(),path->inds[1]);
     }
 #endif
-#if 1
     err= cg_golist (path->file_cgid, path->base, path->deep,
       path->labs.data(), path->inds.data());
     if (err) {return 1;}//TODO set read err in vals.
-#endif
-    //
-    //
   }
   switch (vals.type) {
     case (fmr::Data::Elem_conn) :
-      //
-      //FIXME IAMHERE
-      //
       if (path == nullptr) {return 1;}//TODO set read err in vals.
-      if (path->inds.size()==2) {
+      if (path->inds.size() == 2) {
         cgsize_t conn_sz =0;
           FMR_PRAGMA_OMP(omp critical) {//TODO critical?
             err= cg_golist (path->file_cgid, path->base, path->deep,
               path->labs.data(), path->inds.data());
             err= cg_ElementDataSize (path->file_cgid, path->base,
               path->inds[0], path->inds[1], &conn_sz);
+            //if (!err) {this->time.bytes += sizeof(cgsize_t);}//TODO count this?
           }
         if (err) {return 1;}
         if (conn_sz > 0) {
@@ -492,15 +486,16 @@ int Dcgn::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
               path->inds[1], buf.data(), nullptr);//cgsize_t *ParentData
           }
           if (err) {return 1;}
-          //TODO next is for XS sims only.
+          else {this->time.bytes += conn_sz *sizeof(cgsize_t);}
           for (cgsize_t i=0; i<conn_sz; i++) {
-            vals.data[i] = fmr::Local_int(buf[i]);
-      } } }
+            vals.data[i] = fmr::Local_int(buf[i]);//TODO XS sims only.
+          }
+          if (err <= 0) {vals.stored_state.was_read = true;}
+      } }
       break;
     default : {}//TODO Print warning.
   }
   err= Data::read_local_vals (id, vals);//TODO Remove this call?
-  if (err <= 0) {vals.stored_state.was_read = true;}
   return err;
 }
 Data::File_info Dcgn::scan_file_data (const std::string fname) {
