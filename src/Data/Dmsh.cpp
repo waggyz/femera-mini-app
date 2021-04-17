@@ -18,6 +18,59 @@ namespace fmr {namespace detail {//TODO move to Femera namespace?
     {39,"inp" },{40,"ply2"    },{41,"celum"},{42,"su2" },{47,"tochnog"},
     {49,"neu" },{50,"matlab"  }
   };
+  static const std::map <int, fmr::Elem_info> elem_info_gmsh ={
+    { 0, fmr::Elem_info (fmr::Elem_form::Unknown, fmr::math::Poly::Unknown, 0)},
+    { 1, fmr::Elem_info (fmr::Elem_form::Line, fmr::math::Poly::Full, 1)},
+      // 2-node line.
+    { 2, fmr::Elem_info (fmr::Elem_form::Tris, fmr::math::Poly::Full, 1)},
+      //  3-node triangle.
+    { 3, fmr::Elem_info (fmr::Elem_form::Quad, fmr::math::Poly::Full, 1)},
+      //  4-node quadrangle.
+    { 4, fmr::Elem_info (fmr::Elem_form::Tets, fmr::math::Poly::Full, 1)},
+      //  4-node tetrahedron.
+    { 5, fmr::Elem_info (fmr::Elem_form::Cube, fmr::math::Poly::Full, 1)},
+      //  8-node hexahedron.
+    { 6, fmr::Elem_info (fmr::Elem_form::Prsm, fmr::math::Poly::Prism, 1)},
+      //  6-node prism.
+    { 7, fmr::Elem_info (fmr::Elem_form::Prmd, fmr::math::Poly::Pyramid, 1)},
+      //  5-node pyramid.
+    { 8, fmr::Elem_info (fmr::Elem_form::Line, fmr::math::Poly::Full, 2)},
+      //  3-node second order line (2 vertices, 1 edge).
+    { 9, fmr::Elem_info (fmr::Elem_form::Tris, fmr::math::Poly::Full, 2)},
+      //  6-node second order triangle (3 vertices, 3 edges).
+    {10, fmr::Elem_info (fmr::Elem_form::Quad, fmr::math::Poly::Serendipity, 2)},
+      //  9-node second order quadrangle (4 vertices, 4 edges, 1 face).
+    {11, fmr::Elem_info (fmr::Elem_form::Tets, fmr::math::Poly::Full, 2)},
+      //  10-node second order tetrahedron (4 vertices, 6 edges).
+    {12, fmr::Elem_info (fmr::Elem_form::Cube, fmr::math::Poly::Full, 2)},
+      //  27-node second order hexahedron (8 vertices, 12 edges, 6 faces, 1 volume).
+    {13, fmr::Elem_info (fmr::Elem_form::Prsm, fmr::math::Poly::Prism, 2)},
+      //  18-node second order prism (6 vertices, 9 edges, 3 quadrangular faces).
+    {14, fmr::Elem_info (fmr::Elem_form::Prmd, fmr::math::Poly::Pyramid, 2)},
+      //  14-node second order pyramid (5 vertices, 8 edges, 1 quadrangular face).
+    {15, fmr::Elem_info (fmr::Elem_form::Node, fmr::math::Poly::Full, 0)},
+      //  1-node point.
+    {16, fmr::Elem_info (fmr::Elem_form::Quad, fmr::math::Poly::Full, 2)},
+      //  8-node second order quadrangle (4 vertices, 4 edges).
+    {17, fmr::Elem_info (fmr::Elem_form::Cube, fmr::math::Poly::Serendipity, 2)},
+      //  20-node second order hexahedron (8 vertices, 12 edges).
+    {18, fmr::Elem_info (fmr::Elem_form::Prsm, fmr::math::Poly::Prism, 2)},
+      //  15-node second order prism (6 vertices, 9 edges).
+    {19, fmr::Elem_info (fmr::Elem_form::Prmd, fmr::math::Poly::Pyramid, 2)},
+      //  13-node second order pyramid (5 vertices, 8 edges).
+    {20, fmr::Elem_info (fmr::Elem_form::Tris, fmr::math::Poly::Tripoly, 3)},
+      //  9-node third order incomplete triangle (3 vertices, 6 edges)
+    {21, fmr::Elem_info (fmr::Elem_form::Tris, fmr::math::Poly::Full, 3)},
+      //  10-node third order triangle (3 vertices, 6 edges, 1 face)
+    {26, fmr::Elem_info (fmr::Elem_form::Line, fmr::math::Poly::Full, 3)},
+      // 4-node third order edge (2 vertices, 2 edge)
+    {29, fmr::Elem_info (fmr::Elem_form::Tets, fmr::math::Poly::Tripoly, 3)},
+      //  20-node third order tetrahedron (4 vertices, 12 edges, 4 faces)
+    {92, fmr::Elem_info (fmr::Elem_form::Cube, fmr::math::Poly::Full, 3)}
+      //  64-node third order hexahedron (8 vertices, 24 edges, 24 on faces, 8 in volume)
+    //TODO See external/gmsh/Common/GmshDefines.h
+  };
+  //
 } }
 namespace Femera {
   Dmsh:: Dmsh (Proc* P,Data* D) noexcept {this->proc=P; this->data=D;
@@ -353,29 +406,25 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
         nid.c_str(), node_n);
 #endif
 #endif
-      //
-      // Each elem type is at least one different Femera Mesh.
-      fmr::Local_int mesh_n=0,
-        tris_n=0, quad_n=0, corn_n=0, tets_n=0, pyrm_n=0, prsm_n=0, cube_n=0;
       fmr::Global_int elem_sysn =0;
-      const auto zero = Dmsh::Optval(0);
-      //TODO should be Global_int ?
-      //TODO What about 1D elements?
-      gmsh::option::getNumber ("Mesh.NbTriangles", optval);
-      tris_n = fmr::Local_int(optval); mesh_n += (optval > zero) ? 1 : 0;
-      gmsh::option::getNumber ("Mesh.NbQuadrangles", optval);
-      quad_n = fmr::Local_int(optval); mesh_n += (optval > zero) ? 1 : 0;
-      gmsh::option::getNumber ("Mesh.NbTrihedra", optval);// 3-plane inersect
-      corn_n = fmr::Local_int(optval); mesh_n += (optval > zero) ? 1 : 0;
-      gmsh::option::getNumber ("Mesh.NbTetrahedra", optval);
-      tets_n = fmr::Local_int(optval); mesh_n += (optval > zero) ? 1 : 0;
-      gmsh::option::getNumber ("Mesh.NbPyramids", optval);
-      pyrm_n = fmr::Local_int(optval); mesh_n += (optval > zero) ? 1 : 0;
-      gmsh::option::getNumber ("Mesh.NbPrisms", optval);
-      prsm_n = fmr::Local_int(optval); mesh_n += (optval > zero) ? 1 : 0;
-      gmsh::option::getNumber ("Mesh.NbHexahedra", optval);
-      cube_n = fmr::Local_int(optval); mesh_n += (optval > zero) ? 1 : 0;
-      if (mesh_n > 0) {// Cache these. //TODO only when Partition::Join ?
+      std::string fname ="";
+      gmsh::option::getString ("General.FileName", fname);
+      std::vector<int> mesh_elem_gmsh={};// int dims=-1, tags=-1;
+      gmsh::model::mesh::getElementTypes (mesh_elem_gmsh);//, dims, tags);
+      const auto mesh_n = fmr::Local_int(mesh_elem_gmsh.size());
+#ifdef FMR_DEBUG
+      if (mesh_n > 1) {
+        log->label_fprintf (log->fmrerr,"Gmsh scan",
+          "scan_model %s (Gmsh types %i,%i)\n",
+          data_id.c_str(), mesh_elem_gmsh[0], mesh_elem_gmsh[1]);
+      }
+      if (mesh_n > 2) {
+        log->label_fprintf (log->fmrerr,"Gmsh scan",
+          "scan_model %s (Gmsh type  %i)\n",
+          data_id.c_str(), mesh_elem_gmsh[2]);
+      }
+#endif
+      if (mesh_n > 0) {//TODO XS sims only
         const auto eid = this->make_data_id (data_id, fmr::Data::Elem_n);
         {//TODO Refactor into a function. -----------------------------------v
           is_found = this->data->local_vals.count(eid) > 0;
@@ -388,112 +437,78 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
         }//------------------------------------------------------------------^
         auto elems =& this->data->local_vals[eid].data[0];
 #ifdef FMR_DEBUG
-          log->label_fprintf (log->fmrerr,"*** Dmsh","%s size is %u.\n",
-            eid.c_str(), this->data->global_vals[eid].data.size());
+        log->label_fprintf (log->fmrerr,"*** Dmsh","%s size is %u.\n",
+          eid.c_str(), this->data->global_vals[eid].data.size());
 #endif
-        const auto tid = this->make_data_id (data_id, fmr::Data::Elem_form);
+        const auto fid = this->make_data_id (data_id, fmr::Data::Elem_form);
         {//------------------------------------------------------------------v
-          is_found = this->data->enum_vals.count(tid) > 0;
-          if (!is_found) {this->data->enum_vals[tid]
+          is_found = this->data->enum_vals.count(fid) > 0;
+          if (!is_found) {this->data->enum_vals[fid]
             = fmr::Enum_int_vals (fmr::Data::Elem_form, mesh_n);
-          }else if (this->data->enum_vals[tid].data.size() < mesh_n) {
-            this->data->enum_vals[tid].data.resize (mesh_n);
+          }else if (this->data->enum_vals[fid].data.size() < mesh_n) {
+            this->data->enum_vals[fid].data.resize (mesh_n);
           }
         }//------------------------------------------------------------------^
+        auto forms =& this->data->enum_vals[fid].data[0];
+        for (fmr::Local_int mesh_i=0; mesh_i<mesh_n; mesh_i++) {
+          const auto elem_gmsh = mesh_elem_gmsh [mesh_i];
+          auto form = fmr::Elem_form::Unknown;
+          if (fmr::detail::elem_info_gmsh.count(elem_gmsh) > 0) {
+            const auto elinfo
+              = fmr::detail::elem_info_gmsh.at (elem_gmsh);
+            form = elinfo.form;
+          }else{
+            log->printf_err("WARNING Gmsh element type %i not supported\n",
+              elem_gmsh);
+          }
+          fmr::Local_int elem_n=0;
+          switch (form) {
+            //TODO What about 1D elements?
+            case (fmr::Elem_form::Tris) :
+              gmsh::option::getNumber ("Mesh.NbTriangles", optval);
+              elem_n = fmr::Local_int(optval);
+            break;
+            case (fmr::Elem_form::Quad) :
+              gmsh::option::getNumber ("Mesh.NbQuadrangles", optval);
+              elem_n = fmr::Local_int(optval);
+            break;
 #if 0
-        gmsh::option::getNumber ("Mesh.ElementOrder", optval);
-        if (optval < Dmsh::Optval(1)) {
-          gmsh::model::mesh::setOrder (2);//TODO Default element order member.
-          gmsh::option::getNumber ("Mesh.ElementOrder", optval);
-          log->label_fprintf (log->fmrout,"NOTE Gmsh",
-            "Set element order in %s to %g.\n",eid.c_str(), optval);
-        }
-        if (optval > Dmsh::Optval(3)) {
-          log->label_fprintf (log->fmrerr,"ERROR Dmsh",
-            "Element order in %s is %g.\n",eid.c_str(), optval);
-          err= 1;
-        }
-        const auto elem_p = fmr::Dim_int(optval);
+            case (TODO) :// 3-plane inersect
+              gmsh::option::getNumber ("Mesh.NbTrihedra", optval);
+              elem_n = fmr::Local_int(optval);
+            break;
 #endif
-        std::string fname ="";
-        gmsh::option::getString ("General.FileName", fname);
-        //
-        //
-        gmsh::option::getNumber ("Mesh.ElementOrder", optval);
-        //
-        std::vector<int> elementTypes={};// int dims=-1, tags=-1;
-        gmsh::model::mesh::getElementTypes (elementTypes);//, dims, tags);
-        //
-        //FIXME IAMHERE
-        //TODO Refactor below to loop through elementTypes for XS sims.
-        //
-#if 1//def FMR_DEBUG
-        log->label_fprintf (log->fmrerr,"Gmsh scan",
-          "scan_model %s (Gmsh types %i,%i)\n",
-          data_id.c_str(), elementTypes[0], elementTypes[1]);
-        if (elementTypes.size() > 2) {
-          log->label_fprintf (log->fmrerr,"Gmsh scan",
-            "scan_model %s (Gmsh type  %i)\n",
-            data_id.c_str(), elementTypes[2]);
-        }
-#endif
-        //
-        auto elem_pord = int (optval);
-        auto types =& this->data->enum_vals[tid].data[0];
-        fmr::Local_int mesh_i=0;
-        int elgmsh=0;
-        if (tris_n > 0) {
-          elems[mesh_i] = tris_n;
-          types[mesh_i] = fmr::enum2val(fmr::Elem_form::Tris);
+            case (fmr::Elem_form::Tets) :
+              gmsh::option::getNumber ("Mesh.NbTetrahedra", optval);
+              elem_n = fmr::Local_int(optval);
+            break;
+            case (fmr::Elem_form::Prmd) :
+              gmsh::option::getNumber ("Mesh.NbPyramids", optval);
+              elem_n = fmr::Local_int(optval);
+            break;
+            case (fmr::Elem_form::Prsm) :
+              gmsh::option::getNumber ("Mesh.NbPrisms", optval);
+              elem_n = fmr::Local_int(optval);
+            break;
+            case (fmr::Elem_form::Cube) :
+              gmsh::option::getNumber ("Mesh.NbHexahedra", optval);
+              elem_n = fmr::Local_int(optval);
+            break;
+            default : {}//TODO
+          }
+          elem_sysn += (fmr::elem_form_d [fmr::enum2val(form)] == geom_d)
+            ? elem_n : 0;
+          elems [mesh_i] = elem_n;
+          forms [mesh_i] = fmr::enum2val(form);
+          //
+          //FIXME elem_conn_n
+          //
           const auto id = data_id +":Mesh_"+ std::to_string(mesh_i);
           const auto cid = this->make_data_id(id, fmr::Data::Elem_conn);
+          elem_gmsh_info [cid] = Elem_gmsh_info ({-1},0,elem_gmsh);
           err= this->new_local_vals (id, fmr::Data::Elem_conn, 0);
           err= this->data->add_data_file (cid, this, fname);//TODO handle err
-          const bool serendip = false;//TODO lookup
-          try {
-            elgmsh = gmsh::model::mesh::getElementType ("triangle",
-              elem_pord, serendip);// Gmsh element type 2,9,21 for p1,p2,p3
-          }
-          catch (int e) {err = e;
-            log->label_fprintf (log->fmrerr,"ERROR Gmsh tris",
-              "scan_model %s %s%i (Gmsh type %i)\n",
-              cid.c_str(), serendip?"S":"P",elem_pord, elgmsh);
-          }
-          elem_gmsh_info [cid] = Elem_gmsh_info ({-1},0,elgmsh);
-          mesh_i++;}
-        if (quad_n > 0) {elems[mesh_i] = quad_n; mesh_i++;}//TODO
-        if (corn_n > 0) {elems[mesh_i] = corn_n; mesh_i++;}//TODO
-        if (tets_n > 0) {
-          elems[mesh_i] = tets_n;
-          types[mesh_i] = fmr::enum2val(fmr::Elem_form::Tets);
-          const auto id = data_id +":Mesh_"+ std::to_string(mesh_i);
-          const auto cid = this->make_data_id(id, fmr::Data::Elem_conn);
-          err= this->new_local_vals (id, fmr::Data::Elem_conn, 0);
-          err= this->data->add_data_file (cid, this, fname);//TODO handle err
-          const bool serendip = (elem_pord == 3);//TODO lookup
-          try {
-            elgmsh = gmsh::model::mesh::getElementType ("tetrahedron",
-              elem_pord, serendip);// Gmsh element type 4,11,29 for p1,p2,s3
-          }
-          catch (int e) {err = e;
-            log->label_fprintf (log->fmrerr,"ERROR Gmsh tris",
-              "scan_model %s %s%i (Gmsh type %i)\n",
-              cid.c_str(), serendip?"S":"P",elem_pord, elgmsh);
-          }
-          elem_gmsh_info [cid] = Elem_gmsh_info ({-1},0,elgmsh);
-#if 1//def FMR_DEBUG
-          log->label_fprintf (log->fmrerr,"Gmsh tets",
-            "%s %s%i (Gmsh type %i)\n",
-            cid.c_str(), serendip?"S":"P",elem_pord, elgmsh);
-#endif
-          mesh_i++;}
-        if (pyrm_n > 0) {elems[mesh_i] = pyrm_n; mesh_i++;}//TODO
-        if (prsm_n > 0) {elems[mesh_i] = prsm_n; mesh_i++;}//TODO
-        if (cube_n > 0) {elems[mesh_i] = cube_n; mesh_i++;}//TODO
-        const auto n = this->data->local_vals[eid].data.size();
-        for (size_t i=0; i<n; i++) {
-          elem_sysn += (fmr::elem_form_d[types[i]] == geom_d) ? elems[i] : 0;
-        }
+        }//end mesh_i loop
       }//end if mesh_n>0
       if (elem_sysn > 0) {
         const auto id = this->make_data_id (data_id, fmr::Data::Elem_sysn);
@@ -507,9 +522,9 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
             this->data->global_vals[id].data[0]+= elem_sysn;
           }
         }//-------------------------------------------------------------------
+        //TODO gmsh::model::mesh::getNodesByElementType (..) to get node_n,
+        //     later because the function call (may?) copy node data.
       }
-      //TODO gmsh::model::mesh::getNodesByElementType (..) to get node_n,
-      //     later because the function call (may?) copy node data.
       //
       // If no meshes exist yet, handle as an abstract geometry (CAD) file.
       const fmr::Local_int gcad_n = (mesh_n==0) ? 1 : 0;

@@ -95,11 +95,10 @@ namespace fmr {//TODO? namespace data {
 #endif
   enum class Elem_form : Enum_int {None=0, Error, Unknown,//TODO also Cell_form?
     User,
-    Node,    // 0D
-    Line,    // 1D: Bars, Beam: not here,
-    Tris,    // 2D: Quad,
-    Tets,    // 3D: Pymd, Prsm,
-    Cube,
+    Node,                  // 0D
+    Line,                  // 1D
+    Tris, Quad,            // 2D
+    Tets, Prmd, Prsm, Cube,// 3D
   end};
   static const std::array<std::string,enum2val(Elem_form::end)+1>
     elem_form_name ={
@@ -108,12 +107,11 @@ namespace fmr {//TODO? namespace data {
     "unknown element shape",
     "user-defined element shape",
     //
-    "Node",
-    "Line",
-    "Tris",
-    "Tets",
+    "node",
+    "line",
+    "tris","quad",
+    "tets","pyramid","prism","cube",
     //
-    "Cube",
     "Elem_form end marker"
   };
   static const std::array<fmr::Dim_int,enum2val(Elem_form::end)+1>
@@ -123,29 +121,43 @@ namespace fmr {//TODO? namespace data {
     0,//"unknown element shape",
     0,//"user-defined element shape",
     //
-    0,//"Node",
-    1,//"Line",
-    2,//"Tris",
-    3,//"Tets",
+    0,// Node,
+    1,// Line,
+    2,2,// Tris, Quad,
+    3,3,3,3,// Tets, Prmd, Prsm, Cube,
     //
-    3,//"Cube",
     0 //"Elem_form end marker"
   };
+  struct Elem_info {
+//    Local_int  node_n    = 0;
+    Elem_form  form      = Elem_form::Unknown;
+    math::Poly poly      = math::Poly::Unknown;
+    Dim_int    pord      = 0;
+//    Dim_int    dimension = 0;
+//    Dim_int    edge_n    = 0;
+//    Dim_int    face_n    = 0;
+    Elem_info (const Elem_form f, const math::Poly y, const Dim_int p)
+      : form(f), poly(y), pord(p) {
+//      dimension = elem_form_d [enum2val (Elem_form)];
+    }
+  };
 #if 1
-  enum class Elem : Enum_int {None=0, Error, Unknown,//TODO
-    Bars,    // Beam
+  enum class Elem : Enum_int {None=0, Error, Unknown,//TODO Replace Elem_form?
+    Node,
+    Line,    // Beam
     Tris,    // Quad,
-    Tets,    // Pymd, Prsm, Cube,
+    Tets,    // Pyrm, Prsm, Cube,
     // Mbrn, Shll_xxxx
     // Cell_FD, Cell_FV,
     // FD1D, FD2D, FD3D, FV1D, FV2D, FV3D, SG1D, SG2D, SG3D, // grid cell types
   end};
   inline Elid_int make_elid (//TODO Remove?
-    Elem e, fmr::math::Poly y, fmr::Dim_int p) {
+    const Elem e, const fmr::math::Poly y, const fmr::Dim_int p) {
     constexpr auto ysz = 8*sizeof(y), psz = 8*sizeof(p);
     return
-      ( (Elid_int(fmr::enum2val(e)) << (ysz+psz))
-      + (Elid_int(fmr::enum2val(y)) << (psz)) + p );
+      ( (Elid_int(fmr::enum2val(e)) << (psz+ysz))
+      + (Elid_int(fmr::enum2val(y)) << (psz))
+      + p );
   }
 #endif
 }//end fmr:: namespace -------------------------------------------------------

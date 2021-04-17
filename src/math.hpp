@@ -18,7 +18,7 @@ namespace fmr {namespace data {
 } }// end fmr::data namespace
 namespace fmr {namespace math {
   enum class Poly : uint8_t {None=0, Error, Unknown,
-    Full, Serendipity, Bipoly, Pyramid, Prism,
+    Full, Serendipity, Bipoly, Tripoly, Pyramid, Prism,
   end};
   static const std::map<Poly,std::pair<std::string,std::string>>
   Poly_letter_name {
@@ -28,6 +28,7 @@ namespace fmr {namespace math {
     {Poly::        Full,std::make_pair("P","Full Taylor polynomial")},
     {Poly:: Serendipity,std::make_pair("S","Serendipity")},
     {Poly::      Bipoly,std::make_pair("B","Bipolynomial")},
+    {Poly::     Tripoly,std::make_pair("T","Tripolynomial")},
     {Poly::     Pyramid,std::make_pair("D","Pyramid polynomial")},
     {Poly::       Prism,std::make_pair("M","Prism polynomial")}
   };
