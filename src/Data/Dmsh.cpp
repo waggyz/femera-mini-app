@@ -391,7 +391,7 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
       gmsh::option::getNumber ("Mesh.NbNodes", optval);
       const auto node_n = fmr::Global_int(optval);
       const auto nid = this->make_data_id (data_id, fmr::Data::Node_sysn);
-      {//-------------------------------------------------------------------
+      {//---------------------------------------------------------------------v
         is_found = this->data->global_vals.count(nid) > 0;
         if (!is_found) {this->data->global_vals[nid]
           = fmr::Global_int_vals (fmr::Data::Node_sysn, 1, node_n);
@@ -400,7 +400,7 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
         }else{
           this->data->global_vals[nid].data[0]+= node_n;
         }
-      }//-------------------------------------------------------------------
+      }//---------------------------------------------------------------------^
 #ifdef FMR_DEBUG
       log->label_fprintf (log->fmrerr,"*** Dmsh","%s[0] has %u nodes.\n",
         nid.c_str(), node_n);
@@ -449,67 +449,68 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
             this->data->enum_vals[fid].data.resize (mesh_n);
           }
         }//------------------------------------------------------------------^
-        auto forms =& this->data->enum_vals[fid].data[0];
+        auto forms =& this->data->enum_vals [fid].data[0];
         for (fmr::Local_int mesh_i=0; mesh_i<mesh_n; mesh_i++) {
-          const auto elem_gmsh = mesh_elem_gmsh [mesh_i];
-          auto form = fmr::Elem_form::Unknown;
-          if (fmr::detail::elem_info_gmsh.count(elem_gmsh) > 0) {
-            const auto elinfo
-              = fmr::detail::elem_info_gmsh.at (elem_gmsh);
+          const auto  elem_gmsh = mesh_elem_gmsh [mesh_i];
+          auto             form = fmr::Elem_form::Unknown;
+          fmr::Local_int conn_n = 0;
+          fmr::Dim_int   elem_d = 0;
+          if (fmr::detail::elem_info_gmsh.count (elem_gmsh) > 0) {
+            const auto elinfo = fmr::detail::elem_info_gmsh.at (elem_gmsh);
             form = elinfo.form;
+            elem_d = fmr::elem_form_d [fmr::enum2val (form)];
+            conn_n = fmr::math::poly_terms (elem_d, elinfo.poly, elinfo.pord);
           }else{
-            log->printf_err("WARNING Gmsh element type %i not supported\n",
+            log->printf_err("WARNING Gmsh element type %i not supported.\n",
               elem_gmsh);
           }
-          fmr::Local_int elem_n=0;
+          fmr::Local_int elem_n = 0;
           switch (form) {
-            //TODO What about 1D elements?
+            //TODO What about 0D & 1D element meshes?
             case (fmr::Elem_form::Tris) :
               gmsh::option::getNumber ("Mesh.NbTriangles", optval);
               elem_n = fmr::Local_int(optval);
-            break;
+              break;
             case (fmr::Elem_form::Quad) :
               gmsh::option::getNumber ("Mesh.NbQuadrangles", optval);
               elem_n = fmr::Local_int(optval);
-            break;
+              break;
 #if 0
             case (TODO) :// 3-plane inersect
               gmsh::option::getNumber ("Mesh.NbTrihedra", optval);
               elem_n = fmr::Local_int(optval);
-            break;
+              break;
 #endif
             case (fmr::Elem_form::Tets) :
               gmsh::option::getNumber ("Mesh.NbTetrahedra", optval);
               elem_n = fmr::Local_int(optval);
-            break;
+              break;
             case (fmr::Elem_form::Prmd) :
               gmsh::option::getNumber ("Mesh.NbPyramids", optval);
               elem_n = fmr::Local_int(optval);
-            break;
+              break;
             case (fmr::Elem_form::Prsm) :
               gmsh::option::getNumber ("Mesh.NbPrisms", optval);
               elem_n = fmr::Local_int(optval);
-            break;
+              break;
             case (fmr::Elem_form::Cube) :
               gmsh::option::getNumber ("Mesh.NbHexahedra", optval);
               elem_n = fmr::Local_int(optval);
-            break;
+              break;
             default : {}//TODO
           }
-          elem_sysn += (fmr::elem_form_d [fmr::enum2val(form)] == geom_d)
-            ? elem_n : 0;
+          elem_sysn += (elem_d == geom_d) ? elem_n : 0;
+          //
           elems [mesh_i] = elem_n;
           forms [mesh_i] = fmr::enum2val(form);
           //
-          //FIXME elem_conn_n
-          //
-          const auto id = data_id +":Mesh_"+ std::to_string(mesh_i);
+          const auto id = data_id +":Mesh_"+std::to_string (mesh_i);
           const auto cid = this->make_data_id(id, fmr::Data::Elem_conn);
-          elem_gmsh_info [cid] = Elem_gmsh_info ({-1},0,elem_gmsh);
-          err= this->new_local_vals (id, fmr::Data::Elem_conn, 0);
+          this->elem_gmsh_info [cid] = Elem_gmsh_info ({-1},0,elem_gmsh);
           err= this->data->add_data_file (cid, this, fname);//TODO handle err
+          err= this->new_local_vals (id, fmr::Data::Elem_conn, elem_n * conn_n);
         }//end mesh_i loop
-      }//end if mesh_n>0
+      }//end if mesh_n > 0
       if (elem_sysn > 0) {
         const auto id = this->make_data_id (data_id, fmr::Data::Elem_sysn);
         {//-------------------------------------------------------------------
