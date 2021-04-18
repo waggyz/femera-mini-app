@@ -226,7 +226,6 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
   fmr::data::Access for_access, Data::Concurrency for_cncr) {
   int err=0;//TODO This loads file data. Do not reload later.
   auto log = this->proc->log;
-//  FMR_PRAGMA_OMP(omp critical) {//TODO use is_omp_parallel, like below.
   const auto fname = info.data_file.second;
   fmr::perf::timer_resume (& this->time);
   try {gmsh::open (fname);}
@@ -365,7 +364,8 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
     return info;
     }
   int Dmsh::scan_model (const std::string data_id) {int err=0;
-    this->current_model_gate.lock();
+//    this->current_model_gate.lock();
+    std::lock_guard<std::mutex> gate(this->current_model_gate);
     auto log = this->proc->log;
     fmr::perf::timer_resume (&this->time);
     gmsh::model::setCurrent (data_id);//TODO catch error
@@ -614,26 +614,17 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
       if (has_1d_elem_tags){ vals[mesh_n_ix]+= 1; }
 #endif
     }//end if !err
-  this->current_model_gate.unlock();
+//  this->current_model_gate.unlock();
   fmr::perf::timer_pause (&this->time);
   return err;
   }
 int Dmsh::close () {
+//  this->current_model_gate.lock();
+  std::lock_guard<std::mutex> gate(this->current_model_gate);
   fmr::perf::timer_resume(&this->time);
-#if 0
-  if (this->is_omp_parallel ()){
-      FMR_PRAGMA_OMP(omp critical) {
-      //TODO still hangs, probably because
-      //     incomplete parallel for loop does not call this on all threads.
-      gmsh::model::remove();
-    }
-  }else{
-    gmsh::model::remove();
-  }
-#else
-    gmsh::model::remove ();//TODO check if data is still in use.
-#endif
+  gmsh::model::remove ();//TODO check if data is still in use.
   fmr::perf::timer_pause (&this->time);
+//  this->current_model_gate.unlock();
   return 0;
 }
 bool Dmsh::is_this_type (std::string fname){int err=0;//, fmt;

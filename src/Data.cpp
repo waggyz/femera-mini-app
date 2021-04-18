@@ -140,14 +140,14 @@ int Data::make_mesh (const std::string model, const fmr::Local_int ix) {
   if (n>0) {for (int i=0; i<n; i++) {
     Data* D = this->task.get<Data>(i);
     if (D != nullptr && D != this) {
-      err = D->make_mesh (model, ix);
+      err= D->make_mesh (model, ix);
       if (!err) {
         did_mesh = true;
-        if (this->proc->log->timing >= this->verblevel) {
+        if (log->timing >= D->verblevel) {
           const auto s = fmr::perf::format_time_units (this->time.last_busy_ns);
           const auto label = D->task_name+" mesh";
           log->label_fprintf (log->fmrout, label.c_str(),
-            "%u: %s meshed in %s s.\n", ix, model.c_str(), s.c_str());
+            "%u: %s meshed in %s.\n", ix, model.c_str(), s.c_str());
         return 0;
     } } } }
     if (!did_mesh) {
@@ -793,37 +793,40 @@ int Data::chck_file_names (std::deque<std::string> files){int err=0;
       fname_i<fname_n; fname_i += thrd_n){// static round-robin distribution
   //    bool file_ok=true;//TODO Set false here, true if ok and sync all_file_names.
       std::string fname = files [fname_i];
-#if 0
+#ifdef FMR_DEBUG
       this->proc->log-> fprintf(this->proc->log-> fmrout,"file[%i] %s...\n",
         fname_i,fname.c_str());
 #endif
       struct ::stat s;// Check if file exists.
-      FMR_PRAGMA_OMP(omp critical) //TODO try to (re)move this ?
-      if (::stat (fname.c_str(), &s) != 0){// File not found.
-        log->fprintf (log->fmrerr,
-          "WARN""ING Input file not found: %s\n",
-          fname.c_str());
-      }
-      else if (do_read_sims_info) {
-        auto info = get_file_info (Data_file (nullptr,fname));
-        if (fname_i==0) {if (log->verbosity >= this->verblevel) {
-          std::string label = this->task_name +" info";
-          if (log->detail >= this->verblevel) {
-            const std::string mode = fmr::get_enum_string (
-              fmr::data::Access_name, info.access);
-            log->label_fprintf (log->fmrout, label.c_str(),
-              "%s %i file%s...\n",
-              mode.c_str(), fname_n, (fname_n==1)?"":"s");
-        } } }
-        Data* D = info.data_file.first;
-        if (D != nullptr) {// recognized file format
-          if (!info.state.has_error) {
-            info = this->scan_file_data (info.data_file);
+//      FMR_PRAGMA_OMP(omp critical) //TODO try to (re)move this ?
+      {// this->data_gate.lock();
+        std::lock_guard<std::mutex> gate (this->data_gate);
+        if (::stat (fname.c_str(), &s) != 0) {// File not found.
+          log->fprintf (log->fmrerr,
+            "WARN""ING Input file not found: %s\n",
+            fname.c_str());
+        }
+        else if (do_read_sims_info) {
+          auto info = get_file_info (Data_file (nullptr,fname));
+          if (fname_i==0) {if (log->verbosity >= this->verblevel) {
+            std::string label = this->task_name +" info";
+            if (log->detail >= this->verblevel) {
+              const std::string mode = fmr::get_enum_string (
+                fmr::data::Access_name, info.access);
+              log->label_fprintf (log->fmrout, label.c_str(),
+                "%s %i file%s...\n",
+                mode.c_str(), fname_n, (fname_n==1)?"":"s");
+          } } }
+          Data* D = info.data_file.first;
+          if (D != nullptr) {// recognized file format
             if (!info.state.has_error) {
-              this->inp_file_names.push_back (fname);
-      } } } } }
+              info = this->scan_file_data (info.data_file);
+              if (!info.state.has_error) {
+                this->inp_file_names.push_back (fname);
+        } } } }
+//        this->data_gate.unlock();
+      } }
       this->get_sims_names();
-//      this->sort_sims_data ();
   }//end if files provided
   if (log->verbosity >= this->verblevel){
     log->label_printf ("Input data","in %s\n",

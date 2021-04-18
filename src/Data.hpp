@@ -6,8 +6,8 @@
 #include <unordered_set>
 #include <valarray>
 #include <tuple>       //std::pair
-
 #include <unordered_map>
+#include <mutex>
 
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
@@ -107,11 +107,12 @@ class Data : public Work {//TODO change to File
     //
     std::unordered_set<std::string> sims_names ={};
   private:
-    fmr::Dim_int data_hier_max  = 32;// maximum partitioning/grouping depth
+    std::mutex data_gate {};
     //
     std::deque<std::string> chk_file_names ={};
     std::deque<std::string> out_file_names ={};
     std::deque<std::string> inp_file_names ={};
+    fmr::Dim_int data_hier_max  = 32;// maximum partitioning/grouping depth
   // methods -----------------------------------------------------------------
   public:
     std::string print_details () final override;// Data handler information

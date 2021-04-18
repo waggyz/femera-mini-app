@@ -220,9 +220,7 @@ Data::File_info Dcgn::get_file_info (const std::string fname) {int err=0;
   info.version = info.version.size()
     ? info.version
     : fmr::get_enum_string(fmr::detail::format_cgns_name, info.format);
-//  FMR_PRAGMA_OMP(omp critical) {//TODO thread safety?
-    this->file_info [fname] = info;
-//  }// end critical region
+    this->file_info [fname] = info;//TODO gate.lock/unlock here?
   return info;
 }
 Dcgn::File_cgns Dcgn::close (const std::string fname){
@@ -468,22 +466,26 @@ int Dcgn::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
       if (path == nullptr) {return 1;}//TODO set read err in vals.
       if (path->inds.size() == 2) {
         cgsize_t conn_sz =0;
-          FMR_PRAGMA_OMP(omp critical) {//TODO critical?
+          {// this->goto_gate.lock();
+            std::lock_guard<std::mutex> gate (this->goto_gate);
             err= cg_golist (path->file_cgid, path->base, path->deep,
               path->labs.data(), path->inds.data());
             err= cg_ElementDataSize (path->file_cgid, path->base,
               path->inds[0], path->inds[1], &conn_sz);
+//            this->goto_gate.unlock();
             //if (!err) {this->time.bytes += sizeof(cgsize_t);}//TODO count this?
           }
         if (err) {return 1;}
         if (conn_sz > 0) {
           auto buf = std::vector<cgsize_t>(conn_sz);
           if (vals.data.size() < size_t(conn_sz)) {vals.data.resize (conn_sz);}
-          FMR_PRAGMA_OMP(omp critical) {//TODO critical?
+          {// this->goto_gate.lock();
+            std::lock_guard<std::mutex> gate (this->goto_gate);
             err= cg_golist (path->file_cgid, path->base, path->deep,
               path->labs.data(), path->inds.data());
             err+= cg_elements_read (path->file_cgid, path->base, path->inds[0],
               path->inds[1], buf.data(), nullptr);//cgsize_t *ParentData
+//            this->goto_gate.unlock();
           }
           if (err) {return 1;}
           else {this->time.bytes += conn_sz *sizeof(cgsize_t);}

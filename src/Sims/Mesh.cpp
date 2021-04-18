@@ -101,11 +101,11 @@ namespace Femera {
         this->model_name.c_str(), this->mesh_d, this->geom_d,
         this->parent->model_name.c_str());
     }
-    fmr::perf::timer_resume (& this->time);
+    //fmr::perf::timer_resume (& this->time);
     //
     // this->data->make_mesh (this->parent->model_name);//TODO XS sims only
     //
-    fmr::perf::timer_pause (& this->time);
+    //fmr::perf::timer_pause (& this->time);
     return err;
   }
 #if 0

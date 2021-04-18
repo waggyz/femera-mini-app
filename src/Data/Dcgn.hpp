@@ -10,6 +10,7 @@
 
 #include <queue>
 #include <map>
+#include <mutex>
 
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
@@ -84,6 +85,7 @@ class Dcgn final : public Data {
     };
   // Member variables --------------------------------------------------------
   private:
+    std::mutex goto_gate {};
     std::unordered_map<std::string, File_cgns>file_info ={};// key: path/fname
     std::unordered_map<fmr::Data_id, Path_cgns> data_path = {};
     int add_cgns_here (const std::string fname, const fmr::Data_id cid,

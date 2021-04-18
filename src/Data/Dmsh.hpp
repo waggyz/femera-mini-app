@@ -51,13 +51,13 @@ class Dmsh final : public Data {
     };
   // Member variables ---------------------------------------------------------
   private:
+    std::mutex current_model_gate {};
     // Below are defaults for new Gmsh file.
     std::unordered_map<std::string,File_gmsh> file_info={};// key:path/filename
     //
     std::unordered_map<fmr::Data_id, Elem_gmsh_info> elem_gmsh_info={};
     int format          = 1;// .msh (see fmr::detail::format_gmsh_name map)
     Data::Encode encode = Data::Encode::Binary;
-    std::mutex current_model_gate;//TODO How to initialize?
   // Methods ------------------------------------------------------------------
   protected:
     int init_task (int* argc, char** argv)      final override;
