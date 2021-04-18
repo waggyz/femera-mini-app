@@ -4,6 +4,7 @@
 #include "../../external/gmsh/Common/CreateFile.h" // GetKnownFileFormats (..)
 
 #include <sys/stat.h> // stat
+#include <unistd.h> //TODO Remove usleep?
 
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
@@ -176,7 +177,7 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int ix) {
   //TODO handle mesh index # to generate
   int geom_d = 0;
   if (!err) {
-  geom_d = gmsh::model::getDimension ();
+    geom_d = gmsh::model::getDimension ();
     if (geom_d < 1 || geom_d > 3) {err= 1;
       log->label_fprintf (log->fmrerr, warnlabel.c_str(),
         "can not make %iD mesh for %s:%u.\n", geom_d, model.c_str(), ix);
@@ -206,7 +207,7 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int ix) {
     "make_mesh %s:%u return %i...\n", model.c_str(), ix, err);
 #endif
   if (err>0) {return err;}
-  return this->scan_model (model);;
+  return this->scan_model (model);
 }
 bool Dmsh::is_omp_parallel (){ bool is_omp=false;
   Proc* P = this->proc->task.first<Proc> (Base_type::Pomp);
@@ -290,77 +291,85 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
   this->file_info[fname] = info;
   return info;
 }
-int Dmsh::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
-  int err=0;
-  auto log = this->proc->log;
+  int Dmsh::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
+    int err=0;
+    auto log = this->proc->log;
 #ifdef FMR_DEBUG
-  const auto label = this->task_name +" read";
-  log->label_fprintf (log->fmrerr, label.c_str(), "%s...\n", id.c_str());
+    const auto label = "**** "+this->task_name+" read";
+    log->label_fprintf (log->fmrerr, label.c_str(), "%s...\n", id.c_str());
 #endif
-  switch (vals.type) {
-    case (fmr::Data::Elem_conn) :
-      if (this->elem_gmsh_info.count(id) > 0) {
-        const auto info = this->elem_gmsh_info.at(id);
-        const auto n = info.tags.size();
-        if (n>1) {//TODO Not handled yet
-          log->printf_err (
-            "ERROR Dmsh::read_local_vals (..) multiple tag parts not done yet.");
-          return 1;
-        }
-        if (n>0) {
-          std::vector<std::size_t> elem={}, conn={};
-          std::size_t task_n = 1;//TODO for automatic partitioning by node #
-          for (size_t i=0; i<n; i++) {
-            gmsh::model::mesh::getElementsByType (info.type, elem, conn,
-              info.tags[i], info.task, task_n);
+    switch (vals.type) {
+      case (fmr::Data::Elem_conn) :
+        if (this->elem_gmsh_info.count(id) > 0) {
+          const auto info = this->elem_gmsh_info.at(id);
+          const auto n = info.tags.size();
+          if (n>1) {//TODO Not handled yet
+            log->label_fprintf (log->fmrerr, "WARN""ING Dmsh",
+              "read_local_vals (%s,..) multi-tag parts not supported.\n",
+              id.c_str());
+            return 1;
           }
-          const auto esz = conn.size();
-          if (esz > 0) {
-            if (vals.data.size() < esz) {vals.data.resize(esz);}
-            for (size_t i=0; i<esz; i++) {
-              vals.data[i] = fmr::Local_int(conn[i]);//TODO XS only
-            }//TODO global_id == local_id is XS only
-            vals.stored_state.was_read = true;
-            //TODO cache elem tags?.
-        } } }
-      break;
-    default : {}//TODO Print warning.
+          if (n>0) {
+            std::vector<std::size_t> elem={}, conn={};
+            std::size_t task_n = 1;//TODO for automatic partitioning by node #
+            for (size_t i=0; i<n; i++) {
+              while (this->is_locked) {usleep (1);} this->is_locked = true;
+              gmsh::model::setCurrent (info.model);//TODO catch error
+              gmsh::model::mesh::getElementsByType (info.type, elem, conn,
+                info.tags[i], info.task, task_n);
+              this->is_locked = false;
+            }
+            const auto esz = conn.size();
+            if (esz > 0) {
+              if (vals.data.size() < esz) {vals.data.resize(esz);}
+              for (size_t i=0; i<esz; i++) {
+                vals.data[i] = fmr::Local_int(conn[i]);//TODO XS only
+              }//TODO global_id == local_id is XS only
+              vals.stored_state.was_read = true;
+              //TODO cache elem tags?.
+          } } }
+        break;
+      default : {}//TODO Print warning.
+    }
+    err= Data::read_local_vals (id, vals);//TODO Remove this call?
+    return err;
   }
-  err= Data::read_local_vals (id, vals);//TODO Remove this call?
-  return err;
-}
-Data::File_info Dmsh::scan_file_data (const std::string fname) {
-  auto info = Dmsh::File_gmsh (Data::Data_file (this, fname));
-  info = this->file_info.count (fname) ? this->file_info.at (fname) : info;
-//  info.data_file.second = fname;//TODO redundant?
-  if (!info.state.was_read) {
-    bool do_open = true;
-    switch (info.access) {// Check if already open.
-      case fmr::data::Access::Read   :// Fall through valid open modes...
-      case fmr::data::Access::Write  :// Fall through...
-      case fmr::data::Access::Modify : do_open = false; break;
-      default : do_open = true;
+  Data::File_info Dmsh::scan_file_data (const std::string fname) {
+//    while (this->is_locked) {usleep (1);} this->is_locked = true;
+    auto info = Dmsh::File_gmsh (Data::Data_file (this, fname));
+    info = this->file_info.count (fname) ? this->file_info.at (fname) : info;
+  //  info.data_file.second = fname;//TODO redundant?
+    if (!info.state.was_read) {
+      bool do_open = true;
+      switch (info.access) {// Check if already open.
+        case fmr::data::Access::Read   :// Fall through valid open modes...
+        case fmr::data::Access::Write  :// Fall through...
+        case fmr::data::Access::Modify : do_open = false; break;
+        default : do_open = true;
+      }
+      if (info.state.has_error) {do_open=true;}// Try to reopen.
+      if (do_open) {
+        const auto inp_file_mode = fmr::data::Access::Read;
+        info = this->open (info, inp_file_mode, Data::Concurrency::Independent);
+      }
+      if (info.state.has_error) {
+        this->file_info[fname] = info;
+//        this->is_locked = false;
+        return info;
+      }
+      // Read Gmsh model name
+      std::string data_id(""); gmsh::model::getCurrent (data_id);
+      this->sims_names.insert (std::string (data_id));
+      info.state.has_error = this->scan_model (data_id) > 0;
+    }//end if !read
+    fmr::perf::timer_pause (&this->time);
+    info.state.was_checked = true;
+    this->file_info[fname] = info;
+//    this->is_locked = false;
+    return info;
     }
-    if (info.state.has_error) {do_open=true;}// Try to reopen.
-    if (do_open) {
-      const auto inp_file_mode = fmr::data::Access::Read;
-      info = this->open (info, inp_file_mode, Data::Concurrency::Independent);
-    }
-    if (info.state.has_error) {
-      this->file_info[fname] = info;
-      return info;
-    }
-    // Read Gmsh model name
-    std::string data_id(""); gmsh::model::getCurrent (data_id);
-    this->sims_names.insert (std::string (data_id));
-    info.state.has_error = this->scan_model (data_id) > 0;
-  }//end if !read
-  fmr::perf::timer_pause (&this->time);
-  info.state.was_checked = true;
-  this->file_info[fname] = info;
-  return info;
-  }
   int Dmsh::scan_model (const std::string data_id) {int err=0;
+    while (this->is_locked) {usleep (1);} this->is_locked = true;
     auto log = this->proc->log;
     fmr::perf::timer_resume (&this->time);
     gmsh::model::setCurrent (data_id);//TODO catch error
@@ -398,11 +407,11 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
         }else if (this->data->global_vals[nid].data.size() < 1) {
           this->data->global_vals[nid].data.resize (1, node_n);
         }else{
-          this->data->global_vals[nid].data[0]+= node_n;
+          this->data->global_vals[nid].data[0] += node_n;
         }
       }//---------------------------------------------------------------------^
 #ifdef FMR_DEBUG
-      log->label_fprintf (log->fmrerr,"*** Dmsh","%s[0] has %u nodes.\n",
+      log->label_fprintf (log->fmrerr,"**** Dmsh scan","%s[0] has %u nodes.\n",
         nid.c_str(), node_n);
 #endif
 #endif
@@ -411,18 +420,11 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
       gmsh::option::getString ("General.FileName", fname);
       std::vector<int> mesh_elem_gmsh={};// int dims=-1, tags=-1;
       gmsh::model::mesh::getElementTypes (mesh_elem_gmsh);//, dims, tags);
-      const auto mesh_n = fmr::Local_int(mesh_elem_gmsh.size());
+      const auto mesh_n = fmr::Local_int (mesh_elem_gmsh.size());//TODO XS sims
 #ifdef FMR_DEBUG
-      if (mesh_n > 1) {
-        log->label_fprintf (log->fmrerr,"Gmsh scan",
-          "scan_model %s (Gmsh types %i,%i)\n",
-          data_id.c_str(), mesh_elem_gmsh[0], mesh_elem_gmsh[1]);
-      }
-      if (mesh_n > 2) {
-        log->label_fprintf (log->fmrerr,"Gmsh scan",
-          "scan_model %s (Gmsh type  %i)\n",
-          data_id.c_str(), mesh_elem_gmsh[2]);
-      }
+      std::string s="";for (auto i : mesh_elem_gmsh){s+=" "+std::to_string(i);}
+      log->label_fprintf (log->fmrerr,"**** Gmsh scan",
+        "scan_model %s (Gmsh types%s)\n", data_id.c_str(), s.c_str());
 #endif
       if (mesh_n > 0) {//TODO XS sims only
         const auto eid = this->make_data_id (data_id, fmr::Data::Elem_n);
@@ -437,7 +439,7 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
         }//------------------------------------------------------------------^
         auto elems =& this->data->local_vals[eid].data[0];
 #ifdef FMR_DEBUG
-        log->label_fprintf (log->fmrerr,"*** Dmsh","%s size is %u.\n",
+        log->label_fprintf (log->fmrerr,"**** Dmsh","%s size is %u.\n",
           eid.c_str(), this->data->global_vals[eid].data.size());
 #endif
         const auto fid = this->make_data_id (data_id, fmr::Data::Elem_form);
@@ -506,7 +508,7 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
           //
           const auto id = data_id +":Mesh_"+std::to_string (mesh_i);
           const auto cid = this->make_data_id(id, fmr::Data::Elem_conn);
-          this->elem_gmsh_info [cid] = Elem_gmsh_info ({-1},0,elem_gmsh);
+          this->elem_gmsh_info [cid] = Elem_gmsh_info({-1},0,elem_gmsh,data_id);
           err= this->data->add_data_file (cid, this, fname);//TODO handle err
           err= this->new_local_vals (id, fmr::Data::Elem_conn, elem_n * conn_n);
         }//end mesh_i loop
@@ -617,6 +619,7 @@ Data::File_info Dmsh::scan_file_data (const std::string fname) {
 #endif
     }//end if !err
   fmr::perf::timer_pause (&this->time);
+  this->is_locked = false;
   return err;
   }
 int Dmsh::close () {

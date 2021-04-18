@@ -143,10 +143,11 @@ int Data::make_mesh (const std::string model, const fmr::Local_int ix) {
       err = D->make_mesh (model, ix);
       if (!err) {
         did_mesh = true;
-        if (this->proc->log->verbosity >= this->verblevel) {
+        if (this->proc->log->timing >= this->verblevel) {
+          const auto s = fmr::perf::format_time_units (this->time.last_busy_ns);
           const auto label = D->task_name+" mesh";
           log->label_fprintf (log->fmrout, label.c_str(),
-            "%u: %s meshed in %s s.\n", ix, model.c_str(), "?");
+            "%u: %s meshed in %s s.\n", ix, model.c_str(), s.c_str());
         return 0;
     } } } }
     if (!did_mesh) {

@@ -35,11 +35,13 @@ class Dmsh final : public Data {
         }
     };
     struct Elem_gmsh_info {
-      std::vector<int> tags = {};
+      std::vector<int> tags ={};
       size_t           task = 0;
       int              type = 0;
-      Elem_gmsh_info (const std::vector<int> tg, const size_t tk, const int ty)
-        : tags(tg), task(tk), type(ty) {};
+      std::string     model ="";
+      Elem_gmsh_info (const std::vector<int> tg, const size_t tk, const int ty,
+        const std::string m)
+        : tags(tg), task(tk), type(ty), model(m) {};
       Elem_gmsh_info                                 () =default;
       Elem_gmsh_info            (Elem_gmsh_info const&) =default;// copyable
       Elem_gmsh_info& operator= (const Elem_gmsh_info&) =default;
@@ -47,11 +49,13 @@ class Dmsh final : public Data {
     };
   // Member variables ---------------------------------------------------------
   private:
+    // Below are defaults for new Gmsh file.
     std::unordered_map<std::string,File_gmsh> file_info={};// key:path/filename
-    // Defaults for new Gmsh file.
+    //
     std::unordered_map<fmr::Data_id, Elem_gmsh_info> elem_gmsh_info={};
     int format          = 1;// .msh (see fmr::detail::format_gmsh_name map)
     Data::Encode encode = Data::Encode::Binary;
+    bool is_locked      = false;//TODO Remove?
   // Methods ------------------------------------------------------------------
   protected:
     int init_task (int* argc, char** argv)      final override;
