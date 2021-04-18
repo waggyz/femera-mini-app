@@ -347,10 +347,9 @@ int Data::get_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
   is_found = false;// Change to true if this data can be read by a data handler.
   if (this->sims_data_file.count (vals_id) > 0) {
     const auto data_files = this->sims_data_file.at (vals_id);
-    for (auto df : data_files) {
-      auto D = df.first;
+    for (auto df : data_files) {auto D = df.first;
       if (D) {
-        err= D->read_local_vals (vals_id, vals);//FIXME IAMHERE
+        err= D->read_local_vals (vals_id, vals);
         is_found = is_found | ((err==0) & vals.stored_state.was_read);
   } } }
   if (is_found) {return vals.stored_state.has_error ? 1 : 0;}

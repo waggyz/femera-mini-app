@@ -16,7 +16,7 @@ namespace Femera {
     //
     this->  work_type = work_cast (Base_type::Frun);
 //    this-> base_type = work_cast (Base_type::Sims);// TODO Remove?
-    this->  task_name ="Run!";
+    this->  task_name ="Run1";
     this-> model_name ="(sim runner)";
     this->  verblevel = 3;
     this->  part_type = fmr::Partition::Join;

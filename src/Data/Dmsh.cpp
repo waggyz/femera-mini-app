@@ -168,39 +168,39 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int ix) {
   int err=0;
   const auto log = this->proc->log;
   const auto warnlabel = "WARN""ING "+this->task_name;
-  fmr::perf::timer_resume (& this->time);
-  try {gmsh::model::setCurrent (model);}
-  catch (int e) {err = e;
-    log->label_fprintf (log->fmrerr, warnlabel.c_str(),
-      "can not find %s.\n", model.c_str());
-  }
-  //TODO handle mesh index # to generate
-  int geom_d = 0;
-  if (!err) {
-    geom_d = gmsh::model::getDimension ();
-    if (geom_d < 1 || geom_d > 3) {err= 1;
+  { std::lock_guard<std::mutex> gate (this->current_model_gate);
+    fmr::perf::timer_resume (& this->time);
+    try {gmsh::model::setCurrent (model);}
+    catch (int e) {err = e;
       log->label_fprintf (log->fmrerr, warnlabel.c_str(),
-        "can not make %iD mesh for %s:%u.\n", geom_d, model.c_str(), ix);
-  } }
-  if (!err) {
-//  FMR_PRAGMA_OMP(omp critical) {//TODO thread safety?
-    try {gmsh::model::mesh::generate (geom_d);}
-    catch (int e) {err= e;
-      log->label_fprintf (log->fmrerr, warnlabel.c_str(),
-        "generate %iD mesh of %s:%u returned %i.\n",
-        geom_d, model.c_str(), ix, err);
-  } }// }
-  if (!err) {
-    Dmsh::Optval optval=Dmsh::Optval(0);
-    gmsh::option::getNumber ("Mesh.NbPartitions", optval);//0: unpartitioned
-    if (optval > 1) {//TODO or >0 ?
-      try {gmsh::model::mesh::partition (int (optval));}
+        "can not find %s.\n", model.c_str());
+    }
+    //TODO handle mesh index # to generate
+    int geom_d = 0;
+    if (!err) {
+      geom_d = gmsh::model::getDimension ();
+      if (geom_d < 1 || geom_d > 3) {err= 1;
+        log->label_fprintf (log->fmrerr, warnlabel.c_str(),
+          "can not make %iD mesh for %s:%u.\n", geom_d, model.c_str(), ix);
+    } }
+    if (!err) {
+      try {gmsh::model::mesh::generate (geom_d);}
       catch (int e) {err= e;
         log->label_fprintf (log->fmrerr, warnlabel.c_str(),
-          "partition (%i) %s:%u returned %i.\n",
-          int (optval), model.c_str(), ix, err);
-        gmsh::option::setNumber ("Mesh.NbPartitions", 0.0);
-  } } }
+          "generate %iD mesh of %s:%u returned %i.\n",
+          geom_d, model.c_str(), ix, err);
+    } }// }
+    if (!err) {
+      Dmsh::Optval optval=Dmsh::Optval(0);
+      gmsh::option::getNumber ("Mesh.NbPartitions", optval);//0: unpartitioned
+      if (optval > 1) {//TODO or >0 ?
+        try {gmsh::model::mesh::partition (int (optval));}
+        catch (int e) {err= e;
+          log->label_fprintf (log->fmrerr, warnlabel.c_str(),
+            "partition (%i) %s:%u returned %i.\n",
+            int (optval), model.c_str(), ix, err);
+          gmsh::option::setNumber ("Mesh.NbPartitions", 0.0);
+  } } } }
   fmr::perf::timer_pause (& this->time);
 #ifdef FMR_DEBUG
   log->label_fprintf (log->fmrout, "**** Gmsh",
@@ -312,13 +312,12 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
           if (n>0) {
             std::vector<std::size_t> elem={}, conn={};
             std::size_t task_n = 1;//TODO for automatic partitioning by node #
-            for (size_t i=0; i<n; i++) {
-              while (this->is_locked) {usleep (1);} this->is_locked = true;
-              gmsh::model::setCurrent (info.model);//TODO catch error
-              gmsh::model::mesh::getElementsByType (info.type, elem, conn,
-                info.tags[i], info.task, task_n);
-              this->is_locked = false;
-            }
+            { std::lock_guard<std::mutex> gate(this->current_model_gate);
+              for (size_t i=0; i<n; i++) {
+                gmsh::model::setCurrent (info.model);//TODO catch error
+                gmsh::model::mesh::getElementsByType (info.type, elem, conn,
+                  info.tags[i], info.task, task_n);
+            } }
             const auto esz = conn.size();
             if (esz > 0) {
               if (vals.data.size() < esz) {vals.data.resize(esz);}
@@ -335,7 +334,6 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
     return err;
   }
   Data::File_info Dmsh::scan_file_data (const std::string fname) {
-//    while (this->is_locked) {usleep (1);} this->is_locked = true;
     auto info = Dmsh::File_gmsh (Data::Data_file (this, fname));
     info = this->file_info.count (fname) ? this->file_info.at (fname) : info;
   //  info.data_file.second = fname;//TODO redundant?
@@ -354,7 +352,6 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
       }
       if (info.state.has_error) {
         this->file_info[fname] = info;
-//        this->is_locked = false;
         return info;
       }
       // Read Gmsh model name
@@ -365,11 +362,10 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
     fmr::perf::timer_pause (&this->time);
     info.state.was_checked = true;
     this->file_info[fname] = info;
-//    this->is_locked = false;
     return info;
     }
   int Dmsh::scan_model (const std::string data_id) {int err=0;
-    while (this->is_locked) {usleep (1);} this->is_locked = true;
+    this->current_model_gate.lock();
     auto log = this->proc->log;
     fmr::perf::timer_resume (&this->time);
     gmsh::model::setCurrent (data_id);//TODO catch error
@@ -508,7 +504,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
           //
           const auto id = data_id +":Mesh_"+std::to_string (mesh_i);
           const auto cid = this->make_data_id(id, fmr::Data::Elem_conn);
-          this->elem_gmsh_info [cid] = Elem_gmsh_info({-1},0,elem_gmsh,data_id);
+          this->elem_gmsh_info [cid] = Elem_gmsh_info(data_id,{-1},0,elem_gmsh);
           err= this->data->add_data_file (cid, this, fname);//TODO handle err
           err= this->new_local_vals (id, fmr::Data::Elem_conn, elem_n * conn_n);
         }//end mesh_i loop
@@ -618,8 +614,8 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
       if (has_1d_elem_tags){ vals[mesh_n_ix]+= 1; }
 #endif
     }//end if !err
+  this->current_model_gate.unlock();
   fmr::perf::timer_pause (&this->time);
-  this->is_locked = false;
   return err;
   }
 int Dmsh::close () {

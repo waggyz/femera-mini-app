@@ -4,6 +4,8 @@
 #define FMR_HAS_GMSH
 #endif
 
+#include <mutex>
+
 namespace Femera{
 class Dmsh final : public Data {
   // Typedefs -----------------------------------------------------------------
@@ -35,13 +37,13 @@ class Dmsh final : public Data {
         }
     };
     struct Elem_gmsh_info {
+      std::string     model ="";
       std::vector<int> tags ={};
       size_t           task = 0;
       int              type = 0;
-      std::string     model ="";
-      Elem_gmsh_info (const std::vector<int> tg, const size_t tk, const int ty,
-        const std::string m)
-        : tags(tg), task(tk), type(ty), model(m) {};
+      Elem_gmsh_info (const std::string m, const std::vector<int> tg,
+        const size_t tk, const int ty)
+        : model(m), tags(tg), task(tk), type(ty){};
       Elem_gmsh_info                                 () =default;
       Elem_gmsh_info            (Elem_gmsh_info const&) =default;// copyable
       Elem_gmsh_info& operator= (const Elem_gmsh_info&) =default;
@@ -55,7 +57,7 @@ class Dmsh final : public Data {
     std::unordered_map<fmr::Data_id, Elem_gmsh_info> elem_gmsh_info={};
     int format          = 1;// .msh (see fmr::detail::format_gmsh_name map)
     Data::Encode encode = Data::Encode::Binary;
-    bool is_locked      = false;//TODO Remove?
+    std::mutex current_model_gate;//TODO How to initialize?
   // Methods ------------------------------------------------------------------
   protected:
     int init_task (int* argc, char** argv)      final override;
