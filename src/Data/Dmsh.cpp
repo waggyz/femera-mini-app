@@ -189,7 +189,7 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int ix) {
         log->label_fprintf (log->fmrerr, warnlabel.c_str(),
           "generate %iD mesh of %s:%u returned %i.\n",
           geom_d, model.c_str(), ix, err);
-    } }// }
+    } }
     if (!err) {
       Dmsh::Optval optval=Dmsh::Optval(0);
       gmsh::option::getNumber ("Mesh.NbPartitions", optval);//0: unpartitioned
@@ -364,7 +364,6 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
     return info;
     }
   int Dmsh::scan_model (const std::string data_id) {int err=0;
-//    this->current_model_gate.lock();
     std::lock_guard<std::mutex> gate(this->current_model_gate);
     auto log = this->proc->log;
     fmr::perf::timer_resume (&this->time);
@@ -619,12 +618,10 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
   return err;
   }
 int Dmsh::close () {
-//  this->current_model_gate.lock();
   std::lock_guard<std::mutex> gate(this->current_model_gate);
   fmr::perf::timer_resume(&this->time);
   gmsh::model::remove ();//TODO check if data is still in use.
   fmr::perf::timer_pause (&this->time);
-//  this->current_model_gate.unlock();
   return 0;
 }
 bool Dmsh::is_this_type (std::string fname){int err=0;//, fmt;

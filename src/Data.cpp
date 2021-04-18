@@ -798,9 +798,7 @@ int Data::chck_file_names (std::deque<std::string> files){int err=0;
         fname_i,fname.c_str());
 #endif
       struct ::stat s;// Check if file exists.
-//      FMR_PRAGMA_OMP(omp critical) //TODO try to (re)move this ?
-      {// this->data_gate.lock();
-        std::lock_guard<std::mutex> gate (this->data_gate);
+      { std::lock_guard<std::mutex> gate (this->data_gate);
         if (::stat (fname.c_str(), &s) != 0) {// File not found.
           log->fprintf (log->fmrerr,
             "WARN""ING Input file not found: %s\n",
@@ -824,7 +822,6 @@ int Data::chck_file_names (std::deque<std::string> files){int err=0;
               if (!info.state.has_error) {
                 this->inp_file_names.push_back (fname);
         } } } }
-//        this->data_gate.unlock();
       } }
       this->get_sims_names();
   }//end if files provided
