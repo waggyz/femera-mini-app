@@ -201,6 +201,9 @@ bool Dcgn::is_this_type (const std::string fname) {int err;
 int Dcgn::make_mesh (const std::string, const fmr::Local_int) {
   return 1;
 }
+int Dcgn::make_part (const std::string, const fmr::Local_int) {
+  return 1;
+}
 Data::File_info Dcgn::get_file_info (const std::string fname) {int err=0;
   //TODO Dcgn::get_file_info (..) is NOT thread safe. lock guard here?
   auto info = Dcgn::File_cgns (Data::Data_file (this,fname));

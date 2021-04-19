@@ -214,6 +214,39 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
   if (err>0) {return err;}
   return this->scan_model (model);
 }
+
+int Dmsh::make_part (const std::string model, const fmr::Local_int) {
+  int err=0;
+  const auto log = this->proc->log;
+  const auto warnlabel = "WARN""ING "+this->task_name;
+  //TODO check if meshed
+  //TODO handle part index # to generate
+  if (!err) { Data::Lock_here lock (this->liblock);
+    try {gmsh::model::setCurrent (model);}
+    catch (int e) {err = e;
+      log->label_fprintf (log->fmrerr, warnlabel.c_str(),
+        "can not find %s.\n", model.c_str());
+    }
+    auto optval=Dmsh::Optval(0);
+    gmsh::option::getNumber ("Mesh.NbPartitions", optval);//0: unpartitioned
+    if (optval > 1) {
+      fmr::perf::timer_resume (& this->time);
+      try {gmsh::model::mesh::partition (int (optval));}//TODO make_part(..)
+      catch (int e) {err= e;
+        log->label_fprintf (log->fmrerr, warnlabel.c_str(),
+          "partition (%i) %s returned %i.\n",
+          int (optval), model.c_str(), err);
+        gmsh::option::setNumber ("Mesh.NbPartitions", Dmsh::Optval(0));
+      }
+      fmr::perf::timer_pause (& this->time);
+    } }
+#ifdef FMR_DEBUG
+  log->label_fprintf (log->fmrout, "**** Gmsh",
+    "make_part %s return %i...\n", model.c_str(), err);
+#endif
+  if (err>0) {return err;}
+  return this->scan_model (model);
+}
 bool Dmsh::is_omp_parallel (){ bool is_omp=false;
   Proc* P = this->proc->task.first<Proc> (Base_type::Pomp);
   if (P) {is_omp = P->is_in_parallel ();}

@@ -143,52 +143,56 @@ int Data::make_mesh (const std::string model, const fmr::Local_int ix) {
       fmr::perf::timer_resume (&this->time);
       err= D->make_mesh (model, ix);
       fmr::perf::timer_pause (&this->time);
-      if (!err) {
+      if (err <= 0) {
         did_mesh = true;
         if (log->timing >= D->verblevel) {
           const auto s = fmr::perf::format_time_units (this->time.last_busy_ns);
           const auto label = D->task_name+" mesh";
           log->label_fprintf (log->fmrout, label.c_str(),
-            "%u: %s meshed/partitioned in %s.\n",//TODO make_part(..)
+            "%u: %s meshed in %s.\n",//TODO make_part(..)
             ix, model.c_str(), s.c_str());
-        return 0;
-    } } } }
-    if (!did_mesh) {
-      log->label_fprintf (log->fmrerr, "WARN""ING Data",
-        "did not mesh %s:%u.\n", model.c_str(), ix);
-      return 1;
-  } }
-#if 0
-  const auto warnlabel = "WARN""ING "+this->task_name;
-  if (this->sims_data_file.count (model) < 1) {
-    log->label_fprintf (log->fmrerr, warnlabel.c_str(),
-      "no data handler for %s\n", model.c_str());
+        }
+        return err;
+  } } } }
+  if (!did_mesh) {
+    log->label_fprintf (log->fmrerr, "WARN""ING Data",
+      "did not mesh sim_%u: %s.\n", ix,model.c_str());
     return 1;
   }
-  const auto df = this->sims_data_file.at (model);
-  const auto n  = df.size();
-  if (n < 1 ) {
-    log->label_fprintf (log->fmrerr, warnlabel.c_str(),
-      "no data handler for %s\n", model.c_str());
-    return 1;
-  }
-  for (size_t i=0; i<n; i++){
-    const auto D = df[i].first;
-    if (D == nullptr) {
-      log->label_fprintf (log->fmrerr, warnlabel.c_str(),
-        "data handler for %s is NULL.\n", model.c_str());
-      return (err > 0) ? err : 1;
-    }
-    if (D != this) {
-      if (this->proc->log->verbosity >= this->verblevel || true) {
-        const auto label = this->task_name+" "+D->task_name;
-        log->label_fprintf (log->fmrout, label.c_str(),
-          "meshing %s...\n", model.c_str());
-      }
-      err+= D->make_mesh (model, ix);
-  } }
+  return err;
+}
+int Data::make_part (const std::string model, const fmr::Local_int ix) {
+  int err=0;
+  const auto log = this->proc->log;
+#ifdef FMR_DEBUG
+  log->label_fprintf (log->fmrout,"**** Data","partitioning %s:%u...\n",
+    model.c_str(),ix);
 #endif
-  return 0;
+  bool did_part = false;
+  const auto n = this->task.count ();
+  if (n>0) {for (int i=0; i<n; i++) {
+    Data* D = this->task.get<Data>(i);
+    if (D != nullptr && D != this) {
+      fmr::perf::timer_resume (&this->time);
+      err= D->make_part (model, ix);
+      fmr::perf::timer_pause (&this->time);
+      if (err <= 0) {
+        did_part = true;
+        if (log->timing >= D->verblevel) {
+          const auto s = fmr::perf::format_time_units (this->time.last_busy_ns);
+          const auto label = D->task_name+" part";
+          log->label_fprintf (log->fmrout, label.c_str(),
+            "%u: %s partitioned in %s.\n",//TODO make_part(..)
+            ix, model.c_str(), s.c_str());
+        }
+        return err;
+  } } } }
+  if (!did_part) {
+    log->label_fprintf (log->fmrerr, "WARN""ING Data",
+      "did not partition sim_%u: %s.\n", ix, model.c_str());
+    return 1;
+  }
+  return err;
 }
 int Data::close () {int err=0;
   const auto n = this->task.count ();

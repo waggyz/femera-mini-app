@@ -136,6 +136,7 @@ class Dcgn final : public Data {
       fmr::data::Access, Data::Concurrency);
     File_cgns close (const std::string fname);
     int make_mesh (const std::string, const fmr::Local_int) final override;
+    int make_part (const std::string, const fmr::Local_int) final override;
   public:
     Dcgn           (Proc*,Data*) noexcept;
     Dcgn           ()            =delete;
