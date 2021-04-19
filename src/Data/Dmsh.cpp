@@ -164,47 +164,52 @@ std::deque<std::string> Dmsh::get_sims_names (){//TODO Remove?
   for (auto item : this->sims_names) {model_names.push_back (item); }
   return model_names;
 }
-int Dmsh::make_mesh (const std::string model, const fmr::Local_int ix) {
+int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
   int err=0;
   const auto log = this->proc->log;
   const auto warnlabel = "WARN""ING "+this->task_name;
-  { std::lock_guard<std::mutex> gate (this->current_model_gate);
-    fmr::perf::timer_resume (& this->time);
+  //TODO handle mesh index # to generate
+  int geom_d = 0;
+  if (!err) { Data::Lock_here lock (this->liblock);
     try {gmsh::model::setCurrent (model);}
     catch (int e) {err = e;
       log->label_fprintf (log->fmrerr, warnlabel.c_str(),
         "can not find %s.\n", model.c_str());
     }
-    //TODO handle mesh index # to generate
-    int geom_d = 0;
-    if (!err) {
-      geom_d = gmsh::model::getDimension ();
-      if (geom_d < 1 || geom_d > 3) {err= 1;
-        log->label_fprintf (log->fmrerr, warnlabel.c_str(),
-          "can not make %iD mesh for %s:%u.\n", geom_d, model.c_str(), ix);
-    } }
-    if (!err) {
-      try {gmsh::model::mesh::generate (geom_d);}
+    geom_d = gmsh::model::getDimension ();
+    if (geom_d < 1 || geom_d > 3) {err= 1;
+      log->label_fprintf (log->fmrerr, warnlabel.c_str(),
+        "can not make %iD mesh for %s.\n", geom_d, model.c_str());
+  } }
+  if (!err) { Data::Lock_here lock (this->liblock);
+    gmsh::model::setCurrent (model);
+    fmr::perf::timer_resume (& this->time);
+    try {gmsh::model::mesh::generate (geom_d);}
+    catch (int e) {err= e;
+      log->label_fprintf (log->fmrerr, warnlabel.c_str(),
+        "generate %iD mesh of %s returned %i.\n",
+        geom_d, model.c_str(), err);
+    }
+    fmr::perf::timer_pause (& this->time);
+  }
+  if (!err) { Data::Lock_here lock (this->liblock);
+    gmsh::model::setCurrent (model);
+    auto optval=Dmsh::Optval(0);
+    gmsh::option::getNumber ("Mesh.NbPartitions", optval);//0: unpartitioned
+    if (optval > 1) {
+      fmr::perf::timer_resume (& this->time);
+      try {gmsh::model::mesh::partition (int (optval));}//TODO make_part(..)
       catch (int e) {err= e;
         log->label_fprintf (log->fmrerr, warnlabel.c_str(),
-          "generate %iD mesh of %s:%u returned %i.\n",
-          geom_d, model.c_str(), ix, err);
+          "partition (%i) %s returned %i.\n",
+          int (optval), model.c_str(), err);
+        gmsh::option::setNumber ("Mesh.NbPartitions", Dmsh::Optval(0));
+      }
+      fmr::perf::timer_pause (& this->time);
     } }
-    if (!err) {
-      Dmsh::Optval optval=Dmsh::Optval(0);
-      gmsh::option::getNumber ("Mesh.NbPartitions", optval);//0: unpartitioned
-      if (optval > 1) {//TODO or >0 ?
-        try {gmsh::model::mesh::partition (int (optval));}
-        catch (int e) {err= e;
-          log->label_fprintf (log->fmrerr, warnlabel.c_str(),
-            "partition (%i) %s:%u returned %i.\n",
-            int (optval), model.c_str(), ix, err);
-          gmsh::option::setNumber ("Mesh.NbPartitions", 0.0);
-  } } } }
-  fmr::perf::timer_pause (& this->time);
 #ifdef FMR_DEBUG
   log->label_fprintf (log->fmrout, "**** Gmsh",
-    "make_mesh %s:%u return %i...\n", model.c_str(), ix, err);
+    "make_mesh %s return %i...\n", model.c_str(), err);
 #endif
   if (err>0) {return err;}
   return this->scan_model (model);
@@ -311,7 +316,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
           if (n>0) {
             std::vector<std::size_t> elem={}, conn={};
             std::size_t task_n = 1;//TODO for automatic partitioning by node #
-            { std::lock_guard<std::mutex> gate(this->current_model_gate);
+            { Data::Lock_here lock(this->liblock);
               for (size_t i=0; i<n; i++) {
                 gmsh::model::setCurrent (info.model);//TODO catch error
                 gmsh::model::mesh::getElementsByType (info.type, elem, conn,
@@ -364,7 +369,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
     return info;
     }
   int Dmsh::scan_model (const std::string data_id) {int err=0;
-    std::lock_guard<std::mutex> gate(this->current_model_gate);
+    Data::Lock_here lock(this->liblock);
     auto log = this->proc->log;
     fmr::perf::timer_resume (&this->time);
     gmsh::model::setCurrent (data_id);//TODO catch error
@@ -556,7 +561,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
       isok[gcad_n_ix] |= gcad_n > 0;
 #if 0
       auto log = this->proc->log;
-      //TODO Remove; just checking element jacobians...
+      //TODO move; checking element jacobians...
       if (log->verbosity >= this->verblevel) {
         const int dim = 3;
         std::vector<int> elementTypes={};
@@ -613,12 +618,11 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
       if (has_1d_elem_tags){ vals[mesh_n_ix]+= 1; }
 #endif
     }//end if !err
-//  this->current_model_gate.unlock();
   fmr::perf::timer_pause (&this->time);
   return err;
   }
 int Dmsh::close () {
-  std::lock_guard<std::mutex> gate(this->current_model_gate);
+  Data::Lock_here lock(this->liblock);
   fmr::perf::timer_resume(&this->time);
   gmsh::model::remove ();//TODO check if data is still in use.
   fmr::perf::timer_pause (&this->time);

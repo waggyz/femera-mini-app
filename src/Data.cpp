@@ -140,14 +140,17 @@ int Data::make_mesh (const std::string model, const fmr::Local_int ix) {
   if (n>0) {for (int i=0; i<n; i++) {
     Data* D = this->task.get<Data>(i);
     if (D != nullptr && D != this) {
+      fmr::perf::timer_resume (&this->time);
       err= D->make_mesh (model, ix);
+      fmr::perf::timer_pause (&this->time);
       if (!err) {
         did_mesh = true;
         if (log->timing >= D->verblevel) {
           const auto s = fmr::perf::format_time_units (this->time.last_busy_ns);
           const auto label = D->task_name+" mesh";
           log->label_fprintf (log->fmrout, label.c_str(),
-            "%u: %s meshed in %s.\n", ix, model.c_str(), s.c_str());
+            "%u: %s meshed/partitioned in %s.\n",//TODO make_part(..)
+            ix, model.c_str(), s.c_str());
         return 0;
     } } } }
     if (!did_mesh) {
@@ -798,7 +801,7 @@ int Data::chck_file_names (std::deque<std::string> files){int err=0;
         fname_i,fname.c_str());
 #endif
       struct ::stat s;// Check if file exists.
-      { std::lock_guard<std::mutex> gate (this->data_gate);
+        { Data::Lock_here lock (this->data_lock);
         if (::stat (fname.c_str(), &s) != 0) {// File not found.
           log->fprintf (log->fmrerr,
             "WARN""ING Input file not found: %s\n",

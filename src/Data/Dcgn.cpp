@@ -202,7 +202,7 @@ int Dcgn::make_mesh (const std::string, const fmr::Local_int) {
   return 1;
 }
 Data::File_info Dcgn::get_file_info (const std::string fname) {int err=0;
-  //TODO Dcgn::get_file_info (..) is NOT thread safe. gate guard here?
+  //TODO Dcgn::get_file_info (..) is NOT thread safe. lock guard here?
   auto info = Dcgn::File_cgns (Data::Data_file (this,fname));
   info = this->file_info.count(fname) ? this->file_info.at(fname) : info;
   int fmt = int(Dcgn::File_format::Dcgn_unknown);
@@ -220,7 +220,7 @@ Data::File_info Dcgn::get_file_info (const std::string fname) {int err=0;
   info.version = info.version.size()
     ? info.version
     : fmr::get_enum_string(fmr::detail::format_cgns_name, info.format);
-    this->file_info [fname] = info;//TODO gate guard here?
+    this->file_info [fname] = info;//TODO lock guard here?
   return info;
 }
 Dcgn::File_cgns Dcgn::close (const std::string fname){
@@ -445,55 +445,65 @@ int Dcgn::add_cgns_here (const std::string fname, const fmr::Data_id cid,
 }
 int Dcgn::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
   int err=0;
+  const auto log = this->proc->log;
   Path_cgns* path = nullptr;
   if (this->data_path.count(id) > 0) {
     path = &this->data_path.at(id);
     if (path == nullptr) {return 1;}//TODO set read err in vals.
 #ifdef FMR_DEBUG
-    auto log = this->proc->log;
     if (path->inds.size() >= 2) {
       log->label_fprintf(log->fmrerr,"**** Dcgn","%s: %s:%i/%s:%i\n",id.c_str(),
         path->strs[0].c_str(),path->inds[0],
         path->strs[1].c_str(),path->inds[1]);
     }
 #endif
-    err= cg_golist (path->file_cgid, path->base, path->deep,
-      path->labs.data(), path->inds.data());
-    if (err) {return 1;}//TODO set read err in vals.
   }
+  const auto pn = path->inds.size();
   switch (vals.type) {
-    case (fmr::Data::Elem_conn) :
-      if (path == nullptr) {return 1;}//TODO set read err in vals.
-      if (path->inds.size() == 2) {
-        cgsize_t conn_sz =0;
-          { std::lock_guard<std::mutex> gate (this->goto_gate);
-            err= cg_golist (path->file_cgid, path->base, path->deep,
-              path->labs.data(), path->inds.data());
-            err= cg_ElementDataSize (path->file_cgid, path->base,
-              path->inds[0], path->inds[1], &conn_sz);
-            //if (!err) {this->time.bytes += sizeof(cgsize_t);}//TODO count this?
-          }
-        if (err) {return 1;}
-        if (conn_sz > 0) {
-          auto buf = std::vector<cgsize_t>(conn_sz);
-          if (vals.data.size() < size_t(conn_sz)) {vals.data.resize (conn_sz);}
-          { std::lock_guard<std::mutex> gate (this->goto_gate);
-            err= cg_golist (path->file_cgid, path->base, path->deep,
-              path->labs.data(), path->inds.data());
-            err+= cg_elements_read (path->file_cgid, path->base, path->inds[0],
-              path->inds[1], buf.data(), nullptr);//cgsize_t *ParentData
-          }
-          if (err) {return 1;}
-          else {this->time.bytes += conn_sz *sizeof(cgsize_t);}
-          for (cgsize_t i=0; i<conn_sz; i++) {
-            vals.data[i] = fmr::Local_int(buf[i]);//TODO XS sims only.
-          }
-          if (err <= 0) {vals.stored_state.was_read = true;}
-      } }
-      break;
-    default : {}//TODO Print warning.
-  }
-  err= Data::read_local_vals (id, vals);//TODO Remove this call?
+    case (fmr::Data::Elem_conn) : {
+      cgsize_t conn_sz = 0;
+      if (pn < 2) {err = 1;}
+      else{
+        Data::Lock_here lock (this->liblock);
+        err= cg_golist (path->file_cgid, path->base, path->deep,
+          path->labs.data(), path->inds.data());
+        fmr::perf::timer_resume (&this->time);
+        err+= cg_ElementDataSize (path->file_cgid, path->base,
+          path->inds[pn-2], path->inds[pn-1], &conn_sz);
+        fmr::perf::timer_pause (&this->time);
+      }
+      vals.stored_state.has_error |= (err != 0);
+      if (err) {return err;}
+      if (conn_sz <= 0) {err = 1;}
+      else{
+        auto buf = std::valarray<cgsize_t> (conn_sz);
+        {
+          Data::Lock_here lock (this->liblock);
+          err= cg_golist (path->file_cgid, path->base, path->deep,
+            path->labs.data(), path->inds.data());
+          fmr::perf::timer_resume (&this->time);
+          err+= cg_elements_read (path->file_cgid, path->base,
+            path->inds[pn-2], path->inds[pn-1], &buf[0], nullptr);
+            // last arg: cgsize_t *ParentData
+          fmr::perf::timer_pause (&this->time);
+        }
+        vals.stored_state.has_error |= (err !=0);
+        if (err) {return err;}
+        this->time.bytes += conn_sz * sizeof (cgsize_t);
+        if (vals.data.size() < size_t(conn_sz)) {vals.data.resize (conn_sz);}
+        for (cgsize_t i=0; i<conn_sz; i++) {
+          vals.data[i] = fmr::Local_int (buf[i]);//TODO XS sims only.
+        }
+        vals.stored_state.was_read = (err == 0);
+      }
+      break;}
+    default : {
+      const auto label = "WARN""ING "+this->task_name;
+      log->label_fprintf(log->fmrerr, label.c_str(),
+        "read_local_vals (%s,..) datatype not handled\n", id.c_str());
+  } }//end switch (vals.type)
+  vals.stored_state.has_error |= err > 0;
+  Data::read_local_vals (id, vals);//TODO Remove this call?
   return err;
 }
 Data::File_info Dcgn::scan_file_data (const std::string fname) {
@@ -502,7 +512,7 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
   info = this->file_info.count(fname) ? this->file_info.at(fname) : info;
   if (!info.state.was_read) {
     bool do_open = true;
-    switch (info.access){// Check if already open.
+    switch (info.access) {// Check if already open.
       case fmr::data::Access::Read   :{}//valid open modes.
       case fmr::data::Access::Write  :{}
       case fmr::data::Access::Modify :{do_open = false; break;}

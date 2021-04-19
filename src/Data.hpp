@@ -30,6 +30,7 @@ class Data : public Work {//TODO change to File
     enum class Scan : fmr::Enum_int {None=0, All, Tree, Dims, Size, Name,
       Gset, Sims, Part, Mesh, Load, Boco, Mtrl
     };
+    typedef std::lock_guard<std::mutex> Lock_here;
 #if 0
     typedef std::set<Scan> Scan_for;//TODO Needed?
     struct Data_file {
@@ -107,7 +108,7 @@ class Data : public Work {//TODO change to File
     //
     std::unordered_set<std::string> sims_names ={};
   private:
-    std::mutex data_gate {};
+    std::mutex data_lock {};
     //
     std::deque<std::string> chk_file_names ={};
     std::deque<std::string> out_file_names ={};

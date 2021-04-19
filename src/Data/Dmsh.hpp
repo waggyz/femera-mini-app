@@ -51,7 +51,7 @@ class Dmsh final : public Data {
     };
   // Member variables ---------------------------------------------------------
   private:
-    std::mutex current_model_gate {};
+    std::mutex liblock {};
     // Below are defaults for new Gmsh file.
     std::unordered_map<std::string,File_gmsh> file_info={};// key:path/filename
     //

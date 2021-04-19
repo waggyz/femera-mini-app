@@ -11,11 +11,11 @@ p=1;
 h=1;
 n=2;
 
-If(p==0)
+If(p<=0)
   p=1;
 EndIf
-If(h==0)
-  h=10;
+If(h<=0)
+  h=1;
 EndIf
 //If(n==0)
 //  n=4;
