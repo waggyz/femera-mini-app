@@ -328,6 +328,71 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
   this->file_info[fname] = info;
   return info;
 }
+  int Dmsh::read_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals &vals) {
+    int err=0;
+    auto log = this->proc->log;
+#ifdef FMR_DEBUG
+    const auto label = "**** "+this->task_name+" read";
+    log->label_fprintf (log->fmrerr, label.c_str(), "%s...\n", id.c_str());
+#endif
+    switch (vals.type) {
+      case (fmr::Data::Jacs_dets) :
+        if (this->elem_gmsh_info.count(id) >0) {
+          const auto info = this->elem_gmsh_info.at(id);
+          const auto n = info.tags.size();
+          if (n>1) {//TODO Not handled yet
+            log->label_fprintf (log->fmrerr, "WARN""ING Dmsh",
+              "read_local_vals (%s,..) multi-tag parts not supported.\n",
+              id.c_str());
+            return 1;
+          }
+          fmr::Dim_int elem_d =0;
+          if (fmr::detail::elem_info_gmsh.count (info.type) >0) {
+            const auto form = fmr::detail::elem_info_gmsh.at (info.type).form;
+            elem_d = fmr::elem_form_d [enum2val(form)];
+          }
+          if (n>0 && elem_d>0) {
+            const std::vector<double> intp (elem_d, 0.5);//TODO only tets & tris
+            std::vector<double> jacs={}, dets={}, pts={};
+            std::size_t task_n = 1;//TODO for automatic partitioning by elem #
+            { Data::Lock_here lock(this->liblock);
+              for (size_t i=0; i<n; i++) {
+                gmsh::model::setCurrent (info.model);//TODO catch error
+                gmsh::model::mesh::getJacobians (info.type, intp,
+                  jacs, dets, pts, info.tags[i], info.task, task_n);
+            } }
+            const auto nj = dets.size();
+            const auto sz = jacs.size();
+            if (nj > 0) {
+              const auto ea = sz / nj;
+#ifdef FMR_DEBUG
+              double vol = 0.0;
+#endif
+              if (vals.data.size() < (sz+nj)) {vals.data.resize (sz+nj);}
+              for (size_t i=0; i<nj; i++) {// interleave jacs & dets
+                for (size_t j=0; j<ea; j++) {
+                  vals.data[i*(ea+1) +j] = fmr::Geom_float (jacs[i*ea +j]);
+                }
+                vals.data[i*(ea+1) +ea] = fmr::Geom_float (dets[i]);
+                //TODO check det <=0?
+                //TODO invert? set Jacs_type?
+#ifdef FMR_DEBUG
+                vol += dets[i];
+#endif
+              }
+              vals.stored_state.was_read = true;
+#ifdef FMR_DEBUG
+              const auto lab = "**** "+this->task_name+" read";
+              log->label_fprintf (log->fmrerr, lab.c_str(),
+                "%lu %s geom vals, %g volume\n", sz+nj, id.c_str(), vol);
+#endif
+          } } }
+        break;
+      default : {}//TODO Print warning.
+    }
+    err= Data::read_geom_vals (id, vals);//TODO Remove this call?
+    return err;
+  }
   int Dmsh::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
     int err=0;
     auto log = this->proc->log;
@@ -348,7 +413,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
           }
           if (n>0) {
             std::vector<std::size_t> elem={}, conn={};
-            std::size_t task_n = 1;//TODO for automatic partitioning by node #
+            std::size_t task_n = 1;//TODO for automatic partitioning by elem #
             { Data::Lock_here lock(this->liblock);
               for (size_t i=0; i<n; i++) {
                 gmsh::model::setCurrent (info.model);//TODO catch error
@@ -539,11 +604,15 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
           elems [mesh_i] = elem_n;
           forms [mesh_i] = fmr::enum2val(form);
           //
-          const auto id = data_id +":Mesh_"+std::to_string (mesh_i);
-          const auto cid = this->make_data_id(id, fmr::Data::Elem_conn);
-          this->elem_gmsh_info [cid] = Elem_gmsh_info(data_id,{-1},0,elem_gmsh);
-          err= this->data->add_data_file (cid, this, fname);//TODO handle err
-          err= this->new_local_vals (id, fmr::Data::Elem_conn, elem_n * conn_n);
+          const auto mesh_id = data_id +":Mesh_"+std::to_string (mesh_i);
+          // Register element data available here.
+          for (auto t : {fmr::Data::Elem_conn, fmr::Data::Jacs_dets}) {
+            const auto id = this->make_data_id(mesh_id, t);
+            this->elem_gmsh_info [id] = Elem_gmsh_info(data_id,{-1},0,elem_gmsh);
+            err= this->data->add_data_file (id, this, fname);//TODO handle err
+          }
+          err= this->new_local_vals (mesh_id, fmr::Data::Elem_conn,
+            elem_n * conn_n);//TODO Why is mem allocated here for this?
         }//end mesh_i loop
       }//end if mesh_n > 0
       if (elem_sysn > 0) {

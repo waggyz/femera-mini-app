@@ -17,7 +17,8 @@ class Sims : public Work {// simulation collection manager
    * (e.g. MPI team, OpenMP, or GPU) level.
    */
   // typedefs ----------------------------------------------------------------
-  typedef std::vector<fmr::Data> Data_list;
+  public:
+    typedef std::vector<fmr::Data> Data_list;
   // member variables --------------------------------------------------------
   // this->task contains Frun instances to run sims distributed by this Sims.
   protected:
@@ -66,8 +67,9 @@ class Sims : public Work {// simulation collection manager
     fmr::Enum_int get_enum_val (const fmr::Data, const size_t ix);
     fmr::Local_int get_local_val (const fmr::Data, const size_t ix);
     fmr::Global_int get_global_val (const fmr::Data, const size_t ix);
-    int ini_data_vals (const Data_list list, const size_t n);
-    int get_data_vals (const fmr::Data_id data_id, const Data_list list);
+    //
+    virtual int ini_data_vals (const Data_list, const size_t vals_n);
+    virtual int get_data_vals (const fmr::Data_id, const Data_list);
     //
     fmr::Local_int get_sims_n ();
     fmr::Local_int get_frun_n ();

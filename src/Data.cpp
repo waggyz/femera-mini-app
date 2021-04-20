@@ -147,12 +147,12 @@ int Data::make_mesh (const std::string model, const fmr::Local_int ix) {
         did_mesh = true;
         if (log->timing >= D->verblevel) {
           const auto s = fmr::perf::format_time_units (this->time.last_busy_ns);
-          const auto label = D->task_name+" mesh";
+          const auto label = this->task_name+" "+D->task_name+" mesh";
           log->label_fprintf (log->fmrout, label.c_str(),
-            "%u: %s meshed in %s.\n",//TODO make_part(..)
+            "sim_%u: %s meshed in %s.\n",
             ix, model.c_str(), s.c_str());
         }
-        return err;
+        return err;// early return: no need to try other drivers
   } } } }
   if (!did_mesh) {
     log->label_fprintf (log->fmrerr, "WARN""ING Data",
@@ -180,12 +180,12 @@ int Data::make_part (const std::string model, const fmr::Local_int ix) {
         did_part = true;
         if (log->timing >= D->verblevel) {
           const auto s = fmr::perf::format_time_units (this->time.last_busy_ns);
-          const auto label = D->task_name+" part";
+          const auto label = this->task_name+" "+D->task_name+" part";
           log->label_fprintf (log->fmrout, label.c_str(),
-            "%u: %s partitioned in %s.\n",//TODO make_part(..)
+            "sim_%u: %s partitioned in %s.\n",
             ix, model.c_str(), s.c_str());
         }
-        return err;
+        return err;// early return: no need to try other drivers
   } } } }
   if (!did_part) {
     log->label_fprintf (log->fmrerr, "WARN""ING Data",
@@ -257,6 +257,33 @@ int Data::add_data_file (const fmr::Data_id id, Data* D,
   }
   return 0;
 }
+int Data::get_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals& vals) {
+  int err= 0;
+  auto log = this->proc->log;
+  const auto vals_id = this->make_data_id (id, vals.type);
+  // Check if data is cached here in a homogeneous data array.
+  bool is_found = this->geom_vals.count (vals_id) > 0;
+  if (is_found) {// The data might be cached already.
+    if (vals.stored_state.was_read) {// The data has been cached homogeneous.
+      vals = this->geom_vals.at (vals_id);
+      return vals.stored_state.has_error ? 1 : 0;
+  } }
+  // The data has not been cached, but maybe we know how to get it...
+  is_found = false;// Change to true if this data can be read by a data handler.
+  if (this->sims_data_file.count (vals_id) > 0) {
+    const auto data_files = this->sims_data_file.at (vals_id);
+    for (auto df : data_files) {auto D = df.first;
+      if (D) {
+        err= D->read_geom_vals (vals_id, vals);
+        is_found = is_found | ((err==0) & vals.stored_state.was_read);
+  } } }
+  if (is_found) {return vals.stored_state.has_error ? 1 : 0;}
+  const std::string namestr = fmr::get_enum_string (fmr::vals_name,vals.type);
+  log->label_fprintf (log->fmrerr, "WARN""ING Data",
+    "%u %s:%s geom vals not found.\n",
+    vals.data.size(), id.c_str(), namestr.c_str());
+  return 1;
+}
 int Data::get_dim_vals (const fmr::Data_id id, fmr::Dim_int_vals& vals) {
   int err= 0;
   auto log = this->proc->log;
@@ -326,6 +353,16 @@ int Data::get_enum_vals (const fmr::Data_id id, fmr::Enum_int_vals& vals) {
       "%lu %s:%s enum vals not found.\n",
       vals.data.size(), id.c_str(), name.c_str());
     return 1;
+  }
+  return err;
+}
+int Data::read_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals &vals) {
+  int err= 0;
+  const auto log = this->proc->log;
+  if (log->detail >= this->verblevel) {
+    const std::string label = this->task_name+" read";
+    log->label_fprintf (log->fmrerr, label.c_str(), "%lu %s geom vals.\n",
+      vals.data.size(), id.c_str());
   }
   return err;
 }
@@ -486,9 +523,9 @@ int Data::new_local_vals (const fmr::Data_id data_id,
   const fmr::Data type, const size_t nvals) {int err=0;
   const auto id = this->make_data_id (data_id, type);
   const bool is_found = this->data->local_vals.count(id) > 0;
-  if (!is_found) {this->data->local_vals[id]
-    = fmr::Local_int_vals (type, nvals);
-  }else if (this->data->local_vals[id].data.size() < nvals) {
+  if (!is_found) {this->data->local_vals[id]= fmr::Local_int_vals (type, nvals);
+  }else{
+    if (this->data->local_vals[id].data.size() < nvals) {
     const auto tmp = this->data->local_vals[id].data;
     this->data->local_vals[id].data.resize (nvals);// clears data
     const auto n = tmp.size();
@@ -496,7 +533,24 @@ int Data::new_local_vals (const fmr::Data_id data_id,
       //TODO replace loop below with memcpy
       FMR_PRAGMA_OMP_SIMD
       for (size_t i=0; i<n; i++) {data->local_vals[id].data[i] = tmp[i];}
-  } }
+  } } }
+  return err;
+}
+int Data::new_geom_vals (const fmr::Data_id data_id,
+  const fmr::Data type, const size_t nvals) {int err=0;
+  const auto id = this->make_data_id (data_id, type);
+  const bool is_found = this->data->geom_vals.count(id) > 0;
+  if (!is_found) {this->data->geom_vals[id]= fmr::Geom_float_vals (type, nvals);
+  }else{
+    if (this->data->geom_vals[id].data.size() < nvals) {
+    const auto tmp = this->data->geom_vals[id].data;
+    this->data->geom_vals[id].data.resize (nvals);// clears data
+    const auto n = tmp.size();
+    if (n>0) {
+      //TODO replace loop below with memcpy
+      FMR_PRAGMA_OMP_SIMD
+      for (size_t i=0; i<n; i++) {data->geom_vals[id].data[i] = tmp[i];}
+  } } }
   return err;
 }
 #if 0

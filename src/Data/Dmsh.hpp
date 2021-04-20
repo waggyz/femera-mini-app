@@ -70,6 +70,8 @@ class Dmsh final : public Data {
     //
     int read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals)
       final override;
+    int read_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals &vals)
+      final override;
     //
     int make_mesh (const std::string, const fmr::Local_int) final override;
     int make_part (const std::string, const fmr::Local_int) final override;

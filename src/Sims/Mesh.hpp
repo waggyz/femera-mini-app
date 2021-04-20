@@ -44,13 +44,17 @@ class Mesh : public Geom {// Pure virtual? Mesh?
     fmr::Dim_int  each_conn_size = 0;// nodes/elem
     fmr::Dim_int  each_jacs_size = 0;// size of each jacs (4,10)
     fmr::Dim_int     elem_jacs_n = 0;// jacs/elem
-    fmr::Dim_int          mesh_d = 0;
+    fmr::Dim_int          elem_d = 0;
     fmr::math::Zomplex math_type = fmr::math::Real;
   // methods ----------------------------------------------------------------
   public:
     int prep () final override;
     int chck () final override;
     int run  () final override;
+    //fmr::Geom_float get_geom_val (const fmr::Data, const size_t ix);
+    int ini_data_vals (const Data_list, const size_t n) final override;
+    int get_data_vals (const fmr::Data_id, const Data_list) final override;
+    //
   protected:
 #if 0
     int prep () override;

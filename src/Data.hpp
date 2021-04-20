@@ -60,33 +60,22 @@ class Data : public Work {//TODO change to File
         File_info& operator= (const File_info&) =default;
         virtual   ~File_info ()        noexcept =default;
     };
-#if 1
-    typedef std::unordered_map<fmr::Data_id, fmr::Dim_int_vals>
-      Data_dim_vals;// key: data ID
+    typedef std::unordered_map<fmr::Data_id, fmr::Dim_int_vals>// key: data ID
+      Data_dim_vals;
     typedef std::unordered_map<fmr::Data_id, fmr::Enum_int_vals>
-      Data_enum_vals;// key: data ID
+      Data_enum_vals;
     typedef std::unordered_map<fmr::Data_id, fmr::Local_int_vals>
-      Data_local_vals;// key: data ID
+      Data_local_vals;
     typedef std::unordered_map<fmr::Data_id, fmr::Global_int_vals>
-      Data_global_vals;// key: data ID
+      Data_global_vals;
+    typedef std::unordered_map<fmr::Data_id, fmr::Geom_float_vals>
+      Data_geom_vals;
     //NOTE std::unordered_map is not thread safe.
     Data_dim_vals       dim_vals ={};//key: data ID
     Data_enum_vals     enum_vals ={};
     Data_local_vals   local_vals ={};
     Data_global_vals global_vals ={};
-    //TODO Replace these with Dnew_*, below?
-#endif
-#if 0
-    typedef std::map<fmr::Data,fmr::Dim_int_vals>    Dnew_dim_vals;
-    typedef std::map<fmr::Data,fmr::Enum_int_vals>   Dnew_enum_vals;
-    typedef std::map<fmr::Data,fmr::Local_int_vals>  Dnew_local_vals;
-    typedef std::map<fmr::Data,fmr::Global_int_vals> Dnew_global_vals;
-    //
-    Dnew_dim_vals    dnew_dim_vals ={};//key: fmr::Data type
-    Dnew_enum_vals   dnew_enum_vals ={};
-    Dnew_local_vals  dnew_local_vals ={};
-    Dnew_global_vals dnew_global_vals ={};
-#endif
+    Data_geom_vals     geom_vals ={};
     // These are for caching data that do not yet have a destination,
     // and to marshal data for distribution.
     // Use in Data classes to avoid multiple reads of the same data.
@@ -164,14 +153,15 @@ class Data : public Work {//TODO change to File
     //
     int new_enum_vals (const fmr::Data_id, const fmr::Data, const size_t);
     int new_local_vals (const fmr::Data_id, const fmr::Data, const size_t);
+    int new_geom_vals (const fmr::Data_id, const fmr::Data, const size_t);
     //
     int get_dim_vals (const fmr::Data_id, fmr::Dim_int_vals &);
     int get_enum_vals (const fmr::Data_id, fmr::Enum_int_vals &);
     int get_local_vals (const fmr::Data_id, fmr::Local_int_vals &);
     int get_global_vals (const fmr::Data_id, fmr::Global_int_vals &);
+    int get_geom_vals (const fmr::Data_id, fmr::Geom_float_vals &);
     //
 #if 0
-    int read_local_vals (const std::string id, fmr::Local_int_vals &);
     int save_local_vals (const std::string id, fmr::Local_int_vals &);
     int free_local_vals (const std::string id, fmr::Local_int_vals &);
     int scan (id, Scan_for={Scan::Part,...}, int depth=0);//TODO Needed?
@@ -196,6 +186,7 @@ class Data : public Work {//TODO change to File
     // Hierarchical data structures can then be accessed by data ops, above.
     //
     virtual int read_local_vals (const fmr::Data_id, fmr::Local_int_vals &);
+    virtual int read_geom_vals (const fmr::Data_id, fmr::Geom_float_vals &);
     //
     Data           ();// called implicitly by child constructors
   public:

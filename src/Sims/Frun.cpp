@@ -120,8 +120,8 @@ namespace Femera {
       const auto secstr = fmr::perf::format_time_units (secs);
       const auto label = this->task_name +" Zzzz";
       log->label_fprintf (log->fmrout, label.c_str(),
-        "%i: %u geom, %lu elem, %lu node, %g DOF, sleep %s...\n", this->sims_ix,
-        this->task.count (), elem_n, node_n, dof, secstr.c_str());
+        "sim_%u: %u geom, %lu elem, %lu node, %g DOF, sleep %s...\n",
+        this->sims_ix, this->task.count(), elem_n, node_n, dof, secstr.c_str());
     } }
 #endif
 #endif

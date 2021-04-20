@@ -32,19 +32,19 @@ namespace Femera {
     const auto form = is_found
       ? fmr::Elem_form(this->data->enum_vals.at(tid).data[this->sims_ix])
       : fmr::Elem_form::Unknown;
-    this->mesh_d = fmr::elem_form_d[fmr::enum2val(form)];
+    this->elem_d = fmr::elem_form_d[fmr::enum2val(form)];
     this->geom_d = this->parent->geom_d;
 #ifdef FMR_DEBUG
       log->label_fprintf(log->fmrout, "**** Mesh prep",
         "%s: %uD %s mesh in %uD space\n",
-        this->model_name.c_str(), mesh_d,
+        this->model_name.c_str(), elem_d,
         fmr::get_enum_string(fmr::elem_form_name,form).c_str(),geom_d);
 #endif
     const auto eid = this->data->make_data_id (pid, fmr::Data::Elem_n);
     is_found = this->data->local_vals.count(eid) > 0;
     this->elem_n
       = is_found ? this->data->local_vals.at(eid).data[this->sims_ix] : 0;
-    if ((this->mesh_d == this->geom_d) && this->mesh_d > 0) {
+    if ((this->elem_d == this->geom_d) && this->elem_d > 0) {
     //TODO for now, prep only meshes matching the enclosing space dimension.
     //TODO should prep all meshes with physics assigned.
       fmr::perf::timer_pause (& this->time, this->elem_n);//count elems prepped
@@ -52,32 +52,29 @@ namespace Femera {
         this->meter_unit = fmr::get_enum_string (fmr::elem_form_name, form);
       }
       if (log->detail >= this->verblevel) {
-#if 0
-        //TODO The local mesh node count is not available in a Gmsh single file
-        //     nor from the CGNS mid-level library. The local elem connectivity
-        //     needs to be scanned to find all of the unique local nodes.
-        //     Or, an array of all nodes can be shared among meshes in
-        //     XS & SM simms, because each sim is contained in 1 NUMA domain.
-#endif
-        const auto label = std::to_string(this->mesh_d)+"D "
+        const auto label = std::to_string(this->elem_d)+"D "
           + this->task_name+" prep";
         log->label_fprintf (log->fmrout, label.c_str(),"%u %s in %s\n",
           this->elem_n, this->meter_unit.c_str(), name.c_str());
       }
       fmr::perf::timer_resume (& this->time);
       this->ini_data_vals (this->data_list, 0);
-      if (true) {//TODO check element type for nodes/elem
-        this->locals [fmr::Data::Elem_conn] = fmr::Local_int_vals
-          (fmr::Data::Elem_conn, this->elem_n * 0);//TODO * elem_vert_n(form)
-          //                                      TODO or * each_conn_n(form)
-        this->data_list.push_back (fmr::Data::Elem_conn);//or elem_vert_n(form)?
+      if (this->elem_n > 0) {//TODO check element type for nodes/elem
 #if 0
-        // element jacobian data (inverted, may have det)
-        this->geoms [fmr::Data::Jacs_dets] = fmr::Geom_float_vals
-          (fmr::Data::Jacs_dets, this->math_type, this->elem_n * 10);
-          //TODO size: this->elem_n * elem_jacs_n (elem_form)
-        this->data_list.push_back(fmr::Data::Jacs_dets);
+        //TODO The local mesh node count is not available in a Gmsh single file
+        //     nor from the CGNS mid-level library. The local elem connectivity
+        //     needs to be scanned to find all of the unique local nodes.
+        //     Or, an array of all nodes can be shared among meshes in
+        //     XS & SM simms, because each sim is contained in 1 NUMA domain.
+        //     So, load node_coor at global sim level, if needed for jacs calc.
 #endif
+        const auto each_conn_n = 0;//TODO each_conn_n(form)/elem_vert_n(form)?
+        const auto each_jacs_n = 0;//TODO each_jacs_n(form)
+        // element jacobian data (inverted, maybe transposed, may have det)
+        this->ini_data_vals ({fmr::Data::Elem_conn}, elem_n * each_conn_n);
+        this->ini_data_vals ({fmr::Data::Jacs_dets}, elem_n * each_jacs_n);
+        this->data_list.push_back (fmr::Data::Elem_conn);
+        this->data_list.push_back (fmr::Data::Jacs_dets);
       }
 #ifdef FMR_DEBUG
       auto vals = this->locals [fmr::Data::Elem_conn];
@@ -92,13 +89,54 @@ namespace Femera {
     fmr::perf::timer_pause (& this->time);
     return err;
   }
+  int Mesh::ini_data_vals (const Data_list list, const size_t n) {int err=0;
+    for (auto type : list) {
+      switch (fmr::vals_type [fmr::enum2val (type)]) {
+        case fmr::Vals_type::Geom :
+          this->geoms [type] = fmr::Geom_float_vals (type, n); break;
+        default : {err= 1;
+//          const auto log = this->proc->log;
+//          const std::string namestr = fmr::get_enum_string (fmr::vals_name,type);
+//          log->label_fprintf (log->fmrerr, "WARN""ING Sims",
+//            "ini_data_vals (..) type of %s not handled.\n", namestr.c_str());
+    } } }
+    if (err>0) {return Sims::ini_data_vals (list, n);}
+    return err;
+  }
+  int Mesh::get_data_vals (const fmr::Data_id name, const Data_list list) {
+    int err=0;
+#ifdef FMR_DEBUG
+    const auto log = this->proc->log;
+    auto vals = this->locals [fmr::Data::Elem_conn];
+    const std::string tstr = fmr::get_enum_string (fmr::vals_name, vals.type);
+    log->label_fprintf (log->fmrerr, "****    1 Sims",
+      "%lu %s:%s local vals...\n",vals.data.size(),name.c_str(), tstr.c_str());
+#endif
+    for (auto type : list) {
+      switch (fmr::vals_type [fmr::enum2val (type)]) {
+        case fmr::Vals_type::Geom :
+          err= this->data->get_geom_vals (name, this->geoms.at (type)); break;
+        default : {err= 1;
+//          const std::string namestr = fmr::get_enum_string (fmr::vals_name,type);
+//          log->label_fprintf (log->fmrerr, "WARN""ING Sims",
+//            "get_data_vals (..) Vals_type of %s not handled.\n",namestr.c_str());
+    } } }
+#ifdef FMR_DEBUG
+    auto val2 = this->locals [fmr::Data::Elem_conn];
+    const std::string vstr = fmr::get_enum_string (fmr::vals_name, val2.type);
+    log->label_fprintf (log->fmrerr, "****    2 Sims",
+      "%lu %s:%s local vals...\n",val2.data.size(),name.c_str(), vstr.c_str());
+#endif
+    if (err>0) {return Sims::get_data_vals (name, list);}
+    return err;
+  }
   int Mesh::run (){int err=0;
     const auto log = this->proc->log;
     if (log->detail >= this->verblevel) {
       const auto label = "run "+this->task_name;
       log->label_fprintf(log->fmrout, label.c_str(),
         "%s: %uD mesh in the %uD space of %s\n",
-        this->model_name.c_str(), this->mesh_d, this->geom_d,
+        this->model_name.c_str(), this->elem_d, this->geom_d,
         this->parent->model_name.c_str());
     }
     //fmr::perf::timer_resume (& this->time);

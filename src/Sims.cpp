@@ -177,7 +177,7 @@ namespace Femera {
           this->locals [type] = fmr::Local_int_vals (type, n); break;
         case fmr::Vals_type::Global :
           this->globals [type] = fmr::Global_int_vals (type, n); break;
-        default : {err= 1;//TODO Print error.
+        default : {err= 1;
           const auto log = this->proc->log;
           const std::string namestr = fmr::get_enum_string (fmr::vals_name,type);
           log->label_fprintf (log->fmrerr, "WARN""ING Sims",
@@ -197,14 +197,14 @@ namespace Femera {
     for (auto type : list) {
       switch (fmr::vals_type [fmr::enum2val (type)]) {
         case fmr::Vals_type::Dim :
-          this->data->get_dim_vals (name, this->dims.at (type)); break;
+          err= this->data->get_dim_vals (name, this->dims.at (type)); break;
         case fmr::Vals_type::Enum :
-          this->data->get_enum_vals (name, this->enums.at (type)); break;
+          err= this->data->get_enum_vals (name, this->enums.at (type)); break;
         case fmr::Vals_type::Local :
-          this->data->get_local_vals (name, this->locals.at (type)); break;
+          err= this->data->get_local_vals (name, this->locals.at (type)); break;
         case fmr::Vals_type::Global :
-          this->data->get_global_vals (name, this->globals.at (type)); break;
-        default : {err= 1;//TODO Print error.
+          err= this->data->get_global_vals (name, this->globals.at(type)); break;
+        default : {err= 1;
           const std::string namestr = fmr::get_enum_string (fmr::vals_name,type);
           log->label_fprintf (log->fmrerr, "WARN""ING Sims",
             "get_data_vals (..) Vals_type of %s not handled.\n",namestr.c_str());
@@ -288,13 +288,13 @@ namespace Femera {
               const std::string label = szshort+" "+std::to_string(geo_d)+ "D "
                 + this->task_name+" " + R->task_name;
               log->label_fprintf (log->fmrout, label.c_str(),
-                "%u: %u gset%s, %u part%s, %u CAD%s, %u grid%s, %u mesh%s\n",
+                "sim_%u: %u gset%s, %u part%s, %u CAD%s, %u grid%s, %u mesh%s\n",
                 sim_i,
                 gset_n, (gset_n==1)?"":"s", part_n, (part_n==1)?"":"s",
                 gcad_n, (gcad_n==1)?"":"s", grid_n, (grid_n==1)?"":"s",
                 mesh_n, (mesh_n==1)?"":"es");
               log->label_fprintf (log->fmrout, label.c_str(),
-                "%u: %lu elem%s, %lu node%s, %lu DOF%s total in %s\n",
+                "sim_%u: %lu elem%s, %lu node%s, %lu DOF%s total in %s\n",
                 sim_i,
                 elem_n, (elem_n==1)?"":"s", node_n, (node_n==1)?"":"s",
                 dofs_n, (dofs_n==1)?"":"s", R->model_name.c_str());
@@ -306,7 +306,7 @@ namespace Femera {
     }else{
       const auto Pfrom = this->proc->hier [this->from.hier_lv];
       log->printf_err (
-        "ERR""OR %s distribute from %u:%s to %u:%s not yet implemented.\n",
+        "ERR""OR %s distribute from level %u:%s to %u:%s not yet implemented.\n",
         this->task_name.c_str(),
         this->from.hier_lv, Pfrom->task_name.c_str(),
         this->send.hier_lv, Psend->task_name.c_str());
