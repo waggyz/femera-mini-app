@@ -122,7 +122,7 @@ namespace Femera {
           = fmr::math::poly_letter_name.at(this->elem_info.poly).first;
         const std::string label = this->task_name +" prep";
         log->label_fprintf (log->fmrout, label.c_str(),
-          "%u %s%u %u-node %s...\n",
+          "%u %s%u %u-node %s.\n",
           this->elem_n, pchar.c_str(), this->elem_info.pord, elem_info.node_n,
           formstr.c_str());
 
@@ -189,7 +189,7 @@ namespace Femera {
     }
     return err;
   }
-  int Mesh::run (){int err=0;
+  int Mesh::run () {int err=0;
     const auto log = this->proc->log;
     if (log->detail >= this->verblevel) {
       const auto label = "run "+this->task_name;
