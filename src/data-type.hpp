@@ -129,16 +129,41 @@ namespace fmr {//TODO? namespace data {
     0 //"Elem_form end marker"
   };
   struct Elem_info {
-//    Local_int  node_n    = 0;
-    Elem_form  form      = Elem_form::Unknown;
-    math::Poly poly      = math::Poly::Unknown;
-    Dim_int    pord      = 0;
-//    Dim_int    dimension = 0;
-//    Dim_int    edge_n    = 0;
-//    Dim_int    face_n    = 0;
+    Local_int  node_n = 0;
+    Elem_form  form   = Elem_form::Unknown;
+    math::Poly poly   = math::Poly::Unknown;
+    Dim_int    pord   = 0;
+    Dim_int    elem_d = 0;
+//    Dim_int    edge_n = 0;
+//    Dim_int    face_n = 0;
+    Elem_info () {}
     Elem_info (const Elem_form f, const math::Poly y, const Dim_int p)
       : form(f), poly(y), pord(p) {
-//      dimension = elem_form_d [enum2val (Elem_form)];
+      elem_d = elem_form_d [enum2val (f)];
+      node_n = fmr::math::poly_terms (elem_d, y, p);
+    }
+    Elem_info (const Elem_form f, const Local_int n) : form(f) {
+      switch (f) {
+        case Elem_form::Line : switch (n) {
+          case  1 : Elem_info (f, math::Poly::Full, 1); break;
+          case  2 : Elem_info (f, math::Poly::Full, 2); break;
+          case  3 : Elem_info (f, math::Poly::Full, 3); break;
+          default : {}
+        } break;
+        case Elem_form::Tris : switch (n) {
+          case  3 : Elem_info (f, math::Poly::Full, 1); break;
+          case  6 : Elem_info (f, math::Poly::Full, 2); break;
+          case  9 : Elem_info (f, math::Poly::Bipoly, 3); break;
+          default : {}
+        } break;
+        case Elem_form::Tets : switch (n) {
+          case  4 : Elem_info (f, math::Poly::Full, 1); break;
+          case 10 : Elem_info (f, math::Poly::Full, 2); break;
+          case 20 : Elem_info (f, math::Poly::Tripoly, 3); break;
+          default : {}
+        } break;
+        default : {}
+      }
     }
   };
 #if 1

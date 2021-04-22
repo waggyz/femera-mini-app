@@ -127,7 +127,10 @@ class Dcgn final : public Data {
     //
     Data::File_info get_file_info (const std::string fname)  final override;
     Data::File_info scan_file_data (const std::string fname) final override;
+    //
     int read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals)
+      final override;
+    int read_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals &vals)
       final override;
     //
     std::deque<std::string> get_sims_names ()        final override;

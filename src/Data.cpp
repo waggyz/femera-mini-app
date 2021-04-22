@@ -264,10 +264,11 @@ int Data::get_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals& vals) {
   // Check if data is cached here in a homogeneous data array.
   bool is_found = this->geom_vals.count (vals_id) > 0;
   if (is_found) {// The data might be cached already.
-    if (vals.stored_state.was_read) {// The data has been cached homogeneous.
+    if (!vals.stored_state.was_read) {// The data has been cached homogeneous.
       vals = this->geom_vals.at (vals_id);
-      return vals.stored_state.has_error ? 1 : 0;
-  } }
+      if (vals.stored_state.was_read) {
+        return vals.stored_state.has_error ? 1 : 0;
+  } } }
   // The data has not been cached, but maybe we know how to get it...
   is_found = false;// Change to true if this data can be read by a data handler.
   if (this->sims_data_file.count (vals_id) > 0) {
@@ -277,12 +278,23 @@ int Data::get_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals& vals) {
         err= D->read_geom_vals (vals_id, vals);
         is_found = is_found | ((err==0) & vals.stored_state.was_read);
   } } }
+//  this->read_geom_vals (vals_id, vals);//TODO Remove?
   if (is_found) {return vals.stored_state.has_error ? 1 : 0;}
-  const std::string namestr = fmr::get_enum_string (fmr::vals_name,vals.type);
-  log->label_fprintf (log->fmrerr, "WARN""ING Data",
-    "%u %s:%s geom vals not found.\n",
-    vals.data.size(), id.c_str(), namestr.c_str());
-  return 1;
+  err= 1;
+#if 0
+  switch (vals.type) {// Check if not reading is a warning, not an error.
+  //TODO Is this  specific to each data handler?
+ //   case fmr::Data::Jacs_dets : err *= -1; break;
+    default : {}// Do nothing.
+  }
+#endif
+//  if (err > 0) {
+    const std::string valname = fmr::get_enum_string (fmr::vals_name,vals.type);
+    log->label_fprintf (log->fmrerr, "WARN""ING Data",
+      "%u %s:%s geom vals not found.\n",
+      vals.data.size(), id.c_str(), valname.c_str());
+//  }
+  return err;
 }
 int Data::get_dim_vals (const fmr::Data_id id, fmr::Dim_int_vals& vals) {
   int err= 0;
@@ -364,6 +376,7 @@ int Data::read_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals &vals) {
     log->label_fprintf (log->fmrerr, label.c_str(), "%lu %s geom vals.\n",
       vals.data.size(), id.c_str());
   }
+  err= vals.stored_state.has_error | !vals.stored_state.was_read ? 1:0;
   return err;
 }
 int Data::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
@@ -374,6 +387,7 @@ int Data::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
     log->label_fprintf (log->fmrerr, label.c_str(), "%lu %s local vals.\n",
       vals.data.size(), id.c_str());
   }
+  err= vals.stored_state.has_error | !vals.stored_state.was_read ? 1:0;
   return err;
 }
 int Data::get_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {

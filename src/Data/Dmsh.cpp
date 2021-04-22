@@ -331,6 +331,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
   int Dmsh::read_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals &vals) {
     int err=0;
     auto log = this->proc->log;
+    if (vals.stored_state.was_read) {return 0;}
 #ifdef FMR_DEBUG
     const auto label = "**** "+this->task_name+" read";
     log->label_fprintf (log->fmrerr, label.c_str(), "%s...\n", id.c_str());
@@ -354,7 +355,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
           if (n>0 && elem_d>0) {
             const std::vector<double> intp (elem_d, 0.5);//TODO only tets & tris
             std::vector<double> jacs={}, dets={}, pts={};
-            std::size_t task_n = 1;//TODO for automatic partitioning by elem #
+            std::size_t task_n = 1;//TODO automatic partitioning by elem #
             { Data::Lock_here lock(this->liblock);
               for (size_t i=0; i<n; i++) {
                 gmsh::model::setCurrent (info.model);//TODO catch error
@@ -365,22 +366,31 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
             const auto sz = jacs.size();
             if (nj > 0) {
               const auto ea = sz / nj;
-#ifdef FMR_DEBUG
-              double vol = 0.0;
-#endif
+              fmr::Local_int badj_n=0; double vol = 0.0;
               if (vals.data.size() < (sz+nj)) {vals.data.resize (sz+nj);}
               for (size_t i=0; i<nj; i++) {// interleave jacs & dets
                 for (size_t j=0; j<ea; j++) {
-                  vals.data[i*(ea+1) +j] = fmr::Geom_float (jacs[i*ea +j]);
+                  vals.data [(ea+1)*i +j] = fmr::Geom_float (jacs [ea*i +j]);
                 }
-                vals.data[i*(ea+1) +ea] = fmr::Geom_float (dets[i]);
-                //TODO check det <=0?
-                //TODO invert? set Jacs_type?
-#ifdef FMR_DEBUG
-                vol += dets[i];
-#endif
+                const auto det = dets[i];//TODO invert? set Jacs_type?
+                vals.data [(ea+1)*i +ea] = fmr::Geom_float (det);
+                badj_n += (det <= 0.0) ? 1 : 0;
+                vol += det;
               }
               vals.stored_state.was_read = true;
+              if (badj_n > 0) {
+                const auto lab = "WARN""ING "+this->task_name;
+                std::string meas ="";
+                switch (elem_d) {
+                  case 1 : meas ="length"; break;
+                  case 2 : meas ="area"; break;
+                  case 3 : meas ="volume"; break;
+                  default : meas = std::to_string(elem_d)+"D volume"; break;
+                }
+                log->label_fprintf (log->fmrerr, lab.c_str(),
+                  "%u/%lu nonpositive element determinants in %s (%g %s)\n",
+                  badj_n, nj, id.c_str(), vol, meas.c_str());
+              }
 #ifdef FMR_DEBUG
               const auto lab = "**** "+this->task_name+" read";
               log->label_fprintf (log->fmrerr, lab.c_str(),
@@ -396,6 +406,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
   int Dmsh::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
     int err=0;
     auto log = this->proc->log;
+    if (vals.stored_state.was_read) {return 0;}
 #ifdef FMR_DEBUG
     const auto label = "**** "+this->task_name+" read";
     log->label_fprintf (log->fmrerr, label.c_str(), "%s...\n", id.c_str());

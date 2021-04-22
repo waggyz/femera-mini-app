@@ -21,7 +21,7 @@ namespace fmr {namespace math {
     Full, Serendipity, Bipoly, Tripoly, Pyramid, Prism,
   end};
   static const std::map<Poly,std::pair<std::string,std::string>>
-  Poly_letter_name {
+  poly_letter_name {
     {Poly::        None,std::make_pair("-","no polynomial")},//TODO makes sense?
     {Poly::       Error,std::make_pair("!","polynomial error")},
     {Poly::     Unknown,std::make_pair("?","unknown polynomial")},

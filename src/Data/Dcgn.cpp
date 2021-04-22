@@ -446,9 +446,48 @@ int Dcgn::add_cgns_here (const std::string fname, const fmr::Data_id cid,
   err= this->data->add_data_file (cid, this, fname);//TODO handle err
   return err;
 }
+int Dcgn::read_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals &vals) {
+  int err=0;
+  const auto log = this->proc->log;
+  if (vals.stored_state.was_read) {return 0;}
+  Path_cgns* path = nullptr;// location where this data should be found
+  if (this->data_path.count(id) > 0) {
+    path = &this->data_path.at(id);
+    if (path == nullptr) {return 1;}//TODO set read err in vals.
+#if 1//def FMR_DEBUG
+    if (path->inds.size() >= 2) {
+      log->label_fprintf(log->fmrerr,"**** Dcgn","%s: %s:%i/%s:%i\n",id.c_str(),
+        path->strs[0].c_str(),path->inds[0],
+        path->strs[1].c_str(),path->inds[1]);
+    }
+#endif
+  }
+//  const auto pn = path->inds.size();
+  bool is_found = false;
+  switch (vals.type) {
+//      case (fmr::Data::Node_coor) : break;
+    case (fmr::Data::Jacs_dets) :
+      //TODO Check if stored in user-defined data CGNS node
+      if (is_found) {// read from this location
+//        if (vals.data.size() < (sz+nj)) {vals.data.resize (sz+nj);}
+        Data::Lock_here lock(this->liblock);
+        err= cg_golist (path->file_cgid, path->base, path->deep,
+          path->labs.data(), path->inds.data());
+        fmr::perf::timer_resume (&this->time);
+//              err+= cg_ElementDataSize (path->file_cgid, path->base,
+//                path->inds[pn-2], path->inds[pn-1], &conn_sz);
+        fmr::perf::timer_pause (&this->time);
+      }
+      break;
+    default : Data::read_geom_vals (id, vals);//TODO Remove this call?
+  }
+  err=  is_found ? 0 : 1;
+  return err;
+ }
 int Dcgn::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
   int err=0;
   const auto log = this->proc->log;
+  if (vals.stored_state.was_read) {return 0;}
   Path_cgns* path = nullptr;
   if (this->data_path.count(id) > 0) {
     path = &this->data_path.at(id);
@@ -674,52 +713,68 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
         // https://cgns.github.io/CGNS_docs_current/sids/gridflow.html#Elements
         err= cg_goto (info.file_cgid, base_i, "Zone_t",zone_i, NULL);
 //        if (err) {return err;}
+        if (!err) {// Register location of XS sim data here.
+          for (auto t : {fmr::Data::Node_coor}) {
+            const auto id = this->make_data_id (data_id, t);
+            err= this->add_cgns_here (fname, id, t);
+        } }
         for (int sect_i=1; sect_i<=sect_n; sect_i++) {
           char sectname [this->label_size+1];//TODO Cache names now?
-          ElementType_t eltype; cgsize_t start,end;
-          int nbndry, parent_flag;
+          ElementType_t eltype; cgsize_t start=0, end=0;
+          int nbndry=0, parent_flag=0;
           err= fmr::perf::time_activity<int> (&this->time,
             cg_section_read, info.file_cgid, base_i, zone_i, sect_i,
             sectname,& eltype,& start,& end,& nbndry,& parent_flag);
           if (elem_form_from_cgns.count (eltype) > 0) {
             const auto form = elem_form_from_cgns.at (eltype);
+            const auto elem_n = fmr::Local_int (end - start +1);
             const auto i = sect_0 + sect_i -1;
             const auto fid = this->make_data_id (data_id, fmr::Data::Elem_form);
             const auto eid = this->make_data_id (data_id, fmr::Data::Elem_n);
             this->data->enum_vals[fid].data[i] = fmr::enum2val (form);
-            const auto elem_n = fmr::Local_int (end - start +1);
             this->data->local_vals[eid].data[i] = fmr::Local_int (elem_n);
             if (elem_n > 0) {
               const auto mesh_id = data_id + ":Mesh_" + std::to_string(i);
-              const auto cid = this->make_data_id(mesh_id,fmr::Data::Elem_conn);
-              // Log the location of this here, and in the general Data handler.
               err= cg_goto (info.file_cgid, base_i,
                 "Zone_t",zone_i, "Elements_t",sect_i, NULL);
-              err= this->add_cgns_here (fname, cid, fmr::Data::Elem_conn);
+              if (!err) {
+                // Log location of this here, and in the general Data handler.
+                const auto cid
+                  = this->make_data_id (mesh_id, fmr::Data::Elem_conn);
+                err= this->add_cgns_here (fname, cid, fmr::Data::Elem_conn);
+              }
 #ifdef FMR_DEBUG
-              log->label_fprintf(log->fmrerr,"**** Dcgn add!","%s\n",cid.c_str());
+              log->label_fprintf(log->fmrerr,"**** Dcgn add!","%s\n",
+                cid.c_str());
 #endif
-#if 0
-              // Add empty Elem_conn for this mesh marked as not read yet.
-              const auto mesh_id = data_id + ":Mesh_" + std::to_string(i);
-#if 0
-              this->new_local_vals (mesh_id, fmr::Data::Elem_conn, 0);
-#else
-              this->data->new_local_vals (mesh_id, fmr::Data::Elem_conn, 0);
-#endif
-              const auto cid = this->make_data_id (mesh_id, fmr::Data::Elem_conn);
-              this->data->local_vals.at(cid).stored_state.was_read = false;
-#endif
-            }
-            if (fmr::elem_form_d [fmr::enum2val (form)] == geom_d) {
-              // Count all elements of the same dimension as enclosing space.
-              elem_sysn += elem_n;
+              int user_n=0;
+              err = cg_nuser_data (& user_n);
+              if (sect_i < user_n) {
+                //TODO Move to zone level and loop through all nodes to match
+                //     name "fmr::Data::Jacs_dets" using
+                //     cg_user_data_read(sect_i, char *Name);
+                err= cg_goto (info.file_cgid, base_i,
+                  "Zone_t",zone_i, "UserDefinedData_t",sect_i, NULL);
+                if (err) {
+                  const auto lab = "WARN""ING "+this->task_name;
+                  log->label_fprintf (log->fmrerr, lab.c_str(),
+                    "cg_goto (cgid, %i, Zone_t,%i, UserDefinedData_t,%i, NULL)"
+                    " in %s returned %i.\n", base_i, zone_i, sect_i,
+                    data_id.c_str(), err);
+                }else{
+                const auto jid
+                  = this->make_data_id (mesh_id, fmr::Data::Jacs_dets);
+                err= this->add_cgns_here (fname, jid, fmr::Data::Jacs_dets);
+              } }
+              if (fmr::elem_form_d [fmr::enum2val (form)] == geom_d) {
+                // Count all elements of the same dimension as enclosing space.
+                elem_sysn += elem_n;
 #ifdef FMR_DEBUG
               const auto str = fmr::get_enum_string (fmr::elem_form_name, form);
               log->label_fprintf (log->fmrerr, "**** Dcgn scan", "%s %lu %s\n",
                 data_id.c_str(), elem_sysn, str.c_str());
 #endif
-        } } }
+        } } } }//end section loop
         if (true) {sect_0 += sect_n;}//TODO Partition::Join only
       }//end zone loop
 #ifdef FMR_DEBUG
