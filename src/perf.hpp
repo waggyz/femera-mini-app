@@ -249,7 +249,7 @@ std::string detail::format_units_sigfigs (const V val, std::string unit,
     const int sigfigs) {
   int log1000 = 0; double v = double(val);
   if (unit.size()>8) { unit = unit.substr (0,8); }
-  const double threshold = std::pow (10.0, double(sigfigs-1));
+  const double threshold = 0.95*std::pow (10.0, double(sigfigs-1));
   if (std::abs(v) > 1e-24) {
     log1000 = int(std::log10 (std::abs(v)))/3 - (std::abs(v)<1 ? 1:0);
     v = double(val) * std::pow (10.0, double(-3 * log1000));
@@ -269,8 +269,8 @@ std::string format_units (const V val, const std::string unit) {
 }
 template<typename V>
 std::string format_count (const V val, const std::string unit) {// val >=1
-  const int threshhold = (double(std::abs(val)) < 1000.0) ? 1:2;
-  return detail::format_units_sigfigs (val, unit, threshhold);
+  const int threshold = (double(std::abs(val)) < 1000.0) ? 1:2;
+  return detail::format_units_sigfigs (val, unit, threshold);
 }
 template<typename V>
 std::string format_speed (const V val, std::string unit) {
@@ -288,12 +288,12 @@ std::string format_speed (const V val, std::string unit) {
     if (std::abs (v) > 1e-24) {
       log1000 = int(std::log10 (std::abs(v)))/3 - (std::abs(v)<1 ? 1:0);
       v = double(val) * std::pow (10.0, double(-3 * log1000));
-      if (v < 10.0) {v *= 1000.0; log1000 -= 1; }
+      if (v < 9.5) {v *= 1000.0; log1000 -= 1; }
     }
     const uint i = log1000 +6; pre = "?";
     const char prefix[]="afpnum kMGTPE";
     if (i>=0 && i<std::strlen(prefix)) {pre = prefix[i];}
-    if (pre=="u") {pre="\u00b5";}//unicode micro \u00b5 (prefer Greek mu u03bc)
+    if (pre=="u") {pre="\u00b5";}//unicode micro u00b5 (prefer Greek mu u03bc)
   }
   std::vector<char> buf(16,0);
   if (do_invert) {
