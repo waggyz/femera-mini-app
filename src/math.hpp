@@ -162,17 +162,23 @@ static inline uint fmr::math::poly_terms (
   if (pord < 1) {return 1;}
   uint terms = 0;
   switch (ptype) {
-    case fmr::math::Poly::Full : {//terms=1;
-//      for (uint p = 1; p<=pord+1; p++) {
-//        terms += fmr::math::upow (p, nvar-1); }
-       terms = fmr::math::nchoosek (pord+nvar, nvar);
+    case fmr::math::Poly::Full : {
+#if 0
+      terms=1;
+      for (uint p = 1; p<=pord+1; p++) {
+      terms += fmr::math::upow (p, nvar-1); }
+#else
+      terms = fmr::math::nchoosek (pord+nvar, nvar);
+#endif
       break;}
     case math::Poly::Serendipity : {//TODO Check this.
       terms = fmr::math::poly_terms (nvar, fmr::math::Poly::Bipoly, pord);
       terms-= (pord>1 && nvar>1)
         ? fmr::math::poly_terms (nvar, fmr::math::Poly::Full, pord-2) : 0;
+        terms/= nvar;
       break;}
-    case fmr::math::Poly::Bipoly : {
+    case fmr::math::Poly::Tripoly :// Fall through.
+    case fmr::math::Poly::Bipoly  : {
       terms = fmr::math::upow (pord+1, nvar);
       break;}
     case fmr::math::Poly::Pyramid : {

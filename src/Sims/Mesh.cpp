@@ -30,17 +30,16 @@ namespace Femera {
     this->geom_d = this->parent->geom_d;
     const auto fid = this->data->make_data_id (pid, fmr::Data::Elem_form);
     bool is_found = this->data->enum_vals.count(fid) > 0;
+    auto form = fmr::Elem_form::Unknown;
+    if (is_found) {
+      form = fmr::Elem_form(this->data->enum_vals.at(fid).data [this->sims_ix]);
+    }
 #if 0
-    const auto form = is_found
-      ? fmr::Elem_form(this->data->enum_vals.at(fid).data [this->sims_ix])
-      : fmr::Elem_form::Unknown;
-    this->elem_info = fmr::Elem_info (form, 4);//FIXME each_node_n
+    this->elem_info = fmr::Elem_info (form, 4);//TODO each_node_n
 #else
-    this->elem_info.form = is_found
-      ? fmr::Elem_form(this->data->enum_vals.at(fid).data [this->sims_ix])
-      : fmr::Elem_form::Unknown;
-    this->elem_info.elem_d = fmr::elem_form_d [fmr::enum2val (
-      this->elem_info.form)];
+    this->elem_info.form = form;
+    this->elem_info.elem_d
+      = fmr::elem_form_d [fmr::enum2val (this->elem_info.form)];
 #endif
 #ifdef FMR_DEBUG
       log->label_fprintf(log->fmrout, "**** Mesh prep",
@@ -56,17 +55,14 @@ namespace Femera {
     if (this->elem_info.elem_d == this->geom_d && this->elem_info.elem_d > 0) {
       //TODO for now, prep only meshes matching the enclosing space dimension.
       //TODO should prep all meshes with physics assigned.
-      fmr::perf::timer_pause (& this->time, this->elem_n);//count elems prepped
-      if (log->timing >= this->verblevel) {
-        this->meter_unit
-          = fmr::get_enum_string (fmr::elem_form_name, this->elem_info.form);
-      }
+#if 0
       if (log->detail >= this->verblevel) {
         const auto label = std::to_string(this->elem_info.elem_d)+"D "
-          + this->task_name+" prep";
+          + this->task_name+" prep ****";
         log->label_fprintf (log->fmrout, label.c_str(),"%u %s in %s\n",
           this->elem_n, this->meter_unit.c_str(), name.c_str());
       }
+#endif
       fmr::perf::timer_resume (& this->time);
       this->ini_data_vals (this->data_list, 0);
       if (this->elem_n > 0) {//TODO check element type for nodes/elem
@@ -78,23 +74,58 @@ namespace Femera {
         //     XS & SM simms, because each sim is contained in 1 NUMA domain.
         //     So, load node_coor at global sim level, if needed for jacs calc.
 #endif
-        const auto each_conn_n = 0;//TODO each_conn_n(form)/elem_vert_n(form)?
+//        const auto each_conn_n = 0;//TODO each_conn_n(form)/elem_vert_n(form)?
         const auto each_jacs_n = 0;//TODO each_jacs_n(form)
         // element jacobian data (inverted, maybe transposed, may have det)
-        this->ini_data_vals ({fmr::Data::Elem_conn}, elem_n * each_conn_n);
+        this->ini_data_vals ({fmr::Data::Elem_conn}, elem_n * elem_info.node_n);
         this->ini_data_vals ({fmr::Data::Jacs_dets}, elem_n * each_jacs_n);
         this->data_list.push_back (fmr::Data::Elem_conn);
         this->data_list.push_back (fmr::Data::Jacs_dets);
       }
 #ifdef FMR_DEBUG
       auto vals = this->locals [fmr::Data::Elem_conn];
-      const std::string tstr = fmr::get_enum_string (fmr::vals_name, vals.type);
+      const auto tstr = fmr::get_enum_string (fmr::vals_name, vals.type);
       log->label_fprintf (log->fmrerr, "****  get Mesh",
         "%lu %s:%s vals...\n",
         vals.data.size(),
         name.c_str(), tstr.c_str());
 #endif
       this->get_data_vals (this->model_name, this->data_list);
+      if (this->elem_n > 0) {
+        if (this->locals.count (fmr::Data::Elem_conn) > 0) {
+          const auto sz
+            = fmr::Local_int (this->locals [fmr::Data::Elem_conn].data.size());
+          this->elem_info = fmr::Elem_info (form, sz / this->elem_n);
+        }else{
+          log->label_fprintf (log->fmrerr, "WARNING Mesh",
+            "%s locals [fmr::Data::Elem_conn] not found.\n",
+            this->model_name.c_str());
+      } }
+      if (log->timing >= this->verblevel) {
+        this->meter_unit
+          = fmr::get_enum_string (fmr::elem_form_name, this->elem_info.form);
+      }
+      fmr::perf::timer_pause (& this->time, this->elem_n);//count elems prepped
+      if (log->detail >= this->verblevel) {
+#if 0
+        const auto label = std::to_string(this->elem_info.elem_d)+"D "
+          + this->task_name+" prep";
+        log->label_fprintf (log->fmrout, label.c_str(),"%u %s in %s\n",
+          this->elem_n, this->meter_unit.c_str(), name.c_str());
+#endif
+
+        const auto formstr = fmr::get_enum_string (
+          fmr::elem_form_name, this->elem_info.form);
+        std::string pchar
+          = fmr::math::poly_letter_name.at(this->elem_info.poly).first;
+        const std::string label = this->task_name +" prep";
+        log->label_fprintf (log->fmrout, label.c_str(),
+          "%u %u-node %s%u %s...\n",
+          this->elem_n, elem_info.node_n, pchar.c_str(), this->elem_info.pord,
+          formstr.c_str());
+
+      }
+      fmr::perf::timer_resume (& this->time);
     }//end if this needs prepped
     fmr::perf::timer_pause (& this->time);
     return err;
@@ -125,7 +156,7 @@ namespace Femera {
           else {
             err= this->data->get_geom_vals (name, this->geoms.at (type));
             if ((err > 0) && type == fmr::Data::Jacs_dets) {
-              err=0;// Get Elem_conn, Node_coor, Elid to calculate jacs_dets
+              err=0;// Get Elem_conn, Node_coor to calculate jacs_dets
               err= this->get_data_vals (name,
                 {fmr::Data::Elem_conn, fmr::Data::Node_coor});
               if (this->verblevel <= log->detail) {

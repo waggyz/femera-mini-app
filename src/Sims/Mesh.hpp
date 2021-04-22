@@ -41,11 +41,8 @@ class Mesh : public Geom {// Pure virtual? Mesh?
     std::map<fmr::Data,fmr::Geom_float_vals> geoms ={};
     //
     fmr::Local_int        elem_n = 0;
-///    fmr::Elem_form     elem_form = fmr::Elem_form::Unknown;
-//    fmr::Dim_int  each_conn_size = 0;// nodes/elem replace w/ elem_info.node_n
     fmr::Dim_int  each_jacs_size = 0;// size of each jacs (4,10)
     fmr::Dim_int     elem_jacs_n = 0;// jacs/elem
-//    fmr::Dim_int          elem_d = 0;//TODO Remove & replace w/ elem_info.elem_d
     fmr::Elem_info     elem_info = fmr::Elem_info ();
     fmr::math::Zomplex math_type = fmr::math::Real;
   // methods ----------------------------------------------------------------
