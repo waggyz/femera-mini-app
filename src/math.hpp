@@ -158,8 +158,7 @@ static inline uint fmr::math::nchoosek (const uint n, const uint k) {
 }
 static inline uint fmr::math::poly_terms (
     const uint nvar, const fmr::math::Poly ptype, const uint pord) {
-  if (nvar < 1) {return 0;}
-  if (pord < 1) {return 1;}
+  if (nvar < 1 || pord < 1) {return 0;}
   uint terms = 0;
   switch (ptype) {
     case fmr::math::Poly::Full : {
@@ -175,14 +174,13 @@ static inline uint fmr::math::poly_terms (
       terms = fmr::math::poly_terms (nvar, fmr::math::Poly::Bipoly, pord);
       terms-= (pord>1 && nvar>1)
         ? fmr::math::poly_terms (nvar, fmr::math::Poly::Full, pord-2) : 0;
-        terms/= nvar;
       break;}
-    case fmr::math::Poly::Tripoly :// Fall through.
-    case fmr::math::Poly::Bipoly  : {
+    case fmr::math::Poly::Bipoly :// Fall through.
+    case fmr::math::Poly::Tripoly : {
       terms = fmr::math::upow (pord+1, nvar);
       break;}
     case fmr::math::Poly::Pyramid : {
-      switch (pord){
+      switch (pord) {
         case 1: {terms = 5; break;}
         case 2: {terms = 5+8; break;}
         case 3: {terms = 5+8*2; break;}
@@ -190,7 +188,7 @@ static inline uint fmr::math::poly_terms (
       }
       break;}
     case fmr::math::Poly::Prism : {
-      switch (pord){
+      switch (pord) {
         case 1: {terms = 6; break;}
         case 2: {terms = 6+9; break;}
         case 3: {terms = 6+9*2; break;}

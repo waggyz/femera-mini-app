@@ -153,13 +153,13 @@ namespace fmr {//TODO? namespace data {
         case Elem_form::Tris : switch (n) {
           case  3 : pord = 1; poly = math::Poly::Full; break;
           case  6 : pord = 2; poly = math::Poly::Full; break;
-          case  9 : pord = 3; poly = math::Poly::Serendipity; break;
+          case  9 : pord = 3; poly = math::Poly::Full; break;
           default : {}
         } break;
         case Elem_form::Tets : switch (n) {
           case  4 : pord = 1; poly = math::Poly::Full; break;
           case 10 : pord = 2; poly = math::Poly::Full; break;
-          case 20 : pord = 3; poly = math::Poly::Serendipity; break;
+          case 20 : pord = 3; poly = math::Poly::Full; break;
           default : {}
         } break;
         default : {}

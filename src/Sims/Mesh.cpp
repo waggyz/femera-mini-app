@@ -80,7 +80,6 @@ namespace Femera {
         this->ini_data_vals ({fmr::Data::Elem_conn}, elem_n * elem_info.node_n);
         this->ini_data_vals ({fmr::Data::Jacs_dets}, elem_n * each_jacs_n);
         this->data_list.push_back (fmr::Data::Elem_conn);
-        this->data_list.push_back (fmr::Data::Jacs_dets);
       }
 #ifdef FMR_DEBUG
       auto vals = this->locals [fmr::Data::Elem_conn];
@@ -100,7 +99,10 @@ namespace Femera {
           log->label_fprintf (log->fmrerr, "WARNING Mesh",
             "%s locals [fmr::Data::Elem_conn] not found.\n",
             this->model_name.c_str());
-      } }
+      }
+        this->data_list.push_back (fmr::Data::Jacs_dets);
+        this->get_data_vals (this->model_name, {fmr::Data::Jacs_dets});
+      }
       if (log->timing >= this->verblevel) {
         this->meter_unit
           = fmr::get_enum_string (fmr::elem_form_name, this->elem_info.form);
@@ -120,8 +122,8 @@ namespace Femera {
           = fmr::math::poly_letter_name.at(this->elem_info.poly).first;
         const std::string label = this->task_name +" prep";
         log->label_fprintf (log->fmrout, label.c_str(),
-          "%u %u-node %s%u %s...\n",
-          this->elem_n, elem_info.node_n, pchar.c_str(), this->elem_info.pord,
+          "%u %s%u %u-node %s...\n",
+          this->elem_n, pchar.c_str(), this->elem_info.pord, elem_info.node_n,
           formstr.c_str());
 
       }
@@ -137,13 +139,14 @@ namespace Femera {
           this->geoms [type] = fmr::Geom_float_vals (type, n);
           break;
         default : err+= Sims::ini_data_vals ({type}, n);
-//          const auto log = this->proc->log;
-//          const std::string namestr
-//              = fmr::get_enum_string (fmr::vals_name,type);
-//          log->label_fprintf (log->fmrerr, "WARN""ING Sims",
-//            "ini_data_vals (..) type of %s not handled.\n", namestr.c_str());
-    } }// }
-//    if (err>0) {return Sims::ini_data_vals (list, n);}//TODO Remove?
+#ifdef FMR_DEBUG
+          const auto log = this->proc->log;
+          const std::string namestr
+              = fmr::get_enum_string (fmr::vals_name,type);
+          log->label_fprintf (log->fmrerr, "WARN""ING Sims",
+            "ini_data_vals (..) type of %s not handled.\n", namestr.c_str());
+#endif
+    } }
     return err;
   }
   int Mesh::get_data_vals (const fmr::Data_id name, const Data_list list) {
@@ -164,12 +167,10 @@ namespace Femera {
                   fmr::elem_form_name, this->elem_info.form);
                 std::string pchar
                   = fmr::math::poly_letter_name.at(this->elem_info.poly).first;
-//                uint each_node_n = fmr::math::poly_terms (
-//                  elem_info.elem_d, elem_info.poly, elem_info.pord);
                 const std::string label = this->task_name +" jacs calc";
                 log->label_fprintf (log->fmrout, label.c_str(),
-                  "%s (%u-node %s%u %s)...\n", this->model_name.c_str(),
-                  elem_info.node_n, pchar.c_str(), this->elem_info.pord,
+                  "%s (%s%u %u-node %s)...\n", this->model_name.c_str(),
+                  pchar.c_str(), this->elem_info.pord, elem_info.node_n,
                   formstr.c_str());
               }
               //FIXME IAMHERE
