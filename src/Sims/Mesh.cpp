@@ -169,12 +169,12 @@ namespace Femera {
             do_warn = false;
             err=0;// Get Elem_conn, Node_coor to calculate jacs_dets
             for (auto t : {fmr::Data::Elem_conn, fmr::Data::Node_coor}) {
-//              if (this->geoms.count(type) == 0) {// does not exist.
-                err= this->ini_data_vals ({t}, 0);//TODO size
-            }// }
+              if (this->geoms.count(type) <= 0) {// does not exist
+                err= this->ini_data_vals ({t}, 0);//TODO size?
+            } }
             err= this->get_data_vals (name,
               {fmr::Data::Elem_conn, fmr::Data::Node_coor});
-//            if (err <=0) {// Calculate jacs_dets.
+            if (err <=0) {// Calculate jacs_dets.
               if (this->verblevel <= log->detail) {
                 const auto formstr = fmr::get_enum_string (
                   fmr::elem_form_name, this->elem_info.form);
@@ -187,7 +187,7 @@ namespace Femera {
                   formstr.c_str());
               }
 //FIXME IAMHERE
-//            }
+            }
             break;}
 #if 0
           case fmr::Data::Node_coor : {// Node info may be at part level.

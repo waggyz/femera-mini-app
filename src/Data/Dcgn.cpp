@@ -477,7 +477,6 @@ int Dcgn::read_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals &vals) {
 //  const auto pn = path->inds.size();
   bool is_found = false;
   switch (vals.type) {
-//      case (fmr::Data::Node_coor) : break;
     case (fmr::Data::Jacs_dets) :
       //TODO Check if stored in user-defined data CGNS node
       if (!is_found) {// read from this location
@@ -486,7 +485,7 @@ int Dcgn::read_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals &vals) {
         err= cg_golist (path->file_cgid, path->base, path->deep,
           path->labs.data(), path->inds.data());
         fmr::perf::timer_resume (&this->time);
-//TODO  err+ = cg_user_data_read(int Index, char *Name);
+//TODO  err+ = cg_user_data_read(int Index, char *Name);//cg[p]_array_read
         fmr::perf::timer_pause (&this->time);
       }
       break;
@@ -527,7 +526,7 @@ int Dcgn::read_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals &vals) {
       break;
     default : Data::read_geom_vals (id, vals);//TODO Remove this call?
   }
-  err=  is_found ? 0 : 1;
+  err= is_found ? 0 : 1;
   return err;
  }
 int Dcgn::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
@@ -569,7 +568,7 @@ int Dcgn::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
         fmr::perf::timer_pause (&this->time);
       }
       vals.stored_state.has_error |= (err != 0);
-      if (err) {return err;}
+      if (err!=0) {return err;}
       if (conn_sz <= 0) {err = 1;}
       else{
         auto buf = std::valarray<cgsize_t> (conn_sz);
@@ -584,7 +583,7 @@ int Dcgn::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
           fmr::perf::timer_pause (&this->time);
         }
         vals.stored_state.has_error |= (err !=0);
-        if (err) {return err;}
+        if (err!=0) {return err;}
         this->time.bytes += conn_sz * sizeof (cgsize_t);
         if (vals.data.size() < size_t(conn_sz)) {vals.data.resize (conn_sz);}
         for (cgsize_t i=0; i<conn_sz; i++) {
