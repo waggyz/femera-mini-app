@@ -43,7 +43,7 @@ namespace Femera {
 #endif
 #ifdef FMR_DEBUG
       log->label_fprintf(log->fmrout, "**** Mesh prep",
-        "%s: %uD %s mesh in %uD space\n", this->model_name.c_str(),
+        "%s: %uD %s mesh in %uD space\n", name.c_str(),
         this->elem_info.elem_d,
         fmr::get_enum_string(fmr::elem_form_name, this->elem_info.form).c_str(),
         geom_d);
@@ -89,7 +89,7 @@ namespace Femera {
         vals.data.size(),
         name.c_str(), tstr.c_str());
 #endif
-      this->get_data_vals (this->model_name, this->data_list);
+      this->get_data_vals (name, this->data_list);
       if (this->elem_n > 0) {
         if (this->locals.count (fmr::Data::Elem_conn) > 0) {
           const auto sz
@@ -98,10 +98,10 @@ namespace Femera {
         }else{
           log->label_fprintf (log->fmrerr, "WARNING Mesh",
             "%s locals [fmr::Data::Elem_conn] not found.\n",
-            this->model_name.c_str());
+            name.c_str());
       }
         this->data_list.push_back (fmr::Data::Jacs_dets);
-        this->get_data_vals (this->model_name, {fmr::Data::Jacs_dets});
+        this->get_data_vals (name, {fmr::Data::Jacs_dets});
       }
       if (log->timing >= this->verblevel) {
         this->meter_unit
@@ -152,16 +152,29 @@ namespace Femera {
   int Mesh::get_data_vals (const fmr::Data_id name, const Data_list list) {
     int err=0;
     const auto log = this->proc->log;
+    bool do_warn = true;
     for (auto type : list) {
       switch (fmr::vals_type [fmr::enum2val (type)]) {
         case fmr::Vals_type::Geom : {
           if (this->geoms.count (type) == 0) {err=1;}
           else {
-            err= this->data->get_geom_vals (name, this->geoms.at (type));
-            if ((err > 0) && type == fmr::Data::Jacs_dets) {
-              err=0;// Get Elem_conn, Node_coor to calculate jacs_dets
-              err= this->get_data_vals (name,
-                {fmr::Data::Elem_conn, fmr::Data::Node_coor});
+            err= this->data->get_geom_vals (name, this->geoms[type]);
+          }
+          break;}
+        default : err= Sims::get_data_vals (name, {type});
+      }
+      if (err > 0) {// there is no local data here
+        switch (type) {// non-standard access handling
+          case fmr::Data::Jacs_dets : {
+            do_warn = false;
+            err=0;// Get Elem_conn, Node_coor to calculate jacs_dets
+            for (auto t : {fmr::Data::Elem_conn, fmr::Data::Node_coor}) {
+//              if (this->geoms.count(type) == 0) {// does not exist.
+                err= this->ini_data_vals ({t}, 0);//TODO size
+            }// }
+            err= this->get_data_vals (name,
+              {fmr::Data::Elem_conn, fmr::Data::Node_coor});
+//            if (err <=0) {// Calculate jacs_dets.
               if (this->verblevel <= log->detail) {
                 const auto formstr = fmr::get_enum_string (
                   fmr::elem_form_name, this->elem_info.form);
@@ -173,13 +186,23 @@ namespace Femera {
                   pchar.c_str(), this->elem_info.pord, elem_info.node_n,
                   formstr.c_str());
               }
-              //FIXME IAMHERE
-          } }
+//FIXME IAMHERE
+//            }
+            break;}
+#if 0
+          case fmr::Data::Node_coor : {// Node info may be at part level.
+            if (name != parent->model_name) {// Avoid infinite recursion.
+              do_warn = false;
+              err= this->get_data_vals (parent->model_name,
+                {fmr::Data::Node_coor});
+            }
           break;}
-        default : err= Sims::get_data_vals (name, {type});
-      }
+#endif
+          default : {}// Do nothing.
+        }//end switch (type)
+      }//end handle non-standard access
 #if 1
-      if (err > 0) {
+      if (err > 0 && do_warn) {
         const std::string valstr
           = fmr::get_enum_string (fmr::vals_name, type);
         log->label_fprintf (log->fmrerr, "WARN""ING Mesh",

@@ -151,15 +151,15 @@ class Data : public Work {//TODO change to File
     virtual int make_mesh (const std::string model, const fmr::Local_int ix);
     virtual int make_part (const std::string model, const fmr::Local_int ix);
     //
-    int new_enum_vals (const fmr::Data_id, const fmr::Data, const size_t);
-    int new_local_vals (const fmr::Data_id, const fmr::Data, const size_t);
-    int new_geom_vals (const fmr::Data_id, const fmr::Data, const size_t);
-    //
     int get_dim_vals (const fmr::Data_id, fmr::Dim_int_vals &);
     int get_enum_vals (const fmr::Data_id, fmr::Enum_int_vals &);
     int get_local_vals (const fmr::Data_id, fmr::Local_int_vals &);
     int get_global_vals (const fmr::Data_id, fmr::Global_int_vals &);
     int get_geom_vals (const fmr::Data_id, fmr::Geom_float_vals &);
+    //
+    // cache vals here in Data instance
+    int new_enum_vals (const fmr::Data_id, const fmr::Data, const size_t);
+    int new_local_vals (const fmr::Data_id, const fmr::Data, const size_t);
     //
 #if 0
     int save_local_vals (const std::string id, fmr::Local_int_vals &);

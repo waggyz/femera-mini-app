@@ -251,7 +251,7 @@ fmr::Dim_int Data::get_hier_max (){
 int Data::add_data_file (const fmr::Data_id id, Data* D,
   const std::string fname) {
   if (this->sims_data_file.count (id) > 0) {
-    this->sims_data_file.at (id).push_back (Data_file (D,fname));
+    this->sims_data_file[id].push_back (Data_file (D,fname));
   }else{
     this->sims_data_file[id] = std::vector<Data_file>({Data_file(D,fname)});
   }
@@ -259,8 +259,14 @@ int Data::add_data_file (const fmr::Data_id id, Data* D,
 }
 int Data::get_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals& vals) {
   int err= 0;
-  auto log = this->proc->log;
   const auto vals_id = this->make_data_id (id, vals.type);
+#ifdef FMR_DEBUG
+    auto log = this->proc->log;
+    const std::string valname = fmr::get_enum_string (fmr::vals_name,vals.type);
+    log->label_fprintf (log->fmrerr, "**** Data",
+      "%u %s geom vals\n",
+      vals.data.size(), vals_id.c_str());
+#endif
   // Check if data is cached here in a homogeneous data array.
   bool is_found = this->geom_vals.count (vals_id) > 0;
   if (is_found) {// The data might be cached already.
@@ -273,6 +279,11 @@ int Data::get_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals& vals) {
   is_found = false;// Change to true if this data can be read by a data handler.
   if (this->sims_data_file.count (vals_id) > 0) {
     const auto data_files = this->sims_data_file.at (vals_id);
+#ifdef FMR_DEBUG
+    log->label_fprintf (log->fmrerr, "**** Data",
+      "%u %s geom vals found %lu handler...\n",
+      vals.data.size(), vals_id.c_str(), data_files.size());
+#endif
     for (auto df : data_files) {auto D = df.first;
       if (D) {
         err= D->read_geom_vals (vals_id, vals);
@@ -281,24 +292,17 @@ int Data::get_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals& vals) {
 //  this->read_geom_vals (vals_id, vals);//TODO Remove?
   if (is_found) {return vals.stored_state.has_error ? 1 : 0;}
   err= 1;
-#if 0
-  switch (vals.type) {// Check if not reading is a warning, not an error.
-  //TODO Is this  specific to each data handler?
- //   case fmr::Data::Jacs_dets : err *= -1; break;
-    default : {}// Do nothing.
-  }
-#endif
-//  if (err > 0) {
+#ifdef FMR_DEBUG
+    auto log = this->proc->log;
     const std::string valname = fmr::get_enum_string (fmr::vals_name,vals.type);
     log->label_fprintf (log->fmrerr, "WARN""ING Data",
       "%u %s:%s geom vals not found.\n",
       vals.data.size(), id.c_str(), valname.c_str());
-//  }
+#endif
   return err;
 }
 int Data::get_dim_vals (const fmr::Data_id id, fmr::Dim_int_vals& vals) {
   int err= 0;
-  auto log = this->proc->log;
   const auto vals_id = this->make_data_id (id, vals.type);
   bool is_found = this->dim_vals.count (vals_id) > 0;
   if (is_found) {
@@ -324,17 +328,19 @@ int Data::get_dim_vals (const fmr::Data_id id, fmr::Dim_int_vals& vals) {
     name_i++;
   }
   if (!is_found) {
+#ifdef FMR_DEBUG
+    auto log = this->proc->log;
     const std::string namestr = fmr::get_enum_string (fmr::vals_name,vals.type);
     log->label_fprintf (log->fmrerr, "WARN""ING Data",
       "%u %s:%s dim vals not found.\n",
       vals.data.size(), id.c_str(), namestr.c_str());
+#endif
     return 1;
   }
   return err;
 }
 int Data::get_enum_vals (const fmr::Data_id id, fmr::Enum_int_vals& vals) {
   int err= 0;
-  auto log = this->proc->log;
   const auto vals_id = this->make_data_id (id, vals.type);
   bool is_found = this->enum_vals.count (vals_id) > 0;
   if (is_found) {
@@ -360,10 +366,13 @@ int Data::get_enum_vals (const fmr::Data_id id, fmr::Enum_int_vals& vals) {
     name_i++;
   }
   if (!is_found) {
+#ifdef FMR_DEBUG
+    auto log = this->proc->log;
     const std::string name = fmr::get_enum_string (fmr::vals_name, vals.type);
     log->label_fprintf (log->fmrerr, "WARN""ING Data",
       "%lu %s:%s enum vals not found.\n",
       vals.data.size(), id.c_str(), name.c_str());
+#endif
     return 1;
   }
   return err;
@@ -392,7 +401,6 @@ int Data::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
 }
 int Data::get_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
   int err= 0;
-  const auto log = this->proc->log;
   const auto vals_id = this->make_data_id (id, vals.type);
   // Check if data is in a homogeneous data array. ----------------------------
   bool is_found = this->local_vals.count (vals_id) > 0;
@@ -442,10 +450,13 @@ int Data::get_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
     name_i++;
   }
   if (!is_found) {
+#ifdef FMR_DEBUG
+    const auto log = this->proc->log;
     const std::string name = fmr::get_enum_string (fmr::vals_name, vals.type);
     log->label_fprintf (log->fmrerr, "WARN""ING Data",
       "%u %s:%s local vals not found.\n",
       vals.data.size(), id.c_str(), name.c_str());
+#endif
     return 1;
   }
 #if 0
@@ -488,7 +499,6 @@ int Data::get_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
 }
 int Data::get_global_vals (const fmr::Data_id id, fmr::Global_int_vals& vals) {
   int err= 0;
-  auto log = this->proc->log;
   const auto vals_id = this->make_data_id (id, vals.type);
   bool is_found = this->global_vals.count (vals_id) > 0;
   if (is_found) {
@@ -508,10 +518,13 @@ int Data::get_global_vals (const fmr::Data_id id, fmr::Global_int_vals& vals) {
     name_i++;
   }
   if (!is_found) {
+#ifdef FMR_DEBUG
+    auto log = this->proc->log;
     const std::string namestr = fmr::get_enum_string (fmr::vals_name,vals.type);
     log->label_fprintf (log->fmrerr, "WARN""ING Data",
       "%u %s:%s global vals not found.\n",
       vals.data.size(), id.c_str(), namestr.c_str());
+#endif
     return 1;
   }
   return err;
@@ -533,7 +546,7 @@ int Data::new_enum_vals (const fmr::Data_id data_id,
   } }
   return err;
 }
-int Data::new_local_vals (const fmr::Data_id data_id,
+int Data::new_local_vals (const fmr::Data_id data_id,// cache here in Data.
   const fmr::Data type, const size_t nvals) {int err=0;
   const auto id = this->make_data_id (data_id, type);
   const bool is_found = this->data->local_vals.count(id) > 0;
@@ -550,7 +563,8 @@ int Data::new_local_vals (const fmr::Data_id data_id,
   } } }
   return err;
 }
-int Data::new_geom_vals (const fmr::Data_id data_id,
+#if 0
+int Data::new_geom_vals (const fmr::Data_id data_id,// cache here in Data.
   const fmr::Data type, const size_t nvals) {int err=0;
   const auto id = this->make_data_id (data_id, type);
   const bool is_found = this->data->geom_vals.count(id) > 0;
@@ -567,6 +581,7 @@ int Data::new_geom_vals (const fmr::Data_id data_id,
   } } }
   return err;
 }
+#endif
 #if 0
 int Data::get_global_vals (std::string name, fmr::Tree_path part_tree_id,
   std::vector<fmr::Global_int_vals*> V){int err=0;

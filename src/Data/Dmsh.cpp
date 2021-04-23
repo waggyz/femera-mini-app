@@ -564,13 +564,12 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
         for (fmr::Local_int mesh_i=0; mesh_i<mesh_n; mesh_i++) {
           const auto  elem_gmsh = mesh_elem_gmsh [mesh_i];
           auto             form = fmr::Elem_form::Unknown;
-          fmr::Local_int conn_n = 0;
           fmr::Dim_int   elem_d = 0;
           if (fmr::detail::elem_info_gmsh.count (elem_gmsh) > 0) {
             const auto elinfo = fmr::detail::elem_info_gmsh.at (elem_gmsh);
             form = elinfo.form;
             elem_d = fmr::elem_form_d [fmr::enum2val (form)];
-            conn_n = fmr::math::poly_terms (elem_d, elinfo.poly, elinfo.pord);
+//TODO Remove?            conn_n = fmr::math::poly_terms (elem_d, elinfo.poly, elinfo.pord);
           }else{
             log->printf_err("WARNING Gmsh element type %i not supported.\n",
               elem_gmsh);
@@ -622,8 +621,11 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
             this->elem_gmsh_info [id] = Elem_gmsh_info(data_id,{-1},0,elem_gmsh);
             err= this->data->add_data_file (id, this, fname);//TODO handle err
           }
+#if 0
+          fmr::Local_int conn_n = 0;
           err= this->new_local_vals (mesh_id, fmr::Data::Elem_conn,
             elem_n * conn_n);//TODO Why is mem allocated here for this?
+#endif
         }//end mesh_i loop
       }//end if mesh_n > 0
       if (elem_sysn > 0) {
