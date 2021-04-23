@@ -101,7 +101,7 @@ namespace Femera {
             name.c_str());
       }
         this->data_list.push_back (fmr::Data::Jacs_dets);
-        this->get_data_vals (name, {fmr::Data::Jacs_dets});
+        this->get_data_vals (name,{fmr::Data::Jacs_dets});
       }
       if (log->timing >= this->verblevel) {
         this->meter_unit
@@ -115,17 +115,15 @@ namespace Femera {
         log->label_fprintf (log->fmrout, label.c_str(),"%u %s in %s\n",
           this->elem_n, this->meter_unit.c_str(), name.c_str());
 #endif
-
         const auto formstr = fmr::get_enum_string (
           fmr::elem_form_name, this->elem_info.form);
         std::string pchar
           = fmr::math::poly_letter_name.at(this->elem_info.poly).first;
         const std::string label = this->task_name +" prep";
         log->label_fprintf (log->fmrout, label.c_str(),
-          "%u %s%u %u-node %s.\n",
+          "%s: %u %s%u %u-node %s.\n", name.c_str(),
           this->elem_n, pchar.c_str(), this->elem_info.pord, elem_info.node_n,
           formstr.c_str());
-
       }
       fmr::perf::timer_resume (& this->time);
     }//end if this needs prepped

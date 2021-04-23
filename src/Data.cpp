@@ -145,7 +145,7 @@ int Data::make_mesh (const std::string model, const fmr::Local_int ix) {
       fmr::perf::timer_pause (&this->time);
       if (err <= 0) {
         did_mesh = true;
-        if (log->timing >= D->verblevel) {
+        if (log->timing >= D->verblevel && log->verbosity >= D->verblevel) {
           const auto s = fmr::perf::format_time_units (this->time.last_busy_ns);
           const auto label = this->task_name+" "+D->task_name+" mesh";
           log->label_fprintf (log->fmrout, label.c_str(),
