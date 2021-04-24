@@ -504,7 +504,7 @@ int Dcgn::read_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals &vals) {
         default : isok = false;
       }
       if (!isok) {return 1;}
-      Data::Lock_here lock (this->liblock);
+      Data::Lock_here lock (this->liblock);//TODO break this up ?
       err= cg_golist (path->file_cgid, path->base, path->deep,
         path->labs.data(), path->inds.data());//TODO one level up from path?
       if (err !=0) {return err;}
@@ -518,7 +518,7 @@ int Dcgn::read_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals &vals) {
       const cgsize_t node_n = sz / coor_d;
       range_min[0] = 1; range_max[0] = node_n;// unstructured: only first val
       fmr::perf::timer_resume (&this->time);
-      //char *coordname,//CoordinateX, CoordinateY, CoordinateZ
+      //char *coordname: CoordinateX, CoordinateY, CoordinateZ
       if (err==0 && coor_d>0) {
         err= cg_coord_read (path->file_cgid, path->base, path->inds [pn-1],
           "CoordinateX", mem_datatype, &range_min[0], &range_max[0],
@@ -554,7 +554,7 @@ int Dcgn::read_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals &vals) {
 #if 0
   if (log->detail >= this->verblevel) {
     const std::string label = this->task_name+" read";
-    log->label_fprintf (log->fmrerr, label.c_str(), "%lu %s geom vals.\n",
+    log->label_fprintf (log->fmrout, label.c_str(), "%lu %s geom vals.\n",
       vals.data.size(), id.c_str());
   }
 #else

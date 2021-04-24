@@ -385,7 +385,7 @@ int Data::read_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals &vals) {
   const auto log = this->proc->log;
   if (log->detail >= this->verblevel) {
     const std::string label = this->task_name+" read";
-    log->label_fprintf (log->fmrerr, label.c_str(), "%lu %s geom vals.\n",
+    log->label_fprintf (log->fmrout, label.c_str(), "%lu %s geom vals.\n",
       vals.data.size(), id.c_str());
   }
   err= vals.stored_state.has_error | !vals.stored_state.was_read ? 1:0;
@@ -396,7 +396,7 @@ int Data::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
   const auto log = this->proc->log;
   if (log->detail >= this->verblevel) {
     const std::string label = this->task_name+" read";
-    log->label_fprintf (log->fmrerr, label.c_str(), "%lu %s local vals.\n",
+    log->label_fprintf (log->fmrout, label.c_str(), "%lu %s local vals.\n",
       vals.data.size(), id.c_str());
   }
   err= vals.stored_state.has_error | !vals.stored_state.was_read ? 1:0;
