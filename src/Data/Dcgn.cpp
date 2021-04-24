@@ -52,8 +52,7 @@ namespace Femera {// header extension: needs cgnslib.h
     { fmr::data::Access::  Write, CG_MODE_WRITE  },
     { fmr::data::Access:: Modify, CG_MODE_MODIFY }
   };
-  static const std::map<ElementType_t,fmr::Elem_form> elem_form_from_cgns
-    ={
+  static const std::map<ElementType_t,fmr::Elem_form> elem_form_from_cgns ={
     {ElementTypeNull, fmr::Elem_form::None},
     {ElementTypeUserDefined, fmr::Elem_form::User},
     {NODE    , fmr::Elem_form::Node},
@@ -419,7 +418,11 @@ int Dcgn::add_cgns_here (const std::string fname, const fmr::Data_id id,
     log->label_fprintf(log->fmrerr,"**** Dcgn add!","%s\n",cid.c_str());
 #endif
   this->data_path [cid] = Path_cgns();// Add to map.
-  auto path = &this->data_path.at (cid);
+#if 0
+  auto path = &this->data_path.at (cid);//TODO works?
+#else
+  auto path = &this->data_path [cid];
+#endif
   path->comm = this->comm;
   path->type = type;
   fmr::perf::timer_resume (&this->time);
@@ -427,7 +430,7 @@ int Dcgn::add_cgns_here (const std::string fname, const fmr::Data_id id,
   err= cg_where (&path->file_cgid, &path->base, &path->deep, nullptr, nullptr);
   //TODO handle err
   fmr::perf::timer_pause (&this->time);
-//  if (!err) {this->time.bytes += 3*sizeof(int);}
+  if (!err) {this->time.bytes += 3*sizeof(int);}
 #ifdef FMR_DEBUG
   log->label_fprintf(log->fmrerr,"**** Dcgn deep","%u\n", path->deep);
 #endif
@@ -445,40 +448,41 @@ int Dcgn::add_cgns_here (const std::string fname, const fmr::Data_id id,
   err= cg_where (&path->file_cgid, &path->base, &path->deep,
     path->labs.data(), path->inds.data());//TODO handle err
   fmr::perf::timer_pause (&this->time);
-//  if (!err) {this->time.bytes
-//    += (3 + path->deep)*sizeof(int) + path->deep * 32*sizeof(char);
-//  }
+  if (!err) {this->time.bytes += (3 + path->deep) * sizeof(int)
+    + path->deep * this->label_size * sizeof(char);
+  }
   err= this->data->add_data_file (cid, this, fname);//TODO handle err
   return err;
 }
 int Dcgn::read_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals &vals) {
   int err=0;
+  const auto log = this->proc->log;
+#ifdef FMR_DEBUG
+  log->label_fprintf (log->fmrerr,"**** Dcgn read","%s\n",id.c_str());
+#endif
   if (vals.stored_state.was_read) {return 0;}
   Path_cgns* path = nullptr;// location where this data should be found
   if (this->data_path.count (id) > 0) {
     path = &this->data_path [id];
     if (path == nullptr) {return 1;}//TODO set read err in vals.
 #ifdef FMR_DEBUG
-    const auto log = this->proc->log;
-    if (path->inds.size() == 0) {
-      log->label_fprintf(log->fmrerr,"**** Dcgn","%s\n",id.c_str());
-    }
     if (path->inds.size() == 1) {
-      log->label_fprintf(log->fmrerr,"**** Dcgn","%s: %s:%i\n",id.c_str(),
+      log->label_fprintf(log->fmrerr,"**** Dcgn read","%s: %s:%i\n",id.c_str(),
         path->strs[0].c_str(),path->inds[0]);
     }
     if (path->inds.size() >= 2) {
-      log->label_fprintf(log->fmrerr,"**** Dcgn","%s: %s:%i/%s:%i\n",id.c_str(),
+      log->label_fprintf(log->fmrerr,"**** Dcgn read","%s: %s:%i/%s:%i\n",
+        id.c_str(),
         path->strs[0].c_str(),path->inds[0],
         path->strs[1].c_str(),path->inds[1]);
     }
 #endif
   }
-//  const auto pn = path->inds.size();
+  const auto pn = path->inds.size();
   bool is_found = false;
   switch (vals.type) {
-    case (fmr::Data::Jacs_dets) :
-      //TODO Check if stored in user-defined data CGNS node
+    case fmr::Data::Jacs_dets :
+      //TODO Check if stored in jacs user-defined data CGNS node
       if (!is_found) {// read from this location
 //        if (vals.data.size() < (sz+nj)) {vals.data.resize (sz+nj);}
         Data::Lock_here lock (this->liblock);
@@ -489,44 +493,78 @@ int Dcgn::read_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals &vals) {
         fmr::perf::timer_pause (&this->time);
       }
       break;
-    case (fmr::Data::Node_coor) :
-#if 0
-        int coor_n=0; cgsize_t range_min[3], cgsize_t range_max[3];
-        bool isok = false;
-        DataType_t mem_datatype = RealDouble;//  RealSingle RealDouble
-        if (std::is_same<vals.data[0], float>::value) {
-          mem_datatype = RealSingle; isok = true;}
-        if (std::is_same<vals.data[0], double>::value) {
-          mem_datatype = RealDouble; isok = true;}
-        if (!isok) {return 1;}
-        //
-        Data::Lock_here lock (this->liblock);
-        err= cg_golist (path->file_cgid, path->base, path->deep,
-          path->labs.data(), path->inds.data());
-        if (err!=0) {return err;}
-        err= cg_ncoords (path->file_cgid, path->base, path->inds[pn-1],&coor_n);
-        if (err!=0) {return err;}
-        is_found = true;
-        fmr::Dim_int coor_d=0;
-        fmr::perf::timer_resume (&this->time);
-        //char *coordname,//CoordinateX, CoordinateY, CoordinateZ
-        err= cg_coord_read(path->file_cgid, path->base, path->inds[pn-1],
-          &coordname, mem_datatype, &range_min, &range_max, &x[0])
-        fmr::perf::timer_pause (&this->time);
-        this->timer.bytes+= coor_n * sizeof(vals.data[0]);
-        if (err!=0) {return err;}
-        coor_d++
-        //FIXME
-        if (vals.data.size() < coor_d*coor_n) {
-          vals.data.resize (coor_d*coor_n);
-        }
-        //FIXME IAMHERE
-        vals.stored_state.was_read = true;
+    case fmr::Data::Node_coor :{
+      if (pn < 1) {return 1;}
+      bool isok = false;
+      int array_n=0; cgsize_t range_min[3]; cgsize_t range_max[3];
+      DataType_t mem_datatype = RealDouble;//CGNS: RealSingle or RealDouble
+      switch (sizeof (vals.data[0])) {
+        case  4 : mem_datatype = RealSingle; isok = true; break;
+        case  8 : mem_datatype = RealDouble; isok = true; break;
+        default : isok = false;
+      }
+      if (!isok) {return 1;}
+      //
+      const cgsize_t node_n = 8;//FIXME
+      range_min[0] = 1; range_max[0] = node_n;// unstructured: only first val
+#if 1
+      Data::Lock_here lock (this->liblock);
+      err= cg_golist (path->file_cgid, path->base, path->deep,
+        path->labs.data(), path->inds.data());//TODO one level up from path?
 #endif
-      break;
-    default : Data::read_geom_vals (id, vals);//TODO Remove this call?
+      if (err !=0) {return err;}
+      err= cg_ncoords (path->file_cgid, path->base, path->inds[pn-1],
+        &array_n);
+      if (err !=0) {return err;}
+      const fmr::Dim_int coor_d = (array_n < 3) ? fmr::Dim_int (array_n) : 3;
+      //TODO check geom_d/mesh_d/elem_d ?
+      vals.layout = fmr::data::Layout::Block;
+      const auto sz = coor_d * fmr::Global_int (node_n);
+      if (vals.data.size () < sz) {vals.data.resize (sz);}
+#if 1
+//      log->label_fprintf(log->fmrerr,"**** Dcgn read","%lu coor\n",sz);
+      fmr::perf::timer_resume (&this->time);
+      //char *coordname,//CoordinateX, CoordinateY, CoordinateZ
+      if (err==0 && coor_d>0) {
+        err= cg_coord_read (path->file_cgid, path->base, path->inds [pn-1],
+          "CoordinateX", mem_datatype, &range_min[0], &range_max[0],
+          &vals.data [0]);
+        if (err==0) {this->time.bytes+= node_n * sizeof (vals.data[0]);}
+        else {vals.stored_state.has_error = true;}
+      }
+//      log->label_fprintf(log->fmrerr,"**** Dcgn read","%lu x\n",node_n);
+      if (err==0 && coor_d>1) {
+        err= cg_coord_read (path->file_cgid, path->base, path->inds [pn-1],
+          "CoordinateY", mem_datatype, &range_min[0], &range_max[0],
+          &vals.data [node_n]);
+        if (err==0){this->time.bytes+= node_n * sizeof (vals.data[0]);}
+        else {vals.stored_state.has_error = true;}
+      }
+//      log->label_fprintf(log->fmrerr,"**** Dcgn read","%lu y\n",node_n);
+      if (err==0 && coor_d>2) {
+        err= cg_coord_read (path->file_cgid, path->base, path->inds [pn-1],
+          "CoordinateZ", mem_datatype, &range_min[0], &range_max[0],
+          &vals.data [node_n*2]);
+        if (err==0) {this->time.bytes+= node_n * sizeof (vals.data[0]);}
+        else {vals.stored_state.has_error = true;}
+      }
+//      log->label_fprintf(log->fmrerr,"**** Dcgn read","%lu z\n",node_n);
+      fmr::perf::timer_pause (&this->time);
+//        if (err !=0) {return err;}//TODO Remove?
+      is_found = true;
+#endif
+      vals.stored_state.was_read = true;
+      break;}
+    default : err= Data::read_geom_vals (id, vals);//TODO Remove this call?
   }
-  err= is_found ? 0 : 1;
+  vals.stored_state.has_error |= (err!=0);
+//  err= is_found ? 0 : 1;//TODO Remove?
+  if (err >0) {return err;}
+  if (log->detail >= this->verblevel) {
+    const std::string label = this->task_name+" read";
+    log->label_fprintf (log->fmrerr, label.c_str(), "%lu %s geom vals.\n",
+      vals.data.size(), id.c_str());
+  }
   return err;
  }
 int Dcgn::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
@@ -766,8 +804,8 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
         // https://cgns.github.io/CGNS_docs_current/sids/gridflow.html#Elements
         err= cg_goto (info.file_cgid, base_i, "Zone_t",zone_i, NULL);
 //        if (err) {return err;}
+        const auto part_id = data_id + ":Part_" + std::to_string(zone_i);
         if (!err) {// Register location of >XS sim data here.
-          const auto part_id = data_id + ":Part_" + std::to_string(zone_i);
           for (auto t : {fmr::Data::Node_coor}) {
 //            const auto id = this->make_data_id (part_id, t);
             err= this->add_cgns_here (fname, part_id, t);
@@ -795,9 +833,10 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
             const auto mesh_id = data_id + ":Mesh_" + std::to_string(mesh_i);
             if (elem_n > 0) {//TODO only adding meshes needed for now.
               err= cg_goto (info.file_cgid, base_i, "Zone_t",zone_i, NULL);
-              for (auto t : {fmr::Data::Node_coor}) {// Register XS sim data.
+              for (auto t : {fmr::Data::Node_coor}) {
 //                const auto id = this->make_data_id (mesh_id, t);
-                this->add_cgns_here (fname, mesh_id, t);
+                this->add_cgns_here (fname, mesh_id, t);// Register XS sim data.
+                this->add_cgns_here (fname, part_id, t);// bigger sim data.
 #ifdef FMR_DEBUG
                 log->label_fprintf(log->fmrerr,"**** Dcgn add!","%s\n",
                   this->make_data_id (mesh_id, t).c_str());

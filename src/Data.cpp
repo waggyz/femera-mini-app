@@ -261,25 +261,28 @@ int Data::get_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals& vals) {
   int err= 0;
   const auto vals_id = this->make_data_id (id, vals.type);
 #ifdef FMR_DEBUG
-    auto log = this->proc->log;
-    const std::string valname = fmr::get_enum_string (fmr::vals_name,vals.type);
-    log->label_fprintf (log->fmrerr, "**** Data",
-      "%u %s geom vals\n",
-      vals.data.size(), vals_id.c_str());
+  const auto log = this->proc->log;
+  const std::string valname = fmr::get_enum_string (fmr::vals_name,vals.type);
+  log->label_fprintf (log->fmrerr, "**** Data",
+    "%u %s geom vals\n",
+    vals.data.size(), vals_id.c_str());
 #endif
   // Check if data is cached here in a homogeneous data array.
   bool is_found = this->geom_vals.count (vals_id) > 0;
   if (is_found) {// The data might be cached already.
     if (!vals.stored_state.was_read) {// The data has been cached homogeneous.
-      vals = this->geom_vals.at (vals_id);
+//      vals = this->geom_vals.at (vals_id);
+      vals = this->geom_vals [vals_id];
       if (vals.stored_state.was_read) {
         return vals.stored_state.has_error ? 1 : 0;
   } } }
   // The data has not been cached, but maybe we know how to get it...
   is_found = false;// Change to true if this data can be read by a data handler.
   if (this->sims_data_file.count (vals_id) > 0) {
-    const auto data_files = this->sims_data_file.at (vals_id);
+//    const auto data_files = this->sims_data_file.at (vals_id);
+    const auto data_files = this->sims_data_file [vals_id];
 #ifdef FMR_DEBUG
+//    const auto log = this->proc->log;
     log->label_fprintf (log->fmrerr, "**** Data",
       "%u %s geom vals found %lu handler...\n",
       vals.data.size(), vals_id.c_str(), data_files.size());
@@ -293,7 +296,7 @@ int Data::get_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals& vals) {
   if (is_found) {return vals.stored_state.has_error ? 1 : 0;}
   err= 1;
 #ifdef FMR_DEBUG
-    auto log = this->proc->log;
+//    const auto log = this->proc->log;
     const std::string valname = fmr::get_enum_string (fmr::vals_name,vals.type);
     log->label_fprintf (log->fmrerr, "WARN""ING Data",
       "%u %s:%s geom vals not found.\n",
