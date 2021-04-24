@@ -456,8 +456,8 @@ int Dcgn::add_cgns_here (const std::string fname, const fmr::Data_id id,
 }
 int Dcgn::read_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals &vals) {
   int err=0;
-  const auto log = this->proc->log;
 #ifdef FMR_DEBUG
+  const auto log = this->proc->log;
   log->label_fprintf (log->fmrerr,"**** Dcgn read","%s\n",id.c_str());
 #endif
   if (vals.stored_state.was_read) {return 0;}
@@ -504,14 +504,9 @@ int Dcgn::read_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals &vals) {
         default : isok = false;
       }
       if (!isok) {return 1;}
-      //
-      const cgsize_t node_n = 8;//FIXME
-      range_min[0] = 1; range_max[0] = node_n;// unstructured: only first val
-#if 1
       Data::Lock_here lock (this->liblock);
       err= cg_golist (path->file_cgid, path->base, path->deep,
         path->labs.data(), path->inds.data());//TODO one level up from path?
-#endif
       if (err !=0) {return err;}
       err= cg_ncoords (path->file_cgid, path->base, path->inds[pn-1],
         &array_n);
@@ -519,10 +514,9 @@ int Dcgn::read_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals &vals) {
       const fmr::Dim_int coor_d = (array_n < 3) ? fmr::Dim_int (array_n) : 3;
       //TODO check geom_d/mesh_d/elem_d ?
       vals.layout = fmr::data::Layout::Block;
-      const auto sz = coor_d * fmr::Global_int (node_n);
-      if (vals.data.size () < sz) {vals.data.resize (sz);}
-#if 1
-//      log->label_fprintf(log->fmrerr,"**** Dcgn read","%lu coor\n",sz);
+      const auto sz = vals.data.size ();
+      const cgsize_t node_n = sz / coor_d;
+      range_min[0] = 1; range_max[0] = node_n;// unstructured: only first val
       fmr::perf::timer_resume (&this->time);
       //char *coordname,//CoordinateX, CoordinateY, CoordinateZ
       if (err==0 && coor_d>0) {
@@ -532,7 +526,6 @@ int Dcgn::read_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals &vals) {
         if (err==0) {this->time.bytes+= node_n * sizeof (vals.data[0]);}
         else {vals.stored_state.has_error = true;}
       }
-//      log->label_fprintf(log->fmrerr,"**** Dcgn read","%lu x\n",node_n);
       if (err==0 && coor_d>1) {
         err= cg_coord_read (path->file_cgid, path->base, path->inds [pn-1],
           "CoordinateY", mem_datatype, &range_min[0], &range_max[0],
@@ -540,7 +533,6 @@ int Dcgn::read_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals &vals) {
         if (err==0){this->time.bytes+= node_n * sizeof (vals.data[0]);}
         else {vals.stored_state.has_error = true;}
       }
-//      log->label_fprintf(log->fmrerr,"**** Dcgn read","%lu y\n",node_n);
       if (err==0 && coor_d>2) {
         err= cg_coord_read (path->file_cgid, path->base, path->inds [pn-1],
           "CoordinateZ", mem_datatype, &range_min[0], &range_max[0],
@@ -548,25 +540,28 @@ int Dcgn::read_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals &vals) {
         if (err==0) {this->time.bytes+= node_n * sizeof (vals.data[0]);}
         else {vals.stored_state.has_error = true;}
       }
-//      log->label_fprintf(log->fmrerr,"**** Dcgn read","%lu z\n",node_n);
       fmr::perf::timer_pause (&this->time);
 //        if (err !=0) {return err;}//TODO Remove?
       is_found = true;
-#endif
       vals.stored_state.was_read = true;
       break;}
-    default : err= Data::read_geom_vals (id, vals);//TODO Remove this call?
+    default : err=1;
+      //err= Data::read_geom_vals (id, vals);//TODO Remove this call?
   }
   vals.stored_state.has_error |= (err!=0);
 //  err= is_found ? 0 : 1;//TODO Remove?
   if (err >0) {return err;}
+#if 0
   if (log->detail >= this->verblevel) {
     const std::string label = this->task_name+" read";
     log->label_fprintf (log->fmrerr, label.c_str(), "%lu %s geom vals.\n",
       vals.data.size(), id.c_str());
   }
+#else
+  err= Data::read_geom_vals (id, vals);//TODO only prints msg?
+#endif
   return err;
- }
+}
 int Dcgn::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
   int err=0;
   const auto log = this->proc->log;
@@ -636,7 +631,7 @@ int Dcgn::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
         "read_local_vals (%s,..) datatype not handled\n", id.c_str());
   } }//end switch (vals.type)
   vals.stored_state.has_error |= err > 0;
-  Data::read_local_vals (id, vals);//TODO Remove this call?
+  Data::read_local_vals (id, vals);//TODO Remove this call? only prints msg?
   return err;
 }
 Data::File_info Dcgn::scan_file_data (const std::string fname) {
@@ -761,7 +756,7 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
       //TODO Move to get_info(part_id,..)
       //
       fmr::Local_int mesh_n=0, grid_n=0;
-      fmr::Global_int node_sysn=0, elem_sysn=0;
+      fmr::Global_int node_n=0, node_sysn=0, elem_sysn=0;
       int sect_0 = 0;
       for(int zone_i=1; zone_i <= zone_n; zone_i++) {
         ::ZoneType_t zone_type;// grid:structured or mesh:unstructured
@@ -778,7 +773,8 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
           case ::Structured   : break;//TODO
           case ::Unstructured :
             if (!err) {this->time.bytes+= 3*sizeof(zonesize[0]);}
-            node_sysn += zonesize[0];// counts halo nodes more than once
+            node_n     = zonesize[0];
+            node_sysn += node_n;// counts halo nodes more than once
             break;
           default : err+=1;
         }
@@ -798,6 +794,7 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
         if (mesh_n>0) {
           this->new_enum_vals (data_id, fmr::Data::Elem_form, mesh_n);
           this->new_local_vals (data_id, fmr::Data::Elem_n, mesh_n);
+          this->new_local_vals (data_id, fmr::Data::Node_n, mesh_n);
         }
 #endif
         // Scan meshes (CGNS sections) //TODO for Partition::Join only?
@@ -828,8 +825,10 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
             const auto mesh_i = sect_0 + sect_i -1;
             const auto fid = this->make_data_id (data_id, fmr::Data::Elem_form);
             const auto eid = this->make_data_id (data_id, fmr::Data::Elem_n);
+            const auto nid = this->make_data_id (data_id, fmr::Data::Node_n);
             this->data->enum_vals[fid].data[mesh_i] = fmr::enum2val (form);
             this->data->local_vals[eid].data[mesh_i] = fmr::Local_int (elem_n);
+            this->data->local_vals[nid].data[mesh_i] = fmr::Local_int (node_n);
             const auto mesh_id = data_id + ":Mesh_" + std::to_string(mesh_i);
             if (elem_n > 0) {//TODO only adding meshes needed for now.
               err= cg_goto (info.file_cgid, base_i, "Zone_t",zone_i, NULL);

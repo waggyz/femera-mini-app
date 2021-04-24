@@ -48,6 +48,10 @@ namespace Femera {
         fmr::get_enum_string(fmr::elem_form_name, this->elem_info.form).c_str(),
         geom_d);
 #endif
+    const auto nid = this->data->make_data_id (pid, fmr::Data::Node_n);
+    is_found = this->data->local_vals.count(nid) > 0;
+    this->node_n
+      = is_found ? this->data->local_vals.at(nid).data[this->sims_ix] : 0;
     const auto eid = this->data->make_data_id (pid, fmr::Data::Elem_n);
     is_found = this->data->local_vals.count(eid) > 0;
     this->elem_n
@@ -172,9 +176,13 @@ namespace Femera {
           case fmr::Data::Jacs_dets : {
             do_warn = false;
             err=0;// Get Elem_conn, Node_coor to calculate jacs_dets
-            for (auto t : {fmr::Data::Elem_conn, fmr::Data::Node_coor}) {
+            for (auto t : {fmr::Data::Elem_conn}) {
               if (this->geoms.count(t) <= 0) {// does not exist
                 err= this->ini_data_vals ({t}, 0);//TODO size?
+            } }
+            for (auto t : {fmr::Data::Node_coor}) {
+              if (this->geoms.count(t) <= 0) {// does not exist
+                err= this->ini_data_vals ({t}, this->geom_d * this->node_n);
             } }
             err= this->get_data_vals (loc,
               {fmr::Data::Elem_conn, fmr::Data::Node_coor});

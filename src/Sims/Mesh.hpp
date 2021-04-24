@@ -40,6 +40,7 @@ class Mesh : public Geom {// Pure virtual? Mesh?
 #endif
     std::map<fmr::Data,fmr::Geom_float_vals> geoms ={};
     //
+    fmr::Local_int        node_n = 0;
     fmr::Local_int        elem_n = 0;
     fmr::Dim_int  each_jacs_size = 0;// size of each jacs (4,10)
     fmr::Dim_int     elem_jacs_n = 0;// jacs/elem
