@@ -79,10 +79,10 @@ namespace Femera {
         //     So, load node_coor at global sim level, if needed for jacs calc.
 #endif
 //        const auto each_conn_n = 0;//TODO each_conn_n(form)/elem_vert_n(form)?
-        const auto each_jacs_n = 0;//TODO each_jacs_n(form)
+        const auto each_jacs_sz = 10;//TODO each_jacs_n(form)
         // element jacobian data (inverted, maybe transposed, may have det)
         this->ini_data_vals ({fmr::Data::Elem_conn}, elem_n * elem_info.node_n);
-        this->ini_data_vals ({fmr::Data::Jacs_dets}, elem_n * each_jacs_n);
+        this->ini_data_vals ({fmr::Data::Jacs_dets}, elem_n * each_jacs_sz);
         this->data_list.push_back (fmr::Data::Elem_conn);
       }
 #ifdef FMR_DEBUG
@@ -166,11 +166,18 @@ namespace Femera {
         case fmr::Vals_type::Geom : {
           if (this->geoms.count (type) == 0) {err= 1;}
           else {
+            auto vals =& this->geoms.at (type);
 #if 0
             //TODO Figure out when to use .at(x) vs. [x].
             err= this->data->get_geom_vals (loc, this->geoms [type]);
 #else
-            err= this->data->get_geom_vals (loc, this->geoms.at (type));
+//            err= this->data->get_geom_vals (loc, this->geoms.at (type));
+            const auto was_read_already = vals->stored_state.was_read;
+            err= this->data->get_geom_vals (loc, *vals);
+            this->time.bytes// TODO Count ints too?
+              += (!was_read_already && vals->stored_state.was_read)
+              ? vals->data.size() * sizeof (vals->data[0]) : 0;
+            //TODO size() may be greater than vals read.
 #endif
           }
           break;}
@@ -217,8 +224,52 @@ namespace Femera {
                 } } } }
 #endif
               }
-//FIXME IAMHERE
+              if (this->elem_n > 0
+                && this->locals.count (fmr::Data::Elem_conn) > 0
+                && this->geoms.count  (fmr::Data::Node_coor) > 0) {
+                const fmr::Dim_int jacs_sz = 10;//TODO get each_elem_jacs_sz
+                const auto conn_n = this->elem_info.node_n;
+                err= ini_data_vals ({fmr::Data::Jacs_dets}, elem_n * jacs_sz);
+                const auto conn =& this->locals.at (fmr::Data::Elem_conn).data[0];
+                const auto jacs =& this->geoms.at  (fmr::Data::Jacs_dets).data[0];
+                //TODO assumes coor has block layout
+                const auto x =& this->geoms.at (fmr::Data::Node_coor).data[0];
+                const auto y =& x [node_n];
+                const auto z =& y [node_n];// TODO assumes 3D geom
+                for (fmr::Local_int elem_i=0; elem_i<this->elem_n; elem_i++) {
+                  //
+                  //FIXME IAMHERE
+                  const fmr::Global_int c = conn_n * elem_i;
+                  jacs [jacs_sz * elem_i + jacs_sz-1]// det
+                    = x [conn[c+0]] +x [conn[c+1]] +x [conn[c+2]] +x [conn[c+3]]
+                    + y [conn[c+0]] +y [conn[c+1]] +y [conn[c+2]] +y [conn[c+3]]
+                    + z [conn[c+0]] +z [conn[c+1]] +z [conn[c+2]] +z [conn[c+3]];
+                  jacs [jacs_sz * elem_i + jacs_sz-1] /= fmr::Geom_float (3*4);
+                  //
+                }
+              if (this->verblevel <= log->timing) {
+                this->time.flops += elem_n * 13;//FIXME
+                const auto C =& this->locals.at (fmr::Data::Elem_conn);
+                const auto X =& this->geoms.at  (fmr::Data::Node_coor);
+                const auto J =& this->geoms.at  (fmr::Data::Jacs_dets);
+                this->time.bytes += elem_n *  4 * sizeof (C->data[0]);// read
+                this->time.bytes += elem_n * 12 * sizeof (X->data[0]);// read
+                this->time.bytes += elem_n * jacs_sz * sizeof (J->data[0]);// w
+            } } }//end calculate jacs_dets
+#ifdef FMR_DEBUG
+            if (this->elem_n > 0
+              && this->geoms.count (fmr::Data::Jacs_dets) > 0) {
+              const auto jacs =& this->geoms.at  (fmr::Data::Jacs_dets).data[0];
+              const fmr::Dim_int jacs_sz = 10;//TODO get each_elem_jacs_sz
+              auto tot = fmr::Geom_float(0);
+              for (fmr::Local_int elem_i=0; elem_i<this->elem_n; elem_i++) {
+                tot += jacs [jacs_sz * elem_i + jacs_sz-1];
+              }
+              const std::string label = "**** "+this->task_name +" jacs";
+              log->label_fprintf (log->fmrerr, label.c_str(),"%g det avg\n",
+                double (tot / fmr::Geom_float (elem_n)));
             }
+#endif
             break;}
           default : {}// Do nothing.
         }//end switch (type)
@@ -243,11 +294,6 @@ namespace Femera {
         this->model_name.c_str(), this->elem_info.elem_d, this->geom_d,
         this->parent->model_name.c_str());
     }
-    //fmr::perf::timer_resume (& this->time);
-    //
-    // this->data->make_mesh (this->parent->model_name);//TODO XS sims only
-    //
-    //fmr::perf::timer_pause (& this->time);
     return err;
   }
 #if 0

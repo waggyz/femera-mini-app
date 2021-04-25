@@ -29,8 +29,9 @@ namespace fmr {namespace math {
     {Poly:: Serendipity,std::make_pair("S","Serendipity")},
     {Poly::      Bipoly,std::make_pair("B","Bipolynomial")},
     {Poly::     Tripoly,std::make_pair("T","Tripolynomial")},
-    {Poly::     Pyramid,std::make_pair("D","Pyramid polynomial")},
-    {Poly::       Prism,std::make_pair("M","Prism polynomial")}
+    {Poly::     Pyramid,std::make_pair("Y","Pyramid polynomial")},
+    {Poly::       Prism,std::make_pair("M","Prism polynomial")},
+    {Poly::         end,std::make_pair("*","Poly enum end marker")}
   };
   typedef int8_t Zorder_int;
 #ifdef FMR_HAS_ZYCLOPS
