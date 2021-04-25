@@ -165,33 +165,38 @@ namespace Femera {
         case fmr::Vals_type::Geom : {
           if (this->geoms.count (type) == 0) {err= 1;}
           else {
-//            err= this->data->get_geom_vals (loc, this->geoms [type]);
+#if 0
+            //TODO Figure out when to use .at(x) vs. [x].
+            err= this->data->get_geom_vals (loc, this->geoms [type]);
+#else
             err= this->data->get_geom_vals (loc, this->geoms.at (type));
+#endif
           }
           break;}
         default : err= Sims::get_data_vals (loc, {type});
       }
-      if (err > 0) {// there is no local data here
-        switch (type) {// non-standard access handling
-          case fmr::Data::Jacs_dets : {
+      if (err > 0) {// There is no data here.
+        switch (type) {// non-standard read handling
+          case fmr::Data::Jacs_dets : {// Calculate jacs_dets.
             do_warn = false;
-            err=0;// Get Elem_conn, Node_coor to calculate jacs_dets
-            for (auto t : {fmr::Data::Elem_conn}) {
-              if (this->geoms.count(t) <= 0) {// does not exist
-                err= this->ini_data_vals ({t}, 0);//TODO size?
-            } }
-            for (auto t : {fmr::Data::Node_coor}) {
-              if (this->geoms.count(t) <= 0) {// does not exist
-                err= this->ini_data_vals ({t}, this->geom_d * this->node_n);
-            } }
+            err=0;// Get Elem_conn, Node_coor
+            if (this->locals.count (fmr::Data::Elem_conn) == 0) {
+              err= this->ini_data_vals ({fmr::Data::Elem_conn},
+                this->elem_n * this->elem_info.node_n);
+            }
+            if (this->geoms.count (fmr::Data::Node_coor) == 0) {
+              err= this->ini_data_vals ({fmr::Data::Node_coor},
+                this->geom_d * this->node_n);
+            }
             err= this->get_data_vals (loc,
               {fmr::Data::Elem_conn, fmr::Data::Node_coor});
-            if (err <=0) {// Calculate jacs_dets.
+            if (err > 0) {do_warn=true;}
+            else {// Calculate jacs_dets.
               if (this->verblevel <= log->detail) {
                 const auto formstr = fmr::get_enum_string (
                   fmr::elem_form_name, this->elem_info.form);
-                std::string pchar
-                  = fmr::math::poly_letter_name.at(this->elem_info.poly).first;
+                const auto pchar
+                  = fmr::math::poly_letter_name.at (this->elem_info.poly).first;
                 const std::string label = this->task_name +" jacs calc";
                 log->label_fprintf (log->fmrout, label.c_str(),
                   "%s (%s%u %u-node %s)...\n", this->model_name.c_str(),
@@ -200,17 +205,7 @@ namespace Femera {
               }
 //FIXME IAMHERE
             }
-            else {do_warn=true;}
             break;}
-#if 0
-          case fmr::Data::Node_coor : {// Node info may be at part level.
-            if (loc != parent->model_name) {// Avoid infinite recursion.
-              do_warn = false;
-              err= this->get_data_vals (parent->model_name,
-                {fmr::Data::Node_coor});
-            }
-          break;}
-#endif
           default : {}// Do nothing.
         }//end switch (type)
       }//end handle non-standard access

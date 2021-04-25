@@ -623,6 +623,11 @@ int Dcgn::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
           vals.data[i] = fmr::Local_int (buf[i]);//TODO XS sims only.
         }
         vals.stored_state.was_read = (err == 0);
+#ifdef FMR_DEBUG
+        log->label_fprintf(log->fmrerr, "**** CGNS read",
+          "%s Elem_conn read %u B\n", id.c_str(),
+          vals.stored_state.was_read ? conn_sz * sizeof (cgsize_t) : 0);
+#endif
       }
       break;}
     default : {
