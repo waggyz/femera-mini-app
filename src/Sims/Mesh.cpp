@@ -128,7 +128,8 @@ namespace Femera {
           = fmr::math::poly_letter_name.at(this->elem_info.poly).first;
         const std::string label = this->task_name +" prep";
         log->label_fprintf (log->fmrout, label.c_str(),
-          "%s: %u %s%u %u-node %s.\n", name.c_str(),
+          "%s: %u node%s, %u %s%u %u-node %s.\n", name.c_str(),
+          this->node_n, (node_n==1)?"":"s",
           this->elem_n, pchar.c_str(), this->elem_info.pord, elem_info.node_n,
           formstr.c_str());
       }
@@ -199,9 +200,22 @@ namespace Femera {
                   = fmr::math::poly_letter_name.at (this->elem_info.poly).first;
                 const std::string label = this->task_name +" jacs calc";
                 log->label_fprintf (log->fmrout, label.c_str(),
-                  "%s (%s%u %u-node %s)...\n", this->model_name.c_str(),
-                  pchar.c_str(), this->elem_info.pord, elem_info.node_n,
+                  "%s: %u %s%u %u-node %s...\n", this->model_name.c_str(),
+                  elem_n, pchar.c_str(), elem_info.pord, elem_info.node_n,
                   formstr.c_str());
+#ifdef FMR_DEBUG
+                if (this->locals.count (fmr::Data::Elem_conn) > 0) {
+                  if (elem_info.node_n == 4) {
+                    const auto sz = locals.at(fmr::Data::Elem_conn).data.size();
+                    const auto conn =& locals.at(fmr::Data::Elem_conn).data[0];
+                    for (fmr::Local_int elem_i=0; elem_i<elem_n; elem_i++) {
+                      const auto i = elem_info.node_n * elem_i;
+                      if (i+3 < sz) {
+                        log->label_fprintf (log->fmrerr, "Mesh conn",
+                          "elem %3u:[%3u %3u %3u %3u]\n",
+                          elem_i, conn[i], conn[i+1], conn[i+2], conn[i+3]);
+                } } } }
+#endif
               }
 //FIXME IAMHERE
             }

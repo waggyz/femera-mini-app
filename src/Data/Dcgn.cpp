@@ -620,7 +620,8 @@ int Dcgn::read_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
         this->time.bytes += conn_sz * sizeof (cgsize_t);
         if (vals.data.size() < size_t(conn_sz)) {vals.data.resize (conn_sz);}
         for (cgsize_t i=0; i<conn_sz; i++) {
-          vals.data[i] = fmr::Local_int (buf[i]);//TODO XS sims only.
+          vals.data[i] = fmr::Local_int (buf[i] - 1);//TODO XS sims only.
+          //TODO XS only: local_id = global_id - 1
         }
         vals.stored_state.was_read = (err == 0);
 #ifdef FMR_DEBUG

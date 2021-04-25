@@ -435,8 +435,8 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
             if (esz > 0) {
               if (vals.data.size() < esz) {vals.data.resize(esz);}
               for (size_t i=0; i<esz; i++) {
-                vals.data[i] = fmr::Local_int(conn[i]);//TODO XS only
-              }//TODO global_id == local_id is XS only
+                vals.data[i] = fmr::Local_int(conn[i] - 1);//TODO Check this -1.
+              }//TODO XS only: local_id = global_id - 1
               vals.stored_state.was_read = true;
               //TODO cache elem tags?.
           } } }
