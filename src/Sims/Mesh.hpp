@@ -55,6 +55,7 @@ class Mesh : public Geom {// Pure virtual? Mesh?
     int ini_data_vals (const Data_list, const size_t n) final override;
     int get_data_vals (const fmr::Data_id, const Data_list) final override;
     //
+    fmr::Local_int make_jacs ();// Returns number of nonpositive determinants
   protected:
 #if 0
     int prep () override;
