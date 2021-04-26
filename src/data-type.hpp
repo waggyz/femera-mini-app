@@ -129,18 +129,24 @@ namespace fmr {//TODO? namespace data {
     0 //"Elem_form end marker"
   };
   struct Elem_info {
-    Local_int  node_n = 0;
-    Elem_form  form   = Elem_form::Unknown;
-    math::Poly poly   = math::Poly::Unknown;
-    Dim_int    pord   = 0;
-    Dim_int    elem_d = 0;
-//    Dim_int    edge_n = 0;
-//    Dim_int    face_n = 0;
+    Local_int       node_n = 0;
+    Local_int  elem_jacs_n = 1;//TODO jacs/elem
+    Elem_form       form   = Elem_form::Unknown;
+    math::Poly      poly   = math::Poly::Unknown;
+    Dim_int         pord   = 0;
+    Dim_int         elem_d = 0;
+#if 0
+    Dim_int         vert_n = 0;
+    Dim_int         edge_n = 0;
+    Dim_int         face_n = 0;
+    Dim_int         volu_n = 1;
+#endif
+    Dim_int each_jacs_size =10;//TODO size of each jacs (4,10)
     Elem_info () {}
     Elem_info (const Elem_form f, const math::Poly y, const Dim_int p)
       : form (f), poly (y), pord (p) {
       elem_d = elem_form_d [enum2val (f)];
-      node_n = fmr::math::poly_terms (elem_d, y, p);
+      node_n = math::poly_terms (elem_d, y, p);
     }
     Elem_info (const Elem_form f, const Local_int n) : form (f) {
       switch (f) {

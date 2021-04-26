@@ -42,9 +42,7 @@ class Mesh : public Geom {// Pure virtual? Mesh?
     //
     fmr::Local_int        node_n = 0;
     fmr::Local_int        elem_n = 0;
-    fmr::Dim_int  each_jacs_size = 0;// size of each jacs (4,10)
-    fmr::Dim_int     elem_jacs_n = 0;// jacs/elem
-    fmr::Elem_info     elem_info = fmr::Elem_info ();
+    fmr::Elem_info     elem_info = fmr::Elem_info ();//TODO replace with Elem ?
     fmr::math::Zomplex math_type = fmr::math::Real;
   // methods ----------------------------------------------------------------
   public:

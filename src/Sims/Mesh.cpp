@@ -78,11 +78,11 @@ namespace Femera {
         //     XS & SM simms, because each sim is contained in 1 NUMA domain.
         //     So, load node_coor at global sim level, if needed for jacs calc.
 #endif
-//        const auto each_conn_n = 0;//TODO each_conn_n(form)/elem_vert_n(form)?
-        const auto each_jacs_sz = 10;//TODO each_jacs_n(form)
+        const fmr::Local_int jacs_sz
+          =  this->elem_info.elem_jacs_n * this->elem_info.each_jacs_size;
         // element jacobian data (inverted, maybe transposed, may have det)
         this->ini_data_vals ({fmr::Data::Elem_conn}, elem_n * elem_info.node_n);
-        this->ini_data_vals ({fmr::Data::Jacs_dets}, elem_n * each_jacs_sz);
+        this->ini_data_vals ({fmr::Data::Jacs_dets}, elem_n * jacs_sz);
         this->data_list.push_back (fmr::Data::Elem_conn);
       }
 #ifdef FMR_DEBUG
@@ -214,7 +214,8 @@ namespace Femera {
               if (this->elem_n > 0
                 && this->locals.count (fmr::Data::Elem_conn) > 0
                 && this->geoms.count  (fmr::Data::Node_coor) > 0) {
-                const fmr::Dim_int jacs_sz = 10;//TODO get each_elem_jacs_sz
+                const fmr::Local_int jacs_sz
+                  = this->elem_info.elem_jacs_n * elem_info.each_jacs_size;
                 err= ini_data_vals ({fmr::Data::Jacs_dets}, elem_n * jacs_sz);
                 // Calculate jacs_dets.
                 const fmr::Local_int jacs_bad_n = this->make_jacs ();
@@ -228,7 +229,8 @@ namespace Femera {
             if (this->elem_n > 0
               && this->geoms.count (fmr::Data::Jacs_dets) > 0) {
               const auto jacs =& this->geoms.at (fmr::Data::Jacs_dets).data[0];
-              const fmr::Dim_int jacs_sz = 10;//TODO get each_elem_jacs_sz
+              const fmr::Local_int jacs_sz
+                =  this->elem_info.elem_jacs_n * this->elem_info.each_jacs_size;
               auto tot = fmr::Geom_float (0);
               for (fmr::Local_int elem_i=0; elem_i<this->elem_n; elem_i++) {
                 tot += jacs [jacs_sz * elem_i + jacs_sz-1];
@@ -273,23 +275,36 @@ namespace Femera {
     const auto z =& y [node_n];// TODO assumes 3D geom
     //
     const auto conn_n = this->elem_info.node_n;
-    const fmr::Dim_int jacs_sz = 10;//TODO get each_elem_jacs_sz
+    const fmr::Local_int jacs_sz
+      = this->elem_info.elem_jacs_n * this->elem_info.each_jacs_size;
     //
     for (fmr::Local_int elem_i=0; elem_i<this->elem_n; elem_i++) {
-      const fmr::Global_int c = conn_n * elem_i;
-      //FIXME IAMHERE
-      jacs [jacs_sz * elem_i + jacs_sz-1]// det
-        =x [conn[c+0]] +x [conn[c+1]] +x [conn[c+2]] +x [conn[c+3]]
-        +y [conn[c+0]] +y [conn[c+1]] +y [conn[c+2]] +y [conn[c+3]]
-        +z [conn[c+0]] +z [conn[c+1]] +z [conn[c+2]] +z [conn[c+3]];
-      jacs [jacs_sz * elem_i + jacs_sz-1] /= fmr::Geom_float (3*4);
-      bad_jacs_n += jacs [jacs_sz * elem_i + jacs_sz-1] <= fmr::Geom_float (0);
+      const fmr::Global_int ci = conn_n  * elem_i;
+      const fmr::Global_int ji = jacs_sz * elem_i;
+#if 0
+      //FIXME IAMHERE call inline function to calculate jacs_dets for 1 elem:
+      // coor block layout
+      bad_jacs_n += this->elem->make_jacs (&jacs[ji], &conn[ci], x,y,z, &time);
+      // coor interleaved layout
+//      bad_jacs_n += this->elem->make_jacs (&jacs[ji], &conn[ci], coor, &time);
+#else
+      jacs [ji + jacs_sz-1]// fake det calc
+        = x [conn[ci+0]] + x [conn[ci+1]] + x [conn[ci+2]] + x [conn[ci+3]]
+        + y [conn[ci+0]] + y [conn[ci+1]] + y [conn[ci+2]] + y [conn[ci+3]]
+        + z [conn[ci+0]] + z [conn[ci+1]] + z [conn[ci+2]] + z [conn[ci+3]];
+      jacs [ji + jacs_sz-1] /= fmr::Geom_float (3*4);
+      bad_jacs_n += jacs [ji + jacs_sz-1] <= fmr::Geom_float (0);
+#endif
     }
     if (this->verblevel <= this->proc->log->timing) {
-      this->time.flops += elem_n * 13;//FIXME
-      this->time.bytes += elem_n *  4 * sizeof (conn[0]);// read
-      this->time.bytes += elem_n * 12 * sizeof (x[0]);// read
-      this->time.bytes += elem_n * jacs_sz * sizeof (jacs[0]);// w
+#if 0
+      err = this->elem->make_jacs (&this->time, this->elem_n);//TODO below calcs
+#else
+      this->time.flops += this->elem_n * 13;//FIXME
+      this->time.bytes += this->elem_n *  4      * sizeof (conn[0]);// read
+      this->time.bytes += this->elem_n * 12      * sizeof (   x[0]);// read
+      this->time.bytes += this->elem_n * jacs_sz * sizeof (jacs[0]);// write
+#endif
     }
     return bad_jacs_n;
   }
