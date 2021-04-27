@@ -267,12 +267,11 @@ namespace Femera {
     return err;
   }
   fmr::Local_int Mesh::make_jacs () {fmr::Local_int bad_jacs_n = 0;
-    const auto jacs =&  geoms.at (fmr::Data::Jacs_dets).data[0];
-    const auto conn =& locals.at (fmr::Data::Elem_conn).data[0];
-    //TODO assumes coor has block layout
-    const auto x =& geoms.at (fmr::Data::Node_coor).data[0];
-    const auto y =& x [node_n];
-    const auto z =& y [node_n];// TODO assumes 3D geom
+    FMR_ARRAY_PTR jacs =&  geoms.at (fmr::Data::Jacs_dets).data[0];
+    FMR_CONST_PTR conn =& locals.at (fmr::Data::Elem_conn).data[0];
+    FMR_CONST_PTR    x =&  geoms.at (fmr::Data::Node_coor).data[0];
+    FMR_CONST_PTR    y =& x [node_n];//TODO assume block layout
+    FMR_CONST_PTR    z =& y [node_n];//TODO assumes 3D geom
     //
     const auto conn_n = this->elem_info.node_n;
     const fmr::Local_int jacs_sz
@@ -289,9 +288,16 @@ namespace Femera {
 //      bad_jacs_n += this->elem->make_jacs (&jacs[ji], &conn[ci], coor, &time);
 #else
       jacs [ji + jacs_sz-1]// fake det calc
+#if 0
         = x [conn[ci+0]] + x [conn[ci+1]] + x [conn[ci+2]] + x [conn[ci+3]]
         + y [conn[ci+0]] + y [conn[ci+1]] + y [conn[ci+2]] + y [conn[ci+3]]
         + z [conn[ci+0]] + z [conn[ci+1]] + z [conn[ci+2]] + z [conn[ci+3]];
+#else
+        = x [conn[ci+0]] + y [conn[ci+0]] + z [conn[ci+0]]
+        + x [conn[ci+1]] + y [conn[ci+1]] + z [conn[ci+1]]
+        + x [conn[ci+2]] + y [conn[ci+2]] + z [conn[ci+2]]
+        + x [conn[ci+3]] + y [conn[ci+3]] + z [conn[ci+3]];
+#endif
       jacs [ji + jacs_sz-1] /= fmr::Geom_float (3*4);
       bad_jacs_n += jacs [ji + jacs_sz-1] <= fmr::Geom_float (0);
 #endif

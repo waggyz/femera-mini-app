@@ -4,6 +4,13 @@
 #include <tuple>
 #include <valarray>
 
+#ifndef FMR_RESTRICT
+#define FMR_RESTRICT __restrict
+#endif
+#define FMR_ARRAY_PTR auto* FMR_RESTRICT
+#define FMR_CONST_PTR const auto* FMR_RESTRICT
+
+
 namespace fmr {namespace data {
   enum class Precision   : int {Unknown=0, Bit = 1,//TODO unsigned Dim_int?
 //    Bit        =  1, Int_hexadec  = -4, Int_byte     =-8,
