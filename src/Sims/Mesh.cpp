@@ -287,34 +287,20 @@ namespace Femera {
       const fmr::Global_int ci = conn_n  * elem_i;
       const fmr::Global_int ji = jacs_sz * elem_i;
       //
+      //FIXME IAMHERE inline/template function to calculate jacs_dets for 1 elem
       bad_jacs_n += fmr::elem::make_jacobian (&jacs[ji],
         vert_n, &conn[ci], shpg_ptr, x,y,z);
 #if 0
-      //FIXME IAMHERE call inline function to calculate jacs_dets for 1 elem:
       // coor block layout
-      //
       bad_jacs_n += fmr::elem::make_jacobian (&jacs[ji],// templated (T*, ...
         conn_n, &conn[ci], &shpg[0], x,y,z);
-      //
       //
       fmr::Local_int jac0=0, con0=0;
       bad_jacs_n += this->elem->make_elem_jacs (&jacs[j0],
         elem_n, conn_n, &conn[c0], &this->timer, x,y,z);
       // coor interleaved layout
-//      bad_jacs_n += this->elem->make_elem_jac3 ( &jacs[ji],
+//      bad_jacs_n += this->elem->make_elem_jac3 (&jacs[ji],
           elem_n, conn_n, &conn[ci], coor, &this->timer,);
-//#else
-      jacs [ji + jacs_sz-1]// fake det calc
-#if 0
-        = x [conn[ci+0]] + x [conn[ci+1]] + x [conn[ci+2]] + x [conn[ci+3]]
-        + y [conn[ci+0]] + y [conn[ci+1]] + y [conn[ci+2]] + y [conn[ci+3]]
-        + z [conn[ci+0]] + z [conn[ci+1]] + z [conn[ci+2]] + z [conn[ci+3]];
-#else
-        = x [conn[ci+0]] + y [conn[ci+0]] + z [conn[ci+0]]
-        + x [conn[ci+1]] + y [conn[ci+1]] + z [conn[ci+1]]
-        + x [conn[ci+2]] + y [conn[ci+2]] + z [conn[ci+2]]
-        + x [conn[ci+3]] + y [conn[ci+3]] + z [conn[ci+3]];
-#endif
       jacs [ji + jacs_sz-1] /= fmr::Geom_float (3*4);
       bad_jacs_n += jacs [ji + jacs_sz-1] <= fmr::Geom_float (0);
 #endif
@@ -324,7 +310,7 @@ namespace Femera {
       err = fmr::mesh::perf_elem_jac3 (&this->time, this->elem_n,
         &jacs[ji], conn_n, &conn[ci], &shpg[0], x,y,z);//TODO below
 #else
-      this->time.flops += this->elem_n * 6 * vert_n + 1;//FIXME
+      this->time.flops += this->elem_n * 6 * vert_n + 1;//FIXME above
       this->time.bytes += this->elem_n *     vert_n  * sizeof (conn[0]);// read
       this->time.bytes += this->elem_n * 3 * vert_n  * sizeof (   x[0]);// read
       this->time.bytes += this->elem_n *     jacs_sz * sizeof (jacs[0]);// write
