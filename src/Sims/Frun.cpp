@@ -41,7 +41,7 @@ namespace Femera {
       const auto timestr = fmr::get_enum_string (fmr::Sim_time_name, time_type);
       const auto szshort = fmr::get_enum_string (fmr::Sim_size_short,
         this->sims_size);
-      std::string label = szshort +" "+std::to_string(geom_d)+"D "
+      const auto label = szshort +std::to_string(geom_d)+"D "
         + this->task_name +" prep";
       log->label_fprintf (log->fmrout, label.c_str(),
         "%s time, %s:%s_%u is %s\n", timestr.c_str(),
@@ -108,7 +108,10 @@ namespace Femera {
         err= 0;
     } }
     const double iters = (dof > 500.0 ? 0.01 : 0.1) * dof;
-    const double speed = 1e9 / 40.0;// dof/s Skylake XS sim solve speed/core
+    double speed = 1e9;// dof/s Skylake XS sim solve speed on 40 cores
+    speed = (dof > 10e3) ? -90e6 * (std::log(dof) - std::log(10e3)) : speed;
+    speed = (speed < 500e6) ? 500e6 : speed;
+    speed /= 40.0;// single-core speed
     const double  secs = iters * dof / speed;
 #if 0
     usleep (int (1e6 * secs));
@@ -118,7 +121,10 @@ namespace Femera {
       const auto elem_n = this->parent->globals.at
         (fmr::Data::Elem_sysn).data [this->sims_ix];
       const auto secstr = fmr::perf::format_time_units (secs);
-      const auto label = this->task_name +" Zzzz";
+      const auto szshort = fmr::get_enum_string (fmr::Sim_size_short,
+        this->sims_size);
+      const auto  label = szshort +std::to_string(geom_d)+"D "
+        + this->task_name +" zzzz";
       log->label_fprintf (log->fmrout, label.c_str(),
         "sim_%u: %u geom, %lu elem, %lu node, %g DOF, sleep %s...\n",
         this->sims_ix, this->task.count(), elem_n, node_n, dof, secstr.c_str());

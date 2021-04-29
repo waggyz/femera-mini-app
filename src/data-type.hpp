@@ -135,8 +135,8 @@ namespace fmr {//TODO? namespace data {
     math::Poly      poly   = math::Poly::Unknown;
     Dim_int         pord   = 0;
     Dim_int         elem_d = 0;
-#if 0
     Dim_int         vert_n = 0;
+#if 0
     Dim_int         edge_n = 0;
     Dim_int         face_n = 0;
     Dim_int         volu_n = 1;
@@ -150,22 +150,28 @@ namespace fmr {//TODO? namespace data {
     }
     Elem_info (const Elem_form f, const Local_int n) : form (f) {
       switch (f) {
-        case Elem_form::Line : switch (n) {
-          case  1 : pord = 1; poly = math::Poly::Full; break;
-          case  2 : pord = 2; poly = math::Poly::Full; break;
-          case  3 : pord = 3; poly = math::Poly::Full; break;
+        case Elem_form::Line :
+          vert_n = 2;
+          switch (n) {
+            case  1 : pord = 1; poly = math::Poly::Full; break;
+            case  2 : pord = 2; poly = math::Poly::Full; break;
+            case  3 : pord = 3; poly = math::Poly::Full; break;
           default : {}
         } break;
-        case Elem_form::Tris : switch (n) {
-          case  3 : pord = 1; poly = math::Poly::Full; break;
-          case  6 : pord = 2; poly = math::Poly::Full; break;
-          case  9 : pord = 3; poly = math::Poly::Full; break;
+        case Elem_form::Tris :
+          vert_n = 3;
+          switch (n) {
+            case  3 : pord = 1; poly = math::Poly::Full; break;
+            case  6 : pord = 2; poly = math::Poly::Full; break;
+            case  9 : pord = 3; poly = math::Poly::Full; break;
           default : {}
         } break;
-        case Elem_form::Tets : switch (n) {
-          case  4 : pord = 1; poly = math::Poly::Full; break;
-          case 10 : pord = 2; poly = math::Poly::Full; break;
-          case 20 : pord = 3; poly = math::Poly::Full; break;
+        case Elem_form::Tets :
+          vert_n = 4;
+          switch (n) {
+            case  4 : pord = 1; poly = math::Poly::Full; break;
+            case 10 : pord = 2; poly = math::Poly::Full; break;
+            case 20 : pord = 3; poly = math::Poly::Full; break;
           default : {}
         } break;
         default : {}

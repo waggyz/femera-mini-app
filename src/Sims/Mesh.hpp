@@ -69,6 +69,25 @@ class Mesh : public Geom {// Pure virtual? Mesh?
     Mesh operator= (const Mesh&)   =delete;
 };
 }//end Femera namespace
+namespace fmr { namespace elem {//FIXME move to elem.hpp
+  template<typename T>
+  fmr::Local_int make_jacobian (T* FMR_RESTRICT jacs,//TODO T jacs FMR_RESTRICT &
+    const fmr::Local_int conn_n, const fmr::Local_int* FMR_RESTRICT conn,
+    const T* FMR_RESTRICT shpg,
+    const T* FMR_RESTRICT x, const T* FMR_RESTRICT y, const T* FMR_RESTRICT z) {
+    const fmr::Local_int jacs_sz = 10;//TODO = fmr::elem::jac3_size
+    jacs [jacs_sz-1] = T (0);
+    FMR_PRAGMA_OMP_SIMD
+    for (fmr::Local_int i=0; i<conn_n; i++) {
+      jacs [jacs_sz-1]//TODO Fix fake det calc.
+        += x [conn[i]] * shpg[3* i+0]
+        +  y [conn[i]] * shpg[3* i+1]
+        +  z [conn[i]] * shpg[3* i+2];
+    }
+    jacs [jacs_sz-1] /= T (3*4);
+    return jacs [jacs_sz-1] <= T (0);
+  }
+} }//end fmr::elem:: namespace
 #else
 //end FMR_HAS_MESH_HPP
 #endif

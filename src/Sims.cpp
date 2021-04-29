@@ -285,7 +285,7 @@ namespace Femera {
 #endif
               const auto szshort = fmr::get_enum_string (fmr::Sim_size_short,
                 this->sims_size);
-              const std::string label = szshort+" "+std::to_string(geo_d)+ "D "
+              const std::string label = szshort+std::to_string(geo_d)+ "D "
                 + this->task_name+" " + R->task_name;
               log->label_fprintf (log->fmrout, label.c_str(),
                 "sim_%u: %u gset%s, %u part%s, %u CAD%s, %u grid%s, %u mesh%s\n",
@@ -420,7 +420,7 @@ namespace Femera {
         this->sims_size);
       const auto szshort = fmr::get_enum_string (fmr::Sim_size_short,
         this->sims_size);
-      const auto label = szshort+" "+this->task_name +" init";
+      const auto label = szshort+this->task_name +" init";
       log->label_printf (label.c_str(),"%s assumed sim size\n", szname.c_str());
     }
     fmr::perf::timer_pause (&this->time);
