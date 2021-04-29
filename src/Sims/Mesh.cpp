@@ -222,8 +222,9 @@ namespace Femera {
                 if (jacs_bad_n > 0) {
                   const auto label = "WARN""ING "+this->task_name;
                   log->label_fprintf (log->fmrerr, label.c_str(),
-                    "%u nonpositive element jacobian determinants in %s\n",
-                    jacs_bad_n, this->model_name.c_str());
+                    "%u nonpositive element jacobian determinant%s in %s\n",
+                    jacs_bad_n, (jacs_bad_n==1) ? "":"s",
+                    this->model_name.c_str());
               } } }//end calculate jacs_dets
 #ifdef FMR_DEBUG
             if (this->elem_n > 0
@@ -273,13 +274,13 @@ namespace Femera {
     FMR_CONST_PTR    y =& x [node_n];//TODO assumes block layout
     FMR_CONST_PTR    z =& y [node_n];//TODO assumes 3D geom
     //
-    const auto shpg = std::valarray<fmr::Geom_float> (60,1.0);//TODO
-    FMR_CONST_PTR shpg_ptr =& shpg[0];
-    //
     const auto vert_n = fmr::Local_int (this->elem_info.vert_n);
     const auto conn_n = this->elem_info.node_n;
     const fmr::Local_int jacs_sz
       = this->elem_info.elem_jacs_n * this->elem_info.each_jacs_size;
+    //
+    const auto shpg = std::valarray<fmr::Geom_float> (1.0, 3*vert_n);//TODO
+    FMR_CONST_PTR shpg_ptr =& shpg[0];
     //
     const auto en = this->elem_n;
     for (fmr::Local_int elem_i=0; elem_i<en; elem_i++) {
