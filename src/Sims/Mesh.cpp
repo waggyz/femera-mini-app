@@ -37,15 +37,16 @@ namespace Femera {
 #if 0
     this->elem_info = fmr::Elem_info (form, 4);//TODO each_node_n
 #else
-    this->elem_info.form = form;
+    this->elem_info.elem_form = form;
     this->elem_info.elem_d
-      = fmr::elem_form_d [fmr::enum2val (this->elem_info.form)];
+      = fmr::elem_form_d [fmr::enum2val (this->elem_info.elem_form)];
 #endif
 #ifdef FMR_DEBUG
       log->label_fprintf(log->fmrout, "**** Mesh prep",
         "%s: %uD %s mesh in %uD space\n", name.c_str(),
         this->elem_info.elem_d,
-        fmr::get_enum_string(fmr::elem_form_name, this->elem_info.form).c_str(),
+        fmr::get_enum_string (fmr::elem_form_name,
+          this->elem_info.elem_form).c_str(),
         geom_d);
 #endif
     const auto nid = this->data->make_data_id (pid, fmr::Data::Node_n);
@@ -79,9 +80,10 @@ namespace Femera {
         //     So, load node_coor at global sim level, if needed for jacs calc.
 #endif
         const fmr::Local_int jacs_sz
-          =  this->elem_info.elem_jacs_n * this->elem_info.each_jacs_size;
+          =  this->elem_info.each_jacs_n * this->elem_info.each_jacs_size;
         // element jacobian data (inverted, maybe transposed, may have det)
-        this->ini_data_vals ({fmr::Data::Elem_conn}, elem_n * elem_info.node_n);
+        this->ini_data_vals ({fmr::Data::Elem_conn},
+          elem_n * elem_info.each_node_n);
         this->ini_data_vals ({fmr::Data::Jacs_dets}, elem_n * jacs_sz);
         this->data_list.push_back (fmr::Data::Elem_conn);
       }
@@ -111,20 +113,21 @@ namespace Femera {
         this->data_list.push_back (fmr::Data::Jacs_dets);
       }
       if (log->timing >= this->verblevel) {
-        this->meter_unit
-          = fmr::get_enum_string (fmr::elem_form_name, this->elem_info.form);
+        this->meter_unit = fmr::get_enum_string (fmr::elem_form_name,
+          this->elem_info.elem_form);
       }
       fmr::perf::timer_pause (& this->time, this->elem_n);//count elems prepped
       if (log->detail >= this->verblevel) {
         const auto formstr = fmr::get_enum_string (
-          fmr::elem_form_name, this->elem_info.form);
+          fmr::elem_form_name, this->elem_info.elem_form);
         std::string pchar
-          = fmr::math::poly_letter_name.at (this->elem_info.poly).first;
+          = fmr::math::poly_letter_name.at (this->elem_info.elem_poly).first;
         const std::string label = this->task_name +" prep";
         log->label_fprintf (log->fmrout, label.c_str(),
           "%s: %u %s%u %u-node %s, %u node%s\n", name.c_str(),
-          this->elem_n, pchar.c_str(), this->elem_info.pord, elem_info.node_n,
-          formstr.c_str(), this->node_n, (node_n==1)?"":"s");
+          this->elem_n, pchar.c_str(), this->elem_info.elem_p,
+          elem_info.each_node_n, formstr.c_str(),
+          this->node_n, (node_n==1)?"":"s");
       }
       fmr::perf::timer_resume (& this->time);
     }//end if this needs prepped
@@ -177,7 +180,7 @@ namespace Femera {
             err=0;// Get Elem_conn, Node_coor
             if (this->locals.count (fmr::Data::Elem_conn) == 0) {
               err= this->ini_data_vals ({fmr::Data::Elem_conn},
-                this->elem_n * this->elem_info.node_n);
+                this->elem_n * this->elem_info.each_node_n);
             }
             if (this->geoms.count (fmr::Data::Node_coor) == 0) {
               err= this->ini_data_vals ({fmr::Data::Node_coor},
@@ -189,21 +192,21 @@ namespace Femera {
             else {// Calculate jacs_dets.
               if (this->verblevel <= log->detail) {
                 const auto formstr = fmr::get_enum_string (
-                  fmr::elem_form_name, this->elem_info.form);
-                const auto pchar
-                  = fmr::math::poly_letter_name.at (this->elem_info.poly).first;
+                  fmr::elem_form_name, this->elem_info.elem_form);
+                const auto pchar = fmr::math::poly_letter_name.at (
+                  this->elem_info.elem_poly).first;
                 const std::string label = this->task_name +" jacs calc";
                 log->label_fprintf (log->fmrout, label.c_str(),
                   "%s: %u %s%u %u-node %s...\n", this->model_name.c_str(),
-                  elem_n, pchar.c_str(), elem_info.pord, elem_info.node_n,
-                  formstr.c_str());
+                  elem_n, pchar.c_str(), elem_info.elem_p,
+                  elem_info.each_node_n, formstr.c_str());
 #ifdef FMR_DEBUG
                 if (this->locals.count (fmr::Data::Elem_conn) > 0) {
-                  if (elem_info.node_n == 4) {
+                  if (elem_info.each_node_n == 4) {
                     const auto sz = locals.at(fmr::Data::Elem_conn).data.size();
                     const auto conn =& locals.at(fmr::Data::Elem_conn).data[0];
                     for (fmr::Local_int elem_i=0; elem_i<elem_n; elem_i++) {
-                      const auto i = elem_info.node_n * elem_i;
+                      const auto i = elem_info.each_node_n * elem_i;
                       if (i+3 < sz) {
                         log->label_fprintf (log->fmrerr, "Mesh conn",
                           "elem %3u:[%3u %3u %3u %3u]\n",
@@ -215,7 +218,7 @@ namespace Femera {
                 && this->locals.count (fmr::Data::Elem_conn) > 0
                 && this->geoms.count  (fmr::Data::Node_coor) > 0) {
                 const fmr::Local_int jacs_sz
-                  = this->elem_info.elem_jacs_n * elem_info.each_jacs_size;
+                  = this->elem_info.each_jacs_n * elem_info.each_jacs_size;
                 err= ini_data_vals ({fmr::Data::Jacs_dets}, elem_n * jacs_sz);
                 // Calculate jacs_dets.
                 const fmr::Local_int jacs_bad_n = this->make_jacs ();
@@ -231,7 +234,7 @@ namespace Femera {
               && this->geoms.count (fmr::Data::Jacs_dets) > 0) {
               const auto jacs =& this->geoms.at (fmr::Data::Jacs_dets).data[0];
               const fmr::Local_int jacs_sz
-                =  this->elem_info.elem_jacs_n * this->elem_info.each_jacs_size;
+                =  this->elem_info.each_jacs_n * this->elem_info.each_jacs_size;
               auto tot = fmr::Geom_float (0);
               for (fmr::Local_int elem_i=0; elem_i<this->elem_n; elem_i++) {
                 tot += jacs [jacs_sz * elem_i + jacs_sz-1];
@@ -275,9 +278,9 @@ namespace Femera {
     FMR_CONST_PTR    z =& y [node_n];//TODO assumes 3D geom
     //
     const auto vert_n = fmr::Local_int (this->elem_info.vert_n);
-    const auto conn_n = this->elem_info.node_n;
+    const auto conn_n = this->elem_info.each_node_n;
     const fmr::Local_int jacs_sz
-      = this->elem_info.elem_jacs_n * this->elem_info.each_jacs_size;
+      = this->elem_info.each_jacs_n * this->elem_info.each_jacs_size;
     //
     const auto shpg = std::valarray<fmr::Geom_float> (1.0, 3*vert_n);//TODO
     FMR_CONST_PTR shpg_ptr =& shpg[0];
@@ -311,9 +314,10 @@ namespace Femera {
         &jacs[ji], conn_n, &conn[ci], &shpg[0], x,y,z);//TODO below
 #else
       this->time.flops += this->elem_n * 6 * vert_n + 1;//FIXME above
-      this->time.bytes += this->elem_n *     vert_n  * sizeof (conn[0]);// read
-      this->time.bytes += this->elem_n * 3 * vert_n  * sizeof (   x[0]);// read
-      this->time.bytes += this->elem_n *     jacs_sz * sizeof (jacs[0]);// write
+      this->time.bytes
+        +=this->elem_n *     vert_n  * sizeof (conn[0]) // read
+        + this->elem_n * 3 * vert_n  * sizeof (   x[0]) // read
+        + this->elem_n *     jacs_sz * sizeof (jacs[0]);// write
 #endif
     }
     return bad_jacs_n;

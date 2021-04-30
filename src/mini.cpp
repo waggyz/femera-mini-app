@@ -17,7 +17,7 @@ inline int print_poly_info (uint pstart, uint pend) {//TODO Move to Elem.
       for (uint pord=pstart; pord<=pend; pord++) {
         const auto L = fmr::get_enum_string (
           fmr::math::Poly_name, ptype).substr(0,1);
-        const auto terms = fmr::math::poly_terms (dim, ptype, pord);
+        const auto terms = fmr::math::poly_terms (ptype, dim, pord);
         fmr::flog::label_printf ("poly", "%uD %s%u: %u terms\n",
           dim, L.c_str(), pord, terms);
   } } }

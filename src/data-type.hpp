@@ -129,56 +129,81 @@ namespace fmr {//TODO? namespace data {
     0 //"Elem_form end marker"
   };
   struct Elem_info {
-    Local_int       node_n = 0;
-    Local_int  elem_jacs_n = 1;//TODO jacs/elem
-    Elem_form       form   = Elem_form::Unknown;
-    math::Poly      poly   = math::Poly::Unknown;
-    Dim_int         pord   = 0;
+    Local_int  each_node_n = 0;// nodes/elem
+    Local_int  each_jacs_n = 0;//  jacs/elem
+    Elem_form  elem_form   = Elem_form::Unknown;
+    math::Poly elem_poly   = math::Poly::Unknown;
+    math::Poly jacs_poly   = math::Poly::Unknown;
+    Dim_int         jacs_p = 0;
+    Dim_int         elem_p = 0;
     Dim_int         elem_d = 0;
-    Dim_int         vert_n = 0;
+    Dim_int         vert_n = 0;//TODO needed or function of form?
 #if 0
-    Dim_int         edge_n = 0;
+    Dim_int         edge_n = 0;//TODO needed or function of form?
     Dim_int         face_n = 0;
     Dim_int         volu_n = 1;
 #endif
-    Dim_int each_jacs_size =10;//TODO size of each jacs (4,10)
+    Dim_int each_jacs_size = 0;
     Elem_info () {}
     Elem_info (const Elem_form f, const math::Poly y, const Dim_int p)
-      : form (f), poly (y), pord (p) {
-      elem_d = elem_form_d [enum2val (f)];
-      node_n = math::poly_terms (elem_d, y, p);
-    }
-    Elem_info (const Elem_form f, const Local_int n) : form (f) {
+      : elem_form (f), elem_poly (y), elem_p (p) {
+      // Construct from shape and interpolating polynomial.
+      elem_d      = elem_form_d [enum2val (f)];
+      each_node_n = math::poly_terms (y, elem_d, p);
+      jacs_poly   = elem_poly;
+      switch (f) {
+        case Elem_form::Line :// constant jacs when side nodes at
+        case Elem_form::Tris :// natural locations
+        case Elem_form::Tets : jacs_p = 0; each_jacs_n = 1; break;
+        default : jacs_p = (elem_p > 0) ? fmr::Dim_int (elem_p - 1) : 0;
+          each_jacs_n= fmr::math::poly_terms (math::Poly::Full, elem_d, jacs_p);
+      }
+      switch (elem_d) {
+        case 1 : each_jacs_size =  1; break;
+        case 2 : each_jacs_size =  4; break;
+        case 3 : each_jacs_size = 10; break;
+        default: {}// Do nothing.
+    } }
+    Elem_info (const Elem_form f, const Local_int n) :
+      each_node_n (n), elem_form (f) {// Construct from shape & number of nodes.
       switch (f) {
         case Elem_form::Line :
-          vert_n = 2;
-          switch (n) {
-            case  1 : pord = 1; poly = math::Poly::Full; break;
-            case  2 : pord = 2; poly = math::Poly::Full; break;
-            case  3 : pord = 3; poly = math::Poly::Full; break;
-          default : {}
+          vert_n = 2; jacs_p = 0; each_jacs_n = 1;
+          switch (n) {// constant jacs when side nodes at natural locations
+            case  1 : elem_p = 1; elem_poly = math::Poly::Full; break;
+            case  2 : elem_p = 2; elem_poly = math::Poly::Full; break;
+            case  3 : elem_p = 3; elem_poly = math::Poly::Full; break;
+          default: {}
         } break;
         case Elem_form::Tris :
-          vert_n = 3;
-          switch (n) {
-            case  3 : pord = 1; poly = math::Poly::Full; break;
-            case  6 : pord = 2; poly = math::Poly::Full; break;
-            case  9 : pord = 3; poly = math::Poly::Full; break;
+          vert_n = 3; jacs_p = 0; each_jacs_n = 1;
+          switch (n) {// constant jacs when side nodes at natural locations
+            case  3 : elem_p = 1; elem_poly = math::Poly::Full; break;
+            case  6 : elem_p = 2; elem_poly = math::Poly::Full; break;
+            case  9 : elem_p = 3; elem_poly = math::Poly::Full; break;
           default : {}
         } break;
         case Elem_form::Tets :
-          vert_n = 4;
-          switch (n) {
-            case  4 : pord = 1; poly = math::Poly::Full; break;
-            case 10 : pord = 2; poly = math::Poly::Full; break;
-            case 20 : pord = 3; poly = math::Poly::Full; break;
+          vert_n = 4; jacs_p = 0; each_jacs_n = 1;
+          switch (n) {// constant jacs when side nodes at natural locations
+            case  4 : elem_p = 1; elem_poly = math::Poly::Full; break;
+            case 10 : elem_p = 2; elem_poly = math::Poly::Full; break;
+            case 20 : elem_p = 3; elem_poly = math::Poly::Full; break;
           default : {}
         } break;
-        default : {}
+        default : jacs_p = (elem_p > 0) ? fmr::Dim_int (elem_p - 1) : 0;
+          each_jacs_n= fmr::math::poly_terms (math::Poly::Full, elem_d, jacs_p);
       }
-      elem_d = elem_form_d [enum2val (f)];
-      node_n = fmr::math::poly_terms (elem_d, poly, pord);//TODO WARN if !=n
-    }
+      elem_d      = elem_form_d [enum2val (f)];
+      each_node_n = fmr::math::poly_terms (elem_poly, elem_d, elem_p);
+      //TODO        WARN if each_node_n != n
+      jacs_poly   = elem_poly;
+      switch (elem_d) {
+        case 1 : each_jacs_size =  1; break;
+        case 2 : each_jacs_size =  4; break;
+        case 3 : each_jacs_size = 10; break;
+        default: {}// Do nothing.
+    } }
     Elem_info            (Elem_info const&) =default;// copyable
     Elem_info& operator= (const Elem_info&) =default;
   };

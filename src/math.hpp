@@ -105,7 +105,7 @@ namespace fmr {namespace math {
   static inline unsigned int count_digits (unsigned int x);
   static inline uint upow (uint base, uint exp);
   static inline uint nchoosek (uint n, uint k);
-  static inline uint poly_terms (uint nvars, Poly ptype, uint pord);
+  static inline uint poly_terms (Poly ptype, uint nvars, uint pord);
 } }// end fmr::math namespace
 
 template <typename I> static inline// I : Integer type
@@ -165,7 +165,7 @@ static inline uint fmr::math::nchoosek (const uint n, const uint k) {
 #endif
 }
 static inline uint fmr::math::poly_terms (
-    const uint nvar, const fmr::math::Poly ptype, const uint pord) {
+    const fmr::math::Poly ptype, const uint nvar, const uint pord) {
   if (nvar < 1) {return 0;}
   if (pord < 1) {return 1;}
   uint terms = 0;
@@ -179,9 +179,9 @@ static inline uint fmr::math::poly_terms (
 #endif
       break;}
     case math::Poly::Serendipity : {
-      terms = fmr::math::poly_terms (nvar, fmr::math::Poly::Bipoly, pord);
+      terms = fmr::math::poly_terms (fmr::math::Poly::Bipoly, nvar, pord);
       terms-= (pord > 1 && nvar > 1)
-        ? fmr::math::poly_terms (nvar, fmr::math::Poly::Full, pord-2) : 0;
+        ? fmr::math::poly_terms (fmr::math::Poly::Full, nvar, pord-2) : 0;
       break;}
     case fmr::math::Poly::Bipoly :// Fall through.
     case fmr::math::Poly::Tripoly : {

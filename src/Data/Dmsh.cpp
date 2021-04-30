@@ -349,7 +349,8 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
           }
           fmr::Dim_int elem_d =0;
           if (fmr::detail::elem_info_gmsh.count (info.type) >0) {
-            const auto form = fmr::detail::elem_info_gmsh.at (info.type).form;
+            const auto form
+              = fmr::detail::elem_info_gmsh.at (info.type).elem_form;
             elem_d = fmr::elem_form_d [enum2val(form)];
           }
           if (n>0 && elem_d>0) {
@@ -567,9 +568,8 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
           fmr::Dim_int   elem_d = 0;
           if (fmr::detail::elem_info_gmsh.count (elem_gmsh) > 0) {
             const auto elinfo = fmr::detail::elem_info_gmsh.at (elem_gmsh);
-            form = elinfo.form;
+            form = elinfo.elem_form;
             elem_d = fmr::elem_form_d [fmr::enum2val (form)];
-//TODO Remove?            conn_n = fmr::math::poly_terms (elem_d, elinfo.poly, elinfo.pord);
           }else{
             log->printf_err("WARNING Gmsh element type %i not supported.\n",
               elem_gmsh);
