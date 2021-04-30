@@ -134,6 +134,7 @@ namespace fmr {//TODO? namespace data {
   struct Elem_info {
     Local_int  each_node_n = 0;// nodes/elem
     Local_int  each_jacs_n = 0;//  jacs/elem
+    Geom_float elem_size   = Geom_float (0.0);// natural length/area/volume
     Elem_form  elem_form   = Elem_form::Unknown;
     math::Poly elem_poly   = math::Poly::Unknown;
     math::Poly jacs_poly   = math::Poly::Unknown;
@@ -166,6 +167,7 @@ namespace fmr {//TODO? namespace data {
       each_node_n (n), elem_form (f) {// Construct from shape & number of nodes.
       switch (f) {
         case Elem_form::Line :
+          elem_size = fmr::Geom_float (1.0);
           vert_n = 2; jacs_p = 0; each_jacs_n = 1;
           switch (n) {// constant jacs when side nodes at natural locations
             case  1 : elem_p = 1; elem_poly = math::Poly::Full; break;
@@ -174,6 +176,7 @@ namespace fmr {//TODO? namespace data {
           default: {}
         } break;
         case Elem_form::Tris :
+          elem_size = fmr::Geom_float (1.0/2.0);
           vert_n = 3; jacs_p = 0; each_jacs_n = 1;
           switch (n) {// constant jacs when side nodes at natural locations
             case  3 : elem_p = 1; elem_poly = math::Poly::Full; break;
@@ -182,6 +185,7 @@ namespace fmr {//TODO? namespace data {
           default : {}
         } break;
         case Elem_form::Tets :
+          elem_size = fmr::Geom_float (1.0/6.0);
           vert_n = 4; jacs_p = 0; each_jacs_n = 1;
           switch (n) {// constant jacs when side nodes at natural locations
             case  4 : elem_p = 1; elem_poly = math::Poly::Full; break;

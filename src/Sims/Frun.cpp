@@ -39,8 +39,8 @@ namespace Femera {
     if (log->detail >= this->verblevel) {
       fmr::perf::timer_pause (& this->time);
       const auto timestr = fmr::get_enum_string (fmr::Sim_time_name, time_type);
-      const auto szshort = fmr::get_enum_string (fmr::Sim_size_short,
-        this->sims_size);
+      const auto szshort
+        = fmr::get_enum_string (fmr::Sim_size_short, this->sims_size);
       const auto label = szshort +std::to_string(geom_d)+"D "
         + this->task_name +" prep";
       log->label_fprintf (log->fmrout, label.c_str(),

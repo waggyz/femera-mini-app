@@ -288,13 +288,13 @@ namespace Femera {
     const auto shpg = std::valarray<fmr::Geom_float> ={//FIXME Move to Elem
       -v, v, o, o,// dN/dx (natural coords)
       -v, o, v, o,// dN/dy
-      -v, o, o, v };//TODO Transpose?
+      -v, o, o, v };
 #else
     const std::valarray<fmr::Geom_float> shpg ={
       -v,-v,-v,
        v, o, o,
        o, v, o,
-       o, o, v};//TODO Transpose?
+       o, o, v};//TODO Transpose? (above)
 #endif
     const auto en = this->elem_n;
     for (fmr::Local_int elem_i=0; elem_i<en; elem_i++) {
@@ -302,34 +302,27 @@ namespace Femera {
       const fmr::Global_int ji = elem_i * jacs_sz;
       //
       bad_jacs_n += fmr::elem::make_inv_jacdet (& jacs[ji],
-        vert_n, & conn[ci], & shpg[0], x,y,z);
+        vert_n, & conn[ci], & shpg[0], x,y,z);// 3D coor block layout
 #if 0
-      // coor block layout
-      bad_jacs_n += fmr::elem::make_inv_jacdet (&jacs[ji],// templated (T*, ...
-        conn_n, &conn[ci], &shpg[0], x,y,z);
-      //
-      fmr::Local_int jac0=0, con0=0;
-      bad_jacs_n += this->elem->make_elem_jacs (&jacs[j0],
-        elem_n, conn_n, &conn[c0], &this->timer, x,y,z);
       // coor interleaved layout
-//      bad_jacs_n += this->elem->make_elem_jac3 (&jacs[ji],
-          elem_n, conn_n, &conn[ci], coor, &this->timer,);
-      jacs [ji + jacs_sz-1] /= fmr::Geom_float (3*4);
-      bad_jacs_n += jacs [ji + jacs_sz-1] <= fmr::Geom_float (0);
+      bad_jacs_n += this->elem->make_elem_jac3 (&jacs[ji],
+        elem_n, conn_n, &conn[ci], coor, &this->timer,);
 #endif
+      this->volume//TODO Remove: only for 1 jac/elem.
+       += this->elem_info.elem_size / jacs [ji +jacs_sz-1];
     }
     if (this->verblevel <= this->proc->log->timing) {
-#if 0
-      this->time.flops += this->elem_n * 6 * vert_n + 1;
-      this->time.bytes
-        +=this->elem_n *     vert_n  * sizeof (conn[0]) // read
-        + this->elem_n * 3 * vert_n  * sizeof (   x[0]) // read
-        + this->elem_n *     jacs_sz * sizeof (jacs[0]);// write
-#else
       fmr::elem::perf_jacobian (&this->time, elem_n, jacs,
         vert_n, conn, & shpg[0], x,y,z);
-#endif
     }
+#ifdef FMR_DEBUG
+    if (this->verblevel <= this->proc->log->detail) {
+      auto log = this->proc->log;
+      const auto label = "**** "+task_name;
+      log->label_fprintf (log->fmrerr, label.c_str(), "volume: %g\n",
+        double(this->volume));
+    }
+#endif
     return bad_jacs_n;
   }
 #if 0

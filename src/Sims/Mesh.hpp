@@ -44,6 +44,8 @@ class Mesh : public Geom {// Pure virtual? Mesh?
     fmr::Local_int        elem_n = 0;
     fmr::Elem_info     elem_info = fmr::Elem_info ();//TODO replace with Elem ?
     fmr::math::Zomplex math_type = fmr::math::Real;
+    //
+    fmr::Geom_float volume = fmr::Geom_float(0.0);//TODO Remove
   // methods ----------------------------------------------------------------
   public:
     int prep () final override;
