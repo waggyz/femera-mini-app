@@ -128,6 +128,9 @@ namespace fmr {//TODO? namespace data {
     //
     0 //"Elem_form end marker"
   };
+  namespace elem {
+    static const std::vector<fmr::Dim_int> jacs_size = {1,1,4,10};
+  }// end fmr::elem:: namespace
   struct Elem_info {
     Local_int  each_node_n = 0;// nodes/elem
     Local_int  each_jacs_n = 0;//  jacs/elem
@@ -151,18 +154,13 @@ namespace fmr {//TODO? namespace data {
       elem_d      = elem_form_d [enum2val (f)];
       each_node_n = math::poly_terms (y, elem_d, p);
       jacs_poly   = elem_poly;
+      each_jacs_size = fmr::elem::jacs_size [elem_d];
       switch (f) {
         case Elem_form::Line :// constant jacs when side nodes at
         case Elem_form::Tris :// natural locations
         case Elem_form::Tets : jacs_p = 0; each_jacs_n = 1; break;
         default : jacs_p = (elem_p > 0) ? fmr::Dim_int (elem_p - 1) : 0;
           each_jacs_n= fmr::math::poly_terms (math::Poly::Full, elem_d, jacs_p);
-      }
-      switch (elem_d) {
-        case 1 : each_jacs_size =  1; break;
-        case 2 : each_jacs_size =  4; break;
-        case 3 : each_jacs_size = 10; break;
-        default: {}// Do nothing.
     } }
     Elem_info (const Elem_form f, const Local_int n) :
       each_node_n (n), elem_form (f) {// Construct from shape & number of nodes.
@@ -198,12 +196,8 @@ namespace fmr {//TODO? namespace data {
       each_node_n = fmr::math::poly_terms (elem_poly, elem_d, elem_p);
       //TODO        WARN if each_node_n != n
       jacs_poly   = elem_poly;
-      switch (elem_d) {
-        case 1 : each_jacs_size =  1; break;
-        case 2 : each_jacs_size =  4; break;
-        case 3 : each_jacs_size = 10; break;
-        default: {}// Do nothing.
-    } }
+      each_jacs_size = fmr::elem::jacs_size [elem_d];
+    }
     Elem_info            (Elem_info const&) =default;// copyable
     Elem_info& operator= (const Elem_info&) =default;
   };

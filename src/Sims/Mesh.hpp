@@ -69,13 +69,13 @@ class Mesh : public Geom {// Pure virtual? Mesh?
     Mesh operator= (const Mesh&)   =delete;
 };
 }//end Femera namespace
-namespace fmr { namespace elem {//FIXME move to elem.hpp
+namespace fmr { namespace elem {//TODO move to elem.hpp
   template<typename T>
   fmr::Local_int make_jacobian (T* FMR_RESTRICT jacs,//TODO T jacs FMR_RESTRICT &
     const fmr::Local_int conn_n, const fmr::Local_int* FMR_RESTRICT conn,
     const T* FMR_RESTRICT shpg,
     const T* FMR_RESTRICT x, const T* FMR_RESTRICT y, const T* FMR_RESTRICT z) {
-    const fmr::Local_int jacs_sz = 10;//TODO = fmr::elem::jac3_size
+    const auto jacs_sz = fmr::elem::jacs_size [3];
     jacs [jacs_sz-1] = T (0.0);
     FMR_PRAGMA_OMP_SIMD
     for (fmr::Local_int i=0; i<conn_n; i++) {
@@ -86,6 +86,20 @@ namespace fmr { namespace elem {//FIXME move to elem.hpp
     }
     jacs [jacs_sz-1] /= T (3*4);
     return jacs [jacs_sz-1] <= T (0.0);
+  }
+  template<typename T>
+  int perf_jacobian (fmr::perf::Meter* time, const fmr::Local_int elem_n,
+    const T* FMR_RESTRICT jacs,
+    const fmr::Local_int conn_n, const fmr::Local_int* FMR_RESTRICT conn,
+    const T* FMR_RESTRICT,
+    const T* FMR_RESTRICT x, const T* FMR_RESTRICT, const T* FMR_RESTRICT) {
+    const auto jacs_sz = fmr::elem::jacs_size [3];
+    time->flops += elem_n * 6 * conn_n + 1;
+    time->bytes
+      +=elem_n *     conn_n  * sizeof (conn[0]) // read
+      + elem_n * 3 * conn_n  * sizeof (   x[0]) // read
+      + elem_n *     jacs_sz * sizeof (jacs[0]);// write
+    return 0;
   }
 } }//end fmr::elem:: namespace
 #else

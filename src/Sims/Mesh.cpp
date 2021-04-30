@@ -310,14 +310,14 @@ namespace Femera {
     }
     if (this->verblevel <= this->proc->log->timing) {
 #if 0
-      err = fmr::mesh::perf_elem_jac3 (&this->time, this->elem_n,
-        &jacs[ji], conn_n, &conn[ci], &shpg[0], x,y,z);//TODO below
-#else
-      this->time.flops += this->elem_n * 6 * vert_n + 1;//FIXME above
+      this->time.flops += this->elem_n * 6 * vert_n + 1;
       this->time.bytes
         +=this->elem_n *     vert_n  * sizeof (conn[0]) // read
         + this->elem_n * 3 * vert_n  * sizeof (   x[0]) // read
         + this->elem_n *     jacs_sz * sizeof (jacs[0]);// write
+#else
+      fmr::elem::perf_jacobian (&this->time, elem_n, jacs,
+        vert_n, conn, shpg_ptr, x,y,z);
 #endif
     }
     return bad_jacs_n;
