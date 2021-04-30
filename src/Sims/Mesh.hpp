@@ -69,22 +69,60 @@ class Mesh : public Geom {// Pure virtual? Mesh?
     Mesh operator= (const Mesh&)   =delete;
 };
 }//end Femera namespace
-namespace fmr { namespace elem {//TODO move to elem.hpp
+namespace fmr {
+  namespace math {//TODO move to math.hpp
   template<typename T>
-  fmr::Local_int make_jacobian (T* FMR_RESTRICT jacs,//TODO T jacs FMR_RESTRICT &
+  T det3 (const T* m) {// m is 3x3
+    // FLOPS: 4*3 + 1 = 12
+    return(
+        m[3* 0+0] * (m[3* 1+1] * m[3* 2+2] - m[3* 2+1] * m[3* 1+2])
+      + m[3* 0+1] * (m[3* 1+2] * m[3* 2+0] - m[3* 2+2] * m[3* 1+0])
+      + m[3* 0+2] * (m[3* 1+0] * m[3* 2+1] - m[3* 2+0] * m[3* 1+1]) );
+  }
+  template<typename T>
+  int inv3 (T* m, const T det) {// returns 3x3 inverse in m
+    // FLOPS: 4*9 + 1 = 37
+#if 0
+    if (det==0) {return 1;}//TODO
+#endif
+    const T dinv = T(1.0) / det;
+    FMR_PRAGMA_OMP_SIMD
+    T minv[9]; for (int i=0; i<9; i++) {minv[i] = dinv;};
+    //
+    minv[3* 0+0]*= (m[3* 1+1] * m[3* 2+2] - m[3* 2+1] * m[3* 1+2]);
+    minv[3* 0+1]*= (m[3* 0+2] * m[3* 2+1] - m[3* 0+1] * m[3* 2+2]);
+    minv[3* 0+2]*= (m[3* 0+1] * m[3* 1+2] - m[3* 0+2] * m[3* 1+1]);
+    //
+    minv[3* 1+0]*= (m[3* 1+2] * m[3* 2+0] - m[3* 1+0] * m[3* 2+2]);
+    minv[3* 1+1]*= (m[3* 0+0] * m[3* 2+2] - m[3* 0+2] * m[3* 2+0]);
+    minv[3* 1+2]*= (m[3* 1+0] * m[3* 0+2] - m[3* 0+0] * m[3* 1+2]);
+    //
+    minv[3* 2+0]*= (m[3* 1+0] * m[3* 2+1] - m[3* 2+0] * m[3* 1+1]);
+    minv[3* 2+1]*= (m[3* 2+0] * m[3* 0+1] - m[3* 0+0] * m[3* 2+1]);
+    minv[3* 2+2]*= (m[3* 0+0] * m[3* 1+1] - m[3* 1+0] * m[3* 0+1]);
+    FMR_PRAGMA_OMP_SIMD
+    for (int i=0; i<9; i++) {m[i]=minv[i];};//TODO memcpy
+    return (det < 0) ? -1 : 0;
+  }
+  }//end fmr::math:: namespace
+  namespace elem {//TODO move to elem.hpp
+  template<typename T>
+  fmr::Local_int make_inv_jacdet (T* FMR_RESTRICT jacs,
     const fmr::Local_int conn_n, const fmr::Local_int* FMR_RESTRICT conn,
-    const T* FMR_RESTRICT shpg,
+    const T* FMR_RESTRICT shpg,//TODO e.g. T jacs FMR_RESTRICT &
     const T* FMR_RESTRICT x, const T* FMR_RESTRICT y, const T* FMR_RESTRICT z) {
     const auto jacs_sz = fmr::elem::jacs_size [3];
-    jacs [jacs_sz-1] = T (0.0);
     FMR_PRAGMA_OMP_SIMD
-    for (fmr::Local_int i=0; i<conn_n; i++) {
-      jacs [jacs_sz-1]//TODO Fix fake det calc.
-        += x [conn[i]] * shpg[3* i+0]
-        +  y [conn[i]] * shpg[3* i+1]
-        +  z [conn[i]] * shpg[3* i+2];
-    }
-    jacs [jacs_sz-1] /= T (3*4);
+    for (fmr::Local_int i=0; i<jacs_sz; i++) {jacs [i] = T (0.0);}
+    FMR_PRAGMA_OMP_SIMD
+    for (fmr::Local_int j=0; j<conn_n; j++) {//TODO permute loops?
+    for (fmr::Local_int i=0; i<3; i++) {
+      jacs [3* i+0] += x [conn[j]] * shpg [3* j+i];
+      jacs [3* i+1] += y [conn[j]] * shpg [3* j+i];
+      jacs [3* i+2] += z [conn[j]] * shpg [3* j+i];
+    } }// 2* 3*3*conn_n FLOP
+    jacs [jacs_sz-1] = fmr::math::det3 (jacs);// determinant 12 FLOP
+    fmr::math::inv3 (jacs, jacs [jacs_sz-1]);// 37 FLOP
     return jacs [jacs_sz-1] <= T (0.0);
   }
   template<typename T>
@@ -94,11 +132,11 @@ namespace fmr { namespace elem {//TODO move to elem.hpp
     const T* FMR_RESTRICT,
     const T* FMR_RESTRICT x, const T* FMR_RESTRICT, const T* FMR_RESTRICT) {
     const auto jacs_sz = fmr::elem::jacs_size [3];
-    time->flops += elem_n * 6 * conn_n + 1;
-    time->bytes
-      +=elem_n *     conn_n  * sizeof (conn[0]) // read
-      + elem_n * 3 * conn_n  * sizeof (   x[0]) // read
-      + elem_n *     jacs_sz * sizeof (jacs[0]);// write
+    time->flops += elem_n * (2 * 3*3*conn_n + 37+12) + 1;
+    time->bytes += elem_n * (
+      3 * conn_n  * sizeof (   x[0]) // read
+      +   conn_n  * sizeof (conn[0]) // read
+      +   jacs_sz * sizeof (jacs[0]));// write
     return 0;
   }
 } }//end fmr::elem:: namespace

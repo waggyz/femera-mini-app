@@ -274,7 +274,7 @@ namespace Femera {
     FMR_ARRAY_PTR jacs =&  geoms.at (fmr::Data::Jacs_dets).data[0];
     FMR_CONST_PTR conn =& locals.at (fmr::Data::Elem_conn).data[0];
     FMR_CONST_PTR    x =&  geoms.at (fmr::Data::Node_coor).data[0];
-    FMR_CONST_PTR    y =& x [node_n];//TODO assumes block layout
+    FMR_CONST_PTR    y =& x [node_n];//TODO assumes block layout & real
     FMR_CONST_PTR    z =& y [node_n];//TODO assumes 3D geom
     //
     const auto vert_n = fmr::Local_int (this->elem_info.vert_n);
@@ -282,20 +282,30 @@ namespace Femera {
     const fmr::Local_int jacs_sz
       = this->elem_info.each_jacs_n * this->elem_info.each_jacs_size;
     //
-    const auto shpg = std::valarray<fmr::Geom_float> (1.0, 3*vert_n);//TODO
-    FMR_CONST_PTR shpg_ptr =& shpg[0];
-    //
+    const auto o = fmr::Geom_float (0.0);
+    const auto v = fmr::Geom_float (1.0);//TODO check if 1/6
+#if 0
+    const auto shpg = std::valarray<fmr::Geom_float> ={//FIXME Move to Elem
+      -v, v, o, o,// dN/dx (natural coords)
+      -v, o, v, o,// dN/dy
+      -v, o, o, v };//TODO Transpose?
+#else
+    const std::valarray<fmr::Geom_float> shpg ={
+      -v,-v,-v,
+       v, o, o,
+       o, v, o,
+       o, o, v};//TODO Transpose?
+#endif
     const auto en = this->elem_n;
     for (fmr::Local_int elem_i=0; elem_i<en; elem_i++) {
-      const fmr::Global_int ci = conn_n  * elem_i;
-      const fmr::Global_int ji = jacs_sz * elem_i;
+      const fmr::Global_int ci = elem_i * conn_n;
+      const fmr::Global_int ji = elem_i * jacs_sz;
       //
-      //FIXME IAMHERE inline/template function to calculate jacs_dets for 1 elem
-      bad_jacs_n += fmr::elem::make_jacobian (&jacs[ji],
-        vert_n, &conn[ci], shpg_ptr, x,y,z);
+      bad_jacs_n += fmr::elem::make_inv_jacdet (& jacs[ji],
+        vert_n, & conn[ci], & shpg[0], x,y,z);
 #if 0
       // coor block layout
-      bad_jacs_n += fmr::elem::make_jacobian (&jacs[ji],// templated (T*, ...
+      bad_jacs_n += fmr::elem::make_inv_jacdet (&jacs[ji],// templated (T*, ...
         conn_n, &conn[ci], &shpg[0], x,y,z);
       //
       fmr::Local_int jac0=0, con0=0;
@@ -317,7 +327,7 @@ namespace Femera {
         + this->elem_n *     jacs_sz * sizeof (jacs[0]);// write
 #else
       fmr::elem::perf_jacobian (&this->time, elem_n, jacs,
-        vert_n, conn, shpg_ptr, x,y,z);
+        vert_n, conn, & shpg[0], x,y,z);
 #endif
     }
     return bad_jacs_n;
