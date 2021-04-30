@@ -283,7 +283,7 @@ namespace Femera {
       = this->elem_info.each_jacs_n * this->elem_info.each_jacs_size;
     //
     const auto o = fmr::Geom_float (0.0);
-    const auto v = fmr::Geom_float (1.0);//TODO check if 1/6
+    const auto v = fmr::Geom_float(1);
 #if 0
     const auto shpg = std::valarray<fmr::Geom_float> ={//FIXME Move to Elem
       -v, v, o, o,// dN/dx (natural coords)
@@ -308,8 +308,11 @@ namespace Femera {
       bad_jacs_n += this->elem->make_elem_jac3 (&jacs[ji],
         elem_n, conn_n, &conn[ci], coor, &this->timer,);
 #endif
+#ifdef FMR_DEBUG
       this->volume//TODO Remove: only for 1 jac/elem.
-       += this->elem_info.elem_size / jacs [ji +jacs_sz-1];
+        +=  this->elem_info.elem_size / jacs [ji +jacs_sz-1];
+      this->time.flops += 1; this->time.bytes += 4*sizeof(fmr::Geom_float);
+#endif
     }
     if (this->verblevel <= this->proc->log->timing) {
       fmr::elem::perf_jacobian (&this->time, elem_n, jacs,
