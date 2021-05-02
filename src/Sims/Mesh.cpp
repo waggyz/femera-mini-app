@@ -313,6 +313,19 @@ namespace Femera {
         +=  this->elem_info.elem_size / jacs [ji +jacs_sz-1];
       this->time.flops += 1; this->time.bytes += 4*sizeof(fmr::Geom_float);
 #endif
+#ifdef FMR_DEBUG
+      using d=double;
+      const auto log = this->proc->log;
+      const auto J =& jacs[ji];
+      const std::string label = this->task_name +" jacs invs";
+      log->label_fprintf (log->fmrout, label.c_str(),
+        "%u:r0 %+8.3e %+8.3e %+8.3e [%u]\n", elem_i, d(J[0]), d(J[1]), d(J[2]));
+      log->label_fprintf (log->fmrout, label.c_str(),
+        "%u:r1 %+8.3e %+8.3e %+8.3e\n",      elem_i, d(J[3]), d(J[4]), d(J[5]));
+      log->label_fprintf (log->fmrout, label.c_str(),
+        "%u:r2 %+8.3e %+8.3e %+8.3e: %+8.3e\n",
+        elem_i, d(J[6]), d(J[7]), d(J[8]), d(J[9]));
+#endif
     }
     if (this->verblevel <= this->proc->log->timing) {
       fmr::elem::perf_jacobian (&this->time, elem_n, jacs,

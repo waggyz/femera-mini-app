@@ -370,14 +370,27 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
               fmr::Local_int badj_n=0; double vol = 0.0;
               if (vals.data.size() < (sz+nj)) {vals.data.resize (sz+nj);}
               for (size_t i=0; i<nj; i++) {// interleave jacs & dets
-                for (size_t j=0; j<ea; j++) {
-                  vals.data [(ea+1)*i +j] = fmr::Geom_float (jacs [ea*i +j]);
+                const auto ji = (ea+1)*i;
+                for (size_t j=0; j<ea; j++) {//TODO memcpy
+                  vals.data [ji +j] = fmr::Geom_float (jacs [ea*i +j]);
                 }
                 const auto det = dets[i];//TODO set Jacs_type?
-                vals.data [(ea+1)*i +ea] = fmr::Geom_float (det);
+                vals.data [ji +ea] = fmr::Geom_float (det);
                 vol += det;
-                badj_n += (fmr::math::inv3 (& vals.data [(ea+1)*i],// Invert jac.
-                  vals.data [(ea+1)*i +ea]) == 0) ? 0 : 1;
+                badj_n += (fmr::math::inv3 (& vals.data [ji],// Invert jac.
+                  vals.data [ji +ea]) == 0) ? 0 : 1;
+#ifdef FMR_DEBUG
+                using d=double;
+                const auto J =& vals.data[ji];
+                const std::string label = this->task_name +" jacs invt";
+                log->label_fprintf (log->fmrout, label.c_str(),
+                  "%lu:r0 %+8.3e %+8.3e %+8.3e\n", i, d(J[0]),d(J[1]),d(J[2]));
+                log->label_fprintf (log->fmrout, label.c_str(),
+                  "%lu:r1 %+8.3e %+8.3e %+8.3e\n", i, d(J[3]),d(J[4]),d(J[5]));
+                log->label_fprintf (log->fmrout, label.c_str(),
+                  "%lu:r2 %+8.3e %+8.3e %+8.3e: %+8.3\n",
+                  i, d(J[6]),d(J[7]),d(J[8]),d(J[9]));
+#endif
               }
 #ifdef FMR_DEBUG
               if (this->verblevel <= log->detail) {
@@ -387,7 +400,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
               }
 #endif
               fmr::math::perf_inv3 (&this->time,
-                fmr::Local_int (nj),& vals.data [0]);
+                fmr::Local_int (nj),& vals.data [0]);//TODO Global_int
               vals.stored_state.was_read = true;
               if (badj_n > 0) {
                 const auto lab = "WARN""ING "+this->task_name;

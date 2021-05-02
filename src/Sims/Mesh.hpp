@@ -74,7 +74,7 @@ class Mesh : public Geom {// Pure virtual? Mesh?
 namespace fmr {
   namespace math {//TODO move to math.hpp
   template<typename T>
-  T det3 (const T* m) {// m is 3x3
+  inline T det3 (const T* m) {// m is 3x3
     // FLOPS: 4*3 + 1 = 12
     return(
         m[3* 0+0] * (m[3* 1+1] * m[3* 2+2] - m[3* 2+1] * m[3* 1+2])
@@ -82,7 +82,7 @@ namespace fmr {
       + m[3* 0+2] * (m[3* 1+0] * m[3* 2+1] - m[3* 2+0] * m[3* 1+1]) );
   }
   template<typename T>
-  int inv3 (T* m, const T det) {// returns 3x3 inverse in m
+  inline int inv3 (T* m, const T det) {// returns 3x3 inverse in m
     // FLOPS: 4*9 + 1 = 37
 #if 0
     if (det==0) {return 1;}//TODO
@@ -107,7 +107,7 @@ namespace fmr {
     return (det < 0) ? -1 : 0;
   }
   template<typename T>
-  int perf_inv3  (fmr::perf::Meter* time, const fmr::Local_int elem_n,
+  inline int perf_inv3  (fmr::perf::Meter* time, const fmr::Local_int elem_n,
     const T* m) {
     time->flops += elem_n * 37;
     time->bytes += elem_n *(10 +9) * sizeof (m);// read + write
@@ -116,7 +116,7 @@ namespace fmr {
   }//end fmr::math:: namespace
   namespace elem {//TODO move to elem.hpp
   template<typename T>
-  fmr::Local_int make_inv_jacdet (T* FMR_RESTRICT jacs,
+  inline fmr::Local_int make_inv_jacdet (T* FMR_RESTRICT jacs,
     const fmr::Local_int conn_n, const fmr::Local_int* FMR_RESTRICT conn,
     const T* FMR_RESTRICT shpg,//TODO e.g. T jacs FMR_RESTRICT &
     const T* FMR_RESTRICT x, const T* FMR_RESTRICT y, const T* FMR_RESTRICT z) {
@@ -135,7 +135,7 @@ namespace fmr {
     return jacs [jacs_sz-1] <= T (0.0);
   }
   template<typename T>
-  int perf_jacobian (fmr::perf::Meter* time, const fmr::Local_int elem_n,
+  inline int perf_jacobian (fmr::perf::Meter* time, const fmr::Local_int elem_n,
     const T* FMR_RESTRICT jacs,
     const fmr::Local_int conn_n, const fmr::Local_int* FMR_RESTRICT conn,
     const T* FMR_RESTRICT,
