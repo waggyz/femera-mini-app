@@ -28,22 +28,28 @@ C=`tools/cpucount.sh`
 GMSH_OMP="-nt $C" #TODO Not working on K?
 GMSH_OMP=""
 
+H=1
+
 cp -f "tests/geo/cube-tet6p1n2-geo.geo" "$MESHDIR"
 if [ "$N" -eq 1 ]; then
 EXT="msh2"
-rm -f "$MESHDIR/cube-tet6p"$P"n"$N"."$EXT
+MESHFILE="$MESHDIR/cube-tet6p"$P"n"$N"."$EXT
+rm -f "$MESHFILE"
 # rm -f "$MESHDIR/cube-tet6p"$P"n"$N".inp"
-$MPIEXEC gmsh $GMSH_OMP -setnumber p $P -setnumber h 1 tests/geo/unit-cube.geo \
- -v 3 $PART -save -o "$MESHDIR/cube-tet6p"$P"n"$N"."$EXT -3 2>/dev/null
+#echo meshing "$MESHFILE""..."
+$MPIEXEC gmsh $GMSH_OMP -setnumber p $P -setnumber h $H tests/geo/unit-cube.geo \
+ -v 3 $PART -save -o "$MESHFILE" -3 2>/dev/null
 # else
 # Hm, looks like gmsh can write, but not read .inp files...
 # $MPIEXEC gmsh $GMSH_OMP -setnumber p $P -setnumber h 1 tests/geo/unit-cube.geo \
 #  -v 3 $PART -save -o "$MESHDIR/cube-tet6p"$P"n"$N".inp" -3 2>/dev/null
 fi
 EXT="cgns"
-rm -f "$MESHDIR/cube-tet6p"$P"n"$N"."$EXT
-gmsh $GMSH_OMP -setnumber p $P -setnumber h 1 tests/geo/unit-cube.geo \
- -v 3 $PART -save -o "$MESHDIR/cube-tet6p"$P"n"$N"."$EXT -3
+MESHFILE="$MESHDIR/cube-tet6p"$P"n"$N"."$EXT
+rm -f "$MESHFILE"
+#echo meshing "$MESHFILE""..."
+gmsh $GMSH_OMP -setnumber p $P -setnumber h $H tests/geo/unit-cube.geo \
+ -v 3 $PART -save -o "$MESHFILE" -3
 chmod -w "$MESHDIR/cube-tet6p"$P"n"$N"."*
 done
 done

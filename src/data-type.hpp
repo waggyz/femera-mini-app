@@ -152,11 +152,12 @@ namespace fmr {//TODO? namespace data {
     Elem_info (const Elem_form f, const math::Poly y, const Dim_int p)
       : elem_form (f), elem_poly (y), elem_p (p) {
       // Construct from shape and interpolating polynomial.
-      elem_d      = elem_form_d [enum2val (f)];
-      each_node_n = math::poly_terms (y, elem_d, p);
-      jacs_poly   = elem_poly;
+      elem_d         = elem_form_d [enum2val (f)];
+      each_node_n    = math::poly_terms (y, elem_d, p);
+      jacs_poly      = elem_poly;
       each_jacs_size = fmr::elem::jacs_size [elem_d];
-      switch (f) {
+      switch (f) {// Set element jacobian order and number/element.
+        //TODO Elem_form:: Teta, Tria, Lina : Affine tets/tris/line?
         case Elem_form::Line :// constant jacs when side nodes at
         case Elem_form::Tris :// natural locations
         case Elem_form::Tets : jacs_p = 0; each_jacs_n = 1; break;

@@ -106,6 +106,13 @@ namespace fmr {
     for (int i=0; i<9; i++) {m[i]=minv[i];};//TODO memcpy
     return (det < 0) ? -1 : 0;
   }
+  template<typename T>
+  int perf_inv3  (fmr::perf::Meter* time, const fmr::Local_int elem_n,
+    const T* m) {
+    time->flops += elem_n * 37;
+    time->bytes += elem_n *(10 +9) * sizeof (m);// read + write
+    return 0;
+  }
   }//end fmr::math:: namespace
   namespace elem {//TODO move to elem.hpp
   template<typename T>

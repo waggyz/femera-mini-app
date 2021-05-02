@@ -366,18 +366,28 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
             const auto nj = dets.size();
             const auto sz = jacs.size();
             if (nj > 0) {
-              const auto ea = sz / nj;
+              const auto ea = sz / nj;// 1,4,9 for 1D, 2D, 3D
               fmr::Local_int badj_n=0; double vol = 0.0;
               if (vals.data.size() < (sz+nj)) {vals.data.resize (sz+nj);}
               for (size_t i=0; i<nj; i++) {// interleave jacs & dets
                 for (size_t j=0; j<ea; j++) {
                   vals.data [(ea+1)*i +j] = fmr::Geom_float (jacs [ea*i +j]);
                 }
-                const auto det = dets[i];//TODO invert? set Jacs_type?
+                const auto det = dets[i];//TODO set Jacs_type?
                 vals.data [(ea+1)*i +ea] = fmr::Geom_float (det);
-                badj_n += (det <= 0.0) ? 1 : 0;
                 vol += det;
+                badj_n += (fmr::math::inv3 (& vals.data [(ea+1)*i],// Invert jac.
+                  vals.data [(ea+1)*i +ea]) == 0) ? 0 : 1;
               }
+#ifdef FMR_DEBUG
+              if (this->verblevel <= log->detail) {
+                const std::string label = this->task_name +" jacs invt";
+                log->label_fprintf (log->fmrout, label.c_str(),
+                  "%u jacobians in %s...\n", nj, id.c_str());
+              }
+#endif
+              fmr::math::perf_inv3 (&this->time,
+                fmr::Local_int (nj),& vals.data [0]);
               vals.stored_state.was_read = true;
               if (badj_n > 0) {
                 const auto lab = "WARN""ING "+this->task_name;
@@ -389,8 +399,8 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
                   default : meas = std::to_string(elem_d)+"D volume"; break;
                 }
                 log->label_fprintf (log->fmrerr, lab.c_str(),
-                  "%u/%lu nonpositive element determinants in %s (%g %s)\n",
-                  badj_n, nj, id.c_str(), vol, meas.c_str());
+                  "%u/%lu nonpositive element determinants in %s (%s %g)\n",
+                  badj_n, nj, id.c_str(), meas.c_str(), vol);
               }
 #ifdef FMR_DEBUG
               const auto lab = "**** "+this->task_name+" read";

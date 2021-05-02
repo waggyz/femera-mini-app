@@ -228,7 +228,7 @@ namespace Femera {
                     "%u nonpositive element jacobian determinant%s in %s\n",
                     jacs_bad_n, (jacs_bad_n==1) ? "":"s",
                     this->model_name.c_str());
-              } } }//end calculate jacs_dets
+            } } }//end calculate jacs_dets
 #ifdef FMR_DEBUG
             if (this->elem_n > 0
               && this->geoms.count (fmr::Data::Jacs_dets) > 0) {
@@ -282,8 +282,8 @@ namespace Femera {
     const fmr::Local_int jacs_sz
       = this->elem_info.each_jacs_n * this->elem_info.each_jacs_size;
     //
-    const auto o = fmr::Geom_float (0.0);
-    const auto v = fmr::Geom_float(1);
+    const auto o = fmr::Geom_float (0);
+    const auto v = fmr::Geom_float (1);
 #if 0
     const auto shpg = std::valarray<fmr::Geom_float> ={//FIXME Move to Elem
       -v, v, o, o,// dN/dx (natural coords)

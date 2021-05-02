@@ -15,9 +15,9 @@ EndIf
 If(h<=0)
   h=10;
 EndIf
-If(n<=0)
+//If(n<=0)
   n=1;
-EndIf
+//EndIf
 N=h+1;
 
 Point(1)={0,0,0, 1/(N-1)};
