@@ -2,6 +2,7 @@
 
 #include <unistd.h>   // getopt, optarg
 #include <sys/stat.h> // stat, S_ISDIR
+#include <dirent.h>
 #include <limits>     // std::numeric_limits<int>::max()
 
 #undef FMR_DEBUG
@@ -832,7 +833,33 @@ int Data::init_task (int* argc, char** argv){ int err=0;
     //std::queue<std::string> unk_file_names={};
     //
     for(; optind < argc[0]; optind++){// Parse non-option arguments.
-      chk_file_names.push_back (std::string (argv[optind]));// assume input file
+      const auto path = argv[optind];
+      DIR* dir;
+      if ((dir = opendir (path)) != NULL) {//TODO don't open twice (stat below)
+        struct dirent* ent;
+        while ((ent = readdir (dir)) != NULL) {// all files and dirs in path
+          const auto child = std::string (path)+"/"+std::string (ent->d_name);
+          DIR* child_dir;// Check if ent is a directory.
+          if ((child_dir = opendir (child.c_str())) != NULL) {//ent is dir
+            closedir (child_dir);// Close child dir and do nothing.
+          }else{// child is not directory; assume input file
+            chk_file_names.push_back (child);
+        } }
+        closedir (dir);
+      }else{// could not open as directory, assume input file
+        chk_file_names.push_back (std::string (path));
+      }
+#if 0
+      struct stat info;
+      if (stat( path, &info ) != 0) {
+        err=1;
+      }else if (info.st_mode & S_IFDIR) {// or S_ISDIR()
+          printf( "%s is a directory\n", path );
+      }
+      else {
+        chk_file_names.push_back (std::string (path));// assume input file
+      }
+#endif
     }
     // Restore getopt variables.
     argc[0]=argc2;opterr=opterr2;optopt=optopt2;optind=optind2;optarg=optarg2;

@@ -297,23 +297,29 @@ namespace Femera {
        o, o, v};//TODO Transpose? (above)
 #endif
     const auto en = this->elem_n;
-    for (fmr::Local_int elem_i=0; elem_i<en; elem_i++) {
-      const fmr::Global_int ci = elem_i * conn_n;
-      const fmr::Global_int ji = elem_i * jacs_sz;
-      //
-      bad_jacs_n += fmr::elem::make_inv_jacdet (& jacs[ji],
-        vert_n, & conn[ci], & shpg[0], x,y,z);// 3D coor block layout
+    switch (this->geom_d) {//TODO Can a template switch on geom_d & data layout?
+      case 3 : for (fmr::Local_int elem_i=0; elem_i<en; elem_i++) {
+        const fmr::Global_int ci = elem_i * conn_n;
+        const fmr::Global_int ji = elem_i * jacs_sz;
+        bad_jacs_n += fmr::elem::make_inv3_jacdet (& jacs[ji],
+          vert_n, & conn[ci], & shpg[0], x,y,z);// 3D coor block layout
+      } break;
+      default : {}//TODO Warn.
+    }
 #if 0
       // coor interleaved layout
       bad_jacs_n += this->elem->make_elem_jac3 (&jacs[ji],
         elem_n, conn_n, &conn[ci], coor, &this->timer,);
 #endif
 #ifdef FMR_DEBUG
+    for (fmr::Local_int elem_i=0; elem_i<en; elem_i++) {
       this->volume//TODO Remove: only for 1 jac/elem.
         +=  this->elem_info.elem_size / jacs [ji +jacs_sz-1];
       this->time.flops += 1; this->time.bytes += 4*sizeof(fmr::Geom_float);
+    }
 #endif
 #ifdef FMR_DEBUG
+    for (fmr::Local_int elem_i=0; elem_i<en; elem_i++) {
       using d=double;
       const auto log = this->proc->log;
       const auto J =& jacs[ji];
@@ -325,8 +331,8 @@ namespace Femera {
       log->label_fprintf (log->fmrout, label.c_str(),
         "%u:r2 %+8.3e %+8.3e %+8.3e: %+8.3e\n",
         elem_i, d(J[6]), d(J[7]), d(J[8]), d(J[9]));
-#endif
     }
+#endif
     if (this->verblevel <= this->proc->log->timing) {
       fmr::elem::perf_jacobian (&this->time, elem_n, jacs,
         vert_n, conn, & shpg[0], x,y,z);

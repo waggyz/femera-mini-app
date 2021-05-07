@@ -116,19 +116,19 @@ namespace fmr {
   }//end fmr::math:: namespace
   namespace elem {//TODO move to elem.hpp
   template<typename T>
-  inline fmr::Local_int make_inv_jacdet (T* FMR_RESTRICT jacs,
+  inline fmr::Local_int make_inv3_jacdet (T* FMR_RESTRICT jacs,
     const fmr::Local_int conn_n, const fmr::Local_int* FMR_RESTRICT conn,
     const T* FMR_RESTRICT shpg,//TODO e.g. T jacs FMR_RESTRICT &
     const T* FMR_RESTRICT x, const T* FMR_RESTRICT y, const T* FMR_RESTRICT z) {
-    const auto jacs_sz = fmr::elem::jacs_size [3];
+    const auto jacs_sz = fmr::elem::jacs_size [3];//TODO Only 3D
     FMR_PRAGMA_OMP_SIMD
     for (fmr::Local_int i=0; i<jacs_sz; i++) {jacs [i] = T (0.0);}
-    FMR_PRAGMA_OMP_SIMD
+    //TODO_FMR_PRAGMA_OMP_SIMD
     for (fmr::Local_int j=0; j<conn_n; j++) {//TODO permute loops?
     for (fmr::Local_int i=0; i<3; i++) {
-      jacs [3* i+0] += x [conn[j]] * shpg [3* j+i];
-      jacs [3* i+1] += y [conn[j]] * shpg [3* j+i];
-      jacs [3* i+2] += z [conn[j]] * shpg [3* j+i];
+      jacs [3* i+0] += shpg [3* j+i] * x [conn[j]];//TODO transpose shpg?
+      jacs [3* i+1] += shpg [3* j+i] * y [conn[j]];
+      jacs [3* i+2] += shpg [3* j+i] * z [conn[j]];
     } }// 2* 3*3*conn_n FLOP
     jacs [jacs_sz-1] = fmr::math::det3 (jacs);// determinant 12 FLOP
     fmr::math::inv3 (jacs, jacs [jacs_sz-1]);// 37 FLOP
@@ -140,11 +140,11 @@ namespace fmr {
     const fmr::Local_int conn_n, const fmr::Local_int* FMR_RESTRICT conn,
     const T* FMR_RESTRICT,
     const T* FMR_RESTRICT x, const T* FMR_RESTRICT, const T* FMR_RESTRICT) {
-    const auto jacs_sz = fmr::elem::jacs_size [3];
-    time->flops += elem_n * (2 * 3*3*conn_n + 37+12) + 1;
+    const auto jacs_sz = fmr::elem::jacs_size [3];//TODO Only 3D
+    time->flops += elem_n * (2*3*3*conn_n + 37+12) + 1;
     time->bytes += elem_n * (
-      3 * conn_n  * sizeof (   x[0]) // read
-      +   conn_n  * sizeof (conn[0]) // read
+      3 * conn_n  * sizeof (   x[0])  // read
+      +   conn_n  * sizeof (conn[0])  // read
       +   jacs_sz * sizeof (jacs[0]));// write
     return 0;
   }

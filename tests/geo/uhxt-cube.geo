@@ -13,7 +13,7 @@ If(p<=0)
   p=1;
 EndIf
 If(h<=0)
-  h=10;
+  h=1;
 EndIf
 //If(n<=0)
   n=1;

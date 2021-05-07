@@ -107,10 +107,10 @@ namespace Femera {
         dof = 3.0 * double(node_n);
         err= 0;
     } }
-    const double iters = (dof > 500.0 ? 0.01 : 0.1) * dof;
-    double speed = 1e9;// dof/s Skylake XS sim solve speed on 40 cores
-    speed = (dof > 10e3) ? -90e6 * (std::log(dof) - std::log(10e3)) : speed;
-    speed = (speed < 500e6) ? 500e6 : speed;
+    const double iters = (dof < 500.0 ? 0.1 : 0.01) * dof;
+    double speed// dof/s Skylake XS sim solve speed on 40 cores
+      = 1e9 - (dof < 10e3) ? 0 : 90e6 * (std::log(dof) - std::log(10e3));
+    speed  = (speed < 500e6) ? 500e6 : speed;
     speed /= 40.0;// single-core speed
     const double  secs = iters * dof / speed;
 #if 0

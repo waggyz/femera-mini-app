@@ -28,7 +28,7 @@ C=`tools/cpucount.sh`
 GMSH_OMP="-nt $C" #TODO Not working on K?
 GMSH_OMP=""
 
-H=1
+H="1"
 
 cp -f "tests/geo/cube-tet6p1n2-geo.geo" "$MESHDIR"
 if [ "$N" -eq 1 ]; then
@@ -37,7 +37,7 @@ MESHFILE="$MESHDIR/cube-tet6p"$P"n"$N"."$EXT
 rm -f "$MESHFILE"
 # rm -f "$MESHDIR/cube-tet6p"$P"n"$N".inp"
 #echo meshing "$MESHFILE""..."
-$MPIEXEC gmsh $GMSH_OMP -setnumber p $P -setnumber h $H tests/geo/unit-cube.geo \
+$MPIEXEC gmsh $GMSH_OMP -setnumber p $P -setnumber h $H tests/geo/uhxt-cube.geo \
  -v 3 $PART -save -o "$MESHFILE" -3 2>/dev/null
 # else
 # Hm, looks like gmsh can write, but not read .inp files...
@@ -48,7 +48,7 @@ EXT="cgns"
 MESHFILE="$MESHDIR/cube-tet6p"$P"n"$N"."$EXT
 rm -f "$MESHFILE"
 #echo meshing "$MESHFILE""..."
-gmsh $GMSH_OMP -setnumber p $P -setnumber h $H tests/geo/unit-cube.geo \
+gmsh $GMSH_OMP -setnumber p $P -setnumber h $H tests/geo/uhxt-cube.geo \
  -v 3 $PART -save -o "$MESHFILE" -3
 chmod -w "$MESHDIR/cube-tet6p"$P"n"$N"."*
 done
