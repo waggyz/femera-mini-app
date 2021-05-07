@@ -840,13 +840,18 @@ int Data::init_task (int* argc, char** argv){ int err=0;
         while ((ent = readdir (dir)) != NULL) {// all files and dirs in path
           const auto child = std::string (path)+"/"+std::string (ent->d_name);
           DIR* child_dir;// Check if ent is a directory.
-          if ((child_dir = opendir (child.c_str())) != NULL) {//ent is dir
-            closedir (child_dir);// Close child dir and do nothing.
-          }else{// child is not directory; assume input file
+          if ((child_dir = opendir (child.c_str())) != NULL) {//ent is a dir
+            closedir (child_dir);// Close child directory.
+            const auto child_name = std::string (ent->d_name);
+            if (child_name !="." && child_name !="..") {
+              const auto lab = "NOTE "+this->task_name;
+              log->label_fprintf (log->fmrerr, lab.c_str(),
+                "skipping directory %s...\n",child.c_str());
+          } }else{// child is not directory; assume input file
             chk_file_names.push_back (child);
         } }
         closedir (dir);
-      }else{// could not open as directory, assume input file
+      }else{// could not open as directory; assume input file
         chk_file_names.push_back (std::string (path));
       }
 #if 0
