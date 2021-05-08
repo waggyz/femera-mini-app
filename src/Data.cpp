@@ -838,17 +838,17 @@ int Data::init_task (int* argc, char** argv){ int err=0;
       if ((dir = opendir (path)) != NULL) {//TODO don't open twice (stat below)
         struct dirent* ent;
         while ((ent = readdir (dir)) != NULL) {// all files and dirs in path
-          const auto child = std::string (path)+"/"+std::string (ent->d_name);
+          const auto child_name = std::string (ent->d_name);
+          const auto child = std::string (path) +"/"+ child_name;
           DIR* child_dir;// Check if ent is a directory.
-          if ((child_dir = opendir (child.c_str())) != NULL) {//ent is a dir
+          if ((child_dir = opendir (child.c_str())) != NULL) {// ent is a dir
             closedir (child_dir);// Close child directory.
-            const auto child_name = std::string (ent->d_name);
             if (child_name !="." && child_name !="..") {
               const auto lab = "NOTE "+this->task_name;
               log->label_fprintf (log->fmrerr, lab.c_str(),
                 "skipping directory %s...\n",child.c_str());
-          } }else{// child is not directory; assume input file
-            chk_file_names.push_back (child);
+          } }else{// child is not a directory; assume input file
+          chk_file_names.push_back (child);
         } }
         closedir (dir);
       }else{// could not open as directory; assume input file
@@ -870,7 +870,7 @@ int Data::init_task (int* argc, char** argv){ int err=0;
     argc[0]=argc2;opterr=opterr2;optopt=optopt2;optind=optind2;optarg=optarg2;
   }//end non-threadsafe section
   err= this->chck_file_names ();//chk_file_names);
-  for (auto model : this->sims_names){// Copy model names to the main queue
+  for (auto model : this->sims_names){// Copy model names to the main queue.
     fmr::sims::add (model);
   }
   if (log->detail >= this->verblevel){this->print_details (); }
