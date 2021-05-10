@@ -183,12 +183,16 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
   } }
   if (!err) { Data::Lock_here lock (this->liblock);
     gmsh::model::setCurrent (model);
+    const fmr::Dim_int p = 2;//FIXME
+    const auto soi = (p > 2) ? Dmsh::Optval (0) : Dmsh::Optval (1);
+    gmsh::option::setNumber ("Mesh.ElementOrder", Dmsh::Optval (p));
+    gmsh::option::setNumber ("Mesh.SecondOrderLinear", Dmsh::Optval (1));
+    gmsh::option::setNumber ("Mesh.SecondOrderIncomplete", soi);
     fmr::perf::timer_resume (& this->time);
     try {gmsh::model::mesh::generate (geom_d);}
     catch (int e) {err= e;
       log->label_fprintf (log->fmrerr, warnlabel.c_str(),
-        "generate %iD mesh of %s returned %i.\n",
-        geom_d, model.c_str(), err);
+        "generate %iD mesh of %s returned %i.\n", geom_d, model.c_str(), err);
     }
     fmr::perf::timer_pause (& this->time);
   }
