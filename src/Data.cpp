@@ -92,7 +92,7 @@ Data::File_info Data::get_file_info (Data::Data_file data_file) {
     data_file.first = D;
   }
   new_info.data_file = data_file;
-  auto log = this->proc->log;
+  const auto log = this->proc->log;
   if (D == nullptr) {// Unknown file format.
     new_info.state.has_error = true;
     log->fprintf (log->fmrerr,"WARN""ING Unrecognized file type: %s\n",
@@ -101,23 +101,33 @@ Data::File_info Data::get_file_info (Data::Data_file data_file) {
   }
   new_info.state.has_error = false;
   new_info.access = fmr::data::Access::Check;
+  const auto start = fmr::perf::get_now_ns();
   auto info= D->get_file_info (new_info.data_file.second);
   if (info.state.has_error) {
     log->fprintf (log->fmrerr,"WARN""ING %s file may be corrupt: %s\n",
       D->task_name.c_str(), fname.c_str());
     return info;
-  }
+  }else{
+    if (this->verblevel <= log->timing && false) {//TODO Remove?
+      log->proc_printf ("\"%s\",\"%s\",%lu,%lu\n",
+        fname.c_str(), "info", start, fmr::perf::get_now_ns());
+  } }
   return info;
 }
 #endif
 Data::File_info Data::scan_file_data (Data::Data_file df) {
   auto info = this->get_file_info (df);
   if (info.state.has_error) {return info;}
+  const auto log = this->proc->log;
   Data* D; std::string fname; std::tie (D,fname) = info.data_file;
 //  if (!D) {D = this->get_task_for_file (fname); }//TODO Remove?
   if (D) {
-    const auto log = this->proc->log;
+    const auto start = fmr::perf::get_now_ns();
     info = D->scan_file_data (fname);// Call derived class handler.
+    if (this->verblevel <= log->timing && false) {//TODO Remove?
+      log->proc_printf ("\"%s\",\"%s\",%lu,%lu\n",
+        fname.c_str(), "scan", start, fmr::perf::get_now_ns());
+    }
     if (this->verblevel <= log->detail) {
       const std::string label = this->task_name+" scan file";
       const auto ver = info.version;
@@ -141,10 +151,15 @@ int Data::make_mesh (const std::string model, const fmr::Local_int ix) {
   if (n>0) {for (int i=0; i<n; i++) {
     Data* D = this->task.get<Data>(i);
     if (D != nullptr && D != this) {
+      const auto start = fmr::perf::get_now_ns();
       fmr::perf::timer_resume (&this->time);
       err= D->make_mesh (model, ix);
       fmr::perf::timer_pause (&this->time);
       if (err <= 0) {
+        if (this->verblevel <= log->timing) {
+          log->proc_printf ("\"%s\",\"%s\",%lu,%lu\n",
+            model.c_str(), "mesh", start, fmr::perf::get_now_ns());
+        }
         did_mesh = true;
         if (log->timing >= D->verblevel && log->verbosity >= D->verblevel) {
           const auto s = fmr::perf::format_time_units (this->time.last_busy_ns);
@@ -175,10 +190,15 @@ int Data::make_part (const std::string model, const fmr::Local_int ix,
   if (n>0) {for (int i=0; i<n; i++) {
     Data* D = this->task.get<Data>(i);
     if (D != nullptr && D != this) {
+      const auto start = fmr::perf::get_now_ns();
       fmr::perf::timer_resume (&this->time);
       err= D->make_part (model, ix, part_n);
       fmr::perf::timer_pause (&this->time);
       if (err <= 0) {
+        if (this->verblevel <= log->timing) {
+          log->proc_printf ("\"%s\",\"%s\",%lu,%lu\n",
+            model.c_str(), "part", start, fmr::perf::get_now_ns());
+        }
         did_part = true;
         if (log->timing >= D->verblevel) {
           const auto s = fmr::perf::format_time_units (this->time.last_busy_ns);
@@ -838,6 +858,24 @@ int Data::init_task (int* argc, char** argv){ int err=0;
       DIR* dir;
       if ((dir = opendir (path)) != NULL) {//TODO don't open twice (stat below)
         struct dirent* ent;
+        // Set cpuout to use this directory.
+        const auto n = this->proc->get_proc_n ();
+        if (log->cpuout.size () >= size_t(n)) {
+          if (this->verblevel <= log->detail) {
+            const auto lab = this->task_name +" save";
+            log->label_printf (lab.c_str(),
+              "write cpuout to files %s...\n", path);
+          }
+          for (int i=0; i<n; i++) {
+            const auto logname = std::string(path)
+              + ".cpu." + std::to_string(i)+".out";
+#if 0
+            err= std::fopen_s (& this->log->cpuout[i], & stream;
+              logname.c_str(), "w");
+#else
+            log->cpuout [i] = std::fopen (logname.c_str(), "w");//TODO append ?
+#endif
+        } }
         while ((ent = readdir (dir)) != NULL) {// all files and dirs in path
           const auto child_name = std::string (ent->d_name);
           const auto child = std::string (path) +"/"+ child_name;
@@ -849,7 +887,7 @@ int Data::init_task (int* argc, char** argv){ int err=0;
               log->label_fprintf (log->fmrerr, lab.c_str(),
                 "skipping directory %s...\n",child.c_str());
           } }else{// child is not a directory; assume input file
-          chk_file_names.push_back (child);
+            chk_file_names.push_back (child);
         } }
         closedir (dir);
       }else{// could not open as directory; assume input file
@@ -916,7 +954,8 @@ int Data::chck_file_names (std::deque<std::string> files){int err=0;
   if (files.size() > 0) {
     FMR_PRAGMA_OMP(omp parallel)
     for (fmr::Local_int fname_i=this->proc->get_stat()[dlevel].thrd_id;
-      fname_i<fname_n; fname_i += thrd_n){// static round-robin distribution
+      fname_i<fname_n; fname_i += thrd_n) {// static round-robin distribution
+      const auto start = fmr::perf::get_now_ns();
   //    bool file_ok=true;//TODO Set false here, true if ok and sync all_file_names.
       std::string fname = files [fname_i];
 #ifdef FMR_DEBUG
@@ -947,9 +986,12 @@ int Data::chck_file_names (std::deque<std::string> files){int err=0;
               info = this->scan_file_data (info.data_file);
               if (!info.state.has_error) {
                 this->inp_file_names.push_back (fname);
-        } } } }
-      } }
-      this->get_sims_names();
+        } } } } }// end thread lock region
+        if (this->verblevel <= log->timing) {
+          log->proc_printf ("\"%s\",\"%s\",%lu,%lu\n",
+            fname.c_str(), "chck", start, fmr::perf::get_now_ns());
+    } }
+    this->get_sims_names();
   }//end if files provided
   if (log->verbosity >= this->verblevel){
     log->label_printf ("Input data","in %s\n",

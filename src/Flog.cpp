@@ -12,7 +12,7 @@ Flog::Flog (Proc* P) : proc (P) {// constructor
 }
 int Flog::init (int*, char**) {
   const int n = this->proc->get_proc_n ();
-  if (n>0) {this->cpulog.resize (n, nullptr);}
+  if (n>0) {this->cpuout.resize (n, nullptr);}
   this->pid_width = (n > 9) ? fmr::math::count_digits (n-1) : 1;
   return this->pid_width < 1 ? 1 : 0 ;
 }

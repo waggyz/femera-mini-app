@@ -17,17 +17,24 @@
 #endif
 
 namespace Femera{
-Proc::~Proc () noexcept{
-  if (this->work_type==work_cast(Base_type::Proc)){if (this->log){
+Proc::~Proc () noexcept {
+  if (this->work_type == work_cast(Base_type::Proc)) {if (this->log) {
+    if (this->verblevel <= log->timing) {
+      this->log->proc_printf ("\"%s\",\"%s\",%lu,%lu\n",
+        "Femera", "Proc", this->time.start, fmr::perf::get_now_ns());
+    }
     delete this->log;log=nullptr;
 } } }
-Proc::Proc (){
+Proc::Proc () {
   this->work_type = work_cast(Base_type::Proc);
   this->task_name ="Process";
+#if 1
+  this->     proc = this;//TODO safe?
+#endif
   this->verblevel = 1;
-  this->hier_lv   = 0;
-  this->logi_n    = int(std::thread::hardware_concurrency());//physical+logical
-  if (this->logi_n < 1){this->logi_n = 1; }
+  this->  hier_lv = 0;
+  this->   logi_n = int (std::thread::hardware_concurrency());//physical+logical
+  if (this->logi_n < 1) {this->logi_n = 1; }
 #ifdef FMR_CORE_N
   this->core_n = FMR_CORE_N ;
 #else
@@ -38,13 +45,13 @@ Proc::Proc (){
 #endif
   this->proc_n = this->core_n;
 }
-int Proc::prep (){// Set up the base processing environment stack.
-  if(this->work_type == work_cast(Base_type::Proc)){// Protect against no
+int Proc::prep () {// Set up the base processing environment stack.
+  if (this->work_type == work_cast(Base_type::Proc)) {// Protect against
     // override; only first base Proc makes logger.
     this->proc = this;
     this->task.add (this);
     if (!this->log){
-      this->log = new Flog(this);//deleted in ~Proc destructor
+      this->log = new Flog (this);//deleted in ~Proc destructor
   } }
   return 0;
 }
