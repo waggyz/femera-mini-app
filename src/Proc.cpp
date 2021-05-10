@@ -19,10 +19,6 @@
 namespace Femera{
 Proc::~Proc () noexcept {
   if (this->work_type == work_cast(Base_type::Proc)) {if (this->log) {
-    if (this->verblevel <= log->timing) {
-      this->log->proc_printf ("\"%s\",\"%s\",%lu,%lu\n",
-        "Femera", "Proc", this->time.start, fmr::perf::get_now_ns());
-    }
     delete this->log;log=nullptr;
 } } }
 Proc::Proc () {
@@ -374,7 +370,7 @@ std::string Proc::print_details (){
     info[omp_i] += std::string( "| \n" );
   }
   std::string table("");
-  for(const auto &line : info){ table += line; }// concatenate info
+  for (const auto &line : info) {table += line;}// concatenate info
   table = this->reduce (table);
   this->log->printf (head + table + legend);
   return pre + head + table + legend;
@@ -393,6 +389,10 @@ int Proc:: exit_task (int err) {
   }
   err= this->log->exit (err);
 #endif
+  if (this->verblevel <= log->timing) {
+    this->log->proc_printf ("\"%s\",\"%s\",%lu,%lu\n",
+      "Femera", "Proc", this->time.start, fmr::perf::get_now_ns());
+  }
   return err;
 }
 int Proc:: init_task (int* argc, char** argv ){int err=0;
