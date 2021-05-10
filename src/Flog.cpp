@@ -8,10 +8,11 @@
 #endif
 
 namespace Femera{
-  Flog::Flog (Proc* P):proc(P){
-  }
+Flog::Flog (Proc* P) : proc (P) {// constructor
+}
 int Flog::init (int*, char**) {
-  const int n = this->proc->get_proc_n();
+  const int n = this->proc->get_proc_n ();
+  if (n>0) {this->cpulog.resize (n, nullptr);}
   this->pid_width = (n > 9) ? fmr::math::count_digits (n-1) : 1;
   return this->pid_width < 1 ? 1 : 0 ;
 }
@@ -24,28 +25,28 @@ int Flog::print_log_time (std::string suffix) {
   } }
   return 0;
 }
-int Flog::printf (const char* format){
+int Flog::printf (const char* format) {
   fmr::perf::timer_resume (& this->time);
-  if (this->proc->is_master()){if (this->verbosity > 0){
+  if (this->proc->is_master()){if (this->verbosity > 0) {
     return std::fprintf (this-> fmrout, format);
   } }
   fmr::perf::timer_pause (& this->time);
   return 0;
 }
-std::string Flog::print_label_line (std::string label, std::string info){
+std::string Flog::print_label_line (std::string label, std::string info) {
   fmr::perf::timer_resume (& this->time);
   std::string line = this->format_label_line (label, info);
   this->printf (line.c_str());
   fmr::perf::timer_pause (& this->time);
   return line;
 }
-std::string Flog::format_label_line (std::string label, std::string info){
+std::string Flog::format_label_line (std::string label, std::string info) {
   fmr::perf::timer_resume (& this->time);
-  if (this->label_width < 3){
+  if (this->label_width < 3) {
     fmr::perf::timer_pause (& this->time);
     return info;
   }
-  if (this->label_width > 240){
+  if (this->label_width > 240) {
     this->label_width = 240;
     this->printf_err ("WARN""ING Set line label width to 240.\n");
     label = label.substr (0, this->label_width);

@@ -162,7 +162,8 @@ int Data::make_mesh (const std::string model, const fmr::Local_int ix) {
   }
   return err;
 }
-int Data::make_part (const std::string model, const fmr::Local_int ix) {
+int Data::make_part (const std::string model, const fmr::Local_int ix,
+  const fmr::Local_int part_n) {
   int err=0;
   const auto log = this->proc->log;
 #ifdef FMR_DEBUG
@@ -175,7 +176,7 @@ int Data::make_part (const std::string model, const fmr::Local_int ix) {
     Data* D = this->task.get<Data>(i);
     if (D != nullptr && D != this) {
       fmr::perf::timer_resume (&this->time);
-      err= D->make_part (model, ix);
+      err= D->make_part (model, ix, part_n);
       fmr::perf::timer_pause (&this->time);
       if (err <= 0) {
         did_part = true;

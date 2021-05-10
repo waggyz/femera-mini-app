@@ -81,13 +81,16 @@ int Work::print_task_time (const std::string name_suffix) {
             if (i>0) {fmr::perf::timer_resume (&W->time);}
             fmr::perf::timer_pause (&W->time);
             if (log->timing >= W->verblevel) {
-              const auto label = W->task_name+" "+name_suffix;
-              W->proc->log->print_label_meter (label, W->meter_unit, W->time);
-        } } } }else{
-        fmr::perf::timer_resume (&this->time);
-        const auto label = this->task_name+" "+name_suffix;
-        log->print_label_meter (label, this->meter_unit, this->time);
-        fmr::perf::timer_pause (&this->time);
+              const auto  busy = double(timer_busy_ns (W->time));
+              const auto total = double(timer_total_ns(W->time));
+              if (W->verblevel < 8 || (busy/total > 0.002)) {//TODO magic nmbrs
+                const auto label = W->task_name+" "+name_suffix;
+                W->proc->log->print_label_meter (label, W->meter_unit, W->time);
+      } } } } }else{
+      fmr::perf::timer_resume (&this->time);
+      const auto label = this->task_name+" "+name_suffix;
+      log->print_label_meter (label, this->meter_unit, this->time);
+      fmr::perf::timer_pause (&this->time);
   } } }
   return 0;
 }

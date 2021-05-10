@@ -166,6 +166,12 @@ namespace Femera {
     }
     return err;
   }
+  int Sims::iter () {int err=0;
+    return err;
+  }
+  int Sims::post () {int err=0;
+    return err;
+  }
   int Sims::ini_data_vals (const Data_list list, const size_t n) {int err=0;
     for (auto type : list) {
       switch (fmr::vals_type [fmr::enum2val (type)]) {
@@ -278,8 +284,12 @@ namespace Femera {
               const auto mesh_n = this->get_local_val(fmr::Data::Mesh_n, sim_i);
               const auto node_n = get_global_val (fmr::Data::Node_sysn, sim_i);
               const auto elem_n = get_global_val (fmr::Data::Elem_sysn, sim_i);
+              if (false) {
+                for (fmr::Local_int i=0; i<gcad_n; i++) {
+                  err+= this->data->make_part (R->model_name, i, part_n);//TODO
+              } }
 #if 0
-              const auto dofs_n = get_global_val (fmr::Data::Dofs_sysn,sim_i);
+              const auto dofs_n = get_global_val (fmr::Data::Dofs_sysn, sim_i);
 #else
               const fmr::Global_int dofs_n = 0;//TODO
 #endif

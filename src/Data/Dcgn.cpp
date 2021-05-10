@@ -200,7 +200,13 @@ bool Dcgn::is_this_type (const std::string fname) {int err;
 int Dcgn::make_mesh (const std::string, const fmr::Local_int) {
   return 1;
 }
+#if 0
 int Dcgn::make_part (const std::string, const fmr::Local_int) {
+  return 1;
+}
+#endif
+int Dcgn::make_part (const std::string, const fmr::Local_int,
+  const fmr::Local_int) {
   return 1;
 }
 Data::File_info Dcgn::get_file_info (const std::string fname) {int err=0;

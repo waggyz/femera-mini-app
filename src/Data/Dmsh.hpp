@@ -74,7 +74,11 @@ class Dmsh final : public Data {
       final override;
     //
     int make_mesh (const std::string, const fmr::Local_int) final override;
+#if 0
     int make_part (const std::string, const fmr::Local_int) final override;
+#endif
+    int make_part (const std::string, const fmr::Local_int,
+        const fmr::Local_int) final override;
     Dmsh::File_gmsh open (Dmsh::File_gmsh, fmr::data::Access,Data::Concurrency);
   private:
     int scan_model (const std::string name);

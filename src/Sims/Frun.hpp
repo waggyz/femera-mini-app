@@ -26,6 +26,8 @@ class Frun final : public Sims {//TODO Problably NOT derived from Sims or Work.
   private:
 //    int init_task (int* argc, char** argv)final override;//TODO called?
     int run  () final override;
+    int iter () final override;//TODO or loop() ?
+    int post () final override;
   public:
     virtual ~Frun  ()      noexcept=default;
     Frun           (Sims*) noexcept;

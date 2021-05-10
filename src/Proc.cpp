@@ -372,18 +372,19 @@ std::string Proc::print_details (){
   this->log->printf (head + table + legend);
   return pre + head + table + legend;
 }
-int Proc:: opt_add (const int c){
+int Proc:: opt_add (const int c) {
   handled_opts.insert(c);
   return 0;
 }
-bool Proc:: is_opt_handled (int c){
+bool Proc:: is_opt_handled (int c) {
   return handled_opts.count(c) > 0;
 }
-int Proc:: exit_task (int err){
+int Proc:: exit_task (int err) {
 #if 0
   if (this->proc->log->detail >= this->verblevel) {
     this->proc->log->print_heading ("Done");
   }
+  err= this->log->exit (err);
 #endif
   return err;
 }

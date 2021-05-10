@@ -18,6 +18,7 @@ class Flog {
     //
     FILE*    fmrout = ::stdout;// can redirect stdout
     FILE*    fmrerr = ::stderr;// can redirect stderr
+    std::vector <FILE*> cpulog ={};//TODO could be ofstream ?
     //
     int   verbosity =  7;
     int      timing =  7;
@@ -36,6 +37,7 @@ class Flog {
     Flog operator= (const Flog&)=delete;
     //
     int init (int*, char**);
+    //
     int print_log_time (std::string suffix);
     std::string print_heading (const char* text);
     std::string print_center  (const char* text);
@@ -49,14 +51,14 @@ class Flog {
       fmr::perf::Meter M);
     //
     template<typename ...Args>// prints from all processes
-    int fprintf (FILE* out, const char* format, Args ...args){
-      if (out){return std::fprintf (out, format, args...);}
+    int fprintf (FILE* out, const char* format, Args ...args) {
+      if (out) {return std::fprintf (out, format, args...);}
       return 0;
     }
     template<typename ...Args>// prints from all processes
     int label_fprintf (FILE* out, const char* label, const char* format,
       Args ...args){
-      if (out){
+      if (out) {
         if (this->detail){
           std::string f = std::string("%") +std::to_string(this->pid_width)
             + std::string("i %") +std::to_string(this->label_width)
@@ -71,14 +73,14 @@ class Flog {
       return 0;
     }
     template<typename ...Args>// only prints from master
-    int printf_err (const char* format, Args ...args){
-      if (this->proc->is_master()){if (this->fmrerr){
+    int printf_err (const char* format, Args ...args) {
+      if (this->proc->is_master()) {if (this->fmrerr) {
       return this->fprintf (this->fmrerr, format, args...); } }
       return 0;
     }
     template<typename ...Args>// only prints from master
     int printf (const char* format, Args ...args){
-      if (this->proc->is_master()){if(this->verbosity > 0 ){if(this->fmrout ){
+      if (this->proc->is_master()) {if(this->verbosity > 0) {if (this->fmrout){
         return this->fprintf (this->fmrout, format, args...); } } }
       return 0;
     }

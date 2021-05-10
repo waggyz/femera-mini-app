@@ -192,13 +192,14 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
     }
     fmr::perf::timer_pause (& this->time);
   }
+#if 0
   if (!err) { Data::Lock_here lock (this->liblock);
     gmsh::model::setCurrent (model);
     auto optval=Dmsh::Optval(0);
     gmsh::option::getNumber ("Mesh.NbPartitions", optval);//0: unpartitioned
     if (optval > 1) {
       fmr::perf::timer_resume (& this->time);
-      try {gmsh::model::mesh::partition (int (optval));}//TODO make_part(..)
+      try {gmsh::model::mesh::partition (int (optval));}//TODO to make_part(..)
       catch (int e) {err= e;
         log->label_fprintf (log->fmrerr, warnlabel.c_str(),
           "partition (%i) %s returned %i.\n",
@@ -207,6 +208,7 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
       }
       fmr::perf::timer_pause (& this->time);
     } }
+#endif
 #ifdef FMR_DEBUG
   log->label_fprintf (log->fmrout, "**** Gmsh",
     "make_mesh %s return %i...\n", model.c_str(), err);
@@ -215,7 +217,8 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
   return this->scan_model (model);
 }
 
-int Dmsh::make_part (const std::string model, const fmr::Local_int) {
+int Dmsh::make_part (const std::string model, const fmr::Local_int,
+  const fmr::Local_int part_n) {
   int err=0;
   const auto log = this->proc->log;
   const auto warnlabel = "WARN""ING "+this->task_name;
@@ -228,10 +231,10 @@ int Dmsh::make_part (const std::string model, const fmr::Local_int) {
         "can not find %s.\n", model.c_str());
     }
     auto optval=Dmsh::Optval(0);
-    gmsh::option::getNumber ("Mesh.NbPartitions", optval);//0: unpartitioned
+    //gmsh::option::getNumber ("Mesh.NbPartitions", optval);//0: unpartitioned
     if (optval > 1) {
       fmr::perf::timer_resume (& this->time);
-      try {gmsh::model::mesh::partition (int (optval));}//TODO make_part(..)
+      try {gmsh::model::mesh::partition (int (part_n));}
       catch (int e) {err= e;
         log->label_fprintf (log->fmrerr, warnlabel.c_str(),
           "partition (%i) %s returned %i.\n",
@@ -286,13 +289,13 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
     if (!err) {this->time.bytes += stat_buf.st_size;}
   }
   Dmsh::Optval optval=Dmsh::Optval(0);
-  gmsh::option::getNumber ("Mesh.Binary", optval);
-  info.encode = (optval > Dmsh::Optval(0))
+  gmsh::option::getNumber ("Mesh.Binary", optval);//TODO this is for write,
+  info.encode = (optval > Dmsh::Optval(0))        // not current file encoding
     ? Data::Encode::Binary : Data::Encode::ASCII;
   std::string encstr = (optval > Dmsh::Optval(0)) ? "binary" : "ASCII";
   //
   gmsh::option::getNumber ("Mesh.Format", optval);
-  info.format = int(optval);
+  info.format = int(optval);//TODO this is for write, not current file.
   if (fmr::detail::format_gmsh_name.count (info.format) > 0) {
     info.version = fmr::detail::format_gmsh_name.at (info.format)+" ";
     if (info.format == 1) {// .msh format

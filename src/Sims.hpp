@@ -59,9 +59,10 @@ class Sims : public Work {// simulation collection manager
     fmr::Dim_int geom_d =0;// used by inheriting classes
   // methods -----------------------------------------------------------------
   public:
-    virtual int add   (const std::string model_name);
-    virtual int run   ();
-    virtual int clear ();
+    fmr::Local_int get_sims_n ();
+    fmr::Local_int get_frun_n ();
+//    fmr::Local_int get_mtrl_n ();//TODO
+    fmr::Local_int get_part_n ();// used in derived classes
     //
     fmr::Dim_int get_dim_val (const fmr::Data, const size_t ix);
     fmr::Enum_int get_enum_val (const fmr::Data, const size_t ix);
@@ -71,16 +72,19 @@ class Sims : public Work {// simulation collection manager
     virtual int ini_data_vals (const Data_list, const size_t vals_n);
     virtual int get_data_vals (const fmr::Data_id, const Data_list);
     //
-    fmr::Local_int get_sims_n ();
-    fmr::Local_int get_frun_n ();
-//    fmr::Local_int get_mtrl_n ();//TODO
-    fmr::Local_int get_part_n ();// used in derived classes
-    int prep () override;//TODO or virtual int init() ?
-  protected:
-    //TODO The following are run by this->run () ?
+    virtual int add (const std::string model_name);
+    virtual int run ();
+    virtual int clear ();
+    //
+    //TODO The following called by this->run () in child tasks?
     int chck () override;//TODO Is this needed here?
-#if 0
+    int prep () override;//TODO or virtual int init() ?
     virtual int iter ();//TODO or loop() ?
+    virtual int post ();
+    //
+  protected:
+#if 0
+    //TODO The following called by this->run () ?
     virtual int krnl ();//TODO or body() ? Is this needed?
     virtual int sync ();
     virtual int done ();//TODO or exit() ? Is this needed here?

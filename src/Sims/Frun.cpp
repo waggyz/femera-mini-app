@@ -23,7 +23,7 @@ namespace Femera {
     this-> meter_unit ="dof";
     //this->data_list = {};
   }
-  int Frun::chck (){
+  int Frun::chck () {
     return 0;
   }
   int Frun::prep () {int err=0;
@@ -93,58 +93,69 @@ namespace Femera {
   }
   int Frun::run () {int err=0;
     fmr::perf::timer_resume (& this->time);
-    const auto log = this->proc->log;
     err= this->prep ();
-//    if (err) {return err;}//TODO early return segfaults
-    //TODO this->solv->run(); ?
-#if 1
-    double dof = 10e3; err= 1;
-    fmr::Global_int node_n = 0;
-    if (this->parent->globals.count (fmr::Data::Node_sysn) > 0) {
-      if (this->sims_ix < this->parent->globals.at
-        (fmr::Data::Node_sysn).data.size()) {
-        node_n = this->parent->globals.at
-          (fmr::Data::Node_sysn).data [this->sims_ix];
-        dof = 3.0 * double (node_n);
-        err= 0;
-    } }
-    double speed// dof/s Skylake XS sim solve speed on 40 cores
-      = 1e9 - (dof <  10e3) ?   0.0 : 90e6 * (std::log (dof) - std::log (10e3));
-    speed = (speed < 500e6) ? 500e6 : speed;
-    speed/= 40.0;// single-core speed
-    const double iters = (dof < 500.0 ? 0.1 : 0.01) * dof;
-    const double  secs = iters * dof / speed;
-    int ret= 0;
-    if (secs < 1.0) {
-      ret= usleep (int (1e6 * secs));
-    }else{
-      ret= sleep (int (secs));
-    }
-    if (ret==0) {if (log->detail >= this->verblevel) {
-      const auto elem_n = this->parent->globals.at
-        (fmr::Data::Elem_sysn).data [this->sims_ix];
-      const auto secstr = fmr::perf::format_time_units (secs);
-      const auto szshort = fmr::get_enum_string (fmr::Sim_size_short,
-        this->sims_size);
-      const auto  label = szshort +std::to_string (geom_d)+"D "
-        + this->task_name +" zzzz";
-      log->label_fprintf (log->fmrout, label.c_str(),
-        "sim_%u: %u geom, %lu elem, %lu node, %g DOF, sleep %s...\n",
-        this->sims_ix, this->task.count(), elem_n, node_n, dof, secstr.c_str());
-    } }
+#if 0
+    if (err) {return err;}//TODO early return segfaults
 #endif
-#endif
-    //...
+    err= this->iter ();
+    err= this->post ();
 #if 0
     if (geom_n > 0) {
       for (int i=0; i < geom_n; i++) {//TODO need barrier before this?
         const auto G = this->task.get<Sims>(i);
         if (G) {err= G->exit (err);}
     } }
-#else
-    fmr::perf::timer_resume (& this->time);
-    return this->exit (err);//TODO need barrier before this?
 #endif
+    fmr::perf::timer_pause (& this->time);
+    return this->exit (err);//TODO need barrier before this?
+  }
+  int Frun::iter () {int err=0;// TODO this->solv->iter ?
+    //
+    const int solv = 0;
+    //
+    switch (solv) {
+      case 0 : break;// Solv::None
+      case 2 : break;// Solv::Flop
+      case 1 : {     // Solv::Zzzz
+        const auto log = this->proc->log;
+        double dof = 10e3; err= 1;
+        fmr::Global_int node_n = 0;
+        if (this->parent->globals.count (fmr::Data::Node_sysn) > 0) {
+          if (this->sims_ix < this->parent->globals.at
+            (fmr::Data::Node_sysn).data.size()) {
+            node_n = this->parent->globals.at
+              (fmr::Data::Node_sysn).data [this->sims_ix];
+            dof = 3.0 * double (node_n);
+            err= 0;
+        } }
+        double speed = 1e9 // dof/s Skylake XS P2 tet solve speed on 40 cores
+          - (dof <  10e3) ?   0.0 : 90e6 * (std::log (dof) - std::log (10e3));
+        speed = (speed < 500e6) ? 500e6 : speed;// dof/s XL solve speed
+        speed/= 40.0;// single-core speed
+        const double iters = (dof < 500.0 ? 0.1 : 0.01) * dof;
+        const double  secs = iters * dof / speed;
+        const int ret = (secs < 1.0)
+          ? usleep (int (1e6 * secs)) : sleep (int (secs));
+        if (ret==0) {if (log->detail >= this->verblevel) {
+          const auto elem_n = this->parent->globals.at
+            (fmr::Data::Elem_sysn).data [this->sims_ix];
+          const auto secstr = fmr::perf::format_time_units (secs);
+          const auto szshort = fmr::get_enum_string (fmr::Sim_size_short,
+            this->sims_size);
+          const auto  label = szshort +std::to_string (geom_d)+"D "
+            + this->task_name +" zzzz";
+          log->label_fprintf (log->fmrout, label.c_str(),
+            "sim_%u: %u geom, %lu elem, %lu node, %g DOF, sleep %s...\n",
+            this->sims_ix, this->task.count(), elem_n, node_n, dof,
+            secstr.c_str());
+        } }
+        break;}
+      default : err=1;
+    }// end switch (solv)
+    return err;
+  }
+  int Frun::post () {int err=0;
+    return err;
   }
 #if 0
   int Frun::init_task (int*, char**){int err=0;//TODO call this?

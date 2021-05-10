@@ -149,7 +149,8 @@ class Data : public Work {//TODO change to File
     //
     int add_data_file (const fmr::Data_id, Data*D, const std::string fname);
     virtual int make_mesh (const std::string model, const fmr::Local_int ix);
-    virtual int make_part (const std::string model, const fmr::Local_int ix);
+    virtual int make_part (const std::string model, const fmr::Local_int ix,
+      const fmr::Local_int part_n);
     //
     int get_dim_vals (const fmr::Data_id, fmr::Dim_int_vals &);
     int get_enum_vals (const fmr::Data_id, fmr::Enum_int_vals &);

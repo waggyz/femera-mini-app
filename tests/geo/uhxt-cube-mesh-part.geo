@@ -68,7 +68,7 @@ Mesh.Optimize=0;
 
 SetOrder p;
 RecombineAll=0;// Only make tets
-/*
+
 Mesh 3;
 //RenumberMeshNodes;
 //RenumberMeshElements;
@@ -78,7 +78,6 @@ EndIf
 If(n>1)
   PartitionMesh n;
 EndIf
-*/
 /*
 If ( n>=1000 )
   If( n<4000 )
