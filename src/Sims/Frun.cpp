@@ -193,7 +193,7 @@ namespace Femera {
   }
   int Frun::post () {int err=0;
     const auto start = fmr::perf::get_now_ns();
-    auto log = this->proc->log;
+    const auto log = this->proc->log;
     //
     //
     //
@@ -208,6 +208,15 @@ namespace Femera {
     return err;
   }
 #endif
-  int Frun::exit_task (int err) {return err;}
+  int Frun::exit_task (int err) {
+#if 0
+    const auto log = this->proc->log;
+    if (this->verblevel <= log->timing) {
+      log->proc_printf ("\"%s\",\"%s\",%lu,%lu\n", this->model_name.c_str(),
+        "run1", this->time.start, fmr::perf::get_now_ns());
+    }
+#endif
+    return err;
+  }
 }// end Femera namespace
 #undef FMR_DEBUG

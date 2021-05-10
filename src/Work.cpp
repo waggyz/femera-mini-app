@@ -10,7 +10,7 @@
 #endif
 
 namespace Femera{
-Work::~Work (){ }
+Work::~Work () {}
 int Work::prep (){return 0;}
 int Work::chck (){return 0;}
 int Work::init (int* argc, char** argv){int err=0;
@@ -31,7 +31,7 @@ int Work::init (int* argc, char** argv){int err=0;
   return err;
 #endif
 }
-int Work::exit (int err){//TODO Why getting called a lot (after task empty)
+int Work::exit (int err) {//TODO Why getting called a lot (after task empty)
   // when exiting Proc?
 #ifdef FMR_DEBUG
   std::printf("*** Work::exit( %i ) %s...\n", err,this->task_name.c_str());
@@ -44,7 +44,7 @@ int Work::exit (int err){//TODO Why getting called a lot (after task empty)
   fmr::perf::timer_pause (&this->time);
   return err;
 }
-std::string Work::print_summary (){
+std::string Work::print_summary () {
   std::string label, info("");
   const int n = this->task.count();
   if (n == 0) {
