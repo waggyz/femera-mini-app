@@ -68,17 +68,18 @@ Mesh.Optimize=0;
 
 SetOrder p;
 RecombineAll=0;// Only make tets
-/*
-Mesh 3;
-//RenumberMeshNodes;
-//RenumberMeshElements;
-If(part_size>0)
-  n = Ceil (Mesh.NbNodes/part_size);//TODO round to ncpu
+
+If(mesh_d>0)
+  Mesh mesh_d;
+  //RenumberMeshNodes;
+  //RenumberMeshElements;
+  If(part_size>0)
+    n = Ceil (Mesh.NbNodes/part_size);//TODO round to ncpu
+  EndIf
+  If(n>1)
+    PartitionMesh n;
+  EndIf
 EndIf
-If(n>1)
-  PartitionMesh n;
-EndIf
-*/
 /*
 If ( n>=1000 )
   If( n<4000 )
