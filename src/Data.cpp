@@ -109,7 +109,7 @@ Data::File_info Data::get_file_info (Data::Data_file data_file) {
     return info;
   }else{
     if (this->verblevel <= log->timing && false) {//TODO Remove?
-      log->proc_printf ("\"%s\",\"%s\",%lu,%lu\n",
+      log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu\n", this->proc->get_proc_id(),
         fname.c_str(), "info", start, fmr::perf::get_now_ns());
   } }
   return info;
@@ -124,8 +124,8 @@ Data::File_info Data::scan_file_data (Data::Data_file df) {
   if (D) {
     const auto start = fmr::perf::get_now_ns();
     info = D->scan_file_data (fname);// Call derived class handler.
-    if (this->verblevel <= log->timing && false) {//TODO Remove?
-      log->proc_printf ("\"%s\",\"%s\",%lu,%lu\n",
+    if (this->verblevel <= log->timing) {//TODO Remove?
+      log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu\n", this->proc->get_proc_id(),
         fname.c_str(), "scan", start, fmr::perf::get_now_ns());
     }
     if (this->verblevel <= log->detail) {
@@ -157,7 +157,7 @@ int Data::make_mesh (const std::string model, const fmr::Local_int ix) {
       fmr::perf::timer_pause (&this->time);
       if (err <= 0) {
         if (this->verblevel <= log->timing) {
-          log->proc_printf ("\"%s\",\"%s\",%lu,%lu\n",
+          log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu\n", proc->get_proc_id(),
             model.c_str(), "mesh", start, fmr::perf::get_now_ns());
         }
         did_mesh = true;
@@ -196,7 +196,7 @@ int Data::make_part (const std::string model, const fmr::Local_int ix,
       fmr::perf::timer_pause (&this->time);
       if (err <= 0) {
         if (this->verblevel <= log->timing) {
-          log->proc_printf ("\"%s\",\"%s\",%lu,%lu\n",
+          log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu\n", proc->get_proc_id(),
             model.c_str(), "part", start, fmr::perf::get_now_ns());
         }
         did_part = true;
@@ -868,7 +868,7 @@ int Data::init_task (int* argc, char** argv){ int err=0;
           }
           for (int i=0; i<n; i++) {
             const auto logname = std::string(path)
-              + ".cpu." + std::to_string(i)+".out";
+              + "." + std::to_string(i)+".out";
 #if 0
             err= std::fopen_s (& this->log->cpuout[i], & stream;
               logname.c_str(), "w");
@@ -988,7 +988,7 @@ int Data::chck_file_names (std::deque<std::string> files){int err=0;
                 this->inp_file_names.push_back (fname);
         } } } } }// end thread lock region
         if (this->verblevel <= log->timing) {
-          log->proc_printf ("\"%s\",\"%s\",%lu,%lu\n",
+          log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu\n", proc->get_proc_id(),
             fname.c_str(), "chck", start, fmr::perf::get_now_ns());
     } }
     this->get_sims_names();

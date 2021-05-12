@@ -390,7 +390,7 @@ int Proc:: exit_task (int err) {
   err= this->log->exit (err);
 #endif
   if (this->verblevel <= log->timing) {
-    this->log->proc_printf ("\"%s\",\"%s\",%lu,%lu\n",
+    this->log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu\n", this->get_proc_id (),
       "Femera", "Proc", this->time.start, fmr::perf::get_now_ns());
   }
   return err;

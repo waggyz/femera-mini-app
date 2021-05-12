@@ -30,6 +30,7 @@ for MESH_I in $(seq 1 1 $MESH_N) ; do
   MESHFILE="$DIR/cube-$MESH_I""$BIN.$FMT"
   # Distribute evenly over log mesh size.
   H=`echo "e (l ($H_MIN) + $RANDOM/32767 * l ($H_MAX/$H_MIN))" | bc -l`
+  H=`printf "%.5f" $H`; # Round it.
   EXEC="gmsh $GMSH_OMP"
   EXEC=$EXEC" -setnumber p $P -setnumber h $H -setnumber part_size $PS"
   if [ "$FMT" = "geo_unrolled" ] ; then

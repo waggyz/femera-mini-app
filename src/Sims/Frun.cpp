@@ -30,7 +30,7 @@ namespace Femera {
     //
     //
     if (this->verblevel <= log->timing) {
-      log->proc_printf ("\"%s\",\"%s\",%lu,%lu\n",
+      log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu\n", this->proc->get_proc_id(),
         this->model_name.c_str(), "chck", start, fmr::perf::get_now_ns());
     }
     return 0;
@@ -100,7 +100,7 @@ namespace Femera {
     //TODO Post, Solv, & Phys prep
     fmr::perf::timer_pause (& this->time);
     if (this->verblevel <= log->timing) {
-      log->proc_printf ("\"%s\",\"%s\",%lu,%lu\n",
+      log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu\n", this->proc->get_proc_id(),
         this->model_name.c_str(), "prep", start, fmr::perf::get_now_ns());
     }
     return err;
@@ -127,7 +127,7 @@ namespace Femera {
     const auto start = fmr::perf::get_now_ns();
     const auto log = this->proc->log;
     //
-    const int solv = 0;
+    const int solv = 1;//TODO
     //
     switch (solv) {
       case 0 : {// Solv::None
@@ -143,9 +143,9 @@ namespace Femera {
         const auto elem_n = this->parent->globals.at
           (fmr::Data::Elem_sysn).data [this->sims_ix];
         if (this->verblevel <= log->timing) {
-          log->proc_printf ("\"%s\",\"%s\",%lu,%lu,%lu,%lu,%lu\n",
-            this->model_name.c_str(), "iter", start, fmr::perf::get_now_ns(),
-            elem_n, node_n, 3*node_n);
+          log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu,%lu,%lu,%lu\n",
+            this->proc->get_proc_id(), this->model_name.c_str(), "iter",
+            start, fmr::perf::get_now_ns(), elem_n, node_n, 3*node_n);
         }
         break;}
       case 1 : {// Solv::Zzzz
@@ -163,16 +163,21 @@ namespace Femera {
           - (dof <  10e3) ? 0.0 : 90e6 * (std::log (dof) - std::log (10e3));
         speed = (speed < 500e6) ? 500e6 : speed;// dof/s XL solve speed
         speed/= 40.0;// single-core speed
+#if 0
         const double iters = (dof < 500.0 ? 0.1 : 0.01) * dof;
+#else
+        const double c0=1.5, c1=1.0/3.0;
+        const double iters = std::exp (c1 * std::log (dof) + c0);
+#endif
         const double  secs = iters * dof / speed;
         const int ret = (secs < 1.0)
           ? usleep (int (1e6 * secs)) : sleep (int (secs));
         const auto elem_n = this->parent->globals.at
           (fmr::Data::Elem_sysn).data [this->sims_ix];
         if (this->verblevel <= log->timing) {
-          log->proc_printf ("\"%s\",\"%s\",%lu,%lu,%lu,%lu,%lu\n",
-            this->model_name.c_str(), "zzzz", start, fmr::perf::get_now_ns(),
-            elem_n, node_n, 3*node_n);
+          log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu,%lu,%lu,%lu\n",
+            this->proc->get_proc_id(), this->model_name.c_str(), "zzzz",
+            start, fmr::perf::get_now_ns(), elem_n, node_n, 3*node_n);
         }
         if (ret==0) {if (log->detail >= this->verblevel) {
           const auto secstr = fmr::perf::format_time_units (secs);
@@ -198,7 +203,7 @@ namespace Femera {
     //
     //
     if (this->verblevel <= log->timing) {
-      log->proc_printf ("\"%s\",\"%s\",%lu,%lu\n",
+      log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu\n", this->proc->get_proc_id(),
         this->model_name.c_str(), "post", start, fmr::perf::get_now_ns());
     }
     return err;
@@ -212,8 +217,8 @@ namespace Femera {
 #if 0
     const auto log = this->proc->log;
     if (this->verblevel <= log->timing) {
-      log->proc_printf ("\"%s\",\"%s\",%lu,%lu\n", this->model_name.c_str(),
-        "run1", this->time.start, fmr::perf::get_now_ns());
+      log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu\n", this->proc->get_proc_id(),
+      model_name.c_str(), "run1", this->time.start, fmr::perf::get_now_ns());
     }
 #endif
     return err;
