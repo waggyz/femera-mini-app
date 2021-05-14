@@ -183,11 +183,16 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
   } }
   if (!err) { Data::Lock_here lock (this->liblock);
     gmsh::model::setCurrent (model);
+#if 0
     const fmr::Dim_int p = 2;//FIXME
     const auto soi = (p > 2) ? Dmsh::Optval (0) : Dmsh::Optval (1);
     gmsh::option::setNumber ("Mesh.ElementOrder", Dmsh::Optval (p));
     gmsh::option::setNumber ("Mesh.SecondOrderLinear", Dmsh::Optval (1));
     gmsh::option::setNumber ("Mesh.SecondOrderIncomplete", soi);
+    gmsh::option::setNumber ("Mesh.Algorithm", Dmsh::Optval (3));
+    gmsh::option::setNumber ("Mesh.Algorithm3D", Dmsh::Optval (10));
+    gmsh::option::setNumber ("Mesh.Optimize", Dmsh::Optval (0));
+#endif
     fmr::perf::timer_resume (& this->time);
     try {gmsh::model::mesh::generate (geom_d);}
     catch (int e) {err= e;

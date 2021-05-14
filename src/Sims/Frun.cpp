@@ -160,18 +160,15 @@ namespace Femera {
             err= 0;
         } }
         double speed = 1e9 // dof/s Skylake XS P2 tet solve speed on 40 cores
-          - (dof <  10e3) ? 0.0 : 90e6 * (std::log (dof) - std::log (10e3));
+          - ((dof < 10e3) ? 0.0 : 90e6 * (std::log (dof) - std::log (10e3)));
         speed = (speed < 500e6) ? 500e6 : speed;// dof/s XL solve speed
-        speed/= 40.0;// single-core speed
-#if 0
-        const double iters = (dof < 500.0 ? 0.1 : 0.01) * dof;
-#else
+        speed/= double(40);// single-core speed
         const double c0=1.5, c1=1.0/3.0;
         const double iters = std::exp (c1 * std::log (dof) + c0);
-#endif
         const double  secs = iters * dof / speed;
-        const int ret = (secs < 1.0)
-          ? usleep (int (1e6 * secs)) : sleep (int (secs));
+        int ret = 0;
+        ret += usleep (int (1e6 * (secs - floor(secs))));
+        if (secs >= 1.0) {ret += sleep (int (secs));}
         const auto elem_n = this->parent->globals.at
           (fmr::Data::Elem_sysn).data [this->sims_ix];
         if (this->verblevel <= log->timing) {
@@ -179,7 +176,7 @@ namespace Femera {
             this->proc->get_proc_id(), this->model_name.c_str(), "zzzz",
             start, fmr::perf::get_now_ns(), elem_n, node_n, 3*node_n);
         }
-        if (ret==0) {if (log->detail >= this->verblevel) {
+        if (log->detail >= this->verblevel) {
           const auto secstr = fmr::perf::format_time_units (secs);
           const auto szshort = fmr::get_enum_string (fmr::Sim_size_short,
             this->sims_size);
@@ -189,7 +186,7 @@ namespace Femera {
             "sim_%u: %u geom, %lu elem, %lu node, %g DOF, sleep %s...\n",
             this->sims_ix, this->task.count(), elem_n, node_n, dof,
             secstr.c_str());
-        } }
+        }
         break;}
       case 2 : break;// Solv::Flop
       default : err=1;

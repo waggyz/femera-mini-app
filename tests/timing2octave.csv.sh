@@ -36,6 +36,11 @@ sed -i 's/-asc.msh2"/,2,2/g' $CSV
 sed -i 's/-asc.msh4"/,2,4/g' $CSV
 sed -i 's/-bin.msh2"/,1,2/g' $CSV
 sed -i 's/-bin.msh4"/,1,4/g' $CSV
+sed -i 's/-asc.mesh"/,2,7/g' $CSV
+sed -i 's/-asc.vtk"/,2,6/g' $CSV
+sed -i 's/-bin.vtk"/,1,6/g' $CSV
+sed -i 's/-asc.bdf"/,2,8/g' $CSV
+sed -i 's/-asc.unv"/,2,9/g' $CSV
 #
 sed -i 's/-bin"/,1,0/g' $CSV
 sed -i 's/-asc"/,2,0/g' $CSV
@@ -43,4 +48,9 @@ sed -i 's/-geo"/,2,1/g' $CSV
 #
 sed -i 's/"build\/test\/sm-md\/cube-//g' $CSV
 sed -i 's/"cube-//g' $CSV
+#
+PREPROC="build/test/sm-md-time.err"
+grep '^[0-9]' "build/test/sm-md-time.err" > "build/test/sm-md-time.csv"
+#
+#
 #
