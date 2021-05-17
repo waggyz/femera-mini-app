@@ -28,6 +28,7 @@ else
   INSTALL_DIR := $(INSTALL_DIR)/$(CPUMODEL)-$(CXX)
   INSTALL_SUFFIX :=-$(CPUMODEL)-$(CXX)
 endif
+TEMP_DIR := $(BUILD_DIR)/$(CPUMODEL)/tmp
 BUILD_TREE:= $(BUILD_DIR)/ $(STAGE_DIR)/ $(TEST_DIR)/
 ifndef TDD_FMRFILE
   # TDD_FMRFILE:=tests/mesh/cube-tet6p1n1.cgns
@@ -206,12 +207,12 @@ AREXE := ar
 #NOTE There is no switch case in makefile syntax.
 ifeq ($(CXX),g++)
   ifeq ($(ENABLE_MPI),ON)
-    CXX := mpic++
+    CXX := export TMPDIR="$(TEMP_DIR)"; mpic++
     # LDLIBS += -lstdc++ # maybe needed?
     #TODO Fix the following hack by figuring out the correct lib order.
     # LDLIBS += -Wl,--copy-dt-needed-entries
   endif
-  CXXFLAGS := -std=c++11 -g -Ofast -march=native -mtune=native -save-temps=obj
+  CXXFLAGS := -std=c++11 -g -Ofast -march=native -mtune=native
   ifeq ($(ENABLE_OMP),ON)
     CXXFLAGS += -fopenmp
     FMRFLAGS += -D_GLIBCXX_PARALLEL
@@ -488,7 +489,7 @@ endif
   >> $(BUILD_DIR)/build-data/build-detail.txt)
 
 pre-build-tests : tools/pre_build_test.py build-info ompexec fmrexec \
-  $(BUILD_DIR)/Data/cube-tet6p1n1.msh2 $(INSTALL_CINCLUDE2DOT)
+  $(BUILD_DIR)/Data/cube-tet6p1n1.msh2 $(INSTALL_CINCLUDE2DOT) $(TEMP_DIR)/
 	$(call build_timestamp,$@,$<)
 	if [ -h "tools/testy" ]; then \
   echo "$(INFO) tools/testy is a link to external/testy."; \
