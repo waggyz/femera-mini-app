@@ -211,7 +211,7 @@ ifeq ($(CXX),g++)
     #TODO Fix the following hack by figuring out the correct lib order.
     # LDLIBS += -Wl,--copy-dt-needed-entries
   endif
-  CXXFLAGS := -std=c++11 -g -Ofast -march=native -mtune=native
+  CXXFLAGS := -std=c++11 -g -Ofast -march=native -mtune=native -save-temps=obj
   ifeq ($(ENABLE_OMP),ON)
     CXXFLAGS += -fopenmp
     FMRFLAGS += -D_GLIBCXX_PARALLEL
@@ -220,7 +220,7 @@ ifeq ($(CXX),g++)
     -fpic -flto -fvisibility=hidden -fvisibility-inlines-hidden \
     -fearly-inlining --param inline-min-speedup=2 \
     --param inline-unit-growth=500 --param large-function-growth=500 \
-    -funroll-loops -ftree-vectorize -fstrict-enums
+    -funroll-loops -ftree-vectorize -fstrict-enums -fno-common
   CXXFLAGS += -Wall -Wextra -Wpedantic -Wuninitialized -Wshadow \
     -Wdouble-promotion -Wfloat-equal -Wconversion -Wcast-qual -Wcast-align \
     -Wlogical-op -Woverloaded-virtual -Wstrict-null-sentinel -Wnoexcept \
