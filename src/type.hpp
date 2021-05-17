@@ -1,6 +1,7 @@
 #ifndef FMR_HAS_TYPE_HPP
 #define FMR_HAS_TYPE_HPP
 
+#include <string>
 #include <typeinfo> // std::underlying_type
 #include <map>
 #include <vector>
