@@ -173,7 +173,7 @@ cncr = ref_cncr ;
 sim_n = max (csv(:,2)),
 tmin = 0.100 *cncr/sim_n *0,%FIXME 100ms startup time, pro-rated
 %
-dofs_span = 10.^(3:0.1:10);
+dofs_span = 10.^((3-1e9):0.1:10);
 f=find(csv(:,10)>0);
 dofs_min=min(csv(f,10)), dofs_avg=mean(csv(f,10)), dofs_max=max(csv(f,10)),
 %
