@@ -8,7 +8,6 @@ EndIf
 Mesh.SecondOrderLinear        = 1;
 
 Mesh.CharacteristicLengthFromPoints=1;
-Mesh.NbPartitions             = n ;
 Mesh.PartitionSplitMeshFiles  = 0 ;//1 ;
 Mesh.PartitionCreatePhysicals = 0 ;// Is this useful?
 Mesh.PartitionCreateTopology  = 1 ;

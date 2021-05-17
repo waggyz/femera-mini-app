@@ -31,6 +31,7 @@ sed -i 's/"post"/10/g' $CSV
 # -bin.msh4 -> ,1,4
 #
 sed -i 's/-geo.geo_unrolled"/,2,1/g' $CSV
+sed -i 's/-geo.geo"/,2,1/g' $CSV
 sed -i 's/-bin.cgns"/,1,5/g' $CSV
 sed -i 's/-asc.msh2"/,2,2/g' $CSV
 sed -i 's/-asc.msh4"/,2,4/g' $CSV

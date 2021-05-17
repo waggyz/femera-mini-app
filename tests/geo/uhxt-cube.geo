@@ -12,16 +12,19 @@ Geometry.CopyMeshingMethod = 1;
 If(p<=0)
   p=1;
 EndIf
-If(h<=0)
-  h=1;
+If(h1<=0)
+  h1=1;
+EndIf
+If(h2<=0)
+  h2=h1;
 EndIf
 //If(n<=0)
 n=-1;
 //EndIf
-N=h+1;
+//N=h+1;
 
-Point(1)={0,0,0, 1/(N-1)};
-Point(2)={1,0,0, 1/(N-1)};
+Point(1)={0,0,0, 1/h1};
+Point(2)={1,0,0, 1/h2};
 Line(1)={1,2};
 
 S=Extrude{0,1,0}{ Curve {1}; };
@@ -50,9 +53,10 @@ If(mesh_d>0)
   //RenumberMeshElements;
   If(part_size>0)
     n = Ceil (Mesh.NbNodes/part_size);//TODO round to ncpu
-  EndIf
-  If(n>1)
-    PartitionMesh n;
+    Mesh.NbPartitions             = n ;
+    If(n>1)
+      PartitionMesh n;
+    EndIf
   EndIf
 EndIf
 /*
