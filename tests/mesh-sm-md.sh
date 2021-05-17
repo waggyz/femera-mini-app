@@ -49,8 +49,9 @@ for MESH_I in $(seq 1 1 $MESH_N) ; do
   if [ "$FMT" = "geo" ] ; then
     echo $MESHFILE
     TS0=$(date +%s%N)
-    echo "p=$P; h1=$H1; h2=$H2; part_size=$PS; mesh_d=-1;" > "$MESHFILE"
-    printf "$OPTS_GEO\n$BASE_GEO" >> "$MESHFILE"
+#    echo "p=$P; h1=$H1; h2=$H2; part_size=$PS; mesh_d=-1;" > "$MESHFILE"
+#    printf "$OPTS_GEO\n$BASE_GEO" >> "$MESHFILE"
+    printf "p=$P; h1=$H1; h2=$H2; part_size=$PS; mesh_d=-1;\n$OPTS_GEO\n$BASE_GEO" > "$MESHFILE"
     TS1=$(date +%s%N)
     ELAPSED=`echo "($TS1 - $TS0) * 10^-9" | bc -l`
     ELAPSED=`printf "%.9f" $ELAPSED`;
