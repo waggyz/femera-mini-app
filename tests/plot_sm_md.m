@@ -11,7 +11,7 @@ fas='fontangle';
 %
 ns=1e-9; us=1e-6; ms=1e-3; sc=1; mn=60; hr=60*mn; dy=24*hr;
 %
-figdir = '../build/test/'
+figdir = '../build/tests/'
 %
 %
 csv = dlmread ('perf/iters2solve-1e-5.csv');
@@ -29,11 +29,11 @@ if (0==1);
   return
 end;
 %
-csv = dlmread ('../build/test/sm-md.csv');
-%csv = dlmread ('../build/test/sm-md-no-solve.csv');
-%csv = dlmread ('../build/test/sm-md-sleep.csv');
+csv = dlmread ('../build/tests/sm-md.csv');
+%csv = dlmread ('../build/tests/sm-md-no-solve.csv');
+%csv = dlmread ('../build/tests/sm-md-sleep.csv');
 %
-mesh_time = dlmread ('../build/test/sm-md-time.csv');
+mesh_time = dlmread ('../build/tests/sm-md-time.csv');
 %
 start = min(csv(:,6));
 stop  = max(csv(:,7));
@@ -205,7 +205,7 @@ poly_mesh_cads(end) = min(wmesh(f)),
 s = unique(csv(find(csv(:,4)~=5),2)); s(s<=0)=[];% NOT cgns
 fread = s;
 poly_read = polyfit (wdofs(s),wread(s),1),
-if (poly_read(end)<0);% Re-fit, assuming y-intercept is zero.
+if (1==1);%poly_read(end)<0);% Re-fit, assuming y-intercept is zero.
   %fread=find(read>0 & dofs>0);%FIXME
   poly_read = polyfit (wdofs(fread),wread(fread)./wdofs(fread),0);
   %poly_read = [poly_read,0],
@@ -214,8 +214,8 @@ end;
 %
 fcgns = unique( csv( find( csv(:,4)==5),2));% cgns
 poly_read_cgns = polyfit (wdofs(fcgns),wread(fcgns),1),
-poly_chck_cgns = polyfit (wdofs(fcgns),wchck(fcgns),1),%TODO const?
-poly_chck_cgns(end) = min(wchck(fcgns)),
+poly_chck_cgns = polyfit (wdofs(fcgns),wchck(fcgns),0),
+%poly_chck_cgns(end) = min(wchck(fcgns)),
 %
 fmesh = unique( csv( find( csv(:,4)~=1),2));% NOT CAD (geo,geo_unrolled)
 fmesh(fmesh<=0)=[]; fmesh(prep(fmesh)<=0)=[];
