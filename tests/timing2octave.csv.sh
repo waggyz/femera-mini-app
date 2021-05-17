@@ -1,9 +1,9 @@
 #!/bin/bash
 #
 #
-CSV="build/test/sm-md.csv"
+CSV="build/tests/sm-md.csv"
 #
-cat build/test/sm-md.*.out > $CSV
+cat build/tests/sm-md.*.out > $CSV
 #
 sed -i 's/"Proc"/0/g' $CSV
 sed -i 's/"Femera"/0,0,0/g' $CSV
@@ -47,11 +47,11 @@ sed -i 's/-bin"/,1,0/g' $CSV
 sed -i 's/-asc"/,2,0/g' $CSV
 sed -i 's/-geo"/,2,1/g' $CSV
 #
-sed -i 's/"build\/test\/sm-md\/cube-//g' $CSV
+sed -i 's/"build\/tests\/sm-md\/cube-//g' $CSV
 sed -i 's/"cube-//g' $CSV
 #
-PREPROC="build/test/sm-md-time.err"
-grep '^[0-9]' "build/test/sm-md-time.err" > "build/test/sm-md-time.csv"
+PREPROC="build/tests/sm-md-time.err"
+grep '^[0-9]' "build/tests/sm-md-time.err" > "build/tests/sm-md-time.csv"
 #
 #
 #

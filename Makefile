@@ -207,7 +207,8 @@ AREXE := ar
 #NOTE There is no switch case in makefile syntax.
 ifeq ($(CXX),g++)
   ifeq ($(ENABLE_MPI),ON)
-    CXX := export TMPDIR="$(TEMP_DIR)"; mpic++
+    CXX := mpic++
+    # CXX := export TMPDIR="$(TEMP_DIR)"; mpic++
     # LDLIBS += -lstdc++ # maybe needed?
     #TODO Fix the following hack by figuring out the correct lib order.
     # LDLIBS += -Wl,--copy-dt-needed-entries
@@ -557,7 +558,7 @@ build/%$(INSTALL_SUFFIX).a : $(BUILD_DIR)/%.a $(STAGE_DIR)/lib/
 
 $(VALGRIND_SUPP_EXE) : src/$(VALGRIND_SUPP).cpp
 	$(info $(CLAB) $(CXX) ... -o $(BUILD_DIR)/$(VALGRIND_SUPP).exe)
-	$(CXX) $(VGFLAGS) src/$(VALGRIND_SUPP).cpp $(LDFLAGS) -L$(BUILD_DIR)\
+	export TMPDIR=$(TEMP_DIR); $(CXX) $(VGFLAGS) src/$(VALGRIND_SUPP).cpp $(LDFLAGS) -L$(BUILD_DIR)\
   -lfemera -o $(VALGRIND_SUPP_EXE) $(LDLIBS) $(call build_log,$@)
 	$(info $(GRND) suppression file: $(BUILD_DIR)/$(VALGRIND_SUPP))
 	$(VGSUPP)
@@ -567,10 +568,10 @@ $(BUILD_DIR)/mini : src/mini.cpp src/mini.hpp $(BUILD_DIR)/libuser.a \
  src/mini.test.py $(VALGRIND_SUPP_EXE)
 	$(info $(CLAB) $(CXX) ... $< -o $@)
 ifeq ($(ENABLE_GOOGLETEST),ON)
-	$(CXX) $(GTESTFLAGS) $< $(LDFLAGS) -L$(BUILD_DIR) \
+	 export TMPDIR=$(TEMP_DIR); $(CXX) $(GTESTFLAGS) $< $(LDFLAGS) -L$(BUILD_DIR) \
   -lfemera -o $@ $(LDLIBS) $(call build_log,$@)
 else
-	$(CXX) $(CXXFLAGS) $< $(LDFLAGS) -L$(BUILD_DIR) \
+	 export TMPDIR=$(TEMP_DIR); $(CXX) $(CXXFLAGS) $< $(LDFLAGS) -L$(BUILD_DIR) \
   -lfemera -o $@ $(LDLIBS) $(call build_log,$@)
 endif
 	$(PYEXEC) src/mini.test.py $@
@@ -591,7 +592,7 @@ $(BUILD_DIR)/full: src/femera.cpp
 $(BUILD_DIR)/%.gtst : src/%.gtst.cpp # $(BUILD_DIR)/libcore.a
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(info $(CLAB) $(CXX) ... $< -o $@)
-	$(CXX) $(GTESTFLAGS) $< $(LDFLAGS) -L$(BUILD_DIR) \
+	export TMPDIR=$(TEMP_DIR); $(CXX) $(GTESTFLAGS) $< $(LDFLAGS) -L$(BUILD_DIR) \
   -lfemera -o $@ $(LDLIBS) $(call build_log,$@)
 	-$(TEST_EXEC) $@ -Tv0 $(TDD_FMRFILE) \
   $(call build_log,$(BUILD_DIR)/$*.gtst)
@@ -641,6 +642,7 @@ $(BUILD_DIR)/libfemera.h : $(TODO_lib_h_files) \
 # Intermediate file target patterns -------------------------------------------
 
 ifeq (0,1)
+$(BUILD_DIR)/mini.o : export TMPDIR = $(TEMP_DIR)
 $(BUILD_DIR)/mini.o : src/mini.cpp src/mini.hpp $(BUILD_DIR)/libuser.a
 	$(info $(CLAB) $(CXX) ... $< -o $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@ $(call build_log,$@)
@@ -653,6 +655,7 @@ endif
 #	$(info $(CLAB) $(CXX) ... $< -o $@)
 #	$(CXX) -c $(CXXFLAGS) $< -o $@ $(call build_log,$@)
 
+$(BUILD_DIR)/%.o : export TMPDIR = $(TEMP_DIR)
 $(BUILD_DIR)/%.o : src/%.cpp src/%.hpp src/%.gtst.cpp # $(BUILD_DIR)/%.gtst
 	-python tools/testy/check_code_graffiti.py $^
 	rm -f $*.err $*.gtst.err
@@ -666,9 +669,9 @@ src/%.cpp src/%.hpp src/%.test.cpp src/%.test.py
 	-python tools/testy/check_code_graffiti.py $^
 	rm -f $*.err $*.test.err
 	$(info $(CLAB) $(CXX) ... $< -o $@)
-	$(CXX) -c $(CXXFLAGS) $< -o $@ $(call build_log,$@)
+	export TMPDIR=$(TEMP_DIR); $(CXX) -c $(CXXFLAGS) $< -o $@ $(call build_log,$@)
 	$(info $(CLAB) $(CXX) ... $< -o $(BUILD_DIR)/$*.test.o)
-	$(CXX) -c $(CXXFLAGS) src/$*.test.cpp -o $(BUILD_DIR)/$*.test.o \
+	export TMPDIR=$(TEMP_DIR); $(CXX) -c $(CXXFLAGS) src/$*.test.cpp -o $(BUILD_DIR)/$*.test.o \
   $(call build_log,$(BUILD_DIR)/$*.test.o)
 	$(info $(LINK) $(CXX) ... -o $(BUILD_DIR)/$*.test)
 	$(CXX) $(CXXFLAGS) $(BUILD_DIR)/$*.test.o $< $(LDFLAGS) \
@@ -683,6 +686,7 @@ endif
 $(BUILD_DIR)/Proc.o : $(BUILD_DIR)/build-data/copyright.inc
 
 # Warn if no test.
+$(BUILD_DIR)/%.o : export TMPDIR = $(TEMP_DIR)
 $(BUILD_DIR)/%.o : src/%.cpp src/%.hpp
 	-python tools/testy/check_code_graffiti.py $^
 	$(info $(WARN) No test of $<.)

@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-DIR="build/test/sm-md"
-#mkdir -p build/test
+DIR="build/tests/sm-md"
+#mkdir -p build/tests
 mkdir -p $DIR
 rm -f "$DIR/*"
 rm -f "$DIR-time.err"
@@ -20,6 +20,9 @@ H_MAX=38; # WAS 33
 # TODO part_size in nodes, >0 partitions
 PS=-5000;
 #TODO stl ply2 wrl p3d?
+#
+OPTS_GEO=`cat "tests/geo/gmsh-opts.geo"`
+BASE_GEO=`grep -v '^Include' "tests/geo/uhxt-cube.geo"`
 MESH_I=0
 for MESH_I in $(seq 1 1 $MESH_N) ; do
   case $(( ( $RANDOM * 10 ) / ( 32767 + 1 ) + 1 )) in
@@ -47,8 +50,7 @@ for MESH_I in $(seq 1 1 $MESH_N) ; do
     echo $MESHFILE
     TS0=$(date +%s%N)
     echo "p=$P; h1=$H1; h2=$H2; part_size=$PS; mesh_d=-1;" > "$MESHFILE"
-    cat "tests/geo/gmsh-opts.geo" >> "$MESHFILE"
-    grep -v '^Include' "tests/geo/uhxt-cube.geo" >> "$MESHFILE"
+    printf "$OPTS_GEO\n$BASE_GEO" >> "$MESHFILE"
     TS1=$(date +%s%N)
     ELAPSED=`echo "($TS1 - $TS0) * 10^-9" | bc -l`
     ELAPSED=`printf "%.9f" $ELAPSED`;
