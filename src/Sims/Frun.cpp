@@ -160,7 +160,7 @@ namespace Femera {
             err= 0;
         } }
         double speed = 1e9 // dof/s Skylake XS P2 tet solve speed on 40 cores
-          - ((dof < 10e3) ? 0.0 : 90e6 * (std::log (dof) - std::log (10e3)));
+          - (dof < 10e3 ? 0.0 : 90e6 * (std::log (dof) - std::log (10e3)));
         speed = (speed < 500e6) ? 500e6 : speed;// dof/s XL solve speed
         speed/= double(40);// single-core speed
         const double c0=1.5, c1=1.0/3.0;
