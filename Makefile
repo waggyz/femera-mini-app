@@ -217,7 +217,7 @@ ifeq ($(CXX),g++)
     FMRFLAGS += -D_GLIBCXX_PARALLEL
   endif
   CXXFLAGS += -fno-builtin-sin -fno-builtin-cos \
-    -fpic -flto -fvisibility=hidden -fvisibility-inlines-hidden \
+    -fpic -flto=auto -fvisibility=hidden -fvisibility-inlines-hidden \
     -fearly-inlining --param inline-min-speedup=2 \
     --param inline-unit-growth=500 --param large-function-growth=500 \
     -funroll-loops -ftree-vectorize -fstrict-enums -fno-common
