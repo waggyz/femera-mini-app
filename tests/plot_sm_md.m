@@ -120,8 +120,17 @@ print([figdir,figname,'.eps'],'-depsc2','-FHelvetica');
 %
 %==============================================================================
 figure (2); clf; hold on; grid on;
+%
+run_cncr = 4,
+ref_cncr = 40,
+%
 set (gca, 'position',  [0.15,0.15, 0.75, 0.7]);
-title (['Batch performance: 1 Skylake node, 40 sims/40 cpu, ',...
+if (run_cncr == ref_cncr);
+  s='performance';
+else;
+  s='estimate'
+end;
+title (['Batch ',s,': 1 Skylake node, 40 sims/40 cpu, ',...
   '|u_{ij}^{FEM}-u_{ij}^{exact}| <10^{-5}']);
 axis ([1000,10e9, sc/10000 /10,3*dy]);
 %
@@ -141,7 +150,12 @@ end;
 text (x,y,ytic);
 %
 xlabel ('3D linear-elastic simulation size (dof)');
-ylabel ('Batch simulation throughput (sims/time)');
+if (run_cncr == ref_cncr);
+  s='Simulation';
+else;
+  s='Estimated'
+end;
+ylabel ([s,' throughput (sims/time)']);
 %
 set (gca,'xtick', 10.^[1e-9:11]);% hack around integer overflow for xtick 10^10
 ytic = 1./[1/(3*dy),1/dy,1/hr,10/hr,1/mn,10/mn,1/sc,...
@@ -165,27 +179,22 @@ text (1e7,mx,'40 sims/3d','color','r',vas,'top', fss,lfs);
 barw=3; ms =3;
 %
 encolor = ['b';'k';'m'];
-%
-run_cncr = 4,
-%mesh_cncr = 1;
-ref_cncr = 40,
-cncr = ref_cncr ;
 sim_n = max (csv(:,2)),
-tmin = 0.100 *cncr/sim_n *0,%FIXME 100ms startup time, pro-rated
+tmin = 0;%0.100 *cncr/sim_n *0,%FIXME 100ms startup time, pro-rated
 %
 dofs_span = 10.^((3.0-1e-9):0.1:10);
 f=find(csv(:,10)>0);
 dofs_min=min(csv(f,10)), dofs_avg=mean(csv(f,10)), dofs_max=max(csv(f,10)),
 %
-prep = mesh_time*run_cncr/ref_cncr;
+prep = mesh_time * run_cncr / ref_cncr;
 si = csv(:,2);
 chck = zeros (sim_n,1); mesh=chck; read=chck; solv=chck; dofs=chck;
 f = find (csv(:,10)>0); dofs(si(f)) = csv(f,10);
-f = find (csv(:,5)==1); chck(si(f)) = tmin + (csv(f,7)-csv(f,6))*ns;
-f = find (csv(:,5)==2); mesh(si(f)) = tmin + (csv(f,7)-csv(f,6))*ns;
-f = find (csv(:,5)==3); read(si(f)) = tmin + (csv(f,7)-csv(f,6))*ns;
-f = find (csv(:,5)==5); solv(si(f)) = tmin + (csv(f,7)-csv(f,6))*ns;
-simt = prep*cncr+chck+mesh+read+solv;
+f = find (csv(:,5)==1); chck(si(f)) = tmin + (csv(f,7)-csv(f,6))*ns / ref_cncr;
+f = find (csv(:,5)==2); mesh(si(f)) = tmin + (csv(f,7)-csv(f,6))*ns / ref_cncr;
+f = find (csv(:,5)==3); read(si(f)) = tmin + (csv(f,7)-csv(f,6))*ns / ref_cncr;
+f = find (csv(:,5)==5); solv(si(f)) = tmin + (csv(f,7)-csv(f,6))*ns / ref_cncr;
+simt = prep+chck+mesh+read+solv;
 prep(prep<=0)=nan;
 chck(chck<=0)=nan;
 mesh(mesh<=0)=nan;
@@ -205,11 +214,11 @@ poly_mesh_cads(end) = min(wmesh(f)),
 s = unique(csv(find(csv(:,4)~=5),2)); s(s<=0)=[];% NOT cgns
 fread = s;
 poly_read = polyfit (wdofs(s),wread(s),1),
-if (1==1);%poly_read(end)<0);% Re-fit, assuming y-intercept is zero.
-  %fread=find(read>0 & dofs>0);%FIXME
-  poly_read = polyfit (wdofs(fread),wread(fread)./wdofs(fread),0);
+if (poly_read(end)<0);% Re-fit, assuming y-intercept is min(wread(fread).
+  rmin = min(wread(fread));
+  poly_read = polyfit (wdofs(fread),(wread(fread)-rmin)./wdofs(fread),0);
   %poly_read = [poly_read,0],
-  poly_read = [poly_read,min(wread(fread))],
+  poly_read = [poly_read,rmin],
 end;
 %
 fcgns = unique( csv( find( csv(:,4)==5),2));% cgns
@@ -219,72 +228,84 @@ poly_chck_cgns = polyfit (wdofs(fcgns),wchck(fcgns),0),
 %
 fmesh = unique( csv( find( csv(:,4)~=1),2));% NOT CAD (geo,geo_unrolled)
 fmesh(fmesh<=0)=[]; fmesh(prep(fmesh)<=0)=[];
-poly_prep_mesh = polyfit (wdofs(fmesh),wprep(fmesh)*cncr,1),
-poly_prep_mesh(end) = min(wprep(fmesh)*cncr),
+poly_prep_mesh = polyfit (wdofs(fmesh),wprep(fmesh),1),
+%poly_prep_mesh(end) = min(wprep(fmesh)),
 %
 fothr = unique( csv( find( (csv(:,4)~=1) & (csv(:,4)~=5)),2));% NOT CAD, NOT CGNS
 fothr(fothr<=0)=[]; fothr(prep(fothr)<=0)=[];
-if (1==1);% Assume y-intercept is zero.
-  poly_chck = polyfit (wdofs(fothr),wchck(fothr)./wdofs(fothr),0);
-  poly_chck(2)=0;
+if (1==1);% Assume y-intercept is min.
+  cmin = min(wchck(fothr));
+  poly_chck = polyfit (wdofs(fothr),(wchck(fothr)-cmin)./wdofs(fothr),0);
+  poly_chck(2)=cmin;
 else;
   poly_chck = polyfit (wdofs(fothr),wchck(fothr),1);
 end;
 %
-fgeob = unique(csv(find(csv(:,3)==1 & csv(:,4)==4),2));% msh4 binary
-poly_chck_msh4 = polyfit (wdofs(fgeob),wchck(fgeob),1),
-if (poly_chck_msh4(end)<0);% Re-fit, assuming y-intercept is zero.
-  %fgeob=find(chck>0 & dofs>0);
-  poly_chck_msh4 = polyfit (wdofs(fgeob),wchck(fgeob)./wdofs(fgeob),0);
-  poly_chck_msh4 = [poly_chck_msh4,0],
-  %poly_chck_msh4 = [poly_chck_msh4,min(wchck(fgeob))],
+fmshb = unique(csv(find(csv(:,3)==1 & csv(:,4)==4),2));% msh4 binary
+poly_chck_msh4 = polyfit (wdofs(fmshb),wchck(fmshb),1),
+if (poly_chck_msh4(end)<0);% Re-fit, assuming y-intercept is min.
+  cmin = min(wchck(fmshb));
+  poly_chck_msh4 = polyfit (wdofs(fmshb),(wchck(fmshb)-cmin)./wdofs(fmshb),0);
+  poly_chck_msh4 = [poly_chck_msh4,cmin],
 end;
+%poly_read_mshb = polyfit (wdofs(fmshb),wread(fmshb),1),
+%if (poly_read_mshb(end)<0);% Re-fit, assuming y-intercept is min.
+%  rmin = min(wread(fmshb));
+%  poly_read_mshb = polyfit (wdofs(fmshb),(wread(fmshb)-rmin)./wdofs(fmshb),0);
+%  poly_read_mshb = [poly_read_mshb,cmin],
+%end;
 %
 fcads = unique(csv(find(csv(:,4)==1),2));% CAD (geo,geo_unrolled)
 fcads(fcads<=0)=[]; fcads(prep(fcads)<=0)=[];
-avg = mean(prep(fcads));
-fgeos = fcads(prep(fcads)<avg/2); fgeou=fcads(prep(fcads)>avg/2);
-cnst_prep_cads_bash = polyfit (wdofs(fgeos),wprep(fgeos)*cncr,0),% geo
-cnst_prep_cads_gmsh = polyfit (wdofs(fgeou),wprep(fgeou)*cncr,0),% geo_unrolled
+%avg = mean(prep(fcads));
+%fgeos = fcads(prep(fcads)<avg/2); fgeou=fcads(prep(fcads)>avg/2);
+fgeou = unique(csv(find(csv(:,3)==2 & csv(:,4)==1),2));
+fgeos = unique(csv(find(csv(:,3)==3 & csv(:,4)==1),2));
+cnst_prep_cads_gmsh = polyfit (wdofs(fgeou),wprep(fgeou),0),% geo_unrolled
+cnst_prep_cads_bash = polyfit (wdofs(fgeos),wprep(fgeos),0),% geo
 cnst_chck_cads_gmsh = polyfit (wdofs(fcads),wchck(fcads),0),
 %
+loglog (dofs(fmesh), prep(fmesh),'<k','markersize',sms,'linewidth',mlw);
+loglog (dofs(fgeou), prep(fgeou),'<c','markersize',ms,'linewidth',mlw);
+loglog (dofs(fgeos), prep(fgeos),'<b','markersize',ms,'linewidth',mlw);
 %
-loglog (dofs(fmesh), [prep(fmesh)],'<k','markersize',sms,'linewidth',mlw);
-loglog (dofs(fgeou), [prep(fgeou)],'<c','markersize',ms,'linewidth',mlw);
-loglog (dofs(fgeos), [prep(fgeos)],'<b','markersize',ms,'linewidth',mlw);
+loglog (dofs(fothr), chck(fothr),'+k','markersize',sms,'linewidth',mlw);
+loglog (dofs(fcads), chck(fcads),'+b','markersize',sms,'linewidth',mlw);
+loglog (dofs(fcgns), chck(fcgns),'+g','markersize',sms,'linewidth',mlw);
+loglog (dofs(fmshb), chck(fmshb),'+y','markersize',sms,'linewidth',mlw);
 %
-loglog (dofs(fothr), [chck(fothr)]/cncr,'+k','markersize',sms,'linewidth',mlw);
-loglog (dofs(fcads), [chck(fcads)]/cncr,'+b','markersize',sms,'linewidth',mlw);
-loglog (dofs(fcgns), [chck(fcgns)]/cncr,'+g','markersize',sms,'linewidth',mlw);
-loglog (dofs(fgeob), [chck(fgeob)]/cncr,'+y','markersize',sms,'linewidth',mlw);
+loglog (dofs, mesh,'^b','markersize',sms+1,'linewidth',mlw);
 %
-loglog (dofs, [mesh]/cncr,'^b','markersize',sms+1,'linewidth',mlw);
+loglog (dofs(fread), read(fread),'ok','markersize',sms,'linewidth',mlw);
+loglog (dofs(fcgns), read(fcgns),'og','markersize',sms,'linewidth',mlw);
+%loglog (dofs(fmshb), read(fmshb),'oy','markersize',sms,'linewidth',mlw);
 %
-loglog (dofs(fread), [read(fread)]/cncr,'ok','markersize',sms,'linewidth',mlw);
-loglog (dofs(fcgns), [read(fcgns)]/cncr,'og','markersize',sms,'linewidth',mlw);
-%loglog (dofs(fgeob), [read(fgeob)]/cncr,'oy','markersize',sms,'linewidth',mlw);
+loglog (dofs, solv,'*m','markersize',sms-1,'linewidth',mlw);
+loglog (dofs(fmesh), simt(fmesh),'xm','markersize',sms,'linewidth',hlw);
+loglog (dofs(fcgns), simt(fcgns),'xg','markersize',sms,'linewidth',lw);
+loglog (dofs(fgeou), simt(fgeou),'xc','markersize',sms,'linewidth',mlw);
+loglog (dofs(fgeos), simt(fgeos),'xr','markersize',ms,'linewidth',lw);
 %
-loglog (dofs, [solv]/cncr,'*m','markersize',sms-1,'linewidth',mlw);
-loglog (dofs(fmesh), [simt(fmesh)]/cncr,'xm','markersize',sms,'linewidth',hlw);
-loglog (dofs(fcgns), [simt(fcgns)]/cncr,'xg','markersize',sms,'linewidth',lw);
-loglog (dofs(fgeou), [simt(fgeou)]/cncr,'xc','markersize',sms,'linewidth',mlw);
-loglog (dofs(fgeos), [simt(fgeos)]/cncr,'xr','markersize',ms,'linewidth',lw);
+loglog (dofs_span, polyval(poly_prep_mesh,dofs_span),'--k','linewidth',mlw);
+loglog (dofs_span, polyval(cnst_prep_cads_gmsh,dofs_span),'--c','linewidth',hlw);
+loglog (dofs_span, polyval(cnst_prep_cads_bash,dofs_span),'--b','linewidth',flw);
 %
-loglog (dofs_span, polyval(poly_prep_mesh,dofs_span)/cncr,'--k','linewidth',mlw);
-loglog (dofs_span, polyval(cnst_prep_cads_gmsh,dofs_span)/cncr,'--c','linewidth',hlw);
-loglog (dofs_span, polyval(cnst_prep_cads_bash,dofs_span)/cncr,'--b','linewidth',flw);
+loglog (dofs_span, polyval(poly_chck     ,dofs_span),':k','linewidth',mlw);
+loglog (dofs_span, polyval(poly_chck_msh4,dofs_span),'-y','linewidth',lw);
+loglog (dofs_span, polyval(poly_chck_cgns,dofs_span),':g','linewidth',mlw);
+loglog (dofs_span, polyval(cnst_chck_cads_gmsh,dofs_span),':b','linewidth',hlw);
 %
-loglog (dofs_span, polyval(poly_chck     ,dofs_span)/cncr,':k','linewidth',mlw);
-loglog (dofs_span, polyval(poly_chck_msh4,dofs_span)/cncr,':y','linewidth',lw);
-loglog (dofs_span, polyval(poly_chck_cgns,dofs_span)/cncr,':g','linewidth',mlw);
-loglog (dofs_span, polyval(cnst_chck_cads_gmsh,dofs_span)/cncr,':b','linewidth',hlw);
+loglog (dofs_span, polyval(poly_mesh_cads,dofs_span),'-.b','linewidth',mlw);
 %
-loglog (dofs_span, polyval(poly_mesh_cads,dofs_span)/cncr,'-.b','linewidth',mlw);
+%loglog (dofs_span, polyval(poly_read     ,dofs_span),'-k','linewidth',hlw);
+%loglog (dofs_span, polyval(poly_read_mshb,dofs_span),'-k','linewidth',hlw);
+loglog (dofs_span, polyval(poly_read_cgns,dofs_span),'-g','linewidth',mlw);
 %
-loglog (dofs_span, polyval(poly_read     ,dofs_span)/cncr,'-k','linewidth',hlw);
-loglog (dofs_span, polyval(poly_read_cgns,dofs_span)/cncr,'-g','linewidth',mlw);
+femera_cgns_data_speedup(1) = (poly_chck_msh4(1)*2)  / poly_read_cgns(1);
+femera_cgns_data_speedup(2) = (poly_chck_msh4(1)+poly_chck(1))/poly_read_cgns(1);
+femera_cgns_data_speedup,
 %
-femera_cad_mesh_speedup = poly_prep_mesh(1) / poly_mesh_cads(1)
+femera_cads_mesh_speedup = poly_prep_mesh(1) / poly_mesh_cads(1),
 %
 %run_time = (max(csv(:,7)) - min(csv(:,6)))*ns,
 %tot_time = run_time + sum(mesh_time),
@@ -293,7 +314,7 @@ femera_cad_mesh_speedup = poly_prep_mesh(1) / poly_mesh_cads(1)
 %
 speed = 1e9 - (dofs_span>10e3).* 90e6.*(log(dofs_span)-log(10e3));
 speed (speed < 500e6) = 500e6;
-poly = [1/3,1.5],
+poly = [1/3,1.5];
 iters = exp (polyval (poly, log (dofs_span)));
 secs = iters .* dofs_span ./ speed;% avg time to solve 1 sim (using 40 cores)
 loglog (dofs_span,secs,'-m','linewidth',lw);% estimated solve (only) time
