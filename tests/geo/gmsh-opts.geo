@@ -14,7 +14,7 @@ Mesh.PartitionCreateTopology  = 1 ;
 Mesh.PartitionCreateGhostCells= 0 ;// Is this necessary?
 Mesh.SaveAll                  = 0 ;// Includes 2d surfaces
 
-Mesh.Algorithm  =3;// Chosen for less regular mesh
+Mesh.Algorithm  =5;// Chosen for less regular mesh WAS 3
 // 1: MeshAdapt, 2: Automatic, 5: Delaunay, 6: Frontal, 7: BAMG, 8: DelQuad
 
 Mesh.Algorithm3D=10;// WAS 1
