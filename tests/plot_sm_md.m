@@ -125,12 +125,12 @@ run_cncr = 4,
 ref_cncr = 40,
 %
 set (gca, 'position',  [0.15,0.15, 0.75, 0.7]);
-if (run_cncr == ref_cncr);
+if (1==1);%(run_cncr == ref_cncr);
   s='performance';
 else;
   s='estimate'
 end;
-title (['Batch ',s,': 1 Skylake node, 40 sims/40 cpu, ',...
+title (['Batch ',s,' per Skylake node, 40 sims/40 cpu, ',...
   '|u_{ij}^{FEM}-u_{ij}^{exact}| <10^{-5}']);
 axis ([1000,10e9, sc/10000 /10,3*dy]);
 %
@@ -151,7 +151,7 @@ text (x,y,ytic);
 %
 xlabel ('3D linear-elastic simulation size (dof)');
 if (run_cncr == ref_cncr);
-  s='Simulation';
+  s='Expected';
 else;
   s='Estimated'
 end;
@@ -166,15 +166,15 @@ ylab = ['1/3d';'1/d';'1/h';'10/h';'1/m';...
 set (gca,'yticklabel',ylab);
 %
 fr = sc/24; loglog ([1e3,1e10],[fr,fr],'--k', lws,hlw, mss,ms);
-text (1e10,fr,'24 sims/s (Movie)','color','k',...
+text (1e10,fr,'24 sims/s/node (Movie)','color','k',...
   has,'right',vas,'bottom', fss,lfs);
 fr = sc/30; loglog ([1e3,1e10],[fr,fr],'--k', lws,hlw, mss,ms);
-text (1e10,fr,'30 sims/s (NTSC)','color','k',...
+text (1e10,fr,'30 sims/s/node (NTSC)','color','k',...
   has,'right',vas,'top', fss,lfs);
 %
 mx = 1./(40/(3*dy));
 ax = loglog ([1e3,10e9],[mx,mx],'-r', lws,flw);
-text (1e7,mx,'40 sims/3d','color','r',vas,'top', fss,lfs);
+text (1e7,mx,'40 sims/3 d/node','color','r',vas,'top', fss,lfs);
 %
 barw=3; ms =3;
 %
@@ -263,7 +263,7 @@ fgeou = unique(csv(find(csv(:,3)==2 & csv(:,4)==1),2));
 fgeos = unique(csv(find(csv(:,3)==3 & csv(:,4)==1),2));
 cnst_prep_cads_gmsh = polyfit (wdofs(fgeou),wprep(fgeou),0),% geo_unrolled
 cnst_prep_cads_bash = polyfit (wdofs(fgeos),wprep(fgeos),0),% geo
-cnst_chck_cads_gmsh = polyfit (wdofs(fcads),wchck(fcads),0),
+cnst_chck_cads_geos = polyfit (wdofs(fcads),wchck(fcads),0),
 %
 loglog (dofs(fmesh), prep(fmesh),'<k','markersize',sms,'linewidth',mlw);
 loglog (dofs(fgeou), prep(fgeou),'<c','markersize',ms,'linewidth',mlw);
@@ -293,7 +293,7 @@ loglog (dofs_span, polyval(cnst_prep_cads_bash,dofs_span),'--b','linewidth',flw)
 loglog (dofs_span, polyval(poly_chck     ,dofs_span),':k','linewidth',mlw);
 loglog (dofs_span, polyval(poly_chck_msh4,dofs_span),'-y','linewidth',lw);
 loglog (dofs_span, polyval(poly_chck_cgns,dofs_span),':g','linewidth',mlw);
-loglog (dofs_span, polyval(cnst_chck_cads_gmsh,dofs_span),':b','linewidth',hlw);
+loglog (dofs_span, polyval(cnst_chck_cads_geos,dofs_span),':b','linewidth',hlw);
 %
 loglog (dofs_span, polyval(poly_mesh_cads,dofs_span),'-.b','linewidth',mlw);
 %

@@ -1,7 +1,16 @@
 #!/bin/bash
 #
-DIR="build/tests/sm-md"
-#mkdir -p build/tests
+echo mesh-sm-md.sh $1 $2 $3 $4...
+MESH_N="$1"
+H_MIN="$2"
+H_MAX="$3"
+DIR="$4"
+#
+if [ "$MESH_N" -lt 1 ] ; then exit 1; fi
+if [ "$H_MIN" -lt 1 ] ; then exit 1; fi
+if [ "$H_MAX" -lt 1 ] ; then exit 1; fi
+if [ -z "$DIR" ] ; then exit 1; fi
+#
 mkdir -p $DIR
 rm -f "$DIR/*"
 rm -f "$DIR-time.err"
@@ -12,11 +21,11 @@ export OMP_NUM_THREADS=$C
 GMSH_OMP="-nt $C" #TODO Not working on K?
 #GMSH_OMP=""
 
-MESH_N=150
+#MESH_N=150
+#H_MIN=2; # 7:10kdof
+#H_MAX=38; # WAS 33
 
 P=2
-H_MIN=2; # 7:10kdof
-H_MAX=38; # WAS 33
 # TODO part_size in nodes, >0 partitions
 PS=-5000;
 #TODO stl ply2 wrl p3d?

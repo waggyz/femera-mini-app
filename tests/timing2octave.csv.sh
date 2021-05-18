@@ -1,9 +1,15 @@
 #!/bin/bash
 #
+TESTDIR="$1"
+echo "timing2octave.csv.sh $1"...
 #
-CSV="build/tests/sm-md.csv"
+if [[ ! -f "$TESTDIR.0.out" ]] ; then
+  echo "$TESTDIR.0.out does not exist."
+  exit 1
+fi
 #
-cat build/tests/sm-md.*.out > $CSV
+CSV="$TESTDIR.csv"
+cat $TESTDIR.*.out > $CSV
 #
 sed -i 's/"Proc"/0/g' $CSV
 sed -i 's/"Femera"/0,0,0/g' $CSV
