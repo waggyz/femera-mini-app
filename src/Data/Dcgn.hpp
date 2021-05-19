@@ -45,14 +45,14 @@ class Dcgn final : public Data {
         Dcgn::File_format    format = Dcgn::File_format::Dcgn_unknown;
       // specialized methods
       public:
-        File_cgns () {// Construct from defaults.
+        File_cgns () noexcept (false) {// Construct from defaults.
           encode      = Data::Encode::Binary;// CGNS is a binary data format.
         }
-        File_cgns (Data::Data_file df) {// Construct from data_file pair.
+        File_cgns (Data::Data_file df) noexcept (false) {// from data_file pair.
           data_file   = df;
           encode      = Data::Encode::Binary;
         }
-        File_cgns (Data::File_info& base) {// Construct from base instance.
+        File_cgns (Data::File_info& base) noexcept (false) {// base instance.
           data_file   = base.data_file  ;
           encode      = Data::Encode::Binary;
           version     = base.version    ;

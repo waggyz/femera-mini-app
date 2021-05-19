@@ -109,7 +109,7 @@ class Flog {
     template<typename ...Args>// prints from all processes to cpuout [proc_id]
     int proc_printf (std::string format, Args ...args) {
       const auto pid = this->proc->get_proc_id ();
-      if (pid < this->cpuout.size()) {
+      if (std::size_t(pid) < this->cpuout.size()) {
         if (cpuout [pid]) {
           return std::fprintf (cpuout [pid], format.c_str(), args...);
       } }

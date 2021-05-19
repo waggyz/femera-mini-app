@@ -8,7 +8,7 @@
 #include <unistd.h> //TODO Remove usleep.
 
 namespace Femera {
-  Frun::Frun (Sims* F) noexcept {//TODO Change derived class name. Fsim? Sim1?
+  Frun::Frun (Sims* F) noexcept(false) {//TODO Change derived class name. Fsim? Sim1?
     this->parent = F; this->proc=F->proc; this->data=F->data;
     this->from = F->send;
     this->send = {from.hier_lv, fmr::Schedule::Once, fmr::Concurrency::Once};

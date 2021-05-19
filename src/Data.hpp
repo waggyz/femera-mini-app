@@ -55,7 +55,7 @@ class Data : public Work {//TODO change to File
         fmr::data::Access       access = fmr::data::Access    :: Check       ;
         fmr::data::State         state = fmr::data::State();// file state
       public:
-        File_info            ()                 =default;
+        File_info            () noexcept(false) =default;
         File_info            (File_info const&) =default;// copyable
         File_info& operator= (const File_info&) =default;
         virtual   ~File_info ()        noexcept =default;
