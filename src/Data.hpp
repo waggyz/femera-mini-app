@@ -195,7 +195,7 @@ class Data : public Work {//TODO change to File
     Data           (Proc*) noexcept(false);
     Data           (Data const&) =delete;// not copyable
     Data operator= (const Data&) =delete;
-    virtual ~Data  ()    =default;
+    virtual ~Data  ()   noexcept =default;
 };
 }//end Femera namespace
 
