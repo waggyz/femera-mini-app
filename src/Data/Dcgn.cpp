@@ -94,7 +94,7 @@ namespace Femera {// header extension: needs cgnslib.h
      */
 }//end Femera namespace for header extension
 namespace Femera {
-  Dcgn::Dcgn (Proc* P, Data* D) noexcept:
+  Dcgn::Dcgn (Proc* P, Data* D) noexcept(false):
     format (Dcgn::File_format::Dcgn_HDF5),
     comm   (Proc::Team_id( MPI_COMM_WORLD )) {// changed in init_task(..)
     this->proc=P; this->data=D;
