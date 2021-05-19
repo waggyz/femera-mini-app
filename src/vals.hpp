@@ -29,9 +29,7 @@ namespace fmr {
     }
 #endif
     // constructors
-    Vals (){
-      for (size_t i=0; i<8*sizeof(T); i++) {isok[i]=false;}
-    }
+    Vals (){}
     Vals (const Data);
     Vals (const Data, Global_int size);
     Vals (const Data, const Global_int size, T init_val);
@@ -55,6 +53,11 @@ namespace fmr {
    *  = fmr::Local_int (this->geom_d);
    */
   // Implementation ==========================================================
+#if 0
+  template <typename T> Vals<T>::Vals () {//TODO Does not fix unit warning.
+    for (size_t i=0; i<8*sizeof(T); i++) {isok[i]=false;}
+  }
+#endif
   template <typename T> Vals<T>::Vals (const Data t)
   : type(t) {
     const bool was_found = Data_size.count(t) > 0;
