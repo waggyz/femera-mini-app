@@ -11,8 +11,8 @@
 #endif
 
 namespace Femera {
-Data:: Data () noexcept(false) {meter_unit="W";}
-Data:: Data (Proc* P) noexcept(false) {
+Data:: Data () noexcept {meter_unit="W";}
+Data:: Data (Proc* P) noexcept {
   this-> proc=P; this->data=this;
   this-> work_type = work_cast (Base_type::Data);
   this-> task_name ="Data";

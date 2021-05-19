@@ -26,11 +26,12 @@ class Fake final : public Data {
     int close () final override;
     int close (const std::string model) final override;
     //
-    Fake ()=default;
-    Fake (Fake const&)=delete;// not copyable
-    Fake operator= (const Fake&)=delete;
+    //Fake () noexcept=default;
   public:
     Fake (Proc*, Data*) noexcept;
+    Fake ()                      =delete;
+    Fake (Fake const&)           =delete;// not copyable
+    Fake operator= (const Fake&) =delete;
     virtual ~Fake () noexcept=default;// Virtual destructor for virtual class
 };
 }//end Femera namespace

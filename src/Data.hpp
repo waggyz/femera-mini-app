@@ -190,9 +190,9 @@ class Data : public Work {//TODO change to File
     virtual int read_local_vals (const fmr::Data_id, fmr::Local_int_vals &);
     virtual int read_geom_vals (const fmr::Data_id, fmr::Geom_float_vals &);
     //
-    Data           () noexcept(false);// called implicitly by child constructors
+    Data           () noexcept;// called implicitly by child constructors
   public:
-    Data           (Proc*) noexcept(false);
+    Data           (Proc*) noexcept;
     Data           (Data const&) =delete;// not copyable
     Data operator= (const Data&) =delete;
     virtual ~Data  ()   noexcept =default;

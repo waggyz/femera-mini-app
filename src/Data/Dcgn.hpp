@@ -146,7 +146,7 @@ class Dcgn final : public Data {
     int make_part (const std::string, const fmr::Local_int,
       const fmr::Local_int) final override;
   public:
-    Dcgn           (Proc*,Data*) noexcept(false);
+    Dcgn           (Proc*,Data*) noexcept;
     Dcgn           ()            =delete;
     Dcgn           (Dcgn const&) =delete;// not copyable
     Dcgn operator= (const Dcgn&) =delete;
