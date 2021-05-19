@@ -29,7 +29,9 @@ namespace fmr {
     }
 #endif
     // constructors
-    Vals (){}
+    Vals (){
+      for (size_t i=0; i<8*sizeof(T); i++) {isok[i]=false;}
+    }
     Vals (const Data);
     Vals (const Data, Global_int size);
     Vals (const Data, const Global_int size, T init_val);
