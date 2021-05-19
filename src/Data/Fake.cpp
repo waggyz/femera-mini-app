@@ -73,6 +73,9 @@ namespace Femera {
   int Fake::close (){
     return 0;
   }
+  int Fake::close (const std::string) {
+    return 0;
+  }
   int Fake::init_task (int* argc, char** argv){int err=0;
     FMR_PRAGMA_OMP(omp master) {//NOTE getopt is NOT thread safe.
       int argc2=argc[0];// Copy getopt variables.

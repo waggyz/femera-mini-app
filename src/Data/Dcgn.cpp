@@ -231,7 +231,7 @@ Data::File_info Dcgn::get_file_info (const std::string fname) {int err=0;
     this->file_info [fname] = info;//TODO lock guard here?
   return info;
 }
-Dcgn::File_cgns Dcgn::close (const std::string fname){
+Dcgn::File_cgns Dcgn::close_file (const std::string fname){
   auto info = Dcgn::File_cgns (Data::Data_file (this,fname));
   info = this->file_info.count(fname) ? this->file_info.at(fname) : info;
   int err=0;
@@ -1078,7 +1078,10 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
 #endif
         } } }
 #endif
-int Dcgn::close (){int err=0;
+int Dcgn::close (const std::string) {int err=0;//TODO close model
+  return err;
+}
+int Dcgn::close () {int err=0;
   fmr::perf::timer_resume (&this->time);
   for (auto fi : this->file_info){// Close all open files.
     auto fname = fi.first;
@@ -1086,7 +1089,7 @@ int Dcgn::close (){int err=0;
     switch (info.access) {
       case fmr::data::Access::Read   :{}//Fall through.
       case fmr::data::Access::Write  :{}//Fall through.
-      case fmr::data::Access::Modify :{this->close (fname); break;}
+      case fmr::data::Access::Modify :{this->close_file (fname); break;}
       default :{}// Do nothing.
   } }
   fmr::perf::timer_pause (&this->time);

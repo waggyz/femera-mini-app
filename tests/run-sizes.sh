@@ -2,9 +2,9 @@
 #
 MESH_N=150
 #
-# P2: H = 2:1kdof, 7:10kdof, 39:1Mdof, ?72:10Mdof, ?157:100Mdof
+# P2: H = 2:1kdof, 7:10kdof, 35:1Mdof, 77:10Mdof, 164:100Mdof
 H_MIN=2
-H_MAX=39
+H_MAX=35
 #
 C=`tools/cpucount.sh`
 #

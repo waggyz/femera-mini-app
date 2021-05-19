@@ -71,9 +71,13 @@ namespace Femera {
         + std::to_string (Pfrom->get_proc_id ());
       }
       const auto sim_n = fmr::Local_int (this->model_list.size());
-      //
-      this->from.bats_sz = sim_n;//TODO for XS sims only?
-      //
+      if (false){//(sim_n < 10 * Psend->get_proc_n ()) {
+        this->send.bats_sz = 10;// to each thread
+        this->from.bats_sz = this->send.bats_sz * Psend->get_proc_n ();
+      }else{
+        //TODO this->send.bats_sz = ?;
+        this->from.bats_sz = sim_n;//TODO one big batch for XS sims only?
+      }
       const auto sendp = (this->send.hier_lv > this->from.hier_lv)
         ? Psend->get_proc_n () : 1;       // # threads sent to
       const auto bsz = this->send.bats_sz;// # items sent in each batch
@@ -83,11 +87,11 @@ namespace Femera {
         case fmr::Concurrency::Serial      : sendn = sendp; break;
         case fmr::Concurrency::Independent : sendn = sendp; break;
         case fmr::Concurrency::Collective  : sendn = 1;     break;
-        default :{}// Do nothing.
+        default :{}//TODO Report err?
       }
       const auto send_type
         = work_cast ((bsz>1) ? Base_type::Sims : Base_type::Frun);
-      for (fmr::Global_int i=0; i < (sendp*bsz); i++) {// add initial tasks
+      for (fmr::Global_int i=0; i < (sendp*bsz); i++) {// Add initial tasks.
         err= fmr::detail::main->add_new_task (send_type, this);
       }
       if (log->verbosity >= this->verblevel) {
@@ -312,6 +316,7 @@ namespace Femera {
             }
             //TODO Should this timing include lower-level runtime?
             err+= (R->run() > 0) ? 1 : 0;//TODO handle warnings (err<0)?
+            //TODO Clear data not needed for sims collection post-processing.
       } } }//end parallel region
     }else{
       const auto Pfrom = this->proc->hier [this->from.hier_lv];

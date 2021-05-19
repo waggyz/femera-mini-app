@@ -490,7 +490,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
       bool do_open = true;
       switch (info.access) {// Check if already open.
         case fmr::data::Access::Read   :// Fall through valid open modes...
-        case fmr::data::Access::Write  :// Fall through...
+        case fmr::data::Access::Write  ://TODO Fall through?
         case fmr::data::Access::Modify : do_open = false; break;
         default : do_open = true;
       }
@@ -771,8 +771,29 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
   fmr::perf::timer_pause (&this->time);
   return err;
   }
-int Dmsh::close () {
-  Data::Lock_here lock(this->liblock);
+int Dmsh::close (const std::string model) {int err=0;
+  fmr::perf::timer_pause (&this->time);
+  Data::Lock_here lock (this->liblock);
+  fmr::perf::timer_resume(&this->time);
+  //TODO check if data is still in use.
+  try {gmsh::model::setCurrent (model);}
+  catch (int e) {err = e;//TODO handle CGNS already closed. Check model list?
+    // Or handle in Data::close(model): returns err only if all return err.
+#if 0
+    const auto warnlabel = "WARN""ING "+this->task_name;
+    this->proc->log->label_fprintf (this->proc->log->fmrerr, warnlabel.c_str(),
+      "could not find %s to close it.\n", model.c_str());
+#endif
+  }
+  if (!err) {
+    try {gmsh::model::remove ();}
+    catch (int e) {err = e;}
+  } else {err= 0;}//TODO
+  fmr::perf::timer_pause (&this->time);
+  return err;
+}
+int Dmsh::close () {//TODO Remove? (not thread safe)
+  Data::Lock_here lock (this->liblock);
   fmr::perf::timer_resume(&this->time);
   gmsh::model::remove ();//TODO check if data is still in use.
   fmr::perf::timer_pause (&this->time);

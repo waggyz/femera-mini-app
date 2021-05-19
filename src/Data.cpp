@@ -225,6 +225,15 @@ int Data::close () {int err=0;
   } } }
   return err;
 }
+int Data::close (const std::string model) {int err=0;
+  const auto n = this->task.count ();
+  for (int i=0; i < n; i++) {
+    Data* D=this->task.get<Data>(i); if (D) {
+      if (D->work_type != this->work_type) {
+        err+= D->close (model);
+  } } }
+  return err;
+}
 fmr::Data_id Data::make_data_id (const fmr::Data_id base_path,
   const fmr::Tree_type tree_type, const fmr::Tree_path branch,
   const fmr::Data data_type) {

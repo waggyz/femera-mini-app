@@ -137,7 +137,8 @@ class Dcgn final : public Data {
     //
     File_cgns open  (const std::string fname,
       fmr::data::Access, Data::Concurrency);
-    File_cgns close (const std::string fname);
+    int close (const std::string model) final override;
+    File_cgns close_file (const std::string fname);
     int make_mesh (const std::string, const fmr::Local_int) final override;
 #if 0
     int make_part (const std::string, const fmr::Local_int) final override;

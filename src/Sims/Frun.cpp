@@ -197,7 +197,9 @@ namespace Femera {
     const auto start = fmr::perf::get_now_ns();
     const auto log = this->proc->log;
     //
-    //
+    //TODO Clear vals stored here.
+    //TODO err= this->data->clear (this->model_name);
+    err= this->data->close (this->model_name);//TODO Move to exit_task?
     //
     if (this->verblevel <= log->timing) {
       log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu\n", this->proc->get_proc_id(),
@@ -212,6 +214,7 @@ namespace Femera {
 #endif
   int Frun::exit_task (int err) {
 #if 0
+    err= this->data->close (this->model_name);//TODO check if already closed.
     const auto log = this->proc->log;
     if (this->verblevel <= log->timing) {
       log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu\n", this->proc->get_proc_id(),

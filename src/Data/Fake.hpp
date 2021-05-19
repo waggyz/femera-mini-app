@@ -22,8 +22,9 @@ class Fake final : public Data {
     std::deque<std::string> get_sims_names () final override;
     bool is_this_type (const std::string fname) final override;
   private:
-    int prep  () final  override;
+    int prep  () final override;
     int close () final override;
+    int close (const std::string model) final override;
     //
     Fake ()=default;
     Fake (Fake const&)=delete;// not copyable

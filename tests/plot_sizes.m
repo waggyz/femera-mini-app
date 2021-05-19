@@ -117,6 +117,7 @@ paper=[0.25,0.25, 6,3];
 set(gcf,'paperposition',paper);
 figname=['sm-md-gandt-',solvshort],
 print([figdir,figname,'.eps'],'-depsc2','-FHelvetica');
+print([figdir,figname,'.pdf'],'-depsc2','-FHelvetica');
 %
 %==============================================================================
 figure (2); clf; hold on; grid on;
@@ -297,6 +298,8 @@ loglog (dofs_span, polyval(cnst_chck_cads_geos,dofs_span),':b','linewidth',hlw);
 %
 loglog (dofs_span, polyval(poly_mesh_cads,dofs_span),'-.b','linewidth',mlw);
 %
+%TODO plot post times (Gmsh vs. CGNS)?
+%
 %loglog (dofs_span, polyval(poly_read     ,dofs_span),'-k','linewidth',hlw);
 %loglog (dofs_span, polyval(poly_read_mshb,dofs_span),'-k','linewidth',hlw);
 loglog (dofs_span, polyval(poly_read_cgns,dofs_span),'-g','linewidth',mlw);
@@ -325,4 +328,5 @@ paper=[0.25,0.25, 6,4];
 set(gcf,'paperposition',paper);
 figname=['sm-md-simtime-',solvshort],
 print([figdir,figname,'.eps'],'-depsc2','-FHelvetica');
+print([figdir,figname,'.pdf'],'-depsc2','-FHelvetica');
 %

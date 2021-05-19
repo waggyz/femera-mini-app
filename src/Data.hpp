@@ -111,8 +111,9 @@ class Data : public Work {//TODO change to File
     // Keep most file handling operations hidden (protected or private).
     //TODO batch file operations?
     //
+    virtual int close (const std::string model);
     virtual int close ();// Close all files.
-    int clear ();// Clear all file data.
+    int clear ();// Clear all data.
     //
     // Data source and destination (file) targets for this run.
     int set_out_file (const std::string fname);//TODO data can go to >1 file
