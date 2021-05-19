@@ -29,11 +29,11 @@ if (0==1);
   return
 end;
 %
-csv = dlmread ('../build/tests/sm-md.csv');
-%csv = dlmread ('../build/tests/sm-md-no-solve.csv');
-%csv = dlmread ('../build/tests/sm-md-sleep.csv');
+csv = dlmread ('../build/tests/sizes.csv');
+%csv = dlmread ('../build/tests/sizes-no-solve.csv');
+%csv = dlmread ('../build/tests/sizes-sleep.csv');
 %
-mesh_time = dlmread ('../build/tests/sm-md-time.csv');
+mesh_time = dlmread ('../build/tests/sizes-time.csv');
 %
 start = min(csv(:,6));
 stop  = max(csv(:,7));
@@ -115,7 +115,7 @@ legend (...
 figure (1); hold on;
 paper=[0.25,0.25, 6,3];
 set(gcf,'paperposition',paper);
-figname=['sm-md-gandt-',solvshort],
+figname=['sizes-gandt-',solvshort],
 print([figdir,figname,'.eps'],'-depsc2','-FHelvetica');
 print([figdir,figname,'.pdf'],'-depsc2','-FHelvetica');
 %
@@ -214,40 +214,53 @@ poly_mesh_cads(end) = min(wmesh(f)),
 %
 s = unique(csv(find(csv(:,4)~=5),2)); s(s<=0)=[];% NOT cgns
 fread = s;
-poly_read = polyfit (wdofs(s),wread(s),1),
-if (poly_read(end)<0);% Re-fit, assuming y-intercept is min(wread(fread).
-  rmin = min(wread(fread));
-  poly_read = polyfit (wdofs(fread),(wread(fread)-rmin)./wdofs(fread),0);
-  %poly_read = [poly_read,0],
-  poly_read = [poly_read,rmin],
+poly_read=nan;
+if(numel(fread)>0);
+  poly_read = polyfit (wdofs(s),wread(s),1),
+  if (poly_read(end)<0);% Re-fit, assuming y-intercept is min(wread(fread).
+    rmin = min(wread(fread));
+    poly_read = polyfit (wdofs(fread),(wread(fread)-rmin)./wdofs(fread),0);
+    %poly_read = [poly_read,0],
+    poly_read = [poly_read,rmin],
+  end;
 end;
-%
 fcgns = unique( csv( find( csv(:,4)==5),2));% cgns
-poly_read_cgns = polyfit (wdofs(fcgns),wread(fcgns),1),
-poly_chck_cgns = polyfit (wdofs(fcgns),wchck(fcgns),0),
-%poly_chck_cgns(end) = min(wchck(fcgns)),
+poly_read_cgns=nan;
+poly_chck_cgns=nan;
+if(numel(fcgns)>0);
+  poly_read_cgns = polyfit (wdofs(fcgns),wread(fcgns),1),
+  poly_chck_cgns = polyfit (wdofs(fcgns),wchck(fcgns),0),
+  %poly_chck_cgns(end) = min(wchck(fcgns)),
+end;
 %
 fmesh = unique( csv( find( csv(:,4)~=1),2));% NOT CAD (geo,geo_unrolled)
-fmesh(fmesh<=0)=[]; fmesh(prep(fmesh)<=0)=[];
-poly_prep_mesh = polyfit (wdofs(fmesh),wprep(fmesh),1),
-%poly_prep_mesh(end) = min(wprep(fmesh)),
-%
+poly_prep_mesh=nan;
+if(numel(fmesh)>0);
+  fmesh(fmesh<=0)=[]; fmesh(prep(fmesh)<=0)=[];
+  poly_prep_mesh = polyfit (wdofs(fmesh),wprep(fmesh),1),
+  %poly_prep_mesh(end) = min(wprep(fmesh)),
+end;
 fothr = unique( csv( find( (csv(:,4)~=1) & (csv(:,4)~=5)),2));% NOT CAD, NOT CGNS
 fothr(fothr<=0)=[]; fothr(prep(fothr)<=0)=[];
-if (1==1);% Assume y-intercept is min.
-  cmin = min(wchck(fothr));
-  poly_chck = polyfit (wdofs(fothr),(wchck(fothr)-cmin)./wdofs(fothr),0);
-  poly_chck(2)=cmin;
-else;
-  poly_chck = polyfit (wdofs(fothr),wchck(fothr),1);
+poly_chck=nan;
+if (numel(fothr)>0);
+  if (1==1);% Assume y-intercept is min.
+    cmin = min(wchck(fothr));
+    poly_chck = polyfit (wdofs(fothr),(wchck(fothr)-cmin)./wdofs(fothr),0);
+    poly_chck(2)=cmin;
+  else;
+    poly_chck = polyfit (wdofs(fothr),wchck(fothr),1);
+  end;
 end;
-%
 fmshb = unique(csv(find(csv(:,3)==1 & csv(:,4)==4),2));% msh4 binary
-poly_chck_msh4 = polyfit (wdofs(fmshb),wchck(fmshb),1),
-if (poly_chck_msh4(end)<0);% Re-fit, assuming y-intercept is min.
-  cmin = min(wchck(fmshb));
-  poly_chck_msh4 = polyfit (wdofs(fmshb),(wchck(fmshb)-cmin)./wdofs(fmshb),0);
-  poly_chck_msh4 = [poly_chck_msh4,cmin],
+poly_chck_msh4=nan;
+if (numel(fmshb)>0);
+  poly_chck_msh4 = polyfit (wdofs(fmshb),wchck(fmshb),1),
+  if (poly_chck_msh4(end)<0);% Re-fit, assuming y-intercept is min.
+    cmin = min(wchck(fmshb));
+    poly_chck_msh4 = polyfit (wdofs(fmshb),(wchck(fmshb)-cmin)./wdofs(fmshb),0);
+    poly_chck_msh4 = [poly_chck_msh4,cmin],
+  end;
 end;
 %poly_read_mshb = polyfit (wdofs(fmshb),wread(fmshb),1),
 %if (poly_read_mshb(end)<0);% Re-fit, assuming y-intercept is min.
@@ -257,14 +270,19 @@ end;
 %end;
 %
 fcads = unique(csv(find(csv(:,4)==1),2));% CAD (geo,geo_unrolled)
-fcads(fcads<=0)=[]; fcads(prep(fcads)<=0)=[];
-%avg = mean(prep(fcads));
-%fgeos = fcads(prep(fcads)<avg/2); fgeou=fcads(prep(fcads)>avg/2);
-fgeou = unique(csv(find(csv(:,3)==2 & csv(:,4)==1),2));
-fgeos = unique(csv(find(csv(:,3)==3 & csv(:,4)==1),2));
-cnst_prep_cads_gmsh = polyfit (wdofs(fgeou),wprep(fgeou),0),% geo_unrolled
-cnst_prep_cads_bash = polyfit (wdofs(fgeos),wprep(fgeos),0),% geo
-cnst_chck_cads_geos = polyfit (wdofs(fcads),wchck(fcads),0),
+cnst_prep_cads_gmsh=nan;
+cnst_prep_cads_bash=nan;
+cnst_chck_cads_geos=nan;
+if(numel(fcads)>0);
+  fcads(fcads<=0)=[]; fcads(prep(fcads)<=0)=[];
+  %avg = mean(prep(fcads));
+  %fgeos = fcads(prep(fcads)<avg/2); fgeou=fcads(prep(fcads)>avg/2);
+  fgeou = unique(csv(find(csv(:,3)==2 & csv(:,4)==1),2));
+  fgeos = unique(csv(find(csv(:,3)==3 & csv(:,4)==1),2));
+  cnst_prep_cads_gmsh = polyfit (wdofs(fgeou),wprep(fgeou),0),% geo_unrolled
+  cnst_prep_cads_bash = polyfit (wdofs(fgeos),wprep(fgeos),0),% geo
+  cnst_chck_cads_geos = polyfit (wdofs(fcads),wchck(fcads),0),
+end;
 %
 loglog (dofs(fmesh), prep(fmesh),'<k','markersize',sms,'linewidth',mlw);
 loglog (dofs(fgeou), prep(fgeou),'<c','markersize',ms,'linewidth',mlw);
@@ -326,7 +344,7 @@ loglog (dofs_span,secs,'-m','linewidth',lw);% estimated solve (only) time
 figure (2); hold on;
 paper=[0.25,0.25, 6,4];
 set(gcf,'paperposition',paper);
-figname=['sm-md-simtime-',solvshort],
+figname=['sizes-simtime-',solvshort],
 print([figdir,figname,'.eps'],'-depsc2','-FHelvetica');
 print([figdir,figname,'.pdf'],'-depsc2','-FHelvetica');
 %

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-echo mesh-sm-md.sh $1 $2 $3 $4...
+echo mesh-sizes.sh $1 $2 $3 $4...
 MESH_N="$1"
 H_MIN="$2"
 H_MAX="$3"
@@ -34,14 +34,14 @@ OPTS_GEO=`cat "tests/geo/gmsh-opts.geo"`
 BASE_GEO=`grep -v '^Include' "tests/geo/uhxt-cube.geo"`
 MESH_I=0
 for MESH_I in $(seq 1 1 $MESH_N) ; do
-  case $(( ( $RANDOM * 10 ) / ( 32767 + 1 ) + 1 )) in
+  case $(( ( $RANDOM * 3 ) / ( 32767 + 1 ) + 1 )) in
      1) FMT="geo"; BIN="-geo" ;;
      2) FMT="geo_unrolled"; BIN="-geo" ;;
-     3) FMT="msh4"; BIN="-asc" ;;
-     4) FMT="msh4"; BIN="-bin" ;;
+     3) FMT="cgns"; BIN="-bin" ;;
+     4) FMT="msh4"; BIN="-asc" ;;
+     5) FMT="msh4"; BIN="-bin" ;;
 #     4) FMT="msh2"; BIN="-asc" ;;
-     5) FMT="msh2"; BIN="-bin" ;;
-     6) FMT="cgns"; BIN="-bin" ;;
+     6) FMT="msh2"; BIN="-bin" ;;
      7) FMT="mesh"; BIN="-asc" ;;
 #     7) FMT="unv" ; BIN="-asc" ;; # CAD only? No p2?
      8) FMT="vtk" ; BIN="-bin" ;;

@@ -55,11 +55,11 @@ sed -i 's/-bin"/,1,0/g' $CSV
 sed -i 's/-asc"/,2,0/g' $CSV
 sed -i 's/-geo"/,0,1/g' $CSV
 #
-sed -i 's/"build\/tests\/sm-md\/cube-//g' $CSV
+sed -i 's/"build\/tests\/sizes\/cube-//g' $CSV
 sed -i 's/"cube-//g' $CSV
 #
-PREPROC="build/tests/sm-md-time.err"
-grep '^[0-9]' "build/tests/sm-md-time.err" > "build/tests/sm-md-time.csv"
+PREPROC="build/tests/sizes-time.err"
+grep '^[0-9]' "build/tests/sizes-time.err" > "build/tests/sizes-time.csv"
 #
 #
 #

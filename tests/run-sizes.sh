@@ -8,13 +8,13 @@ H_MAX=35
 #
 C=`tools/cpucount.sh`
 #
-TESTDIR="build/tests/sm-md"
-TIMEFILE="build/tests/run-sm-md.err"
+TESTDIR="build/tests/sizes"
+TIMEFILE="build/tests/run-sizes.err"
 rm -rf "$TESTDIR"
 rm -f $TESTDIR.*.out
 rm -f "$TIMEFILE"
 #
-EXEC="tests/mesh-sm-md.sh $MESH_N $H_MIN $H_MAX $TESTDIR"
+EXEC="tests/mesh-sizes.sh $MESH_N $H_MIN $H_MAX $TESTDIR"
 echo $EXEC...
 /bin/time --format="%e" $EXEC 2>> "$TIMEFILE"
 #
