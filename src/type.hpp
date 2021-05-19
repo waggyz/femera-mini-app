@@ -108,8 +108,8 @@ namespace fmr {
     fmr::Concurrency cncr    = fmr::Concurrency::Once;
     fmr::Dim_int     hier_lv = 1;// processing hierarchy run level
     // constructor
-    Distribute noexcept (const fmr::Dim_int h, const fmr::Schedule p,
-      const fmr::Concurrency c, fmr::Local_int b=1)
+    Distribute (const fmr::Dim_int h, const fmr::Schedule p,
+      const fmr::Concurrency c, fmr::Local_int b=1) noexcept
       : bats_sz(b), plan(p), cncr(c), hier_lv(h){}
   };
   enum class Sim_time : Enum_int { None=0, Error, Unknown, Plugin,
