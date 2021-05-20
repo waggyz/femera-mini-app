@@ -125,14 +125,13 @@ figure (2); clf; hold on; grid on;
 run_cncr = 4,
 ref_cncr = 40,
 %
-set (gca, 'position',  [0.15,0.15, 0.75, 0.7]);
+set (gca, 'position',  [0.15,0.15, 0.75, 0.75]);
 if (1==1);%(run_cncr == ref_cncr);
   s='performance';
 else;
   s='estimate'
 end;
-title (['Batch ',s,' per Skylake node, 40 sims/40 cpu, ',...
-  '|u_{ij}^{FEM}-u_{ij}^{exact}| <10^{-5}']);
+title (['Batch ',s,' per Skylake node, 40 sims/40 cpu']);
 axis ([1000,10e9, sc/10000 /10,3*dy]);
 %
 if (1==0)
@@ -162,7 +161,7 @@ set (gca,'xtick', 10.^[1e-9:11]);% hack around integer overflow for xtick 10^10
 ytic = 1./[1/(3*dy),1/dy,1/hr,10/hr,1/mn,10/mn,1/sc,...
   10/sc,100/sc,1e3/sc,10e3/sc];
 set (gca,'ytick', ytic);
-ylab = ['1/3d';'1/d';'1/h';'10/h';'1/m';...
+ylab = ['1/3 d';'1/d';'1/h';'10/h';'1/m';...
        '10/m';'1/s';'10/s';'100/s';'1k/s';'10k/s'];
 set (gca,'yticklabel',ylab);
 %
@@ -175,10 +174,29 @@ text (1e10,fr,'30 sims/s/node (NTSC)','color','k',...
 %
 mx = 1./(40/(3*dy));
 ax = loglog ([1e3,10e9],[mx,mx],'-r', lws,flw);
-text (1e7,mx,'40 sims/3 d/node','color','r',vas,'top', fss,lfs);
+text (1.2e3,mx,'40 sims/3 d/node','color','r',
+  has,'left', vas,'bottom', fss,lfs);
 %
-barw=3; ms =3;
+byte_per_dof = 112;
+mem = 96; mx = mem*1e9 / byte_per_dof /40;
+loglog ([mx,mx],[1e-5,3*dy],':r', lws,flw);
+text (mx, 15e-6, [num2str(mem),' GB/40 sims'],...
+  'rotation',90, has,'left', vas,'bottom', 'fontsize',lfs, 'color','r');
+mem =376; mx = mem*1e9 / byte_per_dof /40;
+loglog ([mx,mx],[1e-5,3*dy],'--r', lws,flw);
+text (mx, 15e-6, [num2str(mem),' GB/40 sims'],
+  'rotation',90, has,'left', vas,'bottom', 'fontsize',lfs, 'color','r');
 %
+szstr = ['XS';'SM';'MD';'LG';'XL'];
+szpos = [e*1e3;1e5;e*1e6;1e8;e*1e9]; y = 3*dy *ones(size(szpos));
+text (szpos, y, szstr, has,'center', vas,'bottom', 'fontsize',lfs, 'color','b');
+loglog ([1e3,10e9],[3*dy,3*dy], 'b', lws,lw);
+sz = [10e3;1e6;10e6;1e9];
+x=nan(numel(sz)*3,1); x(1:3:end)=sz; x(2:3:end)=sz;
+y=nan(size(x)); y(1:3:end)=2*dy; y(2:3:end)=3*dy;
+loglog (x,y, 'b', lws,3);
+%
+ms =3;
 encolor = ['b';'k';'m'];
 sim_n = max (csv(:,2)),
 tmin = 0;%0.100 *cncr/sim_n *0,%FIXME 100ms startup time, pro-rated
@@ -333,13 +351,21 @@ femera_cads_mesh_speedup = poly_prep_mesh(1) / poly_mesh_cads(1),
 %avg_run_time = run_time / sim_n,
 %avg_tot_time = tot_time / sim_n,
 %
+iters_poly = [1/3,1.5];
 speed = 1e9 - (dofs_span>10e3).* 90e6.*(log(dofs_span)-log(10e3));
 speed (speed < 500e6) = 500e6;
-poly = [1/3,1.5];
-iters = exp (polyval (poly, log (dofs_span)));
+iters = exp (polyval (iters_poly, log (dofs_span)));
 secs = iters .* dofs_span ./ speed;% avg time to solve 1 sim (using 40 cores)
 loglog (dofs_span,secs,'-m','linewidth',lw);% estimated solve (only) time
 %
+dofs=1.5e8;
+speed = 1e9 - (dofs>10e3).* 90e6.*(log(dofs)-log(10e3));
+speed (speed < 500e6) = 500e6;
+iters = exp (polyval (iters_poly, log (dofs)));
+secs = iters .* dofs ./ speed;
+solvstr = ['max |u_{ij}^{FEM}-u_{ij}^{exact}| <10^{-5}'];
+text (dofs,1.2*secs,solvstr, 'color','m',
+  'rotation', 1.7*atand(iters_poly(1)), 'fontsize',lfs, vas,'bottom');
 %
 figure (2); hold on;
 paper=[0.25,0.25, 6,4];
