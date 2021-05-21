@@ -101,6 +101,7 @@ namespace Femera {
 #ifdef FMR_HAS_OMP
     FMR_PRAGMA_OMP(omp master) {
 //    FMR_PRAGMA_OMP(omp single nowait) {//TODO omp single nowait ?
+      //TODO liblock instead of omp master?
       auto P = this->proc->task.first<Proc> (Plug_type::Pomp);
       if (P) {
         Dmsh::Optval n = Dmsh::Optval(P->get_proc_n());
