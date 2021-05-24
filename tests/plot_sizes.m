@@ -11,9 +11,8 @@ fas='fontangle';
 %
 ns=1e-9; us=1e-6; ms=1e-3; sc=1; mn=60; hr=60*mn; dy=24*hr;
 %
-basedir = '../build/tests/sizes',
-figdir = '../build/tests/'
-%
+filebase = '../build/tests/sizes',
+figdir   = '../build/tests/'
 %
 csv = dlmread ('perf/iters2solve-1e-5.csv');
 %
@@ -30,11 +29,11 @@ if (0==1);
   return
 end;
 %
-csv = dlmread ([basedir,'.csv']);
+csv = dlmread ([filebase,'.csv']);
 %csv = dlmread ('../build/tests/sizes-no-solve.csv');
 %csv = dlmread ('../build/tests/sizes-sleep.csv');
 %
-mesh_time = dlmread ([basedir,'-time.csv']);
+mesh_time = dlmread ([filebase,'-time.csv']);
 %
 start = min(csv(:,6));
 stop  = max(csv(:,7));
