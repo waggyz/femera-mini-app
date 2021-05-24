@@ -11,6 +11,7 @@ fas='fontangle';
 %
 ns=1e-9; us=1e-6; ms=1e-3; sc=1; mn=60; hr=60*mn; dy=24*hr;
 %
+basedir = '../build/tests/sizes',
 figdir = '../build/tests/'
 %
 %
@@ -29,11 +30,11 @@ if (0==1);
   return
 end;
 %
-csv = dlmread ('../build/tests/sizes.csv');
+csv = dlmread ([basedir,'.csv']);
 %csv = dlmread ('../build/tests/sizes-no-solve.csv');
 %csv = dlmread ('../build/tests/sizes-sleep.csv');
 %
-mesh_time = dlmread ('../build/tests/sizes-time.csv');
+mesh_time = dlmread ([basedir,'-time.csv']);
 %
 start = min(csv(:,6));
 stop  = max(csv(:,7));
@@ -123,7 +124,7 @@ print([figdir,figname,'.pdf'],'-depsc2','-FHelvetica');
 for (fig = [2:3]);
 figure (fig); clf; hold on; grid on;
 %
-run_cncr = 4,
+run_cncr = max(csv(:,1))+1,
 ref_cncr = 40,
 %
 set (gca, 'position',  [0.15,0.15, 0.75, 0.75]);
@@ -138,7 +139,7 @@ ax = [1000,10e9, 10*us,3*dy];
 axis (ax);
 %
 text(50e9,exp ((log(ax(3))+log(ax(4)))*0.5),...
-  '\leftarrow Lower is better. (time)',...
+  '\leftarrow Lower is better. (time/sim/node)',...
   has,'center',vas,'top','rotation',90,fss,lfs);
 %
 if (1==0)
@@ -162,7 +163,7 @@ if (run_cncr == ref_cncr);
 else;
   s='Estimated'
 end;
-ylabel ([s,' throughput (sims/time)']);
+ylabel ([s,' throughput (sims/time/node)']);
 %
 set (gca,'xtick', 10.^[1e-9:11]);% hack around integer overflow for xtick 10^10
 ytic = 1./[1/(3*dy),1/dy,1/hr,10/hr,1/mn,10/mn,1/sc,...

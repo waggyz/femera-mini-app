@@ -105,7 +105,7 @@ namespace Femera {
       auto P = this->proc->task.first<Proc> (Plug_type::Pomp);
       if (P) {
         const auto n = P->get_proc_n();
-        this-> max_open_n = 2 * n;
+        this-> max_open_n = 1 * n;//TODO For 1 sim/omp (XS-MD) only?
         gmsh::option::setNumber ("General.NumThreads",Dmsh::Optval(n));
         if (this->proc->log->detail > this->verblevel){
           this->proc->log->label_printf ("Gmsh uses",
