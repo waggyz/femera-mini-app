@@ -156,7 +156,7 @@ else;
 end;
 text (x,y, ytic, fss,lfs);
 %
-xlabel ('3D linear-elastic simulation size (dof)');
+xlabel ('3D linear-elastic isotropic simulation size (dof)');
 if (run_cncr == ref_cncr);
   s='Expected';
 else;
@@ -181,7 +181,7 @@ text (1e10,fr,'30 sims/s/node (NTSC)','color','b',...
 %
 x=1e6;% x=1.2e3;
 mx = 1./(40/(3*dy));
-hax = loglog ([200e3,10e9],[mx,mx],'-b', lws,flw);
+hax = loglog ([200e3*0+1e3,10e9],[mx,mx],'-b', lws,flw);
 text (x,mx,'40 sims/3 d/node','color','b',
   has,'left', vas,'bottom', fss,lfs);
 %
@@ -189,17 +189,25 @@ text (x,mx,'40 sims/3 d/node','color','b',
 lof_dof=25932897; lof_byte=2705536 *1000; byte_per_dof = lof_byte/lof_dof,
 
 mem = 96; mx = mem*1e9 / byte_per_dof /40;
-loglog ([mx,mx],[1e-5,3*dy],':b', lws,flw);
-text (mx, 15e-6, [num2str(mem),' GB/40 sims'],...
+loglog ([mx,mx],[1e-5,3*dy],':b', lws,hlw);
+text (mx, 15e-6, [num2str(mem),' GB/40 sims/node'],...
   'rotation',90, has,'left', vas,'bottom', 'fontsize',lfs, 'color','b');
 mem =376; mx = mem*1e9 / byte_per_dof /40;
-loglog ([mx,mx],[1e-5,3*dy],'--b', lws,flw);
-text (mx, 15e-6, [num2str(mem),' GB/40 sims'],
+loglog ([mx,mx],[1e-5,3*dy],'-.b', lws,hlw);
+text (mx, 15e-6, [num2str(mem),' GB/40 sims/node'],
+  'rotation',90, has,'left', vas,'bottom', 'fontsize',lfs, 'color','b');
+mem =96; mx = mem*1e9 / byte_per_dof /1;
+loglog ([mx,mx],[1e-5,3*dy],'--b', lws,hlw);
+text (mx, 15e-6, [num2str(mem),' GB/sim/node'],
+  'rotation',90, has,'left', vas,'bottom', 'fontsize',lfs, 'color','b');
+mem =376; mx = mem*1e9 / byte_per_dof /1;
+loglog ([mx,mx],[1e-5,3*dy],'-b', lws,hlw);
+text (mx, 15e-6, [num2str(mem),' GB/sim/node'],
   'rotation',90, has,'left', vas,'bottom', 'fontsize',lfs, 'color','b');
 %
 szstr = ['XS';'SM';'MD';'LG';'XL'];
 szpos = [e*1e3;1e5;e*1e6;1e8;e*1e9]; y = 3*dy *ones(size(szpos));
-text (szpos, y, szstr, has,'center', vas,'bottom', 'fontsize',lfs, 'color','b');
+text (szpos,y, szstr, has,'center', vas,'bottom', 'fontsize',lfs, 'color','b');
 loglog ([1e3,10e9],[3*dy,3*dy], 'b', lws,lw);
 sz = [10e3;1e6;10e6;1e9];
 x=nan(numel(sz)*3,1); x(1:3:end)=sz; x(2:3:end)=sz;
@@ -207,6 +215,8 @@ y=nan(size(x)); y(1:3:end)=2*dy; y(2:3:end)=3*dy;
 loglog (x,y, 'b', lws,3);
 %
 encolor = ['b';'k';'m'];
+sim_n = size (mesh_time, 1),
+sim_n = numel(unique(csv(csv(:,2)>0,2))),
 sim_n = max (csv(:,2)),
 tmin = 0;%0.100 *cncr/sim_n *0,%FIXME 100ms startup time, pro-rated
 %
@@ -215,7 +225,7 @@ f=find(csv(:,10)>0);
 dofs_min=min(csv(f,10)), dofs_avg=mean(csv(f,10)), dofs_max=max(csv(f,10)),
 %
 init=prep;
-prep = mesh_time * run_cncr / ref_cncr;
+prep = mesh_time(:,1) * run_cncr / ref_cncr;
 si = csv(:,2);
 chck = zeros (sim_n,1); mesh=chck; read=chck; solv=chck; dofs=chck;
 f = find (csv(:,10)>0); dofs(si(f)) = csv(f,10);
@@ -270,7 +280,7 @@ if(numel(fmesh)>0);
   poly_prep_mesh = polyfit (wdofs(fmesh),wprep(fmesh),1),
   %poly_prep_mesh(end) = min(wprep(fmesh)),
 end;
-fothr = unique( csv( find( (csv(:,4)~=1) & (csv(:,4)~=5)),2));% NOT CAD, NOT CGNS
+fothr = unique( csv( find( (csv(:,4)~=1) & (csv(:,4)~=5)),2));%NOT CAD,NOT CGNS
 fothr(fothr<=0)=[]; fothr(prep(fothr)<=0)=[];
 poly_chck=nan;
 if (numel(fothr)>0);
@@ -288,7 +298,7 @@ if (numel(fmshb)>0);
   poly_chck_msh4 = polyfit (wdofs(fmshb),wchck(fmshb),1),
   if (poly_chck_msh4(end)<0);% Re-fit, assuming y-intercept is min.
     cmin = min(wchck(fmshb));
-    poly_chck_msh4 = polyfit (wdofs(fmshb),(wchck(fmshb)-cmin)./wdofs(fmshb),0);
+    poly_chck_msh4 = polyfit(wdofs(fmshb),(wchck(fmshb)-cmin)./wdofs(fmshb),0);
     poly_chck_msh4 = [poly_chck_msh4,cmin],
   end;
 end;
@@ -330,6 +340,54 @@ if(numel(fcads)>0);
   cnst_prep_cads_bash = polyfit (wdofs(fgeos),wprep(fgeos),0),% geo
   cnst_chck_cads_geos = polyfit (wdofs(fcads),wchck(fcads),0),
 end;
+if ( fig == 3);
+  xmin=max ([min(dofs(fcgns)),min(dofs(fgeou))]);
+  xmax=min ([max(dofs(fcgns)),max(dofs(fgeou))]);
+  x=exp(log(xmin):0.1:log(xmax));
+  x(x<1e3)=[];
+  xy1=sortrows ([dofs(fcgns), simt(fcgns)]);
+  xy2=sortrows ([dofs(fgeou), simt(fgeou)]);
+  y1=interp1(xy1(:,1),xy1(:,2),x);
+  y2=interp1(xy2(:,1),xy2(:,2),x);
+  %y2(y2<poly_prep_mesh(end)) = poly_prep_mesh(end);
+  %y2(y2<cnst_prep_cads_gmsh) = cnst_prep_cads_gmsh;
+  frgb=[1.0,1.0,0.5];
+  px = [x(1:(end-1));x(2:end);x(1:(end-1))];
+  py = [y1(1:(end-1));y1(2:end);y2(1:(end-1))];
+  patch (px,py,'y','facecolor',frgb,'edgecolor','none');
+  px = [x(1:(end-1));x(2:end);x(2:(end))];
+  py = [y2(1:(end-1));y2(2:end);y1(2:(end))];
+  patch (px,py,'y','facecolor',frgb,'edgecolor','none');
+  %
+  xmin=min(dofs(fgeos));
+  xmax=max(dofs(fgeos));
+  x=exp(log(xmin):0.1:log(xmax));
+%  [~,u,~] = unique(dofs(fgeos));
+  xy1=sortrows ([dofs(fgeos), simt(fgeos)]);
+  xy2=sortrows ([dofs(fgeos), simt(fgeos)-prep(fgeos)]);
+  y1=interp1(xy1(:,1),xy1(:,2),x);
+  y2=interp1(xy2(:,1),xy2(:,2),x);
+  px = [x(1:(end-1));x(2:end);x(1:(end-1))];
+  py = [y1(1:(end-1));y1(2:end);y2(1:(end-1))];
+  frgb=[0.5,1.0,0.5];
+  patch (px,py,'g','facecolor',frgb,'edgecolor','none');
+  px = [x(1:(end-1));x(2:end);x(2:(end))];
+  py = [y2(1:(end-1));y2(2:end);y1(2:(end))];
+  patch (px,py,'g','facecolor',frgb,'edgecolor','none');
+  %
+  x=dofs_span; x(end)=x(end)*0.95;
+  y1=polyval(poly_read_cgns,x);
+  y2=polyval(poly_read_cads,x);
+  l=find (y1<y2);
+  x=x(l); y1=y1(l); y2=y2(l);
+  px = [x(1:(end-1));x(2:end);x(1:(end-1))];
+  py = [y1(1:(end-1));y1(2:end);y2(1:(end-1))];
+  frgb=[1,1,1]*0.9;
+  patch (px,py,'k','facecolor',frgb, 'edgecolor','none');
+  px = [x(1:(end-1));x(2:end);x(2:(end))];
+  py = [y2(1:(end-1));y2(2:end);y1(2:(end))];
+  patch (px,py,'k','facecolor',frgb, 'edgecolor','none');
+end;
 if ( fig == 2);
   loglog (dofs(fmesh), prep(fmesh),'<k','markersize',sms,lws,mlw);
   loglog (dofs(fgeou), prep(fgeou),'<m','markersize',mms,lws,mlw);
@@ -343,7 +401,7 @@ if ( fig == 2);
   loglog (dofs, mesh,'^r','markersize',sms+1,lws,mlw);
   %
   %loglog (dofs(fread), read(fread),'ob','markersize',sms,lws,mlw);
-  loglog (dofs(fread), read(fcads),'or','markersize',sms,lws,mlw);
+  loglog (dofs(fcads), read(fcads),'or','markersize',sms,lws,mlw);
   loglog (dofs(fcgns), read(fcgns),'ok','markersize',sms,lws,mlw);
   %loglog (dofs(fmshb), read(fmshb),'oy','markersize',sms,lws,mlw);
   %
@@ -352,12 +410,12 @@ end;
 if (0);
   loglog (dofs_span, polyval(poly_chck     ,dofs_span),':b',lws,mlw);
   loglog (dofs_span, polyval(poly_chck_msh4,dofs_span),'-y',lws,lw);
-  loglog (dofs(fmesh), simt(fmesh),'xb','markersize',sms,lws,mlw);
+  loglog (dofs(fmesh), simt(fmesh),'.b','markersize',mms,lws,mlw);
 end;
 loglog (dofs_span, polyval(poly_prep_mesh,dofs_span),'-.k;Prep save mesh;',lws,lw);
 loglog (dofs_span, polyval(poly_chck_cgns,dofs_span),':k;Check CGNS;',lws,mlw);
-loglog (dofs_span, polyval(poly_read_cgns,dofs_span),'--k;Read disk CGNS;',lws,mlw);
-loglog (dofs(fcgns), simt(fcgns),'xk;Total CGNS;','markersize',sms,lws,mlw);
+loglog (dofs_span, polyval(poly_read_cgns,dofs_span),'--k;Read file CGNS;',lws,mlw);
+loglog (dofs(fcgns), simt(fcgns),'.k;Total CGNS;','markersize',mms,lws,mlw);
 
 
 loglog (dofs_span, polyval(cnst_prep_cads_gmsh,dofs_span),'-m;Prep unroll CADs;',lws,mlw);
@@ -368,8 +426,8 @@ loglog (dofs_span, polyval(cnst_chck_cads_geos,dofs_span),':r;Check CADs;',lws,m
 loglog (dofs_span, polyval(poly_mesh_cads,dofs_span),'-.r;Mesh CADs;',lws,lw);
 loglog (dofs_span, polyval(poly_read_cads,dofs_span),'--r;Read memory CADs;',lws,mlw);
 %
-loglog (dofs(fgeou), simt(fgeou),'xm;Total unroll CADs;','markersize',sms,lws,mlw);
-loglog (dofs(fgeos), simt(fgeos),'xr;Total script CADs;','markersize',sms,lws,lw);
+loglog (dofs(fgeou), simt(fgeou),'.m;Total unroll CADs;','markersize',mms,lws,mlw);
+loglog (dofs(fgeos), simt(fgeos),'.r;Total script CADs;','markersize',mms,lws,lw);
 %
 %TODO plot post times (Gmsh vs. CGNS)?
 %
@@ -395,12 +453,12 @@ paper=[0.25,0.25, 6,4];
 set(gcf,'paperposition',paper);
 figname=['sizes-samples-',solvshort],
 print([figdir,figname,'.eps'],'-depsc2','-FHelvetica');
-print([figdir,figname,'.pdf'],'-depsc2','-FHelvetica');
+%print([figdir,figname,'.png'],'-depsc2','-FHelvetica');
 %
 figure (3); hold on;
 paper=[0.25,0.25, 6,4];
 set(gcf,'paperposition',paper);
 figname=['sizes-simtime-',solvshort],
 print([figdir,figname,'.eps'],'-depsc2','-FHelvetica');
-print([figdir,figname,'.pdf'],'-depsc2','-FHelvetica');
+%print([figdir,figname,'.png'],'-depsc2','-FHelvetica');
 %

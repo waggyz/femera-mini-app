@@ -930,7 +930,8 @@ int Data::chck_file_names (){
   auto log = this->proc->log;
   if (log->verbosity >= this->verblevel){
     log->label_printf ("Check stat","of %s\n",
-      chk_file_names.size() == 1 ? chk_file_names[0].c_str()
+      chk_file_names.size() == 1
+      ? chk_file_names[0].c_str()
       : (std::to_string (chk_file_names.size())+" files...").c_str());
   }
 #endif

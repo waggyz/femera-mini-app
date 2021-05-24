@@ -55,7 +55,11 @@ class Data : public Work {//TODO change to File
         fmr::data::Access       access = fmr::data::Access    :: Check       ;
         fmr::data::State         state = fmr::data::State();// file state
       public:
-        File_info            () noexcept(false) =default;
+        File_info            () =default;// ok gcc 4.8.5, warns gcc 9.2
+#if 0
+        //File_info            () noexcept(false) =default;// warns gcc 4.8.5
+        //File_info            () noexcept(false) {};// valgrind loss reported
+#endif
         File_info            (File_info const&) =default;// copyable
         File_info& operator= (const File_info&) =default;
         virtual   ~File_info ()        noexcept =default;

@@ -181,7 +181,7 @@ namespace fmr {
   }
 }//end fmr:: namespace
 namespace fmr {namespace data {
-  enum class Access : fmr::Enum_int {Unknown=0, Error,//TODO Find, Scan?
+  enum class Access : fmr::Enum_int {Unknown=0, Error,//TODO Find, Scan, Append?
     New, Check, Read, Write, Modify, Close
   };
   static const std::map<Access,std::string> Access_name {

@@ -34,7 +34,7 @@ OPTS_GEO=`cat "tests/geo/gmsh-opts.geo"`
 BASE_GEO=`grep -v '^Include' "tests/geo/uhxt-cube.geo"`
 MESH_I=0
 for MESH_I in $(seq 1 1 $MESH_N) ; do
-  case $(( ( $RANDOM * 3 ) / ( 32767 + 1 ) + 1 )) in
+  case $(( ( $RANDOM * 10 ) / ( 32767 + 1 ) + 1 )) in
      1) FMT="geo"; BIN="-geo" ;;
      2) FMT="geo_unrolled"; BIN="-geo" ;;
      3) FMT="cgns"; BIN="-bin" ;;
@@ -58,13 +58,14 @@ for MESH_I in $(seq 1 1 $MESH_N) ; do
   if [ "$FMT" = "geo" ] ; then
     echo $MESHFILE
     TS0=$(date +%s%N)
-#    echo "p=$P; h1=$H1; h2=$H2; part_size=$PS; mesh_d=-1;" > "$MESHFILE"
-#    printf "$OPTS_GEO\n$BASE_GEO" >> "$MESHFILE"
     printf "p=$P; h1=$H1; h2=$H2; part_size=$PS; mesh_d=-1;\n$OPTS_GEO\n$BASE_GEO" > "$MESHFILE"
     TS1=$(date +%s%N)
     ELAPSED=`echo "($TS1 - $TS0) * 10^-9" | bc -l`
     ELAPSED=`printf "%.9f" $ELAPSED`;
     echo "$ELAPSED" >> "$DIR-time.err"
+#    EXEC=printf "p=$P; h1=$H1; h2=$H2; part_size=$PS; mesh_d=-1;\n$OPTS_GEO\n$BASE_GEO" > "$MESHFILE"
+#    /bin/time --format="%e,%M,%t,%S,%U,%P" $EXEC 2>> "$DIR-time.err"
+    # wall clock, max mem, avg mem use, kernel CPU-sec, user CPU-sec, %CPU
   else
     EXEC="gmsh $GMSH_OMP"
     EXEC=$EXEC" -setnumber p $P -setnumber h1 $H1 -setnumber h2 $H2"
@@ -81,7 +82,7 @@ for MESH_I in $(seq 1 1 $MESH_N) ; do
       EXEC=$EXEC" -v 3 -save -o $MESHFILE"
     fi
     echo $EXEC
-    /bin/time --format="%e" $EXEC 2>> "$DIR-time.err"
+    /bin/time --format="%e,%M,%t,%S,%U,%P" $EXEC 2>> "$DIR-time.err"
     if [ "$FMT" = "geo_unrolled" ] ; then
       echo "p=$P;" >> $MESHFILE
       cat "tests/geo/gmsh-opts.geo" >> $MESHFILE

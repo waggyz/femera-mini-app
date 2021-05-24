@@ -56,8 +56,10 @@ class Dmsh final : public Data {
     std::unordered_map<std::string,File_gmsh> file_info={};// key:path/filename
     //
     std::unordered_map<fmr::Data_id, Elem_gmsh_info> elem_gmsh_info={};
-    int format          = 1;// .msh (see fmr::detail::format_gmsh_name map)
-    Data::Encode encode = Data::Encode::Binary;
+    int format = 1;// .msh (see fmr::detail::format_gmsh_name map)
+    Data::Encode       encode = Data::Encode::Binary;
+    fmr::Local_int max_open_n = 2;// Limit number of files open/MPI.
+    fmr::Local_int     open_n = 0;
   // Methods ------------------------------------------------------------------
   protected:
     int init_task (int* argc, char** argv)      final override;

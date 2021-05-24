@@ -405,7 +405,7 @@ namespace Femera {
       auto opterr2=opterr; auto optopt2=optopt;
       auto optind2=optind; auto optarg2=optarg;
       opterr = 0; int optchar;
-      while ((optchar = getopt (argc[0], argv, ":S::M::L::X::")) != -1){
+      while ((optchar = getopt (argc[0], argv, ":S::M::L::X:")) != -1){
         // x:  requires an argument
         // x:: optional argument (Gnu compiler)
         switch (optchar){
@@ -422,8 +422,8 @@ namespace Femera {
             if (optarg) {switch (optarg[0]) {
               case 'S' : {this->sims_size = fmr::Sim_size::XS; break;}
               case 'L' : {this->sims_size = fmr::Sim_size::XL; break;}
-              default : {}// Do nothing.
-            } }
+              default : {}//TODO Warn.
+            } }//TODO else warn
             break;}
           default :{}// Do nothing.
       } }
@@ -435,7 +435,7 @@ namespace Femera {
         this->sims_size);
       const auto szshort = fmr::get_enum_string (fmr::Sim_size_short,
         this->sims_size);
-      const auto label = szshort+this->task_name +" init";
+      const auto label = szshort+" "+this->task_name +" init";
       log->label_printf (label.c_str(),"%s assumed sim size\n", szname.c_str());
     }
     fmr::perf::timer_pause (&this->time);

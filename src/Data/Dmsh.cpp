@@ -104,11 +104,12 @@ namespace Femera {
       //TODO liblock instead of omp master?
       auto P = this->proc->task.first<Proc> (Plug_type::Pomp);
       if (P) {
-        Dmsh::Optval n = Dmsh::Optval(P->get_proc_n());
-        gmsh::option::setNumber ("General.NumThreads",n);
+        const auto n = P->get_proc_n();
+        this-> max_open_n = 2 * n;
+        gmsh::option::setNumber ("General.NumThreads",Dmsh::Optval(n));
         if (this->proc->log->detail > this->verblevel){
           this->proc->log->label_printf ("Gmsh uses",
-            "up to %g OpenMP threads each.\n",n);
+            "up to %i OpenMP thread%s each.\n",n,(n==1)?"":"s");
     } } }
 #endif
     FMR_PRAGMA_OMP(omp master) {//TODO omp single nowait ?
@@ -278,17 +279,32 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
   int err=0;//TODO This loads file data. Do not reload later.
   auto log = this->proc->log;
   const auto fname = info.data_file.second;
-  fmr::perf::timer_resume (& this->time);
-  try {gmsh::open (fname);}
-  catch (int e) {
-    fmr::perf::timer_pause (& this->time);
-    info.access = fmr::data::Access::Error;
-    info.state.has_error = true;
-    log->printf_err ("WARN""ING Gmsh could not open %s\n",
-      fname.c_str());
-    this->file_info[fname] = info;
-    return info;
+  {// liblock scope
+//    Data::Lock_here lock(this->liblock);//TODO liblock needed HERE?
+    fmr::perf::timer_resume (& this->time);
+    try {gmsh::open (fname);}
+    catch (int e) {
+      fmr::perf::timer_pause (& this->time);
+      info.access = fmr::data::Access::Error;
+      info.state.has_error = true;
+      log->printf_err ("WARN""ING Gmsh could not open %s.\n", fname.c_str());
+      this->file_info[fname] = info;
+      // Do not return from within lock scope.
+    }
+#if 0
+    if (!info.state.has_error) {
+      this->open_n++;
+      std::string data_id("");
+      gmsh::model::getCurrent (data_id);
+      this->sims_names.insert (std::string (data_id));
+    }
+#endif
+    { Data::Lock_here lock(this->liblock);
+      this->open_n += (info.state.has_error) ? 0 : 1;
+    }
   }
+  if (info.state.has_error) {return info;}
+//  {Data::Lock_here lock(this->liblock); this->open_n++;}//TODO Pull out to HERE?
 #ifdef FMR_DEBUG
   log->printf_err ("*** Gmsh opened %s\n", fname.c_str());
 #endif
@@ -462,12 +478,12 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
           if (n>0) {
             std::vector<std::size_t> elem={}, conn={};
             std::size_t task_n = 1;//TODO for automatic partitioning by elem #
-            { Data::Lock_here lock(this->liblock);
               for (size_t i=0; i<n; i++) {
+                Data::Lock_here lock(this->liblock);
                 gmsh::model::setCurrent (info.model);//TODO catch error
                 gmsh::model::mesh::getElementsByType (info.type, elem, conn,
                   info.tags[i], info.task, task_n);
-            } }
+            }
             const auto esz = conn.size();
             if (esz > 0) {
               if (vals.data.size() < esz) {vals.data.resize(esz);}
@@ -488,7 +504,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
     info = this->file_info.count (fname) ? this->file_info.at (fname) : info;
   //  info.data_file.second = fname;//TODO redundant?
     if (!info.state.was_read) {
-      bool do_open = true;
+      bool do_open = (this->open_n < this->max_open_n);
       switch (info.access) {// Check if already open.
         case fmr::data::Access::Read   :// Fall through valid open modes...
         case fmr::data::Access::Write  ://TODO Fall through?
@@ -496,16 +512,21 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
         default : do_open = true;
       }
       if (info.state.has_error) {do_open=true;}// Try to reopen.
-      if (do_open) {
-        const auto inp_file_mode = fmr::data::Access::Read;
-        info = this->open (info, inp_file_mode, Data::Concurrency::Independent);
-      }
-      if (info.state.has_error) {
-        this->file_info[fname] = info;
-        return info;
-      }
-      // Read Gmsh model name
-      std::string data_id(""); gmsh::model::getCurrent (data_id);
+      std::string data_id("");
+      {// Data::Lock_here lock(this->liblock);//FIXME Deadlocks
+        if (do_open) {
+          const auto inp_file_mode = fmr::data::Access::Read;
+          //FIXME race condition from *HERE*
+          info = this->open (info, inp_file_mode, Data::Concurrency::Independent);
+        }
+        if (info.state.has_error) {
+          this->file_info[fname] = info;
+          // Do not return from within liblock scope.
+        }else{
+          // Read Gmsh model name
+          gmsh::model::getCurrent (data_id);//FIXME race condition to *HERE*
+      } }
+      if (info.state.has_error) {return info;}
       this->sims_names.insert (std::string (data_id));
       info.state.has_error = this->scan_model (data_id) > 0;
     }//end if !read
@@ -789,16 +810,21 @@ int Dmsh::close (const std::string model) {int err=0;
   if (!err) {
     try {gmsh::model::remove ();}
     catch (int e) {err = e;}
+    if (!err) {this->open_n--;}
   } else {err= 0;}//TODO
   fmr::perf::timer_pause (&this->time);
   return err;
 }
-int Dmsh::close () {//TODO Remove? (not thread safe)
+int Dmsh::close () {//TODO Remove? (not thread safe) or close all?
+#if 0
   Data::Lock_here lock (this->liblock);
   fmr::perf::timer_resume(&this->time);
   gmsh::model::remove ();//TODO check if data is still in use.
   fmr::perf::timer_pause (&this->time);
   return 0;
+#else
+  return 1;
+#endif
 }
 bool Dmsh::is_this_type (std::string fname){int err=0;//, fmt;
   std::string::size_type idx = fname.rfind('.');

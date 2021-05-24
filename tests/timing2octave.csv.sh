@@ -11,8 +11,8 @@ fi
 CSV="$TESTDIR.csv"
 cat $TESTDIR.*.out > $CSV
 #
-sed -i 's/"Proc"/0/g' $CSV
-sed -i 's/"Femera"/0,0,0/g' $CSV
+sed -i 's/"exit_task"/0/g' $CSV
+sed -i 's/"Proc"/0,0,0/g' $CSV
 #
 # mesh prep (iter,zzzz,...) post
 sed -i 's/"chck"/1/g' $CSV
@@ -57,6 +57,10 @@ sed -i 's/-geo"/,0,1/g' $CSV
 #
 sed -i 's/"build\/tests\/sizes\/cube-//g' $CSV
 sed -i 's/"cube-//g' $CSV
+
+#sed -i 's/"\"/0,0,0/g' $CSV
+#TODO Why is "" in here? For now, remove these lines.
+#sed -i '/""/d' $CSV
 #
 PREPROC="build/tests/sizes-time.err"
 grep '^[0-9]' "build/tests/sizes-time.err" > "build/tests/sizes-time.csv"

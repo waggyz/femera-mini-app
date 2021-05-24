@@ -6,6 +6,8 @@
 
 #include <unistd.h>   // getopt, *optarg
 #include <cstdlib>    // strtol
+#include <sys/time.h> // rusage
+#include <sys/resource.h> //rusage
 
 #include <cstdio>     // std::printf
 #include <sstream>    // std::istringstream
@@ -390,8 +392,12 @@ int Proc:: exit_task (int err) {
   err= this->log->exit (err);
 #endif
   if (this->verblevel <= log->timing) {
-    this->log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu\n", this->get_proc_id (),
-      "Femera", "Proc", this->time.start, fmr::perf::get_now_ns());
+    rusage r;
+    getrusage (RUSAGE_SELF, & r);
+    this->log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu,%li\n",
+      this->get_proc_id (), "Proc", "exit_task",
+      this->time.start, fmr::perf::get_now_ns(),
+      r.ru_maxrss);// max memory used in kbyte (1024)
   }
   return err;
 }

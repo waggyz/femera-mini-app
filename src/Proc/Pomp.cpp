@@ -59,10 +59,10 @@ namespace Femera {
         = fmr::Local_int (parent_sims->model_list.size ());
       std::string liststr = " block list";
       switch (F->from.plan) {
-        case fmr::Schedule::Once : liststr=" one only"; [[fallthrough]];
+        case fmr::Schedule::Once : liststr=" one only";// [[fallthrough]];
         //nmodel=1;
         case fmr::Schedule::List : liststr=" preset list"; pn=1;//TODO Check.
-          [[fallthrough]];
+          //[[fallthrough]];//TODO Use this?
         case fmr::Schedule::Block :{
           for (fmr::Local_int i=pid+1; i<nmodel; i+=pn) {
             err= fmr::detail::main->add_new_task (F->work_type, parent_sims);
