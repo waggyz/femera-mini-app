@@ -283,14 +283,14 @@ end;
 fgmsh = unique( csv( find( csv(:,4)~=5),2));% NOT CGNS
 fgmsh(fgmsh<=0)=[];
 poly_read_gmsh = polyfit (wdofs(fgmsh),wread(fgmsh),1),
-if(numel(wread)>0); if (poly_read_gmsh(end)<0);% Re-fit,
-% assuming y-intercept is min.
-  rmin = min(wread(fgmsh));
-  poly_read_gmsh = polyfit(wdofs(fgmsh),(wread(fgmsh)-rmin)./wdofs(fgmsh),0);
-  poly_read_gmsh = [poly_read_gmsh,rmin],
+if(numel(wread)>0); if (poly_read_gmsh(end)<0);
+  poly_read_gmsh(end)=min(wread(fgmsh)),
+  %rmin = min(wread(fgmsh));% Re-fit, assuming y-intercept is min.
+  %poly_read_gmsh = polyfit(wdofs(fgmsh),(wread(fgmsh)-rmin)./wdofs(fgmsh),0);
+  %poly_read_gmsh = mean((wread(fgmsh)-rmin)./wdofs(fgmsh));
+  %poly_read_gmsh = [poly_read_gmsh,rmin],
 end; end;
-
-poly_read_gmsh(end)=min(wread(fgmsh)),
+%
 fothr = unique( csv( find( (csv(:,4)~=1) & (csv(:,4)~=5)),2));%NOT CAD,NOT CGNS
 fothr(fothr<=0)=[]; fothr(prep(fothr)<=0)=[];
 poly_chck=nan;
@@ -450,7 +450,7 @@ loglog (dofs(fgeos), simt(fgeos),'.r;Total script CADs;','markersize',mms,lws,lw
 %
 if (1);
   loglog (dofs_span, polyval(poly_chck     ,dofs_span),':c;Check mesh;',cos,crgb,lws,mlw);
-  loglog (dofs_span, polyval(poly_chck_msh4,dofs_span),'--y;Check msh4 bin;',cos,yrgb,lws,lw);
+%  loglog (dofs_span, polyval(poly_chck_msh4,dofs_span),'--y;Check msh4 bin;',cos,yrgb,lws,lw);
 %  loglog (dofs(fothr), simt(fothr),'.c;Total other;',cos,crgb,'markersize',mms,lws,mlw);
 end;
 %TODO plot post times (Gmsh vs. CGNS)?
