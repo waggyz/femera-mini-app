@@ -179,7 +179,7 @@ fr = sc/30; loglog ([1e3,1e10],[fr,fr],'--b', lws,hlw, mss,ms);
 text (1e10,fr,'30 sims/s/node (NTSC)','color','b',...
   has,'right',vas,'top', fss,lfs);
 %
-x=1e6;% x=1.2e3;
+x=1.1e3;
 mx = 1./(40/(3*dy));
 hax = loglog ([200e3*0+1e3,10e9],[mx,mx],'-b', lws,flw);
 text (x,mx,'40 sims/3 d/node','color','b',
@@ -283,6 +283,14 @@ end;
 fgmsh = unique( csv( find( csv(:,4)~=5),2));% NOT CGNS
 fgmsh(fgmsh<=0)=[];
 poly_read_gmsh = polyfit (wdofs(fgmsh),wread(fgmsh),1),
+if(numel(wread)>0); if (poly_read_gmsh(end)<0);% Re-fit,
+% assuming y-intercept is min.
+  rmin = min(wread(fgmsh));
+  poly_read_gmsh = polyfit(wdofs(fgmsh),(wread(fgmsh)-rmin)./wdofs(fgmsh),0);
+  poly_read_gmsh = [poly_read_gmsh,rmin],
+end; end;
+
+poly_read_gmsh(end)=min(wread(fgmsh)),
 fothr = unique( csv( find( (csv(:,4)~=1) & (csv(:,4)~=5)),2));%NOT CAD,NOT CGNS
 fothr(fothr<=0)=[]; fothr(prep(fothr)<=0)=[];
 poly_chck=nan;
@@ -335,11 +343,13 @@ cnst_prep_cads_gmsh=nan;
 cnst_prep_cads_bash=nan;
 cnst_chck_cads_geos=nan;
 if(numel(fcads)>0);
-  fcads(fcads<=0)=[]; fcads(prep(fcads)<=0)=[];
+  fcads(fcads<=0)=[]; fcads(wchck(fcads)<=0)=[];
   %avg = mean(prep(fcads));
   %fgeos = fcads(prep(fcads)<avg/2); fgeou=fcads(prep(fcads)>avg/2);
   fgeou = unique(csv(find(csv(:,3)==2 & csv(:,4)==1),2));
   fgeos = unique(csv(find(csv(:,3)==3 & csv(:,4)==1),2));
+  fgeou(fgeou<=0)=[]; fgeou(wprep(fgeou)<=0)=[];
+  fgeou(fgeos<=0)=[]; fgeou(wprep(fgeos)<=0)=[];
   cnst_prep_cads_gmsh = polyfit (wdofs(fgeou),wprep(fgeou),0),% geo_unrolled
   cnst_prep_cads_bash = polyfit (wdofs(fgeos),wprep(fgeos),0),% geo
   cnst_chck_cads_geos = polyfit (wdofs(fcads),wchck(fcads),0),
@@ -453,17 +463,18 @@ femera_cads_mesh_speedup = poly_prep_mesh(1) / poly_mesh_cads(1),
 legend ('location','northwest');
 end;% fig loop
 %
+figdir='';
 figure (2); hold on;
 paper=[0.25,0.25, 6,4];
 set(gcf,'paperposition',paper);
-figname=['sizes-samples-',solvshort],
-print([figdir,figname,'.eps'],'-depsc2','-FHelvetica');
+figname=[filebase,'-samples-',solvshort],
+print([figdir,filebase,'.eps'],'-depsc2','-FHelvetica');
 %print([figdir,figname,'.png'],'-depsc2','-FHelvetica');
 %
 figure (3); hold on;
 paper=[0.25,0.25, 6,4];
 set(gcf,'paperposition',paper);
-figname=['sizes-simtime-',solvshort],
-print([figdir,figname,'.eps'],'-depsc2','-FHelvetica');
+figname=[filebase,'-simtime-',solvshort],
+print([figdir,filebase,'.eps'],'-depsc2','-FHelvetica');
 %print([figdir,figname,'.png'],'-depsc2','-FHelvetica');
 %

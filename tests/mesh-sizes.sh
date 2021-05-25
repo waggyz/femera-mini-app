@@ -18,8 +18,7 @@ rm -f "$DIR-time.csv"
 
 C=`tools/cpucount.sh`
 export OMP_NUM_THREADS=$C
-GMSH_OMP="-nt $C" #TODO Not working on K?
-#GMSH_OMP=""
+GMSH_OMP="-nt $C"
 
 #MESH_N=150
 #H_MIN=2; # 7:10kdof
