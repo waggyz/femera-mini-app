@@ -180,7 +180,7 @@ namespace Femera {
           const auto secstr = fmr::perf::format_time_units (secs);
           const auto szshort = fmr::get_enum_string (fmr::Sim_size_short,
             this->sims_size);
-          const auto  label = szshort +std::to_string (geom_d)+"D "
+          const auto label = szshort +std::to_string (geom_d)+"D "
             + this->task_name +" zzzz";
           log->label_fprintf (log->fmrout, label.c_str(),
             "sim_%u: %u geom, %lu elem, %lu node, %g DOF, sleep %s...\n",

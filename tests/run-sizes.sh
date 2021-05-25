@@ -1,14 +1,14 @@
 #!/bin/bash
 #
-MESH_N=4000
+MESH_N=200
 #
 # P2: H = 2:1kdof, 7:10kdof, 35:1Mdof, 77:10Mdof, 164:100Mdof
 H_MIN=2
-H_MAX=77
+H_MAX=35
 #
 C=`tools/cpucount.sh`
 #
-TESTDIR="build/tests/xs-md-10fmt"
+TESTDIR="build/tests/sizes"
 TIMEFILE="$TESTDIR-run.err"
 rm -rf "$TESTDIR"
 rm -f $TESTDIR.*.out

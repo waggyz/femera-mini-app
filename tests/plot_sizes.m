@@ -179,9 +179,9 @@ fr = sc/30; loglog ([1e3,1e10],[fr,fr],'--b', lws,hlw, mss,ms);
 text (1e10,fr,'30 sims/s/node (NTSC)','color','b',...
   has,'right',vas,'top', fss,lfs);
 %
-x=1.1e3;
+x=1.2e6;
 mx = 1./(40/(3*dy));
-hax = loglog ([200e3*0+1e3,10e9],[mx,mx],'-b', lws,flw);
+hax = loglog ([110e3,10e9],[mx,mx],'-b', lws,flw);
 text (x,mx,'40 sims/3 d/node','color','b',
   has,'left', vas,'bottom', fss,lfs);
 %
@@ -365,7 +365,7 @@ if ( fig == 3);
   y2=interp1(xy2(:,1),xy2(:,2),x);
   %y2(y2<poly_prep_mesh(end)) = poly_prep_mesh(end);
   %y2(y2<cnst_prep_cads_gmsh) = cnst_prep_cads_gmsh;
-  frgb=[1.0,1.0,0.5];
+  frgb=[1.0,1.0,0.5];% yellow
   px = [x(1:(end-1));x(2:end);x(1:(end-1))];
   py = [y1(1:(end-1));y1(2:end);y2(1:(end-1))];
   patch (px,py,'y','facecolor',frgb,'edgecolor','none');
@@ -378,12 +378,21 @@ if ( fig == 3);
   x=exp(log(xmin):0.1:log(xmax));
 %  [~,u,~] = unique(dofs(fgeos));
   xy1=sortrows ([dofs(fgeos), simt(fgeos)]);
-  xy2=sortrows ([dofs(fgeos), simt(fgeos)-prep(fgeos)]);
+  %xy2=sortrows ([dofs(fgeos), simt(fgeos)-prep(fgeos)]);
   y1=interp1(xy1(:,1),xy1(:,2),x);
-  y2=interp1(xy2(:,1),xy2(:,2),x);
+  %y2=interp1(xy2(:,1),xy2(:,2),x);
+  iters_poly = [1/3,1.5];
+  speed = 1e9 - (dofs_span>10e3).* 90e6.*(log(dofs_span)-log(10e3));
+  speed (speed < 500e6) = 500e6;
+  iters = exp (polyval (iters_poly, log (dofs_span)));
+  secs = iters .* dofs_span ./ speed;
+  y2= cnst_chck_cads_geos...      % chck
+    + polyval(poly_mesh_cads,x)...% mesh
+    + polyval(poly_read_gmsh,x)...% read
+    + interp1(dofs_span,secs,x);  % solv
   px = [x(1:(end-1));x(2:end);x(1:(end-1))];
   py = [y1(1:(end-1));y1(2:end);y2(1:(end-1))];
-  frgb=[0.5,1.0,0.5];
+  frgb=[0.5,1.0,0.5];% green
   patch (px,py,'g','facecolor',frgb,'edgecolor','none');
   px = [x(1:(end-1));x(2:end);x(2:(end))];
   py = [y2(1:(end-1));y2(2:end);y1(2:(end))];
@@ -397,7 +406,7 @@ if ( fig == 3);
   x=x(l); y1=y1(l); y2=y2(l);
   px = [x(1:(end-1));x(2:end);x(1:(end-1))];
   py = [y1(1:(end-1));y1(2:end);y2(1:(end-1))];
-  frgb=[1,1,1]*0.9;
+  frgb=[1,1,1]*0.9;% gray
   patch (px,py,'k','facecolor',frgb, 'edgecolor','none');
   px = [x(1:(end-1));x(2:end);x(2:(end))];
   py = [y2(1:(end-1));y2(2:end);y1(2:(end))];
@@ -469,12 +478,12 @@ paper=[0.25,0.25, 6,4];
 set(gcf,'paperposition',paper);
 figname=[filebase,'-samples-',solvshort],
 print([figdir,filebase,'.eps'],'-depsc2','-FHelvetica');
-%print([figdir,figname,'.png'],'-depsc2','-FHelvetica');
+%print([figdir,figname,'.png'],'-dpng','-FHelvetica');
 %
 figure (3); hold on;
 paper=[0.25,0.25, 6,4];
 set(gcf,'paperposition',paper);
 figname=[filebase,'-simtime-',solvshort],
 print([figdir,filebase,'.eps'],'-depsc2','-FHelvetica');
-%print([figdir,figname,'.png'],'-depsc2','-FHelvetica');
+%print([figdir,figname,'.png'],'-dpng','-FHelvetica');
 %
