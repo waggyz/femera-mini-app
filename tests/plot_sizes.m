@@ -252,16 +252,16 @@ poly_mesh_cads(end) = min(wmesh(f)),
 poly_read_cads= polyfit (wdofs(f),wread(f),1),
 poly_read_cads(end) = min(wread(f)),
 %
-s = unique(csv(find(csv(:,4)~=5),2)); s(s<=0)=[];% NOT cgns
-fread = s;
+fread = unique(csv(find(csv(:,4)~=5),2)); fread(fread<=0)=[];% NOT cgns
 poly_read=nan;
 if(numel(fread)>0);
-  poly_read = polyfit (wdofs(s),wread(s),1),
+  poly_read = polyfit (wdofs(fread),wread(fread),1),
   if (poly_read(end)<0);% Re-fit, assuming y-intercept is min(wread(fread).
-    rmin = min(wread(fread));
-    poly_read = polyfit (wdofs(fread),(wread(fread)-rmin)./wdofs(fread),0);
+    poly_read_gmsh(end)=min(wread(fread)),
+    %rmin = min(wread(fread));
+    %poly_read = polyfit (wdofs(fread),(wread(fread)-rmin)./wdofs(fread),0);
     %poly_read = [poly_read,0],
-    poly_read = [poly_read,rmin],
+    %poly_read = [poly_read,rmin],
   end;
 end;
 fcgns = unique( csv( find( csv(:,4)==5),2));% cgns
@@ -295,12 +295,13 @@ fothr = unique( csv( find( (csv(:,4)~=1) & (csv(:,4)~=5)),2));%NOT CAD,NOT CGNS
 fothr(fothr<=0)=[]; fothr(prep(fothr)<=0)=[];
 poly_chck=nan;
 if (numel(fothr)>0);
-  if (1==1);% Assume y-intercept is min.
+  if (1==0);% Assume y-intercept is min.
     cmin = min(wchck(fothr));
     poly_chck = polyfit (wdofs(fothr),(wchck(fothr)-cmin)./wdofs(fothr),0);
     poly_chck(2)=cmin;
   else;
     poly_chck = polyfit (wdofs(fothr),wchck(fothr),1);
+    if (poly_chck(end)<0); poly_chck(end)=min(wchck(fothr)), end;
   end;
 end;
 fmshb = unique(csv(find(csv(:,3)==1 & csv(:,4)==4),2));% msh4 binary
@@ -308,9 +309,10 @@ poly_chck_msh4=nan;
 if (numel(fmshb)>0);
   poly_chck_msh4 = polyfit (wdofs(fmshb),wchck(fmshb),1),
   if (poly_chck_msh4(end)<0);% Re-fit, assuming y-intercept is min.
-    cmin = min(wchck(fmshb));
-    poly_chck_msh4 = polyfit(wdofs(fmshb),(wchck(fmshb)-cmin)./wdofs(fmshb),0);
-    poly_chck_msh4 = [poly_chck_msh4,cmin],
+    poly_chck_msh4(end)=min(wchck(fmshb)),
+    %cmin = min(wchck(fmshb));
+    %poly_chck_msh4 = polyfit(wdofs(fmshb),(wchck(fmshb)-cmin)./wdofs(fmshb),0);
+    %poly_chck_msh4 = [poly_chck_msh4,cmin],
   end;
 end;
 %poly_read_mshb = polyfit (wdofs(fmshb),wread(fmshb),1),
