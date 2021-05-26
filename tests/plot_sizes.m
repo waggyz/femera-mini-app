@@ -480,14 +480,14 @@ paper=[0.25,0.25, 6,4];
 set(gcf,'paperposition',paper);
 figname=[filebase,'-samples-',solvshort],
 print([figdir,figname,'.eps'],'-depsc2','-FHelvetica');
-print([figdir,figname,'.pdf'],'-dpng','-FHelvetica');
-print([figdir,figname,'.png'],'-dpng','-FHelvetica');
+%print([figdir,figname,'.pdf'],'-dpdf','-FHelvetica');
+%print([figdir,figname,'.png'],'-dpng','-FHelvetica');
 %
 figure (3); hold on;
 paper=[0.25,0.25, 6,4];
 set(gcf,'paperposition',paper);
 figname=[filebase,'-simtime-',solvshort],
 print([figdir,figname,'.eps'],'-depsc2','-FHelvetica');
-print([figdir,figname,'.pdf'],'-dpng','-FHelvetica');
-print([figdir,figname,'.png'],'-dpng','-FHelvetica');
+%print([figdir,figname,'.pdf'],'-dpdf','-FHelvetica');
+%print([figdir,figname,'.png'],'-dpng','-FHelvetica');
 %
