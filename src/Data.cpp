@@ -495,42 +495,6 @@ int Data::get_local_vals (const fmr::Data_id id, fmr::Local_int_vals &vals) {
 #endif
     return 1;
   }
-#if 0
-  //for (int i=1; 1<this->task.count();
-#if 0
-  switch (vals.type) {//TODO is switch needed?
-    case fmr::Data::Geom_info :{
-      if (is_found) {
-        vals.data = this->local_vals[id].data; }//TODO copies data?
-      break;}
-    case fmr::Data::Phys_info :{
-      if (is_found) {
-        vals.data = this->local_vals[id].data; }//TODO copies data?
-      break;}
-    default: err= 1;
-  }
-#else
-    if (is_found) {vals.data = this->local_vals[id].data; }//TODO copies?
-    else {err= 1;}
-#endif
-  if (err){
-    vals.stored_state.was_checked = true;
-    vals.stored_state.has_error   = true;
-  }else{
-#if 0
-    const bool w
-      = (info.access == fmr::data::Access::Write
-      || info.access == fmr::data::Access::Modify);
-    vals.stored_state.can_write   = w;//TODO
-#endif
-    vals.stored_state.can_read    = true;
-    vals.stored_state.was_read    = true;
-    vals.stored_state.was_checked = true;
-    vals.memory_state.can_write   = true;
-    vals.memory_state.can_read    = true;
-    vals.memory_state.was_read    = true;
-  }
-#endif
   return vals.stored_state.has_error ? 1 : 0;;
 }
 int Data::get_global_vals (const fmr::Data_id id, fmr::Global_int_vals& vals) {
@@ -599,53 +563,6 @@ int Data::new_local_vals (const fmr::Data_id data_id,// cache here in Data.
   } } }
   return err;
 }
-#if 0
-int Data::new_geom_vals (const fmr::Data_id data_id,// cache here in Data.
-  const fmr::Data type, const size_t nvals) {int err=0;
-  const auto id = this->make_data_id (data_id, type);
-  const bool is_found = this->data->geom_vals.count(id) > 0;
-  if (!is_found) {this->data->geom_vals[id]= fmr::Geom_float_vals (type, nvals);
-  }else{
-    if (this->data->geom_vals[id].data.size() < nvals) {
-    const auto tmp = this->data->geom_vals[id].data;
-    this->data->geom_vals[id].data.resize (nvals);// clears data
-    const auto n = tmp.size();
-    if (n>0) {
-      //TODO replace loop below with memcpy
-      FMR_PRAGMA_OMP_SIMD
-      for (size_t i=0; i<n; i++) {data->geom_vals[id].data[i] = tmp[i];}
-  } } }
-  return err;
-}
-#endif
-#if 0
-int Data::get_global_vals (std::string name, fmr::Tree_path part_tree_id,
-  std::vector<fmr::Global_int_vals*> V){int err=0;
-  const bool w
-    = (this->current_access == fmr::data::Access::Write
-    || this->current_access == fmr::data::Access::Modify);
-  const size_t n = V.size();
-  for (size_t i=0; i<n; i++) {
-    bool item_err= false;
-    switch (V[i]->type) {
-      case fmr::Data::Part_size :{ printf("*** Woo64!\n"); break;}
-      default: item_err=true; err= 1;
-    }
-    if (item_err){
-      V[i]->stored_state.was_checked = true;
-      V[i]->stored_state.has_error   = true;
-    }else{
-      V[i]->stored_state.can_write   = w;
-      V[i]->stored_state.can_read    = true;
-      V[i]->stored_state.was_read    = true;
-      V[i]->stored_state.was_checked = true;
-      V[i]->memory_state.can_write   = true;
-      V[i]->memory_state.can_read    = true;
-      V[i]->memory_state.was_read    = true;
-  } }
-  return err;
-}
-#endif
 std::deque<std::string> Data::get_sims_names () {
   std::deque<std::string> model_names={};
   for (auto name : this->sims_names) {model_names.push_back (name);}
@@ -693,22 +610,6 @@ int Data::clear (){
 #endif
   return (this->get_sims_n()==0) ? 0 : 1;
 }
-#if 0
-bool Data:: has_data_for (const Work_type){
-  return false;
-}
-#endif
-#if 0
-Data* Data:: get_task_for (const Work_type type, const std::string model){
-  for(int i=0; i<this->task.count(); i++){
-    Data* D=this->task.get<Data>(i);
-    //if(D->get_model (model)==0{
-      if(D->has_data_for (type)){
-        return D;
-  } }// }
-  return nullptr;
-}
-#endif
 std::string Data::print_details (){
   auto log = this->proc->log;
   std::string ret = log-> print_heading ("Data details");
@@ -1068,14 +969,4 @@ int fmr::sims::run_file (const std::string fname){
   return 0;
 #endif
 }
-#if 0
-int fmr::data::init (int* argc, char** argv ){
-  fmr::detail::main->data=new Femera::Data(fmr::detail::main->proc);
-  return fmr::detail::main->data-> init (argc,argv);
-}
-int fmr::data::exit (int err ){
-  return fmr::detail::main->data-> exit (err);
-  //delete fmr::detail::main->data; fmr::detail::main->data=nullptr;
-}
-#endif
 #undef FMR_DEBUG

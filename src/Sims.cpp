@@ -38,13 +38,6 @@ namespace Femera {
   }
   int Sims::add (std::string name) {int err=0;
     this->model_list.push_back (name);
-#if 0
-    if (this->model_list.size() == 1) {// Add the first Frun.
-      err= fmr::detail::main->add_new_task (Femera::Base_type::Frun, this);
-      // New instances made by add_new_task will be deleted in this->exit(err),
-      // or before.
-    }
-#endif
     return err;
   }
   int Sims::clear () {
@@ -53,12 +46,6 @@ namespace Femera {
     this->locals ={};
     this->enums ={};
     this->dims ={};
-#if 0
-    if (this->locals.count(fmr::Data::Sims_n)) {// present in map
-      this->locals.at(fmr::Data::Sims_n)
-        = fmr::Local_int_vals(fmr::Data::Sims_n);
-    }
-#endif
     return 0;
   }
   int Sims::prep () {int err=0;
@@ -274,40 +261,17 @@ namespace Femera {
             R->sims_ix = sim_i;
             auto  geo_d = this->get_dim_val (fmr::Data::Geom_d, sim_i);
             const auto gcad_n = this->get_local_val (fmr::Data::Gcad_n,sim_i);
-            //FIXME IAMHERE
             const auto gcad_d = this->get_dim_val (fmr::Data::Gcad_d, sim_i);
             const auto mesh_d = this->get_dim_val (fmr::Data::Mesh_d, sim_i);
             if (gcad_n > 0 && gcad_d > mesh_d) {//TODO move to *** HERE?
-              for (fmr::Local_int i=0; i<gcad_n; i++) {
+              for (fmr::Local_int i=0; i<gcad_n; i++) {//TODO hmm...
                 err+= this->data->make_mesh (R->model_name, i);
                 //TODO add R->model_name+"-"+std::to_str(i) to model_list ?
               }
               this->get_data_vals (name, this->data_list);//TODO only new vals
             }
-#if 0
-            const auto mesh_n = this->get_local_val(fmr::Data::Mesh_n, sim_i);
-            if (mesh_n > 0) {//TODO move to *** HERE?;
-              fmr::Dim_int max_d=0;
-              for (fmr::Local_int i=0; i<mesh_n; i++) {
-                const auto mesh_d = this->get_dim_val (fmr::Data::Mesh_d,i);
-                max_d = (mesh_d > max_d) ? mesh_d : max_d;
-              }
-              if (max_d < geo_d) {
-                err+= this->data->make_mesh (R->model_name, 0);
-                geo_d = this->get_dim_val (fmr::Data::Geom_d, sim_i);
-              }
-              this->get_data_vals (name, this->data_list);//TODO only new vals
-            }
-#endif
-//            if (gcad_d > mesh_d) {
-//              err = this->data->make_mesh (R->model_name, 0);
-//              this->get_data_vals (name, this->data_list);//TODO only new vals
-//            }
-            //
             if (log->detail >= this->verblevel) {
               fmr::perf::timer_pause (& this->time);
-//              const auto gcad_d = this->get_dim_val (fmr::Data::Gcad_d, sim_i);
-//              const auto mesh_d = this->get_dim_val (fmr::Data::Mesh_d, sim_i);
               const auto mesh_n = this->get_local_val(fmr::Data::Mesh_n, sim_i);
               const auto grid_d = this->get_dim_val (fmr::Data::Grid_d, sim_i);
               const auto gset_n = this->get_local_val(fmr::Data::Gset_n, sim_i);
@@ -415,9 +379,7 @@ namespace Femera {
     printf ("*** Sims::exit_task\n");
 #endif
 #if 0
-    if (log->detail >= this->verblevel) {
-      log->print_heading ("D_one");
-    }
+    if (log->detail >= this->verblevel) {log->print_heading ("D_one");}
 #endif
     return err;
   }
@@ -473,143 +435,3 @@ namespace Femera {
   }
 }// end Femera namespace
 #undef FMR_DEBUG
-
-
-#if 0
-  fmr::Local_int Sims::get_sims_n () {// number of models in this collection
-    // Valid after this->model_list has been populated.
-    bool is_new=false;
-    //TODO was: fmr::Local_int n = this->task.count (Base_type::Frun);
-    if (this->locals.count(fmr::Data::Sims_n)) {// already in map
-      auto item = & this->locals.at(fmr::Data::Sims_n);
-      if (item->data.size() < 1) {
-        is_new = true;
-        item->data.resize (1,fmr::Local_int (this->model_list.size ()));
-      }else{
-        if (item->data[0] <1) {
-          is_new = true;
-          item->data[0] = fmr::Local_int (this->model_list.size ());
-    } } }
-    else {// Add to map and initialize data.
-      is_new = true;
-      this->locals[fmr::Data::Sims_n].data.resize (1,//TODO allow >1 collection
-        fmr::Local_int (this->model_list.size ()));
-    }
-    const fmr::Local_int n = this->locals.at(fmr::Data::Sims_n).data[0];
-    if (is_new) {
-      auto store = & this->locals.at(fmr::Data::Sims_n).stored_state;
-      // number of sims in a collection not stored directly in a file
-      store->is_default  = true;
-      store->can_write   = false;
-      store->can_read    = false;
-      store->was_read    = false;
-      store->was_checked = true;
-      store->has_changed = false;
-      store->do_save     = false;
-      store->has_error   = n < 1;
-      auto inmem = & this->locals.at(fmr::Data::Sims_n).memory_state;
-      inmem->is_default  = true;
-      inmem->can_write   = false;//TODO change # sims dynamically?
-      inmem->can_read    = true;
-      inmem->was_read    = true;
-      inmem->was_checked = true;
-      inmem->has_changed = false;
-      inmem->do_save     = false;
-      inmem->has_error   = n < 1;
-    }
-    return n;// zero-indexed
-  }
-  fmr::Local_int Sims::get_part_n (){// zero-indexed
-    this->part_dims.data[enum2val(fmr::Geom_info::Part_n)]
-      = this->task.count (Base_type::Part);
-    return this->part_dims.data[enum2val(fmr::Geom_info::Part_n)] ;
-  }
-#endif
-#if 0
-  fmr::Dim_int Sims::get_phys_d (std::string sim_name, fmr::Tree_path part){
-    Sims* P=this;//TODO look up sim_name
-    const auto n = part.size();
-    for (size_t i=0; i<n; i++) {
-      if (P) {
-        if (part[i] < P->task.count()) {P = P->task.get<Sims> (part[i]);}
-      }else{
-      return 1;
-    } }
-    if (!fmr::data::is_loaded_ok (P->part_dims.memory_state)) {
-      //TODO call overloaded P->read_part_dims();
-    }
-    if (!P->part_dims.memory_state.has_error){
-      return fmr::Dim_int(
-        P->part_dims.data[enum2val(fmr::Geom_info::Phys_d)]);
-    }
-    return 0;
-  }
-  fmr::Dim_int Sims::get_geom_d (std::string sim_name, fmr::Tree_path part){
-    Sims* P=this;
-    const auto n = part.size();
-    for (size_t i=0; i<n; i++) {
-      if (P) {
-        if (part[i] < P->task.count()) {P = P->task.get<Sims> (part[i]);}
-      }else{
-      return 1;
-    } }
-    if (!fmr::data::is_loaded_ok (P->part_dims.memory_state)) {
-      //TODO call overloaded P->read_part_dims();
-    }
-    if (!P->part_dims.memory_state.has_error){
-      return fmr::Dim_int(
-        P->part_dims.data[enum2val(fmr::Geom_info::Geom_d)]);
-    }
-    return 0;
-  }
-  fmr::Local_int Sims::get_part_n (std::string sim_name, fmr::Tree_path part){
-    Sims* P=this;
-    const auto n = part.size();
-    for (size_t i=0; i<n; i++) {
-      if (P) {
-        if (part[i] < P->task.count()) {P = P->task.get<Sims> (part[i]);}
-      }else{
-      return 1;
-    } }
-    if (!fmr::data::is_loaded_ok (P->part_dims.memory_state)) {
-      //TODO call overloaded P->read_part_dims();
-    }
-    if (!P->part_dims.memory_state.has_error){
-      return fmr::Local_int(
-        P->part_dims.data [enum2val(fmr::Geom_info::Part_n)]);
-    }
-    return 0;
-  }
-  fmr::Local_int Sims::get_mtrl_n (std::string sim_name, fmr::Tree_path part){
-    Sims* P=this;
-    const auto n = part.size();
-    for (size_t i=0; i<n; i++) {
-      if (P) {
-        if (part[i] < P->task.count()) {P = P->task.get<Sims> (part[i]);}
-      }else{
-      return 1;
-    } }
-    if (!fmr::data::is_loaded_ok (P->part_dims.memory_state)) {
-      //TODO call overloaded P->read_part_dims();
-    }
-    if (!P->part_dims.memory_state.has_error){
-      return fmr::Local_int(
-        P->part_dims.data [enum2val(fmr::Geom_info::Mtrl_n)]);
-    }
-    return 0;
-  }
-//#else
-  fmr::Dim_int Sims::get_phys_d (std::string, fmr::Tree_path){
-    return 0;
-  }
-  fmr::Dim_int Sims::get_geom_d (std::string, fmr::Tree_path){
-    return 0;
-  }
-  fmr::Local_int Sims::get_part_n (std::string, fmr::Tree_path){
-    return 0;
-  }
-  fmr::Local_int Sims::get_mtrl_n (std::string, fmr::Tree_path){
-    return 0;
-  }
-#endif
-

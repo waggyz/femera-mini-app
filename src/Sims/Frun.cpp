@@ -77,12 +77,6 @@ namespace Femera {
       const auto send_type = work_cast (Plug_type::Mesh);
       for (fmr::Local_int i=0; i < mesh_n; i++) {
         err= fmr::detail::main->add_new_task (send_type, this);
-#if 0
-      for (auto type : {fmr::Data::Elem_n}) {//TODO needed here?
-        this->locals [type] = fmr::Local_int_vals (type, mesh_n);
-        this->data->get_local_vals (name, this->locals.at (type));
-      }
-#endif
     } }
     const auto geom_n = this->task.count ();// grid_n + mesh_n
     if (geom_n > 0) {for (int i=0; i < geom_n; i++) {// Run serially.
@@ -113,13 +107,6 @@ namespace Femera {
 #endif
     err= this->iter ();
     err= this->post ();
-#if 0
-    if (geom_n > 0) {
-      for (int i=0; i < geom_n; i++) {//TODO need barrier before this?
-        const auto G = this->task.get<Sims>(i);
-        if (G) {err= G->exit (err);}
-    } }
-#endif
     fmr::perf::timer_pause (& this->time);
     return this->exit (err);//TODO need barrier before this?
   }

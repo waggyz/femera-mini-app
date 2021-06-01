@@ -186,6 +186,7 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
       = ((xmax-xmin) > 0.0 ? 1:0)
       + ((ymax-ymin) > 0.0 ? 1:0)
       + ((zmax-zmin) > 0.0 ? 1:0);
+    //TODO get geom_d, gcad_d, mesh_d from cached vals.
 #if 0
     if ((geom_d == 2) && (bbox_d == 3)) {//TODO stl file defines one volume
       gmsh::model::geo::addSurfaceLoop (std::vector<int>({1}));
@@ -201,16 +202,6 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
   if ((!err) && (geom_d <= bbox_d)) { Data::Lock_here lock (this->liblock);
     fmr::perf::timer_resume (& this->time);
     gmsh::model::setCurrent (model);
-#if 0
-    const fmr::Dim_int p = 2;//FIXME
-    const auto soi = (p > 2) ? Dmsh::Optval (0) : Dmsh::Optval (1);
-    gmsh::option::setNumber ("Mesh.ElementOrder", Dmsh::Optval (p));
-    gmsh::option::setNumber ("Mesh.SecondOrderLinear", Dmsh::Optval (1));
-    gmsh::option::setNumber ("Mesh.SecondOrderIncomplete", soi);
-    gmsh::option::setNumber ("Mesh.Algorithm", Dmsh::Optval (3));
-    gmsh::option::setNumber ("Mesh.Algorithm3D", Dmsh::Optval (10));
-    gmsh::option::setNumber ("Mesh.Optimize", Dmsh::Optval (0));
-#endif
     try {gmsh::model::mesh::generate (geom_d);}
     catch (int e) {err= e;
       log->label_fprintf (log->fmrerr, warnlabel.c_str(),
@@ -218,29 +209,12 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
     }
     fmr::perf::timer_pause (& this->time);
   }
-#if 0
-  if (!err) { Data::Lock_here lock (this->liblock);
-    gmsh::model::setCurrent (model);
-    auto optval=Dmsh::Optval(0);
-    gmsh::option::getNumber ("Mesh.NbPartitions", optval);//0: unpartitioned
-    if (optval > 1) {
-      fmr::perf::timer_resume (& this->time);
-      try {gmsh::model::mesh::partition (int (optval));}//TODO to make_part(..)
-      catch (int e) {err= e;
-        log->label_fprintf (log->fmrerr, warnlabel.c_str(),
-          "partition (%i) %s returned %i.\n",
-          int (optval), model.c_str(), err);
-        gmsh::option::setNumber ("Mesh.NbPartitions", Dmsh::Optval(0));
-      }
-      fmr::perf::timer_pause (& this->time);
-    } }
-#endif
 #ifdef FMR_DEBUG
   log->label_fprintf (log->fmrout, "**** Gmsh",
     "make_mesh %s %iD return %i...\n", model.c_str(), geom_d, err);
 #endif
   if (err>0) {return err;}
-  return this->scan_model (model);//TODO does this work?
+  return this->scan_model (model);
 }
 
 int Dmsh::make_part (const std::string model, const fmr::Local_int,
@@ -577,20 +551,15 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
     auto gd = gmsh::model::getDimension ();// return<0: File has no Gmsh model.
     if (gd<1 || gd>3) {err= 1;}
     if (!err) {
-#if 0
-      const auto geom_d = fmr::Local_int(gd);
-#else
-    fmr::Dim_int mesh_d = 0;
-    const double un=std::nan("unset");
-    double xmin=un, ymin=un, zmin=un, xmax=un, ymax=un, zmax=un;
-    gmsh::model::getBoundingBox (-1,-1, xmin,ymin,zmin, xmax,ymax,zmax);
-    const fmr::Dim_int d0=0, d1=1;// to stop conversion from int warning
-    const fmr::Dim_int geom_d // Model spatial dim is dim of bounding box.
-      = ((xmax-xmin) > 0.0 ? d1:d0)
-      + ((ymax-ymin) > 0.0 ? d1:d0)
-      + ((zmax-zmin) > 0.0 ? d1:d0);
-#endif
-#if 1
+      fmr::Dim_int mesh_d = 0;
+      const double un=std::nan("unset");
+      double xmin=un, ymin=un, zmin=un, xmax=un, ymax=un, zmax=un;
+      gmsh::model::getBoundingBox (-1,-1, xmin,ymin,zmin, xmax,ymax,zmax);
+      const uint ugd// this is to avoid spurious conversion from int warning
+        = ((xmax-xmin) > 0.0 ? 1:0)
+        + ((ymax-ymin) > 0.0 ? 1:0)
+        + ((zmax-zmin) > 0.0 ? 1:0);
+      const auto geom_d = fmr::Dim_int (ugd);// spatial dim is bounding box dim
       gmsh::option::getNumber ("Mesh.NbNodes", optval);
       const auto node_n = fmr::Global_int (optval);
       const auto nid = this->make_data_id (data_id, fmr::Data::Node_sysn);
@@ -607,7 +576,6 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
 #ifdef FMR_DEBUG
       log->label_fprintf (log->fmrerr,"**** Dmsh scan","%s[0] has %u nodes.\n",
         nid.c_str(), node_n);
-#endif
 #endif
       fmr::Global_int elem_sysn =0;
       std::string fname ="";

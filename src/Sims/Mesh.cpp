@@ -285,7 +285,7 @@ namespace Femera {
     const auto o = fmr::Geom_float (0);
     const auto v = fmr::Geom_float (1);
 #if 0
-    const auto shpg = std::valarray<fmr::Geom_float> ={//FIXME Move to Elem
+    const auto shpg = std::valarray<fmr::Geom_float> ={//TODO Move to Elem
       -v, v, o, o,// dN/dx (natural coords)
       -v, o, v, o,// dN/dy
       -v, o, o, v };
