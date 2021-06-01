@@ -15,7 +15,8 @@ namespace Femera {
     this->meter_unit="sim";
     //this-> parent = this;//TODO leave as nullptr or set to this?
     this->data_list = {
-      fmr::Data::Geom_d,
+      fmr::Data::Geom_d, fmr::Data::Mesh_d, fmr::Data::Gcad_d,
+      fmr::Data::Grid_d,
       fmr::Data::Gset_n,    fmr::Data::Part_n,    fmr::Data::Mesh_n,
       fmr::Data::Grid_n,    fmr::Data::Gcad_n,
       fmr::Data::Node_sysn, fmr::Data::Elem_sysn//,
@@ -271,21 +272,47 @@ namespace Femera {
           } }//end critical region
           if (!do_abort) {
             R->sims_ix = sim_i;
-            const auto  geo_d = this->get_dim_val (fmr::Data::Geom_d, sim_i);
+            auto  geo_d = this->get_dim_val (fmr::Data::Geom_d, sim_i);
             const auto gcad_n = this->get_local_val (fmr::Data::Gcad_n,sim_i);
-            if (gcad_n > 0) {//TODO move to *** HERE?
+            //FIXME IAMHERE
+            const auto gcad_d = this->get_dim_val (fmr::Data::Gcad_d, sim_i);
+            const auto mesh_d = this->get_dim_val (fmr::Data::Mesh_d, sim_i);
+            if (gcad_n > 0 && gcad_d > mesh_d) {//TODO move to *** HERE?
               for (fmr::Local_int i=0; i<gcad_n; i++) {
                 err+= this->data->make_mesh (R->model_name, i);
                 //TODO add R->model_name+"-"+std::to_str(i) to model_list ?
               }
               this->get_data_vals (name, this->data_list);//TODO only new vals
             }
+#if 0
+            const auto mesh_n = this->get_local_val(fmr::Data::Mesh_n, sim_i);
+            if (mesh_n > 0) {//TODO move to *** HERE?;
+              fmr::Dim_int max_d=0;
+              for (fmr::Local_int i=0; i<mesh_n; i++) {
+                const auto mesh_d = this->get_dim_val (fmr::Data::Mesh_d,i);
+                max_d = (mesh_d > max_d) ? mesh_d : max_d;
+              }
+              if (max_d < geo_d) {
+                err+= this->data->make_mesh (R->model_name, 0);
+                geo_d = this->get_dim_val (fmr::Data::Geom_d, sim_i);
+              }
+              this->get_data_vals (name, this->data_list);//TODO only new vals
+            }
+#endif
+//            if (gcad_d > mesh_d) {
+//              err = this->data->make_mesh (R->model_name, 0);
+//              this->get_data_vals (name, this->data_list);//TODO only new vals
+//            }
+            //
             if (log->detail >= this->verblevel) {
               fmr::perf::timer_pause (& this->time);
+//              const auto gcad_d = this->get_dim_val (fmr::Data::Gcad_d, sim_i);
+//              const auto mesh_d = this->get_dim_val (fmr::Data::Mesh_d, sim_i);
+              const auto mesh_n = this->get_local_val(fmr::Data::Mesh_n, sim_i);
+              const auto grid_d = this->get_dim_val (fmr::Data::Grid_d, sim_i);
               const auto gset_n = this->get_local_val(fmr::Data::Gset_n, sim_i);
               const auto part_n = this->get_local_val(fmr::Data::Part_n, sim_i);
               const auto grid_n = this->get_local_val(fmr::Data::Grid_n, sim_i);
-              const auto mesh_n = this->get_local_val(fmr::Data::Mesh_n, sim_i);
               const auto node_n = get_global_val (fmr::Data::Node_sysn, sim_i);
               const auto elem_n = get_global_val (fmr::Data::Elem_sysn, sim_i);
               if (false) {
@@ -301,6 +328,9 @@ namespace Femera {
                 this->sims_size);
               const std::string label = szshort+std::to_string(geo_d)+ "D "
                 + this->task_name+" " + R->task_name;
+              log->label_fprintf (log->fmrout, label.c_str(),
+                "sim_%u: %uD CAD, %uD grid, %uD mesh\n",
+                sim_i, gcad_d, grid_d, mesh_d);
               log->label_fprintf (log->fmrout, label.c_str(),
                 "sim_%u: %u gset%s, %u part%s, %u CAD%s, %u grid%s, %u mesh%s\n",
                 sim_i,

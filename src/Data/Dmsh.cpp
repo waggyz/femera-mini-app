@@ -170,20 +170,36 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
   int err=0;
   const auto log = this->proc->log;
   const auto warnlabel = "WARN""ING "+this->task_name;
-  //TODO handle mesh index # to generate
-  int geom_d = 0;
+  //TODO handle mesh index # to generate?
+  int geom_d=-1,bbox_d=-1;//, elem_d=0;//TODO check max existing elem_d?
   if (!err) { Data::Lock_here lock (this->liblock);
     try {gmsh::model::setCurrent (model);}
     catch (int e) {err = e;
       log->label_fprintf (log->fmrerr, warnlabel.c_str(),
         "can not find %s.\n", model.c_str());
     }
-    geom_d = gmsh::model::getDimension ();
-    if (geom_d < 1 || geom_d > 3) {err= 1;
+    geom_d = gmsh::model::getDimension ();//TODO this->get_dim_val(Gcad_d)
+    const double un=std::nan("unset");
+    double xmin=un, ymin=un, zmin=un, xmax=un, ymax=un, zmax=un;
+    gmsh::model::getBoundingBox (-1,-1, xmin,ymin,zmin, xmax,ymax,zmax);
+    bbox_d// Get geom_d from model bounding box.//TODO this->get_dim_val(Geom_d)
+      = ((xmax-xmin) > 0.0 ? 1:0)
+      + ((ymax-ymin) > 0.0 ? 1:0)
+      + ((zmax-zmin) > 0.0 ? 1:0);
+#if 0
+    if ((geom_d == 2) && (bbox_d == 3)) {//TODO stl file defines one volume
+      gmsh::model::geo::addSurfaceLoop (std::vector<int>({1}));
+      gmsh::model::geo::addVolume (std::vector<int>({1}));
+      geom_d = gmsh::model::getDimension ();
+    }
+#endif
+    if ((geom_d < 1) || (geom_d > bbox_d)) {err= 1;
       log->label_fprintf (log->fmrerr, warnlabel.c_str(),
-        "can not make %iD mesh for %s.\n", geom_d, model.c_str());
+        "can not make %iD mesh in %iD space for %s.\n",
+        geom_d, bbox_d, model.c_str());
   } }
-  if (!err) { Data::Lock_here lock (this->liblock);
+  if ((!err) && (geom_d <= bbox_d)) { Data::Lock_here lock (this->liblock);
+    fmr::perf::timer_resume (& this->time);
     gmsh::model::setCurrent (model);
 #if 0
     const fmr::Dim_int p = 2;//FIXME
@@ -195,7 +211,6 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
     gmsh::option::setNumber ("Mesh.Algorithm3D", Dmsh::Optval (10));
     gmsh::option::setNumber ("Mesh.Optimize", Dmsh::Optval (0));
 #endif
-    fmr::perf::timer_resume (& this->time);
     try {gmsh::model::mesh::generate (geom_d);}
     catch (int e) {err= e;
       log->label_fprintf (log->fmrerr, warnlabel.c_str(),
@@ -222,10 +237,10 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
 #endif
 #ifdef FMR_DEBUG
   log->label_fprintf (log->fmrout, "**** Gmsh",
-    "make_mesh %s return %i...\n", model.c_str(), err);
+    "make_mesh %s %iD return %i...\n", model.c_str(), geom_d, err);
 #endif
   if (err>0) {return err;}
-  return this->scan_model (model);
+  return this->scan_model (model);//TODO does this work?
 }
 
 int Dmsh::make_part (const std::string model, const fmr::Local_int,
@@ -559,13 +574,25 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
     auto pvals =& data->local_vals[physid].data[0];
 #endif
     // this->chck();
-    auto gd = gmsh::model::getDimension();// return<0: File has no Gmsh model.
+    auto gd = gmsh::model::getDimension ();// return<0: File has no Gmsh model.
     if (gd<1 || gd>3) {err= 1;}
-    if(!err){
+    if (!err) {
+#if 0
       const auto geom_d = fmr::Local_int(gd);
+#else
+    fmr::Dim_int mesh_d = 0;
+    const double un=std::nan("unset");
+    double xmin=un, ymin=un, zmin=un, xmax=un, ymax=un, zmax=un;
+    gmsh::model::getBoundingBox (-1,-1, xmin,ymin,zmin, xmax,ymax,zmax);
+    const fmr::Dim_int d0=0, d1=1;// to stop conversion from int warning
+    const fmr::Dim_int geom_d // Model spatial dim is dim of bounding box.
+      = ((xmax-xmin) > 0.0 ? d1:d0)
+      + ((ymax-ymin) > 0.0 ? d1:d0)
+      + ((zmax-zmin) > 0.0 ? d1:d0);
+#endif
 #if 1
       gmsh::option::getNumber ("Mesh.NbNodes", optval);
-      const auto node_n = fmr::Global_int(optval);
+      const auto node_n = fmr::Global_int (optval);
       const auto nid = this->make_data_id (data_id, fmr::Data::Node_sysn);
       {//---------------------------------------------------------------------v
         is_found = this->data->global_vals.count(nid) > 0;
@@ -619,6 +646,18 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
           }
         }//------------------------------------------------------------------^
         auto forms =& this->data->enum_vals [fid].data[0];
+#if 0
+        const auto did = this->make_data_id (data_id, fmr::Data::Elem_d);
+        {//------------------------------------------------------------------v
+          is_found = this->data->dim_vals.count(did) > 0;
+          if (!is_found) {this->data->dim_vals[did]
+            = fmr::Dim_int_vals (fmr::Data::Elem_d, mesh_n);
+          }else if (this->data->dim_vals[did].data.size() < mesh_n) {
+            this->data->dim_vals[did].data.resize (mesh_n);
+          }
+        }//------------------------------------------------------------------^
+        auto edims =& this->data->dim_vals [did].data[0];
+#endif
         for (fmr::Local_int mesh_i=0; mesh_i<mesh_n; mesh_i++) {
           const auto  elem_gmsh = mesh_elem_gmsh [mesh_i];
           auto             form = fmr::Elem_form::Unknown;
@@ -627,6 +666,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
             const auto elinfo = fmr::detail::elem_info_gmsh.at (elem_gmsh);
             form = elinfo.elem_form;
             elem_d = fmr::elem_form_d [fmr::enum2val (form)];
+            mesh_d = (elem_d > mesh_d) ? elem_d : mesh_d;
           }else{
             log->printf_err("WARNING Gmsh element type %i not supported.\n",
               elem_gmsh);
@@ -669,6 +709,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
           elem_sysn += (elem_d == geom_d) ? elem_n : 0;
           //
           elems [mesh_i] = elem_n;
+//          edims [mesh_i] = elem_d;
           forms [mesh_i] = fmr::enum2val(form);
           //
           const auto mesh_id = data_id +":Mesh_"+std::to_string (mesh_i);
@@ -702,7 +743,15 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
       }
       //
       // If no meshes exist yet, handle as an abstract geometry (CAD) file.
-      const fmr::Local_int gcad_n = (mesh_n==0) ? 1 : 0;
+#if 0
+      const fmr::Local_int gcad_n = (mesh_n==0) ?  1 : 0;
+      const fmr::Dim_int   gcad_d = (mesh_n==0) ? fmr::Dim_int(gd) : 0;
+#else
+      const fmr::Dim_int gcad_d = (fmr::Dim_int(gd) > mesh_d)
+        ? fmr::Dim_int(gd) : mesh_d;
+      const fmr::Local_int gcad_n = (gcad_d > 0) ? 1 : 0;
+#endif
+      //TODO Check gcad_d.
       //
       gmsh::option::getNumber ("Mesh.NbPartitions", optval);//0: unpartitioned
       auto part_n = fmr::Local_int(optval);
@@ -715,12 +764,16 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
 //      auto phys_d_ix = enum2val(fmr::Phys_info::Phys_d);//TODO ResultSet?
 //      auto mtrl_n_ix = enum2val(fmr::Geom_info::Mtrl_n);//TODO Remove.
       const auto geom_d_ix = enum2val(fmr::Geom_info::Geom_d);
+      const auto gcad_d_ix = enum2val(fmr::Geom_info::Gcad_d);
+      const auto mesh_d_ix = enum2val(fmr::Geom_info::Mesh_d);
       const auto gset_n_ix = enum2val(fmr::Geom_info::Gset_n);
       const auto part_n_ix = enum2val(fmr::Geom_info::Part_n);
       const auto mesh_n_ix = enum2val(fmr::Geom_info::Mesh_n);
       const auto gcad_n_ix = enum2val(fmr::Geom_info::Gcad_n);
       auto vals =& this->data->local_vals[gid].data[0];
       if (geom_d > vals[geom_d_ix]) {vals[geom_d_ix] = geom_d;}
+      if (gcad_d > vals[gcad_d_ix]) {vals[gcad_d_ix] = gcad_d;}
+      if (mesh_d > vals[mesh_d_ix]) {vals[mesh_d_ix] = mesh_d;}
       vals[gset_n_ix] = fmr::Local_int (dim_tag.size());//TODO +=
       vals[part_n_ix] = part_n;//TODO +=
       vals[mesh_n_ix] = mesh_n;//TODO +=

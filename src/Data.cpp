@@ -353,6 +353,9 @@ int Data::get_dim_vals (const fmr::Data_id id, fmr::Dim_int_vals& vals) {
         is_found = true;
         switch (vals.type) {
           case fmr::Data::Geom_d : key = fmr::Geom_info::Geom_d; break;
+          case fmr::Data::Gcad_d : key = fmr::Geom_info::Gcad_d; break;
+          case fmr::Data::Mesh_d : key = fmr::Geom_info::Mesh_d; break;
+          case fmr::Data::Grid_d : key = fmr::Geom_info::Grid_d; break;
           default : is_found = false;
         }
         if (is_found) {
@@ -390,7 +393,6 @@ int Data::get_enum_vals (const fmr::Data_id id, fmr::Enum_int_vals& vals) {
         fmr::Geom_info key = fmr::Geom_info(0);
         is_found = true;
         switch (vals.type) {
-//          case fmr::Data::Elem_type : key = fmr::Geom_info::Geom_d; break;
           default : is_found = false;
         }
         if (is_found) {

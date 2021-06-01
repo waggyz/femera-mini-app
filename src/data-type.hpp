@@ -72,7 +72,7 @@ namespace fmr {//TODO? namespace data {
   enum class Geom_info : Enum_int {isok=0, // Use for Sims and Part data.
     Gset_n, Part_n, Gcad_n, Mesh_n, Grid_n,// Local_int
     Part_halo_n, Mesh_halo_n, Grid_halo_n, // Local_int
-    Geom_d,                                // Dim_int
+    Geom_d, Gcad_d, Mesh_d, Grid_d,        // Dim_int
   end};
   enum class Phys_info : Enum_int {isok=0,
     Mtrl_n,  // Local_int //TODO here?

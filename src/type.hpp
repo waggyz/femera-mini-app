@@ -21,7 +21,7 @@ namespace fmr {
   typedef uint32_t   Elid_int;//(See above.)
   typedef uint64_t Global_int;//TODO signed?
   //
-  typedef float    Geom_float;
+  typedef double   Geom_float;//TODO try float.
   typedef double   Phys_float;
   typedef double   Solv_float;
   typedef float    Cond_float;// Preconditioning and scaling

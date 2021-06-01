@@ -19,7 +19,8 @@ namespace Femera {
     if (true){//TODO Remove.
       //info.access == fmr::data::Access::Check){
       //TODO Move to chck()?
-      const fmr::Local_int geom_d=3, gset_n=3, part_n=1, mesh_n=1, grid_n=0;
+      const fmr::Local_int geom_d=3, gcad_d=0, mesh_d=3, grid_d=0,
+        gset_n=3, part_n=1, mesh_n=1, grid_n=0;
       const fmr::Local_int phys_d=3, mtrl_n=1;
 //      const fmr::Local_int boco_n=2;
       std::string data_id = "fmr:sims:default";
@@ -35,6 +36,9 @@ namespace Femera {
       }
       auto vals =& data->local_vals[gid].data[0];
       vals [enum2val (fmr::Geom_info::Geom_d)] = geom_d;
+      vals [enum2val (fmr::Geom_info::Gcad_d)] = gcad_d;
+      vals [enum2val (fmr::Geom_info::Mesh_d)] = mesh_d;
+      vals [enum2val (fmr::Geom_info::Grid_d)] = grid_d;
       vals [enum2val (fmr::Geom_info::Gset_n)] = gset_n;
       vals [enum2val (fmr::Geom_info::Part_n)] = part_n;
       vals [enum2val (fmr::Geom_info::Mesh_n)] = mesh_n;

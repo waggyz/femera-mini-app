@@ -6,6 +6,7 @@ If(p>2)
 Mesh.SecondOrderIncomplete    = 0;
 EndIf
 Mesh.SecondOrderLinear        = 1;
+SetOrder p;
 
 Mesh.CharacteristicLengthFromPoints=1;
 Mesh.PartitionSplitMeshFiles  = 0 ;//1 ;
@@ -22,5 +23,5 @@ Mesh.Algorithm3D=10;// WAS 1
 // 9: R-tree, 10: HXT
 
 Mesh.Optimize=0;
-SetOrder p;
 RecombineAll=0;// Only make tets
+

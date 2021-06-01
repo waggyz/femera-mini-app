@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-MESH_N=200
+MESH_N=100
 #
 # P2: H = 2:1kdof, 7:10kdof, 35:1Mdof, 77:10Mdof, 164:100Mdof
 H_MIN=2
