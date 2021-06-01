@@ -676,6 +676,7 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
     // Material properties are in DataArray_t nodes,
     // and can be in Base_t, Zone_t or Family_t nodes.
     int base_n=0, geom_d=0, phys_d=0;
+    fmr::Dim_int elem_d=0, mesh_d=0;
     // Try reading basenames from the CGNS file.
     err= fmr::perf::time_activity<int> (&this->time,
       cg_nbases, info.file_cgid,& base_n);
@@ -882,7 +883,9 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
                   " in %s returned %i.\n", base_i, zone_i, sect_i,
                   data_id.c_str(), err);
               } }
-              if (fmr::elem_form_d [fmr::enum2val (form)] == geom_d) {
+              elem_d = fmr::elem_form_d [fmr::enum2val (form)];
+              mesh_d = (elem_d > mesh_d) ? elem_d : mesh_d;
+              if (int(elem_d) == geom_d) {
                 // Count all elements of the same dimension as enclosing space.
                 elem_sysn += elem_n;
 #ifdef FMR_DEBUG
@@ -961,6 +964,8 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
           gvals[enum2val(fmr::Geom_info::Geom_d)] = gd;
           gisok[enum2val(fmr::Geom_info::Geom_d)] = true;
         }
+        gvals[enum2val(fmr::Geom_info::Mesh_d)]  = fmr::Local_int(mesh_d);
+        gisok[enum2val(fmr::Geom_info::Mesh_d)] |= mesh_d > 0;
         gvals[enum2val(fmr::Geom_info::Gset_n)] += fmr::Local_int(gset_n);
         gisok[enum2val(fmr::Geom_info::Gset_n)] |= gset_n > 0;
         //

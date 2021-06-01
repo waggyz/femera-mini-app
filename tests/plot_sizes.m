@@ -449,11 +449,11 @@ if ( fig == 2);
   %loglog (dofs(fmshb), read(fmshb),'xy',cos,yrgb,'markersize',sms,lws,mlw);
   %
   loglog (dofs, solv,'*b','markersize',sms-1,lws,mlw);
-end;
-loglog (dofs(fmesh), simt(fmesh),'.k;Total saved mesh;','markersize',mms,lws,mlw);
   loglog (dofs(fstls), chck(fstls),'xg','markersize',sms,lws,mlw);
   loglog (dofs(fstls), prep(fstls),'xg','markersize',sms,lws,mlw);
   loglog (dofs(fstls), mesh(fstls),'xg','markersize',sms,lws,mlw);
+end;
+loglog (dofs(fmesh), simt(fmesh),'.k;Total saved mesh;','markersize',mms,lws,mlw);
 loglog (dofs_span, polyval(poly_prep_mesh,dofs_span),'-.k;Prep save mesh;',lws,lw);
 loglog (dofs_span, polyval(poly_chck_cgns,dofs_span),':k;Check CGNS;',lws,mlw);
 loglog (dofs_span, polyval(poly_read_cgns,dofs_span),'--k;Read file CGNS;',lws,mlw);
