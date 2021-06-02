@@ -47,7 +47,7 @@ else;
   xunit = 1/mn; xunitstr='m';
 end;
 %
-figure (1); clf; hold on; grid on;
+figure (100); clf; hold on; grid on;
 axis ([0,elapsed*ns*xunit, -1.0,3.5]);
 xlabel (['Elapsed time (',xunitstr,')']);
 ylabel ('Physical CPU');
@@ -88,13 +88,13 @@ x(1:3:end) = (csv(prep,6)-start)*ns*xunit; y(1:3:end) = csv(prep,1);
 x(2:3:end) = (csv(prep,7)-start)*ns*xunit; y(2:3:end) = csv(prep,1);
 plot (x,y,'-b',lws,barw);
 %
-if (numel(iter)); solvstr='No Solve'; solvshort='no-solve';
+if (numel(iter)); solv_text='No Solve'; solvshort='no-solve';
   x = nan(3*numel(iter),1); y=x;
   x(1:3:end) = (csv(iter,6)-start)*ns*xunit; y(1:3:end) = csv(iter,1);
   x(2:3:end) = (csv(iter,7)-start)*ns*xunit; y(2:3:end) = csv(iter,1);
   plot (x,y,'-w',lws,barw);
 end;
-if (numel(zzzz)); solvstr='Sleep'; solvshort='sleep';
+if (numel(zzzz)); solv_text='Sleep'; solvshort='sleep';
   x = nan(3*numel(zzzz),1); y=x;
   x(1:3:end) = (csv(zzzz,6)-start)*ns*xunit; y(1:3:end) = csv(zzzz,1);
   x(2:3:end) = (csv(zzzz,7)-start)*ns*xunit; y(2:3:end) = csv(zzzz,1);
@@ -110,11 +110,11 @@ plot ((csv(:,6)-start)*ns*xunit,csv(:,1),'>g');
 plot ((csv(:,7)-start)*ns*xunit,csv(:,1),'or');
 %
 legend (...
-  'Check','Scan','Mesh','Prep',solvstr,'Post',...
+  'Check','Scan','Mesh','Prep',solv_text,'Post',...
   'Begin','Done',...
   'location','south', 'orientation','horizontal');
 %
-figure (1); hold on;
+figure (100); hold on;
 paper=[0.25,0.25, 6,3];
 set(gcf,'paperposition',paper);
 figname=['sizes-gandt-',solvshort],
@@ -122,101 +122,7 @@ print([figdir,figname,'.eps'],'-depsc2','-FHelvetica');
 print([figdir,figname,'.pdf'],'-depsc2','-FHelvetica');
 %
 %==============================================================================
-for (fig = [2:3]);
-figure (fig); clf; hold on; grid on;
-%
-run_cncr = max(csv(:,1))+1,
-ref_cncr = 40,
-%
-set (gca, 'position',  [0.10,0.10, 0.80, 0.80]);
-set (gca, fss,lfs);
-if (1==1);%(run_cncr == ref_cncr);
-  s='performance';
-else;
-  s='estimate'
-end;
-title (['Baseline batch ',s,' per Skylake node, 40 sims/40 cpu'], fss,tfs);
-ax = [1000,10e9, 10*us,3*dy];
-axis (ax);
-%
-text(50e9,exp ((log(ax(3))+log(ax(4)))*0.5),...
-  '\leftarrow Lower is better. (time/sim/node)',...
-  has,'center',vas,'top','rotation',90,fss,lfs);
-%
-if (1==0)
-  text (3e10,1,'Time','rotation',90,...
-    'verticalalignment','top','horizontalalignment','center');
-  y=10.^(-4:5);
-  x=1.23e10*ones(size(y));
-  ytic = ['10^{-4}';'10^{-3}';'10^{-2}';'10^{-1}';...
-          '10^0   ';'10^1   ';'10^2   ';'10^3   ';'10^4   ';'10^5   '];
-else;
-  y=[100*us,1*ms,10*ms,100*ms,1*sc,6*sc,1*mn,6*mn,1*hr,1*dy,3*dy]
-  x=1.23e10*ones(size(y));
-  ytic = ['100 \mus';'1 ms';'10 ms';'100 ms';...
-          '1 s   ';'6 s   ';'1 m   ';'6 m   ';'1 h   ';'1 d   ';'3 d   '];
-end;
-text (x,y, ytic, fss,lfs);
-%
-xlabel ('3D linear-elastic isotropic simulation size (dof)');
-if (run_cncr == ref_cncr);
-  s='Expected';
-else;
-  s='Estimated'
-end;
-ylabel ([s,' throughput (sims/time/node)']);
-%
-set (gca,'xtick', 10.^[1e-9:11]);% hack around integer overflow for xtick 10^10
-ytic = 1./[1/(3*dy),1/dy,1/hr,10/hr,1/mn,10/mn,1/sc,...
-  10/sc,100/sc,1e3/sc,10e3/sc];
-set (gca,'ytick', ytic);
-ylab = ['1/3 d';'1/d';'1/h';'10/h';'1/m';...
-       '10/m';'1/s';'10/s';'100/s';'1k/s';'10k/s'];
-set (gca,'yticklabel',ylab);
-%
-fr = sc/24; loglog ([1e3,1e10],[fr,fr],'--b', lws,hlw, mss,ms);
-text (1e10,fr,'24 sims/s/node (Movie)','color','b',...
-  has,'right',vas,'bottom', fss,lfs);
-fr = sc/30; loglog ([1e3,1e10],[fr,fr],'--b', lws,hlw, mss,ms);
-text (1e10,fr,'30 sims/s/node (NTSC)','color','b',...
-  has,'right',vas,'top', fss,lfs);
-%
-x=1.2e6;
-mx = 1./(40/(3*dy));
-loglog ([120e3,10e9],[mx,mx],'-b', lws,flw);
-text (x,mx,'40 sims/3 d/node','color','b',
-  has,'left', vas,'bottom', fss,lfs);
-%
-% Estimate of mem use from mini-app v0.1
-lof_dof=25932897; lof_byte=2705536 *1000; byte_per_dof = lof_byte/lof_dof,
-
-mem = 96; mx = mem*1e9 / byte_per_dof /40;
-loglog ([mx,mx],[1e-5,3*dy],':b', lws,hlw);
-text (mx, 15e-6, [num2str(mem),' GB/40 sims/node'],...
-  'rotation',90, has,'left', vas,'bottom', 'fontsize',lfs, 'color','b');
-mem =375; mx = mem*1e9 / byte_per_dof /40;
-loglog ([mx,mx],[1e-5,3*dy],'-.b', lws,hlw);
-text (mx, 15e-6, [num2str(mem),' GB/40 sims/node'],
-  'rotation',90, has,'left', vas,'bottom', 'fontsize',lfs, 'color','b');
-mem =96; mx = mem*1e9 / byte_per_dof /1;
-loglog ([mx,mx],[1e-5,3*dy],'--b', lws,hlw);
-text (mx, 15e-6, [num2str(mem),' GB/sim/node'],
-  'rotation',90, has,'left', vas,'bottom', 'fontsize',lfs, 'color','b');
-mem =375; mx = mem*1e9 / byte_per_dof /1;
-loglog ([mx,mx],[1e-5,3*dy],'-b', lws,hlw);
-text (mx, 15e-6, [num2str(mem),' GB/sim/node'],
-  'rotation',90, has,'left', vas,'bottom', 'fontsize',lfs, 'color','b');
-%
-szstr = ['XS';'SM';'MD';'LG';'XL'];
-szpos = [e*1e3;1e5;e*1e6;1e8;e*1e9]; y = 3*dy *ones(size(szpos));
-text (szpos,y, szstr, has,'center', vas,'bottom', 'fontsize',lfs, 'color','b');
-loglog ([1e3,10e9],[3*dy,3*dy], 'b', lws,lw);
-sz = [10e3;1e6;10e6;1e9];
-x=nan(numel(sz)*3,1); x(1:3:end)=sz; x(2:3:end)=sz;
-y=nan(size(x)); y(1:3:end)=2*dy; y(2:3:end)=3*dy;
-loglog (x,y, 'b', lws,3);
-%
-encolor = ['b';'k';'m'];
+%encolor = ['b';'k';'m'];
 sim_n = size (mesh_time, 1),
 sim_n = numel(unique(csv(csv(:,2)>0,2))),
 sim_n = max (csv(:,2)),
@@ -226,10 +132,126 @@ dofs_span = 10.^((3.0-1e-9):0.1:10);
 f=find(csv(:,10)>0);
 dofs_min=min(csv(f,10)), dofs_avg=mean(csv(f,10)), dofs_max=max(csv(f,10)),
 %
+run_cncr = max(csv(:,1))+1,
+ref_cncr = 40,
+%
+% Estimates of solver mem use from mini-app v0.1
+lof_dof=25932897; lof_byte=2705536 *1000; byte_per_dof = lof_byte/lof_dof,
+%
+run_time = (max(csv(:,7)) - min(csv(:,6)))*ns,
+prep_time = sum(mesh_time(:,1)),
+tot_time = run_time + prep_time,
+avg_run_time = run_time / sim_n,
+avg_tot_time = tot_time / sim_n,
+%
+grgb = [0,0,10]/16;% [0,5/8,0];
+yrgb = [16,8,0]/16; crgb = [0,10,10]/16; cos='color';
+%
+fig_n = 3,
+for (fig = [1:fig_n]); figure (fig); clf; hold on; grid on;
+  %
+  set (gca, 'position',  [0.10,0.10, 0.80, 0.80]);
+  set (gca, fss,lfs);
+  if (1==1);%(run_cncr == ref_cncr);
+    s='performance';
+  else;
+    s='estimate';
+  end;
+  title (['Baseline batch ',s,' per Skylake node, 40 sims/40 cpu'], fss,tfs);
+  ax = [1000,10e9, 10*us,3*dy];
+  axis (ax);
+  %
+  text(50e9,exp ((log(ax(3))+log(ax(4)))*0.5),...
+    '\leftarrow Lower is better. (time/sim/node)',...
+    has,'center',vas,'top','rotation',90,fss,lfs);
+  %
+  if (1==0)
+    text (3e10,1,'Time','rotation',90,...
+      'verticalalignment','top','horizontalalignment','center');
+    y=10.^(-4:5);
+    x=1.23e10*ones(size(y));
+    ytic = ['10^{-4}';'10^{-3}';'10^{-2}';'10^{-1}';...
+            '10^0   ';'10^1   ';'10^2   ';'10^3   ';'10^4   ';'10^5   '];
+  else;
+    y=[100*us,1*ms,10*ms,100*ms,1*sc,6*sc,1*mn,6*mn,1*hr,1*dy,3*dy];
+    x=1.23e10*ones(size(y));
+    ytic = ['100 \mus';'1 ms';'10 ms';'100 ms';...
+            '1 s   ';'6 s   ';'1 m   ';'6 m   ';'1 h   ';'1 d   ';'3 d   '];
+  end;
+  text (x,y, ytic, fss,lfs);
+  %
+  xlabel ('3D linear-elastic isotropic simulation size (dof)');
+  if (run_cncr == ref_cncr);
+    s='Expected';
+  else;
+    s='Estimated';
+  end;
+  ylabel ([s,' throughput (sims/time/node)']);
+  %
+  set (gca,'xtick', 10.^[1e-9:11]);% hack around integer overflow for xtick 10^10
+  ytic = 1./[1/(3*dy),1/dy,1/hr,10/hr,1/mn,10/mn,1/sc,...
+    10/sc,100/sc,1e3/sc,10e3/sc];
+  set (gca,'ytick', ytic);
+  ylab = ['1/3 d';'1/d';'1/h';'10/h';'1/m';...
+         '10/m';'1/s';'10/s';'100/s';'1k/s';'10k/s'];
+  set (gca,'yticklabel',ylab);
+  %
+  fr = sc/24; loglog ([1e3,1e10],[fr,fr],'--b', lws,hlw, mss,ms);
+  text (1e10,fr,'24 sims/s/node (Movie)','color','b',...
+    has,'right',vas,'bottom', fss,lfs);
+  fr = sc/30; loglog ([1e3,1e10],[fr,fr],'--b', lws,hlw, mss,ms);
+  text (1e10,fr,'30 sims/s/node (NTSC)','color','b',...
+    has,'right',vas,'top', fss,lfs);
+  %
+  x40=exp(sum(log([1e6,1e7]))*0.5);
+  mx40 = 1./(40/(3*dy));
+  text (x40,mx40,'40 sims/3 d/node','color','b',
+    has,'center', vas,'bottom', fss,lfs);
+  %
+  mem = 96; mx = mem*1e9 / byte_per_dof /40;
+  loglog ([mx,mx],[1e-5,3*dy],':b', lws,hlw);
+  text (mx, 15e-6, [num2str(mem),' GB/40 sims/node'],...
+    'rotation',90, has,'left', vas,'bottom', 'fontsize',lfs, 'color','b');
+  mem =375; mx = mem*1e9 / byte_per_dof /40;
+  loglog ([mx,mx],[1e-5,3*dy],'-.b', lws,hlw);
+  text (mx, 15e-6, [num2str(mem),' GB/40 sims/node'],
+    'rotation',90, has,'left', vas,'bottom', 'fontsize',lfs, 'color','b');
+  mem =96; mx = mem*1e9 / byte_per_dof /1;
+  loglog ([mx,mx],[1e-5,3*dy],'--b', lws,hlw);
+  text (mx, 15e-6, [num2str(mem),' GB/sim/node'],
+    'rotation',90, has,'left', vas,'bottom', 'fontsize',lfs, 'color','b');
+  mem =375; mx = mem*1e9 / byte_per_dof /1;
+  loglog ([mx,mx],[1e-5,3*dy],'-b', lws,hlw);
+  text (mx, 15e-6, [num2str(mem),' GB/sim/node'],
+    'rotation',90, has,'left', vas,'bottom', 'fontsize',lfs, 'color','b');
+  %
+  szstr = ['XS';'SM';'MD';'LG';'XL'];
+  szpos = [e*1e3;1e5;e*1e6;1e8;e*1e9]; y = 3*dy *ones(size(szpos));
+  text (szpos,y, szstr, has,'center', vas,'bottom', 'fontsize',lfs, 'color','b');
+  loglog ([1e3,10e9],[3*dy,3*dy], 'b', lws,lw);
+  sz = [10e3;1e6;10e6;1e9];
+  x=nan(numel(sz)*3,1); x(1:3:end)=sz; x(2:3:end)=sz;
+  y=nan(size(x)); y(1:3:end)=2*dy; y(2:3:end)=3*dy;
+  loglog (x,y, 'b', lws,3);
+end;% fig loop
+%
+iters_poly = [1/3,1.5];
+speed = 1e9 - (dofs_span>10e3).* 90e6.*(log(dofs_span)-log(10e3));
+speed (speed < 500e6) = 500e6;
+iters = exp (polyval (iters_poly, log (dofs_span)));
+solv_secs = iters .* dofs_span ./ speed;% avg time to solve 1 sim (using 40 cores)
+%
+solv_text_dofs=1.5e8;
+speed = 1e9 - (solv_text_dofs>10e3).* 90e6.*(log(solv_text_dofs)-log(10e3));
+speed (speed < 500e6) = 500e6;
+iters = exp (polyval (iters_poly, log (solv_text_dofs)));
+solv_text_secs = iters .* solv_text_dofs ./ speed;
+solv_text = ['max |u_{ij}^{FEM}-u_{ij}^{exact}| <10^{-5}'];
+%
 init=prep;
 prep = mesh_time(:,1) * run_cncr / ref_cncr;
 si = csv(:,2);
-chck = zeros (sim_n,1); mesh=chck; read=chck; solv=chck; dofs=chck;
+chck = mesh = read = solv = dofs = chck = zeros (sim_n,1);
 f = find (csv(:,10)>0); dofs(si(f)) = csv(f,10);
 f = find (csv(:,5)==1); chck(si(f)) = tmin + (csv(f,7)-csv(f,6))*ns / ref_cncr;
 f = find (csv(:,5)==2); mesh(si(f)) = tmin + (csv(f,7)-csv(f,6))*ns / ref_cncr;
@@ -298,7 +320,15 @@ if(numel(wread)>0); if (poly_read_gmsh(end)<0);
   poly_read_gmsh(end)=min(wread(fgmsh)),
 end; end;
 %
-fothr = unique( csv( find( (csv(:,4)~=1) & (csv(:,4)~=5)),2));%NOT CAD,NOT CGNS
+fstls = unique( csv( find( csv(:,4)==3),2));% STL (surface mesh)
+fstls(fstls<=0)=[];
+poly_prep_stls = polyfit (wdofs(fstls),wprep(fstls),1),
+if(numel(wprep)>0); if (poly_prep_stls(end)<0);
+  poly_prep_stls(end)=min(wprep(fstls)),
+end; end;
+%
+fothr = unique( csv( find(...
+  (csv(:,4)~=1) & (csv(:,4)~=5) & (csv(:,4)~=3)),2));%NOT CAD, NOT CGNS, NOT STL
 fothr(fothr<=0)=[]; fothr(prep(fothr)<=0)=[];
 poly_chck=nan;
 if (numel(fothr)>0);
@@ -320,33 +350,15 @@ end;
 %  poly_read_mshb = [poly_read_mshb,cmin],
 %end;
 %
-grgb = [0,0,10]/16;% [0,5/8,0];
-yrgb = [16,8,0]/16; crgb = [0,10,10]/16; cos='color';
-iters_poly = [1/3,1.5];
-speed = 1e9 - (dofs_span>10e3).* 90e6.*(log(dofs_span)-log(10e3));
-speed (speed < 500e6) = 500e6;
-iters = exp (polyval (iters_poly, log (dofs_span)));
-secs = iters .* dofs_span ./ speed;% avg time to solve 1 sim (using 40 cores)
-loglog (dofs_span,secs,'-b','color',grgb,lws,lw);% estimated solve (only) time
-%
-loc_dofs=1.5e8;
-speed = 1e9 - (loc_dofs>10e3).* 90e6.*(log(loc_dofs)-log(10e3));
-speed (speed < 500e6) = 500e6;
-iters = exp (polyval (iters_poly, log (loc_dofs)));
-secs = iters .* loc_dofs ./ speed;
-solvstr = ['max |u_{ij}^{FEM}-u_{ij}^{exact}| <10^{-5}'];
-text (loc_dofs,1.2*secs,solvstr, 'color',grgb,
-  'rotation', 1.7*atand(iters_poly(1)), 'fontsize',lfs, vas,'bottom');
-%
 fcads = unique(csv(find(csv(:,4)==1),2));% CAD (geo,geo_unrolled)
 if (0)
-[cads_near_1Mdof,icads_1Mdof] = min(abs(dofs(fcads)-1e6)),
-dofs_cads_1Mdof = dofs(fcads(icads_1Mdof)),
-simt_cads_1Mdof = simt(fcads(icads_1Mdof)),
-%
-[mesh_near_1Mdof,imesh_1Mdof] = min(abs(dofs(fmesh)-1e6)),
-dofs_mesh_1Mdof = dofs(fmesh(imesh_1Mdof)),
-simt_mesh_1Mdof = simt(fmesh(imesh_1Mdof)),
+  [cads_near_1Mdof,icads_1Mdof] = min(abs(dofs(fcads)-1e6)),
+  dofs_cads_1Mdof = dofs(fcads(icads_1Mdof)),
+  simt_cads_1Mdof = simt(fcads(icads_1Mdof)),
+  %
+  [mesh_near_1Mdof,imesh_1Mdof] = min(abs(dofs(fmesh)-1e6)),
+  dofs_mesh_1Mdof = dofs(fmesh(imesh_1Mdof)),
+  simt_mesh_1Mdof = simt(fmesh(imesh_1Mdof)),
 end;
 cnst_prep_cads_gmsh=nan;
 cnst_prep_cads_bash=nan;
@@ -363,7 +375,20 @@ if(numel(fcads)>0);
   cnst_prep_cads_bash = polyfit (wdofs(fgeos),wprep(fgeos),0),% geo
   cnst_chck_cads_geos = polyfit (wdofs(fcads),wchck(fcads),0),
 end;
-if ( fig == 3);
+%
+femera_cgns_data_speedup_xsmd(1) = (poly_chck(end)+poly_read_gmsh(end))...
+  / (poly_read_cgns(end)+poly_chck_cgns(end));
+femera_cgns_data_speedup_xsmd(2)= (poly_chck(1)+poly_read_gmsh(1))...
+  / poly_read_cgns(1);
+femera_cgns_data_speedup_xsmd,
+%
+femera_cads_mesh_speedup_xsmd(1) = poly_prep_mesh(end)...
+  / (poly_mesh_cads(end)+cnst_chck_cads_geos);
+femera_cads_mesh_speedup_xsmd(2) = poly_prep_mesh(1) / poly_mesh_cads(1);
+femera_cads_mesh_speedup_xsmd,
+%
+for (fig = [1:fig_n]); figure (fig);
+%
   xmin=max ([min(dofs(fcgns)),min(dofs(fgeou))]);
   xmax=min ([max(dofs(fcgns)),max(dofs(fgeou))]);
   x=exp(log(xmin):0.1:log(xmax));
@@ -430,78 +455,116 @@ if ( fig == 3);
   px = [x(1:(end-1));x(2:end);x(2:(end))];
   py = [y2(1:(end-1));y2(2:end);y1(2:(end))];
   patch (px,py,'k','facecolor',frgb, 'edgecolor','none');
-end;
-if ( fig == 2);
-  loglog (dofs(fmesh), prep(fmesh),'<c',cos,crgb,'markersize',sms,lws,mlw);
-  loglog (dofs(fgeou), prep(fgeou),'<m','markersize',mms,lws,mlw);
-  loglog (dofs(fgeos), prep(fgeos),'<r','markersize',mms,lws,mlw);
   %
-  loglog (dofs(fothr), chck(fothr),'+c',cos,crgb,'markersize',sms,lws,mlw);
-  loglog (dofs(fcads), chck(fcads),'+r','markersize',sms,lws,mlw);
-  loglog (dofs(fcgns), chck(fcgns),'+k','markersize',sms,lws,mlw);
-  loglog (dofs(fmshb), chck(fmshb),'sy',cos,yrgb,'markersize',sms,lws,mlw);
+  switch (fig);
+  case (1);% fig
+    loglog ([120e3,10e9],[mx40,mx40],'-b', lws,flw);
+    loglog (dofs(fmesh), prep(fmesh),'<c',cos,crgb,'markersize',sms,lws,mlw);
+    loglog (dofs(fgeou), prep(fgeou),'<m','markersize',mms,lws,mlw);
+    loglog (dofs(fgeos), prep(fgeos),'<r','markersize',mms,lws,mlw);
+    %
+    loglog (dofs(fothr), chck(fothr),'+c',cos,crgb,'markersize',sms,lws,mlw);
+    loglog (dofs(fcads), chck(fcads),'+r','markersize',sms,lws,mlw);
+    loglog (dofs(fcgns), chck(fcgns),'+k','markersize',sms,lws,mlw);
+    loglog (dofs(fmshb), chck(fmshb),'sy',cos,yrgb,'markersize',sms,lws,mlw);
+    %
+    loglog (dofs, mesh,'^r','markersize',sms+1,lws,mlw);
+    %
+    loglog (dofs(fgmsh), read(fgmsh),'or','markersize',sms,lws,mlw);
+    %loglog (dofs(fcads), read(fcads),'or','markersize',sms,lws,mlw);
+    loglog (dofs(fcgns), read(fcgns),'ok','markersize',sms,lws,mlw);
+    %loglog (dofs(fmshb), read(fmshb),'xy',cos,yrgb,'markersize',sms,lws,mlw);
+    %
+    loglog (dofs, solv,'*b','markersize',sms-1,lws,mlw);
+    loglog (dofs(fstls), chck(fstls),'xg','markersize',sms,lws,mlw);
+    loglog (dofs(fstls), prep(fstls),'xg','markersize',sms,lws,mlw);
+    loglog (dofs(fstls), mesh(fstls),'xg','markersize',sms,lws,mlw);
+  case (2);% fig
+    loglog ([120e3,10e9],[mx40,mx40],'-b', lws,flw);
+  case (3);% fig
+    loglog ([300e3,10e9],[mx40,mx40],'-b', lws,flw);
+    %
+    mesh(isnan(mesh))=0;
+    file = prep+chck+mesh+read;
+    %
+    loglog (dofs(fothr), simt(fothr),'.k;3D flat file total;', mss,mms,lws,mlw);
+    loglog (dofs(fcgns), simt(fcgns),'.c;3D CGNS total;', mss,mms,lws,mlw);
+    loglog (dofs(fstls), simt(fstls),'.g;2D STL total;', mss,mms,lws,mlw);
+    loglog (dofs(fgeou), simt(fgeou),'.m;CAD unrolled total;', mss,mms,lws,mlw);
+    loglog (dofs(fgeos), simt(fgeos),'.r;CAD scipt total;', mss,mms,lws,mlw);
+    %
+    loglog (dofs_span,solv_secs,'-b;Solve (estimate);','color',grgb,lws,tlw);
+    %
+    poly = polyfit (dofs(fothr), file(fothr),1); poly(end) = min(prep(fothr));
+    loglog (dofs_span, polyval(poly,dofs_span),'-k;3D flat file mesh+I/O;',lws,mlw);
+    poly = polyfit (dofs(fcgns), file(fcgns),1); poly(end) = min(prep(fcgns));
+    loglog (dofs_span, polyval(poly,dofs_span),'-c;3D CGNS mesh+I/O;',lws,mlw);
+    poly = polyfit (dofs(fstls), file(fstls),1); poly(end) = min(prep(fstls));
+    loglog (dofs_span, polyval(poly,dofs_span),'-g;2D STL mesh+I/O;',lws,mlw);
+    poly = polyfit (dofs(fgeou), file(fgeou),1); poly(end) = min(prep(fgeou));
+    loglog (dofs_span, polyval(poly,dofs_span),'-m;CAD unrolled mesh+I/O;',lws,mlw);
+    poly = polyfit (dofs(fgeos), file(fgeos),1); poly(end) = min(prep(fgeos));
+    loglog (dofs_span, polyval(poly,dofs_span),'-r;CAD scripted mesh+I/O;',lws,mlw);
+    if (0)
+    loglog (dofs(fothr), file(fothr),'+k','markersize',sms,lws,mlw);
+    loglog (dofs(fcgns), file(fcgns),'+c','markersize',sms,lws,mlw);
+    loglog (dofs(fstls), file(fstls),'+g','markersize',sms,lws,mlw);
+    loglog (dofs(fgeou), file(fgeou),'+m','markersize',sms,lws,mlw);
+    loglog (dofs(fgeos), file(fgeos),'+r','markersize',sms,lws,mlw);
+    end;
+    if (0)
+    loglog (dofs(fothr), prep(fothr),'<k',cos,crgb,'markersize',sms,lws,mlw);
+    loglog (dofs(fcgns), prep(fcgns),'<c','markersize',sms,lws,mlw);
+    loglog (dofs(fstls), prep(fstls),'<g','markersize',sms,lws,mlw);
+    loglog (dofs(fgeou), prep(fgeou),'<m','markersize',sms,lws,mlw);
+    loglog (dofs(fgeos), prep(fgeos),'<r','markersize',sms,lws,mlw);
+    loglog (dofs, solv,'*b','markersize',sms-1,lws,mlw);
+    end;
+    %
+    loglog (dofs_span, polyval(poly_read_gmsh,dofs_span),'--k;Gmsh read memory;',lws,lw);
+    loglog (dofs_span, polyval(poly_read_cgns,dofs_span),'--c;CGNS read file;',lws,mlw);
+    %
+  end;% switch (fig)
+  if (any (fig == [1,2]));
+    loglog (dofs(fmesh), simt(fmesh),'.k;Total saved mesh;','markersize',mms,lws,mlw);
+    loglog (dofs_span, polyval(poly_prep_mesh,dofs_span),'-.k;Prep save mesh;',lws,lw);
+    loglog (dofs_span, polyval(poly_chck_cgns,dofs_span),':k;Check CGNS;',lws,mlw);
+    loglog (dofs_span, polyval(poly_read_cgns,dofs_span),'--k;Read file CGNS;',lws,mlw);
+    %loglog (dofs(fcgns), simt(fcgns),'.k;Total CGNS;','markersize',mms,lws,mlw);
+    loglog (dofs_span, polyval(cnst_prep_cads_gmsh,dofs_span),'-m;Prep unroll CADs;',lws,mlw);
+    loglog (dofs_span, polyval(cnst_prep_cads_bash,dofs_span),'-r;Prep script CADs;',lws,mlw);
+    %
+    loglog (dofs_span, polyval(cnst_chck_cads_geos,dofs_span),':r;Check CADs;',lws,mlw);
+    %
+    loglog (dofs_span, polyval(poly_mesh_cads,dofs_span),'-.r;Mesh CADs;',lws,lw);
+    %loglog (dofs_span, polyval(poly_read_cads,dofs_span),'--r;Read memory CADs;',lws,mlw);
+      loglog (dofs_span, polyval(poly_read_gmsh,dofs_span),'--r;Read memory Gmsh;',lws,lw);
+    %
+    loglog (dofs(fgeou), simt(fgeou),'.m;Total unroll CADs;','markersize',mms,lws,mlw);
+    loglog (dofs(fgeos), simt(fgeos),'.r;Total script CADs;','markersize',mms,lws,lw);
+    %
+    if (1);
+      loglog (dofs_span, polyval(poly_chck     ,dofs_span),':c;Check mesh Gmsh;',cos,crgb,lws,mlw);
+    %  loglog (dofs_span, polyval(poly_chck_msh4,dofs_span),'--y;Check msh4 bin;',cos,yrgb,lws,lw);
+    %  loglog (dofs(fothr), simt(fothr),'.c;Total other;',cos,crgb,'markersize',mms,lws,mlw);
+    end;
+    %TODO plot post times (Gmsh vs. CGNS)?
+    loglog (dofs_span, polyval(poly_prep_stls,dofs_span),'-g;Prep STL;',lws,mlw);
+    loglog (dofs(fstls), simt(fstls),'.g;Total STL;','markersize',mms,lws,lw);
+    %
+    %loglog (dofs_span, polyval(poly_read     ,dofs_span),'-k',lws,hlw);
+    %loglog (dofs_span, polyval(poly_read_mshb,dofs_span),'-k',lws,hlw);
+    loglog (dofs_span,solv_secs,'-b;Solve (estimate);','color',grgb,lws,lw);
+  end;% fig < 3
   %
-  loglog (dofs, mesh,'^r','markersize',sms+1,lws,mlw);
+  text (solv_text_dofs,1.2*solv_text_secs,solv_text, 'color',grgb,
+    'rotation', 1.7*atand(iters_poly(1)), 'fontsize',lfs, vas,'bottom');
   %
-  loglog (dofs(fgmsh), read(fgmsh),'or','markersize',sms,lws,mlw);
-  %loglog (dofs(fcads), read(fcads),'or','markersize',sms,lws,mlw);
-  loglog (dofs(fcgns), read(fcgns),'ok','markersize',sms,lws,mlw);
-  %loglog (dofs(fmshb), read(fmshb),'xy',cos,yrgb,'markersize',sms,lws,mlw);
-  %
-  loglog (dofs, solv,'*b','markersize',sms-1,lws,mlw);
-  loglog (dofs(fstls), chck(fstls),'xg','markersize',sms,lws,mlw);
-  loglog (dofs(fstls), prep(fstls),'xg','markersize',sms,lws,mlw);
-  loglog (dofs(fstls), mesh(fstls),'xg','markersize',sms,lws,mlw);
-end;
-loglog (dofs(fmesh), simt(fmesh),'.k;Total saved mesh;','markersize',mms,lws,mlw);
-loglog (dofs_span, polyval(poly_prep_mesh,dofs_span),'-.k;Prep save mesh;',lws,lw);
-loglog (dofs_span, polyval(poly_chck_cgns,dofs_span),':k;Check CGNS;',lws,mlw);
-loglog (dofs_span, polyval(poly_read_cgns,dofs_span),'--k;Read file CGNS;',lws,mlw);
-%loglog (dofs(fcgns), simt(fcgns),'.k;Total CGNS;','markersize',mms,lws,mlw);
-loglog (dofs_span, polyval(cnst_prep_cads_gmsh,dofs_span),'-m;Prep unroll CADs;',lws,mlw);
-loglog (dofs_span, polyval(cnst_prep_cads_bash,dofs_span),'-r;Prep script CADs;',lws,mlw);
-%
-loglog (dofs_span, polyval(cnst_chck_cads_geos,dofs_span),':r;Check CADs;',lws,mlw);
-%
-loglog (dofs_span, polyval(poly_mesh_cads,dofs_span),'-.r;Mesh CADs;',lws,lw);
-%loglog (dofs_span, polyval(poly_read_cads,dofs_span),'--r;Read memory CADs;',lws,mlw);
-  loglog (dofs_span, polyval(poly_read_gmsh,dofs_span),'--r;Read memory Gmsh;',lws,lw);
-%
-loglog (dofs(fgeou), simt(fgeou),'.m;Total unroll CADs;','markersize',mms,lws,mlw);
-loglog (dofs(fgeos), simt(fgeos),'.r;Total script CADs;','markersize',mms,lws,lw);
-%
-if (1);
-  loglog (dofs_span, polyval(poly_chck     ,dofs_span),':c;Check mesh Gmsh;',cos,crgb,lws,mlw);
-%  loglog (dofs_span, polyval(poly_chck_msh4,dofs_span),'--y;Check msh4 bin;',cos,yrgb,lws,lw);
-%  loglog (dofs(fothr), simt(fothr),'.c;Total other;',cos,crgb,'markersize',mms,lws,mlw);
-end;
-%TODO plot post times (Gmsh vs. CGNS)?
-%
-%loglog (dofs_span, polyval(poly_read     ,dofs_span),'-k',lws,hlw);
-%loglog (dofs_span, polyval(poly_read_mshb,dofs_span),'-k',lws,hlw);
-%
-%
-%run_time = (max(csv(:,7)) - min(csv(:,6)))*ns,
-%tot_time = run_time + sum(mesh_time),
-%avg_run_time = run_time / sim_n,
-%avg_tot_time = tot_time / sim_n,
-%
-legend ('location','northwest');
+  legend ('location','northwest');
 end;% fig loop
 %
-femera_cgns_data_speedup_xsmd(1) = (poly_chck(end)+poly_read_gmsh(end))...
-  / (poly_read_cgns(end)+poly_chck_cgns(end));
-femera_cgns_data_speedup_xsmd(2)= (poly_chck(1)+poly_read_gmsh(1))...
-  / poly_read_cgns(1);
-femera_cgns_data_speedup_xsmd,
-%
-femera_cads_mesh_speedup_xsmd(1) = poly_prep_mesh(end)...
-  / (poly_mesh_cads(end)+cnst_chck_cads_geos);
-femera_cads_mesh_speedup_xsmd(2) = poly_prep_mesh(1) / poly_mesh_cads(1);
-femera_cads_mesh_speedup_xsmd,
-%
 figdir='';
-figure (2); hold on;
+figure (1); hold on;
 paper=[0.25,0.25, 6,4];
 set(gcf,'paperposition',paper);
 figname=[filebase,'-samples-',solvshort],
@@ -509,11 +572,17 @@ print([figdir,figname,'.eps'],'-depsc2','-FHelvetica');
 %print([figdir,figname,'.pdf'],'-dpdf','-FHelvetica');
 %print([figdir,figname,'.png'],'-dpng','-FHelvetica');
 %
-figure (3); hold on;
+figure (2); hold on;
 paper=[0.25,0.25, 6,4];
 set(gcf,'paperposition',paper);
 figname=[filebase,'-simtime-',solvshort],
 print([figdir,figname,'.eps'],'-depsc2','-FHelvetica');
 %print([figdir,figname,'.pdf'],'-dpdf','-FHelvetica');
 %print([figdir,figname,'.png'],'-dpng','-FHelvetica');
+%
+figure (3); hold on;
+paper=[0.25,0.25, 6,4];
+set(gcf,'paperposition',paper);
+figname=[filebase,'-summary-',solvshort],
+print([figdir,figname,'.eps'],'-depsc2','-FHelvetica');
 %
