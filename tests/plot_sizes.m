@@ -11,9 +11,12 @@ fas='fontangle';
 %
 ns=1e-9; us=1e-6; ms=1e-3; sc=1; mn=60; hr=60*mn; dy=24*hr;
 %
-filebase = '../build/tests/sizes',
+%filebase = '../build/tests/sizes',
 %filebase = '../build/tests/xs-md-10fmt',
-figdir   = '../build/tests/'
+filebase ='../data/perf/mini.0.2-baseline/sizes',
+figdir   = '../data/perf/mini.0.2-baseline/'
+%
+%figdir   = '../build/tests/'
 %
 csv = dlmread ('perf/iters2solve-1e-5.csv');
 %
@@ -322,10 +325,15 @@ end; end;
 %
 fstls = unique( csv( find( csv(:,4)==3),2));% STL (surface mesh)
 fstls(fstls<=0)=[];
-poly_prep_stls = polyfit (wdofs(fstls),wprep(fstls),1),
-if(numel(wprep)>0); if (poly_prep_stls(end)<0);
-  poly_prep_stls(end)=min(wprep(fstls)),
-end; end;
+if (0);% Not linear!
+  poly_prep_stls = polyfit (wdofs(fstls),wprep(fstls),1),
+  if(numel(wprep)>0); if (poly_prep_stls(end)<0);
+    poly_prep_stls(end)=min(wprep(fstls)),
+  end; end;
+else;
+    po32_prep_stls = polyfit(dofs(fstls), prep(fstls).^(3/2)-min(wprep(fstls)).^(3/2),1);
+    po32_prep_stls(end)=min(wprep(fstls)).^(3/2),
+end;
 %
 fothr = unique( csv( find(...
   (csv(:,4)~=1) & (csv(:,4)~=5) & (csv(:,4)~=3)),2));%NOT CAD, NOT CGNS, NOT STL
@@ -460,8 +468,8 @@ for (fig = [1:fig_n]); figure (fig);
   case (1);% fig
     loglog ([120e3,10e9],[mx40,mx40],'-b', lws,flw);
     loglog (dofs(fmesh), prep(fmesh),'<c',cos,crgb,'markersize',sms,lws,mlw);
-    loglog (dofs(fgeou), prep(fgeou),'<m','markersize',mms,lws,mlw);
-    loglog (dofs(fgeos), prep(fgeos),'<r','markersize',mms,lws,mlw);
+    loglog (dofs(fgeou), prep(fgeou),'<m','markersize',sms,lws,mlw);
+    loglog (dofs(fgeos), prep(fgeos),'<r','markersize',sms,lws,mlw);
     %
     loglog (dofs(fothr), chck(fothr),'+c',cos,crgb,'markersize',sms,lws,mlw);
     loglog (dofs(fcads), chck(fcads),'+r','markersize',sms,lws,mlw);
@@ -499,8 +507,17 @@ for (fig = [1:fig_n]); figure (fig);
     loglog (dofs_span, polyval(poly,dofs_span),'-k;3D flat file mesh+I/O;',lws,mlw);
     poly = polyfit (dofs(fcgns), file(fcgns),1); poly(end) = min(prep(fcgns));
     loglog (dofs_span, polyval(poly,dofs_span),'-c;3D CGNS mesh+I/O;',lws,mlw);
+    if (0);% not linear!
     poly = polyfit (dofs(fstls), file(fstls),1); poly(end) = min(prep(fstls));
     loglog (dofs_span, polyval(poly,dofs_span),'-g;2D STL mesh+I/O;',lws,mlw);
+    else;
+    poly_prep = polyfit(dofs(fstls), prep(fstls).^(3/2),1);
+    poly_prep(end) = min(prep(fstls).^(3/2));
+    poly=polyfit (dofs(fstls), file(fstls)-prep(fstls),1);
+    poly(end) = min(prep(fstls)-prep(fstls));
+    plot_y = polyval(poly_prep,dofs_span).^(2/3) + polyval(poly,dofs_span);
+    loglog (dofs_span,plot_y ,'-g;2D STL mesh+I/O;','markersize',4,lws,lw);
+    end;
     poly = polyfit (dofs(fgeou), file(fgeou),1); poly(end) = min(prep(fgeou));
     loglog (dofs_span, polyval(poly,dofs_span),'-m;CAD unrolled mesh+I/O;',lws,mlw);
     poly = polyfit (dofs(fgeos), file(fgeos),1); poly(end) = min(prep(fgeos));
@@ -549,7 +566,11 @@ for (fig = [1:fig_n]); figure (fig);
     %  loglog (dofs(fothr), simt(fothr),'.c;Total other;',cos,crgb,'markersize',mms,lws,mlw);
     end;
     %TODO plot post times (Gmsh vs. CGNS)?
+    if(0);% not linear
     loglog (dofs_span, polyval(poly_prep_stls,dofs_span),'-g;Prep STL;',lws,mlw);
+    else;
+    loglog (dofs_span, polyval(po32_prep_stls,dofs_span).^(2/3),'-g;Prep STL;',lws,mlw);
+    end;
     loglog (dofs(fstls), simt(fstls),'.g;Total STL;','markersize',mms,lws,lw);
     %
     %loglog (dofs_span, polyval(poly_read     ,dofs_span),'-k',lws,hlw);
@@ -562,7 +583,6 @@ for (fig = [1:fig_n]); figure (fig);
   %
   legend ('location','northwest');
 end;% fig loop
-%
 figdir='';
 figure (1); hold on;
 paper=[0.25,0.25, 6,4];

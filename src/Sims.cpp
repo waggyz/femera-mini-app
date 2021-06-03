@@ -225,8 +225,8 @@ namespace Femera {
     const std::string name = this->model_name;
     if (sim_n < 1) {
       log->fprintf (log->fmrerr,
-        "ERR""OR Sims::run() no sims found in collection %s\n", name.c_str());
-      return 1;
+        "WARN""ING Sims::run() no sims found in collection %s\n", name.c_str());
+      return -1;//TODO 1 ?
     }
     // *** HERE: get gcad_n for each sim in this batch and mesh them?
     this->get_data_vals (name, this->data_list);
