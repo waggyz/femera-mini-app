@@ -141,8 +141,10 @@ namespace Femera {
       FMR_PRAGMA_OMP(omp master) {
         // unknown opt error:gmsh::initialize (argc[0], argv, read_gmsh_config);
         gmsh::initialize (0, nullptr, read_gmsh_config);// init w/out cli args.
+        gmsh::option::setNumber ("General.Verbosity", Dmsh::Optval(0));
     } }else{
       gmsh::initialize (0, nullptr, read_gmsh_config);// init w/out cli args.
+      gmsh::option::setNumber ("General.Verbosity", Dmsh::Optval(0));
     }
     this->is_init = true;
     fmr::perf::timer_pause (& this->time);
