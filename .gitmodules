@@ -20,7 +20,7 @@
 [submodule "external/gmsh"]
 	path = external/gmsh
 	url = https://gitlab.onelab.info/gmsh/gmsh.git
-	branch = master
+	branch = gmsh_4_8_4
 [submodule "external/petsc"]
 	path = external/petsc
 	url = https://gitlab.com/petsc/petsc.git
