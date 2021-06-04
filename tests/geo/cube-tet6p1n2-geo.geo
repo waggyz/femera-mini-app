@@ -75,6 +75,12 @@ If( (n>1) )
 EndIf
 EndIf
 
+If(0==1)
+Draw;
+Print "../test.eps";
+Exit;
+EndIf
+
 //Save Sprintf("../cube/unit%gp%gn%g.msh2",h,p,n);
 
 //These are probably not needed
