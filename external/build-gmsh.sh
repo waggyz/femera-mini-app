@@ -27,8 +27,6 @@ mkdir -p "$BUILD_DIR"
 cd "$BUILD_DIR"
 cmake -DCMAKE_INSTALL_PREFIX="$INSTALL_PREFIX" \
   -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX"        \
-  -DENABLE_BUILD_DYNAMIC=1                     \
-  -DENABLE_BUILD_LIB=1                         \
   $3 "$FMRDIR/external/gmsh"
 
 make -j8
