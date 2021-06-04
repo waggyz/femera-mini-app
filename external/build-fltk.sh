@@ -25,7 +25,9 @@ export LD_LIBRARY_PATH="$INSTALL_PREFIX/lib64:$INSTALL_PREFIX/lib:$LD_LIBRARY_PA
 mkdir -p "$INSTALL_PREFIX"
 mkdir -p "$BUILD_DIR"
 cd "$BUILD_DIR"
-echo cd "$BUILD_DIR"
+
+#NOTE Need for K
+# module unload anaconda_3
 
 ./configure --prefix="$INSTALL_PREFIX" --enable-shared
 

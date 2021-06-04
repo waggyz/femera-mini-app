@@ -876,6 +876,7 @@ $(BUILD_EXTERNAL_DIR)/freetype-ok | $(BUILD_TREE)
 
 $(BUILD_EXTERNAL_DIR)/fltk-ok : external/build-fltk.sh \
 $(BUILD_EXTERNAL_DIR)/fltk/fltk-1.3.4-2-source.tar.gz | $(BUILD_TREE)
+	$(info $(NOTE) module unload anaconda_3 to build FLTK. )
 	$(call build_timestamp,FLTK,$<)
 	external/build-fltk.sh "`pwd`/$(BUILD_EXTERNAL_DIR)/fltk/fltk-1.3.4-2" \
   "$(INSTALL_DIR)" && touch "$(BUILD_EXTERNAL_DIR)/fltk-ok"
