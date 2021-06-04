@@ -68,3 +68,5 @@ done
 #   h5copy --enable-error-stack -i "$MESHDIR/cube-tet6p"$P"n"$N".cgns" \
 #  -o "$MESHDIR/cube-tet6.cgn"
 # fi
+
+libGL error No matching fbConfigs or visuals found error failed to load driver: swrast
