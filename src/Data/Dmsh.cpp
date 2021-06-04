@@ -176,7 +176,7 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
   int geom_d=-1,bbox_d=-1;//, elem_d=0;//TODO check max existing elem_d?
   if (!err) { Data::Lock_here lock (this->liblock);
     try {gmsh::model::setCurrent (model);}
-    catch (int e) {err = e;
+    catch (...) {err = -1;//FIXME catch std::error and print basic_string
       log->label_fprintf (log->fmrerr, warnlabel.c_str(),
         "can not find %s.\n", model.c_str());
     }
@@ -209,6 +209,10 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
       log->label_fprintf (log->fmrerr, warnlabel.c_str(),
         "generate %iD mesh of %s returned %i.\n", geom_d, model.c_str(), err);
     }
+    catch (...) {err= 1;//FIXME catch std::error and print basic_string
+      log->label_fprintf (log->fmrerr, warnlabel.c_str(),
+        "generate %iD mesh of %s returned %i.\n", geom_d, model.c_str(), err);
+    }
     fmr::perf::timer_pause (& this->time);
   }
 #ifdef FMR_DEBUG
@@ -228,7 +232,7 @@ int Dmsh::make_part (const std::string model, const fmr::Local_int,
   //TODO handle part index # to generate
   if (!err) { Data::Lock_here lock (this->liblock);
     try {gmsh::model::setCurrent (model);}
-    catch (int e) {err = e;
+    catch (...) {err= 1;//FIXME catch std::error and print basic_string
       log->label_fprintf (log->fmrerr, warnlabel.c_str(),
         "can not find %s.\n", model.c_str());
     }
@@ -237,7 +241,7 @@ int Dmsh::make_part (const std::string model, const fmr::Local_int,
     if (optval > 1) {
       fmr::perf::timer_resume (& this->time);
       try {gmsh::model::mesh::partition (int (part_n));}
-      catch (int e) {err= e;
+      catch (...) {err= 1;//FIXME catch std::error and print basic_string
         log->label_fprintf (log->fmrerr, warnlabel.c_str(),
           "partition (%i) %s returned %i.\n",
           int (optval), model.c_str(), err);
@@ -274,7 +278,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
 //    Data::Lock_here lock(this->liblock);//TODO liblock needed HERE?
     fmr::perf::timer_resume (& this->time);
     try {gmsh::open (fname);}
-    catch (int e) {
+    catch (...) {err= 1;//FIXME catch std::error and print basic_string
       fmr::perf::timer_pause (& this->time);
       info.access = fmr::data::Access::Error;
       info.state.has_error = true;
@@ -822,7 +826,8 @@ int Dmsh::close (const std::string model) {int err=0;
   fmr::perf::timer_resume(&this->time);
   //TODO check if data is still in use.
   try {gmsh::model::setCurrent (model);}
-  catch (int e) {err = e;//TODO handle CGNS already closed. Check model list?
+    catch (...) {err= 1;//FIXME catch std::error and print basic_string
+    //TODO handle model already closed. Check model list?
     // Or handle in Data::close(model): returns err only if all return err.
 #if 0
     const auto warnlabel = "WARN""ING "+this->task_name;
@@ -832,7 +837,7 @@ int Dmsh::close (const std::string model) {int err=0;
   }
   if (!err) {
     try {gmsh::model::remove ();}
-    catch (int e) {err = e;}
+    catch (...) {err= 1;}//FIXME catch std::error and print basic_string
     if (!err) {this->open_n--;}
   } else {err= 0;}//TODO
   fmr::perf::timer_pause (&this->time);
