@@ -107,8 +107,13 @@ ifeq ($(ENABLE_GMSH),ON)
 endif
 ifeq ($(ENABLE_FLTK),ON)
   GMSH_FLAGS += -DENABLE_FLTK=1
+  GMSH_REQUIRES += $(BUILD_EXTERNAL_DIR)/fltk-ok
 else
   GMSH_FLAGS += -DENABLE_FLTK=0
+endif
+ifeq ($(ENABLE_OCCT),ON)
+  GMSH_REQUIRES += $(BUILD_EXTERNAL_DIR)/occt-ok
+  GMSH_FLAGS += -DENABLE_OCC=1 -DENABLE_OCC_CAF=1 -DENABLE_OCC_STATIC=1
 endif
 
 BUILD_HOST := $(shell hostname)
@@ -841,8 +846,42 @@ ifeq ($(ENABLE_GRAPHIZ),ON)
   chmod +x cinclude2dot )
 endif
 
+$(BUILD_EXTERNAL_DIR)/freetype/freetype-2.8.tar.gz : | $(BUILD_EXTERNAL_DIR)/freetype/
+	-$(shell mkdir -p $(BUILD_EXTERNAL_DIR)/freetype; cd "`pwd`/$(BUILD_EXTERNAL_DIR)/freetype"; \
+  wget -O freetype-2.8.tar.gz http://download.savannah.gnu.org/releases/freetype/freetype-2.8.tar.gz \
+  ; tar zxvf freetype-2.8.tar.gz )
+
+$(BUILD_EXTERNAL_DIR)/occt/occt.tgz : | $(BUILD_EXTERNAL_DIR)/occt/
+	-$(shell mkdir -p $(BUILD_EXTERNAL_DIR)/occt; cd "`pwd`/$(BUILD_EXTERNAL_DIR)/occt"; \
+  wget -O occt.tgz "http://git.dev.opencascade.org/gitweb/?p=occt.git;a=snapshot;h=refs/tags/V7_3_0;sf=tgz" \
+  ; tar zxf occt.tgz )
+
+$(BUILD_EXTERNAL_DIR)/fltk/fltk-1.3.4-2-source.tar.gz : | $(BUILD_EXTERNAL_DIR)/fltk/
+	-$(shell mkdir -p $(BUILD_EXTERNAL_DIR)/fltk; cd "`pwd`/$(BUILD_EXTERNAL_DIR)/fltk"; \
+  wget -O fltk-1.3.4-2-source.tar.gz http://fltk.org/pub/fltk/1.3.4/fltk-1.3.4-2-source.tar.gz \
+  ; tar zxvf fltk-1.3.4-2-source.tar.gz )
+
+$(BUILD_EXTERNAL_DIR)/freetype-ok : external/build-freetype.sh \
+$(BUILD_EXTERNAL_DIR)/freetype/freetype-2.8.tar.gz | $(BUILD_TREE)
+	$(call build_timestamp,Freetype,$<)
+	external/build-freetype.sh "`pwd`/$(BUILD_EXTERNAL_DIR)/freetype/freetype-2.8" \
+  "$(INSTALL_DIR)" && touch "$(BUILD_EXTERNAL_DIR)/freetype-ok"
+
+$(BUILD_EXTERNAL_DIR)/occt-ok : external/build-occt.sh \
+$(BUILD_EXTERNAL_DIR)/occt/occt.tgz \
+$(BUILD_EXTERNAL_DIR)/freetype-ok | $(BUILD_TREE)
+	$(call build_timestamp,OpenCASCADE,$<)
+	external/build-occt.sh "`pwd`/$(BUILD_EXTERNAL_DIR)/occt/occt-V7_3_0" \
+  "$(INSTALL_DIR)" && touch "$(BUILD_EXTERNAL_DIR)/occt-ok"
+
+$(BUILD_EXTERNAL_DIR)/fltk-ok : external/build-fltk.sh \
+$(BUILD_EXTERNAL_DIR)/fltk/fltk-1.3.4-2-source.tar.gz | $(BUILD_TREE)
+	$(call build_timestamp,FLTK,$<)
+	external/build-fltk.sh "`pwd`/$(BUILD_EXTERNAL_DIR)/fltk/fltk-1.3.4-2" \
+  "$(INSTALL_DIR)" && touch "$(BUILD_EXTERNAL_DIR)/fltk-ok"
+
 $(BUILD_EXTERNAL_DIR)/CGNS-ok : external/build-cgns.sh \
-  $(BUILD_EXTERNAL_DIR)/hdf5-ok |$(BUILD_TREE)
+  $(BUILD_EXTERNAL_DIR)/hdf5-ok | $(BUILD_TREE)
 	$(call build_timestamp,CGNS,$<)
 	external/build-cgns.sh "`pwd`/$(BUILD_EXTERNAL_DIR)/CGNS" \
   "$(INSTALL_DIR)" && touch "$(BUILD_EXTERNAL_DIR)/CGNS-ok"
