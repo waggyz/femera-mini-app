@@ -62,7 +62,7 @@ ifeq ($(ENABLE_OMP),ON)
   #NOTE Can not export from here; use the src/ompexec shell script
 endif
 # For now, disable MPI in Gmsh. It is probably not needed.
-GMSH_FLAGS += -DENABLE_MPI=0 -DENABLE_CAIRO=1 -DENABLE_BUILD_DYNAMIC=0
+GMSH_FLAGS += -DENABLE_MPI=0 -DENABLE_CAIRO=0 -DENABLE_BUILD_DYNAMIC=0
 GMSH_FLAGS += -DENABLE_BUILD_SHARED=1 -DENABLE_BUILD_LIB=1
 # -DENABLE_BUILD_DYNAMIC=1
 ifeq ($(ENABLE_MPI),ON)
