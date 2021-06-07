@@ -109,7 +109,8 @@ ifeq ($(ENABLE_GMSH),ON)
 endif
 ifeq ($(ENABLE_FLTK),ON)
   GMSH_FLAGS += -DENABLE_FLTK=1
-  GMSH_FLAGS += -DENABLE_OSMESA=1 -DENABLE_GRAPHICS=1
+  #TODO It looks like native off-screen rendering does not work.
+  # GMSH_FLAGS += -DENABLE_OSMESA=1 -DENABLE_GRAPHICS=1
   GMSH_REQUIRES += $(BUILD_EXTERNAL_DIR)/fltk-ok
 else
   GMSH_FLAGS += -DENABLE_FLTK=0

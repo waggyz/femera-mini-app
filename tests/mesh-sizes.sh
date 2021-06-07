@@ -1,28 +1,37 @@
 #!/bin/bash
 #
-echo mesh-sizes.sh $1 $2 $3 $4...
+echo mesh-sizes.sh $1 $2 $3 $4 $5...
 MESH_N="$1"
 H_MIN="$2"
 H_MAX="$3"
 DIR="$4"
+MESH_0="$5"
 #
 if [ "$MESH_N" -lt 1 ] ; then exit 1; fi
 if [ "$H_MIN" -lt 1 ] ; then exit 1; fi
 if [ "$H_MAX" -lt 1 ] ; then exit 1; fi
 if [ -z "$DIR" ] ; then exit 1; fi
+
+C=`tools/cpucount.sh`
+if [ -z "$MESH_0" ] ; then # running serial...
+  MESH_0=1;
+  MESH_D=1;
+  export OMP_NUM_THREADS=$C # running parallel...
+  GMSH_OMP="-nt $C"
+else
+  MESH_D=$C;
+  export OMP_NUM_THREADS=1
+  GMSH_OMP="-nt 1"
+fi
+TIMEFILE="$DIR-time.err.$MESH_0"
 #
 mkdir -p $DIR
 mkdir -p $DIR/stl
-rm -f "$DIR/*"
-rm -f "$DIR/stl/*"
-rm -f "$DIR-time.err"
-rm -f "$DIR-time.csv"
+#rm -f "$DIR/*"
+#rm -f "$DIR/stl/*"
+#rm -f "$DIR-time.err"
+#rm -f "$DIR-time.csv"
 
-C=`tools/cpucount.sh`
-export OMP_NUM_THREADS=$C
-GMSH_OMP="-nt $C"
-
-#MESH_N=150
 #H_MIN=2; # 7:10kdof
 #H_MAX=38; # WAS 33
 
@@ -35,8 +44,7 @@ OPTS_GEO=`cat "tests/geo/gmsh-opts.geo"`
 BASE_GEO=`grep -v '^Include' "tests/geo/uhxt-cube.geo"`
 STLTAIL="Surface Loop(1) = {1};\nVolume(1) = {1};\n"
 STLTAIL=$STLTAIL"\np=$P;\n$OPTS_GEO\n"
-MESH_I=0
-for MESH_I in $(seq 1 1 $MESH_N) ; do
+for MESH_I in $(seq $MESH_0 $MESH_D $MESH_N) ; do
   case $(( ( $RANDOM * 10 ) / ( 32767 + 1 ) + 1 )) in
      1) FMT="geo"; BIN="-geo" ;;
      2) FMT="geo_unrolled"; BIN="-geo" ;;
@@ -65,9 +73,9 @@ for MESH_I in $(seq 1 1 $MESH_N) ; do
     TS1=$(date +%s%N)
     ELAPSED=`echo "($TS1 - $TS0) * 10^-9" | bc -l`
     ELAPSED=`printf "%.9f" $ELAPSED`;
-    echo "$ELAPSED" >> "$DIR-time.err"
+    echo "$ELAPSED" >> "$TIMEFILE"
 #    EXEC=printf "p=$P; h1=$H1; h2=$H2; part_size=$PS; mesh_d=-1;\n$OPTS_GEO\n$BASE_GEO" > "$OUTFILE"
-#    /bin/time --format="%e,%M,%t,%S,%U,%P" $EXEC 2>> "$DIR-time.err"
+#    /bin/time --format="%e,%M,%t,%S,%U,%P" $EXEC 2>> "$TIMEFILE"
     # wall clock, max mem, avg mem use, kernel CPU-sec, user CPU-sec, %CPU
   else
     EXEC="gmsh $GMSH_OMP"
@@ -91,7 +99,7 @@ for MESH_I in $(seq 1 1 $MESH_N) ; do
       EXEC=$EXEC" -v 3 -save -o $OUTFILE"
     fi
     echo $EXEC
-    /bin/time --format="%e,%M,%t,%S,%U,%P" $EXEC 2>> "$DIR-time.err"
+    /bin/time --format="%e,%M,%t,%S,%U,%P" $EXEC 2>> "$TIMEFILE"
     if [ "$FMT" = "geo_unrolled" ] ; then
       echo "p=$P;" >> $OUTFILE
       cat "tests/geo/gmsh-opts.geo" >> $OUTFILE

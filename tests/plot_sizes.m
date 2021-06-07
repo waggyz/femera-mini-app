@@ -11,12 +11,15 @@ fas='fontangle';
 %
 ns=1e-9; us=1e-6; ms=1e-3; sc=1; mn=60; hr=60*mn; dy=24*hr;
 %
-%filebase = '../build/tests/sizes',
-%filebase = '../build/tests/xs-md-10fmt',
-filebase ='../data/perf/mini.0.2-baseline/sizes',
-figdir   = '../data/perf/mini.0.2-baseline/'
+prep_cncr=nan;
 %
-%figdir   = '../build/tests/'
+figdir   = '../build/tests/'
+filebase = '../build/tests/sizes',
+%filebase = '../build/tests/xs-md-10fmt',
+%
+%filebase ='../data/perf/mini.0.2-baseline/sizes', prep_cncr=1,
+%figdir   = '../data/perf/mini.0.2-baseline/'
+%
 %
 csv = dlmread ('perf/iters2solve-1e-5.csv');
 %
@@ -135,8 +138,11 @@ dofs_span = 10.^((3.0-1e-9):0.1:10);
 f=find(csv(:,10)>0);
 dofs_min=min(csv(f,10)), dofs_avg=mean(csv(f,10)), dofs_max=max(csv(f,10)),
 %
-run_cncr = max(csv(:,1))+1,
 ref_cncr = 40,
+run_cncr = max(csv(:,1))+1,
+if (isnan(prep_cncr)); prep_cncr=run_cncr, end;
+%ref_cncr = run_cncr;%TODO Remove ref_cncr?
+mesh_time(:,1) = mesh_time(:,1) / prep_cncr;
 %
 % Estimates of solver mem use from mini-app v0.1
 lof_dof=25932897; lof_byte=2705536 *1000; byte_per_dof = lof_byte/lof_dof,
@@ -495,13 +501,13 @@ for (fig = [1:fig_n]); figure (fig);
     mesh(isnan(mesh))=0;
     file = prep+chck+mesh+read;
     %
+    loglog (dofs_span,solv_secs,'-b;Solve (estimate);','color',grgb,lws,tlw);
+    %
     loglog (dofs(fothr), simt(fothr),'.k;3D flat file total;', mss,mms,lws,mlw);
     loglog (dofs(fcgns), simt(fcgns),'.c;3D CGNS total;', mss,mms,lws,mlw);
     loglog (dofs(fstls), simt(fstls),'.g;2D STL total;', mss,mms,lws,mlw);
     loglog (dofs(fgeou), simt(fgeou),'.m;CAD unrolled total;', mss,mms,lws,mlw);
     loglog (dofs(fgeos), simt(fgeos),'.r;CAD scipt total;', mss,mms,lws,mlw);
-    %
-    loglog (dofs_span,solv_secs,'-b;Solve (estimate);','color',grgb,lws,tlw);
     %
     poly = polyfit (dofs(fothr), file(fothr),1); poly(end) = min(prep(fothr));
     loglog (dofs_span, polyval(poly,dofs_span),'-k;3D flat file mesh+I/O;',lws,mlw);
