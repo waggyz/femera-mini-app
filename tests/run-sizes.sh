@@ -27,7 +27,7 @@ for RUN_I in $(seq 1 1 $CNCR) ; do
 done
 wait
 cat $TIMEFILE.* > "$TIMEFILE"
-cat $TESTDIR-time.err.* > "$TESTDIR-time.err"
+cat $TESTDIR-time.err.* > "$TESTDIR-time"
 #
 EXEC="fmr1omp build/femera/mini -v5 -Dd0 -t7 $TESTDIR"
 EXEC=$EXEC" -o'build/femera/cube-tets.cgn'"

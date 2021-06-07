@@ -12,14 +12,19 @@ fas='fontangle';
 ns=1e-9; us=1e-6; ms=1e-3; sc=1; mn=60; hr=60*mn; dy=24*hr;
 %
 prep_cncr=nan;
-%
 figdir   = '../build/tests/'
-filebase = '../build/tests/sizes',
-%filebase = '../build/tests/xs-md-10fmt',
-%
-%filebase ='../data/perf/mini.0.2-baseline/sizes', prep_cncr=1,
-%figdir   = '../data/perf/mini.0.2-baseline/'
-%
+switch (3);
+case (1);
+  filebase = '../build/tests/sizes',
+case (2);
+  filebase = '../build/tests/xs-md-10fmt',
+case (3);
+  filebase ='../data/perf/mini.0.2-baseline/sizes', prep_cncr=1,
+  figdir   = '../data/perf/mini.0.2-baseline/'
+case (4);
+  filebase ='../data/perf/mini.0.2-parallel-prep/sizes',
+  figdir   = '../data/perf/mini.0.2-parallel-prep/'
+end;
 %
 csv = dlmread ('perf/iters2solve-1e-5.csv');
 %
@@ -40,7 +45,14 @@ csv = dlmread ([filebase,'.csv']);
 %csv = dlmread ('../build/tests/sizes-no-solve.csv');
 %csv = dlmread ('../build/tests/sizes-sleep.csv');
 %
-mesh_time = dlmread ([filebase,'-time.csv']);
+csv2 = dlmread ([filebase,'-time.csv']);
+if (1==1);
+  mesh_time=nan(size(csv2,1),1);
+  mesh_time(csv2(:,1)) = csv2(:,2);
+else;
+  mesh_time=csv2;
+end;
+%
 ram_total_GB = 193637764 * 1024 / 1e9,%FIXME xs-md skylake
 %
 start = min(csv(:,6));
@@ -384,7 +396,7 @@ if(numel(fcads)>0);
   fgeou = unique(csv(find(csv(:,3)==2 & csv(:,4)==1),2));
   fgeos = unique(csv(find(csv(:,3)==3 & csv(:,4)==1),2));
   fgeou(fgeou<=0)=[]; fgeou(wprep(fgeou)<=0)=[];
-  fgeou(fgeos<=0)=[]; fgeou(wprep(fgeos)<=0)=[];
+  fgeou(fgeos<=0)=[]; fgeos(wprep(fgeos)<=0)=[]; fgeos(wdofs(fgeos)<=0)=[];
   cnst_prep_cads_gmsh = polyfit (wdofs(fgeou),wprep(fgeou),0),% geo_unrolled
   cnst_prep_cads_bash = polyfit (wdofs(fgeos),wprep(fgeos),0),% geo
   cnst_chck_cads_geos = polyfit (wdofs(fcads),wchck(fcads),0),

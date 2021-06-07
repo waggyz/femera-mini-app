@@ -73,9 +73,9 @@ for MESH_I in $(seq $MESH_0 $MESH_D $MESH_N) ; do
     TS1=$(date +%s%N)
     ELAPSED=`echo "($TS1 - $TS0) * 10^-9" | bc -l`
     ELAPSED=`printf "%.9f" $ELAPSED`;
-    echo "$ELAPSED" >> "$TIMEFILE"
+    echo "$MESH_I,$ELAPSED" >> "$TIMEFILE"
 #    EXEC=printf "p=$P; h1=$H1; h2=$H2; part_size=$PS; mesh_d=-1;\n$OPTS_GEO\n$BASE_GEO" > "$OUTFILE"
-#    /bin/time --format="%e,%M,%t,%S,%U,%P" $EXEC 2>> "$TIMEFILE"
+#    /bin/time --format="$MESH_I,%e,%M,%t,%S,%U,%P" $EXEC 2>> "$TIMEFILE"
     # wall clock, max mem, avg mem use, kernel CPU-sec, user CPU-sec, %CPU
   else
     EXEC="gmsh $GMSH_OMP"
@@ -99,7 +99,7 @@ for MESH_I in $(seq $MESH_0 $MESH_D $MESH_N) ; do
       EXEC=$EXEC" -v 3 -save -o $OUTFILE"
     fi
     echo $EXEC
-    /bin/time --format="%e,%M,%t,%S,%U,%P" $EXEC 2>> "$TIMEFILE"
+    /bin/time --format="$MESH_I,%e,%M,%t,%S,%U,%P" $EXEC 2>> "$TIMEFILE"
     if [ "$FMT" = "geo_unrolled" ] ; then
       echo "p=$P;" >> $OUTFILE
       cat "tests/geo/gmsh-opts.geo" >> $OUTFILE
