@@ -10,21 +10,14 @@
 namespace Femera{
 class Proc;
 class Pmpi final : public Proc{
-private:
-    Pmpi() = default;
-  protected:
-    Proc::Team_id comm      = 0;//MPI_COMM_WORLD;// could use this->team_id
+  private:
+    Proc::Team_id comm      = 0;//MPI_COMM_WORLD;//TODO could use this->team_id
     const int  mpi_required = 0;//MPI_THREAD_SERIALIZED;
-    int        mpi_provided = 0;
+    int        mpi_provided = 0;//TODO rqrd_mpi_thrd, prvd_mpi_thrd ?
   protected:
     int init_task (int* argc, char** argv ) final override;
     int exit_task (int err) final override;
   public:
-    virtual ~Pmpi() noexcept=default;
-    Pmpi (Proc*,Data*);
-    Pmpi (Pmpi const& )=delete;// not copyable
-    Pmpi operator=(const Pmpi&)=delete;
-    //
     int  prep        ()   final override;
     int  chck        ()   final override;
     //
@@ -42,7 +35,13 @@ private:
     std::string get_host_name ();
     Proc::Team_id  get_comm ();
     int            set_comm ( Proc::Team_id );
+    //
+    virtual ~Pmpi() noexcept=default;
+    Pmpi (Proc*,Data*);
+    Pmpi (Pmpi const& )=delete;// not copyable
+    Pmpi operator=(const Pmpi&)=delete;
   private:
+    Pmpi() = default;
 };
 inline Proc::Team_id Pmpi:: get_team_id (){ return Proc::Team_id( this->comm );
 }
@@ -50,10 +49,10 @@ inline Proc::Team_id Pmpi:: get_team_id (){ return Proc::Team_id( this->comm );
 #if 0
 template<typename T>
 static inline int fmr_mpi_gather(Femera::Pmpi* M,
-  MPI_Datatype mpi_type, T send, T* recv ){
+  MPI_Datatype type_mpi, T send, T* recv ){
   int send_count=1, recv_count=send_count;
-  return MPI_Gather( &send, send_count, mpi_type,
-    &recv, recv_count, mpi_type, M->my_master, M->get_comm() );
+  return MPI_Gather( &send, send_count, type_mpi,
+    &recv, recv_count, type_mpi, M->my_master, M->get_comm() );
 };
 #endif
 #undef FMR_DEBUG

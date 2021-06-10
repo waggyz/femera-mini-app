@@ -10,6 +10,7 @@ namespace Femera {
 Pmpi::  Pmpi(Proc* P,Data* D):
 comm {Proc::Team_id (MPI_COMM_WORLD) },
 mpi_required {int (MPI_THREAD_SERIALIZED) }{
+  // MPI_THREAD_SERIALIZED used: infiniband use with MPI may not be thread safe
   this->proc=P; this->data=D; this->log=proc->log;
   //this-> comm         = Proc::Team_id( MPI_COMM_WORLD );
   //this-> mpi_required = MPI_THREAD_SERIALIZED;
@@ -29,13 +30,14 @@ int Pmpi:: prep (){
 int Pmpi::init_task( int* argc, char** argv ){ int err=0;
   fmr::perf:: timer_resume (&this->time);
   this-> prep ();
-  int mpi_is_init=0;
-  MPI_Initialized(& mpi_is_init);
-  if( !err && !mpi_is_init ){
+  int is_mpi_init=0;
+  MPI_Initialized(& is_mpi_init);
+  if( !err && !is_mpi_init ){
     err= MPI_Init_thread(argc,&argv, MPI_THREAD_SERIALIZED,&this->mpi_provided);
     MPI_Comm c;
     if( !err ){// good practice: use a copy of MPI_COMM_WORLD
-      err= MPI_Comm_dup (MPI_COMM_WORLD, &c); }// exit_task() frees
+      err= MPI_Comm_dup (MPI_COMM_WORLD, &c);// exit_task() frees
+    }
     if( !err ){
       this->comm = Proc::Team_id(c);
       err= this->chck();
@@ -46,11 +48,11 @@ int Pmpi::init_task( int* argc, char** argv ){ int err=0;
 }
 int Pmpi::exit_task (int err){
   fmr::perf:: timer_resume (&this->time);
-  int mpi_is_init=0;
-  MPI_Initialized(& mpi_is_init);
+  int is_mpi_init=0;
+  MPI_Initialized(& is_mpi_init);
   if( err>0 ){ this->proc->log-> printf_err("ERROR Femera returned %i\n",err); }
   err=0;// Exit from mpi normally when Femera exits on error.
-  if( mpi_is_init ){
+  if( is_mpi_init ){
     if(this-> comm != Proc::Team_id(MPI_COMM_WORLD) ){
       if(this-> comm){
         MPI_Comm f=MPI_Comm(this-> comm);
