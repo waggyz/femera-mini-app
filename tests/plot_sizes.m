@@ -46,12 +46,12 @@ csv = dlmread ([filebase,'.csv']);
 %csv = dlmread ('../build/tests/sizes-sleep.csv');
 %
 csv2 = dlmread ([filebase,'-time.csv']);
-if (1==1);
-  mesh_time=nan(size(csv2,1),1);
-  mesh_time(csv2(:,1)) = csv2(:,2);
-else;
-  mesh_time=csv2;
-end;
+csv2 = sortrows(csv2);
+mesh_time = csv2(:,2:end);
+%
+ref_cncr = 40,
+run_cncr = max(csv(:,1))+1,
+if (isnan(prep_cncr)); prep_cncr=run_cncr, end;
 %
 ram_total_GB = 193637764 * 1024 / 1e9,%FIXME xs-md skylake
 %
@@ -66,11 +66,13 @@ else;
 end;
 %
 figure (100); clf; hold on; grid on;
-axis ([0,elapsed*ns*xunit, -1.0,3.5]);
+axis ([0,elapsed*ns*xunit, -run_cncr/4,run_cncr-0.5]);
 xlabel (['Elapsed time (',xunitstr,')']);
 ylabel ('Physical CPU');
-set (gca,'ytick',[0:3]);
-barw=20;
+dtic = run_cncr/4;
+set (gca,'ytick',[0:dtic:(run_cncr-1)]);
+barw=20*log(4)/log(run_cncr);
+msw = 5*log(4)/log(run_cncr);
 %
 chck = find (csv(:,5)==1);
 scan = find (csv(:,5)==1.1);
@@ -124,8 +126,8 @@ x(1:3:end) = (csv(post,6)-start)*ns*xunit; y(1:3:end) = csv(post,1);
 x(2:3:end) = (csv(post,7)-start)*ns*xunit; y(2:3:end) = csv(post,1);
 plot (x,y,'-c',lws,barw);
 %
-plot ((csv(:,6)-start)*ns*xunit,csv(:,1),'>g');
-plot ((csv(:,7)-start)*ns*xunit,csv(:,1),'or');
+plot ((csv(:,6)-start)*ns*xunit,csv(:,1),'>g',mss,msw);
+plot ((csv(:,7)-start)*ns*xunit,csv(:,1),'or',mss,msw);
 %
 legend (...
   'Check','Scan','Mesh','Prep',solv_text,'Post',...
@@ -137,11 +139,12 @@ paper=[0.25,0.25, 6,3];
 set(gcf,'paperposition',paper);
 figname=['sizes-gandt-',solvshort],
 print([figdir,figname,'.eps'],'-depsc2','-FHelvetica');
-print([figdir,figname,'.pdf'],'-depsc2','-FHelvetica');
+%print([figdir,figname,'.pdf'],'-dpdf','-FHelvetica');
 %
 %==============================================================================
 %encolor = ['b';'k';'m'];
 sim_n = size (mesh_time, 1),
+sim_n = size (mesh_time(mesh_time>0), 1),
 sim_n = numel(unique(csv(csv(:,2)>0,2))),
 sim_n = max (csv(:,2)),
 tmin = 0;%0.100 *cncr/sim_n *0,%FIXME 100ms startup time, pro-rated
@@ -150,9 +153,6 @@ dofs_span = 10.^((3.0-1e-9):0.1:10);
 f=find(csv(:,10)>0);
 dofs_min=min(csv(f,10)), dofs_avg=mean(csv(f,10)), dofs_max=max(csv(f,10)),
 %
-ref_cncr = 40,
-run_cncr = max(csv(:,1))+1,
-if (isnan(prep_cncr)); prep_cncr=run_cncr, end;
 %ref_cncr = run_cncr;%TODO Remove ref_cncr?
 mesh_time(:,1) = mesh_time(:,1) / prep_cncr;
 %
@@ -166,7 +166,7 @@ avg_run_time = run_time / sim_n,
 avg_tot_time = tot_time / sim_n,
 %
 grgb = [0,0,10]/16;% [0,5/8,0];
-yrgb = [16,8,0]/16; crgb = [0,10,10]/16; cos='color';
+yrgb = [16,8,0]/16; crgb = [0,10,10]/16; costr='color';
 %
 fig_n = 3,
 for (fig = [1:fig_n]); figure (fig); clf; hold on; grid on;
@@ -310,6 +310,7 @@ poly_read_cads= polyfit (wdofs(f),wread(f),1),
 poly_read_cads(end) = min(wread(f)),
 %
 fread = unique(csv(find(csv(:,4)~=5),2)); fread(fread<=0)=[];% NOT cgns
+fread(isnan(wread(fread)))=[];
 poly_read=nan;
 if(numel(fread)>0);
   poly_read = polyfit (wdofs(fread),wread(fread),1),
@@ -332,10 +333,10 @@ poly_prep_mesh=nan;
 if(numel(fmesh)>0);
   fmesh(fmesh<=0)=[]; fmesh(prep(fmesh)<=0)=[];
   poly_prep_mesh = polyfit (wdofs(fmesh),wprep(fmesh),1),
-  %poly_prep_mesh(end) = min(wprep(fmesh)),
+  poly_prep_mesh(end) = min(wprep(fmesh)),
 end;
 fgmsh = unique( csv( find( csv(:,4)~=5),2));% NOT CGNS
-fgmsh(fgmsh<=0)=[];
+fgmsh(fgmsh<=0)=[]; fgmsh(isnan(wread(fgmsh)))=[];
 poly_read_gmsh = polyfit (wdofs(fgmsh),wread(fgmsh),1),
 if(numel(wread)>0); if (poly_read_gmsh(end)<0);
   poly_read_gmsh(end)=min(wread(fgmsh)),
@@ -397,21 +398,27 @@ if(numel(fcads)>0);
   fgeos = unique(csv(find(csv(:,3)==3 & csv(:,4)==1),2));
   fgeou(fgeou<=0)=[]; fgeou(wprep(fgeou)<=0)=[];
   fgeou(fgeos<=0)=[]; fgeos(wprep(fgeos)<=0)=[]; fgeos(wdofs(fgeos)<=0)=[];
-  cnst_prep_cads_gmsh = polyfit (wdofs(fgeou),wprep(fgeou),0),% geo_unrolled
-  cnst_prep_cads_bash = polyfit (wdofs(fgeos),wprep(fgeos),0),% geo
-  cnst_chck_cads_geos = polyfit (wdofs(fcads),wchck(fcads),0),
+  if (1);
+    cnst_prep_cads_gmsh = median (wprep(fgeou)),% geo_unrolled
+    cnst_prep_cads_bash = median (wprep(fgeos)),% geo
+    cnst_chck_cads_geos = median (wchck(fcads)),
+  else;
+    cnst_prep_cads_gmsh = polyfit (wdofs(fgeou),wprep(fgeou),0),% geo_unrolled
+    cnst_prep_cads_bash = polyfit (wdofs(fgeos),wprep(fgeos),0),% geo
+    cnst_chck_cads_geos = polyfit (wdofs(fcads),wchck(fcads),0),
+  end;
 end;
 %
-femera_cgns_data_speedup_xsmd(1) = (poly_chck(end)+poly_read_gmsh(end))...
+femera_cgns_data_speedup_xsxl(1) = (poly_chck(end)+poly_read_gmsh(end))...
   / (poly_read_cgns(end)+poly_chck_cgns(end));
-femera_cgns_data_speedup_xsmd(2)= (poly_chck(1)+poly_read_gmsh(1))...
+femera_cgns_data_speedup_xsxl(2)= (poly_chck(1)+poly_read_gmsh(1))...
   / poly_read_cgns(1);
-femera_cgns_data_speedup_xsmd,
+femera_cgns_data_speedup_xsxl,
 %
-femera_cads_mesh_speedup_xsmd(1) = poly_prep_mesh(end)...
+femera_cads_mesh_speedup_xsxl(1) = poly_prep_mesh(end)...
   / (poly_mesh_cads(end)+cnst_chck_cads_geos);
-femera_cads_mesh_speedup_xsmd(2) = poly_prep_mesh(1) / poly_mesh_cads(1);
-femera_cads_mesh_speedup_xsmd,
+femera_cads_mesh_speedup_xsxl(2) = poly_prep_mesh(1) / poly_mesh_cads(1);
+femera_cads_mesh_speedup_xsxl,
 %
 for (fig = [1:fig_n]); figure (fig);
 %
@@ -485,21 +492,21 @@ for (fig = [1:fig_n]); figure (fig);
   switch (fig);
   case (1);% fig
     loglog ([120e3,10e9],[mx40,mx40],'-b', lws,flw);
-    loglog (dofs(fmesh), prep(fmesh),'<c',cos,crgb,'markersize',sms,lws,mlw);
+    loglog (dofs(fmesh), prep(fmesh),'<c',costr,crgb,'markersize',sms,lws,mlw);
     loglog (dofs(fgeou), prep(fgeou),'<m','markersize',sms,lws,mlw);
     loglog (dofs(fgeos), prep(fgeos),'<r','markersize',sms,lws,mlw);
     %
-    loglog (dofs(fothr), chck(fothr),'+c',cos,crgb,'markersize',sms,lws,mlw);
+    loglog (dofs(fothr), chck(fothr),'+c',costr,crgb,'markersize',sms,lws,mlw);
     loglog (dofs(fcads), chck(fcads),'+r','markersize',sms,lws,mlw);
     loglog (dofs(fcgns), chck(fcgns),'+k','markersize',sms,lws,mlw);
-    loglog (dofs(fmshb), chck(fmshb),'sy',cos,yrgb,'markersize',sms,lws,mlw);
+    loglog (dofs(fmshb), chck(fmshb),'sy',costr,yrgb,'markersize',sms,lws,mlw);
     %
     loglog (dofs, mesh,'^r','markersize',sms+1,lws,mlw);
     %
     loglog (dofs(fgmsh), read(fgmsh),'or','markersize',sms,lws,mlw);
     %loglog (dofs(fcads), read(fcads),'or','markersize',sms,lws,mlw);
     loglog (dofs(fcgns), read(fcgns),'ok','markersize',sms,lws,mlw);
-    %loglog (dofs(fmshb), read(fmshb),'xy',cos,yrgb,'markersize',sms,lws,mlw);
+    %loglog (dofs(fmshb), read(fmshb),'xy',costr,yrgb,'markersize',sms,lws,mlw);
     %
     loglog (dofs, solv,'*b','markersize',sms-1,lws,mlw);
     loglog (dofs(fstls), chck(fstls),'xg','markersize',sms,lws,mlw);
@@ -548,7 +555,7 @@ for (fig = [1:fig_n]); figure (fig);
     loglog (dofs(fgeos), file(fgeos),'+r','markersize',sms,lws,mlw);
     end;
     if (0)
-    loglog (dofs(fothr), prep(fothr),'<k',cos,crgb,'markersize',sms,lws,mlw);
+    loglog (dofs(fothr), prep(fothr),'<k',costr,crgb,'markersize',sms,lws,mlw);
     loglog (dofs(fcgns), prep(fcgns),'<c','markersize',sms,lws,mlw);
     loglog (dofs(fstls), prep(fstls),'<g','markersize',sms,lws,mlw);
     loglog (dofs(fgeou), prep(fgeou),'<m','markersize',sms,lws,mlw);
@@ -579,9 +586,9 @@ for (fig = [1:fig_n]); figure (fig);
     loglog (dofs(fgeos), simt(fgeos),'.r;Total script CADs;','markersize',mms,lws,lw);
     %
     if (1);
-      loglog (dofs_span, polyval(poly_chck     ,dofs_span),':c;Check mesh Gmsh;',cos,crgb,lws,mlw);
-    %  loglog (dofs_span, polyval(poly_chck_msh4,dofs_span),'--y;Check msh4 bin;',cos,yrgb,lws,lw);
-    %  loglog (dofs(fothr), simt(fothr),'.c;Total other;',cos,crgb,'markersize',mms,lws,mlw);
+      loglog (dofs_span, polyval(poly_chck     ,dofs_span),':c;Check mesh Gmsh;',costr,crgb,lws,mlw);
+    %  loglog (dofs_span, polyval(poly_chck_msh4,dofs_span),'--y;Check msh4 bin;',costr,yrgb,lws,lw);
+    %  loglog (dofs(fothr), simt(fothr),'.c;Total other;',costr,crgb,'markersize',mms,lws,mlw);
     end;
     %TODO plot post times (Gmsh vs. CGNS)?
     if(0);% not linear
