@@ -1,0 +1,8828 @@
+%!PS-Adobe-2.0 EPSF-2.0
+%%Title: ../data/perf/mini.0.2-parallel-prep/sizes-simtime-sleep.eps
+%%Creator: gnuplot 4.6 patchlevel 2
+%%CreationDate: Wed Jun  9 04:52:57 2021
+%%DocumentFonts: (atend)
+%%BoundingBox: 50 50 482 338
+%%EndComments
+%%BeginProlog
+/gnudict 256 dict def
+gnudict begin
+%
+% The following true/false flags may be edited by hand if desired.
+% The unit line width and grayscale image gamma correction may also be changed.
+%
+/Color false def
+/Blacktext false def
+/Solid false def
+/Dashlength 2 def
+/Landscape false def
+/Level1 false def
+/Rounded false def
+/ClipToBoundingBox false def
+/SuppressPDFMark false def
+/TransparentPatterns false def
+/gnulinewidth 5.000 def
+/userlinewidth gnulinewidth def
+/Gamma 1.0 def
+/BackgroundColor {-1.000 -1.000 -1.000} def
+%
+/vshift -46 def
+/dl1 {
+  10.0 Dashlength mul mul
+  Rounded { currentlinewidth 0.75 mul sub dup 0 le { pop 0.01 } if } if
+} def
+/dl2 {
+  10.0 Dashlength mul mul
+  Rounded { currentlinewidth 0.75 mul add } if
+} def
+/hpt_ 31.5 def
+/vpt_ 31.5 def
+/hpt hpt_ def
+/vpt vpt_ def
+/doclip {
+  ClipToBoundingBox {
+    newpath 50 50 moveto 482 50 lineto 482 338 lineto 50 338 lineto closepath
+    clip
+  } if
+} def
+%
+% Gnuplot Prolog Version 4.6 (September 2012)
+%
+%/SuppressPDFMark true def
+%
+/M {moveto} bind def
+/L {lineto} bind def
+/R {rmoveto} bind def
+/V {rlineto} bind def
+/N {newpath moveto} bind def
+/Z {closepath} bind def
+/C {setrgbcolor} bind def
+/f {rlineto fill} bind def
+/g {setgray} bind def
+/Gshow {show} def   % May be redefined later in the file to support UTF-8
+/vpt2 vpt 2 mul def
+/hpt2 hpt 2 mul def
+/Lshow {currentpoint stroke M 0 vshift R 
+	Blacktext {gsave 0 setgray show grestore} {show} ifelse} def
+/Rshow {currentpoint stroke M dup stringwidth pop neg vshift R
+	Blacktext {gsave 0 setgray show grestore} {show} ifelse} def
+/Cshow {currentpoint stroke M dup stringwidth pop -2 div vshift R 
+	Blacktext {gsave 0 setgray show grestore} {show} ifelse} def
+/UP {dup vpt_ mul /vpt exch def hpt_ mul /hpt exch def
+  /hpt2 hpt 2 mul def /vpt2 vpt 2 mul def} def
+/DL {Color {setrgbcolor Solid {pop []} if 0 setdash}
+ {pop pop pop 0 setgray Solid {pop []} if 0 setdash} ifelse} def
+/BL {stroke userlinewidth 2 mul setlinewidth
+	Rounded {1 setlinejoin 1 setlinecap} if} def
+/AL {stroke userlinewidth 2 div setlinewidth
+	Rounded {1 setlinejoin 1 setlinecap} if} def
+/UL {dup gnulinewidth mul /userlinewidth exch def
+	dup 1 lt {pop 1} if 10 mul /udl exch def} def
+/PL {stroke userlinewidth setlinewidth
+	Rounded {1 setlinejoin 1 setlinecap} if} def
+3.8 setmiterlimit
+% Default Line colors
+/LCw {1 1 1} def
+/LCb {0 0 0} def
+/LCa {0 0 0} def
+/LC0 {1 0 0} def
+/LC1 {0 1 0} def
+/LC2 {0 0 1} def
+/LC3 {1 0 1} def
+/LC4 {0 1 1} def
+/LC5 {1 1 0} def
+/LC6 {0 0 0} def
+/LC7 {1 0.3 0} def
+/LC8 {0.5 0.5 0.5} def
+% Default Line Types
+/LTw {PL [] 1 setgray} def
+/LTb {BL [] LCb DL} def
+/LTa {AL [1 udl mul 2 udl mul] 0 setdash LCa setrgbcolor} def
+/LT0 {PL [] LC0 DL} def
+/LT1 {PL [4 dl1 2 dl2] LC1 DL} def
+/LT2 {PL [2 dl1 3 dl2] LC2 DL} def
+/LT3 {PL [1 dl1 1.5 dl2] LC3 DL} def
+/LT4 {PL [6 dl1 2 dl2 1 dl1 2 dl2] LC4 DL} def
+/LT5 {PL [3 dl1 3 dl2 1 dl1 3 dl2] LC5 DL} def
+/LT6 {PL [2 dl1 2 dl2 2 dl1 6 dl2] LC6 DL} def
+/LT7 {PL [1 dl1 2 dl2 6 dl1 2 dl2 1 dl1 2 dl2] LC7 DL} def
+/LT8 {PL [2 dl1 2 dl2 2 dl1 2 dl2 2 dl1 2 dl2 2 dl1 4 dl2] LC8 DL} def
+/Pnt {stroke [] 0 setdash gsave 1 setlinecap M 0 0 V stroke grestore} def
+/Dia {stroke [] 0 setdash 2 copy vpt add M
+  hpt neg vpt neg V hpt vpt neg V
+  hpt vpt V hpt neg vpt V closepath stroke
+  Pnt} def
+/Pls {stroke [] 0 setdash vpt sub M 0 vpt2 V
+  currentpoint stroke M
+  hpt neg vpt neg R hpt2 0 V stroke
+ } def
+/Box {stroke [] 0 setdash 2 copy exch hpt sub exch vpt add M
+  0 vpt2 neg V hpt2 0 V 0 vpt2 V
+  hpt2 neg 0 V closepath stroke
+  Pnt} def
+/Crs {stroke [] 0 setdash exch hpt sub exch vpt add M
+  hpt2 vpt2 neg V currentpoint stroke M
+  hpt2 neg 0 R hpt2 vpt2 V stroke} def
+/TriU {stroke [] 0 setdash 2 copy vpt 1.12 mul add M
+  hpt neg vpt -1.62 mul V
+  hpt 2 mul 0 V
+  hpt neg vpt 1.62 mul V closepath stroke
+  Pnt} def
+/Star {2 copy Pls Crs} def
+/BoxF {stroke [] 0 setdash exch hpt sub exch vpt add M
+  0 vpt2 neg V hpt2 0 V 0 vpt2 V
+  hpt2 neg 0 V closepath fill} def
+/TriUF {stroke [] 0 setdash vpt 1.12 mul add M
+  hpt neg vpt -1.62 mul V
+  hpt 2 mul 0 V
+  hpt neg vpt 1.62 mul V closepath fill} def
+/TriD {stroke [] 0 setdash 2 copy vpt 1.12 mul sub M
+  hpt neg vpt 1.62 mul V
+  hpt 2 mul 0 V
+  hpt neg vpt -1.62 mul V closepath stroke
+  Pnt} def
+/TriDF {stroke [] 0 setdash vpt 1.12 mul sub M
+  hpt neg vpt 1.62 mul V
+  hpt 2 mul 0 V
+  hpt neg vpt -1.62 mul V closepath fill} def
+/DiaF {stroke [] 0 setdash vpt add M
+  hpt neg vpt neg V hpt vpt neg V
+  hpt vpt V hpt neg vpt V closepath fill} def
+/Pent {stroke [] 0 setdash 2 copy gsave
+  translate 0 hpt M 4 {72 rotate 0 hpt L} repeat
+  closepath stroke grestore Pnt} def
+/PentF {stroke [] 0 setdash gsave
+  translate 0 hpt M 4 {72 rotate 0 hpt L} repeat
+  closepath fill grestore} def
+/Circle {stroke [] 0 setdash 2 copy
+  hpt 0 360 arc stroke Pnt} def
+/CircleF {stroke [] 0 setdash hpt 0 360 arc fill} def
+/C0 {BL [] 0 setdash 2 copy moveto vpt 90 450 arc} bind def
+/C1 {BL [] 0 setdash 2 copy moveto
+	2 copy vpt 0 90 arc closepath fill
+	vpt 0 360 arc closepath} bind def
+/C2 {BL [] 0 setdash 2 copy moveto
+	2 copy vpt 90 180 arc closepath fill
+	vpt 0 360 arc closepath} bind def
+/C3 {BL [] 0 setdash 2 copy moveto
+	2 copy vpt 0 180 arc closepath fill
+	vpt 0 360 arc closepath} bind def
+/C4 {BL [] 0 setdash 2 copy moveto
+	2 copy vpt 180 270 arc closepath fill
+	vpt 0 360 arc closepath} bind def
+/C5 {BL [] 0 setdash 2 copy moveto
+	2 copy vpt 0 90 arc
+	2 copy moveto
+	2 copy vpt 180 270 arc closepath fill
+	vpt 0 360 arc} bind def
+/C6 {BL [] 0 setdash 2 copy moveto
+	2 copy vpt 90 270 arc closepath fill
+	vpt 0 360 arc closepath} bind def
+/C7 {BL [] 0 setdash 2 copy moveto
+	2 copy vpt 0 270 arc closepath fill
+	vpt 0 360 arc closepath} bind def
+/C8 {BL [] 0 setdash 2 copy moveto
+	2 copy vpt 270 360 arc closepath fill
+	vpt 0 360 arc closepath} bind def
+/C9 {BL [] 0 setdash 2 copy moveto
+	2 copy vpt 270 450 arc closepath fill
+	vpt 0 360 arc closepath} bind def
+/C10 {BL [] 0 setdash 2 copy 2 copy moveto vpt 270 360 arc closepath fill
+	2 copy moveto
+	2 copy vpt 90 180 arc closepath fill
+	vpt 0 360 arc closepath} bind def
+/C11 {BL [] 0 setdash 2 copy moveto
+	2 copy vpt 0 180 arc closepath fill
+	2 copy moveto
+	2 copy vpt 270 360 arc closepath fill
+	vpt 0 360 arc closepath} bind def
+/C12 {BL [] 0 setdash 2 copy moveto
+	2 copy vpt 180 360 arc closepath fill
+	vpt 0 360 arc closepath} bind def
+/C13 {BL [] 0 setdash 2 copy moveto
+	2 copy vpt 0 90 arc closepath fill
+	2 copy moveto
+	2 copy vpt 180 360 arc closepath fill
+	vpt 0 360 arc closepath} bind def
+/C14 {BL [] 0 setdash 2 copy moveto
+	2 copy vpt 90 360 arc closepath fill
+	vpt 0 360 arc} bind def
+/C15 {BL [] 0 setdash 2 copy vpt 0 360 arc closepath fill
+	vpt 0 360 arc closepath} bind def
+/Rec {newpath 4 2 roll moveto 1 index 0 rlineto 0 exch rlineto
+	neg 0 rlineto closepath} bind def
+/Square {dup Rec} bind def
+/Bsquare {vpt sub exch vpt sub exch vpt2 Square} bind def
+/S0 {BL [] 0 setdash 2 copy moveto 0 vpt rlineto BL Bsquare} bind def
+/S1 {BL [] 0 setdash 2 copy vpt Square fill Bsquare} bind def
+/S2 {BL [] 0 setdash 2 copy exch vpt sub exch vpt Square fill Bsquare} bind def
+/S3 {BL [] 0 setdash 2 copy exch vpt sub exch vpt2 vpt Rec fill Bsquare} bind def
+/S4 {BL [] 0 setdash 2 copy exch vpt sub exch vpt sub vpt Square fill Bsquare} bind def
+/S5 {BL [] 0 setdash 2 copy 2 copy vpt Square fill
+	exch vpt sub exch vpt sub vpt Square fill Bsquare} bind def
+/S6 {BL [] 0 setdash 2 copy exch vpt sub exch vpt sub vpt vpt2 Rec fill Bsquare} bind def
+/S7 {BL [] 0 setdash 2 copy exch vpt sub exch vpt sub vpt vpt2 Rec fill
+	2 copy vpt Square fill Bsquare} bind def
+/S8 {BL [] 0 setdash 2 copy vpt sub vpt Square fill Bsquare} bind def
+/S9 {BL [] 0 setdash 2 copy vpt sub vpt vpt2 Rec fill Bsquare} bind def
+/S10 {BL [] 0 setdash 2 copy vpt sub vpt Square fill 2 copy exch vpt sub exch vpt Square fill
+	Bsquare} bind def
+/S11 {BL [] 0 setdash 2 copy vpt sub vpt Square fill 2 copy exch vpt sub exch vpt2 vpt Rec fill
+	Bsquare} bind def
+/S12 {BL [] 0 setdash 2 copy exch vpt sub exch vpt sub vpt2 vpt Rec fill Bsquare} bind def
+/S13 {BL [] 0 setdash 2 copy exch vpt sub exch vpt sub vpt2 vpt Rec fill
+	2 copy vpt Square fill Bsquare} bind def
+/S14 {BL [] 0 setdash 2 copy exch vpt sub exch vpt sub vpt2 vpt Rec fill
+	2 copy exch vpt sub exch vpt Square fill Bsquare} bind def
+/S15 {BL [] 0 setdash 2 copy Bsquare fill Bsquare} bind def
+/D0 {gsave translate 45 rotate 0 0 S0 stroke grestore} bind def
+/D1 {gsave translate 45 rotate 0 0 S1 stroke grestore} bind def
+/D2 {gsave translate 45 rotate 0 0 S2 stroke grestore} bind def
+/D3 {gsave translate 45 rotate 0 0 S3 stroke grestore} bind def
+/D4 {gsave translate 45 rotate 0 0 S4 stroke grestore} bind def
+/D5 {gsave translate 45 rotate 0 0 S5 stroke grestore} bind def
+/D6 {gsave translate 45 rotate 0 0 S6 stroke grestore} bind def
+/D7 {gsave translate 45 rotate 0 0 S7 stroke grestore} bind def
+/D8 {gsave translate 45 rotate 0 0 S8 stroke grestore} bind def
+/D9 {gsave translate 45 rotate 0 0 S9 stroke grestore} bind def
+/D10 {gsave translate 45 rotate 0 0 S10 stroke grestore} bind def
+/D11 {gsave translate 45 rotate 0 0 S11 stroke grestore} bind def
+/D12 {gsave translate 45 rotate 0 0 S12 stroke grestore} bind def
+/D13 {gsave translate 45 rotate 0 0 S13 stroke grestore} bind def
+/D14 {gsave translate 45 rotate 0 0 S14 stroke grestore} bind def
+/D15 {gsave translate 45 rotate 0 0 S15 stroke grestore} bind def
+/DiaE {stroke [] 0 setdash vpt add M
+  hpt neg vpt neg V hpt vpt neg V
+  hpt vpt V hpt neg vpt V closepath stroke} def
+/BoxE {stroke [] 0 setdash exch hpt sub exch vpt add M
+  0 vpt2 neg V hpt2 0 V 0 vpt2 V
+  hpt2 neg 0 V closepath stroke} def
+/TriUE {stroke [] 0 setdash vpt 1.12 mul add M
+  hpt neg vpt -1.62 mul V
+  hpt 2 mul 0 V
+  hpt neg vpt 1.62 mul V closepath stroke} def
+/TriDE {stroke [] 0 setdash vpt 1.12 mul sub M
+  hpt neg vpt 1.62 mul V
+  hpt 2 mul 0 V
+  hpt neg vpt -1.62 mul V closepath stroke} def
+/PentE {stroke [] 0 setdash gsave
+  translate 0 hpt M 4 {72 rotate 0 hpt L} repeat
+  closepath stroke grestore} def
+/CircE {stroke [] 0 setdash 
+  hpt 0 360 arc stroke} def
+/Opaque {gsave closepath 1 setgray fill grestore 0 setgray closepath} def
+/DiaW {stroke [] 0 setdash vpt add M
+  hpt neg vpt neg V hpt vpt neg V
+  hpt vpt V hpt neg vpt V Opaque stroke} def
+/BoxW {stroke [] 0 setdash exch hpt sub exch vpt add M
+  0 vpt2 neg V hpt2 0 V 0 vpt2 V
+  hpt2 neg 0 V Opaque stroke} def
+/TriUW {stroke [] 0 setdash vpt 1.12 mul add M
+  hpt neg vpt -1.62 mul V
+  hpt 2 mul 0 V
+  hpt neg vpt 1.62 mul V Opaque stroke} def
+/TriDW {stroke [] 0 setdash vpt 1.12 mul sub M
+  hpt neg vpt 1.62 mul V
+  hpt 2 mul 0 V
+  hpt neg vpt -1.62 mul V Opaque stroke} def
+/PentW {stroke [] 0 setdash gsave
+  translate 0 hpt M 4 {72 rotate 0 hpt L} repeat
+  Opaque stroke grestore} def
+/CircW {stroke [] 0 setdash 
+  hpt 0 360 arc Opaque stroke} def
+/BoxFill {gsave Rec 1 setgray fill grestore} def
+/Density {
+  /Fillden exch def
+  currentrgbcolor
+  /ColB exch def /ColG exch def /ColR exch def
+  /ColR ColR Fillden mul Fillden sub 1 add def
+  /ColG ColG Fillden mul Fillden sub 1 add def
+  /ColB ColB Fillden mul Fillden sub 1 add def
+  ColR ColG ColB setrgbcolor} def
+/BoxColFill {gsave Rec PolyFill} def
+/PolyFill {gsave Density fill grestore grestore} def
+/h {rlineto rlineto rlineto gsave closepath fill grestore} bind def
+%
+% PostScript Level 1 Pattern Fill routine for rectangles
+% Usage: x y w h s a XX PatternFill
+%	x,y = lower left corner of box to be filled
+%	w,h = width and height of box
+%	  a = angle in degrees between lines and x-axis
+%	 XX = 0/1 for no/yes cross-hatch
+%
+/PatternFill {gsave /PFa [ 9 2 roll ] def
+  PFa 0 get PFa 2 get 2 div add PFa 1 get PFa 3 get 2 div add translate
+  PFa 2 get -2 div PFa 3 get -2 div PFa 2 get PFa 3 get Rec
+  TransparentPatterns {} {gsave 1 setgray fill grestore} ifelse
+  clip
+  currentlinewidth 0.5 mul setlinewidth
+  /PFs PFa 2 get dup mul PFa 3 get dup mul add sqrt def
+  0 0 M PFa 5 get rotate PFs -2 div dup translate
+  0 1 PFs PFa 4 get div 1 add floor cvi
+	{PFa 4 get mul 0 M 0 PFs V} for
+  0 PFa 6 get ne {
+	0 1 PFs PFa 4 get div 1 add floor cvi
+	{PFa 4 get mul 0 2 1 roll M PFs 0 V} for
+ } if
+  stroke grestore} def
+%
+/languagelevel where
+ {pop languagelevel} {1} ifelse
+ 2 lt
+	{/InterpretLevel1 true def}
+	{/InterpretLevel1 Level1 def}
+ ifelse
+%
+% PostScript level 2 pattern fill definitions
+%
+/Level2PatternFill {
+/Tile8x8 {/PaintType 2 /PatternType 1 /TilingType 1 /BBox [0 0 8 8] /XStep 8 /YStep 8}
+	bind def
+/KeepColor {currentrgbcolor [/Pattern /DeviceRGB] setcolorspace} bind def
+<< Tile8x8
+ /PaintProc {0.5 setlinewidth pop 0 0 M 8 8 L 0 8 M 8 0 L stroke} 
+>> matrix makepattern
+/Pat1 exch def
+<< Tile8x8
+ /PaintProc {0.5 setlinewidth pop 0 0 M 8 8 L 0 8 M 8 0 L stroke
+	0 4 M 4 8 L 8 4 L 4 0 L 0 4 L stroke}
+>> matrix makepattern
+/Pat2 exch def
+<< Tile8x8
+ /PaintProc {0.5 setlinewidth pop 0 0 M 0 8 L
+	8 8 L 8 0 L 0 0 L fill}
+>> matrix makepattern
+/Pat3 exch def
+<< Tile8x8
+ /PaintProc {0.5 setlinewidth pop -4 8 M 8 -4 L
+	0 12 M 12 0 L stroke}
+>> matrix makepattern
+/Pat4 exch def
+<< Tile8x8
+ /PaintProc {0.5 setlinewidth pop -4 0 M 8 12 L
+	0 -4 M 12 8 L stroke}
+>> matrix makepattern
+/Pat5 exch def
+<< Tile8x8
+ /PaintProc {0.5 setlinewidth pop -2 8 M 4 -4 L
+	0 12 M 8 -4 L 4 12 M 10 0 L stroke}
+>> matrix makepattern
+/Pat6 exch def
+<< Tile8x8
+ /PaintProc {0.5 setlinewidth pop -2 0 M 4 12 L
+	0 -4 M 8 12 L 4 -4 M 10 8 L stroke}
+>> matrix makepattern
+/Pat7 exch def
+<< Tile8x8
+ /PaintProc {0.5 setlinewidth pop 8 -2 M -4 4 L
+	12 0 M -4 8 L 12 4 M 0 10 L stroke}
+>> matrix makepattern
+/Pat8 exch def
+<< Tile8x8
+ /PaintProc {0.5 setlinewidth pop 0 -2 M 12 4 L
+	-4 0 M 12 8 L -4 4 M 8 10 L stroke}
+>> matrix makepattern
+/Pat9 exch def
+/Pattern1 {PatternBgnd KeepColor Pat1 setpattern} bind def
+/Pattern2 {PatternBgnd KeepColor Pat2 setpattern} bind def
+/Pattern3 {PatternBgnd KeepColor Pat3 setpattern} bind def
+/Pattern4 {PatternBgnd KeepColor Landscape {Pat5} {Pat4} ifelse setpattern} bind def
+/Pattern5 {PatternBgnd KeepColor Landscape {Pat4} {Pat5} ifelse setpattern} bind def
+/Pattern6 {PatternBgnd KeepColor Landscape {Pat9} {Pat6} ifelse setpattern} bind def
+/Pattern7 {PatternBgnd KeepColor Landscape {Pat8} {Pat7} ifelse setpattern} bind def
+} def
+%
+%
+%End of PostScript Level 2 code
+%
+/PatternBgnd {
+  TransparentPatterns {} {gsave 1 setgray fill grestore} ifelse
+} def
+%
+% Substitute for Level 2 pattern fill codes with
+% grayscale if Level 2 support is not selected.
+%
+/Level1PatternFill {
+/Pattern1 {0.250 Density} bind def
+/Pattern2 {0.500 Density} bind def
+/Pattern3 {0.750 Density} bind def
+/Pattern4 {0.125 Density} bind def
+/Pattern5 {0.375 Density} bind def
+/Pattern6 {0.625 Density} bind def
+/Pattern7 {0.875 Density} bind def
+} def
+%
+% Now test for support of Level 2 code
+%
+Level1 {Level1PatternFill} {Level2PatternFill} ifelse
+%
+/Symbol-Oblique /Symbol findfont [1 0 .167 1 0 0] makefont
+dup length dict begin {1 index /FID eq {pop pop} {def} ifelse} forall
+currentdict end definefont pop
+/MFshow {
+   { dup 5 get 3 ge
+     { 5 get 3 eq {gsave} {grestore} ifelse }
+     {dup dup 0 get findfont exch 1 get scalefont setfont
+     [ currentpoint ] exch dup 2 get 0 exch R dup 5 get 2 ne {dup dup 6
+     get exch 4 get {Gshow} {stringwidth pop 0 R} ifelse }if dup 5 get 0 eq
+     {dup 3 get {2 get neg 0 exch R pop} {pop aload pop M} ifelse} {dup 5
+     get 1 eq {dup 2 get exch dup 3 get exch 6 get stringwidth pop -2 div
+     dup 0 R} {dup 6 get stringwidth pop -2 div 0 R 6 get
+     show 2 index {aload pop M neg 3 -1 roll neg R pop pop} {pop pop pop
+     pop aload pop M} ifelse }ifelse }ifelse }
+     ifelse }
+   forall} def
+/Gswidth {dup type /stringtype eq {stringwidth} {pop (n) stringwidth} ifelse} def
+/MFwidth {0 exch { dup 5 get 3 ge { 5 get 3 eq { 0 } { pop } ifelse }
+ {dup 3 get{dup dup 0 get findfont exch 1 get scalefont setfont
+     6 get Gswidth pop add} {pop} ifelse} ifelse} forall} def
+/MLshow { currentpoint stroke M
+  0 exch R
+  Blacktext {gsave 0 setgray MFshow grestore} {MFshow} ifelse } bind def
+/MRshow { currentpoint stroke M
+  exch dup MFwidth neg 3 -1 roll R
+  Blacktext {gsave 0 setgray MFshow grestore} {MFshow} ifelse } bind def
+/MCshow { currentpoint stroke M
+  exch dup MFwidth -2 div 3 -1 roll R
+  Blacktext {gsave 0 setgray MFshow grestore} {MFshow} ifelse } bind def
+/XYsave    { [( ) 1 2 true false 3 ()] } bind def
+/XYrestore { [( ) 1 2 true false 4 ()] } bind def
+Level1 SuppressPDFMark or 
+{} {
+/SDict 10 dict def
+systemdict /pdfmark known not {
+  userdict /pdfmark systemdict /cleartomark get put
+} if
+SDict begin [
+  /Title (../data/perf/mini.0.2-parallel-prep/sizes-simtime-sleep.eps)
+  /Subject (gnuplot plot)
+  /Creator (gnuplot 4.6 patchlevel 2)
+  /Author (dwagner5)
+%  /Producer (gnuplot)
+%  /Keywords ()
+  /CreationDate (Wed Jun  9 04:52:57 2021)
+  /DOCINFO pdfmark
+end
+} ifelse
+end
+%%EndProlog
+%%Page: 1 1
+gnudict begin
+gsave
+doclip
+50 50 translate
+0.050 0.050 scale
+0 setgray
+newpath
+(Helvetica) findfont 140 scalefont setfont
+BackgroundColor 0 lt 3 1 roll 0 lt exch 0 lt or or not {BackgroundColor C 1.000 0 0 8640.00 5760.00 BoxColFill} if
+gsave % colour palette begin
+/maxcolors 64 def
+/HSV2RGB {  exch dup 0.0 eq {pop exch pop dup dup} % achromatic gray
+  { /HSVs exch def /HSVv exch def 6.0 mul dup floor dup 3 1 roll sub
+     /HSVf exch def /HSVi exch cvi def /HSVp HSVv 1.0 HSVs sub mul def
+	 /HSVq HSVv 1.0 HSVs HSVf mul sub mul def 
+	 /HSVt HSVv 1.0 HSVs 1.0 HSVf sub mul sub mul def
+	 /HSVi HSVi 6 mod def 0 HSVi eq {HSVv HSVt HSVp}
+	 {1 HSVi eq {HSVq HSVv HSVp}{2 HSVi eq {HSVp HSVv HSVt}
+	 {3 HSVi eq {HSVp HSVq HSVv}{4 HSVi eq {HSVt HSVp HSVv}
+	 {HSVv HSVp HSVq} ifelse} ifelse} ifelse} ifelse} ifelse
+  } ifelse} def
+/Constrain {
+  dup 0 lt {0 exch pop}{dup 1 gt {1 exch pop} if} ifelse} def
+/YIQ2RGB {
+  3 copy -1.702 mul exch -1.105 mul add add Constrain 4 1 roll
+  3 copy -0.647 mul exch -0.272 mul add add Constrain 5 1 roll
+  0.621 mul exch -0.956 mul add add Constrain 3 1 roll } def
+/CMY2RGB {  1 exch sub exch 1 exch sub 3 2 roll 1 exch sub 3 1 roll exch } def
+/XYZ2RGB {  3 copy -0.9017 mul exch -0.1187 mul add exch 0.0585 mul exch add
+  Constrain 4 1 roll 3 copy -0.0279 mul exch 1.999 mul add exch
+  -0.9844 mul add Constrain 5 1 roll -0.2891 mul exch -0.5338 mul add
+  exch 1.91 mul exch add Constrain 3 1 roll} def
+/SelectSpace {ColorSpace (HSV) eq {HSV2RGB}{ColorSpace (XYZ) eq {
+  XYZ2RGB}{ColorSpace (CMY) eq {CMY2RGB}{ColorSpace (YIQ) eq {YIQ2RGB}
+  if} ifelse} ifelse} ifelse} def
+/InterpolatedColor true def
+/grayindex {/gidx 0 def
+  {GrayA gidx get grayv ge {exit} if /gidx gidx 1 add def} loop} def
+/dgdx {grayv GrayA gidx get sub GrayA gidx 1 sub get
+  GrayA gidx get sub div} def 
+/redvalue {RedA gidx get RedA gidx 1 sub get
+  RedA gidx get sub dgdxval mul add} def
+/greenvalue {GreenA gidx get GreenA gidx 1 sub get
+  GreenA gidx get sub dgdxval mul add} def
+/bluevalue {BlueA gidx get BlueA gidx 1 sub get
+  BlueA gidx get sub dgdxval mul add} def
+/interpolate {
+  grayindex grayv GrayA gidx get sub abs 1e-5 le
+    {RedA gidx get GreenA gidx get BlueA gidx get}
+    {/dgdxval dgdx def redvalue greenvalue bluevalue} ifelse} def
+/GrayA [0 .0159 .0317 .0476 .0635 .0794 .0952 .1111 .127 .1429 .1587 .1746 
+  .1905 .2063 .2222 .2381 .254 .2698 .2857 .3016 .3175 .3333 .3492 .3651 
+  .381 .3968 .4127 .4286 .4444 .4603 .4762 .4921 .5079 .5238 .5397 .5556 
+  .5714 .5873 .6032 .619 .6349 .6508 .6667 .6825 .6984 .7143 .7302 .746 
+  .7619 .7778 .7937 .8095 .8254 .8413 .8571 .873 .8889 .9048 .9206 .9365 
+  .9524 .9683 .9841 1 ] def
+/RedA [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .0238 .0873 .1508 
+  .2143 .2778 .3413 .4048 .4683 .5317 .5952 .6587 .7222 .7857 .8492 .9127 
+  .9762 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 .9444 .881 .8175 .754 .6905 .627 
+  .5635 .5 ] def
+/GreenA [0 0 0 0 0 0 0 0 .0079 .0714 .1349 .1984 .2619 .3254 .3889 .4524 
+  .5159 .5794 .6429 .7063 .7698 .8333 .8968 .9603 1 1 1 1 1 1 1 1 1 1 1 1 1 
+  1 1 1 .9603 .8968 .8333 .7698 .7063 .6429 .5794 .5159 .4524 .3889 .3254 
+  .2619 .1984 .1349 .0714 .0079 0 0 0 0 0 0 0 0 ] def
+/BlueA [.5 .5635 .627 .6905 .754 .8175 .881 .9444 1 1 1 1 1 1 1 1 1 1 1 1 1 
+  1 1 1 .9762 .9127 .8492 .7857 .7222 .6587 .5952 .5317 .4683 .4048 .3413 
+  .2778 .2143 .1508 .0873 .0238 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+  0 0 ] def
+/pm3dround {maxcolors 0 gt {dup 1 ge
+	{pop 1} {maxcolors mul floor maxcolors 1 sub div} ifelse} if} def
+/pm3dGamma 1.0 1.5 Gamma mul div def
+/ColorSpace (RGB) def
+Color InterpolatedColor or { % COLOUR vs. GRAY map
+  InterpolatedColor { %% Interpolation vs. RGB-Formula
+    /g {stroke pm3dround /grayv exch def interpolate
+        SelectSpace setrgbcolor} bind def
+  }{
+  /g {stroke pm3dround dup cF7 Constrain exch dup cF5 Constrain exch cF15 Constrain 
+       SelectSpace setrgbcolor} bind def
+  } ifelse
+}{
+  /g {stroke pm3dround pm3dGamma exp setgray} bind def
+} ifelse
+1.000 UL
+LTb
+1.00 1.00 1.00 C 1.000 864 576 6910 4606 BoxColFill
+LCb setrgbcolor
+864 576 M
+0 4606 V
+6910 0 V
+0 -4606 V
+864 576 L
+stroke
+0.500 UL
+LTb
+LCb setrgbcolor
+0.500 UL
+LTa
+LCa setrgbcolor
+864 1018 M
+6911 0 V
+stroke
+LTb
+LCb setrgbcolor
+864 1018 M
+88 0 V
+6823 0 R
+-88 0 V
+stroke
+0.00 0.00 0.00 C 780 1018 M
+[ [(Helvetica) 140.0 0.0 true true 0 (10k/s)]
+] -46.7 MRshow
+0.500 UL
+LTb
+LCb setrgbcolor
+0.500 UL
+LTa
+LCa setrgbcolor
+864 1461 M
+6911 0 V
+stroke
+LTb
+LCb setrgbcolor
+864 1461 M
+88 0 V
+6823 0 R
+-88 0 V
+stroke
+0.00 0.00 0.00 C 780 1461 M
+[ [(Helvetica) 140.0 0.0 true true 0 (1k/s)]
+] -46.7 MRshow
+0.500 UL
+LTb
+LCb setrgbcolor
+0.500 UL
+LTa
+LCa setrgbcolor
+864 1903 M
+6911 0 V
+stroke
+LTb
+LCb setrgbcolor
+864 1903 M
+88 0 V
+6823 0 R
+-88 0 V
+stroke
+0.00 0.00 0.00 C 780 1903 M
+[ [(Helvetica) 140.0 0.0 true true 0 (100/s)]
+] -46.7 MRshow
+0.500 UL
+LTb
+LCb setrgbcolor
+0.500 UL
+LTa
+LCa setrgbcolor
+864 2346 M
+6911 0 V
+stroke
+LTb
+LCb setrgbcolor
+864 2346 M
+88 0 V
+6823 0 R
+-88 0 V
+stroke
+0.00 0.00 0.00 C 780 2346 M
+[ [(Helvetica) 140.0 0.0 true true 0 (10/s)]
+] -46.7 MRshow
+0.500 UL
+LTb
+LCb setrgbcolor
+0.500 UL
+LTa
+LCa setrgbcolor
+864 2788 M
+6911 0 V
+stroke
+LTb
+LCb setrgbcolor
+864 2788 M
+88 0 V
+6823 0 R
+-88 0 V
+stroke
+0.00 0.00 0.00 C 780 2788 M
+[ [(Helvetica) 140.0 0.0 true true 0 (1/s)]
+] -46.7 MRshow
+0.500 UL
+LTb
+LCb setrgbcolor
+0.500 UL
+LTa
+LCa setrgbcolor
+864 3132 M
+84 0 V
+1995 0 R
+4832 0 V
+stroke
+LTb
+LCb setrgbcolor
+864 3132 M
+88 0 V
+6823 0 R
+-88 0 V
+stroke
+0.00 0.00 0.00 C 780 3132 M
+[ [(Helvetica) 140.0 0.0 true true 0 (10/m)]
+] -46.7 MRshow
+0.500 UL
+LTb
+LCb setrgbcolor
+0.500 UL
+LTa
+LCa setrgbcolor
+864 3575 M
+84 0 V
+1995 0 R
+4832 0 V
+stroke
+LTb
+LCb setrgbcolor
+864 3575 M
+88 0 V
+6823 0 R
+-88 0 V
+stroke
+0.00 0.00 0.00 C 780 3575 M
+[ [(Helvetica) 140.0 0.0 true true 0 (1/m)]
+] -46.7 MRshow
+0.500 UL
+LTb
+LCb setrgbcolor
+0.500 UL
+LTa
+LCa setrgbcolor
+864 3919 M
+84 0 V
+1995 0 R
+4832 0 V
+stroke
+LTb
+LCb setrgbcolor
+864 3919 M
+88 0 V
+6823 0 R
+-88 0 V
+stroke
+0.00 0.00 0.00 C 780 3919 M
+[ [(Helvetica) 140.0 0.0 true true 0 (10/h)]
+] -46.7 MRshow
+0.500 UL
+LTb
+LCb setrgbcolor
+0.500 UL
+LTa
+LCa setrgbcolor
+864 4361 M
+84 0 V
+1995 0 R
+4832 0 V
+stroke
+LTb
+LCb setrgbcolor
+864 4361 M
+88 0 V
+6823 0 R
+-88 0 V
+stroke
+0.00 0.00 0.00 C 780 4361 M
+[ [(Helvetica) 140.0 0.0 true true 0 (1/h)]
+] -46.7 MRshow
+0.500 UL
+LTb
+LCb setrgbcolor
+0.500 UL
+LTa
+LCa setrgbcolor
+864 4972 M
+84 0 V
+1995 0 R
+4832 0 V
+stroke
+LTb
+LCb setrgbcolor
+864 4972 M
+88 0 V
+6823 0 R
+-88 0 V
+stroke
+0.00 0.00 0.00 C 780 4972 M
+[ [(Helvetica) 140.0 0.0 true true 0 (1/d)]
+] -46.7 MRshow
+0.500 UL
+LTb
+LCb setrgbcolor
+0.500 UL
+LTa
+LCa setrgbcolor
+864 5183 M
+6911 0 V
+stroke
+LTb
+LCb setrgbcolor
+864 5183 M
+88 0 V
+6823 0 R
+-88 0 V
+stroke
+0.00 0.00 0.00 C 780 5183 M
+[ [(Helvetica) 140.0 0.0 true true 0 (1/3 d)]
+] -46.7 MRshow
+0.500 UL
+LTb
+LCb setrgbcolor
+0.500 UL
+LTa
+LCa setrgbcolor
+864 576 M
+0 4607 V
+stroke
+LTb
+LCb setrgbcolor
+864 576 M
+0 88 V
+0 4519 R
+0 -88 V
+stroke
+864 436 M
+[ [(Helvetica) 140.0 0.0 true true 0 (10)]
+[(Helvetica) 112.0 70.0 true true 0 (3)]
+] -60.7 MCshow
+0.500 UL
+LTb
+LCb setrgbcolor
+0.500 UL
+LTa
+LCa setrgbcolor
+1851 576 M
+0 2444 V
+0 2100 R
+0 63 V
+stroke
+LTb
+LCb setrgbcolor
+1851 576 M
+0 88 V
+0 4519 R
+0 -88 V
+stroke
+1851 436 M
+[ [(Helvetica) 140.0 0.0 true true 0 (10)]
+[(Helvetica) 112.0 70.0 true true 0 (4)]
+] -60.7 MCshow
+0.500 UL
+LTb
+LCb setrgbcolor
+0.500 UL
+LTa
+LCa setrgbcolor
+2839 576 M
+0 2444 V
+0 2100 R
+0 63 V
+stroke
+LTb
+LCb setrgbcolor
+2839 576 M
+0 88 V
+0 4519 R
+0 -88 V
+stroke
+2839 436 M
+[ [(Helvetica) 140.0 0.0 true true 0 (10)]
+[(Helvetica) 112.0 70.0 true true 0 (5)]
+] -60.7 MCshow
+0.500 UL
+LTb
+LCb setrgbcolor
+0.500 UL
+LTa
+LCa setrgbcolor
+3826 576 M
+0 4607 V
+stroke
+LTb
+LCb setrgbcolor
+3826 576 M
+0 88 V
+0 4519 R
+0 -88 V
+stroke
+3826 436 M
+[ [(Helvetica) 140.0 0.0 true true 0 (10)]
+[(Helvetica) 112.0 70.0 true true 0 (6)]
+] -60.7 MCshow
+0.500 UL
+LTb
+LCb setrgbcolor
+0.500 UL
+LTa
+LCa setrgbcolor
+4813 576 M
+0 4607 V
+stroke
+LTb
+LCb setrgbcolor
+4813 576 M
+0 88 V
+0 4519 R
+0 -88 V
+stroke
+4813 436 M
+[ [(Helvetica) 140.0 0.0 true true 0 (10)]
+[(Helvetica) 112.0 70.0 true true 0 (7)]
+] -60.7 MCshow
+0.500 UL
+LTb
+LCb setrgbcolor
+0.500 UL
+LTa
+LCa setrgbcolor
+5800 576 M
+0 4607 V
+stroke
+LTb
+LCb setrgbcolor
+5800 576 M
+0 88 V
+0 4519 R
+0 -88 V
+stroke
+5800 436 M
+[ [(Helvetica) 140.0 0.0 true true 0 (10)]
+[(Helvetica) 112.0 70.0 true true 0 (8)]
+] -60.7 MCshow
+0.500 UL
+LTb
+LCb setrgbcolor
+0.500 UL
+LTa
+LCa setrgbcolor
+6788 576 M
+0 4607 V
+stroke
+LTb
+LCb setrgbcolor
+6788 576 M
+0 88 V
+0 4519 R
+0 -88 V
+stroke
+6788 436 M
+[ [(Helvetica) 140.0 0.0 true true 0 (10)]
+[(Helvetica) 112.0 70.0 true true 0 (9)]
+] -60.7 MCshow
+0.500 UL
+LTb
+LCb setrgbcolor
+0.500 UL
+LTa
+LCa setrgbcolor
+7775 576 M
+0 4607 V
+stroke
+LTb
+LCb setrgbcolor
+7775 576 M
+0 88 V
+0 4519 R
+0 -88 V
+stroke
+7775 436 M
+[ [(Helvetica) 140.0 0.0 true true 0 (10)]
+[(Helvetica) 112.0 70.0 true true 0 (10)]
+] -60.7 MCshow
+0.500 UL
+LTb
+LCb setrgbcolor
+0.500 UL
+LTb
+LCb setrgbcolor
+864 5183 N
+864 576 L
+6911 0 V
+0 4607 V
+-6911 0 V
+Z stroke
+0.00 0.00 0.00 C 206 2879 M
+currentpoint gsave translate 90 rotate 0 0 moveto
+[ [(Helvetica) 140.0 0.0 true true 0 (Expected throughput \(sims/time/node\))]
+] -46.7 MCshow
+grestore
+LTb
+0.00 0.00 0.00 C 4319 226 M
+[ [(Helvetica) 140.0 0.0 true true 0 (3D linear-elastic isotropic simulation size \(dof\))]
+] -46.7 MCshow
+LTb
+4319 5393 M
+[ [(Helvetica) 200.0 0.0 true true 0 (Baseline batch performance per Skylake node, 40 sims/40 cpu)]
+] -66.7 MCshow
+1.000 UP
+0.500 UL
+LTb
+LCb setrgbcolor
+1.000 UL
+LTb
+LCb setrgbcolor
+948 3020 N
+0 2100 V
+1995 0 V
+0 -2100 V
+-1995 0 V
+Z stroke
+% Begin plot #1
+0.250 UL
+LT1
+0.00 0.00 1.00 C 864 2177 M
+6911 0 V
+% End plot #1
+% Begin plot #2
+stroke
+LT1
+0.00 0.00 1.00 C 864 2135 M
+6911 0 V
+% End plot #2
+% Begin plot #3
+stroke
+LT2
+0.00 0.00 1.00 C 5170 576 M
+0 4607 V
+% End plot #3
+% Begin plot #4
+stroke
+LT5
+0.00 0.00 1.00 C 5755 576 M
+0 4607 V
+% End plot #4
+% Begin plot #5
+stroke
+LT1
+0.00 0.00 1.00 C 6752 576 M
+0 4607 V
+% End plot #5
+% Begin plot #6
+stroke
+LT0
+0.00 0.00 1.00 C 7336 576 M
+0 4607 V
+% End plot #6
+% Begin plot #7
+stroke
+2.000 UL
+LT0
+0.00 0.00 1.00 C 864 5183 M
+6911 0 V
+% End plot #7
+% Begin plot #8
+stroke
+3.000 UL
+LT0
+0.00 0.00 1.00 C 1851 5105 M
+0 78 V
+1975 -78 R
+0 78 V
+987 -78 R
+0 78 V
+1975 -78 R
+0 78 V
+% End plot #8
+% Begin plot #9
+stroke
+1.000 UL
+LT8
+1.00 1.00 0.50 C gsave 871 2083 N 0 0 V 43 -347 V -43 20 V 1 PolyFill
+871 2083 M
+43 -347 V
+-43 20 V
+% End plot #9
+% Begin plot #10
+stroke
+LT0
+1.00 1.00 0.50 C gsave 914 1736 N 0 0 V 43 362 V -43 -341 V 1 PolyFill
+914 1736 M
+43 362 V
+914 1757 L
+% End plot #10
+% Begin plot #11
+stroke
+LT1
+1.00 1.00 0.50 C gsave 957 2098 N 0 0 V 43 -3 V -43 -337 V 1 PolyFill
+957 2098 M
+43 -3 V
+957 1758 L
+% End plot #11
+% Begin plot #12
+stroke
+LT2
+1.00 1.00 0.50 C gsave 1000 2095 N 0 0 V 43 -100 V -43 -236 V 1 PolyFill
+1000 2095 M
+43 -100 V
+-43 -236 V
+% End plot #12
+% Begin plot #13
+stroke
+LT3
+1.00 1.00 0.50 C gsave 1043 1995 N 0 0 V 42 106 V -42 -341 V 1 PolyFill
+1043 1995 M
+42 106 V
+-42 -341 V
+% End plot #13
+% Begin plot #14
+stroke
+LT4
+1.00 1.00 0.50 C gsave 1085 2101 N 0 0 V 43 -21 V -43 -319 V 1 PolyFill
+1085 2101 M
+43 -21 V
+-43 -319 V
+% End plot #14
+% Begin plot #15
+stroke
+LT5
+1.00 1.00 0.50 C gsave 1128 2080 N 0 0 V 43 29 V -43 -347 V 1 PolyFill
+1128 2080 M
+43 29 V
+-43 -347 V
+% End plot #15
+% Begin plot #16
+stroke
+LT6
+1.00 1.00 0.50 C gsave 1171 2109 N 0 0 V 43 8 V -43 -354 V 1 PolyFill
+1171 2109 M
+43 8 V
+-43 -354 V
+% End plot #16
+% Begin plot #17
+stroke
+LT7
+1.00 1.00 0.50 C gsave 1214 2117 N 0 0 V 43 8 V -43 -361 V 1 PolyFill
+1214 2117 M
+43 8 V
+-43 -361 V
+% End plot #17
+% Begin plot #18
+stroke
+LT8
+1.00 1.00 0.50 C gsave 1257 2125 N 0 0 V 43 13 V -43 -372 V 1 PolyFill
+1257 2125 M
+43 13 V
+-43 -372 V
+% End plot #18
+% Begin plot #19
+stroke
+LT0
+1.00 1.00 0.50 C gsave 1300 2138 N 0 0 V 43 2 V -43 -372 V 1 PolyFill
+1300 2138 M
+43 2 V
+-43 -372 V
+% End plot #19
+% Begin plot #20
+stroke
+LT1
+1.00 1.00 0.50 C gsave 1343 2140 N 0 0 V 43 5 V -43 -375 V 1 PolyFill
+1343 2140 M
+43 5 V
+-43 -375 V
+% End plot #20
+% Begin plot #21
+stroke
+LT2
+1.00 1.00 0.50 C gsave 1386 2145 N 0 0 V 42 5 V -42 -378 V 1 PolyFill
+1386 2145 M
+42 5 V
+-42 -378 V
+% End plot #21
+% Begin plot #22
+stroke
+LT3
+1.00 1.00 0.50 C gsave 1428 2150 N 0 0 V 43 5 V -43 -381 V 1 PolyFill
+1428 2150 M
+43 5 V
+-43 -381 V
+% End plot #22
+% Begin plot #23
+stroke
+LT4
+1.00 1.00 0.50 C gsave 1471 2155 N 0 0 V 43 -156 V -43 -222 V 1 PolyFill
+1471 2155 M
+43 -156 V
+-43 -222 V
+% End plot #23
+% Begin plot #24
+stroke
+LT5
+1.00 1.00 0.50 C gsave 1514 1999 N 0 0 V 43 239 V -43 -458 V 1 PolyFill
+1514 1999 M
+43 239 V
+-43 -458 V
+% End plot #24
+% Begin plot #25
+stroke
+LT6
+1.00 1.00 0.50 C gsave 1557 2238 N 0 0 V 43 -157 V -43 -298 V 1 PolyFill
+1557 2238 M
+43 -157 V
+-43 -298 V
+% End plot #25
+% Begin plot #26
+stroke
+LT7
+1.00 1.00 0.50 C gsave 1600 2081 N 0 0 V 43 114 V -43 -408 V 1 PolyFill
+1600 2081 M
+43 114 V
+-43 -408 V
+% End plot #26
+% Begin plot #27
+stroke
+LT8
+1.00 1.00 0.50 C gsave 1643 2195 N 0 0 V 43 -64 V -43 -340 V 1 PolyFill
+1643 2195 M
+43 -64 V
+-43 -340 V
+% End plot #27
+% Begin plot #28
+stroke
+LT0
+1.00 1.00 0.50 C gsave 1686 2131 N 0 0 V 43 -17 V -43 -319 V 1 PolyFill
+1686 2131 M
+43 -17 V
+-43 -319 V
+% End plot #28
+% Begin plot #29
+stroke
+LT1
+1.00 1.00 0.50 C gsave 1729 2114 N 0 0 V 42 118 V -42 -432 V 1 PolyFill
+1729 2114 M
+42 118 V
+-42 -432 V
+% End plot #29
+% Begin plot #30
+stroke
+LT2
+1.00 1.00 0.50 C gsave 1771 2232 N 0 0 V 43 -8 V -43 -419 V 1 PolyFill
+1771 2232 M
+43 -8 V
+-43 -419 V
+% End plot #30
+% Begin plot #31
+stroke
+LT3
+1.00 1.00 0.50 C gsave 1814 2224 N 0 0 V 43 10 V -43 -423 V 1 PolyFill
+1814 2224 M
+43 10 V
+-43 -423 V
+% End plot #31
+% Begin plot #32
+stroke
+LT4
+1.00 1.00 0.50 C gsave 1857 2234 N 0 0 V 43 10 V -43 -426 V 1 PolyFill
+1857 2234 M
+43 10 V
+-43 -426 V
+% End plot #32
+% Begin plot #33
+stroke
+LT5
+1.00 1.00 0.50 C gsave 1900 2244 N 0 0 V 43 -30 V -43 -389 V 1 PolyFill
+1900 2244 M
+43 -30 V
+-43 -389 V
+% End plot #33
+% Begin plot #34
+stroke
+LT6
+1.00 1.00 0.50 C gsave 1943 2214 N 0 0 V 43 462 V -43 -843 V 1 PolyFill
+1943 2214 M
+43 462 V
+-43 -843 V
+% End plot #34
+% Begin plot #35
+stroke
+LT7
+1.00 1.00 0.50 C gsave 1986 2676 N 0 0 V 43 252 V -43 -1087 V 1 PolyFill
+1986 2676 M
+43 252 V
+1986 1841 L
+% End plot #35
+% Begin plot #36
+stroke
+LT8
+1.00 1.00 0.50 C gsave 2029 2928 N 0 0 V 43 -627 V -43 -450 V 1 PolyFill
+2029 2928 M
+43 -627 V
+-43 -450 V
+% End plot #36
+% Begin plot #37
+stroke
+LT0
+1.00 1.00 0.50 C gsave 2072 2301 N 0 0 V 42 -54 V -42 -386 V 1 PolyFill
+2072 2301 M
+42 -54 V
+-42 -386 V
+% End plot #37
+% Begin plot #38
+stroke
+LT1
+1.00 1.00 0.50 C gsave 2114 2247 N 0 0 V 43 89 V -43 -464 V 1 PolyFill
+2114 2247 M
+43 89 V
+-43 -464 V
+% End plot #38
+% Begin plot #39
+stroke
+LT2
+1.00 1.00 0.50 C gsave 2157 2336 N 0 0 V 43 4 V -43 -457 V 1 PolyFill
+2157 2336 M
+43 4 V
+-43 -457 V
+% End plot #39
+% Begin plot #40
+stroke
+LT3
+1.00 1.00 0.50 C gsave 2200 2340 N 0 0 V 43 35 V -43 -479 V 1 PolyFill
+2200 2340 M
+43 35 V
+-43 -479 V
+% End plot #40
+% Begin plot #41
+stroke
+LT4
+1.00 1.00 0.50 C gsave 2243 2375 N 0 0 V 43 11 V -43 -477 V 1 PolyFill
+2243 2375 M
+43 11 V
+-43 -477 V
+% End plot #41
+% Begin plot #42
+stroke
+LT5
+1.00 1.00 0.50 C gsave 2286 2386 N 0 0 V 43 -295 V -43 -168 V 1 PolyFill
+2286 2386 M
+43 -295 V
+-43 -168 V
+% End plot #42
+% Begin plot #43
+stroke
+LT6
+1.00 1.00 0.50 C gsave 2329 2091 N 0 0 V 43 392 V -43 -545 V 1 PolyFill
+2329 2091 M
+43 392 V
+-43 -545 V
+% End plot #43
+% Begin plot #44
+stroke
+LT7
+1.00 1.00 0.50 C gsave 2372 2483 N 0 0 V 43 -72 V -43 -458 V 1 PolyFill
+2372 2483 M
+43 -72 V
+-43 -458 V
+% End plot #44
+% Begin plot #45
+stroke
+LT8
+1.00 1.00 0.50 C gsave 2415 2411 N 0 0 V 42 43 V -42 -484 V 1 PolyFill
+2415 2411 M
+42 43 V
+-42 -484 V
+% End plot #45
+% Begin plot #46
+stroke
+LT0
+1.00 1.00 0.50 C gsave 2457 2454 N 0 0 V 43 392 V -43 -859 V 1 PolyFill
+2457 2454 M
+43 392 V
+-43 -859 V
+% End plot #46
+% Begin plot #47
+stroke
+LT1
+1.00 1.00 0.50 C gsave 2500 2846 N 0 0 V 43 -472 V -43 -369 V 1 PolyFill
+2500 2846 M
+43 -472 V
+-43 -369 V
+% End plot #47
+% Begin plot #48
+stroke
+LT2
+1.00 1.00 0.50 C gsave 2543 2374 N 0 0 V 43 0 V -43 -351 V 1 PolyFill
+2543 2374 M
+43 0 V
+-43 -351 V
+% End plot #48
+% Begin plot #49
+stroke
+LT3
+1.00 1.00 0.50 C gsave 2586 2374 N 0 0 V 43 160 V -43 -491 V 1 PolyFill
+2586 2374 M
+43 160 V
+-43 -491 V
+% End plot #49
+% Begin plot #50
+stroke
+LT4
+1.00 1.00 0.50 C gsave 2629 2534 N 0 0 V 43 14 V -43 -485 V 1 PolyFill
+2629 2534 M
+43 14 V
+-43 -485 V
+% End plot #50
+% Begin plot #51
+stroke
+LT5
+1.00 1.00 0.50 C gsave 2672 2548 N 0 0 V 43 25 V -43 -490 V 1 PolyFill
+2672 2548 M
+43 25 V
+-43 -490 V
+% End plot #51
+% Begin plot #52
+stroke
+LT6
+1.00 1.00 0.50 C gsave 2715 2573 N 0 0 V 43 3 V -43 -472 V 1 PolyFill
+2715 2573 M
+43 3 V
+-43 -472 V
+% End plot #52
+% Begin plot #53
+stroke
+LT7
+1.00 1.00 0.50 C gsave 2758 2576 N 0 0 V 42 29 V -42 -479 V 1 PolyFill
+2758 2576 M
+42 29 V
+-42 -479 V
+% End plot #53
+% Begin plot #54
+stroke
+LT8
+1.00 1.00 0.50 C gsave 2800 2605 N 0 0 V 43 -24 V -43 -433 V 1 PolyFill
+2800 2605 M
+43 -24 V
+-43 -433 V
+% End plot #54
+% Begin plot #55
+stroke
+LT0
+1.00 1.00 0.50 C gsave 2843 2581 N 0 0 V 43 48 V -43 -459 V 1 PolyFill
+2843 2581 M
+43 48 V
+-43 -459 V
+% End plot #55
+% Begin plot #56
+stroke
+LT1
+1.00 1.00 0.50 C gsave 2886 2629 N 0 0 V 43 32 V -43 -467 V 1 PolyFill
+2886 2629 M
+43 32 V
+-43 -467 V
+% End plot #56
+% Begin plot #57
+stroke
+LT2
+1.00 1.00 0.50 C gsave 2929 2661 N 0 0 V 43 -2 V -43 -442 V 1 PolyFill
+2929 2661 M
+43 -2 V
+-43 -442 V
+% End plot #57
+% Begin plot #58
+stroke
+LT3
+1.00 1.00 0.50 C gsave 2972 2659 N 0 0 V 43 49 V -43 -467 V 1 PolyFill
+2972 2659 M
+43 49 V
+-43 -467 V
+% End plot #58
+% Begin plot #59
+stroke
+LT4
+1.00 1.00 0.50 C gsave 3015 2708 N 0 0 V 43 -35 V -43 -408 V 1 PolyFill
+3015 2708 M
+43 -35 V
+-43 -408 V
+% End plot #59
+% Begin plot #60
+stroke
+LT5
+1.00 1.00 0.50 C gsave 3058 2673 N 0 0 V 43 177 V -43 -561 V 1 PolyFill
+3058 2673 M
+43 177 V
+-43 -561 V
+% End plot #60
+% Begin plot #61
+stroke
+LT6
+1.00 1.00 0.50 C gsave 3101 2850 N 0 0 V 42 -117 V -42 -419 V 1 PolyFill
+3101 2850 M
+42 -117 V
+-42 -419 V
+% End plot #61
+% Begin plot #62
+stroke
+LT7
+1.00 1.00 0.50 C gsave 3143 2733 N 0 0 V 43 -49 V -43 -346 V 1 PolyFill
+3143 2733 M
+43 -49 V
+-43 -346 V
+% End plot #62
+% Begin plot #63
+stroke
+LT8
+1.00 1.00 0.50 C gsave 3186 2684 N 0 0 V 43 116 V -43 -436 V 1 PolyFill
+3186 2684 M
+43 116 V
+-43 -436 V
+% End plot #63
+% Begin plot #64
+stroke
+LT0
+1.00 1.00 0.50 C gsave 3229 2800 N 0 0 V 43 -293 V -43 -118 V 1 PolyFill
+3229 2800 M
+43 -293 V
+-43 -118 V
+% End plot #64
+% Begin plot #65
+stroke
+LT1
+1.00 1.00 0.50 C gsave 3272 2507 N 0 0 V 43 357 V -43 -449 V 1 PolyFill
+3272 2507 M
+43 357 V
+-43 -449 V
+% End plot #65
+% Begin plot #66
+stroke
+LT2
+1.00 1.00 0.50 C gsave 3315 2864 N 0 0 V 43 -276 V -43 -148 V 1 PolyFill
+3315 2864 M
+43 -276 V
+-43 -148 V
+% End plot #66
+% Begin plot #67
+stroke
+LT3
+1.00 1.00 0.50 C gsave 3358 2588 N 0 0 V 43 32 V -43 -153 V 1 PolyFill
+3358 2588 M
+43 32 V
+-43 -153 V
+% End plot #67
+% Begin plot #68
+stroke
+LT4
+1.00 1.00 0.50 C gsave 3401 2620 N 0 0 V 43 184 V -43 -311 V 1 PolyFill
+3401 2620 M
+43 184 V
+-43 -311 V
+% End plot #68
+% Begin plot #69
+stroke
+LT5
+1.00 1.00 0.50 C gsave 3444 2804 N 0 0 V 43 144 V -43 -429 V 1 PolyFill
+3444 2804 M
+43 144 V
+-43 -429 V
+% End plot #69
+% Begin plot #70
+stroke
+LT6
+1.00 1.00 0.50 C gsave 3487 2948 N 0 0 V 42 -64 V -42 -338 V 1 PolyFill
+3487 2948 M
+42 -64 V
+-42 -338 V
+% End plot #70
+% Begin plot #71
+stroke
+LT7
+1.00 1.00 0.50 C gsave 3529 2884 N 0 0 V 43 104 V -43 -416 V 1 PolyFill
+3529 2884 M
+43 104 V
+-43 -416 V
+% End plot #71
+% Begin plot #72
+stroke
+LT8
+1.00 1.00 0.50 C gsave 3572 2988 N 0 0 V 43 -37 V -43 -352 V 1 PolyFill
+3572 2988 M
+43 -37 V
+-43 -352 V
+% End plot #72
+% Begin plot #73
+stroke
+LT0
+1.00 1.00 0.50 C gsave 3615 2951 N 0 0 V 43 48 V -43 -374 V 1 PolyFill
+3615 2951 M
+43 48 V
+-43 -374 V
+% End plot #73
+% Begin plot #74
+stroke
+LT1
+1.00 1.00 0.50 C gsave 3658 2999 N 0 0 V 43 -136 V -43 -210 V 1 PolyFill
+3658 2999 M
+43 -136 V
+-43 -210 V
+% End plot #74
+% Begin plot #75
+stroke
+LT2
+1.00 1.00 0.50 C gsave 3701 2863 N 0 0 V 43 197 V -43 -380 V 1 PolyFill
+3701 2863 M
+43 197 V
+-43 -380 V
+% End plot #75
+% Begin plot #76
+stroke
+LT3
+1.00 1.00 0.50 C gsave 3744 3060 N 0 0 V 43 39 V -43 -392 V 1 PolyFill
+3744 3060 M
+43 39 V
+-43 -392 V
+% End plot #76
+% Begin plot #77
+stroke
+LT4
+1.00 1.00 0.50 C gsave 3787 3099 N 0 0 V 43 22 V -43 -387 V 1 PolyFill
+3787 3099 M
+43 22 V
+-43 -387 V
+% End plot #77
+% Begin plot #78
+stroke
+LT5
+1.00 1.00 0.50 C gsave 3830 3121 N 0 0 V 42 -40 V -42 -320 V 1 PolyFill
+3830 3121 M
+42 -40 V
+-42 -320 V
+% End plot #78
+% Begin plot #79
+stroke
+LT6
+1.00 1.00 0.50 C gsave 3872 3081 N 0 0 V 43 -65 V -43 -227 V 1 PolyFill
+3872 3081 M
+43 -65 V
+-43 -227 V
+% End plot #79
+% Begin plot #80
+stroke
+LT7
+1.00 1.00 0.50 C gsave 3915 3016 N 0 0 V 43 97 V -43 -297 V 1 PolyFill
+3915 3016 M
+43 97 V
+-43 -297 V
+% End plot #80
+% Begin plot #81
+stroke
+LT8
+1.00 1.00 0.50 C gsave 3958 3113 N 0 0 V 43 93 V -43 -361 V 1 PolyFill
+3958 3113 M
+43 93 V
+-43 -361 V
+% End plot #81
+% Begin plot #82
+stroke
+LT0
+1.00 1.00 0.50 C gsave 4001 3206 N 0 0 V 43 -1 V -43 -333 V 1 PolyFill
+4001 3206 M
+43 -1 V
+-43 -333 V
+% End plot #82
+% Begin plot #83
+stroke
+LT1
+1.00 1.00 0.50 C gsave 4044 3205 N 0 0 V 43 3 V -43 -308 V 1 PolyFill
+4044 3205 M
+43 3 V
+-43 -308 V
+% End plot #83
+% Begin plot #84
+stroke
+LT2
+1.00 1.00 0.50 C gsave 4087 3208 N 0 0 V 43 59 V -43 -339 V 1 PolyFill
+4087 3208 M
+43 59 V
+-43 -339 V
+% End plot #84
+% Begin plot #85
+stroke
+LT3
+1.00 1.00 0.50 C gsave 4130 3267 N 0 0 V 43 -242 V -43 -69 V 1 PolyFill
+4130 3267 M
+43 -242 V
+-43 -69 V
+% End plot #85
+% Begin plot #86
+stroke
+LT4
+1.00 1.00 0.50 C gsave 4173 3025 N 0 0 V 42 282 V -42 -322 V 1 PolyFill
+4173 3025 M
+42 282 V
+-42 -322 V
+% End plot #86
+% Begin plot #87
+stroke
+LT5
+1.00 1.00 0.50 C gsave 4215 3307 N 0 0 V 43 17 V -43 -312 V 1 PolyFill
+4215 3307 M
+43 17 V
+-43 -312 V
+% End plot #87
+% Begin plot #88
+stroke
+LT6
+1.00 1.00 0.50 C gsave 4258 3324 N 0 0 V 43 31 V -43 -316 V 1 PolyFill
+4258 3324 M
+43 31 V
+-43 -316 V
+% End plot #88
+% Begin plot #89
+stroke
+LT7
+1.00 1.00 0.50 C gsave 4301 3355 N 0 0 V 43 8 V -43 -299 V 1 PolyFill
+4301 3355 M
+43 8 V
+-43 -299 V
+% End plot #89
+% Begin plot #90
+stroke
+LT8
+1.00 1.00 0.50 C gsave 4344 3363 N 0 0 V 43 -22 V -43 -252 V 1 PolyFill
+4344 3363 M
+43 -22 V
+-43 -252 V
+% End plot #90
+% Begin plot #91
+stroke
+LT0
+1.00 1.00 0.50 C gsave 4387 3341 N 0 0 V 43 79 V -43 -305 V 1 PolyFill
+4387 3341 M
+43 79 V
+-43 -305 V
+% End plot #91
+% Begin plot #92
+stroke
+LT1
+1.00 1.00 0.50 C gsave 4430 3420 N 0 0 V 43 16 V -43 -296 V 1 PolyFill
+4430 3420 M
+43 16 V
+-43 -296 V
+% End plot #92
+% Begin plot #93
+stroke
+LT2
+1.00 1.00 0.50 C gsave 4473 3436 N 0 0 V 43 -200 V -43 -71 V 1 PolyFill
+4473 3436 M
+43 -200 V
+-43 -71 V
+% End plot #93
+% Begin plot #94
+stroke
+LT3
+1.00 1.00 0.50 C gsave 4516 3236 N 0 0 V 42 203 V -42 -249 V 1 PolyFill
+4516 3236 M
+42 203 V
+-42 -249 V
+% End plot #94
+% Begin plot #95
+stroke
+LT4
+1.00 1.00 0.50 C gsave 4558 3439 N 0 0 V 43 64 V -43 -287 V 1 PolyFill
+4558 3439 M
+43 64 V
+-43 -287 V
+% End plot #95
+% Begin plot #96
+stroke
+LT5
+1.00 1.00 0.50 C gsave 4601 3503 N 0 0 V 43 19 V -43 -281 V 1 PolyFill
+4601 3503 M
+43 19 V
+-43 -281 V
+% End plot #96
+% Begin plot #97
+stroke
+LT6
+1.00 1.00 0.50 C gsave 4644 3522 N 0 0 V 43 22 V -43 -278 V 1 PolyFill
+4644 3522 M
+43 22 V
+-43 -278 V
+% End plot #97
+% Begin plot #98
+stroke
+LT7
+1.00 1.00 0.50 C gsave 4687 3544 N 0 0 V 43 -12 V -43 -241 V 1 PolyFill
+4687 3544 M
+43 -12 V
+-43 -241 V
+% End plot #98
+% Begin plot #99
+stroke
+LT8
+1.00 1.00 0.50 C gsave 871 1756 N 0 0 V 43 1 V 0 -21 V 1 PolyFill
+871 1756 M
+43 1 V
+0 -21 V
+% End plot #99
+% Begin plot #100
+stroke
+LT0
+1.00 1.00 0.50 C gsave 914 1757 N 0 0 V 43 1 V 0 340 V 1 PolyFill
+914 1757 M
+43 1 V
+0 340 V
+% End plot #100
+% Begin plot #101
+stroke
+LT1
+1.00 1.00 0.50 C gsave 957 1758 N 0 0 V 43 1 V 0 336 V 1 PolyFill
+957 1758 M
+43 1 V
+0 336 V
+% End plot #101
+% Begin plot #102
+stroke
+LT2
+1.00 1.00 0.50 C gsave 1000 1759 N 0 0 V 43 1 V 0 235 V 1 PolyFill
+1000 1759 M
+43 1 V
+0 235 V
+% End plot #102
+% Begin plot #103
+stroke
+LT3
+1.00 1.00 0.50 C gsave 1043 1760 N 0 0 V 42 1 V 0 340 V 1 PolyFill
+1043 1760 M
+42 1 V
+0 340 V
+% End plot #103
+% Begin plot #104
+stroke
+LT4
+1.00 1.00 0.50 C gsave 1085 1761 N 0 0 V 43 1 V 0 318 V 1 PolyFill
+1085 1761 M
+43 1 V
+0 318 V
+% End plot #104
+% Begin plot #105
+stroke
+LT5
+1.00 1.00 0.50 C gsave 1128 1762 N 0 0 V 43 1 V 0 346 V 1 PolyFill
+1128 1762 M
+43 1 V
+0 346 V
+% End plot #105
+% Begin plot #106
+stroke
+LT6
+1.00 1.00 0.50 C gsave 1171 1763 N 0 0 V 43 1 V 0 353 V 1 PolyFill
+1171 1763 M
+43 1 V
+0 353 V
+% End plot #106
+% Begin plot #107
+stroke
+LT7
+1.00 1.00 0.50 C gsave 1214 1764 N 0 0 V 43 2 V 0 359 V 1 PolyFill
+1214 1764 M
+43 2 V
+0 359 V
+% End plot #107
+% Begin plot #108
+stroke
+LT8
+1.00 1.00 0.50 C gsave 1257 1766 N 0 0 V 43 2 V 0 370 V 1 PolyFill
+1257 1766 M
+43 2 V
+0 370 V
+% End plot #108
+% Begin plot #109
+stroke
+LT0
+1.00 1.00 0.50 C gsave 1300 1768 N 0 0 V 43 2 V 0 370 V 1 PolyFill
+1300 1768 M
+43 2 V
+0 370 V
+% End plot #109
+% Begin plot #110
+stroke
+LT1
+1.00 1.00 0.50 C gsave 1343 1770 N 0 0 V 43 2 V 0 373 V 1 PolyFill
+1343 1770 M
+43 2 V
+0 373 V
+% End plot #110
+% Begin plot #111
+stroke
+LT2
+1.00 1.00 0.50 C gsave 1386 1772 N 0 0 V 42 2 V 0 376 V 1 PolyFill
+1386 1772 M
+42 2 V
+0 376 V
+% End plot #111
+% Begin plot #112
+stroke
+LT3
+1.00 1.00 0.50 C gsave 1428 1774 N 0 0 V 43 3 V 0 378 V 1 PolyFill
+1428 1774 M
+43 3 V
+0 378 V
+% End plot #112
+% Begin plot #113
+stroke
+LT4
+1.00 1.00 0.50 C gsave 1471 1777 N 0 0 V 43 3 V 0 219 V 1 PolyFill
+1471 1777 M
+43 3 V
+0 219 V
+% End plot #113
+% Begin plot #114
+stroke
+LT5
+1.00 1.00 0.50 C gsave 1514 1780 N 0 0 V 43 3 V 0 455 V 1 PolyFill
+1514 1780 M
+43 3 V
+0 455 V
+% End plot #114
+% Begin plot #115
+stroke
+LT6
+1.00 1.00 0.50 C gsave 1557 1783 N 0 0 V 43 4 V 0 294 V 1 PolyFill
+1557 1783 M
+43 4 V
+0 294 V
+% End plot #115
+% Begin plot #116
+stroke
+LT7
+1.00 1.00 0.50 C gsave 1600 1787 N 0 0 V 43 4 V 0 404 V 1 PolyFill
+1600 1787 M
+43 4 V
+0 404 V
+% End plot #116
+% Begin plot #117
+stroke
+LT8
+1.00 1.00 0.50 C gsave 1643 1791 N 0 0 V 43 4 V 0 336 V 1 PolyFill
+1643 1791 M
+43 4 V
+0 336 V
+% End plot #117
+% Begin plot #118
+stroke
+LT0
+1.00 1.00 0.50 C gsave 1686 1795 N 0 0 V 43 5 V 0 314 V 1 PolyFill
+1686 1795 M
+43 5 V
+0 314 V
+% End plot #118
+% Begin plot #119
+stroke
+LT1
+1.00 1.00 0.50 C gsave 1729 1800 N 0 0 V 42 5 V 0 427 V 1 PolyFill
+1729 1800 M
+42 5 V
+0 427 V
+% End plot #119
+% Begin plot #120
+stroke
+LT2
+1.00 1.00 0.50 C gsave 1771 1805 N 0 0 V 43 6 V 0 413 V 1 PolyFill
+1771 1805 M
+43 6 V
+0 413 V
+% End plot #120
+% Begin plot #121
+stroke
+LT3
+1.00 1.00 0.50 C gsave 1814 1811 N 0 0 V 43 7 V 0 416 V 1 PolyFill
+1814 1811 M
+43 7 V
+0 416 V
+% End plot #121
+% Begin plot #122
+stroke
+LT4
+1.00 1.00 0.50 C gsave 1857 1818 N 0 0 V 43 7 V 0 419 V 1 PolyFill
+1857 1818 M
+43 7 V
+0 419 V
+% End plot #122
+% Begin plot #123
+stroke
+LT5
+1.00 1.00 0.50 C gsave 1900 1825 N 0 0 V 43 8 V 0 381 V 1 PolyFill
+1900 1825 M
+43 8 V
+0 381 V
+% End plot #123
+% Begin plot #124
+stroke
+LT6
+1.00 1.00 0.50 C gsave 1943 1833 N 0 0 V 43 8 V 0 835 V 1 PolyFill
+1943 1833 M
+43 8 V
+0 835 V
+% End plot #124
+% Begin plot #125
+stroke
+LT7
+1.00 1.00 0.50 C gsave 1986 1841 N 0 0 V 43 10 V 0 1077 V 1 PolyFill
+1986 1841 M
+43 10 V
+0 1077 V
+% End plot #125
+% Begin plot #126
+stroke
+LT8
+1.00 1.00 0.50 C gsave 2029 1851 N 0 0 V 43 10 V 0 440 V 1 PolyFill
+2029 1851 M
+43 10 V
+0 440 V
+% End plot #126
+% Begin plot #127
+stroke
+LT0
+1.00 1.00 0.50 C gsave 2072 1861 N 0 0 V 42 11 V 0 375 V 1 PolyFill
+2072 1861 M
+42 11 V
+0 375 V
+% End plot #127
+% Begin plot #128
+stroke
+LT1
+1.00 1.00 0.50 C gsave 2114 1872 N 0 0 V 43 11 V 0 453 V 1 PolyFill
+2114 1872 M
+43 11 V
+0 453 V
+% End plot #128
+% Begin plot #129
+stroke
+LT2
+1.00 1.00 0.50 C gsave 2157 1883 N 0 0 V 43 13 V 0 444 V 1 PolyFill
+2157 1883 M
+43 13 V
+0 444 V
+% End plot #129
+% Begin plot #130
+stroke
+LT3
+1.00 1.00 0.50 C gsave 2200 1896 N 0 0 V 43 13 V 0 466 V 1 PolyFill
+2200 1896 M
+43 13 V
+0 466 V
+% End plot #130
+% Begin plot #131
+stroke
+LT4
+1.00 1.00 0.50 C gsave 2243 1909 N 0 0 V 43 14 V 0 463 V 1 PolyFill
+2243 1909 M
+43 14 V
+0 463 V
+% End plot #131
+% Begin plot #132
+stroke
+LT5
+1.00 1.00 0.50 C gsave 2286 1923 N 0 0 V 43 15 V 0 153 V 1 PolyFill
+2286 1923 M
+43 15 V
+0 153 V
+% End plot #132
+% Begin plot #133
+stroke
+LT6
+1.00 1.00 0.50 C gsave 2329 1938 N 0 0 V 43 15 V 0 530 V 1 PolyFill
+2329 1938 M
+43 15 V
+0 530 V
+% End plot #133
+% Begin plot #134
+stroke
+LT7
+1.00 1.00 0.50 C gsave 2372 1953 N 0 0 V 43 17 V 0 441 V 1 PolyFill
+2372 1953 M
+43 17 V
+0 441 V
+% End plot #134
+% Begin plot #135
+stroke
+LT8
+1.00 1.00 0.50 C gsave 2415 1970 N 0 0 V 42 17 V 0 467 V 1 PolyFill
+2415 1970 M
+42 17 V
+0 467 V
+% End plot #135
+% Begin plot #136
+stroke
+LT0
+1.00 1.00 0.50 C gsave 2457 1987 N 0 0 V 43 18 V 0 841 V 1 PolyFill
+2457 1987 M
+43 18 V
+0 841 V
+% End plot #136
+% Begin plot #137
+stroke
+LT1
+1.00 1.00 0.50 C gsave 2500 2005 N 0 0 V 43 18 V 0 351 V 1 PolyFill
+2500 2005 M
+43 18 V
+0 351 V
+% End plot #137
+% Begin plot #138
+stroke
+LT2
+1.00 1.00 0.50 C gsave 2543 2023 N 0 0 V 43 20 V 0 331 V 1 PolyFill
+2543 2023 M
+43 20 V
+0 331 V
+% End plot #138
+% Begin plot #139
+stroke
+LT3
+1.00 1.00 0.50 C gsave 2586 2043 N 0 0 V 43 20 V 0 471 V 1 PolyFill
+2586 2043 M
+43 20 V
+0 471 V
+% End plot #139
+% Begin plot #140
+stroke
+LT4
+1.00 1.00 0.50 C gsave 2629 2063 N 0 0 V 43 20 V 0 465 V 1 PolyFill
+2629 2063 M
+43 20 V
+0 465 V
+% End plot #140
+% Begin plot #141
+stroke
+LT5
+1.00 1.00 0.50 C gsave 2672 2083 N 0 0 V 43 21 V 0 469 V 1 PolyFill
+2672 2083 M
+43 21 V
+0 469 V
+% End plot #141
+% Begin plot #142
+stroke
+LT6
+1.00 1.00 0.50 C gsave 2715 2104 N 0 0 V 43 22 V 0 450 V 1 PolyFill
+2715 2104 M
+43 22 V
+0 450 V
+% End plot #142
+% Begin plot #143
+stroke
+LT7
+1.00 1.00 0.50 C gsave 2758 2126 N 0 0 V 42 22 V 0 457 V 1 PolyFill
+2758 2126 M
+42 22 V
+0 457 V
+% End plot #143
+% Begin plot #144
+stroke
+LT8
+1.00 1.00 0.50 C gsave 2800 2148 N 0 0 V 43 22 V 0 411 V 1 PolyFill
+2800 2148 M
+43 22 V
+0 411 V
+% End plot #144
+% Begin plot #145
+stroke
+LT0
+1.00 1.00 0.50 C gsave 2843 2170 N 0 0 V 43 24 V 0 435 V 1 PolyFill
+2843 2170 M
+43 24 V
+0 435 V
+% End plot #145
+% Begin plot #146
+stroke
+LT1
+1.00 1.00 0.50 C gsave 2886 2194 N 0 0 V 43 23 V 0 444 V 1 PolyFill
+2886 2194 M
+43 23 V
+0 444 V
+% End plot #146
+% Begin plot #147
+stroke
+LT2
+1.00 1.00 0.50 C gsave 2929 2217 N 0 0 V 43 24 V 0 418 V 1 PolyFill
+2929 2217 M
+43 24 V
+0 418 V
+% End plot #147
+% Begin plot #148
+stroke
+LT3
+1.00 1.00 0.50 C gsave 2972 2241 N 0 0 V 43 24 V 0 443 V 1 PolyFill
+2972 2241 M
+43 24 V
+0 443 V
+% End plot #148
+% Begin plot #149
+stroke
+LT4
+1.00 1.00 0.50 C gsave 3015 2265 N 0 0 V 43 24 V 0 384 V 1 PolyFill
+3015 2265 M
+43 24 V
+0 384 V
+% End plot #149
+% Begin plot #150
+stroke
+LT5
+1.00 1.00 0.50 C gsave 3058 2289 N 0 0 V 43 25 V 0 536 V 1 PolyFill
+3058 2289 M
+43 25 V
+0 536 V
+% End plot #150
+% Begin plot #151
+stroke
+LT6
+1.00 1.00 0.50 C gsave 3101 2314 N 0 0 V 42 24 V 0 395 V 1 PolyFill
+3101 2314 M
+42 24 V
+0 395 V
+% End plot #151
+% Begin plot #152
+stroke
+LT7
+1.00 1.00 0.50 C gsave 3143 2338 N 0 0 V 43 26 V 0 320 V 1 PolyFill
+3143 2338 M
+43 26 V
+0 320 V
+% End plot #152
+% Begin plot #153
+stroke
+LT8
+1.00 1.00 0.50 C gsave 3186 2364 N 0 0 V 43 25 V 0 411 V 1 PolyFill
+3186 2364 M
+43 25 V
+0 411 V
+% End plot #153
+% Begin plot #154
+stroke
+LT0
+1.00 1.00 0.50 C gsave 3229 2389 N 0 0 V 43 26 V 0 92 V 1 PolyFill
+3229 2389 M
+43 26 V
+0 92 V
+% End plot #154
+% Begin plot #155
+stroke
+LT1
+1.00 1.00 0.50 C gsave 3272 2415 N 0 0 V 43 25 V 0 424 V 1 PolyFill
+3272 2415 M
+43 25 V
+0 424 V
+% End plot #155
+% Begin plot #156
+stroke
+LT2
+1.00 1.00 0.50 C gsave 3315 2440 N 0 0 V 43 27 V 0 121 V 1 PolyFill
+3315 2440 M
+43 27 V
+0 121 V
+% End plot #156
+% Begin plot #157
+stroke
+LT3
+1.00 1.00 0.50 C gsave 3358 2467 N 0 0 V 43 26 V 0 127 V 1 PolyFill
+3358 2467 M
+43 26 V
+0 127 V
+% End plot #157
+% Begin plot #158
+stroke
+LT4
+1.00 1.00 0.50 C gsave 3401 2493 N 0 0 V 43 26 V 0 285 V 1 PolyFill
+3401 2493 M
+43 26 V
+0 285 V
+% End plot #158
+% Begin plot #159
+stroke
+LT5
+1.00 1.00 0.50 C gsave 3444 2519 N 0 0 V 43 27 V 0 402 V 1 PolyFill
+3444 2519 M
+43 27 V
+0 402 V
+% End plot #159
+% Begin plot #160
+stroke
+LT6
+1.00 1.00 0.50 C gsave 3487 2546 N 0 0 V 42 26 V 0 312 V 1 PolyFill
+3487 2546 M
+42 26 V
+0 312 V
+% End plot #160
+% Begin plot #161
+stroke
+LT7
+1.00 1.00 0.50 C gsave 3529 2572 N 0 0 V 43 27 V 0 389 V 1 PolyFill
+3529 2572 M
+43 27 V
+0 389 V
+% End plot #161
+% Begin plot #162
+stroke
+LT8
+1.00 1.00 0.50 C gsave 3572 2599 N 0 0 V 43 26 V 0 326 V 1 PolyFill
+3572 2599 M
+43 26 V
+0 326 V
+% End plot #162
+% Begin plot #163
+stroke
+LT0
+1.00 1.00 0.50 C gsave 3615 2625 N 0 0 V 43 28 V 0 346 V 1 PolyFill
+3615 2625 M
+43 28 V
+0 346 V
+% End plot #163
+% Begin plot #164
+stroke
+LT1
+1.00 1.00 0.50 C gsave 3658 2653 N 0 0 V 43 27 V 0 183 V 1 PolyFill
+3658 2653 M
+43 27 V
+0 183 V
+% End plot #164
+% Begin plot #165
+stroke
+LT2
+1.00 1.00 0.50 C gsave 3701 2680 N 0 0 V 43 27 V 0 353 V 1 PolyFill
+3701 2680 M
+43 27 V
+0 353 V
+% End plot #165
+% Begin plot #166
+stroke
+LT3
+1.00 1.00 0.50 C gsave 3744 2707 N 0 0 V 43 27 V 0 365 V 1 PolyFill
+3744 2707 M
+43 27 V
+0 365 V
+% End plot #166
+% Begin plot #167
+stroke
+LT4
+1.00 1.00 0.50 C gsave 3787 2734 N 0 0 V 43 27 V 0 360 V 1 PolyFill
+3787 2734 M
+43 27 V
+0 360 V
+% End plot #167
+% Begin plot #168
+stroke
+LT5
+1.00 1.00 0.50 C gsave 3830 2761 N 0 0 V 42 28 V 0 292 V 1 PolyFill
+3830 2761 M
+42 28 V
+0 292 V
+% End plot #168
+% Begin plot #169
+stroke
+LT6
+1.00 1.00 0.50 C gsave 3872 2789 N 0 0 V 43 27 V 0 200 V 1 PolyFill
+3872 2789 M
+43 27 V
+0 200 V
+% End plot #169
+% Begin plot #170
+stroke
+LT7
+1.00 1.00 0.50 C gsave 3915 2816 N 0 0 V 43 29 V 0 268 V 1 PolyFill
+3915 2816 M
+43 29 V
+0 268 V
+% End plot #170
+% Begin plot #171
+stroke
+LT8
+1.00 1.00 0.50 C gsave 3958 2845 N 0 0 V 43 27 V 0 334 V 1 PolyFill
+3958 2845 M
+43 27 V
+0 334 V
+% End plot #171
+% Begin plot #172
+stroke
+LT0
+1.00 1.00 0.50 C gsave 4001 2872 N 0 0 V 43 28 V 0 305 V 1 PolyFill
+4001 2872 M
+43 28 V
+0 305 V
+% End plot #172
+% Begin plot #173
+stroke
+LT1
+1.00 1.00 0.50 C gsave 4044 2900 N 0 0 V 43 28 V 0 280 V 1 PolyFill
+4044 2900 M
+43 28 V
+0 280 V
+% End plot #173
+% Begin plot #174
+stroke
+LT2
+1.00 1.00 0.50 C gsave 4087 2928 N 0 0 V 43 28 V 0 311 V 1 PolyFill
+4087 2928 M
+43 28 V
+0 311 V
+% End plot #174
+% Begin plot #175
+stroke
+LT3
+1.00 1.00 0.50 C gsave 4130 2956 N 0 0 V 43 29 V 0 40 V 1 PolyFill
+4130 2956 M
+43 29 V
+0 40 V
+% End plot #175
+% Begin plot #176
+stroke
+LT4
+1.00 1.00 0.50 C gsave 4173 2985 N 0 0 V 42 27 V 0 295 V 1 PolyFill
+4173 2985 M
+42 27 V
+0 295 V
+% End plot #176
+% Begin plot #177
+stroke
+LT5
+1.00 1.00 0.50 C gsave 4215 3012 N 0 0 V 43 27 V 0 285 V 1 PolyFill
+4215 3012 M
+43 27 V
+0 285 V
+% End plot #177
+% Begin plot #178
+stroke
+LT6
+1.00 1.00 0.50 C gsave 4258 3039 N 0 0 V 43 25 V 0 291 V 1 PolyFill
+4258 3039 M
+43 25 V
+0 291 V
+% End plot #178
+% Begin plot #179
+stroke
+LT7
+1.00 1.00 0.50 C gsave 4301 3064 N 0 0 V 43 25 V 0 274 V 1 PolyFill
+4301 3064 M
+43 25 V
+0 274 V
+% End plot #179
+% Begin plot #180
+stroke
+LT8
+1.00 1.00 0.50 C gsave 4344 3089 N 0 0 V 43 26 V 0 226 V 1 PolyFill
+4344 3089 M
+43 26 V
+0 226 V
+% End plot #180
+% Begin plot #181
+stroke
+LT0
+1.00 1.00 0.50 C gsave 4387 3115 N 0 0 V 43 25 V 0 280 V 1 PolyFill
+4387 3115 M
+43 25 V
+0 280 V
+% End plot #181
+% Begin plot #182
+stroke
+LT1
+1.00 1.00 0.50 C gsave 4430 3140 N 0 0 V 43 25 V 0 271 V 1 PolyFill
+4430 3140 M
+43 25 V
+0 271 V
+% End plot #182
+% Begin plot #183
+stroke
+LT2
+1.00 1.00 0.50 C gsave 4473 3165 N 0 0 V 43 25 V 0 46 V 1 PolyFill
+4473 3165 M
+43 25 V
+0 46 V
+% End plot #183
+% Begin plot #184
+stroke
+LT3
+1.00 1.00 0.50 C gsave 4516 3190 N 0 0 V 42 26 V 0 223 V 1 PolyFill
+4516 3190 M
+42 26 V
+0 223 V
+% End plot #184
+% Begin plot #185
+stroke
+LT4
+1.00 1.00 0.50 C gsave 4558 3216 N 0 0 V 43 25 V 0 262 V 1 PolyFill
+4558 3216 M
+43 25 V
+0 262 V
+% End plot #185
+% Begin plot #186
+stroke
+LT5
+1.00 1.00 0.50 C gsave 4601 3241 N 0 0 V 43 25 V 0 256 V 1 PolyFill
+4601 3241 M
+43 25 V
+0 256 V
+% End plot #186
+% Begin plot #187
+stroke
+LT6
+1.00 1.00 0.50 C gsave 4644 3266 N 0 0 V 43 25 V 0 253 V 1 PolyFill
+4644 3266 M
+43 25 V
+0 253 V
+% End plot #187
+% Begin plot #188
+stroke
+LT7
+1.00 1.00 0.50 C gsave 4687 3291 N 0 0 V 43 26 V 0 215 V 1 PolyFill
+4687 3291 M
+43 26 V
+0 215 V
+% End plot #188
+% Begin plot #189
+stroke
+LT8
+0.50 1.00 0.50 C gsave 869 1983 N 0 0 V 43 -119 V -43 -576 V 1 PolyFill
+869 1983 M
+43 -119 V
+869 1288 L
+% End plot #189
+% Begin plot #190
+stroke
+LT0
+0.50 1.00 0.50 C gsave 912 1864 N 0 0 V 43 -453 V -43 -115 V 1 PolyFill
+912 1864 M
+43 -453 V
+912 1296 L
+% End plot #190
+% Begin plot #191
+stroke
+LT1
+0.50 1.00 0.50 C gsave 955 1411 N 0 0 V 42 10 V -42 -117 V 1 PolyFill
+955 1411 M
+42 10 V
+955 1304 L
+% End plot #191
+% Begin plot #192
+stroke
+LT2
+0.50 1.00 0.50 C gsave 997 1421 N 0 0 V 43 -56 V -43 -53 V 1 PolyFill
+997 1421 M
+43 -56 V
+-43 -53 V
+% End plot #192
+% Begin plot #193
+stroke
+LT3
+0.50 1.00 0.50 C gsave 1040 1365 N 0 0 V 43 104 V -43 -148 V 1 PolyFill
+1040 1365 M
+43 104 V
+-43 -148 V
+% End plot #193
+% Begin plot #194
+stroke
+LT4
+0.50 1.00 0.50 C gsave 1083 1469 N 0 0 V 43 278 V -43 -416 V 1 PolyFill
+1083 1469 M
+43 278 V
+-43 -416 V
+% End plot #194
+% Begin plot #195
+stroke
+LT5
+0.50 1.00 0.50 C gsave 1126 1747 N 0 0 V 43 -283 V -43 -123 V 1 PolyFill
+1126 1747 M
+43 -283 V
+-43 -123 V
+% End plot #195
+% Begin plot #196
+stroke
+LT6
+0.50 1.00 0.50 C gsave 1169 1464 N 0 0 V 43 -45 V -43 -67 V 1 PolyFill
+1169 1464 M
+43 -45 V
+-43 -67 V
+% End plot #196
+% Begin plot #197
+stroke
+LT7
+0.50 1.00 0.50 C gsave 1212 1419 N 0 0 V 43 1350 V -43 -1405 V 1 PolyFill
+1212 1419 M
+43 1350 V
+1212 1364 L
+% End plot #197
+% Begin plot #198
+stroke
+LT8
+0.50 1.00 0.50 C gsave 1255 2769 N 0 0 V 43 178 V -43 -1571 V 1 PolyFill
+1255 2769 M
+43 178 V
+1255 1376 L
+% End plot #198
+% Begin plot #199
+stroke
+LT0
+0.50 1.00 0.50 C gsave 1298 2947 N 0 0 V 42 -1488 V -42 -70 V 1 PolyFill
+1298 2947 M
+42 -1488 V
+-42 -70 V
+% End plot #199
+% Begin plot #200
+stroke
+LT1
+0.50 1.00 0.50 C gsave 1340 1459 N 0 0 V 43 -43 V -43 -13 V 1 PolyFill
+1340 1459 M
+43 -43 V
+-43 -13 V
+% End plot #200
+% Begin plot #201
+stroke
+LT2
+0.50 1.00 0.50 C gsave 1383 1416 N 0 0 V 43 -63 V -43 64 V 1 PolyFill
+1383 1416 M
+43 -63 V
+-43 64 V
+% End plot #201
+% Begin plot #202
+stroke
+LT3
+0.50 1.00 0.50 C gsave 1426 1353 N 0 0 V 43 90 V -43 -11 V 1 PolyFill
+1426 1353 M
+43 90 V
+-43 -11 V
+% End plot #202
+% Begin plot #203
+stroke
+LT4
+0.50 1.00 0.50 C gsave 1469 1443 N 0 0 V 43 -24 V -43 28 V 1 PolyFill
+1469 1443 M
+43 -24 V
+-43 28 V
+% End plot #203
+% Begin plot #204
+stroke
+LT5
+0.50 1.00 0.50 C gsave 1512 1419 N 0 0 V 43 382 V -43 -338 V 1 PolyFill
+1512 1419 M
+43 382 V
+-43 -338 V
+% End plot #204
+% Begin plot #205
+stroke
+LT6
+0.50 1.00 0.50 C gsave 1555 1801 N 0 0 V 43 -176 V -43 -146 V 1 PolyFill
+1555 1801 M
+43 -176 V
+-43 -146 V
+% End plot #205
+% Begin plot #206
+stroke
+LT7
+0.50 1.00 0.50 C gsave 1598 1625 N 0 0 V 43 654 V -43 -783 V 1 PolyFill
+1598 1625 M
+43 654 V
+-43 -783 V
+% End plot #206
+% Begin plot #207
+stroke
+LT8
+0.50 1.00 0.50 C gsave 1641 2279 N 0 0 V 42 -700 V -42 -65 V 1 PolyFill
+1641 2279 M
+42 -700 V
+-42 -65 V
+% End plot #207
+% Begin plot #208
+stroke
+LT0
+0.50 1.00 0.50 C gsave 1683 1579 N 0 0 V 43 -12 V -43 -35 V 1 PolyFill
+1683 1579 M
+43 -12 V
+-43 -35 V
+% End plot #208
+% Begin plot #209
+stroke
+LT1
+0.50 1.00 0.50 C gsave 1726 1567 N 0 0 V 43 -42 V -43 25 V 1 PolyFill
+1726 1567 M
+43 -42 V
+-43 25 V
+% End plot #209
+% Begin plot #210
+stroke
+LT2
+0.50 1.00 0.50 C gsave 1769 1525 N 0 0 V 43 159 V -43 -115 V 1 PolyFill
+1769 1525 M
+43 159 V
+-43 -115 V
+% End plot #210
+% Begin plot #211
+stroke
+LT3
+0.50 1.00 0.50 C gsave 1812 1684 N 0 0 V 43 167 V -43 -263 V 1 PolyFill
+1812 1684 M
+43 167 V
+-43 -263 V
+% End plot #211
+% Begin plot #212
+stroke
+LT4
+0.50 1.00 0.50 C gsave 1855 1851 N 0 0 V 43 183 V -43 -427 V 1 PolyFill
+1855 1851 M
+43 183 V
+-43 -427 V
+% End plot #212
+% Begin plot #213
+stroke
+LT5
+0.50 1.00 0.50 C gsave 1898 2034 N 0 0 V 43 167 V -43 -573 V 1 PolyFill
+1898 2034 M
+43 167 V
+-43 -573 V
+% End plot #213
+% Begin plot #214
+stroke
+LT6
+0.50 1.00 0.50 C gsave 1941 2201 N 0 0 V 43 -491 V -43 -61 V 1 PolyFill
+1941 2201 M
+43 -491 V
+-43 -61 V
+% End plot #214
+% Begin plot #215
+stroke
+LT7
+0.50 1.00 0.50 C gsave 1984 1710 N 0 0 V 42 40 V -42 -79 V 1 PolyFill
+1984 1710 M
+42 40 V
+-42 -79 V
+% End plot #215
+% Begin plot #216
+stroke
+LT8
+0.50 1.00 0.50 C gsave 2026 1750 N 0 0 V 43 -21 V -43 -37 V 1 PolyFill
+2026 1750 M
+43 -21 V
+-43 -37 V
+% End plot #216
+% Begin plot #217
+stroke
+LT0
+0.50 1.00 0.50 C gsave 2069 1729 N 0 0 V 43 29 V -43 -44 V 1 PolyFill
+2069 1729 M
+43 29 V
+-43 -44 V
+% End plot #217
+% Begin plot #218
+stroke
+LT1
+0.50 1.00 0.50 C gsave 2112 1758 N 0 0 V 43 12 V -43 -33 V 1 PolyFill
+2112 1758 M
+43 12 V
+-43 -33 V
+% End plot #218
+% Begin plot #219
+stroke
+LT2
+0.50 1.00 0.50 C gsave 2155 1770 N 0 0 V 43 21 V -43 -32 V 1 PolyFill
+2155 1770 M
+43 21 V
+-43 -32 V
+% End plot #219
+% Begin plot #220
+stroke
+LT3
+0.50 1.00 0.50 C gsave 2198 1791 N 0 0 V 43 14 V -43 -23 V 1 PolyFill
+2198 1791 M
+43 14 V
+-43 -23 V
+% End plot #220
+% Begin plot #221
+stroke
+LT4
+0.50 1.00 0.50 C gsave 2241 1805 N 0 0 V 43 385 V -43 -385 V 1 PolyFill
+2241 1805 M
+43 385 V
+-43 -385 V
+% End plot #221
+% Begin plot #222
+stroke
+LT5
+0.50 1.00 0.50 C gsave 2284 2190 N 0 0 V 43 596 V -43 -957 V 1 PolyFill
+2284 2190 M
+43 596 V
+-43 -957 V
+% End plot #222
+% Begin plot #223
+stroke
+LT6
+0.50 1.00 0.50 C gsave 2327 2786 N 0 0 V 42 -931 V -42 -3 V 1 PolyFill
+2327 2786 M
+42 -931 V
+-42 -3 V
+% End plot #223
+% Begin plot #224
+stroke
+LT7
+0.50 1.00 0.50 C gsave 2369 1855 N 0 0 V 43 50 V -43 -29 V 1 PolyFill
+2369 1855 M
+43 50 V
+-43 -29 V
+% End plot #224
+% Begin plot #225
+stroke
+LT8
+0.50 1.00 0.50 C gsave 2412 1905 N 0 0 V 43 27 V -43 -32 V 1 PolyFill
+2412 1905 M
+43 27 V
+-43 -32 V
+% End plot #225
+% Begin plot #226
+stroke
+LT0
+0.50 1.00 0.50 C gsave 2455 1932 N 0 0 V 43 1262 V -43 -1270 V 1 PolyFill
+2455 1932 M
+43 1262 V
+2455 1924 L
+% End plot #226
+% Begin plot #227
+stroke
+LT1
+0.50 1.00 0.50 C gsave 2498 3194 N 0 0 V 43 -53 V -43 -1192 V 1 PolyFill
+2498 3194 M
+43 -53 V
+2498 1949 L
+% End plot #227
+% Begin plot #228
+stroke
+LT2
+0.50 1.00 0.50 C gsave 2541 3141 N 0 0 V 43 -85 V -43 -1084 V 1 PolyFill
+2541 3141 M
+43 -85 V
+2541 1972 L
+% End plot #228
+% Begin plot #229
+stroke
+LT3
+0.50 1.00 0.50 C gsave 2584 3056 N 0 0 V 43 -183 V -43 -875 V 1 PolyFill
+2584 3056 M
+43 -183 V
+-43 -875 V
+% End plot #229
+% Begin plot #230
+stroke
+LT4
+0.50 1.00 0.50 C gsave 2627 2873 N 0 0 V 43 -827 V -43 -24 V 1 PolyFill
+2627 2873 M
+43 -827 V
+-43 -24 V
+% End plot #230
+% Begin plot #231
+stroke
+LT5
+0.50 1.00 0.50 C gsave 2670 2046 N 0 0 V 43 18 V -43 -17 V 1 PolyFill
+2670 2046 M
+43 18 V
+-43 -17 V
+% End plot #231
+% Begin plot #232
+stroke
+LT6
+0.50 1.00 0.50 C gsave 2713 2064 N 0 0 V 42 16 V -42 -8 V 1 PolyFill
+2713 2064 M
+42 16 V
+-42 -8 V
+% End plot #232
+% Begin plot #233
+stroke
+LT7
+0.50 1.00 0.50 C gsave 2755 2080 N 0 0 V 43 17 V -43 0 V 1 PolyFill
+2755 2080 M
+43 17 V
+-43 0 V
+% End plot #233
+% Begin plot #234
+stroke
+LT8
+0.50 1.00 0.50 C gsave 2798 2097 N 0 0 V 43 29 V -43 -3 V 1 PolyFill
+2798 2097 M
+43 29 V
+-43 -3 V
+% End plot #234
+% Begin plot #235
+stroke
+LT0
+0.50 1.00 0.50 C gsave 2841 2126 N 0 0 V 43 159 V -43 -137 V 1 PolyFill
+2841 2126 M
+43 159 V
+-43 -137 V
+% End plot #235
+% Begin plot #236
+stroke
+LT1
+0.50 1.00 0.50 C gsave 2884 2285 N 0 0 V 43 145 V -43 -256 V 1 PolyFill
+2884 2285 M
+43 145 V
+-43 -256 V
+% End plot #236
+% Begin plot #237
+stroke
+LT2
+0.50 1.00 0.50 C gsave 2927 2430 N 0 0 V 43 46 V -43 -277 V 1 PolyFill
+2927 2430 M
+43 46 V
+-43 -277 V
+% End plot #237
+% Begin plot #238
+stroke
+LT3
+0.50 1.00 0.50 C gsave 2970 2476 N 0 0 V 43 -220 V -43 -31 V 1 PolyFill
+2970 2476 M
+43 -220 V
+-43 -31 V
+% End plot #238
+% Begin plot #239
+stroke
+LT4
+0.50 1.00 0.50 C gsave 3013 2256 N 0 0 V 43 22 V -43 -27 V 1 PolyFill
+3013 2256 M
+43 22 V
+-43 -27 V
+% End plot #239
+% Begin plot #240
+stroke
+LT5
+0.50 1.00 0.50 C gsave 3056 2278 N 0 0 V 42 -18 V -42 16 V 1 PolyFill
+3056 2278 M
+42 -18 V
+-42 16 V
+% End plot #240
+% Begin plot #241
+stroke
+LT6
+0.50 1.00 0.50 C gsave 3098 2260 N 0 0 V 43 328 V -43 -285 V 1 PolyFill
+3098 2260 M
+43 328 V
+-43 -285 V
+% End plot #241
+% Begin plot #242
+stroke
+LT7
+0.50 1.00 0.50 C gsave 3141 2588 N 0 0 V 43 111 V -43 -371 V 1 PolyFill
+3141 2588 M
+43 111 V
+-43 -371 V
+% End plot #242
+% Begin plot #243
+stroke
+LT8
+0.50 1.00 0.50 C gsave 3184 2699 N 0 0 V 43 -318 V -43 -26 V 1 PolyFill
+3184 2699 M
+43 -318 V
+-43 -26 V
+% End plot #243
+% Begin plot #244
+stroke
+LT0
+0.50 1.00 0.50 C gsave 3227 2381 N 0 0 V 43 51 V -43 -51 V 1 PolyFill
+3227 2381 M
+43 51 V
+-43 -51 V
+% End plot #244
+% Begin plot #245
+stroke
+LT1
+0.50 1.00 0.50 C gsave 3270 2432 N 0 0 V 43 3 V -43 -27 V 1 PolyFill
+3270 2432 M
+43 3 V
+-43 -27 V
+% End plot #245
+% Begin plot #246
+stroke
+LT2
+0.50 1.00 0.50 C gsave 3313 2435 N 0 0 V 43 34 V -43 -35 V 1 PolyFill
+3313 2435 M
+43 34 V
+-43 -35 V
+% End plot #246
+% Begin plot #247
+stroke
+LT3
+0.50 1.00 0.50 C gsave 3356 2469 N 0 0 V 43 23 V -43 -31 V 1 PolyFill
+3356 2469 M
+43 23 V
+-43 -31 V
+% End plot #247
+% Begin plot #248
+stroke
+LT4
+0.50 1.00 0.50 C gsave 3399 2492 N 0 0 V 42 24 V -42 -28 V 1 PolyFill
+3399 2492 M
+42 24 V
+-42 -28 V
+% End plot #248
+% Begin plot #249
+stroke
+LT5
+0.50 1.00 0.50 C gsave 3441 2516 N 0 0 V 43 27 V -43 -29 V 1 PolyFill
+3441 2516 M
+43 27 V
+-43 -29 V
+% End plot #249
+% Begin plot #250
+stroke
+LT6
+0.50 1.00 0.50 C gsave 3484 2543 N 0 0 V 43 236 V -43 -238 V 1 PolyFill
+3484 2543 M
+43 236 V
+-43 -238 V
+% End plot #250
+% Begin plot #251
+stroke
+LT7
+0.50 1.00 0.50 C gsave 3527 2779 N 0 0 V 43 -187 V -43 -24 V 1 PolyFill
+3527 2779 M
+43 -187 V
+-43 -24 V
+% End plot #251
+% Begin plot #252
+stroke
+LT8
+0.50 1.00 0.50 C gsave 3570 2592 N 0 0 V 43 217 V -43 -214 V 1 PolyFill
+3570 2592 M
+43 217 V
+-43 -214 V
+% End plot #252
+% Begin plot #253
+stroke
+LT0
+0.50 1.00 0.50 C gsave 3613 2809 N 0 0 V 43 160 V -43 -347 V 1 PolyFill
+3613 2809 M
+43 160 V
+-43 -347 V
+% End plot #253
+% Begin plot #254
+stroke
+LT1
+0.50 1.00 0.50 C gsave 3656 2969 N 0 0 V 43 -313 V -43 -6 V 1 PolyFill
+3656 2969 M
+43 -313 V
+-43 -6 V
+% End plot #254
+% Begin plot #255
+stroke
+LT2
+0.50 1.00 0.50 C gsave 3699 2656 N 0 0 V 43 40 V -43 -19 V 1 PolyFill
+3699 2656 M
+43 40 V
+-43 -19 V
+% End plot #255
+% Begin plot #256
+stroke
+LT3
+0.50 1.00 0.50 C gsave 3742 2696 N 0 0 V 42 37 V -42 -29 V 1 PolyFill
+3742 2696 M
+42 37 V
+-42 -29 V
+% End plot #256
+% Begin plot #257
+stroke
+LT4
+0.50 1.00 0.50 C gsave 3784 2733 N 0 0 V 43 31 V -43 -32 V 1 PolyFill
+3784 2733 M
+43 31 V
+-43 -32 V
+% End plot #257
+% Begin plot #258
+stroke
+LT5
+0.50 1.00 0.50 C gsave 3827 2764 N 0 0 V 43 27 V -43 -32 V 1 PolyFill
+3827 2764 M
+43 27 V
+-43 -32 V
+% End plot #258
+% Begin plot #259
+stroke
+LT6
+0.50 1.00 0.50 C gsave 3870 2791 N 0 0 V 43 258 V -43 -262 V 1 PolyFill
+3870 2791 M
+43 258 V
+-43 -262 V
+% End plot #259
+% Begin plot #260
+stroke
+LT7
+0.50 1.00 0.50 C gsave 3913 3049 N 0 0 V 43 -84 V -43 -151 V 1 PolyFill
+3913 3049 M
+43 -84 V
+-43 -151 V
+% End plot #260
+% Begin plot #261
+stroke
+LT8
+0.50 1.00 0.50 C gsave 3956 2965 N 0 0 V 43 148 V -43 -270 V 1 PolyFill
+3956 2965 M
+43 148 V
+-43 -270 V
+% End plot #261
+% Begin plot #262
+stroke
+LT0
+0.50 1.00 0.50 C gsave 3999 3113 N 0 0 V 43 -39 V -43 -204 V 1 PolyFill
+3999 3113 M
+43 -39 V
+-43 -204 V
+% End plot #262
+% Begin plot #263
+stroke
+LT1
+0.50 1.00 0.50 C gsave 4042 3074 N 0 0 V 43 -55 V -43 -121 V 1 PolyFill
+4042 3074 M
+43 -55 V
+-43 -121 V
+% End plot #263
+% Begin plot #264
+stroke
+LT2
+0.50 1.00 0.50 C gsave 4085 3019 N 0 0 V 42 -62 V -42 -30 V 1 PolyFill
+4085 3019 M
+42 -62 V
+-42 -30 V
+% End plot #264
+% Begin plot #265
+stroke
+LT3
+0.50 1.00 0.50 C gsave 4127 2957 N 0 0 V 43 147 V -43 -150 V 1 PolyFill
+4127 2957 M
+43 147 V
+-43 -150 V
+% End plot #265
+% Begin plot #266
+stroke
+LT4
+0.50 1.00 0.50 C gsave 4170 3104 N 0 0 V 43 -93 V -43 -28 V 1 PolyFill
+4170 3104 M
+43 -93 V
+-43 -28 V
+% End plot #266
+% Begin plot #267
+stroke
+LT5
+0.50 1.00 0.50 C gsave 4213 3011 N 0 0 V 43 27 V -43 -27 V 1 PolyFill
+4213 3011 M
+43 27 V
+-43 -27 V
+% End plot #267
+% Begin plot #268
+stroke
+LT6
+0.50 1.00 0.50 C gsave 4256 3038 N 0 0 V 43 26 V -43 -27 V 1 PolyFill
+4256 3038 M
+43 26 V
+-43 -27 V
+% End plot #268
+% Begin plot #269
+stroke
+LT7
+0.50 1.00 0.50 C gsave 4299 3064 N 0 0 V 43 27 V -43 -28 V 1 PolyFill
+4299 3064 M
+43 27 V
+-43 -28 V
+% End plot #269
+% Begin plot #270
+stroke
+LT8
+0.50 1.00 0.50 C gsave 4342 3091 N 0 0 V 43 23 V -43 -26 V 1 PolyFill
+4342 3091 M
+43 23 V
+-43 -26 V
+% End plot #270
+% Begin plot #271
+stroke
+LT0
+0.50 1.00 0.50 C gsave 4385 3114 N 0 0 V 43 25 V -43 -26 V 1 PolyFill
+4385 3114 M
+43 25 V
+-43 -26 V
+% End plot #271
+% Begin plot #272
+stroke
+LT1
+0.50 1.00 0.50 C gsave 4428 3139 N 0 0 V 42 27 V -42 -28 V 1 PolyFill
+4428 3139 M
+42 27 V
+-42 -28 V
+% End plot #272
+% Begin plot #273
+stroke
+LT2
+0.50 1.00 0.50 C gsave 4470 3166 N 0 0 V 43 25 V -43 -27 V 1 PolyFill
+4470 3166 M
+43 25 V
+-43 -27 V
+% End plot #273
+% Begin plot #274
+stroke
+LT3
+0.50 1.00 0.50 C gsave 4513 3191 N 0 0 V 43 24 V -43 -26 V 1 PolyFill
+4513 3191 M
+43 24 V
+-43 -26 V
+% End plot #274
+% Begin plot #275
+stroke
+LT4
+0.50 1.00 0.50 C gsave 4556 3215 N 0 0 V 43 25 V -43 -26 V 1 PolyFill
+4556 3215 M
+43 25 V
+-43 -26 V
+% End plot #275
+% Begin plot #276
+stroke
+LT5
+0.50 1.00 0.50 C gsave 4599 3240 N 0 0 V 43 26 V -43 -27 V 1 PolyFill
+4599 3240 M
+43 26 V
+-43 -27 V
+% End plot #276
+% Begin plot #277
+stroke
+LT6
+0.50 1.00 0.50 C gsave 4642 3266 N 0 0 V 43 26 V -43 -27 V 1 PolyFill
+4642 3266 M
+43 26 V
+-43 -27 V
+% End plot #277
+% Begin plot #278
+stroke
+LT7
+0.50 1.00 0.50 C gsave 869 1288 N 0 0 V 43 8 V 0 568 V 1 PolyFill
+869 1288 M
+43 8 V
+0 568 V
+% End plot #278
+% Begin plot #279
+stroke
+LT8
+0.50 1.00 0.50 C gsave 912 1296 N 0 0 V 43 8 V 0 107 V 1 PolyFill
+912 1296 M
+43 8 V
+0 107 V
+% End plot #279
+% Begin plot #280
+stroke
+LT0
+0.50 1.00 0.50 C gsave 955 1304 N 0 0 V 42 8 V 0 109 V 1 PolyFill
+955 1304 M
+42 8 V
+0 109 V
+% End plot #280
+% Begin plot #281
+stroke
+LT1
+0.50 1.00 0.50 C gsave 997 1312 N 0 0 V 43 9 V 0 44 V 1 PolyFill
+997 1312 M
+43 9 V
+0 44 V
+% End plot #281
+% Begin plot #282
+stroke
+LT2
+0.50 1.00 0.50 C gsave 1040 1321 N 0 0 V 43 10 V 0 138 V 1 PolyFill
+1040 1321 M
+43 10 V
+0 138 V
+% End plot #282
+% Begin plot #283
+stroke
+LT3
+0.50 1.00 0.50 C gsave 1083 1331 N 0 0 V 43 10 V 0 406 V 1 PolyFill
+1083 1331 M
+43 10 V
+0 406 V
+% End plot #283
+% Begin plot #284
+stroke
+LT4
+0.50 1.00 0.50 C gsave 1126 1341 N 0 0 V 43 11 V 0 112 V 1 PolyFill
+1126 1341 M
+43 11 V
+0 112 V
+% End plot #284
+% Begin plot #285
+stroke
+LT5
+0.50 1.00 0.50 C gsave 1169 1352 N 0 0 V 43 12 V 0 55 V 1 PolyFill
+1169 1352 M
+43 12 V
+0 55 V
+% End plot #285
+% Begin plot #286
+stroke
+LT6
+0.50 1.00 0.50 C gsave 1212 1364 N 0 0 V 43 12 V 0 1393 V 1 PolyFill
+1212 1364 M
+43 12 V
+0 1393 V
+% End plot #286
+% Begin plot #287
+stroke
+LT7
+0.50 1.00 0.50 C gsave 1255 1376 N 0 0 V 43 13 V 0 1558 V 1 PolyFill
+1255 1376 M
+43 13 V
+0 1558 V
+% End plot #287
+% Begin plot #288
+stroke
+LT8
+0.50 1.00 0.50 C gsave 1298 1389 N 0 0 V 42 14 V 0 56 V 1 PolyFill
+1298 1389 M
+42 14 V
+0 56 V
+% End plot #288
+% Begin plot #289
+stroke
+LT0
+0.50 1.00 0.50 C gsave 1340 1403 N 0 0 V 43 14 V 0 -1 V 1 PolyFill
+1340 1403 M
+43 14 V
+0 -1 V
+% End plot #289
+% Begin plot #290
+stroke
+LT1
+0.50 1.00 0.50 C gsave 1383 1417 N 0 0 V 43 15 V 0 -79 V 1 PolyFill
+1383 1417 M
+43 15 V
+0 -79 V
+% End plot #290
+% Begin plot #291
+stroke
+LT2
+0.50 1.00 0.50 C gsave 1426 1432 N 0 0 V 43 15 V 0 -4 V 1 PolyFill
+1426 1432 M
+43 15 V
+0 -4 V
+% End plot #291
+% Begin plot #292
+stroke
+LT3
+0.50 1.00 0.50 C gsave 1469 1447 N 0 0 V 43 16 V 0 -44 V 1 PolyFill
+1469 1447 M
+43 16 V
+0 -44 V
+% End plot #292
+% Begin plot #293
+stroke
+LT4
+0.50 1.00 0.50 C gsave 1512 1463 N 0 0 V 43 16 V 0 322 V 1 PolyFill
+1512 1463 M
+43 16 V
+0 322 V
+% End plot #293
+% Begin plot #294
+stroke
+LT5
+0.50 1.00 0.50 C gsave 1555 1479 N 0 0 V 43 17 V 0 129 V 1 PolyFill
+1555 1479 M
+43 17 V
+0 129 V
+% End plot #294
+% Begin plot #295
+stroke
+LT6
+0.50 1.00 0.50 C gsave 1598 1496 N 0 0 V 43 18 V 0 765 V 1 PolyFill
+1598 1496 M
+43 18 V
+0 765 V
+% End plot #295
+% Begin plot #296
+stroke
+LT7
+0.50 1.00 0.50 C gsave 1641 1514 N 0 0 V 42 18 V 0 47 V 1 PolyFill
+1641 1514 M
+42 18 V
+0 47 V
+% End plot #296
+% Begin plot #297
+stroke
+LT8
+0.50 1.00 0.50 C gsave 1683 1532 N 0 0 V 43 18 V 0 17 V 1 PolyFill
+1683 1532 M
+43 18 V
+0 17 V
+% End plot #297
+% Begin plot #298
+stroke
+LT0
+0.50 1.00 0.50 C gsave 1726 1550 N 0 0 V 43 19 V 0 -44 V 1 PolyFill
+1726 1550 M
+43 19 V
+0 -44 V
+% End plot #298
+% Begin plot #299
+stroke
+LT1
+0.50 1.00 0.50 C gsave 1769 1569 N 0 0 V 43 19 V 0 96 V 1 PolyFill
+1769 1569 M
+43 19 V
+0 96 V
+% End plot #299
+% Begin plot #300
+stroke
+LT2
+0.50 1.00 0.50 C gsave 1812 1588 N 0 0 V 43 19 V 0 244 V 1 PolyFill
+1812 1588 M
+43 19 V
+0 244 V
+% End plot #300
+% Begin plot #301
+stroke
+LT3
+0.50 1.00 0.50 C gsave 1855 1607 N 0 0 V 43 21 V 0 406 V 1 PolyFill
+1855 1607 M
+43 21 V
+0 406 V
+% End plot #301
+% Begin plot #302
+stroke
+LT4
+0.50 1.00 0.50 C gsave 1898 1628 N 0 0 V 43 21 V 0 552 V 1 PolyFill
+1898 1628 M
+43 21 V
+0 552 V
+% End plot #302
+% Begin plot #303
+stroke
+LT5
+0.50 1.00 0.50 C gsave 1941 1649 N 0 0 V 43 22 V 0 39 V 1 PolyFill
+1941 1649 M
+43 22 V
+0 39 V
+% End plot #303
+% Begin plot #304
+stroke
+LT6
+0.50 1.00 0.50 C gsave 1984 1671 N 0 0 V 42 21 V 0 58 V 1 PolyFill
+1984 1671 M
+42 21 V
+0 58 V
+% End plot #304
+% Begin plot #305
+stroke
+LT7
+0.50 1.00 0.50 C gsave 2026 1692 N 0 0 V 43 22 V 0 15 V 1 PolyFill
+2026 1692 M
+43 22 V
+0 15 V
+% End plot #305
+% Begin plot #306
+stroke
+LT8
+0.50 1.00 0.50 C gsave 2069 1714 N 0 0 V 43 23 V 0 21 V 1 PolyFill
+2069 1714 M
+43 23 V
+0 21 V
+% End plot #306
+% Begin plot #307
+stroke
+LT0
+0.50 1.00 0.50 C gsave 2112 1737 N 0 0 V 43 22 V 0 11 V 1 PolyFill
+2112 1737 M
+43 22 V
+0 11 V
+% End plot #307
+% Begin plot #308
+stroke
+LT1
+0.50 1.00 0.50 C gsave 2155 1759 N 0 0 V 43 23 V 0 9 V 1 PolyFill
+2155 1759 M
+43 23 V
+0 9 V
+% End plot #308
+% Begin plot #309
+stroke
+LT2
+0.50 1.00 0.50 C gsave 2198 1782 N 0 0 V 43 23 V 0 0 V 1 PolyFill
+2198 1782 M
+43 23 V
+% End plot #309
+% Begin plot #310
+stroke
+LT3
+0.50 1.00 0.50 C gsave 2241 1805 N 0 0 V 43 24 V 0 361 V 1 PolyFill
+2241 1805 M
+43 24 V
+0 361 V
+% End plot #310
+% Begin plot #311
+stroke
+LT4
+0.50 1.00 0.50 C gsave 2284 1829 N 0 0 V 43 23 V 0 934 V 1 PolyFill
+2284 1829 M
+43 23 V
+0 934 V
+% End plot #311
+% Begin plot #312
+stroke
+LT5
+0.50 1.00 0.50 C gsave 2327 1852 N 0 0 V 42 24 V 0 -21 V 1 PolyFill
+2327 1852 M
+42 24 V
+0 -21 V
+% End plot #312
+% Begin plot #313
+stroke
+LT6
+0.50 1.00 0.50 C gsave 2369 1876 N 0 0 V 43 24 V 0 5 V 1 PolyFill
+2369 1876 M
+43 24 V
+0 5 V
+% End plot #313
+% Begin plot #314
+stroke
+LT7
+0.50 1.00 0.50 C gsave 2412 1900 N 0 0 V 43 24 V 0 8 V 1 PolyFill
+2412 1900 M
+43 24 V
+0 8 V
+% End plot #314
+% Begin plot #315
+stroke
+LT8
+0.50 1.00 0.50 C gsave 2455 1924 N 0 0 V 43 25 V 0 1245 V 1 PolyFill
+2455 1924 M
+43 25 V
+0 1245 V
+% End plot #315
+% Begin plot #316
+stroke
+LT0
+0.50 1.00 0.50 C gsave 2498 1949 N 0 0 V 43 23 V 0 1169 V 1 PolyFill
+2498 1949 M
+43 23 V
+0 1169 V
+% End plot #316
+% Begin plot #317
+stroke
+LT1
+0.50 1.00 0.50 C gsave 2541 1972 N 0 0 V 43 26 V 0 1058 V 1 PolyFill
+2541 1972 M
+43 26 V
+0 1058 V
+% End plot #317
+% Begin plot #318
+stroke
+LT2
+0.50 1.00 0.50 C gsave 2584 1998 N 0 0 V 43 24 V 0 851 V 1 PolyFill
+2584 1998 M
+43 24 V
+0 851 V
+% End plot #318
+% Begin plot #319
+stroke
+LT3
+0.50 1.00 0.50 C gsave 2627 2022 N 0 0 V 43 25 V 0 -1 V 1 PolyFill
+2627 2022 M
+43 25 V
+0 -1 V
+% End plot #319
+% Begin plot #320
+stroke
+LT4
+0.50 1.00 0.50 C gsave 2670 2047 N 0 0 V 43 25 V 0 -8 V 1 PolyFill
+2670 2047 M
+43 25 V
+0 -8 V
+% End plot #320
+% Begin plot #321
+stroke
+LT5
+0.50 1.00 0.50 C gsave 2713 2072 N 0 0 V 42 25 V 0 -17 V 1 PolyFill
+2713 2072 M
+42 25 V
+0 -17 V
+% End plot #321
+% Begin plot #322
+stroke
+LT6
+0.50 1.00 0.50 C gsave 2755 2097 N 0 0 V 43 26 V 0 -26 V 1 PolyFill
+2755 2097 M
+43 26 V
+0 -26 V
+% End plot #322
+% Begin plot #323
+stroke
+LT7
+0.50 1.00 0.50 C gsave 2798 2123 N 0 0 V 43 25 V 0 -22 V 1 PolyFill
+2798 2123 M
+43 25 V
+0 -22 V
+% End plot #323
+% Begin plot #324
+stroke
+LT8
+0.50 1.00 0.50 C gsave 2841 2148 N 0 0 V 43 26 V 0 111 V 1 PolyFill
+2841 2148 M
+43 26 V
+0 111 V
+% End plot #324
+% Begin plot #325
+stroke
+LT0
+0.50 1.00 0.50 C gsave 2884 2174 N 0 0 V 43 25 V 0 231 V 1 PolyFill
+2884 2174 M
+43 25 V
+0 231 V
+% End plot #325
+% Begin plot #326
+stroke
+LT1
+0.50 1.00 0.50 C gsave 2927 2199 N 0 0 V 43 26 V 0 251 V 1 PolyFill
+2927 2199 M
+43 26 V
+0 251 V
+% End plot #326
+% Begin plot #327
+stroke
+LT2
+0.50 1.00 0.50 C gsave 2970 2225 N 0 0 V 43 26 V 0 5 V 1 PolyFill
+2970 2225 M
+43 26 V
+0 5 V
+% End plot #327
+% Begin plot #328
+stroke
+LT3
+0.50 1.00 0.50 C gsave 3013 2251 N 0 0 V 43 25 V 0 2 V 1 PolyFill
+3013 2251 M
+43 25 V
+0 2 V
+% End plot #328
+% Begin plot #329
+stroke
+LT4
+0.50 1.00 0.50 C gsave 3056 2276 N 0 0 V 42 27 V 0 -43 V 1 PolyFill
+3056 2276 M
+42 27 V
+0 -43 V
+% End plot #329
+% Begin plot #330
+stroke
+LT5
+0.50 1.00 0.50 C gsave 3098 2303 N 0 0 V 43 25 V 0 260 V 1 PolyFill
+3098 2303 M
+43 25 V
+0 260 V
+% End plot #330
+% Begin plot #331
+stroke
+LT6
+0.50 1.00 0.50 C gsave 3141 2328 N 0 0 V 43 27 V 0 344 V 1 PolyFill
+3141 2328 M
+43 27 V
+0 344 V
+% End plot #331
+% Begin plot #332
+stroke
+LT7
+0.50 1.00 0.50 C gsave 3184 2355 N 0 0 V 43 26 V 0 0 V 1 PolyFill
+3184 2355 M
+43 26 V
+% End plot #332
+% Begin plot #333
+stroke
+LT8
+0.50 1.00 0.50 C gsave 3227 2381 N 0 0 V 43 27 V 0 24 V 1 PolyFill
+3227 2381 M
+43 27 V
+0 24 V
+% End plot #333
+% Begin plot #334
+stroke
+LT0
+0.50 1.00 0.50 C gsave 3270 2408 N 0 0 V 43 26 V 0 1 V 1 PolyFill
+3270 2408 M
+43 26 V
+0 1 V
+% End plot #334
+% Begin plot #335
+stroke
+LT1
+0.50 1.00 0.50 C gsave 3313 2434 N 0 0 V 43 27 V 0 8 V 1 PolyFill
+3313 2434 M
+43 27 V
+0 8 V
+% End plot #335
+% Begin plot #336
+stroke
+LT2
+0.50 1.00 0.50 C gsave 3356 2461 N 0 0 V 43 27 V 0 4 V 1 PolyFill
+3356 2461 M
+43 27 V
+0 4 V
+% End plot #336
+% Begin plot #337
+stroke
+LT3
+0.50 1.00 0.50 C gsave 3399 2488 N 0 0 V 42 26 V 0 2 V 1 PolyFill
+3399 2488 M
+42 26 V
+0 2 V
+% End plot #337
+% Begin plot #338
+stroke
+LT4
+0.50 1.00 0.50 C gsave 3441 2514 N 0 0 V 43 27 V 0 2 V 1 PolyFill
+3441 2514 M
+43 27 V
+0 2 V
+% End plot #338
+% Begin plot #339
+stroke
+LT5
+0.50 1.00 0.50 C gsave 3484 2541 N 0 0 V 43 27 V 0 211 V 1 PolyFill
+3484 2541 M
+43 27 V
+0 211 V
+% End plot #339
+% Begin plot #340
+stroke
+LT6
+0.50 1.00 0.50 C gsave 3527 2568 N 0 0 V 43 27 V 0 -3 V 1 PolyFill
+3527 2568 M
+43 27 V
+0 -3 V
+% End plot #340
+% Begin plot #341
+stroke
+LT7
+0.50 1.00 0.50 C gsave 3570 2595 N 0 0 V 43 27 V 0 187 V 1 PolyFill
+3570 2595 M
+43 27 V
+0 187 V
+% End plot #341
+% Begin plot #342
+stroke
+LT8
+0.50 1.00 0.50 C gsave 3613 2622 N 0 0 V 43 28 V 0 319 V 1 PolyFill
+3613 2622 M
+43 28 V
+0 319 V
+% End plot #342
+% Begin plot #343
+stroke
+LT0
+0.50 1.00 0.50 C gsave 3656 2650 N 0 0 V 43 27 V 0 -21 V 1 PolyFill
+3656 2650 M
+43 27 V
+0 -21 V
+% End plot #343
+% Begin plot #344
+stroke
+LT1
+0.50 1.00 0.50 C gsave 3699 2677 N 0 0 V 43 27 V 0 -8 V 1 PolyFill
+3699 2677 M
+43 27 V
+0 -8 V
+% End plot #344
+% Begin plot #345
+stroke
+LT2
+0.50 1.00 0.50 C gsave 3742 2704 N 0 0 V 42 28 V 0 1 V 1 PolyFill
+3742 2704 M
+42 28 V
+0 1 V
+% End plot #345
+% Begin plot #346
+stroke
+LT3
+0.50 1.00 0.50 C gsave 3784 2732 N 0 0 V 43 27 V 0 5 V 1 PolyFill
+3784 2732 M
+43 27 V
+0 5 V
+% End plot #346
+% Begin plot #347
+stroke
+LT4
+0.50 1.00 0.50 C gsave 3827 2759 N 0 0 V 43 28 V 0 4 V 1 PolyFill
+3827 2759 M
+43 28 V
+0 4 V
+% End plot #347
+% Begin plot #348
+stroke
+LT5
+0.50 1.00 0.50 C gsave 3870 2787 N 0 0 V 43 27 V 0 235 V 1 PolyFill
+3870 2787 M
+43 27 V
+0 235 V
+% End plot #348
+% Begin plot #349
+stroke
+LT6
+0.50 1.00 0.50 C gsave 3913 2814 N 0 0 V 43 29 V 0 122 V 1 PolyFill
+3913 2814 M
+43 29 V
+0 122 V
+% End plot #349
+% Begin plot #350
+stroke
+LT7
+0.50 1.00 0.50 C gsave 3956 2843 N 0 0 V 43 27 V 0 243 V 1 PolyFill
+3956 2843 M
+43 27 V
+0 243 V
+% End plot #350
+% Begin plot #351
+stroke
+LT8
+0.50 1.00 0.50 C gsave 3999 2870 N 0 0 V 43 28 V 0 176 V 1 PolyFill
+3999 2870 M
+43 28 V
+0 176 V
+% End plot #351
+% Begin plot #352
+stroke
+LT0
+0.50 1.00 0.50 C gsave 4042 2898 N 0 0 V 43 29 V 0 92 V 1 PolyFill
+4042 2898 M
+43 29 V
+0 92 V
+% End plot #352
+% Begin plot #353
+stroke
+LT1
+0.50 1.00 0.50 C gsave 4085 2927 N 0 0 V 42 27 V 0 3 V 1 PolyFill
+4085 2927 M
+42 27 V
+0 3 V
+% End plot #353
+% Begin plot #354
+stroke
+LT2
+0.50 1.00 0.50 C gsave 4127 2954 N 0 0 V 43 29 V 0 121 V 1 PolyFill
+4127 2954 M
+43 29 V
+0 121 V
+% End plot #354
+% Begin plot #355
+stroke
+LT3
+0.50 1.00 0.50 C gsave 4170 2983 N 0 0 V 43 28 V 0 0 V 1 PolyFill
+4170 2983 M
+43 28 V
+% End plot #355
+% Begin plot #356
+stroke
+LT4
+0.50 1.00 0.50 C gsave 4213 3011 N 0 0 V 43 26 V 0 1 V 1 PolyFill
+4213 3011 M
+43 26 V
+0 1 V
+% End plot #356
+% Begin plot #357
+stroke
+LT5
+0.50 1.00 0.50 C gsave 4256 3037 N 0 0 V 43 26 V 0 1 V 1 PolyFill
+4256 3037 M
+43 26 V
+0 1 V
+% End plot #357
+% Begin plot #358
+stroke
+LT6
+0.50 1.00 0.50 C gsave 4299 3063 N 0 0 V 43 25 V 0 3 V 1 PolyFill
+4299 3063 M
+43 25 V
+0 3 V
+% End plot #358
+% Begin plot #359
+stroke
+LT7
+0.50 1.00 0.50 C gsave 4342 3088 N 0 0 V 43 25 V 0 1 V 1 PolyFill
+4342 3088 M
+43 25 V
+0 1 V
+% End plot #359
+% Begin plot #360
+stroke
+LT8
+0.50 1.00 0.50 C gsave 4385 3113 N 0 0 V 43 25 V 0 1 V 1 PolyFill
+4385 3113 M
+43 25 V
+0 1 V
+% End plot #360
+% Begin plot #361
+stroke
+LT0
+0.50 1.00 0.50 C gsave 4428 3138 N 0 0 V 42 26 V 0 2 V 1 PolyFill
+4428 3138 M
+42 26 V
+0 2 V
+% End plot #361
+% Begin plot #362
+stroke
+LT1
+0.50 1.00 0.50 C gsave 4470 3164 N 0 0 V 43 25 V 0 2 V 1 PolyFill
+4470 3164 M
+43 25 V
+0 2 V
+% End plot #362
+% Begin plot #363
+stroke
+LT2
+0.50 1.00 0.50 C gsave 4513 3189 N 0 0 V 43 25 V 0 1 V 1 PolyFill
+4513 3189 M
+43 25 V
+0 1 V
+% End plot #363
+% Begin plot #364
+stroke
+LT3
+0.50 1.00 0.50 C gsave 4556 3214 N 0 0 V 43 25 V 0 1 V 1 PolyFill
+4556 3214 M
+43 25 V
+0 1 V
+% End plot #364
+% Begin plot #365
+stroke
+LT4
+0.50 1.00 0.50 C gsave 4599 3239 N 0 0 V 43 26 V 0 1 V 1 PolyFill
+4599 3239 M
+43 26 V
+0 1 V
+% End plot #365
+% Begin plot #366
+stroke
+LT5
+0.50 1.00 0.50 C gsave 4642 3265 N 0 0 V 43 25 V 0 2 V 1 PolyFill
+4642 3265 M
+43 25 V
+0 2 V
+% End plot #366
+% Begin plot #367
+stroke
+LT6
+0.90 0.90 0.90 C gsave 3135 1400 N 0 0 V 98 21 V -98 0 V 1 PolyFill
+3135 1400 M
+98 21 V
+-98 0 V
+% End plot #367
+% Begin plot #368
+stroke
+LT7
+0.90 0.90 0.90 C gsave 3233 1421 N 0 0 V 99 23 V -99 21 V 1 PolyFill
+3233 1421 M
+99 23 V
+-99 21 V
+% End plot #368
+% Begin plot #369
+stroke
+LT8
+0.90 0.90 0.90 C gsave 3332 1444 N 0 0 V 99 26 V -99 39 V 1 PolyFill
+3332 1444 M
+99 26 V
+-99 39 V
+% End plot #369
+% Begin plot #370
+stroke
+LT0
+0.90 0.90 0.90 C gsave 3431 1470 N 0 0 V 99 29 V -99 54 V 1 PolyFill
+3431 1470 M
+99 29 V
+-99 54 V
+% End plot #370
+% Begin plot #371
+stroke
+LT1
+0.90 0.90 0.90 C gsave 3530 1499 N 0 0 V 98 31 V -98 68 V 1 PolyFill
+3530 1499 M
+98 31 V
+-98 68 V
+% End plot #371
+% Begin plot #372
+stroke
+LT2
+0.90 0.90 0.90 C gsave 3628 1530 N 0 0 V 99 32 V -99 80 V 1 PolyFill
+3628 1530 M
+99 32 V
+-99 80 V
+% End plot #372
+% Begin plot #373
+stroke
+LT3
+0.90 0.90 0.90 C gsave 3727 1562 N 0 0 V 99 35 V -99 89 V 1 PolyFill
+3727 1562 M
+99 35 V
+-99 89 V
+% End plot #373
+% Begin plot #374
+stroke
+LT4
+0.90 0.90 0.90 C gsave 3826 1597 N 0 0 V 99 36 V -99 97 V 1 PolyFill
+3826 1597 M
+99 36 V
+-99 97 V
+% End plot #374
+% Begin plot #375
+stroke
+LT5
+0.90 0.90 0.90 C gsave 3925 1633 N 0 0 V 98 38 V -98 104 V 1 PolyFill
+3925 1633 M
+98 38 V
+-98 104 V
+% End plot #375
+% Begin plot #376
+stroke
+LT6
+0.90 0.90 0.90 C gsave 4023 1671 N 0 0 V 99 38 V -99 110 V 1 PolyFill
+4023 1671 M
+99 38 V
+-99 110 V
+% End plot #376
+% Begin plot #377
+stroke
+LT7
+0.90 0.90 0.90 C gsave 4122 1709 N 0 0 V 99 40 V -99 114 V 1 PolyFill
+4122 1709 M
+99 40 V
+-99 114 V
+% End plot #377
+% Begin plot #378
+stroke
+LT8
+0.90 0.90 0.90 C gsave 4221 1749 N 0 0 V 98 41 V -98 117 V 1 PolyFill
+4221 1749 M
+98 41 V
+-98 117 V
+% End plot #378
+% Begin plot #379
+stroke
+LT0
+0.90 0.90 0.90 C gsave 4319 1790 N 0 0 V 99 41 V -99 121 V 1 PolyFill
+4319 1790 M
+99 41 V
+-99 121 V
+% End plot #379
+% Begin plot #380
+stroke
+LT1
+0.90 0.90 0.90 C gsave 4418 1831 N 0 0 V 99 42 V -99 123 V 1 PolyFill
+4418 1831 M
+99 42 V
+-99 123 V
+% End plot #380
+% Begin plot #381
+stroke
+LT2
+0.90 0.90 0.90 C gsave 4517 1873 N 0 0 V 99 43 V -99 124 V 1 PolyFill
+4517 1873 M
+99 43 V
+-99 124 V
+% End plot #381
+% Begin plot #382
+stroke
+LT3
+0.90 0.90 0.90 C gsave 4616 1916 N 0 0 V 98 42 V -98 126 V 1 PolyFill
+4616 1916 M
+98 42 V
+-98 126 V
+% End plot #382
+% Begin plot #383
+stroke
+LT4
+0.90 0.90 0.90 C gsave 4714 1958 N 0 0 V 99 43 V -99 127 V 1 PolyFill
+4714 1958 M
+99 43 V
+-99 127 V
+% End plot #383
+% Begin plot #384
+stroke
+LT5
+0.90 0.90 0.90 C gsave 4813 2001 N 0 0 V 99 44 V -99 128 V 1 PolyFill
+4813 2001 M
+99 44 V
+-99 128 V
+% End plot #384
+% Begin plot #385
+stroke
+LT6
+0.90 0.90 0.90 C gsave 4912 2045 N 0 0 V 99 43 V -99 129 V 1 PolyFill
+4912 2045 M
+99 43 V
+-99 129 V
+% End plot #385
+% Begin plot #386
+stroke
+LT7
+0.90 0.90 0.90 C gsave 5011 2088 N 0 0 V 98 44 V -98 129 V 1 PolyFill
+5011 2088 M
+98 44 V
+-98 129 V
+% End plot #386
+% Begin plot #387
+stroke
+LT8
+0.90 0.90 0.90 C gsave 5109 2132 N 0 0 V 99 43 V -99 130 V 1 PolyFill
+5109 2132 M
+99 43 V
+-99 130 V
+% End plot #387
+% Begin plot #388
+stroke
+LT0
+0.90 0.90 0.90 C gsave 5208 2175 N 0 0 V 99 44 V -99 131 V 1 PolyFill
+5208 2175 M
+99 44 V
+-99 131 V
+% End plot #388
+% Begin plot #389
+stroke
+LT1
+0.90 0.90 0.90 C gsave 5307 2219 N 0 0 V 99 44 V -99 131 V 1 PolyFill
+5307 2219 M
+99 44 V
+-99 131 V
+% End plot #389
+% Begin plot #390
+stroke
+LT2
+0.90 0.90 0.90 C gsave 5406 2263 N 0 0 V 98 44 V -98 131 V 1 PolyFill
+5406 2263 M
+98 44 V
+-98 131 V
+% End plot #390
+% Begin plot #391
+stroke
+LT3
+0.90 0.90 0.90 C gsave 5504 2307 N 0 0 V 99 44 V -99 131 V 1 PolyFill
+5504 2307 M
+99 44 V
+-99 131 V
+% End plot #391
+% Begin plot #392
+stroke
+LT4
+0.90 0.90 0.90 C gsave 5603 2351 N 0 0 V 99 44 V -99 132 V 1 PolyFill
+5603 2351 M
+99 44 V
+-99 132 V
+% End plot #392
+% Begin plot #393
+stroke
+LT5
+0.90 0.90 0.90 C gsave 5702 2395 N 0 0 V 98 44 V -98 132 V 1 PolyFill
+5702 2395 M
+98 44 V
+-98 132 V
+% End plot #393
+% Begin plot #394
+stroke
+LT6
+0.90 0.90 0.90 C gsave 5800 2439 N 0 0 V 99 45 V -99 131 V 1 PolyFill
+5800 2439 M
+99 45 V
+-99 131 V
+% End plot #394
+% Begin plot #395
+stroke
+LT7
+0.90 0.90 0.90 C gsave 5899 2484 N 0 0 V 99 44 V -99 131 V 1 PolyFill
+5899 2484 M
+99 44 V
+-99 131 V
+% End plot #395
+% Begin plot #396
+stroke
+LT8
+0.90 0.90 0.90 C gsave 5998 2528 N 0 0 V 99 44 V -99 132 V 1 PolyFill
+5998 2528 M
+99 44 V
+-99 132 V
+% End plot #396
+% Begin plot #397
+stroke
+LT0
+0.90 0.90 0.90 C gsave 6097 2572 N 0 0 V 98 44 V -98 132 V 1 PolyFill
+6097 2572 M
+98 44 V
+-98 132 V
+% End plot #397
+% Begin plot #398
+stroke
+LT1
+0.90 0.90 0.90 C gsave 6195 2616 N 0 0 V 99 44 V -99 132 V 1 PolyFill
+6195 2616 M
+99 44 V
+-99 132 V
+% End plot #398
+% Begin plot #399
+stroke
+LT2
+0.90 0.90 0.90 C gsave 6294 2660 N 0 0 V 99 45 V -99 131 V 1 PolyFill
+6294 2660 M
+99 45 V
+-99 131 V
+% End plot #399
+% Begin plot #400
+stroke
+LT3
+0.90 0.90 0.90 C gsave 6393 2705 N 0 0 V 99 44 V -99 132 V 1 PolyFill
+6393 2705 M
+99 44 V
+-99 132 V
+% End plot #400
+% Begin plot #401
+stroke
+LT4
+0.90 0.90 0.90 C gsave 6492 2749 N 0 0 V 98 44 V -98 132 V 1 PolyFill
+6492 2749 M
+98 44 V
+-98 132 V
+% End plot #401
+% Begin plot #402
+stroke
+LT5
+0.90 0.90 0.90 C gsave 6590 2793 N 0 0 V 99 44 V -99 132 V 1 PolyFill
+6590 2793 M
+99 44 V
+-99 132 V
+% End plot #402
+% Begin plot #403
+stroke
+LT6
+0.90 0.90 0.90 C gsave 6689 2837 N 0 0 V 99 44 V -99 132 V 1 PolyFill
+6689 2837 M
+99 44 V
+-99 132 V
+% End plot #403
+% Begin plot #404
+stroke
+LT7
+0.90 0.90 0.90 C gsave 6788 2881 N 0 0 V 98 45 V -98 132 V 1 PolyFill
+6788 2881 M
+98 45 V
+-98 132 V
+% End plot #404
+% Begin plot #405
+stroke
+LT8
+0.90 0.90 0.90 C gsave 6886 2926 N 0 0 V 99 44 V -99 132 V 1 PolyFill
+6886 2926 M
+99 44 V
+-99 132 V
+% End plot #405
+% Begin plot #406
+stroke
+LT0
+0.90 0.90 0.90 C gsave 6985 2970 N 0 0 V 99 44 V -99 132 V 1 PolyFill
+6985 2970 M
+99 44 V
+-99 132 V
+% End plot #406
+% Begin plot #407
+stroke
+LT1
+0.90 0.90 0.90 C gsave 7084 3014 N 0 0 V 99 44 V -99 132 V 1 PolyFill
+7084 3014 M
+99 44 V
+-99 132 V
+% End plot #407
+% Begin plot #408
+stroke
+LT2
+0.90 0.90 0.90 C gsave 7183 3058 N 0 0 V 98 45 V -98 131 V 1 PolyFill
+7183 3058 M
+98 45 V
+-98 131 V
+% End plot #408
+% Begin plot #409
+stroke
+LT3
+0.90 0.90 0.90 C gsave 7281 3103 N 0 0 V 99 44 V -99 132 V 1 PolyFill
+7281 3103 M
+99 44 V
+-99 132 V
+% End plot #409
+% Begin plot #410
+stroke
+LT4
+0.90 0.90 0.90 C gsave 7380 3147 N 0 0 V 99 44 V -99 132 V 1 PolyFill
+7380 3147 M
+99 44 V
+-99 132 V
+% End plot #410
+% Begin plot #411
+stroke
+LT5
+0.90 0.90 0.90 C gsave 7479 3191 N 0 0 V 99 44 V -99 132 V 1 PolyFill
+7479 3191 M
+99 44 V
+-99 132 V
+% End plot #411
+% Begin plot #412
+stroke
+LT6
+0.90 0.90 0.90 C gsave 7578 3235 N 0 0 V 98 45 V -98 131 V 1 PolyFill
+7578 3235 M
+98 45 V
+-98 131 V
+% End plot #412
+% Begin plot #413
+stroke
+LT7
+0.90 0.90 0.90 C gsave 7676 3280 N 0 0 V 77 34 V -77 142 V 1 PolyFill
+7676 3280 M
+77 34 V
+-77 142 V
+% End plot #413
+% Begin plot #414
+stroke
+LT8
+0.90 0.90 0.90 C gsave 3135 1421 N 0 0 V 98 44 V 0 -44 V 1 PolyFill
+3135 1421 M
+98 44 V
+0 -44 V
+% End plot #414
+% Begin plot #415
+stroke
+LT0
+0.90 0.90 0.90 C gsave 3233 1465 N 0 0 V 99 44 V 0 -65 V 1 PolyFill
+3233 1465 M
+99 44 V
+0 -65 V
+% End plot #415
+% Begin plot #416
+stroke
+LT1
+0.90 0.90 0.90 C gsave 3332 1509 N 0 0 V 99 44 V 0 -83 V 1 PolyFill
+3332 1509 M
+99 44 V
+0 -83 V
+% End plot #416
+% Begin plot #417
+stroke
+LT2
+0.90 0.90 0.90 C gsave 3431 1553 N 0 0 V 99 45 V 0 -99 V 1 PolyFill
+3431 1553 M
+99 45 V
+0 -99 V
+% End plot #417
+% Begin plot #418
+stroke
+LT3
+0.90 0.90 0.90 C gsave 3530 1598 N 0 0 V 98 44 V 0 -112 V 1 PolyFill
+3530 1598 M
+98 44 V
+0 -112 V
+% End plot #418
+% Begin plot #419
+stroke
+LT4
+0.90 0.90 0.90 C gsave 3628 1642 N 0 0 V 99 44 V 0 -124 V 1 PolyFill
+3628 1642 M
+99 44 V
+0 -124 V
+% End plot #419
+% Begin plot #420
+stroke
+LT5
+0.90 0.90 0.90 C gsave 3727 1686 N 0 0 V 99 44 V 0 -133 V 1 PolyFill
+3727 1686 M
+99 44 V
+0 -133 V
+% End plot #420
+% Begin plot #421
+stroke
+LT6
+0.90 0.90 0.90 C gsave 3826 1730 N 0 0 V 99 45 V 0 -142 V 1 PolyFill
+3826 1730 M
+99 45 V
+0 -142 V
+% End plot #421
+% Begin plot #422
+stroke
+LT7
+0.90 0.90 0.90 C gsave 3925 1775 N 0 0 V 98 44 V 0 -148 V 1 PolyFill
+3925 1775 M
+98 44 V
+0 -148 V
+% End plot #422
+% Begin plot #423
+stroke
+LT8
+0.90 0.90 0.90 C gsave 4023 1819 N 0 0 V 99 44 V 0 -154 V 1 PolyFill
+4023 1819 M
+99 44 V
+0 -154 V
+% End plot #423
+% Begin plot #424
+stroke
+LT0
+0.90 0.90 0.90 C gsave 4122 1863 N 0 0 V 99 44 V 0 -158 V 1 PolyFill
+4122 1863 M
+99 44 V
+0 -158 V
+% End plot #424
+% Begin plot #425
+stroke
+LT1
+0.90 0.90 0.90 C gsave 4221 1907 N 0 0 V 98 45 V 0 -162 V 1 PolyFill
+4221 1907 M
+98 45 V
+0 -162 V
+% End plot #425
+% Begin plot #426
+stroke
+LT2
+0.90 0.90 0.90 C gsave 4319 1952 N 0 0 V 99 44 V 0 -165 V 1 PolyFill
+4319 1952 M
+99 44 V
+0 -165 V
+% End plot #426
+% Begin plot #427
+stroke
+LT3
+0.90 0.90 0.90 C gsave 4418 1996 N 0 0 V 99 44 V 0 -167 V 1 PolyFill
+4418 1996 M
+99 44 V
+0 -167 V
+% End plot #427
+% Begin plot #428
+stroke
+LT4
+0.90 0.90 0.90 C gsave 4517 2040 N 0 0 V 99 44 V 0 -168 V 1 PolyFill
+4517 2040 M
+99 44 V
+0 -168 V
+% End plot #428
+% Begin plot #429
+stroke
+LT5
+0.90 0.90 0.90 C gsave 4616 2084 N 0 0 V 98 44 V 0 -170 V 1 PolyFill
+4616 2084 M
+98 44 V
+0 -170 V
+% End plot #429
+% Begin plot #430
+stroke
+LT6
+0.90 0.90 0.90 C gsave 4714 2128 N 0 0 V 99 45 V 0 -172 V 1 PolyFill
+4714 2128 M
+99 45 V
+0 -172 V
+% End plot #430
+% Begin plot #431
+stroke
+LT7
+0.90 0.90 0.90 C gsave 4813 2173 N 0 0 V 99 44 V 0 -172 V 1 PolyFill
+4813 2173 M
+99 44 V
+0 -172 V
+% End plot #431
+% Begin plot #432
+stroke
+LT8
+0.90 0.90 0.90 C gsave 4912 2217 N 0 0 V 99 44 V 0 -173 V 1 PolyFill
+4912 2217 M
+99 44 V
+0 -173 V
+% End plot #432
+% Begin plot #433
+stroke
+LT0
+0.90 0.90 0.90 C gsave 5011 2261 N 0 0 V 98 44 V 0 -173 V 1 PolyFill
+5011 2261 M
+98 44 V
+0 -173 V
+% End plot #433
+% Begin plot #434
+stroke
+LT1
+0.90 0.90 0.90 C gsave 5109 2305 N 0 0 V 99 45 V 0 -175 V 1 PolyFill
+5109 2305 M
+99 45 V
+0 -175 V
+% End plot #434
+% Begin plot #435
+stroke
+LT2
+0.90 0.90 0.90 C gsave 5208 2350 N 0 0 V 99 44 V 0 -175 V 1 PolyFill
+5208 2350 M
+99 44 V
+0 -175 V
+% End plot #435
+% Begin plot #436
+stroke
+LT3
+0.90 0.90 0.90 C gsave 5307 2394 N 0 0 V 99 44 V 0 -175 V 1 PolyFill
+5307 2394 M
+99 44 V
+0 -175 V
+% End plot #436
+% Begin plot #437
+stroke
+LT4
+0.90 0.90 0.90 C gsave 5406 2438 N 0 0 V 98 44 V 0 -175 V 1 PolyFill
+5406 2438 M
+98 44 V
+0 -175 V
+% End plot #437
+% Begin plot #438
+stroke
+LT5
+0.90 0.90 0.90 C gsave 5504 2482 N 0 0 V 99 45 V 0 -176 V 1 PolyFill
+5504 2482 M
+99 45 V
+0 -176 V
+% End plot #438
+% Begin plot #439
+stroke
+LT6
+0.90 0.90 0.90 C gsave 5603 2527 N 0 0 V 99 44 V 0 -176 V 1 PolyFill
+5603 2527 M
+99 44 V
+0 -176 V
+% End plot #439
+% Begin plot #440
+stroke
+LT7
+0.90 0.90 0.90 C gsave 5702 2571 N 0 0 V 98 44 V 0 -176 V 1 PolyFill
+5702 2571 M
+98 44 V
+0 -176 V
+% End plot #440
+% Begin plot #441
+stroke
+LT8
+0.90 0.90 0.90 C gsave 5800 2615 N 0 0 V 99 44 V 0 -175 V 1 PolyFill
+5800 2615 M
+99 44 V
+0 -175 V
+% End plot #441
+% Begin plot #442
+stroke
+LT0
+0.90 0.90 0.90 C gsave 5899 2659 N 0 0 V 99 45 V 0 -176 V 1 PolyFill
+5899 2659 M
+99 45 V
+0 -176 V
+% End plot #442
+% Begin plot #443
+stroke
+LT1
+0.90 0.90 0.90 C gsave 5998 2704 N 0 0 V 99 44 V 0 -176 V 1 PolyFill
+5998 2704 M
+99 44 V
+0 -176 V
+% End plot #443
+% Begin plot #444
+stroke
+LT2
+0.90 0.90 0.90 C gsave 6097 2748 N 0 0 V 98 44 V 0 -176 V 1 PolyFill
+6097 2748 M
+98 44 V
+0 -176 V
+% End plot #444
+% Begin plot #445
+stroke
+LT3
+0.90 0.90 0.90 C gsave 6195 2792 N 0 0 V 99 44 V 0 -176 V 1 PolyFill
+6195 2792 M
+99 44 V
+0 -176 V
+% End plot #445
+% Begin plot #446
+stroke
+LT4
+0.90 0.90 0.90 C gsave 6294 2836 N 0 0 V 99 45 V 0 -176 V 1 PolyFill
+6294 2836 M
+99 45 V
+0 -176 V
+% End plot #446
+% Begin plot #447
+stroke
+LT5
+0.90 0.90 0.90 C gsave 6393 2881 N 0 0 V 99 44 V 0 -176 V 1 PolyFill
+6393 2881 M
+99 44 V
+0 -176 V
+% End plot #447
+% Begin plot #448
+stroke
+LT6
+0.90 0.90 0.90 C gsave 6492 2925 N 0 0 V 98 44 V 0 -176 V 1 PolyFill
+6492 2925 M
+98 44 V
+0 -176 V
+% End plot #448
+% Begin plot #449
+stroke
+LT7
+0.90 0.90 0.90 C gsave 6590 2969 N 0 0 V 99 44 V 0 -176 V 1 PolyFill
+6590 2969 M
+99 44 V
+0 -176 V
+% End plot #449
+% Begin plot #450
+stroke
+LT8
+0.90 0.90 0.90 C gsave 6689 3013 N 0 0 V 99 45 V 0 -177 V 1 PolyFill
+6689 3013 M
+99 45 V
+0 -177 V
+% End plot #450
+% Begin plot #451
+stroke
+LT0
+0.90 0.90 0.90 C gsave 6788 3058 N 0 0 V 98 44 V 0 -176 V 1 PolyFill
+6788 3058 M
+98 44 V
+0 -176 V
+% End plot #451
+% Begin plot #452
+stroke
+LT1
+0.90 0.90 0.90 C gsave 6886 3102 N 0 0 V 99 44 V 0 -176 V 1 PolyFill
+6886 3102 M
+99 44 V
+0 -176 V
+% End plot #452
+% Begin plot #453
+stroke
+LT2
+0.90 0.90 0.90 C gsave 6985 3146 N 0 0 V 99 44 V 0 -176 V 1 PolyFill
+6985 3146 M
+99 44 V
+0 -176 V
+% End plot #453
+% Begin plot #454
+stroke
+LT3
+0.90 0.90 0.90 C gsave 7084 3190 N 0 0 V 99 44 V 0 -176 V 1 PolyFill
+7084 3190 M
+99 44 V
+0 -176 V
+% End plot #454
+% Begin plot #455
+stroke
+LT4
+0.90 0.90 0.90 C gsave 7183 3234 N 0 0 V 98 45 V 0 -176 V 1 PolyFill
+7183 3234 M
+98 45 V
+0 -176 V
+% End plot #455
+% Begin plot #456
+stroke
+LT5
+0.90 0.90 0.90 C gsave 7281 3279 N 0 0 V 99 44 V 0 -176 V 1 PolyFill
+7281 3279 M
+99 44 V
+0 -176 V
+% End plot #456
+% Begin plot #457
+stroke
+LT6
+0.90 0.90 0.90 C gsave 7380 3323 N 0 0 V 99 44 V 0 -176 V 1 PolyFill
+7380 3323 M
+99 44 V
+0 -176 V
+% End plot #457
+% Begin plot #458
+stroke
+LT7
+0.90 0.90 0.90 C gsave 7479 3367 N 0 0 V 99 44 V 0 -176 V 1 PolyFill
+7479 3367 M
+99 44 V
+0 -176 V
+% End plot #458
+% Begin plot #459
+stroke
+LT8
+0.90 0.90 0.90 C gsave 7578 3411 N 0 0 V 98 45 V 0 -176 V 1 PolyFill
+7578 3411 M
+98 45 V
+0 -176 V
+% End plot #459
+% Begin plot #460
+stroke
+LT0
+0.90 0.90 0.90 C gsave 7676 3456 N 0 0 V 77 34 V 0 -176 V 1 PolyFill
+7676 3456 M
+77 34 V
+0 -176 V
+% End plot #460
+% Begin plot #461
+stroke
+1.500 UL
+LT0
+0.00 0.00 1.00 C 2917 4474 M
+4858 0 V
+% End plot #461
+% Begin plot #462
+0.444 UP
+stroke
+1.000 UL
+LT2
+0.00 0.00 0.00 C 0.00 0.00 0.00 C 2943 5050 M
+[ [(Helvetica) 140.0 0.0 true true 0 (Total saved mesh)]
+] -46.7 MRshow
+LT2
+0.00 0.00 0.00 C 2448 2426 CircleF
+3992 3202 CircleF
+1473 2149 CircleF
+3729 3036 CircleF
+1610 2228 CircleF
+2653 2550 CircleF
+1224 2112 CircleF
+3732 3059 CircleF
+2493 2482 CircleF
+2940 2406 CircleF
+4114 3251 CircleF
+2572 2494 CircleF
+1940 2243 CircleF
+3665 3006 CircleF
+3562 2953 CircleF
+3436 2926 CircleF
+1960 2303 CircleF
+3938 3161 CircleF
+3109 2611 CircleF
+1570 2142 CircleF
+3606 3003 CircleF
+2099 2288 CircleF
+1450 2139 CircleF
+1117 2108 CircleF
+2415 2262 CircleF
+1885 2064 CircleF
+1416 1933 CircleF
+3683 3037 CircleF
+3070 2714 CircleF
+1225 2121 CircleF
+3975 3159 CircleF
+2711 2573 CircleF
+4234 3279 CircleF
+1688 2205 CircleF
+1761 2146 CircleF
+4536 3233 CircleF
+2653 2542 CircleF
+2108 2257 CircleF
+2997 2674 CircleF
+2151 2329 CircleF
+2923 2638 CircleF
+1191 1978 CircleF
+1552 2055 CircleF
+4049 3231 CircleF
+1573 2072 CircleF
+1036 2101 CircleF
+1562 2062 CircleF
+1876 2025 CircleF
+1413 1951 CircleF
+2327 2405 CircleF
+4437 3388 CircleF
+3729 3037 CircleF
+4741 3553 CircleF
+1545 2079 CircleF
+4124 3251 CircleF
+4503 3420 CircleF
+3806 3109 CircleF
+2930 2678 CircleF
+1198 1981 CircleF
+3563 2981 CircleF
+4176 3257 CircleF
+2070 2302 CircleF
+2872 2603 CircleF
+2923 2634 CircleF
+3590 2994 CircleF
+1175 2016 CircleF
+4013 3214 CircleF
+2741 2307 CircleF
+1083 1992 CircleF
+1434 2039 CircleF
+1119 1974 CircleF
+4639 3508 CircleF
+3360 2586 CircleF
+2246 2319 CircleF
+2174 2335 CircleF
+1608 2189 CircleF
+4231 3066 CircleF
+1307 1929 CircleF
+1040 1956 CircleF
+3491 2939 CircleF
+3091 2723 CircleF
+4761 3576 CircleF
+3789 3102 CircleF
+1190 2008 CircleF
+1694 2147 CircleF
+2790 2594 CircleF
+2251 2353 CircleF
+1224 2003 CircleF
+2157 2336 CircleF
+2376 2171 CircleF
+2740 2311 CircleF
+2104 2261 CircleF
+1571 2091 CircleF
+3993 3190 CircleF
+901 2104 CircleF
+1011 1938 CircleF
+4114 3228 CircleF
+1321 2019 CircleF
+2189 2327 CircleF
+1110 2109 CircleF
+2215 2328 CircleF
+3906 2877 CircleF
+1104 2108 CircleF
+2814 2619 CircleF
+3172 2766 CircleF
+1310 2012 CircleF
+1050 1951 CircleF
+1805 2222 CircleF
+3017 2676 CircleF
+1007 1952 CircleF
+3024 2719 CircleF
+4229 3285 CircleF
+3699 3046 CircleF
+892 2100 CircleF
+2216 2115 CircleF
+3909 3162 CircleF
+1009 1977 CircleF
+2330 2351 CircleF
+4108 3257 CircleF
+1933 2033 CircleF
+3485 2947 CircleF
+3699 3022 CircleF
+1177 2113 CircleF
+3759 3074 CircleF
+2219 2353 CircleF
+3979 3184 CircleF
+3028 2716 CircleF
+3396 2894 CircleF
+1482 2068 CircleF
+2336 2387 CircleF
+3312 2856 CircleF
+2243 2377 CircleF
+1468 2068 CircleF
+2963 2391 CircleF
+3114 2733 CircleF
+3536 2959 CircleF
+2378 2162 CircleF
+3245 2801 CircleF
+2201 2116 CircleF
+4046 3193 CircleF
+1195 2005 CircleF
+1241 1916 CircleF
+1077 1912 CircleF
+1619 2096 CircleF
+2191 2351 CircleF
+3163 2790 CircleF
+1746 2141 CircleF
+4652 3511 CircleF
+2326 2353 CircleF
+2239 2362 CircleF
+1009 1958 CircleF
+1935 2038 CircleF
+2289 2341 CircleF
+4531 3434 CircleF
+2327 2361 CircleF
+3375 2597 CircleF
+2917 2637 CircleF
+3525 2962 CircleF
+1172 1970 CircleF
+1427 2044 CircleF
+4479 3408 CircleF
+1040 2102 CircleF
+2487 2473 CircleF
+2350 2161 CircleF
+1081 1961 CircleF
+3726 3054 CircleF
+2634 2539 CircleF
+1225 2010 CircleF
+3062 2710 CircleF
+2732 2550 CircleF
+3468 2640 CircleF
+2400 2389 CircleF
+1763 2178 CircleF
+4459 3433 CircleF
+4621 3499 CircleF
+1774 2186 CircleF
+1606 2182 CircleF
+1771 2233 CircleF
+4639 3524 CircleF
+3022 2720 CircleF
+4681 3315 CircleF
+2510 2216 CircleF
+4380 3383 CircleF
+3159 2787 CircleF
+2106 2144 CircleF
+3782 3062 CircleF
+3402 2873 CircleF
+3010 2710 CircleF
+3869 3107 CircleF
+1170 1983 CircleF
+2640 2372 CircleF
+3527 2933 CircleF
+4559 3466 CircleF
+872 2092 CircleF
+1200 1993 CircleF
+2646 2540 CircleF
+2993 2703 CircleF
+3156 2488 CircleF
+2254 2346 CircleF
+3546 2943 CircleF
+3676 3007 CircleF
+1751 2177 CircleF
+1445 2069 CircleF
+1441 2050 CircleF
+1040 1957 CircleF
+896 1951 CircleF
+2143 2290 CircleF
+1705 2137 CircleF
+2840 2472 CircleF
+4422 3169 CircleF
+2220 2341 CircleF
+1200 1996 CircleF
+2247 2366 CircleF
+2178 2343 CircleF
+2222 2358 CircleF
+1738 2169 CircleF
+2924 2508 CircleF
+2984 2699 CircleF
+1324 2007 CircleF
+3787 3089 CircleF
+3936 3160 CircleF
+3073 2712 CircleF
+3324 2570 CircleF
+1223 2008 CircleF
+3197 2800 CircleF
+3172 2795 CircleF
+3394 2895 CircleF
+1565 2190 CircleF
+4360 3350 CircleF
+3990 3200 CircleF
+3523 2930 CircleF
+2069 2270 CircleF
+1736 2157 CircleF
+4511 3422 CircleF
+2995 2708 CircleF
+3063 2739 CircleF
+921 1946 CircleF
+896 1948 CircleF
+1166 1918 CircleF
+1451 2159 CircleF
+1703 2139 CircleF
+1117 1930 CircleF
+1010 1957 CircleF
+870 2076 CircleF
+3839 3127 CircleF
+2124 2146 CircleF
+4431 3403 CircleF
+1203 1986 CircleF
+3936 3142 CircleF
+4511 3441 CircleF
+1322 2129 CircleF
+3672 3040 CircleF
+3094 2598 CircleF
+1964 2093 CircleF
+3242 2827 CircleF
+2788 2567 CircleF
+1167 1926 CircleF
+2251 2332 CircleF
+1960 2212 CircleF
+4184 3263 CircleF
+1009 1970 CircleF
+3901 3123 CircleF
+2870 2642 CircleF
+1110 1981 CircleF
+4271 3339 CircleF
+1051 2098 CircleF
+940 1965 CircleF
+1320 2005 CircleF
+3812 2822 CircleF
+901 1954 CircleF
+1634 2121 CircleF
+4013 3197 CircleF
+2920 2669 CircleF
+1388 1946 CircleF
+4285 3312 CircleF
+1556 2082 CircleF
+1198 1992 CircleF
+3451 2896 CircleF
+4720 3547 CircleF
+1710 2156 CircleF
+4139 3265 CircleF
+1240 1946 CircleF
+2055 2240 CircleF
+1921 2197 CircleF
+1222 2110 CircleF
+1041 1955 CircleF
+1756 2166 CircleF
+4360 3386 CircleF
+1311 2032 CircleF
+2818 2612 CircleF
+3700 3041 CircleF
+1447 2055 CircleF
+3748 3043 CircleF
+3183 2799 CircleF
+4328 3370 CircleF
+1178 1979 CircleF
+2372 2167 CircleF
+3779 3083 CircleF
+4137 3274 CircleF
+1571 2090 CircleF
+2394 2415 CircleF
+1602 2090 CircleF
+2579 2523 CircleF
+1541 2073 CircleF
+1922 2187 CircleF
+3553 2981 CircleF
+1956 2272 CircleF
+1198 1995 CircleF
+896 1968 CircleF
+3153 2628 CircleF
+4431 3386 CircleF
+3492 2950 CircleF
+1087 1935 CircleF
+3736 3040 CircleF
+2179 2297 CircleF
+2344 2394 CircleF
+4287 3312 CircleF
+1793 2221 CircleF
+2246 2368 CircleF
+2275 2379 CircleF
+3115 2734 CircleF
+4662 3498 CircleF
+2277 2374 CircleF
+1007 2091 CircleF
+2696 2531 CircleF
+1228 1991 CircleF
+3885 2864 CircleF
+1558 2086 CircleF
+1008 1944 CircleF
+3404 2907 CircleF
+1090 2116 CircleF
+4715 3543 CircleF
+4160 3250 CircleF
+4343 3362 CircleF
+2896 2496 CircleF
+1561 2092 CircleF
+1642 2115 CircleF
+3661 3003 CircleF
+2799 2607 CircleF
+1110 2110 CircleF
+1697 2204 CircleF
+1172 1986 CircleF
+4344 3365 CircleF
+4497 3417 CircleF
+3549 2979 CircleF
+1304 2139 CircleF
+3614 3005 CircleF
+2996 2702 CircleF
+1009 1963 CircleF
+2817 2587 CircleF
+1224 1981 CircleF
+2423 2424 CircleF
+1637 1984 CircleF
+895 2088 CircleF
+3907 3147 CircleF
+4621 3479 CircleF
+2739 2545 CircleF
+2083 2278 CircleF
+4202 3295 CircleF
+3805 3071 CircleF
+1762 2225 CircleF
+1044 2097 CircleF
+4671 3504 CircleF
+1769 2002 CircleF
+1417 2148 CircleF
+1666 2116 CircleF
+1921 2082 CircleF
+921 1957 CircleF
+2572 2510 CircleF
+1333 2039 CircleF
+3783 3089 CircleF
+3070 2714 CircleF
+2214 2113 CircleF
+3249 2675 CircleF
+2656 2512 CircleF
+1316 2008 CircleF
+1209 1996 CircleF
+3229 2665 CircleF
+2789 2564 CircleF
+3171 2762 CircleF
+1800 2228 CircleF
+1224 2002 CircleF
+1089 1967 CircleF
+3200 2809 CircleF
+1170 1995 CircleF
+2681 2553 CircleF
+3539 2938 CircleF
+1198 1993 CircleF
+2873 2619 CircleF
+1198 1985 CircleF
+2570 2473 CircleF
+2633 2503 CircleF
+2737 2415 CircleF
+1006 1942 CircleF
+2329 2388 CircleF
+1191 1984 CircleF
+3673 3035 CircleF
+1185 2001 CircleF
+2401 2412 CircleF
+2867 2630 CircleF
+2862 2610 CircleF
+1091 1970 CircleF
+1048 1954 CircleF
+1329 2141 CircleF
+1949 2232 CircleF
+1700 2122 CircleF
+3665 3038 CircleF
+1717 2002 CircleF
+3088 2755 CircleF
+1347 1947 CircleF
+2795 2598 CircleF
+2447 2418 CircleF
+4233 3304 CircleF
+2649 2540 CircleF
+1570 2081 CircleF
+1227 2116 CircleF
+3542 2942 CircleF
+1555 2081 CircleF
+2182 2293 CircleF
+4431 3420 CircleF
+4050 3197 CircleF
+1466 2072 CircleF
+4704 3517 CircleF
+1058 1955 CircleF
+1114 2101 CircleF
+2411 2440 CircleF
+3109 2731 CircleF
+2325 2373 CircleF
+2256 2330 CircleF
+2386 2427 CircleF
+1038 1971 CircleF
+2651 2505 CircleF
+1806 2179 CircleF
+1117 1993 CircleF
+2980 2697 CircleF
+3074 2446 CircleF
+2218 2110 CircleF
+1451 2043 CircleF
+3674 3009 CircleF
+1113 1993 CircleF
+3277 2692 CircleF
+2250 2354 CircleF
+3276 2839 CircleF
+3203 2651 CircleF
+1702 2160 CircleF
+1198 1985 CircleF
+3580 2987 CircleF
+3357 2877 CircleF
+4701 3517 CircleF
+3531 2958 CircleF
+1744 2150 CircleF
+3333 2871 CircleF
+2452 2450 CircleF
+3144 2740 CircleF
+4006 3209 CircleF
+3447 2898 CircleF
+4175 3257 CircleF
+1481 2068 CircleF
+1926 2051 CircleF
+1191 1979 CircleF
+2447 2413 CircleF
+3590 2858 CircleF
+4079 3210 CircleF
+3069 2710 CircleF
+1197 1983 CircleF
+3746 2788 CircleF
+895 1962 CircleF
+1415 1938 CircleF
+4415 3414 CircleF
+3551 2945 CircleF
+2943 2388 CircleF
+2378 2173 CircleF
+1793 2178 CircleF
+2979 2693 CircleF
+1802 2144 CircleF
+4500 3420 CircleF
+2780 2567 CircleF
+3407 2902 CircleF
+3172 2766 CircleF
+2918 2664 CircleF
+4137 3259 CircleF
+1009 2095 CircleF
+3229 2526 CircleF
+946 1960 CircleF
+1319 1933 CircleF
+2252 2343 CircleF
+4052 3221 CircleF
+4230 3308 CircleF
+3021 2717 CircleF
+1797 2154 CircleF
+892 2095 CircleF
+1608 2113 CircleF
+1952 2230 CircleF
+1706 2153 CircleF
+1554 1973 CircleF
+3519 2817 CircleF
+2653 2538 CircleF
+1655 2127 CircleF
+1694 2125 CircleF
+1174 1972 CircleF
+1179 1994 CircleF
+1789 2148 CircleF
+1333 2015 CircleF
+1169 2110 CircleF
+3730 3037 CircleF
+2286 2386 CircleF
+3587 2964 CircleF
+1009 1967 CircleF
+3440 2894 CircleF
+2681 2556 CircleF
+3685 3049 CircleF
+4361 3349 CircleF
+1189 2109 CircleF
+4704 3535 CircleF
+1197 1990 CircleF
+874 1936 CircleF
+1224 2007 CircleF
+1175 2002 CircleF
+3030 2721 CircleF
+4427 3420 CircleF
+3019 2714 CircleF
+4501 3419 CircleF
+1200 1971 CircleF
+4013 3202 CircleF
+4053 3222 CircleF
+1808 2048 CircleF
+4410 3394 CircleF
+3289 2846 CircleF
+1412 2047 CircleF
+3762 3078 CircleF
+3535 2935 CircleF
+4480 3428 CircleF
+2988 2704 CircleF
+1703 2133 CircleF
+1200 2116 CircleF
+3020 2715 CircleF
+2190 2338 CircleF
+3734 3059 CircleF
+2871 2637 CircleF
+3838 3126 CircleF
+1223 1997 CircleF
+1649 2141 CircleF
+1101 1964 CircleF
+2081 2246 CircleF
+1607 2117 CircleF
+1334 2140 CircleF
+4426 3383 CircleF
+4569 3453 CircleF
+2245 2347 CircleF
+1047 1977 CircleF
+1192 1998 CircleF
+2970 2660 CircleF
+3346 2845 CircleF
+1792 2224 CircleF
+2268 2324 CircleF
+3986 3195 CircleF
+4381 3361 CircleF
+2592 2508 CircleF
+4310 3345 CircleF
+2255 2352 CircleF
+1919 2202 CircleF
+1947 2210 CircleF
+1007 1924 CircleF
+1605 2112 CircleF
+3312 2834 CircleF
+3899 3157 CircleF
+4240 3069 CircleF
+2913 2373 CircleF
+1633 2119 CircleF
+4400 3370 CircleF
+1638 2135 CircleF
+4117 3251 CircleF
+1116 1985 CircleF
+3589 2702 CircleF
+3396 2869 CircleF
+2992 2705 CircleF
+4415 3379 CircleF
+4398 3390 CircleF
+1625 2108 CircleF
+2182 2313 CircleF
+2804 2605 CircleF
+4741 3348 CircleF
+1799 2227 CircleF
+1694 2212 CircleF
+1040 1972 CircleF
+2977 2536 CircleF
+1314 1916 CircleF
+2985 2699 CircleF
+1104 1970 CircleF
+3327 2864 CircleF
+3021 2677 CircleF
+3115 2734 CircleF
+3687 3042 CircleF
+1580 2086 CircleF
+2952 2389 CircleF
+3306 2861 CircleF
+3858 2847 CircleF
+2713 2536 CircleF
+1732 2147 CircleF
+1798 2167 CircleF
+2682 2546 CircleF
+4342 3337 CircleF
+4454 3431 CircleF
+2066 2257 CircleF
+3711 2766 CircleF
+3362 2589 CircleF
+1961 2206 CircleF
+3938 3157 CircleF
+3070 2738 CircleF
+870 1955 CircleF
+1479 2043 CircleF
+3708 2923 CircleF
+3204 2801 CircleF
+3058 2709 CircleF
+1616 2095 CircleF
+1700 2148 CircleF
+1774 2156 CircleF
+3407 2878 CircleF
+3527 2957 CircleF
+2243 2366 CircleF
+2320 2152 CircleF
+3833 3123 CircleF
+3881 3114 CircleF
+2185 2330 CircleF
+2249 2365 CircleF
+2060 2099 CircleF
+3527 2961 CircleF
+1421 1924 CircleF
+1928 2201 CircleF
+1175 1980 CircleF
+3929 3159 CircleF
+1178 1994 CircleF
+1010 1957 CircleF
+1108 1978 CircleF
+1452 2059 CircleF
+3535 2966 CircleF
+2416 2276 CircleF
+4417 3395 CircleF
+2196 2321 CircleF
+4567 3471 CircleF
+1195 2003 CircleF
+4694 3550 CircleF
+2248 2344 CircleF
+1629 2112 CircleF
+1774 2160 CircleF
+2993 2707 CircleF
+1171 1989 CircleF
+4659 3496 CircleF
+1111 1970 CircleF
+1472 2155 CircleF
+4582 3476 CircleF
+3398 2870 CircleF
+4284 3345 CircleF
+3303 2828 CircleF
+3092 2757 CircleF
+3627 2984 CircleF
+3146 2782 CircleF
+1701 2119 CircleF
+1054 2094 CircleF
+3197 2513 CircleF
+3681 3047 CircleF
+1110 1997 CircleF
+4734 3532 CircleF
+3737 3073 CircleF
+2071 2305 CircleF
+1041 2093 CircleF
+1197 1987 CircleF
+2454 2428 CircleF
+1045 1982 CircleF
+4656 3494 CircleF
+1177 1987 CircleF
+2180 2274 CircleF
+4325 3367 CircleF
+1562 2074 CircleF
+3543 2963 CircleF
+1694 2220 CircleF
+3770 3089 CircleF
+1040 1952 CircleF
+2977 2657 CircleF
+2972 2662 CircleF
+1198 1979 CircleF
+1037 1966 CircleF
+895 1969 CircleF
+1007 1950 CircleF
+1117 1984 CircleF
+4641 3525 CircleF
+3760 3049 CircleF
+2868 2612 CircleF
+1228 2006 CircleF
+2981 2698 CircleF
+3906 3129 CircleF
+3761 3054 CircleF
+4656 3496 CircleF
+2484 2456 CircleF
+4364 3375 CircleF
+2452 2411 CircleF
+2654 2542 CircleF
+3699 3055 CircleF
+1626 2098 CircleF
+2281 2384 CircleF
+3932 3132 CircleF
+2154 2281 CircleF
+3556 2942 CircleF
+1604 2106 CircleF
+1167 1912 CircleF
+1529 1952 CircleF
+1804 2143 CircleF
+2390 2381 CircleF
+3582 2988 CircleF
+3977 3157 CircleF
+2748 2420 CircleF
+1971 2269 CircleF
+4365 3387 CircleF
+1191 1968 CircleF
+3361 2855 CircleF
+1936 2194 CircleF
+1197 1988 CircleF
+3603 2997 CircleF
+1699 2154 CircleF
+1883 2036 CircleF
+1329 2025 CircleF
+4202 3254 CircleF
+3779 3061 CircleF
+1567 2166 CircleF
+1323 2129 CircleF
+4111 3232 CircleF
+4600 3503 CircleF
+4289 3325 CircleF
+1598 2112 CircleF
+2980 2660 CircleF
+2067 2247 CircleF
+1750 2223 CircleF
+2273 2325 CircleF
+2253 2348 CircleF
+1687 2115 CircleF
+2850 2627 CircleF
+1603 2092 CircleF
+2451 2411 CircleF
+1561 2085 CircleF
+2631 2509 CircleF
+1928 2194 CircleF
+2333 2386 CircleF
+1887 2016 CircleF
+2870 2599 CircleF
+4341 3123 CircleF
+2177 2322 CircleF
+3634 3001 CircleF
+3638 2992 CircleF
+2720 2533 CircleF
+4083 3210 CircleF
+3703 2915 CircleF
+1612 2099 CircleF
+893 1959 CircleF
+1309 2006 CircleF
+1569 2083 CircleF
+4117 3222 CircleF
+2184 2312 CircleF
+1168 1974 CircleF
+3658 3000 CircleF
+2907 2367 CircleF
+2530 2487 CircleF
+1008 2115 CircleF
+2629 2534 CircleF
+1089 1978 CircleF
+943 2099 CircleF
+4528 3433 CircleF
+3552 2948 CircleF
+1698 2199 CircleF
+1119 1981 CircleF
+2536 2320 CircleF
+3058 2731 CircleF
+1115 1909 CircleF
+1728 2009 CircleF
+1554 2082 CircleF
+2104 2141 CircleF
+3211 2791 CircleF
+1964 2082 CircleF
+1738 1986 CircleF
+2450 2405 CircleF
+3542 2932 CircleF
+3457 2923 CircleF
+3276 2814 CircleF
+3050 2726 CircleF
+3936 2896 CircleF
+1743 2171 CircleF
+4366 3388 CircleF
+2456 2199 CircleF
+3403 2613 CircleF
+1083 1964 CircleF
+4217 3051 CircleF
+1226 2011 CircleF
+1700 2133 CircleF
+1977 2055 CircleF
+956 1941 CircleF
+1701 2108 CircleF
+1006 1929 CircleF
+2659 2517 CircleF
+4695 3506 CircleF
+1702 2213 CircleF
+4016 3193 CircleF
+2251 2312 CircleF
+1551 2070 CircleF
+1808 2182 CircleF
+1221 1998 CircleF
+1052 1976 CircleF
+4106 3258 CircleF
+1197 1994 CircleF
+1046 1965 CircleF
+3031 2722 CircleF
+3306 2828 CircleF
+2686 2286 CircleF
+3574 2979 CircleF
+2064 2269 CircleF
+2735 2543 CircleF
+4134 3260 CircleF
+2601 2518 CircleF
+1966 2080 CircleF
+4110 3245 CircleF
+3020 2701 CircleF
+1042 1962 CircleF
+3576 2993 CircleF
+3018 2681 CircleF
+1226 1971 CircleF
+1803 2169 CircleF
+1772 2154 CircleF
+4380 3383 CircleF
+3410 2762 CircleF
+1428 2020 CircleF
+3179 2770 CircleF
+1322 2133 CircleF
+1006 1951 CircleF
+2568 2506 CircleF
+1224 2116 CircleF
+1813 2010 CircleF
+2448 2433 CircleF
+4535 3436 CircleF
+1738 2203 CircleF
+3026 2673 CircleF
+4443 3410 CircleF
+1197 1961 CircleF
+2636 2542 CircleF
+3865 3013 CircleF
+1224 1988 CircleF
+4736 3540 CircleF
+2326 2381 CircleF
+1567 2066 CircleF
+2808 2571 CircleF
+2592 2346 CircleF
+1792 2244 CircleF
+1325 2112 CircleF
+2063 2259 CircleF
+1561 2082 CircleF
+3144 2752 CircleF
+1643 2195 CircleF
+2520 2483 CircleF
+1054 2065 CircleF
+1168 2107 CircleF
+3244 2830 CircleF
+4475 3406 CircleF
+1412 2038 CircleF
+1329 2012 CircleF
+1802 2156 CircleF
+1941 2196 CircleF
+2727 2571 CircleF
+3790 3050 CircleF
+4240 3308 CircleF
+2633 2507 CircleF
+2946 2355 CircleF
+1117 2108 CircleF
+1290 1927 CircleF
+2101 2288 CircleF
+1040 2101 CircleF
+1620 2131 CircleF
+1006 1944 CircleF
+1807 2033 CircleF
+4224 3280 CircleF
+4469 3401 CircleF
+3687 3050 CircleF
+2449 2453 CircleF
+4202 3292 CircleF
+2402 2437 CircleF
+2099 2108 CircleF
+4384 3384 CircleF
+1040 1963 CircleF
+2077 2247 CircleF
+1453 2023 CircleF
+4348 3362 CircleF
+2427 2378 CircleF
+2190 2322 CircleF
+3673 2984 CircleF
+4229 3302 CircleF
+2572 2474 CircleF
+2594 2480 CircleF
+2405 2388 CircleF
+1006 2088 CircleF
+3854 3110 CircleF
+3514 2924 CircleF
+1970 2271 CircleF
+1006 1960 CircleF
+1725 2132 CircleF
+1579 2062 CircleF
+4419 3379 CircleF
+1105 1983 CircleF
+895 1942 CircleF
+4348 3361 CircleF
+1224 1988 CircleF
+4419 3372 CircleF
+4202 3296 CircleF
+2180 2287 CircleF
+1008 2077 CircleF
+2971 2677 CircleF
+4266 3328 CircleF
+3292 2853 CircleF
+2880 2359 CircleF
+1705 2154 CircleF
+2857 2624 CircleF
+3040 2728 CircleF
+4251 3314 CircleF
+1323 2014 CircleF
+3673 3032 CircleF
+1950 2209 CircleF
+3673 2747 CircleF
+4161 3249 CircleF
+4536 3420 CircleF
+2985 2702 CircleF
+2721 2528 CircleF
+2080 2343 CircleF
+3923 3154 CircleF
+1117 2108 CircleF
+1104 1960 CircleF
+1709 2106 CircleF
+3070 2702 CircleF
+1708 2178 CircleF
+1832 2022 CircleF
+1732 2142 CircleF
+1108 1989 CircleF
+3897 3115 CircleF
+3785 3091 CircleF
+4456 3425 CircleF
+3021 2714 CircleF
+1800 2221 CircleF
+2755 2556 CircleF
+4350 3372 CircleF
+1633 2104 CircleF
+1184 1976 CircleF
+2919 2615 CircleF
+2450 2419 CircleF
+1623 2047 CircleF
+1709 2104 CircleF
+1195 1980 CircleF
+3764 3045 CircleF
+2518 2459 CircleF
+1785 2003 CircleF
+2144 2312 CircleF
+3067 2441 CircleF
+1117 1911 CircleF
+2963 2690 CircleF
+3110 2468 CircleF
+1118 2114 CircleF
+4548 3469 CircleF
+1938 2216 CircleF
+1692 2128 CircleF
+1694 2132 CircleF
+3663 2983 CircleF
+3694 2748 CircleF
+2075 2276 CircleF
+1923 2205 CircleF
+1226 1993 CircleF
+1224 2117 CircleF
+3248 2822 CircleF
+2071 2236 CircleF
+3524 2931 CircleF
+3803 3074 CircleF
+3063 2740 CircleF
+957 1957 CircleF
+3632 2722 CircleF
+2482 2470 CircleF
+3366 2877 CircleF
+4135 3268 CircleF
+4465 3435 CircleF
+2981 2690 CircleF
+1591 2156 CircleF
+4462 3405 CircleF
+1783 2115 CircleF
+1652 2123 CircleF
+4055 3221 CircleF
+2245 2347 CircleF
+1608 2106 CircleF
+3404 2887 CircleF
+3403 2891 CircleF
+1706 2097 CircleF
+1689 2109 CircleF
+3525 2930 CircleF
+3070 2705 CircleF
+1006 1982 CircleF
+893 1955 CircleF
+3884 3114 CircleF
+4607 3467 CircleF
+1705 2128 CircleF
+2662 2544 CircleF
+3585 2988 CircleF
+893 1958 CircleF
+3698 3035 CircleF
+4704 3491 CircleF
+4049 3211 CircleF
+2719 2562 CircleF
+2244 2313 CircleF
+1798 2142 CircleF
+881 1927 CircleF
+3253 2814 CircleF
+2419 2421 CircleF
+1005 1960 CircleF
+2981 2698 CircleF
+1445 2022 CircleF
+3679 2893 CircleF
+1949 2147 CircleF
+3069 2720 CircleF
+1055 1956 CircleF
+4735 3517 CircleF
+3304 2860 CircleF
+3442 2907 CircleF
+1706 2143 CircleF
+2405 2419 CircleF
+2143 2305 CircleF
+1007 1945 CircleF
+3976 2918 CircleF
+1799 2171 CircleF
+2694 2512 CircleF
+3204 2804 CircleF
+2071 2232 CircleF
+3018 2710 CircleF
+2105 2139 CircleF
+4748 3349 CircleF
+1167 1887 CircleF
+1795 2145 CircleF
+2452 2433 CircleF
+4343 3340 CircleF
+3395 2872 CircleF
+3021 2665 CircleF
+4310 3340 CircleF
+2864 2583 CircleF
+1046 1952 CircleF
+1612 2117 CircleF
+1918 2201 CircleF
+3853 2833 CircleF
+3209 2516 CircleF
+3249 2828 CircleF
+2450 2451 CircleF
+1226 2004 CircleF
+4172 3246 CircleF
+1925 2224 CircleF
+1447 2036 CircleF
+2102 2295 CircleF
+1095 1832 CircleF
+1704 2124 CircleF
+2323 2346 CircleF
+2655 2545 CircleF
+3802 3080 CircleF
+3368 2872 CircleF
+3861 2962 CircleF
+2970 2522 CircleF
+4073 3233 CircleF
+3979 3182 CircleF
+2598 2503 CircleF
+2146 2314 CircleF
+1195 1975 CircleF
+2573 2510 CircleF
+1202 1968 CircleF
+1322 2022 CircleF
+3017 2674 CircleF
+1743 2147 CircleF
+1039 1982 CircleF
+3070 2732 CircleF
+1617 1983 CircleF
+2787 2578 CircleF
+4381 3383 CircleF
+3583 2988 CircleF
+1577 2073 CircleF
+1311 2014 CircleF
+1622 2073 CircleF
+1110 1961 CircleF
+1107 2039 CircleF
+1009 1915 CircleF
+1794 2206 CircleF
+4739 3552 CircleF
+2870 2353 CircleF
+2909 2495 CircleF
+4232 3308 CircleF
+924 1924 CircleF
+1795 2165 CircleF
+2832 2598 CircleF
+2074 2246 CircleF
+1038 1934 CircleF
+2580 2495 CircleF
+4117 3254 CircleF
+4595 3471 CircleF
+1575 2066 CircleF
+1104 1967 CircleF
+4361 3346 CircleF
+2190 2342 CircleF
+1009 1916 CircleF
+4282 3312 CircleF
+1558 2063 CircleF
+4679 3493 CircleF
+3249 2812 CircleF
+3764 3087 CircleF
+1222 1998 CircleF
+1556 2055 CircleF
+3701 3046 CircleF
+1107 2145 CircleF
+903 1924 CircleF
+3732 3057 CircleF
+3759 3085 CircleF
+4278 3308 CircleF
+1010 1930 CircleF
+4732 3540 CircleF
+4112 3228 CircleF
+3025 2720 CircleF
+2991 2684 CircleF
+3698 3049 CircleF
+3379 2568 CircleF
+3062 2685 CircleF
+1608 1969 CircleF
+1875 2039 CircleF
+3578 2992 CircleF
+1084 2097 CircleF
+3765 3064 CircleF
+1612 2115 CircleF
+2511 2217 CircleF
+1958 2206 CircleF
+1569 2064 CircleF
+4223 3299 CircleF
+3172 2787 CircleF
+1008 1933 CircleF
+3982 3074 CircleF
+2144 2276 CircleF
+3816 3114 CircleF
+3803 3056 CircleF
+3338 2701 CircleF
+1699 2075 CircleF
+4650 3505 CircleF
+1004 2095 CircleF
+1333 2094 CircleF
+1511 1954 CircleF
+3668 3016 CircleF
+3730 3069 CircleF
+3215 2776 CircleF
+2250 2328 CircleF
+3619 2973 CircleF
+2580 2510 CircleF
+1444 1972 CircleF
+1785 2169 CircleF
+3870 3106 CircleF
+1010 1958 CircleF
+2653 2540 CircleF
+1311 1994 CircleF
+1769 2140 CircleF
+1197 1986 CircleF
+3637 2884 CircleF
+920 1936 CircleF
+1443 1901 CircleF
+1571 2051 CircleF
+1172 1964 CircleF
+3698 3019 CircleF
+902 1928 CircleF
+1178 1949 CircleF
+1009 2016 CircleF
+3633 2973 CircleF
+1691 2125 CircleF
+1177 1979 CircleF
+2338 2372 CircleF
+2655 2510 CircleF
+2513 2453 CircleF
+2848 2600 CircleF
+2802 2576 CircleF
+3170 2744 CircleF
+3022 2711 CircleF
+1801 2172 CircleF
+4179 3293 CircleF
+2589 2514 CircleF
+2759 2317 CircleF
+2145 2257 CircleF
+2182 2313 CircleF
+2332 2379 CircleF
+2450 2449 CircleF
+2308 2215 CircleF
+4365 3359 CircleF
+3024 2574 CircleF
+3357 2833 CircleF
+1635 2200 CircleF
+3925 3139 CircleF
+1324 1935 CircleF
+2575 2437 CircleF
+1740 2125 CircleF
+4382 3345 CircleF
+4308 3302 CircleF
+4728 3498 CircleF
+1626 2120 CircleF
+4454 3367 CircleF
+3601 2972 CircleF
+4695 3504 CircleF
+4109 3249 CircleF
+4032 3188 CircleF
+1005 1951 CircleF
+1795 2153 CircleF
+1568 2080 CircleF
+3897 3147 CircleF
+4692 3510 CircleF
+1700 2141 CircleF
+3090 2601 CircleF
+1743 2174 CircleF
+2565 2485 CircleF
+3021 2641 CircleF
+4487 3428 CircleF
+3732 3052 CircleF
+1766 2213 CircleF
+1772 2229 CircleF
+2187 2266 CircleF
+1707 2070 CircleF
+1502 1876 CircleF
+891 1906 CircleF
+1530 1940 CircleF
+3754 3034 CircleF
+3573 2964 CircleF
+2656 2508 CircleF
+4486 3436 CircleF
+1310 2001 CircleF
+1197 2117 CircleF
+3025 2674 CircleF
+3958 2905 CircleF
+2864 2632 CircleF
+4649 3496 CircleF
+1700 2118 CircleF
+2183 2286 CircleF
+2186 2302 CircleF
+2657 2388 CircleF
+2782 2551 CircleF
+2415 2416 CircleF
+1416 1919 CircleF
+1782 2195 CircleF
+1945 2174 CircleF
+1167 1949 CircleF
+3068 2717 CircleF
+1636 2099 CircleF
+2840 2465 CircleF
+3556 2963 CircleF
+1439 2151 CircleF
+1884 2000 CircleF
+2291 2119 CircleF
+2453 2408 CircleF
+2778 2550 CircleF
+2241 2354 CircleF
+2061 2273 CircleF
+3251 2519 CircleF
+1569 2059 CircleF
+1007 1810 CircleF
+4288 3283 CircleF
+1566 2068 CircleF
+2924 2445 CircleF
+1917 2196 CircleF
+3058 2677 CircleF
+1226 2110 CircleF
+1627 2078 CircleF
+2098 2284 CircleF
+1183 1978 CircleF
+1800 2152 CircleF
+1713 2152 CircleF
+1756 2126 CircleF
+4141 3234 CircleF
+3762 3036 CircleF
+2630 2530 CircleF
+893 1987 CircleF
+3086 2732 CircleF
+3020 2545 CircleF
+1954 2204 CircleF
+1780 1982 CircleF
+3700 3054 CircleF
+1209 1964 CircleF
+3108 2733 CircleF
+3802 3073 CircleF
+2221 2241 CircleF
+1046 1949 CircleF
+1197 1984 CircleF
+1698 2048 CircleF
+3699 2994 CircleF
+1946 2229 CircleF
+4121 3265 CircleF
+2915 2646 CircleF
+4446 3411 CircleF
+2703 2389 CircleF
+1420 1944 CircleF
+3633 2963 CircleF
+1634 2041 CircleF
+3301 2818 CircleF
+3583 2977 CircleF
+1347 1943 CircleF
+1698 2112 CircleF
+3408 2887 CircleF
+1039 1886 CircleF
+4413 3394 CircleF
+3408 2792 CircleF
+4612 3436 CircleF
+3198 2805 CircleF
+4010 3188 CircleF
+2534 2314 CircleF
+1708 2214 CircleF
+3066 2714 CircleF
+2218 2329 CircleF
+2132 2265 CircleF
+1692 2123 CircleF
+1175 1964 CircleF
+2148 2131 CircleF
+2186 2289 CircleF
+3762 3020 CircleF
+2871 2579 CircleF
+3914 3145 CircleF
+1685 2135 CircleF
+3368 2767 CircleF
+3323 2540 CircleF
+4433 3388 CircleF
+911 1817 CircleF
+2788 2602 CircleF
+1416 1915 CircleF
+2217 2325 CircleF
+3874 3144 CircleF
+2405 2395 CircleF
+1959 2209 CircleF
+1099 1960 CircleF
+3954 3169 CircleF
+1698 2175 CircleF
+4218 3293 CircleF
+1748 1988 CircleF
+1117 2104 CircleF
+2657 2363 CircleF
+2948 2385 CircleF
+2184 2240 CircleF
+4398 3366 CircleF
+2807 2567 CircleF
+3350 2730 CircleF
+3698 3023 CircleF
+1175 1964 CircleF
+1008 1952 CircleF
+3699 2986 CircleF
+3175 2743 CircleF
+2275 2230 CircleF
+3909 3151 CircleF
+4563 3358 CircleF
+3010 2657 CircleF
+2976 2650 CircleF
+1415 1957 CircleF
+4735 3540 CircleF
+3146 2775 CircleF
+1197 2003 CircleF
+1554 1950 CircleF
+1939 2193 CircleF
+4436 3399 CircleF
+2252 2333 CircleF
+2804 2565 CircleF
+3541 2935 CircleF
+2259 2294 CircleF
+1605 2110 CircleF
+1177 1956 CircleF
+2251 2204 CircleF
+2259 2312 CircleF
+1224 2004 CircleF
+1966 2056 CircleF
+3730 3030 CircleF
+1175 1922 CircleF
+3916 3122 CircleF
+3113 2765 CircleF
+4175 3200 CircleF
+1174 2108 CircleF
+1940 2057 CircleF
+2330 2363 CircleF
+1806 2009 CircleF
+2098 2263 CircleF
+3899 3081 CircleF
+1037 2100 CircleF
+4163 3010 CircleF
+1328 2138 CircleF
+1048 2080 CircleF
+2368 2150 CircleF
+3577 2995 CircleF
+4651 3513 CircleF
+2383 2385 CircleF
+1197 1993 CircleF
+3730 3062 CircleF
+1199 2001 CircleF
+3856 3120 CircleF
+3115 2745 CircleF
+1044 1834 CircleF
+1317 1979 CircleF
+3407 2855 CircleF
+2450 2406 CircleF
+4108 3186 CircleF
+3086 2679 CircleF
+3128 2766 CircleF
+2070 2301 CircleF
+1104 1953 CircleF
+3301 2727 CircleF
+4437 3171 CircleF
+2450 2425 CircleF
+2710 2534 CircleF
+3249 2763 CircleF
+1759 2138 CircleF
+2976 2692 CircleF
+2401 2372 CircleF
+1560 2099 CircleF
+3968 3139 CircleF
+1756 2154 CircleF
+2488 2471 CircleF
+2868 2636 CircleF
+2453 2401 CircleF
+3065 2598 CircleF
+2652 2494 CircleF
+1051 2152 CircleF
+2388 2281 CircleF
+2330 2299 CircleF
+1198 2056 CircleF
+3408 2877 CircleF
+4107 3169 CircleF
+4104 3215 CircleF
+1445 2012 CircleF
+4114 3213 CircleF
+2183 2296 CircleF
+1203 2125 CircleF
+1751 3358 CircleF
+3172 2792 CircleF
+4176 3255 CircleF
+2326 2376 CircleF
+1416 2040 CircleF
+3023 2706 CircleF
+3587 2967 CircleF
+4059 3106 CircleF
+2807 2553 CircleF
+4173 3207 CircleF
+1041 1944 CircleF
+1697 2126 CircleF
+3538 2941 CircleF
+1009 1854 CircleF
+1107 1964 CircleF
+3771 3082 CircleF
+1436 2070 CircleF
+2183 2348 CircleF
+1433 2057 CircleF
+3584 2729 CircleF
+1039 2097 CircleF
+3647 2837 CircleF
+2181 2284 CircleF
+1799 2148 CircleF
+4638 3501 CircleF
+2574 2453 CircleF
+3550 2953 CircleF
+2278 2329 CircleF
+1695 2122 CircleF
+2593 2505 CircleF
+3842 3106 CircleF
+1734 2157 CircleF
+4055 3178 CircleF
+3302 2846 CircleF
+4691 3505 CircleF
+4343 3339 CircleF
+1050 1810 CircleF
+1493 2062 CircleF
+3526 2903 CircleF
+1785 2214 CircleF
+3063 2691 CircleF
+3758 3038 CircleF
+1686 2147 CircleF
+4014 3084 CircleF
+4313 3154 CircleF
+1010 1828 CircleF
+4690 3453 CircleF
+1610 2110 CircleF
+2749 2507 CircleF
+4568 3223 CircleF
+1006 1910 CircleF
+3637 3007 CircleF
+2070 2237 CircleF
+1008 1956 CircleF
+3449 2907 CircleF
+1224 2329 CircleF
+1197 2100 CircleF
+1475 2119 CircleF
+1180 1929 CircleF
+3819 3044 CircleF
+2215 2320 CircleF
+1111 2945 CircleF
+2929 2602 CircleF
+3068 2596 CircleF
+3348 2851 CircleF
+1320 2001 CircleF
+3186 2759 CircleF
+1322 2356 CircleF
+3843 2990 CircleF
+3623 2701 CircleF
+2807 2598 CircleF
+1531 1962 CircleF
+917 1767 CircleF
+4347 3336 CircleF
+3613 3095 CircleF
+3402 2892 CircleF
+3453 2871 CircleF
+1578 2018 CircleF
+1511 1945 CircleF
+2660 2290 CircleF
+4073 3179 CircleF
+4228 3240 CircleF
+1005 2056 CircleF
+3340 2862 CircleF
+3184 2675 CircleF
+2298 2192 CircleF
+4672 3512 CircleF
+4014 3191 CircleF
+1222 1994 CircleF
+1764 2158 CircleF
+3985 3164 CircleF
+2252 2288 CircleF
+4647 3479 CircleF
+1740 2142 CircleF
+4310 3324 CircleF
+3745 3058 CircleF
+1797 2164 CircleF
+2999 2449 CircleF
+3835 3054 CircleF
+2857 2590 CircleF
+3554 2813 CircleF
+2383 2364 CircleF
+1738 2046 CircleF
+1566 1999 CircleF
+1745 2159 CircleF
+1009 1818 CircleF
+1471 2042 CircleF
+1109 1668 CircleF
+1456 2469 CircleF
+1691 2070 CircleF
+1698 2112 CircleF
+1198 1956 CircleF
+2973 2654 CircleF
+2408 2175 CircleF
+4050 3093 CircleF
+2057 2272 CircleF
+1051 1870 CircleF
+4173 3239 CircleF
+1631 1875 CircleF
+4611 3268 CircleF
+2869 2577 CircleF
+4627 3445 CircleF
+2249 2282 CircleF
+2097 2156 CircleF
+3043 2669 CircleF
+3435 2870 CircleF
+2102 2246 CircleF
+3635 2618 CircleF
+2248 2337 CircleF
+1178 1825 CircleF
+1511 1842 CircleF
+2593 2341 CircleF
+4680 3312 CircleF
+2094 2704 CircleF
+2245 2330 CircleF
+1692 2178 CircleF
+2853 2617 CircleF
+2820 2461 CircleF
+2334 2332 CircleF
+2447 2197 CircleF
+1198 1933 CircleF
+1792 2078 CircleF
+1928 2183 CircleF
+3282 2533 CircleF
+3458 2892 CircleF
+3252 2488 CircleF
+3605 2920 CircleF
+1009 1886 CircleF
+3588 2582 CircleF
+2444 2393 CircleF
+3047 2704 CircleF
+3085 2742 CircleF
+2807 2428 CircleF
+3697 2931 CircleF
+3145 2727 CircleF
+2931 2542 CircleF
+1791 2157 CircleF
+1546 1984 CircleF
+3614 2997 CircleF
+3724 3067 CircleF
+3853 3092 CircleF
+1796 2223 CircleF
+4327 3299 CircleF
+2066 2241 CircleF
+1225 1976 CircleF
+1046 1940 CircleF
+1267 1793 CircleF
+2744 2301 CircleF
+3288 2768 CircleF
+3288 2628 CircleF
+4419 3131 CircleF
+1107 1891 CircleF
+1175 1980 CircleF
+1702 2131 CircleF
+2896 1733 CircleF
+3798 3019 CircleF
+2863 2542 CircleF
+4350 3322 CircleF
+2134 2289 CircleF
+3856 2985 CircleF
+1445 2022 CircleF
+3070 2260 CircleF
+1794 1685 CircleF
+1177 2080 CircleF
+3110 2634 CircleF
+3017 2688 CircleF
+4649 3409 CircleF
+1197 2069 CircleF
+1695 1775 CircleF
+1005 1920 CircleF
+1931 2233 CircleF
+2224 2202 CircleF
+1772 2127 CircleF
+1481 2062 CircleF
+1167 1833 CircleF
+1206 1897 CircleF
+1755 2139 CircleF
+2447 2365 CircleF
+4114 2931 CircleF
+1189 1935 CircleF
+1112 2105 CircleF
+3071 2714 CircleF
+4113 2944 CircleF
+2386 2391 CircleF
+2336 1775 CircleF
+2186 1998 CircleF
+2328 2273 CircleF
+3921 2992 CircleF
+2416 2393 CircleF
+3799 3031 CircleF
+2103 2078 CircleF
+2076 2247 CircleF
+2648 2486 CircleF
+4048 3209 CircleF
+3899 3097 CircleF
+4150 2989 CircleF
+3070 2605 CircleF
+1972 2028 CircleF
+3612 2598 CircleF
+4730 3494 CircleF
+1698 2036 CircleF
+3422 2775 CircleF
+2865 2529 CircleF
+1006 1874 CircleF
+4480 3416 CircleF
+4609 3367 CircleF
+1260 1909 CircleF
+2863 2480 CircleF
+2331 2037 CircleF
+2188 2221 CircleF
+2254 2345 CircleF
+1172 1881 CircleF
+2989 2591 CircleF
+3527 2922 CircleF
+3082 2681 CircleF
+3529 2576 CircleF
+1173 1938 CircleF
+3938 3124 CircleF
+3839 2770 CircleF
+2064 2120 CircleF
+2239 2099 CircleF
+2798 2592 CircleF
+2914 2612 CircleF
+3061 2508 CircleF
+3746 2687 CircleF
+2273 2120 CircleF
+3248 2795 CircleF
+2246 2708 CircleF
+2923 2391 CircleF
+1643 2085 CircleF
+4735 3315 CircleF
+2984 2645 CircleF
+1206 1819 CircleF
+2211 2200 CircleF
+3857 2987 CircleF
+2978 2575 CircleF
+1007 1767 CircleF
+2180 2027 CircleF
+1798 2116 CircleF
+1224 1684 CircleF
+3132 2452 CircleF
+1695 2027 CircleF
+3404 2860 CircleF
+4678 3294 CircleF
+2327 2289 CircleF
+3301 2788 CircleF
+3095 2256 CircleF
+1637 1892 CircleF
+4307 3324 CircleF
+2986 2214 CircleF
+2404 2114 CircleF
+1570 2047 CircleF
+3477 2841 CircleF
+3772 2728 CircleF
+2790 2497 CircleF
+3587 2692 CircleF
+2334 2374 CircleF
+1684 1649 CircleF
+4107 3227 CircleF
+3536 2843 CircleF
+4301 3271 CircleF
+1456 1982 CircleF
+3937 3023 CircleF
+1794 2145 CircleF
+4548 3428 CircleF
+2331 2449 CircleF
+2055 2185 CircleF
+3739 2841 CircleF
+4567 3352 CircleF
+4178 3035 CircleF
+1175 1957 CircleF
+3551 2912 CircleF
+3950 2878 CircleF
+2250 2305 CircleF
+1470 2017 CircleF
+3173 2479 CircleF
+1570 1810 CircleF
+4016 3157 CircleF
+4433 3247 CircleF
+1649 2224 CircleF
+1753 1882 CircleF
+3410 2773 CircleF
+1791 2074 CircleF
+1101 1891 CircleF
+2801 2564 CircleF
+1546 2019 CircleF
+3584 2611 CircleF
+1712 2124 CircleF
+2971 2647 CircleF
+1574 1672 CircleF
+2103 2025 CircleF
+1558 1998 CircleF
+1799 1929 CircleF
+1570 2720 CircleF
+2219 2151 CircleF
+2034 2032 CircleF
+2764 2370 CircleF
+1697 2043 CircleF
+4509 3360 CircleF
+1711 2057 CircleF
+1574 2360 CircleF
+2922 2639 CircleF
+2335 2109 CircleF
+1610 2079 CircleF
+1765 1502 CircleF
+4382 3103 CircleF
+1206 1881 CircleF
+1275 2173 CircleF
+2691 2513 CircleF
+3408 2901 CircleF
+4166 3264 CircleF
+3177 2476 CircleF
+2859 2622 CircleF
+1111 1991 CircleF
+3988 3144 CircleF
+1707 2214 CircleF
+3703 3001 CircleF
+1551 2100 CircleF
+1051 3099 CircleF
+2330 2215 CircleF
+1223 1953 CircleF
+3731 2977 CircleF
+2927 2544 CircleF
+1173 1876 CircleF
+2785 2547 CircleF
+4325 3353 CircleF
+4590 3264 CircleF
+3185 2491 CircleF
+3584 2975 CircleF
+1089 1666 CircleF
+2597 2327 CircleF
+3874 3115 CircleF
+1011 1823 CircleF
+2567 1974 CircleF
+2062 2221 CircleF
+3638 2622 CircleF
+2675 2522 CircleF
+1699 3463 CircleF
+4592 3248 CircleF
+4246 3021 CircleF
+2573 2115 CircleF
+1709 2152 CircleF
+2378 2007 CircleF
+2866 2579 CircleF
+3073 2280 CircleF
+1167 1880 CircleF
+3536 2875 CircleF
+3401 2620 CircleF
+2581 2411 CircleF
+2806 2133 CircleF
+3188 2732 CircleF
+2862 2182 CircleF
+3855 2941 CircleF
+1198 1787 CircleF
+1195 2016 CircleF
+4011 2871 CircleF
+1055 1803 CircleF
+2251 2027 CircleF
+4380 3236 CircleF
+3657 2997 CircleF
+4290 3349 CircleF
+2656 2534 CircleF
+1443 2026 CircleF
+1688 2078 CircleF
+2575 2487 CircleF
+1167 1769 CircleF
+1198 2652 CircleF
+4218 3003 CircleF
+2487 2400 CircleF
+1887 2154 CircleF
+1716 2100 CircleF
+3290 2662 CircleF
+3183 2787 CircleF
+4316 3314 CircleF
+3059 2253 CircleF
+3161 2664 CircleF
+2654 2429 CircleF
+3476 2601 CircleF
+4034 3137 CircleF
+2765 2391 CircleF
+3925 2924 CircleF
+2145 2223 CircleF
+2862 2786 CircleF
+1042 1982 CircleF
+2406 1981 CircleF
+3786 2720 CircleF
+2105 1952 CircleF
+1734 2142 CircleF
+1603 2003 CircleF
+3561 2737 CircleF
+1472 3098 CircleF
+1005 1976 CircleF
+3946 2867 CircleF
+2780 2565 CircleF
+4632 3448 CircleF
+4306 3305 CircleF
+4139 2963 CircleF
+1420 1862 CircleF
+4386 3116 CircleF
+2145 2254 CircleF
+4400 3112 CircleF
+2333 2270 CircleF
+919 1846 CircleF
+4161 3018 CircleF
+1209 1911 CircleF
+1197 1949 CircleF
+2105 1511 CircleF
+4251 3286 CircleF
+1717 1873 CircleF
+3700 2850 CircleF
+2213 2020 CircleF
+4173 3252 CircleF
+2922 2782 CircleF
+2372 2168 CircleF
+2387 1937 CircleF
+2571 2277 CircleF
+1567 1964 CircleF
+1326 1965 CircleF
+3528 2564 CircleF
+1923 1922 CircleF
+2786 2188 CircleF
+3737 3015 CircleF
+3728 3034 CircleF
+2992 2680 CircleF
+2075 2147 CircleF
+1561 2299 CircleF
+1224 1967 CircleF
+3277 2649 CircleF
+1940 2162 CircleF
+1576 2010 CircleF
+3907 3066 CircleF
+3399 2806 CircleF
+1046 1148 CircleF
+3630 2972 CircleF
+2391 2260 CircleF
+4468 3306 CircleF
+3614 2879 CircleF
+1533 1404 CircleF
+1224 1789 CircleF
+2448 2177 CircleF
+2064 2139 CircleF
+1688 2282 CircleF
+3003 2615 CircleF
+3965 3137 CircleF
+1319 1984 CircleF
+1442 2010 CircleF
+2333 3267 CircleF
+4005 3141 CircleF
+3444 2796 CircleF
+1048 1920 CircleF
+3069 3450 CircleF
+1631 1970 CircleF
+2982 3167 CircleF
+1774 2064 CircleF
+3726 2941 CircleF
+4005 2920 CircleF
+2187 2210 CircleF
+3659 2818 CircleF
+1003 3173 CircleF
+1693 2025 CircleF
+3113 2642 CircleF
+1209 1942 CircleF
+3242 2882 CircleF
+3669 2795 CircleF
+3123 2288 CircleF
+4417 3121 CircleF
+4074 2979 CircleF
+3025 2279 CircleF
+2984 2644 CircleF
+1563 1874 CircleF
+1803 2009 CircleF
+1468 2934 CircleF
+2519 2438 CircleF
+1324 1968 CircleF
+2512 3282 CircleF
+2855 2412 CircleF
+1946 1919 CircleF
+2873 2867 CircleF
+4202 3263 CircleF
+1587 2098 CircleF
+1175 1968 CircleF
+1528 1864 CircleF
+2392 1957 CircleF
+2809 2102 CircleF
+2213 2130 CircleF
+1112 1903 CircleF
+2185 2235 CircleF
+3527 2573 CircleF
+1744 1910 CircleF
+2079 2126 CircleF
+3128 2704 CircleF
+3896 3123 CircleF
+1086 1973 CircleF
+4533 3190 CircleF
+1598 1790 CircleF
+2130 2267 CircleF
+4344 3171 CircleF
+1710 2194 CircleF
+3407 2861 CircleF
+1929 2195 CircleF
+1039 3309 CircleF
+3083 2334 CircleF
+3610 2664 CircleF
+3403 2501 CircleF
+3206 2804 CircleF
+2449 1911 CircleF
+1574 2032 CircleF
+922 1923 CircleF
+2451 1927 CircleF
+4139 2964 CircleF
+3692 2736 CircleF
+3303 2749 CircleF
+1881 3189 CircleF
+3291 2732 CircleF
+4245 3036 CircleF
+1945 2212 CircleF
+4115 3112 CircleF
+1612 1785 CircleF
+1242 1883 CircleF
+1046 1794 CircleF
+3757 2790 CircleF
+1660 2022 CircleF
+1952 2196 CircleF
+4325 3326 CircleF
+2593 2022 CircleF
+3677 3038 CircleF
+2487 2425 CircleF
+2577 2440 CircleF
+2684 2533 CircleF
+2801 2423 CircleF
+3236 2617 CircleF
+1930 2721 CircleF
+3115 2409 CircleF
+2989 3409 CircleF
+1798 1862 CircleF
+3301 2715 CircleF
+1592 2139 CircleF
+1005 2003 CircleF
+3913 3025 CircleF
+1009 1975 CircleF
+4371 3270 CircleF
+3773 2973 CircleF
+1307 1891 CircleF
+2124 2341 CircleF
+3885 3018 CircleF
+1317 1714 CircleF
+1064 1537 CircleF
+2981 2213 CircleF
+3668 3241 CircleF
+2191 2086 CircleF
+1556 2191 CircleF
+1009 1859 CircleF
+1599 2182 CircleF
+896 2064 CircleF
+4379 3310 CircleF
+3302 2617 CircleF
+3525 2867 CircleF
+919 1791 CircleF
+2066 2996 CircleF
+2444 2416 CircleF
+3872 3081 CircleF
+3129 2680 CircleF
+2103 2234 CircleF
+2255 1621 CircleF
+3173 2785 CircleF
+1051 2042 CircleF
+2285 2186 CircleF
+4736 3312 CircleF
+2216 1791 CircleF
+1753 2020 CircleF
+2897 2335 CircleF
+1531 1924 CircleF
+4115 2947 CircleF
+1009 1891 CircleF
+1698 2137 CircleF
+1417 1593 CircleF
+1698 1896 CircleF
+1007 2945 CircleF
+1190 1974 CircleF
+1197 1989 CircleF
+1054 1823 CircleF
+1762 2139 CircleF
+3024 2499 CircleF
+2634 2040 CircleF
+3679 2956 CircleF
+3019 2678 CircleF
+1043 2009 CircleF
+1680 2072 CircleF
+1559 1992 CircleF
+1551 2055 CircleF
+1800 1980 CircleF
+2380 2030 CircleF
+4227 3233 CircleF
+3527 2786 CircleF
+1093 1839 CircleF
+4271 3063 CircleF
+3010 2513 CircleF
+2251 2633 CircleF
+1198 1771 CircleF
+3637 2772 CircleF
+1800 1668 CircleF
+3270 2425 CircleF
+4414 3381 CircleF
+3933 2891 CircleF
+1568 3212 CircleF
+2183 2240 CircleF
+3921 3117 CircleF
+1772 1598 CircleF
+1110 1920 CircleF
+3307 2825 CircleF
+1077 2339 CircleF
+3338 2723 CircleF
+1240 2522 CircleF
+1191 3335 CircleF
+4568 3407 CircleF
+2581 3189 CircleF
+1945 3023 CircleF
+1955 2179 CircleF
+2185 1921 CircleF
+2190 2559 CircleF
+3289 2676 CircleF
+1935 2066 CircleF
+4419 3133 CircleF
+4050 3197 CircleF
+2051 1771 CircleF
+3337 2571 CircleF
+2791 2504 CircleF
+1563 2361 CircleF
+3127 2325 CircleF
+1692 2063 CircleF
+2247 2173 CircleF
+2833 2501 CircleF
+1529 1883 CircleF
+1737 1815 CircleF
+1925 2162 CircleF
+2183 2166 CircleF
+1473 1989 CircleF
+2105 2233 CircleF
+2189 1872 CircleF
+2978 2209 CircleF
+2921 2609 CircleF
+3727 2690 CircleF
+1785 2024 CircleF
+3539 2831 CircleF
+2102 1985 CircleF
+2385 2125 CircleF
+1197 1753 CircleF
+1197 1954 CircleF
+2813 2604 CircleF
+1197 1659 CircleF
+3250 2688 CircleF
+1758 2081 CircleF
+1040 2092 CircleF
+2680 2800 CircleF
+1167 1745 CircleF
+2141 1926 CircleF
+2517 2633 CircleF
+3183 2462 CircleF
+917 1945 CircleF
+3318 2442 CircleF
+3984 3177 CircleF
+1684 2045 CircleF
+3085 2634 CircleF
+3403 2869 CircleF
+1005 1718 CircleF
+3250 2441 CircleF
+3412 2850 CircleF
+1706 2161 CircleF
+4124 3082 CircleF
+3831 2967 CircleF
+4285 3165 CircleF
+4114 3058 CircleF
+3048 2471 CircleF
+1205 1890 CircleF
+1943 1694 CircleF
+1038 1802 CircleF
+2517 2324 CircleF
+3659 2978 CircleF
+2451 3097 CircleF
+1044 1408 CircleF
+1633 1959 CircleF
+2062 1775 CircleF
+1937 1841 CircleF
+1178 1731 CircleF
+1608 1387 CircleF
+3170 2589 CircleF
+1930 2238 CircleF
+1556 1975 CircleF
+2142 2121 CircleF
+1179 1992 CircleF
+2273 2305 CircleF
+2249 2164 CircleF
+3735 2709 CircleF
+2246 3121 CircleF
+4173 3242 CircleF
+1173 2041 CircleF
+4690 3283 CircleF
+3880 3009 CircleF
+2325 1933 CircleF
+1206 1670 CircleF
+4176 2972 CircleF
+2997 2299 CircleF
+3015 2612 CircleF
+4610 3261 CircleF
+1545 2826 CircleF
+2966 2513 CircleF
+3774 2946 CircleF
+4432 3133 CircleF
+4180 1752 CircleF
+2868 2616 CircleF
+2492 2391 CircleF
+1176 1771 CircleF
+2595 2297 CircleF
+2444 1991 CircleF
+3109 2908 CircleF
+4235 3012 CircleF
+1449 1305 CircleF
+4115 2974 CircleF
+3661 3009 CircleF
+2380 2261 CircleF
+3466 2509 CircleF
+2062 2053 CircleF
+1660 2097 CircleF
+3076 2300 CircleF
+2246 2327 CircleF
+1633 1951 CircleF
+3634 2965 CircleF
+898 1801 CircleF
+1318 1625 CircleF
+2327 2331 CircleF
+2922 2437 CircleF
+2181 2572 CircleF
+3014 2707 CircleF
+2483 1962 CircleF
+1083 2064 CircleF
+3083 2299 CircleF
+3637 2621 CircleF
+1533 1731 CircleF
+2274 1920 CircleF
+1704 2346 CircleF
+1176 1615 CircleF
+3982 2904 CircleF
+2918 2354 CircleF
+3322 2411 CircleF
+1110 1794 CircleF
+2378 2273 CircleF
+1106 1966 CircleF
+3276 2790 CircleF
+3872 2963 CircleF
+3898 2912 CircleF
+2176 2269 CircleF
+2060 3015 CircleF
+3842 1305 CircleF
+1923 2250 CircleF
+3394 2737 CircleF
+2358 2558 CircleF
+895 2112 CircleF
+3157 2334 CircleF
+1604 2044 CircleF
+2861 2125 CircleF
+3681 2672 CircleF
+901 1936 CircleF
+3957 3032 CircleF
+1196 2493 CircleF
+4366 3094 CircleF
+1170 3197 CircleF
+1883 1917 CircleF
+2726 2252 CircleF
+1564 2707 CircleF
+1644 2305 CircleF
+2872 2562 CircleF
+3401 2886 CircleF
+3667 2642 CircleF
+1104 2065 CircleF
+3072 2530 CircleF
+896 1939 CircleF
+1007 1921 CircleF
+3983 3182 CircleF
+2517 2308 CircleF
+3885 3094 CircleF
+3043 2258 CircleF
+2486 2030 CircleF
+1957 2180 CircleF
+1175 2153 CircleF
+3700 2654 CircleF
+1544 1127 CircleF
+4407 3125 CircleF
+4281 3058 CircleF
+2975 2506 CircleF
+3228 2489 CircleF
+1419 1665 CircleF
+1328 1973 CircleF
+3267 2421 CircleF
+2257 2754 CircleF
+1555 1954 CircleF
+1166 1815 CircleF
+1173 1915 CircleF
+3844 3165 CircleF
+4530 3410 CircleF
+2317 2740 CircleF
+1224 2055 CircleF
+3614 2951 CircleF
+1197 1976 CircleF
+2579 1987 CircleF
+1703 1859 CircleF
+4379 3364 CircleF
+3442 2510 CircleF
+2512 3014 CircleF
+2573 2021 CircleF
+4105 3069 CircleF
+1952 2042 CircleF
+2652 2327 CircleF
+2784 2434 CircleF
+1943 1997 CircleF
+3111 2556 CircleF
+2654 2533 CircleF
+1322 2680 CircleF
+921 1990 CircleF
+3695 2681 CircleF
+3199 2496 CircleF
+4014 3120 CircleF
+3535 2690 CircleF
+2446 2303 CircleF
+2977 2636 CircleF
+4155 3003 CircleF
+3410 2474 CircleF
+1748 1771 CircleF
+1582 2705 CircleF
+3852 2769 CircleF
+3016 2541 CircleF
+1768 1962 CircleF
+3809 3019 CircleF
+3923 3006 CircleF
+2332 2103 CircleF
+2854 2414 CircleF
+1798 1957 CircleF
+4051 3082 CircleF
+1196 1629 CircleF
+3940 3035 CircleF
+1316 1831 CircleF
+3163 2337 CircleF
+1198 1930 CircleF
+4382 3100 CircleF
+3039 2517 CircleF
+902 1677 CircleF
+1048 1850 CircleF
+2764 2293 CircleF
+1223 1571 CircleF
+3249 2646 CircleF
+3537 2871 CircleF
+2196 2272 CircleF
+4059 3193 CircleF
+4308 3070 CircleF
+2873 2495 CircleF
+1574 2120 CircleF
+2064 2160 CircleF
+3476 2623 CircleF
+4699 3471 CircleF
+4235 3260 CircleF
+1590 2040 CircleF
+1189 1580 CircleF
+4174 3124 CircleF
+2252 2258 CircleF
+1544 1752 CircleF
+4583 3236 CircleF
+1956 2008 CircleF
+2334 2075 CircleF
+1010 1986 CircleF
+1056 2359 CircleF
+3478 2690 CircleF
+1599 1887 CircleF
+3988 2870 CircleF
+4352 3095 CircleF
+1411 1894 CircleF
+3880 3035 CircleF
+2693 2187 CircleF
+2922 2600 CircleF
+3089 2416 CircleF
+2326 2006 CircleF
+3802 2752 CircleF
+1318 2998 CircleF
+3090 2520 CircleF
+1313 1918 CircleF
+3021 2487 CircleF
+1045 1732 CircleF
+1552 2169 CircleF
+893 1798 CircleF
+1081 1644 CircleF
+1111 1887 CircleF
+3984 2885 CircleF
+4681 3445 CircleF
+879 1871 CircleF
+3703 2661 CircleF
+3088 2579 CircleF
+3621 2917 CircleF
+2336 2148 CircleF
+3451 2872 CircleF
+2406 2141 CircleF
+3884 3091 CircleF
+3533 2692 CircleF
+1195 2279 CircleF
+2566 2275 CircleF
+3731 2712 CircleF
+903 1531 CircleF
+1037 1557 CircleF
+1104 2783 CircleF
+2976 2269 CircleF
+3548 2562 CircleF
+2328 1812 CircleF
+4381 3327 CircleF
+2725 2616 CircleF
+2213 1965 CircleF
+1170 2261 CircleF
+2274 2317 CircleF
+2488 3205 CircleF
+2216 2324 CircleF
+3362 2441 CircleF
+2381 1904 CircleF
+3284 2399 CircleF
+3072 3207 CircleF
+2979 2350 CircleF
+1009 1891 CircleF
+899 1908 CircleF
+4621 3252 CircleF
+4269 3135 CircleF
+4509 3251 CircleF
+1173 2684 CircleF
+1232 5050 CircleF
+% End plot #462
+% Begin plot #463
+2.000 UL
+LT5
+0.00 0.00 0.00 C 0.00 0.00 0.00 C 2943 4910 M
+[ [(Helvetica) 140.0 0.0 true true 0 (Prep save mesh)]
+] -46.7 MRshow
+LT5
+0.00 0.00 0.00 C 1032 4910 M
+399 0 V
+864 1674 M
+99 43 V
+98 44 V
+99 43 V
+99 44 V
+99 44 V
+98 44 V
+99 43 V
+99 44 V
+99 45 V
+98 44 V
+99 44 V
+99 44 V
+98 44 V
+99 44 V
+99 44 V
+99 45 V
+98 44 V
+99 44 V
+99 44 V
+99 45 V
+98 44 V
+99 44 V
+99 44 V
+98 44 V
+99 45 V
+99 44 V
+99 44 V
+98 44 V
+99 45 V
+99 44 V
+99 44 V
+98 44 V
+99 45 V
+99 44 V
+98 44 V
+99 44 V
+99 45 V
+99 44 V
+98 44 V
+99 44 V
+99 44 V
+99 45 V
+98 44 V
+99 44 V
+99 44 V
+99 45 V
+98 44 V
+99 44 V
+99 44 V
+98 45 V
+99 44 V
+99 44 V
+99 44 V
+98 45 V
+99 44 V
+99 44 V
+99 44 V
+98 45 V
+99 44 V
+99 44 V
+98 44 V
+99 45 V
+99 44 V
+99 44 V
+98 44 V
+99 44 V
+99 45 V
+99 44 V
+98 44 V
+99 44 V
+% End plot #463
+% Begin plot #464
+stroke
+1.000 UL
+LT2
+0.00 0.00 0.00 C 0.00 0.00 0.00 C 2943 4770 M
+[ [(Helvetica) 140.0 0.0 true true 0 (Check CGNS)]
+] -46.7 MRshow
+LT2
+0.00 0.00 0.00 C 1032 4770 M
+399 0 V
+864 1618 M
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+% End plot #464
+% Begin plot #465
+stroke
+LT1
+0.00 0.00 0.00 C 0.00 0.00 0.00 C 2943 4630 M
+[ [(Helvetica) 140.0 0.0 true true 0 (Read file CGNS)]
+] -46.7 MRshow
+LT1
+0.00 0.00 0.00 C 1032 4630 M
+399 0 V
+864 1288 M
+99 0 V
+98 0 V
+99 0 V
+99 1 V
+99 0 V
+98 1 V
+99 1 V
+99 1 V
+99 1 V
+98 1 V
+99 2 V
+99 3 V
+98 3 V
+99 3 V
+99 5 V
+99 5 V
+98 7 V
+99 8 V
+99 10 V
+99 12 V
+98 14 V
+99 16 V
+99 18 V
+98 21 V
+99 23 V
+99 26 V
+99 29 V
+98 31 V
+99 32 V
+99 35 V
+99 36 V
+98 38 V
+99 38 V
+99 40 V
+98 41 V
+99 41 V
+99 42 V
+99 43 V
+98 42 V
+99 43 V
+99 44 V
+99 43 V
+98 44 V
+99 43 V
+99 44 V
+99 44 V
+98 44 V
+99 44 V
+99 44 V
+98 44 V
+99 45 V
+99 44 V
+99 44 V
+98 44 V
+99 44 V
+99 45 V
+99 44 V
+98 44 V
+99 44 V
+99 44 V
+98 45 V
+99 44 V
+99 44 V
+99 44 V
+98 45 V
+99 44 V
+99 44 V
+99 44 V
+98 45 V
+99 44 V
+% End plot #465
+% Begin plot #466
+stroke
+LT0
+1.00 0.00 1.00 C 0.00 0.00 0.00 C 2943 4490 M
+[ [(Helvetica) 140.0 0.0 true true 0 (Prep unroll CADs)]
+] -46.7 MRshow
+LT0
+1.00 0.00 1.00 C 1032 4490 M
+399 0 V
+864 1739 M
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+% End plot #466
+% Begin plot #467
+stroke
+LT0
+1.00 0.00 0.00 C 0.00 0.00 0.00 C 2943 4350 M
+[ [(Helvetica) 140.0 0.0 true true 0 (Prep script CADs)]
+] -46.7 MRshow
+LT0
+1.00 0.00 0.00 C 1032 4350 M
+399 0 V
+864 1062 M
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+% End plot #467
+% Begin plot #468
+stroke
+LT2
+1.00 0.00 0.00 C 0.00 0.00 0.00 C 2943 4210 M
+[ [(Helvetica) 140.0 0.0 true true 0 (Check CADs)]
+] -46.7 MRshow
+LT2
+1.00 0.00 0.00 C 1032 4210 M
+399 0 V
+864 1210 M
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+99 0 V
+99 0 V
+98 0 V
+99 0 V
+% End plot #468
+% Begin plot #469
+stroke
+2.000 UL
+LT5
+1.00 0.00 0.00 C 0.00 0.00 0.00 C 2943 4070 M
+[ [(Helvetica) 140.0 0.0 true true 0 (Mesh CADs)]
+] -46.7 MRshow
+LT5
+1.00 0.00 0.00 C 1032 4070 M
+399 0 V
+864 987 M
+99 44 V
+98 44 V
+99 44 V
+99 44 V
+99 45 V
+98 44 V
+99 44 V
+99 44 V
+99 44 V
+98 45 V
+99 44 V
+99 44 V
+98 44 V
+99 44 V
+99 45 V
+99 44 V
+98 44 V
+99 44 V
+99 45 V
+99 44 V
+98 44 V
+99 44 V
+99 45 V
+98 44 V
+99 44 V
+99 44 V
+99 45 V
+98 44 V
+99 44 V
+99 44 V
+99 44 V
+98 45 V
+99 44 V
+99 44 V
+98 44 V
+99 45 V
+99 44 V
+99 44 V
+98 44 V
+99 45 V
+99 44 V
+99 44 V
+98 44 V
+99 45 V
+99 44 V
+99 44 V
+98 44 V
+99 45 V
+99 44 V
+98 44 V
+99 44 V
+99 45 V
+99 44 V
+98 44 V
+99 44 V
+99 44 V
+99 45 V
+98 44 V
+99 44 V
+99 44 V
+98 45 V
+99 44 V
+99 44 V
+99 44 V
+98 45 V
+99 44 V
+99 44 V
+99 44 V
+98 45 V
+99 44 V
+% End plot #469
+% Begin plot #470
+stroke
+LT1
+1.00 0.00 0.00 C 0.00 0.00 0.00 C 2943 3930 M
+[ [(Helvetica) 140.0 0.0 true true 0 (Read memory Gmsh)]
+] -46.7 MRshow
+LT1
+1.00 0.00 0.00 C 1032 3930 M
+399 0 V
+1250 576 M
+9 4 V
+99 44 V
+98 45 V
+99 44 V
+99 44 V
+99 44 V
+98 45 V
+99 44 V
+99 44 V
+98 44 V
+99 45 V
+99 44 V
+99 44 V
+98 44 V
+99 44 V
+99 45 V
+99 44 V
+98 44 V
+99 44 V
+99 45 V
+98 44 V
+99 44 V
+99 44 V
+99 45 V
+98 44 V
+99 44 V
+99 44 V
+99 45 V
+98 44 V
+99 44 V
+99 44 V
+98 45 V
+99 44 V
+99 44 V
+99 44 V
+98 44 V
+99 45 V
+99 44 V
+99 44 V
+98 44 V
+99 45 V
+99 44 V
+99 44 V
+98 44 V
+99 45 V
+99 44 V
+98 44 V
+99 44 V
+99 45 V
+99 44 V
+98 44 V
+99 44 V
+99 45 V
+99 44 V
+98 44 V
+99 44 V
+99 45 V
+98 44 V
+99 44 V
+99 44 V
+99 44 V
+98 45 V
+99 44 V
+99 44 V
+99 44 V
+98 45 V
+99 44 V
+% End plot #470
+% Begin plot #471
+0.444 UP
+stroke
+1.000 UL
+LT2
+1.00 0.00 1.00 C 0.00 0.00 0.00 C 2943 3790 M
+[ [(Helvetica) 140.0 0.0 true true 0 (Total unroll CADs)]
+] -46.7 MRshow
+LT2
+1.00 0.00 1.00 C 1106 2026 CircleF
+3547 2584 CircleF
+1780 1835 CircleF
+2769 2138 CircleF
+3651 2653 CircleF
+3585 2613 CircleF
+1487 1782 CircleF
+1048 1783 CircleF
+4467 3163 CircleF
+3844 2777 CircleF
+4058 2911 CircleF
+2600 2052 CircleF
+1567 1820 CircleF
+2331 1948 CircleF
+3664 2659 CircleF
+1039 1769 CircleF
+1050 1784 CircleF
+1454 1807 CircleF
+1603 1805 CircleF
+4127 2955 CircleF
+4013 2882 CircleF
+1933 1818 CircleF
+1323 1802 CircleF
+1050 1760 CircleF
+1206 1774 CircleF
+2261 1923 CircleF
+1573 1813 CircleF
+4171 2984 CircleF
+3666 2659 CircleF
+1195 1863 CircleF
+4268 3045 CircleF
+4430 3141 CircleF
+1076 1759 CircleF
+2516 2023 CircleF
+3529 2577 CircleF
+1579 1821 CircleF
+2649 2082 CircleF
+1011 1798 CircleF
+2777 2139 CircleF
+3778 2732 CircleF
+2139 1874 CircleF
+3549 2584 CircleF
+1113 1799 CircleF
+4227 3022 CircleF
+2627 2069 CircleF
+3289 2430 CircleF
+1416 1774 CircleF
+1173 1760 CircleF
+4172 2985 CircleF
+1007 1753 CircleF
+4278 3053 CircleF
+4500 3184 CircleF
+1694 1828 CircleF
+3283 2428 CircleF
+4499 3182 CircleF
+4010 2879 CircleF
+4075 2923 CircleF
+2058 1850 CircleF
+1475 1828 CircleF
+3340 2461 CircleF
+3697 2677 CircleF
+2420 1992 CircleF
+4046 2902 CircleF
+1556 1792 CircleF
+4240 3030 CircleF
+2224 1916 CircleF
+1308 1784 CircleF
+2084 1913 CircleF
+2921 2218 CircleF
+4734 3320 CircleF
+4559 3217 CircleF
+1173 1772 CircleF
+1224 1740 CircleF
+2147 1870 CircleF
+1928 1851 CircleF
+2598 2044 CircleF
+3272 2420 CircleF
+1328 1823 CircleF
+2070 1859 CircleF
+2406 1958 CircleF
+1200 1755 CircleF
+1198 1828 CircleF
+2344 1976 CircleF
+1441 1763 CircleF
+2323 1940 CircleF
+1007 1783 CircleF
+2567 2039 CircleF
+3836 2768 CircleF
+3886 2798 CircleF
+1089 1766 CircleF
+1318 1763 CircleF
+1051 2152 CircleF
+1807 1803 CircleF
+1197 1792 CircleF
+3122 2331 CircleF
+4506 3186 CircleF
+4634 3262 CircleF
+3560 2595 CircleF
+4351 3095 CircleF
+917 1767 CircleF
+3613 3095 CircleF
+1005 2056 CircleF
+1794 1805 CircleF
+2094 2704 CircleF
+4016 2885 CircleF
+2630 2054 CircleF
+1267 1793 CircleF
+4419 3131 CircleF
+2896 1733 CircleF
+872 1772 CircleF
+1695 1775 CircleF
+4113 2944 CircleF
+2102 1853 CircleF
+2113 1886 CircleF
+1545 1740 CircleF
+3529 2576 CircleF
+2317 1965 CircleF
+2246 2708 CircleF
+2926 2213 CircleF
+1007 1767 CircleF
+1224 1684 CircleF
+2132 1883 CircleF
+1008 1551 CircleF
+3772 2728 CircleF
+4178 3035 CircleF
+1039 1327 CircleF
+3584 2611 CircleF
+1687 1786 CircleF
+1574 2360 CircleF
+2277 1962 CircleF
+2691 2513 CircleF
+1551 2100 CircleF
+2567 1974 CircleF
+3077 2311 CircleF
+2575 2487 CircleF
+2656 2077 CircleF
+1167 1769 CircleF
+3059 2253 CircleF
+3401 2496 CircleF
+1042 1982 CircleF
+1472 3098 CircleF
+4139 2963 CircleF
+4386 3116 CircleF
+2105 1511 CircleF
+2387 1937 CircleF
+3614 2879 CircleF
+3433 2513 CircleF
+1468 2934 CircleF
+3896 3123 CircleF
+1598 1790 CircleF
+3403 2501 CircleF
+2449 1911 CircleF
+4245 3036 CircleF
+1612 1785 CircleF
+2593 2022 CircleF
+2989 3409 CircleF
+1563 1749 CircleF
+3885 3018 CircleF
+2981 2213 CircleF
+2191 2086 CircleF
+2238 1894 CircleF
+2255 1621 CircleF
+4115 2947 CircleF
+1191 1728 CircleF
+1054 1823 CircleF
+2634 2040 CircleF
+1800 1668 CircleF
+3270 2425 CircleF
+1772 1598 CircleF
+2978 2209 CircleF
+3029 2278 CircleF
+1197 1954 CircleF
+1197 1659 CircleF
+1167 1745 CircleF
+3318 2442 CircleF
+4203 3004 CircleF
+3403 2869 CircleF
+4124 3082 CircleF
+1943 1694 CircleF
+1930 2238 CircleF
+4176 2972 CircleF
+4180 1752 CircleF
+3076 2300 CircleF
+2246 2327 CircleF
+1633 1951 CircleF
+1318 1625 CircleF
+1083 2064 CircleF
+1533 1731 CircleF
+2274 1920 CircleF
+1176 1615 CircleF
+3157 2334 CircleF
+4612 3248 CircleF
+3983 3182 CircleF
+3043 2258 CircleF
+1571 1695 CircleF
+2975 2506 CircleF
+1419 1665 CircleF
+1640 1743 CircleF
+1166 1815 CircleF
+3844 3165 CircleF
+2579 1987 CircleF
+3442 2510 CircleF
+2512 3014 CircleF
+2573 2021 CircleF
+1943 1997 CircleF
+3410 2474 CircleF
+2332 2103 CircleF
+2186 1866 CircleF
+1196 1629 CircleF
+902 1677 CircleF
+1010 1986 CircleF
+1056 2359 CircleF
+3988 2870 CircleF
+3880 3035 CircleF
+1552 2169 CircleF
+1081 1644 CircleF
+3533 2692 CircleF
+3548 2562 CircleF
+2328 1812 CircleF
+2725 2616 CircleF
+1170 2261 CircleF
+1209 1768 CircleF
+1232 3790 CircleF
+% End plot #471
+% Begin plot #472
+0.444 UP
+2.000 UL
+LT3
+1.00 0.00 0.00 C 0.00 0.00 0.00 C 2943 3650 M
+[ [(Helvetica) 140.0 0.0 true true 0 (Total script CADs)]
+] -46.7 MRshow
+LT3
+1.00 0.00 0.00 C 3546 2585 CircleF
+1957 1683 CircleF
+1117 1779 CircleF
+4697 3299 CircleF
+2412 1905 CircleF
+1684 1579 CircleF
+1553 1547 CircleF
+1698 1593 CircleF
+1739 1673 CircleF
+3199 2372 CircleF
+2982 2232 CircleF
+3408 2499 CircleF
+4359 3099 CircleF
+3409 2503 CircleF
+4119 2953 CircleF
+1328 1470 CircleF
+3204 2368 CircleF
+1191 1470 CircleF
+4281 3053 CircleF
+1580 1571 CircleF
+1606 1562 CircleF
+3784 2733 CircleF
+3023 2264 CircleF
+1697 1608 CircleF
+3688 2675 CircleF
+1110 1459 CircleF
+3448 2519 CircleF
+4259 3040 CircleF
+4699 3300 CircleF
+1061 1466 CircleF
+4605 3243 CircleF
+4213 3012 CircleF
+2678 2051 CircleF
+1197 1410 CircleF
+1687 1541 CircleF
+1797 1626 CircleF
+1198 1601 CircleF
+1593 1655 CircleF
+1585 1557 CircleF
+1005 1422 CircleF
+4417 3132 CircleF
+4323 3079 CircleF
+4344 3092 CircleF
+1172 1516 CircleF
+3785 2731 CircleF
+2065 1731 CircleF
+3538 2583 CircleF
+2175 1790 CircleF
+1800 1594 CircleF
+1670 1591 CircleF
+1052 1441 CircleF
+3859 2783 CircleF
+3562 2597 CircleF
+1616 1541 CircleF
+1787 1611 CircleF
+1170 1465 CircleF
+2653 2044 CircleF
+4138 2962 CircleF
+1209 1362 CircleF
+1589 1624 CircleF
+3059 2280 CircleF
+4382 3112 CircleF
+4629 3258 CircleF
+1161 1453 CircleF
+2810 2128 CircleF
+3527 2570 CircleF
+897 1446 CircleF
+1011 1536 CircleF
+3014 2256 CircleF
+2103 1758 CircleF
+3311 2439 CircleF
+1101 1371 CircleF
+2242 1805 CircleF
+4503 3186 CircleF
+1224 1431 CircleF
+950 1410 CircleF
+2245 1829 CircleF
+1191 1535 CircleF
+3352 2467 CircleF
+4459 3159 CircleF
+3782 2730 CircleF
+1736 1557 CircleF
+4344 3093 CircleF
+2386 1886 CircleF
+1041 1385 CircleF
+4702 3301 CircleF
+2651 2038 CircleF
+4701 3300 CircleF
+1449 1453 CircleF
+1788 1577 CircleF
+1567 1538 CircleF
+1006 1291 CircleF
+3588 2582 CircleF
+1794 1685 CircleF
+1753 1577 CircleF
+2336 1775 CircleF
+3678 2667 CircleF
+2102 1853 CircleF
+3839 2770 CircleF
+4344 3090 CircleF
+3527 2573 CircleF
+2446 1919 CircleF
+3095 2256 CircleF
+1684 1649 CircleF
+1039 1327 CircleF
+2059 1711 CircleF
+2143 1757 CircleF
+1574 1672 CircleF
+1558 1998 CircleF
+3245 2391 CircleF
+1765 1502 CircleF
+1051 3099 CircleF
+3073 2280 CircleF
+3020 2255 CircleF
+4218 3003 CircleF
+3399 2492 CircleF
+4342 3091 CircleF
+3885 2801 CircleF
+1209 1911 CircleF
+3907 3066 CircleF
+1046 1148 CircleF
+1533 1404 CircleF
+3965 3137 CircleF
+2333 3267 CircleF
+3433 2513 CircleF
+1200 1426 CircleF
+3123 2288 CircleF
+1563 1874 CircleF
+2809 2102 CircleF
+3527 2573 CircleF
+2657 2038 CircleF
+2451 1927 CircleF
+4139 2964 CircleF
+1945 2212 CircleF
+2655 2045 CircleF
+2487 2425 CircleF
+4551 3211 CircleF
+3022 2256 CircleF
+1064 1537 CircleF
+3302 2617 CircleF
+3404 2493 CircleF
+3173 2785 CircleF
+2216 1791 CircleF
+3527 2786 CircleF
+3953 2843 CircleF
+2051 1771 CircleF
+3127 2325 CircleF
+2247 2173 CircleF
+3250 2441 CircleF
+3659 2978 CircleF
+1044 1408 CircleF
+1608 1387 CircleF
+2966 2513 CircleF
+1449 1305 CircleF
+3466 2509 CircleF
+2483 1962 CircleF
+3322 2411 CircleF
+3842 1305 CircleF
+3288 2423 CircleF
+2861 2125 CircleF
+3681 2672 CircleF
+1196 2493 CircleF
+1883 1917 CircleF
+1644 2305 CircleF
+3700 2654 CircleF
+1571 1695 CircleF
+1544 1127 CircleF
+3487 2548 CircleF
+1173 1915 CircleF
+921 1990 CircleF
+4155 3003 CircleF
+1582 2705 CircleF
+1223 1571 CircleF
+3537 2871 CircleF
+4308 3070 CircleF
+1189 1580 CircleF
+4174 3124 CircleF
+2090 1722 CircleF
+2252 2258 CircleF
+1956 2008 CircleF
+4352 3095 CircleF
+3089 2416 CircleF
+2326 2006 CircleF
+3802 2752 CircleF
+1318 2998 CircleF
+1045 1732 CircleF
+893 1798 CircleF
+3703 2661 CircleF
+3451 2872 CircleF
+903 1531 CircleF
+1037 1557 CircleF
+2488 3205 CircleF
+4621 3252 CircleF
+1232 3650 CircleF
+% End plot #472
+% Begin plot #473
+1.000 UL
+LT2
+0.00 0.62 0.62 C 0.00 0.00 0.00 C 2943 3510 M
+[ [(Helvetica) 140.0 0.0 true true 0 (Check mesh Gmsh)]
+] -46.7 MRshow
+LT2
+0.00 0.62 0.62 C 1032 3510 M
+399 0 V
+864 1688 M
+99 0 V
+98 1 V
+99 0 V
+99 0 V
+99 1 V
+98 1 V
+99 1 V
+99 1 V
+99 1 V
+98 2 V
+99 3 V
+99 2 V
+98 4 V
+99 4 V
+99 6 V
+99 6 V
+98 8 V
+99 10 V
+99 11 V
+99 13 V
+98 16 V
+99 18 V
+99 21 V
+98 23 V
+99 26 V
+99 28 V
+99 30 V
+98 32 V
+99 35 V
+99 36 V
+99 37 V
+98 39 V
+99 39 V
+99 41 V
+98 41 V
+99 42 V
+99 42 V
+99 43 V
+98 43 V
+99 43 V
+99 44 V
+99 43 V
+98 44 V
+99 44 V
+99 44 V
+99 44 V
+98 44 V
+99 44 V
+99 44 V
+98 44 V
+99 44 V
+99 44 V
+99 45 V
+98 44 V
+99 44 V
+99 44 V
+99 44 V
+98 45 V
+99 44 V
+99 44 V
+98 44 V
+99 45 V
+99 44 V
+99 44 V
+98 44 V
+99 45 V
+99 44 V
+99 44 V
+98 44 V
+99 44 V
+% End plot #473
+% Begin plot #474
+stroke
+LT0
+0.00 1.00 0.00 C 0.00 0.00 0.00 C 2943 3370 M
+[ [(Helvetica) 140.0 0.0 true true 0 (Prep STL)]
+] -46.7 MRshow
+LT0
+0.00 1.00 0.00 C 1032 3370 M
+399 0 V
+864 1959 M
+99 29 V
+98 30 V
+99 29 V
+99 30 V
+99 29 V
+98 30 V
+99 29 V
+99 30 V
+99 29 V
+98 30 V
+99 29 V
+99 30 V
+98 29 V
+99 30 V
+99 29 V
+99 30 V
+98 29 V
+99 30 V
+99 29 V
+99 30 V
+98 29 V
+99 30 V
+99 29 V
+98 30 V
+99 29 V
+99 30 V
+99 29 V
+98 30 V
+99 29 V
+99 30 V
+99 29 V
+98 30 V
+99 29 V
+99 30 V
+98 29 V
+99 30 V
+99 29 V
+99 30 V
+98 29 V
+99 30 V
+99 29 V
+99 30 V
+98 29 V
+99 30 V
+99 29 V
+99 30 V
+98 29 V
+99 30 V
+99 29 V
+98 30 V
+99 29 V
+99 30 V
+99 29 V
+98 30 V
+99 29 V
+99 30 V
+99 29 V
+98 30 V
+99 29 V
+99 30 V
+98 29 V
+99 29 V
+99 30 V
+99 29 V
+98 30 V
+99 29 V
+99 30 V
+99 29 V
+98 30 V
+99 29 V
+% End plot #474
+% Begin plot #475
+0.444 UP
+stroke
+2.000 UL
+LT6
+0.00 1.00 0.00 C 0.00 0.00 0.00 C 2943 3230 M
+[ [(Helvetica) 140.0 0.0 true true 0 (Total STL)]
+] -46.7 MRshow
+LT6
+0.00 1.00 0.00 C 2940 2406 CircleF
+3109 2611 CircleF
+2415 2262 CircleF
+1885 2064 CircleF
+1416 1933 CircleF
+4536 3233 CircleF
+1876 2025 CircleF
+1413 1951 CircleF
+2741 2307 CircleF
+3360 2586 CircleF
+4231 3066 CircleF
+1307 1929 CircleF
+2376 2171 CircleF
+2740 2311 CircleF
+3906 2877 CircleF
+2216 2115 CircleF
+1933 2033 CircleF
+2963 2391 CircleF
+2378 2162 CircleF
+2201 2116 CircleF
+1241 1916 CircleF
+1077 1912 CircleF
+1935 2038 CircleF
+3375 2597 CircleF
+2350 2161 CircleF
+3468 2640 CircleF
+4681 3315 CircleF
+2510 2216 CircleF
+2106 2144 CircleF
+2640 2372 CircleF
+3156 2488 CircleF
+2840 2472 CircleF
+4422 3169 CircleF
+2924 2508 CircleF
+3324 2570 CircleF
+1166 1918 CircleF
+1117 1930 CircleF
+2124 2146 CircleF
+3094 2598 CircleF
+1964 2093 CircleF
+1167 1926 CircleF
+3812 2822 CircleF
+1388 1946 CircleF
+1240 1946 CircleF
+2372 2167 CircleF
+3153 2628 CircleF
+1087 1935 CircleF
+3885 2864 CircleF
+2896 2496 CircleF
+1637 1984 CircleF
+1769 2002 CircleF
+1921 2082 CircleF
+2214 2113 CircleF
+3249 2675 CircleF
+3229 2665 CircleF
+2737 2415 CircleF
+1717 2002 CircleF
+1347 1947 CircleF
+3074 2446 CircleF
+2218 2110 CircleF
+3277 2692 CircleF
+3203 2651 CircleF
+1926 2051 CircleF
+3590 2858 CircleF
+3746 2788 CircleF
+1415 1938 CircleF
+2943 2388 CircleF
+2378 2173 CircleF
+3229 2526 CircleF
+1319 1933 CircleF
+1554 1973 CircleF
+3519 2817 CircleF
+1808 2048 CircleF
+4240 3069 CircleF
+2913 2373 CircleF
+3589 2702 CircleF
+4741 3348 CircleF
+2977 2536 CircleF
+1314 1916 CircleF
+2952 2389 CircleF
+3858 2847 CircleF
+3711 2766 CircleF
+3362 2589 CircleF
+3708 2923 CircleF
+2320 2152 CircleF
+2060 2099 CircleF
+1421 1924 CircleF
+2416 2276 CircleF
+3197 2513 CircleF
+1167 1912 CircleF
+1529 1952 CircleF
+2748 2420 CircleF
+1883 2036 CircleF
+1887 2016 CircleF
+4341 3123 CircleF
+3703 2915 CircleF
+2907 2367 CircleF
+2536 2320 CircleF
+1115 1909 CircleF
+1728 2009 CircleF
+2104 2141 CircleF
+1964 2082 CircleF
+1738 1986 CircleF
+3936 2896 CircleF
+2456 2199 CircleF
+3403 2613 CircleF
+4217 3051 CircleF
+1977 2055 CircleF
+2686 2286 CircleF
+1966 2080 CircleF
+3410 2762 CircleF
+1813 2010 CircleF
+3865 3013 CircleF
+2592 2346 CircleF
+2946 2355 CircleF
+1290 1927 CircleF
+1807 2033 CircleF
+2099 2108 CircleF
+2880 2359 CircleF
+3673 2747 CircleF
+1832 2022 CircleF
+1785 2003 CircleF
+3067 2441 CircleF
+1117 1911 CircleF
+3110 2468 CircleF
+3694 2748 CircleF
+3632 2722 CircleF
+3679 2893 CircleF
+3976 2918 CircleF
+2105 2139 CircleF
+4748 3349 CircleF
+1167 1887 CircleF
+3853 2833 CircleF
+3209 2516 CircleF
+3861 2962 CircleF
+2970 2522 CircleF
+2870 2353 CircleF
+2909 2495 CircleF
+3379 2568 CircleF
+1608 1969 CircleF
+1875 2039 CircleF
+2511 2217 CircleF
+3338 2701 CircleF
+1511 1954 CircleF
+1444 1972 CircleF
+3637 2884 CircleF
+2759 2317 CircleF
+2308 2215 CircleF
+1502 1876 CircleF
+1530 1940 CircleF
+3958 2905 CircleF
+1416 1919 CircleF
+1167 1949 CircleF
+2840 2465 CircleF
+1884 2000 CircleF
+2291 2119 CircleF
+3251 2519 CircleF
+2924 2445 CircleF
+1780 1982 CircleF
+2703 2389 CircleF
+1420 1944 CircleF
+1347 1943 CircleF
+2534 2314 CircleF
+3323 2540 CircleF
+911 1817 CircleF
+1416 1915 CircleF
+1748 1988 CircleF
+2948 2385 CircleF
+3350 2730 CircleF
+1415 1957 CircleF
+1554 1950 CircleF
+1966 2056 CircleF
+4163 3010 CircleF
+2368 2150 CircleF
+4437 3171 CircleF
+3647 2837 CircleF
+1224 2329 CircleF
+3843 2990 CircleF
+3623 2701 CircleF
+1531 1962 CircleF
+1511 1945 CircleF
+2660 2290 CircleF
+3554 2813 CircleF
+2408 2175 CircleF
+4611 3268 CircleF
+1511 1842 CircleF
+2593 2341 CircleF
+4680 3312 CircleF
+2820 2461 CircleF
+3282 2533 CircleF
+3252 2488 CircleF
+2807 2428 CircleF
+1267 1793 CircleF
+2744 2301 CircleF
+2896 1733 CircleF
+1167 1833 CircleF
+1206 1897 CircleF
+4114 2931 CircleF
+2103 2078 CircleF
+4150 2989 CircleF
+1972 2028 CircleF
+3612 2598 CircleF
+3422 2775 CircleF
+1260 1909 CircleF
+3839 2770 CircleF
+2239 2099 CircleF
+2273 2120 CircleF
+1206 1819 CircleF
+3132 2452 CircleF
+4678 3294 CircleF
+3095 2256 CircleF
+1637 1892 CircleF
+2404 2114 CircleF
+3587 2692 CircleF
+4107 3227 CircleF
+3950 2878 CircleF
+2250 2305 CircleF
+1570 1810 CircleF
+1649 2224 CircleF
+1101 1891 CircleF
+2034 2032 CircleF
+2764 2370 CircleF
+1206 1881 CircleF
+1275 2173 CircleF
+3177 2476 CircleF
+4592 3248 CircleF
+4246 3021 CircleF
+2573 2115 CircleF
+3073 2280 CircleF
+1167 1880 CircleF
+1198 1787 CircleF
+2487 2400 CircleF
+3476 2601 CircleF
+2765 2391 CircleF
+2145 2223 CircleF
+3786 2720 CircleF
+3561 2737 CircleF
+3946 2867 CircleF
+4632 3448 CircleF
+1420 1862 CircleF
+4161 3018 CircleF
+1209 1911 CircleF
+2105 1511 CircleF
+2213 2020 CircleF
+2372 2168 CircleF
+1923 1922 CircleF
+1533 1404 CircleF
+3726 2941 CircleF
+4005 2920 CircleF
+2187 2210 CircleF
+3659 2818 CircleF
+4074 2979 CircleF
+2855 2412 CircleF
+1946 1919 CircleF
+1528 1864 CircleF
+2213 2130 CircleF
+1744 1910 CircleF
+3083 2334 CircleF
+3610 2664 CircleF
+3692 2736 CircleF
+1881 3189 CircleF
+1242 1883 CircleF
+3236 2617 CircleF
+1930 2721 CircleF
+1798 1862 CircleF
+1307 1891 CircleF
+1064 1537 CircleF
+2897 2335 CircleF
+1531 1924 CircleF
+1417 1593 CircleF
+2380 2030 CircleF
+4271 3063 CircleF
+3010 2513 CircleF
+4414 3381 CircleF
+3933 2891 CircleF
+1077 2339 CircleF
+3338 2723 CircleF
+1240 2522 CircleF
+1955 2179 CircleF
+2185 1921 CircleF
+2051 1771 CircleF
+1737 1815 CircleF
+1197 1753 CircleF
+2813 2604 CircleF
+1167 1745 CircleF
+3085 2634 CircleF
+2517 2324 CircleF
+1608 1387 CircleF
+2246 3121 CircleF
+3880 3009 CircleF
+1206 1670 CircleF
+4610 3261 CircleF
+4180 1752 CircleF
+4115 2974 CircleF
+2062 2053 CircleF
+2922 2437 CircleF
+2181 2572 CircleF
+1533 1731 CircleF
+2274 1920 CircleF
+3276 2790 CircleF
+3872 2963 CircleF
+2358 2558 CircleF
+3157 2334 CircleF
+1883 1917 CircleF
+2726 2252 CircleF
+1104 2065 CircleF
+3072 2530 CircleF
+3885 3094 CircleF
+4281 3058 CircleF
+3228 2489 CircleF
+3267 2421 CircleF
+2317 2740 CircleF
+1943 1997 CircleF
+3111 2556 CircleF
+3695 2681 CircleF
+3535 2690 CircleF
+4155 3003 CircleF
+2764 2293 CircleF
+3476 2623 CircleF
+3478 2690 CircleF
+3988 2870 CircleF
+1411 1894 CircleF
+2693 2187 CircleF
+1045 1732 CircleF
+3703 2661 CircleF
+3088 2579 CircleF
+3731 2712 CircleF
+2976 2269 CircleF
+3548 2562 CircleF
+2213 1965 CircleF
+3362 2441 CircleF
+2381 1904 CircleF
+3284 2399 CircleF
+1232 3230 CircleF
+% End plot #475
+% Begin plot #476
+2.000 UL
+LT0
+0.00 0.00 0.62 C 0.00 0.00 0.00 C 2943 3090 M
+[ [(Helvetica) 140.0 0.0 true true 0 (Solve \(estimate\))]
+] -46.7 MRshow
+LT0
+0.00 0.00 0.62 C 1032 3090 M
+399 0 V
+864 864 M
+99 59 V
+98 59 V
+99 59 V
+99 59 V
+99 59 V
+98 59 V
+99 59 V
+99 59 V
+99 59 V
+98 59 V
+99 63 V
+99 63 V
+98 63 V
+99 64 V
+99 63 V
+99 63 V
+98 64 V
+99 64 V
+99 64 V
+99 64 V
+98 64 V
+99 64 V
+99 64 V
+98 65 V
+99 64 V
+99 65 V
+99 65 V
+98 66 V
+99 65 V
+99 66 V
+99 66 V
+98 66 V
+99 66 V
+99 67 V
+98 60 V
+99 59 V
+99 59 V
+99 59 V
+98 59 V
+99 59 V
+99 59 V
+99 59 V
+98 59 V
+99 59 V
+99 59 V
+99 59 V
+98 59 V
+99 59 V
+99 59 V
+98 59 V
+99 59 V
+99 59 V
+99 59 V
+98 59 V
+99 59 V
+99 59 V
+99 59 V
+98 59 V
+99 59 V
+99 59 V
+98 59 V
+99 59 V
+99 59 V
+99 59 V
+98 59 V
+99 59 V
+99 58 V
+99 59 V
+98 59 V
+99 59 V
+% End plot #476
+1.000 UP
+stroke
+0.00 0.00 0.00 C 8536 2880 M
+currentpoint gsave translate 90 rotate 0 0 moveto
+[ [(Symbol) 140.0 0.0 true true 0 (\254)]
+[(Helvetica) 140.0 0.0 true true 0 ( Lower is better. \(time/sim/node\))]
+] -46.7 MCshow
+grestore
+0.00 0.00 0.00 C 7864 1018 M
+[ [(Helvetica) 140.0 0.0 true true 0 (100 )]
+[(Symbol) 140.0 0.0 true true 0 (m)]
+[(Helvetica) 140.0 0.0 true true 0 (s)]
+] -46.7 MLshow
+0.00 0.00 0.00 C 7864 1461 M
+[ [(Helvetica) 140.0 0.0 true true 0 (1 ms)]
+] -46.7 MLshow
+0.00 0.00 0.00 C 7864 1903 M
+[ [(Helvetica) 140.0 0.0 true true 0 (10 ms)]
+] -46.7 MLshow
+0.00 0.00 0.00 C 7864 2346 M
+[ [(Helvetica) 140.0 0.0 true true 0 (100 ms)]
+] -46.7 MLshow
+0.00 0.00 0.00 C 7864 2788 M
+[ [(Helvetica) 140.0 0.0 true true 0 (1 s)]
+] -46.7 MLshow
+0.00 0.00 0.00 C 7864 3132 M
+[ [(Helvetica) 140.0 0.0 true true 0 (6 s)]
+] -46.7 MLshow
+0.00 0.00 0.00 C 7864 3575 M
+[ [(Helvetica) 140.0 0.0 true true 0 (1 m)]
+] -46.7 MLshow
+0.00 0.00 0.00 C 7864 3919 M
+[ [(Helvetica) 140.0 0.0 true true 0 (6 m)]
+] -46.7 MLshow
+0.00 0.00 0.00 C 7864 4361 M
+[ [(Helvetica) 140.0 0.0 true true 0 (1 h)]
+] -46.7 MLshow
+0.00 0.00 0.00 C 7864 4972 M
+[ [(Helvetica) 140.0 0.0 true true 0 (1 d)]
+] -46.7 MLshow
+0.00 0.00 0.00 C 7864 5183 M
+[ [(Helvetica) 140.0 0.0 true true 0 (3 d)]
+] -46.7 MLshow
+0.00 0.00 1.00 C 7775 2247 M
+[ [(Helvetica) 140.0 0.0 true true 0 (24 sims/s/node \(Movie\))]
+] -46.7 MRshow
+0.00 0.00 1.00 C 7775 2065 M
+[ [(Helvetica) 140.0 0.0 true true 0 (30 sims/s/node \(NTSC\))]
+] -46.7 MRshow
+0.00 0.00 1.00 C 4320 4544 M
+[ [(Helvetica) 140.0 0.0 true true 0 (40 sims/3 d/node)]
+] -46.7 MCshow
+0.00 0.00 1.00 C 5099 654 M
+currentpoint gsave translate 90 rotate 0 0 moveto
+[ [(Helvetica) 140.0 0.0 true true 0 (96 GB/40 sims/node)]
+] -46.7 MLshow
+grestore
+0.00 0.00 1.00 C 5684 654 M
+currentpoint gsave translate 90 rotate 0 0 moveto
+[ [(Helvetica) 140.0 0.0 true true 0 (375 GB/40 sims/node)]
+] -46.7 MLshow
+grestore
+0.00 0.00 1.00 C 6681 654 M
+currentpoint gsave translate 90 rotate 0 0 moveto
+[ [(Helvetica) 140.0 0.0 true true 0 (96 GB/sim/node)]
+] -46.7 MLshow
+grestore
+0.00 0.00 1.00 C 7265 654 M
+currentpoint gsave translate 90 rotate 0 0 moveto
+[ [(Helvetica) 140.0 0.0 true true 0 (375 GB/sim/node)]
+] -46.7 MLshow
+grestore
+0.00 0.00 1.00 C 1293 5253 M
+[ [(Helvetica) 140.0 0.0 true true 0 (XS)]
+] -46.7 MCshow
+0.00 0.00 1.00 C 2839 5253 M
+[ [(Helvetica) 140.0 0.0 true true 0 (SM)]
+] -46.7 MCshow
+0.00 0.00 1.00 C 4255 5253 M
+[ [(Helvetica) 140.0 0.0 true true 0 (MD)]
+] -46.7 MCshow
+0.00 0.00 1.00 C 5800 5253 M
+[ [(Helvetica) 140.0 0.0 true true 0 (LG)]
+] -46.7 MCshow
+0.00 0.00 1.00 C 7216 5253 M
+[ [(Helvetica) 140.0 0.0 true true 0 (XL)]
+] -46.7 MCshow
+0.00 0.00 0.62 C 5937 4145 M
+currentpoint gsave translate 31 rotate 0 0 moveto
+[ [(Helvetica) 140.0 0.0 true true 0 (max |u)]
+XYsave
+[(Helvetica) 112.0 -42.0 true true 0 (ij)]
+XYrestore
+[(Helvetica) 112.0 70.0 true true 0 (FEM)]
+[(Helvetica) 140.0 0.0 true true 0 (-u)]
+XYsave
+[(Helvetica) 112.0 -42.0 true true 0 (ij)]
+XYrestore
+[(Helvetica) 112.0 70.0 true true 0 (exact)]
+[(Helvetica) 140.0 0.0 true true 0 (| <10)]
+[(Helvetica) 112.0 70.0 true true 0 (-5)]
+] -46.7 MLshow
+grestore
+0.500 UL
+LTb
+LCb setrgbcolor
+grestore % colour palette end
+stroke
+grestore
+end
+showpage
+%%Trailer
+%%DocumentFonts: Symbol Helvetica

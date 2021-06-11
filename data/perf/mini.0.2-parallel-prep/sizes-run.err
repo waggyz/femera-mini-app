@@ -1,0 +1,885 @@
+5566.89,958728,0,7.10,136.11,2%
+4300.27,952916,0,5.93,104.28,2%
+9309.39,1056452,0,14.45,315.36,3%
+6811.97,809944,0,8.18,169.88,2%
+9338.86,1118276,0,14.65,324.22,3%
+8160.52,827112,0,10.37,214.71,2%
+9368.36,1114564,0,14.79,351.50,3%
+9317.61,961960,0,14.43,317.46,3%
+8331.34,704272,0,10.32,222.42,2%
+8758.99,1136368,0,11.13,246.31,2%
+5647.32,723520,0,7.24,138.22,2%
+8629.45,792376,0,11.24,237.63,2%
+8272.08,1111676,0,9.87,220.09,2%
+7387.48,956308,0,9.30,186.90,2%
+6333.99,571908,0,7.91,156.62,2%
+7933.74,876572,0,9.80,205.90,2%
+8919.50,964868,0,11.34,260.85,3%
+7000.96,1056456,0,8.70,174.97,2%
+7901.55,1095368,0,8.91,205.47,2%
+7170.49,729044,0,9.00,180.09,2%
+9342.63,927040,0,14.48,326.39,3%
+8583.40,1135100,0,9.56,236.56,2%
+8273.56,951580,0,9.75,220.24,2%
+8404.31,917740,0,10.38,225.93,2%
+7766.72,946432,0,10.00,199.38,2%
+4610.40,751384,0,6.30,111.82,2%
+8695.76,884928,0,11.24,241.76,2%
+7858.49,1030900,0,9.60,203.19,2%
+8780.87,1029024,0,11.11,247.93,2%
+9173.70,949684,0,13.09,291.87,3%
+9116.74,1040832,0,12.49,284.18,3%
+6870.83,794868,0,8.62,171.18,2%
+9240.27,937816,0,13.98,302.05,3%
+8875.78,881476,0,11.53,256.14,3%
+8905.84,941624,0,11.32,259.33,3%
+8708.18,1179552,0,10.45,243.30,2%
+8783.63,702644,0,11.50,247.86,2%
+8453.83,824772,0,9.92,228.97,2%
+7235.19,1060780,0,8.65,182.47,2%
+7666.30,888668,0,9.42,196.35,2%
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+      NOTE Data : skipping directory build/tests/sizes/stl...
+WARNING Gmsh could not open build/tests/sizes/cube-3503-asc.bdf.
+   WARNING Mesh : get_data_vals (cube-497-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-497-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3041-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3041-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-634-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-634-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/5264 nonpositive element determinants in cube-171-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1532-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1532-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/37999 nonpositive element determinants in cube-2957-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/40217 nonpositive element determinants in cube-3626-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1585-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1585-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/31548 nonpositive element determinants in cube-393-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1444-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1444-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3047-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3047-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/33593 nonpositive element determinants in cube-2416-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 2/74390 nonpositive element determinants in cube-2689-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1446-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1446-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3769-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3769-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-40-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-40-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-142-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-142-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/210 nonpositive element determinants in cube-212-asc:Mesh_1:Jacs_dets (volume 6.00001)
+   WARNING Mesh : get_data_vals (cube-2387-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2387-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3352-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3352-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/1975255 nonpositive element determinants in cube-510-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1761-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1761-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3781-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3781-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-170-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-170-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1669-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1669-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/204516 nonpositive element determinants in cube-962-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-722-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-722-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3146-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3146-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-424-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-424-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-936-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-936-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3753-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3753-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2411-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2411-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-941-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-941-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-504-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-504-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 2/29997 nonpositive element determinants in cube-2627-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/1279 nonpositive element determinants in cube-1400-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-2455-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2455-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 2/4010 nonpositive element determinants in cube-3242-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/1601209 nonpositive element determinants in cube-3869-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-406-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-406-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/1974729 nonpositive element determinants in cube-3704-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3641-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3641-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3872-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3872-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2694-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2694-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3515-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3515-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2031-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2031-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/1089658 nonpositive element determinants in cube-3013-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3482-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3482-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3660-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3660-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 3/34786 nonpositive element determinants in cube-2845-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-447-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-447-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3421-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3421-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/170291 nonpositive element determinants in cube-1071-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1577-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1577-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-307-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-307-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/135938 nonpositive element determinants in cube-125-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-2101-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2101-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1903-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1903-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/745476 nonpositive element determinants in cube-3238-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-942-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-942-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1029-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1029-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2552-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2552-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1624-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1624-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/581186 nonpositive element determinants in cube-3351-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1955-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1955-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-49-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-49-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3782-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3782-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 3/240 nonpositive element determinants in cube-1560-asc:Mesh_1:Jacs_dets (volume 6.00001)
+   WARNING Mesh : get_data_vals (cube-3732-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3732-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1506-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1506-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1293-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1293-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-545-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-545-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/9261 nonpositive element determinants in cube-3425-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/365 nonpositive element determinants in cube-667-asc:Mesh_1:Jacs_dets (volume 6.00001)
+   WARNING Mesh : get_data_vals (cube-2862-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2862-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/238871 nonpositive element determinants in cube-3905-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-779-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-779-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/951035 nonpositive element determinants in cube-957-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-2092-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2092-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-542-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-542-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 2/120971 nonpositive element determinants in cube-754-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 2/752000 nonpositive element determinants in cube-1852-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3865-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3865-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2029-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2029-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 2/1531 nonpositive element determinants in cube-3548-asc:Mesh_1:Jacs_dets (volume 5.99999)
+   WARNING Mesh : get_data_vals (cube-3675-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3675-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-593-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-593-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/605420 nonpositive element determinants in cube-2390-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3152-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3152-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3020-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3020-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2993-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2993-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/143719 nonpositive element determinants in cube-2821-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/5237 nonpositive element determinants in cube-799-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3622-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3622-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/165254 nonpositive element determinants in cube-1575-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-2589-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2589-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/5164 nonpositive element determinants in cube-1769-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/3271 nonpositive element determinants in cube-2231-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3673-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3673-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 2/52784 nonpositive element determinants in cube-677-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 2/34343 nonpositive element determinants in cube-1445-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/745646 nonpositive element determinants in cube-3010-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3707-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3707-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/212 nonpositive element determinants in cube-3011-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/11557 nonpositive element determinants in cube-2126-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/132 nonpositive element determinants in cube-3795-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Gmsh : 3/282198 nonpositive element determinants in cube-2908-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3185-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3185-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1999-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1999-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1137-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1137-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3798-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3798-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-900-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-900-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/1670 nonpositive element determinants in cube-781-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-483-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-483-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1224-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1224-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/13991 nonpositive element determinants in cube-2519-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/175595 nonpositive element determinants in cube-2404-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3484-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3484-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/85607 nonpositive element determinants in cube-3286-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1628-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1628-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2428-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2428-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/374070 nonpositive element determinants in cube-1418-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3031-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3031-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1411-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1411-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/534970 nonpositive element determinants in cube-3103-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1421-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1421-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2615-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2615-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1332-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1332-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3670-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3670-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 3/407739 nonpositive element determinants in cube-953-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/972875 nonpositive element determinants in cube-3568-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/540182 nonpositive element determinants in cube-904-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-198-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-198-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3593-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3593-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2807-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2807-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2965-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2965-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2280-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2280-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2236-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2236-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 2/36336 nonpositive element determinants in cube-3797-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-2686-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2686-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/2048931 nonpositive element determinants in cube-1818-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/122475 nonpositive element determinants in cube-61-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-2556-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2556-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3225-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3225-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2444-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2444-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2565-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2565-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3167-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3167-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1099-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1099-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/42979 nonpositive element determinants in cube-2450-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-2559-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2559-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/953 nonpositive element determinants in cube-1103-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-458-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-458-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/327 nonpositive element determinants in cube-679-asc:Mesh_1:Jacs_dets (volume 5.99999)
+   WARNING Gmsh : 1/254354 nonpositive element determinants in cube-3170-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3792-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3792-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2679-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2679-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3123-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3123-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/1278 nonpositive element determinants in cube-1276-asc:Mesh_1:Jacs_dets (volume 5.99999)
+   WARNING Mesh : get_data_vals (cube-1892-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1892-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/1632556 nonpositive element determinants in cube-3653-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-758-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-758-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/467 nonpositive element determinants in cube-3940-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3536-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3536-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/1615 nonpositive element determinants in cube-2149-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3282-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3282-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2384-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2384-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/166180 nonpositive element determinants in cube-3616-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-2334-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2334-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3715-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3715-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2528-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2528-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/119033 nonpositive element determinants in cube-1142-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-676-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-676-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3850-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3850-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2818-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2818-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3234-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3234-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/202769 nonpositive element determinants in cube-238-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/1439 nonpositive element determinants in cube-2162-asc:Mesh_1:Jacs_dets (volume 5.99999)
+   WARNING Mesh : get_data_vals (cube-2155-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2155-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1766-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1766-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3192-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3192-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2262-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2262-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-397-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-397-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1146-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1146-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2664-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2664-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/151199 nonpositive element determinants in cube-2771-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 2/735924 nonpositive element determinants in cube-3305-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-2870-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2870-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/88318 nonpositive element determinants in cube-3631-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/216132 nonpositive element determinants in cube-1674-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3672-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3672-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-870-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-870-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3992-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3992-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2656-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2656-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3595-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3595-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/1095 nonpositive element determinants in cube-2134-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-2896-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2896-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/618024 nonpositive element determinants in cube-1197-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-2377-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2377-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3870-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3870-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3222-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3222-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1151-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1151-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3935-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3935-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/307822 nonpositive element determinants in cube-456-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/1124740 nonpositive element determinants in cube-2879-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/370795 nonpositive element determinants in cube-948-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 2/210 nonpositive element determinants in cube-3791-asc:Mesh_1:Jacs_dets (volume 6.00001)
+   WARNING Gmsh : 7/465931 nonpositive element determinants in cube-2141-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-855-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-855-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 3/38777 nonpositive element determinants in cube-1916-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3336-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3336-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1949-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1949-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-996-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-996-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1386-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1386-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/40164 nonpositive element determinants in cube-2812-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1045-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1045-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/345 nonpositive element determinants in cube-1148-asc:Mesh_1:Jacs_dets (volume 5.99999)
+   WARNING Mesh : get_data_vals (cube-1048-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1048-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-592-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-592-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/813012 nonpositive element determinants in cube-599-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-2510-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2510-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-254-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-254-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3414-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3414-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 2/580109 nonpositive element determinants in cube-1285-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3128-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3128-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 2/621950 nonpositive element determinants in cube-884-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-2111-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2111-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3066-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3066-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/252897 nonpositive element determinants in cube-2824-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/1193272 nonpositive element determinants in cube-2607-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-162-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-162-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/63701 nonpositive element determinants in cube-3744-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-169-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-169-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/39890 nonpositive element determinants in cube-3725-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 4/500911 nonpositive element determinants in cube-516-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-11-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-11-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/24095 nonpositive element determinants in cube-481-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3502-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3502-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 2/1166219 nonpositive element determinants in cube-615-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1459-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1459-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/31339 nonpositive element determinants in cube-1810-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/288643 nonpositive element determinants in cube-2414-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3349-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3349-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3844-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3844-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1917-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1917-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3775-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3775-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/618719 nonpositive element determinants in cube-3523-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 2/1310 nonpositive element determinants in cube-3407-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-181-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-181-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-551-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-551-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2292-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2292-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1543-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1543-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/896275 nonpositive element determinants in cube-1559-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3205-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3205-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3688-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3688-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/1540 nonpositive element determinants in cube-3316-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1480-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1480-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1753-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1753-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-27-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-27-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3861-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3861-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3411-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3411-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1512-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1512-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/1613813 nonpositive element determinants in cube-2614-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3171-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3171-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-977-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-977-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/272780 nonpositive element determinants in cube-3369-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 2/31416 nonpositive element determinants in cube-3888-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/23020 nonpositive element determinants in cube-2794-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1820-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1820-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1991-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1991-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/245093 nonpositive element determinants in cube-2952-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Gmsh : 2/474553 nonpositive element determinants in cube-1958-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/1537 nonpositive element determinants in cube-318-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/95037 nonpositive element determinants in cube-3840-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1382-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1382-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/60295 nonpositive element determinants in cube-1805-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3667-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3667-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1505-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1505-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2260-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2260-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 4/212 nonpositive element determinants in cube-624-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 2/1273 nonpositive element determinants in cube-2327-asc:Mesh_1:Jacs_dets (volume 6.00001)
+   WARNING Gmsh : 2/7691 nonpositive element determinants in cube-771-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1649-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1649-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-882-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-882-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 2/20673 nonpositive element determinants in cube-3361-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1073-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1073-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3464-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3464-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2907-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2907-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/58618 nonpositive element determinants in cube-463-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/151903 nonpositive element determinants in cube-2630-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-243-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-243-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3951-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3951-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/135 nonpositive element determinants in cube-1245-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/461181 nonpositive element determinants in cube-2532-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-960-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-960-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3096-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3096-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 2/38190 nonpositive element determinants in cube-3581-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-2425-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2425-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-348-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-348-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-775-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-775-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3846-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3846-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/6475 nonpositive element determinants in cube-247-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-745-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-745-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/209 nonpositive element determinants in cube-1595-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1102-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1102-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 2/1280852 nonpositive element determinants in cube-1637-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 2/59857 nonpositive element determinants in cube-3630-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3446-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3446-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/1490646 nonpositive element determinants in cube-3896-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-96-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-96-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/545158 nonpositive element determinants in cube-820-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-620-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-620-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3588-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3588-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/9987 nonpositive element determinants in cube-3793-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-2423-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2423-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/65720 nonpositive element determinants in cube-1303-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3344-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3344-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/36343 nonpositive element determinants in cube-2767-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1959-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1959-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1139-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1139-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2429-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2429-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/2396 nonpositive element determinants in cube-2301-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 2/1895274 nonpositive element determinants in cube-2624-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Gmsh : 2/429874 nonpositive element determinants in cube-1648-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3793-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3793-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3747-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3747-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3518-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3518-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/2043377 nonpositive element determinants in cube-3903-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-453-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-453-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 3/143597 nonpositive element determinants in cube-3291-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/899400 nonpositive element determinants in cube-3241-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-2837-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2837-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1164-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1164-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2913-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2913-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3236-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3236-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2341-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2341-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2471-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2471-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1938-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1938-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 2/412218 nonpositive element determinants in cube-293-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-761-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-761-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/1380116 nonpositive element determinants in cube-2627-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/87930 nonpositive element determinants in cube-3058-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3030-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3030-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 3/346823 nonpositive element determinants in cube-2704-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1835-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1835-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 2/855148 nonpositive element determinants in cube-1236-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 3/212 nonpositive element determinants in cube-477-asc:Mesh_1:Jacs_dets (volume 6.00001)
+   WARNING Gmsh : 1/407481 nonpositive element determinants in cube-883-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 2/683386 nonpositive element determinants in cube-3997-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-101-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-101-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3051-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3051-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3987-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3987-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/11922 nonpositive element determinants in cube-2104-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-345-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-345-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/1177584 nonpositive element determinants in cube-1464-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Gmsh : 3/224626 nonpositive element determinants in cube-1884-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/75078 nonpositive element determinants in cube-3145-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/1881566 nonpositive element determinants in cube-876-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/120494 nonpositive element determinants in cube-2431-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/98784 nonpositive element determinants in cube-2804-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/1290 nonpositive element determinants in cube-971-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/1085 nonpositive element determinants in cube-1685-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-2165-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2165-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1235-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1235-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3263-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3263-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2024-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2024-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 5/653327 nonpositive element determinants in cube-3254-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1302-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1302-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/886423 nonpositive element determinants in cube-329-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3558-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3558-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/300026 nonpositive element determinants in cube-3211-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3584-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3584-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1403-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1403-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3671-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3671-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1230-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1230-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/581386 nonpositive element determinants in cube-3623-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/135 nonpositive element determinants in cube-44-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 2/369 nonpositive element determinants in cube-2441-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 3/59844 nonpositive element determinants in cube-3605-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 2/215029 nonpositive element determinants in cube-659-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-514-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-514-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 2/178743 nonpositive element determinants in cube-3506-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/59597 nonpositive element determinants in cube-1861-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-2157-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2157-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/143575 nonpositive element determinants in cube-619-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3856-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3856-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1977-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1977-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2000-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2000-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 2/1318 nonpositive element determinants in cube-3900-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-526-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-526-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2796-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2796-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-533-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-533-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/4852 nonpositive element determinants in cube-3079-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/23520 nonpositive element determinants in cube-3824-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/1276 nonpositive element determinants in cube-1472-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Gmsh : 2/1472 nonpositive element determinants in cube-2544-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1305-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1305-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3122-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3122-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2591-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2591-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/4485 nonpositive element determinants in cube-3311-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-427-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-427-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/1531688 nonpositive element determinants in cube-3765-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1941-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1941-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 2/625327 nonpositive element determinants in cube-1948-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-2583-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2583-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/413416 nonpositive element determinants in cube-3902-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1294-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1294-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1808-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1808-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/150516 nonpositive element determinants in cube-2313-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3953-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3953-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 2/887530 nonpositive element determinants in cube-1462-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/1763889 nonpositive element determinants in cube-647-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1436-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1436-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3376-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3376-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 2/501820 nonpositive element determinants in cube-3027-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-2725-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2725-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3328-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3328-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1821-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1821-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2892-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2892-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2842-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2842-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/821370 nonpositive element determinants in cube-2676-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3095-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3095-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3845-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3845-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/349466 nonpositive element determinants in cube-3927-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Gmsh : 2/212 nonpositive element determinants in cube-921-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-2619-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2619-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2217-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2217-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1086-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1086-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2445-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2445-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/38088 nonpositive element determinants in cube-2016-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-2797-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2797-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2295-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2295-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3725-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3725-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3919-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3919-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-488-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-488-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 2/371947 nonpositive element determinants in cube-2613-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 2/86631 nonpositive element determinants in cube-1771-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/1089589 nonpositive element determinants in cube-246-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-498-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-498-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 3/580913 nonpositive element determinants in cube-1608-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3135-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3135-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-809-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-809-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1476-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1476-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3824-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3824-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3654-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3654-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/136 nonpositive element determinants in cube-1549-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 3/116033 nonpositive element determinants in cube-3893-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-743-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-743-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2574-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2574-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 5/214 nonpositive element determinants in cube-1136-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/64820 nonpositive element determinants in cube-3990-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 2/247 nonpositive element determinants in cube-3310-asc:Mesh_1:Jacs_dets (volume 5.99999)
+   WARNING Mesh : get_data_vals (cube-3168-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3168-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1831-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1831-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1212-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1212-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-909-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-909-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-353-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-353-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2548-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2548-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1989-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1989-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/15448 nonpositive element determinants in cube-3099-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-1816-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1816-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2628-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2628-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 2/6450 nonpositive element determinants in cube-1312-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-813-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-813-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1108-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1108-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/309411 nonpositive element determinants in cube-1096-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-2193-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2193-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2344-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2344-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1908-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1908-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/165801 nonpositive element determinants in cube-790-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3145-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3145-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 3/1501 nonpositive element determinants in cube-3873-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3097-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3097-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2182-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2182-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3743-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3743-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1602-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1602-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2596-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2596-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-889-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-889-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3607-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3607-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/967675 nonpositive element determinants in cube-1435-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-2258-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2258-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/7640 nonpositive element determinants in cube-3219-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3581-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3581-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1973-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1973-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/31388 nonpositive element determinants in cube-1231-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-3993-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3993-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 2/11272 nonpositive element determinants in cube-2163-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/1185837 nonpositive element determinants in cube-2209-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Gmsh : 2/427650 nonpositive element determinants in cube-1901-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Mesh : get_data_vals (cube-257-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-257-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2724-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2724-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-1966-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-1966-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-2831-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-2831-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 1/405671 nonpositive element determinants in cube-3569-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/67755 nonpositive element determinants in cube-3465-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Gmsh : 2/34632 nonpositive element determinants in cube-2555-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/1468 nonpositive element determinants in cube-2882-asc:Mesh_1:Jacs_dets (volume 5.99998)
+   WARNING Mesh : get_data_vals (cube-3075-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3075-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Mesh : get_data_vals (cube-3026-asc:Mesh_0, {Node_coor}) not found.
+   WARNING Mesh : get_data_vals (cube-3026-asc:Mesh_0, {Jacs_dets}) not found.
+   WARNING Gmsh : 2/212 nonpositive element determinants in cube-3867-asc:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/1284 nonpositive element determinants in cube-1184-bin:Mesh_1:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/1280 nonpositive element determinants in cube-575-geo:Mesh_2:Jacs_dets (volume 6)
+   WARNING Gmsh : 1/1888945 nonpositive element determinants in cube-2657-geo:Mesh_2:Jacs_dets (volume 6)
+6105.36,5046808,0,3430.59,6147.38,156%

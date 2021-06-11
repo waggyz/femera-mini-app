@@ -1,0 +1,247 @@
+16,2.16,12516,0,0.06,0.04,5%
+Warning : Volume mesh: worst distortion = -6.16667 (avg = 0.999695, 1 elements with jac. < 0)
+Warning : ------------------------------
+Warning : Mesh generation error summary
+Warning :     1 warning
+Warning :     0 errors
+Warning : Check the full log for details
+Warning : ------------------------------
+56,17.11,23148,0,0.03,0.40,2%
+3520,0.35,20960,0,0.01,0.03,13%
+3544,0.63,21036,0,0.02,0.04,10%
+Warning : Volume mesh: worst distortion = -30.4252 (avg = 0.999955, 3 elements with jac. < 0)
+Warning : ------------------------------
+Warning : Mesh generation error summary
+Warning :     1 warning
+Warning :     0 errors
+Warning : Check the full log for details
+Warning : ------------------------------
+3568,284.16,469108,0,0.84,16.92,6%
+3592,54.65,124668,0,0.22,3.21,6%
+3616,3.09,25208,0,0.01,0.19,7%
+3640,12.65,43112,0,0.06,0.75,6%
+3664,1.24,24364,0,0.06,0.04,8%
+3688,294.84,482620,0,0.99,19.77,7%
+3712,0.15,19280,0,0.01,0.02,22%
+Warning : Volume mesh: worst distortion = -0.126799 (avg = 0.999993, 1 elements with jac. < 0)
+Warning : ------------------------------
+Warning : Mesh generation error summary
+Warning :     1 warning
+Warning :     0 errors
+Warning : Check the full log for details
+Warning : ------------------------------
+3736,72.78,162452,0,0.25,5.22,7%
+3760,18.03,64268,0,0.08,1.32,7%
+3784,44.31,112404,0,0.17,3.43,8%
+Warning : Volume mesh: worst distortion = -10.8466 (avg = 0.99998, 2 elements with jac. < 0)
+Warning : ------------------------------
+Warning : Mesh generation error summary
+Warning :     1 warning
+Warning :     0 errors
+Warning : Check the full log for details
+Warning : ------------------------------
+Warning : Volume mesh: worst distortion = -10.247 (avg = 0.999991, 4 elements with jac. < 0)
+Warning : ------------------------------
+Warning : Mesh generation error summary
+Warning :     1 warning
+Warning :     0 errors
+Warning : Check the full log for details
+Warning : ------------------------------
+3808,214.83,457968,0,0.88,18.63,9%
+3832,0.45,21624,0,0.01,0.04,14%
+3856,0.19,21004,0,0.01,0.02,21%
+3880,0.27,20976,0,0.01,0.03,18%
+3904,1.61,21932,0,0.10,0.06,10%
+3928,0.40,21020,0,0.03,0.02,15%
+3952,17.65,53816,0,0.04,1.57,9%
+Warning : Volume mesh: worst distortion = -12.5143 (avg = 0.999804, 1 elements with jac. < 0)
+Warning : ------------------------------
+Warning : Mesh generation error summary
+Warning :     1 warning
+Warning :     0 errors
+Warning : Check the full log for details
+Warning : ------------------------------
+3976,13.71,59300,0,0.07,1.19,9%
+4000,0.37,20844,0,0.01,0.02,12%
+96,1519.97,961960,0,1.33,36.58,2%
+136,0.58,11512,0,0.00,0.01,4%
+176,1.77,12584,0,0.00,0.05,3%
+216,1031.59,739548,0,0.90,24.83,2%
+Warning : Volume mesh: worst distortion = -8.50631 (avg = 0.999779, 1 elements with jac. < 0)
+Warning : ------------------------------
+Warning : Mesh generation error summary
+Warning :     1 warning
+Warning :     0 errors
+Warning : Check the full log for details
+Warning : ------------------------------
+256,27.24,35796,0,0.03,0.65,2%
+296,12.64,19100,0,0.01,0.31,2%
+336,24.41,28052,0,0.03,0.59,2%
+376,1.27,12292,0,0.01,0.03,3%
+416,43.69,44236,0,0.04,1.06,2%
+Warning : Volume mesh: worst distortion = -9.69475 (avg = 0.999965, 1 elements with jac. < 0)
+Warning : ------------------------------
+Warning : Mesh generation error summary
+Warning :     1 warning
+Warning :     0 errors
+Warning : Check the full log for details
+Warning : ------------------------------
+456,206.37,157228,0,0.22,4.93,2%
+Warning : Volume mesh: worst distortion = -19.4337 (avg = 0.999934, 1 elements with jac. < 0)
+Warning : ------------------------------
+Warning : Mesh generation error summary
+Warning :     1 warning
+Warning :     0 errors
+Warning : Check the full log for details
+Warning : ------------------------------
+496,239.83,157432,0,0.24,5.74,2%
+536,38.51,35796,0,0.04,0.92,2%
+576,0.21,9996,0,0.00,0.01,8%
+Warning : Volume mesh: worst distortion = -14.3233 (avg = 0.999821, 2 elements with jac. < 0)
+Warning : ------------------------------
+Warning : Mesh generation error summary
+Warning :     1 warning
+Warning :     0 errors
+Warning : Check the full log for details
+Warning : ------------------------------
+616,96.23,81792,0,0.07,2.33,2%
+656,8.88,17292,0,0.01,0.21,2%
+696,0.19,9996,0,0.01,0.00,9%
+736,0.18,9996,0,0.01,0.00,10%
+776,0.005209271
+816,6.48,19664,0,0.01,0.16,2%
+Warning : Volume mesh: worst distortion = -8.09422 (avg = 0.999704, 1 elements with jac. < 0)
+Warning : ------------------------------
+Warning : Mesh generation error summary
+Warning :     1 warning
+Warning :     0 errors
+Warning : Check the full log for details
+Warning : ------------------------------
+856,19.49,26704,0,0.03,0.46,2%
+896,35.39,32764,0,0.02,0.86,2%
+936,1397.51,887300,0,1.34,33.87,2%
+976,3.60,17536,0,0.01,0.10,3%
+1016,0.44,11592,0,0.00,0.01,5%
+1056,0.52,11500,0,0.01,0.01,5%
+1096,225.48,156812,0,0.24,5.68,2%
+1136,0.48,11424,0,0.01,0.01,6%
+1176,0.14,9996,0,0.00,0.01,12%
+1216,0.48,11452,0,0.01,0.01,5%
+1256,0.45,11032,0,0.01,0.01,5%
+1296,18.71,26980,0,0.03,0.47,2%
+1336,0.57,11616,0,0.01,0.01,4%
+1376,72.70,70780,0,0.08,1.83,2%
+1416,0.19,9996,0,0.00,0.01,9%
+1456,0.004474791
+1496,4.59,18444,0,0.01,0.12,2%
+1536,1.29,11788,0,0.01,0.03,3%
+1576,0.005168499
+Warning : Volume mesh: worst distortion = -9.30922 (avg = 0.999985, 1 elements with jac. < 0)
+Warning : ------------------------------
+Warning : Mesh generation error summary
+Warning :     1 warning
+Warning :     0 errors
+Warning : Check the full log for details
+Warning : ------------------------------
+1616,521.43,379832,0,0.39,13.31,2%
+1656,23.10,30484,0,0.03,0.60,2%
+1696,0.47,11032,0,0.01,0.01,5%
+1736,1.83,12544,0,0.01,0.05,3%
+Warning : Volume mesh: worst distortion = -8.96798 (avg = 0.991994, 1 elements with jac. < 0)
+Warning : ------------------------------
+Warning : Mesh generation error summary
+Warning :     1 warning
+Warning :     0 errors
+Warning : Check the full log for details
+Warning : ------------------------------
+1776,1.14,12328,0,0.01,0.03,3%
+1816,25.66,30428,0,0.03,0.67,2%
+1856,1.82,12532,0,0.00,0.05,3%
+1896,0.18,9996,0,0.01,0.01,10%
+1936,0.53,11444,0,0.00,0.02,5%
+1976,1055.53,841864,0,1.01,28.52,2%
+Warning : Volume mesh: worst distortion = -30.8806 (avg = 0.999002, 2 elements with jac. < 0)
+Warning : ------------------------------
+Warning : Mesh generation error summary
+Warning :     1 warning
+Warning :     0 errors
+Warning : Check the full log for details
+Warning : ------------------------------
+2016,21.00,30148,0,0.03,0.57,2%
+2056,0.40,11604,0,0.00,0.01,5%
+2096,6.62,20420,0,0.01,0.19,3%
+2136,0.39,11012,0,0.01,0.01,6%
+2176,0.40,11484,0,0.00,0.01,5%
+Warning : Volume mesh: worst distortion = -6.7186 (avg = 0.9998, 1 elements with jac. < 0)
+Warning : ------------------------------
+Warning : Mesh generation error summary
+Warning :     1 warning
+Warning :     0 errors
+Warning : Check the full log for details
+Warning : ------------------------------
+2216,25.34,35200,0,0.02,0.70,2%
+2256,10.94,21572,0,0.02,0.30,2%
+2296,97.09,108876,0,0.11,2.70,2%
+2336,753.49,872472,0,0.86,23.58,3%
+2376,4.63,15140,0,0.01,0.15,3%
+2416,18.03,28024,0,0.03,0.60,3%
+2456,6.33,16924,0,0.02,0.21,3%
+2496,35.28,40888,0,0.03,1.20,3%
+2536,0.004892492
+2576,0.004989853
+2616,4.25,15704,0,0.01,0.15,3%
+2656,13.66,25016,0,0.04,0.46,3%
+2696,0.15,9996,0,0.01,0.00,11%
+2736,0.54,11756,0,0.01,0.02,6%
+2776,472.95,472212,0,0.73,17.90,3%
+2816,64.40,95016,0,0.12,2.68,4%
+2856,0.79,12172,0,0.00,0.04,6%
+2896,2.53,14532,0,0.00,0.11,4%
+2936,1.93,13580,0,0.00,0.08,5%
+Warning : Volume mesh: worst distortion = -5.75296 (avg = 0.998577, 1 elements with jac. < 0)
+Warning : ------------------------------
+Warning : Mesh generation error summary
+Warning :     1 warning
+Warning :     0 errors
+Warning : Check the full log for details
+Warning : ------------------------------
+2976,2.06,13384,0,0.00,0.09,5%
+3016,42.71,60136,0,0.09,1.80,4%
+3056,0.66,12304,0,0.01,0.03,6%
+3096,306.38,429256,0,0.68,15.39,5%
+3136,3.13,17156,0,0.01,0.19,6%
+3176,205.72,425196,0,0.53,13.44,6%
+3216,19.73,55756,0,0.04,1.76,9%
+3256,35.28,109800,0,0.11,3.10,9%
+3296,1.37,16140,0,0.01,0.12,10%
+3336,74.02,214464,0,0.33,7.24,10%
+3376,111.01,384244,0,0.59,13.27,12%
+3416,0.13,11420,0,0.01,0.01,19%
+3456,4.51,27000,0,0.13,0.43,12%
+3496,0.14,11516,0,0.00,0.01,17%
+3536,20.34,82884,0,0.12,2.42,12%
+3576,88.28,468748,0,0.46,11.20,13%
+Warning : Volume mesh: worst distortion = -39.5384 (avg = 0.999756, 1 elements with jac. < 0)
+Warning : ------------------------------
+Warning : Mesh generation error summary
+Warning :     1 warning
+Warning :     0 errors
+Warning : Check the full log for details
+Warning : ------------------------------
+3616,17.43,89792,0,0.11,2.38,14%
+3656,0.15,11540,0,0.01,0.01,18%
+3696,0.004608772
+3736,2.74,26616,0,0.04,0.36,14%
+3776,0.13,11572,0,0.00,0.02,22%
+3816,5.23,35940,0,0.04,0.81,16%
+3856,5.15,36704,0,0.04,0.84,17%
+Warning : Volume mesh: worst distortion = -9.88051 (avg = 0.999993, 1 elements with jac. < 0)
+Warning : ------------------------------
+Warning : Mesh generation error summary
+Warning :     1 warning
+Warning :     0 errors
+Warning : Check the full log for details
+Warning : ------------------------------
+3896,134.10,689476,0,1.05,24.28,18%
+3936,0.004792314
+3976,0.16,11900,0,0.00,0.04,30%
