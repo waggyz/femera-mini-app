@@ -165,7 +165,7 @@ tot_time = run_time + prep_time,
 avg_run_time = run_time / sim_n,
 avg_tot_time = tot_time / sim_n,
 %
-grgb = [0,0,10]/16;% [0,5/8,0];
+brgb = [0,0,10]/16; grgb = [0,5/8,0];
 yrgb = [16,8,0]/16; crgb = [0,10,10]/16; costr='color';
 %
 fig_n = 3,
@@ -492,26 +492,26 @@ for (fig = [1:fig_n]); figure (fig);
   switch (fig);
   case (1);% fig
     loglog ([120e3,10e9],[mx40,mx40],'-b', lws,flw);
-    loglog (dofs(fmesh), prep(fmesh),'<c',costr,crgb,'markersize',sms,lws,mlw);
-    loglog (dofs(fgeou), prep(fgeou),'<m','markersize',sms,lws,mlw);
-    loglog (dofs(fgeos), prep(fgeos),'<r','markersize',sms,lws,mlw);
+    loglog (dofs(fmesh), prep(fmesh),'<c',costr,crgb,mss,sms,lws,mlw);
+    loglog (dofs(fgeou), prep(fgeou),'<m',mss,sms,lws,mlw);
+    loglog (dofs(fgeos), prep(fgeos),'<r',mss,sms,lws,mlw);
     %
-    loglog (dofs(fothr), chck(fothr),'+c',costr,crgb,'markersize',sms,lws,mlw);
-    loglog (dofs(fcads), chck(fcads),'+r','markersize',sms,lws,mlw);
-    loglog (dofs(fcgns), chck(fcgns),'+k','markersize',sms,lws,mlw);
-    loglog (dofs(fmshb), chck(fmshb),'sy',costr,yrgb,'markersize',sms,lws,mlw);
+    loglog (dofs(fothr), chck(fothr),'+c',costr,crgb,mss,sms,lws,mlw);
+    loglog (dofs(fcads), chck(fcads),'+r',mss,sms,lws,mlw);
+    loglog (dofs(fcgns), chck(fcgns),'+k',mss,sms,lws,mlw);
+    loglog (dofs(fmshb), chck(fmshb),'sy',costr,yrgb,mss,sms,lws,mlw);
     %
-    loglog (dofs, mesh,'^r','markersize',sms+1,lws,mlw);
+    loglog (dofs, mesh,'^r',mss,sms+1,lws,mlw);
     %
-    loglog (dofs(fgmsh), read(fgmsh),'or','markersize',sms,lws,mlw);
-    %loglog (dofs(fcads), read(fcads),'or','markersize',sms,lws,mlw);
-    loglog (dofs(fcgns), read(fcgns),'ok','markersize',sms,lws,mlw);
-    %loglog (dofs(fmshb), read(fmshb),'xy',costr,yrgb,'markersize',sms,lws,mlw);
+    loglog (dofs(fgmsh), read(fgmsh),'or',mss,sms,lws,mlw);
+    %loglog (dofs(fcads), read(fcads),'or',mss,sms,lws,mlw);
+    loglog (dofs(fcgns), read(fcgns),'ok',mss,sms,lws,mlw);
+    %loglog (dofs(fmshb), read(fmshb),'xy',costr,yrgb,mss,sms,lws,mlw);
     %
-    loglog (dofs, solv,'*b','markersize',sms-1,lws,mlw);
-    loglog (dofs(fstls), chck(fstls),'xg','markersize',sms,lws,mlw);
-    loglog (dofs(fstls), prep(fstls),'xg','markersize',sms,lws,mlw);
-    loglog (dofs(fstls), mesh(fstls),'xg','markersize',sms,lws,mlw);
+    loglog (dofs, solv,'*b',mss,sms-1,lws,mlw);
+    loglog (dofs(fstls), chck(fstls),'xg',costr,grgb,mss,sms,lws,mlw);
+    loglog (dofs(fstls), prep(fstls),'xg',costr,grgb,mss,sms,lws,mlw);
+    loglog (dofs(fstls), mesh(fstls),'xg',costr,grgb,mss,sms,lws,mlw);
   case (2);% fig
     loglog ([120e3,10e9],[mx40,mx40],'-b', lws,flw);
   case (3);% fig
@@ -520,11 +520,11 @@ for (fig = [1:fig_n]); figure (fig);
     mesh(isnan(mesh))=0;
     file = prep+chck+mesh+read;
     %
-    loglog (dofs_span,solv_secs,'-b;Solve (estimate);','color',grgb,lws,tlw);
+    loglog (dofs_span,solv_secs,'-b;Solve (estimate);','color',brgb,lws,tlw);
     %
     loglog (dofs(fothr), simt(fothr),'.k;3D flat file total;', mss,mms,lws,mlw);
     loglog (dofs(fcgns), simt(fcgns),'.c;3D CGNS total;', mss,mms,lws,mlw);
-    loglog (dofs(fstls), simt(fstls),'.g;2D STL total;', mss,mms,lws,mlw);
+    loglog (dofs(fstls), simt(fstls),'.g;2D STL total;', costr,grgb,mss,mms,lws,mlw);
     loglog (dofs(fgeou), simt(fgeou),'.m;CAD unrolled total;', mss,mms,lws,mlw);
     loglog (dofs(fgeos), simt(fgeos),'.r;CAD scipt total;', mss,mms,lws,mlw);
     %
@@ -534,33 +534,33 @@ for (fig = [1:fig_n]); figure (fig);
     loglog (dofs_span, polyval(poly,dofs_span),'-c;3D CGNS mesh+I/O;',lws,mlw);
     if (0);% not linear!
     poly = polyfit (dofs(fstls), file(fstls),1); poly(end) = min(prep(fstls));
-    loglog (dofs_span, polyval(poly,dofs_span),'-g;2D STL mesh+I/O;',lws,mlw);
+    loglog (dofs_span, polyval(poly,dofs_span),'-g;2D STL mesh+I/O;',costr,grgb,lws,mlw);
     else;
     poly_prep = polyfit(dofs(fstls), prep(fstls).^(3/2),1);
     poly_prep(end) = min(prep(fstls).^(3/2));
     poly=polyfit (dofs(fstls), file(fstls)-prep(fstls),1);
     poly(end) = min(prep(fstls)-prep(fstls));
     plot_y = polyval(poly_prep,dofs_span).^(2/3) + polyval(poly,dofs_span);
-    loglog (dofs_span,plot_y ,'-g;2D STL mesh+I/O;','markersize',4,lws,lw);
+    loglog (dofs_span,plot_y ,'-g;2D STL mesh+I/O;',costr,grgb,mss,4,lws,lw);
     end;
     poly = polyfit (dofs(fgeou), file(fgeou),1); poly(end) = min(prep(fgeou));
     loglog (dofs_span, polyval(poly,dofs_span),'-m;CAD unrolled mesh+I/O;',lws,mlw);
     poly = polyfit (dofs(fgeos), file(fgeos),1); poly(end) = min(prep(fgeos));
     loglog (dofs_span, polyval(poly,dofs_span),'-r;CAD scripted mesh+I/O;',lws,mlw);
     if (0)
-    loglog (dofs(fothr), file(fothr),'+k','markersize',sms,lws,mlw);
-    loglog (dofs(fcgns), file(fcgns),'+c','markersize',sms,lws,mlw);
-    loglog (dofs(fstls), file(fstls),'+g','markersize',sms,lws,mlw);
-    loglog (dofs(fgeou), file(fgeou),'+m','markersize',sms,lws,mlw);
-    loglog (dofs(fgeos), file(fgeos),'+r','markersize',sms,lws,mlw);
+    loglog (dofs(fothr), file(fothr),'+k',mss,sms,lws,mlw);
+    loglog (dofs(fcgns), file(fcgns),'+c',mss,sms,lws,mlw);
+    loglog (dofs(fstls), file(fstls),'+g',costr,grgb,mss,sms,lws,mlw);
+    loglog (dofs(fgeou), file(fgeou),'+m',mss,sms,lws,mlw);
+    loglog (dofs(fgeos), file(fgeos),'+r',mss,sms,lws,mlw);
     end;
     if (0)
-    loglog (dofs(fothr), prep(fothr),'<k',costr,crgb,'markersize',sms,lws,mlw);
-    loglog (dofs(fcgns), prep(fcgns),'<c','markersize',sms,lws,mlw);
-    loglog (dofs(fstls), prep(fstls),'<g','markersize',sms,lws,mlw);
-    loglog (dofs(fgeou), prep(fgeou),'<m','markersize',sms,lws,mlw);
-    loglog (dofs(fgeos), prep(fgeos),'<r','markersize',sms,lws,mlw);
-    loglog (dofs, solv,'*b','markersize',sms-1,lws,mlw);
+    loglog (dofs(fothr), prep(fothr),'<k',costr,crgb,mss,sms,lws,mlw);
+    loglog (dofs(fcgns), prep(fcgns),'<c',mss,sms,lws,mlw);
+    loglog (dofs(fstls), prep(fstls),'<g',costr,grgb,mss,sms,lws,mlw);
+    loglog (dofs(fgeou), prep(fgeou),'<m',mss,sms,lws,mlw);
+    loglog (dofs(fgeos), prep(fgeos),'<r',mss,sms,lws,mlw);
+    loglog (dofs, solv,'*b',mss,sms-1,lws,mlw);
     end;
     %
     loglog (dofs_span, polyval(poly_read_gmsh,dofs_span),'--k;Gmsh read memory;',lws,lw);
@@ -568,11 +568,11 @@ for (fig = [1:fig_n]); figure (fig);
     %
   end;% switch (fig)
   if (any (fig == [1,2]));
-    loglog (dofs(fmesh), simt(fmesh),'.k;Total saved mesh;','markersize',mms,lws,mlw);
+    loglog (dofs(fmesh), simt(fmesh),'.k;Total saved mesh;',mss,mms,lws,mlw);
     loglog (dofs_span, polyval(poly_prep_mesh,dofs_span),'-.k;Prep save mesh;',lws,lw);
     loglog (dofs_span, polyval(poly_chck_cgns,dofs_span),':k;Check CGNS;',lws,mlw);
     loglog (dofs_span, polyval(poly_read_cgns,dofs_span),'--k;Read file CGNS;',lws,mlw);
-    %loglog (dofs(fcgns), simt(fcgns),'.k;Total CGNS;','markersize',mms,lws,mlw);
+    %loglog (dofs(fcgns), simt(fcgns),'.k;Total CGNS;',mss,mms,lws,mlw);
     loglog (dofs_span, polyval(cnst_prep_cads_gmsh,dofs_span),'-m;Prep unroll CADs;',lws,mlw);
     loglog (dofs_span, polyval(cnst_prep_cads_bash,dofs_span),'-r;Prep script CADs;',lws,mlw);
     %
@@ -582,13 +582,13 @@ for (fig = [1:fig_n]); figure (fig);
     %loglog (dofs_span, polyval(poly_read_cads,dofs_span),'--r;Read memory CADs;',lws,mlw);
       loglog (dofs_span, polyval(poly_read_gmsh,dofs_span),'--r;Read memory Gmsh;',lws,lw);
     %
-    loglog (dofs(fgeou), simt(fgeou),'.m;Total unroll CADs;','markersize',mms,lws,mlw);
-    loglog (dofs(fgeos), simt(fgeos),'.r;Total script CADs;','markersize',mms,lws,lw);
+    loglog (dofs(fgeou), simt(fgeou),'.m;Total unroll CADs;',mss,mms,lws,mlw);
+    loglog (dofs(fgeos), simt(fgeos),'.r;Total script CADs;',mss,mms,lws,lw);
     %
     if (1);
       loglog (dofs_span, polyval(poly_chck     ,dofs_span),':c;Check mesh Gmsh;',costr,crgb,lws,mlw);
     %  loglog (dofs_span, polyval(poly_chck_msh4,dofs_span),'--y;Check msh4 bin;',costr,yrgb,lws,lw);
-    %  loglog (dofs(fothr), simt(fothr),'.c;Total other;',costr,crgb,'markersize',mms,lws,mlw);
+    %  loglog (dofs(fothr), simt(fothr),'.c;Total other;',costr,crgb,mss,mms,lws,mlw);
     end;
     %TODO plot post times (Gmsh vs. CGNS)?
     if(0);% not linear
@@ -596,14 +596,14 @@ for (fig = [1:fig_n]); figure (fig);
     else;
     loglog (dofs_span, polyval(po32_prep_stls,dofs_span).^(2/3),'-g;Prep STL;',lws,mlw);
     end;
-    loglog (dofs(fstls), simt(fstls),'.g;Total STL;','markersize',mms,lws,lw);
+    loglog (dofs(fstls), simt(fstls),'.g;Total STL;',mss,mms,lws,lw);
     %
     %loglog (dofs_span, polyval(poly_read     ,dofs_span),'-k',lws,hlw);
     %loglog (dofs_span, polyval(poly_read_mshb,dofs_span),'-k',lws,hlw);
-    loglog (dofs_span,solv_secs,'-b;Solve (estimate);','color',grgb,lws,lw);
+    loglog (dofs_span,solv_secs,'-b;Solve (estimate);','color',brgb,lws,lw);
   end;% fig < 3
   %
-  text (solv_text_dofs,1.2*solv_text_secs,solv_text, 'color',grgb,
+  text (solv_text_dofs,1.2*solv_text_secs,solv_text, 'color',brgb,
     'rotation', 1.7*atand(iters_poly(1)), 'fontsize',lfs, vas,'bottom');
   %
   legend ('location','northwest');
