@@ -41,6 +41,7 @@ else
   ENABLE_GRAPHIZ:=ON
   INSTALL_CINCLUDE2DOT:=external/tools/cinclude2dot
 endif
+  ENABLE_GRAPHIZ:=OFF
 
 # TODO Change *-ok to *-flags as external requirement.
 
@@ -67,7 +68,7 @@ GMSH_FLAGS += -DENABLE_BUILD_SHARED=1 -DENABLE_BUILD_LIB=1
 # -DENABLE_BUILD_DYNAMIC=1
 ifeq ($(ENABLE_MPI),ON)
   CORE_LEAF += src/Proc/Pmpi
-  #TODO Is MPI breaking Gmsh on K?-no. Is it needed for CGNS within Gmsh?-no
+  # Is MPI breaking Gmsh on K?-no. Is it needed for CGNS within Gmsh?-no
   # GMSH_FLAGS += -DENABLE_MPI=1
   PETSC_FLAGS += --with-mpi
   # for valgrind with OpenMPI
