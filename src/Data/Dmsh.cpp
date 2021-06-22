@@ -960,25 +960,35 @@ int Dmsh::close (const std::string model) {int err=0;
         catch (...) {err= -1;}
       }
       if (err==0) {
-        try {gmsh::fltk::awake ("update");}//TODO Only OpenMP master thread
-        // does FLTK operations. Pending ops are queued until the master thread
-        // gets here. Thus, the write and remove () ops on other threads should
-        // be deferred until after the master thread can render it.
+        //TODO Only OpenMP master thread does FLTK operations. Pending ops are
+        // queued by Gmsh until the master thread gets here. Thus, the write
+        // and remove () ops on other threads should be deferred until after
+        // the master thread can render it.
         // But, this works fine when there is only 1 OpenMP thread / MPI rank.
+#if 0
+        try {gmsh::fltk::awake ("update");}
         catch (Dmsh::Thrown e) {err= -1;
           const auto from = "gmsh::fltk::awake (\"update\")";
           this->label_gmsh_err ("WARNING", from, e);
         }
         catch (...) {err= -1;}
-      }
-      if (err==0) {
-        try {gmsh::write (model+".png");}
-        catch (Dmsh::Thrown e) {err= -1;
-          const auto from = "gmsh::write ("+model+".png)";
-          this->label_gmsh_err ("WARNING", from.c_str(), e);
-        }
-        catch (...) {err= -1;}
-    } }
+#else
+        FMR_PRAGMA_OMP(omp master) {
+          try {gmsh::fltk::update ();}
+          catch (Dmsh::Thrown e) {err= -1;
+            const auto from = "gmsh::fltk::update ()";
+            this->label_gmsh_err ("WARNING", from, e);
+          }
+          catch (...) {err= -1;}
+#endif
+        if (err==0) {
+          try {gmsh::write (model+".png");}
+          catch (Dmsh::Thrown e) {err= -1;
+            const auto from = "gmsh::write ("+model+".png)";
+            this->label_gmsh_err ("WARNING", from.c_str(), e);
+          }
+          catch (...) {err= -1;}
+    } } } }
     if (err<=0) {err=0;
       try {gmsh::model::remove ();}
       catch (Dmsh::Thrown e) {err= 1;
