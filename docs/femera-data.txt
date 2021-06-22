@@ -30,7 +30,7 @@ Work : Work for Femera to do
        Proc : Processing environment
        Data : Data sources and destinations, including optional
               Save : Save or export data
-              Plot : Visualization methods
+              View : Visualization methods
        Post : Post-processing tasks
 
 
@@ -42,7 +42,7 @@ Dcgn : CGNS mid-level interface to mesh/grid and CFD data on mesh/grid
 Dmsh : Gmsh high-level interface to mesh (.msh) and abstract (.geo) geometry
        Supports several other mesh formats (.cgns, .mesh, etc.)
        Supports high-order elements
-       Exports visualizations (EPS, PNG, MPG, etc.)
+       Exports visualizations (EPS, PNG, MPG, etc.; requires Xwindows)
 
 Grid : Structured grid data generated at runtime
 

@@ -91,6 +91,7 @@ class Data : public Work {//TODO change to File
   public:
   // member variables --------------------------------------------------------
     // fmr::perf::IOmeter  time_io = fmr::perf::IOmeter ();//TODO
+    std::string         display_string = "";
   protected:
     std::string      default_file_name = "new-femera-data";
     std::vector<std::string> file_exts ={"csv"};

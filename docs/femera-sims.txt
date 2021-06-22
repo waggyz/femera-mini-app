@@ -20,7 +20,7 @@ Part : Partitioning model(s)
               Halo :
               Shft : Load balancing (Divy, Mete?, Bala? or Deal?)
        Data : Data I/O
-              Plot : Visualization
+              View : Visualization
               Save : Save or export
        Post : Post-processing task handler
 

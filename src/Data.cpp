@@ -630,6 +630,11 @@ std::string Data::print_details (){
         std::string label = D->task_name+" exts";
         log->label_printf (label.c_str(),"%s\n",exts.c_str());
     } }
+    if (this->display_string.size() > 0) {
+      std::string label = this->task_name+" Xwin";
+      log->label_printf (label.c_str(),
+        "display %s\n", this->display_string.c_str());
+    }
     std::string label = this->task_name+" vals";
     log->label_printf (label.c_str(),
       "%u built-in simulation variables defined\n",
@@ -719,7 +724,7 @@ int Data::init_task (int* argc, char** argv){ int err=0;
     log-> fmrout = stdout;
     bool is_read_only=false, has_one_dest=false; std::string one_dest_file("");
 #endif
-    while ((optchar = getopt (argc[0], argv, ":i:o:m:")) != -1){
+    while ((optchar = getopt (argc[0], argv, "i:o:m:V:")) != -1){
       // x:  requires an argument
       // x:: optional argument (Gnu compiler)
       switch (optchar){
@@ -739,7 +744,8 @@ int Data::init_task (int* argc, char** argv){ int err=0;
         case '1':{ has_one_dest=true; break; }
         case ',':{break; }
 #endif
-        case ':':{break; }
+        case 'V':{this->proc->opt_add (optchar);
+          this->display_string = std::string(optarg); break; }
         case '?':{break; }
         default :{break; }
     } }

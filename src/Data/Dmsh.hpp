@@ -10,6 +10,7 @@ namespace Femera{
 class Dmsh final : public Data {
   // Typedefs -----------------------------------------------------------------
   typedef double Optval;
+  typedef const std::basic_string<char> Thrown;
   private:
     class File_gmsh final : public Data::File_info {
     //TODO specialize to handle unmeshed geometry (CAD) files,
@@ -60,6 +61,8 @@ class Dmsh final : public Data {
     Data::Encode       encode = Data::Encode::Binary;
     fmr::Local_int max_open_n = 2;// Limit number of files open/MPI.
     fmr::Local_int     open_n = 0;
+    bool is_init = false;
+    bool is_xwin_open = false;
   // Methods ------------------------------------------------------------------
   protected:
     int init_task (int* argc, char** argv)      final override;
@@ -88,8 +91,9 @@ class Dmsh final : public Data {
     int scan_model (const std::string name);
     int prep  () final override;
     int close () final override;
-    bool is_init = false;
+    int set_color (const std::string name, const int c[3]);
     bool is_omp_parallel ();//NOTE Gmsh is not completely thread safe.
+    int label_gmsh_err (const std::string,const std::string, Thrown);
   public:
     Dmsh           (Proc*,Data*) noexcept;
     Dmsh           ()            =delete;

@@ -3,6 +3,9 @@
 #include "gmsh.h"
 #include "../../external/gmsh/Common/CreateFile.h" // GetKnownFileFormats (..)
 
+#include <exception>
+#include <stdexcept>
+
 #include <sys/stat.h> // stat
 #include <unistd.h> //TODO Remove usleep?
 
@@ -134,21 +137,82 @@ namespace Femera {
     //
     return err;
   }
-  int Dmsh::init_task (int*,char**) {int err=0;// init w/out cli args.
+  int Dmsh::set_color (const std::string name, const int c[3]) {int err=0;
+    try {gmsh::option::setColor(name, c[0], c[1], c[2]);}
+    catch (Dmsh::Thrown e) {err=-1;
+      this->label_gmsh_err ("WARNING","gmsh::option::setColor (...)", e);
+    }
+    return err;
+  }
+  int Dmsh::init_task (int* argc, char** argv) {int err=0;
     fmr::perf::timer_start (& this->time);
-    const bool read_gmsh_config = false;
-    if (this->is_omp_parallel ()) {
-      FMR_PRAGMA_OMP(omp master) {
-        // unknown opt error:gmsh::initialize (argc[0], argv, read_gmsh_config);
-        gmsh::initialize (0, nullptr, read_gmsh_config);// init w/out cli args.
-        gmsh::option::setNumber ("General.Verbosity", Dmsh::Optval(0));
-    } }else{
-      gmsh::initialize (0, nullptr, read_gmsh_config);// init w/out cli args.
+    fmr::perf::timer_resume (&this->time);
+    const auto log = this->proc->log;
+    FMR_PRAGMA_OMP(omp master) {//NOTE getopt is NOT thread safe.
+      int argc2=argc[0];// Copy getopt variables.
+      auto opterr2=opterr; auto optopt2=optopt;
+      auto optind2=optind; auto optarg2=optarg;
+      opterr = 0; int optchar;
+      while ((optchar = getopt (argc[0], argv, "V:")) != -1){
+        // x:  requires an argument
+        // x:: optional argument (Gnu compiler)
+        switch (optchar){
+          case 'V':{this->proc->opt_add (optchar);
+            this->display_string = std::string(optarg); break; }
+          case '?':{break; }
+          default :{break; }//TODO
+      } }
+      const bool read_gmsh_config = false;
+      // unknown opt error: gmsh::initialize (argc[0], argv, read_gmsh_config);
+      //TODO Maybe can fix by handling all non-Gmsh args above?
+      gmsh::initialize (0, nullptr, read_gmsh_config);// init w/out args.
       gmsh::option::setNumber ("General.Verbosity", Dmsh::Optval(0));
+      if (this->display_string.size() > 0) {
+        gmsh::option::setString ("General.Display", this->display_string);
+        gmsh::option::setNumber ("General.NoPopup", 1);
+#if 0//def FMR_DEBUG
+        log->label_fprintf (log->fmrout,"**** Dmsh Xwin",
+          "init display %s\n", this->display_string.c_str());
+#endif
+        gmsh::option::setNumber("General.Trackball", 0);
+        gmsh::option::setNumber("General.RotationX", 0);
+        gmsh::option::setNumber("General.RotationY", 0);
+        gmsh::option::setNumber("General.RotationZ", 0);
+        gmsh::option::setNumber("General.Orthographic", 0);
+        gmsh::option::setNumber("General.Axes", 0);
+        gmsh::option::setNumber("General.SmallAxes", 0);
+        auto mw = Dmsh::Optval(0);
+        gmsh::option::getNumber("General.MenuWidth", mw);
+        gmsh::option::setNumber("General.GraphicsWidth" , 640 + mw);
+        gmsh::option::setNumber("General.GraphicsHeight", 480);
+        //
+        const int white[3] = {255, 255, 255};
+        const int black[3] = {0, 0, 0};
+        this->set_color("General.Background", white);
+        this->set_color("General.Foreground", black);
+        this->set_color("General.Text", black);
+        //
+        if (!gmsh::fltk::isAvailable ()) {
+          try {gmsh::fltk::initialize ();}
+//          catch (const std::basic_string<char> e) {err= -1;
+          catch (Dmsh::Thrown e) {err= -1;
+            this->label_gmsh_err ("WARNING","gmsh::fltk::initialize ()", e);
+          }
+          catch (...) {err = -1;
+            log->label_fprintf (log->fmrerr, "WARNING Dmsh",
+              "Could not open Xwindows display %s for visualization.\n",
+              this->display_string.c_str());
+        } }
+        this->is_xwin_open = (err==0);
+        //if (err==0) { gmsh::fltk::run(); }//TODO Needed?
+      }
+      // Restore getopt variables.
+      argc[0]=argc2;opterr=opterr2;optopt=optopt2;optind=optind2;optarg=optarg2;
     }
     this->is_init = true;
     fmr::perf::timer_pause (& this->time);
     this->prep ();
+//TODO    FMR_PRAGMA_OMP(omp barrier)
     return err;
   }
   int Dmsh::exit_task (int err){
@@ -156,6 +220,7 @@ namespace Femera {
     fmr::perf::timer_resume(& this->time);
     if (this->is_init){
       if (this->is_omp_parallel ()){
+//TODO        FMR_PRAGMA_OMP(omp barrier)
         FMR_PRAGMA_OMP(omp master) {
           gmsh::finalize ();
         } }else{
@@ -163,6 +228,13 @@ namespace Femera {
     } }
     return err;
   }
+int Dmsh::label_gmsh_err (std::string label, const std::string from,
+  Dmsh::Thrown e){
+  label += " " + this->task_name;
+  this->proc->log->label_fprintf (this->proc->log->fmrerr, label.c_str(),
+    "%s threw \"%s\".\n", from.c_str(), std::string(e).c_str());
+  return 0;
+}
 std::deque<std::string> Dmsh::get_sims_names (){//TODO Remove?
   std::deque<std::string> model_names={};
   for (auto item : this->sims_names) {model_names.push_back (item); }
@@ -176,7 +248,11 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
   int geom_d=-1,bbox_d=-1;//, elem_d=0;//TODO check max existing elem_d?
   if (!err) { Data::Lock_here lock (this->liblock);
     try {gmsh::model::setCurrent (model);}
-    catch (...) {err = -1;//FIXME catch std::error and print basic_string
+    catch (Dmsh::Thrown e) {err=-1;
+      const auto from = "gmsh::model::setCurrent ("+model+")";
+      this->label_gmsh_err ("WARNING",from.c_str(), e);
+    }
+    catch (...) {err = -1;
       log->label_fprintf (log->fmrerr, warnlabel.c_str(),
         "can not find %s.\n", model.c_str());
     }
@@ -209,7 +285,12 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
       log->label_fprintf (log->fmrerr, warnlabel.c_str(),
         "generate %iD mesh of %s returned %i.\n", geom_d, model.c_str(), err);
     }
-    catch (...) {err= 1;//FIXME catch std::error and print basic_string
+    catch (Dmsh::Thrown e) {err= 1;
+      const auto from
+        = "gmsh::model::mesh::generate ("+std::to_string(geom_d)+")";
+      this->label_gmsh_err ("WARNING", from.c_str(), e);
+    }
+    catch (...) {err= 1;
       log->label_fprintf (log->fmrerr, warnlabel.c_str(),
         "generate %iD mesh of %s returned %i.\n", geom_d, model.c_str(), err);
     }
@@ -232,7 +313,11 @@ int Dmsh::make_part (const std::string model, const fmr::Local_int,
   //TODO handle part index # to generate
   if (!err) { Data::Lock_here lock (this->liblock);
     try {gmsh::model::setCurrent (model);}
-    catch (...) {err= 1;//FIXME catch std::error and print basic_string
+      catch (Dmsh::Thrown e) {err= 1;
+        const auto from = "gmsh::model::setCurrent ("+model+"))";
+        this->label_gmsh_err ("WARNING",from.c_str(), e);
+      }
+    catch (...) {err= 1;
       log->label_fprintf (log->fmrerr, warnlabel.c_str(),
         "can not find %s.\n", model.c_str());
     }
@@ -241,7 +326,12 @@ int Dmsh::make_part (const std::string model, const fmr::Local_int,
     if (optval > 1) {
       fmr::perf::timer_resume (& this->time);
       try {gmsh::model::mesh::partition (int (part_n));}
-      catch (...) {err= 1;//FIXME catch std::error and print basic_string
+      catch (Dmsh::Thrown e) {err= 1;
+        const auto from
+          = "gmsh::model::mesh::partition (int ("+std::to_string(part_n)+"))";
+        this->label_gmsh_err ("WARNING",from.c_str(), e);
+      }
+      catch (...) {err= 1;
         log->label_fprintf (log->fmrerr, warnlabel.c_str(),
           "partition (%i) %s returned %i.\n",
           int (optval), model.c_str(), err);
@@ -278,13 +368,19 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
 //    Data::Lock_here lock(this->liblock);//TODO liblock needed HERE?
     fmr::perf::timer_resume (& this->time);
     try {gmsh::open (fname);}
-    catch (...) {err= 1;//FIXME catch std::error and print basic_string
+    catch (Dmsh::Thrown e) {err= 1;
+      const auto from = "gmsh::open ("+fname+")";
+      this->label_gmsh_err ("WARNING", from.c_str(), e);
+    }
+    catch (...) {err= 1;
       fmr::perf::timer_pause (& this->time);
+      log->printf_err ("WARN""ING Gmsh could not open %s.\n", fname.c_str());
+      // Do not return from within lock scope.
+    }
+    if (err>0) {
       info.access = fmr::data::Access::Error;
       info.state.has_error = true;
-      log->printf_err ("WARN""ING Gmsh could not open %s.\n", fname.c_str());
       this->file_info[fname] = info;
-      // Do not return from within lock scope.
     }
 #if 0
     if (!info.state.has_error) {
@@ -822,24 +918,104 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
   }
 int Dmsh::close (const std::string model) {int err=0;
   fmr::perf::timer_pause (&this->time);
-  Data::Lock_here lock (this->liblock);
   fmr::perf::timer_resume(&this->time);
-  //TODO check if data is still in use.
-  try {gmsh::model::setCurrent (model);}
-    catch (...) {err= 1;//FIXME catch std::error and print basic_string
+#if 0
+  if (gmsh::fltk::isAvailable () != 0) {
+//    gmsh::fltk::lock ();//TODO how to use this?
+#endif
+    Data::Lock_here lock (this->liblock);
+    //TODO check if data is still in use.
+    try {gmsh::model::setCurrent (model);}
+#ifdef FMR_DEBUG
+    catch (const std::basic_string<char> e) {err= 1;
+      const auto txt = std::string (e);
+      const auto warnlabel = "WARN""ING "+this->task_name;
+      this->proc->log->label_fprintf (this->proc->log->fmrerr,
+        warnlabel.c_str(), "gmsh::model::setCurrent (\"%s\") threw \"%s\".\n",
+        model.c_str(), txt.c_str());
+    }
+#endif
+    catch (...) {err= 1;
+#ifdef FMR_DEBUG
+      const auto warnlabel = "WARN""ING "+this->task_name;
+      this->proc->log->label_fprintf (this->proc->log->fmrerr,
+        warnlabel.c_str(), "could not find %s to close it.\n", model.c_str());
+#endif
+    }
     //TODO handle model already closed. Check model list?
     // Or handle in Data::close(model): returns err only if all return err.
-#if 0
-    const auto warnlabel = "WARN""ING "+this->task_name;
-    this->proc->log->label_fprintf (this->proc->log->fmrerr, warnlabel.c_str(),
-      "could not find %s to close it.\n", model.c_str());
+#if 1
+    if (err<=0) {
+      std::string current_model="";
+      gmsh::model::getCurrent (current_model);
+      err = (current_model == model) ? err : 1;
+    }
+    if ((err<=0) && this->is_xwin_open) {err= 0;
+      if (err==0) {
+        try {gmsh::graphics::draw ();}
+        catch (Dmsh::Thrown e) {err= -1;
+          const auto from = "gmsh::graphics::draw ()";
+          this->label_gmsh_err ("WARNING", from, e);
+        }
+        catch (...) {err= -1;}
+      }
+      if (err==0) {
+        try {gmsh::fltk::awake ("update");}//TODO Only OpenMP master thread
+        // does FLTK operations. Pending ops are queued until the master thread
+        // gets here. Thus, the write and remove () ops on other threads should
+        // be deferred until after the master thread can render it.
+        // But, this works fine when there is only 1 OpenMP thread / MPI rank.
+        catch (Dmsh::Thrown e) {err= -1;
+          const auto from = "gmsh::fltk::awake (\"update\")";
+          this->label_gmsh_err ("WARNING", from, e);
+        }
+        catch (...) {err= -1;}
+      }
+      if (err==0) {
+        try {gmsh::write (model+".png");}
+        catch (Dmsh::Thrown e) {err= -1;
+          const auto from = "gmsh::write ("+model+".png)";
+          this->label_gmsh_err ("WARNING", from.c_str(), e);
+        }
+        catch (...) {err= -1;}
+    } }
+    if (err<=0) {err=0;
+      try {gmsh::model::remove ();}
+      catch (Dmsh::Thrown e) {err= 1;
+        const auto from = "gmsh::model::remove () with "+model;
+        this->label_gmsh_err ("WARNING", from.c_str(), e);
+      }
+      catch (...) {err= 1;}
+      if (err<=0) {this->open_n--;}
+    } else {err= 0;}
 #endif
+#if 0
+//    gmsh::fltk::unlock ();
+  } else {//TODO Below not needed if gmsh::fltk::lock () does not work.
+    Data::Lock_here lock (this->liblock);
+    try {gmsh::model::setCurrent (model);}
+    catch (Dmsh::Thrown e) {err= 1;
+      const auto from = "gmsh::model::setCurrent ("+model+")";
+      this->label_gmsh_err ("WARNING", from.c_str(), e);
+    }
+    catch (...) {err= 1;
+#ifdef FMR_DEBUG
+      const auto warnlabel = "WARN""ING "+this->task_name;
+      this->proc->log->label_fprintf (this->proc->log->fmrerr, warnlabel.c_str(),
+        "could not find %s to close it.\n", model.c_str());
+#endif
+    }
+    if (err<=0) {
+      try {gmsh::model::remove ();}
+      catch (Dmsh::Thrown e) {err= 1;
+        const auto from = "gmsh::model::remove () with "+model;
+        this->label_gmsh_err ("WARNING", from.c_str(), e);
+      }
+      catch (...) {err= 1;}
+      if (err<=0) {this->open_n--;}
+    } else {err= 0;}//TODO
   }
-  if (!err) {
-    try {gmsh::model::remove ();}
-    catch (...) {err= 1;}//FIXME catch std::error and print basic_string
-    if (!err) {this->open_n--;}
-  } else {err= 0;}//TODO
+#endif
   fmr::perf::timer_pause (&this->time);
   return err;
 }

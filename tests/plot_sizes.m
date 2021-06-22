@@ -526,7 +526,7 @@ for (fig = [1:fig_n]); figure (fig);
     loglog (dofs(fcgns), simt(fcgns),'.c;3D CGNS total;', mss,mms,lws,mlw);
     loglog (dofs(fstls), simt(fstls),'.g;2D STL total;', costr,grgb,mss,mms,lws,mlw);
     loglog (dofs(fgeou), simt(fgeou),'.m;CAD unrolled total;', mss,mms,lws,mlw);
-    loglog (dofs(fgeos), simt(fgeos),'.r;CAD scipt total;', mss,mms,lws,mlw);
+    loglog (dofs(fgeos), simt(fgeos),'.r;CAD scripted total;', mss,mms,lws,mlw);
     %
     poly = polyfit (dofs(fothr), file(fothr),1); poly(end) = min(prep(fothr));
     loglog (dofs_span, polyval(poly,dofs_span),'-k;3D flat file mesh+I/O;',lws,mlw);

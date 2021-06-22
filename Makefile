@@ -63,7 +63,7 @@ ifeq ($(ENABLE_OMP),ON)
   #NOTE Can not export from here; use the src/ompexec shell script
 endif
 # For now, disable MPI in Gmsh. It is probably not needed.
-GMSH_FLAGS += -DENABLE_MPI=0 -DENABLE_CAIRO=0 -DENABLE_BUILD_DYNAMIC=0
+GMSH_FLAGS += -DENABLE_MPI=0 -DENABLE_CAIRO=0 -DENABLE_BUILD_DYNAMIC=1
 GMSH_FLAGS += -DENABLE_BUILD_SHARED=1 -DENABLE_BUILD_LIB=1
 # -DENABLE_BUILD_DYNAMIC=1
 ifeq ($(ENABLE_MPI),ON)
@@ -85,7 +85,9 @@ ifeq ($(ENABLE_CGNS),ON)
   BUILD_TREE += $(BUILD_EXTERNAL_DIR)/CGNS/
   INSTALL_EXTERNAL += $(BUILD_EXTERNAL_DIR)/CGNS-ok
   CGNS_REQUIRES += $(BUILD_EXTERNAL_DIR)/hdf5-ok
-  GMSH_FLAGS += -DENABLE_CGNS=1 -DENABLE_CGNS_CPEX0045=1
+  GMSH_FLAGS += -DENABLE_CGNS=1
+  #TODO Enable for gmsh 4.8 (requires gcc 4.9): -DENABLE_CGNS_CPEX0045=1
+  GMSH_FLAGS += -DENABLE_CGNS_CPEX0045=0
   GMSH_REQUIRES += $(BUILD_EXTERNAL_DIR)/CGNS-ok
   PETSC_REQUIRES += $(BUILD_EXTERNAL_DIR)/CGNS-ok
   PETSC_FLAGS += --with-cgns --with-hdf5 --with-zlib
@@ -111,7 +113,8 @@ endif
 ifeq ($(ENABLE_FLTK),ON)
   GMSH_FLAGS += -DENABLE_FLTK=1
   #TODO It looks like native off-screen rendering does not work.
-  # GMSH_FLAGS += -DENABLE_OSMESA=1 -DENABLE_GRAPHICS=1
+  #rhel7: sudo yum install mesa-libOSMesa-devel
+  GMSH_FLAGS += -DENABLE_OSMESA=1 -DENABLE_GRAPHICS=1
   GMSH_REQUIRES += $(BUILD_EXTERNAL_DIR)/fltk-ok
 else
   GMSH_FLAGS += -DENABLE_FLTK=0
