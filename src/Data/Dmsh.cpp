@@ -3,9 +3,6 @@
 #include "gmsh.h"
 #include "../../external/gmsh/Common/CreateFile.h" // GetKnownFileFormats (..)
 
-#include <exception>
-#include <stdexcept>
-
 #include <sys/stat.h> // stat
 #include <unistd.h> //TODO Remove usleep?
 
@@ -153,11 +150,12 @@ namespace Femera {
       auto opterr2=opterr; auto optopt2=optopt;
       auto optind2=optind; auto optarg2=optarg;
       opterr = 0; int optchar;
-      while ((optchar = getopt (argc[0], argv, "V:")) != -1){
+      while ((optchar = getopt (argc[0], argv,
+        "d::v::t::hi:o:m:n:s:x:")) != -1){
         // x:  requires an argument
         // x:: optional argument (Gnu compiler)
         switch (optchar){
-          case 'V':{this->proc->opt_add (optchar);
+          case 's':{this->proc->opt_add (optchar);
             this->display_string = std::string(optarg); break; }
           case '?':{break; }
           default :{break; }//TODO
@@ -365,8 +363,16 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
   auto log = this->proc->log;
   const auto fname = info.data_file.second;
   {// liblock scope
-//    Data::Lock_here lock(this->liblock);//TODO liblock needed HERE?
+    Data::Lock_here lock(this->liblock);
     fmr::perf::timer_resume (& this->time);
+    //
+    //FIXME Move these
+    const auto frame_i = this->get_next_redo_i () + 1;
+    const auto wall_sc
+      = 1e-9*double(fmr::perf::timer_total_elapsed (this->time));
+    gmsh::onelab::setNumber("frame", {Dmsh::Optval(frame_i)});
+    gmsh::onelab::setNumber("wall", {Dmsh::Optval(wall_sc)});
+    //
     try {gmsh::open (fname);}
     catch (Dmsh::Thrown e) {err= 1;
       const auto from = "gmsh::open ("+fname+")";
@@ -390,12 +396,9 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
       this->sims_names.insert (std::string (data_id));
     }
 #endif
-    { Data::Lock_here lock(this->liblock);
-      this->open_n += (info.state.has_error) ? 0 : 1;
-    }
+    this->open_n += (info.state.has_error) ? 0 : 1;
   }
   if (info.state.has_error) {return info;}
-//  {Data::Lock_here lock(this->liblock); this->open_n++;}//TODO Pull out to HERE?
 #ifdef FMR_DEBUG
   log->printf_err ("*** Gmsh opened %s\n", fname.c_str());
 #endif
@@ -924,15 +927,12 @@ int Dmsh::close (const std::string model) {int err=0;
 //    gmsh::fltk::lock ();//TODO how to use this?
 #endif
     Data::Lock_here lock (this->liblock);
-    //TODO check if data is still in use.
+    //TODO Check if data is still in use.
     try {gmsh::model::setCurrent (model);}
 #ifdef FMR_DEBUG
-    catch (const std::basic_string<char> e) {err= 1;
-      const auto txt = std::string (e);
-      const auto warnlabel = "WARN""ING "+this->task_name;
-      this->proc->log->label_fprintf (this->proc->log->fmrerr,
-        warnlabel.c_str(), "gmsh::model::setCurrent (\"%s\") threw \"%s\".\n",
-        model.c_str(), txt.c_str());
+    catch (Dmsh::Thrown e) {err= 1;
+      const auto from = "gmsh::model::setCurrent ("+model+")";
+      this->label_gmsh_err ("WARNING", from.c_str(), e);
     }
 #endif
     catch (...) {err= 1;
@@ -950,7 +950,8 @@ int Dmsh::close (const std::string model) {int err=0;
       gmsh::model::getCurrent (current_model);
       err = (current_model == model) ? err : 1;
     }
-    if ((err<=0) && this->is_xwin_open) {err= 0;
+    if ((err<=0) && this->is_xwin_open) {err= 0;//TODO Move Post/View.
+      const auto start = fmr::perf::get_now_ns();
       if (err==0) {
         try {gmsh::graphics::draw ();}
         catch (Dmsh::Thrown e) {err= -1;
@@ -961,9 +962,9 @@ int Dmsh::close (const std::string model) {int err=0;
       }
       if (err==0) {
         //TODO Only OpenMP master thread does FLTK operations. Pending ops are
-        // queued by Gmsh until the master thread gets here. Thus, the write
-        // and remove () ops on other threads should be deferred until after
-        // the master thread can render it.
+        // queued by Gmsh until the master thread makes a model current. Thus,
+        // the write and remove () ops on other threads should be deferred until
+        // after the master thread can render it.
         // But, this works fine when there is only 1 OpenMP thread / MPI rank.
 #if 0
         try {gmsh::fltk::awake ("update");}
@@ -982,17 +983,27 @@ int Dmsh::close (const std::string model) {int err=0;
           catch (...) {err= -1;}
 #endif
         if (err==0) {
-          try {gmsh::write (model+".png");}
+          auto fname = model;
+          if ( this->data->get_redo_n () > 1) {//TODO Fix for omp thrds >1/mpi.
+            fname += "-"+std::to_string(this->data->get_this_redo_i ());
+          }
+          fname += ".png";
+          try {gmsh::write (fname);}
           catch (Dmsh::Thrown e) {err= -1;
-            const auto from = "gmsh::write ("+model+".png)";
+            const auto from = "gmsh::write ("+fname+")";
             this->label_gmsh_err ("WARNING", from.c_str(), e);
           }
           catch (...) {err= -1;}
-    } } } }
+      } } }
+      if (this->verblevel <= this->proc->log->timing) {//TODO Remove?
+        this->proc->log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu\n",
+          this->proc->get_proc_id(), model.c_str(), "view",
+          start, fmr::perf::get_now_ns());
+    } }
     if (err<=0) {err=0;
       try {gmsh::model::remove ();}
       catch (Dmsh::Thrown e) {err= 1;
-        const auto from = "gmsh::model::remove () with "+model;
+        const auto from = "gmsh::model::remove () current: "+model;
         this->label_gmsh_err ("WARNING", from.c_str(), e);
       }
       catch (...) {err= 1;}
@@ -1018,7 +1029,7 @@ int Dmsh::close (const std::string model) {int err=0;
     if (err<=0) {
       try {gmsh::model::remove ();}
       catch (Dmsh::Thrown e) {err= 1;
-        const auto from = "gmsh::model::remove () with "+model;
+        const auto from = "gmsh::model::remove () current: "+model;
         this->label_gmsh_err ("WARNING", from.c_str(), e);
       }
       catch (...) {err= 1;}

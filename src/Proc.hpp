@@ -41,8 +41,6 @@ class Proc : public Work {
   public:
     Flog* log  = nullptr;//TODO make new Flog objects for each derived instance.
     std::vector<Proc*> hier = {};
-    int redo_n = 1;//TODO Move these?
-    int redo_i = 0;
   // methods ------------------------------------------------------------------
   private:
     bool is_opt_handled (int);

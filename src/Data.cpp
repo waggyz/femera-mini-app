@@ -37,6 +37,7 @@ int Data::print_sims_file_info (const std::string sim_name) {
 }
 int Data::prep () {
   if (this->task.get<Data>(0) != this) {this->task.add (this);}
+  this->redo_i = this->proc->get_proc_id ();
   return 0;
 }
 int Data::add_inp_file (const std::string name) {
@@ -588,6 +589,18 @@ std::deque<std::string> Data::get_inp_file_names (){
 std::deque<std::string> Data::get_out_file_names (){
   return this->out_file_names;
 }
+fmr::Local_int Data::get_this_redo_i() {
+  return this->redo_i;
+}
+fmr::Local_int Data::get_redo_n() {
+  return this->redo_n;
+}
+fmr::Local_int Data::get_next_redo_i() {
+  Data::Lock_here lock(this->data_lock);
+  const auto ret = this->redo_i;
+  this->redo_i = (this->redo_i + this->proc->get_proc_n()) % this->redo_n;
+  return ret;
+}
 Work_type Data::get_file_type (const std::string fname) {
   for (int i=0; i < this->task.count(); i++) {
     Data* D=this->task.get<Data>(i);
@@ -697,6 +710,10 @@ std::string Data::print_details (){
       log->label_fprintf (log->fmrout,
         s.c_str(),"%s\n", model.c_str());
   } }
+  if(log->verbosity >= this->verblevel){
+    log->label_fprintf (log->fmrout,"Repeat sims",
+      "%ux each\n",this->redo_n);
+  }
   return ret ;
 }
 // Specialize initialization and exit for each task->item
@@ -724,7 +741,8 @@ int Data::init_task (int* argc, char** argv){ int err=0;
     log-> fmrout = stdout;
     bool is_read_only=false, has_one_dest=false; std::string one_dest_file("");
 #endif
-    while ((optchar = getopt (argc[0], argv, "i:o:m:V:")) != -1){
+    while ((optchar = getopt (argc[0], argv,
+      "d::v::t::hi:o:m:n:s:x:")) != -1){
       // x:  requires an argument
       // x:: optional argument (Gnu compiler)
       switch (optchar){
@@ -744,7 +762,8 @@ int Data::init_task (int* argc, char** argv){ int err=0;
         case '1':{ has_one_dest=true; break; }
         case ',':{break; }
 #endif
-        case 'V':{this->proc->opt_add (optchar);
+        case 'x':{this->redo_n = atoi (optarg); break;}
+        case 's':{this->proc->opt_add (optchar);
           this->display_string = std::string(optarg); break; }
         case '?':{break; }
         default :{break; }
@@ -805,12 +824,13 @@ int Data::init_task (int* argc, char** argv){ int err=0;
               log->label_fprintf (log->fmrerr, lab.c_str(),
                 "skipping directory %s...\n",child.c_str());
           } }else{// child is not a directory; assume input file
-            chk_file_names.push_back (child);
+            chk_file_names.push_back (child);//TODO redo_n loop here?
         } }
         closedir (dir);
       }else{// could not open as directory; assume input file
-        chk_file_names.push_back (std::string (path));
-      }
+//        for {fmr::Local_int redo_i=1; redo_i<=this->redo_n; redo_i++) {
+          chk_file_names.push_back (std::string (path));
+      }// }
 #if 0
       struct stat info;
       if (stat( path, &info ) != 0) {

@@ -24,6 +24,7 @@ sed -i 's/"prep"/3/g' $CSV
 sed -i 's/"iter"/4/g' $CSV
 sed -i 's/"zzzz"/5/g' $CSV
 #
+sed -i 's/"view"/9/g' $CSV
 sed -i 's/"post"/10/g' $CSV
 #
 # bin:1, asc:2,

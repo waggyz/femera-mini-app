@@ -32,6 +32,7 @@ Options in lower case do not modify a model, but can be used to get information
 -i<str> input file(s)
 -o<str> output file
 -m<str> model name(s)
+-s<str> screen Xwindows name (e.g. :0.0)
 -x<int> Repeat tasks <int> times. This is useful for performance testing.
 
 If no (-m) models are given, Femera will run every simulation found in the
