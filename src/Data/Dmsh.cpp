@@ -370,8 +370,8 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
     const auto frame_i = this->get_next_redo_i () + 1;
     const auto wall_sc
       = 1e-9*double(fmr::perf::timer_total_elapsed (this->time));
-    gmsh::onelab::setNumber("frame", {Dmsh::Optval(frame_i)});
-    gmsh::onelab::setNumber("wall", {Dmsh::Optval(wall_sc)});
+    gmsh::onelab::setNumber ("frame", {Dmsh::Optval(frame_i)});
+    gmsh::onelab::setNumber ("wall" , {Dmsh::Optval(wall_sc)});
     //
     try {gmsh::open (fname);}
     catch (Dmsh::Thrown e) {err= 1;
