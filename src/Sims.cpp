@@ -254,12 +254,12 @@ namespace Femera {
             is_done = this->model_list.empty();
             if (!is_done) {
               switch (this->send.plan) {
-              case fmr::Schedule::Fifo :// first in/first out
+              case fmr::Schedule::Filo :// first in/FIXME out
                 sim_i = sim_n - fmr::Local_int (this->model_list.size());
                 R->model_name = this->model_list.front();
                 this->model_list.pop_front();
                 break;
-              case fmr::Schedule::Filo :// first in/last out
+              case fmr::Schedule::Fifo :// first in/FIXME out
                 R->model_name = this->model_list.back();
                 this->model_list.pop_back();
                 sim_i = fmr::Local_int (this->model_list.size());

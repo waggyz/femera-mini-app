@@ -565,7 +565,7 @@ int Data::new_local_vals (const fmr::Data_id data_id,// cache here in Data.
 std::deque<std::string> Data::get_sims_names () {
   std::deque<std::string> model_names={};
   switch (fmr::Schedule::Fifo) {//TODO member variable?
-  case (fmr::Schedule::Filo) :{//TODO Check which is FIFO/FILO.
+  case (fmr::Schedule::Fifo) :{//TODO Check which is FIFO/FILO.
     for (auto name : this->sims_names) {model_names.push_back (name.first);}
     if (this->work_type == work_cast (Base_type::Data)) {
       for (int i =0; i < this->task.count(); i++) {
@@ -585,14 +585,14 @@ std::deque<std::string> Data::get_sims_names () {
             this->sims_names[names.back()] = names.back();
             names.pop_back();
     } } } } } }
-    case (fmr::Schedule::Fifo) :{
+    case (fmr::Schedule::Filo) :{
     for (auto name : this->sims_names) {model_names.push_back (name.first);}
     if (this->work_type == work_cast (Base_type::Data)) {
       for (int i =0; i < this->task.count(); i++) {
         auto D = this->task.get<Data>(i);
          if (D) {if (D != this) {
           auto names = D->get_sims_names ();
-          while (!names.empty()){
+          while (!names.empty()) {
             if (this->sims_names.count (names.front()) < 1) {
               model_names.push_back (names.front());
             }
@@ -613,8 +613,11 @@ std::deque<std::string> Data::add_sims_name (const std::string name) {
       names.push_back (name);
       break;}
     default:{
-      for (fmr::Local_int i=1; i<=n; i++) {
-        const auto nm = name+"-"+std::to_string(i);
+      const int dlevel=0;//FIXME should be MPI level
+      const fmr::Local_int thrd_n  = this->proc->get_stat()[dlevel].thrd_n;
+      const fmr::Local_int thrd_id = this->proc->get_stat()[dlevel].thrd_id;
+      for (fmr::Local_int i=thrd_id; i<n; i+=thrd_n) {
+        const auto nm = name+"-"+std::to_string(i+1);
         this->sims_names[nm] = name;
         names.push_back (nm);
 #ifdef FMR_DEBUG
@@ -748,8 +751,7 @@ std::string Data::print_details (){
         s.c_str(),"%s\n", model.first.c_str());
   } }
   if(log->verbosity >= this->verblevel){
-    log->label_fprintf (log->fmrout,"Repeat sims",
-      "%ux each\n",this->redo_n);
+    log->label_printf ("Repeat sims","%ux each\n",this->redo_n);
   }
   return ret ;
 }
@@ -907,6 +909,7 @@ int Data::chck_file_names (std::deque<std::string> files){int err=0;
   /* Check files in parallel to build a map between file storage and model data,
    * caching data found while traversing file structures.
    */
+  const auto log = this->proc->log;
   const bool do_read_sims_info = true;//(sims_names.size() == 0);//TODO
 #if 0
   for (std::string fname : this->out_file_names){// Check output files first.
@@ -922,17 +925,17 @@ int Data::chck_file_names (std::deque<std::string> files){int err=0;
   //TODO    ? fmr::data::Access::Modify : fmr::data::Access::Read;
 #endif
   const fmr::Local_int fname_n = fmr::Local_int(files.size());
-  const int dlevel = 0;
-  const int thrd_n = this->proc->get_stat()[dlevel].thrd_n;//TODO get by level
-  // Input file checking done parallel.
-  // Data info synchronization may be needed later for collective data access.
-  auto log = this->proc->log;
+  const int thrd_n = (this->redo_n>1) ? 1 : this->proc->get_stat()[0].thrd_n;
   if (files.size() > 0) {
+    // Input file checking in parallel: all threads check all files for redo_n>1,
+    // static round-robin check when redo_n <=1.
+    // Data info synchronization may be needed later for collective data access.
     FMR_PRAGMA_OMP(omp parallel)
-    for (fmr::Local_int fname_i=this->proc->get_stat()[dlevel].thrd_id;
-      fname_i<fname_n; fname_i += thrd_n) {// static round-robin distribution
+    for (fmr::Local_int
+      fname_i = (this->redo_n>1) ? 0 : this->proc->get_stat()[0].thrd_id;
+      fname_i < fname_n;
+      fname_i += thrd_n) {
       const auto start = fmr::perf::get_now_ns();
-  //    bool file_ok=true;//TODO Set false here, true if ok and sync all_file_names.
       std::string fname = files [fname_i];
 #ifdef FMR_DEBUG
       this->proc->log-> fprintf(this->proc->log-> fmrout,"file[%i] %s...\n",
@@ -942,8 +945,7 @@ int Data::chck_file_names (std::deque<std::string> files){int err=0;
         { Data::Lock_here lock (this->data_lock);
         if (::stat (fname.c_str(), &s) != 0) {// File not found.
           log->fprintf (log->fmrerr,
-            "WARN""ING Input file not found: %s\n",
-            fname.c_str());
+            "WARN""ING Input file not found: %s\n", fname.c_str());
         }
         else if (do_read_sims_info) {
           auto info = get_file_info (Data_file (nullptr,fname));

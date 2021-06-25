@@ -154,11 +154,7 @@ class Data : public Work {//TODO change to File
     // Below valid after scan_file_data(..).
     fmr::Local_int get_sims_n ();
     virtual std::deque<std::string> get_sims_names ();
-#if 0
-    std::string add_sims_name (const std::string);//FIXME return vec<str>
-#else
     std::deque<std::string> add_sims_name(const std::string);
-#endif
     //
     fmr::Local_int get_redo_n();
     //

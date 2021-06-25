@@ -105,8 +105,8 @@ namespace Femera {
       auto P = this->proc->task.first<Proc> (Plug_type::Pomp);
       if (P) {
         const auto n = P->get_proc_n();
-        //this-> max_open_n = n;//TODO for 1 sim/omp (XS)?
-        this-> max_open_n = n * this->data->get_redo_n ();//FIXME
+        this-> max_open_n = n;//TODO for 1 sim/omp (XS)?
+        //this-> max_open_n = this->data->get_redo_n () / n + 1;//TODO
         gmsh::option::setNumber ("General.NumThreads",Dmsh::Optval(n));
         if (this->proc->log->detail > this->verblevel){
           this->proc->log->label_printf ("Gmsh uses",
@@ -640,6 +640,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
     return err;
   }
   Data::File_info Dmsh::scan_file_data (const std::string fname) {
+    //NOTE: Must be called from within a thread locked scope.
     auto info = Dmsh::File_gmsh (Data::Data_file (this, fname));
     info = this->file_info.count (fname) ? this->file_info.at (fname) : info;
   //  info.data_file.second = fname;//TODO redundant?
@@ -649,48 +650,46 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
         case fmr::data::Access::Read   : do_open = false; break;
         case fmr::data::Access::Write  : do_open = false; break;//TODO true?
         case fmr::data::Access::Modify : do_open = false; break;
-        default : do_open = true;
+        default :{}// do nothing
       }
       if (info.state.has_error) {do_open=true;}// Try to reopen.
       std::string data_id("");
-      {// Data::Lock_here lock(this->liblock);//FIXME Deadlocks
-        if (do_open) {
-          //FIXME race condition from *HERE*
-          info = this->open (info, fmr::data::Access::Read,
-            Data::Concurrency::Independent);
+      if (do_open) {
+        info = this->open (info, fmr::data::Access::Read,
+          Data::Concurrency::Independent);
+      }
+      if (info.state.has_error) {
+        this->file_info [fname] = info;
+      }else{
+        gmsh::model::getCurrent (data_id);// Read Gmsh model name
+    }
+    if (info.state.has_error) {return info;}
+    const auto names = this->add_sims_name (data_id);
+    if (names[0] != data_id) {
+      try {gmsh::model::remove ();}
+      catch (Dmsh::Thrown e) {info.state.has_error= true;
+        const auto from = "gmsh::model::remove () current: "+data_id;
+        this->label_gmsh_err ("WARNING", from.c_str(), e);
+      }
+      const int dlevel=0;//FIXME should be MPI level
+      const fmr::Local_int thrd_n  = this->proc->get_stat()[dlevel].thrd_n;
+      const fmr::Local_int thrd_id = this->proc->get_stat()[dlevel].thrd_id;
+      fmr::Local_int frame_i=thrd_id;
+      for (const auto name : names) {
+        if (name != data_id) {frame_i+=thrd_n;
+          // Data::Lock_here lock(this->liblock);//TODO when pulled out.
+          gmsh::model::add (name);// should make current, but doesn't?
+          gmsh::model::setCurrent (name);
+          const auto wall_sc
+            = 1e-9*double(fmr::perf::timer_total_elapsed (this->time));
+          gmsh::onelab::setNumber ("frame", {Dmsh::Optval(frame_i)});
+          gmsh::onelab::setNumber ("wall" , {Dmsh::Optval(wall_sc)});
+          gmsh::merge (fname);//FIXME open(fname, model_name)
+          this->sims_names[name] = name;
+          this->data->sims_names[name] = name;//FIXME make protected
         }
-        if (info.state.has_error) {
-          this->file_info [fname] = info;
-          // Do not return from within liblock scope.
-        }else{
-          // Read Gmsh model name
-          gmsh::model::getCurrent (data_id);//FIXME race condition to *HERE*
-      } }
-      if (info.state.has_error) {return info;}
-      const auto names = this->add_sims_name (data_id);
-      if (names[0] != data_id) {
-        try {gmsh::model::remove ();}
-        catch (Dmsh::Thrown e) {info.state.has_error= true;
-          const auto from = "gmsh::model::remove () current: "+data_id;
-          this->label_gmsh_err ("WARNING", from.c_str(), e);
-        }
-        fmr::Local_int frame_i=0;
-        for (const auto name : names) {//TODO open all?
-          if (name != data_id) {frame_i++;
-            // Data::Lock_here lock(this->liblock);
-            gmsh::model::add (name);// should make current, but does not really
-            gmsh::model::setCurrent (name);
-            const auto wall_sc
-              = 1e-9*double(fmr::perf::timer_total_elapsed (this->time));
-            gmsh::onelab::setNumber ("frame", {Dmsh::Optval(frame_i)});
-            gmsh::onelab::setNumber ("wall" , {Dmsh::Optval(wall_sc)});
-            gmsh::merge (fname);//FIXME open(fname, model_name)
-            this->sims_names[name] = name;
-            this->data->sims_names[name] = name;//FIXME make protected
-          }
-          info.state.has_error |= this->scan_model (name) > 0;
-      } }
-    }//end if !read
+        info.state.has_error |= this->scan_model (name) > 0;
+    } } }//end if !read
     fmr::perf::timer_pause (&this->time);
     info.state.was_checked = true;
     this->file_info [fname] = info;
@@ -699,7 +698,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
   int Dmsh::scan_model (const std::string data_id) {int err=0;
     Data::Lock_here lock(this->liblock);
     auto log = this->proc->log;
-#if 1//def FMR_DEBUG
+#ifdef FMR_DEBUG
     log->label_fprintf (log->fmrerr, "**** Gmsh scan",
       "model %s\n",data_id.c_str());
 #endif
