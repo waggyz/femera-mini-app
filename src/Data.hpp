@@ -92,16 +92,15 @@ class Data : public Work {//TODO change to File
   // member variables --------------------------------------------------------
     // fmr::perf::IOmeter  time_io = fmr::perf::IOmeter ();//TODO
     std::string         display_string = "";
+    std::unordered_map<std::string, std::string> sims_names ={};
   protected:
     std::string      default_file_name = "new-femera-data";
     std::vector<std::string> file_exts ={"csv"};
     // File extensions are case-insensitive; the default extension is first.
     //
-    std::unordered_map<fmr::Data_id, std::vector<Data_file>>//TODO std::set?
-      sims_data_file ={};// key: sim ID //TODO private for thread safety?
-    //
-    std::unordered_set<std::string> sims_names ={};
   private:
+    std::unordered_map<fmr::Data_id, std::vector<Data_file>>//TODO std::set?
+      sims_data_file ={};// private for thread safety
     std::mutex data_lock {};
     //
     std::deque<std::string> chk_file_names ={};
@@ -109,7 +108,6 @@ class Data : public Work {//TODO change to File
     std::deque<std::string> inp_file_names ={};
     //
     fmr::Local_int redo_n = 1;
-    fmr::Local_int redo_i = 0;
     //
     fmr::Dim_int data_hier_max  = 32;// maximum partitioning/grouping depth
   // methods -----------------------------------------------------------------
@@ -156,10 +154,13 @@ class Data : public Work {//TODO change to File
     // Below valid after scan_file_data(..).
     fmr::Local_int get_sims_n ();
     virtual std::deque<std::string> get_sims_names ();
+#if 0
+    std::string add_sims_name (const std::string);//FIXME return vec<str>
+#else
+    std::deque<std::string> add_sims_name(const std::string);
+#endif
     //
     fmr::Local_int get_redo_n();
-    fmr::Local_int get_this_redo_i();
-    fmr::Local_int get_next_redo_i();
     //
     int add_data_file (const fmr::Data_id, Data*D, const std::string fname);
     virtual int make_mesh (const std::string model, const fmr::Local_int ix);

@@ -27,6 +27,7 @@ class Dmsh final : public Data {
         };
         File_gmsh (Data::File_info& in) {
           data_file   = in.data_file  ;
+          //std::string     model ="";//TODO
           encode      = Data::Encode::Binary;
           version     = in.version    ;
           compress    = in.compress   ;

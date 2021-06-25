@@ -20,7 +20,7 @@ namespace Femera {
       fmr::Data::Gset_n,    fmr::Data::Part_n,    fmr::Data::Mesh_n,
       fmr::Data::Grid_n,    fmr::Data::Gcad_n,
       fmr::Data::Node_sysn, fmr::Data::Elem_sysn//,
-//      fmr::Data::Phys_d,    fmr::Data::Mtrl_n,
+//TODO      fmr::Data::Phys_d,    fmr::Data::Mtrl_n,
 //      fmr::Data::Dofs_sysn
     };
   }
@@ -36,8 +36,19 @@ namespace Femera {
   int Sims::chck () {
     return 0;
   }
-  int Sims::add (std::string name) {int err=0;
+  int Sims::add_model (std::string name) {int err=0;
+#if 0
+    const auto n = this->data->get_redo_n ();
+    switch (n) {
+      case  0: break;
+      case  1: this->model_list.push_back (name); break;
+      default:
+        for (fmr::Local_int i=0; i<n; i++) {
+          this->model_list.push_back (name+"."+std::to_string(i));
+    } }
+#else
     this->model_list.push_back (name);
+#endif
     return err;
   }
   int Sims::clear () {
@@ -237,11 +248,12 @@ namespace Femera {
         //TODO Handle other sim sizes.
         fmr::Local_int sim_i=0;
         const auto R = this->task.get<Sims>(Psend->get_proc_id());
-        bool do_abort = false;
-        while (!this->model_list.empty() && !do_abort) {// Run XS sims
-          do_abort = false;
+        bool is_done = false;
+        while (!is_done) {// Run XS sims
           FMR_PRAGMA_OMP(omp critical) {
-            switch (this->send.plan) {
+            is_done = this->model_list.empty();
+            if (!is_done) {
+              switch (this->send.plan) {
               case fmr::Schedule::Fifo :// first in/first out
                 sim_i = sim_n - fmr::Local_int (this->model_list.size());
                 R->model_name = this->model_list.front();
@@ -252,12 +264,12 @@ namespace Femera {
                 this->model_list.pop_back();
                 sim_i = fmr::Local_int (this->model_list.size());
                 break;
-              default : do_abort = true;//TODO Set err ?
+              default : is_done = true;//TODO Set err ?
                 log->printf_err (
                   "ERR""OR Sims distribution plan %s not yet implemented.\n",
                   get_enum_string(fmr::Schedule_name, this->send.plan).c_str());
-          } }//end critical region
-          if (!do_abort) {
+          } } }//end critical region
+          if (!is_done) {
             R->sims_ix = sim_i;
             auto  geo_d = this->get_dim_val (fmr::Data::Geom_d, sim_i);
             const auto gcad_n = this->get_local_val (fmr::Data::Gcad_n,sim_i);

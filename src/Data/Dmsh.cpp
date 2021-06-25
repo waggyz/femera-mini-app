@@ -105,7 +105,8 @@ namespace Femera {
       auto P = this->proc->task.first<Proc> (Plug_type::Pomp);
       if (P) {
         const auto n = P->get_proc_n();
-        this-> max_open_n = 1 * n;//TODO For 1 sim/omp (XS-MD) only?
+        //this-> max_open_n = n;//TODO for 1 sim/omp (XS)?
+        this-> max_open_n = n * this->data->get_redo_n ();//FIXME
         gmsh::option::setNumber ("General.NumThreads",Dmsh::Optval(n));
         if (this->proc->log->detail > this->verblevel){
           this->proc->log->label_printf ("Gmsh uses",
@@ -192,7 +193,6 @@ namespace Femera {
         //
         if (!gmsh::fltk::isAvailable ()) {
           try {gmsh::fltk::initialize ();}
-//          catch (const std::basic_string<char> e) {err= -1;
           catch (Dmsh::Thrown e) {err= -1;
             this->label_gmsh_err ("WARNING","gmsh::fltk::initialize ()", e);
           }
@@ -210,7 +210,6 @@ namespace Femera {
     this->is_init = true;
     fmr::perf::timer_pause (& this->time);
     this->prep ();
-//TODO    FMR_PRAGMA_OMP(omp barrier)
     return err;
   }
   int Dmsh::exit_task (int err){
@@ -235,7 +234,7 @@ int Dmsh::label_gmsh_err (std::string label, const std::string from,
 }
 std::deque<std::string> Dmsh::get_sims_names (){//TODO Remove?
   std::deque<std::string> model_names={};
-  for (auto item : this->sims_names) {model_names.push_back (item); }
+  for (auto item : this->sims_names) {model_names.push_back (item.first); }
   return model_names;
 }
 int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
@@ -245,10 +244,18 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
   //TODO handle mesh index # to generate?
   int geom_d=-1,bbox_d=-1;//, elem_d=0;//TODO check max existing elem_d?
   if (!err) { Data::Lock_here lock (this->liblock);
+#if 0
+    try {gmsh::model::setCurrent (this->sims_names.at(model));}
+#else
     try {gmsh::model::setCurrent (model);}
-    catch (Dmsh::Thrown e) {err=-1;
+#endif
+    catch (Dmsh::Thrown e) {err= -1;
       const auto from = "gmsh::model::setCurrent ("+model+")";
       this->label_gmsh_err ("WARNING",from.c_str(), e);
+    }
+    catch (std::out_of_range e) {err= -1;
+      const auto from = "this->sims_names.at("+model+") in make_mesh (..)";
+      this->label_gmsh_err ("WARNING",from.c_str(), e.what());
     }
     catch (...) {err = -1;
       log->label_fprintf (log->fmrerr, warnlabel.c_str(),
@@ -277,7 +284,19 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
   } }
   if ((!err) && (geom_d <= bbox_d)) { Data::Lock_here lock (this->liblock);
     fmr::perf::timer_resume (& this->time);
-    gmsh::model::setCurrent (model);
+#if 0
+    try {gmsh::model::setCurrent (this->sims_names.at(model));}
+#else
+    try {gmsh::model::setCurrent (model);}
+#endif
+    catch (Dmsh::Thrown e) {
+      const auto from = "gmsh::model::setCurrent ("+model+")";
+      this->label_gmsh_err ("WARNING",from.c_str(), e);
+    }
+    catch (std::out_of_range e) {
+      const auto from = "this->sims_names.at("+model+") in make_mesh (..)";
+      this->label_gmsh_err ("WARNING",from.c_str(), e.what());
+    }
     try {gmsh::model::mesh::generate (geom_d);}
     catch (int e) {err= e;
       log->label_fprintf (log->fmrerr, warnlabel.c_str(),
@@ -310,11 +329,19 @@ int Dmsh::make_part (const std::string model, const fmr::Local_int,
   //TODO check if meshed
   //TODO handle part index # to generate
   if (!err) { Data::Lock_here lock (this->liblock);
+#if 0
+    try {gmsh::model::setCurrent (this->sims_names.at(model));}
+#else
     try {gmsh::model::setCurrent (model);}
+#endif
       catch (Dmsh::Thrown e) {err= 1;
         const auto from = "gmsh::model::setCurrent ("+model+"))";
         this->label_gmsh_err ("WARNING",from.c_str(), e);
       }
+    catch (std::out_of_range e) {err= 1;
+      const auto from = "this->sims_names.at("+model+") in make_part (..)";
+      this->label_gmsh_err ("WARNING",from.c_str(), e.what());
+    }
     catch (...) {err= 1;
       log->label_fprintf (log->fmrerr, warnlabel.c_str(),
         "can not find %s.\n", model.c_str());
@@ -366,13 +393,6 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
     Data::Lock_here lock(this->liblock);
     fmr::perf::timer_resume (& this->time);
     //
-    //FIXME Move these
-    const auto frame_i = this->get_next_redo_i () + 1;
-    const auto wall_sc
-      = 1e-9*double(fmr::perf::timer_total_elapsed (this->time));
-    gmsh::onelab::setNumber ("frame", {Dmsh::Optval(frame_i)});
-    gmsh::onelab::setNumber ("wall" , {Dmsh::Optval(wall_sc)});
-    //
     try {gmsh::open (fname);}
     catch (Dmsh::Thrown e) {err= 1;
       const auto from = "gmsh::open ("+fname+")";
@@ -393,7 +413,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
       this->open_n++;
       std::string data_id("");
       gmsh::model::getCurrent (data_id);
-      this->sims_names.insert (std::string (data_id));
+      this->add_sims_name (data_id);
     }
 #endif
     this->open_n += (info.state.has_error) ? 0 : 1;
@@ -482,7 +502,20 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
             std::size_t task_n = 1;//TODO automatic partitioning by elem #
             { Data::Lock_here lock(this->liblock);
               for (size_t i=0; i<n; i++) {
-                gmsh::model::setCurrent (info.model);//TODO catch error
+#if 0
+                try{ gmsh::model::setCurrent (this->sims_names.at(info.model));}
+#else
+                try{ gmsh::model::setCurrent (info.model);}
+#endif
+                catch (Dmsh::Thrown e) {
+                  const auto from = "gmsh::model::setCurrent ("+info.model+")";
+                  this->label_gmsh_err ("WARNING", from.c_str(), e);
+                }
+                catch (std::out_of_range e) {
+                  const auto from = "this->sims_names.at("+info.model
+                    +") in read_geom_values (..)";
+                  this->label_gmsh_err ("WARNING",from.c_str(), e.what());
+                }
                 gmsh::model::mesh::getJacobians (info.type, intp,
                   jacs, dets, pts, info.tags[i], info.task, task_n);
             } }
@@ -574,7 +607,20 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
             std::size_t task_n = 1;//TODO for automatic partitioning by elem #
               for (size_t i=0; i<n; i++) {
                 Data::Lock_here lock(this->liblock);
-                gmsh::model::setCurrent (info.model);//TODO catch error
+#if 0
+                try{gmsh::model::setCurrent (this->sims_names.at(info.model));}
+#else
+                try{gmsh::model::setCurrent (info.model);}
+#endif
+                catch (Dmsh::Thrown e) {
+                  const auto from = "gmsh::model::setCurrent ("+info.model+")";
+                  this->label_gmsh_err ("WARNING", from.c_str(), e);
+                }
+                catch (std::out_of_range e) {
+                  const auto from = "this->sims_names.at("+info.model
+                    +") in read_local_vals (..)";
+                  this->label_gmsh_err ("WARNING",from.c_str(), e.what());
+                }
                 gmsh::model::mesh::getElementsByType (info.type, elem, conn,
                   info.tags[i], info.task, task_n);
             }
@@ -600,8 +646,8 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
     if (!info.state.was_read) {
       bool do_open = (this->open_n < this->max_open_n);
       switch (info.access) {// Check if already open.
-        case fmr::data::Access::Read   :// Fall through valid open modes...
-        case fmr::data::Access::Write  ://TODO Fall through?
+        case fmr::data::Access::Read   : do_open = false; break;
+        case fmr::data::Access::Write  : do_open = false; break;//TODO true?
         case fmr::data::Access::Modify : do_open = false; break;
         default : do_open = true;
       }
@@ -609,31 +655,69 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
       std::string data_id("");
       {// Data::Lock_here lock(this->liblock);//FIXME Deadlocks
         if (do_open) {
-          const auto inp_file_mode = fmr::data::Access::Read;
           //FIXME race condition from *HERE*
-          info = this->open (info, inp_file_mode, Data::Concurrency::Independent);
+          info = this->open (info, fmr::data::Access::Read,
+            Data::Concurrency::Independent);
         }
         if (info.state.has_error) {
-          this->file_info[fname] = info;
+          this->file_info [fname] = info;
           // Do not return from within liblock scope.
         }else{
           // Read Gmsh model name
           gmsh::model::getCurrent (data_id);//FIXME race condition to *HERE*
       } }
       if (info.state.has_error) {return info;}
-      this->sims_names.insert (std::string (data_id));
-      info.state.has_error = this->scan_model (data_id) > 0;
+      const auto names = this->add_sims_name (data_id);
+      if (names[0] != data_id) {
+        try {gmsh::model::remove ();}
+        catch (Dmsh::Thrown e) {info.state.has_error= true;
+          const auto from = "gmsh::model::remove () current: "+data_id;
+          this->label_gmsh_err ("WARNING", from.c_str(), e);
+        }
+        fmr::Local_int frame_i=0;
+        for (const auto name : names) {//TODO open all?
+          if (name != data_id) {frame_i++;
+            // Data::Lock_here lock(this->liblock);
+            gmsh::model::add (name);// should make current, but does not really
+            gmsh::model::setCurrent (name);
+            const auto wall_sc
+              = 1e-9*double(fmr::perf::timer_total_elapsed (this->time));
+            gmsh::onelab::setNumber ("frame", {Dmsh::Optval(frame_i)});
+            gmsh::onelab::setNumber ("wall" , {Dmsh::Optval(wall_sc)});
+            gmsh::merge (fname);//FIXME open(fname, model_name)
+            this->sims_names[name] = name;
+            this->data->sims_names[name] = name;//FIXME make protected
+          }
+          info.state.has_error |= this->scan_model (name) > 0;
+      } }
     }//end if !read
     fmr::perf::timer_pause (&this->time);
     info.state.was_checked = true;
-    this->file_info[fname] = info;
+    this->file_info [fname] = info;
     return info;
     }
   int Dmsh::scan_model (const std::string data_id) {int err=0;
     Data::Lock_here lock(this->liblock);
     auto log = this->proc->log;
+#if 1//def FMR_DEBUG
+    log->label_fprintf (log->fmrerr, "**** Gmsh scan",
+      "model %s\n",data_id.c_str());
+#endif
     fmr::perf::timer_resume (&this->time);
-    gmsh::model::setCurrent (data_id);//TODO catch error
+#if 0
+    try {gmsh::model::setCurrent (this->sims_names.at(data_id));}
+#else
+    try {gmsh::model::setCurrent (data_id);}
+#endif
+    catch (std::out_of_range e) {err= 1;
+      const auto from = "this->sims_names.at("+data_id
+        +") in scan_model (..)";
+      this->label_gmsh_err ("WARNING",from.c_str(), e.what());
+    }
+    catch (Dmsh::Thrown e) {err= 1;
+      const auto from = "gmsh::model::setCurrent ("+data_id+")";
+      this->label_gmsh_err ("WARNING", from.c_str(), e);
+    }
     const auto gid = this->make_data_id (data_id,
       fmr::Tree_type::Sims,{}, fmr::Data::Geom_info);
 //    std::valarray<bool> item_isok (false,fmr::Data::Geom_info::end);
@@ -922,34 +1006,40 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
 int Dmsh::close (const std::string model) {int err=0;
   fmr::perf::timer_pause (&this->time);
   fmr::perf::timer_resume(&this->time);
-#if 0
-  if (gmsh::fltk::isAvailable () != 0) {
-//    gmsh::fltk::lock ();//TODO how to use this?
-#endif
+  if (this->sims_names.count(model)>0) {
     Data::Lock_here lock (this->liblock);
     //TODO Check if data is still in use.
+#if 0
+    try {gmsh::model::setCurrent (this->sims_names.at(model));}
+#else
     try {gmsh::model::setCurrent (model);}
-#ifdef FMR_DEBUG
+#endif
+    catch (std::out_of_range e) {err= 1;
+      const auto from = "this->sims_names.at("+model+") in close (..)";
+      this->label_gmsh_err ("WARNING",from.c_str(), e.what());
+    }
     catch (Dmsh::Thrown e) {err= 1;
-      const auto from = "gmsh::model::setCurrent ("+model+")";
+      const auto from = "gmsh::model::setCurrent ("
+        +this->sims_names.at(model)+") in close (..)";
       this->label_gmsh_err ("WARNING", from.c_str(), e);
     }
-#endif
     catch (...) {err= 1;
-#ifdef FMR_DEBUG
       const auto warnlabel = "WARN""ING "+this->task_name;
       this->proc->log->label_fprintf (this->proc->log->fmrerr,
         warnlabel.c_str(), "could not find %s to close it.\n", model.c_str());
-#endif
     }
     //TODO handle model already closed. Check model list?
     // Or handle in Data::close(model): returns err only if all return err.
-#if 1
     if (err<=0) {
       std::string current_model="";
       gmsh::model::getCurrent (current_model);
       err = (current_model == model) ? err : 1;
     }
+#if 1
+#if 0
+    if (gmsh::fltk::isAvailable () != 0) {
+      gmsh::fltk::lock ();//TODO how to use this?
+#endif
     if ((err<=0) && this->is_xwin_open) {err= 0;//TODO Move Post/View.
       const auto start = fmr::perf::get_now_ns();
       if (err==0) {
@@ -984,9 +1074,6 @@ int Dmsh::close (const std::string model) {int err=0;
 #endif
         if (err==0) {
           auto fname = model;
-          if ( this->data->get_redo_n () > 1) {//TODO Fix for omp thrds >1/mpi.
-            fname += "-"+std::to_string(this->data->get_this_redo_i ());
-          }
           fname += ".png";
           try {gmsh::write (fname);}
           catch (Dmsh::Thrown e) {err= -1;
@@ -1037,6 +1124,7 @@ int Dmsh::close (const std::string model) {int err=0;
     } else {err= 0;}//TODO
   }
 #endif
+  }// end if handled by Gmsh
   fmr::perf::timer_pause (&this->time);
   return err;
 }

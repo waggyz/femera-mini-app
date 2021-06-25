@@ -18,6 +18,8 @@ class Frun final : public Sims {//TODO Problably NOT derived from Sims or Work.
   public:
   protected:
   private:
+//TODO    std::mutex data_lock {};
+//TODO    fmr::Local_int redo_ix = 0;
   // methods ----------------------------------------------------------------
   protected:
     int prep () final override;
@@ -28,6 +30,8 @@ class Frun final : public Sims {//TODO Problably NOT derived from Sims or Work.
     int run  () final override;
     int iter () final override;//TODO or loop() ?
     int post () final override;
+    fmr::Local_int get_this_redo_ix();
+    fmr::Local_int get_next_redo_ix();
   public:
     virtual ~Frun  ()      noexcept=default;
     Frun           (Sims*) noexcept;

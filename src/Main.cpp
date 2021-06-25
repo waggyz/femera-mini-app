@@ -29,7 +29,7 @@ namespace Femera{
     return err;
   }
   int Main::add_model_name (std::string model){
-    return this->task.first<Sims>(Base_type::Sims)->add (model);
+    return this->task.first<Sims>(Base_type::Sims)->add_model (model);
   }
   int Main::clear (){
     return this->task.first<Sims>(Base_type::Sims)->clear ();

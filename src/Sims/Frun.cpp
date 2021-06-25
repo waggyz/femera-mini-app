@@ -22,12 +22,11 @@ namespace Femera {
     this->  part_type = fmr::Partition::Join;
     this-> meter_unit ="dof";
     //this->data_list = {};
+    //TODO this->redo_ix = this->proc->get_proc_id ();
   }
   int Frun::chck () {
     const auto start = fmr::perf::get_now_ns();
     const auto log = this->proc->log;
-    //
-    //
     //
     if (this->verblevel <= log->timing) {
       log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu\n", this->proc->get_proc_id(),
@@ -99,6 +98,21 @@ namespace Femera {
     }
     return err;
   }
+#if 0
+fmr::Local_int Frun::get_this_redo_ix() {//TODO Move to Sims?
+  return this->redo_ix;
+}
+fmr::Local_int Frun::get_next_redo_ix() {//TODO Move to Sims?
+  Data::Lock_here lock(this->data_lock);
+  const auto ret = this->redo_ix;
+#if 0
+  this->redo_ix = (this->redo_ix + this->proc->get_proc_n()) % this->redo_n;
+#else
+  this->redo_ix+= (this->redo_ix < this->data->get_redo_n()) ? 1 : 0;
+#endif
+  return ret;
+}
+#endif
   int Frun::run () {int err=0;
     fmr::perf::timer_resume (& this->time);
     err= this->prep ();

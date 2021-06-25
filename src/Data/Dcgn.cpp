@@ -707,8 +707,9 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
       }else{
         this->time.bytes += this->label_size + sizeof(geom_d) + sizeof(phys_d);
       }
-      const std::string data_id = std::string (cname);
-      this->sims_names.insert (std::string (data_id));
+//      const auto data_id = std::string (cname);
+      const auto ids = this->add_sims_name (std::string (cname));
+      const auto data_id = ids[0];//FIXME
       //
       ::SimulationType_t sim_type_cg = ::SimulationTypeNull;
       err= fmr::perf::time_activity<int> (&this->time,
@@ -1102,7 +1103,7 @@ int Dcgn::close () {int err=0;
 }
 std::deque<std::string> Dcgn:: get_sims_names (){//TODO Remove?
   std::deque<std::string> model_names={};
-  for (auto item : this->sims_names) {model_names.push_back (item); }
+  for (auto item : this->sims_names) {model_names.push_back (item.first); }
   return model_names;
 }
 }//end Femera namespace

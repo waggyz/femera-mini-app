@@ -72,7 +72,7 @@ class Sims : public Work {// simulation collection manager
     virtual int ini_data_vals (const Data_list, const size_t vals_n);
     virtual int get_data_vals (const fmr::Data_id, const Data_list);
     //
-    virtual int add (const std::string model_name);
+    virtual int add_model (const std::string model_name);
     virtual int run ();
     virtual int clear ();
     //

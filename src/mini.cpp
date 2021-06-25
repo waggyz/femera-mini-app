@@ -212,7 +212,7 @@ int main (int argc, char** argv){int err=0;
   if(proc->log-> detail > 2){ proc->log->printf("\n"); }
   FMR_PRAGMA_OMP (omp parallel)
   {// start OpenMP parallel region
-  for( proc-> redo_i = 0; proc-> redo_i < proc-> redo_n; proc-> redo_i++){
+  for( proc-> redo_ix = 0; proc-> redo_ix < proc-> redo_n; proc-> redo_ix++){
     const auto stat = proc-> get_stat ();
     const int proc_lvl_n = proc->task.count ();
     std::vector<std::string> proc_lvl_name (proc_lvl_n,"");
@@ -225,7 +225,7 @@ int main (int argc, char** argv){int err=0;
         + std:: to_string (fmr::math::count_digits(uint(proc-> redo_n )))
         +"i / %i ...\n";
       proc->log-> label_printf ("Start repeat", s.c_str(),
-        proc-> redo_i+1, proc-> redo_n );
+        proc-> redo_ix+1, proc-> redo_n );
     }
 #endif
     for(int sims_bat_i=0; sims_bat_i < sims_bat_n; sims_bat_i++){

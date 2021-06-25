@@ -51,8 +51,8 @@ General.GraphicsFontSize = 15;//FIXME No worky.
 
 Mesh.SecondOrderLinear = 1;
 
-Mesh 3;
-SetOrder 2;
+//Mesh 3;
+//SetOrder 2;
 
 Show "*";
 Hide { Volume {:}; Surface{(poly_n+9):(poly_n+11)}; Point{:}; }
