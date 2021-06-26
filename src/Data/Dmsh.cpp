@@ -178,8 +178,8 @@ namespace Femera {
         gmsh::option::setNumber("General.RotationY", 0);
         gmsh::option::setNumber("General.RotationZ", 0);
         gmsh::option::setNumber("General.Orthographic", 0);
-        gmsh::option::setNumber("General.Axes", 0);
-        gmsh::option::setNumber("General.SmallAxes", 0);
+//        gmsh::option::setNumber("General.Axes", 0);
+//        gmsh::option::setNumber("General.SmallAxes", 0);
         auto mw = Dmsh::Optval(0);
         gmsh::option::getNumber("General.MenuWidth", mw);
         gmsh::option::setNumber("General.GraphicsWidth" , 640 + mw);
@@ -671,22 +671,25 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
         const auto from = "gmsh::model::remove () current: "+data_id;
         this->label_gmsh_err ("WARNING", from.c_str(), e);
       }
-      const int dlevel=0;//FIXME should be MPI level
+      const int dlevel=0;//TODO should be MPI level
       const fmr::Local_int thrd_n  = this->proc->get_stat()[dlevel].thrd_n;
       const fmr::Local_int thrd_id = this->proc->get_stat()[dlevel].thrd_id;
       fmr::Local_int frame_i=thrd_id;
       for (const auto name : names) {
         if (name != data_id) {frame_i+=thrd_n;
           // Data::Lock_here lock(this->liblock);//TODO when pulled out.
+          std::vector<int> vs;
+          gmsh::view::getTags (vs);
+          for (const auto v : vs) {gmsh::view::remove (v);}
           gmsh::model::add (name);// should make current, but doesn't?
           gmsh::model::setCurrent (name);
           const auto wall_sc
             = 1e-9*double(fmr::perf::timer_total_elapsed (this->time));
-          gmsh::onelab::setNumber ("frame", {Dmsh::Optval(frame_i)});
+          gmsh::onelab::setNumber ("frame", {Dmsh::Optval(frame_i+1)});
           gmsh::onelab::setNumber ("wall" , {Dmsh::Optval(wall_sc)});
-          gmsh::merge (fname);//FIXME open(fname, model_name)
+          gmsh::merge (fname);//TODO open(fname, model_name)
           this->sims_names[name] = name;
-          this->data->sims_names[name] = name;//FIXME make protected
+          this->data->sims_names[name] = name;//TODO make protected
         }
         info.state.has_error |= this->scan_model (name) > 0;
     } } }//end if !read
