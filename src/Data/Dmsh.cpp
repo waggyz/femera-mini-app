@@ -677,14 +677,15 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
       const fmr::Local_int thrd_id = this->proc->get_stat()[dlevel].thrd_id;
       fmr::Local_int frame_id = thrd_id;
       for (const auto name : names) {
-        if (name != data_id) {frame_id+= thrd_n;
+        if (name != data_id) {
           // Data::Lock_here lock(this->liblock);//TODO when pulled out
           gmsh::model::add (name);// should make current, but doesn't?
           gmsh::model::setCurrent (name);
-          gmsh::onelab::setNumber ("frame", {Dmsh::Optval(frame_id)});
+          gmsh::onelab::setNumber ("frame", {Dmsh::Optval(frame_id+1)});
           gmsh::merge (fname);//TODO open(fname, model_name)
           this->sims_names[name] = name;
           this->data->sims_names[name] = name;//TODO make protected
+          frame_id+= thrd_n;
         }
         info.state.has_error |= this->scan_model (name) > 0;
     } } }//end if !read

@@ -58,6 +58,7 @@ Physical Surface (2) = {1,(poly_n+3):(poly_n+8)};// Fiber surface
 Show "*";
 Hide {Volume {:}; Surface {(poly_n+9):(poly_n+11)}; Point{:};}
 
+If (1==0)
 sims = (frame-1)/30;
 sims_mn = Floor (sims  / 60);
 sims_sc = Floor (sims-sims_mn*60);
@@ -65,7 +66,6 @@ sims_sc = Floor (sims-sims_mn*60);
 wall_mn = Floor (wall  / 60);
 wall_sc = Floor (wall-wall_mn*60);
 //If (wall>0)
-If (1==0)
 View "comments" {
   T2 (10,15,0) {Sprintf(" Sim time %2g:%02g", sims_mn, sims_sc)};
   T2 (10,30,0) {Sprintf("Wall time %2g:%02g", wall_mn, wall_sc)};
