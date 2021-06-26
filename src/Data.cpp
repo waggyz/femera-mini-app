@@ -617,7 +617,7 @@ std::deque<std::string> Data::add_sims_name (const std::string name) {
       const fmr::Local_int thrd_n  = this->proc->get_stat()[dlevel].thrd_n;
       const fmr::Local_int thrd_id = this->proc->get_stat()[dlevel].thrd_id;
       for (fmr::Local_int i=thrd_id; i<n; i+=thrd_n) {
-        const auto nm = name+"-"+std::to_string(i+1);
+        const auto nm = name+"."+std::to_string(i+1);
         this->sims_names[nm] = name;
         names.push_back (nm);
 #ifdef FMR_DEBUG

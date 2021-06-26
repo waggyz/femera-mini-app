@@ -178,8 +178,10 @@ namespace Femera {
         gmsh::option::setNumber("General.RotationY", 0);
         gmsh::option::setNumber("General.RotationZ", 0);
         gmsh::option::setNumber("General.Orthographic", 0);
-//        gmsh::option::setNumber("General.Axes", 0);
-//        gmsh::option::setNumber("General.SmallAxes", 0);
+#if 0
+        gmsh::option::setNumber("General.Axes", 0);
+        gmsh::option::setNumber("General.SmallAxes", 0);
+#endif
         auto mw = Dmsh::Optval(0);
         gmsh::option::getNumber("General.MenuWidth", mw);
         gmsh::option::setNumber("General.GraphicsWidth" , 640 + mw);
@@ -202,7 +204,6 @@ namespace Femera {
               this->display_string.c_str());
         } }
         this->is_xwin_open = (err==0);
-        //if (err==0) { gmsh::fltk::run(); }//TODO Needed?
       }
       // Restore getopt variables.
       argc[0]=argc2;opterr=opterr2;optopt=optopt2;optind=optind2;optarg=optarg2;
@@ -674,19 +675,13 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
       const int dlevel=0;//TODO should be MPI level
       const fmr::Local_int thrd_n  = this->proc->get_stat()[dlevel].thrd_n;
       const fmr::Local_int thrd_id = this->proc->get_stat()[dlevel].thrd_id;
-      fmr::Local_int frame_i=thrd_id;
+      fmr::Local_int frame_id = thrd_id;
       for (const auto name : names) {
-        if (name != data_id) {frame_i+=thrd_n;
-          // Data::Lock_here lock(this->liblock);//TODO when pulled out.
-          std::vector<int> vs;
-          gmsh::view::getTags (vs);
-          for (const auto v : vs) {gmsh::view::remove (v);}
+        if (name != data_id) {frame_id+= thrd_n;
+          // Data::Lock_here lock(this->liblock);//TODO when pulled out
           gmsh::model::add (name);// should make current, but doesn't?
           gmsh::model::setCurrent (name);
-          const auto wall_sc
-            = 1e-9*double(fmr::perf::timer_total_elapsed (this->time));
-          gmsh::onelab::setNumber ("frame", {Dmsh::Optval(frame_i+1)});
-          gmsh::onelab::setNumber ("wall" , {Dmsh::Optval(wall_sc)});
+          gmsh::onelab::setNumber ("frame", {Dmsh::Optval(frame_id)});
           gmsh::merge (fname);//TODO open(fname, model_name)
           this->sims_names[name] = name;
           this->data->sims_names[name] = name;//TODO make protected
@@ -1006,6 +1001,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
   return err;
   }
 int Dmsh::close (const std::string model) {int err=0;
+  const auto log = this->proc->log;
   fmr::perf::timer_pause (&this->time);
   fmr::perf::timer_resume(&this->time);
   if (this->sims_names.count(model)>0) {
@@ -1027,7 +1023,7 @@ int Dmsh::close (const std::string model) {int err=0;
     }
     catch (...) {err= 1;
       const auto warnlabel = "WARN""ING "+this->task_name;
-      this->proc->log->label_fprintf (this->proc->log->fmrerr,
+      log->label_fprintf (log->fmrerr,
         warnlabel.c_str(), "could not find %s to close it.\n", model.c_str());
     }
     //TODO handle model already closed. Check model list?
@@ -1042,7 +1038,7 @@ int Dmsh::close (const std::string model) {int err=0;
     if (gmsh::fltk::isAvailable () != 0) {
       gmsh::fltk::lock ();//TODO how to use this?
 #endif
-    if ((err<=0) && this->is_xwin_open) {err= 0;//TODO Move Post/View.
+    if ((err<=0) && this->is_xwin_open) {err= 0;//TODO Move to Post/View.
       const auto start = fmr::perf::get_now_ns();
       if (err==0) {
         try {gmsh::graphics::draw ();}
@@ -1053,6 +1049,43 @@ int Dmsh::close (const std::string model) {int err=0;
         catch (...) {err= -1;}
       }
       if (err==0) {
+        //int v = -1;
+        //std::vector<int> vs; gmsh::view::getTags (vs);
+        const auto v = gmsh::view::add ("fmr:view:1", 1);//TODO store new view.
+        if (v > 0) {
+          fmr::Local_int frame = 0;//TODO Store sim number instead of parsing.
+          const std::string delim = ".";
+          const auto dlen = delim.length ();
+          const auto nlen = model.length ();
+          const auto pos  = model.find (delim);
+          if (nlen > pos+dlen) {
+            const std::string tok = model.substr (pos+dlen, model.length()-pos);
+            frame = std::stoi (tok);
+          }
+          fmr::perf::timer_resume (&this->proc->time);
+          const auto wall
+            = 1e-9 * double (fmr::perf::timer_total_elapsed (this->proc->time));
+          //
+          const auto sims = (frame-1)/30;
+          const auto sims_mn = std::floor (sims / 60);
+          const auto sims_sc = std::floor (sims - 60*sims_mn);
+          const auto wall_mn = std::floor (wall / 60);
+          const auto wall_sc = std::floor (wall - 60*wall_mn);
+          //
+          auto fstr = std::string("");
+          auto wstr = std::string("");
+          std::vector<char> buf(31 +1,0); int c=0;
+          c = std::snprintf (&buf[0], 31," Sim time %2g:%02g",sims_mn, sims_sc);
+          if (c>0) {fstr = std::string (& buf[0]);}
+          c = std::snprintf (&buf[0], 31,"Wall time %2g:%02g",wall_mn, wall_sc);
+          if (c>0) {wstr = std::string (& buf[0]);}
+          //
+          gmsh::view::addListDataString (v, {10.0,15.0}, {fstr});
+          gmsh::view::addListDataString (v, {10.0,30.0}, {wstr});
+        } else {
+          log->label_fprintf (log->fmrerr, "WARNING Dmsh",
+            "Could not add view %s.\n","fmr:view:1");
+        }
         //TODO Only OpenMP master thread does FLTK operations. Pending ops are
         // queued by Gmsh until the master thread makes a model current. Thus,
         // the write and remove () ops on other threads should be deferred until
@@ -1084,8 +1117,8 @@ int Dmsh::close (const std::string model) {int err=0;
           }
           catch (...) {err= -1;}
       } } }
-      if (this->verblevel <= this->proc->log->timing) {//TODO Remove?
-        this->proc->log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu\n",
+      if (this->verblevel <= log->timing) {//TODO Remove?
+        log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu\n",
           this->proc->get_proc_id(), model.c_str(), "view",
           start, fmr::perf::get_now_ns());
     } }
