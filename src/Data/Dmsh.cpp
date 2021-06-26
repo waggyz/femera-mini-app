@@ -679,6 +679,17 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
       for (const auto name : names) {
         if (name != data_id) {
           // Data::Lock_here lock(this->liblock);//TODO when pulled out
+#if 0
+          fmr::Local_int frame_id = 0;//TODO Store sim number instead of parsing.
+          const std::string delim = ".";
+          const auto dlen = delim.length ();
+          const auto nlen = name.length ();
+          const auto pos  = name.find (delim);
+          if (nlen > pos+dlen) {
+            const std::string tok = name.substr (pos+dlen, name.length()-pos);
+            frame_id = std::stoi (tok);
+          }
+#endif
           gmsh::model::add (name);// should make current, but doesn't?
           gmsh::model::setCurrent (name);
           gmsh::onelab::setNumber ("frame", {Dmsh::Optval(frame_id+1)});

@@ -565,7 +565,7 @@ int Data::new_local_vals (const fmr::Data_id data_id,// cache here in Data.
 std::deque<std::string> Data::get_sims_names () {
   std::deque<std::string> model_names={};
   switch (fmr::Schedule::Fifo) {//TODO member variable?
-  case (fmr::Schedule::Fifo) :{//TODO Check which is FIFO/FILO.
+  case (fmr::Schedule::Filo) :{//TODO Check which is FIFO/FILO.
     for (auto name : this->sims_names) {model_names.push_back (name.first);}
     if (this->work_type == work_cast (Base_type::Data)) {
       for (int i =0; i < this->task.count(); i++) {
@@ -585,7 +585,7 @@ std::deque<std::string> Data::get_sims_names () {
             this->sims_names[names.back()] = names.back();
             names.pop_back();
     } } } } } }
-    case (fmr::Schedule::Filo) :{
+    case (fmr::Schedule::Fifo) :{
     for (auto name : this->sims_names) {model_names.push_back (name.first);}
     if (this->work_type == work_cast (Base_type::Data)) {
       for (int i =0; i < this->task.count(); i++) {
