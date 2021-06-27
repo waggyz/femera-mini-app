@@ -617,7 +617,19 @@ std::deque<std::string> Data::add_sims_name (const std::string name) {
       const fmr::Local_int thrd_n  = this->proc->get_stat()[dlevel].thrd_n;
       const fmr::Local_int thrd_id = this->proc->get_stat()[dlevel].thrd_id;
       for (fmr::Local_int i=thrd_id; i<n; i+=thrd_n) {
+#if 0
         const auto nm = name+"."+std::to_string(i+1);
+#else
+        // Use snprintf (..) for leading zeros in the sim number.
+        auto d = fmr::math::count_digits (n+1);
+        d = d<1 ? 1 : d;
+        const auto b = d+4 ;
+        auto nm = name;
+        std::vector<char> buf(b +1,0);
+        const auto f = ".%0"+std::to_string(d)+"u";
+        int c=0; c = std::snprintf (&buf[0], b, f.c_str(), i+1);
+        if (c>0) {nm += std::string (& buf[0]);}
+#endif
         this->sims_names[nm] = name;
         names.push_back (nm);
 #ifdef FMR_DEBUG

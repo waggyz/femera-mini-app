@@ -167,18 +167,21 @@ namespace Femera {
       gmsh::initialize (0, nullptr, read_gmsh_config);// init w/out args.
       gmsh::option::setNumber ("General.Verbosity", Dmsh::Optval(0));
       if (this->display_string.size() > 0) {
-        gmsh::option::setString ("General.Display", this->display_string);
-        gmsh::option::setNumber ("General.NoPopup", 1);
 #if 0//def FMR_DEBUG
         log->label_fprintf (log->fmrout,"**** Dmsh Xwin",
           "init display %s\n", this->display_string.c_str());
 #endif
-        gmsh::option::setNumber("General.Trackball", 0);
+        gmsh::option::setString ("General.Display", this->display_string);
+        gmsh::option::setNumber ("General.NoPopup", 1);
+        gmsh::option::setNumber ("General.Trackball", 0);
+        //
+        gmsh::option::setNumber ("General.RotationCenterGravity", 0);
+#if 0
+        gmsh::option::setNumber ("View.AutoPosition", 0);
         gmsh::option::setNumber("General.RotationX", 0);
         gmsh::option::setNumber("General.RotationY", 0);
         gmsh::option::setNumber("General.RotationZ", 0);
         gmsh::option::setNumber("General.Orthographic", 0);
-#if 0
         gmsh::option::setNumber("General.Axes", 0);
         gmsh::option::setNumber("General.SmallAxes", 0);
 #endif
@@ -193,7 +196,7 @@ namespace Femera {
         this->set_color("General.Foreground", black);
         this->set_color("General.Text", black);
         //
-        if (!gmsh::fltk::isAvailable ()) {
+//        if (!gmsh::fltk::isAvailable ()) {
           try {gmsh::fltk::initialize ();}
           catch (Dmsh::Thrown e) {err= -1;
             this->label_gmsh_err ("WARNING","gmsh::fltk::initialize ()", e);
@@ -202,7 +205,7 @@ namespace Femera {
             log->label_fprintf (log->fmrerr, "WARNING Dmsh",
               "Could not open Xwindows display %s for visualization.\n",
               this->display_string.c_str());
-        } }
+        }// }
         this->is_xwin_open = (err==0);
       }
       // Restore getopt variables.
