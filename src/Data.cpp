@@ -618,7 +618,7 @@ std::deque<std::string> Data::add_sims_name (const std::string name) {
       const fmr::Local_int thrd_id = this->proc->get_stat()[dlevel].thrd_id;
       for (fmr::Local_int i=thrd_id; i<n; i+=thrd_n) {
 #if 0
-        const auto nm = name+"."+std::to_string(i+1);
+        const auto nm = name+"."+std::to_string(i+1);// no leading zeros
 #else
         // Use snprintf (..) for leading zeros in the sim number.
         auto d = fmr::math::count_digits (n+1);
