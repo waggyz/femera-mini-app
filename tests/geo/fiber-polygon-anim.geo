@@ -1,16 +1,13 @@
 /* Makes a series of RVEs
-
-gmsh geo/fiber-shape-movie.geo -
-
+gmsh -setnumber frame 1 tests/geo/fiber-shape-movie.geo
 */
-
 // These will NOT be applied if already set by gmsh::onelab::setNumber (...).
 frame = DefineNumber[0.0, Name "frame"];
 wall  = DefineNumber[0.0, Name "wall"];
 //=============================================================================
-box_x  =   1 ;// RVE width
-box_y  =   1 ;// RVE length
-box_z  =   1 ;// RVE depth (longitudinal direction)
+box_x  =   1.0;// RVE width
+box_y  =   1.0;// RVE length
+box_z  =   1.0;// RVE height (longitudinal direction)
 
 View.AutoPosition    = 0;
 General.Orthographic = 0;
@@ -35,7 +32,7 @@ Mesh.SecondOrderLinear = 1;
 //-----------------------------------------------------------------------------
 If (frame >= 1)
 
-poly_n = Floor ((frame-1)/30)      + 3.00;
+poly_n = Floor ((frame-1) / 30)    + 3;
 poly_r = 0.4 * ((frame-1) % 30)/30 + 0.05;
 
 SetFactory("OpenCASCADE");
@@ -57,6 +54,9 @@ Box (1) = {0,0,0, box_x,box_y,box_z};
 
 fiber[] = Extrude {0,0,box_z} {Surface{1};};
 
+//twist = 2*Pi / poly_n;//TODO Twisting extrude not available with OpenCascade.
+//fiber[] = Extrude {{0,0,box_z},{0,0,1},{box_x/2,box_y/2,0},twist} {Surface{1};};
+
 BooleanFragments {Volume{:}; Delete;} {Volume{1}; Delete;}
 
 Physical Surface (1) = {(poly_n+9):(poly_n+15)};// Matrix surface
@@ -69,17 +69,18 @@ b=0.33;// Hack to make camera distance consistent by enlarging the bounding box.
 Point (newp) = {-box_x*b    ,-box_y*b    ,-box_z*b    };
 Point (newp) = { box_x*(1+b), box_y*(1+b), box_z*(1+b)};
 
+Show "*";
+Hide {Volume {:}; Surface {poly_n+11,poly_n+12,poly_n+14}; Point{:};}
+
+If (1==0)
 Hide "*";
 Show {Surface {1,(poly_n+5):(poly_n+10),poly_n+13,poly_n+15};}
-
-//Show "*";
-//Hide {Volume {:}; Surface {(poly_n+11),(poly_n+12),(poly_n+14)}; Point{:};}
+Endif
 
 If (1==0)
   sims = (frame-1)/30;
   sims_mn = Floor (sims / 60);
   sims_sc = Floor (sims-sims_mn*60);
-
   wall_mn = Floor (wall / 60);
   wall_sc = Floor (wall-wall_mn*60);
   View "comments" {

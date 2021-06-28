@@ -106,6 +106,10 @@ namespace fmr {namespace math {
   static inline uint upow (uint base, uint exp);
   static inline uint nchoosek (uint n, uint k);
   static inline uint poly_terms (Poly ptype, uint nvars, uint pord);
+  template <typename F> static inline bool are_close (const F a, const F b);
+  template <typename F> static inline bool are_equal (const F a, const F b);
+  template <typename F> static inline bool is_greater_than (const F a, const F b);
+  template <typename F> static inline bool is_less_than (const F a, const F b);
 } }// end fmr::math namespace
 
 template <typename I> static inline// I : Integer type
@@ -206,6 +210,27 @@ static inline uint fmr::math::poly_terms (
     default : {}// do nothing
   }
   return terms;
+}
+// "Comparing floating point numbers" by Bruce Dawson
+template <typename F> static inline// F : Floating-point type
+bool fmr::math::are_close (const F a, const F b) {
+  return std::abs(a - b) <= ( (std::abs(a) < std::abs(b)
+    ? std::abs(b) : std::abs(a)) * std::numeric_limits<F>::epsilon());
+}
+template <typename F> static inline// F : Floating-point type
+bool fmr::math::are_equal (const F a, const F b){
+  return std::abs(a - b) <= ( (std::abs(a) > std::abs(b)
+    ? std::abs(b) : std::abs(a)) * std::numeric_limits<F>::epsilon());
+}
+template <typename F> static inline// F : Floating-point type
+bool fmr::math::is_greater_than (const F a, const F b) {
+  return (a - b) > ( (std::abs(a) < std::abs(b)
+    ? std::abs(b) : std::abs(a)) * std::numeric_limits<F>::epsilon());
+}
+template <typename F> static inline// F : Floating-point type
+bool fmr::math::is_less_than (const F a, const F b) {
+  return (b - a) > ( (std::abs(a) < std::abs(b)
+    ? std::abs(b) : std::abs(a)) * std::numeric_limits<F>::epsilon());
 }
 #if 0
 namespace fmr {namespace data {

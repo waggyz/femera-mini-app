@@ -197,7 +197,7 @@ namespace Femera {
         this->set_color("General.Text", black);
         //
 //        if (!gmsh::fltk::isAvailable ()) {
-          try {gmsh::fltk::initialize ();}
+          try {gmsh::fltk::initialize ();}//TODO Move to Post/View?
           catch (Dmsh::Thrown e) {err= -1;
             this->label_gmsh_err ("WARNING","gmsh::fltk::initialize ()", e);
           }
@@ -257,7 +257,7 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
       const auto from = "gmsh::model::setCurrent ("+model+")";
       this->label_gmsh_err ("WARNING",from.c_str(), e);
     }
-    catch (std::out_of_range e) {err= -1;
+    catch (std::out_of_range& e) {err= -1;
       const auto from = "this->sims_names.at("+model+") in make_mesh (..)";
       this->label_gmsh_err ("WARNING",from.c_str(), e.what());
     }
@@ -297,7 +297,7 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
       const auto from = "gmsh::model::setCurrent ("+model+")";
       this->label_gmsh_err ("WARNING",from.c_str(), e);
     }
-    catch (std::out_of_range e) {
+    catch (std::out_of_range& e) {
       const auto from = "this->sims_names.at("+model+") in make_mesh (..)";
       this->label_gmsh_err ("WARNING",from.c_str(), e.what());
     }
@@ -342,7 +342,7 @@ int Dmsh::make_part (const std::string model, const fmr::Local_int,
         const auto from = "gmsh::model::setCurrent ("+model+"))";
         this->label_gmsh_err ("WARNING",from.c_str(), e);
       }
-    catch (std::out_of_range e) {err= 1;
+    catch (std::out_of_range& e) {err= 1;
       const auto from = "this->sims_names.at("+model+") in make_part (..)";
       this->label_gmsh_err ("WARNING",from.c_str(), e.what());
     }
@@ -515,7 +515,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
                   const auto from = "gmsh::model::setCurrent ("+info.model+")";
                   this->label_gmsh_err ("WARNING", from.c_str(), e);
                 }
-                catch (std::out_of_range e) {
+                catch (std::out_of_range& e) {
                   const auto from = "this->sims_names.at("+info.model
                     +") in read_geom_values (..)";
                   this->label_gmsh_err ("WARNING",from.c_str(), e.what());
@@ -620,7 +620,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
                   const auto from = "gmsh::model::setCurrent ("+info.model+")";
                   this->label_gmsh_err ("WARNING", from.c_str(), e);
                 }
-                catch (std::out_of_range e) {
+                catch (std::out_of_range& e) {
                   const auto from = "this->sims_names.at("+info.model
                     +") in read_local_vals (..)";
                   this->label_gmsh_err ("WARNING",from.c_str(), e.what());
@@ -721,7 +721,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
 #else
     try {gmsh::model::setCurrent (data_id);}
 #endif
-    catch (std::out_of_range e) {err= 1;
+    catch (std::out_of_range& e) {err= 1;
       const auto from = "this->sims_names.at("+data_id
         +") in scan_model (..)";
       this->label_gmsh_err ("WARNING",from.c_str(), e.what());
@@ -756,11 +756,18 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
       const double un=std::nan("unset");
       double xmin=un, ymin=un, zmin=un, xmax=un, ymax=un, zmax=un;
       gmsh::model::getBoundingBox (-1,-1, xmin,ymin,zmin, xmax,ymax,zmax);
-      const uint ugd// this is to avoid spurious conversion from int warning
+#if 0
+      const uint bbox_d// uint avoids spurious conversion from int warning
         = ((xmax-xmin) > 0.0 ? 1:0)
         + ((ymax-ymin) > 0.0 ? 1:0)
         + ((zmax-zmin) > 0.0 ? 1:0);
-      const auto geom_d = fmr::Dim_int (ugd);// spatial dim is bounding box dim
+#else
+      const uint bbox_d// uint avoids spurious conversion from int warning
+        = (fmr::math::are_close (xmax,xmin) ? 0:1)
+        + (fmr::math::are_close (ymax,ymin) ? 0:1)
+        + (fmr::math::are_close (zmax,zmin) ? 0:1);
+#endif
+      const auto geom_d = fmr::Dim_int (bbox_d);// spatial dim is bbox dim
       gmsh::option::getNumber ("Mesh.NbNodes", optval);
       const auto node_n = fmr::Global_int (optval);
       const auto nid = this->make_data_id (data_id, fmr::Data::Node_sysn);
@@ -1027,7 +1034,7 @@ int Dmsh::close (const std::string model) {int err=0;
 #else
     try {gmsh::model::setCurrent (model);}
 #endif
-    catch (std::out_of_range e) {err= 1;
+    catch (std::out_of_range& e) {err= 1;
       const auto from = "this->sims_names.at("+model+") in close (..)";
       this->label_gmsh_err ("WARNING",from.c_str(), e.what());
     }

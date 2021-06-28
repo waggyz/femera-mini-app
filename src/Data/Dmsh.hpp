@@ -10,7 +10,7 @@ namespace Femera{
 class Dmsh final : public Data {
   // Typedefs -----------------------------------------------------------------
   typedef double Optval;
-  typedef const std::basic_string<char> Thrown;
+  typedef const std::basic_string<char>& Thrown;
   private:
     class File_gmsh final : public Data::File_info {
     //TODO specialize to handle unmeshed geometry (CAD) files,
