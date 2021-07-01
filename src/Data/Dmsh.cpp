@@ -219,7 +219,7 @@ namespace Femera {
   int Dmsh::exit_task (int err){
     fmr::perf::timer_pause (& this->time);
     fmr::perf::timer_resume(& this->time);
-#if 0
+#if 1
     if (this->is_init) {
       if (this->is_omp_parallel ()) {
         FMR_PRAGMA_OMP(omp master) {
@@ -229,7 +229,7 @@ namespace Femera {
     } }
 #else
 //    FMR_PRAGMA_OMP(omp barrier)//TODO needed?
-    FMR_PRAGMA_OMP(omp master) {
+    FMR_PRAGMA_OMP(omp master) {//TODO Check if this is sufficient.
       gmsh::finalize ();
     }
 #endif
@@ -402,7 +402,10 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
   {// liblock scope
     Data::Lock_here lock(this->liblock);
     fmr::perf::timer_resume (& this->time);
-    //
+#ifdef FMR_DEBUG
+    log->label_fprintf (log->fmrout, "**** Gmsh",
+      "gmsh::open(%s)...\n", fname.c_str());
+#endif
     try {gmsh::open (fname);}
     catch (Dmsh::Thrown e) {err= 1;
       const auto from = "gmsh::open ("+fname+")";
@@ -675,7 +678,14 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
     }
     if (info.state.has_error) {return info;}
     const auto names = this->add_sims_name (data_id);
-    if (names[0] != data_id) {
+    if (names[0] == data_id) {
+      info.state.has_error |= this->scan_model (data_id) > 0;
+    }else{
+#ifdef FMR_DEBUG
+      const auto log=this->proc->log;
+      log->label_fprintf (log->fmrerr, "**** Gmsh",
+        "gmsh::model::remove(%s)\n", data_id.c_str());
+#endif
       try {gmsh::model::remove ();}
       catch (Dmsh::Thrown e) {info.state.has_error= true;
         const auto from = "gmsh::model::remove () current: "+data_id;
@@ -716,7 +726,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
     }
   int Dmsh::scan_model (const std::string data_id) {int err=0;
     Data::Lock_here lock(this->liblock);
-    auto log = this->proc->log;
+    const auto log = this->proc->log;
 #ifdef FMR_DEBUG
     log->label_fprintf (log->fmrerr, "**** Gmsh scan",
       "model %s\n",data_id.c_str());
@@ -727,7 +737,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
 #else
     try {gmsh::model::setCurrent (data_id);}
 #endif
-    catch (std::out_of_range& e) {err= 1;
+    catch (std::out_of_range &e) {err= 1;
       const auto from = "this->sims_names.at("+data_id
         +") in scan_model (..)";
       this->label_gmsh_err ("WARNING",from.c_str(), e.what());

@@ -90,7 +90,7 @@ namespace Femera {
       }
       const auto send_type
         = work_cast ((bsz>1) ? Base_type::Sims : Base_type::Frun);
-      for (fmr::Global_int i=0; i < (sendp*bsz); i++) {// Add initial tasks.
+      for (fmr::Global_int i=0; i < (sendp * bsz); i++) {// Add initial tasks.
         err= fmr::detail::main->add_new_task (send_type, this);
       }
       if (log->verbosity >= this->verblevel) {
@@ -238,8 +238,8 @@ namespace Femera {
     const auto sim_n = fmr::Local_int (this->model_list.size());
     const std::string name = this->model_name;
     if (sim_n < 1) {
-      log->fprintf (log->fmrerr,
-        "WARN""ING Sims::run() no sims found in collection %s\n", name.c_str());
+      log->label_fprintf( log->fmrerr,"NOTE Sims",
+        "No sims found in collection %s\n", name.c_str());
       return -1;//TODO 1 ?
     }
     // *** HERE: get gcad_n for each sim in this batch and mesh them?
@@ -275,7 +275,7 @@ namespace Femera {
           if (!is_done) {
             R->sims_ix = sim_i;
             auto  geo_d = this->get_dim_val (fmr::Data::Geom_d, sim_i);
-            const auto gcad_n = this->get_local_val (fmr::Data::Gcad_n,sim_i);
+            const auto gcad_n = this->get_local_val (fmr::Data::Gcad_n, sim_i);
             const auto gcad_d = this->get_dim_val (fmr::Data::Gcad_d, sim_i);
             const auto mesh_d = this->get_dim_val (fmr::Data::Mesh_d, sim_i);
             if (gcad_n > 0 && gcad_d > mesh_d) {//TODO move to *** HERE?
