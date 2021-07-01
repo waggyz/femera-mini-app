@@ -52,10 +52,11 @@ namespace Femera{
     return this->run (this->model_list);
   }
 #endif
-  int Main::run (){
-    return this->task.first<Sims>(Base_type::Sims)->run ();
+  int Main::run () {int err=0;
+    err= this->task.first<Sims>(Base_type::Sims)->run ();
+    return err;
   }
-  int Main::add_new_task (Femera::Base_type type, Work* add_to){
+  int Main::add_new_task (Femera::Base_type type, Work* add_to) {
 #ifdef FMR_DEBUG
     this->proc->log->label_fprintf (this->proc->log->fmrout, "** ADD Main",
       "Base_type::%i to %s\n",int(type),add_to->task_name.c_str());
@@ -63,23 +64,23 @@ namespace Femera{
     return this->task.first<Main> (Base_type::Plug)
       ->add_new_task (type, add_to);
   }
-  int Main::add_new_task (Femera::Plug_type type, Work* add_to){
+  int Main::add_new_task (Femera::Plug_type type, Work* add_to) {
     return this->task.first<Main> (Base_type::Plug)
       ->add_new_task (type, add_to);
   }
-  int Main::add_new_task (Femera::Work_type type, Work* add_to){
+  int Main::add_new_task (Femera::Work_type type, Work* add_to) {
     return this->task.first<Main> (Base_type::Plug)
       ->add_new_task (type, add_to);
   }
-  int Main::init_task (int* argc, char** argv){int err=0;
+  int Main::init_task (int* argc, char** argv) {int err=0;
 #ifdef FMR_DEBUG
     std::printf("Main::init_task (..)\n");
 #endif
     fmr::perf::timer_pause (&this->time);
-    if (!this->task.first<Main> (Base_type::Plug)){
+    if (!this->task.first<Main> (Base_type::Plug)) {
       err= proc->init (argc,argv);
       if (err){
-        if (err<0){ this->proc->log->verbosity = 0; }
+        if (err<0) {this->proc->log->verbosity = 0;}
         proc->exit (err);
         return err;
     } }
@@ -95,7 +96,7 @@ namespace Femera{
     fmr::perf::timer_pause (&this->time);
     int exit_err = (err<0) ? 0 : err;// err<0: no error, but exit immediately
 #ifdef FMR_DEBUG
-    std::printf("Main::exit (%i)...\n",err);
+    std::printf("Main::exit_task (%i)...\n",err);
 #endif
 #if 0
     if (this->proc->log->detail >= this->verblevel) {
@@ -134,9 +135,9 @@ namespace Femera{
     }
 #endif
     //int verb = 0, iprint = 0;// std::basic_string<char> label_format = "";
-    if (this->proc){
-      if (proc->log){ this->proc->log->print_log_time ("time"); }
-      if (err){ this->proc->log->verbosity=0; this->proc->log->detail=0; }
+    if (this->proc) {
+      if (proc->log) { this->proc->log->print_log_time ("time"); }
+      if (err) {this->proc->log->verbosity=0; this->proc->log->detail=0;}
 #if 1
       if (this->proc->log->detail > 0){this->proc->log->print_heading ("Exit");}
 #endif
@@ -146,11 +147,11 @@ namespace Femera{
       //verb = this->proc->log->verbosity;
       int iprint = this->proc->is_master ();
       //label_format = "%"+ std::to_string(this->proc->log->label_width) +"s";
-      int proc_err=this->proc->exit (err);
-      if (err<=0 && proc_err && iprint){
+      int proc_err = this->proc->exit (err);
+      if (err<=0 && proc_err && iprint) {
         fprintf (stderr,"ER""ROR %i returned by Main->proc->exit(%i)\n",
           proc_err,err);
-        if (!exit_err){ exit_err = proc_err; }
+        if (!exit_err) {exit_err = proc_err;}
     } }
     fmr::perf::timer_pause (&this->time);
     return exit_err;
@@ -176,7 +177,7 @@ int fmr::exit (int err){
   err = err || test_err;
   if (fmr::detail::main->data){
     int data_err= fmr::detail::main->data->exit (err);
-    if (data_err){ err= data_err; }
+    if (data_err) {err= data_err;}
   }
   return fmr::detail::main->exit (err);
   //NOTE Do NOT: delete fmr::detail::main; fmr::detail::main=nullptr;

@@ -219,14 +219,20 @@ namespace Femera {
   int Dmsh::exit_task (int err){
     fmr::perf::timer_pause (& this->time);
     fmr::perf::timer_resume(& this->time);
-    if (this->is_init){
-      if (this->is_omp_parallel ()){
-//TODO        FMR_PRAGMA_OMP(omp barrier)
+#if 0
+    if (this->is_init) {
+      if (this->is_omp_parallel ()) {
         FMR_PRAGMA_OMP(omp master) {
           gmsh::finalize ();
         } }else{
         gmsh::finalize ();
     } }
+#else
+//    FMR_PRAGMA_OMP(omp barrier)//TODO needed?
+    FMR_PRAGMA_OMP(omp master) {
+      gmsh::finalize ();
+    }
+#endif
     return err;
   }
 int Dmsh::label_gmsh_err (std::string label, const std::string from,

@@ -246,7 +246,7 @@ auto time_activity (T* timer, F fn, A... args)-> R {
 }
 template<typename V>
 std::string detail::format_units_sigfigs (const V val, std::string unit,
-    const int sigfigs) {
+  const int sigfigs) {
   int log1000 = 0; double v = double(val);
   if (unit.size()>8) { unit = unit.substr (0,8); }
   const double threshold = 0.95*std::pow (10.0, double(sigfigs-1));
@@ -277,7 +277,7 @@ std::string format_speed (const V val, std::string unit) {
   if (unit.size() > 8) {unit = unit.substr (0,8);}
   double v = double(val);
   std::string time_str ="s"; std::string pre=" ";
-  const bool do_invert = std::abs (v) < 1.0;
+  const bool do_invert = (std::abs (v) < 1.0) & (std::abs (v) > 0.0);
   if (do_invert) {// format as time/unit
     v = 1.0 / v;
     if (v > 600.0) {v /= 60.0; time_str="m";}

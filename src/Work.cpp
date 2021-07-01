@@ -34,7 +34,7 @@ int Work::init (int* argc, char** argv){int err=0;
 int Work::exit (int err) {//TODO Why getting called a lot (after task empty)
   // when exiting Proc?
 #ifdef FMR_DEBUG
-  std::printf("*** Work::exit( %i ) %s...\n", err,this->task_name.c_str());
+  std::printf("**** Work::exit (%i) %s...\n", err,this->task_name.c_str());
 #endif
   this->print_task_time ("done");
   fmr::perf::timer_resume (&this->time);
@@ -83,10 +83,11 @@ int Work::print_task_time (const std::string name_suffix) {
             if (log->timing >= W->verblevel) {
               const auto  busy = double(timer_busy_ns (W->time));
               const auto total = double(timer_total_ns(W->time));
-              if (W->verblevel < 8 || (busy/total > 0.002)) {//TODO magic nmbrs
+              if (total > 0.0) {
+              if (W->verblevel < 8 || (busy > 0.002*total)) {//TODO magic nmbrs
                 const auto label = W->task_name+" "+name_suffix;
                 W->proc->log->print_label_meter (label, W->meter_unit, W->time);
-      } } } } }else{
+      } } } } } }else{
       fmr::perf::timer_resume (&this->time);
       const auto label = this->task_name+" "+name_suffix;
       log->print_label_meter (label, this->meter_unit, this->time);

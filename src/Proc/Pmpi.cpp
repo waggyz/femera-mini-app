@@ -46,25 +46,44 @@ int Pmpi::init_task( int* argc, char** argv ){ int err=0;
   fmr::perf:: timer_pause (&this->time);
   return err;
 }
-int Pmpi::exit_task (int err){
-  fmr::perf:: timer_resume (&this->time);
+int Pmpi::exit_task (int err) {
+#ifdef FMR_DEBUG
+      std::printf("Pmpi::exit_task (%i) start...\n", err);
+#endif
+  fmr::perf::timer_resume (&this->time);
   int is_mpi_init=0;
-  MPI_Initialized(& is_mpi_init);
-  if( err>0 ){ this->proc->log-> printf_err("ERROR Femera returned %i\n",err); }
+//    this->barrier ();
+  MPI_Initialized (& is_mpi_init);
+#if 1
+  if( err>0 ){ log-> printf_err("ERROR Femera returned %i\n",err); }
+#else
+  // OpenMP is already deleted, so log->printf(..) may no longer work?
+  if (err>0) {std::fprintf (stderr, "ERROR Femera returned %i\n", err);}
+#endif
   err=0;// Exit from mpi normally when Femera exits on error.
-  if( is_mpi_init ){
-    if(this-> comm != Proc::Team_id(MPI_COMM_WORLD) ){
-      if(this-> comm){
-        MPI_Comm f=MPI_Comm(this-> comm);
-        err=MPI_Comm_free(& f );
-        if( err>0 ){this->proc->log-> printf_err
-          ("ERROR MPI_Comm_free(%lu) returned %i\n",err,f);
-    } } }
-    err=MPI_Finalize();
-      if( err>0 ){this->proc->log-> printf_err
-        ("ERROR MPI_Finalize() returned %i\n",err);
+  FMR_PRAGMA_OMP(omp master)
+  if (is_mpi_init) {
+    if (this->comm != Proc::Team_id(MPI_COMM_WORLD) ) {
+      if (this->comm){
+        MPI_Comm f=MPI_Comm (this->comm);
+        err= MPI_Comm_free (& f);
+        if (err>0) {
+          std::fprintf (stderr, "ERROR MPI_Comm_free(%lu) returned %i\n",
+            this->comm, err);
+        }
+    } }
+    if (this->comm != Proc::Team_id (MPI_COMM_WORLD)) {
+      this->comm = Proc::Team_id (MPI_COMM_WORLD);//TODO Set to nullptr?
+    }
+    err= MPI_Finalize();
+      if (err>0) {//log-> printf_err
+//        ("ERROR MPI_Finalize() returned %i\n",err);
+        std::fprintf (stderr, "ERROR MPI_Finalize() returned %i\n", err);
   } }
   fmr::perf:: timer_pause (&this->time);
+#ifdef FMR_DEBUG
+      std::printf("Pmpi::exit_task (%i) done...\n", err);
+#endif
   return err;
 }
 bool Pmpi::is_in_parallel (){

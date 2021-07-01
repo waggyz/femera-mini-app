@@ -122,7 +122,7 @@ fmr::Local_int Frun::get_next_redo_ix() {//TODO Move to Sims?
     err= this->iter ();
     err= this->post ();
     fmr::perf::timer_pause (& this->time);
-    return this->exit (err);//TODO need barrier before this?
+    return this->exit (err);
   }
   int Frun::iter () {int err=0;// TODO this->solv->iter ?
     const auto start = fmr::perf::get_now_ns();
@@ -160,15 +160,17 @@ fmr::Local_int Frun::get_next_redo_ix() {//TODO Move to Sims?
             dof = 3.0 * double (node_n);
             err= 0;
         } }
-        double speed = 1e9 // dof/s Skylake XS P2 tet solve speed on 40 cores
+        double speed = 1e9;// dof/s Skylake XS P2 tet solve speed on 40 cores
+        if (dof > 0.0) {speed = 1e9
           - (dof < 10e3 ? 0.0 : 90e6 * (std::log (dof) - std::log (10e3)));
+        }
         speed = (speed < 500e6) ? 500e6 : speed;// dof/s XL solve speed
         speed/= double(40);// single-core speed
         const double c0=1.5, c1=1.0/3.0;
         const double iters = std::exp (c1 * std::log (dof) + c0);
         const double  secs = iters * dof / speed;
         int ret = 0;
-        ret += usleep (int (1e6 * (secs - floor(secs))));
+        if (secs >  0.0) {ret += usleep (int (1e6 * (secs - floor(secs))));}
         if (secs >= 1.0) {ret += sleep (int (secs));}
         const auto elem_n = this->parent->globals.at
           (fmr::Data::Elem_sysn).data [this->sims_ix];

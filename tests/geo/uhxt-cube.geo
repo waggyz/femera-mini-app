@@ -34,7 +34,7 @@ Physical Surface( 111 )={S[1]};// bottom xy plane, out normal:-z
 Physical Surface( 222 )={V[0]};// top    xy plane, out normal: z
 Physical Surface( 333 )={V[2]};// back   xz plane, out normal: y
 Physical Surface( 555 )={V[4]};// front  xz plane, out normal:-y
-Physical Surface( "fmr:Load:Dirichlet_x::0.001",444 )={V[3]};
+Physical Surface( "fmr:Load:Dirichlet_x:0.001",444 )={V[3]};
 // right  yz plane, out normal: x
 Physical Surface( "fmr:Load:Fix_x",666 )={V[5]};
 // left   yz plane, out normal:-x

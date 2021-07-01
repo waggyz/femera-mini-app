@@ -70,7 +70,7 @@ namespace Femera {
         + std::to_string (Pfrom->get_proc_id ());
       }
       const auto sim_n = fmr::Local_int (this->model_list.size());
-      if (false){//(sim_n < 10 * Psend->get_proc_n ()) {
+      if (false) {//(sim_n < 10 * Psend->get_proc_n ()) {
         this->send.bats_sz = 10;// to each thread
         this->from.bats_sz = this->send.bats_sz * Psend->get_proc_n ();
       }else{
@@ -95,7 +95,8 @@ namespace Femera {
       }
       if (log->verbosity >= this->verblevel) {
         fmr::perf::timer_pause (& this->time);
-        if (log->detail >= this->verblevel) {
+        if (log->detail >= this->verblevel
+          && this->send.bats_sz > 0 && this->from.bats_sz > 0) {
           std::string label ="";
 #if 0
           label = this->task_name+" prep send";
@@ -111,10 +112,12 @@ namespace Femera {
             case fmr::Concurrency::Collective  : fromn = 1;     break;
             default :{}// Do nothing.
           }
-          const fmr::Local_int bn = fmr::math::divide_ceil (sim_n, bsz);
+          const fmr::Local_int bn
+            = (bsz>0) ? fmr::math::divide_ceil (sim_n, bsz) : 0;
           label = this->task_name+" prep from";
           const auto fbsz = this->from.bats_sz;
-          const fmr::Local_int fbn = fmr::math::divide_ceil (sim_n, fbsz);
+          const fmr::Local_int
+            fbn = (fbsz>0) ? fmr::math::divide_ceil (sim_n, fbsz) : 0;
           log->label_fprintf (log->fmrout, label.c_str(),
             "%i set%s /  %i %s %s, %s\n",
             fromn, (fromn==1)?" ":"s", fromp, Pfrom->task_name.c_str(),

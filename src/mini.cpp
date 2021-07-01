@@ -142,7 +142,7 @@ int main (int argc, char** argv){int err=0;
     "%s in main");
   //
   fmr::perf::timer_pause (& main_time);
-  if( fmr::flog::get_detail () > 1 ){fmr::flog::print_heading ("Done"); }
+  if( fmr::flog::get_detail () > 1 ) {fmr::flog::print_heading ("Done"); }
   fmr::flog::label_printf ("Femera time",
     fmr::perf::format_time_units (timer_total_elapsed (main_time))+" in main\n");
   //

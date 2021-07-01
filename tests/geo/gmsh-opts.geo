@@ -9,13 +9,13 @@ Mesh.SecondOrderLinear        = 1;
 SetOrder p;
 
 Mesh.CharacteristicLengthFromPoints=1;
-Mesh.PartitionSplitMeshFiles  = 0 ;//1 ;
+Mesh.PartitionSplitMeshFiles  = 0 ;
 Mesh.PartitionCreatePhysicals = 0 ;// Is this useful?
 Mesh.PartitionCreateTopology  = 1 ;
 Mesh.PartitionCreateGhostCells= 0 ;// Is this necessary?
 Mesh.SaveAll                  = 0 ;// Includes 2d surfaces
 
-Mesh.Algorithm  =5;// Chosen for less regular mesh WAS 3
+Mesh.Algorithm  =2;// 2 seems fatest (WAS 5: for less regular mesh)
 // 1: MeshAdapt, 2: Automatic, 5: Delaunay, 6: Frontal, 7: BAMG, 8: DelQuad
 
 Mesh.Algorithm3D=10;// WAS 1
@@ -24,4 +24,3 @@ Mesh.Algorithm3D=10;// WAS 1
 
 Mesh.Optimize=0;
 RecombineAll=0;// Only make tets
-

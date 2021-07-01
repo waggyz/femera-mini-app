@@ -96,31 +96,34 @@ namespace Femera {
     template<class B, typename Y> B* first (const Y work_type);
   };
 // Header-only class templates ===============================================
-template<class T> Task<T>::Task (T* mywork){
+template<class T>
+Task<T>::Task (T* mywork) {
   this->work = mywork;
 }
-template<class T> int Task<T>::count (){
+template<class T>
+int Task<T>::count () {
   return int(this->todo_task.size ());
 }
-template<class T> template<typename Y> int Task<T>::count (const Y type){
+template<class T> template<typename Y>
+int Task<T>::count (const Y type) {
   int c=0;
   const size_t n = this->todo_task.size ();
-  if (n>0) {
-    for (size_t i=0; i<n; i++){
-      if (this->todo_task [i]->work_type == work_cast (type)) {c+=1; }
+  if (n>0) {for (size_t i=0; i<n; i++) {
+      if (this->todo_task [i]->work_type == work_cast (type)) {c+=1;}
   } }
   return c;
 }
-template<class T> template<class B> B* Task<T>::get (const int i){
+template<class T> template<class B>
+B* Task<T>::get (const int i) {
   return FMR_CAST_TO_DERIVED<B*> (this->todo_task [i]);
 }
 template<class T> template<class B, typename Y>
-  B* Task<T>::first (const Y type){
+B* Task<T>::first (const Y type) {
   const size_t n = this->todo_task.size ();
-  for (size_t i=0; i<n; i++){
-    if (this->todo_task [i]->work_type == work_cast (type)){
+  if (n>0) {for (size_t i=0; i<n; i++) {
+    if (this->todo_task [i]->work_type == work_cast (type)) {
       return FMR_CAST_TO_DERIVED<B*> (this->todo_task [i]);
-  } }
+  } } }
 #if 0
   for (size_t i=0; i<n; i++){// If not found yet, try to match base)type.
     if (this->todo_task [i]->base_type == work_cast (type)){
@@ -129,7 +132,8 @@ template<class T> template<class B, typename Y>
 #endif
   return static_cast<B*> (nullptr);
 }
-template<class T> int Task<T>::add (T* task){
+template<class T>
+int Task<T>::add (T* task) {
   // Push task onto my stacks.
   this->todo_task.push_front (task);
   this->todo_init.push (task);
@@ -153,39 +157,40 @@ template <class T> int Task<T>:: add_todo_free (T* task ){
     return 0;
   }
 #endif
-template<class T> int Task<T>::init_stack (int* argc, char** argv){int err=0;
-  while (!this->todo_init.empty()){
+template<class T>
+int Task<T>::init_stack (int* argc, char** argv) {int err=0;
+  while (!this->todo_init.empty()) {
     T* W=this->todo_init.front(); this->todo_init.pop();
-    if (W!=nullptr){
+    if (W!=nullptr) {
       int init_err = W->init_task (argc,argv);
-      if (init_err){err= init_err; }
+      if (init_err) {err= init_err; }
   } }
   return err;
 }
-template<class T> int Task<T>::exit_stack (int err){
+template<class T>
+int Task<T>::exit_stack (int err) {
   int exit_err=0;
   while (!this->todo_exit.empty()){
     T* W=this->todo_exit.top(); this->todo_exit.pop();
-    if (W!=nullptr){
+    if (W!=nullptr) {
 #ifdef FMR_DEBUG
-      std::printf("Exiting %s...\n",
-        W->task_name.c_str());
+      std::printf("Exiting %s...\n", W->task_name.c_str());
 #endif
       exit_err = W->exit_task (err);
-      if (exit_err){err= exit_err; }
+      if (exit_err) {err= exit_err; }
   } }
-  while (!this->todo_task.empty()){ this->todo_task.pop_front(); }
+  while (!this->todo_task.empty()) {this->todo_task.pop_front(); }
   this->free_stack();
   return err;
 }
-template<class T> int Task<T>:: free_stack (){// Delete todo_free objects
+template<class T>
+int Task<T>:: free_stack () {// Delete todo_free objects
   while (!this->todo_free.empty()){
 #ifdef FMR_DEBUG
-    std::printf("Deleting %s...\n",
-      this->todo_free.top()->task_name.c_str());
+    std::printf("Deleting %s...\n", this->todo_free.top()->task_name.c_str());
 #endif
     T* W = this->todo_free.top(); this->todo_free.pop();
-    if (W != work && W!= nullptr){delete W;W=nullptr; }// Do not delete self.
+    if (W != work && W!= nullptr) {delete W;W=nullptr; }// Do not delete self.
   }
   return 0;
 }
