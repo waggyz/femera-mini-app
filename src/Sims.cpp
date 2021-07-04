@@ -19,8 +19,9 @@ namespace Femera {
       fmr::Data::Grid_d,
       fmr::Data::Gset_n,    fmr::Data::Part_n,    fmr::Data::Mesh_n,
       fmr::Data::Grid_n,    fmr::Data::Gcad_n,
-      fmr::Data::Node_sysn, fmr::Data::Elem_sysn//,
-//TODO      fmr::Data::Phys_d,    fmr::Data::Mtrl_n,
+      fmr::Data::Node_sysn, fmr::Data::Elem_sysn,
+      fmr::Data::Time_type, fmr::Data::Phys_d,//    fmr::Data::Phys_type,
+      fmr::Data::Mtrl_n
 //      fmr::Data::Dofs_sysn
     };
   }

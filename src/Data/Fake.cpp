@@ -44,7 +44,8 @@ namespace Femera {
       vals [enum2val (fmr::Geom_info::Mesh_n)] = mesh_n;
       vals [enum2val (fmr::Geom_info::Grid_n)] = grid_n;
       //
-      const auto yid = this->data->make_data_id (data_id,
+#if 0
+      const auto yid = this->data->make_data_id (data_id,//TODO Remove.
         fmr::Tree_type::Sims,{}, fmr::Data::Phys_info);
       const bool is_yid_found = data->local_vals.count(yid) > 0;
       if (!is_yid_found) {
@@ -53,7 +54,7 @@ namespace Femera {
       vals =& data->local_vals[yid].data[0];
       vals [enum2val (fmr::Phys_info::Phys_d)] = phys_d;
       vals [enum2val (fmr::Phys_info::Mtrl_n)] = mtrl_n;
-      //
+#endif
 //      vals[enum2val(fmr::Geom_info::Boco_n)] = boco_n;
     }
     return 0;

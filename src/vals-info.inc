@@ -46,6 +46,6 @@
  "number of halo elements",
   "simulation time type (enum)",
    "degrees of freedom / node",
- "number of materials",
   "type of physics (enum)",
+ "number of materials",
 "total degrees of freedom in the model",

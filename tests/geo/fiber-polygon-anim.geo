@@ -8,7 +8,7 @@ Include "gmsh-opts.geo";
 frame = DefineNumber[0.0, Name "frame"];
 wall  = DefineNumber[0.0, Name "wall"];
 
-use_opencascade = 0;
+use_opencascade = 1;
 //=============================================================================
 box_x  =   1.0;// RVE width
 box_y  =   1.0;// RVE length

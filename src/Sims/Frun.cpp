@@ -179,7 +179,7 @@ fmr::Local_int Frun::get_next_redo_ix() {//TODO Move to Sims?
             this->proc->get_proc_id(), this->model_name.c_str(), "zzzz",
             start, fmr::perf::get_now_ns(), elem_n, node_n, 3*node_n);
         }
-        if (log->detail >= this->verblevel) {
+        if (log->verbosity >= this->verblevel) {
           const auto secstr = fmr::perf::format_time_units (secs);
           const auto szshort = fmr::get_enum_string (fmr::Sim_size_short,
             this->sims_size);

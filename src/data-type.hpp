@@ -32,7 +32,7 @@ namespace fmr {//TODO? namespace data {
     // The enum items have a corresponding fmr:: class below.
     //
     Geom_info,// Dim_int, Enum_int, Local_int vals
-    Phys_info,// Combine with Geom_info as Part_info?
+//    Phys_info,// Combine with Geom_info as Part_info?//TODO Remove
 #endif
   end};// The last item is "end" to indicate the number of enumerated values.
   static const std::array<Vals_type,enum2val(Data::end)+1> vals_type ={
@@ -40,7 +40,6 @@ namespace fmr {//TODO? namespace data {
     fmr::Vals_type::Error,
     fmr::Vals_type::Unknown,
 #include "vals-type.inc"
-    fmr::Vals_type::Local,
     fmr::Vals_type::Local,
     fmr::Vals_type::None
   };
@@ -50,7 +49,9 @@ namespace fmr {//TODO? namespace data {
     "data_unk",
 #include "vals-name.inc"
     "Geom_info",//TODO Remove these heterogeneous data types.
+#if 0
     "Phys_info",//     Add back if sync is needed.
+#endif
     "END"
   };
   static const std::array<std::string,enum2val(Data::end)+1> vals_info ={
@@ -59,7 +60,7 @@ namespace fmr {//TODO? namespace data {
     "unknown data",
 #include "vals-info.inc"
     "geometry info (Dim_int, Enum_int, Local_int) vals",
-    "physics info (Dim_int, Enum_int, Local_int) vals",
+//    "physics info (Dim_int, Enum_int, Local_int) vals",//TODO Remove
     "Data enum end marker"
   };
 #if 1
@@ -74,11 +75,13 @@ namespace fmr {//TODO? namespace data {
     Part_halo_n, Mesh_halo_n, Grid_halo_n, // Local_int
     Geom_d, Gcad_d, Mesh_d, Grid_d,        // Dim_int
   end};
+#if 0
   enum class Phys_info : Enum_int {isok=0,
     Mtrl_n,  // Local_int //TODO here?
     Sim_time,// Enum_int
     Phys_d,  // Dim_int
   end};
+#endif
   struct Math_size {// Size and algebra type of data elements.
     size_t           size = 0;
     math::Zomplex algebra = math::Real;
@@ -89,8 +92,8 @@ namespace fmr {//TODO? namespace data {
   //     NOT Data_size[type] nor Data_size.find(type).
   static const std::map<Data,Math_size> Data_size {//TODO Remove.
     // for heterogeneous data
-    {Data::Geom_info, Math_size(math::Natural, enum2val (Geom_info::end))},
-    {Data::Phys_info, Math_size(math::Natural, enum2val (Phys_info::end))}
+    {Data::Geom_info, Math_size(math::Natural, enum2val (Geom_info::end))}//,
+//    {Data::Phys_info, Math_size(math::Natural, enum2val (Phys_info::end))}
   };
 #endif
   enum class Elem_form : Enum_int {None=0, Error, Unknown,//TODO also Cell_form?

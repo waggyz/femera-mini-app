@@ -927,29 +927,32 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
       }//-------------------------------------------------------------------^
       const auto geomid = this->data->make_data_id (data_id,
         fmr::Data::Geom_info);
-      const auto physid = this->data->make_data_id (data_id,
-        fmr::Data::Phys_info);
+//      const auto physid = this->data->make_data_id (data_id,//TODO
+//        fmr::Data::Phys_info);
       for (Data* D : std::vector<Data*> ({this->data})) {//TODO
         const bool is_geomid_found = D->local_vals.count(geomid) > 0;
         if (!is_geomid_found) {
           D->local_vals[geomid] = fmr::Local_int_vals (fmr::Data::Geom_info);
         }
+#if 0
         const bool is_physid_found = D->local_vals.count(physid) > 0;
-        if (!is_physid_found) {
+        if (!is_physid_found) {//TODO
           D->local_vals[physid] = fmr::Local_int_vals (fmr::Data::Phys_info);
         }
+#endif
         auto gvals =& D->local_vals[geomid].data[0];
         auto gisok =& D->local_vals[geomid].isok[0];
+        const fmr::Local_int gd = fmr::Local_int (geom_d);
+#if 0
         auto yvals =& D->local_vals[physid].data[0];
         auto yisok =& D->local_vals[physid].isok[0];
-        const fmr::Local_int gd = fmr::Local_int (geom_d);
         const fmr::Local_int yd = fmr::Local_int (phys_d);
         if (yd > yvals[enum2val(fmr::Phys_info::Phys_d)]) {
           yisok[enum2val(fmr::Phys_info::Phys_d)] = true;
           yvals[enum2val(fmr::Phys_info::Phys_d)] = yd;
         }
         bool do_set_sim_time = false;
-        switch (sim_time) {
+        switch (sim_time) {//TODO
           case fmr::Sim_time::None     :// Fall through...
           case fmr::Sim_time::Plugin   :// Fall through...
           case fmr::Sim_time::Explicit :// Fall through...
@@ -961,6 +964,7 @@ Data::File_info Dcgn::scan_file_data (const std::string fname) {
             = fmr::Local_int(enum2val (sim_time));
           yisok[enum2val(fmr::Phys_info::Sim_time)] = true;
         }
+#endif
         if (gd > gvals[enum2val(fmr::Geom_info::Geom_d)]) {
           gvals[enum2val(fmr::Geom_info::Geom_d)] = gd;
           gisok[enum2val(fmr::Geom_info::Geom_d)] = true;

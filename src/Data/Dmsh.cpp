@@ -756,7 +756,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
       this->data->local_vals[gid] = fmr::Local_int_vals (fmr::Data::Geom_info);
     }
 #if 0
-    const auto physid = make_data_id (data_id,
+    const auto physid = make_data_id (data_id,//TODO Remove.
       fmr::Tree_type::Sims,{}, fmr::Data::Phys_info);
     const bool is_found = data->local_vals.count (physid) > 0;
     if (!is_found) {data->local_vals[physid]

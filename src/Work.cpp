@@ -11,9 +11,9 @@
 
 namespace Femera{
 Work::~Work () {}
-int Work::prep (){return 0;}
-int Work::chck (){return 0;}
-int Work::init (int* argc, char** argv){int err=0;
+int Work::prep () {return 0;}
+int Work::chck () {return 0;}
+int Work::init (int* argc, char** argv) {int err=0;
 #if 0
   err = this->prep();
   if(err){return err; }
@@ -22,9 +22,9 @@ int Work::init (int* argc, char** argv){int err=0;
 #else
   fmr::perf::timer_start (&this->time);
   err= this->prep ();
-  if (err) {fmr::perf::timer_pause (&this->time); return err; }
+  if (err) {fmr::perf::timer_pause (&this->time); return err;}
   err= this->task.init_stack (argc,argv);
-  if (err) {fmr::perf::timer_pause (&this->time); return err; }
+  if (err) {fmr::perf::timer_pause (&this->time); return err;}
   Work::print_summary ();
   this->print_task_time ("init");
   fmr::perf::timer_pause (&this->time);
@@ -34,7 +34,7 @@ int Work::init (int* argc, char** argv){int err=0;
 int Work::exit (int err) {//TODO Why getting called a lot (after task empty)
   // when exiting Proc?
 #ifdef FMR_DEBUG
-  std::printf("**** Work::exit (%i) %s...\n", err,this->task_name.c_str());
+  std::printf ("**** Work::exit (%i) %s...\n", err, this->task_name.c_str());
 #endif
   this->print_task_time ("done");
   fmr::perf::timer_resume (&this->time);
@@ -55,7 +55,7 @@ std::string Work::print_summary () {
     if (i==0) {
       label = this->task.get<Work>(i)->task_name+" mods";
     }
-    else{
+    else {
       info += this->task.get<Work>(i)->task_name;
     }
     if (this->task.get<Work>(i)->version.size()) {
@@ -67,32 +67,32 @@ std::string Work::print_summary () {
   } }
   return this->proc->log->print_label_line (label, info);
 }
-std::string Work::print_details (){
+std::string Work::print_details () {
   return this->print_summary ();
 }
 int Work::print_task_time (const std::string name_suffix) {
-  auto log = this->proc->log;
-  if (log->timing >= this->verblevel) {
-    if (log->verbosity >= this->verblevel) {
-      const int n=this->task.count ();
-      if (log->detail >= this->verblevel) {
-        for (int i=n-1; i>=0; i--) {
-          Work* W = this->task.get<Work>(i); if (W) {
-            if (i>0) {fmr::perf::timer_resume (&W->time);}
-            fmr::perf::timer_pause (&W->time);
-            if (log->timing >= W->verblevel) {
-              const auto  busy = double(timer_busy_ns (W->time));
-              const auto total = double(timer_total_ns(W->time));
-              if (total > 0.0) {
+  const auto log = this->proc->log;
+  if (log->timing >= this->verblevel && log->verbosity >= this->verblevel) {
+    if (log->detail >= this->verblevel) {
+      const int n = this->task.count ();
+      for (int i=n-1; i>=0; i--) {
+        Work* W = this->task.get<Work>(i); if (W) {
+//          if (i>0) {fmr::perf::timer_resume (&W->time);}//TODO Use below?
+          if (W != this) {fmr::perf::timer_resume (&W->time);}
+          fmr::perf::timer_pause (&W->time);
+          if (log->timing >= W->verblevel) {
+            const auto  busy = double (timer_busy_ns (W->time));
+            const auto total = double (timer_total_ns(W->time));
+            if (total > 0.0) {
               if (W->verblevel < 8 || (busy > 0.002*total)) {//TODO magic nmbrs
                 const auto label = W->task_name+" "+name_suffix;
                 W->proc->log->print_label_meter (label, W->meter_unit, W->time);
-      } } } } } }else{
-      fmr::perf::timer_resume (&this->time);
-      const auto label = this->task_name+" "+name_suffix;
-      log->print_label_meter (label, this->meter_unit, this->time);
-      fmr::perf::timer_pause (&this->time);
-  } } }
+    } } } } } }else{// Print summary instead of details.
+    fmr::perf::timer_resume (&this->time);
+    const auto label = this->task_name+" "+name_suffix;
+    log->print_label_meter (label, this->meter_unit, this->time);
+    fmr::perf::timer_pause (&this->time);
+  } }
   return 0;
 }
 }// end Femera namespace
