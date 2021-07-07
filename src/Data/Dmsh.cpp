@@ -1070,7 +1070,8 @@ int Dmsh::close (const std::string model) {int err=0;
       std::string current_model="";
       gmsh::model::getCurrent (current_model);
       err = (current_model == model) ? err : 1;
-    }
+    }//========================================================================
+    //TODO Pull out functions, maybe into a View class.
 #if 1
 #if 0
     if (gmsh::fltk::isAvailable () != 0) {
@@ -1104,11 +1105,11 @@ int Dmsh::close (const std::string model) {int err=0;
           const auto wall
             = 1e-9 * double (fmr::perf::timer_total_elapsed (this->proc->time));
           //
-          const auto sims = (frame-1)/30;
-          const auto sims_mn = std::floor (sims / 60);
-          const auto sims_sc = std::floor (sims - 60*sims_mn);
-          const auto wall_mn = std::floor (wall / 60);
-          const auto wall_sc = std::floor (wall - 60*wall_mn);
+          const double sims    = double   (frame) / 30.0;
+          const double sims_mn = std::floor (sims / 60.0);
+          const double sims_sc = std::floor (sims - 60.0*sims_mn);
+          const double wall_mn = std::floor (wall / 60.0);
+          const double wall_sc = std::floor (wall - 60.0*wall_mn);
           //
           auto fstr = std::string("");
           auto wstr = std::string("");
@@ -1117,6 +1118,16 @@ int Dmsh::close (const std::string model) {int err=0;
           if (c>0) {fstr = std::string (& buf[0]);}
           c = std::snprintf (&buf[0], 31,"Wall time %2g:%02g",wall_mn, wall_sc);
           if (c>0) {wstr = std::string (& buf[0]);}
+          // Add progress bars.
+          const double char_per_sec = 2.0;
+          int l = int(char_per_sec * sims);
+          fstr += " |";
+          if (l > 1) {fstr += std::string(uint(l-1),'=');}
+          if (l > 0) {fstr += "|";}
+          l = int(char_per_sec * wall);
+          wstr += " |";
+          if (l > 1) {wstr += std::string(uint(l-1),'-');}
+          if (l > 0) {wstr += "+";}
           //
           gmsh::view::addListDataString (v, {10.0,15.0}, {fstr});
           gmsh::view::addListDataString (v, {10.0,30.0}, {wstr});
@@ -1170,6 +1181,7 @@ int Dmsh::close (const std::string model) {int err=0;
       if (err<=0) {this->open_n--;}
     } else {err= 0;}
 #endif
+    //=========================================================================
 #if 0
 //    gmsh::fltk::unlock ();
   } else {//TODO Below not needed if gmsh::fltk::lock () does not work.

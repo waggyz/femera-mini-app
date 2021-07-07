@@ -938,6 +938,7 @@ int Data::chck_file_names (std::deque<std::string> files){int err=0;
 #endif
   const fmr::Local_int fname_n = fmr::Local_int(files.size());
   const int thrd_n = (this->redo_n>1) ? 1 : this->proc->get_stat()[0].thrd_n;
+  //FIXME Only works for 1 OpenMP thread / MPI rank.
   if (files.size() > 0) {
     // Input file checking in parallel: all threads check all files for redo_n>1,
     // static round-robin check when redo_n <=1.
@@ -950,7 +951,7 @@ int Data::chck_file_names (std::deque<std::string> files){int err=0;
       const auto start = fmr::perf::get_now_ns();
       std::string fname = files [fname_i];
 #ifdef FMR_DEBUG
-      this->proc->log-> fprintf(this->proc->log-> fmrout,"file[%i] %s...\n",
+      this->proc->log->fprintf(this->proc->log->fmrout,"file[%i] %s...\n",
         fname_i,fname.c_str());
 #endif
       struct ::stat s;// Check if file exists.

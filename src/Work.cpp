@@ -73,12 +73,14 @@ std::string Work::print_details () {
 int Work::print_task_time (const std::string name_suffix) {
   const auto log = this->proc->log;
   if (log->timing >= this->verblevel && log->verbosity >= this->verblevel) {
-    if (log->detail >= this->verblevel) {
+//    bool did_print_this = false;//TODO
+    if (log->detail >= this->verblevel) {// Print details: task times.
       const int n = this->task.count ();
-      for (int i=n-1; i>=0; i--) {
+      if (n>0) {for (int i=n-1; i>=0; i--) {
         Work* W = this->task.get<Work>(i); if (W) {
 //          if (i>0) {fmr::perf::timer_resume (&W->time);}//TODO Use below?
-          if (W != this) {fmr::perf::timer_resume (&W->time);}
+          if (W == this) {//did_print_this = true;}
+          } else {fmr::perf::timer_resume (&W->time);}
           fmr::perf::timer_pause (&W->time);
           if (log->timing >= W->verblevel) {
             const auto  busy = double (timer_busy_ns (W->time));
@@ -87,7 +89,8 @@ int Work::print_task_time (const std::string name_suffix) {
               if (W->verblevel < 8 || (busy > 0.002*total)) {//TODO magic nmbrs
                 const auto label = W->task_name+" "+name_suffix;
                 W->proc->log->print_label_meter (label, W->meter_unit, W->time);
-    } } } } } }else{// Print summary instead of details.
+    } } } } } } } else {//FIXME not working as intended for no detail Proc exit.
+//    if (!did_print_this) {// Print a summary of this timing.
     fmr::perf::timer_resume (&this->time);
     const auto label = this->task_name+" "+name_suffix;
     log->print_label_meter (label, this->meter_unit, this->time);

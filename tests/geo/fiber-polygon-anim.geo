@@ -1,29 +1,30 @@
-/* Makes a series of RVEs
+/* makes a series of RVEs based on the frame number
 gmsh -setnumber frame 1 tests/geo/fiber-shape-movie.geo
 */
-p  = 2;//DefineNumber[2, Name "elem_p"];
+p  = 2;//DefineNumber[2, Name "elem_p"];// used in gmsh-opts.geo
 Include "gmsh-opts.geo";
 
 // These will NOT be applied if already set by gmsh::onelab::setNumber (...).
 frame = DefineNumber[0.0, Name "frame"];
 wall  = DefineNumber[0.0, Name "wall"];
 
-use_opencascade = 1;
-//=============================================================================
 box_x  =   1.0;// RVE width
 box_y  =   1.0;// RVE length
 box_z  =   1.0;// RVE height (longitudinal direction)
 
+use_opencascade = 1;
+//=============================================================================
 View.AutoPosition    = 0;
 General.Orthographic = 0;
 General.DisplayBorderFactor = 0.0;
-//
+
 General.RotationCenterGravity = 0;// 1: approximate center of mass, 0: use below
 General.RotationCenterX = box_x / 2;
 General.RotationCenterY = box_y / 2;
 General.RotationCenterZ = box_z / 2;
 General.RotationX = -60; General.RotationY = 0; General.RotationZ = -150;
 
+Mesh.LightTwoSide  = 0;// 1: slower rendering
 Mesh.SurfaceFaces  = 1;
 Mesh.ColorCarousel = 2;
 
@@ -31,9 +32,6 @@ Mesh.ColorCarousel = 2;
 //General.GraphicsFontSize = 15;//FIXME No worky.
 //General.GraphicsFontSizeTitle = 30;
 //General.FontSize = 12;
-
-//Mesh.ElementOrder      = 2;
-//Mesh.SecondOrderLinear = 1;
 //-----------------------------------------------------------------------------
 If (frame >= 1)
   poly_n = Floor ((frame-1) / 30)    + 3;
@@ -61,17 +59,16 @@ If (frame >= 1)
 
     fiber[] = Extrude {0,0,box_z} {Surface{1};};
 
-    //twist = 2*Pi / poly_n;//TODO Twisting extrude not available with OpenCascade.
-    //fiber[] = Extrude {{0,0,box_z},{0,0,1},{box_x/2,box_y/2,0},twist} {Surface{1};};
-
     BooleanFragments {Volume{:}; Delete;} {Volume{1}; Delete;}
 
     Physical Surface (1) = {(poly_n+9):(poly_n+15)};// Matrix surface
-    Physical Surface (2) = {1,(poly_n+3):(poly_n+8)};// Fiber surface
-    //---------------------------------------------------------------------------
-    //Mesh 3;
-    //SetOrder 2;
-    //---------------------------------------------------------------------------
+    Physical Surface (2) = {(poly_n+3):(poly_n+7)};// Matrix/fiber interface
+    Physical Surface (3) = {1,poly_n+8};// Fiber section surface
+
+    //Physical Volume (1) = {6};
+
+    Transfinite Surface {2:(poly_n+7),(poly_n+9):(poly_n+10),poly_n+12,poly_n+14};
+    //-------------------------------------------------------------------------
     b=0.33;// Hack to make camera distance consistent by enlarging the bounding box.
     Point (newp) = {-box_x*b    ,-box_y*b    ,-box_z*b    };
     Point (newp) = { box_x*(1+b), box_y*(1+b), box_z*(1+b)};
@@ -83,9 +80,13 @@ If (frame >= 1)
     Hide "*";
     Show {Surface {1,(poly_n+5):(poly_n+10),poly_n+13,poly_n+15};}
     Endif
-  EndIf
+  EndIf//======================================================================
   If (use_opencascade <= 0.99)
+    //TODO Twisting extrude not available with OpenCascade.
     // Fiber
+
+    //twist = 2*Pi / poly_n;
+    //fiber[] = Extrude {{0,0,box_z},{0,0,1},{box_x/2,box_y/2,0},twist} {Surface{1};};
 
     // Box
     s0 = newp;
