@@ -201,9 +201,9 @@ namespace Femera {
           catch (Dmsh::Thrown e) {err= -1;
             this->label_gmsh_err ("WARNING","gmsh::fltk::initialize ()", e);
           }
-          catch (...) {err = -1;
+          catch (...) {err= -1;
             log->label_fprintf (log->fmrerr, "WARNING Dmsh",
-              "Could not open Xwindows display %s for visualization.\n",
+              "could not open Xwindows display %s for visualization.\n",
               this->display_string.c_str());
         }// }
         this->is_xwin_open = (err==0);
@@ -1097,10 +1097,24 @@ int Dmsh::close (const std::string model) {int err=0;
           const auto dlen = delim.length ();
           const auto nlen = model.length ();
           const auto pos  = model.find (delim);
+#if 0
           if (nlen > pos+dlen) {
             const std::string tok = model.substr (pos+dlen, model.length()-pos);
-            frame = std::stoi (tok);
+            if (tok.length() > 0) {frame = std::stoi (tok);}
           }
+          if (nlen > pos+dlen) {
+            const std::string tok = model.substr (pos+dlen, model.length()-pos);
+            std::size_t p = 0;
+            frame = std::stoi (tok, &p, 10);
+            if (p == 0) {frame = 0;}
+          }
+#else
+          if (nlen > pos+dlen) {
+            const std::string tok = model.substr (pos+dlen, model.length()-pos);
+            try {frame = std::stoi (tok);}// can throw std::invalid_argument
+            catch (...) {frame = 0;  }    // or std::out_of_range
+          }
+#endif
           fmr::perf::timer_resume (&this->proc->time);
           const auto wall
             = 1e-9 * double (fmr::perf::timer_total_elapsed (this->proc->time));
