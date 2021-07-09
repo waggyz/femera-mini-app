@@ -1077,6 +1077,7 @@ int Dmsh::close (const std::string model) {int err=0;
 #if 0
       gmsh::fltk::lock ();//TODO how to use this?
 #endif
+#if 0
       if (err==0) {
         try {gmsh::graphics::draw ();}
         catch (Dmsh::Thrown e) {err= -1;
@@ -1085,6 +1086,7 @@ int Dmsh::close (const std::string model) {int err=0;
         }
         catch (...) {err= -1;}
       }
+#endif
       if (err==0) {
         //int v = -1;
         //std::vector<int> vs; gmsh::view::getTags (vs);
@@ -1158,8 +1160,23 @@ int Dmsh::close (const std::string model) {int err=0;
           catch (...) {err= -1;}
 #endif
         if (err==0) {
+
+
+          gmsh::fltk::setCurrentWindow ();
+          if (err==0) {
+            try {gmsh::graphics::draw ();}
+            catch (Dmsh::Thrown e) {err= -1;
+              const auto from = "gmsh::graphics::draw ()";
+              this->label_gmsh_err ("WARNING", from, e);
+            }
+            catch (...) {err= -1;}
+          }
+          
+
+
           const auto fname = model+".png";
-          try {gmsh::fltk::lock();gmsh::write (fname);gmsh::fltk::unlock();}
+//FIXME No worky          try {gmsh::fltk::lock();gmsh::write (fname);gmsh::fltk::unlock();}
+          try {gmsh::write (fname);}
           catch (Dmsh::Thrown e) {err= -1;
             const auto from = "gmsh::write ("+fname+")";
             this->label_gmsh_err ("WARNING", from.c_str(), e);
