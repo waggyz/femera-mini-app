@@ -1077,7 +1077,7 @@ int Dmsh::close (const std::string model) {int err=0;
 #if 0
       gmsh::fltk::lock ();//TODO how to use this?
 #endif
-#if 0
+#if 1
       if (err==0) {
         try {gmsh::graphics::draw ();}
         catch (Dmsh::Thrown e) {err= -1;
@@ -1141,7 +1141,7 @@ int Dmsh::close (const std::string model) {int err=0;
         // the write and remove () ops on other threads should be deferred until
         // after the master thread can render it.
         // But, this works fine when there is only 1 OpenMP thread / MPI rank.
-        //TODO But FLTK handles UI events, not OpenGL?
+        //TODO But FLTK handles UI events, not OpenGL drawing?
 #if 0
         try {gmsh::fltk::awake ("update");}
         catch (Dmsh::Thrown e) {err= -1;
@@ -1160,8 +1160,7 @@ int Dmsh::close (const std::string model) {int err=0;
           catch (...) {err= -1;}
 #endif
         if (err==0) {
-
-
+#if 0
           gmsh::fltk::setCurrentWindow ();
           if (err==0) {
             try {gmsh::graphics::draw ();}
@@ -1171,9 +1170,7 @@ int Dmsh::close (const std::string model) {int err=0;
             }
             catch (...) {err= -1;}
           }
-          
-
-
+#endif
           const auto fname = model+".png";
 //FIXME No worky          try {gmsh::fltk::lock();gmsh::write (fname);gmsh::fltk::unlock();}
           try {gmsh::write (fname);}
@@ -1188,8 +1185,8 @@ int Dmsh::close (const std::string model) {int err=0;
           this->proc->get_proc_id(), model.c_str(), "view",
           start, fmr::perf::get_now_ns());
     } }
-    if (err<=0) {err=0;
-      try {gmsh::model::remove ();}//FIXME Wait until write completes.
+    if (err<=0) {err=0;gmsh::fltk::lock(); gmsh::fltk::unlock();
+      try {gmsh::model::remove ();}//FIXME Wait until write (above) completes.
       catch (Dmsh::Thrown e) {err= 1;
         const auto from = "gmsh::model::remove () current: "+model;
         this->label_gmsh_err ("WARNING", from.c_str(), e);
