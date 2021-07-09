@@ -196,16 +196,15 @@ namespace Femera {
         this->set_color("General.Foreground", black);
         this->set_color("General.Text", black);
         //
-//        if (!gmsh::fltk::isAvailable ()) {
-          try {gmsh::fltk::initialize ();}//TODO Move to Post/View?
-          catch (Dmsh::Thrown e) {err= -1;
-            this->label_gmsh_err ("WARNING","gmsh::fltk::initialize ()", e);
-          }
-          catch (...) {err= -1;
-            log->label_fprintf (log->fmrerr, "WARNING Dmsh",
-              "could not open Xwindows display %s for visualization.\n",
-              this->display_string.c_str());
-        }// }
+        try {gmsh::fltk::initialize ();}//TODO Move to Post/View?
+        catch (Dmsh::Thrown e) {err= -1;
+          this->label_gmsh_err ("WARNING","gmsh::fltk::initialize ()", e);
+        }
+        catch (...) {err= -1;
+          log->label_fprintf (log->fmrerr, "WARNING Dmsh",
+            "could not open Xwindows display %s for visualization.\n",
+            this->display_string.c_str());
+        }
         this->is_xwin_open = (err==0);
       }
       // Restore getopt variables.
@@ -1073,12 +1072,11 @@ int Dmsh::close (const std::string model) {int err=0;
     }//========================================================================
     //TODO Pull out functions, maybe into a View class.
 #if 1
-#if 0
-    if (gmsh::fltk::isAvailable () != 0) {
-      gmsh::fltk::lock ();//TODO how to use this?
-#endif
     if ((err<=0) && this->is_xwin_open) {err= 0;//TODO Move to Post/View.
       const auto start = fmr::perf::get_now_ns();
+#if 0
+      gmsh::fltk::lock ();//TODO how to use this?
+#endif
       if (err==0) {
         try {gmsh::graphics::draw ();}
         catch (Dmsh::Thrown e) {err= -1;
@@ -1097,24 +1095,11 @@ int Dmsh::close (const std::string model) {int err=0;
           const auto dlen = delim.length ();
           const auto nlen = model.length ();
           const auto pos  = model.find (delim);
-#if 0
-          if (nlen > pos+dlen) {
-            const std::string tok = model.substr (pos+dlen, model.length()-pos);
-            if (tok.length() > 0) {frame = std::stoi (tok);}
-          }
-          if (nlen > pos+dlen) {
-            const std::string tok = model.substr (pos+dlen, model.length()-pos);
-            std::size_t p = 0;
-            frame = std::stoi (tok, &p, 10);
-            if (p == 0) {frame = 0;}
-          }
-#else
           if (nlen > pos+dlen) {
             const std::string tok = model.substr (pos+dlen, model.length()-pos);
             try {frame = std::stoi (tok);}// can throw std::invalid_argument
-            catch (...) {frame = 0;  }    // or std::out_of_range
+            catch (...) {frame = 0;}      // or std::out_of_range
           }
-#endif
           fmr::perf::timer_resume (&this->proc->time);
           const auto wall
             = 1e-9 * double (fmr::perf::timer_total_elapsed (this->proc->time));
@@ -1150,10 +1135,11 @@ int Dmsh::close (const std::string model) {int err=0;
             "Could not add view %s.\n","fmr:view:1");
         }
         //TODO Only OpenMP master thread does FLTK operations. Pending ops are
-        // queued by Gmsh until the master thread makes a model current. Thus,
+        // queued by Gmsh until a master thread makes the model current. Thus,
         // the write and remove () ops on other threads should be deferred until
         // after the master thread can render it.
         // But, this works fine when there is only 1 OpenMP thread / MPI rank.
+        //TODO But FLTK handles UI events, not OpenGL?
 #if 0
         try {gmsh::fltk::awake ("update");}
         catch (Dmsh::Thrown e) {err= -1;
@@ -1161,7 +1147,8 @@ int Dmsh::close (const std::string model) {int err=0;
           this->label_gmsh_err ("WARNING", from, e);
         }
         catch (...) {err= -1;}
-#else
+#endif
+# if 0
         FMR_PRAGMA_OMP(omp master) {
           try {gmsh::fltk::update ();}
           catch (Dmsh::Thrown e) {err= -1;
@@ -1171,22 +1158,21 @@ int Dmsh::close (const std::string model) {int err=0;
           catch (...) {err= -1;}
 #endif
         if (err==0) {
-          auto fname = model;
-          fname += ".png";
+          const auto fname = model+".png";
           try {gmsh::write (fname);}
           catch (Dmsh::Thrown e) {err= -1;
             const auto from = "gmsh::write ("+fname+")";
             this->label_gmsh_err ("WARNING", from.c_str(), e);
           }
           catch (...) {err= -1;}
-      } } }
+      } }// }
       if (this->verblevel <= log->timing) {//TODO Remove?
         log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu\n",
           this->proc->get_proc_id(), model.c_str(), "view",
           start, fmr::perf::get_now_ns());
     } }
     if (err<=0) {err=0;
-      try {gmsh::model::remove ();}
+      try {gmsh::model::remove ();}//FIXME Wait until write completes.
       catch (Dmsh::Thrown e) {err= 1;
         const auto from = "gmsh::model::remove () current: "+model;
         this->label_gmsh_err ("WARNING", from.c_str(), e);
