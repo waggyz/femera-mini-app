@@ -1159,7 +1159,7 @@ int Dmsh::close (const std::string model) {int err=0;
 #endif
         if (err==0) {
           const auto fname = model+".png";
-          try {gmsh::write (fname);}
+          try {gmsh::fltk::lock();gmsh::write (fname);gmsh::fltk::unlock();}
           catch (Dmsh::Thrown e) {err= -1;
             const auto from = "gmsh::write ("+fname+")";
             this->label_gmsh_err ("WARNING", from.c_str(), e);
