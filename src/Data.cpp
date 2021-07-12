@@ -590,7 +590,7 @@ std::deque<std::string> Data::get_sims_names () {
     if (this->work_type == work_cast (Base_type::Data)) {
       for (int i =0; i < this->task.count(); i++) {
         auto D = this->task.get<Data>(i);
-         if (D) {if (D != this) {
+         if (D && D != this) {
           auto names = D->get_sims_names ();
           while (!names.empty()) {
             if (this->sims_names.count (names.front()) < 1) {
@@ -598,7 +598,7 @@ std::deque<std::string> Data::get_sims_names () {
             }
             this->sims_names[names.front()] = names.front();
             names.pop_front();
-    } } } } } }
+    } } } } }
     default:{}// Do nothing
   }
   return model_names;
@@ -622,12 +622,12 @@ std::deque<std::string> Data::add_sims_name (const std::string name) {
 #else
         // Use snprintf (..) for leading zeros in the sim number.
         auto d = fmr::math::count_digits (n+1);
-        d = d<1 ? 1 : d;
+        d = (d<1) ? 1 : d;
         const auto b = d+4 ;
         auto nm = name;
         std::vector<char> buf(b +1,0);
         const auto f = ".%0"+std::to_string(d)+"u";
-        int c=0; c = std::snprintf (&buf[0], b, f.c_str(), i+1);
+        int c = std::snprintf (&buf[0], b, f.c_str(), i+1);
         if (c>0) {nm += std::string (& buf[0]);}
 #endif
         this->sims_names[nm] = name;
@@ -639,13 +639,13 @@ std::deque<std::string> Data::add_sims_name (const std::string name) {
   } } }
   return names;
 }
-fmr::Local_int Data::get_sims_n (){
+fmr::Local_int Data::get_sims_n () {
   return fmr::Local_int(this->sims_names.size());
 }
-std::deque<std::string> Data::get_inp_file_names (){
+std::deque<std::string> Data::get_inp_file_names () {
   return this->inp_file_names;
 }
-std::deque<std::string> Data::get_out_file_names (){
+std::deque<std::string> Data::get_out_file_names () {
   return this->out_file_names;
 }
 fmr::Local_int Data::get_redo_n() {
@@ -658,7 +658,7 @@ Work_type Data::get_file_type (const std::string fname) {
   }
   return work_cast(Base_type::None);
 }
-int Data::clear (){
+int Data::clear () {
   for (int i=0; i < this->task.count(); i++){
     //TODO check for open model?
     Data* D=this->task.get<Data>(i);
@@ -841,7 +841,8 @@ int Data::init_task (int* argc, char** argv){ int err=0;
 #endif
     //std::queue<std::string> unk_file_names={};
     //
-    for(; optind < argc[0]; optind++){// Parse non-option arguments.
+    bool is_cpuout_set = false;
+    for (; optind < argc[0]; optind++) {// Parse non-option arguments.
       const auto path = argv[optind];
       DIR* dir;
       if ((dir = opendir (path)) != NULL) {//TODO don't open twice (stat below)
@@ -854,11 +855,12 @@ int Data::init_task (int* argc, char** argv){ int err=0;
             log->label_printf (lab.c_str(),
               "write cpuout to files %s...\n", path);
           }
+          is_cpuout_set = true;
           for (int i=0; i<n; i++) {
             const auto logname = std::string(path)
               + "." + std::to_string(i)+".out";
 #if 0
-            err= std::fopen_s (& this->log->cpuout[i], & stream;
+            err= std::fopen_s (& this->log->cpuout [i], & stream;
               logname.c_str(), "w");
 #else
             log->cpuout [i] = std::fopen (logname.c_str(), "w");//TODO append ?
@@ -873,12 +875,12 @@ int Data::init_task (int* argc, char** argv){ int err=0;
             if (child_name !="." && child_name !="..") {
               const auto lab = "NOTE "+this->task_name;
               log->label_fprintf (log->fmrerr, lab.c_str(),
-                "skipping directory %s...\n",child.c_str());
-          } }else{// child is not a directory; assume input file
+                "skipping directory %s...\n", child.c_str());
+          } } else {// child is not a directory; assume input file
             chk_file_names.push_back (child);//TODO redo_n loop here?
         } }
         closedir (dir);
-      }else{// could not open as directory; assume input file
+      } else {// could not open as directory; assume input file
 //        for {fmr::Local_int redo_ix=1; redo_ix<=this->redo_n; redo_ix++) {
           chk_file_names.push_back (std::string (path));
       }// }
@@ -893,22 +895,37 @@ int Data::init_task (int* argc, char** argv){ int err=0;
         chk_file_names.push_back (std::string (path));// assume input file
       }
 #endif
-    }
+    }//end optind loop
+    if (!is_cpuout_set) {
+      // Set cpuout to use a generic base filename.
+      const std::string path ="mini";
+        const auto n = this->proc->get_proc_n ();
+        if (log->cpuout.size () >= size_t(n)) {
+          if (this->verblevel <= log->detail) {
+            const auto lab = this->task_name +" save";
+            log->label_printf (lab.c_str(),
+              "write cpuout to files %s...\n", path.c_str());
+          }
+          is_cpuout_set = true;
+          for (int i=0; i<n; i++) {
+            const auto logname = path + "." + std::to_string(i) + ".out";
+            log->cpuout [i] = std::fopen (logname.c_str(), "w");//TODO append ?
+    } } }
     // Restore getopt variables.
     argc[0]=argc2;opterr=opterr2;optopt=optopt2;optind=optind2;optarg=optarg2;
   }//end non-threadsafe section
   err= this->chck_file_names ();
-  for (auto model : this->sims_names){// Copy model names to the main queue.
+  for (auto model : this->sims_names) {// Copy model names to the main queue.
     fmr::sims::add (model.first);
   }
-  if (log->detail >= this->verblevel){this->print_details (); }
+  if (log->detail >= this->verblevel) {this->print_details (); }
   fmr::perf::timer_pause (&this->time);
   return err;
 }
 int Data::chck_file_names (){
 #if 1
   auto log = this->proc->log;
-  if (log->verbosity >= this->verblevel){
+  if (log->verbosity >= this->verblevel) {
     log->label_printf ("Check stat","of %s\n",
       chk_file_names.size() == 1
       ? chk_file_names[0].c_str()
@@ -917,7 +934,7 @@ int Data::chck_file_names (){
 #endif
   return Data::chck_file_names (this->chk_file_names);
 }
-int Data::chck_file_names (std::deque<std::string> files){int err=0;
+int Data::chck_file_names (std::deque<std::string> files) {int err=0;
   /* Check files in parallel to build a map between file storage and model data,
    * caching data found while traversing file structures.
    */
@@ -955,7 +972,7 @@ int Data::chck_file_names (std::deque<std::string> files){int err=0;
         fname_i,fname.c_str());
 #endif
       struct ::stat s;// Check if file exists.
-        { Data::Lock_here lock (this->data_lock);
+      { Data::Lock_here lock (this->data_lock);
         if (::stat (fname.c_str(), &s) != 0) {// File not found.
           log->fprintf (log->fmrerr,
             "WARN""ING Input file not found: %s\n", fname.c_str());
@@ -977,14 +994,14 @@ int Data::chck_file_names (std::deque<std::string> files){int err=0;
               info = this->scan_file_data (info.data_file);
               if (!info.state.has_error) {
                 this->inp_file_names.push_back (fname);
-        } } } } }// end thread lock region
-        if (this->verblevel <= log->timing) {
-          log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu\n", proc->get_proc_id(),
-            fname.c_str(), "chck", start, fmr::perf::get_now_ns());
+      } } } } }// end thread lock region
+      if (this->verblevel <= log->timing) {
+        log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu\n", proc->get_proc_id(),
+          fname.c_str(), "chck", start, fmr::perf::get_now_ns());
     } }
     this->get_sims_names();
   }//end if files provided
-  if (log->verbosity >= this->verblevel){
+  if (log->verbosity >= this->verblevel) {
     log->label_printf ("Input data","in %s\n",
       this->inp_file_names.size() == 1 ? this->inp_file_names[0].c_str()
       : (std::to_string (this->inp_file_names.size())+" files").c_str());
@@ -995,19 +1012,19 @@ int Data::chck_file_names (std::deque<std::string> files){int err=0;
   return err;
 }
 }// end Femera namespace
-int fmr::data::clear (){
+int fmr::data::clear () {
   return fmr::detail::main->data->clear ();
 }
-int fmr::data::clr (){
+int fmr::data::clr () {
   return fmr::detail::main->data->clear ();
 }
-int fmr::data::add_inp_file (const std::string name){
+int fmr::data::add_inp_file (const std::string name) {
   return fmr::detail::main->data->add_inp_file (name);
 }
-int fmr::data::set_out_file (const std::string name){
+int fmr::data::set_out_file (const std::string name) {
   return fmr::detail::main->data->set_out_file (name);
 }
-std::deque<std::string> fmr::data::get_sims (){int err=0;
+std::deque<std::string> fmr::data::get_sims () {int err=0;
   err= fmr::detail::main->data->chck_file_names ();
 #if 1
   if (err) {fmr::detail::main->proc->log->printf_err (
@@ -1024,11 +1041,10 @@ std::deque<std::string> fmr::data::get_sims (){int err=0;
   }
 #else
   const auto sims =fmr::detail::main->data->get_sims_names();
-  if (sims.size () == 0){
+  if (sims.size () == 0) {
     fmr::Local_int fsz = fmr::Local_int(fmr::detail::main->data
       ->get_inp_file_names().size());
-    fmr::detail::main->proc->log->printf (
-      "W""ARNING Found no sims in %i %s.\n",
+    fmr::detail::main->proc->log->printf ("WARN""ING Found no sims in %i %s.\n",
       fsz, (fsz==1) ? "file" : "files");
   }
 #endif

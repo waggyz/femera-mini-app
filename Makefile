@@ -243,7 +243,7 @@ ifeq ($(CXX),g++)
     -Wunused-macros -Wzero-as-null-pointer-constant -Wundef -Weffc++
   CXXFLAGS += -MMD -MP
     # -Wnoexcept #TODO Put this back.
-    # -Winline #TODO need to filter warings from system libs.
+    # -Winline #TODO need to filter warnings from system libs.
     # -Wpadded
     #NOTE flags in the -fpic line may be better if only used to build library
     #     perhaps -fpie (or -fPIE) should be used for builing executable

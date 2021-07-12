@@ -69,4 +69,4 @@ done
 #  -o "$MESHDIR/cube-tet6.cgn"
 # fi
 
-libGL error No matching fbConfigs or visuals found error failed to load driver: swrast
+#libGL error No matching fbConfigs or visuals found error failed to load driver: swrast

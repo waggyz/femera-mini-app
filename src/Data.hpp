@@ -5,13 +5,13 @@
 #include <deque>
 #include <unordered_set>
 #include <valarray>
-#include <tuple>       //std::pair
+#include <tuple>        // std::pair
 #include <unordered_map>
 #include <mutex>
 
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
-#include <cstdio>     // std::printf
+#include <cstdio>       // std::printf
 #endif
 
 namespace Femera{

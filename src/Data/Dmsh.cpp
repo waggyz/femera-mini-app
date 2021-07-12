@@ -110,7 +110,8 @@ namespace Femera {
         gmsh::option::setNumber ("General.NumThreads",Dmsh::Optval(n));
         if (this->proc->log->detail > this->verblevel){
           this->proc->log->label_printf ("Gmsh uses",
-            "up to %i OpenMP thread%s each.\n",n,(n==1)?"":"s");
+            "%s %i OpenMP thread%s each.\n",
+            (n==1)?"only":"up to", n, (n==1)?"":"s");
     } } }
 #endif
     FMR_PRAGMA_OMP(omp master) {//TODO omp single nowait ?
@@ -118,10 +119,10 @@ namespace Femera {
       const std::string f = ::GetKnownFileFormats (only_mesh_formats);
       // Dunno why .geo is not in the list.
       fmr::detail::string_split (f+", geo",',', &this->file_exts);
-      for (uint i=0; i<this->file_exts.size(); i++){
+      for (uint i=0; i<this->file_exts.size(); i++) {
         std::string str = this->file_exts[i];
-        if (str.length()>1){ if (str.substr(0,1) ==" "){
-          str = str.substr (1,str.length()-1);
+        if (str.length()>1) {if (str.substr(0,1) ==" "){
+          str = str.substr (1, str.length()-1);
         } }
         this->file_exts[i] = str;
     } }
@@ -138,7 +139,7 @@ namespace Femera {
   int Dmsh::set_color (const std::string name, const int c[3]) {int err=0;
     try {gmsh::option::setColor(name, c[0], c[1], c[2]);}
     catch (Dmsh::Thrown e) {err=-1;
-      this->label_gmsh_err ("WARNING","gmsh::option::setColor (...)", e);
+      this->label_gmsh_err ("WARN""ING","gmsh::option::setColor (...)", e);
     }
     return err;
   }
@@ -198,10 +199,10 @@ namespace Femera {
         //
         try {gmsh::fltk::initialize ();}//TODO Move to Post/View?
         catch (Dmsh::Thrown e) {err= -1;
-          this->label_gmsh_err ("WARNING","gmsh::fltk::initialize ()", e);
+          this->label_gmsh_err ("WARN""ING","gmsh::fltk::initialize ()", e);
         }
         catch (...) {err= -1;
-          log->label_fprintf (log->fmrerr, "WARNING Dmsh",
+          log->label_fprintf (log->fmrerr, "WARN""ING Dmsh",
             "could not open Xwindows display %s for visualization.\n",
             this->display_string.c_str());
         }
@@ -260,11 +261,11 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
 #endif
     catch (Dmsh::Thrown e) {err= -1;
       const auto from = "gmsh::model::setCurrent ("+model+")";
-      this->label_gmsh_err ("WARNING",from.c_str(), e);
+      this->label_gmsh_err ("WARN""ING",from.c_str(), e);
     }
     catch (std::out_of_range& e) {err= -1;
       const auto from = "this->sims_names.at("+model+") in make_mesh (..)";
-      this->label_gmsh_err ("WARNING",from.c_str(), e.what());
+      this->label_gmsh_err ("WARN""ING",from.c_str(), e.what());
     }
     catch (...) {err = -1;
       log->label_fprintf (log->fmrerr, warnlabel.c_str(),
@@ -300,11 +301,11 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
 #endif
     catch (Dmsh::Thrown e) {
       const auto from = "gmsh::model::setCurrent ("+model+")";
-      this->label_gmsh_err ("WARNING",from.c_str(), e);
+      this->label_gmsh_err ("WARN""ING",from.c_str(), e);
     }
     catch (std::out_of_range& e) {
       const auto from = "this->sims_names.at("+model+") in make_mesh (..)";
-      this->label_gmsh_err ("WARNING",from.c_str(), e.what());
+      this->label_gmsh_err ("WARN""ING",from.c_str(), e.what());
     }
     try {gmsh::model::mesh::generate (geom_d);}
     catch (int e) {err= e;
@@ -314,7 +315,7 @@ int Dmsh::make_mesh (const std::string model, const fmr::Local_int) {
     catch (Dmsh::Thrown e) {err= 1;
       const auto from
         = "gmsh::model::mesh::generate ("+std::to_string(geom_d)+")";
-      this->label_gmsh_err ("WARNING", from.c_str(), e);
+      this->label_gmsh_err ("WARN""ING", from.c_str(), e);
     }
     catch (...) {err= 1;
       log->label_fprintf (log->fmrerr, warnlabel.c_str(),
@@ -345,11 +346,11 @@ int Dmsh::make_part (const std::string model, const fmr::Local_int,
 #endif
       catch (Dmsh::Thrown e) {err= 1;
         const auto from = "gmsh::model::setCurrent ("+model+"))";
-        this->label_gmsh_err ("WARNING",from.c_str(), e);
+        this->label_gmsh_err ("WARN""ING",from.c_str(), e);
       }
     catch (std::out_of_range& e) {err= 1;
       const auto from = "this->sims_names.at("+model+") in make_part (..)";
-      this->label_gmsh_err ("WARNING",from.c_str(), e.what());
+      this->label_gmsh_err ("WARN""ING",from.c_str(), e.what());
     }
     catch (...) {err= 1;
       log->label_fprintf (log->fmrerr, warnlabel.c_str(),
@@ -363,7 +364,7 @@ int Dmsh::make_part (const std::string model, const fmr::Local_int,
       catch (Dmsh::Thrown e) {err= 1;
         const auto from
           = "gmsh::model::mesh::partition (int ("+std::to_string(part_n)+"))";
-        this->label_gmsh_err ("WARNING",from.c_str(), e);
+        this->label_gmsh_err ("WARN""ING",from.c_str(), e);
       }
       catch (...) {err= 1;
         log->label_fprintf (log->fmrerr, warnlabel.c_str(),
@@ -408,7 +409,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
     try {gmsh::open (fname);}
     catch (Dmsh::Thrown e) {err= 1;
       const auto from = "gmsh::open ("+fname+")";
-      this->label_gmsh_err ("WARNING", from.c_str(), e);
+      this->label_gmsh_err ("WARN""ING", from.c_str(), e);
     }
     catch (...) {err= 1;
       fmr::perf::timer_pause (& this->time);
@@ -521,12 +522,12 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
 #endif
                 catch (Dmsh::Thrown e) {
                   const auto from = "gmsh::model::setCurrent ("+info.model+")";
-                  this->label_gmsh_err ("WARNING", from.c_str(), e);
+                  this->label_gmsh_err ("WARN""ING", from.c_str(), e);
                 }
                 catch (std::out_of_range& e) {
                   const auto from = "this->sims_names.at("+info.model
                     +") in read_geom_values (..)";
-                  this->label_gmsh_err ("WARNING",from.c_str(), e.what());
+                  this->label_gmsh_err ("WARN""ING",from.c_str(), e.what());
                 }
                 gmsh::model::mesh::getJacobians (info.type, intp,
                   jacs, dets, pts, info.tags[i], info.task, task_n);
@@ -590,7 +591,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
 #endif
           } } }
         break;
-      default : {}//TODO Print warning.
+      default : {}//TODO Print warn.
     }
     err= Data::read_geom_vals (id, vals);//TODO Remove this call?
     return err;
@@ -626,12 +627,12 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
 #endif
                 catch (Dmsh::Thrown e) {
                   const auto from = "gmsh::model::setCurrent ("+info.model+")";
-                  this->label_gmsh_err ("WARNING", from.c_str(), e);
+                  this->label_gmsh_err ("WARN""ING", from.c_str(), e);
                 }
                 catch (std::out_of_range& e) {
                   const auto from = "this->sims_names.at("+info.model
                     +") in read_local_vals (..)";
-                  this->label_gmsh_err ("WARNING",from.c_str(), e.what());
+                  this->label_gmsh_err ("WARN""ING",from.c_str(), e.what());
                 }
                 gmsh::model::mesh::getElementsByType (info.type, elem, conn,
                   info.tags[i], info.task, task_n);
@@ -646,7 +647,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
               //TODO cache elem tags?.
           } } }
         break;
-      default : {}//TODO Print warning.
+      default : {}//TODO Print warn.
     }
     err= Data::read_local_vals (id, vals);//TODO Remove this call?
     return err;
@@ -688,7 +689,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
       try {gmsh::model::remove ();}
       catch (Dmsh::Thrown e) {info.state.has_error= true;
         const auto from = "gmsh::model::remove () current: "+data_id;
-        this->label_gmsh_err ("WARNING", from.c_str(), e);
+        this->label_gmsh_err ("WARN""ING", from.c_str(), e);
       }
       const int dlevel=0;//TODO should be MPI level
       const fmr::Local_int thrd_n  = this->proc->get_stat()[dlevel].thrd_n;
@@ -739,11 +740,11 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
     catch (std::out_of_range &e) {err= 1;
       const auto from = "this->sims_names.at("+data_id
         +") in scan_model (..)";
-      this->label_gmsh_err ("WARNING",from.c_str(), e.what());
+      this->label_gmsh_err ("WARN""ING",from.c_str(), e.what());
     }
     catch (Dmsh::Thrown e) {err= 1;
       const auto from = "gmsh::model::setCurrent ("+data_id+")";
-      this->label_gmsh_err ("WARNING", from.c_str(), e);
+      this->label_gmsh_err ("WARN""ING", from.c_str(), e);
     }
     const auto gid = this->make_data_id (data_id,
       fmr::Tree_type::Sims,{}, fmr::Data::Geom_info);
@@ -772,12 +773,12 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
       double xmin=un, ymin=un, zmin=un, xmax=un, ymax=un, zmax=un;
       gmsh::model::getBoundingBox (-1,-1, xmin,ymin,zmin, xmax,ymax,zmax);
 #if 0
-      const uint bbox_d// uint avoids spurious conversion from int warning
+      const uint bbox_d// uint avoids spurious conversion from int warn
         = ((xmax-xmin) > 0.0 ? 1:0)
         + ((ymax-ymin) > 0.0 ? 1:0)
         + ((zmax-zmin) > 0.0 ? 1:0);
 #else
-      const uint bbox_d// uint avoids spurious conversion from int warning
+      const uint bbox_d// uint avoids spurious conversion from int warn
         = (fmr::math::are_close (xmax,xmin) ? 0:1)
         + (fmr::math::are_close (ymax,ymin) ? 0:1)
         + (fmr::math::are_close (zmax,zmin) ? 0:1);
@@ -859,7 +860,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
             elem_d = fmr::elem_form_d [fmr::enum2val (form)];
             mesh_d = (elem_d > mesh_d) ? elem_d : mesh_d;
           }else{
-            log->printf_err("WARNING Gmsh element type %i not supported.\n",
+            log->printf_err("WARN""ING Gmsh element type %i not supported.\n",
               elem_gmsh);
           }
           fmr::Local_int elem_n = 0;
@@ -1051,12 +1052,12 @@ int Dmsh::close (const std::string model) {int err=0;
 #endif
     catch (std::out_of_range& e) {err= 1;
       const auto from = "this->sims_names.at("+model+") in close (..)";
-      this->label_gmsh_err ("WARNING",from.c_str(), e.what());
+      this->label_gmsh_err ("WARN""ING",from.c_str(), e.what());
     }
     catch (Dmsh::Thrown e) {err= 1;
       const auto from = "gmsh::model::setCurrent ("
         +this->sims_names.at(model)+") in close (..)";
-      this->label_gmsh_err ("WARNING", from.c_str(), e);
+      this->label_gmsh_err ("WARN""ING", from.c_str(), e);
     }
     catch (...) {err= 1;
       const auto warnlabel = "WARN""ING "+this->task_name;
@@ -1077,12 +1078,13 @@ int Dmsh::close (const std::string model) {int err=0;
 #if 0
       gmsh::fltk::lock ();//TODO how to use this?
 #endif
+      const auto v = gmsh::view::add ("fmr:view:1", 1);//TODO store new view.
 #if 1
       if (err==0) {
         try {gmsh::graphics::draw ();}
         catch (Dmsh::Thrown e) {err= -1;
           const auto from = "gmsh::graphics::draw ()";
-          this->label_gmsh_err ("WARNING", from, e);
+          this->label_gmsh_err ("WARN""ING", from, e);
         }
         catch (...) {err= -1;}
       }
@@ -1090,50 +1092,52 @@ int Dmsh::close (const std::string model) {int err=0;
       if (err==0) {
         //int v = -1;
         //std::vector<int> vs; gmsh::view::getTags (vs);
-        const auto v = gmsh::view::add ("fmr:view:1", 1);//TODO store new view.
         if (v > 0) {
-          fmr::Local_int frame = 0;//TODO Store sim number instead of parsing.
+          fmr::Local_int frames = 0;//TODO Store sim number instead of parsing.
           const std::string delim = ".";
           const auto dlen = delim.length ();
           const auto nlen = model.length ();
           const auto pos  = model.find (delim);
           if (nlen > pos+dlen) {
             const std::string tok = model.substr (pos+dlen, model.length()-pos);
-            try {frame = std::stoi (tok);}// can throw std::invalid_argument
-            catch (...) {frame = 0;}      // or std::out_of_range
+            try {frames = std::stoi (tok);}// can throw std::invalid_argument
+            catch (...) {frames = 0;}      // or std::out_of_range
           }
           fmr::perf::timer_resume (&this->proc->time);
           const auto wall
             = 1e-9 * double (fmr::perf::timer_total_elapsed (this->proc->time));
           //
-          const double sims    = double   (frame) / 30.0;
+          const double sims    = double   (frames)/ 30.0;
           const double sims_mn = std::floor (sims / 60.0);
-          const double sims_sc = std::floor (sims - 60.0*sims_mn);
+          const double sims_sc = std::floor (sims - 60.0 * sims_mn);
           const double wall_mn = std::floor (wall / 60.0);
-          const double wall_sc = std::floor (wall - 60.0*wall_mn);
+          const double wall_sc = std::floor (wall - 60.0 * wall_mn);
+          //
+          const double char_per_sec = 2.0;// for progess bars
+          const int bsz = 31;
+          std::vector<char> buf(bsz+1,0);
+          int c=0;
           //
           auto fstr = std::string("");
-          auto wstr = std::string("");
-          std::vector<char> buf(31 +1,0); int c=0;
-          c = std::snprintf (&buf[0], 31," Sim time %2g:%02g",sims_mn, sims_sc);
-          if (c>0) {fstr = std::string (& buf[0]);}
-          c = std::snprintf (&buf[0], 31,"Wall time %2g:%02g",wall_mn, wall_sc);
-          if (c>0) {wstr = std::string (& buf[0]);}
-          // Add progress bars.
-          const double char_per_sec = 2.0;
-          int l = int(char_per_sec * sims);
-          fstr += " |";
-          if (l > 1) {fstr += std::string(uint(l-1),'=');}
+          c = std::snprintf (&buf[0],bsz," Sim time %2g:%02g", sims_mn,sims_sc);
+          if (c > 0) {fstr = std::string (& buf[0]);}
+          fstr += " |";// Add progress bar.
+          int l = int (char_per_sec * sims);
+          if (l > 1) {fstr += std::string (uint(l-1),'=');}
           if (l > 0) {fstr += "|";}
-          l = int(char_per_sec * wall);
-          wstr += " |";
-          if (l > 1) {wstr += std::string(uint(l-1),'-');}
-          if (l > 0) {wstr += "+";}
-          //
           gmsh::view::addListDataString (v, {10.0,15.0}, {fstr});
+#if 1
+          auto wstr = std::string("");
+          c = std::snprintf (&buf[0],bsz,"Wall time %2g:%02g", wall_mn,wall_sc);
+          if (c > 0) {wstr = std::string (& buf[0]);}
+          wstr += " |";// Add progress bar.
+          l = int (char_per_sec * wall);
+          if (l > 1) {wstr += std::string (uint(l-1),'-');}
+          if (l > 0) {wstr += "+";}
           gmsh::view::addListDataString (v, {10.0,30.0}, {wstr});
+#endif
         } else {
-          log->label_fprintf (log->fmrerr, "WARNING Dmsh",
+          log->label_fprintf (log->fmrerr, "WARN""ING Dmsh",
             "Could not add view %s.\n","fmr:view:1");
         }
         //TODO Only OpenMP master thread does FLTK operations. Pending ops are
@@ -1146,7 +1150,7 @@ int Dmsh::close (const std::string model) {int err=0;
         try {gmsh::fltk::awake ("update");}
         catch (Dmsh::Thrown e) {err= -1;
           const auto from = "gmsh::fltk::awake (\"update\")";
-          this->label_gmsh_err ("WARNING", from, e);
+          this->label_gmsh_err ("WARN""ING", from, e);
         }
         catch (...) {err= -1;}
 #endif
@@ -1155,41 +1159,57 @@ int Dmsh::close (const std::string model) {int err=0;
           try {gmsh::fltk::update ();}
           catch (Dmsh::Thrown e) {err= -1;
             const auto from = "gmsh::fltk::update ()";
-            this->label_gmsh_err ("WARNING", from, e);
+            this->label_gmsh_err ("WARN""ING", from, e);
           }
           catch (...) {err= -1;}
 #endif
-        if (err==0) {
+        const auto draw_done = fmr::perf::get_now_ns();
+        if (log->timing >= this->verblevel) {//TODO Remove?
+          log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu\n",
+            this->proc->get_proc_id(), model.c_str(), "view_draw",
+               start, draw_done);
+          if (log->verbosity >= this->verblevel) {
+            const auto d = fmr::perf::format_time_units (draw_done - start);
+            auto label = "View "+this->task_name+" draw";
+            log->label_fprintf (log->fmrout, label.c_str(),
+              "%s in %s.\n", model.c_str(), d.c_str());
+        } }
+        if (err == 0) {
 #if 0
           gmsh::fltk::setCurrentWindow ();
           if (err==0) {
             try {gmsh::graphics::draw ();}
             catch (Dmsh::Thrown e) {err= -1;
               const auto from = "gmsh::graphics::draw ()";
-              this->label_gmsh_err ("WARNING", from, e);
+              this->label_gmsh_err ("WARN""ING", from, e);
             }
             catch (...) {err= -1;}
           }
 #endif
           const auto fname = model+".png";
-//FIXME No worky          try {gmsh::fltk::lock();gmsh::write (fname);gmsh::fltk::unlock();}
+//FIXME no worky K4         try {gmsh::fltk::lock();gmsh::write (fname);gmsh::fltk::unlock();}
           try {gmsh::write (fname);}
           catch (Dmsh::Thrown e) {err= -1;
             const auto from = "gmsh::write ("+fname+")";
-            this->label_gmsh_err ("WARNING", from.c_str(), e);
+            this->label_gmsh_err ("WARN""ING", from.c_str(), e);
           }
           catch (...) {err= -1;}
-      } }// }
-      if (this->verblevel <= log->timing) {//TODO Remove?
-        log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu\n",
-          this->proc->get_proc_id(), model.c_str(), "view",
-          start, fmr::perf::get_now_ns());
-    } }
-    if (err<=0) {err=0;gmsh::fltk::lock(); gmsh::fltk::unlock();
-      try {gmsh::model::remove ();}//FIXME Wait until write (above) completes.
+          const auto save_done = fmr::perf::get_now_ns();
+          if (log->timing >= this->verblevel) {//TODO Remove?
+            log->proc_printf ("%i,\"%s\",\"%s\",%lu,%lu\n",
+              this->proc->get_proc_id(), model.c_str(), "view_save",
+                draw_done, save_done);
+            if (log->verbosity >= this->verblevel) {
+              const auto s = fmr::perf::format_time_units (save_done-draw_done);
+              const auto label = "View "+this->task_name+" save";
+              log->label_fprintf (log->fmrout, label.c_str(),
+                "%s in %s.\n", model.c_str(), s.c_str());
+    } } } } }
+    if (err<=0) {err=0;//TODO no worky gmsh::fltk::lock(); gmsh::fltk::unlock();
+      try {gmsh::model::remove ();}//TODO Wait until write (above) completes?
       catch (Dmsh::Thrown e) {err= 1;
         const auto from = "gmsh::model::remove () current: "+model;
-        this->label_gmsh_err ("WARNING", from.c_str(), e);
+        this->label_gmsh_err ("WARN""ING", from.c_str(), e);
       }
       catch (...) {err= 1;}
       if (err<=0) {this->open_n--;}
@@ -1203,7 +1223,7 @@ int Dmsh::close (const std::string model) {int err=0;
     try {gmsh::model::setCurrent (model);}
     catch (Dmsh::Thrown e) {err= 1;
       const auto from = "gmsh::model::setCurrent ("+model+")";
-      this->label_gmsh_err ("WARNING", from.c_str(), e);
+      this->label_gmsh_err ("WARN""ING", from.c_str(), e);
     }
     catch (...) {err= 1;
 #ifdef FMR_DEBUG
@@ -1216,7 +1236,7 @@ int Dmsh::close (const std::string model) {int err=0;
       try {gmsh::model::remove ();}
       catch (Dmsh::Thrown e) {err= 1;
         const auto from = "gmsh::model::remove () current: "+model;
-        this->label_gmsh_err ("WARNING", from.c_str(), e);
+        this->label_gmsh_err ("WARN""ING", from.c_str(), e);
       }
       catch (...) {err= 1;}
       if (err<=0) {this->open_n--;}
