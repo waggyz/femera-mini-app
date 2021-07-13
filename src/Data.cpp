@@ -572,7 +572,7 @@ std::deque<std::string> Data::get_sims_names () {
         auto D = this->task.get<Data>(i);
          if (D) {if (D != this) {
           auto names = D->get_sims_names ();
-          while (!names.empty()){
+          while (!names.empty()) {
 #if 0
             if (this->sims_names.insert (names.back()).second == false) {
               model_names.push_back (names.back());
