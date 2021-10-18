@@ -30,11 +30,12 @@ class Proc : public Work {
     };
     typedef uint64_t Team_id;// cast-compatible with ::MPI_comm from mpi.h
   // variables ----------------------------------------------------------------
-  protected:
-    int hier_lv =-1;// default <0 : not in processing hierarchy
-    int proc_n  = 1;
-    int core_n  = 1;
-    int logi_n  = 1;
+  protected://TODO Make private with get/setters.
+    int my_master = 0;
+    int hier_lv   =-1;// default <0 : not in processing hierarchy
+    int proc_n    = 1;
+    int core_n    = 1;
+    int logi_n    = 1;
     Team_id team_id = 0;
   private:
     std::set<int> handled_opts ={};

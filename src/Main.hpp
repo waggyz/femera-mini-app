@@ -13,8 +13,11 @@ class Main : public Work {// singleton: only one instance on each MPI thread
   public:
     virtual ~Main ();
     Main ()=default;
-    Main (Main const&)=delete;// not copyable
+    //
+    Main (Main const&)=delete;// not copyable: can only have one singleton
     Main operator= (const Main&)=delete;
+    Main (Main&&) = delete;
+    Main& operator= (Main&&) = delete;
     //
     virtual int add_new_task (Femera::Base_type type, Work* add_to);
     virtual int add_new_task (Femera::Plug_type type, Work* add_to);
@@ -25,6 +28,10 @@ class Main : public Work {// singleton: only one instance on each MPI thread
     int add_model_name (const std::string);
     int run ();
     int clear ();
+#if 0
+    int init (std::vector<std::string>);//TODO For Pybind11
+    //TODO convert to argc,argv** and call err=fmr::init(argc,argv) in main.hpp
+#endif
   protected:
     int prep () override;
     int init_task (int* argc, char** argv) override;

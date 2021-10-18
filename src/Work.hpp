@@ -17,7 +17,8 @@
 namespace Femera{
 class Proc;// Forward-declare
 class Data;
-class Work {//TODO Refactor to the curiously recurrent template pattern (CRTP)
+class Work {// This is an abstract (pure virtual) class (interface).
+  //TODO Refactor Work to the curiously recurrent template pattern (CRTP)
   // to avoid FMR_CAST_TO_DERIVED use in task->get* methods?
   // Variables ----------------------------------------------------------------
   public:
@@ -33,14 +34,13 @@ class Work {//TODO Refactor to the curiously recurrent template pattern (CRTP)
     std::string meter_unit ="unit";
     int verblevel = 1;
   protected:
-    int my_master = 0;
   private:
   // Methods ------------------------------------------------------------------
   public:
     Work           ()           =default;
     Work           (Work const&)=delete;// not copyable
     void operator= (const Work&)=delete;
-    virtual ~Work  ();// virtual destructor for virtual class
+    virtual ~Work  ()=0;// pure virtual destructor indicates Work is abstract
     //
     int print_task_time (const std::string label_suffix);
     //
@@ -57,6 +57,7 @@ class Work {//TODO Refactor to the curiously recurrent template pattern (CRTP)
     // e.g., a call to Derived::prep() will call Work::prep().
     virtual int prep ();//TODO or virtual int init() ?
     virtual int chck ();//TODO chk?
+    //
     virtual std::string print_summary ();
     virtual std::string print_details ();
   protected:

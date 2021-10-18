@@ -1,3 +1,4 @@
+#!/usr/bin/make
 SHELL:=/bin/bash
 
 -include config.local

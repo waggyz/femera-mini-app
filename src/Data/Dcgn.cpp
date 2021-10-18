@@ -457,7 +457,7 @@ int Dcgn::add_cgns_here (const std::string fname, const fmr::Data_id id,
   if (!err) {this->time.bytes += (3 + path->deep) * sizeof(int)
     + path->deep * this->label_size * sizeof(char);
   }
-  err= this->data->add_data_file (cid, this, fname);//TODO handle err
+  err= this->data->add_file (cid, this, fname);//TODO handle err
   return err;
 }
 int Dcgn::read_geom_vals (const fmr::Data_id id, fmr::Geom_float_vals &vals) {

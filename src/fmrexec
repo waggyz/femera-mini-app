@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# fmrexec -np 2 --bind-to core -map-by node:pe=2 build/femera/mini
+# fmrexec -n 2 --bind-to core -map-by node:pe=2 build/femera/mini -n2
 #
 if [ 1 -eq 1 ]; then
   mpiexec "$@"

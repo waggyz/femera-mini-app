@@ -37,7 +37,7 @@ If (frame >= 1)
   poly_n = Floor ((frame-1) / 30)    + 3;
   poly_r = 0.4 * ((frame-1) % 30)/30 + 0.05;
 
-  If (use_opencascade > 0)
+  If (use_opencascade >= 1)
     SetFactory ("OpenCASCADE");
   EndIf
 
@@ -54,13 +54,12 @@ If (frame >= 1)
   Curve Loop (1) = {1:poly_n};
   Surface (1) = {1};
 
-  If (use_opencascade > 0.99)
+  If (use_opencascade >= 1)
     Box (1) = {0,0,0, box_x,box_y,box_z};
 
     fiber[] = Extrude {0,0,box_z} {Surface{1};};
 
     BooleanFragments {Volume{:}; Delete;} {Volume{1}; Delete;}
-
     Physical Surface (1) = {(poly_n+9):(poly_n+15)};// Matrix surface
     Physical Surface (2) = {(poly_n+3):(poly_n+7)};// Matrix/fiber interface
     Physical Surface (3) = {1,poly_n+8};// Fiber section surface
@@ -81,8 +80,12 @@ If (frame >= 1)
     Show {Surface {1,(poly_n+5):(poly_n+10),poly_n+13,poly_n+15};}
     Endif
   EndIf//======================================================================
-  If (use_opencascade <= 0.99)
+  If (use_opencascade < 1)
     //TODO Twisting extrude not available with OpenCascade.
+    //Error   : 'tests/geo/fiber-polygon-anim.geo', line 65 :
+    //          Twisting extrude not available with OpenCASCADE geometry kernel
+    fiber[] = Extrude {{0,0,box_z},
+      {0,0,1}, {box_x/2,box_y/2,box_z/2}, 2*Pi/poly_n} {Surface{1};};
     // Fiber
 
     //twist = 2*Pi / poly_n;

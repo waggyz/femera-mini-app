@@ -1,10 +1,11 @@
-#include "mpi.h"
+//#include "mpi.h"
 #include "gtest/gtest.h"
 
 #include "core.h"
 #if 0
 using namespace Femera;
 
+// Work is abstract (pure virtual) and cannot be instantiated for testing.
 Work* work = new Work();
 
 TEST( Work, TaskName ){

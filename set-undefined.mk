@@ -1,3 +1,4 @@
+#!/usr/bin/make
 # Set undefined variables needed by the Makefile.
 
 ifndef COMPILED_BY

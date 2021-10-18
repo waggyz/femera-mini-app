@@ -13,13 +13,17 @@ namespace fmr {
     data::Layout        layout = data::Layout::Block ;
     data::State   stored_state = data::State()       ;
     data::State   memory_state = data::State()       ;
+    //TODO Record access (time & count) to identify optimization opportunies:
+    //TODO fmr::perf::Meter file_time = fmr::perf::Meter ();// I/O access
+    //TODO fmr::perf::Meter bulk_time = fmr::perf::Meter ();// memory access
+    // These can be used together to check if data was loaded but never used.
     bool isok [8 * sizeof(T)];// state of heterogeneous data type items
 #if 0
     //TODO std::valarray<Dim_int> dims = {1};// array dimensions?
     //TODO data.size = prod (dims) << order; // native complex is <<(order-1)
 #endif
 #if 0
-    void clear (){
+    void clear () {//TODO needed?
       this->data.resize(0);
            algebra = math::Real          ;
               type = Data::Unknown       ;

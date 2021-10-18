@@ -74,7 +74,7 @@ class Mesh : public Geom {// Pure virtual? Mesh?
 namespace fmr {
   namespace math {//TODO move to math.hpp
   template<typename T>
-  inline T det3 (const T* m) {// m is 3x3
+  inline T calc_det3 (const T* m) {// m is 3x3
     // FLOPS: 4*3 + 1 = 12
     return(
         m[3* 0+0] * (m[3* 1+1] * m[3* 2+2] - m[3* 2+1] * m[3* 1+2])
@@ -82,10 +82,10 @@ namespace fmr {
       + m[3* 0+2] * (m[3* 1+0] * m[3* 2+1] - m[3* 2+0] * m[3* 1+1]) );
   }
   template<typename T>
-  inline int inv3 (T* m, const T det) {// returns 3x3 inverse in m
+  inline int calc_inv3 (T* m, const T det) {// returns 3x3 inverse in m
     // FLOPS: 4*9 + 1 = 37
 #if 0
-    if (det==0) {return 1;}//TODO
+    if (det==0) {return 1;}//TODO ?
 #endif
     const T dinv = T(1.0) / det;
     FMR_PRAGMA_OMP_SIMD
@@ -109,6 +109,7 @@ namespace fmr {
   template<typename T>
   inline int perf_inv3  (fmr::perf::Meter* time, const fmr::Local_int elem_n,
     const T* m) {
+    //NOTE same signature as calc_inv3 (..)
     time->flops += elem_n * 37;
     time->bytes += elem_n *(10 +9) * sizeof (m);// read + write
     return 0;
@@ -116,31 +117,32 @@ namespace fmr {
   }//end fmr::math:: namespace
   namespace elem {//TODO move to elem.hpp
   template<typename T>
-  inline fmr::Local_int make_inv3_jacdet (T* FMR_RESTRICT jacs,
+  inline fmr::Local_int calc_inv3_jacd (T* FMR_RESTRICT jacd,
     const fmr::Local_int conn_n, const fmr::Local_int* FMR_RESTRICT conn,
-    const T* FMR_RESTRICT shpg,//TODO e.g. T jacs FMR_RESTRICT &
+    const T* FMR_RESTRICT shpg,//TODO e.g. T jacd FMR_RESTRICT &
     const T* FMR_RESTRICT x, const T* FMR_RESTRICT y, const T* FMR_RESTRICT z) {
-    const auto jacs_sz = fmr::elem::jacs_size [3];//TODO Only 3D
+    const auto jacd_sz = fmr::elem::jacs_size [3];
     FMR_PRAGMA_OMP_SIMD
-    for (fmr::Local_int i=0; i<jacs_sz; i++) {jacs [i] = T (0.0);}
+    for (fmr::Local_int i=0; i<jacd_sz; i++) {jacd [i] = T (0.0);}
     //TODO_FMR_PRAGMA_OMP_SIMD
     for (fmr::Local_int j=0; j<conn_n; j++) {//TODO permute loops?
-    for (fmr::Local_int i=0; i<3; i++) {
-      jacs [3* i+0] += shpg [3* j+i] * x [conn[j]];//TODO transpose shpg?
-      jacs [3* i+1] += shpg [3* j+i] * y [conn[j]];
-      jacs [3* i+2] += shpg [3* j+i] * z [conn[j]];
+      for (fmr::Local_int i=0; i<3; i++) {
+        jacd [3* i+0] += shpg [3* j+i] * x [conn[j]];//TODO transpose shpg?
+        jacd [3* i+1] += shpg [3* j+i] * y [conn[j]];
+        jacd [3* i+2] += shpg [3* j+i] * z [conn[j]];
     } }// 2* 3*3*conn_n FLOP
-    jacs [jacs_sz-1] = fmr::math::det3 (jacs);// determinant 12 FLOP
-    fmr::math::inv3 (jacs, jacs [jacs_sz-1]);// 37 FLOP
-    return jacs [jacs_sz-1] <= T (0.0);
+    jacd [jacd_sz-1] = fmr::math::calc_det3 (jacd);// determinant 12 FLOP
+    fmr::math::calc_inv3 (jacd, jacd [jacd_sz-1]);// 37 FLOP
+    return jacd [jacd_sz-1] <= T (0.0);
   }
   template<typename T>
-  inline int perf_jacobian (fmr::perf::Meter* time, const fmr::Local_int elem_n,
-    const T* FMR_RESTRICT jacs,
+  inline int perf_inv3_jacd (fmr::perf::Meter* time,
+    const fmr::Local_int elem_n, const T* FMR_RESTRICT jacs,
     const fmr::Local_int conn_n, const fmr::Local_int* FMR_RESTRICT conn,
     const T* FMR_RESTRICT,
     const T* FMR_RESTRICT x, const T* FMR_RESTRICT, const T* FMR_RESTRICT) {
-    const auto jacs_sz = fmr::elem::jacs_size [3];//TODO Only 3D
+    //NOTE same signature as calc_inv3_jacd (..)
+    const auto jacs_sz = fmr::elem::jacs_size [3];
     time->flops += elem_n * (2*3*3*conn_n + 37+12) + 1;
     time->bytes += elem_n * (
       3 * conn_n  * sizeof (   x[0])  // read

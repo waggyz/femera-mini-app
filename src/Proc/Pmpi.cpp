@@ -12,10 +12,8 @@ comm {Proc::Team_id (MPI_COMM_WORLD) },
 mpi_required {int (MPI_THREAD_SERIALIZED) }{
   // MPI_THREAD_SERIALIZED used: infiniband use with MPI may not be thread safe
   this->proc=P; this->data=D; this->log=proc->log;
-  //this-> comm         = Proc::Team_id( MPI_COMM_WORLD );
-  //this-> mpi_required = MPI_THREAD_SERIALIZED;
   this-> work_type = work_cast (Plug_type::Pmpi);
-//  this-> base_type = work_cast (Base_type::Proc);
+//  this-> base_type = work_cast (Base_type::Proc);//TODO
   this-> task_name ="MPI";
   this-> verblevel = 2;
   this-> hier_lv   = 1;
@@ -32,11 +30,24 @@ int Pmpi::init_task( int* argc, char** argv ){ int err=0;
   this-> prep ();
   int is_mpi_init=0;
   MPI_Initialized(& is_mpi_init);
-  if( !err && !is_mpi_init ){
+  if (!err && !is_mpi_init){
+#undef FMR_MPI_COPY_ARGS
+#ifdef FMR_MPI_COPY_ARGS
+    auto argc2=argc[0];// Copy argc and argv so the mpi args don't get eaten.
+    char** argv2 = new char*[argc2];
+    for(int i=0; i<argc2; ++i){
+      argv2[i] = new char[strlen(argv[i])+1];
+      strcpy(argv2[i],argv[i]);
+    }
+    err= MPI_Init_thread(&argc2,&argv2, MPI_THREAD_SERIALIZED,&this->mpi_provided);
+    for(int i=0; i<argc2; ++i) {delete [] argv2[i];}
+    delete [] argv2;
+#else
     err= MPI_Init_thread(argc,&argv, MPI_THREAD_SERIALIZED,&this->mpi_provided);
-    MPI_Comm c;
-    if( !err ){// good practice: use a copy of MPI_COMM_WORLD
-      err= MPI_Comm_dup (MPI_COMM_WORLD, &c);// exit_task() frees
+#endif
+    MPI_Comm c=nullptr;
+    if( !err ){// Good practice: use a copy of MPI_COMM_WORLD.
+      err= MPI_Comm_dup (MPI_COMM_WORLD, &c);// exit_task() frees this
     }
     if( !err ){
       this->comm = Proc::Team_id(c);
@@ -52,7 +63,7 @@ int Pmpi::exit_task (int err) {
 #endif
   fmr::perf::timer_resume (&this->time);
   int is_mpi_init=0;
-//    this->barrier ();
+//    this->barrier ();//TODO NEEDED?
   MPI_Initialized (& is_mpi_init);
 #if 1
   if( err>0 ){ log-> printf_err("ERROR Femera returned %i\n",err); }
@@ -111,7 +122,7 @@ Proc::Team_id Pmpi:: get_comm (){
 int Pmpi:: set_comm ( Proc::Team_id c ){int err=0;
   if(this-> comm != Proc::Team_id(MPI_COMM_WORLD)
     && this-> comm != Proc::Team_id(MPI_COMM_NULL) ){
-    //err= MPI_Comm_free (&this-> comm );
+    //err= MPI_Comm_free (&this-> comm );//TODO do this?
     MPI_Comm f=MPI_Comm(this-> comm);
     err=MPI_Comm_free(& f );
   }
@@ -163,7 +174,7 @@ inline std::string Pmpi::reduce( std::string strings ){
   const int tag=0;
   for(int src=0; src < this->proc_n; src++){
     if((this->get_proc_id() == this->my_master) && (src !=this->my_master) ){
-      // master recieves
+      // master receives
       MPI_Status stat;
       uint len=0;
       MPI_Recv(&len, 1, MPI_UNSIGNED, src, tag, MPI_Comm(this->get_comm()),

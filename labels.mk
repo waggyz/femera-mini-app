@@ -1,3 +1,4 @@
+#!/usr/bin/make
 # Labels needs extra spacing.
 # Make action labels
 SPCS:=$(shell echo "       ")

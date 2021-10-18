@@ -1,4 +1,4 @@
-# Makefile syntax
+#!/usr/bin/make
 
 COMPILED_BY:=Your Name <unknown@nasa.gov>
 INSTALL_DIR:=/u/username/.local

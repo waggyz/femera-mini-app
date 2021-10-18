@@ -301,7 +301,7 @@ namespace Femera {
       case 3 : for (fmr::Local_int elem_i=0; elem_i<en; elem_i++) {
         const fmr::Global_int ci = elem_i * conn_n;
         const fmr::Global_int ji = elem_i * jacs_sz;
-        bad_jacs_n += fmr::elem::make_inv3_jacdet (& jacs[ji],
+        bad_jacs_n += fmr::elem::calc_inv3_jacd (& jacs[ji],
           vert_n, & conn[ci], & shpg[0], x,y,z);// 3D coor block layout
       } break;
       default : {}//TODO Warn.
@@ -334,7 +334,7 @@ namespace Femera {
     }
 #endif
     if (this->verblevel <= this->proc->log->timing) {
-      fmr::elem::perf_jacobian (&this->time, elem_n, jacs,
+      fmr::elem::perf_inv3_jacd (&this->time, elem_n, jacs,
         vert_n, conn, & shpg[0], x,y,z);
     }
 #ifdef FMR_DEBUG

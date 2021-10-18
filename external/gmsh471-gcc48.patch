@@ -1,0 +1,203 @@
+diff --git a/contrib/hxt/core/include/hxt_mesh.h b/contrib/hxt/core/include/hxt_mesh.h
+index 8a9d5e9..c878d46 100644
+--- a/contrib/hxt/core/include/hxt_mesh.h
++++ b/contrib/hxt/core/include/hxt_mesh.h
+@@ -14,6 +14,9 @@ extern "C" {
+ 
+ #define HXT_COLOR_OUT UINT32_MAX
+ 
++//dw: Define if available (undef for gcc 4.8.5)
++#undef HAS_OMP_FOR_SIMD
++
+ typedef struct {
+   // vertices
+   struct {
+diff --git a/contrib/hxt/tetMesh/src/hxt_tetDelaunay.c b/contrib/hxt/tetMesh/src/hxt_tetDelaunay.c
+index d2bfdd9..a41659b 100644
+--- a/contrib/hxt/tetMesh/src/hxt_tetDelaunay.c
++++ b/contrib/hxt/tetMesh/src/hxt_tetDelaunay.c
+@@ -1396,8 +1396,11 @@ static HXTStatus parallelDelaunay3D(HXTMesh* mesh,
+     for (unsigned i=firstPassEver; i<npasses; i++) {
+       HXT_CHECK( hxtVerticesSort(verticesToInsert+passes[i], passes[i+1]-passes[i]) );
+     }
+-
++#ifdef HAS_OMP_FOR_SIMD
+     #pragma omp parallel for simd aligned(nodeInfo:SIMD_ALIGN)
++#else
++    #pragma omp parallel for
++#endif
+     for (uint32_t i=0; i<nToInsert; i++) {
+       nodeInfo[i].hilbertDist = verticesToInsert[i].padding.hilbertDist;
+     }
+@@ -1428,7 +1431,11 @@ static HXTStatus parallelDelaunay3D(HXTMesh* mesh,
+       HXT_CHECK( hxtAlignedMalloc(&vertCopy, vertSize) );
+       HXT_CHECK( hxtAlignedMalloc(&sizeCopy, sizeSize) );
+ 
++#ifdef HAS_OMP_FOR_SIMD
+       #pragma omp parallel for simd aligned(vertCopy,sizeCopy,nodeInfo: SIMD_ALIGN)
++#else
++      #pragma omp parallel for
++#endif
+       for (uint32_t i=0; i<nToInsert; i++) {
+         vertCopy[i] = verticesToInsert[nodeInfo[i].node-options->insertionFirst];
+         sizeCopy[i] = sizesToInsert[nodeInfo[i].node-options->insertionFirst];
+@@ -1519,7 +1526,11 @@ static HXTStatus parallelDelaunay3D(HXTMesh* mesh,
+           HXT_CHECK( hxtMoore(options->bbox, vertices, mesh->vertices.num - nToInsert + passEnd, bboxShift) );
+         }
+ 
++#ifdef HAS_OMP_FOR_SIMD
+         #pragma omp parallel for simd aligned(nodeInfo:SIMD_ALIGN)
++#else
++        #pragma omp parallel for
++#endif
+         for (uint32_t i=passStart; i<passEnd; i++) {
+           nodeInfo[i].hilbertDist = vertices[nodeInfo[i].node].padding.hilbertDist;
+         }
+@@ -1932,7 +1943,11 @@ static HXTStatus parallelDelaunay3D(HXTMesh* mesh,
+       }
+ 
+       // 4th: update tetrahedra.node accordingly
++#ifdef HAS_OMP_FOR_SIMD
+       #pragma omp for simd
++#else
++      #pragma omp for
++#endif
+       for (uint64_t i=0; i<4*mesh->tetrahedra.num; i++) {
+         uint32_t index = mesh->tetrahedra.node[i];
+         if(index>=firstShifted && index!=HXT_GHOST_VERTEX)
+@@ -2030,7 +2045,11 @@ HXT_ASSERT(options!=NULL);
+   HXT_CHECK( hxtAlignedMalloc(&nodeInfo, nToInsert*sizeof(HXTNodeInfo)) );
+ 
+   // we fill nodeInfo with the indices of each vertices to insert...
++#ifdef HAS_OMP_FOR_SIMD
+   #pragma omp parallel for simd
++#else
++  #pragma omp parallel for
++#endif
+   for (uint32_t i=0; i<nToInsert; i++) {
+     nodeInfo[i].node = options->insertionFirst + i;
+     nodeInfo[i].status = HXT_STATUS_TRYAGAIN;
+diff --git a/contrib/hxt/tetMesh/src/hxt_tetNodalSize.c b/contrib/hxt/tetMesh/src/hxt_tetNodalSize.c
+index 5e94dee..c8ad8ba 100644
+--- a/contrib/hxt/tetMesh/src/hxt_tetNodalSize.c
++++ b/contrib/hxt/tetMesh/src/hxt_tetNodalSize.c
+@@ -17,7 +17,11 @@ HXTStatus hxtNodalSizesInit(HXTMesh* mesh, HXTNodalSizes* nodalSizes)
+   /*********************************************************************
+    first step: compute the missing nodalSizes from triangles and lines *
+    *********************************************************************/
++#ifdef HAS_OMP_FOR_SIMD
+   #pragma omp parallel for simd
++#else
++  #pragma omp parallel for
++#endif
+   for (uint32_t i = 0; i<mesh->vertices.num; i++) {
+     if(mesh->vertices.coord[4 * i + 3] <= 0.0) {
+       mesh->vertices.coord[4 * i + 3] = 0.0; // we use that as a counter to do the average...
+@@ -81,7 +85,11 @@ HXTStatus hxtNodalSizesInit(HXTMesh* mesh, HXTNodalSizes* nodalSizes)
+       }
+   }
+ 
++#ifdef HAS_OMP_FOR_SIMD
+   #pragma omp parallel for simd
++#else
++  #pragma omp parallel for
++#endif
+   for (uint32_t i=0; i<mesh->vertices.num; i++)
+   {
+     if(mesh->vertices.coord[4 * i + 3] == DBL_MAX)
+diff --git a/contrib/hxt/tetMesh/src/hxt_tetOpti.c b/contrib/hxt/tetMesh/src/hxt_tetOpti.c
+index 20e5de2..4822b2c 100644
+--- a/contrib/hxt/tetMesh/src/hxt_tetOpti.c
++++ b/contrib/hxt/tetMesh/src/hxt_tetOpti.c
+@@ -31,7 +31,11 @@ static inline void unsetConflictFlag(HXTMesh* mesh, uint64_t tet) {
+ }
+ 
+ static void conflictFlagsInit(HXTMesh* mesh, HXTGroup2* badTets, uint64_t num) {
++#ifdef HAS_OMP_FOR_SIMD
+   #pragma omp parallel for simd
++#else
++  #pragma omp parallel for
++#endif
+   for(uint64_t i=0; i<num; i++) {
+     setConflictFlag(mesh, badTets[i].v[1]);
+   }
+@@ -295,7 +299,11 @@ static HXTStatus threadLocals_update(HXTMesh* mesh, HXTBbox* bbox,
+                                      int badTetAlreadySorted)
+ {
+   const uint64_t bit63 = UINT64_C(1)<<63;
++#ifdef HAS_OMP_FOR_SIMD
+   #pragma omp parallel for simd
++#else
++  #pragma parallel omp for
++#endif
+   for(uint64_t i=0; i<shared->badTets.num; i++) {
+     shared->badTets.array[i].v[0] &= ~bit63;
+   }
+@@ -316,7 +324,11 @@ static HXTStatus threadLocals_update(HXTMesh* mesh, HXTBbox* bbox,
+   }
+ 
+   if(changePartitionCurve || !badTetAlreadySorted) {
++#ifdef HAS_OMP_FOR_SIMD
+     #pragma omp parallel for simd aligned(badTets:SIMD_ALIGN)
++#else
++    #pragma omp parallel for
++#endif
+     for (uint64_t i=0; i<shared->badTets.num; i++) {
+       uint64_t curTet = badTets[i].v[1];
+       uint32_t* nodes = &mesh->tetrahedra.node[4*curTet];
+diff --git a/contrib/hxt/tetMesh/src/hxt_tetRefine.c b/contrib/hxt/tetMesh/src/hxt_tetRefine.c
+index aa4dc22..d694e12 100644
+--- a/contrib/hxt/tetMesh/src/hxt_tetRefine.c
++++ b/contrib/hxt/tetMesh/src/hxt_tetRefine.c
+@@ -15,7 +15,11 @@
+ // mark all the points which are in mesh->(points | lines | triangles)
+ static void markMeshPoints(HXTMesh* mesh)
+ {
++#ifdef HAS_OMP_FOR_SIMD
+   #pragma omp parallel for simd
++#else
++  #pragma omp parallel for
++#endif
+   for(uint32_t i=0; i<mesh->vertices.num; i++) {
+     mesh->vertices.coord[4*i+3] = 0.0;
+   }
+@@ -65,7 +69,11 @@ HXTStatus hxtEmptyMesh(HXTMesh* mesh, HXTDelaunayOptions* delOptions)
+   delOptions->perfectDelaunay = 0;
+ 
+ #ifdef DEBUG
++#ifdef HAS_OMP_FOR_SIMD
+   #pragma omp parallel for simd aligned(nodeInfo:SIMD_ALIGN)
++#else
++  #pragma omp parallel for
++#endif
+   for (uint32_t i=0; i<numToInsert; i++) {
+     if(nodeInfo[i].status!=HXT_STATUS_TRUE){
+       HXT_WARNING("point %u of the empty mesh was not inserted\n", nodeInfo[i].node);
+diff --git a/contrib/hxt/tetMesh/src/hxt_vertices.c b/contrib/hxt/tetMesh/src/hxt_vertices.c
+index 2c201cb..99b5a53 100644
+--- a/contrib/hxt/tetMesh/src/hxt_vertices.c
++++ b/contrib/hxt/tetMesh/src/hxt_vertices.c
+@@ -319,7 +319,11 @@ static inline uint32_t getNodeInfoDist32(HXTNodeInfo*  const __restrict__ nodeIn
+ 
+ /* for the non-static function, use a 22 bit key and a sort with two pass so we don't need to copy */
+ HXTStatus hxtVerticesShuffle(HXTVertex* const __restrict__ vertices, const uint32_t n){
++#ifdef HAS_OMP_FOR_SIMD
+   #pragma omp parallel for simd
++#else
++  #pragma omp parallel for
++#endif
+   for (uint32_t i=0; i<n; i++){
+     vertices[i].padding.hilbertDist = fastHash(i);
+   }
+@@ -330,7 +334,11 @@ HXTStatus hxtVerticesShuffle(HXTVertex* const __restrict__ vertices, const uint3
+ 
+ /* for the non-static function, use a 22 bit key and a sort with two pass so we don't need to copy */
+ HXTStatus hxtNodeInfoShuffle(HXTNodeInfo* const __restrict__ nodeInfo, const uint32_t n){
++#ifdef HAS_OMP_FOR_SIMD
+   #pragma omp parallel for simd
++#else
++  #pragma omp parallel for
++#endif
+   for (uint32_t i=0; i<n; i++){
+     nodeInfo[i].hilbertDist = fastHash(i);
+   }

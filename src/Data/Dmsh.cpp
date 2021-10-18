@@ -153,22 +153,34 @@ namespace Femera {
       auto optind2=optind; auto optarg2=optarg;
       opterr = 0; int optchar;
       while ((optchar = getopt (argc[0], argv,
-        "d::v::t::hi:o:m:n:s:x:")) != -1){
+        "d::v::t::hi:o:m:n:s:x:")) != -1) {
         // x:  requires an argument
         // x:: optional argument (Gnu compiler)
-        switch (optchar){
+        switch (optchar) {
           case 's':{this->proc->opt_add (optchar);
-            this->display_string = std::string(optarg); break; }
-          case '?':{break; }
-          default :{break; }//TODO
+            this->display_string = std::string (optarg); break;}
+          case '?':{break;}
+          default :{break;}//TODO
       } }
       const bool read_gmsh_config = false;
-      // unknown opt error: gmsh::initialize (argc[0], argv, read_gmsh_config);
+#if 0
       //TODO Maybe can fix by handling all non-Gmsh args above?
+      // exit 1 on unknown option error:
+      try {gmsh::initialize (argc[0], argv, read_gmsh_config);}// Doesn't throw.
+      catch (Dmsh::Thrown e) {err= -1;
+        this->label_gmsh_err ("WARN""ING",
+          "gmsh::initialize (argc, argv, ?)", e);
+      }
+      catch (...) {//err= -1;
+        log->label_fprintf (log->fmrerr, "WARN""ING Dmsh",
+          "did not initialize properly.\n");
+      }
+#else
       gmsh::initialize (0, nullptr, read_gmsh_config);// init w/out args.
+#endif
       gmsh::option::setNumber ("General.Verbosity", Dmsh::Optval(0));
       if (this->display_string.size() > 0) {
-#if 0//def FMR_DEBUG
+#ifdef FMR_DEBUG
         log->label_fprintf (log->fmrout,"**** Dmsh Xwin",
           "init display %s\n", this->display_string.c_str());
 #endif
@@ -381,7 +393,7 @@ int Dmsh::make_part (const std::string model, const fmr::Local_int,
   if (err>0) {return err;}
   return this->scan_model (model);
 }
-bool Dmsh::is_omp_parallel (){ bool is_omp=false;
+bool Dmsh::is_omp_parallel () {bool is_omp=false;
   Proc* P = this->proc->task.first<Proc> (Base_type::Pomp);
   if (P) {is_omp = P->is_in_parallel ();}
   return is_omp;
@@ -404,7 +416,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
     fmr::perf::timer_resume (& this->time);
 #ifdef FMR_DEBUG
     log->label_fprintf (log->fmrout, "**** Gmsh",
-      "gmsh::open(%s)...\n", fname.c_str());
+      "try gmsh::open (%s)...\n", fname.c_str());
 #endif
     try {gmsh::open (fname);}
     catch (Dmsh::Thrown e) {err= 1;
@@ -546,7 +558,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
                 const auto det = dets[i];//TODO set Jacs_type?
                 vals.data [ji +ea] = fmr::Geom_float (det);
                 vol += det;
-                badj_n += (fmr::math::inv3 (& vals.data [ji],// Invert jac.
+                badj_n += (fmr::math::calc_inv3 (& vals.data [ji],// Invert jac.
                   vals.data [ji +ea]) == 0) ? 0 : 1;
 #ifdef FMR_DEBUG
                 using d=double;
@@ -679,6 +691,12 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
     if (info.state.has_error) {return info;}
     const auto names = this->add_sims_name (data_id);
     if (names[0] == data_id) {
+#ifdef FMR_DEBUG
+      const auto log=this->proc->log;
+      log->label_fprintf (log->fmrerr, "**** Gmsh",
+        "gmsh::model::scan_model(%s)\n",
+        data_id.c_str());//, name.c_str());
+#endif
       info.state.has_error |= this->scan_model (data_id) > 0;
     }else{
 #ifdef FMR_DEBUG
@@ -712,11 +730,23 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
           gmsh::model::add (name);// should make current, but doesn't?
           gmsh::model::setCurrent (name);
           gmsh::onelab::setNumber ("frame", {Dmsh::Optval(frame_id+1)});
-          gmsh::merge (fname);//TODO open(fname, model_name)
+          gmsh::merge (fname);//TODO move to open(fname, model_name)
+#ifdef FMR_DEBUG
+          const auto log=this->proc->log;
+          log->label_fprintf (log->fmrerr, "**** Gmsh",
+            "gmsh::model::merge (%s) into %s\n",
+            fname.c_str(), name.c_str());
+#endif
           this->sims_names[name] = name;
           this->data->sims_names[name] = name;//TODO make protected
           frame_id+= thrd_n;
         }
+#ifdef FMR_DEBUG
+        const auto log=this->proc->log;
+        log->label_fprintf (log->fmrerr, "**** Gmsh",
+          "gmsh::model::scan_model (%s): %s\n",
+          data_id.c_str(), name.c_str());
+#endif
         info.state.has_error |= this->scan_model (name) > 0;
     } } }//end if !read
     fmr::perf::timer_pause (&this->time);
@@ -909,7 +939,7 @@ Dmsh::File_gmsh Dmsh::open (Dmsh::File_gmsh info,
           for (auto t : {fmr::Data::Elem_conn, fmr::Data::Jacs_dets}) {
             const auto id = this->make_data_id(mesh_id, t);
             this->elem_gmsh_info [id] = Elem_gmsh_info(data_id,{-1},0,elem_gmsh);
-            err= this->data->add_data_file (id, this, fname);//TODO handle err
+            err= this->data->add_file (id, this, fname);//TODO handle err
           }
 #if 0
           fmr::Local_int conn_n = 0;

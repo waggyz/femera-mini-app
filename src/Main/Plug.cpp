@@ -1,6 +1,5 @@
-//#include "base.h"
+//TODO Rename to Libs.cpp?
 #include "Plug.hpp"
-
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
 #include <cstdio>     // std::printf
@@ -15,24 +14,24 @@ namespace Femera{
     this->verblevel = 1;
     this->task.add (this);
   }
-  int Plug::prep (){
+  int Plug::prep (){//Register processing environment and file handling drivers.
     // The new Work:: objects below will be destroyed by proc->exit(err).
 #ifdef FMR_HAS_MPI
-    this->add<Proc>(new Pmpi(proc,data), this->proc);
+    this->add<Proc>(new Pmpi(this->proc,this->data), this->proc);
 #endif
 #ifdef _OPENMP
-    this->add<Proc>(new Pomp(proc,data), this->proc);
+    this->add<Proc>(new Pomp(this->proc,this->data), this->proc);
 #endif
 #ifdef FMR_HAS_GTEST
-    this->add<Proc>(new Gtst(proc,data), this->proc);
+    this->add<Proc>(new Gtst(this->proc,this->data), this->proc);
 #endif
     // below will be destroyed by data->exit(err).
-    this->add<Data>(new Fake(proc,data), this->data);
+    this->add<Data>(new Fake(this->proc,this->data), this->data);
 #ifdef FMR_HAS_GMSH
-    this->add<Data>(new Dmsh(proc,data), this->data);
+    this->add<Data>(new Dmsh(this->proc,this->data), this->data);
 #endif
 #ifdef FMR_HAS_CGNS
-    this->add<Data>(new Dcgn(proc,data), this->data);
+    this->add<Data>(new Dcgn(this->proc,this->data), this->data);
 #endif
 #if 0
 #ifdef FMR_HAS_HDF5
@@ -48,6 +47,7 @@ namespace Femera{
     err= this->prep ();
     fmr::perf::timer_pause (&this->time);
     fmr::perf::timer_pause (&this->proc->time);
+    // Initialize processing environment.
     err= proc->init (argc,argv);
     if (err){
       if (err<0){ this->proc->log->verbosity = 0; }
@@ -56,6 +56,7 @@ namespace Femera{
     }
     fmr::perf::timer_resume(&this->time);
     fmr::perf::timer_pause (&this->time);
+    // Print available lib names.
     std::string info("");
     size_t i=0;
     for (auto name : loaded_names){i++;

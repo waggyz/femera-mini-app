@@ -279,7 +279,7 @@ fmr::Data_id Data::get_id (){fmr::Data_id id = "";//TODO needed?
 fmr::Dim_int Data::get_hier_max (){
   return data_hier_max;
 }
-int Data::add_data_file (const fmr::Data_id id, Data* D,
+int Data::add_file (const fmr::Data_id id, Data* D,
   const std::string fname) {
   if (this->sims_data_file.count (id) > 0) {
     this->sims_data_file[id].push_back (Data_file (D,fname));
