@@ -4,6 +4,7 @@ cd $BASE
 cd ../
 #NOTE This works when this script is within a top-level directory.
 
+PRE_RELEASE="x"
 RELEASE=`cat data/VERSION`
 if [ -f data/PRE_RELEASE ]; then
   PRE_RELEASE=`cat data/PRE_RELEASE`
@@ -11,21 +12,22 @@ if [ -f data/PRE_RELEASE ]; then
     PRE_RELEASE=-$PRE_RELEASE
   fi
 fi
-# Check if user has modified source code, data, or tests.
-LOCAL_MD5=`tools/md5-all.sh -`
-REPO_MD5=`cat .md5`
-MOD=`diff <(echo "$LOCAL_MD5") <(echo "$REPO_MD5")`
-  if [ -n "$MOD" ]; then
-    if [ -e "$LOCAL_BUILD_ID" ]; then
-      MOD="mod"
-    else
-      MOD="-mod"
+if [ 0 -eq 1 ]; then # FIXME DISABLED
+  # Check if user has modified source code, data, or tests.
+  LOCAL_MD5=`tools/md5-all.sh -`
+  REPO_MD5=`cat .md5`
+  MOD=`diff <(echo "$LOCAL_MD5") <(echo "$REPO_MD5")`
+    if [ -n "$MOD" ]; then
+      if [ -e "$LOCAL_BUILD_ID" ]; then
+        MOD="mod"
+      else
+        MOD="-mod"
+      fi
     fi
-  fi
-#
+fi
 # Check the git repository (if present) to determine version from release tag.
 IS_IN_REPO=`git rev-parse --is-inside-work-tree 2>/dev/null`
-if [ "IS_IN_REPO"=="true" ]; then
+if [ "$IS_IN_REPO"=="true" ]; then
   DESC=`git describe --long --dirty 2>/dev/null`
   # Use --tags to find lightweight tags, instead of only annotated tags.
   if [ -n "$DESC" ]; then

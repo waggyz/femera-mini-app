@@ -1,6 +1,15 @@
-[submodule "external/testy"]
-	path = external/testy
-	url = ../../uq-coe/testy
+[submodule "external/bats"]
+	path = external/bats
+	url = https://github.com/bats-core/bats-core.git
+[submodule "external/bats-support"]
+	path = external/bats-support
+	url = https://github.com/bats-core/bats-support.git
+[submodule "external/bats-assert/"]
+	path = external/bats-assert
+	url = https://github.com/bats-core/bats-assert.git
+[submodule "external/bats-file/"]
+	path = external/bats-file
+	url = https://github.com/bats-core/bats-file.git
 [submodule "external/googletest"]
 	path = external/googletest
 	url = https://github.com/google/googletest
@@ -12,7 +21,7 @@
 [submodule "external/hdf5"]
 	path = external/hdf5
 	url = https://github.com/HDFGroup/hdf5.git
-	branch = hdf5_1_12
+	branch = develop
 [submodule "external/CGNS"]
 	path = external/CGNS
 	url = https://github.com/CGNS/CGNS.git
@@ -23,4 +32,12 @@
 [submodule "external/petsc"]
 	path = external/petsc
 	url = https://gitlab.com/petsc/petsc.git
-	branch = maint
+	branch = main
+[submodule "external/freetype"]
+        path = external/freetype
+        url = https://gitlab.freedesktop.org/freetype/freetype.git
+        branch = master
+[submodule "external/fltk"]
+        path = external/fltk
+        url = https://github.com/fltk/fltk.git
+        branch = branch-1.3

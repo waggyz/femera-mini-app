@@ -4,15 +4,13 @@ Femera is an open-source finite element-by-element (EBE) matrix-free
 application that can be tuned for performance across a wide range of problem
 sizes and HPC architectures.
 
-This version (0.2) of the Femera mini-app is targeted at optimizing a modular
-software architecture for high-performance computing. The primary goal is to
-maintain the high level of performance demonstrated by version 0.1 while
-providing flexible data handling. This mini-app is intended to minimize the
-file/data conversion bottleneck that often limits the overall performance of
-finite element applications by developing efficient interfaces to libraries that can
-read and write several common file formats.
+This version (0.3) of the Femera mini-app is for optimizing the basic
+capabilities of a high-performance finite element analysis toolchain.
+The primary goal is to verify that the high level of performance demonstrated
+by version 0.1 can be maintained while providing the flexible data handling
+emonstrated in version 0.2.
 
-## Femera data handling mini-app installation
+## Femera demo mini-app installation
 
 ### 1. Clone Femera with its required and optional external packages
 
@@ -21,11 +19,16 @@ At least one external package will not compile if there are spaces in the build
 path.
 
 ```bash
+git clone -b demo https://github.com/waggyz/femera-mini-app.git
+```
+Or
+
+```bash
 git clone --recursive -b data https://github.com/waggyz/femera-mini-app.git
 ```
 
 This populates external/ with:
-googletest (gtest), testy, HDF5, CGNS, gmsh, pybind11 (when available)
+googletest (gtest), HDF5, CGNS, gmsh, pybind11
 
 These have several dependencies.
 
@@ -33,57 +36,37 @@ These have several dependencies.
 * CMake 3.? is required for several external packages.
 * Pybind11 requires boost 1.56.
 
-### 2. Set up your Python environment
+### 2. Install MPI
+
+OpenMPI 2.1.1 and 3.1 have been tested.
+
+### 3. Set up your Python environment
 
 [**NOTE** Skip this step for now]
 [**TODO**] Install pytest, pytest-check, and python-subunit in your environment.
 
 * PETSc installation requires the python module configure.
 
-### 3. Install MPI
 
-OpenMPI 2.1.1 and 3.1 have been tested.
+### 4. Set build options in config.local.
 
-### 4. Build external packages
+**TODO**
+
+### 5. Build and install Femera
+
+**Important** Build Femera on the machine that you will use it on.
 
 ```bash
 cd femera-mini-app
 make external
+make mini
+make test tune
+make install
 ```
 
-### 5. Set build options in config.local.
-
-**TODO** See docs/install-femera.txt for details.
-
-### 6. Build Femera
-
-**Important** Build Femera on the machine that you will use it on.
-```bash
-make -j
-```
-
-### 7. Try it
-
-This version of the mini-app must be run under MPI.
-A bash script (fmr1node) is provided for single-node runs.
-
-```bash
-fmr1node build/femera/mini tests/mesh/cube-tet6*.* -o'build/femera/cube-tet6.cgn'
-```
-
-## Femera command line interface
-
-For a list of command line options, run:
-
-```bash
-build/femera/mini -h
-```
-You may also see GoogleTest options, if you built Femera with it.
-
-**TODO** Describe how to run some examples.
 
 
- Notices:
+Notices:
 Copyright 2018 United States Government as represented by the Administrator of
 the National Aeronautics and Space Administration. No copyright is claimed in
 the United States under Title 17, U.S. Code. All Other Rights Reserved.

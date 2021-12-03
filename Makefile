@@ -1,960 +1,691 @@
 #!/usr/bin/make
-SHELL:=/bin/bash
+SHELL:= bash
+FMRDIR:=$(shell pwd)
 
+include examples/config.recommended
 -include config.local
--include set-undefined.mk
--include labels.mk
+include tools/set-undefined.mk
 
-SPC40:=$(shell echo "                                        ")
-COMPILED_BY_EMAIL:=$(shell echo '$(COMPILED_BY)' \
-  | sed 's/ *(.*)//; s/>.*//; s/.*[:<] *//' )
+include tools/functions.mk
+#------------------------------------------------------------------------------
+CXX_VERSION   := $(shell $(CXX) -dumpversion)
+BUILD_VERSION := $(shell tools/build-version-number.sh)
+FEMERA_VERSION:= Femera $(BUILD_VERSION)
 
-#TODO Check for BLAS and LAPAK
-#TODO Check for MPI
+BUILT_BY_EMAIL:= $(call parse_email,$(BUILT_BY))
 
-CPUCOUNT:=$(shell tools/cpucount.sh)
-CPUMODEL:=$(shell tools/cpumodel.sh)
-CPUSIMD :=$(shell tools/cpusimd.sh)
+IS_IN_REPO:= $(shell git rev-parse --is-inside-work-tree 2>/dev/null)
+# contains "true" or "".
 
-TEST_DIR := build/$(CPUMODEL)
-
-ifeq ($(INSTALL_GENERIC_NAME),ON)
-  BUILD_DIR := build/femera
-  STAGE_DIR := build/stage
-  BUILD_EXTERNAL_DIR := build
-else
-  BUILD_DIR := build/$(CPUMODEL)-$(CXX)/femera
-  STAGE_DIR := build/$(CPUMODEL)-$(CXX)/stage
-  BUILD_EXTERNAL_DIR := build/$(CPUMODEL)-$(CXX)
-  INSTALL_DIR := $(INSTALL_DIR)/$(CPUMODEL)-$(CXX)
-  INSTALL_SUFFIX :=-$(CPUMODEL)-$(CXX)
+# Check if the user has altered content in src/ data/, tools/,
+# or some content in extras/, even when not a git repository.
+#FIXME Move to recipe?
+REPO_MD5:= $(shell cat .md5)
+ifeq ($(shell test -e file_name && echo -n yes),yes)
+  #(shell tools/md5-all.sh build/.md5)
+  $(shell echo "host hash" > build/.md5)
+  HOST_MD5:= $(shell cat build/.md5)
 endif
-TEMP_DIR := $(BUILD_DIR)/$(CPUMODEL)/tmp
-BUILD_TREE:= $(BUILD_DIR)/ $(STAGE_DIR)/ $(TEST_DIR)/
-ifndef TDD_FMRFILE
-  # TDD_FMRFILE:=tests/mesh/cube-tet6p1n1.cgns
-  TDD_FMRFILE:=tests/mesh/cube-tet?p*.* -o'$(BUILD_DIR)/cube-test.cgn'
-endif
+# Directories -----------------------------------------------------------------
+# Directories for generic components
+BUILD_DIR  := build
+STAGE_DIR  := $(BUILD_DIR)/stage
+INSTALL_DIR:= $(PREFIX)
 
+# Directories for CPU-model specific components
+BUILD_CPU  := $(BUILD_DIR)/$(CPUMODEL)
+STAGE_CPU  := $(STAGE_DIR)/$(CPUMODEL)
+INSTALL_CPU:= $(INSTALL_DIR)/$(CPUMODEL)
+
+# Subdirectories needed
+BUILD_TREE+= $(BUILD_DIR)/docs/ $(BUILD_DIR)/external/
+BUILD_TREE+= $(BUILD_CPU)/tests/ $(BUILD_CPU)/tools/
+
+STAGE_TREE+= $(STAGE_DIR)/bin/ $(STAGE_DIR)/libs/
+STAGE_TREE+= $(STAGE_CPU)/bin/ $(STAGE_CPU)/libs/
+
+# INSTALL_TREE:= $(patsubst $(STAGE_DIR)%,$(INSTALL_DIR)%,$(STAGE_TREE))
+
+# Libraries and applications available ----------------------------------------
+EXT_DOT:=digraph "external dependencies" {\n
+EXT_DOT+=overlap=scale;\n
+EXT_DOT+=size="6,3";\n
+EXT_DOT+=ratio="fill";\n
+EXT_DOT+=fontsize="12";\n
+EXT_DOT+=fontname="Helvetica";\n
+EXT_DOT+=clusterrank="local";\n
 ifeq ($(shell which dot 2>/dev/null),"")# dot is part of graphviz
-  ENABLE_GRAPHIZ:=OFF
+  ENABLE_DOT:=OFF
 else
-  ENABLE_GRAPHIZ:=ON
-  INSTALL_CINCLUDE2DOT:=external/tools/cinclude2dot
-endif
-  ENABLE_GRAPHIZ:=OFF
-
-# TODO Change *-ok to *-flags as external requirement.
-
-# ENABLE_GOOGLETEST := OFF
-
-ifeq ($(ENABLE_GOOGLETEST),ON)
-  CORE_LEAF += src/Proc/Gtst
-  BUILD_TREE += $(BUILD_EXTERNAL_DIR)/gmsh/
-  INSTALL_EXTERNAL += $(BUILD_EXTERNAL_DIR)/googletest-ok
-endif
-ifeq ($(ENABLE_GMSH_OPENMP),ON)
-  GMSH_FLAGS += -DENABLE_OPENMP=1
+  ENABLE_DOT:=ON
+  # EXT_DOT+="dot" -> "Makefile"\n
 endif
 ifeq ($(ENABLE_OMP),ON)
-  CORE_LEAF += src/Proc/Pomp
-  # export OMP_PLACES=cores
-  # export OMP_PROC_BIND=spread
-  # export OMP_NUM_THREADS=2
-  #NOTE Can not export from here; use the src/ompexec shell script
+  EXT_DOT+="OpenMP" -> "Femera"\n
 endif
-# For now, disable MPI in Gmsh. It is probably not needed.
-GMSH_FLAGS += -DENABLE_MPI=0 -DENABLE_CAIRO=0 -DENABLE_BUILD_DYNAMIC=1
-GMSH_FLAGS += -DENABLE_BUILD_SHARED=1 -DENABLE_BUILD_LIB=1
-# -DENABLE_BUILD_DYNAMIC=1
 ifeq ($(ENABLE_MPI),ON)
-  CORE_LEAF += src/Proc/Pmpi
-  # Is MPI breaking Gmsh on K?-no. Is it needed for CGNS within Gmsh?-no
-  # GMSH_FLAGS += -DENABLE_MPI=1
-  PETSC_FLAGS += --with-mpi
-  # for valgrind with OpenMPI
-  VGMPISUPP:=$(shell tools/valgrind-mpi-supp.sh)
+  EXT_DOT+="MPI" -> "Femera"\n
 endif
-ifeq ($(ENABLE_PYBIND),ON)
-  BUILD_TREE += $(BUILD_EXTERNAL_DIR)/pybind11/
-  INSTALL_EXTERNAL += $(BUILD_EXTERNAL_DIR)/pybind11-ok
-  GMSH_FLAGS += -DENABLE_WRAP_PYTHON=1 -DENABLE_NUMPY=1
-  GMSH_REQUIRES += $(BUILD_EXTERNAL_DIR)/pybind11-ok
-endif
-ifeq ($(ENABLE_CGNS),ON)
-  MINI_LEAF += src/Data/Dcgn
-  BUILD_TREE += $(BUILD_EXTERNAL_DIR)/CGNS/
-  INSTALL_EXTERNAL += $(BUILD_EXTERNAL_DIR)/CGNS-ok
-  CGNS_REQUIRES += $(BUILD_EXTERNAL_DIR)/hdf5-ok
-  GMSH_FLAGS += -DENABLE_CGNS=1
-  #TODO Enable for gmsh 4.8 (requires gcc 4.9): -DENABLE_CGNS_CPEX0045=1
-  GMSH_FLAGS += -DENABLE_CGNS_CPEX0045=0
-  GMSH_REQUIRES += $(BUILD_EXTERNAL_DIR)/CGNS-ok
-  PETSC_REQUIRES += $(BUILD_EXTERNAL_DIR)/CGNS-ok
-  PETSC_FLAGS += --with-cgns --with-hdf5 --with-zlib
-endif
-ifeq ($(ENABLE_PETSC),ON)#TODO Check for PETSc.
-  BUILD_TREE += $(BUILD_EXTERNAL_DIR)/petsc/
-  ifeq ("$(wildcard $(BUILD_EXTERNAL_DIR)/petsc-ok)","")
-    $(shell touch $(BUILD_EXTERNAL_DIR)/petsc-ok)
-  endif
-  GMSH_REQUIRES += $(BUILD_EXTERNAL_DIR)/petsc-ok
-  GMSH_FLAGS += -DENABLE_PETSC=1
-  ifeq ($(ENABLE_PYBIND),ON)
-    GMSH_FLAGS += -DENABLE_PETSC4PY=1
-  endif
-  PETSC_REQUIRES:=$(GMSH_REQUIRES) $(BUILD_EXTERNAL_DIR)/petsc-flags
-  INSTALL_EXTERNAL += $(BUILD_EXTERNAL_DIR)/petsc-ok
-endif
-ifeq ($(ENABLE_GMSH),ON)
-  MINI_LEAF += src/Data/Dmsh
-  INSTALL_EXTERNAL += $(BUILD_EXTERNAL_DIR)/gmsh-ok
-  GMSH_REQUIRES += $(BUILD_EXTERNAL_DIR)/gmsh-flags
-endif
-ifeq ($(ENABLE_FLTK),ON)
-  GMSH_FLAGS += -DENABLE_FLTK=1
-  #TODO It looks like native off-screen rendering does not work.
-  #rhel7: sudo yum install mesa-libOSMesa-devel
-  GMSH_FLAGS += -DENABLE_OSMESA=1 -DENABLE_GRAPHICS=1
-  GMSH_REQUIRES += $(BUILD_EXTERNAL_DIR)/fltk-ok
-else
-  GMSH_FLAGS += -DENABLE_FLTK=0
-endif
-ifeq ($(ENABLE_OCCT),ON)
-  GMSH_REQUIRES += $(BUILD_EXTERNAL_DIR)/occt-ok
-  GMSH_FLAGS += -DENABLE_OCC=1 -DENABLE_OCC_CAF=1 -DENABLE_OCC_STATIC=1
-endif
-
-BUILD_HOST := $(shell hostname)
-CXXVERSION := $(shell $(CXX) -dumpversion )
-
-BUILD_VERSION  := $(shell tools/build-version-number.sh)
-BUILT_BY_INFO_1:=Femera $(BUILD_VERSION)
-BUILT_BY_MINI_1:=Femera mini-app $(BUILD_VERSION)
-BUILT_ON_INFO  :=$(BUILD_HOST) for $(CPUMODEL) with $(CXX) $(CXXVERSION)
-BUILT_BY_INFO_2:=built on $(BUILT_ON_INFO)
-# Check if the user has altered content in src/ data/, tools/,
-# or some content in extras/, even if not in a git clone.
-REPO_MD5:=$(shell cat .md5)
-LOCAL_MD5:=$(shell tools/md5-all.sh -)
-ifneq ($(LOCAL_MD5),$(REPO_MD5))
-  BUILT_BY_INFO_3:=built by <$(COMPILED_BY_EMAIL)>.
-endif
-
-#******************
-# It's never correct to have .o files depend on other .o files.
-# It's never correct to have executable files depend on header files.
-# https://stackoverflow.com/questions/37632836/makefile-not-allowing-me-to
-#   -specify-directory-for-object-files
-#******************
-
-# src/work src/proc src/data src/phys src/main
-# API_CXX   := src/proc
-CORE_TRUNK  := src/Work src/Proc src/Flog
-MINI_BRANCH := src/Data src/Sims src/Phys src/Main
-MINI_LEAF   += src/Main/Plug
-MINI_LEAF   += src/Sims/Part src/Sims/Frun
-MINI_LEAF   += src/Sims/Geom src/Sims/Mesh
-#  src/Sims/Cpu1 src/Sims/Fset src/Sims/Fifo
-MINI_LEAF   += src/Data/Fake
-# CORE_LEAF   +=
-
-MINI_BASE   := $(CORE_TRUNK) $(MINI_BRANCH)
-ifeq (1,1) # ENABLED -----------------------------------------------------------
-
-BUILD_TREE += $(patsubst src/%,$(BUILD_DIR)/%/,$(MINI_BASE))
-BUILD_TREE += $(BUILD_DIR)/build-data/
-
-CORE_OBJS := $(patsubst src/%,$(BUILD_DIR)/%.o, $(CORE_TRUNK) $(CORE_LEAF) )
-CORE_GTST := $(patsubst src/%,$(BUILD_DIR)/%.gtst, $(CORE_TRUNK) $(CORE_LEAF) )
-MINI_OBJS := $(patsubst src/%,$(BUILD_DIR)/%.o, $(MINI_BRANCH) $(MINI_LEAF) )
-MINI_GTST := $(patsubst src/%,$(BUILD_DIR)/%.gtst, $(MINI_BRANCH) $(MINI_LEAF) )
-else # DISABLED ----------------------------------------------------------------
-ifeq (1,0)
-ifeq (1,1)
-  CLASS_HPP := $(addsuffix .hpp,$(MINI_DIRS))
-else
-  CLASS_HPP := $(shell find src/ -maxdepth 3 -name "[[:upper:]]*.hpp" -printf "%p ")
-endif
-endif
-
-FULL_DIRS := $(shell find src/* -maxdepth 3 -type d -printf "%p ")
-# FULL_DIRS := $(sort $(dir $(wildcard src/*)) $(dir $(wildcard src/*/*)))
-BUILD_TREE += $(patsubst src/%,$(BUILD_DIR)/%/,$(FULL_DIRS)) \
-  $(BUILD_DIR)/build-data/
-
-CXXSRCS := $(CXXSRCS) $(shell find src/ -maxdepth 3 -name "*.cpp" -printf "%p ")
-
-FULL_OBJS += $(patsubst src/%.cpp,$(BUILD_DIR)/%.o,$(CXXSRCS))
-
-# Exclude tests and executables from lib.
-NOT_IN_LIB := %.noop.o %.stub.o %.mock.o %.dumm.o %.fake.o %.test.o %.gtst.o \
-  %/mini.o %/full.o
-FULL_OBJS := $(filter-out $(NOT_IN_LIB) $(CORE_OBJS),$(FULL_OBJS))
-
-# FULL_DIRS := $(shell find src/* -maxdepth 3 -type d -printf "%p ")
-NOT_MINI := $(filter-out $(MINI_DIRS),$(FULL_DIRS))
-
-MINI_PATTERN := $(patsubst src/%,$(BUILD_DIR)/%%,$(NOT_MINI))
-MINI_OBJS := $(filter-out $(MINI_PATTERN),$(FULL_OBJS) )
-# MINI_OBJS := $(filter-out $(CORE_OBJS),$(MINI_OBJS) )
-# MINI_LIBS := $(addsuffix .a,$(MINI_DIRS))
-endif # END DISABLED -----------------------------------------------------------
-
-WRAP_SRCS := \
-  $(BUILD_DIR)/build-data/mini-help.en.inc \
-  $(BUILD_DIR)/build-data/build-info.inc   \
-  $(BUILD_DIR)/build-data/build-detail.inc \
-  $(BUILD_DIR)/build-data/built-by.inc     \
-  $(BUILD_DIR)/build-data/copyright.inc
-#  $(BUILD_DIR)/femera-options.inc
-#  $(BUILD_DIR)/build-data/LICENSE.inc
-#  $(BUILD_DIR)/build-data/modification.inc
-
-ifeq ($(ENABLE_GOOGLETEST),ON)
-  WRAP_SRCS += $(BUILD_DIR)/build-data/googletest-version.inc
-endif
-
-# MINI_SRCS := src/mini.cpp # $(WRAP_SRCS)
-
-AREXE := ar
-#NOTE There is no switch case in makefile syntax.
-ifeq ($(CXX),g++)
-  ifeq ($(ENABLE_MPI),ON)
-    CXX := mpic++
-    # CXX := export TMPDIR="$(TEMP_DIR)"; mpic++
-    # LDLIBS += -lstdc++ # maybe needed?
-    #TODO Fix the following hack by figuring out the correct lib order.
-    # LDLIBS += -Wl,--copy-dt-needed-entries
-  endif
-  CXXFLAGS := -std=c++11 -g -Ofast -march=native -mtune=native
-  ifeq ($(ENABLE_OMP),ON)
-    CXXFLAGS += -fopenmp
-    FMRFLAGS += -D_GLIBCXX_PARALLEL
-  endif
-  CXXFLAGS += -fno-builtin-sin -fno-builtin-cos \
-    -fpic -flto -fvisibility=hidden -fvisibility-inlines-hidden \
-    -fearly-inlining --param inline-min-speedup=2 \
-    --param inline-unit-growth=500 --param large-function-growth=500 \
-    -funroll-loops -ftree-vectorize -fstrict-enums -fno-common
-  CXXFLAGS += -Wall -Wextra -Wpedantic -Wuninitialized -Wshadow \
-    -Wdouble-promotion -Wfloat-equal -Wconversion -Wcast-qual -Wcast-align \
-    -Wlogical-op -Woverloaded-virtual -Wstrict-null-sentinel \
-    -Wmissing-declarations -Wredundant-decls -Wdisabled-optimization \
-    -Wunused-macros -Wzero-as-null-pointer-constant -Wundef -Weffc++
-  CXXFLAGS += -MMD -MP
-    # -Wnoexcept #TODO Put this back.
-    # -Winline #TODO need to filter warnings from system libs.
-    # -Wpadded
-    #NOTE flags in the -fpic line may be better if only used to build library
-    #     perhaps -fpie (or -fPIE) should be used for builing executable
-    #     -fpic (platform-dependent) should be smaller and faster than
-    #     -fPIC (which "always works")
-    # -finline-limit=1000000 --param large-unit-insns=1000
-    # -fvisibility=hidden may need to be removed,
-    #--param inline-xx=1000 --param large-xxx=1000
-    # -fmax-errors=10
-    #NOTE --param: numeric args are percent.
-    #NOTE Do NOT use these if gtest.h is included: -Wundef -Winline
-    #TODO Use only if gcc version does NOT warn about stl library inlining,
-    #     and suppresses library warnings with -isystem instead of -I
-    #     -Weffc++ -Winline -Wzero-as-null-pointer-constant
-    #     or add later and filter out std::string and other unimportant
-    #     -Wpadded doesn't seem to get filtered out by -isystem...
-    #TODO Check supported gcc version: -Wsuggest-attribute -Walloc-zero
-    #     -Wduplicated-branches -Wduplicated-cond  -Wunsafe-loop-optimizations
-    #     -Wmultiple-inheritance -Wvirtual-inheritance -Wsized-deallocation
-    #     -fno-semantic-interposition -fstrong-eval-order -faligned-new
-    #     -Wsuggest-override -Wsuggest-final-methods -Wsuggest-final-types
-    #TODO maybe add --no-as-needed for gcc>X to add all symbols to .a
-    # Hmm...these are gcc, but supported by many compilers
-    #     -Wsuggest-attribute=cold -Wsuggest-attribute=malloc
-    #     -Wsuggest-attribute=pure -Wsuggest-attribute=const
-    #     -Wsuggest-attribute=format
-    #TODO See if these are useful: -Wpadded -fprefetch-loop-arrays
-    # not useful: -Waggregate-return
-
-    # This creates dependency (.d) files for make.
-  AREXE := gcc-ar
-endif
-ifeq ($(CXX),icpc)
-  CXXFLAGS := -restrict c++11 -Wall -Wextra -Wshadow -g \
-    -Ofast -xHost -auto-ilp32 -ipo -fPIC -ffast-math -no-fast-transcendentals \
-    -no-inline-max-size -no-inline-max-total-size -qoverride-limits
-  ifeq ($(ENABLE_INTEL_MKL),ON)
-    FMRFLAGS += -mkl=sequential -DMKL_DIRECT_CALL_SEQ
-  endif
-  AREXE := xiar
-endif
-
-# Femera-specific compiler options
-FMRFLAGS += \
-  -DFMR_VERSION=\"$(BUILD_VERSION)\" \
-  -DFMR_CORE_N=$(CPUCOUNT)           \
-  -DFMR_BUILD_DIR=\"$(BUILD_DIR)\"
-ifdef FMR_VERBMAX
-  FMRFLAGS += -DFMR_VERBMAX=$(FMR_VERBMAX)
-endif
-ifdef FMR_TIMELVL
-  FMRFLAGS +=-DFMR_TIMELVL=$(FMR_TIMELVL)
-endif
-
 ifeq ($(ENABLE_LIBNUMA),ON)
+  EXT_DOT+="libnuma" -> "Femera"\n
   FMRFLAGS += -DFMR_HAS_LIBNUMA
   LDLIBS += -lnuma
 endif
-
-ifeq ($(CXX),mpic++)# or g++
-  # need to remove libfemera from this
-  FMRFLAGS += -I"$(BUILD_DIR)" -isystem"$(INSTALL_DIR)/include"
+# External code to build and install ------------------------------------------
+ifeq ($(ENABLE_BATS),ON)
+  # LIST_EXTERNAL +=
+  # EXT_DOT+={ rank = sink; "Bats"; }\n
+  # EXT_DOT+="Bats" -> "Makefile"\n
+  BATS_MODS:= bats-core bats-support bats-assert bats-file
+  label_bats = $(call label_test,$(1),$(2),$(3),$(4))
 else
-  FMRFLAGS += -I$(BUILD_DIR) -I"$(INSTALL_DIR)/include"
-endif
-
-LDPATH:=$(INSTALL_DIR)/lib:$(INSTALL_DIR)/lib64:${LD_LIBRARY_PATH}
-LDFLAGS += -L"$(BUILD_DIR)" -L"$(INSTALL_DIR)/lib" -L"$(INSTALL_DIR)/lib64"
-
-PYEXEC := LD_LIBRARY_PATH=$(LDPATH) python
-
-ifeq ($(ENABLE_MPI),ON)
-  #TODO Find include and lib dirs automatically
-  ifeq ($(CXX),mpic++)
-   FMRFLAGS += -isystem"/usr/include/openmpi-x86_64"
-  else
-   FMRFLAGS += -I"/usr/include/openmpi-x86_64"
-  endif
-  LDFLAGS += -L/usr/lib64/openmpi/lib
-  LDLIBS += -lmpi
-#  MPIEXEC := fmrexec -np $(TDD_MPI_NP) \
-#    --bind-to core -map-by node:pe=$(TDD_OMP_NP)
-  MPIEXEC := fmr1node
-  TEST_EXEC := LD_LIBRARY_PATH=$(LDPATH) $(MPIEXEC)
-  VGMPI := mpiexec -np $(TDD_MPI_NP) \
-    --bind-to core -map-by node:pe=$(TDD_OMP_NP)
-else
-  TEST_EXEC := LD_LIBRARY_PATH=$(LDPATH)
+  label_bats = $(info \
+    $(DBUG) Set ENABLE_BATS:=ON in config.local for $(notdir $(3)).)
 endif
 ifeq ($(ENABLE_GOOGLETEST),ON)
-  LDLIBS += -lgtest -lgmock -lpthread
-  #  -lstdc++
-  #  -D_GLIBCXX_USE_CXX11_ABI=1
-  #   or 0, may be needed when compiling external -lstdc++
-  GTESTFLAGS := $(filter-out -Wundef,$(CXXFLAGS))
-  # GTESTFLAGS := $(filter-out -Winline,$(GTESTFLAGS))
-  GTESTFLAGS += $(FMRFLAGS)
-  # -DFMR_HAS_GTEST
+  EXT_DOT+="GoogleTest" -> "Femera"\n
+  # EXT_DOT+="GoogleTest" -> "Makefile"\n
+  LIST_EXTERNAL += googletest
+  GOOGLETEST_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
 endif
-ifeq ($(ENABLE_HDF5),ON)
-  # LDLIBS += -l:libhdf5.a
-  LDLIBS += -lhdf5
-endif
-ifeq ($(ENABLE_CGNS),ON)
-  # LDLIBS += -l:libcgns.a
-  LDLIBS += -lcgns
+# ENABLE_PYBIND11=ON
+ifeq ($(ENABLE_PYBIND11),ON)
+  LIST_EXTERNAL += pybind11
+  EXT_DOT+="pybind11" -> "Femera"\n
+  # FMRFLAGS += -DFMR_HAS_PYBIND11
+  PYBIND11_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
+  PYBIND11_FLAGS += -DBOOST_ROOT:PATHNAME=/usr/local/pkgs-modules/boost_1.66.0
+  PYBIND11_FLAGS += -DDOWNLOAD_CATCH=0
 endif
 ifeq ($(ENABLE_GMSH),ON)
-  #NOTE linking gmsh static increases executable by 170 MB!
-  # LDLIBS += -l:libgmsh.a -llapack -lblas
-  LDLIBS += -lgmsh
-endif
-ifeq ($(ENABLE_PETSC),ON)
-  LDLIBS += -lpetsc
-endif
-
-CXXFLAGS+= $(FMRFLAGS)
-
-ifeq ($(ENABLE_VALGRIND),ON)
-  # Use (mostly) the same flags to compile the suppression file.
-  VGFLAGS:= $(filter-out -Winline,$(CXXFLAGS))
-  VALGRIND_SUPP := valgrind.supp
-  VALGRIND_SUPP_EXE := $(BUILD_DIR)/$(VALGRIND_SUPP).exe
-  VGSUPP := valgrind --leak-check=full --show-reachable=yes --error-limit=no \
-    --show-leak-kinds=all --gen-suppressions=all           \
-    $(VGMPI) $(BUILD_DIR)/$(VALGRIND_SUPP).exe 3>&1 1>&2 2>&3 \
-    | tools/grindmerge.pl $(VGMPISUPP)                     \
-    > $(BUILD_DIR)/$(VALGRIND_SUPP) 2>/dev/null;
-
-  VGEXEC := valgrind --track-origins=yes --leak-check=full \
-    --suppressions=$(BUILD_DIR)/$(VALGRIND_SUPP)           \
-    --log-file=$(BUILD_DIR)/mini.valgrind.log              \
-    $(VGMPI) $(BUILD_DIR)/mini -n$(TDD_OMP_NP) -v0 $(TDD_FMRFILE); \
-    sed -i '/invalid file descriptor 10[0-4][0-9] /d'      \
-    $(BUILD_DIR)/mini.valgrind.log;                        \
-    sed -i '/invalid file descriptor 2[56][0-9] /d'        \
-    $(BUILD_DIR)/mini.valgrind.log;                        \
-    sed -i '/select an alternative log fd/d'               \
-    $(BUILD_DIR)/mini.valgrind.log
-endif
-
-
-# Define some functions to call -----------------------------------------------
-
-# This keeps the time persistent through recursive makefile calls.
-BUILD_DATE := ${BUILD_DATE}
-BUILD_SECS := ${BUILD_SECS}
-ifndef BUILD_DATE
-  export BUILD_DATE := $(shell date -u +"%Y-%m-%dT%H:%M")
-  export BUILD_SECS := $(shell date +%s)
-endif
-
-strcut = $(shell echo "$(1)" | cut -c-45 )
-build_timestamp = @printf '%8s%-46s %25s\n' "  make  " \
-'$(call strcut,$(1): $(2)$(SPC40)$(SPC40))' \
-$(BUILD_DATE)"+"$(shell tools/elapsed_time.sh $(BUILD_SECS))
-
-rewrap_file = printf "$(INFO_COLOR)"; cat '$(1)' | tr '\n' ' ' | tr -s " " \
-  | fold -w 72 -s | sed 's/^/$(SPCS) /'; printf "$(NORM_COLOR)\n"
-
-ifeq ($(CXX),mpic++)#TODO or g++
-  # Remove warnings from system headers not recognized as such.
-  ifeq (1,1)
-  build_log = 2> >( \
-   sed '/\/gtest-internal.* In /,+3d' \
- | sed '/\/gtest-internal/,+2d' \
- | sed '/\/external\/gmsh.*arning/,+3d' \
- | tee $(1).err >&2);
+  ifeq ("$(CXX) $(CXX_VERSION)","g++ 4.8.5")
+    LIST_EXTERNAL += gmsh471
   else
-  build_log = 2> >( \
-   sed '/\/bits\/.* In /,+3d' \
- | sed '/\/bits\//,+2d' \
- | sed '/\/sstream.* In /,+3d' \
- | sed '/\/sstream/,+2d' \
- | sed '/In member.*DescribeNegationTo/,+4d' \
- | sed '/In member.*operator/,+4d' \
- | sed '/In function ‘Print’:/,+4d' \
- | sed '/\/ostream:.*operator/,+2d' \
- | sed '/\/ostream:.*Winline/,+3d' \
- | sed '/\/gtest-internal.* In /,+3d' \
- | sed '/\/gtest-internal/,+2d' \
- | sed '/\/external\/gmsh.*arning/,+3d' \
- | tee $(1).err >&2);
- endif
-else
-  build_log = 2> >(tee $(1).err >&2);
+    LIST_EXTERNAL += gmsh
+  endif
+  EXT_DOT+="Gmsh" -> "Femera"\n
+  GMSH_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
+  GMSH_FLAGS += -DCMAKE_PREFIX_PATH="$(INSTALL_DIR)"
+  GMSH_FLAGS += -DENABLE_BUILD_LIB=1
+  GMSH_FLAGS += -DENABLE_BUILD_SHARED=1
+  GMSH_FLAGS += -DENABLE_BUILD_DYNAMIC=1
+  ifeq ($(ENABLE_OMP),ON)
+    GMSH_FLAGS += -DENABLE_OPENMP=1
+  endif
+  # Disable MPI in Gmsh for now. It is probably not needed.
+  GMSH_FLAGS += -DENABLE_MPI=0
+  ifeq ($(ENABLE_PYBIND11),ON)
+    GMSH_REQUIRES += pybind11
+    EXT_DOT+="pybind11" -> "Gmsh"\n
+    GMSH_FLAGS += -DENABLE_WRAP_PYTHON=1 -DENABLE_NUMPY=1
+  endif
+  ifeq ($(ENABLE_CGNS),ON)
+    GMSH_REQUIRES += CGNS hdf5
+    EXT_DOT+="CGNS" -> "Gmsh"\n
+    EXT_DOT+="HDF5" -> "Gmsh"\n
+    GMSH_FLAGS += -DENABLE_CGNS=1
+    GMSH_FLAGS += -DENABLE_CGNS_CPEX0045=0
+  endif
+  ifeq ($(ENABLE_PETSC),ON)
+    GMSH_REQUIRES += petsc
+    EXT_DOT+="PETSc" -> "Gmsh"\n
+    GMSH_FLAGS += -DENABLE_PETSC=1
+    ifeq ($(ENABLE_PYBIND11),ON)
+      GMSH_FLAGS += -DENABLE_PETSC4PY=1
+    endif
+  endif
+  ifeq ($(ENABLE_FLTK),ON)
+    GMSH_REQUIRES += fltk
+    EXT_DOT+="FLTK" -> "Gmsh"\n
+    EXT_DOT+="X" -> "Gmsh"\n
+    GMSH_FLAGS += -DENABLE_FLTK=1
+    #TODO It looks like native off-screen rendering does not work.
+    #rhel7: sudo yum install mesa-libOSMesa-devel
+    GMSH_FLAGS += -DENABLE_OSMESA=1 -DENABLE_GRAPHICS=1
+  else
+    GMSH_FLAGS += -DENABLE_FLTK=0
+  endif
+  ifeq ($(ENABLE_OCCT),ON)
+    GMSH_REQUIRES += occt
+    EXT_DOT+="OpenCASCADE" -> "Gmsh"\n
+    GMSH_FLAGS += -DENABLE_OCC=1 -DENABLE_OCC_CAF=1 -DENABLE_OCC_STATIC=1
+  endif
+  # Disable Cairo fonts for now. Just use FreeType (required by OCCT).
+  GMSH_FLAGS += -DENABLE_CAIRO=0
+  GMSH_DEPS:=$(patsubst %,$(BUILD_DIR)/external/install-%.out,$(GMSH_REQUIRES))
+endif
+ifeq ($(ENABLE_OCCT),ON)
+  LIST_EXTERNAL += occt
+  OCCT_REQUIRES += freetype
+  EXT_DOT+="FreeType" -> "OpenCASCADE"\n
+  ENABLE_FREETYPE:=ON
+  OCCT_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
+  OCCT_FLAGS += -DCMAKE_PREFIX_PATH="$(INSTALL_DIR)"
+  OCCT_FLAGS += -DBUILD_LIBRARY_TYPE=Static
+  OCCT_FLAGS += -DCMAKE_BUILD_TYPE=Release
+  OCCT_FLAGS += -DBUILD_MODULE_Draw=0
+  OCCT_FLAGS += -DBUILD_MODULE_Visualization=0
+  OCCT_FLAGS += -DBUILD_MODULE_ApplicationFramework=0
+  OCCT_DEPS:=$(patsubst %,$(BUILD_DIR)/external/install-%.out, \
+    $(OCCT_REQUIRES))
+endif
+ifeq ($(ENABLE_HDF5),ON)
+  LIST_EXTERNAL += hdf5
+  HDF5_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
+  HDF5_FLAGS += -DHDF5_BUILD_CPP_LIB:BOOL=OFF
+  HDF5_FLAGS += -DHDF5_ENABLE_PARALLEL:BOOL=ON
+  HDF5_FLAGS += -DMPIEXEC_MAX_NUMPROCS:STRING=4
+  HDF5_FLAGS += -DBUILD_STATIC_LIBS:BOOL=ON
+  HDF5_FLAGS += -DBUILD_SHARED_LIBS:BOOL=ON
+  HDF5_FLAGS += -DCTEST_BUILD_CONFIGURATION=Release
+  HDF5_FLAGS += -DHDF5_NO_PACKAGES:BOOL=ON
+endif
+ifeq ($(ENABLE_CGNS),ON)
+  LIST_EXTERNAL += CGNS
+  EXT_DOT+="CGNS" -> "Femera"\n
+  ifeq ($(ENABLE_HDF5),ON)
+    CGNS_REQUIRES += hdf5
+    EXT_DOT+="HDF5" -> "CGNS"\n
+  endif
+  CGNS_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
+  CGNS_FLAGS += -DCGNS_ENABLE_LFS:BOOL=ON
+  CGNS_FLAGS += -DCGNS_ENABLE_64BIT:BOOL=ON
+  CGNS_FLAGS += -DCGNS_ENABLE_LEGACY:BOOL=OFF
+  CGNS_FLAGS += -DCGNS_ENABLE_SCOPING:BOOL=OFF
+  CGNS_FLAGS += -DCGNS_ENABLE_BASE_SCOPE:BOOL=OFF
+  CGNS_FLAGS += -DCGNS_ENABLE_TESTS:BOOL=OFF
+  CGNS_FLAGS += -DCGNS_ENABLE_FORTRAN:BOOL=OFF
+  CGNS_FLAGS += -DCGNS_ENABLE_HDF5:BOOL=ON
+  CGNS_DEPS:=$(patsubst %,$(BUILD_DIR)/external/install-%.out, \
+    $(CGNS_REQUIRES))
+endif
+#FIXME PETSc, CGNS, FLTK, and FreeType build in external/*/
+ifeq ($(ENABLE_PETSC),ON)
+  LIST_EXTERNAL += petsc
+  EXT_DOT+="PETSc" -> "Femera"\n
+  PETSC_FLAGS += --prefix="$(INSTALL_DIR)"
+  ifeq ($(ENABLE_OMP),ON)
+    PETSC_FLAGS += --with-openmp
+  endif
+  ifeq ($(ENABLE_CGNS),ON)
+    PETSC_REQUIRES += CGNS hdf5
+    EXT_DOT+="PETSc" -> "CGNS"\n
+    EXT_DOT+="PETSc" -> "HDF5"\n
+    PETSC_FLAGS += --with-cgns --with-hdf5 --with-zlib
+  endif
+  PETSC_DEPS:=$(patsubst %,$(BUILD_DIR)/external/install-%.out, \
+    $(PETSC_REQUIRES))
+endif
+ifeq ($(ENABLE_FLTK),ON)
+  LIST_EXTERNAL += fltk
+  FLTK_FLAGS += --prefix="$(INSTALL_DIR)"
+  FLTK_FLAGS += --enable-shared
+endif
+ifeq ($(ENABLE_FREETYPE),ON)
+  LIST_EXTERNAL += freetype
+  FREETYPE_FLAGS += --prefix="$(INSTALL_DIR)"
+endif
+ifeq ($(ENABLE_MKL),ON)
+  EXT_DOT+="MKL" -> "Femera"\n
+endif
+# Developer tools
+ifeq ($(ENABLE_DOT),ON)
+  # EXT_DOT+="cinclude2dot" -> "Makefile"\n
+  LIST_EXTERNAL += cinclude2dot
+endif
+EXT_DOT+=}\n
+EXT_DOTFILE:=$(BUILD_DIR)/external/external.dot
+# Files -----------------------------------------------------------------------
+# Generic Femera tools
+LIST_TOOLS:= fmrmodel fmrcores fmrexec fmrnumas
+INSTALL_TOOLS:= $(patsubst %,$(INSTALL_DIR)/bin/%,$(LIST_TOOLS))
+
+# CPU-specific Femera tools
+# LIST_TOOLS+= fmrnumas
+# INSTALL_TOOLS+= $(INSTALL_CPU)/bin/fmrnumas
+# TEST_TOOLS:= $(patsubst %,$(BUILD_CPU)/tools/%.test.out,$(LIST_TOOLS))
+
+# External packages
+GET_EXTERNAL:= $(patsubst %,$(BUILD_DIR)/external/get-%.out,$(LIST_EXTERNAL))
+INSTALL_EXTERNAL:= $(patsubst %,$(BUILD_DIR)/external/install-%.out, \
+  $(LIST_EXTERNAL))
+
+# GET_BATS:= $(patsubst %,$(BUILD_DIR)/external/get-%.out,$(BATS_MODS))
+GET_BATS:= $(patsubst %,get-%,$(BATS_MODS))
+
+# GIT_SUBMODULES:= #TODO?
+
+# -----------------------------------------------------------------------------
+ifeq ("$(findstring $(INSTALL_DIR)/bin:,$(PATH):)","")
+  ADD_TO_PATH:= $(INSTALL_DIR)/bin:$(ADD_TO_PATH)
+endif
+ifeq ("$(findstring $(INSTALL_CPU)/bin:,$(PATH):)","")
+  ADD_TO_PATH:= $(INSTALL_CPU)/bin:$(ADD_TO_PATH)
+endif
+ifneq ("$(ADD_TO_PATH)","")
+  export PATH:= $(ADD_TO_PATH)$(PATH)
+  #NOTE export does not work for this in a recipe below.
 endif
 
+ifeq ("$(findstring $(INSTALL_DIR)/lib64:,$(LDPATH):)","")
+  ADD_TO_LDPATH:= $(INSTALL_DIR)/lib64:$(ADD_TO_LDPATH)
+endif
+ifeq ("$(findstring $(INSTALL_DIR)/lib:,$(LDPATH):)","")
+  ADD_TO_LDPATH:= $(INSTALL_DIR)/lib:$(ADD_TO_LDPATH)
+endif
+ifeq ("$(findstring $(INSTALL_CPU)/lib64:,$(LDPATH):)","")
+  ADD_TO_LDPATH:= $(INSTALL_CPU)/lib64:$(ADD_TO_LDPATH)
+endif
+ifeq ("$(findstring $(INSTALL_CPU)/lib:,$(LDPATH):)","")
+  ADD_TO_LDPATH:= $(INSTALL_CPU)/lib:$(ADD_TO_LDPATH)
+endif
+ifneq ("$(ADD_TO_LDPATH)","")
+  export LD_LIBRARY_PATH:= $(ADD_TO_LDPATH)$(LD_LIBRARY_PATH)
+endif
 
-# make targets ================================================================
-.SILENT :
+ifeq ("$(FMR_COPYRIGHT)","")
+  export FMR_COPYRIGHT:= cat data/copyright.txt | tr '\n' ' ' | tr -s ' '
+  NOSA_INFO:= See the NASA open source agreement (NOSA-1-3.txt) for details.
+endif
 
-# Prevent some intermediate file removal
-# .PRECIOUS : %.o
-#  %.gtst
-#%.a %.h %.o
-# Maybe this should be used only for debbuging?
+# make recipes ================================================================
+# These .PHONY targets are intended for users.
+# external libfemera test tune
+.PHONY: all tools external mini femera install
+.PHONY: uninstall reinstall clean cleaner cleanest purge
+# -----------------------------------------------------------------------------
+# The rest are for developers...
+.PHONY: docs hash patch
+.PHONY: install-tools test-tools uninstall-tools reinstall-tools clean-tools
+.PHONY: get-bats install-bats get-external # install-external
+# ...and internal makefile use.
+.PHONY: intro
+.PHONY: all-done build-done
+.PHONY: install-tools-done install-done uninstall-done
 
-#NOTE The first two lines of .PHONY targets are intended for users.
-#NOTE The rest, for developers and internal makefile use.
-.PHONY: all external mini femera libfemera check test-perf \
-  install unistall clean cleaner cleanest \
-  libmini libfull \
-  build-info pre-build-tests post-build-tests done \
-  $(BUILD_DIR)/VERSION
-  #$(BUILD_DIR)/femera-options.new
-#TODO what other targets are needed?
-#  femera plugins
-#  mini-test test-build-scripts test-gmsh
+# Real files, but considered always out of date.
+.PHONY: build/.md5
 
+# -----------------------------------------------------------------------------
+.SILENT:
+
+# $(STAGE_DIR)/% Does not work as target for .SECONDARY or .PRECIOUS.
+# It looks like .PRECIOUS prerequisites must match a target pattern exactly.
+.PRECIOUS: $(STAGE_DIR)/bin/fmr% $(BUILD_DIR)/external/install-%.flags
+
+# libmini libfull
+# pre-build-tests post-build-tests post-install-tests
+# done
+# $(BUILD_DIR)/VERSION
 
 # Primary named targets -------------------------------------------------------
-# These are intended for users to make.
-all : mini #femera plugins
-	$(call build_timestamp,$@,$?)
-	$(MAKE) done
+# These are intended for users.
+# Many launch parallel make jobs to simplify command-line use.
+femera: tools
+	$(call timestamp,$@,$^)
 
-libfemera : pre-build-tests
-	$(call build_timestamp,$@,$?)
-	$(MAKE) build/libfemera$(INSTALL_SUFFIX).a
+all: | intro
+	$(call timestamp,$@,-$(MAKEFLAGS))
+	$(MAKE) $(JSER) external
+	#(MAKE) $(JPAR) mini
+	#$(MAKE) test tune
+	$(MAKE) $(JSER) install
 
-mini : libfemera # $(BUILD_DIR)/femera-options.inc
-	$(call build_timestamp,$@,$(?F))
-	$(MAKE) build/femera-mini$(INSTALL_SUFFIX)
+tools: | intro $(STAGE_TREE)
+	$(MAKE) $(JPAR) install-tools
+	$(call timestamp,$@,$^)
 
-femera : mini
-	$(call build_timestamp,$@,$?)
+external: tools get-external
+	$(call timestamp,$@,$^)
+	#(MAKE) $(JPAR) get-external
+	$(MAKE) $(JSER) install-external
+	$(MAKE) $(JPAR) external-done
 
-external : $(INSTALL_EXTERNAL)
-	$(call build_timestamp,$@,$(BUILD_EXTERNAL_DIR)/*-ok)
+install: tools | $(STAGE_TREE)
+	$(call timestamp,$@,$^)
+	$(MAKE) $(JPAR) install-done
 
-# Named targets for developer and internal makefile use. ----------------------
+uninstall:
+	$(call timestamp,$@,$^)
+	$(MAKE) $(JPAR) uninstall-tools
+	$(MAKE) $(JPAR) uninstall-done
 
-build-info : $(BUILD_DIR)/VERSION $(BUILD_TREE)
-	$(call build_timestamp,$@,Femera $(BUILD_VERSION))
-ifdef BUILT_BY_INFO_3
-	@head -c -1 -q data/modification.txt data/copyright.txt \
-  | tr '\n' ' ' | fold -w 80 -s > $(BUILD_DIR)/build-data/copyright.txt
-	@echo >> $(BUILD_DIR)/build-data/copyright.txt
-	$(call rewrap_file,$(BUILD_DIR)/build-data/copyright.txt)
-	#$(call rewrap_file,data/modification.txt)
-	#$(call rewrap_file,data/copyright.txt)
-	@printf "$(BUILT_BY_INFO_3)\n" > "$(BUILD_DIR)/build-data/built-by.txt"
-else
-	@head -c -1 -q data/copyright.txt \
-  | tr '\n' ' ' | fold -w 80 -s > $(BUILD_DIR)/build-data/copyright.txt
-	@echo >> $(BUILD_DIR)/build-data/copyright.txt
-	$(call rewrap_file,data/copyright.txt)
-	@printf "" > $(BUILD_DIR)/build-data/built-by.txt
+reinstall: | intro
+	$(call timestamp,$@,$^)
+	$(MAKE) $(JPAR) uninstall
+	$(MAKE) $(JSER) install
+
+clean: $(BUILD_CPU)/femera/
+	$(call timestamp,$@,$^)
+	-rm -rf $^
+	$(info $(DONE) made $(FEMERA_VERSION) for $(CPUMODEL) on $(HOSTNAME) $@)
+
+cleaner: $(BUILD_CPU)/ $(STAGE_CPU)/
+	$(call timestamp,$@,$^)
+	-rm -rf $^ $(STAGE_DIR)/bin/fmr*
+	$(info $(DONE) made $(FEMERA_VERSION) for $(CPUMODEL) on $(HOSTNAME) $@)
+
+cleanest: build/
+	$(call timestamp,$@,$^)
+	-rm -rf $^
+	$(info $(DONE) made $(FEMERA_VERSION) for $(CPUMODEL) on $(HOSTNAME) $@)
+
+purge:
+	$(MAKE) $(JPAR) uninstall
+	$(MAKE) $(JPAR) cleanest
+
+# Internal named targets ======================================================
+intro: build/copyright.txt build/docs/find-tdd-files.csv | $(BUILD_TREE)
+ifneq ("$(NOSA_INFO)","")
+	$(info $(INFO) $(NOSA_INFO))
 endif
-	@printf "$(BUILT_BY_MINI_1)\n$(BUILT_ON_INFO)\n" \
-  > $(BUILD_DIR)/build-data/build-info.txt
-	$(shell grep -m1 -i 'model name' /proc/cpuinfo \
-  > $(BUILD_DIR)/build-data/build-detail.txt)
-	$(shell printf " Compile & link : ` \
-  echo $(CXX) $(CXXFLAGS) $(LDFLAGS) $(LDLIBS) -lfemera \
-  | tr -s '[:space:]'`\n" | fold -w 80 -s \
-  >> $(BUILD_DIR)/build-data/build-detail.txt)
-
-pre-build-tests : tools/pre_build_test.py build-info ompexec fmrexec \
-  $(BUILD_DIR)/Data/cube-tet6p1n1.msh2 $(INSTALL_CINCLUDE2DOT) $(TEMP_DIR)/
-	$(call build_timestamp,$@,$<)
-	if [ -h "tools/testy" ]; then \
-  echo "$(INFO) tools/testy is a link to external/testy."; \
-  else if [ -d "tools/testy" ]; then \
-    echo "$(INFO) tools/testy is a directory."; \
-    else \
-      ln -s "../external/testy" "tools/testy"; \
-      echo "$(NOTE) tools/testy symlinked to external/testy."; fi; fi
-	@external/tools/cinclude2dot --src src >docs/src.dot \
-          2>build/src.dot.err #  --groups is nice, too
-	$(info $(INFO) Source dependencies: docs/src.dot)
-	@grep -v '\.gtst\.' docs/src.dot > docs/src-notest.dot
-	$(info $(INFO) Dependencies without tests: docs/src-notest.dot)
-ifeq ($(ENABLE_GRAPHIZ),ON)
-	@tools/src-inherit.sh
-	@dot docs/src-notest.dot -Gsize="10.0,8.0" -Teps -o build/src-notest.eps
-	#  -Gratio="fill" -Gsize="11.7,8.267!" -Gmargin=0
-	$(info $(INFO) Dependency graph: build/src-notest.eps)
+ifneq ("$(ADD_TO_PATH)","")
+	$(info $(NOTE) temporarily prepended PATH with:)
+	$(info $(SPCS) $(ADD_TO_PATH))
 endif
-	python tools/pre_build_test.py 'src' $(BUILD_DIR)
-	$(MAKE) $(WRAP_SRCS)
+	@printf '%s' '$(EXT_DOT)' | sed 's/\\n/\n/g' > '$(EXT_DOTFILE)'
+	@dot '$(EXT_DOTFILE)' -Teps -o $(BUILD_DIR)/external/build-external.eps
+	@dot external/external.dot -Teps -o $(BUILD_DIR)/external/external.eps
 
-post-build-tests : tools/post_build_test.py $(BUILD_DIR)/mini
-	$(call build_timestamp,$@,$<)
-	$(info $(INFO) $(BUILD_DIR)/mini is \
-  $(shell du -h "$(BUILD_DIR)/mini" | cut -f1)B)
-	$(PYEXEC) tools/post_build_test.py 'src' $(BUILD_DIR)
+install-done:
+	$(info $(DONE) installing $(FEMERA_VERSION) on $(HOSTNAME) to:)
+	$(info $(SPCS) $(INSTALL_DIR)/)
+	$(info $(E_G_) $(patsubst %,%;,$(LIST_TOOLS)))
+	$(call timestamp,$@,)
 
-ompexec : src/ompexec $(STAGE_DIR)/bin/
-	$(call build_timestamp,$@,$?)
-	@cp src/ompexec $(STAGE_DIR)/bin/
+uninstall-done:
+	-rm -f $(INSTALL_CPU)/bin/mini
+	$(info $(DONE) uninstalling $(FEMERA_VERSION) on $(HOSTNAME) from:)
+	$(info $(SPCS) $(INSTALL_DIR)/)
+	$(info $(E_G_) $(patsubst %,%;,$(LIST_TOOLS)))
+	$(call timestamp,$@,)
 
-fmrexec : src/fmr1node src/fmrexec $(STAGE_DIR)/bin/
-	$(call build_timestamp,$@,$?)
-	@cp src/fmrexec $(STAGE_DIR)/bin/
-	@cp src/fmr1node $(STAGE_DIR)/bin/
-
-done : post-build-tests
-	$(call build_timestamp,$@,$?)
-	$(info $(DONE) $(BUILT_BY_INFO_1))
-	$(info $(SPCS) $(BUILT_BY_INFO_2))
-	$(info $(SPCS) $(BUILT_BY_INFO_3))
-	$(info $(XMPL) $(MPIEXEC) "$(BUILD_DIR)/mini" -d -t -D \)# -n$(TDD_OMP_NP)
-	$(info $(SPCS) $(TDD_FMRFILE))
-
-
-# Installation file (exes, libs) targets --------------------------------------
-
-# Rename files for installation.
-
-build/femera$(INSTALL_SUFFIX) : $(BUILD_DIR)/full $(STAGE_DIR)/bin/
-	@cp $< $@
-	@cp $< $(STAGE_DIR)/bin/femera
-
-build/femera-mini$(INSTALL_SUFFIX) : $(BUILD_DIR)/mini $(STAGE_DIR)/bin/
-	@cp $< $@
-	@cp $< $(STAGE_DIR)/bin/femera-mini
-
-build/%$(INSTALL_SUFFIX).a : $(BUILD_DIR)/%.a $(STAGE_DIR)/lib/
-	@cp $< $@
-	@cp $< $(STAGE_DIR)/lib/$(<F)
-
-
-# Executables
-
-$(VALGRIND_SUPP_EXE) : src/$(VALGRIND_SUPP).cpp
-	$(info $(CLAB) $(CXX) ... -o $(BUILD_DIR)/$(VALGRIND_SUPP).exe)
-	export TMPDIR=$(TEMP_DIR); $(CXX) $(VGFLAGS) src/$(VALGRIND_SUPP).cpp $(LDFLAGS) -L$(BUILD_DIR)\
-  -lfemera -o $(VALGRIND_SUPP_EXE) $(LDLIBS) $(call build_log,$@)
-	$(info $(GRND) suppression file: $(BUILD_DIR)/$(VALGRIND_SUPP))
-	$(VGSUPP)
-
-$(BUILD_DIR)/mini : $(BUILD_DIR)/libfemera.a
-$(BUILD_DIR)/mini : src/mini.cpp src/mini.hpp $(BUILD_DIR)/libuser.a \
- src/mini.test.py $(VALGRIND_SUPP_EXE)
-	$(info $(CLAB) $(CXX) ... $< -o $@)
-ifeq ($(ENABLE_GOOGLETEST),ON)
-	 export TMPDIR=$(TEMP_DIR); $(CXX) $(GTESTFLAGS) $< $(LDFLAGS) -L$(BUILD_DIR) \
-  -lfemera -o $@ $(LDLIBS) $(call build_log,$@)
-else
-	 export TMPDIR=$(TEMP_DIR); $(CXX) $(CXXFLAGS) $< $(LDFLAGS) -L$(BUILD_DIR) \
-  -lfemera -o $@ $(LDLIBS) $(call build_log,$@)
+build-done: # $(BUILD_CPU)/make-build.post.test.out
+	$(call timestamp,$@,$?)
+	$(info $(DONE) building $(FEMERA_VERSION))
+	$(info $(SPCS) on $(HOSTNAME) for $(CPUMODEL) with $(CXX) $(CXX_VERSION))
+ifneq ($(HOST_MD5),$(REPO_MD5))
+	$(info $(SPCS) modified by <$(BUILT_BY_EMAIL)>.)
 endif
-	$(PYEXEC) src/mini.test.py $@
-ifeq ($(ENABLE_VALGRIND),ON)
-	$(info $(GRND) Checking mpiexec ... $(BUILD_DIR)/mini ...)
-	$(VGEXEC)
-	-grep -i 'lost: [1-9]' $(BUILD_DIR)/mini.valgrind.log \
-  | cut -d " " -f 5- | awk '{print "$(WARN) valgrind:",$$0}'
-	-grep -i '[1-9] err' $(BUILD_DIR)/mini.valgrind.log \
-  | cut -d " " -f 4- | awk '{print "$(WARN) valgrind:",$$0}'
-	$(info $(GRND) See: $(BUILD_DIR)/mini.valgrind.log)
-endif
-
-#NOTE mini and libfemera.a (containing libmini.a stuff)
-#     will be built before this.
-$(BUILD_DIR)/full: src/femera.cpp
-
-$(BUILD_DIR)/%.gtst : src/%.gtst.cpp # $(BUILD_DIR)/libcore.a
-ifeq ($(ENABLE_GOOGLETEST),ON)
-	$(info $(CLAB) $(CXX) ... $< -o $@)
-	export TMPDIR=$(TEMP_DIR); $(CXX) $(GTESTFLAGS) $< $(LDFLAGS) -L$(BUILD_DIR) \
-  -lfemera -o $@ $(LDLIBS) $(call build_log,$@)
-	-$(TEST_EXEC) $@ -Tv0 $(TDD_FMRFILE) \
-  $(call build_log,$(BUILD_DIR)/$*.gtst)
-else
-	$(info $(WARN) $@ not tested: Googletest disabled. )
-	-echo "WARNING: $@ not tested: Googletest disabled." >> $@.err
-endif
-
-# Libraries
-
-ifeq ($(ENABLE_GOOGLETEST),ON)
-$(BUILD_DIR)/libuser.a : | $(CORE_GTST)
-
-$(CORE_GTST) : | $(BUILD_DIR)/libcore.a
-
-$(BUILD_DIR)/libfemera.a : | $(MINI_GTST)
-
-$(MINI_GTST) : $(BUILD_DIR)/libuser.a
-endif
-
-# libfemera archive.
-#NOTE that libfemera.a is used to make both femera AND femera-mini executables.
-
-$(BUILD_DIR)/libfemera.a : $(BUILD_DIR)/libcore.a $(BUILD_DIR)/libuser.a
-
-# intermediate archives, used for handling prerequisites and testing
-$(BUILD_DIR)/libuser.a : $(MINI_OBJS)
-	$(call build_timestamp,$(@F),"")
-	$(info $(LIBS) $(AREXE) libfemera.a <-- $(?F))
-	@touch $@ # @$(AREXE) -crs $@ $(MINI_OBJS) $(call build_log,$@)
-	@$(AREXE) -crs $(BUILD_DIR)/libfemera.a $? $(call build_log,$@)
-
-$(BUILD_DIR)/libuser.a : | $(BUILD_DIR)/libcore.a
-
-$(BUILD_DIR)/libcore.a : $(CORE_OBJS)
-	$(call build_timestamp,$(@F),"")
-	$(info $(LIBS) $(AREXE) libfemera.a <-- $(?F))
-	@touch $@ # @$(AREXE) -crs $@ $(CORE_OBJS) $(call build_log,$@)
-	@$(AREXE) -crs $(BUILD_DIR)/libfemera.a $? $(call build_log,$@)
-
-$(BUILD_DIR)/libfemera.h : $(TODO_lib_h_files) \
-  $(BUILD_DIR)/phys_inline.h  #$(BUILD_DIR)/Phys/phys_stub.o
-	$(info $(LIBS) cat $(?F) --> $(@F))
-	@cat $? >> $@ $(call build_log,$@)
+	$(info $(E_G_) tools/fmrexec.sh auto -d -t -D examples/cube.fmr)
 
 
-# Intermediate file target patterns -------------------------------------------
+# Femera tools ----------------------------------------------------------------
+install-tools: get-bats
+	$(call timestamp,$@,$<)
+	$(MAKE) $(JPAR) install-tools-done
 
-ifeq (0,1)
-$(BUILD_DIR)/mini.o : export TMPDIR = $(TEMP_DIR)
-$(BUILD_DIR)/mini.o : src/mini.cpp src/mini.hpp $(BUILD_DIR)/libuser.a
-	$(info $(CLAB) $(CXX) ... $< -o $@)
-	$(CXX) $(CXXFLAGS) -c $< -o $@ $(call build_log,$@)
-	# No test here. Executable mini is tested by src/mini.test.py.
-endif
+clean-tools: $(BUILD_CPU)/tools/ | $(STAGE_CPU)/bin/
+	$(call timestamp,$@,$^)
+	-rm -rf $^ $(STAGE_CPU)/bin/fmr*
 
-# Every other target .o needs a test.
+uninstall-tools: clean-tools | $(BUILD_DIR)/tests/ $(BUILD_CPU)/tests/
+	$(call timestamp,$@,$<)
+	-rm -f $(INSTALL_DIR)/bin/fmr* $(INSTALL_CPU)/bin/fmr*
+	$(MAKE) $(JPAR) uninstall-tools-done
 
-#$(BUILD_DIR)/%.gtst.o : src/%.cpp src/%.hpp src/%.gtst.cpp
-#	$(info $(CLAB) $(CXX) ... $< -o $@)
-#	$(CXX) -c $(CXXFLAGS) $< -o $@ $(call build_log,$@)
+reinstall-tools:
+	$(call timestamp,$@,$<)
+	$(MAKE) $(JPAR) uninstall-tools
+	$(MAKE) $(JPAR) install-tools
+	#grep -h . build/i7-7820HQ/tools/* build/i7-7820HQ/tests/*
 
-$(BUILD_DIR)/%.o : export TMPDIR = $(TEMP_DIR)
-$(BUILD_DIR)/%.o : src/%.cpp src/%.hpp src/%.gtst.cpp # $(BUILD_DIR)/%.gtst
-	-python tools/testy/check_code_graffiti.py $^
-	rm -f $*.err $*.gtst.err
-	$(info $(CLAB) $(CXX) ... $< -o $@)
-	$(CXX) -c $(CXXFLAGS) $< -o $@ $(call build_log,$@)
+test-tools:
+	$(call timestamp,$@,$(LIST_TOOLS))
+	$(MAKE) $(JPAR) $(TEST_TOOLS)
 
-ifeq (0,1)
-$(BUILD_DIR)/%.o $(BUILD_DIR)/%.test.o $(BUILD_DIR)/%.test : \
-src/%.cpp src/%.hpp src/%.test.cpp src/%.test.py
-#  $(BUILD_DIR)/<parent>.hpp
-	-python tools/testy/check_code_graffiti.py $^
-	rm -f $*.err $*.test.err
-	$(info $(CLAB) $(CXX) ... $< -o $@)
-	export TMPDIR=$(TEMP_DIR); $(CXX) -c $(CXXFLAGS) $< -o $@ $(call build_log,$@)
-	$(info $(CLAB) $(CXX) ... $< -o $(BUILD_DIR)/$*.test.o)
-	export TMPDIR=$(TEMP_DIR); $(CXX) -c $(CXXFLAGS) src/$*.test.cpp -o $(BUILD_DIR)/$*.test.o \
-  $(call build_log,$(BUILD_DIR)/$*.test.o)
-	$(info $(LINK) $(CXX) ... -o $(BUILD_DIR)/$*.test)
-	$(CXX) $(CXXFLAGS) $(BUILD_DIR)/$*.test.o $< $(LDFLAGS) \
-  -o $(BUILD_DIR)/$*.test $(LDLIBS) $(call build_log,$(BUILD_DIR)/$*.test)
-	$(PYEXEC) src/$*.test.py "$(@D)/"
-endif
+install-tools-done: $(TEST_TOOLS) $(INSTALL_TOOLS)
+	$(MAKE) $(JPAR) $(BUILD_CPU)/tests/make-install-tools.test.out
 
-# Handle dependancies generated by CXX -MMD -MP ...
-#NOTE This needs to be before "no test" recipes.
- -include $(CXXSRCS : %.cpp=%.d)
+uninstall-tools-done: $(BUILD_DIR)/tests/make-uninstall-tools.test.out
+uninstall-tools-done: $(BUILD_CPU)/tests/make-uninstall-tools.test.out
 
-$(BUILD_DIR)/Proc.o : $(BUILD_DIR)/build-data/copyright.inc
+# External --------------------------------------------------------------------
+
+install-bats: external/get-bats.test.sh
+install-bats: get-bats external/install-bats.sh external/install-bats.test.bats
+	$(call label_test,$(PASS),$(FAIL),external/get-bats.test.sh, \
+	  $(BUILD_DIR)/external/get-bats.test)
+	$(call label_test,$(EXEC),ERROR , \
+	  external/install-bats.sh "$(INSTALL_DIR)", \
+	  $(BUILD_DIR)/external/install-bats)
+	$(call label_bats,$(PASS),$(FAIL),external/install-bats.test.bats, \
+	  $(BUILD_DIR)/external/install-bats.test)
+	$(call timestamp,$@,$<)
+
+get-bats:
+	$(call timestamp,$@,$<)
+	$(MAKE) $(JPAR) $(GET_BATS)
+
+get-external:
+	$(MAKE) $(JPAR) $(GET_EXTERNAL)
+	$(call timestamp,$@,)
+
+install-external: $(INSTALL_EXTERNAL)
+	$(call timestamp,$@,make $(JEXT))
+
+external-done:
+	$(info $(DONE) building and installing externals on $(HOSTNAME) to:)
+	$(info $(SPCS) $(INSTALL_DIR)/)
+	$(info $(E_G_) $(patsubst %,%,$(LIST_EXTERNAL)))
+	$(call timestamp,$@,)
+
+get-%: | $(BUILD_DIR)/external/
+	#(call timestamp,$@,$<)
+	external/get-external.sh $(*)
+
+#$(BUILD_DIR)/external/get-bats-%.out; external/get-external.sh
+#	#(info $(Make) looking for bats-$(*)...)
+#	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
+#	  "external/get-external.sh bats-$(*)"   \
+#	  "$(BUILD_DIR)/external/get-bats-$(*)"
+
+$(BUILD_DIR)/external/get-%.out: external/get-external.sh external/get-%.dat
+	$(info $(Make) looking for bats-$(*)...)
+	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
+	  "external/get-external.sh $(*)"   \
+	  "$(BUILD_DIR)/external/get-$(*)"
+
+install-%: $(BUILD_DIR)/external/install-%.out | $(BUILD_DIR)/external/
+	$(call timestamp,$@,)
+
+$(BUILD_DIR)/external/install-%.flags: $(BUILD_DIR)/external/install-%.flags.new
+	tools/update-file-if-diff.sh "$(@)"
+
+$(BUILD_DIR)/external/install-pybind11.flags.new:
+	printf "%s" "$(PYBIND11_FLAGS)" > "$(@)"
+
+$(BUILD_DIR)/external/install-googletest.flags.new:
+	printf "%s" "$(GOOGLETEST_FLAGS)" > "$(@)"
+
+$(BUILD_DIR)/external/install-gmsh.flags.new: $(GMSH_DEPS)
+	printf "%s" "$(GMSH_FLAGS)" > "$(@)"
+
+$(BUILD_DIR)/external/install-gmsh471.flags.new: $(GMSH_DEPS)
+	printf "%s" "$(GMSH_FLAGS)" > "$(@)"
+
+$(BUILD_DIR)/external/install-occt.flags.new: $(OCCT_DEPS)
+	printf "%s" "$(OCCT_FLAGS)" > "$(@)"
+
+$(BUILD_DIR)/external/install-hdf5.flags.new: $(HDF5_DEPS)
+	printf "%s" "$(HDF5_FLAGS)" > "$(@)"
+
+$(BUILD_DIR)/external/install-fltk.flags.new: $(FLTK_DEPS)
+	$(info $(NOTE) K: module unload anaconda_3 to build FLTK. )
+	printf "%s" "$(FLTK_FLAGS)" > "$(@)"
+
+$(BUILD_DIR)/external/install-freetype.flags.new: $(FREETYPE_DEPS)
+	printf "%s" "$(FREETYPE_FLAGS)" > "$(@)"
+
+$(BUILD_DIR)/external/install-petsc.flags.new: $(PETSC_DEPS)
+	printf "%s" "$(PETSC_FLAGS)" > "$(@)"
+
+$(BUILD_DIR)/external/install-CGNS.flags.new: $(CGNS_DEPS)
+	printf "%s" "$(CGNS_FLAGS)" > "$(@)"
+
+$(BUILD_DIR)/external/install-cinclude2dot.flags.new:
+	printf "%s" "$(DOT_FLAGS)" > "$(@)"
+
+$(BUILD_DIR)/external/install-%.out: external/install-%.sh
+$(BUILD_DIR)/external/install-%.out: $(BUILD_DIR)/external/install-%.flags
+	$(call timestamp,$@,)
+	mkdir -p $(BUILD_DIR)/external/$(*)
+	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
+	  "external/install-$(*).sh $(INSTALL_DIR) $(<) $(JEXT)" \
+	  "$(BUILD_DIR)/external/install-$(*)"
+
+
+# Specialized targets =========================================================
+$(STAGE_DIR)/bin/fmr%: $(BUILD_CPU)/tools/fmr%.test.out
+	#(info $(INFO) staging fmr$(*) to $(STAGE_CPU)/bin/...)
+	cp -f "tools/fmr$(*).sh" "$(@)"
+	# should only copy fmrmodel, fmrcores, fmrnumas, fmrexec
+
+$(INSTALL_DIR)/bin/fmr%: $(STAGE_DIR)/bin/fmr% | $(INSTALL_DIR)/bin/
+	#(info $(INFO) installing fmr$(*) to $(INSTALL_DIR)/bin/...)
+	cp -f "$(STAGE_DIR)/bin/fmr$(*)" "$(@)"
+
+#ifeq ($(ENABLE_LIBNUMA),ON)
+#$(STAGE_CPU)/bin/fmrnumas: $(BUILD_CPU)/tools/fmrnumas.test.out
+#	cp -f $(BUILD_CPU)/tools/fmrnumas "$(@)"
+#
+#$(INSTALL_CPU)/bin/fmr%: $(STAGE_CPU)/bin/fmr% | $(INSTALL_CPU)/bin/
+#	#(info $(INFO) installing fmr$(*) to $(INSTALL_CPU)/bin/...)
+#	cp -f "$(STAGE_CPU)/bin/fmr$(*)" "$(@)"
+#endif
+
+# CPU-specific test targets (*.test.out) --------------------------------------
+#ifeq ($(ENABLE_LIBNUMA),ON)
+#$(BUILD_CPU)/tools/fmrnumas.test.out: src/tools/fmrnumas.c tools/fmrnumas.test.bats
+#	$(info $(CC__) $(CC) $(<) .. -o $(BUILD_CPU)/tools/fmrnumas)
+#	$(CC) $(<) $(FMRFLAGS) $(LDLIBS) -o $(BUILD_CPU)/tools/fmrnumas
+#	$(call label_bats,$(PASS),$(FAIL),tools/fmrnumas.test.bats, \
+#	  $(BUILD_CPU)/tools/fmrnumas.test)
+#endif
+
+
+$(BUILD_DIR)/tests/make-uninstall-tools.test.out: tests/make-uninstall-tools.test.bats
+	$(call label_bats,$(PASS),$(FAIL),DIR="$(INSTALL_DIR)/bin" $(<), \
+	  $(BUILD_CPU)/tests/make-uninstall-tools.test)
+$(BUILD_CPU)/tests/make-uninstall-tools.test.out: tests/make-uninstall-tools.test.bats
+	$(call label_bats,$(PASS),$(FAIL),DIR="$(INSTALL_CPU)/bin" $(<), \
+	  $(BUILD_CPU)/tests/make-uninstall-tools.test)
+	#NOTE Pass test parameters through the environment, e.g.,
+	#     MYVAR="myval" my.test.bats;
+	#     because Bats scripts do not support test arguments.
+	# https://bats-core.readthedocs.io/en/stable/gotchas.html#i-cannot-pass-parameters-to-test-or-bats-files
+
+# Tested shell scripts
+$(BUILD_CPU)/%.test.out: %.sh %.test.bats
+	$(call label_bats,$(PASS),$(FAIL),$(*).test.bats,$(BUILD_CPU)/$(*).test)
+	#touch $(@) # TODO Why does this do nothing?
+$(BUILD_CPU)/%.test.out: %.sh %.test.py
+	$(call label_test,$(PASS),$(FAIL),$(*).test.py,$(BUILD_CPU)/$(*).test)
+$(BUILD_CPU)/%.test.out: %.sh %.test.sh
+	$(call label_test,$(PASS),$(FAIL),$(*).test.sh,$(BUILD_CPU)/$(*).test)
+
+# Tested Python scripts
+$(BUILD_CPU)/%.test.out: %.py %.test.py
+	$(call label_test,$(PASS),$(FAIL),$(*).test.py,$(BUILD_CPU)/$(*).test)
+$(BUILD_CPU)/%.test.out: %.py %.test.bats
+	$(call label_bats,$(PASS),$(FAIL),$(*).test.bats,$(BUILD_CPU)/$(*).test))
+
+# Integration tests
+$(BUILD_CPU)/%.test.out: %.test.bats
+	$(call label_bats,$(PASS),$(FAIL),$(*).test.bats,$(BUILD_CPU)/$(*).test)
+$(BUILD_CPU)/%.test: %.test.py
+	$(call label_test,$(PASS),$(FAIL),$(*).test.py,$(BUILD_CPU)/$(*).test))
 
 # Warn if no test.
-$(BUILD_DIR)/%.o : export TMPDIR = $(TEMP_DIR)
-$(BUILD_DIR)/%.o : src/%.cpp src/%.hpp
-	-python tools/testy/check_code_graffiti.py $^
-	$(info $(WARN) No test of $<.)
-	rm -f $*.err
-	$(info $(CLAB) $(CXX) ... $< -o $@)
-	$(CXX) -c $(CXXFLAGS) $< -o $@ $(call build_log,$@)
-	-echo "WARNING: No test of $<." >> $@.err
+$(BUILD_CPU)/%.test.out: %.sh
+	$(info $(DBUG) $(<) needs a test, e.g., $(*).test.bats)
+	echo "$(<) needs a test, e.g., $(*).test.bats" \
+	  >> $(BUILD_CPU)/$(*).test.out
+$(BUILD_CPU)/%.test.out: %.py
+	$(info $(DBUG) $(<) needs a test, e.g., $(*).test.py)
+	echo "$(<) needs a test, e.g., $(*).test.py" \
+	  >> $(BUILD_CPU)/$(*).test.out
 
-ifeq (1,0)
-# Warn if no header.
-$(BUILD_DIR)/%.o : src/%.cpp
-	-python tools/testy/check_code_graffiti.py $^
-	$(info $(WARN) No $(*).hpp for $<, needed to build $(@F).)
-	-echo "WARNING: No $(*).hpp for $<, needed to build $(@F)." >> $@.err
-endif
+# Generic test targets (*.test.out) -------------------------------------------
 
-# Build info include targets ---------------------------------------------------
-# These only update the target if the content has changed.
-# Touches src/Work.cpp because that is where they are used.
+# Tested shell scripts
+$(BUILD_DIR)/%.test.out: %.sh %.test.bats
+	$(call label_bats,$(PASS),$(FAIL),$(*).test.bats,$(BUILD_DIR)/$(*).test)
+	#touch $(@) # TODO Why does this do nothing?
+$(BUILD_DIR)/%.test.out: %.sh %.test.py
+	$(call label_test,$(PASS),$(FAIL),$(*).test.py,$(BUILD_DIR)/$(*).test)
+$(BUILD_DIR)/%.test.out: %.sh %.test.sh
+	$(call label_test,$(PASS),$(FAIL),$(*).test.sh,$(BUILD_DIR)/$(*).test)
 
-ifeq (1,0) #DISABLED femera-options
-$(BUILD_DIR)/femera-options.new :
+# Tested Python scripts
+$(BUILD_DIR)/%.test.out: %.py %.test.py
+	$(call label_test,$(PASS),$(FAIL),$(*).test.py,$(BUILD_DIR)/$(*).test)
+$(BUILD_DIR)/%.test.out: %.py %.test.bats
+	$(call label_bats,$(PASS),$(FAIL),$(*).test.bats,$(BUILD_DIR)/$(*).test)
+
+# Integration tests
+$(BUILD_DIR)/%.test.out: %.test.bats
+	$(call label_bats,$(PASS),$(FAIL),$(*).test.bats,$(BUILD_DIR)/$(*).test)
+$(BUILD_DIR)/%.test: %.test.py
+	$(call label_test,$(PASS),$(FAIL),$(*).test.py,$(BUILD_DIR)/$(*).test)
+
+# Warn if no test.
+$(BUILD_DIR)/%.test.out: %.sh
+	$(info $(DBUG) $(<) needs a test, e.g., $(*).test.bats)
+	echo "$(<) needs a test, e.g., $(*).test.bats" \
+	  >> $(BUILD_DIR)/$(*).test.out
+$(BUILD_DIR)/%.test.out: %.py
+	$(info $(DBUG) $(<) needs a test, e.g., $(*).test.py)
+	echo "$(<) needs a test, e.g., $(*).test.py" \
+	  >> $(BUILD_DIR)/$(*).test.out
+
+# Untested targets ------------------------------------------------------------
+
+%.test.bats: # Continue when tests do not exist.
+	#(call label_test,$(PASS),$(FAIL),$(@),$(@))
+%.test.py:
+	#(call label_test,$(PASS),$(FAIL),$(@),$(@))
+%.test.sh:
+	#(call label_test,$(PASS),$(FAIL),$(@),$(@))
+
+$(BUILD_CPU)/%.test,out: # Warn if no test.
+	$(info $(DBUG) did not find test: $(*).test.*)
+
+# hm ==========================================================================
+%/:
+	mkdir -p $(@)
+
+build/.md5: | build/
+	touch $@
+build/%/.md5: | build/%/
 	touch $@
 
-DISABLED:
-ifeq ($(ENABLE_LIBNUMA),ON)
-	echo "#define FMR_HAS_LIBNUMA" >> $@
-endif
-ifeq ($(ENABLE_GOOGLETEST),ON)
-	echo "#define FMR_HAS_GTEST" >> $@
-endif
-ifeq ($(ENABLE_MPI),ON)
-	echo "#define FMR_HAS_MPI" >> $@
-endif
-ifeq ($(ENABLE_HDF5),ON)
-	echo "#define FMR_HAS_HDF5" >> $@
-endif
-ifeq ($(ENABLE_CGNS),ON)
-	echo "#define FMR_HAS_CGNS" >> $@
-endif
-ifeq ($(ENABLE_GMSH),ON)
-	echo "#define FMR_HAS_GMSH" >> $@
-endif
-ifeq ($(ENABLE_PETSC),ON)
-	echo "#define FMR_HAS_PETSC" >> $@
+build/modification.txt: data/modification.txt build/.md5
+	touch "build/modification.txt"
+ifneq ($(HOST_MD5),$(REPO_MD5))
+	cp "data/modification.txt" "build/modification.txt"
 endif
 
-$(BUILD_DIR)/femera-options.inc : $(BUILD_DIR)/femera-options.new | $(BUILD_TREE)
-	if test -r $@; then                              \
-	  cmp $@ $< >/dev/null 2>/dev/null || (          \
-	    mv -f $< $@;                                 \
-	    touch src/*.hpp src/*/*.hpp;                 \
-	    echo "$(INFO)" $(@F): has changed. )         \
-	else                                             \
-	  mv -f $< $@;                                   \
-	  touch src/*.hpp src/*/*.hpp;                   \
-	  echo "$(INFO)" $(@F): created.;                \
-	fi;                                              \
-	rm -f $(BUILD_DIR)/femera-options.new
-endif #DISABLED femera-options
-
-ifeq ($(ENABLE_GOOGLETEST),ON)
-$(BUILD_DIR)/build-data/googletest-version.inc :
-	-echo \"$(shell external/get-googletest-version.sh)\" > $@
+build/copyright.txt: data/copyright.txt build/modification.txt
+	cp "data/copyright.txt" $@
+ifneq ("$(NOSA_INFO)","")
+	printf "$(INFO_COLOR)";
+	cat build/modification.txt build/copyright.txt \
+	  | tr '\n' ' ' | tr -s ' ' | fold -s -w 80
+	printf "$(NORM_COLOR)\n";
 endif
 
-$(BUILD_DIR)/build-data/%.inc : $(BUILD_DIR)/build-data/%.txt | $(BUILD_TREE)
-	tools/wrap-txt2c.sh $< $@.new
-	if test -r $@; then                              \
-	  cmp $@.new $@ >/dev/null || (                  \
-	    python tools/testy/check_code_graffiti.py $?;\
-	    mv -f $@.new $@;                             \
-	    touch src/Proc.cpp;                          \
-	    echo "$(WRAP)" $< as $(@F) )                 \
-	else                                             \
-	  python tools/testy/check_code_graffiti.py $?;  \
-	  mv $@.new $@; echo "$(WRAP)" $< as $(@F);      \
-	  touch src/Proc.cpp;                            \
-	fi
+build/test-files.txt: tools/list-test-files.sh build/.md5
+	-tools/list-test-files.sh > $@
 
-$(BUILD_DIR)/build-data/%.inc : data/%.txt | $(BUILD_TREE)
-	tools/wrap-txt2c.sh $< $@.new
-	if test -r $@; then                              \
-	  cmp $@.new $@ >/dev/null || (                  \
-	    python tools/testy/check_code_graffiti.py $?;\
-	    mv -f $@.new $@;                             \
-	    touch src/Proc.cpp;                          \
-	    echo "$(WRAP)" $< as $(@) )                  \
-	else                                             \
-	  python tools/testy/check_code_graffiti.py $?;  \
-	  mv $@.new $@; echo "$(WRAP)" $< as $(@F);      \
-	  touch src/Proc.cpp;                            \
-	fi
+build/docs/tdd-tests.txt: tools/list-tdd-tests.sh build/docs/.md5
+	-tools/list-tdd-tests.sh src/docs/*.tex src/docs/*.lyx > $@
 
-# Build directory structure targets and patterns ------------------------------
-
-$(BUILD_DIR)/VERSION : | $(BUILD_TREE)
-	echo $(BUILD_VERSION) > $(BUILD_DIR)/VERSION.new
-	if test -r $@; then                                   \
-	  cmp $(BUILD_DIR)/VERSION.new $@ >/dev/null ||       \
-	    (mv -f $(BUILD_DIR)/VERSION.new $@;               \
-	    touch src/Proc.cpp src/Work.cpp;                  \
-	    echo "$(INFO)" Set version to $(BUILD_VERSION). ) \
-	else                                                  \
-	  mv $(BUILD_DIR)/VERSION.new $@;                     \
-	  touch src/Proc.cpp src/Work.cpp;                    \
-	  echo "$(INFO)" Set version to $(BUILD_VERSION).;    \
-	fi
-	echo $(CXXFLAGS) > $(BUILD_DIR)/CXXFLAGS
-
-
-# Targets for additional tests ------------------------------------------------
-# These include integration, end-to-end, and performance tests.
-
-$(BUILD_DIR)/Data/cube-tet6p1n1.msh2 : tests/mesh-tests.sh
-	$(call build_timestamp,$(@F),$?)
-	$(shell $< $(BUILD_DIR)/Data)
-
-#test-perf : test-gmsh
-#	$(call build_timestamp,$@,$?)
-#
-#test-gmsh : $(TEST_DIR)/test-gmsh.log
-#	$(call build_timestamp,$@,$?)
-#
-#$(TEST_DIR)/test-gmsh.log : tests/test-gmsh.sh tests/geo/uhxt-cube.geo
-#	tests/test-gmsh.sh > $(TEST_DIR)/test-gmsh.log
-#	tests/print-test-results.sh "" "" $(TEST_DIR)/test-gmsh.log
-
-
-# Installation targets --------------------------------------------------------
-
-install :
-	$(call build_timestamp,$@,$?)
-	-rsync -a $(STAGE_DIR) $(INSTALL_DIR)/
-
-uninstall :
-	$(call build_timestamp,$@,$?)
-	-rm -f $(INSTALL_DIR)/bin/femera$(INSTALL_SUFFIX)
-	-rm -f $(INSTALL_DIR)/bin/femera-mini$(INSTALL_SUFFIX)
-	-rm -f $(INSTALL_DIR)/lib/libfemera$(INSTALL_SUFFIX).a
-	-rm -r $(INSTALL_DIR)/include/femera$(INSTALL_SUFFIX).h
-
-
-# External targets ------------------------------------------------------------
-external/tools/cinclude2dot :
-	$(call build_timestamp,cinclude2dot,$<)
-ifeq ($(ENABLE_GRAPHIZ),ON)
-	-mkdir -p external/tools
-	-$(shell cd external/tools; \
-  wget https://www.flourish.org/cinclude2dot/cinclude2dot; \
-  chmod +x cinclude2dot )
-endif
-
-$(BUILD_EXTERNAL_DIR)/freetype/freetype-2.8.tar.gz : | $(BUILD_EXTERNAL_DIR)/freetype/
-	-$(shell mkdir -p $(BUILD_EXTERNAL_DIR)/freetype; cd "`pwd`/$(BUILD_EXTERNAL_DIR)/freetype"; \
-  wget -O freetype-2.8.tar.gz http://download.savannah.gnu.org/releases/freetype/freetype-2.8.tar.gz \
-  ; tar zxvf freetype-2.8.tar.gz )
-
-$(BUILD_EXTERNAL_DIR)/occt/occt.tgz : | $(BUILD_EXTERNAL_DIR)/occt/
-	-$(shell mkdir -p $(BUILD_EXTERNAL_DIR)/occt; cd "`pwd`/$(BUILD_EXTERNAL_DIR)/occt"; \
-  wget -O occt.tgz "http://git.dev.opencascade.org/gitweb/?p=occt.git;a=snapshot;h=refs/tags/V7_3_0;sf=tgz" \
-  ; tar zxf occt.tgz )
-
-$(BUILD_EXTERNAL_DIR)/fltk/fltk-1.3.4-2-source.tar.gz : | $(BUILD_EXTERNAL_DIR)/fltk/
-	-$(shell mkdir -p $(BUILD_EXTERNAL_DIR)/fltk; cd "`pwd`/$(BUILD_EXTERNAL_DIR)/fltk"; \
-  wget -O fltk-1.3.4-2-source.tar.gz http://fltk.org/pub/fltk/1.3.4/fltk-1.3.4-2-source.tar.gz \
-  ; tar zxvf fltk-1.3.4-2-source.tar.gz )
-
-$(BUILD_EXTERNAL_DIR)/freetype-ok : external/build-freetype.sh \
-$(BUILD_EXTERNAL_DIR)/freetype/freetype-2.8.tar.gz | $(BUILD_TREE)
-	$(call build_timestamp,Freetype,$<)
-	external/build-freetype.sh "`pwd`/$(BUILD_EXTERNAL_DIR)/freetype/freetype-2.8" \
-  "$(INSTALL_DIR)" && touch "$(BUILD_EXTERNAL_DIR)/freetype-ok"
-
-$(BUILD_EXTERNAL_DIR)/occt-ok : external/build-occt.sh \
-$(BUILD_EXTERNAL_DIR)/occt/occt.tgz \
-$(BUILD_EXTERNAL_DIR)/freetype-ok | $(BUILD_TREE)
-	$(call build_timestamp,OpenCASCADE,$<)
-	external/build-occt.sh "`pwd`/$(BUILD_EXTERNAL_DIR)/occt/occt-V7_3_0" \
-  "$(INSTALL_DIR)" && touch "$(BUILD_EXTERNAL_DIR)/occt-ok"
-
-$(BUILD_EXTERNAL_DIR)/fltk-ok : external/build-fltk.sh \
-$(BUILD_EXTERNAL_DIR)/fltk/fltk-1.3.4-2-source.tar.gz | $(BUILD_TREE)
-	$(info $(NOTE) module unload anaconda_3 to build FLTK. )
-	$(call build_timestamp,FLTK,$<)
-	external/build-fltk.sh "`pwd`/$(BUILD_EXTERNAL_DIR)/fltk/fltk-1.3.4-2" \
-  "$(INSTALL_DIR)" && touch "$(BUILD_EXTERNAL_DIR)/fltk-ok"
-
-$(BUILD_EXTERNAL_DIR)/CGNS-ok : external/build-cgns.sh \
-  $(BUILD_EXTERNAL_DIR)/hdf5-ok | $(BUILD_TREE)
-	$(call build_timestamp,CGNS,$<)
-	external/build-cgns.sh "`pwd`/$(BUILD_EXTERNAL_DIR)/CGNS" \
-  "$(INSTALL_DIR)" && touch "$(BUILD_EXTERNAL_DIR)/CGNS-ok"
-
-$(BUILD_EXTERNAL_DIR)/gmsh-ok : external/build-gmsh.sh $(GMSH_REQUIRES) \
-  | $(BUILD_TREE)
-	$(call build_timestamp,gmsh,$<)
-	external/build-gmsh.sh "`pwd`/$(BUILD_EXTERNAL_DIR)/gmsh" \
-  "$(INSTALL_DIR)" "$(GMSH_FLAGS)" && touch "$(BUILD_EXTERNAL_DIR)/gmsh-ok"
-
-$(BUILD_EXTERNAL_DIR)/petsc-ok : external/build-petsc.sh $(PETSC_REQUIRES) \
-  | $(BUILD_TREE)
-	$(call build_timestamp,PETSc,$<)
-	external/build-petsc.sh "`pwd`/$(BUILD_EXTERNAL_DIR)/petsc" \
-  "$(INSTALL_DIR)" "$(PETSC_FLAGS)" && touch "$(BUILD_EXTERNAL_DIR)/petsc-ok"
-
-$(BUILD_EXTERNAL_DIR)/%-ok : external/build-%.sh | $(BUILD_TREE)
-	$(call build_timestamp,$*,$<)
-	external/build-$*.sh "`pwd`/$(BUILD_EXTERNAL_DIR)/$*" \
-  "$(INSTALL_DIR)" && touch "$(BUILD_EXTERNAL_DIR)/$*-ok"
-
-$(BUILD_EXTERNAL_DIR)/%-flags : $(BUILD_EXTERNAL_DIR)/%-flags.new
-	if test -r $@; then                         \
-	  cmp $@.new $@ >/dev/null ||               \
-	    (mv -f $@.new $@;                       \
-	    echo "$(FLAG)" $< to $(@) )             \
-	else                                        \
-	  mv $@.new $@; echo "$(FLAG)" $< to $(@F); \
-	fi
-
-$(BUILD_EXTERNAL_DIR)/gmsh-flags.new : |$(BUILD_TREE)
-	$(shell echo $(GMSH_FLAGS) > $(BUILD_EXTERNAL_DIR)/gmsh-flags.new )
-
-$(BUILD_EXTERNAL_DIR)/petsc-flags.new : |$(BUILD_TREE)
-	$(shell echo $(GMSH_FLAGS) > $(BUILD_EXTERNAL_DIR)/petsc-flags.new )
-
-# Cleanup targets -------------------------------------------------------------
-
-clean : $(BUILD_DIR)/
-	$(call build_timestamp,$@,$<)
-	-rm -rf $(BUILD_DIR)
-	$(info  $(BUILD_HOST) made Femera $(BUILD_VERSION) $@ \
-	  for $(shell tools/cpumodel.sh). )
-
-cleaner : clean clean-googletest/ clean-pybind11/ clean-hdf5/ clean-CGNS/ \
-  clean-gmsh/
-	$(call build_timestamp,$@,$< [clean-*])
-	-rm -f build/femera$(INSTALL_SUFFIX)
-	-rm -f build/femera-mini$(INSTALL_SUFFIX)
-	-rm -f build/libfemera$(INSTALL_SUFFIX).a
-	$(info $(BUILD_DATE) $(BUILD_HOST) made $@ \
-	  for $(shell tools/cpumodel.sh). )
-
-cleanest :
-	$(call build_timestamp,$@,build/ removed)
-	-rm -rf build
-	$(info $(BUILD_DATE) $(BUILD_HOST) made $@. )
-
-clean-%/ :
-	$(call build_timestamp,$@,$(BUILD_EXTERNAL_DIR)/$*/ removed)
-	-rm -f  $(BUILD_EXTERNAL_DIR)/$*-ok
-	-rm -rf $(BUILD_EXTERNAL_DIR)/$*
-
-%/ :
-	@mkdir -p $@
+build/docs/find-tdd-files.csv: build/docs/tdd-tests.txt build/test-files.txt
+build/docs/find-tdd-files.csv: tools/compare-lists.py
+	-tools/compare-lists.py build/docs/tdd-tests.txt build/test-files.txt \
+	  >$@ 2>build/docs/find-tdd-files.err
+	#(call label_test,$(PASS),$(DBUG), \
+	#  tools/compare-lists.py build/docs-tests.txt build/test-files.txt, \
+	#  build/find-docs-tdd-files)
 
