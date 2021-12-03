@@ -1,0 +1,7 @@
+GITMOD petsc
+BRANCH main
+GITSSH git@gitlab.com:petsc/petsc.git
+GITURL https://gitlab.com/petsc/petsc.git
+ZIPURL https://gitlab.com/petsc/petsc/-/archive/main/petsc-main.zip
+ZIPDIR external/petsc-main
+CKFILE external/petsc/LICENSE

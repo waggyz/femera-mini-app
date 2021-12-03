@@ -1,0 +1,7 @@
+GITMOD gmsh
+BRANCH master
+GITSSH git@gitlab.onelab.info:gmsh/gmsh.git
+GITURL https://gitlab.onelab.info/gmsh/gmsh.git
+ZIPURL https://gitlab.onelab.info/gmsh/gmsh/-/archive/master/gmsh-master.zip
+ZIPDIR external/gmsh-master
+CKFILE external/gmsh/LICENSE.txt

@@ -1,0 +1,330 @@
+
+%%section{Femera quick start%label{sec:Quick-start}}
+
+This quick start guide describes how to configure, build, and install
+Femera and its dependencies with the recommended options.
+\begin{verse}
+\textbf{Note}:
+System administrators and Femera developers should
+review the Femera user and developer guide before continuing with this quick
+start.
+\end{verse}
+Configure Femera before building and installing it.
+
+\subsection{Quick configure\label{subsec:Quick-configure}}
+
+Getting started with Femera begins with cloning the repository and
+copying a configuration file to (\texttt{config.local}) as shown in
+the example listing~\ref{lis:Quick-configure}.
+\begin{verse}
+\textbf{Best practice}:
+Copy and edit an appropriate configuration file from
+the (\texttt{examples/}) directory.
+\end{verse}
+\begin{comment}
+tdd:tests/pre-build/config\_local\_is\_valid\_makefile.py
+\end{comment}
+
+\begin{lstlisting}[caption={Femera initial configuration steps and
+time estimate},label={lis:Quick-configure},language=bash,float=ht]
+#!/bin/bash
+# Run these commands to download Femera source and begin configuring Femera.
+#
+git clone https://github.com/waggyz/femera-mini-app.git # 30-90 sc
+cd femera-mini-app
+cp examples/config.recommended config.local
+\end{lstlisting}
+
+Use a text editor to update the local configuration file (\texttt{config.local})
+with your name, affiliation, email, and (recommended) a user-writable
+installation directory as shown in listing~\ref{lis:config.recommended-head-9}.
+Please review section~3 of the NASA Open Source Agreement (\texttt{NOSA-1-3.txt})
+before editing this file.
+\begin{comment}
+tdd:tests/pre-build/file-does-exist.sh NOSA-1-3.txt
+\end{comment}
+\begin{verse}
+\textbf{Best practice}:
+Update the file (\texttt{config.local}) with
+your name, affiliation, email, and desired installation directory.
+\end{verse}
+\begin{comment}
+tdd:tests/pre-build/user\_did\_change\_BUILT\_BY.py
+\end{comment}
+
+Femera is intended to be used in a high-performance computing environment
+with a network file system shared among compute nodes with different
+capabilities.
+Femera build configuration files use makefile syntax, as shown in
+the example listing~\ref{lis:config.recommended-head-9}.
+If the (\texttt{PREFIX}) entry is omitted or blank,
+Femera and its dependencies will be installed in system directories.
+\begin{verse}
+\textbf{Best practice}:
+Install Femera and its dependencies in a user directory and add this directory's
+(\texttt{bin}, \texttt{lib}, \texttt{lib64})
+sub-directories to the appropriate system paths.
+\end{verse}
+\begin{comment}
+tdd:tests/post-install/femera\_is\_installed\_to\_local\_dir\_in\_path.py
+\end{comment}
+
+\begin{lstlisting}[caption={Excerpt of an example Femera configuration file
+(\texttt{config.local})},
+label={lis:config.recommended-head-9},language=make,float=ht]
+#!/usr/bin/make
+# config.local
+#
+# Please update the next line with your name, affiliation, and email address.
+BUILT_BY:=Anonymous User (Example University)<anon@example.edu>
+#
+# Set PREFIX to the full path of a user-writable installation directory.
+PREFIX:=/home/anon/local
+#
+# [...]
+\end{lstlisting}
+
+\begin{comment}
+tdd:tests/pre-build/config\_recommended\_head\_n8\_is\_in\_guide.py
+\end{comment}
+
+Femera build scripts are written for the Linux Bash interpreter.
+\begin{verse}
+\textbf{Best practice}:
+Set Bash as the default Linux shell when installing and using Femera.
+\end{verse}
+
+By default, Femera build scripts test that each step had the desired
+result and report test results to the console.
+
+\subsection{Quick build\label{subsec:Quick-build}}
+
+Depending on how Femera is configured and what is already available
+on the build system, Femera build scripts will typically download
+and install several external dependencies before building Femera itself.
+\begin{verse}
+\textbf{Best practice}:
+Build, test, tune, and install Femera on the same hardware it will be run on.
+\end{verse}
+\begin{comment}
+tdd:tests/post-build/make\_test\_did\_check\_runtime\_fmrmodel.py
+\end{comment}
+\begin{verse}
+\textbf{Note}:
+The make targets (\texttt{test}) and (\texttt{tune})
+should \textit{not} be built on a shared system (login) node.
+\end{verse}
+The time estimates in listings~\ref{lis:quick-start-user}
+and~\ref{lis:quick-start-sys} are based
+on building Femera and its dependencies in the recommended configuration,
+and will vary with build system capabilities.
+\begin{comment}
+tdd:tests/pre-build/sys\_has\_fewer\_than\_5\_users.py
+\end{comment}
+\begin{verse}
+\textbf{Note}:
+These ``quick build'' terminal command examples
+assume that the current working directory is the root of the
+Femera source code repository (\texttt{femera-mini-app/}).
+\end{verse}
+
+\begin{center}
+\begin{lstlisting}[caption={Build and install Femera in a user directory.},
+label={lis:quick-start-user},language=bash,float=ht]
+#!/bin/bash
+# Build Femera from within the femera-mini-app/ directory.
+#-------------------------------------
+# Bash shell command       # Time Est.
+#-------------------------------------
+make external              # 20-60 mn
+make mini                  #  5-10 mn
+make test tune             #  1-2  hr
+make install               #  1-2  mn
+\end{lstlisting}
+\begin{comment}
+tdd:tests/post-build/make\_time\_in\_user\_guide\_is\_correct.py
+\end{comment}
+\end{center}
+
+The make targets in
+listings~\ref{lis:quick-start-user} and~\ref{lis:quick-start-sys},
+summarized below, are described in more detail in
+the Femera user and developer guide.
+
+\begin{enumerate}
+\item \texttt{make external}\\
+Download, build, and install external libraries, tools, and applications
+that are needed to build Femera.
+
+\item \texttt{make mini}\\
+Build the Femera~0.3 mini-app.
+\item \texttt{make test tune}\\
+Run Femera integration tests and optimize run-time parameters.
+\item \texttt{make install}\\
+Install Femera for research and production use.
+\end{enumerate}
+
+After installing Femera (\texttt{make install}),
+commands like the examples in listing~\ref{lis:add-dir-to-path}
+can be added to a Bash shell initialization script
+(e.g.~\texttt{.bash\_profile}, \texttt{.bashrc})
+using a text editor when Femera is installed to a local user directory.
+\begin{comment}
+tdd:tests/pre-build/sys\_bash\_is\_default.py
+\end{comment}
+
+\begin{lstlisting}[caption={Add user installation directories to
+system search paths.},label={lis:add-dir-to-path},language=bash,float=ht]
+#!/bin/bash
+# Run commands like these in a bash console to update system paths temporarily,
+# or append them to an initialization script (e.g. .bash_profile, .bashrc).
+
+# Executable path
+PATH=/home/anon/local/bin:$PATH
+PATH=/home/anon/local/`fmrmodel`/bin:$PATH
+
+# Library path
+export LD_LIBRARY_PATH=/home/anon/local/lib64:$LD_LIBRARY_PATH
+LD_LIBRARY_PATH=/home/anon/local/lib:$LD_LIBRARY_PATH
+LD_LIBRARY_PATH=/home/anon/local/`fmrmodel`/lib:$LD_LIBRARY_PATH
+\end{lstlisting}
+
+Although installing Femera and its dependencies to a
+user directory is recommended, Femera may also be installed to system
+directories as usual for Linux applications.
+\begin{verse}
+\textbf{Note}:
+Elevated privileges may be required to install Femera in system directories.
+\begin{comment}
+tdd:tests/pre-build/sys-user-has-install-privileges.sh
+\end{comment}
+\end{verse}
+If there is no line in the file (\texttt{config.local})
+to specify the installation directory (\texttt{PREFIX}), or it is blank,
+Femera will be installed in system directories.
+Use (\texttt{sudo}) to make the targets (\texttt{external} and
+\texttt{install}) with elevated
+privileges as shown in listing~\ref{lis:quick-start-sys}.
+\begin{verse}
+\textbf{Note}:
+Un-installing Femera will \textit{not} remove dependecies installed in
+system directories.
+Dependencies installed in system directories must be removed individually.
+\end{verse}
+
+\begin{center}
+\begin{lstlisting}[caption={Build and install Femera in system directories.},
+label={lis:quick-start-sys},language=bash,float=ht]
+#!/bin/bash
+# Build Femera from within the femera-mini-app/ directory.
+#-------------------------------------
+# Bash shell command       # Time Est.
+#-------------------------------------
+sudo make external         # 20-60 mn
+make mini                  #  5-10 mn
+make test tune             #  1-2  hr
+sudo make install          #  1-2  mn
+\end{lstlisting}
+\begin{comment}
+tdd:tests/pre-build/quick\_start\_user\_sys\_listings\_is\_same\_with\_sudo\_lines.py
+\end{comment}
+\end{center}
+
+Some common causes of build failures are addressed as frequently asked
+questions~(FAQs) in the next section.
+
+\subsection{Quick build frequently-asked questions~(FAQs)\label{subsec:Quick-faqs}}
+
+The full list of FAQs for this version of Femera can be found
+in~(\texttt{docs/FAQ.md}).
+\begin{comment} or at
+(\texttt{https://github.com/waggyz/femera-mini-app/docs/FAQ.md}).
+\end{comment}
+\begin{comment}
+tdd:tests/pre-build/quick\_start\_faqs\_are\_in\_docs\_FAQ\_file.py
+\end{comment}
+
+\begin{verse}
+\textbf{FAQ}:
+\textit{Why does Make fail with permission errors when
+building Femera installation targets?}\\
+Installation to system directors often requires elevated
+privileges. Prefix the installation (\texttt{make}) commands with (\texttt{sudo})
+as shown in listing~\ref{lis:quick-start-sys}.
+
+\textbf{FAQ}:
+\textit{Why does Make fail with a bad file descriptor
+(bad fd) error when building Femera?}\\
+Most likely, this is because Bash is not the default
+shell. Either configure the environment to use Bash by default, or
+prefix all the (\texttt{make}) commands in listing~\ref{lis:quick-start-user}
+with \texttt{(bash}) as shown in the example command below.\\
+\texttt{bash make mini}
+
+\textbf{FAQ}:
+\textit{Why does building Femera or external dependencies fail
+with a segmentation fault (segfault) or out of memory error?}\\
+Compiling can use a very large amount of memory. Limit the number of
+simultaneous threads for compiling by setting
+(\texttt{MAKEJOBS}) in (\texttt{config.local})
+as shown in the example below.\\
+\texttt{MAKEJOBS:=4}
+
+\end{verse}
+After Femera has been built, tested, tuned, and installed,
+there are several ways to get started using Femera.
+This quick start guide has brief introductions to
+Femera command-line use (section~\ref{subsec:cli-examples}),
+interactive use (section~\ref{subsec:Intro-python-interactive}),
+Python scripts (section~\ref{subsec:Intro-python-script}), and
+C++ programming (section~\ref{subsec:Intro-cpp}).
+
+\begin{verse}
+\textbf{FAQ}:
+\textit{Where are Femera examples and tutorials
+installed?}\\
+The make target (\texttt{install}) in listings~\ref{lis:quick-start-user}
+and~\ref{lis:quick-start-sys} installs Femera documentation, tests, examples,
+and tutorials in a sub-directory (\texttt{share/doc/femera/}) of the
+installation directory described in section~\ref{subsec:Quick-configure}.
+If a user directory is not provided, this sub-directory is installed
+in a Linux system directory (e.g., \texttt{/usr/local/share/doc/femera/}).
+\end{verse}
+\begin{comment}
+tdd:tests/post-install/docs-are-in-share-doc-femera-dir.sh
+tdd:tests/post-install/tests-are-in-share-doc-femera-test-dir.sh
+tdd:tests/post-install/examples-are-in-share-doc-femera-examples-dir.sh
+tdd:tests/post-install/tutorial-is-in-share-doc-femera-tutorial-dir.sh
+\end{comment}
+
+More extensive example and tutorial descriptions can be found in the
+Femera user and developer guide.
+
+\subsection{Quick introduction to using Femera\label{subsec:quick-intro}}
+
+placeholder
+
+\subsubsection{Selected Femera command line examples\label{subsec:cli-examples}}
+
+placeholder
+
+\subsubsection{Introduction to interactive Femera use
+\label{subsec:Intro-python-interactive}}
+
+placeholder
+
+\subsubsection{Introduction to Femera Python scripts
+\label{subsec:Intro-python-script}}
+
+placeholder
+
+\subsubsection{Introduction to the Femera C++ library
+\label{subsec:Intro-cpp}}
+
+placeholder
+
+\subsection{Quick cluster job submission introduction
+\label{subsec:Intro-cluster-job}}
+
+placeholder
+.

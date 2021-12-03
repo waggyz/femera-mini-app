@@ -1,0 +1,24 @@
+digraph "external dependencies" {
+ overlap=scale;
+ size="6,3";
+ ratio="fill";
+ fontsize="12";
+ fontname="Helvetica";
+ clusterrank="local";
+ "OpenMP" -> "Femera"
+ "MPI" -> "Femera"
+ "libnuma" -> "Femera"
+ "GoogleTest" -> "Femera"
+ "pybind11" -> "Femera"
+ "Gmsh" -> "Femera"
+ "pybind11" -> "Gmsh"
+ "CGNS" -> "Gmsh"
+ "HDF5" -> "Gmsh"
+ "FLTK" -> "Gmsh"
+ "X" -> "Gmsh"
+ "OpenCASCADE" -> "Gmsh"
+ "FreeType" -> "OpenCASCADE"
+ "CGNS" -> "Femera"
+ "HDF5" -> "CGNS"
+ "MKL" -> "Femera"
+ }

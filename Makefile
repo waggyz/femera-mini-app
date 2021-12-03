@@ -457,7 +457,7 @@ get-bats:
 	$(call timestamp,$@,$<)
 	$(MAKE) $(JPAR) $(GET_BATS)
 
-get-external:
+get-external: | external/tools/
 	$(MAKE) $(JPAR) $(GET_EXTERNAL)
 	$(call timestamp,$@,)
 

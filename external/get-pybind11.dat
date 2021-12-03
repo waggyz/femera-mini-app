@@ -1,0 +1,7 @@
+GITMOD pybind11
+BRANCH master
+GITSSH git@github.com:pybind/pybind11.git
+GITURL https://github.com/pybind/pybind11.git
+ZIPURL https://github.com/pybind/pybind11/archive/refs/heads/master.zip
+ZIPDIR external/pybind11-master
+CKFILE external/pybind11/LICENSE

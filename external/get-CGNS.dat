@@ -1,0 +1,7 @@
+GITMOD CGNS
+BRANCH CPEX45_high_order
+GITSSH git@github.com:CGNS/CGNS.git
+GITURL https://github.com/CGNS/CGNS.git
+ZIPURL https://github.com/CGNS/CGNS/archive/refs/heads/CPEX45_high_order.zip
+ZIPDIR external/CGNS
+CKFILE external/CGNS/README.md
