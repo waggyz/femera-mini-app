@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# TigerVNC (LASLR18020100):
+Xvnc -quiet -displayfd /dev/stdout -fp /usr/share/X11/fonts/misc 2>/dev/null
+
+# TurboVNC v1.2 2013 (K): Does NOT work (insufficient GL support)
+Xvnc -fp /usr/share/X11/fonts/misc -co /usr/share/X11/rgb 2> Xvnc.err &
+grep Desktop Xvnc.err | sed -e 's/.*[(]\(.*\)[)].*/\1/'
