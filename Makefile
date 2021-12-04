@@ -38,7 +38,8 @@ STAGE_CPU  := $(STAGE_DIR)/$(CPUMODEL)
 INSTALL_CPU:= $(INSTALL_DIR)/$(CPUMODEL)
 
 # Subdirectories needed
-BUILD_TREE+= $(BUILD_DIR)/docs/ $(BUILD_DIR)/external/
+BUILD_TREE+= $(BUILD_DIR)/external/ $(BUILD_DIR)/docs/
+BUILD_TREE+= $(BUILD_DIR)/external/tools/
 BUILD_TREE+= $(BUILD_CPU)/tests/ $(BUILD_CPU)/tools/
 
 STAGE_TREE+= $(STAGE_DIR)/bin/ $(STAGE_DIR)/libs/
@@ -226,7 +227,9 @@ ifeq ($(ENABLE_FREETYPE),ON)
   FREETYPE_FLAGS += --prefix="$(INSTALL_DIR)"
 endif
 ifeq ($(ENABLE_MKL),ON)
+  LIST_EXTERNAL += mkl
   EXT_DOT+="MKL" -> "Femera"\n
+  # MKL_FLAGS +=
 endif
 # Developer tools
 ifeq ($(ENABLE_DOT),ON)
@@ -235,6 +238,11 @@ ifeq ($(ENABLE_DOT),ON)
 endif
 EXT_DOT+=}\n
 EXT_DOTFILE:=$(BUILD_DIR)/external/external.dot
+
+#FIXME Remove $(BUILD_DIR)/external/install-pybind11.flags.new targets,
+#FIXME and write *.flags.new files here from *_FLAGS variables
+#FIXME or move above to reecipes
+
 # Files -----------------------------------------------------------------------
 # Generic Femera tools
 LIST_TOOLS:= fmrmodel fmrcores fmrexec fmrnumas
@@ -474,14 +482,14 @@ get-%: | $(BUILD_DIR)/external/
 	#(call timestamp,$@,$<)
 	external/get-external.sh $(*)
 
-#$(BUILD_DIR)/external/get-bats-%.out; external/get-external.sh
-#	#(info $(Make) looking for bats-$(*)...)
-#	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
-#	  "external/get-external.sh bats-$(*)"   \
-#	  "$(BUILD_DIR)/external/get-bats-$(*)"
+$(BUILD_DIR)/external/get-bats-%.out: external/get-external.sh
+	#(info $(INFO) looking for bats-$(*)...)
+	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
+	  "external/get-external.sh bats-$(*)"   \
+	  "$(BUILD_DIR)/external/get-bats-$(*)"
 
 $(BUILD_DIR)/external/get-%.out: external/get-external.sh external/get-%.dat
-	$(info $(Make) looking for bats-$(*)...)
+	$(info $(INFO) looking for $(*)...)
 	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
 	  "external/get-external.sh $(*)"   \
 	  "$(BUILD_DIR)/external/get-$(*)"
@@ -525,6 +533,9 @@ $(BUILD_DIR)/external/install-CGNS.flags.new: $(CGNS_DEPS)
 
 $(BUILD_DIR)/external/install-cinclude2dot.flags.new:
 	printf "%s" "$(DOT_FLAGS)" > "$(@)"
+
+$(BUILD_DIR)/external/install-mkl.flags.new:
+	printf "%s" "$(MKL_FLAGS)" > "$(@)"
 
 $(BUILD_DIR)/external/install-%.out: external/install-%.sh
 $(BUILD_DIR)/external/install-%.out: $(BUILD_DIR)/external/install-%.flags

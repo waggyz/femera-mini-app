@@ -1,3 +1,3 @@
-GITMOD tools
-EXEURL https://registrationcenter-download.intel.com/akdlm/irc_nas/18236/l_BaseKit_p_2021.4.0.3422_offline.sh
-CKFILE external/tools/l_BaseKit_p_2021.4.0.3422_offline.sh
+GITMOD mkl
+RUNURL https://registrationcenter-download.intel.com/akdlm/irc_nas/18236/l_BaseKit_p_2021.4.0.3422_offline.sh
+CKFILE build/external/mkl/l_BaseKit_p_2021.4.0.3422_offline.sh

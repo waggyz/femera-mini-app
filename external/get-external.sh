@@ -40,6 +40,7 @@ else
         TGZURL) TGZURL=$VAL ;;
         TGZDIR) TGZDIR=$VAL ;;
         EXEURL) EXEURL=$VAL ;;
+        RUNURL) RUNURL=$VAL ;;
         CKFILE) CKFILE=$VAL ;;
         esac
     done < "$DATFILE"
@@ -48,28 +49,29 @@ else
     exit 1
   fi
 fi
-if [ -f $CKFILE ]; then
-  # echo "looks like $REPO source code is already available."
-  DEST_IS_REPO=`cd $DESTDIR/$GITMOD &&git rev-parse --is-inside-work-tree 2>/dev/null`
-  if [ 0 -eq 1 ]; then
-  if [ "$DEST_IS_REPO" == "true" ]; then
-    cd $DESTDIR/$GITMOD
-    DEST_BRANCH=`git rev-parse --abbrev-ref HEAD`
-    if [ -n "$BRANCH" ]; then
-      if [ "$BRANCH" != "$DEST_BRANCH" ]; then # switch branch
-        echo "switching $GITMOD from branch $DEST_BRANCH to $BRANCH..."
-        git checkout $BRANCH
-        #git submodule update --init
-        wait
-        echo "checked out $BRANCH of $GITMOD"
-      fi
-    fi
-    cd ../
+if [ -f "$CKFILE" ]; then
+  if [ -d "$DESTDIR" ]; then
+    # echo "looks like $REPO source code is already available."
+    DEST_IS_REPO=`cd "$DESTDIR/$GITMOD" &&git rev-parse --is-inside-work-tree \
+      2>/dev/null`
+#    if [ "$DEST_IS_REPO" == "true" ]; then
+#      cd $DESTDIR/$GITMOD
+#     DEST_BRANCH=`git rev-parse --abbrev-ref HEAD`
+#      if [ -n "$BRANCH" ]; then
+#       if [ "$BRANCH" != "$DEST_BRANCH" ]; then # switch branch
+#          echo "switching $GITMOD from branch $DEST_BRANCH to $BRANCH..."
+#          git checkout $BRANCH
+#          #git submodule update --init
+#          wait
+#          echo "checked out $BRANCH of $GITMOD"
+#        fi
+#      fi
+#      cd ../
+#    fi
+    exit 0
   fi
-  fi
-  exit 0
 fi
-if [ -f $CKFILE ]; then
+if [ -f "$CKFILE" ]; then
   if [ -n "$BRANCH" ]; then
     echo "updated git repo $GITMOD branch $BRANCH"
   else
@@ -94,7 +96,7 @@ if [ -n "$GITMOD" ]; then # Try updating git submodule.
     #fi
   fi
 fi
-if [ -f $CKFILE ]; then
+if [ -f "$CKFILE" ]; then
   echo "updated git sumbmodule $GITMOD"
   exit 0
 fi
@@ -116,7 +118,7 @@ if [ -n "$GITURL" ]; then # Try cloning it.
   #fi
   cd ../
 fi
-if [ -f $CKFILE ]; then
+if [ -f "$CKFILE" ]; then
   if [ -n "$BRANCH" ]; then
     echo "cloned $GITURL branch $BRANCH"
   else
@@ -141,7 +143,7 @@ if [ -n "$ZIPURL" ]; then # Try downloading and extracting a zip file.
     fi
   fi
 fi
-if [ -f $CKFILE ]; then
+if [ -f "$CKFILE" ]; then
   echo "downloaded and extracted $ZIPURL"
   exit 0
 fi
@@ -163,7 +165,7 @@ if [ -n "$TGZURL" ]; then # Try downloading and extracting a tgz file.
     fi
   fi
 fi
-if [ -f $CKFILE ]; then
+if [ -f "$CKFILE" ]; then
   echo "downloaded and extracted $TGZURL"
   exit 0
 fi
@@ -178,9 +180,19 @@ if [ -n "$EXEURL" ]; then # Try downloading an executable file.
     cp "$BUILDDIR/$GITMOD/$REPO" "$DESTDIR/$GITMOD/$REPO"
   fi
 fi
-if [ -f $CKFILE ]; then
+if [ -f "$CKFILE" ]; then
   chmod +x "$CKFILE"
   echo "downloaded executable $EXEURL"
+  exit 0
+fi
+if [ -n "$RUNURL" ]; then # Try downloading an installer.
+  mkdir -p "$BUILDDIR/$GITMOD"
+  $WGET "$RUNURL" -O "$CKFILE"
+  wait
+fi
+if [ -f "$CKFILE" ]; then
+  chmod +x "$CKFILE"
+  echo "downloaded installer $CKFILE"
   exit 0
 fi
 
