@@ -31,6 +31,9 @@ local.*
 *.err
 *.log
 
+# Documents in development
+*.lyx
+
 # valgrind suppression files
 *.supp
 
