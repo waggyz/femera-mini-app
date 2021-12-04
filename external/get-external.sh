@@ -51,18 +51,21 @@ fi
 if [ -f $CKFILE ]; then
   # echo "looks like $REPO source code is already available."
   DEST_IS_REPO=`cd $DESTDIR/$GITMOD &&git rev-parse --is-inside-work-tree 2>/dev/null`
+  if [ 0 -eq 1 ]; then
   if [ "$DEST_IS_REPO" == "true" ]; then
     cd $DESTDIR/$GITMOD
     DEST_BRANCH=`git rev-parse --abbrev-ref HEAD`
     if [ -n "$BRANCH" ]; then
       if [ "$BRANCH" != "$DEST_BRANCH" ]; then # switch branch
+        echo "switching $GITMOD from branch $DEST_BRANCH to $BRANCH..."
         git checkout $BRANCH
-        git submodule update --init
+        #git submodule update --init
         wait
-        echo "checked out $BRANCH"
+        echo "checked out $BRANCH of $GITMOD"
       fi
     fi
     cd ../
+  fi
   fi
   exit 0
 fi
@@ -77,7 +80,7 @@ fi
 if [ -n "$GITMOD" ]; then # Try updating git submodule.
   IS_IN_REPO=`git rev-parse --is-inside-work-tree 2>/dev/null`
   if [ "$IS_IN_REPO" == "true" ]; then
-    git submodule update --init --recursive $GITMOD
+    git submodule update --init --recursive $DESTDIR/$GITMOD
     #  --OR--
     #  git submodule update --remote $GITMOD
     #if [ -n "$BRANCH" ]; then

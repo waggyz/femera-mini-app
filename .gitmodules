@@ -1,4 +1,4 @@
-[submodule "external/bats"]
+[submodule "external/bats-core"]
 	path = external/bats
 	url = https://github.com/bats-core/bats-core.git
 [submodule "external/bats-support"]
