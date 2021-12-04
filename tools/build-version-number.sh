@@ -49,7 +49,7 @@ if [ "$IS_IN_REPO"=="true" ]; then
     fi
     BUILD_INFO="+"$COMMIT""$MOD""
     # v 0.3 demo branch started at 205 commits ahead of master.
-    COMMITS_PAST=`echo "$COMMITS_PAST-203" | bc`
+    COMMITS_PAST=`echo "$COMMITS_PAST-204" | bc`
   fi
 else # Not in git repository
   #COMMITS_PAST="$LOCAL_BUILD_ID"
