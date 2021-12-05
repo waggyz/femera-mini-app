@@ -16,7 +16,7 @@ if [ ! -f "$FILE2" ]; then
   echo " ERROR  $0 could not find file: $FILE2" >&2
   exit 1
 fi
-if test -r $FILE1; then
+if [ -f "$FILE1" ]; then
   cmp $FILE2 $FILE1 >/dev/null || ( mv -f $FILE2 $FILE1; )
 else
   mv $FILE2 $FILE1;

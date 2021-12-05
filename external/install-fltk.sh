@@ -1,7 +1,7 @@
 #!/bin/bash
 # module unload anaconda_3 #NOTE Needed for K
 INSTALL_DIR="$1"
-if [ -f "$2" ]; then FLAGS=`tr --delete '\n' < "$2"`; fi
+if [ -f "$2" ]; then FLAGS=`tr '\n' ' ' < "$2"`; fi
 JFLAG="$3"
 
 #if which fltk-config 2>/dev/null ; then

@@ -88,6 +88,8 @@ ifeq ($(ENABLE_GOOGLETEST),ON)
   # EXT_DOT+="GoogleTest" -> "Makefile"\n
   LIST_EXTERNAL += googletest
   GOOGLETEST_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
+  $(shell printf "%s" "$(GOOGLETEST_FLAGS)" \
+    > $(BUILD_DIR)/external/googletest.flags.new)
 endif
 # ENABLE_PYBIND11=ON
 ifeq ($(ENABLE_PYBIND11),ON)
@@ -97,6 +99,8 @@ ifeq ($(ENABLE_PYBIND11),ON)
   PYBIND11_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
   PYBIND11_FLAGS += -DBOOST_ROOT:PATHNAME=/usr/local/pkgs-modules/boost_1.66.0
   PYBIND11_FLAGS += -DDOWNLOAD_CATCH=0
+  $(shell printf "%s" "$(PYBIND11_FLAGS)" \
+    > $(BUILD_DIR)/external/pybind11.flags.new)
 endif
 ifeq ($(ENABLE_GMSH),ON)
   ifeq ("$(CXX) $(CXX_VERSION)","g++ 4.8.5")
@@ -154,6 +158,8 @@ ifeq ($(ENABLE_GMSH),ON)
   # Disable Cairo fonts for now. Just use FreeType (required by OCCT).
   GMSH_FLAGS += -DENABLE_CAIRO=0
   GMSH_DEPS:=$(patsubst %,$(BUILD_DIR)/external/install-%.out,$(GMSH_REQUIRES))
+  $(shell printf "%s" "$(gmsh_FLAGS)" \
+    > $(BUILD_DIR)/external/gmsh.flags.new)
 endif
 ifeq ($(ENABLE_OCCT),ON)
   LIST_EXTERNAL += occt
@@ -167,8 +173,9 @@ ifeq ($(ENABLE_OCCT),ON)
   OCCT_FLAGS += -DBUILD_MODULE_Draw=0
   OCCT_FLAGS += -DBUILD_MODULE_Visualization=0
   OCCT_FLAGS += -DBUILD_MODULE_ApplicationFramework=0
-  OCCT_DEPS:=$(patsubst %,$(BUILD_DIR)/external/install-%.out, \
-    $(OCCT_REQUIRES))
+  OCCT_DEPS:=$(patsubst %,$(BUILD_DIR)/external/install-%.out,$(OCCT_REQUIRES))
+  $(shell printf "%s" "$(OCCT_FLAGS)" \
+    > $(BUILD_DIR)/external/occt.flags.new)
 endif
 ifeq ($(ENABLE_HDF5),ON)
   LIST_EXTERNAL += hdf5
@@ -180,6 +187,8 @@ ifeq ($(ENABLE_HDF5),ON)
   HDF5_FLAGS += -DBUILD_SHARED_LIBS:BOOL=ON
   HDF5_FLAGS += -DCTEST_BUILD_CONFIGURATION=Release
   HDF5_FLAGS += -DHDF5_NO_PACKAGES:BOOL=ON
+  $(shell printf "%s" "$(HDF5_FLAGS)" \
+    > $(BUILD_DIR)/external/hdf5.flags.new)
 endif
 ifeq ($(ENABLE_CGNS),ON)
   LIST_EXTERNAL += CGNS
@@ -187,6 +196,9 @@ ifeq ($(ENABLE_CGNS),ON)
   ifeq ($(ENABLE_HDF5),ON)
     CGNS_REQUIRES += hdf5
     EXT_DOT+="HDF5" -> "CGNS"\n
+    CGNS_FLAGS += -DCGNS_ENABLE_HDF5:BOOL=ON
+  else
+    CGNS_FLAGS += -DCGNS_ENABLE_HDF5:BOOL=OFF
   endif
   CGNS_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
   CGNS_FLAGS += -DCGNS_ENABLE_LFS:BOOL=ON
@@ -196,9 +208,9 @@ ifeq ($(ENABLE_CGNS),ON)
   CGNS_FLAGS += -DCGNS_ENABLE_BASE_SCOPE:BOOL=OFF
   CGNS_FLAGS += -DCGNS_ENABLE_TESTS:BOOL=OFF
   CGNS_FLAGS += -DCGNS_ENABLE_FORTRAN:BOOL=OFF
-  CGNS_FLAGS += -DCGNS_ENABLE_HDF5:BOOL=ON
-  CGNS_DEPS:=$(patsubst %,$(BUILD_DIR)/external/install-%.out, \
-    $(CGNS_REQUIRES))
+  CGNS_DEPS:=$(patsubst %,$(BUILD_DIR)/external/install-%.out,$(CGNS_REQUIRES))
+  $(shell printf "%s" "$(CGNS_FLAGS)" \
+    > $(BUILD_DIR)/external/CGNS.flags.new)
 endif
 #FIXME PETSc, CGNS, FLTK, and FreeType build in external/*/
 ifeq ($(ENABLE_PETSC),ON)
@@ -208,40 +220,53 @@ ifeq ($(ENABLE_PETSC),ON)
   ifeq ($(ENABLE_OMP),ON)
     PETSC_FLAGS += --with-openmp
   endif
-  ifeq ($(ENABLE_CGNS),ON)
-    PETSC_REQUIRES += CGNS hdf5
-    EXT_DOT+="PETSc" -> "CGNS"\n
+  ifeq ($(ENABLE_HDF5),ON)
+    PETSC_REQUIRES += hdf5
+    PETSC_FLAGS += --with-hdf5
     EXT_DOT+="PETSc" -> "HDF5"\n
-    PETSC_FLAGS += --with-cgns --with-hdf5 --with-zlib
   endif
-  PETSC_DEPS:=$(patsubst %,$(BUILD_DIR)/external/install-%.out, \
-    $(PETSC_REQUIRES))
+  ifeq ($(ENABLE_CGNS),ON)
+    PETSC_REQUIRES += CGNS
+    EXT_DOT+="PETSc" -> "CGNS"\n
+    PETSC_FLAGS += --with-cgns --with-zlib
+  endif
+  PETSC_DEPS:=$(patsubst %,$(BUILD_DIR)/external/install-%.out,$(PETSC_REQUIRES))
+  $(shell printf "%s" "$(PETSC_FLAGS)" \
+    > $(BUILD_DIR)/external/petsc.flags.new)
 endif
 ifeq ($(ENABLE_FLTK),ON)
   LIST_EXTERNAL += fltk
   FLTK_FLAGS += --prefix="$(INSTALL_DIR)"
   FLTK_FLAGS += --enable-shared
+  $(shell printf "%s" "$(FLTK_FLAGS)" \
+    > $(BUILD_DIR)/external/fltk.flags.new)
 endif
 ifeq ($(ENABLE_FREETYPE),ON)
   LIST_EXTERNAL += freetype
   FREETYPE_FLAGS += --prefix="$(INSTALL_DIR)"
+  $(shell printf "%s" "$(FREETYPE_FLAGS)" \
+    > $(BUILD_DIR)/external/freetype.flags.new)
 endif
 ifeq ($(ENABLE_MKL),ON)
   LIST_EXTERNAL += mkl
   EXT_DOT+="MKL" -> "Femera"\n
-  # MKL_FLAGS +=
+  MKL_FLAGS += --extract-folder $(FMRDIR)/external/mkl
+  MKL_FLAGS += -a --silent --eula accept --install-dir $(INSTALL_DIR)
+  # https://www.intel.com/content/www/us/en/develop/documentation
+  # /installation-guide-for-intel-oneapi-toolkits-linux/top/installation
+  # /install-with-command-line.html#install-with-command-line
+    $(shell printf "%s" "$(MKL_FLAGS)" \
+      > $(BUILD_DIR)/external/install-mkl.flags.new)
 endif
 # Developer tools
 ifeq ($(ENABLE_DOT),ON)
   # EXT_DOT+="cinclude2dot" -> "Makefile"\n
   LIST_EXTERNAL += cinclude2dot
+  $(shell printf "%s" "$(DOT_FLAGS)"  \
+    > $(BUILD_DIR)/external/install-cinclude2dot.flags.new)
 endif
 EXT_DOT+=}\n
 EXT_DOTFILE:=$(BUILD_DIR)/external/external.dot
-
-#FIXME Remove $(BUILD_DIR)/external/install-pybind11.flags.new targets,
-#FIXME and write *.flags.new files here from *_FLAGS variables
-#FIXME or move above to reecipes
 
 # Files -----------------------------------------------------------------------
 # Generic Femera tools
@@ -499,43 +524,7 @@ install-%: $(BUILD_DIR)/external/install-%.out | $(BUILD_DIR)/external/
 
 $(BUILD_DIR)/external/install-%.flags: $(BUILD_DIR)/external/install-%.flags.new
 	tools/update-file-if-diff.sh "$(@)"
-
-$(BUILD_DIR)/external/install-pybind11.flags.new:
-	printf "%s" "$(PYBIND11_FLAGS)" > "$(@)"
-
-$(BUILD_DIR)/external/install-googletest.flags.new:
-	printf "%s" "$(GOOGLETEST_FLAGS)" > "$(@)"
-
-$(BUILD_DIR)/external/install-gmsh.flags.new: $(GMSH_DEPS)
-	printf "%s" "$(GMSH_FLAGS)" > "$(@)"
-
-$(BUILD_DIR)/external/install-gmsh471.flags.new: $(GMSH_DEPS)
-	printf "%s" "$(GMSH_FLAGS)" > "$(@)"
-
-$(BUILD_DIR)/external/install-occt.flags.new: $(OCCT_DEPS)
-	printf "%s" "$(OCCT_FLAGS)" > "$(@)"
-
-$(BUILD_DIR)/external/install-hdf5.flags.new: $(HDF5_DEPS)
-	printf "%s" "$(HDF5_FLAGS)" > "$(@)"
-
-$(BUILD_DIR)/external/install-fltk.flags.new: $(FLTK_DEPS)
-	$(info $(NOTE) K: module unload anaconda_3 to build FLTK. )
-	printf "%s" "$(FLTK_FLAGS)" > "$(@)"
-
-$(BUILD_DIR)/external/install-freetype.flags.new: $(FREETYPE_DEPS)
-	printf "%s" "$(FREETYPE_FLAGS)" > "$(@)"
-
-$(BUILD_DIR)/external/install-petsc.flags.new: $(PETSC_DEPS)
-	printf "%s" "$(PETSC_FLAGS)" > "$(@)"
-
-$(BUILD_DIR)/external/install-CGNS.flags.new: $(CGNS_DEPS)
-	printf "%s" "$(CGNS_FLAGS)" > "$(@)"
-
-$(BUILD_DIR)/external/install-cinclude2dot.flags.new:
-	printf "%s" "$(DOT_FLAGS)" > "$(@)"
-
-$(BUILD_DIR)/external/install-mkl.flags.new:
-	printf "%s" "$(MKL_FLAGS)" > "$(@)"
+	rm -f $(<)
 
 $(BUILD_DIR)/external/install-%.out: external/install-%.sh
 $(BUILD_DIR)/external/install-%.out: $(BUILD_DIR)/external/install-%.flags
@@ -543,7 +532,7 @@ $(BUILD_DIR)/external/install-%.out: $(BUILD_DIR)/external/install-%.flags
 	mkdir -p $(BUILD_DIR)/external/$(*)
 	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
 	  "external/install-$(*).sh $(INSTALL_DIR) $(<) $(JEXT)" \
-	  "$(BUILD_DIR)/external/install-$(*)"
+	  "$(BUILD_DIR)/external/install-$(*).sh"
 
 
 # Specialized targets =========================================================
@@ -573,7 +562,6 @@ $(INSTALL_DIR)/bin/fmr%: $(STAGE_DIR)/bin/fmr% | $(INSTALL_DIR)/bin/
 #	$(call label_bats,$(PASS),$(FAIL),tools/fmrnumas.test.bats, \
 #	  $(BUILD_CPU)/tools/fmrnumas.test)
 #endif
-
 
 $(BUILD_DIR)/tests/make-uninstall-tools.test.out: tests/make-uninstall-tools.test.bats
 	$(call label_bats,$(PASS),$(FAIL),DIR="$(INSTALL_DIR)/bin" $(<), \
