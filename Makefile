@@ -347,7 +347,7 @@ endif
 .PHONY: get-bats install-bats get-external # install-external
 # ...and internal makefile use.
 .PHONY: intro
-.PHONY: all-done build-done
+.PHONY: all-done build-done docs-done
 .PHONY: install-tools-done install-done uninstall-done
 
 # Real files, but considered always out of date.
@@ -389,9 +389,9 @@ external: tools get-external
 	$(MAKE) $(JSER) install-external
 	$(MAKE) $(JPAR) external-done
 
-docs: build/docs/femera-guide.pdf build/docs/femera-quick-start.pdf
 docs: | intro build/docs/
 	$(call timestamp,$@,)
+	$(MAKE) $(JPAR) docs-done
 
 install: tools docs | $(STAGE_TREE)
 	$(call timestamp,$@,$^)
@@ -442,6 +442,19 @@ ifeq ($(ENABLE_DOT),ON)
 	@printf '%s' '$(EXT_DOT)' | sed 's/\\n/\n/g' > '$(EXT_DOTFILE)'
 	@dot '$(EXT_DOTFILE)' -Teps -o $(BUILD_DIR)/external/build-external.eps
 endif
+
+
+docs-done: build/docs/femera-guide.pdf build/docs/femera-quick-start.pdf
+docs-done: docs/femera-guide.xhtml docs/femera-quick-start.xhtml
+ifeq ($(ENABLE_LYX),ON)
+	$(info $(DONE) making $(FEMERA_VERSION) XHTML documentation in \
+	external/docs/)
+	$(info $(SPCS) and PDFs in build/docs/)
+else
+	$(info $(WARN) Set ENABLE_LYX to ON in config.local to make \
+	  $(FEMERA_VERSION) documentation)
+endif
+	$(call timestamp,$@,)
 
 install-done:
 	$(info $(DONE) installing $(FEMERA_VERSION) on $(HOSTNAME) to:)
@@ -699,16 +712,6 @@ endif
 build/test-files.txt: tools/list-test-files.sh build/.md5
 	-tools/list-test-files.sh > $@
 
-build/docs/%.pdf: src/docs/%.lyx src/docs/quick-start.tex
-ifeq ($(ENABLE_LYX),ON)
-	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
-	  "lyx -batch -n -f all -E pdf $(@) $(<)" \
-	  "build/docs/$(*)"
-	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
-	  "lyx -batch -n -f all -E xhtml docs/$(*).xhtml $(<)" \
-	  "build/docs/$(*)-xhtml"
-endif
-
 build/docs/tdd-tests.txt: tools/list-tdd-tests.sh build/docs/.md5
 	-tools/list-tdd-tests.sh src/docs/*.tex src/docs/*.lyx > $@
 
@@ -720,3 +723,16 @@ build/docs/find-tdd-files.csv: tools/compare-lists.py
 	#  tools/compare-lists.py build/docs-tests.txt build/test-files.txt, \
 	#  build/find-docs-tdd-files)
 
+build/docs/%.pdf: src/docs/%.lyx src/docs/quick-start.tex
+ifeq ($(ENABLE_LYX),ON)
+	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
+	  "lyx -batch -n -f all -E pdf $(@) $(<)" \
+	  "build/docs/$(*)-pdf"
+endif
+
+docs/%.xhtml: src/docs/%.lyx src/docs/quick-start.tex
+ifeq ($(ENABLE_LYX),ON)
+	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
+	  "lyx -batch -n -f all -E xhtml $(@) $(<)" \
+	  "build/docs/$(*)-xhtml"
+endif
