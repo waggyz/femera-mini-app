@@ -55,11 +55,19 @@ EXT_DOT+=ratio="fill";\n
 EXT_DOT+=fontsize="12";\n
 EXT_DOT+=fontname="Helvetica";\n
 EXT_DOT+=clusterrank="local";\n
+
+MAKE_DOT:=digraph "external dependencies" {\n
+MAKE_DOT+=overlap=scale;\n
+MAKE_DOT+=size="6,3";\n
+MAKE_DOT+=ratio="fill";\n
+MAKE_DOT+=fontsize="12";\n
+MAKE_DOT+=fontname="Helvetica";\n
+MAKE_DOT+=clusterrank="local";\n
 ifeq ($(shell which dot 2>/dev/null),"")# dot is part of graphviz
   ENABLE_DOT:=OFF
 else
   ENABLE_DOT:=ON
-  # EXT_DOT+="dot" -> "Makefile"\n
+  MAKE_DOT+="dot" -> "Makefile"\n
 endif
 ifeq ($(ENABLE_OMP),ON)
   EXT_DOT+="OpenMP" -> "Femera"\n
@@ -76,7 +84,7 @@ endif
 ifeq ($(ENABLE_BATS),ON)
   # LIST_EXTERNAL +=
   # EXT_DOT+={ rank = sink; "Bats"; }\n
-  # EXT_DOT+="Bats" -> "Makefile"\n
+  MAKE_DOT+="Bats" -> "Makefile"\n
   BATS_MODS:= bats-core bats-support bats-assert bats-file
   label_bats = $(call label_test,$(1),$(2),$(3),$(4))
 else
@@ -85,7 +93,7 @@ else
 endif
 ifeq ($(ENABLE_GOOGLETEST),ON)
   EXT_DOT+="GoogleTest" -> "Femera"\n
-  # EXT_DOT+="GoogleTest" -> "Makefile"\n
+  MAKE_DOT+="GoogleTest" -> "Makefile"\n
   LIST_EXTERNAL += googletest
   GOOGLETEST_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
   $(shell printf "%s" "$(GOOGLETEST_FLAGS)" \
@@ -117,8 +125,6 @@ ifeq ($(ENABLE_GMSH),ON)
   ifeq ($(ENABLE_OMP),ON)
     GMSH_FLAGS += -DENABLE_OPENMP=1
   endif
-  # Disable MPI in Gmsh for now. It is probably not needed.
-  GMSH_FLAGS += -DENABLE_MPI=0
   ifeq ($(ENABLE_PYBIND11),ON)
     GMSH_REQUIRES += pybind11
     EXT_DOT+="pybind11" -> "Gmsh"\n
@@ -138,6 +144,10 @@ ifeq ($(ENABLE_GMSH),ON)
     ifeq ($(ENABLE_PYBIND11),ON)
       GMSH_FLAGS += -DENABLE_PETSC4PY=1
     endif
+    GMSH_FLAGS += -DENABLE_MPI=1
+  else
+    # Disable MPI in Gmsh unless PETSc is used. It is probably not needed.
+    GMSH_FLAGS += -DENABLE_MPI=0
   endif
   ifeq ($(ENABLE_FLTK),ON)
     GMSH_REQUIRES += fltk
@@ -250,23 +260,27 @@ endif
 ifeq ($(ENABLE_MKL),ON)
   LIST_EXTERNAL += mkl
   EXT_DOT+="MKL" -> "Femera"\n
+  # No point saving extracted files. The installer removes them automatically.
   MKL_FLAGS += --extract-folder $(FMRDIR)/external/mkl
+  MKL_FLAGS += --remove-extracted-files no
   MKL_FLAGS += -a --silent --eula accept --install-dir $(INSTALL_DIR)
   # https://www.intel.com/content/www/us/en/develop/documentation
   # /installation-guide-for-intel-oneapi-toolkits-linux/top/installation
   # /install-with-command-line.html#install-with-command-line
-    $(shell printf "%s" "$(MKL_FLAGS)" \
-      > $(BUILD_DIR)/external/install-mkl.flags.new)
+  $(shell printf "%s" "$(MKL_FLAGS)" \
+    > $(BUILD_DIR)/external/install-mkl.flags.new)
 endif
 # Developer tools
 ifeq ($(ENABLE_DOT),ON)
-  # EXT_DOT+="cinclude2dot" -> "Makefile"\n
+  MAKE_DOT+="cinclude2dot" -> "Makefile"\n
   LIST_EXTERNAL += cinclude2dot
   $(shell printf "%s" "$(DOT_FLAGS)"  \
     > $(BUILD_DIR)/external/install-cinclude2dot.flags.new)
 endif
 EXT_DOT+=}\n
 EXT_DOTFILE:=$(BUILD_DIR)/external/external.dot
+MAKE_DOT+=}\n
+MAKE_DOTFILE:=$(BUILD_DIR)/make.dot
 
 # Files -----------------------------------------------------------------------
 # Generic Femera tools
@@ -362,6 +376,7 @@ all: | intro
 	$(MAKE) $(JSER) external
 	#(MAKE) $(JPAR) mini
 	#$(MAKE) test tune
+	$(MAKE) $(JPAR) docs
 	$(MAKE) $(JSER) install
 
 tools: | intro $(STAGE_TREE)
@@ -374,7 +389,11 @@ external: tools get-external
 	$(MAKE) $(JSER) install-external
 	$(MAKE) $(JPAR) external-done
 
-install: tools | $(STAGE_TREE)
+docs: build/docs/femera-guide.pdf build/docs/femera-quick-start.pdf
+docs: | intro build/docs/
+	$(call timestamp,$@,)
+
+install: tools docs | $(STAGE_TREE)
 	$(call timestamp,$@,$^)
 	$(MAKE) $(JPAR) install-done
 
@@ -416,9 +435,13 @@ ifneq ("$(ADD_TO_PATH)","")
 	$(info $(NOTE) temporarily prepended PATH with:)
 	$(info $(SPCS) $(ADD_TO_PATH))
 endif
+ifeq ($(ENABLE_DOT),ON)
+	@printf '%s' '$(MAKE_DOT)' | sed 's/\\n/\n/g' > '$(MAKE_DOTFILE)'
+	@dot '$(MAKE_DOTFILE)' -Teps -o $(BUILD_DIR)/make.eps
+	@dot external/external.dot -Teps -o $(BUILD_DIR)/external/external.eps
 	@printf '%s' '$(EXT_DOT)' | sed 's/\\n/\n/g' > '$(EXT_DOTFILE)'
 	@dot '$(EXT_DOTFILE)' -Teps -o $(BUILD_DIR)/external/build-external.eps
-	@dot external/external.dot -Teps -o $(BUILD_DIR)/external/external.eps
+endif
 
 install-done:
 	$(info $(DONE) installing $(FEMERA_VERSION) on $(HOSTNAME) to:)
@@ -532,8 +555,7 @@ $(BUILD_DIR)/external/install-%.out: $(BUILD_DIR)/external/install-%.flags
 	mkdir -p $(BUILD_DIR)/external/$(*)
 	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
 	  "external/install-$(*).sh $(INSTALL_DIR) $(<) $(JEXT)" \
-	  "$(BUILD_DIR)/external/install-$(*).sh"
-
+	  "$(BUILD_DIR)/external/install-$(*)"
 
 # Specialized targets =========================================================
 $(STAGE_DIR)/bin/fmr%: $(BUILD_CPU)/tools/fmr%.test.out
@@ -676,6 +698,16 @@ endif
 
 build/test-files.txt: tools/list-test-files.sh build/.md5
 	-tools/list-test-files.sh > $@
+
+build/docs/%.pdf: src/docs/%.lyx src/docs/quick-start.tex
+ifeq ($(ENABLE_LYX),ON)
+	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
+	  "lyx -batch -n -f all -E pdf $(@) $(<)" \
+	  "build/docs/$(*)"
+	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
+	  "lyx -batch -n -f all -E xhtml docs/$(*).xhtml $(<)" \
+	  "build/docs/$(*)-xhtml"
+endif
 
 build/docs/tdd-tests.txt: tools/list-tdd-tests.sh build/docs/.md5
 	-tools/list-tdd-tests.sh src/docs/*.tex src/docs/*.lyx > $@

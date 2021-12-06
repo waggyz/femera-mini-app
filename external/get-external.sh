@@ -41,6 +41,7 @@ else
         TGZDIR) TGZDIR=$VAL ;;
         EXEURL) EXEURL=$VAL ;;
         RUNURL) RUNURL=$VAL ;;
+        DLFILE) DLFILE=$VAL ;;
         CKFILE) CKFILE=$VAL ;;
         esac
     done < "$DATFILE"
@@ -186,13 +187,17 @@ if [ -f "$CKFILE" ]; then
   exit 0
 fi
 if [ -n "$RUNURL" ]; then # Try downloading an installer.
-  mkdir -p "$BUILDDIR/$GITMOD"
-  $WGET "$RUNURL" -O "$CKFILE"
-  wait
+  if [ -f "$DLFILE" ]; then
+    echo "$DLFILE already exists"
+  else
+    mkdir -p "$BUILDDIR/$GITMOD"
+    $WGET "$RUNURL" -O "$DLFILE"
+    wait
+  fi
 fi
-if [ -f "$CKFILE" ]; then
-  chmod +x "$CKFILE"
-  echo "downloaded installer $CKFILE"
+if [ -f "$DLFILE" ]; then
+  chmod +x "$DLFILE"
+  echo "downloaded installer $DLFILE"
   exit 0
 fi
 

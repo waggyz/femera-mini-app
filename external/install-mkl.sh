@@ -4,6 +4,10 @@ INSTALL_DIR="$1"
 if [ -f "$2" ]; then FLAGS=`tr --delete '\n' < "$2"`; fi
 JFLAG="$3"
 
+if [ -f "$INSTALL_DIR/mkl/latest/lib/intel64/libmkl_core.a" ]; then
+  echo "looks like the Intel Math Kernel Library (MKL) is already installed"
+  exit 0
+fi
 FMRDIR=$(cd "$(dirname "$0")/.."; pwd)
 DOWNLOAD_DIR="$FMRDIR/build/external/mkl"
 KITFILE=`ls -d "$DOWNLOAD_DIR/"*"Kit"*".sh" | tail -n1`
@@ -15,7 +19,7 @@ if [ -f "$KITFILE" ]; then
   #
   echo $KITFILE $FLAGS
   $KITFILE $FLAGS
-  #
+  # https://www.intel.com/content/www/us/en/develop/documentation/installation-guide-for-intel-oneapi-toolkits-linux/top/installation/install-with-command-line.html#install-with-command-line
   exit
 else
   echo " ERROR  Could not find MKL installer in:" >&2

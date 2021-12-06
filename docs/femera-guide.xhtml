@@ -1,0 +1,1464 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0//EN" "http://www.w3.org/Math/DTD/mathml2/xhtml-math11-f.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta name="GENERATOR" content="LyX 2.2.3" />
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<title>DRAFTFemera 0.3 user and developer guide</title>
+<style type='text/css'>
+/* LyX Provided Styles */
+table { border-collapse: collapse; display: inline-block; }
+td { border: 1px solid black; padding: 0.5ex; }
+
+/* Layout-provided Styles */
+h1.title {
+font-size: x-large;
+margin-bottom: 1ex;
+text-align: center;
+
+}
+div.author {
+font-size: large;
+margin-top: 1.3ex;
+margin-bottom: 0.7ex;
+text-align: center;
+
+}
+div.abstract {
+font-size: small;
+margin-top: 0.7ex;
+margin-bottom: 0.7ex;
+margin-left: 3ex;
+margin-right: 3ex;
+text-align: left;
+
+}
+div.abstract_label {
+font-weight: bold;
+font-size: large;
+text-align: center;
+
+}
+
+div.abstract {
+margin: 4ex;
+}
+div.abstract_item {
+font-size: small;
+padding-top: 1ex;
+}
+div.abstract_label {
+font-weight: bold;
+}
+div.standard {
+margin-bottom: 2ex;
+}
+blockquote.verse {
+margin-top: 0.7ex;
+margin-bottom: 0.7ex;
+margin-left: 4ex;
+text-align: left;
+
+}
+h1.part {
+font-weight: bold;
+font-size: x-large;
+margin-top: 2ex;
+margin-bottom: 1.5ex;
+text-align: left;
+
+}
+h2.section {
+font-weight: bold;
+font-size: x-large;
+margin-top: 1.3ex;
+margin-bottom: 0.7ex;
+text-align: left;
+
+}
+div.plain_layout {
+text-align: left;
+
+}
+h3.subsection {
+font-weight: bold;
+font-size: large;
+margin-top: 0.9ex;
+margin-bottom: 0.5ex;
+text-align: left;
+
+}
+div.lyx_code {
+font-family: monospace;
+margin-top: 0.5ex;
+margin-bottom: 0.5ex;
+margin-left: 3ex;
+margin-right: 3ex;
+text-align: left;
+
+}
+ol.enumerate {
+margin-top: 0.7ex;
+margin-bottom: 0.7ex;
+margin-left: 3ex;
+text-align: left;
+
+}
+ul.itemize {
+margin-top: 0.7ex;
+margin-bottom: 0.7ex;
+margin-left: 3ex;
+text-align: left;
+
+}
+h4.subsubsection {
+font-weight: bold;
+font-size: medium;
+margin-top: 0.7ex;
+margin-bottom: 0.4ex;
+text-align: left;
+
+}
+ div.toc {
+   margin: 2em 0em;
+   border-style: solid;
+   border-width: 2px 0px;
+   padding: 1em 0em;
+ }
+ h2.tochead { font-size: x-large; font-weight: bold; }
+ div.lyxtoc-0 {
+   margin: 2em 0em 0em 0em;
+   font-size: xx-large;
+   font-weight: bold;
+ }
+ div.lyxtoc-1 {
+   margin: 1em 0em 0em 0em;
+   font-size: x-large;
+   font-weight: bold;
+ }
+ div.lyxtoc-2 {
+   margin: 0em 0.1em 0em 1em;
+   font-size: large;
+   font-weight: normal;
+ }
+ div.lyxtoc-3 { margin: 0em 0.1em 0em 0.5em; font-size: medium; }
+ div.lyxtoc-4 { margin: 0em 0.1em 0em 0.5em; }
+ div.lyxtoc-5 { margin: 0em 0.1em 0em 0.5em; }
+ div.lyxtoc-6 { margin: 0em 0.1em 0em 0.5em; }
+ a.tocentry {
+   text-decoration: none;
+   color: black;
+ }
+ a.tocentry:visited { color: black; }
+ div.note_comment {
+   display: none;
+ }
+div.float {
+border: 2px solid black;
+text-align: center;
+}
+div.float-caption {
+text-align: center;
+border: 2px solid black;
+padding: 1ex;
+margin: 1ex;
+}
+div.float-listings {
+border: 2px solid black;
+padding: 1ex;
+margin: 1ex;
+}
+div.listings-caption {
+text-align: center;
+border: 2px solid black;
+padding: 1ex;
+margin: 1ex;
+}
+
+
+</style>
+</head>
+<body dir="auto">
+<h1 class="title"><a id='magicparlabel-1' />DRAFT
+<br />
+
+Femera 0.3 user and developer guide</h1>
+<div class="author"><a id='magicparlabel-2' />David Wagner</div>
+
+<div class="abstract"><a id='magicparlabel-3' /><div class="abstract_label">Abstract</div>
+<div class="abstract_item">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</div>
+<div class="abstract_item"><div class='toc'><h2 class='tochead section'>Table of Contents</h2></div>
+
+<div class='lyxtoc-0'><a href='#magicparlabel-12' class='tocentry'>Part I Build Femera</a>
+
+
+
+<div class='lyxtoc-1'><div class='lyxtoc-2'><a href='#magicparlabel-14' class='tocentry'>1 Linux system requirements</a>
+</div>
+
+<div class='lyxtoc-2'><a href='#magicparlabel-327' class='tocentry'>2 Femera quick start</a>
+</div>
+
+<div class='lyxtoc-2'><a href='#magicparlabel-330' class='tocentry'>3 Advanced Femera configuration</a>
+</div>
+
+<div class='lyxtoc-2'><a href='#magicparlabel-332' class='tocentry'>4 External libraries supported by Femera</a>
+</div>
+
+<div class='lyxtoc-2'><a href='#magicparlabel-779' class='tocentry'>5 Femera integration tests</a>
+
+
+<div class='lyxtoc-3'><a href='#magicparlabel-781' class='tocentry'>5.1 Check for memory leaks</a>
+</div>
+</div>
+
+<div class='lyxtoc-2'><a href='#magicparlabel-783' class='tocentry'>6 Femera performance tuning</a>
+
+
+<div class='lyxtoc-3'><a href='#magicparlabel-792' class='tocentry'>6.1 Use Intel Advisor </a>
+</div>
+</div>
+</div>
+</div>
+
+<div class='lyxtoc-0'><a href='#magicparlabel-794' class='tocentry'>Part II Use Femera </a>
+
+
+
+<div class='lyxtoc-1'><div class='lyxtoc-2'><a href='#magicparlabel-801' class='tocentry'>7 Start Femera </a>
+</div>
+
+<div class='lyxtoc-2'><a href='#magicparlabel-1052' class='tocentry'>8 Get started with Femera on the command line </a>
+</div>
+
+<div class='lyxtoc-2'><a href='#magicparlabel-1055' class='tocentry'>9 Get started with Femera in Python </a>
+</div>
+</div>
+</div>
+
+<div class='lyxtoc-0'><a href='#magicparlabel-1072' class='tocentry'>Part III Develop Femera plugins and extensions </a>
+
+
+
+<div class='lyxtoc-1'><div class='lyxtoc-2'><a href='#magicparlabel-1086' class='tocentry'>10 Advanced Femera use </a>
+</div>
+
+<div class='lyxtoc-2'><a href='#magicparlabel-1134' class='tocentry'>11 Femera capability life cycle</a>
+</div>
+</div>
+</div>
+
+<div class='lyxtoc-0'><a href='#magicparlabel-1142' class='tocentry'>Part IV Femera theory of operation</a>
+
+
+
+<div class='lyxtoc-1'><div class='lyxtoc-2'><a href='#magicparlabel-1148' class='tocentry'>12 Femera software architecture</a>
+
+
+<div class='lyxtoc-3'><a href='#magicparlabel-1150' class='tocentry'>12.1 Repository directory structure</a>
+</div>
+
+<div class='lyxtoc-3'><a href='#magicparlabel-1152' class='tocentry'>12.2 Test-driven development</a>
+</div>
+</div>
+
+<div class='lyxtoc-2'><a href='#magicparlabel-1194' class='tocentry'>13 The finite element method</a>
+
+
+<div class='lyxtoc-3'><a href='#magicparlabel-1196' class='tocentry'>13.1 Sparse matrix-vector response evaluation</a>
+</div>
+
+<div class='lyxtoc-3'><a href='#magicparlabel-1198' class='tocentry'>13.2 Element-by-element matrix-vector response evaluation </a>
+</div>
+
+<div class='lyxtoc-3'><a href='#magicparlabel-1200' class='tocentry'>13.3 Element-by-element tensor train response evaluation</a>
+</div>
+</div>
+</div>
+</div>
+
+<div class='lyxtoc-0'><a href='#magicparlabel-1202' class='tocentry'>Part V Appendices</a>
+
+
+
+<div class='lyxtoc-1'><div class='lyxtoc-2'><a href='#magicparlabel-1203' class='tocentry'>A Femera command line interface</a>
+</div>
+
+<div class='lyxtoc-2'><a href='#magicparlabel-1205' class='tocentry'>B Femera public Python interface</a>
+</div>
+
+<div class='lyxtoc-2'><a href='#magicparlabel-1207' class='tocentry'>C Femera public C++ interface</a>
+</div>
+
+<div class='lyxtoc-2'><a href='#magicparlabel-1209' class='tocentry'>D Femera internal C++ interface</a>
+</div>
+
+<div class='lyxtoc-2'><a href='#magicparlabel-1242' class='tocentry'>E Femera configurations known to work</a>
+</div>
+
+<div class='lyxtoc-2'><a href='#magicparlabel-1249' class='tocentry'>F Femera performance</a>
+</div>
+
+<div class='lyxtoc-2'><a href='#magicparlabel-1251' class='tocentry'>G Femera visualization</a>
+</div>
+
+<div class='lyxtoc-2'><a href='#magicparlabel-1253' class='tocentry'>H Femera development history</a>
+
+
+<div class='lyxtoc-3'><a href='#magicparlabel-1255' class='tocentry'>H.1 Femera mini-apps</a>
+</div>
+
+<div class='lyxtoc-3'><a href='#magicparlabel-1344' class='tocentry'>H.2 Femera contributors</a>
+</div>
+</div>
+
+<div class='lyxtoc-2'><a href='#magicparlabel-1347' class='tocentry'>I Femera license</a>
+</div>
+</div>
+</div>
+</div>
+<div class="abstract_item"><br />
+</div>
+</div>
+<div class="standard"><a id='magicparlabel-6' />Femera is intended to be built and used in a high-performance parallel computing environment. This guide is organized for different readers.</div>
+
+<blockquote class="verse"><a id='magicparlabel-7' /><p class="verse_item"><b>System administrators</b>: build and install Femera (part&nbsp;<a href="#part_Building_Femera">I</a>) for use by production and power users.</p>
+<p class="verse_item"><b>Production users</b>: run Femera from the command line (part&nbsp;<a href="#part_Using_Femera">II</a>, section&nbsp;<a href="#sec_Running_Femera">7</a>) or use it within Python (part&nbsp;<a href="#part_Using_Femera">II</a>, section&nbsp;<a href="#sec_Femera_Python_use">9</a>). </p>
+<p class="verse_item"><b>Power users</b>: develop Femera plugins and compile them in a compatible build environment (part&nbsp;<a href="#part_Developing_Femera_plugins">III</a>).</p>
+<p class="verse_item"><b>Femera developers</b>: maintain, debug, extend, and customize Femera (part&nbsp;<a href="#part_Femera_theory">IV</a>). </p>
+</blockquote>
+<div class="standard"><a id='magicparlabel-11' />If Femera has already been built for your computing environment, production users may skip ahead to section&nbsp;<a href="#sec_Running_Femera">7</a> for details about running Femera from the command line, or section&nbsp;<a href="#sec_Femera_Python_use">9</a> to use Femera in Python. </div>
+<h1 class="part"><a id='magicparlabel-12' /><span class="part_label">Part I</span> Build Femera<a id="part_Building_Femera" />
+</h1>
+<div class="standard"><a id='magicparlabel-13' />Femera is <i>not</i> distributed with a ready-to-use binary executable as it is a high-performance computing mini-app that relies on features of the specific hardware it is used on. Femera is only available for Linux and requires a build environment compatible with the intended run-time environment. </div>
+<h2 class="section"><a id='magicparlabel-14' /><span class="section_label">1</span> Linux system requirements<a id="sec_Linux_system_requirements" />
+</h2>
+<div class="standard"><a id='magicparlabel-15' />Femera can be built and run in most modern Linux environments with a minimal Femera configuration and one of the compiler toolchains listed in table&nbsp;<a href="#tab_mini_app_build_tools">1</a>. The compiler toolchain must support C++11 and should support Open Multi-processing&nbsp;(OpenMP). In addition, the software listed in table&nbsp;<a href="#tab_mini_app_build_tools">1</a> should be available, on the build system and in the run-time environment, to build and run the recommended Femera configuration. </div>
+
+<div class="standard"><a id='magicparlabel-16' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-20' />tdd:tests/pre-build/sys_has_min.py require linux:3 bash:4 git:1.8 make:3 python:2 c++:11 </div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-21' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-25' />tdd:tests/pre-build/sys_has_min.py require_any_of g++:4.8 icc:14 clang++:3.1 </div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-26' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-30' />tdd:tests/pre-build/sys_has_min.py recommend mpi:3.0 numad:20150602 cmake:3.12 mkl:0 xwindows:0 omp:201107</div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-31' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-35' />tdd:tests/pre-build/sys_has_min.py optional valgrind:3 dot:2 gnuplot:4</div>
+</div></div>
+
+
+
+
+<div class='float-table'><div class="plain_layout" style='text-align: center;'><a id='magicparlabel-40' /><table><tbody><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-110' /><b>Software</b></div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-113' /><b>Minimum </b></div>
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-116' /><b>Minimal Femera configuration</b></div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-119' />Git</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-122' />1.8</div>
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-125' />Download Femera and dependency source code.</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-128' />Bash</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-131' />3.2.57(1)</div>
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-138' />Build, install, test, tune, and use Femera.</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-141' />GNU Make</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-144' />3</div>
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-147' />Build, install, test, and tune Femera.</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-150' />Python</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-153' /> 2 or 3</div>
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-156' />Test and tune Femera.</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-165' /><b>Compiler toolchain </b></div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-168' />g++</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-171' />4.8</div>
+</td>
+<td style ="width: 4.25in;" align='left' valign='top' rowspan='3'>
+<div class="plain_layout"><a id='magicparlabel-174' />Only one of these toolchains is needed to compile and link Femera and its dependencies.</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-177' />icc</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-180' />14</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-186' />clang++ </div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-189' />3.1</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-201' /><b>Recommended Femera configuration</b></div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-204' />OpenMP</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-207' />201107</div>
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-210' />Run Femera using shared-memory parallelism.</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-213' />MPI</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-216' />3.0 </div>
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-219' />Run Femera on a cluster using the Message Passing Interface&nbsp;(MPI).</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-226' />libnuma</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-229' />20150602</div>
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-232' />Check for non-uniform memory access&nbsp;(NUMA) domains.</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-235' />CMake</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-238' />3.12*</div>
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-241' />Build and install dependencies.</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-244' />X</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-247' />11</div>
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-250' />See appendix&nbsp;<a href="#sec_Femera_visualization">G</a> to use an X Window System&nbsp;(X) for visualization.</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-259' /><b>Advanced Femera developer and build tools</b></div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-262' />LaTeX</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-272' />Generate this guide.</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-275' />dot </div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-278' />2</div>
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-281' />The dot application is part of graphviz.</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-284' />valgrind</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-287' />3</div>
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-290' />Check for memory leaks. See section&nbsp;<a href="#subsec_Valgrind">5.1</a>.</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-293' />Vector Advisor</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-296' />**</div>
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-299' />Vector Advisor requires icc to measure performance. See section&nbsp;<a href="#subsec_Intel_Vector_Advisor">6.1</a>.</div>
+</td>
+</tr></tbody>
+</table>
+</div>
+
+<div class="plain_layout"><a id='magicparlabel-300' /><span style='font-size:x-small;'>*CMake version&nbsp;3.12 is required by HDF5, version&nbsp;3.1 by Gmsh, and version&nbsp;2.8.x for other libraries recommended in section&nbsp;<a href="#sec_External_libraries">4</a>.</span></div>
+
+<div class="plain_layout"><a id='magicparlabel-301' /><span style='font-size:x-small;'>**Use a version of Vector Advisor that is compatible with the version of icc used.</span></div>
+
+
+
+<div class="plain_layout"><a id='magicparlabel-307' /><span class='float-caption-Standard float-caption float-caption-standard'>Table 1:  Femera mini-app system software needed<a id="tab_mini_app_build_tools" />
+</span></div>
+</div>
+
+
+
+
+<div class="standard"><a id='magicparlabel-321' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-325' />tdd:external/get-cinclude2dot.test.bats</div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-326' />Power users and Femera developers should also make the advance tools listed in table&nbsp;<a href="#tab_mini_app_build_tools">1</a> available on the build system. Configure and build Femera after verifying system requirements.</div>
+<h2 class="section"><a id='magicparlabel-327' /><span class="section_label">2</span> Femera quick start<a id="sec_Quick_start" />
+</h2>
+
+
+<div class="standard"><a id='magicparlabel-329' />The remaining sections in this part provide additional Femera configuration details for power users and system administrators. Production users may proceed to part&nbsp;<a href="#part_Using_Femera">II</a>, <a href="#part_Using_Femera">Part \Roman{part}</a>.</div>
+<h2 class="section"><a id='magicparlabel-330' /><span class="section_label">3</span> Advanced Femera configuration<a id="sec_Configuring_Femera" />
+</h2>
+<div class="standard"><a id='magicparlabel-331' />Femera may be configured for a variety of uses.</div>
+<h2 class="section"><a id='magicparlabel-332' /><span class="section_label">4</span> External libraries supported by Femera<a id="sec_External_libraries" />
+</h2>
+<div class="standard"><a id='magicparlabel-333' />This guide assumes the recommended Femera configuration built with C++11, OpenMP, MPI, libnuma, CGNS with HDF5, Gmsh with OpenCascade and FLTK, Bats, GoogleTest, and pybind11. Support for C++11 and OpenMP should be provided by the compiler toolchain. (See section&nbsp;<a href="#sec_Linux_system_requirements">1</a>.) The source code repositories listed in table&nbsp;<a href="#tab_external_submodules">2</a> are cloned as Git submodules to the (<span style='font-family:monospace;'>external/</span>) directory when making the target (<span style='font-family:monospace;'>external</span>) in listings&nbsp;<a href="#lis_quick_start_user">lis:quick-start-user</a> or&nbsp;<a href="#lis_quick_start_sys">lis:quick-start-sys</a>. </div>
+
+
+<div class='float-figure'><div class="plain_layout" style='text-align: center;'><a id='magicparlabel-338' /><img src='1_home_dwagner5_Documents_My_Code_femera-mini-demo_build_external_external.png' alt='image: 1_home_dwagner5_Documents_My_Code_femera-mini-demo_build_external_external.png' />
+</div>
+
+<div class="plain_layout"><a id='magicparlabel-339' /><span class='float-caption-Standard float-caption float-caption-standard'>Figure 4.1:  External dependencies<a id="fig_External_dependencies" />
+</span></div>
+
+
+</div>
+
+
+<div class='float-table'><div class="plain_layout" style='text-align: center;'><a id='magicparlabel-348' /><table><tbody><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-403' /><b>Submodule</b></div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-406' /><b>Version</b></div>
+</td>
+<td style ="width: 1in;" align='center' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-409' /><b>Needed by</b></div>
+</td>
+<td style ="width: 3in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-412' /><b>Required for</b></div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-415' />Bats</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-418' />1.5</div>
+</td>
+<td style ="width: 1in;" align='center' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-421' />Makefile</div>
+</td>
+<td style ="width: 3in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-424' />Testing executable files and Bash shell scripts</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-427' />GoogleTest</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-430' />1.10</div>
+</td>
+<td style ="width: 1in;" align='center' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-433' />Makefile</div>
+</td>
+<td style ="width: 3in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-436' />Testing C/C++ code</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-439' />pybind11</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-442' />2.5.0</div>
+</td>
+<td style ="width: 1in;" align='center' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-445' />Femera</div>
+</td>
+<td style ="width: 3in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-448' />Python binding</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-451' />PETSc</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+
+</td>
+<td style ="width: 1in;" align='center' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-461' />Femera</div>
+</td>
+<td style ="width: 3in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-464' />Sparse matrix operations</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-467' />CGNS</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-470' />5.0</div>
+</td>
+<td style ="width: 1in;" align='center' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-473' />Femera</div>
+</td>
+<td style ="width: 3in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-476' />Parallel file handling (5.0 for cubic elements)</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-479' />HDF5</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-482' />1.12</div>
+</td>
+<td style ="width: 1in;" align='center' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-485' />CGNS</div>
+</td>
+<td style ="width: 3in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-488' />Parallel file handling</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-491' />Gmsh</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-494' />4.7.1*</div>
+</td>
+<td style ="width: 1in;" align='center' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-497' />Femera</div>
+</td>
+<td style ="width: 3in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-500' />CAD, meshing, file handling, and visualization</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-503' />FLTK</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-506' />1</div>
+</td>
+<td style ="width: 1in;" align='center' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-509' />Gmsh</div>
+</td>
+<td style ="width: 3in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-512' />Visualization</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-515' />FreeType</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-518' />2</div>
+</td>
+<td style ="width: 1in;" align='center' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-521' />FLTK</div>
+</td>
+<td style ="width: 3in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-524' />Visualization</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='left' valign='top' colspan='4'>
+<div class="plain_layout"><a id='magicparlabel-527' /><span style='font-size:x-small;'>*If the compiler is g++&nbsp;4.8, Femera build scripts will roll Gmsh back to Gmsh&nbsp;4.7.1 and apply a custom patch. See (<span style='font-family:monospace;'>external/gmsh471-gcc48-patch</span>.sh). A more recent release of Gmsh&nbsp;4 should be used with a modern compiler.</span></div>
+</td>
+</tr></tbody>
+</table>
+</div>
+
+<div class="plain_layout"><a id='magicparlabel-537' /><span class='float-caption-Standard float-caption float-caption-standard'>Table 2:  External Git submodules<a id="tab_external_submodules" />
+</span></div>
+</div>
+
+
+<div class="standard"><a id='magicparlabel-542' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-546' />tdd:tests/pre-build/sys_has_minimum.py recommend cgns:5.0 hdf5:1 gmsh:4.7.1 googletest:1.10 pybind11:2</div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-547' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-551' />tdd:tests/pre-build/gmsh_is_current_or_gmsh471_is_patched_for_gcc48.py</div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-552' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-556' />tdd:external/sys-has-minimum.test.sh bats 1.5</div>
+
+<div class="plain_layout"><a id='magicparlabel-557' />tdd:external/sys-has-minimum.test.sh googletest 1.10</div>
+
+<div class="plain_layout"><a id='magicparlabel-558' />tdd:external/sys-has-minimum.test.sh pybind11 2.5</div>
+
+<div class="plain_layout"><a id='magicparlabel-559' />tdd:external/sys-has-minimum.test.sh CGNS 5</div>
+
+<div class="plain_layout"><a id='magicparlabel-560' />tdd:external/sys-has-minimum.test.sh hdf5 1.12</div>
+
+<div class="plain_layout"><a id='magicparlabel-561' />tdd:external/sys-has-minimum.test.sh gmsh 4.7</div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-562' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-566' />tdd:external/sys-has-minimum.test.sh occt 7</div>
+
+<div class="plain_layout"><a id='magicparlabel-567' />tdd:external/sys-has-minimum.test.sh fltk 1</div>
+
+<div class="plain_layout"><a id='magicparlabel-568' />tdd:external/sys-has-minimum.test.sh freetype 2</div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-569' />Commands to clone or update all available submodules are provided in listing&nbsp;<a href="#lis_Update_git_submodules">1</a> for reference. If needed, the additional dependency source code in table&nbsp;<a href="#tab_external_libs_downloaded">3</a> is also downloaded, extracted (into <span style='font-family:monospace;'>external/</span>), built, and installed before building Femera.</div>
+
+
+<div class='float-listings'><div class='listings-caption'>Listing 1:  Commands to update Git submodules<a id="lis_Update_git_submodules" />
+</div><pre class ='listings bash'># Clone Femera and all submodules.
+git clone --recurse-submodules https://github.com/waggyz/femera-mini-app.git # 30-60  mn
+#
+# Or, update submodules (if already cloned without --recurse-submodules)
+# from within the femera-mini-app/ repository directory.
+git submodule update --init --recursive
+#
+# To update an individual submodule (e.g., Gmsh).
+cd external/gmsh; git checkout; cd ../
+</pre></div>
+
+
+
+
+
+<div class='float-table'><div class="plain_layout" style='text-align: center;'><a id='magicparlabel-592' /><table><tbody><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-619' /><b>Library</b></div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-622' /><b>Version </b></div>
+</td>
+<td style ="width: 1in;" align='center' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-625' /><b>Needed by</b></div>
+</td>
+<td style ="width: 3in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-628' /><b>Needed for</b></div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-631' />Boost</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-634' />1.56</div>
+</td>
+<td style ="width: 1in;" align='center' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-637' />pybind11</div>
+</td>
+<td style ="width: 3in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-640' />Python binding</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-643' />MKL</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-646' />2021</div>
+</td>
+<td style ="width: 1in;" align='center' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-653' />Femera</div>
+</td>
+<td style ="width: 3in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-656' />Some math acceleration</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-659' />OpenCascade</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-662' />7</div>
+</td>
+<td style ="width: 1in;" align='center' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-665' />Gmsh</div>
+</td>
+<td style ="width: 3in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-668' />Advanced CAD (e.g., constructive solid geometry)</div>
+</td>
+</tr></tbody>
+</table>
+</div>
+
+<div class="plain_layout"><a id='magicparlabel-669' /><span class='float-caption-Standard float-caption float-caption-standard'>Table 3:  External library dependencies<a id="tab_external_libs_downloaded" />
+</span></div>
+</div>
+
+
+<div class="standard"><a id='magicparlabel-674' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-759' />tdd:tests/post-build/sys_has_minimum.py recommend fltk:1 freetype:2 occt:7</div>
+</div></div>
+
+
+<div class='float-table'><div class="plain_layout" style='text-align: center;'><a id='magicparlabel-678' /><table><tbody><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-705' /><b>Python module</b></div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-708' /><b>Version </b></div>
+</td>
+<td style ="width: 1in;" align='center' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-711' /><b>Needed by</b></div>
+</td>
+<td style ="width: 3in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-714' /><b>Needed for</b></div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-717' />pytest</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-720' />3.1</div>
+</td>
+<td style ="width: 1in;" align='center' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-723' />pybind11</div>
+</td>
+<td style ="width: 3in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-726' />Python binding</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-729' />numpy</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+
+</td>
+<td style ="width: 1in;" align='center' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-735' />Femera</div>
+</td>
+<td style ="width: 3in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-738' />Efficient large numerical operations</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-741' />docwriter</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+
+</td>
+<td style ="width: 1in;" align='center' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-747' />FreeType</div>
+</td>
+<td style ="width: 3in;" align='left' valign='middle'>
+<div class="plain_layout"><a id='magicparlabel-750' />Generating documentation</div>
+</td>
+</tr></tbody>
+</table>
+</div>
+
+<div class="plain_layout"><a id='magicparlabel-751' /><span class='float-caption-Standard float-caption float-caption-standard'>Table 4:  Python modules<a id="tab_python_modules" />
+</span></div>
+</div>
+
+
+<div class="standard"><a id='magicparlabel-760' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-764' />tdd:external/get-opencascade.test.bats</div>
+
+<div class="plain_layout"><a id='magicparlabel-765' />tdd:external/get-fltk.test.bats</div>
+
+<div class="plain_layout"><a id='magicparlabel-766' />tdd:external/get-freetype.test.bats</div>
+</div><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-770' />tdd:external/install-opencascade.test.bats</div>
+
+<div class="plain_layout"><a id='magicparlabel-771' />tdd:external/install-fltk.test.bats</div>
+
+<div class="plain_layout"><a id='magicparlabel-772' />tdd:external/install-freetype.test.bats</div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-773' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-777' />tdd:external/tools/get-cinclude2dot.test.bats</div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-778' />A suite of integration tests is available to verify that Femera runs correctly as configured.</div>
+<h2 class="section"><a id='magicparlabel-779' /><span class="section_label">5</span> Femera integration tests<a id="sec_Integration_tests" />
+</h2>
+<div class="standard"><a id='magicparlabel-780' />placeholder</div>
+<h3 class="subsection"><a id='magicparlabel-781' /><span class="subsection_label">5.1</span> Check for memory leaks<a id="subsec_Valgrind" />
+</h3>
+<div class="standard"><a id='magicparlabel-782' />placeholder</div>
+<h2 class="section"><a id='magicparlabel-783' /><span class="section_label">6</span> Femera performance tuning<a id="sec_Tuning_performance" />
+</h2>
+<div class="standard"><a id='magicparlabel-784' />placeholder</div>
+
+<blockquote class="verse"><a id='magicparlabel-785' /><p class="verse_item"><b>Best practice</b>: Tune Femera on the same hardware it is intended to run on.</p>
+</blockquote>
+<div class="standard"><a id='magicparlabel-786' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-790' />tdd:tests/post-build/make_tune_did_check_fmrmodel.py</div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-791' />placeholder</div>
+<h3 class="subsection"><a id='magicparlabel-792' /><span class="subsection_label">6.1</span> Use Intel Advisor <a id="subsec_Intel_Vector_Advisor" />
+</h3>
+<div class="standard"><a id='magicparlabel-793' />placeholder</div>
+<h1 class="part"><a id='magicparlabel-794' /><span class="part_label">Part II</span> Use Femera <a id="part_Using_Femera" />
+</h1>
+<div class="standard"><a id='magicparlabel-795' />Femera is intended for research use by scientists and engineers having some familiarity with using MPI applications on a high-performance computing cluster.</div>
+
+<div class="standard"><a id='magicparlabel-796' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-800' />tdd:tests/post-build/tests_examples_tutorials_are_installed.py</div>
+</div> </div>
+<h2 class="section"><a id='magicparlabel-801' /><span class="section_label">7</span> Start Femera <a id="sec_Running_Femera" />
+</h2>
+<div class="standard"><a id='magicparlabel-802' />Femera is an MPI application intended to execute in a hybrid MPI+OpenMP parallel processing environment. The processing environment must be determined before launching the Femera executable with (<span style='font-family:monospace;'>mpiexec</span>). Installing Femera also installs an executable Bash shell script (from <span style='font-family:monospace;'>tools/fmrexec.sh</span>) that wraps (<span style='font-family:monospace;'>mpiexec</span>) for convenience. </div>
+
+
+
+
+
+<div class="lyx_code"><a id='magicparlabel-813' /><div class="lyx_code_item">fmrexec [RUN_MODE[:fmrmodel]] [-mpi:&lt;MPIOPT&gt;] [-[fmr:]&lt;FMROPT&gt;] [&hellip;]</div>
+</div>
+<div class="standard"><a id='magicparlabel-814' />This script sets up the parallel environment and starts Femera in one of a variety of different run modes based on the optional (<span style='font-family:monospace;'>RUN_MODE</span>) keyword. Femera run modes are listed in table&nbsp;<a href="#tab_Femera_run_modes">5</a>.</div>
+
+
+
+
+<div class='float-table'><div class="plain_layout" style='text-align: center;'><a id='magicparlabel-819' /><table><tbody><tr><td style ="width: 0.75in;" align='center' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-871' /><b>Run mode</b></div>
+</td>
+<td style ="width: 4.5in;" align='left' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-874' /><b>Command-line use</b></div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-881' />Section&nbsp;<a href="#sec_Femera_command_line_use">8</a></div>
+</td>
+</tr><tr><td style ="width: 0.75in;" align='center' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-884' />check</div>
+</td>
+<td style ="width: 4.5in;" align='left' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-887' />Check the options and input provided but do <i>not</i> solve.</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='top'>
+
+</td>
+</tr><tr><td style ="width: 0.75in;" align='center' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-897' />auto</div>
+</td>
+<td style ="width: 4.5in;" align='left' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-900' />Run Femera with the parallel processing environment set up automatically based on model (input file) content.</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='top'>
+
+</td>
+</tr><tr><td style ="width: 0.75in;" align='center' valign='top'>
+
+</td>
+<td style ="width: 4.5in;" align='left' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-909' /><b>Python use</b></div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-912' />Section&nbsp;<a href="#sec_Femera_Python_use">9</a></div>
+</td>
+</tr><tr><td style ="width: 0.75in;" align='center' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-915' />python</div>
+</td>
+<td style ="width: 4.5in;" align='left' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-918' />Run Femera Python scripts.</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='top'>
+
+</td>
+</tr><tr><td style ="width: 0.75in;" align='center' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-924' />interact</div>
+</td>
+<td style ="width: 4.5in;" align='left' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-927' />Run Femera in Python interactively.</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='top'>
+
+</td>
+</tr><tr><td style ="width: 0.75in;" align='center' valign='top'>
+
+</td>
+<td style ="width: 4.5in;" align='left' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-936' /><b>Advanced use</b></div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='top'>
+
+</td>
+</tr><tr><td style ="width: 0.75in;" align='center' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-942' />femera</div>
+</td>
+<td style ="width: 4.5in;" align='left' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-945' />Set up the parallel processing environment manually and run Femera. This is the default if <span style='font-family:monospace;'>RUN_MODE</span> is not specified. </div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-952' />Section&nbsp;<a href="#sec_Femera_advanced_use">10</a></div>
+</td>
+</tr><tr><td style ="width: 0.75in;" align='center' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-955' />test</div>
+</td>
+<td style ="width: 4.5in;" align='left' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-958' />Run Femera integration tests.</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-961' />Section&nbsp;<a href="#sec_Integration_tests">5</a></div>
+</td>
+</tr><tr><td style ="width: 0.75in;" align='center' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-964' />tune</div>
+</td>
+<td style ="width: 4.5in;" align='left' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-967' />Tune Femera for optimal performance.</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-970' />Section&nbsp;<a href="#sec_Tuning_performance">6</a></div>
+</td>
+</tr><tr><td style ="width: 0.75in;" align='center' valign='top'>
+
+</td>
+<td style ="width: 4.5in;" align='left' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-976' /><b>Developer use</b> </div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='top'>
+
+</td>
+</tr><tr><td style ="width: 0.75in;" align='center' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-982' />grind</div>
+</td>
+<td style ="width: 4.5in;" align='left' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-985' />Check Femera for memory leaks.</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-988' />Section&nbsp;<a href="#subsec_Valgrind">5.1</a></div>
+</td>
+</tr><tr><td style ="width: 0.75in;" align='center' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-991' />advisor</div>
+</td>
+<td style ="width: 4.5in;" align='left' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-994' />Analyze Femera performance with Intel Advisor.*</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-997' />Section&nbsp;<a href="#subsec_Intel_Vector_Advisor">6.1</a></div>
+</td>
+</tr><tr><td style ="width: 0.75in;" align='left' valign='top' colspan='3'>
+<div class="plain_layout"><a id='magicparlabel-1000' /><span style='font-size:x-small;'>*Intel Advisor requires a compatible Intel compiler (<span style='font-family:monospace;'>icc</span>) toolchain.</span></div>
+</td>
+</tr></tbody>
+</table>
+<span class='float-caption-Standard float-caption float-caption-standard'>Table 5:  <a id="tab_Femera_run_modes" />
+Femera run modes</span></div>
+</div>
+
+
+<div class="lyx_code"><a id='magicparlabel-1011' /><div class="lyx_code" style='text-align: center;'><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-1015' />tdd:tests/post-build/fmrexec_does_set_run_modes.py</div>
+</div></div>
+</div>
+<div class="standard"><a id='magicparlabel-1016' />See section&nbsp;<a href="#sec_Femera_advanced_use">10</a> to set up the parallel processing environment manually.</div>
+
+<blockquote class="verse"><a id='magicparlabel-1017' /><p class="verse_item"><b>Best practice</b>: Use the (<span style='font-family:monospace;'>fmrexec</span>) wrapper script to run Femera from the command line.</p>
+</blockquote>
+<div class="standard"><a id='magicparlabel-1018' />After tuning Femera for performance (section&nbsp;<a href="#sec_Tuning_performance">6</a>), an efficient processing environment can be set up at run time by specifying the median simulation size (<span style='font-family:monospace;'>SIMSZ</span> ∈ [XS|SM|MD|LG|XL]).</div>
+
+<div class="standard"><a id='magicparlabel-1019' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-1023' />tdd:tests/post-build/femera_cli_fmr_simsz_does_set_nmpi_nomp.py</div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-1024' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-1028' />tdd:tests/post-build/femera_cli_fmr_simsz_does_warn_if_untuned.py</div>
+</div></div>
+
+<div class="lyx_code"><a id='magicparlabel-1029' /><div class="lyx_code_item">fmrexec [RUN_MODE[:fmrmodel]] -[fmr:]&lt;SIMSZ&gt; [&hellip;]</div>
+</div>
+<div class="standard"><a id='magicparlabel-1030' />Femera supports plugins and several optional libraries that may also take command-line options. A unique option prefix is assigned to each library. The (<span style='font-family:monospace;'>fmr:</span>) command line option prefix for Femera may be omitted. </div>
+
+<blockquote class="verse"><a id='magicparlabel-1031' /><p class="verse_item"><b>Best practice</b>: Prefix Femera options (<span style='font-family:monospace;'>-fmr:</span>&lt;option&gt;) to avoid ambiguity.</p>
+</blockquote>
+<div class="standard"><a id='magicparlabel-1032' />Run Femera with the help (<span style='font-family:monospace;'>-fmr:h</span>) option to see a complete list of library and plugin command line prefixes available.</div>
+
+<div class="standard"><a id='magicparlabel-1033' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-1037' />tdd:tests/post-build/femera_cli_fmr_prefix_is_optional.py</div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-1038' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-1042' />tdd:tests/post-build/femera_cli_prefixed_options_are_passed_to_libs.py</div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-1043' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-1047' />tdd:tests/post-build/femera_cli_help_does_list_option_prefixes.py</div>
+</div></div>
+
+<div class="lyx_code"><a id='magicparlabel-1048' /><div class="lyx_code_item">fmrexec -fmr:h</div>
+</div>
+<div class="standard"><a id='magicparlabel-1049' />The default parallel processing environment is 2&nbsp;MPI tasks, or 1&nbsp;MPI task for each NUMA domain, whichever is larger.</div>
+
+<div class="standard"><a id='magicparlabel-1050' />placeholder</div>
+
+<div class="standard"><a id='magicparlabel-1051' />Femera comes with tutorials and examples of common use cases to help users get started. The tutorial and example simulations may be run from the command line (section&nbsp;<a href="#sec_Running_Femera">7</a>) or used within Python (section&nbsp;<a href="#sec_Femera_Python_use">9</a>). </div>
+<h2 class="section"><a id='magicparlabel-1052' /><span class="section_label">8</span> Get started with Femera on the command line <a id="sec_Femera_command_line_use" />
+</h2>
+<div class="standard"><a id='magicparlabel-1053' />placeholder</div>
+
+<div class="standard"><a id='magicparlabel-1054' />Femera may also be run in Python.</div>
+<h2 class="section"><a id='magicparlabel-1055' /><span class="section_label">9</span> Get started with Femera in Python <a id="sec_Femera_Python_use" />
+</h2>
+<div class="standard"><a id='magicparlabel-1056' />As with running the Femera executable, the parallel environment configuration should be specified when running a Femera Python script. </div>
+
+<blockquote class="verse"><a id='magicparlabel-1057' /><p class="verse_item"><b>Best practice</b>: Use the <span style='font-family:monospace;'>fmrexec</span> wrapper script described in section&nbsp;<a href="#sec_Running_Femera">7</a> to start a Femera Python script (e.g. <span style='font-family:monospace;'>fmrscript.py</span>).</p>
+</blockquote>
+<div class="standard"><a id='magicparlabel-1058' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-1062' />tdd:tests/post-build/fmrexec_python_does_run_python.py</div>
+</div></div>
+
+<div class="lyx_code"><a id='magicparlabel-1063' /><div class="lyx_code_item">fmrexec python [fmrscript.py] [&hellip;]</div>
+<div class="lyx_code_item">fmrexec interact [fmrscript.py] [&hellip;]</div>
+</div>
+<div class="standard"><a id='magicparlabel-1065' />Both of these keywords (<span style='font-family:monospace;'>python</span>, <span style='font-family:monospace;'>interact</span>) start Python in interactive mode if a Femera Python script file name is not provided.</div>
+
+<div class="standard"><a id='magicparlabel-1066' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-1070' />tdd:tests/post-build/fmrexec_interact_does_start_python_interactive.py</div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-1071' />placeholder</div>
+<h1 class="part"><a id='magicparlabel-1072' /><span class="part_label">Part III</span> Develop Femera plugins and extensions <a id="part_Developing_Femera_plugins" />
+</h1>
+<div class="standard"><a id='magicparlabel-1073' />placeholder</div>
+
+<blockquote class="verse"><a id='magicparlabel-1074' /><p class="verse_item"><b>Best practice</b>: Put user plugins in (<span style='font-family:monospace;'>external/plugins/</span>).</p>
+</blockquote>
+<div class="standard"><a id='magicparlabel-1075' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-1079' />tdd:tests/pre-build/plugin_external_directory_does_exist.py</div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-1080' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-1084' />tdd:tests/post-build/femera_does_scan_external_plugin_directory.py</div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-1085' />placeholder</div>
+<h2 class="section"><a id='magicparlabel-1086' /><span class="section_label">10</span> Advanced Femera use <a id="sec_Femera_advanced_use" />
+</h2>
+<div class="standard"><a id='magicparlabel-1087' />Femera is built specifically for each type of CPU. In shared filesystem environments, there should be a different Femera executable file for each different CPU type. The Bash script (<span style='font-family:monospace;'>tools/fmrmodel.sh</span>) is installed as (<span style='font-family:monospace;'>fmrmodel</span>) and can be used in an alias to run the version appropriate to the current host.</div>
+
+<blockquote class="verse"><a id='magicparlabel-1088' /><p class="verse_item"><b>Best practice</b>: Alias the machine-specific Femera executable.
+<br />
+
+<span style='font-family:monospace;'>alias femera="femera-`fmrmodel`"</span></p>
+</blockquote>
+<div class="standard"><a id='magicparlabel-1089' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-1093' />tdd:tests/post-install/sys_femera_is_alias.py</div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-1094' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-1098' />tdd:tests/make-install-tools.test.bats</div>
+
+<div class="plain_layout"><a id='magicparlabel-1099' />tdd:tests/make-uninstall-tools.test.bats</div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-1100' />The script (<span style='font-family:monospace;'>fmrmodel</span>) can also be used to run the version of Femera that is appropriate for the current system, as shown below.</div>
+
+<div class="standard"><a id='magicparlabel-1101' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-1105' />tdd:tools/fmrmodel.test.bats</div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-1106' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-1110' />tdd:tools/fmrcores.test.bats</div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-1111' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-1115' />tdd:tools/fmrnumas.test.bats</div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-1116' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-1120' />tdd:tests/pre-build/tools_pragma_simd_is_supported.py</div>
+</div></div>
+
+<div class="lyx_code"><a id='magicparlabel-1121' /><div class="lyx_code_item">femera[-`fmrmodel`] -fmr:h</div>
+</div>
+<div class="standard"><a id='magicparlabel-1122' />The parallel environment configuration, including the number of MPI processes (<span style='font-family:monospace;'>NMPI</span>) and the number of OpenMP threads (<span style='font-family:monospace;'>NOMP</span>) for each MPI process can be specified when Femera is invoked. </div>
+
+<div class="lyx_code"><a id='magicparlabel-1123' /><div class="lyx_code_item">mpiexec -n &lt;NMPI&gt; --bind-to core -map-by node:pe=&lt;NOMP&gt; \</div>
+<div class="lyx_code_item">  femera[-`fmrmodel`] -[fmr:]o &lt;NOMP&gt; [&hellip;]</div>
+</div>
+<div class="standard"><a id='magicparlabel-1125' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-1129' />tdd:tests/post-build/femera_cli_opt_op_does_set_nomp.py</div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-1130' />placeholder</div>
+
+<div class="lyx_code"><a id='magicparlabel-1131' /><div class="lyx_code_item">mpiexec -n &lt;NMPI&gt; --bind-to core -map-by node:pe=&lt;NOMP&gt; \</div>
+<div class="lyx_code_item">  python [fmrscript.py] -[fmr:]o &lt;NOMP&gt; [&hellip;]</div>
+</div>
+<div class="standard"><a id='magicparlabel-1133' />placeholder</div>
+<h2 class="section"><a id='magicparlabel-1134' /><span class="section_label">11</span> Femera capability life cycle</h2>
+<div class="standard"><a id='magicparlabel-1135' />placeholder</div>
+
+<ol class="enumerate"><a id='magicparlabel-1136' /><li class="enumerate_item">User plugin
+<br />
+
+Plugins are detected and loaded at run-time.</li>
+<li class="enumerate_item">External Femera extension
+<br />
+
+Extensions may be enabled when configuring Femera before building it. External dependencies may be downloaded and installed automatically by <span style='font-family:monospace;'>make </span>external. Dependency source code may be available in the repository's (<span style='font-family:monospace;'>external/</span>) directory or automatically downloaded to (<span style='font-family:monospace;'>build/</span>). Some external dependencies may be satisfied if they are available on the build system or provided by the user. See section&nbsp;<a href="#part_Building_Femera">I</a> for details.</li>
+<li class="enumerate_item">Built-in Femera capability
+<br />
+
+Libraries needed must be available on the build system prior to building Femera to enable these capabilities. Examples of these include MPI, OpenMP, and libnuma.</li>
+<li class="enumerate_item">Deprecation
+<br />
+
+From time to time a capability may be deprecated. This can happen, for example, if a specific capability can be replaced by a more general capability that performs as well. A capability identified for deprecation will usually still be available as an optional external extension or user plugin until the next major version release.</li>
+<li class="enumerate_item">Removal from repository
+<br />
+
+Built-in capabilities identified for deprecation will be removed at the next major Femera version release after beta testing. Though it will not be maintained by Femera developers, it may still be possible to obtain and use the capability as a user plugin.</li>
+</ol>
+<div class="standard"><a id='magicparlabel-1141' />placeholder</div>
+<h1 class="part"><a id='magicparlabel-1142' /><span class="part_label">Part IV</span> Femera theory of operation<a id="part_Femera_theory" />
+</h1>
+<div class="standard"><a id='magicparlabel-1143' />Femera is not a replacement for traditional finite element applications. Femera provides capabilities that can not be done efficiently, if at all, by commercial applications. These include the ability to solve very large high-fidelity models, or run a large number of smaller simulations.</div>
+
+<ul class="itemize"><a id='magicparlabel-1144' /><li class="itemize_item">Very large, very high-fidelity models</li>
+<li class="itemize_item">Very many models</li>
+<li class="itemize_item">Finite element development sandbox</li>
+</ul>
+<div class="standard"><a id='magicparlabel-1147' />plcaeholder</div>
+<h2 class="section"><a id='magicparlabel-1148' /><span class="section_label">12</span> Femera software architecture</h2>
+<div class="standard"><a id='magicparlabel-1149' />placeholder</div>
+<h3 class="subsection"><a id='magicparlabel-1150' /><span class="subsection_label">12.1</span> Repository directory structure</h3>
+<div class="standard"><a id='magicparlabel-1151' />The Femera repository is maintained as an open-source mini-app on GitHub [https://github.com/waggyz/femera-mini-app] for public use, and is also available at [FIXME] for internal NASA use and continuous testing.</div>
+<h3 class="subsection"><a id='magicparlabel-1152' /><span class="subsection_label">12.2</span> Test-driven development</h3>
+<div class="standard"><a id='magicparlabel-1153' />placeholder</div>
+
+<blockquote class="verse"><a id='magicparlabel-1154' /><p class="verse_item"><b>Best practice</b>: Follow Femera test-driven development steps.
+<br />
+
+1. Describe a capability in this guide.
+<br />
+
+2. Add a LaTeX comment starting with (<span style='font-family:monospace;'>tdd:</span>) and followed by the name of a test file and any arguments needed to verify that the capability has been implemented correctly.
+<br />
+
+3. Write the test.
+<br />
+
+4. Check that the test fails with a useful debugging message.
+<br />
+
+5. Implement and debug the capability until the test passes.</p>
+</blockquote>
+<div class="standard"><a id='magicparlabel-1159' />Femera test-driven development&nbsp;(TDD) is started by documenting the desired software behavior in this guide and including a LaTeX comment specifying a file that tests this capability immediately after describing the capability.</div>
+
+<blockquote class="verse"><a id='magicparlabel-1160' /><p class="verse_item"><b>Best practice</b>: Test names contain a form of &ldquo;to be&rdquo;, &ldquo;to do&rdquo;, or &ldquo;to have&rdquo;, (e.g. &ldquo;is&rdquo;, &ldquo;are&rdquo;, &ldquo;do&rdquo;, &ldquo;does&rdquo;, &ldquo;did&rdquo;, &ldquo;has&rdquo;, &ldquo;have&rdquo;) representing a Boolean (true/false) of the desired behavior. Avoid negative test names (containing, e.g., &ldquo;does not&rdquo;, &ldquo;is not&rdquo;).</p>
+</blockquote>
+<div class="standard"><a id='magicparlabel-1161' />Test naming conventions and syntax are consistent with the best practices for the type of code being tested. </div>
+
+<ul class="itemize"><a id='magicparlabel-1162' /><li class="itemize_item">Test Bash shell scripts and the Femera executable with Bats [https://bats-core.readthedocs.io/].</li>
+<li class="itemize_item">Test Python scripts with the standard (<span style='font-family:monospace;'>unittest</span>) module [https://docs.python.org/3/library/unittest.html].</li>
+<li class="itemize_item">Test C/C++ code with GoogleTest [https://google.github.io/googletest/].</li>
+</ul>
+<div class="standard"><a id='magicparlabel-1165' />placeholder</div>
+<h4 class="subsubsection"><a id='magicparlabel-1166' /><span class="subsubsection_label">12.2.1</span> Test Bash scripts and Femera command-line use <a id="subsec_Test_Bash_CLI" />
+</h4>
+<div class="standard"><a id='magicparlabel-1167' />During each (<span style='font-family:monospace;'>make&nbsp;tdd</span>) or (<span style='font-family:monospace;'>make&nbsp;test</span>) build, a Bash script (<span style='font-family:monospace;'>tools/scan-tdd.</span>sh) scans the user guide LaTeX source code (<span style='font-family:monospace;'>src/docs/*.tex)</span> for tests to run. This script has its own TDD tests in a Bats script (tdd:<span style='font-family:monospace;'>tools/scan-tdd.test.</span>bats) using the side-by-side (sibling) Pitchfork unit test naming convention. The latter is run automatically during the build process, so only integration tests of (<span style='font-family:monospace;'>tools/scan-tdd.</span>sh) should be specified in a LaTeX comment, such as the test in listing&nbsp;<a href="#lis_Document_tdd_in_user_guide">2</a>, an example of a LaTeX comment used for test-driven development.</div>
+
+
+<div class='float-listings'><div class='listings-caption'>Listing 2:  Document test-driven development tests as LaTeX comments in the source code of this guide.<a id="lis_Document_tdd_in_user_guide" />
+</div><pre class ='listings TeX'>\begin{comment}
+tdd:tests/pre-build/content-has-tdd-lines.bats src/docs/*.lyx src/docs/*.tex
+\end{comment}</pre></div>
+
+
+<div class="standard"><a id='magicparlabel-1179' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-1183' />tdd:tests/pre-build/test_names_have_good_verbs.py</div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-1184' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-1188' />tdd:tests/post-build/make_did_run_user_guide_tdd_tests.py</div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-1189' />placeholder</div>
+<h4 class="subsubsection"><a id='magicparlabel-1190' /><span class="subsubsection_label">12.2.2</span> Test Python code<a id="subsec_Test_Python" />
+</h4>
+<div class="standard"><a id='magicparlabel-1191' />placeholder</div>
+<h4 class="subsubsection"><a id='magicparlabel-1192' /><span class="subsubsection_label">12.2.3</span> Test C/C++ code<a id="subsec_Test_C_code" />
+</h4>
+<div class="standard"><a id='magicparlabel-1193' />placeholder</div>
+<h2 class="section"><a id='magicparlabel-1194' /><span class="section_label">13</span> The finite element method</h2>
+<div class="standard"><a id='magicparlabel-1195' />placeholder</div>
+<h3 class="subsection"><a id='magicparlabel-1196' /><span class="subsection_label">13.1</span> Sparse matrix-vector response evaluation</h3>
+<div class="standard"><a id='magicparlabel-1197' />placeholder</div>
+<h3 class="subsection"><a id='magicparlabel-1198' /><span class="subsection_label">13.2</span> Element-by-element matrix-vector response evaluation </h3>
+<div class="standard"><a id='magicparlabel-1199' />placeholder</div>
+<h3 class="subsection"><a id='magicparlabel-1200' /><span class="subsection_label">13.3</span> Element-by-element tensor train response evaluation</h3>
+<div class="standard"><a id='magicparlabel-1201' />placeholder</div>
+<h1 class="part"><a id='magicparlabel-1202' /><span class="part_label">Part V</span> Appendices<a id="part_Appendices" />
+</h1>
+<h2 class="section"><a id='magicparlabel-1203' /><span class="section_label">A</span> Femera command line interface</h2>
+<div class="standard"><a id='magicparlabel-1204' />placeholder</div>
+<h2 class="section"><a id='magicparlabel-1205' /><span class="section_label">B</span> Femera public Python interface</h2>
+<div class="standard"><a id='magicparlabel-1206' />placeholder</div>
+<h2 class="section"><a id='magicparlabel-1207' /><span class="section_label">C</span> Femera public C++ interface</h2>
+<div class="standard"><a id='magicparlabel-1208' />placeholder</div>
+<h2 class="section"><a id='magicparlabel-1209' /><span class="section_label">D</span> Femera internal C++ interface</h2>
+<div class="standard"><a id='magicparlabel-1210' />placeholder</div>
+
+<div class="standard"><a id='magicparlabel-1211' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-1215' />tdd:tests/post-build/build/make_did_update_inheritance_tree.py</div>
+</div></div>
+
+
+<div class='float-figure'><div class="plain_layout" style='text-align: center;'><a id='magicparlabel-1220' /><img src='/home/dwagner5/Documents/My_Code/femera-mini-demo/build/docs/figs/src-inherit.eps' alt='image: ' />
+</div>
+
+<div class="plain_layout"><a id='magicparlabel-1221' /><span class='float-caption-Standard float-caption float-caption-standard'>Figure D.1:  Femera internal API inheritance</span></div>
+</div>
+
+
+<div class="standard"><a id='magicparlabel-1226' />placeholder</div>
+
+<div class="standard"><a id='magicparlabel-1227' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-1231' />tdd:tests/post-build/make_did_update_include_tree.py</div>
+</div></div>
+<div class='float-figure'><div class="plain_layout" style='text-align: center;'><a id='magicparlabel-1235' /><img src='/home/dwagner5/Documents/My_Code/femera-mini-demo/build/docs/figs/src-notest.eps' alt='image: ' />
+</div>
+
+<div class="plain_layout"><a id='magicparlabel-1236' /><span class='float-caption-Standard float-caption float-caption-standard'>Figure D.2:  Femera included source code files</span></div>
+</div>
+
+
+<div class="standard"><a id='magicparlabel-1241' />placeholder</div>
+<h2 class="section"><a id='magicparlabel-1242' /><span class="section_label">E</span> Femera configurations known to work</h2>
+<div class="standard"><a id='magicparlabel-1243' />placeholder</div>
+
+<div class="standard"><a id='magicparlabel-1244' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-1248' />tdd:tests/post-build/make_did_update_working_config_list.py</div>
+</div></div>
+<h2 class="section"><a id='magicparlabel-1249' /><span class="section_label">F</span> Femera performance</h2>
+<div class="standard"><a id='magicparlabel-1250' />placeholder</div>
+<h2 class="section"><a id='magicparlabel-1251' /><span class="section_label">G</span> Femera visualization<a id="sec_Femera_visualization" />
+</h2>
+<div class="standard"><a id='magicparlabel-1252' />placeholder</div>
+<h2 class="section"><a id='magicparlabel-1253' /><span class="section_label">H</span> Femera development history</h2>
+<div class="standard"><a id='magicparlabel-1254' />placeholder</div>
+<h3 class="subsection"><a id='magicparlabel-1255' /><span class="subsection_label">H.1</span> Femera mini-apps</h3>
+<div class="standard"><a id='magicparlabel-1256' />placeholder</div>
+
+
+<div class='float-table'><div class="plain_layout" style='text-align: center;'><a id='magicparlabel-1260' /><table><tbody><tr><td align='center' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-1287' />Version</div>
+</td>
+<td align='center' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-1290' />Default Make target</div>
+</td>
+<td align='center' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-1293' />Executable</div>
+</td>
+<td align='left' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-1296' />Purpose</div>
+</td>
+</tr><tr><td align='center' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-1299' />0.1</div>
+</td>
+<td align='center' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-1302' />phys</div>
+</td>
+<td align='center' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-1305' />femera-phys</div>
+</td>
+<td align='left' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-1308' />Optimize solver and physics performance</div>
+</td>
+</tr><tr><td align='center' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-1311' />0.2</div>
+</td>
+<td align='center' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-1314' />data</div>
+</td>
+<td align='center' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-1317' />femera-data</div>
+</td>
+<td align='left' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-1320' />Optimize data handling</div>
+</td>
+</tr><tr><td align='center' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-1323' />0.3</div>
+</td>
+<td align='center' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-1326' />mini</div>
+</td>
+<td align='center' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-1329' />femera-mini</div>
+</td>
+<td align='left' valign='top'>
+<div class="plain_layout"><a id='magicparlabel-1332' />Optimize simulation throughput</div>
+</td>
+</tr></tbody>
+</table>
+</div>
+
+<div class="plain_layout"><a id='magicparlabel-1333' /><span class='float-caption-Standard float-caption float-caption-standard'>Table 6:  Femera mini-app versions</span></div>
+</div>
+
+
+<div class="standard"><a id='magicparlabel-1338' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-1342' />tdd:tests/post-build/make_target_exe_is_correct.py</div>
+</div></div>
+
+<div class="standard"><a id='magicparlabel-1343' />placeholder</div>
+<h3 class="subsection"><a id='magicparlabel-1344' /><span class="subsection_label">H.2</span> Femera contributors</h3>
+<div class="standard"><a id='magicparlabel-1345' />placeholder</div>
+
+<div class="standard"><a id='magicparlabel-1346' /><br />
+</div>
+<h2 class="section"><a id='magicparlabel-1347' /><span class="section_label">I</span> Femera license</h2>
+<div class="standard"><a id='magicparlabel-1348' /><pre>NASA OPEN SOURCE AGREEMENT VERSION 1.3
+
+THIS OPEN SOURCE AGREEMENT ("AGREEMENT") DEFINES THE RIGHTS OF USE, REPRODUCTION, DISTRIBUTION, MODIFICATION AND REDISTRIBUTION OF CERTAIN COMPUTER SOFTWARE ORIGINALLY RELEASED BY THE UNITED STATES GOVERNMENT AS REPRESENTED BY THE GOVERNMENT AGENCY LISTED BELOW ("GOVERNMENT AGENCY"). THE UNITED STATES GOVERNMENT, AS REPRESENTED BY GOVERNMENT AGENCY, IS AN INTENDED THIRD-PARTY BENEFICIARY OF ALL SUBSEQUENT DISTRIBUTIONS OR REDISTRIBUTIONS OF THE SUBJECT SOFTWARE. ANYONE WHO USES, REPRODUCES, DISTRIBUTES, MODIFIES OR REDISTRIBUTES THE SUBJECT SOFTWARE, AS DEFINED HEREIN, OR ANY PART THEREOF, IS, BY THAT ACTION, ACCEPTING IN FULL THE RESPONSIBILITIES AND OBLIGATIONS CONTAINED IN THIS AGREEMENT.
+
+Government Agency: National Aeronautics and Space Administration
+Government Agency Original Software Designation: LAR-19531-1
+Government Agency Original Software Title: Femera
+Government Agency Point of Contact for Original Software: david.wagner-1@nasa.gov
+
+1. DEFINITIONS
+
+A. "Contributor" means Government Agency, as the developer of the Original Software, and any entity that makes a Modification. B. "Covered Patents" mean patent claims licensable by a Contributor that are necessarily infringed by the use or sale of its Modification alone or when combined with the Subject Software. C. "Display" means the showing of a copy of the Subject Software, either directly or by means of an image, or any other device. D. "Distribution" means conveyance or transfer of the Subject Software, regardless of means, to another. E. "Larger Work" means computer software that combines Subject Software, or portions thereof, with software separate from the Subject Software that is not governed by the terms of this Agreement. F. "Modification" means any alteration of, including addition to or deletion from, the substance or structure of either the Original Software or Subject Software, and includes derivative works, as that term is defined in the Copyright Statute, 17 USC 101. However, the act of including Subject Software as part of a Larger Work does not in and of itself constitute a Modification. G. "Original Software" means the computer software first released under this Agreement by Government Agency with Government Agency designation LAR-19531-1 and entitled Femera, including source code, object code and accompanying documentation, if any. H. "Recipient" means anyone who acquires the Subject Software under this Agreement, including all Contributors. I. "Redistribution" means Distribution of the Subject Software after a Modification has been made. J. "Reproduction" means the making of a counterpart, image or copy of the Subject Software. K. "Sale" means the exchange of the Subject Software for money or equivalent value. L. "Subject Software" means the Original Software, Modifications, or any respective parts thereof. M. "Use" means the application or employment of the Subject Software for any purpose.
+
+2. GRANT OF RIGHTS
+
+A. Under Non-Patent Rights: Subject to the terms and conditions of this Agreement, each Contributor, with respect to its own contribution to the Subject Software, hereby grants to each Recipient a non-exclusive, world-wide, royalty-free license to engage in the following activities pertaining to the Subject Software:
+
+1. Use 2. Distribution 3. Reproduction 4. Modification 5. Redistribution 6. Display
+
+B. Under Patent Rights: Subject to the terms and conditions of this Agreement, each Contributor, with respect to its own contribution to the Subject Software, hereby grants to each Recipient under Covered Patents a non-exclusive, world-wide, royalty-free license to engage in the following activities pertaining to the Subject Software:
+
+1. Use 2. Distribution 3. Reproduction 4. Sale 5. Offer for Sale
+
+C. The rights granted under Paragraph B. also apply to the combination of a Contributor's Modification and the Subject Software if, at the time the Modification is added by the Contributor, the addition of such Modification causes the combination to be covered by the Covered Patents. It does not apply to any other combinations that include a Modification.
+
+D. The rights granted in Paragraphs A. and B. allow the Recipient to sublicense those same rights. Such sublicense must be under the same terms and conditions of this Agreement.
+
+3. OBLIGATIONS OF RECIPIENT
+
+A. Distribution or Redistribution of the Subject Software must be made under this Agreement except for additions covered under paragraph 3H.
+
+1. Whenever a Recipient distributes or redistributes the Subject Software, a copy of this Agreement must be included with each copy of the Subject Software; and 2. If Recipient distributes or redistributes the Subject Software in any form other than source code, Recipient must also make the source code freely available, and must provide with each copy of the Subject Software information on how to obtain the source code in a reasonable manner on or through a medium customarily used for software exchange.
+
+B. Each Recipient must ensure that the following copyright notice appears prominently in the Subject Software:
+
+Copyright 2018 United States Government as represented by the Administrator of the National Aeronautics and Space Administration. No copyright is claimed in the United States under Title 17, U.S. Code. All Other Rights Reserved.
+
+C. Each Contributor must characterize its alteration of the Subject Software as a Modification and must identify itself as the originator of its Modification in a manner that reasonably allows subsequent Recipients to identify the originator of the Modification. In fulfillment of these requirements, Contributor must include a file (e.g., a change log file) that describes the alterations made and the date of the alterations, identifies Contributor as originator of the alterations, and consents to characterization of the alterations as a Modification, for example, by including a statement that the Modification is derived, directly or indirectly, from Original Software provided by Government Agency. Once consent is granted, it may not thereafter be revoked.
+
+D. A Contributor may add its own copyright notice to the Subject Software. Once a copyright notice has been added to the Subject Software, a Recipient may not remove it without the express permission of the Contributor who added the notice.
+
+E. A Recipient may not make any representation in the Subject Software or in any promotional, advertising or other material that may be construed as an endorsement by Government Agency or by any prior Recipient of any product or service provided by Recipient, or that may seek to obtain commercial advantage by the fact of Government Agency's or a prior Recipient's participation in this Agreement.
+
+F. In an effort to track usage and maintain accurate records of the Subject Software, each Recipient, upon receipt of the Subject Software, is requested to provide Government Agency, by e-mail to the Government Agency Point of Contact listed in clause 5.F., the following information: First and Last Name; Email Address; and Affiliation. Recipient's name and personal information shall be used for statistical purposes only. Once a Recipient makes a Modification available, it is requested that the Recipient inform Government Agency, by e-mail to the Government Agency Point of Contact listed in clause 5.F., how to access the Modification.
+
+G. Each Contributor represents that that its Modification is believed to be Contributor's original creation and does not violate any existing agreements, regulations, statutes or rules, and further that Contributor has sufficient rights to grant the rights conveyed by this Agreement.
+
+H. A Recipient may choose to offer, and to charge a fee for, warranty, support, indemnity and/or liability obligations to one or more other Recipients of the Subject Software. A Recipient may do so, however, only on its own behalf and not on behalf of Government Agency or any other Recipient. Such a Recipient must make it absolutely clear that any such warranty, support, indemnity and/or liability obligation is offered by that Recipient alone. Further, such Recipient agrees to indemnify Government Agency and every other Recipient for any liability incurred by them as a result of warranty, support, indemnity and/or liability offered by such Recipient.
+
+I. A Recipient may create a Larger Work by combining Subject Software with separate software not governed by the terms of this agreement and distribute the Larger Work as a single product. In such case, the Recipient must make sure Subject Software, or portions thereof, included in the Larger Work is subject to this Agreement.
+
+J. Notwithstanding any provisions contained herein, Recipient is hereby put on notice that export of any goods or technical data from the United States may require some form of export license from the U.S. Government. Failure to obtain necessary export licenses may result in criminal liability under U.S. laws. Government Agency neither represents that a license shall not be required nor that, if required, it shall be issued. Nothing granted herein provides any such export license.
+
+4. DISCLAIMER OF WARRANTIES AND LIABILITIES; WAIVER AND INDEMNIFICATION
+
+A. No Warranty: THE SUBJECT SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY OF ANY KIND, EITHER EXPRESSED, IMPLIED, OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, ANY WARRANTY THAT THE SUBJECT SOFTWARE WILL CONFORM TO SPECIFICATIONS, ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR FREEDOM FROM INFRINGEMENT, ANY WARRANTY THAT THE SUBJECT SOFTWARE WILL BE ERROR FREE, OR ANY WARRANTY THAT DOCUMENTATION, IF PROVIDED, WILL CONFORM TO THE SUBJECT SOFTWARE. THIS AGREEMENT DOES NOT, IN ANY MANNER, CONSTITUTE AN ENDORSEMENT BY GOVERNMENT AGENCY OR ANY PRIOR RECIPIENT OF ANY RESULTS, RESULTING DESIGNS, HARDWARE, SOFTWARE PRODUCTS OR ANY OTHER APPLICATIONS RESULTING FROM USE OF THE SUBJECT SOFTWARE. FURTHER, GOVERNMENT AGENCY DISCLAIMS ALL WARRANTIES AND LIABILITIES REGARDING THIRD-PARTY SOFTWARE, IF PRESENT IN THE ORIGINAL SOFTWARE, AND DISTRIBUTES IT "AS IS."
+
+B. Waiver and Indemnity: RECIPIENT AGREES TO WAIVE ANY AND ALL CLAIMS AGAINST THE UNITED STATES GOVERNMENT, ITS CONTRACTORS AND SUBCONTRACTORS, AS WELL AS ANY PRIOR RECIPIENT. IF RECIPIENT'S USE OF THE SUBJECT SOFTWARE RESULTS IN ANY LIABILITIES, DEMANDS, DAMAGES, EXPENSES OR LOSSES ARISING FROM SUCH USE, INCLUDING ANY DAMAGES FROM PRODUCTS BASED ON, OR RESULTING FROM, RECIPIENT'S USE OF THE SUBJECT SOFTWARE, RECIPIENT SHALL INDEMNIFY AND HOLD HARMLESS THE UNITED STATES GOVERNMENT, ITS CONTRACTORS AND SUBCONTRACTORS, AS WELL AS ANY PRIOR RECIPIENT, TO THE EXTENT PERMITTED BY LAW. RECIPIENT'S SOLE REMEDY FOR ANY SUCH MATTER SHALL BE THE IMMEDIATE, UNILATERAL TERMINATION OF THIS AGREEMENT.
+
+5. GENERAL TERMS
+
+A. Termination: This Agreement and the rights granted hereunder will terminate automatically if a Recipient fails to comply with these terms and conditions, and fails to cure such noncompliance within thirty (30) days of becoming aware of such noncompliance. Upon termination, a Recipient agrees to immediately cease use and distribution of the Subject Software. All sublicenses to the Subject Software properly granted by the breaching Recipient shall survive any such termination of this Agreement.
+
+B. Severability: If any provision of this Agreement is invalid or unenforceable under applicable law, it shall not affect the validity or enforceability of the remainder of the terms of this Agreement.
+
+C. Applicable Law: This Agreement shall be subject to United States federal law only for all purposes, including, but not limited to, determining the validity of this Agreement, the meaning of its provisions and the rights, obligations and remedies of the parties.
+
+D. Entire Understanding: This Agreement constitutes the entire understanding and agreement of the parties relating to release of the Subject Software and may not be superseded, modified or amended except by further written agreement duly executed by the parties.
+
+E. Binding Authority: By accepting and using the Subject Software under this Agreement, a Recipient affirms its authority to bind the Recipient to all terms and conditions of this Agreement and that that Recipient hereby agrees to all terms and conditions herein.
+
+F. Point of Contact: Any Recipient contact with Government Agency is to be directed to the designated representative as follows:
+
+Bonnie Lumanog Software Release Authority MS 50, NASA Langley Research Center Hampton, VA 23681 Fax: 757-864-4287 Phone: 757-864-2933 Email: larc-sra@mail.nasa.gov
+</pre></div>
+</body>
+</html>
