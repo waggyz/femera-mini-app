@@ -14,12 +14,15 @@ else
   BUILD_DIR="$FMRDIR/build/external/tools"
 
   mkdir -p "$SRC_DIR" $INSTALL_DIR"/bin"
-  if [ -f "$BUILD_DIR/cinclude2dot" ]; then
-    cp $BUILD_DIR"/cinclude2dot" $SRC_DIR"/cinclude2dot"
-    cp $BUILD_DIR"/cinclude2dot" $INSTALL_DIR"/bin/cinclude2dot"
+  #if [ -f "$BUILD_DIR/cinclude2dot" ]; then
+  if [ -f $SRC_DIR"/cinclude2dot" ]; then
+    #cp $BUILD_DIR"/cinclude2dot" $SRC_DIR"/cinclude2dot"
+    #cp $BUILD_DIR"/cinclude2dot" $INSTALL_DIR"/bin/cinclude2dot"
+    cp $SRC_DIR"/cinclude2dot" $INSTALL_DIR"/bin/cinclude2dot"
     exit 0
   else
     echo " ERROR  Could not find $BUILD_DIR/cinclude2dot" >&2
+    rm -f "$2"
     exit 1
   fi
 fi

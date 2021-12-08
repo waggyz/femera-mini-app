@@ -38,7 +38,7 @@ STAGE_CPU  := $(STAGE_DIR)/$(CPUMODEL)
 INSTALL_CPU:= $(INSTALL_DIR)/$(CPUMODEL)
 
 # Subdirectories needed
-BUILD_TREE+= $(BUILD_DIR)/external/ $(BUILD_DIR)/docs/
+BUILD_TREE+= $(BUILD_CPU)/external/ $(BUILD_DIR)/docs/
 BUILD_TREE+= $(BUILD_DIR)/external/tools/
 BUILD_TREE+= $(BUILD_CPU)/tests/ $(BUILD_CPU)/tools/
 
@@ -95,7 +95,7 @@ ifeq ($(ENABLE_GOOGLETEST),ON)
   EXT_DOT+="GoogleTest" -> "Femera"\n
   MAKE_DOT+="GoogleTest" -> "Makefile"\n
   LIST_EXTERNAL += googletest
-  GOOGLETEST_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
+  GOOGLETEST_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
 #  $(shell printf "%s" "$(GOOGLETEST_FLAGS)" \
 #    > $(BUILD_DIR)/external/install-googletest.flags.new)
 endif
@@ -105,7 +105,7 @@ ifeq ($(ENABLE_PYBIND11),ON)
   EXT_DOT+="pybind11" -> "Femera"\n
   EXT_DOT+="Boost" -> "pybind11"\n
   # FMRFLAGS += -DFMR_HAS_PYBIND11
-  PYBIND11_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
+  PYBIND11_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
   PYBIND11_FLAGS += -DDOWNLOAD_CATCH=0
   PYBIND11_FLAGS += -DBOOST_ROOT:PATHNAME=/usr/local/pkgs-modules/boost_1.66.0
 #  $(shell printf "%s" "$(PYBIND11_FLAGS)" \
@@ -114,14 +114,14 @@ endif
 ifeq ($(ENABLE_GMSH),ON)
   ifeq ("$(CXX) $(CXX_VERSION)","g++ 4.8.5")
     LIST_EXTERNAL += gmsh471
-    GMSH_FLAGFILE:=$(BUILD_DIR)/external/install-gmsh471.flags.new
+    GMSH_FLAGFILE:=$(BUILD_CPU)/external/install-gmsh471.flags.new
   else
     LIST_EXTERNAL += gmsh
-    GMSH_FLAGFILE:=$(BUILD_DIR)/external/install-gmsh.flags.new
+    GMSH_FLAGFILE:=$(BUILD_CPU)/external/install-gmsh.flags.new
   endif
   EXT_DOT+="Gmsh" -> "Femera"\n
-  GMSH_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
-  GMSH_FLAGS += -DCMAKE_PREFIX_PATH="$(INSTALL_DIR)"
+  GMSH_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
+  GMSH_FLAGS += -DCMAKE_PREFIX_PATH="$(INSTALL_CPU)"
   GMSH_FLAGS += -DENABLE_BUILD_LIB=1
   GMSH_FLAGS += -DENABLE_BUILD_SHARED=1
   GMSH_FLAGS += -DENABLE_BUILD_DYNAMIC=1
@@ -154,9 +154,8 @@ ifeq ($(ENABLE_GMSH),ON)
         GMSH_FLAGS += -DENABLE_MPI=1
       endif
     endif
-  else
-  endif
     GMSH_FLAGS += -DENABLE_MPI=0
+  endif
   endif
   ifeq ($(ENABLE_FLTK),ON)
     GMSH_REQUIRES += fltk
@@ -176,7 +175,7 @@ ifeq ($(ENABLE_GMSH),ON)
   endif
   # Disable Cairo fonts for now. Just use FreeType (required by OCCT).
   GMSH_FLAGS += -DENABLE_CAIRO=0
-  GMSH_DEPS:=$(patsubst %,$(BUILD_DIR)/external/install-%.out,$(GMSH_REQUIRES))
+  GMSH_DEPS:=$(patsubst %,$(BUILD_CPU)/external/install-%.out,$(GMSH_REQUIRES))
 #  $(shell printf "%s" "$(gmsh_FLAGS)" > $(GMSH_FLAGFILE))
 endif
 ifeq ($(ENABLE_OCCT),ON)
@@ -184,14 +183,14 @@ ifeq ($(ENABLE_OCCT),ON)
   OCCT_REQUIRES += freetype
   EXT_DOT+="FreeType" -> "OpenCASCADE"\n
   ENABLE_FREETYPE:=ON
-  OCCT_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
-  OCCT_FLAGS += -DCMAKE_PREFIX_PATH="$(INSTALL_DIR)"
+  OCCT_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
+  OCCT_FLAGS += -DCMAKE_PREFIX_PATH="$(INSTALL_CPU)"
   OCCT_FLAGS += -DBUILD_LIBRARY_TYPE=Static
   OCCT_FLAGS += -DCMAKE_BUILD_TYPE=Release
   OCCT_FLAGS += -DBUILD_MODULE_Draw=0
   OCCT_FLAGS += -DBUILD_MODULE_Visualization=0
   OCCT_FLAGS += -DBUILD_MODULE_ApplicationFramework=0
-  OCCT_DEPS:=$(patsubst %,$(BUILD_DIR)/external/install-%.out,$(OCCT_REQUIRES))
+  OCCT_DEPS:=$(patsubst %,$(BUILD_CPU)/external/install-%.out,$(OCCT_REQUIRES))
 #  $(shell printf "%s" "$(OCCT_FLAGS)" \
 #    > $(BUILD_DIR)/external/install-occt.flags.new)
 endif
@@ -200,7 +199,7 @@ ifeq ($(ENABLE_HDF5),ON)
     EXT_DOT+="MPI" -> "HDF5"\n
   endif
   LIST_EXTERNAL += hdf5
-  HDF5_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
+  HDF5_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
   HDF5_FLAGS += -DHDF5_BUILD_CPP_LIB:BOOL=OFF
   HDF5_FLAGS += -DHDF5_ENABLE_PARALLEL:BOOL=ON
   HDF5_FLAGS += -DMPIEXEC_MAX_NUMPROCS:STRING=4
@@ -222,7 +221,7 @@ ifeq ($(ENABLE_CGNS),ON)
   else
     CGNS_FLAGS += -DCGNS_ENABLE_HDF5:BOOL=OFF
   endif
-  CGNS_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
+  CGNS_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
   CGNS_FLAGS += -DCGNS_ENABLE_LFS:BOOL=ON
   CGNS_FLAGS += -DCGNS_ENABLE_64BIT:BOOL=ON
   CGNS_FLAGS += -DCGNS_ENABLE_LEGACY:BOOL=OFF
@@ -230,20 +229,20 @@ ifeq ($(ENABLE_CGNS),ON)
   CGNS_FLAGS += -DCGNS_ENABLE_BASE_SCOPE:BOOL=OFF
   CGNS_FLAGS += -DCGNS_ENABLE_TESTS:BOOL=OFF
   CGNS_FLAGS += -DCGNS_ENABLE_FORTRAN:BOOL=OFF
-  CGNS_DEPS:=$(patsubst %,$(BUILD_DIR)/external/install-%.out,$(CGNS_REQUIRES))
+  CGNS_DEPS:=$(patsubst %,$(BUILD_CPU)/external/install-%.out,$(CGNS_REQUIRES))
 #  $(shell printf "%s" "$(CGNS_FLAGS)" \
 #    > $(BUILD_DIR)/external/install-cgns.flags.new)
 endif
 ifeq ($(ENABLE_FLTK),ON)
   LIST_EXTERNAL += fltk
-  FLTK_FLAGS += --prefix="$(INSTALL_DIR)"
+  FLTK_FLAGS += --prefix="$(INSTALL_CPU)"
   FLTK_FLAGS += --enable-shared
 #  $(shell printf "%s" "$(FLTK_FLAGS)" \
 #    > $(BUILD_DIR)/external/install-fltk.flags.new)
 endif
 ifeq ($(ENABLE_FREETYPE),ON)
   LIST_EXTERNAL += freetype
-  FREETYPE_FLAGS += --prefix="$(INSTALL_DIR)"
+  FREETYPE_FLAGS += --prefix="$(INSTALL_CPU)"
 #  $(shell printf "%s" "$(FREETYPE_FLAGS)" \
 #    > $(BUILD_DIR)/external/install-freetype.flags.new)
 endif
@@ -254,15 +253,13 @@ ifeq ($(ENABLE_PETSC),ON)
 #  PETSC_FLAGS += FOPTFLAGS='$(OPTFLAGS)'
 #  PETSC_FLAGS += COPTFLAGS='$(OPTFLAGS)'
 #  PETSC_FLAGS += CXXOPTFLAGS='$(OPTFLAGS)'
-  PETSC_FLAGS += --prefix="$(INSTALL_DIR)"
-  # PETSC_FLAGS += --with-packages-build-dir="$(BUILD_DIR)"# no worky
+  PETSC_FLAGS += --prefix="$(INSTALL_CPU)"
+  # PETSC_FLAGS += --with-packages-build-dir="$(BUILD_CPU)"# no worky
   PETSC_FLAGS += --with-scalar-type=complex
   ifeq ($(ENABLE_PETSC_DEBUG),ON)
-    #FIXME ENABLE_PETSC_DEBUG
-    # PETSC_FLAGS +=
+    PETSC_FLAGS += --with-debugging
   else
-    #FIXME ENABLE_PETSC_DEBUG
-    # PETSC_FLAGS +=
+    PETSC_FLAGS += --with-debugging=0
   endif
   ifeq ($(ENABLE_PETSC_OMP),ON)
     EXT_DOT+="OpenMP" -> "PETSc"\n
@@ -278,35 +275,33 @@ ifeq ($(ENABLE_PETSC),ON)
   else
     PETSC_FLAGS += --with-mpi=0
   endif
-  ifeq (1,1) # Does not work with gcc 4.8.5? may rquire intel compiler for SOWING
   ifeq ($(ENABLE_MKL),ON)
     PETSC_REQUIRES += mkl
     EXT_DOT+="MKL" -> "PETSc"\n
-    PETSC_FLAGS += --with-blaslapack-dir="$(INSTALL_DIR)/mkl/latest"
-  endif
+    PETSC_FLAGS += --with-blaslapack-dir="$(INSTALL_CPU)/mkl/latest"
   endif
   ifeq (1,0) # Disable for now ------------------------------------------------
     ifeq ($(ENABLE_OCCT),ON)# Incompatible OpenCASCADE
       PETSC_REQUIRES += occt
       EXT_DOT+="OpenCASACADE" -> "PETSc"\n
-      PETSC_FLAGS += --with-opencascade-dir="$(INSTALL_DIR)"
+      PETSC_FLAGS += --with-opencascade-dir="$(INSTALL_CPU)"
     endif
-    ifeq ($(ENABLE_CGNS),ON)
+    ifeq ($(ENABLE_CGNS),ON)# Does not recognize high order branch
       PETSC_REQUIRES += cgns
       EXT_DOT+="CGNS" -> "PETSc"\n
       EXT_DOT+="zlib" -> "PETSc"\n
-      PETSC_FLAGS += --with-cgns-dir="$(INSTALL_DIR)" --with-zlib
+      PETSC_FLAGS += --with-cgns-dir="$(INSTALL_CPU)" --with-zlib
     endif
   endif # end disabled --------------------------------------------------------
   ifeq ($(ENABLE_GMSH),ON)
     PETSC_REQUIRES += gmsh
     EXT_DOT+="Gmsh" -> "PETSc"\n
-    PETSC_FLAGS += --with-gmsh-dir="$(INSTALL_DIR)"
+    PETSC_FLAGS += --with-gmsh-dir="$(INSTALL_CPU)"
   endif
   ifeq ($(ENABLE_HDF5),ON)
     PETSC_REQUIRES += hdf5
     EXT_DOT+="HDF5" -> "PETSc"\n
-    PETSC_FLAGS += --with-hdf5-dir="$(INSTALL_DIR)"
+    PETSC_FLAGS += --with-hdf5-dir="$(INSTALL_CPU)"
   endif
   # PETSc installs the rest
   ifeq ($(ENABLE_PETSC_MOAB),ON)
@@ -329,9 +324,9 @@ ifeq ($(ENABLE_PETSC),ON)
     EXT_DOT+="ParMETIS" -> "PETSc"\n
     PETSC_FLAGS += --download-parmetis
   endif
-  PETSC_DEPS:=$(patsubst %,$(BUILD_DIR)/external/install-%.out,$(PETSC_REQUIRES))
-  PETSC_INSTALLS_DEPS:=$(patsubst \
-    %,$(BUILD_DIR)/external/install-%.out,$(PETSC_INSTALLS))#FIXME not used
+  PETSC_DEPS:=$(patsubst %,$(BUILD_CPU)/external/install-%.out,$(PETSC_REQUIRES))
+#  PETSC_INSTALLS_DEPS:=$(patsubst \
+#    %,$(BUILD_CPU)/external/install-%.out,$(PETSC_INSTALLS))#FIXME not used
 #  $(shell printf "%s" "$(PETSC_FLAGS)" \
 #    > $(BUILD_DIR)/external/install-petsc.flags.new)
 endif
@@ -341,17 +336,22 @@ ifeq ($(ENABLE_MKL),ON)
   # No point saving extracted files. The installer removes them automatically.
   MKL_FLAGS += --extract-folder $(FMRDIR)/external/mkl
   MKL_FLAGS += --remove-extracted-files no
-  MKL_FLAGS += -a --silent --eula accept --install-dir $(INSTALL_DIR)
+  MKL_FLAGS += -a --silent --eula accept --install-dir $(INSTALL_CPU)
   # https://www.intel.com/content/www/us/en/develop/documentation
   # /installation-guide-for-intel-oneapi-toolkits-linux/top/installation
   # /install-with-command-line.html#install-with-command-line
 #  $(shell printf "%s" "$(MKL_FLAGS)" \
 #    > $(BUILD_DIR)/external/install-mkl.flags.new)
+  # ./install.sh --silent --action remove # To remove MKL
+
 endif
 # Developer tools
 ifeq ($(ENABLE_DOT),ON)
   MAKE_DOT+="cinclude2dot" -> "Makefile"\n
-  LIST_EXTERNAL += cinclude2dot
+  # DOT_FLAGS:= --dummy-flag
+  # LIST_EXTERNAL += cinclude2dot
+  GET_EXTERNAL+= $(BUILD_DIR)/external/get-cinclude2dot.out
+  INSTALL_EXTERNAL+= $(BUILD_DIR)/external/install-cinclude2dot.out
 #  $(shell printf "%s" "$(DOT_FLAGS)"  \
 #    > $(BUILD_DIR)/external/install-cinclude2dot.flags.new)
 endif
@@ -371,8 +371,8 @@ INSTALL_TOOLS:= $(patsubst %,$(INSTALL_DIR)/bin/%,$(LIST_TOOLS))
 # TEST_TOOLS:= $(patsubst %,$(BUILD_CPU)/tools/%.test.out,$(LIST_TOOLS))
 
 # External packages
-GET_EXTERNAL:= $(patsubst %,$(BUILD_DIR)/external/get-%.out,$(LIST_EXTERNAL))
-INSTALL_EXTERNAL:= $(patsubst %,$(BUILD_DIR)/external/install-%.out, \
+GET_EXTERNAL+= $(patsubst %,$(BUILD_DIR)/external/get-%.out,$(LIST_EXTERNAL))
+INSTALL_EXTERNAL+= $(patsubst %,$(BUILD_CPU)/external/install-%.out, \
   $(LIST_EXTERNAL))
 
 # GET_BATS:= $(patsubst %,$(BUILD_DIR)/external/get-%.out,$(BATS_MODS))
@@ -417,16 +417,16 @@ endif
 # These .PHONY targets are intended for users.
 # external libfemera test tune
 .PHONY: all tools external mini femera install
-.PHONY: uninstall reinstall clean cleaner cleanest purge
+.PHONY: remove reinstall clean cleaner cleanest purge
 # -----------------------------------------------------------------------------
 # The rest are for developers...
 .PHONY: docs hash patch
-.PHONY: install-tools test-tools uninstall-tools reinstall-tools clean-tools
+.PHONY: install-tools test-tools remove-tools reinstall-tools clean-tools
 .PHONY: get-bats install-bats get-external # install-external
 # ...and internal makefile use.
 .PHONY: intro
 .PHONY: all-done build-done docs-done
-.PHONY: install-tools-done install-done uninstall-done
+.PHONY: install-tools-done install-done remove-done
 
 # Real files, but considered always out of date.
 .PHONY: build/.md5
@@ -436,7 +436,9 @@ endif
 
 # $(STAGE_DIR)/% Does not work as target for .SECONDARY or .PRECIOUS.
 # It looks like .PRECIOUS prerequisites must match a target pattern exactly.
-.PRECIOUS: $(STAGE_DIR)/bin/fmr% $(BUILD_DIR)/external/install-%.flags
+.PRECIOUS: $(STAGE_DIR)/bin/fmr%
+.PRECIOUS: $(BUILD_DIR)/external/install-%.flags
+.PRECIOUS: $(BUILD_CPU)/external/install-%.flags
 
 # libmini libfull
 # pre-build-tests post-build-tests post-install-tests
@@ -475,14 +477,14 @@ install: tools docs | $(STAGE_TREE)
 	$(call timestamp,$@,$^)
 	$(MAKE) $(JPAR) install-done
 
-uninstall:
+remove:
 	$(call timestamp,$@,$^)
-	$(MAKE) $(JPAR) uninstall-tools
-	$(MAKE) $(JPAR) uninstall-done
+	$(MAKE) $(JPAR) remove-tools
+	$(MAKE) $(JPAR) remove-done
 
 reinstall: | intro
 	$(call timestamp,$@,$^)
-	$(MAKE) $(JPAR) uninstall
+	$(MAKE) $(JPAR) remove
 	$(MAKE) $(JSER) install
 
 clean: $(BUILD_CPU)/femera/
@@ -493,6 +495,8 @@ clean: $(BUILD_CPU)/femera/
 cleaner: $(BUILD_CPU)/ $(STAGE_CPU)/
 	$(call timestamp,$@,$^)
 	-rm -rf $^ $(STAGE_DIR)/bin/fmr*
+	#rm -f $(BUILD_CPU)/*/*.out $(BUILD_CPU)/*/*.err
+	#rm -f $(BUILD_CPU)/*/*.flags $(BUILD_CPU)/*/*.new
 	$(info $(DONE) made $(FEMERA_VERSION) for $(CPUMODEL) on $(HOSTNAME) $@)
 
 cleanest: build/
@@ -501,7 +505,8 @@ cleanest: build/
 	$(info $(DONE) made $(FEMERA_VERSION) for $(CPUMODEL) on $(HOSTNAME) $@)
 
 purge:
-	$(MAKE) $(JPAR) uninstall
+	$(MAKE) $(JPAR) remove
+	-rm -rf external/*/*
 	$(MAKE) $(JPAR) cleanest
 
 # Internal named targets ======================================================
@@ -524,24 +529,24 @@ endif
 	printf "%s" "$(DOT_FLAGS)" \
 	  > $(BUILD_DIR)/external/install-cinclude2dot.flags.new
 	printf "%s" "$(MKL_FLAGS)" \
-	  > $(BUILD_DIR)/external/install-mkl.flags.new
+	  > $(BUILD_CPU)/external/install-mkl.flags.new
 	printf "%s" "$(PETSC_FLAGS)" \
-	  > $(BUILD_DIR)/external/install-petsc.flags.new
+	  > $(BUILD_CPU)/external/install-petsc.flags.new
 	printf "%s" "$(FREETYPE_FLAGS)" \
-	  > $(BUILD_DIR)/external/install-freetype.flags.new
+	  > $(BUILD_CPU)/external/install-freetype.flags.new
 	printf "%s" "$(FLTK_FLAGS)" \
-	  > $(BUILD_DIR)/external/install-fltk.flags.new
+	  > $(BUILD_CPU)/external/install-fltk.flags.new
 	printf "%s" "$(CGNS_FLAGS)" \
-	  > $(BUILD_DIR)/external/install-cgns.flags.new
+	  > $(BUILD_CPU)/external/install-cgns.flags.new
 	printf "%s" "$(HDF5_FLAGS)" \
-	  > $(BUILD_DIR)/external/install-hdf5.flags.new
+	  > $(BUILD_CPU)/external/install-hdf5.flags.new
 	printf "%s" "$(OCCT_FLAGS)" \
-	  > $(BUILD_DIR)/external/install-occt.flags.new
+	  > $(BUILD_CPU)/external/install-occt.flags.new
 	printf "%s" "$(GMSH_FLAGS)" > $(GMSH_FLAGFILE)
 	printf "%s" "$(PYBIND11_FLAGS)" \
-	  > $(BUILD_DIR)/external/install-pybind11.flags.new
+	  > $(BUILD_CPU)/external/install-pybind11.flags.new
 	printf "%s" "$(GOOGLETEST_FLAGS)" \
-	  > $(BUILD_DIR)/external/install-googletest.flags.new
+	  > $(BUILD_CPU)/external/install-googletest.flags.new
 
 docs-done: build/docs/femera-guide.pdf build/docs/femera-quick-start.pdf
 docs-done: docs/femera-guide.xhtml docs/femera-quick-start.xhtml
@@ -561,9 +566,9 @@ install-done:
 	$(info $(E_G_) $(patsubst %,%;,$(LIST_TOOLS)))
 	$(call timestamp,$@,)
 
-uninstall-done:
+remove-done:
 	-rm -f $(INSTALL_CPU)/bin/mini
-	$(info $(DONE) uninstalling $(FEMERA_VERSION) on $(HOSTNAME) from:)
+	$(info $(DONE) removeing $(FEMERA_VERSION) on $(HOSTNAME) from:)
 	$(info $(SPCS) $(INSTALL_DIR)/)
 	$(info $(E_G_) $(patsubst %,%;,$(LIST_TOOLS)))
 	$(call timestamp,$@,)
@@ -587,14 +592,14 @@ clean-tools: $(BUILD_CPU)/tools/ | $(STAGE_CPU)/bin/
 	$(call timestamp,$@,$^)
 	-rm -rf $^ $(STAGE_CPU)/bin/fmr*
 
-uninstall-tools: clean-tools | $(BUILD_DIR)/tests/ $(BUILD_CPU)/tests/
+remove-tools: clean-tools | $(BUILD_DIR)/tests/ $(BUILD_CPU)/tests/
 	$(call timestamp,$@,$<)
 	-rm -f $(INSTALL_DIR)/bin/fmr* $(INSTALL_CPU)/bin/fmr*
-	$(MAKE) $(JPAR) uninstall-tools-done
+	$(MAKE) $(JPAR) remove-tools-done
 
 reinstall-tools:
 	$(call timestamp,$@,$<)
-	$(MAKE) $(JPAR) uninstall-tools
+	$(MAKE) $(JPAR) remove-tools
 	$(MAKE) $(JPAR) install-tools
 	#grep -h . build/i7-7820HQ/tools/* build/i7-7820HQ/tests/*
 
@@ -605,8 +610,8 @@ test-tools:
 install-tools-done: $(TEST_TOOLS) $(INSTALL_TOOLS)
 	$(MAKE) $(JPAR) $(BUILD_CPU)/tests/make-install-tools.test.out
 
-uninstall-tools-done: $(BUILD_DIR)/tests/make-uninstall-tools.test.out
-uninstall-tools-done: $(BUILD_CPU)/tests/make-uninstall-tools.test.out
+remove-tools-done: $(BUILD_DIR)/tests/make-remove-tools.test.out
+remove-tools-done: $(BUILD_CPU)/tests/make-remove-tools.test.out
 
 # External --------------------------------------------------------------------
 
@@ -654,26 +659,40 @@ $(BUILD_DIR)/external/get-%.out: external/get-external.sh external/get-%.dat
 	  "external/get-external.sh $(*)"   \
 	  "$(BUILD_DIR)/external/get-$(*)"
 
-$(BUILD_DIR)/external/install-occt.out : $(OCCT_DEPS)
+$(BUILD_CPU)/external/install-occt.out : $(OCCT_DEPS)
 
-$(BUILD_DIR)/external/install-cgns.out : $(CGNS_DEPS)
+$(BUILD_CPU)/external/install-cgns.out : $(CGNS_DEPS)
 
-$(BUILD_DIR)/external/install-petsc.out : $(PETSC_DEPS)
+$(BUILD_CPU)/external/install-gmsh.out : $(GMSH_DEPS)
 
+$(BUILD_CPU)/external/install-gmsh471.out : $(GMSH_DEPS)
+
+$(BUILD_CPU)/external/install-petsc.out : | $(PETSC_DEPS)
 #ifneq ("$(PETSC_INSTALLS_DEPS)","")
 #	touch $(PETSC_INSTALLS_DEPS)
 #endif
 
-$(BUILD_DIR)/external/install-gmsh.out : $(GMSH_DEPS)
-
-$(BUILD_DIR)/external/install-gmsh471.out : $(GMSH_DEPS)
+install-%: $(BUILD_CPU)/external/install-%.out | $(BUILD_CPU)/external/
+	$(call timestamp,$@,)
 
 install-%: $(BUILD_DIR)/external/install-%.out | $(BUILD_DIR)/external/
 	$(call timestamp,$@,)
 
+$(BUILD_CPU)/external/install-%.flags: $(BUILD_CPU)/external/install-%.flags.new
+	tools/update-file-if-diff.sh "$(@)"
+	#rm -f $(<)
+
 $(BUILD_DIR)/external/install-%.flags: $(BUILD_DIR)/external/install-%.flags.new
 	tools/update-file-if-diff.sh "$(@)"
 	#rm -f $(<)
+
+$(BUILD_CPU)/external/install-%.out: external/install-%.sh
+$(BUILD_CPU)/external/install-%.out: $(BUILD_CPU)/external/install-%.flags
+	$(call timestamp,$@,)
+	mkdir -p $(BUILD_CPU)/external/$(*)
+	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
+	  "external/install-$(*).sh $(INSTALL_CPU) $(<) $(JEXT)" \
+	  "$(BUILD_CPU)/external/install-$(*)"
 
 $(BUILD_DIR)/external/install-%.out: external/install-%.sh
 $(BUILD_DIR)/external/install-%.out: $(BUILD_DIR)/external/install-%.flags
@@ -711,12 +730,12 @@ $(INSTALL_DIR)/bin/fmr%: $(STAGE_DIR)/bin/fmr% | $(INSTALL_DIR)/bin/
 #	  $(BUILD_CPU)/tools/fmrnumas.test)
 #endif
 
-$(BUILD_DIR)/tests/make-uninstall-tools.test.out: tests/make-uninstall-tools.test.bats
+$(BUILD_DIR)/tests/make-remove-tools.test.out: tests/make-remove-tools.test.bats
 	$(call label_bats,$(PASS),$(FAIL),DIR="$(INSTALL_DIR)/bin" $(<), \
-	  $(BUILD_CPU)/tests/make-uninstall-tools.test)
-$(BUILD_CPU)/tests/make-uninstall-tools.test.out: tests/make-uninstall-tools.test.bats
+	  $(BUILD_CPU)/tests/make-remove-tools.test)
+$(BUILD_CPU)/tests/make-remove-tools.test.out: tests/make-remove-tools.test.bats
 	$(call label_bats,$(PASS),$(FAIL),DIR="$(INSTALL_CPU)/bin" $(<), \
-	  $(BUILD_CPU)/tests/make-uninstall-tools.test)
+	  $(BUILD_CPU)/tests/make-remove-tools.test)
 	#NOTE Pass test parameters through the environment, e.g.,
 	#     MYVAR="myval" my.test.bats;
 	#     because Bats scripts do not support test arguments.

@@ -10,8 +10,8 @@ if [ -f "$INSTALL_DIR/lib/libcgns_static.a" ]; then
 else
   FMRDIR=$(cd "$(dirname "$0")/.."; pwd)
 
-  SRC_DIR="$FMRDIR/external/hdf5"
-  BUILD_DIR="$FMRDIR/build/external/hdf5"
+  SRC_DIR="$FMRDIR/external/cgns"
+  BUILD_DIR="$FMRDIR/build/external/cgns"
   mkdir -p "$BUILD_DIR"
 
 

@@ -17,7 +17,7 @@ if [ ! -f "$FILE2" ]; then
   exit 1
 fi
 if [ -f "$FILE1" ]; then
-  cmp $FILE2 $FILE1 >/dev/null || ( mv -f $FILE2 $FILE1; )
+  cmp $FILE2 $FILE1 >/dev/null 2>/dev/null || ( cp -f $FILE2 $FILE1; )
 else
-  mv $FILE2 $FILE1;
+  cp $FILE2 $FILE1;
 fi

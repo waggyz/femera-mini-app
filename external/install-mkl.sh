@@ -13,10 +13,16 @@ DOWNLOAD_DIR="$FMRDIR/build/external/mkl"
 KITFILE=`ls -d "$DOWNLOAD_DIR/"*"Kit"*".sh" | tail -n1`
 
 if [ -f "$KITFILE" ]; then
-  SRC_DIR="$FMRDIR/external/mkl"
   BUILD_DIR="$FMRDIR/build/external/mkl"
-  mkdir -p "$SRC_DIR" # "$INSTALL_DIR"
-  #
+  SRC_DIR="$FMRDIR/external/mkl"
+  if [ -d "$SRC_DIR" ]; then
+    KITDIR=`ls -d "$SRC_DIR/"*"Kit"* | tail -n1`
+    if [ -f "$KITDIR/install.sh" ]; then # Remove MKL
+      $KITDIR/install.sh --silent --install_dir $INSTALL_DIR --action remove
+    else
+  else
+    mkdir -p "$SRC_DIR"
+  fi
   echo $KITFILE $FLAGS
   $KITFILE $FLAGS
   # https://www.intel.com/content/www/us/en/develop/documentation/installation-guide-for-intel-oneapi-toolkits-linux/top/installation/install-with-command-line.html#install-with-command-line
