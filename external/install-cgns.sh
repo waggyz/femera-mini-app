@@ -28,11 +28,11 @@ else
   export CMAKE_INCLUDE_PATH="$INSTALL_DIR/include;$MPIDIR/include"
   export CMAKE_LIBRARY_PATH="$INSTALL_DIR/lib64;$INSTALL_DIR/lib;$MPIDIR/lib"
 
-  # in: $FMRDIR/external/CGNS/CMakeLists.txt
+  # in: $FMRDIR/external/cgns/CMakeLists.txt
   #Change: 217:    # add_executable (h5dump IMPORTED)
   if [ 1 -eq 1 ]; then
-    cp -p "$FMRDIR/external/CGNS/CMakeLists.txt" "$FMRDIR/external/CGNS/CMakeLists.orig"
-    sed -i '/h5dump IMPORTED/s/^/#/' "$FMRDIR/external/CGNS/CMakeLists.txt"
+    cp -p "$FMRDIR/external/cgns/CMakeLists.txt" "$FMRDIR/external/cgns/CMakeLists.orig"
+    sed -i '/h5dump IMPORTED/s/^/#/' "$FMRDIR/external/cgns/CMakeLists.txt"
   fi
   # Create CMake initial cache.
   CCONFIG="$BUILD_DIR/CMakeConfig.cmake"
@@ -54,10 +54,10 @@ else
   make install
   cd "$FMRDIR"
 
-  if [ -f "$FMRDIR/external/CGNS/CMakeLists.orig" ]; then
-    rm "$FMRDIR/external/CGNS/CMakeLists.txt"
-    mv "$FMRDIR/external/CGNS/CMakeLists.orig" \
-      "$FMRDIR/external/CGNS/CMakeLists.txt"
+  if [ -f "$FMRDIR/external/cgns/CMakeLists.orig" ]; then
+    rm "$FMRDIR/external/cgns/CMakeLists.txt"
+    mv "$FMRDIR/external/cgns/CMakeLists.orig" \
+      "$FMRDIR/external/cgns/CMakeLists.txt"
   fi
 
   if [ 1 -eq 0 ]; then
@@ -75,7 +75,7 @@ else
     cmake -Wno-dev                             \
       -DCMAKE_INSTALL_DIR="$INSTALL_DIR" \
       -DMPIEXEC=`which mpiexec`                \
-      "$FMRDIR/external/CGNS/src/ptests"
+      "$FMRDIR/external/cgns/src/ptests"
 
     make
     ./pcgns_ctest             # Run serial, then

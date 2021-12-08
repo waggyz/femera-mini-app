@@ -32,7 +32,7 @@
 [submodule "external/petsc"]
 	path = external/petsc
 	url = https://gitlab.com/petsc/petsc.git
-	branch = main
+	branch = release
 [submodule "external/freetype"]
         path = external/freetype
         url = https://gitlab.freedesktop.org/freetype/freetype.git

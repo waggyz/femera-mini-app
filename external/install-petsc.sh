@@ -4,7 +4,7 @@ INSTALL_DIR="$1"
 if [ -f "$2" ]; then FLAGS=`tr --delete '\n' < "$2"`; fi
 JFLAG="$3"
 
-if [ -f "$INSTALL_DIR/lib/petsc.a" ]; then
+if [ -f "$INSTALL_DIR/lib/petsc.so" ]; then
   echo "looks like PETSc is already installed"
   exit 0
 else
@@ -16,14 +16,14 @@ else
 
   FMRDIR=$(cd "$(dirname "$0")/.."; pwd)
 
-  SRC_DIR="$FMRDIR/external/freetype"
-  # BUILD_DIR="$FMRDIR/build/external/freetype"
+  SRC_DIR="$FMRDIR/external/petsc"
 
-  # mkdir -p "$BUILD_DIR"
   cd "$SRC_DIR"
 
   ./configure $FLAGS
-  make $JFLAG
-  make install
+  make PETSC_ARCH=`fmrmodel` all test < echo " "
+  MFLAGS="--no-print-directory -s --  PETSC_DIR=$SRC_DIR PETSC_ARCH=`fmrmodel`"
+  make PETSC_ARCH=`fmrmodel` $MFLAGS install
+  # make PETSC_DIR=$INSTALL_DIR PETSC_ARCH="" check
 fi
 exit

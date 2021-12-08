@@ -14,39 +14,50 @@ FMR_VERBMAX:=11
 
 # Use parallel make jobs
 ENABLE_MAKEJOBS:=ON
-# MAKEJOBS:=8
 
+ENABLE_OMP:=ON
 ENABLE_LIBNUMA:=ON
-ENABLE_VALGRIND:=ON
 
-# External packages
+# External packages -----------------------------------------------------------
 ENABLE_BATS:=ON
 ENABLE_GOOGLETEST:=ON
 
+ENABLE_PYBIND11:=ON
+
 ENABLE_MPI:=ON
 
-# Requires BLAS and LAPACK
+ENABLE_MKL:=ON
+
 ENABLE_GMSH:=ON
-ENABLE_GMSH_OPENMP:=ON
+ENABLE_GMSH_OMP:=ON
+ENABLE_GMSH_METIS:=ON
 ENABLE_FLTK:=ON
 ENABLE_OCCT:=ON
 
-ENABLE_PYBIND11:=ON
-ENABLE_PETSC:=OFF
-
 ENABLE_HDF5:=ON
 ENABLE_CGNS:=ON
-ENABLE_METIS:=ON
+
+ENABLE_PETSC:=ON
+ENABLE_PETSC_DEBUG:=OFF
+ENABLE_PETSC_OMP:=ON
+ENABLE_PETSC_MOAB:=OFF
+# ENABLE_PETSC_MPI4PY:=OFF
+# Partitioners
+ENABLE_PETSC_CHACO:=ON
+ENABLE_PETSC_SCOTCH:=ON
+# Nonprofit research or evaluation use only
+ENABLE_PETSC_PARMETIS:=OFF
+
+# Developer tools -------------------------------------------------------------
+ENABLE_VALGRIND:=ON
 
 ENABLE_LYX:=ON
 ENABLE_DOT:=ON
 
-ENABLE_MKL:=ON
-ENABLE_PETSC:=ON
-
-# $(shell module load mpi/openmpi-x86_64)
+# Override automatic assignment -----------------------------------------------
 
 # Set these to override automatic assignment.
+# MAKEJOBS:=8
 # CPUMODEL:=unknown
 # CPUCOUNT:=4
 # CPUSIMD :=AVX2 FMA

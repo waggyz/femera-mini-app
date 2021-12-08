@@ -8,53 +8,54 @@ This version (0.3) of the Femera mini-app is for optimizing the basic
 capabilities of a high-performance finite element analysis toolchain.
 The primary goal is to verify that the high level of performance demonstrated
 by version 0.1 can be maintained while providing the flexible data handling
-emonstrated in version 0.2.
+emonstrated by version 0.2.
 
 ## Femera demo mini-app installation
 
 ### 1. Clone Femera with its required and optional external packages
 
-**Important** Do **not** build Femera in a location that has spaces in the path.
-At least one external package will not compile if there are spaces in the build
-path.
+**Important** Do **not** download or build Femera in a location that has spaces
+in the path. At least one external package will not install correctly if there
+are spaces in the build path.
 
 ```bash
 git clone -b demo https://github.com/waggyz/femera-mini-app.git
 ```
-Or
+This will download the Femera 0.3 repository into the folder
+femera-mini-app/.
 
-```bash
-git clone --recursive -b data https://github.com/waggyz/femera-mini-app.git
-```
+**Important** the command-line examples assume that the current working
+directory is the root of the Femera repository (femera-mini-app/ by default).
 
-This populates external/ with:
-googletest (gtest), HDF5, CGNS, gmsh, pybind11
+### 2. Set up the build environment
 
-These have several dependencies.
+The recommended Femera configuration requires several applications and libraries.
 
-* BLAS and LAPACK must be installed.
+* BLAS and LAPACK must be installed for use on non-Intel CPUs.
 * CMake 3.? is required for several external packages.
 * Pybind11 requires boost 1.56.
+* MPI: OpenMPI 2.1.1 and 3.1 have been tested.
 
-### 2. Install MPI
+### 3. Set up the Python environment
 
-OpenMPI 2.1.1 and 3.1 have been tested.
-
-### 3. Set up your Python environment
-
-[**NOTE** Skip this step for now]
 [**TODO**] Install pytest, pytest-check, and python-subunit in your environment.
 
 * PETSc installation requires the python module configure.
 
-
 ### 4. Set build options in config.local.
 
-**TODO**
+Copy one of the configuration files (examples/config.*) to config.local.
+
+```bash
+cd femera-mini-app
+cp examples/config.default config.local
+```
+
+Edit config.local.
 
 ### 5. Build and install Femera
 
-**Important** Build Femera on the machine that you will use it on.
+**Important** Build Femera on the machine that it will be used on.
 
 ```bash
 cd femera-mini-app

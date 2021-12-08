@@ -48,7 +48,7 @@ STAGE_TREE+= $(STAGE_CPU)/bin/ $(STAGE_CPU)/libs/
 # INSTALL_TREE:= $(patsubst $(STAGE_DIR)%,$(INSTALL_DIR)%,$(STAGE_TREE))
 
 # Libraries and applications available ----------------------------------------
-EXT_DOT:=digraph "external dependencies" {\n
+EXT_DOT:=digraph "Femera dependencies" {\n
 EXT_DOT+=overlap=scale;\n
 EXT_DOT+=size="6,3";\n
 EXT_DOT+=ratio="fill";\n
@@ -56,7 +56,7 @@ EXT_DOT+=fontsize="12";\n
 EXT_DOT+=fontname="Helvetica";\n
 EXT_DOT+=clusterrank="local";\n
 
-MAKE_DOT:=digraph "external dependencies" {\n
+MAKE_DOT:=digraph "Makefile dependencies" {\n
 MAKE_DOT+=overlap=scale;\n
 MAKE_DOT+=size="6,3";\n
 MAKE_DOT+=ratio="fill";\n
@@ -96,25 +96,28 @@ ifeq ($(ENABLE_GOOGLETEST),ON)
   MAKE_DOT+="GoogleTest" -> "Makefile"\n
   LIST_EXTERNAL += googletest
   GOOGLETEST_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
-  $(shell printf "%s" "$(GOOGLETEST_FLAGS)" \
-    > $(BUILD_DIR)/external/googletest.flags.new)
+#  $(shell printf "%s" "$(GOOGLETEST_FLAGS)" \
+#    > $(BUILD_DIR)/external/install-googletest.flags.new)
 endif
 # ENABLE_PYBIND11=ON
 ifeq ($(ENABLE_PYBIND11),ON)
   LIST_EXTERNAL += pybind11
   EXT_DOT+="pybind11" -> "Femera"\n
+  EXT_DOT+="Boost" -> "pybind11"\n
   # FMRFLAGS += -DFMR_HAS_PYBIND11
   PYBIND11_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
-  PYBIND11_FLAGS += -DBOOST_ROOT:PATHNAME=/usr/local/pkgs-modules/boost_1.66.0
   PYBIND11_FLAGS += -DDOWNLOAD_CATCH=0
-  $(shell printf "%s" "$(PYBIND11_FLAGS)" \
-    > $(BUILD_DIR)/external/pybind11.flags.new)
+  PYBIND11_FLAGS += -DBOOST_ROOT:PATHNAME=/usr/local/pkgs-modules/boost_1.66.0
+#  $(shell printf "%s" "$(PYBIND11_FLAGS)" \
+#    > $(BUILD_DIR)/external/install-pybind11.flags.new)
 endif
 ifeq ($(ENABLE_GMSH),ON)
   ifeq ("$(CXX) $(CXX_VERSION)","g++ 4.8.5")
     LIST_EXTERNAL += gmsh471
+    GMSH_FLAGFILE:=$(BUILD_DIR)/external/install-gmsh471.flags.new
   else
     LIST_EXTERNAL += gmsh
+    GMSH_FLAGFILE:=$(BUILD_DIR)/external/install-gmsh.flags.new
   endif
   EXT_DOT+="Gmsh" -> "Femera"\n
   GMSH_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
@@ -122,8 +125,9 @@ ifeq ($(ENABLE_GMSH),ON)
   GMSH_FLAGS += -DENABLE_BUILD_LIB=1
   GMSH_FLAGS += -DENABLE_BUILD_SHARED=1
   GMSH_FLAGS += -DENABLE_BUILD_DYNAMIC=1
-  ifeq ($(ENABLE_OMP),ON)
+  ifeq ($(ENABLE_GMSH_OMP),ON)
     GMSH_FLAGS += -DENABLE_OPENMP=1
+    EXT_DOT+="OpenMP" -> "Gmsh"\n
   endif
   ifeq ($(ENABLE_PYBIND11),ON)
     GMSH_REQUIRES += pybind11
@@ -131,12 +135,12 @@ ifeq ($(ENABLE_GMSH),ON)
     GMSH_FLAGS += -DENABLE_WRAP_PYTHON=1 -DENABLE_NUMPY=1
   endif
   ifeq ($(ENABLE_CGNS),ON)
-    GMSH_REQUIRES += CGNS hdf5
+    GMSH_REQUIRES += cgns
     EXT_DOT+="CGNS" -> "Gmsh"\n
-    EXT_DOT+="HDF5" -> "Gmsh"\n
     GMSH_FLAGS += -DENABLE_CGNS=1
     GMSH_FLAGS += -DENABLE_CGNS_CPEX0045=0
   endif
+  ifeq (1,0) # Disable PETSc in Gmsh
   ifeq ($(ENABLE_PETSC),ON)
     GMSH_REQUIRES += petsc
     EXT_DOT+="PETSc" -> "Gmsh"\n
@@ -144,9 +148,14 @@ ifeq ($(ENABLE_GMSH),ON)
     ifeq ($(ENABLE_PYBIND11),ON)
       GMSH_FLAGS += -DENABLE_PETSC4PY=1
     endif
-    GMSH_FLAGS += -DENABLE_MPI=1
+    ifeq (0,1)# Disable experimental MPI in Gmsh for now.
+      ifeq ($(ENABLE_MPI),ON)
+        EXT_DOT+="MPI" -> "Gmsh"\n
+        GMSH_FLAGS += -DENABLE_MPI=1
+      endif
+    endif
   else
-    # Disable MPI in Gmsh unless PETSc is used. It is probably not needed.
+  endif
     GMSH_FLAGS += -DENABLE_MPI=0
   endif
   ifeq ($(ENABLE_FLTK),ON)
@@ -168,8 +177,7 @@ ifeq ($(ENABLE_GMSH),ON)
   # Disable Cairo fonts for now. Just use FreeType (required by OCCT).
   GMSH_FLAGS += -DENABLE_CAIRO=0
   GMSH_DEPS:=$(patsubst %,$(BUILD_DIR)/external/install-%.out,$(GMSH_REQUIRES))
-  $(shell printf "%s" "$(gmsh_FLAGS)" \
-    > $(BUILD_DIR)/external/gmsh.flags.new)
+#  $(shell printf "%s" "$(gmsh_FLAGS)" > $(GMSH_FLAGFILE))
 endif
 ifeq ($(ENABLE_OCCT),ON)
   LIST_EXTERNAL += occt
@@ -184,10 +192,13 @@ ifeq ($(ENABLE_OCCT),ON)
   OCCT_FLAGS += -DBUILD_MODULE_Visualization=0
   OCCT_FLAGS += -DBUILD_MODULE_ApplicationFramework=0
   OCCT_DEPS:=$(patsubst %,$(BUILD_DIR)/external/install-%.out,$(OCCT_REQUIRES))
-  $(shell printf "%s" "$(OCCT_FLAGS)" \
-    > $(BUILD_DIR)/external/occt.flags.new)
+#  $(shell printf "%s" "$(OCCT_FLAGS)" \
+#    > $(BUILD_DIR)/external/install-occt.flags.new)
 endif
 ifeq ($(ENABLE_HDF5),ON)
+  ifeq ($(ENABLE_MPI),ON)
+    EXT_DOT+="MPI" -> "HDF5"\n
+  endif
   LIST_EXTERNAL += hdf5
   HDF5_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
   HDF5_FLAGS += -DHDF5_BUILD_CPP_LIB:BOOL=OFF
@@ -197,11 +208,12 @@ ifeq ($(ENABLE_HDF5),ON)
   HDF5_FLAGS += -DBUILD_SHARED_LIBS:BOOL=ON
   HDF5_FLAGS += -DCTEST_BUILD_CONFIGURATION=Release
   HDF5_FLAGS += -DHDF5_NO_PACKAGES:BOOL=ON
-  $(shell printf "%s" "$(HDF5_FLAGS)" \
-    > $(BUILD_DIR)/external/hdf5.flags.new)
+#  $(shell printf "%s" "$(HDF5_FLAGS)" \
+#    > $(BUILD_DIR)/external/install-hdf5.flags.new)
 endif
+#FIXME CGNS, FLTK, and FreeType build in external/*/
 ifeq ($(ENABLE_CGNS),ON)
-  LIST_EXTERNAL += CGNS
+  LIST_EXTERNAL += cgns
   EXT_DOT+="CGNS" -> "Femera"\n
   ifeq ($(ENABLE_HDF5),ON)
     CGNS_REQUIRES += hdf5
@@ -219,43 +231,109 @@ ifeq ($(ENABLE_CGNS),ON)
   CGNS_FLAGS += -DCGNS_ENABLE_TESTS:BOOL=OFF
   CGNS_FLAGS += -DCGNS_ENABLE_FORTRAN:BOOL=OFF
   CGNS_DEPS:=$(patsubst %,$(BUILD_DIR)/external/install-%.out,$(CGNS_REQUIRES))
-  $(shell printf "%s" "$(CGNS_FLAGS)" \
-    > $(BUILD_DIR)/external/CGNS.flags.new)
-endif
-#FIXME PETSc, CGNS, FLTK, and FreeType build in external/*/
-ifeq ($(ENABLE_PETSC),ON)
-  LIST_EXTERNAL += petsc
-  EXT_DOT+="PETSc" -> "Femera"\n
-  PETSC_FLAGS += --prefix="$(INSTALL_DIR)"
-  ifeq ($(ENABLE_OMP),ON)
-    PETSC_FLAGS += --with-openmp
-  endif
-  ifeq ($(ENABLE_HDF5),ON)
-    PETSC_REQUIRES += hdf5
-    PETSC_FLAGS += --with-hdf5
-    EXT_DOT+="PETSc" -> "HDF5"\n
-  endif
-  ifeq ($(ENABLE_CGNS),ON)
-    PETSC_REQUIRES += CGNS
-    EXT_DOT+="PETSc" -> "CGNS"\n
-    PETSC_FLAGS += --with-cgns --with-zlib
-  endif
-  PETSC_DEPS:=$(patsubst %,$(BUILD_DIR)/external/install-%.out,$(PETSC_REQUIRES))
-  $(shell printf "%s" "$(PETSC_FLAGS)" \
-    > $(BUILD_DIR)/external/petsc.flags.new)
+#  $(shell printf "%s" "$(CGNS_FLAGS)" \
+#    > $(BUILD_DIR)/external/install-cgns.flags.new)
 endif
 ifeq ($(ENABLE_FLTK),ON)
   LIST_EXTERNAL += fltk
   FLTK_FLAGS += --prefix="$(INSTALL_DIR)"
   FLTK_FLAGS += --enable-shared
-  $(shell printf "%s" "$(FLTK_FLAGS)" \
-    > $(BUILD_DIR)/external/fltk.flags.new)
+#  $(shell printf "%s" "$(FLTK_FLAGS)" \
+#    > $(BUILD_DIR)/external/install-fltk.flags.new)
 endif
 ifeq ($(ENABLE_FREETYPE),ON)
   LIST_EXTERNAL += freetype
   FREETYPE_FLAGS += --prefix="$(INSTALL_DIR)"
-  $(shell printf "%s" "$(FREETYPE_FLAGS)" \
-    > $(BUILD_DIR)/external/freetype.flags.new)
+#  $(shell printf "%s" "$(FREETYPE_FLAGS)" \
+#    > $(BUILD_DIR)/external/install-freetype.flags.new)
+endif
+ifeq ($(ENABLE_PETSC),ON)
+  LIST_EXTERNAL += petsc
+  EXT_DOT+="PETSc" -> "Femera"\n
+  PETSC_FLAGS += PETSC_ARCH=$(CPUMODEL)
+#  PETSC_FLAGS += FOPTFLAGS='$(OPTFLAGS)'
+#  PETSC_FLAGS += COPTFLAGS='$(OPTFLAGS)'
+#  PETSC_FLAGS += CXXOPTFLAGS='$(OPTFLAGS)'
+  PETSC_FLAGS += --prefix="$(INSTALL_DIR)"
+  # PETSC_FLAGS += --with-packages-build-dir="$(BUILD_DIR)"# no worky
+  PETSC_FLAGS += --with-scalar-type=complex
+  ifeq ($(ENABLE_PETSC_DEBUG),ON)
+    #FIXME ENABLE_PETSC_DEBUG
+    # PETSC_FLAGS +=
+  else
+    #FIXME ENABLE_PETSC_DEBUG
+    # PETSC_FLAGS +=
+  endif
+  ifeq ($(ENABLE_PETSC_OMP),ON)
+    EXT_DOT+="OpenMP" -> "PETSc"\n
+    PETSC_FLAGS += --with-openmp
+  endif
+  ifeq ($(ENABLE_MPI),ON)
+    EXT_DOT+="MPI" -> "PETSc"\n
+    ifeq ($(HAS_MPI),ON)
+      # PETSC_FLAGS += --with-mpi-dir="$(MPI_DIR)"
+    else
+      # PETSC_FLAGS += --download-openmpi
+    endif
+  else
+    PETSC_FLAGS += --with-mpi=0
+  endif
+  ifeq (1,1) # Does not work with gcc 4.8.5? may rquire intel compiler for SOWING
+  ifeq ($(ENABLE_MKL),ON)
+    PETSC_REQUIRES += mkl
+    EXT_DOT+="MKL" -> "PETSc"\n
+    PETSC_FLAGS += --with-blaslapack-dir="$(INSTALL_DIR)/mkl/latest"
+  endif
+  endif
+  ifeq (1,0) # Disable for now ------------------------------------------------
+    ifeq ($(ENABLE_OCCT),ON)# Incompatible OpenCASCADE
+      PETSC_REQUIRES += occt
+      EXT_DOT+="OpenCASACADE" -> "PETSc"\n
+      PETSC_FLAGS += --with-opencascade-dir="$(INSTALL_DIR)"
+    endif
+    ifeq ($(ENABLE_CGNS),ON)
+      PETSC_REQUIRES += cgns
+      EXT_DOT+="CGNS" -> "PETSc"\n
+      EXT_DOT+="zlib" -> "PETSc"\n
+      PETSC_FLAGS += --with-cgns-dir="$(INSTALL_DIR)" --with-zlib
+    endif
+  endif # end disabled --------------------------------------------------------
+  ifeq ($(ENABLE_GMSH),ON)
+    PETSC_REQUIRES += gmsh
+    EXT_DOT+="Gmsh" -> "PETSc"\n
+    PETSC_FLAGS += --with-gmsh-dir="$(INSTALL_DIR)"
+  endif
+  ifeq ($(ENABLE_HDF5),ON)
+    PETSC_REQUIRES += hdf5
+    EXT_DOT+="HDF5" -> "PETSc"\n
+    PETSC_FLAGS += --with-hdf5-dir="$(INSTALL_DIR)"
+  endif
+  # PETSc installs the rest
+  ifeq ($(ENABLE_PETSC_MOAB),ON)
+    PETSC_INSTALLS += moab
+    EXT_DOT+="MOAB" -> "PETSc"\n
+    PETSC_FLAGS += --download-moab
+  endif
+  ifeq ($(ENABLE_PETSC_CHACO),ON)
+    PETSC_INSTALLS += chaco
+    EXT_DOT+="Chaco" -> "PETSc"\n
+    PETSC_FLAGS += --download-chaco
+  endif
+  ifeq ($(ENABLE_PETSC_SCOTCH),ON)
+    PETSC_INSTALLS += scotch
+    EXT_DOT+="PTScotch" -> "PETSc"\n
+    PETSC_FLAGS += --download-ptscotch
+  endif
+  ifeq ($(ENABLE_PETSC_PARMETIS),ON)
+    PETSC_INSTALLS += parmetis
+    EXT_DOT+="ParMETIS" -> "PETSc"\n
+    PETSC_FLAGS += --download-parmetis
+  endif
+  PETSC_DEPS:=$(patsubst %,$(BUILD_DIR)/external/install-%.out,$(PETSC_REQUIRES))
+  PETSC_INSTALLS_DEPS:=$(patsubst \
+    %,$(BUILD_DIR)/external/install-%.out,$(PETSC_INSTALLS))#FIXME not used
+#  $(shell printf "%s" "$(PETSC_FLAGS)" \
+#    > $(BUILD_DIR)/external/install-petsc.flags.new)
 endif
 ifeq ($(ENABLE_MKL),ON)
   LIST_EXTERNAL += mkl
@@ -267,15 +345,15 @@ ifeq ($(ENABLE_MKL),ON)
   # https://www.intel.com/content/www/us/en/develop/documentation
   # /installation-guide-for-intel-oneapi-toolkits-linux/top/installation
   # /install-with-command-line.html#install-with-command-line
-  $(shell printf "%s" "$(MKL_FLAGS)" \
-    > $(BUILD_DIR)/external/install-mkl.flags.new)
+#  $(shell printf "%s" "$(MKL_FLAGS)" \
+#    > $(BUILD_DIR)/external/install-mkl.flags.new)
 endif
 # Developer tools
 ifeq ($(ENABLE_DOT),ON)
   MAKE_DOT+="cinclude2dot" -> "Makefile"\n
   LIST_EXTERNAL += cinclude2dot
-  $(shell printf "%s" "$(DOT_FLAGS)"  \
-    > $(BUILD_DIR)/external/install-cinclude2dot.flags.new)
+#  $(shell printf "%s" "$(DOT_FLAGS)"  \
+#    > $(BUILD_DIR)/external/install-cinclude2dot.flags.new)
 endif
 EXT_DOT+=}\n
 EXT_DOTFILE:=$(BUILD_DIR)/external/external.dot
@@ -439,10 +517,31 @@ ifeq ($(ENABLE_DOT),ON)
 	@printf '%s' '$(MAKE_DOT)' | sed 's/\\n/\n/g' > '$(MAKE_DOTFILE)'
 	@dot '$(MAKE_DOTFILE)' -Teps -o $(BUILD_DIR)/make.eps
 	@dot external/external.dot -Teps -o $(BUILD_DIR)/external/external.eps
+	#dot external/external.dot -Tpng -o $(BUILD_DIR)/external/external.png
 	@printf '%s' '$(EXT_DOT)' | sed 's/\\n/\n/g' > '$(EXT_DOTFILE)'
 	@dot '$(EXT_DOTFILE)' -Teps -o $(BUILD_DIR)/external/build-external.eps
 endif
-
+	printf "%s" "$(DOT_FLAGS)" \
+	  > $(BUILD_DIR)/external/install-cinclude2dot.flags.new
+	printf "%s" "$(MKL_FLAGS)" \
+	  > $(BUILD_DIR)/external/install-mkl.flags.new
+	printf "%s" "$(PETSC_FLAGS)" \
+	  > $(BUILD_DIR)/external/install-petsc.flags.new
+	printf "%s" "$(FREETYPE_FLAGS)" \
+	  > $(BUILD_DIR)/external/install-freetype.flags.new
+	printf "%s" "$(FLTK_FLAGS)" \
+	  > $(BUILD_DIR)/external/install-fltk.flags.new
+	printf "%s" "$(CGNS_FLAGS)" \
+	  > $(BUILD_DIR)/external/install-cgns.flags.new
+	printf "%s" "$(HDF5_FLAGS)" \
+	  > $(BUILD_DIR)/external/install-hdf5.flags.new
+	printf "%s" "$(OCCT_FLAGS)" \
+	  > $(BUILD_DIR)/external/install-occt.flags.new
+	printf "%s" "$(GMSH_FLAGS)" > $(GMSH_FLAGFILE)
+	printf "%s" "$(PYBIND11_FLAGS)" \
+	  > $(BUILD_DIR)/external/install-pybind11.flags.new
+	printf "%s" "$(GOOGLETEST_FLAGS)" \
+	  > $(BUILD_DIR)/external/install-googletest.flags.new
 
 docs-done: build/docs/femera-guide.pdf build/docs/femera-quick-start.pdf
 docs-done: docs/femera-guide.xhtml docs/femera-quick-start.xhtml
@@ -544,23 +643,37 @@ get-%: | $(BUILD_DIR)/external/
 	external/get-external.sh $(*)
 
 $(BUILD_DIR)/external/get-bats-%.out: external/get-external.sh
-	#(info $(INFO) looking for bats-$(*)...)
+	#(info $(INFO) checking bats-$(*)...)
 	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
 	  "external/get-external.sh bats-$(*)"   \
 	  "$(BUILD_DIR)/external/get-bats-$(*)"
 
 $(BUILD_DIR)/external/get-%.out: external/get-external.sh external/get-%.dat
-	$(info $(INFO) looking for $(*)...)
+	#(info $(INFO) checking $(*)...)
 	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
 	  "external/get-external.sh $(*)"   \
 	  "$(BUILD_DIR)/external/get-$(*)"
+
+$(BUILD_DIR)/external/install-occt.out : $(OCCT_DEPS)
+
+$(BUILD_DIR)/external/install-cgns.out : $(CGNS_DEPS)
+
+$(BUILD_DIR)/external/install-petsc.out : $(PETSC_DEPS)
+
+#ifneq ("$(PETSC_INSTALLS_DEPS)","")
+#	touch $(PETSC_INSTALLS_DEPS)
+#endif
+
+$(BUILD_DIR)/external/install-gmsh.out : $(GMSH_DEPS)
+
+$(BUILD_DIR)/external/install-gmsh471.out : $(GMSH_DEPS)
 
 install-%: $(BUILD_DIR)/external/install-%.out | $(BUILD_DIR)/external/
 	$(call timestamp,$@,)
 
 $(BUILD_DIR)/external/install-%.flags: $(BUILD_DIR)/external/install-%.flags.new
 	tools/update-file-if-diff.sh "$(@)"
-	rm -f $(<)
+	#rm -f $(<)
 
 $(BUILD_DIR)/external/install-%.out: external/install-%.sh
 $(BUILD_DIR)/external/install-%.out: $(BUILD_DIR)/external/install-%.flags

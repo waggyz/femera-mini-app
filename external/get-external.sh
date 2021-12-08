@@ -9,6 +9,7 @@ if [ -z "$1" ]; then
 else
   REPO=$1
 fi
+FMRDIR=`pwd`
 BUILDDIR="build/external"
 DESTDIR="external"
 mkdir -p $BUILDDIR $DESTDIR
@@ -17,7 +18,8 @@ WGET="wget --no-check-certificate"
 
 unset CKFILE GITMOD GITURL ZIPURL ZIPDIR
 if [[ $REPO == bats-* ]]; then
-  GITMOD="tools"
+  # GITMOD="tools"
+  GITMOD="$REPO"
   BRANCH="master"
   GITSSH="git@github.com:bats-core/"$REPO".git"
   GITURL="https://github.com/bats-core/"$REPO".git"
@@ -31,7 +33,7 @@ else
         LABEL=${LINE%% *}
         VAL=${LINE##* }
         case $LABEL in
-        GITMOD) GITMOD=$VAL ;; #REPO=$GITMOD ;;
+        GITMOD) GITMOD=$VAL ;; #NOTE git submodules not used
         BRANCH) BRANCH=$VAL ;;
         GITSSH) GITSSH=$VAL ;; #FIXME Not used yet
         GITURL) GITURL=$VAL ;;
@@ -50,63 +52,70 @@ else
     exit 1
   fi
 fi
+if [ 0 -eq 1 ]; then #NOTE disabled pull updates on every build ---------------
+  if [ -f "$CKFILE" ]; then
+    if [ -d "$DESTDIR/$GITMOD" ]; then
+      # echo "looks like $REPO source code is already available."
+      DEST_IS_REPO=`cd "$DESTDIR/$GITMOD" &&git rev-parse --is-inside-work-tree \
+        2>/dev/null`
+      if [ "$DEST_IS_REPO" == "true" ]; then
+        cd $DESTDIR/$GITMOD
+        if [ -n "$BRANCH" ]; then
+          DEST_BRANCH=`git rev-parse --abbrev-ref HEAD`
+          if [ "$BRANCH" != "$DEST_BRANCH" ]; then # switch branch
+            echo "switching $GITMOD from branch $DEST_BRANCH to $BRANCH..."
+            git checkout $BRANCH
+  #          #git submodule update --init
+            wait
+            echo "checked out $BRANCH of $GITMOD"
+          fi
+        fi
+        cd "$FMRDIR"
+        git pull
+        wait
+        if [ -n "$BRANCH" ]; then
+          echo "updated git repo $GITMOD branch $BRANCH"
+        else
+          echo "updated git repo $GITMOD"
+        fi
+      fi
+    fi
+  fi
+fi #---------------------------------------------------------------------------
+cd "$FMRDIR"
 if [ -f "$CKFILE" ]; then
-  if [ -d "$DESTDIR" ]; then
-    # echo "looks like $REPO source code is already available."
-    DEST_IS_REPO=`cd "$DESTDIR/$GITMOD" &&git rev-parse --is-inside-work-tree \
-      2>/dev/null`
-#    if [ "$DEST_IS_REPO" == "true" ]; then
-#      cd $DESTDIR/$GITMOD
-#     DEST_BRANCH=`git rev-parse --abbrev-ref HEAD`
-#      if [ -n "$BRANCH" ]; then
-#       if [ "$BRANCH" != "$DEST_BRANCH" ]; then # switch branch
-#          echo "switching $GITMOD from branch $DEST_BRANCH to $BRANCH..."
-#          git checkout $BRANCH
-#          #git submodule update --init
-#          wait
-#          echo "checked out $BRANCH of $GITMOD"
-#        fi
-#      fi
-#      cd ../
-#    fi
+#  echo "looks like  $GITMOD is available"
+  exit 0
+fi
+if [ 0 -eq 1 ]; then #NOTE git submodules disabled ----------------------------
+  if [ -n "$GITMOD" ]; then # Try updating git submodule.
+    IS_IN_REPO=`git rev-parse --is-inside-work-tree 2>/dev/null`
+    if [ "$IS_IN_REPO" == "true" ]; then
+      git submodule update --init --recursive "$DESTDIR/$GITMOD"
+      #  --OR--
+      #  git submodule update --remote $GITMOD
+      #if [ -n "$BRANCH" ]; then
+      #  if [ -d "$DESTDIR/$GITMOD" ]; then
+      #    cd $DESTDIR/$GITMOD
+      #    git checkout $BRANCH
+      #    wait
+      #    cd ../
+      #    echo "checked out $BRANCH"
+      #  fi
+      #fi
+    fi
+  fi
+  if [ -f "$CKFILE" ]; then
+    echo "updated git sumbmodule $GITMOD"
     exit 0
   fi
-fi
-if [ -f "$CKFILE" ]; then
-  if [ -n "$BRANCH" ]; then
-    echo "updated git repo $GITMOD branch $BRANCH"
-  else
-    echo "updated git repo $GITMOD"
-  fi
-  exit 0
-fi
-if [ -n "$GITMOD" ]; then # Try updating git submodule.
-  IS_IN_REPO=`git rev-parse --is-inside-work-tree 2>/dev/null`
-  if [ "$IS_IN_REPO" == "true" ]; then
-    git submodule update --init --recursive $DESTDIR/$GITMOD
-    #  --OR--
-    #  git submodule update --remote $GITMOD
-    #if [ -n "$BRANCH" ]; then
-    #  if [ -d "$DESTDIR/$GITMOD" ]; then
-    #    cd $DESTDIR/$GITMOD
-    #    git checkout $BRANCH
-    #    wait
-    #    cd ../
-    #    echo "checked out $BRANCH"
-    #  fi
-    #fi
-  fi
-fi
-if [ -f "$CKFILE" ]; then
-  echo "updated git sumbmodule $GITMOD"
-  exit 0
-fi
+fi #---------------------------------------------------------------------------
 if [ -n "$GITURL" ]; then # Try cloning it.
-  cd $DESTDIR
+#  cd $DESTDIR
   if [ -n "$BRANCH" ]; then
-    git clone -b $BRANCH --recurse-submodules $GITURL
+    git clone -b $BRANCH --recurse-submodules $GITURL "$DESTDIR/$GITMOD"
   else
-    git clone --recurse-submodules $GITURL
+    git clone --recurse-submodules $GITURL "$DESTDIR/$GITMOD"
   fi
   wait
   #if [ -n "$BRANCH" ]; then
@@ -117,7 +126,7 @@ if [ -n "$GITURL" ]; then # Try cloning it.
   #     echo "checked out $BRANCH"
   # fi
   #fi
-  cd ../
+#  cd ../
 fi
 if [ -f "$CKFILE" ]; then
   if [ -n "$BRANCH" ]; then
