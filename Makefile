@@ -26,6 +26,37 @@ ifeq ($(shell test -e file_name && echo -n yes),yes)
   $(shell echo "host hash" > build/.md5)
   HOST_MD5:= $(shell cat build/.md5)
 endif
+#------------------------------------------------------------------------------
+ifeq ($(CXX),g++)
+  #ifeq ($(ENABLE_MPI),ON)
+  #  CXX:= mpic++
+  #endif
+  OPTFLAGS:= $(shell cat data/gcc4.flags | tr '\n' ' ' | tr -s ' ')
+  CXXFLAGS:= -std=c++11 -g $(OPTFLAGS) -flto -fpic -fstrict-enums
+  ifeq ($(ENABLE_OMP),ON)
+    CXXFLAGS+= -fopenmp
+    FMRFLAGS+= -D_GLIBCXX_PARALLEL
+  endif
+  # Warning flags
+  CXXFLAGS+= -Wall -Wextra -Wpedantic -Wuninitialized -Wshadow -Wfloat-equal
+  CXXFLAGS+= -Wdouble-promotion -Wconversion -Wcast-qual -Wcast-align
+  CXXFLAGS+= -Wlogical-op -Woverloaded-virtual -Wstrict-null-sentinel
+  CXXFLAGS+= -Wmissing-declarations -Wredundant-decls -Wdisabled-optimization
+  CXXFLAGS+= -Wunused-macros -Wzero-as-null-pointer-constant -Wundef -Weffc++
+  # Dependency flags
+  FMRFLAGS+= -MMD -MP
+  # Archiver
+  AR:= gcc-ar
+endif
+ifeq ($(CXX),icpc)
+  OPTFLAGS:= $(shell cat data/icpc.flags | tr '\n' ' ' | tr -s ' ')
+  CXXFLAGS:= c++11 -restrict -g -fPIC $(OPTFLAGS)
+  CXXFLAGS+= -Wall -Wextra -Wshadow
+  ifeq ($(ENABLE_MKL),ON)
+    FMRFLAGS+= -mkl=sequential -DMKL_DIRECT_CALL_SEQ
+  endif
+  AR:= xiar
+endif
 # Directories -----------------------------------------------------------------
 # Directories for generic components
 BUILD_DIR  := build
@@ -74,11 +105,19 @@ ifeq ($(ENABLE_OMP),ON)
 endif
 ifeq ($(ENABLE_MPI),ON)
   EXT_DOT+="MPI" -> "Femera"\n
+  #TODO Find include and lib dirs automatically
+  ifeq ($(CXX),mpic++)
+    FMRFLAGS+= -isystem"/usr/include/openmpi-x86_64"
+  else
+    FMRFLAGS+= -I"/usr/include/openmpi-x86_64"
+  endif
+  LDFLAGS+= -L/usr/lib64/openmpi/lib
+  LDLIBS+= -lmpi
 endif
 ifeq ($(ENABLE_LIBNUMA),ON)
   EXT_DOT+="libnuma" -> "Femera"\n
-  FMRFLAGS += -DFMR_HAS_LIBNUMA
-  LDLIBS += -lnuma
+  FMRFLAGS+= -DFMR_HAS_LIBNUMA
+  LDLIBS+= -lnuma
 endif
 # External code to build and install ------------------------------------------
 ifeq ($(ENABLE_BATS),ON)
@@ -95,9 +134,11 @@ ifeq ($(ENABLE_GOOGLETEST),ON)
   EXT_DOT+="GoogleTest" -> "Femera"\n
   MAKE_DOT+="GoogleTest" -> "Makefile"\n
   LIST_EXTERNAL += googletest
-  GOOGLETEST_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
-#  $(shell printf "%s" "$(GOOGLETEST_FLAGS)" \
-#    > $(BUILD_DIR)/external/install-googletest.flags.new)
+  GTESTFLAGS := $(filter-out -Wundef,$(CXXFLAGS))
+  # GTESTFLAGS := $(filter-out -Winline,$(GTESTFLAGS))
+  GTEST_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
+  GTESTFLAGS += $(FMRFLAGS)
+  LDLIBS += -lgtest -lgmock -lpthread
 endif
 # ENABLE_PYBIND11=ON
 ifeq ($(ENABLE_PYBIND11),ON)
@@ -108,8 +149,6 @@ ifeq ($(ENABLE_PYBIND11),ON)
   PYBIND11_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
   PYBIND11_FLAGS += -DDOWNLOAD_CATCH=0
   PYBIND11_FLAGS += -DBOOST_ROOT:PATHNAME=/usr/local/pkgs-modules/boost_1.66.0
-#  $(shell printf "%s" "$(PYBIND11_FLAGS)" \
-#    > $(BUILD_DIR)/external/install-pybind11.flags.new)
 endif
 ifeq ($(ENABLE_GMSH),ON)
   ifeq ("$(CXX) $(CXX_VERSION)","g++ 4.8.5")
@@ -191,8 +230,6 @@ ifeq ($(ENABLE_OCCT),ON)
   OCCT_FLAGS += -DBUILD_MODULE_Visualization=0
   OCCT_FLAGS += -DBUILD_MODULE_ApplicationFramework=0
   OCCT_DEPS:=$(patsubst %,$(BUILD_CPU)/external/install-%.out,$(OCCT_REQUIRES))
-#  $(shell printf "%s" "$(OCCT_FLAGS)" \
-#    > $(BUILD_DIR)/external/install-occt.flags.new)
 endif
 ifeq ($(ENABLE_HDF5),ON)
   ifeq ($(ENABLE_MPI),ON)
@@ -207,8 +244,6 @@ ifeq ($(ENABLE_HDF5),ON)
   HDF5_FLAGS += -DBUILD_SHARED_LIBS:BOOL=ON
   HDF5_FLAGS += -DCTEST_BUILD_CONFIGURATION=Release
   HDF5_FLAGS += -DHDF5_NO_PACKAGES:BOOL=ON
-#  $(shell printf "%s" "$(HDF5_FLAGS)" \
-#    > $(BUILD_DIR)/external/install-hdf5.flags.new)
 endif
 #FIXME CGNS, FLTK, and FreeType build in external/*/
 ifeq ($(ENABLE_CGNS),ON)
@@ -230,29 +265,23 @@ ifeq ($(ENABLE_CGNS),ON)
   CGNS_FLAGS += -DCGNS_ENABLE_TESTS:BOOL=OFF
   CGNS_FLAGS += -DCGNS_ENABLE_FORTRAN:BOOL=OFF
   CGNS_DEPS:=$(patsubst %,$(BUILD_CPU)/external/install-%.out,$(CGNS_REQUIRES))
-#  $(shell printf "%s" "$(CGNS_FLAGS)" \
-#    > $(BUILD_DIR)/external/install-cgns.flags.new)
 endif
 ifeq ($(ENABLE_FLTK),ON)
   LIST_EXTERNAL += fltk
   FLTK_FLAGS += --prefix="$(INSTALL_CPU)"
   FLTK_FLAGS += --enable-shared
-#  $(shell printf "%s" "$(FLTK_FLAGS)" \
-#    > $(BUILD_DIR)/external/install-fltk.flags.new)
 endif
 ifeq ($(ENABLE_FREETYPE),ON)
   LIST_EXTERNAL += freetype
   FREETYPE_FLAGS += --prefix="$(INSTALL_CPU)"
-#  $(shell printf "%s" "$(FREETYPE_FLAGS)" \
-#    > $(BUILD_DIR)/external/install-freetype.flags.new)
 endif
 ifeq ($(ENABLE_PETSC),ON)
   LIST_EXTERNAL += petsc
   EXT_DOT+="PETSc" -> "Femera"\n
   PETSC_FLAGS += PETSC_ARCH=$(CPUMODEL)
-#  PETSC_FLAGS += FOPTFLAGS='$(OPTFLAGS)'
-#  PETSC_FLAGS += COPTFLAGS='$(OPTFLAGS)'
-#  PETSC_FLAGS += CXXOPTFLAGS='$(OPTFLAGS)'
+  PETSC_FLAGS += FOPTFLAGS='$(OPTFLAGS)'
+  PETSC_FLAGS += COPTFLAGS='$(OPTFLAGS)'
+  PETSC_FLAGS += CXXOPTFLAGS='$(OPTFLAGS)'
   PETSC_FLAGS += --prefix="$(INSTALL_CPU)"
   # PETSC_FLAGS += --with-packages-build-dir="$(BUILD_CPU)"# no worky
   PETSC_FLAGS += --with-scalar-type=complex
@@ -327,8 +356,6 @@ ifeq ($(ENABLE_PETSC),ON)
   PETSC_DEPS:=$(patsubst %,$(BUILD_CPU)/external/install-%.out,$(PETSC_REQUIRES))
 #  PETSC_INSTALLS_DEPS:=$(patsubst \
 #    %,$(BUILD_CPU)/external/install-%.out,$(PETSC_INSTALLS))#FIXME not used
-#  $(shell printf "%s" "$(PETSC_FLAGS)" \
-#    > $(BUILD_DIR)/external/install-petsc.flags.new)
 endif
 ifeq ($(ENABLE_MKL),ON)
   LIST_EXTERNAL += mkl
@@ -340,8 +367,6 @@ ifeq ($(ENABLE_MKL),ON)
   # https://www.intel.com/content/www/us/en/develop/documentation
   # /installation-guide-for-intel-oneapi-toolkits-linux/top/installation
   # /install-with-command-line.html#install-with-command-line
-#  $(shell printf "%s" "$(MKL_FLAGS)" \
-#    > $(BUILD_DIR)/external/install-mkl.flags.new)
   # ./install.sh --silent --action remove # To remove MKL
 
 endif
@@ -352,8 +377,6 @@ ifeq ($(ENABLE_DOT),ON)
   # LIST_EXTERNAL += cinclude2dot
   GET_EXTERNAL+= $(BUILD_DIR)/external/get-cinclude2dot.out
   INSTALL_EXTERNAL+= $(BUILD_DIR)/external/install-cinclude2dot.out
-#  $(shell printf "%s" "$(DOT_FLAGS)"  \
-#    > $(BUILD_DIR)/external/install-cinclude2dot.flags.new)
 endif
 EXT_DOT+=}\n
 EXT_DOTFILE:=$(BUILD_DIR)/external/external.dot
@@ -547,7 +570,7 @@ endif
 	printf "%s" "$(GMSH_FLAGS)" > $(GMSH_FLAGFILE)
 	printf "%s" "$(PYBIND11_FLAGS)" \
 	  > $(BUILD_CPU)/external/install-pybind11.flags.new
-	printf "%s" "$(GOOGLETEST_FLAGS)" \
+	printf "%s" "$(GTEST_FLAGS)" \
 	  > $(BUILD_CPU)/external/install-googletest.flags.new
 
 docs-done: install-docs
