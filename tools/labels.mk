@@ -43,7 +43,7 @@ ifeq (1,1)#TODO Check for ANSI support
   DEBUG:=$(DBUG)
   STOP:=$(shell printf " $(STOP_COLOR) STOP $(NORM_COLOR)")
   Make:=$(shell printf " $(INFO_COLOR) make $(NORM_COLOR)")
-  EXEC:=$(shell printf " $(NOTE_COLOR) exec $(NORM_COLOR)")
+  EXEC:=$(shell printf " $(PASS_COLOR) exec $(NORM_COLOR)")
   E_G_:=$(shell printf " $(NOTE_COLOR) e.g. $(NORM_COLOR)")
   GRND:=$(shell printf " $(INFO_COLOR)grind $(NORM_COLOR)")
 else

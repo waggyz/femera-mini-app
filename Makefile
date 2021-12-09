@@ -479,7 +479,9 @@ install: tools docs | $(STAGE_TREE)
 
 remove:
 	$(call timestamp,$@,$^)
+	-rm -rf "$(INSTALL_CPU)/share/doc/femera"
 	$(MAKE) $(JPAR) remove-tools
+	#(MAKE) $(JPAR) remove-mini
 	$(MAKE) $(JPAR) remove-done
 
 reinstall: | intro
@@ -492,11 +494,11 @@ clean: $(BUILD_CPU)/femera/
 	-rm -rf $^
 	$(info $(DONE) made $(FEMERA_VERSION) for $(CPUMODEL) on $(HOSTNAME) $@)
 
-cleaner: $(BUILD_CPU)/ $(STAGE_CPU)/
+cleaner: $(BUILD_CPU)/femera/ $(STAGE_CPU)/ # to update make external
 	$(call timestamp,$@,$^)
 	-rm -rf $^ $(STAGE_DIR)/bin/fmr*
-	#rm -f $(BUILD_CPU)/*/*.out $(BUILD_CPU)/*/*.err
-	#rm -f $(BUILD_CPU)/*/*.flags $(BUILD_CPU)/*/*.new
+	-rm -f $(BUILD_CPU)/*/*.out $(BUILD_CPU)/*/*.err
+	-rm -f $(BUILD_CPU)/*/*.flags $(BUILD_CPU)/*/*.new
 	$(info $(DONE) made $(FEMERA_VERSION) for $(CPUMODEL) on $(HOSTNAME) $@)
 
 cleanest: build/
@@ -506,8 +508,8 @@ cleanest: build/
 
 purge:
 	$(MAKE) $(JPAR) remove
-	-rm -rf external/*/*
 	$(MAKE) $(JPAR) cleanest
+	-rm -rf external/*/*
 
 # Internal named targets ======================================================
 intro: build/copyright.txt build/docs/find-tdd-files.csv | $(BUILD_TREE)
@@ -548,17 +550,26 @@ endif
 	printf "%s" "$(GOOGLETEST_FLAGS)" \
 	  > $(BUILD_CPU)/external/install-googletest.flags.new
 
+docs-done: install-docs
 docs-done: build/docs/femera-guide.pdf build/docs/femera-quick-start.pdf
-docs-done: docs/femera-guide.xhtml docs/femera-quick-start.xhtml
 ifeq ($(ENABLE_LYX),ON)
 	$(info $(DONE) making $(FEMERA_VERSION) XHTML documentation in \
 	external/docs/)
 	$(info $(SPCS) and PDFs in build/docs/)
 else
-	$(info $(WARN) Set ENABLE_LYX to ON in config.local to make \
+	$(info $(HINT) Set ENABLE_LYX to ON in config.local to generate \
 	  $(FEMERA_VERSION) documentation)
 endif
+	$(info $(NOTE) $(FEMERA_VERSION) XHTML documentation is in:)
+	$(info $(SPCS) $(INSTALL_CPU)/share/doc/femera/)
 	$(call timestamp,$@,)
+
+install-docs: docs/femera-guide.xhtml docs/femera-quick-start.xhtml
+install-docs: LICENSE NOSA-1-3.txt README.md | $(INSTALL_CPU)/share/doc/femera/
+	-cp docs/*.xhtml "$(INSTALL_CPU)/share/doc/femera/"
+	-cp LICENSE "$(INSTALL_CPU)/share/doc/femera/"
+	-cp NOSA-1-3.txt "$(INSTALL_CPU)/share/doc/femera/"
+	-cp README.md "$(INSTALL_CPU)/share/doc/femera/"
 
 install-done:
 	$(info $(DONE) installing $(FEMERA_VERSION) on $(HOSTNAME) to:)
@@ -619,7 +630,7 @@ install-bats: external/get-bats.test.sh
 install-bats: get-bats external/install-bats.sh external/install-bats.test.bats
 	$(call label_test,$(PASS),$(FAIL),external/get-bats.test.sh, \
 	  $(BUILD_DIR)/external/get-bats.test)
-	$(call label_test,$(EXEC),ERROR , \
+	$(call label_test,$(PASS),$(FAIL), \
 	  external/install-bats.sh "$(INSTALL_DIR)", \
 	  $(BUILD_DIR)/external/install-bats)
 	$(call label_bats,$(PASS),$(FAIL),external/install-bats.test.bats, \
@@ -649,13 +660,13 @@ get-%: | $(BUILD_DIR)/external/
 
 $(BUILD_DIR)/external/get-bats-%.out: external/get-external.sh
 	#(info $(INFO) checking bats-$(*)...)
-	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
+	-tools/label-test.sh "$(PASS)" "$(FAIL)" \
 	  "external/get-external.sh bats-$(*)"   \
 	  "$(BUILD_DIR)/external/get-bats-$(*)"
 
 $(BUILD_DIR)/external/get-%.out: external/get-external.sh external/get-%.dat
 	#(info $(INFO) checking $(*)...)
-	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
+	-tools/label-test.sh "$(PASS)" "$(FAIL)" \
 	  "external/get-external.sh $(*)"   \
 	  "$(BUILD_DIR)/external/get-$(*)"
 
@@ -690,7 +701,7 @@ $(BUILD_CPU)/external/install-%.out: external/install-%.sh
 $(BUILD_CPU)/external/install-%.out: $(BUILD_CPU)/external/install-%.flags
 	$(call timestamp,$@,)
 	mkdir -p $(BUILD_CPU)/external/$(*)
-	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
+	-tools/label-watch.sh "$(PASS)" "$(FAIL)" \
 	  "external/install-$(*).sh $(INSTALL_CPU) $(<) $(JEXT)" \
 	  "$(BUILD_CPU)/external/install-$(*)"
 
@@ -698,7 +709,7 @@ $(BUILD_DIR)/external/install-%.out: external/install-%.sh
 $(BUILD_DIR)/external/install-%.out: $(BUILD_DIR)/external/install-%.flags
 	$(call timestamp,$@,)
 	mkdir -p $(BUILD_DIR)/external/$(*)
-	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
+	-tools/label-test.sh "$(PASS)" "$(FAIL)" \
 	  "external/install-$(*).sh $(INSTALL_DIR) $(<) $(JEXT)" \
 	  "$(BUILD_DIR)/external/install-$(*)"
 
@@ -864,7 +875,7 @@ endif
 
 docs/%.xhtml: src/docs/%.lyx src/docs/quick-start.tex
 ifeq ($(ENABLE_LYX),ON)
-	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
+	-tools/label-test.sh "$(PASS)" "$(FAIL)" \
 	  "lyx -batch -n -f all -E xhtml $(@) $(<)" \
 	  "build/docs/$(*)-xhtml"
 endif

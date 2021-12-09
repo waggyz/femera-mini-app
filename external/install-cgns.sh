@@ -4,7 +4,7 @@ INSTALL_DIR="$1"
 if [ -f "$2" ]; then FLAGS=`tr --delete '\n' < "$2"`; fi
 JFLAG="$3"
 
-if [ -f "$INSTALL_DIR/lib/libcgns_static.a" ]; then
+if [ 0 -eq 1 ]; then # if [ -f "$INSTALL_DIR/lib/libcgns_static.a" ]; then
   echo "looks like CGNS is already installed"
   exit 0
 else

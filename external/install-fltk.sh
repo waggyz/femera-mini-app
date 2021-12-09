@@ -5,7 +5,7 @@ if [ -f "$2" ]; then FLAGS=`tr '\n' ' ' < "$2"`; fi
 JFLAG="$3"
 
 #if which fltk-config 2>/dev/null ; then
-if [ -f "$INSTALL_DIR/lib/libfltk.a" ]; then
+if [ 0 -eq 1 ]; then # [ -f "$INSTALL_DIR/lib/libfltk.a" ]; then
   echo "looks like FLTK is already installed"
   exit 0
 else

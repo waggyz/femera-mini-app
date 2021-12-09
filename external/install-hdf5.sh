@@ -5,7 +5,7 @@ if [ -f "$2" ]; then FLAGS=`tr --delete '\n' < "$2"`; fi
 JFLAG="$3"
 
 #if which h5clear 2>/dev/null ; then
-if [ -f "$INSTALL_DIR/lib/libhdf5.a" ]; then
+if [ 0 -eq 1 ]; then # if [ -f "$INSTALL_DIR/lib/libhdf5.a" ]; then
   echo "looks like HDF5 is already installed"
   exit 0
 else

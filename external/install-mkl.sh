@@ -4,7 +4,7 @@ INSTALL_DIR="$1"
 if [ -f "$2" ]; then FLAGS=`tr --delete '\n' < "$2"`; fi
 JFLAG="$3"
 
-if [ -f "$INSTALL_DIR/mkl/latest/lib/intel64/libmkl_core.a" ]; then
+if [ 0 -eq 1 ]; then # if [ -f "$INSTALL_DIR/mkl/latest/lib/intel64/libmkl_core.a" ]; then
   echo "looks like the Intel Math Kernel Library (MKL) is already installed"
   exit 0
 fi
@@ -18,8 +18,9 @@ if [ -f "$KITFILE" ]; then
   if [ -d "$SRC_DIR" ]; then
     KITDIR=`ls -d "$SRC_DIR/"*"Kit"* | tail -n1`
     if [ -f "$KITDIR/install.sh" ]; then # Remove MKL
-      $KITDIR/install.sh --silent --install_dir $INSTALL_DIR --action remove
-    else
+       echo "Remove MKL?"
+#      $KITDIR/install.sh --silent --action remove
+    fi
   else
     mkdir -p "$SRC_DIR"
   fi
