@@ -1,0 +1,6 @@
+-Ofast -march=native -mtune=native
+-fno-builtin-sin -fno-builtin-cos
+-fvisibility=hidden -fvisibility-inlines-hidden
+-funroll-loops -ftree-vectorize -fno-common
+-fearly-inlining --param inline-min-speedup=2
+--param inline-unit-growth=500 --param large-function-growth=500

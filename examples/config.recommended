@@ -55,9 +55,9 @@ ENABLE_LYX:=ON
 ENABLE_DOT:=ON
 
 # Override automatic assignment -----------------------------------------------
-
 # Set these to override automatic assignment.
 # MAKEJOBS:=8
 # CPUMODEL:=unknown
 # CPUCOUNT:=4
 # CPUSIMD :=AVX2 FMA
+

@@ -32,7 +32,9 @@ ifeq ($(CXX),g++)
   #  CXX:= mpic++
   #endif
   OPTFLAGS:= $(shell cat data/gcc4.flags | tr '\n' ' ' | tr -s ' ')
-  CXXFLAGS:= -std=c++11 -g $(OPTFLAGS) -flto -fpic -fstrict-enums
+  CXXFLAGS+= -std=c++11 -g $(OPTFLAGS) -flto -fpic -fstrict-enums
+  # Dependency flags
+  FMRFLAGS+= -MMD -MP
   ifeq ($(ENABLE_OMP),ON)
     CXXFLAGS+= -fopenmp
     FMRFLAGS+= -D_GLIBCXX_PARALLEL
@@ -43,8 +45,6 @@ ifeq ($(CXX),g++)
   CXXFLAGS+= -Wlogical-op -Woverloaded-virtual -Wstrict-null-sentinel
   CXXFLAGS+= -Wmissing-declarations -Wredundant-decls -Wdisabled-optimization
   CXXFLAGS+= -Wunused-macros -Wzero-as-null-pointer-constant -Wundef -Weffc++
-  # Dependency flags
-  FMRFLAGS+= -MMD -MP
   # Archiver
   AR:= gcc-ar
 endif
@@ -69,37 +69,14 @@ STAGE_CPU  := $(STAGE_DIR)/$(CPUMODEL)
 INSTALL_CPU:= $(INSTALL_DIR)/$(CPUMODEL)
 
 # Subdirectories needed
-BUILD_TREE+= $(BUILD_CPU)/external/ $(BUILD_DIR)/docs/
-BUILD_TREE+= $(BUILD_DIR)/external/tools/
+BUILD_TREE+= $(BUILD_DIR)/external/tools/ $(BUILD_DIR)/docs/
+BUILD_TREE+= $(BUILD_CPU)/external/
 BUILD_TREE+= $(BUILD_CPU)/tests/ $(BUILD_CPU)/tools/
 
 STAGE_TREE+= $(STAGE_DIR)/bin/ $(STAGE_DIR)/libs/
 STAGE_TREE+= $(STAGE_CPU)/bin/ $(STAGE_CPU)/libs/
 
-# INSTALL_TREE:= $(patsubst $(STAGE_DIR)%,$(INSTALL_DIR)%,$(STAGE_TREE))
-
 # Libraries and applications available ----------------------------------------
-EXT_DOT:=digraph "Femera dependencies" {\n
-EXT_DOT+=overlap=scale;\n
-EXT_DOT+=size="6,3";\n
-EXT_DOT+=ratio="fill";\n
-EXT_DOT+=fontsize="12";\n
-EXT_DOT+=fontname="Helvetica";\n
-EXT_DOT+=clusterrank="local";\n
-
-MAKE_DOT:=digraph "Makefile dependencies" {\n
-MAKE_DOT+=overlap=scale;\n
-MAKE_DOT+=size="6,3";\n
-MAKE_DOT+=ratio="fill";\n
-MAKE_DOT+=fontsize="12";\n
-MAKE_DOT+=fontname="Helvetica";\n
-MAKE_DOT+=clusterrank="local";\n
-ifeq ($(shell which dot 2>/dev/null),"")# dot is part of graphviz
-  ENABLE_DOT:=OFF
-else
-  ENABLE_DOT:=ON
-  MAKE_DOT+="dot" -> "Makefile"\n
-endif
 ifeq ($(ENABLE_OMP),ON)
   EXT_DOT+="OpenMP" -> "Femera"\n
 endif
@@ -279,9 +256,10 @@ ifeq ($(ENABLE_PETSC),ON)
   LIST_EXTERNAL += petsc
   EXT_DOT+="PETSc" -> "Femera"\n
   PETSC_FLAGS += PETSC_ARCH=$(CPUMODEL)
-  PETSC_FLAGS += FOPTFLAGS='$(OPTFLAGS)'
-  PETSC_FLAGS += COPTFLAGS='$(OPTFLAGS)'
-  PETSC_FLAGS += CXXOPTFLAGS='$(OPTFLAGS)'
+  #-O3 -march=native -mtune=native'
+  PETSC_FLAGS += FOPTFLAGS=$(OPTFLAGS)
+  PETSC_FLAGS += COPTFLAGS=$(OPTFLAGS)
+  PETSC_FLAGS += CXXOPTFLAGS=$(OPTFLAGS)
   PETSC_FLAGS += --prefix="$(INSTALL_CPU)"
   # PETSC_FLAGS += --with-packages-build-dir="$(BUILD_CPU)"# no worky
   PETSC_FLAGS += --with-scalar-type=complex
@@ -323,6 +301,7 @@ ifeq ($(ENABLE_PETSC),ON)
     endif
   endif # end disabled --------------------------------------------------------
   ifeq ($(ENABLE_GMSH),ON)
+    # Require Gmsh so HDF5 will get built before both PETSc & Gmsh
     PETSC_REQUIRES += gmsh
     EXT_DOT+="Gmsh" -> "PETSc"\n
     PETSC_FLAGS += --with-gmsh-dir="$(INSTALL_CPU)"
@@ -354,8 +333,6 @@ ifeq ($(ENABLE_PETSC),ON)
     PETSC_FLAGS += --download-parmetis
   endif
   PETSC_DEPS:=$(patsubst %,$(BUILD_CPU)/external/install-%.out,$(PETSC_REQUIRES))
-#  PETSC_INSTALLS_DEPS:=$(patsubst \
-#    %,$(BUILD_CPU)/external/install-%.out,$(PETSC_INSTALLS))#FIXME not used
 endif
 ifeq ($(ENABLE_MKL),ON)
   LIST_EXTERNAL += mkl
@@ -372,36 +349,39 @@ ifeq ($(ENABLE_MKL),ON)
 endif
 # Developer tools
 ifeq ($(ENABLE_DOT),ON)
-  MAKE_DOT+="cinclude2dot" -> "Makefile"\n
-  # DOT_FLAGS:= --dummy-flag
-  # LIST_EXTERNAL += cinclude2dot
+  ifeq ($(shell which dot 2>/dev/null),"")# dot is part of graphviz
+    ENABLE_DOT:=OFF
+  else
+    MAKE_DOT+="dot" -> "Makefile"\n
+    HEAD_DOT+=overlap=scale;\n
+    HEAD_DOT+=size="6,3";\n
+    HEAD_DOT+=ratio="fill";\n
+    HEAD_DOT+=fontsize="12";\n
+    HEAD_DOT+=fontname="Helvetica";\n
+    HEAD_DOT+=clusterrank="local";\n
+  endif
+endif
+ifeq ($(ENABLE_DOT),ON)
   GET_EXTERNAL+= $(BUILD_DIR)/external/get-cinclude2dot.out
   INSTALL_EXTERNAL+= $(BUILD_DIR)/external/install-cinclude2dot.out
+  MAKE_DOT+="cinclude2dot" -> "Makefile"\n
+  EXT_DOT:=digraph "Femera dependencies" {\n $(HEAD_DOT) $(EXT_DOT) }\n
+  MAKE_DOT:=digraph "Makefile dependencies" {\n $(HEAD_DOT) $(MAKE_DOT) }\n
+  EXT_DOTFILE:=$(BUILD_DIR)/external/external.dot
+  MAKE_DOTFILE:=$(BUILD_DIR)/make.dot
 endif
-EXT_DOT+=}\n
-EXT_DOTFILE:=$(BUILD_DIR)/external/external.dot
-MAKE_DOT+=}\n
-MAKE_DOTFILE:=$(BUILD_DIR)/make.dot
 
 # Files -----------------------------------------------------------------------
 # Generic Femera tools
 LIST_TOOLS:= fmrmodel fmrcores fmrexec fmrnumas
 INSTALL_TOOLS:= $(patsubst %,$(INSTALL_DIR)/bin/%,$(LIST_TOOLS))
 
-# CPU-specific Femera tools
-# LIST_TOOLS+= fmrnumas
-# INSTALL_TOOLS+= $(INSTALL_CPU)/bin/fmrnumas
-# TEST_TOOLS:= $(patsubst %,$(BUILD_CPU)/tools/%.test.out,$(LIST_TOOLS))
-
 # External packages
 GET_EXTERNAL+= $(patsubst %,$(BUILD_DIR)/external/get-%.out,$(LIST_EXTERNAL))
 INSTALL_EXTERNAL+= $(patsubst %,$(BUILD_CPU)/external/install-%.out, \
   $(LIST_EXTERNAL))
 
-# GET_BATS:= $(patsubst %,$(BUILD_DIR)/external/get-%.out,$(BATS_MODS))
 GET_BATS:= $(patsubst %,get-%,$(BATS_MODS))
-
-# GIT_SUBMODULES:= #TODO?
 
 # -----------------------------------------------------------------------------
 ifeq ("$(findstring $(INSTALL_DIR)/bin:,$(PATH):)","")
@@ -412,7 +392,7 @@ ifeq ("$(findstring $(INSTALL_CPU)/bin:,$(PATH):)","")
 endif
 ifneq ("$(ADD_TO_PATH)","")
   export PATH:= $(ADD_TO_PATH)$(PATH)
-  #NOTE export does not work for this in a recipe below.
+  #NOTE export does not work for this when in a recipe.
 endif
 
 ifeq ("$(findstring $(INSTALL_DIR)/lib64:,$(LDPATH):)","")
@@ -535,7 +515,8 @@ purge:
 	-rm -rf external/*/*
 
 # Internal named targets ======================================================
-intro: build/copyright.txt build/docs/find-tdd-files.csv | $(BUILD_TREE)
+intro: build/copyright.txt build/docs/find-tdd-files.csv external-flags
+intro: | $(BUILD_TREE)
 ifneq ("$(NOSA_INFO)","")
 	$(info $(INFO) $(NOSA_INFO))
 endif
@@ -551,27 +532,6 @@ ifeq ($(ENABLE_DOT),ON)
 	@printf '%s' '$(EXT_DOT)' | sed 's/\\n/\n/g' > '$(EXT_DOTFILE)'
 	@dot '$(EXT_DOTFILE)' -Teps -o $(BUILD_DIR)/external/build-external.eps
 endif
-	printf "%s" "$(DOT_FLAGS)" \
-	  > $(BUILD_DIR)/external/install-cinclude2dot.flags.new
-	printf "%s" "$(MKL_FLAGS)" \
-	  > $(BUILD_CPU)/external/install-mkl.flags.new
-	printf "%s" "$(PETSC_FLAGS)" \
-	  > $(BUILD_CPU)/external/install-petsc.flags.new
-	printf "%s" "$(FREETYPE_FLAGS)" \
-	  > $(BUILD_CPU)/external/install-freetype.flags.new
-	printf "%s" "$(FLTK_FLAGS)" \
-	  > $(BUILD_CPU)/external/install-fltk.flags.new
-	printf "%s" "$(CGNS_FLAGS)" \
-	  > $(BUILD_CPU)/external/install-cgns.flags.new
-	printf "%s" "$(HDF5_FLAGS)" \
-	  > $(BUILD_CPU)/external/install-hdf5.flags.new
-	printf "%s" "$(OCCT_FLAGS)" \
-	  > $(BUILD_CPU)/external/install-occt.flags.new
-	printf "%s" "$(GMSH_FLAGS)" > $(GMSH_FLAGFILE)
-	printf "%s" "$(PYBIND11_FLAGS)" \
-	  > $(BUILD_CPU)/external/install-pybind11.flags.new
-	printf "%s" "$(GTEST_FLAGS)" \
-	  > $(BUILD_CPU)/external/install-googletest.flags.new
 
 docs-done: install-docs
 docs-done: build/docs/femera-guide.pdf build/docs/femera-quick-start.pdf
@@ -648,6 +608,43 @@ remove-tools-done: $(BUILD_DIR)/tests/make-remove-tools.test.out
 remove-tools-done: $(BUILD_CPU)/tests/make-remove-tools.test.out
 
 # External --------------------------------------------------------------------
+# External dependencies
+$(BUILD_CPU)/external/install-occt.out : $(OCCT_DEPS)
+
+$(BUILD_CPU)/external/install-cgns.out : $(CGNS_DEPS)
+
+$(BUILD_CPU)/external/install-gmsh.out : $(GMSH_DEPS)
+
+$(BUILD_CPU)/external/install-gmsh471.out : $(GMSH_DEPS)
+
+$(BUILD_CPU)/external/install-petsc.out : | $(PETSC_DEPS)
+
+#ifneq ("$(PETSC_INSTALLS)","")
+#	$(info $(INFO) PETSc installs: $(PETSC_INSTALLS))
+#endif
+
+external-flags:
+	printf "%s" "$(GMSH_FLAGS)" > $(GMSH_FLAGFILE)
+	printf "%s" "$(DOT_FLAGS)" \
+	  > $(BUILD_DIR)/external/install-cinclude2dot.flags.new
+	printf "%s" "$(MKL_FLAGS)" \
+	  > $(BUILD_CPU)/external/install-mkl.flags.new
+	printf "%s" "$(PETSC_FLAGS)" \
+	  > $(BUILD_CPU)/external/install-petsc.flags.new
+	printf "%s" "$(FREETYPE_FLAGS)" \
+	  > $(BUILD_CPU)/external/install-freetype.flags.new
+	printf "%s" "$(FLTK_FLAGS)" \
+	  > $(BUILD_CPU)/external/install-fltk.flags.new
+	printf "%s" "$(CGNS_FLAGS)" \
+	  > $(BUILD_CPU)/external/install-cgns.flags.new
+	printf "%s" "$(HDF5_FLAGS)" \
+	  > $(BUILD_CPU)/external/install-hdf5.flags.new
+	printf "%s" "$(OCCT_FLAGS)" \
+	  > $(BUILD_CPU)/external/install-occt.flags.new
+	printf "%s" "$(PYBIND11_FLAGS)" \
+	  > $(BUILD_CPU)/external/install-pybind11.flags.new
+	printf "%s" "$(GTEST_FLAGS)" \
+	  > $(BUILD_CPU)/external/install-googletest.flags.new
 
 install-bats: external/get-bats.test.sh
 install-bats: get-bats external/install-bats.sh external/install-bats.test.bats
@@ -668,18 +665,24 @@ get-external: | external/tools/
 	$(MAKE) $(JPAR) $(GET_EXTERNAL)
 	$(call timestamp,$@,)
 
+get-%: | $(BUILD_DIR)/external/
+	#(call timestamp,$@,$<)
+	external/get-external.sh $(*)
+
 install-external: $(INSTALL_EXTERNAL)
 	$(call timestamp,$@,make $(JEXT))
+
+install-%: $(BUILD_CPU)/external/install-%.out | $(BUILD_DIR)/external/
+	$(call timestamp,$@,)
+
+install-%: $(BUILD_DIR)/external/install-%.out | $(BUILD_CPU)/external/
+	$(call timestamp,$@,)
 
 external-done:
 	$(info $(DONE) building and installing externals on $(HOSTNAME) to:)
 	$(info $(SPCS) $(INSTALL_DIR)/)
 	$(info $(E_G_) $(patsubst %,%,$(LIST_EXTERNAL)))
 	$(call timestamp,$@,)
-
-get-%: | $(BUILD_DIR)/external/
-	#(call timestamp,$@,$<)
-	external/get-external.sh $(*)
 
 $(BUILD_DIR)/external/get-bats-%.out: external/get-external.sh
 	#(info $(INFO) checking bats-$(*)...)
@@ -692,25 +695,6 @@ $(BUILD_DIR)/external/get-%.out: external/get-external.sh external/get-%.dat
 	-tools/label-test.sh "$(PASS)" "$(FAIL)" \
 	  "external/get-external.sh $(*)"   \
 	  "$(BUILD_DIR)/external/get-$(*)"
-
-$(BUILD_CPU)/external/install-occt.out : $(OCCT_DEPS)
-
-$(BUILD_CPU)/external/install-cgns.out : $(CGNS_DEPS)
-
-$(BUILD_CPU)/external/install-gmsh.out : $(GMSH_DEPS)
-
-$(BUILD_CPU)/external/install-gmsh471.out : $(GMSH_DEPS)
-
-$(BUILD_CPU)/external/install-petsc.out : | $(PETSC_DEPS)
-#ifneq ("$(PETSC_INSTALLS_DEPS)","")
-#	touch $(PETSC_INSTALLS_DEPS)
-#endif
-
-install-%: $(BUILD_CPU)/external/install-%.out | $(BUILD_CPU)/external/
-	$(call timestamp,$@,)
-
-install-%: $(BUILD_DIR)/external/install-%.out | $(BUILD_DIR)/external/
-	$(call timestamp,$@,)
 
 $(BUILD_CPU)/external/install-%.flags: $(BUILD_CPU)/external/install-%.flags.new
 	tools/update-file-if-diff.sh "$(@)"
@@ -746,23 +730,25 @@ $(INSTALL_DIR)/bin/fmr%: $(STAGE_DIR)/bin/fmr% | $(INSTALL_DIR)/bin/
 	#(info $(INFO) installing fmr$(*) to $(INSTALL_DIR)/bin/...)
 	cp -f "$(STAGE_DIR)/bin/fmr$(*)" "$(@)"
 
-#ifeq ($(ENABLE_LIBNUMA),ON)
-#$(STAGE_CPU)/bin/fmrnumas: $(BUILD_CPU)/tools/fmrnumas.test.out
-#	cp -f $(BUILD_CPU)/tools/fmrnumas "$(@)"
-#
-#$(INSTALL_CPU)/bin/fmr%: $(STAGE_CPU)/bin/fmr% | $(INSTALL_CPU)/bin/
-#	#(info $(INFO) installing fmr$(*) to $(INSTALL_CPU)/bin/...)
-#	cp -f "$(STAGE_CPU)/bin/fmr$(*)" "$(@)"
-#endif
+ifeq (1,0) #FIXME No longer needed if lscpu is available
+ifeq ($(ENABLE_LIBNUMA),ON)
+$(STAGE_CPU)/bin/fmrnumas: $(BUILD_CPU)/tools/fmrnumas.test.out
+	cp -f $(BUILD_CPU)/tools/fmrnumas "$(@)"
+
+$(INSTALL_CPU)/bin/fmr%: $(STAGE_CPU)/bin/fmr% | $(INSTALL_CPU)/bin/
+	#(info $(INFO) installing fmr$(*) to $(INSTALL_CPU)/bin/...)
+	cp -f "$(STAGE_CPU)/bin/fmr$(*)" "$(@)"
+endif
 
 # CPU-specific test targets (*.test.out) --------------------------------------
-#ifeq ($(ENABLE_LIBNUMA),ON)
-#$(BUILD_CPU)/tools/fmrnumas.test.out: src/tools/fmrnumas.c tools/fmrnumas.test.bats
-#	$(info $(CC__) $(CC) $(<) .. -o $(BUILD_CPU)/tools/fmrnumas)
-#	$(CC) $(<) $(FMRFLAGS) $(LDLIBS) -o $(BUILD_CPU)/tools/fmrnumas
-#	$(call label_bats,$(PASS),$(FAIL),tools/fmrnumas.test.bats, \
-#	  $(BUILD_CPU)/tools/fmrnumas.test)
-#endif
+ifeq ($(ENABLE_LIBNUMA),ON)
+$(BUILD_CPU)/tools/fmrnumas.test.out: src/tools/fmrnumas.c tools/fmrnumas.test.bats
+	$(info $(CC__) $(CC) $(<) .. -o $(BUILD_CPU)/tools/fmrnumas)
+	$(CC) $(<) $(FMRFLAGS) $(LDLIBS) -o $(BUILD_CPU)/tools/fmrnumas
+	$(call label_bats,$(PASS),$(FAIL),tools/fmrnumas.test.bats, \
+	  $(BUILD_CPU)/tools/fmrnumas.test)
+endif
+endif
 
 $(BUILD_DIR)/tests/make-remove-tools.test.out: tests/make-remove-tools.test.bats
 	$(call label_bats,$(PASS),$(FAIL),DIR="$(INSTALL_DIR)/bin" $(<), \
