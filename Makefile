@@ -32,6 +32,8 @@ ifeq ($(CXX),g++)
   #  CXX:= mpic++
   #endif
   OPTFLAGS:= $(shell cat data/gcc4.flags | tr '\n' ' ' | tr -s ' ')
+  # TMP:="$(OPTFLAGS)"
+  #(info $(TMP))
   CXXFLAGS+= -std=c++11 -g $(OPTFLAGS) -flto -fpic -fstrict-enums
   # Dependency flags
   FMRFLAGS+= -MMD -MP
@@ -110,6 +112,7 @@ ifeq ("$(FMR_COPYRIGHT)","")# only true once during build
   $(shell cat external/config.*.mk > $(BUILD_CPU)/external.config.mk)
 endif
 -include $(BUILD_CPU)/external.config.mk
+
 #FIXME CGNS, FLTK, and FreeType build in external/*/
 
 # Libraries and applications available ----------------------------------------
@@ -216,7 +219,7 @@ GET_BATS:= $(patsubst %,get-%,$(BATS_MODS))
 .PHONY: get-bats install-bats get-external # install-external
 # ...and internal makefile use.
 .PHONY: intro
-.PHONY: all-done build-done docs-done external-flags
+.PHONY: all-done build-done docs-done
 .PHONY: install-tools-done install-done remove-done
 
 # Real files, but considered always out of date.
@@ -303,15 +306,13 @@ purge:
 	-rm -rf external/*/*
 
 # Internal named targets ======================================================
-intro: build/copyright.txt build/docs/find-tdd-files.csv external-flags
+intro: build/copyright.txt build/docs/find-tdd-files.csv
 intro: | $(BUILD_TREE)
-ifneq ("$(NOSA_INFO)","")
+ifneq ("$(NOSA_INFO)","") # Run once during a build
 	$(info $(INFO) $(NOSA_INFO))
-endif
-ifneq ("$(ADD_TO_PATH)","")
-	$(info $(NOTE) temporarily prepended PATH with:)
-	$(info $(SPCS) $(ADD_TO_PATH))
-endif
+	-rm -f "$(BUILD_DIR)/external/install-*.flags.new"
+	-rm -f "$(BUILD_CPU)/external/install-*.flags.new"
+	$(MAKE) $(JPAR) external-flags
 ifeq ($(ENABLE_DOT),ON)
 	@printf '%s' '$(MAKE_DOT)' | sed 's/\\n/\n/g' > '$(MAKE_DOTFILE)'
 	@dot '$(MAKE_DOTFILE)' -Teps -o $(BUILD_DIR)/make.eps
@@ -319,6 +320,11 @@ ifeq ($(ENABLE_DOT),ON)
 	#dot external/external.dot -Tpng -o $(BUILD_DIR)/external/external.png
 	@printf '%s' '$(EXT_DOT)' | sed 's/\\n/\n/g' > '$(EXT_DOTFILE)'
 	@dot '$(EXT_DOTFILE)' -Teps -o $(BUILD_DIR)/external/build-external.eps
+endif
+endif
+ifneq ("$(ADD_TO_PATH)","")
+	$(info $(NOTE) temporarily prepended PATH with:)
+	$(info $(SPCS) $(ADD_TO_PATH))
 endif
 
 docs-done: install-docs
@@ -398,24 +404,31 @@ remove-tools-done: $(BUILD_CPU)/tests/make-remove-tools.test.out
 # External build tools --------------------------------------------------------
 
 ifeq ($(ENABLE_DOT),ON)
+
+.PHONY: $(DOT_FLAGFILE).new
+
 external-flags: $(DOT_FLAGFILE).new
 
 $(DOT_FLAGFILE).new:
-	printf "%s" "$(DOT_FLAGS)" > $(@)
+	printf "%s" '$(DOT_FLAGS)' > $(@)
 endif
-
 ifeq ($(ENABLE_GOOGLETEST),ON)
+
+.PHONY: $(GTEST_FLAGFILE).new
+
 external-flags: $(GTEST_FLAGFILE).new
 
 $(GTEST_FLAGFILE).new:
-	printf "%s" "$(GTEST_FLAGS)" > $(@)
+	printf "%s" '$(GTEST_FLAGS)' > $(@)
 endif
-
 ifeq ($(ENABLE_PYBIND11),ON)
+
+.PHONY: $(PYBIND11_FLAGFILE).new
+
 external-flags: $(PYBIND11_FLAGFILE).new
 
 $(PYBIND11_FLAGFILE).new:
-	printf "%s" "$(PYBIND11_FLAGS)" > $(@)
+	printf "%s" '$(PYBIND11_FLAGS)' > $(@)
 endif
 
 install-bats: external/get-bats.test.sh
@@ -433,21 +446,21 @@ get-bats:
 	$(call timestamp,$@,$<)
 	$(MAKE) $(JPAR) $(GET_BATS)
 
-get-external: | external/tools/
+get-external: | intro external/tools/
 	$(MAKE) $(JPAR) $(GET_EXTERNAL)
 	$(call timestamp,$@,)
 
-get-%: | $(BUILD_DIR)/external/
+get-%: | intro $(BUILD_DIR)/external/
 	#(call timestamp,$@,$<)
 	external/get-external.sh $(*)
 
-install-external: $(INSTALL_EXTERNAL)
+install-external: $(INSTALL_EXTERNAL) | intro
 	$(call timestamp,$@,make $(JEXT))
 
-install-%: $(BUILD_CPU)/external/install-%.out | $(BUILD_DIR)/external/
+install-%: $(BUILD_CPU)/external/install-%.out | intro $(BUILD_DIR)/external/
 	$(call timestamp,$@,)
 
-install-%: $(BUILD_DIR)/external/install-%.out | $(BUILD_CPU)/external/
+install-%: $(BUILD_DIR)/external/install-%.out | intro $(BUILD_CPU)/external/
 	$(call timestamp,$@,)
 
 external-done:

@@ -18,7 +18,8 @@ else
   CPUMODEL=`fmrmodel`
 
   cd "$SRC_DIR"
-  ./configure $FLAGS
+  echo "./configure $FLAGS"
+  eval ./configure $FLAGS
   make PETSC_ARCH=$CPUMODEL all
   # NOTE make test takes about 4 hr to run, may only show failed test output here
   # make PETSC_ARCH=$CPUMODEL test
