@@ -20,8 +20,7 @@ else
   cd "$SRC_DIR"
   ./configure $FLAGS
   make PETSC_ARCH=$CPUMODEL all
-  # NOTE sys ex31_1 test fails
-  # NOTE make test takes a REALLY long time to run, only show failed test output
+  # NOTE make test takes about 4 hr to run, may only show failed test output here
   # make PETSC_ARCH=$CPUMODEL test
   MFLAGS="--no-print-directory -s -- PETSC_DIR=$SRC_DIR PETSC_ARCH=$CPUMODEL"
   make PETSC_ARCH=$CPUMODEL $MFLAGS install

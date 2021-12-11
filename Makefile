@@ -76,13 +76,48 @@ BUILD_TREE+= $(BUILD_CPU)/tests/ $(BUILD_CPU)/tools/
 STAGE_TREE+= $(STAGE_DIR)/bin/ $(STAGE_DIR)/libs/
 STAGE_TREE+= $(STAGE_CPU)/bin/ $(STAGE_CPU)/libs/
 
+# -----------------------------------------------------------------------------
+ifeq ("$(findstring $(INSTALL_DIR)/bin:,$(PATH):)","")
+  ADD_TO_PATH:= $(INSTALL_DIR)/bin:$(ADD_TO_PATH)
+endif
+ifeq ("$(findstring $(INSTALL_CPU)/bin:,$(PATH):)","")
+  ADD_TO_PATH:= $(INSTALL_CPU)/bin:$(ADD_TO_PATH)
+endif
+ifneq ("$(ADD_TO_PATH)","")# only true once during build
+  export PATH:= $(ADD_TO_PATH)$(PATH)
+  #NOTE export does not work for this when in a recipe.
+endif
+
+ifeq ("$(findstring $(INSTALL_DIR)/lib64:,$(LDPATH):)","")
+  ADD_TO_LDPATH:= $(INSTALL_DIR)/lib64:$(ADD_TO_LDPATH)
+endif
+ifeq ("$(findstring $(INSTALL_DIR)/lib:,$(LDPATH):)","")
+  ADD_TO_LDPATH:= $(INSTALL_DIR)/lib:$(ADD_TO_LDPATH)
+endif
+ifeq ("$(findstring $(INSTALL_CPU)/lib64:,$(LDPATH):)","")
+  ADD_TO_LDPATH:= $(INSTALL_CPU)/lib64:$(ADD_TO_LDPATH)
+endif
+ifeq ("$(findstring $(INSTALL_CPU)/lib:,$(LDPATH):)","")
+  ADD_TO_LDPATH:= $(INSTALL_CPU)/lib:$(ADD_TO_LDPATH)
+endif
+ifneq ("$(ADD_TO_LDPATH)","")# only true once during build
+  export LD_LIBRARY_PATH:= $(ADD_TO_LDPATH)$(LD_LIBRARY_PATH)
+endif
+
+ifeq ("$(FMR_COPYRIGHT)","")# only true once during build
+  export FMR_COPYRIGHT:= cat data/copyright.txt | tr '\n' ' ' | tr -s ' '
+  NOSA_INFO:= See the NASA open source agreement (NOSA-1-3.txt) for details.
+  $(shell cat external/config.*.mk > $(BUILD_CPU)/external.config.mk)
+endif
+-include "$(BUILD_CPU)/external.config.mk"
+
 # Libraries and applications available ----------------------------------------
 ifeq ($(ENABLE_OMP),ON)
   EXT_DOT+="OpenMP" -> "Femera"\n
 endif
 ifeq ($(ENABLE_MPI),ON)
   EXT_DOT+="MPI" -> "Femera"\n
-  #TODO Find include and lib dirs automatically
+  #FIXME Find include and lib dirs automatically
   ifeq ($(CXX),mpic++)
     FMRFLAGS+= -isystem"/usr/include/openmpi-x86_64"
   else
@@ -96,7 +131,7 @@ ifeq ($(ENABLE_LIBNUMA),ON)
   FMRFLAGS+= -DFMR_HAS_LIBNUMA
   LDLIBS+= -lnuma
 endif
-# External code to build and install ------------------------------------------
+# External build tools to build and install -----------------------------------
 ifeq ($(ENABLE_BATS),ON)
   # LIST_EXTERNAL +=
   # EXT_DOT+={ rank = sink; "Bats"; }\n
@@ -108,16 +143,18 @@ else
     $(DBUG) Set ENABLE_BATS:=ON in config.local for $(notdir $(3)).)
 endif
 ifeq ($(ENABLE_GOOGLETEST),ON)
+  # Flags for compiling Femera tests
+  FMRGTESTFLAGS := $(filter-out -Wundef,$(CXXFLAGS))
+  # FMRGTESTFLAGS := $(filter-out -Winline,$(GTESTFLAGS))
+  FMRGTESTFLAGS += $(FMRFLAGS)
+endif
+ifeq ($(ENABLE_GOOGLETEST),ON)
   EXT_DOT+="GoogleTest" -> "Femera"\n
   MAKE_DOT+="GoogleTest" -> "Makefile"\n
   LIST_EXTERNAL += googletest
-  GTESTFLAGS := $(filter-out -Wundef,$(CXXFLAGS))
-  # GTESTFLAGS := $(filter-out -Winline,$(GTESTFLAGS))
   GTEST_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
-  GTESTFLAGS += $(FMRFLAGS)
   LDLIBS += -lgtest -lgmock -lpthread
 endif
-# ENABLE_PYBIND11=ON
 ifeq ($(ENABLE_PYBIND11),ON)
   LIST_EXTERNAL += pybind11
   EXT_DOT+="pybind11" -> "Femera"\n
@@ -127,13 +164,15 @@ ifeq ($(ENABLE_PYBIND11),ON)
   PYBIND11_FLAGS += -DDOWNLOAD_CATCH=0
   PYBIND11_FLAGS += -DBOOST_ROOT:PATHNAME=/usr/local/pkgs-modules/boost_1.66.0
 endif
+# External Femera components to build and install -----------------------------
+# Gmsh and its dependencies
 ifeq ($(ENABLE_GMSH),ON)
   ifeq ("$(CXX) $(CXX_VERSION)","g++ 4.8.5")
     LIST_EXTERNAL += gmsh471
-    GMSH_FLAGFILE:=$(BUILD_CPU)/external/install-gmsh471.flags.new
+    GMSH_FLAGFILE:=$(BUILD_CPU)/external/install-gmsh471.flags
   else
     LIST_EXTERNAL += gmsh
-    GMSH_FLAGFILE:=$(BUILD_CPU)/external/install-gmsh.flags.new
+    GMSH_FLAGFILE:=$(BUILD_CPU)/external/install-gmsh.flags
   endif
   EXT_DOT+="Gmsh" -> "Femera"\n
   GMSH_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
@@ -208,6 +247,15 @@ ifeq ($(ENABLE_OCCT),ON)
   OCCT_FLAGS += -DBUILD_MODULE_ApplicationFramework=0
   OCCT_DEPS:=$(patsubst %,$(BUILD_CPU)/external/install-%.out,$(OCCT_REQUIRES))
 endif
+ifeq ($(ENABLE_FREETYPE),ON)
+  LIST_EXTERNAL += freetype
+  FREETYPE_FLAGS += --prefix="$(INSTALL_CPU)"
+endif
+ifeq ($(ENABLE_FLTK),ON)
+  LIST_EXTERNAL += fltk
+  FLTK_FLAGS += --prefix="$(INSTALL_CPU)"
+  FLTK_FLAGS += --enable-shared
+endif
 ifeq ($(ENABLE_HDF5),ON)
   ifeq ($(ENABLE_MPI),ON)
     EXT_DOT+="MPI" -> "HDF5"\n
@@ -243,15 +291,6 @@ ifeq ($(ENABLE_CGNS),ON)
   CGNS_FLAGS += -DCGNS_ENABLE_FORTRAN:BOOL=OFF
   CGNS_DEPS:=$(patsubst %,$(BUILD_CPU)/external/install-%.out,$(CGNS_REQUIRES))
 endif
-ifeq ($(ENABLE_FLTK),ON)
-  LIST_EXTERNAL += fltk
-  FLTK_FLAGS += --prefix="$(INSTALL_CPU)"
-  FLTK_FLAGS += --enable-shared
-endif
-ifeq ($(ENABLE_FREETYPE),ON)
-  LIST_EXTERNAL += freetype
-  FREETYPE_FLAGS += --prefix="$(INSTALL_CPU)"
-endif
 ifeq ($(ENABLE_PETSC),ON)
   LIST_EXTERNAL += petsc
   EXT_DOT+="PETSc" -> "Femera"\n
@@ -261,6 +300,8 @@ ifeq ($(ENABLE_PETSC),ON)
   PETSC_FLAGS += COPTFLAGS=$(OPTFLAGS)
   PETSC_FLAGS += CXXOPTFLAGS=$(OPTFLAGS)
   PETSC_FLAGS += --prefix="$(INSTALL_CPU)"
+  # Build static libs
+  PETSC_FLAGS += --with-shared-libraries=0
   # PETSC_FLAGS += --with-packages-build-dir="$(BUILD_CPU)"# no worky
   PETSC_FLAGS += --with-scalar-type=complex
   ifeq ($(ENABLE_PETSC_DEBUG),ON)
@@ -330,6 +371,8 @@ ifeq ($(ENABLE_PETSC),ON)
   ifeq ($(ENABLE_PETSC_PARMETIS),ON)
     PETSC_INSTALLS += parmetis
     EXT_DOT+="ParMETIS" -> "PETSc"\n
+    EXT_DOT+="METIS" -> "ParMETIS"\n
+    PETSC_FLAGS += --download-metis
     PETSC_FLAGS += --download-parmetis
   endif
   PETSC_DEPS:=$(patsubst %,$(BUILD_CPU)/external/install-%.out,$(PETSC_REQUIRES))
@@ -337,7 +380,6 @@ endif
 ifeq ($(ENABLE_MKL),ON)
   LIST_EXTERNAL += mkl
   EXT_DOT+="MKL" -> "Femera"\n
-  # No point saving extracted files. The installer removes them automatically.
   MKL_FLAGS += --extract-folder $(FMRDIR)/external/mkl
   MKL_FLAGS += --remove-extracted-files no
   MKL_FLAGS += -a --silent --eula accept --install-dir $(INSTALL_CPU)
@@ -382,39 +424,6 @@ INSTALL_EXTERNAL+= $(patsubst %,$(BUILD_CPU)/external/install-%.out, \
   $(LIST_EXTERNAL))
 
 GET_BATS:= $(patsubst %,get-%,$(BATS_MODS))
-
-# -----------------------------------------------------------------------------
-ifeq ("$(findstring $(INSTALL_DIR)/bin:,$(PATH):)","")
-  ADD_TO_PATH:= $(INSTALL_DIR)/bin:$(ADD_TO_PATH)
-endif
-ifeq ("$(findstring $(INSTALL_CPU)/bin:,$(PATH):)","")
-  ADD_TO_PATH:= $(INSTALL_CPU)/bin:$(ADD_TO_PATH)
-endif
-ifneq ("$(ADD_TO_PATH)","")
-  export PATH:= $(ADD_TO_PATH)$(PATH)
-  #NOTE export does not work for this when in a recipe.
-endif
-
-ifeq ("$(findstring $(INSTALL_DIR)/lib64:,$(LDPATH):)","")
-  ADD_TO_LDPATH:= $(INSTALL_DIR)/lib64:$(ADD_TO_LDPATH)
-endif
-ifeq ("$(findstring $(INSTALL_DIR)/lib:,$(LDPATH):)","")
-  ADD_TO_LDPATH:= $(INSTALL_DIR)/lib:$(ADD_TO_LDPATH)
-endif
-ifeq ("$(findstring $(INSTALL_CPU)/lib64:,$(LDPATH):)","")
-  ADD_TO_LDPATH:= $(INSTALL_CPU)/lib64:$(ADD_TO_LDPATH)
-endif
-ifeq ("$(findstring $(INSTALL_CPU)/lib:,$(LDPATH):)","")
-  ADD_TO_LDPATH:= $(INSTALL_CPU)/lib:$(ADD_TO_LDPATH)
-endif
-ifneq ("$(ADD_TO_LDPATH)","")
-  export LD_LIBRARY_PATH:= $(ADD_TO_LDPATH)$(LD_LIBRARY_PATH)
-endif
-
-ifeq ("$(FMR_COPYRIGHT)","")
-  export FMR_COPYRIGHT:= cat data/copyright.txt | tr '\n' ' ' | tr -s ' '
-  NOSA_INFO:= See the NASA open source agreement (NOSA-1-3.txt) for details.
-endif
 
 # make recipes ================================================================
 # These .PHONY targets are intended for users.
@@ -624,7 +633,7 @@ $(BUILD_CPU)/external/install-petsc.out : | $(PETSC_DEPS)
 #endif
 
 external-flags:
-	printf "%s" "$(GMSH_FLAGS)" > $(GMSH_FLAGFILE)
+	printf "%s" "$(GMSH_FLAGS)" > $(GMSH_FLAGFILE).new
 	printf "%s" "$(DOT_FLAGS)" \
 	  > $(BUILD_DIR)/external/install-cinclude2dot.flags.new
 	printf "%s" "$(MKL_FLAGS)" \
