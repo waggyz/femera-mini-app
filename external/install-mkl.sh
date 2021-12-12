@@ -25,7 +25,7 @@ if [ -f "$KITFILE" ]; then
     mkdir -p "$SRC_DIR"
   fi
   echo $KITFILE $FLAGS
-  $KITFILE $FLAGS
+  eval $KITFILE $FLAGS
   # https://www.intel.com/content/www/us/en/develop/documentation/installation-guide-for-intel-oneapi-toolkits-linux/top/installation/install-with-command-line.html#install-with-command-line
   exit
 else

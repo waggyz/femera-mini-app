@@ -21,7 +21,7 @@ else
   # mkdir -p "$BUILD_DIR"
   cd "$SRC_DIR"
   if [ ! -f "configure" ]; then make makeinclude; fi
-  ./configure  $FLAGS
+  eval ./configure  $FLAGS
   make $JFLAG
   make install
 fi

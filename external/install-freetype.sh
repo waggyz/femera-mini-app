@@ -23,7 +23,7 @@ else
   # python3 -m pip install docwriter #FIXME requires elevated priveleges
   if [ -f ".gitignore" ]; then sh autogen.sh; fi
 
-  ./configure $FLAGS
+  eval ./configure $FLAGS
   make $JFLAG
   make install
 fi

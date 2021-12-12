@@ -24,7 +24,7 @@ else
 
   mkdir -p "$BUILD_DIR"
   cd "$BUILD_DIR"
-  cmake $FLAGS "$SRC_DIR"
+  eval cmake $FLAGS "$SRC_DIR"
   make $JFLAG
   make install
 fi

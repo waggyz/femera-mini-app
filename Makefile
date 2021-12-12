@@ -109,7 +109,6 @@ endif
 ifeq ("$(FMR_COPYRIGHT)","")# only true once during build
   export FMR_COPYRIGHT:= cat data/copyright.txt | tr '\n' ' ' | tr -s ' '
   NOSA_INFO:= See the NASA open source agreement (NOSA-1-3.txt) for details.
-  $(shell cat external/config.*.mk > $(BUILD_CPU)/external.config.mk)
 endif
 -include $(BUILD_CPU)/external.config.mk
 
@@ -234,6 +233,10 @@ GET_BATS:= $(patsubst %,get-%,$(BATS_MODS))
 .PRECIOUS: $(BUILD_DIR)/external/install-%.flags
 .PRECIOUS: $(BUILD_CPU)/external/install-%.flags
 
+#FIXME fixes error make[2] unlink /home/dwagner5/local/bin/ Is a directory
+#      while first running make tools?
+.PRECIOUS: $(INSTALL_DIR)/bin/
+
 # libmini libfull
 # pre-build-tests post-build-tests post-install-tests
 # done
@@ -257,9 +260,9 @@ tools: | intro $(STAGE_TREE)
 	$(MAKE) $(JPAR) install-tools
 	$(call timestamp,$@,$^)
 
-external: tools get-external
+external: tools
 	$(call timestamp,$@,$^)
-	#(MAKE) $(JPAR) get-external
+	$(MAKE) $(JPAR) get-external
 	$(MAKE) $(JSER) install-external
 	$(MAKE) $(JPAR) external-done
 
@@ -274,8 +277,8 @@ install: tools docs | $(STAGE_TREE)
 remove:
 	$(call timestamp,$@,$^)
 	-rm -rf "$(INSTALL_CPU)/share/doc/femera"
-	$(MAKE) $(JPAR) remove-tools
 	#(MAKE) $(JPAR) remove-mini
+	$(MAKE) $(JPAR) remove-tools
 	$(MAKE) $(JPAR) remove-done
 
 reinstall: | intro
@@ -310,6 +313,7 @@ intro: build/copyright.txt build/docs/find-tdd-files.csv
 intro: | $(BUILD_TREE)
 ifneq ("$(NOSA_INFO)","") # Run once during a build
 	$(info $(INFO) $(NOSA_INFO))
+	cat external/config.*.mk > "$(BUILD_CPU)/external.config.mk"
 	-rm -f "$(BUILD_DIR)/external/install-*.flags.new"
 	-rm -f "$(BUILD_CPU)/external/install-*.flags.new"
 	$(MAKE) $(JPAR) external-flags
@@ -355,8 +359,8 @@ install-done:
 	$(call timestamp,$@,)
 
 remove-done:
-	-rm -f $(INSTALL_CPU)/bin/mini
-	$(info $(DONE) removeing $(FEMERA_VERSION) on $(HOSTNAME) from:)
+	#rm -f $(INSTALL_CPU)/bin/mini
+	$(info $(DONE) removing $(FEMERA_VERSION) on $(HOSTNAME) from:)
 	$(info $(SPCS) $(INSTALL_DIR)/)
 	$(info $(E_G_) $(patsubst %,%;,$(LIST_TOOLS)))
 	$(call timestamp,$@,)
@@ -380,7 +384,7 @@ clean-tools: $(BUILD_CPU)/tools/ | $(STAGE_CPU)/bin/
 	$(call timestamp,$@,$^)
 	-rm -rf $^ $(STAGE_CPU)/bin/fmr*
 
-remove-tools: clean-tools | $(BUILD_DIR)/tests/ $(BUILD_CPU)/tests/
+remove-tools: clean-tools | $(BUILD_DIR)/external/ $(BUILD_CPU)/external/
 	$(call timestamp,$@,$<)
 	-rm -f $(INSTALL_DIR)/bin/fmr* $(INSTALL_CPU)/bin/fmr*
 	$(MAKE) $(JPAR) remove-tools-done
@@ -396,10 +400,10 @@ test-tools:
 	$(MAKE) $(JPAR) $(TEST_TOOLS)
 
 install-tools-done: $(TEST_TOOLS) $(INSTALL_TOOLS)
-	$(MAKE) $(JPAR) $(BUILD_CPU)/tests/make-install-tools.test.out
+	$(MAKE) $(JPAR) $(BUILD_CPU)/external/make-install-tools.test.out
 
-remove-tools-done: $(BUILD_DIR)/tests/make-remove-tools.test.out
-remove-tools-done: $(BUILD_CPU)/tests/make-remove-tools.test.out
+remove-tools-done: $(BUILD_DIR)/external/make-remove-tools.test.out
+remove-tools-done: $(BUILD_CPU)/external/make-remove-tools.test.out
 
 # External build tools --------------------------------------------------------
 
@@ -447,8 +451,8 @@ get-bats:
 	$(MAKE) $(JPAR) $(GET_BATS)
 
 get-external: | intro external/tools/
-	$(MAKE) $(JPAR) $(GET_EXTERNAL)
 	$(call timestamp,$@,)
+	$(MAKE) $(JPAR) $(GET_EXTERNAL)
 
 get-%: | intro $(BUILD_DIR)/external/
 	#(call timestamp,$@,$<)
@@ -472,13 +476,13 @@ external-done:
 $(BUILD_DIR)/external/get-bats-%.out: external/get-external.sh
 	#(info $(INFO) checking bats-$(*)...)
 	-tools/label-test.sh "$(PASS)" "$(FAIL)" \
-	  "external/get-external.sh bats-$(*)"   \
+	  "external/get-external.sh bats-$(*)" \
 	  "$(BUILD_DIR)/external/get-bats-$(*)"
 
 $(BUILD_DIR)/external/get-%.out: external/get-external.sh external/get-%.dat
 	#(info $(INFO) checking $(*)...)
 	-tools/label-test.sh "$(PASS)" "$(FAIL)" \
-	  "external/get-external.sh $(*)"   \
+	  "external/get-external.sh $(*)" \
 	  "$(BUILD_DIR)/external/get-$(*)"
 
 $(BUILD_CPU)/external/install-%.flags: $(BUILD_CPU)/external/install-%.flags.new
@@ -624,7 +628,7 @@ $(BUILD_CPU)/%.test,out: # Warn if no test.
 
 # hm ==========================================================================
 %/:
-	mkdir -p $(@)
+	mkdir -p $(*)
 
 build/.md5: | build/
 	touch $@
