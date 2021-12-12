@@ -23,6 +23,8 @@ new.*
 tmp.*
 *.bad
 bad.*
+*.bak
+bak.*
 *.local
 local.*
 
