@@ -4,8 +4,8 @@ FMRDIR:=$(shell pwd)
 
 include examples/config.recommended
 -include config.local
-include tools/set-undefined.mk
 
+include tools/set-undefined.mk
 include tools/functions.mk
 #------------------------------------------------------------------------------
 CXX_VERSION   := $(shell $(CXX) -dumpversion)
@@ -32,8 +32,6 @@ ifeq ($(CXX),g++)
   #  CXX:= mpic++
   #endif
   OPTFLAGS:= $(shell cat data/gcc4.flags | tr '\n' ' ' | tr -s ' ')
-  # TMP:="$(OPTFLAGS)"
-  #(info $(TMP))
   CXXFLAGS+= -std=c++11 -g $(OPTFLAGS) -flto -fpic -fstrict-enums
   # Dependency flags
   FMRFLAGS+= -MMD -MP
@@ -116,10 +114,10 @@ endif
 
 # Libraries and applications available ----------------------------------------
 ifeq ($(ENABLE_OMP),ON)
-  EXT_DOT+="OpenMP" -> "Femera"\n
+  EXTERNAL_DOT+="OpenMP" -> "Femera"\n
 endif
 ifeq ($(ENABLE_MPI),ON)
-  EXT_DOT+="MPI" -> "Femera"\n
+  EXTERNAL_DOT+="MPI" -> "Femera"\n
   #FIXME Find include and lib dirs automatically
   ifeq ($(CXX),mpic++)
     FMRFLAGS+= -isystem"/usr/include/openmpi-x86_64"
@@ -130,14 +128,12 @@ ifeq ($(ENABLE_MPI),ON)
   LDLIBS+= -lmpi
 endif
 ifeq ($(ENABLE_LIBNUMA),ON)
-  EXT_DOT+="libnuma" -> "Femera"\n
+  EXTERNAL_DOT+="libnuma" -> "Femera"\n
   FMRFLAGS+= -DFMR_HAS_LIBNUMA
   LDLIBS+= -lnuma
 endif
-# External build tools to build and install -----------------------------------
+# Build tools to download and install -----------------------------------------
 ifeq ($(ENABLE_BATS),ON)
-  # LIST_EXTERNAL +=
-  # EXT_DOT+={ rank = sink; "Bats"; }\n
   MAKE_DOT+="Bats" -> "Makefile"\n
   BATS_MODS:= bats-core bats-support bats-assert bats-file
   label_bats = $(call label_test,$(1),$(2),$(3),$(4))
@@ -152,23 +148,39 @@ ifeq ($(ENABLE_GOOGLETEST),ON)
   FMRGTESTFLAGS += $(FMRFLAGS)
 endif
 ifeq ($(ENABLE_GOOGLETEST),ON)
-  EXT_DOT+="GoogleTest" -> "Femera"\n
-  MAKE_DOT+="GoogleTest" -> "Makefile"\n
   LIST_EXTERNAL += googletest
+  EXTERNAL_DOT+="GoogleTest" -> "Femera"\n
+  MAKE_DOT+="GoogleTest" -> "Makefile"\n
   GTEST_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
   LDLIBS += -lgtest -lgmock -lpthread
   GTEST_FLAGFILE:= $(BUILD_CPU)/external/install-googletest.flags
 endif
 ifeq ($(ENABLE_PYBIND11),ON)
-  LIST_EXTERNAL += pybind11
-  EXT_DOT+="pybind11" -> "Femera"\n
-  EXT_DOT+="Boost" -> "pybind11"\n
+#  LIST_EXTERNAL += pybind11
+  INSTALL_EXTERNAL+= $(BUILD_DIR)/external/install-pybind11.out
+#  PYBIND11_REQUIRES += boost
+  EXTERNAL_DOT+="pybind11" -> "Femera"\n
+#  EXTERNAL_DOT+="Boost" -> "pybind11"\n
   # FMRFLAGS += -DFMR_HAS_PYBIND11
-  PYBIND11_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
+  PYBIND11_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
   PYBIND11_FLAGS += -DDOWNLOAD_CATCH=0
-  PYBIND11_FLAGS += -DBOOST_ROOT:PATHNAME=/usr/local/pkgs-modules/boost_1.66.0
-  PYBIND11_FLAGFILE:= $(BUILD_CPU)/external/install-pybind11.flags
+#  PYBIND11_FLAGS += -DPYBIND11_PYTHON_VERSION=3.6
+  PYBIND11_FLAGS += -DPYBIND11_HAS_OPTIONAL=0
+  PYBIND11_FLAGS += -DPYBIND11_HAS_EXP_OPTIONAL=0
+  PYBIND11_FLAGS += -DPYBIND11_HAS_VARIANT=0
+  #FIXME Find include and lib dirs automatically
+#  PYBIND11_FLAGS += -DBOOST_ROOT:PATHNAME=/usr/local/pkgs-modules/boost_1.66.0
+  PYBIND11_FLAGFILE:= $(BUILD_DIR)/external/install-pybind11.flags
+#  PYBIND11_DEPS:=$(patsubst \
+#    %,$(BUILD_DIR)/external/install-%.out,$(PYBIND11_REQUIRES))
 endif
+#ifeq ($(ENABLE_BOOST_HEADERS),ON)
+#  LIST_EXTERNAL += boost-headers
+#  BOOST_LIBS:=$(shell cat external/boost-headers.dat | tr '\n' ',' | tr -d ' ')
+#  BOOST_FLAGS += --prefix="$(INSTALL_DIR)"
+#  BOOST_FLAGS += --show-libraries --with-libraries=$(BOOST_LIBS)
+#  BOOST_FLAGFILE:= $(BUILD_DIR)/external/install-boost.flags
+#endif
 # Developer tools
 ifeq ($(ENABLE_DOT),ON)
   ifeq ($(shell which dot 2>/dev/null),"")# dot is part of graphviz
@@ -188,9 +200,9 @@ ifeq ($(ENABLE_DOT),ON)
   GET_EXTERNAL+= $(BUILD_DIR)/external/get-cinclude2dot.out
   INSTALL_EXTERNAL+= $(BUILD_DIR)/external/install-cinclude2dot.out
   MAKE_DOT+="cinclude2dot" -> "Makefile"\n
-  EXT_DOT:=digraph "Femera dependencies" {\n $(HEAD_DOT) $(EXT_DOT) }\n
+  EXTERNAL_DOT:=digraph "Femera dependencies" {\n $(HEAD_DOT) $(EXTERNAL_DOT) }\n
   MAKE_DOT:=digraph "Makefile dependencies" {\n $(HEAD_DOT) $(MAKE_DOT) }\n
-  EXT_DOTFILE:=$(BUILD_DIR)/external/external.dot
+  EXTERNAL_DOTFILE:=$(BUILD_DIR)/external/external.dot
   MAKE_DOTFILE:=$(BUILD_DIR)/make.dot
 endif
 
@@ -322,8 +334,8 @@ ifeq ($(ENABLE_DOT),ON)
 	@dot '$(MAKE_DOTFILE)' -Teps -o $(BUILD_DIR)/make.eps
 	@dot external/external.dot -Teps -o $(BUILD_DIR)/external/external.eps
 	#dot external/external.dot -Tpng -o $(BUILD_DIR)/external/external.png
-	@printf '%s' '$(EXT_DOT)' | sed 's/\\n/\n/g' > '$(EXT_DOTFILE)'
-	@dot '$(EXT_DOTFILE)' -Teps -o $(BUILD_DIR)/external/build-external.eps
+	@printf '%s' '$(EXTERNAL_DOT)' | sed 's/\\n/\n/g' > '$(EXTERNAL_DOTFILE)'
+	@dot '$(EXTERNAL_DOTFILE)' -Teps -o $(BUILD_DIR)/external/build-external.eps
 endif
 endif
 ifneq ("$(ADD_TO_PATH)","")
@@ -429,10 +441,21 @@ ifeq ($(ENABLE_PYBIND11),ON)
 
 .PHONY: $(PYBIND11_FLAGFILE).new
 
+$(BUILD_DIR)/external/install-pybind11.out : | $(PYBIND11_DEPS)
+
 external-flags: $(PYBIND11_FLAGFILE).new
 
 $(PYBIND11_FLAGFILE).new:
 	printf "%s" '$(PYBIND11_FLAGS)' > $(@)
+endif
+ifeq ($(ENABLE_BOOST_HEADERS),ON)
+
+.PHONY: $(BOOST_FLAGFILE).new
+
+external-flags: $(BOOST_FLAGFILE).new
+
+$(PYBIND11_BOOST).new:
+	printf "%s" '$(BOOST_FLAGS)' > $(@)
 endif
 
 install-bats: external/get-bats.test.sh
@@ -470,7 +493,7 @@ install-%: $(BUILD_DIR)/external/install-%.out | intro $(BUILD_CPU)/external/
 external-done:
 	$(info $(DONE) building and installing externals on $(HOSTNAME) to:)
 	$(info $(SPCS) $(INSTALL_DIR)/)
-	$(info $(E_G_) $(patsubst %,%,$(LIST_EXTERNAL)))
+	$(info $(E_G_) $(LIST_EXTERNAL))
 	$(call timestamp,$@,)
 
 $(BUILD_DIR)/external/get-bats-%.out: external/get-external.sh

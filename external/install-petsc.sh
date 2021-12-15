@@ -8,8 +8,13 @@ if [ 0 -eq 1 ]; then # if [ -f "$INSTALL_DIR/include/petsc.h" ]; then
   echo "looks like PETSc is already installed"
   exit 0
 else
-  export CC=`which gcc`
-  export CXX=`which g++`
+  # PETSc cpmplains if these are set here.
+  unset MAKEFLAGS
+  #export CC=`which gcc`
+  #export CXX=`which g++`
+  # Instead, do like this:
+  FLAGS="CC=`which gcc` CXX=`which g++` $FLAGS"
+  #
   export MPICC_CC=`which mpicc`
   export MPICXX_CXX=`which mpic++`
 

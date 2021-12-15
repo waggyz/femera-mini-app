@@ -9,24 +9,21 @@ PREFIX:=/home/anon/local
 #
 # Please review NOSA-1.3.txt Section 3D before adding a copyright notice.
 CONTRIBUTOR_COPYRIGHT_FILE:=COPYRIGHT.contrib.txt
-
+#
 FMR_VERBMAX:=11
 
 # Use parallel make jobs
 ENABLE_MAKEJOBS:=ON
 
+# Libraries needed ------------------------------------------------------------
 ENABLE_OMP:=ON
+ENABLE_MPI:=ON
 ENABLE_LIBNUMA:=ON
 
 # External packages -----------------------------------------------------------
 ENABLE_BATS:=ON
 ENABLE_GOOGLETEST:=ON
-
-ENABLE_PYBIND11:=ON
-# ENABLE_BOOST_HEADERS:=ON
-# ENABLE_BOOST:=OFF
-
-ENABLE_MPI:=ON
+# ENABLE_PYBIND11:=OFF
 
 ENABLE_MKL:=ON
 
@@ -40,26 +37,18 @@ ENABLE_HDF5:=ON
 ENABLE_CGNS:=ON
 
 ENABLE_PETSC:=ON
-ENABLE_PETSC_DEBUG:=OFF
+ENABLE_PETSC_DEBUG:=ON
 ENABLE_PETSC_OMP:=ON
-ENABLE_PETSC_MOAB:=OFF
-# ENABLE_PETSC_MPI4PY:=OFF
+
 # Partitioners
 ENABLE_PETSC_CHACO:=ON
-ENABLE_PETSC_SCOTCH:=ON
-# Nonprofit research or evaluation use only
-ENABLE_PETSC_PARMETIS:=OFF
+
+# These do not build with gcc 4.8.
+ENABLE_PETSC_MOAB:=OFF
+ENABLE_PETSC_SCOTCH:=OFF
 
 # Developer tools -------------------------------------------------------------
 ENABLE_VALGRIND:=ON
 
 ENABLE_LYX:=ON
 ENABLE_DOT:=ON
-
-# Override automatic assignment -----------------------------------------------
-# Set these to override automatic assignment.
-# MAKEJOBS:=8
-# CPUMODEL:=unknown
-# CPUCOUNT:=4
-# CPUSIMD :=AVX2 FMA
-

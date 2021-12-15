@@ -4,11 +4,10 @@ INSTALL_DIR="$1"
 if [ -f "$2" ]; then FLAGS=`tr --delete '\n' < "$2"`; fi
 JFLAG="$3"
 
-if [ 0 -eq 1 ]; then # [ -f "$INSTALL_DIR/lib/libpybind11.a" ]; then
+if [ 0 -eq 1 ]; then # [ -f "$INSTALL_DIR/include.pybind11/pybind11.h" ]; then
   echo "looks like pybind11 is already installed"
   exit 0
 else
-  echo " FIXME  Check lib test in external/install-pybind11.sh." >&2
   export CC=`which gcc`
   export CXX=`which g++`
   export MPICC_CC=`which mpicc`

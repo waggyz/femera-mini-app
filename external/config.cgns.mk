@@ -2,10 +2,10 @@
 #FIXME CGNS, FLTK, and FreeType build in external/*/
 ifeq ($(ENABLE_CGNS),ON)
   LIST_EXTERNAL += cgns
-  EXT_DOT+="CGNS" -> "Femera"\n
+  EXTERNAL_DOT+="CGNS" -> "Femera"\n
   ifeq ($(ENABLE_HDF5),ON)
     CGNS_REQUIRES += hdf5
-    EXT_DOT+="HDF5" -> "CGNS"\n
+    EXTERNAL_DOT+="HDF5" -> "CGNS"\n
     CGNS_FLAGS += -DCGNS_ENABLE_HDF5:BOOL=ON
   else
     CGNS_FLAGS += -DCGNS_ENABLE_HDF5:BOOL=OFF
@@ -29,7 +29,7 @@ external-flags: $(CGNS_FLAGFILE).new
 
 $(BUILD_CPU)/external/install-cgns.out: $(CGNS_DEPS)
 
-$(CGNS_FLAGFILE).new:
+$(CGNS_FLAGFILE).new: external/config.cgns.mk
 	printf "%s" '$(CGNS_FLAGS)' > $(@)
 
 endif

@@ -1,7 +1,7 @@
 #!/usr/bin/make
 ifeq ($(ENABLE_HDF5),ON)
   ifeq ($(ENABLE_MPI),ON)
-    EXT_DOT+="MPI" -> "HDF5"\n
+    EXTERNAL_DOT+="MPI" -> "HDF5"\n
   endif
   LIST_EXTERNAL += hdf5
   HDF5_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
@@ -20,7 +20,7 @@ ifeq ($(ENABLE_HDF5),ON)
 
 external-flags: $(HDF5_FLAGFILE).new
 
-$(HDF5_FLAGFILE).new:
+$(HDF5_FLAGFILE).new: external/config.hdf5.mk
 	printf "%s" '$(HDF5_FLAGS)' > $(@)
 
 endif

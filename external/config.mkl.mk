@@ -1,7 +1,7 @@
 #!/usr/bin/make
 ifeq ($(ENABLE_MKL),ON)
   LIST_EXTERNAL += mkl
-  EXT_DOT+="MKL" -> "Femera"\n
+  EXTERNAL_DOT+="MKL" -> "Femera"\n
   MKL_FLAGS += --extract-folder $(FMRDIR)/external/mkl
   MKL_FLAGS += --remove-extracted-files no
   MKL_FLAGS += -a --silent --eula accept --install-dir $(INSTALL_CPU)
@@ -17,7 +17,7 @@ external-flags: $(MKL_FLAGFILE).new
 
 .PHONY: $(MKL_FLAGFILE).new
 
-$(MKL_FLAGFILE).new:
+$(MKL_FLAGFILE).new: external/config.mkl.mk
 	printf "%s" '$(MKL_FLAGS)' > $(@)
 
 endif

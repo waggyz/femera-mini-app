@@ -1,0 +1,5 @@
+GITMOD boost
+BRANCH 1_77_0
+TGZURL https://boostorg.jfrog.io/artifactory/main/release/1.77.0/source/boost_1_77_0.tar.gz
+TGZDIR external/boost_1_77_0
+CKFILE external/boost/README.md
