@@ -27,7 +27,7 @@ TEST(FmrPerfMeter, Naptime) {
   perf.add_busy_time_now ();
   EXPECT_GT(perf.get_busy_time (),       0.99 * 1e-3);
   EXPECT_GT(perf.get_unit_speed (),      0.50 * 1e+3);
-  EXPECT_GT(perf.get_busy_unit_speed (), 0.90 * 1e+3);
+  EXPECT_GT(perf.get_busy_unit_speed (), 0.80 * 1e+3);
   EXPECT_GT(perf.get_busy_unit_speed (), perf.get_unit_speed ());
 }
 int main (int argc, char** argv) {

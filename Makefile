@@ -105,6 +105,8 @@ ifneq ("$(ADD_TO_LDPATH)","")# only true once during build
   export LD_LIBRARY_PATH:= $(ADD_TO_LDPATH)$(LD_LIBRARY_PATH)
 endif
 # TMP_LIBRARY_PATH_=$(LD_LIBRARY_PATH);
+  LDFLAGS+= -L$(INSTALL_CPU)/lib -L$(INSTALL_CPU)/lib64
+  LDFLAGS+= -L$(INSTALL_DIR)/lib -L$(INSTALL_DIR)/lib64
 
 ifeq ("$(FMR_COPYRIGHT)","")# only true once during build
   export FMR_COPYRIGHT:= cat data/copyright.txt | tr '\n' ' ' | tr -s ' '
@@ -145,10 +147,10 @@ else
 endif
 ifeq ($(ENABLE_GOOGLETEST),ON)
   # Flags for compiling Femera tests
-  FMRGTESTFLAGS := $(filter-out -Wundef,$(CXXFLAGS))
-  FMRGTESTFLAGS := $(filter-out -Weffc++,$(FMRGTESTFLAGS))
-  # FMRGTESTFLAGS := $(filter-out -Winline,$(GTESTFLAGS))
-  FMRGTESTFLAGS += $(FMRFLAGS) -I"$(INSTALL_CPU)/include"
+  CXXGTEST := $(filter-out -Wundef,$(CXXFLAGS))
+  CXXGTEST := $(filter-out -Weffc++,$(CXXGTEST))
+  # CXXGTEST := $(filter-out -Winline,$(GTESTFLAGS))
+  CXXGTEST += -I"$(INSTALL_CPU)/include"
 endif
 ifeq ($(ENABLE_GOOGLETEST),ON)
   LIST_EXTERNAL += googletest
@@ -277,6 +279,7 @@ all: | intro
 mini: | intro
 	$(call timestamp,$@,$^)
 	$(MAKE) $(JLIM) $(FMROBJS)
+	$(MAKE) $(JPAR) build-done
 
 tools: | intro $(STAGE_TREE)
 	$(MAKE) $(JPAR) install-tools
@@ -392,7 +395,7 @@ build-done: # $(BUILD_CPU)/make-build.post.test.out
 	$(info $(DONE) building $(FEMERA_VERSION))
 	$(info $(SPCS) on $(HOSTNAME) for $(CPUMODEL) with $(CXX) $(CXX_VERSION))
 ifneq ($(HOST_MD5),$(REPO_MD5))
-	$(info $(SPCS) modified by <$(BUILT_BY_EMAIL)>.)
+	$(info $(SPCS) as modified by <$(BUILT_BY_EMAIL)>)
 endif
 	$(info $(E_G_) tools/fmrexec.sh auto -d -t -D examples/cube.fmr)
 
@@ -648,11 +651,12 @@ $(BUILD_DIR)/%.test.out: %.py
 	  >> $(BUILD_DIR)/$(*).test.out
 
 #NOTE Make target export requires at least Make 3.81.
+
 $(BUILD_CPU)/%.gtst.o : export TMPDIR = $(TEMP_DIR)
 $(BUILD_CPU)/%.gtst.o : src/%.gtst.cpp src/%.cpp src/%.hpp
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(info $(CXX_) $(CXX) -c $< .. -o $(notdir $*.o))
-	$(CXX) $(FMRGTESTFLAGS) -c $< -o $@
+	$(CXX) $(CXXGTEST) -c $< $(FMRFLAGS) -o $@
 else
 	touch $@
 endif
@@ -662,7 +666,7 @@ $(BUILD_CPU)/%.o : src/%.cpp src/%.hpp
 	#-python tools/testy/check_code_graffiti.py $^
 	# rm -f $*.err $*.gtst.err
 	$(info $(CXX_) $(CXX) -c $< .. -o $(notdir $*.o))
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< $(FMRFLAGS) -o $@
 
 # Untested targets ------------------------------------------------------------
 
@@ -686,9 +690,9 @@ $(BUILD_CPU)/%.gtst : export TMPDIR = $(TEMP_DIR)
 $(BUILD_CPU)/%.gtst : $(BUILD_CPU)/%.gtst.o $(BUILD_CPU)/%.o
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(info $(LINK) $(CXX) $@.o ... -o $(notdir $@))
-	$(CXX) $(CXXFLAGS) $@.o $(BUILD_CPU)/$*.o $(LDFLAGS) \
-	  -L$(INSTALL_CPU)/lib64 -o $@ $(LDLIBS)
-	$(TEST_EXEC) $@ #(call build_log,$(BUILD_DIR)/$*.gtst)
+	-$(CXX) $(CXXGTEST) $@.o $(BUILD_CPU)/$*.o $(LDFLAGS) \
+	  -o $@ $(FMRFLAGS) $(LDLIBS)
+	-$(TEST_EXEC) $@ #(call build_log,$(BUILD_DIR)/$*.gtst)
 else
 	$(info $(WARN) $@ not tested: Googletest disabled. )
 	-echo "WARNING: $@ not tested: Googletest disabled." >> $@.err
