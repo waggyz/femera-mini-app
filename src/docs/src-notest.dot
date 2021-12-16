@@ -5,5 +5,8 @@ digraph "source tree" {
     fontsize="16";
     fontname="Helvetica";
 	clusterrank="local";
+	"Meter.cpp" -> "Meter.hpp"
+	"Meter.hpp" -> "perf.hpp"
 	"perf.cpp" -> "perf.hpp"
+	"perf.hpp" -> "detail.hpp"
 }

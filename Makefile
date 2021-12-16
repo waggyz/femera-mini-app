@@ -72,7 +72,7 @@ TEMP_DIR   := $(BUILD_CPU)/tmp
 # Subdirectories needed
 BUILD_TREE+= $(BUILD_DIR)/external/tools/ $(BUILD_DIR)/docs/
 BUILD_TREE+= $(BUILD_CPU)/external/ $(BUILD_CPU)/tests/ $(BUILD_CPU)/tools/
-BUILD_TREE+= $(BUILD_CPU)/Femera/ $(BUILD_CPU)/fmr/
+BUILD_TREE+= $(BUILD_CPU)/Femera/ $(BUILD_CPU)/fmr/perf/
 
 STAGE_TREE+= $(STAGE_DIR)/bin/ $(STAGE_DIR)/libs/
 STAGE_TREE+= $(STAGE_CPU)/bin/ $(STAGE_CPU)/libs/
@@ -223,7 +223,7 @@ INSTALL_EXTERNAL+= $(patsubst %,$(BUILD_CPU)/external/install-%.out, \
 
 GET_BATS:= $(patsubst %,get-%,$(BATS_MODS))
 
-FMROBJS += build/i7-7820HQ/fmr/perf.gtst
+FMROBJS += build/i7-7820HQ/fmr/perf/Meter.gtst
 
 # make recipes ================================================================
 # These .PHONY targets are intended for users.
@@ -291,7 +291,7 @@ external: tools
 	$(MAKE) $(JSER) install-external
 	$(MAKE) $(JPAR) external-done
 
-docs: | intro build/docs/
+docs: | intro build/docs/ build/src-notest.eps
 	$(call timestamp,$@,)
 	$(MAKE) $(JPAR) docs-done
 
@@ -334,7 +334,7 @@ purge:
 	-rm -rf external/*/*
 
 # Internal named targets ======================================================
-intro: build/copyright.txt build/docs/find-tdd-files.csv build/src-notest.eps
+intro: build/copyright.txt build/docs/find-tdd-files.csv
 intro: | $(BUILD_TREE)
 ifneq ("$(NOSA_INFO)","") # Run once during a build
 	$(info $(INFO) $(NOSA_INFO))
@@ -390,7 +390,7 @@ remove-done:
 	$(info $(E_G_) $(patsubst %,%;,$(LIST_TOOLS)))
 	$(call timestamp,$@,)
 
-build-done: # $(BUILD_CPU)/make-build.post.test.out
+build-done: build/src-notest.eps # $(BUILD_CPU)/make-build.post.test.out
 	$(call timestamp,$@,$?)
 	$(info $(DONE) building $(FEMERA_VERSION))
 	$(info $(SPCS) on $(HOSTNAME) for $(CPUMODEL) with $(CXX) $(CXX_VERSION))
@@ -737,11 +737,11 @@ src/docs/src-notest.dot: src/docs/src.dot
 	#(info $(INFO) Dependencies without tests: $@)
 
 build/src-notest.eps: src/docs/src-notest.dot tools/src-inherit.sh
-ifeq ($(ENABLE_GRAPHVIZ),ON)
+ifeq ($(ENABLE_DOT),ON)
 	@tools/src-inherit.sh
 	@dot $< -Gsize="10.0,8.0" -Teps -o $@
 	#  -Gratio="fill" -Gsize="11.7,8.267!" -Gmargin=0
-	#(info $(INFO) Dependency graph: $@)
+	$(info $(INFO) dependency graph: $@)
 endif
 
 build/docs/tdd-tests.txt: tools/list-tdd-tests.sh build/docs/.md5
