@@ -67,11 +67,12 @@ INSTALL_DIR:= $(PREFIX)
 BUILD_CPU  := $(BUILD_DIR)/$(CPUMODEL)
 STAGE_CPU  := $(STAGE_DIR)/$(CPUMODEL)
 INSTALL_CPU:= $(INSTALL_DIR)/$(CPUMODEL)
+TEMP_DIR   := $(BUILD_CPU)/tmp
 
 # Subdirectories needed
 BUILD_TREE+= $(BUILD_DIR)/external/tools/ $(BUILD_DIR)/docs/
-BUILD_TREE+= $(BUILD_CPU)/external/
-BUILD_TREE+= $(BUILD_CPU)/tests/ $(BUILD_CPU)/tools/
+BUILD_TREE+= $(BUILD_CPU)/external/ $(BUILD_CPU)/tests/ $(BUILD_CPU)/tools/
+BUILD_TREE+= $(BUILD_CPU)/Femera/ $(BUILD_CPU)/fmr/
 
 STAGE_TREE+= $(STAGE_DIR)/bin/ $(STAGE_DIR)/libs/
 STAGE_TREE+= $(STAGE_CPU)/bin/ $(STAGE_CPU)/libs/
@@ -103,6 +104,7 @@ endif
 ifneq ("$(ADD_TO_LDPATH)","")# only true once during build
   export LD_LIBRARY_PATH:= $(ADD_TO_LDPATH)$(LD_LIBRARY_PATH)
 endif
+# TMP_LIBRARY_PATH_=$(LD_LIBRARY_PATH);
 
 ifeq ("$(FMR_COPYRIGHT)","")# only true once during build
   export FMR_COPYRIGHT:= cat data/copyright.txt | tr '\n' ' ' | tr -s ' '
@@ -144,8 +146,9 @@ endif
 ifeq ($(ENABLE_GOOGLETEST),ON)
   # Flags for compiling Femera tests
   FMRGTESTFLAGS := $(filter-out -Wundef,$(CXXFLAGS))
+  FMRGTESTFLAGS := $(filter-out -Weffc++,$(FMRGTESTFLAGS))
   # FMRGTESTFLAGS := $(filter-out -Winline,$(GTESTFLAGS))
-  FMRGTESTFLAGS += $(FMRFLAGS)
+  FMRGTESTFLAGS += $(FMRFLAGS) -I"$(INSTALL_CPU)/include"
 endif
 ifeq ($(ENABLE_GOOGLETEST),ON)
   LIST_EXTERNAL += googletest
@@ -218,6 +221,8 @@ INSTALL_EXTERNAL+= $(patsubst %,$(BUILD_CPU)/external/install-%.out, \
 
 GET_BATS:= $(patsubst %,get-%,$(BATS_MODS))
 
+FMROBJS += build/i7-7820HQ/fmr/perf.gtst
+
 # make recipes ================================================================
 # These .PHONY targets are intended for users.
 # external libfemera test tune
@@ -234,7 +239,12 @@ GET_BATS:= $(patsubst %,get-%,$(BATS_MODS))
 .PHONY: install-tools-done install-done remove-done
 
 # Real files, but considered always out of date.
-.PHONY: build/.md5
+.PHONY: build/.md5 # src/docs/src.dot
+
+# libmini libfull
+# pre-build-tests post-build-tests post-install-tests
+# done
+# $(BUILD_DIR)/VERSION
 
 # -----------------------------------------------------------------------------
 .SILENT:
@@ -244,15 +254,11 @@ GET_BATS:= $(patsubst %,get-%,$(BATS_MODS))
 .PRECIOUS: $(STAGE_DIR)/bin/fmr%
 .PRECIOUS: $(BUILD_DIR)/external/install-%.flags
 .PRECIOUS: $(BUILD_CPU)/external/install-%.flags
+.PRECIOUS: $(BUILD_CPU)/%.o
 
 #FIXME fixes error make[2] unlink /home/dwagner5/local/bin/ Is a directory
 #      while first running make tools?
 .PRECIOUS: $(INSTALL_DIR)/bin/
-
-# libmini libfull
-# pre-build-tests post-build-tests post-install-tests
-# done
-# $(BUILD_DIR)/VERSION
 
 # Primary named targets -------------------------------------------------------
 # These are intended for users.
@@ -263,10 +269,14 @@ femera: tools
 all: | intro
 	$(call timestamp,$@,-$(MAKEFLAGS))
 	$(MAKE) $(JSER) external
-	#(MAKE) $(JPAR) mini
+	$(MAKE) $(JPAR) mini
 	#$(MAKE) test tune
 	$(MAKE) $(JPAR) docs
 	$(MAKE) $(JSER) install
+
+mini: | intro
+	$(call timestamp,$@,$^)
+	$(MAKE) $(JLIM) $(FMROBJS)
 
 tools: | intro $(STAGE_TREE)
 	$(MAKE) $(JPAR) install-tools
@@ -321,7 +331,7 @@ purge:
 	-rm -rf external/*/*
 
 # Internal named targets ======================================================
-intro: build/copyright.txt build/docs/find-tdd-files.csv
+intro: build/copyright.txt build/docs/find-tdd-files.csv build/src-notest.eps
 intro: | $(BUILD_TREE)
 ifneq ("$(NOSA_INFO)","") # Run once during a build
 	$(info $(INFO) $(NOSA_INFO))
@@ -637,6 +647,23 @@ $(BUILD_DIR)/%.test.out: %.py
 	echo "$(<) needs a test, e.g., $(*).test.py" \
 	  >> $(BUILD_DIR)/$(*).test.out
 
+#NOTE Make target export requires at least Make 3.81.
+$(BUILD_CPU)/%.gtst.o : export TMPDIR = $(TEMP_DIR)
+$(BUILD_CPU)/%.gtst.o : src/%.gtst.cpp src/%.cpp src/%.hpp
+ifeq ($(ENABLE_GOOGLETEST),ON)
+	$(info $(CXX_) $(CXX) -c $< .. -o $(notdir $*.o))
+	$(CXX) $(FMRGTESTFLAGS) -c $< -o $@
+else
+	touch $@
+endif
+
+$(BUILD_CPU)/%.o : export TMPDIR = $(TEMP_DIR)
+$(BUILD_CPU)/%.o : src/%.cpp src/%.hpp
+	#-python tools/testy/check_code_graffiti.py $^
+	# rm -f $*.err $*.gtst.err
+	$(info $(CXX_) $(CXX) -c $< .. -o $(notdir $*.o))
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
 # Untested targets ------------------------------------------------------------
 
 %.test.bats: # Continue when tests do not exist.
@@ -649,6 +676,25 @@ $(BUILD_DIR)/%.test.out: %.py
 $(BUILD_CPU)/%.test,out: # Warn if no test.
 	$(info $(DBUG) did not find test: $(*).test.*)
 
+# Libraries -------------------------------------------------------------------
+$(BUILD_CPU)/femera.a : $(FMROBJS)
+
+# Executables -----------------------------------------------------------------
+#(BUILD_CPU)/%.gtst _ export LD_LIBRARY_PATH = $(TMP_LIBRARY_PATH)
+
+$(BUILD_CPU)/%.gtst : export TMPDIR = $(TEMP_DIR)
+$(BUILD_CPU)/%.gtst : $(BUILD_CPU)/%.gtst.o $(BUILD_CPU)/%.o
+ifeq ($(ENABLE_GOOGLETEST),ON)
+	$(info $(LINK) $(CXX) $@.o ... -o $(notdir $@))
+	$(CXX) $(CXXFLAGS) $@.o $(BUILD_CPU)/$*.o $(LDFLAGS) \
+	  -L$(INSTALL_CPU)/lib64 -o $@ $(LDLIBS)
+	$(TEST_EXEC) $@ #(call build_log,$(BUILD_DIR)/$*.gtst)
+else
+	$(info $(WARN) $@ not tested: Googletest disabled. )
+	-echo "WARNING: $@ not tested: Googletest disabled." >> $@.err
+	touch $@
+endif
+
 # hm ==========================================================================
 %/:
 	mkdir -p $(*)
@@ -659,9 +705,10 @@ build/%/.md5: | build/%/
 	touch $@
 
 build/modification.txt: data/modification.txt build/.md5
-	touch "build/modification.txt"
-ifneq ($(HOST_MD5),$(REPO_MD5))
-	cp "data/modification.txt" "build/modification.txt"
+ifeq ($(HOST_MD5),$(REPO_MD5))
+	> "$@" # Empty the file.
+else
+	cp "data/modification.txt" "$@"
 endif
 
 build/copyright.txt: data/copyright.txt build/modification.txt
@@ -676,6 +723,23 @@ endif
 build/test-files.txt: tools/list-test-files.sh build/.md5
 	-tools/list-test-files.sh > $@
 
+src/docs/src.dot: build/.md5
+	@external/tools/cinclude2dot --src src >$@ 2>build/src.dot.err
+          #  --groups is nice, too
+	#(info $(INFO) Source dependencies: $@)
+
+src/docs/src-notest.dot: src/docs/src.dot
+	@grep -v '\.gtst\.' $< > $@
+	#(info $(INFO) Dependencies without tests: $@)
+
+build/src-notest.eps: src/docs/src-notest.dot tools/src-inherit.sh
+ifeq ($(ENABLE_GRAPHVIZ),ON)
+	@tools/src-inherit.sh
+	@dot $< -Gsize="10.0,8.0" -Teps -o $@
+	#  -Gratio="fill" -Gsize="11.7,8.267!" -Gmargin=0
+	#(info $(INFO) Dependency graph: $@)
+endif
+
 build/docs/tdd-tests.txt: tools/list-tdd-tests.sh build/docs/.md5
 	-tools/list-tdd-tests.sh src/docs/*.tex src/docs/*.lyx > $@
 
@@ -683,9 +747,6 @@ build/docs/find-tdd-files.csv: build/docs/tdd-tests.txt build/test-files.txt
 build/docs/find-tdd-files.csv: tools/compare-lists.py
 	-tools/compare-lists.py build/docs/tdd-tests.txt build/test-files.txt \
 	  >$@ 2>build/docs/find-tdd-files.err
-	#(call label_test,$(PASS),$(DBUG), \
-	#  tools/compare-lists.py build/docs-tests.txt build/test-files.txt, \
-	#  build/find-docs-tdd-files)
 
 build/docs/%.pdf: src/docs/%.lyx src/docs/quick-start.tex
 ifeq ($(ENABLE_LYX),ON)
