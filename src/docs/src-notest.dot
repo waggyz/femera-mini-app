@@ -9,4 +9,6 @@ digraph "source tree" {
 	"Meter.hpp" -> "perf.hpp"
 	"perf.cpp" -> "perf.hpp"
 	"perf.hpp" -> "detail.hpp"
+	"Meter.hpp" -> "Meter.ipp"
+	"perf.hpp" -> "perf.ipp"
 }

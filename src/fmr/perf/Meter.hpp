@@ -12,23 +12,27 @@ public:// variables
   std::string unit_name ="units";
 public:// methods
   inline Timepoint start () noexcept;
+  inline Timepoint reset () noexcept;
   // The remaining methods could throw integer or floating point exceptions.
-  inline Elapsed add_busy_time_now (const Count flops=0,
+  //
+  inline Float add_busy_time_now ();
+  inline Float add_idle_time_now ();
+  inline Float add_count (const Count flops=0,
     const Count inp=0, const Count out=0, const Count units=1);
-  inline Elapsed add_idle_time_now ();
   //
   inline Float get_byte_n ();
   inline Float get_arithmetic_intensity ();
-  inline Float get_busy_time ();
-  inline Float get_idle_time ();
-  inline Float get_work_time ();
-  // Overall speeds
+  // Elapsed time
+  inline Float get_busy_s ();
+  inline Float get_idle_s ();
+  inline Float get_work_s ();
+  // Overall speed
   inline Float get_unit_speed ();
   inline Float get_flop_speed ();
   inline Float get_data_speed ();
   inline Float get_inp_speed ();
   inline Float get_out_speed ();
-  // Active speeds
+  // Active speed
   inline Float get_busy_unit_speed ();
   inline Float get_busy_flop_speed ();
   inline Float get_busy_data_speed ();
@@ -57,90 +61,8 @@ public:
 #endif
 };
 } }// end fmr::perf:: namespace
-// Inline definitions =========================================================
-namespace fmr {
-  inline perf::Timepoint perf::Meter::start () noexcept {
-    this->tick = perf::get_now_ns ();
-    return this->tick;
-  }
-  inline perf::Elapsed perf::Meter::add_busy_time_now (const perf::Count flops,
-      const perf::Count inp, const perf::Count out, const perf::Count units) {
-    const auto now = perf::get_now_ns ();
-    this->busy_ns += now - this->tick;
-    this->tick = now;
-    this->unit_n += units;
-    this->flop_n += flops;
-    this->binp_n += inp;
-    this->bout_n += out;
-    return this->busy_ns;
-  }
-  inline perf::Elapsed perf::Meter::add_idle_time_now () {
-    const auto now = perf::get_now_ns ();
-    this->idle_ns += now - this->tick;
-    this->tick = now;
-    return this->idle_ns;
-  }
-  inline perf::Float perf::Meter::get_byte_n () {
-    return perf::Float (this->binp_n + this->bout_n);
-  }
-  inline perf::Float perf::Meter::get_arithmetic_intensity () {
-    return perf::Float (this->flop_n) / this->get_byte_n ();
-  }
-  inline perf::Float perf::Meter::get_busy_time () {
-    return perf::Float (1e-9) * perf::Float (this->busy_ns);
-  }
-  inline perf::Float perf::Meter::get_idle_time () {
-    return perf::Float (1e-9) * perf::Float (this->idle_ns);
-  }
-  inline perf::Float perf::Meter::get_work_time () {
-    return perf::Float (1e-9) * perf::Float (this->busy_ns + this->idle_ns);
-  }
-  #if 0
-  //FIXME Are these useful?
-  inline perf::Float perf::Meter::get_life_time_now () {
-    return 1e-9 * perf::Float (perf::get_now_ns() - this->begin_at);
-  }
-  inline perf::Float perf::Meter::get_idle_time_now () {
-    return 1e-9 * perf::Float (
-      perf::get_now_ns() - this->begin_at - this->idle_ns - this->busy_ns);
-  }
-  inline perf::Float perf::Meter::get_life_flop_speed () {
-    return perf::Float (this->flop_n) / this->get_life_time();
-  }
-  #endif
-  // Overall speeds
-  inline perf::Float perf::Meter::get_unit_speed () {
-    return perf::Float (this->unit_n) / this->get_work_time ();
-  }
-  inline perf::Float perf::Meter::get_flop_speed () {
-    return perf::Float (this->flop_n) / this->get_work_time ();
-  }
-  inline perf::Float perf::Meter::get_data_speed () {
-    return perf::Float (this->binp_n + this->bout_n) / this->get_work_time();
-  }
-  inline perf::Float perf::Meter::get_inp_speed () {
-    return perf::Float (this->binp_n) / this->get_work_time();
-  }
-  inline perf::Float perf::Meter::get_out_speed () {
-    return perf::Float (this->bout_n) / this->get_work_time();
-  }
-  // Active speeds
-  inline perf::Float perf::Meter::get_busy_unit_speed () {
-    return perf::Float (this->unit_n) / this->get_busy_time ();
-  }
-  inline perf::Float perf::Meter::get_busy_flop_speed () {
-    return perf::Float (this->flop_n) / this->get_busy_time ();
-  }
-  inline perf::Float perf::Meter::get_busy_data_speed () {
-    return perf::Float (this->binp_n + this->bout_n) / this->get_busy_time();
-  }
-  inline perf::Float perf::Meter::get_busy_inp_speed () {
-    return perf::Float (this->binp_n) / this->get_busy_time();
-  }
-  inline perf::Float perf::Meter::get_busy_out_speed () {
-    return perf::Float (this->bout_n) / this->get_busy_time();
-  }
-}// end fmr:: namespace
+
+#include "Meter.ipp"
 
 #undef FMR_DEBUG
 //end FMR_HAS_PERF_METER_HPP
