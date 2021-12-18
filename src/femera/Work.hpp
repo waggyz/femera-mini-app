@@ -22,37 +22,44 @@ namespace proc {class Base;}
 namespace file {class Base;}
 namespace data {class Base;}
 namespace test {class Base; class Perf;}
+// Work uses the curiously recurrent template pattern (CRTP)
 
-template <class T>// Work uses the curiously recurrent template pattern (CRTP)
-class Work {// This is an abstract (pure virtual) class (interface).
+//template <class T>
+class Work {// This is an abstract (pure virtual) base class (interface).
   public:// Variables ---------------------------------------------------------
     std::string name = std::string("unknown work");
     // public because parent accesses derived instance variables
     std::shared_ptr <proc::Base> proc // Processing hierarchy
-      = static_cast < std::shared_ptr <proc::Base> > ( nullptr );
+      = static_cast <std::shared_ptr <proc::Base>> (nullptr);
     std::shared_ptr <data::Base> data // Data handling
-      = static_cast < std::shared_ptr <data::Base> > ( nullptr );
+      = static_cast <std::shared_ptr <data::Base>> (nullptr);
     std::shared_ptr <file::Base> file // File handling
-      = static_cast < std::shared_ptr <file::Base> > ( nullptr );
+      = static_cast <std::shared_ptr <file::Base>> (nullptr);
     std::shared_ptr <test::Base> test // Correctness and perf testing
-      = static_cast < std::shared_ptr <test::Base> > ( nullptr );
+      = static_cast <std::shared_ptr <test::Base>> (nullptr);
     //
     fmr::perf::Meter perf = fmr::perf::Meter();
-//  private:
+  private:
     // Task<Work>  task = Task<Work>(this);
-    std::deque <std::shared_ptr<T>> task_list = {};
+    //std::deque <std::shared_ptr<T>> task_list = {};
+    std::deque <std::shared_ptr<Work>> task_list = {};
     static const fmr::Dim_int info_d = 1;
   public:// Methods -----------------------------------------------------------
     // Work stack initialization and exit
-    virtual void init (int* argc, char** argv) =0;
-    virtual int  exit (int err);
+    virtual void init (int* argc, char** argv)=0;
+    virtual int  exit (int err)=0;
+    void add_task (std::shared_ptr<Work> W) {task_list.push_back(W);};
+    size_t get_task_n (){return task_list.size();};
+    std::shared_ptr<Work> get_task (int i){return task_list[i];}
     //
     Work (Work*) noexcept;
     //
     Work           ()           =default;
-    Work           (Work const&)=delete;// not copyable
-    void operator= (const Work&)=delete;
-    ~Work          ()           =default;
+    Work           (Work const&)=default;
+    Work& operator= (const Work&)=default;
+    //Work           (Work const&)=delete;// not copyable
+    //void operator= (const Work&)=delete;
+    virtual ~Work  ()           =default;
 };
 }//end femera:: namespace
 #include "Work.ipp"

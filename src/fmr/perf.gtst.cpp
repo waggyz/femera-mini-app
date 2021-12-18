@@ -6,9 +6,14 @@
 #include "mpi.h"
 #endif
 
+#include <limits>
+
 TEST(FmrPerfMeter, PerfIntSizes) {
   EXPECT_EQ(sizeof (fmr::perf::Timepoint), sizeof (fmr::perf::Elapsed));
   EXPECT_EQ(sizeof (fmr::perf::Timepoint), sizeof (fmr::perf::Count));
+}
+TEST(FmrPerfMeter, MaxPerfCountGT10G) {
+  EXPECT_GT(std::numeric_limits<fmr::perf::Count>::max(), 10000000000);
 }
 int main (int argc, char** argv) {
 #ifdef FMR_HAS_MPI
