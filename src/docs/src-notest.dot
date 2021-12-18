@@ -5,10 +5,15 @@ digraph "source tree" {
     fontsize="16";
     fontname="Helvetica";
 	clusterrank="local";
-	"Meter.cpp" -> "Meter.hpp"
 	"Meter.hpp" -> "perf.hpp"
+	"perf.hpp" -> "fmr.hpp"
 	"perf.cpp" -> "perf.hpp"
 	"perf.hpp" -> "detail.hpp"
+	"Work.hpp" -> "Meter.hpp"
+	"Work.cpp" -> "Work.hpp"
+	"Meter.cpp" -> "Meter.hpp"
+	"Work.hpp" -> "Work.ipp"
 	"Meter.hpp" -> "Meter.ipp"
 	"perf.hpp" -> "perf.ipp"
+	"form.hpp" -> "form.ipp"
 }

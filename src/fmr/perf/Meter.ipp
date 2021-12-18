@@ -3,6 +3,13 @@
 
 // Inline definitions
 namespace fmr {
+  inline std::string perf::Meter::get_unit () noexcept {
+    return this->unit_name;
+  }
+  inline std::string perf::Meter::set_unit (const std::string name) noexcept {
+    this->unit_name = name;
+    return this->unit_name;
+  }
   inline perf::Timepoint perf::Meter::start () noexcept {
     this->tick = perf::get_now_ns ();
     return this->tick;
@@ -20,13 +27,13 @@ namespace fmr {
     const auto now = perf::get_now_ns ();
     this->busy_ns += now - this->tick;
     this->tick = now;
-    return perf::Float (1e-9) * perf::Float (this->busy_ns);
+    return perf::Float (1.0e-9) * perf::Float (this->busy_ns);
   }
   inline perf::Float perf::Meter::add_idle_time_now () {
     const auto now = perf::get_now_ns ();
     this->idle_ns += now - this->tick;
     this->tick = now;
-    return perf::Float (1e-9) * perf::Float (this->idle_ns);
+    return perf::Float (1.0e-9) * perf::Float (this->idle_ns);
   }
   inline perf::Float perf::Meter::add_count (const perf::Count flops,
       const perf::Count inp, const perf::Count out, const perf::Count units) {
@@ -42,14 +49,17 @@ namespace fmr {
   inline perf::Float perf::Meter::get_arithmetic_intensity () {
     return perf::Float (this->flop_n) / this->get_byte_n ();
   }
+  inline perf::Float perf::Meter::get_ai () {
+    return perf::Meter::get_arithmetic_intensity ();
+  }
   inline perf::Float perf::Meter::get_busy_s () {
-    return perf::Float (1e-9) * perf::Float (this->busy_ns);
+    return perf::Float (1.0e-9) * perf::Float (this->busy_ns);
   }
   inline perf::Float perf::Meter::get_idle_s () {
-    return perf::Float (1e-9) * perf::Float (this->idle_ns);
+    return perf::Float (1.0e-9) * perf::Float (this->idle_ns);
   }
   inline perf::Float perf::Meter::get_work_s () {
-    return perf::Float (1e-9) * perf::Float (this->busy_ns + this->idle_ns);
+    return perf::Float (1.0e-9) * perf::Float (this->busy_ns + this->idle_ns);
   }
   #if 0
   //FIXME Are these useful?

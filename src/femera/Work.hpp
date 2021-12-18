@@ -1,13 +1,12 @@
 #ifndef FMR_HAS_WORK_HPP
 #define FMR_HAS_WORK_HPP
 /** */
+#include "../fmr/perf/Meter.hpp"
 //#include "Task.hpp"
-//#include "perf.hpp"
 //#include "vals.hpp"
 
 #include <string>
 #include <memory>     //TODO std::shared_ptr, std::make_shared
-
 #include <deque>
 
 #undef FMR_DEBUG
@@ -16,57 +15,66 @@
 #endif
 
 
-namespace Femera {
+namespace femera {
+// Forward-declares
+//class Proc; class File; class Data; class Test;
+namespace proc {class Base;}
+namespace file {class Base;}
+namespace data {class Base;}
+namespace test {class Base; class Perf;}
 
 template <class T>// Work uses the curiously recurrent template pattern (CRTP)
 class Work {// This is an abstract (pure virtual) class (interface).
-  // Variables ----------------------------------------------------------------
-  public:
-    std::string name ="unknown work";
+  public:// Variables ---------------------------------------------------------
+    std::string name = std::string("unknown work");
     // public because parent accesses derived instance variables
-    std::shared_ptr <Proc::Base> proc = nullptr;// Processing hierarchy
-    std::shared_ptr <Data::Base> data = nullptr;// Data handling
-    std::shared_ptr <File::Base> file = nullptr;// File handling
-    std::shared_ptr <Test::Base> test = nullptr;// Correctness and perf testing
-    //
-    // Task<Work>  task = Task<Work>(this);
-    std::deque <std::shared_ptr<T>> task_list = {};
+    std::shared_ptr <proc::Base> proc // Processing hierarchy
+      = static_cast < std::shared_ptr <proc::Base> > ( nullptr );
+    std::shared_ptr <data::Base> data // Data handling
+      = static_cast < std::shared_ptr <data::Base> > ( nullptr );
+    std::shared_ptr <file::Base> file // File handling
+      = static_cast < std::shared_ptr <file::Base> > ( nullptr );
+    std::shared_ptr <test::Base> test // Correctness and perf testing
+      = static_cast < std::shared_ptr <test::Base> > ( nullptr );
     //
     fmr::perf::Meter perf = fmr::perf::Meter();
-    //
-    int info_d = 1;
-  // Methods ------------------------------------------------------------------
-  public:
+//  private:
+    // Task<Work>  task = Task<Work>(this);
+    std::deque <std::shared_ptr<T>> task_list = {};
+    static const fmr::Dim_int info_d = 1;
+  public:// Methods -----------------------------------------------------------
     // Work stack initialization and exit
-//    virtual void init (int* argc, char** argv)=0;
-//    virtual int  exit (int  ierr)=0;
+    virtual void init (int* argc, char** argv) =0;
+    virtual int  exit (int err);
     //
-    Work (int* argc, char** argv)=0;
-    Work (Work*);
+    Work (Work*) noexcept;
     //
     Work           ()           =default;
     Work           (Work const&)=delete;// not copyable
     void operator= (const Work&)=delete;
-    virtual ~Work  ()=0;// pure virtual destructor indicates Work is abstract
+    ~Work          ()           =default;
 };
-class Proc; class File; class Data; class Test;// Forward-declares
-class Proc::Base; class File::Base; class Data::Base; class Test::Base;
-class Test::Perf;
-//
-class Main : Work<Main> {// Has top-level tasks
+}//end femera:: namespace
+#include "Work.ipp"
+
+#if 0
+namespace femera { namespace work {
+class Base : Work <Base> {// Has top-level tasks
   // Variables ----------------------------------------------------------------
   public:
-    std::string name ="Main";
+    std::string name ="Work base";
   // Methods ------------------------------------------------------------------
   public:
-    Main (int* argc, char** argv);
+//    Base (int* argc, char** argv){};
     //
-    Main ()                     =default;
-    Main (Main const&)          =delete;// not copyable
-    void operator= (const Main&)=delete;
-    ~Main ()                    =default;
+    Base ()                     =default;
+    Base (Base const&)          =delete;// not copyable
+    void operator= (const Base&)=delete;
+    ~Base ()                    =default;
 };
-}//end Femera namespace
+} }//end femera::work:: namespace
+#endif
+
 #undef FMR_DEBUG
 //end FMR_HAS_WORK_HPP
 #endif

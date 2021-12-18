@@ -20,7 +20,7 @@ TEST(FmrPerfMeter, Startup) {
   EXPECT_GT(perf.get_idle_s (), first_idle);
 }
 TEST(FmrPerfMeter, Naptime) {
-  perf.unit_name = "naps";
+  perf.set_unit ("naps");
   perf.add_count ();// default is add 1 unit ("naps")
   perf.add_idle_time_now ();// done preparing; get busy sleeping now
   ::usleep (1000);// 1 ms nap
@@ -29,6 +29,11 @@ TEST(FmrPerfMeter, Naptime) {
   EXPECT_GT(perf.get_unit_speed (),      0.50 * 1e+3);
   EXPECT_GT(perf.get_busy_unit_speed (), 0.80 * 1e+3);
   EXPECT_GT(perf.get_busy_unit_speed (), perf.get_unit_speed ());
+}
+TEST(FmrPerfMeter, ArithmeticIntensity) {
+  perf.add_count (1000, 500, 500, 0);
+  EXPECT_FLOAT_EQ(perf.get_ai (), 1.0);
+  EXPECT_FLOAT_EQ(perf.get_ai (), perf.get_arithmetic_intensity ());
 }
 int main (int argc, char** argv) {
 #ifdef FMR_HAS_MPI

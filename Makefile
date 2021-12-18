@@ -57,6 +57,9 @@ ifeq ($(CXX),icpc)
   endif
   AREXE:= xiar
 endif
+ifneq ($(FMR_MICRO_PREFIX),)
+  FMRFLAGS += -DFMR_MICRO_PREFIX=$(FMR_MICRO_PREFIX)
+endif
 FMRFLAGS += -I"$(STAGE_CPU)/include" -I"$(STAGEL_DIR)/include"
 FMRFLAGS += -I"$(INSTALL_CPU)/include" -I"$(INSTALL_DIR)/include"
 LDFLAGS += -L"$(STAGE_CPU)/lib" -L"$(STAGEL_DIR)/lib"
@@ -75,7 +78,7 @@ TEMP_DIR   := $(BUILD_CPU)/tmp
 # Subdirectories needed
 BUILD_TREE+= $(BUILD_DIR)/external/tools/ $(BUILD_DIR)/docs/
 BUILD_TREE+= $(BUILD_CPU)/external/ $(BUILD_CPU)/tests/ $(BUILD_CPU)/tools/
-BUILD_TREE+= $(BUILD_CPU)/Femera/ $(BUILD_CPU)/fmr/perf/
+BUILD_TREE+= $(BUILD_CPU)/femera/ $(BUILD_CPU)/fmr/perf/
 
 STAGE_TREE+= $(STAGE_DIR)/bin/ $(STAGE_DIR)/lib/
 STAGE_TREE+= $(STAGE_CPU)/bin/ $(STAGE_CPU)/lib/
@@ -229,7 +232,11 @@ GET_BATS:= $(patsubst %,get-%,$(BATS_MODS))
 
 CXXSRCS := $(CXXSRCS) $(shell find src/ -maxdepth 3 -name "*.cpp" -printf "%p ")
 
+TOPDEPS += src/fmr/fmr.hpp src/fmr/detail.hpp
+
+FMROUTS += $(BUILD_CPU)/fmr/perf.gtst.out
 FMROUTS += $(BUILD_CPU)/fmr/perf/Meter.gtst.out
+FMROUTS += $(BUILD_CPU)/femera/Work.gtst.out
 
 # make recipes ================================================================
 # These .PHONY targets are intended for users.
@@ -663,16 +670,16 @@ $(BUILD_DIR)/%.test.out: %.py
 #NOTE Make target export requires at least Make 3.81.
 
 $(BUILD_CPU)/%.gtst.o : export TMPDIR = $(TEMP_DIR)
-$(BUILD_CPU)/%.gtst.o : src/%.gtst.cpp src/%.cpp src/%.hpp src/%.ipp
+$(BUILD_CPU)/%.gtst.o : src/%.gtst.cpp src/%.cpp src/%.hpp src/%.ipp $(TOPDEPS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
-	$(info $(CXX_) -c $(CXX) $< .. -o $(notdir $@))
-	$(CXX) $(CXXGTEST) -c $(FMRFLAGS) $< -o $@
+	$(info $(CXX_) $(CXX) -c $< .. -o $(notdir $@))
+	$(CXX) -c $(CXXGTEST) $(FMRFLAGS) $< -o $@
 else
 	touch $@
 endif
 
 $(BUILD_CPU)/%.o : export TMPDIR = $(TEMP_DIR)
-$(BUILD_CPU)/%.o : src/%.cpp src/%.hpp src/%.ipp
+$(BUILD_CPU)/%.o : src/%.cpp src/%.hpp src/%.ipp $(TOPDEPS)
 	#-python tools/testy/check_code_graffiti.py $^
 	# rm -f $*.err $*.gtst.err
 	$(info $(CXX_) $(CXX) -c $< .. -o $(notdir $@))

@@ -3,7 +3,7 @@
 # Make action labels
 SPCS:=$(shell echo "       ")
 WRAP:=$(shell echo "  wrap ")
-CXX_:=$(shell echo "  C++  ")
+CXX_:=$(shell echo "   C++ ")
 CC__:=$(shell echo "   C   ")
 LINK:=$(shell echo "  link ")
 LIBS:=$(shell echo "   ar  ")

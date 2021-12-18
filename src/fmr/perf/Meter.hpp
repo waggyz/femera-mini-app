@@ -8,9 +8,10 @@
 namespace fmr { namespace perf {
 
 struct Meter {
-public:// variables
-  std::string unit_name ="units";
 public:// methods
+  inline std::string get_unit () noexcept;
+  inline std::string set_unit (const std::string name) noexcept;
+  //
   inline Timepoint start () noexcept;
   inline Timepoint reset () noexcept;
   // The remaining methods could throw integer or floating point exceptions.
@@ -22,6 +23,7 @@ public:// methods
   //
   inline Float get_byte_n ();
   inline Float get_arithmetic_intensity ();
+  inline Float get_ai ();// convenient synonym of get_arithmetic_intensity ()
   // Elapsed time
   inline Float get_busy_s ();
   inline Float get_idle_s ();
@@ -46,6 +48,7 @@ private:
   Count     flop_n  = 0;
   Count     binp_n  = 0;
   Count     bout_n  = 0;
+  std::string unit_name ="units";
 #if 0
 private:
   Timepoint begin   = get_now_ns ();//FIXME Useful?

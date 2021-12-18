@@ -12,6 +12,9 @@ CONTRIBUTOR_COPYRIGHT_FILE:=COPYRIGHT.contrib.txt
 
 FMR_VERBMAX:=11
 
+# replace prefix "u" with micro symbol "\u00b5" or Greek mu "\u03bc" (preferred)
+FMR_MICRO_PREFIX:="\u00b5"
+
 # Use parallel make jobs
 ENABLE_MAKEJOBS:=ON
 
