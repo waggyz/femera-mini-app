@@ -8,7 +8,7 @@
 
 namespace femera {
   inline Work::Work (Work* W)
-    noexcept : proc (W->proc), data (W->data), file (W->file), test (W->test) {
+    noexcept : proc (W->proc), file (W->file), data (W->data), test (W->test) {
   }
   inline Work_t Work::get_work (size_t i)
   noexcept {
