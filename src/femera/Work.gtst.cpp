@@ -55,6 +55,7 @@ TEST(TestableWork, AddGetTask) {
 TEST(TestableWork, PointerCopy) {
   auto T0=std::static_pointer_cast<Testable>(testable);
   auto T1=T0; T1->name = "changed name";
+  EXPECT_EQ(T0, T1);
   EXPECT_EQ(T0->name, "changed name");
 }
 TEST(TestableWork, ExitErr) {

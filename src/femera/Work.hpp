@@ -38,8 +38,6 @@ class Work {// This is an abstract (pure virtual) base class (interface).
     //
     fmr::perf::Meter perf = fmr::perf::Meter();
   private:
-    // Task<Work>  task = Task<Work>(this);
-    //std::deque <std::shared_ptr<T>> task_list = {};
     std::deque <Work_t> task_list = {};
     static const fmr::Dim_int info_d = 1;
   public:// Methods -----------------------------------------------------------
