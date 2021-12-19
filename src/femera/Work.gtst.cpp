@@ -33,7 +33,7 @@ class Testable : public Base <Testable> {
 };
 
 auto testable = std::make_shared<Testable> ();
-auto another  = std::make_shared<Testable> (testable);
+auto another  = std::make_shared<Testable> (*testable);
 
 TEST( TestableWork, TaskName ) {
   EXPECT_NE( testable, another );

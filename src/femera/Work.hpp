@@ -44,7 +44,7 @@ class Work {// This is an abstract (pure virtual) base class (interface).
     virtual void init (int* argc, char** argv) =0;
     virtual int  exit (int err) =0;
     //
-    inline Work (Work) noexcept;// preferred constructor
+    inline Work (Work*) noexcept;// preferred constructor
   public:// Built-in stuff ----------------------------------------------------
     Work ()           =default;
     Work (Work const&)=default;
