@@ -47,7 +47,8 @@ TEST( TestableWork, AddGetTask ) {
   EXPECT_EQ( testable->get_task_n(), 0);
   testable->add_task (another);
   EXPECT_EQ( testable->get_task_n(), 1);
-  auto T0 = testable->get_task(0);// same Work object, cast to derived class
+  auto T0 = testable->get_task(0);// Work object in task_list, cast to derived
+  EXPECT_EQ( typeid(T0), typeid(Testable_t));
   EXPECT_EQ( T0->name, "another Testable");// derived instance Testable::name
 }
 TEST( TestableWork, PointerCopy ) {

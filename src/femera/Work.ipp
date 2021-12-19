@@ -12,8 +12,7 @@ Work::Work (Work* W)
 }
 Work_t Work::get_work (size_t i)
 noexcept {
-  if (i<this->task_list.size()) { return this->task_list[i]; }
-  else { return nullptr; }
+  return (i < this->task_list.size()) ? this->task_list[i] : nullptr;
 }
 void Work::add_task (Work_t W)
 noexcept {
