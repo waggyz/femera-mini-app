@@ -6,8 +6,7 @@
 #include "mpi.h"
 #endif
 
-// Derive a Base class from abstract (pure virtual) Work...
-template <typename T>
+template <typename T>// Derive a Base class from abstract (pure virtual) Work...
 class Base : public femera::Work {
   public:
     void init (int*, char**) override {};
@@ -17,7 +16,7 @@ class Base : public femera::Work {
     std::shared_ptr<T> get_task (int i) {
       return std::static_pointer_cast<T> (get_work (i));
     };
-  protected:// make it clear that Base class needs to be inherited
+  protected:// make it clear that Base needs to be inherited
     Base ()            =default;
     Base (const Base&) =default;
     Base (Base&&)      =default;// pointer copyable
@@ -25,8 +24,7 @@ class Base : public femera::Work {
       (const Base<T>&) =default;
     ~Base ()           =default;
 };
-// ...then derive a CRTP concrete class from the Base class for testing.
-class Testable;
+class Testable;// ...then derive a CRTP concrete class from Base for testing.
 using Testable_t = std::shared_ptr <Testable>;
 class Testable : public Base <Testable> {
   public:
@@ -35,7 +33,7 @@ class Testable : public Base <Testable> {
 };
 
 auto testable = std::make_shared<Testable> ();
-auto another  = std::make_shared<Testable> (*testable);
+auto another  = std::make_shared<Testable> (testable);
 
 TEST( TestableWork, TaskName ) {
   EXPECT_NE( testable, another );
