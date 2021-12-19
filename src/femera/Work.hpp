@@ -11,46 +11,59 @@
 
 namespace femera {
 // Forward-declares
-//class Proc; class File; class Data; class Test;
+#if 0
 namespace proc { class Base; using Base_t = std::shared_ptr <Base>; }
 namespace data { class Base; using Base_t = std::shared_ptr <Base>; }
 namespace file { class Base; using Base_t = std::shared_ptr <Base>; }
 namespace test { class Base; using Base_t = std::shared_ptr <Base>;
                  class Perf; using Perf_t = std::shared_ptr <Perf>; }
+#endif
+//FIXME check if need, e.g., using Proc_t = class Proc : public femera::Work
+//FIXME or is, e.g., class femera::Proc_base better?
+namespace proc { class Base; }
+namespace data { class Base; }
+namespace file { class Base; }
+namespace test { class Base; class Perf; }
 
-// Classes derived from Work use the curiously recurrent template pattern (CRTP)
+using Proc_t = std::shared_ptr <proc::Base>;
+using Data_t = std::shared_ptr <data::Base>;
+using File_t = std::shared_ptr <file::Base>;
+using Test_t = std::shared_ptr <test::Base>;
+using Perf_t = std::shared_ptr <test::Perf>;
+
 class Work;
 using Work_t = std::shared_ptr <Work>;
 class Work {// This is an abstract (pure virtual) base class (interface).
+  // Derived Classes use the curiously recurrent template pattern (CRTP)
   public:// Variables ---------------------------------------------------------
+    fmr::perf::Meter time = fmr::perf::Meter ();
     std::string      name = std::string ("unknown work");
-    fmr::perf::Meter perf = fmr::perf::Meter ();
   protected:
-    proc::Base_t proc = static_cast <proc::Base_t> (nullptr);// processing hier
-    data::Base_t data = static_cast <data::Base_t> (nullptr);// data handling
-    file::Base_t file = static_cast <file::Base_t> (nullptr);// file handling
-    test::Base_t test = static_cast <test::Base_t> (nullptr);// correct and perf
+    Proc_t proc = static_cast <Proc_t> (nullptr);// processing hierarchy
+    Data_t data = static_cast <Data_t> (nullptr);// data handling
+    File_t file = static_cast <File_t> (nullptr);// file handling
+    Test_t test = static_cast <Test_t> (nullptr);// correctness and perf testing
   private:
     std::deque <Work_t> task_list = {};
     static const fmr::Dim_int info_d = 1;
   protected:// Methods --------------------------------------------------------
-    inline Work_t get_work   (size_t) noexcept;
+    Work_t get_work   (size_t) noexcept;
   public:
     //<Derived>_t get_task   (size_t) defined in derived and returns that type
-    inline void   add_task   (Work_t) noexcept;
-    inline size_t get_task_n ()       noexcept;
+    size_t add_task   (Work_t) noexcept;
+    size_t get_task_n ()       noexcept;
     //
     // Work stack initialization and exit
     virtual void init (int* argc, char** argv) =0;
     virtual int  exit (int err) =0;
     //
-    inline Work (Work*) noexcept;// preferred constructor
+    Work (Work*) noexcept;// preferred constructor
   public:// Built-in stuff ----------------------------------------------------
-    Work ()           =default;
-    Work (Work const&)=default;
+    Work ()            =default;
+    Work (Work const&) =default;
     Work& operator=
-         (const Work&)=default;
-    virtual ~Work ()  =default;
+      (const Work&)    =default;
+    virtual ~Work ()   =default;
 };
 }//end femera:: namespace
 

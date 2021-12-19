@@ -33,19 +33,19 @@ class Testable : public Base <Testable> {
 };
 
 auto testable = std::make_shared<Testable> ();
-auto another  = std::make_shared<Testable> (*testable);
+auto another1 = std::make_shared<Testable> (*testable);
 
 TEST( TestableWork, TaskName ) {
-  EXPECT_NE( testable, another );
+  EXPECT_NE( testable, another1 );
   EXPECT_EQ( testable->name, "testable class derived from Base");
-  EXPECT_EQ( another ->name, "testable class derived from Base");
-  another->name ="another Testable";
+  EXPECT_EQ( another1 ->name, "testable class derived from Base");
+  another1->name ="another Testable";
   EXPECT_EQ( testable->name, "testable class derived from Base");
-  EXPECT_EQ( another ->name, "another Testable");
+  EXPECT_EQ( another1 ->name, "another Testable");
 }
 TEST( TestableWork, AddGetTask ) {
   EXPECT_EQ( testable->get_task_n(), 0);
-  testable->add_task (another);
+  testable->add_task (another1);
   EXPECT_EQ( testable->get_task_n(), 1);
   auto T0 = testable->get_task(0);// Work object in task_list, cast to derived
   EXPECT_EQ( typeid(T0), typeid(Testable_t));
@@ -56,6 +56,11 @@ TEST( TestableWork, PointerCopy ) {
   auto T1 = T0; T1->name = "changed name";
   EXPECT_EQ( T0, T1 );
   EXPECT_EQ( T0->name, "changed name");
+}
+TEST( TestableWork, PerfMeter ) {
+  another1->time.add_idle_time_now ();
+  testable->time.add_idle_time_now ();
+  EXPECT_GT( testable->time.get_idle_s (), another1->time.get_idle_s () );
 }
 TEST( TestableWork, ExitErr ) {
   EXPECT_EQ( testable->exit(0), 42);

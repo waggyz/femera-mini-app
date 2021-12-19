@@ -20,7 +20,7 @@ TEST(FmrPerfMeter, Startup) {
   EXPECT_GT(perf.get_idle_s (), first_idle);
 }
 TEST(FmrPerfMeter, Naptime) {
-  perf.set_unit ("naps");
+  perf.set_unit_name ("naps");
   perf.add_count ();// default is add 1 unit ("naps")
   perf.add_idle_time_now ();// done preparing; get busy sleeping now
   ::usleep (1000);// 1 ms nap

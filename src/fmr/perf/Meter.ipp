@@ -3,18 +3,25 @@
 
 // Inline definitions
 namespace fmr {
-  inline std::string perf::Meter::get_unit () noexcept {
+  inline perf::Meter::Meter (const std::string units)
+    noexcept : unit_name (units) {
+  }
+  inline std::string perf::Meter::get_unit_name ()
+  noexcept {
     return this->unit_name;
   }
-  inline std::string perf::Meter::set_unit (const std::string name) noexcept {
+  inline std::string perf::Meter::set_unit_name (const std::string name)
+  noexcept {
     this->unit_name = name;
     return this->unit_name;
   }
-  inline perf::Timepoint perf::Meter::start () noexcept {
+  inline perf::Timepoint perf::Meter::start ()
+  noexcept {
     this->tick = perf::get_now_ns ();
     return this->tick;
   }
-  inline perf::Timepoint perf::Meter::reset () noexcept {
+  inline perf::Timepoint perf::Meter::reset ()
+  noexcept {
     this->idle_ns = 0;
     this->busy_ns = 0;
     this->unit_n  = 0;
