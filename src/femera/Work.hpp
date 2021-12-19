@@ -18,48 +18,46 @@
 namespace femera {
 // Forward-declares
 //class Proc; class File; class Data; class Test;
-namespace proc {class Base;}
-namespace file {class Base;}
-namespace data {class Base;}
-namespace test {class Base; class Perf;}
-// Work uses the curiously recurrent template pattern (CRTP)
+namespace proc { class Base; using Base_t = std::shared_ptr <Base>; }
+namespace data { class Base; using Base_t = std::shared_ptr <Base>; }
+namespace file { class Base; using Base_t = std::shared_ptr <Base>; }
+namespace test { class Base; using Base_t = std::shared_ptr <Base>;
+  class Perf; using Perf_t = std::shared_ptr <Perf>; }
 
-//template <class T>
+// Classes derived from Work use the curiously recurrent template pattern (CRTP)
+class Work;
+using Work_t = std::shared_ptr<Work>;
 class Work {// This is an abstract (pure virtual) base class (interface).
   public:// Variables ---------------------------------------------------------
     std::string name = std::string("unknown work");
-    // public because parent accesses derived instance variables
-    std::shared_ptr <proc::Base> proc // Processing hierarchy
-      = static_cast <std::shared_ptr <proc::Base>> (nullptr);
-    std::shared_ptr <data::Base> data // Data handling
-      = static_cast <std::shared_ptr <data::Base>> (nullptr);
-    std::shared_ptr <file::Base> file // File handling
-      = static_cast <std::shared_ptr <file::Base>> (nullptr);
-    std::shared_ptr <test::Base> test // Correctness and perf testing
-      = static_cast <std::shared_ptr <test::Base>> (nullptr);
+    // public because parent accesses derived instance variables?
+    proc::Base_t proc = static_cast <proc::Base_t> (nullptr);// Processing hierarchy
+    data::Base_t data = static_cast <data::Base_t> (nullptr);// Data handling
+    file::Base_t file = static_cast <file::Base_t> (nullptr);// File handling
+    test::Base_t test = static_cast <test::Base_t> (nullptr);// Correctness and perf testing
     //
     fmr::perf::Meter perf = fmr::perf::Meter();
   private:
     // Task<Work>  task = Task<Work>(this);
     //std::deque <std::shared_ptr<T>> task_list = {};
-    std::deque <std::shared_ptr<Work>> task_list = {};
+    std::deque <Work_t> task_list = {};
     static const fmr::Dim_int info_d = 1;
   public:// Methods -----------------------------------------------------------
     // Work stack initialization and exit
     virtual void init (int* argc, char** argv)=0;
     virtual int  exit (int err)=0;
-    void add_task (std::shared_ptr<Work> W) {task_list.push_back(W);};
+    //
+    Work_t get_work   (int i){return task_list[i];}
+    void   add_task   (Work_t W) {task_list.push_back(W);};
     size_t get_task_n (){return task_list.size();};
-    std::shared_ptr<Work> get_task (int i){return task_list[i];}
     //
     Work (Work*) noexcept;
     //
-    Work           ()           =default;
-    Work           (Work const&)=default;
-    Work& operator= (const Work&)=default;
-    //Work           (Work const&)=delete;// not copyable
-    //void operator= (const Work&)=delete;
-    virtual ~Work  ()           =default;
+    Work ()           =default;
+    Work (Work const&)=default;
+    Work& operator=
+         (const Work&)=default;
+    virtual ~Work ()  =default;
 };
 }//end femera:: namespace
 #include "Work.ipp"

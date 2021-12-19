@@ -13,12 +13,15 @@ class Base : public femera::Work {
     std::string name = std::string("Base derived from Work");
   public:
     void init (int*, char**) override {};
-    int  exit (int err) override {const auto t=T::task_exit (err);return err==0?t:err;}
+    int  exit (int err) override {
+      const auto t=T::task_exit (err);return err==0?t:err; }
+    std::shared_ptr<T> get_task (int i){
+      return std::static_pointer_cast<T>(get_work (i));};
   protected://make it clear that Base class needs to be inherited
-    Base ()                     =default;
-    Base ( const Base&)          =default;
+    Base ()                  =default;
+    Base ( const Base&)      =default;
     Base (  Base&&)          =default;
-    //Base ( Base& const)          =delete;// not copyable
+    //Base ( Base& const)         =delete;// not copyable
     //void operator= (const Base&)=default;
     //~Testable ()                    =default;
 };
@@ -30,25 +33,29 @@ class Testable : public Base <Testable> {
 };
 
 auto testable = std::make_shared <Testable> ();
+auto another  = std::make_shared <Testable> (*testable);
 
 TEST(TestableWork, WorkName) {
-  auto another  = std::make_shared <Testable> (*testable);
   EXPECT_EQ(testable->name, "testable class derived from Base");
   EXPECT_EQ(another ->name, "testable class derived from Base");
-  another->name="another instance derived from Base";
+  another->name="another Testable";
   EXPECT_EQ(testable->name, "testable class derived from Base");
-  EXPECT_EQ(another ->name, "another instance derived from Base");
+  EXPECT_EQ(another ->name, "another Testable");
 }
-TEST(TestableWork, AddTask) {
+TEST(TestableWork, AddGetTask) {
   EXPECT_EQ(testable->get_task_n(), 0);
-  auto another  = std::make_shared <Testable> (*testable);
-  another->name="another instance derived from Base";
   testable->add_task(another);
   EXPECT_EQ(testable->get_task_n(), 1);
-  EXPECT_EQ(testable->get_task(0)->name, "unknown work");
-  //auto W = testable->get_task(0);
-  auto T0=std::static_pointer_cast<Testable>(testable->get_task(0));
-  EXPECT_EQ(T0->name, "another instance derived from Base");
+  auto W0 = testable->get_work(0);// type is femera::Work_t
+  auto T0 = testable->get_task(0);// same Work object, cast to derived class
+  EXPECT_EQ(T0, W0);
+  EXPECT_EQ(W0->name, "unknown work");// abstract class Work::name
+  EXPECT_EQ(T0->name, "another Testable");// derived instance Testable::name
+}
+TEST(TestableWork, PointerCopy) {
+  auto T0=std::static_pointer_cast<Testable>(testable);
+  auto T1=T0; T1->name = "changed name";
+  EXPECT_EQ(T0->name, "changed name");
 }
 TEST(TestableWork, ExitErr) {
   EXPECT_EQ(testable->exit(0), 42);

@@ -28,9 +28,9 @@ ifeq ($(shell test -e file_name && echo -n yes),yes)
 endif
 #------------------------------------------------------------------------------
 ifeq ($(CXX),g++)
-  #ifeq ($(ENABLE_MPI),ON)
-  #  CXX:= mpic++
-  #endif
+  ifeq ($(ENABLE_MPI),ON)
+    CXX:= mpic++
+  endif
   OPTFLAGS:= $(shell cat data/gcc4.flags | tr '\n' ' ' | tr -s ' ')
   CXXFLAGS+= -std=c++11 -g $(OPTFLAGS) -flto -fpic -fstrict-enums
   # Dependency flags
