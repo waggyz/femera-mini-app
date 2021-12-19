@@ -6,36 +6,24 @@
 #ifdef FMR_DEBUG
 #endif
 
-//template <class T>
-//femera::Work<T>::Work (Work* W) noexcept
-//femera::Work::Work (Work* W) noexcept
-//  : proc (W.proc), file (W.file), test (W.test) {}
-femera::Work::Work (Work* W) noexcept
-  : proc (W->proc), file (W->file), test (W->test) {}
-#if 0
-template <class T>
-void femera::Work<T>::init (int* argc, char** argv) {
-  //static_cast<T*>(this)->init (argc, argv);
-  T::task_init (argc, argv);
-}
-#endif
-//template <class T>
-//int femera::Work<T>::exit (int err) {
-int femera::Work::exit (int err) { return err;
-  //const auto task_err = T::task_exit (err);
-  //return err==0 ? task_err : err;
-}
 namespace femera {
-#if 0
-  template <class T>
-  femera::Work<T>::Work (int* argc, char** argv) noexcept {
-    proc = std::make_shared <femera::Proc::Base>(this, argc, argv);
-    data = std::make_shared <femera::Data::Base>(this, argc, argv);
-    file = std::make_shared <femera::File::Base>(this, argc, argv);
-    test = std::make_shared <femera::Test::Base>(this, argc, argv);
-  }
-#endif
-}// end Femera namespace
+Work::Work (Work* W)
+  noexcept : proc (W->proc), file (W->file), test (W->test) {
+}
+Work_t Work::get_work (size_t i)
+noexcept {
+  if (i<this->task_list.size()) { return this->task_list[i]; }
+  else { return nullptr; }
+}
+void Work::add_task (Work_t W)
+noexcept {
+  this->task_list.push_back(W);
+}
+size_t Work::get_task_n ()
+noexcept {
+  return this->task_list.size();
+}
+}// end femera:: namespace
 
 #undef FMR_DEBUG
 //end FMR_HAS_WORK_IPP

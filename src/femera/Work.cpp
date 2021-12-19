@@ -12,11 +12,18 @@
 
 #undef FMR_DEBUG
 
-/*
-  template <class T>
-  void init (int* argc, char** argv);
-    static_cast<T*>(this)->init_task (int* argc, char** argv);
-*/
+
+#if 0
+void femera::Work<T>::init (int* argc, char** argv) {
+  //static_cast<T*>(this)->init (argc, argv);
+  T::task_init (argc, argv);
+}
+#endif
+int femera::Work::exit (int err) { return err;
+  //const auto task_err = T::task_exit (err);
+  //return err==0 ? task_err : err;
+}
+
 
 
 
