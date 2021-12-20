@@ -17,6 +17,8 @@ public:
   void init (int*, char**) override {};
   int  exit (int err) override;
   std::shared_ptr<T> get_task (int i);
+private:
+  T* derived_ptr (Base* ptr);
 protected:// make it clear that Base needs to be inherited
   Base ()            =default;
   Base (const Base&) =default;
@@ -25,27 +27,35 @@ protected:// make it clear that Base needs to be inherited
     (const Base<T>&) =default;
   ~Base ()           =default;
 };
-#define DERIVED static_cast<T*>(this)
-template <typename T>
-int Base<T>::exit (int err) {
-  err = femera::Work::exit (err);// exit task stack, then exit this task
-  return err==0 ? DERIVED->task_exit (err) : err;//TODO try/catch
-}
-template <typename T>
-std::shared_ptr<T> get_task (int i) {
-  return std::static_pointer_cast<T> (get_work (i));
-}
-#undef DERIVED
 class Testable;// ...then derive a CRTP concrete class from Base for testing.
 using Testable_t = std::shared_ptr <Testable>;
 class Testable : public Base <Testable> {
-  public:
-    Testable () {this->name ="testable class derived from Base"; }
-     int task_exit (int) {return 42;}//TODO throw and return void
-};
+public:
+  Testable ();
+  int task_exit (int);
+};//---------------------------------------------------------------------------
+inline Testable::Testable (){
+  this->name ="testable class derived from Base";
+}
+inline int Testable::task_exit (int) {//TODO throw and return void
+  return 42;
+}
+template <typename T> inline
+T* Base<T>::derived_ptr (Base* ptr){
+  return static_cast<T*>(ptr);
+}
+template <typename T>
+int Base<T>::exit (int err) {
+  err = femera::Work::exit (err);// exit task stack, then exit this task
+  return err==0 ? Base::derived_ptr(this)->task_exit (err) : err;//TODO try/catch
+}
+template <typename T>
+std::shared_ptr<T> Base<T>::get_task (int i) {
+  return std::static_pointer_cast<T> (this->get_work (i));
+}//----------------------------------------------------------------------------
 auto testable = std::make_shared<Testable> ();
 auto another1 = std::make_shared<Testable> (*testable);
-
+//-----------------------------------------------------------------------------
 TEST( TestableWork, ClassSize ) {
   const int class_size = 224, instance_size=16;
   EXPECT_EQ( sizeof(femera::Work::Task_list_t), 80);
