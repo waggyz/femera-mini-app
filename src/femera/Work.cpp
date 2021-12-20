@@ -6,11 +6,9 @@
 //#include <memory>     // std::unique_ptr, std::make_unique
 
 #undef FMR_DEBUG
-#include <cstdio>     // std::printf
 #ifdef FMR_DEBUG
+#include <cstdio>     // std::printf
 #endif
-
-#undef FMR_DEBUG
 
 
 #if 0
@@ -19,10 +17,18 @@ void femera::Work<T>::init (int* argc, char** argv) {
   T::task_init (argc, argv);
 }
 #endif
-int femera::Work::exit (int err) { return err;
-  //const auto task_err = T::task_exit (err);
-  //return err==0 ? task_err : err;
+int femera::Work::exit (int err) {
+  while (! this->task_list.empty ()) {
+    auto W = task_list.back ();// Exit in reverse order.
+    if (W != static_cast <Work_t> (nullptr)) {
+      const auto Werr = W->exit (err);
+      err = (Werr==0) ? err : Werr;
+    }
+    this->task_list.pop_back ();
+  }
+  return err;
 }
+#undef FMR_DEBUG
 
 
 

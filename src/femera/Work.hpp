@@ -21,7 +21,7 @@ namespace test { class Base; using Base_t = std::shared_ptr <Base>;
 //FIXME is, e.g., class femera::Proc_base better?
 namespace proc { class Base; }// class Main; }
 namespace file { class Base; }// class Flog; }
-namespace data { class Base; }// class Fake; }//FIXME not Fake, Builtin?
+namespace data { class Base; }// class Fake; }//FIXME not Fake; Builtin?
 namespace test { class Base; }// class Self; class Perf; }
 
 using Proc_t = std::shared_ptr <proc::Base>;
@@ -35,15 +35,16 @@ class Work;
 using Work_t = std::shared_ptr <Work>;
 class Work {// This is an abstract (pure virtual) base class (interface).
   // Derived Classes use the curiously recurrent template pattern (CRTP).
-  using Task_list_t = std::deque <Work_t>;
   public:// Variables ---------------------------------------------------------
+    using Task_list_t = std::deque <Work_t>;
     fmr::perf::Meter time = fmr::perf::Meter ();
     std::string      name = std::string      ("unknown work");
   protected:
-    Proc_t proc = static_cast <Proc_t> (nullptr);// processing hierarchy
-    File_t file = static_cast <File_t> (nullptr);// file handling
-    Data_t data = static_cast <Data_t> (nullptr);// data handling
-    Test_t test = static_cast <Test_t> (nullptr);// correctness, perf testing
+    //Proc_t proc = static_cast <Proc_t> (nullptr);
+    Proc_t proc = nullptr;// processing hierarchy
+    File_t file = nullptr;// file handling
+    Data_t data = nullptr;// data handling
+    Test_t test = nullptr;// correctness and performance testing
   private:
     Task_list_t               task_list ={};
     static const fmr::Dim_int info_d    = 1;
@@ -55,10 +56,12 @@ class Work {// This is an abstract (pure virtual) base class (interface).
     size_t get_task_n ()       noexcept;
     //
     // Work stack initialization and exit
-    virtual void init (int* argc, char** argv) =0;
-    virtual int  exit (int err)                =0;
+    virtual void init (int* argc, char** argv) =0;//NOTE at least 1 pure virtual
+    virtual int  exit (int err);// default is to exit task_list in reverse
     //
-    Work (Work*) noexcept;// preferred constructor
+//    virtual void FIXME_pure_virtual ()=0;// Remove this later.
+    //
+    Work (Work*) noexcept;// use this constructor after proc,file,data,test init
   public:// Built-in stuff ----------------------------------------------------
     Work ()            =default;
     Work (Work const&) =default;

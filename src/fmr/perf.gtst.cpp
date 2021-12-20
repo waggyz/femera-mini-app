@@ -8,11 +8,11 @@
 
 #include <limits>
 
-TEST(FmrPerfMeter, PerfIntSizes) {
+TEST(FmrPerf, PerfIntSizes) {
   EXPECT_EQ(sizeof (fmr::perf::Timepoint), sizeof (fmr::perf::Elapsed));
   EXPECT_EQ(sizeof (fmr::perf::Timepoint), sizeof (fmr::perf::Count));
 }
-TEST(FmrPerfMeter, MaxPerfCountGT10G) {
+TEST(FmrPerf, MaxPerfCountGT10G) {
   EXPECT_GT(std::numeric_limits<fmr::perf::Count>::max(), 10000000000);
 }
 int main (int argc, char** argv) {
