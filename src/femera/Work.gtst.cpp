@@ -31,7 +31,7 @@ protected:// make it clear that Base needs to be inherited
   ~Base ()           =default;
 };
 template <typename T>
-int Base::exit (int err) {
+int Base<T>::exit (int err) {
   err = femera::Work::exit (err);// exit task stack, then exit this task
   return err==0 ? DERIVED->task_exit (err) : err;//TODO try/catch
 }
