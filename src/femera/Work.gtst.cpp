@@ -13,15 +13,10 @@
 
 template <typename T>// Derive a Base class from abstract (pure virtual) Work...
 class Base : public femera::Work {
-#define DERIVED static_cast<T*>(this)
 public:
   void init (int*, char**) override {};
   int  exit (int err) override;
-  std::shared_ptr<T> get_task (int i) {
-    return std::static_pointer_cast<T> (get_work (i));
-  }
-//private:
-//  T* const derived = static_cast<T*>(this);
+  std::shared_ptr<T> get_task (int i);
 protected:// make it clear that Base needs to be inherited
   Base ()            =default;
   Base (const Base&) =default;
@@ -30,10 +25,15 @@ protected:// make it clear that Base needs to be inherited
     (const Base<T>&) =default;
   ~Base ()           =default;
 };
+#define DERIVED static_cast<T*>(this)
 template <typename T>
 int Base<T>::exit (int err) {
   err = femera::Work::exit (err);// exit task stack, then exit this task
   return err==0 ? DERIVED->task_exit (err) : err;//TODO try/catch
+}
+template <typename T>
+std::shared_ptr<T> get_task (int i) {
+  return std::static_pointer_cast<T> (get_work (i));
 }
 #undef DERIVED
 class Testable;// ...then derive a CRTP concrete class from Base for testing.
