@@ -11,16 +11,17 @@
 #include <cstdio>     // std::printf
 #endif
 //=============================================================================
-template <typename T>// Derive a Base class from abstract (pure virtual) Work...
+// Template a class derived from the abstract (pure virtual) Work class...
+template <typename T>
 class Base : public femera::Work {
 private:
   using Derived_t = std::shared_ptr<T>;
 public:
   void      init     (int*, char**) override;
   int       exit     (int err)      override;
-  Derived_t get_task (int i);
+  Derived_t get_task (size_t i);
 private:
-  T* cast_to_derived (Base* ptr);
+  T* derived (Base* ptr);
 protected:// make it clear that Base needs to be inherited
   Base ()            =default;
   Base (const Base&) =default;
@@ -41,23 +42,24 @@ Testable::Testable () {
   this->name ="testable class derived from Base";
 }
 inline
-int Testable::task_exit (int) {//TODO throw and return void
+int Testable::task_exit (int) {//TODO throw err and return void
   return 42;
 }//----------------------------------------------------------------------------
 template <typename T> inline
-T* Base<T>::cast_to_derived (Base* ptr){
+T* Base<T>::derived (Base* ptr) {
   return static_cast<T*>(ptr);
 }
 template <typename T> inline
-void Base<T>:: init (int*, char**)  {
+void Base<T>:: init (int*, char**) {
 }
 template <typename T> inline
 int Base<T>::exit (int err) {
-  err = femera::Work::exit (err);// exit task stack, then exit this task
-  return err==0 ? Base::cast_to_derived(this)->task_exit (err) : err;//TODO try/catch
+  err = femera::Work::exit (err);// Exit the task stack, then exit this task.
+  return (err==0)
+    ? Base::derived(this)->task_exit (err) : err;//TODO try/catch
 }
 template <typename T> inline
-std::shared_ptr<T> Base<T>::get_task (int i) {
+std::shared_ptr<T> Base<T>::get_task (size_t i) {
   return std::static_pointer_cast<T> (this->get_work (i));
 }//============================================================================
 auto testable = std::make_shared<Testable> ();
