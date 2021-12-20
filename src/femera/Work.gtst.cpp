@@ -44,12 +44,12 @@ template <typename T> inline
 T* Base<T>::derived_ptr (Base* ptr){
   return static_cast<T*>(ptr);
 }
-template <typename T>
+template <typename T> inline
 int Base<T>::exit (int err) {
   err = femera::Work::exit (err);// exit task stack, then exit this task
   return err==0 ? Base::derived_ptr(this)->task_exit (err) : err;//TODO try/catch
 }
-template <typename T>
+template <typename T> inline
 std::shared_ptr<T> Base<T>::get_task (int i) {
   return std::static_pointer_cast<T> (this->get_work (i));
 }//----------------------------------------------------------------------------
