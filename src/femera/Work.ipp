@@ -23,6 +23,17 @@ namespace femera {
   noexcept {
     return this->task_list.size ();
   }
+  inline int Work::exit (int err) {
+    while (! this->task_list.empty ()) {
+      auto W = task_list.back ();// Exit in reverse order.
+      if (W != nullptr) {//static_cast <Work_t> (nullptr)) {
+	const auto Werr = W->exit (err);
+	err = (Werr==0) ? err : Werr;
+      }
+      this->task_list.pop_back ();
+    }
+    return err;
+  }
 }// end femera:: namespace
 
 #undef FMR_DEBUG

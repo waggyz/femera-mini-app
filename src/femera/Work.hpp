@@ -64,7 +64,7 @@ class Work {// This is an abstract (pure virtual) base class (interface).
     Work (Work*) noexcept;// use this constructor after proc,file,data,test init
   public:// Built-in stuff ----------------------------------------------------
     Work ()            =default;
-    Work (Work const&) =default;
+    Work (Work const&) =default;// copyable
     Work& operator=
       (const Work&)    =default;
     virtual ~Work ()   =default;

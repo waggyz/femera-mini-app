@@ -10,63 +10,67 @@
 #ifdef FMR_DEBUG
 #include <cstdio>     // std::printf
 #endif
-
+//=============================================================================
 template <typename T>// Derive a Base class from abstract (pure virtual) Work...
 class Base : public femera::Work {
-public:
-  void init (int*, char**) override {};
-  int  exit (int err) override;
-  std::shared_ptr<T> get_task (int i);
 private:
-  T* derived_ptr (Base* ptr);
+  using Derived_t = std::shared_ptr<T>;
+public:
+  void      init     (int*, char**) override;
+  int       exit     (int err)      override;
+  Derived_t get_task (int i);
+private:
+  T* cast_to_derived (Base* ptr);
 protected:// make it clear that Base needs to be inherited
   Base ()            =default;
   Base (const Base&) =default;
-  Base (Base&&)      =default;// pointer copyable
-  Base<T>& operator=
-    (const Base<T>&) =default;
+  Base (Base&&)      =default;// shallow (pointer) copyable
+  Base& operator =
+    (const Base&)    =default;
   ~Base ()           =default;
-};
+};//---------------------------------------------------------------------------
 class Testable;// ...then derive a CRTP concrete class from Base for testing.
 using Testable_t = std::shared_ptr <Testable>;
 class Testable : public Base <Testable> {
 public:
   Testable ();
   int task_exit (int);
-};//---------------------------------------------------------------------------
-inline Testable::Testable (){
+};//===========================================================================
+inline
+Testable::Testable () {
   this->name ="testable class derived from Base";
 }
-inline int Testable::task_exit (int) {//TODO throw and return void
+inline
+int Testable::task_exit (int) {//TODO throw and return void
   return 42;
+}//----------------------------------------------------------------------------
+template <typename T> inline
+T* Base<T>::cast_to_derived (Base* ptr){
+  return static_cast<T*>(ptr);
 }
 template <typename T> inline
-T* Base<T>::derived_ptr (Base* ptr){
-  return static_cast<T*>(ptr);
+void Base<T>:: init (int*, char**)  {
 }
 template <typename T> inline
 int Base<T>::exit (int err) {
   err = femera::Work::exit (err);// exit task stack, then exit this task
-  return err==0 ? Base::derived_ptr(this)->task_exit (err) : err;//TODO try/catch
+  return err==0 ? Base::cast_to_derived(this)->task_exit (err) : err;//TODO try/catch
 }
 template <typename T> inline
 std::shared_ptr<T> Base<T>::get_task (int i) {
   return std::static_pointer_cast<T> (this->get_work (i));
-}//----------------------------------------------------------------------------
+}//============================================================================
 auto testable = std::make_shared<Testable> ();
 auto another1 = std::make_shared<Testable> (*testable);
 //-----------------------------------------------------------------------------
 TEST( TestableWork, ClassSize ) {
-  const int class_size = 224, instance_size=16;
   EXPECT_EQ( sizeof(femera::Work::Task_list_t), 80);
+  const int instance_size=16, class_size = 224;
   EXPECT_EQ( sizeof(femera::Work), class_size );
   EXPECT_EQ( sizeof(Base<Testable>), class_size );
   EXPECT_EQ( sizeof(Testable), class_size );
   EXPECT_EQ( sizeof(testable), instance_size );
   EXPECT_EQ( sizeof(testable), sizeof(another1) );
-//    sizeof(femera::Work)
-//    - sizeof(fmr::perf::Meter) - sizeof(std::string)
-//    - 4 * sizeof(nullptr) - sizeof(femera::Work::Task_list_t), 16 );
 }
 TEST( TestableWork, TaskName ) {
   EXPECT_NE( testable, another1 );
@@ -82,21 +86,23 @@ TEST( TestableWork, AddGetExitTask ) {
   testable->add_task (another1);
   EXPECT_EQ( testable->get_task_n(), 1);
   EXPECT_EQ( another1.use_count(), 2);
+  {// Scope T0
   auto T0 = testable->get_task(0);// Work object in task_list, cast to derived
   EXPECT_EQ( another1.use_count(), 3);
   EXPECT_EQ( typeid(T0), typeid(Testable_t));
   EXPECT_EQ( T0->name, "another Testable");// derived instance Testable::name
   EXPECT_EQ( T0->Work::name, "another Testable");
+  EXPECT_EQ( T0->get_task_n(), 0);
+  }
+  EXPECT_EQ( another1.use_count(), 2);
   testable->exit (0);
   EXPECT_EQ( testable->get_task_n(), 0);
-  EXPECT_EQ( T0->get_task_n(), 0);
-  EXPECT_EQ( another1.use_count(), 2);
-  T0 = nullptr;
-  EXPECT_EQ( another1.use_count(),1);
+  EXPECT_EQ( another1.use_count(), 1);
 }
 TEST( TestableWork, PointerCopy ) {
   auto T0 = std::static_pointer_cast<Testable> (testable);
-  auto T1 = T0; T1->name = "changed name";
+  auto T1 = T0;
+  T1->name = "changed name";
   EXPECT_EQ( T0, T1 );
   EXPECT_EQ( T0->name, "changed name");
 }
