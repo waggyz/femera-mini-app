@@ -713,7 +713,7 @@ $(BUILD_CPU)/%.test.out: # Warn if no test.
 
 # Library targets -------------------------------------------------------------
 $(LIBFEMERA)(build/%.o) : build/%.o
-	$(info $(LIBS) $(AREXE) libfemera.a <-- $^)
+	$(info $(LIBS) $(AREXE) -crs libfemera.a <-- $^)
 	# Serialize archive operations.
 	flock "$(STAGE_CPU)/libfemera.lck"  $(AREXE) -crs $(LIBFEMERA) $^
 # Executable targets ----------------------------------------------------------
@@ -731,7 +731,7 @@ endif
 build/%.gtst : export TMPDIR = $(TEMP_DIR)
 build/%.gtst : build/%.gtst.o $(LIBFEMERA)(build/%.o)
 ifeq ($(ENABLE_GOOGLETEST),ON)
-	$(info $(LINK) $(CXX) $@.o ... -o $(notdir $@))
+	$(info $(LINK) $(CXX) $(notdir $@).o .. -lfemera .. -o $(notdir $@))
 	-$(CXX) $(CXXGTEST) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
 	$(info $(WARN) $@ not tested: GoogleTest disabled)
@@ -743,7 +743,7 @@ endif
 build/%.gtst : export TMPDIR = $(TEMP_DIR)
 build/%.gtst : build/%.gtst.o
 ifeq ($(ENABLE_GOOGLETEST),ON)
-	$(info $(LINK) $(CXX) $@.o ... -o $(notdir $@))
+	$(info $(LINK) $(CXX) $(notdir $@).o .. -lfemera .. -o $(notdir $@))
 	-$(CXX) $(CXXGTEST) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
 	$(info $(WARN) $@ not tested: GoogleTest disabled)

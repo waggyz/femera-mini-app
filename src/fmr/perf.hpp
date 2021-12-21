@@ -2,7 +2,6 @@
 #define FMR_HAS_PERF_HPP
 
 #include "fmr.hpp"
-#include "detail.hpp"
 
 namespace fmr { namespace perf {
 // This "using" syntax is preferred to "typedef" in the Google C++ Style Guide:

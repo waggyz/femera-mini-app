@@ -12,6 +12,8 @@ using Dim_int = int_fast8_t;
 
 }//end fmr:: namespace
 
+#include "detail.hpp"
+
 #undef FMR_DEBUG
 //end FMR_HAS_FMR_HPP
 #endif

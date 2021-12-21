@@ -1,6 +1,7 @@
 #include "form.hpp"
 
-#include <limits>
+#include <string>
+#include "gmock/gmock.h"  //::testing::HasSubstr
 
 #include "../femera/main-early.gtst.ipp"
 
@@ -14,9 +15,10 @@ TEST(FmrForm, FormatMilli) {
   EXPECT_EQ(fmr::form:: si_unit_string (12.3456e-3,"m"), "  12 mm");
 }
 TEST(FmrForm, FormatMicro) {
-#ifdef FMR_MICRO_UCHAR
-  EXPECT_NE(fmr::form:: si_unit_string (12.3456e-6,"m"), "  12 um");
-#else
+  const std::string anyok = "  12 um""  12 ""\u00b5""m""  12 ""\u03bc""m";
+  using ::testing::HasSubstr;
+  EXPECT_THAT(anyok, HasSubstr(fmr::form:: si_unit_string (12.3456e-6,"m")));
+#ifndef FMR_MICRO_UCHAR
   EXPECT_EQ(fmr::form:: si_unit_string (12.3456e-6,"m"), "  12 um");
 #endif
 }
@@ -39,5 +41,5 @@ TEST(FmrForm, FormatNear10) {
   EXPECT_EQ(fmr::form:: si_unit_string (9.40,"m",1), "   9  m");
 }
 TEST(FmrForm, FormatLongName) {
-  EXPECT_EQ(fmr::form:: si_unit_string (12.3456,"c23456789"), "  12  c2345678");
+  EXPECT_EQ(fmr::form:: si_unit_string (12.3456,"c234567890"), "  12  c2345678");
 }
