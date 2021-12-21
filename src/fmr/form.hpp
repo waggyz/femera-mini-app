@@ -7,7 +7,7 @@
 namespace fmr { namespace form {
 
 template<typename V>
-std::string si_unit_string (const V val, std::string unit, const int sigfigs=2);
+std::string si_unit_string (const V val, std::string unit, const int mindigits=2);
 
 } }// end fmr::form:: namespace
 
