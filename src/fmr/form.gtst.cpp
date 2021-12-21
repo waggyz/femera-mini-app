@@ -39,5 +39,5 @@ TEST(FmrForm, FormatNear10) {
   EXPECT_EQ(fmr::form:: si_unit_string (9.40,"m",1), "   9  m");
 }
 TEST(FmrForm, FormatLongName) {
-  EXPECT_EQ(fmr::form:: si_unit_string (12.3456,"c23456789"), "  12  c234567");
+  EXPECT_EQ(fmr::form:: si_unit_string (12.3456,"c23456789"), "  12  c2345678");
 }
