@@ -769,8 +769,6 @@ else
 endif
 
 # Header-only
-#FIXME race condition if $(LIBFEMERA)(build/%.o) does not exist yet, but should?
-#FIXME I think requiring a *.gtst.cpp for all *.gtst.hpp might fix it?
 build/%.gtst : export TMPDIR := $(TEMP_DIR)
 build/%.gtst : build/%.gtst.o $(LIBFEMERA)($(BUILD_CPU)/fmr/test.o)
 ifeq ($(ENABLE_GOOGLETEST),ON)
