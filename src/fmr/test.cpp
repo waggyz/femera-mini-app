@@ -1,15 +1,19 @@
 #include "test.hpp"
 
+#ifdef FMR_HAS_GTEST
 #include "gtest/gtest.h"
+#endif
 #ifdef FMR_HAS_MPI
 #include "mpi.h"
 #endif
 
 int fmr::detail::test:: early_main (int* argc, char** argv) {
+  // Use this for testing before femera::proc/test/Gtst.?pp has been coded.
+#ifdef FMR_HAS_GTEST
 #ifdef FMR_HAS_MPI
   int err=0;
-  ::MPI_Init (&argc,&argv);
-  ::testing::InitGoogleTest (&argc,argv);
+  ::MPI_Init (argc,&argv);
+  ::testing::InitGoogleTest (argc,argv);
   int proc_id=0; ::MPI_Comm_rank (MPI_COMM_WORLD,& proc_id);
   //
   //from: https://github.com/google/googletest/issues/822
@@ -24,5 +28,8 @@ int fmr::detail::test:: early_main (int* argc, char** argv) {
 #else
   ::testing::InitGoogleTest (argc,argv);
   return RUN_ALL_TESTS();
+#endif
+#else
+  return 1;// GoogleTest not enabled
 #endif
 }

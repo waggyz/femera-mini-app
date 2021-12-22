@@ -128,6 +128,7 @@ ifeq ($(ENABLE_OMP),ON)
 endif
 ifeq ($(ENABLE_MPI),ON)
   EXTERNAL_DOT+="MPI" -> "Femera"\n
+  FMRFLAGS+= -DFMR_HAS_MPI
   #FIXME Find include and lib dirs automatically
   ifeq ($(CXX),mpic++)
     FMRFLAGS+= -isystem"/usr/include/openmpi-x86_64"
@@ -160,6 +161,7 @@ ifeq ($(ENABLE_GOOGLETEST),ON)
 endif
 ifeq ($(ENABLE_GOOGLETEST),ON)
   LIST_EXTERNAL += googletest
+  FMRFLAGS+= -DFMR_HAS_GTEST
   EXTERNAL_DOT+="GoogleTest" -> "Femera"\n
   MAKE_DOT+="GoogleTest" -> "Makefile"\n
   GTEST_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
@@ -276,7 +278,8 @@ include $(FMRCPPS : %.cpp=%.d)
 .PRECIOUS: $(STAGE_DIR)/bin/fmr% $(LIBFEMERA)
 .PRECIOUS: $(BUILD_DIR)/external/install-%.flags
 .PRECIOUS: $(BUILD_CPU)/external/install-%.flags
-.PRECIOUS: $(BUILD_CPU)/%.o $(BUILD_CPU)/%.gtst.o
+
+#PRECIOUS $(BUILD_CPU)/%.o $(BUILD_CPU)/%.gtst.o
 
 #FIXME fixes error make[2] unlink /home/dwagner5/local/bin/ Is a directory
 #      while first running make tools?
@@ -674,9 +677,9 @@ $(BUILD_DIR)/%.test.out: %.py
 #NOTE Make target export requires at least Make 3.81.
 
 $(BUILD_CPU)/%.gtst.o : export TMPDIR := $(TEMP_DIR)
+$(BUILD_CPU)/%.gtst.o : $(BUILD_CPU)/fmr/test.o
 $(BUILD_CPU)/%.gtst.o : src/%.gtst.cpp src/%.cpp src/%.hpp src/%.ipp $(TOPDEPS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
-	#(info $(CXX_) $(CXX) -c $< .. -o $(notdir $@))
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
 	$(CXX) -c $(CXXGTEST) $(FMRFLAGS) $< -o $@
 else
@@ -687,7 +690,6 @@ endif
 $(BUILD_CPU)/%.gtst.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.gtst.o : src/%.gtst.cpp src/%.cpp src/%.hpp $(TOPDEPS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
-	#(info $(CXX_) $(CXX) -c $< .. -o $(notdir $@))
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
 	$(CXX) -c $(CXXGTEST) $(FMRFLAGS) $< -o $@
 else
@@ -698,7 +700,6 @@ endif
 $(BUILD_CPU)/%.gtst.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.gtst.o : src/%.gtst.cpp src/%.hpp src/%.ipp $(TOPDEPS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
-	#(info $(CXX_) $(CXX) -c $< .. -o $(notdir $@))
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
 	$(CXX) -c $(CXXGTEST) $(FMRFLAGS) $< -o $@
 else
@@ -707,19 +708,12 @@ endif
 
 $(BUILD_CPU)/%.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.o : src/%.cpp src/%.hpp src/%.ipp $(TOPDEPS)
-	#-python tools/testy/check_code_graffiti.py $^
-	# rm -f $*.err $*.gtst.err
-	#(info $(CXX_) $(CXX) -c $< .. -o $(notdir $@))
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
 	$(CXX) -c $(CXXFLAGS) $(FMRFLAGS) $< -o $@
 
-
-
+# Use gtest flags for this one.
 $(BUILD_CPU)/%/test.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%/test.o : src/%/test.cpp src/%/test.hpp $(TOPDEPS)
-	#-python tools/testy/check_code_graffiti.py $^
-	# rm -f $*.err $*.gtst.err
-	#(info $(CXX_) $(CXX) -c $< .. -o $(notdir $@))
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
 	$(CXX) -c $(CXXGTEST) $(FMRFLAGS) $< -o $@
 
@@ -748,7 +742,7 @@ $(LIBFEMERA)(build/%.o) : build/%.o
 	#(info $(LIBS) $(AREXE) -cr libfemera.a <-- $^)
 	$(call col2lib,$(LIBS),$(AREXE) -cr libfemera.a <--,$^)
 	# Serialize archive operations.
-	flock "$(STAGE_CPU)/libfemera.lck"  $(AREXE) -cr $(LIBFEMERA) $^
+	flock "$(STAGE_CPU)/libfemera.lck" $(AREXE) -cr $(LIBFEMERA) $^
 # Executable targets ----------------------------------------------------------
 #(BUILD_CPU)/%.gtst _ export LD_LIBRARY_PATH = $(TMP_LIBRARY_PATH)
 
@@ -762,7 +756,8 @@ else
 endif
 
 build/%.gtst : export TMPDIR := $(TEMP_DIR)
-build/%.gtst : build/%.gtst.o $(LIBFEMERA)(build/%.o)
+build/%.gtst : build/%.gtst.o $(LIBFEMERA)(build/%.o) \
+  $(LIBFEMERA)($(BUILD_CPU)/fmr/test.o)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(notdir $@).o .. -lfemera,$(notdir $@))
 	#(info $(LINK) $(CXX) $(notdir $@).o .. -lfemera .. -o $(notdir $@))
@@ -774,8 +769,10 @@ else
 endif
 
 # Header-only
+#FIXME race condition if $(LIBFEMERA)(build/%.o) does not exist yet, but should?
+#FIXME I think requiring a *.gtst.cpp for all *.gtst.hpp might fix it?
 build/%.gtst : export TMPDIR := $(TEMP_DIR)
-build/%.gtst : build/%.gtst.o
+build/%.gtst : build/%.gtst.o $(LIBFEMERA)($(BUILD_CPU)/fmr/test.o)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(notdir $@).o .. -lfemera,$(notdir $@))
 	#(info $(LINK) $(CXX) $(notdir $@).o .. -lfemera .. -o $(notdir $@))
