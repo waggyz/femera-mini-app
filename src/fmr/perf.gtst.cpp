@@ -1,8 +1,9 @@
 #include "perf.hpp"
 
+#include "gtest/gtest.h"
+
 #include <limits>
 
-#include "../femera/main-early.gtst.ipp"
 
 TEST(FmrPerf, PerfIntSizes) {
   EXPECT_EQ(sizeof (fmr::perf::Timepoint), sizeof (fmr::perf::Elapsed));
@@ -10,4 +11,7 @@ TEST(FmrPerf, PerfIntSizes) {
 }
 TEST(FmrPerf, MaxPerfCountGT10G) {
   EXPECT_GT(std::numeric_limits<fmr::perf::Count>::max(), 10000000000);
+}
+int main (int argc, char** argv) {
+  return fmr::detail::test:: early_main (&argc, argv);
 }

@@ -1,5 +1,7 @@
-#ifndef FMR_HAS_DETAIL_HPP
-#define FMR_HAS_DETAIL_HPP
+#ifndef FMR_HAS_FMR_DETAIL_HPP
+#define FMR_HAS_FMR_DETAIL_HPP
+
+#include "../femera/femera.hpp"
 
 #include <cstdint>
 #include <string>
@@ -18,8 +20,12 @@ namespace fmr { namespace detail { namespace form {
 std::string si_unit_string (const double val, std::string unit,
   const int min_digits, const std::string signchar);
 
-} } }// end fmr::form::detail:: namespace
+} } }// end fmr::detail::form:: namespace
+
+namespace fmr { namespace detail { namespace test {
+  int early_main (int* argc, char** argv);
+} } }// end fmr::detail::test:: namespace
 
 #undef FMR_DEBUG
-//end FMR_HAS_DETAIL_HPP
+//end FMR_HAS_FMR_DETAIL_HPP
 #endif

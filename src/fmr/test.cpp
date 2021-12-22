@@ -1,11 +1,11 @@
-#ifndef FMR_HAS_MAIN_GTST_IPP
-#define FMR_HAS_MAIN_GTST_IPP
+#include "test.hpp"
 
 #include "gtest/gtest.h"
 #ifdef FMR_HAS_MPI
 #include "mpi.h"
 #endif
-int main (int argc, char** argv) {
+
+int fmr::detail::test:: early_main (int* argc, char** argv) {
 #ifdef FMR_HAS_MPI
   int err=0;
   ::MPI_Init (&argc,&argv);
@@ -22,9 +22,7 @@ int main (int argc, char** argv) {
   ::MPI_Finalize ();
   return err;
 #else
-  ::testing::InitGoogleTest (&argc,argv);
+  ::testing::InitGoogleTest (argc,argv);
   return RUN_ALL_TESTS();
 #endif
 }
-//end FMR_HAS_MAIN_GTST_IPP
-#endif

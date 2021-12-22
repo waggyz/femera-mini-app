@@ -7,13 +7,16 @@ digraph "source tree" {
 	clusterrank="local";
 	"Meter.hpp" -> "perf.hpp"
 	"perf.hpp" -> "fmr.hpp"
+	"test.cpp" -> "test.hpp"
 	"Work.hpp" -> "Work.ipp"
 	"form.cpp" -> "form.hpp"
 	"perf.hpp" -> "perf.ipp"
 	"form.hpp" -> "fmr.hpp"
 	"form.hpp" -> "form.ipp"
+	"detail.hpp" -> "femera.hpp"
 	"Work.hpp" -> "Meter.hpp"
 	"Work.cpp" -> "Work.hpp"
+	"test.hpp" -> "detail.hpp"
 	"Meter.hpp" -> "Meter.ipp"
 	"fmr.hpp" -> "detail.hpp"
 }

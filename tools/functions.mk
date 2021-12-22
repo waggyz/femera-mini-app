@@ -28,6 +28,10 @@ elapstamp = @printf '%8s%-62s %9s\n' "$(Make) " \
 '$(call strcut,$(1): $(2)$(SPC40)$(SPC40),61)' \
 "+"$(shell tools/elapsed-time.sh $(BUILD_SECS))
 
+# 80-8 = 72, (80-8)/2 =41
+col2cxx = printf "%s %-47s%25s\n" "$(1)" "$(2)" "$(3)";
+col2lib = printf "%s %-30s%42s\n" "$(1)" "$(2)" "$(3)";
+
 label_test = touch $(4).out;   \
  $(3) >$(4).out 2>$(4).err;    \
   if [[ "$$?" -eq 0 ]];        \
@@ -38,6 +42,9 @@ label_test = touch $(4).out;   \
   fi;                          \
   if [ -f $(4).err ]; then     \
     tail $(4).err >&2; fi;
+
+
+
 
 # label_test = touch $(strip $(4)).out; \
 # $(strip $(3)) >>$(strip $(4)).out 2>>$(strip $(4)).err;   \

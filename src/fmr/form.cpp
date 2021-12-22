@@ -4,8 +4,8 @@
 #include <cstring>  // strlen()
 #include <vector>
 
-#define makestr(s) str(s)
-#define str(s) #s
+#define MAKESTR(s) STR(s)
+#define STR(s) #s
 namespace fmr {
 
 std::string detail::form::si_unit_string (double v, std::string unit,
@@ -23,7 +23,10 @@ const int min_digits, const std::string sign) {// implemented here, not inline
   std::string pre = "?";
   if (i>=0 && i<int(std::strlen(prefix))) { pre = prefix[i]; }
 #ifdef FMR_MICRO_UCHAR
-  if (pre=="u")  { pre = makestr(\FMR_MICRO_UCHAR) ; }
+  if (pre=="u")  {
+    const std::string mu( MAKESTR(\FMR_MICRO_UCHAR) );
+    pre = (mu =="\\u") ? "u" : mu ;
+  }
 #endif
   std::vector<char> buf(16,0);
   std::snprintf (&buf[0], 15, "%s%4.0f %s%s",
@@ -32,6 +35,6 @@ const int min_digits, const std::string sign) {// implemented here, not inline
 }
 
 }// end fmr:: namespace
-#undef str
-#undef makestr
+#undef STR
+#undef MAKESTR
 #undef FMR_DEBUG

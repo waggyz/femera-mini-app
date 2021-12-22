@@ -7,7 +7,7 @@
 
 namespace fmr { namespace form {
 
-template<typename V>
+template <typename V>
 std::string si_unit_string (const V value, std::string unit,
   const int min_digits = 2, const bool is_signed = false);
 

@@ -1,11 +1,12 @@
 #include "Work.hpp"
 
+#include "gtest/gtest.h"
+
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
 #include <cstdio>     // std::printf
 #endif
 
-#include "main-early.gtst.ipp"
 //=============================================================================
 // Template a class derived from the abstract (pure virtual) Work class...
 template <typename T>
@@ -112,5 +113,8 @@ TEST( TestableWork, PerfMeter ) {
 TEST( TestableWork, ExitErr ) {
   EXPECT_EQ( testable->exit(0), 42);
   EXPECT_EQ( testable->exit(1),  1);
+}
+int main (int argc, char** argv) {
+  return fmr::detail::test:: early_main (&argc, argv);
 }
 #undef FMR_DEBUG

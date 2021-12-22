@@ -1,8 +1,8 @@
 #include "Meter.hpp"
 
-#include <unistd.h> // usleep
+#include "gtest/gtest.h"
 
-#include "../../femera/main-early.gtst.ipp"
+#include <unistd.h> // usleep
 
 // Make something to test.
 fmr::perf::Meter perf = fmr::perf::Meter();
@@ -35,4 +35,7 @@ TEST(FmrPerfMeter, ArithmeticIntensity) {
   perf.add_count (1000, 500, 500, 0);
   EXPECT_FLOAT_EQ(perf.get_ai (), 1.0);
   EXPECT_FLOAT_EQ(perf.get_ai (), perf.get_arithmetic_intensity ());
+}
+int main (int argc, char** argv) {
+  return fmr::detail::test:: early_main (&argc, argv);
 }

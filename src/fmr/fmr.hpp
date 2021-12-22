@@ -1,6 +1,8 @@
 #ifndef FMR_HAS_FMR_HPP
 #define FMR_HAS_FMR_HPP
 
+#include "detail.hpp"
+
 #include <cstdint>
 
 namespace fmr {
@@ -11,8 +13,6 @@ using Dim_int = int_fast8_t;
 //TODO e.g. int_fast8_t, uint_least8_t, ...,  uintmax_t, uintptr_t
 
 }//end fmr:: namespace
-
-#include "detail.hpp"
 
 #undef FMR_DEBUG
 //end FMR_HAS_FMR_HPP
