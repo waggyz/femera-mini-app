@@ -172,11 +172,11 @@ ifeq ($(ENABLE_GOOGLETEST),ON)
   GTEST_FLAGFILE:= $(BUILD_CPU)/external/install-googletest.flags
 endif
 ifeq ($(ENABLE_PYBIND11),ON)
-  LIST_EXTERNAL += pybind11
-#  INSTALL_EXTERNAL+= $(BUILD_DIR)/external/install-pybind11.out
+#  LIST_EXTERNAL += pybind11
+  INSTALL_EXTERNAL+= $(BUILD_DIR)/external/install-pybind11.out
 #  PYBIND11_REQUIRES += boost-headers
   EXTERNAL_DOT+="pybind11" -> "Femera"\n
-  BUILD_TREE += $(BUILD_DIR)/external/pybind11/
+  # BUILD_TREE += $(BUILD_DIR)/external/pybind11/
 #  EXTERNAL_DOT+="Boost" -> "pybind11"\n
   # FMRFLAGS += -DFMR_HAS_PYBIND11
   PYBIND11_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
