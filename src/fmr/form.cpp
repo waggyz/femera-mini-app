@@ -3,6 +3,7 @@
 #include <cmath>    // pow(), log10()
 #include <cstring>  // strlen()
 #include <vector>
+#include <cfloat>   // DBL_EPSILON
 
 #define MAKESTR(s) STR(s)
 #define STR(s) #s
@@ -11,7 +12,8 @@ namespace fmr {
 std::string detail::form::si_unit_string (double v, std::string unit,
 const int min_digits, const std::string sign) {// implemented here, not inline
   if (unit.size()>8) { unit = unit.substr (0,8); }
-  const double threshold = 0.95*std::pow (10.0, double(min_digits - 1));
+  const double threshold
+    = (0.95 - DBL_EPSILON) * std::pow (10.0, double(min_digits - 1));
   int log1000 = 0;
   if (v > 1.0e-24) {
     log1000 = int(std::log10 (v)) / 3 - ((v<1.0) ? 1 : 0);
