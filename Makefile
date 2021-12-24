@@ -857,7 +857,7 @@ ifeq ($(ENABLE_LYX),ON)
 	  "lyx -batch -n -f all -E pdf $(@) $(<)" \
 	  "build/docs/$(*)-pdf"
 else
-	# Do nothing.
+	echo "Lyx is required to make $(@)" > "build/docs/$(*)-pdf.out"
 endif
 
 docs/%.xhtml: src/docs/%.lyx src/docs/quick-start.tex
@@ -866,5 +866,5 @@ ifeq ($(ENABLE_LYX),ON)
 	  "lyx -batch -n -f all -E xhtml $(@) $(<)" \
 	  "build/docs/$(*)-xhtml"
 else
-	# Do nothing.
+	echo "Lyx is required to make $(@)" > "build/docs/$(*)-xhtml.out"
 endif
