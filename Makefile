@@ -313,7 +313,7 @@ tools: | intro
 	$(MAKE) $(JPAR) install-tools
 	$(call timestamp,$@,$^)
 
-external: tools
+external: | tools
 	$(call timestamp,$@,$^)
 	$(MAKE) $(JPAR) get-external
 	$(MAKE) $(JSER) install-external
@@ -430,8 +430,8 @@ remove-done:
 
 build-done: build/src-notest.eps # $(BUILD_CPU)/make-build.post.test.out
 	$(call timestamp,$@,$?)
-	$(info $(DONE) building $(FEMERA_VERSION))
-	$(info $(SPCS) on $(HOSTNAME) for $(CPUMODEL) with $(CXX) $(CXX_VERSION))
+	$(info $(DONE) building $(FEMERA_VERSION) with $(CXX) $(CXX_VERSION))
+	$(info $(SPCS) on $(HOSTNAME) for $(CPUMODEL))
 ifneq ($(HOST_MD5),$(REPO_MD5))
 	$(info $(SPCS) as modified by <$(BUILT_BY_EMAIL)>)
 endif
@@ -761,8 +761,7 @@ $(LIBFEMERA)(build/%.o) : build/%.o
 
 build/%.gtst.out : build/%.gtst
 ifeq ($(ENABLE_GOOGLETEST),ON)
-	#(TEST_EXEC) $@ > $@ 2> $^.err
-	$(call label_test,$(PASS),$(FAIL),$(strip $(TEST_EXEC) $^),$^)
+	$(call label_test,$(PASS),$(FAIL),$(^),$(^))
 else
 	echo "build/$*.o not tested: GoogleTest disabled" > $@
 	echo "WARNING: build/$*.o not tested: GoogleTest disabled" > $^.err

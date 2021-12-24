@@ -12,7 +12,7 @@ if [[ "$?" -eq 0 ]]; then # truncate command if ok.
   fi;
 else # include arguments if returned nonzero
   printf "$2 $3\n";
-  if [ -f "$4.out" ]; then tail "$4.out" >&2; fi;
+  if [ -f "$4.out" ]; then tail "$4.out" >&2; mv -f "$4.out" "$4.bad"; fi;
   if [ -f "$4.err" ]; then tail "$4.err" >&2; fi;
 fi;
 #
