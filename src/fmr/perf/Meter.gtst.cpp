@@ -6,10 +6,11 @@
 
 // Make something to test.
 fmr::perf::Meter perf = fmr::perf::Meter();
-
+#if 0
 TEST(FmrPerfMeter, StructSize) {
   EXPECT_EQ(sizeof (fmr::perf::Meter), 64);
 }
+#endif
 TEST(FmrPerfMeter, Startup) {
   const auto first_idle = perf.add_idle_time_now ();
   EXPECT_FLOAT_EQ(perf.get_idle_s (), first_idle);
