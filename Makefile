@@ -1,4 +1,5 @@
 #!/usr/bin/make
+.DEFAULT_GOAL := all
 SHELL:= bash
 FMRDIR:=$(shell pwd)
 
@@ -8,6 +9,7 @@ include examples/config.recommended
 include tools/set-undefined.mk
 include tools/functions.mk
 #------------------------------------------------------------------------------
+
 CXX_VERSION   := $(shell $(CXX) -dumpversion)
 BUILD_VERSION := $(shell tools/build-version-number.sh)
 FEMERA_VERSION:= Femera $(BUILD_VERSION)
@@ -293,9 +295,6 @@ include $(FMRCPPS : %.cpp=%.d)
 # Primary named targets -------------------------------------------------------
 # These are intended for users.
 # Many launch parallel make jobs to simplify command-line use.
-femera: tools
-	$(call timestamp,$@,$^)
-
 all: | intro
 	$(call timestamp,$@,-$(MAKEFLAGS))
 	$(MAKE) $(JSER) external
@@ -303,6 +302,9 @@ all: | intro
 	#$(MAKE) test tune
 	$(MAKE) $(JPAR) docs
 	$(MAKE) $(JSER) install
+
+femera: mini full
+	$(call timestamp,$@,$^)
 
 mini: | intro
 	$(call timestamp,$@,$^)
@@ -318,10 +320,6 @@ external: | tools
 	$(MAKE) $(JPAR) get-external
 	$(MAKE) $(JSER) install-external
 	$(MAKE) $(JPAR) external-done
-
-docs: | intro build/docs/ build/src-notest.eps
-	$(call timestamp,$@,)
-	$(MAKE) $(JPAR) docs-done
 
 install: docs | tools intro $(STAGE_TREE)
 	$(call timestamp,$@,$^)
@@ -360,6 +358,11 @@ purge:
 	$(MAKE) $(JPAR) remove
 	$(MAKE) $(JPAR) cleanest
 	-rm -rf external/*/*
+
+# Developer named targets =====================================================
+docs: | intro build/docs/ build/src-notest.eps
+	$(call timestamp,$@,)
+	$(MAKE) $(JPAR) docs-done
 
 # Internal named targets ======================================================
 intro: build/copyright.txt build/docs/find-tdd-files.csv
@@ -401,8 +404,8 @@ ifeq ($(ENABLE_LYX),ON)
 	external/docs/)
 	$(info $(SPCS) and PDFs in build/docs/)
 else
-	$(info $(HINT) Set ENABLE_LYX to ON in config.local to generate \
-	  $(FEMERA_VERSION) documentation)
+	$(info $(HINT) Set ENABLE_LYX to ON in config.local)
+	$(info $(SPCS) to generate $(FEMERA_VERSION) documentation.)
 endif
 	$(info $(NOTE) $(FEMERA_VERSION) XHTML documentation is in:)
 	$(info $(SPCS) $(INSTALL_CPU)/share/doc/femera/)
