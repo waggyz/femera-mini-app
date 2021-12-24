@@ -323,7 +323,7 @@ docs: | intro build/docs/ build/src-notest.eps
 	$(call timestamp,$@,)
 	$(MAKE) $(JPAR) docs-done
 
-install: tools docs | intro $(STAGE_TREE)
+install: docs | tools intro $(STAGE_TREE)
 	$(call timestamp,$@,$^)
 	$(MAKE) $(JPAR) install-done
 
@@ -856,6 +856,8 @@ ifeq ($(ENABLE_LYX),ON)
 	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
 	  "lyx -batch -n -f all -E pdf $(@) $(<)" \
 	  "build/docs/$(*)-pdf"
+else
+	# Do nothing.
 endif
 
 docs/%.xhtml: src/docs/%.lyx src/docs/quick-start.tex
@@ -863,4 +865,6 @@ ifeq ($(ENABLE_LYX),ON)
 	-tools/label-test.sh "$(PASS)" "$(FAIL)" \
 	  "lyx -batch -n -f all -E xhtml $(@) $(<)" \
 	  "build/docs/$(*)-xhtml"
+else
+	# Do nothing.
 endif
