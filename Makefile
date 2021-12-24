@@ -851,20 +851,22 @@ build/docs/find-tdd-files.csv: tools/compare-lists.py
 	-tools/compare-lists.py build/docs/tdd-tests.txt build/test-files.txt \
 	  >$@ 2>build/docs/find-tdd-files.err
 
-build/docs/%.pdf: src/docs/%.lyx src/docs/quick-start.tex
 ifeq ($(ENABLE_LYX),ON)
+build/docs/%.pdf: src/docs/%.lyx src/docs/quick-start.tex
 	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
 	  "lyx -batch -n -f all -E pdf $(@) $(<)" \
 	  "build/docs/$(*)-pdf"
 else
-	echo "Lyx is required to make $(@)" > "build/docs/$(*)-pdf.out"
+build/docs/%.pdf:
+	echo "Documentation is not yet available." > "build/docs/$(*)-pdf.out"
 endif
 
-docs/%.xhtml: src/docs/%.lyx src/docs/quick-start.tex
 ifeq ($(ENABLE_LYX),ON)
+docs/%.xhtml: src/docs/%.lyx src/docs/quick-start.tex
 	-tools/label-test.sh "$(PASS)" "$(FAIL)" \
 	  "lyx -batch -n -f all -E xhtml $(@) $(<)" \
 	  "build/docs/$(*)-xhtml"
 else
-	echo "Lyx is required to make $(@)" > "build/docs/$(*)-xhtml.out"
+docs/%.xhtml:
+	echo "Documentation is not yet available." > "build/docs/$(*)-xhtml.out"
 endif
