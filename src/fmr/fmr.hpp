@@ -1,7 +1,7 @@
 #ifndef FMR_HAS_FMR_HPP
 #define FMR_HAS_FMR_HPP
 
-#include "detail.hpp"
+#include "../femera/Test.hpp"
 
 #include <cstdint>
 

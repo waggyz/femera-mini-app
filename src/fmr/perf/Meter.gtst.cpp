@@ -38,5 +38,5 @@ TEST(FmrPerfMeter, ArithmeticIntensity) {
   EXPECT_FLOAT_EQ(perf.get_ai (), perf.get_arithmetic_intensity ());
 }
 int main (int argc, char** argv) {
-  return fmr::detail::test:: early_main (&argc, argv);
+  return femera::test:: early_main (&argc, argv);
 }

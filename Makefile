@@ -242,7 +242,8 @@ GET_BATS:= $(patsubst %,get-%,$(BATS_MODS))
 LIBFEMERA:=$(STAGE_CPU)/lib/libfemera.a
 
 # Changing any of these should cause a full rebuld.
-TOPDEPS += src/fmr/fmr.hpp src/fmr/detail.hpp src/femera/femera.hpp
+TOPDEPS += src/fmr/fmr.hpp src/femera/femera.hpp
+# src/fmr/detail.hpp
 TOPDEPS += $(BUILD_CPU)/femera.flags
 
 # C++11 code to compile and gtest
@@ -728,8 +729,8 @@ $(BUILD_CPU)/%.o : src/%.cpp src/%.hpp src/%.ipp $(TOPDEPS)
 	$(CXX) -c $(CXXFLAGS) $(FMRFLAGS) $< -o $@
 
 # Use gtest flags for this one.
-$(BUILD_CPU)/%/test.o : export TMPDIR := $(TEMP_DIR)
-$(BUILD_CPU)/%/test.o : src/%/test.cpp src/%/test.hpp $(TOPDEPS)
+$(BUILD_CPU)/%/Test.o : export TMPDIR := $(TEMP_DIR)
+$(BUILD_CPU)/%/Test.o : src/%/Test.cpp src/%/Test.hpp $(TOPDEPS)
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
 	$(CXX) -c $(CXXGTEST) $(FMRFLAGS) $< -o $@
 
@@ -772,7 +773,7 @@ endif
 
 build/%.gtst : export TMPDIR := $(TEMP_DIR)
 build/%.gtst : build/%.gtst.o $(LIBFEMERA)(build/%.o) \
-  $(LIBFEMERA)($(BUILD_CPU)/fmr/test.o)
+  $(LIBFEMERA)($(BUILD_CPU)/femera/Test.o)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(notdir $@).o .. -lfemera,$(notdir $@))
 	#(info $(LINK) $(CXX) $(notdir $@).o .. -lfemera .. -o $(notdir $@))
@@ -785,7 +786,7 @@ endif
 
 # Header-only
 build/%.gtst : export TMPDIR := $(TEMP_DIR)
-build/%.gtst : build/%.gtst.o $(LIBFEMERA)($(BUILD_CPU)/fmr/test.o)
+build/%.gtst : build/%.gtst.o $(LIBFEMERA)($(BUILD_CPU)/femera/Test.o)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(notdir $@).o .. -lfemera,$(notdir $@))
 	#(info $(LINK) $(CXX) $(notdir $@).o .. -lfemera .. -o $(notdir $@))
@@ -831,6 +832,7 @@ build/test-files.txt: tools/list-test-files.sh build/.md5
 
 src/docs/src.dot: build/.md5
 	@external/tools/cinclude2dot --src src >$@ 2>build/src.dot.err
+	@dot $@ -Gsize="10.0,8.0" -Teps -o build/src-test.eps
           #  --groups is nice, too
 	#(info $(INFO) Source dependencies: $@)
 

@@ -117,6 +117,6 @@ TEST( TestableWork, ExitErr ) {
   EXPECT_EQ( testable->exit(1),  1);
 }
 int main (int argc, char** argv) {
-  return fmr::detail::test:: early_main (&argc, argv);
+  return femera::test:: early_main (&argc, argv);
 }
 #undef FMR_DEBUG

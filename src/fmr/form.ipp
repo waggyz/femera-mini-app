@@ -3,6 +3,13 @@
 
 #include <cmath>    // std::abs()
 
+namespace fmr { namespace detail { namespace form {
+
+std::string si_unit_string (const double val, std::string unit,
+  const int min_digits, const std::string signchar);
+
+} } }// end fmr::detail::form:: namespace
+
 namespace fmr {
 
 template<typename V>

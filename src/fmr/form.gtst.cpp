@@ -44,5 +44,5 @@ TEST(FmrForm, FormatLongName) {
   EXPECT_EQ(fmr::form:: si_unit_string (12.3456,"c234567890"), "  12  c2345678");
 }
 int main (int argc, char** argv) {
-  return fmr::detail::test:: early_main (&argc, argv);
+  return femera::test:: early_main (&argc, argv);
 }
