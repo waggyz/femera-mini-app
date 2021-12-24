@@ -82,23 +82,23 @@ TEST( TestableWork, TaskName ) {
   EXPECT_EQ( another1->name, "another Testable");
 }
 TEST( TestableWork, AddGetExitTask ) {
-  EXPECT_EQ( testable->get_task_n(), 0);
-  EXPECT_EQ( another1.use_count(), 1);
+  EXPECT_EQ( testable->get_task_n(), size_t(0));
+  EXPECT_EQ( another1.use_count(), 1u);
   testable->add_task (another1);
-  EXPECT_EQ( testable->get_task_n(), 1);
-  EXPECT_EQ( another1.use_count(), 2);
+  EXPECT_EQ( testable->get_task_n(), 1u);
+  EXPECT_EQ( another1.use_count(), 2u);
   {// Scope T0
-  auto T0 = testable->get_task(0);// Work object in task_list, cast to derived
-  EXPECT_EQ( another1.use_count(), 3);
+  auto T0 = testable->get_task(0u);// Work object in task_list, cast to derived
+  EXPECT_EQ( another1.use_count(), 3u);
   EXPECT_EQ( typeid(T0), typeid(Testable_t));
   EXPECT_EQ( T0->name, "another Testable");// derived instance Testable::name
   EXPECT_EQ( T0->Work::name, "another Testable");
-  EXPECT_EQ( T0->get_task_n(), 0);
+  EXPECT_EQ( T0->get_task_n(), 0u);
   }
-  EXPECT_EQ( another1.use_count(), 2);
+  EXPECT_EQ( another1.use_count(), 2u);
   testable->exit (0);
-  EXPECT_EQ( testable->get_task_n(), 0);
-  EXPECT_EQ( another1.use_count(), 1);
+  EXPECT_EQ( testable->get_task_n(), 0u);
+  EXPECT_EQ( another1.use_count(), 1u);
 }
 TEST( TestableWork, PointerCopy ) {
   auto T0 = std::static_pointer_cast<Testable> (testable);
