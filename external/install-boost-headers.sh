@@ -23,6 +23,4 @@ else
   eval ./bootstrap.sh $FLAGS
   ./b2 install
 fi
-exit
-
-
+exit ?

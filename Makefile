@@ -33,8 +33,9 @@ ifeq ($(CXX),g++)
     CXX:= mpic++
   endif
   OPTFLAGS:= $(shell cat data/gcc4.flags | tr '\n' ' ' | tr -s ' ')
-  CXXFLAGS+= -std=c++11 -MMD -MP -g $(OPTFLAGS) -flto -fpic -fstrict-enums
+  CXXFLAGS+= -std=c++11 -g -MMD -MP $(OPTFLAGS) -flto -fstrict-enums
   # Dependency file generation: -MMD -MP
+  #NOTE -fpic needed for shared libs, but may degrade static lib performance.
   ifeq ($(ENABLE_OMP),ON)
     CXXFLAGS+= -fopenmp
     FMRFLAGS+= -D_GLIBCXX_PARALLEL
@@ -50,7 +51,8 @@ ifeq ($(CXX),g++)
 endif
 ifeq ($(CXX),icpc)
   OPTFLAGS:= $(shell cat data/icpc.flags | tr '\n' ' ' | tr -s ' ')
-  CXXFLAGS:= c++11 -restrict -g -fPIC $(OPTFLAGS)
+  CXXFLAGS:= c++11 -restrict -g $(OPTFLAGS)
+  #NOTE -fPIC needed for shared libs, but may degrade static lib performance.
   CXXWARNS+= -Wall -Wextra -Wshadow
   ifeq ($(ENABLE_MKL),ON)
     FMRFLAGS+= -mkl=sequential -DMKL_DIRECT_CALL_SEQ
@@ -116,7 +118,7 @@ endif
 
 ifeq ("$(FMR_COPYRIGHT)","")# only true once during build
   export FMR_COPYRIGHT:= cat data/copyright.txt | tr '\n' ' ' | tr -s ' '
-  NOSA_INFO:= See the NASA open source agreement (NOSA-1-3.txt) for details.
+  NOSA_SEE:= See the NASA open source agreement (NOSA-1-3.txt) for details.
 endif
 -include $(BUILD_CPU)/external.config.mk
 
@@ -125,6 +127,7 @@ endif
 # Libraries and applications available ----------------------------------------
 ifeq ($(ENABLE_OMP),ON)
   EXTERNAL_DOT+="OpenMP" -> "Femera"\n
+    FMRFLAGS+= -DFMR_HAS_OMP
 endif
 ifeq ($(ENABLE_MPI),ON)
   EXTERNAL_DOT+="MPI" -> "Femera"\n
@@ -173,6 +176,7 @@ ifeq ($(ENABLE_PYBIND11),ON)
   INSTALL_EXTERNAL+= $(BUILD_DIR)/external/install-pybind11.out
 #  PYBIND11_REQUIRES += boost
   EXTERNAL_DOT+="pybind11" -> "Femera"\n
+  # BUILD_TREE += $(BUILD_DIR)/external/pybind11
 #  EXTERNAL_DOT+="Boost" -> "pybind11"\n
   # FMRFLAGS += -DFMR_HAS_PYBIND11
   PYBIND11_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
@@ -213,10 +217,11 @@ ifeq ($(ENABLE_DOT),ON)
   GET_EXTERNAL+= $(BUILD_DIR)/external/get-cinclude2dot.out
   INSTALL_EXTERNAL+= $(BUILD_DIR)/external/install-cinclude2dot.out
   MAKE_DOT+="cinclude2dot" -> "Makefile"\n
-  EXTERNAL_DOT:=digraph "Femera dependencies" {\n $(HEAD_DOT) $(EXTERNAL_DOT) }\n
-  MAKE_DOT:=digraph "Makefile dependencies" {\n $(HEAD_DOT) $(MAKE_DOT) }\n
-  EXTERNAL_DOTFILE:=$(BUILD_DIR)/external/external.dot
-  MAKE_DOTFILE:=$(BUILD_DIR)/make.dot
+  EXTERNAL_DOT:= digraph "Femera external dependencies as built" \
+    {\n $(HEAD_DOT) $(EXTERNAL_DOT) }\n
+  MAKE_DOT:= digraph "Makefile dependencies" {\n $(HEAD_DOT) $(MAKE_DOT) }\n
+  EXTERNAL_DOTFILE:= $(BUILD_DIR)/external/external.dot
+  MAKE_DOTFILE:= $(BUILD_DIR)/make.dot
 endif
 
 CXXFLAGS+= $(CXXWARNS)
@@ -304,7 +309,7 @@ mini: | intro
 	$(MAKE) $(JLIM) $(FMROUTS)
 	$(MAKE) $(JPAR) build-done
 
-tools: | intro $(STAGE_TREE)
+tools: | intro
 	$(MAKE) $(JPAR) install-tools
 	$(call timestamp,$@,$^)
 
@@ -318,7 +323,7 @@ docs: | intro build/docs/ build/src-notest.eps
 	$(call timestamp,$@,)
 	$(MAKE) $(JPAR) docs-done
 
-install: tools docs | $(STAGE_TREE)
+install: tools docs | intro $(STAGE_TREE)
 	$(call timestamp,$@,$^)
 	$(MAKE) $(JPAR) install-done
 
@@ -360,8 +365,8 @@ purge:
 intro: build/copyright.txt build/docs/find-tdd-files.csv
 intro: $(BUILD_CPU)/femera.flags.new
 intro: | $(BUILD_TREE) $(STAGE_TREE)
-ifneq ("$(NOSA_INFO)","") # Run once during a build
-	$(info $(INFO) $(NOSA_INFO))
+ifneq ("$(NOSA_SEE)","") # Run once during a build
+	$(info $(INFO) $(NOSA_SEE))
 	cat external/config.*.mk > "$(BUILD_CPU)/external.config.mk"
 	-rm -f "$(BUILD_DIR)/external/install-*.flags.new"
 	-rm -f "$(BUILD_CPU)/external/install-*.flags.new"
@@ -379,6 +384,15 @@ ifneq ("$(ADD_TO_PATH)","")
 	$(info $(NOTE) temporarily prepended PATH with:)
 	$(info $(SPCS) $(ADD_TO_PATH))
 endif
+
+info: | intro
+	$(info CXXFLAGS: $(CXXFLAGS))
+	$(info FMRFLAGS: $(FMRFLAGS))
+	$(info LDFLAGS: $(LDFLAGS))
+	$(info LDLIBS: $(LDLIBS))
+	$(info exported LD_LIBRARY_PATH: $(LD_LIBRARY_PATH))
+	$(info exported PATH: $(PATH))
+	$(MAKE) $(JPAR) build-done
 
 docs-done: install-docs
 docs-done: build/docs/femera-guide.pdf build/docs/femera-quick-start.pdf
@@ -422,7 +436,6 @@ ifneq ($(HOST_MD5),$(REPO_MD5))
 	$(info $(SPCS) as modified by <$(BUILT_BY_EMAIL)>)
 endif
 	$(info $(E_G_) tools/fmrexec.sh auto -d -t -D examples/cube.fmr)
-
 
 # Femera tools ----------------------------------------------------------------
 install-tools: get-bats
@@ -804,7 +817,7 @@ endif
 
 build/copyright.txt: data/copyright.txt build/modification.txt
 	cp "data/copyright.txt" $@
-ifneq ("$(NOSA_INFO)","")
+ifneq ("$(NOSA_SEE)","")
 	printf "$(INFO_COLOR)";
 	cat build/modification.txt build/copyright.txt \
 	  | tr '\n' ' ' | tr -s ' ' | fold -s -w 80

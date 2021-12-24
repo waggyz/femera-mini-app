@@ -7,6 +7,10 @@
 #include "mpi.h"
 #endif
 
+
+
+
+#if 1
 int fmr::detail::test:: early_main (int* argc, char** argv) {
   // Use this for testing before femera::proc/test/Gtst.?pp has been coded.
 #ifdef FMR_HAS_GTEST
@@ -33,3 +37,4 @@ int fmr::detail::test:: early_main (int* argc, char** argv) {
   return 1;// GoogleTest not enabled
 #endif
 }
+#endif
