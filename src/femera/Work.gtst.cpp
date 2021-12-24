@@ -63,7 +63,7 @@ auto testable = std::make_shared<Testable> ();
 auto another1 = std::make_shared<Testable> (*testable);
 //-----------------------------------------------------------------------------
 TEST( TestableWork, ClassSize ) {
-  EXPECT_EQ( sizeof(femera::Work::Task_list_t), 80);
+  EXPECT_EQ( sizeof(femera::Work::Task_list_t), size_t(80));
 #if 0
   const int instance_size=16, class_size = 224;
   EXPECT_EQ( sizeof(femera::Work), class_size );
