@@ -10,7 +10,7 @@ PREFIX:=/home/anon/local
 # Please review NOSA-1.3.txt Section 3D before adding a copyright notice.
 CONTRIBUTOR_COPYRIGHT_FILE:=COPYRIGHT.contrib.txt
 
-FMR_VERBMAX:=11
+FMR_VERBMAX:=5
 
 # replace prefix "u" with micro symbol "\u00b5" or Greek mu "\u03bc" (preferred)
 FMR_MICRO_UCHAR:=u03bc
