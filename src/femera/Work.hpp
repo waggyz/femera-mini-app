@@ -68,7 +68,7 @@ class Work {// This is an abstract (pure virtual) base class (interface).
 //    virtual void FIXME_pure_virtual ()=0;// Remove this later.
     //
     Make_work_t ptrs () noexcept;
-    Work (Make_work_t) noexcept;// use this constructor after proc,file,data,test ok
+//    Work (Make_work_t) noexcept;// use this constructor after proc,file,data,test ok
 #if 0
 #FIXME This may not be needed if copy constructors set proc,data,file,test
     Work (Work*) noexcept;// use this constructor after proc,file,data,test ok
