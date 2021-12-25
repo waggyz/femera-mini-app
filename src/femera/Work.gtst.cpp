@@ -21,7 +21,7 @@ public:
 private:
   T* derived (Base*);
 protected:// make it clear that Base needs to be inherited
-  derived (Make_work_t) noexcept;
+//  Base (Make_work_t) noexcept;
   Base ()            =default;
   Base (const Base&) =default;
   Base (Base&&)      =default;// shallow (pointer) copyable
@@ -33,11 +33,11 @@ class Testable;// ...then derive a CRTP concrete class from Base for testing.
 using Testable_t = std::shared_ptr <Testable>;
 class Testable : public Base <Testable> {
 public:
-//  Testable (Make_work_t) noexcept;
+  Testable (Make_work_t) noexcept;
   Testable () noexcept;
   void task_exit ();
 };//===========================================================================
-#if 0
+#if 1
 inline
 Testable::Testable (femera::Work::Make_work_t W) noexcept {
   this->name ="testable";
@@ -52,10 +52,13 @@ inline
 void Testable::task_exit () {//TODO throw err and return void
   throw std::runtime_error("woops");
 }//----------------------------------------------------------------------------
-inline
-Base<T>::derived (femera::Work::Make_work_t W) noexcept {
+#if 0
+template <typename T> inline
+Base<T>::Base (femera::Work::Make_work_t W) noexcept {
   std::tie(this->proc,this->file,this->data, this->test) = W;
+  //return static_cast<T*> (ptr);
 }
+#endif
 template <typename T> inline
 T* Base<T>::derived (Base* ptr) {
   return static_cast<T*> (ptr);
