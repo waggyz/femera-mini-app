@@ -32,11 +32,17 @@ class Testable;// ...then derive a CRTP concrete class from Base for testing.
 using Testable_t = std::shared_ptr <Testable>;
 class Testable : public Base <Testable> {
 public:
-  Testable ();
+  Testable (Make_work_t) noexcept;
+  Testable () noexcept;
   void task_exit ();
 };//===========================================================================
 inline
-Testable::Testable () {
+Testable::Testable (femera::Work::Make_work_t W) noexcept {
+  this->name ="testable";
+  std::tie(this->proc,this->file,this->data, this->test) = W;
+}
+inline
+Testable::Testable () noexcept {
   this->name ="testable";
 }
 inline
@@ -69,7 +75,7 @@ std::shared_ptr<T> Base<T>::get_task (const std::vector<size_t> tree) {
 }//============================================================================
 auto testable = std::make_shared<Testable> ();
 //auto another1 = std::make_shared<Testable> (*testable);
-auto another1 = std::make_shared<Testable> (testable->femera::Work::ptrs());
+auto another1 = std::make_shared<Testable> (testable->ptrs());
 //-----------------------------------------------------------------------------
 TEST( TestableWork, ClassSize ) {
   EXPECT_EQ( sizeof(femera::Work::Task_list_t), size_t(80));
@@ -110,7 +116,8 @@ TEST( TestableWork, AddGetExitTask ) {
   EXPECT_EQ( another1.use_count(), 1u);
 }
 TEST( TestableWork, SubTask ) {
-  auto subtask = std::make_shared<Testable> (*testable);
+  //auto subtask = std::make_shared<Testable> (*testable);
+  auto subtask = std::make_shared<Testable> (testable->ptrs());
   testable->add_task (another1);
   subtask->name = "subtask";
   another1->add_task (subtask);
