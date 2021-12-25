@@ -21,6 +21,7 @@ public:
 private:
   T* derived (Base*);
 protected:// make it clear that Base needs to be inherited
+  derived (Make_work_t) noexcept;
   Base ()            =default;
   Base (const Base&) =default;
   Base (Base&&)      =default;// shallow (pointer) copyable
@@ -32,15 +33,17 @@ class Testable;// ...then derive a CRTP concrete class from Base for testing.
 using Testable_t = std::shared_ptr <Testable>;
 class Testable : public Base <Testable> {
 public:
-  Testable (Make_work_t) noexcept;
+//  Testable (Make_work_t) noexcept;
   Testable () noexcept;
   void task_exit ();
 };//===========================================================================
+#if 0
 inline
 Testable::Testable (femera::Work::Make_work_t W) noexcept {
   this->name ="testable";
   std::tie(this->proc,this->file,this->data, this->test) = W;
 }
+#endif
 inline
 Testable::Testable () noexcept {
   this->name ="testable";
@@ -49,6 +52,10 @@ inline
 void Testable::task_exit () {//TODO throw err and return void
   throw std::runtime_error("woops");
 }//----------------------------------------------------------------------------
+inline
+Base<T>::derived (femera::Work::Make_work_t W) noexcept {
+  std::tie(this->proc,this->file,this->data, this->test) = W;
+}
 template <typename T> inline
 T* Base<T>::derived (Base* ptr) {
   return static_cast<T*> (ptr);
@@ -74,7 +81,6 @@ std::shared_ptr<T> Base<T>::get_task (const std::vector<size_t> tree) {
   return std::static_pointer_cast<T> (this->get_work (tree));
 }//============================================================================
 auto testable = std::make_shared<Testable> ();
-//auto another1 = std::make_shared<Testable> (*testable);
 auto another1 = std::make_shared<Testable> (testable->ptrs());
 //-----------------------------------------------------------------------------
 TEST( TestableWork, ClassSize ) {
@@ -116,7 +122,6 @@ TEST( TestableWork, AddGetExitTask ) {
   EXPECT_EQ( another1.use_count(), 1u);
 }
 TEST( TestableWork, SubTask ) {
-  //auto subtask = std::make_shared<Testable> (*testable);
   auto subtask = std::make_shared<Testable> (testable->ptrs());
   testable->add_task (another1);
   subtask->name = "subtask";
