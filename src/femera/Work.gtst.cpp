@@ -55,7 +55,7 @@ int Base<T>::exit (int err) {
   if (err>0) {return err;}
   err = femera::Work::exit (err);// Exit the task stack,
   if (err>0) {return err;}// then exit this task.
-  try { Base::derived(this)->task_exit (); }//TODO try/catch
+  try { Base::derived(this)->task_exit (); }
   catch (std::exception& e) { err = 42; }
   return err;
 }
@@ -68,7 +68,8 @@ std::shared_ptr<T> Base<T>::get_task (const std::vector<size_t> tree) {
   return std::static_pointer_cast<T> (this->get_work (tree));
 }//============================================================================
 auto testable = std::make_shared<Testable> ();
-auto another1 = std::make_shared<Testable> (*testable);
+//auto another1 = std::make_shared<Testable> (*testable);
+auto another1 = std::make_shared<Testable> (testable->femera::Work::ptrs());
 //-----------------------------------------------------------------------------
 TEST( TestableWork, ClassSize ) {
   EXPECT_EQ( sizeof(femera::Work::Task_list_t), size_t(80));

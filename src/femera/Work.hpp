@@ -10,6 +10,7 @@
 #include <vector>
 #include <deque>
 #include <exception>
+#include <tuple>
 
 namespace femera {
 // Forward-declares
@@ -39,6 +40,8 @@ class Work {// This is an abstract (pure virtual) base class (interface).
   // Derived Classes use the curiously recurrent template pattern (CRTP).
   public:// Variables ---------------------------------------------------------
     using Task_list_t = std::deque <Work_t>;
+    using Make_work_t = std::tuple<Proc_t,File_t,Data_t,Test_t>;
+//      = std::make_tuple(nullptr,nullptr,nullptr,nullptr);
     fmr::perf::Meter time = fmr::perf::Meter ();
     std::string      name = std::string      ("unknown work");
   protected:
@@ -64,6 +67,8 @@ class Work {// This is an abstract (pure virtual) base class (interface).
     //
 //    virtual void FIXME_pure_virtual ()=0;// Remove this later.
     //
+    Make_work_t ptrs () noexcept;
+    Work (Make_work_t) noexcept;// use this constructor after proc,file,data,test ok
 #if 0
 #FIXME This may not be needed if copy constructors set proc,data,file,test
     Work (Work*) noexcept;// use this constructor after proc,file,data,test ok

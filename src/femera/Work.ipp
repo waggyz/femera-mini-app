@@ -12,6 +12,14 @@ namespace femera {
     noexcept : proc (W->proc), file (W->file), data (W->data), test (W->test) {
   }
 #endif
+  inline Work::Work (Make_work_t W)
+    noexcept {
+    std::tie(this->proc,this->file,this->data, this->test) = W;
+  }
+  inline Work::Make_work_t Work::ptrs ()
+    noexcept {
+    return std::make_tuple(this->proc,this->file, this->data, this->test);
+  }
   inline Work_t Work::get_work (const size_t i)
   noexcept {
     return (i < this->task_list.size()) ? this->task_list [i] : nullptr;
