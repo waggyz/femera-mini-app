@@ -11,11 +11,11 @@ namespace femera {
   inline Work::Work (Work* W)
     noexcept : proc (W->proc), file (W->file), data (W->data), test (W->test) {
   }
+#endif
   inline Work::Work (Make_work_t W)
     noexcept {
     std::tie(this->proc,this->file,this->data, this->test) = W;
   }
-#endif
   inline Work::Make_work_t Work::ptrs ()
     noexcept {
     return std::make_tuple(this->proc,this->file, this->data, this->test);
