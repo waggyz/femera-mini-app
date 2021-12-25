@@ -5,8 +5,9 @@
 //#include "Task.hpp"
 //#include "vals.hpp"
 
-#include <string>
 #include <memory>     //TODO std::shared_ptr, std::make_shared
+#include <string>
+#include <vector>
 #include <deque>
 
 namespace femera {
@@ -41,7 +42,7 @@ class Work {// This is an abstract (pure virtual) base class (interface).
     std::string      name = std::string      ("unknown work");
   protected:
     //Proc_t proc = static_cast <Proc_t> (nullptr);
-    Proc_t proc = nullptr;// processing hierarchy
+    Proc_t proc = nullptr;// processing hierarchy (Main_t)
     File_t file = nullptr;// file handling
     Data_t data = nullptr;// data handling
     Test_t test = nullptr;// correctness and performance testing
@@ -49,7 +50,8 @@ class Work {// This is an abstract (pure virtual) base class (interface).
     Task_list_t               task_list ={};
     static const fmr::Dim_int info_d    = 1;
   protected:// Methods --------------------------------------------------------
-    Work_t get_work   (size_t) noexcept;
+    Work_t get_work   (size_t) noexcept;// used by derived get_task(..) method
+    Work_t get_work   (std::vector<size_t>) noexcept;// ""
   public:
     // Derived_t get_task (size_t) is in Derived class and returns that type.
     size_t add_task   (Work_t) noexcept;
@@ -61,7 +63,10 @@ class Work {// This is an abstract (pure virtual) base class (interface).
     //
 //    virtual void FIXME_pure_virtual ()=0;// Remove this later.
     //
-    Work (Work*) noexcept;// use this constructor after proc,file,data,test init
+#if 0
+#FIXME This may not be needed if copy constructors set proc,data,file,test
+    Work (Work*) noexcept;// use this constructor after proc,file,data,test ok
+#endif
   public:// Built-in stuff ----------------------------------------------------
     Work ()            =default;
     Work (Work const&) =default;// copyable
