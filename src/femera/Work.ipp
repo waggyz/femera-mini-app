@@ -41,7 +41,9 @@ namespace femera {
     while (! this->task_list.empty ()) {
       auto W = task_list.back ();// Exit in reverse order.
       if (W != nullptr) {//static_cast <Work_t> (nullptr)) {
-	const auto Werr = W->exit (err);
+	int Werr=0;
+        try { Werr = W->exit (err); }
+	catch (std::exception& e) { Werr = 1; }
 	err = (Werr==0) ? err : Werr;
       }
       this->task_list.pop_back ();

@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <deque>
+#include <exception>
 
 namespace femera {
 // Forward-declares
@@ -59,7 +60,7 @@ class Work {// This is an abstract (pure virtual) base class (interface).
     //
     // Work stack initialization and exit
     virtual void init (int* argc, char** argv) =0;//NOTE at least 1 pure virtual
-    virtual int  exit (int err);// default is to exit task_list in reverse
+    virtual int  exit (int err=0);// default is to exit task_list in reverse
     //
 //    virtual void FIXME_pure_virtual ()=0;// Remove this later.
     //

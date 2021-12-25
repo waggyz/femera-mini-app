@@ -15,7 +15,7 @@ private:
   using Derived_t = std::shared_ptr<T>;
 public:
   void      init     (int*, char**) override;
-  int       exit     (int err)      override;
+  int       exit     (int err=0)    override;
   Derived_t get_task (size_t i);
   Derived_t get_task (std::vector<size_t> tree);
 private:
@@ -33,15 +33,15 @@ using Testable_t = std::shared_ptr <Testable>;
 class Testable : public Base <Testable> {
 public:
   Testable ();
-  int task_exit (int);
+  void task_exit ();
 };//===========================================================================
 inline
 Testable::Testable () {
   this->name ="testable";
 }
 inline
-int Testable::task_exit (int) {//TODO throw err and return void
-  return 42;
+void Testable::task_exit () {//TODO throw err and return void
+  throw std::runtime_error("woops");
 }//----------------------------------------------------------------------------
 template <typename T> inline
 T* Base<T>::derived (Base* ptr) {
@@ -52,9 +52,12 @@ void Base<T>:: init (int*, char**) {
 }
 template <typename T> inline
 int Base<T>::exit (int err) {
-  err = femera::Work::exit (err);// Exit the task stack, then exit this task.
-  return (err==0)
-    ? Base::derived(this)->task_exit (err) : err;//TODO try/catch
+  if (err>0) {return err;}
+  err = femera::Work::exit (err);// Exit the task stack,
+  if (err>0) {return err;}// then exit this task.
+  try { Base::derived(this)->task_exit (); }//TODO try/catch
+  catch (std::exception& e) { err = 42; }
+  return err;
 }
 template <typename T> inline
 std::shared_ptr<T> Base<T>::get_task (const size_t i) {
@@ -101,7 +104,7 @@ TEST( TestableWork, AddGetExitTask ) {
   EXPECT_EQ( T0->get_task_n(), 0u);
   }
   EXPECT_EQ( another1.use_count(), 2u);
-  testable->exit (0);
+  testable->exit ();
   EXPECT_EQ( testable->get_task_n(), 0u);
   EXPECT_EQ( another1.use_count(), 1u);
 }
@@ -119,7 +122,7 @@ TEST( TestableWork, SubTask ) {
   EXPECT_EQ( testable->get_task(std::vector<size_t>({0,0}))->name, "subtask");
   EXPECT_EQ( testable->get_task(std::vector<size_t>({0,1}))->name, "subtask");
   EXPECT_EQ( testable->get_task(std::vector<size_t>({0,3})), nullptr);
-  testable->exit (0);
+  testable->exit ();
   EXPECT_EQ( testable->get_task_n(), 0u);
   EXPECT_EQ( another1.use_count(), 1u);
   EXPECT_EQ( subtask.use_count(), 1u);
@@ -138,7 +141,7 @@ TEST( TestableWork, PerfMeter ) {
 }
 TEST( TestableWork, ExitErr ) {
   EXPECT_EQ( testable->exit(0), 42);
-  EXPECT_EQ( testable->exit(1),  1);
+  EXPECT_EQ( testable->exit(3), 3);
 }
 int main (int argc, char** argv) {
   return femera::test:: early_main (&argc, argv);
