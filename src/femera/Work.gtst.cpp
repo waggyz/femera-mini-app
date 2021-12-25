@@ -21,7 +21,6 @@ public:
 private:
   T* derived (Base*);
 protected:// make it clear that Base needs to be inherited
-//  Base (Make_work_t) noexcept;
   Base ()            =default;
   Base (const Base&) =default;
   Base (Base&&)      =default;// shallow (pointer) copyable
@@ -34,6 +33,7 @@ using Testable_t = std::shared_ptr <Testable>;
 class Testable : public Base <Testable> {
 public:
   Testable (Make_work_t) noexcept;
+  //FIXME This may not be needed if copy constructors set proc,data,file,test
   Testable () noexcept;
   void task_exit ();
 };//===========================================================================
@@ -52,13 +52,6 @@ inline
 void Testable::task_exit () {//TODO throw err and return void
   throw std::runtime_error("woops");
 }//----------------------------------------------------------------------------
-#if 0
-template <typename T> inline
-Base<T>::Base (femera::Work::Make_work_t W) noexcept {
-  std::tie(this->proc,this->file,this->data, this->test) = W;
-  //return static_cast<T*> (ptr);
-}
-#endif
 template <typename T> inline
 T* Base<T>::derived (Base* ptr) {
   return static_cast<T*> (ptr);
@@ -88,13 +81,6 @@ auto another1 = std::make_shared<Testable> (testable->ptrs());
 //-----------------------------------------------------------------------------
 TEST( TestableWork, ClassSize ) {
   EXPECT_EQ( sizeof(femera::Work::Task_list_t), size_t(80));
-#if 0
-  const int instance_size=16, class_size = 224;
-  EXPECT_EQ( sizeof(femera::Work), class_size );
-  EXPECT_EQ( sizeof(Base<Testable>), class_size );
-  EXPECT_EQ( sizeof(Testable), class_size );
-  EXPECT_EQ( sizeof(testable), instance_size );
-#endif
   EXPECT_EQ( sizeof(testable), sizeof(another1) );
 }
 TEST( TestableWork, TaskName ) {
