@@ -14,10 +14,10 @@ class Base : public femera::Work {
 private:
   using Derived_t = std::shared_ptr<T>;
 public:
-  void      init     (int*, char**) override;
-  int       exit     (int err=0)    override;
-  Derived_t get_task (size_t i);
-  Derived_t get_task (std::vector<size_t> tree);
+  void          init     (int*, char**) override;
+  fmr::Exit_int exit     (fmr::Exit_int err=0)    override;
+  Derived_t     get_task (size_t i);
+  Derived_t     get_task (std::vector<size_t> tree);
 private:
   T* derived (Base*);
 protected:// make it clear that Base needs to be inherited
@@ -60,7 +60,7 @@ template <typename T> inline
 void Base<T>:: init (int*, char**) {
 }
 template <typename T> inline
-int Base<T>::exit (int err) {
+fmr::Exit_int Base<T>::exit (fmr::Exit_int err) {
   if (err>0) {return err;}
   err = femera::Work::exit (err);// Exit the task stack,
   if (err>0) {return err;}// then exit this task.
@@ -145,7 +145,7 @@ TEST( TestableWork, ExitErr ) {
   EXPECT_EQ( testable->exit(0), 42);
   EXPECT_EQ( testable->exit(3), 3);
 }
-int main (int argc, char** argv) {
+fmr::Exit_int main (int argc, char** argv) {
   return femera::test:: early_main (&argc, argv);
 }
 #undef FMR_DEBUG

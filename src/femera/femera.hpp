@@ -1,7 +1,7 @@
 #ifndef FMR_HAS_FEMERA_DETAIL_HPP
 #define FMR_HAS_FEMERA_DETAIL_HPP
 
-#include <cstdint>
+
 
 #ifndef FMR_VERBMAX
 #define FMR_VERBMAX 7
@@ -11,14 +11,9 @@
 #define FMR_TIMELVL FMR_VERBMAX
 #endif
 
-// This "using" syntax is preferred to "typedef" in the Google C++ Style Guide:
-// https://google.github.io/styleguide/cppguide.html#Aliases
-namespace femera {
-
-using Perf_float = float;
-using Perf_int   = uint_fast64_t;
-
-}//end femera::namespace
+namespace femera { namespace test {
+  int early_main (int* argc, char** argv);
+} }// end femera::test:: namespace
 
 // These help keep source code tidy.
 #ifdef _OPENMP

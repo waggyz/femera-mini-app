@@ -3,15 +3,18 @@
 
 #include "fmr.hpp"
 
+#include <cstdint>
+
 namespace fmr { namespace perf {
 // This "using" syntax is preferred to "typedef" in the Google C++ Style Guide:
 // https://google.github.io/styleguide/cppguide.html#Aliases
-
-using Float     = femera::Perf_float;
-using Timepoint = femera::Perf_int  ;// ...One underlying type...
-using Elapsed   = femera::Perf_int  ;// ...of these user types...
-using Count     = femera::Perf_int  ;// ...used for easy struct packing.
-
+#if 1
+using Float     = fmr::Perf_float;
+using Perf_int  = fmr::Perf_int  ;
+using Timepoint = Perf_int       ;// ...One underlying type...
+using Elapsed   = Perf_int       ;// ...of these user types...
+using Count     = Perf_int       ;// ...used for simple struct packing.
+#endif
 static inline Timepoint get_now_ns () noexcept;
 
 } }// end fmr::perf:: namespace

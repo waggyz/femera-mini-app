@@ -36,11 +36,11 @@ namespace femera {
   noexcept {
     return this->task_list.size ();
   }
-  inline int Work::exit (int err) {
+  inline fmr::Exit_int Work::exit (fmr::Exit_int err) {
     while (! this->task_list.empty ()) {
       auto W = task_list.back ();// Exit in reverse order.
       if (W != nullptr) {//static_cast <Work_t> (nullptr)) {
-	int Werr=0;
+	fmr::Exit_int Werr=0;
         try { Werr = W->exit (err); }
 	catch (std::exception& e) { Werr = 1; }
 	err = (Werr==0) ? err : Werr;

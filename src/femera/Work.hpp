@@ -21,16 +21,17 @@ namespace file { class Base; using Base_t = std::shared_ptr <Base>; }
 namespace test { class Base; using Base_t = std::shared_ptr <Base>;
                  class Perf; using Perf_t = std::shared_ptr <Perf>; }
 #endif
-//FIXME is, e.g., class femera::Proc_base better?
-namespace proc { class Base; }// class Main; }
-namespace file { class Base; }// class Flog; }
-namespace data { class Base; }// class Fake; }//FIXME not Fake; Builtin?
-namespace test { class Base; }// class Self; class Perf; }
+//FIXME is, e.g., class femera::Proc_base or femera::Proc::Base better?
+namespace proc { class Main; }// class Main; }
+namespace file { class Exts; }// class Flog; }
+namespace data { class Type; }// class Fake; }//FIXME Fake -> Base?
+namespace test { class Beds; }// class Unit; class Self; class Perf; }
 
-using Proc_t = std::shared_ptr <proc::Base>;
-using File_t = std::shared_ptr <file::Base>;
-using Data_t = std::shared_ptr <data::Base>;
-using Test_t = std::shared_ptr <test::Base>;
+using Proc_t = std::shared_ptr <proc::Main>;
+using File_t = std::shared_ptr <file::Exts>;
+using Data_t = std::shared_ptr <data::Type>;
+using Test_t = std::shared_ptr <test::Beds>;
+//using Flog_t = std::shared_ptr <file::Flog>;
 //using Perf_t = std::shared_ptr <test::Perf>;
 //using Self_t = std::shared_ptr <test::Self>;
 
@@ -38,10 +39,10 @@ class Work;
 using Work_t = std::shared_ptr <Work>;
 class Work {// This is an abstract (pure virtual) base class (interface).
   // Derived Classes use the curiously recurrent template pattern (CRTP).
-  public:// Variables ---------------------------------------------------------
+  public:
     using Task_list_t = std::deque <Work_t>;
-    using Make_work_t = std::tuple<Proc_t,File_t,Data_t,Test_t>;
-//      = std::make_tuple(nullptr,nullptr,nullptr,nullptr);
+    using Make_work_t = std::tuple <Proc_t,File_t,Data_t,Test_t>;
+  public:// Variables ---------------------------------------------------------
     fmr::perf::Meter time = fmr::perf::Meter ();
     std::string      name = std::string      ("unknown work");
   protected:
@@ -54,6 +55,7 @@ class Work {// This is an abstract (pure virtual) base class (interface).
     Task_list_t               task_list ={};
     static const fmr::Dim_int info_d    = 1;
   protected:// Methods --------------------------------------------------------
+    //NOTE Make at least 1 pure virtual.
     Work_t get_work   (size_t) noexcept;// used by derived get_task(..) method
     Work_t get_work   (std::vector<size_t>) noexcept;// ""
   public:
@@ -62,8 +64,9 @@ class Work {// This is an abstract (pure virtual) base class (interface).
     size_t get_task_n ()       noexcept;
     //
     // Work stack initialization and exit
-    virtual void init (int* argc, char** argv) =0;//NOTE at least 1 pure virtual
-    virtual int  exit (int err=0);// default is to exit task_list in reverse
+    virtual void          init (int* argc, char** argv) =0;
+    virtual fmr::Exit_int exit (fmr::Exit_int err=0);
+    // default is to exit task_list in reverse
     //
     Make_work_t ptrs () noexcept;
   public:// Built-in stuff ----------------------------------------------------

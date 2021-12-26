@@ -30,88 +30,88 @@ namespace fmr {
     this->bout_n  = 0;
     return this->start ();
   }
-  inline perf::Float perf::Meter::add_busy_time_now () {
+  inline fmr::Perf_float perf::Meter::add_busy_time_now () {
     const auto now = perf::get_now_ns ();
     this->busy_ns += now - this->tick;
     this->tick = now;
-    return perf::Float (1.0e-9) * perf::Float (this->busy_ns);
+    return fmr::Perf_float (1.0e-9) * fmr::Perf_float (this->busy_ns);
   }
-  inline perf::Float perf::Meter::add_idle_time_now () {
+  inline fmr::Perf_float perf::Meter::add_idle_time_now () {
     const auto now = perf::get_now_ns ();
     this->idle_ns += now - this->tick;
     this->tick = now;
-    return perf::Float (1.0e-9) * perf::Float (this->idle_ns);
+    return fmr::Perf_float (1.0e-9) * fmr::Perf_float (this->idle_ns);
   }
-  inline perf::Float perf::Meter::add_count (const perf::Count flops,
+  inline fmr::Perf_float perf::Meter::add_count (const perf::Count flops,
       const perf::Count inp, const perf::Count out, const perf::Count units) {
     this->unit_n += units;
     this->flop_n += flops;
     this->binp_n += inp;
     this->bout_n += out;
-    return perf::Float (this->unit_n);
+    return fmr::Perf_float (this->unit_n);
   }
-  inline perf::Float perf::Meter::get_byte_n () {
-    return perf::Float (this->binp_n + this->bout_n);
+  inline fmr::Perf_float perf::Meter::get_byte_n () {
+    return fmr::Perf_float (this->binp_n + this->bout_n);
   }
-  inline perf::Float perf::Meter::get_arithmetic_intensity () {
-    return perf::Float (this->flop_n) / this->get_byte_n ();
+  inline fmr::Perf_float perf::Meter::get_arithmetic_intensity () {
+    return fmr::Perf_float (this->flop_n) / this->get_byte_n ();
   }
-  inline perf::Float perf::Meter::get_ai () {
+  inline fmr::Perf_float perf::Meter::get_ai () {
     return perf::Meter::get_arithmetic_intensity ();
   }
-  inline perf::Float perf::Meter::get_busy_s () {
-    return perf::Float (1.0e-9) * perf::Float (this->busy_ns);
+  inline fmr::Perf_float perf::Meter::get_busy_s () {
+    return fmr::Perf_float (1.0e-9) * fmr::Perf_float (this->busy_ns);
   }
-  inline perf::Float perf::Meter::get_idle_s () {
-    return perf::Float (1.0e-9) * perf::Float (this->idle_ns);
+  inline fmr::Perf_float perf::Meter::get_idle_s () {
+    return fmr::Perf_float (1.0e-9) * fmr::Perf_float (this->idle_ns);
   }
-  inline perf::Float perf::Meter::get_work_s () {
-    return perf::Float (1.0e-9) * perf::Float (this->busy_ns + this->idle_ns);
+  inline fmr::Perf_float perf::Meter::get_work_s () {
+    return fmr::Perf_float (1.0e-9) * fmr::Perf_float (this->busy_ns + this->idle_ns);
   }
   #if 0
   //FIXME Are these useful?
-  inline perf::Float perf::Meter::get_life_time_now () {
-    return 1e-9 * perf::Float (perf::get_now_ns() - this->begin_at);
+  inline fmr::Perf_float perf::Meter::get_life_time_now () {
+    return 1e-9 * fmr::Perf_float (perf::get_now_ns() - this->begin_at);
   }
-  inline perf::Float perf::Meter::get_idle_time_now () {
-    return 1e-9 * perf::Float (
+  inline fmr::Perf_float perf::Meter::get_idle_time_now () {
+    return 1e-9 * fmr::Perf_float (
       perf::get_now_ns() - this->begin_at - this->idle_ns - this->busy_ns);
   }
-  inline perf::Float perf::Meter::get_life_flop_speed () {
-    return perf::Float (this->flop_n) / this->get_life_time();
+  inline fmr::Perf_float perf::Meter::get_life_flop_speed () {
+    return fmr::Perf_float (this->flop_n) / this->get_life_time();
   }
   #endif
   // Overall speeds
-  inline perf::Float perf::Meter::get_unit_speed () {
-    return perf::Float (this->unit_n) / this->get_work_s ();
+  inline fmr::Perf_float perf::Meter::get_unit_speed () {
+    return fmr::Perf_float (this->unit_n) / this->get_work_s ();
   }
-  inline perf::Float perf::Meter::get_flop_speed () {
-    return perf::Float (this->flop_n) / this->get_work_s ();
+  inline fmr::Perf_float perf::Meter::get_flop_speed () {
+    return fmr::Perf_float (this->flop_n) / this->get_work_s ();
   }
-  inline perf::Float perf::Meter::get_data_speed () {
-    return perf::Float (this->binp_n + this->bout_n) / this->get_work_s();
+  inline fmr::Perf_float perf::Meter::get_data_speed () {
+    return fmr::Perf_float (this->binp_n + this->bout_n) / this->get_work_s();
   }
-  inline perf::Float perf::Meter::get_inp_speed () {
-    return perf::Float (this->binp_n) / this->get_work_s();
+  inline fmr::Perf_float perf::Meter::get_inp_speed () {
+    return fmr::Perf_float (this->binp_n) / this->get_work_s();
   }
-  inline perf::Float perf::Meter::get_out_speed () {
-    return perf::Float (this->bout_n) / this->get_work_s();
+  inline fmr::Perf_float perf::Meter::get_out_speed () {
+    return fmr::Perf_float (this->bout_n) / this->get_work_s();
   }
   // Active speeds
-  inline perf::Float perf::Meter::get_busy_unit_speed () {
-    return perf::Float (this->unit_n) / this->get_busy_s ();
+  inline fmr::Perf_float perf::Meter::get_busy_unit_speed () {
+    return fmr::Perf_float (this->unit_n) / this->get_busy_s ();
   }
-  inline perf::Float perf::Meter::get_busy_flop_speed () {
-    return perf::Float (this->flop_n) / this->get_busy_s ();
+  inline fmr::Perf_float perf::Meter::get_busy_flop_speed () {
+    return fmr::Perf_float (this->flop_n) / this->get_busy_s ();
   }
-  inline perf::Float perf::Meter::get_busy_data_speed () {
-    return perf::Float (this->binp_n + this->bout_n) / this->get_busy_s();
+  inline fmr::Perf_float perf::Meter::get_busy_data_speed () {
+    return fmr::Perf_float (this->binp_n + this->bout_n) / this->get_busy_s();
   }
-  inline perf::Float perf::Meter::get_busy_inp_speed () {
-    return perf::Float (this->binp_n) / this->get_busy_s();
+  inline fmr::Perf_float perf::Meter::get_busy_inp_speed () {
+    return fmr::Perf_float (this->binp_n) / this->get_busy_s();
   }
-  inline perf::Float perf::Meter::get_busy_out_speed () {
-    return perf::Float (this->bout_n) / this->get_busy_s();
+  inline fmr::Perf_float perf::Meter::get_busy_out_speed () {
+    return fmr::Perf_float (this->bout_n) / this->get_busy_s();
   }
 }// end fmr:: namespace
 #undef FMR_DEBUG

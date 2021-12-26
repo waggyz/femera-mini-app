@@ -7,6 +7,8 @@
 
 namespace fmr { namespace perf {
   struct Meter {
+  private:
+    using Float = fmr::Perf_float;
   public:// methods
     std::string get_unit_name () noexcept;
     std::string set_unit_name (std::string) noexcept;
