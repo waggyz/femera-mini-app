@@ -32,23 +32,7 @@ elapstamp = @printf '%8s%-62s %9s\n' "$(Make) " \
 col2cxx = printf "%s %-47s%25s\n" "$(1)" "$(2)" "$(3)";
 col2lib = printf "%s %-30s%42s\n" "$(1)" "$(2)" "$(3)";
 
-ifeq (0,1)
-label_test = touch $(4).out;    \
- $(3) >$(4).out 2>$(4).err;     \
-  if [[ "$$?" -eq 0 ]];         \
-    then printf "$(1) %-.70s\n" "$(3)"; \
-    else printf "$(2) $(3)\n";  \
-      if [ -f $(4).out ]; then  \
-        tail $(4).out >&2;      \
-        mv -f $(4).out $(4).bad;\
-    fi;                         \
-  fi;                           \
-  if [ -f $(4).err ]; then      \
-    tail $(4).err >&2;          \
-  fi;
-else
 label_test = -tools/label-test.sh "$(1)" "$(2)" "$(3)" "$(4)"
-endif
 
 
 

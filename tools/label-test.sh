@@ -3,12 +3,26 @@
 touch "$4.out";
 $3 >"$4.out" 2>"$4.err";
 if [[ "$?" -eq 0 ]]; then # truncate command if ok.
-  if [ ${3%% *} != ${3##* } ]; then DD=" .."; fi
+#  if [ ${3%% *} != ${3##* } ]; then DD=" .."; fi
+  if [ "${3%% *}" == "${3##* }" ]; then
+    FIRSTLAST="${3%% *}"
+  else
+    FIRSTLAST="${3%% *} ${3##* }"
+    if [ "$FIRSTLAST" != "$3" ]; then FIRSTLAST="${3%% *} .. ${3##* }"; fi
+  fi
+#  ARR=($3); W2=`echo ${ARR[@]:0:2}`
   if [ -s "$4.err" ]; then
-    printf "$1 %-.70s\n" "${3%% *}$DD, but see:";
+#    printf "$1 %-.70s\n" "$3, but see:";
+#    printf "$1 %-.70s\n" "${3%% *}$DD, but see:";
+#    printf "$1 %-.70s\n" "$W2, but see:";
+    printf "$1 %-.70s\n" "$FIRSTLAST, but see:";
     printf "        $4.err\n";
   else
-    printf "$1 %-.70s\n" "${3%% *}$DD";
+#    printf "$1 %-.70s\n" "$3";
+#    printf "$1 %-.70s\n" "${3%% *}$DD";
+#    printf "$1 %-.70s\n" "$W2";
+#    printf "$1 %-.70s\n" "${3%% *}$DD";
+    printf "$1 %-.70s\n" "$FIRSTLAST";
   fi;
 else # include arguments if returned nonzero
   printf "$2 $3\n";

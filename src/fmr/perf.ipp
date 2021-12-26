@@ -6,7 +6,7 @@
 // Inline definitions
 namespace fmr {
 
-static inline perf::Timepoint perf::get_now_ns () noexcept {
+static inline fmr::Perf_int perf::get_now_ns () noexcept {
   namespace sc = ::std::chrono;
   const sc::time_point <sc::high_resolution_clock, sc::nanoseconds> t
     = sc::high_resolution_clock::now();

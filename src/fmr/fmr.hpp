@@ -6,17 +6,17 @@
 #include <cstdint>
 
 namespace fmr {
+//NOTE prefer e.g. int_fast8_t, uint_least8_t, ...,  uintmax_t, uintptr_t
+  
 // This "using" syntax is preferred to "typedef" in the Google C++ Style Guide:
 // https://google.github.io/styleguide/cppguide.html#Aliases
 
-//NOTE prefer e.g. int_fast8_t, uint_least8_t, ...,  uintmax_t, uintptr_t
-  
-using Dim_int    = int_fast8_t;
+using Dim_int    = uint_fast8_t  ;// spatial dim., hier. depth, poly. order,...
 
-using Exit_int   = int;
+using Perf_float = float         ;
+using Perf_int   = uint_fast64_t ;// unit counters, internal time (ns) counters
 
-using Perf_float = float;
-using Perf_int   = uint_fast64_t;
+using Exit_int   = int           ;// system return code
 
 }//end fmr:: namespace
 
