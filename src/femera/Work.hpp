@@ -1,5 +1,5 @@
-#ifndef FMR_HAS_WORK_HPP
-#define FMR_HAS_WORK_HPP
+#ifndef FEMERA_HAS_WORK_HPP
+#define FEMERA_HAS_WORK_HPP
 /** */
 #include "../fmr/perf/Meter.hpp"
 //#include "Task.hpp"
@@ -65,7 +65,7 @@ class Work {// This is an abstract (pure virtual) base class (interface).
     //
     // Work stack initialization and exit
     virtual void          init (int* argc, char** argv) =0;
-    virtual fmr::Exit_int exit (fmr::Exit_int err=0);
+    virtual fmr::Exit_int exit (fmr::Exit_int err=0) noexcept;
     // default is to exit task_list in reverse
     //
     Make_work_t ptrs () noexcept;
@@ -81,7 +81,7 @@ class Work {// This is an abstract (pure virtual) base class (interface).
 #include "Work.ipp"
 
 #undef FMR_DEBUG
-//end FMR_HAS_WORK_HPP
+//end FEMERA_HAS_WORK_HPP
 #endif
 
 #if 0

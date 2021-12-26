@@ -9,8 +9,8 @@ echo     fontsize=\"16\"\; >>$DOT
 echo     fontname=\"Helvetica\"\; >>$DOT
 echo         clusterrank=\"local\"\; >>$DOT
 #
-sed -n 's/^[ ]*class \([A-Z][a-z0-9]*\)\([ :a-z0-9]*\)\([A-Z][a-z0-9]*\).*/\"\1\" -> \"\3\"/p' \
-  src/*/*.hpp >>$DOT
+sed -n 's/^[ ]*class \([A-Z][a-z0-9_]*\)\([ :a-z0-9_]*\)\([A-Z][a-z0-9_<>]*\).*/\"\1\" -> \"\3\"/p' \
+  src/*/*.hpp src/*/*/*.hpp >>$DOT
 #
 echo '{ rank = sink; "perf"; }' >>$DOT
 

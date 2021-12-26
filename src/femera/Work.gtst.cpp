@@ -15,12 +15,12 @@ private:
   using Derived_t = std::shared_ptr<T>;
 public:
   void          init     (int*, char**) override;
-  fmr::Exit_int exit     (fmr::Exit_int err=0)    override;
+  fmr::Exit_int exit     (fmr::Exit_int err=0) noexcept override;
   Derived_t     get_task (size_t i);
   Derived_t     get_task (std::vector<size_t> tree);
 private:
   T* derived (Base*);
-protected:// make it clear that Base needs to be inherited
+protected:// Make it clear that Base needs to be inherited.
   Base ()            =default;
   Base (const Base&) =default;
   Base (Base&&)      =default;// shallow (pointer) copyable
@@ -32,7 +32,7 @@ class Testable;// ...then derive a CRTP concrete class from Base for testing.
 using Testable_t = std::shared_ptr <Testable>;
 class Testable : public Base <Testable> {
 public:
-  Testable (Make_work_t) noexcept;
+  Testable (femera::Work::Make_work_t) noexcept;
   //FIXME This may not be needed if copy constructors set proc,data,file,test
   Testable () noexcept;
   void task_exit ();
@@ -49,7 +49,7 @@ Testable::Testable () noexcept {
   this->name ="testable";
 }
 inline
-void Testable::task_exit () {//TODO throw err and return void
+void Testable::task_exit () {
   throw std::runtime_error("woops");
 }//----------------------------------------------------------------------------
 template <typename T> inline
@@ -60,7 +60,7 @@ template <typename T> inline
 void Base<T>:: init (int*, char**) {
 }
 template <typename T> inline
-fmr::Exit_int Base<T>::exit (fmr::Exit_int err) {
+fmr::Exit_int Base<T>::exit (fmr::Exit_int err) noexcept {
   if (err>0) {return err;}
   err = femera::Work::exit (err);// Exit the task stack,
   if (err>0) {return err;}// then exit this task.

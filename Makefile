@@ -82,7 +82,9 @@ TEMP_DIR   := $(BUILD_CPU)/tmp
 #NOTE Subdirectories needed in the build directory have a trailing slash.
 BUILD_TREE+= $(BUILD_DIR)/external/tools/ $(BUILD_DIR)/docs/
 BUILD_TREE+= $(BUILD_CPU)/external/ $(BUILD_CPU)/tests/ $(BUILD_CPU)/tools/
-BUILD_TREE+= $(BUILD_CPU)/femera/ $(BUILD_CPU)/fmr/perf/
+BUILD_TREE+= $(BUILD_CPU)/femera/proc/ $(BUILD_CPU)/femera/data/
+BUILD_TREE+= $(BUILD_CPU)/femera/file/ $(BUILD_CPU)/femera/test/
+BUILD_TREE+= $(BUILD_CPU)/fmr/perf/
 
 STAGE_TREE+= $(STAGE_DIR)/bin/ $(STAGE_DIR)/lib/
 STAGE_TREE+= $(STAGE_CPU)/bin/ $(STAGE_CPU)/lib/
@@ -247,7 +249,7 @@ TOPDEPS += src/fmr/fmr.hpp src/femera/femera.hpp
 TOPDEPS += $(BUILD_CPU)/femera.flags
 
 # C++11 code to compile and gtest
-FMRCPPS:= $(shell find src/ -maxdepth 3 -name "*.cpp" -printf "%p ")
+FMRCPPS:= $(shell find src/ -maxdepth 4 -name "*.cpp" -printf "%p ")
 FMRGTST:= $(filter %.gtst.cpp,$(FMRCPPS))
 FMROUTS:= $(patsubst src/%.gtst.cpp,$(BUILD_CPU)/%.gtst.out,$(FMRGTST))
 
@@ -287,7 +289,7 @@ include $(FMRCPPS : %.cpp=%.d)
 .PRECIOUS: $(BUILD_DIR)/external/install-%.flags
 .PRECIOUS: $(BUILD_CPU)/external/install-%.flags
 
-#PRECIOUS $(BUILD_CPU)/%.o $(BUILD_CPU)/%.gtst.o
+#PRECIOUS $(BUILD_CPU)/%.o $(BUILD_CPU)/%.gtst.o %.d
 
 #FIXME fixes error make[2] unlink /home/dwagner5/local/bin/ Is a directory
 #      while first running make tools?
@@ -716,6 +718,16 @@ endif
 # Header-only
 $(BUILD_CPU)/%.gtst.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.gtst.o : src/%.gtst.cpp src/%.hpp src/%.ipp $(TOPDEPS)
+ifeq ($(ENABLE_GOOGLETEST),ON)
+	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
+	$(CXX) -c $(CXXGTEST) $(FMRFLAGS) $< -o $@
+else
+	touch $@
+endif
+
+# Header-only
+$(BUILD_CPU)/%.gtst.o : export TMPDIR := $(TEMP_DIR)
+$(BUILD_CPU)/%.gtst.o : src/%.gtst.cpp src/%.hpp $(TOPDEPS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
 	$(CXX) -c $(CXXGTEST) $(FMRFLAGS) $< -o $@

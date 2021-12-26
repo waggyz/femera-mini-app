@@ -1,5 +1,5 @@
-#ifndef FMR_HAS_WORK_IPP
-#define FMR_HAS_WORK_IPP
+#ifndef FEMERA_HAS_WORK_IPP
+#define FEMERA_HAS_WORK_IPP
 
 #undef FMR_DEBUG
 #include <cstdio>     // std::printf
@@ -36,7 +36,7 @@ namespace femera {
   noexcept {
     return this->task_list.size ();
   }
-  inline fmr::Exit_int Work::exit (fmr::Exit_int err) {
+  inline fmr::Exit_int Work::exit (fmr::Exit_int err) noexcept {
     while (! this->task_list.empty ()) {
       auto W = task_list.back ();// Exit in reverse order.
       if (W != nullptr) {//static_cast <Work_t> (nullptr)) {
@@ -52,5 +52,5 @@ namespace femera {
 }// end femera:: namespace
 
 #undef FMR_DEBUG
-//end FMR_HAS_WORK_IPP
+//end FEMERA_HAS_WORK_IPP
 #endif
