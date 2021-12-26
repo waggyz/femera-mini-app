@@ -20,7 +20,7 @@ echo '{ rank = sink; "data-type"; }' >>$DOT
 echo '{ rank = sink; "vals"; }' >>$DOT
 
 echo '{ rank = sink; "Task"; }' >>$DOT
-echo '{ rank = sink; "Flog"; }' >>$DOT
+# echo '{ rank = sink; "Flog"; }' >>$DOT
 #
 echo \} >>$DOT
 #
