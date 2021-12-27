@@ -18,16 +18,17 @@ namespace femera {
   template <typename> class Proc; class Main;
   template <typename> class Data; class File;
   template <typename> class Test; class Beds;
-  namespace proc { class Fcpu; class Fomp; class Fmpi; }
+  namespace proc { class Ftop; class Fmpi; class Fomp; class Fcpu; }
   namespace data { class Flog; }// class Type; class Base; }//FIXME Fake -> Base?
   namespace test { class Unit; class Self; class Perf; class Gtst; }
   using Work_t = std::shared_ptr <Work>;
   using Proc_t = std::shared_ptr <Proc<Work>>;
   //
   using Main_t = std::shared_ptr <Main>;
-  using Fcpu_t = std::shared_ptr <proc::Fcpu>;//TODO or  proc::Ftop ?
-  using Fomp_t = std::shared_ptr <proc::Fomp>;
+  using Ftop_t = std::shared_ptr <proc::Ftop>;
   using Fmpi_t = std::shared_ptr <proc::Fmpi>;
+  using Fomp_t = std::shared_ptr <proc::Fomp>;
+  using Fcpu_t = std::shared_ptr <proc::Fcpu>;
   //
   using Data_t = std::shared_ptr <Data<Work>>;
   using File_t = std::shared_ptr <File>;
@@ -56,8 +57,8 @@ namespace femera {
     File_t data = nullptr;// data and file handling
     Beds_t test = nullptr;// correctness and performance testing
   private:
-    Task_list_t task_list ={};
   protected:
+    Task_list_t task_list ={};
     fmr::Dim_int   info_d = 1;
   protected:// Methods --------------------------------------------------------
     //NOTE Make at least 1 pure virtual.

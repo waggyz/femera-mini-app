@@ -5,6 +5,8 @@ namespace femera {
   inline
   proc::Fcpu::Fcpu (femera::Work::Make_work_t W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
+    this->name ="CPU";
+    this->info_d = 3;
   }
   inline
   proc::Fcpu::Fcpu () noexcept {

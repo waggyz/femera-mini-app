@@ -5,6 +5,8 @@ namespace femera {
   inline
   Beds::Beds (femera::Work::Make_work_t W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
+    this->name ="testbeds";
+    this->info_d = 2;
   }
   inline
   Beds::Beds () noexcept {

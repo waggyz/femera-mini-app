@@ -5,6 +5,8 @@ namespace femera {
   inline
   Main::Main (femera::Work::Make_work_t W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
+    this->name ="Femera";
+    this->info_d = 2;
   }
   inline
   Main::Main () noexcept {
