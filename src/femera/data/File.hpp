@@ -3,7 +3,7 @@
 
 #include "../Data.hpp"
 
-namespace femera { namespace data {
+namespace femera {
 
 class File;// ...then derive a CRTP concrete class from File.
 class File : public Data <File> {
@@ -14,7 +14,7 @@ public:
   void task_exit ();
 };
 
-} }//end femera::file:: namespace
+}//end femera:: namespace
 
 #include "File.ipp"
 

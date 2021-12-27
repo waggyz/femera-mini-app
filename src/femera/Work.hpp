@@ -15,16 +15,16 @@
 namespace femera {
   // Forward-declares
   class Work;
-  template <typename> class Proc;
-  template <typename> class Data;
-  template <typename> class Test;
-  namespace proc { class Main; class Fcpu; class Fomp; class Fmpi; }
-  namespace data { class File; class Flog; }// class Type; class Base; }//FIXME Fake -> Base?
-  namespace test { class Beds; class Unit; class Self; class Perf; class Gtst; }
-
+  template <typename> class Proc; class Main;
+  template <typename> class Data; class File;
+  template <typename> class Test; class Beds;
+  namespace proc { class Fcpu; class Fomp; class Fmpi; }
+  namespace data { class Flog; }// class Type; class Base; }//FIXME Fake -> Base?
+  namespace test { class Unit; class Self; class Perf; class Gtst; }
+  //FIXME Move primary handlers (Main, File, Beds) into root femera:: namespace?
   using Work_t = std::shared_ptr <Work>;
   using Proc_t = std::shared_ptr <Proc<Work>>;
-  using Main_t = std::shared_ptr <proc::Main>;
+  using Main_t = std::shared_ptr <Main>;
   using Fcpu_t = std::shared_ptr <proc::Fcpu>;
   using Fomp_t = std::shared_ptr <proc::Fomp>;
   using Fmpi_t = std::shared_ptr <proc::Fmpi>;
@@ -38,11 +38,11 @@ namespace femera {
   using Type_t = std::shared_ptr <data::Type>;
 #endif
   using Data_t = std::shared_ptr <Data<Work>>;
-  using File_t = std::shared_ptr <data::File>;
+  using File_t = std::shared_ptr <File>;
   using Flog_t = std::shared_ptr <data::Flog>;
 
   using Test_t = std::shared_ptr <Test<Work>>;
-  using Beds_t = std::shared_ptr <test::Beds>;
+  using Beds_t = std::shared_ptr <Beds>;
   //using Unit_t = std::shared_ptr <test::Unit>;
   //using Self_t = std::shared_ptr <test::Self>;
   //using Perf_t = std::shared_ptr <test::Perf>;

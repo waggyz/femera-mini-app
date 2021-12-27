@@ -3,16 +3,16 @@
 
 namespace femera {
 inline
-data::File::File (femera::Work::Make_work_t W) noexcept {
+File::File (femera::Work::Make_work_t W) noexcept {
   this->name ="file";
   std::tie (this->proc, this->data, this->test) = W;
 }
 inline
-data::File::File () noexcept {
+File::File () noexcept {
   this->name ="file";
 }
 inline
-void data::File::task_exit () {
+void File::task_exit () {
 }
 
 }//end femera namespace
