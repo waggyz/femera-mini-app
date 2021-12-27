@@ -1,8 +1,6 @@
 #ifndef FEMERA_FMPI_IPP
 #define FEMERA_FMPI_IPP
 
-# include "mpi.h"
-
 namespace femera {
   inline
   proc::Fmpi::Fmpi (femera::Work::Make_work_t W) noexcept {

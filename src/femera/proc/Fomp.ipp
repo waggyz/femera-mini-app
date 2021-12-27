@@ -1,8 +1,6 @@
 #ifndef FEMERA_FOMP_IPP
 #define FEMERA_FOMP_IPP
 
-#include "omp.h"
-
 namespace femera {
   inline
   proc::Fomp::Fomp (femera::Work::Make_work_t W) noexcept {

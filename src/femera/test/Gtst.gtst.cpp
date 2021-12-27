@@ -2,7 +2,6 @@
 
 #include "gtest/gtest.h"
 
-
 auto gtst = femera::test::Gtst();
 
 TEST( Gtst, TaskName ){
