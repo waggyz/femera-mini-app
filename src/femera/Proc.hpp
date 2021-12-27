@@ -4,7 +4,6 @@
 #include "Work.hpp"
 
 namespace femera {
-  //
   template <typename T>
   class Proc : public Work {
   private:
@@ -24,7 +23,6 @@ namespace femera {
       (const Proc&)    =default;
     ~Proc ()           =default;
   };
-
 }//end femera:: namespace
 
 #include "Proc.ipp"

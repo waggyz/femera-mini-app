@@ -4,15 +4,13 @@
 #include "../Proc.hpp"
 
 namespace femera { namespace proc {
-
-class Fomp;// ...then derive a CRTP concrete class from Proc.
-class Fomp : public Proc <Fomp> {
-public:
-  Fomp (femera::Work::Make_work_t) noexcept;
-  Fomp () noexcept;
-  void task_exit ();
-};
-
+  class Fomp;// Derive a CRTP concrete class from Proc.
+  class Fomp : public Proc <Fomp> {
+  public:
+    Fomp (femera::Work::Make_work_t) noexcept;
+    Fomp () noexcept;
+    void task_exit ();
+  };
 } }//end femera::proc:: namespace
 
 #include "Fomp.ipp"

@@ -25,11 +25,11 @@ TEST(FmrPerfMeter, Naptime) {
   perf.set_unit_name ("naps");
   perf.add_count ();// default is add 1 unit ("naps")
   perf.add_idle_time_now ();// done preparing; get busy sleeping now
-  ::usleep (1000);// 1 ms nap
+  ::usleep (1000);// 1 ms nap (minimum)
   perf.add_busy_time_now ();// done being busy sleeping
   EXPECT_GT(perf.get_busy_s (),          fmr::Perf_float(0.99 * 1e-3));
   //EXPECT_GT(perf.get_unit_speed (),      0.50 * 1e+3);
-  EXPECT_GT(perf.get_busy_unit_speed (), fmr::Perf_float(0.80 * 1e+3));
+  EXPECT_LT(perf.get_busy_unit_speed (), fmr::Perf_float(1.01 * 1e+3));
   EXPECT_GT(perf.get_busy_unit_speed (), perf.get_unit_speed ());
 }
 TEST(FmrPerfMeter, ArithmeticIntensity) {

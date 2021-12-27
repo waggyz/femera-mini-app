@@ -25,7 +25,7 @@ namespace femera {
   using Proc_t = std::shared_ptr <Proc<Work>>;
   //
   using Main_t = std::shared_ptr <Main>;
-  using Fcpu_t = std::shared_ptr <proc::Fcpu>;
+  using Fcpu_t = std::shared_ptr <proc::Fcpu>;//TODO or  proc::Ftop ?
   using Fomp_t = std::shared_ptr <proc::Fomp>;
   using Fmpi_t = std::shared_ptr <proc::Fmpi>;
   //
@@ -44,7 +44,7 @@ namespace femera {
 
   class Work {// This is an abstract (pure virtual) base class (interface).
   // Derived Classes use the curiously recurrent template pattern (CRTP).
-  public:
+  public:// typedefs ----------------------------------------------------------
     using Task_list_t = std::deque <Work_t>;
     using Make_work_t = std::tuple <Main_t,File_t,Beds_t>;
   public:// Variables ---------------------------------------------------------
@@ -57,6 +57,7 @@ namespace femera {
     Beds_t test = nullptr;// correctness and performance testing
   private:
     Task_list_t task_list ={};
+  protected:
     fmr::Dim_int   info_d = 1;
   protected:// Methods --------------------------------------------------------
     //NOTE Make at least 1 pure virtual.
