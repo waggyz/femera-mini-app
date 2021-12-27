@@ -8,7 +8,7 @@ namespace femera {
 inline
 proc::Fmpi::Fmpi (femera::Work::Make_work_t W) noexcept {
   this->name ="MPI";
-  std::tie(this->proc,this->file,this->data, this->test) = W;
+  std::tie (this->proc, this->data, this->test) = W;
 }
 inline
 proc::Fmpi::Fmpi () noexcept {

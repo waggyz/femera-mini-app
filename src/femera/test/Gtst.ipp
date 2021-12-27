@@ -6,7 +6,7 @@ namespace femera {
 inline
 test::Gtst::Gtst (femera::Work::Make_work_t W) noexcept {
   this->name ="GoogleTest";
-  std::tie(this->proc,this->file,this->data, this->test) = W;
+  std::tie (this->proc, this->data, this->test) = W;
 }
 inline
 test::Gtst::Gtst () noexcept {

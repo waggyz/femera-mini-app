@@ -41,7 +41,7 @@ public:
 inline
 Testable::Testable (femera::Work::Make_work_t W) noexcept {
   this->name ="testable";
-  std::tie(this->proc,this->file,this->data, this->test) = W;
+  std::tie(this->proc,this->data,this->test) = W;
 }
 #endif
 inline

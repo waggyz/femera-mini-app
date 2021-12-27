@@ -9,7 +9,7 @@
 namespace femera {
   inline Work::Make_work_t Work::ptrs ()
     noexcept {
-    return std::make_tuple(this->proc,this->file, this->data, this->test);
+    return std::make_tuple(this->proc, this->data, this->test);
   }
   inline Work_t Work::get_work (const size_t i)
   noexcept {

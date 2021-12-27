@@ -6,7 +6,6 @@
 namespace femera { namespace test {
 
 class Beds;// ...then derive a CRTP concrete class from Test.
-using Beds_t = std::shared_ptr <Beds>;
 class Beds : public Test <Beds> {
 public:
   Beds (femera::Work::Make_work_t) noexcept;

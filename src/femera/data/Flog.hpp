@@ -1,13 +1,12 @@
 #ifndef FEMERA_FLOG_HPP
 #define FEMERA_FLOG_HPP
 
-#include "../File.hpp"
+#include "../Data.hpp"
 
-namespace femera { namespace file {
+namespace femera { namespace data {
 
 class Flog;// ...then derive a CRTP concrete class from File.
-using Flog_t = std::shared_ptr <Flog>;
-class Flog : public File <Flog> {
+class Flog : public Data <Flog> {
 public:
   Flog (femera::Work::Make_work_t) noexcept;
   //FIXME This may not be needed if copy constructors set proc,data,file,test

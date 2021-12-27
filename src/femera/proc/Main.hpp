@@ -6,7 +6,6 @@
 namespace femera { namespace proc {
 
 class Main;// ...then derive a CRTP concrete class from Proc.
-using Main_t = std::shared_ptr <Main>;
 class Main : public Proc <Main> {
 public:
   Main (femera::Work::Make_work_t) noexcept;

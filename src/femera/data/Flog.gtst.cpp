@@ -3,10 +3,10 @@
 #include "gtest/gtest.h"
 
 
-auto flog = femera::file::Flog();
+auto flog = femera::data::Flog();
 
 TEST( Flog, TaskName ){
-  EXPECT_EQ( flog.name, "file" );
+  EXPECT_EQ( flog.name, "log" );
 }
 TEST( Flog, SizeofFlogGE120 ){
   EXPECT_GE( sizeof(flog), 120 );

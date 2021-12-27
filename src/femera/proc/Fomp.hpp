@@ -6,7 +6,6 @@
 namespace femera { namespace proc {
 
 class Fomp;// ...then derive a CRTP concrete class from Proc.
-using Fomp_t = std::shared_ptr <Fomp>;
 class Fomp : public Proc <Fomp> {
 public:
   Fomp (femera::Work::Make_work_t) noexcept;
