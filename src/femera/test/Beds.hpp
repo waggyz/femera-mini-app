@@ -9,7 +9,6 @@ class Beds;// ...then derive a CRTP concrete class from Test.
 class Beds : public Test <Beds> {
 public:
   Beds (femera::Work::Make_work_t) noexcept;
-  //FIXME This may not be needed if copy constructors set proc,data,file,test
   Beds () noexcept;
   void task_exit ();
 };

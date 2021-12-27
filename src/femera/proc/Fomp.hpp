@@ -9,7 +9,6 @@ class Fomp;// ...then derive a CRTP concrete class from Proc.
 class Fomp : public Proc <Fomp> {
 public:
   Fomp (femera::Work::Make_work_t) noexcept;
-  //FIXME This may not be needed if copy constructors set proc,data,file,test
   Fomp () noexcept;
   void task_exit ();
 };

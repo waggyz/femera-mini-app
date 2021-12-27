@@ -9,7 +9,6 @@ class Gtst;// ...then derive a CRTP concrete class from Test.
 class Gtst : public Test <Gtst> {
 public:
   Gtst (femera::Work::Make_work_t) noexcept;
-  //FIXME This may not be needed if copy constructors set proc,data,file,test
   Gtst () noexcept;
   void task_exit ();
 };

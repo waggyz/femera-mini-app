@@ -9,7 +9,6 @@ class Main;// ...then derive a CRTP concrete class from Proc.
 class Main : public Proc <Main> {
 public:
   Main (femera::Work::Make_work_t) noexcept;
-  //FIXME This may not be needed if copy constructors set proc,data,file,test
   Main () noexcept;
   void task_exit ();
 };

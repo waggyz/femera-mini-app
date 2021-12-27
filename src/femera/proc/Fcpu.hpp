@@ -9,7 +9,6 @@ class Fcpu;// ...then derive a CRTP concrete class from Proc.
 class Fcpu : public Proc <Fcpu> {
 public:
   Fcpu (femera::Work::Make_work_t) noexcept;
-  //FIXME This may not be needed if copy constructors set proc,data,file,test
   Fcpu () noexcept;
   void task_exit ();
 };

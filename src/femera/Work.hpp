@@ -21,26 +21,18 @@ namespace femera {
   namespace proc { class Fcpu; class Fomp; class Fmpi; }
   namespace data { class Flog; }// class Type; class Base; }//FIXME Fake -> Base?
   namespace test { class Unit; class Self; class Perf; class Gtst; }
-  //FIXME Move primary handlers (Main, File, Beds) into root femera:: namespace?
   using Work_t = std::shared_ptr <Work>;
   using Proc_t = std::shared_ptr <Proc<Work>>;
+  //
   using Main_t = std::shared_ptr <Main>;
   using Fcpu_t = std::shared_ptr <proc::Fcpu>;
   using Fomp_t = std::shared_ptr <proc::Fomp>;
   using Fmpi_t = std::shared_ptr <proc::Fmpi>;
-#if 0
-  template <typename> File;
-  namespace file { Flog; }// class Exts;
-  using File_t = std::shared_ptr <File<Work>>;
-  using Flog_t = std::shared_ptr <file::Flog>;
-  using Exts_t = std::shared_ptr <file::Exts>;
-  using Data_t = std::shared_ptr <Data<Work>>;
-  using Type_t = std::shared_ptr <data::Type>;
-#endif
+  //
   using Data_t = std::shared_ptr <Data<Work>>;
   using File_t = std::shared_ptr <File>;
   using Flog_t = std::shared_ptr <data::Flog>;
-
+  //
   using Test_t = std::shared_ptr <Test<Work>>;
   using Beds_t = std::shared_ptr <Beds>;
   //using Unit_t = std::shared_ptr <test::Unit>;
@@ -54,7 +46,6 @@ namespace femera {
   // Derived Classes use the curiously recurrent template pattern (CRTP).
   public:
     using Task_list_t = std::deque <Work_t>;
-//    using Make_work_t = std::tuple <Proc_t,File_t,Data_t,Test_t>;
     using Make_work_t = std::tuple <Main_t,File_t,Beds_t>;
   public:// Variables ---------------------------------------------------------
     fmr::perf::Meter time = fmr::perf::Meter ();
@@ -62,9 +53,7 @@ namespace femera {
     //
     //Proc_t proc = static_cast <Proc_t> (nullptr);
     Main_t proc = nullptr;// processing hierarchy (Main_t)
-    File_t data = nullptr;// file handling
-//    Flog_t file = nullptr;// file handling
-//    Type_t data = nullptr;// data handling
+    File_t data = nullptr;// data and file handling
     Beds_t test = nullptr;// correctness and performance testing
   private:
     Task_list_t task_list ={};

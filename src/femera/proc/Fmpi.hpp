@@ -9,7 +9,6 @@ class Fmpi;// ...then derive a CRTP concrete class from Proc.
 class Fmpi : public Proc <Fmpi> {
 public:
   Fmpi (femera::Work::Make_work_t) noexcept;
-  //FIXME This may not be needed if copy constructors set proc,data,file,test
   Fmpi () noexcept;
   void task_exit ();
 };
