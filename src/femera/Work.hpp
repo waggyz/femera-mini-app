@@ -72,7 +72,7 @@ namespace femera {
     fmr::Exit_int exit_list () noexcept;// exit task_list in reverse
     //
     //NOTE Make at least 1 pure virtual.
-    //FIXME Do all need to be pure to avoid vtable?
+    //FIXME Do all need to be pure to avoid vtable using CRTP derived classes?
     virtual fmr::Exit_int init (int* argc, char** argv) noexcept =0;
     virtual fmr::Exit_int exit (fmr::Exit_int err=0) =0;
     //
@@ -82,7 +82,7 @@ namespace femera {
     Work (Work const&) =default;// copyable
     Work& operator=
       (const Work&)    =default;
-    virtual ~Work ()   =default;
+    virtual ~Work ();// not inline to avoid -Winline large growth warning
   };
   //
 }//end femera:: namespace

@@ -4,12 +4,15 @@
 #include <string>
 #include <cstdio>     // std::printf
 //#include <memory>     // std::unique_ptr, std::make_unique
+#include "Work.hpp"
 
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
 #include <cstdio>     // std::printf
 #endif
 
+//femera::Work::Work (Work const&){}
+femera::Work::~Work (){}
 
 #if 0
 void femera::Work<T>::init (int* argc, char** argv) {

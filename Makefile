@@ -51,7 +51,9 @@ ifeq ($(CXX),g++)
   CXXWARNS+= -Wlogical-op -Woverloaded-virtual -Wstrict-null-sentinel
   CXXWARNS+= -Wmissing-declarations -Wredundant-decls -Wdisabled-optimization
   CXXWARNS+= -Wunused-macros -Wzero-as-null-pointer-constant -Wundef -Weffc++
-  # CXXWARNS+= -Winline
+  CXXWARNS+= -Winline
+  #TODO Consider suppressing -Winline errors for con/de-structors and
+  #     lower the --param large-function-growth limit.
   # Library archiver
   AREXE:= gcc-ar
 endif
