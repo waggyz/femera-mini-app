@@ -7,15 +7,18 @@
 #endif
 
 namespace femera {
-  inline Work::Make_work_t Work::ptrs ()
-    noexcept {
+  inline
+  Work::Make_work_t Work::ptrs ()
+  noexcept {
     return std::make_tuple(this->proc, this->data, this->test);
   }
-  inline Work_t Work::get_work (const size_t i)
+  inline
+  Work_t Work::get_work (const size_t i)
   noexcept {
     return (i < this->task_list.size()) ? this->task_list [i] : nullptr;
   }
-  inline Work_t Work::get_work (const std::vector<size_t> hier)
+  inline
+  Work_t Work::get_work (const std::vector<size_t> hier)
   noexcept {
     Work_t W = nullptr;
     const auto sz = hier.size();
@@ -27,16 +30,31 @@ namespace femera {
     } } }
     return W;
   }
-  inline size_t Work::add_task (Work_t W)
+  inline 
+  size_t Work::add_task (Work_t W)
   noexcept {
     this->task_list.push_back (W);
     return this->task_list.size ();
   }
-  inline size_t Work::get_task_n ()
+  inline
+  size_t Work::get_task_n ()
   noexcept {
     return this->task_list.size ();
   }
-  inline fmr::Exit_int Work::exit (fmr::Exit_int err) noexcept {
+  inline // init task_list forward
+  void Work::init_list (int* argc, char** argv) noexcept {
+    while (! this->task_list.empty ()) {
+      auto W = task_list.front ();// Init forward.
+      if (W != nullptr) {//static_cast <Work_t> (nullptr)) {
+        try { W->init (argc, argv); }
+	catch (std::exception& e) { }
+      }
+      this->task_list.pop_front ();
+    }
+  }
+  inline
+  fmr::Exit_int Work::exit_list () noexcept {
+    fmr::Exit_int err=0;
     while (! this->task_list.empty ()) {
       auto W = task_list.back ();// Exit in reverse order.
       if (W != nullptr) {//static_cast <Work_t> (nullptr)) {
@@ -49,6 +67,11 @@ namespace femera {
     }
     return err;
   }
+#if 0
+  inline
+  fmr::Exit_int Work::exit (fmr::Exit_int err) noexcept {
+  }
+#endif
 }// end femera:: namespace
 
 #undef FMR_DEBUG

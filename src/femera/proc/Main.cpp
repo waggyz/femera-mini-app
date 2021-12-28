@@ -10,7 +10,7 @@
 #endif
 
 namespace femera {
-  void Main:: init (int* argc , char** argv) {
+  void Main:: task_init (int* argc , char** argv) {
     this->add_task (std::make_shared<proc::Ftop> (proc::Ftop(this->ptrs())));
 #ifdef FMR_HAS_MPI
     this->add_task (std::make_shared<proc::Fmpi> (proc::Fmpi(this->ptrs())));
@@ -20,7 +20,7 @@ namespace femera {
 #endif
     this->add_task (std::make_shared<proc::Fcpu> (proc::Fcpu(this->ptrs())));
     for (auto P : this->task_list) {
-      P->init (argc, argv);//TODO Check if this calls Work::init(..) or derived
+      P->init (argc, argv);// Work::init(..) is pure virtual
 #ifdef FMR_DEBUG
       printf ("init %s\n", P->name.c_str());
 #endif

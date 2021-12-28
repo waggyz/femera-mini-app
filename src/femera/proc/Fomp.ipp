@@ -13,6 +13,8 @@ namespace femera {
     this->info_d = 3;
   }
   inline
+  void proc::Fomp::task_init (int*, char**){}
+  inline
   void proc::Fomp::task_exit () {
   }
 }//end femera namespace

@@ -12,13 +12,19 @@ namespace femera {
     return static_cast<T*> (ptr);
   }
   template <typename T> inline
-  void Proc<T>:: init (int*, char**) {
+  fmr::Exit_int Proc<T>::init (int* argc, char** argv) noexcept {
+    fmr::Exit_int err=0;
+    try { init_list (argc, argv); }                     // Init this task,
+    catch (std::exception& e) { err = exit (1); }
+    try { Proc::derived(this)->task_init (argc, argv); }// then init the list.
+    catch (std::exception& e) { err = exit (2); }
+    return err;
   }
   template <typename T> inline
   fmr::Exit_int Proc<T>::exit (fmr::Exit_int err) noexcept {
     if (err>0) {return err;}
-    err = femera::Work::exit (err);// Exit the task stack (exceptions caught),
-    if (err>0) {return err;}// then exit this task.
+    err = exit_list ();     // Exit the task list (exceptions caught),
+    if (err>0) {return err;}// then exit this derived task.
     try { Proc::derived(this)->task_exit (); }
     catch (std::exception& e) { err = 2; }
     return err;

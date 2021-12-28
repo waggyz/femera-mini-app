@@ -14,7 +14,7 @@ class Base : public femera::Work {
 private:
   using Derived_t = std::shared_ptr<T>;
 public:
-  void          init     (int*, char**) override;
+  fmr::Exit_int init     (int*, char**) noexcept override;
   fmr::Exit_int exit     (fmr::Exit_int err=0) noexcept override;
   Derived_t     get_task (size_t i);
   Derived_t     get_task (std::vector<size_t> tree);
@@ -57,12 +57,14 @@ T* Base<T>::derived (Base* ptr) {
   return static_cast<T*> (ptr);
 }
 template <typename T> inline
-void Base<T>:: init (int*, char**) {
+fmr::Exit_int Base<T>:: init (int*, char**) noexcept {
+  return 0;
 }
 template <typename T> inline
 fmr::Exit_int Base<T>::exit (fmr::Exit_int err) noexcept {
   if (err>0) {return err;}
-  err = femera::Work::exit (err);// Exit the task stack,
+  //err = femera::Work::exit (err);// Exit the task stack,
+  err = exit_list ();
   if (err>0) {return err;}// then exit this task.
   try { Base::derived(this)->task_exit (); }
   catch (std::exception& e) { err = 42; }

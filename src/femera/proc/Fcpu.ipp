@@ -14,6 +14,8 @@ namespace femera {
     this->info_d = 3;
   }
   inline
+  void proc::Fcpu::task_init (int*, char**){}
+  inline
   void proc::Fcpu::task_exit () {
   }
 }//end femera namespace

@@ -10,6 +10,7 @@ namespace femera { namespace proc {
     Fcpu (femera::Work::Make_work_t) noexcept;
     Fcpu () noexcept;
     void task_exit ();
+    void task_init (int* argc, char** argv);
   };
 } }//end femera::proc:: namespace
 

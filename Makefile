@@ -8,9 +8,8 @@ include examples/config.recommended
 
 include tools/set-undefined.mk
 include tools/functions.mk
-#------------------------------------------------------------------------------
 
-CXX_VERSION   := $(shell $(CXX) -dumpversion)
+#------------------------------------------------------------------------------
 BUILD_VERSION := $(shell tools/build-version-number.sh)
 FEMERA_VERSION:= Femera $(BUILD_VERSION)
 
@@ -35,7 +34,11 @@ ifeq ($(CXX),g++)
     CXX:= mpic++
   endif
   OPTFLAGS:= $(shell cat data/gcc4.flags | tr '\n' ' ' | tr -s ' ')
-  CXXFLAGS+= -std=c++11 -g -MMD -MP $(OPTFLAGS) -flto -fstrict-enums
+  CXXFLAGS+= -std=c++11 -g -MMD -MP
+  ifeq ($(ENABLE_LTO),ON)
+    CXXFLAGS+= -flto
+  endif
+  CXXFLAGS+= $(OPTFLAGS) -fstrict-enums
   # Dependency file generation: -MMD -MP
   #NOTE -fpic needed for shared libs, but may degrade static lib performance.
   ifeq ($(ENABLE_OMP),ON)
@@ -48,6 +51,7 @@ ifeq ($(CXX),g++)
   CXXWARNS+= -Wlogical-op -Woverloaded-virtual -Wstrict-null-sentinel
   CXXWARNS+= -Wmissing-declarations -Wredundant-decls -Wdisabled-optimization
   CXXWARNS+= -Wunused-macros -Wzero-as-null-pointer-constant -Wundef -Weffc++
+  # CXXWARNS+= -Winline
   # Library archiver
   AREXE:= gcc-ar
 endif
@@ -67,6 +71,7 @@ endif
 FMRFLAGS += -I"$(STAGE_CPU)/include" -I"$(STAGE_DIR)/include"
 FMRFLAGS += -I"$(INSTALL_CPU)/include" -I"$(INSTALL_DIR)/include"
 LDFLAGS += -L"$(STAGE_CPU)/lib" -L"$(STAGE_DIR)/lib"
+
 # Directories -----------------------------------------------------------------
 # Directories for generic components
 BUILD_DIR  := build
@@ -164,7 +169,9 @@ ifeq ($(ENABLE_GOOGLETEST),ON)
   CXXGTEST := $(CXXFLAGS) $(CXXWARNS)
   CXXGTEST := $(filter-out -Wundef,$(CXXGTEST))
   CXXGTEST := $(filter-out -Weffc++,$(CXXGTEST))
-  # CXXGTEST := $(filter-out -Winline,$(GTESTFLAGS))
+  CXXGTEST := $(filter-out -Winline,$(CXXGTEST))
+  CXXGTEST := $(filter-out -flto,$(CXXGTEST))
+  #NOTE Parallel make breaks link-time optimization of gtests.
 endif
 ifeq ($(ENABLE_GOOGLETEST),ON)
   LIST_EXTERNAL += googletest
@@ -229,6 +236,8 @@ ifeq ($(ENABLE_DOT),ON)
 endif
 
 CXXFLAGS+= $(CXXWARNS)
+CXX_VERSION   := $(shell $(CXX) -dumpversion)
+
 # Files -----------------------------------------------------------------------
 # Generic Femera tools
 LIST_TOOLS:= fmrmodel fmrcores fmrexec fmrnumas

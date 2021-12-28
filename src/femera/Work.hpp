@@ -56,13 +56,11 @@ namespace femera {
     Main_t proc = nullptr;// processing hierarchy (Main_t)
     File_t data = nullptr;// data and file handling
     Beds_t test = nullptr;// correctness and performance testing
-  private:
   protected:
     Task_list_t task_list ={};
     fmr::Dim_int   info_d = 1;
   protected:// Methods --------------------------------------------------------
-    //NOTE Make at least 1 pure virtual.
-    Work_t get_work   (size_t) noexcept;// used by derived get_task(..) method
+    Work_t get_work   (size_t) noexcept;// used by derived::get_task(..) method
     Work_t get_work   (std::vector<size_t>) noexcept;// ""
   public:
     // Derived_t get_task (size_t) is in Derived class and returns that type.
@@ -70,9 +68,13 @@ namespace femera {
     size_t get_task_n ()       noexcept;
     //
     // Work stack initialization and exit
-    virtual void          init (int* argc, char** argv) =0;
-    virtual fmr::Exit_int exit (fmr::Exit_int err=0) noexcept;
-    // default is to exit task_list in reverse
+    void          init_list (int* argc, char** argv) noexcept;// init forward
+    fmr::Exit_int exit_list () noexcept;// exit task_list in reverse
+    //
+    //NOTE Make at least 1 pure virtual.
+    //FIXME Do all need to be pure to avoid vtable?
+    virtual fmr::Exit_int init (int* argc, char** argv) noexcept =0;
+    virtual fmr::Exit_int exit (fmr::Exit_int err=0) =0;
     //
     Make_work_t ptrs () noexcept;
   public:// Built-in stuff ----------------------------------------------------

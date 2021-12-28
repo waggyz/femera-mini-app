@@ -9,7 +9,7 @@ namespace femera {
   private:
     using This_t = std::shared_ptr<T>;
   public:
-    void          init     (int*, char**) override;
+    fmr::Exit_int init     (int*, char**)        noexcept override;
     fmr::Exit_int exit     (fmr::Exit_int err=0) noexcept override;
     This_t        get_task (size_t i);
     This_t        get_task (std::vector<size_t> tree);

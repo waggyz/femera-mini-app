@@ -18,6 +18,9 @@ FMR_MICRO_UCHAR:=u03bc
 # Use parallel make jobs
 ENABLE_MAKEJOBS:=ON
 
+# Link-time optimization
+ENABLE_LTO:=ON
+
 ENABLE_OMP:=ON
 ENABLE_LIBNUMA:=ON
 

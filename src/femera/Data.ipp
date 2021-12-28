@@ -12,12 +12,13 @@ namespace femera {
     return static_cast<T*> (ptr);
   }
   template <typename T> inline
-  void Data<T>:: init (int*, char**) {
+  fmr::Exit_int Data<T>::init (int*, char**) noexcept {
+    return 0;
   }
   template <typename T> inline
   fmr::Exit_int Data<T>::exit (fmr::Exit_int err) noexcept {
     if (err>0) {return err;}
-    err = femera::Work::exit (err);// Exit the task stack (exceptions caught),
+    err = exit_list ();// Exit the task stack (exceptions caught),
     if (err>0) {return err;}// then exit this task.
     try { Data::derived(this)->task_exit (); }
     catch (std::exception& e) { err = 2; }
