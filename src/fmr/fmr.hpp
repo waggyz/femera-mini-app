@@ -6,18 +6,31 @@
 #include <cstdint>
 
 namespace fmr {
-//NOTE prefer e.g. int_fast8_t, uint_least8_t, ...,  uintmax_t, uintptr_t
-  
-// This "using" syntax is preferred to "typedef" in the Google C++ Style Guide:
-// https://google.github.io/styleguide/cppguide.html#Aliases
-
-using Dim_int    = uint_fast8_t  ;// spatial dim., hier. depth, poly. order,...
-
-using Perf_float = float         ;
-using Perf_int   = uint_fast64_t ;// unit counters, internal time (ns) counters
-
-using Exit_int   = int           ;// system return code
-
+/* NOTE prefer e.g. int_fast8_t, uint_least8_t, ...,  uintmax_t, uintptr_t
+ *
+ * This "using" syntax is preferred to "using" in the Google C++ Style Guide:
+ * https://google.github.io/styleguide/cppguide.html#Aliases
+ *
+ * sizeof (Dim_int <= Enum_int <= Local_int < Global_int)
+ * sizeof (Elid_int >= Enum_int + fmr::math::Poly + Dim_int)
+*/
+  using   Exit_int = int           ;// system return code
+  //
+  using    Dim_int = uint_fast8_t  ;// spatial dim., hier. depth, poly. order,
+  using   Enum_int = uint_fast16_t ;
+  using  Local_int = uint32_t      ;
+  using   Elid_int = uint32_t      ;//(See above.)
+  using Global_int = uint64_t      ;//TODO signed?
+  //
+  using   Perf_int = uint_fast64_t ;// unit counters, time (ns) counters
+  using Perf_float = float         ;
+  //
+  using Geom_float = double        ;//TODO try float.
+  using Phys_float = double        ;
+  using Solv_float = double        ;
+  using Cond_float = float         ;// Preconditioning and scaling
+  using Post_float = float         ;// Post-processing
+  using Plot_float = float         ;// Visualization
 }//end fmr:: namespace
 
 #undef FMR_DEBUG

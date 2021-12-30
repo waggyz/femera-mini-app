@@ -9,7 +9,6 @@ namespace femera {
   public:
     Main (femera::Work::Make_work_t) noexcept;
     Main () noexcept;
-//    void init (int* argc, char** argv) override;//FIXME should be task_init(..)
     void task_init (int* argc, char** argv);
     void task_exit ();
   };

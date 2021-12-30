@@ -17,7 +17,7 @@
 namespace femera {
   void Main:: task_init (int*, char**) {
     const auto this_ptrs = this->ptrs();
-    std::vector<size_t> path ={};
+    std::vector<fmr::Local_int> path ={};
     auto task_i = this->add_task
       (std::make_shared<proc::Ftop> (proc::Ftop(this_ptrs)));
     path.push_back (task_i);

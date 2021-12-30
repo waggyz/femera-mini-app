@@ -30,11 +30,11 @@ namespace femera {
     return err;
   }
   template <typename T> inline
-  std::shared_ptr<T> Proc<T>::get_task (const size_t i) {
+  std::shared_ptr<T> Proc<T>::get_task (const fmr::Local_int i) {
     return std::static_pointer_cast<T> (this->get_work (i));
   }
   template <typename T> inline
-  std::shared_ptr<T> Proc<T>::get_task (const std::vector<size_t> path) {
+  std::shared_ptr<T> Proc<T>::get_task (const Work::Path_t path) {
     return std::static_pointer_cast<T> (this->get_work (path));
   }
 }// end femera:: namespace

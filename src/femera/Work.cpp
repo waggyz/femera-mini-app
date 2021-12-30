@@ -1,9 +1,4 @@
-//#include "core.h"
 #include "Work.hpp"
-
-#include <string>
-#include <cstdio>     // std::printf
-//#include <memory>     // std::unique_ptr, std::make_unique
 
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
@@ -14,25 +9,38 @@
 femera::Work::~Work (){}
 
 namespace femera {
-  fmr::Exit_int Work::exit_list () noexcept {
+  fmr::Exit_int Work::exit_tree () noexcept {
     fmr::Exit_int err =0;
+    Work::Path_t branch ={};
     while (! this->task_list.empty ()) {
-      auto W = this->task_list.back ();// Exit in reverse order.
-      if (W != nullptr) {
-        fmr::Exit_int Werr =0;
+      auto W = this->task_list.back ();
+      if ( W == nullptr ){ W->task_list.pop_back (); }
+      else {// Go to the bottom of the hierarchy.
+        while (! W->task_list.empty ()) {
+          branch.push_back (W->get_task_n () - 1);
+          W = W->task_list.back ();
+        }
+        while (! branch.empty ()) {
+          W = this->get_work (branch);
 #ifdef FMR_DEBUG
-        printf ("exit task %s\n", W->name.c_str());
+          printf ("exit tree %s\n", W->task_list.back()->name.c_str());
 #endif
-        try { Werr = W->exit (err); }
-        catch (std::exception& e) { Werr = 1; }
-        err = (Werr == 0) ? err : Werr;
+          fmr::Exit_int Werr =0;
+          try { Werr = W->task_list.back()->exit (err); }
+          catch (std::exception& e) { Werr = 1; }
+          err = (Werr == 0) ? err : Werr;
+          W->task_list.pop_back ();
+          branch.pop_back ();
+      } }
 #ifdef FMR_DEBUG
-        printf ("exit done %s\n", W->name.c_str());
+      printf ("exit tree %s\n", this->task_list.back()->name.c_str());
 #endif
-      }
-      this->task_list.pop_back ();
+    this->task_list.pop_back (); 
     }
-    return err;
+#ifdef FMR_DEBUG
+  printf ("exit base %s\n", this->name.c_str());
+#endif
+  return err;
   }
 }//end femera:: namespace
 #undef FMR_DEBUG

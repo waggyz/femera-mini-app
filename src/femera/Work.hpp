@@ -40,14 +40,14 @@ namespace femera {
   //using Self_t = std::shared_ptr <test::Self>;
   //using Perf_t = std::shared_ptr <test::Perf>;
   using Gtst_t = std::shared_ptr <test::Gtst>;
-
 //FIXME is, e.g., class femera::Proc_base or femera::Proc::Base better?
-
+  //
   class Work {// This is an abstract (pure virtual) base class (interface).
   // Derived Classes use the curiously recurrent template pattern (CRTP).
   public:// typedefs ----------------------------------------------------------
     using Task_list_t = std::deque <Work_t>;
     using Make_work_t = std::tuple <Main_t,File_t,Beds_t>;
+    using Path_t      = std::vector<fmr::Local_int>;
   public:// Variables ---------------------------------------------------------
     fmr::perf::Meter time = fmr::perf::Meter ();
     std::string      name = std::string      ("unknown work");
@@ -60,17 +60,17 @@ namespace femera {
     Task_list_t task_list ={};
     fmr::Dim_int   info_d = 1;
   protected:// Methods --------------------------------------------------------
-    Work_t get_work   (size_t) noexcept;// used by derived::get_task(..) method
-    Work_t get_work   (std::vector<size_t>) noexcept;// ""
+    Work_t get_work   (fmr::Local_int) noexcept;// used by derived::get_task(..) method
+    Work_t get_work   (Path_t) noexcept;// ""
     //
     // Work stack initialization and exit
     void          init_list (int* argc, char** argv) noexcept;// init forward
     fmr::Exit_int exit_list () noexcept;// exit task_list in reverse
     fmr::Exit_int exit_tree () noexcept;// exit task hierarchy in reverse
   public:
-    // Derived_t get_task (size_t) is in Derived class and returns that type.
-    size_t add_task   (Work_t) noexcept;
-    size_t get_task_n ()       noexcept;
+    // Derived_t get_task (fmr::Local_int) is in Derived class and returns that type.
+    fmr::Local_int add_task   (Work_t) noexcept;
+    fmr::Local_int get_task_n ()       noexcept;
     //
 //    std::deque<std::vector<std::size_t>> get_tree () noexcept;
     //

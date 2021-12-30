@@ -3,5 +3,5 @@
 -fno-signed-zeros -fno-trapping-math
 -fvisibility=hidden -fvisibility-inlines-hidden
 -funroll-loops -frename-registers -ftree-vectorize -fno-common
--fearly-inlining -finline-limit=2000 --param inline-min-speedup=2
+-fearly-inlining -finline-limit=1000 --param inline-min-speedup=2
 --param inline-unit-growth=500 --param large-function-growth=2000
