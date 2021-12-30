@@ -17,7 +17,7 @@ public:
   fmr::Exit_int init     (int*, char**) noexcept override;
   fmr::Exit_int exit     (fmr::Exit_int err=0) noexcept override;
   Derived_t     get_task (fmr::Local_int i);
-  Derived_t     get_task (std::vector<fmr::Local_int> tree);
+  Derived_t     get_task (femera::Work::Path_t tree);
 private:
   T* derived (Base*);
 protected:// Make it clear that Base needs to be inherited.
@@ -75,7 +75,7 @@ std::shared_ptr<T> Base<T>::get_task (const fmr::Local_int i) {
   return std::static_pointer_cast<T> (this->get_work (i));
 }
 template <typename T> inline
-std::shared_ptr<T> Base<T>::get_task (const std::vector<fmr::Local_int> tree) {
+std::shared_ptr<T> Base<T>::get_task (const femera::Work::Path_t tree) {
   return std::static_pointer_cast<T> (this->get_work (tree));
 }//============================================================================
 auto testable = std::make_shared<Testable> ();
@@ -122,10 +122,10 @@ TEST( TestableWork, SubTask ) {
   EXPECT_EQ( subtask.use_count(), 3u);
   EXPECT_EQ( testable->get_task_n(), 1u);
   EXPECT_EQ( testable->get_task(0)->get_task_n(), 2u);
-  EXPECT_EQ( testable->get_task(std::vector<fmr::Local_int>({0}))->name, "another");
-  EXPECT_EQ( testable->get_task(std::vector<fmr::Local_int>({0,0}))->name, "subtask");
-  EXPECT_EQ( testable->get_task(std::vector<fmr::Local_int>({0,1}))->name, "subtask");
-  EXPECT_EQ( testable->get_task(std::vector<fmr::Local_int>({0,3})), nullptr);
+  EXPECT_EQ( testable->get_task(femera::Work::Path_t({0}))->name, "another");
+  EXPECT_EQ( testable->get_task(femera::Work::Path_t({0,0}))->name, "subtask");
+  EXPECT_EQ( testable->get_task(femera::Work::Path_t({0,1}))->name, "subtask");
+  EXPECT_EQ( testable->get_task(femera::Work::Path_t({0,3})), nullptr);
   testable->exit ();
   EXPECT_EQ( testable->get_task_n(), 0u);
   EXPECT_EQ( another1.use_count(), 1u);

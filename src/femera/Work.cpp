@@ -17,9 +17,11 @@ namespace femera {
       if ( W == nullptr ){ W->task_list.pop_back (); }
       else {// Go to the bottom of the hierarchy.
         while (! W->task_list.empty ()) {
-          branch.push_back (W->get_task_n () - 1);
-          W = W->task_list.back ();
-        }
+          if ( W->task_list.back () == nullptr ){ W->task_list.pop_back (); }
+          else {
+            branch.push_back (W->get_task_n () - 1);
+            W = W->task_list.back ();
+        } }
         while (! branch.empty ()) {
           W = this->get_work (branch);
 #ifdef FMR_DEBUG
