@@ -18,9 +18,11 @@ namespace femera {
   template <typename> class Proc; class Main;
   template <typename> class Data;// class File;
   template <typename> class Test;// class Beds;
+  template <typename> class Sims;
   namespace proc { class Ftop; class Fmpi; class Fomp; class Fcpu; }
   namespace data { class File; class Flog; }// class Type; class Base; }//FIXME Fake -> Base?
   namespace test { class Beds; class Unit; class Self; class Perf; class Gtst; }
+  namespace sims { class Jobs; }
   using Work_t = std::shared_ptr <Work>;
   using Proc_t = std::shared_ptr <Proc<Work>>;
   //
@@ -46,33 +48,34 @@ namespace femera {
   // Derived Classes use the curiously recurrent template pattern (CRTP).
   public:// typedefs ----------------------------------------------------------
     using Task_list_t = std::deque <Work_t>;
-    using Make_work_t = std::tuple <Main_t,File_t,Beds_t>;
+    //using Make_work_t = std::tuple <Main_t,File_t,Beds_t>;
+    using Make_work_t = std::tuple <Proc_t,Data_t,Test_t>;
     using Path_t      = std::vector<fmr::Local_int>;
   public:// Variables ---------------------------------------------------------
     fmr::perf::Meter time = fmr::perf::Meter ();
     std::string      name = std::string      ("unknown work");
     //
     //Proc_t proc = static_cast <Proc_t> (nullptr);
-    Main_t proc = nullptr;// processing hierarchy (Main_t)
-    File_t data = nullptr;// data and file handling
-    Beds_t test = nullptr;// correctness and performance testing
+    Proc_t proc = nullptr;// processing hierarchy (Main_t)
+    Data_t data = nullptr;// data and file handling
+    Test_t test = nullptr;// correctness and performance testing
   protected:
     Task_list_t task_list ={};
     fmr::Dim_int   info_d = 1;
   protected:// Methods --------------------------------------------------------
     Work_t get_work   (fmr::Local_int) noexcept;// used by derived::get_task(..) method
-    Work_t get_work   (Path_t) noexcept;// ""
+    Work_t get_work   (Path_t) noexcept;        // ""
     //
     // Work stack initialization and exit
     void          init_list (int* argc, char** argv) noexcept;// init forward
     fmr::Exit_int exit_list () noexcept;// exit task_list in reverse
     fmr::Exit_int exit_tree () noexcept;// exit task hierarchy in reverse
   public:
-    // Derived_t get_task (fmr::Local_int) is in Derived class and returns that type.
     fmr::Local_int add_task   (Work_t) noexcept;
     fmr::Local_int get_task_n ()       noexcept;
+    // Derived_t get_task (fmr::Local_int) is in Derived class, returns that type.
     //
-//    std::deque<std::vector<std::size_t>> get_tree () noexcept;
+//    std::vector<Path_t>> get_tree () noexcept;
     //
     //NOTE Make at least 1 pure virtual.
     //FIXME Do all need to be pure to avoid vtable using CRTP derived classes?

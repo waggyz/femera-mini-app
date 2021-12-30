@@ -95,6 +95,7 @@ BUILD_TREE+= $(BUILD_DIR)/external/tools/ $(BUILD_DIR)/docs/
 BUILD_TREE+= $(BUILD_CPU)/external/ $(BUILD_CPU)/tests/ $(BUILD_CPU)/tools/
 BUILD_TREE+= $(BUILD_CPU)/femera/proc/ $(BUILD_CPU)/femera/data/
 BUILD_TREE+= $(BUILD_CPU)/femera/file/ $(BUILD_CPU)/femera/test/
+BUILD_TREE+= $(BUILD_CPU)/femera/sims/
 BUILD_TREE+= $(BUILD_CPU)/fmr/perf/
 
 STAGE_TREE+= $(STAGE_DIR)/bin/ $(STAGE_DIR)/lib/

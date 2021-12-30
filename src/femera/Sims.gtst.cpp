@@ -1,8 +1,8 @@
-#include "Test.hpp"
+#include "Sims.hpp"
 
 #include "gtest/gtest.h"
 
-TEST(EarlyMain, IsOK) {
+TEST(Sims, IsOK) {
   EXPECT_EQ( 1, 1);
 }
 int main (int argc, char** argv) {
