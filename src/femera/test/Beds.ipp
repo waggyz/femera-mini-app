@@ -3,20 +3,20 @@
 
 namespace femera {
   inline
-  Beds::Beds (femera::Work::Make_work_t W) noexcept {
+  test::Beds::Beds (femera::Work::Make_work_t W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="testbeds";
     this->info_d = 2;
   }
   inline
-  Beds::Beds () noexcept {
+  test::Beds::Beds () noexcept {
     this->name ="testbeds";
     this->info_d = 2;
   }
   inline
-  void Beds::task_init (int*, char**){}
+  void test::Beds::task_init (int*, char**){}
   inline
-  void Beds::task_exit () {
+  void test::Beds::task_exit () {
   }
 }//end femera namespace
 

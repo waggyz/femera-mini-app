@@ -9,8 +9,8 @@ namespace femera {
   private:
     using This_t = std::shared_ptr<T>;
   public:
-    fmr::Exit_int init     (int*, char**)        noexcept final override;
-    fmr::Exit_int exit     (fmr::Exit_int err=0) noexcept final override;
+    fmr::Exit_int     init (int*, char**)        noexcept final override;
+    fmr::Exit_int     exit (fmr::Exit_int err=0) noexcept final override;
     This_t        get_task (fmr::Local_int i);
     This_t        get_task (Work::Path_t tree);
   private:

@@ -3,7 +3,7 @@
 
 #include "../Test.hpp"
 
-namespace femera {
+namespace femera { namespace test {
   class Beds;// Derive a CRTP concrete class from Test.
   class Beds : public Test <Beds> {
   public:
@@ -12,7 +12,7 @@ namespace femera {
     void task_init (int* argc, char** argv);
     void task_exit ();
   };
-}//end femera:: namespace
+} }//end femera::test:: namespace
 
 #include "Beds.ipp"
 

@@ -32,6 +32,8 @@ endif
 ifeq ($(CXX),g++)
   ifeq ($(ENABLE_MPI),ON)
     CXX:= mpic++
+    # TDDEXEC:=/bin/time
+    TDDEXEC:= mpiexec -np $(TDD_MPI_N) --bind-to core -map-by node:pe=$(TDD_OMP_N)
   endif
   OPTFLAGS:= $(shell cat data/gcc4.flags | tr '\n' ' ' | tr -s ' ')
   CXXFLAGS+= -std=c++11 -g -MMD -MP
@@ -84,7 +86,9 @@ INSTALL_DIR:= $(PREFIX)
 BUILD_CPU  := $(BUILD_DIR)/$(CPUMODEL)
 STAGE_CPU  := $(STAGE_DIR)/$(CPUMODEL)
 INSTALL_CPU:= $(INSTALL_DIR)/$(CPUMODEL)
-TEMP_DIR   := $(BUILD_CPU)/tmp
+
+# Export TMPDIR to prevent system tmpdir overflow. (MPI needs it, maybe others.)
+TEMP_DIR   := $(shell pwd)/$(BUILD_DIR)/tmp
 
 #NOTE Subdirectories needed in the build directory have a trailing slash.
 BUILD_TREE+= $(BUILD_DIR)/external/tools/ $(BUILD_DIR)/docs/
@@ -255,7 +259,7 @@ GET_BATS:= $(patsubst %,get-%,$(BATS_MODS))
 LIBFEMERA:=$(STAGE_CPU)/lib/libfemera.a
 
 # Changing any of these should cause a full rebuld.
-TOPDEPS += $(BUILD_CPU)/femera.flags
+TOPDEPS += Makefile $(BUILD_CPU)/femera.flags
 
 # C++11 code to compile and gtest
 FMRCPPS:= $(shell find src/ -maxdepth 4 -name "*.cpp" -printf "%p ")
@@ -320,6 +324,7 @@ femera: mini full
 mini: | intro
 	$(call timestamp,$@,$^)
 	$(MAKE) $(JLIM) $(FMROUTS)
+	$(MAKE) $(JLIM) $(BUILD_CPU)/mini
 	$(MAKE) $(JPAR) build-done
 
 tools: | intro
@@ -783,9 +788,15 @@ $(LIBFEMERA)(build/%.o) : build/%.o
 # Executable targets ----------------------------------------------------------
 #(BUILD_CPU)/%.gtst _ export LD_LIBRARY_PATH = $(TMP_LIBRARY_PATH)
 
+$(BUILD_CPU)/mini: export TMPDIR := $(TEMP_DIR)
+$(BUILD_CPU)/mini: src/femera/mini.cpp src/femera/femera.h $(LIBFEMERA)
+	-$(CXX) $(filter-out -Winline,$(CXXFLAGS)) $< \
+	  $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
+	$(call label_test,$(PASS),$(FAIL),$(TDDEXEC) $(@),$(@))
+
 build/%.gtst.out : build/%.gtst
 ifeq ($(ENABLE_GOOGLETEST),ON)
-	$(call label_test,$(PASS),$(FAIL),$(^),$(^))
+	$(call label_test,$(PASS),$(FAIL),$(TDDEXEC) $(^),$(^))
 else
 	echo "build/$*.o not tested: GoogleTest disabled" > $@
 	echo "WARNING: build/$*.o not tested: GoogleTest disabled" > $^.err
@@ -853,7 +864,7 @@ build/test-files.txt: tools/list-test-files.sh build/.md5
 src/docs/src.dot: build/.md5
 	@external/tools/cinclude2dot --src src >$@ 2>build/src.dot.err
 	@dot $@ -Gsize="6.0,4.0" -Teps -o build/src-test.eps
-          #  --groups is nice, too
+        #  --groups is nice, too
 	#(info $(INFO) Source dependencies: $@)
 
 src/docs/src-notest.dot: src/docs/src.dot

@@ -3,7 +3,7 @@
 #include "gtest/gtest.h"
 
 
-auto testbeds = femera::Beds();
+auto testbeds = femera::test::Beds();
 
 TEST( Beds, TaskName ){
   EXPECT_EQ( testbeds.name, "testbeds" );
