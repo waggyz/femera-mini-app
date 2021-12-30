@@ -790,6 +790,7 @@ $(LIBFEMERA)(build/%.o) : build/%.o
 
 $(BUILD_CPU)/mini: export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/mini: src/femera/mini.cpp src/femera/femera.h $(LIBFEMERA)
+	$(call col2cxx,$(CXX_),$(CXX) $(notdir $<) .. -lfemera,$(notdir $@))
 	-$(CXX) $(filter-out -Winline,$(CXXFLAGS)) $< \
 	  $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 	$(call label_test,$(PASS),$(FAIL),$(TDDEXEC) $(@),$(@))
