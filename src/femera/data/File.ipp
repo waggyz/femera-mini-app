@@ -3,19 +3,20 @@
 
 namespace femera {
   inline
-  File::File (femera::Work::Make_work_t W) noexcept {
+  data::File::File (femera::Work::Make_work_t W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="file";
     this->info_d = 2;
   }
   inline
-  File::File () noexcept {
+  data::File::File () noexcept {
     this->name ="file";
     this->info_d = 2;
   }
   inline
-  void File::task_exit () {
-  }
+  void data::File::task_init (int*, char**){}
+  inline
+  void data::File::task_exit () {}
 }//end femera namespace
 
 //end FEMERA_FILE_IPP

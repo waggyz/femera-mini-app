@@ -10,6 +10,7 @@ namespace femera { namespace test {
   public:
     Gtst (femera::Work::Make_work_t) noexcept;
     Gtst () noexcept;
+    void task_init (int* argc, char** argv);
     void task_exit ();
 };
 

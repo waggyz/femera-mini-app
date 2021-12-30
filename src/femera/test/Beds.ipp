@@ -14,6 +14,8 @@ namespace femera {
     this->info_d = 2;
   }
   inline
+  void Beds::task_init (int*, char**){}
+  inline
   void Beds::task_exit () {
   }
 }//end femera namespace

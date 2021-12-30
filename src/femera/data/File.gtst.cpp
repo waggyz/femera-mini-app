@@ -3,7 +3,7 @@
 #include "gtest/gtest.h"
 
 
-auto file = femera::File();
+auto file = femera::data::File();
 
 TEST( File, TaskName ){
   EXPECT_EQ( file.name, "file" );

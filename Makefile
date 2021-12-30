@@ -852,7 +852,7 @@ build/test-files.txt: tools/list-test-files.sh build/.md5
 
 src/docs/src.dot: build/.md5
 	@external/tools/cinclude2dot --src src >$@ 2>build/src.dot.err
-	@dot $@ -Gsize="10.0,8.0" -Teps -o build/src-test.eps
+	@dot $@ -Gsize="6.0,4.0" -Teps -o build/src-test.eps
           #  --groups is nice, too
 	#(info $(INFO) Source dependencies: $@)
 
@@ -863,7 +863,7 @@ src/docs/src-notest.dot: src/docs/src.dot
 build/src-notest.eps: src/docs/src-notest.dot tools/src-inherit.sh
 ifeq ($(ENABLE_DOT),ON)
 	@tools/src-inherit.sh
-	@dot $< -Gsize="10.0,8.0" -Teps -o $@
+	@dot $< -Gsize="6.0,4.0" -Teps -o $@
 	#  -Gratio="fill" -Gsize="11.7,8.267!" -Gmargin=0
 	$(info $(INFO) dependency graph: $@)
 endif

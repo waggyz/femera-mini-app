@@ -24,4 +24,4 @@ echo '{ rank = sink; "Task"; }' >>$DOT
 #
 echo \} >>$DOT
 #
-dot $DOT -Gsize="10.0,8.0" -Teps -o build/src-inherit.eps
+dot $DOT -Gsize="6.0,3.0" -Teps -o build/src-inherit.eps

@@ -4,7 +4,6 @@
 #include <string>
 #include <cstdio>     // std::printf
 //#include <memory>     // std::unique_ptr, std::make_unique
-#include "Work.hpp"
 
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
@@ -14,12 +13,28 @@
 //femera::Work::Work (Work const&){}
 femera::Work::~Work (){}
 
-#if 0
-void femera::Work<T>::init (int* argc, char** argv) {
-  //static_cast<T*>(this)->init (argc, argv);
-  T::task_init (argc, argv);
-}
+namespace femera {
+  fmr::Exit_int Work::exit_list () noexcept {
+    fmr::Exit_int err =0;
+    while (! this->task_list.empty ()) {
+      auto W = this->task_list.back ();// Exit in reverse order.
+      if (W != nullptr) {
+        fmr::Exit_int Werr =0;
+#ifdef FMR_DEBUG
+        printf ("exit task %s\n", W->name.c_str());
 #endif
+        try { Werr = W->exit (err); }
+        catch (std::exception& e) { Werr = 1; }
+        err = (Werr == 0) ? err : Werr;
+#ifdef FMR_DEBUG
+        printf ("exit done %s\n", W->name.c_str());
+#endif
+      }
+      this->task_list.pop_back ();
+    }
+    return err;
+  }
+}//end femera:: namespace
 #undef FMR_DEBUG
 
 

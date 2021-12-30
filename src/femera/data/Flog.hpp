@@ -9,6 +9,7 @@ namespace femera { namespace data {
   public:
     Flog (femera::Work::Make_work_t) noexcept;
     Flog () noexcept;
+    void task_init (int* argc, char** argv);
     void task_exit ();
   };
 } }//end femera::file:: namespace

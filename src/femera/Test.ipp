@@ -12,8 +12,13 @@ namespace femera {
     return static_cast<T*> (ptr);
   }
   template <typename T> inline
-  fmr::Exit_int Test<T>::init (int*, char**) noexcept {
-    return 0;
+  fmr::Exit_int Test<T>::init (int* argc, char** argv) noexcept {
+    fmr::Exit_int err=0;
+    try { Test::derived(this)->task_init (argc, argv); }// Init this task,
+    catch (std::exception& e) { err = exit (2); }
+    try { init_list (argc, argv); }                     // then init the list.
+    catch (std::exception& e) { err = exit (1); }
+    return err;
   }
   template <typename T> inline
   fmr::Exit_int Test<T>::exit (fmr::Exit_int err) noexcept {

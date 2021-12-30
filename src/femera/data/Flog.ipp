@@ -13,9 +13,6 @@ namespace femera {
     this->name ="log";
     this->info_d = 3;
   }
-  inline
-  void data::Flog::task_exit () {
-  }
 }//end femera namespace
 
 //end FEMERA_FLOG_IPP

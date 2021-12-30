@@ -13,12 +13,13 @@ TEST( Main, SizeofMainGE120 ){
 }
 TEST( Main, DidInit ){
   EXPECT_EQ( fmr_main, fmr_main->proc );
-  EXPECT_GT( fmr_main->get_task_n(), 1 );
+  EXPECT_EQ( fmr_main->get_task_n(), 1 );
   EXPECT_EQ( fmr_main->get_task(0)->name, "top");
+  EXPECT_EQ( fmr_main->get_task({0})->name, "top");
 #ifdef FMR_HAS_MPI
-  EXPECT_EQ( fmr_main->get_task(1)->name, "MPI");
+  EXPECT_EQ( fmr_main->get_task({0,0})->name, "MPI");
 #endif
-  EXPECT_EQ( fmr_main->get_task(fmr_main->get_task_n()-1)->name, "CPU");
+  EXPECT_EQ( fmr_main->exit (), 0 );
 }
 fmr::Exit_int main (int argc, char** argv) {
   fmr_main->proc = fmr_main;

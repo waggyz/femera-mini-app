@@ -13,9 +13,6 @@ namespace femera {
     this->name ="GoogleTest";
     this->info_d = 3;
   }
-  inline
-  void test::Gtst::task_exit () {
-  }
 }//end femera namespace
 
 //end FEMERA_GTST_IPP

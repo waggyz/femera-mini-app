@@ -62,14 +62,17 @@ namespace femera {
   protected:// Methods --------------------------------------------------------
     Work_t get_work   (size_t) noexcept;// used by derived::get_task(..) method
     Work_t get_work   (std::vector<size_t>) noexcept;// ""
+    //
+    // Work stack initialization and exit
+    void          init_list (int* argc, char** argv) noexcept;// init forward
+    fmr::Exit_int exit_list () noexcept;// exit task_list in reverse
+    fmr::Exit_int exit_tree () noexcept;// exit task hierarchy in reverse
   public:
     // Derived_t get_task (size_t) is in Derived class and returns that type.
     size_t add_task   (Work_t) noexcept;
     size_t get_task_n ()       noexcept;
     //
-    // Work stack initialization and exit
-    void          init_list (int* argc, char** argv) noexcept;// init forward
-    fmr::Exit_int exit_list () noexcept;// exit task_list in reverse
+//    std::deque<std::vector<std::size_t>> get_tree () noexcept;
     //
     //NOTE Make at least 1 pure virtual.
     //FIXME Do all need to be pure to avoid vtable using CRTP derived classes?

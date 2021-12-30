@@ -4,8 +4,8 @@
 namespace femera {
   inline
   proc::Fomp::Fomp (femera::Work::Make_work_t W) noexcept {
-    this->name ="OpenMP";
     std::tie (this->proc, this->data, this->test) = W;
+    this->name ="OpenMP";
   }
   inline
   proc::Fomp::Fomp () noexcept {

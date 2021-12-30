@@ -3,15 +3,16 @@
 
 #include "../Data.hpp"
 
-namespace femera {
+namespace femera { namespace data {
   class File;// Derive a CRTP concrete class from File.
   class File : public Data <File> {
   public:
     File (femera::Work::Make_work_t) noexcept;
     File () noexcept;
+    void task_init (int* argc, char** argv);
     void task_exit ();
   };
-}//end femera:: namespace
+} }//end femera::data namespace
 
 #include "File.ipp"
 
