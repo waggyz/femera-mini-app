@@ -43,6 +43,7 @@ digraph "source tree" {
 	"Main.hpp" -> "Main.ipp"
 	"mini.cpp" -> "femera.h"
 	"Test.cpp" -> "Test.hpp"
+	"femera.h" -> "Sims.hpp"
 	"Jobs.hpp" -> "Sims.hpp"
 	"Ftop.hpp" -> "Proc.hpp"
 	"File.hpp" -> "Data.hpp"
