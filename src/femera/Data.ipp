@@ -37,6 +37,10 @@ namespace femera {
   std::shared_ptr<T> Data<T>::get_task (const Work::Path_t tree) {
     return std::static_pointer_cast<T> (this->get_work (tree));
   }
+  template <typename T> inline constexpr
+  std::shared_ptr<T> Data<T>::new_task () noexcept {
+    return std::make_shared<T> (T());
+  }
 }// end femera:: namespace
 
 #undef FMR_DEBUG

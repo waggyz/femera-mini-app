@@ -74,6 +74,7 @@ namespace femera {
     fmr::Local_int add_task   (Work_t) noexcept;
     fmr::Local_int get_task_n ()       noexcept;
     // Derived_t get_task (fmr::Local_int) is in Derived class, returns that type.
+    // Derived_t new_task ()               ""
     //
 //    std::vector<Path_t>> get_tree () noexcept;
     //

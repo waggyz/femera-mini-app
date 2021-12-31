@@ -37,6 +37,17 @@ namespace femera {
   std::shared_ptr<T> Proc<T>::get_task (const Work::Path_t path) {
     return std::static_pointer_cast<T> (this->get_work (path));
   }
+  template <typename T> inline constexpr
+  std::shared_ptr<T> Proc<T>::new_task () noexcept {
+    return std::make_shared<T> (T());
+  }
+  //std::make_shared<proc::Ftop> (proc::Ftop(this_ptrs))
+#if 0
+  template <typename T> inline static
+  Proc_t Proc<T>::new_main (int* argc, char** argv) noexcept {
+    return std::make_shared<Main> (Main(this_ptrs));
+  }
+#endif
 }// end femera:: namespace
 
 #undef FMR_DEBUG

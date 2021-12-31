@@ -1,7 +1,7 @@
 #ifndef FMR_HAS_FMR_HPP
 #define FMR_HAS_FMR_HPP
 
-#include "../femera/femera.hpp"
+//#include "../femera/femera.hpp"
 
 #include <cstdint>
 
@@ -32,6 +32,37 @@ namespace fmr {
   using Post_float = float         ;// Post-processing
   using Plot_float = float         ;// Visualization
 }//end fmr:: namespace
+namespace femera { namespace test {
+  int early_main (int* argc, char** argv);
+} }// end femera::test:: namespace
+
+#ifndef FMR_VERBMAX
+#define FMR_VERBMAX 7
+#endif
+
+#ifndef FMR_TIMELVL
+#define FMR_TIMELVL FMR_VERBMAX
+#endif
+
+// These help keep source code tidy.
+#ifdef _OPENMP
+#define FMR_PRAGMA_OMP(x) _Pragma (#x)
+#else
+#define FMR_PRAGMA_OMP(x) // pragma omp not supported
+#endif
+
+#ifdef FMR_HAS_PRAGMA_SIMD
+#define FMR_PRAGMA_OMP_SIMD _Pragma ("omp simd")
+#else
+#define FMR_PRAGMA_OMP_SIMD // pragma omp simd not supported
+#endif
+
+#ifdef __INTEL_COMPILER
+// pragma vector (un)aligned supported by intel compiler
+#define FMR_PRAGMA_VECTOR(x) _Pragma (#x)
+#else
+#define FMR_PRAGMA_VECTOR(x) // pragma vector ... not supported
+#endif
 
 #undef FMR_DEBUG
 //end FMR_HAS_FMR_HPP

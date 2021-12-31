@@ -37,6 +37,10 @@ namespace femera {
   std::shared_ptr<T> Sims<T>::get_task (const Work::Path_t path) {
     return std::static_pointer_cast<T> (this->get_work (path));
   }
+  template <typename T> inline constexpr
+  std::shared_ptr<T> Sims<T>::new_task () noexcept {
+    return std::make_shared<T> (T());
+  }
 }// end femera:: namespace
 
 #undef FMR_DEBUG

@@ -18,21 +18,16 @@ namespace femera {
   void Main:: task_init (int*, char**) {
     const auto this_ptrs = this->ptrs();
     std::vector<fmr::Local_int> path ={};
-    auto task_i = this->add_task
-      (std::make_shared<proc::Ftop> (proc::Ftop(this_ptrs)));
-    path.push_back (task_i);
+//    auto task_i = this->add_task (Proc<proc::Ftop>::new_task ());
+//      (std::make_shared<proc::Ftop> (proc::Ftop(this_ptrs)));
+    path.push_back (this->add_task (Proc<proc::Ftop>::new_task ()));
 #ifdef FMR_HAS_MPI
-    task_i = this->get_task(path)->add_task
-      (std::make_shared<proc::Fmpi> (proc::Fmpi(this_ptrs)));
-    path.push_back (task_i);
+    path.push_back (get_task(path)->add_task (Proc<proc::Fmpi>::new_task ()));
 #endif
 #ifdef FMR_HAS_OMP
-    task_i = this->get_task(path)->add_task
-      (std::make_shared<proc::Fomp> (proc::Fomp(this_ptrs)));
-    path.push_back (task_i);
+    path.push_back (get_task(path)->add_task (Proc<proc::Fomp>::new_task ()));
 #endif
-    this->get_task(path)->add_task
-      (std::make_shared<proc::Fcpu> (proc::Fcpu(this_ptrs)));
+    this->get_task(path)->add_task (Proc<proc::Fcpu>::new_task ());
 #ifdef FMR_DEBUG
     //for (const auto P : this->task_list) { P->init (argc, argv); }
     printf ("%s\n", this->name.c_str());

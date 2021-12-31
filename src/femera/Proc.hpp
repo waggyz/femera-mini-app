@@ -9,10 +9,13 @@ namespace femera {
   private:
     using This_t = std::shared_ptr<T>;
   public:
-    fmr::Exit_int     init (int*, char**)        noexcept final override;
-    fmr::Exit_int     exit (fmr::Exit_int err=0) noexcept final override;
-    This_t        get_task (fmr::Local_int i);
-    This_t        get_task (Work::Path_t tree);
+    fmr::Exit_int init (int*, char**)        noexcept final override;
+    fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;
+    This_t    get_task (fmr::Local_int i);
+    This_t    get_task (Work::Path_t tree);
+    static constexpr
+    This_t    new_task () noexcept;
+//    This_t    new_task (int*, char**);
   private:
     T* derived (Proc*);
   protected:// make it clear this class needs to be inherited
