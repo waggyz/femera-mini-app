@@ -44,6 +44,9 @@ namespace femera {
   using Gtst_t = std::shared_ptr <test::Gtst>;
 //FIXME is, e.g., class femera::Proc_base or femera::Proc::Base better?
   //
+  using Sims_t = std::shared_ptr <Sims<Work>>;
+  using Jobs_t = std::shared_ptr <sims::Jobs>;
+  //
   class Work {// This is an abstract (pure virtual) base class (interface).
   // Derived Classes use the curiously recurrent template pattern (CRTP).
   public:// typedefs ----------------------------------------------------------

@@ -5,8 +5,15 @@
 //#include "proc/Main.hpp"
 #include "Data.hpp"
 #include "Test.hpp"
-//#include "Sims.hpp"
-#include "sims/Jobs.hpp"
+#include "Sims.hpp"
+//#include "sims/Jobs.hpp"
+
+namespace femera {
+  Jobs_t new_sims ();
+#if 0
+  Sims_t new_sims (int, char**);
+#endif
+}//end femera:: namespace
 
 /*
 Notices:

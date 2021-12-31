@@ -9,5 +9,6 @@ int main (int argc, char** argv) {
 //  auto mini = femera::Proc<femera::Main>::new_task ();//FIXME replace w/below
   //
   //TODO provide below as femera::new_sims() and femera::new_sims(int, char**)
-  auto mini = femera::Sims<femera::sims::Jobs>::new_task ();
+//  auto mini = femera::Sims<femera::sims::Jobs>::new_task ();
+  auto mini = femera::new_sims();
 }
