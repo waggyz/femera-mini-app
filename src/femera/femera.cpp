@@ -4,7 +4,10 @@
 femera::Jobs_t femera::new_sims (){
   return femera::Sims<femera::sims::Jobs>::new_task ();
 }
-#if 0
-femera::Sims_t femera::new_sims (int, char**){
+femera::Jobs_t femera::new_sims (int* argc, char** argv){
+  auto jobs = femera::new_sims ();
+  jobs->init (argc,argv);
+  return jobs;
 }
+#if 0
 #endif

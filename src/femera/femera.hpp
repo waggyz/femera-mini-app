@@ -10,8 +10,8 @@
 
 namespace femera {
   Jobs_t new_sims ();
+  Jobs_t new_sims (int*, char**);
 #if 0
-  Sims_t new_sims (int, char**);
 #endif
 }//end femera:: namespace
 
