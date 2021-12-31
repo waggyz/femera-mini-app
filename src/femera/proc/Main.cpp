@@ -15,7 +15,7 @@
 #endif
 
 namespace femera {
-  void Main:: task_init (int*, char**) {
+  void proc::Main:: task_init (int*, char**) {
     const auto this_ptrs = this->ptrs();
     std::vector<fmr::Local_int> path ={};
 //    auto task_i = this->add_task (Proc<proc::Ftop>::new_task ());

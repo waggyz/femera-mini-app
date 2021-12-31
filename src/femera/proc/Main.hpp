@@ -3,7 +3,7 @@
 
 #include "../Proc.hpp"
 
-namespace femera {
+namespace femera { namespace proc {
   class Main;// Derive a CRTP concrete class from Proc.
   class Main : public Proc <Main> {
   public:
@@ -12,7 +12,7 @@ namespace femera {
     void task_init (int* argc, char** argv);
     void task_exit ();
   };
-}//end femera:: namespace
+} }//end femera::proc:: namespace
 
 #include "Main.ipp"
 

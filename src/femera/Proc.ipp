@@ -45,7 +45,7 @@ namespace femera {
 #if 0
   template <typename T> inline static
   Proc_t Proc<T>::new_main (int* argc, char** argv) noexcept {
-    return std::make_shared<Main> (Main(this_ptrs));
+    return std::make_shared<proc::Main> (proc::Main(this_ptrs));
   }
 #endif
 }// end femera:: namespace

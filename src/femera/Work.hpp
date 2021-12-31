@@ -15,18 +15,18 @@
 namespace femera {
   // Forward-declares
   class Work;
-  template <typename> class Proc; class Main;
+  template <typename> class Proc;// class Main;
   template <typename> class Data;// class File;
   template <typename> class Test;// class Beds;
   template <typename> class Sims;
-  namespace proc { class Ftop; class Fmpi; class Fomp; class Fcpu; }
-  namespace data { class File; class Flog; }// class Type; class Base; }//FIXME Fake -> Base?
+  namespace proc { class Main; class Ftop; class Fmpi; class Fomp; class Fcpu; }
+  namespace data { class File; class Flog; }// class Type; class Base; }//TODO Fake -> Base?
   namespace test { class Beds; class Unit; class Self; class Perf; class Gtst; }
   namespace sims { class Jobs; }
   using Work_t = std::shared_ptr <Work>;
-  using Proc_t = std::shared_ptr <Proc<Work>>;
   //
-  using Main_t = std::shared_ptr <Main>;
+  using Proc_t = std::shared_ptr <Proc<Work>>;
+  using Main_t = std::shared_ptr <proc::Main>;
   using Ftop_t = std::shared_ptr <proc::Ftop>;
   using Fmpi_t = std::shared_ptr <proc::Fmpi>;
   using Fomp_t = std::shared_ptr <proc::Fomp>;
@@ -42,7 +42,7 @@ namespace femera {
   //using Self_t = std::shared_ptr <test::Self>;
   //using Perf_t = std::shared_ptr <test::Perf>;
   using Gtst_t = std::shared_ptr <test::Gtst>;
-//FIXME is, e.g., class femera::Proc_base or femera::Proc::Base better?
+//TODO is, e.g., class femera::Proc_base or femera::Proc::Base better?
   //
   using Sims_t = std::shared_ptr <Sims<Work>>;
   using Jobs_t = std::shared_ptr <sims::Jobs>;
@@ -51,7 +51,7 @@ namespace femera {
   // Derived Classes use the curiously recurrent template pattern (CRTP).
   public:// typedefs ----------------------------------------------------------
     using Task_list_t = std::deque <Work_t>;
-    //using Make_work_t = std::tuple <Main_t,File_t,Beds_t>;
+    //using Make_work_t = std::tuple <Main_t,File_t,Beds_t>;//TODO better?
     using Make_work_t = std::tuple <Proc_t,Data_t,Test_t>;
     using Path_t      = std::vector<fmr::Local_int>;
   public:// Variables ---------------------------------------------------------
@@ -59,9 +59,9 @@ namespace femera {
     std::string      name = std::string      ("unknown work");
     //
     //Proc_t proc = static_cast <Proc_t> (nullptr);
-    Proc_t proc = nullptr;// processing hierarchy (Main_t)
-    Data_t data = nullptr;// data and file handling
-    Test_t test = nullptr;// correctness and performance testing
+    Proc_t proc = nullptr;// processing hierarchy (proc::Main_t)
+    Data_t data = nullptr;// data and file handling (data::File)
+    Test_t test = nullptr;// correctness and performance testing {test::Beds}
   protected:
     Task_list_t task_list ={};
     fmr::Dim_int   info_d = 1;

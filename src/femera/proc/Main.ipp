@@ -3,20 +3,20 @@
 
 namespace femera {
   inline
-  Main::Main (femera::Work::Make_work_t W) noexcept {
+  proc::Main::Main (femera::Work::Make_work_t W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="Femera";
     this->info_d = 2;
   }
   inline
-  Main::Main () noexcept {
+  proc::Main::Main () noexcept {
     this->name ="Femera";
     this->info_d = 2;
   }
   inline
-  void Main::task_exit () {
+  void proc::Main::task_exit () {
   }
-}//end femera namespace
+}//end femera:: namespace
 
 //end FEMERA_MAIN_IPP
 #endif
