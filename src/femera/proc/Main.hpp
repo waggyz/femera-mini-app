@@ -1,5 +1,5 @@
-#ifndef FEMERA_MAIN_HPP
-#define FEMERA_MAIN_HPP
+#ifndef HAS_FEMERA_MAIN_HPP
+#define HAS_FEMERA_MAIN_HPP
 
 #include "../Proc.hpp"
 
@@ -16,5 +16,5 @@ namespace femera { namespace proc {
 
 #include "Main.ipp"
 
-//end FEMERA_MAIN_HPP
+//end HAS_FEMERA_MAIN_HPP
 #endif
