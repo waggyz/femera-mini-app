@@ -5,6 +5,7 @@ digraph "source tree" {
     fontsize="16";
     fontname="Helvetica";
 	clusterrank="local";
+	"femera.hpp" -> "Jobs.hpp"
 	"Meter.hpp" -> "perf.hpp"
 	"Main.cpp" -> "Fomp.hpp"
 	"Sims.hpp" -> "Work.hpp"
@@ -18,7 +19,6 @@ digraph "source tree" {
 	"Proc.hpp" -> "Proc.ipp"
 	"Main.cpp" -> "Fmpi.hpp"
 	"Main.cpp" -> "Fcpu.hpp"
-	"femera.hpp" -> "Sims.hpp"
 	"Ftop.hpp" -> "Ftop.ipp"
 	"perf.hpp" -> "fmr.hpp"
 	"Data.hpp" -> "Data.ipp"
@@ -28,6 +28,7 @@ digraph "source tree" {
 	"Test.hpp" -> "Work.hpp"
 	"form.hpp" -> "form.ipp"
 	"Gtst.cpp" -> "Gtst.hpp"
+	"femera.hpp" -> "femera.ipp"
 	"Fcpu.hpp" -> "Proc.hpp"
 	"Fomp.hpp" -> "Proc.hpp"
 	"Flog.hpp" -> "Data.hpp"
@@ -35,7 +36,6 @@ digraph "source tree" {
 	"Meter.hpp" -> "Meter.ipp"
 	"Fomp.hpp" -> "Fomp.ipp"
 	"Gtst.hpp" -> "Gtst.ipp"
-	"femera.cpp" -> "Jobs.hpp"
 	"form.cpp" -> "form.hpp"
 	"perf.hpp" -> "perf.ipp"
 	"Fmpi.cpp" -> "Fmpi.hpp"

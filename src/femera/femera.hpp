@@ -5,8 +5,8 @@
 //#include "proc/Main.hpp"
 #include "Data.hpp"
 #include "Test.hpp"
-#include "Sims.hpp"
-//#include "sims/Jobs.hpp"
+//#include "Sims.hpp"
+#include "sims/Jobs.hpp"
 
 namespace femera {
   Jobs_t new_sims ();
@@ -15,6 +15,7 @@ namespace femera {
 #endif
 }//end femera:: namespace
 
+#include "femera.ipp"
 /*
 Notices:
 Copyright 2018 United States Government as represented by the Administrator of
