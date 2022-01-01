@@ -260,7 +260,7 @@ GET_BATS:= $(patsubst %,get-%,$(BATS_MODS))
 
 LIBFEMERA:=$(STAGE_CPU)/lib/libfemera.a
 
-# Changing any of these should cause a full rebuld.
+# Changing any of these should cause a full Femera rebuild.
 TOPDEPS += Makefile $(BUILD_CPU)/femera.flags
 
 # C++11 code to compile and gtest

@@ -67,7 +67,7 @@ namespace femera {
     fmr::Dim_int   info_d = 1;
   protected:// Methods --------------------------------------------------------
     Work_t get_work   (fmr::Local_int) noexcept;// used by derived::get_task(..) method
-    Work_t get_work   (Path_t) noexcept;        // ""
+    Work_t get_work   (Path_t)         noexcept;// ""
     //
     // Work stack initialization and exit
     void          init_list (int* argc, char** argv) noexcept;// init forward
