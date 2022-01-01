@@ -41,6 +41,12 @@ namespace femera {
   std::shared_ptr<T> Sims<T>::new_task () noexcept {
     return std::make_shared<T> (T());
   }
+  template <typename T> inline
+  std::shared_ptr<T> Sims<T>::new_task (int* argc, char** argv) noexcept {
+    auto S = std::make_shared<T> (T());
+    S->init (argc, argv);
+    return S;
+  }
 }// end femera:: namespace
 
 #undef FMR_DEBUG

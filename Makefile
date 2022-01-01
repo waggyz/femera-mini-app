@@ -1,5 +1,5 @@
 #!/usr/bin/make
-.DEFAULT_GOAL := all
+.DEFAULT_GOAL:= all
 SHELL:= bash
 FMRDIR:=$(shell pwd)
 
@@ -18,15 +18,15 @@ BUILT_BY_EMAIL:= $(call parse_email,$(BUILT_BY))
 IS_IN_REPO:= $(shell git rev-parse --is-inside-work-tree 2>/dev/null)
 # contains "true" or "".
 
-# Check if the user has altered content in src/ data/, tools/,
+# Check if there is altered content in src/ data/, tools/,
 # or some content in extras/, even when not a git repository.
-#FIXME Move to recipe?
 REPO_MD5:= $(shell cat .md5)
 ifeq ($(shell test -e file_name && echo -n yes),yes)
   #(shell tools/md5-all.sh build/.md5)
   $(shell echo "host hash" > build/.md5)
   HOST_MD5:= $(shell cat build/.md5)
 endif
+#FIXME Move to recipe?
 
 #------------------------------------------------------------------------------
 ifeq ($(CXX),g++)
@@ -37,12 +37,12 @@ ifeq ($(CXX),g++)
   endif
   OPTFLAGS:= $(shell cat data/gcc4.flags | tr '\n' ' ' | tr -s ' ')
   CXXFLAGS+= -std=c++11 -g -MMD -MP
+  # Dependency file generation: -MMD -MP
   ifeq ($(ENABLE_LTO),ON)
     CXXFLAGS+= -flto
   endif
-  CXXFLAGS+= $(OPTFLAGS) -fstrict-enums
-  # Dependency file generation: -MMD -MP
   #NOTE -fpic needed for shared libs, but may degrade static lib performance.
+  CXXFLAGS+= $(OPTFLAGS) -fstrict-enums
   ifeq ($(ENABLE_OMP),ON)
     CXXFLAGS+= -fopenmp
     FMRFLAGS+= -D_GLIBCXX_PARALLEL
@@ -69,6 +69,9 @@ ifeq ($(CXX),icpc)
   endif
   AREXE:= xiar
 endif
+# Flags for compiling tests
+CXXTESTS := $(CXXFLAGS) $(CXXWARNS)
+
 ifneq ($(FMR_MICRO_UCHAR),)
   FMRFLAGS += -DFMR_MICRO_UCHAR=$(FMR_MICRO_UCHAR)
 endif
@@ -136,10 +139,10 @@ ifeq ("$(FMR_COPYRIGHT)","")# only true once during build
   export FMR_COPYRIGHT:= cat data/copyright.txt | tr '\n' ' ' | tr -s ' '
   NOSA_SEE:= See the NASA open source agreement (NOSA-1-3.txt) for details.
 endif
+
 -include $(BUILD_CPU)/external.config.mk
 
 #NOTE CGNS, FLTK, FreeType, PETSc build in external/*/
-
 # Libraries and applications available ----------------------------------------
 ifeq ($(ENABLE_OMP),ON)
   EXTERNAL_DOT+="OpenMP" -> "Femera"\n
@@ -172,13 +175,11 @@ else
     $(DBUG) Set ENABLE_BATS:=ON in config.local for $(notdir $(3)).)
 endif
 ifeq ($(ENABLE_GOOGLETEST),ON)
-  # Flags for compiling Femera tests
-  CXXGTEST := $(CXXFLAGS) $(CXXWARNS)
-  CXXGTEST := $(filter-out -Wundef,$(CXXGTEST))
-  CXXGTEST := $(filter-out -Weffc++,$(CXXGTEST))
-  CXXGTEST := $(filter-out -Winline,$(CXXGTEST))
-  CXXGTEST := $(filter-out -flto,$(CXXGTEST))
-  #NOTE Parallel make breaks link-time optimization of gtests.
+  CXXTESTS := $(filter-out -Wundef,$(CXXTESTS))
+  CXXTESTS := $(filter-out -Weffc++,$(CXXTESTS))
+  CXXTESTS := $(filter-out -Winline,$(CXXTESTS))
+  CXXTESTS := $(filter-out -flto,$(CXXTESTS))
+  #NOTE Parallel library build breaks link-time optimization of gtests.
 endif
 ifeq ($(ENABLE_GOOGLETEST),ON)
   LIST_EXTERNAL += googletest
@@ -243,7 +244,7 @@ ifeq ($(ENABLE_DOT),ON)
 endif
 
 CXXFLAGS+= $(CXXWARNS)
-CXX_VERSION   := $(shell $(CXX) -dumpversion)
+CXX_VERSION:= $(shell $(CXX) -dumpversion)
 
 # Files -----------------------------------------------------------------------
 # Generic Femera tools
@@ -714,7 +715,7 @@ $(BUILD_CPU)/%.gtst.o : $(BUILD_CPU)/fmr/test.o
 $(BUILD_CPU)/%.gtst.o : src/%.gtst.cpp src/%.cpp src/%.hpp src/%.ipp $(TOPDEPS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
-	$(CXX) -c $(CXXGTEST) $(FMRFLAGS) $< -o $@
+	$(CXX) -c $(CXXTESTS) $(FMRFLAGS) $< -o $@
 else
 	touch $@
 endif
@@ -724,7 +725,7 @@ $(BUILD_CPU)/%.gtst.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.gtst.o : src/%.gtst.cpp src/%.cpp src/%.hpp $(TOPDEPS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
-	$(CXX) -c $(CXXGTEST) $(FMRFLAGS) $< -o $@
+	$(CXX) -c $(CXXTESTS) $(FMRFLAGS) $< -o $@
 else
 	touch $@
 endif
@@ -734,7 +735,7 @@ $(BUILD_CPU)/%.gtst.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.gtst.o : src/%.gtst.cpp src/%.hpp src/%.ipp $(TOPDEPS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
-	$(CXX) -c $(CXXGTEST) $(FMRFLAGS) $< -o $@
+	$(CXX) -c $(CXXTESTS) $(FMRFLAGS) $< -o $@
 else
 	touch $@
 endif
@@ -744,7 +745,7 @@ $(BUILD_CPU)/%.gtst.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.gtst.o : src/%.gtst.cpp src/%.hpp $(TOPDEPS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
-	$(CXX) -c $(CXXGTEST) $(FMRFLAGS) $< -o $@
+	$(CXX) -c $(CXXTESTS) $(FMRFLAGS) $< -o $@
 else
 	touch $@
 endif
@@ -758,7 +759,7 @@ $(BUILD_CPU)/%.o : src/%.cpp src/%.hpp src/%.ipp $(TOPDEPS)
 $(BUILD_CPU)/%/Test.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%/Test.o : src/%/Test.cpp src/%/Test.hpp $(TOPDEPS)
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
-	$(CXX) -c $(CXXGTEST) $(FMRFLAGS) $< -o $@
+	$(CXX) -c $(CXXTESTS) $(FMRFLAGS) $< -o $@
 
 $(BUILD_CPU)/%.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.o : src/%.cpp src/%.hpp $(TOPDEPS)
@@ -810,7 +811,7 @@ build/%.gtst : build/%.gtst.o $(LIBFEMERA)(build/%.o) \
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(notdir $@).o .. -lfemera,$(notdir $@))
 	#(info $(LINK) $(CXX) $(notdir $@).o .. -lfemera .. -o $(notdir $@))
-	-$(CXX) $(CXXGTEST) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
+	-$(CXX) $(CXXTESTS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
 	$(info $(WARN) $@ not tested: GoogleTest disabled)
 	-echo "WARNING: $@ not tested: GoogleTest disabled" >> $@.err
@@ -823,7 +824,7 @@ build/%.gtst : build/%.gtst.o $(LIBFEMERA)($(BUILD_CPU)/femera/Test.o)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(notdir $@).o .. -lfemera,$(notdir $@))
 	#(info $(LINK) $(CXX) $(notdir $@).o .. -lfemera .. -o $(notdir $@))
-	-$(CXX) $(CXXGTEST) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
+	-$(CXX) $(CXXTESTS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
 	$(info $(WARN) $@ not tested: GoogleTest disabled)
 	-echo "WARNING: $@ not tested: GoogleTest disabled" >> $@.err

@@ -14,7 +14,9 @@ namespace femera {
     this->info_d = 3;
   }
   inline
-  void sims::Jobs::task_init (int*, char**){}
+  void sims::Jobs::task_init (int*, char**){
+//    if (this->proc == nullptr) { this->proc = Proc::new_task (argc, argv); }
+  }
   inline
   void sims::Jobs::task_exit () {
   }

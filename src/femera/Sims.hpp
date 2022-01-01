@@ -15,6 +15,8 @@ namespace femera {
     This_t    get_task (Work::Path_t tree);
     static constexpr
     This_t    new_task () noexcept;
+    static
+    This_t    new_task (int*, char**) noexcept;
   private:
     T* derived (Sims*);
   protected:// make it clear this class needs to be inherited
