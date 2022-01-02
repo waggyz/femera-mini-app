@@ -4,7 +4,6 @@
 #include "../Test.hpp"
 
 namespace femera { namespace test {
-  //
   class Gtst;// Derive a CRTP concrete class from Test.
   class Gtst : public Test <Gtst> {
   public:

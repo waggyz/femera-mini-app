@@ -2,10 +2,14 @@
 #define HAS_FEMERA_HPP
 
 #include "Proc.hpp"
-//#include "proc/Main.hpp"
 #include "Data.hpp"
 #include "Test.hpp"
 //#include "Sims.hpp"
+
+//#include "proc/Main.hpp"
+//#include "test/Beds.hpp"
+//#include "data/File.hpp"
+////FIXME "data/Type.hpp"
 #include "sims/Jobs.hpp"
 
 namespace femera {

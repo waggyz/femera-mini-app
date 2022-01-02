@@ -25,18 +25,21 @@ namespace femera {
   namespace sims { class Jobs; }
   using Work_t = std::shared_ptr <Work>;
   //
-  using Proc_t = std::shared_ptr <Proc<Work>>;
+#if 1
+  using Proc_t = std::shared_ptr <Proc<Work>>;//FIXME These don't work
+  using Data_t = std::shared_ptr <Data<Work>>;
+  using Test_t = std::shared_ptr <Test<Work>>;
+  using Sims_t = std::shared_ptr <Sims<Work>>;
+#endif
   using Main_t = std::shared_ptr <proc::Main>;
   using Ftop_t = std::shared_ptr <proc::Ftop>;
   using Fmpi_t = std::shared_ptr <proc::Fmpi>;
   using Fomp_t = std::shared_ptr <proc::Fomp>;
   using Fcpu_t = std::shared_ptr <proc::Fcpu>;
   //
-  using Data_t = std::shared_ptr <Data<Work>>;
   using File_t = std::shared_ptr <data::File>;
   using Flog_t = std::shared_ptr <data::Flog>;
   //
-  using Test_t = std::shared_ptr <Test<Work>>;
   using Beds_t = std::shared_ptr <test::Beds>;
   //using Unit_t = std::shared_ptr <test::Unit>;
   //using Self_t = std::shared_ptr <test::Self>;
@@ -44,14 +47,13 @@ namespace femera {
   using Gtst_t = std::shared_ptr <test::Gtst>;
 //TODO is, e.g., class femera::Proc_base or femera::Proc::Base better?
   //
-  using Sims_t = std::shared_ptr <Sims<Work>>;
   using Jobs_t = std::shared_ptr <sims::Jobs>;
   //
   class Work {// This is an abstract (pure virtual) base class (interface).
   // Derived Classes use the curiously recurrent template pattern (CRTP).
   public:// typedefs ----------------------------------------------------------
     using Task_list_t = std::deque <Work_t>;
-    //using Make_work_t = std::tuple <Main_t,File_t,Beds_t>;//TODO better?
+//    using Make_work_t = std::tuple <Main_t,File_t,Beds_t>;//TODO better?
     using Make_work_t = std::tuple <Proc_t,Data_t,Test_t>;
     using Path_t      = std::vector<fmr::Local_int>;
   public:// Variables ---------------------------------------------------------

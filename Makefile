@@ -825,13 +825,13 @@ $(BUILD_CPU)/mini: src/femera/mini.cpp src/femera/femera.hpp $(LIBFEMERA)
 
 $(BUILD_CPU)/mini.valgrind.log: $(BUILD_CPU)/mini $(VALGRIND_SUPP_EXE)
 ifeq ($(ENABLE_VALGRIND),ON)
-	$(info $(GRND) Checking mpiexec ... $(BUILD_CPU)/mini ...)
+	$(info $(GRND) checking mpiexec ... $(BUILD_CPU)/mini ...)
 	$(VGEXEC)
 	-grep -i 'lost: [1-9]' $(BUILD_CPU)/mini.valgrind.log \
   | cut -d " " -f 5- | awk '{print "$(WARN) valgrind:",$$0}'
 	-grep -i '[1-9] err' $(BUILD_CPU)/mini.valgrind.log \
   | cut -d " " -f 4- | awk '{print "$(WARN) valgrind:",$$0}'
-	$(info $(GRND) See: $(BUILD_CPU)/mini.valgrind.log)
+	$(info $(SPCS) see: $(BUILD_CPU)/mini.valgrind.log)
 else
 	touch $@
 endif

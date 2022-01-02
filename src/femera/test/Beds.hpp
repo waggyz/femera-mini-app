@@ -1,5 +1,5 @@
-#ifndef FEMERA_GTST_HPP
-#define FEMERA_GTST_HPP
+#ifndef FEMERA_BEDS_HPP
+#define FEMERA_BEDS_HPP
 
 #include "../Test.hpp"
 
@@ -16,5 +16,5 @@ namespace femera { namespace test {
 
 #include "Beds.ipp"
 
-//end FEMERA_GTST_HPP
+//end FEMERA_BEDS_HPP
 #endif
