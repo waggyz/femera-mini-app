@@ -159,6 +159,9 @@ ifeq ($(ENABLE_MPI),ON)
   endif
   LDFLAGS+= -L/usr/lib64/openmpi/lib
   LDLIBS+= -lmpi
+  ifeq ($(ENABLE_ VALGRIND),ON)# for valgrind with OpenMPI
+    VGMPISUPP:=$(shell tools/valgrind-mpi-supp.sh)
+  endif
 endif
 ifeq ($(ENABLE_LIBNUMA),ON)
   EXTERNAL_DOT+="libnuma" -> "Femera"\n
@@ -241,6 +244,28 @@ ifeq ($(ENABLE_DOT),ON)
   MAKE_DOT:= digraph "Makefile dependencies" {\n $(HEAD_DOT) $(MAKE_DOT) }\n
   EXTERNAL_DOTFILE:= $(BUILD_DIR)/external/external.dot
   MAKE_DOTFILE:= $(BUILD_DIR)/make.dot
+endif
+ifeq ($(ENABLE_VALGRIND),ON)
+  # Use (mostly) the same flags to compile the suppression file.
+  VGFLAGS:= $(CXXFLAGS) $(filter-out -Winline,$(CXXWARNS))
+  VALGRIND_SUPP := valgrind.supp
+  VALGRIND_SUPP_EXE := $(BUILD_CPU)/$(VALGRIND_SUPP).exe
+  VGSUPP := valgrind --leak-check=full --show-reachable=yes --error-limit=no \
+    --show-leak-kinds=all --gen-suppressions=all           \
+    $(VGMPI) $(BUILD_CPU)/$(VALGRIND_SUPP).exe 3>&1 1>&2 2>&3 \
+    | tools/grindmerge.pl $(VGMPISUPP)                     \
+    > $(BUILD_CPU)/$(VALGRIND_SUPP) 2>/dev/null;
+
+  VGEXEC := valgrind --track-origins=yes --leak-check=full \
+    --suppressions=$(BUILD_CPU)/$(VALGRIND_SUPP)           \
+    --log-file=$(BUILD_CPU)/mini.valgrind.log              \
+    $(VGMPI) $(BUILD_CPU)/mini -n$(TDD_OMP_NP) -v0 $(TDD_FMRFILE); \
+    sed -i '/invalid file descriptor 10[0-4][0-9] /d'      \
+    $(BUILD_CPU)/mini.valgrind.log;                        \
+    sed -i '/invalid file descriptor 2[56][0-9] /d'        \
+    $(BUILD_CPU)/mini.valgrind.log;                        \
+    sed -i '/select an alternative log fd/d'               \
+    $(BUILD_CPU)/mini.valgrind.log
 endif
 
 CXXFLAGS+= $(CXXWARNS)
@@ -449,7 +474,8 @@ remove-done:
 	$(info $(E_G_) $(patsubst %,%;,$(LIST_TOOLS)))
 	$(call timestamp,$@,)
 
-build-done: build/src-notest.eps # $(BUILD_CPU)/make-build.post.test.out
+# $(BUILD_CPU)/make-build.post.test.out
+build-done: build/src-notest.eps $(BUILD_CPU)/mini.valgrind.log
 	$(call timestamp,$@,$?)
 	$(info $(DONE) building $(FEMERA_VERSION) with $(CXX) $(CXX_VERSION))
 	$(info $(SPCS) on $(HOSTNAME) for $(CPUMODEL))
@@ -791,11 +817,24 @@ $(LIBFEMERA)(build/%.o) : build/%.o
 #(BUILD_CPU)/%.gtst _ export LD_LIBRARY_PATH = $(TMP_LIBRARY_PATH)
 
 $(BUILD_CPU)/mini: export TMPDIR := $(TEMP_DIR)
-$(BUILD_CPU)/mini: src/femera/mini.cpp src/femera/femera.hpp $(LIBFEMERA)
+$(BUILD_CPU)/mini: src/femera/mini.cpp src/femera/femera.hpp $(LIBFEMERA)  
 	$(call col2cxx,$(CXX_),$(CXX) $(notdir $<) .. -lfemera,$(notdir $@))
 	-$(CXX) $(filter-out -Winline,$(CXXFLAGS)) $< \
 	  $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 	$(call label_test,$(PASS),$(FAIL),$(TDDEXEC) $(@),$(@))
+
+$(BUILD_CPU)/mini.valgrind.log: $(BUILD_CPU)/mini $(VALGRIND_SUPP_EXE)
+ifeq ($(ENABLE_VALGRIND),ON)
+	$(info $(GRND) Checking mpiexec ... $(BUILD_CPU)/mini ...)
+	$(VGEXEC)
+	-grep -i 'lost: [1-9]' $(BUILD_CPU)/mini.valgrind.log \
+  | cut -d " " -f 5- | awk '{print "$(WARN) valgrind:",$$0}'
+	-grep -i '[1-9] err' $(BUILD_CPU)/mini.valgrind.log \
+  | cut -d " " -f 4- | awk '{print "$(WARN) valgrind:",$$0}'
+	$(info $(GRND) See: $(BUILD_CPU)/mini.valgrind.log)
+else
+	touch $@
+endif
 
 build/%.gtst.out : build/%.gtst
 ifeq ($(ENABLE_GOOGLETEST),ON)
@@ -828,6 +867,18 @@ ifeq ($(ENABLE_GOOGLETEST),ON)
 else
 	$(info $(WARN) $@ not tested: GoogleTest disabled)
 	-echo "WARNING: $@ not tested: GoogleTest disabled" >> $@.err
+	touch $@
+endif
+
+$(VALGRIND_SUPP_EXE) : export TMPDIR := $(TEMP_DIR)
+$(VALGRIND_SUPP_EXE) : src/$(VALGRIND_SUPP).cpp
+ifeq ($(ENABLE_VALGRIND),ON)
+	$(info $(CLAB) $(CXX) ... -o $(BUILD_CPU)/$(VALGRIND_SUPP).exe)
+	$(CXX) $(VGFLAGS) src/$(VALGRIND_SUPP).cpp $(LDFLAGS) -L$(BUILD_DIR)\
+  -lfemera -o $(VALGRIND_SUPP_EXE) $(LDLIBS) $(call build_log,$@)
+	$(info $(GRND) suppression file: $(BUILD_CPU)/$(VALGRIND_SUPP))
+	$(VGSUPP)
+else
 	touch $@
 endif
 

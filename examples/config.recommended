@@ -60,10 +60,10 @@ ENABLE_PETSC_SCOTCH:=ON
 ENABLE_PETSC_PARMETIS:=OFF
 
 # Developer tools -------------------------------------------------------------
-ENABLE_VALGRIND:=ON
+ENABLE_VALGRIND:=OFF
 
-ENABLE_LYX:=ON
-ENABLE_DOT:=ON
+ENABLE_LYX:=OFF
+ENABLE_DOT:=OFF
 
 # Override automatic assignment -----------------------------------------------
 # Set these to override automatic assignment.
