@@ -41,11 +41,9 @@ namespace femera {
   std::shared_ptr<T> Proc<T>::new_task () noexcept {
     return std::make_shared<T> (T());
   }
-  template <typename T> inline
-  std::shared_ptr<T> Proc<T>::new_task (int* argc, char** argv) noexcept {
-    auto P = std::make_shared<T> (T());
-    P->init (argc, argv);
-    return P;
+  template <typename T> inline constexpr
+  std::shared_ptr<T> Proc<T>::new_task (const Work::Core_t core) noexcept {
+    return std::make_shared<T> (T(core));
   }
 }// end femera:: namespace
 

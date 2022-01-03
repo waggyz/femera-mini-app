@@ -15,10 +15,12 @@ namespace femera {
     This_t    get_task (fmr::Local_int);
     This_t    get_task (Work::Task_path_t);
     static constexpr
-    This_t    new_task () noexcept;
+    This_t    new_task () noexcept;//FIXME Remove.
+    static constexpr
+    This_t    new_task (const Work::Core_t) noexcept;
   private:
     T* derived (Data*);
-  protected:// make it clear this class needs to be inherited
+  protected:// Make it clear this class needs to be inherited from.
     Data ()            =default;
     Data (const Data&) =default;
     Data (Data&&)      =default;// shallow (pointer) copyable

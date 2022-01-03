@@ -23,25 +23,26 @@ namespace femera {
   namespace data { class File; class Flog; }// class Type; class Base; }//TODO Fake -> Base?
   namespace test { class Beds; class Unit; class Self; class Perf; class Gtst; }
   namespace sims { class Jobs; }
+  // typedefs
   using Work_t = std::shared_ptr <Work>;
   //
-  using Main_t = std::shared_ptr <proc::Main>;
-  using Ftop_t = std::shared_ptr <proc::Ftop>;
-  using Fmpi_t = std::shared_ptr <proc::Fmpi>;
-  using Fomp_t = std::shared_ptr <proc::Fomp>;
+  using Main_t = std::shared_ptr <proc::Main>;// concrete Proc interface
+  using Ftop_t = std::shared_ptr <proc::Ftop>;//FIXME should others be visible
+  using Fmpi_t = std::shared_ptr <proc::Fmpi>;//      oustside of their parent
+  using Fomp_t = std::shared_ptr <proc::Fomp>;//      class?
   using Fcpu_t = std::shared_ptr <proc::Fcpu>;
   //
-  using File_t = std::shared_ptr <data::File>;
+  using File_t = std::shared_ptr <data::File>;// concrete Data interface
   using Flog_t = std::shared_ptr <data::Flog>;
   //
-  using Beds_t = std::shared_ptr <test::Beds>;
-  //using Unit_t = std::shared_ptr <test::Unit>;
-  //using Self_t = std::shared_ptr <test::Self>;
-  //using Perf_t = std::shared_ptr <test::Perf>;
+  using Beds_t = std::shared_ptr <test::Beds>;// concrete Test interface
+  //using Unit_t = std::shared_ptr <test::Unit>;// built-in unit tests
+  //using Self_t = std::shared_ptr <test::Self>;// built-in integration tests
+  //using Perf_t = std::shared_ptr <test::Perf>;// built-in performance tests
   using Gtst_t = std::shared_ptr <test::Gtst>;
 //TODO is, e.g., class femera::Proc_base or femera::Proc::Base better?
   //
-  using Jobs_t = std::shared_ptr <sims::Jobs>;
+  using Jobs_t = std::shared_ptr <sims::Jobs>;// concrete Sims interface
   //
   class Work {// This is an abstract (pure virtual) base class (interface).
   // Derived Classes use the curiously recurrent template pattern (CRTP).
@@ -69,9 +70,10 @@ namespace femera {
     //
 //TODO    Task_tree_t   get_tree   () noexcept;
     fmr::Local_int add_task   (Work_t) noexcept;
-    fmr::Local_int get_task_n ()     noexcept;
+    fmr::Local_int get_task_n ()       noexcept;
     //Derived_t    get_task   (fmr::Local_int) in Derived and returns that type
-    //Derived_t    new_task   ()               ""
+    //Derived_t    new_task   ()                     ""
+    //Derived_t    new_task   (Core_t)               ""
     //
     Core_t get_core () noexcept;
   protected:
@@ -83,7 +85,8 @@ namespace femera {
     void          init_list (int* argc, char** argv) noexcept;// init forward
     fmr::Exit_int exit_list () noexcept;// exit task_list in reverse
     fmr::Exit_int exit_tree () noexcept;// exit task hierarchy in reverse
-  public:// Built-in stuff ----------------------------------------------------
+  protected:// Built-in stuff -------------------------------------------------
+    // Make it clear this class needs to be inherited from.
     Work ()            =default;
     Work (Work const&) =default;// copyable
     Work& operator=

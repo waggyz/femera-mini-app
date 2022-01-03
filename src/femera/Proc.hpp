@@ -16,11 +16,11 @@ namespace femera {
     This_t    get_task (Work::Task_path_t);
     static constexpr
     This_t    new_task () noexcept;
-    static
-    This_t    new_task (int*, char**) noexcept;
+    static constexpr
+    This_t    new_task (const Work::Core_t) noexcept;
   private:
     T* derived (Proc*);
-  protected:// make it clear this class needs to be inherited
+  protected:// Make it clear this class needs to be inherited from.
     Proc ()            =default;
     Proc (const Proc&) =default;
     Proc (Proc&&)      =default;// shallow (pointer) copyable

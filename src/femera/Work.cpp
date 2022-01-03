@@ -5,7 +5,6 @@
 #include <cstdio>     // std::printf
 #endif
 
-//femera::Work::Work (Work const&){}
 femera::Work::~Work (){}
 
 namespace femera {
