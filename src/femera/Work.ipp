@@ -8,7 +8,7 @@
 
 namespace femera {
   inline
-  Work::Core_t Work::core_ptrs ()
+  Work::Core_t Work::get_core ()
   noexcept {
     return std::make_tuple(this->proc, this->data, this->test);
   }
@@ -18,7 +18,7 @@ namespace femera {
     return (i < this->task_list.size()) ? this->task_list [i] : nullptr;
   }
   inline
-  Work_t Work::get_work (const Work::Path_t path)
+  Work_t Work::get_work (const Work::Task_path_t path)
   noexcept {
     Work_t W = nullptr;
     const auto sz = path.size();

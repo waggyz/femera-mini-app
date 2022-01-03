@@ -47,8 +47,9 @@ namespace femera {
   // Derived Classes use the curiously recurrent template pattern (CRTP).
   public:// typedefs ----------------------------------------------------------
     using Task_list_t = std::deque <Work_t>;
-    using Core_t = std::tuple <Main_t,File_t,Beds_t>;
-    using Path_t = std::vector<fmr::Local_int>;
+    using Task_path_t = std::vector<fmr::Local_int>;
+    using Task_tree_t = std::vector<Task_path_t>;
+    using      Core_t = std::tuple <Main_t,File_t,Beds_t>;
   public:// Variables ---------------------------------------------------------
     fmr::perf::Meter time = fmr::perf::Meter ();
     std::string      name = std::string      ("unknown work");
@@ -60,28 +61,28 @@ namespace femera {
   protected:
     Task_list_t task_list ={};
     fmr::Dim_int   info_d = 1;
-  protected:// Methods --------------------------------------------------------
-    Work_t get_work   (fmr::Local_int) noexcept;// used by derived::get_task(..) method
-    Work_t get_work   (Path_t)         noexcept;// ""
+  public:// Methods -----------------------------------------------------------
+    //NOTE Make at least 1 method pure virtual.
+    //FIXME Do all need to be pure to avoid vtable using CRTP derived classes?
+    virtual fmr::Exit_int init (int* argc, char** argv) noexcept =0;
+    virtual fmr::Exit_int exit (fmr::Exit_int err=0) =0;
+    //
+//TODO    Task_tree_t   get_tree   () noexcept;
+    fmr::Local_int add_task   (Work_t) noexcept;
+    fmr::Local_int get_task_n ()     noexcept;
+    //Derived_t    get_task   (fmr::Local_int) in Derived and returns that type
+    //Derived_t    new_task   ()               ""
+    //
+    Core_t get_core () noexcept;
+  protected:
+    Work_t get_work (fmr::Local_int) noexcept;
+    Work_t get_work (Task_path_t)         noexcept;
+    // above called by Derived::get_task(..)
     //
     // Work stack initialization and exit
     void          init_list (int* argc, char** argv) noexcept;// init forward
     fmr::Exit_int exit_list () noexcept;// exit task_list in reverse
     fmr::Exit_int exit_tree () noexcept;// exit task hierarchy in reverse
-  public:
-    fmr::Local_int add_task   (Work_t) noexcept;
-    fmr::Local_int get_task_n ()       noexcept;
-    // Derived_t get_task (fmr::Local_int) is in Derived class, returns that type.
-    // Derived_t new_task ()               ""
-    //
-//    std::vector<Path_t>> get_tree () noexcept;
-    //
-    //NOTE Make at least 1 pure virtual.
-    //FIXME Do all need to be pure to avoid vtable using CRTP derived classes?
-    virtual fmr::Exit_int init (int* argc, char** argv) noexcept =0;
-    virtual fmr::Exit_int exit (fmr::Exit_int err=0) =0;
-    //
-    Core_t core_ptrs () noexcept;
   public:// Built-in stuff ----------------------------------------------------
     Work ()            =default;
     Work (Work const&) =default;// copyable

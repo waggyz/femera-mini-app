@@ -11,7 +11,7 @@ femera::Work::~Work (){}
 namespace femera {
   fmr::Exit_int Work::exit_tree () noexcept {
     fmr::Exit_int err =0;
-    Work::Path_t branch ={};
+    Work::Task_path_t branch ={};
     while (! this->task_list.empty ()) {
       auto W = this->task_list.back ();
       if ( W == nullptr ){ W->task_list.pop_back (); }

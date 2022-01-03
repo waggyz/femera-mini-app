@@ -34,7 +34,7 @@ namespace femera {
     return std::static_pointer_cast<T> (this->get_work (i));
   }
   template <typename T> inline
-  std::shared_ptr<T> Data<T>::get_task (const Work::Path_t tree) {
+  std::shared_ptr<T> Data<T>::get_task (const Work::Task_path_t tree) {
     return std::static_pointer_cast<T> (this->get_work (tree));
   }
   template <typename T> inline constexpr
