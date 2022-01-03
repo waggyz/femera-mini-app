@@ -2,6 +2,7 @@
 #define FEMERA_TEST_HPP
 
 #include "Work.hpp"
+//#include "core.h"
 
 namespace femera {
   template <typename T>

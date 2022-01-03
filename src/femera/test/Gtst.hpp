@@ -7,7 +7,7 @@ namespace femera { namespace test {
   class Gtst;// Derive a CRTP concrete class from Test.
   class Gtst : public Test <Gtst> {
   public:
-    Gtst (femera::Work::Make_work_t) noexcept;
+    Gtst (femera::Work::Core_t) noexcept;
     Gtst () noexcept;
     void task_init (int* argc, char** argv);
     void task_exit ();

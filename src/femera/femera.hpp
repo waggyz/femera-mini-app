@@ -1,22 +1,16 @@
 #ifndef HAS_FEMERA_HPP
 #define HAS_FEMERA_HPP
 
-#include "Proc.hpp"
-#include "Data.hpp"
-#include "Test.hpp"
-//#include "Sims.hpp"
+//#include "core.h"
+#include "proc/Main.hpp"
+#include "test/Beds.hpp"
+#include "data/File.hpp"
 
-//#include "proc/Main.hpp"
-//#include "test/Beds.hpp"
-//#include "data/File.hpp"
-////FIXME "data/Type.hpp"
 #include "sims/Jobs.hpp"
 
 namespace femera {
   Jobs_t new_sims ();
   Jobs_t new_sims (int*, char**);
-#if 0
-#endif
 }//end femera:: namespace
 
 #include "femera.ipp"

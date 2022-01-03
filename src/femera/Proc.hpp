@@ -1,7 +1,8 @@
-#ifndef FEMERA_TEST_HPP
-#define FEMERA_TEST_HPP
+#ifndef FEMERA_HAS_PROC_HPP
+#define FEMERA_HAS_PROC_HPP
 
 #include "Work.hpp"
+//#include "core.h"
 
 namespace femera {
   template <typename T>
@@ -31,5 +32,5 @@ namespace femera {
 
 #include "Proc.ipp"
 
-//end FEMERA_TEST_HPP
+//end FEMERA_HAS_PROC_HPP
 #endif

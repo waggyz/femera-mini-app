@@ -3,7 +3,7 @@
 
 namespace femera {
   inline
-  proc::Ftop::Ftop (femera::Work::Make_work_t W) noexcept {
+  proc::Ftop::Ftop (femera::Work::Core_t W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="top";
     this->info_d = 3;

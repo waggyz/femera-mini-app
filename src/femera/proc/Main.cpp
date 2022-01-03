@@ -16,10 +16,10 @@
 
 namespace femera {
   void proc::Main:: task_init (int*, char**) {
-    const auto this_ptrs = this->ptrs();
+    const auto this_core_ptrs = this->core_ptrs();
     std::vector<fmr::Local_int> path ={};
 //    auto task_i = this->add_task (Proc<proc::Ftop>::new_task ());
-//      (std::make_shared<proc::Ftop> (proc::Ftop(this_ptrs)));
+//      (std::make_shared<proc::Ftop> (proc::Ftop(this_core_ptrs)));
     path.push_back (this->add_task (Proc<proc::Ftop>::new_task ()));
 #ifdef FMR_HAS_MPI
     path.push_back (get_task(path)->add_task (Proc<proc::Fmpi>::new_task ()));

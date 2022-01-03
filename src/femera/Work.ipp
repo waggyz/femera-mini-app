@@ -8,7 +8,7 @@
 
 namespace femera {
   inline
-  Work::Make_work_t Work::ptrs ()
+  Work::Core_t Work::core_ptrs ()
   noexcept {
     return std::make_tuple(this->proc, this->data, this->test);
   }

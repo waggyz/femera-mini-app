@@ -25,12 +25,6 @@ namespace femera {
   namespace sims { class Jobs; }
   using Work_t = std::shared_ptr <Work>;
   //
-#if 1
-  using Proc_t = std::shared_ptr <Proc<Work>>;//FIXME These don't work
-  using Data_t = std::shared_ptr <Data<Work>>;
-  using Test_t = std::shared_ptr <Test<Work>>;
-  using Sims_t = std::shared_ptr <Sims<Work>>;
-#endif
   using Main_t = std::shared_ptr <proc::Main>;
   using Ftop_t = std::shared_ptr <proc::Ftop>;
   using Fmpi_t = std::shared_ptr <proc::Fmpi>;
@@ -53,17 +47,16 @@ namespace femera {
   // Derived Classes use the curiously recurrent template pattern (CRTP).
   public:// typedefs ----------------------------------------------------------
     using Task_list_t = std::deque <Work_t>;
-//    using Make_work_t = std::tuple <Main_t,File_t,Beds_t>;//TODO better?
-    using Make_work_t = std::tuple <Proc_t,Data_t,Test_t>;
-    using Path_t      = std::vector<fmr::Local_int>;
+    using Core_t = std::tuple <Main_t,File_t,Beds_t>;
+    using Path_t = std::vector<fmr::Local_int>;
   public:// Variables ---------------------------------------------------------
     fmr::perf::Meter time = fmr::perf::Meter ();
     std::string      name = std::string      ("unknown work");
     //
-    //Proc_t proc = static_cast <Proc_t> (nullptr);
-    Proc_t proc = nullptr;// processing hierarchy (proc::Main_t)
-    Data_t data = nullptr;// data and file handling (data::File)
-    Test_t test = nullptr;// correctness and performance testing {test::Beds}
+    //Main_t proc = static_cast <Main_t> (nullptr);
+    Main_t proc = nullptr;// processing hierarchy (proc::Main_t)
+    File_t data = nullptr;// data and file handling (data::File)
+    Beds_t test = nullptr;// correctness and performance testing {test::Beds}
   protected:
     Task_list_t task_list ={};
     fmr::Dim_int   info_d = 1;
@@ -88,7 +81,7 @@ namespace femera {
     virtual fmr::Exit_int init (int* argc, char** argv) noexcept =0;
     virtual fmr::Exit_int exit (fmr::Exit_int err=0) =0;
     //
-    Make_work_t ptrs () noexcept;
+    Core_t core_ptrs () noexcept;
   public:// Built-in stuff ----------------------------------------------------
     Work ()            =default;
     Work (Work const&) =default;// copyable

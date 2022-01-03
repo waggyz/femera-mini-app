@@ -7,7 +7,7 @@ namespace femera { namespace data {
   class Flog;// Derive a CRTP concrete class from File.
   class Flog : public Data <Flog> {
   public:
-    Flog (femera::Work::Make_work_t) noexcept;
+    Flog (femera::Work::Core_t) noexcept;
     Flog () noexcept;
     void task_init (int* argc, char** argv);
     void task_exit ();
