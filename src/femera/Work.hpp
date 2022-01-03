@@ -50,15 +50,21 @@ namespace femera {
     using Task_list_t = std::deque <Work_t>;
     using Task_path_t = std::vector<fmr::Local_int>;
     using Task_tree_t = std::vector<Task_path_t>;
-    using      Core_t = std::tuple <Main_t,File_t,Beds_t>;
+//    using      Core_t = std::tuple <Main_t,File_t,Beds_t>;
+    using      Core_t = std::tuple <proc::Main*,data::File*,test::Beds*>;
   public:// Variables ---------------------------------------------------------
     fmr::perf::Meter time = fmr::perf::Meter ();
     std::string      name = std::string      ("unknown work");
     //
     //Main_t proc = static_cast <Main_t> (nullptr);
+#if 0
     Main_t proc = nullptr;// processing hierarchy (proc::Main_t)
     File_t data = nullptr;// data and file handling (data::File)
     Beds_t test = nullptr;// correctness and performance testing {test::Beds}
+#endif
+    proc::Main* proc = nullptr;// processing hierarchy (proc::Main_t)
+    data::File* data = nullptr;// data and file handling (data::File)
+    test::Beds* test = nullptr;// correctness and performance testing {test::Beds}
   protected:
     Task_list_t task_list ={};
     fmr::Dim_int   info_d = 1;

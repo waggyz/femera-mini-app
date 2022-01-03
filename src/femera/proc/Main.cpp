@@ -16,16 +16,16 @@
 
 namespace femera {
   void proc::Main:: task_init (int*, char**) {
-    const auto this_get_core = this->get_core();
+    const auto core = this->get_core();
     std::vector<fmr::Local_int> path ={};
-    path.push_back (this->add_task (Proc<proc::Ftop>::new_task ()));
+    path.push_back (this->add_task (Proc<proc::Ftop>::new_task (core)));
 #ifdef FMR_HAS_MPI
-    path.push_back (get_task(path)->add_task (Proc<proc::Fmpi>::new_task ()));
+    path.push_back (get_task(path)->add_task (Proc<proc::Fmpi>::new_task (core)));
 #endif
 #ifdef FMR_HAS_OMP
-    path.push_back (get_task(path)->add_task (Proc<proc::Fomp>::new_task ()));
+    path.push_back (get_task(path)->add_task (Proc<proc::Fomp>::new_task (core)));
 #endif
-    this->get_task(path)->add_task (Proc<proc::Fcpu>::new_task ());
+    this->get_task(path)->add_task (Proc<proc::Fcpu>::new_task (core));
 #ifdef FMR_DEBUG
     //for (const auto P : this->task_list) { P->init (argc, argv); }
     printf ("%s\n", this->name.c_str());
