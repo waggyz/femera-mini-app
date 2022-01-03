@@ -2,7 +2,8 @@
 
 #include "gtest/gtest.h"
 
-auto gtst = femera::test::Gtst();
+auto gtst = femera::test::Gtst
+ ( femera::Work::Core_t (nullptr,nullptr,nullptr) );
 
 TEST( Gtst, TaskName ){
   EXPECT_EQ( gtst.name, "GoogleTest" );

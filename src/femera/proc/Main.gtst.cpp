@@ -5,7 +5,7 @@
 auto fmr_main = std::make_shared<femera::proc::Main> (femera::proc::Main());
 
 TEST( Main, TaskName ){
-  EXPECT_EQ( fmr_main->name, "Femera");
+  EXPECT_EQ( fmr_main->name, "processing environment");
 }
 TEST( Main, SizeofMainGE120 ){
   EXPECT_GE( sizeof(*fmr_main), 120 );

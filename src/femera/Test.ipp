@@ -37,10 +37,12 @@ namespace femera {
   std::shared_ptr<T> Test<T>::get_task (Work::Task_path_t tree) {
     return std::static_pointer_cast<T> (this->get_work (tree));
   }
+#if 0
   template <typename T> inline constexpr
   std::shared_ptr<T> Test<T>::new_task () noexcept {
     return std::make_shared<T> (T());
   }
+#endif
   template <typename T> inline constexpr
   std::shared_ptr<T> Test<T>::new_task (const Work::Core_t core) noexcept {
     return std::make_shared<T> (T(core));

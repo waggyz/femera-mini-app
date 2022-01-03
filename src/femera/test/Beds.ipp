@@ -8,11 +8,13 @@ namespace femera {
     this->name ="testbeds";
     this->info_d = 2;
   }
+#if 0
   inline
   test::Beds::Beds () noexcept {
     this->name ="testbeds";
     this->info_d = 2;
   }
+#endif
   inline
   void test::Beds::task_init (int*, char**){}
   inline

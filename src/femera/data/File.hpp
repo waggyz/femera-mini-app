@@ -8,7 +8,7 @@ namespace femera { namespace data {
   class File : public Data <File> {
   public:
     File (femera::Work::Core_t) noexcept;
-    File () noexcept;
+//    File () noexcept;
     void task_init (int* argc, char** argv);
     void task_exit ();
   };

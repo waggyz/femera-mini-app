@@ -11,21 +11,21 @@
 namespace femera {
   void sims::Jobs::task_init (int* argc, char** argv) {
     if (this->proc == nullptr) {
-      this->proc_uniq = proc::Main::new_task (this->get_core());
-      this->proc = this->proc_uniq.get();
+      this->proc_ptr = proc::Main::new_task (this->get_core());
+      this->proc = this->proc_ptr.get();
       this->proc->init (argc,argv);
     }
     if (this->proc->proc == nullptr) { this->proc->proc = this->proc; }
     if (this->test == nullptr) {
-      this->test_uniq = test::Beds::new_task (this->get_core());
-      this->test = this->test_uniq.get();
+      this->test_ptr = test::Beds::new_task (this->get_core());
+      this->test = this->test_ptr.get();
       this->test->init (argc,argv);
     }
     if (this->test->test == nullptr) { this->test->test = this->test; }
     if (this->proc->test == nullptr) { this->proc->test = this->test; }
     if (this->data == nullptr) {
-      this->data_uniq = data::File::new_task (this->get_core());
-      this->data = this->data_uniq.get();
+      this->data_ptr = data::File::new_task (this->get_core());
+      this->data = this->data_ptr.get();
       this->data->init (argc,argv);
     }
     if (this->data->data == nullptr) { this->data->data = this->data; }

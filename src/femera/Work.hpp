@@ -56,12 +56,6 @@ namespace femera {
     fmr::perf::Meter time = fmr::perf::Meter ();
     std::string      name = std::string      ("unknown work");
     //
-    //Main_t proc = static_cast <Main_t> (nullptr);
-#if 0
-    Main_t proc = nullptr;// processing hierarchy (proc::Main_t)
-    File_t data = nullptr;// data and file handling (data::File)
-    Beds_t test = nullptr;// correctness and performance testing {test::Beds}
-#endif
     proc::Main* proc = nullptr;// processing hierarchy (proc::Main_t)
     data::File* data = nullptr;// data and file handling (data::File)
     test::Beds* test = nullptr;// correctness and performance testing {test::Beds}

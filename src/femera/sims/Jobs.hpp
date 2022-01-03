@@ -12,9 +12,10 @@ namespace femera { namespace sims {
     void task_init (int* argc, char** argv);
     void task_exit ();
   private:
-    Main_t proc_uniq = nullptr;// processing hierarchy (proc::Main_t)
-    File_t data_uniq = nullptr;// data and file handling (data::File)
-    Beds_t test_uniq = nullptr;// correctness and performance testing {test::Beds}
+    // The shared Work::proc, data, test objects are managed by this class.
+    Main_t proc_ptr = nullptr;// processing hierarchy (proc::Main*)
+    File_t data_ptr = nullptr;// data and file handling (data::File*)
+    Beds_t test_ptr = nullptr;// correctness and performance testing (test::Beds*)
   };
 } }//end femera::sims:: namespace
 

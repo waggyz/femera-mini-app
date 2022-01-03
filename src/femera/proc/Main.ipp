@@ -5,12 +5,12 @@ namespace femera {
   inline
   proc::Main::Main (const femera::Work::Core_t W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
-    this->name ="Femera";
+    this->name ="processing environment";
     this->info_d = 2;
   }
   inline
   proc::Main::Main () noexcept {
-    this->name ="Femera";
+    this->name ="processing environment";
     this->info_d = 2;
   }
   inline

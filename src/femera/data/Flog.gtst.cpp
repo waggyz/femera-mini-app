@@ -3,7 +3,8 @@
 #include "gtest/gtest.h"
 
 
-auto flog = femera::data::Flog();
+auto flog = femera::data::Flog
+ ( femera::Work::Core_t (nullptr,nullptr,nullptr) );
 
 TEST( Flog, TaskName ){
   EXPECT_EQ( flog.name, "log" );

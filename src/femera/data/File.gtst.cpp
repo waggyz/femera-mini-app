@@ -3,10 +3,11 @@
 #include "gtest/gtest.h"
 
 
-auto file = femera::data::File();
+auto file = femera::data::File
+ ( femera::Work::Core_t (nullptr,nullptr,nullptr) );
 
 TEST( File, TaskName ){
-  EXPECT_EQ( file.name, "file" );
+  EXPECT_EQ( file.name, "file handler" );
 }
 TEST( File, SizeofFileGE120 ){
   EXPECT_GE( sizeof(file), 120 );
