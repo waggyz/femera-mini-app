@@ -8,7 +8,7 @@ namespace femera { namespace test {
   class Beds : public Test<Beds> {
   public:
     Beds (femera::Work::Core_t) noexcept;
-    Beds () =delete;
+    Beds () =delete;//NOTE Use the constructor above.
     void task_init (int* argc, char** argv);
     void task_exit ();
   };

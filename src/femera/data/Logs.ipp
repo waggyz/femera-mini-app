@@ -8,11 +8,13 @@ namespace femera {
     this->name ="log";
     this->info_d = 3;
   }
+#if 0
   inline
   data::Logs::Logs () noexcept {
     this->name ="log";
     this->info_d = 3;
   }
+#endif
 }//end femera namespace
 
 //end FEMERA_FLOG_IPP

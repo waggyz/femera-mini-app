@@ -3,7 +3,8 @@
 #include "gtest/gtest.h"
 
 
-auto test_mpi = femera::proc::Fcpu();
+auto test_mpi = femera::proc::Fcpu
+  (femera::Work::Core_t (nullptr,nullptr,nullptr));
 
 TEST( Fcpu, TaskName ){
   EXPECT_EQ( test_mpi.name, "CPU" );

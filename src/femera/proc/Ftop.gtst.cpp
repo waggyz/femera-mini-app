@@ -3,7 +3,8 @@
 #include "gtest/gtest.h"
 
 
-auto test_top = femera::proc::Ftop();
+auto test_top = femera::proc::Ftop
+  (femera::Work::Core_t (nullptr,nullptr,nullptr));
 
 TEST( Ftop, TaskName ){
   EXPECT_EQ( test_top.name, "top" );

@@ -8,7 +8,7 @@ namespace femera { namespace test {
   class Gtst : public Test<Gtst> {
   public:
     Gtst (femera::Work::Core_t) noexcept;
-    Gtst () noexcept;
+    Gtst () =delete;//NOTE Use the constructor above.
     void task_init (int* argc, char** argv);
     void task_exit ();
 };

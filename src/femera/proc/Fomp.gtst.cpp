@@ -3,7 +3,8 @@
 #include "gtest/gtest.h"
 
 
-auto test_omp = femera::proc::Fomp();
+auto test_omp = femera::proc::Fomp
+  (femera::Work::Core_t (nullptr,nullptr,nullptr));
 
 TEST( Fomp, TaskName ){
   EXPECT_EQ( test_omp.name, "OpenMP" );

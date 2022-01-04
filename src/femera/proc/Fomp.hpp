@@ -9,7 +9,7 @@ namespace femera { namespace proc {
   class Fomp : public Proc<Fomp> {
   public:
     Fomp (femera::Work::Core_t) noexcept;
-    Fomp () noexcept;
+    Fomp () =delete;//NOTE Use the constructor above.
     void task_init (int* argc, char** argv);
     void task_exit ();
   };

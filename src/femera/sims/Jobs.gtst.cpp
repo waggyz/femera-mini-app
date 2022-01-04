@@ -1,11 +1,12 @@
 #include "../femera.hpp"
 
 #include "gtest/gtest.h"
-#if 1
+#if 0
 auto jobs = femera::sims::Jobs
  ( femera::Work::Core_t (nullptr,nullptr,nullptr) );
 #else
-  auto jobs = femera::new_sims ();
+  auto jobs = femera::sims::Jobs ();
+//  auto jobs = femera::new_sims ();
 #endif
 
 int   dummy_argc = 1;
@@ -23,6 +24,9 @@ TEST( Jobs, CoreNames ){
 }
 TEST( Jobs, SizeofGtstGEWork ){
   EXPECT_GE( sizeof(jobs), sizeof(femera::Work) );
+}
+TEST( Jobs, Exit ){
+  EXPECT_EQ( jobs.exit (), 0);
 }
 fmr::Exit_int main (int argc, char** argv) {
   return femera::test:: early_main (&argc, argv);

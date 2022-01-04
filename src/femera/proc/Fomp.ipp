@@ -7,11 +7,13 @@ namespace femera {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="OpenMP";
   }
+#if 0
   inline
   proc::Fomp::Fomp () noexcept {
     this->name ="OpenMP";
     this->info_d = 3;
   }
+#endif
   inline
   void proc::Fomp::task_init (int*, char**){}
   inline

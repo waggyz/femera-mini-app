@@ -8,7 +8,7 @@ namespace femera { namespace data {
   class Logs : public Data <Logs> {
   public:
     Logs (femera::Work::Core_t) noexcept;
-    Logs () noexcept;
+    Logs () =delete;//NOTE Use the constructor above.
     void task_init (int* argc, char** argv);
     void task_exit ();
   };

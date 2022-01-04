@@ -8,7 +8,7 @@ namespace femera { namespace proc {
   class Fcpu : public Proc<Fcpu> {
   public:
     Fcpu (femera::Work::Core_t) noexcept;
-    Fcpu () noexcept;
+    Fcpu () =delete;//NOTE Use the constructor above.
     void task_init (int* argc, char** argv);
     void task_exit ();
   };

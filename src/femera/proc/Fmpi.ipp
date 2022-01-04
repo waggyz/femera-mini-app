@@ -8,11 +8,13 @@ namespace femera {
     this->name ="MPI";
     this->info_d = 3;
   }
+#if 0
   inline
   proc::Fmpi::Fmpi () noexcept {
     this->name ="MPI";
     this->info_d = 3;
   }
+#endif
   inline
   void proc::Fmpi::task_init (int*, char**){}
   inline
