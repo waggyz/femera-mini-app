@@ -45,6 +45,10 @@ namespace femera {
   std::shared_ptr<T> Proc<T>::new_task (const Work::Core_t core) noexcept {
     return std::make_shared<T> (T(core));
   }
+  template <typename T> inline
+  proc::Team_t Proc<T>::get_team_id () noexcept {
+    return Proc::derived(this)->get_team_id ();
+  }
 }// end femera:: namespace
 
 #undef FMR_DEBUG

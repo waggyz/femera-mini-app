@@ -1,19 +1,19 @@
-#ifndef FEMERA_FMPI_IPP
-#define FEMERA_FMPI_IPP
+#ifndef FEMERA_HAS_FMPI_IPP
+#define FEMERA_HAS_FMPI_IPP
 
 namespace femera {
   inline
-  proc::Fmpi::Fmpi (femera::Work::Core_t W) noexcept {
-    std::tie (this->proc, this->data, this->test) = W;
-    this->name ="MPI";
-    this->info_d = 3;
+  void proc::Fmpi::task_init (int*, char**){
   }
-  inline
-  void proc::Fmpi::task_init (int*, char**){}
   inline
   void proc::Fmpi::task_exit () {
   }
+  inline
+  proc::Team_t proc::Fmpi::get_team_id ()
+  noexcept {
+    return Proc::team_id;
+  }
 }//end femera namespace
 
-//end FEMERA_FMPI_IPP
+//end FEMERA_HAS_FMPI_IPP
 #endif
