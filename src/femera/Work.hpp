@@ -40,7 +40,6 @@ namespace femera {
   //using Self_t = std::shared_ptr <test::Self>;// built-in integration tests
   //using Perf_t = std::shared_ptr <test::Perf>;// built-in performance tests
   using Gtst_t = std::shared_ptr <test::Gtst>;
-//TODO is, e.g., class femera::Proc_base or femera::Proc::Base better?
   //
   using Jobs_t = std::shared_ptr <sims::Jobs>;// concrete Sims interface
   //
@@ -64,7 +63,8 @@ namespace femera {
     fmr::Dim_int   info_d = 1;
   public:// Methods -----------------------------------------------------------
     //NOTE Make at least 1 method pure virtual.
-    //FIXME Do all need to be pure to avoid vtable using CRTP derived classes?
+    //FIXME Do all virtual methods need to be pure
+    //      to avoid vtable using CRTP derived classes?
     virtual fmr::Exit_int init (int* argc, char** argv) noexcept =0;
     virtual fmr::Exit_int exit (fmr::Exit_int err=0) =0;
     //
@@ -78,7 +78,7 @@ namespace femera {
     Core_t get_core () noexcept;
   protected:
     Work_t get_work (fmr::Local_int) noexcept;
-    Work_t get_work (Task_path_t)         noexcept;
+    Work_t get_work (Task_path_t)    noexcept;
     // above called by Derived::get_task(..)
     //
     // Work stack initialization and exit
