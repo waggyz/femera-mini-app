@@ -7,6 +7,9 @@
 #include <cstdio>     // std::printf
 #endif
 
+fmr::Exit_int main (int argc, char** argv) {
+  return femera::test:: early_main (&argc, argv);
+}
 //=============================================================================
 // Template a class derived from the abstract (pure virtual) Work class...
 template <typename T>
@@ -146,8 +149,5 @@ TEST( TestableWork, PerfMeter ) {
 TEST( TestableWork, ExitErr ) {
   EXPECT_EQ( testable->exit(0), 42);
   EXPECT_EQ( testable->exit(3), 3);
-}
-fmr::Exit_int main (int argc, char** argv) {
-  return femera::test:: early_main (&argc, argv);
 }
 #undef FMR_DEBUG

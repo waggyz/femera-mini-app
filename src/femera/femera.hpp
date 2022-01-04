@@ -1,10 +1,7 @@
 #ifndef HAS_FEMERA_HPP
 #define HAS_FEMERA_HPP
 
-//#include "core.h"
-#include "proc/Main.hpp"
-#include "test/Beds.hpp"
-#include "data/File.hpp"
+#include "core.h"
 
 #include "sims/Jobs.hpp"
 

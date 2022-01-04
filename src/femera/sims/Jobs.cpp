@@ -1,7 +1,5 @@
+#include "../core.h"
 #include "Jobs.hpp"
-#include "../proc/Main.hpp"
-#include "../test/Beds.hpp"
-#include "../data/File.hpp"
 
 #undef FMR_DEBUG
 #include <cstdio>     // std::printf
