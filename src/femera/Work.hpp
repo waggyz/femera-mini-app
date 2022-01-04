@@ -20,7 +20,7 @@ namespace femera {
   template <typename> class Test;// class Beds;
   template <typename> class Sims;
   namespace proc { class Main; class Ftop; class Fmpi; class Fomp; class Fcpu; }
-  namespace data { class File; class Flog; }// class Type; class Base; }//TODO Fake -> Base?
+  namespace data { class File; class Logs; }// class Type; class Base; }//TODO Fake -> Base?
   namespace test { class Beds; class Unit; class Self; class Perf; class Gtst; }
   namespace sims { class Jobs; }
   // typedefs
@@ -33,7 +33,7 @@ namespace femera {
   using Fcpu_t = std::shared_ptr <proc::Fcpu>;
   //
   using File_t = std::shared_ptr <data::File>;// concrete Data interface
-  using Flog_t = std::shared_ptr <data::Flog>;
+  using Logs_t = std::shared_ptr <data::Logs>;
   //
   using Beds_t = std::shared_ptr <test::Beds>;// concrete Test interface
   //using Unit_t = std::shared_ptr <test::Unit>;// built-in unit tests

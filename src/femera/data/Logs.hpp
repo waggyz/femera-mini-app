@@ -4,17 +4,17 @@
 #include "../Data.hpp"
 
 namespace femera { namespace data {
-  class Flog;// Derive a CRTP concrete class from File.
-  class Flog : public Data <Flog> {
+  class Logs;// Derive a CRTP concrete class from File.
+  class Logs : public Data <Logs> {
   public:
-    Flog (femera::Work::Core_t) noexcept;
-    Flog () noexcept;
+    Logs (femera::Work::Core_t) noexcept;
+    Logs () noexcept;
     void task_init (int* argc, char** argv);
     void task_exit ();
   };
 } }//end femera::file:: namespace
 
-#include "Flog.ipp"
+#include "Logs.ipp"
 
 //end FEMERA_FLOG_HPP
 #endif

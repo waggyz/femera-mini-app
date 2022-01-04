@@ -1,15 +1,15 @@
-#include "Flog.hpp"
+#include "Logs.hpp"
 
 #include "gtest/gtest.h"
 
 
-auto flog = femera::data::Flog
+auto flog = femera::data::Logs
  ( femera::Work::Core_t (nullptr,nullptr,nullptr) );
 
-TEST( Flog, TaskName ){
+TEST( Logs, TaskName ){
   EXPECT_EQ( flog.name, "log" );
 }
-TEST( Flog, SizeofFlogGE120 ){
+TEST( Logs, SizeofLogsGE120 ){
   EXPECT_GE( sizeof(flog), 120 );
 }
 fmr::Exit_int main (int argc, char** argv) {

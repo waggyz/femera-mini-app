@@ -3,13 +3,13 @@
 
 namespace femera {
   inline
-  data::Flog::Flog (femera::Work::Core_t W) noexcept {
+  data::Logs::Logs (femera::Work::Core_t W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="log";
     this->info_d = 3;
   }
   inline
-  data::Flog::Flog () noexcept {
+  data::Logs::Logs () noexcept {
     this->name ="log";
     this->info_d = 3;
   }
