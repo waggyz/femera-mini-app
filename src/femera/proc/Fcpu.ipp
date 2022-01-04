@@ -8,13 +8,6 @@ namespace femera {
     this->name ="CPU";
     this->info_d = 3;
   }
-#if 0
-  inline
-  proc::Fcpu::Fcpu () noexcept {
-    this->name ="CPU";
-    this->info_d = 3;
-  }
-#endif
   inline
   void proc::Fcpu::task_init (int*, char**){}
   inline

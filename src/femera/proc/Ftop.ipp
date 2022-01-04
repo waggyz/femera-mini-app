@@ -8,13 +8,6 @@ namespace femera {
     this->name ="top";
     this->info_d = 3;
   }
-#if 0
-  inline
-  proc::Ftop::Ftop () noexcept {
-    this->name ="top";
-    this->info_d = 3;
-  }
-#endif
   inline
   void proc::Ftop::task_init (int*, char**){}
   inline

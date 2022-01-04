@@ -8,13 +8,6 @@ namespace femera {
     this->name ="file handler";
     this->info_d = 2;
   }
-#if 0
-  inline
-  data::File::File () noexcept {
-    this->name ="file";
-    this->info_d = 2;
-  }
-#endif
   inline
   void data::File::task_init (int*, char**){}
   inline

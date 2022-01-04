@@ -8,13 +8,6 @@ namespace femera {
     this->name ="GoogleTest";
     this->info_d = 3;
   }
-#if 0
-  inline
-  test::Gtst::Gtst () noexcept {
-    this->name ="GoogleTest";
-    this->info_d = 3;
-  }
-#endif
 }//end femera namespace
 
 //end FEMERA_GTST_IPP
