@@ -9,6 +9,8 @@ echo     fontsize=\"16\"\; >>$DOT
 echo     fontname=\"Helvetica\"\; >>$DOT
 echo         clusterrank=\"local\"\; >>$DOT
 #
+# e.g.   class Jobs : public Sims<Jobs> { #NOTE does not work
+#sed -n 's/^[ ]*class \([A-Z][a-z0-9_]*\)\([ :a-z0-9_]*\)\([A-Z][A-Za-z0-9_<>]*\).*/\"\1\" -> \"\3\"/p' \
 sed -n 's/^[ ]*class \([A-Z][a-z0-9_]*\)\([ :a-z0-9_]*\)\([A-Z][a-z0-9_]*\).*/\"\1\" -> \"\3\"/p' \
   src/*/*.hpp src/*/*/*.hpp >>$DOT
 #

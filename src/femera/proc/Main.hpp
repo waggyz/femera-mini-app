@@ -5,7 +5,7 @@
 
 namespace femera { namespace proc {
   class Main;// Derive a CRTP concrete class from Proc.
-  class Main : public Proc <Main> {
+  class Main : public Proc<Main> {
   public:
     Main (const femera::Work::Core_t) noexcept;
     Main () noexcept;

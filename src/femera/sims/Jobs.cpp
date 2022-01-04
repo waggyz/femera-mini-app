@@ -13,11 +13,17 @@ namespace femera {
       this->proc = this->proc_ptr.get();
       this->proc->init (argc,argv);
     }
+    if (this->proc == nullptr) {
+      throw std::runtime_error ("Failed to initialize processing environment.");
+    }
     if (this->proc->proc == nullptr) { this->proc->proc = this->proc; }
     if (this->test == nullptr) {
       this->test_ptr = test::Beds::new_task (this->get_core());
       this->test = this->test_ptr.get();
       this->test->init (argc,argv);
+    }
+    if (this->test == nullptr) {
+      throw std::runtime_error ("Failed to initialize testbeds.");
     }
     if (this->test->test == nullptr) { this->test->test = this->test; }
     if (this->proc->test == nullptr) { this->proc->test = this->test; }
@@ -25,6 +31,9 @@ namespace femera {
       this->data_ptr = data::File::new_task (this->get_core());
       this->data = this->data_ptr.get();
       this->data->init (argc,argv);
+    }
+    if (this->data == nullptr) {
+      throw std::runtime_error ("Failed to initialize data handler.");
     }
     if (this->data->data == nullptr) { this->data->data = this->data; }
     if (this->proc->data == nullptr) { this->proc->data = this->data; }

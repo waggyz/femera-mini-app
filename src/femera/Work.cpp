@@ -28,7 +28,7 @@ namespace femera {
 #endif
           fmr::Exit_int Werr =0;
           try { Werr = W->task_list.back()->exit (err); }
-          catch (std::exception& e) { Werr = 1; }
+          catch (std::exception& e) { printf ("%s\n", e.what ()); Werr = 1; }
           err = (Werr == 0) ? err : Werr;
           W->task_list.pop_back ();
           branch.pop_back ();

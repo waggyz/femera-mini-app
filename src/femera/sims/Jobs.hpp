@@ -5,7 +5,7 @@
 
 namespace femera { namespace sims {
   class Jobs;// Derive a CRTP concrete class from Sims.
-  class Jobs : public Sims <Jobs> {
+  class Jobs : public Sims<Jobs> {
   public:
     Jobs (femera::Work::Core_t) noexcept;
     Jobs () noexcept;

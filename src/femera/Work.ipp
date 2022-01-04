@@ -52,7 +52,11 @@ namespace femera {
         printf ("init task %s\n", W->name.c_str());
 #endif
         try { W->init (argc, argv); }
-        catch (std::exception& e) { }
+        catch (std::exception& e) {
+          printf ("%s\n", e.what ());//FIXME >stderr
+          return;
+        }
+        //FIXME Catch all errors.
 #ifdef FMR_DEBUG
         printf ("init done %s\n", W->name.c_str());
 #endif
@@ -68,7 +72,9 @@ namespace femera {
         printf ("exit task %s\n", W->name.c_str());
 #endif
         try { Werr = W->exit (err); }
-        catch (std::exception& e) { Werr = 1; }
+        catch (std::exception& e) {
+          printf ("%s\n", e.what ()); Werr = 1; }//FIXME >stderr
+        //FIXME Catch all errors.
         err = (Werr == 0) ? err : Werr;
 #ifdef FMR_DEBUG
         printf ("exit done %s\n", W->name.c_str());

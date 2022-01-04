@@ -5,7 +5,7 @@
 
 namespace femera { namespace proc {
   class Ftop;// Derive a CRTP concrete class from Proc.
-  class Ftop : public Proc <Ftop> {
+  class Ftop : public Proc<Ftop> {
   public:
     Ftop (femera::Work::Core_t) noexcept;
     Ftop () noexcept;
