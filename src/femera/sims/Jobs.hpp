@@ -13,9 +13,9 @@ namespace femera { namespace sims {
     void task_exit ();
   private:
     // The shared Work::proc, data, test objects are managed by this class.
-    Main_t proc_ptr = nullptr;// processing hierarchy (proc::Main*)
-    File_t data_ptr = nullptr;// data and file handling (data::File*)
-    Beds_t test_ptr = nullptr;// correctness and performance testing (test::Beds*)
+//    Main_t proc_ptr = nullptr;// processing hierarchy (proc::Main*)
+//    File_t data_ptr = nullptr;// data and file handling (data::File*)
+//    Beds_t test_ptr = nullptr;// correctness and performance testing (test::Beds*)
   };
 } }//end femera::sims:: namespace
 

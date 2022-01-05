@@ -28,10 +28,10 @@ namespace femera {
     this->get_task(path)->add_task (Proc<proc::Fcpu>::new_task (core));
 #ifdef FMR_DEBUG
     //for (const auto P : this->task_list) { P->init (argc, argv); }
-    printf ("%s\n", this->name.c_str());
+    printf ("Main: task_init added %s\n", this->name.c_str());
     auto P2 = this->get_task(0);
     while (P2!=nullptr) {
-      printf ("%s\n", P2->name.c_str());
+      printf ("Main: task_init added %s\n", P2->name.c_str());
       P2 = P2->get_task(0);
     }
 #endif

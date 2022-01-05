@@ -1,9 +1,12 @@
 #include "Fmpi.hpp"
+//#include "../femera.hpp"
+#include "mpi.h"
 
 #include "gtest/gtest.h"
 
 fmr::Exit_int main (int argc, char** argv) {
   return femera::test:: early_main (&argc, argv);
+//  return femera::new_sims (&argc,argv)->exit ();
 }
 
 auto test_mpi = femera::proc::Fmpi
@@ -15,3 +18,4 @@ TEST( Fmpi, TaskName ){
 TEST( Fmpi, SizeofGtstGEWork ){
   EXPECT_GE( sizeof(test_mpi), sizeof(femera::Work) );
 }
+

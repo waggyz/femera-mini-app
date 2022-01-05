@@ -49,7 +49,7 @@ namespace femera {
     for (auto W : this->task_list) {// Init task_list forward.
       if (W != nullptr) {
 #ifdef FMR_DEBUG
-        printf ("init task %s\n", W->name.c_str());
+        printf ("Work: init list %s\n", W->name.c_str());
 #endif
         try { W->init (argc, argv); }
         catch (std::exception& e) {
@@ -57,8 +57,8 @@ namespace femera {
           return;
         }
         //FIXME Catch all errors.
-#ifdef FMR_DEBUG
-        printf ("init done %s\n", W->name.c_str());
+#if 0
+        printf ("Work: init done %s\n", W->name.c_str());
 #endif
   } } }
   inline
@@ -69,15 +69,15 @@ namespace femera {
       if (W != nullptr) {
         fmr::Exit_int Werr =0;
 #ifdef FMR_DEBUG
-        printf ("exit task %s\n", W->name.c_str());
+        printf ("Work: exit list %s\n", W->name.c_str());
 #endif
         try { Werr = W->exit (err); }
         catch (std::exception& e) {
           printf ("%s\n", e.what ()); Werr = 1; }//FIXME >stderr
         //FIXME Catch all errors.
         err = (Werr == 0) ? err : Werr;
-#ifdef FMR_DEBUG
-        printf ("exit done %s\n", W->name.c_str());
+#if 0
+        printf ("Work: exit list %s\n", W->name.c_str());
 #endif
       }
       this->task_list.pop_back ();

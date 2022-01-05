@@ -3,7 +3,7 @@
 # fmrexec -n 2 --bind-to core -map-by node:pe=2 build/femera/mini -n2
 #
 if [ 1 -eq 1 ]; then
-  mpiexec "$@"
+  mpiexec -n 2 --bind-to core -map-by node:pe=2 "$@" -n2
   exit $?
 else
   # TODO Make this work

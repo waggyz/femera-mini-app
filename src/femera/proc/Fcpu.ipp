@@ -1,6 +1,11 @@
 #ifndef FEMERA_FCPU_IPP
 #define FEMERA_FCPU_IPP
 
+#undef FMR_DEBUG
+#ifdef FMR_DEBUG
+#include <cstdio>     // std::printf
+#endif
+
 namespace femera {
   inline
   proc::Fcpu::Fcpu (femera::Work::Core_t W) noexcept {
@@ -14,6 +19,8 @@ namespace femera {
   void proc::Fcpu::task_exit () {
   }
 }//end femera namespace
+
+#undef FMR_DEBUG
 
 //end FEMERA_FCPU_IPP
 #endif

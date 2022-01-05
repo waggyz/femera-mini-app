@@ -22,9 +22,9 @@ namespace femera {
   }
   template <typename T> inline
   fmr::Exit_int Sims<T>::exit (fmr::Exit_int err) noexcept {
-    if (err>0) {return err;}
-    err = exit_tree ();     // Exit the task tree (exceptions caught),
-    if (err>0) {return err;}// then exit this derived task.
+//    if (err>0) {return err;}
+    err = exit_list ();
+//    if (err>0) {return err;}// then exit this derived task.
     try { Sims::derived(this)->task_exit (); }
     catch (std::exception& e) { err = 2; }
     return err;

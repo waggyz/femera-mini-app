@@ -7,20 +7,20 @@
 #endif
 
 namespace femera {
-  void sims::Jobs::task_init (int* argc, char** argv) {
+  void sims::Jobs::task_init (int*, char**) {
     if (this->proc == nullptr) {
-      this->proc_ptr = proc::Main::new_task (this->get_core());
-      this->proc = this->proc_ptr.get();
-      this->proc->init (argc,argv);
+      auto proc_ptr = proc::Main::new_task (this->get_core());
+      this->proc = proc_ptr.get();
+      this->add_task (proc_ptr);//FIXME check error
     }
     if (this->proc == nullptr) {
       throw std::runtime_error ("Failed to initialize processing environment.");
     }
     if (this->proc->proc == nullptr) { this->proc->proc = this->proc; }
     if (this->test == nullptr) {
-      this->test_ptr = test::Beds::new_task (this->get_core());
-      this->test = this->test_ptr.get();
-      this->test->init (argc,argv);
+      auto test_ptr = test::Beds::new_task (this->get_core());
+      this->test = test_ptr.get();
+      this->add_task (test_ptr);//FIXME check error
     }
     if (this->test == nullptr) {
       throw std::runtime_error ("Failed to initialize testbeds.");
@@ -28,9 +28,9 @@ namespace femera {
     if (this->test->test == nullptr) { this->test->test = this->test; }
     if (this->proc->test == nullptr) { this->proc->test = this->test; }
     if (this->data == nullptr) {
-      this->data_ptr = data::File::new_task (this->get_core());
-      this->data = this->data_ptr.get();
-      this->data->init (argc,argv);
+      auto data_ptr = data::File::new_task (this->get_core());
+      this->data = data_ptr.get();
+      this->add_task (data_ptr);//FIXME check error
     }
     if (this->data == nullptr) {
       throw std::runtime_error ("Failed to initialize data handler.");
@@ -38,11 +38,8 @@ namespace femera {
     if (this->data->data == nullptr) { this->data->data = this->data; }
     if (this->proc->data == nullptr) { this->proc->data = this->data; }
     if (this->test->data == nullptr) { this->test->data = this->data; }
-#ifdef FMR_DEBUG
-    printf ("Jobs: init %s\n",proc->name.c_str());
-    printf ("Jobs: init %s\n",test->name.c_str());
-    printf ("Jobs: init %s\n",data->name.c_str());
-#endif
+  }
+  void sims::Jobs::task_exit () {
   }
 }//end femera namespace
 

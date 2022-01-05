@@ -1,5 +1,10 @@
 #include "Fmpi.hpp"
 
+#undef FMR_DEBUG
+#ifdef FMR_DEBUG
+#include <cstdio>     // std::printf
+#endif
+
 #ifdef FMR_HAS_MPI
 #include "mpi.h"
 namespace femera {
@@ -11,8 +16,119 @@ namespace femera {
     this->name ="MPI";
     this->info_d = 3;
     this->team_id = proc::Team_t (MPI_COMM_WORLD);
+    this-> version =
+      std::to_string( MPI_VERSION )
+      +std::string(".")
+      +std::to_string( MPI_SUBVERSION );
+  }
+  fmr::Local_int proc::Fmpi::get_proc_n() {int err=0, tmp_proc_n=0;
+    err= MPI_Comm_size(MPI_Comm(this->team_id) ,& tmp_proc_n  );
+    if( err ){return 1; }
+    this->proc_n = fmr::Local_int (tmp_proc_n);
+    return this->proc_n;
+  }
+  fmr::Local_int proc::Fmpi::get_proc_i () {int err, proc_id=0;
+    err= MPI_Comm_rank( MPI_Comm(this->team_id),& proc_id );
+    if( err ){return 0; }
+    return fmr::Local_int (proc_id);
+  }
+  void proc::Fmpi::task_init (int* argc, char** argv){ int err=0;
+# if 1
+//  fmr::perf:: timer_resume (&this->time);
+#if 1
+  if (sizeof(this->team_id) != sizeof(MPI_Comm)){
+    std::fprintf (stderr,
+      "WARNING sizeof (Proc::team_id) is %lu but should be %lu\n",
+      sizeof(this->team_id), sizeof(MPI_Comm) );
+  }
+  if (sizeof(this->mpi_required) != sizeof(MPI_THREAD_SERIALIZED)){
+    std::fprintf (stderr,
+      "WARNING sizeof (Proc::mpi_required) is %lu but should be %lu\n",
+      sizeof(this->mpi_required), sizeof(MPI_Comm) );
+  }
+#endif
+  int is_mpi_init=0;
+  MPI_Initialized (& is_mpi_init);
+  if (is_mpi_init) {
+    this->do_finalize_on_exit = false;
+    std::printf ("MPI is already initialized.\n");
+  }
+  if (!err && !is_mpi_init){
+    err= MPI_Init_thread( argc,&argv, this->mpi_required, &this->mpi_provided);
+#ifdef FMR_DEBUG
+    std::printf("%u:Fmpi::task_init (%i) start...\n", this->get_proc_i(),err);
+#endif
+    MPI_Comm c=nullptr;
+    if( !err ){// Good practice: use a copy of MPI_COMM_WORLD.
+      err= MPI_Comm_dup (MPI_COMM_WORLD, &c);// exit_task() frees this
+    }
+    if( !err ){
+      this->team_id = proc::Team_t(c);
+//      err= this->chck();
+  } }
+//  if( !err ){this->get_proc_n(); }
+//  fmr::perf:: timer_pause (&this->time);
+#   endif
+  }
+  void proc::Fmpi::task_exit () {int err=0;                 //FIXME not an arg
+#ifdef FMR_DEBUG
+    std::printf("Fmpi::task_exit (%i) start...\n", err);
+#endif
+//  fmr::perf::timer_resume (&this->time);
+  int is_mpi_init=0;
+//    this->barrier ();//TODO NEEDED?
+  MPI_Initialized (& is_mpi_init);
+#if 0
+  if( err>0 ){ log-> printf_err("ERROR Femera returned %i\n",err); }
+#else
+  // OpenMP is already deleted, so log->printf(..) may no longer work?
+  if (err>0) {std::fprintf (stderr, "ERROR Femera returned %i\n", err);}
+#endif
+  err=0;// Exit from mpi normally when Femera exits on error.
+  FMR_PRAGMA_OMP(omp master)
+  if (is_mpi_init) {
+    const auto this_proc_i = this->get_proc_i();
+    if (this->team_id != proc::Team_t (MPI_COMM_WORLD) ) {
+      if (this->team_id){
+#ifdef FMR_DEBUG
+        std::printf("%u:Fmpi::task exit MPI_Comm_free (%lu)...\n",
+        this_proc_i, team_id);
+#endif
+        MPI_Comm f=MPI_Comm (this->team_id);
+        err= MPI_Comm_free (& f);
+        if (err>0) {
+          std::fprintf (stderr,
+            "ERROR MPI_Comm_free(%lu) in process %u returned %i\n",
+            this->team_id, this_proc_i, err);
+        }
+#ifdef FMR_DEBUG
+        std::printf("%u:Fmpi::task exit MPI_Comm_free (%lu)\n",
+          this_proc_i, proc::Team_t (f));
+#endif
+      }
+      this->team_id = proc::Team_t (MPI_COMM_WORLD);//TODO Set to nullptr?
+#ifdef FMR_DEBUG
+        std::printf("%u:Fmpi::team_id reset to MPI_COMM_WORLD (%lu)\n",
+        this_proc_i, team_id);
+#endif
+    }
+    if (this->do_finalize_on_exit) {
+#ifdef FMR_DEBUG
+      std::printf("%u:Fmpi::exit_task MPI_finalize ()...\n", this_proc_i);
+#endif
+      err= MPI_Finalize();
+      if (err>0) {//log-> printf_err
+//        ("ERROR MPI_Finalize() returned %i\n",err);
+        std::fprintf (stderr, "ERROR MPI_Finalize() returned %i\n", err);
+  } } }
+//  fmr::perf:: timer_pause (&this->time);
+#ifdef FMR_DEBUG
+  std::printf("Fmpi::exit_task (%i) done...\n", err);
+#endif
   }
   //
 }// end femera:: namespace
 //end if FMR_HAS_MPI
 #endif
+
+#undef FMR_DEBUG

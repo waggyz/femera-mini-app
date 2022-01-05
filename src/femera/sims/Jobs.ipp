@@ -13,9 +13,6 @@ namespace femera {
     this->name ="simulation job handler";
     this->info_d = 3;
   }
-  inline
-  void sims::Jobs::task_exit () {
-  }
 }//end femera namespace
 
 //end FEMERA_HAS_JOBS_IPP

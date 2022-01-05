@@ -2,7 +2,6 @@
 #define FEMERA_HAS_PROC_HPP
 
 #include "Work.hpp"
-//#include "core.h"
 
 namespace femera {
   namespace proc {

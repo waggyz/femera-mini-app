@@ -17,7 +17,7 @@ TEST( Main, DidInit ){
 #ifdef FMR_HAS_MPI
   EXPECT_EQ( fmr_main->get_task({0,0})->name, "MPI");
 #endif
-  EXPECT_EQ( fmr_main->exit (), 0 );
+//  EXPECT_EQ( fmr_main->exit (), 0 );
 }
 int main (int argc, char** argv) {
   fmr_main->init (&argc,argv);

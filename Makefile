@@ -247,9 +247,10 @@ ifeq ($(ENABLE_DOT),ON)
 endif
 ifeq ($(ENABLE_VALGRIND),ON)
   # Use (mostly) the same flags to compile the suppression file.
-  VGFLAGS:= $(CXXFLAGS) $(filter-out -Winline,$(CXXWARNS))
+  VGFLAGS := $(CXXFLAGS) $(filter-out -Winline,$(CXXWARNS))
   VALGRIND_SUPP := valgrind.supp
   VALGRIND_SUPP_EXE := $(BUILD_CPU)/$(VALGRIND_SUPP).exe
+  VGMPI := $(TDDEXEC)
   VGSUPP := valgrind --leak-check=full --show-reachable=yes --error-limit=no \
     --show-leak-kinds=all --gen-suppressions=all           \
     $(VGMPI) $(BUILD_CPU)/$(VALGRIND_SUPP).exe 3>&1 1>&2 2>&3 \

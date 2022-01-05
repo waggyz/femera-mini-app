@@ -11,6 +11,9 @@ namespace femera {
   fmr::Exit_int Work::exit_tree () noexcept {
     fmr::Exit_int err =0;
     Work::Task_path_t branch ={};
+#ifdef FMR_DEBUG
+    printf ("Work: exit tree %s [%lu]\n", this->name.c_str(), task_list.size());
+#endif
     while (! this->task_list.empty ()) {
       auto W = this->task_list.back ();
       if ( W == nullptr ){ W->task_list.pop_back (); }
@@ -24,7 +27,7 @@ namespace femera {
         while (! branch.empty ()) {
           W = this->get_work (branch);
 #ifdef FMR_DEBUG
-          printf ("exit tree %s\n", W->task_list.back()->name.c_str());
+          printf ("Work: exit leaf %s\n", W->task_list.back()->name.c_str());
 #endif
           fmr::Exit_int Werr =0;
           try { Werr = W->task_list.back()->exit (err); }
@@ -33,13 +36,13 @@ namespace femera {
           W->task_list.pop_back ();
           branch.pop_back ();
       } }
-#ifdef FMR_DEBUG
-      printf ("exit tree %s\n", this->task_list.back()->name.c_str());
+#if 0
+      printf ("Work: exit tree %s\n", this->task_list.back()->name.c_str());
 #endif
     this->task_list.pop_back (); 
     }
-#ifdef FMR_DEBUG
-  printf ("exit base %s\n", this->name.c_str());
+#if 0
+  printf ("Work: exit base %s\n", this->name.c_str());
 #endif
   return err;
   }

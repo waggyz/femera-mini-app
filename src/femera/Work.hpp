@@ -54,6 +54,7 @@ namespace femera {
   public:// Variables ---------------------------------------------------------
     fmr::perf::Meter time = fmr::perf::Meter ();
     std::string      name = std::string      ("unknown work");
+    std::string   version = "0.3";
     //
     proc::Main* proc = nullptr;// processing hierarchy (proc::Main_t)
     data::File* data = nullptr;// data and file handling (data::File)
