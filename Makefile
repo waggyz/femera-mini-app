@@ -161,7 +161,6 @@ ifeq ($(ENABLE_MPI),ON)
   LDLIBS+= -lmpi
   ifeq ($(ENABLE_VALGRIND),ON)# for valgrind with OpenMPI
     VGMPISUPP:=$(shell tools/valgrind-mpi-supp.sh)
-#    VGSUPP_FLAGS+= --suppressions=$(shell tools/valgrind-mpi-supp.sh)
   endif
 endif
 ifeq ($(ENABLE_LIBNUMA),ON)
@@ -251,9 +250,6 @@ ifeq ($(ENABLE_VALGRIND),ON)
   VALGRIND_SUPP_EXE := $(BUILD_CPU)/$(VALGRIND_SUPP).exe
   VGMPI := $(TDDEXEC)
   VGSUPP_FLAGS += --suppressions=$(BUILD_CPU)/$(VALGRIND_SUPP)
-#  ifneq ("$(VALGRIND_SUPP_FILE)","")
-#    VGSUPP_FLAGS += --suppressions=$(VALGRIND_SUPP_FILE)
-#  endif
   # Use (mostly) the same flags to compile the suppression file.
   VGFLAGS := $(CXXFLAGS) $(filter-out -Winline,$(CXXWARNS))
   VGSUPP := valgrind --leak-check=full --show-reachable=yes --error-limit=no \
@@ -835,7 +831,7 @@ ifeq ($(ENABLE_VALGRIND),ON)
   | cut -d " " -f 5- | awk '{print "$(WARN) valgrind:",$$0}'
 	-grep -i '[1-9] err' $(BUILD_CPU)/mini.valgrind.log \
   | cut -d " " -f 4- | awk '{print "$(WARN) valgrind:",$$0}'
-	$(info $(SPCS) see: $(BUILD_CPU)/mini.valgrind.log)
+	$(info $(MORE) $(BUILD_CPU)/mini.valgrind.log)
 else
 	touch $@
 endif
