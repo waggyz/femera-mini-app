@@ -159,8 +159,9 @@ ifeq ($(ENABLE_MPI),ON)
   endif
   LDFLAGS+= -L/usr/lib64/openmpi/lib
   LDLIBS+= -lmpi
-  ifeq ($(ENABLE_ VALGRIND),ON)# for valgrind with OpenMPI
+  ifeq ($(ENABLE_VALGRIND),ON)# for valgrind with OpenMPI
     VGMPISUPP:=$(shell tools/valgrind-mpi-supp.sh)
+#    VGSUPP_FLAGS+= --suppressions=$(shell tools/valgrind-mpi-supp.sh)
   endif
 endif
 ifeq ($(ENABLE_LIBNUMA),ON)
@@ -246,20 +247,22 @@ ifeq ($(ENABLE_DOT),ON)
   MAKE_DOTFILE:= $(BUILD_DIR)/make.dot
 endif
 ifeq ($(ENABLE_VALGRIND),ON)
-  # Use (mostly) the same flags to compile the suppression file.
-  VGFLAGS := $(CXXFLAGS) $(filter-out -Winline,$(CXXWARNS))
   VALGRIND_SUPP := valgrind.supp
   VALGRIND_SUPP_EXE := $(BUILD_CPU)/$(VALGRIND_SUPP).exe
   VGMPI := $(TDDEXEC)
+  VGSUPP_FLAGS += --suppressions=$(BUILD_CPU)/$(VALGRIND_SUPP)
+#  ifneq ("$(VALGRIND_SUPP_FILE)","")
+#    VGSUPP_FLAGS += --suppressions=$(VALGRIND_SUPP_FILE)
+#  endif
+  # Use (mostly) the same flags to compile the suppression file.
+  VGFLAGS := $(CXXFLAGS) $(filter-out -Winline,$(CXXWARNS))
   VGSUPP := valgrind --leak-check=full --show-reachable=yes --error-limit=no \
-    --show-leak-kinds=all --gen-suppressions=all           \
-    $(VGMPI) $(BUILD_CPU)/$(VALGRIND_SUPP).exe 3>&1 1>&2 2>&3 \
-    | tools/grindmerge.pl $(VGMPISUPP)                     \
+    --show-leak-kinds=all --gen-suppressions=all \
+    $(VGMPI) $(VALGRIND_SUPP_EXE) 3>&1 1>&2 2>&3 \
+    | tools/grindmerge.pl -f $(VGMPISUPP) \
     > $(BUILD_CPU)/$(VALGRIND_SUPP) 2>/dev/null;
-
-  VGEXEC := valgrind --track-origins=yes --leak-check=full \
-    --suppressions=$(BUILD_CPU)/$(VALGRIND_SUPP)           \
-    --log-file=$(BUILD_CPU)/mini.valgrind.log              \
+  VGEXEC := valgrind --leak-check=full --track-origins=yes \
+    $(VGSUPP_FLAGS) --log-file=$(BUILD_CPU)/mini.valgrind.log      \
     $(VGMPI) $(BUILD_CPU)/mini -n$(TDD_OMP_NP) -v0 $(TDD_FMRFILE); \
     sed -i '/invalid file descriptor 10[0-4][0-9] /d'      \
     $(BUILD_CPU)/mini.valgrind.log;                        \
@@ -287,7 +290,7 @@ GET_BATS:= $(patsubst %,get-%,$(BATS_MODS))
 LIBFEMERA:=$(STAGE_CPU)/lib/libfemera.a
 
 # Changing any of these should cause a full Femera rebuild.
-TOPDEPS += Makefile $(BUILD_CPU)/femera.flags
+TOPDEPS += Makefile config.local $(BUILD_CPU)/femera.flags
 
 # C++11 code to compile and gtest
 FMRCPPS:= $(shell find src/ -maxdepth 4 -name "*.cpp" -printf "%p ")
@@ -879,6 +882,9 @@ ifeq ($(ENABLE_VALGRIND),ON)
   -lfemera -o $(VALGRIND_SUPP_EXE) $(LDLIBS) $(call build_log,$@)
 	$(info $(GRND) suppression file: $(BUILD_CPU)/$(VALGRIND_SUPP))
 	$(VGSUPP)
+  ifneq ("$(VALGRIND_SUPP_FILE)","")
+	cat $(VALGRIND_SUPP_FILE) >>$(BUILD_CPU)/$(VALGRIND_SUPP)
+  endif
 else
 	touch $@
 endif
