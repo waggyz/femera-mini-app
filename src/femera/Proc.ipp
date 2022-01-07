@@ -65,18 +65,18 @@ namespace femera {
   }
   template <typename T> inline
   proc::Team_t Proc<T>::get_team_id () noexcept {
-    return this->team_id; //Proc::derived(this)->get_team_id ();
+    return this->team_id;
   }
   template <typename T> inline
   fmr::Local_int Proc<T>::get_team_n () noexcept {
     return fmr::Local_int (this->task_list.size());
   }
 #if 0
-  template <typename T> inline
+  template <typename T> inline constexpr
   fmr::Local_int Proc<T>::get_node_n () {
     return fmr::Local_int (1);
   }
-  template <typename T> inline
+  template <typename T> inline constexpr
   fmr::Local_int Proc<T>::get_node_ix () {
     return fmr::Local_int (0);
   }
@@ -105,7 +105,7 @@ namespace femera {
 #ifdef FMR_HAS_LIBNUMA
   template <typename T> inline
   fmr::Local_int Proc<T>::get_node_numa_ix () {
-    if (::numa_available() != -1){return ::numa_node_of_cpu (::sched_getcpu()); }
+    if (::numa_available() != -1){return ::numa_node_of_cpu (::sched_getcpu());}
   return 0;
   }
   template <typename T> inline
@@ -124,10 +124,10 @@ namespace femera {
   }
 #endif
   template <typename T> inline
-  fmr::Local_int Proc<T>::get_node_used_byte () {
+  fmr::Global_int Proc<T>::get_node_used_byte () {
     rusage r;
     getrusage (RUSAGE_SELF, & r);
-    return fmr::Local_int (r.ru_maxrss * 1024);
+    return fmr::Global_int (r.ru_maxrss * 1024);
   }
 }// end femera:: namespace
 

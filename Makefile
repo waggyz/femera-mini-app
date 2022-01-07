@@ -829,7 +829,7 @@ $(BUILD_CPU)/mini: src/femera/mini.cpp src/femera/femera.hpp $(LIBFEMERA)
 
 $(BUILD_CPU)/mini.valgrind.log: $(BUILD_CPU)/mini $(VALGRIND_SUPP_EXE)
 ifeq ($(ENABLE_VALGRIND),ON)
-	$(call timestamp,$@,$<)
+	$(call timestamp,$@,)
 	$(info $(GRND) mpiexec ... $(BUILD_CPU)/mini ...)
 	$(VGEXEC) > $(BUILD_CPU)/mini.valgrind.out
 	-grep -i 'lost: [1-9]' $(BUILD_CPU)/mini.valgrind.log \
