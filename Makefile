@@ -72,6 +72,9 @@ endif
 # Flags for compiling tests
 CXXTESTS := $(CXXFLAGS) $(CXXWARNS)
 
+ifneq ($(CPUCOUNT),)
+FMRFLAGS += -DFMR_CORE_N=$(CPUCOUNT)
+endif
 ifneq ($(FMR_MICRO_UCHAR),)
   FMRFLAGS += -DFMR_MICRO_UCHAR=$(FMR_MICRO_UCHAR)
 endif
