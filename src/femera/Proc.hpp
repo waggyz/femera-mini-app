@@ -13,9 +13,14 @@ namespace femera {
   private:
     using This_t = std::shared_ptr<T>;
   protected:
-    proc::Team_t team_id = 0;
-  public:
-    //
+    fmr::Local_int proc_ix = 0;
+    fmr::Local_int proc_n  = 1;
+    fmr::Local_int core_n  = 1;
+    fmr::Local_int logi_n  = 1;
+    fmr::Local_int numa_n  = 1;
+    fmr::Local_int team_n  = 1;
+    proc::Team_t   team_id = 0;
+  public:// because proc::Main must access it
     fmr::Exit_int init (int*, char**)        noexcept final override;
     fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;
     This_t    get_task (fmr::Local_int);
@@ -25,7 +30,10 @@ namespace femera {
     static constexpr
     This_t    new_task (const Work::Core_t) noexcept;
     //
-    proc::Team_t get_team_id () noexcept;
+    fmr::Local_int get_proc_ix () noexcept;
+    fmr::Local_int get_proc_n  () noexcept;
+    fmr::Local_int get_team_n  () noexcept;
+    proc::Team_t   get_team_id () noexcept;
   private:
     T* derived (Proc*);
   protected:// Make it clear this class needs to be inherited from.

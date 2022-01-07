@@ -71,11 +71,11 @@ namespace femera {
     //
 //TODO    Task_tree_t   get_tree   () noexcept;
     fmr::Local_int add_task   (Work_t) noexcept;
-    fmr::Local_int get_task_n ()       noexcept;
-    //Derived_t    get_task   (fmr::Local_int) in Derived and returns that type
-    //Derived_t    new_task   ()                     ""
-    //Derived_t    new_task   (Core_t)               ""
-    //
+    fmr::Local_int get_task_n ()       noexcept;/*
+    Derived_t      get_task   (fmr::Local_int) in Derived and returns that type
+    Derived_t      new_task   ()                     ""
+    Derived_t      new_task   (Core_t)               ""
+    */
     Core_t get_core () noexcept;
   protected:
     Work_t get_work (fmr::Local_int) noexcept;

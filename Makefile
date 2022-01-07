@@ -132,8 +132,8 @@ ifneq ("$(ADD_TO_LDPATH)","")# only true once during build
   export LD_LIBRARY_PATH:= $(ADD_TO_LDPATH)$(LD_LIBRARY_PATH)
 endif
 # TMP_LIBRARY_PATH_=$(LD_LIBRARY_PATH);
-  LDFLAGS+= -L$(INSTALL_CPU)/lib -L$(INSTALL_CPU)/lib64
-  LDFLAGS+= -L$(INSTALL_DIR)/lib -L$(INSTALL_DIR)/lib64
+LDFLAGS+= -L$(INSTALL_CPU)/lib -L$(INSTALL_CPU)/lib64
+LDFLAGS+= -L$(INSTALL_DIR)/lib -L$(INSTALL_DIR)/lib64
 
 ifeq ("$(FMR_COPYRIGHT)","")# only true once during build
   export FMR_COPYRIGHT:= cat data/copyright.txt | tr '\n' ' ' | tr -s ' '
@@ -817,7 +817,8 @@ $(LIBFEMERA)(build/%.o) : build/%.o
 #(BUILD_CPU)/%.gtst _ export LD_LIBRARY_PATH = $(TMP_LIBRARY_PATH)
 
 $(BUILD_CPU)/mini: export TMPDIR := $(TEMP_DIR)
-$(BUILD_CPU)/mini: src/femera/mini.cpp src/femera/femera.hpp $(LIBFEMERA)  
+$(BUILD_CPU)/mini: src/femera/mini.cpp src/femera/femera.hpp $(LIBFEMERA)
+	$(call timestamp,$@,$<)
 	$(call col2cxx,$(CXX_),$(CXX) $(notdir $<) .. -lfemera,$(notdir $@))
 	-$(CXX) $(filter-out -Winline,$(CXXFLAGS)) $< \
 	  $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
@@ -825,6 +826,7 @@ $(BUILD_CPU)/mini: src/femera/mini.cpp src/femera/femera.hpp $(LIBFEMERA)
 
 $(BUILD_CPU)/mini.valgrind.log: $(BUILD_CPU)/mini $(VALGRIND_SUPP_EXE)
 ifeq ($(ENABLE_VALGRIND),ON)
+	$(call timestamp,$@,$<)
 	$(info $(GRND) mpiexec ... $(BUILD_CPU)/mini ...)
 	$(VGEXEC) > $(BUILD_CPU)/mini.valgrind.out
 	-grep -i 'lost: [1-9]' $(BUILD_CPU)/mini.valgrind.log \

@@ -46,8 +46,20 @@ namespace femera {
     return std::make_shared<T> (T(core));
   }
   template <typename T> inline
+  fmr::Local_int Proc<T>::get_proc_ix () noexcept {
+    return this->proc_ix;
+  }
+  template <typename T> inline
+  fmr::Local_int Proc<T>::get_proc_n () noexcept {
+    return this->proc_n;
+  }
+  template <typename T> inline
   proc::Team_t Proc<T>::get_team_id () noexcept {
-    return Proc::derived(this)->get_team_id ();
+    return this->team_id; //Proc::derived(this)->get_team_id ();
+  }
+  template <typename T> inline
+  fmr::Local_int Proc<T>::get_team_n () noexcept {
+    return fmr::Local_int (this->task_list.size());
   }
 }// end femera:: namespace
 

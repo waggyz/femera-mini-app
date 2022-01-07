@@ -15,15 +15,15 @@ namespace femera {
   fmr::Exit_int Sims<T>::init (int* argc, char** argv) noexcept {
     fmr::Exit_int err=0;
     try { Sims::derived(this)->task_init (argc, argv); }// Init this task,
-    catch (std::exception& e) { err = exit (2); }
-    try { init_list (argc, argv); }                     // then init the list.
-    catch (std::exception& e) { err = exit (1); }
+    catch (std::exception& e) { err = this->exit (2); }
+    try { this->init_list (argc, argv); }               // then init the list.
+    catch (std::exception& e) { err = this->exit (1); }
     return err;
   }
   template <typename T> inline
   fmr::Exit_int Sims<T>::exit (fmr::Exit_int err) noexcept {
 //    if (err>0) {return err;}
-    err = exit_list ();
+    err = this->exit_list ();
 //    if (err>0) {return err;}// then exit this derived task.
     try { Sims::derived(this)->task_exit (); }
     catch (std::exception& e) { err = 2; }

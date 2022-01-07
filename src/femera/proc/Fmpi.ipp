@@ -7,11 +7,13 @@
 #endif
 
 namespace femera {
+# if 0
   inline
   proc::Team_t proc::Fmpi::get_team_id ()
   noexcept {
     return Proc::team_id;
   }
+#   endif
 }//end femera namespace
 
 #undef FMR_DEBUG
