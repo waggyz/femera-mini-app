@@ -9,8 +9,6 @@ namespace femera {
     this->info_d = 2;
   }
   inline
-  void test::Beds::task_init (int*, char**){}
-  inline
   void test::Beds::task_exit () {
   }
 }//end femera namespace

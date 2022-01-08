@@ -6,6 +6,8 @@
 namespace femera { namespace test {
   class Gtst;// Derive a CRTP concrete class from Test.
   class Gtst : public Test<Gtst> {
+  private:
+    bool is_enabled = false;
   public:
     Gtst (femera::Work::Core_t) noexcept;
     Gtst () =delete;//NOTE Use the constructor above.

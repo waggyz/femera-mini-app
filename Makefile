@@ -779,6 +779,13 @@ else
 	touch $@
 endif
 
+# Use GoogleTest compiler flags to avoid exessive warnings.
+$(BUILD_CPU)/femera/test/Gtst.o : export TMPDIR := $(TEMP_DIR)
+$(BUILD_CPU)/femera/test/Gtst.o : src/femera/test/Gtst.cpp \
+  src/femera/test/Gtst.hpp src/femera/test/Gtst.ipp $(TOPDEPS)
+	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
+	$(CXX) -c $(CXXTESTS) $(FMRFLAGS) $< -o $@
+
 $(BUILD_CPU)/%.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.o : src/%.cpp src/%.hpp src/%.ipp $(TOPDEPS)
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
@@ -825,7 +832,7 @@ $(BUILD_CPU)/mini: src/femera/mini.cpp src/femera/femera.hpp $(LIBFEMERA)
 	$(call col2cxx,$(CXX_),$(CXX) $(notdir $<) .. -lfemera,$(notdir $@))
 	-$(CXX) $(filter-out -Winline,$(CXXFLAGS)) $< \
 	  $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
-	$(call label_test,$(PASS),$(FAIL),$(TDDEXEC) $(@),$(@))
+	$(call label_test,$(PASS),$(FAIL),$(TDDEXEC) $(@) -T,$(@))
 
 $(BUILD_CPU)/mini.valgrind.log: $(BUILD_CPU)/mini $(VALGRIND_SUPP_EXE)
 ifeq ($(ENABLE_VALGRIND),ON)

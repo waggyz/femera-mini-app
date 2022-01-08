@@ -9,8 +9,8 @@ auto testbeds = femera::test::Beds
 TEST( Beds, TaskName ){
   EXPECT_EQ( testbeds.name, "testbeds" );
 }
-TEST( Beds, SizeofBedsGE120 ){
-  EXPECT_GE( sizeof(testbeds), 120 );
+TEST( Beds, SizeofBedsGEWork ){
+  EXPECT_GE( sizeof(testbeds), sizeof(femera::Work) );
 }
 fmr::Exit_int main (int argc, char** argv) {
   return femera::test:: early_main (&argc, argv);
