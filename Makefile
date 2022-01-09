@@ -827,6 +827,7 @@ $(LIBFEMERA)(build/%.o) : build/%.o
 #(BUILD_CPU)/%.gtst _ export LD_LIBRARY_PATH = $(TMP_LIBRARY_PATH)
 
 $(BUILD_CPU)/mini: export TMPDIR := $(TEMP_DIR)
+$(BUILD_CPU)/mini: export PATH:=$(shell pwd)/$(BUILD_CPU):$(PATH)
 $(BUILD_CPU)/mini: src/femera/mini.cpp src/femera/femera.hpp $(LIBFEMERA)
 	$(call timestamp,$@,$<)
 	$(call col2cxx,$(CXX_),$(CXX) $(notdir $<) .. -lfemera,$(notdir $@))
@@ -834,6 +835,7 @@ $(BUILD_CPU)/mini: src/femera/mini.cpp src/femera/femera.hpp $(LIBFEMERA)
 	  $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 	$(call label_test,$(PASS),$(FAIL),$(TDDEXEC) $(@) -T,$(@))
 
+$(BUILD_CPU)/mini: export PATH:=$(shell pwd)/$(BUILD_CPU):$(PATH)
 $(BUILD_CPU)/mini.valgrind.log: $(BUILD_CPU)/mini $(VALGRIND_SUPP_EXE)
 ifeq ($(ENABLE_VALGRIND),ON)
 	$(call timestamp,$@,)
@@ -845,7 +847,7 @@ ifeq ($(ENABLE_VALGRIND),ON)
   | cut -d " " -f 4- | awk '{print "$(WARN) valgrind:",$$0}'
 	$(info $(MORE) $(BUILD_CPU)/mini.valgrind.log)
 else
-	touch $@
+	echo "Set ENABLE_VALGRIND ON in config.local to run valgrind." >$@
 endif
 
 build/%.gtst.out : build/%.gtst
@@ -932,7 +934,7 @@ build/test-files.txt: tools/list-test-files.sh build/.md5
 
 src/docs/src.dot: build/.md5
 	@external/tools/cinclude2dot --src src >$@ 2>build/src.dot.err
-	@dot $@ -Gsize="6.0,4.0" -Teps -o build/src-test.eps
+	@dot $@ -Gsize="6.0,3.0" -Teps -o build/src-test.eps
         #  --groups is nice, too
 	#(info $(INFO) Source dependencies: $@)
 
@@ -943,7 +945,7 @@ src/docs/src-notest.dot: src/docs/src.dot
 build/src-notest.eps: src/docs/src-notest.dot tools/src-inherit.sh
 ifeq ($(ENABLE_DOT),ON)
 	@tools/src-inherit.sh
-	@dot $< -Gsize="6.0,4.0" -Teps -o $@
+	@dot $< -Gsize="6.0,3.0" -Teps -o $@
 	#  -Gratio="fill" -Gsize="11.7,8.267!" -Gmargin=0
 	$(info $(INFO) dependency graph: $@)
 endif

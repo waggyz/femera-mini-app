@@ -61,29 +61,6 @@ namespace femera {
         printf ("Work: init done %s\n", W->name.c_str());
 #endif
   } } }
-  inline
-  fmr::Exit_int Work::exit_list () noexcept {
-    fmr::Exit_int err =0;
-    while (! this->task_list.empty ()) {
-      auto W = this->task_list.back ();// Exit in reverse order.
-      if (W != nullptr) {
-        fmr::Exit_int Werr =0;
-#ifdef FMR_DEBUG
-        printf ("Work: exit list %s\n", W->name.c_str());
-#endif
-        try { Werr = W->exit (err); }
-        catch (std::exception& e) {
-          printf ("%s\n", e.what ()); Werr = 1; }//FIXME >stderr
-        //FIXME Catch all errors.
-        err = (Werr == 0) ? err : Werr;
-#if 0
-        printf ("Work: exit list %s\n", W->name.c_str());
-#endif
-      }
-      this->task_list.pop_back ();
-    }
-    return err;
-  }
 }//end femera:: namespace
 
 #undef FMR_DEBUG

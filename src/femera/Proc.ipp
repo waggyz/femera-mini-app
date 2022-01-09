@@ -26,8 +26,10 @@ namespace femera {
     fmr::Exit_int err=0;
     try { Proc::derived(this)->task_init (argc, argv); }// Init this task,
     catch (std::exception& e) { err = exit (2); }
+    catch (...) { err = exit (2); }
     try { init_list (argc, argv); }                     // then init the list.
     catch (std::exception& e) { err = exit (1); }
+    catch (...) { err = exit (1); }
     return err;
   }
   template <typename T> inline
