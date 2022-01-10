@@ -486,7 +486,7 @@ build-done: build/src-notest.eps $(BUILD_CPU)/mini.valgrind.log
 ifneq ($(HOST_MD5),$(REPO_MD5))
 	$(info $(SPCS) as modified by <$(BUILT_BY_EMAIL)>)
 endif
-	$(info $(E_G_) tools/fmrexec.sh auto -d -t -D examples/cube.fmr)
+	$(info $(E_G_) fmrexec auto -d -t -D examples/cube.fmr)
 
 # Femera tools ----------------------------------------------------------------
 install-tools: get-bats
@@ -831,17 +831,14 @@ $(BUILD_CPU)/mini: export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/mini: export PATH:=$(shell pwd)/$(BUILD_CPU):$(PATH)
 $(BUILD_CPU)/mini: src/femera/mini.cpp src/femera/femera.hpp $(LIBFEMERA)
 	$(call timestamp,$@,$<)
-	$(call col2cxx,$(CXX_),$(CXX) $(notdir $<) .. -lfemera,$(notdir $@))
+	$(call col2cxx,$(CXX_),$(CXX) $(notdir $<) ..,$(notdir $@))
 	-$(CXX) $(filter-out -Winline,$(CXXFLAGS)) $< \
 	  $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
-	#(call label_test,$(PASS),$(FAIL),$(TDDEXEC) $(@) -T,$(@))
 	$(call label_test,$(PASS),$(FAIL),fmrexec tdd:$(@),$(@))
-	
 
 $(BUILD_CPU)/mini: export PATH:=$(shell pwd)/$(BUILD_CPU):$(PATH)
 $(BUILD_CPU)/mini.valgrind.log: $(BUILD_CPU)/mini $(VALGRIND_SUPP_EXE)
 ifeq ($(ENABLE_VALGRIND),ON)
-	$(call timestamp,$@,)
 	$(info $(GRND) valgrind .. fmrexec tdd:$(<))
 	$(VGEXEC) > $(BUILD_CPU)/mini.valgrind.out
 	-grep -i 'lost: [1-9]' $(BUILD_CPU)/mini.valgrind.log \
@@ -850,7 +847,8 @@ ifeq ($(ENABLE_VALGRIND),ON)
   | cut -d " " -f 4- | awk '{print "$(WARN) valgrind:",$$0}'
 	$(info $(MORE) $(BUILD_CPU)/mini.valgrind.log)
 else
-	echo "Set ENABLE_VALGRIND ON in config.local to run valgrind." >$@
+	echo "Set ENABLE_VALGRIND ON in config.local to check for memory leaks." \
+	  >$@
 endif
 
 build/%.gtst.out : build/%.gtst
@@ -865,12 +863,12 @@ build/%.gtst : export TMPDIR := $(TEMP_DIR)
 build/%.gtst : build/%.gtst.o $(LIBFEMERA)(build/%.o) \
   $(LIBFEMERA)($(BUILD_CPU)/femera/Test.o)
 ifeq ($(ENABLE_GOOGLETEST),ON)
-	$(call col2cxx,$(LINK),$(CXX) $(notdir $@).o .. -lfemera,$(notdir $@))
+	$(call col2cxx,$(LINK),$(CXX) $(notdir $@).o ..,$(notdir $@))
 	#(info $(LINK) $(CXX) $(notdir $@).o .. -lfemera .. -o $(notdir $@))
 	-$(CXX) $(CXXTESTS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
 	$(info $(WARN) $@ not tested: GoogleTest disabled)
-	-echo "WARNING: $@ not tested: GoogleTest disabled" >> $@.err
+	echo "WARNING: $@ not tested: GoogleTest disabled" >> $@.err
 	touch $@
 endif
 
@@ -878,12 +876,12 @@ endif
 build/%.gtst : export TMPDIR := $(TEMP_DIR)
 build/%.gtst : build/%.gtst.o $(LIBFEMERA)($(BUILD_CPU)/femera/Test.o)
 ifeq ($(ENABLE_GOOGLETEST),ON)
-	$(call col2cxx,$(LINK),$(CXX) $(notdir $@).o .. -lfemera,$(notdir $@))
+	$(call col2cxx,$(LINK),$(CXX) $(notdir $@).o ..,$(notdir $@))
 	#(info $(LINK) $(CXX) $(notdir $@).o .. -lfemera .. -o $(notdir $@))
 	-$(CXX) $(CXXTESTS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
 	$(info $(WARN) $@ not tested: GoogleTest disabled)
-	-echo "WARNING: $@ not tested: GoogleTest disabled" >> $@.err
+	echo "WARNING: $@ not tested: GoogleTest disabled" >> $@.err
 	touch $@
 endif
 
