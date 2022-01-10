@@ -257,18 +257,19 @@ ifeq ($(ENABLE_VALGRIND),ON)
   VGFLAGS := $(CXXFLAGS) $(filter-out -Winline,$(CXXWARNS))
   VGSUPP := valgrind --leak-check=full --show-reachable=yes --error-limit=no \
     --show-leak-kinds=all --gen-suppressions=all \
-    $(VGMPI):$(VALGRIND_SUPP_EXE) 3>&1 1>&2 2>&3 \
+    mpiexec -np $(TDD_MPI_N) --bind-to core -map-by node:pe=$(TDD_OMP_N) \
+    $(VALGRIND_SUPP_EXE) 3>&1 1>&2 2>&3 \
     | tools/grindmerge.pl -f $(VGMPISUPP) \
     > $(BUILD_CPU)/$(VALGRIND_SUPP) 2>/dev/null;
-  VGEXEC := valgrind --leak-check=full --track-origins=yes \
+  VGEXEC := valgrind --leak-check=full --track-origins=yes         \
     $(VGSUPP_FLAGS) --log-file=$(BUILD_CPU)/mini.valgrind.log      \
     $(VGMPI):$(BUILD_CPU)/mini -n$(TDD_OMP_NP) -v0 $(TDD_FMRFILE); \
     sed -i '/invalid file descriptor 10[0-4][0-9] /d'      \
-    $(BUILD_CPU)/mini.valgrind.log;                        \
+      $(BUILD_CPU)/mini.valgrind.log;                      \
     sed -i '/invalid file descriptor 2[56][0-9] /d'        \
-    $(BUILD_CPU)/mini.valgrind.log;                        \
+      $(BUILD_CPU)/mini.valgrind.log;                      \
     sed -i '/select an alternative log fd/d'               \
-    $(BUILD_CPU)/mini.valgrind.log
+      $(BUILD_CPU)/mini.valgrind.log
 endif
 
 CXXFLAGS+= $(CXXWARNS)
