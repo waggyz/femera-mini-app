@@ -33,7 +33,7 @@ ifeq ($(CXX),g++)
   ifeq ($(ENABLE_MPI),ON)
     CXX:= mpic++
     # TDDEXEC:=/bin/time
-    TDDEXEC:= mpiexec -np $(TDD_MPI_N) --bind-to core -map-by node:pe=$(TDD_OMP_N)
+    # TDDEXEC:= mpiexec -np $(TDD_MPI_N) --bind-to core -map-by node:pe=$(TDD_OMP_N)
   endif
   OPTFLAGS:= $(shell cat data/gcc4.flags | tr '\n' ' ' | tr -s ' ')
   CXXFLAGS+= -std=c++11 -g -MMD -MP
@@ -100,8 +100,8 @@ TEMP_DIR   := $(shell pwd)/$(BUILD_DIR)/tmp
 BUILD_TREE+= $(BUILD_DIR)/external/tools/ $(BUILD_DIR)/docs/
 BUILD_TREE+= $(BUILD_CPU)/external/ $(BUILD_CPU)/tests/ $(BUILD_CPU)/tools/
 BUILD_TREE+= $(BUILD_CPU)/femera/proc/ $(BUILD_CPU)/femera/data/
-BUILD_TREE+= $(BUILD_CPU)/femera/file/ $(BUILD_CPU)/femera/test/
-BUILD_TREE+= $(BUILD_CPU)/femera/sims/
+BUILD_TREE+= $(BUILD_CPU)/femera/test/ $(BUILD_CPU)/femera/sims/
+BUILD_TREE+=
 BUILD_TREE+= $(BUILD_CPU)/fmr/perf/
 
 STAGE_TREE+= $(STAGE_DIR)/bin/ $(STAGE_DIR)/lib/
@@ -251,18 +251,18 @@ endif
 ifeq ($(ENABLE_VALGRIND),ON)
   VALGRIND_SUPP := valgrind.supp
   VALGRIND_SUPP_EXE := $(BUILD_CPU)/$(VALGRIND_SUPP).exe
-  VGMPI := $(TDDEXEC)
+  VGMPI := fmrexec tdd
   VGSUPP_FLAGS += --suppressions=$(BUILD_CPU)/$(VALGRIND_SUPP)
   # Use (mostly) the same flags to compile the suppression file.
   VGFLAGS := $(CXXFLAGS) $(filter-out -Winline,$(CXXWARNS))
   VGSUPP := valgrind --leak-check=full --show-reachable=yes --error-limit=no \
     --show-leak-kinds=all --gen-suppressions=all \
-    $(VGMPI) $(VALGRIND_SUPP_EXE) 3>&1 1>&2 2>&3 \
+    $(VGMPI):$(VALGRIND_SUPP_EXE) 3>&1 1>&2 2>&3 \
     | tools/grindmerge.pl -f $(VGMPISUPP) \
     > $(BUILD_CPU)/$(VALGRIND_SUPP) 2>/dev/null;
   VGEXEC := valgrind --leak-check=full --track-origins=yes \
     $(VGSUPP_FLAGS) --log-file=$(BUILD_CPU)/mini.valgrind.log      \
-    $(VGMPI) $(BUILD_CPU)/mini -n$(TDD_OMP_NP) -v0 $(TDD_FMRFILE); \
+    $(VGMPI):$(BUILD_CPU)/mini -n$(TDD_OMP_NP) -v0 $(TDD_FMRFILE); \
     sed -i '/invalid file descriptor 10[0-4][0-9] /d'      \
     $(BUILD_CPU)/mini.valgrind.log;                        \
     sed -i '/invalid file descriptor 2[56][0-9] /d'        \
@@ -833,13 +833,15 @@ $(BUILD_CPU)/mini: src/femera/mini.cpp src/femera/femera.hpp $(LIBFEMERA)
 	$(call col2cxx,$(CXX_),$(CXX) $(notdir $<) .. -lfemera,$(notdir $@))
 	-$(CXX) $(filter-out -Winline,$(CXXFLAGS)) $< \
 	  $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
-	$(call label_test,$(PASS),$(FAIL),$(TDDEXEC) $(@) -T,$(@))
+	#(call label_test,$(PASS),$(FAIL),$(TDDEXEC) $(@) -T,$(@))
+	$(call label_test,$(PASS),$(FAIL),fmrexec tdd:$(@),$(@))
+	
 
 $(BUILD_CPU)/mini: export PATH:=$(shell pwd)/$(BUILD_CPU):$(PATH)
 $(BUILD_CPU)/mini.valgrind.log: $(BUILD_CPU)/mini $(VALGRIND_SUPP_EXE)
 ifeq ($(ENABLE_VALGRIND),ON)
 	$(call timestamp,$@,)
-	$(info $(GRND) mpiexec ... $(BUILD_CPU)/mini ...)
+	$(info $(GRND) valgrind .. fmrexec tdd:$(<))
 	$(VGEXEC) > $(BUILD_CPU)/mini.valgrind.out
 	-grep -i 'lost: [1-9]' $(BUILD_CPU)/mini.valgrind.log \
   | cut -d " " -f 5- | awk '{print "$(WARN) valgrind:",$$0}'
@@ -852,7 +854,7 @@ endif
 
 build/%.gtst.out : build/%.gtst
 ifeq ($(ENABLE_GOOGLETEST),ON)
-	$(call label_test,$(PASS),$(FAIL),$(TDDEXEC) $(^),$(^))
+	$(call label_test,$(PASS),$(FAIL),fmrexec tdd:$(^),$(^))
 else
 	echo "build/$*.o not tested: GoogleTest disabled" > $@
 	echo "WARNING: build/$*.o not tested: GoogleTest disabled" > $^.err
