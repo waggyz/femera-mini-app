@@ -17,9 +17,6 @@ do
     ARG="-fmr:o"${ARG#-o}
   fi
   case "$ARG" in
-  exe:* | exec:* | -exe:* | -exec:* | --exe:* | --exec:*)
-    FMREXE="${ARG#*exe*:}"
-    ;;
   "auto" | "femera")
     PRE=fmr
     ;;
@@ -28,16 +25,17 @@ do
     PRE=fmr
     ;;
   tdd*)
-    #NOTE The Femera build directory must be in the PATH.
     #FIXME change -T to -fmr:test
     FMRARGS+=" -T"
-    # MPIARGS+=" -n 2"
     NMPI=2
     NOMP=2
     PRE=fmr
-    X="${ARG#tdd:}"
-    if [ -n "$X" ]; then
-      FMREXE=$X
+    FMREXE="femera"
+    if [ "$ARG" != "tdd" ]; then
+      X="${ARG#tdd:}"
+      if [ -n "$X" ]; then
+        FMREXE=$X
+      fi
     fi
     ;;
   "grind" | "valgrind" | "memcheck")
@@ -50,14 +48,10 @@ do
   -fmr:n*)
     PRE=fmr
     NMPI=${ARG#-fmr:n}
-    # FMRARGS+=" -n"${ARG##*-fmr:n}
-    # MPIARGS+=" -n "${ARG##*-fmr:n}
     ;;
   -fmr:o*)
     PRE=fmr
     NOMP=${ARG#-fmr:o}
-    # FMRARGS=${ARG##*-fmr:o}
-    # MPIARGS+=" -map-by node:pe=${ARG##*-fmr:o}"
     ;;
   *:pe=*)
     NOMP=${ARG#*pe=}
@@ -66,7 +60,7 @@ do
   *mpi:*)
     PRE=mpi; MPIARGS+=" "${ARG%%mpi:*}""${ARG#*mpi:};;
   *vg:*)
-    PRE=vg; VGARGS+=" ""${ARG%%vg:*}"${ARG#*mpi:};;
+    PRE=vg; VGARGS+=" ""${ARG%%vg:*}"${ARG#*vg:};;
   *)
     case "$PRE" in
     mpi)
@@ -104,16 +98,16 @@ if [ -n "$VGARGS" ]; then
   VGEXE="valgrind"
 fi
 if [ -n "$VGEXE" ]; then
-  VGARGS=" "
+  VGARGS+=" "
 fi
 FMREXE+=" -fmr:n$NMPI -fmr:o$NOMP"
-#echo $VGEXE "$VGARGS"mpiexec $MPIARGS $FMREXE "$FMRARGS"
-$VGEXE "$VGARGS"mpiexec $MPIARGS $FMREXE "$FMRARGS"
+RUN=$VGEXE"$VGARGS"mpiexec$MPIARGS" "$FMREXE$FMRARGS
+$RUN
 
 exit $?
 
 if [ 0 -eq 1 ]; then
-  # TODO Make this work
+  # TODO Make this work?
   if [ -z "$OMP_NUM_THREADS" ]; then
   echo "CL: $@"
     N=`echo "$@" | grep -ioP '(?<=PE\=)[0-9]+'`
