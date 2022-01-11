@@ -52,7 +52,8 @@ namespace femera {
 #ifdef FMR_DEBUG
         printf ("Work: init list %s\n", W->name.c_str());
 #endif
-        err = W->init (argc, argv); // is noexcept
+        const int Werr = W->init (argc, argv); // is noexcept
+        err = (Werr == 0) ? err : Werr;
 #if 0
         printf ("Work: init done %s\n", W->name.c_str());
 #endif

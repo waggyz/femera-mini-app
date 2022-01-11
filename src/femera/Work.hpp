@@ -2,6 +2,7 @@
 #define FEMERA_HAS_WORK_HPP
 /** */
 #include "../fmr/perf/Meter.hpp"
+#include "Errs.hpp"
 //#include "Task.hpp"
 //#include "vals.hpp"
 
@@ -9,7 +10,6 @@
 #include <string>
 #include <vector>
 #include <deque>
-#include <exception>
 #include <tuple>
 
 namespace femera {

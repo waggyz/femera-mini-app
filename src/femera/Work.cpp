@@ -13,11 +13,10 @@ namespace femera {
     while (! this->task_list.empty ()) {
       auto W = this->task_list.back ();// Exit in reverse order.
       if (W != nullptr) {
-        fmr::Exit_int Werr =0;
 #ifdef FMR_DEBUG
         printf ("Work: exit list %s\n", W->name.c_str());
 #endif
-        Werr = W->exit (err);// is noexcept
+        const fmr::Exit_int Werr = W->exit (err);// is noexcept
         err = (Werr == 0) ? err : Werr;
 #if 0
         printf ("Work: exit list %s\n", W->name.c_str());
@@ -48,8 +47,7 @@ namespace femera {
 #ifdef FMR_DEBUG
           printf ("Work: exit leaf %s\n", W->task_list.back()->name.c_str());
 #endif
-          fmr::Exit_int Werr =0;
-          Werr = W->task_list.back()->exit (err);
+          const fmr::Exit_int Werr = W->task_list.back()->exit (err);
           err = (Werr == 0) ? err : Werr;
           W->task_list.pop_back ();
           branch.pop_back ();

@@ -10,6 +10,7 @@ digraph "source tree" {
 	"Main.cpp" -> "Fomp.hpp"
 	"Sims.hpp" -> "Work.hpp"
 	"femera.cpp" -> "femera.hpp"
+	"Work.hpp" -> "Errs.hpp"
 	"Fmpi.hpp" -> "Fmpi.ipp"
 	"Sims.hpp" -> "Sims.ipp"
 	"Jobs.hpp" -> "Jobs.ipp"
