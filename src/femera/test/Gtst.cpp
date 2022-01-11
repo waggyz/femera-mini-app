@@ -22,7 +22,7 @@ namespace femera {
     // Init even if not is_enabled as it could be enabled later.
     try {::testing::InitGoogleTest (argc, argv); }// Is this thread safe?
     catch (...) {
-      throw std::runtime_error ("error initializing GoogleTest");
+      FMR_THROW("error initializing GoogleTest");
       return;
     }
 #ifdef FMR_HAS_MPI
@@ -42,12 +42,12 @@ namespace femera {
     if (this->is_enabled) {
       int err =0;
       try {err= RUN_ALL_TESTS(); }//NOTE macro runs regardless of being enabled
-      catch (...) {
-        throw std::runtime_error ("error in GoogleTest RUN_ALL_TESTS()");
+      catch (...) {//TODO Check if the macro is noexcept.
+        FMR_THROW("error in GoogleTest RUN_ALL_TESTS()");
       }
       if (err) {
         auto msg = std::string("Warn""ing: GoogleTest returned ")
           + std::to_string(err) + ".";
-        throw std::runtime_error (msg);
+        FMR_THROW(msg);
   } } }
 }

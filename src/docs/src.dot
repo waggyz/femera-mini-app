@@ -55,6 +55,7 @@ digraph "source tree" {
 	"File.gtst.cpp" -> "File.hpp"
 	"perf.gtst.cpp" -> "perf.hpp"
 	"Work.cpp" -> "Work.hpp"
+	"Errs.hpp" -> "Errs.ipp"
 	"Ftop.gtst.cpp" -> "Ftop.hpp"
 	"Main.hpp" -> "Main.ipp"
 	"Test.cpp" -> "Test.hpp"

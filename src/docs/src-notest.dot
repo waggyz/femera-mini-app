@@ -46,6 +46,7 @@ digraph "source tree" {
 	"core.h" -> "Beds.hpp"
 	"Fcpu.hpp" -> "Fcpu.ipp"
 	"Work.cpp" -> "Work.hpp"
+	"Errs.hpp" -> "Errs.ipp"
 	"Main.hpp" -> "Main.ipp"
 	"Test.cpp" -> "Test.hpp"
 	"Beds.cpp" -> "Beds.hpp"

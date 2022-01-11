@@ -425,7 +425,9 @@ ifeq ($(ENABLE_DOT),ON)
 	@printf '%s' '$(MAKE_DOT)' | sed 's/\\n/\n/g' > '$(MAKE_DOTFILE)'
 	@dot '$(MAKE_DOTFILE)' -Teps -o $(BUILD_DIR)/make.eps
 	@dot external/external.dot -Teps -o $(BUILD_DIR)/external/external.eps
-	#dot external/external.dot -Tpng -o $(BUILD_DIR)/external/external.png
+ifeq ($(ENABLE_DOT_PNG),ON)
+	@dot external/external.dot -Tpng -o $(BUILD_DIR)/external/external.png
+endif
 	@printf '%s' '$(EXTERNAL_DOT)' | sed 's/\\n/\n/g' > '$(EXTERNAL_DOTFILE)'
 	@dot '$(EXTERNAL_DOTFILE)' -Teps -o $(BUILD_DIR)/external/build-external.eps
 endif
@@ -936,6 +938,9 @@ build/test-files.txt: tools/list-test-files.sh build/.md5
 src/docs/src.dot: build/.md5
 	@external/tools/cinclude2dot --src src >$@ 2>build/src.dot.err
 	@dot $@ -Gsize="6.0,3.0" -Teps -o build/src-test.eps
+ifeq ($(ENABLE_DOT_PNG),ON)
+	@dot $@ -Gsize="12.0,6.0" -Tpng -o build/src-test.png
+endif
         #  --groups is nice, too
 	#(info $(INFO) Source dependencies: $@)
 
@@ -947,6 +952,9 @@ build/src-notest.eps: src/docs/src-notest.dot tools/src-inherit.sh
 ifeq ($(ENABLE_DOT),ON)
 	@tools/src-inherit.sh
 	@dot $< -Gsize="6.0,3.0" -Teps -o $@
+ifeq ($(ENABLE_DOT_PNG),ON)
+	@dot $< -Gsize="12.0,6.0" -Tpng -o build/src-notest.png
+endif
 	#  -Gratio="fill" -Gsize="11.7,8.267!" -Gmargin=0
 	$(info $(INFO) dependency graph: $@)
 endif
