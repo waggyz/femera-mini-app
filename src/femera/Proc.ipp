@@ -27,16 +27,12 @@ namespace femera {
     try { Proc::derived(this)->task_init (argc, argv); }// Init this task,
     catch (std::exception& e) { err = exit (2); }
     catch (...) { err = exit (2); }
-    try { init_list (argc, argv); }                     // then init the list.
-    catch (std::exception& e) { err = exit (1); }
-    catch (...) { err = exit (1); }
+    init_list (argc, argv);// then init the list.
     return err;
   }
   template <typename T> inline
   fmr::Exit_int Proc<T>::exit (fmr::Exit_int err) noexcept {
-    if (err>0) {return err;}
-    try { exit_tree (); }   // Exit the task tree (exceptions caught),
-    catch (std::exception& e) { err = 1; }
+    exit_tree ();   // Exit the task tree (is noexceptt),
     if (err>0) {return err;}// then exit this derived task.
     try { Proc::derived(this)->task_exit (); }
     catch (std::exception& e) { err = 2; }

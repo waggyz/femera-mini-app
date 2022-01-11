@@ -17,16 +17,12 @@ namespace femera {
     try { Sims::derived(this)->task_init (argc, argv); }// Init this task,
     catch (const std::exception& e) { err = this->exit (2); }
     catch (...) { err = this->exit (2); }
-    try { this->init_list (argc, argv); }               // then init the list.
-    catch (const std::exception& e) { err = this->exit (1); }
-    catch (...) { err = this->exit (1); }
+    this->init_list (argc, argv);// then init the list; is noexcept
     return err;
   }
   template <typename T> inline
   fmr::Exit_int Sims<T>::exit (fmr::Exit_int err) noexcept {
-    try { this->exit_list (); }
-    catch (const std::exception& e) { err = 1; }
-    catch (...) { err = 1; }
+    this->exit_list ();// is noexcept
     try { Sims::derived(this)->task_exit (); }
     catch (const std::exception& e) { err = 2; }
     catch (...) { err = 2; }

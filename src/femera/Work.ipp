@@ -51,13 +51,7 @@ namespace femera {
 #ifdef FMR_DEBUG
         printf ("Work: init list %s\n", W->name.c_str());
 #endif
-#if 0
-        try { W->init (argc, argv); }//FIXME init (..) is noexcept
-        catch (std::exception& e) {throw e; return; }
-        catch (...) {throw std::runtime_error ("init_list()"); return; }
-#else
         W->init (argc, argv); // is noexcept
-#endif
 #if 0
         printf ("Work: init done %s\n", W->name.c_str());
 #endif

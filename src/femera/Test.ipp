@@ -17,25 +17,13 @@ namespace femera {
     try { Test::derived (this)->task_init (argc, argv); }// Init this task,
     catch (const std::exception& e) { err = exit (2); }
     catch (...) { err = exit (2); }
-# if 0
-    try { init_list (argc, argv); }                      // then init the list.
-    catch (const std::exception& e) { err = exit (1); }
-    catch (...) { err = exit (1); }
-# else
     init_list (argc, argv);// is noexcept
-# endif
     return err;
   }
   template <typename T> inline
   fmr::Exit_int Test<T>::exit (fmr::Exit_int err) noexcept {
     if (err>0) {return err;}
-#if 0
-    try { exit_list (); }// Exit the task stack (exceptions caught),
-    catch (const std::exception& e) { err = 1; }
-    catch (...) { err = exit (1); }
-#else
     exit_list ();// is noexcept
-#endif
     if (err>0) {return err;}// then exit this task.
     try { Test::derived (this)->task_exit (); }
     catch (const std::exception& e) { err = 2; }
