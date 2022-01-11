@@ -67,7 +67,7 @@ namespace femera {
     //FIXME Do all virtual methods need to be pure
     //      to avoid vtable using CRTP derived classes?
     virtual fmr::Exit_int init (int* argc, char** argv) noexcept =0;
-    virtual fmr::Exit_int exit (fmr::Exit_int err=0) =0;
+    virtual fmr::Exit_int exit (fmr::Exit_int err=0)    noexcept =0;
     //
 //TODO    Task_tree_t   get_tree   () noexcept;
     fmr::Local_int add_task   (Work_t) noexcept;
@@ -83,9 +83,9 @@ namespace femera {
     // above called by Derived::get_task(..)
     //
     // Work stack initialization and exit
-    void          init_list (int* argc, char** argv) noexcept;// init forward
-    fmr::Exit_int exit_list () noexcept;// exit task_list in reverse
-    fmr::Exit_int exit_tree () noexcept;// exit task hierarchy in reverse
+    void init_list (int* argc, char** argv) noexcept;// init forward
+    void exit_list () noexcept;// exit task_list in reverse
+    void exit_tree () noexcept;// exit task hierarchy in reverse
   protected:// Built-in stuff -------------------------------------------------
     // Make it clear this class needs to be inherited from.
     Work ()            =default;

@@ -8,7 +8,7 @@
 femera::Work::~Work (){}
 
 namespace femera {
-  fmr::Exit_int Work::exit_list () noexcept {
+  void Work::exit_list () noexcept {
     fmr::Exit_int err =0;
     while (! this->task_list.empty ()) {
       auto W = this->task_list.back ();// Exit in reverse order.
@@ -17,10 +17,16 @@ namespace femera {
 #ifdef FMR_DEBUG
         printf ("Work: exit list %s\n", W->name.c_str());
 #endif
-        try { Werr = W->exit (err); }
-        catch (std::exception& e) {
-          printf ("%s\n", e.what ()); Werr = 1; }//FIXME >stderr
-        //FIXME Catch all errors.
+#if 0
+        try { Werr = W->exit (err); }// is noexcept
+        catch (const std::exception& e) { throw e; }
+        catch (...) {
+          const auto msg = W->name + " from " + this->name + " exit_list()";
+          throw (std::runtime_error (msg));
+        }
+#else
+        Werr = W->exit (err);// is noexcept
+#endif
         err = (Werr == 0) ? err : Werr;
 #if 0
         printf ("Work: exit list %s\n", W->name.c_str());
@@ -28,9 +34,9 @@ namespace femera {
       }
       this->task_list.pop_back ();
     }
-    return err;
+    return;
   }
-  fmr::Exit_int Work::exit_tree () noexcept {
+  void Work::exit_tree () noexcept {
     fmr::Exit_int err =0;
     Work::Task_path_t branch ={};
 #ifdef FMR_DEBUG
@@ -52,8 +58,16 @@ namespace femera {
           printf ("Work: exit leaf %s\n", W->task_list.back()->name.c_str());
 #endif
           fmr::Exit_int Werr =0;
-          try { Werr = W->task_list.back()->exit (err); }
-          catch (std::exception& e) { printf ("%s\n", e.what ()); Werr = 1; }
+#if 0
+          try { Werr = W->task_list.back()->exit (err); }// is noexcept
+          catch (const std::exception& e) { throw e; }
+          catch (...) {
+            const auto msg = W->name + " from " + this->name + " exit_tree()";
+            throw (std::runtime_error (msg));
+          }
+#else
+          Werr = W->task_list.back()->exit (err);
+#endif
           err = (Werr == 0) ? err : Werr;
           W->task_list.pop_back ();
           branch.pop_back ();
@@ -66,7 +80,7 @@ namespace femera {
 #if 0
   printf ("Work: exit base %s\n", this->name.c_str());
 #endif
-  return err;
+  return;
   }
 }//end femera:: namespace
 #undef FMR_DEBUG

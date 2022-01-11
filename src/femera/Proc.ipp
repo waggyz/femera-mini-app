@@ -35,7 +35,8 @@ namespace femera {
   template <typename T> inline
   fmr::Exit_int Proc<T>::exit (fmr::Exit_int err) noexcept {
     if (err>0) {return err;}
-    err = exit_tree ();     // Exit the task tree (exceptions caught),
+    try { exit_tree (); }   // Exit the task tree (exceptions caught),
+    catch (std::exception& e) { err = 1; }
     if (err>0) {return err;}// then exit this derived task.
     try { Proc::derived(this)->task_exit (); }
     catch (std::exception& e) { err = 2; }

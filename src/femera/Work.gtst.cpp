@@ -66,10 +66,11 @@ fmr::Exit_int Base<T>:: init (int*, char**) noexcept {
 template <typename T> inline
 fmr::Exit_int Base<T>::exit (fmr::Exit_int err) noexcept {
   if (err>0) {return err;}
-  //err = femera::Work::exit (err);// Exit the task stack,
-  err = exit_list ();
-  if (err>0) {return err;}// then exit this task.
-  try { Base::derived(this)->task_exit (); }
+  //err = femera::Work::exit (err);
+  try { exit_list (); }// Exit the task stack,
+  catch (...) { err=1; }
+  if (err>0) {return err;}
+  try { Base::derived(this)->task_exit (); }// then exit this task.
   catch (std::exception& e) { err = 42; }
   return err;
 }

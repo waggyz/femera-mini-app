@@ -47,7 +47,7 @@ namespace femera {
       }
       if (err) {
         auto msg = std::string("Warn""ing: GoogleTest returned ")
-          + std::to_string(err) + std::string (".");
-        throw std::runtime_error (msg.c_str());
+          + std::to_string(err) + ".";
+        throw std::runtime_error (msg);
   } } }
 }
