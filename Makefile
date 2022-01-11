@@ -789,6 +789,8 @@ $(BUILD_CPU)/femera/test/Gtst.o : src/femera/test/Gtst.cpp \
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
 	$(CXX) -c $(CXXTESTS) $(FMRFLAGS) $< -o $@
 
+$(BUILD_CPU)/femera/Test.o : $(LIBFEMERA)($(BUILD_CPU)/femera/Errs.o)
+
 $(BUILD_CPU)/%.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.o : src/%.cpp src/%.hpp src/%.ipp $(TOPDEPS)
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))

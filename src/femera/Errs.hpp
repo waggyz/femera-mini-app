@@ -1,7 +1,10 @@
 #ifndef FEMERA_HAS_ERRS_HPP
 #define FEMERA_HAS_ERRS_HPP
 
+#include "../fmr/fmr.hpp"
+
 #include <exception>
+#include <string>
 
 namespace femera {
   class Errs : public std::exception {
@@ -13,29 +16,30 @@ namespace femera {
     *                 Hence, responsibility for deleting the char* lies
     *                 with the caller.
     */
-  explicit Errs(const char* message) : msg(message) {}
+  explicit Errs (const char* message) : msg(message) {}
 
   /** Constructor (C++ STL strings).
     *  @param message The error message.
     */
-  explicit Errs(const std::string& message) : msg(message) {}
+  explicit Errs (const std::string& message) : msg (message) {}
 
-  explicit Errs(const char* message, const char *file, int line)
+  explicit Errs (const char* message, const char *file, int line)
       : msg (std::string(file)+":"+std::to_string(line)+":"+message) {}
+
   explicit Errs (const std::string& message, const char *file, int line)
       : msg (std::string(file)+":"+std::to_string(line)+":"+message) {}
   /** Destructor.
     * Virtual to allow for subclassing.
     */
-  virtual ~Errs() noexcept {}
+  virtual ~Errs () noexcept {}
 
   /** Returns a pointer to the (constant) error description.
     *  @return A pointer to a const char*. The underlying memory
     *          is in posession of the Errs object. Callers must
     *          not attempt to free the memory.
     */
-  virtual inline const char* what() const noexcept;
-  virtual inline void print() const noexcept;
+  virtual const char* what () const noexcept;
+  virtual void       print () const noexcept;
   protected:
     /** Error message.
      */
