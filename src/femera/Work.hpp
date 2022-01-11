@@ -83,9 +83,9 @@ namespace femera {
     // above called by Derived::get_task(..)
     //
     // Work stack initialization and exit
-    void init_list (int* argc, char** argv) noexcept;// init forward
-    void exit_list () noexcept;// exit task_list in reverse
-    void exit_tree () noexcept;// exit task hierarchy in reverse
+    fmr::Exit_int init_list (int* argc, char** argv) noexcept;// init forward
+    fmr::Exit_int exit_list () noexcept;// exit task_list in reverse
+    fmr::Exit_int exit_tree () noexcept;// exit task hierarchy in reverse
   protected:// Built-in stuff -------------------------------------------------
     // Make it clear this class needs to be inherited from.
     Work ()            =default;

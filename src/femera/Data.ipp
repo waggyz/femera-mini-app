@@ -14,10 +14,10 @@ namespace femera {
   template <typename T> inline
   fmr::Exit_int Data<T>::init (int* argc, char** argv) noexcept {
     fmr::Exit_int err=0;
-    Data::derived(this)->task_init (argc, argv);// Init this task,
-    try { init_list (argc, argv); }                     // then init its list.
-    catch (std::exception& e) { err = exit (1); }
-    catch (...) { err = this->exit (1); }
+    try { Data::derived(this)->task_init (argc, argv); }// Init this task,
+    catch (std::exception& e) { err = exit (2); }
+    catch (...) { err = this->exit (2); }
+    init_list (argc, argv);// then init its list.
     return err;
   }
   template <typename T> inline

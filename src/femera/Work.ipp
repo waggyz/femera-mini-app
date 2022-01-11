@@ -10,7 +10,7 @@ namespace femera {
   inline
   Work::Core_t Work::get_core ()
   noexcept {
-    return std::make_tuple(this->proc, this->data, this->test);
+    return std::make_tuple (this->proc, this->data, this->test);
   }
   inline
   Work_t Work::get_work (const fmr::Local_int i)
@@ -45,17 +45,19 @@ namespace femera {
     return fmr::Local_int (this->task_list.size ());
   }
   inline
-  void Work::init_list (int* argc, char** argv) noexcept {
+  fmr::Exit_int Work::init_list (int* argc, char** argv)
+  noexcept {fmr::Exit_int err =0;
     for (auto W : this->task_list) {// Init task_list forward.
       if (W != nullptr) {
 #ifdef FMR_DEBUG
         printf ("Work: init list %s\n", W->name.c_str());
 #endif
-        W->init (argc, argv); // is noexcept
+        err = W->init (argc, argv); // is noexcept
 #if 0
         printf ("Work: init done %s\n", W->name.c_str());
 #endif
-  } } }
+  } }
+  return err; }
 }//end femera:: namespace
 
 #undef FMR_DEBUG

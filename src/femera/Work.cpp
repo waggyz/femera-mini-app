@@ -8,8 +8,8 @@
 femera::Work::~Work (){}
 
 namespace femera {
-  void Work::exit_list () noexcept {
-    fmr::Exit_int err =0;
+  fmr::Exit_int Work::exit_list ()
+  noexcept { fmr::Exit_int err =0;
     while (! this->task_list.empty ()) {
       auto W = this->task_list.back ();// Exit in reverse order.
       if (W != nullptr) {
@@ -25,10 +25,10 @@ namespace femera {
       }
       this->task_list.pop_back ();
     }
-    return;
+    return err;
   }
-  void Work::exit_tree () noexcept {
-    fmr::Exit_int err =0;
+  fmr::Exit_int Work::exit_tree ()
+  noexcept { fmr::Exit_int err =0;
     Work::Task_path_t branch ={};
 #ifdef FMR_DEBUG
     printf ("Work: exit tree %s [%lu]\n", this->name.c_str(), task_list.size());
@@ -62,7 +62,7 @@ namespace femera {
 #if 0
   printf ("Work: exit base %s\n", this->name.c_str());
 #endif
-  return;
+  return err;
   }
 }//end femera:: namespace
 #undef FMR_DEBUG
