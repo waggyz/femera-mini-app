@@ -70,9 +70,9 @@ namespace femera {
     virtual fmr::Exit_int exit (fmr::Exit_int err=0)    noexcept =0;
     //
 //TODO    Task_tree_t   get_tree   () noexcept;
-    fmr::Local_int add_task   (Work_t) noexcept;
-    fmr::Local_int get_task_n ()       noexcept;/*
-    Derived_t      get_task   (fmr::Local_int) in Derived and returns that type
+    fmr::Local_int add_task   (Work_t) noexcept;// returns task number
+    fmr::Local_int get_task_n ()       noexcept;
+/*  Derived_t      get_task   (fmr::Local_int) in Derived and returns that type
     Derived_t      new_task   ()                     ""
     Derived_t      new_task   (Core_t)               ""
     */

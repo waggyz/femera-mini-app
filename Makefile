@@ -782,7 +782,7 @@ else
 	touch $@
 endif
 
-# Build the exception handler (Errs) early.
+# Compile the exception handler (Errs) early.
 $(BUILD_CPU)/femera/Test.o : $(LIBFEMERA)($(BUILD_CPU)/femera/Errs.o)
 
 # Use GoogleTest compiler flags to avoid exessive warnings.

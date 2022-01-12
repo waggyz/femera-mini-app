@@ -27,7 +27,7 @@ namespace femera {
     int is_init=0;
     int err = MPI_Initialized (& is_init);
     //FIXME Be careful handling errors to shut down MPI properly before exit.
-    //if (err) {throw std::runtime_error ("proc::Fmpi::is_mpi_init() failed"); }
+    //if (err) { FMR_THROW("proc::Fmpi::is_mpi_init() failed"); }
     return bool (err) | bool (is_init);
   }
   fmr::Local_int proc::Fmpi::mpi_proc_n () {int err=0, tmp_proc_n=0;
