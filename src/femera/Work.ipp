@@ -12,30 +12,27 @@ namespace femera {
   noexcept {
     return std::make_tuple (this->proc, this->data, this->test);
   }
-# ifdef FMR_REMOVE_STUFF
   inline
-  Work_t Work::get_work (const fmr::Local_int i)
+  Work_t Work::get_work_spt (const fmr::Local_int i)
   noexcept {
     return (i < this->task_list.size()) ? this->task_list [i] : nullptr;
   }
   inline
-  Work_t Work::get_work (const Work::Task_path_t path)
+  Work_t Work::get_work_spt (const Work::Task_path_t path)
   noexcept {
     Work_t W = nullptr;
     const auto sz = path.size();
     if (sz > 0) {
       if (path[0] < this->get_task_n()) {
-        W = this->get_work (path[0]);
+        W = this->get_work_spt (path[0]);
         if (sz > 1) {
           for (fmr::Local_int i = 1; i < sz; i++) {
             if (W != nullptr) {
-              if (path[i] < W->get_task_n()) { W = W->get_work (path[i]); }
+              if (path[i] < W->get_task_n()) { W = W->get_work_spt (path[i]); }
               else { W = nullptr; }
     } } } } }
     return W;
   }
-//FIXME with these ------------------------------------------------------------
-#endif
   inline
   Work* Work::get_work_raw (const fmr::Local_int i)
   noexcept {

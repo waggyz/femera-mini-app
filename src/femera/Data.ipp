@@ -30,18 +30,14 @@ namespace femera {
     catch (...) { err = 2; }
     return err;
   }
-//FIXME Replace these =========================================================
-#ifdef FMR_REMOVE_STUFF
   template <typename T> inline
-  std::shared_ptr<T> Data<T>::get_task (const fmr::Local_int i) {
-    return std::static_pointer_cast<T> (this->get_work (i));
+  std::shared_ptr<T> Data<T>::get_task_spt (const fmr::Local_int i) {
+    return std::static_pointer_cast<T> (this->get_work_spt (i));
   }
   template <typename T> inline
-  std::shared_ptr<T> Data<T>::get_task (const Work::Task_path_t tree) {
-    return std::static_pointer_cast<T> (this->get_work (tree));
+  std::shared_ptr<T> Data<T>::get_task_spt (const Work::Task_path_t tree) {
+    return std::static_pointer_cast<T> (this->get_work_spt (tree));
   }
-# endif
-//FIXME with these ------------------------------------------------------------
   template <typename T> inline
   T* Data<T>::get_task_raw (const fmr::Local_int i) {
     return static_cast<T*> (this->get_work_raw (i));
@@ -50,7 +46,6 @@ namespace femera {
   T* Data<T>::get_task_raw (const Work::Task_path_t tree) {
     return static_cast<T*> (this->get_work_raw (tree));
   }
-  //===========================================================================
   template <typename T> inline constexpr
   std::shared_ptr<T> Data<T>::new_task (const Work::Core_t core) noexcept {
     return std::make_shared<T> (T(core));

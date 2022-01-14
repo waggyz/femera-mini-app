@@ -45,18 +45,14 @@ namespace femera {
     catch (...) { task_err = exit (3); }
     return (task_err > 0) ? task_err : err;
   }
-//FIXME Replace these =========================================================
-# ifdef FMR_REMOVE_STUFF
   template <typename T> inline
-  std::shared_ptr<T> Proc<T>::get_task (const fmr::Local_int i) {
-    return std::static_pointer_cast<T> (this->get_work (i));
+  std::shared_ptr<T> Proc<T>::get_task_spt (const fmr::Local_int i) {
+    return std::static_pointer_cast<T> (this->get_work_spt (i));
   }
   template <typename T> inline
-  std::shared_ptr<T> Proc<T>::get_task (const Work::Task_path_t path) {
-    return std::static_pointer_cast<T> (this->get_work (path));
+  std::shared_ptr<T> Proc<T>::get_task_spt (const Work::Task_path_t path) {
+    return std::static_pointer_cast<T> (this->get_work_spt (path));
   }
-#   endif
-//FIXME with these ------------------------------------------------------------
   template <typename T> inline
   T* Proc<T>::get_task_raw (const fmr::Local_int i) {
     return static_cast<T*> (this->get_work_raw (i));
@@ -65,7 +61,6 @@ namespace femera {
   T* Proc<T>::get_task_raw (const Work::Task_path_t path) {
     return static_cast<T*> (this->get_work_raw (path));
   }
-  //===========================================================================
   template <typename T> inline constexpr
   std::shared_ptr<T> Proc<T>::new_task () noexcept {
     return std::make_shared<T> (T());
