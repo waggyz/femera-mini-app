@@ -30,6 +30,7 @@ namespace femera {
     catch (...) { err = 2; }
     return err;
   }
+//FIXME Replace these =========================================================
   template <typename T> inline
   std::shared_ptr<T> Data<T>::get_task (const fmr::Local_int i) {
     return std::static_pointer_cast<T> (this->get_work (i));
@@ -38,6 +39,16 @@ namespace femera {
   std::shared_ptr<T> Data<T>::get_task (const Work::Task_path_t tree) {
     return std::static_pointer_cast<T> (this->get_work (tree));
   }
+//FIXME with these ------------------------------------------------------------
+  template <typename T> inline
+  T* Data<T>::get_task_raw (const fmr::Local_int i) {
+    return static_cast<T*> (this->get_work (i));
+  }
+  template <typename T> inline
+  T* Data<T>::get_task_raw (const Work::Task_path_t tree) {
+    return static_cast<T*> (this->get_work (tree));
+  }
+  //===========================================================================
   template <typename T> inline constexpr
   std::shared_ptr<T> Data<T>::new_task (const Work::Core_t core) noexcept {
     return std::make_shared<T> (T(core));

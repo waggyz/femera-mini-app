@@ -21,7 +21,7 @@ int femera::test:: early_main (int* argc, char** argv) {
   //from: https://github.com/google/googletest/issues/822
   ::testing::TestEventListeners& listeners
     = ::testing::UnitTest::GetInstance ()->listeners ();
-  if (proc_id != 0) {// Only print from master; release the others.
+  if (proc_id != 0) {// Only print from main thread; release the others.
     delete listeners.Release (listeners.default_result_printer ());
   }
   err = RUN_ALL_TESTS();

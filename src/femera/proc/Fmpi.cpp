@@ -30,13 +30,13 @@ namespace femera {
     //if (err) { FMR_THROW("proc::Fmpi::is_mpi_init() failed"); }
     return bool (err) | bool (is_init);
   }
-  fmr::Local_int proc::Fmpi::mpi_proc_n () {int err=0, tmp_proc_n=0;
+  fmr::Local_int proc::Fmpi::task_proc_n () {int err=0, tmp_proc_n=0;
     err= MPI_Comm_size(MPI_Comm(this->team_id) ,& tmp_proc_n  );
     if( err ){return 1; }
     this->proc_n = fmr::Local_int (tmp_proc_n);
     return this->proc_n;
   }
-  fmr::Local_int proc::Fmpi::mpi_proc_ix () {int err, proc_i=0;
+  fmr::Local_int proc::Fmpi::task_proc_ix () {int err, proc_i=0;
     err= MPI_Comm_rank( MPI_Comm(this->team_id),& proc_i );
     if( err ){return 0; }
     this->proc_ix = fmr::Local_int (proc_i);
@@ -71,8 +71,8 @@ namespace femera {
     }
     if( !err ){
       this->team_id = proc::Team_t (comm);
-      this->proc_ix = this->mpi_proc_ix ();
-      this->proc_n  = this->mpi_proc_n ();
+      this->proc_ix = this->task_proc_ix ();
+      this->proc_n  = this->task_proc_n ();
     }
 //  fmr::perf:: timer_pause (&this->time);
   } }
@@ -91,7 +91,7 @@ namespace femera {
   err=0;// Exit from mpi normally when Femera exits on error.
 FMR_PRAGMA_OMP(omp master)
   if (is_mpi_init ()) {
-    const auto proc_i = this->mpi_proc_ix ();
+    const auto proc_i = this->task_proc_ix ();
     if (this->team_id != proc::Team_t (MPI_COMM_WORLD) ) {
       if (this->team_id) {
 #ifdef FMR_DEBUG

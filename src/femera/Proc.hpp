@@ -12,13 +12,13 @@ namespace femera {
   public:
   private:
     using This_t = std::shared_ptr<T>;
-  protected:// Set by derived instances during task_init().
+  protected:// Set by derived instances during task_init()...
     proc::Team_t   team_id = 0;
     fmr::Local_int team_n  = 1;
     fmr::Local_int proc_ix = 0;
     fmr::Local_int proc_n  = 1;
     fmr::Local_int node_n  = 1;
-  public:// because proc::Main must access these
+  public:   // ...because proc::Main uses these.
     proc::Team_t   get_team_id () noexcept;
     fmr::Local_int get_team_n  () noexcept;
     fmr::Local_int get_proc_ix () noexcept;
@@ -39,8 +39,13 @@ namespace femera {
     fmr::Exit_int init (int*, char**)        noexcept final override;
     fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;
     //
+//FIXME Replace these =========================================================
     This_t                  get_task (fmr::Local_int)             ;
     This_t                  get_task (Work::Task_path_t)          ;
+//FIXME with these ------------------------------------------------------------
+    T*                      get_task_raw (fmr::Local_int)             ;
+    T*                      get_task_raw (Work::Task_path_t)          ;
+  //===========================================================================
     static constexpr This_t new_task ()                   noexcept;
     static constexpr This_t new_task (const Work::Core_t) noexcept;
   private:

@@ -24,20 +24,28 @@ namespace femera {
   template <typename T> inline
   fmr::Exit_int Proc<T>::init (int* argc, char** argv) noexcept {
     fmr::Exit_int err=0;
-    try { Proc::derived(this)->task_init (argc, argv); }// Init this task,
-    catch (std::exception& e) { err = exit (2); }
+    try { Proc::derived (this)->task_init (argc, argv); }// Init this task,
+    catch (const Errs& e) { err = 1; e.print (); }
+    catch (std::exception& e) { err = exit (1); }
     catch (...) { err = exit (2); }
     init_list (argc, argv);// then init the list.
+#if 0
+    this->proc_n = this->get_proc_n ();
+#endif
     return err;
   }
   template <typename T> inline
   fmr::Exit_int Proc<T>::exit (fmr::Exit_int err) noexcept {
     exit_tree ();   // Exit the task tree (is noexceptt),
     if (err>0) {return err;}// then exit this derived task.
-    try { Proc::derived(this)->task_exit (); }
-    catch (std::exception& e) { err = 2; }
-    return err;
+    fmr::Exit_int task_err =0;
+    try { Proc::derived (this)->task_exit (); }
+    catch (const Errs& e) { task_err = 1; e.print (); }
+    catch (std::exception& e) { task_err = 2; }
+    catch (...) { task_err = exit (3); }
+    return (task_err > 0) ? task_err : err;
   }
+//FIXME Replace these =========================================================
   template <typename T> inline
   std::shared_ptr<T> Proc<T>::get_task (const fmr::Local_int i) {
     return std::static_pointer_cast<T> (this->get_work (i));
@@ -46,6 +54,16 @@ namespace femera {
   std::shared_ptr<T> Proc<T>::get_task (const Work::Task_path_t path) {
     return std::static_pointer_cast<T> (this->get_work (path));
   }
+//FIXME with these ------------------------------------------------------------
+  template <typename T> inline
+  T* Proc<T>::get_task_raw (const fmr::Local_int i) {
+    return static_cast<T*> (this->get_work (i));
+  }
+  template <typename T> inline
+  T* Proc<T>::get_task_raw (const Work::Task_path_t path) {
+    return static_cast<T*> (this->get_work (path));
+  }
+  //===========================================================================
   template <typename T> inline constexpr
   std::shared_ptr<T> Proc<T>::new_task () noexcept {
     return std::make_shared<T> (T());
@@ -60,6 +78,13 @@ namespace femera {
   }
   template <typename T> inline
   fmr::Local_int Proc<T>::get_proc_n () noexcept {
+#if 0
+    this->proc_n =0;
+    for (const auto W : this->task_list) {
+      const auto P = static_cast<Proc<T>*> (W.get());
+      this->proc_n += P->get_proc_n ();
+    }
+#endif
     return this->proc_n;
   }
   template <typename T> inline

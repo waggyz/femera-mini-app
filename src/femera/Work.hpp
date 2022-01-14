@@ -78,8 +78,13 @@ namespace femera {
     */
     Core_t get_core () noexcept;
   protected:
+//FIXME Replace these =========================================================
     Work_t get_work (fmr::Local_int) noexcept;
     Work_t get_work (Task_path_t)    noexcept;
+//FIXME with these ------------------------------------------------------------
+    Work* get_work_raw (fmr::Local_int) noexcept;
+    Work* get_work_raw (Task_path_t)    noexcept;
+  //===========================================================================
     // above called by Derived::get_task(..)
     //
     // Work stack initialization and exit

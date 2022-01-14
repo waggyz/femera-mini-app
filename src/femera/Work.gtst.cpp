@@ -19,8 +19,12 @@ private:
 public:
   fmr::Exit_int init     (int*, char**) noexcept override;
   fmr::Exit_int exit     (fmr::Exit_int err=0) noexcept override;
+#if 0
   Derived_t     get_task (fmr::Local_int i);
-  Derived_t     get_task (femera::Work::Task_path_t tree);
+  Derived_t     get_task (femera::Work::Task_path_t tree);//FIXME Replace w/below.
+#endif
+  T*     get_task (fmr::Local_int i);
+  T*     get_task (femera::Work::Task_path_t tree);
 private:
   T* derived (Base*);
 protected:// Make it clear that Base needs to be inherited.
@@ -74,6 +78,8 @@ fmr::Exit_int Base<T>::exit (fmr::Exit_int err) noexcept {
   catch (std::exception& e) { err = 42; }
   return err;
 }
+//FIXME Replace these =========================================================
+#if 0
 template <typename T> inline
 std::shared_ptr<T> Base<T>::get_task (const fmr::Local_int i) {
   return std::static_pointer_cast<T> (this->get_work (i));
@@ -81,7 +87,18 @@ std::shared_ptr<T> Base<T>::get_task (const fmr::Local_int i) {
 template <typename T> inline
 std::shared_ptr<T> Base<T>::get_task (const femera::Work::Task_path_t tree) {
   return std::static_pointer_cast<T> (this->get_work (tree));
-}//============================================================================
+}
+#endif
+//FIXME with these ------------------------------------------------------------
+template <typename T> inline
+T* Base<T>::get_task (const fmr::Local_int i) {
+  return static_cast<T*> (this->get_work_raw (i));
+}
+template <typename T> inline
+T* Base<T>::get_task (const femera::Work::Task_path_t tree) {
+  return static_cast<T*> (this->get_work_raw (tree));
+}
+//============================================================================
 auto testable = std::make_shared<Testable> ();
 auto another1 = std::make_shared<Testable> (testable->get_core());
 //-----------------------------------------------------------------------------
@@ -104,9 +121,9 @@ TEST( TestableWork, AddGetExitTask ) {
   EXPECT_EQ( testable->get_task_n(), 1u);
   EXPECT_EQ( another1.use_count(), 2u);
   {// Scope T0
-  auto T0 = testable->get_task(0u);// Work object in task_list, cast to derived
-  EXPECT_EQ( another1.use_count(), 3u);
-  EXPECT_EQ( typeid(T0), typeid(Testable_t));
+  auto T0 = testable->get_task(0u);// cast object in task_list to derived raw ptr
+  EXPECT_EQ( another1.use_count(), 2u);
+  EXPECT_NE( typeid(T0), typeid(Testable_t));// T* != shared_ptr<T>
   EXPECT_EQ( T0->name, "another");// derived instance Testable::name
   EXPECT_EQ( T0->Work::name, "another");
   EXPECT_EQ( T0->get_task_n(), 0u);
