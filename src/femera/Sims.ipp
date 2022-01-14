@@ -34,6 +34,7 @@ namespace femera {
     return (task_err > 0) ? task_err : err;
   }
 //FIXME Replace these =========================================================
+#ifdef FMR_REMOVE_STUFF
   template <typename T> inline
   std::shared_ptr<T> Sims<T>::get_task (const fmr::Local_int i) {
     return std::static_pointer_cast<T> (this->get_work (i));
@@ -42,14 +43,15 @@ namespace femera {
   std::shared_ptr<T> Sims<T>::get_task (const Work::Task_path_t path) {
     return std::static_pointer_cast<T> (this->get_work (path));
   }
+#   endif
 //FIXME with these ------------------------------------------------------------
   template <typename T> inline
   T* Sims<T>::get_task_raw (const fmr::Local_int i) {
-    return static_cast<T*> (this->get_work (i));
+    return static_cast<T*> (this->get_work_raw (i));
   }
   template <typename T> inline
   T* Sims<T>::get_task_raw (const Work::Task_path_t path) {
-    return static_cast<T*> (this->get_work (path));
+    return static_cast<T*> (this->get_work_raw (path));
   }
   //===========================================================================
   template <typename T> inline constexpr

@@ -12,8 +12,7 @@ namespace femera {
   noexcept {
     return std::make_tuple (this->proc, this->data, this->test);
   }
-#if 1
-//FIXME Replace these =========================================================
+# ifdef FMR_REMOVE_STUFF
   inline
   Work_t Work::get_work (const fmr::Local_int i)
   noexcept {

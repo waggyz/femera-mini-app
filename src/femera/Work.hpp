@@ -12,6 +12,12 @@
 #include <deque>
 #include <tuple>
 
+
+
+# undef FMR_REMOVE_STUFF
+
+
+
 namespace femera {
   // Forward-declares
   class Work;
@@ -79,8 +85,10 @@ namespace femera {
     Core_t get_core () noexcept;
   protected:
 //FIXME Replace these =========================================================
+# ifdef FMR_REMOVE_STUFF
     Work_t get_work (fmr::Local_int) noexcept;
     Work_t get_work (Task_path_t)    noexcept;
+#endif
 //FIXME with these ------------------------------------------------------------
     Work* get_work_raw (fmr::Local_int) noexcept;
     Work* get_work_raw (Task_path_t)    noexcept;

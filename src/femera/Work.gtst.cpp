@@ -79,7 +79,7 @@ fmr::Exit_int Base<T>::exit (fmr::Exit_int err) noexcept {
   return err;
 }
 //FIXME Replace these =========================================================
-#if 0
+# if 0
 template <typename T> inline
 std::shared_ptr<T> Base<T>::get_task (const fmr::Local_int i) {
   return std::static_pointer_cast<T> (this->get_work (i));

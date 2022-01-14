@@ -31,6 +31,7 @@ namespace femera {
     return err;
   }
 //FIXME Replace these =========================================================
+#ifdef FMR_REMOVE_STUFF
   template <typename T> inline
   std::shared_ptr<T> Data<T>::get_task (const fmr::Local_int i) {
     return std::static_pointer_cast<T> (this->get_work (i));
@@ -39,14 +40,15 @@ namespace femera {
   std::shared_ptr<T> Data<T>::get_task (const Work::Task_path_t tree) {
     return std::static_pointer_cast<T> (this->get_work (tree));
   }
+# endif
 //FIXME with these ------------------------------------------------------------
   template <typename T> inline
   T* Data<T>::get_task_raw (const fmr::Local_int i) {
-    return static_cast<T*> (this->get_work (i));
+    return static_cast<T*> (this->get_work_raw (i));
   }
   template <typename T> inline
   T* Data<T>::get_task_raw (const Work::Task_path_t tree) {
-    return static_cast<T*> (this->get_work (tree));
+    return static_cast<T*> (this->get_work_raw (tree));
   }
   //===========================================================================
   template <typename T> inline constexpr
