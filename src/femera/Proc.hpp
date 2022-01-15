@@ -29,7 +29,7 @@ namespace femera {
     static constexpr fmr::Local_int get_node_ix        ();
 #endif
     static constexpr fmr::Local_int get_node_core_n    ();
-    static constexpr fmr::Local_int get_node_hype_n    ();
+    static           fmr::Local_int get_node_hype_n    ();
     static           fmr::Local_int get_node_numa_n    ();
     static           fmr::Local_int get_node_core_ix   ();
     static           fmr::Local_int get_node_hype_ix   ();

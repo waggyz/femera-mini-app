@@ -1,15 +1,7 @@
 #ifndef FEMERA_HAS_PROC_IPP
 #define FEMERA_HAS_PROC_IPP
 
-
-#include <thread>     // hardware_concurrency (ncpu)
-//#include <sys/time.h> // rusage
-#include <sys/resource.h> //rusage
-
-#ifdef FMR_HAS_LIBNUMA
-//FIXME Move to proc.cpp and put helper femera::proc:: functions there.
-#include <numa.h>     // numa_node_of_cpu, numa_num_configured_nodes
-#endif
+#include "../fmr/proc.hpp"
 
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
@@ -103,52 +95,32 @@ namespace femera {
   }
 #endif
   template <typename T> inline constexpr
-  fmr::Local_int Proc<T>::get_node_core_n () {
-#ifdef FMR_CORE_N
-    return FMR_CORE_N ;
-#else
-    return Proc<T>::get_node_hype_n ();
-#endif
+  fmr::Local_int Proc<T>::get_node_core_n () {//NOTE physical+logical cores
+    return fmr::proc::get_node_core_n ();
   }
-  template <typename T> inline constexpr
+  template <typename T> inline
   fmr::Local_int Proc<T>::get_node_hype_n () {//NOTE physical+logical cores
-    return fmr::Local_int (std::thread::hardware_concurrency());
+    return fmr::proc::get_node_hype_n ();
   }
   template <typename T> inline
   fmr::Local_int Proc<T>::get_node_core_ix () {
-    return fmr::Local_int (fmr::Local_int (::sched_getcpu())
-      % Proc<T>::get_node_core_n ());
+    return fmr::proc::get_node_core_ix ();
   }
   template <typename T> inline
   fmr::Local_int Proc<T>::get_node_hype_ix () {
-    return fmr::Local_int (fmr::Local_int (::sched_getcpu()));
+    return fmr::proc::get_node_hype_ix ();
   }
-#ifdef FMR_HAS_LIBNUMA
   template <typename T> inline
   fmr::Local_int Proc<T>::get_node_numa_ix () {
-    if (::numa_available() != -1){return ::numa_node_of_cpu (::sched_getcpu());}
-  return 0;
+    return fmr::proc::get_node_numa_ix ();
   }
   template <typename T> inline
   fmr::Local_int Proc<T>::get_node_numa_n () {
-    if (::numa_available() != -1){return ::numa_num_configured_nodes(); }
-  return 1;
+    return fmr::proc::get_node_numa_n ();
   }
-#else
-  template <typename T> inline
-  fmr::Local_int Proc<T>::get_node_numa_ix () {
-    return fmr::Local_int (0);
-  }
-  template <typename T> inline constexpr
-  fmr::Local_int Proc<T>::get_node_numa_n () {
-    return fmr::Local_int (1);
-  }
-#endif
   template <typename T> inline
   fmr::Global_int Proc<T>::get_node_used_byte () {
-    rusage r;
-    getrusage (RUSAGE_SELF, & r);
-    return fmr::Global_int (r.ru_maxrss * 1024);
+    return fmr::proc::get_node_used_byte ();
   }
 }// end femera:: namespace
 

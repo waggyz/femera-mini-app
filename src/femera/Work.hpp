@@ -49,7 +49,6 @@ namespace femera {
     using Task_list_t = std::deque <Work_t>;
     using Task_path_t = std::vector<fmr::Local_int>;
     using Task_tree_t = std::vector<Task_path_t>;
-//    using      Core_t = std::tuple <Main_t,File_t,Beds_t>;
     using      Core_t = std::tuple <proc::Main*,data::File*,test::Beds*>;
   public:// Variables ---------------------------------------------------------
     fmr::perf::Meter time = fmr::perf::Meter ();
@@ -70,19 +69,20 @@ namespace femera {
     virtual fmr::Exit_int exit (fmr::Exit_int err=0)    noexcept =0;
     //
 //TODO    Task_tree_t   get_tree   () noexcept;
-    fmr::Local_int add_task   (Work_t) noexcept;// returns task number
-    fmr::Local_int get_task_n ()       noexcept;
-/*  Derived_t      get_task   (fmr::Local_int) in Derived and returns that type
-    Derived_t      new_task   ()                     ""
-    Derived_t      new_task   (Core_t)               ""
-    */
+    fmr::Local_int get_task_n   ()       noexcept;
+    fmr::Local_int add_task     (Work_t) noexcept;// returns task number added
+/*  Derived_t      new_task     ()// in Derived and returns that smart pointer
+    Derived_t      new_task     (Core_t)        //           ""
+    Derived_t      get_task_spt (fmr::Local_int)//           ""
+    Derived*       get_task_raw (fmr::Local_int)// returns Derived* raw pointer
+*/
     Core_t get_core () noexcept;
   protected:
     Work*  get_work_raw (fmr::Local_int) noexcept;
     Work*  get_work_raw (Task_path_t)    noexcept;
-    // above called by Derived::get_task(..)
     Work_t get_work_spt (fmr::Local_int) noexcept;
     Work_t get_work_spt (Task_path_t)    noexcept;
+    // above called by Derived::get_task_*(..)
     //
     // Work stack initialization and exit
     fmr::Exit_int init_list (int* argc, char** argv) noexcept;// init forward
