@@ -18,7 +18,7 @@ TEST( Jobs, TaskName ){
 }
 TEST( Jobs, CoreNames ){
   EXPECT_EQ( jobs.init (&dummy_argc,&dummy_argv[0]), 0);
-  EXPECT_EQ( jobs.proc->name, "processing environment" );
+  EXPECT_EQ( jobs.proc->name, "processing" );
   EXPECT_EQ( jobs.data->name, "file handler" );
   EXPECT_EQ( jobs.test->name, "testbeds" );
 }

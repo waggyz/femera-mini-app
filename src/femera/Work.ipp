@@ -74,8 +74,12 @@ namespace femera {
 #ifdef FMR_DEBUG
         printf ("Work: init list %s\n", W->name.c_str());
 #endif
+        W->time.add_idle_time_now ();
         const int Werr = W->init (argc, argv); // is noexcept
         err = (Werr == 0) ? err : Werr;
+        W->time.add_busy_time_now ();
+        printf ("init %20s busy %f of %f s\n", W->name.c_str(),
+          double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
 #if 0
         printf ("Work: init done %s\n", W->name.c_str());
 #endif

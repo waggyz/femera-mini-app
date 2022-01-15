@@ -1,15 +1,15 @@
-#include "Ftop.hpp"
+#include "Root.hpp"
 
 #include "gtest/gtest.h"
 
 
-auto test_top = femera::proc::Ftop
+auto test_top = femera::proc::Root
   (femera::Work::Core_t (nullptr,nullptr,nullptr));
 
-TEST( Ftop, TaskName ){
+TEST( Root, TaskName ){
   EXPECT_EQ( test_top.name, "top" );
 }
-TEST( Ftop, SizeofGtstGE120 ){
+TEST( Root, SizeofGtstGE120 ){
   EXPECT_GE( sizeof(test_top), 120 );
 }
 fmr::Exit_int main (int argc, char** argv) {

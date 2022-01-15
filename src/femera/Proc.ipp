@@ -20,7 +20,7 @@ namespace femera {
     catch (const Errs& e) { err = 1; e.print (); }
     catch (std::exception& e) { err = exit (1); }
     catch (...) { err = exit (2); }
-    init_list (argc, argv);// then init the list.
+    init_list (argc, argv);// then init the sub-tasks.
 #if 0
     this->proc_n = this->get_proc_n ();
 #endif
@@ -28,7 +28,7 @@ namespace femera {
   }
   template <typename T> inline
   fmr::Exit_int Proc<T>::exit (fmr::Exit_int err) noexcept {
-    exit_tree ();   // Exit the task tree (is noexceptt),
+    exit_tree ();   // Exit the task tree (is noexcept),
     if (err>0) {return err;}// then exit this derived task.
     fmr::Exit_int task_err =0;
     try { Proc::derived (this)->task_exit (); }
@@ -95,11 +95,11 @@ namespace femera {
   }
 #endif
   template <typename T> inline constexpr
-  fmr::Local_int Proc<T>::get_node_core_n () {//NOTE physical+logical cores
+  fmr::Local_int Proc<T>::get_node_core_n () {// physical cores
     return fmr::proc::get_node_core_n ();
   }
   template <typename T> inline
-  fmr::Local_int Proc<T>::get_node_hype_n () {//NOTE physical+logical cores
+  fmr::Local_int Proc<T>::get_node_hype_n () {// physical+logical cores
     return fmr::proc::get_node_hype_n ();
   }
   template <typename T> inline

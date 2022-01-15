@@ -1,5 +1,11 @@
 #include "Work.hpp"
 
+
+
+#include <cstdio>     // std::printf
+
+
+
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
 #include <cstdio>     // std::printf
@@ -16,12 +22,16 @@ namespace femera {
 #ifdef FMR_DEBUG
         printf ("Work: exit list %s\n", W->name.c_str());
 #endif
+        W->time.add_idle_time_now ();
         const fmr::Exit_int Werr = W->exit (err);// is noexcept
         err = (Werr == 0) ? err : Werr;
 #if 0
         printf ("Work: exit list %s\n", W->name.c_str());
 #endif
       }
+      W->time.add_busy_time_now ();
+      printf ("exit %20s busy %f of %f s\n", W->name.c_str(),
+        double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
       this->task_list.pop_back ();
     }
     return err;
@@ -47,8 +57,12 @@ namespace femera {
 #ifdef FMR_DEBUG
           printf ("Work: exit leaf %s\n", W->task_list.back()->name.c_str());
 #endif
+          W->time.add_idle_time_now ();
           const fmr::Exit_int Werr = W->task_list.back()->exit (err);
           err = (Werr == 0) ? err : Werr;
+          W->time.add_busy_time_now ();
+          printf ("exit %20s busy %f of %f s\n", W->name.c_str(),
+            double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
           W->task_list.pop_back ();
           branch.pop_back ();
       } }

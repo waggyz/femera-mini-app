@@ -2,14 +2,9 @@
 
 #include "gtest/gtest.h"
 
-int main (int argc, char** argv) {
-  return femera::test:: early_main (&argc, argv);
-}
-
 TEST(EarlyProc, IsOK) {
   EXPECT_EQ( 1, 1);
 }
-
 TEST(Proc, NodeCoreN) {
   EXPECT_GE( femera::Proc<femera::Work>::get_node_core_n (), 1);
 #ifdef FMR_CORE_N
@@ -19,25 +14,28 @@ TEST(Proc, NodeCoreN) {
     femera::Proc<femera::Work>::get_node_hype_ix () );
 #endif
 }
-TEST(Proc, NodeHypeN) {
+TEST(ProcNode, NodeHypeN) {
   EXPECT_GE( femera::Proc<femera::Work>::get_node_hype_n (),
     femera::Proc<femera::Work>::get_node_core_n ());
 }
-TEST(Proc, NodeNumaN) {
-  EXPECT_GE( femera::Proc<femera::Work>::get_node_core_n (), 1);
+TEST(ProcNode, NodeNumaN) {
+  EXPECT_GE( femera::Proc<femera::Work>::get_node_numa_n (), 1);
 }
-TEST(Proc, NodeCoreIx) {
+TEST(ProcNode, NodeCoreIx) {
   EXPECT_LT( femera::Proc<femera::Work>::get_node_core_ix (),
     femera::Proc<femera::Work>::get_node_core_n ());
 }
-TEST(Proc, NodeHypeIx) {
+TEST(ProcNode, NodeHypeIx) {
   EXPECT_LT( femera::Proc<femera::Work>::get_node_hype_ix (),
     femera::Proc<femera::Work>::get_node_hype_n ());
 }
-TEST(Proc, NodeNumaIx) {
+TEST(ProcNode, NodeNumaIx) {
   EXPECT_LT( femera::Proc<femera::Work>::get_node_numa_ix (),
     femera::Proc<femera::Work>::get_node_numa_n ());
 }
-TEST(Proc, NodeUsedByte) {
-  EXPECT_GT( femera::Proc<femera::Work>::get_node_used_byte (), 0);
+TEST(ProcNode, NodeUsedByte) {
+  EXPECT_GT( femera::Proc<femera::Work>::get_node_used_byte (), 1000);
+}
+int main (int argc, char** argv) {
+  return femera::test:: early_main (&argc, argv);
 }

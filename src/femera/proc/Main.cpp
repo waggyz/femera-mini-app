@@ -1,5 +1,5 @@
 #include "Main.hpp"
-#include "Ftop.hpp"
+#include "Root.hpp"
 #include "Fcpu.hpp"
 
 #ifdef FMR_HAS_MPI
@@ -18,7 +18,7 @@ namespace femera {
   void proc::Main:: task_init (int*, char**) {
     const auto core = this->get_core();
     std::vector<fmr::Local_int> path ={};
-    path.push_back (this->add_task (Proc<proc::Ftop>::new_task (core)));
+    path.push_back (this->add_task (Proc<proc::Root>::new_task (core)));
 #ifdef FMR_HAS_MPI
     path.push_back (get_task_raw(path)->add_task (Proc<proc::Fmpi>::new_task (core)));
 #endif

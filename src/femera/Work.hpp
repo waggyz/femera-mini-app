@@ -19,7 +19,7 @@ namespace femera {
   template <typename> class Data;// class File;
   template <typename> class Test;// class Beds;
   template <typename> class Sims;
-  namespace proc { class Main; class Ftop; class Fmpi; class Fomp; class Fcpu; }
+  namespace proc { class Main; class Root; class Fmpi; class Fomp; class Fcpu; }
   namespace data { class File; class Logs; }// class Type; class Base; }//TODO Fake -> Base?
   namespace test { class Beds; class Unit; class Self; class Perf; class Gtst; }
   namespace sims { class Jobs; }
@@ -27,7 +27,7 @@ namespace femera {
   using Work_t = std::shared_ptr <Work>;
   //
   using Main_t = std::shared_ptr <proc::Main>;// concrete Proc interface
-  using Ftop_t = std::shared_ptr <proc::Ftop>;//FIXME should others be visible
+  using Root_t = std::shared_ptr <proc::Root>;//FIXME should others be visible
   using Fmpi_t = std::shared_ptr <proc::Fmpi>;//      oustside of their parent
   using Fomp_t = std::shared_ptr <proc::Fomp>;//      class?
   using Fcpu_t = std::shared_ptr <proc::Fcpu>;

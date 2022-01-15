@@ -4,17 +4,17 @@
 #include "../Proc.hpp"
 
 namespace femera { namespace proc {
-  class Ftop;// Derive a CRTP concrete class from Proc.
-  class Ftop : public Proc<Ftop> {
+  class Root;// Derive a CRTP concrete class from Proc.
+  class Root : public Proc<Root> {
   public:
-    Ftop (femera::Work::Core_t) noexcept;
-    Ftop () =delete;//NOTE Use the constructor above.
+    Root (femera::Work::Core_t) noexcept;
+    Root () =delete;//NOTE Use the constructor above.
     void task_init (int* argc, char** argv);
     void task_exit ();
   };
 } }//end femera::proc:: namespace
 
-#include "Ftop.ipp"
+#include "Root.ipp"
 
 //end FEMERA_FTOP_HPP
 #endif
