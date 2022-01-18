@@ -339,6 +339,9 @@ FMROUTS:= $(patsubst src/%.gtst.cpp,$(BUILD_CPU)/%.gtst.out,$(FMRGTST))
 #      while first running make tools?
 .PRECIOUS: $(INSTALL_DIR)/bin/ build/%.gtst
 
+# Compile and add the exception handler (Errs) to libfemera early.
+$(BUILD_CPU)/femera/Test.o : $(LIBFEMERA)($(BUILD_CPU)/femera/Errs.o)
+
 # Primary named targets -------------------------------------------------------
 # These are intended for users.
 # Many launch parallel make jobs to simplify command-line use.
@@ -783,9 +786,6 @@ else
 	touch $@
 endif
 
-# Compile the exception handler (Errs) early.
-$(BUILD_CPU)/femera/Test.o : $(LIBFEMERA)($(BUILD_CPU)/femera/Errs.o)
-
 # Use GoogleTest compiler flags to avoid exessive warnings.
 $(BUILD_CPU)/femera/test/Gtst.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/femera/test/Gtst.o : src/femera/test/Gtst.cpp \
@@ -950,14 +950,20 @@ endif
 
 src/docs/src-notest.dot: src/docs/src.dot
 	@grep -v '\.gtst\.' $< > $@
+
+src/docs/src-headers.dot: src/docs/src.dot
+	@grep -v '\.cpp' $< | grep -v '\.ipp' > $@
 	#(info $(INFO) Dependencies without tests: $@)
 
+build/src-notest.eps: src/docs/src-headers.dot
 build/src-notest.eps: src/docs/src-notest.dot tools/src-inherit.sh
 ifeq ($(ENABLE_DOT),ON)
 	@tools/src-inherit.sh
 	@dot $< -Gsize="6.0,3.0" -Teps -o $@
+	@dot src/docs/src-headers.dot -Gsize="12.0,6.0" -Teps -o build/src-headers.eps
 ifeq ($(ENABLE_DOT_PNG),ON)
 	@dot $< -Gsize="12.0,6.0" -Tpng -o build/src-notest.png
+	@dot src/docs/src-headers.dot -Gsize="12.0,6.0" -Tpng -o build/src-headers.png
 endif
 	#  -Gratio="fill" -Gsize="11.7,8.267!" -Gmargin=0
 	$(info $(INFO) dependency graph: $@)

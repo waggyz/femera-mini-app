@@ -18,28 +18,28 @@ namespace femera {
     this->name ="MPI";
     this->info_d = 3;
     this->team_id = proc::Team_t (MPI_COMM_WORLD);
-    this-> version =
+    this->version =
       std::to_string( MPI_VERSION )
       +std::string(".")
       +std::to_string( MPI_SUBVERSION );
   }
-  bool proc::Fmpi::is_mpi_init () {
+  bool proc::Fmpi::did_mpi_init () {
     int is_init=0;
     int err = MPI_Initialized (& is_init);
     //FIXME Be careful handling errors to shut down MPI properly before exit.
-    //if (err) { FMR_THROW("proc::Fmpi::is_mpi_init() failed"); }
+    //if (err) { FMR_THROW("proc::Fmpi::did_mpi_init() failed"); }
     return bool (err) | bool (is_init);
   }
   fmr::Local_int proc::Fmpi::task_proc_n () {int err=0, tmp_proc_n=0;
-    err= MPI_Comm_size(MPI_Comm(this->team_id) ,& tmp_proc_n  );
-    if( err ){return 1; }
+    err= MPI_Comm_size( MPI_Comm (this->team_id), & tmp_proc_n  );
+    if (err) {return 1; }
     this->proc_n = fmr::Local_int (tmp_proc_n);
     return this->proc_n;
   }
   fmr::Local_int proc::Fmpi::task_proc_ix () {int err =0;
-    if (this->is_mpi_init ()) {
+    if (this->did_mpi_init ()) {
       int proc_i =0;
-      err= MPI_Comm_rank( MPI_Comm(this->team_id),& proc_i );
+      err= MPI_Comm_rank( MPI_Comm (this->team_id),& proc_i );
       if (err) {return 0; }
       this->proc_ix = fmr::Local_int (proc_i);
     }
@@ -47,27 +47,27 @@ namespace femera {
   }
   void proc::Fmpi::task_init (int* argc, char** argv){ int err=0;
 //  fmr::perf:: timer_resume (&this->time);
-  if (sizeof(this->team_id) != sizeof(MPI_Comm)){
+  if (sizeof (this->team_id) != sizeof (MPI_Comm)){
     std::fprintf (stderr,
       "WARNING sizeof (Proc::team_id) is %lu but should be %lu\n",
-      sizeof(this->team_id), sizeof(MPI_Comm) );
+      sizeof (this->team_id), sizeof (MPI_Comm) );
   }
-  if (sizeof(this->mpi_required) != sizeof(MPI_THREAD_SERIALIZED)){
+  if (sizeof (this->mpi_required) != sizeof (MPI_THREAD_SERIALIZED)){
     std::fprintf (stderr,
       "WARNING sizeof (Proc::mpi_required) is %lu but should be %lu\n",
-      sizeof(this->mpi_required), sizeof(MPI_Comm) );
+      sizeof (this->mpi_required), sizeof (MPI_Comm) );
   }
-  if (is_mpi_init ()) {
+  if (did_mpi_init ()) {
     this->do_final_on_exit = false;
     std::printf ("MPI is already initialized.\n");
   }
-  if (!err && !is_mpi_init ()) {
+  if (!err && !did_mpi_init ()) {
     err= MPI_Init_thread( argc,&argv, this->mpi_required, &this->mpi_provided);
 #ifdef FMR_DEBUG
-    std::printf("%u:Fmpi::task_init (%i) start...\n", this->get_proc_i(),err);
+    std::printf("%u:Fmpi::task_init (%i) start...\n", this->get_proc_ix(),err);
 #endif
   }
-  if (is_mpi_init ()) {
+  if (did_mpi_init ()) {
     MPI_Comm comm =nullptr;
     if( !err ){// Good practice: use a copy of MPI_COMM_WORLD.
       err= MPI_Comm_dup (MPI_COMM_WORLD, &comm);// exit_task() frees this
@@ -93,9 +93,9 @@ namespace femera {
 #endif
   err=0;// Exit from mpi normally when Femera exits on error.
 FMR_PRAGMA_OMP(omp master)
-  if (is_mpi_init ()) {
+  if (did_mpi_init ()) {
     const auto proc_i = this->task_proc_ix ();
-    if (this->team_id != proc::Team_t (MPI_COMM_WORLD) ) {
+    if (this->team_id != proc::Team_t (MPI_COMM_WORLD)) {
       if (this->team_id) {
 #ifdef FMR_DEBUG
         std::printf("%u:Fmpi::task exit MPI_Comm_free (%lu)...\n",

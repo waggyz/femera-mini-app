@@ -10,11 +10,11 @@ namespace femera { namespace proc {
   class Fmpi : public Proc<Fmpi> {
   private:
     //proc::Team_t comm      = 0; default: MPI_COMM_WORLD (in Proc)
-    int       mpi_required = 0;// default: MPI_THREAD_SERIALIZED
-    int       mpi_provided = 0;//TODO rqrd_mpi_thrd, prvd_mpi_thrd ?
-    bool do_final_on_exit  = true;
+    int      mpi_required = 0;// default: MPI_THREAD_SERIALIZED
+    int      mpi_provided = 0;//TODO rqrd_mpi_thrd, prvd_mpi_thrd ?
+    bool do_final_on_exit = true;
   private:
-    bool is_mpi_init ();
+    bool did_mpi_init ();
 //    Team_t get_team_id () noexcept;
     fmr::Local_int task_proc_n ();
     fmr::Local_int task_proc_ix ();

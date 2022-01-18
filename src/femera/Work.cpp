@@ -34,7 +34,7 @@ namespace femera {
   fmr::Exit_int Work::exit_list ()
   noexcept { fmr::Exit_int err =0;
     while (! this->task_list.empty ()) {
-      auto W = this->task_list.back ().get();// Exit in reverse order.
+      auto W = this->task_list.back().get ();// Exit in reverse order.
       if (W != nullptr) {
 #ifdef FMR_DEBUG
         printf ("Work: exit list %s\n", W->name.c_str());
@@ -60,14 +60,10 @@ namespace femera {
 #endif
     auto W = this;
     while (! W->task_list.empty ()) {// Go to the bottom of the hierarchy.
-//      if (W->name != "processing") {//FIXME magic name
-//      if (W != this) {
-      if (true) {
-        branch.push_back (W->get_task_n () - 1);
+      branch.push_back (W->get_task_n () - 1);
 #ifdef FMR_DEBUG
-        printf ("Work: exit down (%u tasks) %s\n",W->get_task_n(),W->name.c_str());
+      printf ("Work: exit down (%u tasks) %s\n",W->get_task_n(),W->name.c_str());
 #endif
-      }
       W = W->task_list.back ().get();
     }
     if ( W != nullptr){// && W != this) {
@@ -101,35 +97,6 @@ namespace femera {
           if (W!=this) {this->exit_tree();}
         }
     } }
-#if 0
-    if (! branch.empty()) {
-      W = this->get_work_raw (branch);
-      if ( W != nullptr) {
-#ifdef FMR_DEBUG
-        printf ("Work: exit branch %s\n", W->name.c_str());
-#endif
-        const fmr::Exit_int Werr = W->exit_list ();
-        err = (Werr == 0) ? err : Werr;
-        branch.pop_back ();
-        if (! branch.empty()) {
-          W = this->get_work_raw (branch);
-          if ( W != nullptr) {
-#ifdef FMR_DEBUG
-            printf ("Work: removing %s...\n", W->task_list.back ()->name.c_str());
-#endif
-            W->task_list.pop_back ();
-      } } }
-      this->time.add_idle_time_now ();
-      const auto Werr = this->exit (err);
-      err = (Werr == 0) ? err : Werr;
-      this->time.add_busy_time_now ();
-      if (this->proc != nullptr) {
-        printf ("%u:%20s exit busy %f / %f s\n",
-          this->proc->get_proc_ix (), this->name.c_str(),
-          double (this->time.get_busy_s ()), double (this->time.get_work_s ()) );
-      }
-    }
-#endif
   return err;
   }
 }//end femera:: namespace

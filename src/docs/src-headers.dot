@@ -1,0 +1,35 @@
+digraph "source tree" {
+    overlap=scale;
+    size="8,10";
+    ratio="fill";
+    fontsize="16";
+    fontname="Helvetica";
+	clusterrank="local";
+	"femera.hpp" -> "Jobs.hpp"
+	"Meter.hpp" -> "perf.hpp"
+	"Sims.hpp" -> "Work.hpp"
+	"Work.hpp" -> "Errs.hpp"
+	"proc.hpp" -> "fmr.hpp"
+	"Root.hpp" -> "Proc.hpp"
+	"core.h" -> "Main.hpp"
+	"perf.hpp" -> "fmr.hpp"
+	"Fmpi.hpp" -> "Proc.hpp"
+	"Test.hpp" -> "Work.hpp"
+	"Fcpu.hpp" -> "Proc.hpp"
+	"Fomp.hpp" -> "Proc.hpp"
+	"core.h" -> "File.hpp"
+	"Logs.hpp" -> "Data.hpp"
+	"core.h" -> "Beds.hpp"
+	"Errs.hpp" -> "fmr.hpp"
+	"Node.hpp" -> "Proc.hpp"
+	"Jobs.hpp" -> "Sims.hpp"
+	"File.hpp" -> "Data.hpp"
+	"Beds.hpp" -> "Test.hpp"
+	"Proc.hpp" -> "Work.hpp"
+	"form.hpp" -> "fmr.hpp"
+	"Gtst.hpp" -> "Test.hpp"
+	"Data.hpp" -> "Work.hpp"
+	"femera.hpp" -> "core.h"
+	"Work.hpp" -> "Meter.hpp"
+	"Main.hpp" -> "Proc.hpp"
+}

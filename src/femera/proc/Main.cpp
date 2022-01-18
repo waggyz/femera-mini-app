@@ -34,8 +34,8 @@ namespace femera {
 #ifdef FMR_HAS_OMP
 #if 1
     // Add thread-local Fomp instances.
-    const fmr::Local_int n = 1+1;//FIXME get from command arg
-    FMR_PRAGMA_OMP(omp for schedule(static) ordered)
+    const fmr::Local_int n = 2;//FIXME get from command arg
+    FMR_PRAGMA_OMP(omp parallel for schedule(static) ordered num_threads(n))
     for (fmr::Local_int i=0; i<n; i++) {
       FMR_PRAGMA_OMP(omp ordered)
       path.push_back (get_task_raw (path)->add_task
