@@ -75,28 +75,30 @@ namespace femera {
       printf ("Work: exit branch 1 %s\n", W->name.c_str());
 #endif
       W->time.add_idle_time_now ();
-//      err= W->exit(err);
+      err= W->exit (err);// is noexcept
+#if 0
       const fmr::Exit_int Werr = W->exit (err);// is noexcept
       err = (Werr == 0) ? err : Werr;
+#endif
       W->time.add_busy_time_now ();
       if (this->proc != nullptr) {
         printf ("%u:%20s exit busy %f / %f s\n",
           this->proc->get_proc_ix (), W->name.c_str(),
           double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
     } }
-    if(!branch.empty()){
+    if (!branch.empty()) {
       branch.pop_back ();
-      if(!branch.empty()){
+      if (!branch.empty()) {
         W=this->get_work_raw (branch);
         if (W !=nullptr) {
 #ifdef FMR_DEBUG
           printf ("Work: exit pop %s\n", W->task_list.back()->name.c_str());
 #endif
-          if(!W->task_list.empty()){W->task_list.pop_back();}
+          if (!W->task_list.empty()) {W->task_list.pop_back();}
 #ifdef FMR_DEBUG
           printf ("Work: exit this %s\n", this->name.c_str());
 #endif
-          if(W!=this){this->exit_tree();}
+          if (W!=this) {this->exit_tree();}
         }
     } }
 #if 0

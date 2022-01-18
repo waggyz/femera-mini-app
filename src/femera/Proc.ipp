@@ -19,8 +19,8 @@ namespace femera {
     fmr::Exit_int err=0;
     try { Proc::derived (this)->task_init (argc, argv); }// Init this task,...
     catch (const Errs& e) { err = 1; e.print (); }
-    catch (std::exception& e) { err = exit (1); }
-    catch (...) { err = exit (2); }
+    catch (std::exception& e) { err = 1;}
+    catch (...) { err = 2;}
     this->init_list (argc, argv);// ...then init the sub-tasks.
 #if 0
     this->proc_n = this->get_proc_n ();
@@ -38,7 +38,7 @@ namespace femera {
     try { Proc::derived (this)->task_exit (); }
     catch (const Errs& e) { task_err = 1; e.print (); }
     catch (std::exception& e) { task_err = 2; }
-    catch (...) { task_err = exit (3); }
+    catch (...) { task_err = 3; }
     return (task_err > 0) ? task_err : err;
   }
   template <typename T> inline
