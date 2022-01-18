@@ -5,7 +5,7 @@ namespace femera {
   inline
   proc::Root::Root (femera::Work::Core_t W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
-    this->name ="top";
+    this->name ="root process";
     this->info_d = 3;
   }
   inline

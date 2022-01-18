@@ -9,9 +9,9 @@ namespace femera {
     this->info_d = 2;
   }
   inline
-  void data::File::task_init (int*, char**){}
-  inline
-  void data::File::task_exit () {}
+  void data::File::task_exit () {
+//    this->log =nullptr;
+  }
 }//end femera namespace
 
 //end FEMERA_FILE_IPP

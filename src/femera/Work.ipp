@@ -21,7 +21,9 @@ namespace femera {
   Work_t Work::get_work_spt (const Work::Task_path_t path)
   noexcept {
     Work_t W = nullptr;
+    auto Wraw = this;
     const auto sz = path.size();
+#if 0
     if (sz > 0) {
       if (path[0] < this->get_task_n()) {
         W = this->get_work_spt (path[0]);
@@ -31,6 +33,14 @@ namespace femera {
               if (path[i] < W->get_task_n()) { W = W->get_work_spt (path[i]); }
               else { W = nullptr; }
     } } } } }
+#else
+    if (sz > 0) {
+      for (fmr::Local_int i = 0; i < sz; i++) {
+        if (Wraw != nullptr) {
+          W = W->get_work_spt (path[i]);
+          Wraw = W.get();
+    } } }
+#endif
     return W;
   }
   inline
@@ -41,6 +51,14 @@ namespace femera {
   inline
   Work* Work::get_work_raw (const Work::Task_path_t path)
   noexcept {
+    auto W = this;
+    const auto sz = path.size ();
+    if (sz > 0) {
+      for (fmr::Local_int i = 0; i < sz; i++) {
+        if (W != nullptr) {
+          W = W->get_work_raw (path[i]);
+    } } }
+#if 0
     Work* W = nullptr;
     const auto sz = path.size();
     if (sz > 0) {
@@ -52,6 +70,7 @@ namespace femera {
               if (path[i] < W->get_task_n()) { W = W->get_work_raw (path[i]); }
               else { W = nullptr; }
     } } } } }
+#endif
     return W;
   }
   //===========================================================================
@@ -66,25 +85,6 @@ namespace femera {
   noexcept {
     return fmr::Local_int (this->task_list.size ());
   }
-  inline
-  fmr::Exit_int Work::init_list (int* argc, char** argv)
-  noexcept {fmr::Exit_int err =0;
-    for (auto W : this->task_list) {// Init task_list forward.
-      if (W != nullptr) {
-#ifdef FMR_DEBUG
-        printf ("Work: init list %s\n", W->name.c_str());
-#endif
-        W->time.add_idle_time_now ();
-        const int Werr = W->init (argc, argv); // is noexcept
-        err = (Werr == 0) ? err : Werr;
-        W->time.add_busy_time_now ();
-        printf ("init %20s busy %f of %f s\n", W->name.c_str(),
-          double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
-#if 0
-        printf ("Work: init done %s\n", W->name.c_str());
-#endif
-  } }
-  return err; }
 }//end femera:: namespace
 
 #undef FMR_DEBUG

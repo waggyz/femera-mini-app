@@ -1,5 +1,4 @@
-#include "Work.hpp"
-
+#include "core.h"
 
 
 #include <cstdio>     // std::printf
@@ -14,6 +13,24 @@
 femera::Work::~Work (){}
 
 namespace femera {
+  fmr::Exit_int Work::init_list (int* argc, char** argv)
+  noexcept {fmr::Exit_int err =0;
+    for (auto W : this->task_list) {// Init task_list forward.
+      if (W != nullptr) {
+#ifdef FMR_DEBUG
+        printf ("Work: init list %s\n", W->name.c_str());
+#endif
+        W->time.add_idle_time_now ();
+        const int Werr = W->init (argc, argv); // is noexcept
+        err = (Werr == 0) ? err : Werr;
+        W->time.add_busy_time_now ();
+        if (this->proc != nullptr) {
+          printf ("%u:%20s init busy %f / %f s\n",
+            this->proc->get_proc_ix (), W->name.c_str(),
+            double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
+  } } }
+  return err;
+  }
   fmr::Exit_int Work::exit_list ()
   noexcept { fmr::Exit_int err =0;
     while (! this->task_list.empty ()) {
@@ -25,13 +42,12 @@ namespace femera {
         W->time.add_idle_time_now ();
         const fmr::Exit_int Werr = W->exit (err);// is noexcept
         err = (Werr == 0) ? err : Werr;
-#if 0
-        printf ("Work: exit list %s\n", W->name.c_str());
-#endif
-      }
-      W->time.add_busy_time_now ();
-      printf ("exit %20s busy %f of %f s\n", W->name.c_str(),
-        double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
+        W->time.add_busy_time_now ();
+        if (this->proc != nullptr) {
+          printf ("%u:%20s exit busy %f / %f s\n",
+            this->proc->get_proc_ix (), W->name.c_str(),
+            double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
+      } }
       this->task_list.pop_back ();
     }
     return err;
@@ -42,37 +58,75 @@ namespace femera {
 #ifdef FMR_DEBUG
     printf ("Work: exit tree %s [%lu]\n", this->name.c_str(), task_list.size());
 #endif
-    while (! this->task_list.empty ()) {
-      auto W = this->task_list.back ().get();
-      if ( W == nullptr ){ W->task_list.pop_back (); }
-      else {// Go to the bottom of the hierarchy.
-        while (! W->task_list.empty ()) {
-          if ( W->task_list.back () == nullptr ){ W->task_list.pop_back (); }
-          else {
-            branch.push_back (W->get_task_n () - 1);
-            W = W->task_list.back ().get();
-        } }
-        while (! branch.empty ()) {
-          W = this->get_work_raw (branch);
+    auto W = this;
+    while (! W->task_list.empty ()) {// Go to the bottom of the hierarchy.
+//      if (W->name != "processing") {//FIXME magic name
+//      if (W != this) {
+      if (true) {
+        branch.push_back (W->get_task_n () - 1);
 #ifdef FMR_DEBUG
-          printf ("Work: exit leaf %s\n", W->task_list.back()->name.c_str());
+        printf ("Work: exit down (%u tasks) %s\n",W->get_task_n(),W->name.c_str());
 #endif
-          W->time.add_idle_time_now ();
-          const fmr::Exit_int Werr = W->task_list.back()->exit (err);
-          err = (Werr == 0) ? err : Werr;
-          W->time.add_busy_time_now ();
-          printf ("exit %20s busy %f of %f s\n", W->name.c_str(),
-            double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
-          W->task_list.pop_back ();
-          branch.pop_back ();
-      } }
-#if 0
-      printf ("Work: exit tree %s\n", this->task_list.back()->name.c_str());
-#endif
-    this->task_list.pop_back (); 
+      }
+      W = W->task_list.back ().get();
     }
+    if ( W != nullptr){// && W != this) {
+#ifdef FMR_DEBUG
+      printf ("Work: exit branch 1 %s\n", W->name.c_str());
+#endif
+      W->time.add_idle_time_now ();
+//      err= W->exit(err);
+      const fmr::Exit_int Werr = W->exit (err);// is noexcept
+      err = (Werr == 0) ? err : Werr;
+      W->time.add_busy_time_now ();
+      if (this->proc != nullptr) {
+        printf ("%u:%20s exit busy %f / %f s\n",
+          this->proc->get_proc_ix (), W->name.c_str(),
+          double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
+    } }
+    if(!branch.empty()){
+      branch.pop_back ();
+      if(!branch.empty()){
+        W=this->get_work_raw (branch);
+        if (W !=nullptr) {
+#ifdef FMR_DEBUG
+          printf ("Work: exit pop %s\n", W->task_list.back()->name.c_str());
+#endif
+          if(!W->task_list.empty()){W->task_list.pop_back();}
+#ifdef FMR_DEBUG
+          printf ("Work: exit this %s\n", this->name.c_str());
+#endif
+          if(W!=this){this->exit_tree();}
+        }
+    } }
 #if 0
-  printf ("Work: exit base %s\n", this->name.c_str());
+    if (! branch.empty()) {
+      W = this->get_work_raw (branch);
+      if ( W != nullptr) {
+#ifdef FMR_DEBUG
+        printf ("Work: exit branch %s\n", W->name.c_str());
+#endif
+        const fmr::Exit_int Werr = W->exit_list ();
+        err = (Werr == 0) ? err : Werr;
+        branch.pop_back ();
+        if (! branch.empty()) {
+          W = this->get_work_raw (branch);
+          if ( W != nullptr) {
+#ifdef FMR_DEBUG
+            printf ("Work: removing %s...\n", W->task_list.back ()->name.c_str());
+#endif
+            W->task_list.pop_back ();
+      } } }
+      this->time.add_idle_time_now ();
+      const auto Werr = this->exit (err);
+      err = (Werr == 0) ? err : Werr;
+      this->time.add_busy_time_now ();
+      if (this->proc != nullptr) {
+        printf ("%u:%20s exit busy %f / %f s\n",
+          this->proc->get_proc_ix (), this->name.c_str(),
+          double (this->time.get_busy_s ()), double (this->time.get_work_s ()) );
+      }
+    }
 #endif
   return err;
   }

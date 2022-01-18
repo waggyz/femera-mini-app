@@ -1,7 +1,13 @@
 #include "Gtst.hpp"
+#include "../core.h"
 
 #ifdef FMR_HAS_GTEST
 #include "gtest/gtest.h"
+#endif
+
+#define FMR_DEBUG
+#ifdef FMR_DEBUG
+#include <cstdio>     // std::printf
 #endif
 
 namespace femera {
@@ -14,7 +20,8 @@ namespace femera {
       while ((optchar = getopt (argc[0], argv, "T")) != -1){
         // T  -T has no argument//NOTE -g is eaten by MPI
         switch (optchar) {
-          case 'T':{ this->is_enabled=true; break; }//this->proc->opt_add ('T'); break; }
+          case 'T':{ this->is_enabled=true; break; }
+          //this->proc->opt_add ('T'); break; }
       } }
       // Restore getopt variables.
       argc[0]=argc2;opterr=opterr2;optopt=optopt2;optind=optind2;optarg=optarg2;
@@ -29,11 +36,7 @@ namespace femera {
     //from: https://github.com/google/googletest/issues/822
     ::testing::TestEventListeners& listeners
       = ::testing::UnitTest::GetInstance()->listeners();
-    if (this->is_enabled) {
-      if (false) {//FIXME !this->proc->is_master()){
-        delete listeners.Release (listeners.default_result_printer());
-    } }
-    else {
+    if ( !this->is_enabled | !this->proc->is_main()) {// Only report from main
       delete listeners.Release (listeners.default_result_printer());
     }
 #endif
@@ -41,6 +44,9 @@ namespace femera {
   void test::Gtst::task_exit () {
     if (this->is_enabled) {
       int err =0;
+#ifdef FMR_DEBUG
+      printf ("Running GoogleTest...\n");
+#endif
       try {err= RUN_ALL_TESTS(); }//NOTE macro runs regardless of being enabled
       catch (...) {//TODO Check if the macro is noexcept.
         FMR_THROW("error in GoogleTest RUN_ALL_TESTS()");
@@ -51,3 +57,5 @@ namespace femera {
         FMR_THROW(msg);
   } } }
 }
+
+#undef FMR_DEBUG

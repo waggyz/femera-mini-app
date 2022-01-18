@@ -15,6 +15,7 @@ namespace femera {
   }
   inline
   void proc::Main::task_exit () {
+    this->proc =nullptr;
   }
 }//end femera:: namespace
 

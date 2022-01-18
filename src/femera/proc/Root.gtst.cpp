@@ -7,7 +7,7 @@ auto test_top = femera::proc::Root
   (femera::Work::Core_t (nullptr,nullptr,nullptr));
 
 TEST( Root, TaskName ){
-  EXPECT_EQ( test_top.name, "top" );
+  EXPECT_EQ( test_top.name, "root process" );
 }
 TEST( Root, SizeofGtstGE120 ){
   EXPECT_GE( sizeof(test_top), 120 );

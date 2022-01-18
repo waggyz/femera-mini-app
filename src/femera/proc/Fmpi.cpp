@@ -36,10 +36,13 @@ namespace femera {
     this->proc_n = fmr::Local_int (tmp_proc_n);
     return this->proc_n;
   }
-  fmr::Local_int proc::Fmpi::task_proc_ix () {int err, proc_i=0;
-    err= MPI_Comm_rank( MPI_Comm(this->team_id),& proc_i );
-    if( err ){return 0; }
-    this->proc_ix = fmr::Local_int (proc_i);
+  fmr::Local_int proc::Fmpi::task_proc_ix () {int err =0;
+    if (this->is_mpi_init ()) {
+      int proc_i =0;
+      err= MPI_Comm_rank( MPI_Comm(this->team_id),& proc_i );
+      if (err) {return 0; }
+      this->proc_ix = fmr::Local_int (proc_i);
+    }
     return this->proc_ix;
   }
   void proc::Fmpi::task_init (int* argc, char** argv){ int err=0;

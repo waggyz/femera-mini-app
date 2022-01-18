@@ -9,6 +9,8 @@ namespace femera {
   class Data : public Work {
   private:
     using This_t = std::shared_ptr<T>;
+//  protected:
+//    data::Logs* log =nullptr;
   public:
     fmr::Exit_int init (int*, char**)        noexcept final override;
     fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;

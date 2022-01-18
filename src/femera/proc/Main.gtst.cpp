@@ -6,16 +6,15 @@ auto fmr_main = std::make_shared<femera::proc::Main> (femera::proc::Main());
 
 TEST( Main, TaskName ){
   EXPECT_EQ( fmr_main->name, "processing");
-}
-TEST( Main, SizeofMainGE120 ){
-  EXPECT_GE( sizeof(*fmr_main), 120 );
+  //xxx_EXPECT_EQ( fmr_main->get_task_raw({})->name, "processing");
 }
 TEST( Main, DidInit ){
   EXPECT_EQ( fmr_main->get_task_n(), 1 );
-  EXPECT_EQ( fmr_main->get_task_raw(0)->name, "top");
-  EXPECT_EQ( fmr_main->get_task_raw({0})->name, "top");
+  EXPECT_EQ( fmr_main->get_task_raw(0)->name, "root process");
+  EXPECT_EQ( fmr_main->get_task_raw({0})->name, "root process");
+  EXPECT_NE( fmr_main->get_task_raw({0,0})->name, "node");
 #ifdef FMR_HAS_MPI
-  EXPECT_EQ( fmr_main->get_task_raw({0,0})->name, "MPI");
+  EXPECT_EQ( fmr_main->get_task_raw({0,0,0})->name, "MPI");
 #endif
 //  EXPECT_EQ( fmr_main->exit (), 0 );
 }

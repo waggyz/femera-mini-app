@@ -11,7 +11,7 @@ namespace fmr { namespace proc {
   fmr::Local_int get_node_core_ix   ();
   fmr::Local_int get_node_hype_ix   ();
   fmr::Local_int get_node_numa_ix   ();
-  fmr::Global_int get_node_used_byte ();
+  fmr::Global_int get_used_byte ();
 
 } }// end fmr::proc:: namespace
 

@@ -49,10 +49,11 @@ ifeq ($(CXX),g++)
   endif
   # Warning flags
   CXXWARNS+= -Wall -Wextra -Wpedantic -Wuninitialized -Wshadow -Wfloat-equal
-  CXXWARNS+= -Wdouble-promotion -Wconversion -Wcast-qual -Wcast-align
-  CXXWARNS+= -Wlogical-op -Woverloaded-virtual -Wstrict-null-sentinel
-  CXXWARNS+= -Wmissing-declarations -Wredundant-decls -Wdisabled-optimization
-  CXXWARNS+= -Wunused-macros -Wzero-as-null-pointer-constant -Wundef -Weffc++
+  CXXWARNS+= -Wdouble-promotion -Wconversion -Wsign-conversion -Wlogical-op
+  CXXWARNS+= -Wcast-qual -Wcast-align -Woverloaded-virtual -Wundef
+  CXXWARNS+= -Wmissing-declarations -Wredundant-decls -Wunused-macros
+  CXXWARNS+= -Wzero-as-null-pointer-constant -Wstrict-null-sentinel -Weffc++
+  CXXWARNS+= -Wdisabled-optimization
   CXXWARNS+= -Winline
   #TODO Consider suppressing -Winline errors for con/de-structors and
   #     lower the --param large-function-growth limit.
@@ -336,7 +337,7 @@ FMROUTS:= $(patsubst src/%.gtst.cpp,$(BUILD_CPU)/%.gtst.out,$(FMRGTST))
 
 #FIXME fixes error make[2] unlink /home/dwagner5/local/bin/ Is a directory
 #      while first running make tools?
-.PRECIOUS: $(INSTALL_DIR)/bin/
+.PRECIOUS: $(INSTALL_DIR)/bin/ build/%.gtst
 
 # Primary named targets -------------------------------------------------------
 # These are intended for users.

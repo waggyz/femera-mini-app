@@ -28,11 +28,11 @@ namespace fmr {
 #ifdef FMR_HAS_LIBNUMA
   fmr::Local_int proc::get_node_numa_ix () {
     return (::numa_available() == -1) ? 0
-      : ::numa_node_of_cpu (::sched_getcpu());
+      : fmr::Local_int (::numa_node_of_cpu (::sched_getcpu()));
   }
   fmr::Local_int proc::get_node_numa_n () {
     return (::numa_available() == -1) ? 1
-      : ::numa_num_configured_nodes();
+      : fmr::Local_int (::numa_num_configured_nodes());
   }
 #else
   fmr::Local_int proc::get_node_numa_ix () {
@@ -42,7 +42,7 @@ namespace fmr {
     return fmr::Local_int (1);
   }
 #endif
-  fmr::Global_int proc::get_node_used_byte () {
+  fmr::Global_int proc::get_used_byte () {
     rusage r;
     getrusage (RUSAGE_SELF, & r);
     return fmr::Global_int (r.ru_maxrss * 1024);

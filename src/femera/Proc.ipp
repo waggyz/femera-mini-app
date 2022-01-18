@@ -14,22 +14,26 @@ namespace femera {
     return static_cast<T*> (ptr);
   }
   template <typename T> inline
-  fmr::Exit_int Proc<T>::init (int* argc, char** argv) noexcept {
+  fmr::Exit_int Proc<T>::init (int* argc, char** argv)
+  noexcept {
     fmr::Exit_int err=0;
-    try { Proc::derived (this)->task_init (argc, argv); }// Init this task,
+    try { Proc::derived (this)->task_init (argc, argv); }// Init this task,...
     catch (const Errs& e) { err = 1; e.print (); }
     catch (std::exception& e) { err = exit (1); }
     catch (...) { err = exit (2); }
-    init_list (argc, argv);// then init the sub-tasks.
+    this->init_list (argc, argv);// ...then init the sub-tasks.
 #if 0
     this->proc_n = this->get_proc_n ();
 #endif
     return err;
   }
   template <typename T> inline
-  fmr::Exit_int Proc<T>::exit (fmr::Exit_int err) noexcept {
-    exit_tree ();   // Exit the task tree (is noexcept),
-    if (err>0) {return err;}// then exit this derived task.
+  fmr::Exit_int Proc<T>::exit (fmr::Exit_int err)
+  noexcept {
+    if (!this->task_list.empty()) {
+     this->exit_tree ();    // Exit the task tree below this (is noexcept), ...
+    }
+    if (err>0) {return err;}// ...then exit this derived task.
     fmr::Exit_int task_err =0;
     try { Proc::derived (this)->task_exit (); }
     catch (const Errs& e) { task_err = 1; e.print (); }
@@ -54,19 +58,27 @@ namespace femera {
     return static_cast<T*> (this->get_work_raw (path));
   }
   template <typename T> inline constexpr
-  std::shared_ptr<T> Proc<T>::new_task () noexcept {
+  std::shared_ptr<T> Proc<T>::new_task ()
+  noexcept {
     return std::make_shared<T> (T());
   }
   template <typename T> inline constexpr
-  std::shared_ptr<T> Proc<T>::new_task (const Work::Core_t core) noexcept {
+  std::shared_ptr<T> Proc<T>::new_task (const Work::Core_t core)
+  noexcept {
     return std::make_shared<T> (T(core));
   }
   template <typename T> inline
-  fmr::Local_int Proc<T>::get_proc_ix () noexcept {
+  bool Proc<T>::is_main () {
+    return this->get_proc_ix () == this->main_ix;
+  }
+  template <typename T> inline
+  fmr::Local_int Proc<T>::get_proc_ix ()
+  noexcept {
     return this->proc_ix;
   }
   template <typename T> inline
-  fmr::Local_int Proc<T>::get_proc_n () noexcept {
+  fmr::Local_int Proc<T>::get_proc_n ()
+  noexcept {
 #if 0
     this->proc_n =0;
     for (const auto W : this->task_list) {
@@ -77,11 +89,13 @@ namespace femera {
     return this->proc_n;
   }
   template <typename T> inline
-  proc::Team_t Proc<T>::get_team_id () noexcept {
+  proc::Team_t Proc<T>::get_team_id ()
+  noexcept {
     return this->team_id;
   }
   template <typename T> inline
-  fmr::Local_int Proc<T>::get_team_n () noexcept {
+  fmr::Local_int Proc<T>::get_team_n ()
+  noexcept {
     return fmr::Local_int (this->task_list.size());
   }
 #if 0
@@ -94,6 +108,7 @@ namespace femera {
     return fmr::Local_int (0);
   }
 #endif
+# if 0
   template <typename T> inline constexpr
   fmr::Local_int Proc<T>::get_node_core_n () {// physical cores
     return fmr::proc::get_node_core_n ();
@@ -119,9 +134,10 @@ namespace femera {
     return fmr::proc::get_node_numa_n ();
   }
   template <typename T> inline
-  fmr::Global_int Proc<T>::get_node_used_byte () {
-    return fmr::proc::get_node_used_byte ();
+  fmr::Global_int Proc<T>::get_used_byte () {
+    return fmr::proc::get_used_byte ();
   }
+#   endif
 }// end femera:: namespace
 
 #undef FMR_DEBUG
