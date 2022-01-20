@@ -12,6 +12,7 @@ namespace femera {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="CPU";
     this->info_d = 3;
+    this->abrv ="cpu";
   }
   inline
   void proc::Fcpu::task_init (int*, char**){}

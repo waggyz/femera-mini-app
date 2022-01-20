@@ -24,11 +24,11 @@ namespace femera {
         const int Werr = W->init (argc, argv); // is noexcept
         err = (Werr == 0) ? err : Werr;
         W->time.add_busy_time_now ();
-        if (this->proc != nullptr) {
+        if (this->proc != nullptr) {if (this->proc->is_main ()) {
           printf ("%u:%20s init busy %f / %f s\n",
             this->proc->get_proc_ix (), W->name.c_str(),
             double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
-  } } }
+  } } } }
   return err;
   }
   fmr::Exit_int Work::exit_list ()
@@ -43,11 +43,11 @@ namespace femera {
         const fmr::Exit_int Werr = W->exit (err);// is noexcept
         err = (Werr == 0) ? err : Werr;
         W->time.add_busy_time_now ();
-        if (this->proc != nullptr) {
+        if (this->proc != nullptr) {if (this->proc->is_main ()) {
           printf ("%u:%20s exit busy %f / %f s\n",
             this->proc->get_proc_ix (), W->name.c_str(),
             double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
-      } }
+      } } }
       this->task_list.pop_back ();
     }
     return err;
@@ -77,11 +77,11 @@ namespace femera {
       err = (Werr == 0) ? err : Werr;
 #endif
       W->time.add_busy_time_now ();
-      if (this->proc != nullptr) {
+      if (this->proc != nullptr) {if (this->proc->is_main ()) {
         printf ("%u:%20s exit busy %f / %f s\n",
           this->proc->get_proc_ix (), W->name.c_str(),
           double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
-    } }
+    } } }
     if (!branch.empty()) {
       branch.pop_back ();
       if (!branch.empty()) {

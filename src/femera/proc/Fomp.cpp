@@ -13,7 +13,9 @@ namespace femera {
   proc::Fomp::Fomp (femera::Work::Core_t core) noexcept {
     std::tie (this->proc, this->data, this->test) = core;
     this->name ="OpenMP";
-    this->proc_ix = fmr::Local_int (omp_get_thread_num ());
+    this->abrv ="omp";
+    this->proc_ix = fmr::Local_int (::omp_get_thread_num  ());
+    this->proc_n  = fmr::Local_int (::omp_get_num_threads ());
 #ifdef FMR_DEBUG
     printf ("Fomp::proc_ix %u\n", this->proc_ix);
 #endif

@@ -9,17 +9,14 @@ namespace femera {
   }
   template <typename T>
   class Proc : public Work {
-  public:
   private:
     using This_t = std::shared_ptr<T>;
   protected:// Set by derived instances during task_init()...
     proc::Team_t   team_id = 0;
     fmr::Local_int team_n  = 1;
     fmr::Local_int main_ix = 0;
-    fmr::Local_int proc_ix = 0;
     fmr::Local_int proc_n  = 1;
-    fmr::Local_int node_ix = 1;
-    fmr::Local_int node_n  = 1;
+    fmr::Local_int proc_ix = 0;
   public:   // ...because proc::Main uses these.
     bool is_main ();
     proc::Team_t   get_team_id () noexcept;
@@ -52,7 +49,9 @@ namespace femera {
     static constexpr This_t new_task ()                   noexcept;
     static constexpr This_t new_task (const Work::Core_t) noexcept;
   private:
-    T* derived (Proc*);
+    T*       derived   (Proc*) noexcept;
+    T*       derived   (Work*) noexcept;
+    Proc<T>* this_cast (Work*) noexcept;
   protected:// Make it clear this class needs to be inherited from.
     Proc ()            =default;
     Proc (const Proc&) =default;

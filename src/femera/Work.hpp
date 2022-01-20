@@ -54,8 +54,9 @@ namespace femera {
     using      Core_t = std::tuple <proc::Main*,data::File*,test::Beds*>;
   public:// Variables ---------------------------------------------------------
     fmr::perf::Meter time = fmr::perf::Meter ();
-    std::string      name = std::string      ("unknown work");
-    std::string   version = "0.3";
+    std::string      name ="unknown work";
+    std::string      abrv ="work";
+    std::string   version ="0.3";
     //
     proc::Main* proc = nullptr;// processing hierarchy (proc::Main_t)
     data::File* data = nullptr;// data and file handling (data::File)
@@ -79,13 +80,14 @@ namespace femera {
     Derived*       get_task_raw (fmr::Local_int)// returns Derived* raw pointer
 */
     Core_t get_core () noexcept;
-  protected:
+  public:
     Work*  get_work_raw (fmr::Local_int) noexcept;
     Work*  get_work_raw (Task_path_t)    noexcept;
     Work_t get_work_spt (fmr::Local_int) noexcept;
     Work_t get_work_spt (Task_path_t)    noexcept;
     // above called by Derived::get_task_*(..)
     //
+  protected:
     // Work stack initialization and exit
     fmr::Exit_int init_list (int* argc, char** argv) noexcept;// init forward
     fmr::Exit_int exit_list () noexcept;// exit task_list in reverse

@@ -32,8 +32,8 @@ namespace femera {
       (Proc<proc::Nvid>::new_task (core));
 #endif
 #ifdef FMR_HAS_OMP
-#if 1
-    // Add thread-local Fomp instances.
+#if 0
+    // Add thread-local Fomp instances?
     const fmr::Local_int n = 2;//FIXME get from command arg
     FMR_PRAGMA_OMP(omp parallel for schedule(static) ordered num_threads(n))
     for (fmr::Local_int i=0; i<n; i++) {

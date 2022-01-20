@@ -17,6 +17,7 @@ namespace femera {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="MPI";
     this->info_d = 3;
+    this->abrv ="mpi";
     this->team_id = proc::Team_t (MPI_COMM_WORLD);
     this->version =
       std::to_string( MPI_VERSION )
@@ -76,6 +77,9 @@ namespace femera {
       this->team_id = proc::Team_t (comm);
       this->proc_ix = this->task_proc_ix ();
       this->proc_n  = this->task_proc_n ();
+#ifdef FMR_DEBUG
+    std::printf("Fmpi::task_init: %u/%u processes...\n", proc_ix, proc_n);
+#endif
     }
 //  fmr::perf:: timer_pause (&this->time);
   } }

@@ -16,7 +16,7 @@ namespace femera { namespace proc {
   private:
     bool did_mpi_init ();
 //    Team_t get_team_id () noexcept;
-    fmr::Local_int task_proc_n ();
+    fmr::Local_int task_proc_n  ();
     fmr::Local_int task_proc_ix ();
   public:
     Fmpi (femera::Work::Core_t) noexcept;

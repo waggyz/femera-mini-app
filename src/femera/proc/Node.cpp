@@ -12,6 +12,7 @@ namespace femera {
     if (err) { this->name = "node"; }
     else     { this->name = std::string (hostname); }
     this->info_d = 3;
+    this->abrv ="nde";
   }
 
 }//end femera:: namespace

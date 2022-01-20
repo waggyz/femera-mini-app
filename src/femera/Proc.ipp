@@ -10,8 +10,19 @@
 
 namespace femera {
   template <typename T> inline
-  T* Proc<T>::derived (Proc* ptr) {
+  T* Proc<T>::derived (Proc* ptr)
+  noexcept {
     return static_cast<T*> (ptr);
+  }
+  template <typename T> inline
+  T* Proc<T>::derived (Work* ptr)
+  noexcept {
+    return static_cast<T*> (ptr);
+  }
+  template <typename T> inline
+  Proc<T>* Proc<T>::this_cast (Work* ptr)
+  noexcept {
+    return static_cast<Proc*> (ptr);
   }
   template <typename T> inline
   fmr::Exit_int Proc<T>::init (int* argc, char** argv)
@@ -31,11 +42,11 @@ namespace femera {
   fmr::Exit_int Proc<T>::exit (fmr::Exit_int err)
   noexcept {
     if (!this->task_list.empty()) {
-     this->exit_tree ();    // Exit the task tree below this (is noexcept), ...
+     this->exit_tree ();// Exit the task tree below this (is noexcept), ...
     }
-    if (err>0) {return err;}// ...then exit this derived task.
+    if (err>0) {return err;}
     fmr::Exit_int task_err =0;
-    try { Proc::derived (this)->task_exit (); }
+    try { Proc::derived (this)->task_exit (); }//...then exit this derived task.
     catch (const Errs& e) { task_err = 1; e.print (); }
     catch (std::exception& e) { task_err = 2; }
     catch (...) { task_err = 3; }
@@ -51,11 +62,11 @@ namespace femera {
   }
   template <typename T> inline
   T* Proc<T>::get_task_raw (const fmr::Local_int i) {
-    return static_cast<T*> (this->get_work_raw (i));
+    return derived (this->get_work_raw (i));
   }
   template <typename T> inline
   T* Proc<T>::get_task_raw (const Work::Task_path_t path) {
-    return static_cast<T*> (this->get_work_raw (path));
+    return derived (this->get_work_raw (path));
   }
   template <typename T> inline constexpr
   std::shared_ptr<T> Proc<T>::new_task ()
@@ -67,10 +78,27 @@ namespace femera {
   noexcept {
     return std::make_shared<T> (T(core));
   }
+#if 0
   template <typename T> inline
-  bool Proc<T>::is_main () {
-    return this->get_proc_ix () == this->main_ix;
+  bool Proc<T>::is_main (bool ans=true) {// recursive version cannot inline
+    ans = ans & (this->get_proc_ix () == this->main_ix);
+    if (! this->task_list.empty ()) {
+      ans = this->get_task_raw (0)->is_main (ans);
+    }
+    return ans;
   }
+#else
+  template <typename T> inline
+  bool Proc<T>::is_main () { bool ans=true;// serial version
+    auto P = this;
+    while (! P->task_list.empty ()) {
+      ans = ans & (P->get_proc_ix () == P->main_ix);
+//      ans = ans & P->is_task_main ();
+      P = this_cast (P->get_work_raw (0));
+    }
+    return ans;
+  }
+#endif
   template <typename T> inline
   fmr::Local_int Proc<T>::get_proc_ix ()
   noexcept {
