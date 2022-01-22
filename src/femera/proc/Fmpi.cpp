@@ -96,7 +96,7 @@ namespace femera {
   if (err>0) {std::fprintf (stderr, "ERROR Femera returned %i\n", err);}
 #endif
   err=0;// Exit from mpi normally when Femera exits on error.
-FMR_PRAGMA_OMP(omp master)
+FMR_PRAGMA_OMP(omp MAIN)
   if (did_mpi_init ()) {
     const auto proc_i = this->task_proc_ix ();
     if (this->team_id != proc::Team_t (MPI_COMM_WORLD)) {

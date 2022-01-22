@@ -45,6 +45,7 @@ namespace femera { namespace test {
 #endif
 
 // These help keep source code tidy.
+#define MAIN master
 #ifdef _OPENMP
 #define FMR_PRAGMA_OMP(x) _Pragma (#x)
 #else

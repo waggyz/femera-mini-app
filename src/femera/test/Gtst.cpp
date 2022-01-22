@@ -12,7 +12,7 @@
 
 namespace femera {
   void test::Gtst::task_init (int* argc, char** argv) {
-    FMR_PRAGMA_OMP(omp master) {//NOTE getopt is NOT thread safe.
+    FMR_PRAGMA_OMP(omp MAIN) {//NOTE getopt is NOT thread safe.
       int argc2=argc[0];// Copy getopt variables.
       auto opterr2=opterr; auto optopt2=optopt;
       auto optind2=optind; auto optarg2=optarg;

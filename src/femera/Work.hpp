@@ -64,6 +64,9 @@ namespace femera {
   protected:
     Task_list_t task_list ={};
     fmr::Dim_int   info_d = 1;
+  private:
+    bool is_work_init = false;
+    bool is_work_main = true;// save for use after proc::exit (..)
   public:// Methods -----------------------------------------------------------
     //NOTE Make at least 1 method pure virtual.
     //FIXME Do all virtual methods need to be pure

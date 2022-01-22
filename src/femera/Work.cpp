@@ -29,10 +29,15 @@ namespace femera {
             this->proc->get_proc_ix (), W->name.c_str(),
             double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
   } } } }
+  if (err <=0) {this->is_work_init = true;}
   return err;
   }
   fmr::Exit_int Work::exit_list ()
   noexcept { fmr::Exit_int err =0;
+    if (this->proc != nullptr && this->is_work_init == true) {
+      this->is_work_main = this->proc->is_main ();
+    }
+    this->is_work_init = false;
     while (! this->task_list.empty ()) {
       auto W = this->task_list.back().get ();// Exit in reverse order.
       if (W != nullptr) {
@@ -43,17 +48,22 @@ namespace femera {
         const fmr::Exit_int Werr = W->exit (err);// is noexcept
         err = (Werr == 0) ? err : Werr;
         W->time.add_busy_time_now ();
-        if (this->proc != nullptr) {if (this->proc->is_main ()) {
+//        if (this->proc != nullptr) {if (this->proc->is_main ()) {
+        if (this->is_work_main) {
           printf ("%u:%20s exit busy %f / %f s\n",
             this->proc->get_proc_ix (), W->name.c_str(),
             double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
-      } } }
+      } }// }
       this->task_list.pop_back ();
     }
     return err;
   }
   fmr::Exit_int Work::exit_tree ()
   noexcept { fmr::Exit_int err =0;
+    if (this->proc != nullptr && this->is_work_init == true) {
+      this->is_work_main = this->proc->is_main ();
+    }
+    this->is_work_init = false;
     Work::Task_path_t branch ={};
 #ifdef FMR_DEBUG
     printf ("Work: exit tree %s [%lu]\n", this->name.c_str(), task_list.size());
@@ -66,22 +76,24 @@ namespace femera {
 #endif
       W = W->task_list.back ().get();
     }
-    if ( W != nullptr){// && W != this) {
+    if ( W != nullptr){
 #ifdef FMR_DEBUG
       printf ("Work: exit branch 1 %s\n", W->name.c_str());
 #endif
       W->time.add_idle_time_now ();
-      err= W->exit (err);// is noexcept
 #if 0
       const fmr::Exit_int Werr = W->exit (err);// is noexcept
       err = (Werr == 0) ? err : Werr;
+#else
+      err= W->exit (err);// is noexcept
 #endif
       W->time.add_busy_time_now ();
-      if (this->proc != nullptr) {if (this->proc->is_main ()) {
+//      if (this->proc != nullptr) {if (this->proc->is_main ()) {
+      if (this->is_work_main) {
         printf ("%u:%20s exit busy %f / %f s\n",
           this->proc->get_proc_ix (), W->name.c_str(),
           double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
-    } } }
+    } }// }
     if (!branch.empty()) {
       branch.pop_back ();
       if (!branch.empty()) {
