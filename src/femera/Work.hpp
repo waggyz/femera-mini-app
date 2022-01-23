@@ -96,14 +96,13 @@ namespace femera {
     fmr::Exit_int exit_list () noexcept;// exit task_list in reverse
     fmr::Exit_int exit_tree () noexcept;// exit task hierarchy in reverse
   protected:// Built-in stuff -------------------------------------------------
-    // Make it clear this class needs to be inherited from.
     Work ()            =default;
     Work (Work const&) =default;// copyable
     Work& operator=
       (const Work&)    =default;
+    // Make it clear this class needs to be inherited from.
     virtual ~Work ();// not inline to avoid -Winline large growth warning
   };
-  //
 }//end femera:: namespace
 
 #include "Work.ipp"
