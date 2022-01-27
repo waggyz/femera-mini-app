@@ -10,7 +10,8 @@ namespace femera {
     this->abrv ="top";
   }
   inline
-  void proc::Root::task_init (int*, char**){}
+  void proc::Root::task_init (int*, char**){
+  }
   inline
   void proc::Root::task_exit () {
   }

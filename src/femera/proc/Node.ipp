@@ -9,16 +9,19 @@
 namespace femera {
   inline
   void proc::Node::task_init (int*, char**) {
+#if 0
+    this->set_auto ();                       //TODO move to proc::Root?
+    //  const auto n = fmr::proc::get_node_n () * fmr::proc::get_node_core_n ()
+    //    / this->all_proc_n ();
+#endif
     const auto core_n = this->node_n * this->get_core_n ();
     const auto  all_n = this->all_proc_n ();
     if (all_n < core_n) {
-      printf ("Fewer threads (%u) than physical cores (%u)\n",
-        all_n, core_n);
-    }
-    if (all_n > core_n) {
-      printf ("More threads (%u) than physical cores (%u)\n",
-        all_n, core_n);
-  } }
+      printf ("Fewer threads (%u) than physical cores (%u)\n", all_n, core_n);
+    } else {
+      if (all_n > core_n) {
+        printf ("More threads (%u) than physical cores (%u)\n", all_n, core_n);
+  } } }
   inline
   void proc::Node::task_exit () {
   }

@@ -24,17 +24,11 @@ namespace femera {
     if (this->is_in_parallel ()) {
       this->proc_n  = fmr::Local_int (::omp_get_num_threads ());
     } else {
-#if 0
-      const auto n = fmr::proc::get_node_n ()* fmr::proc::get_node_core_n ()
-        / proc->all_proc_n ();
-#else
       const auto n = 2;//FIXME Handle command line options.
-#endif
       ::omp_set_num_threads (n);
       FMR_PRAGMA_OMP(omp parallel) {
         this->proc_n  = fmr::Local_int (::omp_get_num_threads ());
-    } }
-  }
+  } } }
   bool proc::Fomp::is_in_parallel () {
     return ::omp_in_parallel ();
   }

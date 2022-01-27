@@ -33,9 +33,6 @@ namespace femera {
     catch (std::exception& e) { err = 1;}
     catch (...) { err = 2;}
     this->init_list (argc, argv);// ...then init the sub-tasks.
-#if 0
-    this->proc_n = this->get_proc_n ();
-#endif
     this->set_base_n ();
     return err;
   }
