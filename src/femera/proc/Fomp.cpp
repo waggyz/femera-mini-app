@@ -20,12 +20,24 @@ namespace femera {
     printf ("Fomp::proc_ix %u\n", this->proc_ix);
 #endif
   }
+  void proc::Fomp::task_init (int*, char**) {
+    if (this->is_in_parallel ()) {
+      this->proc_n  = fmr::Local_int (::omp_get_num_threads ());
+    } else {
+      ::omp_set_num_threads (2);//FIXME Handle command line options.
+      FMR_PRAGMA_OMP(omp parallel) {
+        this->proc_n  = fmr::Local_int (::omp_get_num_threads ());
+    } }
+  }
+  bool proc::Fomp::is_in_parallel () {
+    return ::omp_in_parallel ();
+  }
 #if 0
 bool Fomp::is_in_parallel (){
-  return omp_in_parallel ();
+  return is_omp_parallel ();
 }
 int Fomp::get_proc_ix (){
-  return omp_get_thread_num ();
+  return get_omp_thread_num ();
 }
 #endif
 }//end femera:: namespace

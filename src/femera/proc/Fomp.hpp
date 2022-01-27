@@ -12,6 +12,8 @@ namespace femera { namespace proc {
     Fomp () =delete;//NOTE Use the constructor above.
     void task_init (int* argc, char** argv);
     void task_exit ();
+  private:
+    static bool is_in_parallel ();
   };
 } }//end femera::proc:: namespace
 
