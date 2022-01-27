@@ -26,18 +26,18 @@ namespace femera {
         W->time.add_busy_time_now ();
         if (this->proc != nullptr) {if (this->proc->is_main ()) {
           printf ("%u/%u:%20s init busy %f / %f s\n",
-            this->proc->get_proc_ix (), proc->get_proc_n (), W->name.c_str(),
+            this->proc->get_proc_id (), proc->all_proc_n (), W->name.c_str(),
             double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
     } } } }
-    if (err <=0) {this->is_work_init = true;}
+    if (err <=0) {this->did_work_init = true;}
     return err;
   }
   fmr::Exit_int Work::exit_list ()
   noexcept { fmr::Exit_int err =0;
-    if (this->proc != nullptr && this->is_work_init == true) {
+    if (this->proc != nullptr && this->did_work_init == true) {
       this->is_work_main = this->proc->is_main ();
     }
-    this->is_work_init = false;
+    this->did_work_init = false;
     while (! this->task_list.empty ()) {
       auto W = this->task_list.back().get ();// Exit in reverse order.
       if (W != nullptr) {
@@ -50,7 +50,7 @@ namespace femera {
         W->time.add_busy_time_now ();
         if (this->is_work_main) {
           printf ("%u/%u:%20s exit busy %f / %f s\n",
-            this->proc->get_proc_ix (), proc->get_proc_n (), W->name.c_str(),
+            this->proc->get_proc_id (), proc->all_proc_n (), W->name.c_str(),
             double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
       } }
       this->task_list.pop_back ();
@@ -59,10 +59,10 @@ namespace femera {
   }
   fmr::Exit_int Work::exit_tree ()
   noexcept { fmr::Exit_int err =0;
-    if (this->proc != nullptr && this->is_work_init == true) {
+    if (this->proc != nullptr && this->did_work_init == true) {
       this->is_work_main = this->proc->is_main ();
     }
-    this->is_work_init = false;
+    this->did_work_init = false;
     Work::Task_path_t branch ={};
 #ifdef FMR_DEBUG
     printf ("Work: exit tree %s [%lu]\n", this->name.c_str(), task_list.size());
@@ -89,7 +89,7 @@ namespace femera {
       W->time.add_busy_time_now ();
       if (this->is_work_main) {
         printf ("%u/%u:%20s exit busy %f / %f s\n",
-          this->proc->get_proc_ix (), proc->get_proc_n (), W->name.c_str(),
+          this->proc->get_proc_id (), proc->all_proc_n (), W->name.c_str(),
           double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
     } }
     if (!branch.empty()) {

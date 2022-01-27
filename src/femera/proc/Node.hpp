@@ -6,6 +6,8 @@
 namespace femera { namespace proc {
   class Node;// Derive a CRTP concrete class from Proc.
   class Node : public Proc<Node> {
+  private:
+    fmr::Local_int node_n = 1;
   public:
 #if 0
     static  fmr::Local_int get_node_n    ();

@@ -10,7 +10,9 @@ namespace femera {
   }
 #   endif
   inline
-  void proc::Fomp::task_init (int*, char**){}
+  void proc::Fomp::task_init (int*, char**){
+    this->proc_n = 2;//set from args or calculate from node_n*node_core_n /...
+  }
   inline
   void proc::Fomp::task_exit () {}
 }//end femera namespace

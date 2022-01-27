@@ -2,7 +2,6 @@
 #define HAS_FEMERA_HPP
 
 #include "core.h"
-
 #include "sims/Jobs.hpp"
 
 namespace femera {

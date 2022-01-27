@@ -8,7 +8,17 @@
 
 namespace femera {
   inline
-  void proc::Node::task_init (int*, char**){}
+  void proc::Node::task_init (int*, char**) {
+    const auto core_n = this->node_n * this->get_core_n ();
+    const auto  all_n = this->all_proc_n ();
+    if (all_n < core_n) {
+      printf ("Fewer threads (%u) than physical cores (%u)\n",
+        all_n, core_n);
+    }
+    if (all_n > core_n) {
+      printf ("More threads (%u) than physical cores (%u)\n",
+        all_n, core_n);
+  } }
   inline
   void proc::Node::task_exit () {
   }

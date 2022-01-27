@@ -28,14 +28,15 @@ namespace femera {
   fmr::Exit_int Proc<T>::init (int* argc, char** argv)
   noexcept {
     fmr::Exit_int err=0;
-    try { Proc::derived (this)->task_init (argc, argv); }// Init this task,...
-    catch (const Errs& e) { err = 1; e.print (); }
+    try { Proc::derived (this)->task_init (argc, argv);}// Init this task,...
+    catch (const Errs& e) { err = 1; e.print ();}
     catch (std::exception& e) { err = 1;}
     catch (...) { err = 2;}
     this->init_list (argc, argv);// ...then init the sub-tasks.
 #if 0
     this->proc_n = this->get_proc_n ();
 #endif
+    this->set_base_n ();
     return err;
   }
   template <typename T> inline
@@ -89,16 +90,28 @@ namespace femera {
   }
 #else
   template <typename T> inline
-  bool Proc<T>::is_main () { bool ans=true;// serial version
+  bool Proc<T>::is_main () { bool ans=true;// series version
     auto P = this;
     while (! P->task_list.empty ()) {
       ans = ans & (P->get_proc_ix () == P->main_ix);
-//      ans = ans & P->is_task_main ();
       P = this_cast (P->get_work_raw (0));
     }
     return ans;
   }
 #endif
+  template <typename T> inline
+  fmr::Local_int Proc<T>::get_proc_id () {fmr::Local_int id=0;
+    auto P = this;
+    while (! P->task_list.empty ()) {
+      id += P->base_id + P->base_n * P->get_proc_ix ();
+#ifdef FMR_DEBUG
+      printf ("%s id: %u += %u + %u * %u\n",
+        P->name.c_str(), id, P->base_id, P->base_n, P->get_proc_ix ());
+#endif
+      P = this_cast (P->get_work_raw (0));
+    }
+    return id;
+  }
   template <typename T> inline
   fmr::Local_int Proc<T>::get_proc_ix ()
   noexcept {
@@ -115,6 +128,27 @@ namespace femera {
     }
 #endif
     return this->proc_n;
+  }
+  template <typename T> inline
+  fmr::Local_int Proc<T>::all_proc_n () {fmr::Local_int n=1;
+    auto P = this;
+    while (! P->task_list.empty ()) {
+      n *= P->get_proc_n ();
+#ifdef FMR_DEBUG
+      printf ("%s: * %u = %u\n", P->name.c_str(), P->get_proc_n(), n);
+#endif
+      P = this_cast (P->get_work_raw (0));
+    }
+    return n;
+  }
+  template <typename T> inline
+  fmr::Local_int Proc<T>::set_base_n () {
+    auto P = this;
+    while (! P->task_list.empty ()) {
+      P->base_n = P->all_proc_n () / P->proc_n;
+      P = this_cast(P->get_work_raw (0));
+    }
+    return this->base_n;
   }
   template <typename T> inline
   proc::Team_t Proc<T>::get_team_id ()

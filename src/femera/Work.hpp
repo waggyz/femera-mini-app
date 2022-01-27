@@ -48,10 +48,10 @@ namespace femera {
   class Work {// This is an abstract (pure virtual) base class (interface).
   // Derived Classes use the curiously recurrent template pattern (CRTP).
   public:// typedefs ----------------------------------------------------------
-    using Task_list_t = std::deque <Work_t>;
-    using Task_path_t = std::vector<fmr::Local_int>;
-    using Task_tree_t = std::vector<Task_path_t>;
-    using      Core_t = std::tuple <proc::Main*,data::File*,test::Beds*>;
+    using Task_list_t = std::deque  <Work_t>;
+    using Task_path_t = std::vector <fmr::Local_int>;
+    using Task_tree_t = std::vector <Task_path_t>;
+    using      Core_t = std::tuple  <proc::Main*, data::File*, test::Beds*>;
   public:// Variables ---------------------------------------------------------
     fmr::perf::Meter time = fmr::perf::Meter ();
     std::string      name ="unknown work";
@@ -65,8 +65,8 @@ namespace femera {
     Task_list_t task_list ={};
     fmr::Dim_int   info_d = 1;
   private:
-    bool is_work_init = false;
-    bool is_work_main = true;// save for use after proc::exit (..)
+    bool did_work_init = false;
+    bool  is_work_main = true ;// save for use after proc::exit (..)
   public:// Methods -----------------------------------------------------------
     //NOTE Make at least 1 method pure virtual.
     //FIXME Do all virtual methods need to be pure
@@ -74,7 +74,7 @@ namespace femera {
     virtual fmr::Exit_int init (int* argc, char** argv) noexcept =0;
     virtual fmr::Exit_int exit (fmr::Exit_int err=0)    noexcept =0;
     //
-//TODO    Task_tree_t   get_tree   () noexcept;
+//TODO Task_tree_t get_tree     ()       noexcept;
     fmr::Local_int get_task_n   ()       noexcept;
     fmr::Local_int add_task     (Work_t) noexcept;// returns task number added
 /*  Derived_t      new_task     ()// in Derived and returns that smart pointer

@@ -15,7 +15,9 @@ namespace femera {
     this->abrv ="cpu";
   }
   inline
-  void proc::Fcpu::task_init (int*, char**){}
+  void proc::Fcpu::task_init (int*, char**) {
+//FIXME remove?     proc->Proc::set_base_n ();
+  }
   inline
   void proc::Fcpu::task_exit () {
   }

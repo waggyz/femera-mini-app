@@ -15,7 +15,7 @@ namespace femera {
     this->name ="OpenMP";
     this->abrv ="omp";
     this->proc_ix = fmr::Local_int (::omp_get_thread_num  ());
-    this->proc_n  = fmr::Local_int (::omp_get_num_threads ());
+    this->proc_n  = fmr::Local_int (::omp_get_max_threads ());
 #ifdef FMR_DEBUG
     printf ("Fomp::proc_ix %u\n", this->proc_ix);
 #endif
