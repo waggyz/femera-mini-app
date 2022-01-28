@@ -1,5 +1,4 @@
 #include "../core.h"
-#include "Fmpi.hpp"
 #include "mpi.h"
 
 #include "gtest/gtest.h"
@@ -7,7 +6,6 @@
 fmr::Exit_int main (int argc, char** argv) {
   return femera::test:: early_main (&argc, argv);
 }
-
 auto test_mpi = femera::proc::Main ();
 
 TEST( Fmpi, Init ){// Initialize Fmpi with MPI already init by early_main(..)
@@ -15,7 +13,7 @@ TEST( Fmpi, Init ){// Initialize Fmpi with MPI already init by early_main(..)
   test_mpi.proc = &test_mpi;
 }
 TEST( Fmpi, TaskName ){
-  //TODO get_task by enum
+  //TODO get_task by enum?
   EXPECT_EQ( test_mpi.get_task_raw ({0,0,0})->name, "MPI" );
 }
 TEST( Fmpi, TeamID ){
@@ -27,7 +25,7 @@ TEST( Fmpi, ProcN ){
   const auto M = test_mpi.get_task_raw ({0,0,0});
   EXPECT_EQ( M->get_proc_n (), 2 );
 }
-TEST( Fmpi, Exit ){// should NOT finalize MPI, because not initialized by Femera
+TEST( Fmpi, Exit ){// should NOT finalize MPI: not initialized by test_mpi
   EXPECT_EQ( test_mpi.exit (0), 0 );
   int is_init=0;
   int err = MPI_Initialized (& is_init);

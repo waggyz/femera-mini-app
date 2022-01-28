@@ -13,7 +13,7 @@ namespace femera {
   //
   proc::Fmpi::Fmpi (femera::Work::Core_t W)
   noexcept
-  : mpi_required {int (MPI_THREAD_SERIALIZED) } {
+  : fmpi_required {int (MPI_THREAD_SERIALIZED) } {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="MPI";
     this->info_d = 3;
@@ -53,17 +53,17 @@ namespace femera {
       "WARNING sizeof (Proc::team_id) is %lu but should be %lu\n",
       sizeof (this->team_id), sizeof (MPI_Comm) );
   }
-  if (sizeof (this->mpi_required) != sizeof (MPI_THREAD_SERIALIZED)){
+  if (sizeof (this->fmpi_required) != sizeof (MPI_THREAD_SERIALIZED)){
     std::fprintf (stderr,
       "WARNING sizeof (Proc::mpi_required) is %lu but should be %lu\n",
-      sizeof (this->mpi_required), sizeof (MPI_Comm) );
+      sizeof (this->fmpi_required), sizeof (MPI_Comm) );
   }
   if (did_mpi_init ()) {
     this->do_final_on_exit = false;
     std::printf ("MPI is already initialized.\n");
   }
   if (!err && !did_mpi_init ()) {
-    err= MPI_Init_thread( argc,&argv, this->mpi_required, &this->mpi_provided);
+    err= MPI_Init_thread(argc,&argv, this->fmpi_required, &this->fmpi_provided);
 #ifdef FMR_DEBUG
     std::printf("%u:Fmpi::task_init (%i) start...\n", this->get_proc_ix(),err);
 #endif

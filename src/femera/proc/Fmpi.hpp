@@ -9,21 +9,20 @@ namespace femera { namespace proc {
   class Fmpi;// Derive a CRTP concrete class from Proc.
   class Fmpi : public Proc<Fmpi> { friend class Proc;
   private:
-    //proc::Team_t comm      = 0; default: MPI_COMM_WORLD (in Proc)
-    int      mpi_required = 0;// default: MPI_THREAD_SERIALIZED
-    int      mpi_provided = 0;//TODO rqrd_mpi_thrd, prvd_mpi_thrd ?
+  //proc::Team_t     comm = 0; default: MPI_COMM_WORLD (in Proc)
+    int     fmpi_required = 0;// default: MPI_THREAD_SERIALIZED
+    int     fmpi_provided = 0;//TODO rqrd_mpi_thrd, prvd_mpi_thrd ?
     bool do_final_on_exit = true;
   private:
     bool did_mpi_init ();
-//    Team_t get_team_id () noexcept;
     fmr::Local_int task_proc_n  ();
     fmr::Local_int task_proc_ix ();
   private:
-    Fmpi (femera::Work::Core_t) noexcept;
-    Fmpi () =delete;//NOTE Use the constructor above.
-  private:
     void task_init (int* argc, char** argv);
     void task_exit ();
+  private:
+    Fmpi (femera::Work::Core_t) noexcept;
+    Fmpi () =delete;//NOTE Use the constructor above.
   };
 } }//end femera::proc:: namespace
 
