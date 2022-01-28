@@ -19,8 +19,8 @@ namespace femera {
     fmr::Local_int proc_n  = 1;
     fmr::Local_int main_ix = 0;
     fmr::Local_int base_id = 0;
-  public:                      //              ...because proc::Main uses these.
     fmr::Local_int base_n  = 1;
+  public:                      //              ...because proc::Main uses these.
     fmr::Exit_int init (int*, char**)        noexcept final override;
     fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;
     //
@@ -40,7 +40,7 @@ namespace femera {
     This_t new_task     (const Work::Core_t) noexcept;
     T*     get_task_raw (fmr::Local_int);
     T*     get_task_raw (Work::Task_path_t);
-  private:
+  public:
     This_t get_task_spt (fmr::Local_int);
     This_t get_task_spt (Work::Task_path_t);
   private:

@@ -143,7 +143,7 @@ namespace femera {
     auto P = this;
     while (! P->task_list.empty ()) {
       P->base_n = P->all_proc_n () / P->proc_n;
-      P = this_cast(P->get_work_raw (0));
+      P = this_cast (P->get_work_raw (0));
     }
     return this->base_n;
   }

@@ -9,6 +9,7 @@ digraph "source tree" {
 	"femera.hpp" -> "Jobs.hpp"
 	"Meter.hpp" -> "perf.hpp"
 	"Main.cpp" -> "Fomp.hpp"
+	"Fmpi.gtst.cpp" -> "core.h"
 	"Sims.hpp" -> "Work.hpp"
 	"proc.gtst.cpp" -> "proc.hpp"
 	"Errs.cpp" -> "Errs.hpp"
