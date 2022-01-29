@@ -5,12 +5,13 @@
 
 namespace femera { namespace proc {
   class Fcpu;// Derive a CRTP concrete class from Proc.
-  class Fcpu : public Proc<Fcpu> {
-  public:
-    Fcpu (femera::Work::Core_t) noexcept;
-    Fcpu () =delete;//NOTE Use the constructor above.
+  class Fcpu : public Proc<Fcpu> { friend class Proc;
+  private:
     void task_init (int* argc, char** argv);
     void task_exit ();
+  private:
+    Fcpu (femera::Work::Core_t) noexcept;
+    Fcpu () =delete;//NOTE Use the constructor above.
   };
 } }//end femera::proc:: namespace
 

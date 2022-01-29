@@ -5,12 +5,12 @@
 
 namespace femera { namespace test {
   class Gtst;// Derive a CRTP concrete class from Test.
-  class Gtst : public Test<Gtst> {
+  class Gtst : public Test<Gtst> { private: friend class Test;
   private:
     bool is_enabled = false;
-  public:
     void task_init (int* argc, char** argv);
     void task_exit ();
+  private:
     Gtst (femera::Work::Core_t) noexcept;
     Gtst () =delete;//NOTE Use the constructor above.
 };

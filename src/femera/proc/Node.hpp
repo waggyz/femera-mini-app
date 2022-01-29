@@ -5,7 +5,7 @@
 
 namespace femera { namespace proc {
   class Node;// Derive a CRTP concrete class from Proc.
-  class Node : public Proc<Node> {
+  class Node : public Proc<Node> { friend class Proc;
   private:
     fmr::Local_int node_n = 1;
   public:
@@ -20,7 +20,7 @@ namespace femera { namespace proc {
     static  fmr::Local_int get_hype_ix   ();
     static  fmr::Local_int get_numa_ix   ();
     static fmr::Global_int get_used_byte ();
-  public:
+  private:
     Node (femera::Work::Core_t) noexcept;
     Node () =delete;//NOTE Use the constructor above.
     void task_init (int* argc, char** argv);

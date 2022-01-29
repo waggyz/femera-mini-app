@@ -12,14 +12,15 @@ namespace femera {
   public:
     fmr::Exit_int init (int*, char**)        noexcept final override;
     fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;
-    This_t    get_task (fmr::Local_int);
-    This_t    get_task (Work::Task_path_t);
+    T*        get_task (fmr::Local_int);
+    T*        get_task (Work::Task_path_t);
 //    static constexpr
 //    This_t    new_task () noexcept;//FIXME Remove.
     static constexpr
     This_t    new_task (const Work::Core_t) noexcept;
   private:
-    T* derived (Test*);
+    T* derived (Test*) noexcept;
+    T* derived (Work*) noexcept;
   protected:// Make it clear this class needs to be inherited from.
     Test ()            =default;
     Test (const Test&) =default;

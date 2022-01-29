@@ -1,13 +1,16 @@
+#include "../core.h"
 #include "Node.hpp"
 
 #include "gtest/gtest.h"
 
-
-auto test_node = femera::proc::Node
-  (femera::Work::Core_t (nullptr,nullptr,nullptr));
+fmr::Exit_int main (int argc, char** argv) {
+  return femera::test:: early_main (&argc, argv);
+}
+auto test_proc = femera::proc::Main ();
 
 TEST( Node, TaskName ){
-  EXPECT_NE( test_node.name, "node" );
+  EXPECT_EQ( test_proc.init (nullptr,nullptr), 0 ); test_proc.proc = &test_proc;
+  EXPECT_NE( test_proc.get_task_raw ({0,0})->name, "node" );
 }
 TEST(Node, CoreN) {
   EXPECT_GE( femera::proc::Node::get_core_n (), 1);
@@ -40,6 +43,6 @@ TEST(Node, NumaIx) {
 TEST(Node, UsedByte) {
   EXPECT_GT( femera::proc::Node::get_used_byte (), 1000);
 }
-fmr::Exit_int main (int argc, char** argv) {
-  return femera::test:: early_main (&argc, argv);
+TEST( Node, Exit ){
+  EXPECT_EQ( test_proc.exit (0), 0 );
 }

@@ -8,7 +8,12 @@
 
 namespace femera {
   template <typename T> inline
-  T* Test<T>::derived (Test* ptr) {
+  T* Test<T>::derived (Test* ptr) noexcept {
+    return static_cast<T*> (ptr);
+  }
+  template <typename T> inline
+  T* Test<T>::derived (Work* ptr)
+  noexcept {
     return static_cast<T*> (ptr);
   }
   template <typename T> inline
@@ -31,12 +36,12 @@ namespace femera {
     return err;
   }
   template <typename T> inline
-  std::shared_ptr<T> Test<T>::get_task (const fmr::Local_int i) {
-    return std::static_pointer_cast<T> (this->get_work (i));
+  T* Test<T>::get_task (const fmr::Local_int i) {
+    return derived (this->get_work_raw (i));
   }
-  template <typename T> inline
-  std::shared_ptr<T> Test<T>::get_task (Work::Task_path_t tree) {
-    return std::static_pointer_cast<T> (this->get_work (tree));
+  template <typename T> inline 
+  T* Test<T>::get_task (Work::Task_path_t tree) {
+    return derived (this->get_work_raw (tree));
   }
 #if 0
   template <typename T> inline constexpr

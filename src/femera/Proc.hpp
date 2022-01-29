@@ -40,8 +40,8 @@ namespace femera {
     This_t new_task     (const Work::Core_t) noexcept;
     T*     get_task_raw (fmr::Local_int);
     T*     get_task_raw (Work::Task_path_t);
-  public:
-    This_t get_task_spt (fmr::Local_int);
+  private:
+    This_t get_task_spt (fmr::Local_int);//FIXME Remove these?
     This_t get_task_spt (Work::Task_path_t);
   private:
     T*          derived (Proc*) noexcept;

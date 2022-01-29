@@ -5,10 +5,11 @@
 
 namespace femera { namespace data {
   class Logs;// Derive a CRTP concrete class from File.
-  class Logs : public Data <Logs> {
-  public:
+  class Logs : public Data <Logs> { private: friend class Data;
+  private:
     Logs (femera::Work::Core_t) noexcept;
     Logs () =delete;//NOTE Use the constructor above.
+  private:
     void task_init (int* argc, char** argv);
     void task_exit ();
   };

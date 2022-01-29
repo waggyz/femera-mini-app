@@ -1,16 +1,11 @@
-#include "Gtst.hpp"
+#include "../femera.hpp"
 
 #include "gtest/gtest.h"
 
-auto gtst = femera::test::Gtst
- ( femera::Work::Core_t (nullptr,nullptr,nullptr) );
-
-TEST( Gtst, TaskName ){
-  EXPECT_EQ( gtst.name, "GoogleTest" );
-}
-TEST( Gtst, SizeofGtstGE120 ){
-  EXPECT_GE( sizeof(gtst), 120 );
-}
+auto mini = femera::new_sims ();
 fmr::Exit_int main (int argc, char** argv) {
-  return femera::test:: early_main (&argc, argv);
+  return mini->exit (mini->init (&argc,argv));
+}
+TEST( Gtst, TaskName ){
+  EXPECT_EQ( mini->test->get_task (0)->name, "GoogleTest" );
 }

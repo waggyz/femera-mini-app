@@ -1,4 +1,5 @@
 #include "../core.h"
+
 #include "mpi.h"
 
 #include "gtest/gtest.h"

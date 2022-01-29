@@ -1,17 +1,12 @@
-#include "Logs.hpp"
+#include "../femera.hpp"
 
 #include "gtest/gtest.h"
 
-
-auto flog = femera::data::Logs
- ( femera::Work::Core_t (nullptr,nullptr,nullptr) );
-
-TEST( Logs, TaskName ){
-  EXPECT_EQ( flog.name, "log" );
-}
-TEST( Logs, SizeofLogsGE120 ){
-  EXPECT_GE( sizeof(flog), 120 );
-}
+auto mini = femera::new_sims ();
 fmr::Exit_int main (int argc, char** argv) {
-  return femera::test:: early_main (&argc, argv);
+  return mini->exit (mini->init (&argc,argv));
+}
+
+TEST( Mini, DataName ){
+  EXPECT_EQ( mini->data->name, "log" );
 }
