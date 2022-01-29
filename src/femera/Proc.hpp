@@ -12,14 +12,13 @@ namespace femera {
   private:
     using This_t = std::shared_ptr <T>;
   protected:                   // Set by derived instances during task_init()...
-    proc::Team_t   team_id = 0;
-    fmr::Local_int team_n  = 1;
-//    fmr::Local_int proc_id = 0;
-    fmr::Local_int proc_ix = 0;// index at this level [0,proc_n-1]
-    fmr::Local_int proc_n  = 1;
-    fmr::Local_int main_ix = 0;
     fmr::Local_int base_id = 0;
     fmr::Local_int base_n  = 1;
+    fmr::Local_int proc_n  = 1;
+    fmr::Local_int proc_ix = 0;//TODO Make proc_ix private?
+    fmr::Local_int main_ix = 0;// [0,proc_n-1]
+    proc::Team_t   team_id = 0;
+    fmr::Local_int team_n  = 1;
   public:                      //              ...because proc::Main uses these.
     fmr::Exit_int init (int*, char**)        noexcept final override;
     fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;
@@ -27,7 +26,7 @@ namespace femera {
     bool            is_main    ();
     proc::Team_t   get_team_id () noexcept;
     fmr::Local_int get_team_n  () noexcept;
-    fmr::Local_int get_proc_ix () noexcept;
+    fmr::Local_int get_proc_ix () noexcept;// index at this level [0,proc_n-1]
     fmr::Local_int get_proc_n  () noexcept;
     fmr::Local_int set_base_n  ();
     fmr::Local_int all_proc_n  ();
