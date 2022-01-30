@@ -1,13 +1,11 @@
-#include "Beds.hpp"
+#include "../femera.hpp"
 
 #include "gtest/gtest.h"
 
+auto mini = femera::new_sims ();
 fmr::Exit_int main (int argc, char** argv) {
-  return femera::test:: early_main (&argc, argv);
+  return mini->exit (mini->init (&argc,argv));
 }
-auto testbeds = femera::test::Beds
- ( femera::Work::Core_t (nullptr,nullptr,nullptr) );
-
-TEST( Beds, TaskName ){
-  EXPECT_EQ( testbeds.name, "testbeds" );
+TEST( Gtst, TaskName ){
+  EXPECT_EQ( mini->test->name, "testbeds" );
 }

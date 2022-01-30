@@ -14,8 +14,6 @@ namespace femera {
     fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;
     T*        get_task (fmr::Local_int);
     T*        get_task (Work::Task_path_t);
-//    static constexpr
-//    This_t    new_task () noexcept;//FIXME Remove.
     static constexpr
     This_t    new_task (const Work::Core_t) noexcept;
   private:

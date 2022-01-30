@@ -40,7 +40,7 @@ namespace femera {
     T*     get_task_raw (fmr::Local_int);
     T*     get_task_raw (Work::Task_path_t);
   private:
-    This_t get_task_spt (fmr::Local_int);//FIXME Remove these?
+    This_t get_task_spt (fmr::Local_int);//TODO Remove these?
     This_t get_task_spt (Work::Task_path_t);
   private:
     T*          derived (Proc*) noexcept;

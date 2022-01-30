@@ -6,7 +6,7 @@
 namespace femera { namespace test {
   class Beds;// Derive a CRTP concrete class from Test.
   class Beds : public Test<Beds> { private: friend class Test;
-  public:
+  private:
     Beds (femera::Work::Core_t) noexcept;
     Beds () =delete;//NOTE Use the constructor above.
   private:
