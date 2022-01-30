@@ -21,7 +21,7 @@ namespace femera { namespace proc {
     static  fmr::Local_int get_numa_ix   ();
     static fmr::Global_int get_used_byte ();
   private:
-    Node (femera::Work::Core_t) noexcept;
+    Node (femera::Work::Core_ptrs) noexcept;
     Node () =delete;//NOTE Use the constructor above.
     void task_init (int* argc, char** argv);
     void task_exit ();

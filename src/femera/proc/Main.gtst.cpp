@@ -2,7 +2,7 @@
 
 #include "gtest/gtest.h"
 
-auto fmr_main = std::make_shared<femera::proc::Main> (femera::proc::Main());
+auto fmr_main = FMR_MAKE_SMART<femera::proc::Main> (femera::proc::Main());
 
 TEST( Main, TaskName ){
   EXPECT_EQ( fmr_main->name, "processing");

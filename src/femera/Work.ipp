@@ -8,19 +8,19 @@
 
 namespace femera {
   inline
-  Work::Core_t Work::get_core ()
+  Work::Core_ptrs Work::get_core ()
   noexcept {
     return std::make_tuple (this->proc, this->data, this->test);
   }
   inline
-  Work_t Work::get_work_spt (const fmr::Local_int i)
+  Work_spt Work::get_work_spt (const fmr::Local_int i)
   noexcept {
-    return (i < this->task_list.size()) ? this->task_list [i] : nullptr;
+    return (i < this->task_list.size()) ? std::move(task_list [i]) : nullptr;
   }
   inline
-  Work_t Work::get_work_spt (const Work::Task_path_t path)
+  Work_spt Work::get_work_spt (const Work::Task_path_t path)
   noexcept {
-    Work_t W = nullptr;
+    Work_spt W = nullptr;
     auto Wraw = this;
     const auto sz = path.size();
 #if 0
@@ -41,7 +41,7 @@ namespace femera {
           Wraw = W.get();
     } } }
 #endif
-    return W;
+    return std::move(W);
   }
   inline
   Work* Work::get_work_raw (const fmr::Local_int i)
@@ -75,9 +75,9 @@ namespace femera {
   }
   //===========================================================================
   inline
-  fmr::Local_int Work::add_task (Work_t W)
+  fmr::Local_int Work::add_task (Work_spt W)
   noexcept {
-    this->task_list.push_back (W);
+    this->task_list.push_back (std::move(W));
     return fmr::Local_int (this->task_list.size () - 1);
   }
   inline
@@ -86,6 +86,38 @@ namespace femera {
     return fmr::Local_int (this->task_list.size ());
   }
 }//end femera:: namespace
+#if 0
+#include <cstddef>
+#include <memory>
+#include <type_traits>
+#include <utility>
+namespace std {                                             // from C++14
+// http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3656.htm
+  template<class T> struct _Unique_if {
+  typedef unique_ptr<T> _Single_object;
+  };
+  template<class T> struct _Unique_if<T[]> {
+  typedef unique_ptr<T[]> _Unknown_bound;
+  };
+  template<class T, size_t N> struct _Unique_if<T[N]> {
+  typedef void _Known_bound;
+  };
+  template<class T, class... Args>
+  typename _Unique_if<T>::_Single_object
+  make_unique(Args&&... args) {
+    return unique_ptr<T>(new T(std::forward<Args>(args)...));
+  }
+  template<class T>
+  typename _Unique_if<T>::_Unknown_bound
+  make_unique(size_t n) {
+    typedef typename remove_extent<T>::type U;
+    return unique_ptr<T>(new U[n]());
+  }
+  template<class T, class... Args>
+  typename _Unique_if<T>::_Known_bound
+  make_unique(Args&&...) = delete;
+}
+#endif
 
 #undef FMR_DEBUG
 //end FEMERA_HAS_WORK_IPP

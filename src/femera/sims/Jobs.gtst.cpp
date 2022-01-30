@@ -3,7 +3,7 @@
 #include "gtest/gtest.h"
 #if 0
 auto jobs = femera::sims::Jobs
- ( femera::Work::Core_t (nullptr,nullptr,nullptr) );
+ ( femera::Work::Core_ptrs (nullptr,nullptr,nullptr) );
 #else
   auto jobs = femera::sims::Jobs ();
 //  auto jobs = femera::new_sims ();

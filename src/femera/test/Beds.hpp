@@ -7,11 +7,11 @@ namespace femera { namespace test {
   class Beds;// Derive a CRTP concrete class from Test.
   class Beds : public Test<Beds> { private: friend class Test;
   private:
-    Beds (femera::Work::Core_t) noexcept;
-    Beds () =delete;//NOTE Use the constructor above.
-  private:
     void task_init (int* argc, char** argv);
     void task_exit ();
+  private:
+    Beds (femera::Work::Core_ptrs) noexcept;
+    Beds () =delete;//NOTE Use the constructor above.
   };
 } }//end femera::test:: namespace
 

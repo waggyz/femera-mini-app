@@ -4,7 +4,7 @@
 namespace femera {
 # if 0
   inline
-  proc::Fomp::Fomp (femera::Work::Core_t core) noexcept {
+  proc::Fomp::Fomp (femera::Work::Core_ptrs core) noexcept {
     std::tie (this->proc, this->data, this->test) = core;
     this->name ="OpenMP";
   }

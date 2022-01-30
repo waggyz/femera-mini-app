@@ -21,7 +21,7 @@ namespace femera { namespace proc {
     void task_init (int* argc, char** argv);
     void task_exit ();
   private:
-    Fmpi (femera::Work::Core_t) noexcept;
+    Fmpi (femera::Work::Core_ptrs) noexcept;
     Fmpi () =delete;//NOTE Use the constructor above.
   };
 } }//end femera::proc:: namespace

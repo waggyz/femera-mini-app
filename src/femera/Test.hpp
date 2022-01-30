@@ -8,17 +8,17 @@ namespace femera {
   template <typename T>
   class Test : public Work {
   private:
-    using This_t = std::shared_ptr<T>;
+    using This_spt = FMR_SMART_PTR<T>;
   public:
     fmr::Exit_int init (int*, char**)        noexcept final override;
     fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;
     T*        get_task (fmr::Local_int);
     T*        get_task (Work::Task_path_t);
     static constexpr
-    This_t    new_task (const Work::Core_t) noexcept;
+    This_spt  new_task (const Work::Core_ptrs) noexcept;
   private:
-    T* derived (Test*) noexcept;
-    T* derived (Work*) noexcept;
+    T*        derived  (Test*) noexcept;
+    T*        derived  (Work*) noexcept;
   protected:// Make it clear this class needs to be inherited from.
     Test ()            =default;
     Test (const Test&) =default;

@@ -5,8 +5,8 @@
 #include "sims/Jobs.hpp"
 
 namespace femera {
-  Jobs_t new_sims ();
-  Jobs_t new_sims (int*, char**);
+  Jobs_spt new_sims ();
+  Jobs_spt new_sims (int*, char**);
 }//end femera:: namespace
 
 #include "femera.ipp"

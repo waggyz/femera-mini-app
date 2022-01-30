@@ -15,7 +15,10 @@ namespace femera {
   }
   fmr::Exit_int Work::init_list (int* argc, char** argv)
   noexcept {fmr::Exit_int err =0;
-    for (auto W : this->task_list) {// Init task_list forward.
+//    for (auto W : this->task_list) {// Init task_list forward.
+    const auto n = this->task_list.size ();
+    for (fmr::Local_int i=0; i<n; i++) {
+      const auto W =this->task_list[i].get();
       if (W != nullptr) {
 #ifdef FMR_DEBUG
         printf ("Work: init list %s\n", W->name.c_str());
@@ -115,8 +118,8 @@ namespace femera {
 
 
 
-// std::shared_ptr<Work> work = std::make_shared<Work>(some_work);
-// std::shared_ptr<Work> work(new Work(some_work));
+// FMR_SMART_PTR<Work> work = FMR_MAKE_SMART<Work>(some_work);
+// FMR_SMART_PTR<Work> work(new Work(some_work));
 
 #if 0
 int Work::prep () {return 0;}

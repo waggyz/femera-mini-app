@@ -11,47 +11,57 @@
 #include <vector>
 #include <deque>
 #include <tuple>
+#if 0
+#define FMR_SMART_PTR std::unique_ptr
+#define FMR_MAKE_SMART(T) std::unique_ptr<T>(new T (std::forward<Args>(args)...))
+//define FMR_MAKE_SMART std::make_unique // in Work.ipp
+#else
+#define FMR_SMART_PTR std::shared_ptr
+#define FMR_MAKE_SMART std::make_shared
+#endif
 
 namespace femera {
   // Forward-declares
   class Work;
-  template <typename> class Proc;// class Main;
-  template <typename> class Data;// class File;
-  template <typename> class Test;// class Beds;
-  template <typename> class Sims;
+  template <typename> class Proc;// class Main; interface
+  template <typename> class Data;// class File; interface
+  template <typename> class Test;// class Beds; interface
+  template <typename> class Sims;// class Jobs; interface
   namespace proc {
     class Main; class Root; class Node; class Fmpi; class Fomp; class Fcpu; }
   namespace data { class File; class Logs; }// class Type; class Base; }//TODO Fake -> Base?
   namespace test { class Beds; class Unit; class Self; class Perf; class Gtst; }
   namespace sims { class Jobs; }
   // typedefs
-  using Work_t = std::shared_ptr <Work>;
+  using Work_spt = FMR_SMART_PTR <Work>;
+#if 0
   //
-  using Main_t = std::shared_ptr <proc::Main>;// concrete Proc interface
-  using Root_t = std::shared_ptr <proc::Root>;//FIXME should others be visible
-  using Node_t = std::shared_ptr <proc::Node>;//
-  using Fmpi_t = std::shared_ptr <proc::Fmpi>;//      oustside of their parent
-  using Fomp_t = std::shared_ptr <proc::Fomp>;//      class?
-  using Fcpu_t = std::shared_ptr <proc::Fcpu>;
+  using Main_t = FMR_SMART_PTR <proc::Main>;// concrete Proc interface
+  using Root_t = FMR_SMART_PTR <proc::Root>;//FIXME should others be visible
+  using Node_t = FMR_SMART_PTR <proc::Node>;//
+  using Fmpi_t = FMR_SMART_PTR <proc::Fmpi>;//      oustside of their parent
+  using Fomp_t = FMR_SMART_PTR <proc::Fomp>;//      class?
+  using Fcpu_t = FMR_SMART_PTR <proc::Fcpu>;
   //
-  using File_t = std::shared_ptr <data::File>;// concrete Data interface
-  using Logs_t = std::shared_ptr <data::Logs>;
+  using File_t = FMR_SMART_PTR <data::File>;// concrete Data interface
+  using Logs_t = FMR_SMART_PTR <data::Logs>;
   //
-  using Beds_t = std::shared_ptr <test::Beds>;// concrete Test interface
-  //using Unit_t = std::shared_ptr <test::Unit>;// built-in unit tests
-  //using Self_t = std::shared_ptr <test::Self>;// built-in integration tests
-  //using Perf_t = std::shared_ptr <test::Perf>;// built-in performance tests
-  using Gtst_t = std::shared_ptr <test::Gtst>;
+  using Beds_t = FMR_SMART_PTR <test::Beds>;// concrete Test interface
+  //using Unit_t = FMR_SMART_PTR <test::Unit>;// built-in unit tests
+  //using Self_t = FMR_SMART_PTR <test::Self>;// built-in integration tests
+  //using Perf_t = FMR_SMART_PTR <test::Perf>;// built-in performance tests
+  using Gtst_t = FMR_SMART_PTR <test::Gtst>;
+#endif
   //
-  using Jobs_t = std::shared_ptr <sims::Jobs>;// concrete Sims interface
+  using Jobs_spt = FMR_SMART_PTR <sims::Jobs>;// concrete Sims interface
   //
   class Work {// This is an abstract (pure virtual) base class (interface).
   // Derived Classes use the curiously recurrent template pattern (CRTP).
   public:// typedefs ----------------------------------------------------------
-    using Task_list_t = std::deque  <Work_t>;
+    using Core_ptrs   = std::tuple  <proc::Main*, data::File*, test::Beds*>;
+    using Task_list_t = std::deque  <Work_spt>;
     using Task_path_t = std::vector <fmr::Local_int>;
     using Task_tree_t = std::vector <Task_path_t>;
-    using      Core_t = std::tuple  <proc::Main*, data::File*, test::Beds*>;
   public:// Variables ---------------------------------------------------------
     fmr::perf::Meter time = fmr::perf::Meter ();
     std::string      name ="unknown work";
@@ -76,18 +86,18 @@ namespace femera {
     //
 //TODO Task_tree_t get_tree     ()       noexcept;
     fmr::Local_int get_task_n   ()       noexcept;
-    fmr::Local_int add_task     (Work_t) noexcept;// returns task number added
+    fmr::Local_int add_task     (Work_spt) noexcept;// returns task number added
 /*  Derived_t      new_task     ()// in Derived and returns that smart pointer
-    Derived_t      new_task     (Core_t)        //           ""
+    Derived_t      new_task     (Core_ptrs)        //           ""
     Derived_t      get_task_spt (fmr::Local_int)//           ""
     Derived*       get_task_raw (fmr::Local_int)// returns Derived* raw pointer
 */
-    Core_t get_core () noexcept;
+    Core_ptrs get_core () noexcept;
   public:
     Work*  get_work_raw (fmr::Local_int) noexcept;
     Work*  get_work_raw (Task_path_t)    noexcept;
-    Work_t get_work_spt (fmr::Local_int) noexcept;
-    Work_t get_work_spt (Task_path_t)    noexcept;
+    Work_spt get_work_spt (fmr::Local_int) noexcept;
+    Work_spt get_work_spt (Task_path_t)    noexcept;
     // above called by Derived::get_task_*(..)
     //
   protected:
@@ -101,6 +111,7 @@ namespace femera {
     Work& operator=
       (const Work&)    =default;
     // Make it clear this class needs to be inherited from.
+  public:
     virtual ~Work ();// not inline to avoid -Winline large growth warning
   };
 }//end femera:: namespace

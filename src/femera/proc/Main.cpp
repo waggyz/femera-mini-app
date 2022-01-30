@@ -19,8 +19,8 @@ namespace femera {
   void proc::Main:: task_init (int*, char**) {
     const auto core = this->get_core ();
     std::vector<fmr::Local_int> path ={};
-    path.push_back (this->add_task
-      (Proc<proc::Root>::new_task (core)));
+    path.push_back (std::move(this->add_task
+      (std::move(Proc<proc::Root>::new_task (core)))));
     path.push_back (get_task_raw (path)->add_task
       (Proc<proc::Node>::new_task (core)));
 #ifdef FMR_HAS_MPI

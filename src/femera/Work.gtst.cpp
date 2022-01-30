@@ -22,7 +22,7 @@ TEST( Work, TrivialTest ) {
 template <typename T>
 class Base : public femera::Work {
 private:
-  using Derived_t = std::shared_ptr<T>;
+  using Derived_t = FMR_SMART_PTR<T>;
 public:
   fmr::Exit_int init     (int*, char**) noexcept override;
   fmr::Exit_int exit     (fmr::Exit_int err=0) noexcept override;
@@ -43,17 +43,17 @@ protected:// Make it clear that Base needs to be inherited.
   ~Base ()           =default;
 };//---------------------------------------------------------------------------
 class Testable;// ...then derive a CRTP concrete class from Base for testing.
-using Testable_t = std::shared_ptr <Testable>;
+using Testable_t = FMR_SMART_PTR <Testable>;
 class Testable : public Base <Testable> {
 public:
-  Testable (femera::Work::Core_t) noexcept;
+  Testable (femera::Work::Core_ptrs) noexcept;
   //FIXME This may not be needed if copy constructors set proc,data,file,test
   Testable () noexcept;
   void task_exit ();
 };//===========================================================================
 #if 1
 inline
-Testable::Testable (femera::Work::Core_t W) noexcept {
+Testable::Testable (femera::Work::Core_ptrs W) noexcept {
   this->name ="testable";
   std::tie(this->proc,this->data,this->test) = W;
 }
@@ -88,11 +88,11 @@ fmr::Exit_int Base<T>::exit (fmr::Exit_int err) noexcept {
 //FIXME Replace these =========================================================
 # if 0
 template <typename T> inline
-std::shared_ptr<T> Base<T>::get_task (const fmr::Local_int i) {
+FMR_SMART_PTR<T> Base<T>::get_task (const fmr::Local_int i) {
   return std::static_pointer_cast<T> (this->get_work (i));
 }
 template <typename T> inline
-std::shared_ptr<T> Base<T>::get_task (const femera::Work::Task_path_t tree) {
+FMR_SMART_PTR<T> Base<T>::get_task (const femera::Work::Task_path_t tree) {
   return std::static_pointer_cast<T> (this->get_work (tree));
 }
 #endif
@@ -106,8 +106,8 @@ T* Base<T>::get_task (const femera::Work::Task_path_t tree) {
   return static_cast<T*> (this->get_work_raw (tree));
 }
 //============================================================================
-auto testable = std::make_shared<Testable> ();
-auto another1 = std::make_shared<Testable> (testable->get_core());
+auto testable = FMR_MAKE_SMART<Testable> ();
+auto another1 = FMR_MAKE_SMART<Testable> (testable->get_core());
 //-----------------------------------------------------------------------------
 TEST( TestableWork, ClassSize ) {
   EXPECT_EQ( sizeof(femera::Work::Task_list_t), size_t(80));
@@ -141,7 +141,7 @@ TEST( TestableWork, AddGetExitTask ) {
   EXPECT_EQ( another1.use_count(), 1u);
 }
 TEST( TestableWork, SubTask ) {
-  auto subtask = std::make_shared<Testable> (testable->get_core());
+  auto subtask = FMR_MAKE_SMART<Testable> (testable->get_core());
   testable->add_task (another1);
   subtask->name = "subtask";
   another1->add_task (subtask);

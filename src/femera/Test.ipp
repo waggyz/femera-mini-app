@@ -44,8 +44,8 @@ namespace femera {
     return derived (this->get_work_raw (tree));
   }
   template <typename T> inline constexpr
-  std::shared_ptr<T> Test<T>::new_task (const Work::Core_t core) noexcept {
-    return std::make_shared<T> (T(core));
+  FMR_SMART_PTR<T> Test<T>::new_task (const Work::Core_ptrs core) noexcept {
+    return FMR_MAKE_SMART<T> (T(core));
   }
 }// end femera:: namespace
 

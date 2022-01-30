@@ -35,11 +35,11 @@ namespace femera {
   }
 //FIXME Replace these =========================================================
   template <typename T> inline
-  std::shared_ptr<T> Sims<T>::get_task_spt (const fmr::Local_int i) {
+  FMR_SMART_PTR<T> Sims<T>::get_task_spt (const fmr::Local_int i) {
     return std::static_pointer_cast<T> (this->get_work (i));
   }
   template <typename T> inline
-  std::shared_ptr<T> Sims<T>::get_task_spt (const Work::Task_path_t path) {
+  FMR_SMART_PTR<T> Sims<T>::get_task_spt (const Work::Task_path_t path) {
     return std::static_pointer_cast<T> (this->get_work (path));
   }
   template <typename T> inline
@@ -51,12 +51,12 @@ namespace femera {
     return static_cast<T*> (this->get_work_raw (path));
   }
   template <typename T> inline constexpr
-  std::shared_ptr<T> Sims<T>::new_task () noexcept {
-    return std::make_shared<T> (T());
+  FMR_SMART_PTR<T> Sims<T>::new_task () noexcept {
+    return FMR_MAKE_SMART<T> (T());
   }
   template <typename T> inline
-  std::shared_ptr<T> Sims<T>::new_task (int* argc, char** argv) noexcept {
-    auto S = std::make_shared<T> (T());
+  FMR_SMART_PTR<T> Sims<T>::new_task (int* argc, char** argv) noexcept {
+    auto S = FMR_MAKE_SMART<T> (T());
     S->init (argc, argv);
     return S;
   }

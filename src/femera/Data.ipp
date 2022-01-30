@@ -31,11 +31,11 @@ namespace femera {
     return err;
   }
   template <typename T> inline
-  std::shared_ptr<T> Data<T>::get_task_spt (const fmr::Local_int i) {
+  FMR_SMART_PTR<T> Data<T>::get_task_spt (const fmr::Local_int i) {
     return std::static_pointer_cast<T> (this->get_work_spt (i));
   }
   template <typename T> inline
-  std::shared_ptr<T> Data<T>::get_task_spt (const Work::Task_path_t tree) {
+  FMR_SMART_PTR<T> Data<T>::get_task_spt (const Work::Task_path_t tree) {
     return std::static_pointer_cast<T> (this->get_work_spt (tree));
   }
   template <typename T> inline
@@ -47,8 +47,8 @@ namespace femera {
     return static_cast<T*> (this->get_work_raw (tree));
   }
   template <typename T> inline constexpr
-  std::shared_ptr<T> Data<T>::new_task (const Work::Core_t core) noexcept {
-    return std::make_shared<T> (T(core));
+  FMR_SMART_PTR<T> Data<T>::new_task (const Work::Core_ptrs core) noexcept {
+    return FMR_MAKE_SMART<T> (T(core));
   }
 }// end femera:: namespace
 

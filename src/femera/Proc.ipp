@@ -51,11 +51,11 @@ namespace femera {
     return (task_err > 0) ? task_err : err;
   }
   template <typename T> inline
-  std::shared_ptr<T> Proc<T>::get_task_spt (const fmr::Local_int i) {
+  FMR_SMART_PTR<T> Proc<T>::get_task_spt (const fmr::Local_int i) {
     return std::static_pointer_cast<T> (this->get_work_spt (i));
   }
   template <typename T> inline
-  std::shared_ptr<T> Proc<T>::get_task_spt (const Work::Task_path_t path) {
+  FMR_SMART_PTR<T> Proc<T>::get_task_spt (const Work::Task_path_t path) {
     return std::static_pointer_cast<T> (this->get_work_spt (path));
   }
   template <typename T> inline
@@ -67,14 +67,14 @@ namespace femera {
     return derived (this->get_work_raw (path));
   }
   template <typename T> inline constexpr
-  std::shared_ptr<T> Proc<T>::new_task ()
+  FMR_SMART_PTR<T> Proc<T>::new_task ()
   noexcept {
-    return std::make_shared<T> (T());
+    return FMR_MAKE_SMART<T> (T());
   }
   template <typename T> inline constexpr
-  std::shared_ptr<T> Proc<T>::new_task (const Work::Core_t core)
+  FMR_SMART_PTR<T> Proc<T>::new_task (const Work::Core_ptrs core)
   noexcept {
-    return std::make_shared<T> (T(core));
+    return std::move(FMR_MAKE_SMART<T> (T(core)));
   }
 #if 0
   template <typename T> inline

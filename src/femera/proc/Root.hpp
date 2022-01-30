@@ -10,7 +10,7 @@ namespace femera { namespace proc {
     void task_init (int* argc, char** argv);
     void task_exit ();
   private:
-    Root (femera::Work::Core_t) noexcept;
+    Root (femera::Work::Core_ptrs) noexcept;
     Root () =delete;//NOTE Use the constructor above.
   };
 } }//end femera::proc:: namespace

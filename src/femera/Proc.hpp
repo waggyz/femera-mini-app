@@ -10,7 +10,7 @@ namespace femera {
   template <typename T>
   class Proc : public Work {
   private:
-    using This_t = std::shared_ptr <T>;
+    using This_spt = FMR_SMART_PTR <T>;
   protected:                   // Set by derived instances during task_init()...
     fmr::Local_int base_id = 0;
     fmr::Local_int base_n  = 1;
@@ -34,18 +34,18 @@ namespace femera {
     // proc_id = base_id + base_n * proc_ix
     //
     static constexpr
-    This_t new_task     () noexcept;
+    This_spt new_task     () noexcept;
     static constexpr
-    This_t new_task     (const Work::Core_t) noexcept;
-    T*     get_task_raw (fmr::Local_int);
-    T*     get_task_raw (Work::Task_path_t);
+    This_spt new_task     (const Work::Core_ptrs) noexcept;
+    T*       get_task_raw (fmr::Local_int);
+    T*       get_task_raw (Work::Task_path_t);
   private:
-    This_t get_task_spt (fmr::Local_int);//TODO Remove these?
-    This_t get_task_spt (Work::Task_path_t);
+    This_spt get_task_spt (fmr::Local_int);//TODO Remove these?
+    This_spt get_task_spt (Work::Task_path_t);
   private:
-    T*          derived (Proc*) noexcept;
-    T*          derived (Work*) noexcept;
-    Proc<T>*  this_cast (Work*) noexcept;
+    T*            derived (Proc*) noexcept;
+    T*            derived (Work*) noexcept;
+    Proc<T>*    this_cast (Work*) noexcept;
   protected:// Make it clear this class needs to be inherited from.
     Proc ()            =default;
     Proc (const Proc&) =default;
