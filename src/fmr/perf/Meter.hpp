@@ -11,7 +11,7 @@ namespace fmr { namespace perf {
     using Float = fmr::Perf_float;
   public:// methods
     std::string get_unit_name () noexcept;
-    std::string set_unit_name (std::string) noexcept;
+    std::string set_unit_name (const std::string&) noexcept;
     //
     Timepoint start () noexcept;
     Timepoint reset () noexcept;
@@ -41,7 +41,7 @@ namespace fmr { namespace perf {
     Float get_busy_inp_speed ();
     Float get_busy_out_speed ();
     // Constructors
-    Meter (std::string unit_name) noexcept;
+    Meter (const std::string& unit_name) noexcept;
     Meter () =default;
   private:
     Timepoint tick    = get_now_ns ();

@@ -3,14 +3,14 @@
 
 // Inline definitions
 namespace fmr {
-  inline perf::Meter::Meter (const std::string units)
+  inline perf::Meter::Meter (const std::string& units)
     noexcept : unit_name (units) {
   }
   inline std::string perf::Meter::get_unit_name ()
   noexcept {
     return this->unit_name;
   }
-  inline std::string perf::Meter::set_unit_name (const std::string name)
+  inline std::string perf::Meter::set_unit_name (const std::string& name)
   noexcept {
     this->unit_name = name;
     return this->unit_name;

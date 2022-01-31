@@ -4,6 +4,9 @@
 #include "Work.hpp"
 //#include "core.h"
 
+#include <map>
+#include <cstdio>
+
 namespace femera {
   template <typename T>
   class Data : public Work {
@@ -11,19 +14,24 @@ namespace femera {
     using This_spt = FMR_SMART_PTR<T>;
     using File_ptrs_t = std::vector<FILE*>;
   public:
-//    data::Logs* log =nullptr;
     File_ptrs_t fmrlog = {::stdout};
     File_ptrs_t fmrout = {::stdout};
     File_ptrs_t fmrerr = {::stderr};
+  private:
+    std::map <FILE*, fmr::Line_size_int> file_line_sz
+      = {{::stdout, 80}, {::stderr, 250}};
+    std::map <FILE*, fmr::Line_size_int> file_head_sz
+      = {{::stdout, 15}, {::stderr, 0}};
   public:
-    std::string text_line (const File_ptrs_t, const std::string form,...);
-    std::string text_line (const std::string form,...);
-    std::string head_line
-      (const File_ptrs_t, const std::string head, const std::string form,...);
-    std::string head_line
-      (const std::string head, const std::string form,...);
-//    std::string time_line (File_ptrs_t, std::string head, std::string form,...);
-//    std::string time_line (std::string head, std::string form,...);
+    std::string text_line (const File_ptrs_t,      const std::string& form,...);
+    std::string text_line (                        const std::string& form,...);
+    std::string head_line (const File_ptrs_t,
+                           const std::string& head, const std::string& form,...);
+    std::string head_line (const std::string& head, const std::string& form,...);
+//    std::string head_time (File_ptrs_t, std::string head, std::string form,...);
+//    std::string head_time (std::string head, std::string form,...);
+//    std::string head_perf (File_ptrs_t, std::string head, std::string form,...);
+//    std::string head_perf (std::string head, std::string form,...);
   public:
     fmr::Exit_int init     (int*, char**)        noexcept final override;
     fmr::Exit_int exit     (fmr::Exit_int err=0) noexcept final override;
