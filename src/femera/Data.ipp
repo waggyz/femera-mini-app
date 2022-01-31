@@ -1,6 +1,8 @@
 #ifndef FEMERA_HAS_DATA_IPP
 #define FEMERA_HAS_DATA_IPP
 
+#include "core.h"
+
 #undef FMR_DEBUG
 #include <cstdio>     // std::printf
 #ifdef FMR_DEBUG
@@ -10,6 +12,39 @@ namespace femera {
   template <typename T> inline
   T* Data<T>::derived (Data* ptr) {
     return static_cast<T*> (ptr);
+  }
+  template <typename T> inline
+  std::string Data<T>::text_line
+  (const Data::File_ptrs_t f, const std::string form,...){
+    std::string line = Data<T>::text_line (form);
+    if (f.size () > 0 && this->proc != nullptr) {
+      const auto fh = f[this->proc->get_proc_id () % f.size()];
+      if (fh != nullptr) {
+        fprintf (fh,"%s\n", line.c_str());
+    } }
+    return line;
+  }
+  template <typename T> inline
+  std::string Data<T>::text_line (const std::string form,...){
+    std::string line = form;// TODO fmr::form::text_line (..)
+    return line;
+  }
+  template <typename T> inline
+  std::string Data<T>::head_line
+  (Data::File_ptrs_t f, const std::string head, const std::string form,...){
+    std::string line = Data<T>::head_line (head, form);
+    if (f.size () > 0 && this->proc != nullptr) {
+      const auto fh = f[this->proc->get_proc_id () % f.size()];
+      if (fh != nullptr) {
+        fprintf (fh,"%s\n", line.c_str());
+    } }
+    return line;
+  }
+  template <typename T> inline
+  std::string Data<T>::head_line
+  (const std::string head, const std::string form,...){
+    std::string line = head+" "+form;// TODO fmr::form::head_line (..)
+    return line;
   }
   template <typename T> inline
   fmr::Exit_int Data<T>::init (int* argc, char** argv) noexcept {

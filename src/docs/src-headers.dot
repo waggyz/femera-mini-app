@@ -31,5 +31,6 @@ digraph "source tree" {
 	"Data.hpp" -> "Work.hpp"
 	"femera.hpp" -> "core.h"
 	"Work.hpp" -> "Meter.hpp"
+	"Logs.hpp" -> "form.hpp"
 	"Main.hpp" -> "Proc.hpp"
 }

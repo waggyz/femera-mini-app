@@ -12,14 +12,15 @@ namespace femera {
   private:
     using This_spt = FMR_SMART_PTR <T>;
   protected:                   // Set by derived instances during task_init()...
-    fmr::Local_int base_id = 0;
-    fmr::Local_int base_n  = 1;
-    fmr::Local_int proc_n  = 1;
+    proc::Team_t   team_id = 0;//
+    fmr::Local_int team_n  = 1;//
+    fmr::Local_int base_id = 0;//
+    fmr::Local_int base_n  = 1;//
+    fmr::Local_int proc_n  = 1;//
     fmr::Local_int proc_ix = 0;//TODO Make proc_ix private?
     fmr::Local_int main_ix = 0;// [0,proc_n-1]
-    proc::Team_t   team_id = 0;
-    fmr::Local_int team_n  = 1;
-  public:                      //              ...because proc::Main uses these.
+                               //              ...because proc::Main uses them.
+  public:
     fmr::Exit_int init (int*, char**)        noexcept final override;
     fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;
     //
@@ -31,8 +32,7 @@ namespace femera {
     fmr::Local_int set_base_n  ();
     fmr::Local_int all_proc_n  ();
     fmr::Local_int get_proc_id ();// global thread identifier
-    // proc_id = base_id + base_n * proc_ix
-    //
+                                  // proc_id = base_id + base_n * proc_ix
     static constexpr
     This_spt new_task     () noexcept;
     static constexpr

@@ -1,14 +1,12 @@
 #ifndef FMR_HAS_FMR_HPP
 #define FMR_HAS_FMR_HPP
 
-//#include "../femera/femera.hpp"
-
 #include <cstdint>
 
 namespace fmr {
 /* NOTE prefer e.g. int_fast8_t, uint_least8_t, ...,  uintmax_t, uintptr_t
  *
- * This "using" syntax is preferred to "using" in the Google C++ Style Guide:
+ * This "using" syntax is preferred to "typedef" in the Google C++ Style Guide:
  * https://google.github.io/styleguide/cppguide.html#Aliases
  *
  * sizeof (Dim_int <= Enum_int <= Local_int < Global_int)
@@ -31,6 +29,8 @@ namespace fmr {
   using Cond_float = float         ;// Preconditioning and scaling
   using Post_float = float         ;// Post-processing
   using Plot_float = float         ;// Visualization
+  //
+  using Line_size_int = uint_fast16_t ;
 }//end fmr:: namespace
 namespace femera { namespace test {
   int early_main (int* argc, char** argv);

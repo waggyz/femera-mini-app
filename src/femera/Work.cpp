@@ -1,5 +1,5 @@
 #include "core.h"
-
+#include "../fmr/form.hpp"
 
 #include <cstdio>     //FIXME remove std::printf
 
@@ -27,10 +27,20 @@ namespace femera {
         const int Werr = W->init (argc, argv); // is noexcept
         err = (Werr == 0) ? err : Werr;
         W->time.add_busy_time_now ();
+        if (this->data != nullptr) {
+          data->head_line (data->fmrout,"label","format"); }
         if (this->proc != nullptr) {if (this->proc->is_main ()) {
+#if 0
           printf ("%u/%u:%20s init busy %f / %f s\n",
             this->proc->get_proc_id (), proc->all_proc_n (), W->name.c_str(),
             double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
+#else
+          const auto busy = fmr::form::si_unit_string(W->time.get_busy_s(),"s");
+          const auto tot  = fmr::form::si_unit_string(W->time.get_work_s(),"s");
+          printf ("%u/%u:%15s init busy %s/%s\n",
+            this->proc->get_proc_id (), proc->all_proc_n (), W->abrv.c_str(),
+            busy.c_str(), tot.c_str() );
+#endif
     } } } }
     if (err <=0) {this->did_work_init = true;}
     return err;
@@ -52,9 +62,17 @@ namespace femera {
         err = (Werr == 0) ? err : Werr;
         W->time.add_busy_time_now ();
         if (this->is_work_main) {
+#if 0
           printf ("%u/%u:%20s exit busy %f / %f s\n",
             this->proc->get_proc_id (), proc->all_proc_n (), W->name.c_str(),
             double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
+#else
+          const auto busy = fmr::form::si_unit_string(W->time.get_busy_s(),"s");
+          const auto tot  = fmr::form::si_unit_string(W->time.get_work_s(),"s");
+          printf ("%u/%u:%15s exit busy %s/%s\n",
+            this->proc->get_proc_id (), proc->all_proc_n (), W->abrv.c_str(),
+            busy.c_str(), tot.c_str() );
+#endif
       } }
       this->task_list.pop_back ();
     }
@@ -91,9 +109,17 @@ namespace femera {
 #endif
       W->time.add_busy_time_now ();
       if (this->is_work_main) {
+#if 0
         printf ("%u/%u:%20s exit busy %f / %f s\n",
           this->proc->get_proc_id (), proc->all_proc_n (), W->name.c_str(),
           double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
+#else
+        const auto busy = fmr::form::si_unit_string (W->time.get_busy_s (),"s");
+        const auto tot  = fmr::form::si_unit_string (W->time.get_work_s (),"s");
+        printf ("%u/%u:%15s exit busy %s/%s\n",
+          this->proc->get_proc_id (), proc->all_proc_n (), W->abrv.c_str(),
+          busy.c_str(), tot.c_str() );
+#endif
     } }
     if (!branch.empty()) {
       branch.pop_back ();

@@ -9,8 +9,21 @@ namespace femera {
   class Data : public Work {
   private:
     using This_spt = FMR_SMART_PTR<T>;
-//  protected:
+    using File_ptrs_t = std::vector<FILE*>;
+  public:
 //    data::Logs* log =nullptr;
+    File_ptrs_t fmrlog = {::stdout};
+    File_ptrs_t fmrout = {::stdout};
+    File_ptrs_t fmrerr = {::stderr};
+  public:
+    std::string text_line (const File_ptrs_t, const std::string form,...);
+    std::string text_line (const std::string form,...);
+    std::string head_line
+      (const File_ptrs_t, const std::string head, const std::string form,...);
+    std::string head_line
+      (const std::string head, const std::string form,...);
+//    std::string time_line (File_ptrs_t, std::string head, std::string form,...);
+//    std::string time_line (std::string head, std::string form,...);
   public:
     fmr::Exit_int init     (int*, char**)        noexcept final override;
     fmr::Exit_int exit     (fmr::Exit_int err=0) noexcept final override;

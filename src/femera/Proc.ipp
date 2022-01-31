@@ -28,10 +28,10 @@ namespace femera {
   fmr::Exit_int Proc<T>::init (int* argc, char** argv)
   noexcept {
     fmr::Exit_int err=0;
-    try { Proc::derived (this)->task_init (argc, argv);}// Init this task,...
-    catch (const Errs& e) { err = 1; e.print ();}
-    catch (std::exception& e) { err = 1;}
-    catch (...) { err = 2;}
+    try { Proc::derived (this)->task_init (argc, argv); }// Init this task,...
+    catch (const Errs& e) { err = 1; e.print (); }
+    catch (std::exception& e) { err = 2; }
+    catch (...) { err = 3; }
     this->init_list (argc, argv);// ...then init the sub-tasks.
     this->set_base_n ();
     return err;
@@ -40,9 +40,11 @@ namespace femera {
   fmr::Exit_int Proc<T>::exit (fmr::Exit_int err)
   noexcept {
     if (!this->task_list.empty()) {
-     this->exit_tree ();// Exit the task tree below this (is noexcept), ...
+      this->exit_tree ();// Exit the task tree below this (is noexcept), ...
     }
-    if (err>0) {return err;}
+#if 0
+    if (err>0) { return err; }
+#endif
     fmr::Exit_int task_err =0;
     try { Proc::derived (this)->task_exit (); }//...then exit this derived task.
     catch (const Errs& e) { task_err = 1; e.print (); }

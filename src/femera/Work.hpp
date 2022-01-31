@@ -14,14 +14,14 @@
 #if 0
 #define FMR_SMART_PTR std::unique_ptr
 #define FMR_MAKE_SMART(T) std::unique_ptr<T>(new T (std::forward<Args>(args)...))
-//define FMR_MAKE_SMART std::make_unique // in Work.ipp
+//define FMR_MAKE_SMART std::make_unique // in Work.ipp (from C++14)
 #else
 #define FMR_SMART_PTR std::shared_ptr
 #define FMR_MAKE_SMART std::make_shared
 #endif
 
 namespace femera {
-  // Forward-declares
+  // Forward declares
   class Work;
   template <typename> class Proc;// class Main; interface
   template <typename> class Data;// class File; interface
