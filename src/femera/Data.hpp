@@ -13,25 +13,30 @@ namespace femera {
   private:
     using This_spt = FMR_SMART_PTR<T>;
     using File_ptrs_t = std::vector<FILE*>;
+    using ss = std::string;
   public:
     File_ptrs_t fmrlog = {::stdout};
     File_ptrs_t fmrout = {::stdout};
     File_ptrs_t fmrerr = {::stderr};
   private:
     std::map <FILE*, fmr::Line_size_int> file_line_sz
-      = {{::stdout, 80}, {::stderr, 250}};
+      = {{nullptr, 80}, {::stdout, 80}, {::stderr, 250}};
     std::map <FILE*, fmr::Line_size_int> file_head_sz
-      = {{::stdout, 15}, {::stderr, 0}};
+      = {{nullptr, 15}, {::stdout, 15}, {::stderr, 0}};
   public:
-    std::string text_line (const File_ptrs_t,      const std::string& form,...);
-    std::string text_line (                        const std::string& form,...);
-    std::string head_line (const File_ptrs_t,
-                           const std::string& head, const std::string& form,...);
-    std::string head_line (const std::string& head, const std::string& form,...);
-//    std::string head_time (File_ptrs_t, std::string head, std::string form,...);
-//    std::string head_time (std::string head, std::string form,...);
-//    std::string head_perf (File_ptrs_t, std::string head, std::string form,...);
-//    std::string head_perf (std::string head, std::string form,...);
+    template<typename ...Args>
+    ss text_line (const File_ptrs_t,                 const ss& form, Args...);
+    template<typename ...Args>
+    ss text_line (                                   const ss& form, Args...);
+    template<typename ...Args>
+    ss head_line (const File_ptrs_t, const ss& head, const ss& form, Args...);
+    template<typename ...Args>
+    ss head_line (                   const ss& head, const ss& form, Args...);
+//    ss wrap_line (File_ptrs_t, ss head, ss form,...);
+//    ss head_time (File_ptrs_t, ss head, ss form,...);
+//    ss head_time (ss head, ss form,...);
+//    ss head_perf (File_ptrs_t, ss head, ss form,...);
+//    ss head_perf (ss head, std::string form,...);
   public:
     fmr::Exit_int init     (int*, char**)        noexcept final override;
     fmr::Exit_int exit     (fmr::Exit_int err=0) noexcept final override;

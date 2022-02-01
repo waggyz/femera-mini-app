@@ -13,38 +13,47 @@ namespace femera {
   T* Data<T>::derived (Data* ptr) {
     return static_cast<T*> (ptr);
   }
-  template <typename T> inline
+  template <typename T> template <typename ...Args> inline
   std::string Data<T>::text_line
-  (const Data::File_ptrs_t f, const std::string& form,...){
-    std::string line = Data<T>::text_line (form);
-    if (f.size () > 0 && this->proc != nullptr) {
-      const auto fh = f[this->proc->get_proc_id () % f.size()];
-      if (fh != nullptr) {
-        fprintf (fh,"%s\n", line.c_str());
+  (const Data::File_ptrs_t flist, const std::string& form, Args ...args) {
+    std::string line = "";
+    if (flist.size () > 0 && this->proc != nullptr) {
+      const auto file = flist [this->proc->get_proc_id () % flist.size()];
+      const auto w = this->file_line_sz [file];
+      std::vector<char> buf(w + 1,0);//TODO line = fmr::form::text_line (..)
+      std::snprintf (&buf[0], w, form.c_str(), args...);
+      line = std::string(&buf[0]);
+      if (file != nullptr) {
+        fprintf (file,"%s\n", line.c_str());
     } }
     return line;
   }
-  template <typename T> inline
-  std::string Data<T>::text_line (const std::string& form,...){
-    std::string line = form;// TODO fmr::form::text_line (..)
-    return line;
+  template <typename T> template <typename ...Args> inline
+  std::string Data<T>::text_line (const std::string& form, Args ...args) {
+    return Data<T>::text_line (Data::File_ptrs_t({nullptr}), form, args...);
   }
-  template <typename T> inline
-  std::string Data<T>::head_line
-  (Data::File_ptrs_t f, const std::string& head, const std::string& form,...){
-    std::string line = Data<T>::head_line (head, form);
-    if (f.size () > 0 && this->proc != nullptr) {
-      const auto fh = f[this->proc->get_proc_id () % f.size()];
-      if (fh != nullptr) {
-        fprintf (fh,"%s\n", line.c_str());
+  template <typename T> template <typename ...Args> inline
+  std::string Data<T>::head_line (const Data::File_ptrs_t flist,
+    const std::string& head, const std::string& form, Args ...args) {
+    std::string line = "";
+    if (flist.size () > 0 && this->proc != nullptr) {
+      const auto file = flist [this->proc->get_proc_id () % flist.size()];
+      const auto w = this->file_line_sz [file];
+      const auto h = this->file_head_sz [file];
+      std::vector<char> buf(w + 1,0);//TODO line = fmr::form::head_line (..)
+      const auto format = std::string("%"+std::to_string(h)+"s "+form);
+      std::snprintf (&buf[0], w, format.c_str(), head.c_str(), args...);
+      line = std::string(&buf[0]);
+      if (file != nullptr) {
+        fprintf (file,"%s\n", line.c_str());
     } }
     return line;
   }
-  template <typename T> inline
+  template <typename T> template <typename ...Args> inline
   std::string Data<T>::head_line
-  (const std::string& head, const std::string& form,...){
-    std::string line = head+" "+form;// TODO fmr::form::head_line (..)
-    return line;
+  (const std::string& head, const std::string& form, Args ...args) {
+    return Data<T>::head_line (Data::File_ptrs_t({nullptr}),
+      head, form, args...);
   }
   template <typename T> inline
   fmr::Exit_int Data<T>::init (int* argc, char** argv) noexcept {

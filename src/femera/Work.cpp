@@ -28,7 +28,9 @@ namespace femera {
         err = (Werr == 0) ? err : Werr;
         W->time.add_busy_time_now ();
         if (this->data != nullptr) {
-          data->head_line (data->fmrout,"label","format"); }
+          const auto busy = fmr::form::si_unit_string(W->time.get_busy_s(),"s");
+          const auto tot  = fmr::form::si_unit_string(W->time.get_work_s(),"s");
+          data->head_line (data->fmrout,W->abrv+" init","busy "+busy+"/"+tot); }
         if (this->proc != nullptr) {if (this->proc->is_main ()) {
 #if 0
           printf ("%u/%u:%20s init busy %f / %f s\n",
@@ -37,9 +39,9 @@ namespace femera {
 #else
           const auto busy = fmr::form::si_unit_string(W->time.get_busy_s(),"s");
           const auto tot  = fmr::form::si_unit_string(W->time.get_work_s(),"s");
-          printf ("%u/%u:%15s init busy %s/%s\n",
-            this->proc->get_proc_id (), proc->all_proc_n (), W->abrv.c_str(),
-            busy.c_str(), tot.c_str() );
+          printf ("%u/%u:%15s busy %s/%s\n",
+            this->proc->get_proc_id (), proc->all_proc_n (),
+            (W->abrv+" init").c_str(), busy.c_str(), tot.c_str() );
 #endif
     } } } }
     if (err <=0) {this->did_work_init = true;}

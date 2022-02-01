@@ -15,17 +15,17 @@ const int min_digits, const std::string sign) {// implemented here, not inline
   const double threshold
     = (0.95 - DBL_EPSILON) * std::pow (10.0, double(min_digits - 1));
   int log1000 = 0;
-  if (v > 1.0e-24) {
-    log1000 = int(std::log10 (v)) / 3 - ((v<1.0) ? 1 : 0);
+  if (v > double(FLT_EPSILON) * 0.5) {//1.0e-24) {
+    log1000 = int(std::log10 (v)) / 3 - ((v < 1.0) ? 1 : 0);
     v *= std::pow (10.0, -3.0 * double(log1000));
     if (v < threshold) { v *= 1000.0; log1000 -= 1; }
   }
   const int i = log1000 + 6;
   const char prefix[]="afpnum kMGTPE";
   std::string pre = "?";
-  if (i>=0 && i<int(std::strlen(prefix))) { pre = prefix[i]; }
+  if (i >= 0 && i < int(std::strlen(prefix))) { pre = prefix[i]; }
 #ifdef FMR_MICRO_UCHAR
-  if (pre=="u")  {
+  if (pre == "u")  {
     const std::string mu( MAKESTR(\FMR_MICRO_UCHAR) );
     pre = (mu =="\\u") ? "u" : mu ;
   }
