@@ -4,7 +4,7 @@
 #include "Work.hpp"
 //#include "core.h"
 
-#include <map>
+#include <unordered_map>
 #include <cstdio>
 
 namespace femera {
@@ -19,9 +19,9 @@ namespace femera {
     File_ptrs_t fmrout = {::stdout};
     File_ptrs_t fmrerr = {::stderr};
   private:
-    std::map <FILE*, fmr::Line_size_int> file_line_sz
+    std::unordered_map <FILE*, fmr::Line_size_int> file_line_sz
       = {{nullptr, 80}, {::stdout, 80}, {::stderr, 250}};
-    std::map <FILE*, fmr::Line_size_int> file_head_sz
+    std::unordered_map <FILE*, fmr::Line_size_int> file_head_sz
       = {{nullptr, 15}, {::stdout, 15}, {::stderr, 0}};
   public:
     template<typename ...Args>
