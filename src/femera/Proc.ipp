@@ -39,6 +39,7 @@ namespace femera {
   template <typename T> inline
   fmr::Exit_int Proc<T>::exit (fmr::Exit_int err)
   noexcept {
+    this->data = nullptr;
     if (!this->task_list.empty()) {
       this->exit_tree ();// Exit the task tree below this (is noexcept), ...
     }

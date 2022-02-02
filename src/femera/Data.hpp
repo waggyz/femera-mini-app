@@ -12,10 +12,11 @@ namespace femera {
   class Data : public Work {
   private:
     using This_spt = FMR_SMART_PTR<T>;
-    using File_ptrs_t = std::vector<FILE*>;
     using ss = std::string;
+  protected:
+    using File_ptrs_t = std::vector<FILE*>;
   public:
-    File_ptrs_t fmrlog = {::stdout};
+    File_ptrs_t fmrlog = {};//{::stdout};
     File_ptrs_t fmrout = {::stdout};
     File_ptrs_t fmrerr = {::stderr};
   private:

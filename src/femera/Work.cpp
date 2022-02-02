@@ -15,9 +15,8 @@ namespace femera {
   }
   fmr::Exit_int Work::init_list (int* argc, char** argv)
   noexcept {fmr::Exit_int err =0;
-//    for (auto W : this->task_list) {// Init task_list forward.
     const auto n = this->task_list.size ();
-    for (fmr::Local_int i=0; i<n; i++) {
+    for (fmr::Local_int i=0; i<n; i++) {// Init task_list forward.
       const auto W =this->task_list[i].get();
       if (W != nullptr) {
 #ifdef FMR_DEBUG
@@ -27,23 +26,18 @@ namespace femera {
         const int Werr = W->init (argc, argv); // is noexcept
         err = (Werr == 0) ? err : Werr;
         W->time.add_busy_time_now ();
-        if (this->data != nullptr) {
-          const auto busy = fmr::form::si_unit_string(W->time.get_busy_s(),"s");
-          const auto tot  = fmr::form::si_unit_string(W->time.get_work_s(),"s");
-          data->head_line (data->fmrout,W->abrv+" init","busy "+busy+"/"+tot); }
-        if (this->proc != nullptr) {if (this->proc->is_main ()) {
-#if 0
-          printf ("%u/%u:%20s init busy %f / %f s\n",
-            this->proc->get_proc_id (), proc->all_proc_n (), W->name.c_str(),
-            double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
-#else
-          const auto busy = fmr::form::si_unit_string(W->time.get_busy_s(),"s");
-          const auto tot  = fmr::form::si_unit_string(W->time.get_work_s(),"s");
-          printf ("%u/%u:%15s busy %s/%s\n",
-            this->proc->get_proc_id (), proc->all_proc_n (),
-            (W->abrv+" init").c_str(), busy.c_str(), tot.c_str() );
-#endif
-    } } } }
+        const auto busy = fmr::form::si_unit_string(W->time.get_busy_s(),"s");
+        const auto tot  = fmr::form::si_unit_string(W->time.get_work_s(),"s");
+        if (W->data != nullptr) {
+          if (W->data->did_logs_init) {
+            W->data->head_line
+              (W->data->fmrlog, W->abrv+" init","busy "+busy+"/"+tot);
+          } else {
+            if (this->proc != nullptr) {if (this->proc->is_main ()) {
+              printf ("%u/%u:%15s busy %s/%s\n",
+                this->proc->get_proc_id (), proc->all_proc_n (),
+                (W->abrv+" init").c_str(), busy.c_str(), tot.c_str() );
+    } } } } } }
     if (err <=0) {this->did_work_init = true;}
     return err;
   }
@@ -57,25 +51,23 @@ namespace femera {
       auto W = this->task_list.back().get ();// Exit in reverse order.
       if (W != nullptr) {
 #ifdef FMR_DEBUG
-        printf ("Work: exit list %s\n", W->name.c_str());
+      printf ("Work: exit list %s\n", W->name.c_str());
 #endif
-        W->time.add_idle_time_now ();
-        const fmr::Exit_int Werr = W->exit (err);// is noexcept
-        err = (Werr == 0) ? err : Werr;
-        W->time.add_busy_time_now ();
+      W->time.add_idle_time_now ();
+      const fmr::Exit_int Werr = W->exit (err);// is noexcept
+      err = (Werr == 0) ? err : Werr;
+      W->time.add_busy_time_now ();
+      const auto busy = fmr::form::si_unit_string(W->time.get_busy_s(),"s");
+      const auto tot  = fmr::form::si_unit_string(W->time.get_work_s(),"s");
+      if (W->data == nullptr) {
         if (this->is_work_main) {
-#if 0
-          printf ("%u/%u:%20s exit busy %f / %f s\n",
-            this->proc->get_proc_id (), proc->all_proc_n (), W->name.c_str(),
-            double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
-#else
-          const auto busy = fmr::form::si_unit_string(W->time.get_busy_s(),"s");
-          const auto tot  = fmr::form::si_unit_string(W->time.get_work_s(),"s");
           printf ("%u/%u:%15s exit busy %s/%s\n",
             this->proc->get_proc_id (), proc->all_proc_n (), W->abrv.c_str(),
             busy.c_str(), tot.c_str() );
-#endif
-      } }
+      } } else {
+        W->data->head_line
+          (W->data->fmrlog,W->abrv+" exit","busy "+busy+"/"+tot);
+    } }
       this->task_list.pop_back ();
     }
     return err;
@@ -98,7 +90,7 @@ namespace femera {
 #endif
       W = W->task_list.back ().get();
     }
-    if ( W != nullptr){
+    if ( W != nullptr) {
 #ifdef FMR_DEBUG
       printf ("Work: exit branch 1 %s\n", W->name.c_str());
 #endif
@@ -110,18 +102,16 @@ namespace femera {
       err= W->exit (err);// is noexcept
 #endif
       W->time.add_busy_time_now ();
-      if (this->is_work_main) {
-#if 0
-        printf ("%u/%u:%20s exit busy %f / %f s\n",
-          this->proc->get_proc_id (), proc->all_proc_n (), W->name.c_str(),
-          double (W->time.get_busy_s ()), double (W->time.get_work_s ()) );
-#else
-        const auto busy = fmr::form::si_unit_string (W->time.get_busy_s (),"s");
-        const auto tot  = fmr::form::si_unit_string (W->time.get_work_s (),"s");
-        printf ("%u/%u:%15s exit busy %s/%s\n",
-          this->proc->get_proc_id (), proc->all_proc_n (), W->abrv.c_str(),
-          busy.c_str(), tot.c_str() );
-#endif
+      const auto busy = fmr::form::si_unit_string(W->time.get_busy_s(),"s");
+      const auto tot  = fmr::form::si_unit_string(W->time.get_work_s(),"s");
+      if (W->data == nullptr) {
+        if (this->is_work_main) {
+          printf ("%u/%u:%15s exit busy %s/%s\n",
+            this->proc->get_proc_id (), proc->all_proc_n (), W->abrv.c_str(),
+            busy.c_str(), tot.c_str() );
+      } } else {
+        W->data->head_line
+          (W->data->fmrlog,W->abrv+" exit","busy "+busy+"/"+tot);
     } }
     if (!branch.empty()) {
       branch.pop_back ();

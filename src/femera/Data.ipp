@@ -21,7 +21,7 @@ namespace femera {
       file = flist [this->proc->get_proc_id () % flist.size()];
     }
     const auto w = this->file_line_sz [file];
-    std::vector<char> buf(w + 1, 0);//TODO line = fmr::form::text_line (..)
+    std::vector<char> buf (w + 1, 0);//TODO line = fmr::form::text_line (..)
     std::snprintf (&buf[0], w, form.c_str(), args...);
     const auto line = std::string(&buf[0]);
     if (file != nullptr) {
@@ -42,8 +42,8 @@ namespace femera {
     }
     const auto w = this->file_line_sz [file];
     const auto h = this->file_head_sz [file];
-    std::vector<char> buf(w + 1, 0);//TODO line = fmr::form::head_line (..)
-    const auto format = std::string("%"+std::to_string(h)+"s "+form);
+    std::vector<char> buf (w + 1, 0);//TODO line = fmr::form::head_line (..)
+    const auto format = "%" + std::to_string(h) +"s "+ form;
     std::snprintf (&buf[0], w, format.c_str(), head.c_str(), args...);
     const auto line = std::string(&buf[0]);
     if (file != nullptr) {
@@ -68,8 +68,9 @@ namespace femera {
   }
   template <typename T> inline
   fmr::Exit_int Data<T>::exit (fmr::Exit_int err) noexcept {
+    this->data = nullptr;
     if (err>0) {return err;}
-    exit_list ();// Exit this task stack (exceptions caught),
+    Work::exit_list ();// Exit this task stack (exceptions caught),
     if (err>0) {return err;}// then exit this task.
     try { Data::derived(this)->task_exit (); }
     catch (std::exception& e) { err = 2; }

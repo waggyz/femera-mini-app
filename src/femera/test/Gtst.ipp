@@ -6,6 +6,7 @@ namespace femera {
   test::Gtst::Gtst (femera::Work::Core_ptrs W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="GoogleTest";
+    this->abrv ="gtst";
     this->info_d = 3;
   }
 }//end femera namespace

@@ -6,6 +6,8 @@
 namespace femera { namespace data {
   class File;// Derive a CRTP concrete class from File.
   class File : public Data <File> { private: friend class Data;
+  public:
+    bool did_logs_init = false;
   private:
     void task_init (int* argc, char** argv);
     void task_exit ();
