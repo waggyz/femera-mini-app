@@ -31,14 +31,23 @@ namespace femera {
   template<typename ...Args>
   std::string form::head_line
   (const fmr::Line_size_int head_width, const fmr::Line_size_int line_width,
-    const std::string head, const std::string form, Args ...args)
+    const std::string& head, const std::string& form, Args ...args)
     {
     std::vector<char> buf (line_width + 1, 0);
     const auto format = "%" + std::to_string(head_width) +"s "+ form;
     std::snprintf (&buf[0], line_width, format.c_str(), head.c_str(), args...);
     return std::string(&buf[0]);
   }
-
+  template<typename ...Args>
+  std::string form::head_line (FILE* f,
+  const fmr::Line_size_int head_width, const fmr::Line_size_int line_width,
+    const std::string& head, const std::string& form, Args ...args)
+    {
+      const auto line = form::head_line
+        (head_width, line_width, head, form, args...);
+      fprintf (f,"%s\n", line.c_str());
+      return line;
+    }
 }//end femera:: namespace
 
 #undef FMR_DEBUG
