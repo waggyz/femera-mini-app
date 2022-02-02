@@ -25,6 +25,16 @@ namespace femera { namespace form {
     fmr::Line_size_int head_width, fmr::Line_size_int line_width,
     const std::string& head, const std::string& form, Args...);
 
+  template<typename ...Args>
+  std::string head_time
+  (fmr::Line_size_int head_width, fmr::Line_size_int line_width,
+    const std::string& head, const std::string& form, Args...);
+
+  template<typename ...Args>
+  std::string head_time (FILE*,
+    fmr::Line_size_int head_width, fmr::Line_size_int line_width,
+    const std::string& head, const std::string& form, Args...);
+
 } }//end femera::form:: namespace
 
 #include "form.ipp"
