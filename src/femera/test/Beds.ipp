@@ -6,7 +6,7 @@ namespace femera {
   test::Beds::Beds (femera::Work::Core_ptrs W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="testbeds";
-    this->abrv ="beds";
+    this->abrv ="test";
     this->info_d = 2;
   }
   inline
