@@ -340,7 +340,7 @@ FMROUTS:= $(patsubst src/%.gtst.cpp,$(BUILD_CPU)/%.gtst.out,$(FMRGTST))
 .PRECIOUS: $(INSTALL_DIR)/bin/ build/%.gtst
 
 # Compile and add the exception handler (Errs) to libfemera early.
-$(BUILD_CPU)/femera/Test.o : $(LIBFEMERA)($(BUILD_CPU)/femera/Errs.o)
+$(BUILD_CPU)/femera/Test.o: $(LIBFEMERA)($(BUILD_CPU)/femera/Errs.o)
 
 # Primary named targets -------------------------------------------------------
 # These are intended for users.
@@ -867,7 +867,8 @@ endif
 
 build/%.gtst : export TMPDIR := $(TEMP_DIR)
 build/%.gtst : build/%.gtst.o $(LIBFEMERA)(build/%.o) \
-  $(LIBFEMERA)($(BUILD_CPU)/femera/Test.o)
+  $(LIBFEMERA)($(BUILD_CPU)/femera/Test.o) \
+  $(LIBFEMERA)($(BUILD_CPU)/femera/sims/Jobs.o)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(notdir $@).o ..,$(notdir $@))
 	#(info $(LINK) $(CXX) $(notdir $@).o .. -lfemera .. -o $(notdir $@))
