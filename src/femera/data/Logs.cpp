@@ -15,4 +15,6 @@ namespace femera {
     this->data->did_logs_init = true;
   }
   void data::Logs::task_exit () {}
-}
+}//end femera:: namespace
+
+

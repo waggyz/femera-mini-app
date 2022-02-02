@@ -1,6 +1,8 @@
 #ifndef FEMERA_HAS_DATA_IPP
 #define FEMERA_HAS_DATA_IPP
 
+#include "../fmr/form.hpp"
+
 #include "core.h"
 
 #undef FMR_DEBUG
@@ -42,10 +44,14 @@ namespace femera {
     }
     const auto w = this->file_line_sz [file];
     const auto h = this->file_head_sz [file];
-    std::vector<char> buf (w + 1, 0);//TODO line = fmr::form::head_line (..)
+# if 0
+    std::vector<char> buf (w + 1, 0);
     const auto format = "%" + std::to_string(h) +"s "+ form;
     std::snprintf (&buf[0], w, format.c_str(), head.c_str(), args...);
     const auto line = std::string(&buf[0]);
+#   else
+    const auto line = femera::form::head_line (h, w, head, form, args...);
+#   endif
     if (file != nullptr) {
       fprintf (file,"%s\n", line.c_str());
     }

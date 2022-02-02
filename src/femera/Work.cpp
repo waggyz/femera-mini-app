@@ -1,10 +1,6 @@
 #include "core.h"
 #include "../fmr/form.hpp"
 
-#include <cstdio>     //FIXME remove std::printf
-
-
-
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
 #include <cstdio>     // std::printf
@@ -33,10 +29,15 @@ namespace femera {
             W->data->head_line
               (W->data->fmrlog, W->abrv+" init","busy "+busy+"/"+tot);
           } else {
-            if (this->proc != nullptr) {if (this->proc->is_main ()) {
+          if (this->proc != nullptr) {if (this->proc->is_main ()) {
+#if 0
               printf ("%u/%u:%15s busy %s/%s\n",
                 this->proc->get_proc_id (), proc->all_proc_n (),
                 (W->abrv+" init").c_str(), busy.c_str(), tot.c_str() );
+#else
+            printf ("%s\n", form::head_line
+              (15, 80, W->abrv+" init","busy "+busy+"/"+tot).c_str());
+#endif
     } } } } } }
     if (err <=0) {this->did_work_init = true;}
     return err;
@@ -61,9 +62,14 @@ namespace femera {
       const auto tot  = fmr::form::si_unit_string(W->time.get_work_s(),"s");
       if (W->data == nullptr) {
         if (this->is_work_main) {
+#if 0
           printf ("%u/%u:%15s exit busy %s/%s\n",
             this->proc->get_proc_id (), proc->all_proc_n (), W->abrv.c_str(),
             busy.c_str(), tot.c_str() );
+#else
+          printf ("%s\n", form::head_line
+            (15, 80, W->abrv+" exit","busy "+busy+"/"+tot).c_str());
+#endif
       } } else {
         W->data->head_line
           (W->data->fmrlog,W->abrv+" exit","busy "+busy+"/"+tot);
@@ -106,9 +112,14 @@ namespace femera {
       const auto tot  = fmr::form::si_unit_string(W->time.get_work_s(),"s");
       if (W->data == nullptr) {
         if (this->is_work_main) {
+#if 0
           printf ("%u/%u:%15s exit busy %s/%s\n",
             this->proc->get_proc_id (), proc->all_proc_n (), W->abrv.c_str(),
             busy.c_str(), tot.c_str() );
+#else
+          printf ("%s\n", form::head_line
+            (15, 80, W->abrv+" exit","busy "+busy+"/"+tot).c_str());
+#endif
       } } else {
         W->data->head_line
           (W->data->fmrlog,W->abrv+" exit","busy "+busy+"/"+tot);

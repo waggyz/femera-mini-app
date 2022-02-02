@@ -3,8 +3,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"  //::testing::HasSubstr
 
-#include <string>
-
 TEST(FmrForm, FormatNoPrefix) {
   EXPECT_EQ(fmr::form:: si_unit_string (12.3456,"m"), "  12  m");
 }

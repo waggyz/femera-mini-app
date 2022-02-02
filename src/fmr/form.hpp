@@ -13,6 +13,14 @@ std::string si_unit_string (const V value, std::string unit,
 
 } }// end fmr::form:: namespace
 
+namespace femera { namespace form {
+
+  template<typename ...Args>
+  std::string head_line (fmr::Line_size_int head_width, fmr::Line_size_int line_width,
+    std::string head, std::string form, Args...);
+
+} }//end femera::form:: namespace
+
 #include "form.ipp"
 
 //end FMR_HAS_FORM_HPP

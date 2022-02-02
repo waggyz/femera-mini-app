@@ -30,7 +30,7 @@ namespace fmr {
   using Post_float = float         ;// Post-processing
   using Plot_float = float         ;// Visualization
   //
-  using Line_size_int = uint_fast16_t ;
+  using Line_size_int = uint_fast16_t;
 }//end fmr:: namespace
 namespace femera { namespace test {
   int early_main (int* argc, char** argv);
