@@ -23,9 +23,6 @@ namespace femera {
         printf ("More threads (%u) than physical cores (%u)\n", all_n, core_n);
   } } }
   inline
-  void proc::Node::task_exit () {
-  }
-  inline
   fmr::Local_int proc::Node::get_core_n () {// physical cores
     return fmr::proc::get_node_core_n ();
   }

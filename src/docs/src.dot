@@ -60,6 +60,7 @@ digraph "source tree" {
 	"File.cpp" -> "File.hpp"
 	"perf.hpp" -> "perf.ipp"
 	"proc.cpp" -> "proc.hpp"
+	"Node.cpp" -> "core.h"
 	"Fmpi.cpp" -> "Fmpi.hpp"
 	"File.cpp" -> "Logs.hpp"
 	"core.h" -> "Beds.hpp"

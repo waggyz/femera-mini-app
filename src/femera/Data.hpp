@@ -7,6 +7,11 @@
 #include <unordered_map>
 #include <cstdio>
 
+#undef FMR_DEBUG
+#ifdef FMR_DEBUG
+#include <cstdio>     // std::printf
+#endif
+
 namespace femera {
   template <typename T>
   class Data : public Work {
@@ -63,6 +68,7 @@ namespace femera {
     ~Data ()           =default;
   };
 }//end femera:: namespace
+#undef FMR_DEBUG
 
 #include "Data.ipp"
 

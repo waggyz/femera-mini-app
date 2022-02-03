@@ -837,7 +837,8 @@ $(BUILD_CPU)/mini: export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/mini: export PATH:=$(shell pwd)/$(BUILD_CPU):$(PATH)
 $(BUILD_CPU)/mini: src/femera/mini.cpp src/femera/femera.hpp $(LIBFEMERA)
 	$(call timestamp,$@,$<)
-	$(call col2cxx,$(CXX_),$(CXX) $(notdir $<) ..,$(notdir $@))
+	$(call col2cxx,$(CXX_),$(CXX) $(notdir $<) .. $(notdir $@),$(shell \
+	ls -sh $(@) | cut -d " " -f1)B)
 	-$(CXX) $(filter-out -Winline,$(CXXFLAGS)) $< \
 	  $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 	$(call label_test,$(PASS),$(FAIL),fmrexec tdd:$(@),$(@))
