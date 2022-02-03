@@ -28,7 +28,7 @@ namespace femera {
           const auto head = W->abrv+" init busy";
           const auto text = busy+" /"+tot;
           if (W->data->did_logs_init) {
-            W->data->head_time (W->data->fmrlog, head, text);
+            W->data->head_line (W->data->fmrlog, head, text);
           } else {
           if (this->proc != nullptr) {
             if (this->proc->is_main ()) {
