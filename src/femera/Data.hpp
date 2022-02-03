@@ -20,10 +20,10 @@ namespace femera {
     File_ptrs_t fmrout = {::stdout};
     File_ptrs_t fmrerr = {::stderr};
   private:
-    std::unordered_map <FILE*, fmr::Line_size_int> file_line_sz
-      = {{nullptr, 80}, {::stdout, 80}, {::stderr, 250}};
     std::unordered_map <FILE*, fmr::Line_size_int> file_head_sz
       = {{nullptr, 15}, {::stdout, 15}, {::stderr, 0}};
+    std::unordered_map <FILE*, fmr::Line_size_int> file_line_sz
+      = {{nullptr, 80}, {::stdout, 80}, {::stderr, 250}};
   public:
     template<typename ...Args>
     ss text_line (const File_ptrs_t,                 const ss& form, Args...);
@@ -33,6 +33,10 @@ namespace femera {
     ss head_line (const File_ptrs_t, const ss& head, const ss& form, Args...);
     template<typename ...Args>
     ss head_line (                   const ss& head, const ss& form, Args...);
+    template<typename ...Args>
+    ss head_time (const File_ptrs_t, const ss& head, const ss& form, Args...);
+    template<typename ...Args>
+    ss head_time (                   const ss& head, const ss& form, Args...);
 //    ss wrap_line (File_ptrs_t, ss head, ss form,...);
 //    ss head_time (File_ptrs_t, ss head, ss form,...);
 //    ss head_time (ss head, ss form,...);

@@ -7,8 +7,10 @@ namespace femera { namespace test {
   class Gtst;// Derive a CRTP concrete class from Test.
   class Gtst : public Test<Gtst> { private: friend class Test;
   private:
-    bool is_enabled = false;
-  private:
+    bool is_enabled           = false;
+    bool did_run_all_tests    = false;
+    bool do_all_tests_on_exit = true;
+    bool do_enable (int* argc, char** argv);
     void task_init (int* argc, char** argv);
     void task_exit ();
   private:

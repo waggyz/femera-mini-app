@@ -4,37 +4,54 @@
 #include <cstring>  // strlen()
 #include <vector>
 #include <cfloat>   // DBL_EPSILON
+#include <chrono>
 
 #define MAKESTR(s) STR(s)
 #define STR(s) #s
 namespace fmr {
 
 std::string detail::form::si_unit_string (double v, std::string unit,
-const int min_digits, const std::string sign) {// implemented here, not inline
-  if (unit.size()>8) { unit = unit.substr (0,8); }
-  const double threshold
-    = (0.95 - DBL_EPSILON) * std::pow (10.0, double(min_digits - 1));
-  int log1000 = 0;
-  if (v > double(FLT_EPSILON) * 0.5) {//1.0e-24) {
-    log1000 = int(std::log10 (v)) / 3 - ((v < 1.0) ? 1 : 0);
-    v *= std::pow (10.0, -3.0 * double(log1000));
-    if (v < threshold) { v *= 1000.0; log1000 -= 1; }
-  }
-  const int i = log1000 + 6;
-  const char prefix[]="afpnum kMGTPE";
-  std::string pre = "?";
-  if (i >= 0 && i < int(std::strlen(prefix))) { pre = prefix[i]; }
+  const int min_digits, const std::string sign) {// implemented here, not inline
+    if (unit.size()>8) { unit = unit.substr (0,8); }
+    const double threshold
+      = (0.95 - DBL_EPSILON) * std::pow (10.0, double(min_digits - 1));
+    int log1000 = 0;
+    if (v > double(FLT_EPSILON) * 0.5) {//1.0e-24) {
+      log1000 = int(std::log10 (v)) / 3 - ((v < 1.0) ? 1 : 0);
+      v *= std::pow (10.0, -3.0 * double(log1000));
+      if (v < threshold) { v *= 1000.0; log1000 -= 1; }
+    }
+    const int i = log1000 + 6;
+    const char prefix[]="afpnum kMGTPE";
+    std::string pre = "?";
+    if (i >= 0 && i < int(std::strlen(prefix))) { pre = prefix[i]; }
 #ifdef FMR_MICRO_UCHAR
-  if (pre == "u")  {
-    const std::string mu( MAKESTR(\FMR_MICRO_UCHAR) );
-    pre = (mu =="\\u") ? "u" : mu ;
-  }
+    if (pre == "u")  {
+      const std::string mu( MAKESTR(\FMR_MICRO_UCHAR) );
+      pre = (mu =="\\u") ? "u" : mu ;
+    }
 #endif
-  std::vector<char> buf(16,0);
-  std::snprintf (&buf[0], 15, "%s%4.0f %s%s",
-    sign.c_str(), v, pre.c_str(), unit.c_str());
-  return std::string(&buf[0]);
-}
+    std::vector<char> buf(16,0);
+    std::snprintf (&buf[0], buf.size()-1, "%s%4.0f %s%s",
+      sign.c_str(), v, pre.c_str(), unit.c_str());
+    return std::string (&buf[0]);
+  }
+  std::string form::utc_time () {
+    std::string timestr="";
+    const auto now_time = std::chrono::system_clock::now();
+    const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>
+      (now_time.time_since_epoch()).count();
+    const auto as_time_t = std::chrono::system_clock::to_time_t (now_time);
+    struct tm tmbuf;
+    std::vector<char> buf(32,0);
+    if (::gmtime_r (& as_time_t, & tmbuf)){
+      if (std::strftime (& buf[0], buf.size()-1,"%Y-%m-%d %H:%M:%S",& tmbuf)) {
+        timestr = std::string (& buf[0]);
+    } }
+    std::snprintf (& buf[0], buf.size()-1, "%s.%03i",
+      timestr.c_str(), int(ms % 1000));
+    return std::string (& buf[0]);
+  }
 
 }// end fmr:: namespace
 #undef STR

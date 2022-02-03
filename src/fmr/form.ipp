@@ -32,7 +32,7 @@ namespace femera {
   const std::string& head, const std::string& form, Args ...args) {
     const auto format = "%*s "+ form;
     std::vector<char> buf (line_width + 1, 0);
-    std::snprintf (&buf[0], line_width, format.c_str(),
+    std::snprintf (&buf[0], buf.size(), format.c_str(),
       int(head_width), head.c_str(), args...);
     return std::string(&buf[0]);
   }
@@ -49,14 +49,14 @@ namespace femera {
   (const fmr::Line_size_int head_width, const fmr::Line_size_int line_width,
   const std::string& head, const std::string& form, Args ...args) {
     //
-    std::string timestr ="UTC 2022-02-02T14:29+00:00.000";  //FIXME
+    std::string timestr = "UTC "+fmr::form::utc_time();//"UTC 2022-02-02T14:29+00:00.000";  //FIXME
     //
     const auto time_width = timestr.length () + 1;
     auto line = form::head_line (head_width, line_width, head, form, args...);
     const auto text_width = line_width - time_width;
     if (line.length () > text_width) { line = line.substr (0, text_width); }
     std::vector<char> buf (line_width + 2, 0);
-    std::snprintf (&buf[0], line_width + 1, "%-*s%*s",
+    std::snprintf (&buf[0], buf.size(), "%-*s%*s",
       int(text_width), line.c_str(), int(time_width), timestr.c_str());
     return std::string(&buf[0]);
   }

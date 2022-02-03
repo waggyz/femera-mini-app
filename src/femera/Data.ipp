@@ -24,7 +24,7 @@ namespace femera {
     }
     const auto w = this->file_line_sz [file];
     std::vector<char> buf (w + 1, 0);//TODO line = fmr::form::text_line (..)
-    std::snprintf (&buf[0], w, form.c_str(), args...);
+    std::snprintf (&buf[0], buf.size(), form.c_str(), args...);
     const auto line = std::string(&buf[0]);
     if (file != nullptr) {
       fprintf (file,"%s\n", line.c_str());
@@ -47,7 +47,7 @@ namespace femera {
 # if 0
     std::vector<char> buf (w + 1, 0);
     const auto format = "%" + std::to_string(h) +"s "+ form;
-    std::snprintf (&buf[0], w, format.c_str(), head.c_str(), args...);
+    std::snprintf (&buf[0], buf.size(), format.c_str(), head.c_str(), args...);
     const auto line = std::string(&buf[0]);
 #   else
     const auto line = femera::form::head_line (h, w, head, form, args...);
@@ -61,6 +61,27 @@ namespace femera {
   std::string Data<T>::head_line
   (const std::string& head, const std::string& form, Args ...args) {
     return Data<T>::head_line (Data::File_ptrs_t({nullptr}),
+      head, form, args...);
+  }
+  template <typename T> template <typename ...Args> inline
+  std::string Data<T>::head_time (const Data::File_ptrs_t flist,
+    const std::string& head, const std::string& form, Args ...args) {
+    FILE* file = nullptr;
+    if (flist.size () > 0 && this->proc != nullptr) {
+      file = flist [this->proc->get_proc_id () % flist.size()];
+    }
+    const auto h = this->file_head_sz [file];
+    const auto w = this->file_line_sz [file];
+    const auto line = femera::form::head_time (h, w, head, form, args...);
+    if (file != nullptr) {
+      fprintf (file,"%s\n", line.c_str());
+    }
+    return line;
+  }
+  template <typename T> template <typename ...Args> inline
+  std::string Data<T>::head_time
+  (const std::string& head, const std::string& form, Args ...args) {
+    return Data<T>::head_time (Data::File_ptrs_t({nullptr}),
       head, form, args...);
   }
   template <typename T> inline
