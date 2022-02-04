@@ -13,10 +13,10 @@ TEST( Root, TaskName ){
   EXPECT_EQ( test_proc.get_task_raw ({0})->name, "root process" );
 }
 TEST( Root, ProcNisOne ){
-  EXPECT_EQ( test_proc.get_task_raw ({0})->get_proc_n (), 1 );
+  EXPECT_EQ( test_proc.get_task_raw ({0})->get_proc_n (), uint(1) );
 }
 TEST( Root, ProcIxIsZero ){
-  EXPECT_EQ( test_proc.get_task_raw ({0})->get_proc_ix (), 0 );
+  EXPECT_EQ( test_proc.get_task_raw ({0})->get_proc_ix (), uint(0) );
 }
 /*
 TEST( Root, ProcIdIsZero ){

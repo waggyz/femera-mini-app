@@ -9,7 +9,7 @@ TEST( Main, TaskName ){
   //xxx_EXPECT_EQ( fmr_main->get_task_raw({})->name, "processing");
 }
 TEST( Main, DidInit ){
-  EXPECT_EQ( fmr_main->get_task_n(), 1 );
+  EXPECT_EQ( fmr_main->get_task_n(), uint(1) );
   EXPECT_EQ( fmr_main->get_task_raw(0)->name, "root process");
   EXPECT_EQ( fmr_main->get_task_raw({0})->name, "root process");
   EXPECT_NE( fmr_main->get_task_raw({0,0})->name, "node");

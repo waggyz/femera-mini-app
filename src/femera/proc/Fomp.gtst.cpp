@@ -16,7 +16,7 @@ TEST( Fomp, TaskName ){
   EXPECT_EQ( test_omp.get_task_raw ({0,0,0,0})->name, "OpenMP" );
 }
 TEST( Fomp, ProcN ){
-  EXPECT_EQ( test_omp.get_task_raw ({0,0,0,0})->get_proc_n (), 2 );
+  EXPECT_EQ( test_omp.get_task_raw ({0,0,0,0})->get_proc_n (), uint(2) );
 }
 TEST( Fomp, Exit ){// should NOT finalize MPI: not initialized by test_omp
   EXPECT_EQ( test_omp.exit (0), 0 );

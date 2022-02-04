@@ -41,7 +41,7 @@ namespace femera {
           Wraw = W.get();
     } } }
 #endif
-    return std::move(W);
+    return W;
   }
   inline
   Work* Work::get_work_raw (const fmr::Local_int i)

@@ -19,12 +19,12 @@ TEST( Fmpi, TaskName ){
 }
 TEST( Fmpi, TeamID ){
   const auto M = test_mpi.get_task_raw ({0,0,0});
-  EXPECT_NE( M->get_team_id (), 0 );
+  EXPECT_NE( M->get_team_id (), uint(0) );
   EXPECT_NE( M->get_team_id (), femera::proc::Team_t (MPI_COMM_WORLD) );
 }
 TEST( Fmpi, ProcN ){
   const auto M = test_mpi.get_task_raw ({0,0,0});
-  EXPECT_EQ( M->get_proc_n (), 2 );
+  EXPECT_EQ( M->get_proc_n (), uint(2) );
 }
 TEST( Fmpi, Exit ){// should NOT finalize MPI: not initialized by test_mpi
   EXPECT_EQ( test_mpi.exit (0), 0 );

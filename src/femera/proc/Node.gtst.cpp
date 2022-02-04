@@ -13,7 +13,7 @@ TEST( Node, TaskName ){
   EXPECT_NE( test_proc.get_task_raw ({0,0})->name, "node" );
 }
 TEST(Node, CoreN) {
-  EXPECT_GE( femera::proc::Node::get_core_n (), 1);
+  EXPECT_GE( femera::proc::Node::get_core_n (), uint(1));
 #ifdef FMR_CORE_N
   EXPECT_EQ( femera::proc::Node::get_core_n (), FMR_CORE_N );
 #else
@@ -26,7 +26,7 @@ TEST(Node, HypeN) {
     femera::proc::Node::get_core_n ());
 }
 TEST(Node, NumaN) {
-  EXPECT_GE( femera::proc::Node::get_numa_n (), 1);
+  EXPECT_GE( femera::proc::Node::get_numa_n (), uint(1));
 }
 TEST(Node, CoreIx) {
   EXPECT_LT( femera::proc::Node::get_core_ix (),
@@ -41,7 +41,7 @@ TEST(Node, NumaIx) {
     femera::proc::Node::get_numa_n ());
 }
 TEST(Node, UsedByte) {
-  EXPECT_GT( femera::proc::Node::get_used_byte (), 1000);
+  EXPECT_GT( femera::proc::Node::get_used_byte (), uint(1000));
 }
 TEST( Node, Exit ){
   EXPECT_EQ( test_proc.exit (0), 0 );
