@@ -499,7 +499,8 @@ code-stats:
 	tools/code-stats.sh
 	touch "$(SRC_STAT_FILE)"; \
 	if ! grep -q "$(FEMERA_VERSION)" "$(SRC_STAT_FILE)"; \
-	then echo "$(FEMERA_VERSION),`cat build/src-code-stats.csv`",\
+	then echo "$(BUILD_DATE)",'"'$(FEMERA_VERSION)'"',\
+	"`cat build/src-code-stats.csv`",\
 	"`tools/elapsed-time.sh $(BUILD_SECS)`",'"'$(CXX) $(CXX_VERSION)'"',\
 	'"'$(HOSTNAME)'"','"'$(CPUMODEL)'"'\
 	>> "$(SRC_STAT_FILE)"; fi
