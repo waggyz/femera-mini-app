@@ -9,8 +9,8 @@ TEST_LINES=`(find src \( -name '*.gtst.?pp' -o -name '*.bats' \) \
 #
 LOC="lines of source code in"
 
-printf "        counted %5i %s %4i %s\n" $CODE_LINES "$LOC" $CODE_FILES "files (*.?pp), including"
-printf "                %5i %s %4i %s\n" $TEST_LINES "$LOC" $TEST_FILES "files (*.gtst.?pp, *.bats)"
+printf "  src/  counted   %5i %s %4i %s\n" $CODE_LINES "$LOC" $CODE_FILES "files (*.?pp) total,"
+printf "        including %5i %s %4i %s\n" $TEST_LINES "$LOC" $TEST_FILES "files (*.gtst.?pp, *.bats)"
 
 TD="TO""DO"
 FM="FIX""ME"
@@ -23,5 +23,9 @@ grep -rn "$FM" $check_dirs $check_files > "build/"$FM".txt"
 source_dirs='src/femera src/fmr'
 NTD=`grep -rn "$TD" $source_dirs | tee "build/src-"$TD".txt" | wc -l`
 NFM=`grep -rn "$FM" $source_dirs | tee "build/src-"$FM".txt" | wc -l`
-printf "        with     %4i $FM (build/src-$FM.txt)\n" "$NFM"
-printf "        and      %4i $TD  (build/src-$TD.txt)\n" "$NTD"
+printf "        with       %4i $FM in build/src-$FM.txt\n" "$NFM"
+printf "        and        %4i $TD  in build/src-$TD.txt\n" "$NTD"
+
+printf "%5i,%5i,%5i,%5i,%5i,%5i" \
+  $CODE_LINES $CODE_FILES $TEST_LINES $TEST_FILES $NFM $NTD \
+  > build/src-code-stats.csv

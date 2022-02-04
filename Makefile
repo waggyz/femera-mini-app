@@ -225,6 +225,7 @@ endif
 #  BOOST_FLAGFILE:= $(BUILD_DIR)/external/install-boost.flags
 #endif
 # Developer tools
+SRC_STAT_FILE:=data/femera-src-code-stats.csv
 ifeq ($(ENABLE_DOT),ON)
   ifeq ($(shell which dot 2>/dev/null),"")# dot is part of graphviz
     ENABLE_DOT:=OFF
@@ -496,6 +497,10 @@ endif
 
 code-stats:
 	tools/code-stats.sh
+	touch "$(SRC_STAT_FILE)"; \
+	if ! grep -q "$(FEMERA_VERSION)" "$(SRC_STAT_FILE)"; \
+	then echo "$(FEMERA_VERSION),`cat build/src-code-stats.csv`" \
+	>> "$(SRC_STAT_FILE)"; fi
 	
 	
 # Femera tools ----------------------------------------------------------------
