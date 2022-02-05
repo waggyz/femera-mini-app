@@ -156,6 +156,8 @@ endif
 ifeq ($(ENABLE_NVIDIA),ON)
   # EXTERNAL_DOT+="NVIDIA" -> "Femera"\n
   FMRFLAGS+= -DFMR_HAS_NVIDIA
+  CUXX:=nvcc
+  CUFLAGS+= --std=c++11
 endif
 ifeq ($(ENABLE_MPI),ON)
   EXTERNAL_DOT+="MPI" -> "Femera"\n
@@ -302,9 +304,9 @@ TOPDEPS += Makefile config.local $(BUILD_CPU)/femera.flags
 
 # C++11 code to compile and gtest
 FMRCPPS:= $(shell find src/ -maxdepth 4 -name "*.cpp" -printf "%p ")
-FMRCUS:= $(shell find src/ -maxdepth 4 -name "*.cu" -printf "%p ")
+# FMRCUS:= $(shell find src/ -maxdepth 4 -name "*.cu.cpp" -printf "%p ")
 DEPFILE:= $(patsubst src/%.cpp,$(BUILD_CPU)/%.d,$(FMRCPPS))
-DEPFILE+= $(patsubst src/%.cu,$(BUILD_CPU)/%.d,$(FMRCUS))
+# DEPFILE+= $(patsubst src/%.cu.cpp,$(BUILD_CPU)/%.d,$(FMRCUS))
 FMRGTST:= $(filter %.gtst.cpp,$(FMRCPPS))
 FMROUTS:= $(patsubst src/%.gtst.cpp,$(BUILD_CPU)/%.gtst.out,$(FMRGTST))
 
@@ -767,17 +769,6 @@ $(BUILD_DIR)/%.test.out: %.py
 #NOTE Make target export requires at least Make 3.81.
 
 $(BUILD_CPU)/%.gtst.o : export TMPDIR := $(TEMP_DIR)
-$(BUILD_CPU)/%.gtst.o : $(BUILD_CPU)/fmr/test.o
-$(BUILD_CPU)/%.gtst.o : src/%.gtst.cpp src/%.cpp src/%.hpp src/%.ipp $(TOPDEPS)
-ifeq ($(ENABLE_GOOGLETEST),ON)
-	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
-	$(CXX) -c $(CXXTESTS) $(FMRFLAGS) $< -o $@
-else
-	touch $@
-endif
-
-# No .ipp
-$(BUILD_CPU)/%.gtst.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.gtst.o : src/%.gtst.cpp src/%.cpp src/%.hpp $(TOPDEPS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
@@ -786,9 +777,8 @@ else
 	touch $@
 endif
 
-# Header-only
 $(BUILD_CPU)/%.gtst.o : export TMPDIR := $(TEMP_DIR)
-$(BUILD_CPU)/%.gtst.o : src/%.gtst.cpp src/%.hpp src/%.ipp $(TOPDEPS)
+$(BUILD_CPU)/%.gtst.o : src/%.gtst.cpp src/%.cu.cpp src/%.hpp $(TOPDEPS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
 	$(CXX) -c $(CXXTESTS) $(FMRFLAGS) $< -o $@
@@ -813,11 +803,6 @@ $(BUILD_CPU)/femera/test/Gtst.o : src/femera/test/Gtst.cpp \
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
 	$(CXX) -c $(CXXTESTS) $(FMRFLAGS) $< -o $@
 
-$(BUILD_CPU)/%.o : export TMPDIR := $(TEMP_DIR)
-$(BUILD_CPU)/%.o : src/%.cpp src/%.hpp src/%.ipp $(TOPDEPS)
-	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
-	$(CXX) -c $(CXXFLAGS) $(FMRFLAGS) $< -o $@
-
 # Use gtest flags for this one.
 $(BUILD_CPU)/%/Test.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%/Test.o : src/%/Test.cpp src/%/Test.hpp $(TOPDEPS)
@@ -832,14 +817,15 @@ $(BUILD_CPU)/%.o : src/%.cpp src/%.hpp $(TOPDEPS)
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
 	$(CXX) -c $(CXXFLAGS) $(FMRFLAGS) $< -o $@
 
+ifeq ($(ENABLE_NVIDIA),ON)
 $(BUILD_CPU)/%.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.o : src/%.cu.cpp src/%.hpp $(TOPDEPS)
 	#-python tools/testy/check_code_graffiti.py $^
 	# rm -f $*.err $*.gtst.err
 	#(info $(CXX_) $(CXX) -c $< .. -o $(notdir $@))
 	$(call col2cxx,$(CXX_),$(CUXX) -c $<,$(notdir $@))
-	$(CUXX) -c $(CUFLAGS) $(FMRFLAGS) $< -o $@
-
+	$(CUXX) -c $(CUFLAGS) $(FMRFLAGS_FIXME) $< -o $@
+endif
 # Untested targets ------------------------------------------------------------
 
 %.test.bats: # Continue when tests do not exist.
