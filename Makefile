@@ -73,6 +73,7 @@ endif
 # Flags for compiling tests
 CXXTESTS := $(CXXFLAGS) $(CXXWARNS)
 
+FMRFLAGS += -DFMR_CPUMODEL="$(CPUMODEL)"
 ifneq ($(CPUCOUNT),)
 FMRFLAGS += -DFMR_CORE_N=$(CPUCOUNT)
 endif
@@ -152,6 +153,10 @@ ifeq ($(ENABLE_OMP),ON)
   EXTERNAL_DOT+="OpenMP" -> "Femera"\n
     FMRFLAGS+= -DFMR_HAS_OMP
 endif
+ifeq ($(ENABLE_NVIDIA),ON)
+  # EXTERNAL_DOT+="NVIDIA" -> "Femera"\n
+  FMRFLAGS+= -DFMR_HAS_NVIDIA
+endif
 ifeq ($(ENABLE_MPI),ON)
   EXTERNAL_DOT+="MPI" -> "Femera"\n
   FMRFLAGS+= -DFMR_HAS_MPI
@@ -191,6 +196,7 @@ endif
 ifeq ($(ENABLE_GOOGLETEST),ON)
   LIST_EXTERNAL += googletest
   FMRFLAGS+= -DFMR_HAS_GTEST
+  FMRFLAGS+= -DFMR_GTEST_VERSION=$(shell external/get-googletest-version.sh)
   EXTERNAL_DOT+="GoogleTest" -> "Femera"\n
   MAKE_DOT+="GoogleTest" -> "Makefile"\n
   GTEST_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
@@ -296,7 +302,9 @@ TOPDEPS += Makefile config.local $(BUILD_CPU)/femera.flags
 
 # C++11 code to compile and gtest
 FMRCPPS:= $(shell find src/ -maxdepth 4 -name "*.cpp" -printf "%p ")
+FMRCUS:= $(shell find src/ -maxdepth 4 -name "*.cu" -printf "%p ")
 DEPFILE:= $(patsubst src/%.cpp,$(BUILD_CPU)/%.d,$(FMRCPPS))
+DEPFILE+= $(patsubst src/%.cu,$(BUILD_CPU)/%.d,$(FMRCUS))
 FMRGTST:= $(filter %.gtst.cpp,$(FMRCPPS))
 FMROUTS:= $(patsubst src/%.gtst.cpp,$(BUILD_CPU)/%.gtst.out,$(FMRGTST))
 
@@ -498,7 +506,7 @@ endif
 code-stats:
 	tools/code-stats.sh
 	touch "$(SRC_STAT_FILE)"; \
-	if ! grep -q "$(FEMERA_VERSION)" "$(SRC_STAT_FILE)"; \
+	if ! grep "$(FEMERA_VERSION)" "$(SRC_STAT_FILE)" | grep -q "$(HOSTNAME)"; \
 	then echo "$(BUILD_DATE)",'"'$(FEMERA_VERSION)'"',\
 	"`cat build/src-code-stats.csv`",\
 	"`tools/elapsed-time.sh $(BUILD_SECS)`",'"'$(CXX) $(CXX_VERSION)'"',\
@@ -823,6 +831,14 @@ $(BUILD_CPU)/%.o : src/%.cpp src/%.hpp $(TOPDEPS)
 	#(info $(CXX_) $(CXX) -c $< .. -o $(notdir $@))
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
 	$(CXX) -c $(CXXFLAGS) $(FMRFLAGS) $< -o $@
+
+$(BUILD_CPU)/%.o : export TMPDIR := $(TEMP_DIR)
+$(BUILD_CPU)/%.o : src/%.cu.cpp src/%.hpp $(TOPDEPS)
+	#-python tools/testy/check_code_graffiti.py $^
+	# rm -f $*.err $*.gtst.err
+	#(info $(CXX_) $(CXX) -c $< .. -o $(notdir $@))
+	$(call col2cxx,$(CXX_),$(CUXX) -c $<,$(notdir $@))
+	$(CUXX) -c $(CUFLAGS) $(FMRFLAGS) $< -o $@
 
 # Untested targets ------------------------------------------------------------
 

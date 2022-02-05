@@ -14,6 +14,7 @@ namespace femera {
     std::tie (this->proc, this->data, this->test) = core;
     this->name ="OpenMP";
     this->abrv ="omp";
+    this->version = std::to_string( _OPENMP );
     this->proc_ix = fmr::Local_int (::omp_get_thread_num  ());
     this->proc_n  = fmr::Local_int (::omp_get_max_threads ());
 #ifdef FMR_DEBUG

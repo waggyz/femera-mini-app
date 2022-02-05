@@ -6,8 +6,6 @@
 #include <cfloat>   // DBL_EPSILON
 #include <chrono>
 
-#define MAKESTR(s) STR(s)
-#define STR(s) #s
 namespace fmr {
 
 std::string detail::form::si_unit_string (double v, std::string unit,
@@ -54,6 +52,4 @@ std::string detail::form::si_unit_string (double v, std::string unit,
   }
 
 }// end fmr:: namespace
-#undef STR
-#undef MAKESTR
 #undef FMR_DEBUG

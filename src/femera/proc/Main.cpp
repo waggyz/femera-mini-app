@@ -9,6 +9,9 @@
 #ifdef FMR_HAS_OMP
 #include "Fomp.hpp"
 #endif
+#ifdef FMR_HAS_NVIDIA
+#include "Nvid.hpp"
+#endif
 
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
@@ -23,18 +26,20 @@ namespace femera {
       (std::move(Proc<proc::Root>::new_task (core)))));
     path.push_back (get_task_raw (path)->add_task
       (Proc<proc::Node>::new_task (core)));
+#ifdef FMR_HAS_NVIDIA
+    auto gpu_path = path;
+#endif
 #ifdef FMR_HAS_MPI
     path.push_back (get_task_raw (path)->add_task
       (Proc<proc::Fmpi>::new_task (core)));
-#endif
 #ifdef FMR_HAS_NVIDIA
-    this->get_task_raw (path)->add_task
-      (Proc<proc::Nvid>::new_task (core));
+    gpu_path = path;
+#endif
 #endif
 #ifdef FMR_HAS_OMP
 #if 0
     // Add thread-local Fomp instances?
-    const fmr::Local_int n = 2;//FIXME get from command arg
+    const fmr::Local_int n = 2;//FIXME calc or get from command arg
     FMR_PRAGMA_OMP(omp parallel for schedule(static) ordered num_threads(n))
     for (fmr::Local_int i=0; i<n; i++) {
       FMR_PRAGMA_OMP(omp ordered)
@@ -53,6 +58,10 @@ namespace femera {
 #else
     this->get_task_raw (path)->add_task
       (Proc<proc::Fcpu>::new_task (core));
+#endif
+#ifdef FMR_HAS_NVIDIA
+    this->get_task_raw (gpu_path)->add_task
+      (Proc<proc::Nvid>::new_task (core));
 #endif
 #ifdef FMR_DEBUG
     //for (const auto P : this->task_list) { P->init (argc, argv); }

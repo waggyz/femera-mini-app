@@ -10,9 +10,10 @@ namespace femera {
   inline
   proc::Fcpu::Fcpu (femera::Work::Core_ptrs W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
-    this->name ="CPU";
+    this->name = std::string ( MAKESTR(FMR_CPUMODEL) );
     this->info_d = 3;
     this->abrv ="cpu";
+    this->version = "";                                     //FIXME
   }
   inline
   void proc::Fcpu::task_init (int*, char**) {

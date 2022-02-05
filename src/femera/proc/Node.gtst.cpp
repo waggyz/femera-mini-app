@@ -15,7 +15,7 @@ TEST( Node, TaskName ){
 TEST(Node, CoreN) {
   EXPECT_GE( femera::proc::Node::get_core_n (), uint(1));
 #ifdef FMR_CORE_N
-  EXPECT_EQ( femera::proc::Node::get_core_n (), FMR_CORE_N );
+  EXPECT_EQ( femera::proc::Node::get_core_n (), uint(FMR_CORE_N) );
 #else
   EXPECT_EQ( femera::proc::Node::get_core_n (),
     femera::proc::Node::get_hype_ix () );

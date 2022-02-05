@@ -28,7 +28,8 @@ namespace femera {
   template <typename> class Test;// class Beds; interface
   template <typename> class Sims;// class Jobs; interface
   namespace proc {
-    class Main; class Root; class Node; class Fmpi; class Fomp; class Fcpu; }
+    class Main; class Root; class Node; class Fmpi; class Fomp; class Fcpu;
+    class Nvid; }
   namespace data { class File; class Logs; }// class Type; class Base; }//TODO Fake -> Base?
   namespace test { class Beds; class Unit; class Self; class Perf; class Gtst; }
   namespace sims { class Jobs; }

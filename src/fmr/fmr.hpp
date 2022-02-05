@@ -44,6 +44,9 @@ namespace femera { namespace test {
 #define FMR_TIMELVL FMR_VERBMAX
 #endif
 
+#define MAKESTR(s) STR(s)
+#define STR(s) #s
+
 // These help keep source code tidy.
 #define MAIN master
 #ifdef _OPENMP

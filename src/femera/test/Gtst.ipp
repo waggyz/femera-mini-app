@@ -7,6 +7,7 @@ namespace femera {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="GoogleTest";
     this->abrv ="gtst";
+    this->version = MAKESTR(FMR_GTEST_VERSION) ;
     this->info_d = 3;
   }
 }//end femera namespace
