@@ -154,10 +154,18 @@ ifeq ($(ENABLE_OMP),ON)
     FMRFLAGS+= -DFMR_HAS_OMP
 endif
 ifeq ($(ENABLE_NVIDIA),ON)
+  ifeq ("$(NVIDIA_DIR)","")
+    NVIDIA_DIR:=/usr/local/cuda-11.6
+  endif
   # EXTERNAL_DOT+="NVIDIA" -> "Femera"\n
   FMRFLAGS+= -DFMR_HAS_NVIDIA
   CUXX:=nvcc
-  CUFLAGS+= --std=c++11
+  FMRFLAGS+= -I"$(NVIDIA_DIR)/include"
+  LDFLAGS+= -L$(NVIDIA_DIR)/lib64
+  LDLIBS+= -lcuda -lcudart
+  CUFLAGS+= --std=c++11 -g -MMD -MP -O3
+  CUFLAGS+= -DFMR_HAS_NVIDIA -I"$(NVIDIA_DIR)/include"
+  CUFLAGS+= -L$(NVIDIA_DIR)/lib64 -lcuda -lcudart
 endif
 ifeq ($(ENABLE_MPI),ON)
   EXTERNAL_DOT+="MPI" -> "Femera"\n
