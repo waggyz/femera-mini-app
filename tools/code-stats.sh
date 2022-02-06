@@ -1,16 +1,17 @@
 #!/bin/bash
 #
 
-CODE_FILES=`find src -name '*.?pp' -printf x | wc -c`
+CODE_FILES=`find src \( -name '*.?pp' -o -name '*.bats' \) -printf x | wc -c`
 TEST_FILES=`find src \( -name '*.gtst.?pp' -o -name '*.bats' \) -printf x | wc -c`
-CODE_LINES=`(find src \( -name '*.?pp' \) -print0 | xargs -0 cat) | wc -l`
+CODE_LINES=`(find src \( -name '*.?pp' -o -name '*.bats' \) -print0 | xargs -0 cat) | wc -l`
 TEST_LINES=`(find src \( -name '*.gtst.?pp' -o -name '*.bats' \) \
   -print0 | xargs -0 cat) | wc -l`
 #
-LOC="lines of source code in"
+LOC1="lines of source code in"
+LOC2="lines of  test  code in"
 
-printf "  src/  counted   %5i %s %4i %s\n" $CODE_LINES "$LOC" $CODE_FILES "files (*.?pp) total,"
-printf "        including %5i %s %4i %s\n" $TEST_LINES "$LOC" $TEST_FILES "files (*.gtst.?pp, *.bats)"
+printf "  src/  counted   %5i %s %4i %s\n" $CODE_LINES "$LOC1" $CODE_FILES "files (*.?pp) total,"
+printf "        including %5i %s %4i %s\n" $TEST_LINES "$LOC2" $TEST_FILES "files (*.gtst.?pp, *.bats)"
 
 TD="TO""DO"
 FM="FIX""ME"

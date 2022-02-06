@@ -461,12 +461,15 @@ ifneq ("$(ADD_TO_PATH)","")
 endif
 
 info: | intro
-	$(info CXXFLAGS: $(CXXFLAGS))
-	$(info FMRFLAGS: $(FMRFLAGS))
-	$(info LDFLAGS: $(LDFLAGS))
-	$(info LDLIBS: $(LDLIBS))
-	$(info exported LD_LIBRARY_PATH: $(LD_LIBRARY_PATH))
-	$(info exported PATH: $(PATH))
+ifeq ("$(ENABLE_NVIDIA)","ON")
+	printf "CUFLAGS:\n$(CUFLAGS)\n"
+endif
+	printf "CXXFLAGS:\n$(CXXFLAGS)\n"
+	printf "FMRFLAGS:\n$(FMRFLAGS)\n"
+	printf "LDFLAGS:\n$(LDFLAGS)\n"
+	printf "LDLIBS:\n$(LDLIBS)\n"
+	printf "exported LD_LIBRARY_PATH:\n$(LD_LIBRARY_PATH)\n"
+	printf "exported PATH:\n$(PATH)\n"
 	$(MAKE) $(JPAR) build-done
 
 docs-done: install-docs
