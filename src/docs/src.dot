@@ -82,6 +82,7 @@ digraph "source tree" {
 	"Node.gtst.cpp" -> "core.h"
 	"Root.gtst.cpp" -> "core.h"
 	"Test.cpp" -> "Test.hpp"
+	"nvid.cu.cpp" -> "Errs.hpp"
 	"Beds.cpp" -> "Beds.hpp"
 	"Node.hpp" -> "Proc.hpp"
 	"Fcpu.gtst.cpp" -> "core.h"

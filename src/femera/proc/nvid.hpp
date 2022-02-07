@@ -7,6 +7,7 @@
 #include <string>
 
 namespace femera { namespace proc { namespace nvid {
+
   fmr::Local_int get_node_card_n ();
   std::string    get_card_name   (fmr::Local_int ix);
 

@@ -12,10 +12,9 @@ namespace femera {
     std::tie (this->proc, this->data, this->test) = core;
     this->name ="NVIDIA";
     this->abrv ="gpu";
-    this->proc_n  = fmr::Local_int (999);
   }
   void proc::Nvid::task_init (int*, char**) {
-#if 0
+#if 1
     this->team_n = proc::nvid::get_node_card_n ();
     this->name = proc::nvid::get_card_name (0);//FIXME loop
 #endif

@@ -5,6 +5,11 @@
 
 #include <exception>
 #include <string>
+/*
+  https://stackoverflow.com/questions/348833
+    /how-to-know-the-exact-line-of-code-where-an-exception-has-been-caused
+*/
+#define FMR_THROW(arg) throw Errs(arg, __FILE__, __LINE__)
 
 namespace femera {
   class Errs : public std::exception {
@@ -24,10 +29,10 @@ namespace femera {
   explicit Errs (const std::string& message) : msg (message) {}
 
   explicit Errs (const char* message, const char *file, int line)
-      : msg (std::string(file)+":"+std::to_string(line)+":"+message) {}
+      : msg (std::string(file)+":"+std::to_string(line)+" "+message) {}
 
   explicit Errs (const std::string& message, const char *file, int line)
-      : msg (std::string(file)+":"+std::to_string(line)+":"+message) {}
+      : msg (std::string(file)+":"+std::to_string(line)+" "+message) {}
   /** Destructor.
     * Virtual to allow for subclassing.
     */
@@ -46,9 +51,6 @@ namespace femera {
     std::string msg;
   };
 }//end femera:: namespace
-
-//https://stackoverflow.com/questions/348833/how-to-know-the-exact-line-of-code-where-an-exception-has-been-caused
-#define FMR_THROW(arg) throw Errs(arg, __FILE__, __LINE__)
 
 #include "Errs.ipp"
 

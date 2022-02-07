@@ -18,7 +18,7 @@ TEST( Nvid, TaskName ){
   EXPECT_EQ( test_main.get_task_raw ({0,0,0,1})->name, "NVIDIA" );
 }
 TEST( Nvid, ProcN ){
-  EXPECT_EQ( test_main.get_task_raw ({0,0,0,1})->get_proc_n (), uint(999) );
+  EXPECT_GT( test_main.get_task_raw ({0,0,0,1})->get_proc_n (), uint(0) );
 }
 TEST( Nvid, Exit ){// should NOT finalize MPI: not initialized by test_main
   EXPECT_EQ( test_main.exit (0), 0 );
