@@ -48,39 +48,44 @@ namespace femera {
   }
   void proc::Fmpi::task_init (int* argc, char** argv){ int err=0;
 //  fmr::perf:: timer_resume (&this->time);
-  if (sizeof (this->team_id) != sizeof (MPI_Comm)){
-    std::fprintf (stderr,
-      "WARNING sizeof (Proc::team_id) is %lu but should be %lu\n",
-      sizeof (this->team_id), sizeof (MPI_Comm) );
-  }
-  if (sizeof (this->fmpi_required) != sizeof (MPI_THREAD_SERIALIZED)){
-    std::fprintf (stderr,
-      "WARNING sizeof (Proc::mpi_required) is %lu but should be %lu\n",
-      sizeof (this->fmpi_required), sizeof (MPI_Comm) );
-  }
-  if (did_mpi_init ()) {
-    this->do_final_on_exit = false;
-    std::printf ("MPI is already initialized.\n");
-  }
-  if (!err && !did_mpi_init ()) {
-    err= MPI_Init_thread(argc,&argv, this->fmpi_required, &this->fmpi_provided);
-#ifdef FMR_DEBUG
-    std::printf("%u:Fmpi::task_init (%i) start...\n", this->get_proc_ix(),err);
-#endif
-  }
-  if (did_mpi_init ()) {
-    MPI_Comm comm =nullptr;
-    if( !err ){// Good practice: use a copy of MPI_COMM_WORLD.
-      err= MPI_Comm_dup (MPI_COMM_WORLD, &comm);// exit_task() frees this
+    std::vector<char> buf( MPI_MAX_LIBRARY_VERSION_STRING ,0);
+    int buflen=0; err= MPI_Get_library_version (& buf[0], & buflen);
+    int mpiver=0,mpisub=0; err= MPI_Get_version (& mpiver, & mpisub);
+    this->name = "MPI "+std::to_string(mpiver)+"."+std::to_string(mpisub)
+      +" ("+std::string(& buf[0])+")";
+    if (sizeof (this->team_id) != sizeof (MPI_Comm)){
+      std::fprintf (stderr,
+        "WARNING sizeof (Proc::team_id) is %lu but should be %lu\n",
+        sizeof (this->team_id), sizeof (MPI_Comm) );
     }
-    if( !err ){
-      this->team_id = proc::Team_t (comm);
-      this->proc_ix = this->task_proc_ix ();
-      this->proc_n  = this->task_proc_n ();
+    if (sizeof (this->fmpi_required) != sizeof (MPI_THREAD_SERIALIZED)){
+      std::fprintf (stderr,
+        "WARNING sizeof (Proc::mpi_required) is %lu but should be %lu\n",
+        sizeof (this->fmpi_required), sizeof (MPI_Comm) );
+    }
+    if (did_mpi_init ()) {
+      this->do_final_on_exit = false;
+      std::printf ("MPI is already initialized.\n");
+    }
+    if (!err && !did_mpi_init ()) {
+      err= MPI_Init_thread(argc,&argv, this->fmpi_required, &this->fmpi_provided);
 #ifdef FMR_DEBUG
-    std::printf("Fmpi::task_init: %u/%u processes...\n", proc_ix, proc_n);
+      std::printf("%u:Fmpi::task_init (%i) start...\n", this->get_proc_ix(),err);
 #endif
     }
+    if (did_mpi_init ()) {
+      MPI_Comm comm =nullptr;
+      if( !err ){// Good practice: use a copy of MPI_COMM_WORLD.
+        err= MPI_Comm_dup (MPI_COMM_WORLD, &comm);// exit_task() frees this
+      }
+      if( !err ){
+        this->team_id = proc::Team_t (comm);
+        this->proc_ix = this->task_proc_ix ();
+        this->proc_n  = this->task_proc_n ();
+#ifdef FMR_DEBUG
+      std::printf("Fmpi::task_init: %u/%u processes...\n", proc_ix, proc_n);
+#endif
+      }
 //  fmr::perf:: timer_pause (&this->time);
   } }
   void proc::Fmpi::task_exit () {int err=0;                 //FIXME not an arg

@@ -1,9 +1,9 @@
 #ifndef FEMERA_NVIDCU_HPP
 #define FEMERA_NVIDCU_HPP
-#ifdef FMR_HAS_NVIDIA
 
 #include "../../fmr/fmr.hpp"
 
+#ifdef FMR_HAS_NVIDIA
 #include <string>
 
 namespace femera { namespace proc { namespace nvid {

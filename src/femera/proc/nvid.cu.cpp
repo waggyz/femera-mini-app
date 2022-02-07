@@ -1,4 +1,3 @@
-#ifdef FMR_HAS_NVIDIA
 #include "nvid.hpp"
 #include "../Errs.hpp"
 
@@ -9,6 +8,8 @@
 #ifdef FMR_DEBUG
 #include <cstdio>     // std::printf
 #endif
+
+#ifdef FMR_HAS_NVIDIA
 
 #include "cuda.h"
 #include "cuda_runtime.h"
@@ -26,7 +27,7 @@ namespace femera {namespace proc {namespace nvid {
       fprintf (stderr,"%s:%d %s \n", file, line, cudaGetErrorString (code));
 #endif
       if (do_throw) {
-        FMR_THROW( "from\n"+std::string(file)+":"+std::to_string(line)
+        FMR_THROW( "called from\n"+std::string(file)+":"+std::to_string(line)
           +" "+cudaGetErrorString (code));
   } } }
 

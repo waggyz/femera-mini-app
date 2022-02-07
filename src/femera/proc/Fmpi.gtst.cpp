@@ -15,7 +15,7 @@ TEST( Fmpi, Init ){// Initialize Fmpi with MPI already init by early_main(..)
 }
 TEST( Fmpi, TaskName ){
   //TODO get_task by enum?
-  EXPECT_EQ( test_mpi.get_task_raw ({0,0,0})->name, "MPI" );
+  EXPECT_EQ( test_mpi.get_task_raw ({0,0,0})->abrv, "mpi" );
 }
 TEST( Fmpi, TeamID ){
   const auto M = test_mpi.get_task_raw ({0,0,0});
