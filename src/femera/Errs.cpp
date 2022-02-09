@@ -1,10 +1,10 @@
 #include "Errs.hpp"
 
-#include <cstdio>     // std::printf
+#include <cstdio>     // std::fprintf, stderr
 
 namespace femera {
   void Errs::print ()
   const noexcept {
-    printf ("%s\n", msg.c_str());
+    fprintf (::stderr, "%s\n", msg.c_str());
   }
 }//end femera:: namespace

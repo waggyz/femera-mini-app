@@ -36,12 +36,11 @@ namespace femera {
   // typedefs
   using Work_spt = FMR_SMART_PTR <Work>;
 #if 0
-  //
   using Main_t = FMR_SMART_PTR <proc::Main>;// concrete Proc interface
-  using Root_t = FMR_SMART_PTR <proc::Root>;//FIXME should others be visible
-  using Node_t = FMR_SMART_PTR <proc::Node>;//
-  using Fmpi_t = FMR_SMART_PTR <proc::Fmpi>;//      oustside of their parent
-  using Fomp_t = FMR_SMART_PTR <proc::Fomp>;//      class?
+  using Root_t = FMR_SMART_PTR <proc::Root>;
+  using Node_t = FMR_SMART_PTR <proc::Node>;
+  using Fmpi_t = FMR_SMART_PTR <proc::Fmpi>;
+  using Fomp_t = FMR_SMART_PTR <proc::Fomp>;
   using Fcpu_t = FMR_SMART_PTR <proc::Fcpu>;
   //
   using File_t = FMR_SMART_PTR <data::File>;// concrete Data interface
@@ -53,50 +52,62 @@ namespace femera {
   //using Perf_t = FMR_SMART_PTR <test::Perf>;// built-in performance tests
   using Gtst_t = FMR_SMART_PTR <test::Gtst>;
 #endif
-  //
   using Jobs_spt = FMR_SMART_PTR <sims::Jobs>;// concrete Sims interface
   //
-  class Work {// This is an abstract (pure virtual) base class (interface).
-  // Derived Classes use the curiously recurrent template pattern (CRTP).
+  class Work {/* This is an abstract (pure virtual) base class (interface).
+  * Derived classes use the curiously recurrent template pattern (CRTP) e.g.,
+  * class Proc : public Work { .. };
+  * class Main : public Proc<Main> { private: friend class Proc; .. };
+  */
   public:// typedefs ----------------------------------------------------------
     using Core_ptrs   = std::tuple  <proc::Main*, data::File*, test::Beds*>;
     using Task_list_t = std::deque  <Work_spt>;
     using Task_path_t = std::vector <fmr::Local_int>;
     using Task_tree_t = std::vector <Task_path_t>;
-  public:// Variables ---------------------------------------------------------
+  public:// variables ---------------------------------------------------------
     fmr::perf::Meter time = fmr::perf::Meter ();
-    std::string      name ="unknown work";
-    std::string      abrv ="work";
-    std::string   version ="0.3";
     //
     proc::Main* proc = nullptr;// processing hierarchy (proc::Main_t)
     data::File* data = nullptr;// data and file handling (data::File)
     test::Beds* test = nullptr;// correctness and performance testing {test::Beds}
+    //
+    std::string      name ="unknown work";
+    std::string      abrv ="work";
   protected:
+    std::string   version ="";
     Task_list_t task_list ={};
-    fmr::Dim_int   info_d = 1;
+#if 0
+// https://stackoverflow.com/questions/60040665/replacing-the-command-line-arguments-int-argc-and-char-argv-with-stdvectors
+    std::string argv_prfx ="-fmr:";
+    std::unique_ptr<char*[]> my_argv;// use: err= init (&my_argc, my_argv.get());
+    int                      my_argc =0;
+#endif
+  protected:
+    fmr::Dim_int info_d    = 1;
   private:
     bool did_work_init = false;
     bool  is_work_main = true ;// save for use after proc::exit (..)
-  public:// Methods -----------------------------------------------------------
+  public:// methods -----------------------------------------------------------
     //NOTE Make at least 1 method pure virtual.
     //FIXME Do all virtual methods need to be pure
     //      to avoid vtable using CRTP derived classes?
     virtual fmr::Exit_int init (int* argc, char** argv) noexcept =0;
     virtual fmr::Exit_int exit (fmr::Exit_int err=0)    noexcept =0;
     //
-//TODO Task_tree_t get_tree     ()       noexcept;
-    fmr::Local_int get_task_n   ()       noexcept;
+//TODO Task_tree_t get_tree     ()         noexcept;
+    fmr::Local_int get_task_n   ()         noexcept;
     fmr::Local_int add_task     (Work_spt) noexcept;// returns task number added
-/*  Derived_t      new_task     ()// in Derived and returns that smart pointer
-    Derived_t      new_task     (Core_ptrs)        //           ""
-    Derived_t      get_task_spt (fmr::Local_int)//           ""
-    Derived*       get_task_raw (fmr::Local_int)// returns Derived* raw pointer
-*/
+    fmr::Local_int del_task     (fmr::Local_int ix) noexcept;// returns task_n
+/*
+ *  Derived_t      new_task     ()// in Derived and returns that smart pointer
+ *  Derived_t      new_task     (Core_ptrs)     //           ""
+ *  Derived_t      get_task_spt (fmr::Local_int)//           ""
+ *  Derived*       get_task_raw (fmr::Local_int)// returns Derived* raw pointer
+ */
     Core_ptrs get_core () noexcept;
   public:
-    Work*  get_work_raw (fmr::Local_int) noexcept;
-    Work*  get_work_raw (Task_path_t)    noexcept;
+    Work*    get_work_raw (fmr::Local_int) noexcept;
+    Work*    get_work_raw (Task_path_t)    noexcept;
     Work_spt get_work_spt (fmr::Local_int) noexcept;
     Work_spt get_work_spt (Task_path_t)    noexcept;
     // above called by Derived::get_task_*(..)

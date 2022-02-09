@@ -85,6 +85,14 @@ namespace femera {
   noexcept {
     return fmr::Local_int (this->task_list.size ());
   }
+  inline
+  fmr::Local_int Work::del_task (const fmr::Local_int ix)
+  noexcept {
+    if (ix < this->task_list.size ()) {
+      this->task_list.erase (this->task_list.begin() + ix);
+    }
+    return fmr::Local_int (this->task_list.size ());
+  }
 }//end femera:: namespace
 #if 0
 #include <cstddef>
