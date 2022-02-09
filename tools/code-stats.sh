@@ -1,6 +1,5 @@
 #!/bin/bash
 #
-
 CODE_FILES=`find src \( -name '*.?pp' -o -name '*.bats' \) -printf x | wc -c`
 TEST_FILES=`find src \( -name '*.gtst.?pp' -o -name '*.bats' \) -printf x | wc -c`
 CODE_LINES=`(find src \( -name '*.?pp' -o -name '*.bats' \) -print0 | xargs -0 cat) | wc -l`
@@ -21,11 +20,12 @@ check_files='Makefile README* config*'
 grep -rn "$TD" $check_dirs $check_files > "build/"$TD".txt"
 grep -rn "$FM" $check_dirs $check_files > "build/"$FM".txt"
 
+TD+=" "
 source_dirs='src/femera src/fmr'
 NTD=`grep -rn "$TD" $source_dirs | tee "build/src-"$TD".txt" | wc -l`
 NFM=`grep -rn "$FM" $source_dirs | tee "build/src-"$FM".txt" | wc -l`
-printf "        with       %4i $FM in build/src-$FM.txt\n" "$NFM"
-printf "        and        %4i $TD  in build/src-$TD.txt\n" "$NTD"
+printf "        with       %4i $FM see: build/src-$FM.txt\n" "$NFM"
+printf "        and        %4i $TD see: build/src-$TD.txt\n" "$NTD"
 
 printf "%5i,%5i,%5i,%5i,%5i,%5i" \
   $CODE_LINES $CODE_FILES $TEST_LINES $TEST_FILES $NFM $NTD \
