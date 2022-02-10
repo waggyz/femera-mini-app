@@ -18,24 +18,32 @@ template <typename V>
 namespace femera { namespace form {
 
   template<typename ...Args>
+  std::string text_line
+  (fmr::Line_size_int line_width, const std::string& format, Args...);
+
+  template<typename ...Args>
+  std::string text_line (FILE*,
+    fmr::Line_size_int line_width, const std::string& format, Args...);
+
+  template<typename ...Args>
   std::string head_line
   (fmr::Line_size_int head_width, fmr::Line_size_int line_width,
-    const std::string& head, const std::string& form, Args...);
+    const std::string& heading, const std::string& format, Args...);
 
   template<typename ...Args>
   std::string head_line (FILE*,
     fmr::Line_size_int head_width, fmr::Line_size_int line_width,
-    const std::string& head, const std::string& form, Args...);
+    const std::string& heading, const std::string& format, Args...);
 
   template<typename ...Args>
   std::string head_time
   (fmr::Line_size_int head_width, fmr::Line_size_int line_width,
-    const std::string& head, const std::string& form, Args...);
+    const std::string& heading, const std::string& format, Args...);
 
   template<typename ...Args>
   std::string head_time (FILE*,
     fmr::Line_size_int head_width, fmr::Line_size_int line_width,
-    const std::string& head, const std::string& form, Args...);
+    const std::string& heading, const std::string& format, Args...);
 
 } }//end femera::form:: namespace
 

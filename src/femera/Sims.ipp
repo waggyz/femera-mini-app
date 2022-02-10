@@ -33,6 +33,10 @@ namespace femera {
     if (Sims::derived (this)->do_exit_zero) { return 0; }
     return (task_err > 0) ? task_err : err;
   }
+  template <typename T> inline
+  std::string Sims<T>::get_base_name () {
+    return "sims";
+  }
 //FIXME Replace these =========================================================
   template <typename T> inline
   FMR_SMART_PTR<T> Sims<T>::get_task_spt (const fmr::Local_int i) {

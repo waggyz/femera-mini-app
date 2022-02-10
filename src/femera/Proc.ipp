@@ -54,6 +54,10 @@ namespace femera {
     return (task_err > 0) ? task_err : err;
   }
   template <typename T> inline
+  std::string Proc<T>::get_base_name () {
+    return "proc";
+  }
+  template <typename T> inline
   FMR_SMART_PTR<T> Proc<T>::get_task_spt (const fmr::Local_int i) {
     return std::static_pointer_cast<T> (this->get_work_spt (i));
   }

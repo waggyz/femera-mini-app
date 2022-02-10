@@ -105,6 +105,10 @@ namespace femera {
     return err;
   }
   template <typename T> inline
+  std::string Data<T>::get_base_name () {
+    return "data";
+  }
+  template <typename T> inline
   FMR_SMART_PTR<T> Data<T>::get_task_spt (const fmr::Local_int i) {
     return std::static_pointer_cast<T> (this->get_work_spt (i));
   }

@@ -23,7 +23,9 @@ namespace femera {
   }
   void proc::Node::task_exit () {
     const auto bytes = fmr::form::si_unit_string (this->get_used_byte (), "B");
-    femera::form::head_line (::stdout, 15, 80, this->abrv+" DRAM used",
+    const auto head = femera::form::text_line (80, " %4s %4s DRAM",
+      this->get_base_name().c_str(), this->abrv.c_str());
+    femera::form::head_line (::stdout, 15, 80, head,
       "%s maximum resident set size of this process", bytes.c_str());
   }
 

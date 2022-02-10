@@ -20,12 +20,12 @@ check_files='Makefile README* config*'
 grep -rn "$TD" $check_dirs $check_files > "build/"$TD".txt"
 grep -rn "$FM" $check_dirs $check_files > "build/"$FM".txt"
 
-TD+=" "
+TS="$TD "
 source_dirs='src/femera src/fmr'
 NTD=`grep -rn "$TD" $source_dirs | tee "build/src-"$TD".txt" | wc -l`
 NFM=`grep -rn "$FM" $source_dirs | tee "build/src-"$FM".txt" | wc -l`
 printf "        with       %4i $FM see: build/src-$FM.txt\n" "$NFM"
-printf "        and        %4i $TD see: build/src-$TD.txt\n" "$NTD"
+printf "        and        %4i $TS see: build/src-$TD.txt\n" "$NTD"
 
 printf "%5i,%5i,%5i,%5i,%5i,%5i" \
   $CODE_LINES $CODE_FILES $TEST_LINES $TEST_FILES $NFM $NTD \

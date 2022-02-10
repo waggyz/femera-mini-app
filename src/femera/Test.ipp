@@ -36,6 +36,10 @@ namespace femera {
     return err;
   }
   template <typename T> inline
+  std::string Test<T>::get_base_name () {
+    return "test";
+  }
+  template <typename T> inline
   T* Test<T>::get_task (const fmr::Local_int i) {
     return derived (this->get_work_raw (i));
   }
