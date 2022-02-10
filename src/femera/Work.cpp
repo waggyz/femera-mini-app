@@ -30,7 +30,6 @@ namespace femera {
           const auto busy = fmr::form::si_unit_string (W->time.get_busy_s(),"s");
           const auto tot  = fmr::form::si_unit_string (W->time.get_work_s(),"s");
           if (Werr > 0) {// Remove task if failed to initialize.
-            //const auto head = W->abrv+" init fail";
             const auto head = femera::form::text_line (250, " %4s %4s init",
               W->get_base_name().c_str(), W->abrv.c_str());
             const auto text = busy+" /"+tot+" failed: "+W->name
@@ -44,7 +43,6 @@ namespace femera {
             } } }
             W->exit (-1);
           } else {
-            //const auto head = W->get_base_name()+" "+W->abrv+" init";
             const auto head = femera::form::text_line (250, " %4s %4s init",
               W->get_base_name().c_str(), W->abrv.c_str());
             const auto text = busy+" /"+tot+" "+W->name
@@ -85,11 +83,9 @@ namespace femera {
       W->time.add_busy_time_now ();
       const auto busy = fmr::form::si_unit_string (W->time.get_busy_s(),"s");
       const auto tot  = fmr::form::si_unit_string (W->time.get_work_s(),"s");
-//      const auto head = W->abrv+" exit busy";
       const auto head = femera::form::text_line (250, " %4s %4s exit",
         W->get_base_name().c_str(), W->abrv.c_str());
       const auto text = busy+" /"+tot+" "+W->name
-//      const auto text = busy+" /"+tot+" "+W->name
         +((W->version=="") ? "":" "+W->version);
       if (W->data == nullptr) {
         if (this->is_work_main) {
@@ -133,11 +129,9 @@ namespace femera {
       W->time.add_busy_time_now ();
       const auto busy = fmr::form::si_unit_string (W->time.get_busy_s(),"s");
       const auto tot  = fmr::form::si_unit_string (W->time.get_work_s(),"s");
-//      const auto head = W->abrv+" exit busy";
       const auto head = femera::form::text_line (250, " %4s %4s exit",
         W->get_base_name().c_str(), W->abrv.c_str());
       const auto text = busy+" /"+tot+" "+W->name
-//      const auto text = busy+" /"+tot+" "+W->name
         +((W->version=="") ? "":" "+W->version);
       if (W->data == nullptr) {
         if (this->is_work_main) {
