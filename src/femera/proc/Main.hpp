@@ -13,6 +13,7 @@ namespace femera { namespace proc {
   private:
     void task_init (int* argc, char** argv);
     void task_exit ();
+    fmr::Local_int task_proc_ix ();
   };
 } }//end femera::proc:: namespace
 

@@ -9,6 +9,7 @@ namespace femera { namespace proc {
   private:
     void task_init (int* argc, char** argv);
     void task_exit ();
+    fmr::Local_int task_proc_ix ();
   private:
     Fcpu (femera::Work::Core_ptrs) noexcept;
     Fcpu () =delete;//NOTE Use the constructor above.

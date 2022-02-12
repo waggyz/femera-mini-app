@@ -50,6 +50,10 @@ namespace femera {
   fmr::Global_int proc::Node::get_used_byte () {
     return fmr::proc::get_used_byte ();
   }
+  inline
+  fmr::Local_int proc::Node::task_proc_ix () {
+    return this->proc_ix;
+  }
 }//end femera namespace
 
 #undef FMR_DEBUG

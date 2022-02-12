@@ -36,6 +36,8 @@ ifeq ($(CXX),g++)
     # TDDEXEC:= mpiexec -np $(TDD_MPI_N) --bind-to core -map-by node:pe=$(TDD_OMP_N)
   endif
   OPTFLAGS:= $(shell cat data/gcc4.flags | tr '\n' ' ' | tr -s ' ')
+  # -finline-limit=1000 --param inline-min-speedup=2
+  # --param inline-unit-growth=500 --param large-function-growth=2000
   CXXFLAGS+= -std=c++11 -g -MMD -MP
   # Dependency file generation: -MMD -MP
   ifeq ($(ENABLE_LTO),ON)
@@ -241,7 +243,7 @@ endif
 #  BOOST_FLAGFILE:= $(BUILD_DIR)/external/install-boost.flags
 #endif
 # Developer tools
-SRC_STAT_FILE:=data/build/femera-$(CPUMODEL)-build-stats.csv
+SRC_STAT_FILE:=data/src/femera-$(CPUMODEL)-build-stats.csv
 ifeq ($(ENABLE_DOT),ON)
   ifeq ($(shell which dot 2>/dev/null),"")# dot is part of graphviz
     ENABLE_DOT:=OFF

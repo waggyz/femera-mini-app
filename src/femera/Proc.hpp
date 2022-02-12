@@ -47,7 +47,7 @@ namespace femera {
     T*            derived (Proc*) noexcept;
     T*            derived (Work*) noexcept;
     Proc<T>*    this_cast (Work*) noexcept;
-  protected:// Make it clear this class needs to be inherited from.
+  protected:
     Proc ()            =default;
     Proc (const Proc&) =default;
     Proc (Proc&&)      =default;// shallow (pointer) copyable

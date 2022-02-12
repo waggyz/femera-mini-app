@@ -120,6 +120,7 @@ namespace femera {
   fmr::Local_int Proc<T>::get_proc_ix ()
   noexcept {
     return this->proc_ix;
+//    return derived (this)->task_proc_ix ();
   }
   template <typename T> inline
   fmr::Local_int Proc<T>::get_proc_n ()

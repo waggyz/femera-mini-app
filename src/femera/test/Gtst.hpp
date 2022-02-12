@@ -9,14 +9,15 @@ namespace femera { namespace test {
   private:
     bool is_enabled           = false;
     bool did_run_all_tests    = false;
-    bool do_all_tests_on_exit = true;
+    bool do_all_tests_on_exit = true ;
+  private:
     bool do_enable (int* argc, char** argv);
     void task_init (int* argc, char** argv);
     void task_exit ();
   private:
     Gtst (femera::Work::Core_ptrs) noexcept;
     Gtst () =delete;//NOTE Use the constructor above.
-};
+  };
 } }//end femera::test:: namespace
 
 #include "Gtst.ipp"

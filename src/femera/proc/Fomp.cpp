@@ -15,7 +15,7 @@ namespace femera {
     this->name ="OpenMP";
     this->abrv ="omp";
     this->version = std::to_string( _OPENMP );
-    this->proc_ix = fmr::Local_int (::omp_get_thread_num  ());
+    this->proc_ix = this->task_proc_ix ();
     this->proc_n  = fmr::Local_int (::omp_get_max_threads ());
 #ifdef FMR_DEBUG
     printf ("Fomp::proc_ix %u\n", this->proc_ix);
@@ -32,6 +32,9 @@ namespace femera {
   } } }
   bool proc::Fomp::is_in_parallel () {
     return ::omp_in_parallel ();
+  }
+  fmr::Local_int proc::Fomp::task_proc_ix () {
+    return fmr::Local_int (::omp_get_thread_num  ());
   }
 #if 0
 bool Fomp::is_in_parallel (){
