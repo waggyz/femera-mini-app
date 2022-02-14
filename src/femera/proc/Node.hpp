@@ -20,7 +20,9 @@ namespace femera { namespace proc {
     static  fmr::Local_int get_hype_ix   ();
     static  fmr::Local_int get_numa_ix   ();
     static fmr::Global_int get_used_byte ();
+#if 0
     fmr::Local_int task_proc_ix ();
+#endif
   private:
     Node (femera::Work::Core_ptrs) noexcept;
     Node () =delete;//NOTE Use the constructor above.

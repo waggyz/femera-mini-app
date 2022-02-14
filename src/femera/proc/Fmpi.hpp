@@ -16,7 +16,9 @@ namespace femera { namespace proc {
   private:
     bool did_mpi_init ();
     fmr::Local_int task_proc_n  ();
+#if 1
     fmr::Local_int task_proc_ix ();
+#endif
   private:
     void task_init (int* argc, char** argv);
     void task_exit ();

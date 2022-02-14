@@ -54,6 +54,9 @@ namespace femera {
 #endif
   using Jobs_spt = FMR_SMART_PTR <sims::Jobs>;// concrete Sims interface
   //
+  template <typename T, typename U>
+  T* cast_via_work (U* obj);
+  //
   class Work {/* This is an abstract (pure virtual) base class (interface).
   * Derived classes use the curiously recurrent template pattern (CRTP) e.g.,
   * class Proc : public Work { .. };

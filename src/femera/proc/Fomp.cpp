@@ -30,7 +30,7 @@ namespace femera {
   bool proc::Fomp::is_in_parallel () {
     return ::omp_in_parallel ();
   }
-  fmr::Local_int proc::Fomp::task_proc_ix () {//FIXME not getting called
+  fmr::Local_int proc::Fomp::task_proc_ix () {
 #ifdef FMR_DEBUG
     printf ("%s Fomp::task_proc_ix %i\n", abrv.c_str(), ::omp_get_thread_num());
 #endif

@@ -22,10 +22,12 @@ namespace femera {
   inline
   void proc::Fcpu::task_exit () {
   }
+#if 0
   inline
   fmr::Local_int proc::Fcpu::task_proc_ix () {
     return this->proc_ix;
   }
+#endif
 }//end femera namespace
 
 #undef FMR_DEBUG

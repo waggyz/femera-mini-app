@@ -6,6 +6,10 @@
 #include <cstdio>     // std::printf
 #endif
 
+template <typename T, typename U> inline
+T* femera::cast_via_work (U* obj) {
+  return static_cast<T*> (static_cast<Work*> (obj));
+}
 namespace femera {
   inline
   Work::Core_ptrs Work::get_core ()

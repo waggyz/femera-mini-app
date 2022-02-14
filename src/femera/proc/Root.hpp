@@ -9,7 +9,9 @@ namespace femera { namespace proc {
   private:
     void task_init (int* argc, char** argv);
     void task_exit ();
+#if 0
     fmr::Local_int task_proc_ix ();
+#endif
   private:
     Root (femera::Work::Core_ptrs) noexcept;
     Root () =delete;//NOTE Use the constructor above.
