@@ -15,17 +15,14 @@ namespace femera {
     this->name ="OpenMP";
     this->abrv ="omp";
     this->version = std::to_string( _OPENMP );
-    this->proc_ix = this->task_proc_ix ();
+//    this->proc_ix = this->task_proc_ix ();
     this->proc_n  = fmr::Local_int (::omp_get_max_threads ());
-#ifdef FMR_DEBUG
-    printf ("Fomp::proc_ix %u\n", this->proc_ix);
-#endif
   }
   void proc::Fomp::task_init (int*, char**) {
     if (this->is_in_parallel ()) {
       this->proc_n  = fmr::Local_int (::omp_get_num_threads ());
     } else {
-      const auto n = 2;//FIXME Handle command line options.
+      const int n = 2;//FIXME Handle command line options.
       ::omp_set_num_threads (n);
       FMR_PRAGMA_OMP(omp parallel) {
         this->proc_n  = fmr::Local_int (::omp_get_num_threads ());
@@ -33,7 +30,10 @@ namespace femera {
   bool proc::Fomp::is_in_parallel () {
     return ::omp_in_parallel ();
   }
-  fmr::Local_int proc::Fomp::task_proc_ix () {
+  fmr::Local_int proc::Fomp::task_proc_ix () {//FIXME not getting called
+#ifdef FMR_DEBUG
+    printf ("%s Fomp::task_proc_ix %i\n", abrv.c_str(), ::omp_get_thread_num());
+#endif
     return fmr::Local_int (::omp_get_thread_num  ());
   }
 #if 0

@@ -73,6 +73,15 @@ namespace femera {
     }
 #endif
   }
+  fmr::Local_int proc::Main::task_proc_ix () {
+#ifdef FMR_DEBUG
+    printf ("%s Main::task_proc_ix %u\n", abrv.c_str(), proc_ix);
+#endif
+    if (this->abrv =="omp") {//FIXME bad hack, and slow
+      return static_cast<proc::Fomp*>(static_cast<Work*>(this))->task_proc_ix();
+    }
+    return this->proc_ix;
+  }
 }// end femera::namespace
 
 #undef FMR_DEBUG

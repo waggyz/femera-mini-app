@@ -22,7 +22,7 @@ namespace femera {
   template <typename T> inline
   Proc<T>* Proc<T>::this_cast (Work* ptr)
   noexcept {
-    return static_cast<Proc*> (ptr);
+    return static_cast<Proc<T>*> (ptr);
   }
   template <typename T> inline
   fmr::Exit_int Proc<T>::init (int* argc, char** argv)
@@ -32,7 +32,7 @@ namespace femera {
     catch (const Errs& e) { err = 1; e.print (); }
     catch (std::exception& e) { err = 2; }
     catch (...) { err = 3; }
-    this->init_list (argc, argv);// ...then init the sub-tasks.
+    Work::init_list (argc, argv);// ...then init the sub-tasks.
     this->set_base_n ();
     return err;
   }
@@ -41,11 +41,8 @@ namespace femera {
   noexcept {
     this->data = nullptr;
     if (!this->task_list.empty()) {
-      this->exit_tree ();// Exit the task tree below this (is noexcept), ...
+      Work::exit_tree ();// Exit the task tree below this (is noexcept), ...
     }
-#if 0
-    if (err>0) { return err; }
-#endif
     fmr::Exit_int task_err =0;
     try { Proc::derived (this)->task_exit (); }//...then exit this derived task.
     catch (const Errs& e) { task_err = 1; e.print (); }
@@ -59,19 +56,19 @@ namespace femera {
   }
   template <typename T> inline
   FMR_SMART_PTR<T> Proc<T>::get_task_spt (const fmr::Local_int i) {
-    return std::static_pointer_cast<T> (this->get_work_spt (i));
+    return std::static_pointer_cast<T> (Work::get_work_spt (i));
   }
   template <typename T> inline
   FMR_SMART_PTR<T> Proc<T>::get_task_spt (const Work::Task_path_t path) {
-    return std::static_pointer_cast<T> (this->get_work_spt (path));
+    return std::static_pointer_cast<T> (Work::get_work_spt (path));
   }
   template <typename T> inline
   T* Proc<T>::get_task_raw (const fmr::Local_int i) {
-    return derived (this->get_work_raw (i));
+    return Proc::derived (Work::get_work_raw (i));
   }
   template <typename T> inline
   T* Proc<T>::get_task_raw (const Work::Task_path_t path) {
-    return derived (this->get_work_raw (path));
+    return Proc::derived (Work::get_work_raw (path));
   }
   template <typename T> inline constexpr
   FMR_SMART_PTR<T> Proc<T>::new_task ()
@@ -81,7 +78,11 @@ namespace femera {
   template <typename T> inline constexpr
   FMR_SMART_PTR<T> Proc<T>::new_task (const Work::Core_ptrs core)
   noexcept {
+#if 0
     return std::move(FMR_MAKE_SMART<T> (T(core)));
+#else
+    return FMR_MAKE_SMART<T> (T(core));
+#endif
   }
 #if 0
   template <typename T> inline
@@ -95,32 +96,59 @@ namespace femera {
 #else
   template <typename T> inline
   bool Proc<T>::is_main () { bool ans=true;// series version
-    auto P = this;
+    Proc* P = this;
+    ans = ans & (P->get_proc_ix () == P->main_ix);
     while (! P->task_list.empty ()) {
+      P = static_cast<Proc*> (P->get_work_raw (0));//FIXME only path 0
       ans = ans & (P->get_proc_ix () == P->main_ix);
-      P = this_cast (P->get_work_raw (0));
     }
     return ans;
   }
 #endif
+
+
+
+
   template <typename T> inline
-  fmr::Local_int Proc<T>::get_proc_id () {fmr::Local_int id=0;
-    auto P = this;
-    while (! P->task_list.empty ()) {
-      id += P->base_id + P->base_n * P->get_proc_ix ();
+  fmr::Local_int Proc<T>::get_proc_id (fmr::Local_int id) {
+    const fmr::Local_int tid
+      = this->base_id + this->base_n * Proc::derived (this)->get_proc_ix ();
+    if (! this->task_list.empty ()) {
+      id += this->get_task_raw (0)->get_proc_id (tid);
 #ifdef FMR_DEBUG
-      printf ("%s id: %u += %u + %u * %u\n",
-        P->name.c_str(), id, P->base_id, P->base_n, P->get_proc_ix ());
+      printf ("%s id: %u += %u + %u * %u\n", this->abrv.c_str(), id,
+        this->base_id, this->base_n, Proc::derived (this)->get_proc_ix ());
 #endif
-      P = this_cast (P->get_work_raw (0));
     }
     return id;
   }
+# if 0
   template <typename T> inline
-  fmr::Local_int Proc<T>::get_proc_ix ()
-  noexcept {
-    return this->proc_ix;
-//    return derived (this)->task_proc_ix ();
+  fmr::Local_int Proc<T>::get_proc_id () {fmr::Local_int id=0;
+    Proc* P = this;
+    id += P->base_id + P->base_n * P->get_proc_ix ();
+    while (! P->task_list.empty ()) {
+      P = static_cast<Proc*> (P->get_work_raw (0));                  //FIXME
+      id += P->base_id + P->base_n * P->get_proc_ix ();//FIXME which is called? 
+#ifdef FMR_DEBUG
+      printf ("%s id: %u += %u + %u * %u\n", P->abrv.c_str(), id,
+        P->base_id, P->base_n, P->get_proc_ix ());
+#endif
+    }
+    return id;
+  }
+#   endif
+
+
+
+  template <typename T> inline
+  fmr::Local_int Proc<T>::get_proc_ix () {
+#ifdef FMR_DEBUG
+      printf ("Proc<%s>>::get_proc_ix: %u\n", this->abrv.c_str(),
+        Proc::derived (this)->task_proc_ix ());
+#endif
+//    return this->proc_ix;
+    return Proc::derived (this)->task_proc_ix ();//FIXME always calls Main::task_proc_ix
   }
   template <typename T> inline
   fmr::Local_int Proc<T>::get_proc_n ()

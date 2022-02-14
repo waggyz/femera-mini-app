@@ -1,6 +1,10 @@
 #ifndef FEMERA_MAIN_IPP
 #define FEMERA_MAIN_IPP
 
+#undef FMR_DEBUG
+#ifdef FMR_DEBUG
+#include <cstdio>     // std::printf
+#endif
 namespace femera {
   inline
   proc::Main::Main (const femera::Work::Core_ptrs W) noexcept {
@@ -19,11 +23,16 @@ namespace femera {
   void proc::Main::task_exit () {
     this->proc =nullptr;
   }
+#if 0
   inline
   fmr::Local_int proc::Main::task_proc_ix () {
+#ifdef FMR_DEBUG
+    printf ("%s Main::task_proc_ix %u\n", abrv.c_str(), proc_ix);
+#endif
     return this->proc_ix;
   }
+#endif
 }//end femera:: namespace
-
+#undef FMR_DEBUG
 //end FEMERA_MAIN_IPP
 #endif

@@ -67,12 +67,12 @@ namespace femera {
   public:// variables ---------------------------------------------------------
     fmr::perf::Meter time = fmr::perf::Meter ();
     //
-    proc::Main* proc = nullptr;// processing hierarchy (proc::Main_t)
-    data::File* data = nullptr;// data and file handling (data::File)
-    test::Beds* test = nullptr;// correctness and performance testing {test::Beds}
+    proc::Main* proc = nullptr;// processing hierarchy
+    data::File* data = nullptr;// data and file handling
+    test::Beds* test = nullptr;// correctness and performance testing
     //
-    std::string      name ="unknown work";
-    std::string      abrv ="work";
+    std::string name ="unknown work";
+    std::string abrv ="work";
   protected:
     std::string   version ="";
     Task_list_t task_list ={};
@@ -123,7 +123,6 @@ namespace femera {
     Work (Work const&) =default;// copyable
     Work& operator=
       (const Work&)    =default;
-    // Make it clear this class needs to be inherited from.
   public:
     virtual ~Work ();// not inline to avoid -Winline large growth warning
   };

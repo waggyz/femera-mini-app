@@ -28,12 +28,12 @@ namespace femera {
     bool            is_main    ();
     proc::Team_t   get_team_id () noexcept;
     fmr::Local_int get_team_n  () noexcept;
-    fmr::Local_int get_proc_ix () noexcept;// index at this level [0,proc_n-1]
     fmr::Local_int get_proc_n  () noexcept;
+    fmr::Local_int get_proc_ix ();// index at this level [0,proc_n-1]
     fmr::Local_int set_base_n  ();
     fmr::Local_int all_proc_n  ();
-    fmr::Local_int get_proc_id ();// global thread identifier
-                                  // proc_id = base_id + base_n * proc_ix
+    fmr::Local_int get_proc_id (fmr::Local_int id=0);// global thread identifier
+    //                 proc_id = base_id + base_n * proc_ix
     static constexpr
     This_spt new_task     () noexcept;
     static constexpr
