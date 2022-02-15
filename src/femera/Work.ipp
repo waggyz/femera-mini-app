@@ -6,8 +6,8 @@
 #include <cstdio>     // std::printf
 #endif
 
-template <typename T, typename U> inline
-T* femera::cast_via_work (U* obj) {
+template <typename T, typename O> inline
+T* femera::cast_via_work (O* obj) {
   return static_cast<T*> (static_cast<Work*> (obj));
 }
 namespace femera {
