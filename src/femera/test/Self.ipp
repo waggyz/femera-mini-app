@@ -5,7 +5,7 @@ namespace femera {
   inline
   test::Self::Self (femera::Work::Core_ptrs W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
-    this->name ="self test";
+    this->name ="self tests";
     this->abrv ="self";
     this->info_d = 2;
   }

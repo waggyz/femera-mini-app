@@ -5,14 +5,14 @@
 auto fmr_main = FMR_MAKE_SMART<femera::proc::Main> (femera::proc::Main());
 
 TEST( Main, TaskName ){
-  EXPECT_EQ( fmr_main->name, "processing");
-  //xxx_EXPECT_EQ( fmr_main->get_task_raw({})->name, "processing");
+  EXPECT_EQ( fmr_main->abrv, "main");
+  //xxx_EXPECT_EQ( fmr_main->get_task_raw({})->abrv, "main");
 }
 TEST( Main, DidInit ){
   EXPECT_EQ( fmr_main->get_task_n(), uint(1) );
-  EXPECT_EQ( fmr_main->get_task_raw(0)->name, "root process");
-  EXPECT_EQ( fmr_main->get_task_raw({0})->name, "root process");
-  EXPECT_NE( fmr_main->get_task_raw({0,0})->name, "node");
+  EXPECT_EQ( fmr_main->get_task_raw(0)->abrv, "root");
+  EXPECT_EQ( fmr_main->get_task_raw({0})->abrv, "root");
+  EXPECT_EQ( fmr_main->get_task_raw({0,0})->abrv, "node");
 #ifdef FMR_HAS_MPI
   EXPECT_EQ( fmr_main->get_task_raw({0,0,0})->abrv, "mpi");
 #endif

@@ -19,7 +19,7 @@ namespace femera {
 #if 1
       FMR_PRAGMA_OMP(omp barrier)
       const auto head = femera::form::text_line (40," %4s %4s %4s",
-        this->get_base_name().c_str(), this->abrv.c_str(), "pid");
+        this->get_base_name().c_str(), this->abrv.c_str(), "proc");
       const std::string text = std::to_string(ix);
       this->data->head_line (this->data->fmrout, head,
         "%4u proc[%u %% %u=%u]=%u%s", proc->get_proc_id (),

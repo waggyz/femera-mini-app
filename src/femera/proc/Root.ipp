@@ -7,7 +7,7 @@ namespace femera {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="root process";
     this->info_d = 3;
-    this->abrv ="top";
+    this->abrv ="root";
   }
   inline
   void proc::Root::task_init (int*, char**){

@@ -193,46 +193,6 @@ namespace femera {
   noexcept {
     return fmr::Local_int (this->task_list.size());
   }
-#if 0
-  template <typename T> inline constexpr
-  fmr::Local_int Proc<T>::get_node_n () {
-    return fmr::Local_int (1);
-  }
-  template <typename T> inline constexpr
-  fmr::Local_int Proc<T>::get_node_ix () {
-    return fmr::Local_int (0);
-  }
-#endif
-# if 0
-  template <typename T> inline constexpr
-  fmr::Local_int Proc<T>::get_node_core_n () {// physical cores
-    return fmr::proc::get_node_core_n ();
-  }
-  template <typename T> inline
-  fmr::Local_int Proc<T>::get_node_hype_n () {// physical+logical cores
-    return fmr::proc::get_node_hype_n ();
-  }
-  template <typename T> inline
-  fmr::Local_int Proc<T>::get_node_core_ix () {
-    return fmr::proc::get_node_core_ix ();
-  }
-  template <typename T> inline
-  fmr::Local_int Proc<T>::get_node_hype_ix () {
-    return fmr::proc::get_node_hype_ix ();
-  }
-  template <typename T> inline
-  fmr::Local_int Proc<T>::get_node_numa_ix () {
-    return fmr::proc::get_node_numa_ix ();
-  }
-  template <typename T> inline
-  fmr::Local_int Proc<T>::get_node_numa_n () {
-    return fmr::proc::get_node_numa_n ();
-  }
-  template <typename T> inline
-  fmr::Global_int Proc<T>::get_used_byte () {
-    return fmr::proc::get_used_byte ();
-  }
-#   endif
 }// end femera:: namespace
 
 #undef FMR_DEBUG

@@ -8,5 +8,5 @@ fmr::Exit_int main (int argc, char** argv) {
 }
 
 TEST( Mini, DataName ){
-  EXPECT_EQ( mini->data->name, "log" );
+  EXPECT_EQ( mini->data->abrv, "logs" );
 }
