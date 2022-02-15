@@ -6,6 +6,6 @@ auto mini = femera::new_sims ();
 fmr::Exit_int main (int argc, char** argv) {
   return mini->exit (mini->init (&argc,argv));
 }
-TEST( TestProc, TrivialTest ){
+TEST( SelfTestProc, TrivialTest ){
   EXPECT_EQ( 1, 1 );
 }
