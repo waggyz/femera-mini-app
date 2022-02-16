@@ -26,7 +26,7 @@ namespace femera {
     File_ptrs_t fmrerr = {::stderr};
   private:
     std::unordered_map <FILE*, fmr::Line_size_int> file_head_sz
-      = {{nullptr, 15}, {::stdout, 15}, {::stderr, 0}};
+      = {{nullptr, 14}, {::stdout, 14}, {::stderr, 0}};
     std::unordered_map <FILE*, fmr::Line_size_int> file_line_sz
       = {{nullptr, 80}, {::stdout, 80}, {::stderr, 250}};
   public:

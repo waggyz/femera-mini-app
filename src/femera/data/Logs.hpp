@@ -8,8 +8,8 @@ namespace femera { namespace data {
   class Logs;// Derive a CRTP concrete class from File.
   class Logs : public Data <Logs> { private: friend class Data;
   private:
-    fmr::Line_size_int line_sz = 80;
-    fmr::Line_size_int head_sz = 15;
+//FIXME remove?    fmr::Line_size_int line_sz = 80;
+//FIXME remove?    fmr::Line_size_int head_sz = 14;
   private:
     Logs (femera::Work::Core_ptrs) noexcept;
     Logs () =delete;//NOTE Use the constructor above.

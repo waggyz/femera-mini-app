@@ -4,6 +4,7 @@ touch "$4.out";
 $3 >"$4.out" 2>"$4.err";
 if [[ "$?" -eq 0 ]]; then # truncate command if ok.
 #  if [ ${3%% *} != ${3##* } ]; then DD=" .."; fi
+  LAST="${3##* }"
   if [ "${3%% *}" == "${3##* }" ]; then
     FIRSTLAST="${3%% *}"
   else
@@ -23,7 +24,7 @@ if [[ "$?" -eq 0 ]]; then # truncate command if ok.
 #    printf "$1 %-.70s\n" "${3%% *}$DD";
 #    printf "$1 %-.70s\n" "$W2";
 #    printf "$1 %-.70s\n" "${3%% *}$DD";
-    printf "$1 %-64s%8s\n" "$FIRSTLAST" "$MEM";
+    printf "$1 %-55s>%16s\n" "$FIRSTLAST" "`basename $LAST`.out";
   fi;
 else # include arguments if returned nonzero
   printf "$2 $3\n";
