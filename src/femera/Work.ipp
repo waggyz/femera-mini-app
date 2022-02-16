@@ -11,6 +11,15 @@ T* femera::cast_via_work (O* obj) {
   return static_cast<T*> (static_cast<Work*> (obj));
 }
 namespace femera {
+  static inline constexpr Task_type task_cast (Task_type t) noexcept {
+    return t;
+  }
+  static inline constexpr Task_type task_cast (Base_type t) noexcept {
+    return static_cast<Task_type> (t);
+  }
+  static inline constexpr Task_type task_cast (Plug_type t) noexcept {
+    return static_cast<Task_type> (t);
+  }
   inline
   Work::Core_ptrs Work::get_core ()
   noexcept {

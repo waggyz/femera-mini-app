@@ -18,8 +18,10 @@ namespace femera {
     const auto err = gethostname (hostname, HOST_NAME_MAX);
     if (err) { this->name = "node"; }
     else     { this->name = std::string (hostname); }
-    this->info_d = 3;
     this->abrv ="node";
+    this->task_type = task_cast (Plug_type::Node);
+    this->base_type = task_cast (Base_type::Proc);
+    this->info_d = 3;
   }
   void proc::Node::task_exit () {
     const auto bytes = fmr::form::si_unit_string (this->get_used_byte (), "B");

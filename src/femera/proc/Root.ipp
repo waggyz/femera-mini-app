@@ -6,8 +6,10 @@ namespace femera {
   proc::Root::Root (femera::Work::Core_ptrs W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="root process";
-    this->info_d = 3;
     this->abrv ="root";
+    this->task_type = task_cast (Plug_type::Root);
+    this->base_type = task_cast (Base_type::Proc);
+    this->info_d = 3;
   }
   inline
   void proc::Root::task_init (int*, char**){

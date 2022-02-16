@@ -4,6 +4,7 @@
 #include "Gtst.hpp"
 #endif
 #include "Self.hpp"
+#include "Perf.hpp"
 
 namespace femera {
   void test::Beds::task_init (int*, char**) {
@@ -12,5 +13,8 @@ namespace femera {
 #endif
     if (true) {//TODO if -T option in args
       this->add_task (Test<test::Self>::new_task (this->get_core()));
+    }
+    if (true) {//TODO if -T or -P ? option in args
+      this->add_task (Test<test::Perf>::new_task (this->get_core()));
   } }
 }//end femera namespace

@@ -8,6 +8,8 @@ namespace femera {
     this->name ="GoogleTest";
     this->abrv ="gtst";
     this->version = MAKESTR(FMR_GTEST_VERSION) ;
+    this->task_type = task_cast (Plug_type::Gtst);
+    this->base_type = task_cast (Base_type::Test);
     this->info_d = 3;
   }
 }//end femera namespace

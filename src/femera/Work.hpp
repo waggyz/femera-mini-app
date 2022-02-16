@@ -3,7 +3,7 @@
 /** */
 #include "../fmr/perf/Meter.hpp"
 #include "Errs.hpp"
-//#include "Task.hpp"
+#include "Task.hpp"
 //#include "vals.hpp"
 
 #include <memory>     //TODO std::shared_ptr, std::make_shared
@@ -76,6 +76,8 @@ namespace femera {
     //
     std::string name ="unknown work";
     std::string abrv ="work";
+    Task_type task_type = task_cast (Base_type::Work);
+    Task_type base_type = task_cast (Base_type::None);
   protected:
     std::string   version ="";
     Task_list_t task_list ={};

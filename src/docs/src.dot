@@ -5,6 +5,7 @@ digraph "source tree" {
     fontsize="16";
     fontname="Helvetica";
 	clusterrank="local";
+	"Perf.cpp" -> "core.h"
 	"Gtst.cpp" -> "core.h"
 	"Nvid.gtst.cpp" -> "core.h"
 	"femera.hpp" -> "Jobs.hpp"
@@ -31,6 +32,8 @@ digraph "source tree" {
 	"Main.cpp" -> "Node.hpp"
 	"Main.cpp" -> "Main.hpp"
 	"Proc.hpp" -> "Proc.ipp"
+	"Perf.hpp" -> "Perf.ipp"
+	"Perf.hpp" -> "Test.hpp"
 	"Beds.cpp" -> "Gtst.hpp"
 	"Node.cpp" -> "Node.hpp"
 	"Main.cpp" -> "Fmpi.hpp"
@@ -39,6 +42,7 @@ digraph "source tree" {
 	"Work.cpp" -> "core.h"
 	"nvid.hpp" -> "fmr.hpp"
 	"perf.hpp" -> "fmr.hpp"
+	"Beds.cpp" -> "Perf.hpp"
 	"Data.hpp" -> "Data.ipp"
 	"Proc.gtst.cpp" -> "Proc.hpp"
 	"Beds.cpp" -> "Self.hpp"
@@ -58,6 +62,7 @@ digraph "source tree" {
 	"Fomp.hpp" -> "Proc.hpp"
 	"File.hpp" -> "File.ipp"
 	"Self.cpp" -> "core.h"
+	"Work.hpp" -> "Task.hpp"
 	"Main.cpp" -> "Nvid.hpp"
 	"Meter.hpp" -> "Meter.ipp"
 	"Beds.gtst.cpp" -> "femera.hpp"
@@ -68,6 +73,7 @@ digraph "source tree" {
 	"nvid.gtst.cpp" -> "nvid.hpp"
 	"Sims.gtst.cpp" -> "Sims.hpp"
 	"Fomp.gtst.cpp" -> "core.h"
+	"Perf.cpp" -> "Perf.hpp"
 	"form.cpp" -> "form.hpp"
 	"File.cpp" -> "File.hpp"
 	"Self.hpp" -> "Test.hpp"
@@ -80,6 +86,7 @@ digraph "source tree" {
 	"core.h" -> "Beds.hpp"
 	"Errs.hpp" -> "fmr.hpp"
 	"Fcpu.hpp" -> "Fcpu.ipp"
+	"Perf.gtst.cpp" -> "femera.hpp"
 	"perf.gtst.cpp" -> "perf.hpp"
 	"Root.hpp" -> "Root.ipp"
 	"Errs.hpp" -> "Errs.ipp"

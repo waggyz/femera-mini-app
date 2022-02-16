@@ -77,7 +77,7 @@ namespace femera {
 #ifdef FMR_DEBUG
     printf ("%s Main::task_proc_ix %u\n", abrv.c_str(), proc_ix);
 #endif
-    if (this->abrv =="omp") {//FIXME bad hack, and slow
+    if (this->task_type == task_cast (Plug_type::Fomp)) {
       return cast_via_work<proc::Fomp>(this)->task_proc_ix();
     }
     return this->proc_ix;

@@ -12,12 +12,16 @@ namespace femera {
     this->name ="processing";
     this->info_d = 2;
     this->abrv ="main";
+    this->task_type = task_cast (Plug_type::Main);
+    this->base_type = task_cast (Base_type::Proc);
   }
   inline
   proc::Main::Main () noexcept {
     this->name ="processing";
     this->info_d = 2;
     this->abrv ="main";
+    this->task_type = task_cast (Plug_type::Main);
+    this->base_type = task_cast (Base_type::Proc);
   }
   inline
   void proc::Main::task_exit () {

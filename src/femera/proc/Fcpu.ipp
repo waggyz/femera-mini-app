@@ -13,7 +13,9 @@ namespace femera {
     this->name = std::string ( MAKESTR(FMR_CPUMODEL) );
     this->info_d = 3;
     this->abrv ="cpu";
-    this->version = "";                                     //FIXME
+    this->version = "";//FIXME
+    this->task_type = task_cast (Plug_type::Fcpu);
+    this->base_type = task_cast (Base_type::Proc);
   }
   inline
   void proc::Fcpu::task_init (int*, char**) {

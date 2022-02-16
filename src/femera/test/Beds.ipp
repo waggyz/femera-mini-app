@@ -7,6 +7,8 @@ namespace femera {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="testbeds";
     this->abrv ="beds";
+    this->task_type = task_cast (Plug_type::Beds);
+    this->base_type = task_cast (Base_type::Test);
     this->info_d = 2;
   }
   inline
