@@ -35,27 +35,10 @@ namespace femera {
   namespace sims { class Jobs; }
   // typedefs
   using Work_spt = FMR_SMART_PTR <Work>;
-#if 0
-  using Main_t = FMR_SMART_PTR <proc::Main>;// concrete Proc interface
-  using Root_t = FMR_SMART_PTR <proc::Root>;
-  using Node_t = FMR_SMART_PTR <proc::Node>;
-  using Fmpi_t = FMR_SMART_PTR <proc::Fmpi>;
-  using Fomp_t = FMR_SMART_PTR <proc::Fomp>;
-  using Fcpu_t = FMR_SMART_PTR <proc::Fcpu>;
-  //
-  using File_t = FMR_SMART_PTR <data::File>;// concrete Data interface
-  using Logs_t = FMR_SMART_PTR <data::Logs>;
-  //
-  using Beds_t = FMR_SMART_PTR <test::Beds>;// concrete Test interface
-  //using Unit_t = FMR_SMART_PTR <test::Unit>;// built-in unit tests
-  //using Self_t = FMR_SMART_PTR <test::Self>;// built-in integration tests
-  //using Perf_t = FMR_SMART_PTR <test::Perf>;// built-in performance tests
-  using Gtst_t = FMR_SMART_PTR <test::Gtst>;
-#endif
   using Jobs_spt = FMR_SMART_PTR <sims::Jobs>;// concrete Sims interface
   //
-  template <typename T, typename U>
-  T* cast_via_work (U* obj);
+  template <typename T, typename O>
+  T* cast_via_work (O* obj);
   //
   class Work {/* This is an abstract (pure virtual) base class (interface).
   * Derived classes use the curiously recurrent template pattern (CRTP) e.g.,
@@ -64,10 +47,14 @@ namespace femera {
   */
   public:// typedefs ----------------------------------------------------------
     using Core_ptrs   = std::tuple  <proc::Main*, data::File*, test::Beds*>;
-    using Task_list_t = std::deque  <Work_spt>;
+  protected:
     using Task_path_t = std::vector <fmr::Local_int>;
     using Task_tree_t = std::vector <Task_path_t>;
-  public:// variables ---------------------------------------------------------
+  private:
+    using Task_list_t = std::deque  <Work_spt>;
+  protected:// variables ---------------------------------------------------------
+    Task_type task_type = task_cast (Base_type::Work);
+  public:
     fmr::perf::Meter time = fmr::perf::Meter ();
     //
     proc::Main* proc = nullptr;// processing hierarchy
@@ -76,8 +63,6 @@ namespace femera {
     //
     std::string name ="unknown work";
     std::string abrv ="work";
-    Task_type task_type = task_cast (Base_type::Work);
-    Task_type base_type = task_cast (Base_type::None);
   protected:
     std::string   version ="";
     Task_list_t task_list ={};
@@ -94,8 +79,8 @@ namespace femera {
     bool  is_work_main = true ;// save for use after proc::exit (..)
   public:// methods -----------------------------------------------------------
     //NOTE Make at least 1 method pure virtual.
-    //FIXME Do all virtual methods need to be pure
-    //      to avoid vtable using CRTP derived classes?
+    //TODO Do all virtual methods need to be pure
+    //     to avoid vtable using CRTP derived classes?
     virtual fmr::Exit_int init (int* argc, char** argv) noexcept =0;
     virtual fmr::Exit_int exit (fmr::Exit_int err=0)    noexcept =0;
     virtual std::string get_base_name () =0;
@@ -137,50 +122,4 @@ namespace femera {
 
 #undef FMR_DEBUG
 //end FEMERA_HAS_WORK_HPP
-#endif
-
-#if 0
-  // to avoid FMR_CAST_TO_DERIVED use in task->get* methods?
-  // Variables ----------------------------------------------------------------
-  public:
-    Work_type    work_type = work_cast (Base_type::Work);
-//    Work_type    base_type = work_cast (Base_type::Work);//TODO Remove this?
-    std::string  task_name ="Femera work";
-    std::string    version ="";
-    Proc*             proc = nullptr;
-    Data*             data = nullptr;
-    Task<Work>        task = Task<Work>(this);// Work task stack
-    // task must be public because parent accesses derived instances.
-    fmr::perf::Meter  time = fmr::perf::Meter ();
-    std::string meter_unit ="unit";
-    int verblevel = 1;
-  protected:
-  private:
-  // Methods ------------------------------------------------------------------
-  public:
-    Work           ()           =default;
-    Work           (Work const&)=delete;// not copyable
-    void operator= (const Work&)=delete;
-    virtual ~Work  ()=0;// pure virtual destructor indicates Work is abstract
-    //
-    int print_task_time (const std::string label_suffix);
-    //
-    // Work stack initialization and exit
-    int init (int* argc, char** argv);//TODO init_work or init_all or init_stack?
-    int exit (int  err);              //TODO init_work or exit_all or exit_stack?
-    //
-    // Single-inheritance interface
-    // These pure virtual functions must be specialized for each task.
-    virtual int init_task (int* argc, char** argv)=0;//TODO Change to init(..).
-    virtual int exit_task (int  err)=0;//TODO               Change to exit(..).
-    //
-    // If a derived class does not override these, then,
-    // e.g., a call to Derived::prep() will call Work::prep().
-    virtual int prep ();//TODO or virtual int init() ?
-    virtual int chck ();//TODO chk?
-    //
-    virtual std::string print_summary ();
-    virtual std::string print_details ();
-  protected:
-  private:
 #endif

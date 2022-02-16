@@ -1,5 +1,5 @@
-#ifndef FEMERA_FTOP_IPP
-#define FEMERA_FTOP_IPP
+#ifndef FEMERA_ROOT_IPP
+#define FEMERA_ROOT_IPP
 
 namespace femera {
   inline
@@ -8,7 +8,6 @@ namespace femera {
     this->name ="root process";
     this->abrv ="root";
     this->task_type = task_cast (Plug_type::Root);
-    this->base_type = task_cast (Base_type::Proc);
     this->info_d = 3;
   }
   inline
@@ -25,5 +24,5 @@ namespace femera {
 #endif
 }//end femera namespace
 
-//end FEMERA_FTOP_IPP
+//end FEMERA_ROOT_IPP
 #endif

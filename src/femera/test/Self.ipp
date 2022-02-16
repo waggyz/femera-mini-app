@@ -9,7 +9,6 @@ namespace femera {
     this->abrv ="self";
     this->info_d = 2;
     this->task_type = task_cast (Plug_type::Self);
-    this->base_type = task_cast (Base_type::Test);
   }
   inline
   void test::Self::task_exit () {

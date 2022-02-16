@@ -8,7 +8,6 @@ namespace femera {
     this->name ="simulation job handler";
     this->abrv ="jobs";
     this->task_type = task_cast (Plug_type::Jobs);
-    this->base_type = task_cast (Base_type::Sims);
     this->info_d = 3;
   }
   inline
@@ -16,7 +15,6 @@ namespace femera {
     this->name ="simulation job handler";
     this->abrv ="jobs";
     this->task_type = task_cast (Plug_type::Jobs);
-    this->base_type = task_cast (Base_type::Sims);
     this->info_d = 3;
   }
 }//end femera namespace

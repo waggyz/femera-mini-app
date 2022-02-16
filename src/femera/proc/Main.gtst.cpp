@@ -6,7 +6,7 @@ auto fmr_main = FMR_MAKE_SMART<femera::proc::Main> (femera::proc::Main());
 
 TEST( Main, TaskName ){
   EXPECT_EQ( fmr_main->abrv, "main");
-  //xxx_EXPECT_EQ( fmr_main->get_task_raw({})->abrv, "main");
+  //FIXME_EXPECT_EQ( fmr_main->get_task_raw({})->abrv, "main");
 }
 TEST( Main, DidInit ){
   EXPECT_EQ( fmr_main->get_task_n(), uint(1) );

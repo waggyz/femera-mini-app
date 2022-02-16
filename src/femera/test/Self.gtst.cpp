@@ -27,6 +27,12 @@ std::vector<fmr::Local_int> get_local_proc_ids () {//TODO all_gathered_proc_ids(
     if (id % mod_n < each_n) {
       FMR_PRAGMA_OMP(omp atomic write)
       pids [id % mod_n] = id;
+      const auto head = femera::form::text_line (40," %4s %4s %4s",
+        mini->test->get_base_name().c_str(), mini->test->abrv.c_str(), "proc");
+      const std::string text = std::to_string(id);
+      mini->data->head_line (mini->data->fmrout, head,
+        "%4u proc[%u %% %u=%u]=%u%s", mini->proc->get_proc_id (),
+        id, mod_n, id%mod_n, pids[id%mod_n], mini->proc->is_main() ? " *main":"");
     }
     else {}
     FMR_PRAGMA_OMP(omp barrier)

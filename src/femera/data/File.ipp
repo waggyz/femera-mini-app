@@ -7,6 +7,7 @@ namespace femera {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="file handler";
     this->abrv ="file";
+    this->task_type = task_cast (Plug_type::File);
     this->info_d = 2;
   }
   inline

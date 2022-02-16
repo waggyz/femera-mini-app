@@ -13,7 +13,6 @@ namespace femera {
     this->name ="NVIDIA";
     this->abrv ="gpu";
     this->task_type = task_cast (Plug_type::Nvid);
-    this->base_type = task_cast (Base_type::Proc);
   }
   void proc::Nvid::task_init (int*, char**) {
 #if 1

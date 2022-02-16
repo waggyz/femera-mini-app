@@ -16,8 +16,9 @@ namespace femera {
   : fmpi_required {int (MPI_THREAD_SERIALIZED) } {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="MPI";
-    this->info_d = 3;
     this->abrv ="mpi";
+    this->task_type = task_cast (Plug_type::Fmpi);
+    this->info_d = 3;
     this->team_id = proc::Team_t (MPI_COMM_WORLD);
     this->version =
       std::to_string( MPI_VERSION )
