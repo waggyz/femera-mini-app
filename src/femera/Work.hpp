@@ -52,9 +52,7 @@ namespace femera {
     using Task_tree_t = std::vector <Task_path_t>;
   private:
     using Task_list_t = std::deque  <Work_spt>;
-  protected:// variables ---------------------------------------------------------
-    Task_type task_type = task_cast (Base_type::Work);
-  public:
+  public:// variables ---------------------------------------------------------
     fmr::perf::Meter time = fmr::perf::Meter ();
     //
     proc::Main* proc = nullptr;// processing hierarchy
@@ -73,6 +71,7 @@ namespace femera {
     int                      my_argc =0;
 #endif
   protected:
+    Task_type task_type = task_cast (Base_type::Work);
     fmr::Dim_int info_d = 1;
   private:
     bool did_work_init = false;

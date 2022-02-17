@@ -7,6 +7,6 @@ fmr::Exit_int main (int argc, char** argv) {
   return mini->exit (mini->init (&argc,argv));
 }
 
-TEST( Mini, DataName ){
-  EXPECT_EQ( mini->data->abrv, "logs" );
+TEST( Logs, TrivialTest ){
+  EXPECT_EQ( 0, 0 );
 }

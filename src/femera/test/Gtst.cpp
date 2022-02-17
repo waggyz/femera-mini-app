@@ -57,8 +57,7 @@ namespace femera {
       if (this->did_run_all_tests) {
         FMR_THROW("already called GoogleTest RUN_ALL_TESTS()");
         return;
-      }
-      else {
+      } else {
         int err =0;
 #ifdef FMR_DEBUG
         printf ("running GoogleTest...\n");
@@ -69,7 +68,7 @@ namespace femera {
           return;
         }
         if (err) {
-          auto msg = std::string("warn""ing: GoogleTest returned ")
+          const auto msg = std::string("warn""ing: GoogleTest returned ")
             + std::to_string(err) + ".";
           FMR_THROW(msg);
           return;

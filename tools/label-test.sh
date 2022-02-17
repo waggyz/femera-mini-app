@@ -1,8 +1,11 @@
 #!/bin/bash
 #
 touch "$4.out";
-$3 >"$4.out" 2>"$4.err";
-if [[ "$?" -eq 0 ]]; then # truncate command if ok.
+$3 >"$4.out" 2>"$4.err"; ERR=$?;
+if [[ "$ERR" -eq 0 ]]; then
+   ERR=`grep -c "FA""IL" "$4.out"`
+fi
+if [[ "$ERR" -eq 0 ]]; then # truncate command if ok.
 #  if [ ${3%% *} != ${3##* } ]; then DD=" .."; fi
   LAST="${3##* }"
   if [ "${3%% *}" == "${3##* }" ]; then
@@ -28,7 +31,9 @@ if [[ "$?" -eq 0 ]]; then # truncate command if ok.
   fi;
 else # include arguments if returned nonzero
   printf "$2 $3\n";
-  if [ -f "$4.out" ]; then tail "$4.out" >&2; mv -f "$4.out" "$4.bad"; fi;
-  if [ -f "$4.err" ]; then tail "$4.err" >&2; fi;
+  if [ -f "$4.out" ];
+    then grep -h -3 -i "FA""IL" "$4.out" >&2; mv -f "$4.out" "$4.bad";
+  fi;
+  if [ -f "$4.err" ]; then cat "$4.err" >&2; fi;
 fi;
 #

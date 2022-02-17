@@ -34,7 +34,7 @@ double test_proc_id_speed () {
   if (ans2 > ans1) {
     mini->data->head_line (mini->data->fmrout, "test perf pids",
       "%s /%s (pid/ref) = %.0fx slower each call",
-      pids_str.c_str(), base_str.c_str(), ratio-1.0);
+      pids_str.c_str(), base_str.c_str(), ratio - 1.0);
 #if 0
     mini->data->head_line (mini->data->fmrout, "test perf pids",
       "%e (pid) / %e (ref) = %f",
