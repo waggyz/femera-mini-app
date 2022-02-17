@@ -518,7 +518,7 @@ ifneq ($(HOST_MD5),$(REPO_MD5))
 endif
 	$(info $(E_G_) fmrexec auto -d -t -D examples/cube.fmr)
 
-code-stats:
+code-stats: | build/$(CPUMODEL)/
 	tools/code-stats.sh
 	touch "$(SRC_STAT_FILE)"; \
 	if ! grep "$(FEMERA_VERSION)" "$(SRC_STAT_FILE)" | grep -q "$(HOSTNAME)"; \
@@ -527,6 +527,7 @@ code-stats:
 	"`tools/elapsed-time.sh $(BUILD_SECS)`",'"'$(CXX) $(CXX_VERSION)'"',\
 	'"'$(HOSTNAME)'"','"'$(CPUMODEL)'"'\
 	>> "$(SRC_STAT_FILE)"; fi
+	-tools/plot_code_stats.py 2>/dev/null
 	
 	
 # Femera tools ----------------------------------------------------------------
