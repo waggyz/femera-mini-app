@@ -21,14 +21,23 @@ namespace femera { namespace data {
     ss data_line (std::tuple<A,Args...> t, ss& line="");
 #else
   public:
-    static
-    std::string data_line (std::string line);
-    template <typename L> static
-    std::string data_line (std::string line, L last);
-    template <typename H, typename ...Tail> static
-    std::string data_line (std::string line, H head, Tail...);
     template <typename ...Args> static
     std::string data_line (Args...);
+  private:
+    static
+    std::string data_line_p (std::string line, std::string last);
+    template <typename ...Tail> static
+    std::string data_line_p (std::string line, std::string head, Tail...);
+    static
+    std::string data_line_p (std::string line, const char* last);
+    template <typename ...Tail> static
+    std::string data_line_p (std::string line, const char* head, Tail...);
+    static
+    std::string data_line_p (std::string line);
+    template <typename L> static
+    std::string data_line_p (std::string line, L last);
+    template <typename H, typename ...Tail> static
+    std::string data_line_p (std::string line, H head, Tail...);
 #endif
 //    ss data_page (std::tuple<Args...> t);//tuple of valarray/vector refs (SOA)
   };
