@@ -63,6 +63,7 @@ digraph "source tree" {
 	"File.hpp" -> "File.ipp"
 	"Self.cpp" -> "core.h"
 	"Work.hpp" -> "Task.hpp"
+	"Logs.gtst.cpp" -> "Logs.hpp"
 	"Main.cpp" -> "Nvid.hpp"
 	"Meter.hpp" -> "Meter.ipp"
 	"Beds.gtst.cpp" -> "femera.hpp"

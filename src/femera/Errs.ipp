@@ -5,7 +5,7 @@ namespace femera {
   inline
   const char* Errs::what ()
   const noexcept {
-    return msg.c_str();
+    return this->msg.c_str();
   }
 }//end femera:: namespace
 

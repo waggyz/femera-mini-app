@@ -99,37 +99,20 @@ namespace femera {
     Proc* P = this;
     ans = ans & (P->get_proc_ix () == P->main_ix);
     while (! P->task_list.empty ()) {
-      P = static_cast<Proc*> (P->get_work_raw (0));//FIXME only path 0
+      P = static_cast<Proc*> (P->get_work_raw (0));//TODO only path 0? 
       ans = ans & (P->get_proc_ix () == P->main_ix);
     }
     return ans;
   }
 #endif
-
-
-
-
-  template <typename T> inline
-  fmr::Local_int Proc<T>::get_proc_id (fmr::Local_int id) {
-    const fmr::Local_int tid
-      = this->base_id + this->base_n * Proc::derived (this)->get_proc_ix ();
-    if (! this->task_list.empty ()) {
-      id += this->get_task_raw (0)->get_proc_id (tid);
-#ifdef FMR_DEBUG
-      printf ("%s id: %u += %u + %u * %u\n", this->abrv.c_str(), id,
-        this->base_id, this->base_n, Proc::derived (this)->get_proc_ix ());
-#endif
-    }
-    return id;
-  }
-# if 0
+#if 0
   template <typename T> inline
   fmr::Local_int Proc<T>::get_proc_id () {fmr::Local_int id=0;
     Proc* P = this;
     id += P->base_id + P->base_n * P->get_proc_ix ();
     while (! P->task_list.empty ()) {
-      P = static_cast<Proc*> (P->get_work_raw (0));                  //FIXME
-      id += P->base_id + P->base_n * P->get_proc_ix ();//FIXME which is called? 
+      P = static_cast<Proc*> (P->get_work_raw (0));
+      id += P->base_id + P->base_n * P->get_proc_ix ();
 #ifdef FMR_DEBUG
       printf ("%s id: %u += %u + %u * %u\n", P->abrv.c_str(), id,
         P->base_id, P->base_n, P->get_proc_ix ());
@@ -137,18 +120,29 @@ namespace femera {
     }
     return id;
   }
-#   endif
-
-
-
+#else
+  template <typename T> inline
+  fmr::Local_int Proc<T>::get_proc_id (fmr::Local_int id) {
+    const fmr::Local_int tid
+      = this->base_id + this->base_n * Proc::derived (this)->get_proc_ix ();
+    if (! this->task_list.empty ()) {
+      id += this->get_task_raw (0)->get_proc_id (tid);//TODO only path 0?
+#ifdef FMR_DEBUG
+      printf ("%s id: %u += %u + %u * %u\n", this->abrv.c_str(), id,
+        this->base_id, this->base_n, Proc::derived (this)->get_proc_ix ());
+#endif
+    }
+    return id;
+  }
+#endif
   template <typename T> inline
   fmr::Local_int Proc<T>::get_proc_ix () {
 #ifdef FMR_DEBUG
-      printf ("Proc<%s>>::get_proc_ix: %u\n", this->abrv.c_str(),
-        Proc::derived (this)->task_proc_ix ());
+    printf ("Proc<%s>>::get_proc_ix: %u\n", this->abrv.c_str(),
+      Proc::derived (this)->task_proc_ix ());
 #endif
-//    return this->proc_ix;
-    return Proc::derived (this)->task_proc_ix ();//FIXME always calls Main::task_proc_ix
+    return Proc::derived (this)->task_proc_ix ();
+    // proc->task_proc_ix() always calls Main::task_proc_ix ().
   }
   template <typename T> inline
   fmr::Local_int Proc<T>::get_proc_n ()

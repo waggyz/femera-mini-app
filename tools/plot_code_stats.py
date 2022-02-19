@@ -27,8 +27,8 @@ if __name__ == "__main__":
   build_time = []
   ntd = [] # number of TO_DO
   nfm = [] # number of FIX_ME
-  lines_ylim = 20000
-  files_ylim = 200
+  lines_ylim = 20000.0
+  files_ylim = 200.0
   with open ('data/src/femera-'+cpumodel+'-build-stats.csv') as File:
     data = csv.reader(File, delimiter=',')
     i=177
@@ -37,9 +37,9 @@ if __name__ == "__main__":
         i+=1
         ix.append(i)
         # x.append(dt.datetime.strptime(row[0],'%Y-%d-%mT').date())
-        loc.append(int(row[2]) * files_ylim/lines_ylim)
+        loc.append(float(row[2]) * files_ylim/lines_ylim)
         foc.append(int(row[3]))
-        lot.append(int(row[4]) * files_ylim/lines_ylim)
+        lot.append(float(row[4]) * files_ylim/lines_ylim)
         fot.append(int(row[5]))
         ntd.append(int(row[6]))
         nfm.append(int(row[7]))
@@ -47,14 +47,14 @@ if __name__ == "__main__":
   # w = 0.5
   # plt.gca().xaxis.set_major_formatter(pdt.DateFormatter('%Y-%M-%D'))
   # plt.gca().xaxis.set_major_locator(pdt.DayLocator())
-  plt.plot(ix,fot,label='Hundreds of lines source code')
+  plt.plot(ix,loc,label='Hundreds of lines source code')
   plt.plot(ix,lot,label='Hundreds of lines test code')
   plt.plot(ix,foc,label='Source code files')
-  plt.plot(ix,loc,label='Test code files')
+  plt.plot(ix,fot,label='Test code files')
   plt.plot(ix,ntd,label='Number of TO'+'DO in source code')
   plt.plot(ix,nfm,label='Number of FIX'+'ME in source code')
   plt.plot(ix,build_time,label='Build time (sec)')
-  plt.title('Femera 0.3 source code statistics')
+  plt.title('Femera 0.3 mini-app source code statistics')
   plt.xlabel('Commit number (approximate)')#TODO parse from row[1]
   plt.legend()
   # plt.gcf().autofmt_xdate()
