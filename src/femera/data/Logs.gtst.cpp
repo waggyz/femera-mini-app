@@ -4,6 +4,7 @@
 #include "gtest/gtest.h"
 
 auto mini = femera::new_sims ();
+
 fmr::Exit_int main (int argc, char** argv) {
   return mini->exit (mini->init (&argc,argv));
 }
@@ -18,6 +19,7 @@ namespace femera { namespace test {
   const auto csv_hello4bye = femera::data::Logs::data_line ("hello",4,"bye");
   const auto csv_1int = femera::data::Logs::data_line (1);
   const auto csv_1str = femera::data::Logs::data_line ("one");
+  const auto csv_fp12 = femera::data::Logs::data_line (float(1),double(2));
 
   TEST( Logs, TrivialTest)  { EXPECT_EQ( 0, 0 ); }
   TEST( Logs, CSV123)       { EXPECT_EQ( csv_123,       "1,2,3"); }
@@ -28,5 +30,7 @@ namespace femera { namespace test {
   TEST( Logs, CSVHello4bye) { EXPECT_EQ( csv_hello4bye, "\"hello\",4,\"bye\"");}
   TEST( Logs, CSV1int)      { EXPECT_EQ( csv_1int,      "1"); }
   TEST( Logs, CSV1Str)      { EXPECT_EQ( csv_1str,      "\"one\""); }
+  TEST( Logs, CSVfp12)      { EXPECT_EQ( csv_fp12,
+    "1.0000000e+00,2.000000000000000E+00"); }
 
 } }//end femerea::test:: namespace
