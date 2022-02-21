@@ -17,7 +17,7 @@ namespace femera { namespace data {
     void task_init (int* argc, char** argv);
     void task_exit ();
 #if 0
-    template <typename A, typename ...Args>  
+    template <typename A, typename ...Args>
     ss data_line (std::tuple<A,Args...> t, ss& line="");
 #else
   public:
@@ -41,7 +41,7 @@ namespace femera { namespace data {
     template <typename H, typename ...Tail> static
     std::string data_line_p (std::string line, H head, Tail...);
 #endif
-//TODO    ss data_page (std::tuple<Args...> t);//tuple of valarray/vector refs (SOA)
+//TODO    ss data_page (std::tuple<Args...> t);//tuple of valarray/vector refs (SoA)
   };
 } }//end femera::file:: namespace
 
