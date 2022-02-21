@@ -14,20 +14,12 @@ namespace femera {
     this->info_d = 3;
   }
   inline
-  std::string data::Logs::to_string (float f) {
-  std::vector<char> buf (15 + 1, 0);
-  std::snprintf (&buf[0], buf.size(), "%1.7e", double(f));
-  return std::string(&buf[0]);
+  std::string data::Logs::csv_string (std::string& str) {
+    return +"\""+str+"\"";
   }
   inline
-  std::string data::Logs::to_string (double f) {
-  std::vector<char> buf (31 + 1, 0);
-  std::snprintf (&buf[0], buf.size(), "%1.15E", f);
-  return std::string(&buf[0]);
-  }
-  template <typename I> inline
-  std::string data::Logs::to_string (I integer) {
-    return std::to_string (integer);
+  std::string data::Logs::csv_string (const char* str) {
+    return "\""+std::string(str)+"\"";
   }
   template <typename ...Args> inline
   std::string data::Logs::data_line (Args... args) {
@@ -38,30 +30,28 @@ namespace femera {
     return line;
   }
   inline
-  std::string data::Logs::data_line_p (std::string line, std::string only) {
-    return line +"\""+only+"\"";
-  }
-  template <typename ...Rest> inline
-  std::string data::Logs::data_line_p
-  (std::string line, std::string first, Rest... rest) {
-    return data_line_p (line +"\""+first+"\"" +",", rest...);
+  std::string data::Logs::csv_string (float f) {
+  std::vector<char> buf (15 + 1, 0);
+  std::snprintf (&buf[0], buf.size(), "%1.7e", double(f));
+  return std::string(&buf[0]);
   }
   inline
-  std::string data::Logs::data_line_p (std::string line, const char* only) {
-    return line +"\""+only+"\"";
+  std::string data::Logs::csv_string (double f) {
+  std::vector<char> buf (31 + 1, 0);
+  std::snprintf (&buf[0], buf.size(), "%1.15E", f);
+  return std::string(&buf[0]);
   }
-  template <typename ...Rest> inline
-  std::string data::Logs::data_line_p
-  (std::string line, const char* first, Rest... rest) {
-    return data_line_p (line + "\""+first+"\"" +",", rest...);
+  template <typename I> inline
+  std::string data::Logs::csv_string (I integer) {
+    return std::to_string (integer);
   }
   template <typename O> inline
   std::string data::Logs::data_line_p (std::string line, O only) {
-    return line + data::Logs::to_string (only);//TODO snprintf(..)
+    return line + data::Logs::csv_string (only);//TODO snprintf(..)
   }
   template <typename F, typename ...Rest> inline
   std::string data::Logs::data_line_p (std::string line, F first, Rest... rest){
-    return data_line_p (line + data::Logs::to_string (first) +",", rest...);
+    return data_line_p (line + data::Logs::csv_string (first) +",", rest...);
   }
 }//end femera namespace
 

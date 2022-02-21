@@ -23,25 +23,19 @@ namespace femera { namespace data {
   public:
     template <typename ...Args> static
     std::string data_line (Args...);
+    static// quoted string types
+    std::string csv_string (std::string&);
     static
-    std::string to_string (float);
+    std::string csv_string (const char*);
+    static// numeric types
+    std::string csv_string (float);
     static
-    std::string to_string (double);
+    std::string csv_string (double);
     template <typename I> static
-    std::string to_string (I integer);
+    std::string csv_string (I integer);
   private:
     static
     std::string data_line_p (std::string line);
-    // quoted string types
-    static
-    std::string data_line_p (std::string line, std::string last);
-    template <typename ...Tail> static
-    std::string data_line_p (std::string line, std::string head, Tail...);
-    static
-    std::string data_line_p (std::string line, const char* last);
-    template <typename ...Tail> static
-    std::string data_line_p (std::string line, const char* head, Tail...);
-    // numeric types
     template <typename L> static
     std::string data_line_p (std::string line, L last);
     template <typename H, typename ...Tail> static
