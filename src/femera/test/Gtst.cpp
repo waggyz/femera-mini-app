@@ -57,7 +57,8 @@ namespace femera {
       if (this->did_run_all_tests) {
         FMR_THROW("already called GoogleTest RUN_ALL_TESTS()");
         return;
-      } else {
+      }
+      if (::testing::UnitTest::GetInstance()->test_suite_to_run_count() > 0) {
         int err =0;
 #ifdef FMR_DEBUG
         printf ("running GoogleTest...\n");

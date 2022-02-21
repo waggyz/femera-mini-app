@@ -3,7 +3,7 @@
 
 namespace femera {
   inline
-  test::Self::Self (femera::Work::Core_ptrs W) noexcept {
+  test::Self::Self (const femera::Work::Core_ptrs W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="self tests";
     this->abrv ="self";

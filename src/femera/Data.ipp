@@ -60,8 +60,8 @@ namespace femera {
   template <typename T> template <typename ...Args> inline
   std::string Data<T>::head_line
   (const std::string& head, const std::string& form, Args ...args) {
-    return Data<T>::head_line (Data::File_ptrs_t({nullptr}),
-      head, form, args...);
+    return Data<T>::head_line
+      (Data::File_ptrs_t({nullptr}), head, form, args...);
   }
   template <typename T> template <typename ...Args> inline
   std::string Data<T>::head_time (const Data::File_ptrs_t flist,

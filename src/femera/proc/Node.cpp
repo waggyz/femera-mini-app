@@ -12,7 +12,7 @@
 
 namespace femera {
 
-  proc::Node::Node (femera::Work::Core_ptrs W) noexcept {
+  proc::Node::Node (const femera::Work::Core_ptrs W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
     char hostname [HOST_NAME_MAX];
     const auto err = gethostname (hostname, HOST_NAME_MAX);

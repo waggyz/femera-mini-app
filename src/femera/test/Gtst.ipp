@@ -3,7 +3,7 @@
 
 namespace femera {
   inline
-  test::Gtst::Gtst (femera::Work::Core_ptrs W) noexcept {
+  test::Gtst::Gtst (const femera::Work::Core_ptrs W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="GoogleTest";
     this->abrv ="gtst";

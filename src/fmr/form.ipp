@@ -21,6 +21,16 @@ namespace fmr {
       (is_signed ? ((val > V(0)) ? "+" : " ") : "");
     return detail::form::si_unit_string (std::abs(double(val)), unit, md, sign);
   }
+  template<typename V>
+  std::string form::si_time_string (V val,
+  const int md, const bool is_signed) {
+    std::string unit = "s";
+    if (val > V(599)) { val /= 60; unit="m"; }
+    if (val > V(599)) { val /= 60; unit="h"; }
+    const std::string sign = (val < V(0)) ? "-" :
+      (is_signed ? ((val > V(0)) ? "+" : " ") : "");
+    return detail::form::si_unit_string (std::abs(double(val)), unit, md, sign);
+  }
 
 }// end fmr:: namespace
 

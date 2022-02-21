@@ -8,7 +8,7 @@
 
 namespace femera {
 #ifdef FMR_HAS_NVIDIA
-  proc::Nvid::Nvid (femera::Work::Core_ptrs core) noexcept {
+  proc::Nvid::Nvid (const femera::Work::Core_ptrs core) noexcept {
     std::tie (this->proc, this->data, this->test) = core;
     this->name ="NVIDIA";
     this->abrv ="gpu";

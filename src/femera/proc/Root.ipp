@@ -3,7 +3,7 @@
 
 namespace femera {
   inline
-  proc::Root::Root (femera::Work::Core_ptrs W) noexcept {
+  proc::Root::Root (const femera::Work::Core_ptrs W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="root process";
     this->abrv ="root";

@@ -27,8 +27,8 @@ namespace femera {
         err = (Werr >= 0) ? err : Werr;
         W->time.add_busy_time_now ();
         if (W->data != nullptr) {
-          const auto busy = fmr::form::si_unit_string (W->time.get_busy_s(),"s");
-          const auto tot  = fmr::form::si_unit_string (W->time.get_work_s(),"s");
+          const auto busy = fmr::form::si_time_string (W->time.get_busy_s());
+          const auto tot  = fmr::form::si_time_string (W->time.get_work_s());
           if (Werr > 0) {// Remove task if failed to initialize.
             const auto head = femera::form::text_line (250, "%4s %4s init",
               W->get_base_name().c_str(), W->abrv.c_str());
@@ -81,8 +81,8 @@ namespace femera {
       const fmr::Exit_int Werr = W->exit (err);// is noexcept
       err = (Werr == 0) ? err : Werr;
       W->time.add_busy_time_now ();
-      const auto busy = fmr::form::si_unit_string (W->time.get_busy_s(),"s");
-      const auto tot  = fmr::form::si_unit_string (W->time.get_work_s(),"s");
+      const auto busy = fmr::form::si_time_string (W->time.get_busy_s());
+      const auto tot  = fmr::form::si_time_string (W->time.get_work_s());
       const auto head = femera::form::text_line (250, "%4s %4s exit",
         W->get_base_name().c_str(), W->abrv.c_str());
       const auto text = busy+" /"+tot+" "+W->name
@@ -127,8 +127,8 @@ namespace femera {
       err= W->exit (err);// is noexcept
 #endif
       W->time.add_busy_time_now ();
-      const auto busy = fmr::form::si_unit_string (W->time.get_busy_s(),"s");
-      const auto tot  = fmr::form::si_unit_string (W->time.get_work_s(),"s");
+      const auto busy = fmr::form::si_time_string (W->time.get_busy_s());
+      const auto tot  = fmr::form::si_time_string (W->time.get_work_s());
       const auto head = femera::form::text_line (250, "%4s %4s exit",
         W->get_base_name().c_str(), W->abrv.c_str());
       const auto text = busy+" /"+tot+" "+W->name

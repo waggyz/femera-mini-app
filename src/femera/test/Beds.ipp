@@ -3,7 +3,7 @@
 
 namespace femera {
   inline
-  test::Beds::Beds (femera::Work::Core_ptrs W) noexcept {
+  test::Beds::Beds (const femera::Work::Core_ptrs W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="testbeds";
     this->abrv ="beds";
