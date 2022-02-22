@@ -84,8 +84,8 @@ namespace femera {
     virtual fmr::Exit_int exit (fmr::Exit_int err=0)    noexcept =0;
     virtual std::string get_base_name () =0;
     //
-//TODO Task_tree_t get_tree   ()         noexcept;
     fmr::Local_int get_task_n ()         noexcept;
+//TODO Task_tree_t get_tree   ()         noexcept;
     fmr::Local_int add_task   (Work_spt) noexcept;// returns task number added
     fmr::Local_int del_task   (fmr::Local_int ix) noexcept;// returns task_n
 /*
@@ -95,13 +95,17 @@ namespace femera {
  *  Derived*       get_task_raw (fmr::Local_int)// returns Derived* raw pointer
  */
     Core_ptrs get_core () noexcept;
-  public:
+  public:// called by Derived::get_task_*(..)
     Work*    get_work_raw (fmr::Local_int) noexcept;
     Work*    get_work_raw (Task_path_t)    noexcept;
     Work_spt get_work_spt (fmr::Local_int) noexcept;
     Work_spt get_work_spt (Task_path_t)    noexcept;
-    // above called by Derived::get_task_*(..)
-    //
+#if 0
+  public:
+    template <typename T>
+    T* get_task (fmr::Local_int ix=0) {return task #ix of specific type
+      return static_cast<T*>(get_derived(ix));}
+#endif
   protected:
     // Work stack initialization and exit
     fmr::Exit_int init_list (int* argc, char** argv) noexcept;// init forward

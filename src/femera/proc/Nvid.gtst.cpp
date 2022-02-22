@@ -25,4 +25,8 @@ TEST( Nvid, ProcN ){
 TEST( Nvid, Exit ){// should NOT finalize MPI: not initialized by test_main
   EXPECT_EQ( test_main.exit (0), 0 );
 }
+#else
+TEST( NvidNotUsed, TrivialTest ){
+  EXPECT_EQ( 0, 0 );
+}
 #endif

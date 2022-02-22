@@ -867,9 +867,14 @@ $(BUILD_CPU)/mini: src/femera/mini.cpp src/femera/femera.hpp $(LIBFEMERA)
 	$(call timestamp,$@,$<)
 	$(call col2cxx,$(CXX_),$(CXX) $(notdir $<) .. $(notdir $@),$(shell \
 	if [ -f "$(@)" ]; then ls -sh $(@) | cut -d " " -f1; fi)B)
-	-$(CXX) $(filter-out -Winline,$(CXXFLAGS)) $< \
-	  $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
+ifeq ($(ENABLE_LTO),ON)
+	-$(CXX) -flto $(CXXTESTS) $< $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
+else
+	-$(CXX) $(CXXTESTS) $< $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
+endif
 	$(call label_test,$(PASS),$(FAIL),fmrexec tdd:$(@),$(@))
+
+#$(filter-out -Winline,$(CXXFLAGS)) $< \
 
 $(BUILD_CPU)/mini: export PATH:=$(shell pwd)/$(BUILD_CPU):$(PATH)
 $(BUILD_CPU)/mini.valgrind.log: $(BUILD_CPU)/mini $(VALGRIND_SUPP_EXE)

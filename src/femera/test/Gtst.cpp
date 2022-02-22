@@ -9,6 +9,11 @@
 #ifdef FMR_DEBUG
 #include <cstdio>     // std::printf
 #endif
+#if 1
+TEST( SelfGtest, TrivialTest ){
+  EXPECT_EQ( 0, 0 );
+}
+#endif
 
 namespace femera {
   bool test::Gtst::do_enable (int* argc, char** argv) {
@@ -43,39 +48,43 @@ namespace femera {
     //from: https://github.com/google/googletest/issues/822
     ::testing::TestEventListeners& listeners
       = ::testing::UnitTest::GetInstance()->listeners();
-    if ( !this->is_enabled | !this->proc->is_main()) {// Only report from main
+    if ( !this->is_enabled || !this->proc->is_main()) {// Only report from main
       delete listeners.Release (listeners.default_result_printer());
     }
 #endif
   }
   void test::Gtst::task_exit () {
-    if (!this->is_enabled) {
-      FMR_THROW("enable GoogleTest before RUN_ALL_TESTS()");
+    if (!this->is_enabled || !this->do_all_tests_on_exit) {
       return;
     }
-    if (this->do_all_tests_on_exit) {
-      if (this->did_run_all_tests) {
-        FMR_THROW("already called GoogleTest RUN_ALL_TESTS()");
-        return;
-      }
-      if (::testing::UnitTest::GetInstance()->test_suite_to_run_count() > 0) {
-        int err =0;
-#ifdef FMR_DEBUG
-        printf ("running GoogleTest...\n");
+    if (this->did_run_all_tests) {
+      FMR_THROW("already called GoogleTest RUN_ALL_TESTS()");
+      return;
+    }
+#if 0
+    const auto run_suite_n
+      = ::testing::UnitTest::GetInstance()->test_suite_to_run_count();
+    if (run_suite_n <= 0) {//FIXME doesn't always get count?
+      return;
+    }
 #endif
-        try {err= RUN_ALL_TESTS(); }//NOTE macro runs regardless of being enabled
-        catch (...) {//TODO Check if the macro is noexcept.
-          FMR_THROW("err""or in GoogleTest RUN_ALL_TESTS()");
-          return;
-        }
-        if (err) {
-          const auto msg = std::string("warn""ing: GoogleTest returned ")
-            + std::to_string(err) + ".";
-          FMR_THROW(msg);
-          return;
-        }
-        this->did_run_all_tests = true;
-    } }
+    int err =0;
+#ifdef FMR_DEBUG
+    printf ("running %i GoogleTest test suite%s...\n",
+      run_suite_n, (run_suite_n==1) ? "" : "s" );
+#endif
+    try {err= RUN_ALL_TESTS(); }//NOTE macro runs regardless of being enabled
+    catch (...) {//TODO Check if the macro is noexcept.
+      FMR_THROW("err""or thrown during GoogleTest RUN_ALL_TESTS()");
+      return;
+    }
+    if (err) {
+      const auto msg = std::string("warn""ing: GoogleTest returned ")
+        + std::to_string (err) +".";
+      FMR_THROW(msg);
+      return;
+    }
+    this->did_run_all_tests = true;
   }
 }
 

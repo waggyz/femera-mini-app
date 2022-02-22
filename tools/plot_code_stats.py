@@ -47,8 +47,8 @@ if __name__ == "__main__":
   # w = 0.5
   # plt.gca().xaxis.set_major_formatter(pdt.DateFormatter('%Y-%M-%D'))
   # plt.gca().xaxis.set_major_locator(pdt.DayLocator())
-  plt.plot(ix,loc,label='Hundreds of lines source code')
-  plt.plot(ix,lot,label='Hundreds of lines test code')
+  plt.plot(ix,loc,label='Hundreds of lines source code', linestyle='dashed')
+  plt.plot(ix,lot,label='Hundreds of lines test code', linestyle='dashed')
   plt.plot(ix,foc,label='Source code files')
   plt.plot(ix,fot,label='Test code files')
   plt.plot(ix,ntd,label='Number of TO'+'DO in source code')

@@ -30,24 +30,25 @@ namespace femera {
     std::unordered_map <FILE*, fmr::Line_size_int> file_line_sz
       = {{nullptr, 80}, {::stdout, 80}, {::stderr, 250}};
   public:
-    template<typename ...Args>
+    template <typename ...Args>
     ss text_line (const File_ptrs_t,                 const ss& form, Args...);
-    template<typename ...Args>
+    template <typename ...Args>
     ss text_line (                                   const ss& form, Args...);
-    template<typename ...Args>
+    template <typename ...Args>
     ss head_line (const File_ptrs_t, const ss& head, const ss& form, Args...);
-    template<typename ...Args>
+    template <typename ...Args>
     ss head_line (                   const ss& head, const ss& form, Args...);
-    template<typename ...Args>
+    template <typename ...Args>
     ss head_time (const File_ptrs_t, const ss& head, const ss& form, Args...);
-    template<typename ...Args>
+    template <typename ...Args>
     ss head_time (                   const ss& head, const ss& form, Args...);
-//    ss wrap_line (File_ptrs_t, ss head, ss form,...);
-//    ss head_time (File_ptrs_t, ss head, ss form,...);
-//    ss head_time (ss head, ss form,...);
-//    ss head_perf (File_ptrs_t, ss head, ss form,...);
-//    ss head_perf (ss head, std::string form,...);
-//
+#if 0
+    ss wrap_line (File_ptrs_t, ss head, ss form,...);
+    ss head_time (File_ptrs_t, ss head, ss form,...);
+    ss head_time (ss head, ss form,...);
+    ss head_perf (File_ptrs_t, ss head, ss form,...);
+    ss head_perf (ss head, std::string form,...);
+#endif
   public:
     fmr::Exit_int init     (int*, char**)        noexcept final override;
     fmr::Exit_int exit     (fmr::Exit_int err=0) noexcept final override;

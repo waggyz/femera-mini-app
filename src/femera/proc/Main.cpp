@@ -38,7 +38,7 @@ namespace femera {
 #endif
 #ifdef FMR_HAS_OMP
 #if 0
-    // Add thread-local Fomp instances?
+    //TODO Add thread-local Fomp instances?
     const fmr::Local_int n = 2;//FIXME calc or get from command arg
     FMR_PRAGMA_OMP(omp parallel for schedule(static) ordered num_threads(n))
     for (fmr::Local_int i=0; i<n; i++) {
@@ -77,9 +77,10 @@ namespace femera {
 #ifdef FMR_DEBUG
     printf ("%s Main::task_proc_ix %u\n", abrv.c_str(), proc_ix);
 #endif
-    if (this->task_type == task_cast (Plug_type::Fomp)) {
-      return cast_via_work<proc::Fomp>(this)->task_proc_ix();
-    }
+    switch (fmr::Enum_int (this->task_type)) {
+      case (fmr::Enum_int (Plug_type::Fomp)):{
+        return cast_via_work<proc::Fomp> (this)->task_proc_ix ();
+    } }
     return this->proc_ix;
   }
 }// end femera::namespace

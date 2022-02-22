@@ -10,6 +10,10 @@ TEST( NvidNamespace, InitFunctions ){
   EXPECT_NE( femera::proc::nvid::get_card_name (0), "" );
 }
 #endif
+#else
+TEST( NvidNotUsed, TrivialTest ){// should NOT finalize MPI: not initialized by test_main
+  EXPECT_EQ( 0, 0 );
+}
 #endif
 
 fmr::Exit_int main (int argc, char** argv) {

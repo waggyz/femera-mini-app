@@ -3,6 +3,12 @@
 
 #include <valarray>
 
+#if 0
+//#include "gtest/gtest.h"
+TEST( SelfTest, TrivialTest ){
+  EXPECT_EQ( 0, 0 );
+}
+#endif
 namespace femera {
   void test::Self::task_init (int*, char**) {
 #if 0

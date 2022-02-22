@@ -1,5 +1,11 @@
 #include "femera.hpp"
 
+#if 0
+#include "gtest/gtest.h"
+TEST( Mini, TrivialTest ){
+  EXPECT_EQ( 0, 0 );
+}
+#endif
 int main (int argc, char** argv) {
   // These both work.
 #if 0

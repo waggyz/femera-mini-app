@@ -11,6 +11,18 @@ namespace femera {
     this->info_d = 3;
   }
   inline
+  void data::Logs::task_init (int*, char**) {
+    fmr::Local_int n=0;
+    if (this->proc->is_main ()) {
+      n = 2;//FIXME number of OpenMP threads / mpi process
+    }
+    this->data->fmrlog = Data::File_ptrs_t (n, nullptr);
+    if (n > 0) { this->data->fmrlog[0] = ::stdout; }
+    this->data->did_logs_init = true;
+  }
+  inline
+  void data::Logs::task_exit () {}
+  inline
   std::string data::Logs::csv_string (const std::string& str) {
     return +"\""+str+"\"";
   }
@@ -30,7 +42,7 @@ namespace femera {
   }
   inline
   std::string data::Logs::csv_string (const double f) {
-    std::vector<char> buf (31 + 1, 0);
+    std::vector<char> buf (23 + 1, 0);
     std::snprintf (&buf[0], buf.size(), "%1.15E", f);
     return std::string(&buf[0]);
   }
