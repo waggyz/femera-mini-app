@@ -44,6 +44,7 @@ namespace femera {
     if (this->proc->test == nullptr) { this->proc->test = this->test; }
     if (this->data->test == nullptr) { this->data->test = this->test; }
     if (this->test->test == nullptr) { this->test->test = this->test; }
+    // Jobs instance task_list now has proc::Main, data::File, and test::Beds
   }
   void sims::Jobs::task_exit () {
 #ifdef FMR_DEBUG

@@ -46,14 +46,14 @@ class Testable;// ...then derive a CRTP concrete class from Base for testing.
 using Testable_t = FMR_SMART_PTR <Testable>;
 class Testable : public Base <Testable> {
 public:
-  Testable (femera::Work::Core_ptrs) noexcept;
+  Testable (femera::Work::Core_ptrs_t) noexcept;
   //FIXME This may not be needed if copy constructors set proc,data,file,test
   Testable () noexcept;
   void task_exit ();
 };//===========================================================================
 #if 1
 inline
-Testable::Testable (femera::Work::Core_ptrs W) noexcept {
+Testable::Testable (femera::Work::Core_ptrs_t W) noexcept {
   this->name ="testable";
   std::tie(this->proc,this->data,this->test) = W;
 }

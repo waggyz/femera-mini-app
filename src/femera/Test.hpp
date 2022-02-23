@@ -16,7 +16,7 @@ namespace femera {
     T*        get_task (fmr::Local_int);
     T*        get_task (Work::Task_path_t);
     static constexpr
-    This_spt  new_task (const Work::Core_ptrs) noexcept;
+    This_spt  new_task (const Work::Core_ptrs_t) noexcept;
   private:
     T*        derived  (Test*) noexcept;
     T*        derived  (Work*) noexcept;

@@ -13,7 +13,7 @@ namespace femera { namespace proc {
     fmr::Local_int task_proc_ix ();
 #endif
   private:
-    Root (femera::Work::Core_ptrs) noexcept;
+    Root (femera::Work::Core_ptrs_t) noexcept;
     Root () =delete;//NOTE Use the constructor above.
   };
 } }//end femera::proc:: namespace

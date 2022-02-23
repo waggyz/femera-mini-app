@@ -38,6 +38,7 @@ namespace femera {
     return "sims";
   }
 //FIXME Replace these =========================================================
+#if 0
   template <typename T> inline
   FMR_SMART_PTR<T> Sims<T>::get_task_spt (const fmr::Local_int i) {
     return std::static_pointer_cast<T> (this->get_work (i));
@@ -46,6 +47,7 @@ namespace femera {
   FMR_SMART_PTR<T> Sims<T>::get_task_spt (const Work::Task_path_t path) {
     return std::static_pointer_cast<T> (this->get_work (path));
   }
+#endif
   template <typename T> inline
   T* Sims<T>::get_task_raw (const fmr::Local_int i) {
     return static_cast<T*> (this->get_work_raw (i));

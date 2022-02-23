@@ -8,7 +8,7 @@ namespace femera { namespace proc {
   class Main : public Proc<Main> { private: friend class Proc;
   //FIXME friend class Proc<Main> or just Proc? Both work.
   public:
-    Main (const femera::Work::Core_ptrs) noexcept;
+    Main (const femera::Work::Core_ptrs_t) noexcept;
     Main () noexcept;
   private:
     void task_init (int* argc, char** argv);

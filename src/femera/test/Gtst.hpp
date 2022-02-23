@@ -15,7 +15,7 @@ namespace femera { namespace test {
     void task_init (int* argc, char** argv);
     void task_exit ();
   private:
-    Gtst (femera::Work::Core_ptrs) noexcept;
+    Gtst (femera::Work::Core_ptrs_t) noexcept;
     Gtst () =delete;//NOTE Use the constructor above.
   };
 } }//end femera::test:: namespace

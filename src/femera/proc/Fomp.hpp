@@ -14,7 +14,7 @@ namespace femera { namespace proc {
     void task_exit ();
     fmr::Local_int task_proc_ix ();
   private:
-    Fomp (femera::Work::Core_ptrs) noexcept;
+    Fomp (femera::Work::Core_ptrs_t) noexcept;
     Fomp () =delete;//NOTE Use the constructor above.
   };
 } }//end femera::proc:: namespace

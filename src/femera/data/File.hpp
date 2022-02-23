@@ -12,7 +12,7 @@ namespace femera { namespace data {
     void task_init (int* argc, char** argv);
     void task_exit ();
   private:
-    File (femera::Work::Core_ptrs) noexcept;
+    File (femera::Work::Core_ptrs_t) noexcept;
     File () =delete;//NOTE Use the constructor above.
   };
 } }//end femera::data namespace

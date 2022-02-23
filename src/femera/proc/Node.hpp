@@ -24,7 +24,7 @@ namespace femera { namespace proc {
     fmr::Local_int task_proc_ix ();
 #endif
   private:
-    Node (femera::Work::Core_ptrs) noexcept;
+    Node (femera::Work::Core_ptrs_t) noexcept;
     Node () =delete;//NOTE Use the constructor above.
     void task_init (int* argc, char** argv);
     void task_exit ();

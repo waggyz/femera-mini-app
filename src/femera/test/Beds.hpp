@@ -10,7 +10,7 @@ namespace femera { namespace test {
     void task_init (int* argc, char** argv);
     void task_exit ();
   private:
-    Beds (femera::Work::Core_ptrs) noexcept;
+    Beds (femera::Work::Core_ptrs_t) noexcept;
     Beds () =delete;//NOTE Use the constructor above.
   };
 } }//end femera::test:: namespace

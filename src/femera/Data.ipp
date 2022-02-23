@@ -108,6 +108,7 @@ namespace femera {
   std::string Data<T>::get_base_name () {
     return "data";
   }
+#if 0
   template <typename T> inline
   FMR_SMART_PTR<T> Data<T>::get_task_spt (const fmr::Local_int i) {
     return std::static_pointer_cast<T> (this->get_work_spt (i));
@@ -116,6 +117,7 @@ namespace femera {
   FMR_SMART_PTR<T> Data<T>::get_task_spt (const Work::Task_path_t tree) {
     return std::static_pointer_cast<T> (this->get_work_spt (tree));
   }
+#endif
   template <typename T> inline
   T* Data<T>::get_task_raw (const fmr::Local_int i) {
     return static_cast<T*> (this->get_work_raw (i));
@@ -125,7 +127,7 @@ namespace femera {
     return static_cast<T*> (this->get_work_raw (tree));
   }
   template <typename T> inline constexpr
-  FMR_SMART_PTR<T> Data<T>::new_task (const Work::Core_ptrs core) noexcept {
+  FMR_SMART_PTR<T> Data<T>::new_task (const Work::Core_ptrs_t core) noexcept {
     return FMR_MAKE_SMART<T> (T(core));
   }
 }// end femera:: namespace

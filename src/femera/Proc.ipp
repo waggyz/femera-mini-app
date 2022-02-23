@@ -54,6 +54,7 @@ namespace femera {
   std::string Proc<T>::get_base_name () {
     return "proc";
   }
+#if 0
   template <typename T> inline
   FMR_SMART_PTR<T> Proc<T>::get_task_spt (const fmr::Local_int i) {
     return std::static_pointer_cast<T> (Work::get_work_spt (i));
@@ -62,6 +63,7 @@ namespace femera {
   FMR_SMART_PTR<T> Proc<T>::get_task_spt (const Work::Task_path_t path) {
     return std::static_pointer_cast<T> (Work::get_work_spt (path));
   }
+#endif
   template <typename T> inline
   T* Proc<T>::get_task_raw (const fmr::Local_int i) {
     return Proc::derived (Work::get_work_raw (i));
@@ -76,7 +78,7 @@ namespace femera {
     return FMR_MAKE_SMART<T> (T());
   }
   template <typename T> inline constexpr
-  FMR_SMART_PTR<T> Proc<T>::new_task (const Work::Core_ptrs core)
+  FMR_SMART_PTR<T> Proc<T>::new_task (const Work::Core_ptrs_t core)
   noexcept {
 #if 0
     return std::move(FMR_MAKE_SMART<T> (T(core)));

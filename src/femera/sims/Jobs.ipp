@@ -3,7 +3,7 @@
 
 namespace femera {
   inline
-  sims::Jobs::Jobs (femera::Work::Core_ptrs W) noexcept {
+  sims::Jobs::Jobs (femera::Work::Core_ptrs_t W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="simulation job handler";
     this->abrv ="jobs";

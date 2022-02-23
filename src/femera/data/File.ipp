@@ -3,7 +3,7 @@
 
 namespace femera {
   inline
-  data::File::File (const femera::Work::Core_ptrs W) noexcept {
+  data::File::File (const femera::Work::Core_ptrs_t W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="file handler";
     this->abrv ="file";

@@ -7,7 +7,7 @@
 #endif
 namespace femera {
   inline
-  proc::Main::Main (const femera::Work::Core_ptrs W) noexcept {
+  proc::Main::Main (const femera::Work::Core_ptrs_t W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="processing";
     this->info_d = 2;

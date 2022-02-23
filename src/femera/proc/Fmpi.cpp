@@ -11,7 +11,7 @@
 #include "mpi.h"
 namespace femera {
   //
-  proc::Fmpi::Fmpi (const femera::Work::Core_ptrs W)
+  proc::Fmpi::Fmpi (const femera::Work::Core_ptrs_t W)
   noexcept
   : fmpi_required {int (MPI_THREAD_SERIALIZED) } {
     std::tie (this->proc, this->data, this->test) = W;

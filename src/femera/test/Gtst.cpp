@@ -10,9 +10,13 @@
 #include <cstdio>     // std::printf
 #endif
 #if 1
-TEST( SelfGtest, TrivialTest ){
+namespace femera { namespace test { namespace gtst {
+
+TEST( MiniGtest, TrivialTest ){
   EXPECT_EQ( 0, 0 );
 }
+
+} } }//end femera::test::gtst:: namespace
 #endif
 
 namespace femera {

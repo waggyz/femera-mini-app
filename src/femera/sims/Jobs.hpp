@@ -10,7 +10,7 @@ namespace femera { namespace sims {
     void task_init (int* argc, char** argv);
     void task_exit ();
   public:
-    Jobs (femera::Work::Core_ptrs) noexcept;
+    Jobs (femera::Work::Core_ptrs_t) noexcept;
     Jobs () noexcept;
     // The shared Work::proc, data, test objects are managed by this class.
   };
