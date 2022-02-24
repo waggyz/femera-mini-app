@@ -980,7 +980,7 @@ src/docs/src.dot: build/.md5
 ifeq ($(ENABLE_DOT_PNG),ON)
 	@dot $@ -Gsize="12.0,6.0" -Tpng -o build/src-test.png
 endif
-        #  --groups is nice, too
+	#cinclude2dot --groups is nice, too
 	#(info $(INFO) Source dependencies: $@)
 
 src/docs/src-notest.dot: src/docs/src.dot

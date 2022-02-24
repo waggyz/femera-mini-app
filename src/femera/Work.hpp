@@ -46,12 +46,12 @@ namespace femera {
   * class Main : public Proc<Main> { private: friend class Proc; .. };
   */
   public:// typedefs ----------------------------------------------------------
-    using Core_ptrs_t   = std::tuple  <proc::Main*, data::File*, test::Beds*>;
+    using Core_ptrs_t = std::tuple <proc::Main*, data::File*, test::Beds*>;
   protected:
     using Task_path_t = std::vector <fmr::Local_int>;
     using Task_tree_t = std::vector <Task_path_t>;
   private:
-    using Task_list_t = std::deque  <Work_spt>;
+    using Task_list_t = std::deque <Work_spt>;
   public:// variables ---------------------------------------------------------
     fmr::perf::Meter time = fmr::perf::Meter ();
     //
@@ -70,7 +70,6 @@ namespace femera {
     std::unique_ptr<char*[]> my_argv;// use: err= init (&my_argc, my_argv.get());
     int                      my_argc =0;
 #endif
-  protected:
     Task_type task_type = task_cast (Base_type::Work);
     fmr::Dim_int info_d = 1;
   private:
@@ -84,20 +83,15 @@ namespace femera {
     virtual fmr::Exit_int exit (fmr::Exit_int err=0)    noexcept =0;
     virtual std::string get_base_name () =0;
     //
+    Core_ptrs_t get_core () noexcept;
+    //
     fmr::Local_int get_task_n ()         noexcept;
 //TODO Task_tree_t get_tree   ()         noexcept;
     fmr::Local_int add_task   (Work_spt) noexcept;// returns task number added
     fmr::Local_int del_task   (fmr::Local_int ix) noexcept;// returns task_n
-/*
- *  Derived_t      new_task     ()// in Derived and returns that smart pointer
- *  Derived_t      new_task     (Core_ptrs_t)     //           ""
- *  Derived_t      get_task_spt (fmr::Local_int)//           ""
- *  Derived*       get_task_raw (fmr::Local_int)// returns Derived* raw pointer
- */
-    Core_ptrs_t get_core () noexcept;
   public:// called by Derived::get_task_*(..)
-    Work*    get_work_raw (fmr::Local_int) noexcept;//TODO Change to get_work(..)
-    Work*    get_work_raw (Task_path_t)    noexcept;//TODO Change to get_work(..)
+    Work*  get_work_raw (fmr::Local_int) noexcept;//TODO Change to get_work(..)
+    Work*  get_work_raw (Task_path_t)    noexcept;//TODO Change to get_work(..)
 #if 0
     Work_spt get_work_spt (fmr::Local_int) noexcept;
     Work_spt get_work_spt (Task_path_t)    noexcept;

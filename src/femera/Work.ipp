@@ -64,22 +64,8 @@ namespace femera {
         if (W != nullptr) {
           W = W->get_work_raw (path[i]);
     } } }
-#if 0
-    Work* W = nullptr;
-    const auto sz = path.size();
-    if (sz > 0) {
-      if (path[0] < this->get_task_n()) {
-        W = this->get_work_raw (path[0]);
-        if (sz > 1) {
-          for (fmr::Local_int i = 1; i < sz; i++) {
-            if (W != nullptr) {
-              if (path[i] < W->get_task_n()) { W = W->get_work_raw (path[i]); }
-              else { W = nullptr; }
-    } } } } }
-#endif
     return W;
   }
-  //===========================================================================
   inline
   fmr::Local_int Work::add_task (Work_spt W)
   noexcept {
