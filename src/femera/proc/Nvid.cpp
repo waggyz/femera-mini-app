@@ -17,7 +17,7 @@ namespace femera {
   void proc::Nvid::task_init (int*, char**) {
 #if 1
     this->team_n = proc::nvid::get_node_card_n ();
-    this->name = proc::nvid::get_card_name (0);//FIXME loop
+    this->name = proc::nvid::get_card_name (0);//TODO loop over cards?
 #endif
   }
   bool proc::Nvid::is_in_parallel () {

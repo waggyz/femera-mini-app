@@ -55,7 +55,8 @@ namespace femera {
     return (task_err > 0) ? task_err : err;
   }
   template <typename T> inline
-  std::string Proc<T>::get_base_name () {
+  std::string Proc<T>::get_base_name ()
+  noexcept {
     return "proc";
   }
 #if 0

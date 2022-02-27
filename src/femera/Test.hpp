@@ -12,7 +12,7 @@ namespace femera {
   public:
     fmr::Exit_int init (int*, char**)        noexcept final override;
     fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;
-    std::string get_base_name () final override;
+    std::string get_base_name () noexcept final override;
     T*        get_task (fmr::Local_int);
     T*        get_task (Work::Task_path_t);
     static constexpr

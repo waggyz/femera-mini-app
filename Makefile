@@ -83,7 +83,7 @@ ifneq ($(FMR_MICRO_UCHAR),)
   FMRFLAGS += -DFMR_MICRO_UCHAR=$(FMR_MICRO_UCHAR)
 endif
 FMRFLAGS += -I"$(STAGE_CPU)/include" -I"$(STAGE_DIR)/include"
-FMRFLAGS += -I"$(INSTALL_CPU)/include" -I"$(INSTALL_DIR)/include"
+FMRFLAGS += -isystem"$(INSTALL_CPU)/include" -isystem"$(INSTALL_DIR)/include"
 LDFLAGS += -L"$(STAGE_CPU)/lib" -L"$(STAGE_DIR)/lib"
 
 # Directories -----------------------------------------------------------------
@@ -516,7 +516,7 @@ build-done: build/src-notest.eps $(BUILD_CPU)/mini.valgrind.log code-stats
 ifneq ($(HOST_MD5),$(REPO_MD5))
 	$(info $(SPCS) as modified by <$(BUILT_BY_EMAIL)>)
 endif
-	$(info $(E_G_) fmrexec auto -d -t -D examples/cube.fmr)
+	$(info $(E_G_) fmrexec auto examples/cube.fmr)
 
 code-stats: | build/$(CPUMODEL)/
 	tools/code-stats.sh
@@ -528,8 +528,7 @@ code-stats: | build/$(CPUMODEL)/
 	'"'$(HOSTNAME)'"','"'$(CPUMODEL)'"'\
 	>> "$(SRC_STAT_FILE)"; fi
 	-tools/plot_code_stats.py 2>/dev/null
-	
-	
+
 # Femera tools ----------------------------------------------------------------
 install-tools: get-bats
 	$(call timestamp,$@,$<)
@@ -810,19 +809,6 @@ else
 	touch $@
 endif
 
-# Use GoogleTest compiler flags to avoid exessive warnings.
-$(BUILD_CPU)/femera/test/Gtst.o : export TMPDIR := $(TEMP_DIR)
-$(BUILD_CPU)/femera/test/Gtst.o : src/femera/test/Gtst.cpp \
-  src/femera/test/Gtst.hpp src/femera/test/Gtst.ipp $(TOPDEPS)
-	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
-	$(CXX) -c $(CXXTESTS) $(FMRFLAGS) $< -o $@
-
-# Use gtest flags for this one, too.
-$(BUILD_CPU)/%/Test.o : export TMPDIR := $(TEMP_DIR)
-$(BUILD_CPU)/%/Test.o : src/%/Test.cpp src/%/Test.hpp $(TOPDEPS)
-	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
-	$(CXX) -c $(CXXTESTS) $(FMRFLAGS) $< -o $@
-
 $(BUILD_CPU)/%.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.o : src/%.cpp src/%.hpp $(TOPDEPS)
 	#-python tools/testy/check_code_graffiti.py $^
@@ -859,7 +845,6 @@ $(LIBFEMERA)(build/%.o) : build/%.o
 	# Serialize archive operations.
 	flock "$(STAGE_CPU)/libfemera.lck" $(AREXE) -cr $(LIBFEMERA) $^
 # Executable targets ----------------------------------------------------------
-#(BUILD_CPU)/%.gtst _ export LD_LIBRARY_PATH = $(TMP_LIBRARY_PATH)
 
 $(BUILD_CPU)/mini: export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/mini: export PATH:=$(shell pwd)/$(BUILD_CPU):$(PATH)
@@ -873,8 +858,6 @@ else
 	-$(CXX) $(CXXTESTS) $< $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 endif
 	$(call label_test,$(PASS),$(FAIL),fmrexec tdd:$(@),$(@))
-
-#$(filter-out -Winline,$(CXXFLAGS)) $< \
 
 $(BUILD_CPU)/mini: export PATH:=$(shell pwd)/$(BUILD_CPU):$(PATH)
 $(BUILD_CPU)/mini.valgrind.log: $(BUILD_CPU)/mini $(VALGRIND_SUPP_EXE)
@@ -905,7 +888,6 @@ build/%.gtst : build/%.gtst.o $(LIBFEMERA)(build/%.o) \
   $(LIBFEMERA)($(BUILD_CPU)/femera/sims/Jobs.o)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(notdir $@).o ..,$(notdir $@))
-	#(info $(LINK) $(CXX) $(notdir $@).o .. -lfemera .. -o $(notdir $@))
 	-$(CXX) $(CXXTESTS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
 	$(info $(WARN) $@ not tested: GoogleTest disabled)
@@ -918,7 +900,6 @@ build/%.gtst : export TMPDIR := $(TEMP_DIR)
 build/%.gtst : build/%.gtst.o $(LIBFEMERA)($(BUILD_CPU)/femera/Test.o)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(notdir $@).o ..,$(notdir $@))
-	#(info $(LINK) $(CXX) $(notdir $@).o .. -lfemera .. -o $(notdir $@))
 	-$(CXX) $(CXXTESTS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
 	$(info $(WARN) $@ not tested: GoogleTest disabled)

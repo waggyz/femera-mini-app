@@ -67,12 +67,6 @@ namespace femera {
     return W;
   }
   inline
-  fmr::Local_int Work::add_task (Work_spt W)
-  noexcept {
-    this->task_list.push_back (std::move(W));
-    return fmr::Local_int (this->task_list.size () - 1);
-  }
-  inline
   fmr::Local_int Work::get_task_n ()
   noexcept {
     return fmr::Local_int (this->task_list.size ());

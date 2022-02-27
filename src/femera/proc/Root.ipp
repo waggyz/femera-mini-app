@@ -16,12 +16,6 @@ namespace femera {
   inline
   void proc::Root::task_exit () {
   }
-#if 0
-  inline
-  fmr::Local_int proc::Root::task_proc_ix () {
-    return this->proc_ix;
-  }
-#endif
 }//end femera namespace
 
 //end FEMERA_ROOT_IPP

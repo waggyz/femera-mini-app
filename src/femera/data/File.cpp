@@ -8,7 +8,7 @@
 
 namespace femera {
   void data::File::task_init (int*, char**) {
-    auto L = Data<data::Logs>::new_task (this->get_core());
+    const auto L = Data<data::Logs>::new_task (this->get_core());
     this->add_task (L);
 //    this->log = L.get();
   }

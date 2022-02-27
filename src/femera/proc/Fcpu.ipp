@@ -13,22 +13,15 @@ namespace femera {
     this->name = std::string ( MAKESTR(FMR_CPUMODEL) );
     this->info_d = 3;
     this->abrv ="cpu";
-    this->version = "";//FIXME
+    this->version = "";//TODO
     this->task_type = task_cast (Plug_type::Fcpu);
   }
   inline
   void proc::Fcpu::task_init (int*, char**) {
-//FIXME remove?     proc->Proc::set_base_n ();
   }
   inline
   void proc::Fcpu::task_exit () {
   }
-#if 0
-  inline
-  fmr::Local_int proc::Fcpu::task_proc_ix () {
-    return this->proc_ix;
-  }
-#endif
 }//end femera namespace
 
 #undef FMR_DEBUG

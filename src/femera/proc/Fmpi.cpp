@@ -28,7 +28,7 @@ namespace femera {
   bool proc::Fmpi::did_mpi_init () {
     int is_init=0;
     int err = MPI_Initialized (& is_init);
-    //FIXME Be careful handling errors to shut down MPI properly before exit.
+    //NOTE Be careful handling errors to shut down MPI properly before exit.
     //if (err) { FMR_THROW("proc::Fmpi::did_mpi_init() failed"); }
     return bool (err) | bool (is_init);
   }
@@ -89,7 +89,7 @@ namespace femera {
       }
 //  fmr::perf:: timer_pause (&this->time);
   } }
-  void proc::Fmpi::task_exit () {int err=0;                 //FIXME not an arg
+  void proc::Fmpi::task_exit () {int err=0;
 #ifdef FMR_DEBUG
     std::printf("Fmpi::task_exit (%i) start...\n", err);
 #endif

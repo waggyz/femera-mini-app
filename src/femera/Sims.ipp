@@ -36,7 +36,7 @@ namespace femera {
     return (task_err > 0) ? task_err : err;
   }
   template <typename T> inline
-  std::string Sims<T>::get_base_name () {
+  std::string Sims<T>::get_base_name () noexcept {
     return "sims";
   }
 //FIXME Replace these =========================================================

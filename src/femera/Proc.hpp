@@ -10,20 +10,19 @@ namespace femera {
   template <typename T>
   class Proc : public Work {
   private:
-    using This_spt = FMR_SMART_PTR <T>;
+    using This_spt = FMR_SMART_PTR<T>;
   protected:                   // Set by derived instances during task_init()...
     proc::Team_t   team_id = 0;//
     fmr::Local_int team_n  = 1;//
     fmr::Local_int base_id = 0;//
     fmr::Local_int base_n  = 1;//
     fmr::Local_int proc_n  = 1;//
-    fmr::Local_int proc_ix = 0;//TODO Make proc_ix private?
-    fmr::Local_int main_ix = 0;// [0,proc_n-1]
-                               //              ...because proc::Main uses them.
+    fmr::Local_int proc_ix = 0;//
+    fmr::Local_int main_ix = 0;// [0,proc_n-1]  ...because proc::Main uses them.
   public:
     fmr::Exit_int init (int*, char**)        noexcept final override;
     fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;
-    std::string get_base_name () final override;
+    std::string get_base_name () noexcept final override;
     //
     bool            is_main    ();
     proc::Team_t   get_team_id () noexcept;

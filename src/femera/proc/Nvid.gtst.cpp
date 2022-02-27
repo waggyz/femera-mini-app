@@ -13,9 +13,9 @@ TEST( Nvid, Init ){// Initialize Fmpi with MPI already init by early_main(..)
   EXPECT_EQ( test_main.init (nullptr,nullptr), 0 );
   test_main.proc = & test_main;
 }
-#if 0
+#if 1
 TEST( Nvid, TaskName ){
-  //FIXME get_task by enum?
+  //TODO get_task by enum task_type
   EXPECT_EQ( test_main.get_task_raw ({0,0,0,1})->abrv, "gpu" );
 }
 TEST( Nvid, ProcN ){

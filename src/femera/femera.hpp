@@ -5,10 +5,14 @@
 #include "sims/Jobs.hpp"
 
 namespace fmr {
-  using Jobs_spt = femera::Jobs_spt;
+  // typedefs
+  /* The "using" syntax is preferred to "typedef" in the Google C++ Style Guide:
+   * https://google.github.io/styleguide/cppguide.html#Aliases */
+  using Jobs_t = femera::Jobs_spt;
   //
-  Jobs_spt new_sims ();
-  Jobs_spt new_sims (int*, char**);
+  Jobs_t new_sims ();
+  Jobs_t new_sims (int*, char**);
+  //
 }//end fmr:: namespace
 
 #include "femera.ipp"

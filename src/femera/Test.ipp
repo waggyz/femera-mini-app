@@ -38,7 +38,7 @@ namespace femera {
     return err;
   }
   template <typename T> inline
-  std::string Test<T>::get_base_name () {
+  std::string Test<T>::get_base_name () noexcept {
     return "test";
   }
   template <typename T> inline

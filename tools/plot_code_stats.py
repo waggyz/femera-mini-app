@@ -51,8 +51,8 @@ if __name__ == "__main__":
         foc.append(int(row[3]))
         lot.append(float(row[4]) * files_ylim/lines_ylim)
         fot.append(int(row[5]))
-        ntd.append(int(row[6]))
-        nfm.append(int(row[7]))
+        nfm.append(int(row[6]))
+        ntd.append(int(row[7]))
         build_time.append(time2sec(row[8]))
         i+=1
         ix.append(i)

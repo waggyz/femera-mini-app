@@ -10,9 +10,6 @@ namespace femera {
   enum class Base_type : fmr::Enum_int {//TODO Remove?
     None=0, Work, Proc, Data, Test, Sims,
     // Geom, Load, Phys, Cond, Solv, Sync, Post,
-#ifdef _OPENMP_FIXME_DISABLED
-    Fomp,// actually derived from Proc, but treated as a Base_type
-#endif
     //Frun, Part,// Derived from Sims
     Plug// Must be last, derived from TODO
   };
@@ -22,15 +19,10 @@ namespace femera {
   static constexpr Task_type task_cast (Plug_type) noexcept;
 
   enum class Plug_type : fmr::Enum_int {//TODO Move to Plug.hpp?
-#ifdef _OPENMP_FIXME_DISABLED
-    Fomp = fmr::Enum_int(Base_type::Fomp),// Derived from Proc
-#endif
     None = fmr::Enum_int(Base_type::None),
     Plug = fmr::Enum_int(Base_type::Plug),// Derived from TODO
     Main, Fcpu, Node, Root,// Proc types
-#ifndef _OPENMP_FIXME_DISABLED
     Fomp, // Proc type
-#endif
 #ifdef FMR_HAS_MPI
     Fmpi, // Proc type
 #endif

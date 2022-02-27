@@ -47,8 +47,8 @@ namespace femera {
   */
   public:// typedefs ----------------------------------------------------------
     using Core_ptrs_t = std::tuple <proc::Main*, data::File*, test::Beds*>;
-  protected:
     using Task_path_t = std::vector <fmr::Local_int>;
+  protected:
     using Task_tree_t = std::vector <Task_path_t>;
   private:
     using Task_list_t = std::deque <Work_spt>;
@@ -81,7 +81,7 @@ namespace femera {
     //     to avoid vtable using CRTP derived classes?
     virtual fmr::Exit_int init (int* argc, char** argv) noexcept =0;
     virtual fmr::Exit_int exit (fmr::Exit_int err=0)    noexcept =0;
-    virtual std::string get_base_name () =0;
+    virtual std::string get_base_name () noexcept =0;
     //
     Core_ptrs_t get_core () noexcept;
     //
