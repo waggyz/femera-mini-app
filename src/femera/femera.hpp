@@ -4,10 +4,12 @@
 #include "core.h"
 #include "sims/Jobs.hpp"
 
-namespace femera {
+namespace fmr {
+  using Jobs_spt = femera::Jobs_spt;
+  //
   Jobs_spt new_sims ();
   Jobs_spt new_sims (int*, char**);
-}//end femera:: namespace
+}//end fmr:: namespace
 
 #include "femera.ipp"
 /*

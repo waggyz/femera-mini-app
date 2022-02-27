@@ -817,7 +817,7 @@ $(BUILD_CPU)/femera/test/Gtst.o : src/femera/test/Gtst.cpp \
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
 	$(CXX) -c $(CXXTESTS) $(FMRFLAGS) $< -o $@
 
-# Use gtest flags for this one.
+# Use gtest flags for this one, too.
 $(BUILD_CPU)/%/Test.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%/Test.o : src/%/Test.cpp src/%/Test.hpp $(TOPDEPS)
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))

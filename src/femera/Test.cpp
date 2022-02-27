@@ -8,7 +8,7 @@
 #endif
 
 int femera::test:: early_main (int* argc, char** argv) {
-  // Use this for testing before femera::proc/test/Gtst.?pp has been coded.
+  // This was for testing before femera::proc/test/Gtst.?pp had been coded.
 #ifdef FMR_HAS_GTEST
 #ifdef FMR_HAS_MPI
   int err=0;

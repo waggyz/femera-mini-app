@@ -5,7 +5,7 @@
 
 #include <vector>
 
-auto mini = femera::new_sims ();
+auto mini = fmr::new_sims ();
 
 fmr::Exit_int main (int argc, char** argv) {
   return mini->exit (mini->init (&argc,argv));
