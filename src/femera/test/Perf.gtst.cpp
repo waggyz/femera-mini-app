@@ -35,10 +35,10 @@ namespace femera { namespace test { namespace perf {
     }
     return ratio;
   }
-  TEST( SelfTestProc, TrivialTest ){
+  TEST( TestPerf, TrivialTest ){
     EXPECT_EQ( 1, 1 );
   }
-  TEST( SelfTestProc, PidsIsSlower ){
+  TEST( TestProcIDPerf, PidsIsSlower ){
     EXPECT_GT( test_proc_id_speed (), 1.0 );
   }
 } } }//end femera::test::perf:: namespace

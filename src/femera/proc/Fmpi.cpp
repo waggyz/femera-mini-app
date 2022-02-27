@@ -76,7 +76,7 @@ namespace femera {
     }
     if (did_mpi_init ()) {
       MPI_Comm comm =nullptr;
-      if( !err ){// Good practice: use a copy of MPI_COMM_WORLD.
+      if( !err ){//NOTE Good practice: use a copy of MPI_COMM_WORLD.
         err= MPI_Comm_dup (MPI_COMM_WORLD, &comm);// exit_task() frees this
       }
       if( !err ){
@@ -94,15 +94,10 @@ namespace femera {
     std::printf("Fmpi::task_exit (%i) start...\n", err);
 #endif
 //  fmr::perf::timer_resume (&this->time);
-//    this->barrier ();//TODO NEEDED?
-#if 0
-  if( err>0 ){ log-> printf_err("ERROR Femera returned %i\n",err); }
-#else
-  // OpenMP is already deleted, so log->printf(..) may no longer work?
-  if (err>0) {std::fprintf (stderr, "ERROR Femera returned %i\n", err);}
-#endif
+  // data handler has already exited
+  if (err>0) {std::fprintf (stderr, "ERROR Femera returned %i\n", err); }
   err=0;// Exit from mpi normally when Femera exits on error.
-FMR_PRAGMA_OMP(omp MAIN)
+  FMR_PRAGMA_OMP(omp MAIN)
   if (did_mpi_init ()) {
     const auto proc_i = this->task_proc_ix ();
     if (this->team_id != proc::Team_t (MPI_COMM_WORLD)) {
@@ -134,8 +129,7 @@ FMR_PRAGMA_OMP(omp MAIN)
       std::printf("%u:Fmpi::exit_task MPI_finalize ()...\n", proc_i);
 #endif
       err= MPI_Finalize();
-      if (err>0) {//log-> printf_err
-//        ("ERROR MPI_Finalize() returned %i\n",err);
+      if (err>0) {
         std::fprintf (stderr, "ERROR MPI_Finalize() returned %i\n", err);
   } } }
 //  fmr::perf:: timer_pause (&this->time);
