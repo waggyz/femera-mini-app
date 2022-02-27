@@ -9,6 +9,7 @@
 #ifdef FMR_DEBUG
 #include <cstdio>     // std::printf
 #endif
+
 #if 1
 namespace femera { namespace test { namespace gtst {
 

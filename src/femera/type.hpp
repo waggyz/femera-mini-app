@@ -34,14 +34,17 @@ namespace femera {
 #endif
     File, Logs, // Data type
     Beds, Unit, Self, Perf, // Test types
-#if 0
 #ifdef FMR_HAS_CGNS
-    Dcgn, // Data type
+    Cgns, // Data type: CGNS file handler
 #endif
 #ifdef FMR_HAS_GMSH
-    Dmsh, // Data type
+    Gmsh, // Data type: Gmsh file handler
 #endif
-    ??? Fake,//  // Data type: default data for testing
+#ifdef FMR_HAS_MOAB
+    Moab, // Data type: MOAB file handler
+#endif
+#if 0
+    Dflt, // Data type: default data for testing
     //
     Geom, // Move to base/core type?
     Mesh, Grid, Gcad,//TODO Gfem, Gfdm, Gfvm,// Geom types

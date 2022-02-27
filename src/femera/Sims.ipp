@@ -39,7 +39,6 @@ namespace femera {
   std::string Sims<T>::get_base_name () noexcept {
     return "sims";
   }
-//FIXME Replace these =========================================================
 #if 0
   template <typename T> inline
   FMR_SMART_PTR<T> Sims<T>::get_task_spt (const fmr::Local_int i) {

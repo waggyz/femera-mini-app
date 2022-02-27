@@ -18,7 +18,7 @@ namespace fmr {
   using   Enum_int = uint_fast16_t ;
   using  Local_int = uint32_t      ;
   using   Elid_int = uint32_t      ;//(See above.)
-  using Global_int = uint64_t      ;//TODO signed?
+  using Global_int = uint64_t      ;
   //
   using   Perf_int = uint_fast64_t ;// unit counters, time (ns) counters
   using Perf_float = float         ;

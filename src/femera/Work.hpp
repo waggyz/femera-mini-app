@@ -6,7 +6,7 @@
 #include "type.hpp"
 //#include "vals.hpp"
 
-#include <memory>     //TODO std::shared_ptr, std::make_shared
+#include <memory>     // std::shared_ptr, std::make_shared
 #include <string>
 #include <vector>
 #include <deque>
@@ -30,7 +30,8 @@ namespace femera {
   namespace proc {
     class Main; class Root; class Node; class Fmpi; class Fomp; class Fcpu;
     class Nvid; }
-  namespace data { class File; class Logs; }// class Type; class Base; }//TODO Fake -> Base?
+  namespace data { class File; class Logs;//TODO class Cgns; class Gmsh;
+  }//TODO data subclasses: class Type; class Base; class Dflt; }
   namespace test { class Beds; class Unit; class Self; class Perf; class Gtst; }
   namespace sims { class Jobs; }
   // typedefs
