@@ -20,8 +20,9 @@ namespace femera {
   fmr::Exit_int Test<T>::init (int* argc, char** argv) noexcept {
     fmr::Exit_int err=0;
     try { Test::derived (this)->task_init (argc, argv); }// Init this task,
-    catch (const std::exception& e) { err = exit (2); }
-    catch (...) { err = exit (2); }
+    catch (std::exception& e) { err = 2;
+      femera::Errs::print (this->abrv+" task_init", e); }
+    catch (...) { err = exit (3); }
     init_list (argc, argv);// is noexcept
     return err;
   }
@@ -31,8 +32,9 @@ namespace femera {
     exit_list ();// is noexcept
     if (err>0) {return err;}// then exit this task.
     try { Test::derived (this)->task_exit (); }
-    catch (const std::exception& e) { err = 2; }
-    catch (...) { err = exit (2); }
+    catch (std::exception& e) { err = 2;
+      femera::Errs::print (this->abrv+" task_exit", e); }
+    catch (...) { err = exit (3); }
     return err;
   }
   template <typename T> inline

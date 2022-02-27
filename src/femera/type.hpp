@@ -3,10 +3,11 @@
 /** */
 
 namespace femera {
-  enum class Task_type : fmr::Enum_int {};// strongly typed int; see:
-  // https://stackoverflow.com/questions/18195312
-  // /what-happens-if-you-static-cast-invalid-value-to-enum-class
-  enum class Base_type : fmr::Enum_int {
+  enum class Task_type : fmr::Enum_int {};/* strongly typed int; see:
+  https://stackoverflow.com/questions/18195312
+  /what-happens-if-you-static-cast-invalid-value-to-enum-class
+  */
+  enum class Base_type : fmr::Enum_int {//TODO Remove?
     None=0, Work, Proc, Data, Test, Sims,
     // Geom, Load, Phys, Cond, Solv, Sync, Post,
 #ifdef _OPENMP_FIXME_DISABLED
@@ -17,24 +18,24 @@ namespace femera {
   };
   enum class Plug_type : fmr::Enum_int;//TODO forward declare for definition in Plug.hpp?
   static constexpr Task_type task_cast (Task_type) noexcept;
-  static constexpr Task_type task_cast (Base_type) noexcept;
+  static constexpr Task_type task_cast (Base_type) noexcept;//TODO Remove?
   static constexpr Task_type task_cast (Plug_type) noexcept;
 
   enum class Plug_type : fmr::Enum_int {//TODO Move to Plug.hpp?
-#ifdef FMR_HAS_OMP_FIXME_DISABLED
+#ifdef _OPENMP_FIXME_DISABLED
     Fomp = fmr::Enum_int(Base_type::Fomp),// Derived from Proc
 #endif
     None = fmr::Enum_int(Base_type::None),
     Plug = fmr::Enum_int(Base_type::Plug),// Derived from TODO
     Main, Fcpu, Node, Root,// Proc types
-#ifndef FMR_HAS_OMP_FIXME_DISABLED
-    Fomp,
+#ifndef _OPENMP_FIXME_DISABLED
+    Fomp, // Proc type
 #endif
 #ifdef FMR_HAS_MPI
     Fmpi, // Proc type
 #endif
 #ifdef FMR_HAS_NVIDIA
-    Nvid,
+    Nvid, // Proc type
 #endif
 #ifdef FMR_HAS_GTEST
     Gtst, // Proc type

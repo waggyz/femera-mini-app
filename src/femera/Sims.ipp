@@ -16,7 +16,8 @@ namespace femera {
     fmr::Exit_int err=0;
     try { Sims::derived (this)->task_init (argc, argv); }// Init this task,
     catch (const Errs& e) { err = 1; e.print (); }
-    catch (const std::exception& e) { err = 2; }
+    catch (std::exception& e) { err = 2;
+      femera::Errs::print (this->abrv+" task_init", e); }
     catch (...) { err = 3; }
     if (err > 0 ){ return this->exit (err); }
     this->init_list (argc, argv);// then init the list; is noexcept
@@ -28,7 +29,8 @@ namespace femera {
     this->exit_list ();// is noexcept
     try { Sims::derived (this)->task_exit (); }
     catch (const Errs& e) { task_err = 1; e.print (); }
-    catch (const std::exception& e) { task_err = 2; }
+    catch (std::exception& e) { err = 2;
+      femera::Errs::print (this->abrv+" task_exit", e); }
     catch (...) { task_err = 3; }
     if (Sims::derived (this)->do_exit_zero) { return 0; }
     return (task_err > 0) ? task_err : err;

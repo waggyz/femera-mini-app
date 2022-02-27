@@ -6,14 +6,14 @@
 namespace femera { namespace proc {
   class Main;// Derive a CRTP concrete class from Proc.
   class Main : public Proc<Main> { private: friend class Proc;
-  //FIXME friend class Proc<Main> or just Proc? Both work.
+  //TODO friend class Proc<Main> or just Proc? Both work.
   public:
     Main (const femera::Work::Core_ptrs_t) noexcept;
     Main () noexcept;
   private:
+    fmr::Local_int task_proc_ix ();
     void task_init (int* argc, char** argv);
     void task_exit ();
-    fmr::Local_int task_proc_ix ();
   };
 } }//end femera::proc:: namespace
 

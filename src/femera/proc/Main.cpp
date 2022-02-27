@@ -6,7 +6,7 @@
 #ifdef FMR_HAS_MPI
 #include "Fmpi.hpp"
 #endif
-#ifdef FMR_HAS_OMP
+#ifdef _OPENMP
 #include "Fomp.hpp"
 #endif
 #ifdef FMR_HAS_NVIDIA
@@ -36,7 +36,7 @@ namespace femera {
     gpu_path = path;
 #endif
 #endif
-#ifdef FMR_HAS_OMP
+#ifdef _OPENMP
 #if 0
     //TODO Add thread-local Fomp instances?
     const fmr::Local_int n = 2;//FIXME calc or get from command arg

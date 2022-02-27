@@ -153,7 +153,7 @@ endif
 # Libraries and applications available ----------------------------------------
 ifeq ($(ENABLE_OMP),ON)
   EXTERNAL_DOT+="OpenMP" -> "Femera"\n
-    FMRFLAGS+= -DFMR_HAS_OMP
+  # FMRFLAGS+= -DFMR_HAS_OMP not needed; OpenMP defines _OPENMP:
 endif
 ifeq ($(ENABLE_NVIDIA),ON)
   ifeq ("$(NVIDIA_DIR)","")

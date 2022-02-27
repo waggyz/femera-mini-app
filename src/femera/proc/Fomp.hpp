@@ -1,7 +1,7 @@
 #ifndef FEMERA_FOMP_HPP
 #define FEMERA_FOMP_HPP
 
-#ifdef FMR_HAS_OMP
+#ifdef _OPENMP
 #include "../Proc.hpp"
 
 namespace femera { namespace proc {
@@ -9,10 +9,10 @@ namespace femera { namespace proc {
   class Fomp : public Proc<Fomp> {private: friend class Proc; friend class Main;
   private:
     static bool is_in_parallel ();
+    fmr::Local_int task_proc_ix ();
   private:
     void task_init (int* argc, char** argv);
     void task_exit ();
-    fmr::Local_int task_proc_ix ();
   private:
     Fomp (femera::Work::Core_ptrs_t) noexcept;
     Fomp () =delete;//NOTE Use the constructor above.

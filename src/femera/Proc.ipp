@@ -3,6 +3,8 @@
 
 #include "../fmr/proc.hpp"
 
+#include <string>
+
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
 #include <cstdio>     // std::printf
@@ -30,7 +32,8 @@ namespace femera {
     fmr::Exit_int err=0;
     try { Proc::derived (this)->task_init (argc, argv); }// Init this task,...
     catch (const Errs& e) { err = 1; e.print (); }
-    catch (std::exception& e) { err = 2; }
+    catch (std::exception& e) { err = 2;
+      femera::Errs::print (this->abrv+" task_init", e); }
     catch (...) { err = 3; }
     Work::init_list (argc, argv);// ...then init the sub-tasks.
     this->set_base_n ();
@@ -46,7 +49,8 @@ namespace femera {
     fmr::Exit_int task_err =0;
     try { Proc::derived (this)->task_exit (); }//...then exit this derived task.
     catch (const Errs& e) { task_err = 1; e.print (); }
-    catch (std::exception& e) { task_err = 2; }
+    catch (std::exception& e) { task_err = 2;
+      femera::Errs::print (this->abrv+" task_exit", e); }
     catch (...) { task_err = 3; }
     return (task_err > 0) ? task_err : err;
   }

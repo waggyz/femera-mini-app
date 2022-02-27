@@ -88,7 +88,8 @@ namespace femera {
   fmr::Exit_int Data<T>::init (int* argc, char** argv) noexcept {
     fmr::Exit_int err=0;
     try { Data::derived(this)->task_init (argc, argv); }// Init this task,
-    catch (std::exception& e) { err = exit (2); }
+    catch (std::exception& e) { err = 2;
+      femera::Errs::print (this->abrv+" task_init", e); }
     catch (...) { err = this->exit (2); }
     init_list (argc, argv);// then init its list.
     return err;
@@ -100,7 +101,8 @@ namespace femera {
     Work::exit_list ();// Exit this task stack (exceptions caught),
     if (err>0) {return err;}// then exit this task.
     try { Data::derived(this)->task_exit (); }
-    catch (std::exception& e) { err = 2; }
+    catch (std::exception& e) { err = 2;
+      femera::Errs::print (this->abrv+" task_exit", e); }
     catch (...) { err = 2; }
     return err;
   }
