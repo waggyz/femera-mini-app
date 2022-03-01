@@ -139,11 +139,11 @@ namespace femera {
       } } else {
         W->data->head_line (W->data->fmrlog, head, text);
     } }
-    if (!branch.empty ()) {
+    if (! branch.empty ()) {
       branch.pop_back ();
-      if (!branch.empty ()) {
+      if (! branch.empty ()) {
         W = this->get_work_raw (branch);
-        if (W !=nullptr) {
+        if (W != nullptr) {
 #ifdef FMR_DEBUG
           printf ("Work: exit pop %s\n", W->task_list.back()->name.c_str());
 #endif

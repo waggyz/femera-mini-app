@@ -43,11 +43,9 @@ namespace femera {
     template <typename ...Args>
     ss head_time (                   const ss& head, const ss& form, Args...);
 #if 0
-    ss wrap_line (File_ptrs_t, ss head, ss form,...);
-    ss head_time (File_ptrs_t, ss head, ss form,...);
-    ss head_time (ss head, ss form,...);
-    ss head_perf (File_ptrs_t, ss head, ss form,...);
-    ss head_perf (ss head, std::string form,...);
+    ss wrap_line (File_ptrs_t, ss head, ss form,...);//TODO
+    ss perf_line (File_ptrs_t, ss head, ss form,...);//TODO
+    ss perf_line (ss head, ss form,...);
 #endif
   public:
     fmr::Exit_int init     (int*, char**)        noexcept final override;

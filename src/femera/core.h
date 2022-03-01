@@ -4,8 +4,7 @@
 #include "proc/Main.hpp"
 #include "test/Beds.hpp"
 #include "data/File.hpp"
-
-//#include "sims/Jobs.hpp"
+#include "sims/Jobs.hpp"
 
 //end FEMERA_HAS_CORE_H
 #endif

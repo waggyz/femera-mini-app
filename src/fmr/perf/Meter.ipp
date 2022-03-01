@@ -26,38 +26,40 @@ namespace fmr {
     this->busy_ns = 0;
     this->unit_n  = 0;
     this->flop_n  = 0;
-    this->binp_n  = 0;
-    this->bout_n  = 0;
+    this->read_n  = 0;
+    this->save_n  = 0;
     return this->start ();
   }
   inline fmr::Perf_float perf::Meter::add_busy_time_now () {
     const auto now = perf::get_now_ns ();
-    this->busy_ns += now - this->tick;
+    const auto last_busy = now - this->tick;
     this->tick = now;
-    return fmr::Perf_float (1.0e-9) * fmr::Perf_float (this->busy_ns);
+    this->busy_ns += last_busy;
+    return fmr::Perf_float (1.0e-9) * fmr::Perf_float (last_busy);
   }
   inline fmr::Perf_float perf::Meter::add_idle_time_now () {
     const auto now = perf::get_now_ns ();
-    this->idle_ns += now - this->tick;
+    const auto last_idle = now - this->tick;
     this->tick = now;
-    return fmr::Perf_float (1.0e-9) * fmr::Perf_float (this->idle_ns);
+    this->idle_ns += last_idle;
+    return fmr::Perf_float (1.0e-9) * fmr::Perf_float (last_idle);
   }
-  inline fmr::Perf_float perf::Meter::add_count (const perf::Count flops,
-      const perf::Count inp, const perf::Count out, const perf::Count units) {
+  inline fmr::Perf_float perf::Meter::add_count (const perf::Count units,
+    const perf::Count flops, const perf::Count read, const perf::Count save ) {
     this->unit_n += units;
     this->flop_n += flops;
-    this->binp_n += inp;
-    this->bout_n += out;
+    this->read_n += read;
+    this->save_n += save;
     return fmr::Perf_float (this->unit_n);
   }
   inline fmr::Perf_float perf::Meter::get_byte_n () {
-    return fmr::Perf_float (this->binp_n + this->bout_n);
+    return fmr::Perf_float (this->read_n + this->save_n);
   }
   inline fmr::Perf_float perf::Meter::get_arithmetic_intensity () {
     return fmr::Perf_float (this->flop_n) / this->get_byte_n ();
   }
   inline fmr::Perf_float perf::Meter::get_ai () {
-    return perf::Meter::get_arithmetic_intensity ();
+    return fmr::Perf_float (this->flop_n) / this->get_byte_n ();
   }
   inline fmr::Perf_float perf::Meter::get_busy_s () {
     return fmr::Perf_float (1.0e-9) * fmr::Perf_float (this->busy_ns);
@@ -66,7 +68,7 @@ namespace fmr {
     return fmr::Perf_float (1.0e-9) * fmr::Perf_float (this->idle_ns);
   }
   inline fmr::Perf_float perf::Meter::get_work_s () {
-    return fmr::Perf_float (1.0e-9) * fmr::Perf_float (this->busy_ns + this->idle_ns);
+    return fmr::Perf_float (1.0e-9) * fmr::Perf_float (this->busy_ns + idle_ns);
   }
   #if 0
   //FIXME Are these useful?
@@ -89,13 +91,13 @@ namespace fmr {
     return fmr::Perf_float (this->flop_n) / this->get_work_s ();
   }
   inline fmr::Perf_float perf::Meter::get_data_speed () {
-    return fmr::Perf_float (this->binp_n + this->bout_n) / this->get_work_s();
+    return fmr::Perf_float (this->read_n + this->save_n) / this->get_work_s();
   }
-  inline fmr::Perf_float perf::Meter::get_inp_speed () {
-    return fmr::Perf_float (this->binp_n) / this->get_work_s();
+  inline fmr::Perf_float perf::Meter::get_read_speed () {
+    return fmr::Perf_float (this->read_n) / this->get_work_s();
   }
-  inline fmr::Perf_float perf::Meter::get_out_speed () {
-    return fmr::Perf_float (this->bout_n) / this->get_work_s();
+  inline fmr::Perf_float perf::Meter::get_save_speed () {
+    return fmr::Perf_float (this->save_n) / this->get_work_s();
   }
   // Active speeds
   inline fmr::Perf_float perf::Meter::get_busy_unit_speed () {
@@ -105,13 +107,13 @@ namespace fmr {
     return fmr::Perf_float (this->flop_n) / this->get_busy_s ();
   }
   inline fmr::Perf_float perf::Meter::get_busy_data_speed () {
-    return fmr::Perf_float (this->binp_n + this->bout_n) / this->get_busy_s();
+    return fmr::Perf_float (this->read_n + this->save_n) / this->get_busy_s();
   }
-  inline fmr::Perf_float perf::Meter::get_busy_inp_speed () {
-    return fmr::Perf_float (this->binp_n) / this->get_busy_s();
+  inline fmr::Perf_float perf::Meter::get_busy_read_speed () {
+    return fmr::Perf_float (this->read_n) / this->get_busy_s();
   }
-  inline fmr::Perf_float perf::Meter::get_busy_out_speed () {
-    return fmr::Perf_float (this->bout_n) / this->get_busy_s();
+  inline fmr::Perf_float perf::Meter::get_busy_save_speed () {
+    return fmr::Perf_float (this->save_n) / this->get_busy_s();
   }
 }// end fmr:: namespace
 #undef FMR_DEBUG

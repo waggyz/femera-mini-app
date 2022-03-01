@@ -50,9 +50,9 @@ namespace femera {
   }
 #endif
   inline
-  Work* Work::get_work_raw (const fmr::Local_int i)
+  Work* Work::get_work_raw (const fmr::Local_int ix)
   noexcept {
-    return (i < this->task_list.size()) ? this->task_list [i].get() : nullptr;
+    return (ix < this->task_list.size()) ? this->task_list [ix].get() : nullptr;
   }
   inline
   Work* Work::get_work_raw (const Work::Task_path_t path)

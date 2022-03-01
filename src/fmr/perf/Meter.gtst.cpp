@@ -33,7 +33,7 @@ TEST(FmrPerfMeter, Naptime) {
   EXPECT_GT(perf.get_busy_unit_speed (), perf.get_unit_speed ());
 }
 TEST(FmrPerfMeter, ArithmeticIntensity) {
-  perf.add_count (1000, 500, 500, 0);
+  perf.add_count (0, 1000, 500, 500);
   EXPECT_FLOAT_EQ(perf.get_ai (), fmr::Perf_float(1.0));
   EXPECT_FLOAT_EQ(perf.get_ai (), perf.get_arithmetic_intensity ());
 }

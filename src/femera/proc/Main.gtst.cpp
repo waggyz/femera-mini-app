@@ -19,6 +19,6 @@ TEST( Main, DidInit ){
 //  EXPECT_EQ( fmr_main->exit (), 0 );
 }
 int main (int argc, char** argv) {
-  fmr_main->init (&argc,argv);
+  fmr_main->init (& argc, argv);
   return femera::test:: early_main (& argc, argv);
 }

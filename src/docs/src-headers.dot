@@ -5,7 +5,6 @@ digraph "source tree" {
     fontsize="16";
     fontname="Helvetica";
 	clusterrank="local";
-	"femera.hpp" -> "Jobs.hpp"
 	"Meter.hpp" -> "perf.hpp"
 	"Sims.hpp" -> "Work.hpp"
 	"Work.hpp" -> "Errs.hpp"
@@ -26,6 +25,7 @@ digraph "source tree" {
 	"Self.hpp" -> "Test.hpp"
 	"core.h" -> "Beds.hpp"
 	"Errs.hpp" -> "fmr.hpp"
+	"core.h" -> "Jobs.hpp"
 	"Node.hpp" -> "Proc.hpp"
 	"Jobs.hpp" -> "Sims.hpp"
 	"File.hpp" -> "Data.hpp"

@@ -14,7 +14,6 @@ namespace femera { namespace test { namespace self {
 #if 1
   inline
   std::vector<fmr::Local_int> get_local_proc_ids () {//TODO all_gathered_proc_ids()
-//  mini->test->time.add_idle_time_now ();
     const fmr::Local_int  all_n = mini->proc->all_proc_n ();
     const fmr::Local_int each_n = 2;//FIXME
     const fmr::Local_int  mod_n = all_n / each_n;
@@ -34,12 +33,10 @@ namespace femera { namespace test { namespace self {
       else {}
       FMR_PRAGMA_OMP(omp barrier)
     }
-//  mini->test->time.add_busy_time_now ();
     return pids;
   }
   inline
   std::vector<fmr::Local_int> get_local_numa_ixs () {
-//  mini->test->time.add_idle_time_now ();
     const fmr::Local_int  all_n = mini->proc->all_proc_n ();
     const fmr::Local_int each_n = 2;//FIXME
     const fmr::Local_int  mod_n = all_n / each_n;
@@ -53,7 +50,6 @@ namespace femera { namespace test { namespace self {
       else {}
       FMR_PRAGMA_OMP(omp barrier)
     }
-//  mini->test->time.add_busy_time_now ();
     return numas;
   }
   using ::testing::ElementsAreArray;
@@ -64,7 +60,7 @@ namespace femera { namespace test { namespace self {
   }
   TEST( SelfTestProc, LocalProcIDs ){
     EXPECT_THAT( get_local_proc_ids (),
-      ElementsAreArray( std::vector<fmr::Local_int>
+      ElementsAreArray( std::vector<fmr::Local_int>// ({0,1})));
         ({mini->proc->get_proc_id (), mini->proc->get_proc_id () + 1})));
   }
   TEST( SelfTestProc, LocalNumasAllSame ){

@@ -46,6 +46,7 @@ namespace femera {
   }
   void proc::Fmpi::task_init (int* argc, char** argv) {int err=0;
     std::vector<char> buf (MPI_MAX_LIBRARY_VERSION_STRING, 0);
+    // MPI_MAX_LIBRARY_VERSION_STRING includes space for the terminating null.
     int buflen=0, mpiver=0, mpisub=0;
     err= MPI_Get_library_version (& buf[0], & buflen);
     err= MPI_Get_version (& mpiver, & mpisub);
