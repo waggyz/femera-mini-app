@@ -982,7 +982,7 @@ ifeq ($(ENABLE_DOT_PNG),ON)
 	@dot src/docs/src-headers.dot -Gsize="12.0,6.0" -Tpng -o build/src-headers.png
 endif
 	#  -Gratio="fill" -Gsize="11.7,8.267!" -Gmargin=0
-	$(info $(INFO) dependency graph: $@)
+	$(info $(INFO) source code include graph: $@)
 endif
 
 build/docs/tdd-tests.txt: tools/list-tdd-tests.sh build/docs/.md5
