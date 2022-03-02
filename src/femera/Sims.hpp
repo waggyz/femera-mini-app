@@ -19,8 +19,8 @@ namespace femera {
     This_spt  get_task_spt (fmr::Local_int);
     This_spt  get_task_spt (Work::Task_path_t);
 #endif
-    T*        get_task_raw (fmr::Local_int);
-    T*        get_task_raw (Work::Task_path_t);
+    T*        get_task (fmr::Local_int);
+    T*        get_task (Work::Task_path_t);
     static constexpr
     This_spt  new_task     () noexcept;
     static

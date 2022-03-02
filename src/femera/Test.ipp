@@ -51,7 +51,7 @@ namespace femera {
   }
   template <typename T> inline constexpr
   FMR_SMART_PTR<T> Test<T>::new_task (const Work::Core_ptrs_t core) noexcept {
-    return FMR_MAKE_SMART<T> (T(core));
+    return FMR_MAKE_SMART(T) (T(core));
   }
 }// end femera:: namespace
 

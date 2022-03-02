@@ -50,20 +50,20 @@ namespace femera {
   }
 #endif
   template <typename T> inline
-  T* Sims<T>::get_task_raw (const fmr::Local_int i) {
+  T* Sims<T>::get_task (const fmr::Local_int i) {
     return static_cast<T*> (this->get_work_raw (i));
   }
   template <typename T> inline
-  T* Sims<T>::get_task_raw (const Work::Task_path_t path) {
+  T* Sims<T>::get_task (const Work::Task_path_t path) {
     return static_cast<T*> (this->get_work_raw (path));
   }
   template <typename T> inline constexpr
   FMR_SMART_PTR<T> Sims<T>::new_task () noexcept {
-    return FMR_MAKE_SMART<T> (T());
+    return FMR_MAKE_SMART(T) (T());
   }
   template <typename T> inline
   FMR_SMART_PTR<T> Sims<T>::new_task (int* argc, char** argv) noexcept {
-    auto S = FMR_MAKE_SMART<T> (T());
+    auto S = FMR_MAKE_SMART(T) (T());
     S->init (argc, argv);
     return S;
   }

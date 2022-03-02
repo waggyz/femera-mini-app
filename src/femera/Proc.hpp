@@ -37,8 +37,8 @@ namespace femera {
     This_spt new_task     () noexcept;
     static constexpr
     This_spt new_task     (const Work::Core_ptrs_t) noexcept;
-    T*       get_task_raw (fmr::Local_int);
-    T*       get_task_raw (Work::Task_path_t);
+    T*       get_task (fmr::Local_int);
+    T*       get_task (Work::Task_path_t);
 #if 0
   private:
     This_spt get_task_spt (fmr::Local_int);//TODO Remove these?

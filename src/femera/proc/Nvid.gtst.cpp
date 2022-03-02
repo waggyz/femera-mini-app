@@ -16,10 +16,10 @@ TEST( Nvid, Init ){// Initialize Fmpi with MPI already init by early_main(..)
 #if 1
 TEST( Nvid, TaskName ){
   //TODO get_task by enum task_type
-  EXPECT_EQ( test_main.get_task_raw ({0,0,0,1})->abrv, "gpu" );
+  EXPECT_EQ( test_main.get_task ({0,0,0,1})->abrv, "gpu" );
 }
 TEST( Nvid, ProcN ){
-  EXPECT_GT( test_main.get_task_raw ({0,0,0,1})->get_proc_n (), uint(0) );
+  EXPECT_GT( test_main.get_task ({0,0,0,1})->get_proc_n (), uint(0) );
 }
 #endif
 TEST( Nvid, Exit ){// should NOT finalize MPI: not initialized by test_main

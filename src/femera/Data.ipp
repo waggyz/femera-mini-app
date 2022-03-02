@@ -121,16 +121,16 @@ namespace femera {
   }
 #endif
   template <typename T> inline
-  T* Data<T>::get_task_raw (const fmr::Local_int i) {
+  T* Data<T>::get_task (const fmr::Local_int i) {
     return static_cast<T*> (this->get_work_raw (i));
   }
   template <typename T> inline
-  T* Data<T>::get_task_raw (const Work::Task_path_t tree) {
+  T* Data<T>::get_task (const Work::Task_path_t tree) {
     return static_cast<T*> (this->get_work_raw (tree));
   }
   template <typename T> inline constexpr
   FMR_SMART_PTR<T> Data<T>::new_task (const Work::Core_ptrs_t core) noexcept {
-    return FMR_MAKE_SMART<T> (T(core));
+    return FMR_MAKE_SMART(T) (T(core));
   }
 }// end femera:: namespace
 

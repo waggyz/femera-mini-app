@@ -6,9 +6,9 @@
 #include <cstdio>     // std::printf
 #endif
 
-template <typename T, typename O> inline
-T* femera::cast_via_work (O* obj) {
-  return static_cast<T*> (static_cast<Work*> (obj));
+template <typename T, typename D> inline
+T* femera::cast_via_work (D* derived) {
+  return static_cast<T*> (static_cast<Work*> (derived));
 }
 namespace femera {
   inline
@@ -80,6 +80,15 @@ namespace femera {
     return fmr::Local_int (this->task_list.size ());
   }
 }//end femera:: namespace
+#if 0
+namespace fmr {
+template<typename T, typename... Args> inline
+std::unique_ptr<T> make_unique(Args&&... args)
+{
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+}
+#endif
 #if 0
 #include <cstddef>
 #include <memory>

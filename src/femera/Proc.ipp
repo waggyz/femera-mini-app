@@ -70,17 +70,17 @@ namespace femera {
   }
 #endif
   template <typename T> inline
-  T* Proc<T>::get_task_raw (const fmr::Local_int i) {
+  T* Proc<T>::get_task (const fmr::Local_int i) {
     return Proc::derived (Work::get_work_raw (i));
   }
   template <typename T> inline
-  T* Proc<T>::get_task_raw (const Work::Task_path_t path) {
+  T* Proc<T>::get_task (const Work::Task_path_t path) {
     return Proc::derived (Work::get_work_raw (path));
   }
   template <typename T> inline constexpr
   FMR_SMART_PTR<T> Proc<T>::new_task ()
   noexcept {
-    return FMR_MAKE_SMART<T> (T());
+    return FMR_MAKE_SMART(T) (T());
   }
   template <typename T> inline constexpr
   FMR_SMART_PTR<T> Proc<T>::new_task (const Work::Core_ptrs_t core)
@@ -88,7 +88,7 @@ namespace femera {
 #if 0
     return std::move(FMR_MAKE_SMART<T> (T(core)));
 #else
-    return FMR_MAKE_SMART<T> (T(core));
+    return FMR_MAKE_SMART(T) (T(core));
 #endif
   }
 #if 0
@@ -96,7 +96,7 @@ namespace femera {
   bool Proc<T>::is_main (bool ans=true) {// recursive version cannot inline
     ans = ans & (this->get_proc_ix () == this->main_ix);
     if (! this->task_list.empty ()) {
-      ans = this->get_task_raw (0)->is_main (ans);
+      ans = this->get_task (0)->is_main (ans);
     }
     return ans;
   }
@@ -133,7 +133,7 @@ namespace femera {
     const fmr::Local_int tid
       = this->base_id + this->base_n * Proc::derived (this)->get_proc_ix ();
     if (! this->task_list.empty ()) {
-      id += this->get_task_raw (0)->get_proc_id (tid);//TODO only path 0?
+      id += this->get_task (0)->get_proc_id (tid);//TODO only path 0?
 #ifdef FMR_DEBUG
       printf ("%s id: %u += %u + %u * %u\n", this->abrv.c_str(), id,
         this->base_id, this->base_n, Proc::derived (this)->get_proc_ix ());

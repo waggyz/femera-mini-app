@@ -12,12 +12,14 @@
 #include <deque>
 #include <tuple>
 #if 0
+#include <utility>    // std::forward
 #define FMR_SMART_PTR std::unique_ptr
-#define FMR_MAKE_SMART(T) std::unique_ptr<T>(new T (std::forward<Args>(args)...))
-//define FMR_MAKE_SMART std::make_unique // in Work.ipp (from C++14)
+//#define FMR_MAKE_ME_SMART(T) std::unique_ptr<T>(new T (std::forward<Args>(args)...))
+#define FMR_MAKE_ME_SMART(T) fmr::make_unique<T> // in Work.ipp (from C++14)
 #else
 #define FMR_SMART_PTR std::shared_ptr
-#define FMR_MAKE_SMART std::make_shared
+//#define FMR_MAKE_SMART std::make_shared
+#define FMR_MAKE_SMART(T) std::make_shared<T>
 #endif
 
 namespace femera {
@@ -38,8 +40,8 @@ namespace femera {
   using Work_spt = FMR_SMART_PTR <Work>;
   using Jobs_spt = FMR_SMART_PTR <sims::Jobs>;// concrete Sims interface
   //
-  template <typename T, typename O>
-  T* cast_via_work (O* obj);
+  template <typename T, typename D>
+  T* cast_via_work (D* derived);
   //
   class Work {/* This is an abstract (pure virtual) base class (interface).
   * Derived classes use the curiously recurrent template pattern (CRTP) e.g.,
