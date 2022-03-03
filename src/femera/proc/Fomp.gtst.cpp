@@ -21,10 +21,6 @@ TEST( Fomp, TaskAbrv ){
   //TODO get_task by enum?
   EXPECT_EQ( test_main.get_task (path_omp)->abrv, "omp" );
 }
-TEST( Fomp, TddProcN ){
-  EXPECT_EQ( test_main.get_task
-    (path_omp)->get_proc_n (), fmr::Local_int (2) );
-}
 TEST( Fomp, Exit ){// should NOT finalize MPI: not initialized by test_main
   EXPECT_EQ( test_main.exit (0), 0 );
 }

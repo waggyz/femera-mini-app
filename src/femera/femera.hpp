@@ -7,9 +7,9 @@ namespace fmr {
   // typedefs
   /* The "using" syntax is preferred to "typedef" in the Google C++ Style Guide:
    * https://google.github.io/styleguide/cppguide.html#Aliases */
-  using Jobs_t = femera::Jobs_spt;
+  using Jobs_t = femera::Jobs_spt;//TODO replace with Mini class
   //
-  Jobs_t new_sims ();
+  Jobs_t new_sims ();//TODO class fmr::Mini(); w/member var private: Jobs_t jobs;
   Jobs_t new_sims (int*, char**);
   //
 }//end fmr:: namespace

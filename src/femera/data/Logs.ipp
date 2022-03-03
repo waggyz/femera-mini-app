@@ -14,7 +14,8 @@ namespace femera {
   void data::Logs::task_init (int*, char**) {
     fmr::Local_int n=0;
     if (this->proc->is_main ()) {
-      n = 2;//FIXME number of OpenMP threads / mpi process
+      n = 2;// number of OpenMP threads / mpi process
+      //n = this->proc->get_shared_memory_proc_n ();//TODO
     }
     this->data->fmrlog = Data::File_ptrs_t (n, nullptr);
     if (n > 0) { this->data->fmrlog[0] = ::stdout; }

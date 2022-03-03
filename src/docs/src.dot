@@ -112,6 +112,7 @@ digraph "source tree" {
 	"Gtst.gtst.cpp" -> "femera.hpp"
 	"mini.cpp" -> "femera.hpp"
 	"Work.cpp" -> "form.hpp"
+	"Fomp.cpp" -> "Main.hpp"
 	"Meter.gtst.cpp" -> "Meter.hpp"
 	"Beds.hpp" -> "Test.hpp"
 	"Proc.hpp" -> "Work.hpp"

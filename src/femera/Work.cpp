@@ -115,7 +115,7 @@ namespace femera {
 #endif
       W = W->task_list.back ().get();
     }
-    if ( W != nullptr) {
+    if (W != nullptr) {
 #ifdef FMR_DEBUG
       printf ("Work: exit branch 1 %s\n", W->name.c_str());
 #endif
@@ -147,11 +147,11 @@ namespace femera {
 #ifdef FMR_DEBUG
           printf ("Work: exit pop %s\n", W->task_list.back()->name.c_str());
 #endif
-          if (!W->task_list.empty()) { W->task_list.pop_back(); }
+          if (! W->task_list.empty()) {W->task_list.pop_back(); }
 #ifdef FMR_DEBUG
           printf ("Work: exit this %s\n", this->name.c_str());
 #endif
-          if (W!=this) {this->exit_tree(); }
+          if (W != this) {this->exit_tree(); }
     } } }
     return err;
   }

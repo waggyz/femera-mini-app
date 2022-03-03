@@ -1,4 +1,5 @@
 #include "Fomp.hpp"
+#include "Main.hpp"
 
 #ifdef _OPENMP
 #include "omp.h"
@@ -21,12 +22,21 @@ namespace femera {
   }
   void proc::Fomp::task_init (int*, char**) {
     if (this->is_in_parallel ()) {//TODO check 1 Fomp/team or 1 Fomp/openmp thrd
-      this->proc_n  = fmr::Local_int (::omp_get_num_threads ());
+      this->proc_n = fmr::Local_int (::omp_get_num_threads ());
     } else {
-      const int n = 2;//TODO Handle command line options.
-      ::omp_set_num_threads (n);
+      if (false) {//TODO Handle command line options.
+      }
+      if (true && this->proc != nullptr) {// calculate number of OpenMP threads
+        this->proc->auto_proc_n ();// sets this->proc_n
+        /*
+        const auto current_n = this->proc->get_proc_n ();
+        factor = proc::Node->core_n / current_n;
+        this->proc_n = (factor<1) ? current_n : current_n / factor;
+        */
+      }
+      ::omp_set_num_threads (int (this->proc_n));
       FMR_PRAGMA_OMP(omp parallel) {
-        this->proc_n  = fmr::Local_int (::omp_get_num_threads ());
+        this->proc_n = fmr::Local_int (::omp_get_num_threads ());
   } } }
   bool proc::Fomp::is_in_parallel () {
     return ::omp_in_parallel ();
