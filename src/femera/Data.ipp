@@ -108,16 +108,6 @@ namespace femera {
   std::string Data<T>::get_base_name () noexcept {
     return "data";
   }
-#if 0
-  template <typename T> inline
-  FMR_SMART_PTR<T> Data<T>::get_task_spt (const fmr::Local_int i) {
-    return std::static_pointer_cast<T> (this->get_work_spt (i));
-  }
-  template <typename T> inline
-  FMR_SMART_PTR<T> Data<T>::get_task_spt (const Work::Task_path_t tree) {
-    return std::static_pointer_cast<T> (this->get_work_spt (tree));
-  }
-#endif
   template <typename T> inline
   T* Data<T>::get_task (const fmr::Local_int i) {
     return static_cast<T*> (this->get_work_raw (i));

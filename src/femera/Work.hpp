@@ -102,7 +102,7 @@ namespace femera {
 #if 0
   public:
     template <typename T>
-    T* get_task (fmr::Local_int ix=0) {return task #ix of specific type
+    T* get_task (fmr::Local_int ix=0) {//return task #ix of specific type
       return static_cast<T*>(get_derived(ix));}
 #endif
   protected:

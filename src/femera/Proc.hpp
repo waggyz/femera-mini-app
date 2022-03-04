@@ -37,16 +37,11 @@ namespace femera {
     fmr::Local_int get_proc_id (fmr::Local_int id=0);// global thread identifier
     //                 proc_id = base_id + base_n * proc_ix
     static constexpr
-    This_spt new_task     () noexcept;
+    This_spt new_task () noexcept;
     static constexpr
-    This_spt new_task     (const Work::Core_ptrs_t) noexcept;
+    This_spt new_task (const Work::Core_ptrs_t) noexcept;
     T*       get_task (fmr::Local_int);
     T*       get_task (Work::Task_path_t);
-#if 0
-  private:
-    This_spt get_task_spt (fmr::Local_int);//TODO Remove these?
-    This_spt get_task_spt (Work::Task_path_t);
-#endif
   private:
     T*            derived (Proc*) noexcept;
     T*            derived (Work*) noexcept;

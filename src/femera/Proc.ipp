@@ -57,16 +57,6 @@ namespace femera {
   noexcept {
     return "proc";
   }
-#if 0
-  template <typename T> inline
-  FMR_SMART_PTR<T> Proc<T>::get_task_spt (const fmr::Local_int i) {
-    return std::static_pointer_cast<T> (Work::get_work_spt (i));
-  }
-  template <typename T> inline
-  FMR_SMART_PTR<T> Proc<T>::get_task_spt (const Work::Task_path_t path) {
-    return std::static_pointer_cast<T> (Work::get_work_spt (path));
-  }
-#endif
   template <typename T> inline
   T* Proc<T>::get_task (const fmr::Local_int i) {
     return Proc::derived (Work::get_work_raw (i));
