@@ -2,7 +2,7 @@
 #define FEMERA_DATA_LOGS_HPP
 
 #include "../Data.hpp"
-#include "../../fmr/form.hpp"
+//#include "../../fmr/form.hpp"
 
 namespace femera { namespace data {
   class Logs;// Derive a CRTP concrete class from File.

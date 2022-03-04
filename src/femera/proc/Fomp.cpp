@@ -1,5 +1,6 @@
 #include "Fomp.hpp"
 #include "Main.hpp"
+#include "../Data.hpp"
 
 #ifdef _OPENMP
 #include "omp.h"
@@ -26,14 +27,13 @@ namespace femera {
     } else {
       if (false) {//TODO Handle command line options.
       }
-      if (true && this->proc != nullptr) {// calculate number of OpenMP threads
+      if (false && this->proc != nullptr) {//TODO calculate number of OpenMP threads
         this->proc->auto_proc_n ();// sets this->proc_n
-        /*
-        const auto current_n = this->proc->get_proc_n ();
-        factor = proc::Node->core_n / current_n;
-        this->proc_n = (factor<1) ? current_n : current_n / factor;
-        */
-      }
+        if (this->data != nullptr) {
+          const auto head = this->data->text_line ("%4s %4s %4s",
+            this->get_base_name ().c_str(), this->abrv.c_str(), "thrd");
+          data->head_line (data->fmrlog, head.c_str(), "%u", this->proc_n);
+      } }
       ::omp_set_num_threads (int (this->proc_n));
       FMR_PRAGMA_OMP(omp parallel) {
         this->proc_n = fmr::Local_int (::omp_get_num_threads ());

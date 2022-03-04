@@ -1,8 +1,6 @@
 #ifndef FEMERA_HAS_DATA_IPP
 #define FEMERA_HAS_DATA_IPP
 
-#include "../fmr/form.hpp"
-
 #include "core.h"
 
 #undef FMR_DEBUG

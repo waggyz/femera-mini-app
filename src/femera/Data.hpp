@@ -2,7 +2,9 @@
 #define FEMERA_TEST_HPP
 
 #include "Work.hpp"
-//#include "core.h"
+
+// next used in Data.ipp
+#include "../fmr/form.hpp"
 
 #include <unordered_map>
 #include <tuple>

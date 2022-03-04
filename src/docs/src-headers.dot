@@ -8,6 +8,7 @@ digraph "source tree" {
 	"Meter.hpp" -> "perf.hpp"
 	"Sims.hpp" -> "Work.hpp"
 	"Work.hpp" -> "Errs.hpp"
+	"Proc.hpp" -> "proc.hpp"
 	"proc.hpp" -> "fmr.hpp"
 	"Nvid.hpp" -> "Proc.hpp"
 	"Root.hpp" -> "Proc.hpp"
@@ -28,6 +29,7 @@ digraph "source tree" {
 	"core.h" -> "Jobs.hpp"
 	"Node.hpp" -> "Proc.hpp"
 	"Jobs.hpp" -> "Sims.hpp"
+	"Data.hpp" -> "form.hpp"
 	"File.hpp" -> "Data.hpp"
 	"Beds.hpp" -> "Test.hpp"
 	"Proc.hpp" -> "Work.hpp"
@@ -36,6 +38,5 @@ digraph "source tree" {
 	"Data.hpp" -> "Work.hpp"
 	"femera.hpp" -> "core.h"
 	"Work.hpp" -> "Meter.hpp"
-	"Logs.hpp" -> "form.hpp"
 	"Main.hpp" -> "Proc.hpp"
 }

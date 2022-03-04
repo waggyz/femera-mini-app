@@ -87,22 +87,23 @@ namespace femera {
     fmr::Local_int all_n = 1;
     auto P = this->proc;
     if (P != nullptr) {
-      all_n = P->all_proc_n ();
+      all_n = P->all_proc_n ();//FIXME wrong?
       fmr::Local_int all_core_n = 1;
       while (! P->task_list.empty ()) {
         P = P->get_task (0);
         switch (fmr::Enum_int (P->task_type)) {
           case (fmr::Enum_int(Plug_type::Node)): {
-            const auto N = cast_via_work<proc::Node>(P);
-            all_core_n = N->node_n * N->get_core_n ();
-            break;}
+            const auto N = cast_via_work<proc::Node> (P);
+            all_core_n = N->node_n * N->get_core_n ();// correct
+            break;
+          }
           case (fmr::Enum_int(Plug_type::Fomp)): {
-#if 1//def FMR_DEBUG
+#ifdef FMR_DEBUG
             printf ("%s Main::auto_proc_n set %s proc_n = %u / %u = %u\n",
               this->abrv.c_str(), P->abrv.c_str(), all_core_n, all_n,
                 all_core_n / all_n);
 #endif
-            if (all_n < all_core_n  && all_n >0 && all_core_n >0) {
+            if (all_core_n > all_n && all_n >0 && all_core_n >0) {
               //cast_via_work<proc::Fomp>(P)->set_proc_n ();
               P->proc_n = all_core_n / all_n;
             }

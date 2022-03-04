@@ -3,6 +3,9 @@
 
 #include "Work.hpp"
 
+// next used in Proc.ipp
+#include "../fmr/proc.hpp"
+
 namespace femera {
   namespace proc {
     using Team_t = uintptr_t;// cast-compatible with ::MPI_comm from mpi.h

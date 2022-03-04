@@ -1,8 +1,6 @@
 #ifndef FEMERA_HAS_PROC_IPP
 #define FEMERA_HAS_PROC_IPP
 
-#include "../fmr/proc.hpp"
-
 #include <string>
 
 #undef FMR_DEBUG

@@ -10,16 +10,16 @@ namespace femera {
   proc::Main::Main (const femera::Work::Core_ptrs_t W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
     this->name ="processing";
-    this->info_d = 2;
     this->abrv ="main";
     this->task_type = task_cast (Plug_type::Main);
+    this->info_d = 2;
   }
   inline
   proc::Main::Main () noexcept {
     this->name ="processing";
-    this->info_d = 2;
     this->abrv ="main";
     this->task_type = task_cast (Plug_type::Main);
+    this->info_d = 2;
   }
   inline
   void proc::Main::task_exit () {
