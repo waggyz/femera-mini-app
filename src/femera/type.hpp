@@ -8,9 +8,9 @@ namespace femera {
   /what-happens-if-you-static-cast-invalid-value-to-enum-class
   */
   enum class Base_type : fmr::Enum_int {//TODO Remove?
-    None=0, Work, Proc, Data, Test, Sims,
+    None=0, Work, Proc, Data, Test, Task,
     // Geom, Load, Phys, Cond, Solv, Sync, Post,
-    //Frun, Part,// Derived from Sims
+    //Frun, Part,// Derived from Task
     Plug// Must be last, derived from TODO
   };
   enum class Plug_type : fmr::Enum_int;//TODO forward declare for definition in Plug.hpp?
@@ -61,7 +61,7 @@ namespace femera {
     Grad, Spcg, Sncg,// Solvers
     Mono, Halo,
 #endif
-    Jobs, //Sims type
+    Jobs, //Task type
     User// Must be last.
   };
 

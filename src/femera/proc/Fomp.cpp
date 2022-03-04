@@ -22,11 +22,25 @@ namespace femera {
     this->proc_n  = fmr::Local_int (::omp_get_max_threads ());
   }
   void proc::Fomp::task_init (int*, char**) {
+    if (true) {//TODO Handle command line options.
+      this->proc_n = 2;//TODO This is for TDD
+      ::omp_set_num_threads (int (this->proc_n));
+      FMR_PRAGMA_OMP(omp parallel) {
+        this->proc_n = fmr::Local_int (::omp_get_num_threads ());
+      }
+#if 0
+      if (this->data != nullptr) {
+        const auto head = this->data->text_line ("%4s %4s %4s",
+          this->get_base_name ().c_str(), this->abrv.c_str(), "thrd");
+        data->head_line (data->fmrall, head.c_str(), "%4u for process %4u",
+          this->proc_n, this->proc->get_proc_id ());//TODO wrong before init done
+      }
+#endif
+    }
+#if 0
     if (this->is_in_parallel ()) {//TODO check 1 Fomp/team or 1 Fomp/openmp thrd
       this->proc_n = fmr::Local_int (::omp_get_num_threads ());
     } else {
-      if (false) {//TODO Handle command line options.
-      }
       if (false && this->proc != nullptr) {//TODO calculate number of OpenMP threads
         this->proc->auto_proc_n ();// sets this->proc_n
         if (this->data != nullptr) {
@@ -37,7 +51,9 @@ namespace femera {
       ::omp_set_num_threads (int (this->proc_n));
       FMR_PRAGMA_OMP(omp parallel) {
         this->proc_n = fmr::Local_int (::omp_get_num_threads ());
-  } } }
+  } }
+#endif
+  }
   bool proc::Fomp::is_in_parallel () {
     return ::omp_in_parallel ();
   }

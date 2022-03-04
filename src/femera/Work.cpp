@@ -154,10 +154,5 @@ namespace femera {
     } } }
     return err;
   }
-  fmr::Local_int Work::add_task (Work_spt W)// inlining fails growth limit
-  noexcept {
-    this->task_list.push_back (std::move(W));
-    return fmr::Local_int (this->task_list.size () - 1);
-  }
 }//end femera:: namespace
 #undef FMR_DEBUG

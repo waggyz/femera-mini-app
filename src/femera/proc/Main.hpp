@@ -10,7 +10,9 @@ namespace femera { namespace proc {
   public:
     Main (const femera::Work::Core_ptrs_t) noexcept;
     Main () noexcept;
-    fmr::Local_int auto_proc_n ();
+#if 0
+    fmr::Local_int auto_proc_n ();//TODO Remove?
+#endif
   private:
     fmr::Local_int task_proc_ix ();
     void task_init (int* argc, char** argv);

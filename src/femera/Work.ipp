@@ -72,6 +72,12 @@ namespace femera {
     return fmr::Local_int (this->task_list.size ());
   }
   inline
+  fmr::Local_int Work::add_task (Work_spt W)
+  noexcept {
+    this->task_list.push_back (std::move(W));
+    return fmr::Local_int (this->task_list.size () - 1);
+  }
+  inline
   fmr::Local_int Work::del_task (const fmr::Local_int ix)
   noexcept {
     if (ix < this->task_list.size ()) {
@@ -83,11 +89,10 @@ namespace femera {
 #if 0
 namespace fmr {
 template<typename T, typename... Args> inline
-std::unique_ptr<T> make_unique(Args&&... args)
-{
+std::unique_ptr<T> make_unique(Args&&... args) {
     return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
-}
+}//end fmr:: namespace
 #endif
 #if 0
 #include <cstddef>

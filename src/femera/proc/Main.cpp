@@ -83,11 +83,12 @@ namespace femera {
     } }
     return this->proc_ix;
   }
-  fmr::Local_int proc::Main::auto_proc_n () {//FIXME
+#if 0
+  fmr::Local_int proc::Main::auto_proc_n () {//TODO remove?
     fmr::Local_int all_n = 1;
     auto P = this->proc;
     if (P != nullptr) {
-      all_n = P->all_proc_n ();//FIXME wrong?
+      all_n = P->all_proc_n ();//TODO wrong?
       fmr::Local_int all_core_n = 1;
       while (! P->task_list.empty ()) {
         P = P->get_task (0);
@@ -112,6 +113,7 @@ namespace femera {
     } } } }
     return all_n;
   }
+#endif
 }// end femera::namespace
 
 #undef FMR_DEBUG

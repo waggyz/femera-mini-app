@@ -8,8 +8,8 @@
 
 namespace femera {
   void data::File::task_init (int*, char**) {
-    const auto L = Data<data::Logs>::new_task (this->get_core());
-    this->add_task (L);
+    const auto L = std::move(Data<data::Logs>::new_task (this->get_core()));
+    this->add_task (std::move(L));
 //    this->log = L.get();
   }
 }// end femera::namespace

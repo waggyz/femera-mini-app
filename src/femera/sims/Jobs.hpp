@@ -1,11 +1,11 @@
 #ifndef FEMERA_HAS_JOBS_HPP
 #define FEMERA_HAS_JOBS_HPP
 
-#include "../Sims.hpp"
+#include "../Task.hpp"
 
 namespace femera { namespace sims {
-  class Jobs;// Derive a CRTP concrete class from Sims.
-  class Jobs : public Sims<Jobs> { private: friend class Sims;
+  class Jobs;// Derive a CRTP concrete class from Task.
+  class Jobs : public Task<Jobs> { private: friend class Task;
   // The shared Work::proc, data, test objects are managed by this class.
   private:
     void task_init (int* argc, char** argv);

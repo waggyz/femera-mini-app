@@ -9,9 +9,9 @@ namespace femera {
   void sims::Jobs::task_init (int*, char**) {
     // Add a processing environment.
     if (this->proc == nullptr) {
-      auto proc_ptr = proc::Main::new_task (this->get_core());
+      const auto proc_ptr = std::move(proc::Main::new_task (this->get_core()));
       this->proc = proc_ptr.get();
-      this->add_task (proc_ptr);
+      this->add_task (std::move(proc_ptr));
     }
     if (this->proc == nullptr) {
       FMR_THROW("Failed to add a new processing environment.");
@@ -22,9 +22,9 @@ namespace femera {
 #endif
     // Add a data handler.
     if (this->data == nullptr) {
-      auto data_ptr = data::File::new_task (this->get_core());
+      const auto data_ptr = std::move(data::File::new_task (this->get_core()));
       this->data = data_ptr.get();
-      this->add_task (data_ptr);
+      this->add_task (std::move(data_ptr));
     }
     if (this->data == nullptr) {
       FMR_THROW("Failed to add a new data handler.");
@@ -33,9 +33,9 @@ namespace femera {
     if (this->data->data == nullptr) { this->data->data = this->data; }
     // Add testbeds.
     if (this->test == nullptr) {
-      auto test_ptr = test::Beds::new_task (this->get_core());
+      const auto test_ptr = std::move(test::Beds::new_task (this->get_core()));
       this->test = test_ptr.get();
-      this->add_task (test_ptr);
+      this->add_task (std::move(test_ptr));
     }
     if (this->test == nullptr) {
       FMR_THROW("Failed to add new testbeds.");

@@ -5,7 +5,7 @@
 
 namespace femera {
   template <typename T>
-  class Sims : public Work {
+  class Task : public Work {
   private:
     using This_spt = FMR_SMART_PTR<T>;
   protected:
@@ -26,18 +26,18 @@ namespace femera {
     static
     This_spt  new_task     (int*, char**) noexcept;
   private:
-    T*        derived      (Sims*);
+    T*        derived      (Task*);
   protected:// make it clear this class needs to be inherited
-    Sims ()            =default;
-    Sims (const Sims&) =default;
-    Sims (Sims&&)      =default;// shallow (pointer) copyable
-    Sims& operator =
-      (const Sims&)    =default;
-    ~Sims ()           =default;
+    Task ()            =default;
+    Task (const Task&) =default;
+    Task (Task&&)      =default;// shallow (pointer) copyable
+    Task& operator =
+      (const Task&)    =default;
+    ~Task ()           =default;
   };
 }//end femera:: namespace
 
-#include "Sims.ipp"
+#include "Task.ipp"
 
 //end FEMERA_HAS_SIMS_HPP
 #endif

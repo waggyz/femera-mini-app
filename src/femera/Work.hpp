@@ -15,7 +15,7 @@
 #include <utility>    // std::forward
 #define FMR_SMART_PTR std::unique_ptr
 //#define FMR_MAKE_ME_SMART(T) std::unique_ptr<T>(new T (std::forward<Args>(args)...))
-#define FMR_MAKE_ME_SMART(T) fmr::make_unique<T> // in Work.ipp (from C++14)
+#define FMR_MAKE_SMART(T) fmr::make_unique<T> // in Work.ipp (from C++14)
 #else
 #define FMR_SMART_PTR std::shared_ptr
 //#define FMR_MAKE_SMART std::make_shared
@@ -28,7 +28,7 @@ namespace femera {
   template <typename> class Proc;// class Main; interface
   template <typename> class Data;// class File; interface
   template <typename> class Test;// class Beds; interface
-  template <typename> class Sims;// class Jobs; interface
+  template <typename> class Task;// class Jobs; interface
   namespace proc {
     class Main; class Root; class Node; class Fmpi; class Fomp; class Fcpu;
     class Nvid; }
@@ -38,7 +38,7 @@ namespace femera {
   namespace sims { class Jobs; }
   // typedefs
   using Work_spt = FMR_SMART_PTR <Work>;
-  using Jobs_spt = FMR_SMART_PTR <sims::Jobs>;// concrete Sims interface
+  using Jobs_spt = FMR_SMART_PTR <sims::Jobs>;// concrete Task interface
   //
   template <typename T, typename D>
   T* cast_via_work (D* derived);

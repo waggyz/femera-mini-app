@@ -14,14 +14,14 @@ echo         clusterrank=\"local\"\; >>$DOT
 sed -n 's/^[ ]*class \([A-Z][a-z0-9_]*\)\([ :a-z0-9_]*\)\([A-Z][a-z0-9_]*\).*/\"\1\" -> \"\3\"/p' \
   src/*/*.hpp src/*/*/*.hpp >>$DOT
 #
-echo '{ rank = sink; "perf"; }' >>$DOT
-
-echo '{ rank = sink; "math"; }' >>$DOT
-echo '{ rank = sink; "type"; }' >>$DOT
-echo '{ rank = sink; "data-type"; }' >>$DOT
-echo '{ rank = sink; "vals"; }' >>$DOT
-
-echo '{ rank = sink; "Task"; }' >>$DOT
+#echo '{ rank = sink; "perf"; }' >>$DOT
+#
+#echo '{ rank = sink; "math"; }' >>$DOT
+#echo '{ rank = sink; "type"; }' >>$DOT
+#echo '{ rank = sink; "data-type"; }' >>$DOT
+#echo '{ rank = sink; "vals"; }' >>$DOT
+#
+#echo '{ rank = sink; "Task"; }' >>$DOT
 # echo '{ rank = sink; "Flog"; }' >>$DOT
 #
 echo \} >>$DOT

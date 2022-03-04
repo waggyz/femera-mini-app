@@ -7,6 +7,6 @@ auto mini = fmr::new_sims ();
 fmr::Exit_int main (int argc, char** argv) {
   return mini->exit (mini->init (&argc,argv));
 }
-TEST(NewSims, AbrvIsJobs) {
+TEST(NewTask, AbrvIsJobs) {
   EXPECT_EQ( mini->abrv, "jobs");
 }
