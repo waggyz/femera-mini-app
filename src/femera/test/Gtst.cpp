@@ -69,7 +69,7 @@ namespace femera {
 #if 0
     const auto run_suite_n
       = ::testing::UnitTest::GetInstance()->test_suite_to_run_count();
-    if (run_suite_n <= 0) {//FIXME doesn't always get count?
+    if (run_suite_n <= 0) {//TODO doesn't always get count?
       return;
     }
 #endif

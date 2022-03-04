@@ -73,7 +73,7 @@ namespace femera {
   (const fmr::Line_size_int head_width, const fmr::Line_size_int line_width,
   const std::string& head, const std::string& form, Args ...args) {
     //
-    std::string timestr = "UTC "+fmr::form::utc_time();//"UTC 2022-02-02T14:29+00:00.000";  //FIXME
+    std::string timestr = "UTC "+fmr::form::utc_time();//"UTC 2022-02-02T14:29+00:00.000";  //TODO
     //
     const auto time_width = timestr.length () + 1;
     auto line = form::head_line (head_width, line_width, head, form, args...);

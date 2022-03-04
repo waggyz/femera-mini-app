@@ -71,7 +71,7 @@ namespace fmr {
     return fmr::Perf_float (1.0e-9) * fmr::Perf_float (this->busy_ns + idle_ns);
   }
   #if 0
-  //FIXME Are these useful?
+  //TODO Are these useful?
   inline fmr::Perf_float perf::Meter::get_life_time_now () {
     return 1e-9 * fmr::Perf_float (perf::get_now_ns() - this->begin_at);
   }
