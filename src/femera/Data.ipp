@@ -11,7 +11,7 @@
 
 namespace femera {
   template <typename T> inline
-  T* Data<T>::derived (Data* ptr) {
+  T* Data<T>::derived (Data* ptr) noexcept {
     return static_cast<T*> (ptr);
   }
   template <typename T> template <typename ...Args> inline

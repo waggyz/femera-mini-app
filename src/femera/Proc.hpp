@@ -37,15 +37,15 @@ namespace femera {
     proc::Team_t   get_team_id () noexcept;
     fmr::Local_int set_base_n  ();
     static constexpr
-    This_spt new_task () noexcept;
+    This_spt new_task ()                        noexcept;
     static constexpr
     This_spt new_task (const Work::Core_ptrs_t) noexcept;
-    T*       get_task (fmr::Local_int) noexcept;
-    T*       get_task (Work::Task_path_t) noexcept;
+    T*       get_task (fmr::Local_int)          noexcept;
+    T*       get_task (Work::Task_path_t)       noexcept;
   private:
-    T*            derived (Proc*) noexcept;
-    T*            derived (Work*) noexcept;
-    Proc<T>*    this_cast (Work*) noexcept;
+    T*       derived   (Proc*) noexcept;
+    T*       derived   (Work*) noexcept;
+    Proc<T>* this_cast (Work*) noexcept;
   protected:
     Proc ()            =default;
     Proc (const Proc&) =default;

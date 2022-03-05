@@ -8,7 +8,7 @@
 
 namespace femera {
   template <typename T> inline
-  T* Task<T>::derived (Task* ptr) {
+  T* Task<T>::derived (Task* ptr) noexcept {
     return static_cast<T*> (ptr);
   }
   template <typename T> inline
