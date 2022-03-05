@@ -18,7 +18,8 @@ namespace femera {
     catch (const Errs& e) { err = 1; e.print (); }
     catch (std::exception& e) { err = 2;
       femera::Errs::print (this->abrv+" task_init", e); }
-    catch (...) { err = 3; }
+    catch (...) { err = 3;
+      femera::Errs::print (this->abrv+" task_exit"); }
     if (err > 0 ){ return this->exit (err); }
     this->init_list (argc, argv);// then init the list; is noexcept
     return err;
@@ -31,7 +32,8 @@ namespace femera {
     catch (const Errs& e) { task_err = 1; e.print (); }
     catch (std::exception& e) { err = 2;
       femera::Errs::print (this->abrv+" task_exit", e); }
-    catch (...) { task_err = 3; }
+    catch (...) { task_err = 3;
+      femera::Errs::print (this->abrv+" task_exit"); }
     if (Task::derived (this)->do_exit_zero) { return 0; }
     return (task_err > 0) ? task_err : err;
   }
@@ -40,11 +42,11 @@ namespace femera {
     return "sims";
   }
   template <typename T> inline
-  T* Task<T>::get_task (const fmr::Local_int i) {
+  T* Task<T>::get_task (const fmr::Local_int i) noexcept {
     return static_cast<T*> (this->get_work_raw (i));
   }
   template <typename T> inline
-  T* Task<T>::get_task (const Work::Task_path_t path) {
+  T* Task<T>::get_task (const Work::Task_path_t path) noexcept {
     return static_cast<T*> (this->get_work_raw (path));
   }
   template <typename T> inline constexpr

@@ -30,9 +30,9 @@ namespace femera {
       *  @param message The error message.
       */
     explicit Errs (const std::string& message) : msg (message) {}
-    explicit Errs (const char* message, const char *file, int line)
+    explicit Errs (const char* message, const char* file, int line)
         : msg (std::string(file)+":"+std::to_string(line)+" "+message) {}
-    explicit Errs (const std::string& message, const char *file, int line)
+    explicit Errs (const std::string& message, const char* file, int line)
         : msg (std::string(file)+":"+std::to_string(line)+" "+message) {}
     /** Destructor.
       * Virtual to allow for subclassing.
@@ -47,6 +47,7 @@ namespace femera {
     virtual void       print () const noexcept;
     static  void       print (std::exception&) noexcept;
     static  void       print (std::string, std::exception&) noexcept;
+    static  void       print (std::string) noexcept;
   };
 }//end femera:: namespace
 

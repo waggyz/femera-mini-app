@@ -11,8 +11,12 @@ namespace femera {
   noexcept {
     fprintf (::stderr, "%s\n", e.what ());
   }
-  void Errs::print (std::string s,std::exception& e)
+  void Errs::print (const std::string s, std::exception& e)
   noexcept {
     fprintf (::stderr, "%s threw %s\n", s.c_str(), e.what ());
+  }
+  void Errs::print (const std::string s)
+  noexcept {
+    fprintf (::stderr, "%s threw %s\n", s.c_str(), "an unknown exception");
   }
 }//end femera:: namespace

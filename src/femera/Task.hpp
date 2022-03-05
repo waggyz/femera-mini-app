@@ -11,12 +11,12 @@ namespace femera {
   protected:
     bool do_exit_zero = false;// Used by Jobs to exit normally from MPI.
   public:
-    fmr::Exit_int init     (int*, char**)        noexcept final override;
-    fmr::Exit_int exit     (fmr::Exit_int err=0) noexcept final override;
+    fmr::Exit_int init (int*, char**)        noexcept final override;
+    fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;
     std::string get_base_name () noexcept final override;
   public:
-    T*        get_task (fmr::Local_int);
-    T*        get_task (Work::Task_path_t);
+    T*        get_task (fmr::Local_int) noexcept;
+    T*        get_task (Work::Task_path_t) noexcept;
     static constexpr
     This_spt  new_task () noexcept;
     static

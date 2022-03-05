@@ -20,9 +20,11 @@ namespace femera {
   fmr::Exit_int Test<T>::init (int* argc, char** argv) noexcept {
     fmr::Exit_int err=0;
     try { Test::derived (this)->task_init (argc, argv); }// Init this task,
+    catch (const Errs& e) { err = 1; e.print (); }
     catch (std::exception& e) { err = 2;
       femera::Errs::print (this->abrv+" task_init", e); }
-    catch (...) { err = exit (3); }
+    catch (...) { err = 3;
+      femera::Errs::print (this->abrv+" task_exit"); }
     init_list (argc, argv);// is noexcept
     return err;
   }
@@ -32,9 +34,11 @@ namespace femera {
     exit_list ();// is noexcept
     if (err>0) {return err;}// then exit this task.
     try { Test::derived (this)->task_exit (); }
+    catch (const Errs& e) { err = 1; e.print (); }
     catch (std::exception& e) { err = 2;
       femera::Errs::print (this->abrv+" task_exit", e); }
-    catch (...) { err = exit (3); }
+    catch (...) { err = 3;
+      femera::Errs::print (this->abrv+" task_exit"); }
     return err;
   }
   template <typename T> inline
@@ -42,11 +46,11 @@ namespace femera {
     return "test";
   }
   template <typename T> inline
-  T* Test<T>::get_task (const fmr::Local_int i) {
+  T* Test<T>::get_task (const fmr::Local_int i) noexcept {
     return derived (this->get_work_raw (i));
   }
   template <typename T> inline 
-  T* Test<T>::get_task (Work::Task_path_t tree) {
+  T* Test<T>::get_task (Work::Task_path_t tree) noexcept {
     return derived (this->get_work_raw (tree));
   }
   template <typename T> inline constexpr

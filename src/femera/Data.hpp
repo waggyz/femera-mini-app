@@ -3,8 +3,7 @@
 
 #include "Work.hpp"
 
-// next used in Data.ipp
-#include "../fmr/form.hpp"
+#include "../fmr/form.hpp"// used in Data.ipp
 
 #include <unordered_map>
 #include <tuple>
@@ -33,6 +32,15 @@ namespace femera {
     std::unordered_map <FILE*, fmr::Line_size_int> file_line_sz
       = {{nullptr, 80}, {::stdout, 80}, {::stderr, 250}};
   public:
+    fmr::Exit_int init (int*, char**)        noexcept final override;
+    fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;
+    std::string get_base_name () noexcept final override;
+  public:
+    T*        get_task (fmr::Local_int) noexcept;
+    T*        get_task (Work::Task_path_t) noexcept;
+    static constexpr
+    This_spt  new_task (const Work::Core_ptrs_t) noexcept;
+  public:
     template <typename ...Args>
     ss text_line (const File_ptrs_t,                 const ss& form, Args...);
     template <typename ...Args>
@@ -47,18 +55,10 @@ namespace femera {
     ss head_time (                   const ss& head, const ss& form, Args...);
 #if 0
     ss wrap_line (File_ptrs_t, ss head, ss form,...);//TODO
+    ss time_line (File_ptrs_t, ss head, ss form,...);//TODO
     ss perf_line (File_ptrs_t, ss head, ss form,...);//TODO
     ss perf_line (ss head, ss form,...);
 #endif
-  public:
-    fmr::Exit_int init     (int*, char**)        noexcept final override;
-    fmr::Exit_int exit     (fmr::Exit_int err=0) noexcept final override;
-    std::string get_base_name () noexcept final override;
-  public:
-    T*        get_task (fmr::Local_int);
-    T*        get_task (Work::Task_path_t);
-    static constexpr
-    This_spt  new_task (const Work::Core_ptrs_t) noexcept;
   private:
     T*        derived (Data*);
   protected:// Make it clear this class needs to be inherited from.
