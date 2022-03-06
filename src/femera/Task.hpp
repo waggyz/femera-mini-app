@@ -1,5 +1,5 @@
-#ifndef FEMERA_HAS_SIMS_HPP
-#define FEMERA_HAS_SIMS_HPP
+#ifndef FEMERA_HAS_TASK_HPP
+#define FEMERA_HAS_TASK_HPP
 
 #include "Work.hpp"
 
@@ -17,6 +17,8 @@ namespace femera {
   public:
     static constexpr
     This_spt  new_task ()                  noexcept;
+    static constexpr
+    This_spt new_task (const Work::Core_ptrs_t) noexcept;
     static
     This_spt  new_task (int*, char**)      noexcept;
     T*        get_task (fmr::Local_int)    noexcept;
@@ -35,5 +37,5 @@ namespace femera {
 
 #include "Task.ipp"
 
-//end FEMERA_HAS_SIMS_HPP
+//end FEMERA_HAS_TASK_HPP
 #endif

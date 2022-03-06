@@ -1,4 +1,5 @@
 #include "../core.h"
+#include "Sims.hpp"
 
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
@@ -44,6 +45,11 @@ namespace femera {
     if (this->data->test == nullptr) { this->data->test = this->test; }
     if (this->test->test == nullptr) { this->test->test = this->test; }
     // Jobs instance task_list now has proc::Main, data::File, and test::Beds
+    if (true) {//TODO command line args?
+      this->add_task (std::move(Task<sims::Sims>::new_task (this->get_core())));
+    }
+    // this->add_task (std::move(Test<test::Perf>::new_task (this->get_core())));
+    //  const auto L = std::move(Data<data::Logs>::new_task (this->get_core()));
   }
   void sims::Jobs::task_exit () {
 #ifdef FMR_DEBUG

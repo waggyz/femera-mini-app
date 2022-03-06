@@ -1,5 +1,5 @@
-#ifndef FEMERA_HAS_SIMS_IPP
-#define FEMERA_HAS_SIMS_IPP
+#ifndef FEMERA_HAS_TASK_IPP
+#define FEMERA_HAS_TASK_IPP
 
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
@@ -53,6 +53,10 @@ namespace femera {
   FMR_SMART_PTR<T> Task<T>::new_task () noexcept {
     return FMR_MAKE_SMART(T) (T());
   }
+  template <typename T> inline constexpr
+  FMR_SMART_PTR<T> Task<T>::new_task (const Work::Core_ptrs_t core) noexcept {
+    return FMR_MAKE_SMART(T) (T(core));
+  }
   template <typename T> inline
   FMR_SMART_PTR<T> Task<T>::new_task (int* argc, char** argv) noexcept {
     auto S = FMR_MAKE_SMART(T) (T());
@@ -62,5 +66,5 @@ namespace femera {
 }// end femera:: namespace
 
 #undef FMR_DEBUG
-//end FEMERA_HAS_SIMS_IPP
+//end FEMERA_HAS_TASK_IPP
 #endif

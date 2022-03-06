@@ -61,7 +61,7 @@ namespace femera {
     Grad, Spcg, Sncg,// Solvers
     Mono, Halo,
 #endif
-    Jobs, //Task type
+    Jobs, Sims, //Task type
     User// Must be last.
   };
 
