@@ -71,6 +71,7 @@ if __name__ == "__main__":
   plt.plot(x,ntd,label='Number of TO'+'DO in source code')
   plt.plot(x,nfm,label='Number of FIX'+'ME in source code')
   plt.plot(x,build_time,label='Build time for '+cpumodel+' (sec)')
+  plt.grid()
   plt.title('Femera 0.3 mini-app source code statistics')
   plt.xlabel('Repository commit number')
   plt.gca().set(ylim=(0, 200))

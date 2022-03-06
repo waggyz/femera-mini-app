@@ -10,6 +10,12 @@ namespace femera {
     this->task_type = task_cast (Plug_type::Sims);
     this->info_d = 3;
   }
+  inline
+  void sims::Sims::task_init (int*, char**) {
+  }
+  inline
+  void sims::Sims::task_exit () {
+  }
 }//end femera namespace
 
 //end FEMERA_HAS_SIMS_IPP

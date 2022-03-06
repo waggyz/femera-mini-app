@@ -17,6 +17,12 @@ namespace femera {
     this->task_type = task_cast (Plug_type::Jobs);
     this->info_d = 3;
   }
+  inline
+  void sims::Jobs::task_exit () {
+#ifdef FMR_DEBUG
+    FMR_THROW("Jobs::task_exit() test throw.");
+#endif
+  }
 }//end femera namespace
 
 //end FEMERA_HAS_JOBS_IPP

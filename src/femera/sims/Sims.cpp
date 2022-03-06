@@ -7,10 +7,6 @@
 #endif
 
 namespace femera {
-  void sims::Sims::task_init (int*, char**) {
-  }
-  void sims::Sims::task_exit () {
-  }
 }//end femera namespace
 
 #undef FMR_DEBUG

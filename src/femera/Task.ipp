@@ -39,7 +39,7 @@ namespace femera {
   }
   template <typename T> inline
   std::string Task<T>::get_base_name () noexcept {
-    return "sims";
+    return "task";
   }
   template <typename T> inline
   T* Task<T>::get_task (const fmr::Local_int i) noexcept {
