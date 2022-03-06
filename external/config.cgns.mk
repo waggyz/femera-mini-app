@@ -1,6 +1,8 @@
 #!/usr/bin/make
 #FIXME CGNS, FLTK, and FreeType build in external/*/
 ifeq ($(ENABLE_CGNS),ON)
+  FMRFLAGS += -DFMR_HAS_CGNS
+  LDLIBS += -lcgns
   LIST_EXTERNAL += cgns
   EXTERNAL_DOT+="CGNS" -> "Femera"\n
   ifeq ($(ENABLE_HDF5),ON)

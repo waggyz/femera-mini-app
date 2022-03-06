@@ -1,5 +1,7 @@
 #!/usr/bin/make
 ifeq ($(ENABLE_PETSC),ON)
+  FMRFLAGS += -DFMR_HAS_PETSC
+  LDLIBS += -lpetsc
   LIST_EXTERNAL += petsc
   EXTERNAL_DOT+="PETSc" -> "Femera"\n
   PETSC_FLAGS += PETSC_ARCH=$(CPUMODEL)

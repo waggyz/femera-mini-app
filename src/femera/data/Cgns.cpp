@@ -1,7 +1,7 @@
 #include "Cgns.hpp"
 
 #ifdef FMR_HAS_CGNS
-#include "cgns.h"
+#include "pcgnslib.h"
 #endif
 
 namespace femera {

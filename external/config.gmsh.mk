@@ -1,6 +1,8 @@
 #!/usr/bin/make
 # Gmsh and its dependencies
 ifeq ($(ENABLE_GMSH),ON)
+  FMRFLAGS += -DFMR_HAS_GMSH
+  LDLIBS += -lgmsh
   ifeq ("$(CXX) $(CXX_VERSION)","g++ 4.8.5")
     LIST_EXTERNAL += gmsh471
     GMSH_FLAGFILE:=$(BUILD_CPU)/external/install-gmsh471.flags

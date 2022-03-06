@@ -1,5 +1,6 @@
 #!/usr/bin/make
 ifeq ($(ENABLE_MKL),ON)
+  FMRFLAGS += -DFMR_HAS_MKL
   LIST_EXTERNAL += mkl
   EXTERNAL_DOT+="MKL" -> "Femera"\n
   MKL_FLAGS += --extract-folder $(FMRDIR)/external/mkl
