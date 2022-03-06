@@ -10,6 +10,8 @@ namespace femera { namespace data {
     using Optval = double;
     using Thrown = const std::basic_string<char>&;
   private:
+    bool did_gmsh_init = false;
+  private:
     Gmsh (femera::Work::Core_ptrs_t) noexcept;
     Gmsh () =delete;//NOTE Use the constructor above.
   private:

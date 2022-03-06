@@ -13,14 +13,14 @@ int   dummy_argc = 1;
 char  dummy [] ="dummy";
 char* dummy_argv [] = {dummy};
 
-TEST( Jobs, TaskName ){
-  EXPECT_EQ( jobs.name, "simulation job handler" );
+TEST( Jobs, TaskAbrv ){
+  EXPECT_EQ( jobs.abrv, "jobs" );
 }
 TEST( Jobs, CoreNames ){
   EXPECT_EQ( jobs.init (&dummy_argc,&dummy_argv[0]), 0);
-  EXPECT_EQ( jobs.proc->name, "processing" );
-  EXPECT_EQ( jobs.data->name, "file handler" );
-  EXPECT_EQ( jobs.test->name, "testbeds" );
+  EXPECT_EQ( jobs.proc->abrv, "main" );
+  EXPECT_EQ( jobs.data->abrv, "file" );
+  EXPECT_EQ( jobs.test->abrv, "beds" );
 }
 TEST( Jobs, SizeofGtstGEWork ){
   EXPECT_GE( sizeof(jobs), sizeof(femera::Work) );

@@ -9,5 +9,5 @@ fmr::Exit_int main (int argc, char** argv) {
 }
 
 TEST( File, DataName ){
-  EXPECT_EQ( mini->data->name, "file handler" );
+  EXPECT_EQ( mini->data->abrv, "file" );
 }

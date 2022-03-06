@@ -5,17 +5,17 @@ namespace femera {
   inline
   sims::Jobs::Jobs (femera::Work::Core_ptrs_t W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
-    this->name ="simulation job handler";
-    this->abrv ="jobs";
+    this->name      ="Femera simulation job handler";
+    this->abrv      ="jobs";
     this->task_type = task_cast (Plug_type::Jobs);
-    this->info_d = 3;
+    this->info_d    = 2;
   }
   inline
   sims::Jobs::Jobs () noexcept {
-    this->name ="simulation job handler";
-    this->abrv ="jobs";
+    this->name      ="simulation job handler";
+    this->abrv      ="jobs";
     this->task_type = task_cast (Plug_type::Jobs);
-    this->info_d = 3;
+    this->info_d    = 2;
   }
   inline
   void sims::Jobs::task_exit () {

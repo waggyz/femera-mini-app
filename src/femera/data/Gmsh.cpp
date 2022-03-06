@@ -11,18 +11,18 @@ namespace femera {
     this->abrv      ="gmsh";
     this->version   = GMSH_API_VERSION ;
     this->task_type = task_cast (Plug_type::Gmsh);
-    this->info_d = 3;
+    this->info_d    = 3;
   }
   void data::Gmsh::task_init (int*, char**) {
     FMR_PRAGMA_OMP(omp master) {
       const bool read_gmsh_config = false;
-      ::gmsh::initialize (0, nullptr, read_gmsh_config);// init w/out args.
+      ::gmsh::initialize (0, nullptr, read_gmsh_config);// init without args.
+      this->did_gmsh_init = true;
       ::gmsh::option::setNumber ("General.Verbosity", Gmsh::Optval(0));
-    }
+      // gmsh::initialize (..) seeems to set omp_num_threads to 1,
+      // so reset omp_num_threads.
 #ifdef _OPENMP
 #if 0
-    FMR_PRAGMA_OMP(omp master) {
-//    FMR_PRAGMA_OMP(omp single nowait) {//TODO omp single nowait ?
       //TODO liblock instead of omp master?
       auto P = this->proc->task.first<Proc> (Plug_type::Pomp);
       if (P) {
@@ -34,25 +34,17 @@ namespace femera {
           this->proc->log->label_printf ("Gmsh uses",
             "%s %i OpenMP thread%s each.\n",
             (n==1)?"only":"up to", n, (n==1)?"":"s");
-    } } }
+      } }
 #else
-    ::gmsh::option::setNumber ("General.NumThreads", Gmsh::Optval(2));//TODO
+      ::gmsh::option::setNumber ("General.NumThreads", Gmsh::Optval(2));//TODO
 #endif
 #endif
-  }
+  } }
   void data::Gmsh::task_exit () {
-#if 0
-    if (this->did_gmsh_init) {
-        FMR_PRAGMA_OMP(omp master) {
-          gmsh::finalize ();
-        }
-    } }
-#else
     FMR_PRAGMA_OMP(omp master) {
-      ::gmsh::finalize ();
-    }
-#endif
-  }
+      if (this->did_gmsh_init) {
+        ::gmsh::finalize ();
+  } } }
 }//end femera:: namespace
 
 
