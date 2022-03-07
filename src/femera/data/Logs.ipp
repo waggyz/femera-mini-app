@@ -14,11 +14,12 @@ namespace femera {
   void data::Logs::task_init (int*, char**) {
     fmr::Local_int n=0;
     if (this->proc->is_main ()) {
-      n = 2;// number of OpenMP threads / mpi process
-      //n = this->proc->get_shared_memory_proc_n ();//TODO
-    }
+      const auto P = this->proc->get_task (Plug_type::Fomp);
+      if (P != nullptr) {
+        n = P->get_proc_n ();// number of OpenMP threads / mpi process
+    } }
     this->data->fmrlog = Data::File_ptrs_t (n, nullptr);
-    if (n > 0) { this->data->fmrlog[0] = ::stdout; }
+    if (n > 0) {this->data->fmrlog[0] = ::stdout;}
     this->data->did_logs_init = true;
   }
   inline
@@ -33,7 +34,7 @@ namespace femera {
   }
   template <typename ...Args> inline
   std::string data::Logs::data_line (Args... args) {
-    return data_line_p (std::string(""), args...);
+    return make_data_line (std::string(""), args...);
   }
   inline
   std::string data::Logs::csv_string (const float f) {
@@ -48,21 +49,22 @@ namespace femera {
     return std::string(&buf[0]);
   }
   template <typename I> inline
-  std::string data::Logs::csv_string (const I integer) {
+  std::string data::Logs::csv_string (const I integer,
+    typename std::enable_if<std::is_integral<I>::value >::type*) {
     return std::to_string (integer);
   }
   inline
-  std::string data::Logs::data_line_p (const std::string line) {
+  std::string data::Logs::make_data_line (const std::string line) {
     return line;
   }
   template <typename L> inline
-  std::string data::Logs::data_line_p (const std::string line, const L last) {
+  std::string data::Logs::make_data_line (const std::string line, const L last) {
     return line + data::Logs::csv_string (last);
   }
   template <typename F, typename ...Rest> inline
-  std::string data::Logs::data_line_p
+  std::string data::Logs::make_data_line
   (const std::string line, const F first, Rest... rest) {
-    return data_line_p (line + data::Logs::csv_string (first) +",", rest...);
+    return make_data_line (line + data::Logs::csv_string (first) +",", rest...);
   }
 }//end femera namespace
 

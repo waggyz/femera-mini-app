@@ -21,6 +21,14 @@ namespace femera { namespace data {
   public:
     template <typename ...Args> static
     std::string data_line (Args...);
+  private:
+    static
+    std::string make_data_line (const std::string line);
+    template <typename L> static
+    std::string make_data_line (const std::string line, L last);
+    template <typename H, typename ...Tail> static
+    std::string make_data_line (const std::string line, H head, Tail...);
+  private:
     static// quoted string types
     std::string csv_string (const std::string&);
     static
@@ -30,14 +38,8 @@ namespace femera { namespace data {
     static
     std::string csv_string (double);
     template <typename I> static
-    std::string csv_string (I integer);//NOTE includes char type
-  private:
-    static
-    std::string data_line_p (const std::string line);
-    template <typename L> static
-    std::string data_line_p (const std::string line, L last);
-    template <typename H, typename ...Tail> static
-    std::string data_line_p (const std::string line, H head, Tail...);
+    std::string csv_string (I integer,//NOTE includes char type
+      typename std::enable_if<std::is_integral<I>::value>::type* = 0);
 #endif
   };
 } }//end femera::data:: namespace

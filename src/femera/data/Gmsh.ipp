@@ -1,8 +1,8 @@
-#ifndef FEMERA_DATA_Gmsh_IPP
-#define FEMERA_DATA_Gmsh_IPP
+#ifndef FEMERA_DATA_GMSH_IPP
+#define FEMERA_DATA_GMSH_IPP
 
 namespace femera {
 }//end femera namespace
 
-//end FEMERA_DATA_Gmsh_IPP
+//end FEMERA_DATA_GMSH_IPP
 #endif

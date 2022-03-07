@@ -59,7 +59,7 @@ namespace femera {
     fmr::perf::Meter time = fmr::perf::Meter ();
     //
     proc::Main* proc = nullptr;// processing hierarchy
-    data::File* data = nullptr;// data and file handling
+    data::File* data = nullptr;// data, logging, and file handling
     test::Beds* test = nullptr;// correctness and performance testing
     //
     std::string name ="unknown work";
@@ -82,20 +82,20 @@ namespace femera {
     //NOTE Make at least 1 method pure virtual.
     //TODO Do all virtual methods need to be pure
     //     to avoid vtable using CRTP derived classes?
-    virtual fmr::Exit_int init (int* argc, char** argv) noexcept =0;
-    virtual fmr::Exit_int exit (fmr::Exit_int err=0)    noexcept =0;
-    virtual std::string get_base_name () noexcept =0;
-    //
-    Core_ptrs_t get_core () noexcept;
-    //
+    virtual fmr::Exit_int   init (int* argc, char** argv) noexcept =0;
+    virtual fmr::Exit_int   exit (fmr::Exit_int err=0)    noexcept =0;
+    virtual std::string get_base_name ()                  noexcept =0;
+  public:
+    Core_ptrs_t    get_core   ()         noexcept;
+  public:
     fmr::Local_int get_task_n ()         noexcept;
 //TODO Task_tree_t get_tree   ()         noexcept;
     fmr::Local_int add_task   (Work_spt) noexcept;// returns task number added
     fmr::Local_int del_task   (fmr::Local_int ix) noexcept;// returns task_n
-  public:// called by Derived::get_task_*(..)
+  protected:// called by Derived::get_task_*(..)
     Work* get_work_raw (fmr::Local_int) noexcept;//TODO Change to get_work(..)
-    Work* get_work_raw (Task_path_t)    noexcept;//TODO Change to get_work(..)
-    Work* get_work_raw (Task_type, fmr::Local_int ix=0) noexcept;// get_work(..)
+    Work* get_work_raw (Task_path_t)    noexcept;//                  ""
+    Work* get_work_raw (Task_type, fmr::Local_int ix=0) noexcept;//  ""
 #if 0
     Work_spt get_work_spt (fmr::Local_int) noexcept;
     Work_spt get_work_spt (Task_path_t)    noexcept;
@@ -104,7 +104,7 @@ namespace femera {
   public:
     template <typename T>
     T* get_task (fmr::Local_int ix=0) {//return task #ix of specific type
-      return static_cast<T*>(get_derived(ix));}
+      return static_cast<T*>(this->get_work_raw(ix));}
 #endif
   protected:
     // Work stack initialization and exit

@@ -21,7 +21,7 @@ namespace femera {
   protected:
     using File_ptrs_t = std::vector<FILE*>;
   public:
-    File_ptrs_t fmrlog = {};//{::stdout};
+    File_ptrs_t fmrlog = {};// main proc to stdout set by Logs::task_init(..)
     File_ptrs_t fmrout = {::stdout};
     File_ptrs_t fmrerr = {::stderr};
     File_ptrs_t fmrall = {::stdout};
@@ -31,9 +31,9 @@ namespace femera {
     std::unordered_map <FILE*, fmr::Line_size_int> file_line_sz
       = {{nullptr, 80}, {::stdout, 80}, {::stderr, 250}};
   public:
-    fmr::Exit_int    init (int*, char**)        noexcept final override;
-    fmr::Exit_int    exit (fmr::Exit_int err=0) noexcept final override;
-    std::string  get_base_name ()               noexcept final override;
+    fmr::Exit_int   init (int*, char**)        noexcept final override;
+    fmr::Exit_int   exit (fmr::Exit_int err=0) noexcept final override;
+    std::string get_base_name ()               noexcept final override;
   public:
     static constexpr
     This_spt new_task (const Work::Core_ptrs_t) noexcept;

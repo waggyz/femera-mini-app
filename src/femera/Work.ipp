@@ -76,10 +76,12 @@ namespace femera {
       i++;
     }
     while (! W->task_list.empty ()) {
-      W = W->task_list[0].get();//TODO other branches
-      if (W->task_type == t) {
-        if (i == ix) {return W;}
+     for (fmr::Local_int Wix=0; Wix < W->get_task_n (); Wix++) {
+      if (W->task_list[Wix].get()->task_type == t) {
+        if (i == ix) {return W->task_list[Wix].get();}
         i++;
+      }
+      W = W->task_list[0].get();//TODO other branches
     } }
     return nullptr;
   }

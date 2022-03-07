@@ -1,14 +1,14 @@
-#ifndef FEMERA_DATA_Gmsh_HPP
-#define FEMERA_DATA_Gmsh_HPP
+#ifndef FEMERA_DATA_GMSH_HPP
+#define FEMERA_DATA_GMSH_HPP
 
 #include "../Data.hpp"
 
 namespace femera { namespace data {
-  class Gmsh;// Derive a CRTP concrete class from File.
+  class Gmsh;// Derive a CRTP concrete class from Data.
   class Gmsh : public Data <Gmsh> { private: friend class Data;
   private:
-    using Number = double;
-    using Thrown = const std::basic_string<char>&;
+    using Number = double;// for ::gmsh::option::get/setNumber (..)
+    using Thrown = const std::basic_string<char>&;//TODO std::string& ?
   private:
     bool did_gmsh_init = false;
   private:
@@ -22,5 +22,5 @@ namespace femera { namespace data {
 
 #include "Gmsh.ipp"
 
-//end FEMERA_DATA_Gmsh_HPP
+//end FEMERA_DATA_GMSH_HPP
 #endif
