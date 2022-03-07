@@ -93,8 +93,9 @@ namespace femera {
     fmr::Local_int add_task   (Work_spt) noexcept;// returns task number added
     fmr::Local_int del_task   (fmr::Local_int ix) noexcept;// returns task_n
   public:// called by Derived::get_task_*(..)
-    Work*  get_work_raw (fmr::Local_int) noexcept;//TODO Change to get_work(..)
-    Work*  get_work_raw (Task_path_t)    noexcept;//TODO Change to get_work(..)
+    Work* get_work_raw (fmr::Local_int) noexcept;//TODO Change to get_work(..)
+    Work* get_work_raw (Task_path_t)    noexcept;//TODO Change to get_work(..)
+    Work* get_work_raw (Task_type, fmr::Local_int ix=0) noexcept;// get_work(..)
 #if 0
     Work_spt get_work_spt (fmr::Local_int) noexcept;
     Work_spt get_work_spt (Task_path_t)    noexcept;

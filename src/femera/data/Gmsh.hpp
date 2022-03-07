@@ -7,7 +7,7 @@ namespace femera { namespace data {
   class Gmsh;// Derive a CRTP concrete class from File.
   class Gmsh : public Data <Gmsh> { private: friend class Data;
   private:
-    using Optval = double;
+    using Number = double;
     using Thrown = const std::basic_string<char>&;
   private:
     bool did_gmsh_init = false;

@@ -67,6 +67,23 @@ namespace femera {
     return W;
   }
   inline
+  Work* Work::get_work_raw (const Task_type t, const fmr::Local_int ix)
+  noexcept {
+    fmr::Local_int i=0;
+    auto W = this;
+    if (W->task_type == t) {
+      if (i == ix) {return W;}
+      i++;
+    }
+    while (! W->task_list.empty ()) {
+      W = W->task_list[0].get();//TODO other branches
+      if (W->task_type == t) {
+        if (i == ix) {return W;}
+        i++;
+    } }
+    return nullptr;
+  }
+  inline
   fmr::Local_int Work::get_task_n ()
   noexcept {
     return fmr::Local_int (this->task_list.size ());

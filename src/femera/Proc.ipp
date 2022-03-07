@@ -65,6 +65,14 @@ namespace femera {
   T* Proc<T>::get_task (const Work::Task_path_t path) noexcept {
     return Proc::derived (Work::get_work_raw (path));
   }
+  template <typename T> inline
+  T* Proc<T>::get_task (const Task_type t, const fmr::Local_int ix) noexcept {
+    return Proc::derived (Work::get_work_raw (t, ix));
+  }
+  template <typename T> inline
+  T* Proc<T>::get_task (const Plug_type t, const fmr::Local_int ix) noexcept {
+    return Proc::derived (Work::get_work_raw (task_cast (t), ix));
+  }
   template <typename T> inline constexpr
   FMR_SMART_PTR<T> Proc<T>::new_task ()
   noexcept {
