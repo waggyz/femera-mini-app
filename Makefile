@@ -161,11 +161,11 @@ ifeq ($(ENABLE_NVIDIA),ON)
     NVIDIA_DIR:=/usr/local/cuda-11.6
   endif
   # EXTERNAL_DOT+="NVIDIA" -> "Femera"\n
-  # FMRFLAGS+= -DFMR_HAS_NVIDIA
+  FMRFLAGS+= -DFMR_HAS_NVIDIA
   CUXX:=nvcc
   FMRFLAGS+= -I"$(NVIDIA_DIR)/include"
   LDFLAGS+= -L$(NVIDIA_DIR)/lib64
-  # LDLIBS+= -lcuda -lcudart
+  LDLIBS+= -lcuda -lcudart
   CUFLAGS+= --std=c++11 -g -MMD -MP -O3
   CUFLAGS+= -DFMR_HAS_NVIDIA -I"$(NVIDIA_DIR)/include"
   CUFLAGS+= -L$(NVIDIA_DIR)/lib64 -lcuda -lcudart

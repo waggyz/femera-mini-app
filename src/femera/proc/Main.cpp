@@ -21,7 +21,7 @@
 namespace femera {
   void proc::Main:: task_init (int*, char**) {
     const auto core = this->get_core ();
-    std::vector<fmr::Local_int> path ={};
+    Work::Task_path_t path ={};
     path.push_back (this->add_task
       (std::move(Proc<proc::Root>::new_task (core))));
     path.push_back (get_task (path)->add_task

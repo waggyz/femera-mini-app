@@ -12,10 +12,13 @@ namespace femera {
   }
   inline
   void data::Logs::task_init (int*, char**) {
-    fmr::Local_int n=0;
+    // set default logger (data->fmrlog) to stdout only from the main thread
+    fmr::Local_int n = 0;
     if (this->proc->is_main ()) {
       const auto P = this->proc->get_task (Plug_type::Fomp);
-      if (P != nullptr) {
+      if (P == nullptr) {
+        n = 1;
+      } else {
         n = P->get_proc_n ();// number of OpenMP threads / mpi process
     } }
     this->data->fmrlog = Data::File_ptrs_t (n, nullptr);
@@ -23,7 +26,12 @@ namespace femera {
     this->data->did_logs_init = true;
   }
   inline
-  void data::Logs::task_exit () {}
+  void data::Logs::task_exit () {
+  }
+  template <typename ...Args> inline
+  std::string data::Logs::data_line (Args... args) {
+    return make_data_line (std::string(""), args...);
+  }
   inline
   std::string data::Logs::csv_string (const std::string& str) {
     return +"\""+str+"\"";
@@ -32,20 +40,16 @@ namespace femera {
   std::string data::Logs::csv_string (const char* str) {
     return "\""+std::string(str)+"\"";
   }
-  template <typename ...Args> inline
-  std::string data::Logs::data_line (Args... args) {
-    return make_data_line (std::string(""), args...);
-  }
   inline
   std::string data::Logs::csv_string (const float f) {
     std::vector<char> buf (15 + 1, 0);
-    std::snprintf (&buf[0], buf.size(), "%1.7e", double(f));
+    std::snprintf (&buf[0], buf.size(),"%1.7e", double(f));
     return std::string(&buf[0]);
   }
   inline
   std::string data::Logs::csv_string (const double f) {
     std::vector<char> buf (23 + 1, 0);
-    std::snprintf (&buf[0], buf.size(), "%1.15E", f);
+    std::snprintf (&buf[0], buf.size(),"%1.15E", f);
     return std::string(&buf[0]);
   }
   template <typename I> inline
@@ -61,10 +65,10 @@ namespace femera {
   std::string data::Logs::make_data_line (const std::string line, const L last) {
     return line + data::Logs::csv_string (last);
   }
-  template <typename F, typename ...Rest> inline
+  template <typename F, typename ...R> inline
   std::string data::Logs::make_data_line
-  (const std::string line, const F first, Rest... rest) {
-    return make_data_line (line + data::Logs::csv_string (first) +",", rest...);
+  (const std::string line, const F first, R... rest) {
+    return make_data_line (line + data::Logs::csv_string (first)+",", rest...);
   }
 }//end femera namespace
 

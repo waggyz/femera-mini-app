@@ -82,12 +82,11 @@ namespace femera {
     //NOTE Make at least 1 method pure virtual.
     //TODO Do all virtual methods need to be pure
     //     to avoid vtable using CRTP derived classes?
-    virtual fmr::Exit_int   init (int* argc, char** argv) noexcept =0;
-    virtual fmr::Exit_int   exit (fmr::Exit_int err=0)    noexcept =0;
-    virtual std::string get_base_name ()                  noexcept =0;
+    virtual fmr::Exit_int init (int* argc, char** argv) noexcept =0;
+    virtual fmr::Exit_int exit (fmr::Exit_int err=0)    noexcept =0;
+    virtual std::string   get_base_name ()              noexcept =0;
   public:
     Core_ptrs_t    get_core   ()         noexcept;
-  public:
     fmr::Local_int get_task_n ()         noexcept;
 //TODO Task_tree_t get_tree   ()         noexcept;
     fmr::Local_int add_task   (Work_spt) noexcept;// returns task number added

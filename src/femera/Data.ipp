@@ -14,60 +14,6 @@ namespace femera {
   T* Data<T>::derived (Data* ptr) noexcept {
     return static_cast<T*> (ptr);
   }
-  template <typename T> template <typename ...Args> inline
-  std::string Data<T>::text_line
-  (const Data::File_ptrs_t flist, const std::string& form, Args ...args) {
-    FILE* file = nullptr;
-    if (flist.size () > 0 && this->proc != nullptr) {
-      file = flist [this->proc->get_proc_id () % flist.size()];
-    }
-    const auto w = this->file_line_sz [file];
-    std::vector<char> buf (w + 1, 0);
-    std::snprintf (&buf[0], buf.size(), form.c_str(), args...);
-    const auto line = std::string (&buf[0]);
-    if (file != nullptr) { fprintf (file,"%s\n", line.c_str()); }
-    return line;
-  }
-  template <typename T> template <typename ...Args> inline
-  std::string Data<T>::text_line (const std::string& form, Args ...args) {
-    return Data<T>::text_line (Data::File_ptrs_t ({}), form, args...);
-  }
-  template <typename T> template <typename ...Args> inline
-  std::string Data<T>::head_line (const Data::File_ptrs_t flist,
-    const std::string& head, const std::string& form, Args ...args) {
-    FILE* file = nullptr;
-    if (flist.size () > 0 && this->proc != nullptr) {
-      file = flist [this->proc->get_proc_id () % flist.size()];
-    }
-    const auto w = this->file_line_sz [file];
-    const auto h = this->file_head_sz [file];
-    const auto line = femera::form::head_line (h, w, head, form, args...);
-    if (file != nullptr) { fprintf (file,"%s\n", line.c_str()); }
-    return line;
-  }
-  template <typename T> template <typename ...Args> inline
-  std::string Data<T>::head_line
-  (const std::string& head, const std::string& form, Args ...args) {
-    return Data<T>::head_line (Data::File_ptrs_t ({}), head, form, args...);
-  }
-  template <typename T> template <typename ...Args> inline
-  std::string Data<T>::head_time (const Data::File_ptrs_t flist,
-    const std::string& head, const std::string& form, Args ...args) {
-    FILE* file = nullptr;
-    if (flist.size () > 0 && this->proc != nullptr) {
-      file = flist [this->proc->get_proc_id () % flist.size ()];
-    }
-    const auto h = this->file_head_sz [file];
-    const auto w = this->file_line_sz [file];
-    const auto line = femera::form::head_time (h, w, head, form, args...);
-    if (file != nullptr) { fprintf (file,"%s\n", line.c_str()); }
-    return line;
-  }
-  template <typename T> template <typename ...Args> inline
-  std::string Data<T>::head_time
-  (const std::string& head, const std::string& form, Args ...args) {
-    return Data<T>::head_time (Data::File_ptrs_t ({}), head, form, args...);
-  }
   template <typename T> inline
   fmr::Exit_int Data<T>::init (int* argc, char** argv) noexcept {
     fmr::Exit_int err=0;

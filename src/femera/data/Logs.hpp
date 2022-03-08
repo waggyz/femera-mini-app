@@ -5,35 +5,30 @@
 //#include "../../fmr/form.hpp"
 
 namespace femera { namespace data {
-  class Logs;// Derive a CRTP concrete class from File.
+  class Logs;// Derive a CRTP concrete class from Data.
   class Logs : public Data <Logs> { private: friend class Data;
-  private:
-    Logs (femera::Work::Core_ptrs_t) noexcept;
-    Logs () =delete;//NOTE Use the constructor above.
-  private:
-    void task_init (int* argc, char** argv);
-    void task_exit ();
+  public:
+    template <typename ...Args> static
+    std::string data_line (Args...);
 #if 0
     template <typename A, typename ...Args>
     ss data_line (std::tuple<A,Args...> t, ss& line="");// gcc 4.8.5 unsupported
     ss data_page (std::tuple<Args...> t);//tuple of valarray/vector refs (SoA)
 #else
-  public:
-    template <typename ...Args> static
-    std::string data_line (Args...);
   private:
     static
     std::string make_data_line (const std::string line);
-    template <typename L> static
-    std::string make_data_line (const std::string line, L last);
-    template <typename H, typename ...Tail> static
-    std::string make_data_line (const std::string line, H head, Tail...);
-  private:
-    static// quoted string types
+    template <typename Last> static
+    std::string make_data_line (const std::string line, Last);
+    template <typename Head, typename ...Tail> static
+    std::string make_data_line (const std::string line, Head, Tail...);
+  private:// character string types are quoted
+    static
     std::string csv_string (const std::string&);
     static
     std::string csv_string (const char*);
-    static// numeric types
+  private:// numeric types
+    static
     std::string csv_string (float);
     static
     std::string csv_string (double);
@@ -41,6 +36,12 @@ namespace femera { namespace data {
     std::string csv_string (I integer,//NOTE includes char type
       typename std::enable_if<std::is_integral<I>::value>::type* = 0);
 #endif
+  private:
+    void task_init (int* argc, char** argv);
+    void task_exit ();
+  private:
+    Logs (femera::Work::Core_ptrs_t) noexcept;
+    Logs () =delete;//NOTE Use the constructor above.
   };
 } }//end femera::data:: namespace
 
