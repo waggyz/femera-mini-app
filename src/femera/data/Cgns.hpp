@@ -1,11 +1,13 @@
-#ifndef FEMERA_DATA_Cgns_HPP
-#define FEMERA_DATA_Cgns_HPP
+#ifndef FEMERA_DATA_CGNS_HPP
+#define FEMERA_DATA_CGNS_HPP
 
 #include "../Data.hpp"
 
 namespace femera { namespace data {
-  class Cgns;// Derive a CRTP concrete class from File.
+  class Cgns;// Derive a CRTP concrete class from Data.
   class Cgns : public Data <Cgns> { private: friend class Data;
+  private:
+    proc::Team_t team_id = 0;// MPI communicator
   private:
     Cgns (femera::Work::Core_ptrs_t) noexcept;
     Cgns () =delete;//NOTE Use the constructor above.
@@ -17,5 +19,5 @@ namespace femera { namespace data {
 
 #include "Cgns.ipp"
 
-//end FEMERA_DATA_Cgns_HPP
+//end FEMERA_DATA_CGNS_HPP
 #endif

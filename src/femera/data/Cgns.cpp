@@ -1,14 +1,48 @@
 #include "Cgns.hpp"
 
 #ifdef FMR_HAS_CGNS
-#include "pcgnslib.h"
+//#include "hdf5.h"
+#ifdef FMR_HAS_MPI
+#include "pcgnslib.h" // cgp_*
+#else
+#include "cgnslib.h"  // cg_*
+#endif
 #endif
 
 namespace femera {
   void data::Cgns::task_init (int*, char**) {
-    this->version = std::to_string( CGNS_VERSION / 1000 )
-      + "." + std::to_string( CGNS_VERSION % 1000 );
-  }
+    this->version = std::to_string (CGNS_VERSION / 1000)
+      + "." + std::to_string (CGNS_VERSION % 1000);
+    FMR_PRAGMA_OMP(omp master)
+    if (this->proc != nullptr) {
+      const auto P = this->proc->get_task (Plug_type::Fmpi);
+      if (P != nullptr) {// Set the communicator
+        MPI_Comm c;
+        const auto err = MPI_Comm_dup (MPI_Comm (P->get_team_id()), &c);
+        if (!err) {
+          this->team_id = proc::Team_t (c);
+        }
+#if 0
+        if(this->proc->log->detail > 1 ){
+          this->proc->log->label_printf("CGNS mode",
+            "Parallel access using %i MPI threads/team\n",//TODO
+            this->proc->task.first<Proc>( Plug_type:: Pmpi )->get_proc_n() );
+        }
+#endif
+  } } }
+  void data::Cgns::task_exit () {
+//TODO    this->close_all ();
+//TODO?   FMR_PRAGMA_OMP(omp barrier)
+    FMR_PRAGMA_OMP(omp master)
+      if (this->team_id != proc::Team_t (MPI_COMM_WORLD)) {
+        MPI_Comm c = MPI_Comm (this->team_id);
+        const auto err= MPI_Comm_free (&c);
+        if (err) {
+          const std::string msg = "Failed to free CGNS MPI communicator "
+            + std::to_string (this->team_id)+".";
+          FMR_THROW(msg);
+  } } }
+  //
 }//end femera:: namespace
 
 
