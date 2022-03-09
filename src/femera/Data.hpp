@@ -28,8 +28,11 @@ namespace femera {
     This_spt new_task (const Work::Core_ptrs_t) noexcept;
     T*       get_task (fmr::Local_int)          noexcept;
     T*       get_task (Work::Task_path_t)       noexcept;
+    T*       get_task (Task_type, fmr::Local_int ix=0) noexcept;
+    T*       get_task (Plug_type, fmr::Local_int ix=0) noexcept;
   private:
     T* derived (Data*) noexcept;
+    T* derived (Work*) noexcept;
   protected:// Make it clear this class needs to be inherited from.
     Data ()            =default;
     Data (const Data&) =default;

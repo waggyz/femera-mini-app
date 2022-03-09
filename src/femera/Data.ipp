@@ -15,6 +15,11 @@ namespace femera {
     return static_cast<T*> (ptr);
   }
   template <typename T> inline
+  T* Data<T>::derived (Work* ptr)
+  noexcept {
+    return static_cast<T*> (ptr);
+  }
+  template <typename T> inline
   fmr::Exit_int Data<T>::init (int* argc, char** argv) noexcept {
     fmr::Exit_int err=0;
     try { Data::derived(this)->task_init (argc, argv); }// Init this task,...
@@ -51,6 +56,14 @@ namespace femera {
   template <typename T> inline
   T* Data<T>::get_task (const Work::Task_path_t tree) noexcept {
     return static_cast<T*> (this->get_work_raw (tree));
+  }
+  template <typename T> inline
+  T* Data<T>::get_task (const Task_type t, const fmr::Local_int ix) noexcept {
+    return Data::derived (Work::get_work_raw (t, ix));
+  }
+  template <typename T> inline
+  T* Data<T>::get_task (const Plug_type t, const fmr::Local_int ix) noexcept {
+    return Data::derived (Work::get_work_raw (task_cast (t), ix));
   }
   template <typename T> inline constexpr
   FMR_SMART_PTR<T> Data<T>::new_task (const Work::Core_ptrs_t core) noexcept {

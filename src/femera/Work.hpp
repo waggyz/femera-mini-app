@@ -86,11 +86,12 @@ namespace femera {
     virtual fmr::Exit_int exit (fmr::Exit_int err=0)    noexcept =0;
     virtual std::string   get_base_name ()              noexcept =0;
   public:
-    Core_ptrs_t    get_core   ()         noexcept;
-    fmr::Local_int get_task_n ()         noexcept;
-//TODO Task_tree_t get_tree   ()         noexcept;
-    fmr::Local_int add_task   (Work_spt) noexcept;// returns task number added
-    fmr::Local_int del_task   (fmr::Local_int ix) noexcept;// returns task_n
+    std::string    get_version ()         noexcept;
+    Core_ptrs_t    get_core    ()         noexcept;
+    fmr::Local_int get_task_n  ()         noexcept;
+//TODO Task_tree_t get_tree    ()         noexcept;
+    fmr::Local_int add_task    (Work_spt) noexcept;// returns task number added
+    fmr::Local_int del_task    (fmr::Local_int ix) noexcept;// returns task_n
   protected:// called by Derived::get_task_*(..)
     Work* get_work_raw (fmr::Local_int) noexcept;//TODO Change to get_work(..)
     Work* get_work_raw (Task_path_t)    noexcept;//                  ""

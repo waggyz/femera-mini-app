@@ -12,6 +12,11 @@ T* femera::cast_via_work (D* derived) {
 }
 namespace femera {
   inline
+  std::string Work::get_version ()
+  noexcept {
+    return this->version;
+  }
+  inline
   Work::Core_ptrs_t Work::get_core ()
   noexcept {
     return std::make_tuple (this->proc, this->data, this->test);
@@ -76,13 +81,14 @@ namespace femera {
       i++;
     }
     while (! W->task_list.empty ()) {
-     for (fmr::Local_int Wix=0; Wix < W->get_task_n (); Wix++) {
-      if (W->task_list[Wix].get()->task_type == t) {
-        if (i == ix) {return W->task_list[Wix].get();}
-        i++;
-      }
+      const fmr::Local_int n = W->get_task_n ();
+      for (fmr::Local_int Wix=0; Wix < n; Wix++) {
+        if (W->task_list [Wix].get()->task_type == t) {
+          if (i == ix) {return W->task_list [Wix].get();}
+          i++;
+      } }
       W = W->task_list[0].get();//TODO other branches
-    } }
+    }
     return nullptr;
   }
   inline

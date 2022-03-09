@@ -12,7 +12,7 @@ ifeq ($(ENABLE_CGNS),ON)
   else
     CGNS_FLAGS += -DCGNS_ENABLE_HDF5:BOOL=OFF
   endif
-  CGNS_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
+  CGNS_FLAGS += -DCMAKE_INSTALL_PREFIX=$(INSTALL_CPU)
   CGNS_FLAGS += -DCGNS_ENABLE_LFS:BOOL=ON
   CGNS_FLAGS += -DCGNS_ENABLE_64BIT:BOOL=ON
   CGNS_FLAGS += -DCGNS_ENABLE_LEGACY:BOOL=OFF
@@ -21,7 +21,7 @@ ifeq ($(ENABLE_CGNS),ON)
   CGNS_FLAGS += -DCGNS_ENABLE_TESTS:BOOL=OFF
   CGNS_FLAGS += -DCGNS_ENABLE_FORTRAN:BOOL=OFF
   CGNS_DEPS:=$(patsubst %,$(BUILD_CPU)/external/install-%.out,$(CGNS_REQUIRES))
-  CGNS_FLAGFILE:=$(BUILD_CPU)/external/install-cgns
+  CGNS_FLAGFILE:=$(BUILD_CPU)/external/install-cgns.flags
 endif
 ifeq ($(ENABLE_CGNS),ON)
 
@@ -29,7 +29,7 @@ ifeq ($(ENABLE_CGNS),ON)
 
 external-flags: $(CGNS_FLAGFILE).new
 
-$(BUILD_CPU)/external/install-cgns.out: $(CGNS_DEPS)
+$(BUILD_CPU)/external/install-cgns.out: | $(CGNS_DEPS)
 
 $(CGNS_FLAGFILE).new: external/config.cgns.mk
 	printf "%s" '$(CGNS_FLAGS)' > $(@)

@@ -627,10 +627,10 @@ get-%: | intro $(BUILD_DIR)/external/
 install-external: $(INSTALL_EXTERNAL) | intro
 	$(call timestamp,$@,make $(JEXT))
 
-install-%: $(BUILD_CPU)/external/install-%.out | intro $(BUILD_DIR)/external/
+install-%: $(BUILD_CPU)/external/install-%.out | intro $(BUILD_CPU)/external/
 	$(call timestamp,$@,)
 
-install-%: $(BUILD_DIR)/external/install-%.out | intro $(BUILD_CPU)/external/
+install-%: $(BUILD_DIR)/external/install-%.out | intro $(BUILD_DIR)/external/
 	$(call timestamp,$@,)
 
 external-done:
