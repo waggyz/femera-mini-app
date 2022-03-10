@@ -1,7 +1,7 @@
 #include "femera.hpp"
 
 fmr::Jobs_t fmr::new_sims (){
-  return femera::Task<femera::sims::Jobs>::new_task ();
+  return femera::Task<femera::task::Jobs>::new_task ();
 }
 #if 0
 fmr::Jobs_spt fmr::new_sims (int* argc, char** argv){
@@ -11,6 +11,6 @@ fmr::Jobs_spt fmr::new_sims (int* argc, char** argv){
 }
 #else
 fmr::Jobs_t fmr::new_sims (int* argc, char** argv){
-  return femera::Task<femera::sims::Jobs>::new_task (argc,argv);
+  return femera::Task<femera::task::Jobs>::new_task (argc,argv);
 }
 #endif

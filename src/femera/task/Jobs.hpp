@@ -3,7 +3,7 @@
 
 #include "../Task.hpp"
 
-namespace femera { namespace sims {
+namespace femera { namespace task {
   class Jobs;// Derive a CRTP concrete class from Task.
   class Jobs : public Task<Jobs> { private: friend class Task;
   // The shared Work::proc, data, test objects are managed by this class.
@@ -14,7 +14,7 @@ namespace femera { namespace sims {
     Jobs (femera::Work::Core_ptrs_t) noexcept;
     Jobs () noexcept;
   };
-} }//end femera::sims:: namespace
+} }//end femera::task:: namespace
 
 #include "Jobs.ipp"
 

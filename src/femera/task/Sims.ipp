@@ -3,7 +3,7 @@
 
 namespace femera {
   inline
-  sims::Sims::Sims (femera::Work::Core_ptrs_t W) noexcept {
+  task::Sims::Sims (femera::Work::Core_ptrs_t W) noexcept {
     std::tie (this->proc, this->data, this->test) = W;
     this->name      ="Femera simulations";
     this->abrv      ="sims";
@@ -11,10 +11,10 @@ namespace femera {
     this->info_d    = 3;
   }
   inline
-  void sims::Sims::task_init (int*, char**) {
+  void task::Sims::task_init (int*, char**) {
   }
   inline
-  void sims::Sims::task_exit () {
+  void task::Sims::task_exit () {
   }
 }//end femera namespace
 

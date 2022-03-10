@@ -104,7 +104,7 @@ TEMP_DIR   := $(shell pwd)/$(BUILD_DIR)/tmp
 BUILD_TREE+= $(BUILD_DIR)/external/tools/ $(BUILD_DIR)/docs/
 BUILD_TREE+= $(BUILD_CPU)/external/ $(BUILD_CPU)/tests/ $(BUILD_CPU)/tools/
 BUILD_TREE+= $(BUILD_CPU)/femera/proc/ $(BUILD_CPU)/femera/data/
-BUILD_TREE+= $(BUILD_CPU)/femera/test/ $(BUILD_CPU)/femera/sims/
+BUILD_TREE+= $(BUILD_CPU)/femera/test/ $(BUILD_CPU)/femera/task/
 BUILD_TREE+=
 BUILD_TREE+= $(BUILD_CPU)/fmr/perf/
 
@@ -886,7 +886,7 @@ endif
 build/%.gtst : export TMPDIR := $(TEMP_DIR)
 build/%.gtst : build/%.gtst.o $(LIBFEMERA)(build/%.o) \
   $(LIBFEMERA)($(BUILD_CPU)/femera/Test.o) \
-  $(LIBFEMERA)($(BUILD_CPU)/femera/sims/Jobs.o)
+  $(LIBFEMERA)($(BUILD_CPU)/femera/task/Jobs.o)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(notdir $@).o ..,$(notdir $@))
 	-$(CXX) $(CXXTESTS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@

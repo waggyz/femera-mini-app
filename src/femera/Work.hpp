@@ -35,10 +35,10 @@ namespace femera {
   namespace data { class File; class Logs;//TODO class Cgns; class Gmsh;
   }//TODO data subclasses: class Type; class Base; class Dflt; }
   namespace test { class Beds; class Unit; class Self; class Perf; class Gtst; }
-  namespace sims { class Jobs; class Sims; }//TODO namespace task {..}?
+  namespace task { class Jobs; class Sims; }//TODO namespace task {..}?
   // typedefs
   using Work_spt = FMR_SMART_PTR <Work>;
-  using Jobs_spt = FMR_SMART_PTR <sims::Jobs>;// concrete Task interface
+  using Jobs_spt = FMR_SMART_PTR <task::Jobs>;// concrete Task interface
   //
   template <typename T, typename D>
   T* cast_via_work (D* derived);

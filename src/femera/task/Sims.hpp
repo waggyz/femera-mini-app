@@ -3,7 +3,7 @@
 
 #include "../Task.hpp"
 
-namespace femera { namespace sims {
+namespace femera { namespace task {
   class Sims;// Derive a CRTP concrete class from Task.
   class Sims : public Task<Sims> { private: friend class Task;
   private:
@@ -13,7 +13,7 @@ namespace femera { namespace sims {
     Sims (femera::Work::Core_ptrs_t) noexcept;
     Sims () =delete;
   };
-} }//end femera::sims:: namespace
+} }//end femera::task:: namespace
 
 #include "Sims.ipp"
 

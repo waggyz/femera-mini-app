@@ -7,7 +7,7 @@
 #endif
 
 namespace femera {
-  void sims::Jobs::task_init (int*, char**) {
+  void task::Jobs::task_init (int*, char**) {
     // Add a processing environment.
     if (this->proc == nullptr) {
       const auto proc_ptr = std::move(proc::Main::new_task (this->get_core()));
@@ -47,7 +47,7 @@ namespace femera {
     // Jobs instance task_list now has proc::Main, data::File, and test::Beds.
     // Add a simulation handler. //TODO command line args?
     if (true) {
-      this->add_task (std::move(Task<sims::Sims>::new_task (this->get_core())));
+      this->add_task (std::move(Task<task::Sims>::new_task (this->get_core())));
     }
     //
   }
