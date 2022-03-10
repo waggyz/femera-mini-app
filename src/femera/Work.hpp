@@ -114,7 +114,7 @@ namespace femera {
   protected:// Built-in stuff -------------------------------------------------
     Work ()            =default;
     Work (Work const&) =default;// copyable
-    Work& operator=
+    Work& operator =
       (const Work&)    =default;
   public:
     virtual ~Work ();// not inline to avoid -Winline large growth warning

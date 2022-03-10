@@ -30,6 +30,7 @@ digraph "source tree" {
 	"Data.hpp" -> "Work.hpp"
 	"Work.hpp" -> "Meter.hpp"
 	"proc.hpp" -> "fmr.hpp"
+	"Pets.hpp" -> "Data.hpp"
 	"Work.hpp" -> "type.hpp"
 	"Fcpu.hpp" -> "Proc.hpp"
 	"Moab.hpp" -> "Data.hpp"

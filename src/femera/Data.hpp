@@ -25,9 +25,9 @@ namespace femera {
     std::string   get_base_name ()           noexcept final override;
   public:
     static constexpr
-    This_spt new_task (const Work::Core_ptrs_t) noexcept;
-    T*       get_task (fmr::Local_int)          noexcept;
-    T*       get_task (Work::Task_path_t)       noexcept;
+    This_spt new_task (const Work::Core_ptrs_t)        noexcept;
+    T*       get_task (fmr::Local_int)                 noexcept;
+    T*       get_task (Work::Task_path_t)              noexcept;
     T*       get_task (Task_type, fmr::Local_int ix=0) noexcept;
     T*       get_task (Plug_type, fmr::Local_int ix=0) noexcept;
   private:

@@ -1,7 +1,7 @@
 #!/usr/bin/make
 ifeq ($(ENABLE_PETSC),ON)
   FMRFLAGS += -DFMR_HAS_PETSC
-  LDLIBS += -lpetsc
+  LDLIBS += -lpetsc -ldl
   LIST_EXTERNAL += petsc
   EXTERNAL_DOT+="PETSc" -> "Femera"\n
   PETSC_FLAGS += PETSC_ARCH=$(CPUMODEL)
@@ -40,6 +40,7 @@ ifeq ($(ENABLE_PETSC),ON)
   endif
   ifeq ($(ENABLE_MKL),ON)
     PETSC_REQUIRES += mkl
+#    LDLIBS += -lmkl
     EXTERNAL_DOT+="MKL" -> "PETSc"\n
     PETSC_FLAGS += --with-blaslapack-dir=$(INSTALL_CPU)/mkl/latest
   endif
@@ -59,10 +60,12 @@ ifeq ($(ENABLE_PETSC),ON)
   ifeq ($(ENABLE_GMSH),ON)
     # Require Gmsh so HDF5 will get built before both PETSc & Gmsh
     PETSC_REQUIRES += gmsh
+    LDLIBS += -lX11
     EXTERNAL_DOT+="Gmsh" -> "PETSc"\n
     PETSC_FLAGS += --with-gmsh-dir=$(INSTALL_CPU)
   endif
   ifeq ($(ENABLE_HDF5),ON)
+    LDLIBS += -lhdf5
     PETSC_REQUIRES += hdf5
     EXTERNAL_DOT+="HDF5" -> "PETSc"\n
     PETSC_FLAGS += --with-hdf5-dir=$(INSTALL_CPU)

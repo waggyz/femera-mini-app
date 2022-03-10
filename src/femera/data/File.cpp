@@ -10,6 +10,9 @@
 #ifdef FMR_HAS_GMSH
 #include "Gmsh.hpp"
 #endif
+#ifdef FMR_HAS_PETSC
+#include "Pets.hpp"
+#endif
 
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
@@ -27,6 +30,9 @@ namespace femera {
 #endif
 #ifdef FMR_HAS_GMSH
     this->add_task (std::move(Data<data::Gmsh>::new_task (this->get_core())));
+#endif
+#ifdef FMR_HAS_PETSC
+    this->add_task (std::move(Data<data::Pets>::new_task (this->get_core())));
 #endif
   }
 }// end femera::namespace

@@ -36,7 +36,7 @@ namespace femera {
               +((W->version=="") ? "":" "+W->version);
           }
           const auto head = femera::form::text_line (250, "%4s %4s init",
-            W->get_base_name().c_str(), W->abrv.c_str());
+            W->get_base_name ().c_str(), W->abrv.c_str());
           if (W->data->did_logs_init) {
             W->data->head_line (W->data->fmrlog, head, text);
           } else {
@@ -45,12 +45,12 @@ namespace femera {
               form::head_line (::stdout, 14, 80, head, text);
         } } } }
         if (Werr > 0) {
-          del_list.push (ix);// Remove task if init failed,
-          W->exit (-1);
+          del_list.push (ix);// Queue task for removal if init failed,...
+          W->exit (-1);      // ...and exit the task with a warning code.
     } } }
-    while (! del_list.empty ()) {
+    while (! del_list.empty ()) {// Remove failed tasks.
       const auto head = femera::form::text_line (250, "%4s %4s init",
-        this->get_base_name().c_str(), this->abrv.c_str());
+        this->get_base_name ().c_str(), this->abrv.c_str());
       form::head_line (::stdout, 14, 80, head, "removing %s...",
         this->get_work_raw (del_list.top ())->name.c_str());
       this->del_task (del_list.top ());
@@ -69,24 +69,24 @@ namespace femera {
       auto W = this->task_list.back().get ();// Exit in reverse order.
       if (W != nullptr) {
 #ifdef FMR_DEBUG
-      printf ("Work: exit list %s\n", W->name.c_str());
+        printf ("Work: exit list %s\n", W->name.c_str());
 #endif
-      W->time.add_idle_time_now ();
-      const fmr::Exit_int Werr = W->exit (err);// is noexcept
-      const auto busy_s = W->time.add_busy_time_now ();
-      err = (Werr == 0) ? err : Werr;
-      const auto busy = fmr::form::si_time_string (busy_s);
-      const auto tot  = fmr::form::si_time_string (W->time.get_work_s());
-      const auto head = femera::form::text_line (250, "%4s %4s exit",
-        W->get_base_name().c_str(), W->abrv.c_str());
-      const auto text = busy+" /"+tot+" "+W->name
-        +((W->version=="") ? "":" "+W->version);
-      if (W->data == nullptr) {
-        if (this->is_work_main) {
-          form::head_line (::stdout, 14, 80, head, text);
-      } } else {
-        W->data->head_line (W->data->fmrlog, head, text);
-    } }
+        W->time.add_idle_time_now ();
+        const fmr::Exit_int Werr = W->exit (err);// is noexcept
+        const auto busy_s = W->time.add_busy_time_now ();
+        err = (Werr == 0) ? err : Werr;
+        const auto busy = fmr::form::si_time_string (busy_s);
+        const auto tot  = fmr::form::si_time_string (W->time.get_work_s());
+        const auto head = femera::form::text_line (250, "%4s %4s exit",
+          W->get_base_name ().c_str(), W->abrv.c_str());
+        const auto text = busy+" /"+tot+" "+W->name
+          +((W->version=="") ? "":" "+W->version);
+        if (W->data == nullptr) {
+          if (this->is_work_main) {
+            form::head_line (::stdout, 14, 80, head, text);
+        } } else {
+          W->data->head_line (W->data->fmrlog, head, text);
+      } }
       this->task_list.pop_back ();
     }
     return err;
@@ -124,7 +124,7 @@ namespace femera {
       const auto busy = fmr::form::si_time_string (busy_s);
       const auto tot  = fmr::form::si_time_string (W->time.get_work_s());
       const auto head = femera::form::text_line (250, "%4s %4s exit",
-        W->get_base_name().c_str(), W->abrv.c_str());
+        W->get_base_name ().c_str(), W->abrv.c_str());
       const auto text = busy+" /"+tot+" "+W->name
         +((W->version=="") ? "":" "+W->version);
       if (W->data == nullptr) {
@@ -141,11 +141,11 @@ namespace femera {
 #ifdef FMR_DEBUG
           printf ("Work: exit pop %s\n", W->task_list.back()->name.c_str());
 #endif
-          if (! W->task_list.empty()) {W->task_list.pop_back(); }
+          if (! W->task_list.empty()) {W->task_list.pop_back();}
 #ifdef FMR_DEBUG
           printf ("Work: exit this %s\n", this->name.c_str());
 #endif
-          if (W != this) {this->exit_tree(); }
+          if (W != this) {this->exit_tree();}
     } } }
     return err;
   }
