@@ -28,7 +28,8 @@ namespace femera {
       femera::Errs::print (this->abrv+" task_init", e); }
     catch (...) { err = 3;
       femera::Errs::print (this->abrv+" task_exit"); }
-    init_list (argc, argv);//                     ...then init its task list.
+    err = init_list (argc, argv);//                  ...then init its task list.
+    //TODO remove from task list if err
     return err;
   }
   template <typename T> inline

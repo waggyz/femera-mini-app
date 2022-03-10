@@ -22,37 +22,32 @@ namespace femera {
 #endif
         W->time.add_idle_time_now ();
         const int Werr = W->init (argc, argv); // is noexcept
-        if (Werr>0) { del_list.push (ix); }
+        const auto busy_s = W->time.add_busy_time_now ();
         err = (Werr >= 0) ? err : Werr;
-        W->time.add_busy_time_now ();
         if (W->data != nullptr) {
-          const auto busy = fmr::form::si_time_string (W->time.get_busy_s());
+          const auto busy = fmr::form::si_time_string (busy_s);
           const auto tot  = fmr::form::si_time_string (W->time.get_work_s());
-          if (Werr > 0) {// Remove task if failed to initialize.
-            const auto head = femera::form::text_line (250, "%4s %4s init",
-              W->get_base_name().c_str(), W->abrv.c_str());
-            const auto text = busy+" /"+tot+" failed: "+W->name
+          std::string text = "";
+          if (Werr > 0) {
+            text = busy+" /"+tot+" failed: "+W->name
               +" returned "+std::to_string(Werr);
-            if (W->data->did_logs_init) {
-              W->data->head_line (W->data->fmrlog, head, text);
-            } else {
-            if (W->proc != nullptr) {
-              if (W->proc->is_main ()) {
-                form::head_line (::stdout, 14, 80, head, text);
-            } } }
-            W->exit (-1);
           } else {
-            const auto head = femera::form::text_line (250, "%4s %4s init",
-              W->get_base_name().c_str(), W->abrv.c_str());
-            const auto text = busy+" /"+tot+" "+W->name
+            text = busy+" /"+tot+" "+W->name
               +((W->version=="") ? "":" "+W->version);
-            if (W->data->did_logs_init) {
-              W->data->head_line (W->data->fmrlog, head, text);
-            } else {
-            if (W->proc != nullptr) {
-              if (W->proc->is_main ()) {
-                form::head_line (::stdout, 14, 80, head, text);
-    } } } } } } }
+          }
+          const auto head = femera::form::text_line (250, "%4s %4s init",
+            W->get_base_name().c_str(), W->abrv.c_str());
+          if (W->data->did_logs_init) {
+            W->data->head_line (W->data->fmrlog, head, text);
+          } else {
+          if (W->proc != nullptr) {
+            if (W->proc->is_main ()) {
+              form::head_line (::stdout, 14, 80, head, text);
+        } } } }
+        if (Werr > 0) {
+          del_list.push (ix);// Remove task if init failed,
+          W->exit (-1);
+    } } }
     while (! del_list.empty ()) {
       const auto head = femera::form::text_line (250, "%4s %4s init",
         this->get_base_name().c_str(), this->abrv.c_str());
@@ -78,9 +73,9 @@ namespace femera {
 #endif
       W->time.add_idle_time_now ();
       const fmr::Exit_int Werr = W->exit (err);// is noexcept
+      const auto busy_s = W->time.add_busy_time_now ();
       err = (Werr == 0) ? err : Werr;
-      W->time.add_busy_time_now ();
-      const auto busy = fmr::form::si_time_string (W->time.get_busy_s());
+      const auto busy = fmr::form::si_time_string (busy_s);
       const auto tot  = fmr::form::si_time_string (W->time.get_work_s());
       const auto head = femera::form::text_line (250, "%4s %4s exit",
         W->get_base_name().c_str(), W->abrv.c_str());
@@ -125,8 +120,8 @@ namespace femera {
 #else
       err= W->exit (err);// is noexcept
 #endif
-      W->time.add_busy_time_now ();
-      const auto busy = fmr::form::si_time_string (W->time.get_busy_s());
+      const auto busy_s = W->time.add_busy_time_now ();
+      const auto busy = fmr::form::si_time_string (busy_s);
       const auto tot  = fmr::form::si_time_string (W->time.get_work_s());
       const auto head = femera::form::text_line (250, "%4s %4s exit",
         W->get_base_name().c_str(), W->abrv.c_str());
