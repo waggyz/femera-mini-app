@@ -9,8 +9,8 @@ namespace fmr {
    * https://google.github.io/styleguide/cppguide.html#Aliases */
   using Jobs_t = femera::Jobs_spt;//TODO replace with Mini class
   // functions
-  Jobs_t new_sims ();//TODO class fmr::Mini(); w/member var private: Jobs jobs;
-  Jobs_t new_sims (int*, char**);
+  Jobs_t new_jobs ();//TODO class fmr::Mini(); w/member var private: Jobs jobs;
+  Jobs_t new_jobs (int*, char**);
   //
 }//end fmr:: namespace
 

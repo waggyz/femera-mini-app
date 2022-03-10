@@ -6,7 +6,7 @@ auto jobs = femera::task::Jobs
  ( femera::Work::Core_ptrs_t (nullptr,nullptr,nullptr) );
 #else
   auto jobs = femera::task::Jobs ();
-//  auto jobs = femera::new_sims ();
+//  auto jobs = femera::new_jobs ();
 #endif
 
 int   dummy_argc = 1;

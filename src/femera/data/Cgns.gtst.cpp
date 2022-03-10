@@ -6,7 +6,7 @@
 #include <stdlib.h>          // atof
 
 namespace femera { namespace test {
-  const auto mini = fmr::new_sims ();
+  const auto mini = fmr::new_jobs ();
   //
   inline
   double get_cgns_version () {
