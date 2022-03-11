@@ -63,7 +63,6 @@ if __name__ == "__main__":
   plt.gca().xaxis.set_major_formatter(pdt.DateFormatter('%Y-%m-%d'))
   plt.gca().xaxis.set_major_locator(pdt.MonthLocator())
   #
-  dt0=dt.datetime.strptime('2022-02-01','%Y-%m-%d')
   plt.gca().set_yticks (np.arange(0, files_ylim*1.001, 25))
   plt.plot(x,loc,label='Hundreds of lines source code', linestyle='dashed')
   plt.plot(x,lot,label='Hundreds of lines test code', linestyle='dashed')
@@ -75,6 +74,7 @@ if __name__ == "__main__":
   #plt.plot(x,commit,label='Repository commit number', linestyle='dotted')
   plt.grid()
   plt.title('Femera 0.3 mini-app source code statistics')
+  dt0=dt.datetime.strptime('2022-02-01','%Y-%m-%d')
   plt.gca().set(xlim=(dt0.date(), max(t)))
   plt.gca().set(ylim=(0, files_ylim))
   plt.legend(loc='upper left', fontsize=10)

@@ -29,6 +29,9 @@ namespace fmr { namespace perf {
     Float get_busy_s ();
     Float get_idle_s ();
     Float get_work_s ();
+    Elapsed get_busy_ns ();
+    Elapsed get_idle_ns ();
+    Elapsed get_work_ns ();
     // Overall speed
     Float get_unit_speed ();
     Float get_flop_speed ();

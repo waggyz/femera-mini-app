@@ -70,6 +70,15 @@ namespace fmr {
   inline fmr::Perf_float perf::Meter::get_work_s () {
     return fmr::Perf_float (1.0e-9) * fmr::Perf_float (this->busy_ns + idle_ns);
   }
+  inline fmr::perf::Elapsed perf::Meter::get_busy_ns () {
+    return this->busy_ns;
+  }
+  inline fmr::perf::Elapsed perf::Meter::get_idle_ns () {
+    return this->idle_ns;
+  }
+  inline fmr::perf::Elapsed perf::Meter::get_work_ns () {
+    return this->busy_ns + idle_ns;
+  }
   #if 0
   //TODO Are these useful?
   inline fmr::Perf_float perf::Meter::get_life_time_now () {

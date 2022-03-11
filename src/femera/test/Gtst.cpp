@@ -13,7 +13,7 @@
 #if 1
 namespace femera { namespace test { namespace gtst {
 
-TEST( MiniGtest, TrivialTest ){
+TEST( MiniGtest, RunsGtests ){
   EXPECT_EQ( 0, 0 );
 }
 
