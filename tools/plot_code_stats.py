@@ -5,6 +5,7 @@ import csv
 import matplotlib.pyplot as plt
 import matplotlib.dates as pdt
 import datetime as dt
+import numpy as np
 
 def some_function( *args, **opts ):
   #TODO filename, cpumodel arguments
@@ -23,9 +24,8 @@ def parse_commit_number(version):
 if __name__ == "__main__":
   ''' Plot code stats '''
   cpumodel='i7-7820HQ'
-  ix = []
   t = []
-  dur = []
+  #dur = [] # seconds since commit #177
   loc = [] # lines of code
   foc = [] # number of source code files
   lot = [] # lines of test code
@@ -34,42 +34,37 @@ if __name__ == "__main__":
   ntd = [] # number of TO_DO
   nfm = [] # number of FIX_ME
   commit = []
-  lines_ylim = 20000.0
-  files_ylim = 200.0
+  files_ylim = 150.0
+  lines_ylim = files_ylim * 100.0
   with open ('data/src/femera-'+cpumodel+'-build-stats.csv') as File:
     data = csv.reader(File, delimiter=',')
     #i=177
-    for row in data:
-      if row[11] == cpumodel:
-        dto = dt.datetime.strptime(row[0],'%Y-%m-%dT%H:%M')
+    for rowcol in data:
+      if rowcol[11] == cpumodel:
+        dto = dt.datetime.strptime(rowcol[0],'%Y-%m-%dT%H:%M')
         t.append(dto.date())
         #if i == 177:
         #  start = dto
         #dur.append((dto - start).total_seconds())
-        commit.append(parse_commit_number(row[1]))
-        loc.append(float(row[2]) * files_ylim/lines_ylim)
-        foc.append(int(row[3]))
-        lot.append(float(row[4]) * files_ylim/lines_ylim)
-        fot.append(int(row[5]))
-        nfm.append(int(row[6]))
-        ntd.append(int(row[7]))
-        build_time.append(time2sec(row[8]))
+        commit.append(parse_commit_number(rowcol[1]))
+        loc.append(float(rowcol[2]) * files_ylim/lines_ylim)
+        foc.append(int(rowcol[3]))
+        lot.append(float(rowcol[4]) * files_ylim/lines_ylim)
+        fot.append(int(rowcol[5]))
+        nfm.append(int(rowcol[6]))
+        ntd.append(int(rowcol[7]))
+        build_time.append(time2sec(rowcol[8]))
         #i+=1
-        #ix.append(i)
   #x = commit
   #plt.xlabel('Repository commit number')
   #
   x = t
-  plt.gca().xaxis.set_major_formatter(pdt.DateFormatter('%m/%d/%y'))
-  #plt.gca().xaxis.set_major_locator(pdt.MonthLocator())
-  if False:
-    xticlabs=['2/1/2022','3/1/2022','4/1/2022','5/1/2022','6/1/2022','7/1/2022']
-    xticlabs+=['8/1/2022','9/1/2022','10/1/2022','11/1/2022','12/1/2022']
-    xticlocs=[]
-    for loc in xticlocs:
-      xticlocs.append(dt.datetime.strptime(loc,'%m/%d/%Y'))
-    plt.gca().set_xticks (xticlocs, xticlabs)
+  #plt.gca().xaxis.set_major_formatter(pdt.DateFormatter('%m/%d/%y'))
+  plt.gca().xaxis.set_major_formatter(pdt.DateFormatter('%Y-%m-%d'))
+  plt.gca().xaxis.set_major_locator(pdt.MonthLocator())
   #
+  dt0=dt.datetime.strptime('2022-02-01','%Y-%m-%d')
+  plt.gca().set_yticks (np.arange(0, files_ylim*1.001, 25))
   plt.plot(x,loc,label='Hundreds of lines source code', linestyle='dashed')
   plt.plot(x,lot,label='Hundreds of lines test code', linestyle='dashed')
   plt.plot(x,foc,label='Number of source code files')
@@ -80,7 +75,8 @@ if __name__ == "__main__":
   #plt.plot(x,commit,label='Repository commit number', linestyle='dotted')
   plt.grid()
   plt.title('Femera 0.3 mini-app source code statistics')
-  plt.gca().set(ylim=(0, 150))
+  plt.gca().set(xlim=(dt0.date(), max(t)))
+  plt.gca().set(ylim=(0, files_ylim))
   plt.legend(loc='upper left', fontsize=10)
   # plt.gcf().autofmt_xdate()
   #plt.show()
