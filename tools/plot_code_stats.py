@@ -3,7 +3,7 @@
 
 import csv
 import matplotlib.pyplot as plt
-# import matplotlib.dates as pdt
+import matplotlib.dates as pdt
 import datetime as dt
 
 def some_function( *args, **opts ):
@@ -38,14 +38,14 @@ if __name__ == "__main__":
   files_ylim = 200.0
   with open ('data/src/femera-'+cpumodel+'-build-stats.csv') as File:
     data = csv.reader(File, delimiter=',')
-    i=177
+    #i=177
     for row in data:
       if row[11] == cpumodel:
         dto = dt.datetime.strptime(row[0],'%Y-%m-%dT%H:%M')
         t.append(dto.date())
-        if i == 177:
-          start = dto
-        dur.append((dto - start).total_seconds())
+        #if i == 177:
+        #  start = dto
+        #dur.append((dto - start).total_seconds())
         commit.append(parse_commit_number(row[1]))
         loc.append(float(row[2]) * files_ylim/lines_ylim)
         foc.append(int(row[3]))
@@ -54,15 +54,21 @@ if __name__ == "__main__":
         nfm.append(int(row[6]))
         ntd.append(int(row[7]))
         build_time.append(time2sec(row[8]))
-        i+=1
-        ix.append(i)
-  # w = 0.5
-  # plt.gca().xaxis.set_major_formatter(pdt.DateFormatter('%Y-%M-%D'))
-  # plt.gca().xaxis.set_major_locator(pdt.DayLocator())
+        #i+=1
+        #ix.append(i)
+  #x = commit
+  #plt.xlabel('Repository commit number')
   #
-  x = commit
-  #x = t
-  #x = dur
+  x = t
+  plt.gca().xaxis.set_major_formatter(pdt.DateFormatter('%m/%d/%y'))
+  #plt.gca().xaxis.set_major_locator(pdt.MonthLocator())
+  if False:
+    xticlabs=['2/1/2022','3/1/2022','4/1/2022','5/1/2022','6/1/2022','7/1/2022']
+    xticlabs+=['8/1/2022','9/1/2022','10/1/2022','11/1/2022','12/1/2022']
+    xticlocs=[]
+    for loc in xticlocs:
+      xticlocs.append(dt.datetime.strptime(loc,'%m/%d/%Y'))
+    plt.gca().set_xticks (xticlocs, xticlabs)
   #
   plt.plot(x,loc,label='Hundreds of lines source code', linestyle='dashed')
   plt.plot(x,lot,label='Hundreds of lines test code', linestyle='dashed')
@@ -71,11 +77,11 @@ if __name__ == "__main__":
   plt.plot(x,ntd,label='Number of TO'+'DO in source code')
   plt.plot(x,nfm,label='Number of FIX'+'ME in source code')
   plt.plot(x,build_time,label='Build time for '+cpumodel+' (sec)')
+  #plt.plot(x,commit,label='Repository commit number', linestyle='dotted')
   plt.grid()
   plt.title('Femera 0.3 mini-app source code statistics')
-  plt.xlabel('Repository commit number')
-  plt.gca().set(ylim=(0, 200))
-  plt.legend(loc='upper left', fontsize=12)
+  plt.gca().set(ylim=(0, 150))
+  plt.legend(loc='upper left', fontsize=10)
   # plt.gcf().autofmt_xdate()
   #plt.show()
   plt.savefig('build/'+cpumodel+'/code-stats.png',format='png')

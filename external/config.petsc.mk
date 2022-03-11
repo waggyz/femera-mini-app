@@ -40,7 +40,9 @@ ifeq ($(ENABLE_PETSC),ON)
   endif
   ifeq ($(ENABLE_MKL),ON)
     PETSC_REQUIRES += mkl
-#    LDLIBS += -lmkl
+    LDLIBS += -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lm
+    #-liomp5
+    # already added: LDLIBS += -lpthread
     EXTERNAL_DOT+="MKL" -> "PETSc"\n
     PETSC_FLAGS += --with-blaslapack-dir=$(INSTALL_CPU)/mkl/latest
   endif

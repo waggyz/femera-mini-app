@@ -124,23 +124,29 @@ ifneq ("$(ADD_TO_PATH)","")# only true once during build
 endif
 
 ifeq ("$(findstring $(INSTALL_DIR)/lib64:,$(LDPATH):)","")
-  ADD_TO_LDPATH:= $(INSTALL_DIR)/lib64:$(ADD_TO_LDPATH)
+  ADD_TO_LDPATH:=$(INSTALL_DIR)/lib64:$(ADD_TO_LDPATH)
 endif
 ifeq ("$(findstring $(INSTALL_DIR)/lib:,$(LDPATH):)","")
-  ADD_TO_LDPATH:= $(INSTALL_DIR)/lib:$(ADD_TO_LDPATH)
+  ADD_TO_LDPATH:=$(INSTALL_DIR)/lib:$(ADD_TO_LDPATH)
 endif
 ifeq ("$(findstring $(INSTALL_CPU)/lib64:,$(LDPATH):)","")
-  ADD_TO_LDPATH:= $(INSTALL_CPU)/lib64:$(ADD_TO_LDPATH)
+  ADD_TO_LDPATH:=$(INSTALL_CPU)/lib64:$(ADD_TO_LDPATH)
 endif
 ifeq ("$(findstring $(INSTALL_CPU)/lib:,$(LDPATH):)","")
-  ADD_TO_LDPATH:= $(INSTALL_CPU)/lib:$(ADD_TO_LDPATH)
+  ADD_TO_LDPATH:=$(INSTALL_CPU)/lib:$(ADD_TO_LDPATH)
+endif
+ifeq ("$(findstring $(INSTALL_CPU)/mkl/2021.4.0/lib/intel64:,$(LDPATH):)","")
+  ADD_TO_LDPATH:=$(INSTALL_CPU)/mkl/2021.4.0/lib/intel64:$(ADD_TO_LDPATH)
 endif
 ifneq ("$(ADD_TO_LDPATH)","")# only true once during build
   export LD_LIBRARY_PATH:= $(ADD_TO_LDPATH)$(LD_LIBRARY_PATH)
 endif
+
+
 # TMP_LIBRARY_PATH_=$(LD_LIBRARY_PATH);
 LDFLAGS+= -L$(INSTALL_CPU)/lib -L$(INSTALL_CPU)/lib64
 LDFLAGS+= -L$(INSTALL_DIR)/lib -L$(INSTALL_DIR)/lib64
+LDFLAGS+= -L$(INSTALL_CPU)/mkl/2021.4.0/lib/intel64
 
 ifeq ("$(FMR_COPYRIGHT)","")# only true once during build
   export FMR_COPYRIGHT:= cat data/copyright.txt | tr '\n' ' ' | tr -s ' '
