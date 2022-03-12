@@ -7,7 +7,7 @@
 
 namespace fmr { namespace detail { namespace form {
 
-  std::string si_unit_string (const double val, std::string unit,
+  std::string si_unit (const double val, std::string unit,
     const int min_digits, const std::string signchar);
 
 } } }// end fmr::detail::form:: namespace
@@ -15,21 +15,21 @@ namespace fmr { namespace detail { namespace form {
 namespace fmr {
 
   template<typename V>
-  std::string form::si_unit_string (const V val, std::string unit,
+  std::string form::si_unit (const V val, std::string unit,
   const int md, const bool is_signed) {
     const std::string sign = (val < V(0)) ? "-" :
       (is_signed ? ((val > V(0)) ? "+" : " ") : "");
-    return detail::form::si_unit_string (std::abs(double(val)), unit, md, sign);
+    return detail::form::si_unit (std::abs(double(val)), unit, md, sign);
   }
   template<typename V>
-  std::string form::si_time_string (V val,
+  std::string form::si_time (V val,
   const int md, const bool is_signed) {
     std::string unit = "s";
     if (val > V(599)) { val /= 60; unit="m"; }
     if (val > V(599)) { val /= 60; unit="h"; }
     const std::string sign = (val < V(0)) ? "-" :
       (is_signed ? ((val > V(0)) ? "+" : " ") : "");
-    return detail::form::si_unit_string (std::abs(double(val)), unit, md, sign);
+    return detail::form::si_unit (std::abs(double(val)), unit, md, sign);
   }
 
 }// end fmr:: namespace

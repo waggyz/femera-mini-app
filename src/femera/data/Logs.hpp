@@ -24,16 +24,16 @@ namespace femera { namespace data {
     std::string make_data_line (const std::string line, Head, Tail...);
   private:// character string types are quoted
     static
-    std::string csv_string (const std::string&);
+    std::string csv_item (const std::string&);
     static
-    std::string csv_string (const char*);
+    std::string csv_item (const char*);
   private:// numeric types
     static
-    std::string csv_string (float);
+    std::string csv_item (float);
     static
-    std::string csv_string (double);
+    std::string csv_item (double);
     template <typename I> static
-    std::string csv_string (I integer,//NOTE includes char type
+    std::string csv_item (I integer,//NOTE includes char type
       typename std::enable_if<std::is_integral<I>::value>::type* = 0);
 #endif
   private:

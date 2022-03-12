@@ -34,14 +34,13 @@ namespace femera {
               if (C!= nullptr) {
                 child_busy_ns += C->time.get_busy_ns ();
           } } }
-          const auto busy_s
-            = fmr::perf::Float((W->time.get_busy_ns() - child_busy_ns))
-            * fmr::perf::Float(1e-9);
+          const auto busy_s = fmr::perf::Float(1e-9)
+            * fmr::perf::Float((W->time.get_busy_ns() - child_busy_ns));
 #else
           const auto busy_s = W->time.get_busy_s()
 #endif
-          const auto busy = fmr::form::si_time_string (busy_s);
-          const auto tot  = fmr::form::si_time_string (W->time.get_work_s());
+          const auto busy = fmr::form::si_time (busy_s);
+          const auto tot  = fmr::form::si_time (W->time.get_work_s());
           std::string text = "";
           if (Werr > 0) {
             text = busy+" /"+tot+" failed: "+W->name
@@ -90,7 +89,9 @@ namespace femera {
         const fmr::Exit_int Werr = W->exit (err);// is noexcept
         W->time.add_busy_time_now ();
         err = (Werr == 0) ? err : Werr;
-#if 1
+#if 0
+        const auto busy_s = W->time.get_busy_s ()
+#else
         auto child_busy_ns = fmr::perf::Elapsed(0);
         if (! W->task_list.empty()) {// calculate children busy time
           const auto n = fmr::Local_int (W->task_list.size ());
@@ -99,14 +100,11 @@ namespace femera {
             if (C!= nullptr) {
               child_busy_ns += C->time.get_busy_ns ();
         } } }
-        const auto busy_s
-          = fmr::perf::Float ((W->time.get_busy_ns () - child_busy_ns))
-          * fmr::perf::Float (1e-9);
-#else
-        const auto busy_s = W->time.get_busy_s ()
+        const auto busy_s = fmr::perf::Float (1e-9)
+          * fmr::perf::Float ((W->time.get_busy_ns () - child_busy_ns));
 #endif
-        const auto busy = fmr::form::si_time_string (busy_s);
-        const auto tot  = fmr::form::si_time_string (W->time.get_work_s());
+        const auto busy = fmr::form::si_time (busy_s);
+        const auto tot  = fmr::form::si_time (W->time.get_work_s());
         const auto head = femera::form::text_line (250, "%4s %4s exit",
           W->get_base_name ().c_str(), W->abrv.c_str());
         const auto text = busy+" /"+tot+" "+W->name
@@ -151,8 +149,8 @@ namespace femera {
       err= W->exit (err);// is noexcept
 #endif
       const auto busy_s = W->time.add_busy_time_now ();
-      const auto busy = fmr::form::si_time_string (busy_s);
-      const auto tot  = fmr::form::si_time_string (W->time.get_work_s ());
+      const auto busy = fmr::form::si_time (busy_s);
+      const auto tot  = fmr::form::si_time (W->time.get_work_s ());
       const auto head = femera::form::text_line (250, "%4s %4s exit",
         W->get_base_name ().c_str(), W->abrv.c_str());
       const auto text = busy+" /"+tot+" "+W->name

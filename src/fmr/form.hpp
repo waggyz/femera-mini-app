@@ -8,10 +8,10 @@
 namespace fmr { namespace form {
 
   template <typename V>
-  std::string si_unit_string (const V value, std::string unit,
+  std::string si_unit (const V value, std::string unit,
     const int min_digits = 2, const bool is_signed = false);
   template <typename V>
-  std::string si_time_string (const V seconds,
+  std::string si_time (const V seconds,
     const int min_digits = 2, const bool is_signed = false);
 
   std::string utc_time ();

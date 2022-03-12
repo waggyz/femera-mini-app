@@ -8,7 +8,7 @@
 
 namespace fmr {
 
-std::string detail::form::si_unit_string (double v, std::string unit,
+std::string detail::form::si_unit (double v, std::string unit,
   const int min_digits, const std::string sign) {// implemented here, not inline
     if (unit.size()>8) { unit = unit.substr (0,8); }
     const double threshold

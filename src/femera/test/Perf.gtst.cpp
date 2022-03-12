@@ -23,9 +23,9 @@ namespace femera { namespace test { namespace perf {
     const auto pids_time = mini->test->time.add_busy_time_now ();// - start;
     const auto ratio = double (pids_time / base_time);
     const auto base_str
-      = fmr::form::si_unit_string (double (base_time) / double (n),"s");
+      = fmr::form::si_unit (double (base_time) / double (n),"s");
     const auto pids_str
-      = fmr::form::si_unit_string (double (pids_time) / double (n),"s");
+      = fmr::form::si_unit (double (pids_time) / double (n),"s");
     if (ans2 >= ans1) {// should always be always true
       mini->data->head_line (mini->data->fmrout, "test perf pids",
         "%s /%s (pid/ref) = %.0fx slower each call",
