@@ -12,7 +12,7 @@ namespace femera { namespace test {
   double get_petsc_version () {
     const auto D = mini->data->get_task (femera::Plug_type::Petsc);
     std::string ver = "-1.0";
-    if (D != nullptr) {};//FIXME ver = D->get_version ();}
+    if (D != nullptr) {};//TODO ver = D->get_version ();}
     return atof (ver.c_str());
   }
   TEST( PETSc, TrivialTest) { EXPECT_EQ( 0, 0 ); }

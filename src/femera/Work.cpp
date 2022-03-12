@@ -27,7 +27,7 @@ namespace femera {
         if (W->data != nullptr) {
 #if 1
           auto child_busy_ns = fmr::perf::Elapsed(0);
-          if (! W->task_list.empty ()) {// callculate children busy time
+          if (! W->task_list.empty ()) {// calculate children busy time
             const auto nC = fmr::Local_int (W->task_list.size ());
             for (fmr::Local_int i=0; i<nC; i++) {
               const auto C = W->get_work_raw (i);
@@ -61,7 +61,7 @@ namespace femera {
         } } } }
         if (Werr > 0) {
           del_list.push (ix);// Queue task for removal if init failed, and...
-          W->exit (-1);      // ...exit the with a warning (not error) code.
+          W->exit (-1);      // ...exit with a warning (not error) code.
     } } }
     while (! del_list.empty ()) {// Remove failed tasks.
       const auto head = femera::form::text_line (250, "%4s %4s init",
@@ -97,13 +97,13 @@ namespace femera {
           for (fmr::Local_int i=0; i<n; i++) {
             const auto C = W->get_work_raw (i);
             if (C!= nullptr) {
-              child_busy_ns += C->time.get_busy_ns();
+              child_busy_ns += C->time.get_busy_ns ();
         } } }
         const auto busy_s
-          = fmr::perf::Float((W->time.get_busy_ns() - child_busy_ns))
-          * fmr::perf::Float(1e-9);
+          = fmr::perf::Float ((W->time.get_busy_ns () - child_busy_ns))
+          * fmr::perf::Float (1e-9);
 #else
-        const auto busy_s = W->time.get_busy_s()
+        const auto busy_s = W->time.get_busy_s ()
 #endif
         const auto busy = fmr::form::si_time_string (busy_s);
         const auto tot  = fmr::form::si_time_string (W->time.get_work_s());
@@ -135,23 +135,11 @@ namespace femera {
     while (! W->task_list.empty ()) {// Go to the bottom of the hierarchy.
       branch.push_back (W->get_task_n () - 1);
 #ifdef FMR_DEBUG
-      printf ("Work: exit down (%u tasks) %s\n",W->get_task_n(),W->name.c_str());
+      printf("Work: exit down (%u tasks) %s\n",W->get_task_n(),W->name.c_str());
 #endif
       W = W->task_list.back ().get();
     }
     if (W != nullptr) {
-      auto child_busy_ns = fmr::perf::Elapsed(0);
-#if 0
-      if (! W->task_list.empty()) {
-        //FIXME calculate children busy time does not work because children
-        //      are already removed.
-        const auto n = fmr::Local_int (W->task_list.size ());
-        for (fmr::Local_int i=0; i<n; i++) {
-          const auto C = W->get_work_raw (i);
-          if (C!= nullptr) {
-            child_busy_ns += C->time.get_busy_ns ();
-      } } }
-#endif
 #ifdef FMR_DEBUG
       printf ("Work: exit branch 1 %s\n", W->name.c_str());
 #endif
@@ -162,12 +150,9 @@ namespace femera {
 #else
       err= W->exit (err);// is noexcept
 #endif
-      W->time.add_busy_time_now ();
-      const auto busy_s
-        = fmr::perf::Float((W->time.get_busy_ns() - child_busy_ns))
-        * fmr::perf::Float(1e-9);
+      const auto busy_s = W->time.add_busy_time_now ();
       const auto busy = fmr::form::si_time_string (busy_s);
-      const auto tot  = fmr::form::si_time_string (W->time.get_work_s());
+      const auto tot  = fmr::form::si_time_string (W->time.get_work_s ());
       const auto head = femera::form::text_line (250, "%4s %4s exit",
         W->get_base_name ().c_str(), W->abrv.c_str());
       const auto text = busy+" /"+tot+" "+W->name
@@ -175,7 +160,7 @@ namespace femera {
       if (W->data == nullptr) {
         if (this->is_work_main) {
           form::head_line (::stdout, 14, 80, head, text);
-      } } else {
+        } } else {
         W->data->head_line (W->data->fmrlog, head, text);
     } }
     if (! branch.empty ()) {
