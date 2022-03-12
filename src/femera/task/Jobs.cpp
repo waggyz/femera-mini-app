@@ -10,12 +10,12 @@ namespace femera {
   void task::Jobs::task_init (int*, char**) {
     // Add a processing environment.
     if (this->proc == nullptr) {
-      const auto proc_ptr = std::move(proc::Main::new_task (this->get_core()));
+      const auto proc_ptr = std::move (proc::Main::new_task (this->get_core()));
       this->proc = proc_ptr.get();
-      this->add_task (std::move(proc_ptr));
+      this->add_task (std::move (proc_ptr));
     }
     if (this->proc == nullptr) {
-      FMR_THROW("Failed to add a new processing environment.");
+      FMR_THROW("Failed to add a new processing environment."); return;
     }
     if (this->proc->proc == nullptr) {this->proc->proc = this->proc;}
 #ifdef FMR_HAS_MPI
@@ -23,20 +23,20 @@ namespace femera {
 #endif
     // Add a data handler.
     if (this->data == nullptr) {
-      const auto data_ptr = std::move(data::File::new_task (this->get_core()));
+      const auto data_ptr = std::move (data::File::new_task (this->get_core()));
       this->data = data_ptr.get();
-      this->add_task (std::move(data_ptr));
+      this->add_task (std::move (data_ptr));
     }
     if (this->data == nullptr) {
-      FMR_THROW("Failed to add a new data handler.");
+      FMR_THROW("Failed to add a new data handler."); return;
     }
     if (this->proc->data == nullptr) {this->proc->data = this->data;}
     if (this->data->data == nullptr) {this->data->data = this->data;}
     // Add testbeds.
     if (this->test == nullptr) {
-      const auto test_ptr = std::move(test::Beds::new_task (this->get_core()));
+      const auto test_ptr = std::move (test::Beds::new_task (this->get_core()));
       this->test = test_ptr.get();
-      this->add_task (std::move(test_ptr));
+      this->add_task (std::move (test_ptr));
     }
     if (this->test == nullptr) {
       FMR_THROW("Failed to add new testbeds.");
@@ -45,8 +45,11 @@ namespace femera {
     if (this->data->test == nullptr) {this->data->test = this->test;}
     if (this->test->test == nullptr) {this->test->test = this->test;}
     // Jobs instance task_list now has proc::Main, data::File, and test::Beds.
-    // Add a simulation handler. //TODO command line args?
-    if (true) {
+    // Add a simulation handler.
+    if (true) {//TODO command line args?
+#if 0
+      this->data->time_line (data->fmrlog,"Femera","0.3 started\n");//TODO version
+#endif
       this->add_task (std::move(Task<task::Sims>::new_task (this->get_core())));
     }
     //

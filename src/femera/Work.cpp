@@ -15,7 +15,7 @@ namespace femera {
     const auto n = this->task_list.size ();
     std::stack<fmr::Local_int> del_list = {};
     for (fmr::Local_int ix=0; ix<n; ix++) {// Init task_list forward.
-      const auto W =this->task_list[ix].get();
+      const auto W = this->task_list [ix].get();
       if (W != nullptr) {
 #ifdef FMR_DEBUG
         printf ("Work: init list %s\n", W->name.c_str());
@@ -25,7 +25,9 @@ namespace femera {
         W->time.add_busy_time_now ();
         err = (Werr >= 0) ? err : Werr;
         if (W->data != nullptr) {
-#if 1
+#if 0
+          const auto busy_s = W->time.get_busy_s()
+#else
           auto child_busy_ns = fmr::perf::Elapsed(0);
           if (! W->task_list.empty ()) {// calculate children busy time
             const auto nC = fmr::Local_int (W->task_list.size ());
@@ -34,17 +36,15 @@ namespace femera {
               if (C!= nullptr) {
                 child_busy_ns += C->time.get_busy_ns ();
           } } }
-          const auto busy_s = fmr::perf::Float(1e-9)
-            * fmr::perf::Float((W->time.get_busy_ns() - child_busy_ns));
-#else
-          const auto busy_s = W->time.get_busy_s()
+          const auto busy_s = fmr::perf::Float (1e-9)
+            * fmr::perf::Float (W->time.get_busy_ns () - child_busy_ns);
 #endif
           const auto busy = fmr::form::si_time (busy_s);
-          const auto tot  = fmr::form::si_time (W->time.get_work_s());
+          const auto tot  = fmr::form::si_time (W->time.get_work_s ());
           std::string text = "";
           if (Werr > 0) {
             text = busy+" /"+tot+" failed: "+W->name
-              +" returned "+std::to_string(Werr);
+              +" returned "+std::to_string (Werr);
           } else {
             text = busy+" /"+tot+" "+W->name
               +((W->version=="") ? "":" "+W->version);
@@ -93,7 +93,7 @@ namespace femera {
         const auto busy_s = W->time.get_busy_s ()
 #else
         auto child_busy_ns = fmr::perf::Elapsed(0);
-        if (! W->task_list.empty()) {// calculate children busy time
+        if (! W->task_list.empty ()) {// calculate children busy time
           const auto n = fmr::Local_int (W->task_list.size ());
           for (fmr::Local_int i=0; i<n; i++) {
             const auto C = W->get_work_raw (i);
@@ -101,7 +101,7 @@ namespace femera {
               child_busy_ns += C->time.get_busy_ns ();
         } } }
         const auto busy_s = fmr::perf::Float (1e-9)
-          * fmr::perf::Float ((W->time.get_busy_ns () - child_busy_ns));
+          * fmr::perf::Float (W->time.get_busy_ns () - child_busy_ns);
 #endif
         const auto busy = fmr::form::si_time (busy_s);
         const auto tot  = fmr::form::si_time (W->time.get_work_s());
@@ -167,13 +167,13 @@ namespace femera {
         W = this->get_work_raw (branch);
         if (W != nullptr) {
 #ifdef FMR_DEBUG
-          printf ("Work: exit pop %s\n", W->task_list.back()->name.c_str());
+          printf ("Work: exit pop  %s\n", W->task_list.back ()->name.c_str());
 #endif
-          if (! W->task_list.empty()) {W->task_list.pop_back();}
+          if (! W->task_list.empty()) {W->task_list.pop_back ();}
 #ifdef FMR_DEBUG
           printf ("Work: exit this %s\n", this->name.c_str());
 #endif
-          if (W != this) {this->exit_tree();}
+          if (W != this) {this->exit_tree ();}
     } } }
     return err;
   }

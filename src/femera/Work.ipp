@@ -25,7 +25,7 @@ namespace femera {
   inline
   Work_spt Work::get_work_spt (const fmr::Local_int i)
   noexcept {
-    return (i < this->task_list.size()) ? std::move(task_list [i]) : nullptr;
+    return (i < this->task_list.size()) ? std::move (task_list [i]) : nullptr;
   }
   inline
   Work_spt Work::get_work_spt (const Work::Task_path_t path)
@@ -35,19 +35,19 @@ namespace femera {
     const auto sz = path.size();
 #if 0
     if (sz > 0) {
-      if (path[0] < this->get_task_n()) {
-        W = this->get_work_spt (path[0]);
+      if (path [0] < this->get_task_n ()) {
+        W = this->get_work_spt (path [0]);
         if (sz > 1) {
           for (fmr::Local_int i = 1; i < sz; i++) {
             if (W != nullptr) {
-              if (path[i] < W->get_task_n()) { W = W->get_work_spt (path[i]); }
+              if (path [i] < W->get_task_n()) {W = W->get_work_spt (path [i]);}
               else { W = nullptr; }
     } } } } }
 #else
     if (sz > 0) {
       for (fmr::Local_int i = 0; i < sz; i++) {
         if (Wraw != nullptr) {
-          W = W->get_work_spt (path[i]);
+          W = W->get_work_spt (path [i]);
           Wraw = W.get();
     } } }
 #endif
@@ -67,7 +67,7 @@ namespace femera {
     if (sz > 0) {
       for (fmr::Local_int i = 0; i < sz; i++) {
         if (W != nullptr) {
-          W = W->get_work_raw (path[i]);
+          W = W->get_work_raw (path [i]);
     } } }
     return W;
   }
@@ -87,7 +87,7 @@ namespace femera {
           if (i == ix) {return W->task_list [Wix].get();}
           i++;
       } }
-      W = W->task_list[0].get();//TODO other branches
+      W = W->task_list [0].get();//TODO other branches
     }
     return nullptr;
   }

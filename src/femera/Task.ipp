@@ -14,13 +14,13 @@ namespace femera {
   template <typename T> inline
   fmr::Exit_int Task<T>::init (int* argc, char** argv) noexcept {
     fmr::Exit_int err=0;
-    try { Task::derived (this)->task_init (argc, argv); }// Init this task,
-    catch (const Errs& e) { err = 1; e.print (); }
-    catch (std::exception& e) { err = 2;
-      femera::Errs::print (this->abrv+" task_init", e); }
-    catch (...) { err = 3;
-      femera::Errs::print (this->abrv+" task_exit"); }
-    if (err > 0 ){ return this->exit (err); }
+    try {Task::derived (this)->task_init (argc, argv);}// Init this task,
+    catch (const Errs& e) {err = 1; e.print ();}
+    catch (std::exception& e) {err = 2;
+      femera::Errs::print (this->abrv+" task_init", e);}
+    catch (...) {err = 3;
+      femera::Errs::print (this->abrv+" task_exit");}
+    if (err > 0 ) {return this->exit (err);}
     this->init_list (argc, argv);// then init the list; is noexcept
     return err;
   }
@@ -28,13 +28,13 @@ namespace femera {
   fmr::Exit_int Task<T>::exit (fmr::Exit_int err) noexcept {
     fmr::Exit_int task_err =0;
     this->exit_list ();// is noexcept
-    try { Task::derived (this)->task_exit (); }
-    catch (const Errs& e) { task_err = 1; e.print (); }
-    catch (std::exception& e) { err = 2;
-      femera::Errs::print (this->abrv+" task_exit", e); }
-    catch (...) { task_err = 3;
-      femera::Errs::print (this->abrv+" task_exit"); }
-    if (Task::derived (this)->do_exit_zero) { return 0; }
+    try {Task::derived (this)->task_exit ();}
+    catch (const Errs& e) {task_err = 1; e.print ();}
+    catch (std::exception& e) {err = 2;
+      femera::Errs::print (this->abrv+" task_exit", e);}
+    catch (...) {task_err = 3;
+      femera::Errs::print (this->abrv+" task_exit");}
+    if (Task::derived (this)->do_exit_zero) {return 0;}
     return (task_err > 0) ? task_err : err;
   }
   template <typename T> inline
