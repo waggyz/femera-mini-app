@@ -41,7 +41,7 @@ namespace femera {
   using Jobs_spt = FMR_SMART_PTR <task::Jobs>;// concrete Task interface
   //
   template <typename T, typename D>
-  T* cast_via_work (D* derived);
+  T* cast_via_work (D* child);
   //
   class Work {/* This is an abstract (pure virtual) base class (interface).
   * Derived classes use the curiously recurrent template pattern (CRTP) e.g.,
@@ -81,7 +81,7 @@ namespace femera {
   public:// methods -----------------------------------------------------------
     //NOTE Make at least 1 method pure virtual.
     //TODO Do all virtual methods need to be pure
-    //     to avoid vtable using CRTP derived classes?
+    //     to avoid vtable using CRTP child classes?
     virtual fmr::Exit_int init (int* argc, char** argv) noexcept =0;
     virtual fmr::Exit_int exit (fmr::Exit_int err=0)    noexcept =0;
     virtual std::string   get_base_name ()              noexcept =0;

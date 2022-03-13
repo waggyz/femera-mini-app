@@ -13,29 +13,26 @@ namespace femera {
     return "proc";
   }
   template <typename T> inline
-  T* Proc<T>::derived (Proc* ptr)
+  T* Proc<T>::child_cast (Proc* ptr)
   noexcept {
     return static_cast<T*> (ptr);
   }
   template <typename T> inline
-  T* Proc<T>::derived (Work* ptr)
+  T* Proc<T>::child_cast (Work* ptr)
   noexcept {
     return static_cast<T*> (ptr);
-  }
-  template <typename T> inline
-  Proc<T>* Proc<T>::this_cast (Work* ptr)
-  noexcept {
-    return static_cast<Proc<T>*> (ptr);
   }
   template <typename T> inline
   fmr::Exit_int Proc<T>::init (int* argc, char** argv)
   noexcept {
     fmr::Exit_int err = 0;
-    try { Proc::derived(this)->task_init (argc, argv); }// Init this task,...
-    catch (const Errs& e)     { err = 1; e.print (); }
-    catch (std::exception& e) { err = 2; Errs::print (abrv+" task_init", e); }
-    catch (...)               { err = 3; Errs::print (abrv+" task_exit"); }
-    Work::init_list (argc, argv);//               ...then init the sub-tasks.
+    try { Proc::child_cast(this)->task_init (argc, argv); }// Init this task,...
+    catch (const Warn& e)    { err =-1; e.print (); }
+    catch (const Errs& e)    { err = 1; e.print (); }
+    catch (std::exception& e){ err = 2; Errs::print (abrv+" task_init", e); }
+    catch (...)              { err = 3; Errs::print (abrv+" task_init"); }
+    if (err > 0) {return this->exit (err); }
+    Work::init_list (argc, argv);//                    ...then init child tasks.
     this->set_base_n ();// Set values for calculating proc_id.
     return err;
   }
@@ -43,9 +40,10 @@ namespace femera {
   fmr::Exit_int Proc<T>::exit (const fmr::Exit_int err)
   noexcept {
     this->data = nullptr;
-    Work::exit_tree ();//                      Exit the task tree below this,...
+    Work::exit_tree ();//                     Exit the task tree below this,...
     fmr::Exit_int task_err = 0;
-    try { Proc::derived(this)->task_exit (); }// ...then try to exit this task.
+    try  { Proc::child_cast (this)->task_exit (); }// ...then try to exit this task.
+    catch (const Warn& e)    { task_err =-1; e.print (); }
     catch (const Errs& e)    { task_err = 1; e.print (); }
     catch (std::exception& e){ task_err = 2; Errs::print (abrv+" task_exit",e);}
     catch (...)              { task_err = 3; Errs::print (abrv+" task_exit"); }
@@ -54,22 +52,22 @@ namespace femera {
   template <typename T> inline
   T* Proc<T>::get_task (const fmr::Local_int i)
   noexcept {
-    return Proc::derived (Work::get_work_raw (i));
+    return Proc::child_cast (Work::get_work_raw (i));
   }
   template <typename T> inline
   T* Proc<T>::get_task (const Work::Task_path_t path)
   noexcept {
-    return Proc::derived (Work::get_work_raw (path));
+    return Proc::child_cast (Work::get_work_raw (path));
   }
   template <typename T> inline
   T* Proc<T>::get_task (const Task_type t, const fmr::Local_int ix)
   noexcept {
-    return Proc::derived (Work::get_work_raw (t, ix));
+    return Proc::child_cast (Work::get_work_raw (t, ix));
   }
   template <typename T> inline
   T* Proc<T>::get_task (const Plug_type t, const fmr::Local_int ix)
   noexcept {
-    return Proc::derived (Work::get_work_raw (task_cast (t), ix));
+    return Proc::child_cast (Work::get_work_raw (task_cast (t), ix));
   }
   template <typename T> inline constexpr
   FMR_SMART_PTR<T> Proc<T>::new_task ()
@@ -127,12 +125,12 @@ namespace femera {
   fmr::Local_int Proc<T>::get_proc_id (fmr::Local_int id)
   noexcept {
     const fmr::Local_int tid
-      = this->base_id + this->base_n * Proc::derived (this)->get_proc_ix ();
+      = this->base_id + this->base_n * Proc::child_cast (this)->get_proc_ix ();
     if (! this->task_list.empty ()) {
       id += this->get_task (0)->get_proc_id (tid);//TODO only path 0?
 #ifdef FMR_DEBUG
       printf ("%s id: %u += %u + %u * %u\n", this->abrv.c_str(), id,
-        this->base_id, this->base_n, Proc::derived (this)->get_proc_ix ());
+        this->base_id, this->base_n, Proc::child_cast (this)->get_proc_ix ());
 #endif
     }
     return id;
@@ -143,9 +141,9 @@ namespace femera {
   noexcept {
 #ifdef FMR_DEBUG
     printf ("Proc<%s>>::get_proc_ix: %u\n", this->abrv.c_str(),
-      Proc::derived (this)->task_proc_ix ());
+      Proc::child_cast (this)->task_proc_ix ());
 #endif
-    return Proc::derived (this)->task_proc_ix ();
+    return Proc::child_cast (this)->task_proc_ix ();
     //NOTE proc->task_proc_ix() always calls Main::task_proc_ix ().
   }
   template <typename T> inline
@@ -162,7 +160,7 @@ namespace femera {
 #ifdef FMR_DEBUG
       printf ("%s: * %u = %u\n", P->name.c_str(), P->get_proc_n(), n);
 #endif
-      P = this_cast (P->get_work_raw (0));//TODO other branches?
+      P = child_cast (P->get_work_raw (0));//TODO other branches?
     }
     return n;
   }
@@ -171,7 +169,7 @@ namespace femera {
     auto P = this;
     while (! P->task_list.empty ()) {
       P->base_n = P->all_proc_n () / P->proc_n;
-      P = this_cast (P->get_work_raw (0));//TODO other branches?
+      P = child_cast (P->get_work_raw (0));//TODO other branches?
     }
     return this->base_n;
   }

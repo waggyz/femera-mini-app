@@ -16,15 +16,16 @@ namespace femera {
     std::string get_base_name ()               noexcept final override;
   public:
     static constexpr
-    This_spt  new_task (const Work::Core_ptrs_t) noexcept;
+    This_spt new_task (const Work::Core_ptrs_t) noexcept;
     static constexpr
-    This_spt  new_task ()                  noexcept;
+    This_spt new_task ()                  noexcept;
     static
-    This_spt  new_task (int*, char**)      noexcept;
-    T*        get_task (fmr::Local_int)    noexcept;
-    T*        get_task (Work::Task_path_t) noexcept;
+    This_spt new_task (int*, char**)      noexcept;
+    T*       get_task (fmr::Local_int)    noexcept;
+    T*       get_task (Work::Task_path_t) noexcept;
   private:
-    T*        derived (Task*) noexcept;
+    T* child_cast (Task*) noexcept;
+    T* child_cast (Work*) noexcept;
   protected:// make it clear this class needs to be inherited
     Task ()            =default;
     Task (const Task&) =default;

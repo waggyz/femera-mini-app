@@ -14,7 +14,7 @@ namespace femera {
   class Proc : public Work {
   private:
     using This_spt = FMR_SMART_PTR<T>;
-  protected:                   // Set by derived instances during task_init()...
+  protected:                   // Set by child instances during task_init()...
     proc::Team_t   team_id = 0;//
     fmr::Local_int team_n  = 1;//
     fmr::Local_int base_id = 0;//
@@ -45,9 +45,8 @@ namespace femera {
     T*       get_task (Task_type, fmr::Local_int ix=0) noexcept;
     T*       get_task (Plug_type, fmr::Local_int ix=0) noexcept;
   private:
-    T*       derived   (Proc*) noexcept;
-    T*       derived   (Work*) noexcept;
-    Proc<T>* this_cast (Work*) noexcept;
+    T* child_cast (Proc*) noexcept;
+    T* child_cast (Work*) noexcept;
   protected:
     Proc ()            =default;
     Proc (const Proc&) =default;

@@ -16,12 +16,12 @@ namespace femera {
     return "data";
   }
   template <typename T> inline
-  T* Data<T>::derived (Data* ptr)
+  T* Data<T>::child_cast (Data* ptr)
   noexcept {
     return static_cast<T*> (ptr);
   }
   template <typename T> inline
-  T* Data<T>::derived (Work* ptr)
+  T* Data<T>::child_cast (Work* ptr)
   noexcept {
     return static_cast<T*> (ptr);
   }
@@ -29,20 +29,23 @@ namespace femera {
   fmr::Exit_int Data<T>::init (int* argc, char** argv)
   noexcept {
     fmr::Exit_int err = 0;
-    try { Data::derived(this)->task_init (argc, argv); }// Init this task,...
-    catch (const Errs& e)     { err = 1; e.print (); }
-    catch (std::exception& e) { err = 2; Errs::print (abrv+" task_init", e); }
-    catch (...)               { err = 3; Errs::print (abrv+" task_exit"); }
-    err = init_list (argc, argv);//               ...then init its task list.
+    try { Data::child_cast (this)->task_init (argc, argv); }// Init this task,...
+    catch (const Warn& e)    { err =-1; e.print (); }
+    catch (const Errs& e)    { err = 1; e.print (); }
+    catch (std::exception& e){ err = 2; Errs::print (abrv+" task_init", e); }
+    catch (...)              { err = 3; Errs::print (abrv+" task_init"); }
+    if (err > 0) {return this->exit (err); }
+    err = init_list (argc, argv);//                ...then init child tasks.
     return err;
   }
   template <typename T> inline
   fmr::Exit_int Data<T>::exit (const fmr::Exit_int err)
   noexcept {
     this->data = nullptr;
-    Work::exit_list ();//           Exit this task list (exceptions caught),...
+    Work::exit_list ();//              Exit child tasks (exceptions caught),...
     fmr::Exit_int task_err = 0;
-    try { Data::derived(this)->task_exit (); }// ...then try to exit this task.
+    try  { Data::child_cast (this)->task_exit (); }// ...then try to exit this task.
+    catch (const Warn& e)    { task_err =-1; e.print (); }
     catch (const Errs& e)    { task_err = 1; e.print (); }
     catch (std::exception& e){ task_err = 2; Errs::print (abrv+" task_exit",e);}
     catch (...)              { task_err = 3; Errs::print (abrv+" task_exit"); }
@@ -61,12 +64,12 @@ namespace femera {
   template <typename T> inline
   T* Data<T>::get_task (const Task_type t, const fmr::Local_int ix)
   noexcept {
-    return Data::derived (Work::get_work_raw (t, ix));
+    return Data::child_cast (Work::get_work_raw (t, ix));
   }
   template <typename T> inline
   T* Data<T>::get_task (const Plug_type t, const fmr::Local_int ix)
   noexcept {
-    return Data::derived (Work::get_work_raw (task_cast (t), ix));
+    return Data::child_cast (Work::get_work_raw (task_cast (t), ix));
   }
   template <typename T> inline constexpr
   FMR_SMART_PTR<T> Data<T>::new_task (const Work::Core_ptrs_t core)

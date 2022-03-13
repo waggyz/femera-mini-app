@@ -49,6 +49,8 @@ namespace femera {
     static  void       print (std::string, std::exception&) noexcept;
     static  void       print (std::string) noexcept;
   };
+  class Warn : public Errs {
+  };
 }//end femera:: namespace
 
 #include "Errs.ipp"

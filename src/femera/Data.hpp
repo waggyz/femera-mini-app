@@ -31,8 +31,8 @@ namespace femera {
     T*       get_task (Task_type, fmr::Local_int ix=0) noexcept;
     T*       get_task (Plug_type, fmr::Local_int ix=0) noexcept;
   private:
-    T* derived (Data*) noexcept;
-    T* derived (Work*) noexcept;
+    T* child_cast (Data*) noexcept;
+    T* child_cast (Work*) noexcept;
   protected:// Make it clear this class needs to be inherited from.
     Data ()            =default;
     Data (const Data&) =default;
