@@ -15,15 +15,15 @@ TEST( Fmpi, Init ){// Initialize Fmpi with MPI already init by early_main(..)
 }
 TEST( Fmpi, TaskName ){
   //TODO get_task by enum?
-  EXPECT_EQ( test_mpi.get_task ({0,0,0})->abrv, "mpi" );
+  EXPECT_EQ( test_mpi.get_task (femera::Plug_type::Fmpi)->abrv, "mpi" );
 }
 TEST( Fmpi, TeamID ){
-  const auto M = test_mpi.get_task ({0,0,0});
+  const auto M = test_mpi.get_task (femera::Plug_type::Fmpi);
   EXPECT_NE( M->get_team_id (), uint(0) );
   EXPECT_NE( M->get_team_id (), femera::proc::Team_t (MPI_COMM_WORLD) );
 }
 TEST( Fmpi, ProcN ){
-  const auto M = test_mpi.get_task ({0,0,0});
+  const auto M = test_mpi.get_task (femera::Plug_type::Fmpi);
   EXPECT_EQ( M->get_proc_n (), uint(2) );
 }
 TEST( Fmpi, Exit ){// should NOT finalize MPI: not initialized by test_mpi

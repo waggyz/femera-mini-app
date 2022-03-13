@@ -16,9 +16,9 @@ namespace femera {
     std::tie (this->proc, this->data, this->test) = core;
     this->name ="OpenMP";
     this->abrv ="omp";
-    this->version = std::to_string( _OPENMP );
+    this->version = std::to_string (_OPENMP);
     this->task_type = task_cast (Plug_type::Fomp);
-    this->proc_ix = this->task_proc_ix ();
+    //this->proc_ix = this->task_proc_ix ();// set in parallel if >1 Fomp loaded
     this->proc_n  = fmr::Local_int (::omp_get_max_threads ());
   }
   void proc::Fomp::task_init (int*, char**) {
@@ -38,7 +38,7 @@ namespace femera {
 #endif
     }
 #if 0
-    if (this->is_in_parallel ()) {//TODO check 1 Fomp/team or 1 Fomp/openmp thrd
+    if (this->is_in_parallel ()) {//TODO 1 Fomp/team or 1 Fomp/openmp thrd?
       this->proc_n = fmr::Local_int (::omp_get_num_threads ());
     } else {
       if (false && this->proc != nullptr) {//TODO calculate number of OpenMP threads

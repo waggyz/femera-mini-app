@@ -22,10 +22,14 @@ namespace femera {
   void proc::Main:: task_init (int*, char**) {
     const auto core = this->get_core ();
     Work::Task_path_t path ={};
-    path.push_back (this->add_task
-      (std::move(Proc<proc::Root>::new_task (core))));
+#if 1
+    //TODO Is proc::Root needed?
+    path.push_back (add_task (std::move (Proc<proc::Root>::new_task (core))));
     path.push_back (get_task (path)->add_task
       (std::move(Proc<proc::Node>::new_task (core))));
+#else
+    path.push_back (add_task (std::move (Proc<proc::Node>::new_task (core))));
+#endif
 #ifdef FMR_HAS_NVIDIA
     auto gpu_parent_path = path;
 #endif

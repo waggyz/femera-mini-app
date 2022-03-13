@@ -125,56 +125,57 @@ namespace femera {
       this->is_work_main = this->proc->is_main ();
     }
     this->did_work_init = false;
-    Work::Task_path_t branch ={};
+    if (! this->task_list.empty ()) {
+      Work::Task_path_t branch ={};
 #ifdef FMR_DEBUG
-    printf ("Work: exit tree %s [%lu]\n", this->name.c_str(), task_list.size());
+      printf ("Work: exit tree %s [%lu]\n", this->name.c_str(), task_list.size());
 #endif
-    auto W = this;
-    while (! W->task_list.empty ()) {// Go to the bottom of the hierarchy.
-      branch.push_back (W->get_task_n () - 1);
+      auto W = this;
+      while (! W->task_list.empty ()) {// Go to the bottom of the hierarchy.
+        branch.push_back (W->get_task_n () - 1);
 #ifdef FMR_DEBUG
-      printf("Work: exit down (%u tasks) %s\n",W->get_task_n(),W->name.c_str());
+        printf("Work: exit down (%u tasks) %s\n",W->get_task_n(),W->name.c_str());
 #endif
-      W = W->task_list.back ().get();
-    }
-    if (W != nullptr) {
+        W = W->task_list.back ().get();
+      }
+      if (W != nullptr) {
 #ifdef FMR_DEBUG
-      printf ("Work: exit branch 1 %s\n", W->name.c_str());
+        printf ("Work: exit branch 1 %s\n", W->name.c_str());
 #endif
-      W->time.add_idle_time_now ();
+        W->time.add_idle_time_now ();
 #if 0
-      const fmr::Exit_int Werr = W->exit (err);// is noexcept
-      err = (Werr == 0) ? err : Werr;
+        const fmr::Exit_int Werr = W->exit (err);// is noexcept
+        err = (Werr == 0) ? err : Werr;
 #else
-      err= W->exit (err);// is noexcept
+        err= W->exit (err);// is noexcept
 #endif
-      const auto busy_s = W->time.add_busy_time_now ();
-      const auto busy = fmr::form::si_time (busy_s);
-      const auto tot  = fmr::form::si_time (W->time.get_work_s ());
-      const auto head = femera::form::text_line (250, "%4s %4s exit",
-        W->get_base_name ().c_str(), W->abrv.c_str());
-      const auto text = busy+" /"+tot+" "+W->name
-        +((W->version=="") ? "":" "+W->version);
-      if (W->data == nullptr) {
-        if (this->is_work_main) {
-          form::head_line (::stdout, 14, 80, head, text);
-        } } else {
-        W->data->head_line (W->data->fmrlog, head, text);
-    } }
-    if (! branch.empty ()) {
-      branch.pop_back ();
+        const auto busy_s = W->time.add_busy_time_now ();
+        const auto busy = fmr::form::si_time (busy_s);
+        const auto tot  = fmr::form::si_time (W->time.get_work_s ());
+        const auto head = femera::form::text_line (250, "%4s %4s exit",
+          W->get_base_name ().c_str(), W->abrv.c_str());
+        const auto text = busy+" /"+tot+" "+W->name
+          +((W->version=="") ? "":" "+W->version);
+        if (W->data == nullptr) {
+          if (this->is_work_main) {
+            form::head_line (::stdout, 14, 80, head, text);
+          } } else {
+          W->data->head_line (W->data->fmrlog, head, text);
+      } }
       if (! branch.empty ()) {
-        W = this->get_work_raw (branch);
-        if (W != nullptr) {
+        branch.pop_back ();
+        if (! branch.empty ()) {
+          W = this->get_work_raw (branch);
+          if (W != nullptr) {
 #ifdef FMR_DEBUG
-          printf ("Work: exit pop  %s\n", W->task_list.back ()->name.c_str());
+            printf ("Work: exit pop  %s\n", W->task_list.back ()->name.c_str());
 #endif
-          if (! W->task_list.empty()) {W->task_list.pop_back ();}
+            if (! W->task_list.empty()) {W->task_list.pop_back ();}
 #ifdef FMR_DEBUG
-          printf ("Work: exit this %s\n", this->name.c_str());
+            printf ("Work: exit this %s\n", this->name.c_str());
 #endif
-          if (W != this) {this->exit_tree ();}
-    } } }
+            if (W != this) {this->exit_tree ();}
+    } } } }
     return err;
   }
 }//end femera:: namespace

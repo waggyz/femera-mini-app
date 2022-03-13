@@ -8,7 +8,7 @@
 
 namespace femera {
   void task::Jobs::task_init (int*, char**) {
-    // Add a processing environment.
+    // Add the Main processing environment (this->proc).
     if (this->proc == nullptr) {
       const auto proc_ptr = std::move (proc::Main::new_task (this->get_core()));
       this->proc = proc_ptr.get();
@@ -21,7 +21,7 @@ namespace femera {
 #ifdef FMR_HAS_MPI
     this->do_exit_zero = true;
 #endif
-    // Add a data handler.
+    // Add the File data handler (this->data).
     if (this->data == nullptr) {
       const auto data_ptr = std::move (data::File::new_task (this->get_core()));
       this->data = data_ptr.get();
@@ -32,7 +32,7 @@ namespace femera {
     }
     if (this->proc->data == nullptr) {this->proc->data = this->data;}
     if (this->data->data == nullptr) {this->data->data = this->data;}
-    // Add testbeds.
+    // Add test::Beds (this->test).
     if (this->test == nullptr) {
       const auto test_ptr = std::move (test::Beds::new_task (this->get_core()));
       this->test = test_ptr.get();

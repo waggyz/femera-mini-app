@@ -10,7 +10,7 @@ auto test_proc = femera::proc::Main ();
 
 TEST( Node, TaskName ){
   EXPECT_EQ( test_proc.init (nullptr,nullptr), 0 ); test_proc.proc = &test_proc;
-  EXPECT_NE( test_proc.get_task ({0,0})->name, "node" );
+  EXPECT_NE( test_proc.get_task (femera::Plug_type::Node)->name, "node" );
 }
 TEST(Node, CoreN) {
   EXPECT_GE( femera::proc::Node::get_core_n (), uint(1));

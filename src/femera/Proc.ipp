@@ -8,6 +8,11 @@
 
 namespace femera {
   template <typename T> inline
+  std::string Proc<T>::get_base_name ()
+  noexcept {
+    return "proc";
+  }
+  template <typename T> inline
   T* Proc<T>::derived (Proc* ptr)
   noexcept {
     return static_cast<T*> (ptr);
@@ -25,52 +30,45 @@ namespace femera {
   template <typename T> inline
   fmr::Exit_int Proc<T>::init (int* argc, char** argv)
   noexcept {
-    fmr::Exit_int err=0;
-    try { Proc::derived (this)->task_init (argc, argv); }//   Init this task,...
-    catch (const Errs& e) { err = 1; e.print (); }
-    catch (std::exception& e) { err = 2;
-      femera::Errs::print (this->abrv+" task_init", e); }
-    catch (...) { err = 3;
-      femera::Errs::print (this->abrv+" task_exit"); }
-    Work::init_list (argc, argv);//                  ...then init the sub-tasks.
-    this->set_base_n ();
+    fmr::Exit_int err = 0;
+    try { Proc::derived(this)->task_init (argc, argv); }// Init this task,...
+    catch (const Errs& e)     { err = 1; e.print (); }
+    catch (std::exception& e) { err = 2; Errs::print (abrv+" task_init", e); }
+    catch (...)               { err = 3; Errs::print (abrv+" task_exit"); }
+    Work::init_list (argc, argv);//               ...then init the sub-tasks.
+    this->set_base_n ();// Set values for calculating proc_id.
     return err;
   }
   template <typename T> inline
-  fmr::Exit_int Proc<T>::exit (fmr::Exit_int err)
+  fmr::Exit_int Proc<T>::exit (const fmr::Exit_int err)
   noexcept {
     this->data = nullptr;
-    if (!this->task_list.empty()) {
-      Work::exit_tree ();//      Exit the task tree below this (is noexcept),...
-    }
-    fmr::Exit_int task_err =0;
-    try { Proc::derived (this)->task_exit (); }//...then exit this derived task.
-    catch (const Errs& e) { task_err = 1; e.print (); }
-    catch (std::exception& e) { task_err = 2;
-      femera::Errs::print (this->abrv+" task_exit", e); }
-    catch (...) { task_err = 3;
-      femera::Errs::print (this->abrv+" task_exit"); }
+    Work::exit_tree ();//                      Exit the task tree below this,...
+    fmr::Exit_int task_err = 0;
+    try { Proc::derived(this)->task_exit (); }// ...then try to exit this task.
+    catch (const Errs& e)    { task_err = 1; e.print (); }
+    catch (std::exception& e){ task_err = 2; Errs::print (abrv+" task_exit",e);}
+    catch (...)              { task_err = 3; Errs::print (abrv+" task_exit"); }
     return (task_err > 0) ? task_err : err;
   }
   template <typename T> inline
-  std::string Proc<T>::get_base_name ()
+  T* Proc<T>::get_task (const fmr::Local_int i)
   noexcept {
-    return "proc";
-  }
-  template <typename T> inline
-  T* Proc<T>::get_task (const fmr::Local_int i) noexcept {
     return Proc::derived (Work::get_work_raw (i));
   }
   template <typename T> inline
-  T* Proc<T>::get_task (const Work::Task_path_t path) noexcept {
+  T* Proc<T>::get_task (const Work::Task_path_t path)
+  noexcept {
     return Proc::derived (Work::get_work_raw (path));
   }
   template <typename T> inline
-  T* Proc<T>::get_task (const Task_type t, const fmr::Local_int ix) noexcept {
+  T* Proc<T>::get_task (const Task_type t, const fmr::Local_int ix)
+  noexcept {
     return Proc::derived (Work::get_work_raw (t, ix));
   }
   template <typename T> inline
-  T* Proc<T>::get_task (const Plug_type t, const fmr::Local_int ix) noexcept {
+  T* Proc<T>::get_task (const Plug_type t, const fmr::Local_int ix)
+  noexcept {
     return Proc::derived (Work::get_work_raw (task_cast (t), ix));
   }
   template <typename T> inline constexpr
