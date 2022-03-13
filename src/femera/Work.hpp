@@ -30,9 +30,10 @@ namespace femera {
   template <typename> class Test;// class Beds; interface
   template <typename> class Task;// class Jobs; interface
   namespace proc {
-    class Main; class Root; class Node; class Fmpi; class Fomp; class Fcpu;
-    class Nvid; }
-  namespace data { class File; class Logs;//TODO class Cgns; class Gmsh;
+    class Main; class Root; class Node; class Fcpu;
+    class Fmpi; class Fomp; class Nvid; }
+  namespace data { class File; class Logs;
+    class Cgns; class Gmsh; class Moab; class Moab; class Pets;
   }//TODO data subclasses: class Type; class Base; class Dflt; }
   namespace test { class Beds; class Unit; class Self; class Perf; class Gtst; }
   namespace task { class Jobs; class Sims; }//TODO namespace task {..}?
@@ -40,8 +41,8 @@ namespace femera {
   using Work_spt = FMR_SMART_PTR <Work>;
   using Jobs_spt = FMR_SMART_PTR <task::Jobs>;// concrete Task interface
   //
-  template <typename T, typename D>
-  T* cast_via_work (D* child);
+  template <typename T, typename C>
+  T* cast_via_work (C* child);
   //
   class Work {/* This is an abstract (pure virtual) base class (interface).
   * Derived classes use the curiously recurrent template pattern (CRTP) e.g.,
@@ -94,7 +95,7 @@ namespace femera {
     fmr::Local_int del_task    (fmr::Local_int ix) noexcept;// returns task_n
   protected:// called by Derived::get_task_*(..)
     Work* get_work_raw (fmr::Local_int) noexcept;//TODO Change to get_work(..)
-    Work* get_work_raw (Task_path_t)    noexcept;//                  ""
+    Work* get_work_raw (const Task_path_t&) noexcept;//              ""
     Work* get_work_raw (Task_type, fmr::Local_int ix=0) noexcept;//  ""
 #if 0
     Work_spt get_work_spt (fmr::Local_int) noexcept;

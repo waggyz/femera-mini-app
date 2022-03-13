@@ -6,9 +6,9 @@
 #include <cstdio>     // std::printf
 #endif
 
-template <typename T, typename D> inline
-T* femera::cast_via_work (D* this_cast) {
-  return static_cast<T*> (static_cast<Work*> (this_cast));
+template <typename T, typename C> inline
+T* femera::cast_via_work (C* child) {
+  return static_cast<T*> (static_cast<Work*> (child));
 }
 namespace femera {
   inline
@@ -60,7 +60,7 @@ namespace femera {
     return (ix < this->task_list.size()) ? this->task_list [ix].get() : nullptr;
   }
   inline
-  Work* Work::get_work_raw (const Work::Task_path_t path)
+  Work* Work::get_work_raw (const Work::Task_path_t& path)
   noexcept {
     auto W = this;
     const auto sz = path.size ();

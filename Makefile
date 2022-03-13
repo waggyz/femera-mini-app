@@ -518,7 +518,7 @@ remove-done:
 
 # $(BUILD_CPU)/make-build.post.test.out
 build-done: build/src-notest.eps $(BUILD_CPU)/mini.valgrind.log code-stats
-	$(call timestamp,$@,$?)
+	$(call timestamp,$@,)
 	$(info $(DONE) building $(FEMERA_VERSION) with $(CXX) $(CXX_VERSION))
 	$(info $(SPCS) on $(HOSTNAME) for $(CPUMODEL))
 ifneq ($(HOST_MD5),$(REPO_MD5))

@@ -58,16 +58,16 @@ namespace femera {
     return std::to_string (integer);
   }
   inline
-  std::string data::Logs::make_data_line (const std::string line) {
+  std::string data::Logs::make_data_line (const std::string& line) {
     return line;
   }
   template <typename L> inline
-  std::string data::Logs::make_data_line (const std::string line, const L last) {
+  std::string data::Logs::make_data_line (const std::string& line, const L last) {
     return line + data::Logs::csv_item (last);
   }
   template <typename F, typename ...R> inline
   std::string data::Logs::make_data_line
-  (const std::string line, const F first, R... rest) {
+  (const std::string& line, const F first, R... rest) {
     return make_data_line (line + data::Logs::csv_item (first)+",", rest...);
   }
 }//end femera namespace

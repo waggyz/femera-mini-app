@@ -20,17 +20,33 @@ namespace femera { namespace data {
       = {{nullptr, 80}, {::stdout, 80}, {::stderr, 250}};
   public:
     bool did_logs_init = false;
+#if 0
+  private:
+    using ss = std::string;
+    using Dt = fmr::Data_type;
+    using Ft = fmr::File_type;// fmr::File_type::Auto : by extension
+  public:
+    set_default (Ft);
+    //
+    void add_file (ss& file_name, Ft =Ft::Auto, Dt =Dt::All);
+    void inp_file (ss& file_name, Ft =Ft::Auto, Dt =Dt::All);
+    void out_file (ss& file_name, Ft =Ft::Auto, Dt =Dt::All);
+    //
+    void scan_file (ss& file_name="", Ft =Ft::Auto, Dt =Dt::All);
+    void read_file (ss& file_name="", Ft =Ft::Auto, Dt =Dt::All);
+    void save_file (ss& file_name="", Ft =Ft::Auto, Dt =Dt::All);
+#endif
   public:
     template <typename ...Args>
-    ss text_line (const File_ptrs_t,                 const ss& form, Args...);
+    ss text_line (const File_ptrs_t&,                 const ss& form, Args...);
     template <typename ...Args>
     ss text_line (                                   const ss& form, Args...);
     template <typename ...Args>
-    ss head_line (const File_ptrs_t, const ss& head, const ss& form, Args...);
+    ss head_line (const File_ptrs_t&, const ss& head, const ss& form, Args...);
     template <typename ...Args>
     ss head_line (                   const ss& head, const ss& form, Args...);
     template <typename ...Args>
-    ss head_time (const File_ptrs_t, const ss& head, const ss& form, Args...);
+    ss head_time (const File_ptrs_t&, const ss& head, const ss& form, Args...);
     template <typename ...Args>
     ss head_time (                   const ss& head, const ss& form, Args...);
 #if 0

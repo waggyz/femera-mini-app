@@ -17,11 +17,11 @@ namespace femera { namespace data {
 #else
   private:
     static
-    std::string make_data_line (const std::string line);
+    std::string make_data_line (const std::string& line);
     template <typename Last> static
-    std::string make_data_line (const std::string line, Last);
+    std::string make_data_line (const std::string& line, Last);
     template <typename Head, typename ...Tail> static
-    std::string make_data_line (const std::string line, Head, Tail...);
+    std::string make_data_line (const std::string& line, Head, Tail...);
   private:// character string types are quoted
     static
     std::string csv_item (const std::string&);

@@ -2,10 +2,10 @@
 #define FEMERA_TEST_HPP
 
 #include "Work.hpp"
-#include "../fmr/form.hpp"// used in Data.ipp
 
+// used in Data.ipp
+#include "../fmr/form.hpp"
 #include <unordered_map>
-#include <tuple>
 
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
@@ -23,6 +23,13 @@ namespace femera {
     fmr::Exit_int init (int*, char**)        noexcept final override;
     fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;
     std::string   get_base_name ()           noexcept final override;
+#if 0
+  public:
+    void add_data (fmr::Test_data =fmr::Test_data::All);
+    void add_data (fmr::Perf_data =fmr::Perf_data::All);
+    //
+    void set_sims (std::vector<std::strring>& sim_names);
+#endif
   public:
     static constexpr
     This_spt new_task (const Work::Core_ptrs_t)        noexcept;

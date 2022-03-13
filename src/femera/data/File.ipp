@@ -15,7 +15,7 @@ namespace femera {
   }
   template <typename ...Args> inline
   std::string data::File::text_line
-  (const Data::File_ptrs_t flist, const std::string& form, Args ...args) {
+  (const Data::File_ptrs_t& flist, const std::string& form, Args ...args) {
     FILE* file = nullptr;
     if (flist.size () > 0 && this->proc != nullptr) {
       file = flist [this->proc->get_proc_id () % flist.size()];
@@ -32,7 +32,7 @@ namespace femera {
     return data::File::text_line (Data::File_ptrs_t ({}), form, args...);
   }
   template <typename ...Args> inline
-  std::string data::File::head_line (const Data::File_ptrs_t flist,
+  std::string data::File::head_line (const Data::File_ptrs_t& flist,
     const std::string& head, const std::string& form, Args ...args) {
     FILE* file = nullptr;
     if (flist.size () > 0 && this->proc != nullptr) {
@@ -50,7 +50,7 @@ namespace femera {
     return data::File::head_line (Data::File_ptrs_t ({}), head, form, args...);
   }
   template <typename ...Args> inline
-  std::string data::File::head_time (const Data::File_ptrs_t flist,
+  std::string data::File::head_time (const Data::File_ptrs_t& flist,
     const std::string& head, const std::string& form, Args ...args) {
     FILE* file = nullptr;
     if (flist.size () > 0 && this->proc != nullptr) {
