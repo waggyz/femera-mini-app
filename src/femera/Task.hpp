@@ -24,8 +24,8 @@ namespace femera {
     T*       get_task (fmr::Local_int)    noexcept;
     T*       get_task (Work::Task_path_t) noexcept;
   private:
-    T* child_cast (Task*) noexcept;
-    T* child_cast (Work*) noexcept;
+    T* this_cast (Task*) noexcept;
+    T* this_cast (Work*) noexcept;
   protected:// make it clear this class needs to be inherited
     Task ()            =default;
     Task (const Task&) =default;

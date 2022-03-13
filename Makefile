@@ -290,7 +290,8 @@ ifeq ($(ENABLE_VALGRIND),ON)
     > $(BUILD_CPU)/$(VALGRIND_SUPP) 2>/dev/null;
   VGEXEC := valgrind --leak-check=full --track-origins=yes         \
     $(VGSUPP_FLAGS) --log-file=$(BUILD_CPU)/mini.valgrind.log      \
-    $(VGMPI):$(BUILD_CPU)/mini -n$(TDD_OMP_NP) -v0 $(TDD_FMRFILE); \
+    $(VGMPI):$(BUILD_CPU)/mini -n$(TDD_OMP_NP) -v0 $(TDD_FMRFILE) \
+    > $(BUILD_CPU)/mini.valgrind.out; \
     sed -i '/invalid file descriptor 10[0-4][0-9] /d'      \
       $(BUILD_CPU)/mini.valgrind.log;                      \
     sed -i '/invalid file descriptor 2[56][0-9] /d'        \
@@ -870,7 +871,7 @@ $(BUILD_CPU)/mini: export PATH:=$(shell pwd)/$(BUILD_CPU):$(PATH)
 $(BUILD_CPU)/mini.valgrind.log: $(BUILD_CPU)/mini $(VALGRIND_SUPP_EXE)
 ifeq ($(ENABLE_VALGRIND),ON)
 	$(info $(GRND) valgrind .. fmrexec tdd:$(<))
-	$(VGEXEC) > $(BUILD_CPU)/mini.valgrind.out
+	$(VGEXEC) # >> $(BUILD_CPU)/mini.valgrind.out
 	-grep -i 'lost: [1-9]' $(BUILD_CPU)/mini.valgrind.log \
   | cut -d " " -f 5- | awk '{print "$(WARN) valgrind:",$$0}'
 	-grep -i '[1-9] err' $(BUILD_CPU)/mini.valgrind.log \
@@ -915,19 +916,22 @@ else
 endif
 
 $(VALGRIND_SUPP_EXE) : export TMPDIR := $(TEMP_DIR)
-$(VALGRIND_SUPP_EXE) : src/$(VALGRIND_SUPP).cpp
+$(VALGRIND_SUPP_EXE) : src/$(VALGRIND_SUPP).cpp $(BUILD_CPU)/$(VALGRIND_SUPP) \
+  | $(BUILD_CPU)/mini
 ifeq ($(ENABLE_VALGRIND),ON)
 	$(info $(CLAB) $(CXX) ... -o $(BUILD_CPU)/$(VALGRIND_SUPP).exe)
-	$(CXX) $(VGFLAGS) src/$(VALGRIND_SUPP).cpp $(LDFLAGS) -L$(BUILD_DIR)\
+	$(CXX) $(VGFLAGS) src/$(VALGRIND_SUPP).cpp $(LDFLAGS) -L$(BUILD_DIR) \
   -lfemera -o $(VALGRIND_SUPP_EXE) $(LDLIBS) $(call build_log,$@)
 	$(info $(GRND) suppression file: $(BUILD_CPU)/$(VALGRIND_SUPP))
 	$(VGSUPP)
-  ifneq ("$(VALGRIND_SUPP_FILE)","")
-	cat $(VALGRIND_SUPP_FILE) >>$(BUILD_CPU)/$(VALGRIND_SUPP)
-  endif
 else
 	touch $@
 endif
+
+$(BUILD_CPU)/$(VALGRIND_SUPP): $(VALGRIND_SUPP_FILE)
+  ifneq ("$(VALGRIND_SUPP_FILE)","")
+	cat $(VALGRIND_SUPP_FILE) >>$(BUILD_CPU)/$(VALGRIND_SUPP)
+  endif
 
 # hm ==========================================================================
 %/:

@@ -45,8 +45,8 @@ namespace femera {
     T*       get_task (Task_type, fmr::Local_int ix=0) noexcept;
     T*       get_task (Plug_type, fmr::Local_int ix=0) noexcept;
   private:
-    T* child_cast (Proc*) noexcept;
-    T* child_cast (Work*) noexcept;
+    T* this_cast (Proc*) noexcept;
+    T* this_cast (Work*) noexcept;
   protected:
     Proc ()            =default;
     Proc (const Proc&) =default;

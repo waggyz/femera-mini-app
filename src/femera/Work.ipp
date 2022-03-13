@@ -7,8 +7,8 @@
 #endif
 
 template <typename T, typename D> inline
-T* femera::cast_via_work (D* child_cast) {
-  return static_cast<T*> (static_cast<Work*> (child_cast));
+T* femera::cast_via_work (D* this_cast) {
+  return static_cast<T*> (static_cast<Work*> (this_cast));
 }
 namespace femera {
   inline

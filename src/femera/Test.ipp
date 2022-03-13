@@ -13,12 +13,12 @@ namespace femera {
     return "test";
   }
   template <typename T> inline
-  T* Test<T>::child_cast (Test* ptr)
+  T* Test<T>::this_cast (Test* ptr)
   noexcept {
     return static_cast<T*> (ptr);
   }
   template <typename T> inline
-  T* Test<T>::child_cast (Work* ptr)
+  T* Test<T>::this_cast (Work* ptr)
   noexcept {
     return static_cast<T*> (ptr);
   }
@@ -26,7 +26,7 @@ namespace femera {
   fmr::Exit_int Test<T>::init (int* argc, char** argv)
   noexcept {
     fmr::Exit_int err = 0;
-    try { Test::child_cast (this)->task_init (argc, argv); }// Init this task,...
+    try { Test::this_cast (this)->task_init (argc, argv); }// Init this task,...
     catch (const Warn& e)    { err =-1; e.print (); }
     catch (const Errs& e)    { err = 1; e.print (); }
     catch (std::exception& e){ err = 2; Errs::print (abrv+" task_init", e); }
@@ -40,7 +40,7 @@ namespace femera {
   noexcept {
     Work::exit_list ();//                                 Exit child tasks,...
     fmr::Exit_int task_err = 0;
-    try { Test::child_cast (this)->task_exit (); }// ...then try to exit this task.
+    try { Test::this_cast (this)->task_exit (); }// ...then try to exit this task.
     catch (const Warn& e)    { task_err =-1; e.print (); }
     catch (const Errs& e)    { task_err = 1; e.print (); }
     catch (std::exception& e){ task_err = 2; Errs::print (abrv+" task_exit",e);}
@@ -50,12 +50,12 @@ namespace femera {
   template <typename T> inline
   T* Test<T>::get_task (const fmr::Local_int i)
   noexcept {
-    return child_cast (this->get_work_raw (i));
+    return this_cast (this->get_work_raw (i));
   }
   template <typename T> inline 
   T* Test<T>::get_task (Work::Task_path_t tree)
   noexcept {
-    return child_cast (this->get_work_raw (tree));
+    return this_cast (this->get_work_raw (tree));
   }
   template <typename T> inline constexpr
   FMR_SMART_PTR<T> Test<T>::new_task (const Work::Core_ptrs_t core)
