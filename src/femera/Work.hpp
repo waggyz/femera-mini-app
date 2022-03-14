@@ -65,7 +65,7 @@ namespace femera {
   private:
     using Task_list_t = std::deque <Work_spt>;
   public:// variables ---------------------------------------------------------
-    fmr::perf::Meter time = fmr::perf::Meter ();
+    fmr::perf::Meter<fmr::Perf_int> time = fmr::perf::Meter<fmr::Perf_int> ();
     //
     proc::Main* proc = nullptr;// processing hierarchy
     data::File* data = nullptr;// data, logging, and file handling

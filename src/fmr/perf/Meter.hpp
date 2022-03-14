@@ -6,6 +6,7 @@
 #include <string>
 
 namespace fmr { namespace perf {
+  template <typename T>
   struct Meter {
   private:
     using Float = fmr::Perf_float;
@@ -20,7 +21,7 @@ namespace fmr { namespace perf {
     Float add_busy_time_now ();// returns seconds of busy time added
     Float add_idle_time_now ();// returns seconds of idle time added
     Float add_count            // returns current unit_n total
-      (Count units=1, Count flops=0, Count read=0, Count save=0);
+      (T units=1, T flops=0, T read=0, T save=0);
     //
     Float get_byte_n ();
     Float get_arithmetic_intensity ();
@@ -48,14 +49,14 @@ namespace fmr { namespace perf {
     Meter (const std::string& unit_name) noexcept;
     Meter () =default;
   private:// All member variables are private.
-    Timepoint   tick      = ::fmr::perf::get_now_ns ();
-    Elapsed     idle_ns   = 0;
-    Elapsed     busy_ns   = 0;
-    Count       unit_n    = 0;
-    Count       flop_n    = 0;
-    Count       read_n    = 0;// bytes (was binp_n)
-    Count       save_n    = 0;// bytes (was bout_n)
-    std::string unit_name ="units";
+    Timepoint tick    = ::fmr::perf::get_now_ns ();
+    Elapsed   idle_ns = 0;
+    Elapsed   busy_ns = 0;
+    T         unit_n  = 0;
+    T         flop_n  = 0;
+    T         read_n  = 0;// bytes (was binp_n)
+    T         save_n  = 0;// bytes (was bout_n)
+    std::string unit_name = std::string("units");
   };
 } }// end fmr::perf:: namespace
 
