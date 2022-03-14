@@ -895,7 +895,7 @@ build/%.gtst : build/%.gtst.o $(LIBFEMERA)(build/%.o) \
   $(LIBFEMERA)($(BUILD_CPU)/femera/Test.o) \
   $(LIBFEMERA)($(BUILD_CPU)/femera/task/Jobs.o)
 ifeq ($(ENABLE_GOOGLETEST),ON)
-	$(call col2cxx,$(LINK),$(CXX) $(notdir $@).o ..,$(notdir $@))
+	$(call col2cxx,$(LINK),$(CXX) $(notdir $@).o,$(notdir $@))
 	-$(CXX) $(CXXTESTS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
 	$(info $(WARN) $@ not tested: GoogleTest disabled)
@@ -907,7 +907,7 @@ endif
 build/%.gtst : export TMPDIR := $(TEMP_DIR)
 build/%.gtst : build/%.gtst.o $(LIBFEMERA)($(BUILD_CPU)/femera/Test.o)
 ifeq ($(ENABLE_GOOGLETEST),ON)
-	$(call col2cxx,$(LINK),$(CXX) $(notdir $@).o ..,$(notdir $@))
+	$(call col2cxx,$(LINK),$(CXX) $(notdir $@).o,$(notdir $@))
 	-$(CXX) $(CXXTESTS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
 	$(info $(WARN) $@ not tested: GoogleTest disabled)
@@ -919,9 +919,8 @@ $(VALGRIND_SUPP_EXE) : export TMPDIR := $(TEMP_DIR)
 $(VALGRIND_SUPP_EXE) : src/$(VALGRIND_SUPP).cpp $(BUILD_CPU)/$(VALGRIND_SUPP) \
   | $(BUILD_CPU)/mini
 ifeq ($(ENABLE_VALGRIND),ON)
-	$(info $(CXX_) $(CXX) src/$(VALGRIND_SUPP).cpp ... -o $(VALGRIND_SUPP_EXE))
-	$(CXX) $(VGFLAGS) src/$(VALGRIND_SUPP).cpp $(LDFLAGS) -L$(BUILD_DIR) \
-  -lfemera -o $(VALGRIND_SUPP_EXE) $(LDLIBS) $(call build_log,$@)
+	$(call col2cxx,$(CXX_),$(CXX) $<,$(notdir $@))
+	$(CXX) $(VGFLAGS) $< $(LDFLAGS) -L$(BUILD_DIR) -lfemera -o $@ $(LDLIBS)
 	$(info $(GRND) suppression file: $(BUILD_CPU)/$(VALGRIND_SUPP))
 	$(VGSUPP)
 else
