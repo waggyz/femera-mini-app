@@ -14,28 +14,36 @@ namespace fmr {
 */
   using   Exit_int = int           ;// system return code
   //
-  using    Dim_int = uint_fast8_t  ;// spatial dim., hier. depth, poly. order,
+  using    Dim_int = uint_fast8_t  ;// space dim., hier. depth, poly. order,...
   using   Enum_int = uint_fast16_t ;
   using  Local_int = uint32_t      ;
-  using   Elid_int = uint32_t      ;//(See above.)
-  using Global_int = uint64_t      ;
+  //using   Elid_int = uint32_t      ;//TODO See above.
+  using Global_int = uint64_t      ;// element ID, node ID
   //
-  using   Perf_int = uint_fast64_t ;// unit counters, time (ns) counters
-  using Perf_float = float         ;
+  using Perf_int   = uint_fast64_t ;// unit counters, time (ns) counters
+  using Perf_float = float         ;// speed, aithmetic intensity, time (sec)
   //
-  using Geom_float = double        ;//TODO try float.
+  // Floating point types are defaults.
+  using Geom_float = double        ;//TODO Try float.
   using Phys_float = double        ;
   using Solv_float = double        ;
   using Cond_float = float         ;// Preconditioning and scaling
   using Post_float = float         ;// Post-processing
   using Plot_float = float         ;// Visualization
   //
-  using Line_size_int = uint_fast16_t;
+  using Line_size_int = uint_fast16_t;//TODO Remove.
 }//end fmr:: namespace
 namespace femera { namespace test {
   int early_main (int* argc, char** argv);
 } }// end femera::test:: namespace
 
+//TODO Define FMR_OMP_LOCAL to make & use thread-local drivers for each OpenMP
+//     thread. This may be needed to avoid race conditions in OpenMP parallel
+//     regions; NUMA domain data locality automatic when >= 1 MPI thread/NUMA.
+//#define FMR_OMP_LOCAL
+
+#if 0
+//TODO FMR_VERBMAX, FMR_TIMELVL are not used yet.
 #ifndef FMR_VERBMAX
 #define FMR_VERBMAX 7
 #endif
@@ -43,10 +51,10 @@ namespace femera { namespace test {
 #ifndef FMR_TIMELVL
 #define FMR_TIMELVL FMR_VERBMAX
 #endif
+#endif
 
 #define MAKESTR(s) STR(s)
 #define STR(s) #s
-
 // These help keep source code tidy.
 #define MAIN master
 #ifdef _OPENMP

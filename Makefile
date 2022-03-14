@@ -919,7 +919,7 @@ $(VALGRIND_SUPP_EXE) : export TMPDIR := $(TEMP_DIR)
 $(VALGRIND_SUPP_EXE) : src/$(VALGRIND_SUPP).cpp $(BUILD_CPU)/$(VALGRIND_SUPP) \
   | $(BUILD_CPU)/mini
 ifeq ($(ENABLE_VALGRIND),ON)
-	$(info $(CLAB) $(CXX) ... -o $(BUILD_CPU)/$(VALGRIND_SUPP).exe)
+	$(info $(CXX_) $(CXX) src/$(VALGRIND_SUPP).cpp ... -o $(VALGRIND_SUPP_EXE))
 	$(CXX) $(VGFLAGS) src/$(VALGRIND_SUPP).cpp $(LDFLAGS) -L$(BUILD_DIR) \
   -lfemera -o $(VALGRIND_SUPP_EXE) $(LDLIBS) $(call build_log,$@)
 	$(info $(GRND) suppression file: $(BUILD_CPU)/$(VALGRIND_SUPP))
