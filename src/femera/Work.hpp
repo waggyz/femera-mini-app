@@ -29,14 +29,22 @@ namespace femera {
   template <typename> class Data;// class File; interface
   template <typename> class Test;// class Beds; interface
   template <typename> class Task;// class Jobs; interface
+  //
   namespace proc {
     class Main; class Root; class Node; class Fcpu;
-    class Fmpi; class Fomp; class Nvid; }
-  namespace data { class File; class Logs;
+    class Fmpi; class Fomp; class Nvid;
+  }
+  namespace data {
+    class File; class Logs;//TODO class Type; class Base; class Dflt;
     class Cgns; class Gmsh; class Moab; class Moab; class Pets;
-  }//TODO data subclasses: class Type; class Base; class Dflt; }
-  namespace test { class Beds; class Unit; class Self; class Perf; class Gtst; }
-  namespace task { class Jobs; class Sims; }//TODO namespace task {..}?
+  }
+  namespace test {
+    class Beds; class Unit; class Self; class Perf;
+    class Gtst;
+  }
+  namespace task {
+    class Jobs; class Sims;
+  }
   // typedefs
   using Work_spt = FMR_SMART_PTR <Work>;
   using Jobs_spt = FMR_SMART_PTR <task::Jobs>;// concrete Task interface
