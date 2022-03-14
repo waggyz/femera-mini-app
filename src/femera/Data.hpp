@@ -29,6 +29,23 @@ namespace femera {
     void add_data (fmr::Perf_data =fmr::Perf_data::All);
     //
     void set_sims (std::vector<std::strring>& sim_names);
+    void add_sims (std::vector<std::strring>& sim_names);
+    //
+    void read_data ();// read whole dataset
+    void send_data ();// append, write
+    void save_data ();// new, overwrite
+    //
+    void read_line ();// one line at a time
+    void send_line ();// append, write
+    void save_line ();// new, overwrite
+    //
+    void read_page ();// read data in blocks
+    void send_page ();// append, write
+    void save_page ();// new, overwrite
+    //
+    void read_cols ();// by column (SoA)
+    void send_cols ();// append write
+    void save_cols ();// new, overwrite
 #endif
   public:
     static constexpr

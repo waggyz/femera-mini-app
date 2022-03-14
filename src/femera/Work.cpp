@@ -49,23 +49,23 @@ namespace femera {
             text = busy+" /"+tot+" "+W->name
               +((W->version=="") ? "":" "+W->version);
           }
-          const auto head = femera::form::text_line (250, "%4s %4s init",
+          const auto label = femera::form::text_line (250, "%4s %4s init",
             W->get_base_name ().c_str(), W->abrv.c_str());
           if (W->data->did_logs_init) {
-            W->data->head_line (W->data->fmrlog, head, text);
+            W->data->name_line (W->data->fmrlog, label, text);
           } else {
           if (W->proc != nullptr) {
             if (W->proc->is_main ()) {
-              form::head_line (::stdout, 14, 80, head, text);
+              form::name_line (::stdout, 14, 80, label, text);
         } } } }
         if (Werr > 0) {
           del_list.push (ix);// Queue task for removal if init failed, and...
           W->exit (-1);      // ...exit with a warning (not error) code.
     } } }
     while (! del_list.empty ()) {// Remove failed tasks.
-      const auto head = femera::form::text_line (250, "%4s %4s init",
+      const auto label = femera::form::text_line (250, "%4s %4s init",
         this->get_base_name ().c_str(), this->abrv.c_str());
-      form::head_line (::stdout, 14, 80, head, "removing %s...",
+      form::name_line (::stdout, 14, 80, label, "removing %s...",
         this->get_work_raw (del_list.top ())->name.c_str());
       this->del_task (del_list.top ());
       del_list.pop ();
@@ -105,15 +105,15 @@ namespace femera {
 #endif
         const auto busy = fmr::form::si_time (busy_s);
         const auto tot  = fmr::form::si_time (W->time.get_work_s());
-        const auto head = femera::form::text_line (250, "%4s %4s exit",
+        const auto label = femera::form::text_line (250, "%4s %4s exit",
           W->get_base_name ().c_str(), W->abrv.c_str());
         const auto text = busy+" /"+tot+" "+W->name
           +((W->version=="") ? "":" "+W->version);
         if (W->data == nullptr) {
           if (this->is_work_main) {
-            form::head_line (::stdout, 14, 80, head, text);
+            form::name_line (::stdout, 14, 80, label, text);
         } } else {
-          W->data->head_line (W->data->fmrlog, head, text);
+          W->data->name_line (W->data->fmrlog, label, text);
       } }
       this->task_list.pop_back ();
     }
@@ -152,15 +152,15 @@ namespace femera {
         const auto busy_s = W->time.add_busy_time_now ();
         const auto busy = fmr::form::si_time (busy_s);
         const auto tot  = fmr::form::si_time (W->time.get_work_s ());
-        const auto head = femera::form::text_line (250, "%4s %4s exit",
+        const auto label = femera::form::text_line (250, "%4s %4s exit",
           W->get_base_name ().c_str(), W->abrv.c_str());
         const auto text = busy+" /"+tot+" "+W->name
           +((W->version=="") ? "":" "+W->version);
         if (W->data == nullptr) {
           if (this->is_work_main) {
-            form::head_line (::stdout, 14, 80, head, text);
+            form::name_line (::stdout, 14, 80, label, text);
           } } else {
-          W->data->head_line (W->data->fmrlog, head, text);
+          W->data->name_line (W->data->fmrlog, label, text);
       } }
       if (! branch.empty ()) {
         branch.pop_back ();

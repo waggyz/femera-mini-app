@@ -30,9 +30,9 @@ namespace femera {
       }
 #if 0
       if (this->data != nullptr) {
-        const auto head = this->data->text_line ("%4s %4s %4s",
+        const auto name = this->data->text_line ("%4s %4s %4s",
           this->get_base_name ().c_str(), this->abrv.c_str(), "thrd");
-        data->head_line (data->fmrall, head.c_str(), "%4u for process %4u",
+        data->name_line (data->fmrall, name.c_str(), "%4u for process %4u",
           this->proc_n, this->proc->get_proc_id ());//TODO wrong before init done
       }
 #endif
@@ -44,9 +44,9 @@ namespace femera {
       if (false && this->proc != nullptr) {//TODO calculate number of OpenMP threads
         this->proc->auto_proc_n ();// sets this->proc_n
         if (this->data != nullptr) {
-          const auto head = this->data->text_line ("%4s %4s %4s",
+          const auto name = this->data->text_line ("%4s %4s %4s",
             this->get_base_name ().c_str(), this->abrv.c_str(), "thrd");
-          data->head_line (data->fmrlog, head.c_str(), "%u", this->proc_n);
+          data->name_line (data->fmrlog, name.c_str(), "%u", this->proc_n);
       } }
       ::omp_set_num_threads (int (this->proc_n));
       FMR_PRAGMA_OMP(omp parallel) {

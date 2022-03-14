@@ -24,10 +24,10 @@ namespace femera {
       }
       else {}//TODO FMR_THROW()?
       FMR_PRAGMA_OMP(omp barrier)
-      const auto head = femera::form::text_line (40," %4s %4s %4s",
+      const auto name = femera::form::text_line (40," %4s %4s %4s",
         this->get_base_name().c_str(), this->abrv.c_str(), "proc");
       const std::string text = std::to_string(ix);
-      this->data->head_line (this->data->fmrout, head,
+      this->data->name_line (this->data->fmrout, name,
         "%4u proc[%u %% %u=%u]=%u%s", proc->get_proc_id (),
         ix, mod_n, ix%mod_n, pixs[ix%mod_n], proc->is_main() ? " *main":"");
 

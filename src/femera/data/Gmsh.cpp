@@ -30,7 +30,7 @@ namespace femera {
         Gmsh::Number v = 0;
         ::gmsh::option::getNumber ("General.NumThreads", v);
         const auto n = fmr::Local_int (v);
-        this->data->head_line (this->data->fmrlog, "data gmsh uses",
+        this->data->name_line (this->data->fmrlog, "data gmsh uses",
           "%4u OpenMP thread%s each (maximum)", n, (n==1)?"":"s");
   } } }
   void data::Gmsh::task_exit () {

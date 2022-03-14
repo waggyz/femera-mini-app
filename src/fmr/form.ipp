@@ -51,32 +51,32 @@ namespace femera {
     return line;
   }
   template<typename ...Args>
-  std::string form::head_line
-  (const fmr::Line_size_int head_width, const fmr::Line_size_int line_width,
-  const std::string& head, const std::string& form, Args ...args) {
+  std::string form::name_line
+  (const fmr::Line_size_int name_width, const fmr::Line_size_int line_width,
+  const std::string& name, const std::string& form, Args ...args) {
     const auto format = "%*s "+ form;
     std::vector<char> buf (line_width + 1, 0);
     std::snprintf (&buf[0], buf.size(), format.c_str(),
-      int(head_width), head.c_str(), args...);
+      int(name_width), name.c_str(), args...);
     return std::string(&buf[0]);
   }
   template<typename ...Args>
-  std::string form::head_line (FILE* f,
+  std::string form::name_line (FILE* f,
   const fmr::Line_size_int h, const fmr::Line_size_int l,
-  const std::string& head, const std::string& form, Args ...args) {
-    const auto line = form::head_line (h, l, head, form, args...);
+  const std::string& name, const std::string& form, Args ...args) {
+    const auto line = form::name_line (h, l, name, form, args...);
     fprintf (f,"%s\n", line.c_str());
     return line;
   }
   template<typename ...Args>
-  std::string form::head_time
-  (const fmr::Line_size_int head_width, const fmr::Line_size_int line_width,
-  const std::string& head, const std::string& form, Args ...args) {
+  std::string form::name_time
+  (const fmr::Line_size_int name_width, const fmr::Line_size_int line_width,
+  const std::string& name, const std::string& form, Args ...args) {
     //
     std::string timestr = "UTC "+fmr::form::utc_time();//"UTC 2022-02-02T14:29+00:00.000";  //TODO
     //
     const auto time_width = timestr.length () + 1;
-    auto line = form::head_line (head_width, line_width, head, form, args...);
+    auto line = form::name_line (name_width, line_width, name, form, args...);
     const auto text_width = line_width - time_width;
     if (line.length () > text_width) { line = line.substr (0, text_width); }
     std::vector<char> buf (line_width + 2, 0);
@@ -85,10 +85,10 @@ namespace femera {
     return std::string(&buf[0]);
   }
   template<typename ...Args>
-  std::string form::head_time (FILE* f,
+  std::string form::name_time (FILE* f,
   const fmr::Line_size_int h, const fmr::Line_size_int l,
-  const std::string& head, const std::string& form, Args ...args) {
-    const auto line = form::head_time (h, l, head, form, args...);
+  const std::string& name, const std::string& form, Args ...args) {
+    const auto line = form::name_time (h, l, name, form, args...);
     fprintf (f,"%s\n", line.c_str());
     return line;
   }

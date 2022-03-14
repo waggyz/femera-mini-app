@@ -29,24 +29,24 @@ namespace femera { namespace form {
     fmr::Line_size_int line_width, const std::string& format, Args...);
 
   template<typename ...Args>
-  std::string head_line
-  (fmr::Line_size_int head_width, fmr::Line_size_int line_width,
-    const std::string& heading, const std::string& format, Args...);
+  std::string name_line
+  (fmr::Line_size_int name_width, fmr::Line_size_int line_width,
+    const std::string& nameing, const std::string& format, Args...);
 
   template<typename ...Args>
-  std::string head_line (FILE*,
-    fmr::Line_size_int head_width, fmr::Line_size_int line_width,
-    const std::string& heading, const std::string& format, Args...);
+  std::string name_line (FILE*,
+    fmr::Line_size_int name_width, fmr::Line_size_int line_width,
+    const std::string& nameing, const std::string& format, Args...);
 
   template<typename ...Args>
-  std::string head_time
-  (fmr::Line_size_int head_width, fmr::Line_size_int line_width,
-    const std::string& heading, const std::string& format, Args...);
+  std::string name_time
+  (fmr::Line_size_int name_width, fmr::Line_size_int line_width,
+    const std::string& nameing, const std::string& format, Args...);
 
   template<typename ...Args>
-  std::string head_time (FILE*,
-    fmr::Line_size_int head_width, fmr::Line_size_int line_width,
-    const std::string& heading, const std::string& format, Args...);
+  std::string name_time (FILE*,
+    fmr::Line_size_int name_width, fmr::Line_size_int line_width,
+    const std::string& nameing, const std::string& format, Args...);
 
 } }//end femera::form:: namespace
 

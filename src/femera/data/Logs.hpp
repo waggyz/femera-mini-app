@@ -5,7 +5,7 @@
 //#include "../../fmr/form.hpp"
 
 namespace femera { namespace data {
-  class Logs;// Derive a CRTP concrete class from Data.
+  class Logs;// Derive a CRTP concrete class from Data.//TODO Change to Fcsv?
   class Logs : public Data <Logs> { private: friend class Data;
   public:
     template <typename ...Args> static

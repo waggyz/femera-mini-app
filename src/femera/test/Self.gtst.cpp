@@ -23,10 +23,10 @@ namespace femera { namespace test { namespace self {
       if (id % mod_n < each_n) {
         FMR_PRAGMA_OMP(omp atomic write)
         pids [id % mod_n] = id;
-        const auto head = femera::form::text_line (40,"%4s %4s %4s",
+        const auto name = femera::form::text_line (40,"%4s %4s %4s",
           mini->test->get_base_name().c_str(), mini->test->abrv.c_str(),"proc");
         const std::string text = std::to_string(id);
-        mini->data->head_line (mini->data->fmrout, head,
+        mini->data->name_line (mini->data->fmrout, name,
           "%4u proc[%u %% %u=%u]=%u%s", mini->proc->get_proc_id (), id, mod_n,
           id % mod_n, pids [id % mod_n], mini->proc->is_main() ? " *main" : "");
       }
