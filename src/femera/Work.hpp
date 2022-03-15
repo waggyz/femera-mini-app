@@ -65,8 +65,6 @@ namespace femera {
   private:
     using Task_list_t = std::deque <Work_spt>;
   public:// variables ---------------------------------------------------------
-    fmr::perf::Meter<fmr::perf::Count> time
-      = fmr::perf::Meter<fmr::perf::Count> ();
     //
     proc::Main* proc = nullptr;// processing hierarchy
     data::File* data = nullptr;// data, logging, and file handling
@@ -75,6 +73,8 @@ namespace femera {
     std::string name ="unknown work";
     std::string abrv ="work";
   protected:
+    fmr::perf::Meter<fmr::perf::Count> time
+      = fmr::perf::Meter<fmr::perf::Count> ();
     std::string   version ="";
     Task_list_t task_list ={};
 #if 0

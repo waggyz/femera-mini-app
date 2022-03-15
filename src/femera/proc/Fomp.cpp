@@ -61,7 +61,7 @@ namespace femera {
 #ifdef FMR_DEBUG
     printf ("%s Fomp::task_proc_ix %i\n", abrv.c_str(), ::omp_get_thread_num());
 #endif
-    return fmr::Local_int (::omp_get_thread_num  ());
+    return fmr::Local_int (::omp_get_thread_num ());
   }
 }//end femera:: namespace
 

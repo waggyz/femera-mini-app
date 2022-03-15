@@ -3,6 +3,10 @@
 
 #include "../Data.hpp"
 
+// used in Data.ipp
+#include "../../fmr/form.hpp"
+#include <unordered_map>
+
 namespace femera { namespace data {
   class File;// Derive a CRTP concrete class from Data.
   class File : public Data <File> { private: friend class Data;

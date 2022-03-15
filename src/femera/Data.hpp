@@ -3,9 +3,8 @@
 
 #include "Work.hpp"
 
-// used in Data.ipp
-#include "../fmr/form.hpp"
-#include <unordered_map>
+//#include "../fmr/form.hpp"
+//#include <unordered_map>
 
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
@@ -20,9 +19,10 @@ namespace femera {
   protected:
     using File_ptrs_t = std::vector<FILE*>;
   public:
+    std::string   get_base_name ()           noexcept final override;
+    //
     fmr::Exit_int init (int*, char**)        noexcept final override;
     fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;
-    std::string   get_base_name ()           noexcept final override;
 #if 0
   public:
     void add_data (fmr::Test_data =fmr::Test_data::All);
