@@ -178,23 +178,5 @@ namespace femera {
     } } } }
     return err;
   }
-  std::string Work::get_name ()
-  noexcept {
-    return this->name;
-  }
-  std::string Work::get_abrv ()
-  noexcept {
-    return this->abrv;
-  }
-  std::string Work::set_name (const std::string nm)
-  noexcept {
-    this->name = nm;
-    return this->name;
-  }
-  std::string Work::set_abrv (const std::string ab)
-  noexcept {
-    this->abrv = ab;
-    return this->abrv;
-  }
 }//end femera:: namespace
 #undef FMR_DEBUG

@@ -19,11 +19,11 @@ namespace femera { namespace data {
 #if 1
   public:
     using Data_id = uintptr_t;// cast-compatible with FILE* (for stdout, stderr)
-  public:// class =============================================================
-    class Data_form_t {// for file and stream (e.g., stdout) reading and saving
+  public:// subclass ==========================================================
+    class Data_form {// for file and stream (e.g., stdout) reading and saving
     // describes local (partitioned) representation of data.
     public:// constructor
-      Data_form_t (fmr::Enum_int l, fmr::Local_int p=0, fmr::Enum_int i=1,
+      Data_form (fmr::Enum_int l, fmr::Local_int p=0, fmr::Enum_int i=1,
       fmr::Dim_int m=0, fmr::Dim_int h=0)
       : page_size (p), line_size (l), item_size (i), head_size(h),name_size(m){}
     private:
@@ -40,7 +40,7 @@ namespace femera { namespace data {
 //      std::vector<File_type> file_type = File_type::Unknown;
     };//=======================================================================
   private:
-    std::unordered_map <Data_id, Data_form_t> file_data = {};
+    std::unordered_map <Data_id, Data_form> file_data = {};
 #endif
 #if 1
   private: // TODO Replace below with above.

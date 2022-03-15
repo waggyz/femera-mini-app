@@ -110,6 +110,28 @@ namespace femera {
     }
     return fmr::Local_int (this->task_list.size ());
   }
+  inline
+  std::string Work::get_name ()
+  noexcept {
+    return this->name;
+  }
+  inline
+  std::string Work::get_abrv ()
+  noexcept {
+    return this->abrv;
+  }
+  inline
+  std::string Work::set_name (const std::string& nm)
+  noexcept {
+    this->name = nm;
+    return this->name;
+  }
+  inline
+  std::string Work::set_abrv (const std::string& ab)
+  noexcept {
+    this->abrv = ab;
+    return this->abrv;
+  }
 }//end femera:: namespace
 #if 0
 namespace fmr {

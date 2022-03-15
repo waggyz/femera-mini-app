@@ -57,36 +57,18 @@ namespace femera {
   * class Proc : public Work { .. };
   * class Main : public Proc<Main> { private: friend class Proc; .. };
   */
-  public:// typedefs ----------------------------------------------------------
+  public:// typedefs ==========================================================
     using Core_ptrs_t = std::tuple <proc::Main*, data::File*, test::Beds*>;
     using Task_path_t = std::vector <fmr::Local_int>;
-  protected:
-    using Task_tree_t = std::vector <Task_path_t>;
-  private:
-    using Task_list_t = std::deque <Work_spt>;
-  public:// variables ---------------------------------------------------------
+//  protected:
+//TODO    using Task_tree_t = std::vector <Task_path_t>;
+  public:// variables are classes with (mostly) only public member variables --
     fmr::perf::Meter<fmr::perf::Count> time
       = fmr::perf::Meter<fmr::perf::Count> ();
     //
     proc::Main* proc = nullptr;// processing hierarchy
     data::File* data = nullptr;// data, logging, and file handling
     test::Beds* test = nullptr;// correctness and performance testing
-  protected:
-    std::string      name ="unknown work";
-    std::string      abrv ="work";
-    std::string   version ="";
-    Task_list_t task_list ={};
-    Task_type   task_type = task_cast (Base_type::Work);
-    fmr::Dim_int   info_d = 1;
-#if 0
-// https://stackoverflow.com/questions/60040665/replacing-the-command-line-arguments-int-argc-and-char-argv-with-stdvectors
-    std::string argv_prfx ="-fmr:";
-    std::unique_ptr<char*[]> my_argv;// use: err= init (&my_argc, my_argv.get());
-    int                      my_argc =0;
-#endif
-  private:
-    bool did_work_init = false;
-    bool  is_work_main = true ;// save for use after proc::exit (..)
   public:// methods -----------------------------------------------------------
     //NOTE Make at least 1 method pure virtual.
     //TODO Do all virtual methods need to be pure
@@ -104,9 +86,30 @@ namespace femera {
 //TODO Task_tree_t get_tree    ()         noexcept;
     fmr::Local_int add_task    (Work_spt) noexcept;// returns task number added
     fmr::Local_int del_task    (fmr::Local_int ix) noexcept;// returns task_n
+  private:// ==================================================================
+    using Task_list_t = std::deque <Work_spt>;
+  protected:
+    std::string      name ="unknown work";
+    std::string      abrv ="work";
+    std::string   version ="";
+    Task_list_t task_list ={};
+    Task_type   task_type = task_cast (Base_type::Work);
+    fmr::Dim_int   info_d = 1;
+#if 0
+// https://stackoverflow.com/questions/60040665
+    /replacing-the-command-line-arguments-int-argc-and-char-argv-with-stdvectors
+    //
+    std::string argv_prfx ="-fmr:";
+    std::unique_ptr<char*[]> my_argv;// use: err= init (&my_argc, my_argv.get());
+    int                      my_argc =0;
+#endif
+  private:
+    bool did_work_init = false;
+    bool  is_work_main = true ;// save for use after proc::exit (..)
+  protected:
+    std::string set_name (const std::string&) noexcept;
+    std::string set_abrv (const std::string&) noexcept;
   protected:// called by Derived::get_task_*(..)
-    std::string    set_name    (const std::string) noexcept;
-    std::string    set_abrv    (const std::string) noexcept;
     Work* get_work_raw (fmr::Local_int) noexcept;//TODO Change to get_work(..)
     Work* get_work_raw (const Task_path_t&) noexcept;//              ""
     Work* get_work_raw (Task_type, fmr::Local_int ix=0) noexcept;//  ""
