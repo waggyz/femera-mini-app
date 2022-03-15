@@ -51,7 +51,7 @@ namespace femera {
           }
           const auto label = femera::form::text_line (250, "%4s %4s init",
             W->get_base_name ().c_str(), W->abrv.c_str());
-          if (W->data->did_logs_init) {
+          if (W->data->did_logs_init ()) {
             W->data->name_line (W->data->fmrlog, label, text);
           } else {
           if (W->proc != nullptr) {

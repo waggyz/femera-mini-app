@@ -13,6 +13,15 @@ namespace femera {
   inline
   void data::File::task_exit () {
   }
+  inline
+  bool data::File::did_logs_init () {
+    return this->logs_init_stat;
+  }
+  inline
+  bool data::File::set_logs_init (const bool tf) {
+    this->logs_init_stat = tf;
+    return this->logs_init_stat;
+  }
   template <typename ...Args> inline
   std::string data::File::text_line
   (const Data::File_ptrs_t& flist, const std::string& form, Args ...args) {

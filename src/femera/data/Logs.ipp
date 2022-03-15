@@ -23,7 +23,7 @@ namespace femera {
     } }
     this->data->fmrlog = Data::File_ptrs_t (n, nullptr);
     if (n > 0) {this->data->fmrlog[0] = ::stdout;}
-    this->data->did_logs_init = true;
+    this->data->set_logs_init (true);
   }
   inline
   void data::Logs::task_exit () {

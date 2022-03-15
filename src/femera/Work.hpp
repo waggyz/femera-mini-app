@@ -71,20 +71,19 @@ namespace femera {
     proc::Main* proc = nullptr;// processing hierarchy
     data::File* data = nullptr;// data, logging, and file handling
     test::Beds* test = nullptr;// correctness and performance testing
-    //
   protected:
     std::string      name ="unknown work";
     std::string      abrv ="work";
     std::string   version ="";
     Task_list_t task_list ={};
+    Task_type   task_type = task_cast (Base_type::Work);
+    fmr::Dim_int   info_d = 1;
 #if 0
 // https://stackoverflow.com/questions/60040665/replacing-the-command-line-arguments-int-argc-and-char-argv-with-stdvectors
     std::string argv_prfx ="-fmr:";
     std::unique_ptr<char*[]> my_argv;// use: err= init (&my_argc, my_argv.get());
     int                      my_argc =0;
 #endif
-    Task_type task_type = task_cast (Base_type::Work);
-    fmr::Dim_int info_d = 1;
   private:
     bool did_work_init = false;
     bool  is_work_main = true ;// save for use after proc::exit (..)
@@ -92,9 +91,10 @@ namespace femera {
     //NOTE Make at least 1 method pure virtual.
     //TODO Do all virtual methods need to be pure
     //     to avoid vtable using CRTP child classes?
+    virtual std::string   get_base_name ()              noexcept =0;
+    //
     virtual fmr::Exit_int init (int* argc, char** argv) noexcept =0;
     virtual fmr::Exit_int exit (fmr::Exit_int err=0)    noexcept =0;
-    virtual std::string   get_base_name ()              noexcept =0;
   public:
     std::string    get_name    ()         noexcept;
     std::string    get_abrv    ()         noexcept;
