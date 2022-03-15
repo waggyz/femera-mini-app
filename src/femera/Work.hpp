@@ -50,34 +50,27 @@ namespace femera {
   using Jobs_spt = FMR_SMART_PTR <task::Jobs>;// concrete Task interface
   //
   template <typename T, typename C>
-  T* cast_via_work (C* child);
+  T* cast_via_work (C* child);//TODO Move to Work class?
   //
   class Work {/* This is an abstract (pure virtual) base class (interface).
   * Derived classes use the curiously recurrent template pattern (CRTP) e.g.,
   * class Proc : public Work { .. };
   * class Main : public Proc<Main> { private: friend class Proc; .. };
+  *NOTE Make at least 1 method pure virtual.
+  *TODO Do all virtual methods need to be pure
+        to avoid vtable using CRTP child classes?
   */
   public:// typedefs ==========================================================
     using Core_ptrs_t = std::tuple <proc::Main*, data::File*, test::Beds*>;
     using Task_path_t = std::vector <fmr::Local_int>;
-//  protected:
+    using Work_time_t = fmr::perf::Meter <fmr::perf::Count>;
 //TODO    using Task_tree_t = std::vector <Task_path_t>;
-  public:// variables are classes with (mostly) only public member variables --
-    fmr::perf::Meter<fmr::perf::Count> time
-      = fmr::perf::Meter<fmr::perf::Count> ();
-    //
-    proc::Main* proc = nullptr;// processing hierarchy
-    data::File* data = nullptr;// data, logging, and file handling
-    test::Beds* test = nullptr;// correctness and performance testing
+  public:// variables are classes with (mostly) only member functions public --
+    Work_time_t time = Work_time_t ();// performance timer
+    proc::Main* proc = nullptr;       // processing hierarchy
+    data::File* data = nullptr;       // data, logging, and file handling
+    test::Beds* test = nullptr;       // correctness and performance testing
   public:// methods -----------------------------------------------------------
-    //NOTE Make at least 1 method pure virtual.
-    //TODO Do all virtual methods need to be pure
-    //     to avoid vtable using CRTP child classes?
-    virtual std::string   get_base_name ()              noexcept =0;
-    //
-    virtual fmr::Exit_int init (int* argc, char** argv) noexcept =0;
-    virtual fmr::Exit_int exit (fmr::Exit_int err=0)    noexcept =0;
-  public:
     std::string    get_name    ()         noexcept;
     std::string    get_abrv    ()         noexcept;
     std::string    get_version ()         noexcept;
@@ -86,6 +79,11 @@ namespace femera {
 //TODO Task_tree_t get_tree    ()         noexcept;
     fmr::Local_int add_task    (Work_spt) noexcept;// returns task number added
     fmr::Local_int del_task    (fmr::Local_int ix) noexcept;// returns task_n
+  public:// virtual methods ---------------------------------------------------
+    virtual std::string get_base_name () noexcept =0;
+    // intialize and exit
+    virtual fmr::Exit_int init (int* argc, char** argv) noexcept =0;
+    virtual fmr::Exit_int exit (fmr::Exit_int err=0)    noexcept =0;
   private:// ==================================================================
     using Task_list_t = std::deque <Work_spt>;
   protected:
