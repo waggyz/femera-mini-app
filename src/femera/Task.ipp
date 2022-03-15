@@ -19,7 +19,7 @@ namespace femera {
     try { Task::this_cast (this)->task_init (argc, argv); }// Init this task,...
     catch (const Warn& e)    { err =-1; e.print (); }
     catch (const Errs& e)    { err = 1; e.print (); }
-    catch (std::exception& e){ err = 2; Errs::print (abrv+" task_init", e); }
+    catch (std::exception& e){ err = 2; Errs::print (this->get_abrv ()+" task_init", e); }
     catch (...)              { err = 3; Errs::print (abrv+" task_init"); }
     if (err > 0) { return this->exit (err); }
     const auto list_err = Work::init_list (argc, argv);// ...then init children.

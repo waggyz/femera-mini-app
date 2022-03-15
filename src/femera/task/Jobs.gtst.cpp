@@ -14,13 +14,13 @@ char  dummy [] ="dummy";
 char* dummy_argv [] = {dummy};
 
 TEST( Jobs, TaskAbrv ){
-  EXPECT_EQ( jobs.abrv, "jobs" );
+  EXPECT_EQ( jobs.get_abrv (), "jobs" );
 }
 TEST( Jobs, CoreNames ){
   EXPECT_EQ( jobs.init (&dummy_argc,&dummy_argv[0]), 0);
-  EXPECT_EQ( jobs.proc->abrv, "main" );
-  EXPECT_EQ( jobs.data->abrv, "file" );
-  EXPECT_EQ( jobs.test->abrv, "beds" );
+  EXPECT_EQ( jobs.proc->get_abrv (), "main" );
+  EXPECT_EQ( jobs.data->get_abrv (), "file" );
+  EXPECT_EQ( jobs.test->get_abrv (), "beds" );
 }
 TEST( Jobs, SizeofGtstGEWork ){
   EXPECT_GE( sizeof(jobs), sizeof(femera::Work) );

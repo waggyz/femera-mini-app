@@ -20,7 +20,7 @@ namespace femera {
 //  PetscInitialize(&argc,&argv,(char*)0,help);//if (ierr) return ierr;
   PetscGetVersion(ver,sizeof(ver));
   PetscGetVersionNumber(&major,&minor,&subminor,nullptr);
-  this->name = std::string (ver);
+  this->set_name (std::string (ver));
   this->version = std::to_string (major) + "." + std::to_string (minor)
     + "." + std::to_string (subminor);
 #endif

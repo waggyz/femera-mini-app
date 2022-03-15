@@ -16,7 +16,7 @@ TEST( Nvid, Init ){// Initialize Fmpi with MPI already init by early_main(..)
 #if 1
 TEST( Nvid, TaskName ){
   //TODO get_task by enum task_type
-  EXPECT_EQ( test_main.get_task (femera::Plug_type::Nvid)->abrv, "gpu" );
+  EXPECT_EQ( test_main.get_task (femera::Plug_type::Nvid)->get_abrv (), "gpu" );
 }
 TEST( Nvid, ProcN ){
   EXPECT_GT( test_main.get_task(femera::Plug_type::Nvid)->get_proc_n(),uint(0));

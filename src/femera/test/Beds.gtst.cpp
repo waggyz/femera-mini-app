@@ -8,5 +8,5 @@ fmr::Exit_int main (int argc, char** argv) {
   return mini->exit (mini->init (&argc,argv));
 }
 TEST( Gtst, TaskName ){
-  EXPECT_EQ( mini->test->abrv, "beds" );
+  EXPECT_EQ( mini->test->get_abrv (), "beds" );
 }

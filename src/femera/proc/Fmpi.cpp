@@ -50,8 +50,8 @@ namespace femera {
     int buflen=0, mpiver=0, mpisub=0;
     err= MPI_Get_library_version (& buf[0], & buflen);
     err= MPI_Get_version (& mpiver, & mpisub);
-    this->name = "MPI "+std::to_string (mpiver)+"."+std::to_string (mpisub)
-      +" ("+std::string (& buf[0])+")";
+    this->set_name ("MPI "+std::to_string (mpiver)+"."+std::to_string (mpisub)
+      +" ("+std::string (& buf[0])+")");
     if (sizeof (this->team_id) != sizeof (MPI_Comm)) {
       std::fprintf (::stderr,
         "WARNING sizeof (Proc::team_id) is %lu but should be %lu\n",

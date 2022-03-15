@@ -10,7 +10,7 @@ auto test_proc = femera::proc::Main ();
 
 TEST( Root, TaskName ){
   EXPECT_EQ( test_proc.init (nullptr,nullptr), 0 ); test_proc.proc = &test_proc;
-  EXPECT_EQ( test_proc.get_task ({0})->abrv, "root" );
+  EXPECT_EQ( test_proc.get_task ({0})->get_abrv (), "root" );
 }
 TEST( Root, ProcNisOne ){
   EXPECT_EQ( test_proc.get_task ({0})->get_proc_n (), uint(1) );

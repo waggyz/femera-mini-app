@@ -13,7 +13,7 @@ TEST( Fomp, Init ){// Initialize Fmpi with MPI already init by early_main (..)
 }
 TEST( Fomp, TaskAbrv ){
   //TODO get_task by enum?
-  EXPECT_EQ( test_main.get_task (femera::Plug_type::Fomp)->abrv, "omp" );
+  EXPECT_EQ( test_main.get_task (femera::Plug_type::Fomp)->get_abrv (), "omp" );
 }
 TEST( Fomp, Exit ){// should NOT finalize MPI: not initialized by test_main
   EXPECT_EQ( test_main.exit (0), 0 );

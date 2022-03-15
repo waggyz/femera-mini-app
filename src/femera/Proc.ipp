@@ -29,8 +29,10 @@ namespace femera {
     try { Proc::this_cast(this)->task_init (argc, argv); }// Init this task,...
     catch (const Warn& e)    { err =-1; e.print (); }
     catch (const Errs& e)    { err = 1; e.print (); }
-    catch (std::exception& e){ err = 2; Errs::print (abrv+" task_init", e); }
-    catch (...)              { err = 3; Errs::print (abrv+" task_init"); }
+    catch (std::exception& e){ err = 2;
+    Errs::print (this->get_abrv ()+" task_init", e); }
+    catch (...)              { err = 3;
+    Errs::print (this->get_abrv ()+" task_init"); }
     if (err > 0) {return this->exit (err); }
     Work::init_list (argc, argv);//                    ...then init child tasks.
     this->set_base_n ();// Set values for calculating proc_id.
@@ -45,8 +47,10 @@ namespace femera {
     try  { Proc::this_cast (this)->task_exit (); }// ...then try to exit this task.
     catch (const Warn& e)    { task_err =-1; e.print (); }
     catch (const Errs& e)    { task_err = 1; e.print (); }
-    catch (std::exception& e){ task_err = 2; Errs::print (abrv+" task_exit",e);}
-    catch (...)              { task_err = 3; Errs::print (abrv+" task_exit"); }
+    catch (std::exception& e){ task_err = 2;
+    Errs::print (this->get_abrv ()+" task_exit",e);}
+    catch (...)              { task_err = 3;
+    Errs::print (this->get_abrv ()+" task_exit"); }
     return (task_err > 0) ? task_err : err;
   }
   template <typename T> inline
@@ -114,7 +118,7 @@ namespace femera {
       P = static_cast<Proc*> (P->get_work_raw (0));
       id += P->base_id + P->base_n * P->get_proc_ix ();
 #ifdef FMR_DEBUG
-      printf ("%s id: %u += %u + %u * %u\n", P->abrv.c_str(), id,
+      printf ("%s id: %u += %u + %u * %u\n", P->get_abrv ().c_str(), id,
         P->base_id, P->base_n, P->get_proc_ix ());
 #endif
     }
@@ -129,7 +133,7 @@ namespace femera {
     if (! this->task_list.empty ()) {
       id += this->get_task (0)->get_proc_id (tid);//TODO only path 0?
 #ifdef FMR_DEBUG
-      printf ("%s id: %u += %u + %u * %u\n", this->abrv.c_str(), id,
+      printf ("%s id: %u += %u + %u * %u\n", this->get_abrv ().c_str(), id,
         this->base_id, this->base_n, Proc::this_cast (this)->get_proc_ix ());
 #endif
     }
@@ -140,7 +144,7 @@ namespace femera {
   fmr::Local_int Proc<T>::get_proc_ix ()
   noexcept {
 #ifdef FMR_DEBUG
-    printf ("Proc<%s>>::get_proc_ix: %u\n", this->abrv.c_str(),
+    printf ("Proc<%s>>::get_proc_ix: %u\n", this->get_abrv ().c_str(),
       Proc::this_cast (this)->task_proc_ix ());
 #endif
     return Proc::this_cast (this)->task_proc_ix ();
@@ -158,7 +162,7 @@ namespace femera {
     while (! P->task_list.empty ()) {
       n *= P->get_proc_n ();
 #ifdef FMR_DEBUG
-      printf ("%s: * %u = %u\n", P->name.c_str(), P->get_proc_n(), n);
+      printf ("%s: * %u = %u\n", P->get_name ().c_str(), P->get_proc_n(), n);
 #endif
       P = this_cast (P->get_work_raw (0));//TODO other branches?
     }

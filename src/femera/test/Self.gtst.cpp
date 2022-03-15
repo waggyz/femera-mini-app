@@ -24,7 +24,8 @@ namespace femera { namespace test { namespace self {
         FMR_PRAGMA_OMP(omp atomic write)
         pids [id % mod_n] = id;
         const auto name = femera::form::text_line (40,"%4s %4s %4s",
-          mini->test->get_base_name().c_str(), mini->test->abrv.c_str(),"proc");
+          mini->test->get_base_name().c_str(),
+            mini->test->get_abrv().c_str(),"proc");
         const std::string text = std::to_string(id);
         mini->data->name_line (mini->data->fmrout, name,
           "%4u proc[%u %% %u=%u]=%u%s", mini->proc->get_proc_id (), id, mod_n,

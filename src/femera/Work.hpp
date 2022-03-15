@@ -65,16 +65,16 @@ namespace femera {
   private:
     using Task_list_t = std::deque <Work_spt>;
   public:// variables ---------------------------------------------------------
+    fmr::perf::Meter<fmr::perf::Count> time
+      = fmr::perf::Meter<fmr::perf::Count> ();
     //
     proc::Main* proc = nullptr;// processing hierarchy
     data::File* data = nullptr;// data, logging, and file handling
     test::Beds* test = nullptr;// correctness and performance testing
     //
-    std::string name ="unknown work";
-    std::string abrv ="work";
   protected:
-    fmr::perf::Meter<fmr::perf::Count> time
-      = fmr::perf::Meter<fmr::perf::Count> ();
+    std::string      name ="unknown work";
+    std::string      abrv ="work";
     std::string   version ="";
     Task_list_t task_list ={};
 #if 0
@@ -96,6 +96,8 @@ namespace femera {
     virtual fmr::Exit_int exit (fmr::Exit_int err=0)    noexcept =0;
     virtual std::string   get_base_name ()              noexcept =0;
   public:
+    std::string    get_name    ()         noexcept;
+    std::string    get_abrv    ()         noexcept;
     std::string    get_version ()         noexcept;
     Core_ptrs_t    get_core    ()         noexcept;
     fmr::Local_int get_task_n  ()         noexcept;
@@ -103,6 +105,8 @@ namespace femera {
     fmr::Local_int add_task    (Work_spt) noexcept;// returns task number added
     fmr::Local_int del_task    (fmr::Local_int ix) noexcept;// returns task_n
   protected:// called by Derived::get_task_*(..)
+    std::string    set_name    (const std::string) noexcept;
+    std::string    set_abrv    (const std::string) noexcept;
     Work* get_work_raw (fmr::Local_int) noexcept;//TODO Change to get_work(..)
     Work* get_work_raw (const Task_path_t&) noexcept;//              ""
     Work* get_work_raw (Task_type, fmr::Local_int ix=0) noexcept;//  ""

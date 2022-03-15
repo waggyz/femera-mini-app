@@ -31,7 +31,7 @@ namespace femera {
 #if 0
       if (this->data != nullptr) {
         const auto name = this->data->text_line ("%4s %4s %4s",
-          this->get_base_name ().c_str(), this->abrv.c_str(), "thrd");
+          this->get_base_name ().c_str(), this->get_abrv ().c_str(), "thrd");
         data->name_line (data->fmrall, name.c_str(), "%4u for process %4u",
           this->proc_n, this->proc->get_proc_id ());//TODO wrong before init done
       }
@@ -45,7 +45,7 @@ namespace femera {
         this->proc->auto_proc_n ();// sets this->proc_n
         if (this->data != nullptr) {
           const auto name = this->data->text_line ("%4s %4s %4s",
-            this->get_base_name ().c_str(), this->abrv.c_str(), "thrd");
+            this->get_base_name ().c_str(), this->get_abrv ().c_str(), "thrd");
           data->name_line (data->fmrlog, name.c_str(), "%u", this->proc_n);
       } }
       ::omp_set_num_threads (int (this->proc_n));
@@ -59,7 +59,8 @@ namespace femera {
   }
   fmr::Local_int proc::Fomp::task_proc_ix () {
 #ifdef FMR_DEBUG
-    printf ("%s Fomp::task_proc_ix %i\n", abrv.c_str(), ::omp_get_thread_num());
+    printf ("%s Fomp::task_proc_ix %i\n", get_abrv ().c_str(),
+      ::omp_get_thread_num());
 #endif
     return fmr::Local_int (::omp_get_thread_num ());
   }

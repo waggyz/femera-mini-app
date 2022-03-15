@@ -69,17 +69,17 @@ namespace femera {
 #endif
 #ifdef FMR_DEBUG
     //for (const auto P : this->task_list) { P->init (argc, argv); }
-    printf ("Main: task_init added %s\n", this->name.c_str());
+    printf ("Main: task_init added %s\n", this->get_name ().c_str());
     auto P2 = this->get_task (0);
     while (P2 != nullptr) {
-      printf ("Main: task_init added %s\n", P2->name.c_str());
+      printf ("Main: task_init added %s\n", P2->get_name ().c_str());
       P2 = P2->get_task (0);
     }
 #endif
   }
   fmr::Local_int proc::Main::task_proc_ix () {
 #ifdef FMR_DEBUG
-    printf ("%s Main::task_proc_ix %u\n", abrv.c_str(), proc_ix);
+    printf ("%s Main::task_proc_ix %u\n", get_abrv ().c_str(), proc_ix);
 #endif
     switch (fmr::Enum_int (this->task_type)) {
       case (fmr::Enum_int (Plug_type::Fomp)):{
@@ -105,8 +105,8 @@ namespace femera {
           case (fmr::Enum_int(Plug_type::Fomp)): {
 #ifdef FMR_DEBUG
             printf ("%s Main::auto_proc_n set %s proc_n = %u / %u = %u\n",
-              this->abrv.c_str(), P->abrv.c_str(), all_core_n, all_n,
-                all_core_n / all_n);
+              this->get_abrv ().c_str(), P->get_abrv ().c_str(),
+                all_core_n, all_n, all_core_n / all_n);
 #endif
             if (all_core_n > all_n && all_n >0 && all_core_n >0) {
               //cast_via_work<proc::Fomp>(P)->set_proc_n ();
