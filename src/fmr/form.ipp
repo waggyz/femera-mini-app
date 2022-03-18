@@ -58,6 +58,24 @@ namespace femera {
     std::vector<char> buf (line_width + 1, 0);
     std::snprintf (&buf[0], buf.size(), format.c_str(),
       int(name_width), name.c_str(), args...);
+#if 0
+    //TODO Count unicode (multibyte) chars, e.g.. "\u00b5" or "\u03bc"
+    //     then reformat with longer length if present.
+    size_t n =0u;
+    for (size_t i=0; i < buf.size(); i++) {
+#if 1
+      n += (buf[i]=='\x00') ? 1u : 0u;// this counts the terminal null
+      n += (buf[i]=='\x03') ? 1u : 0u;
+#else
+      n += (buf[i] < '\x05') ? 1u : 0u;
+#endif
+    }
+    if (n > 1) {
+      buf.resize (line_width + 1 + n - 1);
+      std::snprintf (&buf[0], buf.size(), format.c_str(),
+        int(name_width), name.c_str(), args...);
+    }
+#endif
     return std::string(&buf[0]);
   }
   template<typename ...Args>
