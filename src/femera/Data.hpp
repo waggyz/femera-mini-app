@@ -34,7 +34,7 @@ namespace femera {
     using Path_file_t = std::deque <std::string>;
     //TODO Path_file_t can be a vector to disambiguate it from Sims_name_t?
     //NOTE An empty deque/vector in an argument means all sims or all files.
-    // Path_file_t ({""}); means the current working directory in a path method
+    // Path_file_t ({""}); means the current working directory in a path method.
     // Text files in Path_file_t may contain a list of model files.
     //
     //TODO functions that take these are overloaded for std::string&, e.g.,
