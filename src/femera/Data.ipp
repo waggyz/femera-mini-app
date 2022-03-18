@@ -15,12 +15,12 @@ namespace femera {
   noexcept {
     return "data";
   }
-  template <typename T> inline
+  template <typename T> inline constexpr
   T* Data<T>::this_cast (Data* ptr)
   noexcept {
     return static_cast<T*> (ptr);
   }
-  template <typename T> inline
+  template <typename T> inline constexpr
   T* Data<T>::this_cast (Work* ptr)
   noexcept {
     return static_cast<T*> (ptr);

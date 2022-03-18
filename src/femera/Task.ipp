@@ -66,12 +66,12 @@ namespace femera {
   noexcept {
     return static_cast<T*> (this->get_work_raw (path));
   }
-  template <typename T> inline
+  template <typename T> inline constexpr
   T* Task<T>::this_cast (Task* ptr)
   noexcept {
     return static_cast<T*> (ptr);
   }
-  template <typename T> inline
+  template <typename T> inline constexpr
   T* Task<T>::this_cast (Work* ptr)
   noexcept {
     return static_cast<T*> (ptr);

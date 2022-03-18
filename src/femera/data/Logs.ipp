@@ -16,11 +16,9 @@ namespace femera {
     fmr::Local_int n = 0;
     if (this->proc->is_main ()) {
       const auto P = this->proc->get_task (Plug_type::Fomp);
-      if (P == nullptr) {
-        n = 1;
-      } else {
-        n = P->get_proc_n ();// number of OpenMP threads / mpi process
-    } }
+      if (P == nullptr) {n = 1;}
+      else {n = P->get_proc_n ();}// number of OpenMP threads / mpi process
+    }
     this->data->fmrlog = Data::File_ptrs_t (n, nullptr);
     if (n > 0) {this->data->fmrlog[0] = ::stdout;}
     this->data->set_logs_init (true);

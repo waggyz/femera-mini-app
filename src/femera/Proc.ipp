@@ -12,12 +12,12 @@ namespace femera {
   noexcept {
     return "proc";
   }
-  template <typename T> inline
+  template <typename T> inline constexpr
   T* Proc<T>::this_cast (Proc* ptr)
   noexcept {
     return static_cast<T*> (ptr);
   }
-  template <typename T> inline
+  template <typename T> inline constexpr
   T* Proc<T>::this_cast (Work* ptr)
   noexcept {
     return static_cast<T*> (ptr);
