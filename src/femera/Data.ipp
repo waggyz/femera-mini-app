@@ -10,6 +10,13 @@
 #endif
 
 namespace femera {
+#if 0
+  inline
+  data::Form_dims::Form_dims (fmr::Local_int l, fmr::Local_int p,
+    fmr::Local_int i, fmr::Dim_int m, fmr::Local_int h)
+    : page_size (p), line_size (l), item_size (i), head_size(h), name_size(m) {
+  }
+#endif
   template <typename T> inline
   std::string Data<T>::get_base_name ()
   noexcept {

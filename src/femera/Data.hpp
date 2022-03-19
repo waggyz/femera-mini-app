@@ -8,13 +8,36 @@
 #include <cstdio>     // std::printf
 #endif
 
+namespace femera { namespace data {
+  using File_ptrs_t = std::vector <FILE*>;
+  class Form_dims {// for file and stream (e.g., stdout) reading and saving
+    // typically describes local (partitioned) representation of data
+#if 0
+  public://TODO Remove? constructor
+    Form_dims (fmr::Enum_int, fmr::Local_int =0, fmr::Enum_int =1,
+      fmr::Dim_int =0, fmr::Dim_int =0);
+#endif
+  private:
+//TODO Data_ptrs_t data;// data handler; OR use std::vector <task_type>?
+//    std::vector <Task_type> task_type ={};// {task_cast (Plug_type::None)};
+//    std::vector <File_type> file_type ={};// {File_type::Unknown};
+    File_ptrs_t    file_ptrs ={};
+    fmr::Local_int line_n    = 0;// total lines of data in this
+    fmr::Local_int page_0    = 0;// global index of first page in this
+    fmr::Local_int page_size = 0;// lines / page; a page can be a partition
+    fmr::Local_int line_size = 0;// items / line
+    fmr::Local_int item_size = 1;// vals  / item
+    fmr::Local_int head_size = 0;// page header size in lines
+    fmr::Local_int foot_size = 0;// page footer size in lines
+    // head_size and foot_size can be used for (alignment) padding
+    fmr::Dim_int   name_size = 0;// line name (first item) size in chars
+  };
+} }//end femera::data:: namespace
 namespace femera {
   template <typename T>
   class Data : public Work {
   private:
     using This_spt = FMR_SMART_PTR<T>;
-  protected:
-    using File_ptrs_t = std::vector<FILE*>;
   public:
     std::string   get_base_name ()           noexcept final override;
     //
@@ -22,76 +45,76 @@ namespace femera {
     fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;
 #if 0
   public:
-    // File operations are spawned from the local OpenMP master thread, and
-    // file methods use vector types for shared-memory access by proc_id, e.g.,
+    //TODO ? File operations are spawned from the local OpenMP master thread, and
+    //     ? file methods use vector types for shared-memory access by proc_id, e.g.,
     // local_x = vec_x [proc_id % vec_x.size ()];
     // or better, contiguous blocks of vals for each proc_id
     //
-    using Byte_n      = std::vector <fmr::perf::Count>;// bytes in or out
-    using Vals_t      = std::vector <Vals*>;
+    using Byte_list   = std::vector <fmr::perf::Count>;// bytes in or out
+    using Vals_list   = std::vector <Vals*>;
     //-------------------------------------------------------------------------
-    using Sims_name_t = std::deque <std::string>;
-    using Path_file_t = std::deque <std::string>;
-    //TODO Path_file_t can be a vector to disambiguate it from Sims_name_t?
+    using Sims_list = std::deque <std::string>;
+    using Path_list = std::deque <std::string>;
+    //TODO Path_list can be a vector to disambiguate it from Sims_list?
     //NOTE An empty deque/vector in an argument means all sims or all files.
-    // Path_file_t ({""}); means the current working directory in a path method.
-    // Text files in Path_file_t may contain a list of model files.
+    // Path_list ({""}); means the current working directory in a path method.
+    // Text files in Path_list may contain a list of model files.
     //
     //TODO functions that take these are overloaded for std::string&, e.g.,
-    //     static inline constexpr Sims_name_t add_sims (std::string& s="") {
-    //       return add_sims (Sims_name_t({s});
+    //     static inline constexpr Sims_list add_sims (std::string& s="") {
+    //       return add_sims (Sims_list({s});
     //     }
     // Data source methods ----------------------------------------------------
     // Data_type::As_needed avoids big data ops and may make false assumptions.
     // E.g., Gmsh (*.msh) files are assumed to contain node & element data.
     //
-    Path_file_t  add_path (Path_file_t& ={""});// add to filename search path
+    Path_list  add_path (Path_list& ={""});// add to filename search path
     //NOTE add_path ({}); does nothing.
-    Path_file_t  add_tree (Path_file_t& ={""});// add dir & subdirs recursively
+    Path_list  add_tree (Path_list& ={""});// add dir & subdirs recursively
     //NOTE add_tree ({}); adds subdirs of dirs in the current path recursively.
-    Path_file_t  clr_path (Path_file_t& ={});// clear filename search path
-    Path_file_t scan_path (Path_file_t& ={});// get model filenames in path
+    Path_list  clr_path (Path_list& ={});// clear filename search path
+    Path_list scan_path (Path_list& ={});// get model filenames in path
     //
-    Path_file_t  add_file (Path_file_t& ={});
-    Sims_name_t scan_file (Path_file_t& ={}, Data_type =Data_type::As_needed);
+    Path_list  add_file (Path_list& ={});
+    Sims_list scan_file (Path_list& ={}, Data_type =Data_type::As_needed);
     // scan_file (..) registers the data in files
     //
-    fmr::Local_int get_sims_n (Path_file_t& ={});
-    fmr::Local_int get_file_n (Path_file_t& ={});
+    fmr::Local_int get_sims_n (Path_list& ={});
+    fmr::Local_int get_file_n (Path_list& ={});
     //
-    Sims_name_t  add_sims (Sims_name_t& ={});// register more models
-    Sims_name_t  set_sims (Sims_name_t& ={});// clear list then add models
-    Sims_name_t  clr_sims (Sims_name_t& ={});// clear model data
-    Sims_name_t  get_sims (Sims_name_t& ={});// returns a list of sims loaded
+    Sims_list  add_sims (Sims_list& ={});// register more models
+    Sims_list  set_sims (Sims_list& ={});// clear list then add models
+    Sims_list  clr_sims (Sims_list& ={});// clear model data
+    Sims_list  get_sims (Sims_list& ={});// returns a list of sims loaded
     //
-    Sims_name_t  add_data (fmr::Test_type =fmr::Test_type::As_needed);
+    Sims_list  add_data (fmr::Test_type =fmr::Test_type::As_needed);
     // Data read/write methods ------------------------------------------------
     //
-    Byte_n scan_data (Sims_name_t ={}, Data_type =Data_type::As_needed);
+    Byte_list scan_data (Sims_list ={}, Data_type =Data_type::As_needed);
     //
-    Vals_t  get_data (Sims_name_t ={}, Data_type =Data_type::As_needed);
-    Byte_n  clr_data (Sims_name_t ={}, Data_type =Data_type::All);
+    Vals_list  get_data (Sims_list ={}, Data_type =Data_type::As_needed);
+    Byte_list  clr_data (Sims_list ={}, Data_type =Data_type::All);
     //
     //NOTE (..) means appropriate arguments
-    Byte_n read_data (..);// read whole dataset
-    Byte_n send_data (..);// append, write; new if destination does not exist
-    Byte_n save_data (..);// new, overwrite
+    Byte_list read_data (..);// read whole dataset
+    Byte_list send_data (..);// append, write; new if destination does not exist
+    Byte_list save_data (..);// new, overwrite
     //
-    Byte_n read_line (..);// one line at a time
-    Byte_n send_line (..);// append, write; new if destination does not exist
-    Byte_n save_line (..);// new, overwrite
+    Byte_list read_line (..);// one line at a time
+    Byte_list send_line (..);// append, write; new if destination does not exist
+    Byte_list save_line (..);// new, overwrite
     //
-    Byte_n read_page (..);// read data in blocks
-    Byte_n send_page (..);// append, write; new if destination does not exist
-    Byte_n save_page (..);// new, overwrite
+    Byte_list read_page (..);// read data in blocks
+    Byte_list send_page (..);// append, write; new if destination does not exist
+    Byte_list save_page (..);// new, overwrite
     //
-    Byte_n read_cols (..);// read data by column (SoA)//TODO or read_vals ?
-    Byte_n send_cols (..);// append write; new if destination does not exist
-    Byte_n save_cols (..);// new, overwrite
+    Byte_list read_cols (..);// read data by column (SoA)//TODO or read_vals ?
+    Byte_list send_cols (..);// append write; new if destination does not exist
+    Byte_list save_cols (..);// new, overwrite
     //
-    Byte_n read_item (..);// read data item(s)
-    Byte_n send_item (..);// append write; new if destination does not exist
-    Byte_n save_item (..);// new, overwrite
+    Byte_list read_item (..);// read data item(s)
+    Byte_list send_item (..);// append write; new if destination does not exist
+    Byte_list save_item (..);// new, overwrite
     //-------------------------------------------------------------------------
 #endif
   public:

@@ -22,7 +22,7 @@ namespace femera { namespace data {
     std::string make_data_line (const std::string& line, Last);
     template <typename Head, typename ...Tail> static
     std::string make_data_line (const std::string& line, Head, Tail...);
-  private:// character string types are quoted
+  private:// character string types are double-quoted ("item")
     static
     std::string csv_item (const std::string&);
     static

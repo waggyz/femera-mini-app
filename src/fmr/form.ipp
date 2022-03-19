@@ -53,31 +53,34 @@ namespace femera {
   template<typename ...Args>
   std::string form::name_line
   (const fmr::Line_size_int name_width, const fmr::Line_size_int line_width,
-  const std::string& name, const std::string& form, Args ...args) {
+    const std::string& name, const std::string& form, Args ...args) {
     const auto format = "%*s "+ form;
     std::vector<char> buf (line_width + 1, 0);
     std::snprintf (&buf[0], buf.size(), format.c_str(),
       int(name_width), name.c_str(), args...);
+#ifdef FMR_MICRO_UCHAR
     // Count unicode multibyte chars, e.g.. "\u00b5" or "\u03bc"
     // then reformat with longer length if present.
-    size_t n =0u;
-    for (size_t i=0; i < buf.size(); i++) {
+    fmr::Local_int c =0;
+    const fmr::Local_int n = fmr::Local_int (buf.size());
+    for (fmr::Local_int i=0; i < n; i++) {
 #if 0
-      n += (buf[i] < 0) ? 1u : 0u;// finds too many characters
+      c += (buf[i] < 0) ? 1u : 0u;// finds too many characters
 #endif
 #if 0
-      n += (buf[i] > '\x7f') ? 1u : 0u;// does not work; buf is signed
+      c += (buf[i] > '\x7f') ? 1u : 0u;// does not work; buf is signed
 #endif
 #if 1
-      n += (buf[i]=='\xb5') ? 1u : 0u;
-      n += (buf[i]=='\xbc') ? 1u : 0u;
+      c += (buf[i]=='\xb5') ? 1u : 0u;
+      c += (buf[i]=='\xbc') ? 1u : 0u;
 #endif
     }
-    if (n > 0) {
-      buf.resize (line_width + 1 + n);
+    if (c > 0) {
+      buf.resize (line_width + 1 + c);
       std::snprintf (&buf[0], buf.size(), format.c_str(),
         int(name_width), name.c_str(), args...);
     }
+#endif
     return std::string(&buf[0]);
   }
   template<typename ...Args>

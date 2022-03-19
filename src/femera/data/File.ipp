@@ -24,7 +24,7 @@ namespace femera {
   }
   template <typename ...Args> inline
   std::string data::File::text_line
-  (const Data::File_ptrs_t& flist, const std::string& form, Args ...args) {
+  (const data::File_ptrs_t& flist, const std::string& form, Args ...args) {
     FILE* file = nullptr;
     if (flist.size () > 0 && this->proc != nullptr) {
       file = flist [this->proc->get_proc_id () % flist.size()];
@@ -38,10 +38,10 @@ namespace femera {
   }
   template <typename ...Args> inline
   std::string data::File::text_line (const std::string& form, Args ...args) {
-    return data::File::text_line (Data::File_ptrs_t ({}), form, args...);
+    return data::File::text_line (data::File_ptrs_t ({}), form, args...);
   }
   template <typename ...Args> inline
-  std::string data::File::name_line (const Data::File_ptrs_t& flist,
+  std::string data::File::name_line (const data::File_ptrs_t& flist,
     const std::string& label, const std::string& form, Args ...args) {
     FILE* file = nullptr;
     if (flist.size () > 0 && this->proc != nullptr) {
@@ -56,10 +56,10 @@ namespace femera {
   template <typename ...Args> inline
   std::string data::File::name_line
   (const std::string& label, const std::string& form, Args ...args) {
-    return data::File::name_line (Data::File_ptrs_t ({}), label, form, args...);
+    return data::File::name_line (data::File_ptrs_t ({}), label, form, args...);
   }
   template <typename ...Args> inline
-  std::string data::File::name_time (const Data::File_ptrs_t& flist,
+  std::string data::File::name_time (const data::File_ptrs_t& flist,
     const std::string& label, const std::string& form, Args ...args) {
     FILE* file = nullptr;
     if (flist.size () > 0 && this->proc != nullptr) {
@@ -74,7 +74,7 @@ namespace femera {
   template <typename ...Args> inline
   std::string data::File::name_time
   (const std::string& label, const std::string& form, Args ...args) {
-    return data::File::name_time (Data::File_ptrs_t ({}), label, form, args...);
+    return data::File::name_time (data::File_ptrs_t ({}), label, form, args...);
   }
 }//end femera namespace
 

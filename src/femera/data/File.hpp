@@ -19,28 +19,9 @@ namespace femera { namespace data {
 #if 1
   public:
     using Data_id = uintptr_t;// cast-compatible with FILE* (for stdout, stderr)
-  public:// subclass ==========================================================
-    class Data_form {// for file and stream (e.g., stdout) reading and saving
-    // describes local (partitioned) representation of data.
-    public:// constructor
-      Data_form (fmr::Enum_int l, fmr::Local_int p=0, fmr::Enum_int i=1,
-      fmr::Dim_int m=0, fmr::Dim_int h=0)
-      : page_size (p), line_size (l), item_size (i), head_size(h),name_size(m){}
-    private:
-//TODO Data_ptrs_t data;// data handler; OR use std::vector<task_type>?
-      File_ptrs_t    file_ptrs ={};
-      //std::valarray<fmr::Dim_int> item_dims = {1};
-      //fmr::Local_int line_n    = 0;// lines of data
-      fmr::Local_int page_size = 0;// lines / page
-      fmr::Enum_int  line_size = 0;// items / line
-      fmr::Enum_int  item_size = 1;// vals  / item
-      fmr::Dim_int   head_size = 0;// optional header size in lines
-      fmr::Dim_int   name_size = 0;// optional line name size in chars
-//      std::vector<Task_type> task_type = task_cast (Plug_type::None);
-//      std::vector<File_type> file_type = File_type::Unknown;
-    };//=======================================================================
+  public:// subclass ==========================================================//=======================================================================
   private:
-    std::unordered_map <Data_id, Data_form> file_data = {};
+    std::unordered_map <Data_id, Form_dims> file_data = {};
 #endif
 #if 1
   private: // TODO Replace below with above.
