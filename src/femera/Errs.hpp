@@ -10,6 +10,7 @@
     /how-to-know-the-exact-line-of-code-where-an-exception-has-been-caused
 */
 #define FMR_THROW(arg) throw Errs(arg, __FILE__, __LINE__)
+#define FMR_WARN( arg) throw Warn(arg, __FILE__, __LINE__)
 
 namespace femera {
   class Errs : public std::exception {
@@ -17,7 +18,7 @@ namespace femera {
   protected:
     /** Error message.
      */
-    std::string msg;
+    std::string msg ="";
   public:
     /** Constructor (C strings).
       *  @param message C-style string error message.
@@ -31,9 +32,10 @@ namespace femera {
       */
     explicit Errs (const std::string& message) : msg (message) {}
     explicit Errs (const char* message, const char* file, int line)
-        : msg (std::string(file)+":"+std::to_string(line)+" "+message) {}
+      : msg (std::string(file)+":"+std::to_string(line)+" "+message) {}
     explicit Errs (const std::string& message, const char* file, int line)
-        : msg (std::string(file)+":"+std::to_string(line)+" "+message) {}
+      : msg (std::string(file)+":"+std::to_string(line)+" "+message) {}
+    explicit Errs () =default;
     /** Destructor.
       * Virtual to allow for subclassing.
       */
@@ -49,7 +51,27 @@ namespace femera {
     static  void       print (std::string, std::exception&) noexcept;
     static  void       print (std::string) noexcept;
   };
-  class Warn : public Errs {
+  class Warn : public Errs {//TODO Remove? Throwing aborts even when caught.
+  public:
+    /** Constructor (C strings).
+      *  @param message C-style string error message.
+      *                 The string contents are copied upon construction.
+      *                 Hence, responsibility for deleting the char* lies
+      *                 with the caller.
+      */
+    explicit Warn (const char* message) {this->msg = message;}
+    /** Constructor (C++ STL strings).
+      *  @param message The error message.
+      */
+    explicit Warn (const std::string& message) {this->msg = message;}
+    explicit Warn (const char* message, const char* file, int line) {
+      this->msg = std::string(file)+":"+std::to_string(line)+" "+message;}
+    explicit Warn (const std::string& message, const char* file, int line) {
+      this->msg = std::string(file)+":"+std::to_string(line)+" "+message;}
+    /** Destructor.
+      * Virtual to allow for subclassing.
+      */
+    ~Warn () noexcept final override {}
   };
 }//end femera:: namespace
 

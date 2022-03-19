@@ -40,9 +40,9 @@ namespace femera {
     catch (const Warn& e)    { err =-1; e.print (); }
     catch (const Errs& e)    { err = 1; e.print (); }
     catch (std::exception& e){ err = 2;
-    Errs::print (this->get_abrv ()+" task_init", e); }
+      Errs::print (this->get_abrv ()+" task_init", e); }
     catch (...)              { err = 3;
-    Errs::print (this->get_abrv ()+" task_init"); }
+      Errs::print (this->get_abrv ()+" task_init"); }
     if (err > 0) {return this->exit (err); }
     err = init_list (argc, argv);//                ...then init child tasks.
     return err;

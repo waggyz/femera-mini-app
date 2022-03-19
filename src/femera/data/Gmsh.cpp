@@ -21,17 +21,24 @@ namespace femera {
       ::gmsh::option::setNumber ("General.Verbosity", Gmsh::Number(0));
       // gmsh::initialize (..) seeems to set omp_num_threads to 1 and
       // setting General.NumThreads also sets omp_num_threads
+      fmr::Local_int proc_omp_n = 0;
       const auto P = this->proc->get_task (Plug_type::Fomp);
       if (P != nullptr) {
+        proc_omp_n = P->get_proc_n ();
         ::gmsh::option::setNumber ("General.NumThreads",
-          Gmsh::Number (P->get_proc_n ()));
+          Gmsh::Number (proc_omp_n));
       }
+      Gmsh::Number gmsh_omp_n = 0;
+      ::gmsh::option::getNumber ("General.NumThreads", gmsh_omp_n);
       if (true) {//TODO detail
-        Gmsh::Number v = 0;
-        ::gmsh::option::getNumber ("General.NumThreads", v);
-        const auto n = fmr::Local_int (v);
+        const auto n = fmr::Local_int (gmsh_omp_n);
         this->data->name_line (this->data->fmrlog, "data gmsh uses",
           "%4u OpenMP thread%s each (maximum)", n, (n==1)?"":"s");
+      }
+      if (fmr::Local_int (gmsh_omp_n) != proc_omp_n) {
+        this->data->name_line (this->data->fmrerr, "gmsh task_init",
+          "OpenMP threads (%g) does not match Femera (%u).",
+          gmsh_omp_n, proc_omp_n);
   } } }
   void data::Gmsh::task_exit () {
     FMR_PRAGMA_OMP(omp master) {
