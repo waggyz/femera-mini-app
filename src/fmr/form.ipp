@@ -13,29 +13,26 @@ namespace fmr { namespace detail { namespace form {
 } } }// end fmr::detail::form:: namespace
 
 namespace fmr {
-
   template<typename V>
-  std::string form::si_unit (const V val, std::string unit,
-  const int md, const bool is_signed) {
-    const std::string sign = (val < V(0)) ? "-" :
-      (is_signed ? ((val > V(0)) ? "+" : " ") : "");
-    return detail::form::si_unit (std::abs(double(val)), unit, md, sign);
+  std::string form::si_unit
+ (const V val, std::string unit, const int md, const bool is_signed) {
+    const std::string sign
+      = (val < V(0)) ? "-" : (is_signed ? ((val > V(0)) ? "+" : " ") : "");
+    return detail::form::si_unit (std::abs (double (val)), unit, md, sign);
   }
   template<typename V>
-  std::string form::si_time (V val,
-  const int md, const bool is_signed) {
+  std::string form::si_time
+  (V val, const int md, const bool is_signed) {
     std::string unit = "s";
-    if (val > V(599)) { val /= 60; unit="m"; }
-    if (val > V(599)) { val /= 60; unit="h"; }
-    const std::string sign = (val < V(0)) ? "-" :
-      (is_signed ? ((val > V(0)) ? "+" : " ") : "");
-    return detail::form::si_unit (std::abs(double(val)), unit, md, sign);
+    if (val >= V(600)) {val /= V(60); unit="m";}
+    if (val >= V(600)) {val /= V(60); unit="h";}
+    const std::string sign
+      = (val < V(0)) ? "-" : (is_signed ? ((val > V(0)) ? "+" : " ") : "");
+    return detail::form::si_unit (std::abs (double (val)), unit, md, sign);
   }
-
 }// end fmr:: namespace
 
 namespace femera {
-
   template<typename ...Args>
   std::string form::text_line
   (fmr::Line_size_int line_width, const std::string& format, Args ...args) {
@@ -57,7 +54,7 @@ namespace femera {
     const auto format = "%*s "+ form;
     std::vector<char> buf (line_width + 1, 0);
     std::snprintf (&buf[0], buf.size(), format.c_str(),
-      int(name_width), name.c_str(), args...);
+      int (name_width), name.c_str(), args...);
 #ifdef FMR_MICRO_UCHAR
     // Count unicode multibyte chars, e.g.. "\u00b5" or "\u03bc"
     // then reformat with longer length if present.
@@ -78,7 +75,7 @@ namespace femera {
     if (c > 0) {
       buf.resize (line_width + 1 + c);
       std::snprintf (&buf[0], buf.size(), format.c_str(),
-        int(name_width), name.c_str(), args...);
+        int (name_width), name.c_str(), args...);
     }
 #endif
     return std::string(&buf[0]);
@@ -101,10 +98,10 @@ namespace femera {
     const auto time_width = timestr.length () + 1;
     auto line = form::name_line (name_width, line_width, name, form, args...);
     const auto text_width = line_width - time_width;
-    if (line.length () > text_width) { line = line.substr (0, text_width); }
+    if (line.length () > text_width) {line = line.substr (0, text_width);}
     std::vector<char> buf (line_width + 2, 0);
     std::snprintf (&buf[0], buf.size(), "%-*s%*s",
-      int(text_width), line.c_str(), int(time_width), timestr.c_str());
+      int (text_width), line.c_str(), int (time_width), timestr.c_str());
     return std::string(&buf[0]);
   }
   template<typename ...Args>
@@ -115,7 +112,6 @@ namespace femera {
     fprintf (f,"%s\n", line.c_str());
     return line;
   }
-
 }//end femera:: namespace
 
 #undef FMR_DEBUG
