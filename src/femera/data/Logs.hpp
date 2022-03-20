@@ -6,7 +6,7 @@
 
 namespace femera { namespace data {
   class Logs;// Derive a CRTP concrete class from Data.//TODO Change to Fcsv?
-  class Logs : public Data <Logs> { private: friend class Data;
+  class Logs : public Data <Logs> {// private: friend class Data;
   public:
     template <typename ...Args> static
     std::string data_line (Args...);
@@ -36,10 +36,10 @@ namespace femera { namespace data {
     std::string csv_item (I integer,//NOTE includes char type
       typename std::enable_if<std::is_integral<I>::value>::type* = 0);
 #endif
-  private:
+  public:
     void task_init (int* argc, char** argv);
     void task_exit ();
-  private:
+  public:
     Logs (femera::Work::Core_ptrs_t) noexcept;
     Logs () =delete;//NOTE Use the constructor above.
   };

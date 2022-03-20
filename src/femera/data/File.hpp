@@ -9,33 +9,33 @@
 
 namespace femera { namespace data {
   class File;// Derive a CRTP concrete class from Data.
-  class File : public Data <File> { private: friend class Data;
+  class File : public Data <File> {// private: friend class Data;
   public:
     // TODO Make fmrlog, fmrout, fmrerr, fmrall into public functions?
     File_ptrs_t fmrlog = {};// main proc to stdout set by Logs::task_init (..)
     File_ptrs_t fmrout = {::stdout};
     File_ptrs_t fmrerr = {::stderr};
     File_ptrs_t fmrall = {::stdout};
-#if 1
+#if 0
   public:
-    using Data_id = uintptr_t;// cast-compatible with FILE* (for stdout, stderr)
-  public:// subclass ==========================================================//=======================================================================
+    using Open_file_id = uintptr_t;// cast-compatible with FILE* (stdout, stderr)
+    //TODO bad idea: do not use open file handles as file IDs.
   private:
-    std::unordered_map <Data_id, Form_dims> file_data = {};
+    std::unordered_map <File_id, Page_dims> file_data = {};
 #endif
 #if 1
-  private: // TODO Replace below with above.
-    std::unordered_map <FILE*, fmr::Line_size_int> file_name_sz
-      = {{nullptr, 14}, {::stdout, 14}, {::stderr, 0}};
+  private:// TODO Replace below with femera::data::Page_dims struct.
     std::unordered_map <FILE*, fmr::Line_size_int> file_line_sz
       = {{nullptr, 80}, {::stdout, 80}, {::stderr, 250}};
+    std::unordered_map <FILE*, fmr::Line_size_int> line_name_sz
+      = {{nullptr, 14}, {::stdout, 14}, {::stderr, 0}};
 #endif
     bool logs_init_stat = false;
   public:
     bool did_logs_init ();
     bool set_logs_init (bool);
   private:
-    using ss   = std::string;
+    using ss = std::string;
 #if 0
   private:
     using Dt = fmr::Data_type;
@@ -72,10 +72,10 @@ namespace femera { namespace data {
     ss perf_line (File_ptrs_t, ss& name, ss& form,...);//TODO
     ss perf_line (ss name, ss& form,...);
 #endif
-  private:
+  public:
     void task_init (int* argc, char** argv);
     void task_exit ();
-  private:
+  public:
     File (femera::Work::Core_ptrs_t) noexcept;
     File () =delete;//NOTE Use the constructor above.
   };

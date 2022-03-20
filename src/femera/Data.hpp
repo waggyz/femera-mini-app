@@ -10,8 +10,8 @@
 
 namespace femera { namespace data {
   using File_ptrs_t = std::vector <FILE*>;
-  class Form_dims {// for file and stream (e.g., stdout) reading and saving
-    // typically describes local (partitioned) representation of data
+  struct Page_dims {// regular blocked data, local (partitioned) data
+    // for file and stream (e.g., stdout) reading and saving
 #if 0
   public://TODO Remove? constructor
     Form_dims (fmr::Enum_int, fmr::Local_int =0, fmr::Enum_int =1,
@@ -22,15 +22,15 @@ namespace femera { namespace data {
 //    std::vector <Task_type> task_type ={};// {task_cast (Plug_type::None)};
 //    std::vector <File_type> file_type ={};// {File_type::Unknown};
     File_ptrs_t    file_ptrs ={};
-    fmr::Local_int line_n    = 0;// total lines of data in this
+    std::valarray <fmr::Local_int> item_size ={1};// vals / item
+    // vals are all the same type
+    fmr::Local_int line_n    = 0;// total lines in this
     fmr::Local_int page_0    = 0;// global index of first page in this
     fmr::Local_int page_size = 0;// lines / page; a page can be a partition
     fmr::Local_int line_size = 0;// items / line
-    fmr::Local_int item_size = 1;// vals  / item
     fmr::Local_int head_size = 0;// page header size in lines
     fmr::Local_int foot_size = 0;// page footer size in lines
-    // head_size and foot_size can be used for (alignment) padding
-    fmr::Dim_int   name_size = 0;// line name (first item) size in chars
+    // head_ and foot_size can be used for (alignment) padding homogeneous data
   };
 } }//end femera::data:: namespace
 namespace femera {
@@ -50,8 +50,8 @@ namespace femera {
     // local_x = vec_x [proc_id % vec_x.size ()];
     // or better, contiguous blocks of vals for each proc_id
     //
-    using Byte_list   = std::vector <fmr::perf::Count>;// bytes in or out
-    using Vals_list   = std::vector <Vals*>;
+    using Byte_list = std::vector <fmr::perf::Count>;// bytes in or out
+    using Vals_list = std::vector <Vals*>;
     //-------------------------------------------------------------------------
     using Sims_list = std::deque <std::string>;
     using Path_list = std::deque <std::string>;
@@ -64,9 +64,23 @@ namespace femera {
     //     static inline constexpr Sims_list add_sims (std::string& s="") {
     //       return add_sims (Sims_list({s});
     //     }
-    // Data source methods ----------------------------------------------------
-    // Data_type::As_needed avoids big data ops and may make false assumptions.
-    // E.g., Gmsh (*.msh) files are assumed to contain node & element data.
+  private:
+    class File_name {
+    public:
+      std::string dir ="";// absolute or relative
+      std::string base ="";// name without path and without (1-)indices.
+      std::vector <fmr::Local_int> name_ix={};// 1-indices (model#, part#,...)
+      std::string ext  ="";//NOTE includes the dot, e.g., ".txt"
+    public:
+      File_name (std::string&);
+      std::string get_name ();
+    };
+    using File_list = std::deque <File_name>;
+  private:
+    Path_list path_list ={""};// first is default dir; "" is current working dir
+    Path_list name_list ={};
+    Sims_list sims_list ={};
+  public:// Data source methods -----------------------------------------------
     //
     Path_list  add_path (Path_list& ={""});// add to filename search path
     //NOTE add_path ({}); does nothing.
@@ -77,7 +91,9 @@ namespace femera {
     //
     Path_list  add_file (Path_list& ={});
     Sims_list scan_file (Path_list& ={}, Data_type =Data_type::As_needed);
-    // scan_file (..) registers the data in files
+    //                   registers the data in files
+    // Data_type::As_needed avoids big data ops and may make false assumptions.
+    // E.g., Gmsh (*.msh) files are assumed to contain node & element data.
     //
     fmr::Local_int get_sims_n (Path_list& ={});
     fmr::Local_int get_file_n (Path_list& ={});

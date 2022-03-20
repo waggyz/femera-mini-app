@@ -48,7 +48,7 @@ namespace femera {
       file = flist [this->proc->get_proc_id () % flist.size()];
     }
     const auto w = this->file_line_sz [file];
-    const auto h = this->file_name_sz [file];
+    const auto h = this->line_name_sz [file];
     const auto line = femera::form::name_line (h, w, label, form, args...);
     if (file != nullptr) { fprintf (file,"%s\n", line.c_str()); }
     return line;
@@ -65,7 +65,7 @@ namespace femera {
     if (flist.size () > 0 && this->proc != nullptr) {
       file = flist [this->proc->get_proc_id () % flist.size ()];
     }
-    const auto h = this->file_name_sz [file];
+    const auto h = this->line_name_sz [file];
     const auto w = this->file_line_sz [file];
     const auto line = femera::form::name_time (h, w, label, form, args...);
     if (file != nullptr) { fprintf (file,"%s\n", line.c_str()); }
