@@ -4,6 +4,7 @@
 #include "fmr.hpp"
 
 #include <string>
+#include <cctype> // used in form.ipp
 
 namespace fmr { namespace form {
 

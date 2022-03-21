@@ -13,6 +13,7 @@ namespace fmr {
  * sizeof (Elid_int >= Enum_int + fmr::math::Poly + Dim_int)
 */
   using   Exit_int = int           ;// system return code
+  using   Form_int = char          ;// data serializing type
   //
   using    Dim_int = uint_fast8_t  ;// space dim., hier. depth, poly. order,...
   using   Enum_int = uint_fast16_t ;
@@ -25,7 +26,7 @@ namespace fmr {
   //
   // Floating point types are defaults.
   using Geom_float = double        ;//TODO Try float.
-  using Phys_float = double        ;
+  using Phys_float = double        ;// includes inverses of jac & det
   using Solv_float = double        ;
   using Cond_float = float         ;// Preconditioning and scaling
   using Post_float = float         ;// Post-processing
@@ -39,7 +40,8 @@ namespace femera { namespace test {
 
 //TODO Define FMR_OMP_LOCAL to make & use thread-local drivers for each OpenMP
 //     thread. This may be needed to avoid race conditions in OpenMP parallel
-//     regions; NUMA domain data locality automatic when >= 1 MPI thread/NUMA.
+//     regions.
+//NOTE NUMA domain data locality is automatic when >= 1 MPI thread/NUMA domain.
 //#define FMR_OMP_LOCAL
 
 #if 0

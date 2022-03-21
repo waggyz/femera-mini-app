@@ -3,6 +3,8 @@
 
 #include "Work.hpp"
 
+#include <valarray>
+
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
 #include <cstdio>     // std::printf
@@ -17,12 +19,12 @@ namespace femera { namespace data {
     Form_dims (fmr::Enum_int, fmr::Local_int =0, fmr::Enum_int =1,
       fmr::Dim_int =0, fmr::Dim_int =0);
 #endif
-  private:
+  public:
 //TODO Data_ptrs_t data;// data handler; OR use std::vector <task_type>?
 //    std::vector <Task_type> task_type ={};// {task_cast (Plug_type::None)};
 //    std::vector <File_type> file_type ={};// {File_type::Unknown};
     File_ptrs_t    file_ptrs ={};
-    std::valarray <fmr::Local_int> item_size ={1};// vals / item
+    std::valarray <fmr::Local_int> item_dims ={1};// vals / item
     // vals are all the same type
     fmr::Local_int line_n    = 0;// total lines in this
     fmr::Local_int page_0    = 0;// global index of first page in this
@@ -52,6 +54,7 @@ namespace femera {
     //
     using Byte_list = std::vector <fmr::perf::Count>;// bytes in or out
     using Vals_list = std::vector <Vals*>;
+    //using Form_list = std::vector <std::valarray<Form_int>>;
     //-------------------------------------------------------------------------
     using Sims_list = std::deque <std::string>;
     using Path_list = std::deque <std::string>;
@@ -67,7 +70,7 @@ namespace femera {
   private:
     class File_name {
     public:
-      std::string dir ="";// absolute or relative
+      std::string dir  ="";// absolute or relative
       std::string base ="";// name without path and without (1-)indices.
       std::vector <fmr::Local_int> name_ix={};// 1-indices (model#, part#,...)
       std::string ext  ="";//NOTE includes the dot, e.g., ".txt"
@@ -102,15 +105,15 @@ namespace femera {
     Sims_list  set_sims (Sims_list& ={});// clear list then add models
     Sims_list  clr_sims (Sims_list& ={});// clear model data
     Sims_list  get_sims (Sims_list& ={});// returns a list of sims loaded
+    Byte_list scan_sims (Sims_list& ={}, Data_type =Data_type::As_needed);
     //
     Sims_list  add_data (fmr::Test_type =fmr::Test_type::As_needed);
+    //
+    Vals_list  get_data (Sims_list& ={}, Data_type =Data_type::As_needed);
+    Byte_list  clr_data (Sims_list& ={}, Data_type =Data_type::All);
+    Vals_list  ser_data (..);// returns serialized data
+    //
     // Data read/write methods ------------------------------------------------
-    //
-    Byte_list scan_data (Sims_list ={}, Data_type =Data_type::As_needed);
-    //
-    Vals_list  get_data (Sims_list ={}, Data_type =Data_type::As_needed);
-    Byte_list  clr_data (Sims_list ={}, Data_type =Data_type::All);
-    //
     //NOTE (..) means appropriate arguments
     Byte_list read_data (..);// read whole dataset
     Byte_list send_data (..);// append, write; new if destination does not exist
@@ -124,9 +127,9 @@ namespace femera {
     Byte_list send_page (..);// append, write; new if destination does not exist
     Byte_list save_page (..);// new, overwrite
     //
-    Byte_list read_cols (..);// read data by column (SoA)//TODO or read_vals ?
-    Byte_list send_cols (..);// append write; new if destination does not exist
-    Byte_list save_cols (..);// new, overwrite
+    Byte_list read_vals (..);// read data by column (SoA)//TODO or read_cols ?
+    Byte_list send_vals (..);// append write; new if destination does not exist
+    Byte_list save_vals (..);// new, overwrite
     //
     Byte_list read_item (..);// read data item(s)
     Byte_list send_item (..);// append write; new if destination does not exist

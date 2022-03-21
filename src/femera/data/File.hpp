@@ -19,7 +19,7 @@ namespace femera { namespace data {
 #if 0
   public:
     using Open_file_id = uintptr_t;// cast-compatible with FILE* (stdout, stderr)
-    //TODO bad idea: do not use open file handles as file IDs.
+    //TODO bad idea: do not use open file handles as file IDs
   private:
     std::unordered_map <File_id, Page_dims> file_data = {};
 #endif

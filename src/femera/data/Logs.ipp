@@ -41,14 +41,14 @@ namespace femera {
   inline
   std::string data::Logs::csv_item (const float f) {
     std::vector<char> buf (15 + 1, 0);
-    std::snprintf (&buf[0], buf.size(),"%1.7e", double(f));
-    return std::string(&buf[0]);
+    std::snprintf (buf.data(), buf.size(),"%1.7e", double(f));
+    return std::string(buf.data());
   }
   inline
   std::string data::Logs::csv_item (const double f) {
     std::vector<char> buf (23 + 1, 0);
-    std::snprintf (&buf[0], buf.size(),"%1.15E", f);
-    return std::string(&buf[0]);
+    std::snprintf (buf.data(), buf.size(),"%1.15E", f);
+    return std::string(buf.data());
   }
   template <typename I> inline
   std::string data::Logs::csv_item (const I integer,

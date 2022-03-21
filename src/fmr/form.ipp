@@ -37,8 +37,8 @@ namespace femera {
   std::string form::text_line
   (fmr::Line_size_int line_width, const std::string& format, Args ...args) {
     std::vector<char> buf (line_width + 1, 0);
-    std::snprintf (&buf[0], buf.size(), format.c_str(), args...);
-    return std::string(&buf[0]);
+    std::snprintf (buf.data(), buf.size(), format.c_str(), args...);
+    return std::string(buf.data());
   }
   template<typename ...Args>
   std::string form::text_line
@@ -53,7 +53,7 @@ namespace femera {
     const std::string& name, const std::string& form, Args ...args) {
     const auto format = "%*s "+ form;
     std::vector<char> buf (line_width + 1, 0);
-    std::snprintf (&buf[0], buf.size(), format.c_str(),
+    std::snprintf (buf.data(), buf.size(), format.c_str(),
       int (name_width), name.c_str(), args...);
 #ifdef FMR_MICRO_UCHAR
     // Count unicode multibyte chars, e.g.. "\u00b5" or "\u03bc"
@@ -61,24 +61,27 @@ namespace femera {
     fmr::Local_int c =0;
     const fmr::Local_int n = fmr::Local_int (buf.size());
     for (fmr::Local_int i=0; i < n; i++) {
+#if 1
+      c += (buf[i]=='\xb5') ? 1u : 0u;
+      c += (buf[i]=='\xbc') ? 1u : 0u;
+#endif
 #if 0
       c += (buf[i] < 0) ? 1u : 0u;// finds too many characters
 #endif
 #if 0
       c += (buf[i] > '\x7f') ? 1u : 0u;// does not work; buf is signed
 #endif
-#if 1
-      c += (buf[i]=='\xb5') ? 1u : 0u;
-      c += (buf[i]=='\xbc') ? 1u : 0u;
+#if 0
+      c += (std::isprint (buf[i])) ? 0u : 1u;//does not work
 #endif
     }
     if (c > 0) {
       buf.resize (line_width + 1 + c);
-      std::snprintf (&buf[0], buf.size(), format.c_str(),
+      std::snprintf (buf.data(), buf.size(), format.c_str(),
         int (name_width), name.c_str(), args...);
     }
 #endif
-    return std::string(&buf[0]);
+    return std::string(buf.data());
   }
   template<typename ...Args>
   std::string form::name_line (FILE* f,
@@ -100,9 +103,9 @@ namespace femera {
     const auto text_width = line_width - time_width;
     if (line.length () > text_width) {line = line.substr (0, text_width);}
     std::vector<char> buf (line_width + 2, 0);
-    std::snprintf (&buf[0], buf.size(), "%-*s%*s",
+    std::snprintf (buf.data(), buf.size(), "%-*s%*s",
       int (text_width), line.c_str(), int (time_width), timestr.c_str());
-    return std::string(&buf[0]);
+    return std::string(buf.data());
   }
   template<typename ...Args>
   std::string form::name_time (FILE* f,

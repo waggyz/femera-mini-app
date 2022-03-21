@@ -31,8 +31,8 @@ namespace femera {
     }
     const auto w = this->file_line_sz [file];
     std::vector<char> buf (w + 1, 0);
-    std::snprintf (&buf[0], buf.size(), form.c_str(), args...);
-    const auto line = std::string (&buf[0]);
+    std::snprintf (buf.data(), buf.size(), form.c_str(), args...);
+    const auto line = std::string (buf.data());
     if (file != nullptr) { fprintf (file,"%s\n", line.c_str()); }
     return line;
   }

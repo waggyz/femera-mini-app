@@ -53,6 +53,7 @@ digraph "source tree" {
 	"Gmsh.hpp" -> "Data.hpp"
 	"Beds.cpp" -> "Beds.hpp"
 	"Node.hpp" -> "Proc.hpp"
+	"Geom.hpp" -> "Work.hpp"
 	"File.hpp" -> "Data.hpp"
 	"Fomp.cpp" -> "Main.hpp"
 	"Beds.hpp" -> "Test.hpp"
