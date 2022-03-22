@@ -420,19 +420,20 @@ reinstall: | intro
 clean: $(BUILD_CPU)/femera/ $(BUILD_CPU)/fmr/ $(STAGE_CPU)/lib/
 	$(call timestamp,$@,$^)
 	-rm -rf $^
-	$(info $(DONE) made $(FEMERA_VERSION) for $(CPUMODEL) on $(HOSTNAME) $@)
+	$(info $(DONE) made $(FEMERA_VERSION) for $(CPUMODEL) $@)
 
-cleaner: $(BUILD_CPU)/femera/ $(BUILD_CPU)/fmr/ $(STAGE_CPU)/ # for make external
+cleaner: $(BUILD_CPU)/femera/ $(BUILD_CPU)/fmr/ $(STAGE_CPU)/
+	# for make external
 	$(call timestamp,$@,$^)
 	-rm -rf $^ $(STAGE_DIR)/bin/fmr*
 	-rm -f $(BUILD_CPU)/*/*.out $(BUILD_CPU)/*/*.err
 	-rm -f $(BUILD_CPU)/*/*.flags $(BUILD_CPU)/*/*.new
-	$(info $(DONE) made $(FEMERA_VERSION) for $(CPUMODEL) on $(HOSTNAME) $@)
+	$(info $(DONE) made $(FEMERA_VERSION) for $(CPUMODEL) $@)
 
 cleanest: build/
 	$(call timestamp,$@,$^)
 	-rm -rf $^
-	$(info $(DONE) made $(FEMERA_VERSION) for $(CPUMODEL) on $(HOSTNAME) $@)
+	$(info $(DONE) made $(FEMERA_VERSION) $@)
 
 purge:
 	$(MAKE) $(JPAR) remove

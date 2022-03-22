@@ -23,7 +23,7 @@ namespace femera {
     return this->logs_init_stat;
   }
   template <typename ...Args> inline
-  std::string data::File::text_line
+  std::string data::File::text_line //TODO move from File to Text handler.
   (const data::File_ptrs_t& flist, const std::string& form, Args ...args) {
     FILE* file = nullptr;
     if (flist.size () > 0 && this->proc != nullptr) {
@@ -33,7 +33,12 @@ namespace femera {
     std::vector<char> buf (w + 1, 0);
     std::snprintf (buf.data(), buf.size(), form.c_str(), args...);
     const auto line = std::string (buf.data());
-    if (file != nullptr) { fprintf (file,"%s\n", line.c_str()); }
+    if (file != nullptr) {
+//FIXME      this->time.add_idle_time_now ();
+      const auto c = fprintf (file,"%s\n", line.c_str());
+//      this->time.add_busy_time_now ();
+      if (c > 0) { this->time.add_count (1, 0, 0, fmr::Perf_int(c)); }
+    }
     return line;
   }
   template <typename ...Args> inline
@@ -50,7 +55,12 @@ namespace femera {
     const auto w = this->file_line_sz [file];
     const auto h = this->line_name_sz [file];
     const auto line = femera::form::name_line (h, w, label, form, args...);
-    if (file != nullptr) { fprintf (file,"%s\n", line.c_str()); }
+    if (file != nullptr) {
+//      this->time.add_idle_time_now ();
+      const auto c = fprintf (file,"%s\n", line.c_str());
+//      this->time.add_busy_time_now ();
+      if (c > 0) { this->time.add_count (1, 0, 0, fmr::Perf_int(c)); }
+    }
     return line;
   }
   template <typename ...Args> inline
@@ -68,7 +78,12 @@ namespace femera {
     const auto h = this->line_name_sz [file];
     const auto w = this->file_line_sz [file];
     const auto line = femera::form::name_time (h, w, label, form, args...);
-    if (file != nullptr) { fprintf (file,"%s\n", line.c_str()); }
+    if (file != nullptr) {
+//      this->time.add_idle_time_now ();
+      const auto c = fprintf (file,"%s\n", line.c_str());
+//      this->time.add_busy_time_now ();
+      if (c > 0) { this->time.add_count (1, 0, 0, fmr::Perf_int(c)); }
+    }
     return line;
   }
   template <typename ...Args> inline

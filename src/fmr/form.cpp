@@ -8,21 +8,21 @@
 
 namespace fmr {
 
-std::string detail::form::si_unit (double v, std::string unit,
-  const int min_digits, const std::string sign) {// implemented here, not inline
-    if (unit.size()>8) { unit = unit.substr (0,8); }
+std::string detail::form::si_unit// implemented here, not inline
+(double v, std::string unit, const int min_digits, const std::string sign) {
+    if (unit.size()>8) { unit = unit.substr (0,8); }//FIXME return std::to_string(v);
     const double threshold
       = (0.95 - DBL_EPSILON) * std::pow (10.0, double(min_digits - 1));
     int log1000 = 0;
     if (v > double(DBL_EPSILON) * 0.5) {//1.0e-24) {// was FLT_EPSILON
       log1000 = int(std::log10 (v)) / 3 - ((v < 1.0) ? 1 : 0);
       v *= std::pow (10.0, -3.0 * double(log1000));
-      if (v < threshold) { v *= 1000.0; log1000 -= 1; }
-    }
+      if (v < threshold) { v *= 1000.0; log1000--; }//return std::to_string(log1000);
+    }// else {return std::string("???");}
     const int i = log1000 + 6;
     const char prefix[]="afpnum kMGTPE";
     std::string pre = "?";
-    if (i >= 0 && i < int(std::strlen(prefix))) { pre = prefix[i]; }
+    if (i >= 0 && i < int (std::strlen (prefix))) { pre = prefix[i]; }
 #ifdef FMR_MICRO_UCHAR
     if (pre == "u")  {
       const std::string mu( MAKESTR(\FMR_MICRO_UCHAR) );
@@ -30,25 +30,25 @@ std::string detail::form::si_unit (double v, std::string unit,
     }
 #endif
     std::vector<char> buf(16,0);
-    std::snprintf (&buf[0], buf.size()-1, "%s%4.0f %s%s",
+    std::snprintf (buf.data(), buf.size(), "%s%4.0f %s%s",
       sign.c_str(), v, pre.c_str(), unit.c_str());
-    return std::string (&buf[0]);
+    return std::string (buf.data());
   }
   std::string form::utc_time () {
     std::string timestr="";
     const auto now_time = std::chrono::system_clock::now();
-    const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>
+    const auto ms = std::chrono::duration_cast <std::chrono::milliseconds>
       (now_time.time_since_epoch()).count();
     const auto as_time_t = std::chrono::system_clock::to_time_t (now_time);
     struct tm tmbuf;
     std::vector<char> buf(32,0);
-    if (::gmtime_r (& as_time_t, & tmbuf)){
-      if (std::strftime (& buf[0], buf.size()-1,"%Y-%m-%d %H:%M:%S",& tmbuf)) {
-        timestr = std::string (& buf[0]);
+    if (::gmtime_r (& as_time_t, & tmbuf)) {
+      if (std::strftime (buf.data(), buf.size(),"%Y-%m-%d %H:%M:%S",& tmbuf)) {
+        timestr = std::string (buf.data());
     } }
-    std::snprintf (& buf[0], buf.size()-1, "%s.%03i",
+    std::snprintf (buf.data(), buf.size(), "%s.%03i",
       timestr.c_str(), int(ms % 1000));
-    return std::string (& buf[0]);
+    return std::string (buf.data());
   }
 
 }// end fmr:: namespace

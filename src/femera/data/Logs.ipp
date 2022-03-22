@@ -20,7 +20,7 @@ namespace femera {
       else {n = P->get_proc_n ();}// number of OpenMP threads / mpi process
     }
     this->data->fmrlog = data::File_ptrs_t (n, nullptr);
-    if (n > 0) {this->data->fmrlog[0] = ::stdout;}
+    if (n > 0) { this->data->fmrlog[0] = ::stdout; }
     this->data->set_logs_init (true);
   }
   inline

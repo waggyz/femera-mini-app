@@ -37,16 +37,16 @@ namespace fmr {
   }
   template <typename T> inline
   fmr::Perf_float perf::Meter<T>::add_busy_time_now () {
-    const auto now = perf::get_now_ns ();
-    const auto last_busy = now - this->tick;
+    const fmr::perf::Count now = perf::get_now_ns ();
+    const fmr::perf::Count last_busy = (now > this->tick) ? now - tick : 0;
     this->tick = now;
     this->busy_ns += last_busy;
     return fmr::Perf_float (1.0e-9) * fmr::Perf_float (last_busy);
   }
   template <typename T> inline
   fmr::Perf_float perf::Meter<T>::add_idle_time_now () {
-    const auto now = perf::get_now_ns ();
-    const auto last_idle = now - this->tick;
+    const fmr::perf::Count now = perf::get_now_ns ();
+    const fmr::perf::Count last_idle = (now > this->tick) ? now - tick : 0;
     this->tick = now;
     this->idle_ns += last_idle;
     return fmr::Perf_float (1.0e-9) * fmr::Perf_float (last_idle);

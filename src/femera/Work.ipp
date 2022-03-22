@@ -76,15 +76,19 @@ namespace femera {
   noexcept {
     fmr::Local_int i=0;
     auto W = this;
+#if 1
     if (W->task_type == t) {
-      if (i == ix) {return W;}
+      //TODO Is this the desired behavior of nested drivers of the same type?
+      //     Task 0 is the parent, with 1-indexed children of the same type.
+      if (i == ix) { return W; }
       i++;
     }
+#endif
     while (! W->task_list.empty ()) {
       const fmr::Local_int n = W->get_task_n ();
       for (fmr::Local_int Wix=0; Wix < n; Wix++) {
         if (W->task_list [Wix].get()->task_type == t) {
-          if (i == ix) {return W->task_list [Wix].get();}
+          if (i == ix) { return W->task_list [Wix].get(); }
           i++;
       } }
       W = W->task_list [0].get();//TODO other branches
@@ -100,7 +104,7 @@ namespace femera {
   fmr::Local_int Work::add_task (Work_spt W)
   noexcept {
     this->task_list.push_back (std::move(W));
-    return fmr::Local_int (this->task_list.size () - 1);
+    return fmr::Local_int (this->task_list.size () - 1);// index of task added
   }
   inline
   fmr::Local_int Work::del_task (const fmr::Local_int ix)
