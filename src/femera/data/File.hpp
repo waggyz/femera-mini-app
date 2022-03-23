@@ -23,8 +23,11 @@ namespace femera { namespace data {
   private:
     std::unordered_map <File_id, Page_dims> file_data = {};
 #endif
+  private:
+    Path_list_t inp_file_list ={};// initialized from command line
+    Path_list_t out_file_list ={};//              "
 #if 1
-  private:// TODO Replace below with femera::data::Page_dims struct.
+    // TODO Replace below with femera::data::Page_dims struct.
     std::unordered_map <FILE*, fmr::Line_size_int> file_line_sz
       = {{nullptr, 80}, {::stdout, 80}, {::stderr, 250}};
     std::unordered_map <FILE*, fmr::Line_size_int> line_name_sz

@@ -14,11 +14,6 @@ namespace femera { namespace data {
   using File_ptrs_t = std::vector <FILE*>;
   struct Page_dims {// regular blocked data, local (partitioned) data
     // for file and stream (e.g., stdout) reading and saving
-#if 0
-  public://TODO Remove? constructor
-    Form_dims (fmr::Enum_int, fmr::Local_int =0, fmr::Enum_int =1,
-      fmr::Dim_int =0, fmr::Dim_int =0);
-#endif
   public:
 //TODO Data_ptrs_t data;// data handler; OR use std::vector <task_type>?
 //    std::vector <Task_type> task_type ={};// {task_cast (Plug_type::None)};
@@ -47,25 +42,46 @@ namespace femera {
     fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;
 #if 0
   public:
+    using Data_name_t = std:vector<Name_t>;
+    // Memory operations
+    //TODO Remove _data  from these.
+    ret::???  add_data (Data_name_t, ...);// Vals_t vals =nullptr);
+    ret::??? size_data (Data_name_t, ...);// Vals_t size =nullptr);
+    Vals_t    get_data (Data_name_t);
+    ret::???  clr_data (Data_name_t);
+    Vals_t    ser_data (Data_name_t, ...);// Vals_t vals =nullptr);// serialize
+    Vals_t   form_data (Data_name_t, ...);// Vals_t vals =nullptr);
+    //
+    // I/O operations
+    Vals_t   scan_data (Data_name_t);
+    Vals_t   read_data (Data_name_t);
+    ret::??? save_data (Data_name_t, ...);// Vals_t =nullptr);
+    ret::??? send_data (Data_name_t, ...);// Vals_t =nullptr);
+#endif
+#if 0
+  public:
     //TODO ? File operations are spawned from the local OpenMP master thread, and
     //     ? file methods use vector types for shared-memory access by proc_id, e.g.,
     // local_x = vec_x [proc_id % vec_x.size ()];
     // or better, contiguous blocks of vals for each proc_id
     //
-    using Byte_list = std::vector <fmr::perf::Count>;// bytes in or out
-    using Vals_list = std::vector <Vals*>;
-    //using Form_list = std::vector <std::valarray<Form_int>>;
+    using Size_list_t = std::vector <fmr::Perf_int>;// bytes in or out
+    using Vals_list_t = std::vector <Vals*>;
+    //using Form_list_t = std::vector <std::valarray<Form_int>>;
     //-------------------------------------------------------------------------
-    using Sims_list = std::deque <std::string>;
-    using Path_list = std::deque <std::string>;
-    //TODO Path_list can be a vector to disambiguate it from Sims_list?
+  public:
+    using Sims_list_t = std::deque <std::string>;
+    using Path_list_t = std::deque <std::string>;
+    //TODO Path_list_t can be a vector to disambiguate it from Sims_list_t?
     //NOTE An empty deque/vector in an argument means all sims or all files.
-    // Path_list ({""}); means the current working directory in a path method.
-    // Text files in Path_list may contain a list of model files.
-    //
+    // Path_list_t ({""}); means the current working directory in a path method.
+    // Text files in Path_list_t may contain a list of model files.
+  private:
+    //std::unordered_map <std::string, Path_list_t> sims_file_name_list ={};
+    //std::unordered_map <std::string, Path_list_t> sims_file_name_list ={};
     //TODO functions that take these are overloaded for std::string&, e.g.,
-    //     static inline constexpr Sims_list add_sims (std::string& s="") {
-    //       return add_sims (Sims_list({s});
+    //     static inline constexpr Sims_list_t add_sims (std::string& s="") {
+    //       return add_sims (Sims_list_t({s});
     //     }
   private:
     class File_name {
@@ -80,60 +96,62 @@ namespace femera {
     };
     using File_list = std::deque <File_name>;
   private:
-    Path_list path_list ={""};// first is default dir; "" is current working dir
-    Path_list name_list ={};
-    Sims_list sims_list ={};
+    Path_list_t Path_list_t ={""};// first is default dir; "" is current working dir
+    Path_list_t name_list ={};
+    Sims_list_t Sims_list_t ={};
   public:// Data source methods -----------------------------------------------
     //
-    Path_list  add_path (Path_list& ={""});// add to filename search path
+    Path_list_t  add_path (Path_list_t& ={""});// add to filename search path
     //NOTE add_path ({}); does nothing.
-    Path_list  add_tree (Path_list& ={""});// add dir & subdirs recursively
+    Path_list_t  add_tree (Path_list_t& ={""});// add dir & subdirs recursively
     //NOTE add_tree ({}); adds subdirs of dirs in the current path recursively.
-    Path_list  clr_path (Path_list& ={});// clear filename search path
-    Path_list scan_path (Path_list& ={});// get model filenames in path
+    Path_list_t  clr_path (Path_list_t& ={});// clear filename search path
+    Path_list_t scan_path (Path_list_t& ={});// get model filenames in path
     //
-    Path_list  add_file (Path_list& ={});
-    Sims_list scan_file (Path_list& ={}, Data_type =Data_type::As_needed);
+    Path_list_t  add_file (Path_list_t& ={});
+    Sims_list_t scan_file (Path_list_t& ={}, Data_type =Data_type::As_needed);
     //                   registers the data in files
     // Data_type::As_needed avoids big data ops and may make false assumptions.
     // E.g., Gmsh (*.msh) files are assumed to contain node & element data.
     //
-    fmr::Local_int get_sims_n (Path_list& ={});
-    fmr::Local_int get_file_n (Path_list& ={});
+    fmr::Local_int get_sims_n (Path_list_t& ={});
+    fmr::Local_int get_file_n (Path_list_t& ={});
     //
-    Sims_list  add_sims (Sims_list& ={});// register more models
-    Sims_list  set_sims (Sims_list& ={});// clear list then add models
-    Sims_list  clr_sims (Sims_list& ={});// clear model data
-    Sims_list  get_sims (Sims_list& ={});// returns a list of sims loaded
-    Byte_list scan_sims (Sims_list& ={}, Data_type =Data_type::As_needed);
+    Sims_list_t  add_sims (Sims_list_t& ={});// register more models
+    Sims_list_t  clr_sims (Sims_list_t& ={});// clear model data
+    Sims_list_t  get_sims (Sims_list_t& ={});// returns a list of sims loaded
+    Size_list_t scan_sims (Sims_list_t& ={}, Data_type =Data_type::As_needed);
     //
-    Sims_list  add_data (fmr::Test_type =fmr::Test_type::As_needed);
+    Vals_list_t  get_data (Sims_list_t& ={}, Data_type =Data_type::As_needed);
+    Size_list_t  clr_data (Sims_list_t& ={}, Data_type =Data_type::All);
+    Vals_list_t  ser_data (..);// returns serialized data
     //
-    Vals_list  get_data (Sims_list& ={}, Data_type =Data_type::As_needed);
-    Byte_list  clr_data (Sims_list& ={}, Data_type =Data_type::All);
-    Vals_list  ser_data (..);// returns serialized data
-    //
+    template <typename V>
+    Vals<V>*     get_data (std::vector<Vals_name>,// path to named data item?
+      //e.g., {"my_sims","named_sim","named_params","physics","material"}
+      Data::Lump_type = Lump_type::All,// Part/Page/Line/Vals/Item
+      fmr::Global_int lump_1x = 0);// part/page/line/vals/item (1-indexed)
     // Data read/write methods ------------------------------------------------
     //NOTE (..) means appropriate arguments
-    Byte_list read_data (..);// read whole dataset
-    Byte_list send_data (..);// append, write; new if destination does not exist
-    Byte_list save_data (..);// new, overwrite
+    Size_list_t read_data (..);// read whole dataset
+    Size_list_t send_data (..);// append, write; new if destination does not exist
+    Size_list_t save_data (..);// new, overwrite
     //
-    Byte_list read_line (..);// one line at a time
-    Byte_list send_line (..);// append, write; new if destination does not exist
-    Byte_list save_line (..);// new, overwrite
+    Size_list_t read_page (..);// read data in blocks
+    Size_list_t send_page (..);// append, write; new if destination does not exist
+    Size_list_t save_page (..);// new, overwrite
     //
-    Byte_list read_page (..);// read data in blocks
-    Byte_list send_page (..);// append, write; new if destination does not exist
-    Byte_list save_page (..);// new, overwrite
+    Size_list_t read_line (..);// one line at a time
+    Size_list_t send_line (..);// append, write; new if destination does not exist
+    Size_list_t save_line (..);// new, overwrite
     //
-    Byte_list read_vals (..);// read data by column (SoA)//TODO or read_cols ?
-    Byte_list send_vals (..);// append write; new if destination does not exist
-    Byte_list save_vals (..);// new, overwrite
+    Size_list_t read_vals (..);// read data by column (SoA)//TODO or read_cols ?
+    Size_list_t send_vals (..);// append write; new if destination does not exist
+    Size_list_t save_vals (..);// new, overwrite
     //
-    Byte_list read_item (..);// read data item(s)
-    Byte_list send_item (..);// append write; new if destination does not exist
-    Byte_list save_item (..);// new, overwrite
+    Size_list_t read_item (..);// read data item(s)
+    Size_list_t send_item (..);// append write; new if destination does not exist
+    Size_list_t save_item (..);// new, overwrite
     //-------------------------------------------------------------------------
 #endif
   public:

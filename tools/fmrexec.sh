@@ -10,68 +10,73 @@ if [ -z "$NCPU" ]; then
 fi
 for ARG in "$@"
 do
-  if [[ "$ARG" == -n* ]]; then
-    ARG="-fmr:n"${ARG#-n}
-  fi
-  if [[ "$ARG" == -o* ]]; then
-    ARG="-fmr:o"${ARG#-o}
-  fi
-  case "$ARG" in
-  "auto" | "femera")
-    PRE=fmr
-    ;;
-  "test")
-    FMRARGS+=" -fmr:test"
-    PRE=fmr
-    ;;
-  tdd*)
-    #FIXME change -T to -fmr:test
-    FMRARGS+=" -T"
-    NMPI=2
-    NOMP=2
-    PRE=fmr
-    FMREXE="femera"
-    if [ "$ARG" != "tdd" ]; then
-      X="${ARG#tdd:}"
-      if [ -n "$X" ]; then
-        FMREXE=$X
-      fi
+  if [[ -f "$ARG" && -x "$ARG" ]]; then
+    FMREXE="$ARG"
+  else
+    if [[ "$ARG" == -n* ]]; then
+      ARG="-fmr:n"${ARG#-n}
     fi
-    ;;
-  "grind" | "valgrind" | "memcheck")
-    VGEXE="valgrind"
-    PRE=vg
-    # --leak-check=full --track-origins=yes"
-    #VGEXE+=" --suppressions=$BUILD_CPU/$VALGRIND_SUPP"
-    #VGEXE+=" --log-file=$BUILD_CPU/mini.valgrind.log"
-    ;;
-  -fmr:n*)
-    PRE=fmr
-    NMPI=${ARG#-fmr:n}
-    ;;
-  -fmr:o*)
-    PRE=fmr
-    NOMP=${ARG#-fmr:o}
-    ;;
-  *:pe=*)
-    NOMP=${ARG#*pe=}
-    MAP_BY="${ARG%%pe=*}"
-    ;;
-  *mpi:*)
-    PRE=mpi; MPIARGS+=" "${ARG%%mpi:*}""${ARG#*mpi:};;
-  *vg:*)
-    PRE=vg; VGARGS+=" ""${ARG%%vg:*}"${ARG#*vg:};;
-  *)
-    case "$PRE" in
-    mpi)
-      MPIARGS+=" $ARG";;
-    vg)
-      VGARGS+=" $ARG";;
+    if [[ "$ARG" == -o* ]]; then
+      ARG="-fmr:o"${ARG#-o}
+    fi
+    case "$ARG" in
+    "auto" | "femera")
+      PRE=fmr
+      ;;
+    "test")
+      FMRARGS+=" -fmr:test"
+      PRE=fmr
+      ;;
+    tdd*)
+      #TODO change -T to -fmr:test ?
+      FMRARGS+=" -T"
+      NMPI=2
+      NOMP=2
+      PRE=fmr
+      #TODO tdd:<executable> is deprecated
+      #FMREXE="femera"
+      if [ "$ARG" != "tdd" ]; then
+        X="${ARG#tdd:}"
+        if [ -n "$X" ]; then
+          FMREXE=$X
+        fi
+      fi
+      ;;
+    "grind" | "valgrind" | "memcheck")
+      VGEXE="valgrind"
+      PRE=vg
+      # --leak-check=full --track-origins=yes"
+      #VGEXE+=" --suppressions=$BUILD_CPU/$VALGRIND_SUPP"
+      #VGEXE+=" --log-file=$BUILD_CPU/mini.valgrind.log"
+      ;;
+    -fmr:n*)
+      PRE=fmr
+      NMPI=${ARG#-fmr:n}
+      ;;
+    -fmr:o*)
+      PRE=fmr
+      NOMP=${ARG#-fmr:o}
+      ;;
+    *:pe=*)
+      NOMP=${ARG#*pe=}
+      MAP_BY="${ARG%%pe=*}"
+      ;;
+    *mpi:*)
+      PRE=mpi; MPIARGS+=" "${ARG%%mpi:*}""${ARG#*mpi:};;
+    *vg:*)
+      PRE=vg; VGARGS+=" ""${ARG%%vg:*}"${ARG#*vg:};;
     *)
-      FMRARGS+=" $ARG";;
+      case "$PRE" in
+      mpi)
+        MPIARGS+=" $ARG";;
+      vg)
+        VGARGS+=" $ARG";;
+      *)
+        FMRARGS+=" $ARG";;
+      esac
+      ;;
     esac
-    ;;
-  esac
+  fi
 done
 if [ -z "$MPIARGS" ]; then
   MPIARGS=" --bind-to core"

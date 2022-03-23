@@ -34,7 +34,7 @@ namespace femera {
     std::snprintf (buf.data(), buf.size(), form.c_str(), args...);
     const auto line = std::string (buf.data());
     if (file != nullptr) {
-//FIXME      this->time.add_idle_time_now ();
+//      this->time.add_idle_time_now ();//TODO move to Text should fix timing
       const auto c = fprintf (file,"%s\n", line.c_str());
 //      this->time.add_busy_time_now ();
       if (c > 0) { this->time.add_count (1, 0, 0, fmr::Perf_int(c)); }

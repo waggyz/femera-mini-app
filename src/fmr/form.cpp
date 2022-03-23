@@ -10,7 +10,7 @@ namespace fmr {
 
 std::string detail::form::si_unit// implemented here, not inline
 (double v, std::string unit, const int min_digits, const std::string sign) {
-    if (unit.size()>8) { unit = unit.substr (0,8); }//FIXME return std::to_string(v);
+    if (unit.size()>8) { unit = unit.substr (0,8); }
     const double threshold
       = (0.95 - DBL_EPSILON) * std::pow (10.0, double(min_digits - 1));
     int log1000 = 0;
