@@ -1,6 +1,8 @@
 #ifndef FEMERA_FILE_IPP
 #define FEMERA_FILE_IPP
 
+#include "../../fmr/form.hpp"//TODO Remove when refactored into data::Text
+
 namespace femera {
   inline
   data::File::File (const femera::Work::Core_ptrs_t W) noexcept {
@@ -17,14 +19,15 @@ namespace femera {
   bool data::File::did_logs_init () {
     return this->logs_init_stat;
   }
-  inline
-  bool data::File::set_logs_init (const bool tf) {
-    this->logs_init_stat = tf;
-    return this->logs_init_stat;
-  }
   template <typename ...Args> inline
-  std::string data::File::text_line //TODO move from File to Text handler.
+  std::string data::File::text_line
   (const data::File_ptrs_t& flist, const std::string& form, Args ...args) {
+# if 0
+    const auto D = this->data->get_task (Plug_type::Text);
+//    const auto D = cast_via_work<data::Text>(this->get_task (Plug_type::Text));
+    if (D != nullptr) {return D->text_line (flist, form, args...);}
+    return "";
+#else
     FILE* file = nullptr;
     if (flist.size () > 0 && this->proc != nullptr) {
       file = flist [this->proc->get_proc_id () % flist.size()];
@@ -40,14 +43,23 @@ namespace femera {
       if (c > 0) { this->time.add_count (1, 0, 0, fmr::Perf_int(c)); }
     }
     return line;
+#endif
   }
   template <typename ...Args> inline
   std::string data::File::text_line (const std::string& form, Args ...args) {
     return data::File::text_line (data::File_ptrs_t ({}), form, args...);
   }
-  template <typename ...Args> inline
+  template <typename ...Args> inline //TODO move from File to Text handler.
   std::string data::File::name_line (const data::File_ptrs_t& flist,
     const std::string& label, const std::string& form, Args ...args) {
+# if 0
+    if (this->did_logs_init ()) {
+      const auto D = cast_via_work<data::Text>(this->get_task (Plug_type::Text));
+//      const auto D = this->get_task (Plug_type::Text);
+      if (D != nullptr) {return D->name_line (flist, label, form, args...);}
+    }
+    return "";
+#else
     FILE* file = nullptr;
     if (flist.size () > 0 && this->proc != nullptr) {
       file = flist [this->proc->get_proc_id () % flist.size()];
@@ -62,6 +74,7 @@ namespace femera {
       if (c > 0) { this->time.add_count (1, 0, 0, fmr::Perf_int(c)); }
     }
     return line;
+#   endif
   }
   template <typename ...Args> inline
   std::string data::File::name_line

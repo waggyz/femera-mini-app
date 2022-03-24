@@ -1,10 +1,11 @@
 #ifndef FEMERA_HAS_FILE_HPP
 #define FEMERA_HAS_FILE_HPP
 
-#include "../Data.hpp"
+//#include "../Data.hpp"
 
 // used in Data.ipp
-#include "../../fmr/form.hpp"
+#include "Text.hpp"
+
 #include <unordered_map>
 
 namespace femera { namespace data {

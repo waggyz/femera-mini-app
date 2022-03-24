@@ -1,6 +1,6 @@
 #include "File.hpp"
-#include "Text.hpp"
 #include "Logs.hpp"
+#include "Text.hpp"
 #include "Fcsv.hpp"
 
 #ifdef FMR_HAS_CGNS
@@ -23,8 +23,8 @@
 
 namespace femera {
   void data::File::task_init (int*, char**) {
-    this->add_task (std::move(Data<data::Text>::new_task (this->get_core())));
     this->add_task (std::move(Data<data::Logs>::new_task (this->get_core())));
+    this->add_task (std::move(Data<data::Text>::new_task (this->get_core())));
     this->add_task (std::move(Data<data::Fcsv>::new_task (this->get_core())));
 #ifdef FMR_HAS_CGNS
     this->add_task (std::move(Data<data::Cgns>::new_task (this->get_core())));
@@ -38,6 +38,18 @@ namespace femera {
 #ifdef FMR_HAS_PETSC
     this->add_task (std::move(Data<data::Pets>::new_task (this->get_core())));
 #endif
+  }
+  bool data::File::set_logs_init (const bool tf) {
+    this->logs_init_stat = tf;
+#if 1
+    if (tf) {
+      auto D = cast_via_work<data::Text>(this->get_task (Plug_type::Text));
+      if (D != nullptr) {
+        D->file_line_sz = this->file_line_sz;
+        D->line_name_sz = this->line_name_sz;
+    } }
+#endif
+    return this->logs_init_stat;
   }
 }// end femera::namespace
 
