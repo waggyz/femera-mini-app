@@ -34,8 +34,8 @@ namespace femera {
     class Main; class Root; class Node; class Fcpu;
     class Fmpi; class Fomp; class Nvid;
   }
-  namespace data {
-    class File; class Logs;//TODO class Type; class Base; class Dflt;
+  namespace data {//TODO class Type; class Base; class Dflt;
+    class File; class Logs; class Fcsv; class Text;
     class Cgns; class Gmsh; class Moab; class Moab; class Pets;
   }
   namespace test {

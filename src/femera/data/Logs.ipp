@@ -12,7 +12,7 @@ namespace femera {
   }
   inline
   void data::Logs::task_init (int*, char**) {
-    // set default logger (data->fmrlog) to stdout only from the main thread
+    // set default logger (data->fmrlog) to stdout only from the main thread (0)
     fmr::Local_int n = 0;
     if (this->proc->is_main ()) {
       const auto P = this->proc->get_task (Plug_type::Fomp);

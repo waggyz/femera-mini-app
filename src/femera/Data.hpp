@@ -41,20 +41,22 @@ namespace femera {
     fmr::Exit_int init (int*, char**)        noexcept final override;
     fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;
 #if 0
+  private:
+    std::unordered_map<std::string,FILE*> open_file_list ={};
   public:
     using Data_name_t = std:vector<Name_t>;
     // Memory operations
     //TODO Remove _data  from these.
     ret::???  add_data (Data_name_t, ...);// Vals_t vals =nullptr);
     ret::??? size_data (Data_name_t, ...);// Vals_t size =nullptr);
+    Vals_t   form_data (Data_name_t, ...);// Vals_t vals =nullptr);
     Vals_t    get_data (Data_name_t);
     ret::???  clr_data (Data_name_t);
-    Vals_t    ser_data (Data_name_t, ...);// Vals_t vals =nullptr);// serialize
-    Vals_t   form_data (Data_name_t, ...);// Vals_t vals =nullptr);
     //
     // I/O operations
-    Vals_t   scan_data (Data_name_t);
+    Vals_t   scan_data (File_name_t);
     Vals_t   read_data (Data_name_t);
+    Vals_t   sync_data (Data_name_t);
     ret::??? save_data (Data_name_t, ...);// Vals_t =nullptr);
     ret::??? send_data (Data_name_t, ...);// Vals_t =nullptr);
 #endif
@@ -69,6 +71,7 @@ namespace femera {
     using Vals_list_t = std::vector <Vals*>;
     //using Form_list_t = std::vector <std::valarray<Form_int>>;
     //-------------------------------------------------------------------------
+#endif
   public:
     using Sims_list_t = std::deque <std::string>;
     using Path_list_t = std::deque <std::string>;
@@ -76,6 +79,7 @@ namespace femera {
     //NOTE An empty deque/vector in an argument means all sims or all files.
     // Path_list_t ({""}); means the current working directory in a path method.
     // Text files in Path_list_t may contain a list of model files.
+#if 0
   private:
     //std::unordered_map <std::string, Path_list_t> sims_file_name_list ={};
     //std::unordered_map <std::string, Path_list_t> sims_file_name_list ={};
