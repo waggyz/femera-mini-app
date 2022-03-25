@@ -26,48 +26,6 @@ namespace femera {
   inline
   void data::Logs::task_exit () {
   }
-  template <typename ...Args> inline
-  std::string data::Logs::data_line (Args... args) {
-    return make_data_line (std::string(""), args...);
-  }
-  inline
-  std::string data::Logs::csv_item (const std::string& str) {
-    return +"\""+str+"\"";
-  }
-  inline
-  std::string data::Logs::csv_item (const char* str) {
-    return "\""+std::string(str)+"\"";
-  }
-  inline
-  std::string data::Logs::csv_item (const float f) {
-    std::vector<char> buf (15 + 1, 0);
-    std::snprintf (buf.data(), buf.size(),"%1.7e", double(f));
-    return std::string(buf.data());
-  }
-  inline
-  std::string data::Logs::csv_item (const double f) {
-    std::vector<char> buf (23 + 1, 0);
-    std::snprintf (buf.data(), buf.size(),"%1.15E", f);
-    return std::string(buf.data());
-  }
-  template <typename I> inline
-  std::string data::Logs::csv_item (const I integer,
-    typename std::enable_if<std::is_integral<I>::value >::type*) {
-    return std::to_string (integer);
-  }
-  inline
-  std::string data::Logs::make_data_line (const std::string& line) {
-    return line;
-  }
-  template <typename L> inline
-  std::string data::Logs::make_data_line (const std::string& line, const L last) {
-    return line + data::Logs::csv_item (last);
-  }
-  template <typename F, typename ...R> inline
-  std::string data::Logs::make_data_line
-  (const std::string& line, const F first, R... rest) {
-    return make_data_line (line + data::Logs::csv_item (first)+",", rest...);
-  }
 }//end femera namespace
 
 //end FEMERA_DATA_LOGS_IPP
