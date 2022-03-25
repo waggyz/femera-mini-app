@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include "../../fmr/form.hpp"// needed in Text.ipp
+#include <valarray>
 
 namespace femera { namespace data {
   class Text;// Derive a CRTP concrete class from Data.

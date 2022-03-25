@@ -30,10 +30,10 @@ namespace femera {
   }
   inline
   std::string data::Fcsv::csv_item (const float f) {
-    std::vector<char> buf (15 + 1, 0);
-    std::snprintf (buf.data(),buf.size(),"%1.*e",
+    std::valarray<char> buf (15 + 1);
+    std::snprintf (&buf[0],buf.size(),"%1.*e",
       std::numeric_limits<float>::max_digits10 - 1, double(f));
-    return std::string(buf.data());
+    return std::string(&buf[0]);
   }
  /* Floats have 7 digits of accuracy. Doubles have 15. See:
   * www.educative.io/edpresso/what-is-the-difference-between-float-and-double
@@ -45,10 +45,10 @@ namespace femera {
   */
   inline
   std::string data::Fcsv::csv_item (const double f) {
-    std::vector<char> buf (23 + 1, 0);
-    std::snprintf (buf.data(), buf.size(),"%1.*E",
+    std::valarray<char> buf (23 + 1);
+    std::snprintf (&buf[0], buf.size(),"%1.*E",
       std::numeric_limits<double>::max_digits10 - 1,  f);
-    return std::string(buf.data());
+    return std::string(&buf[0]);
   }
   template <typename I> inline
   std::string data::Fcsv::csv_item (const I integer,

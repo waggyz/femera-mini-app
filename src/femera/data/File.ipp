@@ -5,7 +5,8 @@
 
 namespace femera {
   inline
-  data::File::File (const femera::Work::Core_ptrs_t W) noexcept {
+  data::File::File (const femera::Work::Core_ptrs_t W)
+  noexcept {
     std::tie (this->proc, this->data, this->test) = W;
     this->name      ="Femera file handler";
     this->abrv      ="file";
@@ -33,9 +34,9 @@ namespace femera {
       file = flist [this->proc->get_proc_id () % flist.size()];
     }
     const auto w = this->file_line_sz [file];
-    std::vector<char> buf (w + 1, 0);
-    std::snprintf (buf.data(), buf.size(), form.c_str(), args...);
-    const auto line = std::string (buf.data());
+    std::valarray<char> buf (w + 1);
+    std::snprintf (&buf[0], buf.size(), form.c_str(), args...);
+    const auto line = std::string (&buf[0]);
     if (file != nullptr) {
 //      this->time.add_idle_time_now ();//TODO move to Text should fix timing
       const auto c = fprintf (file,"%s\n", line.c_str());

@@ -2,9 +2,9 @@
 
 #include <cmath>    // pow(), log10()
 #include <cstring>  // strlen()
-#include <vector>
 #include <cfloat>   // DBL_EPSILON
 #include <chrono>
+#include <array>
 
 namespace fmr {
 
@@ -29,7 +29,7 @@ std::string detail::form::si_unit// implemented here, not inline
       pre = (mu =="\\u") ? "u" : mu ;
     }
 #endif
-    std::vector<char> buf(16,0);
+    std::array<char,16> buf;
     std::snprintf (buf.data(), buf.size(), "%s%4.0f %s%s",
       sign.c_str(), v, pre.c_str(), unit.c_str());
     return std::string (buf.data());
@@ -41,7 +41,7 @@ std::string detail::form::si_unit// implemented here, not inline
       (now_time.time_since_epoch()).count();
     const auto as_time_t = std::chrono::system_clock::to_time_t (now_time);
     struct tm tmbuf;
-    std::vector<char> buf(32,0);
+    std::array<char,32> buf;
     if (::gmtime_r (& as_time_t, & tmbuf)) {
       if (std::strftime (buf.data(), buf.size(),"%Y-%m-%d %H:%M:%S",& tmbuf)) {
         timestr = std::string (buf.data());

@@ -1,6 +1,7 @@
 #include "Fmpi.hpp"
 
 #include <exception>
+#include <valarray>
 
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
@@ -45,7 +46,7 @@ namespace femera {
     return this->proc_ix;
   }
   void proc::Fmpi::task_init (int* argc, char** argv) {int err=0;
-    std::vector<char> buf (MPI_MAX_LIBRARY_VERSION_STRING, 0);
+    std::valarray<char> buf (MPI_MAX_LIBRARY_VERSION_STRING);
     // MPI_MAX_LIBRARY_VERSION_STRING includes space for the terminating null.
     int buflen=0, mpiver=0, mpisub=0;
     err= MPI_Get_library_version (& buf[0], & buflen);

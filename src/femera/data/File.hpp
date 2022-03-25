@@ -7,6 +7,7 @@
 #include "Text.hpp"
 
 #include <unordered_map>
+#include <valarray>
 
 namespace femera { namespace data {
   class File;// Derive a CRTP concrete class from Data.

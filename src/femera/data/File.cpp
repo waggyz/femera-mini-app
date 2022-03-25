@@ -23,25 +23,25 @@
 
 namespace femera {
   void data::File::task_init (int*, char**) {
-    this->add_task (std::move(Data<data::Logs>::new_task (this->get_core())));
-    this->add_task (std::move(Data<data::Text>::new_task (this->get_core())));
-    this->add_task (std::move(Data<data::Fcsv>::new_task (this->get_core())));
+    this->add_task (std::move (Data<data::Logs>::new_task (this->get_core())));
+    this->add_task (std::move (Data<data::Text>::new_task (this->get_core())));
+    this->add_task (std::move (Data<data::Fcsv>::new_task (this->get_core())));
 #ifdef FMR_HAS_CGNS
-    this->add_task (std::move(Data<data::Cgns>::new_task (this->get_core())));
+    this->add_task (std::move (Data<data::Cgns>::new_task (this->get_core())));
 #endif
 #ifdef FMR_HAS_MOAB
-    this->add_task (std::move(Data<data::Moab>::new_task (this->get_core())));
+    this->add_task (std::move (Data<data::Moab>::new_task (this->get_core())));
 #endif
 #ifdef FMR_HAS_GMSH
-    this->add_task (std::move(Data<data::Gmsh>::new_task (this->get_core())));
+    this->add_task (std::move (Data<data::Gmsh>::new_task (this->get_core())));
 #endif
 #ifdef FMR_HAS_PETSC
-    this->add_task (std::move(Data<data::Pets>::new_task (this->get_core())));
+    this->add_task (std::move (Data<data::Pets>::new_task (this->get_core())));
 #endif
   }
   bool data::File::set_logs_init (const bool tf) {
     this->logs_init_stat = tf;
-#if 1
+#if 0
     if (tf) {
       auto D = cast_via_work<data::Text>(this->get_task (Plug_type::Text));
       if (D != nullptr) {

@@ -144,7 +144,7 @@ namespace femera {
   fmr::Local_int Proc<T>::get_proc_ix ()
   noexcept {
 #ifdef FMR_DEBUG
-    printf ("Proc<%s>>::get_proc_ix: %u\n", this->get_abrv ().c_str(),
+    printf ("Proc<%s>::get_proc_ix: %u\n", this->get_abrv ().c_str(),
       Proc::this_cast (this)->task_proc_ix ());
 #endif
     return Proc::this_cast (this)->task_proc_ix ();

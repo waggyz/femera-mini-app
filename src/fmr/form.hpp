@@ -8,10 +8,10 @@
 
 namespace fmr { namespace form {
 
-  template <typename V>
+  template <typename V> static
   std::string si_unit (const V value, std::string unit,
     const int min_digits = 2, const bool is_signed = false);
-  template <typename V>
+  template <typename V> static
   std::string si_time (const V seconds,
     const int min_digits = 2, const bool is_signed = false);
 
@@ -21,33 +21,33 @@ namespace fmr { namespace form {
 
 namespace femera { namespace form {
 
-  template<typename ...Args>
+  template <typename ...Args> static
   std::string text_line
   (fmr::Line_size_int line_width, const std::string& format, Args...);
 
-  template<typename ...Args>
+  template <typename ...Args> static
   std::string text_line (FILE*,
     fmr::Line_size_int line_width, const std::string& format, Args...);
 
-  template<typename ...Args>
+  template <typename ...Args> static
   std::string name_line
   (fmr::Line_size_int name_width, fmr::Line_size_int line_width,
-    const std::string& nameing, const std::string& format, Args...);
+    const std::string& name, const std::string& format, Args...);
 
-  template<typename ...Args>
+  template <typename ...Args> static
   std::string name_line (FILE*,
     fmr::Line_size_int name_width, fmr::Line_size_int line_width,
-    const std::string& nameing, const std::string& format, Args...);
+    const std::string& name, const std::string& format, Args...);
 
-  template<typename ...Args>
+  template <typename ...Args> static
   std::string name_time
   (fmr::Line_size_int name_width, fmr::Line_size_int line_width,
-    const std::string& nameing, const std::string& format, Args...);
+    const std::string& name, const std::string& format, Args...);
 
-  template<typename ...Args>
+  template <typename ...Args> static
   std::string name_time (FILE*,
     fmr::Line_size_int name_width, fmr::Line_size_int line_width,
-    const std::string& nameing, const std::string& format, Args...);
+    const std::string& name, const std::string& format, Args...);
 
 } }//end femera::form:: namespace
 
