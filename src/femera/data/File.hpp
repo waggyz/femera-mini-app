@@ -1,10 +1,10 @@
 #ifndef FEMERA_HAS_FILE_HPP
 #define FEMERA_HAS_FILE_HPP
 
-//#include "../Data.hpp"
+#include "../Data.hpp"
 
-// used in Data.ipp
-#include "Text.hpp"
+// used in File.ipp
+//#include "Text.hpp"
 
 #include <unordered_map>
 #include <valarray>
@@ -29,7 +29,7 @@ namespace femera { namespace data {
     Path_list_t inp_file_list ={};// initialized from command line
     Path_list_t out_file_list ={};//              "
 #if 1
-    // TODO Replace below with femera::data::Page_dims struct.
+    // TODO Replace below with femera::data::Page_dims struct map.
     std::unordered_map <FILE*, fmr::Line_size_int> file_line_sz
       = {{nullptr, 80}, {::stdout, 80}, {::stderr, 250}};
     std::unordered_map <FILE*, fmr::Line_size_int> line_name_sz
@@ -43,18 +43,20 @@ namespace femera { namespace data {
     using ss = std::string;
 #if 0
   private:
-    using Dt = fmr::Data_type;
-    using Ft = fmr::File_type;// fmr::File_type::Auto : by extension
+    using Dt  = fmr::Data_type;
+    using Ft  = fmr::File_type;// fmr::File_type::Auto : by extension
+    using Fnl = std::deque <std::string>;
   public:
-    set_default (Ft);
+    void set_default (Ft);
     //
-    void add_file (ss& file_name, Ft =Ft::Auto, Dt =Dt::All);
-    void inp_file (ss& file_name, Ft =Ft::Auto, Dt =Dt::All);
-    void out_file (ss& file_name, Ft =Ft::Auto, Dt =Dt::All);
+    List_file_id  add_file (Fnl& name_list, Dt =Dt::All, Ft =Ft::Auto);
+    List_file_id  inp_file (Fnl& name_list, Dt =Dt::All, Ft =Ft::Auto);
+    List_file_id  out_file (Fnl& name_list, Dt =Dt::All, Ft =Ft::Auto);
     //
-    void scan_file (ss& file_name="", Ft =Ft::Auto, Dt =Dt::All);
-    void read_file (ss& file_name="", Ft =Ft::Auto, Dt =Dt::All);
-    void save_file (ss& file_name="", Ft =Ft::Auto, Dt =Dt::All);
+    List_file_id scan_file (Fnl& name_list={""}, Dt =Dt::All, Ft =Ft::Auto);
+    List_file_id read_file (Fnl& name_list={""}, Dt =Dt::All, Ft =Ft::Auto);
+    void         save_file (Fnl& name_list={""}, Dt =Dt::All, Ft =Ft::Auto);
+    void         send_file (Fnl& name_list={""}, Dt =Dt::All, Ft =Ft::Auto);
 #endif
   public:
     //TODO? Move to femera::data::Text and/or femera::data::Logs

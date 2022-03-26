@@ -18,8 +18,8 @@ BUILT_BY_EMAIL:= $(call parse_email,$(BUILT_BY))
 IS_IN_REPO:= $(shell git rev-parse --is-inside-work-tree 2>/dev/null)
 # contains "true" or "".
 
-# Check if there is altered content in src/ data/, tools/,
-# or some content in extras/, even when not a git repository.
+# Check if there is altered content in src/ data/ tools/
+# or some content in extras/ even when not a git repository.
 REPO_MD5:= $(shell cat .md5)
 ifeq ($(shell test -e file_name && echo -n yes),yes)
   #(shell tools/md5-all.sh build/.md5)

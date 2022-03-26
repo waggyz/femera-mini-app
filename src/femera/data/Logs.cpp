@@ -1,7 +1,8 @@
 #include "Logs.hpp"
 
-#ifdef FMR_HAS_GTEST
-//#include "gtest/gtest.h"
+#undef FMR_DEBUG
+#ifdef FMR_DEBUG
+#include <cstdio>     // std::printf
 #endif
 
 namespace femera {

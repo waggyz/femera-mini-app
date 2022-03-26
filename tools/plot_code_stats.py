@@ -75,7 +75,7 @@ if __name__ == "__main__":
   plt.grid()
   plt.title('Femera 0.3 mini-app source code statistics')
   dt0=dt.datetime.strptime('2022-02-01','%Y-%m-%d')
-  plt.gca().set(xlim=(dt0.date(), max(t)))
+  plt.gca().set(xlim=(dt0.date(), max(t) + dt.timedelta(days=1)))
   plt.gca().set(ylim=(0, files_ylim))
   plt.legend(loc='upper left', fontsize=10)
   # plt.gcf().autofmt_xdate()
