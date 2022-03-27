@@ -1,4 +1,4 @@
-#include "Beds.hpp"
+#include "../core.h"
 
 #ifdef FMR_HAS_GTEST
 #include "Gtst.hpp"
@@ -34,4 +34,16 @@ namespace femera {
     if (do_test || do_perf) {// -T or -P option in args
       this->add_task (std::move(Test<test::Perf>::new_task (this->get_core())));
   } }
+  void test::Beds::task_exit () {
+    if (true) {
+      const auto all_n = this->proc->all_proc_n ();
+      fmr::Local_int mpi_n=0, omp_n=0;
+      const auto Pmpi = this->proc->get_task (Plug_type::Fmpi);
+      if (Pmpi) {mpi_n = Pmpi->get_proc_n ();}
+      const auto Pomp = this->proc->get_task (Plug_type::Fomp);
+      if (Pomp) {omp_n = Pomp->get_proc_n ();}
+      this->data->name_line (data->fmrlog, "beds task_exit",
+        "%4u MPI %4u OpenMP, %4u total CPU processes", mpi_n, omp_n, all_n);
+    }
+  }
 }//end femera namespace

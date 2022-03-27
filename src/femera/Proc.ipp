@@ -48,9 +48,9 @@ namespace femera {
     catch (const Warn& e)    { task_err =-1; e.print (); }
     catch (const Errs& e)    { task_err = 1; e.print (); }
     catch (std::exception& e){ task_err = 2;
-    Errs::print (this->get_abrv ()+" task_exit",e);}
+      Errs::print (this->get_abrv ()+" task_exit",e); }
     catch (...)              { task_err = 3;
-    Errs::print (this->get_abrv ()+" task_exit"); }
+      Errs::print (this->get_abrv ()+" task_exit"); }
     return (task_err > 0) ? task_err : err;
   }
   template <typename T> inline

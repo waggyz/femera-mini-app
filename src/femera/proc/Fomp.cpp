@@ -6,6 +6,8 @@
 #include "omp.h"
 #endif
 
+#include <unistd.h>
+
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
 #include <cstdio>     // std::printf
@@ -21,13 +23,37 @@ namespace femera {
     //this->proc_ix = this->task_proc_ix ();// set in parallel if >1 Fomp loaded
     this->proc_n  = fmr::Local_int (::omp_get_max_threads ());
   }
+#if 0
   void proc::Fomp::task_init (int*, char**) {
-    if (true) {//TODO Handle command line options.
-      this->proc_n = 2;//TODO This is for TDD
+    const auto orig_proc_n = this->proc_n;
+#else
+  void proc::Fomp::task_init (int* argc, char** argv) {
+    const auto orig_proc_n = this->proc_n;
+    if (argc != nullptr && argv != nullptr) {
+      FMR_PRAGMA_OMP(omp MAIN) {//NOTE getopt is NOT thread safe.
+        int ac=argc[0];// Copy getopt variables.
+        auto oe=opterr; auto oo=optopt; auto oi=optind; auto oa=optarg;
+        opterr = 0; int optchar;
+        while ((optchar = getopt (argc[0], argv, "o:")) != -1) {
+          // o:  -o requires an argument//NOTE -g gets eaten by MPI
+          switch (optchar) {
+            case 'o':{ this->proc_n = fmr::Local_int(atoi (optarg)); break; }
+            //TODO: this->proc->opt_add (optchar); break;
+        } }
+        // Restore getopt variables.
+        argc[0]=ac; opterr=oe; optopt=oo; optind=oi; optarg=oa;
+    } }
+#endif
+    if (this->proc_n != orig_proc_n) {
       ::omp_set_num_threads (int (this->proc_n));
       FMR_PRAGMA_OMP(omp parallel) {
         this->proc_n = fmr::Local_int (::omp_get_num_threads ());
       }
+#ifdef FMR_DEBUG
+      printf ("%s Fomp::task_proc_n %i\n", get_abrv ().c_str(),
+        ::omp_get_num_threads ());
+#endif
+      //this->proc->set_base_n ();
 #if 0
       if (this->data != nullptr) {
         const auto name = this->data->text_line ("%4s %4s %4s",

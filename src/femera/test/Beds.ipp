@@ -10,9 +10,6 @@ namespace femera {
     this->task_type = task_cast (Plug_type::Beds);
     this->info_d    = 2;
   }
-  inline
-  void test::Beds::task_exit () {
-  }
 }//end femera namespace
 
 //end FEMERA_HAS_BEDS_IPP
