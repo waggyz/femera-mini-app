@@ -11,7 +11,7 @@ TEST( SelfTest, TrivialTest ){
 }
 #endif
 namespace femera {
-  void test::Self::task_init (int*, char**) {
+  void test::Self::task_init (int*, char**) {// Test for initialization errors.
     const auto all_n = this->proc->all_proc_n ();
     if (true) {//TODO detail
       fmr::Local_int mpi_n=0, omp_n=0;
@@ -22,9 +22,6 @@ namespace femera {
       this->data->name_line (data->fmrlog, "self task_init",
         "%4u MPI %4u OpenMP, %4u total processes", mpi_n, omp_n, all_n);
     }
-#if 1
-//    const auto Pnode = this->proc->get_task (Plug_type::Node);
-//    const auto core_n = Pnode->node_n * Pnode->get_core_n ();
     const auto node_n = this->proc->get_task (Plug_type::Node)->get_team_n ();
     const auto core_n = node_n * proc::Node::get_core_n ();
     if (all_n < core_n) {
@@ -37,7 +34,6 @@ namespace femera {
         "Femera uses more threads (%u) than physical cores (%u)",
         all_n, core_n);
     }
-#endif
 #if 0
     const fmr::Local_int  all_n = 4;
     const fmr::Local_int each_n = 2;
