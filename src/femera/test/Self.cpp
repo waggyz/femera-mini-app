@@ -1,5 +1,6 @@
 #include "../core.h"
 #include "Self.hpp"
+#include "../proc/Node.hpp"
 
 #include <valarray>
 
@@ -21,15 +22,19 @@ namespace femera {
       this->data->name_line (data->fmrlog, "self task_init",
         "%4u MPI %4u OpenMP, %4u total processes", mpi_n, omp_n, all_n);
     }
-#if 0
-    const auto Pnode = this->proc->get_task (Plug_type::Node);
-    const auto core_n = Pnode->node_n * Pnode->get_core_n ();
-    if (all_n < core_n) {//TODO
-      printf ("Femera uses fewer threads (%u) than physical cores (%u)\n",
+#if 1
+//    const auto Pnode = this->proc->get_task (Plug_type::Node);
+//    const auto core_n = Pnode->node_n * Pnode->get_core_n ();
+    const auto node_n = this->proc->get_task (Plug_type::Node)->get_team_n ();
+    const auto core_n = node_n * proc::Node::get_core_n ();
+    if (all_n < core_n) {
+      this->data->name_line (data->fmrlog, this->abrv+" task_init",
+        "Femera uses fewer threads (%u) than physical cores (%u)",
         all_n, core_n);
     }
     if (all_n > core_n) {
-      printf ("Femera uses more threads (%u) than physical cores (%u)\n",
+      this->data->name_line (data->fmrlog, this->abrv+" task_init",
+        "Femera uses more threads (%u) than physical cores (%u)",
         all_n, core_n);
     }
 #endif

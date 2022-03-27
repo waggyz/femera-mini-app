@@ -129,6 +129,7 @@ digraph "source tree" {
 	"Sims.hpp" -> "Task.hpp"
 	"Cgns.hpp" -> "Cgns.ipp"
 	"Beds.hpp" -> "Beds.ipp"
+	"Self.cpp" -> "Node.hpp"
 	"femera.hpp" -> "core.h"
 	"Gmsh.cpp" -> "core.h"
 	"Main.hpp" -> "Proc.hpp"
