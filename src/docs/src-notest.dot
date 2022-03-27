@@ -94,6 +94,7 @@ digraph "source tree" {
 	"Pets.hpp" -> "Data.hpp"
 	"Pets.cpp" -> "Pets.hpp"
 	"Text.hpp" -> "Data.hpp"
+	"Logs.hpp" -> "core.h"
 	"Text.hpp" -> "Text.ipp"
 	"Work.hpp" -> "type.hpp"
 	"Fcpu.hpp" -> "Proc.hpp"
@@ -104,7 +105,6 @@ digraph "source tree" {
 	"Main.cpp" -> "Nvid.hpp"
 	"core.h" -> "File.hpp"
 	"Fomp.hpp" -> "Fomp.ipp"
-	"Logs.hpp" -> "Data.hpp"
 	"File.cpp" -> "Fcsv.hpp"
 	"form.cpp" -> "form.hpp"
 	"Perf.cpp" -> "Perf.hpp"
@@ -130,6 +130,7 @@ digraph "source tree" {
 	"Cgns.hpp" -> "Cgns.ipp"
 	"Beds.hpp" -> "Beds.ipp"
 	"femera.hpp" -> "core.h"
+	"Gmsh.cpp" -> "core.h"
 	"Main.hpp" -> "Proc.hpp"
 	"Jobs.hpp" -> "Task.hpp"
 }

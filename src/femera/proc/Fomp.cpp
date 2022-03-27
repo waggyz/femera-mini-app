@@ -28,6 +28,26 @@ namespace femera {
     const auto orig_proc_n = this->proc_n;
 #else
   void proc::Fomp::task_init (int* argc, char** argv) {
+    this->scan (argc, argv);
+#endif
+#if 0
+    if (this->is_in_parallel ()) {//TODO 1 Fomp/team or 1 Fomp/openmp thrd?
+      this->proc_n = fmr::Local_int (::omp_get_num_threads ());
+    } else {
+      if (false && this->proc != nullptr) {//TODO calculate number of OpenMP threads
+        this->proc->auto_proc_n ();// sets this->proc_n
+        if (this->data != nullptr) {
+          const auto name = this->data->text_line ("%4s %4s %4s",
+            this->get_base_name ().c_str(), this->get_abrv ().c_str(), "thrd");
+          data->name_line (data->fmrlog, name.c_str(), "%u", this->proc_n);
+      } }
+      ::omp_set_num_threads (int (this->proc_n));
+      FMR_PRAGMA_OMP(omp parallel) {
+        this->proc_n = fmr::Local_int (::omp_get_num_threads ());
+  } }
+#endif
+  }
+  void proc::Fomp::scan (int* argc, char** argv) {
     const auto orig_proc_n = this->proc_n;
     if (argc != nullptr && argv != nullptr) {
       FMR_PRAGMA_OMP(omp MAIN) {//NOTE getopt is NOT thread safe.
@@ -43,7 +63,6 @@ namespace femera {
         // Restore getopt variables.
         argc[0]=ac; opterr=oe; optopt=oo; optind=oi; optarg=oa;
     } }
-#endif
     if (this->proc_n != orig_proc_n) {
       ::omp_set_num_threads (int (this->proc_n));
       FMR_PRAGMA_OMP(omp parallel) {
@@ -62,24 +81,7 @@ namespace femera {
           this->proc_n, this->proc->get_proc_id ());//TODO wrong before init done
       }
 #endif
-    }
-#if 0
-    if (this->is_in_parallel ()) {//TODO 1 Fomp/team or 1 Fomp/openmp thrd?
-      this->proc_n = fmr::Local_int (::omp_get_num_threads ());
-    } else {
-      if (false && this->proc != nullptr) {//TODO calculate number of OpenMP threads
-        this->proc->auto_proc_n ();// sets this->proc_n
-        if (this->data != nullptr) {
-          const auto name = this->data->text_line ("%4s %4s %4s",
-            this->get_base_name ().c_str(), this->get_abrv ().c_str(), "thrd");
-          data->name_line (data->fmrlog, name.c_str(), "%u", this->proc_n);
-      } }
-      ::omp_set_num_threads (int (this->proc_n));
-      FMR_PRAGMA_OMP(omp parallel) {
-        this->proc_n = fmr::Local_int (::omp_get_num_threads ());
   } }
-#endif
-  }
   bool proc::Fomp::is_in_parallel () {
     return ::omp_in_parallel ();
   }

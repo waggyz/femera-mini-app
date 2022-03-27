@@ -11,6 +11,7 @@ namespace femera { namespace proc {
     static bool is_in_parallel ();
     fmr::Local_int task_proc_ix ();
   private:
+    void scan      (int* argc, char** argv);
     void task_init (int* argc, char** argv);
     void task_exit ();
   private:

@@ -106,7 +106,7 @@ if [ -n "$VGEXE" ]; then
   VGARGS+=" "
 fi
 FMREXE+=" -fmr:n$NMPI -fmr:o$NOMP"
-FMREXE+=" -o$NOMP" #TODO fix this
+#FMREXE+=" -o$NOMP" #TODO pass -o or -fmr:o ?
 RUN=$VGEXE"$VGARGS"mpiexec$MPIARGS" "$FMREXE$FMRARGS
 echo $RUN
 $RUN

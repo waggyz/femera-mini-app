@@ -21,6 +21,21 @@ TEST( MiniGtest, RunsGtests ){
 #endif
 
 namespace femera {
+  void test::Gtst::scan (int* argc, char** argv) {
+    if (argc != nullptr && argv != nullptr) {
+      FMR_PRAGMA_OMP(omp MAIN) {//NOTE getopt is NOT thread safe.
+        int ar=argc[0];// Copy getopt variables.
+        auto oe=opterr; auto oo=optopt; auto oi=optind; auto oa=optarg;
+        opterr = 0; int optchar;
+        while ((optchar = getopt (argc[0], argv, "T")) != -1) {
+          // T  -T has no argument//NOTE -g is eaten by MPI
+          switch (optchar) {
+            case 'T':{ this->do_enable (argc, argv); break; }
+            //this->proc->opt_add ('T'); break; }
+        } }
+        // Restore getopt variables.
+        argc[0]=ar; opterr=oe; optopt=oo; optind=oi; optarg=oa;
+  } } }
   bool test::Gtst::do_enable (int* argc, char** argv) {
     if (this->is_enabled) {
       FMR_THROW("GoogleTest is already enabled");
@@ -36,20 +51,7 @@ namespace femera {
     return this->is_enabled;
   }
   void test::Gtst::task_init (int* argc, char** argv) {
-    if (argc != nullptr && argv != nullptr) {
-      FMR_PRAGMA_OMP(omp MAIN) {//NOTE getopt is NOT thread safe.
-        int ar=argc[0];// Copy getopt variables.
-        auto oe=opterr; auto oo=optopt; auto oi=optind; auto oa=optarg;
-        opterr = 0; int optchar;
-        while ((optchar = getopt (argc[0], argv, "T")) != -1) {
-          // T  -T has no argument//NOTE -g is eaten by MPI
-          switch (optchar) {
-            case 'T':{ this->do_enable (argc,argv); break; }
-            //this->proc->opt_add ('T'); break; }
-        } }
-        // Restore getopt variables.
-        argc[0]=ar; opterr=oe; optopt=oo; optind=oi; optarg=oa;
-    } }
+    this->scan (argc, argv);
 #ifdef FMR_HAS_MPI
     //from: https://github.com/google/googletest/issues/822
     ::testing::TestEventListeners& listeners

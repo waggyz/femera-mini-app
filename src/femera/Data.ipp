@@ -2,7 +2,7 @@
 #define FEMERA_HAS_DATA_IPP
 
 #include "proc/Main.hpp"
-#include "data/File.hpp"// circular reference ok for CRTP?
+//#include "data/File.hpp"// circular reference ok for CRTP?
 
 #undef FMR_DEBUG
 #include <cstdio>     // std::printf
@@ -44,7 +44,7 @@ namespace femera {
     catch (...)              { err = 3;
       Errs::print (this->get_abrv ()+" task_init"); }
     if (err > 0) {return this->exit (err); }
-    err = init_list (argc, argv);//                ...then init child tasks.
+    err = init_list (argc, argv);//                    ...then init child tasks.
     return err;
   }
   template <typename T> inline
@@ -53,13 +53,13 @@ namespace femera {
     this->data = nullptr;
     Work::exit_list ();//              Exit child tasks (exceptions caught),...
     fmr::Exit_int task_err = 0;
-    try  { Data::this_cast (this)->task_exit (); }// ...then try to exit this task.
+    try  { Data::this_cast (this)->task_exit (); }//    ...then exit this task.
     catch (const Warn& e)    { task_err =-1; e.print (); }
     catch (const Errs& e)    { task_err = 1; e.print (); }
     catch (std::exception& e){ task_err = 2;
-    Errs::print (this->get_abrv ()+" task_exit",e);}
+      Errs::print (this->get_abrv ()+" task_exit",e);}
     catch (...)              { task_err = 3;
-    Errs::print (this->get_abrv ()+" task_exit"); }
+      Errs::print (this->get_abrv ()+" task_exit"); }
     return (task_err > 0) ? task_err : err;
   }
   template <typename T> inline

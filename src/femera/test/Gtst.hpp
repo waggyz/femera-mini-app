@@ -12,6 +12,7 @@ namespace femera { namespace test {
     bool do_all_tests_on_exit = true ;
   private:
     bool do_enable (int* argc, char** argv);
+    void scan      (int* argc, char** argv);
     void task_init (int* argc, char** argv);
     void task_exit ();
   private:

@@ -14,18 +14,6 @@ namespace femera {
     //  const auto n = fmr::proc::get_node_n () * fmr::proc::get_node_core_n ()
     //    / this->all_proc_n ();
 #endif
-#if 0
-    const auto core_n = this->node_n * this->get_core_n ();
-    const auto  all_n = this->all_proc_n ();
-    if (all_n < core_n) {//TODO Move this. It's too early here.
-      printf ("Femera uses fewer threads (%u) than physical cores (%u)\n",
-        all_n, core_n);
-    }
-    if (all_n > core_n) {
-      printf ("Femera uses more threads (%u) than physical cores (%u)\n",
-        all_n, core_n);
-    }
-#endif
   }
   inline
   fmr::Local_int proc::Node::get_core_n () {// physical cores

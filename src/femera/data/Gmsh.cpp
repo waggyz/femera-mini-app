@@ -1,3 +1,4 @@
+#include "../core.h"
 #include "Gmsh.hpp"
 
 #ifdef FMR_HAS_GMSH

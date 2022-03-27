@@ -1,7 +1,8 @@
 #ifndef FEMERA_DATA_LOGS_HPP
 #define FEMERA_DATA_LOGS_HPP
 
-#include "../Data.hpp"
+#include "../core.h"
+//#include "../Data.hpp"
 //#include "../../fmr/form.hpp"
 
 namespace femera { namespace data {

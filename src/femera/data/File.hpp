@@ -73,10 +73,10 @@ namespace femera { namespace data {
     template <typename ...Args>
     ss name_time (                    const ss& name, const ss& form, Args...);
 #if 0
-    ss wrap_line (File_ptrs_t, ss& name, ss& form,...);//TODO
-    ss time_line (File_ptrs_t, ss& name, ss& form,...);//TODO
-    ss data_line (File_ptrs_t, ss& name, ss& form,...);//TODO
-    ss perf_line (File_ptrs_t, ss& name, ss& form,...);//TODO
+    ss wrap_line (File_ptrs_t, ss& name, ss& form,...);//TODO ?
+    ss time_line (File_ptrs_t, ss& name, ss& form,...);
+    ss data_line (File_ptrs_t, ss& name, ss& form,...);
+    ss perf_line (File_ptrs_t, ss& name, ss& form,...);
     ss perf_line (ss name, ss& form,...);
 #endif
   public:
