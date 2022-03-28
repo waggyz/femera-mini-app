@@ -46,7 +46,7 @@ namespace femera {
   public:
     using Data_name_t = std:vector<Name_t>;
     // Memory operations
-    //TODO Remove _data  from these.
+    //TODO Remove _data from the following methods.
     ret::???  add_data (Data_name_t, ...);// Vals_t vals =nullptr);
     ret::??? size_data (Data_name_t, ...);// Vals_t size =nullptr);
     Vals_t   form_data (Data_name_t, ...);// Vals_t vals =nullptr);
@@ -54,7 +54,7 @@ namespace femera {
     ret::???  clr_data (Data_name_t);
     //
     // I/O operations
-    Vals_t   scan_data (File_name_t);
+    Vals_t   scan_file (File_name_t);
     Vals_t   read_data (Data_name_t);
     Vals_t   sync_data (Data_name_t);
     ret::??? save_data (Data_name_t, ...);// Vals_t =nullptr);

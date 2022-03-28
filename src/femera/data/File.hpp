@@ -13,7 +13,6 @@ namespace femera { namespace data {
   class File;// Derive a CRTP concrete class from Data.
   class File : public Data <File> {// private: friend class Data;
   public:
-    // TODO Make fmrlog, fmrout, fmrerr, fmrall into public functions?
     File_ptrs_t fmrlog = {};// main proc to stdout set by Logs::task_init (..)
     File_ptrs_t fmrout = {::stdout};
     File_ptrs_t fmrerr = {::stderr};

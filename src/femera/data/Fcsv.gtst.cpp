@@ -12,6 +12,8 @@ namespace femera { namespace test {
 
   const auto csv_123 = femera::data::Fcsv::data_line<int,uint,char> (1,2,3);
   const auto csv_456 = femera::data::Fcsv::data_line (4,5,6);
+  const auto csv_789 = femera::data::Fcsv::data_line<int> (7,8,9);
+  const auto csv_f89 = femera::data::Fcsv::data_line<float> (7,8,9);
   const auto csv_hello1 =femera::data::Fcsv::data_line(std::string ("hello"),1);
   const auto csv_hello2
     = femera::data::Fcsv::data_line<std::string,int> ("hello",2);
@@ -29,6 +31,8 @@ namespace femera { namespace test {
   TEST( Fcsv, TrivialTest)  { EXPECT_EQ( 0, 0 ); }
   TEST( Fcsv, CSV123)       { EXPECT_EQ( csv_123,       "1,2,3"); }
   TEST( Fcsv, CSV456)       { EXPECT_EQ( csv_456,       "4,5,6"); }
+  TEST( Fcsv, CSV789)       { EXPECT_EQ( csv_789,       "7,8,9"); }
+  TEST( Fcsv, CSVF89)       { EXPECT_EQ( csv_f89,       "7.00000000e+00,8,9"); }
   TEST( Fcsv, CSVHello1)    { EXPECT_EQ( csv_hello1,    "\"hello\",1"); }
   TEST( Fcsv, CSVHello2)    { EXPECT_EQ( csv_hello2,    "\"hello\",2"); }
   TEST( Fcsv, CSVHello3)    { EXPECT_EQ( csv_hello3,    "\"hello\",3"); }
