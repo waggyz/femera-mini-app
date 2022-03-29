@@ -3,8 +3,8 @@
 
 namespace femera {
   inline
-  data::Moab::Moab (const femera::Work::Core_ptrs_t W) noexcept {
-    std::tie (this->proc, this->data, this->test) = W;
+  data::Moab::Moab (const femera::Work::Core_ptrs_t W) noexcept : Data (W) {
+//    std::tie (this->proc, this->data, this->test) = W;
     this->name ="MOAB";
     this->abrv ="Moab";
     this->task_type = task_cast (Plug_type::Moab);

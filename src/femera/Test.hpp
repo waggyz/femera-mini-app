@@ -23,6 +23,7 @@ namespace femera {
     constexpr
     T* this_cast (Work*) noexcept;
   protected:// Make it clear this class needs to be inherited from.
+    Test (Work::Core_ptrs_t) noexcept;
     Test ()            =default;
     Test (const Test&) =default;
     Test (Test&&)      =default;// shallow (pointer) copyable

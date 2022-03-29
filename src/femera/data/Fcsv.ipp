@@ -3,8 +3,8 @@
 
 namespace femera {
   inline
-  data::Fcsv::Fcsv (const femera::Work::Core_ptrs_t W) noexcept {
-    std::tie (this->proc, this->data, this->test) = W;
+  data::Fcsv::Fcsv (const femera::Work::Core_ptrs_t W) noexcept : Data (W) {
+//    std::tie (this->proc, this->data, this->test) = W;
     this->name      ="Femera CSV file handler";
     this->abrv      ="csv";
     this->task_type = task_cast (Plug_type::Fcsv);
@@ -30,7 +30,7 @@ namespace femera {
   }
   inline
   std::string data::Fcsv::csv_item (const float f) {
-    std::valarray<char> buf (15 + 1);
+    std::array <char, 15 + 1> buf;
     std::snprintf (&buf[0],buf.size(),"%1.*e",
       std::numeric_limits<float>::max_digits10 - 1, double(f));
     return std::string(&buf[0]);
@@ -45,7 +45,7 @@ namespace femera {
   */
   inline
   std::string data::Fcsv::csv_item (const double f) {
-    std::valarray<char> buf (23 + 1);
+    std::array <char, 23 + 1> buf;
     std::snprintf (&buf[0], buf.size(),"%1.*E",
       std::numeric_limits<double>::max_digits10 - 1,  f);
     return std::string(&buf[0]);

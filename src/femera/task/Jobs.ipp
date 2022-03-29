@@ -3,8 +3,8 @@
 
 namespace femera {
   inline
-  task::Jobs::Jobs (femera::Work::Core_ptrs_t W) noexcept {
-    std::tie (this->proc, this->data, this->test) = W;
+  task::Jobs::Jobs (femera::Work::Core_ptrs_t W)
+  noexcept : Task (W) {
     this->name      ="Femera simulation job handler";
     this->abrv      ="jobs";
     this->task_type = task_cast (Plug_type::Jobs);

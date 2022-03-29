@@ -38,8 +38,6 @@ namespace femera { namespace data {
   public:
     bool did_logs_init ();
     bool set_logs_init (bool);
-  private:
-    using ss = std::string;
 #if 0
   private:
     using Dt  = fmr::Data_type;
@@ -57,16 +55,21 @@ namespace femera { namespace data {
     void         save_file (Fnl& name_list={""}, Dt =Dt::All, Ft =Ft::Auto);
     void         send_file (Fnl& name_list={""}, Dt =Dt::All, Ft =Ft::Auto);
 #endif
+#if 1
+  //TODO? Move to femera::data::Text and/or femera::data::Logs
+  private:
+    using ss = std::string;
   public:
-    //TODO? Move to femera::data::Text and/or femera::data::Logs
     template <typename ...Args>
-    ss text_line (const File_ptrs_t&,                 const ss& form, Args...);
+    ss text_line (const File_ptrs_t&, const ss& form, Args...);
     template <typename ...Args>
-    ss text_line (                                    const ss& form, Args...);
+    ss text_line (                    const ss& form, Args...);
+    //
     template <typename ...Args>
     ss name_line (const File_ptrs_t&, const ss& name, const ss& form, Args...);
     template <typename ...Args>
     ss name_line (                    const ss& name, const ss& form, Args...);
+    //
     template <typename ...Args>
     ss name_time (const File_ptrs_t&, const ss& name, const ss& form, Args...);
     template <typename ...Args>
@@ -77,6 +80,7 @@ namespace femera { namespace data {
     ss data_line (File_ptrs_t, ss& name, ss& form,...);
     ss perf_line (File_ptrs_t, ss& name, ss& form,...);
     ss perf_line (ss name, ss& form,...);
+#endif
 #endif
   public:
     void task_init (int* argc, char** argv);

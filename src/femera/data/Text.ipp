@@ -3,8 +3,8 @@
 
 namespace femera {
   inline
-  data::Text::Text (const femera::Work::Core_ptrs_t W) noexcept {
-    std::tie (this->proc, this->data, this->test) = W;
+  data::Text::Text (const femera::Work::Core_ptrs_t W) noexcept : Data (W) {
+//    std::tie (this->proc, this->data, this->test) = W;
     this->name      ="Femera text file handler";
     this->abrv      ="text";
     this->task_type = task_cast (Plug_type::Text);

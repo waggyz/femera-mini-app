@@ -3,8 +3,8 @@
 
 namespace femera {
   inline
-  data::Logs::Logs (const femera::Work::Core_ptrs_t W) noexcept {
-    std::tie (this->proc, this->data, this->test) = W;
+  data::Logs::Logs (const femera::Work::Core_ptrs_t W)
+  noexcept : Data (W) {
     this->name      ="Femera logger";
     this->abrv      ="logs";
     this->task_type = task_cast (Plug_type::Logs);

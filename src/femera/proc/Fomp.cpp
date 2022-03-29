@@ -14,8 +14,8 @@
 #endif
 
 namespace femera {
-  proc::Fomp::Fomp (const Work::Core_ptrs_t core) noexcept {
-    std::tie (this->proc, this->data, this->test) = core;
+  proc::Fomp::Fomp (const Work::Core_ptrs_t core)
+  noexcept : Proc (core) {
     this->name ="OpenMP";
     this->abrv ="omp";
     this->version = std::to_string (_OPENMP);

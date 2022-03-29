@@ -3,8 +3,8 @@
 
 namespace femera {
   inline
-  test::Self::Self (const femera::Work::Core_ptrs_t W) noexcept {
-    std::tie (this->proc, this->data, this->test) = W;
+  test::Self::Self (const femera::Work::Core_ptrs_t W)
+  noexcept : Test (W) {
     this->name      ="Femera integration self-tests";
     this->abrv      ="self";
     this->task_type = task_cast (Plug_type::Self);

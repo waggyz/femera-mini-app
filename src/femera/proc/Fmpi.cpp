@@ -13,8 +13,7 @@
 namespace femera {
   //
   proc::Fmpi::Fmpi (const femera::Work::Core_ptrs_t W)
-  noexcept : fmpi_required {int (MPI_THREAD_SERIALIZED) } {
-    std::tie (this->proc, this->data, this->test) = W;
+  noexcept : Proc (W), fmpi_required {int (MPI_THREAD_SERIALIZED) } {
     this->name ="MPI";
     this->abrv ="mpi";
     this->version = std::to_string (MPI_VERSION)

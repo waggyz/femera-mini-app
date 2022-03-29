@@ -30,6 +30,7 @@ namespace femera {
     constexpr
     T* this_cast (Work*) noexcept;
   protected:// make it clear this class needs to be inherited
+    Task (Work::Core_ptrs_t) noexcept;
     Task ()            =default;
     Task (const Task&) =default;
     Task (Task&&)      =default;// shallow (pointer) copyable

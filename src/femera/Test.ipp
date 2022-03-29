@@ -8,6 +8,9 @@
 
 namespace femera {
   template <typename T> inline
+  Test<T>::Test (const Work::Core_ptrs_t W) noexcept : Work (W) {
+  }
+  template <typename T> inline
   std::string Test<T>::get_base_name ()
   noexcept {
     return "test";

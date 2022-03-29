@@ -127,6 +127,7 @@ namespace femera {
     fmr::Exit_int exit_list () noexcept;// exit task_list in reverse
     fmr::Exit_int exit_tree () noexcept;// exit task hierarchy in reverse
   protected:// Built-in stuff -------------------------------------------------
+    Work (Work::Core_ptrs_t) noexcept;
     Work ()            =default;
     Work (Work const&) =default;// copyable
     Work& operator =

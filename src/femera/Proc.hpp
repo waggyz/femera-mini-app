@@ -51,6 +51,7 @@ namespace femera {
     constexpr
     T* this_cast (Work*) noexcept;
   protected:
+    Proc (Work::Core_ptrs_t) noexcept;
     Proc ()            =default;
     Proc (const Proc&) =default;
     Proc (Proc&&)      =default;// shallow (pointer) copyable

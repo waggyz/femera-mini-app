@@ -8,8 +8,8 @@
 
 namespace femera {
 #ifdef FMR_HAS_NVIDIA
-  proc::Nvid::Nvid (const femera::Work::Core_ptrs_t core) noexcept {
-    std::tie (this->proc, this->data, this->test) = core;
+  proc::Nvid::Nvid (const femera::Work::Core_ptrs_t core)
+  noexcept : Proc (core) {
     this->name ="NVIDIA";
     this->abrv ="gpu";
     this->task_type = task_cast (Plug_type::Nvid);

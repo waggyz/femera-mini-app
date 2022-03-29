@@ -7,8 +7,8 @@
 #endif
 namespace femera {
   inline
-  proc::Main::Main (const femera::Work::Core_ptrs_t W) noexcept {
-    std::tie (this->proc, this->data, this->test) = W;
+  proc::Main::Main (const femera::Work::Core_ptrs_t W)
+  noexcept : Proc (W) {
     this->name      ="Femera process handler";
     this->abrv      ="main";
     this->task_type = task_cast (Plug_type::Main);

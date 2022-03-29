@@ -5,13 +5,10 @@
 #include <cstring>           //std::memcmp
 
 #include "gtest/gtest.h"
-#include "gmock/gmock.h"
 
 int main (int argc, char** argv) {
   return femera::test:: early_main (&argc, argv);
 }
-
-
 namespace femera { namespace test {
   using Vec alignas (size_t) = std::vector   <int>;
   using Val alignas (size_t) = std::valarray <int>;
@@ -20,12 +17,14 @@ namespace femera { namespace test {
   Val val8z = {0,0,0,0,0,0,0,0};
   Vec vec8u (8);
   Val val8u (8);
-  
-  inline int* vec_resize (size_t sz) {
+
+  inline
+  int* vec_resize (size_t sz) {
     vec8u.resize(sz);
     return &vec8u[0];
   }
-  inline int* val_resize (size_t sz) {
+  inline
+  int* val_resize (size_t sz) {
     val8u.resize(sz);
     return &val8u[0];
   }
@@ -47,5 +46,4 @@ namespace femera { namespace test {
   TEST(Vals, ValResizeZeroed) {
     EXPECT_EQ( 0, std::memcmp (val_resize (8192), &val8z[0], sizeof (val8z)));
   }
-
 } }//end femerea::test:: namespace
