@@ -15,8 +15,8 @@ namespace femera { namespace test {
 
   Vec vec8z = {0,0,0,0,0,0,0,0};
   Val val8z = {0,0,0,0,0,0,0,0};
-  Vec vec8u (8);
-  Val val8u (8);
+  std::vector   <int> vec8u (8);
+  std::valarray <int> val8u (8);
 
   inline
   int* vec_resize (size_t sz) {
@@ -31,19 +31,31 @@ namespace femera { namespace test {
   TEST(EarlyData, IsOK) {
     EXPECT_EQ( 1, 1);
   }
-  TEST(Vals, VecAndValZeroed) {
+  TEST(ValsInit, VecAndValZeroed) {
     EXPECT_EQ( 0, std::memcmp (&vec8z[0], &val8z[0], sizeof (vec8z)));
   }
-  TEST(Vals, VecUninitZeroed) {
+  TEST(ValsInit, VecUninitZeroed) {
     EXPECT_EQ( 0, std::memcmp (&vec8u[0], &vec8z[0], sizeof (vec8z)));
   }
-  TEST(Vals, ValUninitZeroed) {
+  TEST(ValsInit, ValUninitZeroed) {
     EXPECT_EQ( 0, std::memcmp (&val8u[0], &val8z[0], sizeof (val8z)));
   }
-  TEST(Vals, VecResizeZeroed) {
+  TEST(ValsInit, VecResizeZeroed) {
     EXPECT_EQ( 0, std::memcmp (vec_resize (8192), &vec8z[0], sizeof (vec8z)));
   }
-  TEST(Vals, ValResizeZeroed) {
+  TEST(ValsInit, ValResizeZeroed) {
     EXPECT_EQ( 0, std::memcmp (val_resize (8192), &val8z[0], sizeof (val8z)));
+  }
+  TEST(ValsAlign, UnalignedInt) {
+    EXPECT_EQ( 4, alignof (int));
+  }
+  TEST(ValsAlign, VecUnalignedOK) {
+    EXPECT_EQ( 0, reinterpret_cast<size_t>(&vec8u[0]) % alignof (int));
+  }
+  TEST(ValsAlign, AlignedSize_t) {
+    EXPECT_EQ( 8, alignof (size_t));
+  }
+  TEST(ValsAlign, VecAlignedOK) {
+    EXPECT_EQ( 0, reinterpret_cast<size_t>(&vec8z[0]) % alignof (size_t));
   }
 } }//end femerea::test:: namespace

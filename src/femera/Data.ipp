@@ -18,7 +18,8 @@ namespace femera {
   }
 #endif
   template <typename T> inline
-  Data<T>::Data (const Work::Core_ptrs_t W) noexcept : Work (W) {
+  Data<T>::Data (const Work::Core_ptrs_t core)
+  noexcept : Work (core) {
   }
   template <typename T> inline
   std::string Data<T>::get_base_name ()

@@ -5,8 +5,8 @@
 
 namespace femera {
   inline
-  data::File::File (const femera::Work::Core_ptrs_t W)
-  noexcept : Data (W) {
+  data::File::File (const femera::Work::Core_ptrs_t core)
+  noexcept : Data (core) {
     this->name      ="Femera file handler";
     this->abrv      ="file";
     this->task_type = task_cast (Plug_type::File);
