@@ -38,11 +38,13 @@ namespace femera { namespace test {
   int early_main (int* argc, char** argv);
 } }// end femera::test:: namespace
 
-//TODO Define FMR_OMP_LOCAL to make & use thread-local drivers for each OpenMP
-//     thread. This may be needed to avoid race conditions in OpenMP parallel
-//     regions.
-//NOTE NUMA domain data locality is automatic when >= 1 MPI thread/NUMA domain.
-//#define FMR_OMP_LOCAL
+#define FMR_OMP_LOCAL
+// Define FMR_OMP_LOCAL to make & use thread-local drivers for each OpenMP
+// thread. This may be needed to avoid race conditions in OpenMP parallel
+// regions. It should also help if the threads in an MPI process are in more
+// than one NUMA domain.
+//NOTE NUMA data locality is NOT automatic when >= 1 MPI thread/NUMA domain,
+//     e.g. 5 MPI processes w/8 threads each on a 2-domain 2x20-core node.
 
 #if 0
 //TODO FMR_VERBMAX, FMR_TIMELVL are not used yet.

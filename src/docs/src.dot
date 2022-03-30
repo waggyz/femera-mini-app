@@ -154,6 +154,7 @@ digraph "source tree" {
 	"Test.cpp" -> "Test.hpp"
 	"Root.gtst.cpp" -> "core.h"
 	"nvid.cu.cpp" -> "Errs.hpp"
+	"Root.cpp" -> "Root.hpp"
 	"Main.cpp" -> "Root.hpp"
 	"File.gtst.cpp" -> "femera.hpp"
 	"Logs.hpp" -> "Logs.ipp"
@@ -178,4 +179,5 @@ digraph "source tree" {
 	"femera.gtst.cpp" -> "femera.hpp"
 	"Main.hpp" -> "Proc.hpp"
 	"Jobs.hpp" -> "Task.hpp"
+	"Root.cpp" -> "File.hpp"
 }
