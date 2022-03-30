@@ -20,12 +20,12 @@ namespace femera { namespace test {
 
   inline
   int* vec_resize (size_t sz) {
-    vec8u.resize(sz);
+    vec8u.resize (sz);
     return &vec8u[0];
   }
   inline
   int* val_resize (size_t sz) {
-    val8u.resize(sz);
+    val8u.resize (sz);
     return &val8u[0];
   }
   TEST(EarlyData, IsOK) {
@@ -49,11 +49,11 @@ namespace femera { namespace test {
   TEST(ValsAlign, UnalignedInt) {
     EXPECT_EQ( 4, alignof (int));
   }
-  TEST(ValsAlign, VecUnalignedOK) {
-    EXPECT_EQ( 0, reinterpret_cast<size_t>(&vec8u[0]) % alignof (int));
-  }
   TEST(ValsAlign, AlignedSize_t) {
     EXPECT_EQ( 8, alignof (size_t));
+  }
+  TEST(ValsAlign, VecUnalignedOK) {
+    EXPECT_EQ( 0, reinterpret_cast<size_t>(&vec8u[0]) % alignof (int));
   }
   TEST(ValsAlign, VecAlignedOK) {
     EXPECT_EQ( 0, reinterpret_cast<size_t>(&vec8z[0]) % alignof (size_t));
