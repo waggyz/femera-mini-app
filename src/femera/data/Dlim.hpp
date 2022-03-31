@@ -1,13 +1,13 @@
-#ifndef FEMERA_DATA_FCSV_HPP
-#define FEMERA_DATA_FCSV_HPP
+#ifndef FEMERA_DATA_DLIM_HPP
+#define FEMERA_DATA_DLIM_HPP
 
 #include "../Data.hpp"
 
 #include <limits.h>     // gcc4.8 does not have FLT_DECIMAL_DIG, DBL_DECIMAL_DIG
 
 namespace femera { namespace data {
-  class Fcsv;// Derive a CRTP concrete class from Data.//TODO Change to Fcsv?
-  class Fcsv : public Data <Fcsv> {// private: friend class Data;
+  class Dlim;// Derive a CRTP concrete class from Data.//TODO Change to Dlim?
+  class Dlim : public Data <Dlim> {// private: friend class Data;
   public:
     template <typename ...Args> static
     std::string data_line (Args...);
@@ -41,12 +41,12 @@ namespace femera { namespace data {
     void task_init (int* argc, char** argv);
     void task_exit ();
   public:
-    Fcsv (femera::Work::Core_ptrs_t) noexcept;
-    Fcsv () =delete;//NOTE Use the constructor above.
+    Dlim (femera::Work::Core_ptrs_t) noexcept;
+    Dlim () =delete;//NOTE Use the constructor above.
   };
 } }//end femera::data:: namespace
 
-#include "Fcsv.ipp"
+#include "Dlim.ipp"
 
-//end FEMERA_DATA_FCSV_HPP
+//end FEMERA_DATA_DLIM_HPP
 #endif

@@ -32,7 +32,7 @@ namespace femera {
 //#ifdef FMR_HAS_GTEST
     Gtst, // Proc type
 //#endif
-    File, Logs, Fcsv, Text,// Data type
+    File, Logs, Dlim, Text,// Data type
     Beds, Unit, Self, Perf, // Test types
 //#ifdef FMR_HAS_CGNS
     Cgns, // Data type: CGNS file handler

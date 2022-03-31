@@ -35,7 +35,7 @@ namespace femera {
     class Fmpi; class Fomp; class Nvid;
   }
   namespace data {//TODO class Type; class Base; class Dflt;
-    class File; class Logs; class Fcsv; class Text;
+    class File; class Logs; class Dlim; class Text;
     class Cgns; class Gmsh; class Moab; class Moab; class Pets;
   }
   namespace test {
