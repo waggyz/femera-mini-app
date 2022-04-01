@@ -5,7 +5,7 @@
 #include <vector>
 #include <valarray>
 #include <cstring>           //std::memcmp
-#include <cstdio>            // std::printf
+#include <cstdio>            // std::snprintf
 
 namespace femera { namespace test {
   const auto mini = fmr::new_jobs ();
@@ -80,7 +80,7 @@ namespace femera { namespace test {
   TEST(BulkInts, ZeroAsStringChars) {
     EXPECT_EQ(char(0), reinterpret_cast<char*> (&bulk[0])[0] );
   }
-  TEST(BulkInt, WorksForStrings) {
+  TEST(BulkInts, WorkForStrings) {
     EXPECT_EQ( 5, std::snprintf (&bulk[0], bulk.size(),// returns #of chars
       std::string("hello").c_str()) );
     EXPECT_EQ( std::string("hello"), std::string (&bulk[0]) );
