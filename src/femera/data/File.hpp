@@ -3,8 +3,12 @@
 
 #include "../Data.hpp"
 
-// used in File.ipp
+//TODO Make variadic read/save/send methods in File to package heterogenous
+//     data into fmr::Vals structures, then call a specialized non-variadic
+//     member function of Text/Dlim to handle that structure used in File.ipp
+//     so the next two can remain in File.cpp.
 //#include "Text.hpp"
+//#include "Dlim.hpp"
 
 #include <unordered_map>
 #include <valarray>
@@ -19,7 +23,7 @@ namespace femera { namespace data {
     File_ptrs_t fmrall = {::stdout};
 #if 0
   public:
-    using Open_file_id = uintptr_t;// cast-compatible with FILE* (stdout, stderr)
+    using Open_file_id = uintptr_t;// cast-compatible with FILE* (stdout,stderr)
     //TODO bad idea: do not use open file handles as file IDs
   private:
     std::unordered_map <File_id, Page_dims> file_data = {};
@@ -28,7 +32,8 @@ namespace femera { namespace data {
     Path_list_t inp_file_list ={};// initialized from command line
     Path_list_t out_file_list ={};//              "
 #if 1
-    // TODO Replace below with femera::data::Page_dims struct map.
+    // TODO Replace below with unordered_map <Data_id    , data::Page_dims>
+    //      or                 unordered_map <Vals_type_t, data::Page_dims>.
     std::unordered_map <FILE*, fmr::Line_size_int> file_line_sz
       = {{nullptr, 80}, {::stdout, 80}, {::stderr, 250}};
     std::unordered_map <FILE*, fmr::Line_size_int> line_name_sz

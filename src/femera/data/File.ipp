@@ -19,6 +19,19 @@ namespace femera {
   bool data::File::did_logs_init () {
     return this->logs_init_stat;
   }
+  inline
+  bool data::File::set_logs_init (const bool tf) {
+    this->logs_init_stat = tf;
+#if 0
+    if (tf) {
+      auto D = cast_via_work<data::Text>(this->get_task (Plug_type::Text));
+      if (D != nullptr) {
+        D->file_line_sz = this->file_line_sz;
+        D->line_name_sz = this->line_name_sz;
+    } }
+#endif
+    return this->logs_init_stat;
+  }
   template <typename ...Args> inline
   std::string data::File::text_line                         // send (..)
   (const data::File_ptrs_t& flist, const std::string& form, Args ...args) {

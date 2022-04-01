@@ -69,7 +69,7 @@ namespace femera {
     //
     using Size_list_t = std::vector <fmr::Perf_int>;// bytes in or out
     using Vals_list_t = std::vector <Vals*>;
-    //using Form_list_t = std::vector <std::valarray<Form_int>>;
+    //using Form_list_t = std::vector <std::valarray<Bulk_int>>;
     //-------------------------------------------------------------------------
 #endif
   public:

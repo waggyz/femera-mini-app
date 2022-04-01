@@ -13,7 +13,7 @@ namespace fmr {
  * sizeof (Elid_int >= Enum_int + fmr::math::Poly + Dim_int)
 */
   using   Exit_int = int           ;// system return code
-  using   Form_int = char          ;// data serializing type
+  using   Bulk_int = uint8_t       ;// bulk data serializing type
   //
   using    Dim_int = uint_fast8_t  ;// space dim., hier. depth, poly. order,...
   using   Enum_int = uint_fast16_t ;
