@@ -5,6 +5,7 @@
 #include <vector>
 #include <valarray>
 #include <cstring>           //std::memcmp
+#include <cstdio>            // std::printf
 
 namespace femera { namespace test {
   const auto mini = fmr::new_jobs ();
@@ -14,10 +15,10 @@ namespace femera { namespace test {
 
   Vec vec8z = {0,0,0,0,0,0,0,0};
   Val val8z = {0,0,0,0,0,0,0,0};
-  std::vector   <int>  vec8u (8);
-  std::valarray <int>  val8u (8);
+  std::vector   <int> vec8u (8);
+  std::valarray <int> val8u (8);
   
-  std::vector   <fmr::Bulk_int> bulk (256);
+  std::valarray <fmr::Bulk_int> bulk (256);
 
   inline
   int* vec_resize (size_t sz) {
@@ -59,21 +60,30 @@ namespace femera { namespace test {
   TEST(ValsAlign, VecAlignedOK) {
     EXPECT_EQ( 0, reinterpret_cast<size_t>(&vec8z[0]) % alignof (size_t));
   }
-  TEST(BulkInt, BulkIntsZeroAsFmrInts) {
+  TEST(BulkInts, ZeroAsFmrInts) {
     EXPECT_EQ(fmr::Dim_int(0)   ,reinterpret_cast<fmr::Dim_int*>   (&bulk[0])[0]);
     EXPECT_EQ(fmr::Enum_int(0)  ,reinterpret_cast<fmr::Enum_int*>  (&bulk[0])[0]);
     EXPECT_EQ(fmr::Local_int(0) ,reinterpret_cast<fmr::Local_int*> (&bulk[0])[0]);
     EXPECT_EQ(fmr::Global_int(0),reinterpret_cast<fmr::Global_int*>(&bulk[0])[0]);
     EXPECT_EQ(fmr::Perf_int(0)  ,reinterpret_cast<fmr::Perf_int*>  (&bulk[0])[0]);
+    EXPECT_EQ(fmr::Exit_int(0)  ,reinterpret_cast<fmr::Exit_int*>  (&bulk[0])[0]);
   }
-  TEST(BulkInt, BulkIntsZeroAsFmrFloats) {
+  TEST(BulkInts, ZeroAsFmrFloats) {
     EXPECT_EQ(fmr::Perf_float(0),reinterpret_cast<fmr::Perf_float*>(&bulk[0])[0]);
-    EXPECT_EQ(fmr::Phys_float(0),reinterpret_cast<fmr::Phys_float*>(&bulk[0])[0]);
     EXPECT_EQ(fmr::Geom_float(0),reinterpret_cast<fmr::Geom_float*>(&bulk[0])[0]);
+    EXPECT_EQ(fmr::Phys_float(0),reinterpret_cast<fmr::Phys_float*>(&bulk[0])[0]);
     EXPECT_EQ(fmr::Solv_float(0),reinterpret_cast<fmr::Solv_float*>(&bulk[0])[0]);
     EXPECT_EQ(fmr::Cond_float(0),reinterpret_cast<fmr::Cond_float*>(&bulk[0])[0]);
     EXPECT_EQ(fmr::Post_float(0),reinterpret_cast<fmr::Post_float*>(&bulk[0])[0]);
     EXPECT_EQ(fmr::Plot_float(0),reinterpret_cast<fmr::Plot_float*>(&bulk[0])[0]);
+  }
+  TEST(BulkInts, ZeroAsStringChars) {
+    EXPECT_EQ(char(0), reinterpret_cast<char*> (&bulk[0])[0] );
+  }
+  TEST(BulkInt, WorksForStrings) {
+    EXPECT_EQ( 5, std::snprintf (&bulk[0], bulk.size(),// returns #of chars
+      std::string("hello").c_str()) );
+    EXPECT_EQ( std::string("hello"), std::string (&bulk[0]) );
   }
 } }//end femerea::test:: namespace
 
