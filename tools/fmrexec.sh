@@ -80,6 +80,7 @@ do
 done
 if [ -z "$MPIARGS" ]; then
   MPIARGS=" --bind-to core"
+  #MPIARGS=" --bind-to core:overload-allowed"
 fi
 if [ -z "$NMPI" ]; then
   if [ -z "$NOMP" ]; then

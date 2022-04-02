@@ -55,7 +55,7 @@ namespace femera {
   class Work {/* This is an abstract (pure virtual) base class (interface).
   * Derived classes use the curiously recurrent template pattern (CRTP) e.g.,
   * class Proc : public Work { .. };
-  * class Main : public Proc<Main> { private: friend class Proc; .. };
+  * class Main : public Proc <Main> { private: friend class Proc; .. };
   *NOTE Make at least 1 method pure virtual.
   *TODO Do all virtual methods need to be pure
         to avoid vtable using CRTP child classes?
