@@ -72,6 +72,7 @@ ifeq ($(CXX),icpc)
   endif
   AREXE:= xiar
 endif
+CXX_VERSION:= $(shell $(CXX) -dumpversion)
 # Flags for compiling tests
 CXXTESTS := $(CXXFLAGS) $(CXXWARNS)
 
@@ -301,7 +302,6 @@ ifeq ($(ENABLE_VALGRIND),ON)
 endif
 
 CXXFLAGS+= $(CXXWARNS)
-CXX_VERSION:= $(shell $(CXX) -dumpversion)
 
 # Files -----------------------------------------------------------------------
 # Generic Femera tools

@@ -11,6 +11,9 @@ namespace femera {
     this->name      ="Gmsh";
     this->abrv      ="gmsh";
     this->version   = GMSH_API_VERSION ;
+#ifdef FMR_HAS_GMSH_GCC48_PATCH
+    this->version  +=" (patched for GCC 4.8)" ;
+#endif
     this->task_type = task_cast (Plug_type::Gmsh);
     this->info_d    = 3;
   }

@@ -20,7 +20,7 @@ namespace femera {
       const auto Pomp = this->proc->get_task (Plug_type::Fomp);
       if (Pomp) {omp_n = Pomp->get_proc_n ();}
       this->data->name_line (data->fmrlog, get_base_name ()+" "+ abrv +" init",
-        "%4u MPI %4u OpenMP, %4u total processes", mpi_n, omp_n, all_n);
+        "%4u MPI,%4u OpenMP,%4u total processes", mpi_n, omp_n, all_n);
     }
     const auto node_n = this->proc->get_task (Plug_type::Node)->get_team_n ();
     const auto core_n = node_n * proc::Node::get_core_n ();

@@ -3,9 +3,11 @@
 ifeq ($(ENABLE_GMSH),ON)
   FMRFLAGS += -DFMR_HAS_GMSH
   LDLIBS += -lgmsh
-  ifeq ("$(CXX) $(CXX_VERSION)","g++ 4.8.5")
+#  ifeq ("$(CXX) $(CXX_VERSION)","g++ 4.8.5") # g+= or mpic++
+  ifeq ("$(CXX_VERSION)","4.8.5")
     LIST_EXTERNAL += gmsh471
     GMSH_FLAGFILE:=$(BUILD_CPU)/external/install-gmsh471.flags
+    FMRFLAGS += -DFMR_HAS_GMSH_GCC48_PATCH
   else
     LIST_EXTERNAL += gmsh
     GMSH_FLAGFILE:=$(BUILD_CPU)/external/install-gmsh.flags

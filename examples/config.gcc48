@@ -48,7 +48,7 @@ ENABLE_PETSC_MOAB:=OFF
 ENABLE_PETSC_SCOTCH:=OFF
 
 # Developer tools -------------------------------------------------------------
-ENABLE_VALGRIND:=OF
+ENABLE_VALGRIND:=OFF
 
 ENABLE_LYX:=OFF
 ENABLE_DOT:=OFF
