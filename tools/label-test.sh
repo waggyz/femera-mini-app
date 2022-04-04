@@ -8,13 +8,19 @@ MORE=" $HINT_COLOR see: $NORM_COLOR"
 touch "$4.out";
 $3 >"$4.out" 2>"$4.err"; ERR=$?;
 if [[ "$ERR" -eq 0 ]]; then
+  ERR=`grep -c "not ok" "$4.out"`
+fi
+if [[ "$ERR" -eq 0 ]]; then
   ERR=`grep -c "FA""IL" "$4.out"`
 fi
 if [[ "$ERR" -eq 0 ]]; then
   ERR=`grep -c "0 test suites" "$4.out"`
 fi
-if [[ "$ERR" -eq 0 ]]; then
+if [[ "$ERR" -eq 0 ]]; then # check for googletest output
   DIDRUN=`grep -c "test suite" "$4.out"`
+  if [[ "$DIDRUN" -eq 0 ]]; then # check for bats output
+  DIDRUN=`grep -c "^ok " "$4.out"`
+  fi
   if [[ "$DIDRUN" -eq 0 ]]; then
     MSG="ran no tests"
     ERR=1

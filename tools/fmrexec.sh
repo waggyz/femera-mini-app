@@ -5,6 +5,7 @@
 FMREXE="femera"
 MAP_BY="node"
 NCPU=`fmrcores`
+DO_RUN="true"
 if [ -z "$NCPU" ]; then
   NCPU=2
 fi
@@ -14,17 +15,22 @@ do
     FMREXE="$ARG"
   else
     if [[ "$ARG" == -n* ]]; then
-      ARG="-fmr:n"${ARG#-n}
+      TODO_ARG="-fmr:n"${ARG#-n}
     fi
     if [[ "$ARG" == -o* ]]; then
-      ARG="-fmr:o"${ARG#-o}
+      TODO_ARG="-fmr:o"${ARG#-o}
     fi
     case "$ARG" in
     "auto" | "femera")
       PRE=fmr
       ;;
+    "echo")
+      DO_RUN=""
+      ;;
     "test")
-      FMRARGS+=" -fmr:test"
+      #FMRARGS+=" -fmr:test"
+      #TODO change -T to -fmr:test ?
+      FMRARGS+=" -T"
       PRE=fmr
       ;;
     tdd*)
@@ -106,12 +112,14 @@ fi
 if [ -n "$VGEXE" ]; then
   VGARGS+=" "
 fi
-FMREXE+=" -fmr:n$NMPI -fmr:o$NOMP"
+#FMREXE+=" -fmr:n$NMPI -fmr:o$NOMP"
+FMREXE+=" -fmr:o$NOMP"
 #FMREXE+=" -o$NOMP" #TODO pass -o or -fmr:o ?
 RUN=$VGEXE"$VGARGS"mpiexec$MPIARGS" "$FMREXE$FMRARGS
 echo $RUN
-$RUN
-
+if [ "$DO_RUN" == "true" ]; then
+  $RUN
+fi
 exit $?
 
 if [ 0 -eq 1 ]; then
