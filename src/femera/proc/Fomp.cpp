@@ -56,6 +56,8 @@ namespace femera {
         opterr = 0; int optchar;
         while ((optchar = getopt (argc[0], argv, "o:")) != -1) {
           // o:  -o requires an argument//NOTE -g gets eaten by MPI
+          //TODO -fmr:o<int> is working because -f -m -r and -: are skipped,
+          //     leaving only the recognized option -o<int>.
           switch (optchar) {
             case 'o':{ this->proc_n = fmr::Local_int (atoi (optarg)); break; }
             //TODO: this->proc->opt_add (optchar); break;

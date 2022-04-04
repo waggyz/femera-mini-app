@@ -14,10 +14,10 @@ namespace femera {
 #ifdef FMR_HAS_GTEST
     this->add_task (std::move(Test<test::Gtst>::new_task (this->get_core())));
 #endif
-    if (do_test) {// -T option in args
+    if (this->do_test) {// -T option in args
       this->add_task (std::move(Test<test::Self>::new_task (this->get_core())));
     }
-    if (do_test || do_perf) {// -T or -P option in args
+    if (this->do_test || this->do_perf) {// -T or -P option in args
       this->add_task (std::move(Test<test::Perf>::new_task (this->get_core())));
     }
     //
@@ -30,6 +30,8 @@ namespace femera {
         opterr = 0; int optchar;
         while ((optchar = getopt (argc[0], argv, "TP")) != -1) {
           // T  -T has no argument//NOTE -g gets eaten by MPI
+          //TODO -fmr:T, -fmr:T is working because -f -m -r and -: are skipped,
+          //     leaving only the recognized option -T, -P.
           switch (optchar) {
             case 'T':{ this->do_test = true; break; }
             //TODO: this->proc->add_optc (optchar); break; }

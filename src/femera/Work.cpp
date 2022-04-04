@@ -40,7 +40,7 @@ namespace femera {
           const auto busy_s = fmr::perf::Float (1e-9)
             * ((W->time.get_busy_ns () > child_busy_ns)
               ? fmr::perf::Float (W->time.get_busy_ns () - child_busy_ns)
-              : fmr::perf::Float(0.0));
+              : fmr::perf::Float (0.0));
 #endif
           const auto busy = fmr::form::si_time (busy_s);
           const auto tot  = fmr::form::si_time (W->time.get_work_s ());

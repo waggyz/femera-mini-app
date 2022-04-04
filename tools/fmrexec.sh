@@ -27,15 +27,19 @@ do
     "echo")
       DO_RUN=""
       ;;
+    "tune")
+      FMRARGS+=" -fmr:P"
+      PRE=fmr
+      ;;
     "test")
       #FMRARGS+=" -fmr:test"
       #TODO change -T to -fmr:test ?
-      FMRARGS+=" -T"
+      FMRARGS+=" -fmr:T"
       PRE=fmr
       ;;
     tdd*)
       #TODO change -T to -fmr:test ?
-      FMRARGS+=" -T"
+      FMRARGS+=" -fmr:T"
       NMPI=2
       NOMP=2
       PRE=fmr
