@@ -8,9 +8,8 @@
 
 namespace femera {
   inline
-  proc::Fcpu::Fcpu (const femera::Work::Core_ptrs_t W)
-  noexcept : Proc (W) {
-//    std::tie (this->proc, this->data, this->test) = W;
+  proc::Fcpu::Fcpu (const femera::Work::Core_ptrs_t core)
+  noexcept : Proc (core) {
     this->name      = std::string ( MAKESTR(FMR_CPUMODEL) );
     this->abrv      ="cpu";
     this->version   = "";//TODO

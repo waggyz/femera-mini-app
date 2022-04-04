@@ -3,9 +3,8 @@
 
 namespace femera {
   inline
-  data::Pets::Pets (const femera::Work::Core_ptrs_t W)
-  noexcept : Data (W) {
-//    std::tie (this->proc, this->data, this->test) = W;
+  data::Pets::Pets (const femera::Work::Core_ptrs_t core)
+  noexcept : Data (core) {
     this->name ="PETSc";
     this->abrv ="petc";
     this->task_type = task_cast (Plug_type::Petsc);

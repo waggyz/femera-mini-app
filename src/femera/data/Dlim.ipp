@@ -3,8 +3,8 @@
 
 namespace femera {
   inline
-  data::Dlim::Dlim (const femera::Work::Core_ptrs_t W) noexcept : Data (W) {
-//    std::tie (this->proc, this->data, this->test) = W;
+  data::Dlim::Dlim (const femera::Work::Core_ptrs_t core)
+  noexcept : Data (core) {
     this->name      ="Femera CSV file handler";
     this->abrv      ="csv";
     this->task_type = task_cast (Plug_type::Dlim);

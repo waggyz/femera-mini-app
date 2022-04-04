@@ -7,19 +7,19 @@ MORE=" $HINT_COLOR see: $NORM_COLOR"
 
 touch "$4.out";
 $3 >"$4.out" 2>"$4.err"; ERR=$?;
-if [[ "$ERR" -eq 0 ]]; then
+if [[ "$ERR" -eq 0 ]]; then # count bats test failures
   ERR=`grep -c "not ok" "$4.out"`
 fi
-if [[ "$ERR" -eq 0 ]]; then
+if [[ "$ERR" -eq 0 ]]; then # count googletest failures
   ERR=`grep -c "FA""IL" "$4.out"`
 fi
 if [[ "$ERR" -eq 0 ]]; then
-  ERR=`grep -c "0 test suites" "$4.out"`
+  ERR=`grep -c " 0 test suites" "$4.out"`
 fi
-if [[ "$ERR" -eq 0 ]]; then # check for googletest output
+if [[ "$ERR" -eq 0 ]]; then # count googletest test suites
   DIDRUN=`grep -c "test suite" "$4.out"`
-  if [[ "$DIDRUN" -eq 0 ]]; then # check for bats output
-  DIDRUN=`grep -c "^ok " "$4.out"`
+  if [[ "$DIDRUN" -eq 0 ]]; then # count bats passed tests
+    DIDRUN=`grep -c '^ok ' "$4.out"`
   fi
   if [[ "$DIDRUN" -eq 0 ]]; then
     MSG="ran no tests"

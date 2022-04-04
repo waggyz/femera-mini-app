@@ -6,8 +6,8 @@
 #endif
 
 namespace femera {
-  data::Gmsh::Gmsh (const femera::Work::Core_ptrs_t W) noexcept {
-    std::tie (this->proc, this->data, this->test) = W;
+  data::Gmsh::Gmsh (const femera::Work::Core_ptrs_t core)
+  noexcept : Data (core) {
     this->name      ="Gmsh";
     this->abrv      ="gmsh";
     this->version   = GMSH_API_VERSION ;
@@ -47,8 +47,7 @@ namespace femera {
   } } }
   void data::Gmsh::task_exit () {
     FMR_PRAGMA_OMP(omp master) {
-      if (this->did_gmsh_init) {
-        ::gmsh::finalize ();
+      if (this->did_gmsh_init) { ::gmsh::finalize ();
   } } }
 }//end femera:: namespace
 

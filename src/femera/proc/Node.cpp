@@ -12,8 +12,8 @@
 
 namespace femera {
 
-  proc::Node::Node (const femera::Work::Core_ptrs_t W) noexcept {
-    std::tie (this->proc, this->data, this->test) = W;
+  proc::Node::Node (const femera::Work::Core_ptrs_t core)
+  noexcept : Proc (core) {
     char hostname [HOST_NAME_MAX];
     const auto err = gethostname (hostname, HOST_NAME_MAX);
     if (err) { this->name = "node"; }

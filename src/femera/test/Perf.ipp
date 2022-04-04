@@ -3,8 +3,8 @@
 
 namespace femera {
   inline
-  test::Perf::Perf (const femera::Work::Core_ptrs_t W) noexcept {
-    std::tie (this->proc, this->data, this->test) = W;
+  test::Perf::Perf (const femera::Work::Core_ptrs_t core)
+  noexcept : Test (core) {
     this->name      ="Femera performance tests";
     this->abrv      ="perf";
     this->task_type = task_cast (Plug_type::Perf);

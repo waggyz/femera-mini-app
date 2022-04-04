@@ -3,9 +3,8 @@
 
 namespace femera {
   inline
-  data::Cgns::Cgns (const femera::Work::Core_ptrs_t W)
-  noexcept : Data (W) {
-//    std::tie (this->proc, this->data, this->test) = W;
+  data::Cgns::Cgns (const femera::Work::Core_ptrs_t core)
+  noexcept : Data (core) {
     this->name ="CGNS";
     this->abrv ="cgns";
     this->task_type = task_cast (Plug_type::Cgns);
