@@ -21,13 +21,12 @@ namespace femera { namespace data {
     File_ptrs_t    file_ptrs ={};
     std::valarray <fmr::Local_int> item_dims ={1};// vals / item
     // vals are all the same type
-    fmr::Local_int line_n    = 0;// total lines in this
     fmr::Local_int page_0    = 0;// global index of first page in this
+    fmr::Local_int line_n    = 0;// total lines in this
     fmr::Local_int page_size = 0;// lines / page; a page can be a partition
     fmr::Local_int line_size = 0;// items / line
     fmr::Local_int head_size = 0;// page header size in lines
     fmr::Local_int foot_size = 0;// page footer size in lines
-    // head_ and foot_size can be used for (alignment) padding homogeneous data
   };
 } }//end femera::data:: namespace
 namespace femera {
