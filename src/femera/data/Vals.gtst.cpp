@@ -35,7 +35,12 @@ namespace femera { namespace test {
     std::vector <double> vec ={};
     vec.reserve (sz);
     // Make valarray from uninitialized reserved vector data.
+#if 0
     std::valarray <double> val (vec.data (), sz);//TODO Does this copy?
+#else
+    //std::valarray <double> val (std::move(&vec[0]), sz);//same as next.
+    std::valarray <double> val (std::move(vec.data ()), sz);//TODO Copies?
+#endif
     for (fmr::Local_int i =0; i<sz; i++) { sum += val [i]; }
     mini->data->name_line (mini->data->fmrout, "vals from vec1",
       "%g (garbage)", sum);
@@ -54,8 +59,9 @@ namespace femera { namespace test {
   double sum_uninit_valarray (Vval_t& vals, const fmr::Local_int sz=100000) {
     std::vector <double> vec ={};
     vec.reserve (sz);
-    // Make valarray from uninitialized reserved vector data.
-    vals.push_back (std::valarray <double> (vec.data (), sz));//TODO copies?
+    // Make valarray from uninitialized reserved vector data.//TODO copies?
+    vals.push_back (std::valarray <double> (std::move(vec.data ()), sz));
+    //
     double sum = 0.0;
     for (fmr::Local_int i =0; i<sz; i++) { sum += vals[0] [i]; }
     mini->data->name_line (mini->data->fmrout, "vals from vec2",
@@ -125,10 +131,10 @@ namespace femera { namespace test {
     EXPECT_GT( (test_uninit_valarray () < 0.0) ? 1 : 2, 0 );
     Vval_t vval= {};// vector of valarrays
     EXPECT_EQ( vval.size (), 0 );
-    EXPECT_GT( ( sum_uninit_valarray (vval, 100000) < 0.0) ? 1 : 2, 0);
+    EXPECT_GT( ( sum_uninit_valarray (vval, 1000000) < 0.0) ? 1 : 2, 0);
     EXPECT_EQ( vval.size (), 1 );
-    EXPECT_EQ( vval[0].size (), 100000 );
-    EXPECT_GT( ( vval[0][99999] > 0.0) ? vval[0][99999] : 1, 0);
+    EXPECT_EQ( vval[0].size (), 1000000 );
+    EXPECT_GT( ( vval[0][999999] > 0.0) ? vval[0][999999] : 1, 0);
 #endif
   }
 } }//end femerea::test:: namespace
