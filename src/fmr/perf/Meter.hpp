@@ -15,7 +15,7 @@ namespace fmr { namespace perf {
     std::string set_unit_name (const std::string&) noexcept;
     //
     Timepoint start () noexcept;// returns start time (now)
-    Timepoint reset () noexcept;// returns start time (reseet does not restart)
+    Timepoint reset () noexcept;// returns start time (reset does not restart)
     //
     // The remaining methods could throw integer or floating point exceptions.
     Float add_busy_time_now ();// returns seconds of busy time added

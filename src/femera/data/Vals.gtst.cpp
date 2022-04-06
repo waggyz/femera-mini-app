@@ -4,8 +4,9 @@
 
 #include <vector>
 #include <valarray>
-#include <cstring>           //std::memcmp
+#include <cstring>           // std::memcmp
 #include <cstdio>            // std::snprintf
+#include <cmath>             // isnan
 
 namespace femera { namespace test {
   const auto mini = fmr::new_jobs ();
@@ -59,7 +60,8 @@ namespace femera { namespace test {
   double sum_uninit_valarray (Vval_t& vals, const fmr::Local_int sz=100000) {
     std::vector <double> vec ={};
     vec.reserve (sz);
-    // Make valarray from uninitialized reserved vector data.//TODO copies?
+    // Make valarray from uninitialized reserved vector data.
+    // NOTE looks like this copies because slower than normal zeroed construct.
     vals.push_back (std::valarray <double> (std::move(vec.data ()), sz));
     //
     double sum = 0.0;
@@ -67,6 +69,68 @@ namespace femera { namespace test {
     mini->data->name_line (mini->data->fmrout, "vals from vec2",
       "%g (garbage)", sum);
     return sum;
+  }
+  inline
+  double zeroed_valarray_speed
+  (const fmr::Local_int sz=500000, const fmr::Local_int n=100) {
+    auto v = std::vector <std::valarray<double>> (n);
+    auto perf = fmr::perf::Meter<fmr::Perf_int> ();
+    perf.start ();
+    for (fmr::Local_int i=0; i<n; i++) {
+      v[i] = std::valarray<double> (sz);
+    }
+    const auto time = perf.add_busy_time_now ();
+    perf.add_count (n, 0, 0, n * sz * sizeof(double));
+    const auto speed = perf.get_busy_data_speed ();
+    double sum = 0.0;
+    for (fmr::Local_int i=0; i<n; i++) {
+      const auto t = &v[i][0];
+      for (fmr::Local_int j=0; j<sz; j++) {
+        sum += t[j];
+    } }
+#if 0
+    sum = (isnan (sum)) ? 0.0 : sum;
+    sum = (sum < 0) ? 0.0 : sum;
+    sum = (sum > 0) ? 0.0 : sum;
+#endif
+    mini->data->name_line (mini->data->fmrout, "zero vals perf",
+      "%s, %s in %s (check %g == 0)",
+      fmr::form::si_unit (speed, "B/s").c_str(),
+      fmr::form::si_unit (perf.get_byte_n (), "B").c_str(),
+      fmr::form::si_unit (time, "s").c_str(), sum);
+    return double (speed);
+  }
+  inline
+  double uninit_valarray_speed
+  (const fmr::Local_int sz=500000, const fmr::Local_int n=100) {
+    auto v = std::vector <std::valarray<double>> (n);
+    auto perf = fmr::perf::Meter<fmr::Perf_int> ();
+    perf.start ();
+    for (fmr::Local_int i=0; i<n; i++) {
+      std::vector <double> vec ={};
+      vec.reserve (sz);
+      v[i] = std::valarray <double> (std::move(vec.data ()), sz);
+    }
+    const auto time = perf.add_busy_time_now ();
+    perf.add_count (n, 0, 0, n * sz * sizeof(double));
+    const auto speed = perf.get_busy_data_speed ();
+    double sum = 0.0;
+    for (fmr::Local_int i=0; i<n; i++) {
+      const auto t = &v[i][0];
+      for (fmr::Local_int j=0; j<sz; j++) {
+        sum += t[j];
+    } }
+#if 0
+    sum = (isnan (sum)) ? 0.0 : sum;
+    sum = (sum < 0) ? 0.0 : sum;
+    sum = (sum > 0) ? 0.0 : sum;
+#endif
+    mini->data->name_line (mini->data->fmrout, "vec2 vals perf",
+      "%s, %s in %s (check %g ?= 0)",
+      fmr::form::si_unit (speed, "B/s").c_str(),
+      fmr::form::si_unit (perf.get_byte_n (), "B").c_str(),
+      fmr::form::si_unit (time, "s").c_str(), sum);
+    return double (speed);
   }
   TEST(Mini, IsOK) {
     EXPECT_EQ( 1, 1);
@@ -123,6 +187,12 @@ namespace femera { namespace test {
       std::string("hello").c_str()) );
     EXPECT_EQ( std::string("hello"), std::string (&bulk[0]) );
   }
+  TEST(Uint8, SizeIs1) {
+    EXPECT_EQ( sizeof(uint8_t(1)), size_t(1) );
+  }
+  TEST(Uint8, HasAdd) {
+    EXPECT_EQ( uint8_t(1) + uint8_t(1), uint8_t(2) );
+  }
   TEST( Valarray, UninitValarray ) {
 #if 0
     // This only works sometimes.
@@ -136,6 +206,9 @@ namespace femera { namespace test {
     EXPECT_EQ( vval[0].size (), 1000000 );
     EXPECT_GT( ( vval[0][999999] > 0.0) ? vval[0][999999] : 1, 0);
 #endif
+  }
+  TEST( Valarray, ZeroedFasterThanUninit ) {
+    EXPECT_GT( zeroed_valarray_speed (), 0.95 * uninit_valarray_speed ());
   }
 } }//end femerea::test:: namespace
 
