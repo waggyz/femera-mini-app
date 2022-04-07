@@ -25,6 +25,19 @@
 
 namespace femera {
   void data::File::task_init (int*, char**) {
+    fmr::Local_int n = 1;
+#ifdef FMR_VALS_LOCAL
+    if (this->proc != nullptr) {
+      const auto P = this->proc->get_task (Plug_type::Fomp);
+      if (P != nullptr) {
+        n = P->get_proc_n ();
+    } }
+#endif
+    FMR_PRAGMA_OMP(omp parallel for schedule(static) ordered num_threads(n))
+    for (fmr::Local_int i=0; i<n; i++) {// add thread-local Vals
+      FMR_PRAGMA_OMP(omp ordered)
+      this->add_task (std::move (Data<data::Vals>::new_task(this->get_core())));
+    }
     this->add_task (std::move (Data<data::Logs>::new_task (this->get_core())));
     this->add_task (std::move (Data<data::Text>::new_task (this->get_core())));
     this->add_task (std::move (Data<data::Dlim>::new_task (this->get_core())));

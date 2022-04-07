@@ -3,12 +3,12 @@
 
 namespace femera {
   inline
-  data::Vals::Vals (const femera::Work::Core_ptrs_t core)
+  data::Vals::Vals (const Work::Core_ptrs_t core)
   noexcept : Data (core) {
-    this->name ="Femera data values";
-    this->abrv ="vals";
+    this->name      ="Femera data values";
+    this->abrv      ="vals";
     this->task_type = task_cast (Plug_type::Vals);
-    this->info_d = 3;
+    this->info_d    = 3;
   }
   void data::Vals::task_init (int*, char**) {
   }

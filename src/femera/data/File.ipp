@@ -5,7 +5,7 @@
 
 namespace femera {
   inline
-  data::File::File (const femera::Work::Core_ptrs_t core)
+  data::File::File (const Work::Core_ptrs_t core)
   noexcept : Data (core) {
     this->name      ="Femera file handler";
     this->abrv      ="file";

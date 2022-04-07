@@ -12,22 +12,24 @@
 
 namespace femera { namespace data {
   using File_ptrs_t = std::vector <FILE*>;
-  struct Page_dims {// regular blocked data, local (partitioned) data
+#if 0
+  struct Page_dims {//TODO regular blocked data, local (partitioned) data
     // for file and stream (e.g., stdout) reading and saving
   public:
-//TODO Data_ptrs_t data;// data handler; OR use std::vector <task_type>?
+// Data_ptrs_t data;// data handler; OR use std::vector <Task_type>?
 //    std::vector <Task_type> task_type ={};// {task_cast (Plug_type::None)};
 //    std::vector <File_type> file_type ={};// {File_type::Unknown};
     File_ptrs_t    file_ptrs ={};
     std::valarray <fmr::Local_int> item_dims ={1};// vals / item
     // vals are all the same type
-    fmr::Local_int page_0    = 0;// global index of first page in this
+    fmr::Local_int page_0id  = 0;// global index of first page in this
     fmr::Local_int line_n    = 0;// total lines in this
     fmr::Local_int page_size = 0;// lines / page; a page can be a partition
     fmr::Local_int line_size = 0;// items / line
     fmr::Local_int head_size = 0;// page header size in lines
     fmr::Local_int foot_size = 0;// page footer size in lines
   };
+#endif
 } }//end femera::data:: namespace
 namespace femera {
   template <typename T>
@@ -45,19 +47,19 @@ namespace femera {
   public:
     using Data_name_t = std:vector<Name_t>;
     // Memory operations
-    //TODO Remove _data from the following methods.
-    ret::???  add_data (Data_name_t, ...);// Vals_t vals =nullptr);
-    ret::??? size_data (Data_name_t, ...);// Vals_t size =nullptr);
-    Vals_t   form_data (Data_name_t, ...);// Vals_t vals =nullptr);
-    Vals_t    get_data (Data_name_t);
-    ret::???  clr_data (Data_name_t);
+    ret::???  add (Data_name_t, ...);// Vals_t vals =nullptr);// in Vals?
+    ret::??? size or init (Data_name_t, ...);// Vals_t size =nullptr);// in Vals?
+    Vals_t   form or pack or bulk (Data_name_t, ...);// Vals_t vals =nullptr);// in Vals?
+    Vals_t    get (Data_name_t);// in Vals?
+    ret::???  clr (Data_name_t);// in Vals?
     //
     // I/O operations
-    Vals_t   scan_file (File_name_t);
-    Vals_t   read_data (Data_name_t);
-    Vals_t   sync_data (Data_name_t);
-    ret::??? save_data (Data_name_t, ...);// Vals_t =nullptr);
-    ret::??? send_data (Data_name_t, ...);// Vals_t =nullptr);
+    Vals_t   scan (File_name_t);// in File?
+    //
+    Vals_t   read (Data_name_t);// in Vals?
+    Vals_t   sync (Data_name_t);// in Vals?
+    ret::??? save (Data_name_t, ...);// Vals_t =nullptr);// in Vals?
+    ret::??? send (Data_name_t, ...);// Vals_t =nullptr);// in Vals?
 #endif
 #if 0
   public:
@@ -80,8 +82,7 @@ namespace femera {
     // Text files in Path_list_t may contain a list of model files.
 #if 0
   private:
-    //std::unordered_map <std::string, Path_list_t> sims_file_name_list ={};
-    //std::unordered_map <std::string, Path_list_t> sims_file_name_list ={};
+    //std::unordered_map <std::string, Path_list_t> sims_file_list ={};
     //TODO functions that take these are overloaded for std::string&, e.g.,
     //     static inline constexpr Sims_list_t add_sims (std::string& s="") {
     //       return add_sims (Sims_list_t({s});
