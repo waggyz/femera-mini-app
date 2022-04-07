@@ -10,8 +10,7 @@ namespace femera {
     this->task_type = task_cast (Plug_type::Vals);
     this->info_d    = 3;
   }
-  void data::Vals::task_init (int*, char**) {
-  }
+  inline
   void data::Vals::task_exit () {
   }
 }//end femera namespace
