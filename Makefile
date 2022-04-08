@@ -86,7 +86,6 @@ endif
 FMRFLAGS += -I"$(STAGE_CPU)/include" -I"$(STAGE_DIR)/include"
 FMRFLAGS += -isystem"$(INSTALL_CPU)/include" -isystem"$(INSTALL_DIR)/include"
 LDFLAGS += -L"$(STAGE_CPU)/lib" -L"$(STAGE_DIR)/lib"
-
 # Directories -----------------------------------------------------------------
 # Directories for generic components
 BUILD_DIR  := build
@@ -301,6 +300,8 @@ ifeq ($(ENABLE_VALGRIND),ON)
       $(BUILD_CPU)/mini.valgrind.log
 endif
 
+
+CXXMINI := $(CXXFLAGS) $(FMRFLAGS) $(filter-out -Winline,$(CXXWARNS))
 CXXFLAGS+= $(CXXWARNS)
 
 # Files -----------------------------------------------------------------------
@@ -861,11 +862,7 @@ $(BUILD_CPU)/mini: src/femera/mini.cpp src/femera/femera.hpp $(LIBFEMERA)
 	$(call timestamp,$@,$<)
 	$(call col2cxx,$(CXX_),$(CXX) $(notdir $<) .. $(notdir $@),$(shell \
 	if [ -f "$(@)" ]; then ls -sh $(@) | cut -d " " -f1; fi)B)
-ifeq ($(ENABLE_LTO),ON)
-	-$(CXX) -flto $(CXXTESTS) $< $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
-else
-	-$(CXX) $(CXXTESTS) $< $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
-endif
+	-$(CXX) $(CXXMINI) $< $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 	$(call label_test,$(PASS),$(FAIL),fmrexec tdd:$(@),$(@))
 
 $(BUILD_CPU)/mini: export PATH:=$(shell pwd)/$(BUILD_CPU):$(PATH)
@@ -970,7 +967,7 @@ src/docs/src.dot: build/.md5
 	@external/tools/cinclude2dot --src src >$@ 2>build/src.dot.err
 	@dot $@ -Gsize="6.0,3.0" -Teps -o build/src-test.eps
 ifeq ($(ENABLE_DOT_PNG),ON)
-	@dot $@ -Gsize="12.0,6.0" -Tpng -o build/src-test.png
+	@dot $@ -Gsize="18.0,6.0" -Tpng -o build/src-test.png
 endif
 	#cinclude2dot --groups is nice, too
 	#(info $(INFO) Source dependencies: $@)
@@ -986,11 +983,11 @@ build/src-notest.eps: src/docs/src-headers.dot
 build/src-notest.eps: src/docs/src-notest.dot tools/src-inherit.sh
 ifeq ($(ENABLE_DOT),ON)
 	@tools/src-inherit.sh
-	@dot $< -Gsize="6.0,3.0" -Teps -o $@
-	@dot src/docs/src-headers.dot -Gsize="12.0,6.0" -Teps -o build/src-headers.eps
+	@dot $< -Gsize="9.0,3.0" -Teps -o $@
+	@dot src/docs/src-headers.dot -Gsize="18.0,6.0" -Teps -o build/src-headers.eps
 ifeq ($(ENABLE_DOT_PNG),ON)
 	@dot $< -Gsize="12.0,6.0" -Tpng -o build/src-notest.png
-	@dot src/docs/src-headers.dot -Gsize="12.0,6.0" -Tpng -o build/src-headers.png
+	@dot src/docs/src-headers.dot -Gsize="18.0,6.0" -Tpng -o build/src-headers.png
 endif
 	#  -Gratio="fill" -Gsize="11.7,8.267!" -Gmargin=0
 	$(info $(INFO) source code include graph: $@)
