@@ -2,24 +2,37 @@
 
 #include "gtest/gtest.h"
 
-auto fmr_main = FMR_MAKE_SMART(femera::proc::Main) (femera::proc::Main());
-
-TEST( Main, TaskName ){
-  EXPECT_EQ( fmr_main->get_abrv (), "main");
-  EXPECT_EQ( fmr_main->get_task
-    (femera::Work::Task_path_t())->get_abrv (), "main");
-}
-TEST( Main, DidInit ){
-  EXPECT_EQ( fmr_main->get_task_n(), uint(1) );
+namespace femera { namespace test {
+  auto main_test = FMR_MAKE_SMART(femera::proc::Main) (femera::proc::Main());
+  inline
+  fmr::Local_int proc_id_sum () {fmr::Local_int sum = 0;
+    FMR_PRAGMA_OMP(omp parallel reduction( +:sum)) {
+      const auto id = main_test->get_proc_id ();
+      sum += id;
+      printf ("main test proc_id%4u/%4u\n",id, main_test->all_proc_n ());
+    }
+    return sum;
+  }
+  TEST( Main, TaskName ){
+    EXPECT_EQ( main_test->get_abrv (), "main");
+    EXPECT_EQ( main_test->get_task
+      (femera::Work::Task_path_t())->get_abrv (), "main");
+  }
+  TEST( Main, DidInit ){
+    EXPECT_EQ( main_test->get_task_n(), uint(1) );
 #if 0
-  EXPECT_EQ( fmr_main->get_task(femera::Plug_type::Root)->get_abrv (), "root");
+    EXPECT_EQ( main_test->get_task(femera::Plug_type::Root)->get_abrv (), "root");
 #endif
-  EXPECT_EQ( fmr_main->get_task(femera::Plug_type::Node)->get_abrv (), "node");
+    EXPECT_EQ( main_test->get_task(femera::Plug_type::Node)->get_abrv (), "node");
 #ifdef FMR_HAS_MPI
-  EXPECT_EQ( fmr_main->get_task(femera::Plug_type::Fmpi)->get_abrv (), "mpi");
+    EXPECT_EQ( main_test->get_task(femera::Plug_type::Fmpi)->get_abrv (), "mpi");
 #endif
-}
+#ifdef _OPENMP
+    EXPECT_GT( proc_id_sum (), 0);
+#endif
+  }
+} }//end femera::test:: namespcae
 int main (int argc, char** argv) {
-  fmr_main->init (& argc, argv);
+  femera::test::main_test->init (& argc, argv);
   return femera::test:: early_main (& argc, argv);
 }

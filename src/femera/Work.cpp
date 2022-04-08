@@ -8,6 +8,7 @@
 #endif
 
 namespace femera {
+  Work::Work (Work const&) = default;// copyable, here to avoid -Winline warns
   Work::~Work () {
   }
   fmr::Exit_int Work::init_list (int* argc, char** argv)

@@ -18,6 +18,8 @@
 #include "Pets.hpp"
 #endif
 
+#include <array>
+
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
 #include <cstdio>     // std::printf
@@ -34,10 +36,18 @@ namespace femera {
     } }
 #endif
     FMR_PRAGMA_OMP(omp parallel for schedule(static) ordered num_threads(n))
-    for (fmr::Local_int i=0; i<n; i++) {// add thread-local Vals
-      FMR_PRAGMA_OMP(omp ordered)
-      this->add_task (std::move (Data<data::Vals>::new_task(this->get_core())));
-    }
+    for (fmr::Local_int i=0; i<n; i++) {// Make & add thread-local Vals
+      FMR_PRAGMA_OMP(omp ordered) {     // in order.
+        auto V = Data<data::Vals>::new_task (this->get_core());
+#ifdef FMR_VALS_LOCAL
+        V->set_name ("Femera data for process "
+          + std::to_string (this->proc->get_proc_id ()));
+#endif
+#ifdef FMR_DEBUG
+        printf ("%s\n", V->get_name ().c_str());
+#endif
+        this->add_task (std::move (V));
+    } }
     this->add_task (std::move (Data<data::Logs>::new_task (this->get_core())));
     this->add_task (std::move (Data<data::Text>::new_task (this->get_core())));
     this->add_task (std::move (Data<data::Dlim>::new_task (this->get_core())));

@@ -71,6 +71,7 @@ namespace femera {
     data::File* data = nullptr;       // data, logging, and file handling
     test::Beds* test = nullptr;       // correctness and performance testing
   public:// methods -----------------------------------------------------------
+    std::string    set_name (const std::string&) noexcept;
     std::string    get_name    ()         noexcept;
     std::string    get_abrv    ()         noexcept;
     std::string    get_version ()         noexcept;
@@ -105,7 +106,6 @@ namespace femera {
     bool did_work_init = false;
     bool  is_work_main = true ;// save for use after proc::exit (..)
   protected:
-    std::string set_name (const std::string&) noexcept;
     std::string set_abrv (const std::string&) noexcept;
   protected:// called by Derived::get_task_*(..)
     Work* get_work_raw (fmr::Local_int) noexcept;//TODO Change to get_work(..)
@@ -129,7 +129,7 @@ namespace femera {
   protected:// Built-in stuff -------------------------------------------------
     Work (Work::Core_ptrs_t) noexcept;
     Work ()            =default;
-    Work (Work const&) =default;// copyable
+    Work (Work const&);// copyable, default constructor in Work.cpp
     Work& operator =
       (const Work&)    =default;
   public:
