@@ -22,10 +22,10 @@ namespace femera {
       const auto Pomp = this->proc->get_task (Plug_type::Fomp);
       if (Pomp) {omp_n = Pomp->get_proc_n ();}
       this->data->name_line (data->fmrlog, get_base_abrv ()+" "+ abrv +" init",
-        "%4u MPI %4u OpenMP =%4u of %4u total CPU processes",
+        "%4u MPI %4u OpenMP = %4u of %4u total CPU processes",
         mpi_n, omp_n, mpi_n * omp_n,  all_n);
       this->data->name_line (data->fmrlog, get_base_abrv ()+" "+ abrv +" init",
-        "%4u node%4u cores  =%4u of %4u total CPU processes",
+        "%4u node%4u cores  = %4u of %4u total CPU processes",
         node_n, core_n, node_n * core_n, all_n);
     }
     if (all_n < core_n) {
