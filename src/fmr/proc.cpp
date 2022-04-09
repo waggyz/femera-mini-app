@@ -1,7 +1,8 @@
 #include "proc.hpp"
 
 #include <thread>     // hardware_concurrency (ncpu)
-#include <sys/resource.h> //rusage
+#include <sys/resource.h> // rusage
+#include <unistd.h>       // sysconf
 
 #ifdef FMR_HAS_LIBNUMA
 #include <numa.h>     // numa_node_of_cpu, numa_num_configured_nodes
@@ -46,5 +47,8 @@ namespace fmr {
     rusage r;
     getrusage (RUSAGE_SELF, & r);
     return fmr::Global_int (r.ru_maxrss * 1024);
+  }
+  fmr::Global_int proc::get_dram_byte () {
+    return fmr::Global_int (sysconf (_SC_PHYS_PAGES) * sysconf (_SC_PAGE_SIZE));
   }
 }// end fmr:: namespace

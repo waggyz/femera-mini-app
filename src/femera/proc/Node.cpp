@@ -23,11 +23,13 @@ namespace femera {
     this->info_d = 3;
   }
   void proc::Node::task_exit () {
-    const auto bytes = fmr::form::si_unit (this->get_used_byte (), "B");
+    const auto use = fmr::form::si_unit (this->get_used_byte (), "B");
+    const auto max = fmr::form::si_unit (this->get_dram_byte (), "B");
     const auto label = femera::form::text_line (80, "%4s %4s DRAM",
       this->get_base_abrv().c_str(), this->get_abrv ().c_str());
     femera::form::name_line (::stdout, 14, 80, label,
-      "%s maximum resident set size of this process", bytes.c_str());
+      "%s /%s maximum resident set size of this process",
+      use.c_str(), max.c_str());
   }
 
 }//end femera:: namespace

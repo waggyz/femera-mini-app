@@ -27,7 +27,7 @@ namespace femera { namespace test {
 #ifdef FMR_HAS_MPI
     EXPECT_EQ( main_test->get_task(femera::Plug_type::Fmpi)->get_abrv (), "mpi");
 #endif
-#ifdef _OPENMP
+#ifdef FMR_HAS_OPENMP
     EXPECT_GT( proc_id_sum (), 0);
 #endif
   }

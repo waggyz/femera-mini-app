@@ -49,11 +49,14 @@ namespace femera { namespace test {
 #endif
 #endif
 
+#undef FMR_USE_PROC_ROOT
+
 #define MAKESTR(s) STR(s)
 #define STR(s) #s
 // These help keep source code tidy.
 #define MAIN master
 #ifdef _OPENMP
+#define FMR_HAS_OPENMP
 #define FMR_PRAGMA_OMP(x) _Pragma (#x)
 #define FMR_VALS_LOCAL
 // Define FMR_VALS_LOCAL to make data arrays thread-local to each OpenMP thread.
@@ -82,5 +85,6 @@ namespace femera { namespace test {
 #endif
 
 #undef FMR_DEBUG
+
 //end FMR_HAS_FMR_HPP
 #endif

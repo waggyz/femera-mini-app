@@ -1,8 +1,8 @@
 #ifndef FEMERA_FOMP_HPP
 #define FEMERA_FOMP_HPP
 
-#ifdef _OPENMP
 #include "../Proc.hpp"
+#ifdef FMR_HAS_OPENMP
 
 namespace femera { namespace proc {
   class Fomp;// Derive a CRTP concrete class from Proc.

@@ -2,7 +2,7 @@
 #include "Main.hpp"
 #include "../Data.hpp"
 
-#ifdef _OPENMP
+#ifdef FMR_HAS_OPENMP
 #include "omp.h"
 #endif
 

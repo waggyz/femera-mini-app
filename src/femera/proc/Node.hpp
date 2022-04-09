@@ -20,6 +20,7 @@ namespace femera { namespace proc {
     static  fmr::Local_int get_hype_ix   ();
     static  fmr::Local_int get_numa_ix   ();
     static fmr::Global_int get_used_byte ();
+    static fmr::Global_int get_dram_byte ();
 #if 0
     fmr::Local_int task_proc_ix ();
 #endif

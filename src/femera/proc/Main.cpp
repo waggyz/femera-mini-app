@@ -6,7 +6,7 @@
 #ifdef FMR_HAS_MPI
 #include "Fmpi.hpp"
 #endif
-#ifdef _OPENMP
+#ifdef FMR_HAS_OPENMP
 #include "Fomp.hpp"
 #endif
 #ifdef FMR_HAS_NVIDIA
@@ -22,7 +22,7 @@ namespace femera {
   void proc::Main:: task_init (int*, char**) {
     const auto core = this->get_core ();
     Work::Task_path_t path ={};
-#if 1
+#ifdef FMR_USE_PROC_ROOT
     //TODO Is proc::Root needed?
     path.push_back (add_task (std::move (Proc<proc::Root>::new_task (core))));
     path.push_back (get_task (path)->add_task
@@ -40,7 +40,7 @@ namespace femera {
     gpu_parent_path = path;
 #endif
 #endif
-#ifdef _OPENMP
+#ifdef FMR_HAS_OPENMP
 #ifdef FMR_OMP_LOCAL
     //TODO Add thread-local Fomp instances?
     const fmr::Local_int n = 2;//TODO calc or get from command arg
@@ -59,7 +59,7 @@ namespace femera {
     this->get_task (path)->add_task
       (std::move(Proc <proc::Fcpu>::new_task (core)));
 #endif // ifdef FMR_OMP_LOCAL
-#else // ifndef _OPENMP
+#else // ifndef FMR_HAS_OPENMP
     this->get_task (path)->add_task
       (std::move(Proc <proc::Fcpu>::new_task (core)));
 #endif
