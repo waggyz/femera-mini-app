@@ -37,6 +37,10 @@ namespace femera {
     //                 proc_id = base_id + base_n * proc_ix
     proc::Team_t   get_team_id () noexcept;
     fmr::Local_int set_base_n  ();
+    fmr::Local_int get_proc_n  (Task_type) noexcept;
+    fmr::Local_int get_proc_n  (Plug_type) noexcept;
+    fmr::Local_int get_proc_ix (Task_type) noexcept;
+    fmr::Local_int get_proc_ix (Plug_type) noexcept;
     static constexpr
     This_spt new_task ()                        noexcept;
     static constexpr

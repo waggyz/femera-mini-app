@@ -25,10 +25,8 @@ namespace femera {
       ::gmsh::option::setNumber ("General.Verbosity", Gmsh::Number(0));
       // gmsh::initialize (..) seeems to set omp_num_threads to 1 and
       // setting General.NumThreads also sets omp_num_threads
-      fmr::Local_int proc_omp_n = 0;
-      const auto P = this->proc->get_task (Plug_type::Fomp);
-      if (P != nullptr) {
-        proc_omp_n = P->get_proc_n ();
+      const auto proc_omp_n = this->proc->get_proc_n (Plug_type::Fomp);
+      if (proc_omp_n > 0) {
         ::gmsh::option::setNumber ("General.NumThreads",
           Gmsh::Number (proc_omp_n));
       }

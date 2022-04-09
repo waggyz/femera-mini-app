@@ -15,9 +15,8 @@ namespace femera {
     // set default logger (data->fmrlog) to stdout only from the main thread (0)
     fmr::Local_int n = 0;
     if (this->proc->is_main ()) {
-      const auto P = this->proc->get_task (Plug_type::Fomp);
-      if (P == nullptr) {n = 1;}
-      else {n = P->get_proc_n ();}// number of OpenMP threads / mpi process
+      n = this->proc->get_proc_n (Plug_type::Fomp);// OpenMP threads / mpi proc
+      n = (n==0) ? 1 : n;
     }
     this->data->fmrlog = data::File_ptrs_t (n, nullptr);
     if (n > 0) { this->data->fmrlog[0] = ::stdout; }
