@@ -35,7 +35,8 @@ namespace femera {
         if (true) {//TODO detail level?
           const auto n = fmr::Local_int (gmsh_omp_n);
           this->data->name_line (this->data->fmrlog, "data gmsh uses",
-            "%4u OpenMP thread%s each (maximum)", n, (n==1)?"":"s");
+            "%4u    /%4u OpenMP thread%s each (maximum)",
+            n, omp_n, (omp_n==1)?"":"s");
         } }
       else {
       this->data->name_line (this->data->fmrerr, "gmsh task_init",
