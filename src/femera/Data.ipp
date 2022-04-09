@@ -22,7 +22,7 @@ namespace femera {
   noexcept : Work (core) {
   }
   template <typename T> inline
-  std::string Data<T>::get_base_name ()
+  std::string Data<T>::get_base_abrv ()
   noexcept {
     return "data";
   }

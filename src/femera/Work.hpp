@@ -81,7 +81,7 @@ namespace femera {
     fmr::Local_int add_task    (Work_spt) noexcept;// returns task number added
     fmr::Local_int del_task    (fmr::Local_int ix) noexcept;// returns task_n
   public:// virtual methods ---------------------------------------------------
-    virtual std::string get_base_name () noexcept =0;
+    virtual std::string get_base_abrv () noexcept =0;
     // intialize and exit
     virtual fmr::Exit_int init (int* argc, char** argv) noexcept =0;
     virtual fmr::Exit_int exit (fmr::Exit_int err=0)    noexcept =0;

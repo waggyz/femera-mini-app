@@ -11,7 +11,7 @@ namespace femera {
   Proc<T>::Proc (const Work::Core_ptrs_t W) noexcept : Work (W) {
   }
   template <typename T> inline
-  std::string Proc<T>::get_base_name ()
+  std::string Proc<T>::get_base_abrv ()
   noexcept {
     return "proc";
   }
@@ -92,7 +92,8 @@ namespace femera {
   }
 #if 0
   template <typename T> inline
-  bool Proc<T>::is_main (bool ans=true) {// recursive version does not inline
+  bool Proc<T>::is_main (bool ans)// recursive version does not inline
+  noexcept {
     ans = ans & (this->get_proc_ix () == this->main_ix);
     if (! this->task_list.empty ()) {
       ans = this->get_task (0)->is_main (ans);
@@ -101,12 +102,12 @@ namespace femera {
   }
 #else
   template <typename T> inline
-  bool Proc<T>::is_main ()// series version
-  noexcept { bool ans=true;
+  bool Proc<T>::is_main (bool ans)// iterative version
+  noexcept {
     Proc* P = this;
     ans = ans & (P->get_proc_ix () == P->main_ix);
     while (! P->task_list.empty ()) {
-      P = static_cast<Proc*> (P->get_work_raw (0));//TODO only path 0? 
+      P = static_cast<Proc*> (P->get_work_raw (0));//TODO only path 0?
       ans = ans & (P->get_proc_ix () == P->main_ix);
     }
     return ans;
@@ -114,7 +115,8 @@ namespace femera {
 #endif
 #if 0
   template <typename T> inline
-  fmr::Local_int Proc<T>::get_proc_id () {fmr::Local_int id=0;
+  fmr::Local_int Proc<T>::get_proc_id ()                    // iterative
+  noexcept {fmr::Local_int id=0;
     Proc* P = this;
     id += P->base_id + P->base_n * P->get_proc_ix ();
     while (! P->task_list.empty ()) {
@@ -129,7 +131,7 @@ namespace femera {
   }
 #else
   template <typename T> inline
-  fmr::Local_int Proc<T>::get_proc_id (fmr::Local_int id)
+  fmr::Local_int Proc<T>::get_proc_id (fmr::Local_int id)   // recursive
   noexcept {
     const fmr::Local_int tid
       = this->base_id + this->base_n * Proc::this_cast (this)->get_proc_ix ();
@@ -182,7 +184,7 @@ namespace femera {
   }
   template <typename T> inline
   fmr::Local_int Proc<T>::all_proc_n ()
-  noexcept {fmr::Local_int n=1;
+  noexcept { fmr::Local_int n = 1;
     auto P = this;
     while (! P->task_list.empty ()) {
       n *= P->get_proc_n ();
@@ -194,10 +196,11 @@ namespace femera {
     return n;
   }
   template <typename T> inline
-  fmr::Local_int Proc<T>::set_base_n () {
+  fmr::Local_int Proc<T>::set_base_n ()
+  noexcept {
     auto P = this;
     while (! P->task_list.empty ()) {
-      P->base_n = P->all_proc_n () / P->proc_n;
+      P->base_n = P->all_proc_n () / ((P->proc_n == 0) ? 1 : P->proc_n);
       P = this_cast (P->get_work_raw (0));//TODO other branches?
     }
     return this->base_n;

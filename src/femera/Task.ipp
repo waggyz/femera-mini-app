@@ -11,7 +11,7 @@ namespace femera {
   Task<T>::Task (const Work::Core_ptrs_t W) noexcept : Work (W) {
   }
   template <typename T> inline
-  std::string Task<T>::get_base_name ()
+  std::string Task<T>::get_base_abrv ()
   noexcept {
     return "task";
   }

@@ -77,7 +77,8 @@ namespace femera {
     }
 #endif
   }
-  fmr::Local_int proc::Main::task_proc_ix () {
+  fmr::Local_int proc::Main::task_proc_ix ()
+  noexcept {
 #ifdef FMR_DEBUG
     printf ("%s Main::task_proc_ix %u\n", get_abrv ().c_str(), proc_ix);
 #endif

@@ -23,12 +23,11 @@ namespace femera {
     fmr::Local_int proc_ix = 0;//
     fmr::Local_int main_ix = 0;// [0,proc_n-1]  ...because proc::Main uses them.
   public:
-    std::string   get_base_name ()           noexcept final override;
-    //
+    std::string   get_base_abrv ()           noexcept final override;
     fmr::Exit_int init (int*, char**)        noexcept final override;
     fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;
   public:
-    bool            is_main    () noexcept;
+    bool            is_main    (bool =true) noexcept;
     fmr::Local_int get_team_n  () noexcept;
     fmr::Local_int get_proc_n  () noexcept;
     fmr::Local_int all_proc_n  () noexcept;
@@ -36,16 +35,16 @@ namespace femera {
     fmr::Local_int get_proc_id (fmr::Local_int id=0) noexcept;//global thread id
     //                 proc_id = base_id + base_n * proc_ix
     proc::Team_t   get_team_id () noexcept;
-    fmr::Local_int set_base_n  ();
+    fmr::Local_int set_base_n  () noexcept;
     fmr::Local_int get_proc_n  (Task_type) noexcept;
     fmr::Local_int get_proc_n  (Plug_type) noexcept;
     fmr::Local_int get_proc_ix (Task_type) noexcept;
     fmr::Local_int get_proc_ix (Plug_type) noexcept;
     static constexpr
-    This_spt new_task ()                        noexcept;
+    This_spt new_task () noexcept;
     static constexpr
     This_spt new_task (const Work::Core_ptrs_t) noexcept;
-    T*       get_task (fmr::Local_int)          noexcept;
+    T*       get_task (fmr::Local_int ix)       noexcept;
     T*       get_task (Work::Task_path_t)       noexcept;
     T*       get_task (Task_type, fmr::Local_int ix=0) noexcept;
     T*       get_task (Plug_type, fmr::Local_int ix=0) noexcept;

@@ -54,7 +54,7 @@ namespace femera {
               +((W->version=="") ? "":" "+W->version);
           }
           const auto label = femera::form::text_line (250, "%4s %4s init",
-            W->get_base_name ().c_str(), W->abrv.c_str());
+            W->get_base_abrv ().c_str(), W->abrv.c_str());
           if (W->data->did_logs_init ()) {
             W->data->name_line (W->data->fmrlog, label, text);
           } else {
@@ -68,7 +68,7 @@ namespace femera {
     } } }
     while (! del_list.empty ()) {// Remove failed tasks.
       const auto label = femera::form::text_line (250, "%4s %4s init",
-        this->get_base_name ().c_str(), this->get_abrv().c_str());
+        this->get_base_abrv ().c_str(), this->get_abrv().c_str());
       form::name_line (::stdout, 14, 80, label, "removing %s...",
         this->get_work_raw (del_list.top ())->get_name ().c_str());
       this->del_task (del_list.top ());
@@ -112,7 +112,7 @@ namespace femera {
         const auto busy = fmr::form::si_time (busy_s);
         const auto tot  = fmr::form::si_time (W->time.get_work_s());
         const auto label = femera::form::text_line (250, "%4s %4s exit",
-          W->get_base_name ().c_str(), W->get_abrv().c_str());
+          W->get_base_abrv ().c_str(), W->get_abrv().c_str());
         const auto text = busy+" /"+tot+" "+W->name
           +((W->version=="") ? "":" "+W->version);
         if (W->data == nullptr) {
@@ -159,7 +159,7 @@ namespace femera {
         const auto busy = fmr::form::si_time (busy_s);
         const auto tot  = fmr::form::si_time (W->time.get_work_s ());
         const auto label = femera::form::text_line (250, "%4s %4s exit",
-          W->get_base_name ().c_str(), W->get_abrv().c_str());
+          W->get_base_abrv ().c_str(), W->get_abrv().c_str());
         const auto text = busy+" /"+tot+" "+W->name
           +((W->version=="") ? "":" "+W->version);
         if (W->data == nullptr) {

@@ -893,7 +893,7 @@ build/%.gtst : build/%.gtst.o $(LIBFEMERA)(build/%.o) \
   $(LIBFEMERA)($(BUILD_CPU)/femera/Test.o) \
   $(LIBFEMERA)($(BUILD_CPU)/femera/task/Jobs.o)
 ifeq ($(ENABLE_GOOGLETEST),ON)
-	$(call col2cxx,$(LINK),$(CXX) $(notdir $@).o,$(notdir $@))
+	$(call col2cxx,$(LINK),$(CXX) $(@).o,$(notdir $@))
 	-$(CXX) $(CXXTESTS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
 	$(info $(WARN) $@ not tested: GoogleTest disabled)
@@ -905,7 +905,7 @@ endif
 build/%.gtst : export TMPDIR := $(TEMP_DIR)
 build/%.gtst : build/%.gtst.o $(LIBFEMERA)($(BUILD_CPU)/femera/Test.o)
 ifeq ($(ENABLE_GOOGLETEST),ON)
-	$(call col2cxx,$(LINK),$(CXX) $(notdir $@).o,$(notdir $@))
+	$(call col2cxx,$(LINK),$(CXX) $(@).o,$(notdir $@))
 	-$(CXX) $(CXXTESTS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
 	$(info $(WARN) $@ not tested: GoogleTest disabled)

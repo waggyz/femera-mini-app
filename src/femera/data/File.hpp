@@ -41,8 +41,8 @@ namespace femera { namespace data {
 #endif
     bool logs_init_stat = false;
   public:
-    bool did_logs_init ();
-    bool set_logs_init (bool);
+    bool did_logs_init ()     noexcept;
+    bool set_logs_init (bool) noexcept;
 #if 0
   private:
     using Dt  = fmr::Data_type;

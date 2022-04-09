@@ -16,11 +16,13 @@ namespace femera {
   void data::File::task_exit () {
   }
   inline
-  bool data::File::did_logs_init () {
+  bool data::File::did_logs_init ()
+  noexcept {
     return this->logs_init_stat;
   }
   inline
-  bool data::File::set_logs_init (const bool tf) {
+  bool data::File::set_logs_init (const bool tf)
+  noexcept {
     this->logs_init_stat = tf;
 #if 0
     if (tf) {

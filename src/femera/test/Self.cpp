@@ -19,7 +19,7 @@ namespace femera {
       if (Pmpi) {mpi_n = Pmpi->get_proc_n ();}
       const auto Pomp = this->proc->get_task (Plug_type::Fomp);
       if (Pomp) {omp_n = Pomp->get_proc_n ();}
-      this->data->name_line (data->fmrlog, get_base_name ()+" "+ abrv +" init",
+      this->data->name_line (data->fmrlog, get_base_abrv ()+" "+ abrv +" init",
         "%4u MPI,%4u OpenMP,%4u total processes", mpi_n, omp_n, all_n);
     }
     const auto node_n = this->proc->get_task (Plug_type::Node)->get_team_n ();
@@ -48,7 +48,7 @@ namespace femera {
       else {}//TODO FMR_THROW()?
       FMR_PRAGMA_OMP(omp barrier)
       const auto name = femera::form::text_line (40," %4s %4s %4s",
-        this->get_base_name().c_str(), this->abrv.c_str(), "proc");
+        this->get_base_abrv().c_str(), this->abrv.c_str(), "proc");
       const std::string text = std::to_string(ix);
       this->data->name_line (this->data->fmrout, name,
         "%4u proc[%u %% %u=%u]=%u%s", proc->get_proc_id (),

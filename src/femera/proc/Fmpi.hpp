@@ -14,10 +14,10 @@ namespace femera { namespace proc {
     int     fmpi_provided = 0;//TODO rqrd_mpi_thrd, prvd_mpi_thrd ?
     bool do_final_on_exit = true;
   private:
-    bool did_mpi_init ();
-    fmr::Local_int task_proc_n  ();
+    bool did_mpi_init () noexcept;
+    fmr::Local_int task_proc_n  () noexcept;
 #if 1
-    fmr::Local_int task_proc_ix ();
+    fmr::Local_int task_proc_ix () noexcept;
 #endif
   private:
     void task_init (int* argc, char** argv);

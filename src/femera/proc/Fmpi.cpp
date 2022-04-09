@@ -22,20 +22,23 @@ namespace femera {
     this->info_d = 3;
     this->team_id = proc::Team_t (MPI_COMM_WORLD);
   }
-  bool proc::Fmpi::did_mpi_init () {
+  bool proc::Fmpi::did_mpi_init ()
+  noexcept {
     int is_init=0;
     int err = MPI_Initialized (& is_init);
     //NOTE Be careful handling errors to shut down MPI properly before exit.
     //if (err) { FMR_THROW("proc::Fmpi::did_mpi_init() failed"); }
     return (err==0) & bool (is_init);
   }
-  fmr::Local_int proc::Fmpi::task_proc_n () {int err=0, n=0;
+  fmr::Local_int proc::Fmpi::task_proc_n ()
+  noexcept {int err=0, n=0;
     err= MPI_Comm_size (MPI_Comm (this->team_id), & n);
     if (err) { return 1; }
     this->proc_n = fmr::Local_int (n);
     return this->proc_n;
   }
-  fmr::Local_int proc::Fmpi::task_proc_ix () {int err =0;
+  fmr::Local_int proc::Fmpi::task_proc_ix ()
+  noexcept {int err =0;
     if (this->did_mpi_init ()) {
       int proc_i =0;
       err= MPI_Comm_rank (MPI_Comm (this->team_id), & proc_i);
