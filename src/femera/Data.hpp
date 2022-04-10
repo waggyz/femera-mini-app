@@ -22,12 +22,14 @@ namespace femera { namespace data {
     File_ptrs_t    file_ptrs ={};
     std::valarray <fmr::Local_int> item_dims ={1};// vals / item
     // vals are all the same type
-    fmr::Local_int page_0id  = 0;// global index of first page in this
+    fmr::Local_int page_base = 0;// global index of first page in this data
     fmr::Local_int line_n    = 0;// total lines in this
-    fmr::Local_int page_size = 0;// lines / page; a page can be a partition
+    fmr::Local_int page_size = 0;// lines / page; a page can be a partition?
     fmr::Local_int line_size = 0;// items / line
-    fmr::Local_int head_size = 0;// page header size in lines
-    fmr::Local_int foot_size = 0;// page footer size in lines
+//    fmr::Local_int head_size = 0;// page header size in lines
+//    fmr::Local_int foot_size = 0;// page footer size in lines
+//    fmr::Local_int head_byte = 0;// data (or page?) start buffer/padding
+//    fmr::Local_int foot_byte = 0;// data (or page?) end buffer/padding
   };
 #endif
 } }//end femera::data:: namespace
@@ -38,7 +40,6 @@ namespace femera {
     using This_spt = FMR_SMART_PTR<T>;
   public:
     std::string   get_base_abrv ()           noexcept final override;
-    //
     fmr::Exit_int init (int*, char**)        noexcept final override;
     fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;
 #if 0
@@ -49,9 +50,10 @@ namespace femera {
     // Memory operations
     ret::???  add (Data_name_t, ...);// Vals_t vals =nullptr);// in Vals?
     ret::??? size or init (Data_name_t, ...);// Vals_t size =nullptr);// in Vals?
-    Vals_t   form or pack or bulk (Data_name_t, ...);// Vals_t vals =nullptr);// in Vals?
+    Bulk_t   form or pack or bulk (Data_name_t, ...);// in Vals?
     Vals_t    get (Data_name_t);// in Vals?
     ret::???  clr (Data_name_t);// in Vals?
+    ret::???  del (Data_name_t);// in Vals?
     //
     // I/O operations
     Vals_t   scan (File_name_t);// in File?
@@ -64,8 +66,8 @@ namespace femera {
 #if 0
   public:
     //TODO ? File operations are spawned from the local OpenMP master thread, and
-    //     ? file methods use vector types for shared-memory access by proc_id, e.g.,
-    // local_x = vec_x [proc_id % vec_x.size ()];
+    //     ? file methods use vector types for shared-memory access by proc_id,
+    // e.g., local_x = vec_x [proc_id % vec_x.size ()];
     // or better, contiguous blocks of vals for each proc_id
     //
     using Size_list_t = std::vector <fmr::Perf_int>;// bytes in or out
@@ -167,9 +169,9 @@ namespace femera {
     T*       get_task (Plug_type, fmr::Local_int ix=0) noexcept;
   private:
     constexpr
-    T* this_cast (Data*) noexcept;
+    T*      this_cast (Data*) noexcept;
     constexpr
-    T* this_cast (Work*) noexcept;
+    T*      this_cast (Work*) noexcept;
   protected:// Make it clear this class needs to be inherited from.
     Data (Work::Core_ptrs_t) noexcept;
     Data ()            =default;
