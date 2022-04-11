@@ -30,12 +30,12 @@ namespace femera {
     }
     if (all_n < core_n) {
       this->data->name_line (data->fmrlog, this->abrv+" task_init",
-        "Femera uses fewer threads (%u) than physical cores (%u)",
+        "NOTE Femera uses fewer threads (%u) than physical cores (%u).",
         all_n, core_n);
     }
     if (all_n > core_n) {
       this->data->name_line (data->fmrlog, this->abrv+" task_init",
-        "Femera uses more threads (%u) than physical cores (%u)",
+        "NOTE Femera uses more threads (%u) than physical cores (%u).",
         all_n, core_n);
   } }
 }//end femera namespace

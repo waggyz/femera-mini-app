@@ -136,11 +136,12 @@ namespace femera {
     const fmr::Local_int tid
       = this->base_id + this->base_n * Proc::this_cast (this)->get_proc_ix ();
     if (! this->task_list.empty ()) {
-      id += this->get_task (0)->get_proc_id (tid);//TODO only path 0?
 #ifdef FMR_DEBUG
-      printf ("%s id: %u += %u + %u * %u\n", this->get_abrv ().c_str(), id,
+      printf ("%s id: %u = %u + %u + %u * %u\n", this->get_abrv ().c_str(),
+        id + this->get_task (0)->get_proc_id (tid), id,
         this->base_id, this->base_n, Proc::this_cast (this)->get_proc_ix ());
 #endif
+      id += this->get_task (0)->get_proc_id (tid);//TODO only path 0?
     }
     return id;
   }
