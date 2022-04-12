@@ -33,7 +33,7 @@ namespace femera { namespace test {
   }
   inline
   double test_uninit_valarray (const fmr::Local_int sz=100000) {double sum = 0;
-    std::vector <double> vec ={};
+    std::vector <double> vec;// ={};
     vec.reserve (sz);
     // Make valarray from uninitialized reserved vector data.
 #if 0

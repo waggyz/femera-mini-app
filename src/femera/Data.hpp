@@ -28,7 +28,7 @@ namespace femera { namespace data {
     fmr::Local_int line_size = 0;// items / line
 //    fmr::Local_int head_size = 0;// page header size in lines
 //    fmr::Local_int foot_size = 0;// page footer size in lines
-//    fmr::Local_int head_byte = 0;// data (or page?) start buffer/padding
+//    fmr::Local_int head_byte = 0;// data (or page?) front buffer/padding
 //    fmr::Local_int foot_byte = 0;// data (or page?) end buffer/padding
   };
 #endif

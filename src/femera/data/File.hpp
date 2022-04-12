@@ -29,8 +29,8 @@ namespace femera { namespace data {
     std::unordered_map <File_id, Page_dims> file_data = {};
 #endif
   private:
-    Path_list_t inp_file_list ={};// initialized from command line
-    Path_list_t out_file_list ={};//              "
+    Path_list_t inp_file_list ={};// initialized from command line args
+    Path_list_t out_file_list ={};//               "
 #if 1
     // TODO Replace below with unordered_map <Data_id    , data::Page_dims>
     //      or                 unordered_map <Vals_type_t, data::Page_dims>.

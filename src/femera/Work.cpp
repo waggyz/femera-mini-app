@@ -64,7 +64,7 @@ namespace femera {
         } } } }
         if (Werr > 0) {
           del_list.push (ix);// Queue task for removal if init failed, and...
-          W->exit (-1);      // ...exit with a warning (not error) code.
+          W->exit (-1);      // ...exit it with a warning (not error) code.
     } } }
     while (! del_list.empty ()) {// Remove failed tasks.
       const auto label = femera::form::text_line (250, "%4s %4s init",
