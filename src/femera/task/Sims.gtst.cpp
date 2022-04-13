@@ -2,12 +2,16 @@
 
 #include "gtest/gtest.h"
 
-auto mini = fmr::new_jobs ();
+
+namespace femera { namespace test {
+  //
+  auto mini = fmr::new_jobs ();
+  //
+  TEST( Sims, TrivialTest ){
+    EXPECT_EQ( 1, 1 );
+  }
+  } }// end femera::test:: namespace
 
 fmr::Exit_int main (int argc, char** argv) {
-  return mini->exit (mini->init (&argc,argv));
-}
-
-TEST( Sims, TrivialTest ){
-  EXPECT_EQ( 1, 1 );
+  return femera::test::mini->exit (femera::test::mini->init (&argc,argv));
 }

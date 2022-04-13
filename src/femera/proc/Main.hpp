@@ -5,7 +5,7 @@
 
 namespace femera { namespace proc {
   class Main;// Derive a CRTP concrete class from Proc.
-  class Main : public Proc<Main> { private: friend class Proc;
+  class Main final: public Proc<Main> { private: friend class Proc;
   //TODO friend class Proc<Main> or just Proc? Both work.
   public:
     Main (const femera::Work::Core_ptrs_t) noexcept;

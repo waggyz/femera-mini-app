@@ -6,7 +6,7 @@
 
 namespace femera { namespace proc {
   class Fomp;// Derive a CRTP concrete class from Proc.
-  class Fomp : public Proc<Fomp> {private: friend class Proc; friend class Main;
+  class Fomp final: public Proc<Fomp> {private: friend class Proc; friend class Main;
   private:
     static bool is_in_parallel () noexcept;
     fmr::Local_int task_proc_ix () noexcept;

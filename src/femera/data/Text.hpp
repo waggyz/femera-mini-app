@@ -9,7 +9,7 @@
 
 namespace femera { namespace data {
   class Text;// Derive a CRTP concrete class from Data.
-  class Text : public Data <Text> {// private: friend class Data;
+  class Text final: public Data <Text> {// private: friend class Data;
 #if 0
   public:
     // TODO Make fmrlog, fmrout, fmrerr, fmrall into public functions?

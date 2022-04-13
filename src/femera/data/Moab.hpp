@@ -6,7 +6,7 @@
 
 namespace femera { namespace data {
   class Moab;// Derive a CRTP concrete class from File.
-  class Moab : public Data <Moab> { private: friend class Data;
+  class Moab final: public Data <Moab> { private: friend class Data;
   private:
     Moab (femera::Work::Core_ptrs_t) noexcept;
     Moab () =delete;//NOTE Use the constructor above.

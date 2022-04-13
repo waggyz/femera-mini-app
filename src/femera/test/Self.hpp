@@ -5,7 +5,7 @@
 
 namespace femera { namespace test {
   class Self;// Derive a CRTP concrete class from Test.
-  class Self : public Test<Self> { private: friend class Test;
+  class Self final: public Test<Self> { private: friend class Test;
   private:
     void task_init (int* argc, char** argv);
     void task_exit ();

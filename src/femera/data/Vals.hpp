@@ -5,7 +5,7 @@
 
 namespace femera { namespace data {
   class Vals;//TODO Derive a CRTP concrete class from Data?
-  class Vals : public Data <Vals> { private: friend class Data;
+  class Vals final: public Data <Vals> { private: friend class Data;
   private:
     proc::Team_t team_id = 0;// MPI communicator
   private:

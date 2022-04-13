@@ -5,7 +5,7 @@
 
 namespace femera { namespace data {
   class Pets;// Derive a CRTP concrete class from Data.
-  class Pets : public Data <Pets> { private: friend class Data;
+  class Pets final: public Data <Pets> { private: friend class Data;
   private:
     proc::Team_t team_id = 0;// MPI communicator
   private:

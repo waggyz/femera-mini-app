@@ -5,7 +5,7 @@
 
 namespace femera { namespace test {
   class Beds;// Derive a CRTP concrete class from Test.
-  class Beds : public Test<Beds> { private: friend class Test;
+  class Beds final: public Test<Beds> { private: friend class Test;
   private:
     bool do_test = false;
     bool do_perf = false;
