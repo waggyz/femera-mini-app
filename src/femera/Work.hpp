@@ -43,7 +43,7 @@ namespace femera {
     class Gtst;
   }
   namespace task {
-    class Jobs; class Sims;
+    class Jobs; class Sims; class Runs;
   }
   // typedefs
   using Work_spt = FMR_SMART_PTR <Work>;

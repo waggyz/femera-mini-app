@@ -44,9 +44,10 @@ namespace femera {
     if (this->proc->test == nullptr) {this->proc->test = this->test;}
     if (this->data->test == nullptr) {this->data->test = this->test;}
     if (this->test->test == nullptr) {this->test->test = this->test;}
-    // Jobs instance task_list now has proc::Main, data::File, and test::Beds.
-    // Add a simulation handler.
+    // Jobs instance task_list now has proc::Main, data::File, and test::Beds,
+    // and its proc, data, and test pointer members are set but NOT initialized.
     if (true) {//TODO command line args?
+      // Add a simulation handler.
 #if 0
       this->data->time_line (data->fmrlog,"Femera","0.3 started\n");//TODO version
 #endif

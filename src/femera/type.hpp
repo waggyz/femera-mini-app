@@ -43,7 +43,7 @@ namespace femera {
 //#ifdef FMR_HAS_GMSH
     Gmsh, // Data type: Gmsh file handler
 //#endif
-    Jobs, Sims, //Task type
+    Task, Jobs, Sims, Runs,//Task types
     Petsc, // PETSc handler
     Vals, // data values
 #if 0

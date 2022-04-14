@@ -11,9 +11,6 @@ namespace femera {
     this->info_d    = 3;
   }
   inline
-  void task::Sims::task_init (int*, char**) {
-  }
-  inline
   void task::Sims::task_exit () {
   }
 }//end femera namespace
