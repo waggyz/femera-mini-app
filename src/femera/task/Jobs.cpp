@@ -46,15 +46,13 @@ namespace femera {
     if (this->test->test == nullptr) {this->test->test = this->test;}
     // Jobs instance task_list now has proc::Main, data::File, and test::Beds,
     // and its proc, data, and test pointer members are set but NOT initialized.
-    if (true) {//TODO command line args?
-      // Add a simulation handler.
+    // Add a simulation handler.
 #if 0
-      this->data->time_line (data->fmrlog,"Femera","0.3 started\n");//TODO version
+    this->data->time_line (data->fmrlog,"Femera","0.3 started\n");//TODO version
 #endif
-      this->add_task (std::move(Task<task::Sims>::new_task (this->get_core())));
-    }
-    //
+    this->add_task (std::move(Task<task::Sims>::new_task (this->get_core())));
   }
+  //
 }//end femera namespace
 
 #undef FMR_DEBUG

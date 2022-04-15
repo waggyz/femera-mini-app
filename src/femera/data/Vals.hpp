@@ -9,11 +9,11 @@ namespace femera { namespace data {
   private:
     proc::Team_t team_id = 0;// MPI communicator
   private:
-    Vals (femera::Work::Core_ptrs_t) noexcept;
-    Vals () =delete;//NOTE Use the constructor above.
-  private:
     void task_init (int* argc, char** argv);
     void task_exit ();
+  private:
+    Vals (femera::Work::Core_ptrs_t) noexcept;
+    Vals () =delete;//NOTE Use the constructor above.
   };
 } }//end femera::data:: namespace
 
