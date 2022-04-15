@@ -56,9 +56,6 @@ namespace femera {
   * Derived classes use the curiously recurrent template pattern (CRTP) e.g.,
   * class Proc : public Work { .. };
   * class Main : public Proc <Main> { private: friend class Proc; .. };
-  *NOTE Make at least 1 method pure virtual.
-  *TODO Do all virtual methods need to be pure
-        to avoid vtable using CRTP child classes?
   */
   public:// typedefs ==========================================================
     using Core_ptrs_t = std::tuple <proc::Main*, data::File*, test::Beds*>;
@@ -88,12 +85,12 @@ namespace femera {
   private:// ==================================================================
     using Task_list_t = std::deque <Work_spt>;
   protected:
-    std::string      name ="unknown work";
-    std::string      abrv ="work";
-    std::string   version ="";
-    Task_list_t task_list ={};
-    Task_type   task_type = task_cast (Base_type::Work);
-    fmr::Dim_int   info_d = 1;
+    std::string       name ="unknown work";
+    std::string       abrv ="work";
+    std::string    version ="";
+    Task_list_t  task_list ={};
+    Task_type    task_type = task_cast (Base_type::Work);
+    fmr::Dim_int info_d    = 1;
 #if 0
 // https://stackoverflow.com/questions/60040665
     /replacing-the-command-line-arguments-int-argc-and-char-argv-with-stdvectors
