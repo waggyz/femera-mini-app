@@ -74,7 +74,7 @@ namespace femera { namespace test {
   double zeroed_valarray_speed
   (const fmr::Local_int sz=500000, const fmr::Local_int n=100) {
     auto vals = std::vector <std::valarray<double>> (n);
-    auto perf = fmr::perf::Meter<fmr::Perf_int> ();
+    auto perf = fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float> ();
     perf.start ();
     for (fmr::Local_int i=0; i<n; i++) {
       vals[i] = std::valarray<double> (sz);
@@ -108,7 +108,7 @@ namespace femera { namespace test {
     auto vecs = std::vector <std::vector  <double>> (n);
 #endif
     auto vals = std::vector <std::valarray<double>> (n);
-    auto perf = fmr::perf::Meter <fmr::Local_int> ();
+    auto perf = fmr::perf::Meter <fmr::Local_int, fmr::Perf_float> ();
     perf.start ();
     for (fmr::Local_int i=0; i<n; i++) {
 #ifdef FMR_TEST_LOCAL_VEC0
@@ -181,12 +181,19 @@ namespace femera { namespace test {
   }
   TEST(BulkInts, ZeroAsFmrFloats) {
     EXPECT_EQ(fmr::Perf_float(0),reinterpret_cast<fmr::Perf_float*>(&bulk[0])[0]);
+#if 0
     EXPECT_EQ(fmr::Geom_float(0),reinterpret_cast<fmr::Geom_float*>(&bulk[0])[0]);
     EXPECT_EQ(fmr::Phys_float(0),reinterpret_cast<fmr::Phys_float*>(&bulk[0])[0]);
     EXPECT_EQ(fmr::Solv_float(0),reinterpret_cast<fmr::Solv_float*>(&bulk[0])[0]);
     EXPECT_EQ(fmr::Cond_float(0),reinterpret_cast<fmr::Cond_float*>(&bulk[0])[0]);
     EXPECT_EQ(fmr::Post_float(0),reinterpret_cast<fmr::Post_float*>(&bulk[0])[0]);
     EXPECT_EQ(fmr::Plot_float(0),reinterpret_cast<fmr::Plot_float*>(&bulk[0])[0]);
+#endif
+  }
+  TEST(BulkInts, ZeroAsFloats) {
+    EXPECT_EQ(0.0f, reinterpret_cast<float*>      (&bulk[0])[0]);
+    EXPECT_EQ(0.0 , reinterpret_cast<double*>     (&bulk[0])[0]);
+    EXPECT_EQ(0.0l, reinterpret_cast<long double*>(&bulk[0])[0]);
   }
   TEST(BulkInts, ZeroAsStringChars) {
     EXPECT_EQ(char(0), reinterpret_cast<char*> (&bulk[0])[0] );

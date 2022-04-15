@@ -5,7 +5,7 @@
 #include <unistd.h> // usleep
 
 // Make something to test.
-auto perf = fmr::perf::Meter<fmr::perf::Count>();
+auto perf = fmr::perf::Meter<fmr::perf::Count,fmr::Perf_float>();
 #if 0
 TEST(FmrPerfMeter, StructSize) {
   EXPECT_EQ(sizeof (fmr::perf::Meter), 64);

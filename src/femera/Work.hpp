@@ -63,7 +63,7 @@ namespace femera {
   public:// typedefs ==========================================================
     using Core_ptrs_t = std::tuple <proc::Main*, data::File*, test::Beds*>;
     using Task_path_t = std::vector <fmr::Local_int>;
-    using Work_time_t = fmr::perf::Meter <fmr::Perf_int>;
+    using Work_time_t = fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>;
 //TODO    using Task_tree_t = std::vector <Task_path_t>;
   public:// variables are classes with (mostly) only member functions public --
     Work_time_t time = Work_time_t ();// performance timer

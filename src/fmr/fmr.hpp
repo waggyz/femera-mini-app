@@ -24,13 +24,15 @@ namespace fmr {
   using Perf_int   = uint_fast64_t ;// unit counters, time (ns) counters
   using Perf_float = float         ;// speed, aithmetic intensity, time (sec)
   //
-  // Floating point types are defaults.
+#if 0
+  // fmr:: floating point types are internal defaults?//TODO dynamic float types
   using Geom_float = double        ;//TODO Try float.
   using Phys_float = double        ;// includes inverses of jac & det
   using Solv_float = double        ;
   using Cond_float = float         ;// Preconditioning and scaling
   using Post_float = float         ;// Post-processing
   using Plot_float = float         ;// Visualization
+#endif
   //
   using Line_size_int = uint_fast16_t;//TODO Remove.
 }//end fmr:: namespace
