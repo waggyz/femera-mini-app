@@ -149,6 +149,7 @@ digraph "source tree" {
 	"Task.gtst.cpp" -> "Task.hpp"
 	"perf.hpp" -> "perf.ipp"
 	"Self.hpp" -> "Test.hpp"
+	"Vals.gtst.cpp" -> "Vals.hpp"
 	"proc.cpp" -> "proc.hpp"
 	"Self.hpp" -> "Self.ipp"
 	"Fmpi.cpp" -> "Fmpi.hpp"

@@ -1,4 +1,5 @@
 #include "../femera.hpp"
+#include "Vals.hpp"
 
 #include "gtest/gtest.h"
 
@@ -226,6 +227,12 @@ namespace femera { namespace test {
   TEST( Valarray, ZeroedFasterOrNearlyUninit ) {// not a reliable test
     EXPECT_NE( zeroed_valarray_speed (), 0.90 * uninit_valarray_speed ());
   }
+#if 0
+  TEST(MiniVals, Add) {
+    EXPECT_EQ( static_cast<femera::data::Vals>
+    (mini->data->get_task(Plug_type::Vals)) ->add<int>("test",10,1)[0], 1);
+  }
+#endif
 } }//end femerea::test:: namespace
 
 fmr::Exit_int main (int argc, char** argv) {
