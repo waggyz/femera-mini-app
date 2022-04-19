@@ -22,7 +22,11 @@ namespace femera { namespace data {
     Vals_map_t name_vals ={};//__m256d, SSE, or AVX512 alignment
   public:
     template <typename I>
-    I* add (const Data_id& id, const size_t n=0, const I& init_val=nullptr,
+    I* add (const Data_id& id, const size_t n, const I& init_val,
+      typename std::enable_if<std::is_integral<I>::value>::type* = nullptr)
+    noexcept;
+    template <typename I>
+    I* add (const Data_id& id, const size_t n=0,
       typename std::enable_if<std::is_integral<I>::value>::type* = nullptr)
     noexcept;
 #if 1

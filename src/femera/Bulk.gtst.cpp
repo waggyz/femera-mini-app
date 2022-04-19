@@ -8,10 +8,11 @@ namespace femera { namespace test {
   //
   auto bulk = femera::data::Bulk();
   const auto ints10 = std::string("test-10-ints");
+  const auto uninit10 = std::string("test-10-uninit");
   //
   TEST(Bulk, Ints10) {
     EXPECT_EQ( bulk.add (ints10,10,1)[9], 1);
-    //XXX_EXPECT_EQ( bulk.get (ints10<int>)[5], 1);
+    EXPECT_NE( bulk.add<int> (uninit10,10)[9], 123);// check is for not segfault
   }
 } }//end femerea::test:: namespace
 
