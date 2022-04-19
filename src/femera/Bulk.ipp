@@ -19,9 +19,9 @@ namespace femera { namespace data {
       // Accessesing past size() is undefined behavior...
 #   else
       // ...but accessing the underlying array should be OK.
-      bulk_ptr [sz - 1] = fmr::Bulk_int(0);// first touch
       auto       bulk_vec = & name_ints[id].bulk;
       const auto bulk_ptr = bulk_vec->data();
+      bulk_ptr [sz - 1] = fmr::Bulk_int(0);// first touch
       for (size_t i=0; i<sz; i++) { bulk_vec->push_back (bulk_ptr[i]); }
 #endif
       auto vals = reinterpret_cast<I*> (bulk_vec->data());
