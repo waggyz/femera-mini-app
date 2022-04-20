@@ -17,16 +17,9 @@ namespace femera { namespace data {
     //TODO need 1 of each map/omp thrd?
     using Ints_map_t = std::unordered_map <Data_id, Bulk_align<FMR_ALIGN_INTS>>;
     using Vals_map_t = std::unordered_map <Data_id, Bulk_align<FMR_ALIGN_VALS>>;
-  private:
-    Ints_map_t name_ints ={};// size_t alignment
-    Vals_map_t name_vals ={};//__m256d, SSE, or AVX512 alignment
   public:
     template <typename I>
     I* add (const Data_id& id, const size_t n, const I& init_val,
-      typename std::enable_if<std::is_integral<I>::value>::type* = nullptr)
-    noexcept;
-    template <typename I>
-    I* add (const Data_id& id, const size_t n=0,
       typename std::enable_if<std::is_integral<I>::value>::type* = nullptr)
     noexcept;
 #if 1
@@ -39,6 +32,14 @@ namespace femera { namespace data {
       typename std::enable_if<std::is_floating_point<V>::value>::type* = nullptr)
     noexcept;
 #endif
+  private:
+    Ints_map_t name_ints ={};// size_t alignment
+    Vals_map_t name_vals ={};//__m256d, SSE, or AVX512 alignment
+  private:
+    template <typename I>
+    I* add (const Data_id& id, const size_t n=0,
+      typename std::enable_if<std::is_integral<I>::value>::type* = nullptr)
+    noexcept;
   };
 } }//end femera::data:: namespace
 

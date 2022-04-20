@@ -12,8 +12,9 @@ namespace femera { namespace test {
   //
   TEST(Bulk, Ints10) {
     EXPECT_EQ( bulk.add (ints10,10,1)[9], 1);
-    EXPECT_NE( bulk.add<int> (uninit10,10)[9], 123);// check is for not segfault
+    //EXPECT_NE( bulk.add<int> (uninit10,10)[9], 123);// check is for not segfault
   }
+#if 1
   inline
   int time_make_new (uint n=1024*1, uint sz=1024*1) {
     if (n<1 || sz<1) { return 1; }
@@ -56,15 +57,16 @@ namespace femera { namespace test {
         vecs[i] = std::vector<double>(0);
       }
     }
-    {
+    { auto tmp = std::vector<double>();
+      tmp.reserve (sz);
+      tmp.data () [0] = 1.0;// first-touch allocate
+      const auto ptr = tmp.data ();
       time.add_idle_time_now ();
       for (uint i=0; i<n; i++) {
         vecs[i] = std::vector<double>();
         vecs[i].reserve (sz);
-        auto ptr = vecs[i].data ();
-        ptr [0] = 1.0;// first-touch allocate
-        vecs[i].assign (ptr, ptr + sz);//FIXME undefined behavior...
-        // Self-assign can be optimized away.
+        vecs[i].data ()[0] = 1.0;// first-touch allocate
+        vecs[i].assign (ptr, ptr + sz);
       }
       const auto make_time = time.add_busy_time_now ();
       double sum=0;
@@ -174,6 +176,7 @@ namespace femera { namespace test {
   TEST(NewVals, Time) {
     EXPECT_EQ( time_make_new (1024*1,1024*16*4), 0);
   }
+#endif
 } }//end femerea::test:: namespace
 
 fmr::Exit_int main (int argc, char** argv) {
