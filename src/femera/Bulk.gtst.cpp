@@ -39,6 +39,7 @@ namespace femera { namespace test {
       for (uint i=0; i<n; i++) {
         vecs[i] = std::vector<double>();
         vecs[i].reserve (sz);
+        vecs[i].data ()[0] = 1.0;// first-touch allocate
       }
       const auto make_time = time.add_busy_time_now ();
       double sum=0;
@@ -60,7 +61,8 @@ namespace femera { namespace test {
       for (uint i=0; i<n; i++) {
         vecs[i] = std::vector<double>();
         vecs[i].reserve (sz);
-        const auto ptr = vecs[i].data ();
+        auto ptr = vecs[i].data ();
+        ptr [0] = 1.0;// first-touch allocate
         vecs[i].assign (ptr, ptr + sz);// Self-assign can be optimized away.
       }
       const auto make_time = time.add_busy_time_now ();
@@ -83,7 +85,8 @@ namespace femera { namespace test {
       for (uint i=0; i<n; i++) {
         vecs[i] = std::vector<double>();
         vecs[i].reserve (sz);
-        const auto ptr = vecs[i].data ();
+        auto ptr = vecs[i].data ();
+//        ptr [0] = 1.0;// first-touch allocate
         for (size_t j=0; j<sz; j++) { vecs[i].push_back (ptr[j]); }
       }
       const auto make_time = time.add_busy_time_now ();
@@ -106,6 +109,7 @@ namespace femera { namespace test {
       for (uint i=0; i<n; i++) {
         vecs[i] = std::vector<double>();
         vecs[i].reserve (sz);
+        vecs[i].data ()[0] = 1.0;// first-touch allocate
       }
       const auto make_time = time.add_busy_time_now ();
       double sum=0;

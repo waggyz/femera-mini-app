@@ -20,7 +20,8 @@ namespace femera { namespace data {
 #else
       // ...but accessing the underlying array should be OK.
       auto       bulk_vec = & name_ints[id].bulk;
-      const auto ptr = bulk_vec->data ();
+      auto ptr = bulk_vec->data ();
+      ptr [0] = fmr::Bulk_int (0);     // first-touch allocate, then set size
       bulk_vec->assign (ptr, ptr + sz);// Self-assign can be optimized away.
 #endif
       auto vals = reinterpret_cast<I*> (bulk_vec->data());
@@ -32,15 +33,12 @@ namespace femera { namespace data {
   noexcept {
     auto vals = reinterpret_cast<I*> (this->add<I> (id, n));
     if (n > 0) {
-      for (size_t i=0; i<n; i++) { vals[i]=init_val; }
-      const auto sz = n * sizeof (I) / sizeof (fmr::Bulk_int);
+      for (size_t i=0; i<n; i++) { vals [i] = init_val; }
 #if 0
+      const auto sz = n * sizeof (I) / sizeof (fmr::Bulk_int);
       const auto bulk_ptr = reinterpret_cast<fmr::Bulk_int*> (vals);
       auto       bulk_vec = & name_ints[id].bulk;
       for (size_t i=0; i<sz; i++) { bulk_vec->push_back (bulk_ptr[i]); }
-#else
-      const auto ptr = reinterpret_cast<fmr::Bulk_int*> (vals);
-      name_ints[id].bulk.assign (ptr, ptr + sz);// Self-assign optimized away.
 #endif
     }
     return vals;
