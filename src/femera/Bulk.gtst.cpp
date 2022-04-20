@@ -63,7 +63,8 @@ namespace femera { namespace test {
         vecs[i].reserve (sz);
         auto ptr = vecs[i].data ();
         ptr [0] = 1.0;// first-touch allocate
-        vecs[i].assign (ptr, ptr + sz);// Self-assign can be optimized away.
+        vecs[i].assign (ptr, ptr + sz);//FIXME undefined behavior...
+        // Self-assign can be optimized away.
       }
       const auto make_time = time.add_busy_time_now ();
       double sum=0;

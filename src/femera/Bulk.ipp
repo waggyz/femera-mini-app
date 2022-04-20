@@ -6,8 +6,8 @@ namespace femera { namespace data {
   I* Bulk::add (const Data_id& id, const size_t n,
     typename std::enable_if<std::is_integral<I>::value>::type*)
   noexcept {
-    if (n == 0) {
-      this->name_ints[id].bulk ={};// inserts new or clears existing empty vec
+    if (n <= 0) {
+      this->name_ints[id].bulk ={};// inserts new empty vec or clears existing
       return reinterpret_cast<I*> (this->name_ints[id].bulk.data());
     } else {
       //TODO over-allocate & find first aligned byte?
@@ -22,7 +22,8 @@ namespace femera { namespace data {
       auto       bulk_vec = & name_ints[id].bulk;
       auto ptr = bulk_vec->data ();
       ptr [0] = fmr::Bulk_int (0);     // first-touch allocate, then set size
-      bulk_vec->assign (ptr, ptr + sz);// Self-assign can be optimized away.
+      bulk_vec->assign (ptr, ptr + sz);//FIXME undefined behavior
+      // Self-assign can be optimized away.
 #endif
       auto vals = reinterpret_cast<I*> (bulk_vec->data());
       return vals;
