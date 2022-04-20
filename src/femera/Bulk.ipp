@@ -7,22 +7,21 @@ namespace femera { namespace data {
     typename std::enable_if<std::is_integral<I>::value>::type*)
   noexcept {
     if (n == 0) {
-      this->name_ints[id].bulk ={};// empty, inserts new or clears existing
+      this->name_ints[id].bulk ={};// inserts new or clears existing empty vec
       return reinterpret_cast<I*> (this->name_ints[id].bulk.data());
     } else {
       //TODO over-allocate & find first aligned byte?
       const auto sz = n * sizeof (I) / sizeof (fmr::Bulk_int);
-      this->name_ints[id].bulk.reserve (sz);// uninitialized,  size()==0
+      this->name_ints[id].bulk.reserve (sz);// uninitialized, size()==0
 #if 0
-      this->name_ints[id].bulk [sz - 1] = fmr::Bulk_int(0);// first touch
+      this->name_ints[id].bulk [sz - 1] = fmr::Bulk_int(0);// undefined behavior
       //printf ("uninit size: %lu\n", name_ints[id].bulk.size());
       // Accessesing past size() is undefined behavior...
-#   else
+#else
       // ...but accessing the underlying array should be OK.
       auto       bulk_vec = & name_ints[id].bulk;
-      const auto bulk_ptr = bulk_vec->data();
-      bulk_ptr [sz - 1] = fmr::Bulk_int(0);// first touch
-      for (size_t i=0; i<sz; i++) { bulk_vec->push_back (bulk_ptr[i]); }
+      const auto ptr = bulk_vec->data ();
+      bulk_vec->assign (ptr, ptr + sz);// Self-assign can be optimized away.
 #endif
       auto vals = reinterpret_cast<I*> (bulk_vec->data());
       return vals;
@@ -34,10 +33,15 @@ namespace femera { namespace data {
     auto vals = reinterpret_cast<I*> (this->add<I> (id, n));
     if (n > 0) {
       for (size_t i=0; i<n; i++) { vals[i]=init_val; }
+      const auto sz = n * sizeof (I) / sizeof (fmr::Bulk_int);
+#if 0
       const auto bulk_ptr = reinterpret_cast<fmr::Bulk_int*> (vals);
       auto       bulk_vec = & name_ints[id].bulk;
-      const auto sz = n * sizeof (I) / sizeof (fmr::Bulk_int);
       for (size_t i=0; i<sz; i++) { bulk_vec->push_back (bulk_ptr[i]); }
+#else
+      const auto ptr = reinterpret_cast<fmr::Bulk_int*> (vals);
+      name_ints[id].bulk.assign (ptr, ptr + sz);// Self-assign optimized away.
+#endif
     }
     return vals;
   }

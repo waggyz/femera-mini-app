@@ -10,11 +10,11 @@ namespace femera { namespace data {
     Bulk bulk = Bulk();
     proc::Team_t team_id = 0;// MPI communicator
   private:
-      void task_init (int* argc, char** argv);
-      void task_exit ();
+    void task_init (int* argc, char** argv);
+    void task_exit ();
   private:
-      Vals (femera::Work::Core_ptrs_t) noexcept;
-      Vals () =delete;//NOTE Use the constructor above.
+    Vals (femera::Work::Core_ptrs_t) noexcept;
+    Vals () =delete;//NOTE Use the constructor above.
   };
 } }//end femera::data:: namespace
 
