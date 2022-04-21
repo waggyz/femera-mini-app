@@ -8,13 +8,23 @@ namespace femera { namespace test {
   //
   auto bulk = femera::data::Bulk();
   const auto ints10 = std::string("test-10-ints");
-  const auto uninit10 = std::string("test-10-uninit");
   //
+  TEST(Bulk, IntSizes) {
+    EXPECT_LE( sizeof(fmr::Bulk_int), sizeof(fmr::Dim_int));
+    EXPECT_LE( sizeof(fmr::Bulk_int), sizeof(fmr::Enum_int));
+    EXPECT_LE( sizeof(fmr::Bulk_int), sizeof(fmr::Local_int));
+    EXPECT_LE( sizeof(fmr::Bulk_int), sizeof(fmr::Global_int));
+    EXPECT_LE( sizeof(fmr::Bulk_int), sizeof(fmr::Perf_int));
+  }
+  TEST(Bulk, FloatSizes) {
+    EXPECT_LE( sizeof(fmr::Bulk_int), sizeof(float));
+    EXPECT_LE( sizeof(fmr::Bulk_int), sizeof(double));
+  }
   TEST(Bulk, Ints10) {
     EXPECT_EQ( bulk.add (ints10,10,1)[9], 1);
-    //EXPECT_NE( bulk.add<int> (uninit10,10)[9], 123);// check is for not segfault
+    EXPECT_EQ( bulk.get<int> (ints10) [9], 1);
   }
-#if 1
+#if 0
   inline
   int time_make_new (uint n=1024*1, uint sz=1024*1) {
     if (n<1 || sz<1) { return 1; }

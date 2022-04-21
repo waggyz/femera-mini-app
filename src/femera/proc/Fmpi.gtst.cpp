@@ -19,8 +19,9 @@ TEST( Fmpi, TaskName ){
 }
 TEST( Fmpi, TeamID ){
   const auto M = test_mpi.get_task (femera::Plug_type::Fmpi);
-  EXPECT_NE( M->get_team_id (), uint(0) );
+  EXPECT_EQ( sizeof(M->get_team_id ()), sizeof(MPI_COMM_WORLD));
   EXPECT_NE( M->get_team_id (), femera::proc::Team_t (MPI_COMM_WORLD) );
+  EXPECT_NE( M->get_team_id (), uint(0) );
 }
 TEST( Fmpi, ProcN ){
   const auto M = test_mpi.get_task (femera::Plug_type::Fmpi);

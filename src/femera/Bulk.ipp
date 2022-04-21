@@ -34,17 +34,30 @@ namespace femera { namespace data {
       return reinterpret_cast<I*> (ptr);
   } }
   template <typename I> inline
-  I* Bulk::add (const Data_id& id, const size_t n, const I& init_val,
+  I* Bulk::add (const Data_id& id, const size_t n, const I init_val,
     typename std::enable_if<std::is_integral<I>::value>::type*)
   noexcept {
     this->add<I> (id, n);
     auto vec = & name_ints[id].bulk;
     if (n>0) {
-      const auto tmp = std::vector<I>(n, init_val);
-      const auto ptr = reinterpret_cast<const fmr::Bulk_int*> (tmp.data());
       const auto sz = n * sizeof (I) / sizeof (fmr::Bulk_int);
-      vec->assign (ptr, ptr + sz);
-    }
+      if (init_val == I(0)) {//NOTE Zero is the same bits for all numeric types.
+        vec->resize (sz);     //    This is tested by data/Vals.gtst.cpp.
+      } else {
+#if 0
+        // Initialize from a temporary vector of type I.
+        const auto tmp = std::vector<I> (n, init_val);
+        const auto ptr = reinterpret_cast<const fmr::Bulk_int*> (tmp.data());
+        vec->assign (ptr, ptr + sz);
+#else
+        // Initialize without making a temporary vector.
+        const auto bytes = reinterpret_cast<const fmr::Bulk_int*> (&init_val);
+        const auto mod   = fmr::Local_int (sizeof (I) / sizeof (fmr::Bulk_int));
+        for (size_t i=0; i<sz; i++ ) {
+          vec->push_back (bytes [i % mod]);
+        }
+#endif
+    } }
     return reinterpret_cast<I*> (vec->data ());
 #if 0
     auto vals = reinterpret_cast<I*> (this->add<I> (id, n));

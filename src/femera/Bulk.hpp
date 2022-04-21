@@ -19,7 +19,7 @@ namespace femera { namespace data {
     using Vals_map_t = std::unordered_map <Data_id, Bulk_align<FMR_ALIGN_VALS>>;
   public:
     template <typename I>
-    I* add (const Data_id& id, const size_t n, const I& init_val,
+    I* add (const Data_id& id, const size_t n, const I init_val,
       typename std::enable_if<std::is_integral<I>::value>::type* = nullptr)
     noexcept;
 #if 1

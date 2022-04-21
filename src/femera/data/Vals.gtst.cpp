@@ -7,7 +7,7 @@
 #include <valarray>
 #include <cstring>           // std::memcmp
 #include <cstdio>            // std::snprintf
-#include <cmath>             // isnan
+#include <cmath>             // isnan, std::signbit
 
 namespace femera { namespace test {
   const auto mini = fmr::new_jobs ();
@@ -144,6 +144,12 @@ namespace femera { namespace test {
   }
   TEST(Mini, IsOK) {
     EXPECT_EQ( 1, 1);
+  }
+  TEST(SignedZero, NegZeroVsPosZero) {
+    EXPECT_EQ( -0.0, +0.0);
+    //EXPECT_EQ( std::signbit (-0.0), true);//TODO gcc 4.8.5 broken?
+    EXPECT_EQ( std::signbit (+0.0), false);
+    EXPECT_EQ( std::signbit ( 0.0), false);
   }
   TEST(ValsInit, VecAndValZeroed) {
     EXPECT_EQ( 0, std::memcmp (&vec8z[0], &val8z[0], sizeof (vec8z)));
