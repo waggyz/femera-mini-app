@@ -13,33 +13,45 @@ namespace femera { namespace data {
   private:
     template <typename A>
     //TODO std::shared_ptr<std::vector<fmr::Bulk_int>> ? needed if std::move ?
-    struct alignas (A) Bulk_align { std::vector<fmr::Bulk_int> bulk; };
+    struct alignas (A) Bulk_align {
+      std::vector <fmr::Bulk_int> bulk;
+    };
     //TODO need 1 of each map/omp thrd?
     using Ints_map_t = std::unordered_map <Data_id, Bulk_align<FMR_ALIGN_INTS>>;
     using Vals_map_t = std::unordered_map <Data_id, Bulk_align<FMR_ALIGN_VALS>>;
   public:
-    template <typename I>
-    I* add (const Data_id& id, const size_t n, const I init_val,
-      typename std::enable_if<std::is_integral<I>::value>::type* = nullptr)
+    template <typename T>
+    T* add (const Data_id& id, const size_t n, const T init_val)
+#if 0
+    //TODO Consider enable if numeric/enum?
+    T* add (const Data_id& id, const size_t n, const T init_val, typename
+      std::enable_if <std::is_integral <T>::value>::type* = nullptr)
+#endif
     noexcept;
-#if 1
     template <typename I>
-    I* get (const Data_id& id,// includes char type
-      typename std::enable_if<std::is_integral<I>::value>::type* = nullptr)
+    I* get (const Data_id& id, size_t start=0)
     noexcept;
-    template <typename V>
-    V* get (const Data_id& id,
-      typename std::enable_if<std::is_floating_point<V>::value>::type* = nullptr)
+  private:
+    Ints_map_t    name_ints ={};// size_t alignment
+    Vals_map_t    name_vals ={};// __m256d, SSE, or AVX512 alignment
+    std::size_t   size      = 0;// number of I-type elements stored
+    fmr::Hash_int file_hash = 0;// CRC32 or CRC64 has of stored data
+    uint_fast16_t size_of   = 0;
+  private:
+    template <typename I>
+    I* add (const Data_id& id, const size_t n=0, typename
+      std::enable_if <std::is_integral <I>::value>::type* = nullptr)
+    noexcept;
+    template <typename I>
+    I* add (const Data_id& id, const size_t n=0, typename
+      std::enable_if <std::is_floating_point <I>::value>::type* = nullptr)
+    noexcept;
+#if 0
+    template <typename To, typename From>
+    To* cast (const Data_id& id, typename
+      std::enable_if <std::is_floating_point <V>::value>::type* = nullptr)
     noexcept;
 #endif
-  private:
-    Ints_map_t name_ints ={};// size_t alignment
-    Vals_map_t name_vals ={};//__m256d, SSE, or AVX512 alignment
-  private:
-    template <typename I>
-    I* add (const Data_id& id, const size_t n=0,
-      typename std::enable_if<std::is_integral<I>::value>::type* = nullptr)
-    noexcept;
   };
 } }//end femera::data:: namespace
 

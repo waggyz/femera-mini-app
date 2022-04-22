@@ -8,21 +8,36 @@ namespace femera { namespace test {
   //
   auto bulk = femera::data::Bulk();
   const auto ints10 = std::string("test-10-ints");
+  const auto vals10 = std::string("test-10-floats");
   //
   TEST(Bulk, IntSizes) {
-    EXPECT_LE( sizeof(fmr::Bulk_int), sizeof(fmr::Dim_int));
-    EXPECT_LE( sizeof(fmr::Bulk_int), sizeof(fmr::Enum_int));
-    EXPECT_LE( sizeof(fmr::Bulk_int), sizeof(fmr::Local_int));
-    EXPECT_LE( sizeof(fmr::Bulk_int), sizeof(fmr::Global_int));
-    EXPECT_LE( sizeof(fmr::Bulk_int), sizeof(fmr::Perf_int));
+    EXPECT_LE( sizeof (fmr::Bulk_int), sizeof (fmr::Dim_int));
+    EXPECT_LE( sizeof (fmr::Bulk_int), sizeof (fmr::Enum_int));
+    EXPECT_LE( sizeof (fmr::Bulk_int), sizeof (fmr::Local_int));
+    EXPECT_LE( sizeof (fmr::Bulk_int), sizeof (fmr::Global_int));
+    EXPECT_LE( sizeof (fmr::Bulk_int), sizeof (fmr::Perf_int));
   }
   TEST(Bulk, FloatSizes) {
-    EXPECT_LE( sizeof(fmr::Bulk_int), sizeof(float));
-    EXPECT_LE( sizeof(fmr::Bulk_int), sizeof(double));
+    EXPECT_LE( sizeof (fmr::Bulk_int), sizeof (float));
+    EXPECT_LE( sizeof (fmr::Bulk_int), sizeof (double));
+    EXPECT_LE( sizeof (fmr::Bulk_int), sizeof (long double));
+    EXPECT_LE( sizeof (float)        , sizeof (FMR_ALIGN_VALS));
+    EXPECT_LE( sizeof (double)       , sizeof (FMR_ALIGN_VALS));
+    EXPECT_LE( sizeof (long double)  , sizeof (FMR_ALIGN_VALS));
+  }
+  TEST(Bulk, CrcHashSizes) {// bulk data end-padded to align int size
+    EXPECT_LE( sizeof (fmr::Hash_int), sizeof (FMR_ALIGN_INTS));
+    EXPECT_LE( sizeof (fmr::Hash_int), sizeof (FMR_ALIGN_INTS));
   }
   TEST(Bulk, Ints10) {
     EXPECT_EQ( bulk.add (ints10,10,1)[9], 1);
     EXPECT_EQ( bulk.get<int> (ints10) [9], 1);
+    EXPECT_EQ( bulk.get<int> (ints10,9) [0], 1);
+  }
+  TEST(Bulk, Vals10) {
+    EXPECT_EQ( bulk.add (vals10,10,1.0)[9], 1.0);
+    //EXPECT_EQ( bulk.get<int> (vals10) [9], 1);
+    //EXPECT_EQ( bulk.get<int> (vals10,9) [0], 1);
   }
 #if 0
   inline
