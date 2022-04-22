@@ -25,19 +25,19 @@ namespace femera { namespace test {
     EXPECT_LE( sizeof (double)       , sizeof (FMR_ALIGN_VALS));
     EXPECT_LE( sizeof (long double)  , sizeof (FMR_ALIGN_VALS));
   }
-  TEST(Bulk, CrcHashSizes) {// bulk data end-padded to align int size
+  TEST(Bulk, CrcHashSizes) {// bulk data end-padded to align size
     EXPECT_LE( sizeof (fmr::Hash_int), sizeof (FMR_ALIGN_INTS));
-    EXPECT_LE( sizeof (fmr::Hash_int), sizeof (FMR_ALIGN_INTS));
+    EXPECT_LE( sizeof (fmr::Hash_int), sizeof (FMR_ALIGN_VALS));
   }
   TEST(Bulk, Ints10) {
-    EXPECT_EQ( bulk.add (ints10,10,1)[9], 1);
-    EXPECT_EQ( bulk.get<int> (ints10) [9], 1);
-    EXPECT_EQ( bulk.get<int> (ints10,9) [0], 1);
+    EXPECT_EQ( bulk.add      (ints10,10,1)[9], int(1));
+    EXPECT_EQ( bulk.get<int> (ints10)     [9], int(1));
+    EXPECT_EQ( bulk.get<int> (ints10,9)   [0], int(1));
   }
   TEST(Bulk, Vals10) {
-    EXPECT_EQ( bulk.add (vals10,10,1.0)[9], 1.0);
-    //EXPECT_EQ( bulk.get<int> (vals10) [9], 1);
-    //EXPECT_EQ( bulk.get<int> (vals10,9) [0], 1);
+    EXPECT_EQ( bulk.add   (vals10,10,1.0)  [9], double(1.0));
+    EXPECT_EQ( bulk.get<double> (vals10)   [9], double(1.0));
+    EXPECT_EQ( bulk.get<double> (vals10,9) [0], double(1.0));
   }
 #if 0
   inline

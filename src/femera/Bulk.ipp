@@ -49,11 +49,11 @@ namespace femera { namespace data {
     auto vec = (std::is_floating_point <T>::value)
       ? & name_vals[id].bulk : & name_ints[id].bulk;
     if (n>0) {
-      size_t sz = n * sizeof (T) / sizeof (fmr::Bulk_int);
       const auto a = (std::is_floating_point <T>::value)
         ? sizeof (FMR_ALIGN_VALS) : sizeof (FMR_ALIGN_INTS);
+      size_t sz = n * sizeof (T) / sizeof (fmr::Bulk_int);
       sz += ((sz % a) == 0 ) ? 0 : a - (sz % a);// Pad end to alignment size.
-      if (init_val <= T(0) && init_val >= T(0)) {
+      if (init_val <= T(0) && init_val >= T(0)) {// ==0, no float warning
         //NOTE              Zero is the same bits for all numeric types.
         vec->resize (sz);// This is tested in data/Vals.gtst.cpp.
       } else {

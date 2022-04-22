@@ -34,9 +34,9 @@ namespace femera { namespace data {
   private:
     Ints_map_t    name_ints ={};// size_t alignment
     Vals_map_t    name_vals ={};// __m256d, SSE, or AVX512 alignment
-    std::size_t   size      = 0;// number of I-type elements stored
-    fmr::Hash_int file_hash = 0;// CRC32 or CRC64 has of stored data
-    uint_fast16_t size_of   = 0;
+    std::size_t   size      = 0;// number of I-type elements
+    fmr::Hash_int file_hash = 0;// CRC32 or CRC64 of stored data
+    uint_fast16_t size_of   = 0;// size of I-type elements
   private:
     template <typename I>
     I* add (const Data_id& id, const size_t n=0, typename
