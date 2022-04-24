@@ -10,15 +10,18 @@ namespace femera { namespace data {
   noexcept {
     if (n <= 0) {
       this->name_ints[id].bulk ={};// inserts new empty vec or clears existing
-      this->name_ints[id].size_of = sizeof (T);
-      return reinterpret_cast<T*>(/*std::align*/ (this->name_ints[id].bulk.data()));
+      const auto v = & this->name_ints [id];
+      v->size    = 0;
+      v->size_of = sizeof (T);
+      return reinterpret_cast<T*> ((v->bulk.data()));
     } else {
       //TODO over-allocate & find first aligned byte
       const auto sz = FMR_ALIGN_INTS + n * sizeof (T) / sizeof (fmr::Bulk_int);
       this->name_ints[id].bulk.reserve (sz);// uninitialized, size()==0
-      this->name_ints[id].size_of = sizeof (T);
-      this->name_ints[id].size    = n;
-      auto ptr = name_ints[id].bulk.data ();
+      const auto v = & this->name_ints [id];
+      v->size_of = sizeof (T);
+      v->size    = n;
+      auto ptr  = v->bulk.data ();
 #if 0
       this->name_ints[id].bulk [0] = fmr::Bulk_int(0);// undefined behavior
       // Accessesing a vector past size() is undefined behavior...
@@ -26,7 +29,7 @@ namespace femera { namespace data {
       // ...but accessing the underlying array should be OK.
       ptr[0] = fmr::Bulk_int(0);  // first touch
 #endif
-      return reinterpret_cast<T*> (/*std::align*/ (ptr));
+      return reinterpret_cast<T*> (ptr);
   } }
   template <typename T> inline
   T* Bulk::add (const Data_id& id, const size_t n, typename
@@ -34,16 +37,19 @@ namespace femera { namespace data {
   noexcept {
     if (n <= 0) {
       this->name_vals[id].bulk ={};// inserts new empty vec or clears existing
-      name_vals[id].size_of = sizeof (T);
-      return reinterpret_cast<T*>(/*std::align*/ (this->name_vals[id].bulk.data()));
+      const auto v = & this->name_vals [id];
+      v->size    = 0;
+      v->size_of = sizeof (T);
+      return reinterpret_cast<T*> (v->bulk.data());
     }
     const auto sz = FMR_ALIGN_VALS + n * sizeof (T) / sizeof (fmr::Bulk_int);
-    this->name_vals[id].bulk.reserve (sz);// uninitialized, size()==0
-    this->name_vals[id].size    = n;
-    this->name_vals[id].size_of = sizeof (T);
-    auto ptr = name_vals[id].bulk.data ();
+    const auto v = & this->name_vals [id];
+    v->bulk.reserve (sz);// uninitialized, size()==0
+    v->size    = n;
+    v->size_of = sizeof (T);
+    auto ptr  = v->bulk.data ();
     ptr[0] = fmr::Bulk_int(0);  // first touch
-    return reinterpret_cast<T*> (/*std::align*/ (ptr));
+    return reinterpret_cast<T*> (ptr);
   }
   template <typename T> inline
   T* Bulk::add (const Data_id& id, const size_t n, const T init_val)
