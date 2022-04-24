@@ -1,8 +1,6 @@
 #ifndef FEMERA_DATA_BULK_IPP
 #define FEMERA_DATA_BULK_IPP
 
-#include <memory>            // std::align
-
 namespace femera { namespace data {
   template <typename T> inline
   T* Bulk::add (const Data_id& id, const size_t n, typename
@@ -66,8 +64,8 @@ namespace femera { namespace data {
       uintptr_t sz = n * sizeof (T) / sizeof (fmr::Bulk_int);
       sz += ((sz % a) == 0 ) ? 0 : a - (sz % a);// Pad end to alignment size.
       if (init_val <= T(0) && init_val >= T(0)) {// ==0, no float warning
-        //NOTE              Zero is the same bits for all numeric types.
-        vec->resize (sz);// This is tested in data/Vals.gtst.cpp.
+        //NOTE Zero is the same bits for all numeric types (data/Vals.gtst.cpp).
+        vec->resize (sz + a - 1);// Also pad the front. 
       } else {
 #if 0
         // Initialize from a temporary vector of type T.
