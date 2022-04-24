@@ -14,23 +14,23 @@ namespace femera { namespace data {
       v->size    = 0;
       v->size_of = sizeof (T);
       return reinterpret_cast<T*> ((v->bulk.data()));
-    } else {
-      //TODO over-allocate & find first aligned byte
-      const auto sz = FMR_ALIGN_INTS + n * sizeof (T) / sizeof (fmr::Bulk_int);
-      this->name_ints[id].bulk.reserve (sz);// uninitialized, size()==0
-      const auto v = & this->name_ints [id];
-      v->size_of = sizeof (T);
-      v->size    = n;
-      auto ptr  = v->bulk.data ();
+    }
+    // over-allocate & find first aligned byte
+    const auto sz = FMR_ALIGN_INTS - 1 + n * sizeof(T)/sizeof(fmr::Bulk_int);
+    this->name_ints[id].bulk.reserve (sz);// uninitialized, bulk.size()==0
+    const auto v = & this->name_ints [id];
+    v->size    = n;
+    v->size_of = sizeof (T);
+    auto ptr   = v->bulk.data ();
 #if 0
-      this->name_ints[id].bulk [0] = fmr::Bulk_int(0);// undefined behavior
-      // Accessesing a vector past size() is undefined behavior...
+    this->name_ints[id].bulk [0] = fmr::Bulk_int(0);// undefined behavior
+    // Accessesing a vector past size() is undefined behavior...
 #else
-      // ...but accessing the underlying array should be OK.
-      ptr[0] = fmr::Bulk_int(0);  // first touch
+    // ...but accessing the underlying array should be OK.
+    ptr[0] = fmr::Bulk_int(0);  // first touch
 #endif
-      return reinterpret_cast<T*> (ptr);
-  } }
+    return reinterpret_cast<T*> (ptr);
+  }
   template <typename T> inline
   T* Bulk::add (const Data_id& id, const size_t n, typename
     std::enable_if <std::is_floating_point <T>::value>::type*)
@@ -42,12 +42,13 @@ namespace femera { namespace data {
       v->size_of = sizeof (T);
       return reinterpret_cast<T*> (v->bulk.data());
     }
-    const auto sz = FMR_ALIGN_VALS + n * sizeof (T) / sizeof (fmr::Bulk_int);
-    const auto v = & this->name_vals [id];
+    // over-allocate & find first aligned byte
+    const auto sz = FMR_ALIGN_VALS - 1 + n * sizeof(T) / sizeof(fmr::Bulk_int);
     v->bulk.reserve (sz);// uninitialized, size()==0
+    const auto v = & this->name_vals [id];
     v->size    = n;
     v->size_of = sizeof (T);
-    auto ptr  = v->bulk.data ();
+    auto ptr   = v->bulk.data ();
     ptr[0] = fmr::Bulk_int(0);  // first touch
     return reinterpret_cast<T*> (ptr);
   }
@@ -78,7 +79,7 @@ namespace femera { namespace data {
         if (pad>0) {for (size_t i=0; i<pad; i++) {
           vec->push_back (fmr::Bulk_int(0));
         } }
-        const auto bytes = reinterpret_cast<const fmr::Bulk_int*> (&init_val);
+        const auto bytes = reinterpret_cast <const fmr::Bulk_int*> (&init_val);
         const auto mod   = fmr::Local_int (sizeof (T) / sizeof (fmr::Bulk_int));
         for (size_t i=0; i<sz; i++ ) { vec->push_back (bytes [i % mod]); }
 #endif

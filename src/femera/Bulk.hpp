@@ -5,7 +5,6 @@
 
 #include <vector>
 #include <unordered_map>
-#include <immintrin.h>       // __m256d
 
 namespace femera { namespace data {
   //===========================================================================
@@ -34,18 +33,18 @@ namespace femera { namespace data {
     I* get (const Data_id& id, size_t start=0, typename
       std::enable_if <std::is_integral <I>::value>::type* = nullptr)
     noexcept;
-    template <typename I>
-    I* get (const Data_id& id, size_t start=0, typename
-      std::enable_if <std::is_floating_point <I>::value>::type* = nullptr)
+    template <typename V>
+    V* get (const Data_id& id, size_t start=0, typename
+      std::enable_if <std::is_floating_point <V>::value>::type* = nullptr)
     noexcept;
   private:
     template <typename I>
     I* add (const Data_id& id, const size_t n=0, typename
       std::enable_if <std::is_integral <I>::value>::type* = nullptr)
     noexcept;
-    template <typename I>
-    I* add (const Data_id& id, const size_t n=0, typename
-      std::enable_if <std::is_floating_point <I>::value>::type* = nullptr)
+    template <typename V>
+    V* add (const Data_id& id, const size_t n=0, typename
+      std::enable_if <std::is_floating_point <V>::value>::type* = nullptr)
     noexcept;
 #if 0
     template <typename To, typename From>
