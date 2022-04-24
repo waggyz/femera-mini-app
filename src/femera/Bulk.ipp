@@ -44,7 +44,7 @@ namespace femera { namespace data {
     }
     // over-allocate & find first aligned byte
     const auto sz = FMR_ALIGN_VALS - 1 + n * sizeof(T) / sizeof(fmr::Bulk_int);
-    this->name_ints[id].bulk.reserve (sz);// uninitialized, size()==0
+    this->name_vals[id].bulk.reserve (sz);// uninitialized, size()==0
     const auto v = & this->name_vals [id];
     v->size    = n;
     v->size_of = sizeof (T);
