@@ -53,8 +53,8 @@ namespace femera { namespace test {
 #endif
 #endif
 
-#define FMR_ALIGN_INTS size_t
-#define FMR_ALIGN_VALS __m256d
+#define FMR_ALIGN_INTS alignof(size_t)
+#define FMR_ALIGN_VALS alignof(__m256d)
 
 #undef FMR_USE_PROC_ROOT
 

@@ -1,20 +1,23 @@
 #ifndef FEMERA_DATA_BULK_IPP
 #define FEMERA_DATA_BULK_IPP
 
+#include <memory>            // std::align
+
 namespace femera { namespace data {
   template <typename T> inline
   T* Bulk::add (const Data_id& id, const size_t n, typename
     std::enable_if <std::is_integral <T>::value>::type*)
   noexcept {
-    this->size    = n;
-    this->size_of = sizeof (T);
     if (n <= 0) {
       this->name_ints[id].bulk ={};// inserts new empty vec or clears existing
-      return reinterpret_cast<T*> (this->name_ints[id].bulk.data());
+      this->name_ints[id].size_of = sizeof (T);
+      return reinterpret_cast<T*>(/*std::align*/ (this->name_ints[id].bulk.data()));
     } else {
-      //TODO over-allocate & find first aligned byte?
-      const auto sz = n * sizeof (T) / sizeof (fmr::Bulk_int);
+      //TODO over-allocate & find first aligned byte
+      const auto sz = FMR_ALIGN_INTS + n * sizeof (T) / sizeof (fmr::Bulk_int);
       this->name_ints[id].bulk.reserve (sz);// uninitialized, size()==0
+      this->name_ints[id].size_of = sizeof (T);
+      this->name_ints[id].size    = n;
       auto ptr = name_ints[id].bulk.data ();
 #if 0
       this->name_ints[id].bulk [0] = fmr::Bulk_int(0);// undefined behavior
@@ -23,24 +26,24 @@ namespace femera { namespace data {
       // ...but accessing the underlying array should be OK.
       ptr[0] = fmr::Bulk_int(0);  // first touch
 #endif
-      return reinterpret_cast<T*> (ptr);
+      return reinterpret_cast<T*> (/*std::align*/ (ptr));
   } }
   template <typename T> inline
   T* Bulk::add (const Data_id& id, const size_t n, typename
     std::enable_if <std::is_floating_point <T>::value>::type*)
   noexcept {
-    this->size    = n;
-    this->size_of = sizeof (T);
     if (n <= 0) {
       this->name_vals[id].bulk ={};// inserts new empty vec or clears existing
-      return reinterpret_cast<T*> (this->name_vals[id].bulk.data());
+      name_vals[id].size_of = sizeof (T);
+      return reinterpret_cast<T*>(/*std::align*/ (this->name_vals[id].bulk.data()));
     }
-    //TODO over-allocate & find first aligned byte?
-    const auto sz = n * sizeof (T) / sizeof (fmr::Bulk_int);
+    const auto sz = FMR_ALIGN_VALS + n * sizeof (T) / sizeof (fmr::Bulk_int);
     this->name_vals[id].bulk.reserve (sz);// uninitialized, size()==0
+    this->name_vals[id].size    = n;
+    this->name_vals[id].size_of = sizeof (T);
     auto ptr = name_vals[id].bulk.data ();
     ptr[0] = fmr::Bulk_int(0);  // first touch
-    return reinterpret_cast<T*> (ptr);
+    return reinterpret_cast<T*> (/*std::align*/ (ptr));
   }
   template <typename T> inline
   T* Bulk::add (const Data_id& id, const size_t n, const T init_val)
@@ -49,9 +52,11 @@ namespace femera { namespace data {
     auto vec = (std::is_floating_point <T>::value)
       ? & name_vals[id].bulk : & name_ints[id].bulk;
     if (n>0) {
-      const auto a = (std::is_floating_point <T>::value)
-        ? sizeof (FMR_ALIGN_VALS) : sizeof (FMR_ALIGN_INTS);
-      size_t sz = n * sizeof (T) / sizeof (fmr::Bulk_int);
+      const uintptr_t a = (std::is_floating_point <T>::value)
+        ? FMR_ALIGN_VALS : FMR_ALIGN_INTS;
+      const auto ptr = uintptr_t (vec->data ());
+      const auto pad = a - (ptr % a);
+      uintptr_t sz = n * sizeof (T) / sizeof (fmr::Bulk_int);
       sz += ((sz % a) == 0 ) ? 0 : a - (sz % a);// Pad end to alignment size.
       if (init_val <= T(0) && init_val >= T(0)) {// ==0, no float warning
         //NOTE              Zero is the same bits for all numeric types.
@@ -64,25 +69,37 @@ namespace femera { namespace data {
         vec->assign (ptr, ptr + sz);
 #else
         // Initialize without making a temporary vector.
+        if (pad>0) {for (size_t i=0; i<pad; i++) {
+          vec->push_back (fmr::Bulk_int(0));
+        } }
         const auto bytes = reinterpret_cast<const fmr::Bulk_int*> (&init_val);
         const auto mod   = fmr::Local_int (sizeof (T) / sizeof (fmr::Bulk_int));
         for (size_t i=0; i<sz; i++ ) { vec->push_back (bytes [i % mod]); }
 #endif
-    } }
+      }
+      return reinterpret_cast<T*> (& vec->data ()[pad]);
+    }
     return reinterpret_cast<T*> (vec->data ());
   }
   template <typename T> inline
-  T* Bulk::get (const Data_id& id, size_t start)
+  T* Bulk::get (const Data_id& id, size_t start, typename
+    std::enable_if <std::is_integral <T>::value>::type*)
   noexcept {
-    if (sizeof (T) == this->size_of) {//TODO Check if signed?
-      return (std::is_floating_point <T>::value
-        ? reinterpret_cast<T*> (& this->name_vals.at(id).bulk.data()
-          [start * sizeof (T) / sizeof (fmr::Bulk_int)])
-        : reinterpret_cast<T*> (& this->name_ints.at(id).bulk.data()
-          [start * sizeof (T) / sizeof (fmr::Bulk_int)]));
-      //TODO catch std::out_of_range
-    }
-    return nullptr;//TODO convert to requested type T
+    //TODO Check size & sign?
+    auto ptr = uintptr_t (this->name_ints.at(id).bulk.data());
+    return & reinterpret_cast<T*>
+    (ptr + FMR_ALIGN_INTS - (ptr % FMR_ALIGN_INTS)) [start];
+    //TODO catch std::out_of_range
+  }
+  template <typename T> inline
+  T* Bulk::get (const Data_id& id, size_t start, typename
+    std::enable_if <std::is_floating_point <T>::value>::type*)
+  noexcept {
+    //TODO Check size & sign?
+    auto ptr = uintptr_t (this->name_vals.at(id).bulk.data());
+    return & reinterpret_cast<T*>
+      (ptr + FMR_ALIGN_VALS - (ptr % FMR_ALIGN_VALS)) [start];
+    //TODO catch std::out_of_range
   }
 } }//end femera::data:: namespace
 
