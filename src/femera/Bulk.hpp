@@ -25,6 +25,8 @@ namespace femera { namespace data {
     Ints_map_t name_ints ={};// size_t alignment
     Vals_map_t name_vals ={};// __m256d, SSE, or AVX512 alignment
   public:
+    static constexpr
+    uintptr_t offset (uintptr_t, uintptr_t);
     template <typename T>
     T* add (const Data_id& id, const size_t n, const T init_val)
     noexcept;

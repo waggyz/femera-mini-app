@@ -2,6 +2,10 @@
 #define FEMERA_DATA_BULK_IPP
 
 namespace femera { namespace data {
+  inline constexpr
+  uintptr_t Bulk::offset (uintptr_t address, uintptr_t align){
+    return ((address % align) == 0 ) ? 0 : (align - (address % align));
+  }
   template <typename T> inline
   T* Bulk::add (const Data_id& id, const size_t n, typename
     std::enable_if <std::is_integral <T>::value>::type*)
@@ -28,7 +32,7 @@ namespace femera { namespace data {
     this->name_ints[id].bulk [0] = fmr::Bulk_int(0);// undefined behavior
     // Accessesing a vector past size() is undefined behavior...
 #else
-    // ...but accessing the underlying array should be OK.
+    // ...but accessing the reserved space in the underlying array should be OK.
     ptr[0] = fmr::Bulk_int(0);  // first touch
 #endif
     return reinterpret_cast<T*> (ptr);
@@ -65,15 +69,16 @@ namespace femera { namespace data {
     this->add<T> (id, n);
     auto vec = (std::is_floating_point <T>::value)
       ? & name_vals[id].bulk : & name_ints[id].bulk;
-    if (n>0) {
+    if (n > 0) {
       const auto ptr = uintptr_t (vec->data ());
       uintptr_t sz = n * sizeof (T) / sizeof (fmr::Bulk_int);
 #ifdef FMR_ALIGN_VALS
       const uintptr_t a = ((std::is_floating_point <T>::value)
         ? FMR_ALIGN_VALS : FMR_ALIGN_INTS) / sizeof (fmr::Bulk_int);
-//      const auto pad = a - (ptr % a);             // max padding is a-1
-      const auto pad = ((ptr % a)==0) ? 0 : a - (ptr % a);// max padding is a-1
-      sz += ((sz % a) == 0 ) ? 0 : (a - (sz % a));// Pad end to alignment size.
+//      const auto pad = ((ptr % a)==0) ? 0 : a - (ptr % a);// max padding is a-1
+//      sz += ((sz % a) == 0 ) ? 0 : (a - (sz % a));// Pad end to alignment size.
+      const auto pad = Bulk::offset (ptr,  a);// max padding is a-1
+      sz += Bulk::offset (sz, a);// Pad end to alignment size.
 #else
       const uintptr_t a=0, pad=0;
 #endif
@@ -88,7 +93,7 @@ namespace femera { namespace data {
         vec->assign (ptr, ptr + sz);
 #else
         // Initialize without making a temporary vector.
-        if (pad>0) {
+        if (pad > 0) {
           for (size_t i=0; i<pad; i++) {vec->push_back (fmr::Bulk_int(0));}
         }
         const auto bytes = reinterpret_cast <const fmr::Bulk_int*> (& init_val);
@@ -107,16 +112,16 @@ namespace femera { namespace data {
     this->add<T> (id, n);
     auto vec = (std::is_floating_point <T>::value)
       ? & name_vals[id].bulk : & name_ints[id].bulk;
-    if (n>0) {
+    if (n > 0) {
       auto ptr = uintptr_t (vec->data ());
 #ifdef FMR_ALIGN_VALS
       const uintptr_t a = ((std::is_floating_point <T>::value)
         ? FMR_ALIGN_VALS : FMR_ALIGN_INTS) / sizeof (fmr::Bulk_int);
-      const auto pad = ((ptr % a)==0) ? 0 : a - (ptr % a);// max padding is a-1
+      const auto pad = Bulk::offset (ptr, a);// max padding is a-1
 #else
       const uintptr_t a=0, pad=0;
 #endif
-      if (pad>0) {
+      if (pad > 0) {
         for (size_t i=0; i<pad; i++) {vec->push_back (fmr::Bulk_int(0));}
       }
       const auto init = reinterpret_cast<const fmr::Bulk_int*> (init_vals);
@@ -139,8 +144,7 @@ namespace femera { namespace data {
       return nullptr;
     }
 #ifdef FMR_ALIGN_INTS
-    ptr += ((ptr % FMR_ALIGN_INTS) == 0)
-      ? uintptr_t (0) : (FMR_ALIGN_INTS - (ptr % FMR_ALIGN_INTS));
+    ptr += Bulk::offset (ptr, FMR_ALIGN_INTS);
 #endif
     return & reinterpret_cast<T*> (ptr) [start];
   }
@@ -155,8 +159,7 @@ namespace femera { namespace data {
       return nullptr;
     }
 #ifdef FMR_ALIGN_VALS
-    ptr += ((ptr % FMR_ALIGN_VALS) == 0 )
-      ? uintptr_t (0) : (FMR_ALIGN_VALS - (ptr % FMR_ALIGN_VALS));
+    ptr += Bulk::offset (ptr, FMR_ALIGN_VALS);
 #endif
     return & reinterpret_cast<T*> (ptr) [start];
   }
