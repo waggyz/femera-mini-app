@@ -24,7 +24,6 @@ namespace femera { namespace data {
   private:
     Ints_map_t name_ints ={};// size_t alignment
     Vals_map_t name_vals ={};// __m256d, SSE, or AVX512 alignment
-    //TODO need 1 of each map/omp thrd?
   public:
     template <typename T>
     T* add (const Data_id& id, const size_t n, const T init_val)
@@ -34,7 +33,8 @@ namespace femera { namespace data {
     T* add (const Data_id& id, const size_t n, const T* init_vals)
     noexcept;
 #endif
-    template <typename I>// get_safe (..) and get_fast (..) ?
+    template <typename I>
+    //TODO get_safe (..) Check sizeof & sign? get_fast (..) ?
     I* get (const Data_id& id, size_t start=0, typename
       std::enable_if <std::is_integral <I>::value>::type* = nullptr)
     noexcept;

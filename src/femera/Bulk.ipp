@@ -132,7 +132,6 @@ namespace femera { namespace data {
   T* Bulk::get (const Data_id& id, size_t start, typename
     std::enable_if <std::is_integral <T>::value>::type*)
   noexcept {
-    //TODO Check sizeof & sign?
     uintptr_t ptr = 0;
     try {ptr = uintptr_t (this->name_ints.at(id).bulk.data());}
     catch (std::out_of_range& e) {
@@ -149,7 +148,6 @@ namespace femera { namespace data {
   T* Bulk::get (const Data_id& id, size_t start, typename
     std::enable_if <std::is_floating_point <T>::value>::type*)
   noexcept {
-    //TODO Check size & sign?
     uintptr_t ptr = 0;
     try {ptr = uintptr_t (this->name_vals.at(id).bulk.data());}
     catch (std::out_of_range& e) {
