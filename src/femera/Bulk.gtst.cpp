@@ -11,6 +11,7 @@ namespace femera { namespace test {
   const auto vals10 = std::string("test-10-floats");
   //
   TEST(Bulk, IntSizes) {
+    EXPECT_EQ( sizeof (fmr::Bulk_int), 1);
     EXPECT_LE( sizeof (fmr::Bulk_int), sizeof (fmr::Dim_int));
     EXPECT_LE( sizeof (fmr::Bulk_int), sizeof (fmr::Enum_int));
     EXPECT_LE( sizeof (fmr::Bulk_int), sizeof (fmr::Local_int));
@@ -27,7 +28,7 @@ namespace femera { namespace test {
     EXPECT_LE( sizeof (long double)  , FMR_ALIGN_VALS);
 #endif
   }
-  TEST(Bulk, CrcHashSizes) {// bulk data end-padded to align size
+  TEST(Bulk, CrcHashSizes) {// bulk data padded to align size
     EXPECT_LE( sizeof (fmr::Hash_int), FMR_ALIGN_INTS);
     EXPECT_LE( sizeof (fmr::Hash_int), FMR_ALIGN_VALS);
   }
@@ -35,13 +36,16 @@ namespace femera { namespace test {
     EXPECT_EQ( bulkv.add      (ints10,10,1)[9], int(1));
     EXPECT_EQ( bulkv.get<int> (ints10)     [9], int(1));
     EXPECT_EQ( bulkv.get<int> (ints10,9)   [0], int(1));
+    EXPECT_EQ( bulkv.get<int> ("not here"), nullptr);
   }
   TEST(Bulk, Vals10) {
     EXPECT_EQ( bulkv.add   (vals10,10,1.0) [9], double(1.0));
     EXPECT_EQ( bulkv.get<double> (vals10)  [9], double(1.0));
     EXPECT_EQ( bulkv.get<double> (vals10,9)[0], double(1.0));
+    EXPECT_EQ( bulkv.add<double>
+      ("another10", 10, bulkv.get<double>(vals10))[9], double(1.0));
   }
-  TEST(Bulk, Alignment) {// bulk data end-padded to align size
+  TEST(Bulk, Alignment) {// bulk data padded to align size
     EXPECT_EQ( uintptr_t (bulkv.get<int>    (ints10)) % FMR_ALIGN_INTS, 0);
     EXPECT_EQ( uintptr_t (bulkv.get<double> (vals10)) % FMR_ALIGN_VALS, 0);
   }

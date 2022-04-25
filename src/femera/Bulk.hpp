@@ -15,7 +15,7 @@ namespace femera { namespace data {
       //                                 bulk and align manually
     public:
       std::vector <fmr::Bulk_int> bulk;
-      std::size_t   size      = 0;// number of values
+      std::size_t   size      = 0;// # of values <= sizeof(T) * bulk.capacity()
       fmr::Hash_int file_hash = 0;// CRC32 or CRC64 of stored data
       uint_fast16_t size_of   = 0;// size of each value in bytes
     };
@@ -29,13 +29,21 @@ namespace femera { namespace data {
     template <typename T>
     T* add (const Data_id& id, const size_t n, const T init_val)
     noexcept;
-    template <typename I>
+#if 1
+    template <typename T>
+    T* add (const Data_id& id, const size_t n, const T* init_vals)
+    noexcept;
+#endif
+    template <typename I>// get_safe (..) and get_fast (..) ?
     I* get (const Data_id& id, size_t start=0, typename
       std::enable_if <std::is_integral <I>::value>::type* = nullptr)
     noexcept;
     template <typename V>
     V* get (const Data_id& id, size_t start=0, typename
       std::enable_if <std::is_floating_point <V>::value>::type* = nullptr)
+    noexcept;
+    template <typename T>
+    void del (const Data_id& id)
     noexcept;
   private:
     template <typename I>
@@ -52,6 +60,11 @@ namespace femera { namespace data {
       std::enable_if <std::is_floating_point <V>::value>::type* = nullptr)
     noexcept;
 #endif
+  public:
+    Bulk () {
+      this->name_ints.reserve (1024);
+      this->name_vals.reserve (1024);
+    }
   };
 } }//end femera::data:: namespace
 

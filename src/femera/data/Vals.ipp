@@ -11,6 +11,9 @@ namespace femera {
     this->info_d    = 3;
   }
   inline
+  void data::Vals::task_init (int*, char**) {
+  }
+  inline
   void data::Vals::task_exit () {
   }
 }//end femera namespace

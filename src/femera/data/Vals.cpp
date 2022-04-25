@@ -6,8 +6,6 @@
 #endif
 
 namespace femera {
-  void data::Vals::task_init (int*, char**) {
-  }
 }//end femera:: namespace
 
 #undef FMR_DEBUG
