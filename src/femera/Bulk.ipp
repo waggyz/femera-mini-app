@@ -51,7 +51,7 @@ namespace femera { namespace data {
 #ifdef FMR_ALIGN_VALS
     // over-allocate & find first aligned byte
     const auto sz = (n * sizeof(T) + 2 * (FMR_ALIGN_VALS - 1))
-      / sizeof(fmr::Bulk_int);
+      / sizeof (fmr::Bulk_int);
 #else
     const auto sz = n * sizeof(T) / sizeof(fmr::Bulk_int);
 #endif
@@ -84,15 +84,16 @@ namespace femera { namespace data {
 #endif
       if (init_val <= T(0) && init_val >= T(0)) {// == 0.0, no float warning
         //NOTE Zero is the same bits for all numeric types (data/Vals.gtst.cpp).
-        vec->resize (sz + a);// Also pad the front.
+        vec->resize (sz + a);// <= capacity (); includes front padding
       } else {
 #if 0
         // Initialize from a temporary vector of type T.
+        // NOTE This will not work with padding.
         const auto tmp = std::vector<T> (n, init_val);
         const auto ptr = reinterpret_cast<const fmr::Bulk_int*> (tmp.data());
         vec->assign (ptr, ptr + sz);
 #else
-        // Initialize without making a temporary vector.
+        // Initialize without making a temporary vector. NOTE 1500x slower.
         if (pad > 0) {
           for (size_t i=0; i<pad; i++) {vec->push_back (fmr::Bulk_int(0));}
         }

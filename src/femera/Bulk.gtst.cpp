@@ -211,7 +211,7 @@ namespace femera { namespace test {
     return 0;
   }
   inline
-  int time_bulk (uint N=10, uint n=1024*1, uint sz=1024*1) {
+  int time_bulk (uint N=10, uint n=1024*1, uint sz=1024*1) {// returns total kB
     if (N<1 || n<1 || sz<1) { return 1; }
     auto time = fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>();
     auto vals = femera::data::Bulk();
@@ -219,9 +219,12 @@ namespace femera { namespace test {
     for (uint v=0; v<N; v++ ) {
       time.add_idle_time_now ();
       for (uint i=0; i<n; i++) {
-        vals.add ("vals_"+std::to_string(i), sz, double (v % 2));
+        vals.add ("vals_"+std::to_string (i), sz, double (v % 2));
       }
       const auto secs = double (time.add_busy_time_now ());
+      for (uint i=0; i<n; i++) {
+        vals.del<double> ("vals_"+std::to_string (i));
+      }
       printf ("%.2e B / %.2e s = %.2e B/s of double (%u)\n",
         bytes, secs, bytes / secs, v % 2);
     }
