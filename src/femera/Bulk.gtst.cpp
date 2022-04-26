@@ -34,24 +34,26 @@ namespace femera { namespace test {
   }
   TEST(Bulk, Ints10) {
     EXPECT_EQ( bulkv.add      (ints10,10,1)[9], int(1));
+    EXPECT_EQ( bulkv.get<int> (ints10)     [0], int(1));
     EXPECT_EQ( bulkv.get<int> (ints10)     [9], int(1));
     EXPECT_EQ( bulkv.get<int> (ints10,9)   [0], int(1));
     EXPECT_EQ( bulkv.get<int> ("not here"), nullptr);
   }
   TEST(Bulk, Vals10) {
     EXPECT_EQ( bulkv.add   (vals10,10,1.0) [9], double(1.0));
+    EXPECT_EQ( bulkv.get<double> (vals10)  [0], double(1.0));
     EXPECT_EQ( bulkv.get<double> (vals10)  [9], double(1.0));
     EXPECT_EQ( bulkv.get<double> (vals10,9)[0], double(1.0));
     EXPECT_EQ( bulkv.add<double>
       ("another10", 10, bulkv.get<double>(vals10))[9], double(1.0));
-    EXPECT_EQ( bulkv.get<double> ("another10")  [0], double(1.0));
+    EXPECT_EQ( bulkv.get<double> ("another10")    [0], double(1.0));
   }
   TEST(Bulk, Alignment) {// bulk data padded to align size
     EXPECT_EQ( uintptr_t (bulkv.get<int>    (ints10)) % FMR_ALIGN_INTS, 0);
     EXPECT_EQ( uintptr_t (bulkv.get<double> (vals10)) % FMR_ALIGN_VALS, 0);
     EXPECT_EQ( uintptr_t (bulkv.get<double> ("another10")) % FMR_ALIGN_VALS, 0);
   }
-#if 0
+#if 1
   inline
   int time_make_new (uint n=1024*1, uint sz=1024*1) {
     if (n<1 || sz<1) { return 1; }
