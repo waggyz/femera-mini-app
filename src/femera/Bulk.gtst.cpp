@@ -44,10 +44,12 @@ namespace femera { namespace test {
     EXPECT_EQ( bulkv.get<double> (vals10,9)[0], double(1.0));
     EXPECT_EQ( bulkv.add<double>
       ("another10", 10, bulkv.get<double>(vals10))[9], double(1.0));
+    EXPECT_EQ( bulkv.get<double> ("another10")  [0], double(1.0));
   }
   TEST(Bulk, Alignment) {// bulk data padded to align size
     EXPECT_EQ( uintptr_t (bulkv.get<int>    (ints10)) % FMR_ALIGN_INTS, 0);
     EXPECT_EQ( uintptr_t (bulkv.get<double> (vals10)) % FMR_ALIGN_VALS, 0);
+    EXPECT_EQ( uintptr_t (bulkv.get<double> ("another10")) % FMR_ALIGN_VALS, 0);
   }
 #if 0
   inline
@@ -208,8 +210,27 @@ namespace femera { namespace test {
     }
     return 0;
   }
+  inline
+  int time_bulk (uint N=10, uint n=1024*1, uint sz=1024*1) {
+    if (N<1 || n<1 || sz<1) { return 1; }
+    auto time = fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>();
+    auto vals = femera::data::Bulk();
+    const double bytes = double (n * sz * sizeof (double));
+    for (uint v=0; v<N; v++ ) {
+      time.add_idle_time_now ();
+      for (uint i=0; i<n; i++) {
+        vals.add ("vals_"+std::to_string(i), sz, double (v % 2));
+      }
+      const auto secs = double (time.add_busy_time_now ());
+      printf ("%.2e B / %.2e s = %.2e B/s of double (%u)\n",
+        bytes, secs, bytes / secs, v % 2);
+    }
+    return int (N * bytes / 1024.0);
+  }
   TEST(NewVals, Time) {
-    EXPECT_EQ( time_make_new (1024*1,1024*16*4), 0);
+    EXPECT_EQ( time_make_new (1024*1, 1024*16*4), 0);
+    EXPECT_EQ( time_bulk (10, 1024*1, 1024*16*4),
+      10 * 1024/1024 * 1024*16*4 * sizeof(double));
   }
 #endif
 } }//end femerea::test:: namespace
