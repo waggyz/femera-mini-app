@@ -94,12 +94,20 @@ namespace femera { namespace data {
         vec->assign (ptr, ptr + sz);
 #else
         // Initialize without making a temporary vector. NOTE 1500x slower.
+        //TODO Try zeroing then loop-filling with T(init_val).
+#   if 0
         if (pad > 0) {
           for (size_t i=0; i<pad; i++) {vec->push_back (fmr::Bulk_int(0));}
         }
         const auto bytes = reinterpret_cast <const fmr::Bulk_int*> (& init_val);
         const auto mod   = fmr::Local_int (sizeof (T) / sizeof (fmr::Bulk_int));
         for (size_t i=0; i<sz; i++ ) { vec->push_back (bytes [i % mod]); }
+#     endif
+//IAMHERE
+        vec->resize (sz + pad);// <= capacity (); includes front padding
+        auto v = reinterpret_cast<T*> (& vec->data ()[pad]);
+        for (size_t i=0; i<n; i++ ) { v[i] = init_val; }    // only 150x slower
+        return v;
 #endif
       }
       return reinterpret_cast<T*> (& vec->data ()[pad]);
