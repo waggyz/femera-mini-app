@@ -15,10 +15,11 @@ namespace femera { namespace data {
       const auto v = & this->name_ints [id];
       v->size      = 0;
       v->size_of   = sizeof (T);
+      v->has_sign  = std::is_signed<T>::value;
       return reinterpret_cast<T*> (v->bulk.data());
     }
 #ifdef FMR_ALIGN_INTS
-    // over-allocate & calculate first aligned byte
+    // over-allocate for aligned access
     const auto sz = (n * sizeof(T) + 2 * (FMR_ALIGN_INTS - 1))
       / sizeof (fmr::Bulk_int);
     //NOTE sz is also large enough for full aligned access at the tail
@@ -29,6 +30,7 @@ namespace femera { namespace data {
     const auto v = & this->name_ints [id];
     v->size      = n;
     v->size_of   = sizeof (T);
+    v->has_sign  = std::is_signed<T>::value;
     auto ptr     = v->bulk.data ();
 #if 0
     this->name_ints[id].bulk [0] = fmr::Bulk_int(0);// undefined behavior
@@ -48,10 +50,11 @@ namespace femera { namespace data {
       const auto v = & this->name_vals [id];
       v->size      = 0;
       v->size_of   = sizeof (T);
+      v->has_sign  = std::is_signed<T>::value;
       return reinterpret_cast<T*> (v->bulk.data());
     }
 #ifdef FMR_ALIGN_VALS
-    // over-allocate & calculate first aligned byte
+    // over-allocate for aligned access
     const auto sz = (n * sizeof(T) + 2 * (FMR_ALIGN_VALS - 1))
       / sizeof (fmr::Bulk_int);
 #else
@@ -59,10 +62,11 @@ namespace femera { namespace data {
 #endif
     this->name_vals[id].bulk.reserve (sz);// uninitialized, size()==0
     const auto v = & this->name_vals [id];
-    v->size    = n;
-    v->size_of = sizeof (T);
-    auto ptr   = v->bulk.data ();
-    ptr [0]    = fmr::Bulk_int(0);  // first touch
+    v->size      = n;
+    v->size_of   = sizeof (T);
+    v->has_sign  = std::is_signed<T>::value;
+    auto ptr     = v->bulk.data ();
+    ptr [0]      = fmr::Bulk_int(0);  // first touch
     return reinterpret_cast<T*> (ptr);
   }
   template <typename T> inline
@@ -75,14 +79,14 @@ namespace femera { namespace data {
       const auto ptr = uintptr_t (vec->data ());
       const uintptr_t sz = n * sizeof (T) / sizeof (fmr::Bulk_int);
 #ifdef FMR_ALIGN_VALS
-      const uintptr_t a = ((std::is_floating_point <T>::value)
+      const uintptr_t a = (std::is_floating_point <T>::value
         ? FMR_ALIGN_VALS : FMR_ALIGN_INTS) / sizeof (fmr::Bulk_int);
       const auto rpad = Bulk::offset (sz,  a);// max padding is a-1
       const auto lpad = Bulk::offset (ptr, a);// max padding is a-1
 #else
       const uintptr_t lpad=0, rpad=0;
 #endif
-      vec->resize (sz + lpad + rpad);// <= capacity (); includes front padding
+      vec->resize (sz + lpad + rpad);// <= capacity (); includes padding
       //NOTE Zero is the same bits for all numeric types (data/Vals.gtst.cpp).
       if (init_val < T(0) || init_val > T(0)) {// != 0.0, no float warning
 #if 0
@@ -149,31 +153,105 @@ namespace femera { namespace data {
   T* Bulk::get (const Data_id& id, size_t start, typename
     std::enable_if <std::is_integral <T>::value>::type*)
   noexcept {
-    uintptr_t ptr = 0;
-    try {ptr = uintptr_t (this->name_ints.at(id).bulk.data());}
+    Bulk_align<FMR_ALIGN_INTS>* ba = nullptr;
+    try {ba =& this->name_ints.at(id);}
     catch (std::out_of_range& e) {
       printf ("%s: integer name not found\n", id.c_str());
       return nullptr;
     }
+    auto ptr = uintptr_t (ba->bulk.data());
 #ifdef FMR_ALIGN_INTS
     ptr += Bulk::offset (ptr, FMR_ALIGN_INTS);
 #endif
-    return & reinterpret_cast<T*> (ptr) [start];
+    if (ba->size_of == sizeof(T) && ba->has_sign == std::is_signed<T>::value) {
+      return & reinterpret_cast<T*> (ptr) [start];
+    }
+#ifdef FMR_DEBUG
+    printf ("converting %s from %sint%lu_t to %sint%lu_t...\n", id.c_str(),
+      ba->has_sign ? "":"u", ba->size_of,
+      std::is_signed<T>::value ? "":"u", sizeof(T) );
+#endif
+    // convert stored to requested type
+    const auto n    = ba->size;
+    const auto bits = ba->size_of * 8;
+    const auto sign = ba->has_sign;
+    const auto src  = std::move (ba->bulk);// stash vector here; ptr still valid
+    auto dest = this->add<T> (id, n, T(0));                 // zero-initialized
+    if (sign) {                                             // signed ints
+      switch (bits) {
+        case  8: {
+          const auto v = reinterpret_cast<int8_t*> (ptr);
+          for (std::size_t i=0; i<n; i++) {dest [i] = T(v[i]);}
+        break;}
+        case 16: {
+          const auto v = reinterpret_cast<int16_t*> (ptr);
+          for (std::size_t i=0; i<n; i++) {dest [i] = T(v[i]);}
+        break;}
+        case 32: {
+          const auto v = reinterpret_cast<int32_t*> (ptr);
+          for (std::size_t i=0; i<n; i++) {dest [i] = T(v[i]);}
+        break;}
+        case 64: {
+          const auto v = reinterpret_cast<int64_t*> (ptr);
+          for (std::size_t i=0; i<n; i++) {dest [i] = T(v[i]);}
+        break;}
+      }
+    } else {                                                // unsigned ints
+      switch (bits) {
+        case  8: {
+          const auto v = reinterpret_cast<uint8_t*> (ptr);
+          for (std::size_t i=0; i<n; i++) {dest [i] = T(v[i]);}
+        break;}
+        case 16: {
+          const auto v = reinterpret_cast<uint16_t*> (ptr);
+          for (std::size_t i=0; i<n; i++) {dest [i] = T(v[i]);}
+        break;}
+        case 32: {
+          const auto v = reinterpret_cast<uint32_t*> (ptr);
+          for (std::size_t i=0; i<n; i++) {dest [i] = T(v[i]);}
+        break;}
+        case 64: {
+          const auto v = reinterpret_cast<uint64_t*> (ptr);
+          for (std::size_t i=0; i<n; i++) {dest [i] = T(v[i]);}
+        break;}
+      }
+    }
+    return & reinterpret_cast<T*> (dest) [start];
   }
   template <typename T> inline
   T* Bulk::get (const Data_id& id, size_t start, typename
     std::enable_if <std::is_floating_point <T>::value>::type*)
   noexcept {
-    uintptr_t ptr = 0;
-    try {ptr = uintptr_t (this->name_vals.at(id).bulk.data());}
+    Bulk_align<FMR_ALIGN_VALS>* ba = nullptr;
+    try {ba =& this->name_vals.at(id);}
     catch (std::out_of_range& e) {
       printf ("%s: floating point name not found\n", id.c_str());
       return nullptr;
     }
+    auto ptr = uintptr_t (ba->bulk.data());
 #ifdef FMR_ALIGN_VALS
     ptr += Bulk::offset (ptr, FMR_ALIGN_VALS);
 #endif
-    return & reinterpret_cast<T*> (ptr) [start];
+    if (ba->size_of == sizeof(T)) {
+      return & reinterpret_cast<T*> (ptr) [start];
+    }
+    // convert stored to requested type
+    const auto n    = ba->size;
+    const auto bits = ba->size_of * 8;
+    const auto src  = std::move (ba->bulk);// stash vector here; ptr still valid
+    auto dest = this->add<T> (id, n, T(0.0));               // zero-initialized
+    switch (bits) {
+      case 32: {                                            // float
+        const auto v = reinterpret_cast<float*> (ptr);
+        for (std::size_t i=0; i<n; i++) {dest [i] = T(v[i]);}
+      break;}
+      case 64: {                                            // double
+        const auto v = reinterpret_cast<double*> (ptr);
+        for (std::size_t i=0; i<n; i++) {dest [i] = T(v[i]);}
+      break;}
+      //TODO add SSE, AVX, AVX512 cases
+    }
+    return & reinterpret_cast<T*> (dest) [start];
   }
   template <typename T> inline
   void Bulk::del (const Data_id& id)

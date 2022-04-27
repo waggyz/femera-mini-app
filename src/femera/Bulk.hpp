@@ -18,6 +18,7 @@ namespace femera { namespace data {
       std::size_t   size      = 0;// # of values <= sizeof(T) * bulk.capacity()
       fmr::Hash_int file_hash = 0;// CRC32 or CRC64 of stored data
       uint_fast16_t size_of   = 0;// size of each value in bytes
+      bool has_sign           = false;
     };
     using Ints_map_t = std::unordered_map <Data_id, Bulk_align<FMR_ALIGN_INTS>>;
     using Vals_map_t = std::unordered_map <Data_id, Bulk_align<FMR_ALIGN_VALS>>;

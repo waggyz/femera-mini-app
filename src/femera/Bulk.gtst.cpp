@@ -53,7 +53,11 @@ namespace femera { namespace test {
     EXPECT_EQ( uintptr_t (bulkv.get<double> (vals10)) % FMR_ALIGN_VALS, 0);
     EXPECT_EQ( uintptr_t (bulkv.get<double> ("another10")) % FMR_ALIGN_VALS, 0);
   }
-#if 1
+  TEST(Bulk, AutoConvert) {
+    EXPECT_EQ(       bulkv.get<uint> (ints10) [0], uint(1));
+    EXPECT_FLOAT_EQ( bulkv.get<float> (vals10) [0], float(1.0));
+  }
+#if 0
   inline
   int time_make_new (uint n=1024*1, uint sz=1024*1) {
     if (n<1 || sz<1) { return 1; }
