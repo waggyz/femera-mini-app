@@ -2,6 +2,11 @@
 #define FEMERA_DATA_BULK_IPP
 
 namespace femera { namespace data {
+  inline
+  Bulk::Bulk () {
+    this->name_ints.reserve (1024);
+    this->name_vals.reserve (1024);
+  }
   inline constexpr
   fmr::Align_int Bulk::offset (std::uintptr_t address, fmr::Align_int align){
     return ((address % align) == 0 ) ? 0 : (align - (address % align));
@@ -25,7 +30,7 @@ namespace femera { namespace data {
       / sizeof (fmr::Bulk_int);
     //NOTE sz is also large enough for full aligned access at the tail
 #else
-    const auto sz = n * sizeof(T) / sizeof(fmr::Bulk_int);
+    const auto sz = (n * sizeof(T)) / sizeof(fmr::Bulk_int);
 #endif
     this->name_ints[id].bulk.reserve (sz);// uninitialized, bulk.size()==0
     const auto v = & this->name_ints [id];
@@ -59,7 +64,7 @@ namespace femera { namespace data {
     const auto sz = (n * sizeof(T) + 2 * (FMR_ALIGN_VALS - 1))
       / sizeof (fmr::Bulk_int);
 #else
-    const auto sz = n * sizeof(T) / sizeof(fmr::Bulk_int);
+    const auto sz = (n * sizeof(T)) / sizeof(fmr::Bulk_int);
 #endif
     this->name_vals[id].bulk.reserve (sz);// uninitialized, size()==0
     const auto v = & this->name_vals [id];
@@ -124,7 +129,7 @@ namespace femera { namespace data {
       ? & name_vals[id].bulk : & name_ints[id].bulk;
     if (n > 0) {
       const auto ptr = std::uintptr_t (vec->data ());
-      const std::uintptr_t sz = n * sizeof (T) / sizeof (fmr::Bulk_int);
+      const std::uintptr_t sz = (n * sizeof (T)) / sizeof (fmr::Bulk_int);
 #ifdef FMR_ALIGN_VALS
       const fmr::Align_int a = (std::is_floating_point <T>::value
         ? FMR_ALIGN_VALS : FMR_ALIGN_INTS) / sizeof (fmr::Bulk_int);
@@ -178,38 +183,38 @@ namespace femera { namespace data {
       switch (bits) {
         case  8: {
           const auto v = reinterpret_cast<int8_t*> (ptr);
-          for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
+          for (std::size_t i=0; i<n; i++) {dest [i] = T(v [i]);}
         break;}
         case 16: {
           const auto v = reinterpret_cast<int16_t*> (ptr);
-          for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
+          for (std::size_t i=0; i<n; i++) {dest [i] = T(v [i]);}
         break;}
         case 32: {
           const auto v = reinterpret_cast<int32_t*> (ptr);
-          for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
+          for (std::size_t i=0; i<n; i++) {dest [i] = T(v [i]);}
         break;}
         case 64: {
           const auto v = reinterpret_cast<int64_t*> (ptr);
-          for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
+          for (std::size_t i=0; i<n; i++) {dest [i] = T(v [i]);}
         break;}
       }
     } else {                                                // unsigned ints
       switch (bits) {
         case  8: {
           const auto v = reinterpret_cast<uint8_t*> (ptr);
-          for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
+          for (std::size_t i=0; i<n; i++) {dest [i] = T(v [i]);}
         break;}
         case 16: {
           const auto v = reinterpret_cast<uint16_t*> (ptr);
-          for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
+          for (std::size_t i=0; i<n; i++) {dest [i] = T(v [i]);}
         break;}
         case 32: {
           const auto v = reinterpret_cast<uint32_t*> (ptr);
-          for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
+          for (std::size_t i=0; i<n; i++) {dest [i] = T(v [i]);}
         break;}
         case 64: {
           const auto v = reinterpret_cast<uint64_t*> (ptr);
-          for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
+          for (std::size_t i=0; i<n; i++) {dest [i] = T(v [i]);}
         break;}
       }
     }
@@ -244,11 +249,11 @@ namespace femera { namespace data {
     switch (bits) {
       case 32: {                                        // cast from float to T
         const auto v = reinterpret_cast<float*> (ptr);
-        for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
+        for (std::size_t i=0; i<n; i++) {dest [i] = T(v [i]);}
       break;}
       case 64: {                                        // cast from double to T
         const auto v = reinterpret_cast<double*> (ptr);
-        for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
+        for (std::size_t i=0; i<n; i++) {dest [i] = T(v [i]);}
       break;}
     }
     return & reinterpret_cast<T*> (dest) [start];
@@ -258,11 +263,6 @@ namespace femera { namespace data {
   noexcept {
     this->name_vals.erase (id);
   }
-  inline
-  Bulk::Bulk () {
-      this->name_ints.reserve (1024);
-      this->name_vals.reserve (1024);
-    }
 } }//end femera::data:: namespace
 
 //end FEMERA_DATA_BULK_IPP
