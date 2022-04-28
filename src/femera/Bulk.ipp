@@ -3,7 +3,7 @@
 
 namespace femera { namespace data {
   inline constexpr
-  uintptr_t Bulk::offset (uintptr_t address, uintptr_t align){
+  fmr::Align_int Bulk::offset (uintptr_t address, fmr::Align_int align){
     return ((address % align) == 0 ) ? 0 : (align - (address % align));
   }
   template <typename T> inline
@@ -79,12 +79,12 @@ namespace femera { namespace data {
       const auto ptr = uintptr_t (vec->data ());
       const uintptr_t sz = n * sizeof (T) / sizeof (fmr::Bulk_int);
 #ifdef FMR_ALIGN_VALS
-      const uintptr_t a = (std::is_floating_point <T>::value
+      const fmr::Align_int a = (std::is_floating_point <T>::value
         ? FMR_ALIGN_VALS : FMR_ALIGN_INTS) / sizeof (fmr::Bulk_int);
       const auto rpad = Bulk::offset (sz,  a);// max padding is a-1
       const auto lpad = Bulk::offset (ptr, a);// max padding is a-1
 #else
-      const uintptr_t lpad=0, rpad=0;
+      const fmr::Align_int lpad=0, rpad=0;
 #endif
       vec->resize (sz + lpad + rpad);// <= capacity (); includes padding
       //NOTE Zero is the same bits for all numeric types (data/Vals.gtst.cpp).
@@ -125,12 +125,12 @@ namespace femera { namespace data {
       const auto ptr = uintptr_t (vec->data ());
       const uintptr_t sz = n * sizeof (T) / sizeof (fmr::Bulk_int);
 #ifdef FMR_ALIGN_VALS
-      const uintptr_t a = (std::is_floating_point <T>::value
+      const fmr::Align_int a = (std::is_floating_point <T>::value
         ? FMR_ALIGN_VALS : FMR_ALIGN_INTS) / sizeof (fmr::Bulk_int);
       const auto lpad = Bulk::offset (ptr, a);// max padding is a-1
       const auto rpad = Bulk::offset (sz,  a);// max padding is a-1
 #else
-      const uintptr_t a=0, lpad=0;
+      const fmr::Align_int a=0, lpad=0;
 #endif
 #if 0
       if (lpad > 0) {
@@ -153,7 +153,7 @@ namespace femera { namespace data {
   T* Bulk::get (const Data_id& id, size_t start, typename
     std::enable_if <std::is_integral <T>::value>::type*)
   noexcept {
-    Bulk_align<FMR_ALIGN_INTS>* ba = nullptr;
+    Bulk_vals<FMR_ALIGN_INTS>* ba = nullptr;
     try {ba =& this->name_ints.at(id);}
     catch (std::out_of_range& e) {
       printf ("%s: integer name not found\n", id.c_str());
@@ -176,7 +176,7 @@ namespace femera { namespace data {
     const auto bits = ba->size_of * 8;
     const auto sign = ba->has_sign;
     const auto src  = std::move (ba->bulk);// stash vector here; ptr still valid
-    auto dest = this->add<T> (id, n, T(0));                 // zero-initialized
+    auto dest = this->add<T> (id, n, T(0));                 // zero-initialize
     if (sign) {                                             // signed ints
       switch (bits) {
         case  8: {
@@ -222,7 +222,7 @@ namespace femera { namespace data {
   T* Bulk::get (const Data_id& id, size_t start, typename
     std::enable_if <std::is_floating_point <T>::value>::type*)
   noexcept {
-    Bulk_align<FMR_ALIGN_VALS>* ba = nullptr;
+    Bulk_vals<FMR_ALIGN_VALS>* ba = nullptr;
     try {ba =& this->name_vals.at(id);}
     catch (std::out_of_range& e) {
       printf ("%s: floating point name not found\n", id.c_str());
@@ -235,21 +235,20 @@ namespace femera { namespace data {
     if (ba->size_of == sizeof(T)) {
       return & reinterpret_cast<T*> (ptr) [start];
     }
-    // convert stored to requested type
+    // convert vals in memory to requested type T
     const auto n    = ba->size;
     const auto bits = ba->size_of * 8;
     const auto src  = std::move (ba->bulk);// stash vector here; ptr still valid
-    auto dest = this->add<T> (id, n, T(0.0));               // zero-initialized
+    auto dest = this->add<T> (id, n, T(0.0));           // zero-initialize
     switch (bits) {
-      case 32: {                                            // float
+      case 32: {                                        // cast from float to T
         const auto v = reinterpret_cast<float*> (ptr);
         for (std::size_t i=0; i<n; i++) {dest [i] = T(v[i]);}
       break;}
-      case 64: {                                            // double
+      case 64: {                                        // cast from double to T
         const auto v = reinterpret_cast<double*> (ptr);
         for (std::size_t i=0; i<n; i++) {dest [i] = T(v[i]);}
       break;}
-      //TODO add SSE, AVX, AVX512 cases
     }
     return & reinterpret_cast<T*> (dest) [start];
   }
@@ -258,6 +257,11 @@ namespace femera { namespace data {
   noexcept {
     this->name_vals.erase (id);
   }
+  inline
+  Bulk::Bulk () {
+      this->name_ints.reserve (1024);
+      this->name_vals.reserve (1024);
+    }
 } }//end femera::data:: namespace
 
 //end FEMERA_DATA_BULK_IPP

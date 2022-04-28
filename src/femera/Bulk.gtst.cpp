@@ -33,13 +33,14 @@ namespace femera { namespace test {
     EXPECT_LE( sizeof (fmr::Hash_int), FMR_ALIGN_VALS);
   }
   TEST(Bulk, Ints10) {
+    EXPECT_EQ( bulkv.get<int> ("ints not found"), nullptr);
     EXPECT_EQ( bulkv.add      (ints10,10,1)[9], int(1));
     EXPECT_EQ( bulkv.get<int> (ints10)     [0], int(1));
     EXPECT_EQ( bulkv.get<int> (ints10)     [9], int(1));
     EXPECT_EQ( bulkv.get<int> (ints10,9)   [0], int(1));
-    EXPECT_EQ( bulkv.get<int> ("not here"), nullptr);
   }
   TEST(Bulk, Vals10) {
+    EXPECT_EQ( bulkv.get<double> ("doubles not found"), nullptr);
     EXPECT_EQ( bulkv.add   (vals10,10,1.0) [9], double(1.0));
     EXPECT_EQ( bulkv.get<double> (vals10)  [0], double(1.0));
     EXPECT_EQ( bulkv.get<double> (vals10)  [9], double(1.0));
@@ -48,13 +49,13 @@ namespace femera { namespace test {
       ("another10", 10, bulkv.get<double>(vals10))[9], double(1.0));
     EXPECT_EQ( bulkv.get<double> ("another10")    [0], double(1.0));
   }
-  TEST(Bulk, Alignment) {// bulk data padded to align size
+  TEST(Bulk, Alignment) {
     EXPECT_EQ( uintptr_t (bulkv.get<int>    (ints10)) % FMR_ALIGN_INTS, 0);
     EXPECT_EQ( uintptr_t (bulkv.get<double> (vals10)) % FMR_ALIGN_VALS, 0);
     EXPECT_EQ( uintptr_t (bulkv.get<double> ("another10")) % FMR_ALIGN_VALS, 0);
   }
   TEST(Bulk, AutoConvert) {
-    EXPECT_EQ(       bulkv.get<uint> (ints10) [0], uint(1));
+    EXPECT_EQ(       bulkv.get<uint>  (ints10) [0], uint(1));
     EXPECT_FLOAT_EQ( bulkv.get<float> (vals10) [0], float(1.0));
   }
 #if 0
@@ -227,12 +228,16 @@ namespace femera { namespace test {
       for (uint i=0; i<n; i++) {
         vals.add ("vals_"+std::to_string (i), sz, double (v % 2));
       }
-      const auto secs = double (time.add_busy_time_now ());
+      const auto add_s = double (time.add_busy_time_now ());
       for (uint i=0; i<n; i++) {
-        vals.del<double> ("vals_"+std::to_string (i));
+        vals.get<float> ("vals_"+std::to_string (i));// convert to float
       }
-      printf ("%.2e B / %.2e s = %.2e B/s of double (%u)\n",
-        bytes, secs, bytes / secs, v % 2);
+      const auto cast_s = double (time.add_busy_time_now ());
+      for (uint i=0; i<n; i++) {
+        vals.del<float> ("vals_"+std::to_string (i));
+      }
+      printf ("%.2e B / %.2e s = %.2e B/s of double (%u), %.2e s to float\n",
+        bytes, add_s, bytes / add_s, v % 2, cast_s);
     }
     return int (N * bytes / 1024.0);
   }
