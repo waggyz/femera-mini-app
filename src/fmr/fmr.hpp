@@ -25,7 +25,7 @@ namespace fmr {
   using Perf_int   = uint_fast64_t ;// unit counters, time (ns) counters
   using Perf_float = float         ;// speed, aithmetic intensity, time (sec)
   //
-  using Hash_int    = uint_fast32_t ;//TODO chck CRC32, CRC64 perf (cpu,gpu)
+  using Hash_int   = uint_fast32_t ;//TODO chck CRC32, CRC64 perf (cpu,gpu)
 #if 0
   //
   // fmr:: floating point types are internal defaults?//TODO dynamic float types
