@@ -10,6 +10,12 @@ namespace femera { namespace test {
   const auto ints10 = std::string("test-10-ints");
   const auto vals10 = std::string("test-10-floats");
   //
+#if 0
+  auto bulk_vals = femera::data::Bulk_vals<FMR_ALIGN_INTS> ();
+  TEST(Bulk, IntSizes) {
+    EXPECT_NE( bulk_vals.bulk = {1,2,3,4}, nullptr);
+  }
+#endif
   TEST(Bulk, IntSizes) {
     EXPECT_EQ( sizeof (fmr::Bulk_int), 1);
     EXPECT_LE( sizeof (fmr::Bulk_int), sizeof (fmr::Dim_int));
@@ -34,18 +40,19 @@ namespace femera { namespace test {
   }
   TEST(Bulk, Ints10) {
     EXPECT_EQ( bulkv.get<int> ("ints not found"), nullptr);
-    EXPECT_EQ( bulkv.add      (ints10,10,1)[9], int(1));
+    EXPECT_EQ( bulkv.set      (ints10,10,1)[9], int(1));
     EXPECT_EQ( bulkv.get<int> (ints10)     [0], int(1));
     EXPECT_EQ( bulkv.get<int> (ints10)     [9], int(1));
     EXPECT_EQ( bulkv.get<int> (ints10,9)   [0], int(1));
   }
   TEST(Bulk, Vals10) {
     EXPECT_EQ( bulkv.get<double> ("doubles not found"), nullptr);
-    EXPECT_EQ( bulkv.add   (vals10,10,1.0) [9], double(1.0));
+    EXPECT_EQ( bulkv.set<double> ("10 zeros",10) [9], double(0.0));
+    EXPECT_EQ( bulkv.set   (vals10,10,1.0) [9], double(1.0));
     EXPECT_EQ( bulkv.get<double> (vals10)  [0], double(1.0));
     EXPECT_EQ( bulkv.get<double> (vals10)  [9], double(1.0));
     EXPECT_EQ( bulkv.get<double> (vals10,9)[0], double(1.0));
-    EXPECT_EQ( bulkv.add<double>
+    EXPECT_EQ( bulkv.set<double>
       ("another10", 10, bulkv.get<double>(vals10))[9], double(1.0));
     EXPECT_EQ( bulkv.get<double> ("another10")    [0], double(1.0));
   }
@@ -226,7 +233,7 @@ namespace femera { namespace test {
     for (uint v=0; v<N; v++ ) {
       time.add_idle_time_now ();
       for (uint i=0; i<n; i++) {
-        vals.add ("vals_"+std::to_string (i), sz, double (v % 2));
+        vals.set ("vals_"+std::to_string (i), sz, double (v % 2));
       }
       const auto add_s = double (time.add_busy_time_now ());
       for (uint i=0; i<n; i++) {

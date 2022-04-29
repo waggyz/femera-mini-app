@@ -8,12 +8,13 @@ namespace femera { namespace data {
     this->name_vals.reserve (1024);
   }
   inline constexpr
-  fmr::Align_int Bulk::offset (std::uintptr_t address, fmr::Align_int align){
+  fmr::Align_int Bulk::offset
+  (const std::uintptr_t address, const fmr::Align_int align) {
     return ((address % align) == 0 ) ? 0 : (align - (address % align));
     // return range: [0, align-1]
   }
   template <typename T> inline
-  T* Bulk::add (const Data_id& id, const std::size_t n, typename
+  T* Bulk::raw (const Data_id& id, const std::size_t n, typename
     std::enable_if <std::is_integral <T>::value>::type*)
   noexcept {
     if (n <= 0) {
@@ -48,7 +49,7 @@ namespace femera { namespace data {
     return reinterpret_cast<T*> (ptr);
   }
   template <typename T> inline
-  T* Bulk::add (const Data_id& id, const std::size_t n, typename
+  T* Bulk::raw (const Data_id& id, const std::size_t n, typename
     std::enable_if <std::is_floating_point <T>::value>::type*)
   noexcept {
     if (n <= 0) {
@@ -76,9 +77,9 @@ namespace femera { namespace data {
     return reinterpret_cast<T*> (ptr);
   }
   template <typename T> inline
-  T* Bulk::add (const Data_id& id, const std::size_t n, const T init_val)
+  T* Bulk::set (const Data_id& id, const std::size_t n, const T init_val)
   noexcept {
-    this->add<T> (id, n);
+    this->raw<T> (id, n);
     auto vec = (std::is_floating_point <T>::value)
       ? & name_vals[id].bulk : & name_ints[id].bulk;
     if (n > 0) {
@@ -122,9 +123,9 @@ namespace femera { namespace data {
   }
 #if 1
   template <typename T>
-  T* Bulk::add (const Data_id& id, const std::size_t n, const T* init_vals)
+  T* Bulk::set (const Data_id& id, const std::size_t n, const T* init_vals)
   noexcept {
-    this->add<T> (id, n);
+    this->raw<T> (id, n);
     auto vec = (std::is_floating_point <T>::value)
       ? & name_vals[id].bulk : & name_ints[id].bulk;
     if (n > 0) {
@@ -178,7 +179,7 @@ namespace femera { namespace data {
     const auto bits = vals->size_of * 8;
     const auto sign = vals->has_sign;
     const auto src  = std::move (vals->bulk);// stash vector; ptr still valid
-    auto dest = this->add<T> (id, n, T(0));                 // zero-initialize
+    auto dest = this->set<T> (id, n, T(0));                 // zero-initialize
     if (sign) {                                             // signed ints
       switch (bits) {
         case  8: {
@@ -245,7 +246,7 @@ namespace femera { namespace data {
     const auto n    = vals->size;
     const auto bits = vals->size_of * 8;
     const auto src  = std::move (vals->bulk);// stash vector; ptr still valid
-    auto dest = this->add<T> (id, n, T(0.0));           // zero-initialize
+    auto dest = this->set<T> (id, n, T(0.0));           // zero-initialize
     switch (bits) {
       case 32: {                                        // cast from float to T
         const auto v = reinterpret_cast<float*> (ptr);
