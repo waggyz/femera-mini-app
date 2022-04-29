@@ -226,12 +226,17 @@ namespace femera { namespace test {
     auto time = fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>();
     auto vals = femera::data::Bulk();
     const double bytes = double (n * sz * sizeof (double));
+    double timez=0.0, timenz=0.0;
     for (uint v=0; v<N; v++ ) {
       time.add_idle_time_now ();
       for (uint i=0; i<n; i++) {
         vals.set ("vals_"+std::to_string (i), sz, double (v % 2));
       }
       const auto add_s = double (time.add_busy_time_now ());
+      if (v>0 && v<(N-1)) {
+        if ((v % 2)==0) {timez  += add_s;}
+        else            {timenz += add_s;}
+      }
       for (uint i=0; i<n; i++) {
         vals.get<float> ("vals_"+std::to_string (i));// convert to float
       }
@@ -242,6 +247,8 @@ namespace femera { namespace test {
       printf ("%.2e B / %.2e s = %.2e B/s of double (%u), %.2e s to float\n",
         bytes, add_s, bytes / add_s, v % 2, cast_s);
     }
+    printf ("nonzero init %.1f%% slower than zero init\n",
+      100.0 * (timenz / timez - 1.0));
     return int (N * bytes / 1024.0);
   }
   TEST(NewVals, Time) {

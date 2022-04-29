@@ -93,9 +93,10 @@ namespace femera { namespace data {
 #else
       const fmr::Align_int lpad=0, rpad=0;
 #endif
-      vec->resize (sz + lpad + rpad);// <= capacity (); ptr still valid
       //NOTE Zero is the same bits for all numeric types (data/Vals.gtst.cpp).
-      if (init_val < T(0) || init_val > T(0)) {// != 0.0, no float warning
+      if (init_val <= T(0) && init_val >= T(0)) {// == 0.0, no float warning
+        vec->resize (sz + lpad + rpad);// <= capacity (); ptr still valid
+      } else {
 #if 0
         // Initialize from a temporary vector of type T.
         // NOTE This will not work with padding.
@@ -103,7 +104,7 @@ namespace femera { namespace data {
         const auto ptr = reinterpret_cast<const fmr::Bulk_int*> (tmp.data());
         vec->assign (ptr, ptr + sz);
 #else
-        // Initialize without making a tmp vector. NOTE 10x slower than below.
+        // Initialize without making a tmp vector. NOTE 10x slower than 0init.
 #if 0
         if (lpad > 0) {
           for (size_t i=0; i<lpad; i++) {vec->push_back (fmr::Bulk_int(0));}
@@ -113,7 +114,8 @@ namespace femera { namespace data {
         for (size_t i=0; i<sz; i++ ) { vec->push_back (bytes [i % mod]); }
 #endif
         auto v = reinterpret_cast<T*> (& vec->data ()[lpad]);
-        for (size_t i=0; i<n; i++ ) {v [i] = init_val;}// 10% slower than 0init
+        vec->resize (sz + lpad + rpad);// <= capacity (); ptr still valid
+        for (size_t i=0; i<n; i++ ) {v [i] = init_val;}// 35% slower than 0init
         return v;
 #endif
       }
@@ -137,13 +139,15 @@ namespace femera { namespace data {
       const auto lpad = Bulk::offset (ptr, a);// max padding is a-1
       const auto rpad = Bulk::offset (sz,  a);// max padding is a-1
 #else
-      const fmr::Align_int a=0, lpad=0;
+      const fmr::Align_int a=0, lpad=0, rpad=0;
 #endif
       auto v = reinterpret_cast<T*> (& vec->data ()[lpad]);
       if (lpad == 0) {// vec->assign(..) works if already aligned when allocated
         const auto from = reinterpret_cast<const fmr::Bulk_int*> (init_vals);
         vec->assign (from, from + sz);
-        for (std::size_t i=0; i<rpad; i++) {vec->push_back (fmr::Bulk_int(0));}
+        if (rpad>0) {
+          for (std::size_t i=0; i<rpad; i++) {vec->push_back (fmr::Bulk_int(0));
+        } }
       } else {        // zero-initialize then copy elements
         vec->resize (sz + lpad + rpad);// <= capacity (); v, ptr still valid
         for (std::size_t i=0; i<n; i++ ) {v [i] = init_vals [i];}
@@ -175,12 +179,12 @@ namespace femera { namespace data {
       && vals->has_sign == std::is_signed<T>::value) {
       return & reinterpret_cast<T*> (ptr) [start];
     }
+    // convert stored to requested type
 #ifdef FMR_DEBUG
     printf ("converting %s from %sint%lu_t to %sint%lu_t...\n", id.c_str(),
       vals->has_sign ? "":"u", vals->size_of,
       std::is_signed<T>::value ? "":"u", sizeof(T) );
 #endif
-    // convert stored to requested type
     const auto n    = vals->size;
     const auto bits = vals->size_of * 8;
     const auto sign = vals->has_sign;
