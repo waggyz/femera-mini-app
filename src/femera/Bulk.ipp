@@ -93,7 +93,7 @@ namespace femera { namespace data {
 #else
       const fmr::Align_int lpad=0, rpad=0;
 #endif
-      vec->resize (sz + lpad + rpad);// <= capacity (); includes padding
+      vec->resize (sz + lpad + rpad);// <= capacity (); ptr still valid
       //NOTE Zero is the same bits for all numeric types (data/Vals.gtst.cpp).
       if (init_val < T(0) || init_val > T(0)) {// != 0.0, no float warning
 #if 0
@@ -139,9 +139,15 @@ namespace femera { namespace data {
 #else
       const fmr::Align_int a=0, lpad=0;
 #endif
-      vec->resize (sz + lpad + rpad);// <= capacity (); includes front padding
       auto v = reinterpret_cast<T*> (& vec->data ()[lpad]);
-      for (std::size_t i=0; i<n; i++ ) {v [i] = init_vals [i];}
+      if (lpad == 0) {// vec->assign(..) works if already aligned when allocated
+        const auto from = reinterpret_cast<const fmr::Bulk_int*> (init_vals);
+        vec->assign (from, from + sz);
+        for (std::size_t i=0; i<rpad; i++) {vec->push_back (fmr::Bulk_int(0));}
+      } else {        // zero-initialize then copy elements
+        vec->resize (sz + lpad + rpad);// <= capacity (); v, ptr still valid
+        for (std::size_t i=0; i<n; i++ ) {v [i] = init_vals [i];}
+      }
       return v;
     }
     return reinterpret_cast<T*> (vec->data ());

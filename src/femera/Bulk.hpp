@@ -32,11 +32,9 @@ namespace femera { namespace data {
     template <typename T>
     T* set (const Data_id& id, const size_t n, const T init_val=T(0))
     noexcept;
-#if 1
     template <typename T>
     T* set (const Data_id& id, const size_t n, const T* init_vals)
     noexcept;
-#endif
     template <typename I>
     I* get (const Data_id& id, size_t start=0, typename
       std::enable_if <std::is_integral <I>::value>::type* = nullptr)
