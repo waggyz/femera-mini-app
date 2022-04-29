@@ -10,12 +10,6 @@ namespace femera { namespace test {
   const auto ints10 = std::string("test-10-ints");
   const auto vals10 = std::string("test-10-floats");
   //
-#if 0
-  auto bulk_vals = femera::data::Bulk_vals<FMR_ALIGN_INTS> ();
-  TEST(Bulk, IntSizes) {
-    EXPECT_NE( bulk_vals.bulk = {1,2,3,4}, nullptr);
-  }
-#endif
   TEST(Bulk, IntSizes) {
     EXPECT_EQ( sizeof (fmr::Bulk_int), 1);
     EXPECT_LE( sizeof (fmr::Bulk_int), sizeof (fmr::Dim_int));
