@@ -21,19 +21,14 @@ namespace femera { namespace data {
     template <typename T> inline
     T* set (const std::size_t n, const T init_val)
     noexcept;
-//TODO  private:
-    template <typename I>
-    I* raw (const size_t n=0, typename
-      std::enable_if <std::is_integral <I>::value>::type* = nullptr)
-    noexcept;
-    template <typename V>
-    V* raw (const size_t n=0, typename
-      std::enable_if <std::is_floating_point <V>::value>::type* = nullptr)
-    noexcept;
     static constexpr
     fmr::Align_int offset (uintptr_t);
     template <typename T>
     T* set (const std::size_t n, const T* init_vals)
+    noexcept;
+  private:
+    template <typename I>
+    I* raw (const size_t n=0)
     noexcept;
 #if 0
     template <typename T> inline
@@ -80,14 +75,6 @@ namespace femera { namespace data {
     void del (const Data_id& id)
     noexcept;
   private:
-    template <typename I>
-    I* raw (const Data_id& id, const size_t n=0, typename//TODO remove
-      std::enable_if <std::is_integral <I>::value>::type* = nullptr)
-    noexcept;
-    template <typename V>
-    V* raw (const Data_id& id, const size_t n=0, typename//TODO remove
-      std::enable_if <std::is_floating_point <V>::value>::type* = nullptr)
-    noexcept;
     static constexpr
     fmr::Align_int offset (uintptr_t, fmr::Align_int);
   public:

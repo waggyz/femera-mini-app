@@ -14,8 +14,7 @@ namespace femera { namespace data {
   }
   template <fmr::Align_int N>
   template <typename T> inline
-  T* Bulk_vals<N>::raw (const std::size_t n, typename
-    std::enable_if <std::is_integral <T>::value>::type*)
+  T* Bulk_vals<N>::raw (const std::size_t n)
   noexcept {
     if (n <= 0) {
       this->bulk      ={};// new empty vec or clear existing
@@ -39,28 +38,6 @@ namespace femera { namespace data {
     // ...but accessing the reserved space in the underlying array should be OK.
     ptr [0] = fmr::Bulk_int(0);  // first touch
 #endif
-    return reinterpret_cast<T*> (ptr);
-  }
-  template <fmr::Align_int N>
-  template <typename T> inline
-  T* Bulk_vals<N>::raw (const std::size_t n, typename
-    std::enable_if <std::is_floating_point <T>::value>::type*)
-  noexcept {
-    if (n <= 0) {
-      this->bulk ={};// inserts new empty vec or clears existing
-      this->size      = 0;
-      this->size_of   = sizeof (T);
-      this->has_sign  = std::is_signed<T>::value;
-      return reinterpret_cast<T*> (this->bulk.data());
-    }
-    // over-allocate for aligned access
-    const auto sz = (n * sizeof (T) + 2 * (N - 1)) / sizeof (fmr::Bulk_int);
-    this->bulk.reserve (sz);// uninitialized, size()==0
-    this->size      = n;
-    this->size_of   = sizeof (T);
-    this->has_sign  = std::is_signed<T>::value;
-    auto ptr     = this->bulk.data ();
-    ptr [0]      = fmr::Bulk_int(0);  // first touch
     return reinterpret_cast<T*> (ptr);
   }
   template <fmr::Align_int N>
@@ -142,18 +119,6 @@ namespace femera { namespace data {
   (const std::uintptr_t address, const fmr::Align_int align) {
     return ((address % align) == 0 ) ? 0 : (align - (address % align));
     // return range: [0, align-1]
-  }
-  template <typename T> inline
-  T* Bulk::raw (const Data_id& id, const std::size_t n, typename
-    std::enable_if <std::is_integral <T>::value>::type*)
-  noexcept {
-    return this->name_ints [id].raw<T> (n);
-  }
-  template <typename T> inline
-  T* Bulk::raw (const Data_id& id, const std::size_t n, typename
-    std::enable_if <std::is_floating_point <T>::value>::type*)
-  noexcept {
-    return this->name_vals [id].raw<T> (n);
   }
   template <typename T> inline
   T* Bulk::set (const Data_id& id, const std::size_t n, const T init_val)
