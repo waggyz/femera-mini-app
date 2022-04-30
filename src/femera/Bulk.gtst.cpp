@@ -6,10 +6,17 @@
 namespace femera { namespace test {
   const auto mini = fmr::new_jobs ();
   //
+  auto bulkvals = femera::data::Bulk_vals<FMR_ALIGN_VALS>();
   auto bulkv = femera::data::Bulk();
   const auto ints10 = std::string("test-10-ints");
   const auto vals10 = std::string("test-10-floats");
   //
+#if 0
+  TEST(BulkVals, Offset) {
+    EXPECT_EQ( bulkvals.offset( 8), 0);
+    EXPECT_GT( bulkvals.offset(13), 0);
+  }
+#endif
   TEST(Bulk, IntSizes) {
     EXPECT_EQ( sizeof (fmr::Bulk_int), 1);
     EXPECT_LE( sizeof (fmr::Bulk_int), sizeof (fmr::Dim_int));
