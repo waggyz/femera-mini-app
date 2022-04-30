@@ -9,10 +9,27 @@ namespace femera {
 namespace femera { namespace data {
   //===========================================================================
   template <fmr::Align_int N> inline constexpr
-  fmr::Align_int Bulk_vals<N>::offset
-  (const std::uintptr_t address)
+  fmr::Align_int Bulk_vals<N>::offset (const std::uintptr_t address)
   noexcept {
     return ((address % N) == 0 ) ? 0 : (N - (address % N));// range: [0, N-1]
+  }
+  template <fmr::Align_int N>
+  template <typename T> inline
+  std::size_t Bulk_vals<N>::get_size ()
+  noexcept {
+    return this->size;
+  }
+  template <fmr::Align_int N>
+  template <typename T> inline
+  fmr::Align_int Bulk_vals<N>::get_sizeof ()
+  noexcept {
+    return this->size_of;
+  }
+  template <fmr::Align_int N>
+  template <typename T> inline
+  bool Bulk_vals<N>::has_sign ()
+  noexcept {
+    return this->is_signed;
   }
   template <fmr::Align_int N>
   template <typename T> inline
@@ -22,7 +39,7 @@ namespace femera { namespace data {
       this->bulk      ={};// new empty vec or clear existing
       this->size      = 0;
       this->size_of   = sizeof (T);
-      this->has_sign  = std::is_signed<T>::value;
+      this->is_signed  = std::is_signed<T>::value;
       return reinterpret_cast<T*> (this->bulk.data());
     }
     // over-allocate for aligned access
@@ -31,7 +48,7 @@ namespace femera { namespace data {
     this->bulk.reserve (sz);// uninitialized, bulk.size()==0
     this->size      = n;
     this->size_of   = sizeof (T);
-    this->has_sign  = std::is_signed<T>::value;
+    this->is_signed = std::is_signed<T>::value;
     auto ptr        = this->bulk.data ();
 #if 0
     this->bulk [0] = fmr::Bulk_int(0);// undefined behavior
@@ -168,19 +185,19 @@ namespace femera { namespace data {
       return nullptr;
     }
     const auto ptr = vals->get_fast<T> ();
-    if (vals->size_of == sizeof(T)
-      && vals->has_sign == std::is_signed<T>::value) {
+    if (vals->get_sizeof<T> () == sizeof(T)
+      && vals->has_sign<T> () == std::is_signed<T>::value) {
       return & ptr [start];
     }
     // convert stored to requested type
 #ifdef FMR_DEBUG
     printf ("converting %s from %sint%lu_t to %sint%lu_t...\n", id.c_str(),
-      vals->has_sign ? "":"u", vals->size_of,
+      vals->has_sign () ? "":"u", vals->size_of,
       std::is_signed<T>::value ? "":"u", sizeof(T) )
 #endif
-    const auto n    = vals->size;
-    const auto bits = vals->size_of * 8;
-    const auto sign = vals->has_sign;
+    const auto n    = vals->get_size<T> ();
+    const auto bits = vals->get_sizeof<T> () * 8;
+    const auto sign = vals->has_sign<T> ();
     const auto src  = std::move (vals->bulk);// stash vector; ptr still valid
     auto dest = this->set<T> (id, n, T(0));                 // zero-initialize                                     // signed ints
     if (n>0) {
@@ -240,12 +257,12 @@ namespace femera { namespace data {
       return nullptr;
     }
     const auto ptr = vals->get_fast<T> ();
-    if (vals->size_of == sizeof(T)) {
+    if (vals->get_sizeof<T> () == sizeof(T)) {
       return & ptr [start];
     }
     // convert vals in memory to requested type T
-    const auto n    = vals->size;
-    const auto bits = vals->size_of * 8;
+    const auto n    = vals->get_size<T> ();
+    const auto bits = vals->get_sizeof<T> () * 8;
     const auto src  = std::move (vals->bulk);// stash vector; ptr still valid
     auto dest = this->set<T> (id, n, T(0.0));           // zero-initialize                                     // signed ints
     if (n>0) {
