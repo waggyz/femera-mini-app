@@ -28,10 +28,9 @@ namespace femera { namespace data {
   }
   template <fmr::Align_int N>
   template <typename T> inline
-  Bulk_vec_t& Bulk_vals<N>::take_bulk ()//(Bulk_vec_t&& dest)
+  Bulk_vec_t& Bulk_vals<N>::take_bulk ()
   noexcept {
-    //dest = std::move (this->bulk);
-    //return reinterpret_cast<T*> (dest);
+    this->size = 0;
     return this->bulk;
   }
   template <fmr::Align_int N>
@@ -168,6 +167,12 @@ namespace femera { namespace data {
       : this->name_ints[id].set (n, init_vals);
   }
   template <typename T> inline
+  void Bulk::del (const Data_id& id)
+  noexcept {std::is_floating_point <T>::value
+      ? this->name_vals.erase (id)
+      : this->name_ints.erase (id);
+  }
+  template <typename T> inline
   T* Bulk::get (const Data_id& id, std::size_t start, typename
     std::enable_if <std::is_integral <T>::value>::type*)
   noexcept {
@@ -189,7 +194,7 @@ namespace femera { namespace data {
     // convert stored to requested type
 #ifdef FMR_DEBUG
     printf ("converting %s from %sint%lu_t to %sint%lu_t...\n", id.c_str(),
-      vals->has_sign () ? "":"u", vals->size_of,
+      vals->has_sign () ? "":"u", vals->get_sizeof (),
       std::is_signed<T>::value ? "":"u", sizeof(T) )
 #endif
     const auto n    = vals->get_size  <T> ();
@@ -272,11 +277,6 @@ namespace femera { namespace data {
       break;}
     }
     return & dest [start];
-  }
-  template <typename T> inline
-  void Bulk::del (const Data_id& id)
-  noexcept {
-    this->name_vals.erase (id);
   }
 } }//end femera::data:: namespace
 
