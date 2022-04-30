@@ -12,9 +12,8 @@ namespace femera { namespace data {
   template <fmr::Align_int N>
   class alignas (N) Bulk_vals {//TODO move to Bulk_vals.hpp ===================
   //NOTE alignas does not always work; over-allocate
-  public://TODO make private   //bulk vector and align manually
-    Bulk_vec_t    bulk;// public for std::move use
-  private:
+  private:   //bulk vector and align manually
+    Bulk_vec_t         bulk;
     std::size_t        size    = 0;// # values <= sizeof(T) * bulk.capacity()
     fmr::Hash_int file_hash    = 0;// CRC32 or CRC64 of data stored in file
     fmr::Align_int     size_of = sizeof (fmr::Bulk_int);// each value in bytes
@@ -43,6 +42,9 @@ namespace femera { namespace data {
     noexcept;
     template <typename T> inline
     T* get_safe (std::size_t start=0)
+    noexcept;
+    template <typename T> inline
+    Bulk_vec_t& take_bulk ()//Bulk_vec_t&& dest)
     noexcept;
   private:
     template <typename I>
