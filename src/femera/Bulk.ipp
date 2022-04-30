@@ -164,7 +164,7 @@ namespace femera { namespace data {
 #ifdef FMR_DEBUG
     printf ("converting %s from %sint%lu_t to %sint%lu_t...\n", id.c_str(),
       vals->has_sign ? "":"u", vals->size_of,
-      std::is_signed<T>::value ? "":"u", sizeof(T) );
+      std::is_signed<T>::value ? "":"u", sizeof(T) )
 #endif
     const auto n    = vals->size;
     const auto bits = vals->size_of * 8;

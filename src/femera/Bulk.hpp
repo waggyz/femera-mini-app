@@ -11,7 +11,7 @@ namespace femera { namespace data {
   using Bulk_vec_t = std::vector <fmr::Bulk_int>;//TODO rename to Bulk_t ?
   template <fmr::Align_int N>
   struct alignas (N) Bulk_vals {//NOTE does not always work; over-allocate
-  public://TODO make private                       //     bulk vector and align manually
+  private://TODO make private    //bulk vector and align manually
     Bulk_vec_t    bulk;
     std::size_t   size         = 0;// # values <= sizeof(T) * bulk.capacity()
     fmr::Hash_int file_hash    = 0;// CRC32 or CRC64 of data stored in file
