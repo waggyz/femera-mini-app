@@ -7,6 +7,7 @@ namespace femera {
 } //end femera:: namespace
 
 namespace femera { namespace data {
+  //===========================================================================
   template <fmr::Align_int N> inline constexpr
   fmr::Align_int Bulk_vals<N>::offset
   (const std::uintptr_t address)
@@ -123,15 +124,13 @@ namespace femera { namespace data {
     }
     return nullptr;
   }
-  
-  
-  
-  
+  //===========================================================================
   inline
   Bulk::Bulk () {
     this->name_ints.reserve (1024);
     this->name_vals.reserve (1024);
   }
+#if 0
   inline constexpr
   fmr::Align_int Bulk::offset
   (const std::uintptr_t address, const fmr::Align_int align)
@@ -139,6 +138,7 @@ namespace femera { namespace data {
     return ((address % align) == 0 ) ? 0 : (align - (address % align));
     // return range: [0, align-1]
   }
+#endif
   template <typename T> inline
   T* Bulk::set (const Data_id& id, const std::size_t n, const T init_val)
   noexcept {
@@ -170,7 +170,7 @@ namespace femera { namespace data {
     const auto ptr = vals->get_fast<T> ();
     if (vals->size_of == sizeof(T)
       && vals->has_sign == std::is_signed<T>::value) {
-      return & reinterpret_cast<T*> (ptr) [start];
+      return & ptr [start];
     }
     // convert stored to requested type
 #ifdef FMR_DEBUG
@@ -184,7 +184,7 @@ namespace femera { namespace data {
     const auto src  = std::move (vals->bulk);// stash vector; ptr still valid
     auto dest = this->set<T> (id, n, T(0));                 // zero-initialize                                     // signed ints
     if (n>0) {
-      if (sign) {
+      if (sign) {                                           // signed ints
         switch (bits) {
           case  8: {
             const auto v = reinterpret_cast<int8_t*> (ptr);
@@ -239,12 +239,9 @@ namespace femera { namespace data {
       printf ("%s: floating point name not found\n", id.c_str());
       return nullptr;
     }
-    auto ptr = std::uintptr_t (vals->bulk.data());
-#ifdef FMR_ALIGN_VALS
-    ptr += Bulk::offset (ptr, FMR_ALIGN_VALS);
-#endif
+    const auto ptr = vals->get_fast<T> ();
     if (vals->size_of == sizeof(T)) {
-      return & reinterpret_cast<T*> (ptr) [start];
+      return & ptr [start];
     }
     // convert vals in memory to requested type T
     const auto n    = vals->size;

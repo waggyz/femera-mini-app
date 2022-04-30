@@ -68,8 +68,11 @@ namespace femera { namespace data {
     void del (const Data_id& id)
     noexcept;
   private:
+#if 0
     static constexpr
-    fmr::Align_int offset (uintptr_t, fmr::Align_int)noexcept;
+    fmr::Align_int offset (uintptr_t, fmr::Align_int)//TODO Remove?
+    noexcept;
+#endif
   public:
     Bulk ();
   };
