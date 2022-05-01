@@ -7,7 +7,7 @@ namespace femera { namespace data {
   class Vals;//            Data has vtable
   class Vals final: public Data <Vals> { private: friend class Data;
   public:
-    Bank bulk = Bank();
+    Bank bank = Bank();
     proc::Team_t team_id = 0;// MPI communicator
   private:
     void task_init (int* argc, char** argv);

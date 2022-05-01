@@ -7,7 +7,6 @@
 #include <unordered_map>
 
 namespace femera { namespace data {
-  //===========================================================================
   using Bulk_vec_t = std::vector <fmr::Bulk_int>;//TODO rename to Bank_t ?
   template <fmr::Align_int N>
   class alignas (N) Bulk {//TODO move to Bank.hpp

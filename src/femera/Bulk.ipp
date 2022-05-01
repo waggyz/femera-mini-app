@@ -2,7 +2,6 @@
 #define FEMERA_DATA_BULK_IPP
 
 namespace femera { namespace data {
-  //===========================================================================
   template <fmr::Align_int N> inline constexpr
   fmr::Align_int Bulk<N>::offset (const std::uintptr_t address)
   noexcept {
@@ -78,7 +77,7 @@ namespace femera { namespace data {
     const auto rpad = this->offset (sz );// max right padding is N-1
     //NOTE Zero is the same bits for all numeric types (data/Vals.gtst.cpp).
     if (init_val <= T(0) && init_val >= T(0)) {// == 0.0, no float warning
-      this->bulk.resize (sz + lpad + rpad);// <= capacity (); ptr still valid
+      this->bulk.resize (lpad + sz + rpad);// <= capacity (); ptr still valid
       return reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
     }
     // nonzero init
@@ -99,7 +98,7 @@ namespace femera { namespace data {
     for (size_t i=0; i<sz; i++ ) {this->bulk.push_back (bytes [i % mod]);}
 #endif
     auto v = reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
-    this->bulk.resize (sz + lpad + rpad);// <= capacity (); ptr still valid
+    this->bulk.resize (lpad + sz + rpad);// <= capacity (); ptr still valid
     for (size_t i=0; i<n; i++) {v [i] = init_val;}// 35% slower than 0init
     return v;
   }
@@ -117,10 +116,10 @@ namespace femera { namespace data {
     if (lpad == 0) {// bulk.assign(..) works if already aligned when allocated
       const auto from = reinterpret_cast<const fmr::Bulk_int*> (init_vals);
       this->bulk.assign (from, from + sz);
-      if (rpad>0) {
+      if (rpad > 0) {
         for (size_t i=0; i<rpad; i++) {this->bulk.push_back (fmr::Bulk_int (0));
     } } } else {    // zero-initialize then copy elements
-      this->bulk.resize (sz + lpad + rpad);// <= capacity(); v, ptr still valid
+      this->bulk.resize (lpad + sz + rpad);// <= capacity(); v, ptr still valid
       for (std::size_t i=0; i<n; i++) {v [i] = init_vals [i];}
     }
     return v;
