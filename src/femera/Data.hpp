@@ -51,7 +51,7 @@ namespace femera {
     // Memory operations
     ret::???  add (Data_name_t, ...);// Vals_t vals =nullptr);// in Vals?
     ret::??? size or init (Data_name_t, ...);// Vals_t size =nullptr);// in Vals?
-    Bulk_t   form or pack or bulk (Data_name_t, ...);// in Vals?
+    Bank_t   form or pack or bulk (Data_name_t, ...);// in Vals?
     Vals_t    get (Data_name_t);// in Vals?
     ret::???  clr (Data_name_t);// in Vals?
     ret::???  del (Data_name_t);// in Vals?

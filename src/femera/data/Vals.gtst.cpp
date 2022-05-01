@@ -178,7 +178,7 @@ namespace femera { namespace test {
   TEST(ValsAlign, VecAlignedOK) {
     EXPECT_EQ( 0, reinterpret_cast<size_t>(&vec8z[0]) % alignof (size_t));
   }
-  TEST(BulkInts, ZeroAsFmrInts) {
+  TEST(BankInts, ZeroAsFmrInts) {
     EXPECT_EQ(fmr::Dim_int(0)   ,reinterpret_cast<fmr::Dim_int*>   (&bulk[0])[0]);
     EXPECT_EQ(fmr::Enum_int(0)  ,reinterpret_cast<fmr::Enum_int*>  (&bulk[0])[0]);
     EXPECT_EQ(fmr::Local_int(0) ,reinterpret_cast<fmr::Local_int*> (&bulk[0])[0]);
@@ -186,7 +186,7 @@ namespace femera { namespace test {
     EXPECT_EQ(fmr::Perf_int(0)  ,reinterpret_cast<fmr::Perf_int*>  (&bulk[0])[0]);
     EXPECT_EQ(fmr::Exit_int(0)  ,reinterpret_cast<fmr::Exit_int*>  (&bulk[0])[0]);
   }
-  TEST(BulkInts, ZeroAsFmrFloats) {
+  TEST(BankInts, ZeroAsFmrFloats) {
     EXPECT_EQ(fmr::Perf_float(0),reinterpret_cast<fmr::Perf_float*>(&bulk[0])[0]);
 #if 0
     EXPECT_EQ(fmr::Geom_float(0),reinterpret_cast<fmr::Geom_float*>(&bulk[0])[0]);
@@ -197,15 +197,15 @@ namespace femera { namespace test {
     EXPECT_EQ(fmr::Plot_float(0),reinterpret_cast<fmr::Plot_float*>(&bulk[0])[0]);
 #endif
   }
-  TEST(BulkInts, ZeroAsFloats) {
+  TEST(BankInts, ZeroAsFloats) {
     EXPECT_EQ(0.0f, reinterpret_cast<float*>      (&bulk[0])[0]);
     EXPECT_EQ(0.0 , reinterpret_cast<double*>     (&bulk[0])[0]);
     EXPECT_EQ(0.0l, reinterpret_cast<long double*>(&bulk[0])[0]);
   }
-  TEST(BulkInts, ZeroAsStringChars) {
+  TEST(BankInts, ZeroAsStringChars) {
     EXPECT_EQ(char(0), reinterpret_cast<char*> (&bulk[0])[0] );
   }
-  TEST(BulkInts, WorkForStrings) {
+  TEST(BankInts, WorkForStrings) {
     EXPECT_EQ( 5, std::snprintf (&bulk[0], bulk.size(),// returns #of chars
       std::string("hello").c_str()) );
     EXPECT_EQ( std::string("hello"), std::string (&bulk[0]) );
