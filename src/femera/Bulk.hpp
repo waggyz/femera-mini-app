@@ -11,16 +11,19 @@ namespace femera { namespace data {
   using Bulk_vec_t = std::vector <fmr::Bulk_int>;//TODO rename to Bulk_t ?
   template <fmr::Align_int N>
   class alignas (N) Bulk_vals {//TODO move to Bulk_vals.hpp ===================
-  //NOTE alignas does not always work; over-allocate
-  private:   //bulk vector and align manually
+  //NOTE alignas does not always work; over-allocate bulk and align manually
+  private:
     Bulk_vec_t     bulk;
     std::size_t    size      = 0;// # values <= sizeof(T) * bulk.capacity()
     fmr::Hash_int  file_hash = 0;// CRC32 or CRC64 of data stored in file
     fmr::Align_int size_of   = sizeof (fmr::Bulk_int);// each value in bytes
-    bool           is_signed = std::is_signed<fmr::Bulk_int>::value;
+    bool           is_signed = std::is_signed <fmr::Bulk_int>::value;
   public:
     template <typename T> inline
     std::size_t get_size ()
+    noexcept;
+    template <typename T> inline
+    std::size_t pad_size ()// size including padding
     noexcept;
     template <typename T> inline
     fmr::Align_int get_sizeof ()
@@ -44,7 +47,7 @@ namespace femera { namespace data {
     T* get_safe (std::size_t start=0)
     noexcept;
     template <typename T> inline
-    Bulk_vec_t& take_bulk ()//Bulk_vec_t&& dest)
+    Bulk_vec_t& take_bulk ()// use to move or swap Bulk_vec_t
     noexcept;
   private:
     template <typename I>
@@ -53,11 +56,19 @@ namespace femera { namespace data {
   };//=========================================================================
   class Bulk {//TODO change to class Bank, Bulk ? Swap Bulk with Vals?
   private:
-    using Ints_map_t = std::unordered_map <Data_id, Bulk_vals <FMR_ALIGN_INTS>>;
-    using Vals_map_t = std::unordered_map <Data_id, Bulk_vals <FMR_ALIGN_VALS>>;
+#ifdef FMR_ALIGN_INTS
+    using Vec_int_t = Bulk_vals<FMR_ALIGN_INTS>;
+#else
+    using Vec_int_t = Bulk_vals<alignof (size_t)>;
+#endif
+#ifdef FMR_ALIGN_INTS
+    using Vec_val_t = Bulk_vals<FMR_ALIGN_VALS>;
+#else
+    using Vec_val_t = Bulk_vals<alignof (double)>;
+#endif
   private:
-    Ints_map_t name_ints ={};// size_t alignment
-    Vals_map_t name_vals ={};// SSE, __m256d, or AVX512 alignment
+    std::unordered_map<Data_id, Vec_int_t> name_ints ={};// size_t alignment
+    std::unordered_map<Data_id, Vec_val_t> name_vals ={};// SSE,__m256d,...align
   public:
     //TODO handle SSE, AVX, AVX512 types
     template <typename T>
@@ -79,7 +90,6 @@ namespace femera { namespace data {
     template <typename T>
     void del (const Data_id& id)
     noexcept;
-  private:
 #if 0
     static constexpr
     fmr::Align_int offset (uintptr_t, fmr::Align_int)//TODO Remove?

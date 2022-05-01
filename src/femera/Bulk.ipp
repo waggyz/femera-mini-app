@@ -10,6 +10,12 @@ namespace femera { namespace data {
   }
   template <fmr::Align_int N>
   template <typename T> inline
+  std::size_t Bulk_vals<N>::pad_size ()
+  noexcept {
+    return this->bulk.size ();
+  }
+  template <fmr::Align_int N>
+  template <typename T> inline
   std::size_t Bulk_vals<N>::get_size ()
   noexcept {
     return this->size;
@@ -41,7 +47,7 @@ namespace femera { namespace data {
       this->bulk      ={};// new empty vec or clear existing
       this->size      = 0;
       this->size_of   = sizeof (T);
-      this->is_signed = std::is_signed<T>::value;
+      this->is_signed = std::is_signed <T>::value;
       return reinterpret_cast<T*> (this->bulk.data());
     }
     // over-allocate for aligned access
@@ -50,15 +56,14 @@ namespace femera { namespace data {
     this->bulk.reserve (sz);// uninitialized, bulk.size()==0
     this->size      = n;
     this->size_of   = sizeof (T);
-    this->is_signed = std::is_signed<T>::value;
+    this->is_signed = std::is_signed <T>::value;
     auto ptr        = this->bulk.data ();
 #if 0
-    this->bulk [0] = fmr::Bulk_int(0);// undefined behavior
+    this->bulk [0] = fmr::Bulk_int (0);// undefined behavior
     // Accessesing a vector past size() is undefined behavior...
-#else
-    // ...but accessing the reserved space in the underlying array should be OK.
-    ptr [0] = fmr::Bulk_int(0);  // first touch
 #endif
+    // ...but accessing the reserved space in the underlying array should be OK.
+    ptr [0] = fmr::Bulk_int (0);// first touch
     return reinterpret_cast<T*> (ptr);
   }
   template <fmr::Align_int N>
@@ -74,30 +79,29 @@ namespace femera { namespace data {
     //NOTE Zero is the same bits for all numeric types (data/Vals.gtst.cpp).
     if (init_val <= T(0) && init_val >= T(0)) {// == 0.0, no float warning
       this->bulk.resize (sz + lpad + rpad);// <= capacity (); ptr still valid
-    } else {                                              // nonzero
-#if 0
-      // Initialize from a temporary vector of type T.
-      // NOTE This will not work with padding.
-      const auto tmp = std::vector<T> (n, init_val);
-      const auto ptr = reinterpret_cast<const fmr::Bulk_int*> (tmp.data());
-      this->bulk.assign (ptr, ptr + sz);
-#else
-      // Initialize without making a tmp vector. NOTE 10x slower than 0init.
-#if 0
-      if (lpad > 0) {
-        for (size_t i=0; i<lpad; i++) {this->bulk.push_back (fmr::Bulk_int(0));}
-      }
-      const auto bytes = reinterpret_cast <const fmr::Bulk_int*> (& init_val);
-      const auto mod   = fmr::Local_int (sizeof (T) / sizeof (fmr::Bulk_int));
-      for (size_t i=0; i<sz; i++ ) { this->bulk.push_back (bytes [i % mod]); }
-#endif
-      auto v = reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
-      this->bulk.resize (sz + lpad + rpad);// <= capacity (); ptr still valid
-      for (size_t i=0; i<n; i++ ) {v [i] = init_val;}// 35% slower than 0init
-      return v;
-#endif
+      return reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
     }
-    return reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
+    // nonzero init
+#if 0
+    // Initialize from a temporary vector of type T.
+    // This will not work with padding.
+    const auto tmp = std::vector<T> (n, init_val);
+    const auto ptr = reinterpret_cast<const fmr::Bulk_int*> (tmp.data());
+    this->bulk.assign (ptr, ptr + sz);
+#endif
+#if 0
+    // Initialize without making a tmp vector. NOTE 10x slower than 0init.
+    if (lpad > 0) {
+      for (size_t i=0; i<lpad; i++) {this->bulk.push_back (fmr::Bulk_int(0));}
+    }
+    const auto bytes = reinterpret_cast <const fmr::Bulk_int*> (& init_val);
+    const auto mod   = fmr::Local_int (sizeof (T) / sizeof (fmr::Bulk_int));
+    for (size_t i=0; i<sz; i++ ) {this->bulk.push_back (bytes [i % mod]);}
+#endif
+    auto v = reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
+    this->bulk.resize (sz + lpad + rpad);// <= capacity (); ptr still valid
+    for (size_t i=0; i<n; i++) {v [i] = init_val;}// 35% slower than 0init
+    return v;
   }
   template <fmr::Align_int N>
   template <typename T>
@@ -114,10 +118,10 @@ namespace femera { namespace data {
       const auto from = reinterpret_cast<const fmr::Bulk_int*> (init_vals);
       this->bulk.assign (from, from + sz);
       if (rpad>0) {
-        for (size_t i=0; i<rpad; i++) {this->bulk.push_back(fmr::Bulk_int(0));
+        for (size_t i=0; i<rpad; i++) {this->bulk.push_back (fmr::Bulk_int (0));
     } } } else {    // zero-initialize then copy elements
-      this->bulk.resize (sz + lpad + rpad);// <= capacity(); v,ptr still valid
-      for (std::size_t i=0; i<n; i++ ) {v [i] = init_vals [i];}
+      this->bulk.resize (sz + lpad + rpad);// <= capacity(); v, ptr still valid
+      for (std::size_t i=0; i<n; i++) {v [i] = init_vals [i];}
     }
     return v;
   }
@@ -126,7 +130,7 @@ namespace femera { namespace data {
   T* Bulk_vals<N>::get_fast (std::size_t start)
   noexcept {
     const auto lpad = this->offset (std::uintptr_t (this->bulk.data ()));
-    return & reinterpret_cast<T*> (& this->bulk.data ()[lpad])[start];
+    return & reinterpret_cast<T*> (& this->bulk.data ()[lpad]) [start];
   }
   template <fmr::Align_int N>
   template <typename T> inline
@@ -134,7 +138,7 @@ namespace femera { namespace data {
   noexcept {
     const auto lpad = this->offset (std::uintptr_t (this->bulk.data ()));
     if ((start + 1) * sizeof (T) <= lpad + this->bulk.size()) {
-      return & reinterpret_cast<T*> (& this->bulk.data ()[lpad])[start];
+      return & reinterpret_cast<T*> (& this->bulk.data ()[lpad]) [start];
     }
     return nullptr;
   }
@@ -176,68 +180,64 @@ namespace femera { namespace data {
   T* Bulk::get (const Data_id& id, std::size_t start, typename
     std::enable_if <std::is_integral <T>::value>::type*)
   noexcept {
-#ifdef FMR_ALIGN_INTS
-    Bulk_vals<FMR_ALIGN_INTS>* vals = nullptr;
-#else
-    Bulk_vals<alignof(std::size_t)>* vals = nullptr;
-#endif
+    Vec_int_t* vals = nullptr;
     try {vals =& this->name_ints.at(id);}
-    catch (std::out_of_range& e) {
+    catch (std::out_of_range & e) {
       printf ("%s: integer name not found\n", id.c_str());
       return nullptr;
     }
-    const auto ptr = vals->get_fast<T> ();
-    if (vals->get_sizeof<T> () == sizeof(T)
-      && vals->has_sign<T> () == std::is_signed<T>::value) {
+    const auto ptr = vals->get_fast<T>();
+    if (vals->get_sizeof<T>() == sizeof (T)
+      && vals->has_sign<T>() == std::is_signed <T>::value) {
       return & ptr [start];
     }
     // convert stored to requested type
 #ifdef FMR_DEBUG
     printf ("converting %s from %sint%lu_t to %sint%lu_t...\n", id.c_str(),
       vals->has_sign () ? "":"u", vals->get_sizeof (),
-      std::is_signed<T>::value ? "":"u", sizeof(T) )
+      std::is_signed <T>::value ? "":"u", sizeof(T) )
 #endif
-    const auto n    = vals->get_size  <T> ();
-    const auto bits = vals->get_sizeof<T> () * 8;
-    const auto sign = vals->has_sign  <T> ();
-    const auto keep = std::move (vals->take_bulk<T>());// keeps ptr valid
-    auto dest = this->set<T> (id, n, T(0));                 // zero-initialize                                     // signed ints
+    const auto n    = vals->get_size  <T>();
+    const auto each = vals->get_sizeof<T>();
+    const auto sign = vals->has_sign  <T>();
+    const auto keep = std::move (vals->take_bulk<T>());// keep ptr valid
+    auto dest = this->set<T> (id, n, T(0));                 // zero-initialize
     if (n<=0) {return dest;}
     if (sign) {                                             // signed ints
-      switch (bits) {
-        case  8: {
+      switch (each) {
+        case sizeof (int8_t): {
           const auto v = reinterpret_cast<int8_t*> (ptr);
-          for (std::size_t i=0; i<n; i++) {dest [i] = T(v [i]);}
+          for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
         break;}
-        case 16: {
+        case sizeof (int16_t): {
           const auto v = reinterpret_cast<int16_t*> (ptr);
-          for (std::size_t i=0; i<n; i++) {dest [i] = T(v [i]);}
+          for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
         break;}
-        case 32: {
+        case sizeof (int32_t): {
           const auto v = reinterpret_cast<int32_t*> (ptr);
-          for (std::size_t i=0; i<n; i++) {dest [i] = T(v [i]);}
+          for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
         break;}
-        case 64: {
+        case sizeof (int64_t): {
           const auto v = reinterpret_cast<int64_t*> (ptr);
-          for (std::size_t i=0; i<n; i++) {dest [i] = T(v [i]);}
+          for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
         break;}
       } } else {                                            // unsigned ints
-      switch (bits) {
-        case  8: {
+      switch (each) {
+        case sizeof (uint8_t): {
           const auto v = reinterpret_cast<uint8_t*> (ptr);
-          for (std::size_t i=0; i<n; i++) {dest [i] = T(v [i]);}
+          for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
         break;}
-        case 16: {
+        case sizeof (uint16_t): {
           const auto v = reinterpret_cast<uint16_t*> (ptr);
-          for (std::size_t i=0; i<n; i++) {dest [i] = T(v [i]);}
+          for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
         break;}
-        case 32: {
+        case sizeof (uint32_t): {
           const auto v = reinterpret_cast<uint32_t*> (ptr);
-          for (std::size_t i=0; i<n; i++) {dest [i] = T(v [i]);}
+          for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
         break;}
-        case 64: {
+        case sizeof (uint64_t): {
           const auto v = reinterpret_cast<uint64_t*> (ptr);
-          for (std::size_t i=0; i<n; i++) {dest [i] = T(v [i]);}
+          for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
         break;}
     } }
     return & dest [start];
@@ -246,34 +246,38 @@ namespace femera { namespace data {
   T* Bulk::get (const Data_id& id, std::size_t start, typename
     std::enable_if <std::is_floating_point <T>::value>::type*)
   noexcept {
-#ifdef FMR_ALIGN_VALS
-    Bulk_vals<FMR_ALIGN_VALS>* vals = nullptr;
-#else
-    Bulk_vals<alignof(double)>* vals = nullptr;
-#endif
-    try {vals =& this->name_vals.at(id);}
-    catch (std::out_of_range& e) {
+    Vec_val_t* vals = nullptr;
+    try {vals =& this->name_vals.at (id);}
+    catch (std::out_of_range & e) {
       printf ("%s: floating point name not found\n", id.c_str());
       return nullptr;
     }
-    const auto ptr = vals->get_fast<T> ();
-    if (vals->get_sizeof<T> () == sizeof(T)) {
+    const auto ptr = vals->get_fast<T>();
+    if (vals->get_sizeof<T>() == sizeof (T)) {
       return & ptr [start];
     }
     // convert vals in memory to requested type T
-    const auto n    = vals->get_size  <T> ();
-    const auto bits = vals->get_sizeof<T> () * 8;
-    const auto keep = std::move (vals->take_bulk<T>()); // keeps ptr valid
-    auto dest = this->set<T> (id, n, T(0.0));           // zero-initialize                                      // signed ints
+    const auto n    = vals->get_size  <T>();
+    const auto each = vals->get_sizeof<T>();
+#ifdef FMR_DEBUG
+    printf ("%s: padded size before move %lu bytes\n",
+      id.c_str(), vals->pad_size<T>());
+#endif
+    const auto keep = std::move (vals->take_bulk<T>()); // keep ptr valid
+#ifdef FMR_DEBUG
+    printf ("%s: padded size after  move %lu bytes\n",
+      id.c_str(), vals->pad_size<T>());
+#endif
+    auto dest = this->set<T> (id, n, T(0.0));           // zero-initialize new
     if (n<=0) {return dest;}
-    switch (bits) {
-      case 32: {                                        // cast from float to T
+    switch (each) {
+      case sizeof (float): {                            // cast from float to T
         const auto v = reinterpret_cast<float*> (ptr);
-        for (std::size_t i=0; i<n; i++) {dest [i] = T(v [i]);}
+        for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
       break;}
-      case 64: {                                        // cast from double to T
+      case sizeof (double): {                           // cast from double to T
         const auto v = reinterpret_cast<double*> (ptr);
-        for (std::size_t i=0; i<n; i++) {dest [i] = T(v [i]);}
+        for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
       break;}
     }
     return & dest [start];

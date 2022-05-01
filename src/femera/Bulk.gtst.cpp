@@ -29,8 +29,8 @@ namespace femera { namespace test {
     EXPECT_LE( sizeof (fmr::Bulk_int), sizeof (float));
     EXPECT_LE( sizeof (fmr::Bulk_int), sizeof (double));
     EXPECT_LE( sizeof (fmr::Bulk_int), sizeof (long double));
-    EXPECT_LE( sizeof (float)        , FMR_ALIGN_VALS);
-    EXPECT_LE( sizeof (double)       , FMR_ALIGN_VALS);
+    EXPECT_LE( sizeof (float),         FMR_ALIGN_VALS);
+    EXPECT_LE( sizeof (double),        FMR_ALIGN_VALS);
 #if 0
     EXPECT_LE( sizeof (long double)  , FMR_ALIGN_VALS);
 #endif
@@ -41,7 +41,7 @@ namespace femera { namespace test {
   }
   TEST(Bulk, Ints10) {
     EXPECT_EQ( bulkv.get<int> ("integer name not found"), nullptr);
-    EXPECT_EQ( bulkv.set      (ints10,10,1)[9], int(1));
+    EXPECT_EQ( bulkv.set      (ints10,10,int(1))[9], int(1));
     EXPECT_EQ( bulkv.get<int> (ints10)     [0], int(1));
     EXPECT_EQ( bulkv.get<int> (ints10)     [9], int(1));
     EXPECT_EQ( bulkv.get<int> (ints10,9)   [0], int(1));
@@ -58,7 +58,7 @@ namespace femera { namespace test {
     EXPECT_EQ( bulkv.get<double> ("another10")    [0], double(1.0));
   }
   TEST(Bulk, Alignment) {
-    EXPECT_LE( alignof (double)     , FMR_ALIGN_VALS);
+    EXPECT_LE( alignof (double),      FMR_ALIGN_VALS);
     EXPECT_LE( alignof (std::size_t), FMR_ALIGN_INTS);
     EXPECT_EQ( uintptr_t (bulkv.get<int>    (ints10)) % FMR_ALIGN_INTS, 0);
     EXPECT_EQ( uintptr_t (bulkv.get<double> (vals10)) % FMR_ALIGN_VALS, 0);
@@ -68,6 +68,12 @@ namespace femera { namespace test {
     EXPECT_EQ(       bulkv.get<uint>  (ints10) [0], uint(1));
     EXPECT_FLOAT_EQ( bulkv.get<float> (vals10) [0], float(1.0));
   }
+#if 0
+  TEST(Bulk, AvxVals) {
+    EXPECT_EQ( reinterpret_cast<double*>
+      (& bulkv.set<__m256d> ("avxd10",10)) [0], 0.0);
+  }
+#endif
 #if 0
   inline
   int time_make_new (uint n=1024*1, uint sz=1024*1) {
