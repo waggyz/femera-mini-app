@@ -51,7 +51,7 @@ namespace femera { namespace data {
     }
     // over-allocate for aligned access
     const auto sz = (n * sizeof (T) + 2 * (N - 1)) / sizeof (fmr::Bulk_int);
-    //NOTE sz is large enough for aligned SIMD access at the tail
+    // sz is also large enough for aligned SIMD access at the tail
     this->bulk.reserve (sz);// uninitialized, bulk.size()==0
     this->size      = n;
     this->size_of   = sizeof (T);
@@ -75,7 +75,7 @@ namespace femera { namespace data {
     const std::uintptr_t sz = n * sizeof (T) / sizeof (fmr::Bulk_int);
     const auto lpad = this->offset (ptr);// max left  padding is N-1
     const auto rpad = this->offset (sz );// max right padding is N-1
-    //NOTE Zero is the same bits for all numeric types (data/Vals.gtst.cpp).
+    // Zero is the same bits for all numeric types (data/Vals.gtst.cpp).
     if (init_val <= T(0) && init_val >= T(0)) {// == 0.0, no float warning
       this->bulk.resize (lpad + sz + rpad);// <= capacity (); ptr still valid
       return reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
@@ -89,7 +89,7 @@ namespace femera { namespace data {
     this->bulk.assign (ptr, ptr + sz);
 #endif
 #if 0
-    // Initialize without making a tmp vector. NOTE 10x slower than 0init.
+    // Initialize without making a tmp vector. 10x slower than 0init.
     if (lpad > 0) {
       for (size_t i=0; i<lpad; i++) {this->bulk.push_back (fmr::Bulk_int(0));}
     }
@@ -117,7 +117,8 @@ namespace femera { namespace data {
       const auto from = reinterpret_cast<const fmr::Bulk_int*> (init_vals);
       this->bulk.assign (from, from + sz);
       if (rpad > 0) {
-        for (size_t i=0; i<rpad; i++) {this->bulk.push_back (fmr::Bulk_int (0));
+        for (size_t i=0; i<rpad; i++) {
+          this->bulk.push_back (fmr::Bulk_int (0));
     } } } else {    // zero-initialize then copy elements
       this->bulk.resize (lpad + sz + rpad);// <= capacity(); v, ptr still valid
       for (std::size_t i=0; i<n; i++) {v [i] = init_vals [i];}
