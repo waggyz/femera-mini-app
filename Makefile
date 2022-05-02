@@ -342,12 +342,12 @@ PRFOUTS:= $(patsubst src/%.perf.cpp,$(BUILD_CPU)/%.perf.out,$(FMRPERF))
 .PHONY: remove reinstall clean cleaner cleanest purge
 # -----------------------------------------------------------------------------
 # The rest are for developers...
-.PHONY: docs hash patch
+.PHONY: docs hash patch perf
 .PHONY: install-tools test-tools remove-tools reinstall-tools clean-tools
 .PHONY: get-bats install-bats get-external # install-external
 # ...and internal makefile use.
 .PHONY: intro
-.PHONY: all-done build-done docs-done
+.PHONY: all-done build-done docs-done perf-done
 .PHONY: install-tools-done install-done remove-done
 
 # Real files, but considered always out of date.
@@ -367,9 +367,9 @@ PRFOUTS:= $(patsubst src/%.perf.cpp,$(BUILD_CPU)/%.perf.out,$(FMRPERF))
 .PRECIOUS: $(BUILD_DIR)/external/install-%.flags
 .PRECIOUS: $(BUILD_CPU)/external/install-%.flags
 
-#FIXME fixes error make[2] unlink /home/dwagner5/local/bin/ Is a directory
+#TODO fixes error make[2] unlink /home/dwagner5/local/bin/ Is a directory
 #      while first running make tools?
-.PRECIOUS: $(INSTALL_DIR)/bin/ build/%.gtst
+.PRECIOUS: $(INSTALL_DIR)/bin/ build/%.gtst build/%.perf
 
 # Compile and add the exception handler (Errs) to libfemera early.
 $(BUILD_CPU)/femera/Test.o: $(LIBFEMERA)($(BUILD_CPU)/femera/Errs.o)
@@ -396,9 +396,10 @@ mini: | intro
 
 perf: | intro
 	$(call timestamp,$@,$^)
-	$(MAKE) $(JLIM) $(PRFOUTS)
+	$(MAKE) $(JLIM) $(FMROUTS)
 	$(MAKE) $(JLIM) $(BUILD_CPU)/mini
-	$(MAKE) $(JPAR) build-done
+	$(MAKE) $(JLIM) $(PRFOUTS) #TODO *.perf executable should run serially
+	$(MAKE) $(JPAR) perf-done
 
 tools: | intro
 	$(MAKE) $(JPAR) install-tools
@@ -546,6 +547,11 @@ code-stats: | build/$(CPUMODEL)/
 	'"'$(HOSTNAME)'"','"'$(CPUMODEL)'"'\
 	>> "$(SRC_STAT_FILE)"; fi
 	-tools/plot_code_stats.py 2>/dev/null
+
+perf-done:
+	$(call timestamp,$@,)
+	$(info $(DONE) performance testing $(FEMERA_VERSION) built with)
+	$(info $(SPCS) $(CXX) $(CXX_VERSION) on $(HOSTNAME) for $(CPUMODEL))
 
 # Femera tools ----------------------------------------------------------------
 install-tools: get-bats
@@ -925,9 +931,7 @@ else
 endif
 
 build/%.perf : export TMPDIR := $(TEMP_DIR)
-build/%.perf : build/%.perf.o $(LIBFEMERA)(build/%.o) \
-  $(LIBFEMERA)($(BUILD_CPU)/femera/Test.o) \
-  $(LIBFEMERA)($(BUILD_CPU)/femera/task/Jobs.o)
+build/%.perf : build/%.perf.o $(LIBFEMERA)(build/%.o)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(@).o,$(notdir $@))
 	-$(CXX) $(CXXTESTS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
@@ -939,7 +943,7 @@ endif
 
 # Header-only
 build/%.perf : export TMPDIR := $(TEMP_DIR)
-build/%.perf : build/%.perf.o $(LIBFEMERA)($(BUILD_CPU)/femera/Test.o)
+build/%.perf : build/%.perf.o
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(@).o,$(notdir $@))
 	-$(CXX) $(CXXTESTS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
