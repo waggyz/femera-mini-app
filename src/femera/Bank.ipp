@@ -15,11 +15,12 @@ namespace femera { namespace data {
     return ((adr % align) == 0 ) ? 0 : (align - (adr % align));// [0, align-1]
   }
 #endif
+  inline
   fmr::Local_int Bank::del_all ()
   noexcept {fmr::Local_int n=0;
     n = fmr::Local_int (this->name_ints.size ()+ this->name_vals.size ());
-    this->name_ints.clear ();
-    this->name_vals.clear ();
+    this->name_ints.clear ();// maybe releases reserve
+    this->name_vals.clear ();// maybe releases reserve
     this->name_ints.reserve (1024);
     this->name_vals.reserve (1024);
     return n;
