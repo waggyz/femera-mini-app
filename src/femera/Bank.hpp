@@ -43,6 +43,8 @@ namespace femera { namespace data {
     template <typename T>
     void del (const Data_id& id)
     noexcept;
+    fmr::Local_int del_all ()// clears int and float maps
+    noexcept;
 #if 0
     static constexpr
     fmr::Align_int offset (uintptr_t, fmr::Align_int)//TODO Remove?

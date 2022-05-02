@@ -6,10 +6,6 @@
 namespace femera { namespace test {
   const auto mini = fmr::new_jobs ();
   //
-  auto bulkvals = femera::data::Bulk<FMR_ALIGN_VALS>();
-  const auto ints10 = std::string("test-10-ints");
-  const auto vals10 = std::string("test-10-floats");
-  //
   inline
   int time_bank (uint N=10, uint n=1024*1, uint sz=1024*1) {// returns total kB
     if (N<1 || n<1 || sz<1) { return 1; }
@@ -23,7 +19,7 @@ namespace femera { namespace test {
         vals.set ("vals_"+std::to_string (i), sz, double (v % 2));
       }
       const auto add_s = double (time.add_busy_time_now ());
-      if (v>0 && v<(N-1)) {
+      if (v > 0 && v < (N - 1)) {
         if ((v % 2)==0) {timez  += add_s;}
         else            {timenz += add_s;}
       }
@@ -31,9 +27,11 @@ namespace femera { namespace test {
         vals.get<float> ("vals_"+std::to_string (i));// convert to float
       }
       const auto cast_s = double (time.add_busy_time_now ());
-      for (uint i=0; i<n; i++) {
-        vals.del<float> ("vals_"+std::to_string (i));
-      }
+#if 0
+      for (uint i=0; i<n; i++) {vals.del<float> ("vals_"+std::to_string (i));}
+#else
+      vals.del_all ();
+#endif
       printf ("%.2e B / %.2e s = %.2e B/s of double (%u), %.2e s to float\n",
         bytes, add_s, bytes / add_s, v % 2, cast_s);
     }
@@ -42,8 +40,8 @@ namespace femera { namespace test {
     return int (N * bytes / 1024.0);
   }
   TEST(NewVals, Time) {
-    EXPECT_EQ( time_bank (10, 1024*1, 1024*16*4),
-      10 * 1024/1024 * 1024*16*4 * sizeof(double));
+    EXPECT_EQ( time_bank (10, 256, 1024*16*4),
+      (10 * 256 * 1024*16*4 * sizeof(double)) / 1024);
   }
 } }//end femerea::test:: namespace
 

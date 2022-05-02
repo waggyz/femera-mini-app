@@ -99,7 +99,7 @@ namespace femera { namespace data {
 #endif
     auto v = reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
     this->bulk.resize (lpad + sz + rpad);// <= capacity (); ptr still valid
-    for (size_t i=0; i<n; i++) {v [i] = init_val;}// 35% slower than 0init
+    for (size_t i=0; i<n; i++) {v [i] = init_val;}// 10% slower than 0init
     return v;
   }
   template <fmr::Align_int N>

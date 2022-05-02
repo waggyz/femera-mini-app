@@ -7,7 +7,7 @@ namespace femera { namespace test {
   const auto mini = fmr::new_jobs ();
   //
   inline
-  int time_make_new (uint n=1024*1, uint sz=1024*1) {
+  int time_init_vec (uint n=1024*1, uint sz=1024*1) {
     if (n<1 || sz<1) { return 1; }
     auto time = fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>();
     auto vecs = std::vector<std::vector<double>>(n);
@@ -165,7 +165,7 @@ namespace femera { namespace test {
     return 0;
   }
   TEST(NewVals, Time) {
-    EXPECT_EQ( time_make_new (1024*1, 1024*16*4), 0);
+    EXPECT_EQ( time_init_vec (1024*1, 1024*16*4), 0);
   }
 } }//end femerea::test:: namespace
 

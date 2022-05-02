@@ -6,7 +6,6 @@
 namespace femera { namespace test {
   const auto mini = fmr::new_jobs ();
   //
-  auto bankals = femera::data::Bulk <FMR_ALIGN_VALS>();
   auto bank = femera::data::Bank();
   const auto ints10 = std::string("test-10-ints");
   const auto vals10 = std::string("test-10-floats");

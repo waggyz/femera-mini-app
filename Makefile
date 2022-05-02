@@ -817,6 +817,16 @@ else
 	touch $@
 endif
 
+# Header-only
+$(BUILD_CPU)/%.perf.o : export TMPDIR := $(TEMP_DIR)
+$(BUILD_CPU)/%.perf.o : src/%.perf.cpp src/%.hpp $(TOPDEPS)
+ifeq ($(ENABLE_GOOGLETEST),ON)
+	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
+	$(CXX) -c $(CXXTESTS) $(FMRFLAGS) $< -o $@
+else
+	touch $@
+endif
+
 $(BUILD_CPU)/%.gtst.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.gtst.o : src/%.gtst.cpp src/%.cpp src/%.hpp $(TOPDEPS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
@@ -918,6 +928,18 @@ build/%.perf : export TMPDIR := $(TEMP_DIR)
 build/%.perf : build/%.perf.o $(LIBFEMERA)(build/%.o) \
   $(LIBFEMERA)($(BUILD_CPU)/femera/Test.o) \
   $(LIBFEMERA)($(BUILD_CPU)/femera/task/Jobs.o)
+ifeq ($(ENABLE_GOOGLETEST),ON)
+	$(call col2cxx,$(LINK),$(CXX) $(@).o,$(notdir $@))
+	-$(CXX) $(CXXTESTS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
+else
+	$(info $(WARN) $@ not tested: GoogleTest disabled)
+	echo "WARNING: $@ not tested: GoogleTest disabled" >> $@.err
+	touch $@
+endif
+
+# Header-only
+build/%.perf : export TMPDIR := $(TEMP_DIR)
+build/%.perf : build/%.perf.o $(LIBFEMERA)($(BUILD_CPU)/femera/Test.o)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(@).o,$(notdir $@))
 	-$(CXX) $(CXXTESTS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
