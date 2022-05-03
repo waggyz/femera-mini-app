@@ -22,9 +22,7 @@ namespace femera { namespace test {
         sum += vecs[i].data()[j];
       } }
       printf ("  using: %lu bytes\n", size_t(sum) * sizeof(double));
-      for (uint i=0; i<n; i++) {
-        vecs[i] = std::vector<double>(0);
-      }
+      for (uint i=0; i<n; i++) {vecs[i] = std::vector<double>(0);}
     }
     {
       time.add_idle_time_now ();

@@ -99,6 +99,7 @@ namespace femera { namespace data {
 #endif
     auto v = reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
     this->bulk.resize (lpad + sz + rpad);// <= capacity (); ptr still valid
+    FMR_PRAGMA_OMP_SIMD
     for (size_t i=0; i<n; i++) {v [i] = init_val;}// 10% slower than 0init
     return v;
   }
@@ -121,6 +122,7 @@ namespace femera { namespace data {
           this->bulk.push_back (fmr::Bulk_int (0));
     } } } else {    // zero-initialize then copy elements
       this->bulk.resize (lpad + sz + rpad);// <= capacity(); v, ptr still valid
+      FMR_PRAGMA_OMP_SIMD
       for (std::size_t i=0; i<n; i++) {v [i] = init_vals [i];}
     }
     return v;
