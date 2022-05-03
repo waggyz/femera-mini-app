@@ -18,6 +18,9 @@ namespace femera { namespace data {
     fmr::Align_int size_of   = sizeof (fmr::Bulk_int);// each value in bytes
     bool           is_signed = std::is_signed <fmr::Bulk_int>::value;
   public:
+    template <typename T> inline static constexpr
+    fmr::Align_int offset (uintptr_t)
+    noexcept;
     template <typename T> inline
     std::size_t get_size ()
     noexcept;
@@ -32,9 +35,6 @@ namespace femera { namespace data {
     noexcept;
     template <typename T> inline
     T* set (const std::size_t n, const T init_val)
-    noexcept;
-    static constexpr
-    fmr::Align_int offset (uintptr_t)
     noexcept;
     template <typename T>
     T* set (const std::size_t n, const T* init_vals)

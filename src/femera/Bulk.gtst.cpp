@@ -6,12 +6,6 @@
 namespace femera { namespace test {
   const auto mini = fmr::new_jobs ();
   //
-#if 0
-  TEST(BulkVals, Offset) {
-    EXPECT_EQ( bankals.offset( 8), 0);
-    EXPECT_GT( bankals.offset(13), 0);
-  }
-#endif
   TEST(Bulk, IntSizes) {
     EXPECT_EQ( sizeof (fmr::Bulk_int), 1);
     EXPECT_LE( sizeof (fmr::Bulk_int), sizeof (fmr::Dim_int));
