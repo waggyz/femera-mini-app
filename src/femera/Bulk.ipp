@@ -147,6 +147,18 @@ namespace femera { namespace data {
     }
     return nullptr;
   }
+  template <fmr::Align_int A>
+  template <typename T> inline
+  T Bulk<A>::make_hash (typename std::enable_if <sizeof(T) == 4>::type*)
+  noexcept {                                                //CRC32
+    return T (0);
+  }
+  template <fmr::Align_int A>
+  template <typename T> inline
+  T Bulk<A>::make_hash (typename std::enable_if <sizeof(T) == 8>::type*)
+  noexcept {                                                //CRC64
+    return T (0);
+  }
 } }//end femera::data:: namespace
 
 //end FEMERA_DATA_BULK_IPP

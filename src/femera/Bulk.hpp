@@ -48,6 +48,12 @@ namespace femera { namespace data {
     template <typename T> inline
     Bulk_vec_t& take_bulk ()// use to move or swap Bulk_vec_t
     noexcept;
+    template <typename T> inline
+    T make_hash (typename std::enable_if <sizeof(T) == 4>::type* = nullptr)
+    noexcept;
+    template <typename T> inline
+    T make_hash (typename std::enable_if <sizeof(T) == 8>::type* = nullptr)
+    noexcept;
   private:
     template <typename I>
     I* raw (const size_t n=0)

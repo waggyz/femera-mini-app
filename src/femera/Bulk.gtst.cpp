@@ -6,6 +6,8 @@
 namespace femera { namespace test {
   const auto mini = fmr::new_jobs ();
   //
+  auto bulk_vals = femera::data::Bulk<FMR_ALIGN_INTS> ();
+  //
   TEST(Bulk, IntSizes) {
     EXPECT_EQ( sizeof (fmr::Bulk_int), 1);
     EXPECT_LE( sizeof (fmr::Bulk_int), sizeof (fmr::Dim_int));
@@ -27,6 +29,9 @@ namespace femera { namespace test {
   TEST(Bulk, CrcHashSizes) {// bulk data padded to align size
     EXPECT_LE( sizeof (fmr::Hash_int), FMR_ALIGN_INTS);
     EXPECT_LE( sizeof (fmr::Hash_int), FMR_ALIGN_VALS);
+  }
+  TEST(Bulk, CrcHash) {
+    EXPECT_EQ( bulk_vals.make_hash<fmr::Hash_int> (), 0);
   }
 } }//end femerea::test:: namespace
 
