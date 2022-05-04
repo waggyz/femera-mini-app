@@ -25,7 +25,7 @@ namespace fmr {
   using Perf_int   = uint_fast64_t ;// unit counters, time (ns) counters
   using Perf_float = float         ;// speed, aithmetic intensity, time (sec)
   //
-  using Hash_int   = uint_fast32_t ;//TODO chck CRC32, CRC64 perf (cpu,gpu)
+  using Hash_int   = uint32_t      ;//TODO chck CRC32, CRC64 perf (cpu,gpu)
 #if 0
   //
   // fmr:: floating point types are internal defaults?//TODO dynamic float types
@@ -56,6 +56,15 @@ namespace femera { namespace test {
 
 #define FMR_ALIGN_INTS alignof(size_t)
 #define FMR_ALIGN_VALS alignof(__m256d)
+
+/* CRC-32C (iSCSI) polynomial in reversed bit order. */
+#define FMR_CRC32_POLY 0x82f63b78
+
+/* CRC-32 (Ethernet, ZIP, etc.) polynomial in reversed bit order. */
+/* #define FMR_CRC32_POLY 0xedb88320 */
+
+ // ECMA-182
+#define FMR_CRC64_POLY 0xc96c5795d7870f42L
 
 #undef FMR_USE_PROC_ROOT
 

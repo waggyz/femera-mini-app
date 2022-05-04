@@ -7,12 +7,12 @@
 #include <unordered_map>
 
 namespace femera { namespace data {
-  using Bulk_vec_t = std::vector <fmr::Bulk_int>;//TODO rename to Bank_t ?
+  using Bulk_t = std::vector <fmr::Bulk_int>;
   template <fmr::Align_int A>
   class alignas (A) Bulk {
   //NOTE alignas does not always work; over-allocate bulk and align manually
   private:
-    Bulk_vec_t     bulk;
+    Bulk_t         bulk;
     std::size_t    size      = 0;// # values <= sizeof(T) * bulk.capacity()
     fmr::Hash_int  file_hash = 0;// CRC32 or CRC64 of data stored in file
     fmr::Align_int size_of   = sizeof (fmr::Bulk_int);// each value in bytes
@@ -46,13 +46,15 @@ namespace femera { namespace data {
     T* get_safe (std::size_t start=0)
     noexcept;
     template <typename T> inline
-    Bulk_vec_t& take_bulk ()// use to move or swap Bulk_vec_t
+    Bulk_t& take_bulk ()// use to move or swap Bulk_t
     noexcept;
     template <typename T> inline
-    T make_hash (typename std::enable_if <sizeof(T) == 4>::type* = nullptr)
+    T make_hash (T init_hash=T(0),
+      typename std::enable_if <sizeof(T) == 4>::type* = nullptr)
     noexcept;
     template <typename T> inline
-    T make_hash (typename std::enable_if <sizeof(T) == 8>::type* = nullptr)
+    T make_hash (T init_hash=T(0),
+      typename std::enable_if <sizeof(T) == 8>::type* = nullptr)
     noexcept;
   private:
     template <typename I>

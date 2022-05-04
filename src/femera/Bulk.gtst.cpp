@@ -6,7 +6,7 @@
 namespace femera { namespace test {
   const auto mini = fmr::new_jobs ();
   //
-  auto bulk_vals = femera::data::Bulk<FMR_ALIGN_INTS> ();
+  auto bulk_vals = femera::data::Bulk<FMR_ALIGN_VALS> ();
   //
   TEST(Bulk, IntSizes) {
     EXPECT_EQ( sizeof (fmr::Bulk_int), 1);
@@ -31,7 +31,13 @@ namespace femera { namespace test {
     EXPECT_LE( sizeof (fmr::Hash_int), FMR_ALIGN_VALS);
   }
   TEST(Bulk, CrcHash) {
+    EXPECT_EQ( bulk_vals.make_hash<uint32_t> (), 0);
+    EXPECT_EQ( bulk_vals.make_hash<uint64_t> (), 0);
     EXPECT_EQ( bulk_vals.make_hash<fmr::Hash_int> (), 0);
+    EXPECT_EQ( bulk_vals.set (99, 1.0)[98], 1.0);
+    EXPECT_NE( bulk_vals.make_hash<fmr::Hash_int> (), 0);
+    EXPECT_NE( bulk_vals.make_hash<uint32_t> (), 0);
+    EXPECT_NE( bulk_vals.make_hash<uint64_t> (), 0);
   }
 } }//end femerea::test:: namespace
 

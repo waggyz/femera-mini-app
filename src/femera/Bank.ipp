@@ -7,14 +7,11 @@ namespace femera { namespace data {
     this->name_vals.reserve (this->map_init_size);
     this->name_ints.reserve (this->map_init_size);
   }
-#if 0
-  inline constexpr
-  fmr::Align_int Bank::offset
-  (const std::uintptr_t adr, const fmr::Align_int align)
-  noexcept {
-    return ((adr % align) == 0 ) ? 0 : (align - (adr % align));// [0, align-1]
+  inline
+  Bank::Bank (const fmr::Local_int n) : map_init_size (n) {
+    this->name_vals.reserve (this->map_init_size);
+    this->name_ints.reserve (this->map_init_size);
   }
-#endif
   inline
   fmr::Local_int Bank::del_all ()
   noexcept {
@@ -47,10 +44,52 @@ namespace femera { namespace data {
       : this->name_ints.erase (id);
   }
   template <typename T> inline
-  T* Bank::get (const Data_id& id, std::size_t start, typename
+  T* Bank::get (const Data_id& id, const std::size_t start, typename
+    std::enable_if <std::is_floating_point <T>::value>::type*)
+  noexcept {
+    Bulk_vals* vals = nullptr;
+    try {vals =& this->name_vals.at (id);}
+    catch (std::out_of_range & e) {
+      printf ("%s: floating point name not found\n", id.c_str());
+      return nullptr;
+    }
+    const auto ptr = vals->get_fast<T>();
+    if (vals->get_sizeof<T>() == sizeof (T)) {
+      return & ptr [start];
+    }
+    // convert vals in memory to requested type T
+    const auto n    = vals->get_size  <T>();
+    const auto each = vals->get_sizeof<T>();
+#ifdef FMR_DEBUG
+    printf ("%s: padded size before move %lu bytes\n",
+      id.c_str(), vals->mem_size<T>());
+#endif
+    const auto keep = std::move (vals->take_bulk<T>()); // keep ptr valid
+#ifdef FMR_DEBUG
+    printf ("%s: padded size after  move %lu bytes\n",
+      id.c_str(), vals->mem_size<T>());
+#endif
+    auto dest = this->set<T> (id, n, T(0.0));           // zero-initialize new
+    if (n<=0) {return dest;}
+    switch (each) {
+      case sizeof (float): {                            // cast from float to T
+        const auto v = reinterpret_cast<float*> (ptr);
+        FMR_PRAGMA_OMP_SIMD
+        for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
+      break;}
+      case sizeof (double): {                           // cast from double to T
+        const auto v = reinterpret_cast<double*> (ptr);
+        FMR_PRAGMA_OMP_SIMD
+        for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
+      break;}
+    }
+    return & dest [start];
+  }
+  template <typename T> inline
+  T* Bank::get (const Data_id& id, const std::size_t start, typename
     std::enable_if <std::is_integral <T>::value>::type*)
   noexcept {
-    Vec_int_t* vals = nullptr;
+    Bulk_ints* vals = nullptr;
     try {vals =& this->name_ints.at(id);}
     catch (std::out_of_range & e) {
       printf ("%s: integer name not found\n", id.c_str());
@@ -118,48 +157,6 @@ namespace femera { namespace data {
           for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
         break;}
     } }
-    return & dest [start];
-  }
-  template <typename T> inline
-  T* Bank::get (const Data_id& id, const std::size_t start, typename
-    std::enable_if <std::is_floating_point <T>::value>::type*)
-  noexcept {
-    Vec_val_t* vals = nullptr;
-    try {vals =& this->name_vals.at (id);}
-    catch (std::out_of_range & e) {
-      printf ("%s: floating point name not found\n", id.c_str());
-      return nullptr;
-    }
-    const auto ptr = vals->get_fast<T>();
-    if (vals->get_sizeof<T>() == sizeof (T)) {
-      return & ptr [start];
-    }
-    // convert vals in memory to requested type T
-    const auto n    = vals->get_size  <T>();
-    const auto each = vals->get_sizeof<T>();
-#ifdef FMR_DEBUG
-    printf ("%s: padded size before move %lu bytes\n",
-      id.c_str(), vals->mem_size<T>());
-#endif
-    const auto keep = std::move (vals->take_bulk<T>()); // keep ptr valid
-#ifdef FMR_DEBUGFEMERA_DATA_BULK_IPP
-    printf ("%s: padded size after  move %lu bytes\n",
-      id.c_str(), vals->mem_size<T>());
-#endif
-    auto dest = this->set<T> (id, n, T(0.0));           // zero-initialize new
-    if (n<=0) {return dest;}
-    switch (each) {
-      case sizeof (float): {                            // cast from float to T
-        const auto v = reinterpret_cast<float*> (ptr);
-        FMR_PRAGMA_OMP_SIMD
-        for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
-      break;}
-      case sizeof (double): {                           // cast from double to T
-        const auto v = reinterpret_cast<double*> (ptr);
-        FMR_PRAGMA_OMP_SIMD
-        for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
-      break;}
-    }
     return & dest [start];
   }
 } }//end femera::data:: namespace

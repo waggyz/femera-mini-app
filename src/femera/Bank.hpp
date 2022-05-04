@@ -9,19 +9,19 @@
 namespace femera { namespace data {
   class Bank {//TODO Swap Bank with Vals?
   private:
-#ifdef FMR_ALIGN_INTS
-    using Vec_int_t = Bulk<FMR_ALIGN_INTS>;
+#ifdef FMR_ALIGN_VALS
+    using Bulk_vals = Bulk <FMR_ALIGN_VALS>;
 #else
-    using Vec_int_t = Bulk<alignof (size_t)>;
+    using Bulk_vals = Bulk <alignof (double)>;
 #endif
 #ifdef FMR_ALIGN_INTS
-    using Vec_val_t = Bulk<FMR_ALIGN_VALS>;
+    using Bulk_ints = Bulk <FMR_ALIGN_INTS>;
 #else
-    using Vec_val_t = Bulk<alignof (double)>;
+    using Bulk_ints = Bulk <alignof (size_t)>;
 #endif
   private:
-    std::unordered_map<Data_id, Vec_val_t> name_vals ={};// SSE,__m256d,...align
-    std::unordered_map<Data_id, Vec_int_t> name_ints ={};// size_t alignment
+    std::unordered_map<Data_id, Bulk_vals> name_vals ={};// SSE,__m256d,...align
+    std::unordered_map<Data_id, Bulk_ints> name_ints ={};// size_t alignment
     fmr::Local_int map_init_size = 1024;
   public:
     //TODO handle SSE, AVX, AVX512 types
@@ -29,7 +29,7 @@ namespace femera { namespace data {
     T* set (const Data_id& id, size_t n, T init_val=T(0))
     noexcept;
     template <typename T>
-    T* set (const Data_id& id, size_t n, const T* init_vals)
+    T* set (const Data_id& id, size_t n, const T* init_vals)// T& is ambiguous
     noexcept;
     template <typename I>
     I* get (const Data_id& id, size_t start=0, typename
@@ -46,13 +46,9 @@ namespace femera { namespace data {
     noexcept;
     fmr::Local_int del_all ()// clears int and float maps; returns # deleted
     noexcept;
-#if 0
-    static constexpr
-    fmr::Align_int offset (uintptr_t, fmr::Align_int)//TODO Remove?
-    noexcept;
-#endif
   public:
     Bank ();
+    Bank (const fmr::Local_int init_size);
   };
 } }//end femera::data:: namespace
 

@@ -1,5 +1,7 @@
 #ifndef FEMERA_DATA_BULK_IPP
 #define FEMERA_DATA_BULK_IPP
+#include <stddef.h>
+#include <stdint.h>
 
 namespace femera { namespace data {
   template <fmr::Align_int A>
@@ -35,7 +37,7 @@ namespace femera { namespace data {
   }
   template <fmr::Align_int A>
   template <typename T> inline
-  Bulk_vec_t& Bulk<A>::take_bulk ()
+  Bulk_t& Bulk<A>::take_bulk ()
   noexcept {
     this->size = 0;
     return this->bulk;
@@ -142,22 +144,44 @@ namespace femera { namespace data {
   T* Bulk<A>::get_safe (std::size_t start)
   noexcept {
     const auto lpad = this->offset<T> (std::uintptr_t (this->bulk.data ()));
-    if ((start + 1) * sizeof (T) <= lpad + this->bulk.size()) {
+    if ((start + 1) * sizeof (T) <= lpad + this->bulk.size ()) {
       return & reinterpret_cast<T*> (& this->bulk.data ()[lpad]) [start];
     }
     return nullptr;
   }
   template <fmr::Align_int A>
   template <typename T> inline
-  T Bulk<A>::make_hash (typename std::enable_if <sizeof(T) == 4>::type*)
-  noexcept {                                                //CRC32
-    return T (0);
+  T Bulk<A>::make_hash (T crc,
+    typename std::enable_if <sizeof(T) == 4>::type*)// CRC32
+  noexcept {// https://stackoverflow.com/questions/27939882/fast-crc-algorithm
+    crc = ~crc;
+    auto sz = this->size * this->size_of;
+    auto buf = reinterpret_cast<const unsigned char*> (& this->bulk);
+    while (sz--) {
+      crc ^= *buf++;
+      for (int i = 0; i < 8; i++) {
+#if 0
+        crc = crc & 1 ? (crc >> 1) ^ FMR_CRC32_POLY : crc >> 1;
+#else
+        crc = (crc >> 1) ^ (FMR_CRC32_POLY & (0 - (crc & 1)));
+#endif
+    } }
+    return ~crc;
   }
   template <fmr::Align_int A>
   template <typename T> inline
-  T Bulk<A>::make_hash (typename std::enable_if <sizeof(T) == 8>::type*)
-  noexcept {                                                //CRC64
-    return T (0);
+  T Bulk<A>::make_hash (T crc,
+    typename std::enable_if <sizeof(T) == 8>::type*)// CRC64
+  noexcept {
+    crc = ~crc;
+    auto sz = this->size * this->size_of;
+    auto buf = reinterpret_cast<const unsigned char*> (& this->bulk);
+    while (sz--) {
+      crc ^= *buf++;
+      for (int i = 0; i < 8; i++) {
+        crc = (crc >> 1) ^ (FMR_CRC64_POLY & (0 - (crc & 1)));
+    } }
+    return ~crc;
   }
 } }//end femera::data:: namespace
 
