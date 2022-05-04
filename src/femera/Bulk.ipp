@@ -2,6 +2,7 @@
 #define FEMERA_DATA_BULK_IPP
 #include <stddef.h>
 #include <stdint.h>
+ #include <nmmintrin.h>
 
 namespace femera { namespace data {
   template <fmr::Align_int A>
@@ -151,30 +152,38 @@ namespace femera { namespace data {
   }
   template <fmr::Align_int A>
   template <typename T> inline
-  T Bulk<A>::make_hash (T crc,
+  T Bulk<A>::make_hash (T in,
     typename std::enable_if <sizeof(T) == 4>::type*)// CRC32
-  noexcept {// https://stackoverflow.com/questions/27939882/fast-crc-algorithm
-    crc = ~crc;
+  noexcept {
+    uint64_t crc = ~in;
     auto sz = this->size * this->size_of;
     auto buf = reinterpret_cast<const unsigned char*> (& this->bulk);
     while (sz--) {
+#if 1//def FMR_HAS_64BITCRC32
+      crc = _mm_crc32_u64 (crc, *buf++);
+#endif
+#ifdef FMR_HAS_32BITCRC32
+      crc = _mm_crc32_u32 (crc, *buf++);
+#endif
+#if 0
       crc ^= *buf++;
       for (int i = 0; i < 8; i++) {
 #if 0
         crc = crc & 1 ? (crc >> 1) ^ FMR_CRC32_POLY : crc >> 1;
-#else
-        crc = (crc >> 1) ^ (FMR_CRC32_POLY & (0 - (crc & 1)));
 #endif
-    } }
-    return ~crc;
+        crc = (crc >> 1) ^ (FMR_CRC32_POLY & (0 - (crc & 1)));
+      }
+#endif
+    }
+    return ~T (crc);
   }
   template <fmr::Align_int A>
   template <typename T> inline
   T Bulk<A>::make_hash (T crc,
     typename std::enable_if <sizeof(T) == 8>::type*)// CRC64
-  noexcept {
+  noexcept {// https://stackoverflow.com/questions/27939882/fast-crc-algorithm
     crc = ~crc;
-    auto sz = this->size * this->size_of;
+    std::size_t sz = this->size * this->size_of;
     auto buf = reinterpret_cast<const unsigned char*> (& this->bulk);
     while (sz--) {
       crc ^= *buf++;

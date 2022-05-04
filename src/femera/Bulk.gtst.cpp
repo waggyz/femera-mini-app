@@ -29,6 +29,8 @@ namespace femera { namespace test {
   TEST(Bulk, CrcHashSizes) {// bulk data padded to align size
     EXPECT_LE( sizeof (fmr::Hash_int), FMR_ALIGN_INTS);
     EXPECT_LE( sizeof (fmr::Hash_int), FMR_ALIGN_VALS);
+    EXPECT_LE( 8, FMR_ALIGN_INTS);// for _mm_crc32_u64 (..)
+    EXPECT_LE( 8, FMR_ALIGN_VALS);
   }
   TEST(Bulk, CrcHash) {
     EXPECT_EQ( bulk_vals.make_hash<uint32_t> (), 0);
@@ -38,6 +40,8 @@ namespace femera { namespace test {
     EXPECT_NE( bulk_vals.make_hash<fmr::Hash_int> (), 0);
     EXPECT_NE( bulk_vals.make_hash<uint32_t> (), 0);
     EXPECT_NE( bulk_vals.make_hash<uint64_t> (), 0);
+    EXPECT_NE( bulk_vals.make_hash<uint32_t> (),
+      uint64_t(bulk_vals.make_hash<uint64_t> ()));
   }
 } }//end femerea::test:: namespace
 
