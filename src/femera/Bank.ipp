@@ -4,8 +4,8 @@
 namespace femera { namespace data {
   inline
   Bank::Bank () {
-    this->name_ints.reserve (1024);
-    this->name_vals.reserve (1024);
+    this->name_vals.reserve (this->map_init_size);
+    this->name_ints.reserve (this->map_init_size);
   }
 #if 0
   inline constexpr
@@ -17,12 +17,13 @@ namespace femera { namespace data {
 #endif
   inline
   fmr::Local_int Bank::del_all ()
-  noexcept {fmr::Local_int n=0;
-    n = fmr::Local_int (this->name_ints.size ()+ this->name_vals.size ());
-    this->name_ints.clear ();// maybe releases reserve
-    this->name_vals.clear ();// maybe releases reserve
-    this->name_ints.reserve (1024);
-    this->name_vals.reserve (1024);
+  noexcept {
+    const fmr::Local_int n = fmr::Local_int
+      (this->name_vals.size () + this->name_ints.size ());
+    this->name_vals.clear ();// may release reserve; standard does not specify
+    this->name_vals.reserve (this->map_init_size);
+    this->name_ints.clear ();
+    this->name_ints.reserve (this->map_init_size);
     return n;
   }
   template <typename T> inline
@@ -120,7 +121,7 @@ namespace femera { namespace data {
     return & dest [start];
   }
   template <typename T> inline
-  T* Bank::get (const Data_id& id, std::size_t start, typename
+  T* Bank::get (const Data_id& id, const std::size_t start, typename
     std::enable_if <std::is_floating_point <T>::value>::type*)
   noexcept {
     Vec_val_t* vals = nullptr;
@@ -138,12 +139,12 @@ namespace femera { namespace data {
     const auto each = vals->get_sizeof<T>();
 #ifdef FMR_DEBUG
     printf ("%s: padded size before move %lu bytes\n",
-      id.c_str(), vals->pad_size<T>());
+      id.c_str(), vals->mem_size<T>());
 #endif
     const auto keep = std::move (vals->take_bulk<T>()); // keep ptr valid
 #ifdef FMR_DEBUGFEMERA_DATA_BULK_IPP
     printf ("%s: padded size after  move %lu bytes\n",
-      id.c_str(), vals->pad_size<T>());
+      id.c_str(), vals->mem_size<T>());
 #endif
     auto dest = this->set<T> (id, n, T(0.0));           // zero-initialize new
     if (n<=0) {return dest;}

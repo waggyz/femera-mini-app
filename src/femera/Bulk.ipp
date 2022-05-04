@@ -11,7 +11,7 @@ namespace femera { namespace data {
   }
   template <fmr::Align_int A>
   template <typename T> inline
-  std::size_t Bulk<A>::pad_size ()
+  std::size_t Bulk<A>::mem_size ()
   noexcept {
     return this->bulk.size ();
   }
@@ -117,7 +117,7 @@ namespace femera { namespace data {
     const auto lpad = this->offset<T> (ptr);// max padding is A-1
     const auto rpad = this->offset<T> (sz );// max padding is A-1
     auto v = reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
-    if (lpad == 0) {// bulk.assign(..) works if already aligned when allocated
+    if (lpad == 0) {// bulk.assign(..) if already aligned when allocated
       const auto from = reinterpret_cast<const fmr::Bulk_int*> (init_vals);
       this->bulk.assign (from, from + sz);
       if (rpad > 0) {

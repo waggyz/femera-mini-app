@@ -20,15 +20,16 @@ namespace femera { namespace data {
     using Vec_val_t = Bulk<alignof (double)>;
 #endif
   private:
-    std::unordered_map<Data_id, Vec_int_t> name_ints ={};// size_t alignment
     std::unordered_map<Data_id, Vec_val_t> name_vals ={};// SSE,__m256d,...align
+    std::unordered_map<Data_id, Vec_int_t> name_ints ={};// size_t alignment
+    fmr::Local_int map_init_size = 1024;
   public:
     //TODO handle SSE, AVX, AVX512 types
     template <typename T>
-    T* set (const Data_id& id, const size_t n, const T init_val=T(0))
+    T* set (const Data_id& id, size_t n, T init_val=T(0))
     noexcept;
     template <typename T>
-    T* set (const Data_id& id, const size_t n, const T* init_vals)
+    T* set (const Data_id& id, size_t n, const T* init_vals)
     noexcept;
     template <typename I>
     I* get (const Data_id& id, size_t start=0, typename
@@ -43,7 +44,7 @@ namespace femera { namespace data {
     template <typename T>
     void del (const Data_id& id)
     noexcept;
-    fmr::Local_int del_all ()// clears int and float maps
+    fmr::Local_int del_all ()// clears int and float maps; returns # deleted
     noexcept;
 #if 0
     static constexpr

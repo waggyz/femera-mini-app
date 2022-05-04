@@ -8,8 +8,8 @@
 
 namespace femera { namespace data {
   using Bulk_vec_t = std::vector <fmr::Bulk_int>;//TODO rename to Bank_t ?
-  template <fmr::Align_int N>
-  class alignas (N) Bulk {//TODO move to Bank.hpp
+  template <fmr::Align_int A>
+  class alignas (A) Bulk {
   //NOTE alignas does not always work; over-allocate bulk and align manually
   private:
     Bulk_vec_t     bulk;
@@ -22,10 +22,10 @@ namespace femera { namespace data {
     fmr::Align_int offset (uintptr_t)
     noexcept;
     template <typename T> inline
-    std::size_t get_size ()
+    std::size_t get_size ()// size of data
     noexcept;
     template <typename T> inline
-    std::size_t pad_size ()// size including padding
+    std::size_t mem_size ()// size including padding
     noexcept;
     template <typename T> inline
     fmr::Align_int get_sizeof ()
