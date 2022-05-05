@@ -64,12 +64,12 @@ namespace femera { namespace data {
     printf ("%s: padded size before move %lu bytes\n",
       id.c_str(), vals->mem_size<T>());
 #endif
-    const auto keep = std::move (vals->take_bulk<T>()); // keep ptr valid
+    const auto keep = std::move (vals->take_bulk());    // keep ptr valid
 #ifdef FMR_DEBUG
     printf ("%s: padded size after  move %lu bytes\n",
       id.c_str(), vals->mem_size<T>());
 #endif
-    auto dest = this->set<T> (id, n, T(0.0));           // zero-initialize new
+    auto dest = this->set<T> (id, n, T(0.0));           // zero-initialize
     if (n<=0) {return dest;}
     switch (each) {
       case sizeof (float): {                            // cast from float to T
@@ -109,7 +109,7 @@ namespace femera { namespace data {
     const auto n    = vals->get_size  <T>();
     const auto each = vals->get_sizeof<T>();
     const auto sign = vals->has_sign  <T>();
-    const auto keep = std::move (vals->take_bulk<T>());// keep ptr valid
+    const auto keep = std::move (vals->take_bulk());        // keep ptr valid
     auto dest = this->set<T> (id, n, T(0));                 // zero-initialize
     if (n<=0) {return dest;}
     if (sign) {                                             // signed ints

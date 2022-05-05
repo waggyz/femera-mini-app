@@ -37,7 +37,6 @@ namespace femera { namespace data {
     return this->is_signed;
   }
   template <fmr::Align_int A>
-  template <typename T> inline
   Bulk_t& Bulk<A>::take_bulk ()
   noexcept {
     this->size = 0;

@@ -45,16 +45,15 @@ namespace femera { namespace data {
     template <typename T> inline
     T* get_safe (std::size_t start=0)
     noexcept;
-    template <typename T> inline
     Bulk_t& take_bulk ()// use to move or swap Bulk_t
     noexcept;
-    template <typename T> inline
-    T make_hash (T init_hash=T(0),
-      typename std::enable_if <sizeof(T) == 4>::type* = nullptr)
+    template <typename H> inline
+    H make_hash (H init_hash=H(0),
+      typename std::enable_if <sizeof(H) == 4>::type* = nullptr)
     noexcept;
-    template <typename T> inline
-    T make_hash (T init_hash=T(0),
-      typename std::enable_if <sizeof(T) == 8>::type* = nullptr)
+    template <typename H> inline
+    H make_hash (H init_hash=H(0),
+      typename std::enable_if <sizeof(H) == 8>::type* = nullptr)
     noexcept;
   private:
     template <typename I>
