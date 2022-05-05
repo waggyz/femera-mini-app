@@ -1,4 +1,4 @@
-#include "femera.hpp"
+#include "../femera.hpp"
 #include "Bank.hpp"
 
 #include "gtest/gtest.h"
@@ -7,7 +7,7 @@ namespace femera { namespace test {
   const auto mini = fmr::new_jobs ();
   //
   inline
-  int time_bank (uint N=10, uint n=1024*1, uint sz=1024*1) {// returns total kB
+  int time_bank (uint N=10, uint n=1024, uint sz=1024) {// returns total kB
     if (N<1 || n<1 || sz<1) { return 1; }
     auto time = fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>();
     auto vals = femera::data::Bank();
