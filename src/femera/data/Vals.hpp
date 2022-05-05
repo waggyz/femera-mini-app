@@ -1,7 +1,7 @@
 #ifndef FEMERA_DATA_VALS_HPP
 #define FEMERA_DATA_VALS_HPP
 
-#include "../Bank.hpp"
+#include "Bank.hpp"
 
 namespace femera { namespace data {
   class Vals;//            Data has vtable

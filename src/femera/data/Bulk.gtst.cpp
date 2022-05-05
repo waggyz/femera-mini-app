@@ -1,4 +1,4 @@
-#include "femera.hpp"
+#include "../femera.hpp"
 #include "Bulk.hpp"
 
 #include "gtest/gtest.h"
@@ -27,10 +27,10 @@ namespace femera { namespace test {
 #endif
   }
   TEST(Bulk, CrcHashSizes) {// bulk data padded to align size
-    EXPECT_LE( sizeof (fmr::Hash_int), FMR_ALIGN_INTS);
     EXPECT_LE( sizeof (fmr::Hash_int), FMR_ALIGN_VALS);
-    EXPECT_LE( 8, FMR_ALIGN_INTS);// for _mm_crc32_u64 (..)
-    EXPECT_LE( 8, FMR_ALIGN_VALS);
+    EXPECT_LE( sizeof (fmr::Hash_int), FMR_ALIGN_INTS);
+    EXPECT_LE( 8, FMR_ALIGN_VALS);// for _mm_crc32_u64 (..)
+    EXPECT_LE( 8, FMR_ALIGN_INTS);
   }
   TEST(Bulk, CrcHash) {
     EXPECT_EQ( bulk_vals.make_hash<uint32_t> (), 0);
@@ -43,6 +43,7 @@ namespace femera { namespace test {
     EXPECT_NE( bulk_vals.make_hash<uint32_t> (),
       uint64_t(bulk_vals.make_hash<uint64_t> ()));
   }
+  //
 } }//end femerea::test:: namespace
 
 fmr::Exit_int main (int argc, char** argv) {

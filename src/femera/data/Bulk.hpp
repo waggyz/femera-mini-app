@@ -1,7 +1,7 @@
 #ifndef FEMERA_DATA_BULK_HPP
 #define FEMERA_DATA_BULK_HPP
 
-#include "Data.hpp"
+#include "../Data.hpp"
 
 #include <vector>
 #include <unordered_map>
