@@ -54,18 +54,6 @@ namespace femera { namespace test {
 #endif
 #endif
 
-#define FMR_ALIGN_INTS alignof(size_t)
-#define FMR_ALIGN_VALS alignof(__m256d)
-
-/* CRC-32C (iSCSI) polynomial in reversed bit order. */
-#define FMR_CRC32_POLY 0x82f63b78
-
-/* CRC-32 (Ethernet, ZIP, etc.) polynomial in reversed bit order. */
-/* #define FMR_CRC32_POLY 0xedb88320 */
-
- // ECMA-182
-#define FMR_CRC64_POLY 0xc96c5795d7870f42L
-
 #undef FMR_USE_PROC_ROOT
 
 #define MAKESTR(s) STR(s)

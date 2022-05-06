@@ -69,16 +69,16 @@ namespace femera { namespace data {
     printf ("%s: padded size after  move %lu bytes\n",
       id.c_str(), vals->mem_size<T>());
 #endif
-    auto dest = this->set<T> (id, n, T(0.0));           // zero-initialize
+    FMR_ALIGN_PTR dest = this->set<T> (id, n, T(0.0));           // zero-initialize
     if (n<=0) {return dest;}
     switch (each) {
       case sizeof (float): {                            // cast from float to T
-        const auto v = reinterpret_cast<float*> (ptr);
+        const FMR_ALIGN_PTR v = reinterpret_cast<float*> (ptr);
         FMR_PRAGMA_OMP_SIMD
         for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
       break;}
       case sizeof (double): {                           // cast from double to T
-        const auto v = reinterpret_cast<double*> (ptr);
+        const FMR_ALIGN_PTR v = reinterpret_cast<double*> (ptr);
         FMR_PRAGMA_OMP_SIMD
         for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
       break;}
@@ -110,50 +110,50 @@ namespace femera { namespace data {
     const auto each = vals->get_sizeof<T>();
     const auto sign = vals->has_sign  <T>();
     const auto keep = std::move (vals->take_bulk());        // keep ptr valid
-    auto dest = this->set<T> (id, n, T(0));                 // zero-initialize
+    FMR_ARRAY_PTR dest = this->set<T> (id, n, T(0));        // zero-initialize
     if (n<=0) {return dest;}
     if (sign) {                                             // signed ints
       switch (each) {
         case sizeof (int8_t): {
-          const auto v = reinterpret_cast<int8_t*> (ptr);
+          const FMR_ARRAY_PTR v = reinterpret_cast<int8_t*> (ptr);
           FMR_PRAGMA_OMP_SIMD
           for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
         break;}
         case sizeof (int16_t): {
           FMR_PRAGMA_OMP_SIMD
-          const auto v = reinterpret_cast<int16_t*> (ptr);
+          const FMR_ARRAY_PTR v = reinterpret_cast<int16_t*> (ptr);
           for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
         break;}
         case sizeof (int32_t): {
           FMR_PRAGMA_OMP_SIMD
-          const auto v = reinterpret_cast<int32_t*> (ptr);
+          const FMR_ARRAY_PTR v = reinterpret_cast<int32_t*> (ptr);
           for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
         break;}
         case sizeof (int64_t): {
           FMR_PRAGMA_OMP_SIMD
-          const auto v = reinterpret_cast<int64_t*> (ptr);
+          const FMR_ARRAY_PTR v = reinterpret_cast<int64_t*> (ptr);
           for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
         break;}
       } } else {                                            // unsigned ints
       switch (each) {
         case sizeof (uint8_t): {
           FMR_PRAGMA_OMP_SIMD
-          const auto v = reinterpret_cast<uint8_t*> (ptr);
+          const FMR_ARRAY_PTR v = reinterpret_cast<uint8_t*> (ptr);
           for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
         break;}
         case sizeof (uint16_t): {
           FMR_PRAGMA_OMP_SIMD
-          const auto v = reinterpret_cast<uint16_t*> (ptr);
+          const FMR_ARRAY_PTR v = reinterpret_cast<uint16_t*> (ptr);
           for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
         break;}
         case sizeof (uint32_t): {
           FMR_PRAGMA_OMP_SIMD
-          const auto v = reinterpret_cast<uint32_t*> (ptr);
+          const FMR_ARRAY_PTR v = reinterpret_cast<uint32_t*> (ptr);
           for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
         break;}
         case sizeof (uint64_t): {
           FMR_PRAGMA_OMP_SIMD
-          const auto v = reinterpret_cast<uint64_t*> (ptr);
+          const FMR_ARRAY_PTR v = reinterpret_cast<uint64_t*> (ptr);
           for (std::size_t i=0; i<n; i++) {dest [i] = T (v [i]);}
         break;}
     } }

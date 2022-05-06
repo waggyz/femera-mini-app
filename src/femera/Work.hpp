@@ -1,6 +1,7 @@
 #ifndef FEMERA_HAS_WORK_HPP
 #define FEMERA_HAS_WORK_HPP
 /** */
+#include "../fmr/math.hpp"
 #include "../fmr/perf/Meter.hpp"
 #include "Errs.hpp"
 #include "type.hpp"

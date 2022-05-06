@@ -7,6 +7,7 @@ digraph "source tree" {
 	clusterrank="local";
 	"Gtst.cpp" -> "core.h"
 	"Meter.hpp" -> "perf.hpp"
+	"Bank.perf.cpp" -> "femera.hpp"
 	"Main.cpp" -> "Fomp.hpp"
 	"Gmsh.hpp" -> "Gmsh.ipp"
 	"Errs.cpp" -> "Errs.hpp"
@@ -28,6 +29,7 @@ digraph "source tree" {
 	"Vals.hpp" -> "Bank.hpp"
 	"nvid.hpp" -> "fmr.hpp"
 	"perf.hpp" -> "fmr.hpp"
+	"Work.hpp" -> "math.hpp"
 	"Data.hpp" -> "Data.ipp"
 	"Text.cpp" -> "Text.hpp"
 	"Beds.cpp" -> "Self.hpp"
@@ -121,6 +123,7 @@ digraph "source tree" {
 	"Perf.cpp" -> "Perf.hpp"
 	"perf.hpp" -> "perf.ipp"
 	"Self.hpp" -> "Test.hpp"
+	"Bulk.perf.cpp" -> "femera.hpp"
 	"proc.cpp" -> "proc.hpp"
 	"Self.hpp" -> "Self.ipp"
 	"Fmpi.cpp" -> "Fmpi.hpp"

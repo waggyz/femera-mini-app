@@ -8,7 +8,7 @@ namespace femera { namespace test {
   //
   inline
   int time_bank (uint N=10, uint n=1024, uint sz=1024) {// returns total kB
-    if (N<1 || n<1 || sz<1) { return 1; }
+    if (N<1 || n<1 || sz<1) { return 0; }
     auto time = fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>();
     auto vals = femera::data::Bank();
     const double bytes = double (n * sz * sizeof (double));
@@ -27,11 +27,7 @@ namespace femera { namespace test {
         vals.get<float> ("vals_"+std::to_string (i));// convert to float
       }
       const auto cast_s = double (time.add_busy_time_now ());
-#if 0
-      for (uint i=0; i<n; i++) {vals.del<float> ("vals_"+std::to_string (i));}
-#else
       vals.del_all ();
-#endif
       printf ("%.2e B / %.2e s = %.2e B/s of double (%u), %.2e s to float\n",
         bytes, add_s, bytes / add_s, v % 2, cast_s);
     }

@@ -7,8 +7,10 @@
 #endif
 
 namespace femera {
-  namespace data{
+  namespace data {
+#ifdef FMR_HAS_PETSC
     static char petsc_help[] = "Femera interface to PETSC.\n";
+#endif
   }
   void data::Pets::task_init (int*, char**) {
 #ifdef FMR_HAS_PETSC
