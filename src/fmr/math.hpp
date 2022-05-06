@@ -1,6 +1,8 @@
 #ifndef FMR_HAS_MATH_HPP
 #define FMR_HAS_MATH_HPP
 
+#include "fmr.hpp"
+
 #include <tuple>
 #include <valarray>
 #include <map>
@@ -25,19 +27,32 @@
 #define FMR_ALIGN_PTR __attribute__((aligned(FMR_ALIGN_VALS))) auto* FMR_RESTRICT
 
 namespace fmr {namespace data {
-  enum class Precision   : int {Unknown=0, Bit = 1,//TODO unsigned Dim_int?
-//    Bit        =  1, Int_hexadec  = -4, Int_byte     =-8,
-    Nat_short  = -2, Nat          = -4, Nat_long     =-8,// unsigned
-    Int_short  =  2, Int          =  4, Int_long     = 8,
+#if 0
+  enum class Precision   : int8_t {Unknown=0, Bit = -111,
+    Int_byte   = -1, Int_short  = -2, Int = -4, Int_long = -8,// signed
+    Nat_byte   =  1, Nat_short  =  2, Nat =  4, Nat_long =  8,// unsigned
+    Fixed_half =-16, Fixed_single =-32, Fixed_double =-64,
     Float_half = 16, Float_single = 32, Float_double = 64,
-    Fixed_half =-16, Fixed_single =-32, Fixed_double =-64
+//    Float_long = sizeof (long double)
   };
-  enum class Layout      : uint8_t { Unknown =0,//TODO Dim_int?
-    Vector=1, Block=2, Native=3 // Native is for built-in complex type
+#endif
+#if 0
+  enum class Precision   : int8_t {Unknown=0,// Bit  = 111,
+//                                          Int_hex  = -3, Nat_hex  = 3,
+                                          Int_byte = -1, Nat_byte = 1,
+    Float_half   = 16, Fixed_half   =-16, Int_short= -2, Nat_short= 2,
+    Float_single = 32, Fixed_single =-32, Int      = -4, Nat      = 4,
+    Float_double = 64, Fixed_double =-64, Int_long = -8, Nat_long = 8,
+//    Float_long   = 65
+  };
+#endif
+  enum class Layout      : int8_t { Unknown =0,// for arrays of Zomplex
+    Vector=1, Block=2, Native=3 // Native is for real & built-in complex type
   };
 } }// end fmr::data namespace
 namespace fmr {namespace math {
-  enum class Poly : uint8_t {None=0, Error, Unknown,
+  using Zorder_int = fmr::Dim_int;
+  enum class Poly : int8_t {None=0, Error, Unknown,
     Full, Serendipity, Bipoly, Tripoly, Pyramid, Prism,
   end};
   static const std::map<Poly,std::pair<std::string,std::string>>
@@ -53,50 +68,40 @@ namespace fmr {namespace math {
     {Poly::       Prism,std::make_pair("M","Prism polynomial")},
     {Poly::         end,std::make_pair("*","Poly enum end marker")}
   };
-  typedef int8_t Zorder_int;
 #ifdef FMR_HAS_ZYCLOPS
-  enum class Algebra     : uint8_t {Unknown =0,
+  enum class Algebra     : int8_t {Unknown =0,
     Real=zyc::Real, Complex=zyc::Complex, Dual=zyc::Dual, Split=zyc::Split,
     Quat=zyc::Quat,     OTI=zyc::OTI    , User=zyc::User,
     Int, Nat
   };
 #else
-  enum class Algebra     : uint8_t {Unknown =0,
+  enum class Algebra     : int8_t {Unknown =0,
     Real, Complex, Dual, Split, Quat, OTI, User,
     Int,// signed
     Nat // unsigned
   };
 #endif
-#if 0
-  enum class Complex_form:int8_t{ Unknown =0,
-    Vector, CR, CRT,     // CRT: transposed
-    CR_sparse, CRT_sparse// zero terms removed
-    //CR_lower, CR_upper //TODO triangular storage?
-    //...for Zomplex struct
-    Algebra          algebra = Algebra::Real;
-    Zorder_int         order = 0;
-    Complex_form        form = Complex_form::Vector;
-    fmr::data::Layout layout = fmr::data::Layout::Native;
-  };
-#endif
   struct Zomplex {
-    Algebra          algebra = Algebra::Real;//TODO change to family
+  public:
+    Algebra           family = Algebra::Real;
     Zorder_int         order = 0;
     fmr::data::Layout layout = fmr::data::Layout::Native;
-#if 0
-    bool       is_cr_matrix  = false;// the rest for is_cr_matrix == true
-    bool       is_transposed = false;
-    bool       is_compressed = false;// true: zero terms removed
-    bool            is_upper = false;
-    bool            is_lower = false;
-#endif
-    // constructors
+    bool        is_transpose = false;
+    bool           has_upper = false;// triangular or full matrix storage
+    bool           has_lower = false;// triangular or full matrix storage
+    bool           is_sparse = false;// true: zero terms removed
+  public:
+    bool       is_cr_full   (){ return this->has_upper && this->has_lower; }
+    bool       is_cr_matrix (){ return this->has_upper || this->has_lower; }
+    bool       is_vector    (){ return ! this->is_cr_full (); }
+    bool       is_conjugate (){ return this->is_transpose; }
+  public:
     Zomplex () {}
-    Zomplex (Algebra z, Zorder_int p) : algebra (z), order(p) {
+    Zomplex (Algebra z, Zorder_int p) : family (z), order(p) {
       if (p!=0) {layout = fmr::data::Layout::Block;}
     }
     Zomplex (Algebra z, Zorder_int p, fmr::data::Layout l) :
-      algebra (z), order(p), layout(l) {}
+      family (z), order(p), layout(l) {}
   };
   const static Zomplex Real
     = Zomplex (Algebra::Real, 0, fmr::data::Layout::Native);
@@ -121,8 +126,9 @@ namespace fmr {namespace math {
   static inline uint poly_terms (Poly ptype, uint nvars, uint pord);
   template <typename F> static inline bool are_close (const F a, const F b);
   template <typename F> static inline bool are_equal (const F a, const F b);
-  template <typename F> static inline bool is_greater_than (const F a, const F b);
   template <typename F> static inline bool is_less_than (const F a, const F b);
+  template <typename F> static inline bool is_more_than (const F a, const F b);
+  template <typename F> static inline bool is_greater_than (const F a, const F b);
 } }// end fmr::math namespace
 
 template <typename I> static inline// I : Integer type
@@ -173,7 +179,7 @@ static inline uint fmr::math::nchoosek (const uint n, const uint k) {
   //https://stackoverflow.com/questions/9330915/number-of-combinations-n-choose-r-in-c/53983114
   //large k: n choose k = n choose (n-k)
   if (k > n / 2) {return fmr::math::nchoosek (n, n - k);}
-  uint res = 1;//TODO unsigned long ?
+  uint res = 1;
   for (uint r = 1; r <= k; ++r) {
     res *= n - r + 1;
     res /= r;
@@ -236,13 +242,18 @@ bool fmr::math::are_equal (const F a, const F b){
     ? std::abs(b) : std::abs(a)) * std::numeric_limits<F>::epsilon());
 }
 template <typename F> static inline// F : Floating-point type
-bool fmr::math::is_greater_than (const F a, const F b) {
+bool fmr::math::is_less_than (const F a, const F b) {
+  return (b - a) > ( (std::abs(a) < std::abs(b)
+    ? std::abs(b) : std::abs(a)) * std::numeric_limits<F>::epsilon());
+}
+template <typename F> static inline// F : Floating-point type
+bool fmr::math::is_more_than (const F a, const F b) {
   return (a - b) > ( (std::abs(a) < std::abs(b)
     ? std::abs(b) : std::abs(a)) * std::numeric_limits<F>::epsilon());
 }
 template <typename F> static inline// F : Floating-point type
-bool fmr::math::is_less_than (const F a, const F b) {
-  return (b - a) > ( (std::abs(a) < std::abs(b)
+bool fmr::math::is_greater_than (const F a, const F b) {
+  return (a - b) > ( (std::abs(a) < std::abs(b)
     ? std::abs(b) : std::abs(a)) * std::numeric_limits<F>::epsilon());
 }
 #if 0

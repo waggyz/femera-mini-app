@@ -45,6 +45,7 @@ digraph "source tree" {
 	"Cgns.hpp" -> "Data.hpp"
 	"core.h" -> "File.hpp"
 	"Self.hpp" -> "Test.hpp"
+	"math.hpp" -> "fmr.hpp"
 	"core.h" -> "Jobs.hpp"
 	"Proc.hpp" -> "Work.hpp"
 	"Sims.hpp" -> "Task.hpp"

@@ -34,7 +34,7 @@ if __name__ == "__main__":
   ntd = [] # number of TO_DO
   nfm = [] # number of FIX_ME
   commit = []
-  files_ylim = 150.0
+  files_ylim = 200.0
   lines_ylim = files_ylim * 100.0
   with open ('data/src/femera-'+cpumodel+'-build-stats.csv') as File:
     data = csv.reader(File, delimiter=',')

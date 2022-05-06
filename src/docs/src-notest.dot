@@ -125,6 +125,7 @@ digraph "source tree" {
 	"Self.hpp" -> "Test.hpp"
 	"Bulk.perf.cpp" -> "femera.hpp"
 	"proc.cpp" -> "proc.hpp"
+	"math.hpp" -> "fmr.hpp"
 	"Self.hpp" -> "Self.ipp"
 	"Fmpi.cpp" -> "Fmpi.hpp"
 	"Node.cpp" -> "core.h"
