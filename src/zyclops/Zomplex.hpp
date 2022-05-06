@@ -28,7 +28,7 @@ namespace zyc {
     bool        is_transpose = false;
     bool           has_upper = false;// triangular or full matrix storage
     bool           has_lower = false;// triangular or full matrix storage
-    bool           has_zeros = true; // false: sparse (zero terms removed)
+    bool           has_zeros = true; // false: is sparse (zero terms removed)
   };
   const static Zomplex Real
     = Zomplex (Algebra::Real, 0, zyc::Layout::Native);
