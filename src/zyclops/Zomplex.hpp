@@ -1,11 +1,26 @@
 #ifndef ZYC_HAS_ZOMPLEX_HPP
 #define ZYC_HAS_ZOMPLEX_HPP
 
-#include "zyclops.hpp"
+#include "zyc.hpp"
 
 namespace zyc {
 
   class Zomplex {
+  public:
+    bool        is_cr_matrix ();
+    bool        is_cr_upper  ();
+    bool        is_cr_lower  ();
+    bool        is_cr_full   ();
+    bool        is_vector    ();
+    bool        is_conjugate ();
+    bool        is_sparse    ();
+    Algebra     get_family   ();
+    Zorder_int  get_order    ();
+    zyc::Layout get_layout   ();
+  public:
+    Zomplex ()=default;
+    Zomplex (Algebra, Zorder_int);
+    Zomplex (Algebra, Zorder_int, zyc::Layout);
   private:
     Algebra           family = Algebra::Real;
     Zorder_int         order = 0;
@@ -14,24 +29,6 @@ namespace zyc {
     bool           has_upper = false;// triangular or full matrix storage
     bool           has_lower = false;// triangular or full matrix storage
     bool           has_zeros = true; // false: sparse (zero terms removed)
-  public:
-    bool       is_cr_matrix (){ return this->has_upper || this->has_lower; }
-    bool       is_cr_upper  (){ return this->has_upper && ! this->has_lower; }
-    bool       is_cr_lower  (){ return ! this->has_upper && this->has_lower; }
-    bool       is_cr_full   (){ return this->has_upper && this->has_lower; }
-    bool       is_vector    (){ return ! this->is_cr_matrix (); }
-    bool       is_conjugate (){ return this->is_transpose; }
-    bool       is_sparse    (){ return ! has_zeros; }
-    Algebra    get_family        (){ return this->family; }
-    Zorder_int get_order         (){ return this->order; }
-    zyc::Layout get_layout (){ return this->layout; }
-  public:
-    Zomplex () {}
-    Zomplex (Algebra z, Zorder_int p) : family (z), order(p) {
-      if (p!=0) {layout = zyc::Layout::Block;}
-    }
-    Zomplex (Algebra z, Zorder_int p, zyc::Layout l) :
-      family (z), order(p), layout(l) {}
   };
   const static Zomplex Real
     = Zomplex (Algebra::Real, 0, zyc::Layout::Native);
@@ -46,6 +43,8 @@ namespace zyc {
     = Zomplex (Algebra::Nat, 0, zyc::Layout::Native);
 
 }// end zyc:: namespace
+
+#include "Zomplex.ipp"
 
 //end ZYC_HAS_ZOMPLEX_HPP
 #endif

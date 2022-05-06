@@ -1,7 +1,11 @@
 #ifndef FMR_HAS_MATH_HPP
 #define FMR_HAS_MATH_HPP
 
-#include "../zyclops/Zomplex.hpp"
+#define FMR_ALIGN_INTS alignof(std::size_t)
+#define FMR_ALIGN_VALS alignof(__m256d)
+
+#define ZYC_ALIGN FMR_ALIGN_VALS
+#include "../zyclops/zyclops.hpp"
 
 #include <tuple>
 #include <valarray>
@@ -15,9 +19,6 @@
 
  // ECMA-182
 #define FMR_CRC64_POLY 0xc96c5795d7870f42L
-
-#define FMR_ALIGN_INTS alignof(std::size_t)
-#define FMR_ALIGN_VALS ZYC_ALIGN
 
 #ifndef FMR_RESTRICT
 #define FMR_RESTRICT ZYC_RESTRICT
