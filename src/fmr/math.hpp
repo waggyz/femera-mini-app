@@ -16,6 +16,16 @@
  // ECMA-182
 #define FMR_CRC64_POLY 0xc96c5795d7870f42L
 
+#define FMR_ALIGN_INTS alignof(std::size_t)
+#define FMR_ALIGN_VALS ZYC_ALIGN
+
+#ifndef FMR_RESTRICT
+#define FMR_RESTRICT ZYC_RESTRICT
+#endif
+#define FMR_ARRAY_PTR ZYC_ARRAY_PTR
+#define FMR_CONST_PTR ZYC_CONST_PTR
+#define FMR_ALIGN_PTR ZYC_ALIGN_PTR
+
 namespace fmr { namespace math {
   enum class Poly : int8_t {None=0, Error, Unknown,
     Full, Serendipity, Bipoly, Tripoly, Pyramid, Prism,

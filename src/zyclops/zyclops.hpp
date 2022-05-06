@@ -3,15 +3,14 @@
 
 #include <cstdint>
 
-#define ZYC_ALIGN_INTS alignof(size_t)
-#define ZYC_ALIGN_VALS alignof(__m256d)
+#define ZYC_ALIGN alignof(__m256d)
 
 #ifndef ZYC_RESTRICT
 #define ZYC_RESTRICT __restrict
 #endif
 #define ZYC_ARRAY_PTR auto* ZYC_RESTRICT
 #define ZYC_CONST_PTR const auto* ZYC_RESTRICT
-#define ZYC_ALIGN_PTR __attribute__((aligned(ZYC_ALIGN_VALS))) auto* ZYC_RESTRICT
+#define ZYC_ALIGN_PTR __attribute__((aligned(ZYC_ALIGN))) auto* ZYC_RESTRICT
 
 namespace zyc {
 

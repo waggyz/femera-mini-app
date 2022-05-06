@@ -131,7 +131,6 @@ digraph "source tree" {
 	"Self.hpp" -> "Self.ipp"
 	"Fmpi.cpp" -> "Fmpi.hpp"
 	"Node.cpp" -> "core.h"
-	"Zomplex.hpp" -> "data.hpp"
 	"File.cpp" -> "Logs.hpp"
 	"core.h" -> "Jobs.hpp"
 	"Pets.hpp" -> "Pets.ipp"
