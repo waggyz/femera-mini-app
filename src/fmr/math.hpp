@@ -1,7 +1,7 @@
 #ifndef FMR_HAS_MATH_HPP
 #define FMR_HAS_MATH_HPP
 
-#include "fmr.hpp"
+#include "../zyclops/Zomplex.hpp"
 
 #include <tuple>
 #include <valarray>
@@ -16,45 +16,10 @@
  // ECMA-182
 #define FMR_CRC64_POLY 0xc96c5795d7870f42L
 
-#define FMR_ALIGN_INTS alignof(size_t)
-#define FMR_ALIGN_VALS alignof(__m256d)
-
-#ifndef FMR_RESTRICT
-#define FMR_RESTRICT __restrict
-#endif
-#define FMR_ARRAY_PTR auto* FMR_RESTRICT
-#define FMR_CONST_PTR const auto* FMR_RESTRICT
-#define FMR_ALIGN_PTR __attribute__((aligned(FMR_ALIGN_VALS))) auto* FMR_RESTRICT
-
-namespace fmr {namespace data {
-#if 0
-  enum class Precision   : int8_t {Unknown=0, Bit = -111,
-    Int_byte   = -1, Int_short  = -2, Int = -4, Int_long = -8,// signed
-    Nat_byte   =  1, Nat_short  =  2, Nat =  4, Nat_long =  8,// unsigned
-    Fixed_half =-16, Fixed_single =-32, Fixed_double =-64,
-    Float_half = 16, Float_single = 32, Float_double = 64,
-//    Float_long = sizeof (long double)
-  };
-#endif
-#if 0
-  enum class Precision   : int8_t {Unknown=0,// Bit  = 111,
-//                                          Int_hex  = -3, Nat_hex  = 3,
-                                          Int_byte = -1, Nat_byte = 1,
-    Float_half   = 16, Fixed_half   =-16, Int_short= -2, Nat_short= 2,
-    Float_single = 32, Fixed_single =-32, Int      = -4, Nat      = 4,
-    Float_double = 64, Fixed_double =-64, Int_long = -8, Nat_long = 8,
-//    Float_long   = 65
-  };
-#endif
-  enum class Layout      : int8_t { Unknown =0,// for arrays of Zomplex
-    Vector=1, Block=2, Native=3 // Native is for real & built-in complex type
-  };
-} }// end fmr::data namespace
-namespace fmr {namespace math {
-  using Zorder_int = fmr::Dim_int;
+namespace fmr { namespace math {
   enum class Poly : int8_t {None=0, Error, Unknown,
     Full, Serendipity, Bipoly, Tripoly, Pyramid, Prism,
-  end};
+    end };
   static const std::map<Poly,std::pair<std::string,std::string>>
   poly_letter_name {
     {Poly::        None,std::make_pair("-","no polynomial")},//TODO makes sense?
@@ -68,194 +33,34 @@ namespace fmr {namespace math {
     {Poly::       Prism,std::make_pair("M","Prism polynomial")},
     {Poly::         end,std::make_pair("*","Poly enum end marker")}
   };
-#ifdef FMR_HAS_ZYCLOPS
-  enum class Algebra     : int8_t {Unknown =0,
-    Real=zyc::Real, Complex=zyc::Complex, Dual=zyc::Dual, Split=zyc::Split,
-    Quat=zyc::Quat,     OTI=zyc::OTI    , User=zyc::User,
-    Int, Nat
-  };
-#else
-  enum class Algebra     : int8_t {Unknown =0,
-    Real, Complex, Dual, Split, Quat, OTI, User,
-    Int,// signed
-    Nat // unsigned
-  };
-#endif
-  struct Zomplex {
-  public:
-    Algebra           family = Algebra::Real;
-    Zorder_int         order = 0;
-    fmr::data::Layout layout = fmr::data::Layout::Native;
-    bool        is_transpose = false;
-    bool           has_upper = false;// triangular or full matrix storage
-    bool           has_lower = false;// triangular or full matrix storage
-    bool           is_sparse = false;// true: zero terms removed
-  public:
-    bool       is_cr_full   (){ return this->has_upper && this->has_lower; }
-    bool       is_cr_matrix (){ return this->has_upper || this->has_lower; }
-    bool       is_vector    (){ return ! this->is_cr_full (); }
-    bool       is_conjugate (){ return this->is_transpose; }
-  public:
-    Zomplex () {}
-    Zomplex (Algebra z, Zorder_int p) : family (z), order(p) {
-      if (p!=0) {layout = fmr::data::Layout::Block;}
-    }
-    Zomplex (Algebra z, Zorder_int p, fmr::data::Layout l) :
-      family (z), order(p), layout(l) {}
-  };
-  const static Zomplex Real
-    = Zomplex (Algebra::Real, 0, fmr::data::Layout::Native);
-  const static Zomplex Native_complex
-    = Zomplex (Algebra::Complex, 1, fmr::data::Layout::Native);
-  const static Zomplex Unit_quaternion
-    = Zomplex (Algebra::Quat, 2, fmr::data::Layout::Vector);
-  //
-  const static Zomplex Integer
-    = Zomplex (Algebra::Int, 0, fmr::data::Layout::Native);
-  const static Zomplex Natural
-    = Zomplex (Algebra::Nat, 0, fmr::data::Layout::Native);
 } }// end fmr::math namespace
 
-namespace fmr {namespace math {
-  template <typename I> static inline I divide_ceil (const I x, const I y);
+namespace fmr { namespace math {
+  template <typename I> static inline
+  I divide_ceil (const I x, const I y);
   // I : Integer type
-  static inline uint base2_digits (uint x);
-  static inline uint count_digits (uint x);
-  static inline uint upow (uint base, uint exp);
-  static inline uint nchoosek (uint n, uint k);
-  static inline uint poly_terms (Poly ptype, uint nvars, uint pord);
-  template <typename F> static inline bool are_close (const F a, const F b);
-  template <typename F> static inline bool are_equal (const F a, const F b);
-  template <typename F> static inline bool is_less_than (const F a, const F b);
-  template <typename F> static inline bool is_more_than (const F a, const F b);
-  template <typename F> static inline bool is_greater_than (const F a, const F b);
+  static inline
+  uint base2_digits (uint x);
+  static inline
+  uint count_digits (uint x);
+  static inline
+  uint upow (uint base, uint exp);
+  static inline
+  uint nchoosek (uint n, uint k);
+  static inline
+  uint poly_terms (Poly ptype, uint nvars, uint pord);
+  template <typename F> static inline
+  bool are_close (const F a, const F b);
+  template <typename F> static inline
+  bool are_equal (const F a, const F b);
+  template <typename F> static inline
+  bool is_less_than (const F a, const F b);
+  template <typename F> static inline
+  bool is_more_than (const F a, const F b);
+  template <typename F> static inline
+  bool is_greater_than (const F a, const F b);
 } }// end fmr::math namespace
 
-template <typename I> static inline// I : Integer type
-I fmr::math::divide_ceil (const I x, const I y){
-#if 0
-  return x / y + (x % y != 0);
-  return 1 + ((x - 1) / y); // if x != 0
-  return x / y + (x % y > 0);// should be correct for negative result, too
-#else
-return (x % y) ? x / y + I(1) : x / y;
-#endif
-}
-// https://stackoverflow.com/questions/25892665/
-// performance-of-log10-function-returning-an-int
-static inline uint fmr::math::base2_digits (uint x){
-  return x ? 32 - uint(__builtin_clz( x )) : 0;// count leading zeros
-}
-static inline uint fmr::math::count_digits (uint x){
-  static const unsigned char guess [33]={
-    0, 0, 0, 0, 1, 1, 1, 2, 2, 2,
-    3, 3, 3, 3, 4, 4, 4, 5, 5, 5,
-    6, 6, 6, 6, 7, 7, 7, 8, 8, 8,
-    9, 9, 9
-  };
-  static const uint ten_to_the [] = {
-    1, 10, 100, 1000, 10000, 100000,
-    1000000, 10000000, 100000000, 1000000000
-  };
-  uint digits = guess [base2_digits (x)];
-  return digits + (x >= ten_to_the [digits]);
-}
-static inline uint fmr::math::upow (uint base, uint exponent) {
-  //https://stackoverflow.com/questions/101439/the-most-efficient-way-to-implement-an-integer-based-power-function-powint-int
-  uint result = 1;
-  for (;;) {
-    if (exponent & 1) {result *= base;}
-    exponent >>= 1;
-    if (!exponent) {break;}
-    base *= base;
-  }
-  return result;
-}
-static inline uint fmr::math::nchoosek (const uint n, const uint k) {
-#if 0
-  return (k==0) ? 1 : fmr::math::nchoosek (n - 1, k - 1) * n / k;
-#else
-  if (k == 0) {return 1;}
-  //https://stackoverflow.com/questions/9330915/number-of-combinations-n-choose-r-in-c/53983114
-  //large k: n choose k = n choose (n-k)
-  if (k > n / 2) {return fmr::math::nchoosek (n, n - k);}
-  uint res = 1;
-  for (uint r = 1; r <= k; ++r) {
-    res *= n - r + 1;
-    res /= r;
-  }
-  return res;
-#endif
-}
-static inline uint fmr::math::poly_terms (
-    const fmr::math::Poly ptype, const uint nvar, const uint pord) {
-  if (nvar < 1) {return 0;}
-  if (pord < 1) {return 1;}
-  uint terms = 0;
-  switch (ptype) {
-    case fmr::math::Poly::Full : {
-#if 0
-      terms=1;
-      for (uint p = 1; p<=pord+1; p++) {terms += fmr::math::upow (p, nvar-1);}
-#else
-      terms = fmr::math::nchoosek (pord + nvar, nvar);
-#endif
-      break;}
-    case math::Poly::Serendipity : {
-      terms = fmr::math::poly_terms (fmr::math::Poly::Bipoly, nvar, pord);
-      terms-= (pord > 1 && nvar > 1)
-        ? fmr::math::poly_terms (fmr::math::Poly::Full, nvar, pord-2) : 0;
-      break;}
-    case fmr::math::Poly::Bipoly :// Fall through.
-    case fmr::math::Poly::Tripoly : {
-      terms = fmr::math::upow (pord+1, nvar);
-      break;}
-    case fmr::math::Poly::Pyramid : {
-      switch (pord) {
-        case 1: {terms = 5; break;}
-        case 2: {terms = 5 + 8; break;}
-        case 3: {terms = 5 + 8*2; break;}
-        default:{}
-      }
-      break;}
-    case fmr::math::Poly::Prism : {
-      switch (pord) {
-        case 1: {terms = 6; break;}
-        case 2: {terms = 6 + 9; break;}
-        case 3: {terms = 6 + 9*2; break;}
-        default:{}
-      }
-      break;}
-    default : {}// do nothing
-  }
-  return terms;
-}
-// "Comparing floating point numbers" by Bruce Dawson
-template <typename F> static inline// F : Floating-point type
-bool fmr::math::are_close (const F a, const F b) {
-  return std::abs(a - b) <= ( (std::abs(a) < std::abs(b)
-    ? std::abs(b) : std::abs(a)) * std::numeric_limits<F>::epsilon());
-}
-template <typename F> static inline// F : Floating-point type
-bool fmr::math::are_equal (const F a, const F b){
-  return std::abs(a - b) <= ( (std::abs(a) > std::abs(b)
-    ? std::abs(b) : std::abs(a)) * std::numeric_limits<F>::epsilon());
-}
-template <typename F> static inline// F : Floating-point type
-bool fmr::math::is_less_than (const F a, const F b) {
-  return (b - a) > ( (std::abs(a) < std::abs(b)
-    ? std::abs(b) : std::abs(a)) * std::numeric_limits<F>::epsilon());
-}
-template <typename F> static inline// F : Floating-point type
-bool fmr::math::is_more_than (const F a, const F b) {
-  return (a - b) > ( (std::abs(a) < std::abs(b)
-    ? std::abs(b) : std::abs(a)) * std::numeric_limits<F>::epsilon());
-}
-template <typename F> static inline// F : Floating-point type
-bool fmr::math::is_greater_than (const F a, const F b) {
-  return (a - b) > ( (std::abs(a) < std::abs(b)
-    ? std::abs(b) : std::abs(a)) * std::numeric_limits<F>::epsilon());
-}
 #if 0
 namespace fmr {namespace data {
   enum class Do :int{ Error=-4, New=-3, Check=-2, Find=-1,
@@ -279,6 +84,8 @@ namespace fmr {namespace data {
   };
 } }//end fmr::data namespace
 #endif
+
+#include "math.ipp"
 
 //end FMR_HAS_MATH_HPP
 #endif
