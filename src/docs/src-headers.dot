@@ -5,6 +5,7 @@ digraph "source tree" {
     fontsize="16";
     fontname="Helvetica";
 	clusterrank="local";
+	"Zmat.hpp" -> "Zomplex.hpp"
 	"Meter.hpp" -> "perf.hpp"
 	"Work.hpp" -> "Errs.hpp"
 	"Proc.hpp" -> "proc.hpp"
@@ -36,7 +37,6 @@ digraph "source tree" {
 	"zyclops.hpp" -> "Zomplex.hpp"
 	"Runs.hpp" -> "Task.hpp"
 	"proc.hpp" -> "fmr.hpp"
-	"math.hpp" -> "zyclops.hpp"
 	"Pets.hpp" -> "Data.hpp"
 	"Text.hpp" -> "Data.hpp"
 	"Logs.hpp" -> "core.h"
@@ -47,6 +47,7 @@ digraph "source tree" {
 	"Cgns.hpp" -> "Data.hpp"
 	"core.h" -> "File.hpp"
 	"Self.hpp" -> "Test.hpp"
+	"math.hpp" -> "Zmat.hpp"
 	"core.h" -> "Jobs.hpp"
 	"Zomplex.hpp" -> "zyc.hpp"
 	"Proc.hpp" -> "Work.hpp"

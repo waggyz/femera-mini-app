@@ -5,6 +5,7 @@ digraph "source tree" {
     fontsize="16";
     fontname="Helvetica";
 	clusterrank="local";
+	"Zmat.hpp" -> "Zomplex.hpp"
 	"Dlim.gtst.cpp" -> "Dlim.hpp"
 	"Gtst.cpp" -> "core.h"
 	"Nvid.gtst.cpp" -> "core.h"
@@ -133,8 +134,8 @@ digraph "source tree" {
 	"Runs.gtst.cpp" -> "femera.hpp"
 	"Moab.gtst.cpp" -> "Moab.hpp"
 	"Runs.hpp" -> "Runs.ipp"
-	"math.hpp" -> "zyclops.hpp"
 	"Beds.cpp" -> "Perf.hpp"
+	"Zmat.hpp" -> "Zmat.ipp"
 	"File.cpp" -> "Gmsh.hpp"
 	"Cgns.gtst.cpp" -> "Cgns.hpp"
 	"Work.hpp" -> "Work.ipp"
@@ -158,6 +159,7 @@ digraph "source tree" {
 	"Meter.hpp" -> "Meter.ipp"
 	"Main.cpp" -> "Nvid.hpp"
 	"core.h" -> "File.hpp"
+	"zyc.hpp" -> "zyc.ipp"
 	"Fomp.hpp" -> "Fomp.ipp"
 	"nvid.gtst.cpp" -> "nvid.hpp"
 	"File.cpp" -> "Vals.hpp"
@@ -169,6 +171,7 @@ digraph "source tree" {
 	"Bulk.perf.cpp" -> "femera.hpp"
 	"Vals.gtst.cpp" -> "Vals.hpp"
 	"proc.cpp" -> "proc.hpp"
+	"math.hpp" -> "Zmat.hpp"
 	"Self.hpp" -> "Self.ipp"
 	"Fmpi.cpp" -> "Fmpi.hpp"
 	"Node.cpp" -> "core.h"

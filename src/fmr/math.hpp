@@ -5,7 +5,7 @@
 #define FMR_ALIGN_VALS alignof(__m256d)
 
 #define ZYC_ALIGN FMR_ALIGN_VALS
-#include "../zyclops/zyclops.hpp"
+#include "../zyclops/Zmat.hpp"
 
 #include <tuple>
 #include <valarray>

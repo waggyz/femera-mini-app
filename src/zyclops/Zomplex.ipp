@@ -3,6 +3,19 @@
 
 namespace zyc {
   inline
+  Algebra Zomplex::get_family   (){
+    return this->family;
+  }
+  inline
+  Zorder_int Zomplex::get_order    (){
+    return this->order;
+  }
+  inline
+  Zomplex::Zomplex (Algebra z, Zorder_int p)
+    :  order(p), family (z) {
+  }
+#if 0
+  inline
   bool Zomplex::is_cr_matrix (){
     return this->has_upper || this->has_lower;
   }
@@ -30,26 +43,7 @@ namespace zyc {
   bool Zomplex::is_sparse    (){
     return ! has_zeros;
   }
-  inline
-  Algebra Zomplex::get_family   (){
-    return this->family;
-  }
-  inline
-  Zorder_int Zomplex::get_order    (){
-    return this->order;
-  }
-  inline
-  zyc::Layout Zomplex::get_layout   (){
-    return this->layout;
-  }
-  inline
-  Zomplex::Zomplex (Algebra z, Zorder_int p) : family (z), order(p) {
-    if (p!=0) {layout = zyc::Layout::Block;}
-  }
-  inline
-  Zomplex::Zomplex (Algebra z, Zorder_int p, zyc::Layout l) :
-    family (z), order(p), layout(l) {
-  }
+#endif
 
 }// end zyc:: namespace
 

@@ -1,7 +1,6 @@
 #ifndef FMR_HAS_MATH_IPP
 #define FMR_HAS_MATH_IPP
 
-
 template <typename I> static inline// I : Integer type
 I fmr::math::divide_ceil (const I x, const I y) {
 #if 0
@@ -26,7 +25,7 @@ uint fmr::math::count_digits (uint x) {
     6, 6, 6, 6, 7, 7, 7, 8, 8, 8,
     9, 9, 9
   };
-  static  const uint ten_to_the [] = {
+  static const uint ten_to_the [] = {
     1, 10, 100, 1000, 10000, 100000,
     1000000, 10000000, 100000000, 1000000000
   };
@@ -82,11 +81,11 @@ uint fmr::math::poly_terms (
     case math::Poly::Serendipity : {
       terms = fmr::math::poly_terms (fmr::math::Poly::Bipoly, nvar, pord);
       terms-= (pord > 1 && nvar > 1)
-        ? fmr::math::poly_terms (fmr::math::Poly::Full, nvar, pord-2) : 0;
+        ? fmr::math::poly_terms (fmr::math::Poly::Full, nvar, pord - 2) : 0;
       break;}
     case fmr::math::Poly::Bipoly :// Fall through.
     case fmr::math::Poly::Tripoly : {
-      terms = fmr::math::upow (pord+1, nvar);
+      terms = fmr::math::upow (pord + 1, nvar);
       break;}
     case fmr::math::Poly::Pyramid : {
       switch (pord) {
