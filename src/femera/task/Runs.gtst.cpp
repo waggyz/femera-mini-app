@@ -2,7 +2,6 @@
 
 #include "gtest/gtest.h"
 
-
 namespace femera { namespace test {
   //
   auto mini = fmr::new_jobs ();

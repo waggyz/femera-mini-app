@@ -34,6 +34,7 @@ digraph "source tree" {
 	"core.h" -> "Main.hpp"
 	"Vals.hpp" -> "Bank.hpp"
 	"nvid.hpp" -> "fmr.hpp"
+	"Zomplex.gtst.cpp" -> "Zomplex.hpp"
 	"perf.hpp" -> "fmr.hpp"
 	"Work.hpp" -> "math.hpp"
 	"Data.hpp" -> "Data.ipp"

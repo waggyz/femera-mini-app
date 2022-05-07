@@ -5,10 +5,13 @@
 
 namespace zyc {
 
-  class Zomplex {// hypercomplex scalar
+  struct Zomplex {// hypercomplex scalar
   public:
-    Algebra    get_family   ();
-    Zorder_int get_order    ();
+    Algebra    get_family ();
+    Zorder_int get_order  ();
+    size_t     zval_size  ();
+    size_t     cr_size    ();
+    size_t     cr_nnz     ();
 #if 0
     bool       is_vector    ();
     bool       is_conjugate ();
