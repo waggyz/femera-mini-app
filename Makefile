@@ -157,6 +157,9 @@ endif
 
 #NOTE CGNS, FLTK, FreeType, PETSc build in external/*/
 # Libraries and applications available ----------------------------------------
+ifeq ($(ENABLE_ZYCLOPS),ON)
+  FMRFLAGS+= -DFMR_HAS_ZYCLOPS
+endif
 ifeq ($(ENABLE_OMP),ON)
   EXTERNAL_DOT+="OpenMP" -> "Femera"\n
   # FMRFLAGS+= -DFMR_HAS_OMP not needed; OpenMP defines _OPENMP:

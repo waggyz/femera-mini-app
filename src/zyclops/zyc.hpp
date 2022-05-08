@@ -35,6 +35,12 @@ namespace zyc {
   uint hamw (uint32_t i);
   static inline
   uint upow (uint base, uint exp);
+  static inline
+  uint dual_nz (uint row, uint col);
+  static inline
+  int dual_ix (int row, int col);
+  static inline
+  int dual_ix (int row, int col, int order);
 
 }// end zyc namespace
 

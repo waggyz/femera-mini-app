@@ -4,8 +4,10 @@
 #define FMR_ALIGN_INTS alignof(std::size_t)
 #define FMR_ALIGN_VALS alignof(__m256d)
 
+#ifdef FMR_HAS_ZYCLOPS
 #define ZYC_ALIGN FMR_ALIGN_VALS
-#include "../zyclops/Zmat.hpp"
+#include "../zyclops/zyclops.hpp"
+#endif
 
 #include <tuple>
 #include <valarray>

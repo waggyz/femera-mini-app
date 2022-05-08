@@ -22,7 +22,6 @@ namespace zyc { namespace test {
     EXPECT_EQ( tricomplex.cr_size   (), 64 );
     EXPECT_EQ( tricomplex.cr_nnz    (), 64 );
   }
-
 } }//end zyc::test:: namespace
 
 int main (int argc, char** argv) {
