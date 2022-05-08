@@ -80,11 +80,6 @@ namespace femera { namespace data {
     const std::uintptr_t sz = nT * sizeof (T) / sizeof (fmr::Bulk_int);
     const auto lpad = this->offset<T> (ptr);// max left  padding is A-1
     const auto rpad = this->offset<T> (sz );// max right padding is A-1
-    // Zero is the same bits for all numeric types (data/Vals.gtst.cpp).
-    if (init_val <= T(0) && init_val >= T(0)) {// == 0.0, no float warning
-      this->bulk.resize (lpad + sz + rpad);// <= capacity (); ptr still valid
-      return reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
-    }
     // nonzero init
 #if 0
     // Initialize from a temporary vector of type T.
@@ -103,6 +98,10 @@ namespace femera { namespace data {
     for (size_t i=0; i<sz; i++ ) {this->bulk.push_back (bytes [i % mod]);}
 #endif
     this->bulk.resize (lpad + sz + rpad);// <= capacity (); ptr still valid
+    if (init_val <= T(0) && init_val >= T(0)) {// == 0.0, no float warning
+      // Zero is the same bits for all numeric types (data/Vals.gtst.cpp).
+      return reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
+    }
     if (std::is_floating_point <T>::value) {
       FMR_ALIGN_PTR v = reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
       FMR_PRAGMA_OMP_SIMD
