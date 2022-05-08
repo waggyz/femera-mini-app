@@ -12,10 +12,6 @@ T* femera::cast_via_work (C* child) {
 }
 namespace femera {
   inline
-  Work::Work (const Work::Core_ptrs_t core) noexcept {
-    std::tie (this->proc, this->data, this->test) = core;
-  }
-  inline
   std::string Work::get_version ()
   noexcept {
     return this->version;

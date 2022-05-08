@@ -7,7 +7,7 @@
 namespace zyc { namespace test {
   //
   static inline
-  int print_dual (uint show_order, uint array_order ) {
+  int print_dual (int show_order, int array_order ) {
     int nnz=0;
     const int n = 1 << show_order;
     for (int i=0; i<n; i++) {
@@ -18,8 +18,7 @@ namespace zyc { namespace test {
     } }
     return nnz;
   }
-  //
-  TEST( Zmat, TrivialTest ){
+  TEST( Zyc, TrivialTest ){
     EXPECT_EQ( 1, 1 );
     EXPECT_EQ( print_dual (3,3), 27 );
     EXPECT_EQ( print_dual (3,2), 27-9 );

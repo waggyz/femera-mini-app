@@ -8,6 +8,9 @@
 #endif
 
 namespace femera {
+  Work::Work (const Work::Core_ptrs_t core) noexcept {
+    std::tie (this->proc, this->data, this->test) = core;
+  }
   Work::Work (Work const&) = default;// copyable, here to avoid -Winline warns
   Work::~Work () {
   }
