@@ -15,8 +15,9 @@ namespace zyc { namespace test {
     auto time = fmr::perf::Meter<uint64_t,float> ();
     if (test_n<=0 || vals_n<=0) {return 0;}
     const auto ea = uint(1) << order;
-    const auto a = std::vector<double> (vals_n * ea);
-    const auto b = std::vector<double> (vals_n * ea, 1.0);
+    const auto n = vals_n * ea;
+    const auto a = std::vector<double> (n);
+    const auto b = std::vector<double> (n, 1.0);
     double sum = 0.0;
     for (uint i=0; i<vals_n; i++) {sum += a[i] * b[i];}// warm up
     time.add_idle_time_now ();
@@ -25,7 +26,7 @@ namespace zyc { namespace test {
         sum += a[i] * b[i];
     } }
     const auto t = double (time.add_busy_time_now ());
-    return double (2.0 * test_n * vals_n * ea) / t + sum;
+    return double (2.0 * test_n * n) / t + sum;
   }
   TEST(NewVals, Time) {
     EXPECT_GT( dual_fma (10, 16*1024*1024, 0), 0.0);
