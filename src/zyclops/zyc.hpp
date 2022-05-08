@@ -41,6 +41,12 @@ namespace zyc {
   int dual_ix (int row, int col);
   static inline
   int dual_ix (int row, int col, int order);
+  static inline
+  uint dual_tnz (uint row, uint col);// transpose
+  static inline
+  int dual_tix (int row, int col);// transpose
+  static inline
+  int dual_tix (int row, int col, int order);// transpose
 
 }// end zyc namespace
 

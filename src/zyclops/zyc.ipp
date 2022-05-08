@@ -61,5 +61,21 @@ int zyc::dual_ix (const int row, const int col, const int array_order) {
   const auto ix = row - col;
   return (ix < (1<<array_order)) && ((row ^ col) == ix) ? ix : -1;
 }
+// Transpose versions
+static inline
+uint zyc::dual_tnz (const uint32_t col, const uint32_t row) {// returns 0 or 1
+  return (row ^ col) == (row - col);
+}
+static inline
+int zyc::dual_tix (const int col, const int row) {
+  //returns index of value, or -1 for a zero entry
+  return (row ^ col) == (row - col) ? row - col : -1;// this works
+}
+static inline
+int zyc::dual_tix (const int col, const int row, const int array_order) {
+  // this one is safe for operations with different order operands
+  const auto ix = row - col;
+  return (ix < (1<<array_order)) && ((row ^ col) == ix) ? ix : -1;
+}
 //end ZYC_HAS_ZYC_IPP
 #endif
