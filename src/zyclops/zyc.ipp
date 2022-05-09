@@ -11,7 +11,7 @@
 #include <nmmintrin.h>
 #endif
 
-static inline
+static inline constexpr
 uint zyc::hamw (const uint64_t i) {
 #ifdef __INTEL_COMPILER
   return uint(_mm_popcnt_u64() (i));
@@ -19,7 +19,7 @@ uint zyc::hamw (const uint64_t i) {
   return uint(__builtin_popcountll (i));
 #endif
 }
-static inline
+static inline constexpr
 uint zyc::hamw (const uint32_t i) {
 #ifdef __INTEL_COMPILER
   return uint(_mm_popcnt_u32() (i));
@@ -40,11 +40,11 @@ uint zyc::upow (uint base, uint exponent) {
   }
   return result;
 }
-static inline
+static inline constexpr
 uint zyc::dual_nz (const uint32_t row, const uint32_t col) {// returns 0 or 1
   return (row ^ col) == (row - col);
 }
-static inline
+static inline constexpr
 int zyc::dual_ix (const int row, const int col) {
   //returns index of value, or -1 for a zero entry
 #if 0
@@ -62,11 +62,11 @@ int zyc::dual_ix (const int row, const int col, const int array_order) {
   return (ix < (1<<array_order)) && ((row ^ col) == ix) ? ix : -1;
 }
 // Transpose versions
-static inline
+static inline constexpr
 uint zyc::dual_tnz (const uint32_t col, const uint32_t row) {// returns 0 or 1
   return (row ^ col) == (row - col);
 }
-static inline
+static inline constexpr
 int zyc::dual_tix (const int col, const int row) {
   //returns index of value, or -1 for a zero entry
   return (row ^ col) == (row - col) ? row - col : -1;// this works

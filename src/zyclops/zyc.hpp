@@ -29,21 +29,21 @@ namespace zyc {
     Block ,// SoA (struct of arrays, arrays of real & each imaginary part)
     Native // Native is for real & built-in complex type
   };
-  static inline
+  static inline constexpr
   uint hamw (uint64_t i);
-  static inline
+  static inline constexpr
   uint hamw (uint32_t i);
   static inline
   uint upow (uint base, uint exp);
-  static inline
+  static inline constexpr
   uint dual_nz (uint row, uint col);
-  static inline
+  static inline constexpr
   int dual_ix (int row, int col);
   static inline
   int dual_ix (int row, int col, int order);
-  static inline
+  static inline constexpr
   uint dual_tnz (uint row, uint col);// transpose
-  static inline
+  static inline constexpr
   int dual_tix (int row, int col);// transpose
   static inline
   int dual_tix (int row, int col, int order);// transpose
