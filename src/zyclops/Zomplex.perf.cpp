@@ -21,10 +21,10 @@ namespace zyc { namespace test {
     const auto b = bvec.data ();
     auto c = cvec.data ();
     double chk = 0.0;
-    const auto byte = double (
+    const auto byte = double (test_n * (
       + avec.size () * sizeof (avec[0])
       + bvec.size () * sizeof (bvec[0])
-      + cvec.size () * sizeof (cvec[0]) * 2);
+      + cvec.size () * sizeof (cvec[0]) * 2));
     for (uint i=0; i<vals_n; i++) {chk += a[i] * b[i];}// warm up
     time.add_idle_time_now ();
     for (uint test_i=0; test_i<test_n; test_i++) {
@@ -34,9 +34,9 @@ namespace zyc { namespace test {
     auto secs = double (time.add_busy_time_now ());
     for (uint i=0; i<vals_n; i++) {chk += c[i];}
     auto flop = 2.0 * double (test_n * vals_n);
-    printf (" zyc, ref, fma,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%2.3f,%1.0f\n",
+    printf (" zyc, ref, fma,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
       -1, test_n * vals_n, byte, flop, secs, flop/secs, flop/byte, chk);
-    if (order < 0) { return flop / secs; }
+    if (order < 0) { return chk; }
     const auto zsz = int(1) << order;
     const auto n = int (vals_n);
     time.add_idle_time_now ();
@@ -54,7 +54,7 @@ namespace zyc { namespace test {
     for (uint i=0; i<vals_n; i++) {chk += c[i];}
     flop = 2.0 * double (test_n * vals_n / uint(zsz))
       * double(std::pow (3,order));
-    printf (" zyc,dual, fma,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%2.3f,%1.0f\n",
+    printf (" zyc,dual, fma,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
       order, (test_n * vals_n) / uint(zsz), byte, flop, secs, flop/secs,
       flop/byte, chk);
     time.add_idle_time_now ();
@@ -70,18 +70,47 @@ namespace zyc { namespace test {
     } } } }
     secs = double (time.add_busy_time_now ());
     for (uint i=0; i<vals_n; i++) {chk += c[i];}
-    printf (" zyc,dual,tfma,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%2.3f,%1.0f\n",
+    printf (" zyc,dual,tfma,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
       order, (test_n * vals_n) / uint(zsz), byte, flop, secs, flop/secs,
       flop/byte, chk);
-    return flop / secs;
+    auto crvec = std::vector<double> (uint(zsz * zsz));
+    auto cr = crvec.data ();
+    time.add_idle_time_now ();
+    for (uint test_i=0; test_i<test_n; test_i++) {
+      for (int k=0; k<n; k+=zsz) {
+        const auto ak = &a [k];
+        const auto bk = &b [k];
+        auto ck = &c [k];
+        for (int i=0; i<zsz; i++) {// build CR form of ak
+          for (int j=0; j<zsz; j++) {
+            const auto ix = zyc::dual_ix(i,j);
+#if 0
+            if (ix>=0) { t[zsz*i + j]= ak [ix]; }
+#else
+            cr[zsz* i + j] = (ix<0) ? 0.0 : ak [ix];
+#endif
+        } }
+        for (int i=0; i<zsz; i++) {
+          for (int j=0; j<zsz; j++) {
+            ck[i] += cr [zsz* i + j] * bk [j];// regular matmul
+    } } } }
+    secs = double (time.add_busy_time_now ());
+    for (uint i=0; i<vals_n; i++) {chk += c[i];}
+    printf (" zyc,dual,naiv,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
+      order, (test_n * vals_n) / uint(zsz), byte, flop, secs, flop/secs,
+      flop/byte, chk);
+    return chk;
   }
-  TEST(NewVals, Time) {
-    EXPECT_GT( dual_fma (10, 16*1024*1024, 0), 0.0);
-    EXPECT_GT( dual_fma (10, 16*1024*1024, 1), 0.0);
-    EXPECT_GT( dual_fma (10, 16*1024*1024, 2), 0.0);
-    EXPECT_GT( dual_fma (10, 16*1024*1024, 3), 0.0);
-    EXPECT_GT( dual_fma (10, 16*1024*1024, 4), 0.0);
-    EXPECT_GT( dual_fma (10, 16*1024*1024, 5), 0.0);
+  TEST(Zomplex, DualMultiply) {
+    EXPECT_DOUBLE_EQ( dual_fma (10, 16*1024*1024, 0), 0.0);
+    EXPECT_DOUBLE_EQ( dual_fma (10, 16*1024*1024, 1), 0.0);
+    EXPECT_DOUBLE_EQ( dual_fma (10, 16*1024*1024, 2), 0.0);
+    EXPECT_DOUBLE_EQ( dual_fma (10, 16*1024*1024, 3), 0.0);
+    EXPECT_DOUBLE_EQ( dual_fma (10, 16*1024*1024, 4), 0.0);
+    EXPECT_DOUBLE_EQ( dual_fma (10, 16*1024*1024, 5), 0.0);
+    EXPECT_DOUBLE_EQ( dual_fma (10, 16*1024*1024, 6), 0.0);
+    EXPECT_DOUBLE_EQ( dual_fma (10, 16*1024*1024, 7), 0.0);
+    EXPECT_DOUBLE_EQ( dual_fma (10, 16*1024*1024, 8), 0.0);
   }
 } }//end femerea::test:: namespace
 
