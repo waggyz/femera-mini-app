@@ -45,6 +45,18 @@ uint zyc::dual_nz (const uint32_t row, const uint32_t col) {// returns 0 or 1
   return (row ^ col) == (row - col);
 }
 static inline constexpr
+bool zyc::is_dual_nz (const uint32_t row, const uint32_t col) {
+  return (row ^ col) == (row - col);
+}
+static inline constexpr
+bool zyc::is_dual_nz (const uint32_t row, const uint32_t col, const uint order){
+  return ((row ^ col) == (row - col)) && (row - col) < (uint(1)<<order);
+}
+static inline constexpr
+uint zyc::dual_ux (const uint row, const uint col) {
+  return (row>col) ? row - col : 0;
+}
+static inline constexpr
 int zyc::dual_ix (const int row, const int col) {
   //returns index of value, or -1 for a zero entry
 #if 0

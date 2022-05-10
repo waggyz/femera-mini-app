@@ -38,7 +38,13 @@ namespace zyc {
   static inline constexpr
   uint dual_nz (uint row, uint col);
   static inline constexpr
-  int dual_ix (int row, int col);
+  bool is_dual_nz (uint row, uint col);
+  static inline constexpr
+  bool is_dual_nz (uint row, uint col, uint order);
+  static inline constexpr
+  int dual_ix (int row, int col);//NOTE returns negative index for zero elements
+  static inline constexpr
+  uint dual_ux (uint row, uint col);//NOTE returns index zero for zero elements
   static inline constexpr
   int dual_ix (int row, int col, int order);
   static inline constexpr
