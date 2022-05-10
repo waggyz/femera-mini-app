@@ -12,6 +12,7 @@
 #include <tuple>
 #include <valarray>
 #include <map>
+#include <immintrin.h>
 
 /* CRC-32C (iSCSI) polynomial in reversed bit order. */
 #define FMR_CRC32_POLY 0x82f63b78

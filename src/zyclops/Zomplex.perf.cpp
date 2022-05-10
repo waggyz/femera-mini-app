@@ -9,6 +9,14 @@
 
 #undef ZYC_TEST_MOST_NAIVE
 
+#if 1
+#define TEST_ZYC_ARRAY_PTR auto
+#define TEST_ZYC_CONST_PTR const auto
+#else
+#define TEST_ZYC_ARRAY_PTR auto* __restrict
+#define TEST_ZYC_CONST_PTR const auto* __restrict
+#endif
+
 namespace zyc { namespace test {
   //
   inline
@@ -21,10 +29,10 @@ namespace zyc { namespace test {
     const auto bvec = std::vector<double> (vals_n);
     auto cvec = std::vector<double> (vals_n);
     auto crvec = std::vector<double> (uint(zsz * zsz));// buffer for naive algo.
-    const auto a = avec.data ();
-    const auto b = bvec.data ();
-    auto c = cvec.data ();
-    auto cr = crvec.data ();
+    TEST_ZYC_CONST_PTR a = avec.data ();
+    TEST_ZYC_CONST_PTR b = bvec.data ();
+    TEST_ZYC_ARRAY_PTR c = cvec.data ();
+    TEST_ZYC_ARRAY_PTR cr = crvec.data ();
     double chk = 0.0;
     const auto byte = double (test_n * (
       + avec.size () * sizeof (avec[0])
@@ -49,30 +57,33 @@ namespace zyc { namespace test {
       const auto n = uint (vals_n);
       time.add_idle_time_now ();
       for (uint k=0; k<n; k+=zsz) {
-        const auto ak = &a [k];
-        const auto bk = &b [k];
-        auto ck = &c [k];
+        TEST_ZYC_CONST_PTR ak = &a [k];
+        TEST_ZYC_CONST_PTR bk = &b [k];
+        TEST_ZYC_ARRAY_PTR ck = &c [k];
         for (uint i=0; i<zsz; i++) {
           for (uint j=0; j<zsz; j++) {
 #if 0
             const auto ix = zyc::dual_ux (i,j);
             ck[j] += (ix<0) ? 0.0 : ak [ix] * bk [j];
 #endif
-#if 1
-            ck [j] += (zyc::is_dual_nz (i,j) ? 0.0 : ak [zyc::dual_ux (i,j)])
+#if 0
+            ck [j] += (zyc::is_dual_nz (i,j) ? ak [zyc::dual_ux (i,j)] : 0.0)
               * bk [j];
 #endif
 #if 0
             ck [j] += zyc::dual_elem_cr (ak, i, j) * bk [j];
+#endif
+#if 1
+            ck [j] += (((i^j)==(i-j)) ? ak [i-j] : 0.0) * bk [j];
 #endif
       } } }
       secs_fma += double (time.add_busy_time_now ());
       for (uint i=0; i<vals_n; i++) {chk += c[i];}
       time.add_idle_time_now ();
       for (uint k=0; k<n; k+=zsz) {
-        const auto ak = &a [k];
-        const auto bk = &b [k];
-        auto ck = &c [k];
+        TEST_ZYC_CONST_PTR ak = &a [k];
+        TEST_ZYC_CONST_PTR bk = &b [k];
+        TEST_ZYC_ARRAY_PTR ck = &c [k];
         for (uint i=0; i<zsz; i++) {
           for (uint j=0; j<zsz; j++) {
 #if 0
@@ -81,7 +92,7 @@ namespace zyc { namespace test {
 #endif
 #if 1
             ck [j] += bk [j]
-              * (zyc::is_dual_nz (j,i) ? 0.0 : ak [zyc::dual_ux (j,i)]);
+              * (zyc::is_dual_nz (j,i) ? ak [zyc::dual_ux (j,i)] : 0.0);
 #endif
 #if 0
             ck [j] +=  bk [j] * zyc::dual_elem_cr (ak, j, i);
@@ -92,9 +103,9 @@ namespace zyc { namespace test {
 #ifdef ZYC_TEST_MOST_NAIVE
       time.add_idle_time_now ();
       for (int k=0; k<n; k+=zsz) {// transposed version below is faster
-        const auto ak = &a [k];
-        const auto bk = &b [k];
-        auto ck = &c [k];
+        TEST_ZYC_CONST_PTR ak = &a [k];
+        TEST_ZYC_CONST_PTR bk = &b [k];
+        TEST_ZYC_ARRAY_PTR ck = &c [k];
         for (uint i=0; i<zsz; i++) {// build CR form of ak
           for (uint j=0; j<zsz; j++) {
 #if 0
@@ -118,9 +129,9 @@ namespace zyc { namespace test {
 #endif
       time.add_idle_time_now ();
       for (uint k=0; k<n; k+=zsz) {
-        const auto ak = &a [k];
-        const auto bk = &b [k];
-        auto ck = &c [k];
+        TEST_ZYC_CONST_PTR ak = &a [k];
+        TEST_ZYC_CONST_PTR bk = &b [k];
+        TEST_ZYC_ARRAY_PTR ck = &c [k];
         for (uint i=0; i<zsz; i++) {// build transposed CR form of ak (faster)
           for (uint j=0; j<zsz; j++) {
 #if 0
@@ -162,7 +173,7 @@ namespace zyc { namespace test {
     return chk;
   }
   const auto zn = 2*1024*1024;
-  TEST(Zomplex, DualMultiply) {
+  TEST(Zomplex, DualMultiply) {//TODO move to zyc.perf.cpp
     EXPECT_DOUBLE_EQ( dual_aos_fma (10, zn, 0), 0.0);
     EXPECT_DOUBLE_EQ( dual_aos_fma (10, zn, 1), 0.0);
     EXPECT_DOUBLE_EQ( dual_aos_fma (10, zn, 2), 0.0);

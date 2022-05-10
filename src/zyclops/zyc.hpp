@@ -11,9 +11,9 @@
 #ifndef ZYC_RESTRICT
 #define ZYC_RESTRICT __restrict
 #endif
-#define ZYC_ARRAY_PTR auto* ZYC_RESTRICT
-#define ZYC_CONST_PTR const auto* ZYC_RESTRICT
-#define ZYC_ALIGN_PTR __attribute__((aligned(ZYC_ALIGN))) auto* ZYC_RESTRICT
+#define ZYC_ARRAY_PTR auto*
+#define ZYC_CONST_PTR const auto*
+#define ZYC_ALIGN_PTR __attribute__((aligned(ZYC_ALIGN))) auto*
 
 namespace zyc {
 
@@ -30,31 +30,31 @@ namespace zyc {
     Native // Native is for real & built-in complex type
   };
   static inline constexpr
-  uint hamw (uint64_t i);
+  uint hamw (uint64_t i) noexcept;
   static inline constexpr
-  uint hamw (uint32_t i);
+  uint hamw (uint32_t i) noexcept;
   static inline
-  uint upow (uint base, uint exp);
+  uint upow (uint base, uint exp) noexcept;
   static inline constexpr
-  uint dual_nz (uint row, uint col);
+  uint dual_nz (uint row, uint col) noexcept;
   static inline constexpr
-  bool is_dual_nz (uint row, uint col);
+  bool is_dual_nz (uint row, uint col) noexcept;
   static inline constexpr
-  bool is_dual_nz (uint row, uint col, uint order);
+  bool is_dual_nz (uint row, uint col, uint order) noexcept;
   static inline constexpr
-  int dual_ix (int row, int col);//NOTE returns negative index for zero elements
+  int dual_ix (int row, int col) noexcept;//NOTE returns negative index for zero elements
   static inline constexpr
-  uint dual_ux (uint row, uint col);//NOTE returns index zero for zero elements
+  uint dual_ux (uint row, uint col) noexcept;//NOTE returns index zero for zero elements
   static inline constexpr
-  int dual_ix (int row, int col, int order);
+  int dual_ix (int row, int col, int order) noexcept;
   static inline constexpr
-  uint dual_tnz (uint row, uint col);// transpose
+  uint dual_tnz (uint row, uint col) noexcept;// transpose
   static inline constexpr
-  int dual_tix (int row, int col);// transpose
+  int dual_tix (int row, int col) noexcept;// transpose
   static inline constexpr
-  int dual_tix (int row, int col, int order);// transpose
+  int dual_tix (int row, int col, int order) noexcept;// transpose
   template <typename T> inline constexpr
-  T dual_elem_cr (const T*, uint row=0, uint col=0);// slow
+  T dual_elem_cr (const T*, uint row=0, uint col=0) noexcept;// slow
 
 }// end zyc namespace
 

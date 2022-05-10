@@ -12,7 +12,8 @@
 #endif
 
 static inline constexpr
-uint zyc::hamw (const uint64_t i) {
+uint zyc::hamw (const uint64_t i)
+noexcept {
 #ifdef __INTEL_COMPILER
   return uint(_mm_popcnt_u64() (i));
 #else
@@ -20,7 +21,8 @@ uint zyc::hamw (const uint64_t i) {
 #endif
 }
 static inline constexpr
-uint zyc::hamw (const uint32_t i) {
+uint zyc::hamw (const uint32_t i)
+noexcept {
 #ifdef __INTEL_COMPILER
   return uint(_mm_popcnt_u32() (i));
 #else
@@ -28,7 +30,8 @@ uint zyc::hamw (const uint32_t i) {
 #endif
 }
 static inline
-uint zyc::upow (uint base, uint exponent) {
+uint zyc::upow (uint base, uint exponent)
+noexcept {
   /* stackoverflow.com/questions/101439/the-most-efficient-way-to-implement
      -an-integer-based-power-function-powint-int */
   uint result = 1;
@@ -41,23 +44,28 @@ uint zyc::upow (uint base, uint exponent) {
   return result;
 }
 static inline constexpr
-uint zyc::dual_nz (const uint32_t row, const uint32_t col) {// returns 0 or 1
+uint zyc::dual_nz (const uint32_t row, const uint32_t col)  // returns 0 or 1
+noexcept {
   return (row ^ col) == (row - col);
 }
 static inline constexpr
-bool zyc::is_dual_nz (const uint32_t row, const uint32_t col) {
+bool zyc::is_dual_nz (const uint32_t row, const uint32_t col)
+noexcept {
   return (row ^ col) == (row - col);
 }
 static inline constexpr
-bool zyc::is_dual_nz (const uint32_t row, const uint32_t col, const uint order){
+bool zyc::is_dual_nz (const uint32_t row, const uint32_t col, const uint order)
+noexcept {
   return ((row ^ col) == (row - col)) && (row - col) < (uint(1)<<order);
 }
 static inline constexpr
-uint zyc::dual_ux (const uint row, const uint col) {
+uint zyc::dual_ux (const uint row, const uint col)
+noexcept {
   return (row>col) ? row - col : 0;
 }
 static inline constexpr
-int zyc::dual_ix (const int row, const int col) {
+int zyc::dual_ix (const int row, const int col)
+noexcept {
   //returns index of value, or -1 for a zero entry
 #if 0
   return ((row ^ col) + (row - col));//TODO try to simplify below
@@ -68,7 +76,8 @@ int zyc::dual_ix (const int row, const int col) {
 #endif
 }
 static inline constexpr
-int zyc::dual_ix (const int row, const int col, const int array_order) {
+int zyc::dual_ix (const int row, const int col, const int array_order)
+noexcept {
   // this one is safe for operations with different order operands
 #if 0
   const auto ix = row - col;
@@ -80,16 +89,19 @@ int zyc::dual_ix (const int row, const int col, const int array_order) {
 }
 // Transpose versions
 static inline constexpr
-uint zyc::dual_tnz (const uint32_t col, const uint32_t row) {// returns 0 or 1
+uint zyc::dual_tnz (const uint32_t col, const uint32_t row)
+noexcept {// returns 0 or 1
   return (row ^ col) == (row - col);
 }
 static inline constexpr
-int zyc::dual_tix (const int col, const int row) {
+int zyc::dual_tix (const int col, const int row)
+noexcept {
   //returns index of value, or -1 for a zero entry
   return (row ^ col) == (row - col) ? row - col : -1;// this works
 }
 static inline constexpr
-int zyc::dual_tix (const int col, const int row, const int array_order) {
+int zyc::dual_tix (const int col, const int row, const int array_order)
+noexcept {
   // this one is safe for operations with different order operands
 #if 0
   const auto ix = row - col;
@@ -100,7 +112,8 @@ int zyc::dual_tix (const int col, const int row, const int array_order) {
 #endif
 }
   template <typename T> inline constexpr
-  T zyc::dual_elem_cr (const T* v, const uint row, const uint col) {
+  T zyc::dual_elem_cr (const T* v, const uint row, const uint col)
+noexcept {
     return ((row ^ col) == (row - col)) ? v[row - col] : T(0.0);
   }
 //end ZYC_HAS_ZYC_IPP
