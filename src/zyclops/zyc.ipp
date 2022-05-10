@@ -99,5 +99,9 @@ int zyc::dual_tix (const int col, const int row, const int array_order) {
     ? row - col : -1;                                       // constexpr
 #endif
 }
+  template <typename T> inline constexpr
+  T zyc::dual_elem_cr (const T* v, const uint row, const uint col) {
+    return ((row ^ col) == (row - col)) ? v[row - col] : T(0.0);
+  }
 //end ZYC_HAS_ZYC_IPP
 #endif

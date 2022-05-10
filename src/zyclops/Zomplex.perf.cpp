@@ -57,9 +57,13 @@ namespace zyc { namespace test {
 #if 0
             const auto ix = zyc::dual_ux (i,j);
             ck[j] += (ix<0) ? 0.0 : ak [ix] * bk [j];
-#else
+#endif
+#if 1
             ck [j] += (zyc::is_dual_nz (i,j) ? 0.0 : ak [zyc::dual_ux (i,j)])
               * bk [j];
+#endif
+#if 0
+            ck [j] += zyc::dual_elem_cr (ak, i, j) * bk [j];
 #endif
       } } }
       secs_fma += double (time.add_busy_time_now ());
@@ -74,9 +78,13 @@ namespace zyc { namespace test {
 #if 0
             const auto ix = zyc::dual_ux (j,i);
             ck[i] += (ix<0) ? 0.0 : bk [i] * ak [ix];
-#else
+#endif
+#if 1
             ck [j] += bk [j]
               * (zyc::is_dual_nz (j,i) ? 0.0 : ak [zyc::dual_ux (j,i)]);
+#endif
+#if 0
+            ck [j] +=  bk [j] * zyc::dual_elem_cr (ak, j, i);
 #endif
       } } }
       secs_tfma += double (time.add_busy_time_now ());
@@ -92,9 +100,13 @@ namespace zyc { namespace test {
 #if 0
             const auto ix = zyc::dual_ux (i,j);
             if (ix>=0) { cr[zsz*i + j]= ak [ix]; }// set only nonzeros
-#else
+#endif
+#if 1
             cr[zsz* i + j]
-              = zyc::is_dual_nz (i,j) ? 0.0 : ak [zyc::dual_ux (i,j)];
+              = zyc::is_dual_nz (i,j) ? ak [zyc::dual_ux (i,j)] : 0.0 ;
+#endif
+#if 0
+            cr [zsz* i + j] = zyc::dual_elem_cr (ak, i, j);
 #endif
         } }
         for (int i=0; i<zsz; i++) {
@@ -114,9 +126,13 @@ namespace zyc { namespace test {
 #if 0
             const auto ix = zyc::dual_ux (j,i);
             cr[zsz* i + j] = (ix<0) ? 0.0 : ak [ix];
-#else
+#endif
+#if 1
             cr[zsz* i + j]
-              = zyc::is_dual_nz (j,i) ? 0.0 : ak [zyc::dual_ux (j,i)];
+              = zyc::is_dual_nz (j,i) ? ak [zyc::dual_ux (j,i)] : 0.0;
+#endif
+#if 0
+            cr [zsz* i + j] = zyc::dual_elem_cr (ak, j, i);
 #endif
         } }
         for (uint i=0; i<zsz; i++) {

@@ -33,7 +33,7 @@ namespace zyc {
   uint hamw (uint64_t i);
   static inline constexpr
   uint hamw (uint32_t i);
-  static inline 
+  static inline
   uint upow (uint base, uint exp);
   static inline constexpr
   uint dual_nz (uint row, uint col);
@@ -53,6 +53,8 @@ namespace zyc {
   int dual_tix (int row, int col);// transpose
   static inline constexpr
   int dual_tix (int row, int col, int order);// transpose
+  template <typename T> inline constexpr
+  T dual_elem_cr (const T*, uint row=0, uint col=0);// slow
 
 }// end zyc namespace
 
