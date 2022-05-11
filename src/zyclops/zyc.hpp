@@ -13,7 +13,7 @@
 #endif
 #define ZYC_ARRAY_PTR auto* ZYC_RESTRICT
 #define ZYC_CONST_PTR const auto* ZYC_RESTRICT
-#define ZYC_ALIGN_PTR __attribute__((aligned(ZYC_ALIGN))) auto*
+#define ZYC_ALIGN_PTR auto* ZYC_RESTRICT __attribute__((aligned(ZYC_ALIGN)))
 
 #ifdef _OPENMP
 #define ZYC_HAS_OPENMP
@@ -39,32 +39,20 @@ namespace zyc {
     Block ,// SoA (struct of arrays, arrays of real & each imaginary part)
     Native // Native is for real & built-in complex type
   };
-  static inline constexpr
-  uint hamw (uint64_t i) noexcept;
-  static inline constexpr
-  uint hamw (uint32_t i) noexcept;
   static inline
-  uint upow (uint base, uint exp) noexcept;
+  uint upow (uint base, uint exp)
+  noexcept;
   static inline constexpr
-  uint dual_nz (uint row, uint col) noexcept;
+  uint hamw (uint64_t i)
+  noexcept;
   static inline constexpr
-  bool is_dual_nz (uint row, uint col) noexcept;
-  static inline constexpr
-  bool is_dual_nz (uint row, uint col, uint order) noexcept;
-  static inline constexpr
-  int dual_ix (int row, int col) noexcept;//NOTE returns negative index for zero elements
-  static inline constexpr
-  uint dual_ux (uint row, uint col) noexcept;//NOTE returns index zero for zero elements
-  static inline constexpr
-  int dual_ix (int row, int col, int order) noexcept;
-  static inline constexpr
-  uint dual_tnz (uint row, uint col) noexcept;// transpose
-  static inline constexpr
-  int dual_tix (int row, int col) noexcept;// transpose
-  static inline constexpr
-  int dual_tix (int row, int col, int order) noexcept;// transpose
+  uint hamw (uint32_t i)
+  noexcept;
   template <typename T> inline constexpr
-  T cr_dual_elem (const T*, Zsize_t row=0, Zsize_t col=0)// fast with -flto
+  T cr_dual_elem (const T*, Zsize_t row, Zsize_t col)// fast with -flto
+  noexcept;
+  template <typename T> inline constexpr
+  T cr_dual_elem (const T*, Zsize_t row, Zsize_t col, Zsize_t order)
   noexcept;
 
 }// end zyc namespace
