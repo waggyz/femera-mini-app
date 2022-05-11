@@ -57,7 +57,5 @@ noexcept {// for promoted or demoted Zorder access
     ? v [row - col] : T(0.0);
 }
 
-# endif
-
 //end ZYC_HAS_ZYC_IPP
 #endif
