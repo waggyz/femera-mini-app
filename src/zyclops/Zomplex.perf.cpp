@@ -67,7 +67,7 @@ namespace zyc { namespace test {
             ck [j] += (((i^j)==(i-j)) ? ak [i-j] : zero) * bk [j];
 #endif
 #if 0
-            const auto ix = zyc::dual_ux (i,j);
+            const auto ix = zyc::dual_ix (i,j);
             ck[j] += (ix<0) ? 0.0 : ak [ix] * bk [j];
 #endif
 #if 0
@@ -91,7 +91,7 @@ namespace zyc { namespace test {
         for (uint i=0; i<zsz; i++) {
           for (uint j=0; j<zsz; j++) {
 #if 0
-            const auto ix = zyc::dual_ux (j,i);
+            const auto ix = zyc::dual_ix (j,i);
             ck[i] += (ix<0) ? 0.0 : bk [i] * ak [ix];
 #endif
 #if 0
@@ -113,7 +113,7 @@ namespace zyc { namespace test {
         for (uint i=0; i<zsz; i++) {// build CR form of ak
           for (uint j=0; j<zsz; j++) {
 #if 0
-            const auto ix = zyc::dual_ux (i,j);
+            const auto ix = zyc::dual_ix (i,j);
             if (ix>=0) { cr[zsz*i + j]= ak [ix]; }// set only nonzeros
 #endif
 #if 0
@@ -139,7 +139,7 @@ namespace zyc { namespace test {
         for (uint i=0; i<zsz; i++) {// build transposed CR form of ak (faster)
           for (uint j=0; j<zsz; j++) {
 #if 0
-            const auto ix = zyc::dual_ux (j,i);
+            const auto ix = zyc::dual_ix (j,i);
             cr[zsz* i + j] = (ix<0) ? 0.0 : ak [ix];
 #endif
 #if 0
@@ -176,17 +176,18 @@ namespace zyc { namespace test {
         flop_dual/secs_tnaiv, flop_dual/byte, chk);
     return chk;
   }
-  const auto zn = 2*1024*1024;
+  const auto test_n  = 5;
+  const auto test_sz = 8*1024*1024;
   TEST(Zomplex, DualMultiply) {//TODO move to zyc.perf.cpp
-    EXPECT_DOUBLE_EQ( dual_aos_fma (10, zn, 0), 0.0);
-    EXPECT_DOUBLE_EQ( dual_aos_fma (10, zn, 1), 0.0);
-    EXPECT_DOUBLE_EQ( dual_aos_fma (10, zn, 2), 0.0);
-    EXPECT_DOUBLE_EQ( dual_aos_fma (10, zn, 3), 0.0);
-    EXPECT_DOUBLE_EQ( dual_aos_fma (10, zn, 4), 0.0);
-    EXPECT_DOUBLE_EQ( dual_aos_fma (10, zn, 5), 0.0);
-    EXPECT_DOUBLE_EQ( dual_aos_fma (10, zn, 6), 0.0);
-    EXPECT_DOUBLE_EQ( dual_aos_fma (10, zn, 7), 0.0);
-    EXPECT_DOUBLE_EQ( dual_aos_fma (10, zn, 8), 0.0);
+    EXPECT_DOUBLE_EQ( dual_aos_fma (test_n, test_sz, 0), 0.0);
+    EXPECT_DOUBLE_EQ( dual_aos_fma (test_n, test_sz, 1), 0.0);
+    EXPECT_DOUBLE_EQ( dual_aos_fma (test_n, test_sz, 2), 0.0);
+    EXPECT_DOUBLE_EQ( dual_aos_fma (test_n, test_sz, 3), 0.0);
+    EXPECT_DOUBLE_EQ( dual_aos_fma (test_n, test_sz, 4), 0.0);
+    EXPECT_DOUBLE_EQ( dual_aos_fma (test_n, test_sz, 5), 0.0);
+    EXPECT_DOUBLE_EQ( dual_aos_fma (test_n, test_sz, 6), 0.0);
+    EXPECT_DOUBLE_EQ( dual_aos_fma (test_n, test_sz, 7), 0.0);
+    EXPECT_DOUBLE_EQ( dual_aos_fma (test_n, test_sz, 8), 0.0);
   }
 } }//end femerea::test:: namespace
 
