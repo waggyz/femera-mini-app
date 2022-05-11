@@ -1,6 +1,6 @@
 #include "proc.hpp"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 TEST(FmrProc, NodeInfo) {
   EXPECT_GE(fmr::proc::get_node_core_n (), uint(1));

@@ -1,6 +1,6 @@
 #include "Main.hpp"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 namespace femera { namespace test {
   auto main_test = FMR_MAKE_SMART(femera::proc::Main) (femera::proc::Main());

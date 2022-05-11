@@ -1,6 +1,6 @@
 #include "Meter.hpp"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 #include <unistd.h> // usleep
 

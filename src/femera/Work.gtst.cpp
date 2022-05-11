@@ -1,6 +1,6 @@
 #include "Work.hpp"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG

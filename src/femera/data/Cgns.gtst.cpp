@@ -1,7 +1,7 @@
 #include "../femera.hpp"
 #include "Cgns.hpp"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 #include <stdlib.h>          // atof
 

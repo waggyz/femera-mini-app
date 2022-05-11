@@ -1,6 +1,6 @@
 #include "Errs.hpp"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 TEST(Errs, IsOK) {
   EXPECT_EQ( 1, 1);

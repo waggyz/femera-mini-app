@@ -1,7 +1,7 @@
 #include "form.hpp"
 
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"  //::testing::HasSubstr
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>  //::testing::HasSubstr
 
 TEST(FmrForm, FormatNoPrefix) {
   EXPECT_EQ(fmr::form:: si_unit (12.3456,"m"), "  12  m");

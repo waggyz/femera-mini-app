@@ -1,5 +1,5 @@
 #include "../core.h"
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 #include "nvid.hpp"
 

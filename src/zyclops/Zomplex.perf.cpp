@@ -2,14 +2,14 @@
 
 #include "../fmr/perf/Meter.hpp"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 #include <vector>
 #include <cstdio>
 
 #undef ZYC_TEST_MOST_NAIVE
 
-#if 1
+#if 0
 #define TEST_ZYC_ARRAY_PTR auto
 #define TEST_ZYC_CONST_PTR const auto
 #else
@@ -24,7 +24,7 @@ namespace zyc { namespace test {
   (const uint test_n=10, const uint vals_n=1024, const int order=-1) {
     auto time = fmr::perf::Meter<uint64_t,float> ();
     if (test_n<=0 || vals_n<=0) {return 0.0;}
-    const uint zsz = uint(1) << order;
+    const uint zsz = uint (1) << order;
     const auto avec = std::vector<double> (vals_n, 1.0);
     const auto bvec = std::vector<double> (vals_n);
     auto cvec = std::vector<double> (vals_n);
@@ -43,7 +43,7 @@ namespace zyc { namespace test {
     double secs_naiv = 0.0;
 #endif
     const auto flop_ref = 2.0 * double (test_n * vals_n);
-    const auto flop_dual = 2.0 * double (test_n * vals_n / uint(zsz))
+    const auto flop_dual = 2.0 * double (test_n * vals_n / uint (zsz))
       * double(std::pow (3,order));
     for (uint i=0; i<vals_n; i++) {chk += a[i] * b[i];}// warm up
     for (uint test_i=0; test_i<test_n; test_i++) {
@@ -56,12 +56,16 @@ namespace zyc { namespace test {
       if (order < 0) { return chk; }
       const auto n = uint (vals_n);
       time.add_idle_time_now ();
+//      const double zero =0.0;
       for (uint k=0; k<n; k+=zsz) {
         TEST_ZYC_CONST_PTR ak = &a [k];
         TEST_ZYC_CONST_PTR bk = &b [k];
         TEST_ZYC_ARRAY_PTR ck = &c [k];
         for (uint i=0; i<zsz; i++) {
           for (uint j=0; j<zsz; j++) {
+#if 0
+            ck [j] += (((i^j)==(i-j)) ? ak [i-j] : zero) * bk [j];
+#endif
 #if 0
             const auto ix = zyc::dual_ux (i,j);
             ck[j] += (ix<0) ? 0.0 : ak [ix] * bk [j];
@@ -70,10 +74,10 @@ namespace zyc { namespace test {
             ck [j] += (zyc::is_dual_nz (i,j) ? ak [zyc::dual_ux (i,j)] : 0.0)
               * bk [j];
 #endif
-#if 0
-            ck [j] += zyc::dual_elem_cr (ak, i, j) * bk [j];
-#endif
 #if 1
+            ck [j] += zyc::cr_dual_elem (ak, i, j) * bk [j];
+#endif
+#if 0
             ck [j] += (((i^j)==(i-j)) ? ak [i-j] : 0.0) * bk [j];
 #endif
       } } }
@@ -90,19 +94,19 @@ namespace zyc { namespace test {
             const auto ix = zyc::dual_ux (j,i);
             ck[i] += (ix<0) ? 0.0 : bk [i] * ak [ix];
 #endif
-#if 1
+#if 0
             ck [j] += bk [j]
               * (zyc::is_dual_nz (j,i) ? ak [zyc::dual_ux (j,i)] : 0.0);
 #endif
-#if 0
-            ck [j] +=  bk [j] * zyc::dual_elem_cr (ak, j, i);
+#if 1
+            ck [j] +=  bk [j] * zyc::cr_dual_elem (ak, j, i);
 #endif
       } } }
       secs_tfma += double (time.add_busy_time_now ());
       for (uint i=0; i<vals_n; i++) {chk += c[i];}
 #ifdef ZYC_TEST_MOST_NAIVE
       time.add_idle_time_now ();
-      for (int k=0; k<n; k+=zsz) {// transposed version below is faster
+      for (int k=0; k<n; k+=zsz) {
         TEST_ZYC_CONST_PTR ak = &a [k];
         TEST_ZYC_CONST_PTR bk = &b [k];
         TEST_ZYC_ARRAY_PTR ck = &c [k];
@@ -112,18 +116,18 @@ namespace zyc { namespace test {
             const auto ix = zyc::dual_ux (i,j);
             if (ix>=0) { cr[zsz*i + j]= ak [ix]; }// set only nonzeros
 #endif
-#if 1
+#if 0
             cr[zsz* i + j]
               = zyc::is_dual_nz (i,j) ? ak [zyc::dual_ux (i,j)] : 0.0 ;
 #endif
-#if 0
-            cr [zsz* i + j] = zyc::dual_elem_cr (ak, i, j);
+#if 1
+            cr [zsz* i + j] = zyc::cr_dual_elem (ak, i, j);
 #endif
         } }
         for (int i=0; i<zsz; i++) {
           for (int j=0; j<zsz; j++) {
             ck[i] += cr [zsz* i + j] * bk [j];// regular matmul
-      } } }
+      } } }// transposed version below is faster
       secs_naiv += double (time.add_busy_time_now ());
       for (uint i=0; i<vals_n; i++) {chk += c[i];}
 #endif
@@ -138,12 +142,12 @@ namespace zyc { namespace test {
             const auto ix = zyc::dual_ux (j,i);
             cr[zsz* i + j] = (ix<0) ? 0.0 : ak [ix];
 #endif
-#if 1
+#if 0
             cr[zsz* i + j]
               = zyc::is_dual_nz (j,i) ? ak [zyc::dual_ux (j,i)] : 0.0;
 #endif
-#if 0
-            cr [zsz* i + j] = zyc::dual_elem_cr (ak, j, i);
+#if 1
+            cr [zsz* i + j] = zyc::cr_dual_elem (ak, j, i);
 #endif
         } }
         for (uint i=0; i<zsz; i++) {

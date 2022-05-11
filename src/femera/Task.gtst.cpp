@@ -1,6 +1,6 @@
 #include "Task.hpp"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 TEST(Task, IsOK) {
   EXPECT_EQ( 1, 1);

@@ -1,7 +1,7 @@
 #include "Test.hpp"
 
 #ifdef FMR_HAS_GTEST
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 #endif
 #ifdef FMR_HAS_MPI
 #include "mpi.h"

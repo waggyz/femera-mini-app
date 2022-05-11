@@ -14,6 +14,11 @@ namespace femera {
   Work::Work (Work const&) = default;// copyable, here to avoid -Winline warns
   Work::~Work () {
   }
+  fmr::Local_int Work::add_task (Work_spt W)
+  noexcept {
+    this->task_list.push_back (std::move(W));
+    return fmr::Local_int (this->task_list.size () - 1);// index of task added
+  }
   fmr::Exit_int Work::init_list (int* argc, char** argv)
   noexcept {fmr::Exit_int err =0;
     const auto n = this->task_list.size ();

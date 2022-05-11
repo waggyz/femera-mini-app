@@ -1,7 +1,7 @@
 #include "../core.h"
 #include "Node.hpp"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 fmr::Exit_int main (int argc, char** argv) {
   return femera::test:: early_main (&argc, argv);

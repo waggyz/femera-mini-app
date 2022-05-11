@@ -2,7 +2,7 @@
 #include "Geom.hpp"
 #include <cstring>      // std::memcpy
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 auto mini = fmr::new_jobs ();
 #if 0

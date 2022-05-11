@@ -1,7 +1,7 @@
 #include "../femera.hpp"
 #include "Bank.hpp"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 namespace femera { namespace test {
   const auto mini = fmr::new_jobs ();

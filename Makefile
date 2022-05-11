@@ -36,8 +36,6 @@ ifeq ($(CXX),g++)
     # TDDEXEC:= mpiexec -np $(TDD_MPI_N) --bind-to core -map-by node:pe=$(TDD_OMP_N)
   endif
   OPTFLAGS:= $(shell cat data/gcc4.flags | tr '\n' ' ' | tr -s ' ')
-  # -finline-limit=1000 --param inline-min-speedup=2
-  # --param inline-unit-growth=500 --param large-function-growth=2000
   CXXFLAGS+= -std=c++11 -g -MMD -MP
   # Dependency file generation: -MMD -MP
   ifeq ($(ENABLE_LTO),ON)
@@ -59,6 +57,10 @@ ifeq ($(CXX),g++)
   CXXWARNS+= -Winline
   #TODO Consider suppressing -Winline errors for con/de-structors and
   #     lower the --param large-function-growth limit.
+  # CXXFLAGS+= -finline-limit=1000
+  # CXXFLAGS+= --param inline-min-speedup=2
+  # CXXFLAGS+= --param inline-unit-growth=500
+  # CXXFLAGS+= --param large-function-growth=2000
   # Library archiver
   AREXE:= gcc-ar
 endif
@@ -75,6 +77,9 @@ endif
 CXX_VERSION:= $(shell $(CXX) -dumpversion)
 # Flags for compiling tests
 CXXTESTS := $(CXXFLAGS) $(CXXWARNS)
+CXXPERFS := $(CXXFLAGS) $(CXXWARNS)
+CXXPERFS := $(filter-out -Weffc++,$(CXXPERFS))
+CXXPERFS := $(filter-out -Winline,$(CXXPERFS))
 
 FMRFLAGS += -DFMR_CPUMODEL="$(CPUMODEL)"
 ifneq ($(CPUCOUNT),)
@@ -812,7 +817,7 @@ $(BUILD_CPU)/%.perf.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.perf.o : src/%.perf.cpp src/%.cpp src/%.hpp $(TOPDEPS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
-	$(CXX) -c $(CXXTESTS) $(FMRFLAGS) $< -o $@
+	$(CXX) -c $(CXXPERFS) $(FMRFLAGS) $< -o $@
 else
 	touch $@
 endif
@@ -821,7 +826,7 @@ $(BUILD_CPU)/%.perf.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.perf.o : src/%.perf.cpp src/%.cu.cpp src/%.hpp $(TOPDEPS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
-	$(CXX) -c $(CXXTESTS) $(FMRFLAGS) $< -o $@
+	$(CXX) -c $(CXXPERFS) $(FMRFLAGS) $< -o $@
 else
 	touch $@
 endif
@@ -831,7 +836,7 @@ $(BUILD_CPU)/%.perf.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.perf.o : src/%.perf.cpp src/%.hpp $(TOPDEPS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
-	$(CXX) -c $(CXXTESTS) $(FMRFLAGS) $< -o $@
+	$(CXX) -c $(CXXPERFS) $(FMRFLAGS) $< -o $@
 else
 	touch $@
 endif
@@ -937,7 +942,7 @@ build/%.perf : export TMPDIR := $(TEMP_DIR)
 build/%.perf : build/%.perf.o $(LIBFEMERA)(build/%.o)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(@).o,$(notdir $@))
-	-$(CXX) $(CXXTESTS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
+	-$(CXX) $(CXXPERFS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
 	$(info $(WARN) $@ not tested: GoogleTest disabled)
 	echo "WARNING: $@ not tested: GoogleTest disabled" >> $@.err
@@ -949,7 +954,7 @@ build/%.perf : export TMPDIR := $(TEMP_DIR)
 build/%.perf : build/%.perf.o
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(@).o,$(notdir $@))
-	-$(CXX) $(CXXTESTS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
+	-$(CXX) $(CXXPERFS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
 	$(info $(WARN) $@ not tested: GoogleTest disabled)
 	echo "WARNING: $@ not tested: GoogleTest disabled" >> $@.err

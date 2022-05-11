@@ -1,7 +1,7 @@
 #include "../femera.hpp"
 #include "Gmsh.hpp"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 auto mini = fmr::new_jobs ();
 

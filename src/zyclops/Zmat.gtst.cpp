@@ -1,6 +1,6 @@
 #include "Zmat.hpp"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 namespace zyc { namespace test {
   //

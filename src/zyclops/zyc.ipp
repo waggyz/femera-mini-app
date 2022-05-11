@@ -2,7 +2,7 @@
 #define ZYC_HAS_ZYC_IPP
 
 //#ifdef ZYC_HAS_GTEST
-#include "gtest/gtest.h"
+//#include <gtest/gtest.h>
 //#endif/
 
 //#include <functional>        //bit_xor
@@ -112,7 +112,7 @@ noexcept {
 #endif
 }
   template <typename T> inline constexpr
-  T zyc::dual_elem_cr (const T* v, const uint row, const uint col)
+  T zyc::cr_dual_elem (const T* v, const uint row, const uint col)
 noexcept {
     return ((row ^ col) == (row - col)) ? v[row - col] : T(0.0);
   }

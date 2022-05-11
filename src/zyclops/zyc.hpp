@@ -54,7 +54,7 @@ namespace zyc {
   static inline constexpr
   int dual_tix (int row, int col, int order) noexcept;// transpose
   template <typename T> inline constexpr
-  T dual_elem_cr (const T*, uint row=0, uint col=0) noexcept;// slow
+  T cr_dual_elem (const T*, uint row=0, uint col=0) noexcept;// fast with -flto
 
 }// end zyc namespace
 

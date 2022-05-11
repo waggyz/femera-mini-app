@@ -1,7 +1,7 @@
 #include "../femera.hpp"
 #include "Vals.hpp"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 #include <vector>
 #include <valarray>

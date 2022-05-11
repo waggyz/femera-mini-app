@@ -2,7 +2,7 @@
 #include "../core.h"
 
 #ifdef FMR_HAS_GTEST
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 #endif
 
 #undef FMR_DEBUG
