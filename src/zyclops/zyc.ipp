@@ -52,7 +52,7 @@ noexcept {
 template <typename T> inline constexpr
 T zyc::cr_dual_elem (const T* ZYC_RESTRICT v,
   const zyc::Zsize_t row, const zyc::Zsize_t col, const zyc::Zsize_t order)
-noexcept {// for promoted or demoted Zorder access
+noexcept {// safe for access of higher order than stored
   return (((row ^ col) == (row - col)) && ((row - col) < (Zsize_t(1) << order)))
     ? v [row - col] : T(0.0);
 }
