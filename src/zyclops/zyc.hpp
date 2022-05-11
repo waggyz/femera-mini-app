@@ -11,13 +11,23 @@
 #ifndef ZYC_RESTRICT
 #define ZYC_RESTRICT __restrict
 #endif
-#define ZYC_ARRAY_PTR auto*
-#define ZYC_CONST_PTR const auto*
+#define ZYC_ARRAY_PTR auto* ZYC_RESTRICT
+#define ZYC_CONST_PTR const auto* ZYC_RESTRICT
 #define ZYC_ALIGN_PTR __attribute__((aligned(ZYC_ALIGN))) auto*
 
-namespace zyc {
+#ifdef _OPENMP
+#define ZYC_HAS_OPENMP
+#define ZYC_PRAGMA_OMP(x) _Pragma (#x)
+#else
+#define ZYC_PRAGMA_OMP(x) // pragma omp not supported
+#endif
 
-  using Zsize_t    = uint_fast32_t;// vector or array dimension
+namespace zyc {
+#if 0
+  using Zsize_t    = uint_fast32_t;// vector or array dimension order <=32
+#else
+  using Zsize_t    = uint_fast16_t;// vector or array dimension order <=16
+#endif
   using Zorder_int = uint8_t;
   enum class Algebra : int8_t {Unknown =0,
     Real, Complex, Dual, Split, Quat, OTI, User,
@@ -54,7 +64,8 @@ namespace zyc {
   static inline constexpr
   int dual_tix (int row, int col, int order) noexcept;// transpose
   template <typename T> inline constexpr
-  T cr_dual_elem (const T*, uint row=0, uint col=0) noexcept;// fast with -flto
+  T cr_dual_elem (const T*, Zsize_t row=0, Zsize_t col=0)// fast with -flto
+  noexcept;
 
 }// end zyc namespace
 

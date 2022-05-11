@@ -112,7 +112,8 @@ noexcept {
 #endif
 }
   template <typename T> inline constexpr
-  T zyc::cr_dual_elem (const T* v, const uint row, const uint col)
+  T zyc::cr_dual_elem (const T* ZYC_RESTRICT v,
+    const zyc::Zsize_t row, const zyc::Zsize_t col)
 noexcept {
     return ((row ^ col) == (row - col)) ? v[row - col] : T(0.0);
   }
