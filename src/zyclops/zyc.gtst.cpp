@@ -34,8 +34,12 @@ namespace zyc { namespace test {
   }
   TEST( Zyc, TrivialTest ){
     EXPECT_EQ( 1, 1 );
+  }
+  TEST( Zyc, Multidual ){
     EXPECT_EQ( print_dual   (3,3), 27 );
     EXPECT_EQ( print_dual   (3,2), 27-9 );
+  }
+  TEST( Zyc, MultidualTransposed ){
     EXPECT_EQ( print_dual_t (3,3), 27 );
     EXPECT_EQ( print_dual_t (3,2), 27-9 );
     EXPECT_EQ( print_dual_t (4,4), zyc::upow (3,4));

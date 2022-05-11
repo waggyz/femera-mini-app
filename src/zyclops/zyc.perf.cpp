@@ -1,4 +1,4 @@
-#include "Zomplex.hpp"
+#include "zyc.hpp"
 
 #include "../fmr/perf/Meter.hpp"
 
@@ -272,7 +272,7 @@ namespace zyc { namespace test {
   }
   const auto test_n  = 5;
   const auto test_sz = 8*1024*1024;
-  TEST(Zomplex, DualMultiply) {//TODO move to zyc.perf.cpp
+  TEST(Zyc, DualMultiply) {//TODO move to zyc.perf.cpp
     EXPECT_DOUBLE_EQ( dual_aos_fma (test_n, test_sz, 0), 0.0);
     EXPECT_DOUBLE_EQ( dual_aos_fma (test_n, test_sz, 1), 0.0);
     EXPECT_DOUBLE_EQ( dual_aos_fma (test_n, test_sz, 2), 0.0);
