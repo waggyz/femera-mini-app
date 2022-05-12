@@ -52,7 +52,7 @@ namespace zyc {
   T cr_dual_elem (const T*, Zsize_t row, Zsize_t col)// fast with -flto
   noexcept;
   template <typename T> inline constexpr
-  T cr_dual_elem (const T*, Zsize_t row, Zsize_t col, Zsize_t stored_order)
+  T cr_dual_elem (const T*, Zsize_t row, Zsize_t col, Zsize_t stored_zorder)
   noexcept;// safe for access of higher order than stored
 
 }// end zyc namespace

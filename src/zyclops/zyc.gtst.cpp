@@ -56,6 +56,26 @@ namespace zyc { namespace test {
     } }
     return nnz;
   }
+  static inline
+  int print_hamw (int show_order, int array_order) {
+    int nnz=0;
+    const int n = 1 << show_order;
+    for (int i=0; i<n; i++) {
+      for (int j=0; j<n; j++) {
+        printf ("%2s%s",
+          std::to_string (zyc::hamw (uint(n*i+j))).c_str(),
+          j == (n-1) ? "\n":" ");
+    } }
+    for (int i=0; i<n; i++) {
+      for (int j=0; j<n; j++) {
+        const auto ix = dual_ix (i,j, array_order);
+        nnz += (ix<0) ? 0 : 1;
+        printf ("%2s%s",
+          ix < 0 ? "" : std::to_string (zyc::hamw (uint(n*i+j))).c_str(),
+          j == (n-1) ? "\n":" ");
+    } }
+    return nnz;
+  }
   TEST( Zyc, TrivialTest ){
     EXPECT_EQ( 1, 1 );
   }
@@ -68,6 +88,11 @@ namespace zyc { namespace test {
     EXPECT_EQ( print_dual_t (3,2), 27-9 );
     EXPECT_EQ( print_dual_t (4,4), zyc::upow (3,4));
   }
+#if 0
+  TEST( Zyc, MultidualHammingWeight ){
+    EXPECT_EQ( print_hamw (3,3), 27 );
+  }
+#endif
 } }//end zyc::test:: namespace
 
 int main (int argc, char** argv) {
