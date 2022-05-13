@@ -1,12 +1,6 @@
 #ifndef ZYC_HAS_ZYC_IPP
 #define ZYC_HAS_ZYC_IPP
 
-//#ifdef ZYC_HAS_GTEST
-//#include <gtest/gtest.h>
-//#endif/
-
-//#include <functional>        //bit_xor
-
 #ifdef __INTEL_COMPILER
 #include <nmmintrin.h>
 #endif
@@ -44,20 +38,36 @@ noexcept {
 #endif
 }
 static inline constexpr
-bool zyc::is_dual_val (Zsize_t row, Zsize_t col)
+bool zyc::is_dual_nz (Zsize_t row, Zsize_t col)
 noexcept{
   return (row ^ col) == (row - col);
 }
-static inline constexpr
-bool zyc::is_dual_val (Zsize_t row, Zsize_t col, Zsize_t order)
-noexcept{
-  return ((row ^ col) == (row - col)) && ((row - col) < (Zsize_t(1) << order));
+# if 0
+template <typename T> static inline constexpr
+T zyc::cr_dual_elem (const T& ZYC_RESTRICT v,//TODO change all ptr to reference
+/*
+ * The difference between pass-by-reference and pass-by-pointer is that pointers
+ * can be NULL or reassigned whereas references cannot. Use pass-by-pointer
+ * if NULL is a valid parameter value or if you want to reassign the pointer.
+ * Otherwise, use constant or non-constant references to pass arguments.
+ *
+ * https://www.ibm.com/docs/en/zos/2.4.0?topic=calls-pass-by-reference-c-only
+ */
+  const zyc::Zsize_t row, const zyc::Zsize_t col)
+noexcept {
+  return ((row ^ col) == (row - col)) ? (&v)[row - col] : T(0.0);
 }
+#   endif
 template <typename T> static inline constexpr
 T zyc::cr_dual_elem (const T* ZYC_RESTRICT v,
   const zyc::Zsize_t row, const zyc::Zsize_t col)
 noexcept {
   return ((row ^ col) == (row - col)) ? v [row - col] : T(0.0);
+}
+static inline constexpr
+bool zyc::is_dual_nz (Zsize_t row, Zsize_t col, Zsize_t order)
+noexcept{
+  return ((row ^ col) == (row - col)) && ((row - col) < (Zsize_t(1) << order));
 }
 template <typename T> static inline constexpr
 T zyc::cr_dual_elem (const T* ZYC_RESTRICT v,
@@ -66,6 +76,16 @@ noexcept {// safe for access of higher order than stored
   return (((row ^ col) == (row - col)) && ((row - col) < (Zsize_t(1) << order)))
     ? v [row - col] : T(0.0);
 }
-
+#if 0
+template <typename T> static inline constexpr
+void zyc::dual_mult (T* ZYC_RESTRICT a,
+  const T* ZYC_RESTRICT b, const T* ZYC_RESTRICT c, const zyc::Zsize_t order)
+noexcept {
+  const zyc::Zsize_t zsz = zyc::Zsize_t (1) << order;
+  for (zyc::Zsize_t i=0; i<zsz; i++) {
+    for (zyc::Zsize_t j=0; j<zsz; j++) {
+      a [j] += zyc::cr_dual_elem (b, i, j) * c [j];
+} } }
+#endif
 //end ZYC_HAS_ZYC_IPP
 #endif

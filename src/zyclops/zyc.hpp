@@ -23,12 +23,12 @@
 #endif
 
 namespace zyc {
+  using Zorder_int = uint8_t;
 #if 0
   using Zsize_t    = uint_fast32_t;// vector or array dimension order <=32
 #else
   using Zsize_t    = uint_fast16_t;// vector or array dimension order <=16
 #endif
-  using Zorder_int = uint8_t;
   enum class Algebra : int8_t {Unknown =0,
     Real, Complex, Dual, Split, Quat, OTI, User,
     Int,// signed
@@ -49,10 +49,10 @@ namespace zyc {
   uint hamw (uint32_t i)
   noexcept;
   static inline constexpr
-  bool is_dual_val (Zsize_t row, Zsize_t col)
+  bool is_dual_nz (Zsize_t row, Zsize_t col)
   noexcept;
   static inline constexpr
-  bool is_dual_val (Zsize_t row, Zsize_t col, Zsize_t stored_zorder)
+  bool is_dual_nz (Zsize_t row, Zsize_t col, Zsize_t stored_zorder)
   noexcept;
   template <typename T> static inline constexpr
   T cr_dual_elem (const T*, Zsize_t row, Zsize_t col)// fast with -flto
@@ -60,6 +60,14 @@ namespace zyc {
   template <typename T> static inline constexpr
   T cr_dual_elem (const T*, Zsize_t row, Zsize_t col, Zsize_t stored_zorder)
   noexcept;// safe for access of higher order than stored
+#if 0
+  template <typename T> static inline constexpr
+  void dual_mult //TODO Tune performance (permute loops?, transposed mult?
+                 //     store rearranged?)
+    (T* ZYC_RESTRICT a, const T* ZYC_RESTRICT b, const T* ZYC_RESTRICT c,
+    zyc::Zorder_int order)
+  noexcept;
+#endif
 
 }// end zyc namespace
 
