@@ -2,7 +2,6 @@
 # -*- coding: utf8 -*-
 import csv
 import matplotlib.pyplot as plt
-import matplotlib.dates as pdt
 import datetime as dt
 import numpy as np
 
@@ -13,9 +12,11 @@ def some_function( *args, **opts ):
 
 if __name__ == "__main__":
   """ Plot zyc.?pp Performance Test results """
+  now = dt.datetime.now()
   cpumodel="i7-7820HQ"
-  file_name = "data/perf/zyc.perf.out"
-  plot_name = "build/"+cpumodel+"/zyc.perf"
+  timestr = now.strftime("%Y-%m-%d")
+  file_name = "data/perf/zyc.perf-"+timestr+".out"
+  plot_name = "build/"+cpumodel+"/zyc-perf-"+timestr
   name1 = []
   name2 = []
   order = []
@@ -72,72 +73,86 @@ if __name__ == "__main__":
   #mdops = [n/s for n,s in zip(md_n,secs)]
   mult_nonz_lim = [speed_mult_ref/(3**o) for o in list_order]
   sum2_nonz_lim = [speed_sum2_ref/(3**o) for o in list_order]
-  mult_band_lim = [speed_mult_ref/(2**o) for o in list_order]
-  sum2_band_lim = [speed_sum2_ref/(2**o) for o in list_order]
+  mult_mdsz_lim = [speed_mult_ref/(2**o) for o in list_order]
+  sum2_mdsz_lim = [speed_sum2_ref/(2**o) for o in list_order]
   mult_crmat_lim = [speed_mult_ref/((2**o)**2) for o in list_order]
   sum2_crmat_lim = [speed_sum2_ref/((2**o)**2) for o in list_order]
   #
-  lw  = 1.0    # linewidth
+  mult_x = [mfree/crmat -1.0 for mfree,crmat in zip (speed_mult,crmat_mult)]
+  sum2_x = [mfree/crmat -1.0 for mfree,crmat in zip (speed_sum2,crmat_sum2)]
+  print mult_x
+  print sum2_x
+  #
+  lw  = 2.0    # linewidth
   ms  = 6      # markersize
   mw  = 1      # markeredgewidth
   rlw = 1.0/3.0# reference linewidth
   rms = 4      # reference markersize
   #
-  if False:
-    plt.semilogy(list_order, sum2_band_lim,
-      label="sum of squares (multidual size limited)",
+  if True:
+    plt.semilogy(list_order, sum2_mdsz_lim,
+      label="Sum of squares (multidual size limited)",
       marker="s", markersize=rms, markeredgecolor='g', markerfacecolor='none',
-      color='g', linestyle="dashed")
+      color='g', linestyle="solid", linewidth=rlw)
   plt.semilogy(list_order, sum2_nonz_lim,
-    label="sum of squares (nonzero size limited)",
-    marker="s", markersize=rms, markeredgecolor='g', markerfacecolor='none',
-    color='g', linestyle="solid", linewidth=rlw)
+    label="Sum of squares (CR nonzero count limited)",
+    marker="s", markersize=rms, markeredgecolor='y', markerfacecolor='none',
+    color='y', linestyle="solid", linewidth=rlw)
   plt.semilogy(list_order, sum2_crmat_lim,
-    label="sum of squares (CR matrix size limited)",
-    marker="s", markersize=rms, markeredgecolor='m', markerfacecolor='none',
-    color='m', linestyle="solid", linewidth=rlw)
-  plt.semilogy(list_order, speed_sum2, label="sum of squares",
+    label="Sum of squares (CR matrix size limited)",
+    marker="s", markersize=rms, markeredgecolor='r', markerfacecolor='none',
+    color='r', linestyle="solid", linewidth=rlw)
+  plt.semilogy(list_order, speed_sum2,
+    label="Sum of squares (matrix-free algorithm)",
     marker="s", markersize=ms, markeredgecolor="b", markerfacecolor='none',
     markeredgewidth=mw, color="b",linestyle="dashed")
   if False:
-    plt.semilogy(list_order, trnsp_sum2, label="sum of squares (transposed)",
+    plt.semilogy(list_order, trnsp_sum2, label="Sum of squares (transposed)",
       marker="s", markersize=ms, markeredgecolor="m", markerfacecolor='none',
       markeredgewidth=mw, color="m",linestyle="dashed")
   plt.semilogy(list_order, crmat_sum2,
-    label="sum of squares (naive)",
-    marker="s", markersize=ms, markeredgecolor="r", markerfacecolor='none',
-    markeredgewidth=mw, color="r",linestyle="dashed")
+    label="Sum of squares (naive algorithm)",
+    marker="s", markersize=ms, markeredgecolor="k", markerfacecolor='none',
+    markeredgewidth=mw, color="k",linestyle="dashed")
   #
-  if False:
-    plt.semilogy(list_order, mult_band_lim,
-      label="multiply (multidual size limited)",
+  if True:
+    plt.semilogy(list_order, mult_mdsz_lim,
+      label="Multiply (multidual size limited)",
       marker="x", markeredgecolor='g', markerfacecolor='none',
-      color='g', linestyle="dashed")
+      color='g', linestyle="solid", linewidth=rlw)
   plt.semilogy(list_order, mult_nonz_lim,
-    label="multiply (nonzero size limited)",
-    marker="x", markersize=rms, markeredgecolor='g', markerfacecolor='none',
-    color='g', linestyle="solid", linewidth=rlw)
+    label="Multiply (CR nonzero count limited)",
+    marker="x", markersize=rms, markeredgecolor='y', markerfacecolor='none',
+    color='y', linestyle="solid", linewidth=rlw)
   plt.semilogy(list_order, mult_crmat_lim,
-    label="multiply (CR matrix size limited)",
-    marker="x", markersize=rms, markeredgecolor='m', markerfacecolor='none',
-    color='m', linestyle="solid", linewidth=rlw)
-  plt.semilogy(list_order, speed_mult,
-    label="multiply", markersize=ms, marker="x", color="b", markeredgewidth=mw,
+    label="Multiply (CR matrix size limited)",
+    marker="x", markersize=rms, markeredgecolor='r', markerfacecolor='none',
+    color='r', linestyle="solid", linewidth=rlw)
+  plt.semilogy(list_order, speed_mult, label="Multiply (matrix-free algorithm)",
+    markersize=ms, marker="x", color="b", markeredgewidth=mw,
     linestyle="dotted")
   if False:
-    plt.semilogy(list_order, trnsp_mult, label="sum of squares (transposed)",
+    plt.semilogy(list_order, trnsp_mult, label="Multiply (transposed)",
       marker="x", markersize=ms, markeredgecolor="m",
       markeredgewidth=mw, color="m",linestyle="dotted",)
-  plt.semilogy(list_order, crmat_mult, label="multiply (naive)",
-    marker="x", markersize=ms, color="r", markeredgewidth=mw,
-    linestyle="dotted")
+  plt.semilogy(list_order, crmat_mult, label="Multiply (naive algorithm)",
+    marker="x", markersize=ms, color="k", markeredgecolor="k",
+    markeredgewidth=mw, linestyle="dotted")
   #
   #plt.gca().set(xlim=(-0.1, 8.1))
+  plt.gca().set(ylim=(1e3, 1e10))
   plt.xlabel("Multidual order")
   plt.ylabel("Speed (multidual operations per second)")
+  ''' plt.gca().annotate ("faster is better ->",
+            xy=(0, 0.5), xytext=(10, 0),#, rotatation=90)#,
+            xycoords=('axes fraction', 'figure fraction'),
+            textcoords='offset points',
+            size=14, ha='center', va='bottom')'''
+  plt.text(x=8.1, y=2.7*10**7, s=r"Higher is better.$\rightarrow$",
+    rotation=90.0)
   #
   plt.grid()
-  plt.title("Femera 0.3 multidual multiplication performance")
+  plt.title("Multidual multiplication performance ("+cpumodel+")")
   plt.legend(loc='lower left', fontsize=10, numpoints=1)
   #
   plt.savefig(plot_name+".eps",format="eps")

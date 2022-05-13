@@ -48,18 +48,20 @@ namespace zyc {
   static inline constexpr
   uint hamw (uint32_t i)
   noexcept;
-  template <typename T> inline constexpr
+  static inline constexpr
+  bool is_dual_val (Zsize_t row, Zsize_t col)
+  noexcept;
+  static inline constexpr
+  bool is_dual_val (Zsize_t row, Zsize_t col, Zsize_t stored_zorder)
+  noexcept;
+  template <typename T> static inline constexpr
   T cr_dual_elem (const T*, Zsize_t row, Zsize_t col)// fast with -flto
   noexcept;
-  template <typename T> inline constexpr
+  template <typename T> static inline constexpr
   T cr_dual_elem (const T*, Zsize_t row, Zsize_t col, Zsize_t stored_zorder)
   noexcept;// safe for access of higher order than stored
 
 }// end zyc namespace
-
-namespace zyc { namespace test {
-  int gtst_main (int* argc, char** argv);
-} }// end zyc::test:: namespace
 
 #include "zyc.ipp"
 

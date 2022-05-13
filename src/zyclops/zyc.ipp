@@ -43,13 +43,23 @@ noexcept {
   return uint(__builtin_popcount (i));
 #endif
 }
-template <typename T> inline constexpr
+static inline constexpr
+bool zyc::is_dual_val (Zsize_t row, Zsize_t col)
+noexcept{
+  return (row ^ col) == (row - col);
+}
+static inline constexpr
+bool zyc::is_dual_val (Zsize_t row, Zsize_t col, Zsize_t order)
+noexcept{
+  return ((row ^ col) == (row - col)) && ((row - col) < (Zsize_t(1) << order));
+}
+template <typename T> static inline constexpr
 T zyc::cr_dual_elem (const T* ZYC_RESTRICT v,
   const zyc::Zsize_t row, const zyc::Zsize_t col)
 noexcept {
   return ((row ^ col) == (row - col)) ? v [row - col] : T(0.0);
 }
-template <typename T> inline constexpr
+template <typename T> static inline constexpr
 T zyc::cr_dual_elem (const T* ZYC_RESTRICT v,
   const zyc::Zsize_t row, const zyc::Zsize_t col, const zyc::Zsize_t order)
 noexcept {// safe for access of higher order than stored
