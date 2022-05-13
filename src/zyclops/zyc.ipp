@@ -44,7 +44,7 @@ noexcept{
 }
 # if 0
 template <typename T> static inline constexpr
-T zyc::cr_dual_elem (const T& ZYC_RESTRICT v,//TODO change all ptr to reference
+T zyc::cr_dual_elem (const T& ZYC_RESTRICT v,//DONE change all ptr to reference
 /*
  * The difference between pass-by-reference and pass-by-pointer is that pointers
  * can be NULL or reassigned whereas references cannot. Use pass-by-pointer
@@ -57,12 +57,18 @@ T zyc::cr_dual_elem (const T& ZYC_RESTRICT v,//TODO change all ptr to reference
 noexcept {
   return ((row ^ col) == (row - col)) ? (&v)[row - col] : T(0.0);
 }
-#   endif
 template <typename T> static inline constexpr
 T zyc::cr_dual_elem (const T* ZYC_RESTRICT v,
   const zyc::Zsize_t row, const zyc::Zsize_t col)
 noexcept {
   return ((row ^ col) == (row - col)) ? v [row - col] : T(0.0);
+}
+#   endif
+template <typename T> static inline constexpr
+T zyc::cr_dual_elem (const T& ZYC_RESTRICT v,
+  const zyc::Zsize_t row, const zyc::Zsize_t col)
+noexcept {
+  return ((row ^ col) == (row - col)) ? (&v)[row - col] : T(0.0);
 }
 static inline constexpr
 bool zyc::is_dual_nz (Zsize_t row, Zsize_t col, Zsize_t order)
@@ -70,11 +76,11 @@ noexcept{
   return ((row ^ col) == (row - col)) && ((row - col) < (Zsize_t(1) << order));
 }
 template <typename T> static inline constexpr
-T zyc::cr_dual_elem (const T* ZYC_RESTRICT v,
+T zyc::cr_dual_elem (const T& ZYC_RESTRICT v,
   const zyc::Zsize_t row, const zyc::Zsize_t col, const zyc::Zsize_t order)
-noexcept {// safe for access of higher order than stored
-  return (((row ^ col) == (row - col)) && ((row - col) < (Zsize_t(1) << order)))
-    ? v [row - col] : T(0.0);
+noexcept {
+  return ((row ^ col) == (row - col)) && ((row - col) < (Zsize_t(1) << order))
+    ? (&v)[row - col] : T(0.0);
 }
 #if 0
 template <typename T> static inline constexpr

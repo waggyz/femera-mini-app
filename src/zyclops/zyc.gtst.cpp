@@ -10,7 +10,7 @@ namespace zyc { namespace test {
     EXPECT_EQ( 1, 1 );
   }
   template <typename T> static inline constexpr
-  T cr_dual_elem (const T& ZYC_RESTRICT v,
+  T cr_dual_elem_test (const T& ZYC_RESTRICT v,
     const zyc::Zsize_t row, const zyc::Zsize_t col)
   noexcept {
     return ((row ^ col) == (row - col)) ? (&v)[row - col] : T(0.0);
@@ -19,7 +19,7 @@ namespace zyc { namespace test {
   double pass_by_reference (const zyc::Zsize_t row, const zyc::Zsize_t col)
   noexcept {
     std::vector<double> bidual = {1.0,0.0,0.0,0.0};
-  return cr_dual_elem (bidual [0], row, col);
+  return cr_dual_elem_test (bidual [0], row, col);
   }
   TEST( Zyc, ByReference ){
     EXPECT_DOUBLE_EQ( pass_by_reference (0,0), 1.0 );

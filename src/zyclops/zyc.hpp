@@ -4,6 +4,12 @@
 #include <sys/types.h>
 #include <cstdint>
 
+#ifndef ZYC_STEP_SINGLE
+#define ZYC_STEP_SINGLE 1e-8f
+#endif
+#ifndef ZYC_STEP_DOUBLE
+#define ZYC_STEP_DOUBLE 1e-12
+#endif
 #ifndef ZYC_ALIGN
 #define ZYC_ALIGN alignof(__m512d)
 #endif
@@ -23,11 +29,11 @@
 #endif
 
 namespace zyc {
-  using Zorder_int = uint8_t;
+  using Zorder_int = uint_fast8_t;
 #if 0
-  using Zsize_t    = uint_fast32_t;// vector or array dimension order <=32
+  using Zsize_t    = uint_fast32_t;// vector or array dimension order <= 31
 #else
-  using Zsize_t    = uint_fast16_t;// vector or array dimension order <=16
+  using Zsize_t    = uint_fast16_t;// vector or array dimension order <= 15
 #endif
   enum class Algebra : int8_t {Unknown =0,
     Real, Complex, Dual, Split, Quat, OTI, User,
@@ -54,11 +60,19 @@ namespace zyc {
   static inline constexpr
   bool is_dual_nz (Zsize_t row, Zsize_t col, Zsize_t stored_zorder)
   noexcept;
+#if 0
   template <typename T> static inline constexpr
-  T cr_dual_elem (const T*, Zsize_t row, Zsize_t col)// fast with -flto
+  T cr_dual_elem (const T*, Zsize_t row, Zsize_t col)//TODO REMOVE
+  noexcept;
+  template <typename T> static inline constexpr//TODO REMOVE
+  T cr_dual_elem (const T*, Zsize_t row, Zsize_t col, Zsize_t stored_zorder)
+  noexcept;// safe for access of higher order than stored
+#endif
+  template <typename T> static inline constexpr
+  T cr_dual_elem (const T&, Zsize_t row, Zsize_t col)// fast with -flto
   noexcept;
   template <typename T> static inline constexpr
-  T cr_dual_elem (const T*, Zsize_t row, Zsize_t col, Zsize_t stored_zorder)
+  T cr_dual_elem (const T&, Zsize_t row, Zsize_t col, Zsize_t stored_zorder)
   noexcept;// safe for access of higher order than stored
 #if 0
   template <typename T> static inline constexpr
@@ -66,6 +80,33 @@ namespace zyc {
                  //     store rearranged?)
     (T* ZYC_RESTRICT a, const T* ZYC_RESTRICT b, const T* ZYC_RESTRICT c,
     zyc::Zorder_int order)
+  noexcept;
+#endif
+#if 0
+  template<typename T>
+  static inline constexpr
+  T dual_derivative (const T& v, const Zorder_int o)
+  noexcept { return (&v)[o]; }
+  template<typename T, typename... Args>
+  static inline constexpr
+  T dual_derivative (const T& v, const Args... orders)
+  noexcept { return get_derivative (v, orders...); }
+#endif
+#if 0
+  static inline constexpr
+  float get_deriv (const float& v, const float step_size=ZYC_STEP_SINGLE,
+    Zorder_int=0)
+  noexcept;
+  template<typename... Orders>
+  static inline constexpr
+  float get_deriv (const float& v, const float step_size=ZYC_STEP_SINGLE,
+    Orders... orders)
+  noexcept { return get_deriv (v, step_size, orders...); }
+#endif
+#if 0
+  static inline constexpr
+  double get_deriv (const double&, const double step_size=ZYC_STEP_DOUBLE,
+    Zorder_int=0);
   noexcept;
 #endif
 

@@ -94,7 +94,7 @@ namespace zyc { namespace test {
                 * bk [j];
 #endif
 #if 1
-              ck [j] += zyc::cr_dual_elem (ak, i, j) * bk [j];
+              ck [j] += zyc::cr_dual_elem (ak[0], i, j) * bk [j];
 #endif
 #if 0
               ck [j] += (((i^j)==(i-j)) ? ak [i-j] : 0.0) * bk [j];
@@ -111,7 +111,7 @@ namespace zyc { namespace test {
           TEST_ZYC_ARRAY_PTR ck = &c [k];
           for (zyc::Zsize_t i=0; i<zsz; i++) {
             for (zyc::Zsize_t j=0; j<zsz; j++) {
-              s2 [j] += zyc::cr_dual_elem (ck, i, j) * ck [j];
+              s2 [j] += zyc::cr_dual_elem (ck[0], i, j) * ck [j];
         } } }
         secs_s2 += double (time.add_busy_time_now ());
         for (uint i=0; i<zsz; i++) {chk += s2[i];}
@@ -132,7 +132,7 @@ namespace zyc { namespace test {
                 * (zyc::is_dual_nz (j,i) ? ak [zyc::dual_ux (j,i)] : 0.0);
 #endif
 #if 1
-              ck [j] +=  bk [j] * zyc::cr_dual_elem (ak, j, i);
+              ck [j] +=  bk [j] * zyc::cr_dual_elem (ak[0], j, i);
 #endif
         } } }
         secs_tfma += double (time.add_busy_time_now ());
@@ -142,7 +142,7 @@ namespace zyc { namespace test {
           TEST_ZYC_ARRAY_PTR ck = &c [k];
           for (zyc::Zsize_t i=0; i<zsz; i++) {
             for (zyc::Zsize_t j=0; j<zsz; j++) {
-              s2 [j] += ck [j] * zyc::cr_dual_elem (ck, j, i);
+              s2 [j] += ck [j] * zyc::cr_dual_elem (ck[0], j, i);
         } } }
         secs_ts2 += double (time.add_busy_time_now ());
         for (uint i=0; i<zsz; i++) {chk += s2[i];}
@@ -167,7 +167,7 @@ namespace zyc { namespace test {
                 = zyc::is_dual_nz (i,j) ? ak [zyc::dual_ux (i,j)] : 0.0 ;
 #endif
 #if 1
-              cr [zsz* i + j] = zyc::cr_dual_elem (ak, i, j);
+              cr [zsz* i + j] = zyc::cr_dual_elem (ak[0], i, j);
 #endif
           } }
           for (zyc::Zsize_t i=0; i<zsz; i++) {
@@ -181,7 +181,7 @@ namespace zyc { namespace test {
           TEST_ZYC_ARRAY_PTR ck = &c [k];
           for (zyc::Zsize_t i=0; i<zsz; i++) {
             for (zyc::Zsize_t j=0; j<zsz; j++) {
-              cr [zsz* i + j] = zyc::cr_dual_elem (ck, i, j);
+              cr [zsz* i + j] = zyc::cr_dual_elem (ck[0], i, j);
           } }
           for (zyc::Zsize_t i=0; i<zsz; i++) {
             for (zyc::Zsize_t j=0; j<zsz; j++) {
@@ -210,7 +210,7 @@ namespace zyc { namespace test {
                 = zyc::is_dual_nz (j,i) ? ak [zyc::dual_ux (j,i)] : 0.0;
 #endif
 #if 1
-              cr [zsz* i + j] = zyc::cr_dual_elem (ak, j, i);
+              cr [zsz* i + j] = zyc::cr_dual_elem (ak[0], j, i);
 #endif
           } }
           for (zyc::Zsize_t i=0; i<zsz; i++) {
@@ -224,7 +224,7 @@ namespace zyc { namespace test {
           TEST_ZYC_ARRAY_PTR ck = &c [k];
           for (zyc::Zsize_t i=0; i<zsz; i++) {
             for (zyc::Zsize_t j=0; j<zsz; j++) {
-              cr [zsz* i + j] = zyc::cr_dual_elem (ck, j, i);
+              cr [zsz* i + j] = zyc::cr_dual_elem (ck[0], j, i);
           } }
           for (zyc::Zsize_t i=0; i<zsz; i++) {
             for (zyc::Zsize_t j=0; j<zsz; j++) {
