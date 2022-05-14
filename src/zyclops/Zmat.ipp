@@ -35,7 +35,7 @@ namespace zyc {
   inline
   Zmat::Zmat (Algebra z, Zorder_int p, std::size_t r, std::size_t c)
    : rows (r), cols (c), order (p), family (z) {
-    if (p!=0) {layout = Layout::Block;}
+    if (p!=0) { layout = Layout::Block; }
   }
   inline
   Zmat::Zmat (Algebra z, Zorder_int p, Layout l, std::size_t r, std::size_t c)
