@@ -7,14 +7,14 @@ namespace zyc {
 
   class Zmat {// hypercomplex matrix or vector
   public:
-    Algebra     get_family ();
-    Zorder_int  get_order  ();
-    Layout      get_layout ();
-    Zix_int     get_row_n  ();
-    Zix_int     get_col_n  ();
-    std::size_t all_size   ();// rows * cols * 2^order
-    std::size_t mat_size   ();// rows * cols
-    Zix_int    elem_size   ();// 2^order
+    Algebra     get_family () noexcept;
+    Zorder_int  get_order  () noexcept;
+    Layout      get_layout () noexcept;
+    Zix_int     get_row_n  () noexcept;
+    Zix_int     get_col_n  () noexcept;
+    std::size_t all_size   () noexcept;// rows * cols * 2^order
+    std::size_t mat_size   () noexcept;// rows * cols
+    Zix_int    elem_size   () noexcept;// 2^order
   public:
     Zmat ()=default;
     Zmat (Algebra, Zorder_int, std::size_t rows=1, std::size_t cols=1);

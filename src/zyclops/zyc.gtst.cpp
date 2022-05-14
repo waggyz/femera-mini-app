@@ -15,7 +15,7 @@ namespace zyc { namespace test {
     EXPECT_EQ( sizeof (int_fast16_t), sizeof (int_fast32_t) );
     EXPECT_GT( std::numeric_limits<Zix_int>::max (),
       zyc::upow (std::size_t (2), zyc::zorder_max));
-    EXPECT_GE( std::numeric_limits<Zsize_t>::max (),
+    EXPECT_GE( std::numeric_limits<CRsize_t>::max (),
       size_t (1) << (size_t(2) * zyc::zorder_max));
   }
   template <typename T> static inline constexpr

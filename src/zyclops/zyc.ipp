@@ -45,6 +45,7 @@ noexcept{
 # if 0
 template <typename T> static inline constexpr
 T zyc::cr_dual_elem (const T& ZYC_RESTRICT v,//DONE change all ptr to reference
+  const zyc::Zix_int row, const zyc::Zix_int col)
 /*
  * The difference between pass-by-reference and pass-by-pointer is that pointers
  * can be NULL or reassigned whereas references cannot. Use pass-by-pointer
@@ -53,7 +54,6 @@ T zyc::cr_dual_elem (const T& ZYC_RESTRICT v,//DONE change all ptr to reference
  *
  * https://www.ibm.com/docs/en/zos/2.4.0?topic=calls-pass-by-reference-c-only
  */
-  const zyc::Zix_int row, const zyc::Zix_int col)
 noexcept {
   return ((row ^ col) == (row - col)) ? (&v)[row - col] : T(0.0);
 }

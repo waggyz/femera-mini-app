@@ -35,7 +35,7 @@ namespace zyc {
   using Zix_int    =  int_fast32_t;// CR matrix index, order <= 15
 #endif
   using Zix_int    =  int_fast32_t;// CR matrix index, order <= 15
-  using Zsize_t    =  int_fast64_t;// CR matrix size, >= 2^(2*order)
+  using CRsize_t   =  int_fast64_t;// CR matrix size, max = 2^(2*order)
   enum class Algebra : int8_t {Unknown =0,
     Real, Complex, Dual, Split, Quat, OTI, User,
     Int,// signed
