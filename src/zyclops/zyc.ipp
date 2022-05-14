@@ -38,7 +38,7 @@ noexcept {
 #endif
 }
 static inline constexpr
-bool zyc::is_dual_nz (Zsize_t row, Zsize_t col)
+bool zyc::is_dual_nz (Zix_int row, Zix_int col)
 noexcept{
   return (row ^ col) == (row - col);
 }
@@ -53,43 +53,43 @@ T zyc::cr_dual_elem (const T& ZYC_RESTRICT v,//DONE change all ptr to reference
  *
  * https://www.ibm.com/docs/en/zos/2.4.0?topic=calls-pass-by-reference-c-only
  */
-  const zyc::Zsize_t row, const zyc::Zsize_t col)
+  const zyc::Zix_int row, const zyc::Zix_int col)
 noexcept {
   return ((row ^ col) == (row - col)) ? (&v)[row - col] : T(0.0);
 }
 template <typename T> static inline constexpr
 T zyc::cr_dual_elem (const T* ZYC_RESTRICT v,
-  const zyc::Zsize_t row, const zyc::Zsize_t col)
+  const zyc::Zix_int row, const zyc::Zix_int col)
 noexcept {
   return ((row ^ col) == (row - col)) ? v [row - col] : T(0.0);
 }
 #   endif
 template <typename T> static inline constexpr
 T zyc::cr_dual_elem (const T& ZYC_RESTRICT v,
-  const zyc::Zsize_t row, const zyc::Zsize_t col)
+  const zyc::Zix_int row, const zyc::Zix_int col)
 noexcept {
   return ((row ^ col) == (row - col)) ? (&v)[row - col] : T(0.0);
 }
 static inline constexpr
-bool zyc::is_dual_nz (Zsize_t row, Zsize_t col, Zsize_t order)
+bool zyc::is_dual_nz (Zix_int row, Zix_int col, Zix_int order)
 noexcept{
-  return ((row ^ col) == (row - col)) && ((row - col) < (Zsize_t(1) << order));
+  return ((row ^ col) == (row - col)) && ((row - col) < (Zix_int(1) << order));
 }
 template <typename T> static inline constexpr
 T zyc::cr_dual_elem (const T& ZYC_RESTRICT v,
-  const zyc::Zsize_t row, const zyc::Zsize_t col, const zyc::Zsize_t order)
+  const zyc::Zix_int row, const zyc::Zix_int col, const zyc::Zix_int order)
 noexcept {
-  return ((row ^ col) == (row - col)) && ((row - col) < (Zsize_t(1) << order))
+  return ((row ^ col) == (row - col)) && ((row - col) < (Zix_int(1) << order))
     ? (&v)[row - col] : T(0.0);
 }
 #if 0
 template <typename T> static inline constexpr
-void zyc::dual_mult (T* ZYC_RESTRICT a,
-  const T* ZYC_RESTRICT b, const T* ZYC_RESTRICT c, const zyc::Zsize_t order)
+void zyc::dual_mult_aos (T* ZYC_RESTRICT a,
+  const T* ZYC_RESTRICT b, const T* ZYC_RESTRICT c, const zyc::Zix_int order)
 noexcept {
-  const zyc::Zsize_t zsz = zyc::Zsize_t (1) << order;
-  for (zyc::Zsize_t i=0; i<zsz; i++) {
-    for (zyc::Zsize_t j=0; j<zsz; j++) {
+  const zyc::Zix_int zsz = zyc::Zix_int (1) << order;
+  for (zyc::Zix_int i=0; i<zsz; i++) {
+    for (zyc::Zix_int j=0; j<zsz; j++) {
       a [j] += zyc::cr_dual_elem (b, i, j) * c [j];
 } } }
 #endif

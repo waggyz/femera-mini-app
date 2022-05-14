@@ -16,24 +16,24 @@ namespace zyc {
   }
   inline
   std::size_t Zmat::all_size   (){
-    return this->rows * this->cols * (uint64_t(1) << this->order);
+    return this->rows * this->cols * (std::size_t(1) << this->order);
   }
   inline
   std::size_t Zmat::mat_size   (){
     return this->rows * this->cols;
   }
   inline
-  std::size_t Zmat::elem_size   (){
-    return (std::size_t(1) << this->order);
+  zyc::Zsize_t Zmat::elem_size   (){
+    return (zyc::Zsize_t(1) << this->order);
   }
   inline
-  Zmat::Zmat (Algebra z, Zorder_int p, Zsize_t r, Zsize_t c)
+  Zmat::Zmat (Algebra z, Zorder_int p, std::size_t r, std::size_t c)
     :  rows(r), cols(c), order(p), family (z) {
     if (p!=0) {layout = zyc::Layout::Block;}
   }
   inline
   Zmat::Zmat (Algebra z, Zorder_int p, zyc::Layout l,
-    Zsize_t r, Zsize_t c) :
+    std::size_t r, std::size_t c) :
     rows(r), cols(c), order(p), family (z), layout(l) {
   }
 

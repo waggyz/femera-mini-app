@@ -10,18 +10,18 @@ namespace zyc {
     Algebra     get_family ();
     Zorder_int  get_order  ();
     Layout      get_layout ();
-    Zsize_t     get_row_n  ();
-    Zsize_t     get_col_n  ();
+    Zix_int     get_row_n  ();
+    Zix_int     get_col_n  ();
     std::size_t all_size   ();// rows * cols * 2^order
     std::size_t mat_size   ();// rows * cols
-    std::size_t elem_size  ();// 2^order
+    Zix_int    elem_size   ();// 2^order
   public:
     Zmat ()=default;
-    Zmat (Algebra, Zorder_int, Zsize_t rows=1, Zsize_t cols=1);
-    Zmat (Algebra, Zorder_int, Layout, Zsize_t rows=1, Zsize_t cols=1);
+    Zmat (Algebra, Zorder_int, std::size_t rows=1, std::size_t cols=1);
+    Zmat (Algebra, Zorder_int, Layout, std::size_t rows=1, std::size_t cols=1);
   private:
-    Zsize_t     rows = 0;
-    Zsize_t     cols = 0;
+    std::size_t rows = 0;
+    std::size_t cols = 0;
     Zorder_int order = 0;
     Algebra   family = Algebra::Real;
     Layout    layout = Layout::Native;

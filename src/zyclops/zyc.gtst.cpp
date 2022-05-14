@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 
+#include <limits>
 #include <cstdio>
 
 namespace zyc { namespace test {
@@ -9,14 +10,22 @@ namespace zyc { namespace test {
   TEST( Zyc, TrivialTest ){
     EXPECT_EQ( 1, 1 );
   }
+  TEST( Zyc, IntSizes ){
+    EXPECT_GE( std::numeric_limits<Zorder_int>::max (), zyc::zorder_max );
+    EXPECT_EQ( sizeof (int_fast16_t), sizeof (int_fast32_t) );
+    EXPECT_GT( std::numeric_limits<Zix_int>::max (),
+      zyc::upow (std::size_t (2), zyc::zorder_max));
+    EXPECT_GE( std::numeric_limits<Zsize_t>::max (),
+      size_t (1) << (size_t(2) * zyc::zorder_max));
+  }
   template <typename T> static inline constexpr
   T cr_dual_elem_test (const T& ZYC_RESTRICT v,
-    const zyc::Zsize_t row, const zyc::Zsize_t col)
+    const zyc::Zix_int row, const zyc::Zix_int col)
   noexcept {
     return ((row ^ col) == (row - col)) ? (&v)[row - col] : T(0.0);
   }
   static inline
-  double pass_by_reference (const zyc::Zsize_t row, const zyc::Zsize_t col)
+  double pass_by_reference (const zyc::Zix_int row, const zyc::Zix_int col)
   noexcept {
     std::vector<double> bidual = {1.0,0.0,0.0,0.0};
   return cr_dual_elem_test (bidual [0], row, col);
