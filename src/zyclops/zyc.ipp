@@ -38,14 +38,27 @@ noexcept {
 #endif
 }
 static inline constexpr
-bool zyc::is_dual_nz (Zix_int row, Zix_int col)
+bool zyc::is_dual_nz (Zarray_int row, Zarray_int col)
 noexcept{
   return (row ^ col) == (row - col);
 }
+template <typename T> static inline constexpr
+void zyc::dual_mult_aos //TODO Tune performance (permute loops?,
+                    //     transposed mult? store rearranged?)
+  (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
+  const zyc::Zorder_int zorder, const std::size_t n=1)
+noexcept {
+  const zyc::Zarray_int zsz = zyc::Zarray_int (1) << zorder;
+  for (std::size_t k=0; k<n; k++) {
+  auto ck =& ((&c)[zsz * k]);
+    for (zyc::Zarray_int i=0; i<zsz; i++) {
+      for (zyc::Zarray_int j=0; j<zsz; j++) {
+      ck[i] += zyc::cr_dual_elem (a, i, j) * (&b)[j];
+} } } }
 # if 0
 template <typename T> static inline constexpr
 T zyc::cr_dual_elem (const T& ZYC_RESTRICT v,//DONE change all ptr to reference
-  const zyc::Zix_int row, const zyc::Zix_int col)
+  const zyc::Zarray_int row, const zyc::Zarray_int col)
 /*
  * The difference between pass-by-reference and pass-by-pointer is that pointers
  * can be NULL or reassigned whereas references cannot. Use pass-by-pointer
@@ -59,37 +72,37 @@ noexcept {
 }
 template <typename T> static inline constexpr
 T zyc::cr_dual_elem (const T* ZYC_RESTRICT v,
-  const zyc::Zix_int row, const zyc::Zix_int col)
+  const zyc::Zarray_int row, const zyc::Zarray_int col)
 noexcept {
   return ((row ^ col) == (row - col)) ? v [row - col] : T(0.0);
 }
 #   endif
 template <typename T> static inline constexpr
 T zyc::cr_dual_elem (const T& ZYC_RESTRICT v,
-  const zyc::Zix_int row, const zyc::Zix_int col)
+  const zyc::Zarray_int row, const zyc::Zarray_int col)
 noexcept {
   return ((row ^ col) == (row - col)) ? (&v)[row - col] : T(0.0);
 }
 static inline constexpr
-bool zyc::is_dual_nz (Zix_int row, Zix_int col, Zix_int order)
+bool zyc::is_dual_nz (Zarray_int row, Zarray_int col, Zarray_int order)
 noexcept{
-  return ((row ^ col) == (row - col)) && ((row - col) < (Zix_int(1) << order));
+  return ((row ^ col) == (row - col)) && ((row - col) < (Zarray_int(1) << order));
 }
 template <typename T> static inline constexpr
 T zyc::cr_dual_elem (const T& ZYC_RESTRICT v,
-  const zyc::Zix_int row, const zyc::Zix_int col, const zyc::Zix_int order)
+  const zyc::Zarray_int row, const zyc::Zarray_int col, const zyc::Zarray_int order)
 noexcept {
-  return ((row ^ col) == (row - col)) && ((row - col) < (Zix_int(1) << order))
+  return ((row ^ col) == (row - col)) && ((row - col) < (Zarray_int(1) << order))
     ? (&v)[row - col] : T(0.0);
 }
 #if 0
 template <typename T> static inline constexpr
 void zyc::dual_mult_aos (T* ZYC_RESTRICT a,
-  const T* ZYC_RESTRICT b, const T* ZYC_RESTRICT c, const zyc::Zix_int order)
+  const T* ZYC_RESTRICT b, const T* ZYC_RESTRICT c, const zyc::Zarray_int order)
 noexcept {
-  const zyc::Zix_int zsz = zyc::Zix_int (1) << order;
-  for (zyc::Zix_int i=0; i<zsz; i++) {
-    for (zyc::Zix_int j=0; j<zsz; j++) {
+  const zyc::Zarray_int zsz = zyc::Zarray_int (1) << order;
+  for (zyc::Zarray_int i=0; i<zsz; i++) {
+    for (zyc::Zarray_int j=0; j<zsz; j++) {
       a [j] += zyc::cr_dual_elem (b, i, j) * c [j];
 } } }
 #endif

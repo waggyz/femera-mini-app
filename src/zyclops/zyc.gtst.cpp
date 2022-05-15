@@ -13,19 +13,17 @@ namespace zyc { namespace test {
   TEST( Zyc, IntSizes ){
     EXPECT_GE( std::numeric_limits<Zorder_int>::max (), zyc::zorder_max );
     EXPECT_EQ( sizeof (int_fast16_t), sizeof (int_fast32_t) );
-    EXPECT_GT( std::numeric_limits<Zix_int>::max (),
+    EXPECT_GT( std::numeric_limits<Zarray_int>::max (),
       zyc::upow (std::size_t (2), zyc::zorder_max));
-    EXPECT_GE( std::numeric_limits<CRsize_t>::max (),
-      size_t (1) << (size_t(2) * zyc::zorder_max));
   }
   template <typename T> static inline constexpr
   T cr_dual_elem_test (const T& ZYC_RESTRICT v,
-    const zyc::Zix_int row, const zyc::Zix_int col)
+    const zyc::Zarray_int row, const zyc::Zarray_int col)
   noexcept {
     return ((row ^ col) == (row - col)) ? (&v)[row - col] : T(0.0);
   }
   static inline
-  double pass_by_reference (const zyc::Zix_int row, const zyc::Zix_int col)
+  double pass_by_reference (const zyc::Zarray_int row, const zyc::Zarray_int col)
   noexcept {
     std::vector<double> bidual = {1.0,0.0,0.0,0.0};
   return cr_dual_elem_test (bidual [0], row, col);
@@ -85,6 +83,52 @@ namespace zyc { namespace test {
     } }
     return nnz;
   }
+  TEST( Zyc, Multidual ){
+    EXPECT_EQ( print_dual   (3,3), 27 );
+    EXPECT_EQ( print_dual   (3,2), 27-9 );
+  }
+  TEST( Zyc, MultidualTransposed ){
+    EXPECT_EQ( print_dual_t (3,3), 27 );
+    EXPECT_EQ( print_dual_t (3,2), 27-9 );
+    EXPECT_EQ( print_dual_t (4,4), zyc::upow (3,4));
+  }
+  static inline
+  double real_f (double x, double y) {// f = x * y;
+    return x * y;
+  }
+  static inline
+  double real_dfdx (double, double y) {
+    return y;
+  }
+  static inline
+  double real_dfdy (double x, double) {
+    return x;
+  }
+  static inline
+  double real_d2fdxdy (double, double) {
+    return 1.0;
+  }
+  static inline
+  double dual_f (const double x, const double y,
+    const Zarray_int zorder=0, const Zarray_int imag_part=0) {
+    const size_t zsz = size_t (Zarray_int (1) << zorder);
+    const std::vector<double> zx = {x,1.0,0.0,0.0};
+    const std::vector<double> zy = {y,0.0,1.0,0.0};
+    auto zf = std::vector<double> (zsz);
+    zyc::dual_mult_aos (zf.data()[0], zx.data()[0], zy.data()[0], 2);
+    return zf[std::size_t(imag_part)];
+  }
+  TEST( Zyc, BidualMultiply ){
+    EXPECT_DOUBLE_EQ( real_f       (3.0, 5.0), 15.0 );
+    EXPECT_DOUBLE_EQ( real_dfdx    (3.0, 5.0),  5.0 );
+    EXPECT_DOUBLE_EQ( real_dfdy    (3.0, 5.0),  3.0 );
+    EXPECT_DOUBLE_EQ( real_d2fdxdy (3.0 ,5.0),  1.0 );
+    EXPECT_DOUBLE_EQ( dual_f (3.0, 5.0, 2, 0), real_f       (3.0, 5.0) );
+    EXPECT_DOUBLE_EQ( dual_f (3.0, 5.0, 2, 1), real_dfdx    (3.0, 5.0) );
+    EXPECT_DOUBLE_EQ( dual_f (3.0, 5.0, 2, 2), real_dfdy    (3.0, 5.0) );
+    EXPECT_DOUBLE_EQ( dual_f (3.0, 5.0, 2, 3), real_d2fdxdy (3.0 ,5.0) );
+  }
+#if 0
   static inline
   int print_hamw (int show_order, int array_order) {
     int nnz=0;
@@ -105,16 +149,6 @@ namespace zyc { namespace test {
     } }
     return nnz;
   }
-  TEST( Zyc, Multidual ){
-    EXPECT_EQ( print_dual   (3,3), 27 );
-    EXPECT_EQ( print_dual   (3,2), 27-9 );
-  }
-  TEST( Zyc, MultidualTransposed ){
-    EXPECT_EQ( print_dual_t (3,3), 27 );
-    EXPECT_EQ( print_dual_t (3,2), 27-9 );
-    EXPECT_EQ( print_dual_t (4,4), zyc::upow (3,4));
-  }
-#if 0
   TEST( Zyc, MultidualHammingWeight ){
     EXPECT_EQ( print_hamw (3,3), 27 );
   }

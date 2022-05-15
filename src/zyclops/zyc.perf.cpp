@@ -80,8 +80,8 @@ namespace zyc { namespace test {
           TEST_ZYC_CONST_PTR ak = &a [k];
           TEST_ZYC_CONST_PTR bk = &b [k];
           TEST_ZYC_ARRAY_PTR ck = &c [k];
-          for (zyc::Zix_int i=0; i<zsz; i++) {
-            for (zyc::Zix_int j=0; j<zsz; j++) {
+          for (zyc::Zarray_int i=0; i<zsz; i++) {
+            for (zyc::Zarray_int j=0; j<zsz; j++) {
 #if 0
               ck [j] += (((i^j)==(i-j)) ? ak [i-j] : zero) * bk [j];
 #endif
@@ -109,8 +109,8 @@ namespace zyc { namespace test {
         time.add_idle_time_now ();
         for (uint k=0; k<n; k+=zsz) {
           TEST_ZYC_ARRAY_PTR ck = &c [k];
-          for (zyc::Zix_int i=0; i<zsz; i++) {
-            for (zyc::Zix_int j=0; j<zsz; j++) {
+          for (zyc::Zarray_int i=0; i<zsz; i++) {
+            for (zyc::Zarray_int j=0; j<zsz; j++) {
               s2 [j] += zyc::cr_dual_elem (ck[0], i, j) * ck [j];
         } } }
         secs_s2 += double (time.add_busy_time_now ());
@@ -121,8 +121,8 @@ namespace zyc { namespace test {
           TEST_ZYC_CONST_PTR ak = &a [k];
           TEST_ZYC_CONST_PTR bk = &b [k];
           TEST_ZYC_ARRAY_PTR ck = &c [k];
-          for (zyc::Zix_int i=0; i<zsz; i++) {
-            for (zyc::Zix_int j=0; j<zsz; j++) {
+          for (zyc::Zarray_int i=0; i<zsz; i++) {
+            for (zyc::Zarray_int j=0; j<zsz; j++) {
 #if 0
               const auto ix = zyc::dual_ix (j,i);
               ck[i] += (ix<0) ? 0.0 : bk [i] * ak [ix];
@@ -140,8 +140,8 @@ namespace zyc { namespace test {
         time.add_idle_time_now ();
         for (uint k=0; k<n; k+=zsz) {
           TEST_ZYC_ARRAY_PTR ck = &c [k];
-          for (zyc::Zix_int i=0; i<zsz; i++) {
-            for (zyc::Zix_int j=0; j<zsz; j++) {
+          for (zyc::Zarray_int i=0; i<zsz; i++) {
+            for (zyc::Zarray_int j=0; j<zsz; j++) {
               s2 [j] += ck [j] * zyc::cr_dual_elem (ck[0], j, i);
         } } }
         secs_ts2 += double (time.add_busy_time_now ());
@@ -156,8 +156,8 @@ namespace zyc { namespace test {
           TEST_ZYC_CONST_PTR ak = &a [k];
           TEST_ZYC_CONST_PTR bk = &b [k];
           TEST_ZYC_ARRAY_PTR ck = &c [k];
-          for (zyc::Zix_int i=0; i<zsz; i++) {// build CR form of ak
-            for (zyc::Zix_int j=0; j<zsz; j++) {
+          for (zyc::Zarray_int i=0; i<zsz; i++) {// build CR form of ak
+            for (zyc::Zarray_int j=0; j<zsz; j++) {
 #if 0
               const auto ix = zyc::dual_ix (i,j);
               if (ix>=0) { cr[zsz*i + j]= ak [ix]; }// set only nonzeros
@@ -170,8 +170,8 @@ namespace zyc { namespace test {
               cr [zsz* i + j] = zyc::cr_dual_elem (ak[0], i, j);
 #endif
           } }
-          for (zyc::Zix_int i=0; i<zsz; i++) {
-            for (zyc::Zix_int j=0; j<zsz; j++) {
+          for (zyc::Zarray_int i=0; i<zsz; i++) {
+            for (zyc::Zarray_int j=0; j<zsz; j++) {
               ck[i] += cr [zsz* i + j] * bk [j];// regular matmul
         } } }// transposed version below is faster
         secs_naiv += double (time.add_busy_time_now ());
@@ -179,12 +179,12 @@ namespace zyc { namespace test {
         time.add_idle_time_now ();
         for (uint k=0; k<n; k+=zsz) {
           TEST_ZYC_ARRAY_PTR ck = &c [k];
-          for (zyc::Zix_int i=0; i<zsz; i++) {
-            for (zyc::Zix_int j=0; j<zsz; j++) {
+          for (zyc::Zarray_int i=0; i<zsz; i++) {
+            for (zyc::Zarray_int j=0; j<zsz; j++) {
               cr [zsz* i + j] = zyc::cr_dual_elem (ck[0], i, j);
           } }
-          for (zyc::Zix_int i=0; i<zsz; i++) {
-            for (zyc::Zix_int j=0; j<zsz; j++) {
+          for (zyc::Zarray_int i=0; i<zsz; i++) {
+            for (zyc::Zarray_int j=0; j<zsz; j++) {
               s2 [i] += cr [zsz* i + j] * ck [j];// regular matmul
         } } }
         secs_nai2 += double (time.add_busy_time_now ());
@@ -199,8 +199,8 @@ namespace zyc { namespace test {
           TEST_ZYC_CONST_PTR ak = &a [k];
           TEST_ZYC_CONST_PTR bk = &b [k];
           TEST_ZYC_ARRAY_PTR ck = &c [k];
-          for (zyc::Zix_int i=0; i<zsz; i++) {// transposed CR of ak (faster)
-            for (zyc::Zix_int j=0; j<zsz; j++) {
+          for (zyc::Zarray_int i=0; i<zsz; i++) {// transposed CR of ak (faster)
+            for (zyc::Zarray_int j=0; j<zsz; j++) {
 #if 0
               const auto ix = zyc::dual_ix (j,i);
               cr[zsz* i + j] = (ix<0) ? 0.0 : ak [ix];
@@ -213,8 +213,8 @@ namespace zyc { namespace test {
               cr [zsz* i + j] = zyc::cr_dual_elem (ak[0], j, i);
 #endif
           } }
-          for (zyc::Zix_int i=0; i<zsz; i++) {
-            for (zyc::Zix_int j=0; j<zsz; j++) {
+          for (zyc::Zarray_int i=0; i<zsz; i++) {
+            for (zyc::Zarray_int j=0; j<zsz; j++) {
               ck[i] += bk [i] * cr [zsz* i + j];// transposed matmul
         } } }
         secs_tnaiv += double (time.add_busy_time_now ());
@@ -222,12 +222,12 @@ namespace zyc { namespace test {
         time.add_idle_time_now ();
         for (uint k=0; k<n; k+=zsz) {
           TEST_ZYC_ARRAY_PTR ck = &c [k];
-          for (zyc::Zix_int i=0; i<zsz; i++) {
-            for (zyc::Zix_int j=0; j<zsz; j++) {
+          for (zyc::Zarray_int i=0; i<zsz; i++) {
+            for (zyc::Zarray_int j=0; j<zsz; j++) {
               cr [zsz* i + j] = zyc::cr_dual_elem (ck[0], j, i);
           } }
-          for (zyc::Zix_int i=0; i<zsz; i++) {
-            for (zyc::Zix_int j=0; j<zsz; j++) {
+          for (zyc::Zarray_int i=0; i<zsz; i++) {
+            for (zyc::Zarray_int j=0; j<zsz; j++) {
               s2 [i] += ck [i] * cr [zsz* i + j];// transposed matmul
         } } }
         secs_tnai2 += double (time.add_busy_time_now ());

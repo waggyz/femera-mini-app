@@ -31,13 +31,12 @@
 namespace zyc {
   using Zorder_int = uint_fast8_t;
 #if 0
-  using Zix_int    =  int_fast16_t;// CR matrix index, order <=  7
-  using Zix_int    =  int_fast32_t;// CR matrix index, order <= 15
+  using Zarray_int = int_fast16_t;// CR matrix index, order <=  7
+  using Zarray_int = int_fast32_t;// CR matrix index, order <= 15
 #endif
-  using Zix_int    =  int_fast32_t;// CR matrix index, order <= 15
-  using CRsize_t   =  int_fast64_t;// CR matrix size, max = 2^(2*order)
-  enum class Algebra : int8_t {Unknown =0,
-    Real, Complex, Dual, Split, Quat, OTI, User,
+  using Zarray_int = int_fast32_t;// max needed: 2^(2*(order-1))
+  enum class Algebra : int8_t { Unknown =0,
+    Real, Complex, Dual, Split, Quat, Oti, User,
     Int,// signed
     Nat // unsigned
   };
@@ -57,31 +56,23 @@ namespace zyc {
   uint hamw (uint32_t i)
   noexcept;
   static inline constexpr
-  bool is_dual_nz (Zix_int row, Zix_int col)
+  bool is_dual_nz (Zarray_int row, Zarray_int col)
   noexcept;
-  static inline constexpr
-  bool is_dual_nz (Zix_int row, Zix_int col, Zix_int stored_zorder)
+  static inline constexpr// for access of higher order than stored
+  bool is_dual_nz (Zarray_int row, Zarray_int col, Zarray_int zorder_limit)
   noexcept;
-#if 0
   template <typename T> static inline constexpr
-  T cr_dual_elem (const T*, Zix_int row, Zix_int col)//TODO REMOVE
+  T cr_dual_elem (const T&, Zarray_int row, Zarray_int col)// fast with -flto
   noexcept;
-  template <typename T> static inline constexpr//TODO REMOVE
-  T cr_dual_elem (const T*, Zix_int row, Zix_int col, Zix_int stored_zorder)
+  template <typename T> static inline constexpr
+  T cr_dual_elem (const T&, Zarray_int row, Zarray_int col, Zarray_int zorder)
   noexcept;// for access of higher order than stored
-#endif
-  template <typename T> static inline constexpr
-  T cr_dual_elem (const T&, Zix_int row, Zix_int col)// fast with -flto
-  noexcept;
-  template <typename T> static inline constexpr
-  T cr_dual_elem (const T&, Zix_int row, Zix_int col, Zix_int stored_zorder)
-  noexcept;// for access of higher order than stored
-#if 0
+#if 1
   template <typename T> static inline constexpr
   void dual_mult_aos //TODO Tune performance (permute loops?,
-                 //     transposed mult? store rearranged?)
-    (T* ZYC_RESTRICT a, const T* ZYC_RESTRICT b, const T* ZYC_RESTRICT c,
-    zyc::Zorder_int order)
+                     //     transposed mult? store rearranged?)
+    (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
+    const zyc::Zorder_int order, const std::size_t n=1)
   noexcept;
 #endif
 #if 0

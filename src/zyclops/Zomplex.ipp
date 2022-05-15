@@ -33,7 +33,7 @@ namespace zyc {
       case Algebra::Split   ://fall through
       case Algebra::Quat    ://fall through
       case Algebra::Complex :{ return this->cr_size (); }
-      case Algebra::OTI     ://fall through
+      case Algebra::Oti     ://fall through
       case Algebra::User    ://fall through
       case Algebra::Unknown :{}
     }

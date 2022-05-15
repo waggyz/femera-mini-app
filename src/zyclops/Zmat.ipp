@@ -28,9 +28,9 @@ namespace zyc {
     return this->rows * this->cols;
   }
   inline
-  zyc::Zix_int Zmat::elem_size ()
+  zyc::Zarray_int Zmat::elem_size ()
   noexcept {
-    return (Zix_int(1) << this->order);
+    return (Zarray_int(1) << this->order);
   }
   inline
   Zmat::Zmat (Algebra z, Zorder_int p, std::size_t r, std::size_t c)
