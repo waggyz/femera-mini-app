@@ -45,6 +45,7 @@ namespace zyc { namespace test {
     const auto byte_s2 = double (test_n * (cvec.size () * sizeof (cvec[0])));
     double secs_ref  = 0.0, secs_fma = 0.0, secs_tfma = 0.0, secs_tnaiv = 0.0;
     double secs_ref2 = 0.0, secs_s2 = 0.0, secs_ts2 = 0.0, secs_tnai2 = 0.0;
+    double secs_ps2 = 0.0, secs_pts2 = 0.0;
 #ifdef ZYC_TEST_MOST_NAIVE
     double secs_naiv = 0.0, secs_nai2 = 0.0;
 #endif
@@ -118,6 +119,16 @@ namespace zyc { namespace test {
         ZYC_PRAGMA_OMP(omp barrier)
         time.add_idle_time_now ();
         for (uint k=0; k<n; k+=zsz) {
+          TEST_ZYC_ARRAY_PTR ck = &c [k];
+          for (zyc::Zarray_int j=0; j<zsz; j++) {
+            for (zyc::Zarray_int i=0; i<zsz; i++) {
+              s2 [j] += zyc::cr_dual_elem (ck[0], i, j) * ck [j];
+        } } }
+        secs_ps2 += double (time.add_busy_time_now ());
+        ZYC_PRAGMA_OMP(omp barrier)
+        for (uint i=0; i<zsz; i++) {chk += s2[i];}
+        time.add_idle_time_now ();
+        for (uint k=0; k<n; k+=zsz) {
           TEST_ZYC_CONST_PTR ak = &a [k];
           TEST_ZYC_CONST_PTR bk = &b [k];
           TEST_ZYC_ARRAY_PTR ck = &c [k];
@@ -145,6 +156,16 @@ namespace zyc { namespace test {
               s2 [j] += ck [j] * zyc::cr_dual_elem (ck[0], j, i);
         } } }
         secs_ts2 += double (time.add_busy_time_now ());
+        for (uint i=0; i<zsz; i++) {chk += s2[i];}
+        ZYC_PRAGMA_OMP(omp barrier)
+        time.add_idle_time_now ();
+        for (uint k=0; k<n; k+=zsz) {
+          TEST_ZYC_ARRAY_PTR ck = &c [k];
+          for (zyc::Zarray_int j=0; j<zsz; j++) {
+            for (zyc::Zarray_int i=0; i<zsz; i++) {
+              s2 [j] += ck [j] * zyc::cr_dual_elem (ck[0], j, i);
+        } } }
+        secs_pts2 += double (time.add_busy_time_now ());
         for (uint i=0; i<zsz; i++) {chk += s2[i];}
         ZYC_PRAGMA_OMP(omp barrier)
 #ifdef ZYC_TEST_MOST_NAIVE
@@ -235,38 +256,49 @@ namespace zyc { namespace test {
         ZYC_PRAGMA_OMP(omp barrier)
         time.add_idle_time_now ();
       } }//end test_n loop
-      printf (" zyc, ref, fma,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
-        -1, test_n * vals_n, byte_fma, flop_ref, secs_ref, flop_ref/secs_ref,
-        flop_ref/byte_fma, chk);
+      //
       printf (" zyc, ref,sum2,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
         -1, test_n * vals_n, byte_s2, flop_ref, secs_ref2, flop_ref/secs_ref2,
         flop_ref/byte_s2, chk);
-      printf (" zyc,dual, fma,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
-        order, (test_n * vals_n) / uint(zsz), byte_fma, flop_dual, secs_fma,
-          flop_dual/secs_fma, flop_dual/byte_fma, chk);
       printf (" zyc,dual,sum2,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
         order, (test_n * vals_n) / uint(zsz), byte_s2, flop_dual, secs_s2,
           flop_dual/secs_s2, flop_dual/byte_s2, chk);
-      printf (" zyc,dual,tfma,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
-        order, (test_n * vals_n) / uint(zsz), byte_fma, flop_dual, secs_tfma,
-          flop_dual/secs_tfma, flop_dual/byte_fma, chk);
+      printf (" zyc,dual, ps2,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
+        order, (test_n * vals_n) / uint(zsz), byte_s2, flop_dual, secs_ps2,
+          flop_dual/secs_ps2, flop_dual/byte_s2, chk);
       printf (" zyc,dual, ts2,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
         order, (test_n * vals_n) / uint(zsz), byte_s2, flop_dual, secs_ts2,
           flop_dual/secs_ts2, flop_dual/byte_s2, chk);
+      printf (" zyc,dual,pts2,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
+        order, (test_n * vals_n) / uint(zsz), byte_s2, flop_dual, secs_ts2,
+          flop_dual/secs_pts2, flop_dual/byte_s2, chk);
 #ifdef ZYC_TEST_MOST_NAIVE
-      printf (" zyc,dual,naiv,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
-        order, (test_n * vals_n) / uint(zsz), byte_fma, flop_dual, secs_naiv,
-          flop_dual/secs_naiv, flop_dual/byte_fma, chk);
       printf (" zyc,dual,nai2,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
         order, (test_n * vals_n) / uint(zsz), byte_s2, flop_dual, secs_nai2,
           flop_dual/secs_nai2, flop_dual/byte_s2, chk);
 #endif
-      printf (" zyc,dual,tnai,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
-        order, (test_n * vals_n) / uint(zsz), byte_fma, flop_dual, secs_tnaiv,
-          flop_dual/secs_tnaiv, flop_dual/byte_fma, chk);
       printf (" zyc,dual,tns2,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
         order, (test_n * vals_n) / uint(zsz), byte_s2, flop_dual, secs_tnai2,
           flop_dual/secs_tnai2, flop_dual/byte_s2, chk);
+      //
+      printf (" zyc, ref, fma,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
+        -1, test_n * vals_n, byte_fma, flop_ref, secs_ref, flop_ref/secs_ref,
+        flop_ref/byte_fma, chk);
+      printf (" zyc,dual, fma,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
+        order, (test_n * vals_n) / uint(zsz), byte_fma, flop_dual, secs_fma,
+          flop_dual/secs_fma, flop_dual/byte_fma, chk);
+      //
+      printf (" zyc,dual,tfma,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
+        order, (test_n * vals_n) / uint(zsz), byte_fma, flop_dual, secs_tfma,
+          flop_dual/secs_tfma, flop_dual/byte_fma, chk);
+#ifdef ZYC_TEST_MOST_NAIVE
+      printf (" zyc,dual,naiv,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
+        order, (test_n * vals_n) / uint(zsz), byte_fma, flop_dual, secs_naiv,
+          flop_dual/secs_naiv, flop_dual/byte_fma, chk);
+#endif
+      printf (" zyc,dual,tnai,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
+        order, (test_n * vals_n) / uint(zsz), byte_fma, flop_dual, secs_tnaiv,
+          flop_dual/secs_tnaiv, flop_dual/byte_fma, chk);
     }//end parallel region
     return chk;
   }

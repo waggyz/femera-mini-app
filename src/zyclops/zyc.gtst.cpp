@@ -116,7 +116,7 @@ namespace zyc { namespace test {
     const std::vector<double> zy = {y,0.0,1.0,0.0};
     auto zf = std::vector<double> (zsz);
     zyc::dual_mult_aos (zf.data()[0], zx.data()[0], zy.data()[0], 2);
-    return zf[std::size_t(imag_part)];
+    return zf [std::size_t (imag_part)];
   }
   TEST( Zyc, BidualMultiply ){
     EXPECT_DOUBLE_EQ( real_f       (3.0, 5.0), 15.0 );
