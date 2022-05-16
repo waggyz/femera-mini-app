@@ -225,7 +225,7 @@ namespace zyc { namespace test {
           for (zyc::Zarray_int i=0; i<zsz; i++) {
             for (zyc::Zarray_int j=0; j<zsz; j++) {
               s2 [i] += cr [zsz* i + j] * ck [j];// regular matmul
-        } } }
+        } } }// transposed version below is faster
         secs_nai2 += double (time.add_busy_time_now ());
         for (uint i=0; i<zsz; i++) {chk += s2[i];}
         ZYC_PRAGMA_OMP(omp barrier)

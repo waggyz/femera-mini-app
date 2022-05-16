@@ -67,7 +67,7 @@ namespace zyc {
   template <typename T> static inline constexpr
   T cr_dual_elem (const T&, Zarray_int row, Zarray_int col, Zarray_int zorder)
   noexcept;// for access of higher order than stored
-#if 0
+#if 1
   template <typename T> static inline constexpr
   T cr_dual_mult_elem (const T& a, const T& b, Zarray_int row, Zarray_int col)
   noexcept;

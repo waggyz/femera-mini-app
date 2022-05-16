@@ -52,12 +52,15 @@ noexcept {
     auto ak =& ((&a)[zsz * k]);
     auto bk =& ((&b)[zsz * k]);
     auto ck =& ((&c)[zsz * k]);
-    for (zyc::Zarray_int i=0; i<zsz; i++) {
-      for (zyc::Zarray_int j=0; j<zsz; j++) {
+    for (zyc::Zarray_int j=0; j<zsz; j++) {// permuted loop, transposed calc
+      for (zyc::Zarray_int i=0; i<zsz; i++) {
 #if 0
       ck[i] += zyc::cr_dual_elem (a, i, j) * (&b)[j];
 #endif
-      ck [i] += zyc::cr_dual_elem (ak[0], i, j) * bk [j];
+#if 0
+      ck [j] += zyc::cr_dual_elem (ak[0], j, i) * bk [i];
+#endif
+      ck [j] += zyc::cr_dual_mult_elem (ak[0], bk[0], j, i);
 } } } }
 # if 0
 template <typename T> static inline constexpr
@@ -99,12 +102,12 @@ noexcept {
   return ((row ^ col) == (row - col)) && ((row - col) < (Zarray_int(1) << p))
     ? (&v)[row - col] : T(0.0);
 }
-#if 0
+#if 1
 template <typename T> static inline constexpr
-T zyc::cr_dual_mult_elem (const T& ZYC_RESTRICT a, const T b,
+T zyc::cr_dual_mult_elem (const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyc::Zarray_int row, const zyc::Zarray_int col)
 noexcept {
-  return ((row ^ col) == (row - col)) ? (&a)[row - col] * b : T(0.0);
+  return ((row ^ col) == (row - col)) ? (&a)[col] * (&b)[row - col] : T(0.0);
 }
 #endif
 #if 0
