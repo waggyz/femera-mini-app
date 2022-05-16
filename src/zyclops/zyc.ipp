@@ -43,17 +43,21 @@ noexcept{
   return (row ^ col) == (row - col);
 }
 template <typename T> static inline constexpr
-void zyc::dual_mult_aos //TODO Tune performance (permute loops?,
-                    //     transposed mult? store rearranged?)
+void zyc::dual_mult_aos
   (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyc::Zorder_int zorder, const std::size_t n=1)
 noexcept {
   const zyc::Zarray_int zsz = zyc::Zarray_int (1) << zorder;
   for (std::size_t k=0; k<n; k++) {
-  auto ck =& ((&c)[zsz * k]);
+    auto ak =& ((&a)[zsz * k]);
+    auto bk =& ((&b)[zsz * k]);
+    auto ck =& ((&c)[zsz * k]);
     for (zyc::Zarray_int i=0; i<zsz; i++) {
       for (zyc::Zarray_int j=0; j<zsz; j++) {
+#if 0
       ck[i] += zyc::cr_dual_elem (a, i, j) * (&b)[j];
+#endif
+      ck [i] += zyc::cr_dual_elem (ak[0], i, j) * bk [j];
 } } } }
 # if 0
 template <typename T> static inline constexpr
@@ -84,17 +88,25 @@ noexcept {
   return ((row ^ col) == (row - col)) ? (&v)[row - col] : T(0.0);
 }
 static inline constexpr
-bool zyc::is_dual_nz (Zarray_int row, Zarray_int col, Zarray_int order)
+bool zyc::is_dual_nz (Zarray_int row, Zarray_int col, Zarray_int p)
 noexcept{
-  return ((row ^ col) == (row - col)) && ((row - col) < (Zarray_int(1) << order));
+  return ((row ^ col) == (row - col)) && ((row - col) < (Zarray_int(1) << p));
 }
 template <typename T> static inline constexpr
-T zyc::cr_dual_elem (const T& ZYC_RESTRICT v,
-  const zyc::Zarray_int row, const zyc::Zarray_int col, const zyc::Zarray_int order)
+T zyc::cr_dual_elem (const T& ZYC_RESTRICT v, const zyc::Zarray_int row,
+  const zyc::Zarray_int col, const zyc::Zarray_int p)
 noexcept {
-  return ((row ^ col) == (row - col)) && ((row - col) < (Zarray_int(1) << order))
+  return ((row ^ col) == (row - col)) && ((row - col) < (Zarray_int(1) << p))
     ? (&v)[row - col] : T(0.0);
 }
+#if 0
+template <typename T> static inline constexpr
+T zyc::cr_dual_mult_elem (const T& ZYC_RESTRICT a, const T b,
+  const zyc::Zarray_int row, const zyc::Zarray_int col)
+noexcept {
+  return ((row ^ col) == (row - col)) ? (&a)[row - col] * b : T(0.0);
+}
+#endif
 #if 0
 template <typename T> static inline constexpr
 void zyc::dual_mult_aos (T* ZYC_RESTRICT a,

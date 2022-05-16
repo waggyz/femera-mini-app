@@ -15,7 +15,7 @@ if __name__ == "__main__":
   now = dt.datetime.now()
   cpumodel="i7-7820HQ"
   timestr = now.strftime("%Y-%m-%d")
-  file_name = "data/perf/zyc.perf-"+timestr+".out"
+  file_name = "data/perf/zyc.perf."+timestr+"b.out"
   plot_name = "build/"+cpumodel+"/zyc-perf-"+timestr
   name1 = []
   name2 = []
@@ -34,6 +34,8 @@ if __name__ == "__main__":
   crmat_sum2 = [0.0] * len(list_order);
   trnsp_mult = [0.0] * len(list_order);
   trnsp_sum2 = [0.0] * len(list_order);
+  permu_trnsp_mult = [0.0] * len(list_order);
+  permu_trnsp_sum2 = [0.0] * len(list_order);
   #
   with open (file_name) as File:
     data = csv.reader(File, delimiter=",")
@@ -59,9 +61,13 @@ if __name__ == "__main__":
           elif rowcol[2] == "sum2":
             speed_sum2[o] += s
           elif rowcol[2] == "tfma":
+            permu_trnsp_mult[o] += s
+          elif rowcol[2] == "ptma":
             trnsp_mult[o] += s
           elif rowcol[2] == " ts2":
             trnsp_sum2[o] += s
+          elif rowcol[2] == "pts2":
+            permu_trnsp_sum2[o] += s
           elif rowcol[2] == "tnai":
             crmat_mult[o] += s
           elif rowcol[2] == "tns2":
@@ -102,10 +108,15 @@ if __name__ == "__main__":
     label="Sum of squares (CR matrix size limited)",
     marker="s", markersize=rms, markeredgecolor='r', markerfacecolor='none',
     color='r', linestyle="solid", linewidth=rlw)
-  plt.semilogy(list_order, speed_sum2,
-    label="Sum of squares (matrix-free algorithm)",
-    marker="s", markersize=ms, markeredgecolor="b", markerfacecolor='none',
-    markeredgewidth=mw, color="b",linestyle="dashed")
+  if True:
+    plt.semilogy(list_order, permu_trnsp_sum2, label="Sum of squares (transposed)",
+      marker="s", markersize=ms, markeredgecolor="m", markerfacecolor='none',
+      markeredgewidth=mw, color="m",linestyle="dashed")
+  if False:
+    plt.semilogy(list_order, speed_sum2,
+      label="Sum of squares (matrix-free algorithm)",
+      marker="s", markersize=ms, markeredgecolor="b", markerfacecolor='none',
+      markeredgewidth=mw, color="b",linestyle="dashed")
   if False:
     plt.semilogy(list_order, trnsp_sum2, label="Sum of squares (transposed)",
       marker="s", markersize=ms, markeredgecolor="m", markerfacecolor='none',
@@ -128,9 +139,14 @@ if __name__ == "__main__":
     label="Multiply (CR matrix size limited)",
     marker="x", markersize=rms, markeredgecolor='r', markerfacecolor='none',
     color='r', linestyle="solid", linewidth=rlw)
-  plt.semilogy(list_order, speed_mult, label="Multiply (matrix-free algorithm)",
-    markersize=ms, marker="x", color="b", markeredgewidth=mw,
-    linestyle="dotted")
+  if True:
+    plt.semilogy(list_order, permu_trnsp_mult, label="Multiply (matrix-free algorithm)",
+      markersize=ms, marker="x", color="b", markeredgewidth=mw,
+      linestyle="dotted")
+  if False:
+    plt.semilogy(list_order, speed_mult, label="Multiply (matrix-free algorithm)",
+      markersize=ms, marker="x", color="b", markeredgewidth=mw,
+      linestyle="dotted")
   if False:
     plt.semilogy(list_order, trnsp_mult, label="Multiply (transposed)",
       marker="x", markersize=ms, markeredgecolor="m",

@@ -34,7 +34,7 @@ namespace zyc {
   using Zarray_int = int_fast16_t;// CR matrix index, order <=  7
   using Zarray_int = int_fast32_t;// CR matrix index, order <= 15
 #endif
-  using Zarray_int = int_fast32_t;// max needed: 2^(2*(order-1))
+  using Zarray_int = int_fast32_t;// max needed: 2^(2*(order-1)), signed order
   enum class Algebra : int8_t { Unknown =0,
     Real, Complex, Dual, Split, Quat, Oti, User,
     Int,// signed
@@ -67,10 +67,14 @@ namespace zyc {
   template <typename T> static inline constexpr
   T cr_dual_elem (const T&, Zarray_int row, Zarray_int col, Zarray_int zorder)
   noexcept;// for access of higher order than stored
+#if 0
+  template <typename T> static inline constexpr
+  T cr_dual_mult_elem (const T& a, const T& b, Zarray_int row, Zarray_int col)
+  noexcept;
+#endif
 #if 1
   template <typename T> static inline constexpr
-  void dual_mult_aos //TODO Tune performance (permute loops?,
-                     //     transposed mult? store rearranged?)
+  void dual_mult_aos
     (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
     const zyc::Zorder_int order, const std::size_t n=1)
   noexcept;
