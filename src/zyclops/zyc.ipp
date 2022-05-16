@@ -42,30 +42,37 @@ bool zyc::is_dual_nz (Zarray_int row, Zarray_int col)
 noexcept{
   return (row ^ col) == (row - col);
 }
-template <typename T> static inline constexpr
-void zyc::dual_mult_aos
+template <typename T> static inline
+T* zyc::dual_mult_aos
   (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyc::Zorder_int zorder, const std::size_t n=1)
 noexcept {
   const auto zsz = std::size_t (1) << zorder;
   const auto sz = zsz * n;
   for (std::size_t k=0; k<sz; k+=zsz) {
-    //auto ak =& ((&a)[zsz * k]);
-    //auto bk =& ((&b)[zsz * k]);
-    //auto ck =& ((&c)[zsz * k]);
     for (zyc::Zarray_int j=0; j<zsz; j++) {// permuted loop, transposed calc
       for (zyc::Zarray_int i=0; i<zsz; i++) {
-#if 0
-      ck[i] += zyc::cr_dual_elem (a, i, j) * (&b)[j];
-#endif
-#if 0
-      ck [j] += zyc::cr_dual_elem (ak[0], j, i) * bk [i];
-#endif
-#if 0
-      ck [j] += zyc::cr_dual_mult_elem (ak[0], bk[0], j, i);
-#endif
-      (&c)[k + j] += zyc::cr_dual_mult_elem ((&a)[k], (&b)[k], j, i);
-} } } }
+        (&c)[k + j] += zyc::cr_dual_mult_elem ((&a)[k], (&b)[k], j, i);
+  } } }
+  return &c;
+}
+#if 1
+template <typename T> static inline
+T* zyc::dual_mult_soa
+  (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
+  const zyc::Zorder_int zorder, const std::size_t n=1)
+noexcept {
+  const auto zsz = std::size_t (1) << zorder;
+  const auto sz = zsz * n;
+  for (zyc::Zarray_int j=0; j<zsz; j++) {// permuted loop, transposed calc
+    for (zyc::Zarray_int i=0; i<zsz; i++) {
+      if (zyc::is_dual_nz (j, i)) {
+        for (std::size_t k=0; k<n; k++) {
+          c[j*n + k] += a[(j-i)*n + k] * b[i*n + k];
+  } } } }
+  return &c;
+}
+#   endif
 #if 0
 template <typename T> static inline constexpr
 void zyc::dual_mult_aos
@@ -103,16 +110,16 @@ noexcept {
   return ((row ^ col) == (row - col)) ? v [row - col] : T(0.0);
 }
 #   endif
+static inline constexpr
+bool zyc::is_dual_nz (Zarray_int row, Zarray_int col, Zarray_int p)
+noexcept{
+  return ((row ^ col) == (row - col)) && ((row - col) < (Zarray_int(1) << p));
+}
 template <typename T> static inline constexpr
 T zyc::cr_dual_elem (const T& ZYC_RESTRICT v,
   const zyc::Zarray_int row, const zyc::Zarray_int col)
 noexcept {
   return ((row ^ col) == (row - col)) ? (&v)[row - col] : T(0.0);
-}
-static inline constexpr
-bool zyc::is_dual_nz (Zarray_int row, Zarray_int col, Zarray_int p)
-noexcept{
-  return ((row ^ col) == (row - col)) && ((row - col) < (Zarray_int(1) << p));
 }
 template <typename T> static inline constexpr
 T zyc::cr_dual_elem (const T& ZYC_RESTRICT v, const zyc::Zarray_int row,

@@ -95,65 +95,63 @@ if __name__ == "__main__":
   rlw = 1.0/3.0# reference linewidth
   rms = 4      # reference markersize
   #
-  if True:
-    plt.semilogy(list_order, sum2_mdsz_lim,
-      label="Sum of squares (multidual size limited)",
-      marker="s", markersize=rms, markeredgecolor='g', markerfacecolor='none',
-      color='g', linestyle="solid", linewidth=rlw)
+  plt.semilogy(list_order, sum2_mdsz_lim,
+    label="Sum of squares (multidual size limited)",
+    marker="s", markersize=rms, markeredgecolor='g', markerfacecolor='none',
+    color='g', linestyle="dotted", linewidth=rlw)
   plt.semilogy(list_order, sum2_nonz_lim,
     label="Sum of squares (CR nonzero count limited)",
     marker="s", markersize=rms, markeredgecolor='y', markerfacecolor='none',
-    color='y', linestyle="solid", linewidth=rlw)
+    color='y', linestyle="dotted", linewidth=rlw)
   plt.semilogy(list_order, sum2_crmat_lim,
     label="Sum of squares (CR matrix size limited)",
     marker="s", markersize=rms, markeredgecolor='r', markerfacecolor='none',
-    color='r', linestyle="solid", linewidth=rlw)
+    color='r', linestyle="dotted", linewidth=rlw)
   if True:
     plt.semilogy(list_order, permu_trnsp_sum2, label="Sum of squares (transposed)",
       marker="s", markersize=ms, markeredgecolor="m", markerfacecolor='none',
       markeredgewidth=mw, color="m",linestyle="dashed")
-  if False:
+  if True:
     plt.semilogy(list_order, speed_sum2,
       label="Sum of squares (matrix-free algorithm)",
-      marker="s", markersize=ms, markeredgecolor="b", markerfacecolor='none',
-      markeredgewidth=mw, color="b",linestyle="dashed")
+      marker="s", markersize=ms, markeredgecolor="c", markerfacecolor='none',
+      markeredgewidth=mw, color="c",linestyle="dashed")
   if False:
     plt.semilogy(list_order, trnsp_sum2, label="Sum of squares (transposed)",
-      marker="s", markersize=ms, markeredgecolor="m", markerfacecolor='none',
-      markeredgewidth=mw, color="m",linestyle="dashed")
+      marker="s", markersize=ms, markeredgecolor="g", markerfacecolor='none',
+      markeredgewidth=mw, color="g",linestyle="dashed")
   plt.semilogy(list_order, crmat_sum2,
     label="Sum of squares (naive algorithm)",
     marker="s", markersize=ms, markeredgecolor="k", markerfacecolor='none',
     markeredgewidth=mw, color="k",linestyle="dashed")
   #
-  if True:
-    plt.semilogy(list_order, mult_mdsz_lim,
-      label="Multiply (multidual size limited)",
-      marker="x", markeredgecolor='g', markerfacecolor='none',
-      color='g', linestyle="solid", linewidth=rlw)
+  plt.semilogy(list_order, mult_mdsz_lim,
+    label="Multiply (multidual size limited)",
+    marker="x", markersize=rms, markeredgecolor='g', markerfacecolor='none',
+    color='g', linestyle="dotted", linewidth=rlw)
   plt.semilogy(list_order, mult_nonz_lim,
     label="Multiply (CR nonzero count limited)",
     marker="x", markersize=rms, markeredgecolor='y', markerfacecolor='none',
-    color='y', linestyle="solid", linewidth=rlw)
+    color='y', linestyle="dotted", linewidth=rlw)
   plt.semilogy(list_order, mult_crmat_lim,
     label="Multiply (CR matrix size limited)",
     marker="x", markersize=rms, markeredgecolor='r', markerfacecolor='none',
-    color='r', linestyle="solid", linewidth=rlw)
+    color='r', linestyle="dotted", linewidth=rlw)
   if True:
-    plt.semilogy(list_order, permu_trnsp_mult, label="Multiply (matrix-free algorithm)",
-      markersize=ms, marker="x", color="b", markeredgewidth=mw,
-      linestyle="dotted")
-  if False:
     plt.semilogy(list_order, speed_mult, label="Multiply (matrix-free algorithm)",
-      markersize=ms, marker="x", color="b", markeredgewidth=mw,
-      linestyle="dotted")
+      markersize=ms, marker="x", color="c", markeredgecolor='c', markeredgewidth=mw,
+      linestyle="solid")
+  if True:
+    plt.semilogy(list_order, permu_trnsp_mult, label="Multiply (matrix-free transposed)",
+      markersize=ms, marker="x", color="g", markeredgecolor='g', markeredgewidth=mw,
+      linestyle="solid")
   if False:
     plt.semilogy(list_order, trnsp_mult, label="Multiply (transposed)",
       marker="x", markersize=ms, markeredgecolor="m",
-      markeredgewidth=mw, color="m",linestyle="dotted",)
+      markeredgewidth=mw, color="m",linestyle="solid",)
   plt.semilogy(list_order, crmat_mult, label="Multiply (naive algorithm)",
     marker="x", markersize=ms, color="k", markeredgecolor="k",
-    markeredgewidth=mw, linestyle="dotted")
+    markeredgewidth=mw, linestyle="solid")
   #
   #plt.gca().set(xlim=(-0.1, 8.1))
   plt.gca().set(ylim=(1e3, 1e10))
@@ -167,7 +165,7 @@ if __name__ == "__main__":
   plt.text(x=8.1, y=2.7*10**7, s=r"Higher is better.$\rightarrow$",
     rotation=90.0)
   #
-  plt.grid()
+  plt.grid(axis = 'y')
   plt.title("Multidual multiplication performance ("+cpumodel+")")
   plt.legend(loc='lower left', fontsize=10, numpoints=1)
   #

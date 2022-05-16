@@ -118,7 +118,7 @@ namespace zyc { namespace test {
     zyc::dual_mult_aos (zf.data()[0], zx.data()[0], zy.data()[0], 2);
     return zf [std::size_t (imag_part)];
   }
-  TEST( Zyc, BidualMultiply ){
+  TEST( Zyc, BidualMultiplyAOS ){
     EXPECT_DOUBLE_EQ( real_f       (3.0, 5.0), 15.0 );
     EXPECT_DOUBLE_EQ( real_dfdx    (3.0, 5.0),  5.0 );
     EXPECT_DOUBLE_EQ( real_dfdy    (3.0, 5.0),  3.0 );
