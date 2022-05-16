@@ -109,7 +109,7 @@ namespace zyc { namespace test {
     return 1.0;
   }
   static inline
-  double dual_f (const double x, const double y,
+  double dual_f1 (const double x, const double y,
     const Zarray_int zorder=0, const Zarray_int imag_part=0) {
     const size_t zsz = size_t (Zarray_int (1) << zorder);
     const std::vector<double> zx = {x,1.0,0.0,0.0};
@@ -123,11 +123,23 @@ namespace zyc { namespace test {
     EXPECT_DOUBLE_EQ( real_dfdx    (3.0, 5.0),  5.0 );
     EXPECT_DOUBLE_EQ( real_dfdy    (3.0, 5.0),  3.0 );
     EXPECT_DOUBLE_EQ( real_d2fdxdy (3.0 ,5.0),  1.0 );
-    EXPECT_DOUBLE_EQ( dual_f (3.0, 5.0, 2, 0), real_f       (3.0, 5.0) );
-    EXPECT_DOUBLE_EQ( dual_f (3.0, 5.0, 2, 1), real_dfdx    (3.0, 5.0) );
-    EXPECT_DOUBLE_EQ( dual_f (3.0, 5.0, 2, 2), real_dfdy    (3.0, 5.0) );
-    EXPECT_DOUBLE_EQ( dual_f (3.0, 5.0, 2, 3), real_d2fdxdy (3.0 ,5.0) );
+    EXPECT_DOUBLE_EQ( dual_f1 (3.0, 5.0, 2, 0), real_f       (3.0, 5.0) );
+    EXPECT_DOUBLE_EQ( dual_f1 (3.0, 5.0, 2, 1), real_dfdx    (3.0, 5.0) );
+    EXPECT_DOUBLE_EQ( dual_f1 (3.0, 5.0, 2, 2), real_dfdy    (3.0, 5.0) );
+    EXPECT_DOUBLE_EQ( dual_f1 (3.0, 5.0, 2, 3), real_d2fdxdy (3.0 ,5.0) );
   }
+#if 0
+  static inline
+  double dual_f2 (const double x, const double y,
+    const Zarray_int pf=0, px=0, py=0, const Zarray_int imag_part=0) {
+    const size_t zsz = size_t (Zarray_int (1) << pf);
+    const std::vector<double> zx = {x,1.0};// porder 1
+    const std::vector<double> zy = {y,0.0,1.0,0.0};// porder 2
+    auto zf = std::vector<double> (zsz);
+    zyc::dual_mult_aos (zf.data()[0], zx.data()[0], zy.data()[0], 2, 1, 2);
+    return zf [std::size_t (imag_part)];
+  }
+#endif
 #if 0
   static inline
   int print_hamw (int show_order, int array_order) {

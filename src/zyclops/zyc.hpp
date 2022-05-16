@@ -72,6 +72,12 @@ namespace zyc {
   T cr_dual_mult_elem (const T& a, const T& b, Zarray_int row, Zarray_int col)
   noexcept;
 #endif
+#if 0
+  template <typename T> static inline constexpr
+  T cr_dual_mult_elem (const T& a, const T& b, Zarray_int row, Zarray_int col,
+  Zarray_int zorder)
+  noexcept;
+#endif
 #if 1
   template <typename T> static inline constexpr
   void dual_mult_aos

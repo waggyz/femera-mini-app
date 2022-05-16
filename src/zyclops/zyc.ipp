@@ -47,11 +47,12 @@ void zyc::dual_mult_aos
   (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyc::Zorder_int zorder, const std::size_t n=1)
 noexcept {
-  const zyc::Zarray_int zsz = zyc::Zarray_int (1) << zorder;
-  for (std::size_t k=0; k<n; k++) {
-    auto ak =& ((&a)[zsz * k]);
-    auto bk =& ((&b)[zsz * k]);
-    auto ck =& ((&c)[zsz * k]);
+  const auto zsz = std::size_t (1) << zorder;
+  const auto sz = zsz * n;
+  for (std::size_t k=0; k<sz; k+=zsz) {
+    //auto ak =& ((&a)[zsz * k]);
+    //auto bk =& ((&b)[zsz * k]);
+    //auto ck =& ((&c)[zsz * k]);
     for (zyc::Zarray_int j=0; j<zsz; j++) {// permuted loop, transposed calc
       for (zyc::Zarray_int i=0; i<zsz; i++) {
 #if 0
@@ -60,8 +61,26 @@ noexcept {
 #if 0
       ck [j] += zyc::cr_dual_elem (ak[0], j, i) * bk [i];
 #endif
+#if 0
       ck [j] += zyc::cr_dual_mult_elem (ak[0], bk[0], j, i);
+#endif
+      (&c)[k + j] += zyc::cr_dual_mult_elem ((&a)[k], (&b)[k], j, i);
 } } } }
+#if 0
+template <typename T> static inline constexpr
+void zyc::dual_mult_aos
+  (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
+  const zyc::Zorder_int pf, const zyc::Zorder_int pa, const zyc::Zorder_int pb,
+  const std::size_t n=1)
+noexcept {
+  const auto zsz = std::size_t (1) << zorder;
+  const auto sz = zsz * n;
+  for (std::size_t k=0; k<sz; k+=zsz) {
+    for (zyc::Zarray_int j=0; j<zsz; j++) {// permuted loop, transposed calc
+      for (zyc::Zarray_int i=0; i<zsz; i++) {
+      (&c)[k + j] += zyc::cr_dual_mult_elem ((&a)[k], (&b)[k], j, i, pa);
+} } } }
+#   endif
 # if 0
 template <typename T> static inline constexpr
 T zyc::cr_dual_elem (const T& ZYC_RESTRICT v,//DONE change all ptr to reference
@@ -108,6 +127,15 @@ T zyc::cr_dual_mult_elem (const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyc::Zarray_int row, const zyc::Zarray_int col)
 noexcept {
   return ((row ^ col) == (row - col)) ? (&a)[col] * (&b)[row - col] : T(0.0);
+}
+#endif
+#if 0
+template <typename T> static inline constexpr
+T zyc::cr_dual_mult_elem (const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
+  const zyc::Zarray_int row, const zyc::Zarray_int col, Zarray_int p)
+noexcept {
+  return ((row ^ col) == (row - col)) && ((row - col) < (Zarray_int(1) << p)
+    ? (&a)[col] * (&b)[row - col] : T(0.0);
 }
 #endif
 #if 0
