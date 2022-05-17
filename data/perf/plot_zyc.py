@@ -117,9 +117,10 @@ if __name__ == "__main__":
       marker="s", markersize=rms, markeredgecolor='r', markerfacecolor='none',
       color='r', linestyle="dotted", linewidth=rlw)
     if True:
-      plt.semilogy(list_order, permu_trnsp_sum2, label="Sum of squares (transposed)",
+      plt.semilogy(list_order, permu_trnsp_sum2,
+        label="Sum of squares (transposed)", color="m",linestyle="dashed",
         marker="s", markersize=ms, markeredgecolor="m", markerfacecolor='none',
-        markeredgewidth=mw, color="m",linestyle="dashed")
+        markeredgewidth=mw)
     if True:
       plt.semilogy(list_order, speed_sum2,
         label="Sum of squares (matrix-free algorithm)",
@@ -135,13 +136,13 @@ if __name__ == "__main__":
       markeredgewidth=mw, color="k",linestyle="dashed")
   if False:#-------------------------------------------------------------------
     if True:
-      plt.semilogy(list_order, speed_mult, label="Multiply (matrix-free algorithm)",
-        markersize=ms, marker="x", color="c", markeredgecolor='c', markeredgewidth=mw,
-        linestyle="solid")
+      plt.semilogy(list_order, speed_mult,
+        label="Multiply (matrix-free algorithm)", color="c", linestyle="solid"
+        markersize=ms, marker="x", markeredgecolor='c', markeredgewidth=mw)
     if True:
-      plt.semilogy(list_order, permu_trnsp_mult, label="Multiply (matrix-free transposed)",
-        markersize=ms, marker="x", color="g", markeredgecolor='g', markeredgewidth=mw,
-        linestyle="solid")
+      plt.semilogy(list_order, permu_trnsp_mult,
+        label="Multiply (matrix-free transposed)", color="g", linestyle="solid"
+        markersize=ms, marker="x", markeredgecolor='g', markeredgewidth=mw)
     if False:
       plt.semilogy(list_order, trnsp_mult, label="Multiply (transposed)",
         marker="x", markersize=ms, markeredgecolor="m",
@@ -149,16 +150,15 @@ if __name__ == "__main__":
     plt.semilogy(list_order, crmat_mult, label="Multiply (naive algorithm)",
       marker="x", markersize=ms, color="k", markeredgecolor="k",
       markeredgewidth=mw, linestyle="solid")
-  #----------------------------------------------------------------------------
-  if True:
-    plt.semilogy(list_order, speed_mult_soa, label="Multiply (SoA)",
-      markersize=ms, marker="x", color="b", markeredgecolor='b', markeredgewidth=mw,
+  if True:#--------------------------------------------------------------------
+    plt.semilogy(list_order, speed_mult_soa, label="Multiply (SoA)", color="b",
+      markersize=ms, marker="x", markeredgecolor='b', markeredgewidth=mw,
       linestyle="solid")
   if True:
-    plt.semilogy(list_order, speed_mult_aos, label="Multiply (AoS)",
-      markersize=ms, marker="x", color="k", markeredgecolor='k', markeredgewidth=mw,
+    plt.semilogy(list_order, speed_mult_aos, label="Multiply (AoS)", color="k",
+      markersize=ms, marker="x", markeredgecolor='k', markeredgewidth=mw,
       linestyle="solid")
-  if True:#-------------------------------------------------------------------
+  if True:#--------------------------------------------------------------------
     plt.semilogy(list_order, mult_mdsz_lim,
       label="Multiply O($\mathregular{2^p}$) multidual size limited",
       marker="x", markersize=rms, markeredgecolor='g', markerfacecolor='none',
