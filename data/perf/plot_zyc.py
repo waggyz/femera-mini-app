@@ -137,11 +137,11 @@ if __name__ == "__main__":
   if False:#-------------------------------------------------------------------
     if True:
       plt.semilogy(list_order, speed_mult,
-        label="Multiply (matrix-free algorithm)", color="c", linestyle="solid"
+        label="Multiply (matrix-free algorithm)", color="c", linestyle="solid",
         markersize=ms, marker="x", markeredgecolor='c', markeredgewidth=mw)
     if True:
       plt.semilogy(list_order, permu_trnsp_mult,
-        label="Multiply (matrix-free transposed)", color="g", linestyle="solid"
+        label="Multiply (matrix-free transposed)", color="g", linestyle="solid",
         markersize=ms, marker="x", markeredgecolor='g', markeredgewidth=mw)
     if False:
       plt.semilogy(list_order, trnsp_mult, label="Multiply (transposed)",
