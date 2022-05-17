@@ -35,8 +35,7 @@ namespace zyc { namespace test {
   }
   static inline constexpr
   int dual_ix (const int row, const int col)
-  noexcept {
-    //returns index of value, or -1 for a zero entry
+  noexcept {//returns index of value, or -1 for a zero entry
   #if 0
     return ((row ^ col) + (row - col));//TODO try to simplify below
   //  return ((row - col) - (row ^ col)) - col+row;
@@ -47,8 +46,7 @@ namespace zyc { namespace test {
   }
   static inline constexpr
   int dual_ix (const int row, const int col, const int array_order)
-  noexcept {
-    // this one is safe for operations with different order operands
+  noexcept {// safe for operations with different order operands
   #if 0
     const auto ix = row - col;
     return (ix < (1<<array_order)) && ((row ^ col) == ix) ? ix : -1;
@@ -118,11 +116,15 @@ namespace zyc { namespace test {
   double dual_aos_f1 (const double x, const double y,
     const Zarray_int zorder=0, const Zarray_int imag_part=0) {
     const size_t zsz = size_t (Zarray_int (1) << zorder);
-    const std::vector<double> zx = {x,1.0,0.0,0.0};
-    const std::vector<double> zy = {y,0.0,1.0,0.0};
-    auto zf = std::vector<double> (zsz);
-    zyc::dual_mult_aos (zf.data()[0], zx.data()[0], zy.data()[0], 2);
-    return zf [std::size_t (imag_part)];
+    const std::vector<double> zx = {x,1.0,0.0,0.0, x,1.0,0.0,0.0};
+    const std::vector<double> zy = {y,0.0,1.0,0.0, y,0.0,1.0,0.0};
+    const uint n = 2;
+    auto zf = std::vector<double> (zsz*n);
+    zyc::dual_mult_aos (zf.data()[0], zx.data()[0], zy.data()[0], 2, n);
+    const auto zf0 = zf [zsz*0 + std::size_t (imag_part)];
+    const auto zf1 = zf [zsz*1 + std::size_t (imag_part)];
+    if ((zf0<zf1) || (zf0>zf1)) { return NAN;}
+    return zf0;
   }
   TEST( Zyc, BidualMultiplyAoS ){
     EXPECT_DOUBLE_EQ( dual_aos_f1 (3.0, 5.0, 2, 0), real_f       (3.0, 5.0) );
@@ -134,11 +136,15 @@ namespace zyc { namespace test {
   double dual_soa_f1 (const double x, const double y,
     const Zarray_int zorder=0, const Zarray_int imag_part=0) {
     const size_t zsz = size_t (Zarray_int (1) << zorder);
-    const std::vector<double> zx = {x,1.0,0.0,0.0};
-    const std::vector<double> zy = {y,0.0,1.0,0.0};
-    auto zf = std::vector<double> (zsz);
-    zyc::dual_mult_soa (zf.data()[0], zx.data()[0], zy.data()[0], 2);
-    return zf [std::size_t (imag_part)];
+    const uint n = 2;
+    const std::vector<double> zx = {x,x, 1.0,1.0, 0.0,0.0, 0.0,0.0, 0.0,0.0};
+    const std::vector<double> zy = {y,y, 0.0,0.0, 1.0,1.0, 0.0,0.0, 0.0,0.0};
+    auto zf = std::vector<double> (zsz*n);
+    zyc::dual_mult_soa (zf.data()[0], zx.data()[0], zy.data()[0], 2, n);
+    const auto zf0 = zf [std::size_t (n* imag_part +0 )];
+    const auto zf1 = zf [std::size_t (n* imag_part +1 )];
+    if ((zf0<zf1) || (zf0>zf1)) { return NAN;}
+    return zf0;
   }
   TEST( Zyc, BidualMultiplySoA ){
     EXPECT_DOUBLE_EQ( dual_soa_f1 (3.0, 5.0, 2, 0), real_f       (3.0, 5.0) );

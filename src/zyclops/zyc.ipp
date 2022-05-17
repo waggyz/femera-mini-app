@@ -12,9 +12,9 @@ noexcept {
      -an-integer-based-power-function-powint-int */
   uint result = 1;
   for (;;) {
-    if (exponent & 1) {result *= base;}
+    if (exponent & 1){ result *= base; }
     exponent >>= 1;
-    if (!exponent) {break;}
+    if (!exponent){ break; }
     base *= base;
   }
   return result;
@@ -38,7 +38,7 @@ noexcept {
 #endif
 }
 static inline constexpr
-bool zyc::is_dual_nz (Zarray_int row, Zarray_int col)
+bool zyc::is_dual_nz (const Zarray_int row, const Zarray_int col)
 noexcept{
   return (row ^ col) == (row - col);
 }
@@ -69,7 +69,7 @@ noexcept {
       for (zyc::Zarray_int i=0; i<zsz; i++) {
         if (zyc::is_dual_nz (j, i)) {
           for (std::size_t k=0; k<n; k++) {
-            (&c)[j*n + k] += (&b)[i*n + k] * (&a)[(j-i)*n + k];
+            (&c)[n* j + k] += (&b)[n* i + k] * (&a)[n* (j-i) + k];
   } } } } }
   return &c;
 }
@@ -112,7 +112,8 @@ noexcept {
 }
 #   endif
 static inline constexpr
-bool zyc::is_dual_nz (Zarray_int row, Zarray_int col, Zarray_int p)
+bool zyc::is_dual_nz
+  (const Zarray_int row, const Zarray_int col, const Zarray_int p)
 noexcept{
   return ((row ^ col) == (row - col)) && ((row - col) < (Zarray_int(1) << p));
 }
@@ -129,14 +130,12 @@ noexcept {
   return ((row ^ col) == (row - col)) && ((row - col) < (Zarray_int(1) << p))
     ? (&v)[row - col] : T(0.0);
 }
-#if 1
 template <typename T> static inline constexpr
 T zyc::cr_dual_mult_elem (const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyc::Zarray_int row, const zyc::Zarray_int col)
 noexcept {
   return ((row ^ col) == (row - col)) ? (&a)[col] * (&b)[row - col] : T(0.0);
 }
-#endif
 #if 0
 template <typename T> static inline constexpr
 T zyc::cr_dual_mult_elem (const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,

@@ -67,31 +67,25 @@ namespace zyc {
   template <typename T> static inline constexpr
   T cr_dual_elem (const T&, Zarray_int row, Zarray_int col, Zarray_int zorder)
   noexcept;// for access of higher order than stored
-#if 1
   template <typename T> static inline constexpr
   T cr_dual_mult_elem (const T& a, const T& b, Zarray_int row, Zarray_int col)
   noexcept;
-#endif
 #if 0
   template <typename T> static inline constexpr
   T cr_dual_mult_elem (const T& a, const T& b, Zarray_int row, Zarray_int col,
   Zarray_int zorder)
   noexcept;
 #endif
-#if 1
   template <typename T> static inline
   T* dual_mult_aos
     (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
     const zyc::Zorder_int order, const std::size_t n=1)
   noexcept;
-#endif
-#if 1
   template <typename T> static inline
-  T* dual_mult_soa//TODO Test this.
+  T* dual_mult_soa
     (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
     const zyc::Zorder_int order, const std::size_t n=1)
   noexcept;
-#endif
 #if 0
   template<typename T>
   static inline constexpr
