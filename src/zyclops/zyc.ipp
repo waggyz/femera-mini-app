@@ -65,12 +65,11 @@ T* zyc::dual_mult_soa
 noexcept {
   if (n>0) {
     const auto zsz = std::size_t (1) << zorder;
-    const auto sz = zsz * n;
     for (zyc::Zarray_int j=0; j<zsz; j++) {// permuted loop, transposed calc
       for (zyc::Zarray_int i=0; i<zsz; i++) {
         if (zyc::is_dual_nz (j, i)) {
           for (std::size_t k=0; k<n; k++) {
-            c[j*n + k] += b[i*n + k] * a[(j-i)*n + k];
+            (&c)[j*n + k] += (&b)[i*n + k] * (&a)[(j-i)*n + k];
   } } } } }
   return &c;
 }

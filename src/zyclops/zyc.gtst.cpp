@@ -137,7 +137,7 @@ namespace zyc { namespace test {
     const std::vector<double> zx = {x,1.0,0.0,0.0};
     const std::vector<double> zy = {y,0.0,1.0,0.0};
     auto zf = std::vector<double> (zsz);
-    zyc::dual_mult_aos (zf.data()[0], zx.data()[0], zy.data()[0], 2);
+    zyc::dual_mult_soa (zf.data()[0], zx.data()[0], zy.data()[0], 2);
     return zf [std::size_t (imag_part)];
   }
   TEST( Zyc, BidualMultiplySoA ){
