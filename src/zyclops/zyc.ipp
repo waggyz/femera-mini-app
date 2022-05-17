@@ -47,13 +47,14 @@ T* zyc::dual_mult_aos
   (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyc::Zorder_int zorder, const std::size_t n=1)
 noexcept {
-  const auto zsz = std::size_t (1) << zorder;
-  const auto sz = zsz * n;
-  for (std::size_t k=0; k<sz; k+=zsz) {
-    for (zyc::Zarray_int j=0; j<zsz; j++) {// permuted loop, transposed calc
-      for (zyc::Zarray_int i=0; i<zsz; i++) {
-        (&c)[k + j] += zyc::cr_dual_mult_elem ((&a)[k], (&b)[k], j, i);
-  } } }
+  if (n>0) {
+    const auto zsz = std::size_t (1) << zorder;
+    const auto sz = zsz * n;
+    for (std::size_t k=0; k<sz; k+=zsz) {
+      for (zyc::Zarray_int j=0; j<zsz; j++) {// permuted loop, transposed calc
+        for (zyc::Zarray_int i=0; i<zsz; i++) {
+          (&c)[k + j] += zyc::cr_dual_mult_elem ((&a)[k], (&b)[k], j, i);
+  } } } }
   return &c;
 }
 #if 1
@@ -62,14 +63,15 @@ T* zyc::dual_mult_soa
   (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyc::Zorder_int zorder, const std::size_t n=1)
 noexcept {
-  const auto zsz = std::size_t (1) << zorder;
-  const auto sz = zsz * n;
-  for (zyc::Zarray_int j=0; j<zsz; j++) {// permuted loop, transposed calc
-    for (zyc::Zarray_int i=0; i<zsz; i++) {
-      if (zyc::is_dual_nz (j, i)) {
-        for (std::size_t k=0; k<n; k++) {
-          c[j*n + k] += a[(j-i)*n + k] * b[i*n + k];
-  } } } }
+  if (n>0) {
+    const auto zsz = std::size_t (1) << zorder;
+    const auto sz = zsz * n;
+    for (zyc::Zarray_int j=0; j<zsz; j++) {// permuted loop, transposed calc
+      for (zyc::Zarray_int i=0; i<zsz; i++) {
+        if (zyc::is_dual_nz (j, i)) {
+          for (std::size_t k=0; k<n; k++) {
+            c[j*n + k] += b[i*n + k] * a[(j-i)*n + k];
+  } } } } }
   return &c;
 }
 #   endif

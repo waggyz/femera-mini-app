@@ -108,8 +108,14 @@ namespace zyc { namespace test {
   double real_d2fdxdy (double, double) {
     return 1.0;
   }
+  TEST( Zyc, CheckF1Derivs ){
+    EXPECT_DOUBLE_EQ( real_f       (3.0, 5.0), 15.0 );
+    EXPECT_DOUBLE_EQ( real_dfdx    (3.0, 5.0),  5.0 );
+    EXPECT_DOUBLE_EQ( real_dfdy    (3.0, 5.0),  3.0 );
+    EXPECT_DOUBLE_EQ( real_d2fdxdy (3.0 ,5.0),  1.0 );
+  }
   static inline
-  double dual_f1 (const double x, const double y,
+  double dual_aos_f1 (const double x, const double y,
     const Zarray_int zorder=0, const Zarray_int imag_part=0) {
     const size_t zsz = size_t (Zarray_int (1) << zorder);
     const std::vector<double> zx = {x,1.0,0.0,0.0};
@@ -118,15 +124,27 @@ namespace zyc { namespace test {
     zyc::dual_mult_aos (zf.data()[0], zx.data()[0], zy.data()[0], 2);
     return zf [std::size_t (imag_part)];
   }
-  TEST( Zyc, BidualMultiplyAOS ){
-    EXPECT_DOUBLE_EQ( real_f       (3.0, 5.0), 15.0 );
-    EXPECT_DOUBLE_EQ( real_dfdx    (3.0, 5.0),  5.0 );
-    EXPECT_DOUBLE_EQ( real_dfdy    (3.0, 5.0),  3.0 );
-    EXPECT_DOUBLE_EQ( real_d2fdxdy (3.0 ,5.0),  1.0 );
-    EXPECT_DOUBLE_EQ( dual_f1 (3.0, 5.0, 2, 0), real_f       (3.0, 5.0) );
-    EXPECT_DOUBLE_EQ( dual_f1 (3.0, 5.0, 2, 1), real_dfdx    (3.0, 5.0) );
-    EXPECT_DOUBLE_EQ( dual_f1 (3.0, 5.0, 2, 2), real_dfdy    (3.0, 5.0) );
-    EXPECT_DOUBLE_EQ( dual_f1 (3.0, 5.0, 2, 3), real_d2fdxdy (3.0 ,5.0) );
+  TEST( Zyc, BidualMultiplyAoS ){
+    EXPECT_DOUBLE_EQ( dual_aos_f1 (3.0, 5.0, 2, 0), real_f       (3.0, 5.0) );
+    EXPECT_DOUBLE_EQ( dual_aos_f1 (3.0, 5.0, 2, 1), real_dfdx    (3.0, 5.0) );
+    EXPECT_DOUBLE_EQ( dual_aos_f1 (3.0, 5.0, 2, 2), real_dfdy    (3.0, 5.0) );
+    EXPECT_DOUBLE_EQ( dual_aos_f1 (3.0, 5.0, 2, 3), real_d2fdxdy (3.0 ,5.0) );
+  }
+  static inline
+  double dual_soa_f1 (const double x, const double y,
+    const Zarray_int zorder=0, const Zarray_int imag_part=0) {
+    const size_t zsz = size_t (Zarray_int (1) << zorder);
+    const std::vector<double> zx = {x,1.0,0.0,0.0};
+    const std::vector<double> zy = {y,0.0,1.0,0.0};
+    auto zf = std::vector<double> (zsz);
+    zyc::dual_mult_aos (zf.data()[0], zx.data()[0], zy.data()[0], 2);
+    return zf [std::size_t (imag_part)];
+  }
+  TEST( Zyc, BidualMultiplySoA ){
+    EXPECT_DOUBLE_EQ( dual_soa_f1 (3.0, 5.0, 2, 0), real_f       (3.0, 5.0) );
+    EXPECT_DOUBLE_EQ( dual_soa_f1 (3.0, 5.0, 2, 1), real_dfdx    (3.0, 5.0) );
+    EXPECT_DOUBLE_EQ( dual_soa_f1 (3.0, 5.0, 2, 2), real_dfdy    (3.0, 5.0) );
+    EXPECT_DOUBLE_EQ( dual_soa_f1 (3.0, 5.0, 2, 3), real_d2fdxdy (3.0 ,5.0) );
   }
 #if 0
   static inline
