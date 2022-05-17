@@ -38,12 +38,12 @@ noexcept {
 #endif
 }
 static inline constexpr
-bool zyc::is_dual_nz (const Zarray_int row, const Zarray_int col)
+bool zyc::cr_dual_nz (const Zarray_int row, const Zarray_int col)
 noexcept{
   return (row ^ col) == (row - col);
 }
 template <typename T> static inline
-T* zyc::dual_mult_aos
+T* zyc::aos_dual_mult
   (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyc::Zorder_int zorder, const std::size_t n=1)
 noexcept {
@@ -59,7 +59,7 @@ noexcept {
 }
 #if 1
 template <typename T> static inline
-T* zyc::dual_mult_soa
+T* zyc::soa_dual_mult
   (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyc::Zorder_int zorder, const std::size_t n=1)
 noexcept {
@@ -67,7 +67,7 @@ noexcept {
     const auto zsz = std::size_t (1) << zorder;
     for (zyc::Zarray_int j=0; j<zsz; j++) {// permuted loop, transposed calc
       for (zyc::Zarray_int i=0; i<zsz; i++) {
-        if (zyc::is_dual_nz (j, i)) {
+        if (zyc::cr_dual_nz (j, i)) {
           for (std::size_t k=0; k<n; k++) {
             (&c)[n* j + k] += (&b)[n* i + k] * (&a)[n* (j-i) + k];
   } } } } }
@@ -76,7 +76,7 @@ noexcept {
 #   endif
 #if 0
 template <typename T> static inline constexpr
-void zyc::dual_mult_aos
+void zyc::aos_dual_mult
   (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyc::Zorder_int pf, const zyc::Zorder_int pa, const zyc::Zorder_int pb,
   const std::size_t n=1)
@@ -112,7 +112,7 @@ noexcept {
 }
 #   endif
 static inline constexpr
-bool zyc::is_dual_nz
+bool zyc::cr_dual_nz
   (const Zarray_int row, const Zarray_int col, const Zarray_int p)
 noexcept{
   return ((row ^ col) == (row - col)) && ((row - col) < (Zarray_int(1) << p));
@@ -147,7 +147,7 @@ noexcept {
 #endif
 #if 0
 template <typename T> static inline constexpr
-void zyc::dual_mult_aos (T* ZYC_RESTRICT a,
+void zyc::aos_dual_mult (T* ZYC_RESTRICT a,
   const T* ZYC_RESTRICT b, const T* ZYC_RESTRICT c, const zyc::Zarray_int order)
 noexcept {
   const zyc::Zarray_int zsz = zyc::Zarray_int (1) << order;

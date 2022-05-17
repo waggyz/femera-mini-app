@@ -120,7 +120,7 @@ namespace zyc { namespace test {
     const std::vector<double> zy = {y,0.0,1.0,0.0, y,0.0,1.0,0.0};
     const uint n = 2;
     auto zf = std::vector<double> (zsz * n);
-    zyc::dual_mult_aos (zf.data()[0], zx.data()[0], zy.data()[0], 2, n);
+    zyc::aos_dual_mult (zf.data()[0], zx.data()[0], zy.data()[0], 2, n);
     const auto zf0 = zf [zsz*0 + std::size_t (imag_part)];
     const auto zf1 = zf [zsz*1 + std::size_t (imag_part)];
     if ((zf0<zf1) || (zf0>zf1)){ return NAN; }
@@ -140,7 +140,7 @@ namespace zyc { namespace test {
     const std::vector<double> zx = {x,x, 1.0,1.0, 0.0,0.0, 0.0,0.0, 0.0,0.0};
     const std::vector<double> zy = {y,y, 0.0,0.0, 1.0,1.0, 0.0,0.0, 0.0,0.0};
     auto zf = std::vector<double> (zsz * n);
-    zyc::dual_mult_soa (zf.data()[0], zx.data()[0], zy.data()[0], 2, n);
+    zyc::soa_dual_mult (zf.data()[0], zx.data()[0], zy.data()[0], 2, n);
     const auto zf0 = zf [std::size_t (n* imag_part +0)];
     const auto zf1 = zf [std::size_t (n* imag_part +1)];
     if ((zf0<zf1) || (zf0>zf1)){ return NAN; }
@@ -160,7 +160,7 @@ namespace zyc { namespace test {
     const std::vector<double> zx = {x,1.0};// porder 1
     const std::vector<double> zy = {y,0.0,1.0,0.0};// porder 2
     auto zf = std::vector<double> (zsz);
-    zyc::dual_mult_aos (zf.data()[0], zx.data()[0], zy.data()[0], 2, 1, 2);
+    zyc::aos_dual_mult (zf.data()[0], zx.data()[0], zy.data()[0], 2, 1, 2);
     return zf [std::size_t (imag_part)];
   }
 #endif

@@ -56,10 +56,10 @@ namespace zyc {
   uint hamw (uint32_t i)
   noexcept;
   static inline constexpr
-  bool is_dual_nz (Zarray_int row, Zarray_int col)
+  bool cr_dual_nz (Zarray_int row, Zarray_int col)
   noexcept;
   static inline constexpr// for access of higher order than stored
-  bool is_dual_nz (Zarray_int row, Zarray_int col, Zarray_int zorder_limit)
+  bool cr_dual_nz (Zarray_int row, Zarray_int col, Zarray_int zorder_limit)
   noexcept;
   template <typename T> static inline constexpr
   T cr_dual_elem (const T&, Zarray_int row, Zarray_int col)// fast with -flto
@@ -77,12 +77,12 @@ namespace zyc {
   noexcept;
 #endif
   template <typename T> static inline
-  T* dual_mult_aos
+  T* aos_dual_mult// array of mutlidual vectors
     (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
     const zyc::Zorder_int order, const std::size_t n=1)
   noexcept;
   template <typename T> static inline
-  T* dual_mult_soa
+  T* soa_dual_mult// contiguos real & imaginary parts
     (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
     const zyc::Zorder_int order, const std::size_t n=1)
   noexcept;
