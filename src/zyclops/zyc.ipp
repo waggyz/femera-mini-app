@@ -52,7 +52,7 @@ noexcept {
     const auto sz = zsz * n;
     for (std::size_t k=0; k<sz; k+=zsz) {
       for (zyc::Zarray_int j=0; j<zsz; j++) {// permuted loop, transposed calc
-        for (zyc::Zarray_int i=0; i<zsz; i++) {
+        for (zyc::Zarray_int i=0; i<=j; i++) {
           (&c)[k + j] += zyc::cr_dual_mult_elem ((&a)[k], (&b)[k], j, i);
   } } } }
   return &c;
@@ -63,14 +63,25 @@ T* zyc::soa_dual_mult
   (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyc::Zorder_int zorder, const std::size_t n=1)
 noexcept {
-  if (n>0) {
+#if 0
+  if (n>0 && zorder>=0) {
+    const auto zsz = std::size_t (1) << zorder;
+    for (zyc::Zarray_int j=0; j<zsz; j++) {// permuted loop
+      for (zyc::Zarray_int i=j; i<zsz; i++) {
+        if (zyc::cr_dual_nz (i, j)) {
+          for (std::size_t k=0; k<n; k++) {
+            (&c)[n* i + k] += (&b)[n* j + k] * (&a)[n* (i-j) + k];
+  } } } } }
+#else
+  if (n>0 && zorder>=0) {
     const auto zsz = std::size_t (1) << zorder;
     for (zyc::Zarray_int j=0; j<zsz; j++) {// permuted loop, transposed calc
-      for (zyc::Zarray_int i=0; i<zsz; i++) {
+      for (zyc::Zarray_int i=0; i<=j; i++) {
         if (zyc::cr_dual_nz (j, i)) {
           for (std::size_t k=0; k<n; k++) {
             (&c)[n* j + k] += (&b)[n* i + k] * (&a)[n* (j-i) + k];
   } } } } }
+#endif
   return &c;
 }
 #   endif

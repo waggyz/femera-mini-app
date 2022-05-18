@@ -100,7 +100,7 @@ if __name__ == "__main__":
   lw  = 2.0    # linewidth
   ms  = 6      # markersize
   mw  = 1      # markeredgewidth
-  rlw = 1.0/3.0# reference linewidth
+  rlw = 1.0/2.0# reference linewidth
   rms = 4      # reference markersize
   #
   if False:#-------------------------------------------------------------------
@@ -151,11 +151,11 @@ if __name__ == "__main__":
       marker="x", markersize=ms, color="k", markeredgecolor="k",
       markeredgewidth=mw, linestyle="solid")
   if True:#--------------------------------------------------------------------
-    plt.semilogy(list_order, speed_mult_soa, label="Multiply (SoA)", color="b",
+    plt.semilogy(list_order, speed_mult_aos, label="Multiply (AoS)", color="b",
       markersize=ms, marker="x", markeredgecolor='b', markeredgewidth=mw,
       linestyle="solid")
   if True:
-    plt.semilogy(list_order, speed_mult_aos, label="Multiply (AoS)", color="k",
+    plt.semilogy(list_order, speed_mult_soa, label="Multiply (SoA)", color="k",
       markersize=ms, marker="x", markeredgecolor='k', markeredgewidth=mw,
       linestyle="solid")
   if True:#--------------------------------------------------------------------
