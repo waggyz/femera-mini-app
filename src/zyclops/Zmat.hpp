@@ -3,7 +3,7 @@
 
 #include "Zomplex.hpp"
 
-namespace zyc {
+namespace zyclops {
 
   class Zmat {// hypercomplex matrix or vector
   public:
@@ -40,7 +40,7 @@ namespace zyc {
     = Zomplex (Algebra::Nat, 0, zyc::Layout::Native);
 #endif
 
-}// end zyc:: namespace
+}// end zyclops:: namespace
 
 #include "Zmat.ipp"
 

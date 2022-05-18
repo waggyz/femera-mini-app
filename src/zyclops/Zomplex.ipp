@@ -1,7 +1,7 @@
 #ifndef ZYC_HAS_ZOMPLEX_IPP
 #define ZYC_HAS_ZOMPLEX_IPP
 
-namespace zyc {
+namespace zyclops {
   inline
   Algebra Zomplex::get_family   (){
     return this->family;
@@ -29,7 +29,7 @@ namespace zyc {
       case Algebra::Int     ://fall through
       case Algebra::Nat     ://fall through
       case Algebra::Real    :{ return 1; }
-      case Algebra::Dual    :{ return zyc::upow (3, this->order); }
+      case Algebra::Dual    :{ return upow (3, this->order); }
       case Algebra::Split   ://fall through
       case Algebra::Quat    ://fall through
       case Algebra::Complex :{ return this->cr_size (); }
@@ -70,7 +70,7 @@ namespace zyc {
   }
 #endif
 
-}// end zyc:: namespace
+}// end zyclops:: namespace
 
 //end ZYC_HAS_ZOMPLEX_IPP
 #endif

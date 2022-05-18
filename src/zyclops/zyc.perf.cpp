@@ -15,7 +15,8 @@
 #define TEST_ZYC_CONST_PTR const auto* __restrict
 #endif
 
-namespace zyc { namespace test {
+namespace zyclops { namespace test {
+  namespace zyc = ::zyclops;
   //
   inline
   double dual_mult// interleaved storage (AoS), returns a check value (0.0)
@@ -135,7 +136,7 @@ namespace zyc { namespace test {
     EXPECT_DOUBLE_EQ( dual_mult (test_n, test_sz, 7), 0.0);
     EXPECT_DOUBLE_EQ( dual_mult (test_n, test_sz, 8), 0.0);
   }
-} }//end femerea::test:: namespace
+} }//end zyclops::test:: namespace
 
 int main (int argc, char** argv) {
   ::testing::InitGoogleTest (& argc,argv);

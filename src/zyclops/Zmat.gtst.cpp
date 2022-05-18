@@ -2,12 +2,13 @@
 
 #include <gtest/gtest.h>
 
-namespace zyc { namespace test {
+namespace zyclops { namespace test {
+  namespace zyc = ::zyclops;
   //
   TEST( Zmat, TrivialTest ){
     EXPECT_EQ( 1, 1 );
   }
-} }//end zyc::test:: namespace
+} }//end zyclops::test:: namespace
 
 int main (int argc, char** argv) {
   ::testing::InitGoogleTest (& argc,argv);

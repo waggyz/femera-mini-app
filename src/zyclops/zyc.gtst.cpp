@@ -5,7 +5,8 @@
 #include <limits>
 #include <cstdio>
 
-namespace zyc { namespace test {
+namespace zyclops { namespace test {
+  namespace zyc = ::zyclops;
   //
   TEST( Zyc, TrivialTest ){
     EXPECT_EQ( 1, 1 );

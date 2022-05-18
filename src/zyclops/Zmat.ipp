@@ -1,7 +1,7 @@
 #ifndef ZYC_HAS_ZMAT_IPP
 #define ZYC_HAS_ZMAT_IPP
 
-namespace zyc {
+namespace zyclops {
   inline
   Algebra Zmat::get_family ()
   noexcept {
@@ -13,7 +13,7 @@ namespace zyc {
     return this->order;
   }
   inline
-  zyc::Layout Zmat::get_layout ()
+  zyclops::Layout Zmat::get_layout ()
   noexcept {
     return this->layout;
   }
@@ -28,7 +28,7 @@ namespace zyc {
     return this->rows * this->cols;
   }
   inline
-  zyc::Zarray_int Zmat::elem_size ()
+  zyclops::Zarray_int Zmat::elem_size ()
   noexcept {
     return (Zarray_int(1) << this->order);
   }
@@ -42,7 +42,7 @@ namespace zyc {
    : rows (r), cols (c), order (p), family (z), layout (l) {
   }
 
-}// end zyc:: namespace
+}// end zyclops:: namespace
 
 //end ZYC_HAS_ZMAT_IPP
 #endif

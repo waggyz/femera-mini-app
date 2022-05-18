@@ -3,7 +3,7 @@
 
 #include "zyc.hpp"
 
-namespace zyc {
+namespace zyclops {
 
   struct Zomplex {// hypercomplex scalar
   public:
@@ -48,7 +48,7 @@ namespace zyc {
     = Zomplex (Algebra::Nat, 0, zyc::Layout::Native);
 #endif
 
-}// end zyc:: namespace
+}// end zyclops:: namespace
 
 #include "Zomplex.ipp"
 

@@ -28,7 +28,7 @@
 #define ZYC_PRAGMA_OMP(x) // pragma omp not supported
 #endif
 
-namespace zyc {
+namespace zyclops {
   using Zorder_int = uint_fast8_t;
 #if 0
   using Zarray_int = int_fast16_t;// CR matrix index, order <=  7
@@ -79,12 +79,12 @@ namespace zyc {
   template <typename T> static inline
   T* aos_dual_mult// array of mutlidual vectors
     (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
-    const zyc::Zorder_int order, const std::size_t n=1)
+    const Zorder_int order, const std::size_t n=1)
   noexcept;
   template <typename T> static inline
   T* soa_dual_mult// contiguos real & imaginary parts
     (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
-    const zyc::Zorder_int order, const std::size_t n=1)
+    const Zorder_int order, const std::size_t n=1)
   noexcept;
 #if 0
   template<typename T>

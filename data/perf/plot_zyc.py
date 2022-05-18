@@ -16,6 +16,7 @@ if __name__ == "__main__":
   cpumodel="i7-7820HQ"
   timestr = now.strftime("%Y-%m-%d")
   file_name = "data/perf/zyc.perf."+timestr+".out"
+  naive_file = "data/perf/zyc.perf.2022-05-16b.out"
   plot_name = "build/"+cpumodel+"/zyc-perf-"+timestr
   name1 = []
   name2 = []
@@ -40,6 +41,26 @@ if __name__ == "__main__":
   #
   speed_mult_aos = [0.0] * len(list_order);
   speed_mult_soa = [0.0] * len(list_order);
+  #
+  with open (naive_file) as File:
+    data = csv.reader(File, delimiter=",")
+    for rowcol in data:
+      try:
+        name0 = rowcol[0]
+      except:
+        name0 = "--skip--"
+      if name0 == " zyc":
+        name1.append(rowcol[1])
+        name2.append(rowcol[2])
+        order.append(int(rowcol[3]))
+        o = int(rowcol[3])
+        s = float(rowcol[4]) / float(rowcol[7])
+        if rowcol[2] == "tnai":
+          crmat_mult[o] += s
+        md_n.append(int(rowcol[4]))
+        byte_n.append(float(rowcol[5]))
+        flop_n.append(float(rowcol[6]))
+        secs.append(float(rowcol[7]))
   #
   with open (file_name) as File:
     data = csv.reader(File, delimiter=",")
@@ -92,15 +113,15 @@ if __name__ == "__main__":
   mult_crmat_lim = [speed_mult_ref/((2**o)**2) for o in list_order]
   sum2_crmat_lim = [speed_sum2_ref/((2**o)**2) for o in list_order]
   #
-  #mult_x = [mfree/crmat -1.0 for mfree,crmat in zip (speed_mult,crmat_mult)]
-  #sum2_x = [mfree/crmat -1.0 for mfree,crmat in zip (speed_sum2,crmat_sum2)]
-  #print mult_x
-  #print sum2_x
+  soa_x = [mfree/crmat for mfree,crmat in zip (speed_mult_soa,crmat_mult)]
+  aos_x = [mfree/crmat for mfree,crmat in zip (speed_mult_aos,crmat_mult)]
+  print soa_x
+  print aos_x
   #
   lw  = 2.0    # linewidth
   ms  = 6      # markersize
   mw  = 1      # markeredgewidth
-  rlw = 1.0/2.0# reference linewidth
+  rlw = 1.0/1.0# reference linewidth
   rms = 4      # reference markersize
   #
   if False:#-------------------------------------------------------------------
@@ -147,17 +168,19 @@ if __name__ == "__main__":
       plt.semilogy(list_order, trnsp_mult, label="Multiply (transposed)",
         marker="x", markersize=ms, markeredgecolor="m",
         markeredgewidth=mw, color="m",linestyle="solid",)
-    plt.semilogy(list_order, crmat_mult, label="Multiply (naive algorithm)",
-      marker="x", markersize=ms, color="k", markeredgecolor="k",
-      markeredgewidth=mw, linestyle="solid")
   if True:#--------------------------------------------------------------------
-    plt.semilogy(list_order, speed_mult_aos, label="Multiply (AoS)", color="b",
+    plt.semilogy(list_order, speed_mult_aos,
+      label="Multiply (matrix-free, AoS storage)", color="b",
       markersize=ms, marker="x", markeredgecolor='b', markeredgewidth=mw,
       linestyle="solid")
   if True:
-    plt.semilogy(list_order, speed_mult_soa, label="Multiply (SoA)", color="k",
-      markersize=ms, marker="x", markeredgecolor='k', markeredgewidth=mw,
+    plt.semilogy(list_order, speed_mult_soa,
+      label="Multiply (matrix-free, SoA storage)", color="m",
+      markersize=ms, marker="x", markeredgecolor='m', markeredgewidth=mw,
       linestyle="solid")
+    plt.semilogy(list_order, crmat_mult, label="Multiply (naive algorithm)",
+      marker="x", markersize=ms, color="k", markeredgecolor="k",
+      markeredgewidth=mw, linestyle="solid")
   if True:#--------------------------------------------------------------------
     plt.semilogy(list_order, mult_mdsz_lim,
       label="Multiply O($\mathregular{2^p}$) multidual size limited",
@@ -176,16 +199,12 @@ if __name__ == "__main__":
   plt.gca().set(ylim=(1e3, 1e10))
   plt.xlabel("Multidual order")
   plt.ylabel("Speed (multidual operations per second)")
-  ''' plt.gca().annotate ("faster is better ->",
-            xy=(0, 0.5), xytext=(10, 0),#, rotatation=90)#,
-            xycoords=('axes fraction', 'figure fraction'),
-            textcoords='offset points',
-            size=14, ha='center', va='bottom')'''
   plt.text(x=8.1, y=2.7*10**7, s=r"Higher is better.$\rightarrow$",
     rotation=90.0)
   #
   plt.grid(axis = 'y')
-  plt.title("Multidual multiplication performance ("+cpumodel+")")
+  plt.title(r"Multidual multiplication ($\mathregular{c_i = a_i b_i}$) "
+    +"performance ("+ cpumodel+")")
   plt.legend(loc='lower left', fontsize=10, numpoints=1)
   #
   plt.savefig(plot_name+".eps",format="eps")
