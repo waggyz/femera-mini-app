@@ -34,7 +34,7 @@ namespace zyclops {
   using Zarray_int = uint_fast32_t;
   using Zorder_int = Zarray_int;// same as Zarray_int, name is for semantics
   enum class Algebra : int8_t { Unknown =0,
-    Real, Complex, Dual, Split, Quat, Oti, User,
+    Real, Complex, Dual, Split, Fcda, Oti, User,// Fcda: Cayley-Dickson algebras
     Int,// signed
     Nat // unsigned
   };

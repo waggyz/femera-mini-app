@@ -7,11 +7,11 @@ namespace zyclops {
 
   struct Zomplex {// hypercomplex scalar
   public:
-    Algebra    get_family ();
-    Zorder_int get_order  ();
-    size_t     zval_size  ();
-    size_t     cr_size    ();
-    size_t     cr_nnz     ();
+    Algebra     get_family ();
+    Zorder_int  get_order  ();
+    Zarray_int zval_size   ();
+    Zarray_int   cr_size   ();
+    Zarray_int   cr_nnz    ();
 #if 0
     bool       is_vector    ();
     bool       is_conjugate ();
@@ -40,7 +40,7 @@ namespace zyclops {
   const static Zomplex Native_complex
     = Zomplex (Algebra::Complex, 1, Layout::Native);
   const static Zomplex Unit_quaternion
-    = Zomplex (Algebra::Quat, 2, Layout::Vector);
+    = Zomplex (Algebra::Fcda, 2, Layout::Vector);
   //
   const static Zomplex Integer
     = Zomplex (Algebra::Int, 0, Layout::Native);

@@ -32,7 +32,7 @@ namespace zyclops {
   const static Zomplex Native_complex
     = Zomplex (Algebra::Complex, 1, Layout::Native);
   const static Zomplex Unit_quaternion
-    = Zomplex (Algebra::Quat, 2, Layout::Vector);
+    = Zomplex (Algebra::Fcda, 2, Layout::Vector);
   //
   const static Zomplex Integer
     = Zomplex (Algebra::Int, 0, Layout::Native);

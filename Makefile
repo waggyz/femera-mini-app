@@ -78,8 +78,6 @@ CXX_VERSION:= $(shell $(CXX) -dumpversion)
 # Flags for compiling tests
 CXXTESTS := $(CXXFLAGS) $(CXXWARNS)
 CXXPERFS := $(CXXFLAGS) $(CXXWARNS)
-CXXPERFS := $(filter-out -Weffc++,$(CXXPERFS))
-CXXPERFS := $(filter-out -Winline,$(CXXPERFS))
 
 FMRFLAGS += -DFMR_CPUMODEL="$(CPUMODEL)"
 ifneq ($(CPUCOUNT),)
@@ -219,6 +217,8 @@ ifeq ($(ENABLE_GOOGLETEST),ON)
   CXXTESTS := $(filter-out -Winline,$(CXXTESTS))
   CXXTESTS := $(filter-out -flto,$(CXXTESTS))
   #NOTE Parallel library build breaks link-time optimization of gtests.
+  CXXPERFS := $(filter-out -Weffc++,$(CXXPERFS))
+  CXXPERFS := $(filter-out -Winline,$(CXXPERFS))
 endif
 ifeq ($(ENABLE_GOOGLETEST),ON)
   LIST_EXTERNAL += googletest

@@ -15,23 +15,23 @@ namespace zyclops {
     :  order(p), family (z) {
   }
   inline
-  size_t Zomplex::zval_size () {
+  Zarray_int Zomplex::zval_size () {
     return size_t(1) << this->order;
   }
   inline
-  size_t Zomplex::cr_size () {
+  Zarray_int Zomplex::cr_size () {
     const auto n=size_t(1) << this->order;
     return n*n;
   }
   inline
-  size_t Zomplex::cr_nnz () {
+  Zarray_int Zomplex::cr_nnz () {
     switch (this->family) {
       case Algebra::Int     ://fall through
       case Algebra::Nat     ://fall through
       case Algebra::Real    :{ return 1; }
       case Algebra::Dual    :{ return upow (3, this->order); }
       case Algebra::Split   ://fall through
-      case Algebra::Quat    ://fall through
+      case Algebra::Fcda    ://fall through
       case Algebra::Complex :{ return this->cr_size (); }
       case Algebra::Oti     ://fall through
       case Algebra::User    ://fall through
