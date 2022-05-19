@@ -70,20 +70,18 @@ namespace zyclops {
   template <typename T> static inline constexpr
   T cr_dual_mult_elem (const T& a, const T& b, Zarray_int row, Zarray_int col)
   noexcept;
-#if 0
   template <typename T> static inline constexpr
   T cr_dual_mult_elem (const T& a, const T& b, Zarray_int row, Zarray_int col,
-  Zarray_int zorder)
+    Zarray_int zorder_limit)// for heterogenous order multiply
   noexcept;
-#endif
   template <typename T> static inline
   T* aos_dual_mult// array of mutlidual vectors
-    (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
+  (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
     const Zorder_int order, const std::size_t n=1)
   noexcept;
   template <typename T> static inline
   T* soa_dual_mult// contiguos real & imaginary parts
-    (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
+  (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
     const Zorder_int order, const std::size_t n=1)
   noexcept;
 #if 0

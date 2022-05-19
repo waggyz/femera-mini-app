@@ -147,15 +147,13 @@ T zyclops::cr_dual_mult_elem (const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
 noexcept {
   return ((row ^ col) == (row - col)) ? (&a)[col] * (&b)[row - col] : T(0.0);
 }
-#if 0
 template <typename T> static inline constexpr
 T zyclops::cr_dual_mult_elem (const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
-  const zyclops::Zarray_int row, const zyclops::Zarray_int col, Zarray_int p)
+  const zyclops::Zarray_int row, const zyclops::Zarray_int col, Zarray_int o)
 noexcept {
-  return ((row ^ col) == (row - col)) && ((row - col) < (Zarray_int(1) << p)
+  return ((row ^ col) == (row - col)) && ((row - col) < (Zarray_int(1) << o))
     ? (&a)[col] * (&b)[row - col] : T(0.0);
 }
-#endif
 #if 0
 template <typename T> static inline constexpr
 void zyclops::aos_dual_mult (T* ZYC_RESTRICT a,

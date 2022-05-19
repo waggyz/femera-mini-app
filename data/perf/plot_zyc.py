@@ -14,7 +14,8 @@ if __name__ == "__main__":
   """ Plot zyc.?pp Performance Test results """
   now = dt.datetime.now()
   cpumodel="i7-7820HQ"
-  timestr = now.strftime("%Y-%m-%d")
+  timestr = "2022-05-18"
+  #timestr = now.strftime("%Y-%m-%d")
   file_name = "data/perf/zyc.perf."+timestr+".out"
   naive_file = "data/perf/zyc.perf.2022-05-16b.out"
   plot_name = "build/"+cpumodel+"/zyc-perf-"+timestr
@@ -27,6 +28,7 @@ if __name__ == "__main__":
   secs  = []
   #
   list_order = [0,1,2,3,4,5,6,7,8]
+  max_order = max(list_order)
   speed_mult_ref = 0
   speed_mult = [0.0] * len(list_order);
   crmat_mult = [0.0] * len(list_order);
@@ -113,10 +115,11 @@ if __name__ == "__main__":
   mult_crmat_lim = [speed_mult_ref/((2**o)**2) for o in list_order]
   sum2_crmat_lim = [speed_sum2_ref/((2**o)**2) for o in list_order]
   #
-  soa_x = [mfree/crmat for mfree,crmat in zip (speed_mult_soa,crmat_mult)]
-  aos_x = [mfree/crmat for mfree,crmat in zip (speed_mult_aos,crmat_mult)]
-  print soa_x
-  print aos_x
+  if False:
+    soa_x = [mfree/crmat for mfree,crmat in zip (speed_mult_soa,crmat_mult)]
+    aos_x = [mfree/crmat for mfree,crmat in zip (speed_mult_aos,crmat_mult)]
+    print soa_x
+    print aos_x
   #
   lw  = 2.0    # linewidth
   ms  = 6      # markersize
@@ -126,15 +129,15 @@ if __name__ == "__main__":
   #
   if False:#-------------------------------------------------------------------
     plt.semilogy(list_order, sum2_mdsz_lim,
-      label="Sum of squares O($\mathregular{2^p}$) multidual size limited",
+      label="Sum of squares O($\mathregular{2^m}$) multidual size limited",
       marker="s", markersize=rms, markeredgecolor='g', markerfacecolor='none',
       color='g', linestyle="dotted", linewidth=rlw)
     plt.semilogy(list_order, sum2_nonz_lim,
-      label="Sum of squares O($\mathregular{3^p}$) CR nonzero count limited",
+      label="Sum of squares O($\mathregular{3^m}$) CR nonzero count limited",
       marker="s", markersize=rms, markeredgecolor='y', markerfacecolor='none',
       color='y', linestyle="dotted", linewidth=rlw)
     plt.semilogy(list_order, sum2_crmat_lim,
-      label="Sum of squares O($\mathregular{4^p}$) CR matrix size limited",
+      label="Sum of squares O($\mathregular{4^m}$) CR matrix size limited",
       marker="s", markersize=rms, markeredgecolor='r', markerfacecolor='none',
       color='r', linestyle="dotted", linewidth=rlw)
     if True:
@@ -170,41 +173,42 @@ if __name__ == "__main__":
         markeredgewidth=mw, color="m",linestyle="solid",)
   if True:#--------------------------------------------------------------------
     plt.semilogy(list_order, speed_mult_aos,
-      label="Multiply (matrix-free, AoS storage)", color="b",
+      label="Matrix-free, interleaved real and imaginary parts (AoS)", color="b",
       markersize=ms, marker="x", markeredgecolor='b', markeredgewidth=mw,
       linestyle="solid")
   if True:
     plt.semilogy(list_order, speed_mult_soa,
-      label="Multiply (matrix-free, SoA storage)", color="m",
+      label="Matrix-free, contiguous real and imaginary parts (SoA)", color="m",
       markersize=ms, marker="x", markeredgecolor='m', markeredgewidth=mw,
       linestyle="solid")
-    plt.semilogy(list_order, crmat_mult, label="Multiply (naive algorithm)",
+    plt.semilogy(list_order, crmat_mult,
+      label="Naive algorithm",
       marker="x", markersize=ms, color="k", markeredgecolor="k",
       markeredgewidth=mw, linestyle="solid")
   if True:#--------------------------------------------------------------------
     plt.semilogy(list_order, mult_mdsz_lim,
-      label="Multiply O($\mathregular{2^p}$) multidual size limited",
+      label="Complexity O($\mathregular{2^m}$): limited by multidual size",
       marker="x", markersize=rms, markeredgecolor='g', markerfacecolor='none',
       color='g', linestyle="dotted", linewidth=rlw)
     plt.semilogy(list_order, mult_nonz_lim,
-      label="Multiply O($\mathregular{3^p}$) CR nonzero count limited",
+      label="Complexity O($\mathregular{3^m}$): limited by CR nonzero count",
       marker="x", markersize=rms, markeredgecolor='y', markerfacecolor='none',
       color='y', linestyle="dotted", linewidth=rlw)
     plt.semilogy(list_order, mult_crmat_lim,
-      label="Multiply O($\mathregular{4^p}$) CR matrix size limited",
+      label="Complexity O($\mathregular{4^m}$): limited by CR matrix size",
       marker="x", markersize=rms, markeredgecolor='r', markerfacecolor='none',
       color='r', linestyle="dotted", linewidth=rlw)
   #
   #plt.gca().set(xlim=(-0.1, 8.1))
   plt.gca().set(ylim=(1e3, 1e10))
-  plt.xlabel("Multidual order")
-  plt.ylabel("Speed (multidual operations per second)")
-  plt.text(x=8.1, y=2.7*10**7, s=r"Higher is better.$\rightarrow$",
+  plt.xlabel("Multidual order (m)")
+  plt.ylabel("Performance (multidual operations per second)")
+  plt.text(x=max_order+0.1, y=2.7*10**7, s=r"Higher is better.$\rightarrow$",
     rotation=90.0)
   #
   plt.grid(axis = 'y')
-  plt.title(r"Multidual multiplication ($\mathregular{c_i = a_i b_i}$) "
-    +"performance ("+ cpumodel+")")
+  plt.title(r"Multidual multiplication ($\mathregular{c_j = a_j b_j}$) "
+    +"baseline ("+ cpumodel+")")
   plt.legend(loc='lower left', fontsize=10, numpoints=1)
   #
   plt.savefig(plot_name+".eps",format="eps")
