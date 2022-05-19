@@ -5,12 +5,29 @@
 #include <nmmintrin.h>
 #endif
 
+# if 0
 static inline
 uint zyclops::upow (uint base, uint exponent)
 noexcept {
   /* stackoverflow.com/questions/101439/the-most-efficient-way-to-implement
      -an-integer-based-power-function-powint-int */
   uint result = 1;
+  for (;;) {
+    if (exponent & 1){ result *= base; }
+    exponent >>= 1;
+    if (!exponent){ break; }
+    base *= base;
+  }
+  return result;
+}
+#   endif
+static inline
+zyclops::Zarray_int zyclops::upow
+(zyclops::Zarray_int base, zyclops::Zarray_int exponent)
+noexcept {
+  /* stackoverflow.com/questions/101439/the-most-efficient-way-to-implement
+     -an-integer-based-power-function-powint-int */
+  zyclops::Zarray_int result = 1;
   for (;;) {
     if (exponent & 1){ result *= base; }
     exponent >>= 1;
@@ -151,7 +168,7 @@ template <typename T> static inline constexpr
 T zyclops::cr_dual_mult_elem (const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyclops::Zarray_int row, const zyclops::Zarray_int col, Zarray_int o)
 noexcept {
-  return ((row ^ col) == (row - col)) && ((row - col) < (Zarray_int(1) << o))
+  return (((row ^ col) == (row - col)) && ((row - col) < (Zarray_int(1) << o)))
     ? (&a)[col] * (&b)[row - col] : T(0.0);
 }
 #if 0

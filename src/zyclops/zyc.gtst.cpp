@@ -13,9 +13,11 @@ namespace zyclops { namespace test {
   }
   TEST( Zyc, IntSizes ){
     EXPECT_GE( std::numeric_limits<Zorder_int>::max (), zyc::zorder_max );
+#if 0
     EXPECT_EQ( sizeof (int_fast16_t), sizeof (int_fast32_t) );
+#endif
     EXPECT_GT( std::numeric_limits<Zarray_int>::max (),
-      zyc::upow (std::size_t (2), zyc::zorder_max));
+      zyc::upow (std::size_t (2), std::size_t (2)*zyc::zorder_max) - 1);
   }
   template <typename T> static inline constexpr
   T cr_dual_elem_test (const T& ZYC_RESTRICT v,

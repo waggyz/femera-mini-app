@@ -29,12 +29,10 @@
 #endif
 
 namespace zyclops {
-  using Zorder_int = uint_fast8_t;
-#if 0
-  using Zarray_int = int_fast16_t;// CR matrix index, order <=  7
-  using Zarray_int = int_fast32_t;// CR matrix index, order <= 15
-#endif
-  using Zarray_int = int_fast32_t;// max needed: 2^(2*(order-1)), signed order
+  // max uint needed to index into   CR matrix: 2^(2*(zorder_max+1)) - 1
+  // max uint needed for matrix-free CR access: 2^(  (zorder_max+1)) - 1
+  using Zarray_int = uint_fast32_t;
+  using Zorder_int = Zarray_int;// same as Zarray_int, name is for semantics
   enum class Algebra : int8_t { Unknown =0,
     Real, Complex, Dual, Split, Quat, Oti, User,
     Int,// signed
@@ -46,8 +44,13 @@ namespace zyclops {
     Native // Native is for real & built-in complex type
   };
   static const Zorder_int zorder_max = 15;
+#if 0
   static inline
   uint upow (uint base, uint exp)
+  noexcept;
+#endif
+  static inline
+  Zarray_int upow (Zarray_int base, Zarray_int exp)
   noexcept;
   static inline constexpr
   uint hamw (uint64_t i)

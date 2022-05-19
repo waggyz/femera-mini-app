@@ -116,10 +116,10 @@ namespace zyclops { namespace test {
       printf (" zyc, ref, fma,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
         -1, test_n * vals_n, byte_fma, flop_ref, secs_ref, flop_ref/secs_ref,
         flop_ref/byte_fma, chk);
-      printf (" zyc,dual, aos,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
+      printf (" zyc,dual, aos,%2lu,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
         order, (test_n * vals_n) / uint(zsz), byte_fma, flop_dual, secs_aos,
           flop_dual/secs_aos, flop_dual/byte_fma, chk);
-      printf (" zyc,dual, soa,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
+      printf (" zyc,dual, soa,%2lu,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
         order, (test_n * vals_n) / uint(zsz), byte_fma, flop_dual, secs_soa,
           flop_dual/secs_soa, flop_dual/byte_fma, chk);
     }//end parallel region
