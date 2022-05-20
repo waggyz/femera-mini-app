@@ -34,9 +34,9 @@ namespace zyclops { namespace test {
     TEST_ZYC_CONST_PTR b = bvec.data ();
     TEST_ZYC_ARRAY_PTR c = cvec.data ();
     const auto byte_fma = double (test_n * (
-      + avec.size () * sizeof (avec[0])
-      + bvec.size () * sizeof (bvec[0])
-      + cvec.size () * sizeof (cvec[0]) * 2));
+      + avec.size () * sizeof (avec[0])       // 1 read
+      + bvec.size () * sizeof (bvec[0])       // 1 read
+      + cvec.size () * sizeof (cvec[0]) * 2));// 1 read + 1 write
     double secs_ref = 0.0, secs_aos = 0.0, secs_soa = 0.0;
 #if 0
     auto s2vec = std::vector<double> (uint(zsz));// sum of squares
@@ -102,6 +102,15 @@ namespace zyclops { namespace test {
       secs_soa2 += double (time.add_busy_time_now ());
 #endif
       }//end test_n loop
+      printf (" zyc, ref, fma,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
+        -1, test_n * vals_n, byte_fma, flop_ref, secs_ref, flop_ref/secs_ref,
+        flop_ref/byte_fma, chk);
+      printf (" zyc,dual, aos,%2lu,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
+        order, (test_n * vals_n) / uint(zsz), byte_fma, flop_dual, secs_aos,
+          flop_dual/secs_aos, flop_dual/byte_fma, chk);
+      printf (" zyc,dual, soa,%2lu,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
+        order, (test_n * vals_n) / uint(zsz), byte_fma, flop_dual, secs_soa,
+          flop_dual/secs_soa, flop_dual/byte_fma, chk);
 #if 0
       printf (" zyc, ref,sum2,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
         -1, test_n * vals_n, byte_s2, flop_ref, secs_ref2, flop_ref/secs_ref2,
@@ -113,15 +122,6 @@ namespace zyclops { namespace test {
       //  order, (test_n * vals_n) / uint(zsz), byte_fma, flop_dual, secs_aos,
       //    flop_dual/secs_aos, flop_dual/byte_fma, chk);
 #endif
-      printf (" zyc, ref, fma,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
-        -1, test_n * vals_n, byte_fma, flop_ref, secs_ref, flop_ref/secs_ref,
-        flop_ref/byte_fma, chk);
-      printf (" zyc,dual, aos,%2lu,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
-        order, (test_n * vals_n) / uint(zsz), byte_fma, flop_dual, secs_aos,
-          flop_dual/secs_aos, flop_dual/byte_fma, chk);
-      printf (" zyc,dual, soa,%2lu,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
-        order, (test_n * vals_n) / uint(zsz), byte_fma, flop_dual, secs_soa,
-          flop_dual/secs_soa, flop_dual/byte_fma, chk);
     }//end parallel region
     return chk;
   }//end dual_mult (..)

@@ -28,7 +28,9 @@ if __name__ == "__main__":
   secs  = []
   #
   list_order = [0,1,2,3,4,5,6,7,8]
+  naiv_order = [0,1,2,3,4,5,6,7,8]
   max_order = max(list_order)
+  '''
   speed_mult_ref = 0
   speed_mult = [0.0] * len(list_order);
   crmat_mult = [0.0] * len(list_order);
@@ -43,6 +45,15 @@ if __name__ == "__main__":
   #
   speed_mult_aos = [0.0] * len(list_order);
   speed_mult_soa = [0.0] * len(list_order);
+  '''
+  time_crmat_mult = [0.0] * len(naiv_order);
+  mdop_crmat_mult = [0.0] * len(naiv_order);
+  time_mult_ref = 0
+  mdop_mult_ref = 0
+  time_mult_aos = [0.0] * len(list_order)
+  mdop_mult_aos = [0.0] * len(list_order)
+  time_mult_soa = [0.0] * len(list_order)
+  mdop_mult_soa = [0.0] * len(list_order)
   #
   with open (naive_file) as File:
     data = csv.reader(File, delimiter=",")
@@ -57,8 +68,13 @@ if __name__ == "__main__":
         order.append(int(rowcol[3]))
         o = int(rowcol[3])
         s = float(rowcol[4]) / float(rowcol[7])
+        m = float(rowcol[4])
+        t = float(rowcol[7])
         if rowcol[2] == "tnai":
-          crmat_mult[o] += s
+          if o < 9:
+            time_crmat_mult[o] += t
+            mdop_crmat_mult[o] += m
+            #crmat_mult[o] += s
         md_n.append(int(rowcol[4]))
         byte_n.append(float(rowcol[5]))
         flop_n.append(float(rowcol[6]))
@@ -77,13 +93,28 @@ if __name__ == "__main__":
         order.append(int(rowcol[3]))
         o = int(rowcol[3])
         s = float(rowcol[4]) / float(rowcol[7])
+        m = float(rowcol[4])
+        t = float(rowcol[7])
         if o < 0:
+          if rowcol[2] == " fma":
+            time_mult_ref += t / len(list_order)
+            mdop_mult_ref += m / len(list_order)
+          '''
           if rowcol[2] == " fma":
             speed_mult_ref += s / len(list_order)
           elif rowcol[2] == "sum2":
             speed_sum2_ref += s / len(list_order)
+          '''
         else:
-          if rowcol[2] == " fma":
+          if rowcol[2] == " aos":
+            time_mult_aos[o] += t
+            mdop_mult_aos[o] += m
+            #speed_mult_aos[o] += s
+          elif rowcol[2] == " soa":
+            time_mult_soa[o] += t
+            mdop_mult_soa[o] += m
+            #speed_mult_soa[o] += s
+          '''if rowcol[2] == " fma":
             speed_mult[o] += s
           elif rowcol[2] == "sum2":
             speed_sum2[o] += s
@@ -98,22 +129,22 @@ if __name__ == "__main__":
           elif rowcol[2] == "tnai":
             crmat_mult[o] += s
           elif rowcol[2] == "tns2":
-            crmat_sum2[o] += s
-          elif rowcol[2] == " aos":
-            speed_mult_aos[o] += s
-          elif rowcol[2] == " soa":
-            speed_mult_soa[o] += s
+            crmat_sum2[o] += s'''
         md_n.append(int(rowcol[4]))
         byte_n.append(float(rowcol[5]))
         flop_n.append(float(rowcol[6]))
         secs.append(float(rowcol[7]))
   #mdops = [n/s for n,s in zip(md_n,secs)]
+  speed_mult_ref = 4* mdop_mult_ref / time_mult_ref
+  crmat_mult = [4* zm/zs for zm,zs in zip (mdop_crmat_mult,time_crmat_mult)]
+  speed_mult_aos = [4* zm/zs for zm,zs in zip (mdop_mult_aos,time_mult_aos)]
+  speed_mult_soa = [4* zm/zs for zm,zs in zip (mdop_mult_soa,time_mult_soa)]
   mult_nonz_lim = [speed_mult_ref/(3**o) for o in list_order]
-  sum2_nonz_lim = [speed_sum2_ref/(3**o) for o in list_order]
+  #sum2_nonz_lim = [speed_sum2_ref/(3**o) for o in list_order]
   mult_mdsz_lim = [speed_mult_ref/(2**o) for o in list_order]
-  sum2_mdsz_lim = [speed_sum2_ref/(2**o) for o in list_order]
+  #sum2_mdsz_lim = [speed_sum2_ref/(2**o) for o in list_order]
   mult_crmat_lim = [speed_mult_ref/((2**o)**2) for o in list_order]
-  sum2_crmat_lim = [speed_sum2_ref/((2**o)**2) for o in list_order]
+  #sum2_crmat_lim = [speed_sum2_ref/((2**o)**2) for o in list_order]
   #
   if False:
     soa_x = [mfree/crmat for mfree,crmat in zip (speed_mult_soa,crmat_mult)]
@@ -181,7 +212,7 @@ if __name__ == "__main__":
       label="Matrix-free, contiguous real and imaginary parts (SoA)", color="m",
       markersize=ms, marker="x", markeredgecolor='m', markeredgewidth=mw,
       linestyle="solid")
-    plt.semilogy(list_order, crmat_mult,
+    plt.semilogy(naiv_order, crmat_mult,
       label="Naive algorithm",
       marker="x", markersize=ms, color="k", markeredgecolor="k",
       markeredgewidth=mw, linestyle="solid")
