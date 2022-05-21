@@ -20,7 +20,7 @@ namespace zyclops { namespace test {
       zyc::upow (std::size_t (2), std::size_t (2)*zyc::zorder_max) - 1);
   }
   template <typename T> static inline constexpr
-  T cr_dual_elem_test (const T& ZYC_RESTRICT v,
+  T mdcr_elem_test (const T& ZYC_RESTRICT v,
     const zyc::Zarray_int row, const zyc::Zarray_int col)
   noexcept {
     return ((row ^ col) == (row - col)) ? (&v)[row - col] : T(0.0);
@@ -29,7 +29,7 @@ namespace zyclops { namespace test {
   double pass_by_reference (const zyc::Zarray_int row, const zyc::Zarray_int col)
   noexcept {
     std::vector<double> bidual = {1.0,0.0,0.0,0.0};
-  return cr_dual_elem_test (bidual [0], row, col);
+  return mdcr_elem_test (bidual [0], row, col);
   }
   TEST( Zyc, ByReference ){
     EXPECT_DOUBLE_EQ( pass_by_reference (0,0), 1.0 );
@@ -123,7 +123,7 @@ namespace zyclops { namespace test {
     const std::vector<double> zy = {y,0.0,1.0,0.0, y,0.0,1.0,0.0};
     const uint n = 2;
     auto zf = std::vector<double> (zsz * n);
-    zyc::aos_dual_mult (zf.data()[0], zx.data()[0], zy.data()[0], 2, n);
+    zyc::md_mult_aos (zf.data()[0], zx.data()[0], zy.data()[0], 2, n);
     const auto zf0 = zf [zsz*0 + std::size_t (imag_part)];
     const auto zf1 = zf [zsz*1 + std::size_t (imag_part)];
     if ((zf0<zf1) || (zf0>zf1)){ return NAN; }
@@ -143,7 +143,7 @@ namespace zyclops { namespace test {
     const std::vector<double> zx = {x,x, 1.0,1.0, 0.0,0.0, 0.0,0.0, 0.0,0.0};
     const std::vector<double> zy = {y,y, 0.0,0.0, 1.0,1.0, 0.0,0.0, 0.0,0.0};
     auto zf = std::vector<double> (zsz * n);
-    zyc::soa_dual_mult (zf.data()[0], zx.data()[0], zy.data()[0], 2, n);
+    zyc::md_mult_soa (zf.data()[0], zx.data()[0], zy.data()[0], 2, n);
     const auto zf0 = zf [std::size_t (n* imag_part +0)];
     const auto zf1 = zf [std::size_t (n* imag_part +1)];
     if ((zf0<zf1) || (zf0>zf1)){ return NAN; }
@@ -163,7 +163,7 @@ namespace zyclops { namespace test {
     const std::vector<double> zx = {x,1.0};// porder 1
     const std::vector<double> zy = {y,0.0,1.0,0.0};// porder 2
     auto zf = std::vector<double> (zsz);
-    zyc::aos_dual_mult (zf.data()[0], zx.data()[0], zy.data()[0], 2, 1, 2);
+    zyc::md_mult_aos (zf.data()[0], zx.data()[0], zy.data()[0], 2, 1, 2);
     return zf [std::size_t (imag_part)];
   }
 #endif

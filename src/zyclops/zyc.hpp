@@ -59,31 +59,31 @@ namespace zyclops {
   uint hamw (uint32_t i)
   noexcept;
   static inline constexpr
-  bool cr_dual_nz (Zarray_int row, Zarray_int col)
+  bool mdcr_nz (Zarray_int row, Zarray_int col)
   noexcept;
   static inline constexpr// for access of higher order than stored
-  bool cr_dual_nz (Zarray_int row, Zarray_int col, Zarray_int zorder_limit)
+  bool mdcr_nz (Zarray_int row, Zarray_int col, Zarray_int zorder_limit)
   noexcept;
   template <typename T> static inline constexpr
-  T cr_dual_elem (const T&, Zarray_int row, Zarray_int col)// fast with -flto
+  T mdcr_elem (const T&, Zarray_int row, Zarray_int col)// fast with -flto
   noexcept;
   template <typename T> static inline constexpr
-  T cr_dual_elem (const T&, Zarray_int row, Zarray_int col, Zarray_int zorder)
+  T mdcr_elem (const T&, Zarray_int row, Zarray_int col, Zarray_int zorder)
   noexcept;// for access of higher order than stored
   template <typename T> static inline constexpr
-  T cr_dual_mult_elem (const T& a, const T& b, Zarray_int row, Zarray_int col)
+  T mdcr_mult_elem (const T& a, const T& b, Zarray_int row, Zarray_int col)
   noexcept;
   template <typename T> static inline constexpr
-  T cr_dual_mult_elem (const T& a, const T& b, Zarray_int row, Zarray_int col,
+  T mdcr_mult_elem (const T& a, const T& b, Zarray_int row, Zarray_int col,
     Zarray_int zorder_limit)// for heterogenous order multiply
   noexcept;
   template <typename T> static inline
-  T* aos_dual_mult// array of mutlidual vectors
+  T* md_mult_aos// array of mutlidual vectors
   (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
     const Zorder_int order, const std::size_t n=1)
   noexcept;
   template <typename T> static inline
-  T* soa_dual_mult// contiguos real & imaginary parts
+  T* md_mult_soa// contiguos real & imaginary parts
   (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
     const Zorder_int order, const std::size_t n=1)
   noexcept;

@@ -9,7 +9,6 @@ def some_function( *args, **opts ):
   #TODO filename, cpumodel arguments
   return
 
-
 if __name__ == "__main__":
   """ Plot zyc.?pp Performance Test results """
   now = dt.datetime.now()
