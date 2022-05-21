@@ -12,7 +12,7 @@ noexcept {
   /* stackoverflow.com/questions/101439/the-most-efficient-way-to-implement
      -an-integer-based-power-function-powint-int */
   zyclops::Zindex_int result = 1;
-  for (;;) {
+  while (true) {//for (;;) {
     if (exponent & 1){ result *= base; }
     exponent >>= 1;
     if (!exponent){ break; }
@@ -24,7 +24,7 @@ static inline constexpr
 uint zyclops::hamw (const uint64_t i)
 noexcept {
 #ifdef __INTEL_COMPILER
-  return uint(_mm_popcnt_u64() (i));
+  return uint(_mm_popcnt_u64 (i));
 #else
   return uint(__builtin_popcountll (i));
 #endif
@@ -33,7 +33,7 @@ static inline constexpr
 uint zyclops::hamw (const uint32_t i)
 noexcept {
 #ifdef __INTEL_COMPILER
-  return uint(_mm_popcnt_u32() (i));
+  return uint(_mm_popcnt_u32 (i));
 #else
   return uint(__builtin_popcount (i));
 #endif
@@ -49,8 +49,7 @@ bool zyclops::mdcr_nz// for access to order > stored
 noexcept{
   return ((row ^ col) == (row - col)) && ((row - col) < (Zindex_int(1) << o));
 }
-/*
- * The difference between pass-by-reference and pass-by-pointer is that pointers
+/* The difference between pass-by-reference and pass-by-pointer is that pointers
  * can be NULL or reassigned whereas references cannot. Use pass-by-pointer
  * if NULL is a valid parameter value or if you want to reassign the pointer.
  * Otherwise, use constant or non-constant references to pass arguments.
@@ -88,7 +87,7 @@ T* zyclops::md_mult_aos
 (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyclops::Zorder_int zorder, const std::size_t n=1)
 noexcept {
-  if (n>0) {
+  if (zorder>=0 && n>0) {
     const auto zsz = std::size_t (1) << zorder;
     const auto sz = zsz * n;
     for (std::size_t k=0; k<sz; k+=zsz) {
@@ -113,7 +112,7 @@ noexcept {
             (&c)[n* i + k] += (&b)[n* j + k] * (&a)[n* (i-j) + k];
   } } } } }
 #else
-  if (n>0 && zorder>=0) {
+  if (zorder>=0 && n>0) {
     const auto zsz = std::size_t (1) << zorder;
     for (zyclops::Zindex_int j=0; j<zsz; j++) {// permuted loop, transp. calc
       for (zyclops::Zindex_int i=0; i<=j; i++) {

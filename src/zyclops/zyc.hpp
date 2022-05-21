@@ -32,11 +32,11 @@ namespace zyclops {
   // max uint needed to index into   CR matrix: 2^(2*(zorder_max+1)) - 1
   // max uint needed for matrix-free CR access: 2^(  (zorder_max+1)) - 1
   using Zindex_int = uint_fast32_t;
-  using Zorder_int = Zindex_int;// same as Zindex_int, name is for semantics
+  using Zorder_int = Zindex_int;// same as Zindex_int; name is for semantics
   enum class Algebra : int8_t { Unknown =0,
-    Real, Complex, Dual, Split, Fcda, Oti, User,// Fcda: Cayley-Dickson algebras
-    Int,// signed
-    Nat // unsigned natural numbers
+    Real, Complex, Dual, Split, QCDa, Oti, User,// QCDa: Cayley-Dickson algebras
+    Int,// signed integer
+    Nat // unsigned natural number
   };
   enum class Stored : int8_t { Unknown =0,// for arrays of Zomplex numbers
     Mixed, // AoS (array of structs, interleaved real & imaginary parts)
@@ -44,11 +44,7 @@ namespace zyclops {
     Native // Native is for real & built-in complex type
   };
   static const Zorder_int zorder_max = 15;
-#if 0
-  static inline
-  uint upow (uint base, uint exp)
-  noexcept;
-#endif
+  //
   static inline
   Zindex_int upow (Zindex_int base, Zindex_int exp)
   noexcept;
@@ -63,7 +59,7 @@ namespace zyclops {
   bool mdcr_nz (Zindex_int row, Zindex_int col)
   noexcept;
   static inline constexpr
-  bool mdcr_nz// for access to higher order than stored
+  bool mdcr_nz// safe access to higher order than stored
   (Zindex_int row, Zindex_int col, Zindex_int zorder_stored)
   noexcept;
   // multidual number operations
@@ -74,7 +70,7 @@ namespace zyclops {
   T mdcr_mult_elem (const T& a, const T& b, Zindex_int row, Zindex_int col)
   noexcept;
   template <typename T> static inline constexpr
-  T mdcr_elem// for access of higher order than stored
+  T mdcr_elem// safe access to higher order than stored
   (const T&, Zindex_int row, Zindex_int col, Zindex_int zorder_stored)
   noexcept;
   // multidual array operations
@@ -85,19 +81,19 @@ namespace zyclops {
   template <typename T> static inline
   T* md_mult_aos// interleaved real & imaginary parts (Stored::Mixed)
   (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
-    const Zorder_int order, const std::size_t n=1)
+    Zorder_int order, std::size_t n=1)
   noexcept;
   template <typename T> static inline
-  T* md_mult_soa// contiguos real & imaginary parts (Stored::Block)
+  T* md_mult_soa// contiguous real & imaginary parts (Stored::Block)
   (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
-    const Zorder_int order, const std::size_t n=1)
+    Zorder_int order, std::size_t n=1)
   noexcept;
 #if 0
-  template<typename T>
+  template <typename T>
   static inline constexpr
   T md_derivative (const T& v, const Zorder_int o)
   noexcept { return (&v)[o]; }
-  template<typename T, typename... Args>
+  template <typename T, typename... Args>
   static inline constexpr
   T md_derivative (const T& v, const Args... orders)
   noexcept { return get_derivative (v, orders...); }

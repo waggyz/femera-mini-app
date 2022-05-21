@@ -31,7 +31,7 @@ namespace zyclops {
       case Algebra::Real    :{ return 1; }
       case Algebra::Dual    :{ return upow (3, this->order); }
       case Algebra::Split   ://fall through
-      case Algebra::Fcda    ://fall through
+      case Algebra::QCDa    ://fall through
       case Algebra::Complex :{ return this->cr_size (); }
       case Algebra::Oti     ://fall through
       case Algebra::User    ://fall through
