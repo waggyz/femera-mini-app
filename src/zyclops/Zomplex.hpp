@@ -9,9 +9,9 @@ namespace zyclops {
   public:
     Algebra     get_family ();
     Zorder_int  get_order  ();
-    Zarray_int zval_size   ();
-    Zarray_int   cr_size   ();
-    Zarray_int   cr_nnz    ();
+    Zindex_int zval_size   ();
+    Zindex_int   cr_size   ();
+    Zindex_int   cr_nnz    ();
 #if 0
     bool       is_vector    ();
     bool       is_conjugate ();
@@ -36,16 +36,16 @@ namespace zyclops {
   };
 #if 0
   const static Zomplex Real
-    = Zomplex (Algebra::Real, 0, Layout::Native);
+    = Zomplex (Algebra::Real, 0, Stored::Native);
   const static Zomplex Native_complex
-    = Zomplex (Algebra::Complex, 1, Layout::Native);
+    = Zomplex (Algebra::Complex, 1, Stored::Native);
   const static Zomplex Unit_quaternion
-    = Zomplex (Algebra::Fcda, 2, Layout::Vector);
+    = Zomplex (Algebra::Fcda, 2, Stored::Mixed);
   //
   const static Zomplex Integer
-    = Zomplex (Algebra::Int, 0, Layout::Native);
+    = Zomplex (Algebra::Int, 0, Stored::Native);
   const static Zomplex Natural
-    = Zomplex (Algebra::Nat, 0, zyc::Layout::Native);
+    = Zomplex (Algebra::Nat, 0, zyc::Stored::Native);
 #endif
 
 }// end zyclops:: namespace

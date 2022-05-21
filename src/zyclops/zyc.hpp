@@ -31,16 +31,16 @@
 namespace zyclops {
   // max uint needed to index into   CR matrix: 2^(2*(zorder_max+1)) - 1
   // max uint needed for matrix-free CR access: 2^(  (zorder_max+1)) - 1
-  using Zarray_int = uint_fast32_t;
-  using Zorder_int = Zarray_int;// same as Zarray_int, name is for semantics
+  using Zindex_int = uint_fast32_t;
+  using Zorder_int = Zindex_int;// same as Zindex_int, name is for semantics
   enum class Algebra : int8_t { Unknown =0,
     Real, Complex, Dual, Split, Fcda, Oti, User,// Fcda: Cayley-Dickson algebras
     Int,// signed
-    Nat // unsigned
+    Nat // unsigned natural numbers
   };
-  enum class Layout : int8_t { Unknown =0,// for arrays of Zomplex numbers
-    Vector,// AoS (array of structs, interleaved real & imaginary parts)
-    Block ,// SoA (struct of arrays, arrays of real & each imaginary part)
+  enum class Stored : int8_t { Unknown =0,// for arrays of Zomplex numbers
+    Mixed, // AoS (array of structs, interleaved real & imaginary parts)
+    Block, // SoA (struct of arrays, arrays of real & each imaginary part)
     Native // Native is for real & built-in complex type
   };
   static const Zorder_int zorder_max = 15;
@@ -50,7 +50,7 @@ namespace zyclops {
   noexcept;
 #endif
   static inline
-  Zarray_int upow (Zarray_int base, Zarray_int exp)
+  Zindex_int upow (Zindex_int base, Zindex_int exp)
   noexcept;
   static inline constexpr
   uint hamw (uint64_t i)
@@ -58,43 +58,48 @@ namespace zyclops {
   static inline constexpr
   uint hamw (uint32_t i)
   noexcept;
+  // multidual indexing
   static inline constexpr
-  bool mdcr_nz (Zarray_int row, Zarray_int col)
+  bool mdcr_nz (Zindex_int row, Zindex_int col)
   noexcept;
-  static inline constexpr// for access of higher order than stored
-  bool mdcr_nz (Zarray_int row, Zarray_int col, Zarray_int zorder_limit)
+  static inline constexpr
+  bool mdcr_nz// for access to higher order than stored
+  (Zindex_int row, Zindex_int col, Zindex_int zorder_stored)
   noexcept;
+  // multidual number operations
   template <typename T> static inline constexpr
-  T mdcr_elem (const T&, Zarray_int row, Zarray_int col)// fast with -flto
-  noexcept;
-  template <typename T> static inline constexpr
-  T mdcr_elem (const T&, Zarray_int row, Zarray_int col, Zarray_int zorder)
-  noexcept;// for access of higher order than stored
-  template <typename T> static inline constexpr
-  T mdcr_mult_elem (const T& a, const T& b, Zarray_int row, Zarray_int col)
+  T mdcr_elem (const T&, Zindex_int row, Zindex_int col)// fast with -flto
   noexcept;
   template <typename T> static inline constexpr
-  T mdcr_mult_elem (const T& a, const T& b, Zarray_int row, Zarray_int col,
-    Zarray_int zorder_limit)// for heterogenous order multiply
+  T mdcr_mult_elem (const T& a, const T& b, Zindex_int row, Zindex_int col)
+  noexcept;
+  template <typename T> static inline constexpr
+  T mdcr_elem// for access of higher order than stored
+  (const T&, Zindex_int row, Zindex_int col, Zindex_int zorder_stored)
+  noexcept;
+  // multidual array operations
+  template <typename T> static inline constexpr
+  T mdcr_mult_elem (const T& a, const T& b,// for heterogenous order multiply
+    Zindex_int row, Zindex_int col, Zindex_int zorder_min_of_operands)
   noexcept;
   template <typename T> static inline
-  T* md_mult_aos// array of mutlidual vectors
+  T* md_mult_aos// interleaved real & imaginary parts (Stored::Mixed)
   (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
     const Zorder_int order, const std::size_t n=1)
   noexcept;
   template <typename T> static inline
-  T* md_mult_soa// contiguos real & imaginary parts
+  T* md_mult_soa// contiguos real & imaginary parts (Stored::Block)
   (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
     const Zorder_int order, const std::size_t n=1)
   noexcept;
 #if 0
   template<typename T>
   static inline constexpr
-  T dual_derivative (const T& v, const Zorder_int o)
+  T md_derivative (const T& v, const Zorder_int o)
   noexcept { return (&v)[o]; }
   template<typename T, typename... Args>
   static inline constexpr
-  T dual_derivative (const T& v, const Args... orders)
+  T md_derivative (const T& v, const Args... orders)
   noexcept { return get_derivative (v, orders...); }
 #endif
 #if 0

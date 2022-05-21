@@ -5,29 +5,13 @@
 #include <nmmintrin.h>
 #endif
 
-# if 0
 static inline
-uint zyclops::upow (uint base, uint exponent)
+zyclops::Zindex_int zyclops::upow
+(zyclops::Zindex_int base, zyclops::Zindex_int exponent)
 noexcept {
   /* stackoverflow.com/questions/101439/the-most-efficient-way-to-implement
      -an-integer-based-power-function-powint-int */
-  uint result = 1;
-  for (;;) {
-    if (exponent & 1){ result *= base; }
-    exponent >>= 1;
-    if (!exponent){ break; }
-    base *= base;
-  }
-  return result;
-}
-#   endif
-static inline
-zyclops::Zarray_int zyclops::upow
-(zyclops::Zarray_int base, zyclops::Zarray_int exponent)
-noexcept {
-  /* stackoverflow.com/questions/101439/the-most-efficient-way-to-implement
-     -an-integer-based-power-function-powint-int */
-  zyclops::Zarray_int result = 1;
+  zyclops::Zindex_int result = 1;
   for (;;) {
     if (exponent & 1){ result *= base; }
     exponent >>= 1;
@@ -55,72 +39,16 @@ noexcept {
 #endif
 }
 static inline constexpr
-bool zyclops::mdcr_nz (const Zarray_int row, const Zarray_int col)
+bool zyclops::mdcr_nz (const Zindex_int row, const Zindex_int col)
 noexcept{
   return (row ^ col) == (row - col);
 }
-template <typename T> static inline
-T* zyclops::md_mult_aos
-  (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
-  const zyclops::Zorder_int zorder, const std::size_t n=1)
-noexcept {
-  if (n>0) {
-    const auto zsz = std::size_t (1) << zorder;
-    const auto sz = zsz * n;
-    for (std::size_t k=0; k<sz; k+=zsz) {
-      for (zyclops::Zarray_int j=0; j<zsz; j++) {// permuted loop, transposed calc
-        for (zyclops::Zarray_int i=0; i<=j; i++) {
-          (&c)[k + j] += zyclops::mdcr_mult_elem ((&a)[k], (&b)[k], j, i);
-  } } } }
-  return &c;
+static inline constexpr
+bool zyclops::mdcr_nz// for access to order > stored
+(const Zindex_int row, const Zindex_int col, const Zindex_int o)
+noexcept{
+  return ((row ^ col) == (row - col)) && ((row - col) < (Zindex_int(1) << o));
 }
-#if 1
-template <typename T> static inline
-T* zyclops::md_mult_soa
-  (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
-  const zyclops::Zorder_int zorder, const std::size_t n=1)
-noexcept {
-#if 0
-  if (n>0 && zorder>=0) {
-    const auto zsz = std::size_t (1) << zorder;
-    for (zyclops::Zarray_int j=0; j<zsz; j++) {// permuted loop
-      for (zyclops::Zarray_int i=j; i<zsz; i++) {
-        if (zyclops::mdcr_nz (i, j)) {
-          for (std::size_t k=0; k<n; k++) {
-            (&c)[n* i + k] += (&b)[n* j + k] * (&a)[n* (i-j) + k];
-  } } } } }
-#else
-  if (n>0 && zorder>=0) {
-    const auto zsz = std::size_t (1) << zorder;
-    for (zyclops::Zarray_int j=0; j<zsz; j++) {// permuted loop, transposed calc
-      for (zyclops::Zarray_int i=0; i<=j; i++) {
-        if (zyclops::mdcr_nz (j, i)) {
-          for (std::size_t k=0; k<n; k++) {
-            (&c)[n* j + k] += (&b)[n* i + k] * (&a)[n* (j-i) + k];
-  } } } } }
-#endif
-  return &c;
-}
-#   endif
-#if 0
-template <typename T> static inline constexpr
-void zyclops::md_mult_aos
-  (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
-  const zyclops::Zorder_int pf, const zyclops::Zorder_int pa, const zyclops::Zorder_int pb,
-  const std::size_t n=1)
-noexcept {
-  const auto zsz = std::size_t (1) << zorder;
-  const auto sz = zsz * n;
-  for (std::size_t k=0; k<sz; k+=zsz) {
-    for (zyclops::Zarray_int j=0; j<zsz; j++) {// permuted loop, transposed calc
-      for (zyclops::Zarray_int i=0; i<zsz; i++) {
-      (&c)[k + j] += zyclops::mdcr_mult_elem ((&a)[k], (&b)[k], j, i, pa);
-} } } }
-#   endif
-# if 0
-template <typename T> static inline constexpr
-T zyclops::mdcr_elem (const T& ZYC_RESTRICT v,//DONE change all ptr to reference
-  const zyclops::Zarray_int row, const zyclops::Zarray_int col)
 /*
  * The difference between pass-by-reference and pass-by-pointer is that pointers
  * can be NULL or reassigned whereas references cannot. Use pass-by-pointer
@@ -129,58 +57,72 @@ T zyclops::mdcr_elem (const T& ZYC_RESTRICT v,//DONE change all ptr to reference
  *
  * https://www.ibm.com/docs/en/zos/2.4.0?topic=calls-pass-by-reference-c-only
  */
-noexcept {
-  return ((row ^ col) == (row - col)) ? (&v)[row - col] : T(0.0);
-}
-template <typename T> static inline constexpr
-T zyclops::mdcr_elem (const T* ZYC_RESTRICT v,
-  const zyclops::Zarray_int row, const zyclops::Zarray_int col)
-noexcept {
-  return ((row ^ col) == (row - col)) ? v [row - col] : T(0.0);
-}
-#   endif
-static inline constexpr
-bool zyclops::mdcr_nz
-  (const Zarray_int row, const Zarray_int col, const Zarray_int p)
-noexcept{
-  return ((row ^ col) == (row - col)) && ((row - col) < (Zarray_int(1) << p));
-}
 template <typename T> static inline constexpr
 T zyclops::mdcr_elem (const T& ZYC_RESTRICT v,
-  const zyclops::Zarray_int row, const zyclops::Zarray_int col)
+  const zyclops::Zindex_int row, const zyclops::Zindex_int col)
 noexcept {
   return ((row ^ col) == (row - col)) ? (&v)[row - col] : T(0.0);
-}
-template <typename T> static inline constexpr
-T zyclops::mdcr_elem (const T& ZYC_RESTRICT v, const zyclops::Zarray_int row,
-  const zyclops::Zarray_int col, const zyclops::Zarray_int p)
-noexcept {
-  return ((row ^ col) == (row - col)) && ((row - col) < (Zarray_int(1) << p))
-    ? (&v)[row - col] : T(0.0);
 }
 template <typename T> static inline constexpr
 T zyclops::mdcr_mult_elem (const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
-  const zyclops::Zarray_int row, const zyclops::Zarray_int col)
+  const zyclops::Zindex_int row, const zyclops::Zindex_int col)
 noexcept {
   return ((row ^ col) == (row - col)) ? (&a)[col] * (&b)[row - col] : T(0.0);
 }
-template <typename T> static inline constexpr
-T zyclops::mdcr_mult_elem (const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
-  const zyclops::Zarray_int row, const zyclops::Zarray_int col, Zarray_int o)
+template <typename T> static inline constexpr// for access to order > stored
+T zyclops::mdcr_elem (const T& ZYC_RESTRICT v, const zyclops::Zindex_int row,
+  const zyclops::Zindex_int col, const zyclops::Zindex_int o)
 noexcept {
-  return (((row ^ col) == (row - col)) && ((row - col) < (Zarray_int(1) << o)))
+  return ((row ^ col) == (row - col)) && ((row - col) < (Zindex_int(1) << o))
+    ? (&v)[row - col] : T(0.0);
+}
+template <typename T> static inline constexpr// for heterogeneous order multiply
+T zyclops::mdcr_mult_elem (const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
+  const zyclops::Zindex_int row, const zyclops::Zindex_int col, Zindex_int o)
+noexcept {
+  return ((row ^ col) == (row - col)) && ((row - col) < (Zindex_int(1) << o))
     ? (&a)[col] * (&b)[row - col] : T(0.0);
 }
-#if 0
-template <typename T> static inline constexpr
-void zyclops::md_mult_aos (T* ZYC_RESTRICT a,
-  const T* ZYC_RESTRICT b, const T* ZYC_RESTRICT c, const zyclops::Zarray_int order)
+template <typename T> static inline
+T* zyclops::md_mult_aos
+(T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
+  const zyclops::Zorder_int zorder, const std::size_t n=1)
 noexcept {
-  const zyclops::Zarray_int zsz = zyclops::Zarray_int (1) << order;
-  for (zyclops::Zarray_int i=0; i<zsz; i++) {
-    for (zyclops::Zarray_int j=0; j<zsz; j++) {
-      a [j] += zyclops::mdcr_elem (b, i, j) * c [j];
-} } }
+  if (n>0) {
+    const auto zsz = std::size_t (1) << zorder;
+    const auto sz = zsz * n;
+    for (std::size_t k=0; k<sz; k+=zsz) {
+      for (zyclops::Zindex_int j=0; j<zsz; j++) {// permuted loop, transp. calc
+        for (zyclops::Zindex_int i=0; i<=j; i++) {
+          (&c)[k + j] += zyclops::mdcr_mult_elem ((&a)[k], (&b)[k], j, i);
+  } } } }
+  return &c;
+}
+template <typename T> static inline
+T* zyclops::md_mult_soa
+(T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
+  const zyclops::Zorder_int zorder, const std::size_t n=1)
+noexcept {
+#if 0
+  if (n>0 && zorder>=0) {
+    const auto zsz = std::size_t (1) << zorder;
+    for (zyclops::Zindex_int j=0; j<zsz; j++) {// permuted loop
+      for (zyclops::Zindex_int i=j; i<zsz; i++) {
+        if (zyclops::mdcr_nz (i, j)) {
+          for (std::size_t k=0; k<n; k++) {
+            (&c)[n* i + k] += (&b)[n* j + k] * (&a)[n* (i-j) + k];
+  } } } } }
+#else
+  if (n>0 && zorder>=0) {
+    const auto zsz = std::size_t (1) << zorder;
+    for (zyclops::Zindex_int j=0; j<zsz; j++) {// permuted loop, transp. calc
+      for (zyclops::Zindex_int i=0; i<=j; i++) {
+        if (zyclops::mdcr_nz (j, i)) {
+          for (std::size_t k=0; k<n; k++) {
+            (&c)[n* j + k] += (&b)[n* i + k] * (&a)[n* (j-i) + k];
+  } } } } }
 #endif
+  return &c;
+}
 //end ZYC_HAS_ZYC_IPP
 #endif

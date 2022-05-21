@@ -16,17 +16,17 @@ namespace zyclops { namespace test {
 #if 0
     EXPECT_EQ( sizeof (int_fast16_t), sizeof (int_fast32_t) );
 #endif
-    EXPECT_GT( std::numeric_limits<Zarray_int>::max (),
+    EXPECT_GT( std::numeric_limits<Zindex_int>::max (),
       zyc::upow (std::size_t (2), std::size_t (2)*zyc::zorder_max) - 1);
   }
   template <typename T> static inline constexpr
   T mdcr_elem_test (const T& ZYC_RESTRICT v,
-    const zyc::Zarray_int row, const zyc::Zarray_int col)
+    const zyc::Zindex_int row, const zyc::Zindex_int col)
   noexcept {
     return ((row ^ col) == (row - col)) ? (&v)[row - col] : T(0.0);
   }
   static inline
-  double pass_by_reference (const zyc::Zarray_int row, const zyc::Zarray_int col)
+  double pass_by_reference (const zyc::Zindex_int row, const zyc::Zindex_int col)
   noexcept {
     std::vector<double> bidual = {1.0,0.0,0.0,0.0};
   return mdcr_elem_test (bidual [0], row, col);
@@ -117,8 +117,8 @@ namespace zyclops { namespace test {
   }
   static inline
   double dual_aos_f1 (const double x, const double y,
-    const Zarray_int zorder=0, const Zarray_int imag_part=0) {
-    const size_t zsz = size_t (Zarray_int (1) << zorder);
+    const Zindex_int zorder=0, const Zindex_int imag_part=0) {
+    const size_t zsz = size_t (Zindex_int (1) << zorder);
     const std::vector<double> zx = {x,1.0,0.0,0.0, x,1.0,0.0,0.0};
     const std::vector<double> zy = {y,0.0,1.0,0.0, y,0.0,1.0,0.0};
     const uint n = 2;
@@ -137,8 +137,8 @@ namespace zyclops { namespace test {
   }
   static inline
   double dual_soa_f1 (const double x, const double y,
-    const Zarray_int zorder=0, const Zarray_int imag_part=0) {
-    const size_t zsz = size_t (Zarray_int (1) << zorder);
+    const Zindex_int zorder=0, const Zindex_int imag_part=0) {
+    const size_t zsz = size_t (Zindex_int (1) << zorder);
     const uint n = 2;
     const std::vector<double> zx = {x,x, 1.0,1.0, 0.0,0.0, 0.0,0.0, 0.0,0.0};
     const std::vector<double> zy = {y,y, 0.0,0.0, 1.0,1.0, 0.0,0.0, 0.0,0.0};
@@ -158,8 +158,8 @@ namespace zyclops { namespace test {
 #if 0
   static inline
   double dual_f2 (const double x, const double y,
-    const Zarray_int pf=0, px=0, py=0, const Zarray_int imag_part=0) {
-    const size_t zsz = size_t (Zarray_int (1) << pf);
+    const Zindex_int pf=0, px=0, py=0, const Zindex_int imag_part=0) {
+    const size_t zsz = size_t (Zindex_int (1) << pf);
     const std::vector<double> zx = {x,1.0};// porder 1
     const std::vector<double> zy = {y,0.0,1.0,0.0};// porder 2
     auto zf = std::vector<double> (zsz);

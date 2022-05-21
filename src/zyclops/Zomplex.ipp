@@ -15,16 +15,16 @@ namespace zyclops {
     :  order(p), family (z) {
   }
   inline
-  Zarray_int Zomplex::zval_size () {
+  Zindex_int Zomplex::zval_size () {
     return size_t(1) << this->order;
   }
   inline
-  Zarray_int Zomplex::cr_size () {
+  Zindex_int Zomplex::cr_size () {
     const auto n=size_t(1) << this->order;
     return n*n;
   }
   inline
-  Zarray_int Zomplex::cr_nnz () {
+  Zindex_int Zomplex::cr_nnz () {
     switch (this->family) {
       case Algebra::Int     ://fall through
       case Algebra::Nat     ://fall through
