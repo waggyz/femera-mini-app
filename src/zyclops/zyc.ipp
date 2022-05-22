@@ -39,12 +39,12 @@ noexcept {
 #endif
 }
 static inline constexpr
-bool zyclops::mdcr_nz (const Zindex_int row, const Zindex_int col)
+bool zyclops::is_mdcr_nz (const Zindex_int row, const Zindex_int col)
 noexcept{
   return (row ^ col) == (row - col);
 }
 static inline constexpr
-bool zyclops::mdcr_nz// for access to order > stored
+bool zyclops::is_mdcr_nz// for access to order > stored
 (const Zindex_int row, const Zindex_int col, const Zindex_int o)
 noexcept{
   return ((row ^ col) == (row - col)) && ((row - col) < (Zindex_int(1) << o));
@@ -107,7 +107,7 @@ noexcept {
     const auto zsz = std::size_t (1) << zorder;
     for (zyclops::Zindex_int j=0; j<zsz; j++) {// permuted loop
       for (zyclops::Zindex_int i=j; i<zsz; i++) {
-        if (zyclops::mdcr_nz (i, j)) {
+        if (zyclops::is_mdcr_nz (i, j)) {
           for (std::size_t k=0; k<n; k++) {
             (&c)[n* i + k] += (&b)[n* j + k] * (&a)[n* (i-j) + k];
   } } } } }
@@ -116,7 +116,7 @@ noexcept {
     const auto zsz = std::size_t (1) << zorder;
     for (zyclops::Zindex_int j=0; j<zsz; j++) {// permuted loop, transp. calc
       for (zyclops::Zindex_int i=0; i<=j; i++) {
-        if (zyclops::mdcr_nz (j, i)) {
+        if (zyclops::is_mdcr_nz (j, i)) {
           for (std::size_t k=0; k<n; k++) {
             (&c)[n* j + k] += (&b)[n* i + k] * (&a)[n* (j-i) + k];
   } } } } }

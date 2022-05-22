@@ -55,38 +55,38 @@ namespace zyclops {
   uint hamw (uint32_t i)
   noexcept;
   // multidual indexing
-  static inline constexpr
-  bool mdcr_nz (Zindex_int row, Zindex_int col)
+  static inline constexpr                      // returns true for nonzero
+  bool is_mdcr_nz (Zindex_int r, Zindex_int c) // CR matrix form elements
   noexcept;
   static inline constexpr
-  bool mdcr_nz// safe access to higher order than stored
-  (Zindex_int row, Zindex_int col, Zindex_int zorder_stored)
-  noexcept;
+  bool is_mdcr_nz (Zindex_int r, Zindex_int c, // also returns false when r,c
+    Zindex_int zorder_stored)                  // is out of range, i.e.,
+  noexcept;                                    // higher order than stored
   // multidual number operations
-  template <typename T> static inline constexpr
-  T mdcr_elem (const T&, Zindex_int row, Zindex_int col)// fast with -flto
+  template <typename T> static inline constexpr// returns a_rc,
+  T mdcr_elem (const T& a,                     // fast with -flto
+    Zindex_int row, Zindex_int col)
   noexcept;
-  template <typename T> static inline constexpr
-  T mdcr_mult_elem (const T& a, const T& b, Zindex_int row, Zindex_int col)
+  template <typename T> static inline constexpr// returns a_rc * b_rc,
+  T mdcr_mult_elem (const T& a, const T& b,    // fast with -flto
+    Zindex_int row, Zindex_int col)
   noexcept;
-  template <typename T> static inline constexpr
-  T mdcr_elem// safe access to higher order than stored
-  (const T&, Zindex_int row, Zindex_int col, Zindex_int zorder_stored)
+  template <typename T> static inline constexpr// returns a_rc with safe access
+  T mdcr_elem (const T& a,                     // to higher order than stored
+    Zindex_int row, Zindex_int col, Zindex_int zorder_stored)
   noexcept;
   // multidual array operations
-  template <typename T> static inline constexpr
-  T mdcr_mult_elem (const T& a, const T& b,// for heterogenous order multiply
+  template <typename T> static inline constexpr// returns a_rc * b_rc
+  T mdcr_mult_elem (const T& a, const T& b,    // for heterogenous order ops
     Zindex_int row, Zindex_int col, Zindex_int zorder_min_of_operands)
   noexcept;
-  template <typename T> static inline
-  T* md_mult_aos// interleaved real & imaginary parts (Stored::Mixed)
-  (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
-    Zorder_int order, std::size_t n=1)
+  template <typename T> static inline          // c += a * b, returns c ptr,
+  T* md_mult_aos (T& c, const T& a, const T& b,// interleaved real & imaginary
+    Zorder_int order, std::size_t n=1)         // parts (Stored::Mixed)
   noexcept;
-  template <typename T> static inline
-  T* md_mult_soa// contiguous real & imaginary parts (Stored::Block)
-  (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
-    Zorder_int order, std::size_t n=1)
+  template <typename T> static inline          // c += a * b, returns c ptr,
+  T* md_mult_soa (T& c, const T& a, const T& b,// contiguous real & imaginary
+    Zorder_int order, std::size_t n=1)         // parts (Stored::Block)
   noexcept;
 #if 0
   template <typename T>
