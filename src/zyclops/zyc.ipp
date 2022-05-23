@@ -45,7 +45,7 @@ noexcept{
 }
 static inline constexpr
 bool zyclops::is_mdcr_nz// for access to order > stored
-(const Zindex_int row, const Zindex_int col, const Zindex_int o)
+(const Zindex_int row, const Zindex_int col, const Zorder_int o)
 noexcept{
   return ((row ^ col) == (row - col)) && ((row - col) < (Zindex_int(1) << o));
 }
@@ -70,20 +70,21 @@ noexcept {
 }
 template <typename T> static inline constexpr// for access to order > stored
 T zyclops::mdcr_elem (const T& ZYC_RESTRICT v, const zyclops::Zindex_int row,
-  const zyclops::Zindex_int col, const zyclops::Zindex_int o)
+  const zyclops::Zindex_int col, const zyclops::Zorder_int o)
 noexcept {
   return ((row ^ col) == (row - col)) && ((row - col) < (Zindex_int(1) << o))
     ? (&v)[row - col] : T(0.0);
 }
 template <typename T> static inline constexpr// for heterogeneous order multiply
 T zyclops::mdcr_mult_elem (const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
-  const zyclops::Zindex_int row, const zyclops::Zindex_int col, Zindex_int o)
+  const zyclops::Zindex_int row, const zyclops::Zorder_int col,
+  const Zorder_int o)
 noexcept {
   return ((row ^ col) == (row - col)) && ((row - col) < (Zindex_int(1) << o))
     ? (&a)[col] * (&b)[row - col] : T(0.0);
 }
 template <typename T> static inline
-T* zyclops::md_mult_aos
+T* zyclops::md_madd_aos
 (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyclops::Zorder_int zorder, const std::size_t n=1)
 noexcept {
@@ -98,7 +99,7 @@ noexcept {
   return &c;
 }
 template <typename T> static inline
-T* zyclops::md_mult_soa
+T* zyclops::md_madd_soa
 (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyclops::Zorder_int zorder, const std::size_t n=1)
 noexcept {

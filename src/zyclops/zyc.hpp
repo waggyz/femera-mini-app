@@ -60,7 +60,7 @@ namespace zyclops {
   noexcept;
   static inline constexpr
   bool is_mdcr_nz (Zindex_int r, Zindex_int c, // also returns false when r,c
-    Zindex_int zorder_stored)                  // is out of range, i.e.,
+    Zorder_int zorder_stored)                  // is out of range, i.e.,
   noexcept;                                    // higher order than stored
   // multidual number operations
   template <typename T> static inline constexpr// returns a_rc,
@@ -73,19 +73,19 @@ namespace zyclops {
   noexcept;
   template <typename T> static inline constexpr// returns a_rc with safe access
   T mdcr_elem (const T& a,                     // to higher order than stored
-    Zindex_int row, Zindex_int col, Zindex_int zorder_stored)
+    Zindex_int row, Zindex_int col, Zorder_int zorder_stored)
   noexcept;
   // multidual array operations
   template <typename T> static inline constexpr// returns a_rc * b_rc
   T mdcr_mult_elem (const T& a, const T& b,    // for heterogenous order ops
-    Zindex_int row, Zindex_int col, Zindex_int zorder_min_of_operands)
+    Zindex_int row, Zindex_int col, Zorder_int min_zorder_of_operands)
   noexcept;
   template <typename T> static inline          // c += a * b, returns c ptr,
-  T* md_mult_aos (T& c, const T& a, const T& b,// interleaved real & imaginary
+  T* md_madd_aos (T& c, const T& a, const T& b,// interleaved real & imaginary
     Zorder_int order, std::size_t n=1)         // parts (Stored::Mixed)
   noexcept;
   template <typename T> static inline          // c += a * b, returns c ptr,
-  T* md_mult_soa (T& c, const T& a, const T& b,// contiguous real & imaginary
+  T* md_madd_soa (T& c, const T& a, const T& b,// contiguous real & imaginary
     Zorder_int order, std::size_t n=1)         // parts (Stored::Block)
   noexcept;
 #if 0

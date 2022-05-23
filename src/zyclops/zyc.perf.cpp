@@ -66,7 +66,7 @@ namespace zyclops { namespace test {
       ZYC_PRAGMA_OMP(omp barrier)
     //-----------------------------------------------------------------------
       time.add_idle_time_now ();
-      md_mult_aos (cvec.data()[0], avec.data()[0], bvec.data()[0],
+      md_madd_aos (cvec.data()[0], avec.data()[0], bvec.data()[0],
         order, dual_n);
       secs_aos += double (time.add_busy_time_now ());
       for (uint ti=0; ti<test_n; ti++) {// do not optimize calc away
@@ -74,7 +74,7 @@ namespace zyclops { namespace test {
       }
       ZYC_PRAGMA_OMP(omp barrier);
       time.add_idle_time_now ();
-      md_mult_soa (cvec.data()[0], avec.data()[0], bvec.data()[0],
+      md_madd_soa (cvec.data()[0], avec.data()[0], bvec.data()[0],
         order, dual_n);
       secs_soa += double (time.add_busy_time_now ());
       for (uint ti=0; ti<test_n; ti++) {// do not optimize calc away
