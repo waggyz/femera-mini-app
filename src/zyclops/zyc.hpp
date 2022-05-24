@@ -46,7 +46,7 @@ namespace zyclops {
   static const Zorder_int zorder_max = 15;
   //
   static inline
-  Zindex_int upow (Zindex_int base, Zindex_int exp)
+  Zindex_int upow (Zindex_int base, Zindex_int exponent)
   noexcept;
   static inline constexpr
   uint hamw (uint64_t i)
@@ -54,7 +54,7 @@ namespace zyclops {
   static inline constexpr
   uint hamw (uint32_t i)
   noexcept;
-  // multidual indexing
+  // multidual Cauchy-Riemann (CR) matrix indexing
   static inline constexpr                      // returns true for nonzero
   bool is_mdcr_nz (Zindex_int r, Zindex_int c) // CR matrix form elements
   noexcept;
@@ -62,7 +62,7 @@ namespace zyclops {
   bool is_mdcr_nz (Zindex_int r, Zindex_int c, // also returns false when r,c
     Zorder_int zorder_stored)                  // is out of range, i.e.,
   noexcept;                                    // higher order than stored
-  // multidual number operations
+  // multidual number CR element operations
   template <typename T> static inline constexpr// returns a_rc,
   T mdcr_elem (const T& a,                     // fast with -flto
     Zindex_int row, Zindex_int col)
@@ -75,27 +75,27 @@ namespace zyclops {
   T mdcr_elem (const T& a,                     // to higher order than stored
     Zindex_int row, Zindex_int col, Zorder_int zorder_stored)
   noexcept;
-  // multidual array operations
   template <typename T> static inline constexpr// returns a_rc * b_rc
-  T mdcr_mult_elem (const T& a, const T& b,    // for heterogenous order ops
+  T mdcr_mult_elem (const T& a, const T& b,    // for heterogeneous order ops
     Zindex_int row, Zindex_int col, Zorder_int min_zorder_of_operands)
   noexcept;
+  // multidual scalar operations
   template <typename T> static inline          // c += a * b, returns c ptr,
-  T* md_madd_aos (T& c, const T& a, const T& b,// interleaved real & imaginary
+  T* mdas_madd (T& c, const T& a, const T& b,  // interleaved real & imaginary
     Zorder_int order, std::size_t n=1)         // parts (Stored::Mixed)
   noexcept;
   template <typename T> static inline          // c += a * b, returns c ptr,
-  T* md_madd_soa (T& c, const T& a, const T& b,// contiguous real & imaginary
+  T* mdsa_madd (T& c, const T& a, const T& b,  // contiguous real & imaginary
     Zorder_int order, std::size_t n=1)         // parts (Stored::Block)
   noexcept;
 #if 0
   template <typename T>
   static inline constexpr
-  T md_derivative (const T& v, const Zorder_int o)
+  T mz_derivative (const T& v, const Zorder_int o)
   noexcept { return (&v)[o]; }
   template <typename T, typename... Args>
   static inline constexpr
-  T md_derivative (const T& v, const Args... orders)
+  T mz_derivative (const T& v, const Args... orders)
   noexcept { return get_derivative (v, orders...); }
 #endif
 #if 0

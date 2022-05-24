@@ -24,18 +24,18 @@ static inline constexpr
 uint zyclops::hamw (const uint64_t i)
 noexcept {
 #ifdef __INTEL_COMPILER
-  return uint(_mm_popcnt_u64 (i));
+  return uint(_mm_popcnt_u64 (i));// intrinsic returns __int64
 #else
-  return uint(__builtin_popcountll (i));
+  return uint(__builtin_popcountll (i));// gcc builtin returns int
 #endif
 }
 static inline constexpr
 uint zyclops::hamw (const uint32_t i)
 noexcept {
 #ifdef __INTEL_COMPILER
-  return uint(_mm_popcnt_u32 (i));
+  return uint(_mm_popcnt_u32 (i));// intrinsic returns int
 #else
-  return uint(__builtin_popcount (i));
+  return uint(__builtin_popcount (i));// gcc builtin returns int
 #endif
 }
 static inline constexpr
@@ -84,14 +84,14 @@ noexcept {
     ? (&a)[col] * (&b)[row - col] : T(0.0);
 }
 template <typename T> static inline
-T* zyclops::md_madd_aos
+T* zyclops::mdas_madd// array of structs storage
 (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyclops::Zorder_int zorder, const std::size_t n=1)
 noexcept {
   if (zorder>=0 && n>0) {
     const auto zsz = std::size_t (1) << zorder;
-    const auto sz = zsz * n;
-    for (std::size_t k=0; k<sz; k+=zsz) {
+    const auto nsz = n * zsz;
+    for (std::size_t k=0; k<nsz; k+=zsz) {
       for (zyclops::Zindex_int j=0; j<zsz; j++) {// permuted loop, transp. calc
         for (zyclops::Zindex_int i=0; i<=j; i++) {
           (&c)[k + j] += zyclops::mdcr_mult_elem ((&a)[k], (&b)[k], j, i);
@@ -99,7 +99,7 @@ noexcept {
   return &c;
 }
 template <typename T> static inline
-T* zyclops::md_madd_soa
+T* zyclops::mdsa_madd// struct of arrays storage
 (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyclops::Zorder_int zorder, const std::size_t n=1)
 noexcept {
