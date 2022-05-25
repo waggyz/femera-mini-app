@@ -88,12 +88,10 @@ namespace zyclops {
   T* mdsa_madd (T& c, const T& a, const T& b,  // contiguous real & imaginary
     Zorder_int order, std::size_t n=1)         // parts (Stored::Block)
   noexcept;
-#if 1
   template <typename T> static inline          // c = a / b, returns c ptr,
   T* mdas_div (T& c, const T& a, const T& b,   // interleaved real & imaginary
     Zorder_int order, std::size_t n=1)         // parts (Stored::Mixed)
   noexcept;//NOTE result (c) must be zeroed before dividing
-#endif
   template <typename T> static inline          // c += a / b, returns c ptr,
   T* mdsa_div  (T& c, const T& a, const T& b,  // contiguous real & imaginary
     Zorder_int order, std::size_t n=1)         // parts (Stored::Block)
