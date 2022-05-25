@@ -93,27 +93,33 @@ namespace zyclops { namespace test {
     EXPECT_EQ( print_dual_t (3,2), 27-9 );
     EXPECT_EQ( print_dual_t (4,4), zyc::upow (3,4));
   }
+  static inline// f = x * y;
+  double real_f (double x, double y) { return x * y; }
   static inline
-  double real_f (double x, double y) {// f = x * y;
-    return x * y;
-  }
+  double real_dfdx (double, double y) { return y; }
   static inline
-  double real_dfdx (double, double y) {
-    return y;
-  }
+  double real_dfdy (double x, double) { return x; }
   static inline
-  double real_dfdy (double x, double) {
-    return x;
-  }
+  double real_d2fdxdy (double, double) { return 1.0; }
+  static inline// f = x / y;
+  double real_g (double x, double y) { return x / y; }
   static inline
-  double real_d2fdxdy (double, double) {
-    return 1.0;
-  }
-  TEST( Zyc, CheckF1Derivs ){
+  double real_dgdx (double, double y) { return 1.0 / y; }
+  static inline
+  double real_dgdy (double x, double y) { return -x / (y * y); }
+  static inline
+  double real_d2gdxdy (double, double y) { return -1.0 / (y * y); }
+  TEST( Zyc, CheckFDerivs ){
     EXPECT_DOUBLE_EQ( real_f       (3.0, 5.0), 15.0 );
     EXPECT_DOUBLE_EQ( real_dfdx    (3.0, 5.0),  5.0 );
     EXPECT_DOUBLE_EQ( real_dfdy    (3.0, 5.0),  3.0 );
     EXPECT_DOUBLE_EQ( real_d2fdxdy (3.0 ,5.0),  1.0 );
+  }
+  TEST( Zyc, CheckGDerivs ){
+    EXPECT_DOUBLE_EQ( real_g       (3.0, 5.0),  3.0 / 5.0 );
+    EXPECT_DOUBLE_EQ( real_dgdx    (3.0, 5.0),  1.0 / 5.0 );
+    EXPECT_DOUBLE_EQ( real_dgdy    (3.0, 5.0), -3.0 / (5.0 * 5.0));
+    EXPECT_DOUBLE_EQ( real_d2gdxdy (3.0 ,5.0), -1.0 / (5.0 * 5.0) );
   }
   static inline
   double dual_aos_f1 (const double x, const double y,
@@ -154,6 +160,46 @@ namespace zyclops { namespace test {
     EXPECT_DOUBLE_EQ( dual_soa_f1 (3.0, 5.0, 2, 1), real_dfdx    (3.0, 5.0) );
     EXPECT_DOUBLE_EQ( dual_soa_f1 (3.0, 5.0, 2, 2), real_dfdy    (3.0, 5.0) );
     EXPECT_DOUBLE_EQ( dual_soa_f1 (3.0, 5.0, 2, 3), real_d2fdxdy (3.0 ,5.0) );
+  }
+  static inline
+  double dual_aos_g1 (const double x, const double y,
+    const Zindex_int zorder=0, const Zindex_int imag_part=0) {
+    const size_t zsz = size_t (Zindex_int (1) << zorder);
+    const std::vector<double> zx = {x,1.0,0.0,0.0, x,1.0,0.0,0.0};
+    const std::vector<double> zy = {y,0.0,1.0,0.0, y,0.0,1.0,0.0};
+    const uint n = 2;
+    auto zf = std::vector<double> (zsz * n);
+    zyc::mdas_div (zf.data()[0], zx.data()[0], zy.data()[0], 2, n);
+    const auto zf0 = zf [zsz*0 + std::size_t (imag_part)];
+    const auto zf1 = zf [zsz*1 + std::size_t (imag_part)];
+    if ((zf0<zf1) || (zf0>zf1)){ return NAN; }
+    return zf0;
+  }
+  TEST( Zyc, BidualDivideAoS ){
+    EXPECT_DOUBLE_EQ( dual_aos_g1 (3.0, 5.0, 2, 0), real_g       (3.0, 5.0) );
+    EXPECT_DOUBLE_EQ( dual_aos_g1 (3.0, 5.0, 2, 1), real_dgdx    (3.0, 5.0) );
+    EXPECT_DOUBLE_EQ( dual_aos_g1 (3.0, 5.0, 2, 2), real_dgdy    (3.0, 5.0) );
+    EXPECT_DOUBLE_EQ( dual_aos_g1 (3.0, 5.0, 2, 3), real_d2gdxdy (3.0 ,5.0) );
+  }
+  static inline
+  double dual_soa_g1 (const double x, const double y,
+    const Zindex_int zorder=0, const Zindex_int imag_part=0) {
+    const size_t zsz = size_t (Zindex_int (1) << zorder);
+    const uint n = 2;
+    const std::vector<double> zx = {x,x, 1.0,1.0, 0.0,0.0, 0.0,0.0, 0.0,0.0};
+    const std::vector<double> zy = {y,y, 0.0,0.0, 1.0,1.0, 0.0,0.0, 0.0,0.0};
+    auto zf = std::vector<double> (zsz * n);
+    zyc::mdsa_div (zf.data()[0], zx.data()[0], zy.data()[0], 2, n);
+    const auto zf0 = zf [std::size_t (n* imag_part +0)];
+    const auto zf1 = zf [std::size_t (n* imag_part +1)];
+    if ((zf0<zf1) || (zf0>zf1)){ return NAN; }
+    return zf0;
+  }
+  TEST( Zyc, BidualDivideSoA ){
+    EXPECT_DOUBLE_EQ( dual_soa_g1 (3.0, 5.0, 2, 0), real_g       (3.0, 5.0) );
+    EXPECT_DOUBLE_EQ( dual_soa_g1 (3.0, 5.0, 2, 1), real_dgdx    (3.0, 5.0) );
+    EXPECT_DOUBLE_EQ( dual_soa_g1 (3.0, 5.0, 2, 2), real_dgdy    (3.0, 5.0) );
+    EXPECT_DOUBLE_EQ( dual_soa_g1 (3.0, 5.0, 2, 3), real_d2gdxdy (3.0 ,5.0) );
   }
 #if 0
   static inline
