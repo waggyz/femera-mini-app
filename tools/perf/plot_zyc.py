@@ -218,7 +218,7 @@ if __name__ == "__main__":
         markeredgewidth=mw, color="m",linestyle="solid",)
   if True:#--------------------------------------------------------------------
     plt.semilogy(list_order, speed_add,
-      label="hypercomplex add", color="c",
+      label="Hypercomplex add", color="c",
       markersize=ms, marker="+", markeredgecolor='c', markeredgewidth=mw,
       linestyle="solid")
     plt.semilogy(list_order, speed_mult_aos,
