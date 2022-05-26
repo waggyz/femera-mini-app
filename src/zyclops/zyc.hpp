@@ -79,6 +79,11 @@ namespace zyclops {
   T mdcr_mult_elem (const T& a, const T& b,    // for heterogeneous order ops
     Zindex_int row, Zindex_int col, Zorder_int min_zorder_of_operands)
   noexcept;
+  // hypercomplex scalar operations
+  template <typename T> static inline          // c = a + b, returns c ptr,
+  T* mz_add (T& c, const T& a, const T& b,
+    Zorder_int order, std::size_t n=1)
+  noexcept;
   // multidual scalar operations
   template <typename T> static inline          // c += a * b, returns c ptr,
   T* mdas_madd (T& c, const T& a, const T& b,  // interleaved real & imaginary

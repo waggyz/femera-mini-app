@@ -164,5 +164,17 @@ noexcept {
   } } }
   return &c;
 }
+template <typename T> static inline
+T* zyclops::mz_add// struct of arrays storage, c = a + b
+(T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
+  const zyclops::Zorder_int zorder, const std::size_t n)
+noexcept {
+  if (zorder>=0 && n>0) {
+    const auto nsz = (std::size_t (1) << zorder) * n;
+    for (zyclops::Zindex_int i=0; i<nsz; i++) {
+        (&c)[i] = (&a)[i] + (&b)[i];
+  } }
+  return &c;
+}
 //end ZYC_HAS_ZYC_IPP
 #endif

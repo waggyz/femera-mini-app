@@ -127,7 +127,7 @@ namespace zyclops { namespace test {
     return chk;
   }//end dual_mult (..)
   inline
-  double dual_div// returns a check value: 0.0
+  double dual_div// returns a check value: 0.0, also does addition
   (const uint test_n=10, const uint vals_n=1024, zyc::Zorder_int order=0) {
     if (test_n<=0 || vals_n<=0) {return 0.0;}
     double chk = 0.0;
@@ -145,7 +145,11 @@ namespace zyclops { namespace test {
       + avec.size () * sizeof (avec[0])       // 1 read
       + bvec.size () * sizeof (bvec[0])       // 1 read
       + cvec.size () * sizeof (cvec[0]) * 2));// 1 read + 1 write
-    double secs_ref = 0.0, secs_aos = 0.0, secs_soa = 0.0;
+    const auto byte_add = double (test_n * (
+      + avec.size () * sizeof (avec[0])       // 1 read
+      + bvec.size () * sizeof (bvec[0])       // 1 read
+      + cvec.size () * sizeof (cvec[0])));// 1 write
+    double secs_ref = 0.0, secs_aos = 0.0, secs_soa = 0.0, secs_add = 0.0;
 #if 0
     auto s2vec = std::vector<double> (uint(zsz));// sum of squares
     TEST_ZYC_ARRAY_PTR s2 = s2vec.data ();
@@ -153,9 +157,10 @@ namespace zyclops { namespace test {
       + 2 * s2vec.size () * sizeof (s2vec[0]) );
     double secs_ref2 = 0.0, secs_aos2 = 0.0, secs_soa2 = 0.0;
 #endif
+    const auto flop_add  = double (test_n * vals_n);
     const auto flop_ref  = 2.0 * double (test_n * vals_n);
     const auto flop_dual = 2.0 * double (test_n * vals_n / uint (zsz))
-      * double(std::pow (3,order));
+      * double(std::pow (3,order));//TODO check this
     for (uint test_i=0; test_i<test_n; test_i++) {
       for (uint ti=0; ti<test_n; ti++) {// warm up
         for (uint i=0; i<vals_n; i++) { chk += a[i] * b[i]; }
@@ -188,6 +193,14 @@ namespace zyclops { namespace test {
       for (uint ti=0; ti<test_n; ti++) {// do not optimize calc away
         for (uint i=0; i<vals_n; i++) { chk += a[i] * b[i] * c[0]; }
       }
+      ZYC_PRAGMA_OMP(omp barrier);
+      time.add_idle_time_now ();
+      mz_add (cvec.data()[0], avec.data()[0], bvec.data()[0],
+        order, dual_n);
+      secs_add += double (time.add_busy_time_now ());
+      for (uint ti=0; ti<test_n; ti++) {// do not optimize calc away
+        for (uint i=0; i<vals_n; i++) { chk += a[i] * b[i] * c[0]; }
+      }
     }//end test_n loop
     printf (" zyc, ref, fma,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
       -1, test_n * vals_n, byte_fma, flop_ref, secs_ref, flop_ref/secs_ref,
@@ -198,6 +211,9 @@ namespace zyclops { namespace test {
     printf (" zyc,mdsa, div,%2lu,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
       order, (test_n * vals_n) / uint(zsz), byte_fma, flop_dual, secs_soa,
         flop_dual/secs_soa, flop_dual/byte_fma, chk);
+    printf (" zyc,  mz, add,%2lu,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
+      order, (test_n * vals_n) / uint(zsz), byte_add, flop_add, secs_add,
+        flop_add/secs_add, flop_add/byte_add, chk);
     ZYC_PRAGMA_OMP(omp barrier);
     }//end parallel region
     return chk;

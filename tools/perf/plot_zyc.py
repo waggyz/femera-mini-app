@@ -13,8 +13,10 @@ if __name__ == "__main__":
   """ Plot zyc.?pp Performance Test results """
   now = dt.datetime.now()
   cpumodel="i7-7820HQ"
-  #timestr = "2022-05-18"
+  ncpu=4
   timestr = now.strftime("%Y-%m-%d")
+  #timestr = "2022-05-18"
+  timestr = "2022-05-26"
   file_name = "data/perf/zyc.perf."+timestr+".out"
   naive_file = "data/perf/zyc.perf.2022-05-16b.out"
   plot_name = "build/"+cpumodel+"/zyc-perf-"+timestr
@@ -58,6 +60,8 @@ if __name__ == "__main__":
   mdop_div_aos = [0.0] * len(list_order)
   time_div_soa = [0.0] * len(list_order)
   mdop_div_soa = [0.0] * len(list_order)
+  time_add = [0.0] * len(list_order)
+  mdop_add = [0.0] * len(list_order)
   #
   with open (naive_file) as File:
     data = csv.reader(File, delimiter=",")
@@ -133,6 +137,9 @@ if __name__ == "__main__":
           elif rowcol[1]+rowcol[2] == "mdsa div":
             time_div_soa[o] += t
             mdop_div_soa[o] += m
+          elif rowcol[1]+rowcol[2] == "  mz add":
+            time_add[o] += t
+            mdop_add[o] += m
         if rowcol[2] == "mult":
           md_n.append(int(rowcol[4]))
           byte_n.append(float(rowcol[5]))
@@ -140,11 +147,12 @@ if __name__ == "__main__":
           secs.append(float(rowcol[7]))
   #mdops = [n/s for n,s in zip(md_n,secs)]
   speed_mult_ref = 4* mdop_mult_ref / time_mult_ref
-  crmat_mult = [4* zm/zs for zm,zs in zip (mdop_crmat_mult,time_crmat_mult)]
-  speed_mult_aos = [4* zm/zs for zm,zs in zip (mdop_mult_aos,time_mult_aos)]
-  speed_mult_soa = [4* zm/zs for zm,zs in zip (mdop_mult_soa,time_mult_soa)]
-  speed_div_aos = [4* zm/zs for zm,zs in zip (mdop_div_aos,time_div_aos)]
-  speed_div_soa = [4* zm/zs for zm,zs in zip (mdop_div_soa,time_div_soa)]
+  crmat_mult = [ncpu* zm/zs for zm,zs in zip (mdop_crmat_mult,time_crmat_mult)]
+  speed_mult_aos = [ncpu* zm/zs for zm,zs in zip (mdop_mult_aos,time_mult_aos)]
+  speed_mult_soa = [ncpu* zm/zs for zm,zs in zip (mdop_mult_soa,time_mult_soa)]
+  speed_div_aos = [ncpu* zm/zs for zm,zs in zip (mdop_div_aos,time_div_aos)]
+  speed_div_soa = [ncpu* zm/zs for zm,zs in zip (mdop_div_soa,time_div_soa)]
+  speed_add = [ncpu* zm/zs for zm,zs in zip (mdop_add,time_add)]
   mult_nonz_lim = [speed_mult_ref/(3**o) for o in list_order]
   #sum2_nonz_lim = [speed_sum2_ref/(3**o) for o in list_order]
   mult_mdsz_lim = [speed_mult_ref/(2**o) for o in list_order]
@@ -206,9 +214,13 @@ if __name__ == "__main__":
         markersize=ms, marker="x", markeredgecolor='g', markeredgewidth=mw)
     if False:
       plt.semilogy(list_order, trnsp_mult, label="Multiply (transposed)",
-        marker="x", markersize=ms, markeredgecolor="m",
+        marker="x", markersize=rms, markeredgecolor="m",
         markeredgewidth=mw, color="m",linestyle="solid",)
   if True:#--------------------------------------------------------------------
+    plt.semilogy(list_order, speed_add,
+      label="hypercomplex add", color="c",
+      markersize=ms, marker="+", markeredgecolor='c', markeredgewidth=mw,
+      linestyle="solid")
     plt.semilogy(list_order, speed_mult_aos,
       label="Matrix-free multiply, interleaved parts (AoS)",
       color="b",
@@ -221,9 +233,9 @@ if __name__ == "__main__":
       markersize=ms, marker="x", markeredgecolor='m', markeredgewidth=mw,
       linestyle="solid")
     plt.semilogy(naiv_order, crmat_mult,
-      label="Naive multiply algorithm",
-      marker="x", markersize=ms, color="k", markeredgecolor="k",
-      markeredgewidth=mw, linestyle="solid")
+      label="Naive multiply algorithm", linewidth=rlw/2,
+      marker="x", markersize=rms-1.5, color="k", markeredgecolor="k",
+      linestyle="solid") #markeredgewidth=mw,
     plt.semilogy(list_order, speed_div_aos,
       label="Matrix-free divide, interleaved parts (AoS)", 
       color="b", markersize=ms, marker="s", markerfacecolor="None",
@@ -258,8 +270,8 @@ if __name__ == "__main__":
   #
   plt.grid(axis = 'y')
   plt.title(r"Multidual operations ($\mathregular{c_j = a_j{\circ}b_j}$) "
-    +"baseline ("+ cpumodel+")")
-  plt.legend(loc='lower left', fontsize=10, numpoints=1)
+    + cpumodel+" baseline")
+  plt.legend(loc='lower left', fontsize=9, numpoints=1)
   #
   plt.savefig(plot_name+".eps",format="eps")
   plt.savefig(plot_name+".png",format="png")
