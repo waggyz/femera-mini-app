@@ -13,9 +13,9 @@ noexcept {
      -an-integer-based-power-function-powint-int */
   zyclops::Zindex_int result = 1;
   while (true) {//for (;;) {
-    if (exponent & 1){ result *= base; }
+    if (exponent & 1) {result *= base;}
     exponent >>= 1;
-    if (!exponent){ break; }
+    if (! exponent) {break;}
     base *= base;
   }
   return result;
@@ -129,19 +129,22 @@ T* zyclops::mdas_div// array of structs storage, c = a / b, c zeroed first
 (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyclops::Zorder_int zorder, const std::size_t n)
 noexcept {
-  if (zorder>=0 && n>0) {
-    const auto zsz = std::size_t (1) << zorder;
-    const auto nsz = n * zsz;
-    for (std::size_t k=0; k<nsz; k+=zsz) {
-      const auto b0inv = T(1.0) / (&b)[k];
-      (&c)[k] = (&a)[k] * b0inv;// real part
-      for (zyclops::Zindex_int j=1; j<zsz; j++) {// permuted loop, transp. calc
-        for (zyclops::Zindex_int i=0; i<j; i++) {// lower triangle w/out diag.
-          (&c)[k + j] -= zyclops::mdcr_mult_elem ((&c)[k], (&b)[k], j, i);
-        }
-        (&c)[k + j] += (&a)[k + j];
-        (&c)[k + j] *= b0inv;
-  } } }
+  if (n>0) {
+    if (zorder<=0) {
+      for (std::size_t k=0; k<n; k++) {(&c)[k] = (&a)[k] / (&b)[k];}
+    } else {
+      const auto zsz = std::size_t (1) << zorder;
+      const auto nsz = n * zsz;
+      for (std::size_t k=0; k<nsz; k+=zsz) {
+        const auto b0inv = T(1.0) / (&b)[k];
+        (&c)[k] = (&a)[k] * b0inv;// real part
+        for (zyclops::Zindex_int j=1; j<zsz; j++) {// permuted loop, transp calc
+          for (zyclops::Zindex_int i=0; i<j; i++) {// lower triangle w/out diag.
+            (&c)[k + j] -= zyclops::mdcr_mult_elem ((&c)[k], (&b)[k], j, i);
+          }
+          (&c)[k + j] += (&a)[k + j];
+          (&c)[k + j] *= b0inv;
+  } } } }
   return &c;
 }
 template <typename T> static inline
@@ -149,30 +152,69 @@ T* zyclops::mdsa_div// struct of arrays storage, c = a / b, c zeroed first
 (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyclops::Zorder_int zorder, const std::size_t n)
 noexcept {
-  if (zorder>=0 && n>0) {
-    const auto zsz = std::size_t (1) << zorder;
-    for (zyclops::Zindex_int j=0; j<zsz; j++) {// permuted loop, transp. calc
-      if (j>0) {
-        for (zyclops::Zindex_int i=0; i<j; i++) {// lower triangle no diagonal
-          if (zyclops::is_mdcr_nz (j, i)) {
-            for (std::size_t k=0; k<n; k++) {
-              (&c)[n* j + k] -= (&c)[n* i + k] * (&b)[n* (j-i) + k];
-      } } } }
-      for (std::size_t k=0; k<n; k++) {
-        (&c)[n* j + k] += (&a)[n* j + k];
-        (&c)[n* j + k] /= (&b)[k];
-  } } }
+  if (n>0) {
+    if (zorder<=0) {
+      for (std::size_t k=0; k<n; k++) {(&c)[k] = (&a)[k] / (&b)[k];}
+    } else {
+      const auto zsz = std::size_t (1) << zorder;
+      for (zyclops::Zindex_int j=0; j<zsz; j++) {// permuted loop, transp. calc
+        if (j>0) {
+          for (zyclops::Zindex_int i=0; i<j; i++) {// lower triangle, no diag.
+            if (zyclops::is_mdcr_nz (j, i)) {
+              for (std::size_t k=0; k<n; k++) {
+                (&c)[n* j + k] -= (&c)[n* i + k] * (&b)[n* (j-i) + k];
+        } } } }
+        for (std::size_t k=0; k<n; k++) {
+          (&c)[n* j + k] += (&a)[n* j + k];
+          (&c)[n* j + k] /= (&b)[k];
+  } } } }
   return &c;
 }
 template <typename T> static inline
-T* zyclops::mz_add// struct of arrays storage, c = a + b
+T* zyclops::mza_add// add, c = a + b
 (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyclops::Zorder_int zorder, const std::size_t n)
 noexcept {
   if (zorder>=0 && n>0) {
     const auto nsz = (std::size_t (1) << zorder) * n;
     for (zyclops::Zindex_int i=0; i<nsz; i++) {
-        (&c)[i] = (&a)[i] + (&b)[i];
+      (&c)[i] = (&a)[i] + (&b)[i];
+  } }
+  return &c;
+}
+template <typename T> static inline
+T* zyclops::mza_adda// add-accumulate, c += a + b
+(T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
+  const zyclops::Zorder_int zorder, const std::size_t n)
+noexcept {
+  if (zorder>=0 && n>0) {
+    const auto nsz = (std::size_t (1) << zorder) * n;
+    for (zyclops::Zindex_int i=0; i<nsz; i++) {
+      (&c)[i] += (&a)[i] + (&b)[i];
+  } }
+  return &c;
+}
+template <typename T> static inline
+T* zyclops::mza_sub// subtract, c = a - b
+(T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
+  const zyclops::Zorder_int zorder, const std::size_t n)
+noexcept {
+  if (zorder>=0 && n>0) {
+    const auto nsz = (std::size_t (1) << zorder) * n;
+    for (zyclops::Zindex_int i=0; i<nsz; i++) {
+      (&c)[i] = (&a)[i] - (&b)[i];
+  } }
+  return &c;
+}
+template <typename T> static inline
+T* zyclops::mza_suba// subtract-accumulate, c += a - b
+(T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
+  const zyclops::Zorder_int zorder, const std::size_t n)
+noexcept {
+  if (zorder>=0 && n>0) {
+    const auto nsz = (std::size_t (1) << zorder) * n;
+    for (zyclops::Zindex_int i=0; i<nsz; i++) {
+      (&c)[i] += (&a)[i] - (&b)[i];
   } }
   return &c;
 }
