@@ -16,14 +16,14 @@ if __name__ == "__main__":
   ncpu=4
   timestr = now.strftime("%Y-%m-%d")
   #timestr = "2022-05-18"
-  timestr = "2022-05-26"
+  timestr = "2022-06-01"
   file_name = "data/perf/zyc.perf."+timestr+".out"
   naive_file = "data/perf/zyc.perf.2022-05-16b.out"
   plot_name = "build/"+cpumodel+"/zyc-perf-"+timestr
   name1 = []
   name2 = []
   order = []
-  md_n  = []# number of multidual operations
+  mdop_n= []# number of multidual operations
   byte_n= []
   flop_n= []
   secs  = []
@@ -31,22 +31,6 @@ if __name__ == "__main__":
   list_order = [0,1,2,3,4,5,6,7,8,9,10]
   naiv_order = [0,1,2,3,4,5,6,7,8]
   max_order = max(list_order)
-  '''
-  speed_mult_ref = 0
-  speed_mult = [0.0] * len(list_order);
-  crmat_mult = [0.0] * len(list_order);
-  trnsp_mult = [0.0] * len(list_order);
-  permu_trnsp_mult = [0.0] * len(list_order);
-  #
-  speed_sum2_ref = 0
-  speed_sum2 = [0.0] * len(list_order);
-  crmat_sum2 = [0.0] * len(list_order);
-  trnsp_sum2 = [0.0] * len(list_order);
-  permu_trnsp_sum2 = [0.0] * len(list_order);
-  #
-  speed_mult_aos = [0.0] * len(list_order);
-  speed_mult_soa = [0.0] * len(list_order);
-  '''
   time_crmat_mult = [0.0] * len(naiv_order);
   mdop_crmat_mult = [0.0] * len(naiv_order);
   time_mult_ref = 0
@@ -82,8 +66,7 @@ if __name__ == "__main__":
           if o < 9:
             time_crmat_mult[o] += t
             mdop_crmat_mult[o] += m
-            #crmat_mult[o] += s
-        md_n.append(int(rowcol[4]))
+        mdop_n.append(int(rowcol[4]))
         byte_n.append(float(rowcol[5]))
         flop_n.append(float(rowcol[6]))
         secs.append(float(rowcol[7]))
@@ -108,17 +91,10 @@ if __name__ == "__main__":
           if rowcol[2] == " fma":
             time_mult_ref += t / len(list_order)
             mdop_mult_ref += m / len(list_order)
-          '''
-          if rowcol[2] == " fma":
-            speed_mult_ref += s / len(list_order)
-          elif rowcol[2] == "sum2":
-            speed_sum2_ref += s / len(list_order)
-          '''
         else:
           if rowcol[2] == " aos":
             time_mult_aos[o] += t
             mdop_mult_aos[o] += m
-            #speed_mult_aos[o] += s
           elif rowcol[2] == " soa":
             time_mult_soa[o] += t
             mdop_mult_soa[o] += m
@@ -126,14 +102,12 @@ if __name__ == "__main__":
           elif rowcol[1]+rowcol[2] == "mdasmadd":
             time_mult_aos[o] += t
             mdop_mult_aos[o] += m
-            #speed_mult_aos[o] += s
           elif rowcol[1]+rowcol[2] == "mdsamadd":
             time_mult_soa[o] += t
             mdop_mult_soa[o] += m
           elif rowcol[1]+rowcol[2] == "mdas div":
             time_div_aos[o] += t
             mdop_div_aos[o] += m
-            #speed_mult_aos[o] += s
           elif rowcol[1]+rowcol[2] == "mdsa div":
             time_div_soa[o] += t
             mdop_div_soa[o] += m
@@ -141,11 +115,10 @@ if __name__ == "__main__":
             time_add[o] += t
             mdop_add[o] += m
         if rowcol[2] == "mult":
-          md_n.append(int(rowcol[4]))
+          mdop_n.append(int(rowcol[4]))
           byte_n.append(float(rowcol[5]))
           flop_n.append(float(rowcol[6]))
           secs.append(float(rowcol[7]))
-  #mdops = [n/s for n,s in zip(md_n,secs)]
   speed_mult_ref = 4* mdop_mult_ref / time_mult_ref
   crmat_mult = [ncpu* zm/zs for zm,zs in zip (mdop_crmat_mult,time_crmat_mult)]
   speed_mult_aos = [ncpu* zm/zs for zm,zs in zip (mdop_mult_aos,time_mult_aos)]
@@ -154,11 +127,8 @@ if __name__ == "__main__":
   speed_div_soa = [ncpu* zm/zs for zm,zs in zip (mdop_div_soa,time_div_soa)]
   speed_add = [ncpu* zm/zs for zm,zs in zip (mdop_add,time_add)]
   mult_nonz_lim = [speed_mult_ref/(3**o) for o in list_order]
-  #sum2_nonz_lim = [speed_sum2_ref/(3**o) for o in list_order]
   mult_mdsz_lim = [speed_mult_ref/(2**o) for o in list_order]
-  #sum2_mdsz_lim = [speed_sum2_ref/(2**o) for o in list_order]
   mult_crmat_lim = [speed_mult_ref/((2**o)**2) for o in list_order]
-  #sum2_crmat_lim = [speed_sum2_ref/((2**o)**2) for o in list_order]
   #
   if False:
     mult_soa_x = [mfree/crmat for mfree,crmat in zip (speed_mult_soa,crmat_mult)]
