@@ -146,8 +146,8 @@ namespace zyclops { namespace test {
     const Zindex_int zorder=0, const Zindex_int imag_part=0) {
     const size_t zsz = size_t (Zindex_int (1) << zorder);
     const uint n = 2;
-    const std::vector<double> zx = {x,x, 1.0,1.0, 0.0,0.0, 0.0,0.0, 0.0,0.0};
-    const std::vector<double> zy = {y,y, 0.0,0.0, 1.0,1.0, 0.0,0.0, 0.0,0.0};
+    const std::vector<double> zx = {x,x, 1.0,1.0, 0.0,0.0, 0.0,0.0};
+    const std::vector<double> zy = {y,y, 0.0,0.0, 1.0,1.0, 0.0,0.0};
     auto zf = std::vector<double> (zsz * n);
     zyc::mdsa_madd (zf.data()[0], zx.data()[0], zy.data()[0], 2, n);
     const auto zf0 = zf [std::size_t (n* imag_part +0)];
