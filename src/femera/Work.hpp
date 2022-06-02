@@ -35,7 +35,7 @@ namespace femera {
     class Main; class Root; class Node; class Fcpu;
     class Fmpi; class Fomp; class Nvid;
   }
-  namespace data {//TODO class Type; class Base; class Dflt;
+  namespace data {
     class File; class Logs; class Dlim; class Text;
     class Cgns; class Gmsh; class Moab; class Moab; class Pets;
   }
@@ -50,8 +50,6 @@ namespace femera {
   using Work_spt = FMR_SMART_PTR <Work>;
   using Jobs_spt = FMR_SMART_PTR <task::Jobs>;// concrete Task interface
   //
-  template <typename T, typename C>
-  T* cast_via_work (C* child);//TODO Move to Work class?
   //
   class Work {/* This is an abstract (pure virtual) base class (interface).
   * Derived classes use the curiously recurrent template pattern (CRTP) e.g.,
@@ -69,6 +67,9 @@ namespace femera {
     data::File* data = nullptr;       // data, logging, and file handling
     test::Beds* test = nullptr;       // correctness and performance testing
   public:// methods -----------------------------------------------------------
+    template <typename T, typename C> static inline constexpr
+    T* cast_via_work (C* child)
+    noexcept;
     std::string    set_name (const std::string&) noexcept;
     std::string    get_name    ()         noexcept;
     std::string    get_abrv    ()         noexcept;

@@ -84,7 +84,7 @@ namespace femera {
 #endif
     switch (fmr::Enum_int (this->task_type)) {
       case (fmr::Enum_int (Plug_type::Fomp)):{
-        return cast_via_work<proc::Fomp> (this)->task_proc_ix ();
+        return Work::cast_via_work<proc::Fomp> (this)->task_proc_ix ();
     } }
     return this->proc_ix;
   }

@@ -26,7 +26,7 @@ namespace femera {
     this->logs_init_stat = tf;
 #if 0
     if (tf) {
-      auto D = cast_via_work<data::Text>(this->get_task (Plug_type::Text));
+      auto D = Work::cast_via_work<data::Text>(this->get_task (Plug_type::Text));
       if (D != nullptr) {
         D->file_line_sz = this->file_line_sz;
         D->line_name_sz = this->line_name_sz;
@@ -39,7 +39,7 @@ namespace femera {
   (const data::File_ptrs_t& flist, const std::string& form, Args ...args) {
 # if 0
     const auto D = this->data->get_task (Plug_type::Text);
-//    const auto D = cast_via_work<data::Text>(this->get_task (Plug_type::Text));
+//    const auto D = Work::cast_via_work<data::Text>(this->get_task (Plug_type::Text));
     if (D != nullptr) {return D->text_line (flist, form, args...);}
     return "";
 #else
@@ -70,7 +70,7 @@ namespace femera {
     const std::string& label, const std::string& form, Args ...args) {
 # if 0
     if (this->did_logs_init ()) {
-      const auto D = cast_via_work<data::Text>(this->get_task (Plug_type::Text));
+      const auto D = Work::cast_via_work<data::Text>(this->get_task (Plug_type::Text));
 //      const auto D = this->get_task (Plug_type::Text);
       if (D != nullptr) {return D->name_line (flist, label, form, args...);}
     }

@@ -6,8 +6,9 @@
 #include <cstdio>     // std::printf
 #endif
 
-template <typename T, typename C> inline
-T* femera::cast_via_work (C* child) {
+template <typename T, typename C> inline constexpr
+T* femera::Work::cast_via_work (C* child)
+noexcept {
   return static_cast<T*> (static_cast<Work*> (child));
 }
 namespace femera {
