@@ -26,7 +26,7 @@ namespace femera { namespace data {
   }
   template <fmr::Align_int A>
   template <typename T> inline
-  fmr::Align_int Bulk<A>::get_sizeof ()
+  fmr::Align_int Bulk<A>::bulk_sizeof ()
   noexcept {
     return this->size_of;
   }

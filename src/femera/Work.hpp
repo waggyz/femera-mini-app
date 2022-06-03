@@ -31,19 +31,19 @@ namespace femera {
   template <typename> class Test;// class Beds; interface
   template <typename> class Task;// class Jobs; interface
   //
-  namespace proc {
+  namespace proc {// CRTP inheriance from Proc; interface is Main
     class Main; class Root; class Node; class Fcpu;
     class Fmpi; class Fomp; class Nvid;
   }
-  namespace data {
+  namespace data {// CRTP inheriance from Data; interface is File
     class File; class Logs; class Dlim; class Text;
     class Cgns; class Gmsh; class Moab; class Moab; class Pets;
   }
-  namespace test {
+  namespace test {// CRTP inheriance from Test; interface is Beds
     class Beds; class Unit; class Self; class Perf;
     class Gtst;
   }
-  namespace task {
+  namespace task {// CRTP inheriance from Task; interface is Task
     class Jobs; class Sims; class Runs;
   }
   // typedefs

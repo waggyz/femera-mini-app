@@ -54,12 +54,12 @@ namespace femera { namespace data {
       return nullptr;
     }
     const auto ptr = vals->get_fast<T>();
-    if (vals->get_sizeof<T>() == sizeof (T)) {
+    if (vals->bulk_sizeof<T>() == sizeof (T)) {
       return & ptr [start];
     }
     // convert vals in memory to requested type T
     const auto n    = vals->get_size  <T>();
-    const auto each = vals->get_sizeof<T>();
+    const auto each = vals->bulk_sizeof<T>();
 #ifdef FMR_DEBUG
     printf ("%s: padded size before move %lu bytes\n",
       id.c_str(), vals->mem_size<T>());
@@ -96,18 +96,18 @@ namespace femera { namespace data {
       return nullptr;
     }
     const auto ptr = vals->get_fast<T>();
-    if (vals->get_sizeof <T>() == sizeof (T)
+    if (vals->bulk_sizeof <T>() == sizeof (T)
       && vals->has_sign <T>() == std::is_signed <T>::value) {
       return & ptr [start];
     }
     // convert stored to requested type
 #ifdef FMR_DEBUG
     printf ("converting %s from %sint%lu_t to %sint%lu_t...\n", id.c_str(),
-      vals->has_sign () ? "":"u", vals->get_sizeof (),
+      vals->has_sign () ? "":"u", vals->bulk_sizeof (),
       std::is_signed <T>::value ? "":"u", sizeof(T) )
 #endif
     const auto n    = vals->get_size  <T>();
-    const auto each = vals->get_sizeof<T>();
+    const auto each = vals->bulk_sizeof<T>();
     const auto sign = vals->has_sign  <T>();
     const auto keep = std::move (vals->take_bulk());        // keep ptr valid
     FMR_ARRAY_PTR dest = this->set<T> (id, n, T(0));        // zero-initialize

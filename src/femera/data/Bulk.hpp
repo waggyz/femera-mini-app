@@ -18,9 +18,6 @@ namespace femera { namespace data {
     fmr::Align_int size_of   = sizeof (fmr::Bulk_int);// each value in bytes
     bool           is_signed = std::is_signed <fmr::Bulk_int>::value;
   public:
-    template <typename T> inline static constexpr
-    fmr::Align_int offset (uintptr_t)
-    noexcept;
     template <typename T> inline
     std::size_t get_size ()// size of data
     noexcept;
@@ -28,16 +25,16 @@ namespace femera { namespace data {
     std::size_t mem_size ()// size including padding
     noexcept;
     template <typename T> inline
-    fmr::Align_int get_sizeof ()
+    fmr::Align_int bulk_sizeof ()// sizeof storage type, usually byte (1)
     noexcept;
     template <typename T> inline
     bool has_sign ()
     noexcept;
     template <typename T> inline
-    T* set (const std::size_t n, const T init_val)
+    T* set (std::size_t n, T init_val)
     noexcept;
     template <typename T>
-    T* set (const std::size_t n, const T* init_vals)
+    T* set (std::size_t n, const T* init_vals)
     noexcept;
     template <typename T> inline
     T* get_fast (std::size_t start=0)
@@ -56,8 +53,11 @@ namespace femera { namespace data {
       typename std::enable_if <sizeof(H) == 8>::type* = nullptr)
     noexcept;
   private:
+    template <typename T> inline static constexpr
+    fmr::Align_int offset (uintptr_t)
+    noexcept;
     template <typename I>
-    I* raw (const size_t n=0)
+    I* raw (size_t n=0)
     noexcept;
   };
 } }//end femera::data:: namespace
