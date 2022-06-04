@@ -5,34 +5,19 @@
 
 namespace zyclops {
 
-  struct Zomplex {// hypercomplex scalar
+  struct Zomplex {// hypercomplex number info
   public:
-    Algebra     get_family ();
-    Zorder_int  get_order  ();
-    Zindex_int zval_size   ();
-    Zindex_int   cr_size   ();
-    Zindex_int   cr_nnz    ();
-#if 0
-    bool       is_vector    ();
-    bool       is_conjugate ();
-    bool       is_cr_matrix ();
-    bool       is_cr_upper  ();
-    bool       is_cr_lower  ();
-    bool       is_cr_full   ();
-    bool       is_sparse    ();
-#endif
+    Algebra     get_family () noexcept;
+    Zorder_int  get_order  () noexcept;
+    Zindex_int zval_size   () noexcept;
+    Zindex_int   cr_size   () noexcept;
+    Zindex_int   cr_nnz    () noexcept;
   public:
-    Zomplex ()=default;
-    Zomplex (Algebra, Zorder_int);
+    Zomplex () noexcept=default;
+    Zomplex (Algebra, Zorder_int) noexcept;
   private:
-    Zorder_int order = 0;
+    Zorder_int order = 0;// default is real number
     Algebra   family = Algebra::Real;
-#if 0
-    bool is_transpose = false;
-    bool    has_upper = false;// triangular or full matrix storage
-    bool    has_lower = false;// triangular or full matrix storage
-    bool    has_zeros = true; // false: is sparse (zeros removed from matrix)
-#endif
   };
 #if 0
   const static Zomplex Real

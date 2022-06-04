@@ -3,12 +3,14 @@
 
 namespace femera { namespace data {
   inline
-  Bank::Bank () {
+  Bank::Bank ()
+  noexcept {
     this->name_vals.reserve (this->map_init_size);
     this->name_ints.reserve (this->map_init_size);
   }
   inline
-  Bank::Bank (const fmr::Local_int n) : map_init_size (n) {
+  Bank::Bank (const fmr::Local_int n)
+  noexcept : map_init_size (n) {
     this->name_vals.reserve (this->map_init_size);
     this->name_ints.reserve (this->map_init_size);
   }

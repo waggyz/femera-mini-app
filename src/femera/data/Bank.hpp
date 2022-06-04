@@ -47,8 +47,8 @@ namespace femera { namespace data {
     fmr::Local_int del_all ()// clears int and float maps; returns # deleted
     noexcept;
   public:
-    Bank ();
-    Bank (fmr::Local_int init_size);
+    Bank () noexcept;
+    Bank (fmr::Local_int init_size) noexcept;
   };
 } }//end femera::data:: namespace
 

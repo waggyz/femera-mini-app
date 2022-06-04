@@ -20,6 +20,7 @@ noexcept {
   }
   return result;
 }
+#if 0
 static inline constexpr
 uint zyclops::hamw (const uint64_t i)
 noexcept {
@@ -38,6 +39,7 @@ noexcept {
   return uint(__builtin_popcount (i));// gcc builtin returns int
 #endif
 }
+#endif
 static inline constexpr
 bool zyclops::is_mdcr_nz (const Zindex_int row, const Zindex_int col)
 noexcept{

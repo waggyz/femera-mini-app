@@ -3,28 +3,30 @@
 
 namespace zyclops {
   inline
-  Algebra Zomplex::get_family   (){
+  Zomplex::Zomplex (Algebra z, Zorder_int p) noexcept : order(p), family (z) {
+  }
+  inline
+  Algebra Zomplex::get_family () noexcept {
     return this->family;
   }
   inline
-  Zorder_int Zomplex::get_order    (){
+  Zorder_int Zomplex::get_order () noexcept {
     return this->order;
   }
   inline
-  Zomplex::Zomplex (Algebra z, Zorder_int p)
-    :  order(p), family (z) {
+  Zindex_int Zomplex::zval_size () noexcept {// 2^m == 1 << m
+    return Zindex_int(1) << this->order;
   }
   inline
-  Zindex_int Zomplex::zval_size () {
-    return size_t(1) << this->order;
-  }
-  inline
-  Zindex_int Zomplex::cr_size () {
+  Zindex_int Zomplex::cr_size () noexcept {// (2^m)^2 == 4^m == 2^(2*m)
+#if 0
     const auto n=size_t(1) << this->order;
     return n*n;
+#endif
+    return Zindex_int(1) << (this->order << 1);
   }
   inline
-  Zindex_int Zomplex::cr_nnz () {
+  Zindex_int Zomplex::cr_nnz () noexcept {
     switch (this->family) {
       case Algebra::Int     ://fall through
       case Algebra::Nat     ://fall through
@@ -39,37 +41,7 @@ namespace zyclops {
     }
     return 0;
   }
-#if 0
-  inline
-  bool Zomplex::is_cr_matrix (){
-    return this->has_upper || this->has_lower;
-  }
-  inline
-  bool Zomplex::is_cr_upper  (){
-    return this->has_upper && ! this->has_lower;
-  }
-  inline
-  bool Zomplex::is_cr_lower  (){
-    return ! this->has_upper && this->has_lower;
-  }
-  inline
-  bool Zomplex::is_cr_full   (){
-    return this->has_upper && this->has_lower;
-  }
-  inline
-  bool Zomplex::is_vector    (){
-    return ! this->is_cr_matrix ();
-  }
-  inline
-  bool Zomplex::is_conjugate (){
-    return this->is_transpose;
-  }
-  inline
-  bool Zomplex::is_sparse    (){
-    return ! has_zeros;
-  }
-#endif
-
+//
 }// end zyclops:: namespace
 
 //end ZYC_HAS_ZOMPLEX_IPP

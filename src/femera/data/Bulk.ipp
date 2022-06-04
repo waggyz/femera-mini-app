@@ -5,6 +5,10 @@
  #include <nmmintrin.h>
 
 namespace femera { namespace data {
+  template <fmr::Align_int A> inline
+  Bulk<A>::Bulk ()
+  noexcept {
+  }
   template <fmr::Align_int A>
   template <typename T> inline constexpr
   fmr::Align_int Bulk<A>::offset (const std::uintptr_t address)
