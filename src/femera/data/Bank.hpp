@@ -17,7 +17,7 @@ namespace femera { namespace data {
 #ifdef FMR_ALIGN_INTS
     using Bulk_ints = Bulk <FMR_ALIGN_INTS>;
 #else
-    using Bulk_ints = Bulk <alignof (size_t)>;
+    using Bulk_ints = Bulk <alignof (std::size_t)>;
 #endif
   private:
     std::unordered_map<Data_id, Bulk_vals> name_vals ={};// SSE,__m256d,...align
@@ -26,10 +26,10 @@ namespace femera { namespace data {
   public:
     //TODO handle SSE, AVX, AVX512 types
     template <typename T>
-    T* set (const Data_id& id, size_t n, T init_val=T(0))
+    T* set (const Data_id& id, size_t, T init_val=T(0))
     noexcept;
     template <typename T>
-    T* set (const Data_id& id, size_t n, const T* init_vals)// T& is ambiguous
+    T* set (const Data_id& id, size_t, const T* init_vals)// T& is ambiguous
     noexcept;
     template <typename I>
     I* get (const Data_id& id, size_t start=0, typename
@@ -48,7 +48,7 @@ namespace femera { namespace data {
     noexcept;
   public:
     Bank ();
-    Bank (const fmr::Local_int init_size);
+    Bank (fmr::Local_int init_size);
   };
 } }//end femera::data:: namespace
 

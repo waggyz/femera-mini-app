@@ -31,29 +31,29 @@
 namespace zyclops {
   using Zindex_int = uint_fast32_t;
   using Zorder_int = Zindex_int;// same as Zindex_int; name is for semantics
-  // max uint needed to index into   CR matrix: 2^(2*(zorder_max+1)) - 1
-  // max uint needed for matrix-free CR access: 2^(  (zorder_max+1)) - 1
+  // max uint needed to index into   CR matrix: 2^(2*(max_zorder+1)) - 1
+  // max uint needed for matrix-free CR access: 2^(  (max_zorder+1)) - 1
   //
-  enum class Algebra : int8_t { Unknown =0,
-    Real, Complex, Dual, Split, QCDa, Oti, User,// QCDa: Cayley-Dickson algebras
+  enum class Algebra : int8_t { Unknown =-1,
+    Real, Complex, Dual, Split, Qcda, Oti, User,// Qcda: Cayley-Dickson algebras
     Int,// signed integer
     Nat // unsigned natural number
   };
-  enum class Stored : int8_t { Unknown =0,// for arrays of Zomplex numbers
-    Mixed, // AoS (array of structs, interleaved real & imaginary parts)
-    Block, // SoA (struct of arrays, arrays of real & each imaginary part)
+  enum class Stored : int8_t { Unknown =-1,// for arrays of Zomplex numbers
+    Mixed, // AoS (array of structs: interleaved real & imaginary parts)
+    Block, // SoA (struct of arrays: arrays of real & each imaginary part)
     Native // Native is for real & built-in complex type
   };
-  static const Zorder_int zorder_max = 15;
+  static const Zorder_int max_zorder = 15;
   //
   static inline
   Zindex_int upow (Zindex_int base, Zindex_int exponent)
   noexcept;
   static inline constexpr
-  uint hamw (uint64_t i)
+  uint hamw (uint64_t)
   noexcept;
   static inline constexpr
-  uint hamw (uint32_t i)
+  uint hamw (uint32_t)
   noexcept;
   // multidual Cauchy-Riemann (CR) matrix indexing
   static inline constexpr                      // returns true for nonzero
@@ -68,18 +68,20 @@ namespace zyclops {
   T mdcr_elem (const T& a,                     // fast with -flto
     Zindex_int row, Zindex_int col)
   noexcept;
-  template <typename T> static inline constexpr// returns a_rc * b_rc,
-  T mdcr_mult_elem (const T& a, const T& b,    // fast with -flto
-    Zindex_int row, Zindex_int col)
-  noexcept;
   template <typename T> static inline constexpr// returns a_rc with safe access
   T mdcr_elem (const T& a,                     // to higher order than stored
     Zindex_int row, Zindex_int col, Zorder_int zorder_stored)
   noexcept;
-  template <typename T> static inline constexpr// returns a_rc * b_rc
-  T mdcr_mult_elem (const T& a, const T& b,    // for heterogeneous order ops
+  template <typename T> static inline constexpr// returns a_r * b_rc,
+  T mdcr_mult_elem (const T& a, const T& b,    // fast with -flto
+    Zindex_int row, Zindex_int col)
+  noexcept;
+#if 0
+  template <typename T> static inline constexpr// returns a_r * b_rc
+  T mdcr_mult_elem (const T& a, const T& b,//TODO for heterogeneous order ops
     Zindex_int row, Zindex_int col, Zorder_int min_zorder_of_operands)
   noexcept;
+#endif
   // hypercomplex scalar array operations
   template <typename T> static inline          // c = a + b, returns c ptr,
   T* mza_add (T& c, const T& a, const T& b, Zorder_int order, std::size_t n=1)

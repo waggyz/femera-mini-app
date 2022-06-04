@@ -75,6 +75,7 @@ noexcept {
   return ((row ^ col) == (row - col)) && ((row - col) < (Zindex_int(1) << o))
     ? (&v)[row - col] : T(0.0);
 }
+#if 0
 template <typename T> static inline constexpr// for heterogeneous order multiply
 T zyclops::mdcr_mult_elem (const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyclops::Zindex_int row, const zyclops::Zorder_int col,
@@ -83,6 +84,7 @@ noexcept {
   return ((row ^ col) == (row - col)) && ((row - col) < (Zindex_int(1) << o))
     ? (&a)[col] * (&b)[row - col] : T(0.0);
 }
+#endif
 template <typename T> static inline
 T* zyclops::mdas_madd// array of structs storage, c += a * b
 (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,

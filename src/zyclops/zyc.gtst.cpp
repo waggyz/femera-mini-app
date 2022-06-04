@@ -12,12 +12,12 @@ namespace zyclops { namespace test {
     EXPECT_EQ( 1, 1 );
   }
   TEST( Zyc, IntSizes ){
-    EXPECT_GE( std::numeric_limits<Zorder_int>::max (), zyc::zorder_max );
+    EXPECT_GE( std::numeric_limits<Zorder_int>::max (), zyc::max_zorder );
 #if 0
     EXPECT_EQ( sizeof (int_fast16_t), sizeof (int_fast32_t) );
 #endif
     EXPECT_GT( std::numeric_limits<Zindex_int>::max (),
-      zyc::upow (std::size_t (2), std::size_t (2)*zyc::zorder_max) - 1);
+      zyc::upow (std::size_t (2), std::size_t (2)*zyc::max_zorder) - 1);
   }
   template <typename T> static inline constexpr
   T mdcr_elem_test (const T& ZYC_RESTRICT v,
