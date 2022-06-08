@@ -8,8 +8,8 @@
 //     data into fmr::Vals structures, then call a specialized non-variadic
 //     member function of Text or Dlim to handle that structure used in File.ipp
 //     so the next two can remain in File.cpp.
-#include "Text.hpp"
-#include "Dlim.hpp"
+//#include "Text.hpp"
+//#include "Dlim.hpp"
 #endif
 
 #include <unordered_map>
