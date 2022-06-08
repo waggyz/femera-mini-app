@@ -1,7 +1,7 @@
 #ifndef FEMERA_TEST_HPP
 #define FEMERA_TEST_HPP
 
-#include "Work.hpp"
+#include "proc/Main.hpp"
 
 #include <valarray>
 

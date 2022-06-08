@@ -1,9 +1,6 @@
 #ifndef FEMERA_HAS_DATA_IPP
 #define FEMERA_HAS_DATA_IPP
 
-#include "proc/Main.hpp"
-//#include "data/File.hpp"// circular reference ok for CRTP?
-
 #undef FMR_DEBUG
 #include <cstdio>     // std::printf
 #ifdef FMR_DEBUG

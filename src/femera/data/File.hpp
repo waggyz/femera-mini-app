@@ -3,12 +3,14 @@
 
 #include "../Data.hpp"
 
+#if 0
 //TODO Make variadic read/save/send methods in File to package heterogenous
 //     data into fmr::Vals structures, then call a specialized non-variadic
-//     member function of Text/Dlim to handle that structure used in File.ipp
+//     member function of Text or Dlim to handle that structure used in File.ipp
 //     so the next two can remain in File.cpp.
-//#include "Text.hpp"
-//#include "Dlim.hpp"
+#include "Text.hpp"
+#include "Dlim.hpp"
+#endif
 
 #include <unordered_map>
 #include <valarray>
@@ -29,8 +31,10 @@ namespace femera { namespace data {
     std::unordered_map <File_id, Page_dims> file_data = {};
 #endif
   private:
-    Path_list_t inp_file_list ={};// initialized from command line args
+#if 0
+    Path_list_t inp_file_list ={};//TODO initialized from command line args
     Path_list_t out_file_list ={};//               "
+#endif
 #if 1
     // TODO Replace below with unordered_map <Data_id    , data::Page_dims>
     //      or                 unordered_map <Vals_type_t, data::Page_dims>.
