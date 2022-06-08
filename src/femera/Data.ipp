@@ -46,6 +46,17 @@ namespace femera {
       Errs::print (this->get_abrv ()+" task_init"); }
     if (err > 0) {return this->exit (err); }
     err = init_list (argc, argv);//                    ...then init child tasks.
+#if 0
+    const auto n = this->get_task_n ();
+    if (n>0) {
+      auto msg = std::string("data init mods ");
+        for (fmr::Local_int i=0; i<n; i++) {
+          msg += this->get_task (i)->abrv;
+          msg += (i == (n - 1)) ? "\n":" ";
+      }
+    printf (msg.c_str());
+  }
+#endif
     return err;
   }
   template <typename T> inline
