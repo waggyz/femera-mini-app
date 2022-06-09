@@ -1,6 +1,7 @@
 #ifndef FEMERA_DATA_BANK_HPP
 #define FEMERA_DATA_BANK_HPP
 
+#include "../Data.hpp"       // femera::data::Data_id
 #include "Bulk.hpp"
 
 #include <vector>

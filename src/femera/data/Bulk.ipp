@@ -1,8 +1,9 @@
 #ifndef FEMERA_DATA_BULK_IPP
 #define FEMERA_DATA_BULK_IPP
+
 #include <stddef.h>
 #include <stdint.h>
- #include <nmmintrin.h>
+#include <nmmintrin.h>
 
 namespace femera { namespace data {
   template <fmr::Align_int A> inline
