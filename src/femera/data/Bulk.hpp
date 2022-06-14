@@ -26,7 +26,7 @@ namespace femera { namespace data {
     std::size_t mem_size ()// size including padding
     noexcept;
     template <typename T> inline
-    fmr::Align_int bulk_sizeof ()// sizeof storage type, usually byte (1)
+    fmr::Align_int bulk_sizeof ()// sizeof storage type, usually 1 byte
     noexcept;
     template <typename T> inline
     bool has_sign ()
@@ -38,20 +38,20 @@ namespace femera { namespace data {
     T* set (std::size_t, const T* init_vals)
     noexcept;
     template <typename T> inline
-    T* get_fast (std::size_t start=0)
+    T* get_fast (std::size_t start = 0)
     noexcept;
     template <typename T> inline
-    T* get_safe (std::size_t start=0)
+    T* get_safe (std::size_t start = 0)
     noexcept;
     Bulk_t& take_bulk ()// use to move or swap Bulk_t
     noexcept;
     template <typename H> inline
-    H make_hash (H init_hash=H(0),
-      typename std::enable_if <sizeof(H) == 4>::type* = nullptr)
+    H make_hash (H init_hash = 0,
+      typename std::enable_if <sizeof (H) == 4>::type* = nullptr)
     noexcept;
     template <typename H> inline
-    H make_hash (H init_hash=H(0),
-      typename std::enable_if <sizeof(H) == 8>::type* = nullptr)
+    H make_hash (H init_hash = 0,
+      typename std::enable_if <sizeof (H) == 8>::type* = nullptr)
     noexcept;
     //
     Bulk () noexcept;// Constructor

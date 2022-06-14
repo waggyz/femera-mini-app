@@ -6,7 +6,7 @@
 namespace femera { namespace test {
   const auto mini = fmr::new_jobs ();
   //
-  auto bank = femera::data::Bank();
+  auto bank = femera::data::Bank ();
   const auto ints10 = std::string("test-10-ints");
   const auto vals10 = std::string("test-10-floats");
   //
