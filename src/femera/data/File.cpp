@@ -3,7 +3,7 @@
 #include "Text.hpp"
 #include "Dlim.hpp"
 
-#include "Vals.hpp"
+#include "Bank.hpp"
 
 #ifdef FMR_HAS_CGNS
 #include "Cgns.hpp"
@@ -32,18 +32,18 @@ namespace femera {
     o = this->proc->get_proc_n (Plug_type::Fomp);
 #endif
     FMR_PRAGMA_OMP(omp parallel for schedule(static) ordered num_threads(o))
-    for (fmr::Local_int i=0; i<o; i++) {// Make & add thread-local Vals
+    for (fmr::Local_int i=0; i<o; i++) {// Make & add thread-local data::Bank
       FMR_PRAGMA_OMP(omp ordered) {     // in order.
-        auto V = Data<data::Vals>::new_task (this->get_core());
+        auto B = Data<data::Bank>::new_task (this->get_core());
 #ifdef FMR_VALS_LOCAL
-        V->set_name ("Femera data for process "
+        B->set_name ("Femera data for process "
           + std::to_string (this->proc->get_proc_id ()));
 #endif
 #ifdef FMR_DEBUG
         const auto m = this->proc->get_proc_ix (Plug_type::Fmpi);
-        printf ("%s (MPI: %u)\n", V->get_name ().c_str(), m);
+        printf ("%s (MPI: %u)\n", B->get_name ().c_str(), m);
 #endif
-        this->add_task (std::move (V));
+        this->add_task (std::move (B));
     } }
     this->add_task (std::move (Data<data::Logs>::new_task (this->get_core())));
     this->add_task (std::move (Data<data::Text>::new_task (this->get_core())));

@@ -5,7 +5,7 @@
 #include <cstdio>     // std::printf
 #endif
 
-namespace femera { namespace data {
-} }//end femera::data:: namespace
+namespace femera {
+}//end femera:: namespace
 
 #undef FMR_DEBUG

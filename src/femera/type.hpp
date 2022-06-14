@@ -45,7 +45,7 @@ namespace femera {
 //#endif
     Task, Jobs, Sims, Runs,//Task types
     Petsc, // PETSc handler
-    Vals, // data values
+    Bank, // data bank
 #if 0
     Dflt, // Data type: default data for testing
     //
