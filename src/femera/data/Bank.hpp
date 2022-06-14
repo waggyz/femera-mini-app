@@ -7,7 +7,7 @@ namespace femera { namespace data {
   class Bank;//            Data has vtable
   class Bank final: public Data <Bank> { private: friend class Data;
   public:
-    Vals bank = Vals();
+    Vals vals = Vals();
   private:
     void task_init (int* argc, char** argv);
     void task_exit ();
