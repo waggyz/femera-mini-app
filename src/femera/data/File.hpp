@@ -16,7 +16,7 @@
 #include <valarray>
 
 namespace femera { namespace data {
-  class File;// Derive a CRTP concrete class from Data.
+  class File;// Derive as a CRTP concrete class from Data.
   class File final: public Data <File> {// private: friend class Data;
   public:
     File_ptrs_t fmrlog = {};// main proc to stdout set by Logs::task_init (..)

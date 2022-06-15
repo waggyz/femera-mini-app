@@ -6,16 +6,23 @@
 
 namespace femera { namespace data {
   class Bank;// use to synchronize Vals data
+  // Derive as a CRTP concrete class from Data.
   class Bank final: public Data <Bank> { private: friend class Data;//has vtable
     //             because Data has vtable
     // wraps & exposes a vector of Vals (no vtable) instances for fast access
-  public:
 #ifdef FMR_BANK_LOCAL
+  private:
     Vals vals = Vals ();
 #endif
 #ifdef FMR_VALS_LOCAL
-    std::vector<Vals> vals = {};
+  private:
+    using Vals_list_t = std::vector<Vals>;
+    Vals_list_t vals = {};
+  public:
+    Vals* vals_ptr (fmr::Local_int ix);
 #endif
+  public:
+    Vals* vals_ptr ();
   private:
     void task_init (int* argc, char** argv);
     void task_exit ();

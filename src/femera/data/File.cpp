@@ -27,6 +27,7 @@
 
 namespace femera {
   void data::File::task_init (int*, char**) {
+//    if (this->data == nullptr) {this->data = this;}
     fmr::Local_int o = 1;
 #ifdef FMR_BANK_LOCAL
     o = this->proc->get_proc_n (Plug_type::Fomp);
