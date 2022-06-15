@@ -1,9 +1,6 @@
 #include "nvid.hpp"
 #include "../Errs.hpp"
 
-#include <cstdint>
-#include <string>
-
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
 #include <cstdio>     // std::printf

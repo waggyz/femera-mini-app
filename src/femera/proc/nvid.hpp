@@ -4,7 +4,6 @@
 #include "../../fmr/fmr.hpp"
 
 #ifdef FMR_HAS_NVIDIA
-#include <string>
 
 namespace femera { namespace proc { namespace nvid {
 

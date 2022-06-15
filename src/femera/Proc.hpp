@@ -4,7 +4,6 @@
 #include "Work.hpp"
 
 #include "../fmr/proc.hpp"// used in Proc.ipp
-#include <string>         // used in Proc.ipp
 
 namespace femera {
   namespace proc {

@@ -36,7 +36,7 @@ namespace femera { namespace data {
     Path_list_t out_file_list ={};//               "
 #endif
 #if 1
-    // TODO Replace below with unordered_map <Data_id    , data::Page_dims>
+    // TODO Replace below with unordered_map <Data_name_t, data::Page_dims>
     //      or                 unordered_map <Vals_type_t, data::Page_dims>
     //      or std::vector <data::Page_dims> indexed by Vals_type_t.
     std::unordered_map <FILE*, fmr::Line_size_int> file_line_sz

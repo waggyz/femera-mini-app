@@ -4,7 +4,6 @@
 #include "../fmr/fmr.hpp"
 
 #include <exception>
-#include <string>
 /*
   https://stackoverflow.com/questions/348833
     /how-to-know-the-exact-line-of-code-where-an-exception-has-been-caused

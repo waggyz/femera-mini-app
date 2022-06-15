@@ -3,8 +3,6 @@
 
 #include "../perf.hpp"
 
-#include <string>
-
 namespace fmr { namespace perf {
   template <typename I, typename F>
   struct Meter {

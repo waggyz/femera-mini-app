@@ -26,27 +26,27 @@ namespace femera { namespace data {
     return n;
   }
   template <typename T> inline
-  T* Vals::set (const Data_id& id, const std::size_t n, const T init_val)
+  T* Vals::set (const fmr::Data_name_t& id, const std::size_t n, const T init_val)
   noexcept {
     return std::is_floating_point <T>::value
       ? this->name_vals[id].set (n, init_val)
       : this->name_ints[id].set (n, init_val);
   }
   template <typename T>
-  T* Vals::set (const Data_id& id, const std::size_t n, const T* init_vals)
+  T* Vals::set (const fmr::Data_name_t& id, const std::size_t n, const T* init_vals)
   noexcept {
     return std::is_floating_point <T>::value
       ? this->name_vals[id].set (n, init_vals)
       : this->name_ints[id].set (n, init_vals);
   }
   template <typename T> inline
-  void Vals::del (const Data_id& id)
+  void Vals::del (const fmr::Data_name_t& id)
   noexcept {std::is_floating_point <T>::value
       ? this->name_vals.erase (id)
       : this->name_ints.erase (id);
   }
   template <typename T> inline
-  T* Vals::get (const Data_id& id, const std::size_t start, typename
+  T* Vals::get (const fmr::Data_name_t& id, const std::size_t start, typename
     std::enable_if <std::is_floating_point <T>::value>::type*)
   noexcept {
     Bulk_vals* vals = nullptr;
@@ -88,7 +88,7 @@ namespace femera { namespace data {
     return & dest [start];
   }
   template <typename T> inline
-  T* Vals::get (const Data_id& id, const std::size_t start, typename
+  T* Vals::get (const fmr::Data_name_t& id, const std::size_t start, typename
     std::enable_if <std::is_integral <T>::value>::type*)
   noexcept {
     Bulk_ints* vals = nullptr;

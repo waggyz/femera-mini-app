@@ -1,6 +1,7 @@
 #ifndef FMR_HAS_FMR_HPP
 #define FMR_HAS_FMR_HPP
 
+#include <string>
 #include <cstdint>
 
 namespace fmr {
@@ -38,6 +39,9 @@ namespace fmr {
 #endif
   //
   using Line_size_int = uint_fast16_t;//TODO Remove.
+  //
+  using Data_name_t = std::string;//WAS Data_id
+  using File_name_t = std::string;
 }//end fmr:: namespace
 namespace femera { namespace test {
   int early_main (int* argc, char** argv);

@@ -8,7 +8,6 @@
 //#include "vals.hpp"
 
 #include <memory>     // std::shared_ptr, std::make_shared
-#include <string>
 #include <vector>
 #include <deque>
 #include <tuple>

@@ -12,7 +12,6 @@
 
 namespace femera { namespace data {
   using File_ptrs_t = std::vector <FILE*>;
-  using Data_id = std::string;
 #if 0
   struct Page_dims {//TODO regular blocked data, local (partitioned) data
     // for file and stream (e.g., stdout) reading and saving

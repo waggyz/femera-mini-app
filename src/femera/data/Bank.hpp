@@ -1,13 +1,14 @@
 #ifndef FEMERA_DATA_BANK_HPP
 #define FEMERA_DATA_BANK_HPP
 
+#include "../Data.hpp"
 #include "Vals.hpp"
 
 namespace femera { namespace data {
-  class Bank;// wraps & exposes Vals (no vtable) instance for fast access
+  class Bank;// use to synchronize Vals data
   class Bank final: public Data <Bank> { private: friend class Data;//has vtable
-    //             becuase Data has vtable
-    // use this class to synchronize Vals data
+    //             because Data has vtable
+    // wraps & exposes Vals (no vtable) instance for fast access
   public:
 #ifdef FMR_BANK_LOCAL
     Vals vals = Vals ();
