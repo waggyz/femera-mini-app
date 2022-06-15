@@ -8,7 +8,7 @@
 #include <unordered_map>
 
 namespace femera { namespace data {
-  class Vals {//TODO Swap Bank with Vals?
+  class Vals {//No vtable for fast non-static procedural data generation methods
   private:
 #ifdef FMR_ALIGN_VALS
     using Bulk_vals = Bulk <FMR_ALIGN_VALS>;

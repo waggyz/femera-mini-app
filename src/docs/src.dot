@@ -96,6 +96,7 @@ digraph "source tree" {
 	"Data.gtst.cpp" -> "Data.hpp"
 	"File.hpp" -> "Data.hpp"
 	"Vals.hpp" -> "Bulk.hpp"
+	"core.h" -> "Vals.hpp"
 	"Fomp.cpp" -> "Main.hpp"
 	"Beds.hpp" -> "Test.hpp"
 	"Bulk.gtst.cpp" -> "Bulk.hpp"

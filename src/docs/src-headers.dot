@@ -32,6 +32,7 @@ digraph "source tree" {
 	"Geom.hpp" -> "Work.hpp"
 	"File.hpp" -> "Data.hpp"
 	"Vals.hpp" -> "Bulk.hpp"
+	"core.h" -> "Vals.hpp"
 	"Beds.hpp" -> "Test.hpp"
 	"form.hpp" -> "fmr.hpp"
 	"Gtst.hpp" -> "Test.hpp"
