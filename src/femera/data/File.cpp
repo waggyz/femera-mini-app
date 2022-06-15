@@ -28,15 +28,15 @@
 namespace femera {
   void data::File::task_init (int*, char**) {
     fmr::Local_int o = 1;
-#ifdef FMR_VALS_LOCAL
+#ifdef FMR_BANK_LOCAL
     o = this->proc->get_proc_n (Plug_type::Fomp);
 #endif
     FMR_PRAGMA_OMP(omp parallel for schedule(static) ordered num_threads(o))
     for (fmr::Local_int i=0; i<o; i++) {// Make & add thread-local data::Bank
       FMR_PRAGMA_OMP(omp ordered) {     // in order.
         auto B = Data<data::Bank>::new_task (this->get_core());
-#ifdef FMR_VALS_LOCAL
-        B->set_name ("Femera data for process "
+#ifdef FMR_BANK_LOCAL
+        B->set_name ("Femera data bank for process "
           + std::to_string (this->proc->get_proc_id ()));
 #endif
 #ifdef FMR_DEBUG

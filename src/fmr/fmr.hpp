@@ -63,8 +63,12 @@ namespace femera { namespace test {
 #ifdef _OPENMP
 #define FMR_HAS_OPENMP
 #define FMR_PRAGMA_OMP(x) _Pragma (#x)
+//
+#undef FMR_BANK_LOCAL
 #define FMR_VALS_LOCAL
-// Define FMR_VALS_LOCAL to make data arrays thread-local to each OpenMP thread.
+//NOTE define only one of the two above.
+// Define FMR_xxxx_LOCAL to make data arrays thread-local to each OpenMP thread.
+//
 #define FMR_RUNS_LOCAL
 // Define FMR_RUNS_LOCAL for thread-local sim runners on each OpenMP thread.
 #undef FMR_OMP_LOCAL

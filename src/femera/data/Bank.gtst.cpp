@@ -11,7 +11,7 @@
 
 namespace femera { namespace test {
   const auto mini = fmr::new_jobs ();
-  
+
   using Vec alignas (size_t) = std::vector   <int>;
   using Val alignas (size_t) = std::valarray <int>;
 
@@ -206,7 +206,7 @@ namespace femera { namespace test {
     EXPECT_EQ(char(0), reinterpret_cast<char*> (&bulk[0])[0] );
   }
   TEST(BankInts, WorkForStrings) {
-    EXPECT_EQ( 5, std::snprintf (&bulk[0], bulk.size(),// returns #of chars
+    EXPECT_EQ( 5, std::snprintf (&bulk[0], bulk.size(),// returns # of chars
       std::string("hello").c_str()) );
     EXPECT_EQ( std::string("hello"), std::string (&bulk[0]) );
   }
