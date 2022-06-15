@@ -76,8 +76,8 @@ namespace femera {
     //-------------------------------------------------------------------------
 #endif
   public:
-    using Sims_list_t = std::deque <std::string>;
-    using Path_list_t = std::deque <std::string>;
+    using Sims_list_t = std::deque <fmr::Data_name_t>;
+    using Path_list_t = std::deque <fmr::File_name_t>;
     //TODO Path_list_t can be a vector to disambiguate it from Sims_list_t?
     //NOTE An empty deque/vector in an argument means all sims or all files.
     // Path_list_t ({""}); means the current working directory in a path method.

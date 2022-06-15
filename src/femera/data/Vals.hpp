@@ -19,9 +19,11 @@ namespace femera { namespace data {
 #else
     using Bulk_ints = Bulk <alignof (std::size_t)>;
 #endif
+    using map_vals_t = std::unordered_map<fmr::Data_name_t, Bulk_vals>;
+    using map_ints_t = std::unordered_map<fmr::Data_name_t, Bulk_ints>;
   private:
-    std::unordered_map<fmr::Data_name_t, Bulk_vals> name_vals ={};// SSE,__m256d,...align
-    std::unordered_map<fmr::Data_name_t, Bulk_ints> name_ints ={};// size_t alignment
+    map_vals_t name_vals ={};// SSE, __m256d,... alignment
+    map_ints_t name_ints ={};// default is size_t alignment
     fmr::Local_int map_init_size = 1024;
   public:
     //TODO handle SSE, AVX, AVX512 types

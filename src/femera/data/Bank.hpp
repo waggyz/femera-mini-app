@@ -8,7 +8,7 @@ namespace femera { namespace data {
   class Bank;// use to synchronize Vals data
   class Bank final: public Data <Bank> { private: friend class Data;//has vtable
     //             because Data has vtable
-    // wraps & exposes Vals (no vtable) instance for fast access
+    // wraps & exposes a vector of Vals (no vtable) instances for fast access
   public:
 #ifdef FMR_BANK_LOCAL
     Vals vals = Vals ();
