@@ -64,12 +64,12 @@ namespace femera { namespace data {
     const auto each = vals->get_sizeof<T>();
 #ifdef FMR_DEBUG
     printf ("%s: padded size before move %lu bytes\n",
-      id.c_str(), vals->mem_size<T>());
+      id.c_str(), vals->mem_byte<T>());
 #endif
     const auto keep = std::move (vals->take_bulk());    // keep ptr valid
 #ifdef FMR_DEBUG
     printf ("%s: padded size after  move %lu bytes\n",
-      id.c_str(), vals->mem_size<T>());
+      id.c_str(), vals->mem_byte<T>());
 #endif
     FMR_ALIGN_PTR dest = this->set<T> (id, n, T(0.0));           // zero-initialize
     if (n<=0) {return dest;}

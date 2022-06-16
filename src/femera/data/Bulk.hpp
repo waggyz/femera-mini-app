@@ -13,22 +13,32 @@ namespace femera { namespace data {
   using Bulk_t = std::vector <fmr::Bulk_int>;
   //
   template <fmr::Align_int A>
-  class alignas (A) Bulk {
+  class alignas (A) Bulk {//NOTE alignas does not always work, so...
+  private:                //
+    Bulk_t         bulk;  // ...bulk is over-allocated and aligned manually.
+    // Defaults are for storing Bulk_int values.
+    std::size_t    size      = 0;// # values <= sizeof(T) * bulk.capacity()
+    zyc::Zomplex   zomplex   = std::is_signed <fmr::Bulk_int>::value
+      ? zyc::Integer : zyc::Natural;
+    fmr::Hash_int  file_hash = 0;// CRC32 or CRC64 of data stored in file
+    fmr::Align_int size_of   = sizeof (fmr::Bulk_int);// native value in bytes
+    zyc::Stored    zlayout   = zyc::Stored::Native;
+    bool           is_signed = std::is_signed <fmr::Bulk_int>::value;
   public:
     template <typename T> inline
-    fmr::Align_int get_sizeof ()// sizeof currently stored type
+    fmr::Align_int get_sizeof ()// sizeof currently stored native (C++) type
     noexcept;
     template <typename T> inline
-    std::size_t get_size ()// number of real values in memory
+    std::size_t get_size ()// number of currently stored native (C++) values
     noexcept;
     template <typename T> inline
-    std::size_t mem_size ()// size including padding (bytes)
+    std::size_t mem_byte ()// size including padding (bytes)
     noexcept;
     template <typename T> inline
-    bool has_sign ()
+    bool has_sign ()// sign of currently stored integer values
     noexcept;
     template <typename T> inline
-    T* set (std::size_t, T init_val)
+    T* set (std::size_t, T init_val)//TODO enable_if integral or floating_point?
     noexcept;
     template <typename T>
     T* set (std::size_t, const T* init_vals)
@@ -58,16 +68,6 @@ namespace femera { namespace data {
     template <typename I>
     I* raw (size_t=0)
     noexcept;
-  private:
-  //NOTE alignas does not always work, so...
-    Bulk_t         bulk;         // ...is over-allocated and aligned manually
-    std::size_t    size      = 0;// # values <= sizeof(T) * bulk.capacity()
-    zyc::Zomplex   zomplex   = std::is_signed <fmr::Bulk_int>::value
-      ? zyc::Integer : zyc::Natural;
-    fmr::Hash_int  file_hash = 0;// CRC32 or CRC64 of data stored in file
-    zyc::Stored    zlayout   = zyc::Stored::Native;
-    fmr::Align_int size_of   = sizeof (fmr::Bulk_int);// real value in bytes
-    bool           is_signed = std::is_signed <fmr::Bulk_int>::value;
   };
 } }//end femera::data:: namespace
 

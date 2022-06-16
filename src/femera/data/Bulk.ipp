@@ -19,7 +19,7 @@ namespace femera { namespace data {
   }
   template <fmr::Align_int A>
   template <typename T> inline
-  std::size_t Bulk<A>::mem_size ()
+  std::size_t Bulk<A>::mem_byte ()
   noexcept {
     return this->bulk.size ();
   }
