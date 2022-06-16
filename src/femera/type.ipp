@@ -17,10 +17,10 @@ namespace femera {
   static inline constexpr Work_type task_cast (Task_type t) noexcept {
     return static_cast<Work_type> (t);
   }
-  static inline constexpr Work_type task_cast (Plug_type t) noexcept {
+  static inline constexpr Work_type task_cast (User_type t) noexcept {
     return static_cast<Work_type> (t);
   }
-  static inline constexpr Work_type task_cast (User_type t) noexcept {
+  static inline constexpr Work_type task_cast (Plug_type t) noexcept {
     return static_cast<Work_type> (t);
   }
 }// end femera::namespace

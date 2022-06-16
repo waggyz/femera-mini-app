@@ -31,7 +31,7 @@ namespace femera { namespace data {
   }
   template <fmr::Align_int A>
   template <typename T> inline
-  fmr::Align_int Bulk<A>::bulk_sizeof ()
+  fmr::Align_int Bulk<A>::get_sizeof ()
   noexcept {
     return this->size_of;
   }
@@ -51,11 +51,13 @@ namespace femera { namespace data {
   template <typename T> inline
   T* Bulk<A>::raw (const std::size_t nT)
   noexcept {
+    this->zomplex = std::is_floating_point <T>::value ? ::zyclops::Real
+      : (std::is_signed <T>::value ? ::zyclops::Integer : ::zyclops::Natural);
+    this->size_of   = sizeof (T);
+    this->is_signed = std::is_signed <T>::value;
     if (nT <= 0) {
       this->bulk      ={};// new empty vec or clear existing
       this->size      = 0;
-      this->size_of   = sizeof (T);
-      this->is_signed = std::is_signed <T>::value;
       return reinterpret_cast<T*> (this->bulk.data());
     }
     // over-allocate for aligned access
@@ -64,8 +66,6 @@ namespace femera { namespace data {
     // sz is also large enough for aligned SIMD access at the tail
     this->bulk.reserve (sz);// uninitialized, bulk.size()==0
     this->size      = nT;
-    this->size_of   = sizeof (T);
-    this->is_signed = std::is_signed <T>::value;
     auto ptr        = this->bulk.data ();
 #if 0
     this->bulk [0] = fmr::Bulk_int (0);// undefined behavior

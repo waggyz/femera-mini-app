@@ -8,25 +8,21 @@
 #include <unordered_map>
 
 namespace femera { namespace data {
+  namespace zyc = ::zyclops;
+  //
   using Bulk_t = std::vector <fmr::Bulk_int>;
+  //
   template <fmr::Align_int A>
   class alignas (A) Bulk {
-  private:
-  //NOTE alignas does not always work, so...
-    Bulk_t         bulk;         // ...is over-allocated and aligned manually
-    std::size_t    size      = 0;// # values <= sizeof(T) * bulk.capacity()
-    fmr::Hash_int  file_hash = 0;// CRC32 or CRC64 of data stored in file
-    fmr::Align_int size_of   = sizeof (fmr::Bulk_int);// each value in bytes
-    bool           is_signed = std::is_signed <fmr::Bulk_int>::value;
   public:
     template <typename T> inline
-    std::size_t get_size ()// size of data
+    fmr::Align_int get_sizeof ()// sizeof currently stored type
     noexcept;
     template <typename T> inline
-    std::size_t mem_size ()// size including padding
+    std::size_t get_size ()// number of real values in memory
     noexcept;
     template <typename T> inline
-    fmr::Align_int bulk_sizeof ()// sizeof storage type, usually 1 byte
+    std::size_t mem_size ()// size including padding (bytes)
     noexcept;
     template <typename T> inline
     bool has_sign ()
@@ -62,6 +58,16 @@ namespace femera { namespace data {
     template <typename I>
     I* raw (size_t=0)
     noexcept;
+  private:
+  //NOTE alignas does not always work, so...
+    Bulk_t         bulk;         // ...is over-allocated and aligned manually
+    std::size_t    size      = 0;// # values <= sizeof(T) * bulk.capacity()
+    zyc::Zomplex   zomplex   = std::is_signed <fmr::Bulk_int>::value
+      ? zyc::Integer : zyc::Natural;
+    fmr::Hash_int  file_hash = 0;// CRC32 or CRC64 of data stored in file
+    zyc::Stored    zlayout   = zyc::Stored::Native;
+    fmr::Align_int size_of   = sizeof (fmr::Bulk_int);// real value in bytes
+    bool           is_signed = std::is_signed <fmr::Bulk_int>::value;
   };
 } }//end femera::data:: namespace
 

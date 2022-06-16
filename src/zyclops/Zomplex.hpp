@@ -19,9 +19,11 @@ namespace zyclops {
     Zorder_int order = 0;// default is real number
     Algebra   family = Algebra::Real;
   };
+  const static Zomplex Real    = Zomplex (Algebra::Real,0);
+  const static Zomplex Integer = Zomplex (Algebra::Int, 0);
+  const static Zomplex Natural = Zomplex (Algebra::Nat, 0);
 #if 0
-  const static Zomplex Real
-    = Zomplex (Algebra::Real, 0, Stored::Native);
+  const static Zomplex Real = Zomplex (Algebra::Real, 0, Stored::Native);
   const static Zomplex Native_complex
     = Zomplex (Algebra::Complex, 1, Stored::Native);
   const static Zomplex Unit_quaternion

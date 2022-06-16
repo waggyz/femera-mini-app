@@ -7,38 +7,38 @@ namespace femera {
   https://stackoverflow.com/questions/18195312
   /what-happens-if-you-static-cast-invalid-value-to-enum-class
   */
-  enum class Base_type : fmr::Enum_int {
-    None=0, Work, Proc, Data, Test,
-    // Geom, Load, Phys, Cond, Solv, Sync, Part?, Post?,
+  enum class Base_type : fmr::Enum_int {// Abstract CRTP base classes
+    None=0, Work, Proc, Data, Test,     // derived from Work
+    // Geom, Load, Phys, Cond, Solv, Sync, Part?, Post?, View?
     Task // Must be last, Task_type numbers start after this.
   };
-  enum class Task_type : fmr::Enum_int {
+  enum class Task_type : fmr::Enum_int {// Built-in modules
     None = fmr::Enum_int (Base_type::None),
     Task = fmr::Enum_int (Base_type::Task),// start numbering for Task_type
-    Main, Fcpu, Node, Root,// Proc types
-    Fomp, // Proc type
+    Main, Fcpu, Node, Root,      // Proc types
+    Fomp,                        // Proc type
 //#ifdef FMR_HAS_MPI
-    Fmpi, // Proc type
+    Fmpi,                        // Proc type
 //#endif
 //#ifdef FMR_HAS_NVIDIA
-    Nvid, // Proc type
-//#endif
-//#ifdef FMR_HAS_GTEST
-    Gtst, // Proc type
+    Nvid,                        // Proc type: NVIDIA GPU handler
 //#endif
     File, Logs, Dlim, Text, Bank,// Data types
-    Beds, Unit, Self, Perf,      // Test types
 //#ifdef FMR_HAS_CGNS
-    Cgns, // Data type: CGNS file handler
+    Cgns,                        // Data type: CGNS file handler
 //#endif
 //#ifdef FMR_HAS_MOAB
-    Moab, // Data type: MOAB file handler
+    Moab,                        // Data type: MOAB file handler
 //#endif
 //#ifdef FMR_HAS_GMSH
-    Gmsh, // Data type: Gmsh file handler
+    Gmsh,                        // Data type: Gmsh handler
 //#endif
-    Jobs, Sims, Runs,//Task types //TODO: Part?, Post?
-    Petsc, // PETSc handler
+    Petsc,                       // Data type: PETSc handler
+    Beds, Unit, Self, Perf,      // Test types
+//#ifdef FMR_HAS_GTEST
+    Gtst,                        // Test type: Googletest handler
+//#endif
+    Jobs, Sims, Runs,            // Task types //TODO: Part?, Post?, View?
 #if 0
     Geom, // Move to base/core type?
     Mesh, Grid, Gcad,// Gfem, Gfdm, Gfvm,// Geom types
@@ -46,25 +46,28 @@ namespace femera {
     Surf,// BEM surfaces
     Elem,// FEM low-order (p:1,2,3) elements
     Elfs,// FEM Finite-strain elements (or just different material/physics?)
-    Bars, Quad, Tris, Tets, Pyrm, Prsm, Cube,// Elem types
-//    Beam, Shll,// Elem types
+    Bars, Quad, Tris, Tets, Pyrm, Prsm, Cube, Beam, Shll,// Elem types
     Mtrl,
+    Cmat, Cuel,// C or C++ source code
+    Fmat, Fuel,// Fortran source code (Umat, Uel ?)
     Boco, Fix0, Diri, Neum,
     Elas, Ther,
     Cnd1, Cjac,// Preconditioners
     Grad, Spcg, Sncg,// Solvers
     Mono, Halo,
 #endif
-    Plug// Must be last. Plug_type numbers start after this.
+    User// Must be last, User_type numbering starts after this.
   };
-  enum class Plug_type : fmr::Enum_int;// Forward declare
-  enum class User_type : fmr::Enum_int;// Forward declare
+  enum class User_type : fmr::Enum_int;// Forward declare, known at build time
+  // User_type::Plug is the last in User_type and starts Plug_type numbering
+  enum class Plug_type : fmr::Enum_int;// Forward declare, for runtime plugins
   //
   static constexpr Work_type task_cast (Work_type) noexcept;
   static constexpr Work_type task_cast (Base_type) noexcept;
   static constexpr Work_type task_cast (Task_type) noexcept;
-  static constexpr Work_type task_cast (Plug_type) noexcept;
   static constexpr Work_type task_cast (User_type) noexcept;
+  static constexpr Work_type task_cast (Plug_type) noexcept;
+  //
 }//end femera::namespace
 
 #include "type.ipp"
