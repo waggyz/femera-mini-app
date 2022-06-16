@@ -31,6 +31,12 @@ namespace femera { namespace data {
   }
   template <fmr::Align_int A>
   template <typename T> inline
+  std::size_t Bulk<A>::zyc_size ()
+  noexcept {
+    return this->size / this->zomplex.zval_size ();
+  }
+  template <fmr::Align_int A>
+  template <typename T> inline
   fmr::Align_int Bulk<A>::get_sizeof ()
   noexcept {
     return this->size_of;
@@ -56,8 +62,8 @@ namespace femera { namespace data {
     this->size_of   = sizeof (T);
     this->is_signed = std::is_signed <T>::value;
     if (nT <= 0) {
-      this->bulk      ={};// new empty vec or clear existing
-      this->size      = 0;
+      this->bulk ={};// new empty vec or clear existing
+      this->size = 0;
       return reinterpret_cast<T*> (this->bulk.data());
     }
     // over-allocate for aligned access
@@ -65,8 +71,8 @@ namespace femera { namespace data {
       / sizeof (fmr::Bulk_int);
     // sz is also large enough for aligned SIMD access at the tail
     this->bulk.reserve (sz);// uninitialized, bulk.size()==0
-    this->size      = nT;
-    auto ptr        = this->bulk.data ();
+    this->size = nT;
+    auto ptr = this->bulk.data ();
 #if 0
     this->bulk [0] = fmr::Bulk_int (0);// undefined behavior
     // Accessesing a vector past size() is undefined behavior...
@@ -77,19 +83,20 @@ namespace femera { namespace data {
   }
   template <fmr::Align_int A>
   template <typename T> inline
-  T* Bulk<A>::set (const std::size_t nT, const T init_val)
+  T* Bulk<A>::set (const std::size_t nvals, const T init_val)
   noexcept {
-    this->raw<T> (nT);
-    if (nT <= 0) {return reinterpret_cast<T*> (this->bulk.data ());}
+    const auto zsz = zomplex.zval_size ();
+    this->raw<T> (nvals * zsz);
+    if (nvals <= 0) {return reinterpret_cast<T*> (this->bulk.data ());}
     const auto ptr = std::uintptr_t (this->bulk.data ());
-    const std::uintptr_t sz = nT * sizeof (T) / sizeof (fmr::Bulk_int);
+    const std::uintptr_t sz = nvals * sizeof (T) * zsz / sizeof (fmr::Bulk_int);
     const auto lpad = this->offset<T> (ptr);// max left  padding is A-1
     const auto rpad = this->offset<T> (sz );// max right padding is A-1
     // nonzero init
 #if 0
     // Initialize from a temporary vector of type T.
     // This will not work with padding.
-    const auto tmp = std::vector<T> (nT, init_val);
+    const auto tmp = std::vector<T> (nvals, init_val);
     const auto ptr = reinterpret_cast<const fmr::Bulk_int*> (tmp.data());
     this->bulk.assign (ptr, ptr + sz);
 #endif
@@ -103,29 +110,35 @@ namespace femera { namespace data {
     for (size_t i=0; i<sz; i++ ) {this->bulk.push_back (bytes [i % mod]);}
 #endif
     this->bulk.resize (lpad + sz + rpad);// <= capacity (); ptr still valid
+    /* Resize sets to zero, and zero is the same bits for all numeric types.
+       This is checked in data/Vals.gtst.cpp. */
     if (init_val <= T(0) && init_val >= T(0)) {// == 0.0, no float warning
-      // Zero is the same bits for all numeric types (data/Vals.gtst.cpp).
       return reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
     }
+    std::size_t  zn = nvals, zi = 1;
+    if (this->zlayout == zyc::Stored::Mixed) { zn = nT * zsz; zi = zsz; }
+#if 0
     if (std::is_floating_point <T>::value) {
       FMR_ALIGN_PTR v = reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
       FMR_PRAGMA_OMP_SIMD
-      for (size_t i=0; i<nT; i++) {v [i] = init_val;}// 10% slower than 0init
+      for (size_t i=0; i<zn; i+=zi) {v [i] = init_val;}// 10% slower than 0init
       return v;
     }
+#endif
     FMR_ALIGN_PTR v = reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
     FMR_PRAGMA_OMP_SIMD
-    for (size_t i=0; i<nT; i++) {v [i] = init_val;}// 10% slower than 0init
+    for (size_t i=0; i<zn; i+=zi) {v [i] = init_val;}// 10% slower than 0init
     return v;
   }
   template <fmr::Align_int A>
   template <typename T>
-  T* Bulk<A>::set (const std::size_t nT, const T* init_vals)
+  T* Bulk<A>::set (const std::size_t nvals, const T* init_vals)
   noexcept {
-    this->raw<T> (nT);
-    if (nT <= 0) {return reinterpret_cast<T*> (this->bulk.data ());}
+    const auto zsz = zomplex.zval_size ();
+    this->raw<T> (nvals * zsz);
+    if (nvals <= 0) {return reinterpret_cast<T*> (this->bulk.data ());}
     const auto ptr = std::uintptr_t (this->bulk.data ());
-    const std::uintptr_t sz = (nT * sizeof (T)) / sizeof (fmr::Bulk_int);
+    const std::uintptr_t sz = (nvals * sizeof (T) * zsz) / sizeof (fmr::Bulk_int);
     const auto lpad = this->offset<T> (ptr);// max padding is A-1
     const auto rpad = this->offset<T> (sz );// max padding is A-1
     FMR_ARRAY_PTR v = reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
@@ -139,7 +152,7 @@ namespace femera { namespace data {
     } } } else {    // zero-initialize then copy elements
       this->bulk.resize (lpad + sz + rpad);// <= capacity(); v, ptr still valid
       FMR_PRAGMA_OMP_SIMD
-      for (std::size_t i=0; i<nT; i++) {v [i] = init_vals [i];}
+      for (std::size_t i=0; i<nvals; i++) {v [i] = init_vals [i];}
     }
     return v;
   }
@@ -148,17 +161,24 @@ namespace femera { namespace data {
   T* Bulk<A>::get_fast (std::size_t start)
   noexcept {
     const auto lpad = this->offset<T> (std::uintptr_t (this->bulk.data ()));
-    return & reinterpret_cast<T*> (& this->bulk.data ()[lpad]) [start];
+    return & reinterpret_cast<T*>
+      (& this->bulk.data ()[lpad]) [start * this->zomplex.zval_size ()];
   }
   template <fmr::Align_int A>
   template <typename T> inline
   T* Bulk<A>::get_safe (std::size_t start)
   noexcept {
+    const auto z0 = start * this->zomplex.zval_size ();
     const auto lpad = this->offset<T> (std::uintptr_t (this->bulk.data ()));
-    if ((start + 1) * sizeof (T) <= lpad + this->bulk.size ()) {
-      return & reinterpret_cast<T*> (& this->bulk.data ()[lpad]) [start];
+#if 0
+    if ((z0 + 1) * sizeof (T) <= lpad + this->bulk.size ()) {
+      return & reinterpret_cast<T*> (& this->bulk.data ()[lpad]) [z0];
     }
     return nullptr;
+#else
+    return ((z0 + 1) * sizeof (T) > lpad + this->bulk.size ())
+      ? nullptr : & reinterpret_cast<T*> (& this->bulk.data ()[lpad]) [z0];
+#endif
   }
   template <fmr::Align_int A>
   template <typename T> inline
