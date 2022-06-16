@@ -43,7 +43,7 @@ namespace femera {
     class Gtst;
   }
   namespace task {// CRTP inheriance from Task; interface is Task
-    class Jobs; class Sims; class Runs;
+    class Jobs; class Sims; class Runs;// Post
   }
   // typedefs
   using Work_spt = FMR_SMART_PTR <Work>;

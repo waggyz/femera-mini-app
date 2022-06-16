@@ -32,8 +32,8 @@ namespace femera {
 //#ifdef FMR_HAS_GTEST
     Gtst, // Proc type
 //#endif
-    File, Logs, Dlim, Text,// Data type
-    Beds, Unit, Self, Perf, // Test types
+    File, Logs, Dlim, Text, Bank,// Data types
+    Beds, Unit, Self, Perf,      // Test types
 //#ifdef FMR_HAS_CGNS
     Cgns, // Data type: CGNS file handler
 //#endif
@@ -43,9 +43,8 @@ namespace femera {
 //#ifdef FMR_HAS_GMSH
     Gmsh, // Data type: Gmsh file handler
 //#endif
-    Task, Jobs, Sims, Runs,//Task types
+    Jobs, Sims, Runs, Post,//Task types
     Petsc, // PETSc handler
-    Bank, // data bank
 #if 0
     Dflt, // Data type: default data for testing
     //
