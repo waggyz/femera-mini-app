@@ -87,7 +87,7 @@ namespace femera { namespace data {
   noexcept {
     const auto zsz = zomplex.zval_size ();
     this->raw<T> (nvals * zsz);
-    if (nvals <= 0) {return reinterpret_cast<T*> (this->bulk.data ());}
+    if (nvals <= 0) { return reinterpret_cast<T*> (this->bulk.data ()); }
     const auto ptr = std::uintptr_t (this->bulk.data ());
     const std::uintptr_t sz = nvals * sizeof (T) * zsz / sizeof (fmr::Bulk_int);
     const auto lpad = this->offset<T> (ptr);// max left  padding is A-1
@@ -116,7 +116,7 @@ namespace femera { namespace data {
       return reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
     }
     std::size_t  zn = nvals, zi = 1;
-    if (this->zlayout == zyc::Stored::Mixed) { zn = nT * zsz; zi = zsz; }
+    if (this->zlayout == zyc::Stored::Mixed) { zn = nvals * zsz; zi = zsz; }
 #if 0
     if (std::is_floating_point <T>::value) {
       FMR_ALIGN_PTR v = reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
