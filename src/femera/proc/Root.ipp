@@ -7,7 +7,7 @@ namespace femera {
   noexcept : Proc (W) {
     this->name      ="Femera root process";
     this->abrv      ="root";
-    this->task_type = task_cast (Plug_type::Root);
+    this->task_type = task_cast (Task_type::Root);
     this->info_d    = 3;
   }
   inline

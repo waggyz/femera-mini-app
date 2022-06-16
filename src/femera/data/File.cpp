@@ -30,7 +30,7 @@ namespace femera {
 //    if (this->data == nullptr) {this->data = this;}
     fmr::Local_int o = 1;
 #ifdef FMR_BANK_LOCAL
-    o = this->proc->get_proc_n (Plug_type::Fomp);
+    o = this->proc->get_proc_n (Task_type::Fomp);
 #endif
     FMR_PRAGMA_OMP(omp parallel for schedule(static) ordered num_threads(o))
     for (fmr::Local_int i=0; i<o; i++) {// Make & add thread-local data::Bank
@@ -41,7 +41,7 @@ namespace femera {
           + std::to_string (this->proc->get_proc_id ()));
 #endif
 #ifdef FMR_DEBUG
-        const auto m = this->proc->get_proc_ix (Plug_type::Fmpi);
+        const auto m = this->proc->get_proc_ix (Task_type::Fmpi);
         printf ("%s (MPI: %u)\n", B->get_name ().c_str(), m);
 #endif
         this->add_task (std::move (B));

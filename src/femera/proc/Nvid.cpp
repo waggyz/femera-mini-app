@@ -12,7 +12,7 @@ namespace femera {
   noexcept : Proc (core) {
     this->name ="NVIDIA";
     this->abrv ="gpu";
-    this->task_type = task_cast (Plug_type::Nvid);
+    this->task_type = task_cast (Task_type::Nvid);
   }
   void proc::Nvid::task_init (int*, char**) {
 #if 1

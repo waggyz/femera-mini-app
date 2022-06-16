@@ -7,7 +7,7 @@ namespace femera {
   noexcept : Data (core) {
     this->name ="MOAB";
     this->abrv ="Moab";
-    this->task_type = task_cast (Plug_type::Moab);
+    this->task_type = task_cast (Task_type::Moab);
     this->info_d = 3;
   }
   inline

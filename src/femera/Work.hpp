@@ -90,7 +90,7 @@ namespace femera {
     std::string       abrv ="work";
     std::string    version ="";
     Task_list_t  task_list ={};
-    Task_type    task_type = task_cast (Base_type::Work);
+    Work_type    task_type = task_cast (Base_type::Work);
     fmr::Dim_int info_d    = 1;
 #if 0
 // https://stackoverflow.com/questions/60040665
@@ -108,7 +108,7 @@ namespace femera {
   protected:// called by Derived::get_task_*(..)
     Work* get_work_raw (fmr::Local_int) noexcept;//TODO Change to get_work(..)
     Work* get_work_raw (const Task_path_t&) noexcept;//              ""
-    Work* get_work_raw (Task_type, fmr::Local_int ix=0) noexcept;//  ""
+    Work* get_work_raw (Work_type, fmr::Local_int ix=0) noexcept;//  ""
 #if 0
     Work_spt get_work_spt (fmr::Local_int) noexcept;
     Work_spt get_work_spt (Task_path_t)    noexcept;

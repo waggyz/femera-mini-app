@@ -6,7 +6,7 @@ namespace femera {
   data::Text::Text (const femera::Work::Core_ptrs_t W) noexcept : Data (W) {
     this->name      ="Femera text handler";
     this->abrv      ="text";
-    this->task_type = task_cast (Plug_type::Text);
+    this->task_type = task_cast (Task_type::Text);
     this->info_d    = 3;
   }
   inline

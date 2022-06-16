@@ -83,7 +83,7 @@ namespace femera {
     printf ("%s Main::task_proc_ix %u\n", get_abrv ().c_str(), proc_ix);
 #endif
     switch (fmr::Enum_int (this->task_type)) {
-      case (fmr::Enum_int (Plug_type::Fomp)):{
+      case (fmr::Enum_int (Task_type::Fomp)):{
         return Work::cast_via_work<proc::Fomp> (this)->task_proc_ix ();
     } }
     return this->proc_ix;

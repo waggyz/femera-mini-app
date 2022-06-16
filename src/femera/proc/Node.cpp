@@ -19,7 +19,7 @@ namespace femera {
     if (err) { this->name = "node"; }
     else     { this->name = std::string (hostname); }
     this->abrv ="node";
-    this->task_type = task_cast (Plug_type::Node);
+    this->task_type = task_cast (Task_type::Node);
     this->info_d = 3;
   }
   void proc::Node::task_exit () {

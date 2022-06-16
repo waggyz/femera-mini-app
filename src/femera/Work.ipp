@@ -73,7 +73,7 @@ namespace femera {
     return W;
   }
   inline
-  Work* Work::get_work_raw (const Task_type t, const fmr::Local_int ix)
+  Work* Work::get_work_raw (const Work_type t, const fmr::Local_int ix)
   noexcept {
     fmr::Local_int i=0;
     auto W = this;

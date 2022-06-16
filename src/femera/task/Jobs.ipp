@@ -7,14 +7,14 @@ namespace femera {
   noexcept : Task (W) {
     this->name      ="Femera simulation job handler";
     this->abrv      ="jobs";
-    this->task_type = task_cast (Plug_type::Jobs);
+    this->task_type = task_cast (Task_type::Jobs);
     this->info_d    = 2;
   }
   inline
   task::Jobs::Jobs () noexcept {
     this->name      ="simulation job handler";
     this->abrv      ="jobs";
-    this->task_type = task_cast (Plug_type::Jobs);
+    this->task_type = task_cast (Task_type::Jobs);
     this->info_d    = 2;
   }
   inline

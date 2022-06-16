@@ -19,7 +19,7 @@ namespace femera {
     this->name ="OpenMP";
     this->abrv ="omp";
     this->version = std::to_string (_OPENMP);
-    this->task_type = task_cast (Plug_type::Fomp);
+    this->task_type = task_cast (Task_type::Fomp);
     //this->proc_ix = this->task_proc_ix ();// set in parallel if >1 Fomp loaded
     this->proc_n  = fmr::Local_int (::omp_get_max_threads ());
   }

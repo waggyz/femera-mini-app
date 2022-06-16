@@ -16,7 +16,7 @@ namespace femera {
 #ifdef FMR_HAS_MPI
     FMR_PRAGMA_OMP(omp master)
     if (this->proc != nullptr) {// Set CGNS comm to a copy of Fmpi::team_id
-      const auto P = this->proc->get_task (Plug_type::Fmpi);
+      const auto P = this->proc->get_task (Task_type::Fmpi);
       if (P != nullptr) {
         MPI_Comm c;
         const auto err = MPI_Comm_dup (MPI_Comm (P->get_team_id()), &c);
@@ -30,7 +30,7 @@ namespace femera {
         if(this->proc->log->detail > 1 ){
           this->proc->log->label_printf("CGNS mode",
             "Parallel access using %i MPI threads/team\n",//TODO?
-            this->proc->task.first<Proc>( Plug_type:: Pmpi )->get_proc_n() );
+            this->proc->task.first<Proc>( Task_type:: Pmpi )->get_proc_n() );
         }
 #endif
     } }

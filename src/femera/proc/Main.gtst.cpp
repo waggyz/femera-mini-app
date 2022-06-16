@@ -21,11 +21,11 @@ namespace femera { namespace test {
   TEST( Main, DidInit ){
     EXPECT_EQ( main_test->get_task_n(), uint(1) );
 #if 0
-    EXPECT_EQ( main_test->get_task(femera::Plug_type::Root)->get_abrv (), "root");
+    EXPECT_EQ( main_test->get_task(femera::Task_type::Root)->get_abrv (), "root");
 #endif
-    EXPECT_EQ( main_test->get_task(femera::Plug_type::Node)->get_abrv (), "node");
+    EXPECT_EQ( main_test->get_task(femera::Task_type::Node)->get_abrv (), "node");
 #ifdef FMR_HAS_MPI
-    EXPECT_EQ( main_test->get_task(femera::Plug_type::Fmpi)->get_abrv (), "mpi");
+    EXPECT_EQ( main_test->get_task(femera::Task_type::Fmpi)->get_abrv (), "mpi");
 #endif
 #ifdef FMR_HAS_OPENMP
     EXPECT_GT( proc_id_sum (), 0);

@@ -7,7 +7,7 @@ namespace femera {
   noexcept : Test (W) {
     this->name      ="Femera integration self-tests";
     this->abrv      ="self";
-    this->task_type = task_cast (Plug_type::Self);
+    this->task_type = task_cast (Task_type::Self);
     this->info_d    = 3;
   }
   inline

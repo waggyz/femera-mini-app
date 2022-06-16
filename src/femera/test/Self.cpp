@@ -13,13 +13,13 @@ TEST( SelfTest, TrivialTest ){
 namespace femera {
   void test::Self::task_init (int*, char**) {// Test for initialization errors.
     const auto all_n = this->proc->all_proc_n ();
-    const auto node_n = this->proc->get_task (Plug_type::Node)->get_team_n ();
+    const auto node_n = this->proc->get_task (Task_type::Node)->get_team_n ();
     const auto core_n = node_n * proc::Node::get_core_n ();
     if (true) {//TODO detail && this->test->do_test
       fmr::Local_int mpi_n=0, omp_n=0;
-      const auto Pmpi = this->proc->get_task (Plug_type::Fmpi);
+      const auto Pmpi = this->proc->get_task (Task_type::Fmpi);
       if (Pmpi) {mpi_n = Pmpi->get_proc_n ();}
-      const auto Pomp = this->proc->get_task (Plug_type::Fomp);
+      const auto Pomp = this->proc->get_task (Task_type::Fomp);
       if (Pomp) {omp_n = Pomp->get_proc_n ();}
       this->data->name_line (data->fmrlog, get_base_abrv ()+" "+ abrv +" proc",
         "%4u MPI %4u OpenMP = %4u of %4u total CPU processes",

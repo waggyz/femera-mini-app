@@ -11,14 +11,14 @@ namespace femera {
   noexcept : Proc (W) {
     this->name      ="Femera processing handler";
     this->abrv      ="main";
-    this->task_type = task_cast (Plug_type::Main);
+    this->task_type = task_cast (Task_type::Main);
     this->info_d    = 2;
   }
   inline
   proc::Main::Main () noexcept {
     this->name      ="Femera processing handler";
     this->abrv      ="main";
-    this->task_type = task_cast (Plug_type::Main);
+    this->task_type = task_cast (Task_type::Main);
     this->info_d    = 2;
   }
   inline

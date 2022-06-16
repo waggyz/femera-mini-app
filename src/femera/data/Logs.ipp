@@ -7,7 +7,7 @@ namespace femera {
   noexcept : Data (core) {
     this->name      ="Femera logger";
     this->abrv      ="logs";
-    this->task_type = task_cast (Plug_type::Logs);
+    this->task_type = task_cast (Task_type::Logs);
     this->info_d    = 3;
   }
   inline
@@ -15,7 +15,7 @@ namespace femera {
     // set default logger (data->fmrlog) to stdout only from the main thread (0)
     fmr::Local_int n = 0;
     if (this->proc->is_main ()) {
-      n = this->proc->get_proc_n (Plug_type::Fomp);// OpenMP threads / mpi proc
+      n = this->proc->get_proc_n (Task_type::Fomp);// OpenMP threads / mpi proc
       n = (n==0) ? 1 : n;
     }
     this->data->fmrlog = data::File_ptrs_t (n, nullptr);

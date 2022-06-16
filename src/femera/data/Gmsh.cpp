@@ -14,7 +14,7 @@ namespace femera {
 #ifdef FMR_HAS_GMSH_GCC48_PATCH
     this->version  +=" (patched for GCC 4.8)" ;
 #endif
-    this->task_type = task_cast (Plug_type::Gmsh);
+    this->task_type = task_cast (Task_type::Gmsh);
     this->info_d    = 3;
   }
   void data::Gmsh::task_init (int*, char**) {
@@ -25,7 +25,7 @@ namespace femera {
       ::gmsh::option::setNumber ("General.Verbosity", Gmsh::Number(0));
       // gmsh::initialize (..) seeems to set omp_num_threads to 1 and
       // setting General.NumThreads also sets omp_num_threads
-      const auto omp_n = this->proc->get_proc_n (Plug_type::Fomp);
+      const auto omp_n = this->proc->get_proc_n (Task_type::Fomp);
       if (omp_n > 0) {
         ::gmsh::option::setNumber ("General.NumThreads", Gmsh::Number (omp_n));
       }

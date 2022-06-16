@@ -10,7 +10,7 @@ namespace femera { namespace test {
   //
   inline
   double get_cgns_version () {
-    const auto D = mini->data->get_task (femera::Plug_type::Cgns);
+    const auto D = mini->data->get_task (femera::Task_type::Cgns);
     std::string ver = "-1.0";
     if (D != nullptr) {ver = D->get_version ();}
     return atof (ver.c_str());

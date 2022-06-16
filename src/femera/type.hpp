@@ -3,24 +3,18 @@
 /** */
 
 namespace femera {
-  enum class Task_type : fmr::Enum_int {};/* strongly typed int; see:
+  enum class Work_type : fmr::Enum_int {};/* strongly typed integer; see:
   https://stackoverflow.com/questions/18195312
   /what-happens-if-you-static-cast-invalid-value-to-enum-class
   */
-  enum class Base_type : fmr::Enum_int {//TODO Remove?
-    None=0, Work, Proc, Data, Test, Task,
-    // Geom, Load, Phys, Cond, Solv, Sync, Post,
-    //Frun, Part,// Derived from Task
-    Plug// Must be last, derived from TODO
+  enum class Base_type : fmr::Enum_int {
+    None=0, Work, Proc, Data, Test,
+    // Geom, Load, Phys, Cond, Solv, Sync, Part?, Post?,
+    Task // Must be last, Task_type numbers start after this.
   };
-  enum class Plug_type : fmr::Enum_int;//TODO forward declare for definition in Plug.hpp?
-  static constexpr Task_type task_cast (Task_type) noexcept;
-  static constexpr Task_type task_cast (Base_type) noexcept;//TODO Remove?
-  static constexpr Task_type task_cast (Plug_type) noexcept;
-
-  enum class Plug_type : fmr::Enum_int {//TODO Move to Plug.hpp?
-    None = fmr::Enum_int(Base_type::None),
-    Plug = fmr::Enum_int(Base_type::Plug),// Derived from TODO
+  enum class Task_type : fmr::Enum_int {
+    None = fmr::Enum_int (Base_type::None),
+    Task = fmr::Enum_int (Base_type::Task),// start numbering for Task_type
     Main, Fcpu, Node, Root,// Proc types
     Fomp, // Proc type
 //#ifdef FMR_HAS_MPI
@@ -43,13 +37,11 @@ namespace femera {
 //#ifdef FMR_HAS_GMSH
     Gmsh, // Data type: Gmsh file handler
 //#endif
-    Jobs, Sims, Runs, Post,//Task types
+    Jobs, Sims, Runs,//Task types //TODO: Part?, Post?
     Petsc, // PETSc handler
 #if 0
-    Dflt, // Data type: default data for testing
-    //
     Geom, // Move to base/core type?
-    Mesh, Grid, Gcad,//TODO Gfem, Gfdm, Gfvm,// Geom types
+    Mesh, Grid, Gcad,// Gfem, Gfdm, Gfvm,// Geom types
     Cell,// FD, FV, SG // SG: staggered grid
     Surf,// BEM surfaces
     Elem,// FEM low-order (p:1,2,3) elements
@@ -63,9 +55,16 @@ namespace femera {
     Grad, Spcg, Sncg,// Solvers
     Mono, Halo,
 #endif
-    User// Must be last.
+    Plug// Must be last. Plug_type numbers start after this.
   };
-
+  enum class Plug_type : fmr::Enum_int;// Forward declare
+  enum class User_type : fmr::Enum_int;// Forward declare
+  //
+  static constexpr Work_type task_cast (Work_type) noexcept;
+  static constexpr Work_type task_cast (Base_type) noexcept;
+  static constexpr Work_type task_cast (Task_type) noexcept;
+  static constexpr Work_type task_cast (Plug_type) noexcept;
+  static constexpr Work_type task_cast (User_type) noexcept;
 }//end femera::namespace
 
 #include "type.ipp"

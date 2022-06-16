@@ -7,7 +7,7 @@ namespace femera {
   noexcept : Task (W) {
     this->name      ="Femera simulations";
     this->abrv      ="sims";
-    this->task_type = task_cast (Plug_type::Sims);
+    this->task_type = task_cast (Task_type::Sims);
     this->info_d    = 3;
   }
   inline

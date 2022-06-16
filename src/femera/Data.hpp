@@ -16,8 +16,8 @@ namespace femera { namespace data {
   struct Page_dims {//TODO regular blocked data, local (partitioned) data
     // for file and stream (e.g., stdout) reading and saving
   public:
-// Data_ptrs_t data;// data handler; OR use std::vector <Task_type>?
-//    std::vector <Task_type> task_type ={};// {task_cast (Plug_type::None)};
+// Data_ptrs_t data;// data handler; OR use std::vector <Work_type>?
+//    std::vector <Work_type> task_type ={};// {task_cast (Task_type::None)};
 //    std::vector <File_type> file_type ={};// {File_type::Unknown};
     File_ptrs_t    file_ptrs ={};
     std::valarray <fmr::Local_int> item_dims ={1};// vals / item
@@ -165,8 +165,8 @@ namespace femera {
     This_spt new_task (const Work::Core_ptrs_t)        noexcept;
     T*       get_task (fmr::Local_int)                 noexcept;
     T*       get_task (Work::Task_path_t)              noexcept;
+    T*       get_task (Work_type, fmr::Local_int ix=0) noexcept;
     T*       get_task (Task_type, fmr::Local_int ix=0) noexcept;
-    T*       get_task (Plug_type, fmr::Local_int ix=0) noexcept;
   private:
     constexpr
     T*      this_cast (Data*) noexcept;

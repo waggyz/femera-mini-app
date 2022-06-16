@@ -7,7 +7,7 @@ namespace femera {
   noexcept : Data (core) {
     this->name      ="Femera CSV file handler";
     this->abrv      ="csv";
-    this->task_type = task_cast (Plug_type::Dlim);
+    this->task_type = task_cast (Task_type::Dlim);
     this->info_d    = 3;
   }
   inline

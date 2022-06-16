@@ -67,12 +67,12 @@ namespace femera {
     return Proc::this_cast (Work::get_work_raw (path));
   }
   template <typename T> inline
-  T* Proc<T>::get_task (const Task_type t, const fmr::Local_int ix)
+  T* Proc<T>::get_task (const Work_type t, const fmr::Local_int ix)
   noexcept {
     return Proc::this_cast (Work::get_work_raw (t, ix));
   }
   template <typename T> inline
-  T* Proc<T>::get_task (const Plug_type t, const fmr::Local_int ix)
+  T* Proc<T>::get_task (const Task_type t, const fmr::Local_int ix)
   noexcept {
     return Proc::this_cast (Work::get_work_raw (task_cast (t), ix));
   }
@@ -157,15 +157,15 @@ namespace femera {
     //NOTE proc->task_proc_ix () always calls Main::task_proc_ix ().
   }
   template <typename T> inline
-  fmr::Local_int Proc<T>::get_proc_ix (Task_type type)
+  fmr::Local_int Proc<T>::get_proc_ix (Work_type type)
   noexcept {
     const auto P = get_task (type);
     return (P == nullptr) ? 0 : P->get_proc_ix ();
   }
   template <typename T> inline
-  fmr::Local_int Proc<T>::get_proc_ix (Plug_type type)
+  fmr::Local_int Proc<T>::get_proc_ix (Task_type type)
   noexcept {
-    return this->get_proc_ix (static_cast<Task_type> (type));
+    return this->get_proc_ix (static_cast<Work_type> (type));
   }
   template <typename T> inline
   fmr::Local_int Proc<T>::get_proc_n ()
@@ -173,15 +173,15 @@ namespace femera {
     return this->proc_n;
   }
   template <typename T> inline
-  fmr::Local_int Proc<T>::get_proc_n (Task_type type)
+  fmr::Local_int Proc<T>::get_proc_n (Work_type type)
   noexcept {
     const auto P = get_task (type);
     return (P == nullptr) ? 0 : P->get_proc_n ();
   }
   template <typename T> inline
-  fmr::Local_int Proc<T>::get_proc_n (Plug_type type)
+  fmr::Local_int Proc<T>::get_proc_n (Task_type type)
   noexcept {
-    return this->get_proc_n (static_cast<Task_type> (type));
+    return this->get_proc_n (static_cast<Work_type> (type));
   }
   template <typename T> inline
   fmr::Local_int Proc<T>::all_proc_n ()

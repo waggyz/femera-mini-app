@@ -236,7 +236,7 @@ namespace femera { namespace test {
 #if 0
   TEST(MiniVals, Add) {
     EXPECT_EQ( static_cast<femera::data::Bank>
-    (mini->data->get_task(Plug_type::Bank)) ->add<int>("test",10,1)[0], 1);
+    (mini->data->get_task(Task_type::Bank)) ->add<int>("test",10,1)[0], 1);
   }
 #endif
 } }//end femerea::test:: namespace

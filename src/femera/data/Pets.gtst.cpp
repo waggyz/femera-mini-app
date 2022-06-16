@@ -10,7 +10,7 @@ namespace femera { namespace test {
   //
   inline
   double get_petsc_version () {
-    const auto D = mini->data->get_task (femera::Plug_type::Petsc);
+    const auto D = mini->data->get_task (femera::Task_type::Petsc);
     std::string ver = "-1.0";
     if (D != nullptr) {};//TODO ver = D->get_version ();}
     return atof (ver.c_str());

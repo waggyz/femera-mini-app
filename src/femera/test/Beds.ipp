@@ -7,7 +7,7 @@ namespace femera {
   noexcept : Test (W) {
     this->name      ="Femera testbeds";
     this->abrv      ="beds";
-    this->task_type = task_cast (Plug_type::Beds);
+    this->task_type = task_cast (Task_type::Beds);
     this->info_d    = 2;
   }
   inline

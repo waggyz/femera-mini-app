@@ -85,12 +85,12 @@ namespace femera {
     return static_cast<T*> (this->get_work_raw (tree));
   }
   template <typename T> inline
-  T* Data<T>::get_task (const Task_type t, const fmr::Local_int ix)
+  T* Data<T>::get_task (const Work_type t, const fmr::Local_int ix)
   noexcept {
     return Data::this_cast (Work::get_work_raw (t, ix));
   }
   template <typename T> inline
-  T* Data<T>::get_task (const Plug_type t, const fmr::Local_int ix)
+  T* Data<T>::get_task (const Task_type t, const fmr::Local_int ix)
   noexcept {
     return Data::this_cast (Work::get_work_raw (task_cast (t), ix));
   }

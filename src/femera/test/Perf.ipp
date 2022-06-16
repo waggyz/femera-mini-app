@@ -7,7 +7,7 @@ namespace femera {
   noexcept : Test (core) {
     this->name      ="Femera performance tests";
     this->abrv      ="perf";
-    this->task_type = task_cast (Plug_type::Perf);
+    this->task_type = task_cast (Task_type::Perf);
     this->info_d    = 3;
   }
   inline
