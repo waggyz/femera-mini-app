@@ -37,5 +37,8 @@ namespace femera {
       this->data->name_line (data->fmrlog, this->abrv+" task_init",
         "NOTE Femera uses more threads (%u) than physical cores (%u).",
         all_n, core_n);
-  } }
+  }
+  this->data->name_line (data->fmrlog, get_base_abrv ()+" "+ abrv +" zord",
+    "%4u maximum hypercomplex order", zyclops::max_zorder);
+  }
 }//end femera namespace

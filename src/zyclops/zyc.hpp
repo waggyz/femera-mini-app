@@ -3,6 +3,7 @@
 
 #include <sys/types.h>
 #include <cstdint>
+#include <immintrin.h>       //__m256d, __m512d,...
 
 #ifndef ZYC_STEP_SINGLE
 #define ZYC_STEP_SINGLE 1e-8f
@@ -11,7 +12,9 @@
 #define ZYC_STEP_DOUBLE 1e-12
 #endif
 #ifndef ZYC_ALIGN
-#define ZYC_ALIGN alignof(__m512d)
+//TODO support x_HAS_AVX, x_HAS_AVX512
+//#define ZYC_ALIGN alignof(__m512d)
+#define ZYC_ALIGN alignof(__m256d)
 #endif
 
 #ifndef ZYC_RESTRICT

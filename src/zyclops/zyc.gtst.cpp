@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include <limits>
+#include <limits>            //std::numeric_limits
 #include <cstdio>
 
 namespace zyclops { namespace test {
@@ -18,6 +18,9 @@ namespace zyclops { namespace test {
 #endif
     EXPECT_GT( std::numeric_limits<Zindex_int>::max (),
       zyc::upow (std::size_t (2), std::size_t (2)*zyc::max_zorder) - 1);
+  }
+  TEST( Zyc, Alignment ){
+    EXPECT_EQ( ZYC_ALIGN, 32 );// __m256d//TODO support x_HAS_AVX, x_HAS_AVX512
   }
   template <typename T> static inline constexpr
   T mdcr_elem_test (const T& ZYC_RESTRICT v,

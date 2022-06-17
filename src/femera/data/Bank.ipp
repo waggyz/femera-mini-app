@@ -29,9 +29,11 @@ namespace femera {
   inline
   void data::Bank::task_init (int*, char**) {
 #ifdef FMR_VALS_LOCAL
-    const auto o = this->proc->get_proc_n (Task_type::Fomp);
-    this->vals.clear ();
+#if 0
+    this->vals.clear ();// should already exist on main thread, if at all
     this->vals.shrink_to_fit ();
+#endif
+    const auto o = this->proc->get_proc_n (Task_type::Fomp);
     this->vals.reserve (o);// allocate on main OpenMP thread
     FMR_PRAGMA_OMP(omp parallel for schedule(static) ordered num_threads(o))
     for (fmr::Local_int i=0; i<o; i++) {// Make & add thread-local data::Bank

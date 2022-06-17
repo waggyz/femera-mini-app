@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <nmmintrin.h>
+#include <immintrin.h>       // _mm_crc32_u64
 
 namespace femera { namespace data {
   template <fmr::Align_int A> inline
@@ -14,8 +14,8 @@ namespace femera { namespace data {
   template <typename T> inline constexpr
   fmr::Align_int Bulk<A>::offset (const std::uintptr_t address)
   noexcept {
-    return ((address % std::max (A, alignof(T))) == 0) ? 0// range: [0, A-1]
-      : (std::max (A, alignof(T)) - (address % std::max (A, alignof(T))));
+    return ((address % std::max (A, alignof(T))) == 0)// range: [0, A-1]
+      ? 0 : (std::max (A, alignof(T)) - (address % std::max (A, alignof(T))));
   }
   template <fmr::Align_int A>
   template <typename T> inline

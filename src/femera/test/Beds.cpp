@@ -20,7 +20,6 @@ namespace femera {
     if (this->do_test || this->do_perf) {// -T or -P option in args
       this->add_task (std::move(Test<test::Perf>::new_task (this->get_core())));
     }
-    //
   }
   void test::Beds::scan (int* argc, char** argv) {
     if (argc != nullptr && argv != nullptr) {
