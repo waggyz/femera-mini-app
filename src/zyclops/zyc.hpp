@@ -29,23 +29,23 @@
 #endif
 
 namespace zyclops {
-  using Zindex_int = std::uint_fast32_t;
+  using Zindex_int = std::uint_fast32_t;// for indices into one CR matrix
   using Zorder_int = Zindex_int;// same as Zindex_int; name is for semantics
   // max uint needed to index into   CR matrix: 2^(2*(max_zorder+1)) - 1
   // max uint needed for matrix-free CR access: 2^(  (max_zorder+1)) - 1
   //
   enum class Algebra : std::int_fast8_t { Unknown =-1,
     Real, Complex, Dual, Split, Qcda, Oti, User,// Qcda: Cayley-Dickson algebras
-    Int,// signed integer
-    Nat // unsigned natural number
+    Integer,// signed integer
+    Natural // unsigned natural number
   };
-  enum class Stored : std::int_fast8_t { Unknown =-1,// for arrays of Zomplex
+  enum class Layout : std::int_fast8_t { Unknown =-1,// for arrays of Zomplex
     Native,// Native is for real & built-in complex type
-    Mixed, // AoS (array of structs: interleaved real & imaginary parts)
-    Block, // SoA (struct of arrays: arrays of real & each imaginary part)
+    Inset, // AoS (array of structs: interleaved real & imaginary parts)
+    Block, // SoA (struct of arrays:  contiguous real & imaginary parts)
     User
   };
-  static const Zorder_int max_zorder = 15;
+  static const Zorder_int max_zorder = (sizeof (Zindex_int) * 4) - 1;// 15;
   //
   static inline
   Zindex_int upow (Zindex_int base, Zindex_int exponent)
@@ -67,7 +67,7 @@ namespace zyclops {
     Zorder_int zorder_stored)                  // is out of range, i.e.,
   noexcept;                                    // higher order than stored
   // multidual number CR element operations
-  template <typename T> static inline constexpr// returns a_rc,
+  template <typename T> static inline constexpr// returns a[row,col] (a_rc),
   T mdcr_elem (const T& a,                     // fast with -flto
     Zindex_int row, Zindex_int col)
   noexcept;
@@ -87,42 +87,42 @@ namespace zyclops {
 #endif
   // hypercomplex scalar array operations
   template <typename T> static inline          // c = a + b, returns c ptr,
-  T* mza_add (T& c, const T& a, const T& b, Zorder_int order, std::size_t n=1)
+  T* hca_add (T& c, const T& a, const T& b, Zorder_int order, std::size_t n=1)
   noexcept;
   template <typename T> static inline          // c += a + b, returns c ptr,
-  T* mza_adda (T& c, const T& a, const T& b, Zorder_int order, std::size_t n=1)
+  T* hca_adda (T& c, const T& a, const T& b, Zorder_int order, std::size_t n=1)
   noexcept;
   template <typename T> static inline          // c = a - b, returns c ptr,
-  T* mza_sub (T& c, const T& a, const T& b, Zorder_int order, std::size_t n=1)
+  T* hca_sub (T& c, const T& a, const T& b, Zorder_int order, std::size_t n=1)
   noexcept;
   template <typename T> static inline          // c += a - b, returns c ptr,
-  T* mza_suba (T& c, const T& a, const T& b, Zorder_int order, std::size_t n=1)
+  T* hca_suba (T& c, const T& a, const T& b, Zorder_int order, std::size_t n=1)
   noexcept;
   // multidual scalar array operations
   template <typename T> static inline          // c += a * b, returns c ptr,
   T* mdas_madd (T& c, const T& a, const T& b,  // interleaved real & imaginary
-    Zorder_int order, std::size_t=1)           // parts (Stored::Mixed)
+    Zorder_int order, std::size_t=1)           // parts (Layout::Inset)
   noexcept;
   template <typename T> static inline          // c += a * b, returns c ptr,
   T* mdsa_madd (T& c, const T& a, const T& b,  // contiguous real & imaginary
-    Zorder_int order, std::size_t=1)           // parts (Stored::Block)
+    Zorder_int order, std::size_t=1)           // parts (Layout::Block)
   noexcept;
   template <typename T> static inline          // c = a / b, returns c ptr,
   T* mdas_div (T& c, const T& a, const T& b,   // interleaved real & imaginary
-    Zorder_int order, std::size_t=1)           // parts (Stored::Mixed)
+    Zorder_int order, std::size_t=1)           // parts (Layout::Inset)
   noexcept;//NOTE result (c) must be zeroed before dividing
   template <typename T> static inline          // c = a / b, returns c ptr,
   T* mdsa_div  (T& c, const T& a, const T& b,  // contiguous real & imaginary
-    Zorder_int order, std::size_t=1)           // parts (Stored::Block)
+    Zorder_int order, std::size_t=1)           // parts (Layout::Block)
   noexcept;//NOTE result (c) must be zeroed before dividing
 #if 0
   template <typename T>
   static inline constexpr
-  T mz_derivative (const T& v, const Zorder_int o)
+  T hc_derivative (const T& v, const Zorder_int o)
   noexcept { return (&v)[o]; }
   template <typename T, typename... Args>
   static inline constexpr
-  T mz_derivative (const T& v, const Args... orders)
+  T hc_derivative (const T& v, const Args... orders)
   noexcept { return get_derivative (v, orders...); }
 #endif
 #if 0

@@ -5,21 +5,21 @@
 namespace zyclops { namespace test {
   namespace zyc = ::zyclops;
   //
-  auto tridual = zyc::Zomplex (zyc::Algebra::Dual, 3);
-  auto tricomplex = zyc::Zomplex (zyc::Algebra::Complex, 3);
+  auto tridual = zyc::Zomplex (zyc::Algebra::Dual, 3, zyc::Layout::Inset);
+  auto tricomplex = zyc::Zomplex (zyc::Algebra::Complex, 3, zyc::Layout::Inset);
   //
   TEST( Zomplex, TrivialTest ){
     EXPECT_EQ( 1, 1 );
   }
   TEST( Zomplex, TridualSizes ){
     EXPECT_EQ( tridual.get_order (),  3 );
-    EXPECT_EQ( tridual.zval_size (),  8 );
+    EXPECT_EQ( tridual.hc_size (),  8 );
     EXPECT_EQ( tridual.cr_size   (), 64 );
     EXPECT_EQ( tridual.cr_nnz    (), 27 );
   }
   TEST( Zomplex, TricomplexSizes ){
     EXPECT_EQ( tricomplex.get_order (),  3 );
-    EXPECT_EQ( tricomplex.zval_size (),  8 );
+    EXPECT_EQ( tricomplex.hc_size (),  8 );
     EXPECT_EQ( tricomplex.cr_size   (), 64 );
     EXPECT_EQ( tricomplex.cr_nnz    (), 64 );
   }

@@ -13,7 +13,7 @@ namespace zyclops {
     return this->order;
   }
   inline
-  zyclops::Stored Zmat::get_layout ()
+  zyclops::Layout Zmat::get_layout ()
   noexcept {
     return this->layout;
   }
@@ -35,10 +35,10 @@ namespace zyclops {
   inline
   Zmat::Zmat (Algebra z, Zorder_int p, std::size_t r, std::size_t c)
    : rows (r), cols (c), order (p), family (z) {
-    if (p!=0) { layout = Stored::Block; }
+    if (p!=0) { layout = Layout::Block; }
   }
   inline
-  Zmat::Zmat (Algebra z, Zorder_int p, Stored l, std::size_t r, std::size_t c)
+  Zmat::Zmat (Algebra z, Zorder_int p, Layout l, std::size_t r, std::size_t c)
    : rows (r), cols (c), order (p), family (z), layout (l) {
   }
 

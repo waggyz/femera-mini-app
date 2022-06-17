@@ -175,7 +175,7 @@ noexcept {
   return &c;
 }
 template <typename T> static inline
-T* zyclops::mza_add// add, c = a + b
+T* zyclops::hca_add// add, c = a + b
 (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyclops::Zorder_int zorder, const std::size_t n)
 noexcept {
@@ -187,7 +187,7 @@ noexcept {
   return &c;
 }
 template <typename T> static inline
-T* zyclops::mza_adda// add-accumulate, c += a + b
+T* zyclops::hca_adda// add-accumulate, c += a + b
 (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyclops::Zorder_int zorder, const std::size_t n)
 noexcept {
@@ -199,7 +199,7 @@ noexcept {
   return &c;
 }
 template <typename T> static inline
-T* zyclops::mza_sub// subtract, c = a - b
+T* zyclops::hca_sub// subtract, c = a - b
 (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyclops::Zorder_int zorder, const std::size_t n)
 noexcept {
@@ -211,7 +211,7 @@ noexcept {
   return &c;
 }
 template <typename T> static inline
-T* zyclops::mza_suba// subtract-accumulate, c += a - b
+T* zyclops::hca_suba// subtract-accumulate, c += a - b
 (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyclops::Zorder_int zorder, const std::size_t n)
 noexcept {

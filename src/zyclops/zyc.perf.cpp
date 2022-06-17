@@ -195,7 +195,7 @@ namespace zyclops { namespace test {
       }
       ZYC_PRAGMA_OMP(omp barrier);
       time.add_idle_time_now ();
-      mza_add (cvec.data()[0], avec.data()[0], bvec.data()[0],
+      hca_add (cvec.data()[0], avec.data()[0], bvec.data()[0],
         order, dual_n);
       secs_add += double (time.add_busy_time_now ());
       for (uint ti=0; ti<test_n; ti++) {// do not optimize calc away
@@ -211,7 +211,7 @@ namespace zyclops { namespace test {
     printf (" zyc,mdsa, div,%2lu,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
       order, (test_n * vals_n) / uint(zsz), byte_fma, flop_dual, secs_soa,
         flop_dual/secs_soa, flop_dual/byte_fma, chk);
-    printf (" zyc,  mz, add,%2lu,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
+    printf (" zyc,  hc, add,%2lu,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",
       order, (test_n * vals_n) / uint(zsz), byte_add, flop_add, secs_add,
         flop_add/secs_add, flop_add/byte_add, chk);
     ZYC_PRAGMA_OMP(omp barrier);

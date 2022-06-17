@@ -22,7 +22,6 @@ namespace femera { namespace data {
       ? zyc::Integer : zyc::Natural;
     fmr::Hash_int  file_hash = 0;// CRC32 or CRC64 of data read from file
     fmr::Align_int size_of   = sizeof (fmr::Bulk_int);// native value in bytes
-    zyc::Stored    zlayout   = zyc::Stored::Native;
     bool           is_signed = std::is_signed <fmr::Bulk_int>::value;
   public:
     template <typename T> inline
