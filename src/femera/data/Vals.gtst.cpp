@@ -36,10 +36,12 @@ namespace femera { namespace test {
     EXPECT_EQ( uintptr_t (vals.get<double> (vals10)) % FMR_ALIGN_VALS, 0);
     EXPECT_EQ( uintptr_t (vals.get<double> ("another10")) % FMR_ALIGN_VALS, 0);
   }
+#if 1
   TEST(Vals, AutoConvert) {
     EXPECT_EQ(       vals.get<uint>  (ints10) [0], uint(1));
     EXPECT_FLOAT_EQ( vals.get<float> (vals10) [0], float(1.0));
   }
+#endif
 #if 0
   TEST(Vals, AvxVals) {
     EXPECT_EQ( reinterpret_cast<double*>

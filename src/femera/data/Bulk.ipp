@@ -55,7 +55,7 @@ namespace femera { namespace data {
   }
   template <fmr::Align_int A>
   template <typename T> inline
-  T* Bulk<A>::raw (const std::size_t nT)
+  T* Bulk<A>::raw (const std::size_t nT)// new uninit, w/capacity for nT vals
   noexcept {
     this->zomplex = std::is_floating_point <T>::value ? ::zyclops::Real
       : (std::is_signed <T>::value ? ::zyclops::Integer : ::zyclops::Natural);
@@ -77,7 +77,7 @@ namespace femera { namespace data {
     this->bulk [0] = fmr::Bulk_int (0);// undefined behavior
     // Accessesing a vector past size() is undefined behavior...
 #endif
-    // ...but accessing the reserved space in the underlying array should be OK.
+    // ...but accessing reserved space in the underlying array should be OK.
     ptr [0] = fmr::Bulk_int (0);// first touch allocate
     return reinterpret_cast<T*> (ptr);
   }
@@ -115,19 +115,15 @@ namespace femera { namespace data {
     if (init_val <= T(0) && init_val >= T(0)) {// == 0.0, no float warning
       return reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
     }
-    std::size_t  zn = nvals, zi = 1;
-    if (this->zlayout == zyc::Stored::Mixed) { zn = nvals * zsz; zi = zsz; }
-#if 0
-    if (std::is_floating_point <T>::value) {
-      FMR_ALIGN_PTR v = reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
+    FMR_ALIGN_PTR v = reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
+    if ((zsz > 1) && (this->zlayout == zyc::Stored::Mixed)) {
+      const auto nz = nvals * zsz;
       FMR_PRAGMA_OMP_SIMD
-      for (size_t i=0; i<zn; i+=zi) {v [i] = init_val;}// 10% slower than 0init
+      for (size_t i=0; i<nz; i+=zsz) { v [i] = init_val; }
       return v;
     }
-#endif
-    FMR_ALIGN_PTR v = reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
     FMR_PRAGMA_OMP_SIMD
-    for (size_t i=0; i<zn; i+=zi) {v [i] = init_val;}// 10% slower than 0init
+    for (size_t i=0; i<nvals; i++) { v [i] = init_val; }// 10% slower than 0init
     return v;
   }
   template <fmr::Align_int A>
@@ -138,7 +134,7 @@ namespace femera { namespace data {
     this->raw<T> (nvals * zsz);
     if (nvals <= 0) {return reinterpret_cast<T*> (this->bulk.data ());}
     const auto ptr = std::uintptr_t (this->bulk.data ());
-    const std::uintptr_t sz = (nvals * sizeof (T) * zsz) / sizeof (fmr::Bulk_int);
+    const std::uintptr_t sz = (nvals * sizeof(T) * zsz) / sizeof(fmr::Bulk_int);
     const auto lpad = this->offset<T> (ptr);// max padding is A-1
     const auto rpad = this->offset<T> (sz );// max padding is A-1
     FMR_ARRAY_PTR v = reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
@@ -151,8 +147,9 @@ namespace femera { namespace data {
           this->bulk.push_back (fmr::Bulk_int (0));
     } } } else {    // zero-initialize then copy elements
       this->bulk.resize (lpad + sz + rpad);// <= capacity(); v, ptr still valid
+      const auto nz = nvals * zsz;
       FMR_PRAGMA_OMP_SIMD
-      for (std::size_t i=0; i<nvals; i++) {v [i] = init_vals [i];}
+      for (std::size_t i=0; i<nz; i++) { v [i] = init_vals [i]; }
     }
     return v;
   }
@@ -185,15 +182,23 @@ namespace femera { namespace data {
   T Bulk<A>::make_hash (T in,
     typename std::enable_if <sizeof(T) == 4>::type*)// CRC32
   noexcept {
-    uint64_t crc = ~in;
-    auto sz = this->size * this->size_of;
-    FMR_CONST_PTR buf = reinterpret_cast<const unsigned char*> (& this->bulk);
-    while (sz--) {
+    std::uint64_t crc = ~in;
+    auto sz = this->size * this->size_of * this->zomplex.zval_size ();
+    if (sz <= 0) { return 0; }
+    const auto lpad = this->offset<T> (std::uintptr_t (this->bulk.data ()));
 #if 1//def FMR_HAS_64BITCRC32
+    FMR_CONST_PTR buf = reinterpret_cast<std::uint64_t*> (& this->bulk[lpad]);
+    sz /= 8;
+    while (sz--) {
       crc = _mm_crc32_u64 (crc, *buf++);
+    }
 #endif
-#ifdef FMR_HAS_32BITCRC32
+#if 0 //def FMR_HAS_32BITCRC32
+    FMR_CONST_PTR buf = reinterpret_cast<std::uint32_t*> (& this->bulk[lpad]);
+    sz /= 4;
+    while (sz--) {
       crc = _mm_crc32_u32 (crc, *buf++);
+    }
 #endif
 #if 0
       crc ^= *buf++;
@@ -204,7 +209,6 @@ namespace femera { namespace data {
         crc = (crc >> 1) ^ (FMR_CRC32_POLY & (0 - (crc & 1)));
       }
 #endif
-    }
     return ~T (crc);
   }
   template <fmr::Align_int A>
@@ -213,8 +217,11 @@ namespace femera { namespace data {
     typename std::enable_if <sizeof(T) == 8>::type*)// CRC64
   noexcept {// https://stackoverflow.com/questions/27939882/fast-crc-algorithm
     crc = ~crc;
-    std::size_t sz = this->size * this->size_of;
-    FMR_CONST_PTR buf = reinterpret_cast<const unsigned char*> (& this->bulk);
+    std::size_t sz = this->size * this->size_of * this->zomplex.zval_size ();
+    if (sz <= 0) { return 0; }
+    const auto lpad = this->offset<T> (std::uintptr_t (this->bulk.data ()));
+    FMR_CONST_PTR buf = reinterpret_cast<const unsigned char*>
+      (& this->bulk [lpad]);
     while (sz--) {
       crc ^= *buf++;
       for (int i = 0; i < 8; i++) {
