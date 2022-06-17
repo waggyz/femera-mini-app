@@ -10,51 +10,49 @@ namespace femera { namespace data {
   Bulk<A>::Bulk ()
   noexcept {
   }
-  template <fmr::Align_int A>
-  template <typename T> inline constexpr
+  template <fmr::Align_int A> template <typename T> inline constexpr
   fmr::Align_int Bulk<A>::offset (const std::uintptr_t address)
   noexcept {
     return ((address % std::max (A, alignof(T))) == 0)// range: [0, A-1]
       ? 0 : (std::max (A, alignof(T)) - (address % std::max (A, alignof(T))));
   }
-  template <fmr::Align_int A>
-  template <typename T> inline
+  template <fmr::Align_int A> inline
+  std::size_t Bulk<A>::get_byte ()
+  noexcept {
+    return this->size * this->size_of;
+  }
+  template <fmr::Align_int A> inline
   std::size_t Bulk<A>::mem_byte ()
   noexcept {
     return this->bulk.size ();
   }
-  template <fmr::Align_int A>
-  template <typename T> inline
+  template <fmr::Align_int A> inline
   std::size_t Bulk<A>::get_size ()
   noexcept {
     return this->size;
   }
-  template <fmr::Align_int A>
-  template <typename T> inline
-  std::size_t Bulk<A>::zyc_size ()
+  template <fmr::Align_int A> inline
+  std::size_t Bulk<A>::hc_size ()
   noexcept {
     return this->size / this->zomplex.hc_size ();
   }
-  template <fmr::Align_int A>
-  template <typename T> inline
+  template <fmr::Align_int A> inline
   fmr::Align_int Bulk<A>::get_sizeof ()
   noexcept {
     return this->size_of;
   }
-  template <fmr::Align_int A>
-  template <typename T> inline
+  template <fmr::Align_int A> inline
   bool Bulk<A>::has_sign ()
   noexcept {
     return this->is_signed;
   }
-  template <fmr::Align_int A>
+  template <fmr::Align_int A> inline
   Bulk_t& Bulk<A>::take_bulk ()
   noexcept {
     this->size = 0;
     return this->bulk;
   }
-  template <fmr::Align_int A>
-  template <typename T> inline
+  template <fmr::Align_int A> template <typename T> inline
   T* Bulk<A>::raw (const std::size_t nT)// new uninit, w/capacity for nT vals
   noexcept {
     this->zomplex = std::is_floating_point <T>::value ? ::zyclops::Real
@@ -81,8 +79,7 @@ namespace femera { namespace data {
     ptr [0] = fmr::Bulk_int (0);// first touch allocate
     return reinterpret_cast<T*> (ptr);
   }
-  template <fmr::Align_int A>
-  template <typename T> inline
+  template <fmr::Align_int A> template <typename T> inline
   T* Bulk<A>::set (const std::size_t nvals, const T init_val)
   noexcept {
     const auto zsz = zomplex.hc_size ();
@@ -126,8 +123,7 @@ namespace femera { namespace data {
     for (size_t i=0; i<nvals; i++) { v [i] = init_val; }// 10% slower than 0init
     return v;
   }
-  template <fmr::Align_int A>
-  template <typename T>
+  template <fmr::Align_int A> template <typename T> inline
   T* Bulk<A>::set (const std::size_t nvals, const T* init_vals)
   noexcept {
     const auto zsz = this->zomplex.hc_size ();
@@ -153,16 +149,14 @@ namespace femera { namespace data {
     }
     return v;
   }
-  template <fmr::Align_int A>
-  template <typename T> inline
+  template <fmr::Align_int A> template <typename T> inline
   T* Bulk<A>::get_fast (std::size_t start)
   noexcept {
     const auto lpad = this->offset<T> (std::uintptr_t (this->bulk.data ()));
     return & reinterpret_cast<T*>
       (& this->bulk.data ()[lpad]) [start * this->zomplex.hc_size ()];
   }
-  template <fmr::Align_int A>
-  template <typename T> inline
+  template <fmr::Align_int A> template <typename T> inline
   T* Bulk<A>::get_safe (std::size_t start)
   noexcept {
     const auto z0 = start * this->zomplex.hc_size ();
@@ -177,8 +171,7 @@ namespace femera { namespace data {
       ? nullptr : & reinterpret_cast<T*> (& this->bulk.data ()[lpad]) [z0];
 #endif
   }
-  template <fmr::Align_int A>
-  template <typename T> inline
+  template <fmr::Align_int A> template <typename T> inline
   T Bulk<A>::make_hash (T in,
     typename std::enable_if <sizeof(T) == 4>::type*)// CRC32
   noexcept {
@@ -211,8 +204,7 @@ namespace femera { namespace data {
 #endif
     return T (~crc);
   }
-  template <fmr::Align_int A>
-  template <typename T> inline
+  template <fmr::Align_int A> template <typename T> inline
   T Bulk<A>::make_hash (T crc,
     typename std::enable_if <sizeof(T) == 8>::type*)// CRC64
   noexcept {// https://stackoverflow.com/questions/27939882/fast-crc-algorithm
