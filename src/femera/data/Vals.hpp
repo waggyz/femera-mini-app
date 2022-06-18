@@ -22,16 +22,16 @@ namespace femera { namespace data {
     using map_vals_t = std::unordered_map<fmr::Data_name_t, Bulk_vals>;
     using map_ints_t = std::unordered_map<fmr::Data_name_t, Bulk_ints>;
   private:
-    map_vals_t name_vals ={};// SSE, __m256d,... alignment
-    map_ints_t name_ints ={};// default is size_t alignment
+    map_vals_t name_vals = {};// SSE, __m256d,... alignment
+    map_ints_t name_ints = {};// default is size_t alignment
     fmr::Local_int map_init_size = 1024;
   public:
     //TODO handle SSE, AVX, AVX512 types
     template <typename T>
     T* set (const fmr::Data_name_t& id, size_t, T init_val=T(0))
     noexcept;
-    template <typename T>
-    T* set (const fmr::Data_name_t& id, size_t, const T* init_vals)// T& is ambiguous
+    template <typename T>// T& is ambiguous as an argument here
+    T* set (const fmr::Data_name_t& id, size_t, const T* init_vals)
     noexcept;
     template <typename I>
     I* get (const fmr::Data_name_t& id, size_t start=0, typename

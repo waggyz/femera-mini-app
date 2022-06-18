@@ -21,7 +21,7 @@ namespace zyclops {
     Algebra   family = Algebra::Real;
     Layout    layout = Layout::Native;/// only applies to hypercomplex arrays
   };
-  const static Zomplex Real    = Zomplex (Algebra::Real,0, Layout::Native);
+  const static Zomplex Real    = Zomplex (Algebra::Real   , 0, Layout::Native);
   const static Zomplex Integer = Zomplex (Algebra::Integer, 0, Layout::Native);
   const static Zomplex Natural = Zomplex (Algebra::Natural, 0, Layout::Native);
 #if 0
