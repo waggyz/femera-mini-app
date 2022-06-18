@@ -16,8 +16,8 @@ namespace femera { namespace data {
   class alignas (A) Bulk {//NOTE alignas does not always work, so...
   private:                //
     Bulk_t         bulk;  // ...bulk is over-allocated and aligned manually.
-    std::size_t    cval_n    = 0;// # values <= bulk.capacity() / sizeof(T)
     // Defaults are for Bulk_int values which can be converted to strings.
+    std::size_t    cval_n    = 0;// # values <= bulk.capacity() / sizeof(T)
     zyc::Zomplex   zplx      = std::is_signed <fmr::Bulk_int>::value
       ?                        zyc::Integer : zyc::Natural;
     fmr::Hash_int  file_hash = 0;// CRC32 or CRC64 of data read from file
@@ -35,8 +35,8 @@ namespace femera { namespace data {
     noexcept;                   // number (int, float, etc.) in bytes
     std::size_t get_cval_n ()// count of currently stored native (C++) numbers
     noexcept;
-    std::size_t get_size ()// count of currently stored hypercomplex numbers
-    noexcept;
+    std::size_t get_size ()// count of currently stored (hypercomplex) numbers
+    noexcept;              // same as get_cval_n () for order 0
     //
     template <typename T>
     T* set (std::size_t nvals, T init_val)// sets real part only
@@ -62,7 +62,7 @@ namespace femera { namespace data {
       typename std::enable_if <sizeof (H) == 8>::type* = nullptr)
     noexcept;
     //
-    Bulk () noexcept;// Constructor
+    Bulk () noexcept;// constructor
   private:
     template <typename T> static constexpr
     fmr::Align_int offset (uintptr_t)

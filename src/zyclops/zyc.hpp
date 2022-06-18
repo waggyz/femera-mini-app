@@ -50,97 +50,100 @@ namespace zyclops {
   };
   static const Zorder_int max_zorder = (sizeof (Zindex_int) * 4) - 1;// 15;
   //
-  static inline
+  static
   Zindex_int upow (Zindex_int base, Zindex_int exponent)
   noexcept;
+  static constexpr
+  Zindex_int upow2 (Zindex_int exponent)
+  noexcept;
 #if 0
-  static inline constexpr
+  static constexpr
   uint hamw (uint64_t)//TODO hamming weight
   noexcept;
-  static inline constexpr
+  static constexpr
   uint hamw (uint32_t)
   noexcept;
 #endif
   // multidual Cauchy-Riemann (CR) matrix indexing
-  static inline constexpr                      // returns true for nonzero
+  static constexpr                      // returns true for nonzero
   bool is_mdcr_nz (Zindex_int r, Zindex_int c) // CR matrix form elements
   noexcept;
-  static inline constexpr
+  static constexpr
   bool is_mdcr_nz (Zindex_int r, Zindex_int c, // also returns false when r,c
     Zorder_int zorder_stored)                  // is out of range, i.e.,
   noexcept;                                    // higher order than stored
   // multidual number CR element operations
-  template <typename T> static inline constexpr// returns a[row,col] (a_rc),
+  template <typename T> static constexpr// returns a[row,col] (a_rc),
   T mdcr_elem (const T& a,                     // fast with -flto
     Zindex_int row, Zindex_int col)
   noexcept;
-  template <typename T> static inline constexpr// returns a_rc with safe access
+  template <typename T> static constexpr// returns a_rc with safe access
   T mdcr_elem (const T& a,                     // to higher order than stored
     Zindex_int row, Zindex_int col, Zorder_int zorder_stored)
   noexcept;
-  template <typename T> static inline constexpr// returns a_r * b_rc,
+  template <typename T> static constexpr// returns a_r * b_rc,
   T mdcr_mult_elem (const T& a, const T& b,    // fast with -flto
     Zindex_int row, Zindex_int col)
   noexcept;
 #if 0
-  template <typename T> static inline constexpr// returns a_r * b_rc
+  template <typename T> static constexpr// returns a_r * b_rc
   T mdcr_mult_elem (const T& a, const T& b,//TODO for heterogeneous order ops
     Zindex_int row, Zindex_int col, Zorder_int min_zorder_of_operands)
   noexcept;
 #endif
   // hypercomplex scalar array operations
-  template <typename T> static inline          // c = a + b, returns c ptr,
+  template <typename T> static          // c = a + b, returns c ptr,
   T* hca_add (T& c, const T& a, const T& b, Zorder_int order, std::size_t n=1)
   noexcept;
-  template <typename T> static inline          // c += a + b, returns c ptr,
+  template <typename T> static          // c += a + b, returns c ptr,
   T* hca_adda (T& c, const T& a, const T& b, Zorder_int order, std::size_t n=1)
   noexcept;
-  template <typename T> static inline          // c = a - b, returns c ptr,
+  template <typename T> static          // c = a - b, returns c ptr,
   T* hca_sub (T& c, const T& a, const T& b, Zorder_int order, std::size_t n=1)
   noexcept;
-  template <typename T> static inline          // c += a - b, returns c ptr,
+  template <typename T> static          // c += a - b, returns c ptr,
   T* hca_suba (T& c, const T& a, const T& b, Zorder_int order, std::size_t n=1)
   noexcept;
   // multidual scalar array operations
-  template <typename T> static inline          // c += a * b, returns c ptr,
+  template <typename T> static          // c += a * b, returns c ptr,
   T* mdas_madd (T& c, const T& a, const T& b,  // interleaved real & imaginary
     Zorder_int order, std::size_t=1)           // parts (Layout::Inset)
   noexcept;
-  template <typename T> static inline          // c += a * b, returns c ptr,
+  template <typename T> static          // c += a * b, returns c ptr,
   T* mdsa_madd (T& c, const T& a, const T& b,  // contiguous real & imaginary
     Zorder_int order, std::size_t=1)           // parts (Layout::Block)
   noexcept;
-  template <typename T> static inline          // c = a / b, returns c ptr,
+  template <typename T> static          // c = a / b, returns c ptr,
   T* mdas_div (T& c, const T& a, const T& b,   // interleaved real & imaginary
     Zorder_int order, std::size_t=1)           // parts (Layout::Inset)
   noexcept;//NOTE result (c) must be zeroed before dividing
-  template <typename T> static inline          // c = a / b, returns c ptr,
+  template <typename T> static          // c = a / b, returns c ptr,
   T* mdsa_div  (T& c, const T& a, const T& b,  // contiguous real & imaginary
     Zorder_int order, std::size_t=1)           // parts (Layout::Block)
   noexcept;//NOTE result (c) must be zeroed before dividing
 #if 0
   template <typename T>
-  static inline constexpr
+  static constexpr
   T hc_derivative (const T& v, const Zorder_int o)
   noexcept { return (&v)[o]; }
   template <typename T, typename... Args>
-  static inline constexpr
+  static constexpr
   T hc_derivative (const T& v, const Args... orders)
   noexcept { return get_derivative (v, orders...); }
 #endif
 #if 0
-  static inline constexpr
+  static constexpr
   float get_deriv (const float& v, const float step_size=ZYC_STEP_SINGLE,
     Zorder_int=0)
   noexcept;
   template<typename... Orders>
-  static inline constexpr
+  static constexpr
   float get_deriv (const float& v, const float step_size=ZYC_STEP_SINGLE,
     Orders... orders)
   noexcept { return get_deriv (v, step_size, orders...); }
 #endif
 #if 0
-  static inline constexpr
+  static constexpr
   double get_deriv (const double&, const double step_size=ZYC_STEP_DOUBLE,
     Zorder_int=0);
   noexcept;

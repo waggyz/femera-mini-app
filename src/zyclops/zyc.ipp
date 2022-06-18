@@ -8,17 +8,21 @@
 static inline
 zyclops::Zindex_int zyclops::upow
 (zyclops::Zindex_int base, zyclops::Zindex_int exponent)
-noexcept {
-  /* stackoverflow.com/questions/101439/the-most-efficient-way-to-implement
-     -an-integer-based-power-function-powint-int */
+noexcept {/* stackoverflow.com/questions/101439/the-most-efficient-way-to
+  -implement-an-integer-based-power-function-powint-int */
   zyclops::Zindex_int result = 1;
   while (true) {//for (;;) {
     if (exponent & 1) {result *= base;}
     exponent >>= 1;
-    if (! exponent) {break;}
+    if (! exponent) { break; }
     base *= base;
   }
   return result;
+}
+static inline constexpr
+zyclops::Zindex_int zyclops::upow2 (zyclops::Zindex_int exponent)
+noexcept {
+  return zyclops::Zindex_int (1) << exponent;
 }
 #if 0
 static inline constexpr
