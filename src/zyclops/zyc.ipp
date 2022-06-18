@@ -12,7 +12,7 @@ noexcept {/* stackoverflow.com/questions/101439/the-most-efficient-way-to
   -implement-an-integer-based-power-function-powint-int */
   zyclops::Zindex_int result = 1;
   while (true) {//for (;;) {
-    if (exponent & 1) {result *= base;}
+    if (exponent & 1) { result *= base; }
     exponent >>= 1;
     if (! exponent) { break; }
     base *= base;
@@ -47,13 +47,20 @@ noexcept {
 static inline constexpr
 bool zyclops::is_mdcr_nz (const Zindex_int row, const Zindex_int col)
 noexcept{
-  return (row ^ col) == (row - col);
+#if 0
+  return (row ^ col) == (row - col);// works
+  return ((row ^ col) & col) == 0;// works
+#endif
+  return ~((row ^ col) & col);// works
 }
 static inline constexpr
 bool zyclops::is_mdcr_nz// for access to order > stored
 (const Zindex_int row, const Zindex_int col, const Zorder_int o)
 noexcept{
   return ((row ^ col) == (row - col)) && ((row - col) < (Zindex_int(1) << o));
+#if 0
+  return (~((row ^ col) & col)) && ((row - col) < (Zindex_int(1) << o));// works
+#endif
 }
 /* The difference between pass-by-reference and pass-by-pointer is that pointers
  * can be NULL or reassigned whereas references cannot. Use pass-by-pointer
@@ -66,20 +73,33 @@ template <typename T> static inline constexpr
 T zyclops::mdcr_elem (const T& ZYC_RESTRICT v,
   const zyclops::Zindex_int row, const zyclops::Zindex_int col)
 noexcept {
-  return ((row ^ col) == (row - col)) ? (&v)[row - col] : T(0.0);
-}
-template <typename T> static inline constexpr
-T zyclops::mdcr_mult_elem (const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
-  const zyclops::Zindex_int row, const zyclops::Zindex_int col)
-noexcept {
-  return ((row ^ col) == (row - col)) ? (&a)[col] * (&b)[row - col] : T(0.0);
+  return ((row ^ col) == (row - col)) ? (&v)[row - col] : T(0.0);// works
+#if 0
+  return ((row ^ col) == (row - col)) ? (&v)[row - col] : T(0.0);// works
+  return (~((row ^ col) & col)) ? (&v)[row - col] : T(0.0);// works
+#endif
+  return T(~((row ^ col) & col)) * (&v)[row - col];
 }
 template <typename T> static inline constexpr// for access to order > stored
 T zyclops::mdcr_elem (const T& ZYC_RESTRICT v, const zyclops::Zindex_int row,
   const zyclops::Zindex_int col, const zyclops::Zorder_int o)
 noexcept {
   return ((row ^ col) == (row - col)) && ((row - col) < (Zindex_int(1) << o))
-    ? (&v)[row - col] : T(0.0);
+    ? (&v)[row - col] : T(0.0);// works
+#if 0
+  return (~((row ^ col) & col)) && ((row - col) < (Zindex_int(1) << o))
+    ? (&v)[row - col] : T(0.0);// works
+#endif
+}
+template <typename T> static inline constexpr
+T zyclops::mdcr_mult_elem (const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
+  const zyclops::Zindex_int row, const zyclops::Zindex_int col)
+noexcept {
+  return ((row ^ col) == (row - col)) ? (&a)[col] * (&b)[row - col] : T(0.0);
+#if 0
+  return (~((row ^ col) & col)) ? (&a)[col] * (&b)[row - col] : T(0.0);// works
+  return T(1-((row ^ col) & col)) * (&a)[col] * (&b)[row - col];// works
+#endif
 }
 #if 0
 template <typename T> static inline constexpr// for heterogeneous order multiply
