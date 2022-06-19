@@ -84,11 +84,16 @@ namespace femera { namespace data {
   template <fmr::Align_int A> template <typename T> inline
   T* Bulk<A>::set (const std::size_t nvals, const T init_val)
   noexcept {
+    return this->set_real (nvals, init_val);
+  }
+  template <fmr::Align_int A> template <typename T> inline
+  T* Bulk<A>::set_real (const std::size_t nvals, const T init_val)
+  noexcept {
     const auto zsz = zplx.hc_size ();
     this->raw<T> (nvals * zsz);
     if (nvals <= 0) { return reinterpret_cast<T*> (this->bulk.data ()); }
     const auto ptr = std::uintptr_t (this->bulk.data ());
-    const std::uintptr_t sz = nvals * sizeof (T) * zsz / sizeof (fmr::Bulk_int);
+    const std::uintptr_t sz = (nvals * sizeof(T) * zsz) / sizeof(fmr::Bulk_int);
     const auto lpad = this->offset<T> (ptr);// max left  padding is A-1
     const auto rpad = this->offset<T> (sz );// max right padding is A-1
     // nonzero init
@@ -110,12 +115,12 @@ namespace femera { namespace data {
 #endif
     this->bulk.resize (lpad + sz + rpad);// <= capacity (); ptr still valid
     /* Resize sets to zero, and zero is the same bits for all numeric types.
-       This is checked in data/Vals.gtst.cpp. */
+       This is checked in Vals.gtst.cpp. */
     if (init_val <= T(0) && init_val >= T(0)) {// == 0.0, no float warning
       return reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
     }
     FMR_ALIGN_PTR v = reinterpret_cast<T*> (& this->bulk.data ()[lpad]);
-    if ((zsz > 1) && (this->zplx.get_layout () == zyc::Layout::Inset)) {
+    if ((zsz > 1) && (this->zplx.get_layout () == zyclops::Layout::Inset)) {
       const auto nz = nvals * zsz;
       FMR_PRAGMA_OMP_SIMD
       for (size_t i=0; i<nz; i+=zsz) { v [i] = init_val; }
@@ -124,6 +129,23 @@ namespace femera { namespace data {
     FMR_PRAGMA_OMP_SIMD
     for (size_t i=0; i<nvals; i++) { v [i] = init_val; }// 10% slower than 0init
     return v;
+  }
+  template <fmr::Align_int A> template <typename T> inline
+    T* Bulk<A>::set
+    (zyclops::Layout lay, zyclops::Algebra alg, zyclops::Zorder_int zord,
+      std::size_t hc_vals_n, T real_part)
+  noexcept {
+    return this->set_real (lay, alg, zord, hc_vals_n, real_part);
+  }
+  template <fmr::Align_int A> template <typename T> inline
+    T* Bulk<A>::set_real
+    (zyclops::Layout lay, zyclops::Algebra alg, zyclops::Zorder_int o,
+      std::size_t hc_vals_n, T real_part)
+  noexcept {
+    this->zplx.order  = o;
+    this->zplx.family = alg;
+    this->zplx.layout = lay;
+    return this->set_real (hc_vals_n, real_part);
   }
   template <fmr::Align_int A> template <typename T> inline
   T* Bulk<A>::set (const std::size_t nvals, const T* init_vals)

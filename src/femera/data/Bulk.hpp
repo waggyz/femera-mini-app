@@ -32,12 +32,23 @@ namespace femera { namespace data {
     noexcept;
     //
     fmr::Align_int get_sizeof ()// sizeof each currently stored native (C++)
-    noexcept;                   // number (int, float, etc.) in bytes
+    noexcept;                   // numbers (int, float, etc.) in bytes
     std::size_t get_cval_n ()// count of currently stored native (C++) numbers
     noexcept;
     std::size_t get_size ()// count of currently stored (hypercomplex) numbers
     noexcept;              // same as get_cval_n () for order 0
     //
+    template <typename T>
+    T* set_real (std::size_t nvals, T init_val)// sets real part only
+    noexcept;
+    template <typename T>
+    T* set_real (zyc::Layout, zyc::Algebra, zyc::Zorder_int,
+      std::size_t hc_vals_n, T real_part)
+    noexcept;
+    template <typename T>
+    T* set (zyc::Layout, zyc::Algebra, zyc::Zorder_int,
+      std::size_t hc_vals_n, T real_part)
+    noexcept;
     template <typename T>
     T* set (std::size_t nvals, T init_val)// sets real part only
     noexcept;
