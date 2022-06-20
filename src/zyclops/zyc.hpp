@@ -56,9 +56,9 @@ namespace zyclops {
   static constexpr
   Zindex_int upow2 (Zindex_int exponent)
   noexcept;
-#if 0
+#if 1
   static constexpr
-  uint hamw (uint64_t)//TODO hamming weight
+  uint hamw (uint64_t)// used to calculate derivative order
   noexcept;
   static constexpr
   uint hamw (uint32_t)
@@ -74,15 +74,15 @@ namespace zyclops {
   noexcept;                                    // higher order than stored
   // multidual number CR element operations
   template <typename T> static constexpr// returns a[row,col] (a_rc),
-  T mdcr_elem (const T& a,                     // fast with -flto
+  T mdcr_elem (const T& a,              // fast with -flto
     Zindex_int row, Zindex_int col)
   noexcept;
   template <typename T> static constexpr// returns a_rc with safe access
-  T mdcr_elem (const T& a,                     // to higher order than stored
+  T mdcr_elem (const T& a,              // to higher order than stored
     Zindex_int row, Zindex_int col, Zorder_int zorder_stored)
   noexcept;
-  template <typename T> static constexpr// returns a_r * b_rc,
-  T mdcr_mult_elem (const T& a, const T& b,    // fast with -flto
+  template <typename T> static constexpr   // returns a_r * b_rc element,
+  T mdcr_mult_elem (const T& a, const T& b,// fast with -flto
     Zindex_int row, Zindex_int col)
   noexcept;
 #if 0

@@ -3,7 +3,6 @@
 
 #include "Bulk.hpp"
 
-#include <vector>
 #include <unordered_map>
 
 namespace femera { namespace data {

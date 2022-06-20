@@ -5,7 +5,6 @@
 #include "../../fmr/math.hpp"
 
 #include <vector>
-#include <unordered_map>
 
 namespace femera { namespace data {
   namespace zyc = ::zyclops;

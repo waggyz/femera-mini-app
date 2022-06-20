@@ -46,6 +46,8 @@ namespace zyclops { namespace test {
     return ((row ^ col) + (row - col));// simplified below
   //  return ((row - col) - (row ^ col)) - col+row;
   //  return (row ^ col) - (row + col);
+    return (row ^ col) == (row - col) ? row - col : -1;// this works
+    return (~((row ^ col) & col));
   #else
     return (row ^ col) == (row - col) ? row - col : -1;// this works
   #endif
@@ -56,9 +58,11 @@ namespace zyclops { namespace test {
   #if 0
     const auto ix = row - col;
     return (ix < (1<<array_order)) && ((row ^ col) == ix) ? ix : -1;
+    return ((row - col) < (1<<array_order)) && (~((row ^ col) & col))
+      ? row - col : -1;// constexpr
   #else
     return ((row - col) < (1<<array_order)) && ((row ^ col) == (row - col))
-      ? row - col : -1;// constexpr
+      ?  row - col : -1;// constexpr
   #endif
   }
   static inline
