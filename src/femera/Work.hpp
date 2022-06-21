@@ -23,31 +23,32 @@
 
 namespace femera {
   // Forward declares
-  class Work;
+  class Work;                          // abstract (pure virtual) base class
   template <typename> class Proc;      // abstract CRTP base derived from Work
   namespace proc {                     // CRTP inheriance from Proc
-    class Main;                        // public interface
-    class Root; class Node; class Fcpu;// Femera internal
-    class Fmpi; class Fomp; class Nvid;// libraries
+    class Main;                        // public interface to process handling
+    class Root; class Node; class Fcpu;// Femera process handling
+    class Fmpi; class Fomp; class Nvid;// process handling libraries
   }
   template <typename> class Data;      // abstract CRTP base derived from Work
   namespace data {                     // CRTP inheriance from Data
-    class File;                        // public interface
-    class Logs; class Dlim; class Text;// Femera internal
-    class Cgns; class Gmsh; class Moab;// libraries
+    class File;                        // public interface to data
+    class Logs; class Dlim; class Text;// Femera data handling
+    class Bank;// class View;
+    class Cgns; class Gmsh; class Moab;// data handling libraries
     class Pets;
   }
   template <typename> class Test;      // abstract CRTP base derived from Work
   namespace test {                     // CRTP inheriance from Test
-    class Beds;                        // public interface
-    class Unit; class Self; class Perf;// Femera internal
-    class Gtst;                        // libraries
+    class Beds;                        // public interface to tests
+    class Unit; class Self; class Perf;// Femera testing
+    class Gtst;                        // testing libraries
   }
   template <typename> class Task;      // abstract CRTP base derived from Work
   namespace task {                     // CRTP inheriance from Task
-    class Jobs;                        // public interface
-    class Sims; class Runs;            // Femera internal
-    //class Post; class View;
+    class Jobs;                        // public interface to tasks
+    class Sims; class Runs;            // Femera tasks
+    //class Post;
     //class Plug;                      // plugins
   }
   // typedefs

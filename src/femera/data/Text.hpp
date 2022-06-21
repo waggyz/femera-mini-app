@@ -1,12 +1,10 @@
 #ifndef FEMERA_HAS_DATA_TEXT_HPP
 #define FEMERA_HAS_DATA_TEXT_HPP
 
-//#include "../Data.hpp"
 #include "File.hpp"
 #include <unordered_map>
 
-#include "../../fmr/form.hpp"// needed in Text.ipp
-#include <valarray>
+#include <valarray>// needed in Text.ipp
 
 namespace femera { namespace data {
   class Text;// Derive a CRTP concrete class from Data.

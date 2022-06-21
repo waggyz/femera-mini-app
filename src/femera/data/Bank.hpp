@@ -5,10 +5,9 @@
 #include "Vals.hpp"
 
 namespace femera { namespace data {
-  class Bank;// use to synchronize Vals data
-  // Derive as a CRTP concrete class from Data.
-  class Bank final: public Data <Bank> { private: friend class Data;//has vtable
-    //             because Data has vtable
+  class Bank;// Derive as a CRTP concrete class from Data.
+  class Bank final: public Data <Bank> { private: friend class Data;
+    //  has vtable because Data has vtable; use to synchronize Vals data
     // wraps & exposes a vector of Vals (no vtable) instances for fast access
 #ifdef FMR_BANK_LOCAL
   private:

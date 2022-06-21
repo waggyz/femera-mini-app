@@ -38,9 +38,10 @@ namespace zyclops {
   // max uint needed for matrix-free CR access: 2^(  (max_zorder+1)) - 1
   //
   enum class Algebra : std::int_fast8_t { Unknown =-1,
-    Real, Complex, Dual, Split, Qcda, Oti, User,// Qcda: Cayley-Dickson algebras
+    Real, Complex, Dual, Split, Qcda, Oti,// Qcda: Cayley-Dickson algebras
     Integer,// signed integer
-    Natural // unsigned natural number
+    Natural,// unsigned natural number
+    User
   };
   enum class Layout : std::int_fast8_t { Unknown =-1,// for arrays of Zomplex
     Native,// Native is for real & built-in complex type

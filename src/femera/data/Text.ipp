@@ -47,7 +47,8 @@ namespace femera {
     }
     const auto w = this->data->file_line_sz [file];
     const auto h = this->data->line_name_sz [file];
-    const auto line = femera::form::name_line (h, w, label, form, args...);
+//    const auto line = femera::form::name_line (h, w, label, form, args...);
+    const auto line = this->data->name_line (h, w, label, form, args...);
     if (file != nullptr) {
 //      this->time.add_idle_time_now ();
       const auto c = fprintf (file,"%s\n", line.c_str());
@@ -70,7 +71,8 @@ namespace femera {
     }
     const auto h = this->data->line_name_sz [file];
     const auto w = this->data->file_line_sz [file];
-    const auto line = femera::form::time_line (h, w, label, form, args...);
+//    const auto line = femera::form::time_line (h, w, label, form, args...);
+    const auto line = this->data->time_line (h, w, label, form, args...);
     if (file != nullptr) {
 //      this->time.add_idle_time_now ();
       const auto c = fprintf (file,"%s\n", line.c_str());

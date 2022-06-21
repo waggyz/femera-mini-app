@@ -3,8 +3,6 @@
 
 #include "proc/Main.hpp"
 
-//#include <valarray>
-
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
 #include <cstdio>     // std::printf
@@ -42,6 +40,31 @@ namespace femera {
     std::string   get_base_abrv ()           noexcept final override;
     fmr::Exit_int init (int*, char**)        noexcept final override;
     fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;
+  public:
+    static constexpr
+    This_spt new_task (const Work::Core_ptrs_t)        noexcept;
+    T*       get_task (fmr::Local_int)                 noexcept;
+    T*       get_task (Work::Task_path_t)              noexcept;
+    T*       get_task (Work_type, fmr::Local_int ix=0) noexcept;
+    T*       get_task (Task_type, fmr::Local_int ix=0) noexcept;
+  private:
+    constexpr
+    T*      this_cast (Data*) noexcept;
+    constexpr
+    T*      this_cast (Work*) noexcept;
+  protected:// Make it clear this class needs to be inherited from.
+    Data (Work::Core_ptrs_t) noexcept;
+    Data ()            =default;
+    Data (const Data&) =default;
+    Data (Data&&)      =default;// shallow (pointer) copyable
+    Data& operator =
+      (const Data&)    =default;
+    ~Data ()           =default;
+#if 0
+  public:
+    using Sims_list_t = std::deque <fmr::Data_name_t>;
+    using Path_list_t = std::deque <fmr::File_name_t>;
+#endif
 #if 0
   private:
     std::unordered_map<std::string,FILE*> open_file_list ={};
@@ -49,11 +72,11 @@ namespace femera {
     using Data_name_t = std:vector<Name_t>;
     // Memory operations
     ret::???  add (Data_name_t, ...);// Vals_t vals =nullptr);// in Vals?
-    ret::??? size or init (Data_name_t, ...);// Vals_t size =nullptr);// in Vals?
-    Bank_t   form or pack or bulk (Data_name_t, ...);// in Vals?
     Vals_t    get (Data_name_t);// in Vals?
     ret::???  clr (Data_name_t);// in Vals?
     ret::???  del (Data_name_t);// in Vals?
+    ret::??? size or init (Data_name_t, ...);// Vals_t size =nullptr);// in Vals?
+    Bank_t   form or pack or bulk (Data_name_t, ...);// in Vals?
     //
     // I/O operations
     Vals_t   scan (File_name_t);// in File?
@@ -75,9 +98,6 @@ namespace femera {
     //using Form_list_t = std::vector <std::valarray<Bulk_int>>;
     //-------------------------------------------------------------------------
 #endif
-  public:
-    using Sims_list_t = std::deque <fmr::Data_name_t>;
-    using Path_list_t = std::deque <fmr::File_name_t>;
     //TODO Path_list_t can be a vector to disambiguate it from Sims_list_t?
     //NOTE An empty deque/vector in an argument means all sims or all files.
     // Path_list_t ({""}); means the current working directory in a path method.
@@ -160,26 +180,6 @@ namespace femera {
     Size_list_t save_item (..);// new, overwrite
     //-------------------------------------------------------------------------
 #endif
-  public:
-    static constexpr
-    This_spt new_task (const Work::Core_ptrs_t)        noexcept;
-    T*       get_task (fmr::Local_int)                 noexcept;
-    T*       get_task (Work::Task_path_t)              noexcept;
-    T*       get_task (Work_type, fmr::Local_int ix=0) noexcept;
-    T*       get_task (Task_type, fmr::Local_int ix=0) noexcept;
-  private:
-    constexpr
-    T*      this_cast (Data*) noexcept;
-    constexpr
-    T*      this_cast (Work*) noexcept;
-  protected:// Make it clear this class needs to be inherited from.
-    Data (Work::Core_ptrs_t) noexcept;
-    Data ()            =default;
-    Data (const Data&) =default;
-    Data (Data&&)      =default;// shallow (pointer) copyable
-    Data& operator =
-      (const Data&)    =default;
-    ~Data ()           =default;
   };
 }//end femera:: namespace
 #undef FMR_DEBUG
