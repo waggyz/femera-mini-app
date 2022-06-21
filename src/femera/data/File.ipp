@@ -18,12 +18,12 @@ namespace femera {
   inline
   bool data::File::did_logs_init ()
   noexcept {
-    return this->logs_init_stat;
+    return this->logs_init_tf;
   }
   inline
   bool data::File::set_logs_init (const bool tf)
   noexcept {
-    this->logs_init_stat = tf;
+    this->logs_init_tf = tf;
 #if 0
     if (tf) {
       auto D = Work::cast_via_work<data::Text>(this->get_task (Task_type::Text));
@@ -32,7 +32,7 @@ namespace femera {
         D->line_name_sz = this->line_name_sz;
     } }
 #endif
-    return this->logs_init_stat;
+    return this->logs_init_tf;
   }
   template <typename ...Args> inline
   std::string data::File::text_line                         // send (..)

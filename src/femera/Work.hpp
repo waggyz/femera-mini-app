@@ -5,7 +5,6 @@
 #include "../fmr/math.hpp"
 #include "Errs.hpp"
 #include "type.hpp"
-//#include "vals.hpp"
 
 #include <memory>     // std::shared_ptr, std::make_shared
 #include <vector>
@@ -25,30 +24,35 @@
 namespace femera {
   // Forward declares
   class Work;
-  template <typename> class Proc;// class Main; interface
-  template <typename> class Data;// class File; interface
-  template <typename> class Test;// class Beds; interface
-  template <typename> class Task;// class Jobs; interface
-  //
-  namespace proc {// CRTP inheriance from Proc; interface is Main
-    class Main; class Root; class Node; class Fcpu;
-    class Fmpi; class Fomp; class Nvid;
+  template <typename> class Proc;      // abstract CRTP base derived from Work
+  namespace proc {                     // CRTP inheriance from Proc
+    class Main;                        // public interface
+    class Root; class Node; class Fcpu;// Femera internal
+    class Fmpi; class Fomp; class Nvid;// libraries
   }
-  namespace data {// CRTP inheriance from Data; interface is File
-    class File; class Logs; class Dlim; class Text;
-    class Cgns; class Gmsh; class Moab; class Moab; class Pets;
+  template <typename> class Data;      // abstract CRTP base derived from Work
+  namespace data {                     // CRTP inheriance from Data
+    class File;                        // public interface
+    class Logs; class Dlim; class Text;// Femera internal
+    class Cgns; class Gmsh; class Moab;// libraries
+    class Pets;
   }
-  namespace test {// CRTP inheriance from Test; interface is Beds
-    class Beds; class Unit; class Self; class Perf;
-    class Gtst;
+  template <typename> class Test;      // abstract CRTP base derived from Work
+  namespace test {                     // CRTP inheriance from Test
+    class Beds;                        // public interface
+    class Unit; class Self; class Perf;// Femera internal
+    class Gtst;                        // libraries
   }
-  namespace task {// CRTP inheriance from Task; interface is Task
-    class Jobs; class Sims; class Runs;// Post
+  template <typename> class Task;      // abstract CRTP base derived from Work
+  namespace task {                     // CRTP inheriance from Task
+    class Jobs;                        // public interface
+    class Sims; class Runs;            // Femera internal
+    //class Post; class View;
+    //class Plug;                      // plugins
   }
   // typedefs
-  using Work_spt = FMR_SMART_PTR <Work>;
+  using Work_spt = FMR_SMART_PTR <Work>;      // abstract packaging base class
   using Jobs_spt = FMR_SMART_PTR <task::Jobs>;// concrete Task interface
-  //
   //
   class Work {/* This is an abstract (pure virtual) base class (interface).
   * Derived classes use the curiously recurrent template pattern (CRTP) e.g.,
@@ -59,7 +63,6 @@ namespace femera {
     using Core_ptrs_t = std::tuple <proc::Main*, data::File*, test::Beds*>;
     using Task_path_t = std::vector <fmr::Local_int>;
     using Work_time_t = fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>;
-//TODO    using Task_tree_t = std::vector <Task_path_t>;
   public:// variables are classes with (mostly) only member functions public --
     Work_time_t time = Work_time_t ();// performance timer
     proc::Main* proc = nullptr;       // processing hierarchy
@@ -67,15 +70,13 @@ namespace femera {
     test::Beds* test = nullptr;       // correctness and performance testing
   public:// methods -----------------------------------------------------------
     template <typename T, typename C> static inline constexpr
-    T* cast_via_work (C* child)
-    noexcept;
+    T* cast_via_work (C* child) noexcept;
     std::string    set_name (const std::string&) noexcept;
     std::string    get_name    ()         noexcept;
     std::string    get_abrv    ()         noexcept;
     std::string    get_version ()         noexcept;
     Core_ptrs_t    get_core    ()         noexcept;
     fmr::Local_int get_task_n  ()         noexcept;
-//TODO Task_tree_t get_tree    ()         noexcept;
     fmr::Local_int add_task    (Work_spt) noexcept;// returns task number added
     fmr::Local_int del_task    (fmr::Local_int ix) noexcept;// returns task_n
   public:// virtual methods ---------------------------------------------------
@@ -85,7 +86,7 @@ namespace femera {
     virtual fmr::Exit_int exit (fmr::Exit_int err=0)    noexcept =0;
   private:// ==================================================================
     using Task_list_t = std::deque <Work_spt>;
-  protected:
+  protected:// variables
     std::string       name ="unknown work";
     std::string       abrv ="work";
     std::string    version ="";
@@ -97,28 +98,18 @@ namespace femera {
     /replacing-the-command-line-arguments-int-argc-and-char-argv-with-stdvectors
     //
     std::string argv_prfx ="-fmr:";
-    std::unique_ptr<char*[]> my_argv;// use: err= init (&my_argc, my_argv.get());
+    std::unique_ptr<char*[]> my_argv;//use: err= init (&my_argc, my_argv.get());
     int                      my_argc =0;
 #endif
-  private:
+  private:// variables
     bool did_work_init = false;
     bool  is_work_main = true ;// save for use after proc::exit (..)
   protected:
     std::string set_abrv (const std::string&) noexcept;
   protected:// called by Derived::get_task_*(..)
-    Work* get_work_raw (fmr::Local_int) noexcept;//TODO Change to get_work(..)
-    Work* get_work_raw (const Task_path_t&) noexcept;//              ""
-    Work* get_work_raw (Work_type, fmr::Local_int ix=0) noexcept;//  ""
-#if 0
-    Work_spt get_work_spt (fmr::Local_int) noexcept;
-    Work_spt get_work_spt (Task_path_t)    noexcept;
-#endif
-#if 0
-  public:
-    template <typename T>
-    T* get_task (fmr::Local_int ix=0) {//return task #ix of specific type
-      return static_cast<T*>(this->get_work_raw(ix));}
-#endif
+    Work* get_work (fmr::Local_int) noexcept;
+    Work* get_work (const Task_path_t&) noexcept;
+    Work* get_work (Work_type, fmr::Local_int ix=0) noexcept;
   protected:
     // Work stack initialization and exit
     fmr::Exit_int init_list (int* argc, char** argv) noexcept;// init forward

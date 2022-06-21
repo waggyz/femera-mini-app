@@ -59,22 +59,22 @@ namespace femera {
   template <typename T> inline
   T* Proc<T>::get_task (const fmr::Local_int i)
   noexcept {
-    return Proc::this_cast (Work::get_work_raw (i));
+    return Proc::this_cast (Work::get_work (i));
   }
   template <typename T> inline
   T* Proc<T>::get_task (const Work::Task_path_t path)
   noexcept {
-    return Proc::this_cast (Work::get_work_raw (path));
+    return Proc::this_cast (Work::get_work (path));
   }
   template <typename T> inline
   T* Proc<T>::get_task (const Work_type t, const fmr::Local_int ix)
   noexcept {
-    return Proc::this_cast (Work::get_work_raw (t, ix));
+    return Proc::this_cast (Work::get_work (t, ix));
   }
   template <typename T> inline
   T* Proc<T>::get_task (const Task_type t, const fmr::Local_int ix)
   noexcept {
-    return Proc::this_cast (Work::get_work_raw (task_cast (t), ix));
+    return Proc::this_cast (Work::get_work (task_cast (t), ix));
   }
   template <typename T> inline constexpr
   FMR_SMART_PTR<T> Proc<T>::new_task ()
@@ -107,7 +107,7 @@ namespace femera {
     Proc* P = this;
     ans = ans & (P->get_proc_ix () == P->main_ix);
     while (! P->task_list.empty ()) {
-      P = static_cast<Proc*> (P->get_work_raw (0));//TODO only path 0?
+      P = static_cast<Proc*> (P->get_work (0));//TODO only path 0?
       ans = ans & (P->get_proc_ix () == P->main_ix);
     }
     return ans;
@@ -120,7 +120,7 @@ namespace femera {
     Proc* P = this;
     id += P->base_id + P->base_n * P->get_proc_ix ();
     while (! P->task_list.empty ()) {
-      P = static_cast<Proc*> (P->get_work_raw (0));
+      P = static_cast<Proc*> (P->get_work (0));
       id += P->base_id + P->base_n * P->get_proc_ix ();
 #ifdef FMR_DEBUG
       printf ("%s id: %u += %u + %u * %u\n", P->get_abrv ().c_str(), id,
@@ -192,7 +192,7 @@ namespace femera {
 #ifdef FMR_DEBUG
       printf ("%s: * %u = %u\n", P->get_name ().c_str(), P->get_proc_n(), n);
 #endif
-      P = this_cast (P->get_work_raw (0));//TODO other branches?
+      P = this_cast (P->get_work (0));//TODO other branches?
     }
     return n;
   }
@@ -202,7 +202,7 @@ namespace femera {
     auto P = this;
     while (! P->task_list.empty ()) {
       P->base_n = P->all_proc_n () / ((P->proc_n == 0) ? 1 : P->proc_n);
-      P = this_cast (P->get_work_raw (0));//TODO other branches?
+      P = this_cast (P->get_work (0));//TODO other branches?
     }
     return this->base_n;
   }

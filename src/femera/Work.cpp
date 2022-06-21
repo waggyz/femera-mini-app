@@ -42,7 +42,7 @@ namespace femera {
             && W->task_type != task_cast (Task_type::Main)) {
             const auto nC = fmr::Local_int (W->task_list.size ());
             for (fmr::Local_int i=0; i<nC; i++) {
-              const auto C = W->get_work_raw (i);
+              const auto C = W->get_work (i);
               if (C!= nullptr) {
                 child_busy_ns += C->time.get_busy_ns ();
           } } }
@@ -78,7 +78,7 @@ namespace femera {
       const auto label = femera::form::text_line (250, "%4s %4s init",
         this->get_base_abrv ().c_str(), this->get_abrv().c_str());
       form::name_line (::stdout, 14, 80, label, "removing %s...",
-        this->get_work_raw (del_list.top ())->get_name ().c_str());
+        this->get_work (del_list.top ())->get_name ().c_str());
       this->del_task (del_list.top ());
       del_list.pop ();
     }
@@ -108,7 +108,7 @@ namespace femera {
         if (! W->task_list.empty ()) {// calculate children busy time
           const auto n = fmr::Local_int (W->task_list.size ());
           for (fmr::Local_int i=0; i<n; i++) {
-            const auto C = W->get_work_raw (i);
+            const auto C = W->get_work (i);
             if (C!= nullptr) {
               child_busy_ns += C->time.get_busy_ns ();
         } } }
@@ -179,7 +179,7 @@ namespace femera {
       if (! branch.empty ()) {
         branch.pop_back ();
         if (! branch.empty ()) {
-          W = this->get_work_raw (branch);
+          W = this->get_work (branch);
           if (W != nullptr) {
 #ifdef FMR_DEBUG
             printf ("Work: exit pop  %s\n", W->task_list.back ()->name.c_str());

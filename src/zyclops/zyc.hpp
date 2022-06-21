@@ -65,7 +65,7 @@ namespace zyclops {
   noexcept;
 #endif
   // multidual Cauchy-Riemann (CR) matrix indexing
-  static constexpr                      // returns true for nonzero
+  static constexpr                             // returns true for nonzero
   bool is_mdcr_nz (Zindex_int r, Zindex_int c) // CR matrix form elements
   noexcept;
   static constexpr

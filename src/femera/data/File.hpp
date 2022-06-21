@@ -44,7 +44,7 @@ namespace femera { namespace data {
     std::unordered_map <FILE*, fmr::Line_size_int> line_name_sz
       = {{nullptr, 14}, {::stdout, 14}, {::stderr, 0}};
 #endif
-    bool logs_init_stat = false;
+    bool logs_init_tf = false;
   public:
     bool did_logs_init ()     noexcept;
     bool set_logs_init (bool) noexcept;

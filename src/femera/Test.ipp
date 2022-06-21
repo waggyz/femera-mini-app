@@ -57,12 +57,12 @@ namespace femera {
   template <typename T> inline
   T* Test<T>::get_task (const fmr::Local_int i)
   noexcept {
-    return this_cast (this->get_work_raw (i));
+    return this_cast (this->get_work (i));
   }
   template <typename T> inline
   T* Test<T>::get_task (Work::Task_path_t tree)
   noexcept {
-    return this_cast (this->get_work_raw (tree));
+    return this_cast (this->get_work (tree));
   }
   template <typename T> inline constexpr
   FMR_SMART_PTR<T> Test<T>::new_task (const Work::Core_ptrs_t core)

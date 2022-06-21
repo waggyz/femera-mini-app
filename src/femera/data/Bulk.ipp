@@ -54,7 +54,7 @@ namespace femera { namespace data {
     this->zplx = std::is_floating_point <T>::value ? ::zyclops::Real
       : (std::is_signed <T>::value ? ::zyclops::Integer : ::zyclops::Natural);
     this->cval_szof = sizeof (T);
-    this->cval_sign = std::is_signed <T>::value;
+    this->cval_sign_tf = std::is_signed <T>::value;
     if (nT <= 0) {
       this->bulk ={};// new empty vec or clear existing
       this->cval_n = 0;

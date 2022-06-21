@@ -77,22 +77,22 @@ namespace femera {
   template <typename T> inline
   T* Data<T>::get_task (const fmr::Local_int i)
   noexcept {
-    return static_cast<T*> (this->get_work_raw (i));
+    return static_cast<T*> (this->get_work (i));
   }
   template <typename T> inline
   T* Data<T>::get_task (const Work::Task_path_t tree)
   noexcept {
-    return static_cast<T*> (this->get_work_raw (tree));
+    return static_cast<T*> (this->get_work (tree));
   }
   template <typename T> inline
   T* Data<T>::get_task (const Work_type t, const fmr::Local_int ix)
   noexcept {
-    return Data::this_cast (Work::get_work_raw (t, ix));
+    return Data::this_cast (Work::get_work (t, ix));
   }
   template <typename T> inline
   T* Data<T>::get_task (const Task_type t, const fmr::Local_int ix)
   noexcept {
-    return Data::this_cast (Work::get_work_raw (task_cast (t), ix));
+    return Data::this_cast (Work::get_work (task_cast (t), ix));
   }
   template <typename T> inline constexpr
   FMR_SMART_PTR<T> Data<T>::new_task (const Work::Core_ptrs_t core)
