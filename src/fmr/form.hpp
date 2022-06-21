@@ -4,7 +4,11 @@
 #include "fmr.hpp"
 
 #include <string>
-#include <cctype> // used in form.ipp
+// below used in form.ipp
+#include <cctype>
+#include <cmath>      // std::abs()
+#include <cstdio>     // std::snprintf
+#include <valarray>
 
 namespace fmr { namespace form {
 

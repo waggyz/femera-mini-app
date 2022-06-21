@@ -1,10 +1,6 @@
 #ifndef FEMERA_DATA_BULK_IPP
 #define FEMERA_DATA_BULK_IPP
 
-#include <stddef.h>
-#include <stdint.h>
-#include <immintrin.h>       // _mm_crc32_u64
-
 namespace femera { namespace data {
   template <fmr::Align_int A> inline
   Bulk<A>::Bulk ()

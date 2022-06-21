@@ -1,8 +1,6 @@
 #ifndef FMR_HAS_PERF_IPP
 #define FMR_HAS_PERF_IPP
 
-#include <chrono>   // high_resolution_clock, duration, nanoseconds
-
 // Inline definitions
 namespace fmr {
 

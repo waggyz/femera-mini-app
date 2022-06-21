@@ -2,6 +2,8 @@
 #define FMR_HAS_PERF_HPP
 
 #include "fmr.hpp"
+// below used in perf.ipp
+#include <chrono>   // high_resolution_clock, duration, nanoseconds
 
 namespace fmr { namespace perf {
 // This "using" syntax is preferred to "typedef" in the Google C++ Style Guide:

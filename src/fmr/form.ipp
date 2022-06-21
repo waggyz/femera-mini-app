@@ -1,10 +1,6 @@
 #ifndef FMR_HAS_FORM_IPP
 #define FMR_HAS_FORM_IPP
 
-#include <cmath>      // std::abs()
-#include <cstdio>     // std::snprintf
-#include <valarray>
-
 namespace fmr { namespace detail { namespace form {
 
   std::string si_unit (const double val, std::string unit,

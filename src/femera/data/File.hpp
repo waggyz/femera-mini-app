@@ -66,7 +66,7 @@ namespace femera { namespace data {
     void         send_file (Fnl& name_list={""}, Dt =Dt::All, Ft =Ft::Auto);
 #endif
 #if 1
-  //TODO? Move to femera::data::Text and/or femera::data::Logs
+  //TODO Move to femera::data::Text and/or femera::data::Logs ?
   private:
     using ss = std::string;
   public:

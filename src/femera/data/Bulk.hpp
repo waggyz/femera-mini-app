@@ -5,6 +5,10 @@
 #include "../../fmr/math.hpp"
 
 #include <vector>
+// below used in Bulk.ipp
+#include <stddef.h>
+#include <stdint.h>
+#include <immintrin.h>       // _mm_crc32_u64
 
 namespace femera { namespace data {
   namespace zyc = ::zyclops;
