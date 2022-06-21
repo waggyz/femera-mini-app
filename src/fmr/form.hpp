@@ -40,12 +40,12 @@ namespace femera { namespace form {
     const std::string& name, const std::string& format, Args...);
 
   template <typename ...Args> static
-  std::string name_time
+  std::string time_line
   (fmr::Line_size_int name_width, fmr::Line_size_int line_width,
     const std::string& name, const std::string& format, Args...);
 
   template <typename ...Args> static
-  std::string name_time (FILE*,
+  std::string time_line (FILE*,
     fmr::Line_size_int name_width, fmr::Line_size_int line_width,
     const std::string& name, const std::string& format, Args...);
 

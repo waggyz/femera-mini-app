@@ -98,7 +98,7 @@ namespace femera {
     return data::File::name_line (data::File_ptrs_t ({}), label, form, args...);
   }
   template <typename ...Args> inline
-  std::string data::File::name_time (const data::File_ptrs_t& flist,
+  std::string data::File::time_line (const data::File_ptrs_t& flist,
     const std::string& label, const std::string& form, Args ...args) {
     FILE* file = nullptr;
     if (flist.size () > 0 && this->proc != nullptr) {
@@ -106,7 +106,7 @@ namespace femera {
     }
     const auto h = this->line_name_sz [file];
     const auto w = this->file_line_sz [file];
-    const auto line = femera::form::name_time (h, w, label, form, args...);
+    const auto line = femera::form::time_line (h, w, label, form, args...);
     if (file != nullptr) {
 //      this->time.add_idle_time_now ();
       const auto c = fprintf (file,"%s\n", line.c_str());
@@ -116,9 +116,9 @@ namespace femera {
     return line;
   }
   template <typename ...Args> inline
-  std::string data::File::name_time
+  std::string data::File::time_line
   (const std::string& label, const std::string& form, Args ...args) {
-    return data::File::name_time (data::File_ptrs_t ({}), label, form, args...);
+    return data::File::time_line (data::File_ptrs_t ({}), label, form, args...);
   }
 }//end femera namespace
 

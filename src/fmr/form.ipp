@@ -90,7 +90,7 @@ namespace femera {
     return line;
   }
   template <typename ...Args> static
-  std::string form::name_time
+  std::string form::time_line
   (const fmr::Line_size_int name_width, const fmr::Line_size_int line_width,
   const std::string& name, const std::string& form, Args...args) {
     //
@@ -107,10 +107,10 @@ namespace femera {
     return std::string(&buf[0]);
   }
   template <typename ...Args> static
-  std::string form::name_time (FILE* f,
+  std::string form::time_line (FILE* f,
   const fmr::Line_size_int h, const fmr::Line_size_int l,
   const std::string& name, const std::string& form, Args...args) {
-    const auto line = form::name_time (h, l, name, form, args...);
+    const auto line = form::time_line (h, l, name, form, args...);
     fprintf (f,"%s\n", line.c_str());
     return line;
   }

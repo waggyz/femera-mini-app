@@ -1,17 +1,13 @@
 #ifndef ZYC_HAS_ZYC_IPP
 #define ZYC_HAS_ZYC_IPP
 
-#ifdef __INTEL_COMPILER
-#include <nmmintrin.h>
-#endif
-
 static inline
 zyclops::Zindex_int zyclops::upow
 (zyclops::Zindex_int base, zyclops::Zindex_int exponent)
 noexcept {/* stackoverflow.com/questions/101439/the-most-efficient-way-to
   -implement-an-integer-based-power-function-powint-int */
   zyclops::Zindex_int result = 1;
-  while (true) {//for (;;) {
+  while (true) {
     if (exponent & 1) { result *= base; }
     exponent >>= 1;
     if (! exponent) { break; }
@@ -57,16 +53,17 @@ static inline constexpr
 bool zyclops::is_mdcr_nz// for access to order > stored
 (const Zindex_int row, const Zindex_int col, const Zorder_int o)
 noexcept{
-  return (~((row ^ col) & col)) && ((row ^ col) < (Zindex_int(1) << o));// works
+  return (~((row ^ col) & col)) && ((row ^ col) < (Zindex_int(1) << o));//works
 #if 0
   // These also work.
   return ((row ^ col) == (row - col)) && ((row - col) < (Zindex_int(1) << o));
-  return (~((row ^ col) & col)) && ((row - col) < (Zindex_int(1) << o));// works
+  return (~((row ^ col) & col)) && ((row - col) < (Zindex_int(1) << o));//works
 #endif
 }
-/* The difference between pass-by-reference and pass-by-pointer is that pointers
- * can be NULL or reassigned whereas references cannot. Use pass-by-pointer
- * if NULL is a valid parameter value or if you want to reassign the pointer.
+/* The difference between pass-by-reference and pass-by-pointer is that
+ * pointers can be NULL or reassigned whereas references cannot. Use
+ * pass-by-pointer if NULL is a valid parameter value or if you want to
+ * reassign the pointer.
  * Otherwise, use constant or non-constant references to pass arguments.
  *
  * https://www.ibm.com/docs/en/zos/2.4.0?topic=calls-pass-by-reference-c-only
@@ -106,7 +103,7 @@ noexcept {
 #endif
 }
 #if 0
-template <typename T> static inline constexpr// for heterogeneous order multiply
+template <typename T> static inline constexpr// multiply different orders
 T zyclops::mdcr_mult_elem (const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyclops::Zindex_int row, const zyclops::Zorder_int col,
   const Zorder_int o)
@@ -124,7 +121,7 @@ noexcept {
     const auto zsz = std::size_t (1) << zorder;
     const auto nsz = n * zsz;
     for (std::size_t k=0; k<nsz; k+=zsz) {
-      for (zyclops::Zindex_int j=0; j<zsz; j++) { // permuted loop, transp. calc
+      for (zyclops::Zindex_int j=0; j<zsz; j++) { // permuted loop, transp calc
         for (zyclops::Zindex_int i=0; i<=j; i++) {// only lower triangle
           (&c)[k + j] += zyclops::mdcr_mult_elem ((&a)[k], (&b)[k], j, i);
   } } } }
@@ -173,8 +170,8 @@ noexcept {
       for (std::size_t k=0; k<nsz; k+=zsz) {
         const auto b0inv = T(1.0) / (&b)[k];
         (&c)[k] = (&a)[k] * b0inv;// real part
-        for (zyclops::Zindex_int j=1; j<zsz; j++) {// permuted loop, transp calc
-          for (zyclops::Zindex_int i=0; i<j; i++) {// lower triangle w/out diag.
+        for (zyclops::Zindex_int j=1; j<zsz; j++) {// permuted loop, trnsp calc
+          for (zyclops::Zindex_int i=0; i<j; i++) {// lower triangle w/out diag
             (&c)[k + j] -= zyclops::mdcr_mult_elem ((&c)[k], (&b)[k], j, i);
           }
           (&c)[k + j] += (&a)[k + j];
