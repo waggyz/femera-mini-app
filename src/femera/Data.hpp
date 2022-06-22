@@ -9,7 +9,7 @@
 #endif
 
 namespace femera { namespace data {
-  using File_ptrs_t = std::vector <FILE*>;
+  using File_ptrs_t = std::vector <FILE*>;//TODO Replace with File_name_t ?
 #if 0
   struct Page_dims {//TODO regular blocked data, local (partitioned) data
     // for file and stream (e.g., stdout) reading and saving
@@ -42,7 +42,7 @@ namespace femera {
     fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;
   public:
     static constexpr
-    This_spt new_task (const Work::Core_ptrs_t)        noexcept;
+    This_spt new_task (Work::Core_ptrs_t)              noexcept;
     T*       get_task (fmr::Local_int)                 noexcept;
     T*       get_task (Work::Task_path_t)              noexcept;
     T*       get_task (Work_type, fmr::Local_int ix=0) noexcept;

@@ -13,7 +13,7 @@
 #endif
 
 #include <unordered_map>
-#include <valarray>           // used on File.ipp
+#include <valarray>           // used in File.ipp
 
 namespace femera { namespace data {
   class File;// Derive as a CRTP concrete class from Data.
@@ -56,12 +56,12 @@ namespace femera { namespace data {
     ss time_line (const File_ptrs_t&, const ss& name, const ss& form, Args...);
     template <typename ...Args>
     ss time_line (                    const ss& name, const ss& form, Args...);
+#endif
 #if 0
     ss wrap_line (File_ptrs_t, ss& name, ss& form,...);//TODO ?
     ss data_line (File_ptrs_t, ss& name, ss& form,...);
     ss perf_line (File_ptrs_t, ss& name, ss& form,...);
     ss perf_line (ss name, ss& form,...);
-#endif
 #endif
   public:
     void task_init (int* argc, char** argv);

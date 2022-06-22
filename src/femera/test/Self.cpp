@@ -17,8 +17,10 @@ namespace femera {
     const auto core_n = node_n * proc::Node::get_core_n ();
     const auto str = get_base_abrv ()+" "+ abrv +" ";
     if (true) {//TODO detail && this->test->do_test
+      const auto ver = std::string(__VERSION__);
+      this->data->name_line (data->fmrlog, str +" C++", ver);
       this->data->name_line (data->fmrlog, str +"zord",
-        "%4u max      hypercomplex order", zyclops::max_zorder);
+        "%4u maximum hypercomplex order", zyclops::max_zorder);
       fmr::Local_int mpi_n=0, omp_n=0;
       const auto Pmpi = this->proc->get_task (Task_type::Fmpi);
       if (Pmpi) {mpi_n = Pmpi->get_proc_n ();}
