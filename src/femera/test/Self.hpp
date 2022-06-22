@@ -9,6 +9,7 @@ namespace femera { namespace test {
   private:
     void task_init (int* argc, char** argv);
     void task_exit ();
+    void log_init_info ();
   private:
     Self (femera::Work::Core_ptrs_t) noexcept;
     Self () =delete;//NOTE Use the constructor above.

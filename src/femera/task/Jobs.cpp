@@ -48,7 +48,8 @@ namespace femera {
     // and its proc, data, and test pointer members are set but NOT initialized.
     // Add a simulation handler.
 #if 0
-    this->data->time_line (data->fmrlog,"Femera","0.3 started\n");//TODO version
+    this->data->time_line (data->fmrlog,"Femera",
+    MAKESTRING(FMR_VERSION)" started\n");
 #endif
     this->add_task (std::move(Task<task::Sims>::new_task (this->get_core())));
   }

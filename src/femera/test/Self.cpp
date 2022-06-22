@@ -15,12 +15,9 @@ namespace femera {
     const auto all_n = this->proc->all_proc_n ();
     const auto node_n = this->proc->get_task (Task_type::Node)->get_team_n ();
     const auto core_n = node_n * proc::Node::get_core_n ();
-    const auto str = get_base_abrv ()+" "+ abrv +" ";
     if (true) {//TODO detail && this->test->do_test
-      const auto ver = std::string(__VERSION__);
-      this->data->name_line (data->fmrlog, str +" C++", ver);
-      this->data->name_line (data->fmrlog, str +"zord",
-        "%4u maximum hypercomplex order", zyclops::max_zorder);
+      const auto str = get_base_abrv ()+" "+ abrv +" ";
+      this->log_init_info ();// pulled out method to prevent inline fail warning
       fmr::Local_int mpi_n=0, omp_n=0;
       const auto Pmpi = this->proc->get_task (Task_type::Fmpi);
       if (Pmpi) {mpi_n = Pmpi->get_proc_n ();}
@@ -43,4 +40,20 @@ namespace femera {
         "NOTE Femera uses more threads (%u) than physical cores (%u).",
         all_n, core_n);
   } }
+  void test::Self::log_init_info () {// pulled out of task_init (inline fail)
+    const auto str = get_base_abrv ()+" "+ abrv +" ";
+    const auto cppver = __cplusplus;
+    this->data->name_line (data->fmrlog, str +" ver",
+      std::string (MAKESTR(FMR_VERSION)));
+#if 0
+    this->data->name_line (data->fmrlog, str +" C++",
+      std::to_string(cppver) +", gcc "+ std::string(__VERSION__));
+#else
+    this->data->name_line (data->fmrlog, str +" g++",
+      std::string(__VERSION__));
+    this->data->name_line (data->fmrlog, str +" C++", "%li", cppver);
+#endif
+    this->data->name_line (data->fmrlog, str +"zord",
+      "%4u maximum hypercomplex order", zyclops::max_zorder);
+  }
 }//end femera namespace
