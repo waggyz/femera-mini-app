@@ -23,12 +23,21 @@ namespace femera {
       if (Pmpi) {mpi_n = Pmpi->get_proc_n ();}
       const auto Pomp = this->proc->get_task (Task_type::Fomp);
       if (Pomp) {omp_n = Pomp->get_proc_n ();}
+#if 0
       this->data->name_line (data->fmrlog, str +"proc",
         "%4u MPI %4u OpenMP: %4u of %4u total CPU processes",
         mpi_n, omp_n, mpi_n * omp_n,  all_n);
       this->data->name_line (data->fmrlog, str +"node",
         "%4u node%4u cores : %4u of %4u total physical cores",
         node_n, core_n, node_n * core_n, all_n);
+#else
+      this->data->name_line (data->fmrlog, str +"proc",
+        "%4u    /%4u total CPU  processes (%4u MPI  x%4u OpenMP)",
+        mpi_n * omp_n,  all_n, mpi_n, omp_n);
+      this->data->name_line (data->fmrlog, str +"node",
+        "%4u    /%4u total physical cores (%4u node x%4u cores)",
+        node_n * core_n, all_n, node_n, core_n);
+#endif
     }
     if (all_n < core_n) {
       this->data->name_line (data->fmrlog, this->abrv+" task_init",
