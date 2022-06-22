@@ -548,7 +548,7 @@ ifneq ($(HOST_MD5),$(REPO_MD5))
 endif
 	$(info $(E_G_) fmrexec auto examples/cube.fmr)
 
-$(SRC_STAT_FILE): | build/$(CPUMODEL)/
+$(SRC_STAT_FILE): $(BUILD_CPU)/mini | build/$(CPUMODEL)/
 	touch "$(SRC_STAT_FILE)"; \
 	if ! grep "$(FEMERA_VERSION)" "$(SRC_STAT_FILE)" | grep -q "$(HOSTNAME)"; \
 	then echo "$(BUILD_DATE)",'"'$(FEMERA_VERSION)'"',\
@@ -557,6 +557,7 @@ $(SRC_STAT_FILE): | build/$(CPUMODEL)/
 	'"'$(HOSTNAME)'"','"'$(CPUMODEL)'"'\
 	>> "$(SRC_STAT_FILE)"; fi
 	-tools/plot_code_stats.py 2>/dev/null
+	$(call timestamp,$@,$<)
 
 code-stats: $(SRC_STAT_FILE)
 	tools/code-stats.sh
