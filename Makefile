@@ -86,6 +86,9 @@ endif
 ifneq ($(FMR_MICRO_UCHAR),)
   FMRFLAGS += -DFMR_MICRO_UCHAR=$(FMR_MICRO_UCHAR)
 endif
+ifneq ($(FMR_TIMES_UCHAR),)
+  FMRFLAGS += -DFMR_TIMES_UCHAR=$(FMR_TIMES_UCHAR)
+endif
 FMRFLAGS += -I"$(STAGE_CPU)/include" -I"$(STAGE_DIR)/include"
 FMRFLAGS += -isystem"$(INSTALL_CPU)/include" -isystem"$(INSTALL_DIR)/include"
 LDFLAGS += -L"$(STAGE_CPU)/lib" -L"$(STAGE_DIR)/lib"
@@ -545,8 +548,7 @@ ifneq ($(HOST_MD5),$(REPO_MD5))
 endif
 	$(info $(E_G_) fmrexec auto examples/cube.fmr)
 
-code-stats: | build/$(CPUMODEL)/
-	tools/code-stats.sh
+$(SRC_STAT_FILE): | build/$(CPUMODEL)/
 	touch "$(SRC_STAT_FILE)"; \
 	if ! grep "$(FEMERA_VERSION)" "$(SRC_STAT_FILE)" | grep -q "$(HOSTNAME)"; \
 	then echo "$(BUILD_DATE)",'"'$(FEMERA_VERSION)'"',\
@@ -555,6 +557,9 @@ code-stats: | build/$(CPUMODEL)/
 	'"'$(HOSTNAME)'"','"'$(CPUMODEL)'"'\
 	>> "$(SRC_STAT_FILE)"; fi
 	-tools/plot_code_stats.py 2>/dev/null
+
+code-stats: $(SRC_STAT_FILE)
+	tools/code-stats.sh
 
 perf-done:
 	$(call timestamp,$@,)
