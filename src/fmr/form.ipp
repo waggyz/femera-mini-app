@@ -57,7 +57,7 @@ namespace femera {
       // then reformat with longer length if present.
       fmr::Line_size_int c =0;
       const auto n = fmr::Line_size_int (buf.size());
-      for (fmr::Line_size_int i=0; i < n; i++) {
+      for (fmr::Line_size_int i=0; i < n; ++i) {
 #if 1
         c += (buf[i]=='\xb5') ? 1u : 0u;
         c += (buf[i]=='\xbc') ? 1u : 0u;

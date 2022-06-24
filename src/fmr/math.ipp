@@ -73,7 +73,7 @@ uint fmr::math::poly_terms (
     case fmr::math::Poly::Full : {
 #if 0
       terms=1;
-      for (uint p = 1; p<=pord+1; p++) {terms += fmr::math::upow (p, nvar-1);}
+      for (uint p = 1; p<=pord+1; ++p) {terms += fmr::math::upow (p, nvar-1);}
 #else
       terms = fmr::math::nchoosek (pord + nvar, nvar);
 #endif

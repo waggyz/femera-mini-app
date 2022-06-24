@@ -103,11 +103,11 @@ namespace femera { namespace data {
 #if 0
     // Initialize without making a tmp vector. 10x slower than 0init.
     if (lpad > 0) {
-      for (size_t i=0; i<lpad; i++) {this->bulk.push_back (fmr::Bulk_int(0));}
+      for (size_t i=0; i<lpad; ++i) {this->bulk.push_back (fmr::Bulk_int(0));}
     }
     const auto bytes = reinterpret_cast <const fmr::Bulk_int*> (& init_val);
     const auto mod   = fmr::Local_int (sizeof (T) / sizeof (fmr::Bulk_int));
-    for (size_t i=0; i<sz; i++ ) {this->bulk.push_back (bytes [i % mod]);}
+    for (size_t i=0; i<sz; ++i ) {this->bulk.push_back (bytes [i % mod]);}
 #endif
     this->bulk.resize (lpad + sz + rpad);// <= capacity (); ptr still valid
     /* Resize sets to zero, and zero is the same bits for all numeric types.
@@ -123,7 +123,7 @@ namespace femera { namespace data {
       return v;
     }
     FMR_PRAGMA_OMP_SIMD
-    for (size_t i=0; i<nvals; i++) { v [i] = init_val; }// 10% slower than 0init
+    for (size_t i=0; i<nvals; ++i) { v [i] = init_val; }// 10% slower than 0init
     return v;
   }
   template <fmr::Align_int A> template <typename T> inline
@@ -159,13 +159,13 @@ namespace femera { namespace data {
         = reinterpret_cast<const fmr::Bulk_int*> (init_vals);
       this->bulk.assign (from, from + sz);
       if (rpad > 0) {
-        for (size_t i=0; i<rpad; i++) {
+        for (size_t i=0; i<rpad; ++i) {
           this->bulk.push_back (fmr::Bulk_int (0));
     } } } else {    // zero-initialize then copy elements
       this->bulk.resize (lpad + sz + rpad);// <= capacity(); v, ptr still valid
       const auto nz = nvals * zsz;
       FMR_PRAGMA_OMP_SIMD
-      for (std::size_t i=0; i<nz; i++) { v [i] = init_vals [i]; }
+      for (std::size_t i=0; i<nz; ++i) { v [i] = init_vals [i]; }
     }
     return v;
   }
@@ -215,7 +215,7 @@ namespace femera { namespace data {
 #endif
 #if 0
       crc ^= *buf++;
-      for (int i = 0; i < 8; i++) {
+      for (int i = 0; i < 8; ++i) {
 #if 0
         crc = crc & 1 ? (crc >> 1) ^ FMR_CRC32_POLY : crc >> 1;
 #endif
@@ -236,7 +236,7 @@ namespace femera { namespace data {
       (& this->bulk [lpad]);
     while (sz--) {
       crc ^= *buf++;
-      for (int i = 0; i < 8; i++) {
+      for (int i = 0; i < 8; ++i) {
         crc = (crc >> 1) ^ (FMR_CRC64_POLY & (0 - (crc & 1)));
     } }
     return ~crc;

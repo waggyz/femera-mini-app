@@ -33,7 +33,7 @@ namespace femera {
     o = this->proc->get_proc_n (Task_type::Fomp);
 #endif
     FMR_PRAGMA_OMP(omp parallel for schedule(static) ordered num_threads(o))
-    for (fmr::Local_int i=0; i<o; i++) {// Make & add thread-local data::Bank
+    for (fmr::Local_int i=0; i<o; ++i) {// Make & add thread-local data::Bank
       FMR_PRAGMA_OMP(omp ordered) {     // in order.
         auto B = Data<data::Bank>::new_task (this->get_core());
 #ifdef FMR_BANK_LOCAL

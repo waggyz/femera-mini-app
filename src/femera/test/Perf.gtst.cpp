@@ -12,12 +12,12 @@ namespace femera { namespace test { namespace perf {
   double test_proc_id_speed (const fmr::Local_int n=100000) {
     fmr::Local_int ans1=0, ans2=0;
     mini->test->time.add_idle_time_now ();
-    for (fmr::Local_int i=0; i<n; i++) {
+    for (fmr::Local_int i=0; i<n; ++i) {
       ans1 += mini->proc->get_team_n ();// just returns a member variable
     }
     const auto base_time = mini->test->time.add_busy_time_now ();// - start;
     mini->test->time.add_idle_time_now ();
-    for (fmr::Local_int i=0; i<n; i++) {
+    for (fmr::Local_int i=0; i<n; ++i) {
       ans2 += mini->proc->get_proc_id ();// descends the processing stack
     }
     const auto pids_time = mini->test->time.add_busy_time_now ();// - start;

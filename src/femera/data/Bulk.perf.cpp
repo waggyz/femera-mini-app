@@ -12,21 +12,21 @@ namespace femera { namespace test {
     auto time = fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>();
     auto vecs = std::vector<std::vector<double>>(n);
     {// Allocate program memory.
-      for (uint i=0; i<n; i++) {
+      for (uint i=0; i<n; ++i) {
         vecs[i] = std::vector<double>(sz,1);
       }
       double sum=0;
       time.add_idle_time_now ();
-      for (uint i=0; i<n; i++) {
-        for (uint j=0; j<sz; j++) {
+      for (uint i=0; i<n; ++i) {
+        for (uint j=0; j<sz; ++j) {
         sum += vecs[i].data()[j];
       } }
       printf ("  using: %lu bytes\n", size_t(sum) * sizeof(double));
-      for (uint i=0; i<n; i++) {vecs[i] = std::vector<double>(0);}
+      for (uint i=0; i<n; ++i) {vecs[i] = std::vector<double>(0);}
     }
     {
       time.add_idle_time_now ();
-      for (uint i=0; i<n; i++) {
+      for (uint i=0; i<n; ++i) {
         vecs[i] = std::vector<double>();
         vecs[i].reserve (sz);
         vecs[i].data ()[0] = 1.0;// first-touch allocate
@@ -34,15 +34,15 @@ namespace femera { namespace test {
       const auto make_time = time.add_busy_time_now ();
       double sum=0;
       time.add_idle_time_now ();
-      for (uint i=0; i<n; i++) {
-        for (uint j=0; j<sz; j++) {
+      for (uint i=0; i<n; ++i) {
+        for (uint j=0; j<sz; ++j) {
         sum += vecs[i].data()[j];
       } }
       const auto sum_time = time.add_busy_time_now ();
       printf ("reserve: %.2e s, sum %.2e s, total %.2e s, sum %9.0f, size %lu\n",
         double(make_time), double(sum_time), double(make_time+sum_time),
         double(sum), vecs[0].size());
-      for (uint i=0; i<n; i++) {
+      for (uint i=0; i<n; ++i) {
         vecs[i] = std::vector<double>(0);
       }
     }
@@ -51,7 +51,7 @@ namespace femera { namespace test {
       tmp.data () [0] = 1.0;// first-touch allocate
       const auto ptr = tmp.data ();
       time.add_idle_time_now ();
-      for (uint i=0; i<n; i++) {
+      for (uint i=0; i<n; ++i) {
         vecs[i] = std::vector<double>();
         vecs[i].reserve (sz);
         vecs[i].data ()[0] = 1.0;// first-touch allocate
@@ -60,45 +60,45 @@ namespace femera { namespace test {
       const auto make_time = time.add_busy_time_now ();
       double sum=0;
       time.add_idle_time_now ();
-      for (uint i=0; i<n; i++) {
-        for (uint j=0; j<sz; j++) {
+      for (uint i=0; i<n; ++i) {
+        for (uint j=0; j<sz; ++j) {
         sum += vecs[i].data()[j];
       } }
       const auto sum_time = time.add_busy_time_now ();
       printf (" assign: %.2e s, sum %.2e s, total %.2e s, sum %9.0f, size %lu\n",
         double(make_time), double(sum_time), double(make_time+sum_time),
         double(sum), vecs[0].size());
-      for (uint i=0; i<n; i++) {
+      for (uint i=0; i<n; ++i) {
         vecs[i] = std::vector<double>(0);
       }
     }
     {
       time.add_idle_time_now ();
-      for (uint i=0; i<n; i++) {
+      for (uint i=0; i<n; ++i) {
         vecs[i] = std::vector<double>();
         vecs[i].reserve (sz);
         auto ptr = vecs[i].data ();
 //        ptr [0] = 1.0;// first-touch allocate
-        for (size_t j=0; j<sz; j++) { vecs[i].push_back (ptr[j]); }
+        for (size_t j=0; j<sz; ++j) { vecs[i].push_back (ptr[j]); }
       }
       const auto make_time = time.add_busy_time_now ();
       double sum=0;
       time.add_idle_time_now ();
-      for (uint i=0; i<n; i++) {
-        for (uint j=0; j<sz; j++) {
+      for (uint i=0; i<n; ++i) {
+        for (uint j=0; j<sz; ++j) {
         sum += vecs[i].data()[j];
       } }
       const auto sum_time = time.add_busy_time_now ();
       printf ("   push: %.2e s, sum %.2e s, total %.2e s, sum %9.0f, size %lu\n",
         double(make_time), double(sum_time), double(make_time+sum_time),
         double(sum), vecs[0].size());
-      for (uint i=0; i<n; i++) {
+      for (uint i=0; i<n; ++i) {
         vecs[i] = std::vector<double>(0);
       }
     }
     {
       time.add_idle_time_now ();
-      for (uint i=0; i<n; i++) {
+      for (uint i=0; i<n; ++i) {
         vecs[i] = std::vector<double>();
         vecs[i].reserve (sz);
         vecs[i].data ()[0] = 1.0;// first-touch allocate
@@ -106,9 +106,9 @@ namespace femera { namespace test {
       const auto make_time = time.add_busy_time_now ();
       double sum=0;
       time.add_idle_time_now ();
-      for (uint i=0; i<n; i++) {
+      for (uint i=0; i<n; ++i) {
         const auto ptr = vecs[i].data ();
-        for (uint j=0; j<sz; j++) {
+        for (uint j=0; j<sz; ++j) {
           vecs[i].push_back (ptr[j]);
           sum += vecs[i].data()[j];
       } }
@@ -116,47 +116,47 @@ namespace femera { namespace test {
       printf ("sumpush: %.2e s, sum %.2e s, total %.2e s, sum %9.0f, size %lu\n",
         double(make_time), double(sum_time), double(make_time+sum_time),
         double(sum), vecs[0].size());
-      for (uint i=0; i<n; i++) {
+      for (uint i=0; i<n; ++i) {
         vecs[i] = std::vector<double>(0);
       }
     }
     {
       time.add_idle_time_now ();
-      for (uint i=0; i<n; i++) {
+      for (uint i=0; i<n; ++i) {
         vecs[i] = std::vector<double>(sz);
       }
       const auto make_time = time.add_busy_time_now ();
       double sum=0;
       time.add_idle_time_now ();
-      for (uint i=0; i<n; i++) {
-        for (uint j=0; j<sz; j++) {
+      for (uint i=0; i<n; ++i) {
+        for (uint j=0; j<sz; ++j) {
         sum += vecs[i].data()[j];
       } }
       const auto sum_time = time.add_busy_time_now ();
       printf ("default: %.2e s, sum %.2e s, total %.2e s, sum %9.0f, size %lu\n",
         double(make_time), double(sum_time), double(make_time+sum_time),
         double(sum), vecs[0].size());
-      for (uint i=0; i<n; i++) {
+      for (uint i=0; i<n; ++i) {
         vecs[i] = std::vector<double>(0);
       }
     }
     {
       time.add_idle_time_now ();
-      for (uint i=0; i<n; i++) {
+      for (uint i=0; i<n; ++i) {
         vecs[i] = std::vector<double>(sz,1.0);
       }
       const auto make_time = time.add_busy_time_now ();
       double sum=0;
       time.add_idle_time_now ();
-      for (uint i=0; i<n; i++) {
-        for (uint j=0; j<sz; j++) {
+      for (uint i=0; i<n; ++i) {
+        for (uint j=0; j<sz; ++j) {
         sum += vecs[i].data()[j];
       } }
       const auto sum_time = time.add_busy_time_now ();
       printf ("init 1.: %.2e s, sum %.2e s, total %.2e s, sum %9.0f, size %lu\n",
         double(make_time), double(sum_time), double(make_time+sum_time),
         double(sum), vecs[0].size());
-      for (uint i=0; i<n; i++) {
+      for (uint i=0; i<n; ++i) {
         vecs[i] = std::vector<double>(0);
       }
     }

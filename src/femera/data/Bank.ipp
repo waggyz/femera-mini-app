@@ -36,7 +36,7 @@ namespace femera {
     const auto n = this->proc->get_proc_n (Task_type::Fomp);
     this->vals.reserve (n);// allocate on main OpenMP thread
     FMR_PRAGMA_OMP(omp parallel for schedule(static) ordered num_threads(n))
-    for (fmr::Local_int i=0; i<n; i++) {// Make & add thread-local data::Bank
+    for (fmr::Local_int i=0; i<n; ++i) {// Make & add thread-local data::Bank
       FMR_PRAGMA_OMP(omp ordered) {     // in order.
         this->vals.push_back (data::Vals ());
     } }

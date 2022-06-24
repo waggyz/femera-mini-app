@@ -14,7 +14,7 @@ int main(int argc, char **argv) { int err=0;
 #ifdef _OPENMP
 #pragma omp parallel for reduction(+:x)
 #endif
-    for(int i=0; i<100; i++){
+    for(int i=0; i<100; ++i){
       x+=1.0/double(i+proc_id+1);
     }
     double tot=0.0;
@@ -32,7 +32,7 @@ int main(int, char**){
 #ifdef _OPENMP
 #pragma omp parallel for reduction(+:x)
 #endif
-  for(int i=0; i<100; i++){
+  for(int i=0; i<100; ++i){
     x+=1.0/double(i+1);
   }
   if(x<0.0){ return 1; }

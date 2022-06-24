@@ -33,7 +33,7 @@ namespace femera {
     auto W = this;
     const auto sz = path.size ();
     if (sz > 0) {
-      for (fmr::Local_int i = 0; i < sz; i++) {
+      for (fmr::Local_int i = 0; i < sz; ++i) {
         if (W != nullptr) {
           W = W->get_work (path [i]);
     } } }
@@ -49,15 +49,15 @@ namespace femera {
       //TODO Is this the desired behavior of nested drivers of the same type?
       //     Task 0 is the parent, with 1-indexed children of the same type.
       if (i == ix) { return W; }
-      i++;
+      ++i;
     }
 #endif
     while (! W->task_list.empty ()) {
       const fmr::Local_int n = W->get_task_n ();
-      for (fmr::Local_int Wix=0; Wix < n; Wix++) {
+      for (fmr::Local_int Wix=0; Wix < n; ++Wix) {
         if (W->task_list [Wix].get()->task_type == t) {
           if (i == ix) { return W->task_list [Wix].get(); }
-          i++;
+          ++i;
       } }
       W = W->task_list [0].get();//TODO other branches
     }

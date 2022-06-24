@@ -50,7 +50,7 @@ namespace femera {
     const auto n = this->get_task_n ();
     if (n>0) {
       auto msg = std::string("data init mods ");
-        for (fmr::Local_int i=0; i<n; i++) {
+        for (fmr::Local_int i=0; i<n; ++i) {
           msg += this->get_task (i)->abrv;
           msg += (i == (n - 1)) ? "\n":" ";
       }

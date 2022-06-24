@@ -48,19 +48,19 @@ namespace zyclops { namespace test {
     const auto flop_ref  = 2.0 * double (test_n * vals_n);
     const auto flop_dual = 2.0 * double (test_n * vals_n / uint (zsz))
       * double(std::pow (3,order));
-    for (uint test_i=0; test_i<test_n; test_i++) {
-      for (uint ti=0; ti<test_n; ti++) {// warm up
-        for (uint i=0; i<vals_n; i++) { chk += a[i] * b[i]; }
+    for (uint test_i=0; test_i<test_n; ++test_i) {
+      for (uint ti=0; ti<test_n; ++ti) {// warm up
+        for (uint i=0; i<vals_n; ++i) { chk += a[i] * b[i]; }
       }
       ZYC_PRAGMA_OMP(omp barrier)
       time.add_idle_time_now ();
-      for (uint i=0; i<vals_n; i++) {
+      for (uint i=0; i<vals_n; ++i) {
         c[i] += a[i] * b[i];
       }
       secs_ref += double (time.add_busy_time_now ());
       ZYC_PRAGMA_OMP(omp barrier)
-      for (uint ti=0; ti<test_n; ti++) {// warm up
-        for (uint i=0; i<vals_n; i++) { chk += a[i] * b[i]; }
+      for (uint ti=0; ti<test_n; ++ti) {// warm up
+        for (uint i=0; i<vals_n; ++i) { chk += a[i] * b[i]; }
       }
       const auto dual_n = vals_n / zsz;
       ZYC_PRAGMA_OMP(omp barrier)
@@ -69,24 +69,24 @@ namespace zyclops { namespace test {
       mdas_madd (cvec.data()[0], avec.data()[0], bvec.data()[0],
         order, dual_n);
       secs_aos += double (time.add_busy_time_now ());
-      for (uint ti=0; ti<test_n; ti++) {// do not optimize calc away
-        for (uint i=0; i<vals_n; i++) { chk += a[i] * b[i] * c[0]; }
+      for (uint ti=0; ti<test_n; ++ti) {// do not optimize calc away
+        for (uint i=0; i<vals_n; ++i) { chk += a[i] * b[i] * c[0]; }
       }
       ZYC_PRAGMA_OMP(omp barrier);
       time.add_idle_time_now ();
       mdsa_madd (cvec.data()[0], avec.data()[0], bvec.data()[0],
         order, dual_n);
       secs_soa += double (time.add_busy_time_now ());
-      for (uint ti=0; ti<test_n; ti++) {// do not optimize calc away
-        for (uint i=0; i<vals_n; i++) { chk += a[i] * b[i] * c[0]; }
+      for (uint ti=0; ti<test_n; ++ti) {// do not optimize calc away
+        for (uint i=0; i<vals_n; ++i) { chk += a[i] * b[i] * c[0]; }
       }
 #if 0
-      for (uint ti=0; ti<test_n; ti++) {// warm up
-        for (uint i=0; i<vals_n; i++) { chk += c[i] * c[i]; }
+      for (uint ti=0; ti<test_n; ++ti) {// warm up
+        for (uint i=0; i<vals_n; ++i) { chk += c[i] * c[i]; }
       }
       ZYC_PRAGMA_OMP(omp barrier)
       time.add_idle_time_now ();
-      for (uint i=0; i<vals_n; i++) {// sum of squares
+      for (uint i=0; i<vals_n; ++i) {// sum of squares
         chk += c[i] * c[i];
       }
       secs_ref2 += double (time.add_busy_time_now ());
@@ -161,19 +161,19 @@ namespace zyclops { namespace test {
     const auto flop_ref  = 2.0 * double (test_n * vals_n);
     const auto flop_dual = 2.0 * double (test_n * vals_n / uint (zsz))
       * double(std::pow (3,order));//TODO check this
-    for (uint test_i=0; test_i<test_n; test_i++) {
-      for (uint ti=0; ti<test_n; ti++) {// warm up
-        for (uint i=0; i<vals_n; i++) { chk += a[i] * b[i]; }
+    for (uint test_i=0; test_i<test_n; ++test_i) {
+      for (uint ti=0; ti<test_n; ++ti) {// warm up
+        for (uint i=0; i<vals_n; ++i) { chk += a[i] * b[i]; }
       }
       ZYC_PRAGMA_OMP(omp barrier)
       time.add_idle_time_now ();
-      for (uint i=0; i<vals_n; i++) {
+      for (uint i=0; i<vals_n; ++i) {
         c[i] += a[i] * b[i];
       }
       secs_ref += double (time.add_busy_time_now ());
       ZYC_PRAGMA_OMP(omp barrier)
-      for (uint ti=0; ti<test_n; ti++) {// warm up
-        for (uint i=0; i<vals_n; i++) { chk += a[i] * b[i]; }
+      for (uint ti=0; ti<test_n; ++ti) {// warm up
+        for (uint i=0; i<vals_n; ++i) { chk += a[i] * b[i]; }
       }
       const auto dual_n = vals_n / zsz;
       ZYC_PRAGMA_OMP(omp barrier)
@@ -182,24 +182,24 @@ namespace zyclops { namespace test {
       mdas_div (cvec.data()[0], avec.data()[0], bvec.data()[0],
         order, dual_n);
       secs_aos += double (time.add_busy_time_now ());
-      for (uint ti=0; ti<test_n; ti++) {// do not optimize calc away
-        for (uint i=0; i<vals_n; i++) { chk += a[i] * b[i] * c[0]; }
+      for (uint ti=0; ti<test_n; ++ti) {// do not optimize calc away
+        for (uint i=0; i<vals_n; ++i) { chk += a[i] * b[i] * c[0]; }
       }
       ZYC_PRAGMA_OMP(omp barrier);
       time.add_idle_time_now ();
       mdsa_div (cvec.data()[0], avec.data()[0], bvec.data()[0],
         order, dual_n);
       secs_soa += double (time.add_busy_time_now ());
-      for (uint ti=0; ti<test_n; ti++) {// do not optimize calc away
-        for (uint i=0; i<vals_n; i++) { chk += a[i] * b[i] * c[0]; }
+      for (uint ti=0; ti<test_n; ++ti) {// do not optimize calc away
+        for (uint i=0; i<vals_n; ++i) { chk += a[i] * b[i] * c[0]; }
       }
       ZYC_PRAGMA_OMP(omp barrier);
       time.add_idle_time_now ();
       hca_add (cvec.data()[0], avec.data()[0], bvec.data()[0],
         order, dual_n);
       secs_add += double (time.add_busy_time_now ());
-      for (uint ti=0; ti<test_n; ti++) {// do not optimize calc away
-        for (uint i=0; i<vals_n; i++) { chk += a[i] * b[i] * c[0]; }
+      for (uint ti=0; ti<test_n; ++ti) {// do not optimize calc away
+        for (uint i=0; i<vals_n; ++i) { chk += a[i] * b[i] * c[0]; }
       }
     }//end test_n loop
     printf (" zyc, ref, fma,%2i,%10u,%7.3e,%7.3e,%7.3e,%7.3e,%6.4f,%3.1f\n",

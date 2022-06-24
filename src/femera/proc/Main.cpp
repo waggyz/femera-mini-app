@@ -45,7 +45,7 @@ namespace femera {
     //TODO Add thread-local Fomp instances?
     const fmr::Local_int n = 2;//TODO calc or get from command arg
     FMR_PRAGMA_OMP(omp parallel for schedule(static) ordered num_threads(n))
-    for (fmr::Local_int i=0; i<n; i++) {
+    for (fmr::Local_int i=0; i<n; ++i) {
       FMR_PRAGMA_OMP(omp ordered)
       path.push_back (get_task (path)->add_task
         (std::move(Proc <proc::Fomp>::new_task (core))));

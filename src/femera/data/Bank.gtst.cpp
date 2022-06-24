@@ -43,7 +43,7 @@ namespace femera { namespace test {
     //std::valarray <double> val (std::move(&vec[0]), sz);//same as next.
     std::valarray <double> val (std::move(vec.data ()), sz);//likely this copies
 #endif
-    for (fmr::Local_int i =0; i<sz; i++) { sum += val [i]; }
+    for (fmr::Local_int i =0; i<sz; ++i) { sum += val [i]; }
     mini->data->name_line (mini->data->fmrout, "vals from vec1",
       "%g (garbage)", sum);
     return sum;
@@ -66,7 +66,7 @@ namespace femera { namespace test {
     vals.push_back (std::valarray <double> (std::move(vec.data ()), sz));
     //
     double sum = 0.0;
-    for (fmr::Local_int i =0; i<sz; i++) { sum += vals[0] [i]; }
+    for (fmr::Local_int i =0; i<sz; ++i) { sum += vals[0] [i]; }
     mini->data->name_line (mini->data->fmrout, "vals from vec2",
       "%g (garbage)", sum);
     return sum;
@@ -77,16 +77,16 @@ namespace femera { namespace test {
     auto vals = std::vector <std::valarray<double>> (n);
     auto perf = fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float> ();
     perf.start ();
-    for (fmr::Local_int i=0; i<n; i++) {
+    for (fmr::Local_int i=0; i<n; ++i) {
       vals[i] = std::valarray<double> (sz);
     }
     const auto time = perf.add_busy_time_now ();
     perf.add_count (n, 0, 0, n * sz * sizeof(double));
     const auto speed = perf.get_busy_data_speed ();
     double sum = 0.0;
-    for (fmr::Local_int i=0; i<n; i++) {
+    for (fmr::Local_int i=0; i<n; ++i) {
       const auto v = &vals[i][0];
-      for (fmr::Local_int j=0; j<sz; j++) {
+      for (fmr::Local_int j=0; j<sz; ++j) {
         sum += v[j];
     } }
 #if 0
@@ -111,7 +111,7 @@ namespace femera { namespace test {
     auto vals = std::vector <std::valarray<double>> (n);
     auto perf = fmr::perf::Meter <fmr::Local_int, fmr::Perf_float> ();
     perf.start ();
-    for (fmr::Local_int i=0; i<n; i++) {
+    for (fmr::Local_int i=0; i<n; ++i) {
 #ifdef FMR_TEST_LOCAL_VEC0
       auto vec = std::vector <double> (0);// seems faster than below
       vec.reserve (sz);
@@ -125,9 +125,9 @@ namespace femera { namespace test {
     perf.add_count (n, 0, 0, fmr::Local_int(n * sz * sizeof(double)));
     const auto speed = perf.get_busy_data_speed ();
     double sum = 0.0;
-    for (fmr::Local_int i=0; i<n; i++) {
+    for (fmr::Local_int i=0; i<n; ++i) {
       const auto v = &vals[i][0];
-      for (fmr::Local_int j=0; j<sz; j++) {
+      for (fmr::Local_int j=0; j<sz; ++j) {
         sum += v[j];
     } }
 #if 0

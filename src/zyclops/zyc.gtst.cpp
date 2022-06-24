@@ -69,8 +69,8 @@ namespace zyclops { namespace test {
   int print_dual (int show_order, int array_order) {
     int nnz=0;
     const int n = 1 << show_order;
-    for (int i=0; i<n; i++) {
-      for (int j=0; j<n; j++) {
+    for (int i=0; i<n; ++i) {
+      for (int j=0; j<n; ++j) {
         const auto ix = dual_ix (i,j, array_order);
         nnz += (ix<0) ? 0 : 1;
         printf ("%2s%s",
@@ -82,8 +82,8 @@ namespace zyclops { namespace test {
   int print_dual_t (int show_order, int array_order) {
     int nnz=0;
     const int n = 1 << show_order;
-    for (int i=0; i<n; i++) {
-      for (int j=0; j<n; j++) {
+    for (int i=0; i<n; ++i) {
+      for (int j=0; j<n; ++j) {
         const auto ix = dual_ix (j,i, array_order);
         nnz += (ix<0) ? 0 : 1;
         printf ("%2s%s",
@@ -225,14 +225,14 @@ namespace zyclops { namespace test {
   int print_hamw (int show_order, int array_order) {
     int nnz=0;
     const int n = 1 << show_order;
-    for (int i=0; i<n; i++) {
-      for (int j=0; j<n; j++) {
+    for (int i=0; i<n; ++i) {
+      for (int j=0; j<n; ++j) {
         printf ("%2s%s",
           std::to_string (zyc::hamw (uint(n*i+j))).c_str(),
           j == (n-1) ? "\n":" ");
     } }
-    for (int i=0; i<n; i++) {
-      for (int j=0; j<n; j++) {
+    for (int i=0; i<n; ++i) {
+      for (int j=0; j<n; ++j) {
         const auto ix = dual_ix (i,j, array_order);
         nnz += (ix<0) ? 0 : 1;
         printf ("%2s%s",

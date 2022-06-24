@@ -23,7 +23,7 @@ namespace femera {
   noexcept {fmr::Exit_int err =0;
     const auto n = this->task_list.size ();
     std::stack<fmr::Local_int> del_list = {};
-    for (fmr::Local_int ix=0; ix<n; ix++) {// Init task_list forward.
+    for (fmr::Local_int ix=0; ix<n; ++ix) {// Init task_list forward.
       const auto W = this->task_list [ix].get();
       if (W != nullptr) {
 #ifdef FMR_DEBUG
@@ -41,7 +41,7 @@ namespace femera {
           if (! W->task_list.empty ()// sum children busy time
             && W->task_type != task_cast (Task_type::Main)) {
             const auto nC = fmr::Local_int (W->task_list.size ());
-            for (fmr::Local_int i=0; i<nC; i++) {
+            for (fmr::Local_int i=0; i<nC; ++i) {
               const auto C = W->get_work (i);
               if (C!= nullptr) {
                 child_busy_ns += C->time.get_busy_ns ();
@@ -107,7 +107,7 @@ namespace femera {
         auto child_busy_ns = fmr::perf::Elapsed(0);
         if (! W->task_list.empty ()) {// calculate children busy time
           const auto n = fmr::Local_int (W->task_list.size ());
-          for (fmr::Local_int i=0; i<n; i++) {
+          for (fmr::Local_int i=0; i<n; ++i) {
             const auto C = W->get_work (i);
             if (C!= nullptr) {
               child_busy_ns += C->time.get_busy_ns ();

@@ -13,9 +13,9 @@ namespace femera { namespace test {
     auto vals = femera::data::Vals ();
     const double bytes = double (n * sz * sizeof (double));
     double timez=0.0, timenz=0.0;
-    for (uint v=0; v<N; v++ ) {
+    for (uint v=0; v<N; ++v ) {
       time.add_idle_time_now ();
-      for (uint i=0; i<n; i++) {
+      for (uint i=0; i<n; ++i) {
         vals.set ("vals_"+std::to_string (i), sz, double (v % 2));
       }
       const auto add_s = double (time.add_busy_time_now ());
@@ -23,7 +23,7 @@ namespace femera { namespace test {
         if ((v % 2)==0) {timez  += add_s;}
         else            {timenz += add_s;}
       }
-      for (uint i=0; i<n; i++) {
+      for (uint i=0; i<n; ++i) {
         vals.get<float> ("vals_"+std::to_string (i));// convert to float
       }
       const auto cast_s = double (time.add_busy_time_now ());
