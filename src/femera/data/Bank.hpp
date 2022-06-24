@@ -18,7 +18,7 @@ namespace femera { namespace data {
     using Vals_list_t = std::vector<Vals>;
     Vals_list_t vals = {};
   public:
-    Vals* vals_ptr (fmr::Local_int ix);
+    Vals* vals_ptr (fmr::Local_int thread_ix);
 #endif
   public:
     Vals* vals_ptr ();

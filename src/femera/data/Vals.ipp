@@ -29,15 +29,15 @@ namespace femera { namespace data {
   T* Vals::set (const fmr::Data_name_t& id, const size_t n, const T init_val)
   noexcept {
     return std::is_floating_point <T>::value
-      ? this->name_vals[id].set (n, init_val)
-      : this->name_ints[id].set (n, init_val);
+      ? this->name_vals [id].set (n, init_val)
+      : this->name_ints [id].set (n, init_val);
   }
   template <typename T>
   T* Vals::set (const fmr::Data_name_t& id, const size_t n, const T* init_vals)
   noexcept {
     return std::is_floating_point <T>::value
-      ? this->name_vals[id].set (n, init_vals)
-      : this->name_ints[id].set (n, init_vals);
+      ? this->name_vals [id].set (n, init_vals)
+      : this->name_ints [id].set (n, init_vals);
   }
   template <typename T> inline
   void Vals::del (const fmr::Data_name_t& id)
