@@ -68,6 +68,7 @@ ifeq ($(CXX),icpc)
   OPTFLAGS:= $(shell cat data/icpc.flags | tr '\n' ' ' | tr -s ' ')
   CXXFLAGS:= c++11 -restrict -g $(OPTFLAGS)
   #NOTE -fPIC needed for shared libs, but may degrade static lib performance.
+  ENABLE_GCC_PROFILE:=OFF
   CXXWARNS+= -Wall -Wextra -Wshadow
   ifeq ($(ENABLE_MKL),ON)
     FMRFLAGS+= -mkl=sequential -DMKL_DIRECT_CALL_SEQ
@@ -918,10 +919,17 @@ $(BUILD_CPU)/mini: src/femera/mini.cpp src/femera/femera.hpp $(LIBFEMERA)
 	$(call timestamp,$@,$<)
 	$(call col2cxx,$(CXX_),$(CXX) $(notdir $<) .. $(notdir $@),$(shell \
 	if [ -f "$(@)" ]; then ls -sh $(@) | cut -d " " -f1; fi)B)
+ifeq ($(ENABLE_GCC_PROFILE),ON)
+	-$(CXX) $(CXXMINI) $< $(LDFLAGS) -lfemera $(LDLIBS) -o $@.pro \
+  -fprofile-generate
+	$@.pro >/dev/null
+	-$(CXX) $(CXXMINI) $< $(LDFLAGS) -lfemera $(LDLIBS) -o $@ -fprofile-use
+else
 	-$(CXX) $(CXXMINI) $< $(LDFLAGS) -lfemera $(LDLIBS) -o $@
+endif
 	$(call label_test,$(PASS),$(FAIL),fmrexec tdd:$(@),$(@))
 
-$(BUILD_CPU)/mini: export PATH:=$(shell pwd)/$(BUILD_CPU):$(PATH)
+$(BUILD_CPU)/mini.valgrind.log: export PATH:=$(shell pwd)/$(BUILD_CPU):$(PATH)
 $(BUILD_CPU)/mini.valgrind.log: $(BUILD_CPU)/mini $(VALGRIND_SUPP_EXE)
 ifeq ($(ENABLE_VALGRIND),ON)
 	$(info $(GRND) valgrind .. fmrexec tdd:$(<))
