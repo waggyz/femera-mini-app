@@ -8,7 +8,9 @@
 auto mini = fmr::new_jobs ();
 
 fmr::Exit_int main (int argc, char** argv) {
+#pragma GCC diagnostic ignored "-Winline"
   return mini->exit (mini->init (&argc,argv));
+#pragma GCC diagnostic warning "-Winline"
 }
 namespace femera { namespace test { namespace self {
 #if 1
@@ -27,9 +29,11 @@ namespace femera { namespace test { namespace self {
           mini->test->get_base_abrv().c_str(),
             mini->test->get_abrv().c_str(),"proc");
         const std::string text = std::to_string(id);
+#pragma GCC diagnostic ignored "-Winline"
         mini->data->name_line (mini->data->fmrout, name,
           "%4u proc[%u %% %u=%u]=%u%s", mini->proc->get_proc_id (), id, mod_n,
           id % mod_n, pids [id % mod_n], mini->proc->is_main() ? " *main" : "");
+#pragma GCC diagnostic warning "-Winline"
       }
       else {}
       FMR_PRAGMA_OMP(omp barrier)
@@ -59,11 +63,13 @@ namespace femera { namespace test { namespace self {
   TEST( SelfTestProc, TrivialTest ){
     EXPECT_EQ( 1, 1 );
   }
+#pragma GCC diagnostic ignored "-Winline"
   TEST( SelfTestProc, LocalProcIDs ){
     EXPECT_THAT( get_local_proc_ids (),
       ElementsAreArray( std::vector<fmr::Local_int>// ({0,1})));
         ({mini->proc->get_proc_id (), mini->proc->get_proc_id () + 1})));
   }
+#pragma GCC diagnostic warning "-Winline"
   TEST( SelfTestProc, LocalNumasAllSame ){
     EXPECT_THAT( get_local_numa_ixs (), Each( get_local_numa_ixs ()[0]) );
   }

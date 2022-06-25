@@ -28,6 +28,31 @@ ifeq ($(shell test -e file_name && echo -n yes),yes)
 endif
 #FIXME Move to recipe?
 
+# Directories -----------------------------------------------------------------
+# Directories for generic components
+BUILD_DIR  := build
+STAGE_DIR  := $(BUILD_DIR)/stage
+INSTALL_DIR:= $(PREFIX)
+
+# Directories for CPU-model specific components
+BUILD_CPU  := $(BUILD_DIR)/$(CPUMODEL)
+STAGE_CPU  := $(STAGE_DIR)/$(CPUMODEL)
+INSTALL_CPU:= $(INSTALL_DIR)/$(CPUMODEL)
+
+# Export TMPDIR to prevent system tmpdir overflow. (MPI needs it, maybe others.)
+TEMP_DIR   := $(shell pwd)/$(BUILD_DIR)/tmp
+
+#NOTE Subdirectories needed in the build directory have a trailing slash.
+BUILD_TREE+= $(BUILD_DIR)/external/tools/ $(BUILD_DIR)/docs/
+BUILD_TREE+= $(BUILD_CPU)/external/ $(BUILD_CPU)/tests/ $(BUILD_CPU)/tools/
+BUILD_TREE+= $(BUILD_CPU)/femera/proc/ $(BUILD_CPU)/femera/data/
+BUILD_TREE+= $(BUILD_CPU)/femera/test/ $(BUILD_CPU)/femera/task/
+BUILD_TREE+= $(BUILD_CPU)/zyclops/
+BUILD_TREE+= $(BUILD_CPU)/fmr/perf/
+
+STAGE_TREE+= $(STAGE_DIR)/bin/ $(STAGE_DIR)/lib/
+STAGE_TREE+= $(STAGE_CPU)/bin/ $(STAGE_CPU)/lib/
+
 #------------------------------------------------------------------------------
 ifeq ($(CXX),g++)
   ifeq ($(ENABLE_MPI),ON)
@@ -42,11 +67,15 @@ ifeq ($(CXX),g++)
     CXXFLAGS+= -flto
   endif
   #NOTE -fpic needed for shared libs, but may degrade static lib performance.
-  CXXFLAGS+= $(OPTFLAGS) -fstrict-enums
   ifeq ($(ENABLE_OMP),ON)
     CXXFLAGS+= -fopenmp
     FMRFLAGS+= -D_GLIBCXX_PARALLEL
   endif
+  ifeq ($(ENABLE_GCC_PROFILE),ON)
+  CXXFLAGS+= -fprofile-dir=$(abspath $(BUILD_CPU)) -fprofile-generate
+  # CXXFLAGS+= fprofile-dir=$(BUILD_CPU)/%p/ -fprofile-generate -fprofile-abs-path
+  endif
+  CXXFLAGS+= $(OPTFLAGS) -fstrict-enums
   # Warning flags
   CXXWARNS+= -Wall -Wextra -Wpedantic -Wuninitialized -Wshadow -Wfloat-equal
   CXXWARNS+= -Wdouble-promotion -Wconversion -Wsign-conversion -Wlogical-op
@@ -55,8 +84,6 @@ ifeq ($(CXX),g++)
   CXXWARNS+= -Wzero-as-null-pointer-constant -Wstrict-null-sentinel -Weffc++
   CXXWARNS+= -Wdisabled-optimization
   CXXWARNS+= -Winline
-  #TODO Consider suppressing -Winline errors for con/de-structors and
-  #     lower the --param large-function-growth limit.
   # CXXFLAGS+= -finline-limit=1000
   # CXXFLAGS+= --param inline-min-speedup=2
   # CXXFLAGS+= --param inline-unit-growth=500
@@ -93,31 +120,6 @@ endif
 FMRFLAGS += -I"$(STAGE_CPU)/include" -I"$(STAGE_DIR)/include"
 FMRFLAGS += -isystem"$(INSTALL_CPU)/include" -isystem"$(INSTALL_DIR)/include"
 LDFLAGS += -L"$(STAGE_CPU)/lib" -L"$(STAGE_DIR)/lib"
-# Directories -----------------------------------------------------------------
-# Directories for generic components
-BUILD_DIR  := build
-STAGE_DIR  := $(BUILD_DIR)/stage
-INSTALL_DIR:= $(PREFIX)
-
-# Directories for CPU-model specific components
-BUILD_CPU  := $(BUILD_DIR)/$(CPUMODEL)
-STAGE_CPU  := $(STAGE_DIR)/$(CPUMODEL)
-INSTALL_CPU:= $(INSTALL_DIR)/$(CPUMODEL)
-
-# Export TMPDIR to prevent system tmpdir overflow. (MPI needs it, maybe others.)
-TEMP_DIR   := $(shell pwd)/$(BUILD_DIR)/tmp
-
-#NOTE Subdirectories needed in the build directory have a trailing slash.
-BUILD_TREE+= $(BUILD_DIR)/external/tools/ $(BUILD_DIR)/docs/
-BUILD_TREE+= $(BUILD_CPU)/external/ $(BUILD_CPU)/tests/ $(BUILD_CPU)/tools/
-BUILD_TREE+= $(BUILD_CPU)/femera/proc/ $(BUILD_CPU)/femera/data/
-BUILD_TREE+= $(BUILD_CPU)/femera/test/ $(BUILD_CPU)/femera/task/
-BUILD_TREE+= $(BUILD_CPU)/zyclops/
-BUILD_TREE+= $(BUILD_CPU)/fmr/perf/
-
-STAGE_TREE+= $(STAGE_DIR)/bin/ $(STAGE_DIR)/lib/
-STAGE_TREE+= $(STAGE_CPU)/bin/ $(STAGE_CPU)/lib/
-
 # -----------------------------------------------------------------------------
 ifeq ("$(findstring $(INSTALL_DIR)/bin:,$(PATH):)","")
   ADD_TO_PATH:= $(INSTALL_DIR)/bin:$(ADD_TO_PATH)
@@ -218,11 +220,12 @@ endif
 ifeq ($(ENABLE_GOOGLETEST),ON)
   CXXTESTS := $(filter-out -Wundef,$(CXXTESTS))
   CXXTESTS := $(filter-out -Weffc++,$(CXXTESTS))
-  CXXTESTS := $(filter-out -Winline,$(CXXTESTS))
+  # CXXTESTS := $(filter-out -Winline,$(CXXTESTS))
   CXXTESTS := $(filter-out -flto,$(CXXTESTS))
   #NOTE Parallel library build breaks link-time optimization of gtests.
   CXXPERFS := $(filter-out -Weffc++,$(CXXPERFS))
-  CXXPERFS := $(filter-out -Winline,$(CXXPERFS))
+  # CXXPERFS := $(filter-out -Winline,$(CXXPERFS))
+  CXXPERFS := $(filter-out -fprofile-generate,$(CXXPERFS))
 endif
 ifeq ($(ENABLE_GOOGLETEST),ON)
   LIST_EXTERNAL += googletest
@@ -313,7 +316,8 @@ ifeq ($(ENABLE_VALGRIND),ON)
 endif
 
 
-CXXMINI := $(CXXFLAGS) $(FMRFLAGS) $(filter-out -Winline,$(CXXWARNS))
+# CXXMINI := $(CXXFLAGS) $(FMRFLAGS) $(filter-out -Winline,$(CXXWARNS))
+CXXMINI := $(CXXFLAGS) $(FMRFLAGS) $(CXXWARNS)
 CXXFLAGS+= $(CXXWARNS)
 
 # Files -----------------------------------------------------------------------
@@ -440,6 +444,7 @@ reinstall: | intro
 	$(MAKE) $(JSER) install
 
 clean: $(BUILD_CPU)/femera/ $(BUILD_CPU)/fmr/ $(STAGE_CPU)/lib/
+clean: $(BUILD_CPU)/zyclops/ $(BUILD_CPU)/build/
 	$(call timestamp,$@,$^)
 	-rm -rf $^
 	$(info $(DONE) made $(FEMERA_VERSION) for $(CPUMODEL) $@)
@@ -912,7 +917,6 @@ $(LIBFEMERA)(build/%.o) : build/%.o
 	# Serialize archive operations.
 	flock "$(STAGE_CPU)/libfemera.lck" $(AREXE) -cr $(LIBFEMERA) $^
 # Executable targets ----------------------------------------------------------
-
 $(BUILD_CPU)/mini: export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/mini: export PATH:=$(shell pwd)/$(BUILD_CPU):$(PATH)
 $(BUILD_CPU)/mini: src/femera/mini.cpp src/femera/femera.hpp $(LIBFEMERA)
@@ -920,12 +924,11 @@ $(BUILD_CPU)/mini: src/femera/mini.cpp src/femera/femera.hpp $(LIBFEMERA)
 	$(call col2cxx,$(CXX_),$(CXX) $(notdir $<) .. $(notdir $@),$(shell \
 	if [ -f "$(@)" ]; then ls -sh $(@) | cut -d " " -f1; fi)B)
 ifeq ($(ENABLE_GCC_PROFILE),ON)
-	-$(CXX) $(CXXMINI) $< $(LDFLAGS) -lfemera $(LDLIBS) -o $@.pro \
-  -fprofile-generate
-	$@.pro >/dev/null
-	-$(CXX) $(CXXMINI) $< $(LDFLAGS) -lfemera $(LDLIBS) -o $@ -fprofile-use
+	-$(CXX) $(CXXMINI) $< $(LDFLAGS) -lfemera $(LDLIBS) -o $@.pro
+	fmrexec tdd:$(@).pro >/dev/null
 else
-	-$(CXX) $(CXXMINI) $< $(LDFLAGS) -lfemera $(LDLIBS) -o $@
+	-$(CXX) $(filter-out $(CXXMINI),-fprofile-generate) -fprofile-use\
+  $< $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 endif
 	$(call label_test,$(PASS),$(FAIL),fmrexec tdd:$(@),$(@))
 

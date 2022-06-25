@@ -49,5 +49,7 @@ TEST( Sims, JacDet ){
 }
 #endif
 fmr::Exit_int main (int argc, char** argv) {
+#pragma GCC diagnostic ignored "-Winline"
   return mini->exit (mini->init (&argc,argv));
+#pragma GCC diagnostic warning "-Winline"
 }

@@ -19,6 +19,33 @@ namespace femera {
     this->task_list.push_back (std::move(W));
     return fmr::Local_int (this->task_list.size () - 1);// index of task added
   }
+  Work* Work::get_work (const fmr::Local_int ix)
+  noexcept {
+    return (ix < this->task_list.size()) ? this->task_list [ix].get() : nullptr;
+  }
+  Work* Work::get_work (const Work_type t, const fmr::Local_int ix)
+  noexcept {
+    fmr::Local_int i=0;
+    auto W = this;
+#if 1
+    if (W->task_type == t) {
+      //TODO Is this the desired behavior of nested drivers of the same type?
+      //     Task 0 is the parent, with 1-indexed children of the same type.
+      if (i == ix) { return W; }
+      ++i;
+    }
+#endif
+    while (! W->task_list.empty ()) {
+      const fmr::Local_int n = W->get_task_n ();
+      for (fmr::Local_int Wix=0; Wix < n; ++Wix) {
+        if (W->task_list [Wix].get()->task_type == t) {
+          if (i == ix) { return W->task_list [Wix].get(); }
+          ++i;
+      } }
+      W = W->task_list [0].get();//TODO other branches
+    }
+    return nullptr;
+  }
   fmr::Exit_int Work::init_list (int* argc, char** argv)
   noexcept {fmr::Exit_int err =0;
     const auto n = this->task_list.size ();
@@ -63,13 +90,16 @@ namespace femera {
           }
           const auto label = femera::form::text_line (250, "%4s %4s init",
             W->get_base_abrv ().c_str(), W->abrv.c_str());
+#pragma GCC diagnostic ignored "-Winline"
           if (W->data->did_logs_init ()) {
             W->data->name_line (W->data->fmrlog, label, text);
           } else {
           if (W->proc != nullptr) {
             if (W->proc->is_main ()) {
               form::name_line (::stdout, 14, 80, label, text);
-        } } } }
+          } } }
+#pragma GCC diagnostic warning "-Winline"
+        }
         if (Werr > 0) {
           del_list.push (ix);// Queue task for removal if init failed, and...
           W->exit (-1);      // ...exit it with a warning (not error) code.
@@ -88,7 +118,9 @@ namespace femera {
   fmr::Exit_int Work::exit_list ()
   noexcept { fmr::Exit_int err =0;
     if (this->proc != nullptr && this->did_work_init == true) {
+#pragma GCC diagnostic ignored "-Winline"
       this->is_work_main = this->proc->is_main ();
+#pragma GCC diagnostic warning "-Winline"
     }
     this->did_work_init = false;
     while (! this->task_list.empty ()) {
@@ -123,12 +155,15 @@ namespace femera {
           W->get_base_abrv ().c_str(), W->get_abrv().c_str());
         const auto text = busy+" /"+tot+" "+W->name
           +((W->version=="") ? "":" "+W->version);
+#pragma GCC diagnostic ignored "-Winline"
         if (W->data == nullptr) {
           if (this->is_work_main) {
             form::name_line (::stdout, 14, 80, label, text);
         } } else {
           W->data->name_line (W->data->fmrlog, label, text);
-      } }
+        }
+#pragma GCC diagnostic warning "-Winline"
+      }
       this->task_list.pop_back ();
     }
     return err;
@@ -136,8 +171,10 @@ namespace femera {
   fmr::Exit_int Work::exit_tree ()
   noexcept { fmr::Exit_int err =0;
     if (this->proc != nullptr && this->did_work_init == true) {
+#pragma GCC diagnostic ignored "-Winline"
       this->is_work_main = this->proc->is_main ();
     }
+#pragma GCC diagnostic warning "-Winline"
     this->did_work_init = false;
     if (! this->task_list.empty ()) {
       Work::Task_path_t branch ={};
@@ -170,12 +207,15 @@ namespace femera {
           W->get_base_abrv ().c_str(), W->get_abrv().c_str());
         const auto text = busy+" /"+tot+" "+W->name
           +((W->version=="") ? "":" "+W->version);
+#pragma GCC diagnostic ignored "-Winline"
         if (W->data == nullptr) {
           if (this->is_work_main) {
             form::name_line (::stdout, 14, 80, label, text);
           } } else {
           W->data->name_line (W->data->fmrlog, label, text);
-      } }
+        }
+#pragma GCC diagnostic warning "-Winline"
+      }
       if (! branch.empty ()) {
         branch.pop_back ();
         if (! branch.empty ()) {

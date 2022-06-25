@@ -9,7 +9,9 @@ fmr::Exit_int main (int argc, char** argv) {
 auto test_proc = femera::proc::Main ();
 
 TEST( Node, TaskName ){
+#pragma GCC diagnostic ignored "-Winline"
   EXPECT_EQ( test_proc.init (nullptr,nullptr), 0 ); test_proc.proc = &test_proc;
+#pragma GCC diagnostic warning "-Winline"
   EXPECT_NE( test_proc.get_task (femera::Task_type::Node)->get_name(), "node" );
 }
 TEST(Node, CoreN) {

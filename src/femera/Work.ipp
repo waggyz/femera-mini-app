@@ -23,11 +23,6 @@ namespace femera {
     return std::make_tuple (this->proc, this->data, this->test);
   }
   inline
-  Work* Work::get_work (const fmr::Local_int ix)
-  noexcept {
-    return (ix < this->task_list.size()) ? this->task_list [ix].get() : nullptr;
-  }
-  inline
   Work* Work::get_work (const Work::Task_path_t& path)
   noexcept {
     auto W = this;
@@ -38,30 +33,6 @@ namespace femera {
           W = W->get_work (path [i]);
     } } }
     return W;
-  }
-  inline
-  Work* Work::get_work (const Work_type t, const fmr::Local_int ix)
-  noexcept {
-    fmr::Local_int i=0;
-    auto W = this;
-#if 1
-    if (W->task_type == t) {
-      //TODO Is this the desired behavior of nested drivers of the same type?
-      //     Task 0 is the parent, with 1-indexed children of the same type.
-      if (i == ix) { return W; }
-      ++i;
-    }
-#endif
-    while (! W->task_list.empty ()) {
-      const fmr::Local_int n = W->get_task_n ();
-      for (fmr::Local_int Wix=0; Wix < n; ++Wix) {
-        if (W->task_list [Wix].get()->task_type == t) {
-          if (i == ix) { return W->task_list [Wix].get(); }
-          ++i;
-      } }
-      W = W->task_list [0].get();//TODO other branches
-    }
-    return nullptr;
   }
   inline
   fmr::Local_int Work::get_task_n ()

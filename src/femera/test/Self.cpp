@@ -25,6 +25,7 @@ namespace femera {
       if (Pmpi) {mpi_n = Pmpi->get_proc_n ();}
       const auto Pomp = this->proc->get_task (Task_type::Fomp);
       if (Pomp) {omp_n = Pomp->get_proc_n ();}
+#pragma GCC diagnostic ignored "-Winline"
 #if 0
       this->data->name_line (data->fmrlog, str +"proc",
         "%4u MPI %4u OpenMP: %4u of %4u total CPU processes",
@@ -49,7 +50,9 @@ namespace femera {
         "%4u ea "+ x +"%4u node:%4u NUMA domain%s total",
         numa_n, node_n, numa_all, (numa_all==1)?"":"s");
 #endif
+#pragma GCC diagnostic warning "-Winline"
     }
+#pragma GCC diagnostic ignored "-Winline"
     if (all_n < core_n) {
       this->data->name_line (data->fmrlog, this->abrv+" task_init",
         "NOTE Femera uses fewer threads (%u) than physical cores (%u).",
@@ -59,12 +62,16 @@ namespace femera {
       this->data->name_line (data->fmrlog, this->abrv+" task_init",
         "NOTE Femera uses more threads (%u) than physical cores (%u).",
         all_n, core_n);
-  } }
+    }
+#pragma GCC diagnostic warning "-Winline"
+  }
   void test::Self::log_init_info () {// pulled out of task_init (inline fail)
     const auto str = get_base_abrv ()+" "+ abrv +" ";
     const auto cppver = __cplusplus;
+#pragma GCC diagnostic ignored "-Winline"
     this->data->name_line (data->fmrlog, str +" ver",
       std::string (MAKESTR(FMR_VERSION)));
+#pragma GCC diagnostic warning "-Winline"
 #if 0
     this->data->name_line (data->fmrlog, str +" C++",
       std::to_string(cppver) +", gcc "+ std::string(__VERSION__));

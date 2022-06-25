@@ -2,15 +2,22 @@
 #define FEMERA_DATA_BULK_IPP
 
 namespace femera { namespace data {
+  template <fmr::Align_int A> template <typename T> constexpr
+  T Bulk<A>::ce_max (T a, T b) {/*
+    https://stackoverflow.com/questions/40285548/get-min-max-value-of-a-static
+      -constexpr-array-at-compile-time
+    */
+    return fmr::Align_int ((a > b) ? a : b);
+  }
   template <fmr::Align_int A> inline
   Bulk<A>::Bulk ()
   noexcept {
   }
-  template <fmr::Align_int A> template <typename T> inline constexpr
-  fmr::Align_int Bulk<A>::offset (const std::uintptr_t address)
+  template <fmr::Align_int A> template <typename T> inline
+  std::uintptr_t Bulk<A>::offset (const std::uintptr_t address)
   noexcept {
-    return ((address % std::max (A, alignof(T))) == 0)// range: [0, A-1]
-      ? 0 : (std::max (A, alignof(T)) - (address % std::max (A, alignof(T))));
+    return (address % ce_max (A, alignof(T)) == 0)// range: [0, A-1]
+      ? 0 : ce_max (A, alignof(T)) - (address % ce_max (A, alignof(T)));
   }
   template <fmr::Align_int A> inline
   std::size_t Bulk<A>::get_byte ()
@@ -86,7 +93,9 @@ namespace femera { namespace data {
   T* Bulk<A>::set_real (const std::size_t nvals, const T init_val)
   noexcept {
     const auto zsz = zplx.hc_size ();
+#pragma GCC diagnostic ignored "-Winline"
     this->raw<T> (nvals * zsz);
+#pragma GCC diagnostic warning "-Winline"
     if (nvals <= 0) { return reinterpret_cast<T*> (this->bulk.data ()); }
     const auto ptr = std::uintptr_t (this->bulk.data ());
     const std::uintptr_t sz = (nvals * sizeof(T) * zsz) / sizeof(fmr::Bulk_int);
@@ -198,7 +207,9 @@ namespace femera { namespace data {
     std::uint64_t crc = ~in;
     auto sz = this->cval_n * this->cval_szof * this->zplx.hc_size ();
     if (sz <= 0) { return 0; }
+#pragma GCC diagnostic ignored "-Winline"
     const auto lpad = this->offset<T> (std::uintptr_t (this->bulk.data ()));
+#pragma GCC diagnostic warning "-Winline"
 #if 1//def FMR_HAS_64BITCRC32
     FMR_CONST_PTR buf = reinterpret_cast<std::uint64_t*> (& this->bulk[lpad]);
     sz /= 8;
@@ -231,7 +242,9 @@ namespace femera { namespace data {
     crc = ~crc;
     std::size_t sz = this->cval_n * this->cval_szof * this->zplx.hc_size ();
     if (sz <= 0) { return 0; }
+#pragma GCC diagnostic ignored "-Winline"
     const auto lpad = this->offset<T> (std::uintptr_t (this->bulk.data ()));
+#pragma GCC diagnostic warning "-Winline"
     FMR_CONST_PTR buf = reinterpret_cast<const unsigned char*>
       (& this->bulk [lpad]);
     while (sz--) {

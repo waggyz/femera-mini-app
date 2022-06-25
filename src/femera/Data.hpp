@@ -42,34 +42,37 @@ namespace femera {
     fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;
   public:
     static constexpr
-    This_spt new_task (Work::Core_ptrs_t)              noexcept;
-    T*       get_task (fmr::Local_int)                 noexcept;
-    T*       get_task (Work::Task_path_t)              noexcept;
-    T*       get_task (Work_type, fmr::Local_int ix=0) noexcept;
-    T*       get_task (Task_type, fmr::Local_int ix=0) noexcept;
+    This_spt new_task (Work::Core_ptrs_t)  noexcept;
+    //
+    T* get_task (fmr::Local_int)                 noexcept;
+    T* get_task (Work::Task_path_t)              noexcept;
+    T* get_task (Work_type, fmr::Local_int ix=0) noexcept;
+    T* get_task (Task_type, fmr::Local_int ix=0) noexcept;
   private:
     constexpr
     T*      this_cast (Data*) noexcept;
     constexpr
     T*      this_cast (Work*) noexcept;
   protected:// Make it clear this class needs to be inherited from.
-    Data (Work::Core_ptrs_t) noexcept;
-    Data ()            =default;
-    Data (const Data&) =default;
-    Data (Data&&)      =default;// shallow (pointer) copyable
-    Data& operator =
-      (const Data&)    =default;
-    ~Data ()           =default;
+    Data (Work::Core_ptrs_t) noexcept;// preferred constructor
+    Data ()            =default;// early (init) constructor
+    Data& operator
+      =  (const Data&) =default;// assignment (copy) operator
+    Data (const Data&) =default;// copy constructor
+    Data (Data&&)      =default;// shallow (pointer) copy constructor
+    ~Data ()           =default;// destructor
 #if 0
   public:
-    using Sims_list_t = std::deque <fmr::Data_name_t>;
-    using Path_list_t = std::deque <fmr::File_name_t>;
+    using Vals_list_t = std::deque <fmr::Vals_name_t>;
+    using File_list_t = std::deque <fmr::File_name_t>;
 #endif
 #if 0
   private:
-    std::unordered_map<std::string,FILE*> open_file_list ={};
+    std::unordered_map <std::string,FILE*> open_file_list ={};
   public:
     using Data_name_t = std:vector<Name_t>;
+    using File_name_t = std:vector<Name_t>;
+    //
     // Memory operations
     ret::???  add (Data_name_t, ...);// Vals_t vals =nullptr);// in Vals?
     Vals_t    get (Data_name_t);// in Vals?
@@ -77,14 +80,19 @@ namespace femera {
     ret::???  del (Data_name_t);// in Vals?
     ret::??? size or init (Data_name_t, ...);// Vals_t size =nullptr);// in Vals?
     Bank_t   form or pack or bulk (Data_name_t, ...);// in Vals?
+    ret::??? post (Data_name_t, ...);// post-process
+    //
+    // File operations
+    ret::?  add_file (File_name_t);
+    ret::? scan_file (File_name_t);
     //
     // I/O operations
-    Vals_t   scan (File_name_t);// in File?
-    //
-    Vals_t   read (Data_name_t);// in Vals?
-    Vals_t   sync (Data_name_t);// in Vals?
-    ret::??? save (Data_name_t, ...);// Vals_t =nullptr);// in Vals?
-    ret::??? send (Data_name_t, ...);// Vals_t =nullptr);// in Vals?
+    std::string  log (?)
+    Vals_t      read (Data_name_t);// in Vals?
+    Vals_t      sync (Data_name_t);// in Vals?
+    ret::?      save (Data_name_t, ...);// Vals_t =nullptr);// in Vals?
+    ret::?      send (Data_name_t, ...);// Vals_t =nullptr);// in Vals?
+    ret::?      view (Data_name_t, ...);// visualize
 #endif
 #if 0
   public:

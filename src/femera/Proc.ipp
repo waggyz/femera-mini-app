@@ -38,7 +38,9 @@ namespace femera {
     Errs::print (this->get_abrv ()+" task_init"); }
     if (err > 0) {return this->exit (err); }
     Work::init_list (argc, argv);//                    ...then init child tasks.
+#pragma GCC diagnostic ignored "-Winline"
     this->set_base_n ();// Set values for calculating proc_id.
+#pragma GCC diagnostic warning "-Winline"
     return err;
   }
   template <typename T> inline
@@ -101,6 +103,7 @@ namespace femera {
     return ans;
   }
 #else
+#pragma GCC diagnostic ignored "-Winline"
   template <typename T> inline
   bool Proc<T>::is_main (bool ans)// iterative version
   noexcept {
@@ -112,6 +115,7 @@ namespace femera {
     }
     return ans;
   }
+#pragma GCC diagnostic warning "-Winline"
 #endif
 #if 0
   template <typename T> inline

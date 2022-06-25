@@ -10,6 +10,7 @@ namespace femera { namespace test {
   const auto ints10 = std::string("test-10-ints");
   const auto vals10 = std::string("test-10-floats");
   //
+#pragma GCC diagnostic ignored "-Winline"
   TEST(Vals, Ints10) {
     EXPECT_EQ( vals.get<int> ("integer name not found"), nullptr);
     EXPECT_EQ( vals.set      (ints10,10,int(1))[9], int(1));
@@ -40,6 +41,7 @@ namespace femera { namespace test {
   TEST(Vals, AutoConvert) {
     EXPECT_EQ(       vals.get<uint>  (ints10) [0], uint(1));
     EXPECT_FLOAT_EQ( vals.get<float> (vals10) [0], float(1.0));
+#pragma GCC diagnostic warning "-Winline"
   }
 #endif
 #if 0
@@ -51,5 +53,7 @@ namespace femera { namespace test {
 } }//end femerea::test:: namespace
 
 fmr::Exit_int main (int argc, char** argv) {
+#pragma GCC diagnostic ignored "-Winline"
   return femera::test::mini->exit (femera::test::mini->init (&argc,argv));
+#pragma GCC diagnostic warning "-Winline"
 }

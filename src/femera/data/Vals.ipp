@@ -3,18 +3,6 @@
 
 namespace femera { namespace data {
   inline
-  Vals::Vals ()
-  noexcept {
-    this->name_vals.reserve (this->map_init_size);
-    this->name_ints.reserve (this->map_init_size);
-  }
-  inline
-  Vals::Vals (const fmr::Local_int n)
-  noexcept : map_init_size (n) {
-    this->name_vals.reserve (n);
-    this->name_ints.reserve (n);
-  }
-  inline
   fmr::Local_int Vals::del_all ()
   noexcept {
     const auto n
@@ -35,9 +23,11 @@ namespace femera { namespace data {
   template <typename T>
   T* Vals::set (const fmr::Data_name_t& id, const size_t n, const T* init_vals)
   noexcept {
+#pragma GCC diagnostic ignored "-Winline"
     return std::is_floating_point <T>::value
       ? this->name_vals [id].set (n, init_vals)
       : this->name_ints [id].set (n, init_vals);
+#pragma GCC diagnostic warning "-Winline"
   }
   template <typename T> inline
   void Vals::del (const fmr::Data_name_t& id)

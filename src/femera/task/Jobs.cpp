@@ -23,7 +23,9 @@ namespace femera {
 #endif
     // Add the File data handler (this->data).
     if (this->data == nullptr) {
+#pragma GCC diagnostic ignored "-Winline"
       const auto data_ptr = std::move (data::File::new_task (this->get_core()));
+#pragma GCC diagnostic warning "-Winline"
       this->data = data_ptr.get();
       this->add_task (std::move (data_ptr));
     }

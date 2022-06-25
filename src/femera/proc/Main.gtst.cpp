@@ -3,7 +3,9 @@
 #include <gtest/gtest.h>
 
 namespace femera { namespace test {
+#pragma GCC diagnostic ignored "-Winline"
   auto main_test = FMR_MAKE_SMART(femera::proc::Main) (femera::proc::Main());
+#pragma GCC diagnostic warning "-Winline"
   inline
   fmr::Local_int proc_id_sum () {fmr::Local_int sum = 0;
     FMR_PRAGMA_OMP(omp parallel reduction( +:sum)) {
@@ -33,6 +35,8 @@ namespace femera { namespace test {
   }
 } }//end femera::test:: namespcae
 int main (int argc, char** argv) {
+#pragma GCC diagnostic ignored "-Winline"
   femera::test::main_test->init (& argc, argv);
   return femera::test:: early_main (& argc, argv);
+#pragma GCC diagnostic warning "-Winline"
 }

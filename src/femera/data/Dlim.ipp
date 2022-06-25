@@ -16,6 +16,7 @@ namespace femera {
   inline
   void data::Dlim::task_exit () {
   }
+#pragma GCC diagnostic ignored "-Winline"
   template <typename ...Args> inline
   std::string data::Dlim::data_line (Args... args) {
     return make_data_line (std::string(""), args...);
@@ -68,6 +69,7 @@ namespace femera {
   (const std::string& line, const F first, R... rest) {
     return make_data_line (line + data::Dlim::csv_item (first)+",", rest...);
   }
+#pragma GCC diagnostic warning "-Winline"
 }//end femera namespace
 
 //end FEMERA_DATA_DLIM_IPP

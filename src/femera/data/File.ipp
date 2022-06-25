@@ -5,14 +5,6 @@
 
 namespace femera {
   inline
-  data::File::File (const Work::Core_ptrs_t core)
-  noexcept : Data (core) {
-    this->name      ="Femera file handler";
-    this->abrv      ="file";
-    this->task_type = task_cast (Task_type::File);
-    this->info_d    = 2;
-  }
-  inline
   void data::File::task_exit () {
   }
   inline
@@ -78,7 +70,9 @@ namespace femera {
 #else
     FILE* file = nullptr;
     if (flist.size () > 0 && this->proc != nullptr) {
+#pragma GCC diagnostic ignored "-Winline"
       file = flist [this->proc->get_proc_id () % flist.size()];
+#pragma GCC diagnostic warning "-Winline"
     }
     const auto w = this->file_line_sz [file];
     const auto h = this->line_name_sz [file];

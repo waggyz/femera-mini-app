@@ -7,21 +7,6 @@
 #endif
 namespace femera {
   inline
-  proc::Main::Main (const femera::Work::Core_ptrs_t W)
-  noexcept : Proc (W) {
-    this->name      ="Femera processing handler";
-    this->abrv      ="main";
-    this->task_type = task_cast (Task_type::Main);
-    this->info_d    = 2;
-  }
-  inline
-  proc::Main::Main () noexcept {
-    this->name      ="Femera processing handler";
-    this->abrv      ="main";
-    this->task_type = task_cast (Task_type::Main);
-    this->info_d    = 2;
-  }
-  inline
   void proc::Main::task_exit () {
     this->proc =nullptr;
   }

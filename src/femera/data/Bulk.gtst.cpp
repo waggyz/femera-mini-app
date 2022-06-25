@@ -33,6 +33,7 @@ namespace femera { namespace test {
     EXPECT_LE( 8, FMR_ALIGN_INTS);
   }
   TEST(Bulk, CrcHash) {
+#pragma GCC diagnostic ignored "-Winline"
     EXPECT_EQ( bulk_vals.make_hash<uint32_t> (), 0);
     EXPECT_EQ( bulk_vals.make_hash<uint64_t> (), 0);
     EXPECT_EQ( bulk_vals.make_hash<fmr::Hash_int> (), 0);
@@ -42,10 +43,13 @@ namespace femera { namespace test {
     EXPECT_NE( bulk_vals.make_hash<uint64_t> (), 0);
     EXPECT_NE( bulk_vals.make_hash<uint32_t> (),
       uint64_t(bulk_vals.make_hash<uint64_t> ()));
+#pragma GCC diagnostic warning "-Winline"
   }
   //
 } }//end femerea::test:: namespace
 
 fmr::Exit_int main (int argc, char** argv) {
+#pragma GCC diagnostic ignored "-Winline"
   return femera::test::mini->exit (femera::test::mini->init (&argc,argv));
+#pragma GCC diagnostic warning "-Winline"
 }

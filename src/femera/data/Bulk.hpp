@@ -75,10 +75,12 @@ namespace femera { namespace data {
     H make_hash (H init_hash = 0,
       typename std::enable_if <sizeof (H) == 8>::type* = nullptr)
     noexcept;
-    //
+  public:
     Bulk () noexcept;// constructor
   private:
     template <typename T> static constexpr
+    T ce_max (T a, T b);
+    template <typename T> static
     fmr::Align_int offset (uintptr_t)
     noexcept;
     template <typename T>
