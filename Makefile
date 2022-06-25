@@ -223,6 +223,8 @@ ifeq ($(ENABLE_GOOGLETEST),ON)
   # CXXTESTS := $(filter-out -Winline,$(CXXTESTS))
   CXXTESTS := $(filter-out -flto,$(CXXTESTS))
   #NOTE Parallel library build breaks link-time optimization of gtests.
+  # CXXTESTS := $(filter-out -fprofile-generate,$(CXXTESTS))
+  #
   CXXPERFS := $(filter-out -Weffc++,$(CXXPERFS))
   # CXXPERFS := $(filter-out -Winline,$(CXXPERFS))
   CXXPERFS := $(filter-out -fprofile-generate,$(CXXPERFS))
@@ -315,7 +317,7 @@ ifeq ($(ENABLE_VALGRIND),ON)
       $(BUILD_CPU)/mini.valgrind.log
 endif
 
-# TODO CXXMINI should show -Winline errors
+#TODO CXXMINI flags should show -Winline errors
 CXXMINI := $(CXXFLAGS) $(FMRFLAGS) $(filter-out -Winline,$(CXXWARNS))
 CXXFLAGS+= $(CXXWARNS)
 
@@ -553,7 +555,7 @@ ifneq ($(HOST_MD5),$(REPO_MD5))
 endif
 	$(info $(E_G_) fmrexec auto examples/cube.fmr)
 
-$(SRC_STAT_FILE): $(BUILD_CPU)/mini | build/$(CPUMODEL)/
+$(SRC_STAT_FILE): | build/$(CPUMODEL)/
 	touch "$(SRC_STAT_FILE)"; \
 	if ! grep "$(FEMERA_VERSION)" "$(SRC_STAT_FILE)" | grep -q "$(HOSTNAME)"; \
 	then echo "$(BUILD_DATE)",'"'$(FEMERA_VERSION)'"',\
@@ -915,6 +917,7 @@ $(LIBFEMERA)(build/%.o) : build/%.o
 	$(call col2lib,$(LIBS),$(AREXE) -cr libfemera.a <--,$^)
 	# Serialize archive operations.
 	flock "$(STAGE_CPU)/libfemera.lck" $(AREXE) -cr $(LIBFEMERA) $^
+
 # Executable targets ----------------------------------------------------------
 $(BUILD_CPU)/mini: export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/mini: export PATH:=$(shell pwd)/$(BUILD_CPU):$(PATH)
@@ -926,13 +929,13 @@ ifeq ($(ENABLE_GCC_PROFILE),ON)
 	-$(CXX) $(CXXMINI) $< $(LDFLAGS) -lfemera $(LDLIBS) -o $@.pro
 	fmrexec tdd:$(@).pro >/dev/null
 else
-	-$(CXX) $(filter-out $(CXXMINI),-fprofile-generate) -fprofile-use\
+	-$(CXX) $(filter-out $(CXXMINI),-fprofile-generate) -fprofile-use \
   $< $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 endif
 	$(call label_test,$(PASS),$(FAIL),fmrexec tdd:$(@),$(@))
 
 $(BUILD_CPU)/mini.valgrind.log: export PATH:=$(shell pwd)/$(BUILD_CPU):$(PATH)
-$(BUILD_CPU)/mini.valgrind.log: $(BUILD_CPU)/mini $(VALGRIND_SUPP_EXE)
+$(BUILD_CPU)/mini.valgrind.log: $(VALGRIND_SUPP_EXE)
 ifeq ($(ENABLE_VALGRIND),ON)
 	$(info $(GRND) valgrind .. fmrexec tdd:$(<))
 	$(VGEXEC) # >> $(BUILD_CPU)/mini.valgrind.out
@@ -1011,8 +1014,7 @@ else
 endif
 
 $(VALGRIND_SUPP_EXE) : export TMPDIR := $(TEMP_DIR)
-$(VALGRIND_SUPP_EXE) : src/$(VALGRIND_SUPP).cpp $(BUILD_CPU)/$(VALGRIND_SUPP) \
-  | $(BUILD_CPU)/mini
+$(VALGRIND_SUPP_EXE) : src/$(VALGRIND_SUPP).cpp $(BUILD_CPU)/$(VALGRIND_SUPP)
 ifeq ($(ENABLE_VALGRIND),ON)
 	$(call col2cxx,$(CXX_),$(CXX) $<,$(notdir $@))
 	$(CXX) $(VGFLAGS) $< $(LDFLAGS) -L$(BUILD_DIR) -lfemera -o $@ $(LDLIBS)
