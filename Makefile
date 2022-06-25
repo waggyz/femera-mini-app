@@ -315,9 +315,8 @@ ifeq ($(ENABLE_VALGRIND),ON)
       $(BUILD_CPU)/mini.valgrind.log
 endif
 
-
+# TODO CXXMINI should show -Winline errors
 CXXMINI := $(CXXFLAGS) $(FMRFLAGS) $(filter-out -Winline,$(CXXWARNS))
-# CXXMINI := $(CXXFLAGS) $(FMRFLAGS) $(CXXWARNS)
 CXXFLAGS+= $(CXXWARNS)
 
 # Files -----------------------------------------------------------------------
