@@ -87,7 +87,8 @@ namespace femera {
     ret::? scan_file (File_name_t);
     //
     // I/O operations
-    std::string  log (?)
+    //std::string log (?)// replace with info (..), below?
+    std::string info (fmr::Dim_int d,...)// details: send when d <= Logs::log_d
     Vals_t      read (Data_name_t);// in Vals?
     Vals_t      sync (Data_name_t);// in Vals?
     ret::?      save (Data_name_t, ...);// Vals_t =nullptr);// in Vals?
