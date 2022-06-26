@@ -119,9 +119,10 @@ namespace femera {
   protected:// Built-in stuff -------------------------------------------------
     Work (Work::Core_ptrs_t) noexcept;
     Work ()            =default;
-    Work (Work const&);// copyable, default constructor in Work.cpp
-    Work& operator =
-      (const Work&)    =default;
+    Work (Work&&);             // movable
+    Work& operator
+      =  (const Work&) =delete;// not asignable
+    Work (const Work&) =delete;// not copyable
   public:
     virtual ~Work ();// not inline to avoid -Winline large growth warning
   };

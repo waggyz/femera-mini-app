@@ -5,9 +5,9 @@
 #include <unistd.h> // usleep
 
 // Make something to test.
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
 auto perf = fmr::perf::Meter<fmr::perf::Count,fmr::Perf_float>();
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
 #if 0
 TEST(FmrPerfMeter, StructSize) {
   EXPECT_EQ(sizeof (fmr::perf::Meter), 64);

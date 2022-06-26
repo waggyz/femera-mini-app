@@ -50,16 +50,16 @@ namespace femera {
     T* get_task (Task_type, fmr::Local_int ix=0) noexcept;
   private:
     constexpr
-    T*      this_cast (Data*) noexcept;
+    T* this_cast (Data*) noexcept;
     constexpr
-    T*      this_cast (Work*) noexcept;
+    T* this_cast (Work*) noexcept;
   protected:// Make it clear this class needs to be inherited from.
     Data (Work::Core_ptrs_t) noexcept;// preferred constructor
     Data ()            =default;// early (init) constructor
+    Data (Data&&)      =default;// movable
     Data& operator
-      =  (const Data&) =default;// assignment (copy) operator
-    Data (const Data&) =default;// copy constructor
-    Data (Data&&)      =default;// shallow (pointer) copy constructor
+      =  (const Data&) =delete; // not assignable
+    Data (const Data&) =delete; // not copyable
     ~Data ()           =default;// destructor
 #if 0
   public:

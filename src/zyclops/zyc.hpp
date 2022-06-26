@@ -31,6 +31,12 @@
 #define ZYC_PRAGMA_OMP(x) // pragma omp not supported
 #endif
 
+#ifdef __INTEL_COMPILER
+#else
+#define ZYC_WARN_INLINE_ON _Pragma ("GCC diagnostic warning \"-Winline\"")
+#define ZYC_WARN_INLINE_OFF _Pragma ("GCC diagnostic ignored \"-Winline\"")
+#endif
+
 namespace zyclops {
   using Zindex_int = std::uint_fast32_t;// for indices into one CR matrix
   using Zorder_int = Zindex_int;// same as Zindex_int; name is for semantics

@@ -91,7 +91,7 @@ namespace zyclops { namespace test {
     } }
     return nnz;
   }
-#pragma GCC diagnostic ignored "-Winline"
+ZYC_WARN_INLINE_OFF
   TEST( Zyc, Multidual ){
     EXPECT_EQ( print_dual   (3,3), 27 );
     EXPECT_EQ( print_dual   (3,2), 27-9 );
@@ -101,7 +101,7 @@ namespace zyclops { namespace test {
     EXPECT_EQ( print_dual_t (3,2), 27-9 );
     EXPECT_EQ( print_dual_t (4,4), zyc::upow (3,4));
   }
-#pragma GCC diagnostic warning "-Winline"
+ZYC_WARN_INLINE_ON
   static inline// f = x * y;
   double real_f (double x, double y) { return x * y; }
   static inline

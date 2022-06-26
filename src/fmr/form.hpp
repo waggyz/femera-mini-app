@@ -3,7 +3,6 @@
 
 #include "fmr.hpp"
 
-#include <string>
 // below used in form.ipp
 #include <cctype>
 #include <cmath>      // std::abs()

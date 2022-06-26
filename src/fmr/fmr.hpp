@@ -99,6 +99,12 @@ namespace femera { namespace test {
 #define FMR_PRAGMA_VECTOR(x) // pragma vector ... not supported
 #endif
 
+#ifdef __INTEL_COMPILER
+#else
+#define FMR_WARN_INLINE_ON _Pragma ("GCC diagnostic warning \"-Winline\"")
+#define FMR_WARN_INLINE_OFF _Pragma ("GCC diagnostic ignored \"-Winline\"")
+#endif
+
 #undef FMR_DEBUG
 
 //end FMR_HAS_FMR_HPP
