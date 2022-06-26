@@ -21,7 +21,7 @@ namespace femera { namespace test {
 } }//end femerea::test:: namespace
 
 fmr::Exit_int main (int argc, char** argv) {
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
   return femera::test::mini->exit (femera::test::mini->init (&argc,argv));
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
 }

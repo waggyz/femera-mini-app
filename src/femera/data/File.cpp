@@ -39,7 +39,7 @@ namespace femera {
 #ifdef FMR_BANK_LOCAL
     o = this->proc->get_proc_n (Task_type::Fomp);
 #endif
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
     FMR_PRAGMA_OMP(omp parallel for schedule(static) ordered num_threads(o))
     for (fmr::Local_int i=0; i<o; ++i) {// Make & add thread-local data::Bank
       FMR_PRAGMA_OMP(omp ordered) {     // in order.
@@ -69,7 +69,7 @@ namespace femera {
 #ifdef FMR_HAS_PETSC
     this->add_task (std::move (Data<data::Pets>::new_task (this->get_core())));
 #endif
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
   }
 }// end femera::namespace
 

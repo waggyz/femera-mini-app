@@ -23,11 +23,11 @@ namespace femera { namespace data {
   template <typename T>
   T* Vals::set (const fmr::Data_name_t& id, const size_t n, const T* init_vals)
   noexcept {
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
     return std::is_floating_point <T>::value
       ? this->name_vals [id].set (n, init_vals)
       : this->name_ints [id].set (n, init_vals);
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
   }
   template <typename T> inline
   void Vals::del (const fmr::Data_name_t& id)

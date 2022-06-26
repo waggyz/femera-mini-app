@@ -5,9 +5,9 @@
 auto mini = fmr::new_jobs ();
 
 fmr::Exit_int main (int argc, char** argv) {
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
   return mini->exit (mini->init (&argc,argv));
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
 }
 namespace femera { namespace test { namespace perf {
   inline
@@ -29,20 +29,20 @@ namespace femera { namespace test { namespace perf {
     const auto pids_str
       = fmr::form::si_unit (double (pids_time) / double (n),"s");
     if (ans2 >= ans1) {// should always be always true
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
       mini->data->name_line (mini->data->fmrout, "test perf pids",
         "%s /%s (pid/ref) = %.0fx slower each call",
         pids_str.c_str(), base_str.c_str(), ratio - 1.0);
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
     }
     return ratio;
   }
   TEST( TestPerf, TrivialTest ){
     EXPECT_EQ( 1, 1 );
   }
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
   TEST( TestProcIDPerf, PidsIsSlower ){
     EXPECT_GT( test_proc_id_speed (), 1.0 );
   }
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
 } } }//end femera::test::perf:: namespace

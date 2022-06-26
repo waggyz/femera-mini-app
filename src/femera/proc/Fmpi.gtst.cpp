@@ -10,9 +10,9 @@ fmr::Exit_int main (int argc, char** argv) {
 auto test_mpi = femera::proc::Main ();
 
 TEST( Fmpi, Init ){// Initialize Fmpi with MPI already init by early_main(..)
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
   EXPECT_EQ( test_mpi.init (nullptr,nullptr), 0 );
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
   test_mpi.proc = &test_mpi;
 }
 TEST( Fmpi, TaskName ){

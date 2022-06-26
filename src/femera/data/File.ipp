@@ -70,9 +70,9 @@ namespace femera {
 #else
     FILE* file = nullptr;
     if (flist.size () > 0 && this->proc != nullptr) {
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
       file = flist [this->proc->get_proc_id () % flist.size()];
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
     }
     const auto w = this->file_line_sz [file];
     const auto h = this->line_name_sz [file];

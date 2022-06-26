@@ -5,10 +5,10 @@
 auto jobs = femera::task::Jobs
  ( femera::Work::Core_ptrs_t (nullptr,nullptr,nullptr) );
 #else
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
   auto jobs = femera::task::Jobs ();
 //  auto jobs = femera::new_jobs ();
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
 #endif
 
 int   dummy_argc = 1;
@@ -19,9 +19,9 @@ TEST( Jobs, TaskAbrv ){
   EXPECT_EQ( jobs.get_abrv (), "jobs" );
 }
 TEST( Jobs, CoreNames ){
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
   EXPECT_EQ( jobs.init (&dummy_argc,&dummy_argv[0]), 0);
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
   EXPECT_EQ( jobs.proc->get_abrv (), "main" );
   EXPECT_EQ( jobs.data->get_abrv (), "file" );
   EXPECT_EQ( jobs.test->get_abrv (), "beds" );

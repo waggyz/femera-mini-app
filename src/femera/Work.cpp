@@ -93,7 +93,7 @@ namespace femera {
           }
           const auto label = femera::form::text_line (250, "%4s %4s init",
             W->get_base_abrv ().c_str(), W->abrv.c_str());
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
           if (W->data->did_logs_init ()) {
             W->data->name_line (W->data->fmrlog, label, text);
           } else {
@@ -101,7 +101,7 @@ namespace femera {
             if (W->proc->is_main ()) {
               form::name_line (::stdout, 14, 80, label, text);
           } } }
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
         }
         if (Werr > 0) {
           del_list.push (ix);// Queue task for removal if init failed, and...
@@ -121,9 +121,9 @@ namespace femera {
   fmr::Exit_int Work::exit_list ()
   noexcept { fmr::Exit_int err =0;
     if (this->proc != nullptr && this->did_work_init == true) {
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
       this->is_work_main = this->proc->is_main ();
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
     }
     this->did_work_init = false;
     while (! this->task_list.empty ()) {
@@ -158,14 +158,14 @@ namespace femera {
           W->get_base_abrv ().c_str(), W->get_abrv().c_str());
         const auto text = busy+" /"+tot+" "+W->name
           +((W->version=="") ? "":" "+W->version);
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
         if (W->data == nullptr) {
           if (this->is_work_main) {
             form::name_line (::stdout, 14, 80, label, text);
         } } else {
           W->data->name_line (W->data->fmrlog, label, text);
         }
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
       }
       this->task_list.pop_back ();
     }
@@ -174,10 +174,10 @@ namespace femera {
   fmr::Exit_int Work::exit_tree ()
   noexcept { fmr::Exit_int err =0;
     if (this->proc != nullptr && this->did_work_init == true) {
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
       this->is_work_main = this->proc->is_main ();
     }
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
     this->did_work_init = false;
     if (! this->task_list.empty ()) {
       Work::Task_path_t branch ={};
@@ -210,14 +210,14 @@ namespace femera {
           W->get_base_abrv ().c_str(), W->get_abrv().c_str());
         const auto text = busy+" /"+tot+" "+W->name
           +((W->version=="") ? "":" "+W->version);
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
         if (W->data == nullptr) {
           if (this->is_work_main) {
             form::name_line (::stdout, 14, 80, label, text);
           } } else {
           W->data->name_line (W->data->fmrlog, label, text);
         }
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
       }
       if (! branch.empty ()) {
         branch.pop_back ();

@@ -44,10 +44,10 @@ namespace femera { namespace test {
     std::valarray <double> val (std::move(vec.data ()), sz);//likely this copies
 #endif
     for (fmr::Local_int i =0; i<sz; ++i) { sum += val [i]; }
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
     mini->data->name_line (mini->data->fmrout, "vals from vec1",
       "%g (garbage)", sum);
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
     return sum;
     /* stackoverflow.com/questions/13634504/assign-a-stdvector-to-a-stdvalarray
     //
@@ -69,10 +69,10 @@ namespace femera { namespace test {
     //
     double sum = 0.0;
     for (fmr::Local_int i =0; i<sz; ++i) { sum += vals[0] [i]; }
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
     mini->data->name_line (mini->data->fmrout, "vals from vec2",
       "%g (garbage)", sum);
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
     return sum;
   }
   inline
@@ -98,13 +98,13 @@ namespace femera { namespace test {
     sum = (sum < 0) ? 0.0 : sum;
     sum = (sum > 0) ? 0.0 : sum;
 #endif
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
     mini->data->name_line (mini->data->fmrout, "zero vals perf",
       "%s, %s in %s (check %g == 0)",
       fmr::form::si_unit (speed, "B/s").c_str(),
       fmr::form::si_unit (perf.get_byte_n (), "B").c_str(),
       fmr::form::si_unit (time, "s").c_str(), sum);
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
     return double (speed);
   }
 #define FMR_TEST_LOCAL_VEC0
@@ -141,13 +141,13 @@ namespace femera { namespace test {
     sum = (sum < 0) ? 0.0 : sum;
     sum = (sum > 0) ? 0.0 : sum;
 #endif
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
     mini->data->name_line (mini->data->fmrout, "vec2 vals perf",
       "%s, %s in %s (check %g ?= 0)",
       fmr::form::si_unit (speed, "B/s").c_str(),
       fmr::form::si_unit (perf.get_byte_n (), "B").c_str(),
       fmr::form::si_unit (time, "s").c_str(), sum);
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
     return double (speed);
   }
   TEST(Mini, IsOK) {
@@ -238,11 +238,11 @@ namespace femera { namespace test {
     EXPECT_GT( ( vval[0][999999] > 0.0) ? vval[0][999999] : 1, 0);
 #endif
   }
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
   TEST( Valarray, ZeroedFasterOrNearlyUninit ) {// not a reliable test
     EXPECT_NE( zeroed_valarray_speed (), 0.90 * uninit_valarray_speed ());
   }
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
 #if 0
   TEST(MiniVals, Add) {
     EXPECT_EQ( static_cast<femera::data::Bank>
@@ -252,7 +252,7 @@ namespace femera { namespace test {
 } }//end femerea::test:: namespace
 
 fmr::Exit_int main (int argc, char** argv) {
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
   return femera::test::mini->exit (femera::test::mini->init (&argc,argv));
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
 }

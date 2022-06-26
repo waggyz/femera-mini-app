@@ -17,7 +17,7 @@ namespace femera {
     const auto core_n = node_n * proc::Node::get_core_n ();
     const auto numa_n = node_n * proc::Node::get_numa_n ();
     const auto numa_all = node_n * numa_n;
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
     if (true) {//TODO detail && this->test->do_test
       const auto str = get_base_abrv ()+" "+ abrv +" ";
       this->log_init_info ();// pulled out method to prevent inline fail warning
@@ -61,12 +61,12 @@ namespace femera {
         "NOTE Femera uses more threads (%u) than physical cores (%u).",
         all_n, core_n);
     }
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
   }
   void test::Self::log_init_info () {// pulled out of task_init (inline fail)
     const auto str = get_base_abrv ()+" "+ abrv +" ";
     const auto cppver = __cplusplus;
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
     this->data->name_line (data->fmrlog, str +" ver",
       std::string (MAKESTR(FMR_VERSION)));
 #if 0
@@ -79,6 +79,6 @@ namespace femera {
 #endif
     this->data->name_line (data->fmrlog, str +"zord",
       "%4u maximum hypercomplex order", zyclops::max_zorder);
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
   }
 }//end femera namespace

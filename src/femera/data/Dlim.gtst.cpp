@@ -6,13 +6,13 @@
 auto mini = fmr::new_jobs ();
 
 fmr::Exit_int main (int argc, char** argv) {
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
   return mini->exit (mini->init (&argc, argv));
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
 }
 namespace femera { namespace test {
 
-#pragma GCC diagnostic ignored "-Winline"
+FMR_WARN_INLINE_OFF
   const auto csv_123 = femera::data::Dlim::data_line<int,uint,char> (1,2,3);
   const auto csv_456 = femera::data::Dlim::data_line (4,5,6);
   const auto csv_789 = femera::data::Dlim::data_line<int> (7,8,9);
@@ -30,7 +30,7 @@ namespace femera { namespace test {
   const auto csv_fp12 = femera::data::Dlim::data_line (float(1),double(2));
   const auto csv_ff12
     = femera::data::Dlim::data_line<float,float> (float(1),2);
-#pragma GCC diagnostic warning "-Winline"
+FMR_WARN_INLINE_ON
 
   TEST( Dlim, TrivialTest)  { EXPECT_EQ( 0, 0 ); }
   TEST( Dlim, CSV123)       { EXPECT_EQ( csv_123,       "1,2,3"); }
