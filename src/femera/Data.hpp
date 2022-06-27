@@ -83,31 +83,40 @@ namespace femera {
     ret::??? post (Data_name_t, ...);// post-process
     //
     // File operations
-    ret::?  add_file (File_name_t);
+    ret::?  add_file (File_name_t, Data::Access = Access:Modify);
     ret::? scan_file (File_name_t);
     //
     // I/O operations
-    //std::string log (?)// replace with info (..), below?
-    std::string info (fmr::Dim_int d,...)// details: send when d <= Logs::log_d
-    Vals_t      read (Data_name_t);// in Vals?
-    Vals_t      sync (Data_name_t);// in Vals?
-    ret::?      save (Data_name_t, ...);// Vals_t =nullptr);// in Vals?
-    ret::?      send (Data_name_t, ...);// Vals_t =nullptr);// in Vals?
-    ret::?      view (Data_name_t, ...);// visualize
+    //?std::string log (?)// replace with info (..), below?
+    //?std::string info (fmr::Dim_int d,...)// details: send when d <= Logs::log_d
+    //
+    // predefined Data_name_t (std::string) file names
+    Data_name_t fmrNEWlog ="fmr:log";// default ::stdout from main thread only
+    Data_name_t fmrNEWout ="fmr:out";// default ::stdout from all threads
+    Data_name_t fmrNEWerr ="fmr:err";// default ::stderr from all threads
+    Data_name_t fmrNEWin  ="fmr:inp":// default ::stdin  from all threads
+    //
+    // send (fmrlog, 2,(std::string) form, ...);// log message (importance 2)
+    //
+    ret::? send (Data_name_t, ...);// Vals_t =nullptr);// in Vals?
+    ret::? read (Data_name_t);// in Vals?
+    ret::? sync (Data_name_t);// in Vals?
+    ret::? save (Data_name_t, ...);// Vals_t =nullptr);// in Vals?
+    ret::? view (Data_name_t, ...);// visualize
 #endif
 #if 0
   public:
-    //TODO ? File operations are spawned from the local OpenMP master thread, and
-    //     ? file methods use vector types for shared-memory access by proc_id,
-    // e.g., local_x = vec_x [proc_id % vec_x.size ()];
-    // or better, contiguous blocks of vals for each proc_id
+    // ? File operations are spawned from the local OpenMP master thread, and
+    // ? file methods use vector types for shared-memory access by proc_id,
+    // ? e.g., local_x = vec_x [proc_id % vec_x.size ()];
+    // ? or better, contiguous blocks of vals for each proc_id
     //
     using Size_list_t = std::vector <fmr::Perf_int>;// bytes in or out
     using Vals_list_t = std::vector <Vals*>;
     //using Form_list_t = std::vector <std::valarray<Bulk_int>>;
     //-------------------------------------------------------------------------
 #endif
-    //TODO Path_list_t can be a vector to disambiguate it from Sims_list_t?
+    // Path_list_t can be a vector to disambiguate it from Sims_list_t?
     //NOTE An empty deque/vector in an argument means all sims or all files.
     // Path_list_t ({""}); means the current working directory in a path method.
     // Text files in Path_list_t may contain a list of model files.
