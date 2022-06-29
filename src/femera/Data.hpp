@@ -14,12 +14,12 @@ namespace fmr {//TODO Move to fmr.h ?
    * and maps to initial (input) sources and final (output) data destinations.
    * The base name & Vals_type (or vals name) together identify a data item
    * (and a data format handler if appropriate) for its source or destination.
-   */
+   *//*
   // built-in Data_path_t (std::string)
   Data_path_t log ="fmr:log";// fmr:log default ::stdout from main thread only
   Data_path_t out ="fmr:out";// fmr:out default ::stdout from all threads
   Data_path_t err ="fmr:err";// fmr:err default ::stderr from all threads
-  Data_path_t in  ="fmr:in" :// fmr:in  default ::stdin  from all threads
+  Data_path_t in  ="fmr:in" ;// fmr:in  default ::stdin  from all threads
   //
   Data::send (fmr::Data_path_t, fmr::Vals_type/Vals_name_t, std::string label,
     std::string  form, ...)
