@@ -20,12 +20,12 @@ namespace femera { namespace data {
   class File final: public Data <File> {// private: friend class Data;
   public:
     File_ptrs_t fmrlog = {};// main proc to stdout set by Logs::task_init (..)
-    File_ptrs_t fmrout = {::stdout};
+    File_ptrs_t fmrout = {::stdout};//TODO Replae these w/ fmr:log, fmr:out,...
     File_ptrs_t fmrerr = {::stderr};
     File_ptrs_t fmrall = {::stdout};
   private:
 #if 1
-    // TODO Replace below with unordered_map <Data_name_t, data::Page_dims>
+    // TODO Replace below with unordered_map <Vals_name_t, data::Page_dims>
     //      or                 unordered_map <Vals_type_t, data::Page_dims>
     //      or std::vector <data::Page_dims> indexed by Vals_type_t.
     std::unordered_map <FILE*, fmr::Line_size_int> file_line_sz
@@ -78,7 +78,7 @@ namespace femera { namespace data {
 #endif
 #if 0
   private:
-    Path_list_t inp_file_list ={};//TODO initialized from command line args
+    Path_list_t inp_file_list ={};//TODO initialize these from command line args
     Path_list_t out_file_list ={};//               "
     Path_list_t log_file_list ={};
     Path_list_t err_file_list ={};

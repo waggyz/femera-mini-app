@@ -18,8 +18,8 @@ namespace femera { namespace data {
 #else
     using Bulk_ints = Bulk <alignof (std::size_t)>;
 #endif
-    using map_vals_t = std::unordered_map <fmr::Data_name_t, Bulk_vals>;
-    using map_ints_t = std::unordered_map <fmr::Data_name_t, Bulk_ints>;
+    using map_vals_t = std::unordered_map <fmr::Vals_name_t, Bulk_vals>;
+    using map_ints_t = std::unordered_map <fmr::Vals_name_t, Bulk_ints>;
   private:
     map_vals_t name_vals = {};// SSE, __m256d,... alignment
     map_ints_t name_ints = {};// default is size_t alignment
@@ -27,23 +27,23 @@ namespace femera { namespace data {
   public:
     //TODO handle SSE, AVX, AVX512 types
     template <typename T>
-    T* set (const fmr::Data_name_t& id, size_t, T init_val = T(0))
+    T* set (const fmr::Vals_name_t& id, size_t, T init_val = T(0))
     noexcept;
     template <typename T>// T& is ambiguous as an argument here
-    T* set (const fmr::Data_name_t& id, size_t, const T* init_vals)
+    T* set (const fmr::Vals_name_t& id, size_t, const T* init_vals)
     noexcept;
     template <typename I>
-    I* get (const fmr::Data_name_t& id, size_t start=0, typename
+    I* get (const fmr::Vals_name_t& id, size_t start=0, typename
       std::enable_if <std::is_integral <I>::value>::type* = nullptr)
     noexcept;
     template <typename V>
-    V* get (const fmr::Data_name_t& id, size_t start=0, typename
+    V* get (const fmr::Vals_name_t& id, size_t start=0, typename
       std::enable_if <std::is_floating_point <V>::value>::type* = nullptr)
     noexcept;
     //TODO get_fast (id), get_safe (id), get_cast (id), get_copy (id, T* copy)
     //     take (id, & dest), give (id, & src)
     template <typename T>
-    void del (const fmr::Data_name_t& id)
+    void del (const fmr::Vals_name_t& id)
     noexcept;
     fmr::Local_int del_all ()// clears int and float maps; returns # deleted
     noexcept;

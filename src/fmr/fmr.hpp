@@ -40,7 +40,7 @@ namespace fmr {
   //
   using Line_size_int = uint_fast16_t;//TODO Remove.
   //
-  using Data_name_t = std::string;//WAS Data_id
+  using Vals_name_t = std::string;//WAS Data_id
   using File_name_t = std::string;
 }//end fmr:: namespace
 namespace femera { namespace test {

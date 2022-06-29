@@ -8,8 +8,27 @@
 #include <cstdio>     // std::printf
 #endif
 
+namespace fmr {//TODO Move to fmr.h ?
+   using Data_path_t = std::string;/*
+   * Data_path_t: sim, part, file, or other data collection path and (base) name
+   * and maps to initial (input) sources and final (output) data destinations.
+   * The base name & Vals_type (or vals name) together identify a data item
+   * (and a data format handler if appropriate) for its source or destination.
+   */
+  // built-in Data_path_t (std::string)
+  Data_path_t log ="fmr:log";// fmr:log default ::stdout from main thread only
+  Data_path_t out ="fmr:out";// fmr:out default ::stdout from all threads
+  Data_path_t err ="fmr:err";// fmr:err default ::stderr from all threads
+  Data_path_t in  ="fmr:in" :// fmr:in  default ::stdin  from all threads
+  //
+  Data::send (fmr::Data_path_t, fmr::Vals_type/Vals_name_t, std::string label,
+    std::string  form, ...)
+  data->send (fmr:log         , fmr::Vals_type::Term_line, "this  log  msg",
+    "x=%u", ...)
+  */
+}
 namespace femera { namespace data {
-  using File_ptrs_t = std::vector <FILE*>;//TODO Replace with File_name_t ?
+  using File_ptrs_t = std::vector <FILE*>;//TODO Replace with ? File_name_t
 #if 0
   struct Page_dims {//TODO regular blocked data, local (partitioned) data
     // for file and stream (e.g., stdout) reading and saving
@@ -70,17 +89,17 @@ namespace femera {
   private:
     std::unordered_map <std::string,FILE*> open_file_list ={};
   public:
-    using Data_name_t = std:vector<Name_t>;
+    using Vals_name_t = std:vector<Name_t>;
     using File_name_t = std:vector<Name_t>;
     //
     // Memory operations
-    ret::???  add (Data_name_t, ...);// Vals_t vals =nullptr);// in Vals?
-    Vals_t    get (Data_name_t);// in Vals?
-    ret::???  clr (Data_name_t);// in Vals?
-    ret::???  del (Data_name_t);// in Vals?
-    ret::??? size or init (Data_name_t, ...);// Vals_t size =nullptr);// in Vals?
-    Bank_t   form or pack or bulk (Data_name_t, ...);// in Vals?
-    ret::??? post (Data_name_t, ...);// post-process
+    ret::???  add (Vals_name_t, ...);// Vals_t vals =nullptr);// in Vals?
+    Vals_t    get (Vals_name_t);// in Vals?
+    ret::???  clr (Vals_name_t);// in Vals?
+    ret::???  ??? del (Vals_name_t);// in Vals? need both clr(..) & del(..) ?
+    ret::??? size or init (Vals_name_t, ...);// Vals_t size =nullptr);// in Vals?
+    Bank_t   form or pack or bulk (Vals_name_t, ...);// in Vals?
+    ret::??? post (Vals_name_t, ...);// post-process
     //
     // File operations
     ret::?  add_file (File_name_t, Data::Access = Access:Modify);
@@ -90,19 +109,13 @@ namespace femera {
     //?std::string log (?)// replace with info (..), below?
     //?std::string info (fmr::Dim_int d,...)// details: send when d <= Logs::log_d
     //
-    // predefined Data_name_t (std::string) file names
-    Data_name_t fmrNEWlog ="fmr:log";// default ::stdout from main thread only
-    Data_name_t fmrNEWout ="fmr:out";// default ::stdout from all threads
-    Data_name_t fmrNEWerr ="fmr:err";// default ::stderr from all threads
-    Data_name_t fmrNEWin  ="fmr:inp":// default ::stdin  from all threads
-    //
     // send (fmrlog, 2,(std::string) form, ...);// log message (importance 2)
     //
-    ret::? send (Data_name_t, ...);// Vals_t =nullptr);// in Vals?
-    ret::? read (Data_name_t);// in Vals?
-    ret::? sync (Data_name_t);// in Vals?
-    ret::? save (Data_name_t, ...);// Vals_t =nullptr);// in Vals?
-    ret::? view (Data_name_t, ...);// visualize
+    ret::? send (Vals_name_t, ...);// Vals_t =nullptr);// in Vals?
+    ret::? read (Vals_name_t);// in Vals?
+    ret::? sync (Vals_name_t);// in Vals?
+    ret::? save (Vals_name_t, ...);// Vals_t =nullptr);// in Vals?
+    ret::? view (Vals_name_t, ...);// visualize
 #endif
 #if 0
   public:
