@@ -6,7 +6,7 @@
 #if 0
 //TODO Make variadic read/save/send methods in File to package heterogenous
 //     data into fmr::Vals structures, then call a specialized non-variadic
-//     member function of Text or Dlim to handle that structure used in File.ipp
+//     member function of Text or Dlim to handle that structure in File.ipp
 //     so the next two can remain in File.cpp.
 //#include "Text.hpp"
 //#include "Dlim.hpp"

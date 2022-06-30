@@ -19,7 +19,7 @@ namespace femera { namespace data {
   class alignas (A) Bulk {//NOTE alignas does not always work, so...
   private:                //
     Bulk_t         bulk;  // ...bulk is over-allocated and aligned manually.
-    // Defaults are for Bulk_int values which can be converted to strings.
+    // Defaults are for Bulk_int values (which can be converted to strings).
     std::size_t    cval_n       = 0;// # values <= bulk.capacity() / sizeof(T)
     zyc::Zomplex   zplx         = std::is_signed <fmr::Bulk_int>::value
       ?                           zyc::Integer : zyc::Natural;

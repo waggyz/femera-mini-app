@@ -12,8 +12,9 @@ namespace fmr {//TODO Move to fmr.h ?
    using Data_path_t = std::string;/*
    * Data_path_t: sim, part, file, or other data collection path and (base) name
    * and maps to initial (input) sources and final (output) data destinations.
-   * The base name & Vals_type (or vals name) together identify a data item
-   * (and a data format handler if appropriate) for its source or destination.
+   * The base name, Vals_type (or vals name), and part(ition) number (or some
+   * other identifying integer) together identify a data item (and a data
+   * format handler if appropriate) for its source and destination(s).
    *//*
   // built-in Data_path_t (std::string)
   Data_path_t log ="fmr:log";// fmr:log default ::stdout from main thread only
@@ -21,10 +22,10 @@ namespace fmr {//TODO Move to fmr.h ?
   Data_path_t err ="fmr:err";// fmr:err default ::stderr from all threads
   Data_path_t in  ="fmr:in" ;// fmr:in  default ::stdin  from all threads
   //
-  Data::send (fmr::Data_path_t, fmr::Vals_type/Vals_name_t, std::string label,
-    std::string  form, ...)
-  data->send (fmr:log         , fmr::Vals_type::Term_line, "this  log  msg",
-    "x=%u", ...)
+  Data::send (fmr::Data_path_t, fmr::Vals_type/Vals_name_t, Local_int thread_id,
+    std::string lab1, std::string lab2, std::string lab3, std::string form, ...)
+  data->send (fmr:log, fmr::Vals_type::Logs_line, this->proc->get_proc_id (),
+    "this", "log", "msg", "i: %u, j: %u", uint (i), uint (j));
   */
 }
 namespace femera { namespace data {
