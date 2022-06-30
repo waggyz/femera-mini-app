@@ -7,13 +7,6 @@
 #endif
 
 namespace femera {
-#if 0
-  inline
-  data::Form_dims::Form_dims (fmr::Local_int l, fmr::Local_int p,
-    fmr::Local_int i, fmr::Dim_int m, fmr::Local_int h)
-    : page_size (p), line_size (l), item_size (i), head_size(h), name_size(m) {
-  }
-#endif
   template <typename T> inline
   Data<T>::Data (const Work::Core_ptrs_t core)
   noexcept : Work (core) {
@@ -46,7 +39,7 @@ namespace femera {
       Errs::print (this->get_abrv ()+" task_init"); }
     if (err > 0) {return this->exit (err); }
     err = init_list (argc, argv);//                    ...then init child tasks.
-#if 0
+#ifdef FMR_DEBUG
     const auto n = this->get_task_n ();
     if (n>0) {
       auto msg = std::string("data init mods ");

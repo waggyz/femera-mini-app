@@ -1,9 +1,7 @@
 #ifndef FEMERA_DATA_LOGS_HPP
 #define FEMERA_DATA_LOGS_HPP
 
-#include "../core.h"
-//#include "../Data.hpp"
-//#include "../../fmr/form.hpp"
+#include "File.hpp"
 
 namespace femera { namespace data {
   class Logs;// Derive a CRTP concrete class from Data.//TODO Change to Dlim?
