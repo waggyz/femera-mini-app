@@ -369,6 +369,7 @@ PRFOUTS:= $(patsubst src/%.perf.cpp,$(BUILD_CPU)/%.perf.out,$(FMRPERF))
 
 # Real files, but considered always out of date.
 .PHONY: build/.md5 # src/docs/src.dot
+.PHONY: code-stats $(SRC_STAT_FILE)
 
 # libmini libfull
 # pre-build-tests post-build-tests post-install-tests
@@ -554,17 +555,6 @@ ifneq ($(HOST_MD5),$(REPO_MD5))
 	$(info $(SPCS) as modified by <$(BUILT_BY_EMAIL)>)
 endif
 	$(info $(E_G_) fmrexec auto examples/cube.fmr)
-
-$(SRC_STAT_FILE): | build/$(CPUMODEL)/
-	touch "$(SRC_STAT_FILE)"; \
-	if ! grep "$(FEMERA_VERSION)" "$(SRC_STAT_FILE)" | grep -q "$(HOSTNAME)"; \
-	then echo "$(BUILD_DATE)",'"'$(FEMERA_VERSION)'"',\
-	"`cat build/src-code-stats.csv`",\
-	"`tools/elapsed-time.sh $(BUILD_SECS)`",'"'$(CXX) $(CXX_VERSION)'"',\
-	'"'$(HOSTNAME)'"','"'$(CPUMODEL)'"'\
-	>> "$(SRC_STAT_FILE)"; fi
-	-tools/plot_code_stats.py 2>/dev/null
-	$(call timestamp,$@,$<)
 
 code-stats: $(SRC_STAT_FILE)
 	tools/code-stats.sh
@@ -1058,6 +1048,17 @@ ifneq ("$(NOSA_SEE)","")
 	  | tr '\n' ' ' | tr -s ' ' | fold -s -w 80
 	printf "$(NORM_COLOR)\n";
 endif
+
+$(SRC_STAT_FILE): | build/$(CPUMODEL)/
+	touch "$(SRC_STAT_FILE)"; \
+	if ! grep "$(FEMERA_VERSION)" "$(SRC_STAT_FILE)" | grep -q "$(HOSTNAME)"; \
+	then echo "$(BUILD_DATE)",'"'$(FEMERA_VERSION)'"',\
+	"`cat build/src-code-stats.csv`",\
+	"`tools/elapsed-time.sh $(BUILD_SECS)`",'"'$(CXX) $(CXX_VERSION)'"',\
+	'"'$(HOSTNAME)'"','"'$(CPUMODEL)'"'\
+	>> "$(SRC_STAT_FILE)"; fi
+	-tools/plot_code_stats.py 2>/dev/null
+	$(call timestamp,$@,)
 
 build/test-files.txt: tools/list-test-files.sh build/.md5
 	-tools/list-test-files.sh > $@
