@@ -14,13 +14,13 @@ namespace femera {
   //
   proc::Fmpi::Fmpi (const femera::Work::Core_ptrs_t W)
   noexcept : Proc (W), fmpi_required {int (MPI_THREAD_SERIALIZED) } {
-    this->name ="MPI";
-    this->abrv ="mpi";
-    this->version = std::to_string (MPI_VERSION)
+    this->name      ="MPI";
+    this->abrv      ="mpi";
+    this->version   = std::to_string (MPI_VERSION)
       +"."+std::to_string (MPI_SUBVERSION);
     this->task_type = task_cast (Task_type::Fmpi);
-    this->info_d = 3;
-    this->team_id = proc::Team_t (MPI_COMM_WORLD);
+    this->info_d    = 3;
+    this->team_id   = proc::Team_t (MPI_COMM_WORLD);
   }
   bool proc::Fmpi::did_mpi_init ()
   noexcept {

@@ -7,7 +7,14 @@
 //TODO Make variadic read/save/send methods in File to package heterogenous
 //     data into fmr::Vals structures, then call a specialized non-variadic
 //     member function of Text or Dlim to handle that structure in File.ipp
-//     so the next two can remain in File.cpp.
+//     so the next two can remain in File.cpp./*
+  Data::send (fmr::Data_path_t, fmr::Vals_type/Vals_name_t, Local_int thread_id,
+    std::string lab1, std::string lab2, std::string lab3, std::string form, ...)
+  data->send (fmr:log, fmr::Vals_type::Logs_line, this->proc->get_proc_id (),
+    "this", "log", "msg", "i: %u, j: %u", uint (i), uint (j));
+  data->send (fmr:log,//TODO can be reduced to this for fmr:log ?
+    "this", "log", "msg", "i: %u, j: %u", uint (i), uint (j));
+  */
 //#include "Text.hpp"
 //#include "Dlim.hpp"
 #endif

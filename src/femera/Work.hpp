@@ -70,12 +70,12 @@ namespace femera {
     data::File* data = nullptr;       // data, logging, and file handling
     test::Beds* test = nullptr;       // correctness and performance testing
   private:// variables
-    using Task_list_t = std::deque <Work_spt>;
+    using Task_stck_t = std::deque <Work_spt>;
   protected:// variables
     std::string       name ="unknown work";
     std::string       abrv ="work";
     std::string    version ="";
-    Task_list_t  task_list ={};
+    Task_stck_t  task_list ={};
     Work_type    task_type = task_cast (Base_type::Work);
     fmr::Dim_int info_d    = 1;
 #if 0
@@ -97,7 +97,7 @@ namespace femera {
     std::string get_abrv    () noexcept;
     std::string get_version () noexcept;
     Core_ptrs_t get_core    () noexcept;
-    // task list handling
+    // task stack handling
     fmr::Local_int get_task_n () noexcept;
     fmr::Local_int add_task   (Work_spt) noexcept;// returns task number added
     fmr::Local_int del_task   (fmr::Local_int ix) noexcept;// returns task_n
