@@ -18,7 +18,7 @@ namespace fmr {
   //
   using    Dim_int = uint_fast8_t  ;// space dim., hier. depth, poly. order,...
   using   Enum_int = int           ;// default enum native type
-//  using   Elid_int = uint32_t      ;//TODO remove
+//  using   Elid_int = uint32_t      ;//TODO remove ?
   using  Align_int = uint_fast16_t ;
   using  Local_int = uint32_t      ;
   using Global_int = uint64_t      ;// element ID, node ID
