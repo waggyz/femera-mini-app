@@ -8,14 +8,6 @@
 
 namespace femera {
   inline
-  void proc::Node::task_init (int*, char**) {
-#if 0
-    this->set_auto ();                       //TODO move to proc::Root?
-    //  const auto n = fmr::proc::get_node_n () * fmr::proc::get_node_core_n ()
-    //    / this->all_proc_n ();
-#endif
-  }
-  inline
   fmr::Local_int proc::Node::get_core_n () {// physical cores
     return fmr::proc::get_node_core_n ();
   }

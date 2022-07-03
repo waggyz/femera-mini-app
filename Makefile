@@ -913,15 +913,17 @@ $(BUILD_CPU)/mini: export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/mini: export PATH:=$(shell pwd)/$(BUILD_CPU):$(PATH)
 $(BUILD_CPU)/mini: src/femera/mini.cpp src/femera/femera.hpp $(LIBFEMERA)
 	$(call timestamp,$@,$<)
-	$(call col2cxx,$(CXX_),$(CXX) $(notdir $<) .. $(notdir $@),$(shell \
-	if [ -f "$(@)" ]; then ls -sh $(@) | cut -d " " -f1; fi)B)
 ifeq ($(ENABLE_GCC_PROFILE),ON)
 	-$(CXX) $(CXXMINI) $< $(LDFLAGS) -lfemera $(LDLIBS) -o $@.pro
 	fmrexec tdd:$(@).pro >/dev/null
+	-$(CXX) $(filter-out -fprofile-generate,$(CXXMINI)) -fprofile-use \
+  $< $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
-	-$(CXX) $(filter-out $(CXXMINI),-fprofile-generate) -fprofile-use \
+	-$(CXX) $(filter-out -fprofile-generate,$(CXXMINI)) \
   $< $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 endif
+	$(call col2cxx,$(CXX_),$(CXX) $(notdir $<) .. $(notdir $@),$(shell \
+	if [ -f "$(@)" ]; then ls -sh $(@) | cut -d " " -f1; fi)B)
 	$(call label_test,$(PASS),$(FAIL),fmrexec tdd:$(@),$(@))
 
 $(BUILD_CPU)/mini.valgrind.log: export PATH:=$(shell pwd)/$(BUILD_CPU):$(PATH)

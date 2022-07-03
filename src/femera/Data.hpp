@@ -53,8 +53,8 @@ namespace femera {
     T* get_task (Task_type, fmr::Local_int ix=0) noexcept;
   private:
 #if 0
-    T* get_task (fmr::Data_name_t, fmr::Vals_type,   fmr::Local_int ix=0);
-    T* get_task (fmr::Data_name_t, fmr::Vals_name_t, fmr::Local_int ix=0);
+    T* get_task (fmr::Data_name_t, fmr::Vals_type,   fmr::Local_int ix=0) noexcept;
+    T* get_task (fmr::Data_name_t, fmr::Vals_name_t, fmr::Local_int ix=0) noexcept;
 #endif
     constexpr
     T* this_cast (Data*) noexcept;

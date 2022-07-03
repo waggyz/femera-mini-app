@@ -118,7 +118,7 @@ namespace femera {
     Work* get_work (const Task_path_t&) noexcept;
   protected:// Built-ins called only by inherited classes ---------------------
     Work (Work::Core_ptrs_t) noexcept;// preferred constructor
-    Work ()            =default;// constructor for early parts of initialization
+    Work () noexcept;// default constructor for early parts of initialization
     Work (Work&&);              // movable
     Work& operator
       =  (const Work&) =delete; // not asignable

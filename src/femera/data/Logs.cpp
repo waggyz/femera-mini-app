@@ -6,7 +6,7 @@
 #endif
 
 namespace femera {
-  void data::Logs::task_init (int*, char**) {
+  void data::Logs::task_init (int*, char**) {//TODO opts -v<int>, -t<int>,...
     // set default logger (data->fmrlog) to stdout only from the main thread (0)
     fmr::Local_int n = 0;
     if (this->proc->is_main ()) {

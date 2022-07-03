@@ -8,6 +8,7 @@
 #endif
 
 namespace femera {
+  Work::Work () noexcept =default;
   Work::Work (const Work::Core_ptrs_t core) noexcept {
     std::tie (this->proc, this->data, this->test) = core;
   }
