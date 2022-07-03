@@ -4,8 +4,13 @@
 #include "File.hpp"
 
 namespace femera { namespace data {
-  class Logs;// Derive a CRTP concrete class from Data.//TODO Change to Dlim?
+  class Logs;// Derive a CRTP concrete class from Data.
   class Logs final: public Data <Logs> {// private: friend class Data;
+  private:
+    fmr::Dim_int verb_d = 5;//TODO set by command line option -v<int>
+  public:
+    fmr::Dim_int set_verb (fmr::Dim_int) noexcept;
+    bool do_log (fmr::Dim_int) noexcept;
   public:
     void task_init (int* argc, char** argv);
     void task_exit ();

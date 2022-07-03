@@ -26,7 +26,7 @@ namespace fmr {//TODO Move to fmr.h ?
   */
 }//end fmr:: namespace
 namespace femera { namespace data {
-  using File_ptrs_t = std::vector <FILE*>;//TODO Replace with Data_name_t
+  using File_ptrs_t = std::vector <::FILE*>;//TODO Replace with Data_name_t
 } }//end femera::data:: namespace
 namespace femera {
   template <typename T>

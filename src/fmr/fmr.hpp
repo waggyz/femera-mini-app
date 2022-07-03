@@ -47,12 +47,12 @@ namespace femera { namespace test {
   int early_main (int* argc, char** argv);
 } }// end femera::test:: namespace
 
-#if 0
-//TODO FMR_VERBMAX, FMR_TIMELVL are not used yet.
 #ifndef FMR_VERBMAX
 #define FMR_VERBMAX 7
 #endif
 
+#if 0
+//TODO FMR_TIMELVL not used yet.
 #ifndef FMR_TIMELVL
 #define FMR_TIMELVL FMR_VERBMAX
 #endif
