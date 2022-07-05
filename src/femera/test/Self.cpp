@@ -15,6 +15,7 @@ namespace femera {
   void test::Self::task_init (int*, char**) {// Test for initialization errors.
     if (true) {//TODO detail && this->test->do_test
       this->log_init_info ();// pulled out method to prevent inline fail warning
+      //TODO call proc->chck (Task_type::Node);
     }
     return;
   }

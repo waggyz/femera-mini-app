@@ -27,7 +27,9 @@ namespace femera {
     //  const auto n = fmr::proc::get_node_n () * fmr::proc::get_node_core_n ()
     //    / this->all_proc_n ();
 #endif
+  }
 #if 0
+  fmr::Local_int proc::Node::chck () {//TODO interface in File and Proc classes
     const auto all_n = 4;//this->proc->all_proc_n ();
 //    const auto node_n = this->proc->get_task (Task_type::Node)->get_team_n ();
     const auto core_n = this->node_n * this->get_core_n ();
@@ -38,7 +40,7 @@ FMR_WARN_INLINE_OFF
       const auto str = this->get_base_abrv ()+" "+ this->abrv +" ";
       fmr::Local_int mpi_n=0, omp_n=0;
       //
-      return;//FIXME segfault after here **************************************
+      return;// segfaults after here if called before tasks init
       //
       const auto Pmpi = this->proc->get_task (Task_type::Fmpi);
       if (Pmpi) {mpi_n = Pmpi->get_proc_n ();}
@@ -85,8 +87,8 @@ FMR_WARN_INLINE_OFF
         all_n, core_n);
     }
 FMR_WARN_INLINE_ON
-#endif
   }
+#endif
   void proc::Node::task_exit () {
     const auto use = fmr::form::si_unit (this->get_used_byte (), "B");
     const auto max = fmr::form::si_unit (this->get_dram_byte (), "B");
