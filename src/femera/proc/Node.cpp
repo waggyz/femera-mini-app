@@ -40,8 +40,7 @@ FMR_WARN_INLINE_OFF
       const auto str = this->get_base_abrv ()+" "+ this->abrv +" ";
       fmr::Local_int mpi_n=0, omp_n=0;
       //
-      return;// segfaults after here if called before tasks init
-      //
+      // segfaults here if called before tasks init
       const auto Pmpi = this->proc->get_task (Task_type::Fmpi);
       if (Pmpi) {mpi_n = Pmpi->get_proc_n ();}
       const auto Pomp = this->proc->get_task (Task_type::Fomp);

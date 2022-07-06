@@ -72,8 +72,9 @@ ifeq ($(CXX),g++)
     FMRFLAGS+= -D_GLIBCXX_PARALLEL
   endif
   ifeq ($(ENABLE_GCC_PROFILE),ON)
-  CXXFLAGS+= -fprofile-dir=$(abspath $(BUILD_CPU)) -fprofile-generate
-  # CXXFLAGS+= fprofile-dir=$(BUILD_CPU)/%p/ -fprofile-generate -fprofile-abs-path
+  # CXXFLAGS+= -fprofile-abs-path fprofile-dir=$(BUILD_CPU)/%p/
+    CXXFLAGS+= -fprofile-dir=$(abspath $(BUILD_CPU))
+    CXXFLAGS+= -fprofile-generate
   endif
   CXXFLAGS+= $(OPTFLAGS) -fstrict-enums
   # Warning flags
@@ -915,12 +916,11 @@ $(BUILD_CPU)/mini: src/femera/mini.cpp src/femera/femera.hpp $(LIBFEMERA)
 	$(call timestamp,$@,$<)
 ifeq ($(ENABLE_GCC_PROFILE),ON)
 	-$(CXX) $(CXXMINI) $< $(LDFLAGS) -lfemera $(LDLIBS) -o $@.pro
-	fmrexec tdd:$(@).pro >/dev/null
+	fmrexec tdd:$(@).pro # >/dev/null
 	-$(CXX) $(filter-out -fprofile-generate,$(CXXMINI)) -fprofile-use \
   $< $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
-	-$(CXX) $(filter-out -fprofile-generate,$(CXXMINI)) \
-  $< $(LDFLAGS) -lfemera $(LDLIBS) -o $@
+	-$(CXX) $(CXXMINI) $< $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 endif
 	$(call col2cxx,$(CXX_),$(CXX) $(notdir $<) .. $(notdir $@),$(shell \
 	if [ -f "$(@)" ]; then ls -sh $(@) | cut -d " " -f1; fi)B)
