@@ -15,9 +15,8 @@ namespace femera {
   void test::Self::task_init (int*, char**) {// Test for initialization errors.
     if (true) {//TODO detail && this->test->do_test
       this->log_init_info ();// pulled out method to prevent inline fail warning
-      //TODO call proc->chck (Task_type::Node);
-      this->proc_node_chck ();
     }
+    this->proc_node_chck ();
     return;
   }
   void test::Self::log_init_info () {// pulled out of task_init (inline fail)
@@ -38,7 +37,7 @@ FMR_WARN_INLINE_OFF
       "%4u maximum hypercomplex order", zyclops::max_zorder);
 FMR_WARN_INLINE_ON
   }
-  fmr::Exit_int test::Self::proc_node_chck () {//TODO interface in File and Proc classes
+  fmr::Exit_int test::Self::proc_node_chck () {
     fmr::Exit_int err = 0;
     const auto all_n = this->proc->all_proc_n ();
     const auto node_n = this->proc->get_task (Task_type::Node)->get_team_n ();
