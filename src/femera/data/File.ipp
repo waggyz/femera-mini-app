@@ -40,7 +40,7 @@ namespace femera {
       file = flist [this->proc->get_proc_id () % flist.size ()];
     }
     const auto w = this->file_line_sz [file];
-    std::valarray<char> buf (w + 1);
+    std::valarray<char> buf (w + 1);// +1 for terminal null
     std::snprintf (&buf[0], buf.size(), form.c_str(), args...);
     const auto line = std::string (&buf[0]);
     if (file != nullptr) {
