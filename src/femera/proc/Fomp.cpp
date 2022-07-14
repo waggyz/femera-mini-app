@@ -1,5 +1,4 @@
 #include "Fomp.hpp"
-#include "Main.hpp"
 #include "../Data.hpp"
 
 #ifdef FMR_HAS_OPENMP
