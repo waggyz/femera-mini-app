@@ -1,9 +1,10 @@
 #ifndef FEMERA_HAS_DATA_TEXT_HPP
 #define FEMERA_HAS_DATA_TEXT_HPP
 
-#include "File.hpp"
-#include <unordered_map>
+#include "File.hpp"//TODO refactor to include "../Data.hpp"
+//#include "../Data.hpp"
 
+#include <unordered_map>
 #include <valarray>// needed in Text.ipp
 
 namespace femera { namespace data {

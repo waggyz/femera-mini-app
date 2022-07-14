@@ -48,7 +48,7 @@ namespace femera {
           msg += (i == (n - 1)) ? "\n":" ";
       }
     printf (msg.c_str());
-  }
+    }
 #endif
     return err;
   }

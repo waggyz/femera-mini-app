@@ -46,7 +46,7 @@ namespace femera {
     if (file != nullptr) {
 //      this->time.add_idle_time_now ();//TODO move to Text should fix timing
 //      this->send (file_name, line);// or file_list, line_list
-      const auto c = fprintf (file,"%s\n", line.c_str());
+      const auto c = fprintf (file,"%s\n",line.c_str());
 //      this->time.add_busy_time_now ();
       if (c > 0) { this->time.add_count (1, 0, 0, fmr::Perf_int(c)); }
     }

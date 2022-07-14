@@ -14,8 +14,9 @@ namespace fmr {//TODO Move to fmr.h ?
   * (base) name.
   * The base name, Vals_type (or vals name), and an integer index (e.g.
   * partition number or thread ID), together identify a data item (and a format
-  * handler if appropriate) for its source and destination(s). Each identifier
-  * can map to an initial (input) source and final (output) data destinations.
+  * handler if appropriate) for its source, destination(s), and storage in
+  * memory. Each identifier can map to an initial (input) source and final
+  * (output) data destinations.
   *//*
   // built-in data sources and destinations
   Data_name_t log ="fmr:log";// default ::stdout from main thread only

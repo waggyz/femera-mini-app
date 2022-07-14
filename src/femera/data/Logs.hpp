@@ -1,7 +1,8 @@
 #ifndef FEMERA_DATA_LOGS_HPP
 #define FEMERA_DATA_LOGS_HPP
 
-#include "File.hpp"
+#include "File.hpp"//TODO refactor to include "../Data.hpp"
+//#include "../Data.hpp"
 
 namespace femera { namespace data {
   class Logs;// Derive a CRTP concrete class from Data.
