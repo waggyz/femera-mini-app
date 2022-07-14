@@ -3,7 +3,8 @@
 
 #include "Work.hpp"
 
-#include "../fmr/proc.hpp"// used in Proc.ipp
+#include "../fmr/proc.hpp"
+// "../fmr/proc.hpp" used in Proc.ipp
 
 namespace femera {
   namespace proc {
