@@ -1,9 +1,6 @@
 #ifndef FEMERA_FILE_IPP
 #define FEMERA_FILE_IPP
 
-//TODO Remove include "../../fmr/form.hpp" when refactored into data::Text
-#include "../../fmr/form.hpp"
-
 namespace femera {
   inline
   void data::File::task_exit () {
@@ -27,6 +24,7 @@ namespace femera {
 #endif
     return this->logs_init_tf;
   }
+//============================ REMOVE BELOW ===================================
   template <typename ...Args> inline
   std::string data::File::text_line                         // send (..)
   (const data::File_ptrs_t& flist, const std::string& form, Args ...args) {

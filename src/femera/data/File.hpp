@@ -3,21 +3,22 @@
 
 #include "../Data.hpp"
 
+// form.hpp needed by File.ipp variadic template methods
+#include "../../fmr/form.hpp"
+
 #if 0
-//TODO Make variadic read/save/send methods in File to package heterogenous
-//     data into fmr::Vals structures, then call a specialized non-variadic
-//     member function of Text or Dlim to handle that structure in File.ipp
-//     so the next two can remain in File.cpp./*
-  std::size_t File::send (// returns bytes sent
-    fmr::Data_name_t, fmr::Vals_type/Vals_name_t, Local_int thread_id,
+/*TODO Make variadic read/save/send methods in File.ipp to package heterogenous
+       data into fmr::Vals structures then call a non-variadic
+       member function in File.cpp to pass it on to a specialized handler
+       (in e.g. Text.cpp or Dlim.cpp) to handle that structure.
+*//*
+  std::size_t File::send (fmr::Data_name_t,                // returns bytes sent
     std::string lab1, std::string lab2, std::string lab3, std::string form, ...)
   data->send (fmr:log, fmr::Vals_type::Logs_line, this->proc->get_proc_id (),
     "this", "log", "msg", "i: %u, j: %u", uint (i), uint (j));
-  data->send (fmr:log,//TODO can be reduced to this for fmr:log ?
+  data->send (fmr:log,// can be reduced to this for fmr:log ?
     "this", "log", "msg", "i: %u, j: %u", uint (i), uint (j));
-  */
-//#include "Text.hpp"
-//#include "Dlim.hpp"
+*/
 #endif
 
 #include <unordered_map>
@@ -45,6 +46,7 @@ namespace femera { namespace data {
   public:
     bool did_logs_init ()     noexcept;
     bool set_logs_init (bool) noexcept;
+    
 #if 1
   private:
     using ss = std::string;
@@ -66,7 +68,7 @@ namespace femera { namespace data {
     ss time_line (                    const ss& name, const ss& form, Args...);
 #endif
 #if 0
-    ss wrap_line (File_ptrs_t, ss& name, ss& form,...);//TODO ?
+    ss wrap_line (File_ptrs_t, ss& name, ss& form,...);
     ss data_line (File_ptrs_t, ss& name, ss& form,...);
     ss perf_line (File_ptrs_t, ss& name, ss& form,...);
     ss perf_line (ss name, ss& form,...);
@@ -80,13 +82,13 @@ namespace femera { namespace data {
 #if 0
   public:
     using Open_file_id = uintptr_t;// cast-compatible with FILE* (stdout,stderr)
-    //TODO bad idea: do not use open file handles as file IDs
+    // bad idea: do not use open file handles as file IDs
   private:
     std::unordered_map <File_id, Page_dims> file_data = {};
 #endif
 #if 0
   private:
-    Path_list_t inp_file_list ={};//TODO initialize these from command line args
+    Path_list_t inp_file_list ={};// initialize these from command line args
     Path_list_t out_file_list ={};//               "
     Path_list_t log_file_list ={};
     Path_list_t err_file_list ={};
