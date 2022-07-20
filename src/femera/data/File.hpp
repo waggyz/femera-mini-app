@@ -8,9 +8,10 @@
 
 #if 0
 /*TODO Make variadic read/save/send methods in File.ipp to package heterogenous
-       data into fmr::Vals structures then call a non-variadic
-       member function in File.cpp to pass it on to a specialized handler
-       (in e.g. Text.cpp or Dlim.cpp) to handle that structure.
+       data into a fmr::Vals structure (or std::string?, vector<std::string>?)
+       then call a non-variadic member function in File.cpp to pass it on to a
+       specialized handler (in e.g. Text.cpp, Dlim.cpp, Loggs.cpp, Cgns.cpp,...)
+       to handle that structure.
 *//*
   std::size_t File::send (fmr::Data_name_t,                // returns bytes sent
     std::string lab1, std::string lab2, std::string lab3, std::string form, ...)
@@ -28,10 +29,12 @@ namespace femera { namespace data {
   class File;// Derive as a CRTP concrete class from Data.
   class File final: public Data <File> {// private: friend class Data;
   public:
+#if 1
     File_ptrs_t fmrlog = {};// main proc to stdout set by Logs::task_init (..)
     File_ptrs_t fmrout = {::stdout};//TODO Replae these w/ fmr:log, fmr:out,...
     File_ptrs_t fmrerr = {::stderr};
     File_ptrs_t fmrall = {::stdout};
+#endif
   private:
 #if 1
     // TODO Replace below with unordered_map <Vals_name_t, data::Page_dims>
@@ -46,7 +49,14 @@ namespace femera { namespace data {
   public:
     bool did_logs_init ()     noexcept;
     bool set_logs_init (bool) noexcept;
-    
+#if 1
+  private:
+    using css = const std::string;
+  public:
+    template <typename ...Args>
+    std::string NEW_send (const fmr::Data_name_t&,// standard fmr:log line
+      css& lab1, css& lab2, css& lab3, css& form, Args...);
+#endif
 #if 1
   private:
     using ss = std::string;

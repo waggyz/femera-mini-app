@@ -15,6 +15,8 @@ namespace femera {
   inline
   void data::Text::task_exit () {
   }
+//============================ REMOVE =========================================
+#if 1
   template <typename ...Args> inline
   std::string data::Text::text_line
   (const data::File_ptrs_t& flist, const std::string& form, Args ...args) {
@@ -86,6 +88,8 @@ namespace femera {
   (const std::string& label, const std::string& form, Args ...args) {
     return data::Text::time_line (data::File_ptrs_t ({}), label, form, args...);
   }
+#endif
+//=============================================================================
 }//end femera namespace
 
 //end FEMERA_DATA_TEXT_IPP

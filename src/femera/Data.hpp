@@ -1,5 +1,5 @@
-#ifndef FEMERA_TEST_HPP
-#define FEMERA_TEST_HPP
+#ifndef FEMERA_HAS_DATA_HPP
+#define FEMERA_HAS_DATA_HPP
 
 #include "proc/Main.hpp"
 
@@ -8,7 +8,7 @@
 #include <cstdio>     // std::printf
 #endif
 
-namespace fmr {//TODO Move to fmr.h ?
+namespace fmr {//TODO Move to fmr.h, change to femera:: ?
   using Data_name_t = std::string;/*
   * Data_name_t: sim, part, file, directory, or other data collection path and
   * (base) name.
@@ -17,14 +17,14 @@ namespace fmr {//TODO Move to fmr.h ?
   * handler if appropriate) for its source, destination(s), and storage in
   * memory. Each identifier can map to an initial (input) source and final
   * (output) data destinations.
-  *//*
-  // built-in data sources and destinations
-  Data_name_t log ="fmr:log";// default ::stdout from main thread only
-  Data_name_t out ="fmr:out";// default ::stdout from all threads
-  Data_name_t err ="fmr:err";// default ::stderr from all threads
-  Data_name_t in  ="fmr:in" ;// default ::stdin  to   each MPI thread
-  // formatters: fmr::Vals_type::Info_line, fmr::Vals_type::Text_line, ...
   */
+  // built-in data sources and destinations
+  //TODO Replace NEW_ with nothing after refactoring is finished.
+  static Data_name_t NEW_log ="fmr:log";// default ::stdout from main thread only
+  static Data_name_t NEW_out ="fmr:out";// default ::stdout from all threads
+  static Data_name_t NEW_err ="fmr:err";// default ::stderr from all threads
+  static Data_name_t NEW_in  ="fmr:in" ;// default ::stdin  to   each MPI thread
+  // formatters: fmr::Vals_type::Info_line, fmr::Vals_type::Text_line, ...
 }//end fmr:: namespace
 namespace femera { namespace data {
   using File_ptrs_t = std::vector <::FILE*>;//TODO Replace with Data_name_t
@@ -75,5 +75,5 @@ namespace femera {
 
 #include "Data.ipp"
 
-//end FEMERA_TEST_HPP
+//end FEMERA_HAS_DATA_HPP
 #endif

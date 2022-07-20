@@ -24,7 +24,22 @@ namespace femera {
 #endif
     return this->logs_init_tf;
   }
+  template <typename ...Args> inline// standard fmr:log line
+  std::string data::File::NEW_send (const fmr::Data_name_t& data_name,
+    const std::string& lab1, const std::string& lab2, const std::string& lab3,
+    const std::string& form, Args...args) {
+    const auto line_width = uint (80);                           //TODO look up
+    const auto msg = femera::form::text_line (line_width,
+      "%4s %4s %4s " + form,
+      lab1.c_str(), lab2.c_str(), lab3.c_str(), args...);
+#ifdef FMR_DEBUG
+  printf ((msg+" "+ data_name+"\n").c_str());
+#endif
+  //TODO look up output (append) destination for data_name
+  return msg;
+  }
 //============================ REMOVE BELOW ===================================
+# if 1
   template <typename ...Args> inline
   std::string data::File::text_line                         // send (..)
   (const data::File_ptrs_t& flist, const std::string& form, Args ...args) {
@@ -113,6 +128,8 @@ FMR_WARN_INLINE_ON
   (const std::string& label, const std::string& form, Args ...args) {
     return data::File::time_line (data::File_ptrs_t ({}), label, form, args...);
   }
+#endif
+//=============================================================================
 }//end femera namespace
 
 //end FEMERA_FILE_IPP
