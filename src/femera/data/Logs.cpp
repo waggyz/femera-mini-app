@@ -6,6 +6,20 @@
 #endif
 
 namespace femera {
+  data::Logs::Logs (const femera::Work::Core_ptrs_t core)
+  noexcept : Data (core) {
+    this->name      ="Femera logger";
+    this->abrv      ="logs";
+    this->task_type = task_cast (Task_type::Logs);
+    this->info_d    = 3;
+    this->out_NEW_name_list = {
+      {fmr::NEW_log , {fmr::NEW_out }},
+      {fmr::NEW_out , {fmr::NEW_out }},
+      {fmr::NEW_err , {fmr::NEW_err }},
+      {fmr::NEW_null, {fmr::NEW_null}},
+      {fmr::NEW_none, {fmr::NEW_null}}
+    };
+  }
   void data::Logs::task_init (int*, char**) {//TODO opts -v<int>, -t<int>,...
     // set default logger (data->fmrlog) to stdout only from the main thread (0)
     fmr::Local_int n = 0;
@@ -25,5 +39,3 @@ namespace femera {
   void data::Logs::task_exit () {
   }
 }//end femera:: namespace
-
-

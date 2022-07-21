@@ -50,8 +50,8 @@ namespace femera { namespace data {
 //TODO ======================== REMOVE BELOW ==================================
   private:
 #if 1
-    // TODO Replace below with unordered_map <Vals_name_t, data::Page_dims>
-    //      or                 unordered_map <Vals_type_t, data::Page_dims>
+    // TODO Replace below with unordered_map <Data_name_NEW_t, data::Page_dims>
+    //      or                 unordered_map <Data_name_NEW_t, data::Page_dims>
     //      or std::vector <data::Page_dims> indexed by Vals_type_t.
     std::unordered_map <FILE*, fmr::Line_size_int> file_line_sz
       = {{nullptr, 80}, {::stdout, 80}, {::stderr, 250}};
