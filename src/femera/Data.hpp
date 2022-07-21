@@ -3,13 +3,17 @@
 
 #include "proc/Main.hpp"
 
+#include <unordered_map>
+
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
 #include <cstdio>     // std::printf
 #endif
 
 namespace fmr {//TODO Move to fmr.h, change to femera:: ?
-  using Data_name_t = std::string;/*
+  // a file name is interpreted as a collection of vals
+  using Data_name_NEW_t = std::string;// variable (vals) or file name
+ /*
   * Data_name_t: sim, part, file, directory, or other data collection path and
   * (base) name.
   * The base name, Vals_type (or vals name), and an integer index (e.g.
@@ -20,10 +24,12 @@ namespace fmr {//TODO Move to fmr.h, change to femera:: ?
   */
   // built-in data sources and destinations
   //TODO Replace NEW_ with nothing after refactoring is finished.
-  static Data_name_t NEW_log ="fmr:log";// default ::stdout from main thread only
-  static Data_name_t NEW_out ="fmr:out";// default ::stdout from all threads
-  static Data_name_t NEW_err ="fmr:err";// default ::stderr from all threads
-  static Data_name_t NEW_in  ="fmr:in" ;// default ::stdin  to   each MPI thread
+  static Data_name_NEW_t NEW_log ="fmr:log" ;// default ::stdout from main thread only
+  static Data_name_NEW_t NEW_out ="fmr:out" ;// default ::stdout from all threads
+  static Data_name_NEW_t NEW_err ="fmr:err" ;// default ::stderr from all threads
+  static Data_name_NEW_t NEW_in  ="fmr:in"  ;// default ::stdin  to   each MPI thread
+  static Data_name_NEW_t NEW_null="fmr:null";
+  static Data_name_NEW_t NEW_none="fmr:none";
   // formatters: fmr::Vals_type::Info_line, fmr::Vals_type::Text_line, ...
 }//end fmr:: namespace
 namespace femera { namespace data {
@@ -34,6 +40,13 @@ namespace femera {
   class Data : public Work {
   private:// typedefs
     using This_spt = FMR_SMART_PTR<T>;
+  protected:// typedefs
+    using Data_list_NEW_t = std::vector<fmr::Data_name_NEW_t>;
+  protected:// member variables
+    // Each data handler has a map of data/file names handled by it.
+    std::unordered_map <fmr::Data_name_NEW_t, Data_list_NEW_t> inp_NEW_name_list = {};
+    //TODO set inp/out_NEW_name_list in each handler derived from data
+    std::unordered_map <fmr::Data_name_NEW_t, Data_list_NEW_t> out_NEW_name_list ={};
 #if 0
   private:// variables
     std::unordered_map <fmr::Data_name_t, std::vector <T*>> inp_data_task ={};

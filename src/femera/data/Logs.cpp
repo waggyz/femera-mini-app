@@ -13,8 +13,13 @@ namespace femera {
       n = this->proc->get_proc_n (Task_type::Fomp);// OpenMP threads / mpi proc
       n = (n==0) ? 1 : n;
     }
-    this->data->fmrlog = data::File_ptrs_t (n, nullptr);
+    // default fmr:log destination is STDOUT from thread 0.
+    this->out_NEW_name_list["fmr:log"] = Data::Data_list_NEW_t (n, "fmr:null");
+    if (n > 0) { this->out_NEW_name_list["fmr:log"][0] = "fmr:out"; }
+#if 1
+    this->data->fmrlog = data::File_ptrs_t (n, nullptr);//TODO REMOVE
     if (n > 0) { this->data->fmrlog[0] = ::stdout; }
+#endif
     this->data->set_logs_init (true);
   }
   void data::Logs::task_exit () {

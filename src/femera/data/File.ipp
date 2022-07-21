@@ -25,20 +25,20 @@ namespace femera {
     return this->logs_init_tf;
   }
   template <typename ...Args> inline// standard fmr:log line
-  std::string data::File::NEW_send (const fmr::Data_name_t& data_name,
+  std::string data::File::NEW_send (const fmr::Data_name_NEW_t& data_name,
     const std::string& lab1, const std::string& lab2, const std::string& lab3,
     const std::string& form, Args...args) {
-    const auto line_width = uint (80);                           //TODO look up
-    const auto msg = femera::form::text_line (line_width,
-      "%4s %4s %4s " + form,
-      lab1.c_str(), lab2.c_str(), lab3.c_str(), args...);
+    const auto line_width = uint (80);//TODO look up for data_name destination
+    const auto msg = femera::form::text_line (line_width, "%4s %4s %4s "+ form,
+      lab1.c_str (), lab2.c_str (), lab3.c_str (), args...);
 #ifdef FMR_DEBUG
-  printf ((msg+" "+ data_name+"\n").c_str());
+    printf ((msg+" "+data_name+"\n").c_str ());
 #endif
-  //TODO look up output (append) destination for data_name
-  return msg;
+   // call method to find data_name handler and output (append) to destination
+    this->NEW_send (data_name, msg);                            // in Data
+    return msg;
   }
-//============================ REMOVE BELOW ===================================
+//TODO ======================== REMOVE BELOW ==================================
 # if 1
   template <typename ...Args> inline
   std::string data::File::text_line                         // send (..)

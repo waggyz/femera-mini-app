@@ -35,16 +35,6 @@ namespace femera { namespace data {
     File_ptrs_t fmrerr = {::stderr};
     File_ptrs_t fmrall = {::stdout};
 #endif
-  private:
-#if 1
-    // TODO Replace below with unordered_map <Vals_name_t, data::Page_dims>
-    //      or                 unordered_map <Vals_type_t, data::Page_dims>
-    //      or std::vector <data::Page_dims> indexed by Vals_type_t.
-    std::unordered_map <FILE*, fmr::Line_size_int> file_line_sz
-      = {{nullptr, 80}, {::stdout, 80}, {::stderr, 250}};
-    std::unordered_map <FILE*, fmr::Line_size_int> line_name_sz
-      = {{nullptr, 14}, {::stdout, 14}, {::stderr, 0}};
-#endif
     bool logs_init_tf = false;
   public:
     bool did_logs_init ()     noexcept;
@@ -54,8 +44,19 @@ namespace femera { namespace data {
     using css = const std::string;
   public:
     template <typename ...Args>
-    std::string NEW_send (const fmr::Data_name_t&,// standard fmr:log line
+    std::string NEW_send (const fmr::Data_name_NEW_t&,// standard fmr:log line
       css& lab1, css& lab2, css& lab3, css& form, Args...);
+#endif
+//TODO ======================== REMOVE BELOW ==================================
+  private:
+#if 1
+    // TODO Replace below with unordered_map <Vals_name_t, data::Page_dims>
+    //      or                 unordered_map <Vals_type_t, data::Page_dims>
+    //      or std::vector <data::Page_dims> indexed by Vals_type_t.
+    std::unordered_map <FILE*, fmr::Line_size_int> file_line_sz
+      = {{nullptr, 80}, {::stdout, 80}, {::stderr, 250}};
+    std::unordered_map <FILE*, fmr::Line_size_int> line_name_sz
+      = {{nullptr, 14}, {::stdout, 14}, {::stderr, 0}};
 #endif
 #if 1
   private:
@@ -77,6 +78,7 @@ namespace femera { namespace data {
     template <typename ...Args>
     ss time_line (                    const ss& name, const ss& form, Args...);
 #endif
+//=============================================================================
 #if 0
     ss wrap_line (File_ptrs_t, ss& name, ss& form,...);
     ss data_line (File_ptrs_t, ss& name, ss& form,...);
