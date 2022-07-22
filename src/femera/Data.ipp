@@ -27,6 +27,11 @@ namespace femera {
     return static_cast<T*> (ptr);
   }
   template <typename T> inline
+  std::size_t Data<T>::NEW_send// returns bytes sent
+  (const fmr::Data_name_NEW_t&, const std::string& txt) {
+    return txt.size ();
+  }
+  template <typename T> inline
   fmr::Exit_int Data<T>::init (int* argc, char** argv)
   noexcept {
     fmr::Exit_int err = 0;
@@ -67,6 +72,11 @@ namespace femera {
       Errs::print (this->get_abrv ()+" task_exit"); }
     return (task_err > 0) ? task_err : err;
   }
+  template <typename T> inline constexpr
+  FMR_SMART_PTR<T> Data<T>::new_task (const Work::Core_ptrs_t core)
+  noexcept {
+    return FMR_MAKE_SMART(T) (T(core));
+  }
   template <typename T> inline
   T* Data<T>::get_task (const fmr::Local_int i)
   noexcept {
@@ -87,10 +97,35 @@ namespace femera {
   noexcept {
     return Data::this_cast (Work::get_work (task_cast (t), ix));
   }
-  template <typename T> inline constexpr
-  FMR_SMART_PTR<T> Data<T>::new_task (const Work::Core_ptrs_t core)
+  template <typename T> inline
+  T* Data<T>::get_task
+  (const fmr::Data_name_NEW_t& file, const fmr::Local_int ix)
   noexcept {
-    return FMR_MAKE_SMART(T) (T(core));
+# if 1
+    fmr::Local_int i=0;
+    auto D = this;
+#if 1
+    if (D->does_file (file)) {
+      //TODO Is this the desired behavior of nested drivers of the same type?
+      //     Task 0 is the parent, with 1-indexed children of the same type.
+      if (i == ix) { return Data::this_cast (D); }
+      ++i;
+    }
+#endif
+    while (! D->task_list.empty ()) {
+      const fmr::Local_int n = D->get_task_n ();
+      for (fmr::Local_int Wix=0; Wix < n; ++Wix) {
+        if (D->task_list [Wix].get()->does_file (file)) {
+          if (i == ix) { return Data::this_cast (D->task_list [Wix].get()); }
+          ++i;
+      } }
+      for (fmr::Local_int Wix=0; Wix < n; ++Wix) {
+        D = D->task_list [Wix].get();
+      }
+    }
+    return nullptr;
+#   endif
+    return nullptr;
   }
 }// end femera:: namespace
 

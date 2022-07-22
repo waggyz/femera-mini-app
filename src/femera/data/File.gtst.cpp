@@ -12,4 +12,6 @@ FMR_WARN_INLINE_ON
 
 TEST( File, DataName ){
   EXPECT_EQ( mini->data->get_abrv (), "file" );
+  EXPECT_GT( mini->data->NEW_send ("fmr:out","File","init","msg",
+    "**** OK on thread %u", mini->proc->get_proc_id ()).size(), 25);
 }

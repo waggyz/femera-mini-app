@@ -46,7 +46,9 @@ namespace femera {
           if (i == ix) { return W->task_list [Wix].get(); }
           ++i;
       } }
-      W = W->task_list [0].get();//TODO other branches
+      for (fmr::Local_int Wix=0; Wix < n; ++Wix) {
+        W = W->task_list [Wix].get();
+      }
     }
     return nullptr;
   }

@@ -65,6 +65,10 @@ namespace femera {
     T* get_task (Work::Task_path_t)              noexcept;
     T* get_task (Work_type, fmr::Local_int ix=0) noexcept;
     T* get_task (Task_type, fmr::Local_int ix=0) noexcept;
+    //
+    T* get_task (const fmr::Data_name_NEW_t&, fmr::Local_int ix=0) noexcept;
+    //
+    std::size_t NEW_send (const fmr::Data_name_NEW_t&, const std::string& txt);// byte
   private:
 #if 0
     T* get_task (fmr::Data_name_t, fmr::Vals_type,   fmr::Local_int ix=0) noexcept;

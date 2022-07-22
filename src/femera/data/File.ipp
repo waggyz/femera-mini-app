@@ -35,7 +35,7 @@ namespace femera {
     printf ((msg+" "+data_name+"\n").c_str ());
 #endif
    // call method to find data_name handler and output (append) to destination
-    this->NEW_send (data_name, msg);                            // in Data
+    Data::NEW_send (data_name, msg);
     return msg;
   }
 //TODO ======================== REMOVE BELOW ==================================

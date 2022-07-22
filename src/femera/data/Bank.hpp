@@ -25,6 +25,7 @@ namespace femera { namespace data {
   private:
     void task_init (int* argc, char** argv);
     void task_exit ();
+    bool does_file (const fmr::Data_name_NEW_t&){return false;}//TODO to .?pp
   private:
     Bank (femera::Work::Core_ptrs_t) noexcept;
     Bank () =delete;//NOTE Use the constructor above.

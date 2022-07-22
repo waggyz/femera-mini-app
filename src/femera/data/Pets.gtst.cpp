@@ -16,7 +16,7 @@ namespace femera { namespace test {
     return atof (ver.c_str());
   }
   TEST( PETSc, TrivialTest) { EXPECT_EQ( 0, 0 ); }
-  TEST( PETSc, VersionTODO)     { EXPECT_GE( get_petsc_version(), -1.0 ); }
+//  TODO_TEST( PETSc, VersionTODO)     { EXPECT_GE( get_petsc_version(), -1.0 ); }
   //
 } }//end femerea::test:: namespace
 

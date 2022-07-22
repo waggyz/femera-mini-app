@@ -69,10 +69,6 @@ FMR_WARN_INLINE_OFF
     this->add_task (std::move (Data<data::Pets>::new_task (this->get_core())));
 #endif
 FMR_WARN_INLINE_ON
-#if 0
-  this->NEW_send ("fmr:out","File","init","msg",
-    "**** OK on thread %u", this->proc->get_proc_id ());
-#endif
   }
 }// end femera::namespace
 
