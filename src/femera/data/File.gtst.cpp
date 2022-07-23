@@ -16,7 +16,7 @@ TEST( File, DataName ){
   EXPECT_EQ( mini->data->get_abrv (), "file" );
 }
 TEST( File, SendOut ){
-  EXPECT_GT( mini->data->NEW_send (fmr::NEW_out,"File","init","msg",
+  EXPECT_GT( mini->data->NEW_send (fmr::NEW_out,"File","gtst","msg",
     "**** OK on thread %u", mini->proc->get_proc_id ()), 25);
 }
 } }//end femera::test:: namespace
