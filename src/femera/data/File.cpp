@@ -70,6 +70,47 @@ FMR_WARN_INLINE_OFF
 #endif
 FMR_WARN_INLINE_ON
   }
+#if 0
+  bool data::File::does_file (const fmr::Data_name_NEW_t& file)
+  noexcept {
+    if (! this->task_list.empty ()) {
+      const fmr::Local_int n = this->get_task_n ();
+      for (fmr::Local_int i=0; i < n; ++i) {
+        auto D = this->get_task (i);
+#if 1//def FMR_DEBUG
+        printf ("task type %u\n", fmr::Enum_int (D->task_type));
+#endif
+        switch (fmr::Enum_int (D->task_type)) {
+          case fmr::Enum_int (Task_type::Logs) : return true;
+    } } }
+    return false;
+  }
+#endif
+  std::size_t data::File::NEW_send
+  (const fmr::Data_name_NEW_t& file, const std::string& text)
+  noexcept { size_t byte = 0;
+    if (! this->task_list.empty ()) {// only checks top-level tasks
+      const fmr::Local_int n = this->get_task_n ();
+      for (fmr::Local_int Wix=0; Wix < n; ++Wix) {
+        bool ok = false;
+        const auto D = this->get_task (Wix);
+        switch (fmr::Enum_int (D->task_type)) {
+          case fmr::Enum_int (Task_type::Logs): {
+            auto C = Work::cast_via_work <data::Logs> (D);
+            ok = C->does_file (file);
+            if (ok) {
+              byte += text.size();//byte += C->send (file, text);
+          } }
+          default: {}// do nothing
+        }
+#if 1//def FMR_DEBUG
+        printf ((D->get_abrv()
+          +( ok ? " handles " : " does not handle ")
+          +file+"\n").c_str());
+#endif
+    } }
+    return byte;
+  }
 }// end femera::namespace
 
 #undef FMR_DEBUG

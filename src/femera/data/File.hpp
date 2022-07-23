@@ -43,8 +43,10 @@ namespace femera { namespace data {
   private:
     using css = const std::string;
   public:
+    std::size_t NEW_send (const fmr::Data_name_NEW_t&, css& text) noexcept;
+//    bool does_file (const fmr::Data_name_NEW_t&) noexcept;
     template <typename ...Args>
-    std::string NEW_send (const fmr::Data_name_NEW_t&,// standard fmr:log line
+    std::size_t NEW_send (const fmr::Data_name_NEW_t&,// standard fmr:log line
       css& lab1, css& lab2, css& lab3, css& form, Args...);
 #endif
 //TODO ======================== REMOVE BELOW ==================================
@@ -88,7 +90,6 @@ namespace femera { namespace data {
   public:
     void task_init (int* argc, char** argv);
     void task_exit ();
-    bool does_file (const fmr::Data_name_NEW_t){return false;}//TODO to .?pp
   public:
     File (femera::Work::Core_ptrs_t) noexcept;
     File () =delete;//NOTE Use the constructor above.

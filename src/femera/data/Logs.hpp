@@ -17,7 +17,7 @@ namespace femera { namespace data {
   public:
     void task_init (int* argc, char** argv);
     void task_exit ();
-    bool does_file (const fmr::Data_name_NEW_t&){return true;}//TODO to .?pp
+    bool does_file (const fmr::Data_name_NEW_t&) noexcept;//{return true;}//TODO to .?pp
   public:
     Logs (femera::Work::Core_ptrs_t) noexcept;
     Logs () =delete;//NOTE Use the constructor above.
