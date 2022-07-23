@@ -12,12 +12,18 @@ namespace femera { namespace data {
   private:
     fmr::Dim_int verb_d = 5;//TODO set by command line option -v<int>
   public:
-    fmr::Dim_int set_verb (fmr::Dim_int) noexcept;
-    bool do_log (fmr::Dim_int) noexcept;
+    fmr::Dim_int set_verb (fmr::Dim_int)
+    noexcept;
+    bool do_log (fmr::Dim_int)
+    noexcept;
   public:
     void task_init (int* argc, char** argv);
     void task_exit ();
-    bool does_file (const fmr::Data_name_NEW_t&) noexcept;//{return true;}//TODO to .?pp
+    bool does_file (const fmr::Data_name_NEW_t&)
+    noexcept;
+    std::size_t task_NEW_send (const fmr::Data_name_NEW_t& file,
+      const std::string& text, fmr::Dim_int out_d=1)
+    noexcept;
   public:
     Logs (femera::Work::Core_ptrs_t) noexcept;
     Logs () =delete;//NOTE Use the constructor above.

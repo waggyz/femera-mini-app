@@ -15,7 +15,7 @@ namespace femera {
   inline
   bool data::Logs::do_log (const fmr::Dim_int v)
   noexcept {
-    return v >= this->verb_d;
+    return v <= this->verb_d;
   }
   inline
   bool data::Logs::does_file (const fmr::Data_name_NEW_t& file)

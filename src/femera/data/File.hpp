@@ -43,8 +43,9 @@ namespace femera { namespace data {
   private:
     using css = const std::string;
   public:
-    std::size_t NEW_send (const fmr::Data_name_NEW_t&, css& text) noexcept;
-//    bool does_file (const fmr::Data_name_NEW_t&) noexcept;
+    std::size_t NEW_send (const fmr::Data_name_NEW_t&, css& text,
+       fmr::Dim_int out_d=1)
+    noexcept;
     template <typename ...Args>
     std::size_t NEW_send (const fmr::Data_name_NEW_t&,// standard fmr:log line
       css& lab1, css& lab2, css& lab3, css& form, Args...);

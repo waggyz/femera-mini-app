@@ -12,7 +12,12 @@ FMR_WARN_INLINE_ON
 }
 namespace femera { namespace test {
 
-  TEST( Logs, TrivialTest) { EXPECT_EQ( 0, 0 ); }
+TEST( Logs, TrivialTest) { EXPECT_EQ( 0, 0 ); }
+TEST( Logs, Send) {
+EXPECT_GT( mini->data->NEW_send (fmr::NEW_log,"File","init","msg",
+  "**** OK on thread %u", mini->proc->get_proc_id ()),
+  mini->proc->is_main () ? 20 : -1);
+}
 #if 0
   TEST( Logs, SendLogLine) {
     EXPECT_EQ( mini->data->send (fmr:log, Vals_type::Logs_line, this->info_d,
