@@ -44,10 +44,8 @@ namespace femera { namespace test {
     std::valarray <double> val (std::move(vec.data ()), sz);//likely this copies
 #endif
     for (fmr::Local_int i =0; i<sz; ++i) { sum += val [i]; }
-FMR_WARN_INLINE_OFF
-    mini->data->name_line (mini->data->fmrout, "vals from vec1",
+    mini->data->NEW_send (fmr::NEW_out, "vals", "from", "vec1",
       "%g (garbage)", sum);
-FMR_WARN_INLINE_ON
     return sum;
     /* stackoverflow.com/questions/13634504/assign-a-stdvector-to-a-stdvalarray
     //
@@ -69,10 +67,8 @@ FMR_WARN_INLINE_ON
     //
     double sum = 0.0;
     for (fmr::Local_int i =0; i<sz; ++i) { sum += vals[0] [i]; }
-FMR_WARN_INLINE_OFF
-    mini->data->name_line (mini->data->fmrout, "vals from vec2",
+    mini->data->NEW_send (fmr::NEW_out, "vals", "from", "vec2",
       "%g (garbage)", sum);
-FMR_WARN_INLINE_ON
     return sum;
   }
   inline
@@ -98,13 +94,11 @@ FMR_WARN_INLINE_ON
     sum = (sum < 0) ? 0.0 : sum;
     sum = (sum > 0) ? 0.0 : sum;
 #endif
-FMR_WARN_INLINE_OFF
-    mini->data->name_line (mini->data->fmrout, "zero vals perf",
+    mini->data->NEW_send (fmr::NEW_out, "vals", "zero", "perf",
       "%s, %s in %s (check %g == 0)",
       fmr::form::si_unit (speed, "B/s").c_str(),
       fmr::form::si_unit (perf.get_byte_n (), "B").c_str(),
       fmr::form::si_unit (time, "s").c_str(), sum);
-FMR_WARN_INLINE_ON
     return double (speed);
   }
 #define FMR_TEST_LOCAL_VEC0
@@ -142,7 +136,7 @@ FMR_WARN_INLINE_ON
     sum = (sum > 0) ? 0.0 : sum;
 #endif
 FMR_WARN_INLINE_OFF
-    mini->data->name_line (mini->data->fmrout, "vec2 vals perf",
+    mini->data->NEW_send (fmr::NEW_out, "vals", "vec2", "perf",
       "%s, %s in %s (check %g ?= 0)",
       fmr::form::si_unit (speed, "B/s").c_str(),
       fmr::form::si_unit (perf.get_byte_n (), "B").c_str(),

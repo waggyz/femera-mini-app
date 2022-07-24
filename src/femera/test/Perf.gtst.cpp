@@ -29,11 +29,9 @@ namespace femera { namespace test { namespace perf {
     const auto pids_str
       = fmr::form::si_unit (double (pids_time) / double (n),"s");
     if (ans2 >= ans1) {// should always be always true
-FMR_WARN_INLINE_OFF
-      mini->data->name_line (mini->data->fmrout, "test perf pids",
+      mini->data->NEW_send (fmr::NEW_log, "perf", "gtst", "proc",
         "%s /%s (pid/ref) = %.0fx slower each call",
         pids_str.c_str(), base_str.c_str(), ratio - 1.0);
-FMR_WARN_INLINE_ON
     }
     return ratio;
   }

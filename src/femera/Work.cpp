@@ -94,17 +94,16 @@ namespace femera {
             text = busy+" /"+tot+" "+W->get_name ()
               +((W->version=="") ? "":" "+W->version);
           }
-          const auto label = femera::form::text_line (250, "%4s %4s init",
-            W->get_base_abrv ().c_str(), W->abrv.c_str());
-FMR_WARN_INLINE_OFF
           if (W->data->did_logs_init ()) {
-            W->data->name_line (W->data->fmrlog, label, text);
+            W->data->NEW_send (fmr::NEW_log,
+              W->get_base_abrv (), W->get_abrv (), "init", text);
           } else {
           if (W->proc != nullptr) {
             if (W->proc->is_main ()) {
-              form::name_line (::stdout, 14, 80, label, text);
+              const auto label = femera::form::text_line (250, "%4s %4s init",
+                W->get_base_abrv ().c_str(), W->abrv.c_str());
+              femera::form::name_line (::stdout, 14, 80, label, text);
           } } }
-FMR_WARN_INLINE_ON
         }
         if (Werr > 0) {
           del_list.push (ix);// Queue task for removal if init failed, and...
@@ -113,7 +112,7 @@ FMR_WARN_INLINE_ON
     while (! del_list.empty ()) {// Remove failed tasks.
       const auto label = femera::form::text_line (250, "%4s %4s init",
         this->get_base_abrv ().c_str(), this->get_abrv().c_str());
-      form::name_line (::stdout, 14, 80, label, "removing %s...",
+      femera::form::name_line (::stdout, 14, 80, label, "removing %s...",
         this->get_work (del_list.top ())->get_name ().c_str());
       this->del_task (del_list.top ());
       del_list.pop ();
@@ -157,16 +156,17 @@ FMR_WARN_INLINE_ON
 #endif
         const auto busy = fmr::form::si_time (busy_s);
         const auto tot  = fmr::form::si_time (W->time.get_work_s());
-        const auto label = femera::form::text_line (250, "%4s %4s exit",
-          W->get_base_abrv ().c_str(), W->get_abrv().c_str());
         const auto text = busy+" /"+tot+" "+W->name
           +((W->version=="") ? "":" "+W->version);
 FMR_WARN_INLINE_OFF
         if (W->data == nullptr) {
           if (this->is_work_main) {
+          const auto label = femera::form::text_line (250, "%4s %4s exit",
+            W->get_base_abrv ().c_str(), W->get_abrv().c_str());
             form::name_line (::stdout, 14, 80, label, text);
         } } else {
-          W->data->name_line (W->data->fmrlog, label, text);
+          W->data->NEW_send (fmr::NEW_log,
+            W->get_base_abrv (), W->get_abrv(), "exit", text);
         }
 FMR_WARN_INLINE_ON
       }
@@ -209,16 +209,17 @@ FMR_WARN_INLINE_ON
         const auto busy_s = W->time.add_busy_time_now ();
         const auto busy = fmr::form::si_time (busy_s);
         const auto tot  = fmr::form::si_time (W->time.get_work_s ());
-        const auto label = femera::form::text_line (250, "%4s %4s exit",
-          W->get_base_abrv ().c_str(), W->get_abrv().c_str());
         const auto text = busy+" /"+tot+" "+W->name
           +((W->version=="") ? "":" "+W->version);
 FMR_WARN_INLINE_OFF
         if (W->data == nullptr) {
           if (this->is_work_main) {
+          const auto label = femera::form::text_line (250, "%4s %4s exit",
+            W->get_base_abrv ().c_str(), W->get_abrv().c_str());
             form::name_line (::stdout, 14, 80, label, text);
           } } else {
-          W->data->name_line (W->data->fmrlog, label, text);
+          W->data->NEW_send (fmr::NEW_log,
+            W->get_base_abrv (), W->get_abrv(), "exit", text);
         }
 FMR_WARN_INLINE_ON
       }

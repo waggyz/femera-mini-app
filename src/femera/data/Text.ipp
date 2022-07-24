@@ -41,30 +41,6 @@ namespace femera {
     return data::Text::text_line (data::File_ptrs_t ({}), form, args...);
   }
   template <typename ...Args> inline
-  std::string data::Text::name_line (const data::File_ptrs_t& flist,
-    const std::string& label, const std::string& form, Args ...args) {
-    FILE* file = nullptr;
-    if (flist.size () > 0 && this->proc != nullptr) {
-      file = flist [this->proc->get_proc_id () % flist.size()];
-    }
-    const auto w = this->data->file_line_sz [file];
-    const auto h = this->data->line_name_sz [file];
-//    const auto line = femera::form::name_line (h, w, label, form, args...);
-    const auto line = this->data->name_line (h, w, label, form, args...);
-    if (file != nullptr) {
-//      this->time.add_idle_time_now ();
-      const auto c = fprintf (file,"%s\n", line.c_str());
-//      this->time.add_busy_time_now ();
-      if (c > 0) { this->time.add_count (1, 0, 0, fmr::Perf_int(c)); }
-    }
-    return line;
-  }
-  template <typename ...Args> inline
-  std::string data::Text::name_line
-  (const std::string& label, const std::string& form, Args ...args) {
-    return data::Text::name_line (data::File_ptrs_t ({}), label, form, args...);
-  }
-  template <typename ...Args> inline
   std::string data::Text::time_line (const data::File_ptrs_t& flist,
     const std::string& label, const std::string& form, Args ...args) {
     FILE* file = nullptr;

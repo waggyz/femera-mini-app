@@ -72,11 +72,6 @@ namespace femera { namespace data {
     ss text_line (                    const ss& form, Args...);
     //
     template <typename ...Args>
-    ss name_line (const File_ptrs_t&, const ss& name, const ss& form, Args...);
-    template <typename ...Args>
-    ss name_line (                    const ss& name, const ss& form, Args...);
-    //
-    template <typename ...Args>
     ss time_line (const File_ptrs_t&, const ss& name, const ss& form, Args...);
     template <typename ...Args>
     ss time_line (                    const ss& name, const ss& form, Args...);

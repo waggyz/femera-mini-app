@@ -70,40 +70,6 @@ namespace femera {
   std::string data::File::text_line (const std::string& form, Args ...args) {
     return data::File::text_line (data::File_ptrs_t ({}), form, args...);
   }
-  template <typename ...Args> inline //TODO move from File to Text handler.
-  std::string data::File::name_line (const data::File_ptrs_t& flist,
-    const std::string& label, const std::string& form, Args ...args) {
-# if 0
-    if (this->did_logs_init ()) {
-      const auto D = Work::cast_via_work<data::Text>(this->get_task (Task_type::Text));
-//      const auto D = this->get_task (Task_type::Text);
-      if (D != nullptr) {return D->name_line (flist, label, form, args...);}
-    }
-    return "";
-#else
-    FILE* file = nullptr;
-    if (flist.size () > 0 && this->proc != nullptr) {
-FMR_WARN_INLINE_OFF
-      file = flist [this->proc->get_proc_id () % flist.size()];
-FMR_WARN_INLINE_ON
-    }
-    const auto w = this->file_line_sz [file];
-    const auto h = this->line_name_sz [file];
-    const auto line = femera::form::name_line (h, w, label, form, args...);
-    if (file != nullptr) {
-//      this->time.add_idle_time_now ();
-      const auto c = fprintf (file,"%s\n", line.c_str());
-//      this->time.add_busy_time_now ();
-      if (c > 0) { this->time.add_count (1, 0, 0, fmr::Perf_int(c)); }
-    }
-    return line;
-#   endif
-  }
-  template <typename ...Args> inline
-  std::string data::File::name_line
-  (const std::string& label, const std::string& form, Args ...args) {
-    return data::File::name_line (data::File_ptrs_t ({}), label, form, args...);
-  }
   template <typename ...Args> inline
   std::string data::File::time_line (const data::File_ptrs_t& flist,
     const std::string& label, const std::string& form, Args ...args) {
