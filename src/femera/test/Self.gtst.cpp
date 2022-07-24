@@ -25,6 +25,7 @@ namespace femera { namespace test { namespace self {
       if (id % mod_n < each_n) {
         FMR_PRAGMA_OMP(omp atomic write)
         pids [id % mod_n] = id;
+#ifdef FMR_DEBUG
         const auto name = femera::form::text_line (40,"%4s %4s %4s",
           mini->test->get_base_abrv().c_str(),
             mini->test->get_abrv().c_str(),"proc");
@@ -34,6 +35,7 @@ FMR_WARN_INLINE_OFF
           "%4u proc[%u %% %u=%u]=%u%s", mini->proc->get_proc_id (), id, mod_n,
           id % mod_n, pids [id % mod_n], mini->proc->is_main() ? " *main" : "");
 FMR_WARN_INLINE_ON
+#endif
       }
       else {}
       FMR_PRAGMA_OMP(omp barrier)

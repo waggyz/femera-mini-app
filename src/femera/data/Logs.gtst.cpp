@@ -11,27 +11,12 @@ FMR_WARN_INLINE_OFF
 FMR_WARN_INLINE_ON
 }
 namespace femera { namespace test {
-
+//
 TEST( Logs, TrivialTest) { EXPECT_EQ( 0, 0 ); }
 TEST( Logs, Send) {
-EXPECT_GE( mini->data->NEW_send (fmr::NEW_log,"File","gtst","msg",
+EXPECT_GE( mini->data->NEW_send (fmr::NEW_log, "Logs","gtst","msg",
   "**** OK on thread %u", mini->proc->get_proc_id ()),
   mini->proc->is_main () ? 20 : 0);
 }
-#if 0
-  TEST( Logs, SendLogLine) {
-    EXPECT_EQ( mini->data->send (fmr:log, Vals_type::Logs_line, this->info_d,
-      "data","logs","gtst","send logs line test level %i", 1), 43 );
-    EXPECT_EQ( mini->data->send (fmr:log, Vals_type::Logs_line, FMR_VERBMAX+1,
-      "data","logs","gtst","send logs line test level %i", FMR_VERBMAX+1), 0 );
-  }
-  TEST( Logs, SendLogNameLine) {
-    EXPECT_EQ( mini->data->send (fmr:log, Vals_type::Name_line, this->info_d,
-      " data logs gtst send ","  info line test %i", 1), 37 );// trims white space
-  }
-  TEST( Logs, SendLogInfoLine) {
-    EXPECT_EQ( mini->data->send (fmr:log, Vals_type::Info_line, this->info_d,
-      "data logs gtst send info line test %i", 1), 37 );
-  }
-#endif
+//
 } }//end femerea::test:: namespace

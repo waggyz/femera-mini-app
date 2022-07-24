@@ -19,7 +19,7 @@ namespace femera {
       FMR_PRAGMA_OMP(omp ordered) {     // in order.
         this->vals.push_back (data::Vals ());
     } }
-    this->name += " with "+std::to_string (n)+" thread-local vals";
+    this->name += " with "+std::to_string (n)+" thread-local vals each";
 # endif
   }
 }//end femera:: namespace

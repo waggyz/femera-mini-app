@@ -13,11 +13,11 @@ namespace femera {
     this->task_type = task_cast (Task_type::Logs);
     this->info_d    = 3;
     this->out_NEW_name_list = {
-      {fmr::NEW_none, {fmr::NEW_none}},
-      {fmr::NEW_null, {fmr::NEW_none}},// convenient synonym
-      {fmr::NEW_log , {fmr::NEW_out }},// task_init sets STDOUT to main only
-      {fmr::NEW_out , {fmr::NEW_out }},// default all threads to STDOUT
-      {fmr::NEW_err , {fmr::NEW_err }} // default all threads to STDERR
+      {fmr::NEW_none, {}},             // suppress output
+      {fmr::NEW_null, {}},             // convenient synonym
+      {fmr::NEW_log , {fmr::NEW_out }},// task_init sets ::stdout to main only
+      {fmr::NEW_out , {fmr::NEW_out }},// default all threads to ::stdout
+      {fmr::NEW_err , {fmr::NEW_err }} // default all threads to ::stderr
     };
   }
   void data::Logs::task_init (int*, char**) {//TODO opts -v<int>, -t<int>,...
@@ -27,7 +27,7 @@ namespace femera {
       n = this->proc->get_proc_n (Task_type::Fomp);// OpenMP threads / mpi proc
       n = (n==0) ? 1 : n;
     }
-    // default fmr:log destination is STDOUT from thread 0.
+    // default fmr:log destination is ::stdout from thread 0.
     this->out_NEW_name_list [fmr::NEW_log ] = Data::Data_list_NEW_t (n, fmr::NEW_out);
     if (n > 0) { this->out_NEW_name_list [fmr::NEW_log][0] = fmr::NEW_out; }
 #if 1
@@ -47,7 +47,7 @@ namespace femera {
 #endif
     if (this->do_log (out_d)) {
       if (this->out_NEW_name_list.find (file) != out_NEW_name_list.end ()) {
-        const auto outs = this->out_NEW_name_list.at (file);
+        const auto outs = this->out_NEW_name_list.at (file);//TODO double-lookup
         const auto n = outs.size ();
         if (n > 0) {
           FILE* f = nullptr;
