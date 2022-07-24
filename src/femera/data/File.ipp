@@ -6,23 +6,15 @@ namespace femera {
   void data::File::task_exit () {
   }
   inline
-  bool data::File::did_logs_init ()
+  bool data::File::did_logs_init ()//TODO get from Logs task
   noexcept {
-    return this->logs_init_tf;
+    return false;//this->logs_init_tf;
   }
   inline
-  bool data::File::set_logs_init (const bool tf)
+  bool data::File::set_logs_init (const bool)//TODO get from Logs task
   noexcept {
-    this->logs_init_tf = tf;
-#if 0
-    if (tf) {
-      auto D = Work::cast_via_work<data::Text>(this->get_task (Task_type::Text));
-      if (D != nullptr) {
-        D->file_line_sz = this->file_line_sz;
-        D->line_name_sz = this->line_name_sz;
-    } }
-#endif
-    return this->logs_init_tf;
+//    this->logs_init_tf = tf;
+   return false;//this->logs_init_tf;
   }
   template <typename ...Args> inline// standard fmr:log line
   std::size_t data::File::NEW_send (const fmr::Data_name_NEW_t& data_name,

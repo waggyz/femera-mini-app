@@ -32,9 +32,6 @@ namespace fmr {//TODO Move to fmr.h, change to femera:: ?
   static const Data_name_NEW_t NEW_none="fmr:none";
   // formatters: fmr::Vals_type::Info_line, fmr::Vals_type::Text_line, ...
 }//end fmr:: namespace
-namespace femera { namespace data {
-  using File_ptrs_t = std::vector <::FILE*>;//TODO Replace with Data_name_t
-} }//end femera::data:: namespace
 namespace femera {
   template <typename T>
   class Data : public Work {

@@ -30,11 +30,7 @@ namespace femera {
     // default fmr:log destination is ::stdout from thread 0.
     this->out_NEW_name_list [fmr::NEW_log ] = Data::Data_list_NEW_t (n, fmr::NEW_out);
     if (n > 0) { this->out_NEW_name_list [fmr::NEW_log][0] = fmr::NEW_out; }
-#if 1
-    this->data->fmrlog = data::File_ptrs_t (n, nullptr);//TODO REMOVE
-    if (n > 0) { this->data->fmrlog [0] = ::stdout; }
-#endif
-    this->data->set_logs_init (true);
+    this-> NEW_logs_init_tf = true;
   }
   void data::Logs::task_exit () {
   }

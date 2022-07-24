@@ -7,11 +7,11 @@
 #include "../../fmr/form.hpp"
 
 #if 0
-/*TODO Make variadic read/save/send methods in File.ipp to package heterogenous
-       data into a fmr::Vals structure (or std::string?, vector<std::string>?)
-       then call a non-variadic member function in File.cpp to pass it on to a
-       specialized handler (in e.g. Text.cpp, Dlim.cpp, Loggs.cpp, Cgns.cpp,...)
-       to handle that structure.
+/* Variadic read/save/send methods in File.ipp package heterogenous
+  data into a fmr::Vals structure (or std::string?, vector<std::string>?)
+  then call a non-variadic member function in File.cpp to pass it on to a
+  specialized handler (in e.g. Text.cpp, Dlim.cpp, Loggs.cpp, Cgns.cpp,...)
+  to handle that structure.
 *//*
   std::size_t File::send (fmr::Data_name_t,                // returns bytes sent
     std::string lab1, std::string lab2, std::string lab3, std::string form, ...)
@@ -28,14 +28,7 @@
 namespace femera { namespace data {
   class File;// Derive as a CRTP concrete class from Data.
   class File final: public Data <File> {// private: friend class Data;
-  public:
-#if 1
-    File_ptrs_t fmrlog = {};// main proc to stdout set by Logs::task_init (..)
-    File_ptrs_t fmrout = {::stdout};//TODO Replae these w/ fmr:log, fmr:out,...
-    File_ptrs_t fmrerr = {::stderr};
-    File_ptrs_t fmrall = {::stdout};
-#endif
-    bool logs_init_tf = false;
+//    bool logs_init_tf = false;//TODO Remove.
   public:
     bool did_logs_init ()     noexcept;
     bool set_logs_init (bool) noexcept;
@@ -50,18 +43,6 @@ namespace femera { namespace data {
     std::size_t NEW_send (const fmr::Data_name_NEW_t&,// standard fmr:log line
       css& lab1, css& lab2, css& lab3, css& form, Args...);
 #endif
-//TODO ======================== REMOVE BELOW ==================================
-  private:
-#if 1
-    // TODO Replace below with unordered_map <Data_name_NEW_t, data::Page_dims>
-    //      or                 unordered_map <Data_name_NEW_t, data::Page_dims>
-    //      or std::vector <data::Page_dims> indexed by Vals_type_t.
-    std::unordered_map <FILE*, fmr::Line_size_int> file_line_sz
-      = {{nullptr, 80}, {::stdout, 80}, {::stderr, 250}};
-    std::unordered_map <FILE*, fmr::Line_size_int> line_name_sz
-      = {{nullptr, 14}, {::stdout, 14}, {::stderr, 0}};
-#endif
-//=============================================================================
   public:
     void task_init (int* argc, char** argv);
     void task_exit ();
