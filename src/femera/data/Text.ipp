@@ -15,57 +15,7 @@ namespace femera {
   inline
   void data::Text::task_exit () {
   }
-//============================ REMOVE =========================================
-#if 1
-  template <typename ...Args> inline
-  std::string data::Text::text_line
-  (const data::File_ptrs_t& flist, const std::string& form, Args ...args) {
-    FILE* file = nullptr;
-    if (flist.size () > 0 && this->proc != nullptr) {
-      file = flist [this->proc->get_proc_id () % flist.size()];
-    }
-    const auto w = this->data->file_line_sz [file];
-    std::valarray<char> buf (w + 1);
-    std::snprintf (&buf[0], buf.size(), form.c_str(), args...);
-    const auto line = std::string (&buf[0]);
-    if (file != nullptr) {
-//      this->time.add_idle_time_now ();//TODO move to Text should fix timing
-      const auto c = fprintf (file,"%s\n", line.c_str());
-//      this->time.add_busy_time_now ();
-      if (c > 0) { this->time.add_count (1, 0, 0, fmr::Perf_int(c)); }
-    }
-    return line;
-  }
-  template <typename ...Args> inline
-  std::string data::Text::text_line (const std::string& form, Args ...args) {
-    return data::Text::text_line (data::File_ptrs_t ({}), form, args...);
-  }
-  template <typename ...Args> inline
-  std::string data::Text::time_line (const data::File_ptrs_t& flist,
-    const std::string& label, const std::string& form, Args ...args) {
-    FILE* file = nullptr;
-    if (flist.size () > 0 && this->proc != nullptr) {
-      file = flist [this->proc->get_proc_id () % flist.size ()];
-    }
-    const auto h = this->data->line_name_sz [file];
-    const auto w = this->data->file_line_sz [file];
-//    const auto line = femera::form::time_line (h, w, label, form, args...);
-    const auto line = this->data->time_line (h, w, label, form, args...);
-    if (file != nullptr) {
-//      this->time.add_idle_time_now ();
-      const auto c = fprintf (file,"%s\n", line.c_str());
-//      this->time.add_busy_time_now ();
-      if (c > 0) { this->time.add_count (1, 0, 0, fmr::Perf_int(c)); }
-    }
-    return line;
-  }
-  template <typename ...Args> inline
-  std::string data::Text::time_line
-  (const std::string& label, const std::string& form, Args ...args) {
-    return data::Text::time_line (data::File_ptrs_t ({}), label, form, args...);
-  }
-#endif
-//=============================================================================
+  //
 }//end femera namespace
 
 //end FEMERA_DATA_TEXT_IPP

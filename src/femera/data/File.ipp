@@ -37,64 +37,6 @@ namespace femera {
    // call method to find data_name handler and output (append) to destination
     return this->NEW_send (data_name, msg);
   }
-//TODO ======================== REMOVE BELOW ==================================
-# if 1
-  template <typename ...Args> inline
-  std::string data::File::text_line                         // send (..)
-  (const data::File_ptrs_t& flist, const std::string& form, Args ...args) {
-# if 0
-    const auto D = this->data->get_task (Task_type::Text);
-//    const auto D = Work::cast_via_work<data::Text>(this->get_task (Task_type::Text));
-    if (D != nullptr) {return D->text_line (flist, form, args...);}
-    return "";
-#else
-    FILE* file = nullptr;
-    if (flist.size () > 0 && this->proc != nullptr) {
-      file = flist [this->proc->get_proc_id () % flist.size ()];
-    }
-    const auto w = this->file_line_sz [file];
-    std::valarray<char> buf (w + 1);// +1 for terminal null
-    std::snprintf (&buf[0], buf.size(), form.c_str(), args...);
-    const auto line = std::string (&buf[0]);
-    if (file != nullptr) {
-//      this->time.add_idle_time_now ();//TODO move to Text should fix timing
-//      this->send (file_name, line);// or file_list, line_list
-      const auto c = fprintf (file,"%s\n",line.c_str());
-//      this->time.add_busy_time_now ();
-      if (c > 0) { this->time.add_count (1, 0, 0, fmr::Perf_int(c)); }
-    }
-    return line;
-#endif
-  }
-  template <typename ...Args> inline
-  std::string data::File::text_line (const std::string& form, Args ...args) {
-    return data::File::text_line (data::File_ptrs_t ({}), form, args...);
-  }
-  template <typename ...Args> inline
-  std::string data::File::time_line (const data::File_ptrs_t& flist,
-    const std::string& label, const std::string& form, Args ...args) {
-    FILE* file = nullptr;
-    if (flist.size () > 0 && this->proc != nullptr) {
-      file = flist [this->proc->get_proc_id () % flist.size ()];
-    }
-    const auto h = this->line_name_sz [file];
-    const auto w = this->file_line_sz [file];
-    const auto line = femera::form::time_line (h, w, label, form, args...);
-    if (file != nullptr) {
-//      this->time.add_idle_time_now ();
-      const auto c = fprintf (file,"%s\n", line.c_str());
-//      this->time.add_busy_time_now ();
-      if (c > 0) { this->time.add_count (1, 0, 0, fmr::Perf_int(c)); }
-    }
-    return line;
-  }
-  template <typename ...Args> inline
-  std::string data::File::time_line
-  (const std::string& label, const std::string& form, Args ...args) {
-    return data::File::time_line (data::File_ptrs_t ({}), label, form, args...);
-  }
-#endif
-//=============================================================================
 }//end femera namespace
 
 //end FEMERA_FILE_IPP

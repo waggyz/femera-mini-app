@@ -61,28 +61,7 @@ namespace femera { namespace data {
     std::unordered_map <FILE*, fmr::Line_size_int> line_name_sz
       = {{nullptr, 14}, {::stdout, 14}, {::stderr, 0}};
 #endif
-#if 1
-  private:
-    using ss = std::string;
-  public:
-    //TODO Move to femera::data::Text and/or femera::data::Logs ?
-    template <typename ...Args>
-    ss text_line (const File_ptrs_t&, const ss& form, Args...);
-    template <typename ...Args>
-    ss text_line (                    const ss& form, Args...);
-    //
-    template <typename ...Args>
-    ss time_line (const File_ptrs_t&, const ss& name, const ss& form, Args...);
-    template <typename ...Args>
-    ss time_line (                    const ss& name, const ss& form, Args...);
-#endif
 //=============================================================================
-#if 0
-    ss wrap_line (File_ptrs_t, ss& name, ss& form,...);
-    ss data_line (File_ptrs_t, ss& name, ss& form,...);
-    ss perf_line (File_ptrs_t, ss& name, ss& form,...);
-    ss perf_line (ss name, ss& form,...);
-#endif
   public:
     void task_init (int* argc, char** argv);
     void task_exit ();

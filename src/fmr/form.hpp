@@ -52,6 +52,12 @@ namespace femera { namespace form {
     fmr::Line_size_int name_width, fmr::Line_size_int line_width,
     const std::string& name, const std::string& format, Args...);
 
+#if 0
+    ss wrap_line (..);
+    ss data_line (..);
+    ss perf_line (..);
+    ss perf_line (..);
+#endif
 } }//end femera::form:: namespace
 
 #include "form.ipp"
