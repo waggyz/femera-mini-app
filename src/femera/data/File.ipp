@@ -17,7 +17,7 @@ namespace femera {
    return false;//this->logs_init_tf;
   }
   template <typename ...Args> inline// standard fmr:log line
-  std::size_t data::File::NEW_send (const fmr::Data_name_NEW_t& data_name,
+  std::size_t data::File::send (const fmr::Data_name_t& data_name,
     const std::string& lab1, const std::string& lab2, const std::string& lab3,
     const std::string& form, Args...args) {
     const auto line_width = uint (80);//TODO look up for data_name destination
@@ -27,7 +27,7 @@ namespace femera {
     printf ((msg+" "+data_name+" in File.ipp\n").c_str ());
 #endif
    // call method to find data_name handler and output (append) to destination
-    return this->NEW_send (data_name, msg);
+    return this->send (data_name, msg);
   }
 }//end femera namespace
 

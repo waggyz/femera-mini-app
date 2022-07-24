@@ -18,9 +18,9 @@ namespace femera {
     return v <= this->verb_d;
   }
   inline
-  bool data::Logs::does_file (const fmr::Data_name_NEW_t& file)
+  bool data::Logs::does_file (const fmr::Data_name_t& file)
   noexcept {
-    return this->out_NEW_name_list.find(file) != this->out_NEW_name_list.end();
+    return this->out_name_list.find(file) != this->out_name_list.end();
   }
 }//end femera namespace
 

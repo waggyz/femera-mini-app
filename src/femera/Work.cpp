@@ -95,7 +95,7 @@ namespace femera {
               +((W->version=="") ? "":" "+W->version);
           }
           if (W->data->did_logs_init ()) {
-            W->data->NEW_send (fmr::NEW_log,
+            W->data->send (fmr::log,
               W->get_base_abrv (), W->get_abrv (), "init", text);
           } else {
           if (W->proc != nullptr) {
@@ -165,7 +165,7 @@ FMR_WARN_INLINE_OFF
             W->get_base_abrv ().c_str(), W->get_abrv().c_str());
             form::name_line (::stdout, 14, 80, label, text);
         } } else {
-          W->data->NEW_send (fmr::NEW_log,
+          W->data->send (fmr::log,
             W->get_base_abrv (), W->get_abrv(), "exit", text);
         }
 FMR_WARN_INLINE_ON
@@ -218,7 +218,7 @@ FMR_WARN_INLINE_OFF
             W->get_base_abrv ().c_str(), W->get_abrv().c_str());
             form::name_line (::stdout, 14, 80, label, text);
           } } else {
-          W->data->NEW_send (fmr::NEW_log,
+          W->data->send (fmr::log,
             W->get_base_abrv (), W->get_abrv(), "exit", text);
         }
 FMR_WARN_INLINE_ON

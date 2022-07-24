@@ -34,12 +34,12 @@ namespace femera {
       if (fmr::Local_int (gmsh_omp_n) == omp_n) {
         if (true) {//TODO detail level?
           const auto n = fmr::Local_int (gmsh_omp_n);
-          this->data->NEW_send (fmr::NEW_log, "data", "gmsh", "uses",
+          this->data->send (fmr::log, "data", "gmsh", "uses",
             "%4u    /%4u OpenMP thread%s each (maximum)",
             n, omp_n, (omp_n==1)?"":"s");
         } }
       else {
-        this->data->NEW_send (fmr::NEW_log, "data", "gmsh", "NOTE",
+        this->data->send (fmr::log, "data", "gmsh", "NOTE",
         "OpenMP threads (%g) does not match Femera (%u).",
         gmsh_omp_n, omp_n);
   } } }

@@ -94,8 +94,8 @@ namespace femera {
   }
 # if 0
   template <typename T> inline
-  std::size_t Data<T>::NEW_send// returns bytes sent
-  (const fmr::Data_name_NEW_t& file, const std::string& txt) {
+  std::size_t Data<T>::send// returns bytes sent
+  (const fmr::Data_name_t& file, const std::string& txt) {
     auto D = this->get_task (file);//printf (txt.c_str ()+"/n");
     if (D == nullptr) {return 0;}
 #if 1//def FMR_DEBUG
@@ -106,7 +106,7 @@ namespace femera {
   }
   template <typename T> inline
   T* Data<T>::get_task
-  (const fmr::Data_name_NEW_t& file, const fmr::Local_int ix)
+  (const fmr::Data_name_t& file, const fmr::Local_int ix)
   noexcept {
     fmr::Local_int i=0;
     auto D = this;

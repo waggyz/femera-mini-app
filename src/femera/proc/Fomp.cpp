@@ -36,7 +36,7 @@ namespace femera {
       if (false && this->proc != nullptr) {//TODO calculate number of OpenMP threads
         this->proc->auto_proc_n ();// sets this->proc_n
         if (this->data != nullptr) {
-          data->NEW_send (fmr::NEW_log, get_base_abrv (), get_abrv (), "thrd",
+          data->send (fmr::log, get_base_abrv (), get_abrv (), "thrd",
             "%u", this->proc_n);
       } }
       ::omp_set_num_threads (int (this->proc_n));
@@ -76,7 +76,7 @@ namespace femera {
 #if 0
       if (this->data != nullptr) {
         //TODO wrong before init done
-        data->NEW_send (fmr::NEW_out, get_base_abrv (), get_abrv (), "thrd",
+        data->send (fmr::out, get_base_abrv (), get_abrv (), "thrd",
           "%4u for process %4u", this->proc_n, this->proc->get_proc_id ());
       }
 #endif

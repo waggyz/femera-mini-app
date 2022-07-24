@@ -25,7 +25,7 @@ namespace femera { namespace test { namespace self {
       if (id % mod_n < each_n) {
         FMR_PRAGMA_OMP(omp atomic write)
         pids [id % mod_n] = id;
-      mini->data->NEW_send (fmr::NEW_log, "self", "gtst", "proc",
+      mini->data->send (fmr::log, "self", "gtst", "proc",
         "%4u proc[%u %% %u=%u]=%u%s", mini->proc->get_proc_id (), id, mod_n,
         id % mod_n, pids [id % mod_n], mini->proc->is_main() ? " *main" : "");
       }

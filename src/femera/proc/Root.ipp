@@ -13,7 +13,7 @@ namespace femera {
   inline
   void proc::Root::task_init (int*, char**) {
 # if 0
-    this->data->NEW_send (fmr::NEW_log, "proc", "root", "NOTE",//TODO in Root.cpp
+    this->data->send (fmr::log, "proc", "root", "NOTE",//TODO in Root.cpp
       "process handler initialization reported in reverse order");
 #   endif
   }

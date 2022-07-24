@@ -15,7 +15,7 @@ namespace femera { namespace data {
   private:
     void task_init (int* argc, char** argv);
     void task_exit ();
-    bool does_file (const fmr::Data_name_NEW_t&){return false;}//TODO to .?pp
+    bool does_file (const fmr::Data_name_t&){return false;}//TODO to .?pp
   };
 } }//end femera::data:: namespace
 

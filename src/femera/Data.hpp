@@ -12,7 +12,7 @@
 
 namespace fmr {//TODO Move to fmr.h, change to femera:: ?
   // a file name is interpreted as a collection of vals
-  using Data_name_NEW_t = std::string;// variable (vals) or file name
+  using Data_name_t = std::string;// variable (vals) or file name
  /*
   * Data_name_t: sim, part, file, directory, or other data collection path and
   * (base) name.
@@ -23,13 +23,13 @@ namespace fmr {//TODO Move to fmr.h, change to femera:: ?
   * (output) data destinations.
   */
   // built-in data sources and destinations
-  //TODO Replace NEW_ with nothing after refactoring is finished.
-  static const Data_name_NEW_t NEW_log ="fmr:log" ;// default ::stdout from main thread only
-  static const Data_name_NEW_t NEW_out ="fmr:out" ;// default ::stdout from all threads
-  static const Data_name_NEW_t NEW_err ="fmr:err" ;// default ::stderr from all threads
-  static const Data_name_NEW_t NEW_in  ="fmr:in"  ;// default ::stdin  to   each MPI thread
-  static const Data_name_NEW_t NEW_null="fmr:null";
-  static const Data_name_NEW_t NEW_none="fmr:none";
+  //TODO Replace  with nothing after refactoring is finished.
+  static const Data_name_t log ="fmr:log" ;// default ::stdout from main thread only
+  static const Data_name_t out ="fmr:out" ;// default ::stdout from all threads
+  static const Data_name_t err ="fmr:err" ;// default ::stderr from all threads
+  static const Data_name_t in  ="fmr:in"  ;// default ::stdin  to   each MPI thread
+  static const Data_name_t null="fmr:null";
+  static const Data_name_t none="fmr:none";
   // formatters: fmr::Vals_type::Info_line, fmr::Vals_type::Text_line, ...
 }//end fmr:: namespace
 namespace femera {
@@ -38,12 +38,12 @@ namespace femera {
   private:// typedefs
     using This_spt = FMR_SMART_PTR<T>;
   protected:// typedefs
-    using Data_list_NEW_t = std::vector<fmr::Data_name_NEW_t>;
+    using Data_list_t = std::vector<fmr::Data_name_t>;
   protected:// member variables
     // Each data handler has a map of data/file names handled by it.
-    std::unordered_map <fmr::Data_name_NEW_t, Data_list_NEW_t> inp_NEW_name_list = {};
-    //TODO set inp/out_NEW_name_list in each handler derived from data
-    std::unordered_map <fmr::Data_name_NEW_t, Data_list_NEW_t> out_NEW_name_list ={};
+    std::unordered_map <fmr::Data_name_t, Data_list_t> inp_name_list = {};
+    //TODO set inp/out_name_list in each handler derived from data
+    std::unordered_map <fmr::Data_name_t, Data_list_t> out_name_list ={};
 #if 0
   private:// variables
     std::unordered_map <fmr::Data_name_t, std::vector <T*>> inp_data_task ={};
@@ -63,10 +63,10 @@ namespace femera {
     T* get_task (Work_type, fmr::Local_int ix=0) noexcept;
     T* get_task (Task_type, fmr::Local_int ix=0) noexcept;
     //
-    T* get_task (const fmr::Data_name_NEW_t&, fmr::Local_int ix=0) noexcept;
+    T* get_task (const fmr::Data_name_t&, fmr::Local_int ix=0) noexcept;
     //
-//    bool does_file (const fmr::Data_name_NEW_t&) noexcept;//{return false;}//TODO to .ipp
-//    std::size_t NEW_send (const fmr::Data_name_NEW_t&, const std::string& txt);// byte
+//    bool does_file (const fmr::Data_name_t&) noexcept;//{return false;}//TODO to .ipp
+//    std::size_t send (const fmr::Data_name_t&, const std::string& txt);// byte
   private:
 #if 0
     T* get_task (fmr::Data_name_t, fmr::Vals_type,   fmr::Local_int ix=0) noexcept;

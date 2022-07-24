@@ -17,9 +17,9 @@ namespace fmr { namespace form {
   template <typename V> static
   std::string si_time (const V seconds,
     const int min_digits = 2, const bool is_signed = false);
-
+  //
   std::string utc_time ();
-
+  //
 } }// end fmr::form:: namespace
 
 namespace femera { namespace form {

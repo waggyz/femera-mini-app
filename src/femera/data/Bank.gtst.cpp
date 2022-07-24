@@ -44,7 +44,7 @@ namespace femera { namespace test {
     std::valarray <double> val (std::move(vec.data ()), sz);//likely this copies
 #endif
     for (fmr::Local_int i =0; i<sz; ++i) { sum += val [i]; }
-    mini->data->NEW_send (fmr::NEW_out, "vals", "from", "vec1",
+    mini->data->send (fmr::out, "vals", "from", "vec1",
       "%g (garbage)", sum);
     return sum;
     /* stackoverflow.com/questions/13634504/assign-a-stdvector-to-a-stdvalarray
@@ -67,7 +67,7 @@ namespace femera { namespace test {
     //
     double sum = 0.0;
     for (fmr::Local_int i =0; i<sz; ++i) { sum += vals[0] [i]; }
-    mini->data->NEW_send (fmr::NEW_out, "vals", "from", "vec2",
+    mini->data->send (fmr::out, "vals", "from", "vec2",
       "%g (garbage)", sum);
     return sum;
   }
@@ -94,7 +94,7 @@ namespace femera { namespace test {
     sum = (sum < 0) ? 0.0 : sum;
     sum = (sum > 0) ? 0.0 : sum;
 #endif
-    mini->data->NEW_send (fmr::NEW_out, "vals", "zero", "perf",
+    mini->data->send (fmr::out, "vals", "zero", "perf",
       "%s, %s in %s (check %g == 0)",
       fmr::form::si_unit (speed, "B/s").c_str(),
       fmr::form::si_unit (perf.get_byte_n (), "B").c_str(),
@@ -136,7 +136,7 @@ namespace femera { namespace test {
     sum = (sum > 0) ? 0.0 : sum;
 #endif
 FMR_WARN_INLINE_OFF
-    mini->data->NEW_send (fmr::NEW_out, "vals", "vec2", "perf",
+    mini->data->send (fmr::out, "vals", "vec2", "perf",
       "%s, %s in %s (check %g ?= 0)",
       fmr::form::si_unit (speed, "B/s").c_str(),
       fmr::form::si_unit (perf.get_byte_n (), "B").c_str(),

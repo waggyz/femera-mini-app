@@ -22,13 +22,13 @@ namespace femera {
   }
   void test::Self::log_init_info () {// pulled out of task_init (inline fail)
     const auto cppver = __cplusplus;
-  this->data->NEW_send (fmr::NEW_log, this->get_base_abrv (), this->abrv, "ver",
+  this->data->send (fmr::log, this->get_base_abrv (), this->abrv, "ver",
     std::string (MAKESTR(FMR_VERSION)));
-  this->data->NEW_send (fmr::NEW_log, this->get_base_abrv (), this->abrv, "g++",
+  this->data->send (fmr::log, this->get_base_abrv (), this->abrv, "g++",
     std::string (__VERSION__));
-  this->data->NEW_send (fmr::NEW_log, this->get_base_abrv (), this->abrv, "C++",
+  this->data->send (fmr::log, this->get_base_abrv (), this->abrv, "C++",
     "%li", cppver);
-  this->data->NEW_send (fmr::NEW_log, this->get_base_abrv (), this->abrv, "zord",
+  this->data->send (fmr::log, this->get_base_abrv (), this->abrv, "zord",
     "%4u maximum hypercomplex order", zyclops::max_zorder);
   }
   fmr::Exit_int test::Self::proc_node_chck () {
@@ -53,23 +53,23 @@ namespace femera {
 #else
       const auto x = std::string ("x");
 #endif
-      this->data->NEW_send (fmr::NEW_log, get_base_abrv (), abrv, "proc",
+      this->data->send (fmr::log, get_base_abrv (), abrv, "proc",
         ("%4u    /%4u total CPU processes (%4u MPI  "+ x +"%4u OpenMP)").c_str(),
         mpi_n * omp_n, all_n, mpi_n, omp_n);
-      this->data->NEW_send (fmr::NEW_log, get_base_abrv (), abrv, "node",
+      this->data->send (fmr::log, get_base_abrv (), abrv, "node",
         ("%4u    /%4u total physical CPUs (%4u node "+ x +"%4u cores)").c_str(),
         node_n * core_n, all_n, node_n, core_n);
-      this->data->NEW_send (fmr::NEW_log, get_base_abrv (), abrv, "numa",
+      this->data->send (fmr::log, get_base_abrv (), abrv, "numa",
         ("%4u ea "+ x +"%4u node:%4u NUMA domain%s total").c_str(),
         numa_n, node_n, numa_all, (numa_all==1)?"":"s");
     }
     if (all_n < core_n) { err =-1;
-      this->data->NEW_send (fmr::NEW_log, get_base_abrv (), abrv, "NOTE",
+      this->data->send (fmr::log, get_base_abrv (), abrv, "NOTE",
         "Femera uses fewer threads (%u) than physical cores (%u).",
         all_n, core_n);
     }
     if (all_n > core_n) { err =-1;
-      this->data->NEW_send (fmr::NEW_log, get_base_abrv (), abrv, "NOTE",
+      this->data->send (fmr::log, get_base_abrv (), abrv, "NOTE",
         "Femera uses more threads (%u) than physical cores (%u).",
         all_n, core_n);
     }

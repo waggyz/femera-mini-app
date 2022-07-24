@@ -71,7 +71,7 @@ FMR_WARN_INLINE_OFF
 #endif
 FMR_WARN_INLINE_ON
   }
-  std::size_t data::File::NEW_send (const fmr::Data_name_NEW_t& file,
+  std::size_t data::File::send (const fmr::Data_name_t& file,
     const std::string& text, const fmr::Dim_int out_d)
   noexcept { size_t byte = 0;
     if (! this->task_list.empty ()) {// only checks top-level tasks
@@ -85,7 +85,7 @@ FMR_WARN_INLINE_ON
             do_task = C->does_file (file);
             if (do_task) {
               //byte += text.size ();//TODO Replace with below.
-              byte += C->task_NEW_send (file, text, out_d);
+              byte += C->task_send (file, text, out_d);
           } }
           default: {}// do nothing
         }

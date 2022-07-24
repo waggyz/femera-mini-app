@@ -14,7 +14,7 @@ namespace femera { namespace test {
 //
 TEST( Logs, TrivialTest) { EXPECT_EQ( 0, 0 ); }
 TEST( Logs, Send) {
-EXPECT_GE( mini->data->NEW_send (fmr::NEW_log, "Logs","gtst","msg",
+EXPECT_GE( mini->data->send (fmr::log, "Logs","gtst","msg",
   "**** OK on thread %u", mini->proc->get_proc_id ()),
   mini->proc->is_main () ? 20 : 0);
 }
