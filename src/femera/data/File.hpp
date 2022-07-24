@@ -28,11 +28,8 @@
 namespace femera { namespace data {
   class File;// Derive as a CRTP concrete class from Data.
   class File final: public Data <File> {// private: friend class Data;
-//    bool logs_init_tf = false;//TODO Remove.
   public:
-    bool did_logs_init ()     noexcept;
-    bool set_logs_init (bool) noexcept;
-#if 1
+    bool did_logs_init () noexcept;
   private:
     using css = const std::string;
   public:
@@ -42,7 +39,6 @@ namespace femera { namespace data {
     template <typename ...Args>
     std::size_t send (const fmr::Data_name_t&,// standard fmr:log line
       css& lab1, css& lab2, css& lab3, css& form, Args...);
-#endif
   public:
     void task_init (int* argc, char** argv);
     void task_exit ();

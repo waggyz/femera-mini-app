@@ -24,10 +24,10 @@ namespace fmr {//TODO Move to fmr.h, change to femera:: ?
   */
   // built-in data sources and destinations
   //TODO Replace  with nothing after refactoring is finished.
-  static const Data_name_t log ="fmr:log" ;// default ::stdout from main thread only
-  static const Data_name_t out ="fmr:out" ;// default ::stdout from all threads
-  static const Data_name_t err ="fmr:err" ;// default ::stderr from all threads
-  static const Data_name_t in  ="fmr:in"  ;// default ::stdin  to   each MPI thread
+  static const Data_name_t log ="fmr:log" ;// default stdout from main thrd only
+  static const Data_name_t out ="fmr:out" ;// default stdout from all threads
+  static const Data_name_t err ="fmr:err" ;// default stderr from all threads
+  static const Data_name_t in  ="fmr:in"  ;// default stdin  to   each MPI thrd
   static const Data_name_t null="fmr:null";
   static const Data_name_t none="fmr:none";
   // formatters: fmr::Vals_type::Info_line, fmr::Vals_type::Text_line, ...

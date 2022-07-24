@@ -84,7 +84,6 @@ FMR_WARN_INLINE_ON
             auto C = Work::cast_via_work <data::Logs> (D);
             do_task = C->does_file (file);
             if (do_task) {
-              //byte += text.size ();//TODO Replace with below.
               byte += C->task_send (file, text, out_d);
           } }
           default: {}// do nothing
@@ -96,6 +95,16 @@ FMR_WARN_INLINE_ON
 #endif
     } }
     return byte;
+  }
+  bool data::File::did_logs_init ()
+  noexcept {
+    const auto L = cast_via_work<data::Logs> (this->get_task (Task_type::Logs));
+#ifdef FMR_DEBUG
+    if (L != nullptr) {
+      printf ("**** logs  did %sinit\n", L->did_init () ? "" : "not ");
+    }
+#endif
+    return (L == nullptr) ? false : L->did_init ();
   }
   //
 }// end femera::namespace
