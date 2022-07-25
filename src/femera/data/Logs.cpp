@@ -13,8 +13,8 @@ namespace femera {
     this->task_type = task_cast (Task_type::Logs);
     this->info_d    = 3;
     this->out_name_list = {
-      {fmr::none, {}},             // suppress output
-      {fmr::null, {}},             // convenient synonym
+      {fmr::none, {}},         // suppress output
+      {fmr::null, {}},         // convenient synonym
       {fmr::log , {fmr::out }},// task_init sets ::stdout to main only
       {fmr::out , {fmr::out }},// default all threads to ::stdout
       {fmr::err , {fmr::err }} // default all threads to ::stderr

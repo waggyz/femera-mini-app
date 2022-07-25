@@ -28,11 +28,10 @@
 namespace femera { namespace data {
   class File;// Derive as a CRTP concrete class from Data.
   class File final: public Data <File> {// private: friend class Data;
-  public:
-    bool did_logs_init () noexcept;
   private:
     using css = const std::string;
   public:
+    bool did_logs_init () noexcept;
     std::size_t send (const fmr::Data_name_t&, css& text,
        fmr::Dim_int out_d=1)
     noexcept;

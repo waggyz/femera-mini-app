@@ -92,52 +92,6 @@ namespace femera {
   noexcept {
     return Data::this_cast (Work::get_work (task_cast (t), ix));
   }
-# if 0
-  template <typename T> inline
-  std::size_t Data<T>::send// returns bytes sent
-  (const fmr::Data_name_t& file, const std::string& txt) {
-    auto D = this->get_task (file);//printf (txt.c_str ()+"/n");
-    if (D == nullptr) {return 0;}
-#if 1//def FMR_DEBUG
-    if (D != nullptr) {printf ((txt+" in Data.ipp\n").c_str ());}
-#endif
- //   if (D != nullptr) {D->task_send (txt);}
-    return txt.size ();
-  }
-  template <typename T> inline
-  T* Data<T>::get_task
-  (const fmr::Data_name_t& file, const fmr::Local_int ix)
-  noexcept {
-    fmr::Local_int i=0;
-    auto D = this;
-#if 0
-    if (D->does_file (file)) {
-      //TODO Is this the desired behavior of nested drivers of the same type?
-      //     Task 0 is the parent, with 1-indexed children of the same type.
-      if (i == ix) { return Data::this_cast (D); }
-      ++i;
-    }
-#endif
-    if (! D->task_list.empty ()) {
-      const fmr::Local_int n = D->get_task_n ();
-      for (fmr::Local_int Wix=0; Wix < n; ++Wix) {
-#if 1//def FMR_DEBUG
-        bool ok = D->get_task(Wix)->does_file (file);
-        printf ((D->get_task(Wix)->get_abrv()
-          +( ok ? " handles " : " does not handle ")
-          +file+"\n").c_str());
-#endif
-        if (D->get_task(Wix)->does_file (file)) {
-          if (i == ix) { return D->get_task(Wix); }
-          ++i;
-      } }
-//      for (fmr::Local_int Wix=0; Wix < n; ++Wix) {
-//        D = Data::this_cast (task_list [Wix].get());
-//      }
-    }
-    return nullptr;
-  }
-#   endif
 }// end femera:: namespace
 
 #undef FMR_DEBUG
