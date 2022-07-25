@@ -218,16 +218,18 @@ FMR_WARN_INLINE_ON
     auto save = std::string ();
     auto flop = std::string ();
     if (W->time.get_read_n () > fmr::Perf_int (0)) {
-      read="**** inp";
-      //read = femera::form::perf_line (this->time.get_read (), busy_s);
+//      read="**** inp";
+      read = femera::form::perf_line (W->time.get_read (), busy_s);
     }
     if (W->time.get_save_n () > fmr::Perf_int (0)) {
-      save="**** out";
-      //save = femera::form::perf_line (this->time.get_save (), busy_s);
+//      save="**** out";
+      save = femera::form::perf_line (W->time.get_save (), busy_s);
     }
-    if (W->time.get_flop_n () > fmr::Perf_int (0)) {
+    if (W->time.get_flop_n () > fmr::Perf_int (0)
+      && W->time.get_byte_n () > fmr::Perf_int (0)) {
       flop="**** flop";
-      //flop = femera::form::flop_line (this->time.get_flop (), busy_s);
+      //flop = femera::form::flop_line
+      //(this->time.get_flop (), this->time.get_byte (), busy_s);
     }
     const auto tot  = fmr::form::si_time (W->time.get_work_s ());
     const auto text = busy+" /"+tot+" "+W->name
@@ -250,10 +252,10 @@ FMR_WARN_INLINE_OFF
     } } else {
       W->data->send (fmr::log, W->get_base_abrv(), W->get_abrv(), "exit", text);
       if (read.size () > 0) {
-        W->data->send (fmr::log, W->get_base_abrv(), W->get_abrv(),"inp",read);
+        W->data->send (fmr::log, W->get_base_abrv(), W->get_abrv(),"inp", read);
       }
       if (save.size () > 0) {
-        W->data->send (fmr::log, W->get_base_abrv(), W->get_abrv(),"out",save);
+        W->data->send (fmr::log, W->get_base_abrv(), W->get_abrv(),"out", save);
       }
       if (flop.size () > 0) {
         W->data->send (fmr::log, W->get_base_abrv(), W->get_abrv(),"flop",flop);

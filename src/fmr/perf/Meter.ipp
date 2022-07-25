@@ -103,7 +103,7 @@ namespace fmr {
   }
   template <typename I, typename F> inline
   F perf::Meter<I,F>::get_flop () {
-    return F (this->flope_n);
+    return F (this->flop_n);
   }
   template <typename I, typename F> inline
   F perf::Meter<I,F>::get_read () {

@@ -28,6 +28,9 @@ namespace femera { namespace form {
   std::string text_line
   (fmr::Line_size_int line_width, const std::string& format, Args...);
 
+  template <typename V, typename ...Args> static
+  std::string perf_line (V count, V secs, const std::string& unit="B");
+
   template <typename ...Args> static
   std::string text_line (FILE*,
     fmr::Line_size_int line_width, const std::string& format, Args...);

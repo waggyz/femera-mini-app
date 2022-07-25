@@ -43,6 +43,16 @@ namespace femera {
     fprintf (f,"%s\n", line.c_str());
     return line;
   }
+  template <typename V, typename ...Args> static
+  std::string form::perf_line (const V count, const V secs,
+    const std::string& unit) {
+    const auto count_str = fmr::form::si_unit (count, unit);
+    const auto  time_str = fmr::form::si_time (secs);
+    const auto speed_str
+      = fmr::form::si_unit (double (count)/double (secs), unit) + "/s";
+    return text_line (250, "%s /%s, %s",
+      count_str.c_str(), time_str.c_str(), speed_str.c_str());
+  }
   template <typename ...Args> static
   std::string form::name_line
   (const fmr::Line_size_int name_width, const fmr::Line_size_int line_width,
