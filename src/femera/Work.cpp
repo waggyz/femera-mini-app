@@ -129,7 +129,7 @@ FMR_WARN_INLINE_ON
     }
     this->did_work_init = false;
     while (! this->task_list.empty ()) {
-      auto W = this->task_list.back().get ();// Exit in reverse order.
+      auto W = this->task_list.back ().get ();// Exit in reverse order.
       if (W != nullptr) {
 #ifdef FMR_DEBUG
         printf ("Work: exit list %s\n", W->name.c_str());
@@ -152,31 +152,12 @@ FMR_WARN_INLINE_ON
         const auto busy_s = fmr::perf::Float (1e-9)
           * ((W->time.get_busy_ns () > child_busy_ns)
             ? fmr::perf::Float (W->time.get_busy_ns () - child_busy_ns)
-            : fmr::perf::Float(0.0));
+            : fmr::perf::Float (0.0));
 #endif
         this->exit_info (W, busy_s);
       }
       this->task_list.pop_back ();
     }
-    return err;
-  }
-  fmr::Exit_int Work::exit_info (Work* W, const fmr::perf::Float busy_s) {
-    fmr::Exit_int err=0;
-    const auto busy = fmr::form::si_time (busy_s);
-    const auto tot  = fmr::form::si_time (W->time.get_work_s());
-    const auto text = busy+" /"+tot+" "+W->name
-      +((W->version=="") ? "":" "+W->version);
-FMR_WARN_INLINE_OFF
-    if (W->data == nullptr) {
-      if (this->is_work_main) {
-      const auto label = femera::form::text_line (250, "%4s %4s exit",
-        W->get_base_abrv ().c_str(), W->get_abrv().c_str());
-        form::name_line (::stdout, 14, 80, label, text);
-    } } else {
-      W->data->send (fmr::log,
-        W->get_base_abrv (), W->get_abrv(), "exit", text);
-    }
-FMR_WARN_INLINE_ON
     return err;
   }
   fmr::Exit_int Work::exit_tree ()
@@ -228,6 +209,24 @@ FMR_WARN_INLINE_ON
 #endif
             if (W != this) {this->exit_tree ();}
     } } } }
+    return err;
+  }
+  fmr::Exit_int Work::exit_info (Work* W, const fmr::perf::Float busy_s) {
+    fmr::Exit_int err=0;
+    const auto busy = fmr::form::si_time (busy_s);
+    const auto tot  = fmr::form::si_time (W->time.get_work_s ());
+    const auto text = busy+" /"+tot+" "+W->name
+      + ((W->version=="") ? "":" "+W->version);
+FMR_WARN_INLINE_OFF
+    if (W->data == nullptr) {
+      if (this->is_work_main) {
+      const auto label = femera::form::text_line (250, "%4s %4s exit",
+        W->get_base_abrv().c_str(), W->get_abrv().c_str());
+        form::name_line (::stdout, 14, 80, label, text);
+    } } else {
+      W->data->send (fmr::log, W->get_base_abrv(), W->get_abrv(), "exit", text);
+    }
+FMR_WARN_INLINE_ON
     return err;
   }
 }//end femera:: namespace
