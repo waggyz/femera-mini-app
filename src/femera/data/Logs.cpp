@@ -8,6 +8,7 @@
 namespace femera {
   data::Logs::Logs (const femera::Work::Core_ptrs_t core)
   noexcept : Data (core) {
+    this->time.set_unit_name ("line");
     this->name      ="Femera logger";
     this->abrv      ="logs";
     this->task_type = task_cast (Task_type::Logs);
@@ -41,21 +42,36 @@ namespace femera {
     printf ("logs task_send (%s, %s, %u)\n",
       file.c_str(), text.c_str(), out_d);
 #endif
-    if (this->do_log (out_d)) {
-      if (this->out_name_list.find (file) != out_name_list.end ()) {
-        const auto outs = this->out_name_list.at (file);//TODO double-lookup
-        const auto n = outs.size ();
-        if (n > 0) {
-          FILE* f = nullptr;
-          const auto dest = outs [this->proc->get_proc_ix () % n];
-          if (dest == fmr::log) { f = ::stdout; };//TODO use unordered_map
-          if (dest == fmr::out) { f = ::stdout; };
-          if (dest == fmr::err) { f = ::stderr; };
-          if (f != nullptr) {
-            const auto b = fprintf (f, "%s\n", text.c_str ());
-            //TODO warn if negative (fail)?
-            byte += std::size_t ((b>0) ? b : 0);
-    } } } }
+    if (! this->do_log (out_d)) { return byte; }
+    //
+    fmr::Exit_int err = 0;
+    Data_list_t outs  ={};
+    try { outs = this->out_name_list.at (file); }
+    catch (std::out_of_range& e) { err = 1; }
+    catch (const Warn& e)    { err =-1; e.print (); }
+    catch (const Errs& e)    { err = 1; e.print (); }
+    catch (std::exception& e){ err = 2;
+      Errs::print (this->get_abrv ()+" task_send", e); }
+    catch (...)              { err = 3;
+      Errs::print (this->get_abrv ()+" task_send"); }
+    if (err > 0) { return byte; }
+    //
+    const auto n = outs.size ();
+    if (n <= 0) { return byte; }
+    //
+    FILE* f = nullptr;
+    const auto dest = outs [this->proc->get_proc_ix () % n];
+    if (dest == fmr::log) { f = ::stdout; };//TODO use unordered_map
+    if (dest == fmr::out) { f = ::stdout; };
+    if (dest == fmr::err) { f = ::stderr; };
+    if (f == nullptr) { return byte; }
+    //
+    this->time.add_idle_time_now ();
+    const auto b = fprintf (f, "%s\n", text.c_str ());
+    this->time.add_busy_time_now ();
+    //TODO warn if negative (fail)?
+    byte += std::size_t ((b>0) ? b : 0);
+    this->time.add_count (1, 0, 0, byte);
     return byte;
   }
   //

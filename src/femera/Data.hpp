@@ -41,7 +41,7 @@ namespace femera {
   protected:// member variables
     // Each data handler has a map of data/file names handled by each thread.
     //TODO set inp/out_name_list in each handler derived from data
-    std::unordered_map <fmr::Data_name_t, Data_list_t> inp_name_list = {};
+    std::unordered_map <fmr::Data_name_t, Data_list_t> inp_name_list ={};
     std::unordered_map <fmr::Data_name_t, Data_list_t> out_name_list ={};
 #if 0
   private:// variables
