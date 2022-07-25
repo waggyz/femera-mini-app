@@ -116,6 +116,8 @@ namespace femera {
     Work* get_work (fmr::Local_int) noexcept;
     Work* get_work (Work_type, fmr::Local_int ix=0) noexcept;
     Work* get_work (const Task_path_t&) noexcept;
+  private:
+    fmr::Exit_int exit_info (Work*, fmr::perf::Float busy_s);
   protected:// Built-ins called only by inherited classes ---------------------
     Work (Work::Core_ptrs_t) noexcept;// preferred constructor
     Work () noexcept;// default constructor for early parts of initialization

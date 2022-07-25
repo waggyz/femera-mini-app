@@ -55,8 +55,8 @@ namespace femera {
   template <typename T> inline
   fmr::Exit_int Data<T>::exit (const fmr::Exit_int err)
   noexcept {
-    this->data = nullptr;
     Work::exit_list ();//              Exit child tasks (exceptions caught),...
+    this->data = nullptr;
     fmr::Exit_int task_err = 0;
     try  { Data::this_cast (this)->task_exit (); }//    ...then exit this task.
     catch (const Warn& e)    { task_err =-1; e.print (); }

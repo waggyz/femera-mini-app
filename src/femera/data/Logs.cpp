@@ -61,7 +61,7 @@ namespace femera {
     //
     FILE* f = nullptr;
     const auto dest = outs [this->proc->get_proc_ix () % n];
-    if (dest == fmr::log) { f = ::stdout; };//TODO use unordered_map
+    if (dest == fmr::log) { f = ::stdout; };//TODO use unordered_map ?
     if (dest == fmr::out) { f = ::stdout; };
     if (dest == fmr::err) { f = ::stderr; };
     if (f == nullptr) { return byte; }

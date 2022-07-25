@@ -154,24 +154,29 @@ FMR_WARN_INLINE_ON
             ? fmr::perf::Float (W->time.get_busy_ns () - child_busy_ns)
             : fmr::perf::Float(0.0));
 #endif
-        const auto busy = fmr::form::si_time (busy_s);
-        const auto tot  = fmr::form::si_time (W->time.get_work_s());
-        const auto text = busy+" /"+tot+" "+W->name
-          +((W->version=="") ? "":" "+W->version);
-FMR_WARN_INLINE_OFF
-        if (W->data == nullptr) {
-          if (this->is_work_main) {
-          const auto label = femera::form::text_line (250, "%4s %4s exit",
-            W->get_base_abrv ().c_str(), W->get_abrv().c_str());
-            form::name_line (::stdout, 14, 80, label, text);
-        } } else {
-          W->data->send (fmr::log,
-            W->get_base_abrv (), W->get_abrv(), "exit", text);
-        }
-FMR_WARN_INLINE_ON
+        this->exit_info (W, busy_s);
       }
       this->task_list.pop_back ();
     }
+    return err;
+  }
+  fmr::Exit_int Work::exit_info (Work* W, const fmr::perf::Float busy_s) {
+    fmr::Exit_int err=0;
+    const auto busy = fmr::form::si_time (busy_s);
+    const auto tot  = fmr::form::si_time (W->time.get_work_s());
+    const auto text = busy+" /"+tot+" "+W->name
+      +((W->version=="") ? "":" "+W->version);
+FMR_WARN_INLINE_OFF
+    if (W->data == nullptr) {
+      if (this->is_work_main) {
+      const auto label = femera::form::text_line (250, "%4s %4s exit",
+        W->get_base_abrv ().c_str(), W->get_abrv().c_str());
+        form::name_line (::stdout, 14, 80, label, text);
+    } } else {
+      W->data->send (fmr::log,
+        W->get_base_abrv (), W->get_abrv(), "exit", text);
+    }
+FMR_WARN_INLINE_ON
     return err;
   }
   fmr::Exit_int Work::exit_tree ()
@@ -207,21 +212,7 @@ FMR_WARN_INLINE_ON
         err= W->exit (err);// is noexcept
 #endif
         const auto busy_s = W->time.add_busy_time_now ();
-        const auto busy = fmr::form::si_time (busy_s);
-        const auto tot  = fmr::form::si_time (W->time.get_work_s ());
-        const auto text = busy+" /"+tot+" "+W->name
-          +((W->version=="") ? "":" "+W->version);
-FMR_WARN_INLINE_OFF
-        if (W->data == nullptr) {
-          if (this->is_work_main) {
-          const auto label = femera::form::text_line (250, "%4s %4s exit",
-            W->get_base_abrv ().c_str(), W->get_abrv().c_str());
-            form::name_line (::stdout, 14, 80, label, text);
-          } } else {
-          W->data->send (fmr::log,
-            W->get_base_abrv (), W->get_abrv(), "exit", text);
-        }
-FMR_WARN_INLINE_ON
+        this->exit_info (W, busy_s);
       }
       if (! branch.empty ()) {
         branch.pop_back ();

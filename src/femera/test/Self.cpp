@@ -22,14 +22,14 @@ namespace femera {
   }
   void test::Self::log_init_info () {// pulled out of task_init (inline fail)
     const auto cppver = __cplusplus;
-  this->data->send (fmr::log, this->get_base_abrv (), this->abrv, "ver",
-    std::string (MAKESTR(FMR_VERSION)));
-  this->data->send (fmr::log, this->get_base_abrv (), this->abrv, "g++",
-    std::string (__VERSION__));
-  this->data->send (fmr::log, this->get_base_abrv (), this->abrv, "C++",
-    "%li", cppver);
-  this->data->send (fmr::log, this->get_base_abrv (), this->abrv, "zord",
-    "%4u maximum hypercomplex order", zyclops::max_zorder);
+    this->data->send (fmr::log, this->get_base_abrv (), this->abrv, "ver",
+      std::string (MAKESTR(FMR_VERSION)));
+    this->data->send (fmr::log, this->get_base_abrv (), this->abrv, "g++",
+      std::string (__VERSION__));
+    this->data->send (fmr::log, this->get_base_abrv (), this->abrv, "C++",
+      "%li", cppver);
+    this->data->send (fmr::log, this->get_base_abrv (), this->abrv, "zord",
+      "%4u maximum hypercomplex order", zyclops::max_zorder);
   }
   fmr::Exit_int test::Self::proc_node_chck () {
     fmr::Exit_int err = 0;
