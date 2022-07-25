@@ -97,7 +97,7 @@ namespace femera { namespace test {
     mini->data->send (fmr::out, "vals", "zero", "perf",
       "%s, %s in %s (check %g == 0)",
       fmr::form::si_unit (speed, "B/s").c_str(),
-      fmr::form::si_unit (perf.get_byte_n (), "B").c_str(),
+      fmr::form::si_unit (perf.get_byte (), "B").c_str(),
       fmr::form::si_unit (time, "s").c_str(), sum);
     return double (speed);
   }
@@ -139,7 +139,7 @@ FMR_WARN_INLINE_OFF
     mini->data->send (fmr::out, "vals", "vec2", "perf",
       "%s, %s in %s (check %g ?= 0)",
       fmr::form::si_unit (speed, "B/s").c_str(),
-      fmr::form::si_unit (perf.get_byte_n (), "B").c_str(),
+      fmr::form::si_unit (perf.get_byte (), "B").c_str(),
       fmr::form::si_unit (time, "s").c_str(), sum);
 FMR_WARN_INLINE_ON
     return double (speed);

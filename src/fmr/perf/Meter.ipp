@@ -75,17 +75,55 @@ namespace fmr {
     this->save_n += save;
     return F (this->unit_n);
   }
+  // The following return integer type (I).
   template <typename I, typename F> inline
-  F perf::Meter<I,F>::get_byte_n () {
+  I perf::Meter<I,F>::get_unit_n() {
+    return this->unit_n;
+  }
+  template <typename I, typename F> inline
+  I perf::Meter<I,F>::get_flop_n () {
+    return this->flop_n;
+  }
+  template <typename I, typename F> inline
+  I perf::Meter<I,F>::get_read_n () {
+    return this->read_n;
+  }
+  template <typename I, typename F> inline
+  I perf::Meter<I,F>::get_save_n () {
+    return this->save_n;
+  }
+  template <typename I, typename F> inline
+  I perf::Meter<I,F>::get_byte_n () {
+    return this->read_n + this->save_n;
+  }
+  // The following return floating point type (F).
+  template <typename I, typename F> inline
+  F perf::Meter<I,F>::get_unit () {
+    return F (this->unit_n);
+  }
+  template <typename I, typename F> inline
+  F perf::Meter<I,F>::get_flop () {
+    return F (this->flope_n);
+  }
+  template <typename I, typename F> inline
+  F perf::Meter<I,F>::get_read () {
+    return F (this->read_n);
+  }
+  template <typename I, typename F> inline
+  F perf::Meter<I,F>::get_save () {
+    return F (this->save_n);
+  }
+  template <typename I, typename F> inline
+  F perf::Meter<I,F>::get_byte () {
     return F (this->read_n + this->save_n);
   }
   template <typename I, typename F> inline
   F perf::Meter<I,F>::get_arithmetic_intensity () {
-    return F (this->flop_n) / this->get_byte_n ();
+    return F (this->flop_n) / this->get_byte ();
   }
   template <typename I, typename F> inline
   F perf::Meter<I,F>::get_ai () {
-    return F (this->flop_n) / this->get_byte_n ();
+    return F (this->flop_n) / this->get_byte ();
   }
   template <typename I, typename F> inline
   F perf::Meter<I,F>::get_busy_s () {
@@ -97,6 +135,7 @@ namespace fmr {
   }
   template <typename I, typename F> inline
   F perf::Meter<I,F>::get_work_s () {
+    this->add_idle_time_now ();
     return F (1.0e-9) * F (this->busy_ns + idle_ns);
   }
   template <typename I, typename F> inline

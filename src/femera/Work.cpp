@@ -214,17 +214,50 @@ FMR_WARN_INLINE_ON
   fmr::Exit_int Work::exit_info (Work* W, const fmr::perf::Float busy_s) {
     fmr::Exit_int err=0;
     const auto busy = fmr::form::si_time (busy_s);
+    auto read = std::string ();
+    auto save = std::string ();
+    auto flop = std::string ();
+    if (W->time.get_read_n () > fmr::Perf_int (0)) {
+      read="**** inp";
+      //read = femera::form::perf_line (this->time.get_read (), busy_s);
+    }
+    if (W->time.get_save_n () > fmr::Perf_int (0)) {
+      save="**** out";
+      //save = femera::form::perf_line (this->time.get_save (), busy_s);
+    }
+    if (W->time.get_flop_n () > fmr::Perf_int (0)) {
+      flop="**** flop";
+      //flop = femera::form::flop_line (this->time.get_flop (), busy_s);
+    }
     const auto tot  = fmr::form::si_time (W->time.get_work_s ());
     const auto text = busy+" /"+tot+" "+W->name
       + ((W->version=="") ? "":" "+W->version);
 FMR_WARN_INLINE_OFF
     if (W->data == nullptr) {
       if (this->is_work_main) {
-      const auto label = femera::form::text_line (250, "%4s %4s exit",
+      const auto label = femera::form::text_line (250, "%4s %4s ",
         W->get_base_abrv().c_str(), W->get_abrv().c_str());
-        form::name_line (::stdout, 14, 80, label, text);
+      form::name_line (::stdout, 14, 80, label+"exit", text);
+      if (read.size () > 0) {
+        form::name_line (::stdout, 14, 80, label+" inp", read);
+      }
+      if (save.size () > 0) {
+        form::name_line (::stdout, 14, 80, label+" out", save);
+      }
+      if (flop.size () > 0) {
+        form::name_line (::stdout, 14, 80, label+"flop", flop);
+      }
     } } else {
       W->data->send (fmr::log, W->get_base_abrv(), W->get_abrv(), "exit", text);
+      if (read.size () > 0) {
+        W->data->send (fmr::log, W->get_base_abrv(), W->get_abrv(),"inp",read);
+      }
+      if (save.size () > 0) {
+        W->data->send (fmr::log, W->get_base_abrv(), W->get_abrv(),"out",save);
+      }
+      if (flop.size () > 0) {
+        W->data->send (fmr::log, W->get_base_abrv(), W->get_abrv(),"flop",flop);
+      }
     }
 FMR_WARN_INLINE_ON
     return err;

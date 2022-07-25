@@ -19,7 +19,18 @@ namespace fmr { namespace perf {
     F add_count            // returns current unit_n total
       (I units=1, I flops=0, I read=0, I save=0);
     //
-    F get_byte_n ();
+    I get_unit_n ();
+    I get_flop_n ();
+    I get_read_n ();
+    I get_save_n ();
+    I get_byte_n ();
+    //
+    F get_unit ();
+    F get_flop ();
+    F get_read ();
+    F get_save ();
+    F get_byte ();
+    //
     F get_arithmetic_intensity ();
     F get_ai ();// convenient synonym of get_arithmetic_intensity ()
     // Elapsed time
