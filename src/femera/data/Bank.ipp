@@ -21,10 +21,6 @@ namespace femera {
   data::Vals* data::Bank::vals_ptr (fmr::Local_int ix) {
     return & vals [ix];
   }
-  inline
-  data::Vals* data::Bank::vals_ptr () {
-    return & vals [this->proc->get_proc_ix (Task_type::Fomp)];
-  }
 #endif
   inline
   void data::Bank::task_exit () {

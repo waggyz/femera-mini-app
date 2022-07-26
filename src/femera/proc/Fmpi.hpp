@@ -9,7 +9,7 @@ namespace femera { namespace proc {
   class Fmpi;// Derive a CRTP concrete class from Proc.
   class Fmpi final: public Proc<Fmpi> {private: friend class Proc;
   private:
-  //proc::Team_t     comm = 0; default: MPI_COMM_WORLD (in Proc)
+  //fmr::Team_int     comm = 0; default: MPI_COMM_WORLD (in Proc)
     int     fmpi_required = 0;// default: MPI_THREAD_SERIALIZED
     int     fmpi_provided = 0;//TODO rqrd_mpi_thrd, prvd_mpi_thrd ?
     bool do_final_on_exit = true;

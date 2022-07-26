@@ -8,19 +8,6 @@ namespace femera {
     return this->verb_d;
   }
   inline
-  fmr::Dim_int data::Logs::set_verb (const fmr::Dim_int v)
-  noexcept {
-    if (v > FMR_VERBMAX) {
-      this->verb_d = FMR_VERBMAX;
-      if (this->did_init ()) {// print warning
-        fprintf (::stderr, "data logs WARN Verbosity set to (%i) "
-          "because requested (%i) exceeds maximum (%i).\n",
-          int (this->verb_d), int (v), int (FMR_VERBMAX));
-    } }
-    else { this->verb_d = v; }
-    return this->verb_d;
-  }
-  inline
   bool data::Logs::do_log (const fmr::Dim_int v)
   noexcept {
     return (v <= this->verb_d) && this->did_init ();

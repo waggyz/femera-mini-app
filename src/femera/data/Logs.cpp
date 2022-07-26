@@ -1,4 +1,6 @@
 #include "Logs.hpp"
+#include "File.hpp"
+#include "../proc/Main.hpp"
 
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
@@ -20,6 +22,22 @@ namespace femera {
       {fmr::out , {fmr::out }},// default all threads to ::stdout
       {fmr::err , {fmr::err }} // default all threads to ::stderr
     };
+  }
+  fmr::Dim_int data::Logs::set_verb (const fmr::Dim_int v)
+  noexcept {
+    if (v > FMR_VERBMAX) {
+      this->verb_d = FMR_VERBMAX;
+      if (this->did_init ()) {// print warning
+        this->data->send (fmr::err, "data","logs","WARN","Verbosity set "
+          "to (%i) because requested (%i) exceeds maximum (%i).\n",
+          int (this->verb_d), int (v), int (FMR_VERBMAX));
+      } else {
+        fprintf (::stderr, "data logs WARN Verbosity set to (%i) "
+          "because requested (%i) exceeds maximum (%i).\n",
+          int (this->verb_d), int (v), int (FMR_VERBMAX));
+    } }
+    else { this->verb_d = v; }
+    return this->verb_d;
   }
   void data::Logs::task_init (int*, char**) {//TODO opts -v<int>, -t<int>,...
     // set default logger (data->fmrlog) to stdout only from the main thread (0)

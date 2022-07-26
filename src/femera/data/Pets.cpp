@@ -39,7 +39,7 @@ namespace femera {
         if (err) {//TODO exception should remove Pets from the data task_list
           FMR_THROW("Failed to copy MPI communicator for Pets.");
         } else {
-          this->team_id = proc::Team_t (c);
+          this->team_id = fmr::Team_int (c);
           this->version+=" (parallel)";
         }
 #if 0
@@ -61,7 +61,7 @@ namespace femera {
 //TODO?   FMR_PRAGMA_OMP(omp barrier)
 #ifdef FMR_HAS_MPI
     FMR_PRAGMA_OMP(omp master)
-      if (this->team_id != proc::Team_t (MPI_COMM_WORLD)) {
+      if (this->team_id != fmr::Team_int (MPI_COMM_WORLD)) {
         MPI_Comm c = MPI_Comm (this->team_id);
         const auto err = MPI_Comm_free (&c);
         if (err) {

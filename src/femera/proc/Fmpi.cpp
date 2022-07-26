@@ -20,7 +20,7 @@ namespace femera {
       +"."+std::to_string (MPI_SUBVERSION);
     this->task_type = task_cast (Task_type::Fmpi);
     this->info_d    = 3;
-    this->team_id   = proc::Team_t (MPI_COMM_WORLD);
+    this->team_id   = fmr::Team_int (MPI_COMM_WORLD);
   }
   bool proc::Fmpi::did_mpi_init ()
   noexcept {
@@ -81,7 +81,7 @@ namespace femera {
         err= MPI_Comm_dup (MPI_COMM_WORLD, & comm);// task_exit() frees this
       }
       if (!err) {
-        this->team_id = proc::Team_t (comm);
+        this->team_id = fmr::Team_int (comm);
         this->proc_ix = this->task_proc_ix ();
         this->proc_n  = this->task_proc_n ();
 #ifdef FMR_DEBUG
@@ -99,7 +99,7 @@ namespace femera {
   FMR_PRAGMA_OMP(omp MAIN)
   if (did_mpi_init ()) {
     const auto proc_i = this->task_proc_ix ();
-    if (this->team_id != proc::Team_t (MPI_COMM_WORLD)) {
+    if (this->team_id != fmr::Team_int (MPI_COMM_WORLD)) {
       if (this->team_id) {
 #ifdef FMR_DEBUG
         std::printf ("%u:Fmpi::task_exit MPI_Comm_free (%lu)...\n",
@@ -114,10 +114,10 @@ namespace femera {
         }
 #ifdef FMR_DEBUG
         std::printf ("%u:Fmpi::task_exit MPI_Comm_free (%lu)\n",
-          proc_i, proc::Team_t (comm));
+          proc_i, fmr::Team_int (comm));
 #endif
       }
-      this->team_id = proc::Team_t (MPI_COMM_WORLD);
+      this->team_id = fmr::Team_int (MPI_COMM_WORLD);
 #ifdef FMR_DEBUG
         std::printf ("%u:Fmpi::team_id reset to MPI_COMM_WORLD (%lu)\n",
           proc_i, team_id);

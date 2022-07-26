@@ -8,7 +8,7 @@ namespace femera { namespace data {
   class Pets final: public Data <Pets> { private: friend class Data;
   public:
   private:
-    proc::Team_t team_id = 0;// MPI communicator
+    fmr::Team_int team_id = 0;// MPI communicator
   private:
     Pets (femera::Work::Core_ptrs_t) noexcept;
     Pets () =delete;//NOTE Use the constructor above.

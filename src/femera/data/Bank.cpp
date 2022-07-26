@@ -1,4 +1,5 @@
 #include "Bank.hpp"
+#include "../proc/Main.hpp"
 
 #define FMR_DEBUG
 #ifdef FMR_DEBUG
@@ -21,6 +22,9 @@ namespace femera {
     } }
     this->name += " with "+std::to_string (n)+" thread-local vals each";
 # endif
+  }
+  data::Vals* data::Bank::vals_ptr () {
+    return & vals [this->proc->get_proc_ix (Task_type::Fomp)];
   }
 }//end femera:: namespace
 

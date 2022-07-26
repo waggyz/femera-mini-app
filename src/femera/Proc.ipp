@@ -211,7 +211,7 @@ FMR_WARN_INLINE_ON
     return this->base_n;
   }
   template <typename T> inline
-  proc::Team_t Proc<T>::get_team_id ()
+  fmr::Team_int Proc<T>::get_team_id ()
   noexcept {
     return this->team_id;
   }

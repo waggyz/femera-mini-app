@@ -1,7 +1,8 @@
 #ifndef FEMERA_HAS_DATA_HPP
 #define FEMERA_HAS_DATA_HPP
 
-#include "proc/Main.hpp"
+#include "Work.hpp"
+//#include "proc/Main.hpp"//TODO REMOVE
 
 #include <unordered_map>
 
@@ -37,7 +38,7 @@ namespace femera {
   private:// typedefs
     using This_spt = FMR_SMART_PTR<T>;
   protected:// typedefs
-    using Data_list_t = std::vector<fmr::Data_name_t>;
+    using Data_list_t = std::vector <fmr::Data_name_t>;
   protected:// member variables
     // Each data handler has a map of data/file names handled by each thread.
     //TODO set inp/out_name_list in each handler derived from data

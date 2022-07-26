@@ -27,6 +27,7 @@ namespace fmr {
   using Perf_float = float         ;// speed, aithmetic intensity, time (sec)
   //
   using Hash_int   = uint32_t      ;//TODO chck CRC32, CRC64 perf (cpu,gpu)
+  using Team_int   = uintptr_t     ;// cast-compatible with MPI_comm from mpi.h
 #if 0
   //
   // fmr:: floating point types are internal defaults?//TODO dynamic float types
