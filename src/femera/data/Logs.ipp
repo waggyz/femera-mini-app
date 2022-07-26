@@ -3,6 +3,11 @@
 
 namespace femera {
   inline
+  fmr::Dim_int data::Logs::get_verb ()
+  noexcept {
+    return this->verb_d;
+  }
+  inline
   fmr::Dim_int data::Logs::set_verb (const fmr::Dim_int v)
   noexcept {
     if (v > FMR_VERBMAX) {//TODO print warning
