@@ -92,9 +92,11 @@ namespace femera {
       Errs::print (this->get_abrv ()+" task_send"); }
     if ((err > 0) || (f == nullptr)) { return byte; }
     //
-    this->time.add_idle_time_now ();
+    FMR_PRAGMA_OMP(omp MAIN)
+    { this->time.add_idle_time_now (); }// TODO Handle other threads safely.
     const auto b = fprintf (f, "%s\n", text.c_str ());
-    this->time.add_busy_time_now ();
+    FMR_PRAGMA_OMP(omp MAIN)
+    { this->time.add_busy_time_now (); }
     if ((b < 0) && (this->did_init ())) {// Warn fprintf negative return value.
       fprintf (::stderr, "data logs WARN",
         "task_send fprintf ([to \"%s\"], \"%%s\\n\", \"%s\") "
@@ -102,7 +104,8 @@ namespace femera {
         file.c_str(), text.c_str(), int (b));
     }
     byte += std::size_t ((b>0) ? b : 0);
-    this->time.add_count (1, 0, 0, byte);
+    FMR_PRAGMA_OMP(omp MAIN)
+    { this->time.add_count (1, 0, 0, byte); }
     return byte;
   }
   //
