@@ -61,10 +61,15 @@ namespace femera {
     //
     FILE* f = nullptr;
     const auto dest = outs [this->proc->get_proc_ix () % n];
-    if (dest == fmr::log) { f = ::stdout; };//TODO use unordered_map ?
-    if (dest == fmr::out) { f = ::stdout; };
-    if (dest == fmr::err) { f = ::stderr; };
-    if (f == nullptr) { return byte; }
+    try { f = this->open_file_map.at (dest); }
+    catch (std::out_of_range& e) { err = 1; }
+    catch (const Warn& e)    { err =-1; e.print (); }
+    catch (const Errs& e)    { err = 1; e.print (); }
+    catch (std::exception& e){ err = 2;
+      Errs::print (this->get_abrv ()+" task_send", e); }
+    catch (...)              { err = 3;
+      Errs::print (this->get_abrv ()+" task_send"); }
+    if ((err > 0) || (f == nullptr)) { return byte; }
     //
     this->time.add_idle_time_now ();
     const auto b = fprintf (f, "%s\n", text.c_str ());

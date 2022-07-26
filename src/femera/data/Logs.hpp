@@ -7,6 +7,11 @@ namespace femera { namespace data {
   class Logs;// Derive a CRTP concrete class from Data.
   class Logs final: public Data <Logs> {// private: friend class Data;
   private:
+    std::unordered_map <fmr::Data_name_t, FILE*> open_file_map = {
+      { fmr::log, ::stdout },
+      { fmr::out, ::stdout },
+      { fmr::err, ::stderr }
+    };
     fmr::Dim_int verb_d = 5;//TODO set by command line option -v<int>
     bool did_init_tf = false;
   public:
