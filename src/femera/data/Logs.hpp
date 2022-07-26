@@ -6,6 +6,7 @@
 namespace femera { namespace data {
   class Logs;// Derive a CRTP concrete class from Data.
 FMR_WARN_INLINE_OFF
+  // Suppress -Winline warning for ~Logs () destructor implicitly defined here.
   class Logs final: public Data <Logs> {// private: friend class Data;
 FMR_WARN_INLINE_ON
   private:
@@ -19,9 +20,9 @@ FMR_WARN_INLINE_ON
   public:
     fmr::Dim_int get_verb ()             noexcept;
     fmr::Dim_int set_verb (fmr::Dim_int) noexcept;// returns verb_d after set
-    bool do_log (fmr::Dim_int)           noexcept;
-    bool did_init ()                     noexcept;
-    bool set_init (bool)                 noexcept;
+    bool do_log           (fmr::Dim_int) noexcept;
+    bool did_init         ()             noexcept;
+    bool set_init         (bool)         noexcept;
   public:
     void task_init (int* argc, char** argv);
     void task_exit ();

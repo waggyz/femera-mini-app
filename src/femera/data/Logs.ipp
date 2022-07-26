@@ -10,11 +10,14 @@ namespace femera {
   inline
   fmr::Dim_int data::Logs::set_verb (const fmr::Dim_int v)
   noexcept {
-    if (v > FMR_VERBMAX) {//TODO print warning
+    if (v > FMR_VERBMAX) {
       this->verb_d = FMR_VERBMAX;
-    } else {
-      this->verb_d = v;
-    }
+      if (this->did_init ()) {// print warning
+        fprintf (::stderr, "data logs WARN Verbosity set to (%i) "
+          "because requested (%i) exceeds maximum (%i).\n",
+          int (this->verb_d), int (v), int (FMR_VERBMAX));
+    } }
+    else { this->verb_d = v; }
     return this->verb_d;
   }
   inline
@@ -36,7 +39,7 @@ namespace femera {
   inline
   bool data::Logs::does_file (const fmr::Data_name_t& file)
   noexcept {
-    return this->out_name_list.find(file) != this->out_name_list.end();
+    return this->out_name_list.find (file) != this->out_name_list.end ();
   }
 }//end femera namespace
 
