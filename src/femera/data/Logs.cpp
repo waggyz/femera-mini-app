@@ -95,7 +95,12 @@ namespace femera {
     this->time.add_idle_time_now ();
     const auto b = fprintf (f, "%s\n", text.c_str ());
     this->time.add_busy_time_now ();
-    //TODO warn if negative (fail)?
+    if ((b < 0) && (this->did_init ())) {// Warn fprintf negative return value.
+      fprintf (::stderr, "data logs WARN",
+        "task_send fprintf ([to \"%s\"], \"%%s\\n\", \"%s\") "
+        "returned (%i), negative bytes written.\n",
+        file.c_str(), text.c_str(), int (b));
+    }
     byte += std::size_t ((b>0) ? b : 0);
     this->time.add_count (1, 0, 0, byte);
     return byte;
