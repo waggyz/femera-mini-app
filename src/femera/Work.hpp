@@ -65,7 +65,7 @@ namespace femera {
     using Work_time_t = fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>;
   public:// variables ---------------------------------------------------------
     // classes with (mostly) only member methods public
-    Work_time_t time = Work_time_t ();// performance timer, NOT thread-safe
+    Work_time_t time = Work_time_t ();// performance timer,//TODO make thread-safe
     proc::Main* proc = nullptr;       // processing hierarchy
     data::File* data = nullptr;       // data, logging, and file handling
     test::Beds* test = nullptr;       // correctness and performance testing
