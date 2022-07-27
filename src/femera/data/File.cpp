@@ -34,10 +34,9 @@ namespace femera {
     this->info_d    = 2;
   }
   void data::File::task_init (int*, char**) {
-//    if (this->data == nullptr) {this->data = this;}
     fmr::Local_int o = 1;
 #ifdef FMR_BANK_LOCAL
-    o = this->proc->get_proc_n (Task_type::Fomp);
+    o = this->proc->get_race_n ();
 #endif
 FMR_WARN_INLINE_OFF
     FMR_PRAGMA_OMP(omp parallel for schedule(static) ordered num_threads(o))

@@ -11,7 +11,7 @@ namespace femera {
   void task::Sims::task_init (int*, char**) {
     fmr::Local_int o = 1;
 #ifdef FMR_RUNS_LOCAL
-    o = this->proc->get_proc_n (Task_type::Fomp);
+    o = this->proc->get_race_n ();
 #endif
     FMR_PRAGMA_OMP(omp parallel for schedule(static) ordered num_threads(o))
     for (fmr::Local_int i=0; i<o; ++i) {// Make & add thread-local Sims...

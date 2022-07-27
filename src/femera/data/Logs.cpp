@@ -43,7 +43,7 @@ namespace femera {
     // set default logger (data->fmrlog) to stdout only from the main thread (0)
     fmr::Local_int n = 0;
     if (this->proc->is_main ()) {
-      n = this->proc->get_proc_n (Task_type::Fomp);// OpenMP threads / mpi proc
+      n = this->proc->get_race_n ();// OpenMP threads / mpi proc
       n = (n==0) ? 1 : n;
     }
     // default fmr:log destination is ::stdout from thread 0.
@@ -98,7 +98,7 @@ namespace femera {
     FMR_PRAGMA_OMP(omp MAIN)
     { this->time.add_busy_time_now (); }
     if ((b < 0) && (this->did_init ())) {// Warn fprintf negative return value.
-      fprintf (::stderr, "data logs WARN",
+      fprintf (::stderr, "data logs WARN "
         "task_send fprintf ([to \"%s\"], \"%%s\\n\", \"%s\") "
         "returned (%i), negative bytes written.\n",
         file.c_str(), text.c_str(), int (b));

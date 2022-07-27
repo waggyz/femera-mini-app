@@ -8,8 +8,10 @@ namespace femera { namespace proc {
   class Fomp;// Derive a CRTP concrete class from Proc.
   class Fomp final: public Proc<Fomp> {private: friend class Proc; friend class Main;
   private:
-    static bool is_in_parallel () noexcept;
+    static bool is_in_parallel         () noexcept;
+    static
     fmr::Local_int task_proc_ix () noexcept;
+    fmr::Local_int task_proc_n  () noexcept;
   private:
     void scan      (int* argc, char** argv);
     void task_init (int* argc, char** argv);

@@ -13,7 +13,7 @@ namespace femera {
     this->vals.clear ();// should already exist on main thread, if at all
     this->vals.shrink_to_fit ();
 #endif
-    const auto n = this->proc->get_proc_n (Task_type::Fomp);
+    const auto n = this->proc->get_race_n ();
     this->vals.reserve (n);// allocate on main OpenMP thread
     FMR_PRAGMA_OMP(omp parallel for schedule(static) ordered num_threads(n))
     for (fmr::Local_int i=0; i<n; ++i) {// Make & add thread-local data::Bank
@@ -24,7 +24,7 @@ namespace femera {
 # endif
   }
   data::Vals* data::Bank::vals_ptr () {
-    return & vals [this->proc->get_proc_ix (Task_type::Fomp)];
+    return & vals [this->proc->get_race_ix ()];
   }
 }//end femera:: namespace
 

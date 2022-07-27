@@ -2,7 +2,6 @@
 #define FEMERA_HAS_DATA_HPP
 
 #include "Work.hpp"
-//#include "proc/Main.hpp"//TODO REMOVE
 
 #include <unordered_map>
 
@@ -28,8 +27,8 @@ namespace fmr {//TODO Move to fmr.h? Change to femera::?
   static const Data_name_t out ="fmr:out" ;// default stdout from all threads
   static const Data_name_t err ="fmr:err" ;// default stderr from all threads
   static const Data_name_t in  ="fmr:in"  ;// default stdin  to   each MPI thrd
-  static const Data_name_t null="fmr:null";
   static const Data_name_t none="fmr:none";
+  static const Data_name_t null="fmr:null";// convenient synonym of fmr::none
   // formatters: fmr::Vals_type::Info_line, fmr::Vals_type::Text_line, ...
 }//end fmr:: namespace
 namespace femera {

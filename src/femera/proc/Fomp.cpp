@@ -93,6 +93,11 @@ namespace femera {
 #endif
     return fmr::Local_int (::omp_get_thread_num ());
   }
+  fmr::Local_int proc::Fomp::task_proc_n ()
+  noexcept {
+    return this->proc_n;
+  }
+  //
 }//end femera:: namespace
 
 #undef FMR_DEBUG

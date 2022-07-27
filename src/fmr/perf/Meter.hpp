@@ -5,7 +5,7 @@
 
 namespace fmr { namespace perf {
   template <typename I, typename F>
-  struct Meter {
+  struct Meter {//NOTE not thread-safe.
   public:// methods
     std::string get_unit_name () noexcept;
     std::string set_unit_name (const std::string&) noexcept;
@@ -44,8 +44,8 @@ namespace fmr { namespace perf {
     F get_unit_speed ();
     F get_flop_speed ();
     F get_data_speed ();
-    F get_read_speed ();// was get_inp_speed ()
-    F get_save_speed ();// was get_out_speed ()
+    F get_read_speed ();// input speed
+    F get_save_speed ();// output speed
     // Active speed
     F get_busy_unit_speed ();
     F get_busy_flop_speed ();
@@ -61,8 +61,8 @@ namespace fmr { namespace perf {
     Elapsed   busy_ns = 0;
     I         unit_n  = 0;
     I         flop_n  = 0;
-    I         read_n  = 0;// bytes (was binp_n)
-    I         save_n  = 0;// bytes (was bout_n)
+    I         read_n  = 0;// bytes in
+    I         save_n  = 0;// bytes out
     std::string unit_name = std::string("units");
   };
 } }// end fmr::perf:: namespace

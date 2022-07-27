@@ -32,6 +32,9 @@ namespace femera {
     this->task_type = task_cast (Task_type::Main);
     this->info_d    = 2;
   }
+  fmr::Local_int proc::Main::get_race_ix () {
+    return proc::Fomp::task_proc_ix ();
+  }
   void proc::Main:: task_init (int*, char**) {
     const auto core = this->get_core ();
     Work::Task_path_t path ={};

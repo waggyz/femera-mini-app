@@ -10,10 +10,10 @@ namespace fmr { namespace perf {
 // https://google.github.io/styleguide/cppguide.html#Aliases
 
 using Float     = fmr::Perf_float;
-using Perf_int  = fmr::Perf_int  ;
-using Timepoint = Perf_int       ;// ...One underlying type...
-using Elapsed   = Perf_int       ;// ...of these user types...
-using Count     = Perf_int       ;// ...used for simple struct packing.
+using Int       = fmr::Perf_int  ;
+using Timepoint = Int            ;// ...One underlying type...
+using Elapsed   = Int            ;// ...of these user types...
+using Count     = Int            ;// ...used for simple struct packing.
 
 static inline Timepoint get_now_ns () noexcept;
 

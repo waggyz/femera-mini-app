@@ -1,6 +1,12 @@
 #ifndef FMR_HAS_PERF_METER_IPP
 #define FMR_HAS_PERF_METER_IPP
 
+#if 0
+// Change to 1 if atomic operators needed
+#define THIS_PRAGMA_OMP(x) FMR_PRAGMA_OMP(x)
+#else
+#define THIS_PRAGMA_OMP(x) // pragma omp not used here
+#endif
 // Inline definitions
 namespace fmr {
   template <typename I, typename F> inline
@@ -21,24 +27,24 @@ namespace fmr {
   template <typename I, typename F> inline
   perf::Timepoint perf::Meter<I,F>::start ()
   noexcept {
-    FMR_PRAGMA_OMP(omp atomic write)
+    THIS_PRAGMA_OMP(omp atomic write)
     this->tick = perf::get_now_ns ();
     return this->tick;
   }
   template <typename I, typename F> inline
   perf::Timepoint perf::Meter<I,F>::reset ()
   noexcept {
-    FMR_PRAGMA_OMP(omp atomic write)
+    THIS_PRAGMA_OMP(omp atomic write)
     this->idle_ns = 0;
-    FMR_PRAGMA_OMP(omp atomic write)
+    THIS_PRAGMA_OMP(omp atomic write)
     this->busy_ns = 0;
-    FMR_PRAGMA_OMP(omp atomic write)
+    THIS_PRAGMA_OMP(omp atomic write)
     this->unit_n  = 0;
-    FMR_PRAGMA_OMP(omp atomic write)
+    THIS_PRAGMA_OMP(omp atomic write)
     this->flop_n  = 0;
-    FMR_PRAGMA_OMP(omp atomic write)
+    THIS_PRAGMA_OMP(omp atomic write)
     this->read_n  = 0;
-    FMR_PRAGMA_OMP(omp atomic write)
+    THIS_PRAGMA_OMP(omp atomic write)
     this->save_n  = 0;
     return this->start ();
   }
@@ -46,9 +52,9 @@ namespace fmr {
   F perf::Meter<I,F>::add_busy_time_now () {
     const fmr::perf::Count now = perf::get_now_ns ();
     const fmr::perf::Count last_busy = (now > this->tick) ? now - tick : 0;
-    FMR_PRAGMA_OMP(omp atomic write)
+    THIS_PRAGMA_OMP(omp atomic write)
     this->tick = now;
-    FMR_PRAGMA_OMP(omp atomic update)
+    THIS_PRAGMA_OMP(omp atomic update)
     this->busy_ns += last_busy;
     return F (1.0e-9) * F (last_busy);
   }
@@ -56,22 +62,22 @@ namespace fmr {
   F perf::Meter<I,F>::add_idle_time_now () {
     const fmr::perf::Count now = perf::get_now_ns ();
     const fmr::perf::Count last_idle = (now > this->tick) ? now - tick : 0;
-    FMR_PRAGMA_OMP(omp atomic write)
+    THIS_PRAGMA_OMP(omp atomic write)
     this->tick = now;
-    FMR_PRAGMA_OMP(omp atomic update)
+    THIS_PRAGMA_OMP(omp atomic update)
     this->idle_ns += last_idle;
     return F (1.0e-9) * F (last_idle);
   }
   template <typename I, typename F> inline
   F perf::Meter<I,F>::add_count
     (const I units, const I flops, const I read, const I save ) {
-    FMR_PRAGMA_OMP(omp atomic update)
+    THIS_PRAGMA_OMP(omp atomic update)
     this->unit_n += units;
-    FMR_PRAGMA_OMP(omp atomic update)
+    THIS_PRAGMA_OMP(omp atomic update)
     this->flop_n += flops;
-    FMR_PRAGMA_OMP(omp atomic update)
+    THIS_PRAGMA_OMP(omp atomic update)
     this->read_n += read;
-    FMR_PRAGMA_OMP(omp atomic update)
+    THIS_PRAGMA_OMP(omp atomic update)
     this->save_n += save;
     return F (this->unit_n);
   }
@@ -207,5 +213,6 @@ namespace fmr {
   }
 }// end fmr:: namespace
 #undef FMR_DEBUG
+#undef THIS_PRAGMA_OMP
 //end FMR_HAS_PERF_METER_IPP
 #endif

@@ -31,6 +31,7 @@ FMR_WARN_INLINE_ON
 #endif
 #ifdef FMR_HAS_OPENMP
     EXPECT_GT( proc_id_sum (), 0);
+    EXPECT_GT( main_test->get_race_n (), 1);
 #endif
   }
 } }//end femera::test:: namespcae
