@@ -156,19 +156,6 @@ namespace fmr {
   fmr::perf::Elapsed perf::Meter<I,F>::get_work_ns () {
     return this->busy_ns + idle_ns;
   }
-  #if 0
-  //TODO Are these useful? inline
-  F perf::Meter<I,F>::get_life_time_now () {
-    return 1e-9 * F (perf::get_now_ns() - this->begin_at);
-  } inline
-  F perf::Meter<I,F>::get_idle_time_now () {
-    return 1e-9 * F (
-      perf::get_now_ns() - this->begin_at - this->idle_ns - this->busy_ns);
-  } inline
-  F perf::Meter<I,F>::get_life_flop_speed () {
-    return F (this->flop_n) / this->get_life_time();
-  }
-  #endif
   // Overall speeds
   template <typename I, typename F> inline
   F perf::Meter<I,F>::get_unit_speed () {

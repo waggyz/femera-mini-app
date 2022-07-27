@@ -23,6 +23,10 @@ namespace femera {
   }
 #endif
   inline
+  bool data::Bank::does_file (const fmr::Data_name_t&){
+    return false;
+  }
+  inline
   void data::Bank::task_exit () {
   }
 }//end femera namespace

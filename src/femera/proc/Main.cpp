@@ -39,7 +39,6 @@ namespace femera {
     const auto core = this->get_core ();
     Work::Task_path_t path ={};
 #ifdef FMR_USE_PROC_ROOT
-    //TODO Is proc::Root needed?
     path.push_back (add_task (std::move (Proc<proc::Root>::new_task (core))));
     path.push_back (get_task (path)->add_task
       (std::move(Proc<proc::Node>::new_task (core))));
@@ -58,7 +57,7 @@ namespace femera {
 #endif
 #ifdef FMR_HAS_OPENMP
 #ifdef FMR_OMP_LOCAL
-    //TODO Add thread-local Fomp instances?
+    // Add thread-local Fomp instances.
     const fmr::Local_int n = 2;//TODO calc or get from command arg
     FMR_PRAGMA_OMP(omp parallel for schedule(static) ordered num_threads(n))
     for (fmr::Local_int i=0; i<n; ++i) {

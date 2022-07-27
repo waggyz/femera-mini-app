@@ -19,31 +19,10 @@ namespace femera {
     this->abrv ="omp";
     this->version = std::to_string (_OPENMP);
     this->task_type = task_cast (Task_type::Fomp);
-    //this->proc_ix = this->task_proc_ix ();// set in parallel if >1 Fomp loaded
     this->proc_n  = fmr::Local_int (::omp_get_max_threads ());
   }
-#if 0
-  void proc::Fomp::task_init (int*, char**) {
-    const auto orig_proc_n = this->proc_n;
-#else
   void proc::Fomp::task_init (int* argc, char** argv) {
     this->scan (argc, argv);
-#endif
-#if 0
-    if (this->is_in_parallel ()) {//TODO 1 Fomp/team or 1 Fomp/openmp thrd?
-      this->proc_n = fmr::Local_int (::omp_get_num_threads ());
-    } else {
-      if (false && this->proc != nullptr) {//TODO calculate number of OpenMP threads
-        this->proc->auto_proc_n ();// sets this->proc_n
-        if (this->data != nullptr) {
-          data->send (fmr::log, get_base_abrv (), get_abrv (), "thrd",
-            "%u", this->proc_n);
-      } }
-      ::omp_set_num_threads (int (this->proc_n));
-      FMR_PRAGMA_OMP(omp parallel) {
-        this->proc_n = fmr::Local_int (::omp_get_num_threads ());
-  } }
-#endif
   }
   void proc::Fomp::scan (int* argc, char** argv) {
     const auto orig_proc_n = this->proc_n;
@@ -54,11 +33,11 @@ namespace femera {
         opterr = 0; int optchar;
         while ((optchar = getopt (argc[0], argv, "o:")) != -1) {
           // o:  -o requires an argument//NOTE -g gets eaten by MPI
-          //TODO -fmr:o<int> is working because -f -m -r and -: are skipped,
+          //NOTE -fmr:o<int> is working because -f -m -r and -: are skipped,
           //     leaving only the recognized option -o<int>.
           switch (optchar) {
             case 'o':{ this->proc_n = fmr::Local_int (atoi (optarg)); break; }
-            //TODO: this->proc->opt_add (optchar); break;
+            //TODO this->proc->opt_add (optchar); break;
         } }
         // Restore getopt variables.
         argc[0]=ac; opterr=oe; optopt=oo; optind=oi; optarg=oa;
@@ -71,14 +50,6 @@ namespace femera {
 #ifdef FMR_DEBUG
       printf ("%s Fomp::task_proc_n %i\n", get_abrv ().c_str(),
         ::omp_get_num_threads ());
-#endif
-      //this->proc->set_base_n ();
-#if 0
-      if (this->data != nullptr) {
-        //TODO wrong before init done
-        data->send (fmr::out, get_base_abrv (), get_abrv (), "thrd",
-          "%4u for process %4u", this->proc_n, this->proc->get_proc_id ());
-      }
 #endif
   } }
   bool proc::Fomp::is_in_parallel ()

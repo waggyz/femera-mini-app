@@ -18,7 +18,6 @@ namespace fmr {
   //
   using    Dim_int = uint_fast8_t  ;// space dim., hier. depth, poly. order,...
   using   Enum_int = int           ;// default enum native type
-//  using   Elid_int = uint32_t      ;//TODO remove ?
   using  Align_int = uint_fast16_t ;
   using  Local_int = uint32_t      ;
   using Global_int = uint64_t      ;// element ID, node ID
@@ -43,6 +42,27 @@ namespace fmr {
   //
   using Vals_name_t = std::string;//WAS Data_id
   using File_name_t = std::string;
+}//end fmr:: namespace
+namespace fmr {
+  // a file name is interpreted as a collection of vals or strings
+  using Data_name_t = std::string;// variable (vals) or file name
+ /*
+  * Data_name_t: sim, part, file, directory, or other data collection path and
+  * (base) name.
+  * The base name, Vals_type (or vals name), and an integer index (e.g.
+  * partition number or thread ID), together identify a data item (and a format
+  * handler if appropriate) for its source, destination(s), and storage in
+  * memory. Each identifier can map to an initial (input) source and final
+  * (output) data destinations.
+  */
+  // built-in data sources and destinations
+  static const Data_name_t log ="fmr:log" ;// default stdout from main thrd only
+  static const Data_name_t out ="fmr:out" ;// default stdout from all threads
+  static const Data_name_t err ="fmr:err" ;// default stderr from all threads
+  static const Data_name_t in  ="fmr:in"  ;// default stdin  to   each MPI thrd
+  static const Data_name_t none="fmr:none";
+  static const Data_name_t null="fmr:null";// convenient synonym of fmr::none
+  // formatters: fmr::Vals_type::Info_line, fmr::Vals_type::Text_line, ...
 }//end fmr:: namespace
 namespace femera { namespace test {
   int early_main (int* argc, char** argv);

@@ -10,27 +10,6 @@
 #include <cstdio>     // std::printf
 #endif
 
-namespace fmr {//TODO Move to fmr.h? Change to femera::?
-  // a file name is interpreted as a collection of vals
-  using Data_name_t = std::string;// variable (vals) or file name
- /*
-  * Data_name_t: sim, part, file, directory, or other data collection path and
-  * (base) name.
-  * The base name, Vals_type (or vals name), and an integer index (e.g.
-  * partition number or thread ID), together identify a data item (and a format
-  * handler if appropriate) for its source, destination(s), and storage in
-  * memory. Each identifier can map to an initial (input) source and final
-  * (output) data destinations.
-  */
-  // built-in data sources and destinations
-  static const Data_name_t log ="fmr:log" ;// default stdout from main thrd only
-  static const Data_name_t out ="fmr:out" ;// default stdout from all threads
-  static const Data_name_t err ="fmr:err" ;// default stderr from all threads
-  static const Data_name_t in  ="fmr:in"  ;// default stdin  to   each MPI thrd
-  static const Data_name_t none="fmr:none";
-  static const Data_name_t null="fmr:null";// convenient synonym of fmr::none
-  // formatters: fmr::Vals_type::Info_line, fmr::Vals_type::Text_line, ...
-}//end fmr:: namespace
 namespace femera {
   template <typename T>
   class Data : public Work {
@@ -40,7 +19,7 @@ namespace femera {
     using Data_list_t = std::vector <fmr::Data_name_t>;
   protected:// member variables
     // Each data handler has a map of data/file names handled by each thread.
-    //TODO set inp/out_name_list in each handler derived from data
+    // Set inp/out_name_list in each handler derived from data.
     std::unordered_map <fmr::Data_name_t, Data_list_t> inp_name_list ={};
     std::unordered_map <fmr::Data_name_t, Data_list_t> out_name_list ={};
 #if 0

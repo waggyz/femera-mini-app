@@ -56,7 +56,7 @@ namespace femera {
       this->data->send (fmr::log, get_base_abrv (), abrv, "proc",
         ("%4u    /%4u total CPU processes (%4u MPI  "+ x +"%4u OpenMP)").c_str(),
         mpi_n * omp_n, all_n, mpi_n, omp_n);
-      this->data->send (fmr::log, get_base_abrv (), abrv, "node",
+      this->data->send (fmr::log, get_base_abrv (), abrv, "core",
         ("%4u    /%4u total physical CPUs (%4u node "+ x +"%4u cores)").c_str(),
         node_n * core_n, all_n, node_n, core_n);
       this->data->send (fmr::log, get_base_abrv (), abrv, "numa",

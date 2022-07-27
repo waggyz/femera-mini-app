@@ -110,7 +110,7 @@ FMR_WARN_INLINE_OFF
     Proc* P = this;
     ans = ans & (P->get_proc_ix () == P->main_ix);
     while (! P->task_list.empty ()) {
-      P = static_cast<Proc*> (P->get_work (0));//TODO only path 0?
+      P = static_cast<Proc*> (P->get_work (0));//NOTE only path 0
       ans = ans & (P->get_proc_ix () == P->main_ix);
     }
     return ans;
@@ -145,7 +145,7 @@ FMR_WARN_INLINE_ON
         id + this->get_task (0)->get_proc_id (tid), id,
         this->base_id, this->base_n, Proc::this_cast (this)->get_proc_ix ());
 #endif
-      id += this->get_task (0)->get_proc_id (tid);//TODO only path 0?
+      id += this->get_task (0)->get_proc_id (tid);//NOTE only path 0?
     }
     return id;
   }
@@ -196,7 +196,7 @@ FMR_WARN_INLINE_ON
 #ifdef FMR_DEBUG
       printf ("%s: * %u = %u\n", P->get_name ().c_str(), P->get_proc_n(), n);
 #endif
-      P = this_cast (P->get_work (0));//TODO other branches?
+      P = this_cast (P->get_work (0));//NOTE only path 0
     }
     return n;
   }
@@ -206,7 +206,7 @@ FMR_WARN_INLINE_ON
     auto P = this;
     while (! P->task_list.empty ()) {
       P->base_n = P->all_proc_n () / ((P->proc_n == 0) ? 1 : P->proc_n);
-      P = this_cast (P->get_work (0));//TODO other branches?
+      P = this_cast (P->get_work (0));//NOTE only path 0
     }
     return this->base_n;
   }

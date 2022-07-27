@@ -5,7 +5,7 @@
 
 namespace fmr { namespace proc {
 
-  fmr::Local_int  get_node_core_n  ();//TODO Move all to femera::proc::Node
+  fmr::Local_int  get_node_core_n  ();
   fmr::Local_int  get_node_hype_n  ();
   fmr::Local_int  get_node_numa_n  ();
   fmr::Local_int  get_node_core_ix ();

@@ -36,7 +36,7 @@ namespace fmr { namespace math {
     end };
   static const std::map<Poly,std::pair<std::string,std::string>>
   poly_letter_name {
-    {Poly::        None,std::make_pair("-","no polynomial")},//TODO makes sense?
+    {Poly::        None,std::make_pair("-","no polynomial")},
     {Poly::       Error,std::make_pair("!","polynomial error")},
     {Poly::     Unknown,std::make_pair("?","unknown polynomial")},
     {Poly::        Full,std::make_pair("P","Full Taylor polynomial")},

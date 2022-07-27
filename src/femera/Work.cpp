@@ -33,8 +33,7 @@ namespace femera {
     auto W = this;
 #if 1
     if (W->task_type == t) {
-      //TODO Is this the desired behavior of nested drivers of the same type?
-      //     Task 0 is the parent, with 1-indexed children of the same type.
+      //NOTE Task 0 is the parent, with 1-indexed children of the same type.
       if (i == ix) { return W; }
       ++i;
     }
