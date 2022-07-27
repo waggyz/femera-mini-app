@@ -55,7 +55,7 @@ namespace femera {
 #endif
   }
   bool data::Cgns::does_file (const fmr::Data_name_t& fname) {int err=0, fmt=0;
-    err= cg_is_cgns (fname.c_str(), &fmt);
+    err = cg_is_cgns (fname.c_str(), &fmt);
     return err == 0;
   }
 }//end femera:: namespace
