@@ -10,7 +10,8 @@ namespace femera { namespace proc {
   private:
     fmr::Local_int race_n = 0;// number of shared-memory threads
   public:
-    static fmr::Local_int get_race_ix ();
+    static
+    fmr::Local_int get_race_ix ();
     fmr::Local_int get_race_n  ();
   public:
     Main (const femera::Work::Core_ptrs_t) noexcept;

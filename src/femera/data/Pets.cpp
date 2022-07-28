@@ -30,7 +30,7 @@ namespace femera {
     this->version = std::to_string (Pets_VERSION / 1000)
       + "." + std::to_string (Pets_VERSION % 1000);
 #ifdef FMR_HAS_MPI
-    FMR_PRAGMA_OMP(omp master)
+//NO_FMR_PRAGMA_OMP(omp MAIN)//NOTE OpenMP does not play nice with exceptions.
     if (this->proc != nullptr) {// Set Pets comm to a copy of Fmpi::team_id
       const auto P = this->proc->get_task (Task_type::Fmpi);
       if (P != nullptr) {
@@ -60,7 +60,7 @@ namespace femera {
 //TODO    this->close_all ();
 //TODO?   FMR_PRAGMA_OMP(omp barrier)
 #ifdef FMR_HAS_MPI
-    FMR_PRAGMA_OMP(omp master)
+//NO_FMR_PRAGMA_OMP(omp MAIN)//NOTE OpenMP does not play nice with exceptions.
       if (this->team_id != fmr::Team_int (MPI_COMM_WORLD)) {
         MPI_Comm c = MPI_Comm (this->team_id);
         const auto err = MPI_Comm_free (&c);

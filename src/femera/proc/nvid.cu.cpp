@@ -18,7 +18,7 @@ namespace femera {namespace proc {namespace nvid {
 */
   inline void
   try_cuda (const cudaError_t code, const char *file, const int line,
-  const bool do_throw=true ) {
+    const bool do_throw = true ) {
     if (code != cudaSuccess) {
 #ifdef FMR_DEBUG
       fprintf (stderr,"%s:%d %s \n", file, line, cudaGetErrorString (code));

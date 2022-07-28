@@ -18,7 +18,7 @@ namespace femera {
     this->info_d    = 3;
   }
   void data::Gmsh::task_init (int*, char**) {
-    FMR_PRAGMA_OMP(omp master) {
+//NO_FMR_PRAGMA_OMP(omp MAIN){//NOTE OpenMP does not play nice with exceptions.
       const bool do_read_gmsh_config = false;
       ::gmsh::initialize (0, nullptr, do_read_gmsh_config);// init without args.
       this->did_gmsh_init = true;
@@ -42,11 +42,12 @@ namespace femera {
         this->data->send (fmr::log, "data", "gmsh", "NOTE",
         "OpenMP threads (%g) does not match Femera (%u).",
         gmsh_omp_n, omp_n);
-  } } }
+  } }//}
   void data::Gmsh::task_exit () {
-    FMR_PRAGMA_OMP(omp master) {
+//NO_FMR_PRAGMA_OMP(omp MAIN)//NOTE OpenMP does not play nice with exceptions.
       if (this->did_gmsh_init) { ::gmsh::finalize ();
-  } } }
+  } }// }
+  //
 }//end femera:: namespace
 
 

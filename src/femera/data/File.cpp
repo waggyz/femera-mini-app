@@ -34,6 +34,7 @@ namespace femera {
     this->info_d    = 2;
   }
   void data::File::task_init (int*, char**) {
+//NOTE OpenMP does not play nice with exceptions.
     fmr::Local_int o = 1;
 #ifdef FMR_BANK_LOCAL
     o = this->proc->get_race_n ();

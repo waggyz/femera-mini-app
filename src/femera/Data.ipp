@@ -29,6 +29,10 @@ namespace femera {
   template <typename T> inline
   fmr::Exit_int Data<T>::init (int* argc, char** argv)
   noexcept {
+#if 1//def FMR_DEBUG
+    printf ("%4s %4s %4s %s\n",get_base_abrv ().c_str(), get_abrv ().c_str(),
+      "init", "trying task_init (..)..." );
+#endif
     fmr::Exit_int err = 0;
     try { Data::this_cast (this)->task_init (argc, argv); }// Init this task,...
     catch (const Warn& e)    { err =-1; e.print (); }
@@ -38,7 +42,7 @@ namespace femera {
     catch (...)              { err = 3;
       Errs::print (this->get_abrv ()+" task_init"); }
     if (err > 0) {return this->exit (err); }
-    err = init_list (argc, argv);//                    ...then init child tasks.
+    err = Work::init_list (argc, argv);//              ...then init child tasks.
 #ifdef FMR_DEBUG
     const auto n = this->get_task_n ();
     if (n>0) {
