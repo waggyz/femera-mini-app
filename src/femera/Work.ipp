@@ -69,6 +69,33 @@ namespace femera {
     this->abrv = ab;
     return this->abrv;
   }
+  inline
+  std::string Work::get_did_init_list ()
+  noexcept { auto list = std::string ();
+    const auto n = this->get_task_n ();
+    if (n>0) {
+      for (fmr::Local_int i=0; i<n; i++) {
+        const auto W = this->get_work (i);
+        if (W->did_init_tf) {
+          list += W->get_abrv ();
+          if (i < (n - 1)) { list +=" "; }
+    } } }
+    return list;
+  }
+  inline
+  std::string Work::get_not_init_list ()
+  noexcept { auto list = std::string ();
+    const auto n = this->get_task_n ();
+    if (n>0) {
+      for (fmr::Local_int i=0; i<n; i++) {
+        const auto W = this->get_work (i);
+        if (! W->did_init_tf) {
+          list += W->get_abrv ();
+          if (i < (n - 1)) { list +=" "; }
+    } } }
+    return list;
+  }
+  //
 }//end femera:: namespace
 #if 0
 namespace fmr {

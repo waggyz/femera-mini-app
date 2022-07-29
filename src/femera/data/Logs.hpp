@@ -16,7 +16,6 @@ FMR_WARN_INLINE_ON
       { fmr::err, ::stderr }
     };
     fmr::Dim_int verb_d = 5;//TODO set by command line option -v<int>
-    bool did_init_tf = false;
   public:
     fmr::Dim_int get_verb ()             noexcept;
     fmr::Dim_int set_verb (fmr::Dim_int) noexcept;// returns verb_d after set

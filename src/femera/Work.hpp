@@ -86,17 +86,18 @@ namespace femera {
     std::unique_ptr<char*[]> my_argv;//use: err= init (&my_argc, my_argv.get());
     int                      my_argc =0;
 #endif
+    bool did_init_tf = false;
   private:// variables
     bool did_work_init = false;
     bool  is_work_main = true ;// save for use after proc::exit (..)
   public:// methods -----------------------------------------------------------
     template <typename T, typename C> static constexpr
     T* cast_via_work (C* child) noexcept;
-    std::string set_name    (const std::string&) noexcept;
-    std::string get_name    () noexcept;
-    std::string get_abrv    () noexcept;
-    std::string get_version () noexcept;
-    Core_ptrs_t get_core    () noexcept;
+    Core_ptrs_t get_core     () noexcept;
+    std::string get_abrv     () noexcept;
+    std::string get_version  () noexcept;
+    std::string get_name     () noexcept;
+    std::string set_name     (const std::string&) noexcept;
     // task stack handling
     fmr::Local_int get_task_n () noexcept;
     fmr::Local_int add_task   (Work_spt) noexcept;// returns task number added
@@ -108,6 +109,8 @@ namespace femera {
     virtual fmr::Exit_int exit (fmr::Exit_int err=0)    noexcept =0;
   protected:
     std::string set_abrv (const std::string&) noexcept;
+    std::string get_did_init_list () noexcept;// returns space-seperated list
+    std::string get_not_init_list () noexcept;// returns space-seperated list
     // Work task_list initialization and exit
     fmr::Exit_int init_list (int* argc, char** argv) noexcept;// init forward
     fmr::Exit_int exit_list () noexcept;// exit task_list in reverse
