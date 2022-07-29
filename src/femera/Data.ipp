@@ -29,7 +29,7 @@ namespace femera {
   template <typename T> inline
   fmr::Exit_int Data<T>::init (int* argc, char** argv)
   noexcept {
-#if 1//def FMR_DEBUG
+#ifdef FMR_DEBUG
     printf ("%4s %4s %4s %s\n",get_base_abrv ().c_str(), get_abrv ().c_str(),
       "init", "trying task_init (..)..." );
 #endif

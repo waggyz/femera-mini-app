@@ -27,6 +27,7 @@ namespace femera { namespace data {
     Cgns (femera::Work::Core_ptrs_t) noexcept;
     Cgns () =delete;//NOTE Use the constructor above.
   };
+  //
 } }//end femera::data:: namespace
 
 #include "Cgns.ipp"

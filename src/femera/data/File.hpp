@@ -32,8 +32,7 @@ namespace femera { namespace data {
     using css = const std::string;
   public:
     bool did_logs_init () noexcept;
-    std::size_t send (const fmr::Data_name_t&, css& text,
-       fmr::Dim_int out_d=1)
+    std::size_t send (const fmr::Data_name_t&, css& text, fmr::Dim_int out_d=1)
     noexcept;
     template <typename ...Args>
     std::size_t send (const fmr::Data_name_t&,// standard fmr:log line
@@ -45,9 +44,6 @@ namespace femera { namespace data {
     File (femera::Work::Core_ptrs_t) noexcept;
     File () =delete;//NOTE Use the constructor above.
 #if 0
-  public:
-    using Open_file_id = uintptr_t;// cast-compatible with FILE* (stdout,stderr)
-    // bad idea: do not use open file handles as file IDs
   private:
     std::unordered_map <File_id, Page_dims> file_data = {};
 #endif

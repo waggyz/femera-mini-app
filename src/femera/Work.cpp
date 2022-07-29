@@ -99,19 +99,18 @@ namespace femera {
           } else {
           if (W->proc != nullptr) {
             if (W->proc->is_main ()) {
-              const auto label = femera::form::text_line (250, "%4s %4s init",
+              const auto label = form::text_line (250, "%4s %4s init",
                 W->get_base_abrv ().c_str(), W->abrv.c_str());
-              femera::form::name_line (::stdout, 14, 80, label, text);
-          } } }
-        }
+              form::name_line (::stdout, 14, 80, label, text);
+        } } } }
         if (Werr > 0) {
           del_list.push (ix);// Queue task for removal if init failed, and...
           W->exit (-1);      // ...exit it with a warning (not error) code.
     } } }
     while (! del_list.empty ()) {// Remove failed tasks.
-      const auto label = femera::form::text_line (250, "%4s %4s init",
+      const auto label = form::text_line (250, "%4s %4s init",
         this->get_base_abrv ().c_str(), this->get_abrv().c_str());
-      femera::form::name_line (::stdout, 14, 80, label, "removing %s...",
+      form::name_line (::stdout, 14, 80, label, "removing %s...",
         this->get_work (del_list.top ())->get_name ().c_str());
       this->del_task (del_list.top ());
       del_list.pop ();
@@ -164,8 +163,8 @@ FMR_WARN_INLINE_ON
     if (this->proc != nullptr && this->did_work_init == true) {
 FMR_WARN_INLINE_OFF
       this->is_work_main = this->proc->is_main ();
-    }
 FMR_WARN_INLINE_ON
+    }
     this->did_work_init = false;
     if (! this->task_list.empty ()) {
       Work::Task_path_t branch ={};
@@ -217,17 +216,15 @@ FMR_WARN_INLINE_ON
     auto save = std::string ();
     auto flop = std::string ();
     if (W->time.get_read_n () > fmr::Perf_int (0)) {
-//      read="**** inp";
-      read = femera::form::perf_line (W->time.get_read (), busy_s);
+      read = form::perf_line (W->time.get_read (), busy_s);
     }
     if (W->time.get_save_n () > fmr::Perf_int (0)) {
-//      save="**** out";
-      save = femera::form::perf_line (W->time.get_save (), busy_s);
+      save = form::perf_line (W->time.get_save (), busy_s);
     }
     if (W->time.get_flop_n () > fmr::Perf_int (0)
       && W->time.get_byte_n () > fmr::Perf_int (0)) {
       flop="**** flop";
-      //flop = femera::form::flop_line
+      //flop = form::flop_line//TODO
       //(this->time.get_flop (), this->time.get_byte (), busy_s);
     }
     const auto tot  = fmr::form::si_time (W->time.get_work_s ());
@@ -236,7 +233,7 @@ FMR_WARN_INLINE_ON
 FMR_WARN_INLINE_OFF
     if (W->data == nullptr) {
       if (this->is_work_main) {
-      const auto label = femera::form::text_line (250, "%4s %4s ",
+      const auto label = form::text_line (80, "%4s %4s ",
         W->get_base_abrv().c_str(), W->get_abrv().c_str());
       form::name_line (::stdout, 14, 80, label+"exit", text);
       if (read.size () > 0) {
@@ -263,5 +260,5 @@ FMR_WARN_INLINE_OFF
 FMR_WARN_INLINE_ON
     return err;
   }
-}//end femera:: namespace
+}//end  namespace
 #undef FMR_DEBUG

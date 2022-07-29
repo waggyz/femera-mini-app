@@ -21,25 +21,16 @@ namespace femera {
       if (P != nullptr) {
         MPI_Comm c;
         const auto err = MPI_Comm_dup (MPI_Comm (P->get_team_id()), &c);
-        if (err) {//TODO exception should remove Cgns from the data task_list
+        if (err) {// exception removes Cgns from the data task_list
           FMR_THROW(std::string("Failed to copy MPI communicator for CGNS."));
         } else {
           this->team_id = fmr::Team_int (c);
           this->version+=" (parallel)";
-        }
-#if 0
-        if(this->proc->log->detail > 1 ){
-          this->proc->log->label_printf("CGNS mode",
-            "Parallel access using %i MPI threads/team\n",//TODO?
-            this->proc->task.first<Proc>( Task_type:: Pmpi )->get_proc_n() );
-        }
-#endif
-    } }
+    } } }
 #endif
   }
   void data::Cgns::task_exit () {
 //TODO    this->close_all ();
-//TODO?   FMR_PRAGMA_OMP(omp barrier)
 #ifdef FMR_HAS_MPI
 //NO_FMR_PRAGMA_OMP(omp MAIN)//NOTE OpenMP does not play nice with exceptions.
       if (this->team_id != fmr::Team_int (MPI_COMM_WORLD)) {

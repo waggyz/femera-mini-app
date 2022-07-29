@@ -16,7 +16,7 @@ namespace femera { namespace test {
     return atof (ver.c_str());
   }
   TEST( Cgns, TrivialTest) { EXPECT_EQ( 0, 0 ); }
-  TEST( Cgns, Version)     { EXPECT_GE( get_cgns_version(), 5.0 ); }
+  TEST( Cgns, Version)     { EXPECT_GE( get_cgns_version (), 5.0 ); }
   //
 } }//end femerea::test:: namespace
 
