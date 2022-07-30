@@ -49,6 +49,7 @@ namespace femera {
     // default fmr:log destination is ::stdout from thread 0.
     this->out_name_list [fmr::log ] = Data::Data_list_t (n, fmr::out);
     if (n > 0) { this->out_name_list [fmr::log][0] = fmr::out; }
+    this->name += " (main to stdout, all to stderr)";
 #ifdef FMR_DEBUG
     this->set_verb (101);
 #endif

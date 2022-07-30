@@ -76,11 +76,11 @@ namespace femera {
         if ( no_n > 1) { no += "("+std::to_string ( no_n)+")";}
         if (did.size() > 0) {
         printf ("%4s %4s %4s %s\n",
-          this->get_abrv ().c_str(),"did","init", did.c_str());
+          this->get_abrv ().c_str(),"init","ok", did.c_str());
       }
       if (no.size() > 0) {
         printf ("%4s %4s %4s %s\n",
-          this->get_abrv ().c_str(),"not","init", no.c_str());
+          this->get_abrv ().c_str(),"init","FAIL", no.c_str());
     } } }
     return did_init_count;
   }
