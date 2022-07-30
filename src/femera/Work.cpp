@@ -12,9 +12,6 @@ namespace femera {
   Work::Work (const Work::Core_ptrs_t core) noexcept {
     std::tie (this->proc, this->data, this->test) = core;
   }
-#if 0
-  Work::Work (Work const&) = default;// copyable, here to avoid -Winline warns
-#endif
   Work::Work (Work &&) = default;// movable, here to avoid -Winline warns
   Work::~Work () {
   }
@@ -53,7 +50,7 @@ namespace femera {
   }
   fmr::Local_int Work::log_init_list ()
   noexcept { fmr::Local_int did_init_count = 1;
-    const auto n = this->get_task_n ();//TODO Move below to Work method or Jobs.
+    const auto n = this->get_task_n ();
     if ((n > 0) && (this->proc != nullptr)) {
       if (this->proc->did_init () && this->proc->is_main ()) {
         auto did = std::string (); fmr::Local_int did_n = 1;
