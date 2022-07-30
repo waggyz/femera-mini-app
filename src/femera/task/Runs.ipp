@@ -12,6 +12,7 @@ namespace femera {
   }
   inline
   void task::Runs::task_init (int*, char**) {
+    this->set_init (true);
   }
   inline
   void task::Runs::task_exit () {

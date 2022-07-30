@@ -47,7 +47,7 @@ namespace femera {
     }
     return this->proc_ix;
   }
-  void proc::Fmpi::task_init (int* argc, char** argv) {int err=0;
+  void proc::Fmpi::task_init (int* argc, char** argv) { int err=0;
     std::valarray<char> buf (MPI_MAX_LIBRARY_VERSION_STRING);
     // MPI_MAX_LIBRARY_VERSION_STRING includes space for the terminating null.
     int buflen=0, mpiver=0, mpisub=0;
@@ -87,7 +87,9 @@ namespace femera {
 #ifdef FMR_DEBUG
       std::printf ("Fmpi::task_init: %u/%u processes...\n", proc_ix, proc_n);
 #endif
-  } } }
+    } }
+    this->set_init (true);
+  }
   void proc::Fmpi::task_exit () {int err=0;
 #ifdef FMR_DEBUG
     std::printf ("Fmpi::task_exit (%i) start...\n", err);

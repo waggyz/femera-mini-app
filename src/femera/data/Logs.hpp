@@ -19,9 +19,7 @@ FMR_WARN_INLINE_ON
   public:
     fmr::Dim_int get_verb ()             noexcept;
     fmr::Dim_int set_verb (fmr::Dim_int) noexcept;// returns verb_d after set
-    bool do_log           (fmr::Dim_int) noexcept;
-    bool did_init         ()             noexcept;
-    bool set_init         (bool)         noexcept;
+    bool          do_log  (fmr::Dim_int) noexcept;
   public:
     void task_init (int* argc, char** argv);
     void task_exit ();
@@ -32,6 +30,7 @@ FMR_WARN_INLINE_ON
     Logs (femera::Work::Core_ptrs_t) noexcept;
     Logs () =delete;//NOTE Use the constructor above.
   };
+  //
 } }//end femera::data:: namespace
 
 #include "Logs.ipp"

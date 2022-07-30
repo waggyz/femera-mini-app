@@ -70,6 +70,7 @@ FMR_WARN_INLINE_OFF
     this->add_task (std::move (Data<data::Pets>::new_task (this->get_core())));
 #endif
 FMR_WARN_INLINE_ON
+  this->set_init (true);
   }
   std::size_t data::File::send (const fmr::Data_name_t& file,
     const std::string& text, const fmr::Dim_int out_d)

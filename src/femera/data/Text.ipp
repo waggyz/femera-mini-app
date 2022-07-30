@@ -11,6 +11,7 @@ namespace femera {
   }
   inline
   void data::Text::task_init (int*, char**) {
+    this->set_init (true);
   }
   inline
   void data::Text::task_exit () {

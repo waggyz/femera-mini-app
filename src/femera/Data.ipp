@@ -43,40 +43,6 @@ namespace femera {
       Errs::print (this->get_abrv ()+" task_init"); }
     if (err > 0) {return this->exit (err); }
     err = Work::init_list (argc, argv);//              ...then init child tasks.
-#if 1//def FMR_DEBUG
-    const auto n = this->get_task_n ();//TODO Move below to Work method.
-    if (n > 0) {
-      auto did = std::string ();
-      auto no  = std::string ();
-      for (fmr::Local_int i=0; i<n; ++i) {
-        const auto W = this->get_task (i);
-        if (W->did_init_tf) {
-          did += W->abrv;
-          did += (i == (n - 1)) ? "":" ";
-        } else {
-          no  += W->abrv;
-          no  += (i == (n - 1)) ? "":" ";
-      } }
-    if (did.size() > 0) {
-      did = this->get_abrv () + "  did init "+ did +"\n";
-      printf (did.c_str());
-    }
-    if (no.size() > 0) {
-      no  = this->get_abrv () + "  not init "+ no  +"\n";
-      printf ( no.c_str());
-    } }
-#endif
-#if 0
-    if (this->task_type == task_cast (Task_type::File)) {
-      const auto L = this->get_task (Task_type::Logs);
-      if (L != nullptr) {
-        if (L->did_init_tf) {
-          this->data->send (fmr::log, this->abrv, "did", "init", "****");
-          this->data->send (fmr::log, this->abrv, "not", "init", "****");
-//          printf ("data  did init ***********\n");
-//          printf ("data  not init ***********\n");
-    } } }
-#endif
     return err;
   }
   template <typename T> inline

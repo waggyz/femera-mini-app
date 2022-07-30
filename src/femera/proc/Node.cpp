@@ -27,6 +27,7 @@ namespace femera {
     //  const auto n = fmr::proc::get_node_n () * fmr::proc::get_node_core_n ()
     //    / this->all_proc_n ();
 #endif
+    this->set_init (true);
   }
   void proc::Node::task_exit () {
     const auto use = fmr::form::si_unit (this->get_used_byte (), "B");

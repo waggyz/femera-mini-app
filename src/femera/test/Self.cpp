@@ -18,7 +18,7 @@ namespace femera {
       this->log_init_info ();// pulled out method to prevent inline fail warning
     }
     this->proc_node_chck ();
-    return;
+    this->set_init (true);
   }
   void test::Self::log_init_info () {// pulled out of task_init (inline fail)
     const auto cppver = __cplusplus;

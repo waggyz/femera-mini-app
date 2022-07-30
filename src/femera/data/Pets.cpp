@@ -52,6 +52,7 @@ namespace femera {
     } }
 #endif
 #endif
+    this->set_init (false);
   }
   void data::Pets::task_exit () {
 #ifdef FMR_HAS_PETSC

@@ -12,6 +12,7 @@ namespace femera {
   }
   inline
   void test::Perf::task_init (int*, char**) {
+    this->set_init (true);
   }
   inline
   void test::Perf::task_exit () {

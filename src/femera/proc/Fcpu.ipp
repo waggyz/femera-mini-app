@@ -18,6 +18,7 @@ namespace femera {
   }
   inline
   void proc::Fcpu::task_init (int*, char**) {
+    this->set_init (true);
   }
   inline
   void proc::Fcpu::task_exit () {

@@ -22,6 +22,7 @@ namespace femera {
     } }
     this->name += " with "+std::to_string (n)+" thread-local vals each";
 # endif
+    this->set_init (true);
   }
   data::Vals* data::Bank::vals_ptr () {
     return & vals [this->proc->get_race_ix ()];

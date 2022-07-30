@@ -52,7 +52,7 @@ namespace femera {
 #ifdef FMR_DEBUG
     this->set_verb (101);
 #endif
-    this-> did_init_tf = true;
+    this-> set_init (true);
   }
   void data::Logs::task_exit () {
   }

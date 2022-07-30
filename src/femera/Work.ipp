@@ -70,6 +70,17 @@ namespace femera {
     return this->abrv;
   }
   inline
+  bool Work::did_init ()
+  noexcept {
+    return this->did_init_tf;
+  }
+  inline
+  bool Work::set_init (const bool tf)
+  noexcept {
+    this->did_init_tf = tf;
+    return this->did_init_tf;
+  }
+  inline
   std::string Work::get_did_init_list ()
   noexcept { auto list = std::string ();
     const auto n = this->get_task_n ();

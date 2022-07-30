@@ -91,6 +91,7 @@ namespace femera {
       P2 = P2->get_task (0);
     }
 #endif
+    this->set_init (true);
   }
   fmr::Local_int proc::Main::task_proc_ix ()
   noexcept {

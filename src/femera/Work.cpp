@@ -51,8 +51,34 @@ namespace femera {
     }
     return nullptr;
   }
+  fmr::Local_int Work::log_init_list ()
+  noexcept { fmr::Local_int did_init_count = 0;
+    const auto n = this->get_task_n ();//TODO Move below to Work method or Jobs.
+    if (n > 0) {
+      auto did = std::string ();
+      auto no  = std::string ();
+      for (fmr::Local_int i=0; i<n; ++i) {
+        const auto W = this->get_work (i);
+        if (W->did_init ()) {
+          ++did_init_count;
+          did += W->abrv;
+          did += (i == (n - 1)) ? "":" ";
+        } else {
+          no  += W->abrv;
+          no  += (i == (n - 1)) ? "":" ";
+      } }
+    if (did.size() > 0) {
+      printf ("%4s %4s %4s %s\n",
+        this->get_abrv ().c_str(),"did","init", did.c_str());
+    }
+    if (no.size() > 0) {
+      printf ("%4s %4s %4s %s\n",
+        this->get_abrv ().c_str(),"did","init", no.c_str());
+    } }
+    return did_init_count;
+  }
   fmr::Exit_int Work::init_list (int* argc, char** argv)
-  noexcept {fmr::Exit_int err =0;
+  noexcept { fmr::Exit_int err =0;
     const auto n = this->task_list.size ();
     std::stack<fmr::Local_int> del_list = {};
     for (fmr::Local_int ix=0; ix<n; ++ix) {// Init task_list forward.
@@ -115,7 +141,8 @@ namespace femera {
       this->del_task (del_list.top ());
       del_list.pop ();
     }
-    if (err <=0) {this->did_work_init = true;}
+    if (err <= 0) { this->did_work_init = true; }
+    if (  n >  0) { this->log_init_list (); }
     return err;
   }
   fmr::Exit_int Work::exit_list ()

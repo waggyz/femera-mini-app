@@ -23,6 +23,7 @@ namespace femera {
   }
   void proc::Fomp::task_init (int* argc, char** argv) {
     this->scan (argc, argv);
+    this->set_init (true);
   }
   void proc::Fomp::scan (int* argc, char** argv) {
     const auto orig_proc_n = this->proc_n;

@@ -54,6 +54,7 @@ FMR_WARN_INLINE_ON
     MAKESTRING(FMR_VERSION)" started\n");
 #endif
     this->add_task (std::move(Task<task::Sims>::new_task (this->get_core())));
+    this->set_init (true);
   }
   //
 }//end femera namespace

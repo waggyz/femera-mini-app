@@ -28,6 +28,7 @@ namespace femera {
           this->version+=" (parallel)";
     } } }
 #endif
+    this->set_init (true);
   }
   void data::Cgns::task_exit () {
 //TODO    this->close_all ();

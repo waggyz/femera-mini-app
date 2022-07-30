@@ -60,6 +60,7 @@ namespace femera {
       delete listeners.Release (listeners.default_result_printer());
     }
 #endif
+  this->set_init (true);
   }
   void test::Gtst::task_exit () {
     if (!this->is_enabled || !this->do_all_tests_on_exit) {

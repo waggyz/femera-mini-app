@@ -16,6 +16,7 @@ namespace femera {
     this->data->send (fmr::log, "proc", "root", "NOTE",//TODO in Root.cpp
       "process handler initialization reported in reverse order");
 #   endif
+    this->set_init (true);
   }
   inline
   void proc::Root::task_exit () {

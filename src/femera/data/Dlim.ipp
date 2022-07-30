@@ -12,6 +12,7 @@ namespace femera {
   }
   inline
   void data::Dlim::task_init (int*, char**) {
+    this->set_init (true);
   }
   inline
   void data::Dlim::task_exit () {
