@@ -70,9 +70,9 @@ namespace femera {
               did += item;
           } } else {
             if (fmr::form::ends_with ( no, item)) {++ no_n;} else {
-              if ( no_n > 1) {did += "("+std::to_string ( no_n)+")";}
+              if ( no_n > 1) { no += "("+std::to_string ( no_n)+")";}
               no_n = 1;
-              no  += (did.size () == 0) ? "":" ";
+              no  += ( no.size () == 0) ? "":" ";
               no  += item;
         } } }
         if (did_n > 1) {did += "("+std::to_string (did_n)+")";}
@@ -143,6 +143,7 @@ namespace femera {
           del_list.push (ix);// Queue task for removal if init failed, and...
           W->exit (-1);      // ...exit it with a warning (not error) code.
     } } }
+    if (  n >  0) { this->log_init_list (); }
     while (! del_list.empty ()) {// Remove failed tasks.
       const auto label = form::text_line (250, "%4s %4s init",
         this->get_base_abrv ().c_str(), this->get_abrv().c_str());
@@ -152,7 +153,6 @@ namespace femera {
       del_list.pop ();
     }
     if (err <= 0) { this->did_work_init = true; }
-    if (  n >  0) { this->log_init_list (); }
     return err;
   }
   fmr::Exit_int Work::exit_list ()
