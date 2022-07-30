@@ -54,27 +54,28 @@ namespace femera {
   fmr::Local_int Work::log_init_list ()
   noexcept { fmr::Local_int did_init_count = 0;
     const auto n = this->get_task_n ();//TODO Move below to Work method or Jobs.
-    if (n > 0) {
-      auto did = std::string ();
-      auto no  = std::string ();
-      for (fmr::Local_int i=0; i<n; ++i) {
-        const auto W = this->get_work (i);
-        if (W->did_init ()) {
-          ++did_init_count;
-          did += W->abrv;
-          did += (i == (n - 1)) ? "":" ";
-        } else {
-          no  += W->abrv;
-          no  += (i == (n - 1)) ? "":" ";
-      } }
-    if (did.size() > 0) {
-      printf ("%4s %4s %4s %s\n",
-        this->get_abrv ().c_str(),"did","init", did.c_str());
-    }
-    if (no.size() > 0) {
-      printf ("%4s %4s %4s %s\n",
-        this->get_abrv ().c_str(),"did","init", no.c_str());
-    } }
+    if ((n > 0) && (this->proc != nullptr)) {
+      if (this->proc->did_init () && this->proc->is_main ()) {
+        auto did = std::string ();
+        auto no  = std::string ();
+        for (fmr::Local_int i=0; i<n; ++i) {
+          const auto W = this->get_work (i);
+          if (W->did_init ()) {
+            ++did_init_count;
+            did += W->abrv;
+            did += (i == (n - 1)) ? "":" ";
+          } else {
+            no  += W->abrv;
+            no  += (i == (n - 1)) ? "":" ";
+        } }
+      if (did.size() > 0) {
+        printf ("%4s %4s %4s %s\n",
+          this->get_abrv ().c_str(),"did","init", did.c_str());
+      }
+      if (no.size() > 0) {
+        printf ("%4s %4s %4s %s\n",
+          this->get_abrv ().c_str(),"did","init", no.c_str());
+    } } }
     return did_init_count;
   }
   fmr::Exit_int Work::init_list (int* argc, char** argv)
