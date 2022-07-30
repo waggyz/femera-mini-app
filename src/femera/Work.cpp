@@ -52,29 +52,38 @@ namespace femera {
     return nullptr;
   }
   fmr::Local_int Work::log_init_list ()
-  noexcept { fmr::Local_int did_init_count = 0;
+  noexcept { fmr::Local_int did_init_count = 1;
     const auto n = this->get_task_n ();//TODO Move below to Work method or Jobs.
     if ((n > 0) && (this->proc != nullptr)) {
       if (this->proc->did_init () && this->proc->is_main ()) {
-        auto did = std::string ();
-        auto no  = std::string ();
+        auto did = std::string (); fmr::Local_int did_n = 1;
+        auto no  = std::string (); fmr::Local_int  no_n = 1;
         for (fmr::Local_int i=0; i<n; ++i) {
           const auto W = this->get_work (i);
+          const auto item = W->get_abrv ();
           if (W->did_init ()) {
             ++did_init_count;
-            did += W->abrv;
-            did += (i == (n - 1)) ? "":" ";
-          } else {
-            no  += W->abrv;
-            no  += (i == (n - 1)) ? "":" ";
-        } }
-      if (did.size() > 0) {
+            if (fmr::form::ends_with (did, item)) {++did_n;} else {
+              if (did_n > 1) {did += "("+std::to_string (did_n)+")";}
+              did_n= 1;
+              did += (did.size () == 0) ? "":" ";
+              did += item;
+          } } else {
+            if (fmr::form::ends_with ( no, item)) {++ no_n;} else {
+              if ( no_n > 1) {did += "("+std::to_string ( no_n)+")";}
+              no_n = 1;
+              no  += (did.size () == 0) ? "":" ";
+              no  += item;
+        } } }
+        if (did_n > 1) {did += "("+std::to_string (did_n)+")";}
+        if ( no_n > 1) { no += "("+std::to_string ( no_n)+")";}
+        if (did.size() > 0) {
         printf ("%4s %4s %4s %s\n",
           this->get_abrv ().c_str(),"did","init", did.c_str());
       }
       if (no.size() > 0) {
         printf ("%4s %4s %4s %s\n",
-          this->get_abrv ().c_str(),"did","init", no.c_str());
+          this->get_abrv ().c_str(),"not","init", no.c_str());
     } } }
     return did_init_count;
   }

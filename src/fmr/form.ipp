@@ -26,6 +26,12 @@ namespace fmr {
       = (val < V(0)) ? "-" : (is_signed ? ((val > V(0)) ? "+" : " ") : "");
     return detail::form::si_unit (std::abs (double (val)), unit, md, sign);
   }
+  inline
+  bool form::ends_with (const std::string& str, const std::string& end) {
+    return str.size() >= end.size() &&
+      str.compare(str.size() - end.size(), end.size(), end) == 0;
+  }
+  //
 }// end fmr:: namespace
 
 namespace femera {

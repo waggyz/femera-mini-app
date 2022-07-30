@@ -20,6 +20,8 @@ namespace fmr { namespace form {
   //
   std::string utc_time ();
   //
+  static bool ends_with (const std::string& str, const std::string& end);
+  //
 } }// end fmr::form:: namespace
 
 namespace femera { namespace form {
