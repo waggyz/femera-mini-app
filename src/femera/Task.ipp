@@ -21,6 +21,7 @@ namespace femera {
     fmr::Exit_int err = 0;
     try { Task::this_cast (this)->task_init (argc, argv); }// Init this task,...
     catch (const Warn& e)    { err =-1; e.print (); }
+    catch (const Note& e)    { err = 0; e.print (); }
     catch (const Errs& e)    { err = 1; e.print (); }
     catch (std::exception& e){ err = 2; Errs::print (this->get_abrv ()+" task_init", e); }
     catch (...)              { err = 3; Errs::print (abrv+" task_init"); }
@@ -36,6 +37,7 @@ namespace femera {
     fmr::Exit_int task_err = 0;
     try { Task::this_cast (this)->task_exit (); }// ...then exit this task.
     catch (const Warn& e)    { task_err =-1; e.print (); }
+    catch (const Note& e)    { task_err = 0; e.print (); }
     catch (const Errs& e)    { task_err = 1; e.print (); }
     catch (std::exception& e){ task_err = 2; Errs::print (abrv+" task_exit",e);}
     catch (...)              { task_err = 3; Errs::print (abrv+" task_exit"); }

@@ -70,8 +70,6 @@ namespace femera {
     Data_list_t outs  ={};
     try { outs = this->out_name_list.at (file); }
     catch (std::out_of_range& e) { err = 1; }
-    catch (const Warn& e)    { err =-1; e.print (); }
-    catch (const Errs& e)    { err = 1; e.print (); }
     catch (std::exception& e){ err = 2;
       Errs::print (this->get_abrv ()+" task_send", e); }
     catch (...)              { err = 3;
@@ -85,8 +83,6 @@ namespace femera {
     const auto dest = outs [this->proc->get_proc_ix () % n];
     try { f = this->open_file_map.at (dest); }
     catch (std::out_of_range& e) { err = 1; }
-    catch (const Warn& e)    { err =-1; e.print (); }
-    catch (const Errs& e)    { err = 1; e.print (); }
     catch (std::exception& e){ err = 2;
       Errs::print (this->get_abrv ()+" task_send", e); }
     catch (...)              { err = 3;

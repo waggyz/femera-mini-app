@@ -18,6 +18,7 @@ namespace femera {
     /** Error message.
      */
     std::string msg ="";
+    file_ptr = ::stderr;
   public:
     /** Constructor (C strings).
       *  @param message C-style string error message.
@@ -50,7 +51,39 @@ namespace femera {
     static  void       print (std::string, std::exception&) noexcept;
     static  void       print (std::string) noexcept;
   };
-  class Warn : public Errs {//TODO Remove? Throwing aborts even when caught.
+  class Note : public Errs {
+  public:
+    /** Constructor (C strings).
+      *  @param message C-style string error message.
+      *                 The string contents are copied upon construction.
+      *                 Hence, responsibility for deleting the char* lies
+      *                 with the caller.
+      */
+    explicit Note (const char* message) {
+      this->msg      = message;
+      this->file_ptr =::stdout;
+    }
+    /** Constructor (C++ STL strings).
+      *  @param message The error message.
+      */
+    explicit Note (const std::string& message) {
+      this->msg      = message;
+      this->file_ptr =::stdout;
+    }
+    explicit Note (const char* message, const char* file, int line) {
+      this->msg      = std::string(file)+":"+std::to_string(line)+" "+message;
+      this->file_ptr =::stdout;
+    }
+    explicit Note (const std::string& message, const char* file, int line) {
+      this->msg      = std::string(file)+":"+std::to_string(line)+" "+message;
+      this->file_ptr =::stdout;
+    }
+    /** Destructor.
+      * Virtual to allow for subclassing.
+      */
+    ~Note () noexcept final override {}
+  };
+  class Warn : public Errs {
   public:
     /** Constructor (C strings).
       *  @param message C-style string error message.
