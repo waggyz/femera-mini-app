@@ -53,7 +53,8 @@ namespace femera {
       =  (const Data&) =delete; // not assignable
     Data (const Data&) =delete; // not copyable
     ~Data ()=default;// destructor
-  };
+  };//
+  //
 }//end femera:: namespace
 #undef FMR_DEBUG
 

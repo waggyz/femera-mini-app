@@ -8,5 +8,5 @@ int main (int argc, char** argv) {
 namespace femera { namespace test {
   TEST(EarlyData, IsOK) {
     EXPECT_EQ( 1, 1);
-  }
+  } //
 } }//end femerea::test:: namespace

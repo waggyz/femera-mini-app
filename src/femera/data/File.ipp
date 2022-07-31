@@ -19,6 +19,5 @@ namespace femera {
     return this->send (data_name, msg);
   }
 }//end femera namespace
-
 //end FEMERA_FILE_IPP
 #endif

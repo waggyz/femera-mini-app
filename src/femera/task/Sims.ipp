@@ -5,7 +5,7 @@ namespace femera {
   inline
   task::Sims::Sims (femera::Work::Core_ptrs_t W)
   noexcept : Task (W) {
-    this->name      ="Femera simulations";
+    this->name      ="Femera simulation handler";
     this->abrv      ="sims";
     this->task_type = task_cast (Task_type::Sims);
     this->info_d    = 3;

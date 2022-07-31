@@ -12,13 +12,13 @@
 #include "cuda_runtime.h"
 
 #define FMR_TRY_CUDA(ans) {femera::proc::nvid::try_cuda((ans), __FILE__, __LINE__);}
-namespace femera {namespace proc {namespace nvid {
+namespace femera { namespace proc { namespace nvid {
 /* https://stackoverflow.com/questions/14038589
      /what-is-the-canonical-way-to-check-for-errors-using-the-cuda-runtime-api
 */
   inline void
   try_cuda (const cudaError_t code, const char *file, const int line,
-    const bool do_throw = true ) {
+    const bool do_throw = true ) {//TODO Don't throw, return failure instead.
     if (code != cudaSuccess) {
 #ifdef FMR_DEBUG
       fprintf (stderr,"%s:%d %s \n", file, line, cudaGetErrorString (code));
@@ -27,7 +27,7 @@ namespace femera {namespace proc {namespace nvid {
         FMR_THROW( "called from\n"+std::string(file)+":"+std::to_string(line)
           +" "+cudaGetErrorString (code));
   } } }
-
+//
 } } }//end femera::proc::nvid namespace
 
 namespace femera {

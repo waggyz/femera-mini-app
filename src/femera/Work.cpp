@@ -53,8 +53,9 @@ namespace femera {
     const auto n = this->get_task_n ();
     if ((n > 0) && (this->proc != nullptr)) {
       if (this->proc->did_init () && this->proc->is_main ()) {
-        auto did = std::string (); fmr::Local_int did_n = 1;
-        auto no  = std::string (); fmr::Local_int  no_n = 1;
+        auto did = std::string ();
+        auto no  = std::string ();;
+        fmr::Local_int did_n = 0, no_n=0;
         for (fmr::Local_int i=0; i<n; ++i) {
           const auto W = this->get_work (i);
           const auto item = W->get_abrv ();
@@ -72,15 +73,15 @@ namespace femera {
               no  += ( no.size () == 0) ? "":" ";
               no  += item;
         } } }
-        if (did_n > 1) {did += "("+std::to_string (did_n)+")";}
-        if ( no_n > 1) { no += "("+std::to_string ( no_n)+")";}
         if (did.size() > 0) {
-        printf ("%4s %4s %4s %s\n",
-          this->get_abrv ().c_str(),"init","ok", did.c_str());
-      }
-      if (no.size() > 0) {
-        printf ("%4s %4s %4s %s\n",
-          this->get_abrv ().c_str(),"init","FAIL", no.c_str());
+          if (did_n > 1) {did += "("+std::to_string (did_n)+")"; }
+          printf ("%4s %4s %4s %s\n",
+            this->get_abrv ().c_str(),"init","ok", did.c_str());
+        }
+        if (no.size() > 0) {
+          if ( no_n > 1) { no += "("+std::to_string ( no_n)+")"; }
+          printf ("%4s %4s %4s %s\n",
+            this->get_abrv ().c_str(),"init","FAIL", no.c_str());
     } } }
     return did_init_count;
   }
@@ -136,11 +137,11 @@ namespace femera {
                 W->get_base_abrv ().c_str(), W->abrv.c_str());
               form::name_line (::stdout, 14, 80, label, text);
         } } } }
-        if (Werr > 0) {
+        if (Werr > 0 || (W->did_init () == false)) {
           del_list.push (ix);// Queue task for removal if init failed, and...
           W->exit (-1);      // ...exit it with a warning (not error) code.
     } } }
-    if (  n >  0) { this->log_init_list (); }
+    if (n > 0) { this->log_init_list (); }
     while (! del_list.empty ()) {// Remove failed tasks.
       const auto label = form::text_line (250, "%4s %4s init",
         this->get_base_abrv ().c_str(), this->get_abrv().c_str());

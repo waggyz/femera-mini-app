@@ -84,7 +84,8 @@ namespace femera {
   T* Data<T>::get_task (const Task_type t, const fmr::Local_int ix)
   noexcept {
     return Data::this_cast (Work::get_work (task_cast (t), ix));
-  }
+  }//
+  //
 }// end femera:: namespace
 
 #undef FMR_DEBUG

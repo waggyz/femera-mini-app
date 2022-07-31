@@ -108,6 +108,7 @@ namespace femera {
     FMR_PRAGMA_OMP(omp MAIN)
     { this->time.add_count (1, 0, 0, byte); }
     return byte;
-  }
+  }//
   //
 }//end femera:: namespace
+//
