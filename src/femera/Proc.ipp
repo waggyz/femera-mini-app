@@ -30,14 +30,13 @@ namespace femera {
   noexcept {
     fmr::Exit_int err = 0;
     try { Proc::this_cast(this)->task_init (argc, argv); }// Init this task,...
-    catch (const Fail_init&) { err = 1; }
     catch (const Warn& e)    { err =-1; e.print (); }
     catch (const Errs& e)    { err = 1; e.print (); }
     catch (std::exception& e){ err = 2;
     Errs::print (this->get_abrv ()+" task_init", e); }
     catch (...)              { err = 3;
     Errs::print (this->get_abrv ()+" task_init"); }
-    if (err > 0) {return this->exit (err); }
+    if (err > 0) { return this->exit (err); }
     Work::init_list (argc, argv);//                    ...then init child tasks.
 FMR_WARN_INLINE_OFF
     this->set_base_n ();// Set values for calculating proc_id.

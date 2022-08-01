@@ -80,7 +80,7 @@ namespace femera {
         if (no.size() > 0) {
           if ( no_n > 1) { no += "("+std::to_string ( no_n)+")"; }
           printf ("%4s %4s %4s %s\n",
-            this->get_abrv ().c_str(),"init","FAIL", no.c_str());
+            this->get_abrv ().c_str(),"init","BAD", no.c_str());
     } } }
     return did_init_count;
   }
@@ -137,8 +137,7 @@ namespace femera {
               form::name_line (::stdout, 14, 80, label, text);
         } } } }
         if (Werr > 0 || (W->did_init () == false)) {
-          del_list.push (ix);// Queue task for removal if init failed, and...
-          W->exit (-1);      // ...exit it with a warning (not error) code.
+          del_list.push (ix);// Queue task for removal if init failed.
     } } }
     if (n > 0) { this->log_init_list (); }
     while (! del_list.empty ()) {// Remove failed tasks.

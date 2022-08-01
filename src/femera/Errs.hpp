@@ -72,28 +72,6 @@ namespace femera {
       * Virtual to allow for subclassing.
       */
     ~Warn () noexcept final override {}
-  };
-  class Fail_init : public Errs {
-  public:
-    /** Constructor (C strings).
-      *  @param message C-style string error message.
-      *                 The string contents are copied upon construction.
-      *                 Hence, responsibility for deleting the char* lies
-      *                 with the caller.
-      */
-    explicit Fail_init (const char* message) {this->msg = message;}
-    /** Constructor (C++ STL strings).
-      *  @param message The error message.
-      */
-    explicit Fail_init (const std::string& message) {this->msg = message;}
-    explicit Fail_init (const char* message, const char* file, int line) {
-      this->msg = std::string(file)+":"+std::to_string(line)+" "+message;}
-    explicit Fail_init (const std::string& str, const char* file, int line) {
-      this->msg = std::string(file)+":"+std::to_string(line)+" "+str;}
-    /** Destructor.
-      * Virtual to allow for subclassing.
-      */
-    ~Fail_init () noexcept final override {}
   };//
   //
 }//end femera:: namespace

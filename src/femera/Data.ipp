@@ -42,7 +42,7 @@ namespace femera {
       Errs::print (this->get_abrv ()+" task_init", e); }
     catch (...)               { err = 3;
       Errs::print (this->get_abrv ()+" task_init"); }
-    if (err > 0) { this->exit (err); }
+    if (err > 0) { return this->exit (err); }
     err = Work::init_list (argc, argv);//              ...then init child tasks.
     return err;
   }
