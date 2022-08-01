@@ -171,6 +171,9 @@ FMR_WARN_INLINE_ON
         const fmr::Exit_int Werr = W->exit (err);// is noexcept
         W->time.add_busy_time_now ();
         err = (Werr == 0) ? err : Werr;
+#if 0
+        const auto busy_s = W->time.get_busy_s ()
+#else
         auto child_busy_ns = fmr::perf::Elapsed(0);
         if (! W->task_list.empty ()) {// calculate children busy time
           const auto n = fmr::Local_int (W->task_list.size ());
