@@ -44,8 +44,7 @@ namespace femera {
       } }
       for (fmr::Local_int Wix=0; Wix < n; ++Wix) {
         W = W->task_list [Wix].get();
-      }
-    }
+    } }
     return nullptr;
   }
   fmr::Local_int Work::log_init_list ()

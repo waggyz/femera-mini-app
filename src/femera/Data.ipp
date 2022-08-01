@@ -35,14 +35,14 @@ namespace femera {
 #endif
     fmr::Exit_int err = 0;
     try { Data::this_cast (this)->task_init (argc, argv); }// Init this task,...
-    catch (const Warn& e)    { err =-1; e.print (); }
-//    catch (const Note& e)    { err = 0; e.print (); }//TODO
-    catch (const Errs& e)    { err = 1; e.print (); }
-    catch (std::exception& e){ err = 2;
+    catch (const Fail_init& e){ err = 1; e.print (); }
+    catch (const Warn& e)     { err =-1; e.print (); }
+    catch (const Errs& e)     { err = 1; e.print (); }
+    catch (std::exception& e) { err = 2;
       Errs::print (this->get_abrv ()+" task_init", e); }
-    catch (...)              { err = 3;
+    catch (...)               { err = 3;
       Errs::print (this->get_abrv ()+" task_init"); }
-    if (err > 0) {return this->exit (err); }
+    if (err > 0) { this->exit (err); }
     err = Work::init_list (argc, argv);//              ...then init child tasks.
     return err;
   }
@@ -54,7 +54,6 @@ namespace femera {
     fmr::Exit_int task_err = 0;
     try  { Data::this_cast (this)->task_exit (); }//    ...then exit this task.
     catch (const Warn& e)    { task_err =-1; e.print (); }
-//    catch (const Note& e)    { task_err = 0; e.print (); }//TODO
     catch (const Errs& e)    { task_err = 1; e.print (); }
     catch (std::exception& e){ task_err = 2;
       Errs::print (this->get_abrv ()+" task_exit",e);}
@@ -89,7 +88,7 @@ namespace femera {
   }//
   //
 }// end femera:: namespace
-
+//
 #undef FMR_DEBUG
 //end FEMERA_HAS_DATA_IPP
 #endif

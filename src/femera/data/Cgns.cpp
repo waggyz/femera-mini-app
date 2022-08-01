@@ -22,7 +22,7 @@ namespace femera {
         MPI_Comm c;
         const auto err = MPI_Comm_dup (MPI_Comm (P->get_team_id()), &c);
         if (err) {// exception removes Cgns from the data task_list
-          FMR_THROW(std::string("Failed to copy MPI communicator for CGNS."));
+          FMR_FAIL_INIT(std::string("Failed to copy MPI communicator for CGNS."));
         } else {
           this->team_id = fmr::Team_int (c);
           this->version+=" (parallel)";

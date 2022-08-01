@@ -31,14 +31,13 @@ namespace femera {
     fmr::Exit_int err = 0;
     try { Test::this_cast (this)->task_init (argc, argv); }// Init this task,...
     catch (const Warn& e)    { err =-1; e.print (); }
-//    catch (const Note& e)    { err = 0; e.print (); }//TODO
     catch (const Errs& e)    { err = 1; e.print (); }
     catch (std::exception& e){ err = 2;
       Errs::print (this->get_abrv ()+" task_init", e); }
     catch (...)              { err = 3;
       Errs::print (this->get_abrv ()+" task_init"); }
     if (err > 0) { return this->exit (err); }
-    init_list (argc, argv);//                         then init child tasks.
+    Work::init_list (argc, argv);//                       then init child tasks.
     return err;
   }
   template <typename T> inline
@@ -48,7 +47,6 @@ namespace femera {
     fmr::Exit_int task_err = 0;
     try { Test::this_cast (this)->task_exit (); }// ...then try to exit this task.
     catch (const Warn& e)    { task_err =-1; e.print (); }
-//    catch (const Note& e)    { task_err = 0; e.print (); }//TODO
     catch (const Errs& e)    { task_err = 1; e.print (); }
     catch (std::exception& e){ task_err = 2;
     Errs::print (this->get_abrv ()+" task_exit",e);}
@@ -70,9 +68,10 @@ namespace femera {
   FMR_SMART_PTR<T> Test<T>::new_task (const Work::Core_ptrs_t core)
   noexcept {
     return FMR_MAKE_SMART(T) (T(core));
-  }
+  }//
+  //
 }// end femera:: namespace
-
+//
 #undef FMR_DEBUG
 //end FEMERA_HAS_TEST_IPP
 #endif

@@ -6,8 +6,8 @@ namespace femera {
   const char* Errs::what ()
   const noexcept {
     return this->msg.c_str();
-  }
+  }//
+  //
 }//end femera:: namespace
-
 //end FEMERA_HAS_ERRS_IPP
 #endif

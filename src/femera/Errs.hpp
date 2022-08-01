@@ -10,6 +10,7 @@
 */
 #define FMR_THROW(arg) throw Errs(arg, __FILE__, __LINE__)
 #define FMR_WARN( arg) throw Warn(arg, __FILE__, __LINE__)
+#define FMR_FAIL_INIT( arg) throw Fail_init(arg, __FILE__, __LINE__)
 
 namespace femera {
   class Errs : public std::exception {
@@ -50,34 +51,6 @@ namespace femera {
     static  void       print (std::string, std::exception&) noexcept;
     static  void       print (std::string) noexcept;
   };
-#if 0
-  class Note : public Errs {//TODO
-  public:
-    /** Constructor (C strings).
-      *  @param message C-style string error message.
-      *                 The string contents are copied upon construction.
-      *                 Hence, responsibility for deleting the char* lies
-      *                 with the caller.
-      */
-    explicit Note (const char* message) {this->msg = message;}
-    /** Constructor (C++ STL strings).
-      *  @param message The error message.
-      */
-    explicit Note (const std::string& message) {this->msg = message;}
-    explicit Note (const char* message, const char* file, int line) {
-      this->msg = std::string(file)+":"+std::to_string(line)+" "+message;}
-    explicit Note (const std::string& message, const char* file, int line) {
-      this->msg = std::string(file)+":"+std::to_string(line)+" "+message;}
-    void       print () const noexcept final override;
-    void       print (std::exception&) noexcept final override;
-    void       print (std::string, std::exception&) noexcept final override;
-    void       print (std::string) noexcept final override;
-    /** Destructor.
-      * Virtual to allow for subclassing.
-      */
-    ~Note () noexcept final override {}
-  };
-#endif
   class Warn : public Errs {
   public:
     /** Constructor (C strings).
@@ -100,8 +73,31 @@ namespace femera {
       */
     ~Warn () noexcept final override {}
   };
+  class Fail_init : public Errs {
+  public:
+    /** Constructor (C strings).
+      *  @param message C-style string error message.
+      *                 The string contents are copied upon construction.
+      *                 Hence, responsibility for deleting the char* lies
+      *                 with the caller.
+      */
+    explicit Fail_init (const char* message) {this->msg = message;}
+    /** Constructor (C++ STL strings).
+      *  @param message The error message.
+      */
+    explicit Fail_init (const std::string& message) {this->msg = message;}
+    explicit Fail_init (const char* message, const char* file, int line) {
+      this->msg = std::string(file)+":"+std::to_string(line)+" "+message;}
+    explicit Fail_init (const std::string& str, const char* file, int line) {
+      this->msg = std::string(file)+":"+std::to_string(line)+" "+str;}
+    /** Destructor.
+      * Virtual to allow for subclassing.
+      */
+    ~Fail_init () noexcept final override {}
+  };//
+  //
 }//end femera:: namespace
-
+//
 #include "Errs.ipp"
 
 //end FEMERA_HAS_ERRS_HPP
