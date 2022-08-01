@@ -24,8 +24,8 @@ namespace femera { namespace proc { namespace nvid {
       fprintf (stderr,"%s:%d %s \n", file, line, cudaGetErrorString (code));
 #endif
       if (do_throw) {
-        FMR_THROW( "called from\n"+std::string(file)+":"+std::to_string(line)
-          +" "+cudaGetErrorString (code));
+        FMR_THROW( "called from\n"+std::string (file)+":"+std::to_string (line)
+          +"\n"+cudaGetErrorString (code));
   } } }
 //
 } } }//end femera::proc::nvid namespace

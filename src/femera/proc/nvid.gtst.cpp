@@ -4,7 +4,7 @@
 #include "nvid.hpp"
 
 #ifdef FMR_HAS_NVIDIA
-#if 0
+#if 1
 TEST( NvidNamespace, InitFunctions ){
   EXPECT_GE( femera::proc::nvid::get_node_card_n (), 0 );
   EXPECT_NE( femera::proc::nvid::get_card_name (0), "" );
