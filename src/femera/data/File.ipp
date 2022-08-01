@@ -17,7 +17,8 @@ namespace femera {
 #endif
    // call method to find data_name handler and output (append) to destination
     return this->send (data_name, msg);
-  }
+  }//
+  //
 }//end femera namespace
 //end FEMERA_FILE_IPP
 #endif

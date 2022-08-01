@@ -52,42 +52,44 @@ namespace femera {
     const auto n = this->get_task_n ();
     if ((n > 0) && (this->proc != nullptr)) {
       if (this->proc->did_init () && this->proc->is_main ()) {
-        auto did = std::string ();
-        auto no  = std::string ();;
-        fmr::Local_int did_n = 0, no_n=0;
+        auto did_str = std::string ();
+        auto not_str  = std::string ();;
+        fmr::Local_int did_n = 0, not_n=0;
         for (fmr::Local_int i=0; i<n; ++i) {
           const auto W = this->get_work (i);
           const auto item = W->get_abrv ();
           if (W->did_init ()) {
             ++did_init_count;
-            if (fmr::form::ends_with (did, item)) {++did_n;} else {
-              if (did_n > 1) {did += "("+std::to_string (did_n)+")";}
+            if (fmr::form::ends_with (did_str, item)) { ++did_n;// repeated item
+            } else {// different item
+              if (did_n > 1) { did_str += "("+std::to_string (did_n)+")"; }
               did_n= 1;
-              did += (did.size () == 0) ? "":" ";
-              did += item;
-          } } else {
-            if (fmr::form::ends_with ( no, item)) {++ no_n;} else {
-              if ( no_n > 1) { no += "("+std::to_string ( no_n)+")";}
-              no_n = 1;
-              no  += ( no.size () == 0) ? "":" ";
-              no  += item;
+              did_str += (did_str.size () == 0) ? "":" ";
+              did_str += item;
+          } } else {// did not init
+            if (fmr::form::ends_with (not_str, item)) { ++not_n;// repeated item
+            } else {// different item
+              if (not_n > 1) { not_str += "("+std::to_string (not_n)+")"; }
+              not_n = 1;
+              not_str += ( not_str.size () == 0) ? "":" ";
+              not_str += item;
         } } }
-        if (did.size() > 0) {
-          if (did_n > 1) {did += "("+std::to_string (did_n)+")"; }
+        if (did_str.size() > 0) {
+          if (did_n > 1) {did_str += "("+std::to_string (did_n)+")"; }
           printf ("%4s %4s %4s %s\n",
-            this->get_abrv ().c_str(),"init","ok", did.c_str());
+            this->get_abrv ().c_str(),"init","ok", did_str.c_str());
         }
-        if (no.size() > 0) {
-          if ( no_n > 1) { no += "("+std::to_string ( no_n)+")"; }
+        if (not_str.size() > 0) {
+          if (not_n > 1) { not_str += "("+std::to_string (not_n)+")"; }
           printf ("%4s %4s %4s %s\n",
-            this->get_abrv ().c_str(),"init","BAD", no.c_str());
+            this->get_abrv ().c_str(),"init","BAD", not_str.c_str());
     } } }
     return did_init_count;
   }
   fmr::Exit_int Work::init_list (int* argc, char** argv)
   noexcept { fmr::Exit_int err =0;
-    const auto n = this->task_list.size ();
     std::stack<fmr::Local_int> del_list = {};
+    const auto n = this->task_list.size ();
     for (fmr::Local_int ix=0; ix<n; ++ix) {// Init task_list forward.
       const auto W = this->task_list [ix].get();
       if (W != nullptr) {
@@ -108,7 +110,7 @@ namespace femera {
             const auto nC = fmr::Local_int (W->task_list.size ());
             for (fmr::Local_int i=0; i<nC; ++i) {
               const auto C = W->get_work (i);
-              if (C!= nullptr) {
+              if (C != nullptr) {
                 child_busy_ns += C->time.get_busy_ns ();
           } } }
           const auto busy_s = fmr::perf::Float (1e-9)
@@ -153,7 +155,7 @@ namespace femera {
   }
   fmr::Exit_int Work::exit_list ()
   noexcept { fmr::Exit_int err =0;
-    if (this->proc != nullptr && this->did_work_init == true) {
+    if ((this->proc != nullptr) && (this->did_work_init == true)) {
 FMR_WARN_INLINE_OFF
       this->is_work_main = this->proc->is_main ();
 FMR_WARN_INLINE_ON
@@ -169,9 +171,6 @@ FMR_WARN_INLINE_ON
         const fmr::Exit_int Werr = W->exit (err);// is noexcept
         W->time.add_busy_time_now ();
         err = (Werr == 0) ? err : Werr;
-#if 0
-        const auto busy_s = W->time.get_busy_s ()
-#else
         auto child_busy_ns = fmr::perf::Elapsed(0);
         if (! W->task_list.empty ()) {// calculate children busy time
           const auto n = fmr::Local_int (W->task_list.size ());

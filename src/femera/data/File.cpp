@@ -91,7 +91,7 @@ FMR_WARN_INLINE_ON
         }
 #ifdef FMR_DEBUG
         printf ((D->get_abrv()
-          +( do_task ? " handles " : " does not handle ")
+          +(do_task ? " handles " : " does not handle ")
           +file+"\n").c_str());
 #endif
     } }
