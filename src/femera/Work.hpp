@@ -63,14 +63,14 @@ namespace femera {
     using Core_ptrs_t = std::tuple <proc::Main*, data::File*, test::Beds*>;
     using Task_path_t = std::vector <fmr::Local_int>;
     using Work_time_t = fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>;
+  private:
+    using Task_stck_t = std::deque <Work_spt>;
   public:// variables ---------------------------------------------------------
     // classes with (mostly) only member methods public
     Work_time_t time = Work_time_t ();// performance timer, NOT thread-safe
     proc::Main* proc = nullptr;       // processing hierarchy
     data::File* data = nullptr;       // data, logging, and file handling
     test::Beds* test = nullptr;       // correctness and performance testing
-  private:// variables
-    using Task_stck_t = std::deque <Work_spt>;
   protected:// variables
     std::string       name ="unknown work";
     std::string       abrv ="work";
@@ -87,9 +87,9 @@ namespace femera {
     int                      my_argc =0;
 #endif
   private:// variables
-    bool did_init_tf = false;
-    bool did_work_init = false;
-    bool  is_work_main = true ;// save for use after proc::exit (..)
+    bool did_task_init_tf = false;// for task init
+    bool did_work_init_tf = false;
+    bool  is_work_main_tf = true ;// save for use after proc::exit (..)
   public:// methods -----------------------------------------------------------
     template <typename T, typename C> static constexpr
     T* cast_via_work (C* child) noexcept;
@@ -98,8 +98,8 @@ namespace femera {
     std::string get_version  () noexcept;
     std::string get_name     () noexcept;
     std::string set_name     (const std::string&) noexcept;
-    bool        did_init     () noexcept;
-    bool        set_init     (bool) noexcept;
+    bool        did_init     () noexcept;// sets & returns did_task_init_tf
+    bool        set_init     (bool) noexcept;//    returns did_task_init_tf
     // task stack handling
     fmr::Local_int get_task_n () noexcept;
     fmr::Local_int add_task   (Work_spt) noexcept;// returns task number added

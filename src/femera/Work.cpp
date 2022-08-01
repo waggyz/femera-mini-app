@@ -150,17 +150,17 @@ namespace femera {
       this->del_task (del_list.top ());
       del_list.pop ();
     }
-    if (err <= 0) { this->did_work_init = true; }
+    if (err <= 0) { this->did_work_init_tf = true; }
     return err;
   }
   fmr::Exit_int Work::exit_list ()
   noexcept { fmr::Exit_int err =0;
-    if ((this->proc != nullptr) && (this->did_work_init == true)) {
+    if ((this->proc != nullptr) && (this->did_work_init_tf == true)) {
 FMR_WARN_INLINE_OFF
-      this->is_work_main = this->proc->is_main ();
+      this->is_work_main_tf = this->proc->is_main ();
 FMR_WARN_INLINE_ON
     }
-    this->did_work_init = false;
+    this->did_work_init_tf = false;
     while (! this->task_list.empty ()) {
       auto W = this->task_list.back ().get ();// Exit in reverse order.
       if (W != nullptr) {
@@ -195,12 +195,12 @@ FMR_WARN_INLINE_ON
   }
   fmr::Exit_int Work::exit_tree ()
   noexcept { fmr::Exit_int err =0;
-    if (this->proc != nullptr && this->did_work_init == true) {
+    if (this->proc != nullptr && this->did_work_init_tf == true) {
 FMR_WARN_INLINE_OFF
-      this->is_work_main = this->proc->is_main ();
+      this->is_work_main_tf = this->proc->is_main ();
 FMR_WARN_INLINE_ON
     }
-    this->did_work_init = false;
+    this->did_work_init_tf = false;
     if (! this->task_list.empty ()) {
       Work::Task_path_t branch ={};
 #ifdef FMR_DEBUG
@@ -267,7 +267,7 @@ FMR_WARN_INLINE_ON
       + ((W->version=="") ? "":" "+W->version);
 FMR_WARN_INLINE_OFF
     if (W->data == nullptr) {
-      if (this->is_work_main) {
+      if (this->is_work_main_tf) {
       const auto label = form::text_line (80, "%4s %4s ",
         W->get_base_abrv().c_str(), W->get_abrv().c_str());
       form::name_line (::stdout, 14, 80, label+"exit", text);
