@@ -15,7 +15,7 @@ namespace femera {
 #ifdef FMR_DEBUG
     printf ((msg+" "+data_name+" in File.ipp\n").c_str ());
 #endif
-   // call method to find data_name handler and output (append) to destination
+    // Call method to find data_name handler and output (append) to destination.
     return this->send (data_name, msg);
   }//
   //

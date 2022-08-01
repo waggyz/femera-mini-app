@@ -18,8 +18,6 @@
 #include "Pets.hpp"
 #endif
 
-#include <array>
-
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
 #include <cstdio>     // std::printf
@@ -39,7 +37,6 @@ namespace femera {
 #ifdef FMR_BANK_LOCAL
     o = this->proc->get_race_n ();
 #endif
-FMR_WARN_INLINE_OFF
     FMR_PRAGMA_OMP(omp parallel for schedule(static) ordered num_threads(o))
     for (fmr::Local_int i=0; i<o; ++i) {// Make & add thread-local data::Bank
       FMR_PRAGMA_OMP(omp ordered) {     // in order.
@@ -69,7 +66,6 @@ FMR_WARN_INLINE_OFF
 #ifdef FMR_HAS_PETSC
     this->add_task (std::move (Data<data::Pets>::new_task (this->get_core())));
 #endif
-FMR_WARN_INLINE_ON
   this->set_init (true);
   }
   std::size_t data::File::send (const fmr::Data_name_t& file,

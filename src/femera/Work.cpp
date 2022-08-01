@@ -179,7 +179,7 @@ FMR_WARN_INLINE_ON
           const auto n = fmr::Local_int (W->task_list.size ());
           for (fmr::Local_int i=0; i<n; ++i) {
             const auto C = W->get_work (i);
-            if (C!= nullptr) {
+            if (C != nullptr) {
               child_busy_ns += C->time.get_busy_ns ();
         } } }
         const auto busy_s = fmr::perf::Float (1e-9)
@@ -204,13 +204,15 @@ FMR_WARN_INLINE_ON
     if (! this->task_list.empty ()) {
       Work::Task_path_t branch ={};
 #ifdef FMR_DEBUG
-      printf ("Work: exit tree %s [%lu]\n", this->name.c_str(), task_list.size());
+      printf ("Work: exit tree %s [%lu]\n",
+        this->name.c_str(), this->task_list.size());
 #endif
       auto W = this;
       while (! W->task_list.empty ()) {// Go to the bottom of the hierarchy.
         branch.push_back (W->get_task_n () - 1);
 #ifdef FMR_DEBUG
-        printf("Work: exit down (%u tasks) %s\n",W->get_task_n(),W->name.c_str());
+        printf("Work: exit down (%u tasks) %s\n",
+          W->get_task_n(), W->name.c_str());
 #endif
         W = W->task_list.back ().get();
       }

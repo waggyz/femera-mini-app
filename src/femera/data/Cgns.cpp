@@ -19,18 +19,19 @@ namespace femera {
     if (this->proc != nullptr) {// Set CGNS comm to a copy of Fmpi::team_id
       const auto P = this->proc->get_task (Task_type::Fmpi);
       if (P != nullptr) {
-        MPI_Comm c;
+        MPI_Comm c = nullptr;
         const auto err = MPI_Comm_dup (MPI_Comm (P->get_team_id()), &c);
-        if (err) {
+        if (err || (c == nullptr)) {
           this->set_init (false);// parent removes uninitialized tasks.
           printf ("%4s %4s %4s %s\n",
             get_base_abrv ().c_str(), get_abrv ().c_str(), "WARN",
-            "Failed to copy MPI communicator for CGNS.");
-        } else {
-          this->team_id = fmr::Team_int (c);
-          this->version+=" (parallel)";
-          this->set_init (true);
-    } } }
+            "failed to copy MPI communicator for CGNS");
+          return;
+        }
+        this->team_id = fmr::Team_int (c);
+        this->version+=" (parallel)";
+        this->set_init (true);
+    } }
 #endif
   }
   void data::Cgns::task_exit () {

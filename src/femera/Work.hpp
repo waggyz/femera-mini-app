@@ -72,12 +72,12 @@ namespace femera {
     data::File* data = nullptr;       // data, logging, and file handling
     test::Beds* test = nullptr;       // correctness and performance testing
   protected:// variables
-    std::string       name ="unknown work";
-    std::string       abrv ="work";
-    std::string    version ="";
-    Task_stck_t  task_list ={};
-    Work_type    task_type = task_cast (Base_type::Work);
-    fmr::Dim_int info_d    = 1;
+    Task_stck_t task_list ={};
+    std::string      name ="unknown work";
+    std::string      abrv ="work";
+    std::string   version ="";
+    Work_type   task_type = task_cast (Base_type::Work);
+    fmr::Dim_int info_d   = 1;
 #if 0
 // https://stackoverflow.com/questions/60040665
     /replacing-the-command-line-arguments-int-argc-and-char-argv-with-stdvectors
@@ -93,13 +93,13 @@ namespace femera {
   public:// methods -----------------------------------------------------------
     template <typename T, typename C> static constexpr
     T* cast_via_work (C* child) noexcept;
-    Core_ptrs_t get_core     () noexcept;
-    std::string get_abrv     () noexcept;
-    std::string get_version  () noexcept;
-    std::string get_name     () noexcept;
-    std::string set_name     (const std::string&) noexcept;
-    bool        did_init     () noexcept;// sets & returns did_task_init_tf
-    bool        set_init     (bool) noexcept;//    returns did_task_init_tf
+    Core_ptrs_t get_core    () noexcept;
+    std::string get_abrv    () noexcept;
+    std::string get_version () noexcept;
+    std::string get_name    () noexcept;
+    std::string set_name    (const std::string&) noexcept;
+    bool        did_init    () noexcept;// sets & returns did_task_init_tf
+    bool        set_init    (bool) noexcept;//    returns did_task_init_tf
     // task stack handling
     fmr::Local_int get_task_n () noexcept;
     fmr::Local_int add_task   (Work_spt) noexcept;// returns task number added
@@ -111,20 +111,20 @@ namespace femera {
     virtual fmr::Exit_int exit (fmr::Exit_int err=0)    noexcept =0;
   protected:
     std::string set_abrv (const std::string&) noexcept;
-    std::string get_did_init_list () noexcept;// returns space-seperated list
-    std::string get_not_init_list () noexcept;// returns space-seperated list
-    fmr::Local_int  log_init_list () noexcept;// returns # of tasks initialized
     // Work task_list initialization and exit
     fmr::Exit_int init_list (int* argc, char** argv) noexcept;// init forward
     fmr::Exit_int exit_list () noexcept;// exit task_list in reverse
-    fmr::Exit_int exit_tree () noexcept;// exit task hierarchy in reverse
-    // called by Derived::get_task_*(..)
+    fmr::Exit_int exit_tree () noexcept;// exit task_list hierarchy in reverse
+    // below called by Derived::get_task_*(..)
     Work* get_work (fmr::Local_int) noexcept;
     Work* get_work (Work_type, fmr::Local_int ix=0) noexcept;
     Work* get_work (const Task_path_t&) noexcept;
   private:
+    fmr::Local_int  log_init_list () noexcept;// returns # of tasks initialized
+    std::string get_did_init_list () noexcept;// returns space-seperated list
+    std::string get_not_init_list () noexcept;// returns space-seperated list
     fmr::Exit_int exit_info (Work*, fmr::perf::Float busy_s);
-  protected:// Built-ins called only by inherited classes ---------------------
+  protected:// Built-ins called only by child classes -------------------------
     Work (Work::Core_ptrs_t) noexcept;// preferred constructor
     Work () noexcept;// default constructor for early parts of initialization
     Work (Work&&);              // movable

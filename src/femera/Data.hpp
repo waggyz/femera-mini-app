@@ -18,7 +18,7 @@ namespace femera {
   protected:// typedefs
     using Data_list_t = std::vector <fmr::Data_name_t>;
   protected:// member variables
-    // Each data handler has a map of data/file names handled by each thread.
+    // Each data item is mappped to data/file names handled by each thread.
     // Set inp/out_name_list in each handler derived from data.
     std::unordered_map <fmr::Data_name_t, Data_list_t> inp_name_list ={};
     std::unordered_map <fmr::Data_name_t, Data_list_t> out_name_list ={};
@@ -35,11 +35,10 @@ namespace femera {
     T* get_task (Work::Task_path_t)              noexcept;
     T* get_task (Work_type, fmr::Local_int ix=0) noexcept;
     T* get_task (Task_type, fmr::Local_int ix=0) noexcept;
-    //
 #if 0
     T* get_task (const fmr::Data_name_t&, fmr::Local_int ix=0) noexcept;
-    T* get_task (const fmr::Data_name_t&, fmr::Vals_type,   fmr::Local_int ix=0) noexcept;
-    T* get_task (const fmr::Data_name_t&, fmr::Vals_name_t, fmr::Local_int ix=0) noexcept;
+    T* get_task (const fmr::Data_name_t&, fmr::Vals_type, fmr::Local_int ix=0) noexcept;
+    T* get_task (const fmr::Data_name_t&, const fmr::Vals_name_t&, fmr::Local_int ix=0) noexcept;
 #endif
     constexpr
     T* this_cast (Data*) noexcept;
@@ -56,6 +55,7 @@ namespace femera {
   };//
   //
 }//end femera:: namespace
+//
 #undef FMR_DEBUG
 
 #include "Data.ipp"
