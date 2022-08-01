@@ -35,7 +35,6 @@ namespace femera {
 #endif
     fmr::Exit_int err = 0;
     try { Data::this_cast (this)->task_init (argc, argv); }// Init this task,...
-    catch (const Fail_init& e){ err = 1; e.print (); }
     catch (const Warn& e)     { err =-1; e.print (); }
     catch (const Errs& e)     { err = 1; e.print (); }
     catch (std::exception& e) { err = 2;
