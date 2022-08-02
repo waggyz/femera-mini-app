@@ -21,11 +21,11 @@ namespace femera {
     this->set_init (true);
   }
   void test::Self::log_init_info () {// pulled out of task_init (inline fail)
-    const auto cppver = __cplusplus;
-    this->data->send (fmr::log, this->get_base_abrv (), this->abrv, "ver.",
+    this->data->send (fmr::log, this->get_base_abrv (), this->abrv, "fmr",
       std::string (MAKESTR(FMR_VERSION)));
     this->data->send (fmr::log, this->get_base_abrv (), this->abrv, "g++",
       std::string (__VERSION__));
+    const auto cppver = __cplusplus;
     this->data->send (fmr::log, this->get_base_abrv (), this->abrv, "C++",
       "%li", cppver);
     this->data->send (fmr::log, this->get_base_abrv (), this->abrv, "zord",
@@ -44,9 +44,9 @@ namespace femera {
       //
       // segfaults here if called before tasks init
       const auto Pmpi = this->proc->get_task (Task_type::Fmpi);
-      if (Pmpi) {mpi_n = Pmpi->get_proc_n ();}
+      if (Pmpi) { mpi_n = Pmpi->get_proc_n (); }
       const auto Pomp = this->proc->get_task (Task_type::Fomp);
-      if (Pomp) {omp_n = Pomp->get_proc_n ();}
+      if (Pomp) { omp_n = Pomp->get_proc_n (); }
 #ifdef FMR_TIMES_UCHAR
       auto x = std::string ( MAKESTR(\FMR_TIMES_UCHAR) );
       x = (x =="\\x") ? "x" : x ;
@@ -60,7 +60,7 @@ namespace femera {
         ("%4u    /%4u total physical CPUs (%4u node "+ x +"%4u cores)").c_str(),
         node_n * core_n, all_n, node_n, core_n);
       this->data->send (fmr::log, get_base_abrv (), abrv, "numa",
-        ("%4u ea "+ x +"%4u node:%4u NUMA domain%s total").c_str(),
+        ("%4u ea "+ x +"%4u node,%4u NUMA domain%s total").c_str(),
         numa_n, node_n, numa_all, (numa_all==1)?"":"s");
     }
     if (all_n < core_n) { err =-1;

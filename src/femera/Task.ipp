@@ -31,6 +31,7 @@ namespace femera {
   template <typename T> inline
   fmr::Exit_int Task<T>::exit (fmr::Exit_int err)
   noexcept {
+    //TODO Check for tasks that have not yet run.
     const auto list_err = Work::exit_list ();//        Exit child tasks,...
     err = (list_err > 0) ? list_err : err;
     fmr::Exit_int task_err = 0;

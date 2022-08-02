@@ -16,7 +16,7 @@ namespace femera {
     FMR_PRAGMA_OMP(omp parallel for schedule(static) ordered num_threads(o))
     for (fmr::Local_int i=0; i<o; ++i) {// Make & add thread-local Sims...
       FMR_PRAGMA_OMP(omp ordered) {     // ...in order.
-        auto R = Data<task::Runs>::new_task (this->get_core());
+        const auto R = Data<task::Runs>::new_task (this->get_core());
 #ifdef FMR_RUNS_LOCAL
         R->set_name ("Femera simulations running on process "
           + std::to_string (this->proc->get_proc_id ()));
@@ -28,7 +28,8 @@ namespace femera {
         this->add_task (std::move (R));
   } }
   this->set_init (true);
-  }
+  }//
+  //
 }//end femera namespace
-
+//
 #undef FMR_DEBUG

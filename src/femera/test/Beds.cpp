@@ -30,7 +30,7 @@ namespace femera {
         opterr = 0; int optchar;
         while ((optchar = getopt (argc[0], argv, "TP")) != -1) {
           // T  -T has no argument//NOTE -g gets eaten by MPI
-          //TODO -fmr:T, -fmr:T is working because -f -m -r and -: are skipped,
+          //NOTE -fmr:T, -fmr:P are working because -f -m -r and -: are skipped,
           //     leaving only the recognized option -T, -P.
           switch (optchar) {
             case 'T':{ this->do_test = true; break; }
