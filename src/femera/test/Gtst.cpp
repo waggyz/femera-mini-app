@@ -23,7 +23,7 @@ namespace femera { namespace test { namespace gtst {
     }
     // Called after a failed assertion or a SUCCESS().
     void OnTestPartResult(const ::testing::TestPartResult& test_part_result)
-    override {//NOTE only reports failures
+    override {//NOTE not called for successful tests
       printf("test gtst %4s in %s:%d\n%s\n",
         test_part_result.failed() ? "FAIL" : "ok",
         test_part_result.file_name(),
@@ -38,7 +38,11 @@ namespace femera { namespace test { namespace gtst {
   };
 
 TEST( MiniGtest, RunsGtests ){
-  ASSERT_EQ( 1, 1 );
+  EXPECT_EQ( 1, 1 );
+#if 0
+  // The following generates a SUCCESS() for listeners' OnTestPartResult (..).
+  SUCCEED();
+#endif
 }
 
 } } }//end femera::test::gtst:: namespace
@@ -86,7 +90,7 @@ namespace femera {
       // Remove default listener from all except main
       delete listeners.Release (listeners.default_result_printer());
       //TODO Remove all default listeners and replace with custom listeners.
-      //     Print from main thread only, and log all threads to file.
+      //     Print from main thread only, and log all threads to files.
     }
     // Add custom listener to all
     listeners.Append(new test::gtst::MinimalistPrinter);
