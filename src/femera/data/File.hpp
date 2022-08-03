@@ -10,7 +10,7 @@
 /* Variadic read/save/send methods in File.ipp package heterogenous
   data into a fmr::Vals structure (or std::string?, vector<std::string>?)
   then call a non-variadic member function in File.cpp to pass it on to a
-  specialized handler (in e.g. Text.cpp, Dlim.cpp, Loggs.cpp, Cgns.cpp,...)
+  specialized handler (in e.g. Text.cpp, Dlim.cpp, Logs.cpp, Cgns.cpp,...)
   to handle that structure.
 *//*
   std::size_t File::send (fmr::Data_name_t,                // returns bytes sent

@@ -69,7 +69,6 @@ digraph "source tree" {
 	"Logs.cpp" -> "Main.hpp"
 	"Gmsh.hpp" -> "Data.hpp"
 	"Node.hpp" -> "Proc.hpp"
-	"Geom.hpp" -> "Work.hpp"
 	"File.hpp" -> "Data.hpp"
 	"Vals.hpp" -> "Bulk.hpp"
 	"Beds.hpp" -> "Test.hpp"

@@ -60,7 +60,8 @@ if __name__ == "__main__":
   #
   x = t
   #plt.gca().xaxis.set_major_formatter(pdt.DateFormatter('%m/%d/%y'))
-  plt.gca().xaxis.set_major_formatter(pdt.DateFormatter('%Y-%m-%d'))
+  #plt.gca().xaxis.set_major_formatter(pdt.DateFormatter('%Y-%m-%d'))
+  plt.gca().xaxis.set_major_formatter(pdt.DateFormatter('%m-%d'))
   plt.gca().xaxis.set_major_locator(pdt.MonthLocator())
   #
   plt.gca().set_yticks (np.arange(0, files_ylim*1.001, 25))
