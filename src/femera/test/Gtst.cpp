@@ -40,7 +40,7 @@ namespace femera { namespace test { namespace gtst {
     fprintf (stdout, "%4s %4s %4s %4i -- /%4i test%s in %s\n",
       "test", "gtst", "skip", skip_n, test_n, (test_n == 1) ? "" : "s", t);
     }
-    if ( bad_n) {
+    if (bad_n > 0) {
     fprintf (stdout, "%4s %4s %4s %4i :( /%4i test%s in %s\n",
       "test", "gtst", "FA""IL", bad_n, test_n, (test_n == 1) ? "" : "s", t);
   } }

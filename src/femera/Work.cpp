@@ -48,7 +48,7 @@ namespace femera {
     return nullptr;
   }
   fmr::Local_int Work::log_init_list ()
-  noexcept { fmr::Local_int did_init_count = 1;
+  noexcept { fmr::Local_int did_init_count = 0;
     const auto n = this->get_task_n ();
     if ((n > 0) && (this->proc != nullptr)) {
       if (this->proc->did_init () && this->proc->is_main ()) {
@@ -76,13 +76,15 @@ namespace femera {
         } } }
         if (did_str.size() > 0) {
           if (did_n > 1) {did_str += "("+std::to_string (did_n)+")"; }
-          printf ("%4s %4s %4s %s\n",
-            this->get_abrv ().c_str(),"init","ok", did_str.c_str());
+          printf ("%4s %4s %4s %4u ok /%4u %s\n",
+            get_base_abrv ().c_str(), get_abrv ().c_str(),"init",
+              did_init_count, n, did_str.c_str());
         }
         if (not_str.size() > 0) {
           if (not_n > 1) { not_str += "("+std::to_string (not_n)+")"; }
-          printf ("%4s %4s %4s %s\n",
-            this->get_abrv ().c_str(),"init","BAD", not_str.c_str());
+          printf ("%4s %4s %4s %4u :( /%4u %s\n",
+            get_base_abrv ().c_str(), get_abrv ().c_str(), "nope",
+              n - did_init_count, n, not_str.c_str());
     } } }
     return did_init_count;
   }

@@ -21,13 +21,13 @@
 namespace femera {
   proc::Main::Main (const femera::Work::Core_ptrs_t W)
   noexcept : Proc (W) {
-    this->name      ="Femera processing handler";
+    this->name      ="Femera process handler";
     this->abrv      ="main";
     this->task_type = task_cast (Task_type::Main);
     this->info_d    = 2;
   }
   proc::Main::Main () noexcept {
-    this->name      ="Femera processing handler";
+    this->name      ="Femera process handler";
     this->abrv      ="main";
     this->task_type = task_cast (Task_type::Main);
     this->info_d    = 2;
