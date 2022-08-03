@@ -12,16 +12,19 @@
 
 #if 1
 namespace femera { namespace test { namespace gtst {
-
-  class MinimalistPrinter : public ::testing::EmptyTestEventListener {
+#if 0
+  class Log_file : public ::testing::EmptyTestEventListener {//TODO
+  }
+#endif
+  class Log_out : public ::testing::EmptyTestEventListener {
     /* from: https://github.com/google/googletest/blob/main/docs/advanced.md
      */
 #if 0
   // Called before any test activity starts.
-  void OnTestProgramStart(const UnitTest& /* unit_test */) override {}
+  void OnTestProgramStart (const UnitTest& /* unit_test */) override {}
 #endif
   // Called after all test activities have ended.
-  void OnTestProgramEnd(const ::testing::UnitTest& unit_test)
+  void OnTestProgramEnd (const ::testing::UnitTest& unit_test)
   override {
     const auto test_n = unit_test.total_test_count ();
     const auto pass_n = unit_test.successful_test_count ();
@@ -43,13 +46,13 @@ namespace femera { namespace test { namespace gtst {
   } }
 #if 0
     // Called before a test starts.
-    void OnTestStart(const ::testing::TestInfo& test_info) override {
+    void OnTestStart (const ::testing::TestInfo& test_info) override {
       fprintf (stdout, "test gtst  run %s.%s starting.\n",
         test_info.test_suite_name(), test_info.name());
     }
 #endif
     // Called after a failed assertion or a SUCCESS().
-    void OnTestPartResult(const ::testing::TestPartResult& test_part_result)
+    void OnTestPartResult (const ::testing::TestPartResult& test_part_result)
     override {//NOTE not called for successful tests
       fprintf (stdout, "%4s %4s %4s in %s:%d\n%s\n", "test", "gtst",
         test_part_result.failed() ? "FA""IL" : "ok",
@@ -59,7 +62,7 @@ namespace femera { namespace test { namespace gtst {
     }
 #if 0
     // Called after a test ends.
-    void OnTestEnd(const ::testing::TestInfo& test_info) override {
+    void OnTestEnd (const ::testing::TestInfo& test_info) override {
       fprintf (stdout, "test gtst  run %s.%s ending.\n",
         test_info.test_suite_name(), test_info.name());
     }
@@ -113,16 +116,16 @@ namespace femera {
     /*from: https://github.com/google/googletest/issues/822
      * and: https://github.com/google/googletest/blob/main/docs/advanced.md
      */
+    // Remove all default listeners and replace with custom listeners.
     ::testing::TestEventListeners& listeners
       = ::testing::UnitTest::GetInstance()->listeners();
-    // Remove all default listeners and replace with custom listeners.
     delete listeners.Release (listeners.default_result_printer());
     if ( !this->is_enabled || !this->proc->is_main()) {
-      // Print from main thread only,... and log all threads to files.
-      listeners.Append(new test::gtst::MinimalistPrinter);
+      // Print from main thread only.
+      listeners.Append (new test::gtst::Log_out);
     }
-    //TODO Add another custom listener to log all threads to files
-//    listeners.Append(new test::gtst::MinimalistPrinter);
+    //TODO Add another custom listener to log all threads to files.
+//    listeners.Append(new test::gtst::Log_file);
 #endif
   this->set_init (true);
   }
