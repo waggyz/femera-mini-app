@@ -20,25 +20,26 @@ namespace femera { namespace test { namespace gtst {
   // Called before any test activity starts.
   void OnTestProgramStart(const UnitTest& /* unit_test */) override {}
 #endif
-
   // Called after all test activities have ended.
-  void OnTestProgramEnd(const ::testing::UnitTest& unit_test) override {
+  void OnTestProgramEnd(const ::testing::UnitTest& unit_test)
+  override {
     const auto test_n = unit_test.total_test_count ();
     const auto pass_n = unit_test.successful_test_count ();
     const auto skip_n = unit_test.skipped_test_count ();
     const auto  bad_n = unit_test.failed_test_count ();
-    const auto ms     = double (unit_test.elapsed_time ());
+    const auto     ms = double (unit_test.elapsed_time ());
+    const auto      t = fmr::form::si_time (ms / 1000.0).c_str ();
     if (pass_n > 0) {
-    fprintf (stdout, "%4s %4s %4s %4i ok /%4i test%s in %g ms\n",
-      "test", "gtst", "pass", pass_n, test_n, (test_n == 1) ? "" : "s", ms);
+    fprintf (stdout, "%4s %4s %4s %4i ok /%4i test%s in %s\n",
+      "test", "gtst", "pass", pass_n, test_n, (test_n == 1) ? "" : "s", t);
     }
     if (skip_n > 0) {
-    fprintf (stdout, "%4s %4s %4s %4i    /%4i test%s in %g ms\n",
-      "test", "gtst", "skip", skip_n, test_n, (test_n == 1) ? "" : "s", ms);
+    fprintf (stdout, "%4s %4s %4s %4i -- /%4i test%s in %s\n",
+      "test", "gtst", "skip", skip_n, test_n, (test_n == 1) ? "" : "s", t);
     }
     if ( bad_n) {
-    fprintf (stdout, "%4s %4s %4s %4i    /%4i test%s in %g ms\n",
-      "test", "gtst", "FA""IL", bad_n, test_n, (test_n == 1) ? "" : "s", ms);
+    fprintf (stdout, "%4s %4s %4s %4i :( /%4i test%s in %s\n",
+      "test", "gtst", "FA""IL", bad_n, test_n, (test_n == 1) ? "" : "s", t);
   } }
 #if 0
     // Called before a test starts.
@@ -99,7 +100,7 @@ namespace femera {
     } else {
       try {::testing::InitGoogleTest (argc, argv); }// Is this thread safe?
       catch (...) {
-        FMR_THROW("error initializing GoogleTest");
+        FMR_THROW("err""or initializing GoogleTest");
         this->is_enabled = false;
         return this->is_enabled;
     } }
@@ -157,7 +158,8 @@ namespace femera {
       return;
     }
     this->did_run_all_tests = true;
-  }
-}
-
+  }//
+  //
+}//
+//
 #undef FMR_DEBUG
