@@ -5,7 +5,7 @@
 
 #include <unordered_map>
 
-namespace femera { namespace data {
+namespace femera { namespace data {//TODO move to fmr::data:: namespace?
   class Vals {//No vtable for fast non-static procedural data generation methods
   private:
 #ifdef FMR_ALIGN_VALS

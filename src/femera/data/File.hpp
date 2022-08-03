@@ -22,18 +22,15 @@
 */
 #endif
 
-#include <unordered_map>
-#include <valarray>           // used in File.ipp
-
 namespace femera { namespace data {
   class File;// Derive as a CRTP concrete class from Data.
   class File final: public Data <File> {// private: friend class Data;
   private:
-    using css = const std::string;
+    using css = const std::string;// for convenience
   public:
     bool did_logs_init () noexcept;
     std::size_t send (const fmr::Data_name_t&, css& text, fmr::Dim_int out_d=1)
-    noexcept;
+    noexcept;// returns bytes sent
     template <typename ...Args>
     std::size_t send (const fmr::Data_name_t&,// standard fmr:log line
       css& lab1, css& lab2, css& lab3, css& form, Args...);
