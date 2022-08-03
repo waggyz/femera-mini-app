@@ -16,8 +16,11 @@ fi
 if [[ "$ERR" -eq 0 ]]; then
   ERR=`grep -c " 0 test suites" "$4.out"`
 fi
-if [[ "$ERR" -eq 0 ]]; then # count googletest test suites
-  DIDRUN=`grep -c "test suite" "$4.out"`
+if [[ "$ERR" -eq 0 ]]; then
+  DIDRUN=`grep -c "test suite" "$4.out"` # count googletest test suites
+  if [[ "$DIDRUN" -eq 0 ]]; then # count googletest runs
+    DIDRUN=`grep -c "test gtst pass" "$4.out"`
+  fi
   if [[ "$DIDRUN" -eq 0 ]]; then # count bats passed tests
     DIDRUN=`grep -c '^ok ' "$4.out"`
   fi
