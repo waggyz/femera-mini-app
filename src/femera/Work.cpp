@@ -60,15 +60,17 @@ namespace femera {
           const auto item = W->get_abrv ();
           if (W->did_init ()) {
             ++did_init_count;
-            if (fmr::form::ends_with (did_str, item)) { ++did_n;// repeated item
-            } else {// different item
+            if (fmr::form::ends_with (did_str, item)) {
+              ++did_n;// repeated item
+            } else {  // different item
               if (did_n > 1) { did_str += "("+std::to_string (did_n)+")"; }
               did_n= 1;
               did_str += (did_str.size () == 0) ? "":" ";
               did_str += item;
           } } else {// did not init
-            if (fmr::form::ends_with (not_str, item)) { ++not_n;// repeated item
-            } else {// different item
+            if (fmr::form::ends_with (not_str, item)) {
+              ++not_n;// repeated item
+            } else {  // different item
               if (not_n > 1) { not_str += "("+std::to_string (not_n)+")"; }
               not_n = 1;
               not_str += ( not_str.size () == 0) ? "":" ";
