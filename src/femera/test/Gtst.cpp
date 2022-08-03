@@ -23,13 +23,23 @@ namespace femera { namespace test { namespace gtst {
 
   // Called after all test activities have ended.
   void OnTestProgramEnd(const ::testing::UnitTest& unit_test) override {
-    const auto test_n = unit_test.test_case_to_run_count ();
-    const auto pass_n = unit_test.successful_test_count();
-    const auto ms     = unit_test.elapsed_time();
+    const auto test_n = unit_test.total_test_count ();
+    const auto pass_n = unit_test.successful_test_count ();
+    const auto skip_n = unit_test.skipped_test_count ();
+    const auto  bad_n = unit_test.failed_test_count ();
+    const auto ms     = double (unit_test.elapsed_time ());
+    if (pass_n > 0) {
     fprintf (stdout, "%4s %4s %4s %4i ok /%4i test%s in %g ms\n",
-      "test", "gtst", "pass",
-      pass_n, test_n, (test_n == 1) ? "" : "s", double(ms));
-  }
+      "test", "gtst", "pass", pass_n, test_n, (test_n == 1) ? "" : "s", ms);
+    }
+    if (skip_n > 0) {
+    fprintf (stdout, "%4s %4s %4s %4i    /%4i test%s in %g ms\n",
+      "test", "gtst", "skip", skip_n, test_n, (test_n == 1) ? "" : "s", ms);
+    }
+    if ( bad_n) {
+    fprintf (stdout, "%4s %4s %4s %4i    /%4i test%s in %g ms\n",
+      "test", "gtst", "FA""IL", bad_n, test_n, (test_n == 1) ? "" : "s", ms);
+  } }
 #if 0
     // Called before a test starts.
     void OnTestStart(const ::testing::TestInfo& test_info) override {
@@ -41,7 +51,7 @@ namespace femera { namespace test { namespace gtst {
     void OnTestPartResult(const ::testing::TestPartResult& test_part_result)
     override {//NOTE not called for successful tests
       fprintf (stdout, "%4s %4s %4s in %s:%d\n%s\n", "test", "gtst",
-        test_part_result.failed() ? "FAIL" : "ok",
+        test_part_result.failed() ? "FA""IL" : "ok",
         test_part_result.file_name(),
         test_part_result.line_number(),
         test_part_result.summary());
