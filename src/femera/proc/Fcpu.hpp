@@ -5,7 +5,7 @@
 
 namespace femera { namespace proc {
   class Fcpu;// Derive a CRTP concrete class from Proc.
-  class Fcpu final: public Proc<Fcpu> {private: friend class Proc;
+  class Fcpu final: public Proc<Fcpu> { private: friend class Proc;
   private:
     void task_init (int* argc, char** argv);
     void task_exit ();

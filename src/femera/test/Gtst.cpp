@@ -31,7 +31,7 @@ namespace femera { namespace test { namespace gtst {
     const auto skip_n = unit_test.skipped_test_count    ();
     const auto fail_n = unit_test.failed_test_count     ();
     const auto time_s = double (unit_test.elapsed_time  ()) / 1000.0;
-    const auto time_c = (time_s < 1.0 / 1000.0) ? "<  1 ms"
+    const auto time_c = (time_s < 0.001) ? "<  1 ms"
       : fmr::form::si_time (time_s).c_str ();
     const auto form_c ="%4s %4s %4s %4i %2s /%4i test%s in %s\n";
     if (pass_n > 0) {
