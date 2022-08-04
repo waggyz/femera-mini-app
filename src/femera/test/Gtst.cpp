@@ -26,24 +26,25 @@ namespace femera { namespace test { namespace gtst {
   // Called after all test activities have ended.
   void OnTestProgramEnd (const ::testing::UnitTest& unit_test)
   override {
-    const auto test_n  = unit_test.total_test_count      ();
-    const auto pass_n  = unit_test.successful_test_count ();
-    const auto skip_n  = unit_test.skipped_test_count    ();
-    const auto fail_n  = unit_test.failed_test_count     ();
-    const auto time_ms = double (unit_test.elapsed_time  ());
-    const auto time_si = fmr::form::si_time (time_ms / 1000.0).c_str ();
-    const auto form_c  ="%4s %4s %4s %4i %2s /%4i test%s in %s\n";
+    const auto test_n = unit_test.total_test_count      ();
+    const auto pass_n = unit_test.successful_test_count ();
+    const auto skip_n = unit_test.skipped_test_count    ();
+    const auto fail_n = unit_test.failed_test_count     ();
+    const auto time_s = double (unit_test.elapsed_time  ()) / 1000.0;
+    const auto time_c = (time_s < 1.0 / 1000.0) ? "<  1 ms"
+      : fmr::form::si_time (time_s).c_str ();
+    const auto form_c ="%4s %4s %4s %4i %2s /%4i test%s in %s\n";
     if (pass_n > 0) {
       fprintf (stdout, form_c, "test", "gtst", "pass",
-        pass_n, "ok", test_n, (test_n == 1) ? "" : "s", time_si);
+        pass_n, "ok", test_n, (test_n == 1) ? "" : "s", time_c);
     }
     if (skip_n > 0) {
       fprintf (stdout, form_c, "test", "gtst", "skip",
-        skip_n, "--", test_n, (test_n == 1) ? "" : "s", time_si);
+        skip_n, "--", test_n, (test_n == 1) ? "" : "s", time_c);
     }
     if (fail_n > 0) {
       fprintf (stdout, form_c, "test", "gtst", "FA""IL",
-        fail_n, ":(", test_n, (test_n == 1) ? "" : "s", time_si);
+        fail_n, ":(", test_n, (test_n == 1) ? "" : "s", time_c);
     }
     return;
   }

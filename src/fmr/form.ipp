@@ -56,7 +56,7 @@ namespace femera {
     const auto  time_str = fmr::form::si_time (secs);
     const auto speed_str
       = fmr::form::si_unit (double (count)/double (secs), unit) + "/s";
-    return text_line (250, "%s /%s, %s",
+    return text_line (250, "%s /%s at %s",
       count_str.c_str(), time_str.c_str(), speed_str.c_str());
   }
   template <typename ...Args> static
@@ -69,7 +69,7 @@ namespace femera {
       int (name_width), name.c_str(), args...);
     if (nc > line_width) {
 #ifdef FMR_MICRO_UCHAR
-      // Count unicode multibyte chars, e.g.. "\u00b5" or "\u03bc"
+      // Count unicode multibyte chars, e.g.. "\u00b5" or "\u03bc",
       // then reformat with longer length if present.
       fmr::Line_size_int c =0;
       const auto n = fmr::Line_size_int (buf.size());
@@ -81,7 +81,7 @@ namespace femera {
 #if 0
         c += (buf[i] > '\x7f') ? 1u : 0u;      // does not work; buf is signed
         c += (buf[i] < 0) ? 1u : 0u;           // finds too many characters
-        c += (std::isprint (buf[i])) ? 0u : 1u;//does not work
+        c += (std::isprint (buf[i])) ? 0u : 1u;// does not work
 #endif
       }
       if (c > 0) {
