@@ -15,16 +15,33 @@ namespace femera {
     this->abrv      ="logs";
     this->task_type = task_cast (Task_type::Logs);
     this->info_d    = 3;
-    this->out_name_list = {
-      {fmr::none, {}},         // suppress output
-      {fmr::null, {}},         // convenient synonym
-      {fmr::log , {fmr::out }},// task_init sets ::stdout to main only
-      {fmr::out , {fmr::out }},// default all threads to ::stdout
-      {fmr::err , {fmr::err }} // default all threads to ::stderr
+    this->out_name_list = {     //NOTE task_init calls set_verb to reset these
+      {fmr::none , {}},         // suppress output
+      {fmr::null , {}},         // convenient synonym to fmr::none
+      {fmr::err  , {fmr::err }},// default all threads to ::stderr verb_d >= 0
+      {fmr::out  , {fmr::out }},// default all threads to ::stdout verb_d >= 1
+      {fmr::log  , {fmr::out }},// default main thread to ::stdout verb_d >= 1
+//      {fmr::perf , {fmr::out }},// default main thread to ::stdout verb_d >= 2
+      {fmr::info , {fmr::out }},// default main thread to ::stdout verb_d >= 3
+      {fmr::spam , {fmr::out }},// default all threads to ::stdout verb_d >= 4
+      {fmr::debug, {fmr::out }} // default all threads to ::stdout verb_d >= 5
     };
   }
-  fmr::Dim_int data::Logs::set_verb (const fmr::Dim_int v)
+  fmr::Dim_int data::Logs::set_verb (const int v)
   noexcept {
+    bool did_reduce = false;
+    if (v < 0) {
+      if (this->did_init ()) {// print warning
+        this->data->send (fmr::err, "data","logs","WARN","Verbosity remains "
+          "(%i) because requested (%i) is negative.\n",
+          int (this->verb_d), int (v));
+      } else {
+        fprintf (::stderr, "data logs WARN Verbosity remains (%i) "
+          "because requested (%i) is negative.\n",
+          int (this->verb_d), int (v));
+      }
+      return this->verb_d;
+    }
     if (v > FMR_VERBMAX) {
       this->verb_d = FMR_VERBMAX;
       if (this->did_init ()) {// print warning
@@ -36,7 +53,25 @@ namespace femera {
           "because requested (%i) exceeds maximum (%i).\n",
           int (this->verb_d), int (v), int (FMR_VERBMAX));
     } }
-    else { this->verb_d = v; }
+    else {
+      did_reduce = v < this->verb_d;
+      this->verb_d = fmr::Dim_int (v);
+    }
+    if (did_reduce) {// verbosity reduced
+      const auto sv = (this->verb_d > 5) ? 5 : this->verb_d;
+      switch (sv) {
+        case 0 : this->out_name_list [fmr::out  ] = {};// all cases fall through
+                       out_name_list [fmr::log  ] = {};
+//        case 1 : this->out_name_list [fmr::perf ] = {};
+        case 2 : this->out_name_list [fmr::info ] = {};
+        case 3 : this->out_name_list [fmr::spam ] = {};
+        case 4 : this->out_name_list [fmr::debug] = {};
+    } }
+    if (this->did_init ()) {// print info
+      this->data->send (fmr::info,
+        "data","logs","verb","%4i    /%4i maximum verbosity",
+        int (this->verb_d), int (FMR_VERBMAX));
+    }
     return this->verb_d;
   }
   void data::Logs::task_init (int*, char**) {//TODO opts -v<int>, -t<int>,...
@@ -46,14 +81,21 @@ namespace femera {
       n = this->proc->get_race_n ();// OpenMP threads / mpi proc
       n = (n==0) ? 1 : n;
     }
-    // default fmr:log destination is ::stdout from thread 0.
+    // default fmr:log, fmr:info destinations are ::stdout from thread 0 only.
     this->out_name_list [fmr::log ] = Data::Data_list_t (n, fmr::out);
-    if (n > 0) { this->out_name_list [fmr::log][0] = fmr::out; }
+    this->out_name_list [fmr::info] = Data::Data_list_t (n, fmr::out);
+//    this->out_name_list [fmr::perf] = Data::Data_list_t (n, fmr::out);
+    if (n > 0) {
+      this->out_name_list [fmr::log ][0] = fmr::out;
+      this->out_name_list [fmr::info][0] = fmr::out;
+//      this->out_name_list [fmr::perf][0] = fmr::out;
+    }
     this->name += " (main to stdout, all to stderr)";
 #ifdef FMR_DEBUG
-    this->set_verb (101);
+    this->set_verb (11);
 #endif
     this-> set_init (true);
+    this->set_verb (this->verb_d);// prints info
   }
   void data::Logs::task_exit () {
   }

@@ -11,14 +11,14 @@ FMR_WARN_INLINE_OFF
 FMR_WARN_INLINE_ON
   private:
     std::unordered_map <fmr::Data_name_t, FILE*> open_file_map = {
-      { fmr::log, ::stdout },
-      { fmr::out, ::stdout },
-      { fmr::err, ::stderr }
+      { fmr::err  , ::stderr },// verb_d >= 0 (quiet)
+      { fmr::log  , ::stdout },// verb_d >= 1 default: main thread
+      { fmr::out  , ::stdout } // verb_d >= 1 default: all threads
     };
     fmr::Dim_int verb_d = 5;//TODO set by command line option -v<int>
   public:
     fmr::Dim_int get_verb ()             noexcept;
-    fmr::Dim_int set_verb (fmr::Dim_int) noexcept;// returns verb_d after set
+    fmr::Dim_int set_verb (int)          noexcept;// returns verb_d after set
     bool          do_log  (fmr::Dim_int) noexcept;
   public:
     void task_init (int* argc, char** argv);

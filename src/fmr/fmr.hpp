@@ -62,6 +62,11 @@ namespace fmr {
   static const Data_name_t in  ="fmr:in"  ;// default stdin  to   each MPI thrd
   static const Data_name_t none="fmr:none";
   static const Data_name_t null="fmr:null";// convenient synonym of fmr::none
+  //
+  static const Data_name_t info="fmr:info";
+//TODO collides with namespace perf::  static const Data_name_t perf="fmr:perf";
+  static const Data_name_t spam="fmr:spam";
+  static const Data_name_t debug="fmr:debug";
   // formatters: fmr::Vals_type::Info_line, fmr::Vals_type::Text_line, ...
 }//end fmr:: namespace
 namespace femera { namespace test {
