@@ -93,8 +93,9 @@ namespace femera {
     this->name += " (main to stdout, all to stderr)";
 #ifdef FMR_DEBUG
     this->set_verb (11);
+    this->set_verb (0);
 #endif
-    this-> set_init (true);
+    this->set_init (true);
     this->set_verb (this->verb_d);// prints info
   }
   void data::Logs::task_exit () {
