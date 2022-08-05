@@ -34,11 +34,9 @@ namespace femera {
         this->version+=" (parallel)";
 #ifdef H5_VERS_INFO
         this->hdf5_vers = H5_VERS_INFO;
-        if (true) {//TODO detail level?
-          this->data->send (fmr::log,
-            get_base_abrv ().c_str(), get_abrv ().c_str(), "uses",
-            H5_VERS_INFO);
-        }
+        this->data->send (fmr::info,
+          get_base_abrv ().c_str(), get_abrv ().c_str(), "uses",
+          H5_VERS_INFO);
 #endif
         this->set_init (true);
     } }

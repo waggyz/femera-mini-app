@@ -32,14 +32,12 @@ namespace femera {
       Gmsh::Number gmsh_omp_n = 0;
       ::gmsh::option::getNumber ("General.NumThreads", gmsh_omp_n);
       if (fmr::Local_int (gmsh_omp_n) == omp_n) {
-        if (true) {//TODO detail level?
-          const auto n = fmr::Local_int (gmsh_omp_n);
-          this->data->send (fmr::log, "data", "gmsh", "uses",
-            "%4u    /%4u OpenMP thread%s each (maximum)",
-            n, omp_n, (omp_n==1)?"":"s");
-        } }
-      else {
-        this->data->send (fmr::log, "data", "gmsh", "NOTE",
+        const auto n = fmr::Local_int (gmsh_omp_n);
+        this->data->send (fmr::info, "data", "gmsh", "uses",
+          "%4u    /%4u OpenMP thread%s each (maximum)",
+          n, omp_n, (omp_n==1)?"":"s");
+      } else {
+        this->data->send (fmr::err, "data", "gmsh", "WA""RN",
         "OpenMP threads (%g) does not match Femera (%u).",
         gmsh_omp_n, omp_n);
     }//}

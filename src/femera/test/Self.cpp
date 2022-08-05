@@ -14,21 +14,19 @@ TEST( SelfTest, TrivialTest ){
 #endif
 namespace femera {
   void test::Self::task_init (int*, char**) {// Test for initialization errors.
-    if (true) {//TODO detail && this->test->do_test
-      this->log_init_info ();// pulled out method to prevent inline fail warning
-    }
+    this->log_init_info ();// pulled out method to prevent inline fail warning
     this->proc_node_chck ();
     this->set_init (true);
   }
   void test::Self::log_init_info () {// pulled out of task_init (inline fail)
-    this->data->send (fmr::log, this->get_base_abrv (), this->abrv, "fmr",
+    this->data->send (fmr::info, this->get_base_abrv (), this->abrv, "fmr",
       std::string (MAKESTR(FMR_VERSION)));
-    this->data->send (fmr::log, this->get_base_abrv (), this->abrv, "g++",
+    this->data->send (fmr::info, this->get_base_abrv (), this->abrv, "g++",
       std::string (__VERSION__));
     const auto cppver = __cplusplus;
-    this->data->send (fmr::log, this->get_base_abrv (), this->abrv, "C++",
+    this->data->send (fmr::info, this->get_base_abrv (), this->abrv, "C++",
       "%li", cppver);
-    this->data->send (fmr::log, this->get_base_abrv (), this->abrv, "zord",
+    this->data->send (fmr::info, this->get_base_abrv (), this->abrv, "zord",
       "%4u maximum hypercomplex order", zyclops::max_zorder);
   }
   fmr::Exit_int test::Self::proc_node_chck () {
@@ -38,7 +36,7 @@ namespace femera {
     const auto core_n = node_n * proc::Node::get_core_n ();
     const auto numa_n = node_n * proc::Node::get_numa_n ();
     const auto numa_all = node_n * numa_n;
-    if (true) {//TODO detail && this->test->do_test
+    if (true) {//TODO if this->test->do_test ?
       const auto str = this->get_base_abrv ()+" "+ this->abrv +" ";
       fmr::Local_int mpi_n=0, omp_n=0;
       //
