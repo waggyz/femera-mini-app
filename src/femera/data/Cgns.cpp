@@ -16,31 +16,31 @@ namespace femera {
   void data::Cgns::task_init (int*, char**) {
     this->version = std::to_string (CGNS_VERSION / 1000)
       + "." + std::to_string (CGNS_VERSION % 1000);
+#ifdef H5_VERS_INFO
+    this->hdf5_vers = H5_VERS_INFO;
+    this->data->send (fmr::info,
+      get_base_abrv ().c_str(), get_abrv ().c_str(), "uses", H5_VERS_INFO);
+#endif
 #ifdef FMR_HAS_MPI
 //NO_FMR_PRAGMA_OMP(omp MAIN)//NOTE OpenMP does not play nice with exceptions.
     if (this->proc != nullptr) {// Set CGNS comm to a copy of Fmpi::team_id
       const auto P = this->proc->get_task (Task_type::Fmpi);
       if (P != nullptr) {
-        MPI_Comm c = nullptr;
-        const auto err = MPI_Comm_dup (MPI_Comm (P->get_team_id()), &c);
-        if (err || (c == nullptr)) {
-          this->set_init (false);// parent removes uninitialized tasks.
-          printf ("%4s %4s %4s %s\n",
-            get_base_abrv ().c_str(), get_abrv ().c_str(), "WARN",
-            "failed to copy MPI communicator for CGNS");
-          return;
-        }
-        this->team_id = fmr::Team_int (c);
-        this->version+=" (parallel)";
-#ifdef H5_VERS_INFO
-        this->hdf5_vers = H5_VERS_INFO;
-        this->data->send (fmr::info,
-          get_base_abrv ().c_str(), get_abrv ().c_str(), "uses",
-          H5_VERS_INFO);
+        if (P->get_team_id() != 0) {
+          MPI_Comm c = nullptr;
+          const auto err = MPI_Comm_dup (MPI_Comm (P->get_team_id()), &c);
+          if (err || (c == nullptr)) {
+            printf ("%4s %4s %4s %s\n",
+              get_base_abrv ().c_str(), get_abrv ().c_str(), "WARN",
+              "failed to copy MPI communicator for CGNS");
+            this->set_init (false);// parent removes uninitialized tasks.
+            return;
+          }
+          this->team_id = fmr::Team_int (c);
+          this->version+=" (parallel)";
+    } } }
 #endif
-        this->set_init (true);
-    } }
-#endif
+    this->set_init (true);
   }
   void data::Cgns::task_exit () {
 //TODO    this->close_all ();
