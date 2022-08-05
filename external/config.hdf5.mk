@@ -1,5 +1,6 @@
 #!/usr/bin/make
 ifeq ($(ENABLE_HDF5),ON)
+  FMRFLAGS += -DFMR_HAS_HDF5
   ifeq ($(ENABLE_MPI),ON)
     EXTERNAL_DOT+="MPI" -> "HDF5"\n
   endif

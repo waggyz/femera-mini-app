@@ -1,8 +1,10 @@
+#include "../core.h"
 #include "Cgns.hpp"
-#include "../proc/Main.hpp"
 
 #ifdef FMR_HAS_CGNS
-//#include "hdf5.h"
+#ifdef FMR_HAS_HDF5
+#include "hdf5.h"
+#endif
 #ifdef FMR_HAS_MPI
 #include "pcgnslib.h" // cgp_*
 #else
@@ -30,6 +32,14 @@ namespace femera {
         }
         this->team_id = fmr::Team_int (c);
         this->version+=" (parallel)";
+#ifdef H5_VERS_INFO
+        this->hdf5_vers = H5_VERS_INFO;
+        if (true) {//TODO detail level?
+          this->data->send (fmr::log,
+            get_base_abrv ().c_str(), get_abrv ().c_str(), "uses",
+            H5_VERS_INFO);
+        }
+#endif
         this->set_init (true);
     } }
 #endif

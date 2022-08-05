@@ -14,7 +14,7 @@ namespace femera { namespace proc {
 #endif
   private:
     Fcpu (femera::Work::Core_ptrs_t) noexcept;
-    Fcpu () =delete;//NOTE Use the constructor above.
+    Fcpu () = delete;//NOTE Use the constructor above.
   };
 } }//end femera::proc:: namespace
 

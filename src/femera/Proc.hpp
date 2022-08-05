@@ -46,9 +46,9 @@ namespace femera {
     T*       get_task (Work_type, fmr::Local_int ix=0) noexcept;
     T*       get_task (Task_type, fmr::Local_int ix=0) noexcept;
   private:
-    constexpr
+    static constexpr
     T* this_cast (Proc*) noexcept;
-    constexpr
+    static constexpr
     T* this_cast (Work*) noexcept;
   protected:
     Proc (Work::Core_ptrs_t) noexcept;

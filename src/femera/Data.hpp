@@ -40,9 +40,9 @@ namespace femera {
     T* get_task (const fmr::Data_name_t&, fmr::Vals_type, fmr::Local_int ix=0) noexcept;
     T* get_task (const fmr::Data_name_t&, const fmr::Vals_name_t&, fmr::Local_int ix=0) noexcept;
 #endif
-    constexpr
+    static constexpr
     T* this_cast (Data*) noexcept;
-    constexpr
+    static constexpr
     T* this_cast (Work*) noexcept;
   protected:// Make it clear this class needs to be inherited from.
     Data (Work::Core_ptrs_t) noexcept;// preferred constructor

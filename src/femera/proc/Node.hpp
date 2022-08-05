@@ -27,7 +27,7 @@ namespace femera { namespace proc {
 #endif
   private:
     Node (femera::Work::Core_ptrs_t) noexcept;
-    Node () =delete;//NOTE Use the constructor above.
+    Node () = delete;//NOTE Use the constructor above.
     void task_init (int* argc, char** argv);
     void task_exit ();
   };

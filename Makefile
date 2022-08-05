@@ -506,7 +506,8 @@ ifeq ("$(ENABLE_NVIDIA)","ON")
 	printf "CUFLAGS:\n$(CUFLAGS)\n"
 endif
 	printf "CXXFLAGS:\n$(CXXFLAGS)\n"
-	printf "FMRFLAGS:\n$(FMRFLAGS)\n"
+	echo "FMRFLAGS:"
+	echo "$(FMRFLAGS)"
 	printf "LDFLAGS:\n$(LDFLAGS)\n"
 	printf "LDLIBS:\n$(LDLIBS)\n"
 	printf "exported LD_LIBRARY_PATH:\n$(LD_LIBRARY_PATH)\n"

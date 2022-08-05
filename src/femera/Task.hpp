@@ -25,9 +25,9 @@ namespace femera {
     T*       get_task (fmr::Local_int)    noexcept;
     T*       get_task (Work::Task_path_t) noexcept;
   private:
-    constexpr
+    static constexpr
     T* this_cast (Task*) noexcept;
-    constexpr
+    static constexpr
     T* this_cast (Work*) noexcept;
   protected:// make it clear this class needs to be inherited
     Task (Work::Core_ptrs_t) noexcept;

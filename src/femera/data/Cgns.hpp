@@ -19,6 +19,7 @@ namespace femera { namespace data {
     };
   private:// member variables
     fmr::Team_int team_id = 0;// MPI communicator
+    std::string hdf5_vers = "";
   private:
     void task_init (int* argc, char** argv);
     void task_exit ();
