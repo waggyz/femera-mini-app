@@ -8,7 +8,6 @@ namespace femera {
     this->name      ="Femera performance tests";
     this->abrv      ="perf";
     this->task_type = task_cast (Task_type::Perf);
-    this->info_d    = 3;
   }
   inline
   void test::Perf::task_init (int*, char**) {

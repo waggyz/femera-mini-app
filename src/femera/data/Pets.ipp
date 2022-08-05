@@ -8,7 +8,6 @@ namespace femera {
     this->name      ="PETSc";
     this->abrv      ="petc";
     this->task_type = task_cast (Task_type::Petsc);
-    this->info_d    = 3;
   }
 }//end femera namespace
 

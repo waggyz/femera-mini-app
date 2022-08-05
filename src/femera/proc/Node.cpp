@@ -19,7 +19,6 @@ namespace femera {
     else     { this->name = std::string (hostname); }
     this->abrv      ="node";
     this->task_type = task_cast (Task_type::Node);
-    this->info_d    = 3;
   }
   void proc::Node::task_init (int*, char**) {
 #if 0

@@ -8,7 +8,6 @@ namespace femera {
     this->name      ="Femera simulation handler";
     this->abrv      ="sims";
     this->task_type = task_cast (Task_type::Sims);
-    this->info_d    = 3;
   }
   inline
   void task::Sims::task_exit () {

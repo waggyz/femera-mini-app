@@ -19,13 +19,12 @@ FMR_WARN_INLINE_ON
   public:
     fmr::Dim_int get_verb ()             noexcept;
     fmr::Dim_int set_verb (int)          noexcept;// returns verb_d after set
-    bool          do_log  (fmr::Dim_int) noexcept;
   public:
     void task_init (int* argc, char** argv);
     void task_exit ();
     bool does_file (const fmr::Data_name_t&) noexcept;
-    std::size_t task_send (const fmr::Data_name_t& file,
-      const std::string& text, fmr::Dim_int out_d=1) noexcept;
+    std::size_t task_send
+    (const fmr::Data_name_t& file, const std::string& text) noexcept;
   public:
     Logs (femera::Work::Core_ptrs_t) noexcept;
     Logs () =delete;//NOTE Use the constructor above.

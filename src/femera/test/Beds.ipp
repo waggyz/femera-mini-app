@@ -8,7 +8,6 @@ namespace femera {
     this->name      ="Femera testbeds";
     this->abrv      ="beds";
     this->task_type = task_cast (Task_type::Beds);
-    this->info_d    = 2;
   }
   inline
   void test::Beds::task_exit () {

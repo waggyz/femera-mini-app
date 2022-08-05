@@ -29,7 +29,6 @@ namespace femera {
     this->name      ="Femera file handler";
     this->abrv      ="file";
     this->task_type = task_cast (Task_type::File);
-    this->info_d    = 2;
   }
   void data::File::task_init (int*, char**) {
 //NOTE OpenMP does not play nice with exceptions.
@@ -68,8 +67,8 @@ namespace femera {
 #endif
   this->set_init (true);
   }
-  std::size_t data::File::send (const fmr::Data_name_t& file,
-    const std::string& text, const fmr::Dim_int out_d)
+  std::size_t data::File::send
+  (const fmr::Data_name_t& file, const std::string& text)
   noexcept { size_t byte = 0;
     if (! this->task_list.empty ()) {// only checks top-level tasks
       const fmr::Local_int n = this->get_task_n ();
@@ -80,9 +79,8 @@ namespace femera {
           case fmr::Enum_int (Task_type::Logs): {
             auto C = Work::cast_via_work <data::Logs> (D);
             do_task = C->does_file (file);
-            if (do_task) {
-              byte += C->task_send (file, text, out_d);
-          } }
+            if (do_task) { byte += C->task_send (file, text); }
+          }
           default: {}// do nothing
         }
 #ifdef FMR_DEBUG

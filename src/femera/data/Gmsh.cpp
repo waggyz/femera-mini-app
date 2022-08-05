@@ -15,7 +15,6 @@ namespace femera {
     this->version  +=" (patched for GCC 4.8)" ;
 #endif
     this->task_type = task_cast (Task_type::Gmsh);
-    this->info_d    = 3;
   }
   void data::Gmsh::task_init (int*, char**) {
 //NO_FMR_PRAGMA_OMP(omp MAIN){//NOTE OpenMP does not play nice with exceptions.

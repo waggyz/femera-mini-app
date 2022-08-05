@@ -19,7 +19,6 @@ namespace femera {
     this->version   = std::to_string (MPI_VERSION)
       +"."+std::to_string (MPI_SUBVERSION);
     this->task_type = task_cast (Task_type::Fmpi);
-    this->info_d    = 3;
     this->team_id   = fmr::Team_int (MPI_COMM_WORLD);
   }
   bool proc::Fmpi::did_mpi_init ()

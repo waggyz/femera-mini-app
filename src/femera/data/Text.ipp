@@ -7,7 +7,6 @@ namespace femera {
     this->name      ="Femera text handler";
     this->abrv      ="text";
     this->task_type = task_cast (Task_type::Text);
-    this->info_d    = 3;
   }
   inline
   void data::Text::task_init (int*, char**) {

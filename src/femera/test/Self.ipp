@@ -8,7 +8,6 @@ namespace femera {
     this->name      ="Femera integration self-tests";
     this->abrv      ="self";
     this->task_type = task_cast (Task_type::Self);
-    this->info_d    = 3;
   }
   inline
   void test::Self::task_exit () {

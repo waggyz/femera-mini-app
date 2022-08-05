@@ -14,7 +14,6 @@ namespace femera {
     this->name      ="Femera logger";
     this->abrv      ="logs";
     this->task_type = task_cast (Task_type::Logs);
-    this->info_d    = 3;
     this->out_name_list = {     //NOTE task_init calls set_verb to reset these
       {fmr::none , {}},         // suppress output
       {fmr::null , {}},         // convenient synonym to fmr::none
@@ -100,15 +99,13 @@ namespace femera {
   }
   void data::Logs::task_exit () {
   }
-  std::size_t data::Logs::task_send (const fmr::Data_name_t& file,
-    const std::string& text, const fmr::Dim_int out_d)
+  std::size_t data::Logs::task_send
+  (const fmr::Data_name_t& file, const std::string& text)
   noexcept { std::size_t byte = 0;
 #ifdef FMR_DEBUG
     printf ("logs task_send (%s, %s, %u)\n",
-      file.c_str(), text.c_str(), out_d);
+      file.c_str(), text.c_str());
 #endif
-    if (! this->do_log (out_d)) { return byte; }
-    //
     fmr::Exit_int err = 0;
     Data_list_t outs  ={};
     try { outs = this->out_name_list.at (file); }

@@ -24,13 +24,11 @@ namespace femera {
     this->name      ="Femera process handler";
     this->abrv      ="main";
     this->task_type = task_cast (Task_type::Main);
-    this->info_d    = 2;
   }
   proc::Main::Main () noexcept {
     this->name      ="Femera process handler";
     this->abrv      ="main";
     this->task_type = task_cast (Task_type::Main);
-    this->info_d    = 2;
   }
   fmr::Local_int proc::Main::get_race_ix () {
     return proc::Fomp::task_proc_ix ();

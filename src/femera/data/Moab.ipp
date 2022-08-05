@@ -8,7 +8,6 @@ namespace femera {
     this->name      ="MOAB";
     this->abrv      ="moab";
     this->task_type = task_cast (Task_type::Moab);
-    this->info_d    = 3;
   }
   inline
   void data::Moab::task_init (int*, char**) {

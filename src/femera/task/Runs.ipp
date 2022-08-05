@@ -8,7 +8,6 @@ namespace femera {
     this->name      ="Femera simulation runner";
     this->abrv      ="runs";
     this->task_type = task_cast (Task_type::Runs);
-    this->info_d    = 3;
   }
   inline
   void task::Runs::task_init (int*, char**) {

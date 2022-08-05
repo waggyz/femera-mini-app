@@ -29,7 +29,7 @@ namespace femera { namespace data {
     using css = const std::string;// for convenience
   public:
     bool did_logs_init () noexcept;
-    std::size_t send (const fmr::Data_name_t&, css& text, fmr::Dim_int out_d=1)
+    std::size_t send (const fmr::Data_name_t&, css& text)
     noexcept;// returns bytes sent
     template <typename ...Args>
     std::size_t send (const fmr::Data_name_t&,// standard fmr:log line

@@ -8,7 +8,6 @@ namespace femera {
     this->name      ="Femera root process";
     this->abrv      ="root";
     this->task_type = task_cast (Task_type::Root);
-    this->info_d    = 3;
   }
   inline
   void proc::Root::task_init (int*, char**) {

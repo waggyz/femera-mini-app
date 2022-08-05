@@ -8,7 +8,6 @@ namespace femera {
     this->name      ="Femera CSV file handler";
     this->abrv      ="csv";
     this->task_type = task_cast (Task_type::Dlim);
-    this->info_d    = 3;
   }
   inline
   void data::Dlim::task_init (int*, char**) {

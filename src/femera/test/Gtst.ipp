@@ -9,7 +9,6 @@ namespace femera {
     this->abrv      ="gtst";
     this->version   = MAKESTR(FMR_GTEST_VERSION) ;
     this->task_type = task_cast (Task_type::Gtst);
-    this->info_d    = 3;
   }
 }//end femera namespace
 

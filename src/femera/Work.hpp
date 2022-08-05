@@ -77,7 +77,6 @@ namespace femera {
     std::string      abrv ="work";
     std::string   version ="";
     Work_type   task_type = task_cast (Base_type::Work);
-    fmr::Dim_int info_d   = 1;
 #if 0
 // https://stackoverflow.com/questions/60040665
     /replacing-the-command-line-arguments-int-argc-and-char-argv-with-stdvectors

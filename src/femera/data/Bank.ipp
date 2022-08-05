@@ -8,7 +8,6 @@ namespace femera {
     this->name      ="Femera data bank";
     this->abrv      ="bank";
     this->task_type = task_cast (Task_type::Bank);
-    this->info_d    = 3;
   }
 #ifdef FMR_BANK_LOCAL
   inline
