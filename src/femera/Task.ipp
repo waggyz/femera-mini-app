@@ -40,6 +40,7 @@ namespace femera {
     catch (const Errs& e)    { task_err = 1; e.print (); }
     catch (std::exception& e){ task_err = 2; Errs::print (abrv+" task_exit",e);}
     catch (...)              { task_err = 3; Errs::print (abrv+" task_exit"); }
+    this->set_init (false);
     if (this->do_exit_zero) { return 0; }
     return (task_err > 0) ? task_err : err;
   }

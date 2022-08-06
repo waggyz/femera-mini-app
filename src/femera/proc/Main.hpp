@@ -23,8 +23,7 @@ namespace femera { namespace proc {
     void task_exit ();
   };
 } }//end femera::proc:: namespace
-
+  //
 #include "Main.ipp"
-
 //end HAS_FEMERA_MAIN_HPP
 #endif

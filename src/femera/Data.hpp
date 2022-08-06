@@ -43,7 +43,7 @@ namespace femera {
   protected:// Make it clear this class needs to be inherited from.
     Data (Work::Core_ptrs_t)     /* preferred constructor */ noexcept;
     Data ()            = default;// early (init) constructor
-    Data (Data&&)      = default;// movable
+    Data (Data&&)      = default;// is movable
     Data& operator
       =  (const Data&) = delete ;// not assignable
     Data (const Data&) = delete ;// not copyable

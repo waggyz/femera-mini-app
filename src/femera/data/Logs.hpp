@@ -15,7 +15,7 @@ FMR_WARN_INLINE_ON
       { fmr::log  , ::stdout },// verb_d >= 1 default: main thread
       { fmr::out  , ::stdout } // verb_d >= 1 default: all threads
     };
-    fmr::Dim_int verb_d = 5;//TODO set by command line option -v<int>
+    fmr::Dim_int verb_d = 3;//TODO set by command line option -v<int>
   public:
     fmr::Dim_int get_verb ()    noexcept;
     fmr::Dim_int set_verb (int) noexcept;// returns verb_d after set
@@ -29,11 +29,9 @@ FMR_WARN_INLINE_ON
   public:
     Logs (femera::Work::Core_ptrs_t) noexcept;
     Logs () = delete;//NOTE Use the constructor above.
-  };
-  //
+  };//
 } }//end femera::data:: namespace
-
+  //
 #include "Logs.ipp"
-
 //end FEMERA_DATA_LOGS_HPP
 #endif

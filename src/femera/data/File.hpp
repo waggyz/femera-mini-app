@@ -69,8 +69,8 @@ namespace femera { namespace data {
     void         send_file (Fnl& name_list={""}, Dt =Dt::All, Ft =Ft::Auto);
 #endif
   };//
-} }//
-  //end femera::data namespace
+} }//end femera::data namespace
+  //
 #include "File.ipp"
 //end FEMERA_HAS_FILE_HPP
 #endif

@@ -92,13 +92,13 @@ namespace femera {
   public:// methods -----------------------------------------------------------
     template <typename T, typename C> static constexpr
     T* cast_via_work (C* child) noexcept;
-    Core_ptrs_t get_core    () noexcept;
-    std::string get_abrv    () noexcept;
-    std::string get_version () noexcept;
-    std::string get_name    () noexcept;
-    std::string set_name    (const std::string&) noexcept;
-    bool        did_init    () noexcept;// sets & returns did_task_init_tf
-    bool        set_init    (bool) noexcept;//    returns did_task_init_tf
+    Core_ptrs_t get_core     () noexcept;
+    std::string get_abrv     () noexcept;
+    std::string get_version  () noexcept;
+    std::string get_name     () noexcept;
+    std::string set_name     (const std::string&) noexcept;
+    bool        did_init     () noexcept;// sets & returns did_task_init_tf
+    bool        set_init     (bool) noexcept;//    returns did_task_init_tf
     // task stack handling
     fmr::Local_int get_task_n () noexcept;
     fmr::Local_int add_task   (Work_spt) noexcept;// returns task number added
@@ -108,7 +108,7 @@ namespace femera {
     // intialize and exit
     virtual fmr::Exit_int init (int* argc, char** argv) noexcept =0;
     virtual fmr::Exit_int exit (fmr::Exit_int err=0)    noexcept =0;
-  protected:
+  protected:// methods
     std::string set_abrv (const std::string&) noexcept;
     // Work task_list initialization and exit
     fmr::Exit_int init_list (int* argc, char** argv) noexcept;// init forward
@@ -118,24 +118,22 @@ namespace femera {
     Work* get_work (fmr::Local_int) noexcept;
     Work* get_work (Work_type, fmr::Local_int ix=0) noexcept;
     Work* get_work (const Task_path_t&) noexcept;
-  private:
+  private:// methods
     fmr::Local_int  log_init_list () noexcept;// returns # of tasks initialized
     std::string get_did_init_list () noexcept;// returns space-seperated list
     std::string get_not_init_list () noexcept;// returns space-seperated list
     fmr::Exit_int exit_info (Work*, fmr::perf::Float busy_s);
-  protected:// Built-ins called only by child classes -------------------------
+  protected:// Built-in methods called only by child classes ------------------
     Work (Work::Core_ptrs_t) noexcept;// preferred constructor
     Work () noexcept;// default constructor for early parts of initialization
-    Work (Work&&);              // movable
+    Work (Work&&);              // is movable
     Work& operator
       =  (const Work&) =delete; // not asignable
     Work (const Work&) =delete; // not copyable
     virtual ~Work ();// not inline to avoid -Winline large growth warning
   };// ========================================================================
-}//end femera:: namespace
-
+}  //end femera:: namespace
 #include "Work.ipp"
-
-#undef FMR_DEBUG
+ //
 //end FEMERA_HAS_WORK_HPP
 #endif

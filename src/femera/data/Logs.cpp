@@ -20,7 +20,7 @@ namespace femera {
       {fmr::err  , {fmr::err }},// default all threads to ::stderr verb_d >= 0
       {fmr::out  , {fmr::out }},// default all threads to ::stdout verb_d >= 1
       {fmr::log  , {fmr::out }},// default main thread to ::stdout verb_d >= 1
-//      {fmr::perf , {fmr::out }},// default main thread to ::stdout verb_d >= 2
+      {"fmr:perf", {fmr::out }},// default main thread to ::stdout verb_d >= 2
       {fmr::info , {fmr::out }},// default main thread to ::stdout verb_d >= 3
       {fmr::spam , {fmr::out }},// default all threads to ::stdout verb_d >= 4
       {fmr::debug, {fmr::out }} // default all threads to ::stdout verb_d >= 5
@@ -52,20 +52,20 @@ namespace femera {
           "to (%i) because requested (%i) exceeds maximum (%i).\n",
           int (this->verb_d), int (v), int (FMR_VERBMAX));
     } }
-    else {
+    else {// v < FMR_VERBMAX
       did_reduce = v < this->verb_d;
       this->verb_d = fmr::Dim_int (v);
     }
     if (did_reduce) {// verbosity reduced
-    this->name      ="Femera logger";
-      const auto sv = (this->verb_d > 5) ? 5 : this->verb_d;
-      switch (sv) {
+      this->name ="Femera logger";
+      switch (this->verb_d) {
         case 0 : this->out_name_list [fmr::out  ] = {};// all cases fall through
                        out_name_list [fmr::log  ] = {};
-//        case 1 : this->out_name_list [fmr::perf ] = {};
+        case 1 : this->out_name_list ["fmr:perf"] = {};
         case 2 : this->out_name_list [fmr::info ] = {};
         case 3 : this->out_name_list [fmr::spam ] = {};
         case 4 : this->out_name_list [fmr::debug] = {};
+        default: {}// Do nothing.
     } }
     if (this->did_init ()) {// print info
       this->data->send (fmr::info,
@@ -75,20 +75,20 @@ namespace femera {
     return this->verb_d;
   }
   void data::Logs::task_init (int*, char**) {//TODO opts -v<int>, -t<int>,...
-    // set default logger (data->fmrlog) to stdout only from the main thread (0)
+    // set defaults to stdout only from the main thread (0)
     fmr::Local_int n = 0;
     if (this->proc->is_main ()) {
       n = this->proc->get_race_n ();// OpenMP threads / mpi proc
       n = (n==0) ? 1 : n;
     }
     // default fmr:log, fmr:info destinations are ::stdout from thread 0 only.
-    this->out_name_list [fmr::log ] = Data::Data_list_t (n, fmr::out);
-    this->out_name_list [fmr::info] = Data::Data_list_t (n, fmr::out);
-//    this->out_name_list [fmr::perf] = Data::Data_list_t (n, fmr::out);
+    this->out_name_list [fmr::log  ] = Data::Data_list_t (n, fmr::out);
+    this->out_name_list [fmr::info ] = Data::Data_list_t (n, fmr::out);
+    this->out_name_list ["fmr:perf"] = Data::Data_list_t (n, fmr::out);
     if (n > 0) {
-      this->out_name_list [fmr::log ][0] = fmr::out;
-      this->out_name_list [fmr::info][0] = fmr::out;
-//      this->out_name_list [fmr::perf][0] = fmr::out;
+      this->out_name_list [fmr::log  ][0] = fmr::out;
+      this->out_name_list [fmr::info ][0] = fmr::out;
+      this->out_name_list ["fmr:perf"][0] = fmr::out;
     }
     this->name += " (main to stdout, all to stderr)";
 #ifdef FMR_DEBUG

@@ -56,6 +56,7 @@ FMR_WARN_INLINE_ON
       Errs::print (this->get_abrv ()+" task_exit",e); }
     catch (...)              { task_err = 3;
       Errs::print (this->get_abrv ()+" task_exit"); }
+    this->set_init (false);
     return (task_err > 0) ? task_err : err;
   }
   template <typename T> inline

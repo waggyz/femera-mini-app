@@ -58,6 +58,11 @@ namespace femera {
       Errs::print (this->get_abrv ()+" task_exit",e);}
     catch (...)              { task_err = 3;
       Errs::print (this->get_abrv ()+" task_exit"); }
+    this->set_init (false);
+#ifdef FMR_DEBUG
+    printf ("%4s %4s %4s %s\n", this->get_abrv ().c_str(), "init", "set",
+      this->did_init () ? "true":"false");
+#endif
     return (task_err > 0) ? task_err : err;
   }
   template <typename T> inline constexpr

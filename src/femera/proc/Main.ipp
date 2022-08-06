@@ -6,7 +6,6 @@
 #include <cstdio>     // std::printf
 #endif
 namespace femera {
-# if 1
   inline
   fmr::Local_int proc::Main::get_race_n () {
     if (this->race_n > 0) { return this->race_n; }
@@ -15,14 +14,15 @@ namespace femera {
       this->race_n = O->get_proc_n ();
       return this->race_n;
     }
-    return 0;
+    return 1;
   }
-#   endif
   inline
   void proc::Main::task_exit () {
-    this->proc =nullptr;
-  }
+    this->proc = nullptr;
+  }//
+  //
 }//end femera:: namespace
+//
 #undef FMR_DEBUG
 //end FEMERA_MAIN_IPP
 #endif

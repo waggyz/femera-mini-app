@@ -274,28 +274,29 @@ FMR_WARN_INLINE_ON
 FMR_WARN_INLINE_OFF
     if (W->data == nullptr) {
       if (this->is_work_main_tf) {
-      const auto label = form::text_line (80, "%4s %4s ",
-        W->get_base_abrv().c_str(), W->get_abrv().c_str());
-      form::name_line (::stdout, 14, 80, label+"exit", text);
-      if (read.size () > 0) {
-        form::name_line (::stdout, 14, 80, label+" inp", read);
-      }
-      if (save.size () > 0) {
-        form::name_line (::stdout, 14, 80, label+" out", save);
-      }
-      if (flop.size () > 0) {
-        form::name_line (::stdout, 14, 80, label+"flop", flop);
-      }
-    } } else {
+        const auto label = form::text_line (80, "%4s %4s ",
+          W->get_base_abrv().c_str(), W->get_abrv().c_str());
+        form::name_line (::stdout, 14, 80, label+"exit", text);
+        if (read.size () > 0) {
+          form::name_line (::stdout, 14, 80, label+" inp", read);
+        }
+        if (save.size () > 0) {
+          form::name_line (::stdout, 14, 80, label+" out", save);
+        }
+        if (flop.size () > 0) {
+          form::name_line (::stdout, 14, 80, label+"flop", flop);
+        }
+      } }
+    else {
       W->data->send (fmr::log, W->get_base_abrv(), W->get_abrv(), "exit", text);
-      if (read.size () > 0) {
-        W->data->send (fmr::log, W->get_base_abrv(), W->get_abrv(),"inp", read);
+      if (read.size () > 0) { W->data->send
+        ("fmr:perf", W->get_base_abrv(), W->get_abrv(),"inp", read);
       }
-      if (save.size () > 0) {
-        W->data->send (fmr::log, W->get_base_abrv(), W->get_abrv(),"out", save);
+      if (save.size () > 0) { W->data->send
+        ("fmr:perf", W->get_base_abrv(), W->get_abrv(),"out", save);
       }
-      if (flop.size () > 0) {
-        W->data->send (fmr::log, W->get_base_abrv(), W->get_abrv(),"flop",flop);
+      if (flop.size () > 0) { W->data->send
+        ("fmr:perf", W->get_base_abrv(), W->get_abrv(),"flop",flop);
       }
     }
 FMR_WARN_INLINE_ON
