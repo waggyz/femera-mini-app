@@ -31,7 +31,7 @@ namespace femera {
     this->task_type = task_cast (Task_type::File);
   }
   void data::File::task_init (int*, char**) {
-//NOTE OpenMP does not play nice with exceptions.
+    //NOTE OpenMP does not play nice with exceptions.
     fmr::Local_int o = 1;
 #ifdef FMR_BANK_LOCAL
     o = this->proc->get_race_n ();
@@ -65,33 +65,25 @@ namespace femera {
 #ifdef FMR_HAS_PETSC
     this->add_task (std::move (Data<data::Pets>::new_task (this->get_core())));
 #endif
-  this->set_init (true);
+    this->set_init (true);
   }
   std::size_t data::File::send
-  (const fmr::Data_name_t& file, const std::string& text)
-  noexcept { size_t byte = 0;
-    if (! this->task_list.empty ()) {// only checks top-level tasks
-      const fmr::Local_int n = this->get_task_n ();
-      for (fmr::Local_int Wix=0; Wix < n; ++Wix) {// checks all top-level tasks
-        bool do_task = false;
+  (const fmr::Data_name_t& name, const std::string& text)
+  noexcept { size_t byte = 0;// Return bytes sent.
+    const fmr::Local_int n = this->get_task_n ();
+    if (n > 0) {//NOTE only checks top-level tasks
+      for (fmr::Local_int Wix=0; Wix < n; ++Wix) {// Check all top-level tasks.
         const auto D = this->get_task (Wix);
         switch (fmr::Enum_int (D->task_type)) {
           case fmr::Enum_int (Task_type::Logs): {
             auto C = Work::cast_via_work <data::Logs> (D);
-            do_task = C->does_file (file);
-            if (do_task) { byte += C->task_send (file, text); }
+            if (C->does_file (name)) { byte += C->task_send (name, text); }
           }
-          default: {}// do nothing
-        }
-#ifdef FMR_DEBUG
-        printf ((D->get_abrv()
-          +(do_task ? " handles " : " does not handle ")
-          +file+"\n").c_str());
-#endif
-    } }
+          default: {}// Do nothing.
+    } } }
     return byte;
   }
-  bool data::File::did_logs_init ()
+  bool data::File::did_logs_init ()//NOTE only checks first Logs in task_list
   noexcept {
     const auto L = cast_via_work<data::Logs> (this->get_task (Task_type::Logs));
 #ifdef FMR_DEBUG
@@ -100,8 +92,8 @@ namespace femera {
     }
 #endif
     return (L == nullptr) ? false : L->did_init ();
-  }
+  }//
   //
 }// end femera::namespace
-
+//
 #undef FMR_DEBUG

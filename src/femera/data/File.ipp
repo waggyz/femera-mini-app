@@ -13,7 +13,7 @@ namespace femera {
     const auto msg = form::text_line (line_width, "%4s %4s %4s "+ form,
       lab1.c_str (), lab2.c_str (), lab3.c_str (), args...);
 #ifdef FMR_DEBUG
-    printf ((msg+" "+data_name+" in File.ipp\n").c_str ());
+    printf ((data_name+" "+msg+" in File.ipp\n").c_str ());
 #endif
     // Call method to find data_name handler and output (append) to destination.
     return this->send (data_name, msg);
