@@ -20,36 +20,40 @@
 #define FMR_MAKE_SMART(T) std::make_shared<T>
 #endif
 
-namespace femera {
   // Forward declares ---------------------------------------------------------
+namespace femera {
   class Work;                          // abstract (pure virtual) base class
   template <typename> class Proc;      // abstract CRTP base derived from Work
   namespace proc {                     // CRTP inheriance from Proc
-    class Main;                        // public interface to process handling
+    class Main;                        // public interface for process handling
     class Root; class Node; class Fcpu;// Femera process handling
     class Fmpi; class Fomp; class Nvid;// process handling libraries
-  }
+} }//end femera::proc:: namespace
+namespace femera {
   template <typename> class Data;      // abstract CRTP base derived from Work
   namespace data {                     // CRTP inheriance from Data
-    class File;                        // public interface to data
+    class File;                        // public interface for data handling
     class Logs; class Dlim; class Text;// Femera data handling
     class Bank;// class View;
     class Cgns; class Gmsh; class Moab;// data handling libraries
     class Pets;
-  }
+} }//end femera::data:: namespace
+namespace femera {
   template <typename> class Test;      // abstract CRTP base derived from Work
   namespace test {                     // CRTP inheriance from Test
-    class Beds;                        // public interface to tests
+    class Beds;                        // public interface for test handling
     class Unit; class Self; class Perf;// Femera testing
     class Gtst;                        // testing libraries
-  }
+} }//end femera::test:: namespace
+namespace femera {
   template <typename> class Task;      // abstract CRTP base derived from Work
   namespace task {                     // CRTP inheriance from Task
-    class Jobs;                        // public interface to tasks
+    class Jobs;                        // public interface for task handling
     class Sims; class Runs;            // Femera tasks
     //class Post;
     //class Plug;                      // plugins
-  }
+} }//end femera::task:: namespace
+namespace femera {
   // typedefs -----------------------------------------------------------------
   using Work_spt = FMR_SMART_PTR <Work>;      // abstract packaging base class
   using Jobs_spt = FMR_SMART_PTR <task::Jobs>;// concrete Task interface
@@ -78,9 +82,10 @@ namespace femera {
     std::string   version ="";
     Work_type   task_type = task_cast (Base_type::Work);
 #if 0
-// https://stackoverflow.com/questions/60040665
+    /*
+    https://stackoverflow.com/questions/60040665
     /replacing-the-command-line-arguments-int-argc-and-char-argv-with-stdvectors
-    //
+    */
     std::string argv_prfx ="-fmr:";
     std::unique_ptr<char*[]> my_argv;//use: err= init (&my_argc, my_argv.get());
     int                      my_argc =0;
