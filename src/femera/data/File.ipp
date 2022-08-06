@@ -6,7 +6,7 @@ namespace femera {
   void data::File::task_exit () {
   }
   template <typename ...Args> inline// standard fmr:log line
-  std::size_t data::File::send (const fmr::Data_name_t& data_name,
+  fmr::Global_int data::File::send (const fmr::Data_name_t& data_name,
     const std::string& lab1, const std::string& lab2, const std::string& lab3,
     const std::string& form, Args...args) {
     const auto line_width = uint (80);//TODO look up for data_name destination

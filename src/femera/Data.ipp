@@ -66,9 +66,9 @@ namespace femera {
     return FMR_MAKE_SMART(T) (T(core));
   }
   template <typename T> inline
-  T* Data<T>::get_task (const fmr::Local_int i)
+  T* Data<T>::get_task (const fmr::Local_int ix)
   noexcept {
-    return static_cast<T*> (this->get_work (i));
+    return static_cast<T*> (this->get_work (ix));
   }
   template <typename T> inline
   T* Data<T>::get_task (const Work::Task_path_t tree)

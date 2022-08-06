@@ -67,9 +67,9 @@ namespace femera {
 #endif
     this->set_init (true);
   }
-  std::size_t data::File::send
-  (const fmr::Data_name_t& name, const std::string& text)
-  noexcept { size_t byte = 0;// Return bytes sent.
+  fmr::Global_int data::File::send
+  (const fmr::Data_name_t& data_name, const std::string& text)
+  noexcept { fmr::Global_int byte = 0;// Return bytes sent.
     const fmr::Local_int n = this->get_task_n ();
     if (n > 0) {//NOTE only checks top-level tasks
       for (fmr::Local_int Wix=0; Wix < n; ++Wix) {// Check all top-level tasks.
@@ -77,8 +77,9 @@ namespace femera {
         switch (fmr::Enum_int (D->task_type)) {
           case fmr::Enum_int (Task_type::Logs): {
             auto C = Work::cast_via_work <data::Logs> (D);
-            if (C->does_file (name)) { byte += C->task_send (name, text); }
-          }
+            if (C->does_file (data_name)) {
+              byte += C->task_send (data_name, text);
+          } }
           default: {}// Do nothing.
     } } }
     return byte;

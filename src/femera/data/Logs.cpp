@@ -32,11 +32,11 @@ namespace femera {
     if (v < 0) {
       if (this->did_init ()) {// print warning
         this->data->send (fmr::err, "data","logs","WARN","Verbosity remains "
-          "(%i) because requested (%i) is negative.\n",
+          "(%i) because requested verbosity (%i) is negative.",
           int (this->verb_d), int (v));
       } else {
-        fprintf (::stderr, "data logs WARN Verbosity remains (%i) "
-          "because requested (%i) is negative.\n",
+        fprintf (::stderr, "data logs WARN Verbosity remains "
+          "(%i) because requested verbosity (%i) is negative.\n",
           int (this->verb_d), int (v));
       }
       return this->verb_d;
@@ -45,11 +45,11 @@ namespace femera {
       this->verb_d = FMR_VERBMAX;
       if (this->did_init ()) {// print warning
         this->data->send (fmr::err, "data","logs","WARN","Verbosity set "
-          "to (%i) because requested (%i) exceeds maximum (%i).\n",
+          "to (%i) because requested (%i) exceeds maximum (%i).",
           int (this->verb_d), int (v), int (FMR_VERBMAX));
       } else {
-        fprintf (::stderr, "data logs WARN Verbosity set to (%i) "
-          "because requested (%i) exceeds maximum (%i).\n",
+        fprintf (::stderr, "data logs WARN Verbosity set "
+          "to (%i) because requested (%i) exceeds maximum (%i).\n",
           int (this->verb_d), int (v), int (FMR_VERBMAX));
     } }
     else {
@@ -57,6 +57,7 @@ namespace femera {
       this->verb_d = fmr::Dim_int (v);
     }
     if (did_reduce) {// verbosity reduced
+    this->name      ="Femera logger";
       const auto sv = (this->verb_d > 5) ? 5 : this->verb_d;
       switch (sv) {
         case 0 : this->out_name_list [fmr::out  ] = {};// all cases fall through
@@ -99,9 +100,9 @@ namespace femera {
   }
   void data::Logs::task_exit () {
   }
-  std::size_t data::Logs::task_send
+  fmr::Global_int data::Logs::task_send
   (const fmr::Data_name_t& file, const std::string& text)
-  noexcept { std::size_t byte = 0;
+  noexcept { fmr::Global_int byte = 0;
 #ifdef FMR_DEBUG
     printf ("logs task_send (%s, %s, %u)\n",
       file.c_str(), text.c_str());
@@ -140,7 +141,7 @@ namespace femera {
         "returned (%i), negative bytes written.\n",
         file.c_str(), text.c_str(), int (b));
     }
-    byte += std::size_t ((b>0) ? b : 0);
+    byte += fmr::Global_int ((b>0) ? b : 0);
     FMR_PRAGMA_OMP(omp MAIN)
     { this->time.add_count (1, 0, 0, byte); }
     return byte;

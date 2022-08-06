@@ -13,7 +13,7 @@
   specialized handler (in e.g. Text.cpp, Dlim.cpp, Logs.cpp, Cgns.cpp,...)
   to handle that structure.
 *//*
-  std::size_t File::send (fmr::Data_name_t,                // returns bytes sent
+  fmr::Global_int File::send (fmr::Data_name_t,            // returns bytes sent
     std::string lab1, std::string lab2, std::string lab3, std::string form, ...)
   data->send (fmr:log, fmr::Vals_type::Logs_line, this->proc->get_proc_id (),
     "this", "log", "msg", "i: %u, j: %u", uint (i), uint (j));
@@ -28,18 +28,18 @@ namespace femera { namespace data {
   private:
     using css = const std::string;// for convenience
   public:
-    bool did_logs_init () noexcept;// true if first Logs did initialize.
-    std::size_t send (const fmr::Data_name_t&, css& text)
-    noexcept;// returns bytes sent
+    bool did_logs_init () noexcept;// true if first Logs did initialize
+    fmr::Global_int send (const fmr::Data_name_t&, css& text)// ret/ bytes sent
+    noexcept;
     template <typename ...Args>
-    std::size_t send (const fmr::Data_name_t&,// standard fmr:log line
+    fmr::Global_int send (const fmr::Data_name_t&,// standard fmr:log line
       css& lab1, css& lab2, css& lab3, css& form, Args...);
   public:
     void task_init (int* argc, char** argv);
     void task_exit ();
   public:
     File (femera::Work::Core_ptrs_t) noexcept;
-    File () =delete;//NOTE Use the constructor above.
+    File () = delete;//NOTE Use the constructor above.
 #if 0
   private:
     std::unordered_map <File_id, Page_dims> file_data = {};
@@ -68,10 +68,9 @@ namespace femera { namespace data {
     void         save_file (Fnl& name_list={""}, Dt =Dt::All, Ft =Ft::Auto);
     void         send_file (Fnl& name_list={""}, Dt =Dt::All, Ft =Ft::Auto);
 #endif
-  };
-} }//end femera::data namespace
-
+  };//
+} }//
+  //end femera::data namespace
 #include "File.ipp"
-
 //end FEMERA_HAS_FILE_HPP
 #endif
