@@ -154,17 +154,20 @@ namespace femera {
       this->del_task (del_list.top ());
       del_list.pop ();
     }
-    if (err <= 0) { this->did_work_init_tf = true; }
+//FIXME    if (err <= 0) { this->did_work_init_tf = true; }
+    if (err <= 0) { this->set_init (true); }
     return err;
   }
   fmr::Exit_int Work::exit_list ()
   noexcept { fmr::Exit_int err =0;
-    if ((this->proc != nullptr) && (this->did_work_init_tf == true)) {
+//FIXME    if ((this->proc != nullptr) && (this->did_work_init_tf == true)) {
+    if ((this->proc != nullptr) && (this->did_init ())) {
 FMR_WARN_INLINE_OFF
       this->is_work_main_tf = this->proc->is_main ();
 FMR_WARN_INLINE_ON
     }
-    this->did_work_init_tf = false;
+//FIXME    this->did_work_init_tf = false;
+this->set_init (false);
     while (! this->task_list.empty ()) {
       auto W = this->task_list.back ().get ();// Exit in reverse order.
       if (W != nullptr) {
@@ -199,12 +202,14 @@ FMR_WARN_INLINE_ON
   }
   fmr::Exit_int Work::exit_tree ()
   noexcept { fmr::Exit_int err =0;
-    if (this->proc != nullptr && this->did_work_init_tf == true) {
+//FIXME    if (this->proc != nullptr && this->did_work_init_tf == true) {
+    if (this->proc != nullptr && this->did_init ()) {
 FMR_WARN_INLINE_OFF
       this->is_work_main_tf = this->proc->is_main ();
 FMR_WARN_INLINE_ON
     }
-    this->did_work_init_tf = false;
+//FIXME    this->did_work_init_tf = false;
+this->set_init (false);
     if (! this->task_list.empty ()) {
       Work::Task_path_t branch ={};
 #ifdef FMR_DEBUG

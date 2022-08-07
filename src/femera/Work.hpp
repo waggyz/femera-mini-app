@@ -19,8 +19,7 @@
 #define FMR_SMART_PTR std::shared_ptr
 #define FMR_MAKE_SMART(T) std::make_shared<T>
 #endif
-
-  // Forward declares ---------------------------------------------------------
+// Forward declares -----------------------------------------------------------
 namespace femera {
   class Work;                          // abstract (pure virtual) base class
   template <typename> class Proc;      // abstract CRTP base derived from Work
@@ -53,10 +52,12 @@ namespace femera {
     //class Post;
     //class Plug;                      // plugins
 } }//end femera::task:: namespace
+// typedefs -------------------------------------------------------------------
 namespace femera {
-  // typedefs -----------------------------------------------------------------
   using Work_spt = FMR_SMART_PTR <Work>;      // abstract packaging base class
   using Jobs_spt = FMR_SMART_PTR <task::Jobs>;// concrete Task interface
+}//end femera:: namespace
+namespace femera {
   // Base class ===============================================================
   class Work {/* This is an abstract (pure virtual) base class (interface).
   * Derived classes use the curiously recurrent template pattern (CRTP) e.g.,
@@ -82,17 +83,17 @@ namespace femera {
     std::string   version ="";
     Work_type   task_type = task_cast (Base_type::Work);
 #if 0
-    /*
-    https://stackoverflow.com/questions/60040665
-    /replacing-the-command-line-arguments-int-argc-and-char-argv-with-stdvectors
-    */
-    std::string argv_prfx ="-fmr:";
+/*
+https://stackoverflow.com/questions/60040665
+/replacing-the-command-line-arguments-int-argc-and-char-argv-with-stdvectors
+*/
+    std::string argv_prfx ="fmr:";
     std::unique_ptr<char*[]> my_argv;//use: err= init (&my_argc, my_argv.get());
     int                      my_argc =0;
 #endif
   private:// variables
     bool did_task_init_tf = false;// for task init
-    bool did_work_init_tf = false;
+//FIXME    bool did_work_init_tf = false;
     bool  is_work_main_tf = true ;// save for use after proc::exit (..)
   public:// methods -----------------------------------------------------------
     template <typename T, typename C> static constexpr

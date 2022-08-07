@@ -28,7 +28,7 @@ namespace femera {
   }
   fmr::Dim_int data::Logs::set_verb (const int v)
   noexcept {
-    bool did_reduce = false;
+    bool did_reduce = false, did_increase = false;
     if (v < 0) {
       if (this->did_init ()) {// print warning
         this->data->send (fmr::err, "data","logs","WARN","Verbosity remains "
@@ -53,11 +53,12 @@ namespace femera {
           int (this->verb_d), int (v), int (FMR_VERBMAX));
     } }
     else {// v < FMR_VERBMAX
-      did_reduce = v < this->verb_d;
+      did_reduce   = v < this->verb_d;
+      did_increase = v > this->verb_d;
       this->verb_d = fmr::Dim_int (v);
     }
+    if (did_reduce || did_increase) { this->name ="Femera logger"; }
     if (did_reduce) {// verbosity reduced
-      this->name ="Femera logger";
       switch (this->verb_d) {
         case 0 : this->out_name_list [fmr::out  ] = {};// all cases fall through
                        out_name_list [fmr::log  ] = {};
@@ -67,6 +68,7 @@ namespace femera {
         case 4 : this->out_name_list [fmr::debug] = {};
         default: {}// Do nothing.
     } }
+    //TODO handle did_increase
     if (this->did_init ()) {// print info
       this->data->send (fmr::info,
         "data","logs","verb","%4i    /%4i maximum verbosity",
