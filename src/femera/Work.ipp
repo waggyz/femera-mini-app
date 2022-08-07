@@ -72,13 +72,13 @@ namespace femera {
   inline
   bool Work::did_init ()
   noexcept {
-    return this->did_task_init_tf;
+    return this->did_init_tf;
   }
   inline
   bool Work::set_init (const bool tf)
   noexcept {
-    this->did_task_init_tf = tf;
-    return this->did_task_init_tf;
+    this->did_init_tf = tf;
+    return this->did_init_tf;
   }
   inline
   std::string Work::get_did_init_list ()
@@ -87,7 +87,7 @@ namespace femera {
     if (n>0) {
       for (fmr::Local_int i=0; i<n; i++) {
         const auto W = this->get_work (i);
-        if (W->did_task_init_tf) {
+        if (W->did_init_tf) {
           list += W->get_abrv ();
           if (i < (n - 1)) { list +=" "; }
     } } }
@@ -100,7 +100,7 @@ namespace femera {
     if (n>0) {
       for (fmr::Local_int i=0; i<n; i++) {
         const auto W = this->get_work (i);
-        if (! W->did_task_init_tf) {
+        if (! W->did_init_tf) {
           list += W->get_abrv ();
           if (i < (n - 1)) { list +=" "; }
     } } }

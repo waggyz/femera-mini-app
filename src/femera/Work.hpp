@@ -92,9 +92,8 @@ https://stackoverflow.com/questions/60040665
     int                      my_argc =0;
 #endif
   private:// variables
-    bool did_task_init_tf = false;// for task init
-//FIXME    bool did_work_init_tf = false;
-    bool  is_work_main_tf = true ;// save for use after proc::exit (..)
+    bool     did_init_tf = false;
+    bool is_work_main_tf = true ;// save for use after proc::exit (..)
   public:// methods -----------------------------------------------------------
     template <typename T, typename C> static constexpr
     T* cast_via_work (C* child) noexcept;
@@ -103,8 +102,8 @@ https://stackoverflow.com/questions/60040665
     std::string get_version  () noexcept;
     std::string get_name     () noexcept;
     std::string set_name     (const std::string&) noexcept;
-    bool        did_init     () noexcept;// sets & returns did_task_init_tf
-    bool        set_init     (bool) noexcept;//    returns did_task_init_tf
+    bool        did_init     () noexcept;// sets & returns did_init_tf
+    bool        set_init     (bool) noexcept;//    returns did_init_tf
     // task stack handling
     fmr::Local_int get_task_n () noexcept;
     fmr::Local_int add_task   (Work_spt) noexcept;// returns task number added
