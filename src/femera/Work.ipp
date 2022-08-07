@@ -77,6 +77,10 @@ namespace femera {
   inline
   bool Work::set_init (const bool tf)
   noexcept {
+#ifdef FMR_DEBUG
+    if (did_init_tf == tf) {
+      printf ("%s redundant set_init (%s)\n", abrv.c_str(), tf?"true":"false");}
+#endif
     this->did_init_tf = tf;
     return this->did_init_tf;
   }

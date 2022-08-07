@@ -26,7 +26,7 @@ namespace femera {
   }
   Work* Work::get_work (const Work_type t, const fmr::Local_int ix)
   noexcept {
-    fmr::Local_int i=0;
+    fmr::Local_int i = 0;
     auto W = this;
 #if 1
     if (W->task_type == t) {
@@ -37,14 +37,21 @@ namespace femera {
 #endif
     while (! W->task_list.empty ()) {
       const fmr::Local_int n = W->get_task_n ();
-      for (fmr::Local_int Wix=0; Wix < n; ++Wix) {
-        if (W->task_list [Wix].get()->task_type == t) {
-          if (i == ix) { return W->task_list [Wix].get(); }
+      for (fmr::Local_int Wix = 0; Wix < n; ++Wix) {
+        auto Wchild = W->task_list [Wix].get();
+        if (Wchild->task_type == t) {
+          if (i == ix) { return Wchild; }
           ++i;
       } }
-      for (fmr::Local_int Wix=0; Wix < n; ++Wix) {
+#if 0
+      for (fmr::Local_int Wix = 0; Wix < n; ++Wix) {
         W = W->task_list [Wix].get();
-    } }
+      }// this is: W = W->get_work (n-1);
+#else
+      W = W->task_list [0].get();//NOTE only descends 0-indexed task branch
+      if (W == nullptr) { return nullptr; }
+#endif
+    }
     return nullptr;
   }
   fmr::Local_int Work::log_init_list ()
@@ -55,7 +62,7 @@ namespace femera {
         auto did_str = std::string ();
         auto not_str  = std::string ();;
         fmr::Local_int did_n = 0, not_n=0;
-        for (fmr::Local_int i=0; i<n; ++i) {
+        for (fmr::Local_int i = 0; i < n; ++i) {
           const auto W = this->get_work (i);
           const auto item = W->get_abrv ();
           if (W->did_init ()) {
@@ -94,7 +101,7 @@ namespace femera {
   noexcept { fmr::Exit_int err =0;
     std::stack<fmr::Local_int> del_list = {};
     const auto n = this->task_list.size ();
-    for (fmr::Local_int ix=0; ix<n; ++ix) {// Init task_list forward.
+    for (fmr::Local_int ix = 0; ix < n; ++ix) {// Init task_list forward.
       const auto W = this->task_list [ix].get();
       if (W != nullptr) {
 #ifdef FMR_DEBUG
@@ -112,7 +119,7 @@ namespace femera {
           if (! W->task_list.empty ()// sum children busy time
             && W->task_type != task_cast (Task_type::Main)) {
             const auto nC = fmr::Local_int (W->task_list.size ());
-            for (fmr::Local_int i=0; i<nC; ++i) {
+            for (fmr::Local_int i = 0; i < nC; ++i) {
               const auto C = W->get_work (i);
               if (C != nullptr) {
                 child_busy_ns += C->time.get_busy_ns ();
@@ -154,17 +161,17 @@ namespace femera {
       this->del_task (del_list.top ());
       del_list.pop ();
     }
-    if (err <= 0) { this->set_init (true); }
+    if (err <= 0) { this->set_init (true); }//NOTE should be redundant to init
     return err;
   }
   fmr::Exit_int Work::exit_list ()
-  noexcept { fmr::Exit_int err =0;
+  noexcept { fmr::Exit_int err = 0;
     if ((this->proc != nullptr) && (this->did_init ())) {
 FMR_WARN_INLINE_OFF
       this->is_work_main_tf = this->proc->is_main ();
 FMR_WARN_INLINE_ON
     }
-    this->set_init (false);
+    this->set_init (false);//NOTE should be redundant to derived::exit (..)
     while (! this->task_list.empty ()) {
       auto W = this->task_list.back ().get ();// Exit in reverse order.
       if (W != nullptr) {
@@ -181,7 +188,7 @@ FMR_WARN_INLINE_ON
         auto child_busy_ns = fmr::perf::Elapsed(0);
         if (! W->task_list.empty ()) {// calculate children busy time
           const auto n = fmr::Local_int (W->task_list.size ());
-          for (fmr::Local_int i=0; i<n; ++i) {
+          for (fmr::Local_int i = 0; i < n; ++i) {
             const auto C = W->get_work (i);
             if (C != nullptr) {
               child_busy_ns += C->time.get_busy_ns ();
@@ -189,7 +196,7 @@ FMR_WARN_INLINE_ON
         const auto busy_s = fmr::perf::Float (1e-9)
           * ((W->time.get_busy_ns () > child_busy_ns)
             ? fmr::perf::Float (W->time.get_busy_ns () - child_busy_ns)
-            : fmr::perf::Float (0.0));
+            : fmr::perf::Float (W->time.get_busy_s ()));
 #endif
         this->exit_info (W, busy_s);
       }
@@ -198,13 +205,13 @@ FMR_WARN_INLINE_ON
     return err;
   }
   fmr::Exit_int Work::exit_tree ()
-  noexcept { fmr::Exit_int err =0;
+  noexcept { fmr::Exit_int err = 0;
     if (this->proc != nullptr && this->did_init ()) {
 FMR_WARN_INLINE_OFF
       this->is_work_main_tf = this->proc->is_main ();
 FMR_WARN_INLINE_ON
     }
-    this->set_init (false);
+    this->set_init (false);//NOTE should be redundant to derived::exit (..)
     if (! this->task_list.empty ()) {
       Work::Task_path_t branch ={};
 #ifdef FMR_DEBUG
@@ -251,6 +258,7 @@ FMR_WARN_INLINE_ON
     return err;
   }
   fmr::Exit_int Work::exit_info (Work* W, const fmr::perf::Float busy_s) {
+    //TODO change to task_time_info (..) and use in init_* and exit_* methods
     fmr::Exit_int err=0;
     const auto busy = fmr::form::si_time (busy_s);
     auto read = std::string ();
