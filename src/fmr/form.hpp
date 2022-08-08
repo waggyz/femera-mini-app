@@ -24,6 +24,10 @@ namespace fmr { namespace form {
   //
 } }// end fmr::form:: namespace
 
+namespace fmr {
+  using Line_size_int = uint_fast16_t;
+}// end fmr:: namespace
+
 namespace femera { namespace form {
 
   template <typename ...Args> static

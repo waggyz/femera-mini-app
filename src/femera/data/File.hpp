@@ -21,7 +21,6 @@
     "this", "log", "msg", "i: %u, j: %u", uint (i), uint (j));
 */
 #endif
-
 namespace femera { namespace data {
   class File;// Derive as a CRTP concrete class from Data.
   class File final: public Data <File> {// private: friend class Data;

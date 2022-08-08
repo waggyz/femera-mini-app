@@ -11,9 +11,9 @@ FMR_WARN_INLINE_OFF
 FMR_WARN_INLINE_ON
   private:
     std::unordered_map <fmr::Data_name_t, FILE*> open_file_map = {
-      { fmr::err  , ::stderr },// verb_d >= 0 (quiet)
-      { fmr::log  , ::stdout },// verb_d >= 1 default: main thread
-      { fmr::out  , ::stdout } // verb_d >= 1 default: all threads
+      { fmr::err, ::stderr },// verb_d >= 0 (quiet)
+      { fmr::log, ::stdout },// verb_d >= 1 default: main thread
+      { fmr::out, ::stdout } // verb_d >= 1 default: all threads
     };
     fmr::Dim_int verb_d = 3;//TODO set by command line option -v<int>
   public:
@@ -26,6 +26,12 @@ FMR_WARN_INLINE_ON
     noexcept;
     fmr::Global_int task_send (const fmr::Data_name_t& file, const std::string&)
     noexcept;
+#if 0
+    //TODO Replace above with below?
+    fmr::Global_int task_send
+    (const fmr::Data_name_t& file, fmr::Data_type, const std::string&)
+    noexcept;
+#endif
   public:
     Logs (femera::Work::Core_ptrs_t) noexcept;
     Logs () = delete;//NOTE Use the constructor above.

@@ -42,6 +42,7 @@ namespace femera {
       return this->verb_d;
     }
     if (v > FMR_VERBMAX) {
+      did_increase = FMR_VERBMAX > this->verb_d;
       this->verb_d = FMR_VERBMAX;
       if (this->did_init ()) {// print warning
         this->data->send (fmr::err, "data","logs","WARN","Verbosity set "
@@ -60,12 +61,12 @@ namespace femera {
     if (did_reduce || did_increase) { this->name ="Femera logger"; }
     if (did_reduce) {// verbosity reduced
       switch (this->verb_d) {
-        case 0 : this->out_name_list [fmr::out  ] = {};// all cases fall through
-                       out_name_list [fmr::log  ] = {};
-        case 1 : this->out_name_list ["fmr:perf"] = {};
-        case 2 : this->out_name_list [fmr::info ] = {};
-        case 3 : this->out_name_list [fmr::spam ] = {};
-        case 4 : this->out_name_list [fmr::debug] = {};
+        case 0: this->out_name_list [fmr::out  ] = {};// all cases fall through
+                      out_name_list [fmr::log  ] = {};
+        case 1: this->out_name_list ["fmr:perf"] = {};
+        case 2: this->out_name_list [fmr::info ] = {};
+        case 3: this->out_name_list [fmr::spam ] = {};
+        case 4: this->out_name_list [fmr::debug] = {};
         default: {}// Do nothing.
     } }
     //TODO handle did_increase
