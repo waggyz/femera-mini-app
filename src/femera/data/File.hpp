@@ -28,10 +28,12 @@ namespace femera { namespace data {
     using css = const std::string;// for convenience
   public:
     bool did_logs_init () noexcept;// true if first Logs did initialize
-    fmr::Global_int send (const fmr::Data_name_t&, css& text)// ret/ bytes sent
+    // send (..) methods return bytes sent
+    fmr::Global_int send (const fmr::Data_name_t&,// fmr::Data_type::Text_line
+      css& text)
     noexcept;
     template <typename ...Args>
-    fmr::Global_int send (const fmr::Data_name_t&,// standard fmr:log line
+    fmr::Global_int send (const fmr::Data_name_t&,// fmr::Data_type::Logs_line
       css& lab1, css& lab2, css& lab3, css& form, Args...);
   public:
     void task_init (int* argc, char** argv);

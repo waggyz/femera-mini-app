@@ -17,7 +17,7 @@ namespace femera {
     // Set inp/out_name_list in each handler derived from data.
     std::unordered_map <fmr::Data_name_t, Data_list_t> inp_name_list = {};
     std::unordered_map <fmr::Data_name_t, Data_list_t> out_name_list = {};
-  public:// virtual methods
+  public:// Work:: virtual method overrides
     std::string get_base_abrv ()             noexcept final override;
     //
     fmr::Exit_int init (int*, char**)        noexcept final override;
