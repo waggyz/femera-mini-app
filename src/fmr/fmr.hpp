@@ -53,7 +53,7 @@ namespace fmr {
   };
   template <typename E>// Cast enum to number: for enum index#, size, sync.
   constexpr typename std::underlying_type<E>::type enum2val (E e) {
-    //use: const auto part_type_n = fmr::enum2val (fmr::Partition::end);
+    // use: const auto part_type_n = fmr::enum2val (fmr::Partition::end);
     return static_cast<typename std::underlying_type<E>::type>(e);
   }
   static const std::array <Vals_type, enum2val (Data_type::end)+1>
