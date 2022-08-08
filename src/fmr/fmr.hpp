@@ -10,21 +10,19 @@
 namespace fmr {
 /* prefer e.g. int_fast8_t, uint_least8_t, ...,  uintmax_t, uintptr_t
  *
- * sizeof (Dim_int <= Enum_int <= Local_int <= Global_int)
- * sizeof (Elid_int >= Enum_int + fmr::math::Poly + Dim_int) TODO remove
- *
  * This "using" syntax is preferred to "typedef" in the Google C++ Style Guide:
  * https://google.github.io/styleguide/cppguide.html#Aliases
 */
   // internal ints
   using   Exit_int = int           ;// system return code type
-  using  Align_int = uint_fast16_t ;
   using   Team_int = uintptr_t     ;// cast-compatible with MPI_comm from mpi.h
+  using  Align_int = uint_fast16_t ;// in-memory data alignment (bytes)
   //
   // storable data types
-  using   Char_int = char          ;// char type in strings
+  using   Char_int = char          ;// native char type in strings
   using   Bulk_int = Char_int      ;// serializing type can cast to std::string
   //
+  // sizeof: Dim_int <= Enum_int <= Local_int <= Global_int
   using    Dim_int = uint_fast8_t  ;// space dim., hier. depth, poly. order,...
   using   Enum_int = int           ;// default enum native type
   using  Local_int = uint32_t      ;
@@ -47,23 +45,25 @@ namespace fmr {
     Bulk, String, Dim, Enum, Local, Global, Hash,
     Count, Perf,
     Geom, Phys, Solv, Cond, Post, Plot,
-    end
+    end// The last item (end) is for indicating the number of enumerated values.
   };
   enum class Data_type : Enum_int { None=0, Error, Unknown,
-#include "vals-enum.inc"
-  end// The last item is "end" to indicate the number of enumerated values.
+#include "data-type-enum.inc"
+    end
   };
-  template <typename E>// Cast enum to number: for enum index#, size, sync.
-  constexpr typename std::underlying_type<E>::type enum2val (E e) {
-    // use: const auto part_type_n = fmr::enum2val (fmr::Partition::end);
-    return static_cast<typename std::underlying_type<E>::type>(e);
+  template <typename E> constexpr typename
+  std::underlying_type<E>::type enum2val (E e) {/* Cast enum to underlying type
+    * to get the last enum index number for size, sync., etc., use, e.g.,
+    * const auto data_type_n = fmr::enum2val (fmr::Data_type::end);
+    */
+    return static_cast <typename std::underlying_type<E>::type> (e);
   }
   static const std::array <Vals_type, enum2val (Data_type::end)+1>
   vals_type = {
     Vals_type::None,
     Vals_type::Error,
     Vals_type::Unknown,
-#include "vals-type.inc"
+#include "data-vals-type.inc"
     Vals_type::None
   };
 #if 1
@@ -72,7 +72,7 @@ namespace fmr {
     "data_none",
     "data_err",
     "data_unk",
-#include "vals-name.inc"
+#include "data-type-name.inc"
     "END"
   };
   static const std::array <std::string, enum2val (Data_type::end)+1>
@@ -80,7 +80,7 @@ namespace fmr {
     "no data",
     "data error",
     "unknown data",
-#include "vals-info.inc"
+#include "data-type-info.inc"
     "Data enum end marker"
   };
 #endif
@@ -89,7 +89,7 @@ namespace fmr {
 //
 namespace fmr {
   //
-  using Vals_name_t = std::string;//WAS Data_id
+  using Vals_name_t = std::string;
   using File_name_t = std::string;
   // a file name is interpreted as a collection of vals or strings
   using Data_name_t = std::string;// variable (vals) or file name
@@ -118,6 +118,7 @@ namespace fmr {
 #endif
   // formats: fmr::Vals_type::Info_line, fmr::Vals_type::Text_line, ...
 }//end fmr:: namespace
+//
 namespace femera { namespace test {
   int early_main (int* argc, char** argv);
 } }// end femera::test:: namespace
