@@ -6,11 +6,11 @@ HINT_COLOR="\e[35m"
 SRCD=`printf " $HINT_COLOR src/ $NORM_COLOR"`
 SPCS="       "
 #
-CODE_FILES=`find src \( -name '*.?pp' -o -name '*.h' -o -name '*.bats' \) \
+CODE_FILES=`find src \( -name '*.?pp' -o -name '*.h' -o -name '*.inc' -o -name '*.bats' \) \
   -printf x | wc -c`
 TEST_FILES=`find src \( -name '*.gtst.?pp' -o -name '*perf.?pp' -o -name '*.bats' \) \
   -printf x | wc -c`
-CODE_LINES=`(find src \( -name '*.?pp' -o -name '*.h' -o -name '*.bats' \) \
+CODE_LINES=`(find src \( -name '*.?pp' -o -name '*.h' -o -name '*.inc' -o -name '*.bats' \) \
   -print0 | xargs -0 cat) | wc -l`
 TEST_LINES=`(find src \( -name '*.gtst.?pp' -o -name '*perf.?pp' -o -name '*.bats' \) \
   -print0 | xargs -0 cat) | wc -l`
