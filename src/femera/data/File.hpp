@@ -27,7 +27,7 @@ namespace femera { namespace data {
   private:
     using css = const std::string;// for convenience
   public:
-    bool did_logs_init () noexcept;// true if first Logs did initialize
+    bool did_logs_init () noexcept;// true if first Logs initialized ok
     // send (..) methods return bytes sent
     fmr::Global_int send (const fmr::Data_name_t&,// fmr::Data_type::Text_line
       css& text)

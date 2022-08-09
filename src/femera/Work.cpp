@@ -116,8 +116,7 @@ namespace femera {
           const auto busy_s = W->time.get_busy_s()
 #else
           auto child_busy_ns = fmr::perf::Elapsed (0);
-          if (! W->task_list.empty ()// sum children busy time
-            && W->task_type != task_cast (Task_type::Main)) {
+          if (! W->task_list.empty ()) {// sum children busy time
             const auto nC = fmr::Local_int (W->task_list.size ());
             for (fmr::Local_int i = 0; i < nC; ++i) {
               const auto C = W->get_work (i);

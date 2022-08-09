@@ -22,6 +22,7 @@ FMR_WARN_INLINE_ON
   public:
     void task_init (int* argc, char** argv);
     void task_exit ();
+    //
     bool does_file (const fmr::Data_name_t&)
     noexcept;
     fmr::Global_int task_send (const fmr::Data_name_t& file, const std::string&)

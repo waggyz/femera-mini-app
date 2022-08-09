@@ -12,7 +12,7 @@ namespace fmr {
  *
  * This "using" syntax is preferred to "typedef" in the Google C++ Style Guide:
  * https://google.github.io/styleguide/cppguide.html#Aliases
-*/
+ */
   // internal ints
   using   Exit_int = int           ;// system return code type
   using   Team_int = uintptr_t     ;// cast-compatible with MPI_comm from mpi.h
@@ -31,7 +31,7 @@ namespace fmr {
   using   Hash_int = uint32_t      ;//TODO check CRC32, CRC64 perf (cpu,gpu)
   //
   using Perf_int   = uint_fast64_t ;// unit counters, time (ns) counters
-  using Perf_float = float         ;// speed, aithmetic intensity, time (sec)
+  using Perf_float = float         ;// speed, arithmetic intensity, time (sec)
   //
   // fmr:: floating point types are defaults?
   using Geom_float = double        ;// includes non-inverted jac & det
