@@ -85,15 +85,15 @@ namespace femera {
         } } }
         if (did_str.size() > 0) {
           if (did_n > 1) {did_str += "("+std::to_string (did_n)+")"; }
-          printf ("%4s %4s %4s %4u ok /%4u %s\n",
+          printf ("%4s %4s %4s %4u ok /%4u %s: %s\n",
             get_base_abrv ().c_str(), get_abrv ().c_str(),"init",
-              did_init_count, n, did_str.c_str());
+              did_init_count, n, get_base_abrv ().c_str(), did_str.c_str());
         }
         if (not_str.size() > 0) {
           if (not_n > 1) { not_str += "("+std::to_string (not_n)+")"; }
-          printf ("%4s %4s %4s %4u :( /%4u %s\n",
+          printf ("%4s %4s %4s %4u :( /%4u %s: %s\n",
             get_base_abrv ().c_str(), get_abrv ().c_str(), "nope",
-              n - did_init_count, n, not_str.c_str());
+              n - did_init_count, n, get_base_abrv ().c_str(), not_str.c_str());
     } } }
     return did_init_count;
   }
