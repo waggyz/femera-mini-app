@@ -46,10 +46,11 @@ namespace femera {
       *          not attempt to free the memory.
       */
     virtual const char* what () const noexcept;
-    virtual void       print () const noexcept;
-    static  void       print (std::exception&) noexcept;
-    static  void       print (std::string, std::exception&) noexcept;
-    static  void       print (std::string) noexcept;
+    // print (..) methods return bytes printed.
+    virtual std::size_t print () const noexcept;
+    static  std::size_t print (std::exception&) noexcept;
+    static  std::size_t print (std::string, std::exception&) noexcept;
+    static  std::size_t print (std::string) noexcept;
   };
   class Warn : public Errs {
   public:
@@ -72,7 +73,7 @@ namespace femera {
       * Virtual to allow for subclassing.
       */
     ~Warn () noexcept final override {}
-  };//
+  };
   //
 }//end femera:: namespace
 //

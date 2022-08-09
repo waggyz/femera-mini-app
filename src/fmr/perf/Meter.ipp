@@ -69,6 +69,26 @@ namespace fmr {
     return F (1.0e-9) * F (last_idle);
   }
   template <typename I, typename F> inline
+  F perf::Meter<I,F>::add_unit (const I n) {
+    THIS_PRAGMA_OMP(omp atomic update)
+    this->unit_n += n;
+  }
+  template <typename I, typename F> inline
+  F perf::Meter<I,F>::add_flop (const I n) {
+    THIS_PRAGMA_OMP(omp atomic update)
+    this->flop_n += n;
+  }
+  template <typename I, typename F> inline
+  F perf::Meter<I,F>::add_read (const I n) {
+    THIS_PRAGMA_OMP(omp atomic update)
+    this->read_n += n;
+  }
+  template <typename I, typename F> inline
+  F perf::Meter<I,F>::add_save (const I n) {
+    THIS_PRAGMA_OMP(omp atomic update)
+    this->save_n += n;
+  }
+  template <typename I, typename F> inline
   F perf::Meter<I,F>::add_count
     (const I units, const I flops, const I read, const I save ) {
     THIS_PRAGMA_OMP(omp atomic update)

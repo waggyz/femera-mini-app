@@ -123,10 +123,15 @@ namespace femera {
               if (C != nullptr) {
                 child_busy_ns += C->time.get_busy_ns ();
           } } }
+#if 0
           const auto busy_s = fmr::perf::Float (1e-9)
             * ((W->time.get_busy_ns () > child_busy_ns)
               ? fmr::perf::Float (W->time.get_busy_ns () - child_busy_ns)
               : fmr::perf::Float (0.0));
+#else
+          const auto busy_s = fmr::perf::Float (1e-9)
+            * (fmr::perf::Float (W->time.get_busy_ns () - child_busy_ns));
+#endif
 #endif
           const auto busy = fmr::form::si_time (busy_s);
           const auto tot  = fmr::form::si_time (W->time.get_work_s ());
@@ -184,7 +189,7 @@ FMR_WARN_INLINE_ON
 #if 0
         const auto busy_s = W->time.get_busy_s ()
 #else
-        auto child_busy_ns = fmr::perf::Elapsed(0);
+        auto child_busy_ns = fmr::perf::Elapsed (0);
         if (! W->task_list.empty ()) {// calculate children busy time
           const auto n = fmr::Local_int (W->task_list.size ());
           for (fmr::Local_int i = 0; i < n; ++i) {
@@ -192,10 +197,15 @@ FMR_WARN_INLINE_ON
             if (C != nullptr) {
               child_busy_ns += C->time.get_busy_ns ();
         } } }
+#if 0
         const auto busy_s = fmr::perf::Float (1e-9)
           * ((W->time.get_busy_ns () > child_busy_ns)
             ? fmr::perf::Float (W->time.get_busy_ns () - child_busy_ns)
-            : fmr::perf::Float (W->time.get_busy_s ()));
+            : fmr::perf::Float (W->time.get_busy_ns ()));
+#else
+        const auto busy_s = fmr::perf::Float (1e-9)
+          * (fmr::perf::Float (W->time.get_busy_ns () - child_busy_ns));
+#endif
 #endif
         this->exit_info (W, busy_s);
       }
