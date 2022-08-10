@@ -17,7 +17,7 @@ namespace femera {
   }
   fmr::Local_int Work::add_task (Work_spt W)
   noexcept {
-    this->task_list.push_back (std::move(W));
+    this->task_list.push_back (std::move (W));
     return fmr::Local_int (this->task_list.size () - 1);// index of task added
   }
   Work* Work::get_work (const fmr::Local_int ix)
@@ -123,15 +123,8 @@ namespace femera {
               if (C != nullptr) {
                 child_busy_ns += C->time.get_busy_ns ();
           } } }
-#if 0
-          const auto busy_s = fmr::perf::Float (1e-9)
-            * ((W->time.get_busy_ns () > child_busy_ns)
-              ? fmr::perf::Float (W->time.get_busy_ns () - child_busy_ns)
-              : fmr::perf::Float (0.0));
-#else
           const auto busy_s = fmr::perf::Float (1e-9)
             * (fmr::perf::Float (W->time.get_busy_ns () - child_busy_ns));
-#endif
 #endif
           const auto busy = fmr::form::si_time (busy_s);
           const auto tot  = fmr::form::si_time (W->time.get_work_s ());
@@ -197,15 +190,8 @@ FMR_WARN_INLINE_ON
             if (C != nullptr) {
               child_busy_ns += C->time.get_busy_ns ();
         } } }
-#if 0
-        const auto busy_s = fmr::perf::Float (1e-9)
-          * ((W->time.get_busy_ns () > child_busy_ns)
-            ? fmr::perf::Float (W->time.get_busy_ns () - child_busy_ns)
-            : fmr::perf::Float (W->time.get_busy_ns ()));
-#else
         const auto busy_s = fmr::perf::Float (1e-9)
           * (fmr::perf::Float (W->time.get_busy_ns () - child_busy_ns));
-#endif
 #endif
         this->exit_info (W, busy_s);
       }
