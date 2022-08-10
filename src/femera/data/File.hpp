@@ -5,22 +5,12 @@
 
 // form.hpp needed by File.ipp variadic template methods
 #include "../../fmr/form.hpp"
-
-#if 0
-/* Variadic read/save/send methods in File.ipp package heterogenous
-  data into a fmr::Vals structure (or std::string?, vector<std::string>?)
-  then call a non-variadic member function in File.cpp to pass it on to a
-  specialized handler (in e.g. Text.cpp, Dlim.cpp, Logs.cpp, Cgns.cpp,...)
-  to handle that structure.
-*//*
-  fmr::Global_int File::send (fmr::Data_name_t,            // returns bytes sent
-    std::string lab1, std::string lab2, std::string lab3, std::string form, ...)
-  data->send (fmr:log, fmr::Vals_type::Logs_line, this->proc->get_proc_id (),
-    "this", "log", "msg", "i: %u, j: %u", uint (i), uint (j));
-  data->send (fmr:log,// can be reduced to this for fmr:log ?
-    "this", "log", "msg", "i: %u, j: %u", uint (i), uint (j));
-*/
-#endif
+/*
+ * Variadic read/save/send methods in File.ipp package heterogenous
+ * data into a fmr::Vals structure (or std::string)
+ * then call a non-variadic member function in File.cpp to pass it on to a
+ * specialized handler (in e.g. Text.cpp, Dlim.cpp, Logs.cpp, Cgns.cpp,...).
+ */
 namespace femera { namespace data {
   class File;// Derive as a CRTP concrete class from Data.
   class File final: public Data <File> {// private: friend class Data;
@@ -28,13 +18,15 @@ namespace femera { namespace data {
     using css = const std::string;// for convenience
   public:
     bool did_logs_init () noexcept;// true if first Logs initialized ok
-    // send (..) methods return bytes sent
+    //
+    // send (..) methods append data and return bytes sent
     fmr::Global_int send (const fmr::Data_name_t&,// fmr::Data_type::Text_line
       css& text)
     noexcept;
     template <typename ...Args>
     fmr::Global_int send (const fmr::Data_name_t&,// fmr::Data_type::Logs_line
       css& lab1, css& lab2, css& lab3, css& form, Args...);
+    //
   public:
     void task_init (int* argc, char** argv);
     void task_exit ();
@@ -48,7 +40,7 @@ namespace femera { namespace data {
 #if 0
   private:
     Path_list_t inp_file_list ={};// initialize these from command line args
-    Path_list_t out_file_list ={};//               "
+    Path_list_t out_file_list ={};//                   ""
     Path_list_t log_file_list ={};
     Path_list_t err_file_list ={};
 #endif

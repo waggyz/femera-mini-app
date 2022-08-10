@@ -17,8 +17,8 @@ FMR_WARN_INLINE_ON
     };
     fmr::Dim_int verb_d = 3;//TODO set by command line option -v<int>
   public:
-    fmr::Dim_int get_verb ()    noexcept;
-    fmr::Dim_int set_verb (int) noexcept;// returns verb_d after set
+    fmr::Dim_int get_verb () noexcept;
+    fmr::Dim_int set_verb (fmr::Dim_int) noexcept;// returns verb_d after set
   public:
     void task_init (int* argc, char** argv);
     void task_exit ();

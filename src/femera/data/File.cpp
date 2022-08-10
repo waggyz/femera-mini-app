@@ -78,7 +78,7 @@ namespace femera {
           case fmr::Enum_int (Task_type::Logs): {
             auto C = Work::cast_via_work <data::Logs> (D);
             if (C->does_file (data_name)) {
-              byte += C->task_send (data_name, text);
+              byte = C->task_send (data_name, text);
           } }
           default: {}// Do nothing.
     } } }

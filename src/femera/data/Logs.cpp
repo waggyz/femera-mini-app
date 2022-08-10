@@ -26,10 +26,11 @@ namespace femera {
       {fmr::debug, {fmr::out }} // default all threads to ::stdout verb_d >= 5
     };
   }
-  fmr::Dim_int data::Logs::set_verb (const int v)
+  fmr::Dim_int data::Logs::set_verb (const fmr::Dim_int v)
   noexcept {
     bool did_reduce = false, did_increase = false;
-    if (v < 0) {
+#if 0
+    if (v < 0) {//NOTE enable this if fmr::Dim_int is signed.
       if (this->did_init ()) {// print warning
         this->data->send (fmr::err, "data","logs","WARN","Verbosity remains "
           "(%i) because requested verbosity (%i) is negative.",
@@ -41,6 +42,7 @@ namespace femera {
       }
       return this->verb_d;
     }
+#endif
     if (v > FMR_VERBMAX) {
       did_increase = FMR_VERBMAX > this->verb_d;
       this->verb_d = FMR_VERBMAX;
