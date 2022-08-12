@@ -17,7 +17,7 @@ namespace femera {
     auto out3 = lab3;
     if (out3 == "fa""il") { out3 ="\\e[30m\\e[41m"+ lab3 + norm; }
     if (out3 == "wa""rn") { out3 ="\\e[07m"+ lab3 + norm; }
-    if (out3 == "pa""ss") { out3 ="\\e[32m"+ lab3 + norm; }
+    if (out3 == "pa""ss") { out3 ="\\e[32m"+ lab3 + norm; }//TODO ANSI colors?
     if (out3 == "ok"    ) { out3 ="\\e[32m"+ lab3 + norm; }
 #endif
     const auto line_width = uint (80);//TODO look up for data_name destination
@@ -26,7 +26,8 @@ namespace femera {
 #ifdef FMR_DEBUG
     printf ((data_name+" "+msg+" in File.ipp\n").c_str ());
 #endif
-    // Call method to find data_name handler and output (append) to destination.
+    // Call non-variadic method to find data_name handler
+    // and output (append) to destination.
     return this->send (data_name, msg);
   }//
   //
