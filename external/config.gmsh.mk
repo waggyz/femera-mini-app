@@ -15,60 +15,61 @@ ifeq ($(ENABLE_GMSH),ON)
   EXTERNAL_DOT+="Gmsh" -> "Femera"\n
   GMSH_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
   GMSH_FLAGS += -DCMAKE_PREFIX_PATH="$(INSTALL_CPU)"
-  GMSH_FLAGS += -DENABLE_BUILD_LIB=1
-  GMSH_FLAGS += -DENABLE_BUILD_SHARED=1
-  GMSH_FLAGS += -DENABLE_BUILD_DYNAMIC=1
+  GMSH_FLAGS += -DENABLE_BUILD_LIB=ON
+  GMSH_FLAGS += -DENABLE_BUILD_SHARED=ON
+  GMSH_FLAGS += -DENABLE_BUILD_DYNAMIC=ON
+  GMSH_FLAGS += -DENABLE_PRIVATE_API=ON
   ifeq ($(ENABLE_GMSH_OMP),ON)
-    GMSH_FLAGS += -DENABLE_OPENMP=1
+    GMSH_FLAGS += -DENABLE_OPENMP=ON
     EXTERNAL_DOT+="OpenMP" -> "Gmsh"\n
   endif
   ifeq ($(ENABLE_PYBIND11),ON)
     # GMSH_REQUIRES += pybind11
     GMSH_DEPS += $(BUILD_DIR)/external/install-pybind11.out
     EXTERNAL_DOT+="pybind11" -> "Gmsh"\n
-    GMSH_FLAGS += -DENABLE_WRAP_PYTHON=1 -DENABLE_NUMPY=1
+    GMSH_FLAGS += -DENABLE_WRAP_PYTHON=ON -DENABLE_NUMPY=ON
   endif
   ifeq ($(ENABLE_CGNS),ON)
     GMSH_REQUIRES += cgns
     EXTERNAL_DOT+="CGNS" -> "Gmsh"\n
-    GMSH_FLAGS += -DENABLE_CGNS=1
-    GMSH_FLAGS += -DENABLE_CGNS_CPEX0045=0
+    GMSH_FLAGS += -DENABLE_CGNS=ON
+    GMSH_FLAGS += -DENABLE_CGNS_CPEX0045=OFF
   endif
   ifeq (0,1)# Disable experimental MPI in Gmsh for now.
     ifeq ($(ENABLE_MPI),ON)
       EXTERNAL_DOT+="MPI" -> "Gmsh"\n
-      GMSH_FLAGS += -DENABLE_MPI=1
+      GMSH_FLAGS += -DENABLE_MPI=ON
     endif
   endif
   ifeq (1,0) # Disable PETSc in Gmsh
   ifeq ($(ENABLE_PETSC),ON)
     GMSH_REQUIRES += petsc
     EXTERNAL_DOT+="PETSc" -> "Gmsh"\n
-    GMSH_FLAGS += -DENABLE_PETSC=1
+    GMSH_FLAGS += -DENABLE_PETSC=ON
     ifeq ($(ENABLE_PYBIND11),ON)
-      GMSH_FLAGS += -DENABLE_PETSC4PY=1
+      GMSH_FLAGS += -DENABLE_PETSC4PY=ON
     endif
-    GMSH_FLAGS += -DENABLE_MPI=0
+    GMSH_FLAGS += -DENABLE_MPI=OFF
   endif
   endif
   ifeq ($(ENABLE_FLTK),ON)
     GMSH_REQUIRES += fltk
     EXTERNAL_DOT+="FLTK" -> "Gmsh"\n
     EXTERNAL_DOT+="X" -> "Gmsh"\n
-    GMSH_FLAGS += -DENABLE_FLTK=1
-    #TODO It looks like native off-screen rendering does not work.
+    GMSH_FLAGS += -DENABLE_FLTK=ON
+    #TODO It looks like native gmsh off-screen rendering does not work.
     #rhel7: sudo yum install mesa-libOSMesa-devel
-    GMSH_FLAGS += -DENABLE_OSMESA=1 -DENABLE_GRAPHICS=1
+    GMSH_FLAGS += -DENABLE_OSMESA=ON -DENABLE_GRAPHICS=ON
   else
-    GMSH_FLAGS += -DENABLE_FLTK=0
+    GMSH_FLAGS += -DENABLE_FLTK=OFF
   endif
   ifeq ($(ENABLE_OCCT),ON)
     GMSH_REQUIRES += occt
     EXTERNAL_DOT+="OpenCASCADE" -> "Gmsh"\n
-    GMSH_FLAGS += -DENABLE_OCC=1 -DENABLE_OCC_CAF=1 -DENABLE_OCC_STATIC=1
+    GMSH_FLAGS += -DENABLE_OCC=ON -DENABLE_OCC_CAF=ON -DENABLE_OCC_STATIC=ON
   endif
   # Disable Cairo fonts for now. Just use FreeType (required by OCCT).
-  GMSH_FLAGS += -DENABLE_CAIRO=0
+  GMSH_FLAGS += -DENABLE_CAIRO=OFF
   GMSH_DEPS+=$(patsubst %,$(BUILD_CPU)/external/install-%.out,$(GMSH_REQUIRES))
 #  $(shell printf "%s" "$(gmsh_FLAGS)" > $(GMSH_FLAGFILE))
 endif
@@ -81,9 +82,9 @@ ifeq ($(ENABLE_OCCT),ON)
   OCCT_FLAGS += -DCMAKE_PREFIX_PATH="$(INSTALL_CPU)"
   OCCT_FLAGS += -DBUILD_LIBRARY_TYPE=Static
   OCCT_FLAGS += -DCMAKE_BUILD_TYPE=Release
-  OCCT_FLAGS += -DBUILD_MODULE_Draw=0
-  OCCT_FLAGS += -DBUILD_MODULE_Visualization=0
-  OCCT_FLAGS += -DBUILD_MODULE_ApplicationFramework=0
+  OCCT_FLAGS += -DBUILD_MODULE_Draw=OFF
+  OCCT_FLAGS += -DBUILD_MODULE_Visualization=OFF
+  OCCT_FLAGS += -DBUILD_MODULE_ApplicationFramework=OFF
   OCCT_DEPS:=$(patsubst %,$(BUILD_CPU)/external/install-%.out,$(OCCT_REQUIRES))
   OCCT_FLAGFILE := $(BUILD_CPU)/external/install-occt.flags
 endif

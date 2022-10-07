@@ -49,7 +49,7 @@ FMR_WARN_INLINE_ON
     this->data = nullptr;
     Work::exit_tree ();//                     Exit the task tree below this,...
     fmr::Exit_int task_err = 0;
-    try  { Proc::this_cast (this)->task_exit (); }// ...then try to exit this task.
+    try  { Proc::this_cast (this)->task_exit (); }// ...then try exit this task.
     catch (const Warn& e)    { task_err =-1; e.print (); }
     catch (const Errs& e)    { task_err = 1; e.print (); }
     catch (std::exception& e){ task_err = 2;

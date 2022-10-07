@@ -5,7 +5,7 @@
 BUILT_BY:=Anonymous User (Example University)<anon@example.edu>
 #
 # Set PREFIX to the full path of a user-writable installation directory.
-PREFIX:=/home/anon/local
+PREFIX:=/home/anon/.local
 #
 # Please review NOSA-1.3.txt Section 3D before adding a copyright notice.
 CONTRIBUTOR_COPYRIGHT_FILE:=COPYRIGHT.contrib.txt

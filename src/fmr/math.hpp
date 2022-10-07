@@ -36,16 +36,16 @@ namespace fmr { namespace math {
     end };
   static const std::map<Poly,std::pair<std::string,std::string>>
   poly_letter_name {
-    {Poly::        None,std::make_pair("-","no polynomial")},
-    {Poly::       Error,std::make_pair("!","polynomial error")},
-    {Poly::     Unknown,std::make_pair("?","unknown polynomial")},
-    {Poly::        Full,std::make_pair("P","Full Taylor polynomial")},
-    {Poly:: Serendipity,std::make_pair("S","Serendipity")},
-    {Poly::      Bipoly,std::make_pair("B","Bipolynomial")},
-    {Poly::     Tripoly,std::make_pair("T","Tripolynomial")},
-    {Poly::     Pyramid,std::make_pair("Y","Pyramid polynomial")},
-    {Poly::       Prism,std::make_pair("M","Prism polynomial")},
-    {Poly::         end,std::make_pair("*","Poly enum end marker")}
+    {Poly::        None, std::make_pair ("-","no polynomial")},
+    {Poly::       Error, std::make_pair ("!","polynomial error")},
+    {Poly::     Unknown, std::make_pair ("?","unknown polynomial")},
+    {Poly::        Full, std::make_pair ("P","Full Taylor polynomial")},
+    {Poly:: Serendipity, std::make_pair ("S","Serendipity")},
+    {Poly::      Bipoly, std::make_pair ("B","Bipolynomial")},
+    {Poly::     Tripoly, std::make_pair ("T","Tripolynomial")},
+    {Poly::     Pyramid, std::make_pair ("Y","Pyramid polynomial")},
+    {Poly::       Prism, std::make_pair ("M","Prism polynomial")},
+    {Poly::         end, std::make_pair ("*","Poly enum end marker")}
   };
 } }// end fmr::math namespace
 

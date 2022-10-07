@@ -8,7 +8,7 @@ This version (0.3) of the Femera mini-app is for optimizing the basic
 capabilities of a high-performance finite element analysis toolchain.
 The primary goal is to verify that the high level of performance demonstrated
 by version 0.1 can be maintained while providing the flexible data handling
-emonstrated by version 0.2.
+demonstrated by version 0.2.
 
 ## Femera demo mini-app installation
 

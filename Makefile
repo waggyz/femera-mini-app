@@ -26,7 +26,7 @@ ifeq ($(shell test -e file_name && echo -n yes),yes)
   $(shell echo "host hash" > build/.md5)
   HOST_MD5:= $(shell cat build/.md5)
 endif
-#FIXME Move to recipe?
+#TODO Move to recipe?
 
 # Directories -----------------------------------------------------------------
 # Directories for generic components
@@ -39,7 +39,7 @@ BUILD_CPU  := $(BUILD_DIR)/$(CPUMODEL)
 STAGE_CPU  := $(STAGE_DIR)/$(CPUMODEL)
 INSTALL_CPU:= $(INSTALL_DIR)/$(CPUMODEL)
 
-# Export TMPDIR to prevent system tmpdir overflow. (MPI needs it, maybe others.)
+# Export TMPDIR to avoid system tmpdir overflow. (MPI needs it, maybe others.)
 TEMP_DIR   := $(shell pwd)/$(BUILD_DIR)/tmp
 
 #NOTE Subdirectories needed in the build directory have a trailing slash.
@@ -60,6 +60,7 @@ ifeq ($(CXX),g++)
     # TDDEXEC:=/bin/time
     # TDDEXEC:= mpiexec -np $(TDD_MPI_N) --bind-to core -map-by node:pe=$(TDD_OMP_N)
   endif
+  #TODO replace below with data/gcc8.flags
   OPTFLAGS:= $(shell cat data/gcc4.flags | tr '\n' ' ' | tr -s ' ')
   CXXFLAGS+= -std=c++11 -g -MMD -MP
   # Dependency file generation: -MMD -MP
@@ -151,7 +152,6 @@ endif
 ifneq ("$(ADD_TO_LDPATH)","")# only true once during build
   export LD_LIBRARY_PATH:= $(ADD_TO_LDPATH)$(LD_LIBRARY_PATH)
 endif
-
 
 # TMP_LIBRARY_PATH_=$(LD_LIBRARY_PATH);
 LDFLAGS+= -L$(INSTALL_CPU)/lib -L$(INSTALL_CPU)/lib64
@@ -386,7 +386,7 @@ PRFOUTS:= $(patsubst src/%.perf.cpp,$(BUILD_CPU)/%.perf.out,$(FMRPERF))
 .PRECIOUS: $(BUILD_DIR)/external/install-%.flags
 .PRECIOUS: $(BUILD_CPU)/external/install-%.flags
 
-#TODO fixes error make[2] unlink /home/dwagner5/local/bin/ Is a directory
+#TODO fixes error make[2] unlink /home/dwagner5/.local/bin/ Is a directory
 #      while first running make tools?
 .PRECIOUS: $(INSTALL_DIR)/bin/ build/%.gtst build/%.perf
 

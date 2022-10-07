@@ -26,7 +26,7 @@ namespace femera {
         printf ("%s (MPI: %u)\n", R->get_name ().c_str(), m);
 #endif
         this->add_task (std::move (R));
-  } }
+    } }
   this->set_init (true);
   }//
   //

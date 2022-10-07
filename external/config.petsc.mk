@@ -15,6 +15,11 @@ ifeq ($(ENABLE_PETSC),ON)
   PETSC_FLAGS += COPTFLAGS='$(PETSC_CFLAGS)'
   PETSC_FLAGS += FOPTFLAGS='$(PETSC_FFLAGS)'
   PETSC_FLAGS += --prefix=$(INSTALL_CPU)
+  
+    PETSC_FLAGS += --with-petsc4py=1
+    PETSC_FLAGS += --with-x=1
+    #TODO PETSC_FLAGS += --with-cuda=1
+  
   # Build static libs
   PETSC_FLAGS += --with-shared-libraries=0
   # PETSC_FLAGS += --with-packages-build-dir="$(BUILD_CPU)"# no worky
@@ -24,16 +29,23 @@ ifeq ($(ENABLE_PETSC),ON)
   else
     PETSC_FLAGS += --with-debugging=0
   endif
+    
+  #TODO Check versions and have PETSc download if needed
+#    PETSC_FLAGS += --download-make=1
+#    PETSC_FLAGS += --download-cmake=1
+#    PETSC_FLAGS += --download-git=1
+
   ifeq ($(ENABLE_PETSC_OMP),ON)
     EXTERNAL_DOT+="OpenMP" -> "PETSc"\n
     PETSC_FLAGS += --with-openmp
   endif
+  #TODO switch to mpich?
   ifeq ($(ENABLE_MPI),ON)
     EXTERNAL_DOT+="MPI" -> "PETSc"\n
     ifeq ($(HAS_MPI),ON)
       # PETSC_FLAGS += --with-mpi-dir="$(MPI_DIR)"
     else
-      # PETSC_FLAGS += --download-openmpi
+      PETSC_FLAGS += --download-openmpi
     endif
   else
     PETSC_FLAGS += --with-mpi=0
@@ -45,6 +57,9 @@ ifeq ($(ENABLE_PETSC),ON)
     # already added: LDLIBS += -lpthread
     EXTERNAL_DOT+="MKL" -> "PETSc"\n
     PETSC_FLAGS += --with-blaslapack-dir=$(INSTALL_CPU)/mkl/latest
+  else
+    #TODO check for blas, and download one if not available
+    #PETSC_FLAGS += --download-fblaslapack=1
   endif
   ifeq (1,0) # Disable for now ------------------------------------------------
     ifeq ($(ENABLE_OCCT),ON)# Incompatible OpenCASCADE
@@ -59,6 +74,8 @@ ifeq ($(ENABLE_PETSC),ON)
       PETSC_FLAGS += --with-cgns-dir=$(INSTALL_CPU) --with-zlib
     endif
   endif # end disabled --------------------------------------------------------
+#******************************************************************************
+#FIXME Change this so PETSc will download and install HDF5
   ifeq ($(ENABLE_GMSH),ON)
     # Require Gmsh so HDF5 will get built before both PETSc & Gmsh
     PETSC_REQUIRES += gmsh
@@ -72,6 +89,7 @@ ifeq ($(ENABLE_PETSC),ON)
     EXTERNAL_DOT+="HDF5" -> "PETSc"\n
     PETSC_FLAGS += --with-hdf5-dir=$(INSTALL_CPU)
   endif
+#******************************************************************************
   # PETSc installs the rest
   ifeq ($(ENABLE_PETSC_MOAB),ON)
     PETSC_INSTALLS += moab

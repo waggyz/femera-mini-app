@@ -15,6 +15,47 @@ else
   # Instead, do like this:
   FLAGS="CC=`which gcc` CXX=`which g++` $FLAGS"
   #
+  if [ 0 -eq 1 ]; then #TODO Move to config.petsc.
+  #
+  EXTFLAGS=$EXTFLAGS --with-memalign=32 #TODO match Femera: <4,8,16,32,64>
+  #
+#  EXTFLAGS=$EXTFLAGS --download-hwloc=yes #FIXME use instead of libnuma?
+  #
+  # needed by other external packages
+  #EXTFLAGS=$EXTFLAGS --download-openmpi=yes
+  #EXTFLAGS=$EXTFLAGS --download-mpich=yes
+  EXTFLAGS=$EXTFLAGS --download-zlib=yes
+  EXTFLAGS=$EXTFLAGS --download-szlib=yes
+  EXTFLAGS=$EXTFLAGS --download-boost=yes
+  EXTFLAGS=$EXTFLAGS --download-opencascade=yes
+  EXTFLAGS=$EXTFLAGS --download-googletest=yes
+  EXTFLAGS=$EXTFLAGS --download-metis=yes
+  EXTFLAGS=$EXTFLAGS --download-hdf5=yes
+  EXTFLAGS=$EXTFLAGS --download-libjpeg=yes
+  EXTFLAGS=$EXTFLAGS --download-libpng=yes
+  EXTFLAGS=$EXTFLAGS --download-giflib=yes
+  #EXTFLAGS=$EXTFLAGS --download-openblas=yes
+  #
+  # more file formats
+  EXTFLAGS=$EXTFLAGS --download-moab=yes
+  EXTFLAGS=$EXTFLAGS --download-exodusii=yes
+  #
+  # partitioners
+  EXTFLAGS=$EXTFLAGS --download-chaco=yes
+  #EXTFLAGS=$EXTFLAGS --download-parmetis=yes
+  EXTFLAGS=$EXTFLAGS --download-ptscotch=yes
+  #EXTFLAGS=$EXTFLAGS --download-party=yes
+  #
+  # future expansion
+  EXTFLAGS=$EXTFLAGS --download-ml=yes
+  EXTFLAGS=$EXTFLAGS --download-fftw=yes
+  EXTFLAGS=$EXTFLAGS --download-mpi4py=yes
+  #EXTFLAGS=$EXTFLAGS --download-moose=yes
+  #EXTFLAGS=$EXTFLAGS --download-mumps=yes
+  #EXTFLAGS=$EXTFLAGS --download-pnetcdf=yes
+  #EXTFLAGS=$EXTFLAGS --download-libmesh=yes
+  #
+  fi
   export MPICC_CC=`which mpicc`
   export MPICXX_CXX=`which mpic++`
 
