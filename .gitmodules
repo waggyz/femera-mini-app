@@ -1,12 +1,7 @@
-[submodule "external/bats-support"]
-	path = external/bats-support
-	url = https://github.com/bats-core/bats-support.git
-[submodule "external/bats-assert"]
-	path = external/bats-assert
-	url = https://github.com/bats-core/bats-assert.git
-[submodule "external/bats-file"]
-	path = external/bats-file
-	url = https://github.com/bats-core/bats-file.git
+[submodule "external/cgns"]
+	path = external/cgns
+	url = https://github.com/CGNS/CGNS.git
+	branch = master
 [submodule "external/freetype"]
 	path = external/freetype
 	url = https://gitlab.freedesktop.org/freetype/freetype.git
@@ -18,18 +13,28 @@
 [submodule "external/gmsh"]
 	path = external/gmsh
 	url = https://gitlab.onelab.info/gmsh/gmsh.git
-[submodule "external/petsc"]
-	path = external/petsc
-	url = https://gitlab.com/petsc/petsc.git
-	branch = release
-[submodule "external/pybind11"]
-	path = external/pybind11
-	url = https://github.com/pybind/pybind11.git
-	branch = master
-[submodule "external/cgns"]
-	path = external/cgns
-	url = https://github.com/CGNS/CGNS.git
 	branch = master
 [submodule "external/bats-core"]
 	path = external/bats-core
 	url = https://github.com/bats-core/bats-core.git
+	branch = master
+[submodule "external/bats-support"]
+	path = external/bats-support
+	url = https://github.com/bats-core/bats-support.git
+	branch = master
+[submodule "external/bats-assert"]
+	path = external/bats-assert
+	url = https://github.com/bats-core/bats-assert.git
+	branch = master
+[submodule "external/bats-file"]
+	path = external/bats-file
+	url = https://github.com/bats-core/bats-file.git
+	branch = master
+[submodule "external/pybind11"]
+	path = external/pybind11
+	url = https://github.com/pybind/pybind11.git
+	branch = v2.9
+[submodule "external/petsc"]
+	path = external/petsc
+	url = https://gitlab.com/petsc/petsc.git
+	branch = release
