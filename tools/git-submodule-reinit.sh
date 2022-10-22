@@ -2,11 +2,12 @@
 #
 
 # https://stackoverflow.com/questions/34890313/deleting-all-git-cached-submodules-from-repository
-if [ 0 -eq 1 ]; then
+if [ 1 -eq 1 ]; then
   echo 'deinit all submodules from .gitmodules...'
   git submodule deinit .
   echo 'remove all submodules (`git rm`) from .gitmodules...'
-  git submodule | cut -c43- | while read -r line; do (git rm "$line"); done
+  #git submodule | cut -c43- | while read -r line; do (git rm "$line"); done
+  git submodule | awk '{print $2}' | while read -r line; do (git rm "$line"); done
 fi
 echo 'add all submodules...'
 for I in {1..10}; do
