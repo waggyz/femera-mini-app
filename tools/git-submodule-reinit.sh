@@ -2,7 +2,7 @@
 #
 
 # https://stackoverflow.com/questions/34890313/deleting-all-git-cached-submodules-from-repository
-if [ 1 -eq 1 ]; then
+if [ 0 -eq 1 ]; then
   echo 'deinit all submodules from .gitmodules...'
   git submodule deinit .
   echo 'remove all submodules (`git rm`) from .gitmodules...'
@@ -37,12 +37,13 @@ for I in {1..10}; do
   5)
   DIR=external/pybind11
   URL=https://github.com/pybind/pybind11.git
-  BRANCH=v2.9
+  BRANCH=master
   ;;
   6)
   DIR=external/cgns
   URL=https://github.com/CGNS/CGNS.git
-  BRANCH=master;;
+  BRANCH=master
+  ;;
   7)
   DIR=external/freetype
   URL=https://gitlab.freedesktop.org/freetype/freetype.git
