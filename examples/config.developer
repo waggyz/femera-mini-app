@@ -2,10 +2,10 @@
 # config.local
 #
 # Please update the next line with your name, affiliation, and email address.
-BUILT_BY:=Anonymous User (Example University)<anon@example.edu>
+BUILT_BY:=Anonymous Developer (Example University)<dev@example.edu>
 #
 # Set PREFIX to the full path of a user-writable installation directory.
-PREFIX:=/home/anon/.local
+PREFIX:=/home/dev/.local
 #
 # Please review NOSA-1.3.txt Section 3D before adding a copyright notice.
 CONTRIBUTOR_COPYRIGHT_FILE:=COPYRIGHT.contrib.txt
@@ -34,7 +34,7 @@ ENABLE_GMSH_OMP:=ON
 ENABLE_GMSH_METIS:=ON
 ENABLE_FLTK:=ON
 
-# change to ENABLE_PETSC_XXX **************************************************
+#TODO change to ENABLE_PETSC_XXX? *********************************************
 # because these are downloaded and installed during PETSc config
 ENABLE_OCCT:=ON
 ENABLE_GOOGLETEST:=ON
@@ -51,6 +51,7 @@ ENABLE_PETSC_MOAB:=ON
 ENABLE_PETSC_EXODUSII:=ON
 
 # Partitioners
+# PARMETIS is for nonprofit research or evaluation use only
 ENABLE_PETSC_PARMETIS:=ON
 ENABLE_PETSC_CHACO:=ON
 ENABLE_PETSC_SCOTCH:=ON

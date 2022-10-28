@@ -3,7 +3,7 @@
 SHELL:= bash
 FMRDIR:=$(shell pwd)
 
-include examples/config.new
+include examples/config.recommended
 -include config.local
 
 include tools/set-undefined.mk
