@@ -1,7 +1,0 @@
-GITMOD googletest
-BRANCH v1.10.x
-GITSSH git@github.com:google/googletest.git
-GITURL https://github.com/google/googletest.git
-ZIPURL https://github.com/google/googletest/archive/refs/heads/v1.10.x.zip
-ZIPDIR external/googletest-v1.10.x
-CKFILE external/googletest/LICENSE

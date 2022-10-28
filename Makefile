@@ -3,7 +3,7 @@
 SHELL:= bash
 FMRDIR:=$(shell pwd)
 
-include examples/config.recommended
+include examples/config.new
 -include config.local
 
 include tools/set-undefined.mk
@@ -16,7 +16,7 @@ FEMERA_VERSION:= Femera $(BUILD_VERSION)
 BUILT_BY_EMAIL:= $(call parse_email,$(BUILT_BY))
 
 IS_IN_REPO:= $(shell git rev-parse --is-inside-work-tree 2>/dev/null)
-# contains "true" or "".
+# contains "true" or ""
 
 # Check if there is altered content in src/ data/ tools/
 # or some content in extras/ even when not a git repository.
@@ -163,7 +163,7 @@ ifeq ("$(FMR_COPYRIGHT)","")# only true once during build
   NOSA_SEE:= See the NASA open source agreement (NOSA-1-3.txt) for details.
 endif
 
--include $(BUILD_CPU)/external.config.mk
+-include $(BUILD_CPU)/external-config.mk
 
 #NOTE CGNS, FLTK, FreeType, PETSc build in external/*/
 # Libraries and applications available ----------------------------------------
@@ -238,11 +238,11 @@ ifeq ($(ENABLE_GOOGLETEST),ON)
   MAKE_DOT+="GoogleTest" -> "Makefile"\n
   GTEST_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
   LDLIBS += -lpthread -lgtest -lgmock
-  GTEST_FLAGFILE:= $(BUILD_CPU)/external/install-googletest.flags
+  GTEST_FLAGFILE:= $(BUILD_CPU)/external/googletest-install.flags
 endif
 ifeq ($(ENABLE_PYBIND11),ON)
 #  LIST_EXTERNAL += pybind11
-  INSTALL_EXTERNAL+= $(BUILD_DIR)/external/install-pybind11.out
+  INSTALL_EXTERNAL+= $(BUILD_DIR)/external/pybind11-install.out
 #  PYBIND11_REQUIRES += boost-headers
   EXTERNAL_DOT+="pybind11" -> "Femera"\n
   # BUILD_TREE += $(BUILD_DIR)/external/pybind11/
@@ -256,7 +256,7 @@ ifeq ($(ENABLE_PYBIND11),ON)
   PYBIND11_FLAGS += -DPYBIND11_HAS_VARIANT=0
   #FIXME Find include and lib dirs automatically
 #  PYBIND11_FLAGS += -DBOOST_ROOT:PATHNAME=/usr/local/pkgs-modules/boost_1.66.0
-  PYBIND11_FLAGFILE:= $(BUILD_DIR)/external/install-pybind11.flags
+  PYBIND11_FLAGFILE:= $(BUILD_DIR)/external/pybind11-install.flags
 #  PYBIND11_DEPS:=$(patsubst \
 #    %,$(BUILD_DIR)/external/install-%.out,$(PYBIND11_REQUIRES))
 endif
@@ -281,11 +281,11 @@ ifeq ($(ENABLE_DOT),ON)
     HEAD_DOT+=fontname="Helvetica";\n
     HEAD_DOT+=clusterrank="local";\n
   endif
-  DOT_FLAGFILE:=$(BUILD_DIR)/external/install-cinclude2dot.flags
+  DOT_FLAGFILE:=$(BUILD_DIR)/external/cinclude2dot-install.flags
 endif
 ifeq ($(ENABLE_DOT),ON)
-  GET_EXTERNAL+= $(BUILD_DIR)/external/get-cinclude2dot.out
-  INSTALL_EXTERNAL+= $(BUILD_DIR)/external/install-cinclude2dot.out
+  #TODO REMOVE GET_EXTERNAL+= $(BUILD_DIR)/external/cinclude2dot-get.out
+  INSTALL_EXTERNAL+= $(BUILD_DIR)/external/cinclude2dot-install.out
   MAKE_DOT+="cinclude2dot" -> "Makefile"\n
   EXTERNAL_DOT:= digraph "Femera external dependencies as built" \
     {\n $(HEAD_DOT) $(EXTERNAL_DOT) }\n
@@ -328,11 +328,11 @@ LIST_TOOLS:= fmrmodel fmrcores fmrexec fmrnumas
 INSTALL_TOOLS:= $(patsubst %,$(INSTALL_DIR)/bin/%,$(LIST_TOOLS))
 
 # External packages
-GET_EXTERNAL+= $(patsubst %,$(BUILD_DIR)/external/get-%.out,$(LIST_EXTERNAL))
-INSTALL_EXTERNAL+= $(patsubst %,$(BUILD_CPU)/external/install-%.out, \
+#TODO REMOVE GET_EXTERNAL+= $(patsubst %,$(BUILD_DIR)/external/get-%.out,$(LIST_EXTERNAL))
+INSTALL_EXTERNAL+= $(patsubst %,$(BUILD_CPU)/external/%-install.out, \
   $(LIST_EXTERNAL))
 
-GET_BATS:= $(patsubst %,get-%,$(BATS_MODS))
+#TODO REMVOE GET_BATS:= $(patsubst %,%-get,$(BATS_MODS))
 
 LIBFEMERA:=$(STAGE_CPU)/lib/libfemera.a
 
@@ -362,7 +362,7 @@ PRFOUTS:= $(patsubst src/%.perf.cpp,$(BUILD_CPU)/%.perf.out,$(FMRPERF))
 # The rest are for developers...
 .PHONY: docs hash patch perf
 .PHONY: install-tools test-tools remove-tools reinstall-tools clean-tools
-.PHONY: get-bats install-bats get-external # install-external
+.PHONY: install-bats # install-external
 # ...and internal makefile use.
 .PHONY: intro
 .PHONY: all-done build-done docs-done perf-done
@@ -383,8 +383,8 @@ PRFOUTS:= $(patsubst src/%.perf.cpp,$(BUILD_CPU)/%.perf.out,$(FMRPERF))
 # $(STAGE_DIR)/% Does not work as target for .SECONDARY or .PRECIOUS.
 # It looks like .PRECIOUS prerequisites must match a target pattern exactly.
 .PRECIOUS: $(STAGE_DIR)/bin/fmr% $(LIBFEMERA)
-.PRECIOUS: $(BUILD_DIR)/external/install-%.flags
-.PRECIOUS: $(BUILD_CPU)/external/install-%.flags
+.PRECIOUS: $(BUILD_DIR)/external/%-install.flags
+.PRECIOUS: $(BUILD_CPU)/external/%-install.flags
 
 #TODO fixes error make[2] unlink /home/dwagner5/.local/bin/ Is a directory
 #      while first running make tools?
@@ -395,7 +395,7 @@ $(BUILD_CPU)/femera/Test.o: $(LIBFEMERA)($(BUILD_CPU)/femera/Errs.o)
 
 # Primary named targets -------------------------------------------------------
 # These are intended for users.
-# Many launch parallel make jobs to simplify command-line use.
+# Many launch serial or parallel make jobs to simplify command-line use.
 all: | intro
 	$(call timestamp,$@,-$(MAKEFLAGS))
 	$(MAKE) $(JSER) external
@@ -426,7 +426,7 @@ tools: | intro
 
 external: | tools
 	$(call timestamp,$@,$^)
-	$(MAKE) $(JPAR) get-external
+	#TODO REMOVE $(MAKE) $(JPAR) get-external
 	$(MAKE) $(JSER) install-external
 	$(MAKE) $(JPAR) external-done
 
@@ -481,9 +481,9 @@ intro: $(BUILD_CPU)/femera.flags.new
 intro: | $(BUILD_TREE) $(STAGE_TREE)
 ifneq ("$(NOSA_SEE)","") # Run once during a build
 	$(info $(INFO) $(NOSA_SEE))
-	cat external/config.*.mk > "$(BUILD_CPU)/external.config.mk"
-	-rm -f "$(BUILD_DIR)/external/install-*.flags.new"
-	-rm -f "$(BUILD_CPU)/external/install-*.flags.new"
+	cat external/*-config.mk > "$(BUILD_CPU)/external-config.mk"
+	-rm -f "$(BUILD_DIR)/external/*-install.flags.new"
+	-rm -f "$(BUILD_CPU)/external/*-install.flags.new"
 	$(MAKE) $(JPAR) external-flags
 ifeq ($(ENABLE_DOT),ON)
 	@printf '%s' '$(MAKE_DOT)' | sed 's/\\n/\n/g' > '$(MAKE_DOTFILE)'
@@ -567,7 +567,7 @@ perf-done:
 	$(info $(SPCS) $(CXX) $(CXX_VERSION) on $(HOSTNAME) for $(CPUMODEL))
 
 # Femera tools ----------------------------------------------------------------
-install-tools: get-bats
+install-tools:
 	$(call timestamp,$@,$<)
 	$(MAKE) $(JPAR) install-tools-done
 
@@ -620,7 +620,7 @@ ifeq ($(ENABLE_PYBIND11),ON)
 
 .PHONY: $(PYBIND11_FLAGFILE).new
 
-$(BUILD_DIR)/external/install-pybind11.out : | $(PYBIND11_DEPS)
+$(BUILD_DIR)/external/pybind11-install.out : | $(PYBIND11_DEPS)
 
 external-flags: $(PYBIND11_FLAGFILE).new
 
@@ -637,36 +637,36 @@ $(PYBIND11_BOOST).new:
 	printf "%s" '$(BOOST_FLAGS)' > $(@)
 endif
 
-install-bats: external/get-bats.test.sh
-install-bats: get-bats external/install-bats.sh external/install-bats.test.bats
-	$(call label_test,$(PASS),$(FAIL),external/get-bats.test.sh, \
-	  $(BUILD_DIR)/external/get-bats.test)
+#TODO REMOVE install-bats: external/get-bats.test.sh
+install-bats: external/bats-install.sh external/bats-install.test.bats
+	#TODO REMOVE $(call label_test,$(PASS),$(FAIL),external/get-bats.test.sh, \
+	#  $(BUILD_DIR)/external/get-bats.test)
 	$(call label_test,$(PASS),$(FAIL), \
-	  external/install-bats.sh "$(INSTALL_DIR)", \
-	  $(BUILD_DIR)/external/install-bats)
-	$(call label_bats,$(PASS),$(FAIL),external/install-bats.test.bats, \
-	  $(BUILD_DIR)/external/install-bats.test)
+	  external/bats-install.sh "$(INSTALL_DIR)", \
+	  $(BUILD_DIR)/external/bats-install)
+	$(call label_bats,$(PASS),$(FAIL),external/bats-install.test.bats, \
+	  $(BUILD_DIR)/external/bats-install.test)
 	$(call timestamp,$@,$<)
 
-get-bats:
-	$(call timestamp,$@,$<)
-	$(MAKE) $(JPAR) $(GET_BATS)
-
-get-external: | intro external/tools/
-	$(call timestamp,$@,)
-	$(MAKE) $(JPAR) $(GET_EXTERNAL)
-
-get-%: | intro $(BUILD_DIR)/external/
-	#(call timestamp,$@,$<)
-	external/get-external.sh $(*)
+#TODO REMOVE get-bats:
+#	$(call timestamp,$@,$<)
+#	$(MAKE) $(JPAR) $(GET_BATS)
+#
+#TODO REMOVE get-external: | intro external/tools/
+#	$(call timestamp,$@,)
+#	$(MAKE) $(JPAR) $(GET_EXTERNAL)
+#
+#get-%: | intro $(BUILD_DIR)/external/
+#	#(call timestamp,$@,$<)
+#	external/get-external.sh $(*)
 
 install-external: $(INSTALL_EXTERNAL) | intro
 	$(call timestamp,$@,make $(JEXT))
 
-install-%: $(BUILD_CPU)/external/install-%.out | intro $(BUILD_CPU)/external/
+install-%: $(BUILD_CPU)/external/%-install.out | intro $(BUILD_CPU)/external/
 	$(call timestamp,$@,)
 
-install-%: $(BUILD_DIR)/external/install-%.out | intro $(BUILD_DIR)/external/
+install-%: $(BUILD_DIR)/external/%-install.out | intro $(BUILD_DIR)/external/
 	$(call timestamp,$@,)
 
 external-done:
@@ -675,41 +675,41 @@ external-done:
 	$(info $(E_G_) $(LIST_EXTERNAL))
 	$(call timestamp,$@,)
 
-$(BUILD_DIR)/external/get-bats-%.out: external/get-external.sh
-	#(info $(INFO) checking bats-$(*)...)
-	-tools/label-test.sh "$(PASS)" "$(FAIL)" \
-	  "external/get-external.sh bats-$(*)" \
-	  "$(BUILD_DIR)/external/get-bats-$(*)"
+#TODO REMOVE $(BUILD_DIR)/external/get-bats-%.out: external/get-external.sh
+#	#(info $(INFO) checking bats-$(*)...)
+#	-tools/label-test.sh "$(PASS)" "$(FAIL)" \
+#	  "external/get-external.sh bats-$(*)" \
+#	  "$(BUILD_DIR)/external/get-bats-$(*)"
+#
+#$(BUILD_DIR)/external/get-%.out: external/get-external.sh external/get-%.dat
+#	#(info $(INFO) checking $(*)...)
+#	-tools/label-test.sh "$(PASS)" "$(FAIL)" \
+#	  "external/get-external.sh $(*)" \
+#	  "$(BUILD_DIR)/external/get-$(*)"
 
-$(BUILD_DIR)/external/get-%.out: external/get-external.sh external/get-%.dat
-	#(info $(INFO) checking $(*)...)
-	-tools/label-test.sh "$(PASS)" "$(FAIL)" \
-	  "external/get-external.sh $(*)" \
-	  "$(BUILD_DIR)/external/get-$(*)"
-
-$(BUILD_CPU)/external/install-%.flags: $(BUILD_CPU)/external/install-%.flags.new
+$(BUILD_CPU)/external/%-install.flags: $(BUILD_CPU)/external/%-install.flags.new
 	tools/update-file-if-diff.sh "$(@)"
 	#rm -f $(<)
 
-$(BUILD_DIR)/external/install-%.flags: $(BUILD_DIR)/external/install-%.flags.new
+$(BUILD_DIR)/external/%-install.flags: $(BUILD_DIR)/external/%-install.flags.new
 	tools/update-file-if-diff.sh "$(@)"
 	#rm -f $(<)
 
-$(BUILD_CPU)/external/install-%.out: external/install-%.sh
-$(BUILD_CPU)/external/install-%.out: $(BUILD_CPU)/external/install-%.flags
+$(BUILD_CPU)/external/%-install.out: external/%-install.sh
+$(BUILD_CPU)/external/%-install.out: $(BUILD_CPU)/external/%-install.flags
 	$(call timestamp,$@,)
 	mkdir -p $(BUILD_CPU)/external/$(*)
 	-tools/label-watch.sh "$(PASS)" "$(FAIL)" \
-	  "external/install-$(*).sh $(INSTALL_CPU) $(<) $(JEXT)" \
-	  "$(BUILD_CPU)/external/install-$(*)"
+	  "external/$(*)-install.sh $(INSTALL_CPU) $(<) $(JEXT)" \
+	  "$(BUILD_CPU)/external/$(*)-install"
 
-$(BUILD_DIR)/external/install-%.out: external/install-%.sh
-$(BUILD_DIR)/external/install-%.out: $(BUILD_DIR)/external/install-%.flags
+$(BUILD_DIR)/external/%-install.out: external/%-install.sh
+$(BUILD_DIR)/external/%-install.out: $(BUILD_DIR)/external/%-install.flags
 	$(call timestamp,$@,)
 	mkdir -p $(BUILD_DIR)/external/$(*)
 	-tools/label-test.sh "$(PASS)" "$(FAIL)" \
-	  "external/install-$(*).sh $(INSTALL_DIR) $(<) $(JEXT)" \
-	  "$(BUILD_DIR)/external/install-$(*)"
+	  "external/$(*)-install.sh $(INSTALL_DIR) $(<) $(JEXT)" \
+	  "$(BUILD_DIR)/external/$(*)-install"
 
 # Specialized targets =========================================================
 $(STAGE_DIR)/bin/fmr%: $(BUILD_CPU)/tools/fmr%.test.out

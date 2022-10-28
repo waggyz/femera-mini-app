@@ -1,7 +1,0 @@
-GITMOD gmsh
-BRANCH gmsh_4_7_1
-GITSSH git@gitlab.onelab.info:gmsh/gmsh.git
-GITURL https://gitlab.onelab.info/gmsh/gmsh.git
-ZIPURL https://gitlab.onelab.info/gmsh/gmsh/-/archive/gmsh_4_7_1/gmsh-gmsh_4_7_1.zip
-ZIPDIR external/gmsh-gmsh_4_7_1
-CKFILE external/gmsh/LICENSE.txt

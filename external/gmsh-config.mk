@@ -59,7 +59,7 @@ ifeq ($(ENABLE_GMSH),ON)
     GMSH_FLAGS += -DENABLE_FLTK=ON
     #TODO It looks like native gmsh off-screen rendering does not work.
     #rhel7: sudo yum install mesa-libOSMesa-devel
-    GMSH_FLAGS += -DENABLE_OSMESA=ON -DENABLE_GRAPHICS=ON
+    #GMSH_FLAGS += -DENABLE_OSMESA=ON -DENABLE_GRAPHICS=ON
   else
     GMSH_FLAGS += -DENABLE_FLTK=OFF
   endif

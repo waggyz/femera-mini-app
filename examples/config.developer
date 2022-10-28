@@ -1,0 +1,62 @@
+#!/usr/bin/make
+# config.local
+#
+# Please update the next line with your name, affiliation, and email address.
+BUILT_BY:=Anonymous User (Example University)<anon@example.edu>
+#
+# Set PREFIX to the full path of a user-writable installation directory.
+PREFIX:=/home/anon/.local
+#
+# Please review NOSA-1.3.txt Section 3D before adding a copyright notice.
+CONTRIBUTOR_COPYRIGHT_FILE:=COPYRIGHT.contrib.txt
+#
+FMR_VERBMAX:=5
+
+# Use parallel make jobs
+ENABLE_MAKEJOBS:=ON
+
+# Libraries needed ------------------------------------------------------------
+ENABLE_OMP:=ON
+ENABLE_MPI:=ON
+
+#TODO use hwloc installed by PETSc instead of libnuma?
+ENABLE_PETSC_HWLOC:=ON
+ENABLE_LIBNUMA:=OFF
+
+# External packages -----------------------------------------------------------
+ENABLE_BATS:=ON
+ENABLE_PYBIND11:=ON
+
+ENABLE_MKL:=ON
+
+ENABLE_GMSH:=ON
+ENABLE_GMSH_OMP:=ON
+ENABLE_GMSH_METIS:=ON
+ENABLE_FLTK:=ON
+
+# change to ENABLE_PETSC_XXX **************************************************
+# because these are downloaded and installed during PETSc config
+ENABLE_OCCT:=ON
+ENABLE_GOOGLETEST:=ON
+ENABLE_HDF5:=ON
+#******************************************************************************
+
+ENABLE_PETSC:=ON
+ENABLE_PETSC_DEBUG:=ON
+ENABLE_PETSC_OMP:=ON
+
+# More file formats
+ENABLE_CGNS:=ON
+ENABLE_PETSC_MOAB:=ON
+ENABLE_PETSC_EXODUSII:=ON
+
+# Partitioners
+ENABLE_PETSC_PARMETIS:=ON
+ENABLE_PETSC_CHACO:=ON
+ENABLE_PETSC_SCOTCH:=ON
+
+# Developer tools -------------------------------------------------------------
+ENABLE_VALGRIND:=ON
+
+ENABLE_LYX:=ON
+ENABLE_DOT:=ON

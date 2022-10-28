@@ -1,8 +1,0 @@
-GITMOD fltk
-BRANCH branch-1.3
-GITURL https://github.com/fltk/fltk.git
-ZIPURL https://github.com/fltk/fltk/archive/refs/heads/branch-1.3.zip
-ZIPDIR external/fltk-1.3
-TGZURL https://www.fltk.org/pub/fltk/1.3.8/fltk-1.3.8-source.tar.gz
-TGZDIR external/fltk-1.3.8
-CKFILE external/fltk/README

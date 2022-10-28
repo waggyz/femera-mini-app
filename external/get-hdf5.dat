@@ -1,7 +1,0 @@
-GITMOD hdf5
-BRANCH develop
-GITSSH git@github.com:HDFGroup/hdf5.git
-GITURL https://github.com/HDFGroup/hdf5.git
-ZIPURL https://github.com/HDFGroup/hdf5/archive/refs/heads/develop.zip
-ZIPDIR external/hdf5-develop
-CKFILE external/hdf5/README.txt

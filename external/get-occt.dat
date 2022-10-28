@@ -1,5 +1,0 @@
-GITMOD occt
-BRANCH V7_3_0
-TGZURL http://git.dev.opencascade.org/gitweb/?p=occt.git;a=snapshot;h=refs/tags/V7_3_0;sf=tgz
-TGZDIR external/occt-V7_3_0
-CKFILE external/occt/README.txt

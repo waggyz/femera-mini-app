@@ -1,9 +1,0 @@
-GITMOD freetype
-BRANCH master
-GITSSH git@gitlab.freedesktop.org:freetype/freetype.git
-GITURL https://gitlab.freedesktop.org/freetype/freetype.git
-ZIPURL https://gitlab.freedesktop.org/freetype/freetype/-/archive/master/freetype-master.zip
-ZIPDIR external/freetype-master
-TGZURL http://download.savannah.gnu.org/releases/freetype/freetype-2.11.1.tar.gz
-TGZDIR external/freetype-2.11.1
-CKFILE external/freetype/README
