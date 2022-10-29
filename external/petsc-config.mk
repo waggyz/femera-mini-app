@@ -41,8 +41,10 @@ ifeq ($(ENABLE_PETSC),ON)
     EXTERNAL_DOT+="MPI" -> "PETSc"\n
     ifeq ($(HAS_MPI),ON)
       # PETSC_FLAGS += --with-mpi-dir="$(MPI_DIR)"
+      PETSC_FLAGS += --with-mpi
     else
-      PETSC_FLAGS += --download-openmpi
+      #FIXME PETSC_FLAGS += --download-openmpi
+      PETSC_FLAGS += --with-mpi
     endif
   else
     PETSC_FLAGS += --with-mpi=0
@@ -87,26 +89,38 @@ ifeq ($(ENABLE_PETSC),ON)
     #TODO PETSC_FLAGS += --with-cuda=1
   
   # PETSc installs the rest ===================================================
-
+  #
   ifeq ($(ENABLE_PETSC_HWLOC),ON)
     #TODO use hwloc instead of libnuma?
     EXTERNAL_DOT+="hwloc" -> "PETSc"\n
+    EXTERNAL_DOT+="hwloc" -> "Femera"\n
     PETSC_INSTALLS += hwloc
     PETSC_FLAGS += --download-hwloc
   endif
-  
+  #
   #TODO condition to install zlib & szlib, below
   ifeq (ON,ON)  
     EXTERNAL_DOT+="zlib" -> "PETSc"\n
     PETSC_FLAGS += --download-zlib
     EXTERNAL_DOT+="szlib" -> "PETSc"\n
     PETSC_FLAGS += --download-szlib
+    ifeq ($(ENABLE_HDF5),ON)
+      EXTERNAL_DOT+="zlib" -> "HDF5"\n
+      EXTERNAL_DOT+="szlib" -> "HDF5"\n
+    endif
   endif
-
+  #
   ifeq ($(ENABLE_OCCT),ON)
-    EXTERNAL_DOT+="OpenCASACADE" -> "PETSc"\n
+    EXTERNAL_DOT+="OpenCASCADE" -> "PETSc"\n
     PETSC_INSTALLS += occt
     PETSC_FLAGS += --download-opencascade
+  endif
+  ifeq ($(ENABLE_GOOGLETEST),ON)
+#FIXME Change this so PETSc will download and install GoogleTest
+    EXTERNAL_DOT+="GoogleTest" -> "PETSc"\n
+    LDLIBS += -lgtest -lgmock
+    PETSC_INSTALLS += GoogleTest
+    PETSC_FLAGS += --download-googletest
   endif
   ifeq ($(ENABLE_HDF5),ON)
 #FIXME Change this so PETSc will download and install HDF5
@@ -117,11 +131,14 @@ ifeq ($(ENABLE_PETSC),ON)
   endif
   ifeq ($(ENABLE_PETSC_MOAB),ON)
     EXTERNAL_DOT+="MOAB" -> "PETSc"\n
+    ifeq ($(ENABLE_HDF5),ON)
+      EXTERNAL_DOT+="HDF5" -> "MOAB"\n
+    endif
     PETSC_INSTALLS += moab
     PETSC_FLAGS += --download-moab
   endif
   ifeq ($(ENABLE_PETSC_EXODUSII),ON)
-    EXTERNAL_DOT+="exodusii" -> "PETSc"\n
+    EXTERNAL_DOT+="EXODUS II" -> "PETSc"\n
     PETSC_INSTALLS += exodusii
     PETSC_FLAGS += --download-exodusii
   endif
@@ -146,19 +163,19 @@ ifeq ($(ENABLE_PETSC),ON)
     PETSC_INSTALLS += parmetis
     PETSC_FLAGS += --download-parmetis
   endif
+  ifeq (1,0)
   #****************************************************************************
-  ifeq (1,0)    
   #TODO Check versions and have PETSc download if needed
   #PETSC_FLAGS += --download-make=1
   #PETSC_FLAGS += --download-cmake=1
   #PETSC_FLAGS += --download-git=1
+  PETSC_FLAGS += --download-libjpeg
+  PETSC_FLAGS += --download-libpng
+  PETSC_FLAGS += --download-giflib
   #
   # needed by other external packages
   PETSC_FLAGS += --download-googletest
   PETSC_FLAGS += --download-boost
-  PETSC_FLAGS += --download-libjpeg
-  PETSC_FLAGS += --download-libpng
-  PETSC_FLAGS += --download-giflib
   #
   # partitioners
   #PETSC_FLAGS += --download-party
@@ -172,6 +189,7 @@ ifeq ($(ENABLE_PETSC),ON)
   #PETSC_FLAGS += --download-pnetcdf
   #PETSC_FLAGS += --download-libmesh
   #
+  #****************************************************************************
   endif
   #
   PETSC_FLAGFILE:=$(BUILD_CPU)/external/petsc-config.flags
