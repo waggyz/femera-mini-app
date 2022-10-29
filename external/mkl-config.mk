@@ -10,7 +10,7 @@ ifeq ($(ENABLE_MKL),ON)
   # /installation-guide-for-intel-oneapi-toolkits-linux/top/installation
   # /install-with-command-line.html#install-with-command-line
   # ./install.sh --silent --action remove # To remove MKL
-  MKL_FLAGFILE:=$(BUILD_CPU)/external/install-mkl.flags
+  MKL_FLAGFILE:=$(BUILD_CPU)/external/mkl-install.flags
 endif
 ifeq ($(ENABLE_MKL),ON)
 
@@ -18,7 +18,7 @@ external-flags: $(MKL_FLAGFILE).new
 
 .PHONY: $(MKL_FLAGFILE).new
 
-$(MKL_FLAGFILE).new: external/config.mkl.mk
+$(MKL_FLAGFILE).new: external/mkl-config.mk
 	printf "%s" '$(MKL_FLAGS)' > $(@)
 
 endif

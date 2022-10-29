@@ -48,6 +48,7 @@ ifeq ($(ENABLE_PETSC),ON)
     PETSC_FLAGS += --with-mpi=0
   endif
   ifeq ($(ENABLE_MKL),ON)
+    # needed by petsc-install.sh not -config.sh:
     PETSC_REQUIRES += mkl
     LDLIBS += -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lm
     #-liomp5
@@ -60,7 +61,7 @@ ifeq ($(ENABLE_PETSC),ON)
   endif
   ifeq ($(ENABLE_CGNS),ON)# Does not recognize high order branch
     EXTERNAL_DOT+="CGNS" -> "PETSc"\n
-    PETSC_REQUIRES += cgns
+   PETSC_REQUIRES += cgns
     PETSC_MAKE_FLAGS += --with-cgns-dir=$(INSTALL_CPU)
   endif
   ifeq ($(ENABLE_GMSH),ON)
@@ -76,21 +77,16 @@ ifeq ($(ENABLE_PETSC),ON)
   # PETSC_FLAGS += --with-packages-build-dir="$(BUILD_CPU)"# no worky
   
     EXTERNAL_DOT+="petsc4py" -> "PETSc"\n
-    PETSC_FLAGS += --with-petsc4py=1
+    PETSC_FLAGS += --with-petsc4py
     
     EXTERNAL_DOT+="X" -> "PETSc"\n
-    PETSC_FLAGS += --with-x=1
+    PETSC_FLAGS += --with-x
     LDLIBS += -lX11
     
     # EXTERNAL_DOT+="CUDA" -> "PETSc"\n
     #TODO PETSC_FLAGS += --with-cuda=1
   
   # PETSc installs the rest ===================================================
-    
-  #TODO Check versions and have PETSc download if needed
-#    PETSC_FLAGS += --download-make=1
-#    PETSC_FLAGS += --download-cmake=1
-#    PETSC_FLAGS += --download-git=1
 
   ifeq ($(ENABLE_PETSC_HWLOC),ON)
     #TODO use hwloc instead of libnuma?
@@ -151,7 +147,11 @@ ifeq ($(ENABLE_PETSC),ON)
     PETSC_FLAGS += --download-parmetis
   endif
   #****************************************************************************
-  ifeq (1,0)
+  ifeq (1,0)    
+  #TODO Check versions and have PETSc download if needed
+  #PETSC_FLAGS += --download-make=1
+  #PETSC_FLAGS += --download-cmake=1
+  #PETSC_FLAGS += --download-git=1
   #
   # needed by other external packages
   PETSC_FLAGS += --download-googletest
@@ -173,20 +173,24 @@ ifeq ($(ENABLE_PETSC),ON)
   #PETSC_FLAGS += --download-libmesh
   #
   endif
-  
-  PETSC_DEPS:=$(patsubst %,$(BUILD_CPU)/external/install-%.out,$(PETSC_REQUIRES))
-  PETSC_FLAGFILE:=$(BUILD_CPU)/external/install-petsc.flags
+  #
+  PETSC_FLAGFILE:=$(BUILD_CPU)/external/petsc-config.flags
+  PETSC_DEPS:=$(patsubst %,$(BUILD_CPU)/external/%-install.out,$(PETSC_REQUIRES))
+  PETSC_MAKEFLAGFILE:=$(BUILD_CPU)/external/petsc-install.flags
 endif
 ifeq ($(ENABLE_PETSC),ON)
 
-.PHONY: $(PETSC_FLAGFILE).new
+.PHONY: $(PETSC_FLAGFILE).new $(PETSC_MAKEFLAGFILE).new
 
-$(BUILD_CPU)/external/install-petsc.out : | $(PETSC_DEPS)
+$(BUILD_CPU)/external/petsc-install.out:| $(PETSC_DEPS) 
+$(BUILD_CPU)/external/petsc-install.out:| $(BUILD_CPU)/external/petsc-config.out 
 
-external-flags: $(PETSC_FLAGFILE).new
+external-flags: $(PETSC_FLAGFILE).new $(PETSC_MAKEFLAGFILE).new
 
-$(PETSC_FLAGFILE).new: external/config.petsc.mk
-  printf "%s" "$(PETSC_FLAGS)" > $(@)
+$(PETSC_FLAGFILE).new: external/petsc-config.mk
+	printf "%s" "$(PETSC_FLAGS)" > $(@)
 
+$(PETSC_MAKEFLAGFILE).new: external/petsc-config.mk
+	printf "%s" "$(PETSC_FLAGS) $(PETSC_MAKE_FLAGS)" > $(@)
 
 endif

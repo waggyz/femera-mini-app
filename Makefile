@@ -687,6 +687,18 @@ external-done:
 #	  "external/get-external.sh $(*)" \
 #	  "$(BUILD_DIR)/external/get-$(*)"
 
+$(BUILD_CPU)/external/%-config.flags: $(BUILD_CPU)/external/%-config.flags.new
+	tools/update-file-if-diff.sh "$(@)"
+	#rm -f $(<)
+
+$(BUILD_CPU)/external/%-config.out: external/%-config.sh
+$(BUILD_CPU)/external/%-config.out: $(BUILD_CPU)/external/%-config.flags
+	$(call timestamp,$@,)
+	mkdir -p $(BUILD_CPU)/external/$(*)
+	-tools/label-watch.sh "$(PASS)" "$(FAIL)" \
+	  "external/$(*)-install.sh $(INSTALL_CPU) $(<) $(JEXT)" \
+	  "$(BUILD_CPU)/external/$(*)-install"
+
 $(BUILD_CPU)/external/%-install.flags: $(BUILD_CPU)/external/%-install.flags.new
 	tools/update-file-if-diff.sh "$(@)"
 	#rm -f $(<)

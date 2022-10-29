@@ -20,8 +20,8 @@ ifeq ($(ENABLE_CGNS),ON)
   CGNS_FLAGS += -DCGNS_ENABLE_BASE_SCOPE:BOOL=OFF
   CGNS_FLAGS += -DCGNS_ENABLE_TESTS:BOOL=OFF
   CGNS_FLAGS += -DCGNS_ENABLE_FORTRAN:BOOL=OFF
-  CGNS_DEPS:=$(patsubst %,$(BUILD_CPU)/external/install-%.out,$(CGNS_REQUIRES))
-  CGNS_FLAGFILE:=$(BUILD_CPU)/external/install-cgns.flags
+  CGNS_DEPS:=$(patsubst %,$(BUILD_CPU)/external/%-install.out,$(CGNS_REQUIRES))
+  CGNS_FLAGFILE:=$(BUILD_CPU)/external/cgns-install.flags
 endif
 ifeq ($(ENABLE_CGNS),ON)
 
@@ -29,9 +29,9 @@ ifeq ($(ENABLE_CGNS),ON)
 
 external-flags: $(CGNS_FLAGFILE).new
 
-$(BUILD_CPU)/external/install-cgns.out: | $(CGNS_DEPS)
+$(BUILD_CPU)/external/cgns-install.out: | $(CGNS_DEPS)
 
-$(CGNS_FLAGFILE).new: external/config.cgns.mk
+$(CGNS_FLAGFILE).new: external/cgns-config.mk
 	printf "%s" '$(CGNS_FLAGS)' > $(@)
 
 endif

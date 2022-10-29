@@ -1,5 +1,5 @@
 #!/usr/bin/make
-ifeq($(ENABLE_NVIDIA),ON)
+ifeq ($(ENABLE_NVIDIA),ON)
   FMRFLAGS += -DFMR_HAS_NVIDIA
   LDLIBS += -lcuda -lcudart
   ifeq ("$(findstring $(NVIDIA_LIBDIR):,$(LDPATH):)","")

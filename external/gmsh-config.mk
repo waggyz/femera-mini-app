@@ -6,11 +6,11 @@ ifeq ($(ENABLE_GMSH),ON)
 #  ifeq ("$(CXX) $(CXX_VERSION)","g++ 4.8.5") # g+= or mpic++
   ifeq ("$(CXX_VERSION)","4.8.5")
     LIST_EXTERNAL += gmsh471
-    GMSH_FLAGFILE:=$(BUILD_CPU)/external/install-gmsh471.flags
+    GMSH_FLAGFILE:=$(BUILD_CPU)/external/gmsh471-install.flags
     FMRFLAGS += -DFMR_HAS_GMSH_GCC48_PATCH
   else
     LIST_EXTERNAL += gmsh
-    GMSH_FLAGFILE:=$(BUILD_CPU)/external/install-gmsh.flags
+    GMSH_FLAGFILE:=$(BUILD_CPU)/external/gmsh-install.flags
   endif
   EXTERNAL_DOT+="Gmsh" -> "Femera"\n
   GMSH_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
@@ -25,7 +25,7 @@ ifeq ($(ENABLE_GMSH),ON)
   endif
   ifeq ($(ENABLE_PYBIND11),ON)
     # GMSH_REQUIRES += pybind11
-    GMSH_DEPS += $(BUILD_DIR)/external/install-pybind11.out
+    GMSH_DEPS += $(BUILD_DIR)/external/pybind11-install.out
     EXTERNAL_DOT+="pybind11" -> "Gmsh"\n
     GMSH_FLAGS += -DENABLE_WRAP_PYTHON=ON -DENABLE_NUMPY=ON
   endif
@@ -70,7 +70,7 @@ ifeq ($(ENABLE_GMSH),ON)
   endif
   # Disable Cairo fonts for now. Just use FreeType (required by OCCT).
   GMSH_FLAGS += -DENABLE_CAIRO=OFF
-  GMSH_DEPS+=$(patsubst %,$(BUILD_CPU)/external/install-%.out,$(GMSH_REQUIRES))
+  GMSH_DEPS+=$(patsubst %,$(BUILD_CPU)/external/%-install.out,$(GMSH_REQUIRES))
 #  $(shell printf "%s" "$(gmsh_FLAGS)" > $(GMSH_FLAGFILE))
 endif
 ifeq ($(ENABLE_OCCT),ON)
@@ -85,20 +85,20 @@ ifeq ($(ENABLE_OCCT),ON)
   OCCT_FLAGS += -DBUILD_MODULE_Draw=OFF
   OCCT_FLAGS += -DBUILD_MODULE_Visualization=OFF
   OCCT_FLAGS += -DBUILD_MODULE_ApplicationFramework=OFF
-  OCCT_DEPS:=$(patsubst %,$(BUILD_CPU)/external/install-%.out,$(OCCT_REQUIRES))
-  OCCT_FLAGFILE := $(BUILD_CPU)/external/install-occt.flags
+  OCCT_DEPS:=$(patsubst %,$(BUILD_CPU)/external/%-install.out,$(OCCT_REQUIRES))
+  OCCT_FLAGFILE := $(BUILD_CPU)/external/occt-install.flags
 endif
 #FIXME CGNS, FLTK, and FreeType build in external/*/
 ifeq ($(ENABLE_FREETYPE),ON)
   LIST_EXTERNAL += freetype
   FREETYPE_FLAGS += --prefix="$(INSTALL_CPU)"
-  FREETYPE_FLAGFILE := $(BUILD_CPU)/external/install-freetype.flags
+  FREETYPE_FLAGFILE := $(BUILD_CPU)/external/freetype-install.flags
 endif
 ifeq ($(ENABLE_FLTK),ON)
   LIST_EXTERNAL += fltk
   FLTK_FLAGS += --prefix="$(INSTALL_CPU)"
   FLTK_FLAGS += --enable-shared
-  FLTK_FLAGFILE := $(BUILD_CPU)/external/install-fltk.flags
+  FLTK_FLAGFILE := $(BUILD_CPU)/external/fltk-install.flags
 endif
 
 ifeq ($(ENABLE_GMSH),ON)
@@ -107,11 +107,11 @@ ifeq ($(ENABLE_GMSH),ON)
 
 external-flags: $(GMSH_FLAGFILE).new
 
-$(BUILD_CPU)/external/install-gmsh.out : | $(GMSH_DEPS)
+$(BUILD_CPU)/external/gmsh-install.out : | $(GMSH_DEPS)
 
-$(BUILD_CPU)/external/install-gmsh471.out : | $(GMSH_DEPS)
+$(BUILD_CPU)/external/gmsh471-install.out : | $(GMSH_DEPS)
 
-$(GMSH_FLAGFILE).new: external/config.gmsh.mk
+$(GMSH_FLAGFILE).new: external/gmsh-config.mk
 	printf "%s" '$(GMSH_FLAGS)' > $(@)
 endif
 
@@ -121,7 +121,7 @@ ifeq ($(ENABLE_OCCT),ON)
 
 external-flags: $(OCCT_FLAGFILE).new
 
-$(BUILD_CPU)/external/install-occt.out : $(OCCT_DEPS)
+$(BUILD_CPU)/external/occt-install.out : $(OCCT_DEPS)
 
 $(OCCT_FLAGFILE).new:
 	printf "%s" '$(OCCT_FLAGS)' > $(@)
