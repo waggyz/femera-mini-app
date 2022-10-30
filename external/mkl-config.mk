@@ -2,7 +2,7 @@
 ifeq ($(ENABLE_MKL),ON)
   FMRFLAGS += -DFMR_HAS_MKL
   LIST_EXTERNAL += mkl
-  EXTERNAL_DOT+="MKL" -> "Femera"\n
+  EXTERNAL_DOT+="Femera" -> "MKL"\n
   MKL_FLAGS += --extract-folder $(FMRDIR)/external/mkl
   MKL_FLAGS += --remove-extracted-files no
   MKL_FLAGS += -a --silent --eula accept --install-dir $(INSTALL_CPU)

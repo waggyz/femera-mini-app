@@ -4,10 +4,10 @@ ifeq ($(ENABLE_CGNS),ON)
   FMRFLAGS += -DFMR_HAS_CGNS
   LDLIBS += -lcgns
   LIST_EXTERNAL += cgns
-  EXTERNAL_DOT+="CGNS" -> "Femera"\n
+  EXTERNAL_DOT+="Femera" -> "CGNS"\n
   ifeq ($(ENABLE_HDF5),ON)
     CGNS_REQUIRES += hdf5
-    EXTERNAL_DOT+="HDF5" -> "CGNS"\n
+    EXTERNAL_DOT+="CGNS" -> "HDF5"\n
     CGNS_FLAGS += -DCGNS_ENABLE_HDF5:BOOL=ON
   else
     CGNS_FLAGS += -DCGNS_ENABLE_HDF5:BOOL=OFF

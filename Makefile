@@ -171,7 +171,7 @@ ifeq ($(ENABLE_ZYCLOPS),ON)
   FMRFLAGS+= -DFMR_HAS_ZYCLOPS
 endif
 ifeq ($(ENABLE_OMP),ON)
-  EXTERNAL_DOT+="OpenMP" -> "Femera"\n
+  EXTERNAL_DOT+="Femera" -> "OpenMP"\n
   # FMRFLAGS+= -DFMR_HAS_OMP not needed; OpenMP defines _OPENMP:
 endif
 ifeq ($(ENABLE_NVIDIA),ON)
@@ -179,7 +179,7 @@ ifeq ($(ENABLE_NVIDIA),ON)
   ifeq ("$(NVIDIA_DIR)","")
     NVIDIA_DIR:=/usr/local/cuda-11.6
   endif
-  # EXTERNAL_DOT+="NVIDIA" -> "Femera"\n
+  # EXTERNAL_DOT+="Femera" -> "NVIDIA"\n
   FMRFLAGS+= -DFMR_HAS_NVIDIA
   CUXX:=nvcc
   FMRFLAGS+= -I"$(NVIDIA_DIR)/include"
@@ -190,7 +190,7 @@ ifeq ($(ENABLE_NVIDIA),ON)
   CUFLAGS+= -L$(NVIDIA_DIR)/lib64 -lcuda -lcudart
 endif
 ifeq ($(ENABLE_MPI),ON)
-  EXTERNAL_DOT+="MPI" -> "Femera"\n
+  EXTERNAL_DOT+="Femera" -> "MPI"\n
   FMRFLAGS+= -DFMR_HAS_MPI
   #FIXME Find include and lib dirs automatically
   ifeq ($(CXX),mpic++)
@@ -205,20 +205,20 @@ ifeq ($(ENABLE_MPI),ON)
   endif
 endif
 ifeq ($(ENABLE_LIBNUMA),ON)
-  EXTERNAL_DOT+="libnuma" -> "Femera"\n
+  EXTERNAL_DOT+="Femera" -> "libnuma"\n
   FMRFLAGS+= -DFMR_HAS_LIBNUMA
   LDLIBS+= -lnuma
 endif
 # Build tools to download and install -----------------------------------------
 ifeq ($(ENABLE_BATS),ON)
-  MAKE_DOT+="Bats" -> "Makefile"\n
+  MAKE_DOT+="Makefile" -> "Bats"\n
   BATS_MODS:= bats-core bats-support bats-assert bats-file
   label_bats = $(call label_test,$(1),$(2),$(3),$(4))
 else
   label_bats = $(info \
     $(DBUG) Set ENABLE_BATS:=ON in config.local for $(notdir $(3)).)
 endif
-ifeq ($(ENABLE_GOOGLETEST),ON)
+ifeq ($(ENABLE_GOOGLETEST),ON-FIXME-DISABLED)
   CXXTESTS := $(filter-out -Wundef,$(CXXTESTS))
   CXXTESTS := $(filter-out -Weffc++,$(CXXTESTS))
   # CXXTESTS := $(filter-out -Winline,$(CXXTESTS))
@@ -234,19 +234,20 @@ ifeq ($(ENABLE_GOOGLETEST),ON)
   LIST_EXTERNAL += googletest
   FMRFLAGS+= -DFMR_HAS_GTEST
   FMRFLAGS+= -DFMR_GTEST_VERSION=$(shell external/get-googletest-version.sh)
-  EXTERNAL_DOT+="GoogleTest" -> "Femera"\n
-  MAKE_DOT+="GoogleTest" -> "Makefile"\n
-  GTEST_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
+  EXTERNAL_DOT+="Femera" -> "GoogleTest"\n
+#  MAKE_DOT+="Makefile" -> "GoogleTest"\n
+#  GTEST_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
   LDLIBS += -lpthread -lgtest -lgmock
-  GTEST_FLAGFILE:= $(BUILD_CPU)/external/googletest-install.flags
+#  GTEST_FLAGFILE:= $(BUILD_CPU)/external/googletest-install.flags
 endif
 ifeq ($(ENABLE_PYBIND11),ON)
 #  LIST_EXTERNAL += pybind11
   INSTALL_EXTERNAL+= $(BUILD_DIR)/external/pybind11-install.out
 #  PYBIND11_REQUIRES += boost-headers
-  EXTERNAL_DOT+="pybind11" -> "Femera"\n
+  EXTERNAL_DOT+="Femera" -> "pybind11"\n
   # BUILD_TREE += $(BUILD_DIR)/external/pybind11/
-#  EXTERNAL_DOT+="Boost" -> "pybind11"\n
+  EXTERNAL_DOT+="pybind11" -> "Boost"\n
+  EXTERNAL_DOT+="pybind11" -> "Python"\n
   # FMRFLAGS += -DFMR_HAS_PYBIND11
   PYBIND11_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
   PYBIND11_FLAGS += -DDOWNLOAD_CATCH=0
@@ -273,7 +274,7 @@ ifeq ($(ENABLE_DOT),ON)
   ifeq ($(shell which dot 2>/dev/null),"")# dot is part of graphviz
     ENABLE_DOT:=OFF
   else
-    MAKE_DOT+="dot" -> "Makefile"\n
+    MAKE_DOT+="Makefile" -> "dot"\n
     HEAD_DOT+=overlap=scale;\n
     HEAD_DOT+=size="6,3";\n
     HEAD_DOT+=ratio="fill";\n
@@ -286,7 +287,7 @@ endif
 ifeq ($(ENABLE_DOT),ON)
   #TODO REMOVE GET_EXTERNAL+= $(BUILD_DIR)/external/cinclude2dot-get.out
   INSTALL_EXTERNAL+= $(BUILD_DIR)/external/cinclude2dot-install.out
-  MAKE_DOT+="cinclude2dot" -> "Makefile"\n
+  MAKE_DOT+="Makefile" -> "cinclude2dot"\n
   EXTERNAL_DOT:= digraph "Femera external dependencies as built" \
     {\n $(HEAD_DOT) $(EXTERNAL_DOT) }\n
   MAKE_DOT:= digraph "Makefile dependencies" {\n $(HEAD_DOT) $(MAKE_DOT) }\n
@@ -607,7 +608,7 @@ external-flags: $(DOT_FLAGFILE).new
 $(DOT_FLAGFILE).new:
 	printf "%s" '$(DOT_FLAGS)' > $(@)
 endif
-ifeq ($(ENABLE_GOOGLETEST),ON)
+ifeq ($(ENABLE_GOOGLETEST),ON-FIXME-DISABLED)
 
 .PHONY: $(GTEST_FLAGFILE).new
 
@@ -627,15 +628,15 @@ external-flags: $(PYBIND11_FLAGFILE).new
 $(PYBIND11_FLAGFILE).new:
 	printf "%s" '$(PYBIND11_FLAGS)' > $(@)
 endif
-ifeq ($(ENABLE_BOOST_HEADERS),ON)
-
-.PHONY: $(BOOST_FLAGFILE).new
-
-external-flags: $(BOOST_FLAGFILE).new
-
-$(PYBIND11_BOOST).new:
-	printf "%s" '$(BOOST_FLAGS)' > $(@)
-endif
+#ifeq ($(ENABLE_BOOST_HEADERS),ON)
+#
+#.PHONY: $(BOOST_FLAGFILE).new
+#
+#external-flags: $(BOOST_FLAGFILE).new
+#
+#$(PYBIND11_BOOST).new:
+#	printf "%s" '$(BOOST_FLAGS)' > $(@)
+#endif
 
 #TODO REMOVE install-bats: external/get-bats.test.sh
 install-bats: external/bats-install.sh external/bats-install.test.bats
