@@ -3,7 +3,7 @@ ifeq ($(ENABLE_PETSC),ON)
   FMRFLAGS += -DFMR_HAS_PETSC
   LDLIBS += -lpetsc -ldl
   LIST_EXTERNAL += petsc
-  EXTERNAL_DOT+="Femera" -> "PETSc"\n
+  EXTERNAL_DOT+="Femera" -> "PETSc" [color="green"]\n
   
   PETSC_FLAGS += PETSC_ARCH=$(CPUMODEL)
   PETSC_FLAGS += --prefix=$(INSTALL_CPU)
@@ -38,7 +38,7 @@ ifeq ($(ENABLE_PETSC),ON)
   endif
   #TODO switch to mpich?
   ifeq ($(ENABLE_MPI),ON)
-    EXTERNAL_DOT+="PETSc" -> "MPI"\n
+    EXTERNAL_DOT+="PETSc" -> "MPI" [color="blue"]\n
     ifeq ($(HAS_MPI),ON)
       # PETSC_FLAGS += --with-mpi-dir="$(MPI_DIR)"
       PETSC_FLAGS += --with-mpi
@@ -90,21 +90,22 @@ ifeq ($(ENABLE_PETSC),ON)
   # PETSC_FLAGS += --with-packages-build-dir="$(BUILD_CPU)"# no worky
   #
   ifeq ($(ENABLE_PETSC_MPI4PY),ON)
-    EXTERNAL_DOT+="PETSc" -> "mpi4py"\n
+    EXTERNAL_DOT+="PETSc" -> "mpi4py" [color="blue"]\n
     EXTERNAL_DOT+="mpi4py" -> "MPI"\n
     EXTERNAL_DOT+="mpi4py" -> "Python"\n
     PETSC_FLAGS += --download-mpi4py
   endif
   ifeq ($(ENABLE_PETSC4PY),ON)
     # petsc4py requires numpy and (optional but highly recommended) mpi4py 
-    EXTERNAL_DOT+="PETSc" -> "petsc4py"\n
+    EXTERNAL_DOT+="PETSc" -> "petsc4py" [color="blue"]\n
     EXTERNAL_DOT+="petsc4py" -> "numpy"\n
     EXTERNAL_DOT+="numpy" -> "Python"\n
+    EXTERNAL_DOT+="Femera" -> "numpy" [color="green"]\n
     PETSC_FLAGS += --with-petsc4py
   endif
   ifeq ($(ENABLE_PETSC_HWLOC),ON)
     #TODO use hwloc instead of libnuma?
-    EXTERNAL_DOT+="PETSc" -> "hwloc"\n
+    EXTERNAL_DOT+="PETSc" -> "hwloc" [color="blue"]\n
     EXTERNAL_DOT+="Femera" -> "hwloc"\n
     PETSC_INSTALLS += hwloc
     PETSC_FLAGS += --download-hwloc
@@ -112,8 +113,8 @@ ifeq ($(ENABLE_PETSC),ON)
   ifeq ($(ENABLE_PETSC_ZIPLIBS),ON)
     PETSC_INSTALLS += zlib szlib
     PETSC_FLAGS += --download-zlib --download-szlib
-    EXTERNAL_DOT+="PETSc" -> "zlib"\n
-    EXTERNAL_DOT+="PETSc" -> "szlib"\n
+    EXTERNAL_DOT+="PETSc" -> "zlib" [color="blue"]\n
+    EXTERNAL_DOT+="PETSc" -> "szlib" [color="blue"]\n
   endif
   ifeq ($(ENABLE_HDF5),ON)
     EXTERNAL_DOT+="HDF5" -> "zlib"\n
@@ -122,9 +123,9 @@ ifeq ($(ENABLE_PETSC),ON)
   ifeq ($(ENABLE_PETSC_IMAGELIBS),ON)
     PETSC_INSTALLS += libjpeg libpng giflib
     PETSC_FLAGS += --download-libjpeg --download-libpng --download-giflib
-    EXTERNAL_DOT+="PETSc" -> "libjpeg"\n
-    EXTERNAL_DOT+="PETSc" -> "libpng"\n
-    EXTERNAL_DOT+="PETSc" -> "giflib"\n
+    EXTERNAL_DOT+="PETSc" -> "libjpeg" [color="blue"]\n
+    EXTERNAL_DOT+="PETSc" -> "libpng" [color="blue"]\n
+    EXTERNAL_DOT+="PETSc" -> "giflib" [color="blue"]\n
   endif
   ifeq ($(ENABLE_GMSH),ON)
     EXTERNAL_DOT+="Gmsh" -> "libjpeg"\n
@@ -132,25 +133,27 @@ ifeq ($(ENABLE_PETSC),ON)
     EXTERNAL_DOT+="Gmsh" -> "giflib"\n
   endif
   ifeq ($(ENABLE_OCCT),ON)
-    EXTERNAL_DOT+="PETSc" -> "OpenCASCADE"\n
+    EXTERNAL_DOT+="PETSc" -> "OpenCASCADE" [color="blue"]\n
     PETSC_INSTALLS += occt
     PETSC_FLAGS += --download-opencascade
   endif
+  ifeq ($(ENABLE_PYBIND11),ON)
+    EXTERNAL_DOT+="PETSc" -> "Boost" [color="blue"]\n
+  endif
   ifeq ($(ENABLE_GOOGLETEST),ON)
-    EXTERNAL_DOT+="PETSc" -> "GoogleTest"\n
-    EXTERNAL_DOT+="PETSc" -> "Boost"\n
+    EXTERNAL_DOT+="PETSc" -> "GoogleTest" [color="blue"]\n
     PETSC_INSTALLS += GoogleTest
     PETSC_FLAGS += --download-googletest
     PETSC_FLAGS += --download-boost
   endif
   ifeq ($(ENABLE_HDF5),ON)
-    EXTERNAL_DOT+="PETSc" -> "HDF5"\n
+    EXTERNAL_DOT+="PETSc" -> "HDF5" [color="blue"]\n
     LDLIBS += -lhdf5
     PETSC_INSTALLS += hdf5
     PETSC_FLAGS += --download-hdf5
   endif
   ifeq ($(ENABLE_PETSC_MOAB),ON)
-    EXTERNAL_DOT+="PETSc" -> "MOAB"\n
+    EXTERNAL_DOT+="PETSc" -> "MOAB" [color="blue"]\n
     ifeq ($(ENABLE_HDF5),ON)
       EXTERNAL_DOT+="MOAB" -> "HDF5"\n
     endif
@@ -158,39 +161,39 @@ ifeq ($(ENABLE_PETSC),ON)
     PETSC_FLAGS += --download-moab
   endif
   ifeq ($(ENABLE_PETSC_EXODUSII),ON)
-    EXTERNAL_DOT+="PETSc" -> "EXODUS II"\n
+    EXTERNAL_DOT+="PETSc" -> "EXODUS II" [color="blue"]\n
     PETSC_INSTALLS += exodusii
     PETSC_FLAGS += --download-exodusii
   endif
   ifeq ($(ENABLE_PETSC_CHACO),ON)
-    EXTERNAL_DOT+="PETSc" -> "Chaco"\n
+    EXTERNAL_DOT+="PETSc" -> "Chaco" [color="blue"]\n
     PETSC_INSTALLS += chaco
     PETSC_FLAGS += --download-chaco
   endif
   ifeq ($(ENABLE_PETSC_SCOTCH),ON)
-    EXTERNAL_DOT+="PETSc" -> "PTScotch"\n
+    EXTERNAL_DOT+="PETSc" -> "PTScotch" [color="blue"]\n
     PETSC_INSTALLS += ptscotch
     PETSC_FLAGS += --download-ptscotch
   endif
   ifeq ($(ENABLE_PETSC_METIS),ON)
-    EXTERNAL_DOT+="PETSc" -> "METIS"\n
+    EXTERNAL_DOT+="PETSc" -> "METIS" [color="blue"]\n
     PETSC_FLAGS += --download-metis
     PETSC_INSTALLS += metis
   endif
   ifeq ($(ENABLE_PETSC_PARMETIS),ON)
-    EXTERNAL_DOT+="PETSc" -> "ParMETIS"\n
+    EXTERNAL_DOT+="PETSc" -> "ParMETIS" [color="blue"]\n
     EXTERNAL_DOT+="ParMETIS" -> "MPI"\n
     PETSC_INSTALLS += parmetis
     PETSC_FLAGS += --download-parmetis
   endif
   ifeq ($(ENABLE_PETSC_FFTW),ON)
-    EXTERNAL_DOT+="PETSc" -> "fftw"\n
+    EXTERNAL_DOT+="PETSc" -> "fftw" [color="blue"]\n
     PETSC_INSTALLS += fftw
     PETSC_FLAGS += --download-fftw
   endif
   ifeq ($(ENABLE_PETSC_ML),ON)
     # Trilonos/ML multilevel preconditioning
-    EXTERNAL_DOT+="PETSc" -> "ml"\n
+    EXTERNAL_DOT+="PETSc" -> "ml" [color="blue"]\n
     PETSC_FLAGS += --download-ml
     PETSC_INSTALLS += ml
   endif
