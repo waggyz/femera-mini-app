@@ -38,13 +38,13 @@ ifeq ($(ENABLE_PETSC),ON)
   endif
   #TODO switch to mpich?
   ifeq ($(ENABLE_MPI),ON)
-    EXTERNAL_DOT+="PETSc" -> "MPI" [color="blue"]\n
-    ifeq ($(HAS_MPI),ON)
-      # PETSC_FLAGS += --with-mpi-dir="$(MPI_DIR)"
-      PETSC_FLAGS += --with-mpi
+    ifeq ($(ENABLE_PETSC_MPI),ON)
+      EXTERNAL_DOT+="PETSc" -> "MPI" [color="blue"]\n
+      FIXME PETSC_FLAGS += --download-openmpi
     else
-      #FIXME PETSC_FLAGS += --download-openmpi
+      EXTERNAL_DOT+="PETSc" -> "MPI"\n
       PETSC_FLAGS += --with-mpi
+      # PETSC_FLAGS += --with-mpi-dir="$(MPI_DIR)"
     endif
   else
     PETSC_FLAGS += --with-mpi=0
@@ -58,8 +58,10 @@ ifeq ($(ENABLE_PETSC),ON)
     EXTERNAL_DOT+="PETSc" -> "MKL"\n
     PETSC_FLAGS += --with-blaslapack-dir=$(INSTALL_CPU)/mkl/latest
   else
-    #TODO check for blas, and download one if not available
-    #PETSC_FLAGS += --download-fblaslapack=1
+    ifeq (TODO,ON)
+      #TODO check for blas, and download one if not available
+      PETSC_FLAGS += --download-fblaslapack
+    endif
   endif
   ifeq ($(ENABLE_CGNS),ON)
     #NOTE PETSc does not recognize high order branch
@@ -81,7 +83,7 @@ ifeq ($(ENABLE_PETSC),ON)
     PETSC_FLAGS += --with-x
     LDLIBS += -lX11
   endif
-  ifeq ($(ENABLE_PETSC_CUDA),ON)
+  ifeq ($(ENABLE_PETSC_NVIDIA),ON)
     EXTERNAL_DOT+="PETSc" -> "CUDA"\n
     PETSC_FLAGS += --with-cuda
   endif
