@@ -6,11 +6,13 @@ BRANCH="$3"
 TAG="$4"
 #
 if [ -z "$DIR" ]; then
-  echo "git.submodule.add: the first argument, submodule directory, is empty" >2
+  >&2 echo \
+  "Error calling git-submodule-add.sh: argument 1, submodule directory, is empty."
 return 1
 fi
 if [ -z "$URL" ]; then
-  echo "git.submodule.add: the second argument, repository URL, is empty" >2
+  >&2 echo \
+  "Error calling git-submodule-add.sh: argument 2, repository URL, is empty."
 return 1
 fi
 if [ ! -f ".gitmodules" ]; then
