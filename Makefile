@@ -244,7 +244,7 @@ ifeq ($(ENABLE_PYBIND11),ON)
 #  LIST_EXTERNAL += pybind11
   INSTALL_EXTERNAL+= $(BUILD_DIR)/external/pybind11-install.out
 #  PYBIND11_REQUIRES += boost-headers
-  EXTERNAL_DOT+="Femera" -> "pybind11" [color="green"]\n
+  EXTERNAL_DOT+="Femera" -> "pybind11" [color="cyan"]\n
   # BUILD_TREE += $(BUILD_DIR)/external/pybind11/
   EXTERNAL_DOT+="pybind11" -> "Boost"\n
   EXTERNAL_DOT+="pybind11" -> "Python"\n

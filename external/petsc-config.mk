@@ -3,7 +3,7 @@ ifeq ($(ENABLE_PETSC),ON)
   FMRFLAGS += -DFMR_HAS_PETSC
   LDLIBS += -lpetsc -ldl
   LIST_EXTERNAL += petsc
-  EXTERNAL_DOT+="Femera" -> "PETSc" [color="green"]\n
+  EXTERNAL_DOT+="Femera" -> "PETSc" [color="cyan"]\n
   
   PETSC_FLAGS += PETSC_ARCH=$(CPUMODEL)
   PETSC_FLAGS += --prefix=$(INSTALL_CPU)
@@ -43,6 +43,7 @@ ifeq ($(ENABLE_PETSC),ON)
       FIXME PETSC_FLAGS += --download-openmpi
     else
       EXTERNAL_DOT+="PETSc" -> "MPI"\n
+      #EXTERNAL_DOT+="PETSc" -> "MPI" [color="blue";style="dashed"]\n
       PETSC_FLAGS += --with-mpi
       # PETSC_FLAGS += --with-mpi-dir="$(MPI_DIR)"
     endif
@@ -102,7 +103,7 @@ ifeq ($(ENABLE_PETSC),ON)
     EXTERNAL_DOT+="PETSc" -> "petsc4py" [color="blue"]\n
     EXTERNAL_DOT+="petsc4py" -> "numpy"\n
     EXTERNAL_DOT+="numpy" -> "Python"\n
-    EXTERNAL_DOT+="Femera" -> "numpy" [color="green"]\n
+    EXTERNAL_DOT+="Femera" -> "numpy" [color="cyan"]\n
     PETSC_FLAGS += --with-petsc4py
   endif
   ifeq ($(ENABLE_PETSC_HWLOC),ON)

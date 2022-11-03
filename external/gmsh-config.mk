@@ -12,7 +12,7 @@ ifeq ($(ENABLE_GMSH),ON)
     LIST_EXTERNAL += gmsh
     GMSH_FLAGFILE:=$(BUILD_CPU)/external/gmsh-install.flags
   endif
-  EXTERNAL_DOT+="Femera" -> "Gmsh" [color="green"]\n
+  EXTERNAL_DOT+="Femera" -> "Gmsh" [color="cyan"]\n
   GMSH_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
   GMSH_FLAGS += -DCMAKE_PREFIX_PATH="$(INSTALL_CPU)"
   GMSH_FLAGS += -DENABLE_BUILD_LIB=ON
@@ -57,7 +57,7 @@ ifeq ($(ENABLE_GMSH),ON)
     GMSH_REQUIRES += fltk
     EXTERNAL_DOT+="Gmsh" -> "FLTK"\n
     EXTERNAL_DOT+="Gmsh" -> "X"\n    
-    EXTERNAL_DOT+="Femera" -> "FLTK" [color="green"]\n
+    EXTERNAL_DOT+="Femera" -> "FLTK" [color="cyan"]\n
     GMSH_FLAGS += -DENABLE_FLTK=ON
     #TODO It looks like native gmsh off-screen rendering does not work.
     #rhel7: sudo yum install mesa-libOSMesa-devel
@@ -79,7 +79,7 @@ ifeq ($(ENABLE_OCCT),ON)
 #  LIST_EXTERNAL += occt
   OCCT_REQUIRES += freetype
   EXTERNAL_DOT+="OpenCASCADE" -> "FreeType"\n
-  EXTERNAL_DOT+="Femera" -> "FreeType" [color="green"]\n
+  EXTERNAL_DOT+="Femera" -> "FreeType" [color="cyan"]\n
   ENABLE_FREETYPE:=ON
 #  OCCT_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
 #  OCCT_FLAGS += -DCMAKE_PREFIX_PATH="$(INSTALL_CPU)"
