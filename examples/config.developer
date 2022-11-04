@@ -27,25 +27,22 @@ ENABLE_LIBNUMA:=OFF
 ENABLE_BATS:=ON
 ENABLE_PYBIND11:=ON
 
-ENABLE_MKL:=ON
-
 ENABLE_GMSH:=ON
 ENABLE_GMSH_OMP:=ON
 ENABLE_GMSH_METIS:=ON
 ENABLE_FLTK:=ON
 
-#TODO change to ENABLE_PETSC_XXX? *********************************************
-# because these are downloaded and installed during PETSc config
+# External packages downloaded and installed by PETSc -------------------------
 ENABLE_OCCT:=ON
 ENABLE_GOOGLETEST:=ON
 ENABLE_HDF5:=ON
-#******************************************************************************
 
 ENABLE_PETSC:=ON
 ENABLE_PETSC_DEBUG:=ON
 
 ENABLE_PETSC_MPI:=OFF
 
+ENABLE_PETSC_BLASLAPACK:=ON
 ENABLE_PETSC_OMP:=ON
 ENABLE_PETSC_ZIPLIBS:=ON
 ENABLE_PETSC_IMAGELIBS:=ON
@@ -60,7 +57,11 @@ ENABLE_PETSC4PY:=ON
 # File formats
 ENABLE_CGNS:=ON
 ENABLE_PETSC_MOAB:=ON
+ENABLE_PETSC_PNETCDF:=ON
 ENABLE_PETSC_EXODUSII:=ON
+
+# PDE solver with adaptive mesh refinement (future expansion)
+#ENABLE_PETSC_LIBMESH:=OFF
 
 # Partitioners
 #NOTE PARMETIS is for nonprofit research or evaluation use only.

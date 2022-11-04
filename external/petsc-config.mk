@@ -61,7 +61,7 @@ ifeq ($(ENABLE_PETSC),ON)
   else
     ifeq (TODO,ON)
       #TODO check for blas, and download one if not available
-      PETSC_FLAGS += --download-fblaslapack
+      # ENABLE_PETSC_BLASLAPACK:=ON
     endif
   endif
   ifeq ($(ENABLE_CGNS),ON)
@@ -92,11 +92,21 @@ ifeq ($(ENABLE_PETSC),ON)
   #
   # PETSC_FLAGS += --with-packages-build-dir="$(BUILD_CPU)"# no worky
   #
+  ifeq ($(ENABLE_PETSC_BLASLAPACK),ON)
+    EXTERNAL_DOT+="PETSc" -> "BLAS" [color="blue"]\n
+    EXTERNAL_DOT+="PETSc" -> "LAPACK" [color="blue"]\n
+    PETSC_REQUIRES += blas
+    PETSC_REQUIRES += lapack
+    PETSC_FLAGS += --download-fblaslapack
+  endif
   ifeq ($(ENABLE_PETSC_MPI4PY),ON)
     EXTERNAL_DOT+="PETSc" -> "mpi4py" [color="blue"]\n
     EXTERNAL_DOT+="mpi4py" -> "MPI"\n
     EXTERNAL_DOT+="mpi4py" -> "Python"\n
     PETSC_FLAGS += --download-mpi4py
+    ifeq ($(ENABLE_PYMERA),ON)
+      EXTERNAL_DOT+="Pymera" -> "mpi4py"\n
+    endif
   endif
   ifeq ($(ENABLE_PETSC4PY),ON)
     # petsc4py requires numpy and (optional but highly recommended) mpi4py 
@@ -105,11 +115,15 @@ ifeq ($(ENABLE_PETSC),ON)
     EXTERNAL_DOT+="numpy" -> "Python"\n
     EXTERNAL_DOT+="Femera" -> "numpy" [color="cyan"]\n
     PETSC_FLAGS += --with-petsc4py
+    ifeq ($(ENABLE_PYMERA),ON)
+      EXTERNAL_DOT+="Pymera" -> "numpy"\n
+      EXTERNAL_DOT+="Pymera" -> "petsc4py"\n
+    endif
   endif
   ifeq ($(ENABLE_PETSC_HWLOC),ON)
     #TODO use hwloc instead of libnuma?
     EXTERNAL_DOT+="PETSc" -> "hwloc" [color="blue"]\n
-    EXTERNAL_DOT+="Femera" -> "hwloc"\n
+    EXTERNAL_DOT+="Femera" -> "hwloc" [style="dotted"]\n
     PETSC_INSTALLS += hwloc
     PETSC_FLAGS += --download-hwloc
   endif
@@ -157,24 +171,34 @@ ifeq ($(ENABLE_PETSC),ON)
   endif
   ifeq ($(ENABLE_PETSC_MOAB),ON)
     EXTERNAL_DOT+="PETSc" -> "MOAB" [color="blue"]\n
+    EXTERNAL_DOT+="Femera" -> "MOAB" [style="dotted"]\n
     ifeq ($(ENABLE_HDF5),ON)
       EXTERNAL_DOT+="MOAB" -> "HDF5"\n
     endif
     PETSC_INSTALLS += moab
     PETSC_FLAGS += --download-moab
   endif
+  ifeq ($(ENABLE_PETSC_PNETCDF),ON)
+    EXTERNAL_DOT+="PETSc" -> "PnetCDF" [color="blue"]\n
+    EXTERNAL_DOT+="Femera" -> "PnetCDF" [style="dotted"]\n
+    PETSC_INSTALLS += pnetcdf
+    PETSC_FLAGS += --download-pnetcdf
+  endif
   ifeq ($(ENABLE_PETSC_EXODUSII),ON)
     EXTERNAL_DOT+="PETSc" -> "EXODUS II" [color="blue"]\n
+    EXTERNAL_DOT+="Femera" -> "EXODUS II" [style="dotted"]\n
     PETSC_INSTALLS += exodusii
     PETSC_FLAGS += --download-exodusii
   endif
   ifeq ($(ENABLE_PETSC_CHACO),ON)
     EXTERNAL_DOT+="PETSc" -> "Chaco" [color="blue"]\n
+    EXTERNAL_DOT+="Femera" -> "Chaco" [style="dotted"]\n
     PETSC_INSTALLS += chaco
     PETSC_FLAGS += --download-chaco
   endif
   ifeq ($(ENABLE_PETSC_SCOTCH),ON)
     EXTERNAL_DOT+="PETSc" -> "PTScotch" [color="blue"]\n
+    EXTERNAL_DOT+="Femera" -> "PTScotch" [style="dotted"]\n
     PETSC_INSTALLS += ptscotch
     PETSC_FLAGS += --download-ptscotch
   endif
@@ -185,18 +209,21 @@ ifeq ($(ENABLE_PETSC),ON)
   endif
   ifeq ($(ENABLE_PETSC_PARMETIS),ON)
     EXTERNAL_DOT+="PETSc" -> "ParMETIS" [color="blue"]\n
+    EXTERNAL_DOT+="Femera" -> "ParMETIS" [style="dotted"]\n
     EXTERNAL_DOT+="ParMETIS" -> "MPI"\n
     PETSC_INSTALLS += parmetis
     PETSC_FLAGS += --download-parmetis
   endif
   ifeq ($(ENABLE_PETSC_FFTW),ON)
     EXTERNAL_DOT+="PETSc" -> "fftw" [color="blue"]\n
+    EXTERNAL_DOT+="Femera" -> "fftw" [style="dotted"]\n
     PETSC_INSTALLS += fftw
     PETSC_FLAGS += --download-fftw
   endif
   ifeq ($(ENABLE_PETSC_ML),ON)
     # Trilonos/ML multilevel preconditioning
     EXTERNAL_DOT+="PETSc" -> "ml" [color="blue"]\n
+    EXTERNAL_DOT+="Femera" -> "ml" [style="dotted"]\n
     PETSC_FLAGS += --download-ml
     PETSC_INSTALLS += ml
   endif
@@ -210,10 +237,11 @@ ifeq ($(ENABLE_PETSC),ON)
   # partitioners
   #PETSC_FLAGS += --download-party
   #
-  # future expansion
-  #PETSC_FLAGS += --download-moose
+  # Direct solver
   #PETSC_FLAGS += --download-mumps
-  #PETSC_FLAGS += --download-pnetcdf
+  #
+  # PDE solver (FE/FD) packages
+  #PETSC_FLAGS += --download-moose
   #PETSC_FLAGS += --download-libmesh
   #
   #****************************************************************************

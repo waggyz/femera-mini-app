@@ -33,13 +33,16 @@ ENABLE_LIBNUMA:=ON
 ENABLE_BATS:=ON
 ENABLE_GOOGLETEST:=ON
 
+ENABLE_PYMERA:=ON
 ENABLE_PYBIND11:=ON
 # ENABLE_BOOST_HEADERS:=ON
 # ENABLE_BOOST:=OFF
 
 ENABLE_MPI:=ON
 
-ENABLE_MKL:=ON
+# The Intel Math Kernel Library (MKL) appears to be no longer available, and
+# has been replaced by oneMKL for oneAPI.
+ENABLE_MKL:=OFF
 
 ENABLE_GMSH:=ON
 ENABLE_GMSH_OMP:=ON

@@ -168,8 +168,12 @@ endif
 #NOTE CGNS, FLTK, FreeType, PETSc build in external/*/
 # Libraries and applications available ----------------------------------------
 ifeq ($(ENABLE_ZYCLOPS),ON)
+  EXTERNAL_DOT+="Femera" -> "Zyclops" [color="cyan"]\n
   FMRFLAGS+= -DFMR_HAS_ZYCLOPS
 endif
+  ifeq ($(ENABLE_PYMERA),ON)
+    EXTERNAL_DOT+="Femera" -> "Pymera" [color="cyan"]\n
+  endif
 ifeq ($(ENABLE_OMP),ON)
   EXTERNAL_DOT+="Femera" -> "OpenMP"\n
   # FMRFLAGS+= -DFMR_HAS_OMP not needed; OpenMP defines _OPENMP:
@@ -248,6 +252,9 @@ ifeq ($(ENABLE_PYBIND11),ON)
   # BUILD_TREE += $(BUILD_DIR)/external/pybind11/
   EXTERNAL_DOT+="pybind11" -> "Boost"\n
   EXTERNAL_DOT+="pybind11" -> "Python"\n
+  ifeq ($(ENABLE_PYMERA),ON)
+    EXTERNAL_DOT+="Pymera" -> "pybind11"\n
+  endif
   # FMRFLAGS += -DFMR_HAS_PYBIND11
   PYBIND11_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
   PYBIND11_FLAGS += -DDOWNLOAD_CATCH=0
@@ -281,6 +288,31 @@ ifeq ($(ENABLE_DOT),ON)
     HEAD_DOT+=fontsize="12";\n
     HEAD_DOT+=fontname="Helvetica";\n
     HEAD_DOT+=clusterrank="local";\n
+    #
+    LEGEND_DOT+={
+    #LEGEND_DOT+=subgraph cluster_01 { \n
+    #LEGEND_DOT+=graph [labelloc="b" labeljust="l" label="Legend"];
+    #LEGEND_DOT+=rankdir=LR\n
+    LEGEND_DOT+=node [shape=plaintext]\n
+    #LEGEND_DOT+=  labelloc="b" labeljust="l" label="Legend";\n
+    LEGEND_DOT+=  key [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0">\n
+    LEGEND_DOT+=    <tr><td align="right" port="i1">Installs during Femera build</td></tr>\n
+    LEGEND_DOT+=    <tr><td align="right" port="i2">Installs during PETSc config</td></tr>\n
+    LEGEND_DOT+=    <tr><td align="right" port="i3">Uses</td></tr>\n
+    LEGEND_DOT+=    <tr><td align="right" port="i4">Not implemented yet</td></tr>\n
+    LEGEND_DOT+=    </table>>]\n
+    LEGEND_DOT+=  key2 [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0">\n
+    LEGEND_DOT+=    <tr><td port="i1">&nbsp;</td></tr>\n
+    LEGEND_DOT+=    <tr><td port="i2">&nbsp;</td></tr>\n
+    LEGEND_DOT+=    <tr><td port="i3">&nbsp;</td></tr>\n
+    LEGEND_DOT+=    <tr><td port="i4">&nbsp;</td></tr>\n
+    LEGEND_DOT+=    </table>>]\n
+    LEGEND_DOT+=  key:i1:e -> key2:i1:w [color=cyan] {rank=same; key, key2 }\n
+    LEGEND_DOT+=  key:i2:e -> key2:i2:w [color=blue] {rank=same; key, key2 }\n
+    LEGEND_DOT+=  key:i3:e -> key2:i3:w {rank=same; key, key2 }\n
+    LEGEND_DOT+=  key:i4:e -> key2:i4:w [style=dotted] {rank=same; key, key2 }\n
+    LEGEND_DOT+=}\n
+    #LEGEND_DOT+=}
   endif
   DOT_FLAGFILE:=$(BUILD_DIR)/external/cinclude2dot-install.flags
 endif
@@ -289,7 +321,8 @@ ifeq ($(ENABLE_DOT),ON)
   INSTALL_EXTERNAL+= $(BUILD_DIR)/external/cinclude2dot-install.out
   MAKE_DOT+="Makefile" -> "cinclude2dot"\n
   EXTERNAL_DOT:= digraph "Femera external dependencies as built" \
-    {\n $(HEAD_DOT) $(EXTERNAL_DOT) }\n
+    {\n $(HEAD_DOT) $(LEGEND_DOT) $(EXTERNAL_DOT) }\n
+  #EXTERNAL_DOT+=$(shell cat external/build-external-legend.dot)
   MAKE_DOT:= digraph "Makefile dependencies" {\n $(HEAD_DOT) $(MAKE_DOT) }\n
   EXTERNAL_DOTFILE:= $(BUILD_DIR)/external/external.dot
   MAKE_DOTFILE:= $(BUILD_DIR)/make.dot
@@ -494,6 +527,7 @@ ifeq ($(ENABLE_DOT_PNG),ON)
 	@dot external/external.dot -Tpng -o $(BUILD_DIR)/external/external.png
 endif
 	@printf '%s' '$(EXTERNAL_DOT)' | sed 's/\\n/\n/g' > '$(EXTERNAL_DOTFILE)'
+	#@cat 'external/build-external-legend.dot' >> '$(EXTERNAL_DOTFILE)'
 	@dot '$(EXTERNAL_DOTFILE)' -Teps -o $(BUILD_DIR)/external/build-external.eps
 endif
 endif
