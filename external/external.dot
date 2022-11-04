@@ -1,32 +1,102 @@
-digraph "Femera dependencies" {
+digraph "Femera external dependencies as built" {
  overlap=scale;
- size="6,3";
+ size="16,8";
  ratio="fill";
- fontsize="12";
+ fontsize="14";
  fontname="Helvetica";
  clusterrank="local";
- "CGNS" -> "Femera"
- "HDF5" -> "CGNS"
- "Gmsh" -> "Femera"
- "OpenMP" -> "Gmsh"
- "pybind11" -> "Gmsh"
- "CGNS" -> "Gmsh"
- "FLTK" -> "Gmsh"
- "X" -> "Gmsh"
- "OpenCASCADE" -> "Gmsh"
- "FreeType" -> "OpenCASCADE"
- "MPI" -> "HDF5"
- "MKL" -> "Femera"
- "PETSc" -> "Femera"
- "OpenMP" -> "PETSc"
- "MPI" -> "PETSc"
- "MKL" -> "PETSc"
- "Gmsh" -> "PETSc"
- "HDF5" -> "PETSc"
- "Chaco" -> "PETSc"
- "OpenMP" -> "Femera"
- "MPI" -> "Femera"
- "libnuma" -> "Femera"
- "GoogleTest" -> "Femera"
- "pybind11" -> "Femera"
+ { node [shape=plaintext]
+ key [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0">
+ <tr><td align="right" port="i1">Installs during Femera build</td></tr>
+ <tr><td align="right" port="i2">Installs during PETSc config</td></tr>
+ <tr><td align="right" port="i3">Uses</td></tr>
+ <tr><td align="right" port="i4">Not implemented yet</td></tr>
+ </table>>]
+ key2 [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0">
+ <tr><td port="i1">&nbsp;</td></tr>
+ <tr><td port="i2">&nbsp;</td></tr>
+ <tr><td port="i3">&nbsp;</td></tr>
+ <tr><td port="i4">&nbsp;</td></tr>
+ </table>>]
+ key:i1:e -> key2:i1:w [color=cyan] {rank=same; key, key2 }
+ key:i2:e -> key2:i2:w [color=blue] {rank=same; key, key2 }
+ key:i3:e -> key2:i3:w {rank=same; key, key2 }
+ key:i4:e -> key2:i4:w [style=dotted] {rank=same; key, key2 }
+ }
+ "Femera" -> "CGNS" [color="cyan"]
+ "CGNS" -> "HDF5"
+ "Femera" -> "Gmsh" [color="cyan"]
+ "Gmsh" -> "OpenMP"
+ "Gmsh" -> "pybind11"
+ "Gmsh" -> "numpy"
+ "Gmsh" -> "CGNS"
+ "Gmsh" -> "FLTK"
+ "Gmsh" -> "X"
+     "Femera" -> "FLTK" [color="cyan"]
+ "Gmsh" -> "OpenCASCADE"
+ "OpenCASCADE" -> "FreeType"
+ "Femera" -> "FreeType" [color="cyan"]
+ "Femera" -> "PETSc" [color="cyan"]
+ "PETSc" -> "OpenMP"
+ "PETSc" -> "MPI"
+ "PETSc" -> "CGNS"
+ "PETSc" -> "Gmsh"
+ "Gmsh" -> "METIS"
+ "PETSc" -> "X"
+ "PETSc" -> "BLAS" [color="blue"]
+ "PETSc" -> "LAPACK" [color="blue"]
+ "PETSc" -> "mpi4py" [color="blue"]
+ "mpi4py" -> "MPI"
+ "mpi4py" -> "Python"
+ "Pymera" -> "mpi4py"
+ "PETSc" -> "petsc4py" [color="blue"]
+ "petsc4py" -> "numpy"
+ "numpy" -> "Python"
+ "Femera" -> "numpy" [color="cyan"]
+ "Pymera" -> "numpy"
+ "Pymera" -> "petsc4py"
+ "PETSc" -> "hwloc" [color="blue"]
+ "Femera" -> "hwloc" [style="dotted"]
+ "PETSc" -> "zlib" [color="blue"]
+ "PETSc" -> "szlib" [color="blue"]
+ "HDF5" -> "zlib"
+ "HDF5" -> "szlib"
+ "PETSc" -> "libjpeg" [color="blue"]
+ "PETSc" -> "libpng" [color="blue"]
+ "PETSc" -> "giflib" [color="blue"]
+ "Gmsh" -> "libjpeg"
+ "Gmsh" -> "libpng"
+ "Gmsh" -> "giflib"
+ "PETSc" -> "OpenCASCADE" [color="blue"]
+ "PETSc" -> "Boost" [color="blue"]
+ "PETSc" -> "GoogleTest" [color="blue"]
+ "PETSc" -> "HDF5" [color="blue"]
+ "PETSc" -> "MOAB" [color="blue"]
+ "Femera" -> "MOAB" [style="dotted"]
+ "MOAB" -> "HDF5"
+ "PETSc" -> "PnetCDF" [color="blue"]
+ "Femera" -> "PnetCDF" [style="dotted"]
+ "PETSc" -> "EXODUS II" [color="blue"]
+ "Femera" -> "EXODUS II" [style="dotted"]
+ "PETSc" -> "Chaco" [color="blue"]
+ "Femera" -> "Chaco" [style="dotted"]
+ "PETSc" -> "PTScotch" [color="blue"]
+ "Femera" -> "PTScotch" [style="dotted"]
+ "PETSc" -> "METIS" [color="blue"]
+ "PETSc" -> "ParMETIS" [color="blue"]
+ "Femera" -> "ParMETIS" [style="dotted"]
+ "ParMETIS" -> "MPI"
+ "PETSc" -> "fftw" [color="blue"]
+ "Femera" -> "fftw" [style="dotted"]
+ "PETSc" -> "ml" [color="blue"]
+ "Femera" -> "ml" [style="dotted"]
+ "Femera" -> "Zyclops" [color="cyan"]
+ "Femera" -> "Pymera" [color="cyan"]
+ "Femera" -> "OpenMP"
+ "Femera" -> "MPI"
+ "Femera" -> "GoogleTest"
+ "Femera" -> "pybind11" [color="cyan"]
+ "pybind11" -> "Boost"
+ "pybind11" -> "Python"
+ "Pymera" -> "pybind11"
  }

@@ -283,9 +283,9 @@ ifeq ($(ENABLE_DOT),ON)
   else
     MAKE_DOT+="Makefile" -> "dot"\n
     HEAD_DOT+=overlap=scale;\n
-    HEAD_DOT+=size="6,3";\n
+    HEAD_DOT+=size="16,8";\n
     HEAD_DOT+=ratio="fill";\n
-    HEAD_DOT+=fontsize="12";\n
+    HEAD_DOT+=fontsize="14";\n
     HEAD_DOT+=fontname="Helvetica";\n
     HEAD_DOT+=clusterrank="local";\n
     #
