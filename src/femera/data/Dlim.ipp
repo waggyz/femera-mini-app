@@ -6,7 +6,7 @@ namespace femera {
   data::Dlim::Dlim (const femera::Work::Core_ptrs_t core)
   noexcept : Data (core) {
     this->name      ="Femera CSV file handler";
-    this->abrv      ="csv";
+    this->abrv      =".csv";
     this->task_type = task_cast (Task_type::Dlim);
   }
   inline
@@ -17,6 +17,21 @@ namespace femera {
   void data::Dlim::task_exit () {
   }
 FMR_WARN_INLINE_OFF
+// This warning is not appropriate for recursively building a CSV line.
+FMR_WARN_NULLPTR0_OFF
+//TODO See if this is fixable.
+  template <typename L> inline
+  std::string data::Dlim::make_data_line
+  (const std::string& line, const L last) {
+    return line + data::Dlim::csv_item (last);
+  }
+  template <typename F, typename ...R> inline
+  std::string data::Dlim::make_data_line
+  (const std::string& line, const F first, R... rest) {
+    return make_data_line
+      (line + data::Dlim::csv_item (first)+",", rest...);
+  }
+FMR_WARN_NULLPTR0_ON
   template <typename ...Args> inline
   std::string data::Dlim::data_line (Args... args) {
     return make_data_line (std::string(""), args...);
@@ -29,13 +44,6 @@ FMR_WARN_INLINE_OFF
   std::string data::Dlim::csv_item (const char* str) {
     return "\""+std::string(str)+"\"";
   }
-  inline
-  std::string data::Dlim::csv_item (const float f) {
-    std::array <char, 15 + 1> buf;
-    std::snprintf (&buf[0],buf.size(),"%1.*e",
-      std::numeric_limits<float>::max_digits10 - 1, double(f));
-    return std::string(&buf[0]);
-  }
  /* Floats have 7 digits of accuracy. Doubles have 15. See:
   * www.educative.io/edpresso/what-is-the-difference-between-float-and-double
   * But,  "DBL_DECIMAL_DIG is the minimum number of significant digits to print
@@ -43,31 +51,35 @@ FMR_WARN_INLINE_OFF
   * all double." See:
   * https://stackoverflow.com/questions/26183735
   * /print-all-significant-digits-in-sprintf-scientific-notation
+  * FLT_DECIMAL_DIG and LDBL_DECIMAL_DIG are defined in the original C interface,
+  * but DBL_DECIMAL_DIG is not until C++17.
   */
+  inline
+  std::string data::Dlim::csv_item (const float f) {
+    std::array <char, 15 + 1> buf;
+    std::snprintf (&buf[0], buf.size(), "%1.*e",
+      std::numeric_limits<float>::max_digits10 - 1, double(f));
+    return std::string(&buf[0]);
+  }
   inline
   std::string data::Dlim::csv_item (const double f) {
     std::array <char, 23 + 1> buf;
-    std::snprintf (&buf[0], buf.size(),"%1.*E",
-      std::numeric_limits<double>::max_digits10 - 1,  f);
+    std::snprintf (&buf[0], buf.size(), "%1.*E",
+      std::numeric_limits<double>::max_digits10 - 1, f);
     return std::string(&buf[0]);
   }
+  /* TODO handle char type explicitly to avoid suppressing warnings below.
+  std::string data::Dlim::csv_item (char c) {
+    return std::to_string (c);
+  }*/
   template <typename I> inline
   std::string data::Dlim::csv_item (const I integer,
-    typename std::enable_if<std::is_integral<I>::value >::type*) {
+    typename std::enable_if<std::is_integral<I>::value>::type*) {
     return std::to_string (integer);
   }
   inline
   std::string data::Dlim::make_data_line (const std::string& line) {
     return line;
-  }
-  template <typename L> inline
-  std::string data::Dlim::make_data_line (const std::string& line, const L last) {
-    return line + data::Dlim::csv_item (last);
-  }
-  template <typename F, typename ...R> inline
-  std::string data::Dlim::make_data_line
-  (const std::string& line, const F first, R... rest) {
-    return make_data_line (line + data::Dlim::csv_item (first)+",", rest...);
   }
 FMR_WARN_INLINE_ON
 }//end femera namespace

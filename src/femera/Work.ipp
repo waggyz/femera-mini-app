@@ -35,6 +35,18 @@ namespace femera {
     return W;
   }
   inline
+  bool Work::has_task (const Work::Task_path_t& path)
+  noexcept {
+    //const auto W = Work::get_work (path);
+    return Work::get_work (path) != nullptr;
+  }
+  inline
+  bool Work::has_task (const Work_type wt, const fmr::Local_int ix)
+  noexcept {
+    //const auto W = Work::get_work (wt, ix);
+    return Work::get_work (wt, ix) != nullptr;
+  }
+  inline
   fmr::Local_int Work::get_task_n ()
   noexcept {
     return fmr::Local_int (this->task_list.size ());
@@ -72,17 +84,19 @@ namespace femera {
   inline
   bool Work::did_init ()
   noexcept {
-    return this->did_init_tf;
+    return this->did_work_init;
   }
   inline
   bool Work::set_init (const bool tf)
   noexcept {
 #ifdef FMR_DEBUG
-    if (did_init_tf == tf) {
-      printf ("%s redundant set_init (%s)\n", abrv.c_str(), tf?"true":"false");}
+    if (did_work_init == tf) {
+      printf ("%s redundant set_init (%s)\n", abrv.c_str(),
+        tf ? "true":"false");
+    }
 #endif
-    this->did_init_tf = tf;
-    return this->did_init_tf;
+    this->did_work_init = tf;
+    return this->did_work_init;
   }
   inline
   std::string Work::get_did_init_list ()
@@ -91,7 +105,7 @@ namespace femera {
     if (n>0) {
       for (fmr::Local_int i=0; i<n; i++) {
         const auto W = this->get_work (i);
-        if (W->did_init_tf) {
+        if (W->did_work_init) {
           list += W->get_abrv ();
           if (i < (n - 1)) { list +=" "; }
     } } }
@@ -104,7 +118,7 @@ namespace femera {
     if (n>0) {
       for (fmr::Local_int i=0; i<n; i++) {
         const auto W = this->get_work (i);
-        if (! W->did_init_tf) {
+        if (! W->did_work_init) {
           list += W->get_abrv ();
           if (i < (n - 1)) { list +=" "; }
     } } }

@@ -11,7 +11,7 @@ namespace femera {
   }
   inline
   void data::Moab::task_init (int*, char**) {
-    this->set_init (false);
+    this->set_init (false);//TODO MOAB not yet implemented
   }
   inline
   void data::Moab::task_exit () {}

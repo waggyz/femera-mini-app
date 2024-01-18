@@ -24,6 +24,7 @@ else
   cd "$SRC_DIR"
   echo "./configure $FLAGS"
   eval ./configure $FLAGS
+  #
   make PETSC_ARCH=$CPUMODEL all
   # NOTE make test takes about 4 hr to run, may only show failed test output
   # make PETSC_ARCH=$CPUMODEL test

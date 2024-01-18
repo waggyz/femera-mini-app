@@ -2,6 +2,8 @@
 #
 # fmrexec -n 2 --bind-to core -map-by node:pe=2 build/femera/mini -n2 -o2
 #
+#FIXME This is for OpenMPI. Need one for MPICH.
+#
 FMREXE="femera"
 MAP_BY="node"
 NCPU=`fmrcores`
@@ -105,11 +107,15 @@ if [ -z "$NMPI" ]; then
   fi
 fi
 MPIARGS+=" -n ""$NMPI"
+
+if [ 0 -eq 1 ]; then #FIXME disable for MPICH CLI debugging
 if [ -z "$NOMP" ]; then
   let "NOMP = $NCPU / $NMPI"
   if [ "$NOMP" -lt "1" ]; then NOMP=1; fi
 fi
 MPIARGS+=" -map-by $MAP_BY:pe=""$NOMP"
+fi
+
 if [ -n "$VGARGS" ]; then
   VGEXE="valgrind"
 fi
@@ -120,10 +126,45 @@ fi
 FMREXE+=" -fmr:o$NOMP"
 #FMREXE+=" -o$NOMP" #TODO pass -o or -fmr:o ?
 RUN=$VGEXE"$VGARGS"mpiexec$MPIARGS" "$FMREXE$FMRARGS
-echo $RUN
-if [ "$DO_RUN" == "true" ]; then
-  $RUN
+
+LOCAL_INSTALL="/home/dwagner5/.local"
+#FIXME argument?
+
+TMP_LIBRARY_PATH=$LD_LIBRARY_PATH
+if ! [[ "$TMP_LIBRARY_PATH:" =~ "$LOCAL_INSTALL/lib64:" ]]
+then
+  TMP_LIBRARY_PATH="$LOCAL_INSTALL/lib64:$TMP_LIBRARY_PATH"
 fi
+if ! [[ "$TMP_LIBRARY_PATH:" =~ "$LOCAL_INSTALL/lib:" ]]
+then
+  TMP_LIBRARY_PATH="$LOCAL_INSTALL/lib:$TMP_LIBRARY_PATH"
+fi
+CPUMODEL=`fmrmodel`
+if ! [ -z "$CPUMODEL" ]; then
+  if ! [[ "$TMP_LIBRARY_PATH:" =~ "$LOCAL_INSTALL/$CPUMODEL/lib64:" ]]
+  then
+    TMP_LIBRARY_PATH="$LOCAL_INSTALL/$CPUMODEL/lib64:$TMP_LIBRARY_PATH"
+  fi
+  if ! [[ "$LD_LIBRARY_PATH:" =~ "$LOCAL_INSTALL/$CPUMODEL/lib:" ]]
+  then
+    TMP_LIBRARY_PATH="$LOCAL_INSTALL/$CPUMODEL/lib:$TMP_LIBRARY_PATH"
+  fi
+fi
+
+#TODO does setting HWLOC_XMLFILE speed up MPICH MPI_init (..)?
+#TODO ...not on development VM
+#F="$LOCAL_INSTALL/$CPUMODEL/share/hwloc/hwloc.xml"
+#if [ -f "$F" ]; then
+#  echo "LD_LIBRARY_PATH=$TMP_LIBRARY_PATH HWLOC_XMLFILE=$F HWLOC_THISSYSTEM=1 $RUN"
+#  if [ "$DO_RUN" == "true" ]; then
+#    LD_LIBRARY_PATH=$TMP_LIBRARY_PATH HWLOC_XMLFILE=$F HWLOC_THISSYSTEM=1 $RUN
+#  fi
+#else
+  echo "LD_LIBRARY_PATH=$TMP_LIBRARY_PATH $RUN"
+  if [ "$DO_RUN" == "true" ]; then
+    LD_LIBRARY_PATH=$TMP_LIBRARY_PATH $RUN
+  fi
+#fi
 exit $?
 
 if [ 0 -eq 1 ]; then
@@ -147,4 +188,4 @@ if [ 0 -eq 1 ]; then
           "$@"
   exit $?
 fi
-#
+

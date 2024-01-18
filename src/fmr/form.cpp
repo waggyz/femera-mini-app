@@ -50,6 +50,23 @@ std::string detail::form::si_unit// implemented here, not inline
       timestr.c_str(), int(ms % 1000));
     return std::string (buf.data());
   }
+  /* The next two functions are from:
+     https://stackoverflow.com/questions/8362094/replace-multiple-spaces-
+     with-one-space-in-a-string
+   */
+  bool form::are_both_spaces (const char lhs, const char rhs) {
+    // checks if two characters are the same
+    return (lhs == rhs) && (lhs == ' ');
+  }
+  std::string form::delete_extra_spaces  ( std::string str ) {
+    // removes extra spaces
+    std::string::iterator new_end = std::unique(str.begin(),
+      str.end(), form::are_both_spaces);
+    str.erase (new_end, str.end());
+    return str;
+   }
 
 }// end fmr:: namespace
+namespace fmr { namespace form {
+} }// end fmr::form:: namespace
 #undef FMR_DEBUG

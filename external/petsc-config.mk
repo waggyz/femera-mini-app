@@ -1,16 +1,25 @@
 #!/usr/bin/make
 ifeq ($(ENABLE_PETSC),ON)
   FMRFLAGS += -DFMR_HAS_PETSC
-  LDLIBS += -lpetsc -ldl
+  LDLIBS += 
+#  ifeq ($(USE_STATIC_LIBS),ON)
+#    LDLIBS += $(INSTALL_CPU)/lib/libpetsc.a $(INSTALL_CPU)/lib/libdl.a
+#  else
+    LDLIBS += -lpetsc -ldl
+#  endif
   LIST_EXTERNAL += petsc
   EXTERNAL_DOT+="Femera" -> "PETSc" [color="cyan"]\n
+  EXTERNAL_DOT+="PETSc" -> "Bison" [color="cyan"]\n
+  EXTERNAL_DOT+="PETSc" -> "Sowing" [color="cyan"]\n
   
   PETSC_FLAGS += PETSC_ARCH=$(CPUMODEL)
   PETSC_FLAGS += --prefix=$(INSTALL_CPU)
+  PETSC_FLAGS += --with-packages-download-dir=$(FMRDIR)/external/
+  PETSC_FLAGS += --with-packages-build-dir=$(BUILD_CPU)/external/
   
   # Build static libs
   PETSC_FLAGS += --with-shared-libraries=0
-  PETSC_FLAGS += --with-scalar-type=complex
+  # PETSC_FLAGS += --with-scalar-type=complex
   
   ifeq ($(ENABLE_PETSC_DEBUG),ON)
     PETSC_FLAGS += --with-debugging
@@ -24,13 +33,13 @@ ifeq ($(ENABLE_PETSC),ON)
   #-O3 -march=native -mtune=native'
   PETSC_CFLAGS:= $(filter-out -fvisibility-inlines-hidden,$(OPTFLAGS))
   PETSC_FLAGS += COPTFLAGS='$(PETSC_CFLAGS)'
+  PETSC_FLAGS += CXXOPTFLAGS='$(OPTFLAGS)'
   
   PETSC_FFLAGS:= $(filter-out -fvisibility-inlines-hidden,$(OPTFLAGS))
   PETSC_FFLAGS:= $(filter-out -fno-builtin-sin,$(PETSC_FFLAGS))
   PETSC_FFLAGS:= $(filter-out -fno-builtin-cos,$(PETSC_FFLAGS))
-  PETSC_FLAGS += FOPTFLAGS='$(PETSC_FFLAGS)'
   
-  PETSC_FLAGS += CXXOPTFLAGS='$(OPTFLAGS)'
+  PETSC_FLAGS += FOPTFLAGS='$(PETSC_FFLAGS)'
 
   ifeq ($(ENABLE_PETSC_OMP),ON)
     EXTERNAL_DOT+="PETSc" -> "OpenMP"\n
@@ -43,8 +52,8 @@ ifeq ($(ENABLE_PETSC),ON)
       FIXME PETSC_FLAGS += --download-openmpi
     else
       EXTERNAL_DOT+="PETSc" -> "MPI"\n
-      #EXTERNAL_DOT+="PETSc" -> "MPI" [color="blue";style="dashed"]\n
       PETSC_FLAGS += --with-mpi
+      # EXTERNAL_DOT+="PETSc" -> "MPI" [color="blue";style="dashed"]\n
       # PETSC_FLAGS += --with-mpi-dir="$(MPI_DIR)"
     endif
   else
@@ -66,9 +75,10 @@ ifeq ($(ENABLE_PETSC),ON)
   endif
   ifeq ($(ENABLE_CGNS),ON)
     #NOTE PETSc does not recognize high order branch
-    EXTERNAL_DOT+="PETSc" -> "CGNS"\n
+    EXTERNAL_DOT+="PETSc" -> "CGNS" [color="blue"]\n
     PETSC_REQUIRES += cgns
-    PETSC_MAKE_FLAGS += --with-cgns-dir=$(INSTALL_CPU)
+    # PETSC_MAKE_FLAGS += --with-cgns-dir=$(INSTALL_CPU)
+    PETSC_FLAGS += --download-cgns
   endif
   ifeq ($(ENABLE_GMSH),ON)
     EXTERNAL_DOT+="PETSc" -> "Gmsh"\n
@@ -95,17 +105,25 @@ ifeq ($(ENABLE_PETSC),ON)
   ifeq ($(ENABLE_PETSC_BLASLAPACK),ON)
     EXTERNAL_DOT+="PETSc" -> "BLAS" [color="blue"]\n
     EXTERNAL_DOT+="PETSc" -> "LAPACK" [color="blue"]\n
-    PETSC_REQUIRES += blas
-    PETSC_REQUIRES += lapack
-    PETSC_FLAGS += --download-fblaslapack
+    EXTERNAL_DOT+="LAPACK" -> "BLAS"\n
+    # PETSC_REQUIRES += fblas
+    # PETSC_REQUIRES += flapack
+    # PETSC_FLAGS += --download-fblaslapack
+    PETSC_REQUIRES += openblas
+    PETSC_FLAGS += --download-openblas
   endif
+  ifeq ($(ENABLE_PETSC_SUITESPARSE),ON)
+    EXTERNAL_DOT+="PETSc" -> "SuiteSparse" [color="blue"]\n
+    PETSC_FLAGS += --download-suitesparse
+    PETSC_INSTALLS += suitesparse
+  endif  
   ifeq ($(ENABLE_PETSC_MPI4PY),ON)
     EXTERNAL_DOT+="PETSc" -> "mpi4py" [color="blue"]\n
     EXTERNAL_DOT+="mpi4py" -> "MPI"\n
     EXTERNAL_DOT+="mpi4py" -> "Python"\n
     PETSC_FLAGS += --download-mpi4py
     ifeq ($(ENABLE_PYMERA),ON)
-      EXTERNAL_DOT+="Pymera" -> "mpi4py"\n
+      EXTERNAL_DOT+="pymera" -> "mpi4py"\n
     endif
   endif
   ifeq ($(ENABLE_PETSC4PY),ON)
@@ -116,14 +134,16 @@ ifeq ($(ENABLE_PETSC),ON)
     EXTERNAL_DOT+="Femera" -> "numpy" [color="cyan"]\n
     PETSC_FLAGS += --with-petsc4py
     ifeq ($(ENABLE_PYMERA),ON)
-      EXTERNAL_DOT+="Pymera" -> "numpy"\n
-      EXTERNAL_DOT+="Pymera" -> "petsc4py"\n
+      EXTERNAL_DOT+="pymera" -> "numpy"\n
+      EXTERNAL_DOT+="pymera" -> "petsc4py"\n
     endif
   endif
   ifeq ($(ENABLE_PETSC_HWLOC),ON)
     #TODO use hwloc instead of libnuma?
     EXTERNAL_DOT+="PETSc" -> "hwloc" [color="blue"]\n
     EXTERNAL_DOT+="Femera" -> "hwloc" [style="dotted"]\n
+    EXTERNAL_DOT+="hwloc" -> "libxml2"\n
+    EXTERNAL_DOT+="libxml2" -> "Femera" [color="cyan"]\n
     PETSC_INSTALLS += hwloc
     PETSC_FLAGS += --download-hwloc
   endif
@@ -136,6 +156,9 @@ ifeq ($(ENABLE_PETSC),ON)
   ifeq ($(ENABLE_HDF5),ON)
     EXTERNAL_DOT+="HDF5" -> "zlib"\n
     EXTERNAL_DOT+="HDF5" -> "szlib"\n
+    ifeq ($(ENABLE_MPI),ON)
+      EXTERNAL_DOT+="HDF5" -> "MPI"\n
+    endif
   endif
   ifeq ($(ENABLE_PETSC_IMAGELIBS),ON)
     PETSC_INSTALLS += libjpeg libpng giflib
@@ -156,16 +179,20 @@ ifeq ($(ENABLE_PETSC),ON)
   endif
   ifeq ($(ENABLE_PYBIND11),ON)
     EXTERNAL_DOT+="PETSc" -> "Boost" [color="blue"]\n
+    PETSC_FLAGS += --download-boost
   endif
   ifeq ($(ENABLE_GOOGLETEST),ON)
     EXTERNAL_DOT+="PETSc" -> "GoogleTest" [color="blue"]\n
     PETSC_INSTALLS += GoogleTest
     PETSC_FLAGS += --download-googletest
-    PETSC_FLAGS += --download-boost
   endif
   ifeq ($(ENABLE_HDF5),ON)
     EXTERNAL_DOT+="PETSc" -> "HDF5" [color="blue"]\n
-    LDLIBS += -lhdf5
+#    ifeq ($(USE_STATIC_LIBS),ON)
+#      LDLIBS += $(INSTALL_CPU)/lib/libhdf5_hl.a
+#    else
+      LDLIBS += -lhdf5
+#    endif
     PETSC_INSTALLS += hdf5
     PETSC_FLAGS += --download-hdf5
   endif
@@ -189,6 +216,12 @@ ifeq ($(ENABLE_PETSC),ON)
     EXTERNAL_DOT+="Femera" -> "EXODUS II" [style="dotted"]\n
     PETSC_INSTALLS += exodusii
     PETSC_FLAGS += --download-exodusii
+  endif
+  ifeq ($(ENABLE_PETSC_LIBMESH),ON)
+    EXTERNAL_DOT+="PETSc" -> "libmesh" [color="blue"]\n
+    EXTERNAL_DOT+="Femera" -> "libmesh" [style="dotted"]\n
+    PETSC_INSTALLS += libmesh
+    PETSC_FLAGS += --download-libmesh
   endif
   ifeq ($(ENABLE_PETSC_CHACO),ON)
     EXTERNAL_DOT+="PETSc" -> "Chaco" [color="blue"]\n
@@ -215,8 +248,8 @@ ifeq ($(ENABLE_PETSC),ON)
     PETSC_FLAGS += --download-parmetis
   endif
   ifeq ($(ENABLE_PETSC_FFTW),ON)
-    EXTERNAL_DOT+="PETSc" -> "fftw" [color="blue"]\n
-    EXTERNAL_DOT+="Femera" -> "fftw" [style="dotted"]\n
+    EXTERNAL_DOT+="PETSc" -> "FFTW" [color="blue"]\n
+    EXTERNAL_DOT+="Femera" -> "FFTW" [style="dotted"]\n
     PETSC_INSTALLS += fftw
     PETSC_FLAGS += --download-fftw
   endif

@@ -5,8 +5,10 @@
 
 namespace fmr {
   // typedefs
-  /* The "using" syntax is preferred to "typedef" in the Google C++ Style Guide:
-   * https://google.github.io/styleguide/cppguide.html#Aliases */
+  /*
+   * The "using" syntax is preferred to "typedef" in the Google C++ Style Guide:
+   * https://google.github.io/styleguide/cppguide.html#Aliases
+   */
   using Jobs_t = femera::Jobs_spt;
   // functions
   Jobs_t new_jobs ();

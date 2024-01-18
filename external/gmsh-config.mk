@@ -2,7 +2,12 @@
 # Gmsh and its dependencies
 ifeq ($(ENABLE_GMSH),ON)
   FMRFLAGS += -DFMR_HAS_GMSH
-  LDLIBS += -lgmsh
+#  ifeq ($(USE_STATIC_LIBS),ON)
+#    LDLIBS += $(INSTALL_CPU)/lib64/libgmsh.a
+#  else
+#TODO fix gmsh dependency linking errors to use static gmsh library
+    LDLIBS += -lgmsh
+#  endif
 #  ifeq ("$(CXX) $(CXX_VERSION)","g++ 4.8.5") # g+= or mpic++
   ifeq ("$(CXX_VERSION)","4.8.5")
     LIST_EXTERNAL += gmsh471
@@ -13,6 +18,7 @@ ifeq ($(ENABLE_GMSH),ON)
     GMSH_FLAGFILE:=$(BUILD_CPU)/external/gmsh-install.flags
   endif
   EXTERNAL_DOT+="Femera" -> "Gmsh" [color="cyan"]\n
+  # [color="red"]
   GMSH_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
   GMSH_FLAGS += -DCMAKE_PREFIX_PATH="$(INSTALL_CPU)"
   GMSH_FLAGS += -DENABLE_BUILD_LIB=ON
@@ -56,7 +62,8 @@ ifeq ($(ENABLE_GMSH),ON)
   ifeq ($(ENABLE_FLTK),ON)
     GMSH_REQUIRES += fltk
     EXTERNAL_DOT+="Gmsh" -> "FLTK"\n
-    EXTERNAL_DOT+="Gmsh" -> "X"\n    
+    EXTERNAL_DOT+="Gmsh" -> "X"\n
+    EXTERNAL_DOT+="Gmsh" -> "OpenGL"\n
     EXTERNAL_DOT+="Femera" -> "FLTK" [color="cyan"]\n
     GMSH_FLAGS += -DENABLE_FLTK=ON
     #TODO It looks like native gmsh off-screen rendering does not work.
@@ -70,10 +77,13 @@ ifeq ($(ENABLE_GMSH),ON)
     EXTERNAL_DOT+="Gmsh" -> "OpenCASCADE"\n
     GMSH_FLAGS += -DENABLE_OCC=ON -DENABLE_OCC_CAF=ON -DENABLE_OCC_STATIC=ON
   endif
-  # Disable Cairo fonts for now. Just use FreeType (required by OCCT).
-  GMSH_FLAGS += -DENABLE_CAIRO=OFF
-  GMSH_DEPS+=$(patsubst %,$(BUILD_CPU)/external/%-install.out,$(GMSH_REQUIRES))
-#  $(shell printf "%s" "$(gmsh_FLAGS)" > $(GMSH_FLAGFILE))
+  ifeq ($(ENABLE_CAIRO),ON)
+		# Can just use FreeType (required by OCCT).
+    EXTERNAL_DOT+="Gmsh" -> "Cairo"\n
+		GMSH_FLAGS += -DENABLE_CAIRO=ON
+		GMSH_DEPS+=$(patsubst %,$(BUILD_CPU)/external/%-install.out,$(GMSH_REQUIRES))
+  endif
+	#  $(shell printf "%s" "$(gmsh_FLAGS)" > $(GMSH_FLAGFILE))
 endif
 ifeq ($(ENABLE_OCCT),ON)
 #  LIST_EXTERNAL += occt

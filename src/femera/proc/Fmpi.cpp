@@ -1,4 +1,5 @@
 #include "Fmpi.hpp"
+#include "../../fmr/form.hpp"
 
 #include <exception>
 #include <valarray>
@@ -52,13 +53,18 @@ namespace femera {
     int buflen=0, mpiver=0, mpisub=0;
     err= MPI_Get_library_version (& buf[0], & buflen);
     err= MPI_Get_version (& mpiver, & mpisub);
+    auto verstr = std::string (& buf[0]);
+    verstr = fmr::form::delete_extra_spaces  (verstr);
+    std::replace (verstr.begin(), verstr.end(), '\n', ' ');
     this->set_name ("MPI "+std::to_string (mpiver)+"."+std::to_string (mpisub)
-      +" ("+std::string (& buf[0])+")");
+      +" ("+verstr+")");
+#ifndef FMR_HAS_MPI
     if (sizeof (this->team_id) != sizeof (MPI_Comm)) {
       std::fprintf (::stderr,
         "WARNING sizeof (Proc::team_id) is %lu but should be %lu\n",
         sizeof (this->team_id), sizeof (MPI_Comm));
     }
+#endif
     if (sizeof (this->fmpi_required) != sizeof (MPI_THREAD_SERIALIZED)) {
       std::fprintf (::stderr,
         "WARNING sizeof (Proc::mpi_required) is %lu but should be %lu\n",
@@ -75,7 +81,7 @@ namespace femera {
 #endif
     }
     if (did_mpi_init ()) {
-      MPI_Comm comm =nullptr;
+      MPI_Comm comm =0;//nullptr;
       if (!err) {//NOTE Good practice: use a copy of MPI_COMM_WORLD.
         err= MPI_Comm_dup (MPI_COMM_WORLD, & comm);// task_exit() frees this
       }

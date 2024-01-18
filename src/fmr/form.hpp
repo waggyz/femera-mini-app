@@ -22,6 +22,8 @@ namespace fmr { namespace form {
   //
   static bool ends_with (const std::string& str, const std::string& end);
   //
+  bool are_both_spaces (char lhs, char rhs);
+  std::string delete_extra_spaces ( std::string );
 } }// end fmr::form:: namespace
 
 namespace fmr {

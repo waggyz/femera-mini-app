@@ -21,12 +21,12 @@ LOC2="lines of  test  code in"
 printf "$SRCD counted   %5i %s %4i %s\n" $CODE_LINES "$LOC1" $CODE_FILES \
 "files total,"
 printf "$SPCS including %5i %s %4i %s\n" $TEST_LINES "$LOC2" $TEST_FILES \
-"files (*.gtst.?pp, *.bats)"
+"files,"
 #
 TD="TO""DO"
 FM="FIX""ME"
 #
-check_dirs='src data docs examples extras tests tools'
+check_dirs='src data docs examples extras tools' # TODO add tests dir
 check_files='Makefile README* config*'
 grep -rn "$TD" $check_dirs $check_files > "build/"$TD".txt"
 grep -rn "$FM" $check_dirs $check_files > "build/"$FM".txt"
@@ -35,11 +35,12 @@ TS="$TD "
 source_dirs='src/femera src/fmr'
 NTD=`grep -rn "$TD" $source_dirs | tee "build/src-"$TD".txt" | wc -l`
 NFM=`grep -rn "$FM" $source_dirs | tee "build/src-"$FM".txt" | wc -l`
-if [ "$NFM" -gt 0 ]; then SEEFM="see: build/src-$FM.txt"; fi
-if [ "$NTD" -gt 0 ]; then SEETD="see: build/src-$TD.txt"; fi
+if [ "$NFM" -gt 0 ]; then SEEFM="(see build/src-$FM.txt)"; fi
+if [ "$NTD" -gt 0 ]; then SEETD="(see build/src-$TD.txt)."; fi
 printf "        with       %4i $FM $SEEFM\n" "$NFM"
 printf "        and        %4i $TD  $SEETD\n" "$NTD"
 #
 printf "%5i,%5i,%5i,%5i,%5i,%5i" \
   $CODE_LINES $CODE_FILES $TEST_LINES $TEST_FILES $NFM $NTD \
   > "build/src-code-stats.csv"
+

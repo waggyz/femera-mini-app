@@ -37,7 +37,7 @@ namespace femera {
     const auto numa_n = node_n * proc::Node::get_numa_n ();
     const auto numa_all = node_n * numa_n;
     if (true) {//TODO if this->test->do_test ?
-      const auto str = this->get_base_abrv ()+" "+ this->abrv +" ";
+      //TODO REMOVE? const auto str = this->get_base_abrv ()+" "+ this->abrv +" ";
       fmr::Local_int mpi_n=0, omp_n=0;
       //
       // segfaults here if called before tasks init

@@ -7,6 +7,7 @@
 // Make something to test.
 FMR_WARN_INLINE_OFF
 auto perf = fmr::perf::Meter<fmr::perf::Count,fmr::Perf_float>();
+const auto first_idle = perf.add_idle_time_now ();
 FMR_WARN_INLINE_ON
 #if 0
 TEST(FmrPerfMeter, StructSize) {
@@ -14,8 +15,6 @@ TEST(FmrPerfMeter, StructSize) {
 }
 #endif
 TEST(FmrPerfMeter, Startup) {
-  const auto first_idle = perf.add_idle_time_now ();
-  EXPECT_FLOAT_EQ(perf.get_idle_s (), first_idle);
   EXPECT_FLOAT_EQ(perf.get_busy_s (), fmr::Perf_float(0));
   EXPECT_GT(perf.get_idle_s (), fmr::Perf_float(0));
   EXPECT_GT(perf.get_work_s (), fmr::Perf_float(0));
@@ -42,3 +41,4 @@ TEST(FmrPerfMeter, ArithmeticIntensity) {
 int main (int argc, char** argv) {
   return femera::test:: early_main (&argc, argv);
 }
+

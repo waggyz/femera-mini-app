@@ -12,6 +12,9 @@ CONTRIBUTOR_COPYRIGHT_FILE:=COPYRIGHT.contrib.txt
 
 FMR_VERBMAX:=5
 
+FMR_LOCAL_INT :=uint32_t
+FMR_GLOBAL_INT:=uint64_t
+
 # replace prefix "u" with micro symbol "\u00b5" or Greek mu "\u03bc" (preferred)
 FMR_MICRO_UCHAR:=u03bc
 
@@ -28,6 +31,7 @@ ENABLE_GCC_PROFILE:=ON
 ENABLE_OMP:=ON
 ENABLE_ZYCLOPS:=ON
 ENABLE_LIBNUMA:=ON
+# NOTE libnuma is LGPL; replace with hwloc (BSD license)
 
 # External packages -----------------------------------------------------------
 ENABLE_BATS:=ON
@@ -49,26 +53,47 @@ ENABLE_GMSH_OMP:=ON
 ENABLE_GMSH_METIS:=ON
 ENABLE_FLTK:=ON
 ENABLE_OCCT:=ON
+ENABLE_CAIRO:=ON
 
 ENABLE_HDF5:=ON
 ENABLE_CGNS:=ON
 
 ENABLE_PETSC:=ON
+ENABLE_PETSC_HWLOC:=ON
+ENABLE_PETSC_SUITESPARSE:=ON
 ENABLE_PETSC_DEBUG:=OFF
 ENABLE_PETSC_OMP:=ON
 ENABLE_PETSC_MPI:=OFF
+ENABLE_PETSC_MPI4PY:=ON
+ENABLE_PETSC4PY:=ON
+
+#NOTE Chaco, ml, ptscotch, moab do not support 64-bit indices
+# File formats
 ENABLE_PETSC_MOAB:=OFF
-# ENABLE_PETSC_MPI4PY:=OFF
+ENABLE_PETSC_PNETCDF:=OFF
+ENABLE_PETSC_EXODUSII:=OFF
+#NOTE NetCDF is required by Exodus II
+ENABLE_PETSC_NETCDF:=OFF
+
+# Meshing
+ENABLE_PETSC_LIBMESH:=OFF
+
 # Partitioners
-ENABLE_PETSC_CHACO:=OFF
-ENABLE_PETSC_SCOTCH:=OFF
 ENABLE_PETSC_METIS:=ON
+ENABLE_PETSC_PTSCOTCH:=OFF
+ENABLE_PETSC_CHACO:=OFF
 # Nonprofit research or evaluation use only
 ENABLE_PETSC_PARMETIS:=OFF
 
+# Preconditioners
+ENABLE_PETSC_ML:=OFF
+
+# Solvers
+ENABLE_PETSC_FFTW:=OFF
+ENABLE_PETSC_MUMPS:=OFF
+
 # Developer tools -------------------------------------------------------------
 ENABLE_VALGRIND:=OFF
-
 ENABLE_LYX:=OFF
 ENABLE_DOT:=OFF
 

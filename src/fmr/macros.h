@@ -57,6 +57,13 @@
 #else
 #define FMR_WARN_INLINE_ON _Pragma ("GCC diagnostic warning \"-Winline\"")
 #define FMR_WARN_INLINE_OFF _Pragma ("GCC diagnostic ignored \"-Winline\"")
+#define FMR_WARN_NULLPTR0_ON _Pragma ("GCC diagnostic warning \"-Wzero-as-null-pointer-constant\"")
+#define FMR_WARN_NULLPTR0_OFF _Pragma ("GCC diagnostic ignored \"-Wzero-as-null-pointer-constant\"")
+#endif
+
+#ifndef FMR_FALL_THROUGH
+#define FMR_FALL_THROUGH [[gnu::fallthrough]];
+//TODO include other compiler options
 #endif
 
 #undef FMR_DEBUG

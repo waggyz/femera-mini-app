@@ -65,9 +65,10 @@ namespace femera {
     const std::string& name, const std::string& form, Args...args) {
     const auto format = "%*s "+ form;
     std::valarray<char> buf (line_width + 1);
-    const auto nc = std::snprintf (&buf[0], buf.size(), format.c_str(),
+    auto nc = std::snprintf (&buf[0], buf.size(), format.c_str(),
       int (name_width), name.c_str(), args...);
-    if (nc > line_width) {
+    if (nc<0) { nc=0; }
+    if (fmr::Line_size_int(nc) > line_width) {
 #ifdef FMR_MICRO_UCHAR
       // Count unicode multibyte chars, e.g.. "\u00b5" or "\u03bc",
       // then reformat with longer length if present.

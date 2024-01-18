@@ -37,7 +37,7 @@ sub parse {
             last;
         }
         my $key = $block;
-        $key =~ s/(\A{[^\n]*\n)\s*[^\n]*\n/$1/;
+        $key =~ s/(\A\{[^\n]*\n)\s*[^\n]*\n/$1/;
         my $sum = md5_hex( $key );
         $dups++ if( exists $known{$sum} );
         $known{$sum} = $block;

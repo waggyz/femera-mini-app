@@ -20,7 +20,7 @@ namespace femera {
       {fmr::err  , {fmr::err }},// default all threads to ::stderr verb_d >= 0
       {fmr::out  , {fmr::out }},// default all threads to ::stdout verb_d >= 1
       {fmr::log  , {fmr::out }},// default main thread to ::stdout verb_d >= 1
-      {"fmr:perf", {fmr::out }},// default main thread to ::stdout verb_d >= 2
+      {fmr::plog , {fmr::out }},// default main thread to ::stdout verb_d >= 2
       {fmr::info , {fmr::out }},// default main thread to ::stdout verb_d >= 3
       {fmr::spam , {fmr::out }},// default all threads to ::stdout verb_d >= 4
       {fmr::debug, {fmr::out }} // default all threads to ::stdout verb_d >= 5
@@ -62,13 +62,18 @@ namespace femera {
     }
     if (did_reduce || did_increase) { this->name ="Femera logger"; }
     if (did_reduce) {// verbosity reduced
-      switch (this->verb_d) {
-        case 0: this->out_name_list [fmr::out  ] = {};// all cases fall through
-                      out_name_list [fmr::log  ] = {};
-        case 1: this->out_name_list ["fmr:perf"] = {};
+      switch (this->verb_d) {// all cases fall through
+        case 0: this->out_name_list [fmr::out  ] = {};
+                       out_name_list [fmr::log  ] = {};
+        FMR_FALL_THROUGH
+        case 1: this->out_name_list [fmr::plog] = {};
+        FMR_FALL_THROUGH
         case 2: this->out_name_list [fmr::info ] = {};
+        FMR_FALL_THROUGH
         case 3: this->out_name_list [fmr::spam ] = {};
+        FMR_FALL_THROUGH
         case 4: this->out_name_list [fmr::debug] = {};
+        FMR_FALL_THROUGH
         default: {}// Do nothing.
     } }
     //TODO handle did_increase
@@ -89,11 +94,11 @@ namespace femera {
     // default fmr:log, fmr:info destinations are ::stdout from thread 0 only.
     this->out_name_list [fmr::log  ] = Data::Data_list_t (n, fmr::out);
     this->out_name_list [fmr::info ] = Data::Data_list_t (n, fmr::out);
-    this->out_name_list ["fmr:perf"] = Data::Data_list_t (n, fmr::out);
+    this->out_name_list [fmr::plog] = Data::Data_list_t (n, fmr::out);
     if (n > 0) {
       this->out_name_list [fmr::log  ][0] = fmr::out;
       this->out_name_list [fmr::info ][0] = fmr::out;
-      this->out_name_list ["fmr:perf"][0] = fmr::out;
+      this->out_name_list [fmr::plog ][0] = fmr::out;
     }
     this->name += " (main to stdout, all to stderr)";
 #ifdef FMR_DEBUG
@@ -107,7 +112,8 @@ namespace femera {
   }
   fmr::Global_int data::Logs::task_send
   (const fmr::Data_name_t& file, const std::string& text)
-  noexcept { fmr::Global_int byte = 0;
+  noexcept {
+    fmr::Global_int byte = 0;
 #ifdef FMR_DEBUG
     printf ("logs task_send (%s, %s, %u)\n",
       file.c_str(), text.c_str());

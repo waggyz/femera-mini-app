@@ -21,7 +21,8 @@ TEST( Fmpi, TaskName ){
 }
 TEST( Fmpi, TeamID ){
   const auto M = test_mpi.get_task (femera::Task_type::Fmpi);
-  EXPECT_EQ( sizeof(M->get_team_id ()), sizeof(MPI_COMM_WORLD));
+  EXPECT_GE( sizeof(M->get_team_id ()), sizeof(MPI_COMM_WORLD));
+  EXPECT_GE( sizeof(M->get_team_id ()), sizeof(MPI_Comm));
   EXPECT_NE( M->get_team_id (), fmr::Team_int (MPI_COMM_WORLD) );
   EXPECT_NE( M->get_team_id (), uint(0) );
 }

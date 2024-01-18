@@ -19,6 +19,7 @@ ENABLE_MAKEJOBS:=ON
 ENABLE_OMP:=ON
 ENABLE_MPI:=ON
 ENABLE_LIBNUMA:=ON
+# NOTE libnuma is LGPL; replace with hwloc (BSD license)
 
 # External packages -----------------------------------------------------------
 ENABLE_BATS:=ON

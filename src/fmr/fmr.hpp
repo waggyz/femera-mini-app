@@ -1,6 +1,14 @@
 #ifndef FMR_HAS_FMR_HPP
 #define FMR_HAS_FMR_HPP
 
+#ifndef FMR_LOCAL_INT
+#define FMR_LOCAL_INT uint32_t
+#endif
+
+#ifndef FMR_GLOBAL_INT
+#define FMR_GLOBAL_INT uint64_t
+#endif
+
 #include "macros.h"
 
 #include <string>
@@ -25,15 +33,15 @@ namespace fmr {
   // sizeof: Dim_int <= Enum_int <= Local_int <= Global_int
   using    Dim_int = uint_fast8_t  ;// space dim., hier. depth, poly. order,...
   using   Enum_int = int           ;// default enum native type
-  using  Local_int = uint32_t      ;
-  using Global_int = uint64_t      ;// element ID, node ID
+  using  Local_int = FMR_LOCAL_INT ;// local partition indices
+  using Global_int = FMR_GLOBAL_INT;// element ID, node ID
   //
   using   Hash_int = uint32_t      ;//TODO check CRC32, CRC64 perf (cpu,gpu)
   //
   using Perf_int   = uint_fast64_t ;// unit counters, time (ns) counters
   using Perf_float = float         ;// speed, arithmetic intensity, time (sec)
   //
-  // fmr:: floating point types are defaults?
+  //NOTE fmr:: floating point types are defaults?
   using Geom_float = double        ;// includes non-inverted jac & det
   using Phys_float = double        ;// includes inverses of jac & det
   using Solv_float = double        ;
@@ -81,7 +89,7 @@ namespace fmr {
     "data error",
     "unknown data",
 #include "data-type-info.inc"
-    "Data enum end marker"
+    "Data_type enum end marker"
   };
 #endif
   //
@@ -100,19 +108,20 @@ namespace fmr {
   * partition number or thread ID), together identify a data item (and a format
   * handler if appropriate) for its source, destination(s), and storage in
   * memory. Each identifier can map to an initial (input) source and final
-  * (output) data destinations.
+  * (output) data destination.
   */
   // built-in data sources and destinations
-  static const Data_name_t log  ="fmr:log" ;// default stdout main thread only
-  static const Data_name_t out  ="fmr:out" ;// default stdout from all threads
-  static const Data_name_t err  ="fmr:err" ;// default stderr from all threads
-  static const Data_name_t in   ="fmr:in"  ;// default stdin to each MPI thread
-  static const Data_name_t none ="fmr:none";
-  static const Data_name_t null ="fmr:null";// convenient synonym of fmr::none
+  static const Data_name_t   log ="fmr:log" ;// default stdout main thread only
+  static const Data_name_t   out ="fmr:out" ;// default stdout from all threads
+  static const Data_name_t   err ="fmr:err" ;// default stderr from all threads
+  static const Data_name_t    in ="fmr:in"  ;// default stdin to each MPI thread
+  static const Data_name_t  none ="fmr:none";
+  static const Data_name_t  null ="fmr:null";// convenient synonym of fmr::none
   //
-  static const Data_name_t info ="fmr:info";
-  static const Data_name_t spam ="fmr:spam";
-  static const Data_name_t debug="fmr:debug";
+  static const Data_name_t  info ="fmr:info";
+  static const Data_name_t  plog ="fmr:perf";// performance log
+  static const Data_name_t  spam ="fmr:spam";
+  static const Data_name_t debug ="fmr:debug";
 #if 0
   static const Data_name_t perf="fmr:perf";//NOTE collides with namespace perf::
 #endif

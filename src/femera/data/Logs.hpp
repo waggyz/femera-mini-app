@@ -23,7 +23,7 @@ FMR_WARN_INLINE_ON
     void task_init (int* argc, char** argv);
     void task_exit ();
     //
-    bool does_file (const fmr::Data_name_t&)
+    bool does_file (const fmr::Data_name_t&)// true if Logs handles data_name
     noexcept;
     fmr::Global_int task_send (const fmr::Data_name_t& file, const std::string&)
     noexcept;
@@ -42,3 +42,4 @@ FMR_WARN_INLINE_ON
 #include "Logs.ipp"
 //end FEMERA_DATA_LOGS_HPP
 #endif
+

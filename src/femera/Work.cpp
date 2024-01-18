@@ -8,7 +8,8 @@
 #endif
 
 namespace femera {
-  Work::Work () noexcept =default;
+  Work::Work () noexcept {
+  }
   Work::Work (const Work::Core_ptrs_t core) noexcept {
     std::tie (this->proc, this->data, this->test) = core;
   }
@@ -60,7 +61,7 @@ namespace femera {
     if ((n > 0) && (this->proc != nullptr)) {
       if (this->proc->did_init () && this->proc->is_main ()) {
         auto did_str = std::string ();
-        auto not_str  = std::string ();;
+        auto not_str = std::string ();;
         fmr::Local_int did_n = 0, not_n=0;
         for (fmr::Local_int i = 0; i < n; ++i) {
           const auto W = this->get_work (i);
@@ -165,7 +166,7 @@ namespace femera {
   noexcept { fmr::Exit_int err = 0;
     if ((this->proc != nullptr) && (this->did_init ())) {
 FMR_WARN_INLINE_OFF
-      this->is_work_main_tf = this->proc->is_main ();
+      this->is_work_main = this->proc->is_main ();
 FMR_WARN_INLINE_ON
     }
     this->set_init (false);//NOTE should be redundant to derived::exit (..)
@@ -203,7 +204,7 @@ FMR_WARN_INLINE_ON
   noexcept { fmr::Exit_int err = 0;
     if (this->proc != nullptr && this->did_init ()) {
 FMR_WARN_INLINE_OFF
-      this->is_work_main_tf = this->proc->is_main ();
+      this->is_work_main = this->proc->is_main ();
 FMR_WARN_INLINE_ON
     }
     this->set_init (false);//NOTE should be redundant to derived::exit (..)
@@ -253,7 +254,7 @@ FMR_WARN_INLINE_ON
     return err;
   }
   fmr::Exit_int Work::exit_info (Work* W, const fmr::perf::Float busy_s) {
-    //TODO change to task_time_info (..) and use in init_* and exit_* methods
+    //TODO change to task_time_info (..) and call from init_* and exit_* methods
     fmr::Exit_int err=0;
     const auto busy = fmr::form::si_time (busy_s);
     auto read = std::string ();
@@ -276,7 +277,7 @@ FMR_WARN_INLINE_ON
       + ((W->version=="") ? "":" "+W->version);
 FMR_WARN_INLINE_OFF
     if (W->data == nullptr) {
-      if (this->is_work_main_tf) {
+      if (this->is_work_main) {
         const auto label = form::text_line (80, "%4s %4s ",
           W->get_base_abrv().c_str(), W->get_abrv().c_str());
         form::name_line (::stdout, 14, 80, label+"exit", text);
@@ -293,13 +294,13 @@ FMR_WARN_INLINE_OFF
     else {
       W->data->send (fmr::log, W->get_base_abrv(), W->get_abrv(), "exit", text);
       if (read.size () > 0) { W->data->send
-        ("fmr:perf", W->get_base_abrv(), W->get_abrv(),"inp", read);
+        (fmr::plog, W->get_base_abrv(), W->get_abrv(),"inp", read);
       }
       if (save.size () > 0) { W->data->send
-        ("fmr:perf", W->get_base_abrv(), W->get_abrv(),"out", save);
+        (fmr::plog, W->get_base_abrv(), W->get_abrv(),"out", save);
       }
       if (flop.size () > 0) { W->data->send
-        ("fmr:perf", W->get_base_abrv(), W->get_abrv(),"flop",flop);
+        (fmr::plog, W->get_base_abrv(), W->get_abrv(),"flop",flop);
       }
     }
 FMR_WARN_INLINE_ON

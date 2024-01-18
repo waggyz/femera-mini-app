@@ -39,11 +39,11 @@ namespace femera { namespace test {
   */
   template <class T>
   class Has_vtable {
-  public :
-      class Derived : public T {
-        virtual void force_a_vtable (){}
-      };
-      enum { Value = (sizeof (T) == sizeof (Derived)) };
+  public:
+    class Derived : public T {
+      virtual void force_a_vtable (){}
+    };
+    enum { Value = (sizeof (T) == sizeof (Derived)) };
   };
 } }//end femera::test:: namespace
 #define OBJECT_HAS_VTABLE(type) femera::test::Has_vtable<type>::Value

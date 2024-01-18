@@ -7,11 +7,6 @@
 
 auto mini = fmr::new_jobs ();
 
-fmr::Exit_int main (int argc, char** argv) {
-FMR_WARN_INLINE_OFF
-  return mini->exit (mini->init (&argc,argv));
-FMR_WARN_INLINE_ON
-}
 namespace femera { namespace test { namespace self {
 #if 1
   inline
@@ -53,7 +48,7 @@ namespace femera { namespace test { namespace self {
   }
   using ::testing::ElementsAreArray;
   using ::testing::Each;
-
+  
   TEST( SelfTestProc, TrivialTest ){
     EXPECT_EQ( 1, 1 );
   }
@@ -69,3 +64,10 @@ FMR_WARN_INLINE_ON
   }
 #endif
 } } }//end femera::test::self:: namespace
+
+fmr::Exit_int main (int argc, char** argv) {
+FMR_WARN_INLINE_OFF
+  return mini->exit (mini->init (&argc,argv));
+FMR_WARN_INLINE_ON
+}
+

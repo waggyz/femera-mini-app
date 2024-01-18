@@ -2,14 +2,10 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0//EN" "http://www.w3.org/Math/DTD/mathml2/xhtml-math11-f.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta name="GENERATOR" content="LyX 2.2.3" />
+<meta name="GENERATOR" content="LyX 2.3.6" />
 <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
 <title>DRAFTFemera 0.3 quick start guide</title>
 <style type='text/css'>
-/* LyX Provided Styles */
-table { border-collapse: collapse; display: inline-block; }
-td { border: 1px solid black; padding: 0.5ex; }
-
 /* Layout-provided Styles */
 h1.title {
 font-size: x-large;
@@ -33,7 +29,7 @@ margin-right: 3ex;
 text-align: left;
 
 }
-div.abstract_label {
+span.abstract_label {
 font-weight: bold;
 font-size: large;
 text-align: center;
@@ -41,17 +37,17 @@ text-align: center;
 }
 
 div.abstract {
-margin: 4ex;
+	margin: 4ex;
 }
 div.abstract_item {
-font-size: small;
-padding-top: 1ex;
+	font-size: small;
+	padding-top: 1ex;
 }
 div.abstract_label {
-font-weight: bold;
+	font-weight: bold;
 }
 div.standard {
-margin-bottom: 2ex;
+	margin-bottom: 2ex;
 }
 div.plain_layout {
 text-align: left;
@@ -72,62 +68,70 @@ margin-left: 4ex;
 text-align: left;
 
 }
- div.toc {
-   margin: 2em 0em;
-   border-style: solid;
-   border-width: 2px 0px;
-   padding: 1em 0em;
- }
- h2.tochead { font-size: x-large; font-weight: bold; }
- div.lyxtoc-0 {
-   margin: 2em 0em 0em 0em;
-   font-size: xx-large;
-   font-weight: bold;
- }
- div.lyxtoc-1 {
-   margin: 1em 0em 0em 0em;
-   font-size: x-large;
-   font-weight: bold;
- }
- div.lyxtoc-2 {
-   margin: 0em 0.1em 0em 1em;
-   font-size: large;
-   font-weight: normal;
- }
- div.lyxtoc-3 { margin: 0em 0.1em 0em 0.5em; font-size: medium; }
- div.lyxtoc-4 { margin: 0em 0.1em 0em 0.5em; }
- div.lyxtoc-5 { margin: 0em 0.1em 0em 0.5em; }
- div.lyxtoc-6 { margin: 0em 0.1em 0em 0.5em; }
- a.tocentry {
-   text-decoration: none;
-   color: black;
- }
- a.tocentry:visited { color: black; }
- div.note_comment {
-   display: none;
- }
+div.toc {
+  margin: 2em 0em;
+  border-style: solid;
+  border-width: 2px 0px;
+  padding: 1em 0em;
+}
+h2.tochead { font-size: x-large; font-weight: bold; }
+div.lyxtoc-0 {
+  margin: 2em 0em 0em 0em;
+  font-size: xx-large;
+  font-weight: bold;
+}
+div.lyxtoc-1 {
+  margin: 1em 0em 0em 0em;
+  font-size: x-large;
+  font-weight: bold;
+}
+div.lyxtoc-2 {
+  margin: 0em 0.1em 0em 1em;
+  font-size: large;
+  font-weight: normal;
+}
+div.lyxtoc-3 { margin: 0em 0.1em 0em 0.5em; font-size: medium; }
+div.lyxtoc-4 { margin: 0em 0.1em 0em 0.5em; }
+div.lyxtoc-5 { margin: 0em 0.1em 0em 0.5em; }
+div.lyxtoc-6 { margin: 0em 0.1em 0em 0.5em; }
+a.tocentry {
+  text-decoration: none;
+  color: black;
+}
+a.tocentry:visited { color: black; }
+div.note_comment {
+	display: none;
+}
 div.float {
-border: 2px solid black;
-text-align: center;
+	border: 2px solid black;
+	text-align: center;
+}
+table {
+	border-collapse: collapse;
+	display: inline-block;
+}
+td {
+	border: 1px solid black;
+	padding: 0.5ex;
 }
 div.float-caption {
-text-align: center;
-border: 2px solid black;
-padding: 1ex;
-margin: 1ex;
+	text-align: center;
+	border: 2px solid black;
+	padding: 1ex;
+	margin: 1ex;
 }
 
 
 </style>
 </head>
 <body dir="auto">
-<h1 class="title"><a id='magicparlabel-1' />DRAFT
+<h1 class="title" id='magicparlabel-1'>DRAFT
 <br />
 
 Femera 0.3 quick start guide</h1>
-<div class="author"><a id='magicparlabel-2' />David Wagner</div>
+<div class="author" id='magicparlabel-2'>David Wagner</div>
 
-<div class="abstract"><a id='magicparlabel-3' /><div class="abstract_label">Abstract</div>
+<div class="abstract" id='magicparlabel-3'><span class="abstract_label">Abstract</span>
 <div class="abstract_item">Femera is a high-performance computing mini-app for testing and tuning numerical algorithms used to solve partial differential equations over a discrete space-time domain. Femera is not a full-featured application as it implements only the basic capabilities of a complete modeling, analysis, and visualization simulation framework. This quick start guide summarizes how to build and install Femera in its default configuration and introduces several ways to begin using the mini-app. Readers should have some knowledge of how to build Linux applications from source.</div>
 <div class="abstract_item"><div class='toc'><h2 class='tochead section'>Table of Contents</h2>
 
@@ -144,175 +148,121 @@ Femera 0.3 quick start guide</h1>
 </div>
 </div>
 </div>
-<div class="standard"><a id='magicparlabel-5' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-9' />Do not put TDD tests in this file. All capabilities and tests in this file should already be covered in femera-guide.lyx and the included quick-start.tex.</div>
+<div class="standard" id='magicparlabel-5'><div class="note_comment"><div class="plain_layout" id='magicparlabel-9'>Do not put TDD tests in this file. All capabilities and tests in this file should already be covered in femera-guide.lyx and the included quick-start.tex.</div>
 </div></div>
 
-<div class="standard"><a id='magicparlabel-10' /><div class="note_comment"><div class="plain_layout"><a id='magicparlabel-14' />tdd:tests/pre-build/quick-start-lyx-has-only-this-tdd-comment.sh</div>
+<div class="standard" id='magicparlabel-10'><div class="note_comment"><div class="plain_layout" id='magicparlabel-14'>tdd:tests/pre-build/quick-start-lyx-has-only-this-tdd-comment.sh</div>
 </div> </div>
-<h2 class="section"><a id='magicparlabel-15' /><span class="section_label">1</span> About this quick start guide</h2>
-<div class="standard"><a id='magicparlabel-16' />Femera is <i>not</i> distributed with a ready-to-use binary executable as it takes advantage of features of the specific hardware it is used on to perform well in a high-performance parallel computing environment. This quick start guide is intended for users to build, install, and begin using the recommended Femera configuration.</div>
+<h2 class="section" id='magicparlabel-15'><span class="section_label">1</span> About this quick start guide</h2>
+<div class="standard" id='magicparlabel-16'>Femera is <i>not</i> distributed with a ready-to-use binary executable as it takes advantage of features of the specific hardware it is used on to perform well in a high-performance parallel computing environment. This quick start guide is intended for users to build, install, and begin using the recommended Femera configuration.</div>
 
-<blockquote class="verse"><a id='magicparlabel-17' /><p class="verse_item"><b>System administrators</b>: build and install Femera for use by production and power users. </p>
+<blockquote class="verse" id='magicparlabel-17'><p class="verse_item"><b>System administrators</b>: build and install Femera for use by production and power users. </p>
 <p class="verse_item"><b>Production users</b>: run Femera from the command line (section&nbsp;<a href="#subsec_cli_examples">subsec:cli-examples</a>), use Femera interactively (section&nbsp;<a href="#subsec_Intro_python_script">subsec:Intro-python-script</a>), or write Femera Python scripts (section&nbsp;<a href="#subsec_Intro_python_interactive">subsec:Intro-python-interactive</a>). </p>
 <p class="verse_item"><b>Power users</b>: develop Femera plugins and compile them in a compatible build environment. </p>
 <p class="verse_item"><b>Femera developers</b>: maintain, debug, extend, and customize Femera. </p>
 </blockquote>
-<div class="standard"><a id='magicparlabel-21' />System administrators, power users, and developers should review the Femera user and developer guide before proceeding with this quick start. Femera is only available for Linux and requires a build environment compatible with the intended run-time environment. </div>
-<h2 class="section"><a id='magicparlabel-22' /><span class="section_label">2</span> Linux system requirements<a id="sec_Linux_system_requirements" />
+<div class="standard" id='magicparlabel-21'>System administrators, power users, and developers should review the Femera user and developer guide before proceeding with this quick start. Femera is only available for Linux and requires a build environment compatible with the intended run-time environment. </div>
+<h2 class="section" id='magicparlabel-22'><span class="section_label">2</span> Linux system requirements<a id="sec_Linux_system_requirements" />
 </h2>
-<div class="standard"><a id='magicparlabel-23' />A minimal Femera configuration can be built and run in most modern Linux environments with at least one of the compiler toolchains listed in table&nbsp;<a href="#tab_mini_app_build_tools">1</a>. The compiler toolchain must support C++11 and should support Open Multi-processing&nbsp;(OpenMP). In addition, the software listed in table&nbsp;<a href="#tab_mini_app_build_tools">1</a> should be available, on the build system and in the run-time environment, to build and run the recommended Femera configuration. </div>
+<div class="standard" id='magicparlabel-23'>A minimal Femera configuration can be built and run in most modern Linux environments with at least one of the compiler toolchains listed in table&nbsp;<a href="#tab_mini_app_build_tools">1</a>. The compiler toolchain must support C++11 and should support Open Multi-processing&nbsp;(OpenMP). In addition, the software listed in table&nbsp;<a href="#tab_mini_app_build_tools">1</a> should be available, on the build system and in the run-time environment, to build and run the recommended Femera configuration. </div>
 
 
 
 
 
 
-<div class='float-table'><div class="plain_layout" style='text-align: center;'><a id='magicparlabel-33' /><table><tbody><tr><td style ="width: 1in;" align='right' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-109' /><b>Software</b></div>
+<div class='float-table'><div class="plain_layout" style='text-align: center;' id='magicparlabel-33'><table><tbody><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout" id='magicparlabel-109'><b>Software</b></div>
 </td>
 <td style ="width: 0.75in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-112' /><b>Minimum </b></div>
+<div class="plain_layout" id='magicparlabel-112'><b>Minimum </b></div>
 </td>
 <td style ="width: 4.25in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-115' /><b>Minimal Femera configuration</b></div>
+<div class="plain_layout" id='magicparlabel-115'><b>Minimal Femera configuration</b></div>
 </td>
 </tr><tr><td style ="width: 1in;" align='right' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-118' />Git</div>
+<div class="plain_layout" id='magicparlabel-118'>Git</div>
 </td>
 <td style ="width: 0.75in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-121' />1.8</div>
+<div class="plain_layout" id='magicparlabel-121'>1.8</div>
 </td>
 <td style ="width: 4.25in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-124' />Download Femera and dependency source code.</div>
+<div class="plain_layout" id='magicparlabel-124'>Download Femera and dependency source code.</div>
 </td>
 </tr><tr><td style ="width: 1in;" align='right' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-127' />Bash</div>
+<div class="plain_layout" id='magicparlabel-127'>Bash</div>
 </td>
 <td style ="width: 0.75in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-130' />3.2.57(1)</div>
+<div class="plain_layout" id='magicparlabel-130'>3.2.57(1)</div>
 </td>
 <td style ="width: 4.25in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-137' />Build, install, test, tune, and use Femera.</div>
+<div class="plain_layout" id='magicparlabel-137'>Build, install, test, tune, and use Femera.</div>
 </td>
 </tr><tr><td style ="width: 1in;" align='right' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-140' />GNU Make</div>
+<div class="plain_layout" id='magicparlabel-140'>GNU Make</div>
 </td>
 <td style ="width: 0.75in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-143' />3.81 [1]</div>
+<div class="plain_layout" id='magicparlabel-143'>3.81 [1]</div>
 </td>
 <td style ="width: 4.25in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-146' />Build, install, test, and tune Femera.</div>
+<div class="plain_layout" id='magicparlabel-146'>Build, install, test, and tune Femera.</div>
 </td>
 </tr><tr><td style ="width: 1in;" align='right' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-149' />wget</div>
-</td>
-<td style ="width: 0.75in;" align='left' valign='middle'>
-
-</td>
-<td style ="width: 4.25in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-155' />Download external source code.</div>
-</td>
-</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-158' />Python</div>
-</td>
-<td style ="width: 0.75in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-161' /> 2 or 3</div>
-</td>
-<td style ="width: 4.25in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-164' />Test and tune Femera.</div>
-</td>
-</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-167' />Python dev</div>
-</td>
-<td style ="width: 0.75in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-170' /> 2 or 3</div>
-</td>
-<td style ="width: 4.25in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-173' />Python development files are required for Python bindings.</div>
-</td>
-</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
-
+<div class="plain_layout" id='magicparlabel-149'>wget</div>
 </td>
 <td style ="width: 0.75in;" align='left' valign='middle'>
 
 </td>
 <td style ="width: 4.25in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-182' /><b>Compiler toolchain </b></div>
+<div class="plain_layout" id='magicparlabel-155'>Download external source code.</div>
 </td>
 </tr><tr><td style ="width: 1in;" align='right' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-185' />g++</div>
+<div class="plain_layout" id='magicparlabel-158'>Python</div>
 </td>
 <td style ="width: 0.75in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-188' />4.8</div>
+<div class="plain_layout" id='magicparlabel-161'> 2 or 3</div>
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout" id='magicparlabel-164'>Test and tune Femera.</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout" id='magicparlabel-167'>Python dev</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout" id='magicparlabel-170'> 2 or 3</div>
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout" id='magicparlabel-173'>Python development files are required for Python bindings.</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout" id='magicparlabel-182'><b>C++11 Compiler toolchain </b></div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout" id='magicparlabel-185'>g++</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout" id='magicparlabel-188'>4.8</div>
 </td>
 <td style ="width: 4.25in;" align='left' valign='top' rowspan='3'>
-<div class="plain_layout"><a id='magicparlabel-191' />Only one of these toolchains is needed to compile and link Femera and its dependencies.</div>
+<div class="plain_layout" id='magicparlabel-191'>Only one of these toolchains is needed to compile and link Femera and its dependencies.</div>
 </td>
 </tr><tr><td style ="width: 1in;" align='right' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-194' />icc</div>
+<div class="plain_layout" id='magicparlabel-194'>icc</div>
 </td>
 <td style ="width: 0.75in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-197' />14</div>
+<div class="plain_layout" id='magicparlabel-197'>14</div>
 </td>
 </tr><tr><td style ="width: 1in;" align='right' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-203' />clang++ </div>
+<div class="plain_layout" id='magicparlabel-203'>clang++ </div>
 </td>
 <td style ="width: 0.75in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-206' />3.1</div>
-</td>
-</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
-
-</td>
-<td style ="width: 0.75in;" align='left' valign='middle'>
-
-</td>
-<td style ="width: 4.25in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-218' /><b>Recommended Femera configuration</b></div>
-</td>
-</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-221' />OpenMP</div>
-</td>
-<td style ="width: 0.75in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-224' />201107</div>
-</td>
-<td style ="width: 4.25in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-227' />Run Femera using shared-memory parallelism.</div>
-</td>
-</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-230' />MPI</div>
-</td>
-<td style ="width: 0.75in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-233' />3.0 </div>
-</td>
-<td style ="width: 4.25in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-236' />Run Femera on a cluster using the Message Passing Interface&nbsp;(MPI).</div>
-</td>
-</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-243' />libnuma</div>
-</td>
-<td style ="width: 0.75in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-246' />20150602</div>
-</td>
-<td style ="width: 4.25in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-249' />Check non-uniform memory access&nbsp;(NUMA) domains.</div>
-</td>
-</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-252' />CMake</div>
-</td>
-<td style ="width: 0.75in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-255' />3.12 [2]</div>
-</td>
-<td style ="width: 4.25in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-258' />Build and install dependencies.</div>
-</td>
-</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-261' />X, OpenGL</div>
-</td>
-<td style ="width: 0.75in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-264' />11</div>
-</td>
-<td style ="width: 4.25in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-267' />An X Window System&nbsp;(X) is used for visualization. [4]</div>
+<div class="plain_layout" id='magicparlabel-206'>3.1</div>
 </td>
 </tr><tr><td style ="width: 1in;" align='right' valign='middle'>
 
@@ -321,70 +271,124 @@ Femera 0.3 quick start guide</h1>
 
 </td>
 <td style ="width: 4.25in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-276' /><b>Advanced Femera developer and build tools</b></div>
+<div class="plain_layout" id='magicparlabel-218'><b>Recommended Femera configuration</b></div>
 </td>
 </tr><tr><td style ="width: 1in;" align='right' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-279' />LaTeX</div>
+<div class="plain_layout" id='magicparlabel-221'>OpenMP</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout" id='magicparlabel-224'>201107</div>
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout" id='magicparlabel-227'>Run Femera using shared-memory parallelism.</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout" id='magicparlabel-230'>MPI</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout" id='magicparlabel-233'>3.0 </div>
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout" id='magicparlabel-236'>Run Femera on a cluster using the Message Passing Interface&nbsp;(MPI).</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout" id='magicparlabel-243'>libnuma</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout" id='magicparlabel-246'>20150602</div>
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout" id='magicparlabel-249'>Check non-uniform memory access&nbsp;(NUMA) domains.</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout" id='magicparlabel-252'>CMake</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout" id='magicparlabel-255'>3.12 [2]</div>
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout" id='magicparlabel-258'>Build and install dependencies.</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout" id='magicparlabel-261'>X, OpenGL</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout" id='magicparlabel-264'>11</div>
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout" id='magicparlabel-267'>An X Window System&nbsp;(X) is used for visualization. [4]</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+
 </td>
 <td style ="width: 0.75in;" align='left' valign='middle'>
 
 </td>
 <td style ="width: 4.25in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-289' />Generate this guide.</div>
+<div class="plain_layout" id='magicparlabel-276'><b>Advanced Femera developer and build tools</b></div>
 </td>
 </tr><tr><td style ="width: 1in;" align='right' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-292' />dot </div>
+<div class="plain_layout" id='magicparlabel-279'>LaTeX</div>
 </td>
 <td style ="width: 0.75in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-295' />2</div>
+
 </td>
 <td style ="width: 4.25in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-298' />The dot application is part of graphviz.</div>
+<div class="plain_layout" id='magicparlabel-289'>Generate this guide.</div>
 </td>
 </tr><tr><td style ="width: 1in;" align='right' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-301' />valgrind</div>
+<div class="plain_layout" id='magicparlabel-292'>dot </div>
 </td>
 <td style ="width: 0.75in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-304' />3</div>
+<div class="plain_layout" id='magicparlabel-295'>2</div>
 </td>
 <td style ="width: 4.25in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-307' />Check for memory leaks. [4]</div>
+<div class="plain_layout" id='magicparlabel-298'>The dot application is part of graphviz.</div>
 </td>
 </tr><tr><td style ="width: 1in;" align='right' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-310' />Vector Advisor</div>
+<div class="plain_layout" id='magicparlabel-301'>valgrind</div>
 </td>
 <td style ="width: 0.75in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-313' />[3]</div>
+<div class="plain_layout" id='magicparlabel-304'>3</div>
 </td>
 <td style ="width: 4.25in;" align='left' valign='middle'>
-<div class="plain_layout"><a id='magicparlabel-316' />Vector Advisor requires icc to measure performance. [4] </div>
+<div class="plain_layout" id='magicparlabel-307'>Check for memory leaks. [4]</div>
+</td>
+</tr><tr><td style ="width: 1in;" align='right' valign='middle'>
+<div class="plain_layout" id='magicparlabel-310'>Vector Advisor</div>
+</td>
+<td style ="width: 0.75in;" align='left' valign='middle'>
+<div class="plain_layout" id='magicparlabel-313'>[3]</div>
+</td>
+<td style ="width: 4.25in;" align='left' valign='middle'>
+<div class="plain_layout" id='magicparlabel-316'>Vector Advisor requires icc to measure performance. [4] </div>
 </td>
 </tr></tbody>
 </table>
 </div>
 
-<div class="plain_layout"><a id='magicparlabel-317' /><span style='font-size:x-small;'>[1] Make 4 is recommended to support PETSc parallel testing options.</span></div>
+<div class="plain_layout" id='magicparlabel-317'><span style='font-size:x-small;'>[1] Make 4 is recommended to support PETSc parallel testing options.</span></div>
 
-<div class="plain_layout"><a id='magicparlabel-318' /><span style='font-size:x-small;'>[2] CMake version 3.12 is required by HDF5, version 3.1 by Gmsh, and version 2.8.x for other libraries recommended in the Femera user and developer guide.</span></div>
+<div class="plain_layout" id='magicparlabel-318'><span style='font-size:x-small;'>[2] CMake version 3.12 is required by HDF5, version 3.1 by Gmsh, and version 2.8.x for other libraries recommended in the Femera user and developer guide.</span></div>
 
-<div class="plain_layout"><a id='magicparlabel-319' /><span style='font-size:x-small;'>[3] Use a version of Vector Advisor that is compatible with the version of icc used.</span></div>
+<div class="plain_layout" id='magicparlabel-319'><span style='font-size:x-small;'>[3] Use a version of Vector Advisor that is compatible with the version of icc used.</span></div>
 
-<div class="plain_layout"><a id='magicparlabel-320' /><span style='font-size:x-small;'>[4] See the Femera user and developer guide for details.</span></div>
+<div class="plain_layout" id='magicparlabel-320'><span style='font-size:x-small;'>[4] See the Femera user and developer guide for details.</span></div>
 
 
 
-<div class="plain_layout"><a id='magicparlabel-326' /><span class='float-caption-Standard float-caption float-caption-standard'>Table 1:  Femera mini-app system software needed<a id="tab_mini_app_build_tools" />
+<div class="plain_layout" id='magicparlabel-326'><span class='float-caption-Standard float-caption float-caption-standard'>Table 1:  Femera mini-app system software needed<a id="tab_mini_app_build_tools" />
 </span></div>
 </div>
 
 
 
 
-<div class="standard"><a id='magicparlabel-340' />Power users and Femera developers should also make the advanced tools listed in table&nbsp;<a href="#tab_mini_app_build_tools">1</a> available on the build system. Configure and build Femera after verifying system requirements.</div>
-<h2 class="section"><a id='magicparlabel-341' /><span class="section_label">3</span> Femera quick start<a id="sec_Quick_start" />
+<div class="standard" id='magicparlabel-340'>Power users and Femera developers should also make the advanced tools listed in table&nbsp;<a href="#tab_mini_app_build_tools">1</a> available on the build system. Configure and build Femera after verifying system requirements.</div>
+<h2 class="section" id='magicparlabel-341'><span class="section_label">3</span> Femera quick start<a id="sec_Quick_start" />
 </h2>
 
 
-<div class="standard"><a id='magicparlabel-343' />placeholder</div>
+<div class="standard" id='magicparlabel-343'>placeholder</div>
 </body>
 </html>

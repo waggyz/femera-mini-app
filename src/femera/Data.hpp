@@ -41,7 +41,7 @@ namespace femera {
     static constexpr
     T* this_cast (Work*) noexcept;
   protected:// Make it clear this class needs to be inherited from.
-    Data (Work::Core_ptrs_t)     /* preferred constructor */ noexcept;
+    Data (Work::Core_ptrs_t) noexcept;/* preferred constructor */
     Data ()            = default;// early (init) constructor
     Data (Data&&)      = default;// is movable
     Data& operator
@@ -54,3 +54,4 @@ namespace femera {
 #include "Data.ipp"
 //end FEMERA_HAS_DATA_HPP
 #endif
+

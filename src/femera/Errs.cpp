@@ -1,7 +1,7 @@
 #include "Errs.hpp"
 
 #include <cstdio>     // std::fprintf, stderr
-#include <cstring>    //std::strlen
+#include <cstring>    // std::strlen
 
 namespace femera {
   std::size_t Errs::print ()

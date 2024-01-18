@@ -209,7 +209,7 @@ FMR_WARN_INLINE_ON
   }
   TEST(BankInts, WorkForStrings) {
     EXPECT_EQ( 5, std::snprintf (&bulk[0], bulk.size(),// returns # of chars
-      std::string("hello").c_str()) );
+      "hello") );
     EXPECT_EQ( std::string("hello"), std::string (&bulk[0]) );
   }
   TEST(Uint8, SizeIs1) {

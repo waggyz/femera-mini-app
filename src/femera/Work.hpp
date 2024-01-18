@@ -34,8 +34,8 @@ namespace femera {
     class File;                        // public interface for data handling
     class Logs; class Dlim; class Text;// Femera data handling
     class Bank;// class View;
-    class Cgns; class Gmsh; class Moab;// data handling libraries
-    class Pets;
+    class Cgns; class Gmsh; class Pets;// data handling libraries
+    class Moab;
 } }//end femera::data:: namespace
 namespace femera {
   template <typename> class Test;      // abstract CRTP base derived from Work
@@ -72,10 +72,10 @@ namespace femera {
     using Task_stck_t = std::deque <Work_spt>;
   public:// variables ---------------------------------------------------------
     // classes with (mostly) only member methods public
-    Work_time_t time = Work_time_t ();// performance timer, NOT thread-safe
-    proc::Main* proc = nullptr;       // processing hierarchy
-    data::File* data = nullptr;       // data, logging, and file handling
-    test::Beds* test = nullptr;       // correctness and performance testing
+    Work_time_t time = Work_time_t (); // performance timer, NOT thread-safe
+    proc::Main* proc = nullptr;        // processing hierarchy
+    data::File* data = nullptr;        // data, logging, and file handling
+    test::Beds* test = nullptr;        // correctness and performance testing
   protected:// variables
     Task_stck_t task_list ={};
     std::string      name ="unknown work";
@@ -92,8 +92,8 @@ https://stackoverflow.com/questions/60040665
     int                      my_argc =0;
 #endif
   private:// variables
-    bool     did_init_tf = false;
-    bool is_work_main_tf = true ;// save for use after proc::exit (..)
+    bool did_work_init = false;
+    bool  is_work_main = true ;// save for use after proc::exit (..)
   public:// methods -----------------------------------------------------------
     template <typename T, typename C> static constexpr
     T* cast_via_work (C* child) noexcept;
@@ -102,12 +102,16 @@ https://stackoverflow.com/questions/60040665
     std::string get_version  () noexcept;
     std::string get_name     () noexcept;
     std::string set_name     (const std::string&) noexcept;
-    bool        did_init     () noexcept;// sets & returns did_init_tf
-    bool        set_init     (bool) noexcept;//    returns did_init_tf
+    bool        did_init     () noexcept;//     returns did_work_init
+    bool        set_init     (bool) noexcept;// sets & returns did_work_init
     // task stack handling
     fmr::Local_int get_task_n () noexcept;
     fmr::Local_int add_task   (Work_spt) noexcept;// returns task number added
     fmr::Local_int del_task   (fmr::Local_int ix) noexcept;// returns task_n
+    //NOTE more efficient to get_task (..) then check for nullptr
+    //     instead of if (has_task (..)) {get_task (..);}
+    bool has_task (const Task_path_t&)  noexcept;//TODO needs tests
+    bool has_task (Work_type, fmr::Local_int ix=0) noexcept;//TODO needs tests
   public:// pure virtual methods defined in CRTP base classes derived from Work
     virtual std::string get_base_abrv () noexcept =0;
     // intialize and exit

@@ -28,7 +28,7 @@ namespace femera { namespace test { namespace gtst {
   override {
     const auto test_n = unit_test.total_test_count      ();
     const auto pass_n = unit_test.successful_test_count ();
-    const auto skip_n = unit_test.skipped_test_count    ();
+//    const auto skip_n = unit_test.skipped_test_count    ();// in newer versions
     const auto fail_n = unit_test.failed_test_count     ();
     const auto time_s = double (unit_test.elapsed_time  ()) / 1000.0;
     const auto time_c = (time_s < 0.001) ? "<  1 ms"
@@ -37,11 +37,11 @@ namespace femera { namespace test { namespace gtst {
     if (pass_n > 0) {
       fprintf (stdout, form_c, "test", "gtst", "pass",
         pass_n, "ok", test_n, (test_n == 1) ? "" : "s", time_c);
-    }
+    }/*
     if (skip_n > 0) {
       fprintf (stdout, form_c, "test", "gtst", "skip",
         skip_n, "--", test_n, (test_n == 1) ? "" : "s", time_c);
-    }
+    }*/
     if (fail_n > 0) {
       fprintf (stdout, form_c, "test", "gtst", "FA""IL",
         fail_n, ":(", test_n, (test_n == 1) ? "" : "s", time_c);

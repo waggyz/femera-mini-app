@@ -5,7 +5,7 @@
 
 namespace femera { namespace proc {
   class Nvid;// Derive a CRTP concrete class from Proc.
-  class Nvid final: public Proc<Nvid> { friend class Proc;
+  class Nvid final: public Proc<Nvid> { private: friend class Proc;
   private:
     static bool is_in_parallel ();
   private:

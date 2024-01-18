@@ -2,10 +2,17 @@
 #FIXME CGNS, FLTK, and FreeType build in external/*/
 ifeq ($(ENABLE_CGNS),ON)
   FMRFLAGS += -DFMR_HAS_CGNS
-  LDLIBS += -lcgns
+  ifeq ($(USE_STATIC_LIBS),ON)
+    LDLIBS += $(INSTALL_CPU)/lib/libcgns.a
+  else
+    LDLIBS += -lcgns
+  endif
   LIST_EXTERNAL += cgns
-  EXTERNAL_DOT+="Femera" -> "CGNS" [color="cyan"]\n
+  EXTERNAL_DOT+="Femera" -> "CGNS"\n
+  EXTERNAL_DOT+="CGNS" -> "Tcl/Tk"\n
+  EXTERNAL_DOT+="CGNS" -> "OpenGL"\n
   ifeq ($(ENABLE_HDF5),ON)
+    FMRFLAGS += -DFMR_HAS_HDF5
     CGNS_REQUIRES += hdf5
     EXTERNAL_DOT+="CGNS" -> "HDF5"\n
     CGNS_FLAGS += -DCGNS_ENABLE_HDF5:BOOL=ON

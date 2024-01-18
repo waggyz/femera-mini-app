@@ -20,12 +20,12 @@ namespace femera { namespace data {
   private:                //
     Bulk_t         bulk;  // ...bulk is over-allocated and aligned manually.
     // Defaults are for Bulk_int values (which can be converted to strings).
-    std::size_t    cval_n       = 0;// # values <= bulk.capacity() / sizeof(T)
-    zyc::Zomplex   zplx         = std::is_signed <fmr::Bulk_int>::value
-      ?                           zyc::Integer : zyc::Natural;
-    fmr::Hash_int  file_hash    = 0;// CRC32 or CRC64 of data read from file
-    fmr::Align_int cval_szof    = sizeof (fmr::Bulk_int);// native value (bytes)
-    bool           cval_sign_tf = std::is_signed <fmr::Bulk_int>::value;
+    std::size_t    cval_n         = 0;// # values <= bulk.capacity() / sizeof(T)
+    zyc::Zomplex   zplx           = std::is_signed <fmr::Bulk_int>::value
+                                    ? zyc::Integer : zyc::Natural;
+    fmr::Hash_int  file_hash      = 0;// CRC32 or CRC64 of data read from file
+    fmr::Align_int cval_szof      = sizeof (fmr::Bulk_int);// native sz (bytes)
+    bool           is_cval_signed = std::is_signed <fmr::Bulk_int>::value;
   public:
     bool has_sign ()// sign of currently stored integer values
     noexcept;
@@ -35,10 +35,10 @@ namespace femera { namespace data {
     noexcept;
     //
     fmr::Align_int get_sizeof ()// sizeof each currently stored native (C++)
-    noexcept;                   // numbers (int, float, etc.) in bytes
-    std::size_t get_cval_n ()// count of currently stored native (C++) numbers
+    noexcept;                 // numbers (int, float, etc.) in bytes
+    std::size_t get_cval_n () // count of currently stored native (C++) numbers
     noexcept;
-    std::size_t get_size ()// count of currently stored (hypercomplex) numbers
+    std::size_t get_size ()  // count of currently stored (hypercomplex) numbers
     noexcept;              // same as get_cval_n () for order 0
     //
     template <typename T>

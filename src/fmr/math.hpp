@@ -1,18 +1,21 @@
 #ifndef FMR_HAS_MATH_HPP
 #define FMR_HAS_MATH_HPP
 
-#define FMR_ALIGN_INTS alignof(std::size_t)
-#define FMR_ALIGN_VALS alignof(__m256d)
+#include <tuple>
+#include <valarray>
+#include <map>
+#include <immintrin.h>
+
+#define FMR_ALIGN_INTS 32
+//alignof(std::size_t) FIXME does not return const
+#define FMR_ALIGN_VALS 32
+//alignof(__m256d) FIXME does not return const
 
 #ifdef FMR_HAS_ZYCLOPS
 #define ZYC_ALIGN FMR_ALIGN_VALS
 #include "../zyclops/zyclops.hpp"
 #endif
 
-#include <tuple>
-#include <valarray>
-#include <map>
-#include <immintrin.h>
 
 /* CRC-32C (iSCSI) polynomial in reversed bit order. */
 #define FMR_CRC32_POLY 0x82f63b78

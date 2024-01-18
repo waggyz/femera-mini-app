@@ -14,17 +14,20 @@ namespace femera {
   }
   void data::Pets::task_init (int*, char**) {
 #ifdef FMR_HAS_PETSC
-//  PetscInitialize(argc,&argv,(char*)nullptr,data::petsc_help);//if (ierr) return ierr;
-   PetscInitialize(nullptr,nullptr,(char*)nullptr,data::petsc_help);
-   //
+  const auto ierr 
+    = PetscInitialize(nullptr, nullptr,(char*)nullptr, data::petsc_help);
+  ////NOTE it is not clear how to init PETSc on other than MPI_COMM_WORLD
   char           ver[128];
   PetscInt       major,minor,subminor;
-//  PetscInitialize(&argc,&argv,(char*)0,help);//if (ierr) return ierr;
-  PetscGetVersion(ver,sizeof(ver));
+  //
   PetscGetVersionNumber(&major,&minor,&subminor,nullptr);
+  PetscGetVersion(ver,sizeof(ver));
   this->set_name (std::string (ver));
   this->version = std::to_string (major) + "." + std::to_string (minor)
     + "." + std::to_string (subminor);
+  if (ierr <=0) {
+    this->set_init (true);
+  }
 #endif
 #if 0
     this->version = std::to_string (Pets_VERSION / 1000)
@@ -52,11 +55,13 @@ namespace femera {
     } }
 #endif
 #endif
-    this->set_init (false);
   }
   void data::Pets::task_exit () {
 #ifdef FMR_HAS_PETSC
+  if (this->did_init()) {
     PetscFinalize();
+    this->set_init(false);
+  }
 #if 0
 //TODO    this->close_all ();
 //TODO?   FMR_PRAGMA_OMP(omp barrier)

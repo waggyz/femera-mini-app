@@ -1,166 +1,201 @@
 #!/usr/bin/make
-.DEFAULT_GOAL:= all
-SHELL:= bash
-FMRDIR:=$(shell pwd)
+.DEFAULT_GOAL:=all
+SHELL        :=bash
 
 include examples/config.recommended
 -include config.local
 
 include tools/set-undefined.mk
 include tools/functions.mk
-
 #------------------------------------------------------------------------------
-BUILD_VERSION := $(shell tools/build-version-number.sh)
-FEMERA_VERSION:= Femera $(BUILD_VERSION)
+BUILD_VERSION  :=$(shell tools/build-version-number.sh)
+FEMERA_VERSION :=Femera $(BUILD_VERSION)
 
-BUILT_BY_EMAIL:= $(call parse_email,$(BUILT_BY))
+BUILT_BY_EMAIL :=$(call parse_email,$(BUILT_BY))
 
-IS_IN_REPO:= $(shell git rev-parse --is-inside-work-tree 2>/dev/null)
+IS_IN_REPO     :=$(shell git rev-parse --is-inside-work-tree 2>/dev/null)
 # contains "true" or ""
 
 # Check if there is altered content in src/ data/ tools/
 # or some content in extras/ even when not a git repository.
-REPO_MD5:= $(shell cat .md5)
+REPO_MD5   :=$(shell cat .md5)
 ifeq ($(shell test -e file_name && echo -n yes),yes)
   #(shell tools/md5-all.sh build/.md5)
   $(shell echo "host hash" > build/.md5)
-  HOST_MD5:= $(shell cat build/.md5)
+  HOST_MD5 :=$(shell cat build/.md5)
 endif
 #TODO Move to recipe?
 
 # Directories -----------------------------------------------------------------
+FMRDIR     :=$(shell pwd)
 # Directories for generic components
-BUILD_DIR  := build
-STAGE_DIR  := $(BUILD_DIR)/stage
-INSTALL_DIR:= $(PREFIX)
+BUILD_DIR  :=build
+STAGE_DIR  :=$(BUILD_DIR)/stage
+INSTALL_DIR:=$(PREFIX)
 
-# Directories for CPU-model specific components
-BUILD_CPU  := $(BUILD_DIR)/$(CPUMODEL)
-STAGE_CPU  := $(STAGE_DIR)/$(CPUMODEL)
-INSTALL_CPU:= $(INSTALL_DIR)/$(CPUMODEL)
+# Directories for CPU-specific components
+BUILD_CPU  :=$(BUILD_DIR)/$(CPUMODEL)
+STAGE_CPU  :=$(STAGE_DIR)/$(CPUMODEL)
+INSTALL_CPU:=$(INSTALL_DIR)/$(CPUMODEL)
 
 # Export TMPDIR to avoid system tmpdir overflow. (MPI needs it, maybe others.)
-TEMP_DIR   := $(shell pwd)/$(BUILD_DIR)/tmp
+TEMP_DIR   :=$FMRDIR/$(BUILD_DIR)/tmp
 
 #NOTE Subdirectories needed in the build directory have a trailing slash.
-BUILD_TREE+= $(BUILD_DIR)/external/tools/ $(BUILD_DIR)/docs/
-BUILD_TREE+= $(BUILD_CPU)/external/ $(BUILD_CPU)/tests/ $(BUILD_CPU)/tools/
-BUILD_TREE+= $(BUILD_CPU)/femera/proc/ $(BUILD_CPU)/femera/data/
-BUILD_TREE+= $(BUILD_CPU)/femera/test/ $(BUILD_CPU)/femera/task/
-BUILD_TREE+= $(BUILD_CPU)/zyclops/
-BUILD_TREE+= $(BUILD_CPU)/fmr/perf/
+BUILD_TREE += $(BUILD_DIR)/external/tools/
+BUILD_TREE += $(BUILD_DIR)/docs/
 
-STAGE_TREE+= $(STAGE_DIR)/bin/ $(STAGE_DIR)/lib/
-STAGE_TREE+= $(STAGE_CPU)/bin/ $(STAGE_CPU)/lib/
+BUILD_TREE += $(BUILD_CPU)/tmp/
+BUILD_TREE += $(BUILD_CPU)/external/
+BUILD_TREE += $(BUILD_CPU)/tests/
+BUILD_TREE += $(BUILD_CPU)/tools/
+BUILD_TREE += $(BUILD_CPU)/femera/proc/
+BUILD_TREE += $(BUILD_CPU)/femera/data/
+BUILD_TREE += $(BUILD_CPU)/femera/test/
+BUILD_TREE += $(BUILD_CPU)/femera/task/
+BUILD_TREE += $(BUILD_CPU)/fmr/perf/
+BUILD_TREE += $(BUILD_CPU)/zyclops/
 
+STAGE_TREE += $(STAGE_DIR)/bin/ $(STAGE_DIR)/lib/
+STAGE_TREE += $(STAGE_CPU)/bin/ $(STAGE_CPU)/lib/
 #------------------------------------------------------------------------------
 ifeq ($(CXX),g++)
   ifeq ($(ENABLE_MPI),ON)
-    CXX:= mpic++
+    CXX      :=mpic++
     # TDDEXEC:=/bin/time
-    # TDDEXEC:= mpiexec -np $(TDD_MPI_N) --bind-to core -map-by node:pe=$(TDD_OMP_N)
+    # TDDEXEC:=mpiexec -n $(TDD_MPI_N) --bind-to core -map-by node:pe=$(TDD_OMP_N)
   endif
   #TODO replace below with data/gcc8.flags
-  OPTFLAGS:= $(shell cat data/gcc4.flags | tr '\n' ' ' | tr -s ' ')
-  CXXFLAGS+= -std=c++11 -g -MMD -MP
+  OPTFLAGS   := $(shell cat data/gcc4.flags | tr '\n' ' ' | tr -s ' ')
+  CXXFLAGS   += -std=c++11 -g -MMD -MP -fPIC
   # Dependency file generation: -MMD -MP
   ifeq ($(ENABLE_LTO),ON)
-    CXXFLAGS+= -flto
+    CXXFLAGS += -flto
   endif
   #NOTE -fpic needed for shared libs, but may degrade static lib performance.
   ifeq ($(ENABLE_OMP),ON)
-    CXXFLAGS+= -fopenmp
-    FMRFLAGS+= -D_GLIBCXX_PARALLEL
+    CXXFLAGS += -D_GLIBCXX_PARALLEL
+    CXXFLAGS += -fopenmp
   endif
   ifeq ($(ENABLE_GCC_PROFILE),ON)
-  # CXXFLAGS+= -fprofile-abs-path fprofile-dir=$(BUILD_CPU)/%p/
-    CXXFLAGS+= -fprofile-dir=$(abspath $(BUILD_CPU))
-    CXXFLAGS+= -fprofile-generate
+  # CXXFLAGS += -fprofile-abs-path fprofile-dir=$(BUILD_CPU)/%p/
+    CXXFLAGS += -fprofile-dir=$(abspath $(BUILD_CPU))
+    CXXFLAGS += -fprofile-generate
   endif
-  CXXFLAGS+= $(OPTFLAGS) -fstrict-enums
+  CXXFLAGS   += $(OPTFLAGS) -fstrict-enums
   # Warning flags
-  CXXWARNS+= -Wall -Wextra -Wpedantic -Wuninitialized -Wshadow -Wfloat-equal
-  CXXWARNS+= -Wdouble-promotion -Wconversion -Wsign-conversion -Wlogical-op
-  CXXWARNS+= -Wcast-qual -Wcast-align -Woverloaded-virtual -Wundef
-  CXXWARNS+= -Wmissing-declarations -Wredundant-decls -Wunused-macros
-  CXXWARNS+= -Wzero-as-null-pointer-constant -Wstrict-null-sentinel -Weffc++
-  CXXWARNS+= -Wdisabled-optimization
-  CXXWARNS+= -Winline
+  CXXWARNS   += -Wall -Wextra -Wpedantic -Wuninitialized -Wshadow -Wfloat-equal
+  CXXWARNS   += -Wdouble-promotion -Wconversion -Wsign-conversion -Wlogical-op
+  CXXWARNS   += -Wcast-qual -Wcast-align -Woverloaded-virtual -Wundef
+  CXXWARNS   += -Wmissing-declarations -Wredundant-decls -Wunused-macros
+  CXXWARNS   += -Wzero-as-null-pointer-constant -Wstrict-null-sentinel -Weffc++
+  CXXWARNS   += -Wdisabled-optimization
+  CXXWARNS   += -Winline
+  #
   # CXXFLAGS+= -finline-limit=1000
   # CXXFLAGS+= --param inline-min-speedup=2
   # CXXFLAGS+= --param inline-unit-growth=500
   # CXXFLAGS+= --param large-function-growth=2000
   # Library archiver
-  AREXE:= gcc-ar
+  AREXE      := gcc-ar
 endif
+# To use static libraries instead of dynamic when both are available, use:
+# <full path>/lib<name>.a instead of -l<name>
+# in LDLIBS.
 ifeq ($(CXX),icpc)
-  OPTFLAGS:= $(shell cat data/icpc.flags | tr '\n' ' ' | tr -s ' ')
-  CXXFLAGS:= c++11 -restrict -g $(OPTFLAGS)
+  OPTFLAGS   := $(shell cat data/icpc.flags | tr '\n' ' ' | tr -s ' ')
+  CXXFLAGS   := c++11 -restrict -g $(OPTFLAGS)
   #NOTE -fPIC needed for shared libs, but may degrade static lib performance.
-  ENABLE_GCC_PROFILE:=OFF
-  CXXWARNS+= -Wall -Wextra -Wshadow
+  ENABLE_GCC_PROFILE :=OFF
+  # CXXWARNS   += -Wall -Wextra -Wshadow
   ifeq ($(ENABLE_MKL),ON)
-    FMRFLAGS+= -mkl=sequential -DMKL_DIRECT_CALL_SEQ
+    LDLIBS   += -mkl=sequential
+    CXXFLAGS += -DMKL_DIRECT_CALL_SEQ
   endif
-  AREXE:= xiar
+  AREXE      :=xiar
 endif
-CXX_VERSION:= $(shell $(CXX) -dumpversion)
+CXX_VERSION  :=$(shell $(CXX) -dumpversion)
 # Flags for compiling tests
-CXXTESTS := $(CXXFLAGS) $(CXXWARNS)
-CXXPERFS := $(CXXFLAGS) $(CXXWARNS)
-FMRFLAGS += -DFMR_VERSION="$(FEMERA_VERSION)"
-FMRFLAGS += -DFMR_CPUMODEL="$(CPUMODEL)"
+CXXTESTS     :=$(CXXFLAGS) $(CXXWARNS)
+CXXPERFS     :=$(CXXFLAGS) $(CXXWARNS)
+FMRFLAGS     += -DFMR_VERSION="$(FEMERA_VERSION)"
+FMRFLAGS     += -DFMR_CPUMODEL="$(CPUMODEL)"
 ifneq ($(CPUCOUNT),)
-FMRFLAGS += -DFMR_CORE_N=$(CPUCOUNT)
+  FMRFLAGS   += -DFMR_CORE_N=$(CPUCOUNT)
+endif
+ifneq ($(FMR_LOCAL_INT),)
+  FMRFLAGS   += -DFMR_LOCAL_INT=$(FMR_LOCAL_INT)
+endif
+ifneq ($(FMR_GLOBAL_INT),)
+  FMRFLAGS   += -DFMR_GLOBAL_INT=$(FMR_GLOBAL_INT)
 endif
 ifneq ($(FMR_MICRO_UCHAR),)
-  FMRFLAGS += -DFMR_MICRO_UCHAR=$(FMR_MICRO_UCHAR)
+  FMRFLAGS   += -DFMR_MICRO_UCHAR=$(FMR_MICRO_UCHAR)
 endif
 ifneq ($(FMR_TIMES_UCHAR),)
-  FMRFLAGS += -DFMR_TIMES_UCHAR=$(FMR_TIMES_UCHAR)
+  FMRFLAGS   += -DFMR_TIMES_UCHAR=$(FMR_TIMES_UCHAR)
 endif
-FMRFLAGS += -I"$(STAGE_CPU)/include" -I"$(STAGE_DIR)/include"
-FMRFLAGS += -isystem"$(INSTALL_CPU)/include" -isystem"$(INSTALL_DIR)/include"
-LDFLAGS += -L"$(STAGE_CPU)/lib" -L"$(STAGE_DIR)/lib"
+INCFLAGS     += -I"$(STAGE_CPU)/include"
+INCFLAGS     += -I"$(STAGE_DIR)/include"
+INCFLAGS     += -isystem"$(INSTALL_CPU)/include"
+INCFLAGS     += -isystem"$(INSTALL_DIR)/include"
+LDFLAGS      += -L"$(STAGE_CPU)/lib"
+LDFLAGS      += -L"$(STAGE_DIR)/lib"
 # -----------------------------------------------------------------------------
 ifeq ("$(findstring $(INSTALL_DIR)/bin:,$(PATH):)","")
-  ADD_TO_PATH:= $(INSTALL_DIR)/bin:$(ADD_TO_PATH)
+  ADD_TO_PATH   :=$(INSTALL_DIR)/bin:$(ADD_TO_PATH)
 endif
 ifeq ("$(findstring $(INSTALL_CPU)/bin:,$(PATH):)","")
-  ADD_TO_PATH:= $(INSTALL_CPU)/bin:$(ADD_TO_PATH)
+  ADD_TO_PATH   :=$(INSTALL_CPU)/bin:$(ADD_TO_PATH)
 endif
 ifneq ("$(ADD_TO_PATH)","")# only true once during build
-  export PATH:= $(ADD_TO_PATH)$(PATH)
+  export PATH   :=$(ADD_TO_PATH):$(PATH)
   #NOTE export does not work for this when in a recipe.
 endif
 
-ifeq ("$(findstring $(INSTALL_DIR)/lib64:,$(LDPATH):)","")
-  ADD_TO_LDPATH:=$(INSTALL_DIR)/lib64:$(ADD_TO_LDPATH)
+ifeq ("$(findstring $(INSTALL_DIR)/lib64:,$(LD_RUN_PATH):)","")
+  ADD_TO_LDPATH :=$(INSTALL_DIR)/lib64:$(ADD_TO_LDPATH)
 endif
-ifeq ("$(findstring $(INSTALL_DIR)/lib:,$(LDPATH):)","")
-  ADD_TO_LDPATH:=$(INSTALL_DIR)/lib:$(ADD_TO_LDPATH)
+ifeq ("$(findstring $(INSTALL_DIR)/lib:,$(LD_RUN_PATH):)","")
+  ADD_TO_LDPATH :=$(INSTALL_DIR)/lib:$(ADD_TO_LDPATH)
 endif
-ifeq ("$(findstring $(INSTALL_CPU)/lib64:,$(LDPATH):)","")
-  ADD_TO_LDPATH:=$(INSTALL_CPU)/lib64:$(ADD_TO_LDPATH)
+ifeq ("$(findstring $(INSTALL_CPU)/lib64:,$(LD_RUN_PATH):)","")
+  ADD_TO_LDPATH :=$(INSTALL_CPU)/lib64:$(ADD_TO_LDPATH)
 endif
-ifeq ("$(findstring $(INSTALL_CPU)/lib:,$(LDPATH):)","")
-  ADD_TO_LDPATH:=$(INSTALL_CPU)/lib:$(ADD_TO_LDPATH)
+ifeq ("$(findstring $(INSTALL_CPU)/lib:,$(LD_RUN_PATH):)","")
+  ADD_TO_LDPATH :=$(INSTALL_CPU)/lib:$(ADD_TO_LDPATH)
 endif
-ifeq ("$(findstring $(INSTALL_CPU)/mkl/2021.4.0/lib/intel64:,$(LDPATH):)","")
-  ADD_TO_LDPATH:=$(INSTALL_CPU)/mkl/2021.4.0/lib/intel64:$(ADD_TO_LDPATH)
+ifeq ($(ENABLE_MKL),ON)
+  ifeq ("$(findstring $(INSTALL_CPU)/mkl/2021.4.0/lib/intel64:,$(LD_RUN_PATH):)","")
+    ADD_TO_LDPATH :=$(INSTALL_CPU)/mkl/2021.4.0/lib/intel64:$(ADD_TO_LDPATH)
+  endif
 endif
 ifneq ("$(ADD_TO_LDPATH)","")# only true once during build
-  export LD_LIBRARY_PATH:= $(ADD_TO_LDPATH)$(LD_LIBRARY_PATH)
+  export LD_RUN_PATH     :=$(ADD_TO_LDPATH)$(LD_RUN_PATH)
+  export LD_LIBRARY_PATH :=$(ADD_TO_LDPATH)$(LD_LIBRARY_PATH)
 endif
 
-# TMP_LIBRARY_PATH_=$(LD_LIBRARY_PATH);
-LDFLAGS+= -L$(INSTALL_CPU)/lib -L$(INSTALL_CPU)/lib64
-LDFLAGS+= -L$(INSTALL_DIR)/lib -L$(INSTALL_DIR)/lib64
-LDFLAGS+= -L$(INSTALL_CPU)/mkl/2021.4.0/lib/intel64
-
+# TMP_LIBRARY_PATH_=$(LD_RUN_PATH);
+ifeq ("$(findstring $(INSTALL_CPU)/lib -L,$(LDFLAGS) -L)","")
+  LDFLAGS   += -L"$(INSTALL_CPU)/lib"
+endif
+ifeq ("$(findstring $(INSTALL_CPU)/lib64 -L,$(LDFLAGS) -L)","")
+  LDFLAGS   += -L"$(INSTALL_CPU)/lib64"
+endif
+ifeq ("$(findstring $(INSTALL_DIR)/lib -L,$(LDFLAGS) -L)","")
+  LDFLAGS   += -L"$(INSTALL_DIR)/lib"
+endif
+ifeq ("$(findstring $(INSTALL_DIR)/lib64 -L,$(LDFLAGS) -L)","")
+  LDFLAGS   += -L"$(INSTALL_DIR)/lib64"
+endif
+ifeq ($(ENABLE_MKL),ON)
+  ifeq ("$(findstring $(INSTALL_CPU)/mkl/2021.4.0/lib/intel64 -L,$(LDFLAGS) -L)","")
+    LDFLAGS += -L"$(INSTALL_CPU)/mkl/2021.4.0/lib/intel64"
+  endif
+endif
 ifeq ("$(FMR_COPYRIGHT)","")# only true once during build
-  export FMR_COPYRIGHT:= cat data/copyright.txt | tr '\n' ' ' | tr -s ' '
-  NOSA_SEE:= See the NASA open source agreement (NOSA-1-3.txt) for details.
+  export FMR_COPYRIGHT := cat data/copyright.txt | tr '\n' ' ' | tr -s ' '
+  NOSA_SEE := See the NASA open source agreement (LICENSE) file for details.
 endif
 
 -include $(BUILD_CPU)/external-config.mk
@@ -172,7 +207,7 @@ ifeq ($(ENABLE_ZYCLOPS),ON)
   FMRFLAGS+= -DFMR_HAS_ZYCLOPS
 endif
   ifeq ($(ENABLE_PYMERA),ON)
-    EXTERNAL_DOT+="Femera" -> "Pymera" [color="cyan"]\n
+    EXTERNAL_DOT+="Femera" -> "pymera" [color="cyan"] [style="dotted"]\n
   endif
 ifeq ($(ENABLE_OMP),ON)
   EXTERNAL_DOT+="Femera" -> "OpenMP"\n
@@ -181,28 +216,41 @@ endif
 ifeq ($(ENABLE_NVIDIA),ON)
 #TODO move to external.config-nvidia.mk?
   ifeq ("$(NVIDIA_DIR)","")
-    NVIDIA_DIR:=/usr/local/cuda-11.6
+    NVIDIA_DIR:="/usr/local/cuda-11.6"
   endif
   # EXTERNAL_DOT+="Femera" -> "NVIDIA"\n
   FMRFLAGS+= -DFMR_HAS_NVIDIA
   CUXX:=nvcc
-  FMRFLAGS+= -I"$(NVIDIA_DIR)/include"
-  LDFLAGS+= -L$(NVIDIA_DIR)/lib64
+  INCFLAGS+= -isystem"$(NVIDIA_DIR)/include"
+  LDFLAGS+= -L"$(NVIDIA_DIR)/lib64"
   LDLIBS+= -lcuda -lcudart
   CUFLAGS+= --std=c++11 -g -MMD -MP -O3
-  CUFLAGS+= -DFMR_HAS_NVIDIA -I"$(NVIDIA_DIR)/include"
-  CUFLAGS+= -L$(NVIDIA_DIR)/lib64 -lcuda -lcudart
+  CUFLAGS+= -DFMR_HAS_NVIDIA
+  CUFLAGS+= -L"$(NVIDIA_DIR)/lib64" -lcuda -lcudart
 endif
 ifeq ($(ENABLE_MPI),ON)
+  #TODO lstopo --of xml "$FMRDIR/share/mpich-hwloc.xml"
   EXTERNAL_DOT+="Femera" -> "MPI"\n
   FMRFLAGS+= -DFMR_HAS_MPI
-  #FIXME Find include and lib dirs automatically
-  ifeq ($(CXX),mpic++)
-    FMRFLAGS+= -isystem"/usr/include/openmpi-x86_64"
+  #TODO find include and lib dirs automatically
+  # ldconfig -p | grep "mpi[.]"
+  ifeq (0,1)
+    # OpenMPI
+    ifeq ($(CXX),mpic++)
+      INCFLAGS:=-isystem"/usr/include/openmpi-x86_64" $(INCFLAGS)
+    else
+      INCFLAGS:=-I"/usr/include/openmpi-x86_64" $(INCFLAGS)
+    endif
+    LDFLAGS:= -L"/usr/lib64/openmpi/lib $(LDFLAGS)"
   else
-    FMRFLAGS+= -I"/usr/include/openmpi-x86_64"
+    # MPICH
+    ifeq ($(CXX),mpic++)
+      INCFLAGS:=-isystem"/usr/include/mpich-x86_64" $(INCFLAGS)
+    else
+      INCFLAGS:=-I"/usr/include/mpich-x86_64" $(INCFLAGS)
+    endif
+    LDFLAGS:=-L"/usr/lib64/mpich/lib" $(LDFLAGS)
   endif
-  LDFLAGS+= -L/usr/lib64/openmpi/lib
   LDLIBS+= -lmpi
   ifeq ($(ENABLE_VALGRIND),ON)# for valgrind with OpenMPI
     VGMPISUPP:=$(shell tools/valgrind-mpi-supp.sh)
@@ -215,19 +263,21 @@ ifeq ($(ENABLE_LIBNUMA),ON)
 endif
 # Build tools to download and install -----------------------------------------
 ifeq ($(ENABLE_BATS),ON)
-  MAKE_DOT+="Makefile" -> "Bats"\n
-  BATS_MODS:= bats-core bats-support bats-assert bats-file
+  MAKE_DOT+="Makefile" -> "bats"\n
+  BATS_MODS:= bats-core bats-support bats-assert bats-file # bats-mock
   label_bats = $(call label_test,$(1),$(2),$(3),$(4))
 else
   label_bats = $(info \
     $(DBUG) Set ENABLE_BATS:=ON in config.local for $(notdir $(3)).)
 endif
+ifeq ($(ENABLE_GOOGLETEST),ON)
+  CXXTESTS := $(filter-out -Winline,$(CXXTESTS))
+  CXXTESTS := $(filter-out -Weffc++,$(CXXTESTS))
+endif
 ifeq ($(ENABLE_GOOGLETEST),ON-FIXME-DISABLED)
   CXXTESTS := $(filter-out -Wundef,$(CXXTESTS))
-  CXXTESTS := $(filter-out -Weffc++,$(CXXTESTS))
-  # CXXTESTS := $(filter-out -Winline,$(CXXTESTS))
   CXXTESTS := $(filter-out -flto,$(CXXTESTS))
-  #NOTE Parallel library build breaks link-time optimization of gtests.
+  #NOTE Parallel library build breaks link-time optimization of gtests. (gcc 4.8)
   # CXXTESTS := $(filter-out -fprofile-generate,$(CXXTESTS))
   #
   CXXPERFS := $(filter-out -Weffc++,$(CXXPERFS))
@@ -253,7 +303,7 @@ ifeq ($(ENABLE_PYBIND11),ON)
   EXTERNAL_DOT+="pybind11" -> "Boost"\n
   EXTERNAL_DOT+="pybind11" -> "Python"\n
   ifeq ($(ENABLE_PYMERA),ON)
-    EXTERNAL_DOT+="Pymera" -> "pybind11"\n
+    EXTERNAL_DOT+="pymera" -> "pybind11"\n
   endif
   # FMRFLAGS += -DFMR_HAS_PYBIND11
   PYBIND11_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
@@ -275,6 +325,15 @@ endif
 #  BOOST_FLAGS += --show-libraries --with-libraries=$(BOOST_LIBS)
 #  BOOST_FLAGFILE:= $(BUILD_DIR)/external/install-boost.flags
 #endif
+#TODO Remove following 2 lines.
+EXTERNAL_DOT+="Femera" -> "CUDA" [style=dotted]\n
+EXTERNAL_DOT+="Femera" -> "ParaView" [style=dotted]\n
+ifeq ($(ENABLE_PARAVIEW),ON)
+  #TODO move to external/paraview-* files
+  LIST_EXTERNAL += paraview
+  FMRFLAGS+= -DFMR_HAS_PARAVIEW
+  EXTERNAL_DOT+="Femera" -> "ParaView" [style=dotted]\n
+endif
 # Developer tools
 SRC_STAT_FILE:=data/src/femera-$(CPUMODEL)-build-stats.csv
 ifeq ($(ENABLE_DOT),ON)
@@ -310,7 +369,7 @@ ifeq ($(ENABLE_DOT),ON)
     LEGEND_DOT+=  key:i1:e -> key2:i1:w [color=cyan] {rank=same; key, key2 }\n
     LEGEND_DOT+=  key:i2:e -> key2:i2:w [color=blue] {rank=same; key, key2 }\n
     LEGEND_DOT+=  key:i3:e -> key2:i3:w {rank=same; key, key2 }\n
-    LEGEND_DOT+=  key:i4:e -> key2:i4:w [style=dotted] {rank=same; key, key2 }\n
+    LEGEND_DOT+=  key:i4:e -> key2:i4:w [style="dotted"] {rank=same; key, key2 }\n
     LEGEND_DOT+=}\n
     #LEGEND_DOT+=}
   endif
@@ -327,6 +386,7 @@ ifeq ($(ENABLE_DOT),ON)
   EXTERNAL_DOTFILE:= $(BUILD_DIR)/external/external.dot
   MAKE_DOTFILE:= $(BUILD_DIR)/make.dot
 endif
+
 ifeq ($(ENABLE_VALGRIND),ON)
   VALGRIND_SUPP := valgrind.supp
   VALGRIND_SUPP_EXE := $(BUILD_CPU)/$(VALGRIND_SUPP).exe
@@ -334,9 +394,11 @@ ifeq ($(ENABLE_VALGRIND),ON)
   VGSUPP_FLAGS += --suppressions=$(BUILD_CPU)/$(VALGRIND_SUPP)
   # Use (mostly) the same flags to compile the suppression file.
   VGFLAGS := $(CXXFLAGS) $(filter-out -Winline,$(CXXWARNS))
+ifeq (1,0)
+  # This is for OpenMPI
   VGSUPP := valgrind --leak-check=full --show-reachable=yes --error-limit=no \
     --show-leak-kinds=all --gen-suppressions=all \
-    mpiexec -np $(TDD_MPI_N) --bind-to core -map-by node:pe=$(TDD_OMP_N) \
+    mpiexec -n $(TDD_MPI_N) --bind-to core -map-by node:pe=$(TDD_OMP_N) \
     $(VALGRIND_SUPP_EXE) 3>&1 1>&2 2>&3 \
     | tools/grindmerge.pl -f $(VGMPISUPP) \
     > $(BUILD_CPU)/$(VALGRIND_SUPP) 2>/dev/null;
@@ -350,6 +412,25 @@ ifeq ($(ENABLE_VALGRIND),ON)
       $(BUILD_CPU)/mini.valgrind.log;                      \
     sed -i '/select an alternative log fd/d'               \
       $(BUILD_CPU)/mini.valgrind.log
+else
+  # This is for MPICH.
+  VGSUPP := valgrind --leak-check=full --show-reachable=yes --error-limit=no \
+    --show-leak-kinds=all --gen-suppressions=all \
+    mpiexec -n $(TDD_MPI_N)                                \
+    $(VALGRIND_SUPP_EXE) 3>&1 1>&2 2>&3 \
+    | tools/grindmerge.pl -f $(VGMPISUPP) \
+    > $(BUILD_CPU)/$(VALGRIND_SUPP) 2>/dev/null;
+  VGEXEC := valgrind --leak-check=full --track-origins=yes         \
+    $(VGSUPP_FLAGS) --log-file=$(BUILD_CPU)/mini.valgrind.log      \
+    $(VGMPI):$(BUILD_CPU)/mini -n$(TDD_OMP_NP) -v0 $(TDD_FMRFILE) \
+    > $(BUILD_CPU)/mini.valgrind.out; #\
+    #sed -i '/invalid file descriptor 10[0-4][0-9] /d'      \
+    #  $(BUILD_CPU)/mini.valgrind.log;                      \
+    #sed -i '/invalid file descriptor 2[56][0-9] /d'        \
+    #  $(BUILD_CPU)/mini.valgrind.log;                      \
+    #sed -i '/select an alternative log fd/d'               \
+    #  $(BUILD_CPU)/mini.valgrind.log
+endif
 endif
 
 #TODO CXXMINI flags should show -Winline errors
@@ -398,12 +479,13 @@ PRFOUTS:= $(patsubst src/%.perf.cpp,$(BUILD_CPU)/%.perf.out,$(FMRPERF))
 .PHONY: install-tools test-tools remove-tools reinstall-tools clean-tools
 .PHONY: install-bats # install-external
 # ...and internal makefile use.
-.PHONY: intro
+.PHONY: intro info
 .PHONY: all-done build-done docs-done perf-done
 .PHONY: install-tools-done install-done remove-done
 
 # Real files, but considered always out of date.
-.PHONY: build/.md5 # src/docs/src.dot
+.PHONY: build/.md5 
+# src/docs/src.dot
 .PHONY: code-stats $(SRC_STAT_FILE)
 
 # libmini libfull
@@ -513,6 +595,9 @@ docs: | intro build/docs/ build/src-notest.eps
 intro: build/copyright.txt build/docs/find-tdd-files.csv
 intro: $(BUILD_CPU)/femera.flags.new
 intro: | $(BUILD_TREE) $(STAGE_TREE)
+ifeq ($(ENABLE_MPI),ON)
+intro: $(BUILD_CPU)/sizeof-mpi-comm.exe
+endif
 ifneq ("$(NOSA_SEE)","") # Run once during a build
 	$(info $(INFO) $(NOSA_SEE))
 	cat external/*-config.mk > "$(BUILD_CPU)/external-config.mk"
@@ -522,13 +607,16 @@ ifneq ("$(NOSA_SEE)","") # Run once during a build
 ifeq ($(ENABLE_DOT),ON)
 	@printf '%s' '$(MAKE_DOT)' | sed 's/\\n/\n/g' > '$(MAKE_DOTFILE)'
 	@dot '$(MAKE_DOTFILE)' -Teps -o $(BUILD_DIR)/make.eps
-	@dot external/external.dot -Teps -o $(BUILD_DIR)/external/external.eps
-ifeq ($(ENABLE_DOT_PNG),ON)
-	@dot external/external.dot -Tpng -o $(BUILD_DIR)/external/external.png
-endif
+	# @dot external/external.dot -Teps -o $(BUILD_DIR)/external/external.eps
+# ifeq ($(ENABLE_DOT_PNG),ON)
+	# @dot external/external.dot -Tpng -o $(BUILD_DIR)/external/external.png
+# endif
 	@printf '%s' '$(EXTERNAL_DOT)' | sed 's/\\n/\n/g' > '$(EXTERNAL_DOTFILE)'
 	#@cat 'external/build-external-legend.dot' >> '$(EXTERNAL_DOTFILE)'
-	@dot '$(EXTERNAL_DOTFILE)' -Teps -o $(BUILD_DIR)/external/build-external.eps
+	@dot '$(EXTERNAL_DOTFILE)' -Teps -o $(BUILD_DIR)/external/external.eps
+ifeq ($(ENABLE_DOT_PNG),ON)
+	@dot '$(EXTERNAL_DOTFILE)' -Tpng -o $(BUILD_DIR)/external/external.png
+endif
 endif
 endif
 ifneq ("$(ADD_TO_PATH)","")
@@ -536,22 +624,24 @@ ifneq ("$(ADD_TO_PATH)","")
 	$(info $(SPCS) $(ADD_TO_PATH))
 endif
 
-info: | intro
-ifeq ("$(ENABLE_NVIDIA)","ON")
-	printf "CUFLAGS:\n$(CUFLAGS)\n"
-endif
+info: | intro docs
 	printf "CXXFLAGS:\n$(CXXFLAGS)\n"
-	echo "FMRFLAGS:"
+ifeq ("$(ENABLE_NVIDIA)","ON")
+	printf "\nCUFLAGS:\n$(CUFLAGS)\n"
+endif
+	printf "\nFMRFLAGS:\n"
 	echo "$(FMRFLAGS)"
-	printf "LDFLAGS:\n$(LDFLAGS)\n"
-	printf "LDLIBS:\n$(LDLIBS)\n"
-	printf "exported LD_LIBRARY_PATH:\n$(LD_LIBRARY_PATH)\n"
-	printf "exported PATH:\n$(PATH)\n"
+	printf "\nINCFLAGS:\n$(INCFLAGS)\n"
+	printf "\nLDFLAGS:\n$(LDFLAGS)\n"
+	printf "\nLDLIBS:\n$(LDLIBS)\n"
+	printf "\nLD_RUN_PATH:\n$(LD_RUN_PATH)\n"
+	printf "\nLD_LIBRARY_PATH:\n$(LD_LIBRARY_PATH)\n"
+	printf "\nPATH:\n$(PATH)\n"
 	$(MAKE) $(JPAR) build-done
 
 docs-done: install-docs
-docs-done: build/docs/femera-guide.pdf build/docs/femera-quick-start.pdf
 ifeq ($(ENABLE_LYX),ON)
+docs-done: build/docs/femera-guide.pdf build/docs/femera-quick-start.pdf
 	$(info $(DONE) making $(FEMERA_VERSION) XHTML documentation in \
 	external/docs/)
 	$(info $(SPCS) and PDFs in build/docs/)
@@ -564,10 +654,11 @@ endif
 	$(call timestamp,$@,)
 
 install-docs: docs/femera-guide.xhtml docs/femera-quick-start.xhtml
-install-docs: LICENSE NOSA-1-3.txt README.md | $(INSTALL_CPU)/share/doc/femera/
+install-docs: LICENSE README.md | $(INSTALL_CPU)/share/doc/femera/
 	-cp docs/*.xhtml "$(INSTALL_CPU)/share/doc/femera/"
 	-cp LICENSE "$(INSTALL_CPU)/share/doc/femera/"
-	-cp NOSA-1-3.txt "$(INSTALL_CPU)/share/doc/femera/"
+	# -cp NOSA-1-3.txt "$(INSTALL_CPU)/share/doc/femera/"
+	-cp LICENSE "$(INSTALL_CPU)/share/doc/femera/"
 	-cp README.md "$(INSTALL_CPU)/share/doc/femera/"
 
 install-done:
@@ -782,7 +873,7 @@ endif
 ifeq ($(ENABLE_LIBNUMA),ON)
 $(BUILD_CPU)/tools/fmrnumas.test.out: src/tools/fmrnumas.c tools/fmrnumas.test.bats
 	$(info $(CC__) $(CC) $(<) .. -o $(BUILD_CPU)/tools/fmrnumas)
-	$(CC) $(<) $(FMRFLAGS) $(LDLIBS) -o $(BUILD_CPU)/tools/fmrnumas
+	$(CC) $(<) $(FMRFLAGS) $(INCFLAGS) $(LDLIBS) -o $(BUILD_CPU)/tools/fmrnumas
 	$(call label_bats,$(PASS),$(FAIL),tools/fmrnumas.test.bats, \
 	  $(BUILD_CPU)/tools/fmrnumas.test)
 endif
@@ -869,7 +960,7 @@ $(BUILD_CPU)/%.perf.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.perf.o : src/%.perf.cpp src/%.cpp src/%.hpp $(TOPDEPS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
-	$(CXX) -c $(CXXPERFS) $(FMRFLAGS) $< -o $@
+	$(CXX) -c $(CXXPERFS) $(FMRFLAGS) $(INCFLAGS) $< -o $@
 else
 	touch $@
 endif
@@ -878,7 +969,7 @@ $(BUILD_CPU)/%.perf.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.perf.o : src/%.perf.cpp src/%.cu.cpp src/%.hpp $(TOPDEPS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
-	$(CXX) -c $(CXXPERFS) $(FMRFLAGS) $< -o $@
+	$(CXX) -c $(CXXPERFS) $(FMRFLAGS) $(INCFLAGS) $< -o $@
 else
 	touch $@
 endif
@@ -888,7 +979,7 @@ $(BUILD_CPU)/%.perf.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.perf.o : src/%.perf.cpp src/%.hpp $(TOPDEPS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
-	$(CXX) -c $(CXXPERFS) $(FMRFLAGS) $< -o $@
+	$(CXX) -c $(CXXPERFS) $(FMRFLAGS) $(INCFLAGS) $< -o $@
 else
 	touch $@
 endif
@@ -897,7 +988,7 @@ $(BUILD_CPU)/%.gtst.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.gtst.o : src/%.gtst.cpp src/%.cpp src/%.hpp $(TOPDEPS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
-	$(CXX) -c $(CXXTESTS) $(FMRFLAGS) $< -o $@
+	$(CXX) -c $(CXXTESTS) $(FMRFLAGS) $(INCFLAGS) $< -o $@
 else
 	touch $@
 endif
@@ -906,7 +997,7 @@ $(BUILD_CPU)/%.gtst.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.gtst.o : src/%.gtst.cpp src/%.cu.cpp src/%.hpp $(TOPDEPS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
-	$(CXX) -c $(CXXTESTS) $(FMRFLAGS) $< -o $@
+	$(CXX) -c $(CXXTESTS) $(FMRFLAGS) $(INCFLAGS) $< -o $@
 else
 	touch $@
 endif
@@ -916,7 +1007,7 @@ $(BUILD_CPU)/%.gtst.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.gtst.o : src/%.gtst.cpp src/%.hpp $(TOPDEPS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
-	$(CXX) -c $(CXXTESTS) $(FMRFLAGS) $< -o $@
+	$(CXX) -c $(CXXTESTS) $(FMRFLAGS) $(INCFLAGS) $< -o $@
 else
 	touch $@
 endif
@@ -927,7 +1018,7 @@ $(BUILD_CPU)/%.o : src/%.cpp src/%.hpp $(TOPDEPS)
 	# rm -f $*.err $*.gtst.err
 	#(info $(CXX_) $(CXX) -c $< .. -o $(notdir $@))
 	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
-	$(CXX) -c $(CXXFLAGS) $(FMRFLAGS) $< -o $@
+	$(CXX) -c $(CXXFLAGS) $(FMRFLAGS) $(INCFLAGS) $< -o $@
 
 ifeq ($(ENABLE_NVIDIA),ON)
 $(BUILD_CPU)/%.o : export TMPDIR := $(TEMP_DIR)
@@ -936,7 +1027,7 @@ $(BUILD_CPU)/%.o : src/%.cu.cpp src/%.hpp $(TOPDEPS)
 	# rm -f $*.err $*.gtst.err
 	#(info $(CXX_) $(CXX) -c $< .. -o $(notdir $@))
 	$(call col2cxx,$(CXX_),$(CUXX) -c $<,$(notdir $@))
-	$(CUXX) -c $(CUFLAGS) $(FMRFLAGS_FIXME) $< -o $@
+	$(CUXX) -c $(CUFLAGS) $(FMRFLAGS_FIXME) $(INCFLAGS) $< -o $@
 endif
 # Untested targets ------------------------------------------------------------
 
@@ -969,6 +1060,8 @@ ifeq ($(ENABLE_GCC_PROFILE),ON)
   $< $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
 	-$(CXX) $(CXXMINI) $< $(LDFLAGS) -lfemera $(LDLIBS) -o $@
+	#TODO strip when NOT compiling debug version
+	# strip $@
 endif
 	$(call col2cxx,$(CXX_),$(CXX) $(notdir $<) .. $(notdir $@),$(shell \
 	if [ -f "$(@)" ]; then ls -sh $(@) | cut -d " " -f1; fi)B)
@@ -1053,11 +1146,18 @@ else
 	touch $@
 endif
 
+ifeq ($(ENABLE_MPI),ON)
+$(BUILD_CPU)/sizeof-mpi-comm.exe : export TMPDIR := $(TEMP_DIR)
+$(BUILD_CPU)/sizeof-mpi-comm.exe : src/sizeof-mpi-comm.c
+	$(call col2cxx,$(CXX_),$(CXX) $<,$(notdir $@))
+	$(CXX) $(CXXFLAGS) $< $(LDFLAGS) $(INCFLAGS) -lmpi -o $@
+endif
+
 $(VALGRIND_SUPP_EXE) : export TMPDIR := $(TEMP_DIR)
 $(VALGRIND_SUPP_EXE) : src/$(VALGRIND_SUPP).cpp $(BUILD_CPU)/$(VALGRIND_SUPP)
 ifeq ($(ENABLE_VALGRIND),ON)
 	$(call col2cxx,$(CXX_),$(CXX) $<,$(notdir $@))
-	$(CXX) $(VGFLAGS) $< $(LDFLAGS) -L$(BUILD_DIR) -lfemera -o $@ $(LDLIBS)
+	$(CXX) $(VGFLAGS) $< $(LDFLAGS) -o $@ $(LDLIBS)
 	$(info $(GRND) suppression file: $(BUILD_CPU)/$(VALGRIND_SUPP))
 	$(VGSUPP)
 else
@@ -1065,9 +1165,11 @@ else
 endif
 
 $(BUILD_CPU)/$(VALGRIND_SUPP): $(VALGRIND_SUPP_FILE)
-  ifneq ("$(VALGRIND_SUPP_FILE)","")
-	cat $(VALGRIND_SUPP_FILE) >>$(BUILD_CPU)/$(VALGRIND_SUPP)
-  endif
+ifeq ("$(VALGRIND_SUPP_FILE)","")
+	touch $(*)
+else
+	cat $(VALGRIND_SUPP_FILE) >> $(*)
+endif
 
 # hm ==========================================================================
 %/:
@@ -1115,9 +1217,9 @@ build/test-files.txt: tools/list-test-files.sh build/.md5
 
 src/docs/src.dot: build/.md5
 	@external/tools/cinclude2dot --src src >$@ 2>build/src.dot.err
-	@dot $@ -Gsize="6.0,3.0" -Teps -o build/src-test.eps
+	@dot $@ -Gsize="18.0,12.0" -Teps -o build/src-test.eps
 ifeq ($(ENABLE_DOT_PNG),ON)
-	@dot $@ -Gsize="18.0,6.0" -Tpng -o build/src-test.png
+	@dot $@ -Gsize="18.0,12.0" -Tpng -o build/src-test.png
 endif
 	#cinclude2dot --groups is nice, too
 	#(info $(INFO) Source dependencies: $@)
@@ -1133,11 +1235,11 @@ build/src-notest.eps: src/docs/src-headers.dot
 build/src-notest.eps: src/docs/src-notest.dot tools/src-inherit.sh
 ifeq ($(ENABLE_DOT),ON)
 	@tools/src-inherit.sh
-	@dot $< -Gsize="9.0,3.0" -Teps -o $@
-	@dot src/docs/src-headers.dot -Gsize="18.0,6.0" -Teps -o build/src-headers.eps
+	@dot $< -Gsize="12.0,8.0" -Teps -o $@
+	@dot src/docs/src-headers.dot -Gsize="18.0,9.0" -Teps -o build/src-headers.eps
 ifeq ($(ENABLE_DOT_PNG),ON)
-	@dot $< -Gsize="12.0,6.0" -Tpng -o build/src-notest.png
-	@dot src/docs/src-headers.dot -Gsize="18.0,6.0" -Tpng -o build/src-headers.png
+	@dot $< -Gsize="12.0,8.0" -Tpng -o build/src-notest.png
+	@dot src/docs/src-headers.dot -Gsize="18.0,9.0" -Tpng -o build/src-headers.png
 endif
 	#  -Gratio="fill" -Gsize="11.7,8.267!" -Gmargin=0
 	$(info $(INFO) source code include graph: $@)

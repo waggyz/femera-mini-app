@@ -20,7 +20,7 @@ else
 
   # mkdir -p "$BUILD_DIR"
   cd "$SRC_DIR"
-  # python3 -m pip install docwriter #FIXME requires elevated priveleges
+  # python3 -m pip install --user docwriter
   if [ -f ".gitignore" ]; then sh autogen.sh; fi
 
   eval ./configure $FLAGS

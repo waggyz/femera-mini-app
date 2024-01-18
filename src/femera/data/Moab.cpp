@@ -6,5 +6,3 @@
 
 namespace femera {
 }//end femera:: namespace
-
-

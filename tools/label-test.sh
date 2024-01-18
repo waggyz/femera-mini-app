@@ -6,28 +6,30 @@ HINT_COLOR="\e[35m"
 MORE=" $HINT_COLOR see: $NORM_COLOR"
 
 touch "$4.out";
+OUTFILE="$4.out"
+
 $3 >"$4.out" 2>"$4.err"; ERR=$?;
 if [[ "$ERR" -eq 0 ]]; then # count bats test failures
-  ERR=`grep -c "not ok" "$4.out"`
+  ERR=`grep -c "not ok" "$OUTFILE"`
 fi
 if [[ "$ERR" -eq 0 ]]; then # count googletest failures
-  ERR=`grep -c "FA""IL" "$4.out"`
+  ERR=`grep -c "FA""IL" "$OUTFILE"`
 fi
 if [[ "$ERR" -eq 0 ]]; then
-  ERR=`grep -c " 0 test suites" "$4.out"`
+  ERR=`grep -c " 0 test suites" "$OUTFILE"`
 fi
 if [[ "$ERR" -eq 0 ]]; then
-  DIDRUN=`grep -c "test suite" "$4.out"` # count googletest test suites
-  if [[ "$DIDRUN" -eq 0 ]]; then # count googletest runs
-    DIDRUN=`grep -c "test gtst pass" "$4.out"`
-  fi
-  if [[ "$DIDRUN" -eq 0 ]]; then # count bats passed tests
-    DIDRUN=`grep -c '^ok ' "$4.out"`
-  fi
-  if [[ "$DIDRUN" -eq 0 ]]; then
-    MSG="ran no tests"
-    ERR=1
-  fi
+DIDRUN=`grep -c "test suite" "$OUTFILE"` # count googletest test suites
+fi
+if [[ "$DIDRUN" -eq 0 ]]; then # count googletest runs
+  DIDRUN=`grep -c "test gtst pass" "$OUTFILE"`
+fi
+if [[ "$DIDRUN" -eq 0 ]]; then # count bats passed tests
+  DIDRUN=`grep -ci 'ok ' "$OUTFILE"`
+fi
+if [[ "$DIDRUN" -eq 0 ]]; then
+  MSG="ran no tests."
+  ERR=1
 fi
 if [[ "$ERR" -eq 0 ]]; then # truncate command if ok.
 #  if [ ${3%% *} != ${3##* } ]; then DD=" .."; fi

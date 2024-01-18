@@ -5,6 +5,8 @@ if [ -d external/googletest ]; then
   # echo `git describe --tags | sed 's/^.*[^0-9]\([0-9]*\.[0-9]*\.[0-9]*\).*$/\1/'`
   echo `git describe --tags | sed 's/^.*[^0-9]\([0-9]*\.[0-9]*\)\..*$/\1/'`
 else
-  echo -1
+  ldconfig -p | grep gtest | grep -m1 '[0-9]' \
+    | sed 's/^.*[^0-9]\([0-9]*\.[0-9]*\)\..*$/\1/'
+  #TODO test if anything returned
 fi
 #

@@ -1,17 +1,26 @@
-#ifndef FEMERA_NVIDCU_HPP
-#define FEMERA_NVIDCU_HPP
+#ifndef FEMERA_NVID_HPP
+#define FEMERA_NVID_HPP
 
-#include "../../fmr/fmr.hpp"
+#include "../Proc.hpp"
 
-#ifdef FMR_HAS_NVIDIA
-
-namespace femera { namespace proc { namespace nvid {
-
-  fmr::Local_int get_node_card_n ();
-  std::string    get_card_name   (fmr::Local_int ix);
-
-} } }//end femera::proc::nvid:: namespace
-//end FMR_HAS_NVIDIA
+namespace femera { namespace proc {
+  class Nvid;// Derive a CRTP concrete class from Proc.
+  class Nvid final: public Proc<Nvid> { private: friend class Proc;
+  private:
+    static bool is_in_parallel ();
+  private:
+    void task_init (int* argc, char** argv);
+    void task_exit ();
+#if 0
+    fmr::Local_int task_proc_ix ();
 #endif
-//end FEMERA_NVIDCU_HPP
+  private:
+    Nvid (femera::Work::Core_ptrs_t) noexcept;
+    Nvid () =delete;//NOTE Use the constructor above.
+  };
+} }//end femera::proc:: namespace
+
+#include "Nvid.ipp"
+
+//end FEMERA_NVID_HPP
 #endif

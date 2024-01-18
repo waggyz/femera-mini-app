@@ -36,6 +36,7 @@ local.*
 # Documents in development
 *.lyx
 *.odg
+*.ods
 
 # valgrind suppression files
 *.supp
@@ -55,4 +56,4 @@ __pycache__/
 *$py.class
 cython_debug/
 *.gcda
-
+.goutputstream-*

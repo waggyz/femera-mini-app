@@ -23,19 +23,21 @@ namespace femera { namespace data {
     std::string make_data_line (const std::string& line, Last);
     template <typename Head, typename ...Tail> static
     std::string make_data_line (const std::string& line, Head, Tail...);
+  private:// numeric types
+    static
+    std::string csv_item (float);
+    static
+    std::string csv_item (double);/*
+    static //FIXME handle char type
+    std::string csv_item (char);*/
+    template <typename I> static
+    std::string csv_item (I integer,//NOTE includes char type
+      typename std::enable_if<std::is_integral<I>::value>::type* = 0);
   private:// character string types are double-quoted ("item")
     static
     std::string csv_item (const std::string&);
     static
     std::string csv_item (const char*);
-  private:// numeric types
-    static
-    std::string csv_item (float);
-    static
-    std::string csv_item (double);
-    template <typename I> static
-    std::string csv_item (I integer,//NOTE includes char type
-      typename std::enable_if<std::is_integral<I>::value>::type* = 0);
 #endif
   public:
     void task_init (int* argc, char** argv);
