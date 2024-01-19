@@ -19,7 +19,10 @@
 #define FMR_SMART_PTR std::shared_ptr
 #define FMR_MAKE_SMART(T) std::make_shared<T>
 #endif
-// Forward declares -----------------------------------------------------------
+/* Forward declares -----------------------------------------------------------
+ * This describes the internaland external namespace and class hierarchy for
+ * all modules, including those not implemented or available yet.
+ */
 namespace femera {
   class Work;                          // abstract (pure virtual) base class
   template <typename> class Proc;      // abstract CRTP base derived from Work
@@ -33,7 +36,7 @@ namespace femera {
   namespace data {                     // CRTP inheriance from Data
     class File;                        // public interface for data handling
     class Logs; class Dlim; class Text;// Femera data handling
-    class Bank;// class View;
+    class Bank;// class View;          // View here or as a CRTP base? 
     class Cgns; class Gmsh; class Pets;// data handling libraries
     class Moab;
 } }//end femera::data:: namespace

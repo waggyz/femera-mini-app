@@ -1,7 +1,6 @@
 #!/usr/bin/make
 ifeq ($(ENABLE_PETSC),ON)
   FMRFLAGS += -DFMR_HAS_PETSC
-  LDLIBS += 
 #  ifeq ($(USE_STATIC_LIBS),ON)
 #    LDLIBS += $(INSTALL_CPU)/lib/libpetsc.a $(INSTALL_CPU)/lib/libdl.a
 #  else

@@ -37,14 +37,13 @@ namespace femera {
     const auto numa_n = node_n * proc::Node::get_numa_n ();
     const auto numa_all = node_n * numa_n;
     if (true) {//TODO if this->test->do_test ?
-      //TODO REMOVE? const auto str = this->get_base_abrv ()+" "+ this->abrv +" ";
       fmr::Local_int mpi_n=0, omp_n=0;
       //
       // segfaults here if called before tasks init
       const auto Pmpi = this->proc->get_task (Task_type::Fmpi);
-      if (Pmpi) { mpi_n = Pmpi->get_proc_n (); }
+      if (Pmpi != nullptr) { mpi_n = Pmpi->get_proc_n (); }
       const auto Pomp = this->proc->get_task (Task_type::Fomp);
-      if (Pomp) { omp_n = Pomp->get_proc_n (); }
+      if (Pomp != nullptr) { omp_n = Pomp->get_proc_n (); }
 #ifdef FMR_TIMES_UCHAR
       auto x = std::string ( MAKESTR(\FMR_TIMES_UCHAR) );
       x = (x =="\\x") ? "x" : x ;
@@ -52,10 +51,12 @@ namespace femera {
       const auto x = std::string ("x");
 #endif
       this->data->send (fmr::log, get_base_abrv (), abrv, "proc",
-        ("%4u    /%4u total CPU processes (%4u MPI  "+ x +"%4u OpenMP)").c_str(),
+        ("%4u    /%4u total CPU processes (%4u MPI  "
+          + x +"%4u OpenMP)").c_str(),
         mpi_n * omp_n, all_n, mpi_n, omp_n);
       this->data->send (fmr::log, get_base_abrv (), abrv, "core",
-        ("%4u    /%4u total physical CPUs (%4u node "+ x +"%4u cores)").c_str(),
+        ("%4u    /%4u total physical CPUs (%4u node "
+          + x +"%4u cores)").c_str(),
         node_n * core_n, all_n, node_n, core_n);
       this->data->send (fmr::log, get_base_abrv (), abrv, "numa",
         ("%4u ea "+ x +"%4u node,%4u NUMA domain%s total").c_str(),

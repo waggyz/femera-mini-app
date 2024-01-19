@@ -9,7 +9,7 @@
  * Variadic read/save/send methods in File.ipp package heterogenous
  * data into a fmr::Vals structure (or std::string)
  * then call a non-variadic member function in File.cpp to pass it on to a
- * specialized handler (in e.g. Text.cpp, Dlim.cpp, Logs.cpp, Cgns.cpp,...).
+ * specialized handler (in, e.g., Text.cpp, Dlim.cpp, Logs.cpp, Cgns.cpp,...).
  */
 namespace femera { namespace data {
   class File;// Derive as a CRTP concrete class from Data.

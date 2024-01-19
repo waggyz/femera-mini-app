@@ -171,8 +171,8 @@ ifeq ($(ENABLE_MKL),ON)
   endif
 endif
 ifneq ("$(ADD_TO_LDPATH)","")# only true once during build
-  export LD_RUN_PATH     :=$(ADD_TO_LDPATH)$(LD_RUN_PATH)
-  export LD_LIBRARY_PATH :=$(ADD_TO_LDPATH)$(LD_LIBRARY_PATH)
+  export LD_RUN_PATH     :=$(LD_RUN_PATH):$(ADD_TO_LDPATH)
+  export LD_LIBRARY_PATH :=$(LD_LIBRARY_PATH):$(ADD_TO_LDPATH)
 endif
 
 # TMP_LIBRARY_PATH_=$(LD_RUN_PATH);
@@ -234,15 +234,7 @@ ifeq ($(ENABLE_MPI),ON)
   FMRFLAGS+= -DFMR_HAS_MPI
   #TODO find include and lib dirs automatically
   # ldconfig -p | grep "mpi[.]"
-  ifeq (0,1)
-    # OpenMPI
-    ifeq ($(CXX),mpic++)
-      INCFLAGS:=-isystem"/usr/include/openmpi-x86_64" $(INCFLAGS)
-    else
-      INCFLAGS:=-I"/usr/include/openmpi-x86_64" $(INCFLAGS)
-    endif
-    LDFLAGS:= -L"/usr/lib64/openmpi/lib $(LDFLAGS)"
-  else
+  ifeq ($(FMR_MPI_TYPE),MPICH)
     # MPICH
     ifeq ($(CXX),mpic++)
       INCFLAGS:=-isystem"/usr/include/mpich-x86_64" $(INCFLAGS)
@@ -250,6 +242,14 @@ ifeq ($(ENABLE_MPI),ON)
       INCFLAGS:=-I"/usr/include/mpich-x86_64" $(INCFLAGS)
     endif
     LDFLAGS:=-L"/usr/lib64/mpich/lib" $(LDFLAGS)
+  else
+    # OpenMPI
+    ifeq ($(CXX),mpic++)
+      INCFLAGS:=-isystem"/usr/include/openmpi-x86_64" $(INCFLAGS)
+    else
+      INCFLAGS:=-I"/usr/include/openmpi-x86_64" $(INCFLAGS)
+    endif
+    LDFLAGS:= -L"/usr/lib64/openmpi/lib $(LDFLAGS)"
   endif
   LDLIBS+= -lmpi
   ifeq ($(ENABLE_VALGRIND),ON)# for valgrind with OpenMPI
@@ -394,7 +394,25 @@ ifeq ($(ENABLE_VALGRIND),ON)
   VGSUPP_FLAGS += --suppressions=$(BUILD_CPU)/$(VALGRIND_SUPP)
   # Use (mostly) the same flags to compile the suppression file.
   VGFLAGS := $(CXXFLAGS) $(filter-out -Winline,$(CXXWARNS))
-ifeq (1,0)
+ifeq ($(FMR_MPI_TYPE),MPICH)
+  # This is for MPICH.
+  VGSUPP := valgrind --leak-check=full --show-reachable=yes --error-limit=no \
+    --show-leak-kinds=all --gen-suppressions=all \
+    mpiexec -n $(TDD_MPI_N)                      \
+    $(VALGRIND_SUPP_EXE) 3>&1 1>&2 2>&3          \
+    | tools/grindmerge.pl -f $(VGMPISUPP)        \
+    > $(BUILD_CPU)/$(VALGRIND_SUPP) 2>/dev/null;
+  VGEXEC := valgrind --leak-check=full --track-origins=yes        \
+    $(VGSUPP_FLAGS) --log-file=$(BUILD_CPU)/mini.valgrind.log     \
+    $(VGMPI):$(BUILD_CPU)/mini -n$(TDD_OMP_NP) -v0 $(TDD_FMRFILE) \
+    > $(BUILD_CPU)/mini.valgrind.out; #\
+    #sed -i '/invalid file descriptor 10[0-4][0-9] /d'      \
+    #  $(BUILD_CPU)/mini.valgrind.log;                      \
+    #sed -i '/invalid file descriptor 2[56][0-9] /d'        \
+    #  $(BUILD_CPU)/mini.valgrind.log;                      \
+    #sed -i '/select an alternative log fd/d'               \
+    #  $(BUILD_CPU)/mini.valgrind.log
+else
   # This is for OpenMPI
   VGSUPP := valgrind --leak-check=full --show-reachable=yes --error-limit=no \
     --show-leak-kinds=all --gen-suppressions=all \
@@ -412,24 +430,6 @@ ifeq (1,0)
       $(BUILD_CPU)/mini.valgrind.log;                      \
     sed -i '/select an alternative log fd/d'               \
       $(BUILD_CPU)/mini.valgrind.log
-else
-  # This is for MPICH.
-  VGSUPP := valgrind --leak-check=full --show-reachable=yes --error-limit=no \
-    --show-leak-kinds=all --gen-suppressions=all \
-    mpiexec -n $(TDD_MPI_N)                                \
-    $(VALGRIND_SUPP_EXE) 3>&1 1>&2 2>&3 \
-    | tools/grindmerge.pl -f $(VGMPISUPP) \
-    > $(BUILD_CPU)/$(VALGRIND_SUPP) 2>/dev/null;
-  VGEXEC := valgrind --leak-check=full --track-origins=yes         \
-    $(VGSUPP_FLAGS) --log-file=$(BUILD_CPU)/mini.valgrind.log      \
-    $(VGMPI):$(BUILD_CPU)/mini -n$(TDD_OMP_NP) -v0 $(TDD_FMRFILE) \
-    > $(BUILD_CPU)/mini.valgrind.out; #\
-    #sed -i '/invalid file descriptor 10[0-4][0-9] /d'      \
-    #  $(BUILD_CPU)/mini.valgrind.log;                      \
-    #sed -i '/invalid file descriptor 2[56][0-9] /d'        \
-    #  $(BUILD_CPU)/mini.valgrind.log;                      \
-    #sed -i '/select an alternative log fd/d'               \
-    #  $(BUILD_CPU)/mini.valgrind.log
 endif
 endif
 
