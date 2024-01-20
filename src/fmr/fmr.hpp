@@ -1,4 +1,7 @@
-#include "macros.inc"
+#ifndef FMR_HAS_FMR_HPP
+#define FMR_HAS_FMR_HPP
+
+#include "macros.h"
 
 #include <string>
 #include <cstdint>
