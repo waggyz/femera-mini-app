@@ -1,7 +1,14 @@
 #ifndef FMR_HAS_FORM_IPP
 #define FMR_HAS_FORM_IPP
 
-namespace fmr {//TODO Move some or most of these to femera::form:: namespace.
+namespace fmr {
+  template <typename V> static
+  std::string form::si_unit (
+  const V val, std::string unit, const int md, const bool is_signed) {
+    const std::string sign
+      = (val < V(0)) ? "-" : (is_signed ? ((val > V(0)) ? "+" : " ") : "");
+    return ::femera::form::si_unit (std::abs (double (val)), unit, md, sign);
+  }
   template <typename V> static
   std::string form::si_time (
   V val, const int md, const bool is_signed) {
@@ -16,13 +23,6 @@ namespace fmr {//TODO Move some or most of these to femera::form:: namespace.
   bool form::ends_with (const std::string& str, const std::string& end) {
     return str.size() >= end.size() &&
       str.compare(str.size() - end.size(), end.size(), end) == 0;
-  }
-  template <typename V> static
-  std::string form::si_unit (
-  const V val, std::string unit, const int md, const bool is_signed) {
-    const std::string sign
-      = (val < V(0)) ? "-" : (is_signed ? ((val > V(0)) ? "+" : " ") : "");
-    return ::femera::form::si_unit (std::abs (double (val)), unit, md, sign);
   }
   //
 }// end fmr:: namespace

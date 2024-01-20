@@ -3,7 +3,7 @@
 
 namespace femera {
   inline
-  task::Runs::Runs (femera::Work::Core_ptrs_t W)
+  task::Runs::Runs (const femera::Work::Core_ptrs_t W)
   noexcept : Task (W) {
     this->name      ="Femera simulation runner";
     this->abrv      ="runs";

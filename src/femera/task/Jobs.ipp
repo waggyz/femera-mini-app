@@ -3,7 +3,7 @@
 
 namespace femera {
   inline
-  task::Jobs::Jobs (femera::Work::Core_ptrs_t W)
+  task::Jobs::Jobs (const femera::Work::Core_ptrs_t W)
   noexcept : Task (W) {
     this->name      ="Femera simulation job handler";
     this->abrv      ="jobs";

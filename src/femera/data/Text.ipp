@@ -3,7 +3,8 @@
 
 namespace femera {
   inline
-  data::Text::Text (const femera::Work::Core_ptrs_t W) noexcept : Data (W) {
+  data::Text::Text (const Work::Core_ptrs_t W)
+  noexcept : Data (W) {
     this->name      ="Femera text handler";
     this->abrv      ="text";
     this->task_type = task_cast (Task_type::Text);

@@ -3,7 +3,7 @@
 
 namespace femera {
   inline
-  task::Sims::Sims (femera::Work::Core_ptrs_t W)
+  task::Sims::Sims (const femera::Work::Core_ptrs_t W)
   noexcept : Task (W) {
     this->name      ="Femera simulation handler";
     this->abrv      ="sims";
