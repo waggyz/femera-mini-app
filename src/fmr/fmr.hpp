@@ -1,15 +1,4 @@
-#ifndef FMR_HAS_FMR_HPP
-#define FMR_HAS_FMR_HPP
-
-#ifndef FMR_LOCAL_INT
-#define FMR_LOCAL_INT uint32_t
-#endif
-
-#ifndef FMR_GLOBAL_INT
-#define FMR_GLOBAL_INT uint64_t
-#endif
-
-#include "macros.h"
+#include "macros.inc"
 
 #include <string>
 #include <cstdint>

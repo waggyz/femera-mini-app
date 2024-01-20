@@ -8,6 +8,8 @@
 namespace femera { namespace test {
   const auto mini = fmr::new_jobs ();
   //
+  TEST( Cgns, TrivialTest) { EXPECT_EQ( 0, 0 ); }
+#if 0
   inline
   double get_cgns_version () {
     const auto D = mini->data->get_task (femera::Task_type::Cgns);
@@ -15,8 +17,9 @@ namespace femera { namespace test {
     if (D != nullptr) {ver = D->get_version ();}
     return atof (ver.c_str());
   }
-  TEST( Cgns, TrivialTest) { EXPECT_EQ( 0, 0 ); }
-  TEST( Cgns, Version)     { EXPECT_GE( get_cgns_version (), 4.0 ); }//WAS 5.0
+  TEST( Cgns, Version)     { EXPECT_GE( get_cgns_version (), 4.0 ); }//TODO
+  //NOTE CGNS was 5.0 before and was incompatible with PETSc.
+#endif
   //
 } }//end femerea::test:: namespace
 

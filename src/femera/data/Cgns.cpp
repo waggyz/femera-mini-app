@@ -15,9 +15,13 @@
 
 namespace femera {
   void data::Cgns::task_init (int*, char**) {
+#if 0
     this->version
       = std::to_string (CGNS_VERSION / 1000) + "."
       + std::to_string (CGNS_VERSION % 1000);
+#else
+    this->version = MAKESTR(CGNS_DOTVERS);
+#endif
 #ifdef H5_VERS_INFO
     this->hdf5_vers = H5_VERS_INFO;// is already double-quoted
     this->data->send (fmr::info,
