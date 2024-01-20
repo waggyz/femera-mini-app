@@ -59,7 +59,7 @@ namespace femera {
     this->set_name ("MPI "+std::to_string (mpiver)+"."+std::to_string (mpisub)
       +" ("+verstr+")");
 #ifndef FMR_HAS_MPI
-    if (sizeof (this->team_id) != sizeof (MPI_Comm)) {
+    if (sizeof (this->team_id) < sizeof (MPI_Comm)) {
       std::fprintf (::stderr,
         "WARNING sizeof (Proc::team_id) is %lu but should be %lu\n",
         sizeof (this->team_id), sizeof (MPI_Comm));

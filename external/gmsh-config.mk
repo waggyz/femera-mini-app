@@ -61,9 +61,9 @@ ifeq ($(ENABLE_GMSH),ON)
   endif
   ifeq ($(ENABLE_FLTK),ON)
     GMSH_REQUIRES += fltk
-    EXTERNAL_DOT+="Gmsh" -> "FLTK"\n
     EXTERNAL_DOT+="Gmsh" -> "X"\n
-    EXTERNAL_DOT+="Gmsh" -> "OpenGL"\n
+    EXTERNAL_DOT+="Gmsh" -> "FLTK"\n
+    EXTERNAL_DOT+="FLTK" -> "OpenGL"\n
     EXTERNAL_DOT+="Femera" -> "FLTK" [color="cyan"]\n
     GMSH_FLAGS += -DENABLE_FLTK=ON
     #TODO It looks like native gmsh off-screen rendering does not work.
