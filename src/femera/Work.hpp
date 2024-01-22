@@ -97,7 +97,7 @@ https://stackoverflow.com/questions/60040665
   private:// variables
     bool did_work_init = false;
     bool  is_work_main = true ;// save for use after proc::exit (..)
-  protected:// visible to children with friend class
+  protected:// variables visible to CRTP children with friend class
     bool        set_init     (bool) noexcept;// sets & returns did_work_init
   public:// methods -----------------------------------------------------------
     template <typename T, typename C> static constexpr
