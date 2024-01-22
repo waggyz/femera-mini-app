@@ -8,7 +8,7 @@
 
 namespace femera { namespace data {
   class Text;// Derive a CRTP concrete class from Data.
-  class Text final: public Data <Text> {// private: friend class Data;
+  class Text final: public Data <Text> {// friend class Data;
   public:
     void task_init (int* argc, char** argv);
     void task_exit ();

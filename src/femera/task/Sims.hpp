@@ -5,7 +5,7 @@
 
 namespace femera { namespace task {
   class Sims;// Derive a CRTP concrete class from Task.
-  class Sims final: public Task<Sims> { private: friend class Task;
+  class Sims final: public Task<Sims> { friend class Task;
   private:
     void task_init (int* argc, char** argv);
     void task_exit ();

@@ -65,7 +65,7 @@ namespace femera {
   class Work {/* This is an abstract (pure virtual) base class (interface).
   * Derived classes use the curiously recurrent template pattern (CRTP) e.g.,
   * class Proc : public Work { .. };
-  * class Main : public Proc <Main> { private: friend class Proc; .. };
+  * class Main : public Proc <Main> { friend class Proc; .. };
   */
   public:// typedefs
     using Core_ptrs_t = std::tuple <proc::Main*, data::File*, test::Beds*>;
@@ -97,6 +97,8 @@ https://stackoverflow.com/questions/60040665
   private:// variables
     bool did_work_init = false;
     bool  is_work_main = true ;// save for use after proc::exit (..)
+  protected:// visible to children with friend class
+    bool        set_init     (bool) noexcept;// sets & returns did_work_init
   public:// methods -----------------------------------------------------------
     template <typename T, typename C> static constexpr
     T* cast_via_work (C* child) noexcept;
@@ -106,7 +108,6 @@ https://stackoverflow.com/questions/60040665
     std::string get_name     () noexcept;
     std::string set_name     (const std::string&) noexcept;
     bool        did_init     () noexcept;//     returns did_work_init
-    bool        set_init     (bool) noexcept;// sets & returns did_work_init
     // task stack handling
     fmr::Local_int get_task_n () noexcept;
     fmr::Local_int add_task   (Work_spt) noexcept;// returns task number added

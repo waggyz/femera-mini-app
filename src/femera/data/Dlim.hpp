@@ -7,7 +7,7 @@
 
 namespace femera { namespace data {
   class Dlim;// Derive a CRTP concrete class from Data.//TODO Change to Dlim?
-  class Dlim final: public Data <Dlim> {// private: friend class Data;
+  class Dlim final: public Data <Dlim> {// friend class Data;
   public:
     template <typename ...Args> static
     std::string data_line (Args...);

@@ -7,7 +7,7 @@ namespace femera { namespace data {
   class Logs;// Derive a CRTP concrete class from Data.
 FMR_WARN_INLINE_OFF
   // Suppress -Winline warning for ~Logs () destructor made here implicitly.
-  class Logs final: public Data <Logs> {// private: friend class Data;
+  class Logs final: public Data <Logs> {// friend class Data;
 FMR_WARN_INLINE_ON
   private:
     std::unordered_map <fmr::Data_name_t, FILE*> open_file_map = {

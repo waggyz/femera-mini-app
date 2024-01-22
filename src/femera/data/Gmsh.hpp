@@ -5,7 +5,7 @@
 
 namespace femera { namespace data {
   class Gmsh;// Derive a CRTP concrete class from Data.
-  class Gmsh final: public Data <Gmsh> { private: friend class Data;
+  class Gmsh final: public Data <Gmsh> { friend class Data;
   public:
   private:
     using Number = double;// for ::gmsh::option::get/setNumber (..)

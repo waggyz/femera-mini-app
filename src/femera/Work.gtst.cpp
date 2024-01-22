@@ -16,7 +16,7 @@ namespace femera { namespace test {
     void not_virtual_function () noexcept {}
   };
   class Crtp_class;// Derive a CRTP concrete class from Class.
-  class Crtp_class : public Class <Crtp_class> { private: friend class Class;
+  class Crtp_class : public Class <Crtp_class> { friend class Class;
   };
   class Base {// can be put into a homogeneous container
 //    virtual void virtual_function () noexcept =0;// pure virtual function
@@ -29,10 +29,10 @@ namespace femera { namespace test {
 //    void virtual_function () noexcept final override{}
   };
   class Crtp;// Derive a CRTP concrete class from Child.
-  class Crtp : public Child <Crtp> { private: friend class Child;
+  class Crtp : public Child <Crtp> { friend class Child;
   };
   class Final;// Derive a final CRTP concrete class from Child.
-  class Final final: public Child <Final> { private: friend class Child;
+  class Final final: public Child <Final> { friend class Child;
   };
   /*
   stackoverflow.com/questions/5970333/how-to-determine-if-a-c-class-has-a-vtable

@@ -6,7 +6,7 @@
 
 namespace femera { namespace data {
   class Bank;// Derive as a CRTP concrete class from Data.
-  class Bank final: public Data <Bank> { private: friend class Data;
+  class Bank final: public Data <Bank> { friend class Data;
     //  has vtable because Data has vtable; use to synchronize Vals data
     //  wraps & exposes a vector of Vals (no vtable) instances for fast access
 #ifdef FMR_BANK_LOCAL

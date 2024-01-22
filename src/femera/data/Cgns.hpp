@@ -5,7 +5,7 @@
 
 namespace femera { namespace data {
   class Cgns;// Derive a CRTP concrete class from Data.
-  class Cgns final: public Data <Cgns> { private: friend class Data;
+  class Cgns final: public Data <Cgns> { friend class Data;
   private:// typedefs
     enum class Concurrency : fmr::Enum_int {Error=0, Serial,
       Independent, Collective
