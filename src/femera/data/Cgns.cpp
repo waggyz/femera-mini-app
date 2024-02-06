@@ -33,7 +33,7 @@ namespace femera {
       const auto P = this->proc->get_task (Task_type::Fmpi);
       if (P != nullptr) {
         if (P->get_team_id() != 0) {
-          MPI_Comm c = MPI_COMM_NULL;//nullptr;
+          MPI_Comm c = MPI_COMM_NULL;//nullptr for OpenMPI, 0 for MPICH;
           const auto err = MPI_Comm_dup (MPI_Comm (P->get_team_id()), &c);
           if (err || (c == MPI_COMM_NULL)) {//nullptr)) {
             printf ("%4s %4s %4s %s\n",
