@@ -36,6 +36,8 @@ namespace femera {
     femera::form::name_line (::stdout, 14, 80, label,
       "%s /%s maximum resident set size of this process",
       use.c_str(), max.c_str());
+    //NOTE that the process number is not available because the children of this
+    //     module have already exited.
   }
 }//end femera:: namespace
 #undef FMR_DEBUG

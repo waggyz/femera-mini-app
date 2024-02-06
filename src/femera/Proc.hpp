@@ -31,7 +31,7 @@ namespace femera {
     fmr::Local_int get_proc_ix () noexcept;// index at this level [0,proc_n-1]
     fmr::Local_int get_proc_id (fmr::Local_int id=0) noexcept;//global thread id
     //                 proc_id = base_id + base_n * proc_ix
-    fmr::Team_int  get_team_id () noexcept;
+    fmr:: Team_int get_team_id () noexcept;
     fmr::Local_int set_base_n  () noexcept;
     fmr::Local_int get_proc_n  (Work_type) noexcept;
     fmr::Local_int get_proc_n  (Task_type) noexcept;

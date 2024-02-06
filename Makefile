@@ -232,26 +232,8 @@ endif
 ifeq ($(ENABLE_MPI),ON)
   #TODO lstopo --of xml "$FMRDIR/share/mpich-hwloc.xml"
   EXTERNAL_DOT+="Femera" -> "MPI"\n
+  #TODO check for libs before setting FMR_HAS_MPI?
   FMRFLAGS+= -DFMR_HAS_MPI
-  #TODO find include and lib dirs automatically
-  # ldconfig -p | grep "mpi[.]"
-  ifeq ($(FMR_MPI_TYPE),MPICH)
-    # MPICH
-    ifeq ($(CXX),mpic++)
-      INCFLAGS:=-isystem"/usr/include/mpich-x86_64" $(INCFLAGS)
-    else
-      INCFLAGS:=-I"/usr/include/mpich-x86_64" $(INCFLAGS)
-    endif
-    LDFLAGS:=-L"/usr/lib64/mpich/lib" $(LDFLAGS)
-  else
-    # OpenMPI
-    ifeq ($(CXX),mpic++)
-      INCFLAGS:=-isystem"/usr/include/openmpi-x86_64" $(INCFLAGS)
-    else
-      INCFLAGS:=-I"/usr/include/openmpi-x86_64" $(INCFLAGS)
-    endif
-    LDFLAGS:= -L"/usr/lib64/openmpi/lib $(LDFLAGS)"
-  endif
   LDLIBS+= -lmpi
   ifeq ($(ENABLE_VALGRIND),ON)# for valgrind with OpenMPI
     VGMPISUPP:=$(shell tools/valgrind-mpi-supp.sh)

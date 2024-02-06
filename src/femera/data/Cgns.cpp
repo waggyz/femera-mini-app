@@ -33,9 +33,9 @@ namespace femera {
       const auto P = this->proc->get_task (Task_type::Fmpi);
       if (P != nullptr) {
         if (P->get_team_id() != 0) {
-          MPI_Comm c = 0;//nullptr;
+          MPI_Comm c = MPI_COMM_NULL;//nullptr;
           const auto err = MPI_Comm_dup (MPI_Comm (P->get_team_id()), &c);
-          if (err || (c == 0)) {//nullptr)) {
+          if (err || (c == MPI_COMM_NULL)) {//nullptr)) {
             printf ("%4s %4s %4s %s\n",
               get_base_abrv ().c_str(), get_abrv ().c_str(), "WARN",
               "failed to copy MPI communicator for CGNS");
@@ -55,7 +55,7 @@ namespace femera {
     if (this->team_id != fmr::Team_int (MPI_COMM_WORLD)) {
       this->set_init (false);
       MPI_Comm c = MPI_Comm (this->team_id);
-      if (c != 0) {//nullptr) {
+      if (c != MPI_COMM_NULL) {//nullptr) {
         const auto err = MPI_Comm_free (&c);
         if (err) {
           const std::string msg = "Failed to free CGNS MPI communicator "
