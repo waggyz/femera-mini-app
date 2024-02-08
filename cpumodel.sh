@@ -1,12 +1,23 @@
 #!/bin/bash
-CPUMODEL=`grep -m 1 "model name" /proc/cpuinfo | awk '{print($7)}'`
-if [ "$CPUMODEL" == "CPU" ];then CPUMODEL=`grep -m 1 "model name" /proc/cpuinfo | awk '{print($6)}'`;fi
-if [ "$CPUMODEL" == "Phi(TM)" ];then CPUMODEL=`grep -m 1 "model name" /proc/cpuinfo | awk '{print($8)}'`;fi
-if [ "$CPUMODEL" == "Processor" ];then CPUMODEL=`grep -m 1 "model name" /proc/cpuinfo | awk '{print($8)}'`;fi
+# Prints the first word containing digits from the model name in /proc/cpuinfo
 #
-MEM_GB=`free -g  | grep Mem | awk '{print $7}'`
-if [ $MEM_GB -gt 100 ]; then
-  CPUMODEL=$CPUMODEL"b"
+if which lscpu >/dev/null 2>/dev/null; then
+  cpumodel=`lscpu | grep -i  -m1 '^model name' \
+  | sed -e 's/\ /\n/g' \
+  | grep -m 1 '[0-9]'`
+  if [ "$cpumodel" == "12th" ]; then
+    cpumodel=`lscpu | grep -i  -m1 '^model name' \
+    | sed -e 's/\ /\n/g' \
+    | grep -m 2 '[0-9]' | tail -n1`
+  fi
+else
+  cpumodel=`grep -m 1 "model name" /proc/cpuinfo \
+  | sed -e 's/\ /\n/g' \
+  | grep -m 1 '[0-9]'`
 fi
-#
-echo $CPUMODEL
+if [ -z "$cpumodel" ]; then
+  echo "unknown-cpu"
+  echo "fmrmodel.sh: unknown processor model" 1>&2
+  exit 1
+fi
+echo $cpumodel

@@ -422,7 +422,7 @@ int main( int argc, char** argv ){
     float work_sec = prec_sec+gmap_sec+gat0_sec+gat1_sec+scat_sec+solv_sec;
     //
     float sc = ms; const char* ss="ms";
-    if( work_sec < 100.0*ms ){ sc=us; ss="μs"; }// U+03BC
+    if( work_sec < 100.0*ms ){ sc=us; ss="µs"; }//u00b5 (μ U+03BC prefered)
     else if( work_sec > 100.0*sec ){sc=sec; ss=" s"; }
     //
     if(verbosity>2){
@@ -540,7 +540,7 @@ int main( int argc, char** argv ){
 #if VERB_MAX>1
     float sc = ms; const char* ss="ms";
     if(verbosity>1){
-    if( loop_sec < 100.0*ms ){ sc=us; ss="μs"; }
+    if( loop_sec < 100.0*ms ){ sc=us; ss="µs"; }//u00b5 (μ U+03BC prefered)
     else if( loop_sec > 100.0*sec ){sc=sec; ss=" s"; }
     const char* c="=";
     if(M->glob_chk2 < M->glob_rto2){ c="<"; }
