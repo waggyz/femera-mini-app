@@ -240,6 +240,8 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
   }// EOF ==========================================================
   {// Scope these local variables
   int n,t; INT_DOF f; FLOAT_SOLV v;
+  //FIXME Do the BCs & loads in each partition (maybe in gmsh2fmr.cc),
+  //FIXME not here at the global (E0) level when reading a single-partition mesh.
   //
   // Specified nodes
   for( auto r : this->rhs_nvals){// Specific nodes getting nodal forces
@@ -259,8 +261,10 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
     std::tie(t,f,v) = r;
     for(auto tn : surf_nodes_tagged[t]){
       E->rhs_vals.insert(nfval(E->node_loid[tn],f,v));
-      //std::cout << "tag: " << t << " node: " << n << " dof: " << uint(f)
-      //  << " val: " << v <<'\n';
+#if 0
+      std::cout << "tag: " << t << " node: " << n << " dof: " << uint(f)
+        << " val: " << v <<'\n';
+#endif
     }
     for(auto tn : line_nodes_tagged[t]){
       E->rhs_vals.insert(nfval(E->node_loid[tn],f,v));
@@ -270,15 +274,21 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
     std::tie(t,f,v) = r;
     for(auto tn : surf_nodes_tagged[t]){
       E->bcs_vals.insert(nfval(E->node_loid[tn],f,v));
+#if 0
+      std::cout << "tag:" << t << " node:" << tn << " dof:" << uint(f)
+        << " val:" << v <<'\n';
+#endif
     }
     for(auto tn : line_nodes_tagged[t]){
       E->bcs_vals.insert(nfval(E->node_loid[tn],f,v));
     }
   }
   for( auto r : this->bc0_tnf){// Tagged nodes getting fixed u
-    std::tie(t,f) = r;// std::cout <<"*** I AM HERE ***";
-    for(auto tn : surf_nodes_tagged[t]){// std::cout <<"*** and ***";
-      //std::cout << tn <<":"<< E->node_loid[tn] <<" ";
+    std::tie(t,f) = r;
+    for(auto tn : surf_nodes_tagged[t]){
+#if 0
+      std::cout << "tag:" << t << " node:" << tn << " dof:" << uint(f) << '\n';
+#endif
       E->bc0_nf.insert(nfitem(E->node_loid[tn],f));
     }
     for(auto tn : line_nodes_tagged[t]){

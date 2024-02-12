@@ -514,9 +514,23 @@ int main( int argc, char** argv ) {
   std::cout << "Made " << part_n <<":"<<M->list_elem.size()
     <<" partitions."<<std::endl;
 #endif
+  {//scope E0
+  const auto E0 = M->list_elem[0];
+  if ( E0 != nullptr ){
+#pragma omp parallel for schedule(static)
+    for(uint e=1; e<M->list_elem.size(); e++){//TODO Merge with loops above?
+      Elem* E=M->list_elem[e];
+      //FIXME ** I AM HERE **
+      E->bcs_vals = E0->bcs_vals;//FIXME hack only for single-partition models
+      E->bc0_nf   = E0->bc0_nf;
+      E->rhs_vals = E0->rhs_vals;
+  } }
+  }//end scope E0
 #if VERB_MAX>1
   if(verbosity>0){
     printf("Applying boundary conditions...\n");
+    //FIXME RHS is not applied correctly.
+    //FIXME Set RHS by integrating the surface element shape functions.
     if(verbosity>1){
     FLOAT_MESH loc,amt; INT_DOF f,g;
     for(auto tp : bc0_at){ std::tie(f,g,loc)=tp;
@@ -530,7 +544,7 @@ int main( int argc, char** argv ) {
   if( (bc0_at.size()+bcs_at.size()+rhs_at.size()) > 0 ){
     // Boundary conditions @
 #pragma omp parallel for schedule(static)
-    for(uint e=1; e<M->list_elem.size(); e++){//FIXME Merge with loops above?
+    for(uint e=1; e<M->list_elem.size(); e++){//TODO Merge with loops above?
       Elem* E=M->list_elem[e];
       int glid; INT_MESH loid;
       FLOAT_MESH loc,amt; INT_DOF f,g;

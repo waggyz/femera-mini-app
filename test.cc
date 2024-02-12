@@ -1,7 +1,7 @@
 #include <valarray>
 #include "femera.h"
 #include "test.h"
-int Test::CheckCubeError( RESTRICT Phys::vals &errors, FLOAT_PHYS nu,
+int Test::CheckCubeError( RESTRICT Phys::vals &errors, const FLOAT_PHYS nu,
   const RESTRICT Phys::vals coor, const RESTRICT Phys::vals disp){
   // Check simple tension displacement solution
   //INT_ORDER  apply_dir  = 0;//FIXED DOF direction 0,1,2
