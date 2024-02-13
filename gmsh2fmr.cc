@@ -514,6 +514,9 @@ int main( int argc, char** argv ) {
   std::cout << "Made " << part_n <<":"<<M->list_elem.size()
     <<" partitions."<<std::endl;
 #endif
+#if VERB_MAX>0
+  INT_MESH dofs_count=0;
+#endif
   {//scope E0
   const auto E0 = M->list_elem[0];
   if ( E0 != nullptr ){
@@ -522,14 +525,19 @@ int main( int argc, char** argv ) {
       Elem* E=M->list_elem[e];
       //FIXME ** I AM HERE **
       E->bcs_vals = E0->bcs_vals;//FIXME hack only for single-partition models
-      E->bc0_nf   = E0->bc0_nf;
+      E->bc0_nf   = E0->bc0_nf;  //FIXME need to change global to local IDs?
       E->rhs_vals = E0->rhs_vals;
+#if VERB_MAX>0
+      if(verbosity>0){
+        dofs_count += E->bc0_nf.size()+E->bcs_vals.size()+E->rhs_vals.size();
+      }
+#endif
   } }
   }//end scope E0
 #if VERB_MAX>1
   if(verbosity>0){
     printf("Applying boundary conditions...\n");
-    //FIXME RHS is not applied correctly.
+    //FIXME RHS is not applied correctly for all of these.
     //FIXME Set RHS by integrating the surface element shape functions.
     if(verbosity>1){
     FLOAT_MESH loc,amt; INT_DOF f,g;
@@ -541,7 +549,7 @@ int main( int argc, char** argv ) {
       printf("RHS @DOF %u == %f: set DOF %u = %f.\n", uint(f),loc,uint(g),amt); }
     } }
 #endif
-  if( (bc0_at.size()+bcs_at.size()+rhs_at.size()) > 0 ){
+//  if( (bc0_at.size()+bcs_at.size()+rhs_at.size()) > 0 ){
     // Boundary conditions @
 #pragma omp parallel for schedule(static)
     for(uint e=1; e<M->list_elem.size(); e++){//TODO Merge with loops above?
@@ -560,8 +568,19 @@ int main( int argc, char** argv ) {
           if(std::abs(E->node_coor[d* loid+f ]-loc)<eps_find){
             E->rhs_vals.insert(Mesh::nfval(loid,g,amt)); } }
       }
+#if VERB_MAX>0
+      if(verbosity>0){
+        dofs_count += E->bc0_nf.size()+E->bcs_vals.size()+E->rhs_vals.size();
+      }
+#endif
     }
-  }// end applying BC@
+//  }// end applying @BCS
+#if VERB_MAX>0
+  if(verbosity>0){
+    if (dofs_count>0){
+      printf("...Applied boundary conditions to %u tagged DOFs.\n", dofs_count);
+    } }
+#endif
   //FIXME Destroy M->list_elem[0]?
   M->list_elem[0]=NULL; if(part_0==0){ part_0=1; part_n-=1; }//FIXME
   M->SyncIDs();//FIXME need to skip [0] when syncing
