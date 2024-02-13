@@ -578,7 +578,7 @@ int main( int argc, char** argv ) {
 #if VERB_MAX>0
   if(verbosity>0){
     if (dofs_count>0){
-      printf("...Applied boundary conditions to %u tagged DOFs.\n", dofs_count);
+      printf("Applied boundary conditions to %u tagged DOFs.\n", dofs_count);
     } }
 #endif
   //FIXME Destroy M->list_elem[0]?
