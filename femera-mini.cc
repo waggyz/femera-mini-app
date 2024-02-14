@@ -789,7 +789,7 @@ int main( int argc, char** argv ){
           for(uint i=0;i<Nn;i++){
             for(int j=0;j<Dm;j++){ printf("%+9.2e ",E->node_coor[Dm* i+j]); }
             printf(" | ");
-            for(int j=0;j<Dm;j++){ printf("%+9.2e ",S->part_u[Dn* i+j]); }
+            for(int j=0;j<Dn;j++){ printf("%+9.2e ",S->part_u[Dn* i+j]); }
             if(Dn>Dm){ printf("  %+9.2e",S->part_u[Dn* i+Dm]); }//FIXME Temperature
             printf("\n");
           }
@@ -805,7 +805,7 @@ int main( int argc, char** argv ){
           for(uint i=0;i<Nn;i++){
             for(int j=0;j<Dm;j++){ printf("%+9.2e ",coor[Dm* i+j]); }
             printf(" | ");
-            for(int j=0;j<Dm;j++){ printf("%+9.2e ",norm_u[Dn* i+j]); }
+            for(int j=0;j<Dn;j++){ printf("%+9.2e ",norm_u[Dn* i+j]); }
             if(Dn>Dm){ printf("  %+9.2e",S->part_u[Dn* i+Dm]/test_T); }
             printf("\n");
           }
@@ -822,7 +822,7 @@ int main( int argc, char** argv ){
           for(uint i=0;i<Nn;i++){
             for(int j=0;j<Dm;j++){ printf("%+9.2e ",E->node_coor[Dm* i+j]); }
             printf(" | ");
-            for(int j=0;j<Dm;j++){
+            for(int j=0;j<Dn;j++){
               for(int k=0;k<Nb;k++){
                 printf("%+9.2e ",S->part_d[Nb*(Dn* i+j)+k]); } }
             if(Dn>Dm){ printf("  %+9.2e",S->part_d[Dn* i+Dm]); }
@@ -956,24 +956,22 @@ int main( int argc, char** argv ){
 #else
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->priv_part[part_i];
 #endif
-    const INT_MESH Dn=uint(E->mesh_d);
+    const INT_MESH Mn=uint(E->mesh_d);
     const INT_MESH Yn=uint(Y->node_d);
     uint dof=test_dir;
     INT_MESH n,f; FLOAT_MESH v;
     INT_MESH r=E->halo_remo_n;
     for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
       // Don't duplicate halo nodes
-      if(n>=r){ if(f==dof){ reac_x+=S->part_f[Yn* n+dof]; } }
+      if(n>=r){ if(f==dof){ reac_x+=S->part_f[Yn* n+f]; } }
 #if 1
-      if(n>=r){ if(f==dof){
+      if(n>=r){ if(f==dof){//*** I AM HERE ***
         // partition, global node ID, local node ID, DOF ID, x,y,z, u, f
         const auto g = E->node_glid [n];
         printf("%u,%u,%u,%u,%+9.2e,%+9.2e,%+9.2e,%+9.2e,%+9.2e\n",
           part_i,g,n,f,
-          E->node_coor[Dn* n+0],E->node_coor[Dn* n+1],E->node_coor[Dn* n+2],
+          E->node_coor[Mn* n+0],E->node_coor[Mn* n+1],E->node_coor[Mn* n+2],
           S->part_u[Yn* n+f],S->part_f[Yn* n+f]);
-        
-        
       } }
 #endif
     }
