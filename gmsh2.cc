@@ -146,9 +146,10 @@ Elem* Gmsh::ReadMsh2( const char* fname ){
 #if VERB_MAX>3
           if(verbosity>3){ std::cout << node_number <<" "; }
 #endif
-          if(is_line){line_nodes_tagged[physical_tag].insert(node_number); }
-          if(is_surf){surf_nodes_tagged[physical_tag].insert(node_number); }
-          if(is_volu){tet_conn.push_back((INT_MESH)node_number); }
+//FIXME Off-by-one error associated with Gmsh files?
+          if(is_line){line_nodes_tagged[physical_tag].insert(node_number+1); }
+          if(is_surf){surf_nodes_tagged[physical_tag].insert(node_number+1); }
+          if(is_volu){tet_conn.push_back((INT_MESH)node_number+1); }
         }
         if( (slic_n > 1) && is_volu ){
           uint Dm=mesh_d;

@@ -9,7 +9,7 @@ public:
   enum Eval {
     EBE_TTE=0, EBE_LMS=1
   };
-  INT_DIM node_d;// Degrees of freedom per node://WAS ndof_n
+  INT_DIM node_d=1;// Degrees of freedom per node://WAS ndof_n
   // 1 for thermal, 2 for elastic 2D, 3 for elastic 3D, 4 for thermoelastic 3D
 #if 0
   // The following are stored interleaved in the system vectors

@@ -524,9 +524,34 @@ int main( int argc, char** argv ) {
     for(uint e=1; e<M->list_elem.size(); e++){//TODO Merge with loops above?
       Elem* E=M->list_elem[e];
       //FIXME ** I AM HERE **
+#if 0
       E->bcs_vals = E0->bcs_vals;//FIXME hack only for single-partition models
       E->bc0_nf   = E0->bc0_nf;  //FIXME need to change global to local IDs?
       E->rhs_vals = E0->rhs_vals;
+#endif
+#if 1
+//      INT_MESH n,f; FLOAT_MESH v;
+//      for(auto t : E->rhs_vals){
+//        std::tie(n,f,v)=t;
+//        this->rhs_vals.insert(Mesh::nfval( E->node_glid[n],f,v ));
+//      };
+      for(auto t : E0->bcs_vals){
+        INT_MESH n,f; FLOAT_MESH v;
+        std::tie(n,f,v)=t;
+        auto lpr = E->node_loid.find(n);
+        if ( lpr != E->node_loid.end()) {
+          E->bcs_vals.insert(Mesh::nfval( lpr->second,f,v ));
+#if VERB_MAX>3
+          if(verbosity>3){
+          printf("BCS: %u(%u),%u: %f\n",n,lpr->second,uint(f),v); };
+#endif
+        }
+      };
+//      for(auto t : E->bc0_nf){
+//        std::tie(n,f)=t;
+//        this->bc0_nf.insert(Mesh::nfitem( E->node_glid[n],f ));
+//      };
+#endif
 #if VERB_MAX>0
       if(verbosity>0){
         dofs_count += E->bc0_nf.size()+E->bcs_vals.size()+E->rhs_vals.size();
@@ -549,7 +574,7 @@ int main( int argc, char** argv ) {
       printf("RHS @DOF %u == %f: set DOF %u = %f.\n", uint(f),loc,uint(g),amt); }
     } }
 #endif
-//  if( (bc0_at.size()+bcs_at.size()+rhs_at.size()) > 0 ){
+  if( (bc0_at.size()+bcs_at.size()+rhs_at.size()) > 0 ){
     // Boundary conditions @
 #pragma omp parallel for schedule(static)
     for(uint e=1; e<M->list_elem.size(); e++){//TODO Merge with loops above?
@@ -574,11 +599,11 @@ int main( int argc, char** argv ) {
       }
 #endif
     }
-//  }// end applying @BCS
+  }// end applying @BCS
 #if VERB_MAX>0
   if(verbosity>0){
     if (dofs_count>0){
-      printf("Applied boundary conditions to %u tagged DOFs.\n", dofs_count);
+      printf("Applied boundary conditions to %u DOFs.\n", dofs_count);
     } }
 #endif
   //FIXME Destroy M->list_elem[0]?

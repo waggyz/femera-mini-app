@@ -956,13 +956,26 @@ int main( int argc, char** argv ){
 #else
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->priv_part[part_i];
 #endif
-    const INT_MESH Dn=uint(Y->node_d);
+    const INT_MESH Dn=uint(E->mesh_d);
+    const INT_MESH Yn=uint(Y->node_d);
     uint dof=test_dir;
     INT_MESH n,f; FLOAT_MESH v;
     INT_MESH r=E->halo_remo_n;
     for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
       // Don't duplicate halo nodes
-      if(n>=r){ if(f==dof){ reac_x+=S->part_f[Dn* n+dof]; } }
+      if(n>=r){ if(f==dof){ reac_x+=S->part_f[Yn* n+dof]; } }
+#if 1
+      if(n>=r){ if(f==dof){
+        // partition, global node ID, local node ID, DOF ID, x,y,z, u, f
+        const auto g = E->node_glid [n];
+        printf("%u,%u,%u,%u,%+9.2e,%+9.2e,%+9.2e,%+9.2e,%+9.2e\n",
+          part_i,g,n,f,
+          E->node_coor[Dn* n+0],E->node_coor[Dn* n+1],E->node_coor[Dn* n+2],
+          S->part_u[Yn* n+f],S->part_f[Yn* n+f]);
+        
+        
+      } }
+#endif
     }
   }
   }// end parallel
