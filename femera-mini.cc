@@ -22,10 +22,11 @@ int main( int argc, char** argv ){
   __itt_pause();
 #endif
 #endif
-  const float ns=1e-9;
 #if VERB_MAX>1
+  const auto start_time = std::chrono::high_resolution_clock::now();
   const float sec=1.0, ms=1e-3, us=1e-6, Meg=1e6, pct=100.0;// k=1e3,Gig=1e9,
 #endif
+  const float ns=1e-9;
   // defaults
   Phys::Eval phys_eval = Phys::EBE_TTE;
   int comp_n     = 0;
@@ -622,12 +623,14 @@ int main( int argc, char** argv ){
       }
     }//printf("******** FINDME node_d: %i\n",node_d);
     errtot.resize(3*(node_d+1)+1); errtot=0.0;// printf("NODED: %i\n",node_d);
-    for(int i= 0; i< 1*(node_d+1); i++){ errtot[i] = 99e99; }
-    for(int i= 2*(node_d+1); i< 3*(node_d+1); i++){ errtot[i] =-99e99; }
-    //FLOAT_PHYS scale=1.0,smin= 99e9,smax=-99e9;//FIXME only works for cubes
-    FLOAT_PHYS scax=1.0,minx= 99e9,maxx=-99e9;
-    FLOAT_PHYS scay=1.0,miny= 99e9,maxy=-99e9;
-    FLOAT_PHYS scaz=1.0,minz= 99e9,maxz=-99e9;
+    const auto Fmax = std::numeric_limits<FLOAT_PHYS>::max();
+    const auto Fmin = std::numeric_limits<FLOAT_PHYS>::lowest();
+    for(int i= 0; i< 1*(node_d+1); i++){ errtot[i] = Fmax; }
+    for(int i= 2*(node_d+1); i< 3*(node_d+1); i++){ errtot[i] = Fmin; }
+    //FLOAT_PHYS scale=1.0,smin= Fmax,smax=Fmin;//FIXME only works for cubes
+    FLOAT_PHYS scax=1.0,minx= Fmax,maxx= Fmin;
+    FLOAT_PHYS scay=1.0,miny= Fmax,maxy= Fmin;
+    FLOAT_PHYS scaz=1.0,minz= Fmax,maxz= Fmin;
     FLOAT_PHYS youn_voig=0.0, ther_pres=0.0, test_amt=0.0;
 #pragma omp parallel num_threads(comp_n)
 {
@@ -956,7 +959,6 @@ int main( int argc, char** argv ){
 #else
     Elem* E; Phys* Y; Solv* S; std::tie(E,Y,S)=M->priv_part[part_i];
 #endif
-    const INT_MESH Mn=uint(E->mesh_d);
     const INT_MESH Yn=uint(Y->node_d);
     uint dof=test_dir;
     INT_MESH n,f; FLOAT_MESH v;
@@ -964,17 +966,50 @@ int main( int argc, char** argv ){
     for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
       // Don't duplicate halo nodes
       if(n>=r){ if(f==dof){ reac_x+=S->part_f[Yn* n+f]; } }
-#if 1
-      if(n>=r){ if(f==dof){//*** I AM HERE ***
-        // partition, global node ID, local node ID, DOF ID, x,y,z, u, f
-        const auto g = E->node_glid [n];
-        printf("%u,%u,%u,%u,%+9.2e,%+9.2e,%+9.2e,%+9.2e,%+9.2e\n",
-          part_i,g,n,f,
-          E->node_coor[Mn* n+0],E->node_coor[Mn* n+1],E->node_coor[Mn* n+2],
-          S->part_u[Yn* n+f],S->part_f[Yn* n+f]);
-      } }
-#endif
     }
+#define PRINT_BCS_INFO
+#ifdef PRINT_BCS_INFO
+    FLOAT_PHYS u_sum =0.0, u_diff =0.0, f_sum =0.0, f_abs =0.0;
+    FLOAT_PHYS u_min = std::numeric_limits<FLOAT_PHYS>::max();
+    FLOAT_PHYS u_max = std::numeric_limits<FLOAT_PHYS>::lowest();
+    for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
+      // This is for the conductive sphere model.
+      if((n>=r) && (f==dof)){//*** I AM HERE ***
+        const auto bc_u = S->part_u[Yn* n+f];
+        const auto bc_f = S->part_f[Yn* n+f];
+#if 0
+        // Print the solution at applied boundary condition nodes.
+        // partition, global node ID, DOF ID, x,y,z, u, f
+        const INT_MESH Mn=uint(E->mesh_d);
+        const auto g = E->node_glid [n];
+        printf("%u,%u,%u,%+9.2e,%+9.2e,%+9.2e,%+9.2e,%+9.2e\n",
+          part_i,g,f,
+          E->node_coor[Mn* n+0], E->node_coor[Mn* n+1], E->node_coor[Mn* n+2],
+          bc_u,S->part_f[Yn* n+f]);
+        );
+#endif
+        if ( bc_u < u_min ){ u_min = bc_u;}
+        if ( bc_u > u_max ){ u_max = bc_u;}
+        u_sum  += bc_u;
+        f_sum  += bc_f;
+        f_abs  += abs (bc_f);;
+      }
+    }// end loop through BCs
+    // Print the overall model solution.
+    // partition, nodes, DOFs, time, sum(u), umax-umin, sum(f), sum(|f|)
+    //auto time_s = M->time_secs.sum();// removed: conflicts with /bin/time
+    u_sum  = u_max + u_min;
+    u_diff = u_max - u_min;
+    
+    const auto now_time = std::chrono::high_resolution_clock::now();
+    const auto elap_time \
+      = std::chrono::duration_cast<std::chrono::nanoseconds>
+        (now_time - start_time);
+    const auto elap_sec = float(elap_time.count())*ns;
+    printf ("%s,%u,%u,%u,%+12.5e,%+12.5e,%+12.5e,%+12.5e,%+12.5e\n",
+      bname, part_i, E->node_n, E->node_n * Y->node_d,
+      elap_sec, u_sum, f_sum, u_diff, 0.5*f_abs);
+#endif
   }
   }// end parallel
   FLOAT_PHYS A=1.0, L=1.0;
@@ -1002,13 +1037,23 @@ int main( int argc, char** argv ){
   //{ float e=( reac_x/A/(test_u*scale))/youn_voig -1.0;
   printf("        Modulus Error:");
   if( std::abs(e)<test_u ){ printf(" %+9.2e\n",e);
-  }else{ printf("%+6.2f%%\n",100.*e); }
+  }else{ printf(" %+6.2f%%\n",100.*e); }
   }
     fflush(stdout); }//end if verbosity > 1
 #endif
 #endif //HAS_TEST
   }//load step loop
   }//load step scope
+#if VERB_MAX>1
+  if (verbosity > 2) {
+    const auto end_time = std::chrono::high_resolution_clock::now();
+    const auto wall_time \
+      = std::chrono::duration_cast<std::chrono::nanoseconds> \
+        (end_time - start_time);
+    const auto total_sec = float(wall_time.count())*ns;
+    printf("Total wall clock time:  %g s\n", total_sec);
+  }
+#endif
 #if OMP_NESTED==true
   }// end omp parallel multi-model outer loop
 #ifdef COLLECT_VTUNE_DATA
