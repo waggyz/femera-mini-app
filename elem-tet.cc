@@ -89,7 +89,7 @@ const RESTRICT Mesh::vals Tet::ShapeFunction(
     f[ 8] = 4.*L3*L4 ;
     f[ 9] = 4.*L2*L4 ;
     return f; }
-  case(3):{ RESTRICT Mesh::vals f(20);
+  case(3):{ RESTRICT Mesh::vals f(20);//TODO 16-node cubic tet
     const FLOAT_MESH L2=x[0]*v, L3=x[1]*v, L4=x[2]*v;
     const FLOAT_MESH L1=(v-L2-L3-L4);
     f[ 0]= 0.5* L1 *(3.* L1 -1.)*(3.* L1 -2.);// corner nodes;

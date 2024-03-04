@@ -65,7 +65,7 @@ int main( int argc, char** argv ){
 #ifdef _OPENMP
 #if OMP_NESTED==true
       case 'm':{ mesh_n   = atoi(optarg); break; }// Total number of models
-      case 'n':{ mult_n   = atoi(optarg); break; }// Number of concurrent models
+      case 'n':{ mult_n   = atoi(optarg); break; }// # concurrent models
 #endif
       case 'c':{ comp_n   = atoi(optarg); break; }// Threads/model
 #if VERB_MAX>1
@@ -967,14 +967,13 @@ int main( int argc, char** argv ){
       // Don't duplicate halo nodes
       if(n>=r){ if(f==dof){ reac_x+=S->part_f[Yn* n+f]; } }
     }
-#define PRINT_BCS_INFO
-#ifdef PRINT_BCS_INFO
-    FLOAT_PHYS u_sum =0.0, u_diff =0.0, f_sum =0.0, f_abs =0.0;
+#ifdef SAVE_BCS_INFO
+    FLOAT_PHYS u_sum =0.0, u_diff =0.0, f_sum =0.0, f_abs =0.0, W_sum=0.0;
     FLOAT_PHYS u_min = std::numeric_limits<FLOAT_PHYS>::max();
     FLOAT_PHYS u_max = std::numeric_limits<FLOAT_PHYS>::lowest();
     for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
       // This is for the conductive sphere model.
-      if((n>=r) && (f==dof)){//*** I AM HERE ***
+      if((n>=r) && (f==dof)){
         const auto bc_u = S->part_u[Yn* n+f];
         const auto bc_f = S->part_f[Yn* n+f];
 #if 0
@@ -990,25 +989,39 @@ int main( int argc, char** argv ){
 #endif
         if ( bc_u < u_min ){ u_min = bc_u;}
         if ( bc_u > u_max ){ u_max = bc_u;}
-        u_sum  += bc_u;
-        f_sum  += bc_f;
-        f_abs  += abs (bc_f);;
+        W_sum += bc_f * bc_u;//TODO W = 0.5 * f*u?
+//        u_sum  += bc_u;//TODO remove? it's set again below
+        f_sum += bc_f;  // TODO I think these might be meaningless,
+                       //      though sum should be zero in equilibrium.
+        f_abs += abs (bc_f);//TODO I think these are meaningless?
       }
     }// end loop through BCs
     // Print the overall model solution.
     // partition, nodes, DOFs, time, sum(u), umax-umin, sum(f), sum(|f|)
     //auto time_s = M->time_secs.sum();// removed: conflicts with /bin/time
     u_sum  = u_max + u_min;
-    u_diff = u_max - u_min;
-    
+    u_diff = u_max - u_min;// assumes uniform bcs
+    //
     const auto now_time = std::chrono::high_resolution_clock::now();
-    const auto elap_time \
+    const auto elap_time
       = std::chrono::duration_cast<std::chrono::nanoseconds>
         (now_time - start_time);
     const auto elap_sec = float(elap_time.count())*ns;
-    printf ("%s,%u,%u,%u,%+12.5e,%+12.5e,%+12.5e,%+12.5e,%+12.5e\n",
-      bname, part_i, E->node_n, E->node_n * Y->node_d,
-      elap_sec, u_sum, f_sum, u_diff, 0.5*f_abs);
+#if 1
+    const auto bfile = fopen ("femera-bcs-sum.csv", "a");
+#else
+    const auto bfile = fopen ((pname+"-bcs-out.csv").c_str(), "w");
+#endif
+    if (bfile != nullptr) {
+      fprintf (bfile,
+        "\"%s\",%+12.5e,%+12.5e,%+12.5e,%+12.5e,%+12.5e,"
+        "%u,%u,%u,%u,%u,%u,"
+        "%+12.5e,%+12.5e,%+12.5e\n",
+        bname, u_diff, 0.5*f_abs, u_sum, f_sum, W_sum,
+        part_i, E->elem_p, E->elem_n, E->node_n, E->node_n * Y->node_d, iter,
+        elap_sec, M->glob_atol, M->glob_rtol);
+      fclose (bfile);
+    }
 #endif
   }
   }// end parallel
@@ -1039,7 +1052,7 @@ int main( int argc, char** argv ){
   if( std::abs(e)<test_u ){ printf(" %+9.2e\n",e);
   }else{ printf(" %+6.2f%%\n",100.*e); }
   }
-    fflush(stdout); }//end if verbosity > 1
+  fflush(stdout); }//end if verbosity > 1
 #endif
 #endif //HAS_TEST
   }//load step loop
