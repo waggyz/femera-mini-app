@@ -968,7 +968,7 @@ int main( int argc, char** argv ){
       if(n>=r){ if(f==dof){ reac_x+=S->part_f[Yn* n+f]; } }
     }
 #ifdef SAVE_BCS_INFO
-    FLOAT_PHYS u_sum =0.0, u_diff =0.0, f_sum =0.0, f_abs =0.0, W_sum=0.0;
+    FLOAT_PHYS u_sum =0.0, u_diff =0.0, f_sum =0.0, f_abs =0.0, W_ext=0.0;
     FLOAT_PHYS u_min = std::numeric_limits<FLOAT_PHYS>::max();
     FLOAT_PHYS u_max = std::numeric_limits<FLOAT_PHYS>::lowest();
     for(auto t : E->bcs_vals ){ std::tie(n,f,v)=t;
@@ -989,7 +989,7 @@ int main( int argc, char** argv ){
 #endif
         if ( bc_u < u_min ){ u_min = bc_u;}
         if ( bc_u > u_max ){ u_max = bc_u;}
-        W_sum += bc_f * bc_u;//TODO W = 0.5 * f*u?
+        W_ext += bc_f * bc_u;//TODO W = 0.5 * f*u?
 //        u_sum  += bc_u;//TODO remove? it's set again below
         f_sum += bc_f;  // TODO I think these might be meaningless,
                        //      though sum should be zero in equilibrium.
@@ -1017,8 +1017,8 @@ int main( int argc, char** argv ){
         "\"%s\",%+12.5e,%+12.5e,%+12.5e,%+12.5e,%+12.5e,"
         "%u,%u,%u,%u,%u,%u,"
         "%+12.5e,%+12.5e,%+12.5e\n",
-        bname, u_diff, 0.5*f_abs, u_sum, f_sum, W_sum,
-        part_i, E->elem_p, E->elem_n, E->node_n, E->node_n * Y->node_d, iter,
+        bname, u_diff, 0.5*f_abs, u_sum, f_sum, W_ext,
+        part_i, E->elem_p, E->elem_n, E->node_n, E->node_n*Y->node_d, iter,
         elap_sec, M->glob_atol, M->glob_rtol);
       fclose (bfile);
     }
