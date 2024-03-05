@@ -80,6 +80,9 @@ OMPFLAGS:=$(OMPFLAGS) -DFETCH_JAC
 
 MMPFLAGS = -DOMP_NESTED=true -DOMP_PROC_BIND=spread,close
 
+# Saves u and f info for nodes with applied boundary conditions
+CPPFLAGS+= -DSAVE_BCS_INFO
+
 CPUMODELC:=$(CPUMODEL)-$(CSTR)
 
 FEMERA_COMMON = mesh.cc elem.cc phys.cc solv.cc elem-tet.cc\
