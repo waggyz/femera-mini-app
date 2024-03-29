@@ -13,7 +13,7 @@
 int Elem::Setup(){
   int bad_jacs = this->JacsDets();
   if( bad_jacs < 0){
-    printf("WARNING: %i Negative element Jacobians.\n",-bad_jacs); }
+    printf("\nWARNING: %i Negative element Jacobians\n",-bad_jacs); }
   const RESTRICT Mesh::vals ipws = GaussLegendre( this->elem_p);
   //if(this->elem_p==2){ this->gaus_n=4; };
   //FIXME this->gaus_p is always 1? );//this->gaus_p );

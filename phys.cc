@@ -184,7 +184,7 @@ int Phys::ReadPartFMR( const char* fname, bool is_bin ){
     }
     if(fmrstring=="$ThermalConductivity"){// Thermal conductivity
       int s=0; fmrfile >> s;
-      ther_cond.resize(s);
+      ther_cond.resize(s+1);//TODO Make size compatible with __m256d.
       for(int i=0; i<s; i++){ fmrfile >> ther_cond[i]; }
     }
     if(fmrstring=="$Plastic"){// Plasticity Constants

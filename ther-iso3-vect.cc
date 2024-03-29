@@ -38,7 +38,12 @@ int ThermIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   const int Ne = Nd*Nc;
   const int intp_n = int(E->gaus_n);
   //const INT_ORDER elem_p =E->elem_p;
-  const FLOAT_PHYS C = this->mtrl_matc[0];
+  const FLOAT_PHYS C = this->mtrl_matc[0];//TODO Cx,Cy,Cz in one __m256d?
+  __m256d Cv = _mm256_setzero_pd();
+  if (mtrl_matc.size()==3){
+    Cv = _mm256_set_pd(0.0,this->mtrl_matc[2],mtrl_matc[1],mtrl_matc[0]);
+  }
+  const int NC = this->mtrl_matc.size();
   FLOAT_PHYS u[Nc];
 #ifdef THIS_FETCH_JAC
   FLOAT_MESH VECALIGNED jac[Nj];
@@ -85,11 +90,27 @@ int ThermIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
       // G = MatMul3x3xN( jac,shg );
       // H = MatMul3xNx3T( G,u );// [H] Thermal gradient
       thermal_g_h( &vG[0],&vH, Nc, &vJ[0], &intp_shpg[ip*Ne], &u[0] );
+      FLOAT_PHYS Cdw = 0.0;
+      switch(NC){
+      case 1:{
 #ifdef THIS_FETCH_JAC
-      const FLOAT_PHYS Cdw = C * jac[9] * wgt[ip];
+        Cdw = C * jac[9] * wgt[ip];
 #else
-      const FLOAT_PHYS Cdw = C * det * wgt[ip];
+        Cdw = C * det * wgt[ip];
 #endif
+      break;}
+      case 3:{
+#ifdef THIS_FETCH_JAC
+        Cdw = jac[9] * wgt[ip];
+#else
+        Cdw = det * wgt[ip];
+#endif
+      break;}
+      default:{//TODO do this check earlier.
+        fprintf(stderr,
+          "ERROR Please use 1 or 3 conductivity values, not %i.\n", NC);
+        return 1;
+      } }
       if(ip==(intp_n-1)){ if((ie+1)<ee){// Fetch stuff for the next iteration
         const INT_MESH* RESTRICT cnxt = &Econn[Nc*(ie+1)];
 #ifdef __INTEL_COMPILER
@@ -101,7 +122,12 @@ int ThermIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
 #endif
       } }
       // Reuse vH instead of new vS
-      thermal_iso_s(& vH, Cdw );
+      if(NC==1){
+        thermal_iso_s(& vH, Cdw );
+      } else {
+        thermal_xyz_s(& vH, Cv, Cdw );
+      //TODO ortho could be more efficient?
+      }
 #if 0
       if(ip==0){
         for(int i=0; i<Nc; i++){ f[i]=part_f[conn[i]]; }

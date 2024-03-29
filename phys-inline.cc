@@ -116,7 +116,7 @@ static inline void rotate_s_voigt( __m256d* vS,
   const __m256d s8 = _mm256_set1_pd(S[2]);
   vS[2] = s2 * vR[0] + s5 * vR[1] + s8 * vR[2];
 }
-// Isotropic Thermal ----------------------------------------------------------
+// Isotropic and Orthotropic Thermal ------------------------------------------
 static inline void thermal_iso_s(FLOAT_PHYS* A,
   const FLOAT_PHYS Cdw ){
       A[0]*= Cdw;//Sxx
@@ -126,6 +126,10 @@ static inline void thermal_iso_s(FLOAT_PHYS* A,
 static inline void thermal_iso_s(__m256d* A,
   const FLOAT_PHYS Cdw ){
       A[0]*=_mm256_set1_pd(Cdw);
+}
+static inline void thermal_xyz_s(__m256d* A,
+  const __m256d C, const FLOAT_PHYS dw ){
+  A[0]*=_mm256_set1_pd(dw) * C;
 }
 static inline void thermal_g_h( __m256d* vG, __m256d* vH,
   const int Nc, const __m256d* vJ, const FLOAT_PHYS* sg, const FLOAT_PHYS* u ){

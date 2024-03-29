@@ -110,13 +110,13 @@ class HaloPCG final: public Mesh{
 // Preconditioned Conjugate Gradient Kernel ----------------------------
 public:
   HaloPCG() : Mesh(Solv::SOLV_CG){
-    meth_name="preconditioned cojugate gradient";
+    meth_name="preconditioned conjugate gradient";
   };
   HaloPCG( INT_MESH i, FLOAT_PHYS r ) : Mesh(Solv::SOLV_CG,i,r){
-    meth_name="preconditioned cojugate gradient";
+    meth_name="preconditioned conjugate gradient";
   };
   HaloPCG( int p, INT_MESH i, FLOAT_PHYS r ) : Mesh(p,Solv::SOLV_CG,i,r){
-    meth_name="preconditioned cojugate gradient";
+    meth_name="preconditioned conjugate gradient";
   };
   int Init() final;
   int Iter() final;
@@ -127,13 +127,13 @@ class HaloPCR final: public Mesh{
 // Preconditioned Conjugate Residual Kernel ----------------------------
 public:
   HaloPCR() : Mesh(Solv::SOLV_CR){
-    meth_name="preconditioned cojugate residual";
+    meth_name="preconditioned conjugate residual";
   };
   HaloPCR( INT_MESH i, FLOAT_PHYS r ) : Mesh(Solv::SOLV_CR,i,r){
-    meth_name="preconditioned cojugate residual";
+    meth_name="preconditioned conjugate residual";
   };
   HaloPCR( int p, INT_MESH i, FLOAT_PHYS r ) : Mesh(p,Solv::SOLV_CR,i,r){
-    meth_name="preconditioned cojugate residual";
+    meth_name="preconditioned conjugate residual";
   };
   int Init() final;
   int Iter() final;
@@ -144,13 +144,13 @@ class HaloNCG final: public Mesh{
 // Preconditioned Conjugate Gradient Kernel ----------------------------
 public:
   HaloNCG() : Mesh(Solv::SOLV_NG){
-    meth_name="nonlinear cojugate gradient";
+    meth_name="nonlinear conjugate gradient";
   };
   HaloNCG( INT_MESH i, FLOAT_PHYS r ) : Mesh(Solv::SOLV_NG,i,r){
-    meth_name="nonlinear cojugate gradient";
+    meth_name="nonlinear conjugate gradient";
   };
   HaloNCG( int p, INT_MESH i, FLOAT_PHYS r ) : Mesh(p,Solv::SOLV_NG,i,r){
-    meth_name="nonlinear cojugate gradient";
+    meth_name="nonlinear conjugate gradient";
   };
   int Init() final;
   int Iter() final;

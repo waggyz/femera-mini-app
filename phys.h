@@ -639,7 +639,7 @@ public:
   ThermIso3D( Phys::vals cond ) :// Constructor
     Phys( cond ){
       node_d = 1;
-      ther_cond.resize(cond.size()); ther_cond=cond;
+      ther_cond.resize(cond.size()); ther_cond=cond;//TODO make __mm256d compat.
       ThermIso3D::MtrlProp2MatC(); 
     }
 #if 0
@@ -663,9 +663,9 @@ public:
   int ElemStiff ( Elem* ) final;
   int ElemStrainStress(std::ostream&, Elem*, FLOAT_SOLV*) final;
   inline int MtrlProp2MatC()final{
-    mtrl_matc.resize(1);
+    mtrl_matc.resize(this->ther_cond.size());
     if(this->ther_cond.size()>0){
-      mtrl_matc[0]=ther_cond[0];
+      for (uint i=0; i<ther_cond.size(); ++i){mtrl_matc[i]=ther_cond[i];}
     }else{ mtrl_matc[0]=1.0; }
     return 0;
   }

@@ -100,10 +100,10 @@ class PCG final: public Solv{
 // Preconditioned Conjugate Gradient Kernel ----------------------------
 public:
   //PCG() : Solv(){
-  //  meth_name="preconditioned cojugate gradient";
+  //  meth_name="preconditioned conjugate gradient";
   //};
   PCG( INT_MESH n, INT_MESH i, FLOAT_PHYS r ) : Solv(n,i,r){
-    meth_name="preconditioned cojugate gradient";
+    meth_name="preconditioned conjugate gradient";
 #ifdef ALIGN_SYS
     part_p = align_resize( data_p, udof_n+1, valign_byte );
 #else
@@ -135,10 +135,10 @@ class PCR final: public Solv{
 // Preconditioned Conjugate Residual Kernel ----------------------------
 public:
   //PCR() : Solv(){
-  //  meth_name="preconditioned cojugate residual";
+  //  meth_name="preconditioned conjugate residual";
   //};
   PCR( INT_MESH n, INT_MESH i, FLOAT_PHYS r ) : Solv(n,i,r){
-    meth_name="preconditioned cojugate residual";
+    meth_name="preconditioned conjugate residual";
 #ifdef ALIGN_SYS
     part_p = align_resize( data_p, udof_n+1, valign_byte );
     part_g = align_resize( data_g, udof_n+1, valign_byte );
@@ -171,7 +171,7 @@ private:
 class NCG final: public Solv{// Nonlinear Conjugate Gradient Kernel -----------
 public:
   NCG( INT_MESH n, INT_MESH i, FLOAT_PHYS r ) : Solv(n,i,r){
-    meth_name="nonlinear cojugate gradient";
+    meth_name="nonlinear conjugate gradient";
 #ifdef ALIGN_SYS
     part_b = align_resize( data_b, udof_n+1, valign_byte );
     part_p = align_resize( data_p, udof_n+1, valign_byte );

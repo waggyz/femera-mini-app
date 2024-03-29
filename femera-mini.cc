@@ -985,7 +985,6 @@ int main( int argc, char** argv ){
           part_i,g,f,
           E->node_coor[Mn* n+0], E->node_coor[Mn* n+1], E->node_coor[Mn* n+2],
           bc_u,S->part_f[Yn* n+f]);
-        );
 #endif
         if ( bc_u < u_min ){ u_min = bc_u;}
         if ( bc_u > u_max ){ u_max = bc_u;}
@@ -1013,13 +1012,14 @@ int main( int argc, char** argv ){
     const auto bfile = fopen ((pname+"-bcs-out.csv").c_str(), "w");
 #endif
     if (bfile != nullptr) {
-      fprintf (bfile,
+      fprintf ( bfile,
         "\"%s\",%+12.5e,%+12.5e,%+12.5e,%+12.5e,%+12.5e,"
         "%u,%u,%u,%u,%u,%u,"
-        "%+12.5e,%+12.5e,%+12.5e\n",
+        "%+12.5e,%+12.5e,%+12.5e,%+12.5e,%+12.5e\n",
         bname, u_diff, 0.5*f_abs, u_sum, f_sum, W_ext,
         part_i, E->elem_p, E->elem_n, E->node_n, E->node_n*Y->node_d, iter,
-        elap_sec, M->glob_atol, M->glob_rtol);
+        elap_sec, M->glob_atol, M->glob_rtol,
+        std::sqrt(M->glob_rto2), std::sqrt(M->glob_chk2) );
       fclose (bfile);
     }
 #endif
