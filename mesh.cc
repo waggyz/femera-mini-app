@@ -679,12 +679,12 @@ int Mesh::ReadPartFMR( part& P, const char* fname, bool is_bin ){
 #pragma omp atomic update
     this->ther_part_n+=1;
     if(t_mtrl_dirs.size()<3){
-      Y = new ThermIso3D(t_ther_cond);//TODO make __m256d compatible
-    }else{//FIXME
+      Y = new ThermIso3D(t_ther_cond);
+    }else{
 #if 0
       Y = new ThermOrtho3D(t_ther_cond,t_mtrl_dirs);
 #else
-      Y = new ThermIso3D(t_ther_cond);
+      Y = new ThermIso3D(t_ther_cond);//FIXME ortho is hacked into the iso driver.
 #endif
     }
   }else if( has_plas ){

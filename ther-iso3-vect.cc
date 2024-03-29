@@ -38,9 +38,9 @@ int ThermIso3D::ElemLinear( Elem* E, const INT_MESH e0, const INT_MESH ee,
   const int Ne = Nd*Nc;
   const int intp_n = int(E->gaus_n);
   //const INT_ORDER elem_p =E->elem_p;
-  const FLOAT_PHYS C = this->mtrl_matc[0];//TODO Cx,Cy,Cz in one __m256d?
+  const FLOAT_PHYS C = this->mtrl_matc[0];
   __m256d Cv = _mm256_setzero_pd();
-  if (mtrl_matc.size()==3){
+  if (mtrl_matc.size()==3){// Cx,Cy,Cz in one __m256d
     Cv = _mm256_set_pd(0.0,this->mtrl_matc[2],mtrl_matc[1],mtrl_matc[0]);
   }
   const int NC = this->mtrl_matc.size();

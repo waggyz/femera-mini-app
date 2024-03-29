@@ -639,7 +639,7 @@ public:
   ThermIso3D( Phys::vals cond ) :// Constructor
     Phys( cond ){
       node_d = 1;
-      ther_cond.resize(cond.size()); ther_cond=cond;//TODO make __mm256d compat.
+      ther_cond.resize(cond.size()); ther_cond=cond;
       ThermIso3D::MtrlProp2MatC(); 
     }
 #if 0
