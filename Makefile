@@ -174,6 +174,8 @@ endif
 ifneq ("$(ADD_TO_LDPATH)","")# only true once during build
   export LD_RUN_PATH     :=$(LD_RUN_PATH):$(ADD_TO_LDPATH)
   export LD_LIBRARY_PATH :=$(LD_LIBRARY_PATH):$(ADD_TO_LDPATH)
+  export OMP_PROC_BIND=spread
+  export OMP_PLACES=cores;
 endif
 
 # TMP_LIBRARY_PATH_=$(LD_RUN_PATH);
@@ -315,7 +317,23 @@ ifeq ($(ENABLE_PARAVIEW),ON)
   #TODO move to external/paraview-* files
   LIST_EXTERNAL += paraview
   FMRFLAGS+= -DFMR_HAS_PARAVIEW
-  EXTERNAL_DOT+="Femera" -> "ParaView" [style=dotted]\n
+  EXTERNAL_DOT+="Femera" -> "ParaView" [color="cyan"] [style=dotted]\n
+endif
+ifeq ($(ENABLE_POVRAY),ON)
+  #TODO move to external/povray-* files
+  LIST_EXTERNAL += povray
+  FMRFLAGS+= -DFMR_HAS_POVRAY
+  EXTERNAL_DOT+="Femera" -> "POV-Ray" [color="cyan"] [style=dotted]\n
+endif
+ifeq ($(ENABLE_NEPER),ON)
+  #TODO move to external/neper-* files
+  LIST_EXTERNAL += neper
+  LIST_EXTERNAL += gsl
+  FMRFLAGS+= -DFMR_HAS_NEPER
+  EXTERNAL_DOT+="Femera" -> "Neper" [color="cyan"] [style=dotted]\n
+  ifeq ($(ENABLE_POVRAY),ON)
+    EXTERNAL_DOT+="Neper" -> "POV-Ray"\n
+  endif
 endif
 # Developer tools
 SRC_STAT_FILE:=data/src/femera-$(CPUMODEL)-build-stats.csv

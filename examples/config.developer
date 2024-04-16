@@ -32,6 +32,8 @@ ENABLE_GMSH:=ON
 ENABLE_GMSH_OMP:=ON
 ENABLE_GMSH_METIS:=ON
 ENABLE_FLTK:=ON
+ENABLE_NEPER:=ON
+ENABLE_POVRAY:=ON
 
 # External packages downloaded and installed by PETSc -------------------------
 ENABLE_OCCT:=ON

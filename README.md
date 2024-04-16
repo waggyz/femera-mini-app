@@ -101,9 +101,26 @@ make install
 ```bash
 cd external/petsc
 
-./configure PETSC_ARCH=i7-12800H-debug --prefix=/home/dwagner5/.local/i7-12800H --with-packages-build-dir=/home/dwagner5/Documents/My_Code/femera-mini-demo/external/petsc-packages --doCleanup=1 --with-shared-libraries --with-debugging --with-64-bit-indices --with-memalign=32 COPTFLAGS='-march=native -mtune=native -Ofast -fno-builtin-sin -fno-builtin-cos -fvisibility=hidden -funroll-loops -frename-registers -ftree-vectorize -fno-common -fearly-inlining' CXXOPTFLAGS='-march=native -mtune=native -Ofast -fno-builtin-sin -fno-builtin-cos -fvisibility=hidden -fvisibility-inlines-hidden -funroll-loops -frename-registers -ftree-vectorize -fno-common -fearly-inlining' FOPTFLAGS='-march=native -mtune=native -Ofast -fvisibility=hidden -funroll-loops -frename-registers -ftree-vectorize -fno-common -fearly-inlining' --with-openmp --with-mpi --with-petsc4py --download-fblaslapack --download-suitesparse --download-hwloc --download-mpi4py --download-zlib --download-libjpeg --download-libpng --download-boost --download-opencascade --download-hdf5 --download-cgns --download-netcdf --download-metis
+./configure PETSC_ARCH=i7-12800H-debug --prefix=/home/dwagner5/.local/i7-12800H \
+  --with-packages-build-dir=/home/dwagner5/Documents/My_Code/femera-mini-demo/external/petsc-packages \
+  --doCleanup=1 --with-shared-libraries --with-debugging \
+  --with-64-bit-indices --with-memalign=32 \
+  COPTFLAGS='-march=native -mtune=native \
+  -Ofast -fno-builtin-sin -fno-builtin-cos -fvisibility=hidden -funroll-loops \
+  -frename-registers -ftree-vectorize -fno-common -fearly-inlining' \
+  CXXOPTFLAGS='-march=native -mtune=native -Ofast -fno-builtin-sin \
+  -fno-builtin-cos -fvisibility=hidden -fvisibility-inlines-hidden \
+  -funroll-loops -frename-registers -ftree-vectorize -fno-common \
+  -fearly-inlining' FOPTFLAGS='-march=native -mtune=native -Ofast \
+  -fvisibility=hidden\ -funroll-loops -frename-registers -ftree-vectorize \
+  -fno-common -fearly-inlining' \
+  --with-openmp --with-mpi --with-petsc4py \
+  --download-fblaslapack --download-suitesparse --download-hwloc \
+  --download-mpi4py --download-zlib --download-libjpeg --download-libpng \
+  --download-boost --download-opencascade --download-hdf5 --download-cgns \
+  --download-netcdf --download-metis --download-parmetis --download-fftw
 
-# --download-pnetcdf --download-exodusii --download-libmesh --download-parmetis --download-fftw
+# --download-pnetcdf --download-exodusii --download-libmesh --download-mumps
 # These need approval
 
 # ADD --with-cuda            # if CUDA is installed
@@ -116,8 +133,11 @@ cd external/petsc
 
 # --download-googletest   # removed because [**BUG**] PETSc configure fails
                           # PETSc downloads googletest v1.10.x
-# --with-googletest       # Cannot use --download-mpich or --download-openmpi when not using --download-googletest. Perhaps you want --download-googletest.
-# --download-mpich        # REMOVED to see if --download-googletest will work. NO: gtest doesn't configure.
+# --with-googletest       # Cannot use --download-mpich or --download-openmpi 
+#                           when not using --download-googletest. Perhaps you 
+#                           want --download-googletest.
+# --download-mpich        # REMOVED to see if --download-googletest will work.
+# NO: gtest doesn't configure.
 # NO: --with-googletest-dir=/home/dwagner5/.local/lib64 : does not work
 # NO: --with-googletest-dir=/home/dwagner5/Documents/My_Code/femera-mini-demo.huh/external/googletest : does not work
 # NO: --with-googletest-include=/home/dwagner5/.local/include --with-googletest-lib=/home/dwagner5/.local/lib64

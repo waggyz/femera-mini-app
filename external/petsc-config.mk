@@ -8,8 +8,8 @@ ifeq ($(ENABLE_PETSC),ON)
 #  endif
   LIST_EXTERNAL += petsc
   EXTERNAL_DOT+="Femera" -> "PETSc" [color="cyan"]\n
-  EXTERNAL_DOT+="PETSc" -> "Bison" [color="cyan"]\n
-  EXTERNAL_DOT+="PETSc" -> "Sowing" [color="cyan"]\n
+  EXTERNAL_DOT+="PETSc" -> "Bison" [color="blue"]\n
+  EXTERNAL_DOT+="PETSc" -> "Sowing" [color="blue"]\n
   
   PETSC_FLAGS += PETSC_ARCH=$(CPUMODEL)
   PETSC_FLAGS += --prefix=$(INSTALL_CPU)
@@ -39,7 +39,7 @@ ifeq ($(ENABLE_PETSC),ON)
   PETSC_FFLAGS:= $(filter-out -fno-builtin-cos,$(PETSC_FFLAGS))
   
   PETSC_FLAGS += FOPTFLAGS='$(PETSC_FFLAGS)'
-
+  
   ifeq ($(ENABLE_PETSC_OMP),ON)
     EXTERNAL_DOT+="PETSc" -> "OpenMP"\n
     PETSC_FLAGS += --with-openmp
@@ -150,7 +150,7 @@ ifeq ($(ENABLE_PETSC),ON)
     PETSC_INSTALLS += zlib szlib
     PETSC_FLAGS += --download-zlib --download-szlib
     EXTERNAL_DOT+="PETSc" -> "zlib" [color="blue"]\n
-    EXTERNAL_DOT+="PETSc" -> "szlib" [color="blue"]\n
+    EXTERNAL_DOT+="PETSc" -> "szlib" [color="red"]\n
   endif
   ifeq ($(ENABLE_HDF5),ON)
     EXTERNAL_DOT+="HDF5" -> "zlib"\n
@@ -164,7 +164,7 @@ ifeq ($(ENABLE_PETSC),ON)
     PETSC_FLAGS += --download-libjpeg --download-libpng --download-giflib
     EXTERNAL_DOT+="PETSc" -> "libjpeg" [color="blue"]\n
     EXTERNAL_DOT+="PETSc" -> "libpng" [color="blue"]\n
-    EXTERNAL_DOT+="PETSc" -> "giflib" [color="blue"]\n
+    EXTERNAL_DOT+="PETSc" -> "giflib" [color="red"]\n
   endif
   ifeq ($(ENABLE_GMSH),ON)
     EXTERNAL_DOT+="Gmsh" -> "libjpeg"\n
@@ -258,6 +258,13 @@ ifeq ($(ENABLE_PETSC),ON)
     EXTERNAL_DOT+="Femera" -> "ml" [style="dotted"]\n
     PETSC_FLAGS += --download-ml
     PETSC_INSTALLS += ml
+  endif
+  ifeq ($(ENABLE_NEPER),ON)
+    # GSL required by Neper
+    EXTERNAL_DOT+="PETSc" -> "GSL" [color="blue"]\n
+    EXTERNAL_DOT+="Neper" -> "GSL"\n
+    PETSC_FLAGS += --download-gsl
+    PETSC_INSTALLS += gsl
   endif
   ifeq (1,0)
   #****************************************************************************

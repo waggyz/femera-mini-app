@@ -25,6 +25,8 @@ ifeq ($(ENABLE_GMSH),ON)
   GMSH_FLAGS += -DENABLE_BUILD_SHARED=ON
   GMSH_FLAGS += -DENABLE_BUILD_DYNAMIC=ON
   GMSH_FLAGS += -DENABLE_PRIVATE_API=ON
+  #TODO Check the next
+  GMSH_FLAGS += -DENABLE_ZIPPER=ON
   ifeq ($(ENABLE_GMSH_OMP),ON)
     GMSH_FLAGS += -DENABLE_OPENMP=ON
     EXTERNAL_DOT+="Gmsh" -> "OpenMP"\n
@@ -48,7 +50,7 @@ ifeq ($(ENABLE_GMSH),ON)
       GMSH_FLAGS += -DENABLE_MPI=ON
     endif
   endif
-  ifeq (1,0) # Disable PETSc in Gmsh
+  ifeq (1,0) # Disable PETSc in Gmsh for now
   ifeq ($(ENABLE_PETSC),ON)
     GMSH_REQUIRES += petsc
     EXTERNAL_DOT+="Gmsh" -> "PETSc"\n

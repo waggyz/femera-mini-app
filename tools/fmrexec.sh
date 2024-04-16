@@ -150,7 +150,7 @@ if ! [ -z "$CPUMODEL" ]; then
     TMP_LIBRARY_PATH="$LOCAL_INSTALL/$CPUMODEL/lib:$TMP_LIBRARY_PATH"
   fi
 fi
-
+OMP_PLACES=cores; export OMP_PROC_BIND=spread
 #TODO does setting HWLOC_XMLFILE speed up MPICH MPI_init (..)?
 #TODO ...not on development VM
 #F="$LOCAL_INSTALL/$CPUMODEL/share/hwloc/hwloc.xml"
@@ -160,9 +160,9 @@ fi
 #    LD_LIBRARY_PATH=$TMP_LIBRARY_PATH HWLOC_XMLFILE=$F HWLOC_THISSYSTEM=1 $RUN
 #  fi
 #else
-  echo "LD_LIBRARY_PATH=$TMP_LIBRARY_PATH $RUN"
+  echo "env LD_LIBRARY_PATH=$TMP_LIBRARY_PATH OMP_PROC_BIND=spread OMP_PLACES=cores OMP_NUM_THREADS=$NOMP $RUN"
   if [ "$DO_RUN" == "true" ]; then
-    LD_LIBRARY_PATH=$TMP_LIBRARY_PATH $RUN
+    env LD_LIBRARY_PATH=$TMP_LIBRARY_PATH OMP_PROC_BIND=spread OMP_PLACES=cores OMP_NUM_THREADS=$NOMP $RUN
   fi
 #fi
 exit $?
