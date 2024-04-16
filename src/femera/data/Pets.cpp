@@ -4,10 +4,8 @@
 //#include "hdf5.h"
 //#include <petsc.h>
 #include <petscsys.h>
-#endif
 
 namespace femera {
-#ifdef FMR_HAS_PETSC
   namespace data {
     static char petsc_help[] = "Femera interface to PETSc.\n";
   }
@@ -77,12 +75,14 @@ namespace femera {
 #endif
 #endif
   }
+}//end femera:: namespace
 #else
 // ! FMR_HAS_PETSC
+namespace femera {
   namespace data {}
   void data::Pets::task_init (int*, char**) {}
   void data::Pets::task_exit () {}
+}//end femera:: namespace
 #endif
 // FMR_HAS_PETSC
-}//end femera:: namespace
 
