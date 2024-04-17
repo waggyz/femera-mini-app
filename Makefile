@@ -100,7 +100,7 @@ ifeq ($(CXX),g++)
   # Library archiver
   AREXE      := gcc-ar
 endif
-# To use static libraries instead of dynamic when both are available, use:
+#TODO To use static libraries instead of dynamic when both are available, use:
 # <full path>/lib<name>.a instead of -l<name>
 # in LDLIBS.
 ifeq ($(CXX),icpc)
@@ -324,6 +324,14 @@ ifeq ($(ENABLE_POVRAY),ON)
   LIST_EXTERNAL += povray
   FMRFLAGS+= -DFMR_HAS_POVRAY
   EXTERNAL_DOT+="Femera" -> "POV-Ray" [color="cyan"] [style=dotted]\n
+  EXTERNAL_DOT+="POV-Ray" -> "Boost"\n
+  EXTERNAL_DOT+="POV-Ray" -> "zlib"\n
+  EXTERNAL_DOT+="POV-Ray" -> "libpng"\n
+  EXTERNAL_DOT+="POV-Ray" -> "giflib"\n
+  EXTERNAL_DOT+="POV-Ray" -> "libtiff"\n
+  EXTERNAL_DOT+="POV-Ray" -> "libjpeg"\n
+  EXTERNAL_DOT+="POV-Ray" -> "OpenEXR"\n
+  EXTERNAL_DOT+="POV-Ray" -> "SDL"\n
 endif
 ifeq ($(ENABLE_NEPER),ON)
   #TODO move to external/neper-* files

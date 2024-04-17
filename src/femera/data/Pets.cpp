@@ -53,8 +53,8 @@ namespace femera {
 #endif
   }
   void data::Pets::task_exit () {
-    if (this->did_init()) {
-      PetscFinalize();
+    if (this->did_init ()) {
+      PetscFinalize ();
       this->set_init (false);
     }
 #if 0
