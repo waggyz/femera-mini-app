@@ -166,11 +166,6 @@ ifeq ($(ENABLE_PETSC),ON)
     EXTERNAL_DOT+="PETSc" -> "libpng" [color="blue"]\n
     EXTERNAL_DOT+="PETSc" -> "giflib" [color="red"]\n
   endif
-  ifeq ($(ENABLE_GMSH),ON)
-    EXTERNAL_DOT+="Gmsh" -> "libjpeg"\n
-    EXTERNAL_DOT+="Gmsh" -> "libpng"\n
-    EXTERNAL_DOT+="Gmsh" -> "giflib"\n
-  endif
   ifeq ($(ENABLE_OCCT),ON)
     EXTERNAL_DOT+="PETSc" -> "OpenCASCADE" [color="blue"]\n
     PETSC_INSTALLS += occt
@@ -229,8 +224,8 @@ ifeq ($(ENABLE_PETSC),ON)
     PETSC_FLAGS += --download-chaco
   endif
   ifeq ($(ENABLE_PETSC_SCOTCH),ON)
-    EXTERNAL_DOT+="PETSc" -> "PTScotch" [color="blue"]\n
-    EXTERNAL_DOT+="Femera" -> "PTScotch" [style="dotted"]\n
+    EXTERNAL_DOT+="PETSc" -> "PT-Scotch" [color="blue"]\n
+    EXTERNAL_DOT+="Femera" -> "PT-Scotch" [style="dotted"]\n
     PETSC_INSTALLS += ptscotch
     PETSC_FLAGS += --download-ptscotch
   endif

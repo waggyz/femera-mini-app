@@ -98,7 +98,7 @@ ifeq ($(CXX),g++)
   # CXXFLAGS+= --param inline-unit-growth=500
   # CXXFLAGS+= --param large-function-growth=2000
   # Library archiver
-  AREXE      := gcc-ar
+  AREXE      :=gcc-ar
 endif
 #TODO To use static libraries instead of dynamic when both are available, use:
 # <full path>/lib<name>.a instead of -l<name>
@@ -332,6 +332,7 @@ ifeq ($(ENABLE_POVRAY),ON)
   EXTERNAL_DOT+="POV-Ray" -> "libjpeg"\n
   EXTERNAL_DOT+="POV-Ray" -> "OpenEXR"\n
   EXTERNAL_DOT+="POV-Ray" -> "SDL"\n
+  #  EXTERNAL_DOT+="POV-Ray" -> "pthreads"\n
 endif
 ifeq ($(ENABLE_NEPER),ON)
   #TODO move to external/neper-* files
@@ -339,6 +340,9 @@ ifeq ($(ENABLE_NEPER),ON)
   LIST_EXTERNAL += gsl
   FMRFLAGS+= -DFMR_HAS_NEPER
   EXTERNAL_DOT+="Femera" -> "Neper" [color="cyan"] [style=dotted]\n
+  EXTERNAL_DOT+="Neper" -> "Scotch" [color="blue"]\n
+  EXTERNAL_DOT+="Neper" -> "NLopt" [color="blue"]\n
+  EXTERNAL_DOT+="Neper" -> "pthreads"\n
   ifeq ($(ENABLE_POVRAY),ON)
     EXTERNAL_DOT+="Neper" -> "POV-Ray"\n
   endif
@@ -442,7 +446,7 @@ else
 endif
 endif
 
-#TODO CXXMINI flags should show -Winline errors
+#TODO CXXMINI flags should show -Winline errors?
 CXXMINI := $(CXXFLAGS) $(FMRFLAGS) $(filter-out -Winline,$(CXXWARNS))
 CXXFLAGS+= $(CXXWARNS)
 
@@ -514,7 +518,7 @@ PRFOUTS:= $(patsubst src/%.perf.cpp,$(BUILD_CPU)/%.perf.out,$(FMRPERF))
 .PRECIOUS: $(BUILD_CPU)/external/%-install.flags
 
 #TODO fixes error make[2] unlink /home/dwagner5/.local/bin/ Is a directory
-#      while first running make tools?
+#     while first running make tools?
 .PRECIOUS: $(INSTALL_DIR)/bin/ build/%.gtst build/%.perf
 
 # Compile and add the exception handler (Errs) to libfemera early.

@@ -18,6 +18,9 @@ ifeq ($(ENABLE_GMSH),ON)
     GMSH_FLAGFILE:=$(BUILD_CPU)/external/gmsh-install.flags
   endif
   EXTERNAL_DOT+="Femera" -> "Gmsh" [color="cyan"]\n
+  EXTERNAL_DOT+="Gmsh" -> "libjpeg"\n
+  EXTERNAL_DOT+="Gmsh" -> "libpng"\n
+  # EXTERNAL_DOT+="Gmsh" -> "giflib"\n
   # [color="red"]
   GMSH_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
   GMSH_FLAGS += -DCMAKE_PREFIX_PATH="$(INSTALL_CPU)"

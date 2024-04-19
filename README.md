@@ -102,7 +102,7 @@ make install
 cd external/petsc
 
 ./configure PETSC_ARCH=i7-12800H-debug --prefix=/home/dwagner5/.local/i7-12800H \
-  --with-packages-build-dir=/home/dwagner5/Documents/My_Code/femera-mini-demo/external/petsc-packages \
+  --with-packages-build-dir=/home/dwagner5/Code/femera-mini-demo/external/petsc-packages \
   --doCleanup=1 --with-shared-libraries --with-debugging \
   --with-64-bit-indices --with-memalign=32 \
   COPTFLAGS='-march=native -mtune=native \
@@ -118,7 +118,8 @@ cd external/petsc
   --download-fblaslapack --download-suitesparse --download-hwloc \
   --download-mpi4py --download-zlib --download-libjpeg --download-libpng \
   --download-boost --download-opencascade --download-hdf5 --download-cgns \
-  --download-netcdf --download-metis --download-parmetis --download-fftw
+  --download-netcdf --download-metis --download-parmetis --download-fftw \
+  --download-gsl
 
 # --download-pnetcdf --download-exodusii --download-libmesh --download-mumps
 # These need approval
@@ -139,7 +140,7 @@ cd external/petsc
 # --download-mpich        # REMOVED to see if --download-googletest will work.
 # NO: gtest doesn't configure.
 # NO: --with-googletest-dir=/home/dwagner5/.local/lib64 : does not work
-# NO: --with-googletest-dir=/home/dwagner5/Documents/My_Code/femera-mini-demo.huh/external/googletest : does not work
+# NO: --with-googletest-dir=/home/dwagner5/Code/femera-mini-demo.huh/external/googletest : does not work
 # NO: --with-googletest-include=/home/dwagner5/.local/include --with-googletest-lib=/home/dwagner5/.local/lib64
 
 # --download-hwloc     # removed from here because of the BUG below
@@ -163,16 +164,16 @@ cd external/petsc
 # --with-shared-libraries # required for petsc4py
 #TODO rerun adding --with-shared-libraries=0 # for static linking
 
-make PETSC_DIR=/home/dwagner5/Documents/My_Code/femera-mini-demo/external/petsc PETSC_ARCH=i7-12800H-debug all
+make PETSC_DIR=/home/dwagner5/Code/femera-mini-demo/external/petsc PETSC_ARCH=i7-12800H-debug all
 
-make PETSC_DIR=/home/dwagner5/Documents/My_Code/femera-mini-demo/external/petsc PETSC_ARCH=i7-12800H-debug install
+make PETSC_DIR=/home/dwagner5/Code/femera-mini-demo/external/petsc PETSC_ARCH=i7-12800H-debug install
 
 make PETSC_DIR=/home/dwagner5/.local/i7-12800H PETSC_ARCH="" check
 
 # TODO REPORT dependency BUGS for --download-hwloc needs libxml2
 
 # Optionally, run several hours of tests.
-# make PETSC_DIR=/home/dwagner5/Documents/My_Code/femera-mini-demo/external/petsc PETSC_ARCH="$CPUMODEL-debug" test
+# make PETSC_DIR=/home/dwagner5/Code/femera-mini-demo/external/petsc PETSC_ARCH="$CPUMODEL-debug" test
 ```
 
 4. Build and install Gmsh with support for CGNS and HDF5.
@@ -191,7 +192,7 @@ JFLAG=-j4
 # FMRDIR=$(cd "$(dirname "$0")/.."; pwd) # when called from script in external
 # FMRDIR=`pwd` # command line in femera-mini-demo directory
 
-FMRDIR=/home/dwagner5/Documents/My_Code/femera-mini-demo # hardcoded here
+FMRDIR=/home/dwagner5/Code/femera-mini-demo # hardcoded here
 
 cd $FMRDIR
 
@@ -214,7 +215,7 @@ make install
 7. Return to the PETSc directory to build and install PETSc without debugging by changing `PETSC_ARCH=i7-12800H` and changing the flag `--with-debugging=0`.
 8. Test it
 ```bash
-make PETSC_DIR=/home/dwagner5/Documents/My_Code/femera-mini-demo/external/petsc PETSC_ARCH=i7-12800H test
+make PETSC_DIR=/home/dwagner5/Code/femera-mini-demo/external/petsc PETSC_ARCH=i7-12800H test
 ```
 # Tests may take an hour or longer and may only show failed test output.
 
