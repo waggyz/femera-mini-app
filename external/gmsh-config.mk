@@ -2,6 +2,7 @@
 # Gmsh and its dependencies
 ifeq ($(ENABLE_GMSH),ON)
   FMRFLAGS += -DFMR_HAS_GMSH
+  FMRFLAGS += -DFMR_GMSH_HAS_METIS
 #  ifeq ($(USE_STATIC_LIBS),ON)
 #    LDLIBS += $(INSTALL_CPU)/lib64/libgmsh.a
 #  else
@@ -20,6 +21,7 @@ ifeq ($(ENABLE_GMSH),ON)
   EXTERNAL_DOT+="Femera" -> "Gmsh" [color="cyan"]\n
   EXTERNAL_DOT+="Gmsh" -> "libjpeg"\n
   EXTERNAL_DOT+="Gmsh" -> "libpng"\n
+  EXTERNAL_DOT+="Gmsh" -> "METIS" [color="green"]\n
   # EXTERNAL_DOT+="Gmsh" -> "giflib"\n
   # [color="red"]
   GMSH_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
@@ -83,14 +85,15 @@ ifeq ($(ENABLE_GMSH),ON)
     GMSH_FLAGS += -DENABLE_OCC=ON -DENABLE_OCC_CAF=ON -DENABLE_OCC_STATIC=ON
   endif
   ifeq ($(ENABLE_CAIRO),ON)
-		# Can just use FreeType (required by OCCT).
+    # Can just use FreeType (required by OCCT).
     EXTERNAL_DOT+="Gmsh" -> "Cairo"\n
-		GMSH_FLAGS += -DENABLE_CAIRO=ON
-		GMSH_DEPS+=$(patsubst %,$(BUILD_CPU)/external/%-install.out,$(GMSH_REQUIRES))
+    GMSH_FLAGS += -DENABLE_CAIRO=ON
+    GMSH_DEPS+=$(patsubst %,$(BUILD_CPU)/external/%-install.out,$(GMSH_REQUIRES))
   endif
-	#  $(shell printf "%s" "$(gmsh_FLAGS)" > $(GMSH_FLAGFILE))
+  #  $(shell printf "%s" "$(gmsh_FLAGS)" > $(GMSH_FLAGFILE))
 endif
 ifeq ($(ENABLE_OCCT),ON)
+  FMRFLAGS += -DFMR_HAS_OCC
 #  LIST_EXTERNAL += occt
   OCCT_REQUIRES += freetype
   EXTERNAL_DOT+="OpenCASCADE" -> "FreeType"\n

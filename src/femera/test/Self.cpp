@@ -21,7 +21,12 @@ namespace femera {
   void test::Self::log_init_info () {// pulled out of task_init (inline fail)
     this->data->send (fmr::info, this->get_base_abrv (), this->abrv, "fmr",
       std::string (MAKESTR(FMR_VERSION)));
-    this->data->send (fmr::info, this->get_base_abrv (), this->abrv, "g++",
+#ifdef __INTEL_COMPILER
+    const auto cc = std::string ("icc");
+#else
+    const auto cc = std::string ("gcc");
+#endif
+    this->data->send (fmr::info, this->get_base_abrv (), this->abrv, cc,
       std::string (__VERSION__));
     const auto cppver = __cplusplus;
     this->data->send (fmr::info, this->get_base_abrv (), this->abrv, "C++",

@@ -84,6 +84,8 @@ ifeq ($(ENABLE_PETSC),ON)
     ifeq ($(ENABLE_GMSH_METIS),ON)
       EXTERNAL_DOT+="Gmsh" -> "METIS"\n
       ENABLE_PETSC_METIS:=ON
+      #FMRFLAGS += -DFMR_HAS_METIS
+      #FMRFLAGS += -DFMR_GMSH_HAS_METIS
     endif
     PETSC_REQUIRES += gmsh
     PETSC_MAKE_FLAGS += --with-gmsh-dir=$(INSTALL_CPU)
@@ -230,6 +232,7 @@ ifeq ($(ENABLE_PETSC),ON)
     PETSC_FLAGS += --download-ptscotch
   endif
   ifeq ($(ENABLE_PETSC_METIS),ON)
+    FMRFLAGS += -DFMR_HAS_METIS
     EXTERNAL_DOT+="PETSc" -> "METIS" [color="blue"]\n
     PETSC_FLAGS += --download-metis
     PETSC_INSTALLS += metis
@@ -240,6 +243,12 @@ ifeq ($(ENABLE_PETSC),ON)
     EXTERNAL_DOT+="ParMETIS" -> "MPI"\n
     PETSC_INSTALLS += parmetis
     PETSC_FLAGS += --download-parmetis
+  endif
+  ifeq ($(ENABLE_PETSC_EIGEN),ON)
+    EXTERNAL_DOT+="PETSc" -> "Eigen" [color="blue"]\n
+    EXTERNAL_DOT+="Femera" -> "Eigen" [style="dotted"]\n
+    PETSC_INSTALLS += eigen
+    PETSC_FLAGS += --download-eigen
   endif
   ifeq ($(ENABLE_PETSC_FFTW),ON)
     EXTERNAL_DOT+="PETSc" -> "FFTW" [color="blue"]\n

@@ -25,7 +25,7 @@ namespace femera {
 #ifdef H5_VERS_INFO
     this->hdf5_vers = H5_VERS_INFO;// is already double-quoted
     this->data->send (fmr::info,
-      get_base_abrv ().c_str(), get_abrv ().c_str(), "uses", H5_VERS_INFO);
+      get_base_abrv ().c_str(), get_abrv ().c_str(), "with", H5_VERS_INFO);
 #endif
 #ifdef FMR_HAS_MPI
 //NO_FMR_PRAGMA_OMP(omp MAIN)//NOTE OpenMP does not play nice with exceptions.

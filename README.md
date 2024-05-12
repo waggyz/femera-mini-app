@@ -112,14 +112,14 @@ cd external/petsc
   -fno-builtin-cos -fvisibility=hidden -fvisibility-inlines-hidden \
   -funroll-loops -frename-registers -ftree-vectorize -fno-common \
   -fearly-inlining' FOPTFLAGS='-march=native -mtune=native -Ofast \
-  -fvisibility=hidden\ -funroll-loops -frename-registers -ftree-vectorize \
+  -fvisibility=hidden -funroll-loops -frename-registers -ftree-vectorize \
   -fno-common -fearly-inlining' \
   --with-openmp --with-mpi --with-petsc4py \
   --download-fblaslapack --download-suitesparse --download-hwloc \
   --download-mpi4py --download-zlib --download-libjpeg --download-libpng \
   --download-boost --download-opencascade --download-hdf5 --download-cgns \
   --download-netcdf --download-metis --download-parmetis --download-fftw \
-  --download-gsl
+  --download-gsl --download-eigen
 
 # --download-pnetcdf --download-exodusii --download-libmesh --download-mumps
 # These need approval

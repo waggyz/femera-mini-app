@@ -70,6 +70,7 @@ ifeq ($(CXX),g++)
   CXXFLAGS   += -std=c++11 -g -MMD -MP -fPIC
   # Dependency file generation: -MMD -MP
   #WAS: -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
+  #TODO Consider finding all dependency statikc libs and building -static.
   ifeq ($(ENABLE_LTO),ON)
     CXXFLAGS += -flto
   endif
@@ -324,6 +325,8 @@ ifeq ($(ENABLE_POVRAY),ON)
   LIST_EXTERNAL += povray
   FMRFLAGS+= -DFMR_HAS_POVRAY
   EXTERNAL_DOT+="Femera" -> "POV-Ray" [color="cyan"] [style=dotted]\n
+  EXTERNAL_DOT+="Femera" -> "OpenEXR" [color="cyan"] [style=dotted]\n
+  EXTERNAL_DOT+="Femera" -> "SDL" [color="cyan"] [style=dotted]\n
   EXTERNAL_DOT+="POV-Ray" -> "Boost"\n
   EXTERNAL_DOT+="POV-Ray" -> "zlib"\n
   EXTERNAL_DOT+="POV-Ray" -> "libpng"\n
@@ -331,8 +334,9 @@ ifeq ($(ENABLE_POVRAY),ON)
   EXTERNAL_DOT+="POV-Ray" -> "libtiff"\n
   EXTERNAL_DOT+="POV-Ray" -> "libjpeg"\n
   EXTERNAL_DOT+="POV-Ray" -> "OpenEXR"\n
+  EXTERNAL_DOT+="OpenEXR" -> "lmath" [color="green"]\n
   EXTERNAL_DOT+="POV-Ray" -> "SDL"\n
-  #  EXTERNAL_DOT+="POV-Ray" -> "pthreads"\n
+  EXTERNAL_DOT+="POV-Ray" -> "pthreads"\n
 endif
 ifeq ($(ENABLE_NEPER),ON)
   #TODO move to external/neper-* files
@@ -340,9 +344,11 @@ ifeq ($(ENABLE_NEPER),ON)
   LIST_EXTERNAL += gsl
   FMRFLAGS+= -DFMR_HAS_NEPER
   EXTERNAL_DOT+="Femera" -> "Neper" [color="cyan"] [style=dotted]\n
-  EXTERNAL_DOT+="Neper" -> "Scotch" [color="blue"]\n
-  EXTERNAL_DOT+="Neper" -> "NLopt" [color="blue"]\n
+  # EXTERNAL_DOT+="Neper" -> "GSL" [color="blue"]\n
+  EXTERNAL_DOT+="Neper" -> "Scotch" [color="green"]\n
+  EXTERNAL_DOT+="Neper" -> "NLopt" [color="green"]\n
   EXTERNAL_DOT+="Neper" -> "pthreads"\n
+  EXTERNAL_DOT+="Neper" -> "Gmsh"\n
   ifeq ($(ENABLE_POVRAY),ON)
     EXTERNAL_DOT+="Neper" -> "POV-Ray"\n
   endif

@@ -4,6 +4,12 @@
 #ifdef FMR_HAS_GMSH
 #include "gmsh.h"
 #endif
+#ifdef FMR_HAS_OCC
+#include "opencascade/Standard_Version.hxx"
+#endif
+#ifdef FMR_GMSH_HAS_METIS
+#include "metis.h"
+#endif
 
 namespace femera {
   data::Gmsh::Gmsh (const femera::Work::Core_ptrs_t core)
@@ -28,6 +34,17 @@ namespace femera {
       if (omp_n > 0) {
         ::gmsh::option::setNumber ("General.NumThreads", Gmsh::Number (omp_n));
       }
+#ifdef FMR_HAS_OCC
+      this->data->send (fmr::info, get_base_abrv ().c_str(),
+        get_abrv ().c_str(), "with Open Cascade", OCC_VERSION_COMPLETE);
+#endif
+#ifdef FMR_GMSH_HAS_METIS
+      const auto metis_ver = std::to_string (METIS_VER_MAJOR) + "."
+        + std::to_string (METIS_VER_MINOR) + "."
+        + std::to_string (METIS_VER_SUBMINOR);
+      this->data->send (fmr::info, get_base_abrv ().c_str(),
+        get_abrv ().c_str(), "with METIS", metis_ver.c_str() );
+#endif
       Gmsh::Number gmsh_omp_n = 0;
       ::gmsh::option::getNumber ("General.NumThreads", gmsh_omp_n);
       if (fmr::Local_int (gmsh_omp_n) == omp_n) {

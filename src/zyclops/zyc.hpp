@@ -39,6 +39,7 @@
 
 namespace zyclops {
   using Zindex_int = std::uint_fast32_t;// for indices into one CR matrix
+  //TODO Change Zindex_int to Zix_int?
   using Zorder_int = Zindex_int;// same as Zindex_int; name is for semantics
   // max uint needed to index into   CR matrix: 2^(2*(max_zorder+1)) - 1
   // max uint needed for matrix-free CR access: 2^(  (max_zorder+1)) - 1

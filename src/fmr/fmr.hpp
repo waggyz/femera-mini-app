@@ -25,16 +25,16 @@ namespace fmr {
   // sizeof: Dim_int <= Enum_int <= Local_int <= Global_int
   using    Dim_int = uint_fast8_t  ;// space dim., hier. depth, poly. order,...
   using   Enum_int = int           ;// default enum native type
-  using  Local_int = FMR_LOCAL_INT ;// local partition indices
+  using  Local_int = FMR_LOCAL_INT ;// local (within partition) indices
   using Global_int = FMR_GLOBAL_INT;// element ID, node ID
   //
   using   Hash_int = uint32_t      ;//TODO check CRC32, CRC64 perf (cpu,gpu)
   //
   using Perf_int   = uint_fast64_t ;// unit counters, time (ns) counters
   using Perf_float = float         ;// speed, arithmetic intensity, time (sec)
-  //
+  //TODO _float or _fp?
   //NOTE fmr:: floating point types are defaults?
-  using Geom_float = double        ;// includes non-inverted jac & det
+  using Geom_float = double        ;// includes non-inverted jac (& det? TODO)
   using Phys_float = double        ;// includes inverses of jac & det
   using Solv_float = double        ;
   using Cond_float = float         ;// Preconditioning and scaling
