@@ -3,9 +3,6 @@
 
 #include "../Data.hpp"
 
-#include <unordered_map>
-#include <valarray>// needed in Text.ipp
-
 namespace femera { namespace data {
   class Text;// Derive a CRTP concrete class from Data.
   class Text final: public Data <Text> {// friend class Data;

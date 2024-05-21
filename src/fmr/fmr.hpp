@@ -8,9 +8,9 @@
 #include <array>
 
 namespace fmr {
-/* prefer e.g. int_fast8_t, uint_least8_t, ...,  uintmax_t, uintptr_t
+/* prefer ints e.g. int_fast8_t, uint_least8_t, ...,  uintmax_t, uintptr_t
  *
- * This "using" syntax is preferred to "typedef" in the Google C++ Style Guide:
+ * This "using" syntax is preferred to "typedef" in the Google C++ Style Guide.
  * https://google.github.io/styleguide/cppguide.html#Aliases
  */
   // internal ints
@@ -20,7 +20,7 @@ namespace fmr {
   //
   // storable data types
   using   Char_int = char          ;// native char type in strings
-  using   Bulk_int = Char_int      ;// serializing type can cast to std::string
+  using   Bulk_int = Char_int      ;// generic serializing type can cast to std::string
   //
   // sizeof: Dim_int <= Enum_int <= Local_int <= Global_int
   using    Dim_int = uint_fast8_t  ;// space dim., hier. depth, poly. order,...
@@ -32,14 +32,14 @@ namespace fmr {
   //
   using Perf_int   = uint_fast64_t ;// unit counters, time (ns) counters
   using Perf_float = float         ;// speed, arithmetic intensity, time (sec)
-  //TODO _float or _fp?
+  //TODO *_float or *_fp, *_fpn?
   //NOTE fmr:: floating point types are defaults?
   using Geom_float = double        ;// includes non-inverted jac (& det? TODO)
   using Phys_float = double        ;// includes inverses of jac & det
   using Solv_float = double        ;
-  using Cond_float = float         ;// Preconditioning and scaling
-  using Post_float = float         ;// Post-processing
-  using Plot_float = float         ;// Visualization
+  using Cond_float = float         ;// preconditioning and scaling
+  using Post_float = float         ;// post-processing
+  using Plot_float = float         ;// visualization
   //
   enum class Vals_type : Enum_int { None=0, Error, Unknown,
     Bulk, String, Dim, Enum, Local, Global, Hash,
@@ -52,8 +52,9 @@ namespace fmr {
     end
   };
   template <typename E> constexpr typename
-  std::underlying_type<E>::type enum2val (E e) {/* Cast enum to underlying type
-    * to get the last enum index number for size, sync., etc., use, e.g.,
+  std::underlying_type<E>::type enum2val (E e) {
+   /* Cast enum to underlying type to get the last enum index number for
+    * size, sync., etc., use, e.g.,
     * const auto data_type_n = fmr::enum2val (fmr::Data_type::end);
     */
     return static_cast <typename std::underlying_type<E>::type> (e);
@@ -91,7 +92,7 @@ namespace fmr {
   //
   using Vals_name_t = std::string;
   using File_name_t = std::string;
-  // a file name is interpreted as a collection of vals or strings
+  // A file name is interpreted as a collection of vals or strings.
   using Data_name_t = std::string;// variable (vals) or file name
  /*
   * Data_name_t: sim, part, file, directory, or other data collection path and
@@ -103,6 +104,7 @@ namespace fmr {
   * (output) data destination.
   */
   // built-in data sources and destinations
+  // These are patterned similar to C stdout, stderr, stdin and C++ std::out,...
   static const Data_name_t   log ="fmr:log" ;// default stdout main thread only
   static const Data_name_t   out ="fmr:out" ;// default stdout from all threads
   static const Data_name_t   err ="fmr:err" ;// default stderr from all threads

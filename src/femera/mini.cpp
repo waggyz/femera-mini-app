@@ -7,9 +7,9 @@ TEST( Mini, TrivialTest ){
 }
 #endif
 int main (int argc, char** argv) {
-  // These all work.
   const int choice = 1;
   switch ( choice ){
+    // These all work.
     case 1: {
       return fmr::new_jobs (& argc, argv)->exit ();// one-liner
     }

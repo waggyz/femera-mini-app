@@ -49,7 +49,7 @@ FMR_WARN_INLINE_ON
     // Jobs instance task_list now has proc::Main, data::File, and test::Beds,
     // and its proc, data, and test pointer members are set but NOT initialized.
 #if 1
-    // Add a simulation handler,//TODO if needed.
+    // Add simulation handlers, one for each mpi procss,//TODO if needed.
     this->add_task (std::move(Task<task::Sims>::new_task (this->get_core())));
 #endif
 #if 0
