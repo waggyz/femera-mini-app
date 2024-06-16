@@ -92,7 +92,7 @@ namespace fmr {
   //
   using Vals_name_t = std::string;
   using File_name_t = std::string;
-  // A file name is interpreted as a collection of vals or strings.
+  // A file name is interpreted as a series of vals or strings.
   using Data_name_t = std::string;// variable (vals) or file name
  /*
   * Data_name_t: sim, part, file, directory, or other data collection path and

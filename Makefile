@@ -70,7 +70,7 @@ ifeq ($(CXX),g++)
   CXXFLAGS   += -std=c++11 -g -MMD -MP -fPIC
   # Dependency file generation: -MMD -MP
   #WAS: -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
-  #TODO Consider finding all dependency statikc libs and building -static.
+  #TODO Consider finding all dependency static libs and building -static.
   ifeq ($(ENABLE_LTO),ON)
     CXXFLAGS += -flto
   endif

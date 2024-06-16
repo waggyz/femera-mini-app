@@ -10,8 +10,10 @@ namespace femera {
     static char petsc_help[] = "Femera interface to PETSc.\n";
   }
   void data::Pets::task_init (int*, char**) {
+  //TODO Set PETSC_COMM_WORLD to a copy of MPI_COMM_WORLD or Femera's MPI communicator?.
   const auto ierr = PetscInitialize (nullptr, nullptr, (char*)nullptr, data::petsc_help);
-  //NOTE it is not clear how to init PETSc on other than MPI_COMM_WORLD.
+  //FIXED it is not clear how to init PETSc on other than MPI_COMM_WORLD.
+  //      Yes it is: https://petsc.org/release/manualpages/Sys/PETSC_COMM_WORLD/
   PetscInt major, minor, subminor;
   char     ver[128];
   //

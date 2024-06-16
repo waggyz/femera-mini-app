@@ -7,26 +7,56 @@ TEST( Mini, TrivialTest ){
 }
 #endif
 int main (int argc, char** argv) {
-  const int choice = 1;
+  const int choice = 0;
   switch ( choice ){
     // These all work.
-    case 1: {
+    case 0: {
       return fmr::new_jobs (& argc, argv)->exit ();// one-liner
     }
-    case 2: {
-      auto mini = fmr::new_jobs (& argc, argv);
+    case 1: {// Preferred
+      const auto mini_ptr = std::move (fmr::new_jobs (& argc, argv));
+      // --or-- auto mini_ptr = fmr::new_jobs (& argc, argv);
+      auto& mini = *mini_ptr;
       // Do mini.* things after parsing the arguments
-      return mini->exit ();// exit argument defaults to 0.
+      return mini.exit ();
+    }
+    case 2: {
+      const auto mini = std::move (fmr::new_jobs ());
+      // Do mini->* things before parsing the arguments (not recommended)
+      auto err = mini->init (& argc, argv);
+      // Do mini->* things after parsing the arguments
+      return mini->exit (err);
     }
     case 3: {
-      auto mini = fmr::new_jobs ();
-      // Do mini.* things before parsing the arguments (not recommended)
-      return mini->exit (mini->init (& argc, argv));
+      auto mini = fmr::new_jobs (& argc, argv);
+      // Do mini->* things after parsing the arguments
+      return mini->exit ();// exit argument defaults to 0.
     }
     case 4: {
       auto mini = fmr::new_jobs ();
-      // Do mini.* things before parsing the arguments (not recommended)
+      // Do mini->* things before parsing the arguments (not recommended)
+      return mini->exit (mini->init (& argc, argv));
+    }
+    case 5: {
+      auto mini = fmr::new_jobs ();
+      // Do mini->* things before parsing the arguments (not recommended)
       auto err = mini->init (& argc, argv);
-      // Do mini.* things after parsing the arguments
+      // Do mini->* things after parsing the arguments
       return mini->exit (err);
-} } }
+    }
+    case 6: {// segfaults
+      auto& mini = *fmr::new_jobs ();
+      // Do mini.* things before parsing the arguments (not recommended)
+      auto err = mini.init (& argc, argv);
+      // Do mini.* things after parsing the arguments
+      return mini.exit (err);
+    }
+    case 7: {// segfaults
+      auto& mini = *std::move(fmr::new_jobs ());
+      // Do mini.* things before parsing the arguments (not recommended)
+      auto err = mini.init (& argc, argv);
+      // Do mini.* things after parsing the arguments
+      return mini.exit (err);
+    }
+    default: return 1;
+} }

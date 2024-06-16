@@ -221,6 +221,32 @@ make PETSC_DIR=/home/dwagner5/Code/femera-mini-demo/external/petsc PETSC_ARCH=i7
 
 9. Return to the Femera root directory to build and install Femera without debugging.  
 
+'''mermaid
+classDiagram
+    Work <|-- Proc
+    Work <|-- Data
+    Work <|-- Jobs
+    Work <|-- Test
+    Proc: +int age
+    Proc: +String gender
+    Proc: +isMammal()
+    Proc: +mate()
+    class Jobs{
+        +String beakColor
+        +swim()
+        +quack()
+     }
+     class Sims{
+         -int sizeInFeet
+         -canEat()
+     }
+     class Runs{
+         +bool is_wild
+         +run()
+     }
+'''
+
+
 # Notices
 Copyright 2018 United States Government as represented by the Administrator of
 the National Aeronautics and Space Administration. No copyright is claimed in
