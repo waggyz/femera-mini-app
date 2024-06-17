@@ -30,6 +30,7 @@ ENABLE_GCC_PROFILE:=ON
 
 ENABLE_OMP:=ON
 ENABLE_ZYCLOPS:=ON
+
 ENABLE_LIBNUMA:=ON
 # NOTE libnuma is LGPL; replace with hwloc (BSD license)
 

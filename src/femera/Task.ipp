@@ -44,6 +44,7 @@ namespace femera {
     if (this->do_exit_zero) { return 0; }
     return (task_err > 0) ? task_err : err;
   }
+FMR_WARN_INLINE_OFF
   template <typename T> inline
   FMR_SMART_PTR<T> Task<T>::new_task (int* argc, char** argv)
   noexcept {
@@ -81,6 +82,7 @@ namespace femera {
   noexcept {
     return static_cast<T*> (ptr);
   }
+FMR_WARN_INLINE_ON
 }// end femera:: namespace
 
 #undef FMR_DEBUG

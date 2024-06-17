@@ -1,14 +1,14 @@
-# Femera
+# Femera v0.3
 
 Femera is an open-source finite element-by-element (EBE) matrix-free
 application that can be tuned for performance across a wide range of problem
 sizes and high-performance computing (HPC) architectures.
 
-This version (0.3) of the Femera mini-app is for optimizing the basic 
+This version (v0.3) of the Femera mini-app is for optimizing the basic 
 capabilities of a high-performance finite element analysis toolchain.
 The primary goal is to verify that the high level of performance demonstrated
-by version 0.1 can be maintained while providing the flexible data handling
-demonstrated by version 0.2.
+by version v0.1 can be maintained while providing the flexible data handling
+demonstrated by version v0.2.
 
 ## Femera demo mini-app installation
 
@@ -24,7 +24,7 @@ git clone -b demo https://github.com/waggyz/femera-mini-app.git
 
 cd femera-mini-app
 ```
-This will download Femera 0.3 source code into the folder femera-mini-app/.
+This will download Femera v0.3 source code into the folder femera-mini-app/.
 
 **Important**: command-line examples assume that the current working
 directory is the root of the Femera repository (femera-mini-app/ by default).
@@ -216,8 +216,8 @@ make install
 8. Test it
 ```bash
 make PETSC_DIR=/home/dwagner5/Code/femera-mini-demo/external/petsc PETSC_ARCH=i7-12800H test
-```
 # Tests may take an hour or longer and may only show failed test output.
+```
 
 9. Return to the Femera root directory to build and install Femera without debugging.  
 

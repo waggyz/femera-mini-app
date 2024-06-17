@@ -70,11 +70,11 @@ ifeq ($(CXX),g++)
   CXXFLAGS   += -std=c++11 -g -MMD -MP -fPIC
   # Dependency file generation: -MMD -MP
   #WAS: -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
+  #NOTE -fPIC (or -fpic?) needed for shared libs, but may degrade static lib performance.
   #TODO Consider finding all dependency static libs and building -static.
   ifeq ($(ENABLE_LTO),ON)
     CXXFLAGS += -flto
   endif
-  #NOTE -fpic needed for shared libs, but may degrade static lib performance.
   ifeq ($(ENABLE_OMP),ON)
     CXXFLAGS += -D_GLIBCXX_PARALLEL
     CXXFLAGS += -fopenmp
@@ -624,7 +624,10 @@ ifneq ("$(NOSA_SEE)","") # Run once during a build
 	cat external/*-config.mk > "$(BUILD_CPU)/external-config.mk"
 	-rm -f "$(BUILD_DIR)/external/*-install.flags.new"
 	-rm -f "$(BUILD_CPU)/external/*-install.flags.new"
+ifneq ("$(external-flags)","")
 	$(MAKE) $(JPAR) external-flags
+endif
+	
 ifeq ($(ENABLE_DOT),ON)
 	@printf '%s' '$(MAKE_DOT)' | sed 's/\\n/\n/g' > '$(MAKE_DOTFILE)'
 	@dot '$(MAKE_DOTFILE)' -Teps -o $(BUILD_DIR)/make.eps

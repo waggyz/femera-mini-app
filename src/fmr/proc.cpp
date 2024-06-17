@@ -1,11 +1,11 @@
 #include "proc.hpp"
 
-#include <thread>     // hardware_concurrency (ncpu)
+#include <thread>         // hardware_concurrency (ncpu)
 #include <sys/resource.h> // rusage
 #include <unistd.h>       // sysconf
 
 #ifdef FMR_HAS_LIBNUMA
-#include <numa.h>     // numa_node_of_cpu, numa_num_configured_nodes
+#include <numa.h>         // numa_node_of_cpu, numa_num_configured_nodes
 #endif
 
 namespace fmr {

@@ -82,7 +82,7 @@ ifeq ($(ENABLE_PETSC),ON)
   ifeq ($(ENABLE_GMSH),ON)
     EXTERNAL_DOT+="PETSc" -> "Gmsh"\n
     ifeq ($(ENABLE_GMSH_METIS),ON)
-      EXTERNAL_DOT+="Gmsh" -> "METIS"\n
+      #EXTERNAL_DOT+="Gmsh" -> "METIS"\n
       ENABLE_PETSC_METIS:=ON
       #FMRFLAGS += -DFMR_HAS_METIS
       #FMRFLAGS += -DFMR_GMSH_HAS_METIS
