@@ -1203,7 +1203,7 @@ $(SRC_STAT_FILE): | build/$(CPUMODEL)/
 	"`tools/elapsed-time $(BUILD_SECS)`",'"'$(CXX) $(CXX_VERSION)'"',\
 	'"'$(HOSTNAME)'"','"'$(CPUMODEL)'"'\
 	>> "$(SRC_STAT_FILE)"; fi
-	-tools/plot_code_stats.py 2>/dev/null
+	-tools/plot_code_stats 2>/dev/null
 	$(call timestamp,$@,)
 
 build/test-files.txt: tools/list-test-filesbuild/.md5
@@ -1243,8 +1243,8 @@ build/docs/tdd-tests.txt: tools/list-tdd-tests build/docs/.md5
 	-tools/list-tdd-tests src/docs/*.tex src/docs/*.lyx > $@
 
 build/docs/find-tdd-files.csv: build/docs/tdd-tests.txt build/test-files.txt
-build/docs/find-tdd-files.csv: tools/compare-lists.py
-	-tools/compare-lists.py build/docs/tdd-tests.txt build/test-files.txt \
+build/docs/find-tdd-files.csv: tools/compare_lists
+	-tools/compare_lists build/docs/tdd-tests.txt build/test-files.txt \
 	  >$@ 2>build/docs/find-tdd-files.err
 
 ifeq ($(ENABLE_LYX),ON)
