@@ -419,7 +419,7 @@ ifeq ($(FMR_MPI_TYPE),MPICH)
     --show-leak-kinds=all --gen-suppressions=all \
     mpiexec -n $(TDD_MPI_N)                      \
     $(VALGRIND_SUPP_EXE) 3>&1 1>&2 2>&3          \
-    | tools/grindmerge.pl -f $(VGMPISUPP)        \
+    | tools/grindmerge -f $(VGMPISUPP)        \
     > $(BUILD_CPU)/$(VALGRIND_SUPP) 2>/dev/null;
   VGEXEC := valgrind --leak-check=full --track-origins=yes        \
     $(VGSUPP_FLAGS) --log-file=$(BUILD_CPU)/mini.valgrind.log     \
@@ -437,7 +437,7 @@ else
     --show-leak-kinds=all --gen-suppressions=all \
     mpiexec -n $(TDD_MPI_N) --bind-to core -map-by node:pe=$(TDD_OMP_N) \
     $(VALGRIND_SUPP_EXE) 3>&1 1>&2 2>&3 \
-    | tools/grindmerge.pl -f $(VGMPISUPP) \
+    | tools/grindmerge -f $(VGMPISUPP) \
     > $(BUILD_CPU)/$(VALGRIND_SUPP) 2>/dev/null;
   VGEXEC := valgrind --leak-check=full --track-origins=yes         \
     $(VGSUPP_FLAGS) --log-file=$(BUILD_CPU)/mini.valgrind.log      \
@@ -1206,7 +1206,7 @@ $(SRC_STAT_FILE): | build/$(CPUMODEL)/
 	-tools/plot_code_stats 2>/dev/null
 	$(call timestamp,$@,)
 
-build/test-files.txt: tools/list-test-filesbuild/.md5
+build/test-files.txt: tools/list-test-files build/.md5
 	-tools/list-test-files> $@
 
 src/docs/src.dot: build/.md5

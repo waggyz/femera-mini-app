@@ -6,13 +6,17 @@ HINT_COLOR="\e[35m"
 SRCD=`printf " $HINT_COLOR src/ $NORM_COLOR"`
 SPCS="       "
 #
-CODE_FILES=`find src \( -name '*.?pp' -o -name '*.h' -o -name '*.inc' -o -name '*.bats' \) \
+CODE_FILES=`find src \( -name '*.?pp' -o -name '*.c' -o -name '*.h' \
+  -o -name '*.inc' -o -name '*.bats' \) \
   -printf x | wc -c`
-TEST_FILES=`find src \( -name '*.gtst.?pp' -o -name '*perf.?pp' -o -name '*.bats' \) \
+TEST_FILES=`find src \( -name '*.gtst.?pp' -o -name '*perf.?pp' \
+  -o -name '*.bats' \) \
   -printf x | wc -c`
-CODE_LINES=`(find src \( -name '*.?pp' -o -name '*.h' -o -name '*.inc' -o -name '*.bats' \) \
+CODE_LINES=`(find src \( -name '*.?pp' -o -name '*.c' -o -name '*.h' \
+  -o -name '*.inc' -o -name '*.bats' \) \
   -print0 | xargs -0 cat) | wc -l`
-TEST_LINES=`(find src \( -name '*.gtst.?pp' -o -name '*perf.?pp' -o -name '*.bats' \) \
+TEST_LINES=`(find src \( -name '*.gtst.?pp' -o -name '*perf.?pp' \
+  -o -name '*.bats' \) \
   -print0 | xargs -0 cat) | wc -l`
 #
 CODE_FILES=$(($CODE_FILES - $TEST_FILES))
@@ -40,8 +44,8 @@ NTD=`grep -rn "$TD" $source_dirs | tee "build/src-"$TD".txt" | wc -l`
 NFM=`grep -rn "$FM" $source_dirs | tee "build/src-"$FM".txt" | wc -l`
 if [ "$NFM" -gt 0 ]; then SEEFM=" (see build/src-$FM.txt)"; fi
 if [ "$NTD" -gt 0 ]; then SEETD=" (see build/src-$TD.txt )"; fi
-printf "        with    %6i $FM$SEEFM,\n" "$NFM"
-printf "        and     %6i $TD $SEETD\n" "$NTD"
+printf "        with    %6i $TD $SEETD,\n" "$NTD"
+printf "        and     %6i $FM$SEEFM\n" "$NFM"
 #
 printf "%i,%i,%i,%i,%i,%i" \
   $CODE_LINES $CODE_FILES $TEST_LINES $TEST_FILES $NFM $NTD \

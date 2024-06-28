@@ -53,5 +53,5 @@ if __name__ == "__main__":
     if(compare_lists(sys.argv[1], sys.argv[2])): sys.exit(0)
     else: sys.exit(1)
   else:
-    print("compare-lists.py needs two arguments.")
+    print("compare-lists needs two arguments.")
     sys.exit(1)
