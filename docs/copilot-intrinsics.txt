@@ -1,0 +1,187 @@
+Would you please write an efficient C function to invert a double precision 3x3 matrix using vector intrinsics?
+#include <emmintrin.h> // SSE2 intrinsics
+
+// Function to invert a 3x3 matrix using SSE2 intrinsics
+void invertMatrix3x3(double* src, double* dst) {
+    __m128d minor0, minor1, minor2; // For storing minors
+    __m128d row0, row1, row2;       // For storing matrix rows
+    __m128d det, tmp1;              // For storing determinant and temporary values
+
+    // Load rows of the source matrix
+    row0 = _mm_loadu_pd(&src[0]);
+    row1 = _mm_loadu_pd(&src[3]);
+    row2 = _mm_loadu_pd(&src[6]);
+
+    // Calculate minors for the first column
+    tmp1 = _mm_mul_pd(row1, row2);
+    minor0 = _mm_sub_pd(_mm_mul_pd(tmp1, _MM_SHUFFLE_PD(row2, row1, 0)), 
+                        _mm_mul_pd(tmp1, _MM_SHUFFLE_PD(row2, row1, 3)));
+
+    // Calculate minors for the second column
+    tmp1 = _mm_mul_pd(row0, row2);
+    minor1 = _mm_sub_pd(_mm_mul_pd(tmp1, _MM_SHUFFLE_PD(row2, row0, 0)), 
+                        _mm_mul_pd(tmp1, _MM_SHUFFLE_PD(row2, row0, 3)));
+
+    // Calculate minors for the third column
+    tmp1 = _mm_mul_pd(row0, row1);
+    minor2 = _mm_sub_pd(_mm_mul_pd(tmp1, _MM_SHUFFLE_PD(row1, row0, 0)), 
+                        _mm_mul_pd(tmp1, _MM_SHUFFLE_PD(row1, row0, 3)));
+
+    // Calculate determinant
+    det = _mm_mul_pd(row0, minor0);
+    det = _mm_add_pd(_mm_shuffle_pd(det, det, 1), det);
+    det = _mm_div_pd(_mm_set1_pd(1.0), det);
+
+    // Multiply minors by determinant
+    minor0 = _mm_mul_pd(det, minor0);
+    minor1 = _mm_mul_pd(det, minor1);
+    minor2 = _mm_mul_pd(det, minor2);
+
+    // Store the result back to the destination matrix
+    _mm_storeu_pd(&dst[0], minor0);
+    _mm_storeu_pd(&dst[3], minor1);
+    _mm_storeu_pd(&dst[6], minor2);
+}
+
+// Example usage
+int main() {
+    double srcMatrix[9] = { /* ... initialize with your 3x3 matrix values ... */ };
+    double invMatrix[9];
+
+    invertMatrix3x3(srcMatrix, invMatrix);
+
+    // invMatrix now contains the inverse of srcMatrix
+    return 0;
+}
+Would you please write an efficient C function using vector intrinsics (e.g., AVX, AVX2, FMA) to invert a double precision 3x3 matrix?
+#include <immintrin.h> // AVX and FMA intrinsics
+
+// Function to invert a 3x3 matrix using AVX and FMA intrinsics
+void invertMatrix3x3(double* src, double* dst) {
+    __m256d row0, row1, row2; // For storing matrix rows
+    __m256d minor0, minor1, minor2; // For storing minors
+    __m256d det, tmp1, tmp2; // For storing determinant and temporary values
+
+    // Load rows of the source matrix
+    row0 = _mm256_loadu_pd(&src[0]);
+    row1 = _mm256_loadu_pd(&src[3]);
+    row2 = _mm256_loadu_pd(&src[6]);
+
+    // Calculate minors for the first column
+    tmp1 = _mm256_fmsub_pd(row1, _mm256_permute4x64_pd(row2, 0xD8), row2);
+    tmp2 = _mm256_permute4x64_pd(row1, 0xD8);
+    minor0 = _mm256_fmsubadd_pd(tmp1, tmp2, _mm256_mul_pd(row2, tmp2));
+
+    // Calculate minors for the second column
+    tmp1 = _mm256_fmsub_pd(row0, _mm256_permute4x64_pd(row2, 0xD8), row2);
+    tmp2 = _mm256_permute4x64_pd(row0, 0xD8);
+    minor1 = _mm256_fmsubadd_pd(tmp1, tmp2, _mm256_mul_pd(row2, tmp2));
+
+    // Calculate minors for the third column
+    tmp1 = _mm256_fmsub_pd(row0, _mm256_permute4x64_pd(row1, 0xD8), row1);
+    tmp2 = _mm256_permute4x64_pd(row0, 0xD8);
+    minor2 = _mm256_fmsubadd_pd(tmp1, tmp2, _mm256_mul_pd(row1, tmp2));
+
+    // Calculate determinant
+    det = _mm256_mul_pd(row0, minor0);
+    det = _mm256_hadd_pd(det, det);
+    det = _mm256_div_pd(_mm256_set1_pd(1.0), det);
+
+    // Multiply minors by determinant
+    minor0 = _mm256_mul_pd(det, minor0);
+    minor1 = _mm256_mul_pd(det, minor1);
+    minor2 = _mm256_mul_pd(det, minor2);
+
+    // Store the result back to the destination matrix
+    _mm256_storeu_pd(&dst[0], minor0);
+    _mm256_storeu_pd(&dst[3], minor1);
+    _mm256_storeu_pd(&dst[6], minor2);
+}
+
+// Example usage
+int main() {
+    double srcMatrix[9] = { /* ... initialize with your 3x3 matrix values ... */ };
+    double invMatrix[9];
+
+    invertMatrix3x3(srcMatrix, invMatrix);
+
+    // invMatrix now contains the inverse of srcMatrix
+    return 0;
+}
+
+Would you please write an efficient C function using vector intrinsics (AVX512) to calculate the determinants of and inverses of two double precision 3x3 matrices at the same time?
+#include <immintrin.h> // AVX512 intrinsics
+
+// Function to calculate the determinants and inverses of two 3x3 matrices
+void invertAndDetermineMatrices3x3(double* src1, double* src2, double* dst1, double* dst2, double* det1, double* det2) {
+    __m512d row0, row1, row2; // For storing matrix rows
+    __m512d minor0, minor1, minor2; // For storing minors
+    __m512d det, tmp1, tmp2; // For storing determinant and temporary values
+
+    // Load rows of the source matrices
+    row0 = _mm512_loadu_pd(&src1[0]); // First 3 elements from src1 and next 3 from src2
+    row1 = _mm512_loadu_pd(&src1[3]); // First 3 elements from src1 and next 3 from src2
+    row2 = _mm512_loadu_pd(&src1[6]); // First 3 elements from src1 and next 3 from src2
+
+    // Calculate minors for the first column
+    tmp1 = _mm512_fmsub_pd(row1, _mm512_permutex_pd(row2, 0xD8), row2);
+    tmp2 = _mm512_permutex_pd(row1, 0xD8);
+    minor0 = _mm512_fmsubadd_pd(tmp1, tmp2, _mm512_mul_pd(row2, tmp2));
+
+    // Calculate minors for the second column
+    tmp1 = _mm512_fmsub_pd(row0, _mm512_permutex_pd(row2, 0xD8), row2);
+    tmp2 = _mm512_permutex_pd(row0, 0xD8);
+    minor1 = _mm512_fmsubadd_pd(tmp1, tmp2, _mm512_mul_pd(row2, tmp2));
+
+    // Calculate minors for the third column
+    tmp1 = _mm512_fmsub_pd(row0, _mm512_permutex_pd(row1, 0xD8), row1);
+    tmp2 = _mm512_permutex_pd(row0, 0xD8);
+    minor2 = _mm512_fmsubadd_pd(tmp1, tmp2, _mm512_mul_pd(row1, tmp2));
+
+    // Calculate determinant
+    det = _mm512_mul_pd(row0, minor0);
+    det = _mm512_add_pd(_mm512_shuffle_f64x2(det, det, 0x88), _mm512_shuffle_f64x2(det, det, 0xDD));
+    det = _mm512_div_pd(_mm512_set1_pd(1.0), det);
+
+    // Extract determinants for both matrices
+    *det1 = _mm512_extractf64x2_pd(det, 0).m256d_f64[0];
+    *det2 = _mm512_extractf64x2_pd(det, 1).m256d_f64[0];
+
+    // Multiply minors by determinant
+    minor0 = _mm512_mul_pd(det, minor0);
+    minor1 = _mm512_mul_pd(det, minor1);
+    minor2 = _mm512_mul_pd(det, minor2);
+
+    // Store the result back to the destination matrices
+    _mm512_storeu_pd(&dst1[0], minor0);
+    _mm512_storeu_pd(&dst1[3], minor1);
+    _mm512_storeu_pd(&dst1[6], minor2);
+
+    // Adjust pointers for the second matrix
+    src1 += 9;
+    src2 += 9;
+    dst1 += 9;
+    dst2 += 9;
+
+    // Repeat the process for the second matrix
+    // ...
+
+    // Now dst1 and dst2 contain the inverses of src1 and src2, respectively
+    // det1 and det2 contain the determinants of src1 and src2, respectively
+}
+
+// Example usage
+int main() {
+    double srcMatrix1[9] = { /* ... initialize with your first 3x3 matrix values ... */ };
+    double srcMatrix2[9] = { /* ... initialize with your second 3x3 matrix values ... */ };
+    double invMatrix1[9], invMatrix2[9];
+    double determinant1, determinant2;
+
+    invertAndDetermineMatrices3x3(srcMatrix1, srcMatrix2, invMatrix1, invMatrix2, &determinant1, &determinant2);
+
+    // invMatrix1 and invMatrix2 now contain the inverses of srcMatrix1 and srcMatrix2
+    // determinant1 and determinant2 contain the determinants of srcMatrix1 and srcMatrix2
+    return 0;
+}
+
+

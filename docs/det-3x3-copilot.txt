@@ -1,0 +1,50 @@
+## Copilot
+Certainly! Below is an example of a C function that calculates the determinant of a 3x3 matrix using AVX intrinsics. This function assumes that the Intel AVX instruction set is available on the target machine. Please note that for brevity and clarity, the function does not include additional optimizations that could be implemented with AVX2 or AVX-512.
+
+#include <immintrin.h>
+#include <stdio.h>
+
+float determinant_avx(float mat[3][3]) {
+    __m256 row1 = _mm256_set_ps(0, 0, 0, mat[0][2], mat[0][1], mat[0][0], 0, 0);
+    __m256 row2 = _mm256_set_ps(0, 0, 0, mat[1][0], mat[1][2], mat[1][1], 0, 0);
+    __m256 row3 = _mm256_set_ps(0, 0, 0, mat[2][1], mat[2][0], mat[2][2], 0, 0);
+
+    // Multiply across the diagonals
+    __m256 diag1 = _mm256_mul_ps(row1, _mm256_mul_ps(row2, row3));
+
+    // Shuffle the elements for the cross products
+    row1 = _mm256_permute_ps(row1, _MM_SHUFFLE(0, 3, 2, 1));
+    row2 = _mm256_permute_ps(row2, _MM_SHUFFLE(1, 0, 3, 2));
+    row3 = _mm256_permute_ps(row3, _MM_SHUFFLE(2, 1, 0, 3));
+
+    // Multiply across the diagonals for the cross products
+    __m256 diag2 = _mm256_mul_ps(row1, _mm256_mul_ps(row2, row3));
+
+    // Subtract the cross product from the main diagonal product
+    __m256 det_vec = _mm256_sub_ps(diag1, diag2);
+
+    // Horizontal add to get the determinant
+    det_vec = _mm256_hadd_ps(det_vec, det_vec);
+    det_vec = _mm256_hadd_ps(det_vec, det_vec);
+
+    float det;
+    _mm256_store_ss(&det, det_vec);
+
+    return det;
+}
+
+int main() {
+    float matrix[3][3] = {
+        {1.0f, 2.0f, 3.0f},
+        {4.0f, 5.0f, 6.0f},
+        {7.0f, 8.0f, 9.0f}
+    };
+
+    float det = determinant_avx(matrix);
+    printf("Determinant: %f\n", det);
+
+    return 0;
+}
+
+This function initializes three AVX vectors with the rows of the matrix, then calculates the products of the diagonals and the cross products. It subtracts the cross products from the diagonal products and performs a horizontal add to sum up the elements of the resulting vector, yielding the determinant.
+Please ensure that your compiler supports AVX and that you enable the appropriate flags (such as -mavx for GCC) when compiling this code. Also, this code assumes that the matrix is stored in row-major order. If your matrix is in column-major order, you'll need to adjust the indices accordingly.

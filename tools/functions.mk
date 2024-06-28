@@ -22,17 +22,17 @@ make_jobs_str = $(shell if [[ "$(MAKEFLAGS)" == *"j"* ]]; \
 
 timestamp = @printf '%8s%-45s %1s%25s\n' "$(Make) " \
 '$(call strcut,$(1): $(2)$(SPC40)$(SPC40),44)' $(call make_jobs_str) \
-$(BUILD_DATE)"+"$(shell tools/elapsed-time.sh $(BUILD_SECS))
+$(BUILD_DATE)"+"$(shell tools/elapsed-time $(BUILD_SECS))
 
 elapstamp = @printf '%8s%-62s %9s\n' "$(Make) " \
 '$(call strcut,$(1): $(2)$(SPC40)$(SPC40),61)' \
-"+"$(shell tools/elapsed-time.sh $(BUILD_SECS))
+"+"$(shell tools/elapsed-time $(BUILD_SECS))
 
 # 80-8 = 72, (80-8)/2 =41
 col2cxx = printf "%s %-47s%25s\n" "$(1)" "$(2)" "$(3)";
 col2lib = printf "%s %-30s%42s\n" "$(1)" "$(2)" "$(3)";
 
-label_test = -tools/label-test.sh "$(1)" "$(2)" "$(3)" "$(4)"
+label_test = -tools/label-test "$(1)" "$(2)" "$(3)" "$(4)"
 
 
 

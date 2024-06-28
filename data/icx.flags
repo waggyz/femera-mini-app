@@ -1,0 +1,2 @@
+-Ofast -xHost -auto-ilp32 -ipo -ffast-math -no-fast-transcendentals
+-no-inline-max-size -no-inline-max-total-size -qoverride-limits

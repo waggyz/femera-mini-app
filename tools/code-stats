@@ -15,13 +15,16 @@ CODE_LINES=`(find src \( -name '*.?pp' -o -name '*.h' -o -name '*.inc' -o -name 
 TEST_LINES=`(find src \( -name '*.gtst.?pp' -o -name '*perf.?pp' -o -name '*.bats' \) \
   -print0 | xargs -0 cat) | wc -l`
 #
+CODE_FILES=$(($CODE_FILES - $TEST_FILES))
+CODE_LINES=$(($CODE_LINES - $TEST_LINES))
+COVERAGE=`echo "100 * $TEST_LINES / $CODE_LINES" | bc`
+#
 LOC1="lines of source code in"
 LOC2="lines of  test  code in"
 #
-printf "$SRCD counted   %5i %s %4i %s\n" $CODE_LINES "$LOC1" $CODE_FILES \
-"files total,"
-printf "$SPCS including %5i %s %4i %s\n" $TEST_LINES "$LOC2" $TEST_FILES \
-"files,"
+printf "$SRCD counted %6i %s %4i files,\n" $CODE_LINES "$LOC1" $CODE_FILES
+printf "$SPCS and     %6i %s %4i files (%3.0f%% coverage),\n" \
+$TEST_LINES "$LOC2" $TEST_FILES $COVERAGE
 #
 TD="TO""DO"
 FM="FIX""ME"
@@ -35,12 +38,12 @@ TS="$TD "
 source_dirs='src/femera src/fmr'
 NTD=`grep -rn "$TD" $source_dirs | tee "build/src-"$TD".txt" | wc -l`
 NFM=`grep -rn "$FM" $source_dirs | tee "build/src-"$FM".txt" | wc -l`
-if [ "$NFM" -gt 0 ]; then SEEFM="(see build/src-$FM.txt)"; fi
-if [ "$NTD" -gt 0 ]; then SEETD="(see build/src-$TD.txt)."; fi
-printf "        with       %4i $FM $SEEFM\n" "$NFM"
-printf "        and        %4i $TD  $SEETD\n" "$NTD"
+if [ "$NFM" -gt 0 ]; then SEEFM=" (see build/src-$FM.txt)"; fi
+if [ "$NTD" -gt 0 ]; then SEETD=" (see build/src-$TD.txt )"; fi
+printf "        with    %6i $FM$SEEFM,\n" "$NFM"
+printf "        and     %6i $TD $SEETD\n" "$NTD"
 #
-printf "%5i,%5i,%5i,%5i,%5i,%5i" \
+printf "%i,%i,%i,%i,%i,%i" \
   $CODE_LINES $CODE_FILES $TEST_LINES $TEST_FILES $NFM $NTD \
   > "build/src-code-stats.csv"
 

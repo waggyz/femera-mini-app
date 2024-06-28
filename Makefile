@@ -8,7 +8,7 @@ include examples/config.recommended
 include tools/set-undefined.mk
 include tools/functions.mk
 #------------------------------------------------------------------------------
-BUILD_VERSION  :=$(shell tools/build-version-number.sh)
+BUILD_VERSION  :=$(shell tools/build-version-number)
 FEMERA_VERSION :=Femera $(BUILD_VERSION)
 
 BUILT_BY_EMAIL :=$(call parse_email,$(BUILT_BY))
@@ -20,7 +20,7 @@ IS_IN_REPO     :=$(shell git rev-parse --is-inside-work-tree 2>/dev/null)
 # or some content in extras/ even when not a git repository.
 REPO_MD5   :=$(shell cat .md5)
 ifeq ($(shell test -e file_name && echo -n yes),yes)
-  #(shell tools/md5-all.sh build/.md5)
+  #(shell tools/md5-all build/.md5)
   $(shell echo "host hash" > build/.md5)
   HOST_MD5 :=$(shell cat build/.md5)
 endif
@@ -104,7 +104,7 @@ endif
 #TODO To use static libraries instead of dynamic when both are available, use:
 # <full path>/lib<name>.a instead of -l<name>
 # in LDLIBS.
-ifeq ($(CXX),icpc)
+ifeq ($(CXX),icx)
   OPTFLAGS   := $(shell cat data/icpc.flags | tr '\n' ' ' | tr -s ' ')
   CXXFLAGS   := c++11 -restrict -g $(OPTFLAGS)
   #NOTE -fPIC needed for shared libs, but may degrade static lib performance.
@@ -239,7 +239,7 @@ ifeq ($(ENABLE_MPI),ON)
   FMRFLAGS+= -DFMR_HAS_MPI
   LDLIBS+= -lmpi
   ifeq ($(ENABLE_VALGRIND),ON)# for valgrind with OpenMPI
-    VGMPISUPP:=$(shell tools/valgrind-mpi-supp.sh)
+    VGMPISUPP:=$(shell tools/valgrind-mpi-supp)
   endif
 endif
 ifeq ($(ENABLE_LIBNUMA),ON)
@@ -273,7 +273,7 @@ endif
 ifeq ($(ENABLE_GOOGLETEST),ON)
   LIST_EXTERNAL += googletest
   FMRFLAGS+= -DFMR_HAS_GTEST
-  FMRFLAGS+= -DFMR_GTEST_VERSION=$(shell external/get-googletest-version.sh)
+  FMRFLAGS+= -DFMR_GTEST_VERSION=$(shell external/get-googletest-version)
   EXTERNAL_DOT+="Femera" -> "GoogleTest"\n
 #  MAKE_DOT+="Makefile" -> "GoogleTest"\n
 #  GTEST_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
@@ -709,7 +709,7 @@ endif
 	$(info $(E_G_) fmrexec auto examples/cube.fmr)
 
 code-stats: $(SRC_STAT_FILE)
-	tools/code-stats.sh
+	tools/code-stats
 
 perf-done:
 	$(call timestamp,$@,)
@@ -808,7 +808,7 @@ install-bats: external/bats-install.sh external/bats-install.test.bats
 #
 #get-%: | intro $(BUILD_DIR)/external/
 #	#(call timestamp,$@,$<)
-#	external/get-external.sh $(*)
+#	external/get-external $(*)
 
 install-external: $(INSTALL_EXTERNAL) | intro
 	$(call timestamp,$@,make $(JEXT))
@@ -825,43 +825,43 @@ external-done:
 	$(info $(E_G_) $(LIST_EXTERNAL))
 	$(call timestamp,$@,)
 
-#TODO REMOVE $(BUILD_DIR)/external/get-bats-%.out: external/get-external.sh
+#TODO REMOVE $(BUILD_DIR)/external/get-bats-%.out: external/get-external
 #	#(info $(INFO) checking bats-$(*)...)
-#	-tools/label-test.sh "$(PASS)" "$(FAIL)" \
-#	  "external/get-external.sh bats-$(*)" \
+#	-tools/label-test "$(PASS)" "$(FAIL)" \
+#	  "external/get-external bats-$(*)" \
 #	  "$(BUILD_DIR)/external/get-bats-$(*)"
 #
-#$(BUILD_DIR)/external/get-%.out: external/get-external.sh external/get-%.dat
+#$(BUILD_DIR)/external/get-%.out: external/get-external external/get-%.dat
 #	#(info $(INFO) checking $(*)...)
-#	-tools/label-test.sh "$(PASS)" "$(FAIL)" \
-#	  "external/get-external.sh $(*)" \
+#	-tools/label-test "$(PASS)" "$(FAIL)" \
+#	  "external/get-external $(*)" \
 #	  "$(BUILD_DIR)/external/get-$(*)"
 
 $(BUILD_CPU)/external/%-config.flags: $(BUILD_CPU)/external/%-config.flags.new
-	tools/update-file-if-diff.sh "$(@)"
+	tools/update-file-if-diff "$(@)"
 	#rm -f $(<)
 
 $(BUILD_CPU)/external/%-config.out: external/%-config.sh
 $(BUILD_CPU)/external/%-config.out: $(BUILD_CPU)/external/%-config.flags
 	$(call timestamp,$@,)
 	mkdir -p $(BUILD_CPU)/external/$(*)
-	-tools/label-watch.sh "$(PASS)" "$(FAIL)" \
+	-tools/label-watch "$(PASS)" "$(FAIL)" \
 	  "external/$(*)-install.sh $(INSTALL_CPU) $(<) $(JEXT)" \
 	  "$(BUILD_CPU)/external/$(*)-install"
 
 $(BUILD_CPU)/external/%-install.flags: $(BUILD_CPU)/external/%-install.flags.new
-	tools/update-file-if-diff.sh "$(@)"
+	tools/update-file-if-diff "$(@)"
 	#rm -f $(<)
 
 $(BUILD_DIR)/external/%-install.flags: $(BUILD_DIR)/external/%-install.flags.new
-	tools/update-file-if-diff.sh "$(@)"
+	tools/update-file-if-diff "$(@)"
 	#rm -f $(<)
 
 $(BUILD_CPU)/external/%-install.out: external/%-install.sh
 $(BUILD_CPU)/external/%-install.out: $(BUILD_CPU)/external/%-install.flags
 	$(call timestamp,$@,)
 	mkdir -p $(BUILD_CPU)/external/$(*)
-	-tools/label-watch.sh "$(PASS)" "$(FAIL)" \
+	-tools/label-watch "$(PASS)" "$(FAIL)" \
 	  "external/$(*)-install.sh $(INSTALL_CPU) $(<) $(JEXT)" \
 	  "$(BUILD_CPU)/external/$(*)-install"
 
@@ -869,7 +869,7 @@ $(BUILD_DIR)/external/%-install.out: external/%-install.sh
 $(BUILD_DIR)/external/%-install.out: $(BUILD_DIR)/external/%-install.flags
 	$(call timestamp,$@,)
 	mkdir -p $(BUILD_DIR)/external/$(*)
-	-tools/label-test.sh "$(PASS)" "$(FAIL)" \
+	-tools/label-test "$(PASS)" "$(FAIL)" \
 	  "external/$(*)-install.sh $(INSTALL_DIR) $(<) $(JEXT)" \
 	  "$(BUILD_DIR)/external/$(*)-install"
 
@@ -914,36 +914,6 @@ $(BUILD_CPU)/tests/make-remove-tools.test.out: tests/make-remove-tools.test.bats
 	#     because Bats scripts do not support test arguments.
 	# https://bats-core.readthedocs.io/en/stable/gotchas.html#i-cannot-pass-parameters-to-test-or-bats-files
 
-# Tested shell scripts
-$(BUILD_CPU)/%.test.out: %.sh %.test.bats
-	$(call label_bats,$(PASS),$(FAIL),$(*).test.bats,$(BUILD_CPU)/$(*).test)
-	#touch $(@) # TODO Why does this do nothing?
-$(BUILD_CPU)/%.test.out: %.sh %.test.py
-	$(call label_test,$(PASS),$(FAIL),$(*).test.py,$(BUILD_CPU)/$(*).test)
-$(BUILD_CPU)/%.test.out: %.sh %.test.sh
-	$(call label_test,$(PASS),$(FAIL),$(*).test.sh,$(BUILD_CPU)/$(*).test)
-
-# Tested Python scripts
-$(BUILD_CPU)/%.test.out: %.py %.test.py
-	$(call label_test,$(PASS),$(FAIL),$(*).test.py,$(BUILD_CPU)/$(*).test)
-$(BUILD_CPU)/%.test.out: %.py %.test.bats
-	$(call label_bats,$(PASS),$(FAIL),$(*).test.bats,$(BUILD_CPU)/$(*).test))
-
-# Integration tests
-$(BUILD_CPU)/%.test.out: %.test.bats
-	$(call label_bats,$(PASS),$(FAIL),$(*).test.bats,$(BUILD_CPU)/$(*).test)
-$(BUILD_CPU)/%.test: %.test.py
-	$(call label_test,$(PASS),$(FAIL),$(*).test.py,$(BUILD_CPU)/$(*).test))
-
-# Warn if no test.
-$(BUILD_CPU)/%.test.out: %.sh
-	$(info $(DBUG) $(<) needs a test, e.g., $(*).test.bats)
-	echo "$(<) needs a test, e.g., $(*).test.bats" \
-	  >> $(BUILD_CPU)/$(*).test.out
-$(BUILD_CPU)/%.test.out: %.py
-	$(info $(DBUG) $(<) needs a test, e.g., $(*).test.py)
-	echo "$(<) needs a test, e.g., $(*).test.py" \
-	  >> $(BUILD_CPU)/$(*).test.out
 
 # Generic test targets (*.test.out) -------------------------------------------
 
@@ -1206,7 +1176,7 @@ build/%/.md5: | build/%/
 
 $(BUILD_CPU)/femera.flags.new:
 	echo "$(CXXFLAGS) $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS)" > "$(@)"
-	tools/update-file-if-diff.sh "$(BUILD_CPU)/femera.flags"
+	tools/update-file-if-diff "$(BUILD_CPU)/femera.flags"
 	rm $(@)
 
 build/modification.txt: data/modification.txt build/.md5
@@ -1230,14 +1200,14 @@ $(SRC_STAT_FILE): | build/$(CPUMODEL)/
 	if ! grep "$(FEMERA_VERSION)" "$(SRC_STAT_FILE)" | grep -q "$(HOSTNAME)"; \
 	then echo "$(BUILD_DATE)",'"'$(FEMERA_VERSION)'"',\
 	"`cat build/src-code-stats.csv`",\
-	"`tools/elapsed-time.sh $(BUILD_SECS)`",'"'$(CXX) $(CXX_VERSION)'"',\
+	"`tools/elapsed-time $(BUILD_SECS)`",'"'$(CXX) $(CXX_VERSION)'"',\
 	'"'$(HOSTNAME)'"','"'$(CPUMODEL)'"'\
 	>> "$(SRC_STAT_FILE)"; fi
 	-tools/plot_code_stats.py 2>/dev/null
 	$(call timestamp,$@,)
 
-build/test-files.txt: tools/list-test-files.sh build/.md5
-	-tools/list-test-files.sh > $@
+build/test-files.txt: tools/list-test-filesbuild/.md5
+	-tools/list-test-files> $@
 
 src/docs/src.dot: build/.md5
 	@external/tools/cinclude2dot --src src >$@ 2>build/src.dot.err
@@ -1256,9 +1226,9 @@ src/docs/src-headers.dot: src/docs/src.dot
 	#(info $(INFO) Dependencies without tests: $@)
 
 build/src-notest.eps: src/docs/src-headers.dot
-build/src-notest.eps: src/docs/src-notest.dot tools/src-inherit.sh
+build/src-notest.eps: src/docs/src-notest.dot tools/src-inherit
 ifeq ($(ENABLE_DOT),ON)
-	@tools/src-inherit.sh
+	@tools/src-inherit
 	@dot $< -Gsize="12.0,8.0" -Teps -o $@
 	@dot src/docs/src-headers.dot -Gsize="18.0,9.0" -Teps -o build/src-headers.eps
 ifeq ($(ENABLE_DOT_PNG),ON)
@@ -1269,8 +1239,8 @@ endif
 	$(info $(INFO) source code include graph: $@)
 endif
 
-build/docs/tdd-tests.txt: tools/list-tdd-tests.sh build/docs/.md5
-	-tools/list-tdd-tests.sh src/docs/*.tex src/docs/*.lyx > $@
+build/docs/tdd-tests.txt: tools/list-tdd-tests build/docs/.md5
+	-tools/list-tdd-tests src/docs/*.tex src/docs/*.lyx > $@
 
 build/docs/find-tdd-files.csv: build/docs/tdd-tests.txt build/test-files.txt
 build/docs/find-tdd-files.csv: tools/compare-lists.py
@@ -1279,7 +1249,7 @@ build/docs/find-tdd-files.csv: tools/compare-lists.py
 
 ifeq ($(ENABLE_LYX),ON)
 build/docs/%.pdf: src/docs/%.lyx src/docs/quick-start.tex
-	-tools/label-test.sh "$(EXEC)" "$(FAIL)" \
+	-tools/label-test "$(EXEC)" "$(FAIL)" \
 	  "lyx -batch -n -f all -E pdf $(@) $(<)" \
 	  "build/docs/$(*)-pdf"
 else
@@ -1289,7 +1259,7 @@ endif
 
 ifeq ($(ENABLE_LYX),ON)
 docs/%.xhtml: src/docs/%.lyx src/docs/quick-start.tex
-	-tools/label-test.sh "$(PASS)" "$(FAIL)" \
+	-tools/label-test "$(PASS)" "$(FAIL)" \
 	  "lyx -batch -n -f all -E xhtml $(@) $(<)" \
 	  "build/docs/$(*)-xhtml"
 else
