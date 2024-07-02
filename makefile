@@ -82,6 +82,8 @@ MMPFLAGS = -DOMP_NESTED=true -DOMP_PROC_BIND=spread,close
 
 # Saves u and f info for nodes with applied boundary conditions
 CPPFLAGS+= -DSAVE_BCS_INFO
+# Saves u and f info for all nodes
+CPPFLAGS+= -DSAVE_NODE_INFO
 
 CPUMODELC:=$(CPUMODEL)-$(CSTR)
 

@@ -705,11 +705,14 @@ int main( int argc, char** argv ) {
             props[i]=orislist[3* (part_i-part_0)+i ]; }
         }
       }
+      //printf ("*****HERE mtrl_part\n");
 //      if(usedmat){
 //        dirs.resize(0);//FIXME Turn this back on later?
 //        Y=new ElastDmv3D(props,dirs);
 //      }else{
         if(props.size()>3){
+          if(verbosity>1){
+            std::cout << "Setting elastic parameters..." <<'\n'; }
           for(uint i=0;i<3;i++){ dirs[i]=props[i]; }
           prop.resize(props.size()-3);
           for(uint i=3;i<props.size();i++){ prop[i-3]=props[i]; }
@@ -718,16 +721,29 @@ int main( int argc, char** argv ) {
           }else{
             Y=new ElastOrtho3D(prop,dirs);
           }
+          //printf ("*****HERE props.size >3 ok\n");
         }else if(props.size()>0){
+          if(verbosity>1){
+            std::cout << "Setting elastic parameters..." <<'\n'; }
+          //printf ("*****HERE props.size >0 start\n");
           prop.resize(props.size());
           for(uint i=0;i<props.size();i++){ prop[i]=props[i]; }
+          //printf ("*****HERE props.size >0 2\n");
           if(usedmat){
             dirs.resize(0);//FIXME Turn this back on later?
             Y=new ElastDmv3D(props,dirs);
           }else{
-            Y=new ElastIso3D(prop[0],prop[1]);
+            if(verbosity>1){
+              std::cout << "Setting elastic parameters..." <<'\n'; }
+          Y=new ElastIso3D(prop[0],prop[1]);
           }
-        }else{ Y=new ThermIso3D( prop ); }//FIXME
+        }else{ prop.resize(1); prop[0]=1.0;
+      //printf ("*****HERE props.size ==0 start\n");
+      Y=new ThermIso3D( prop );
+      Y->mtrl_prop.resize (0);
+      Y->elas_prop.resize (0);
+      Y->mtrl_dmat.resize (0);;}//FIXME
+      //printf ("*****HERE props.size\n");
 //      }
       if(tcon_part.count(part_i)>0){
         if(verbosity>1){
@@ -740,6 +756,7 @@ int main( int argc, char** argv ) {
           std::cout << "Setting model thermal conductivity..." <<'\n'; }
         Y->ther_cond.resize(tcon_part[0].size());
         for(uint i=0; i<tcon_part[0].size(); i++){
+          //printf("***** part:%u, K=%e\n", i,tcon_part[0][i]);
           Y->ther_cond[i] = tcon_part[0][i]; }
       }
       if(texp_part.count(part_i)>0){
@@ -772,7 +789,9 @@ int main( int argc, char** argv ) {
       //Solv* S=new PCG(0, 0, 0.0);
       //Mesh::part t(M->list_elem[part_i],Y,S);
       Mesh::part Ptmp(M->list_elem[part_i],Y,new PCG(0, 0, 0.0));
+      //printf ("*****HERE mesh::part\n");
       M->SavePartFMR( Ptmp, pname.c_str(), false );
+      //printf ("*****HERE M->SavePartFMR\n");
     }//end saving parts loop
   }//end if ascii output
   if(save_abq){//FIXME Move to a method

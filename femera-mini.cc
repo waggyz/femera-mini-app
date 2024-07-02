@@ -834,6 +834,35 @@ int main( int argc, char** argv ){
         }
       }
 #endif
+/*
+#ifdef SAVE_NODE_INFO
+      if (Y->node_d == 1){//TODO Make it work for any node_d > 0.
+        const auto nfile = fopen ((std::string(bname) + "-node-out_"
+          + std::to_string(part_i) + ".csv").c_str(), "w");
+        if (nfile != nullptr) {
+          fprintf ( nfile,
+            "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n",
+            bname, "x", "y", "z", "u", "f", "rhs", "residual" );
+          for(uint i=0;i<Nn;i++){
+            //for(int j=0;j<Dm;j++){//TODO Make it work for any elem_d > 0.
+              const auto x = E->node_coor [Dm* i+0];
+              const auto y = E->node_coor [Dm* i+1];
+              const auto z = E->node_coor [Dm* i+2];
+            //}
+            const auto u = S->part_u [i];
+            const auto f = S->part_f [i];
+            const auto b = S->part_b [i];// RHS
+            const auto r = S->part_r [i];// residual
+            fprintf ( nfile,
+              "\"%s\",%+12.5e,%+12.5e,%+12.5e,%+12.5e,%+12.5e,%+12.5e,%+12.5e\n",
+              bname, x, y, z, u, f, b, r );
+          }
+          fclose (nfile);
+        }
+      }
+//end SAVE_NODE_INFO
+#endif
+*/
 }
 #if VERB_MAX>2
       if(verbosity>2){// Errors in each partition
@@ -1022,6 +1051,34 @@ int main( int argc, char** argv ){
         std::sqrt(M->glob_rto2), std::sqrt(M->glob_chk2) );
       fclose (bfile);
     }
+// end ifdef SAVE_BCS_INFO
+#endif
+#ifdef SAVE_NODE_INFO
+    const auto Md = E->mesh_d;
+    if ((Md == 3) && (Y->node_d == 1)){
+      const auto bfile = fopen ("femera-node-data.csv", "a");
+      //const auto bfile = fopen ((std::string(pname)+"-node-data.csv").c_string, "w");
+      if (bfile != nullptr){
+        const auto node_n = E->node_n;
+        for (auto i=E->halo_remo_n; i < node_n; ++i){
+          //const auto glob_node_id = ;
+          const auto x = E->node_coor [Md*i + 0];
+          const auto y = E->node_coor [Md*i + 1];
+          const auto z = E->node_coor [Md*i + 2];
+          const auto u = S->part_u[i];
+          const auto f = S->part_f[i];
+          //const auto b = S->part_b[i];// RHS
+          //const auto r = S->part_r[i];// residual
+          fprintf ( bfile,
+            "\"%s\",%u,%u, %+12.5e,%+12.5e,%+12.5e, %+12.5e,%+12.5e"
+            "\n",
+            bname,part_i,i, x,y,z, u,f
+          );
+        }
+      fclose (bfile);
+      }
+    }
+// end ifdef SAVE_NODE_INFO
 #endif
   }
   }// end parallel
