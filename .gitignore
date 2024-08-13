@@ -44,6 +44,8 @@ local.*
 # CI/CD stuff
 *.yml
 
+.venv/
+
 # Auto-created directories and files
 *.kate-swp
 *.lyx~

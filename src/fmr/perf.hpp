@@ -2,8 +2,8 @@
 #define FMR_HAS_PERF_HPP
 
 #include "fmr.hpp"
-// below used in perf.ipp
-#include <chrono>   // high_resolution_clock, duration, nanoseconds
+
+#include <chrono>   // high_resolution_clock, duration, nanoseconds; used in perf.ipp
 
 namespace fmr { namespace perf {
 // This "using" syntax is preferred to "typedef" in the Google C++ Style Guide:
@@ -11,6 +11,7 @@ namespace fmr { namespace perf {
 
 using Float     = fmr::Perf_float;
 using Int       = fmr::Perf_int  ;
+//
 using Timepoint = Int            ;// ...One underlying type...
 using Elapsed   = Int            ;// ...of these user types...
 using Count     = Int            ;// ...used for simple struct packing.

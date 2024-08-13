@@ -55,10 +55,11 @@ sudo yum install bats graphiz gtest-devel
 
 ### 3. Set up the Python environment
 
-Install Python modules.
+Install Python modules in a virtual environment.
 ```bash
-python3 -m pip install --user pytest pytest-check python-subunit numpy configure
-#TODO cython?
+python3 -m venv build/.venv
+source build/.venv/bin/activate
+pip install -r external/requirements.txt
 ```
 
 ### 4. Set build options in config.local.

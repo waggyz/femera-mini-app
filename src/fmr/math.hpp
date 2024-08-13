@@ -23,7 +23,7 @@
 /* CRC-32 (Ethernet, ZIP, etc.) polynomial in reversed bit order. */
 /* #define FMR_CRC32_POLY 0xedb88320 */
 
- // ECMA-182
+// ECMA-182
 #define FMR_CRC64_POLY 0xc96c5795d7870f42L
 
 #ifndef FMR_RESTRICT

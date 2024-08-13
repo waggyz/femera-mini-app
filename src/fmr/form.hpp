@@ -7,7 +7,7 @@
 #include <cctype>
 #include <cmath>      // std::abs()
 #include <cstdio>     // std::snprintf
-#include <valarray>
+#include <valarray>  // needed by form.ipp
 
 namespace fmr { namespace form {
 
@@ -31,10 +31,10 @@ namespace fmr {
 }// end fmr:: namespace
 
 namespace femera { namespace form {
-  
+
   std::string si_unit (const double val, std::string unit,
     const int min_digits, const std::string signchar);// defined in form.cpp
-  
+
   template <typename ...Args> static
   std::string text_line
   (fmr::Line_size_int line_width, const std::string& format, Args...);

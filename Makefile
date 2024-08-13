@@ -1160,7 +1160,7 @@ endif
 
 $(BUILD_CPU)/$(VALGRIND_SUPP): $(VALGRIND_SUPP_FILE)
 ifeq ("$(VALGRIND_SUPP_FILE)","")
-	touch $(*)
+	#touch $(*)
 else
 	cat $(VALGRIND_SUPP_FILE) >> $(*)
 endif
