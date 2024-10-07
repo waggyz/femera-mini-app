@@ -48,8 +48,8 @@ namespace fmr {
     this->save_n  = 0;
     return this->start ();
   }
-  template <typename I, typename F> inline
-  F perf::Meter<I,F>::add_busy_time_now () {
+  template <typename I, typename F> inline volatile
+    F perf::Meter<I,F>::add_busy_time_now () {
     const fmr::perf::Count now = perf::get_now_ns ();
     const fmr::perf::Count last_busy = (now > this->tick) ? now - tick : 0;
     THIS_PRAGMA_OMP(omp atomic write)
@@ -58,7 +58,7 @@ namespace fmr {
     this->busy_ns += last_busy;
     return F (1.0e-9) * F (last_busy);
   }
-  template <typename I, typename F> inline
+  template <typename I, typename F> inline volatile
   F perf::Meter<I,F>::add_idle_time_now () {
     const fmr::perf::Count now = perf::get_now_ns ();
     const fmr::perf::Count last_idle = (now > this->tick) ? now - tick : 0;
@@ -72,21 +72,25 @@ namespace fmr {
   F perf::Meter<I,F>::add_unit (const I n) {
     THIS_PRAGMA_OMP(omp atomic update)
     this->unit_n += n;
+    return F(this->unit_n);
   }
   template <typename I, typename F> inline
   F perf::Meter<I,F>::add_flop (const I n) {
     THIS_PRAGMA_OMP(omp atomic update)
     this->flop_n += n;
+    return F(this->flop_n);
   }
   template <typename I, typename F> inline
   F perf::Meter<I,F>::add_read (const I n) {
     THIS_PRAGMA_OMP(omp atomic update)
     this->read_n += n;
+    return F(this->read_n);
   }
   template <typename I, typename F> inline
   F perf::Meter<I,F>::add_save (const I n) {
     THIS_PRAGMA_OMP(omp atomic update)
     this->save_n += n;
+    return F (this->save_n);
   }
   template <typename I, typename F> inline
   F perf::Meter<I,F>::add_count
