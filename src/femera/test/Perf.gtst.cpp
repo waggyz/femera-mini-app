@@ -10,6 +10,7 @@ FMR_WARN_INLINE_OFF
 FMR_WARN_INLINE_ON
 }
 namespace femera { namespace test { namespace perf {
+  const fmr::Global_int Mega = 1000000l;
   inline
   double test_proc_id_speed (const fmr::Local_int n=100000) {
     fmr::Local_int ans1=0, ans2=0;
@@ -57,9 +58,11 @@ FMR_WARN_INLINE_ON
 // https://stackoverflow.com/questions/7083482/how-can-i-prevent-gcc-from-optimizing-out-a-busy-wait-loop
 //
   inline
-  std::valarray<double> mtrl_iso3_ref (const fmr::Global_int test_n=400l*1000000l/1) {// about 10 sec
+  //std::valarray<double>
+  double mtrl_iso3_ref (const fmr::Global_int test_n=400l *Mega/1) {// about 10 sec
   // returns stress tensor.
-    std::valarray<double> out (0.0, 9);
+    //std::valarray<double> out (0.0, 9);
+    double out = 0.0;
     FMR_PRAGMA_OMP(omp parallel) {
       //const auto omp_i = fmr::Local_int (omp_get_thread_num());
       //
@@ -143,7 +146,9 @@ FMR_WARN_INLINE_ON
         } else {// busy time run
           busy_s = double (timer.add_busy_time_now ());
         }
-        out = stress;
+        for (fmr::Local_int i=0; i<9; ++i) {
+          out+= stress [i];
+        }
       }//end phase loop
       fprintf (stdout, "name: %s\n"          ,"Kernel MTR-D: 3D isotropic D-matrix reference");
       fprintf (stdout, "time: %g sec\n"      , busy_s);
@@ -156,9 +161,10 @@ FMR_WARN_INLINE_ON
   return out;
   }
   inline
-  std::valarray<double> mtrl_iso3_naive (const fmr::Global_int test_n=130l *1000000l) {// about 10 sec
+  double mtrl_iso3_naive (const fmr::Global_int test_n=130l *Mega) {// about 10 sec
   // returns stress tensor. Uses valarray operations within kernel.
-    std::valarray<double> out (0.0, 9);
+    double out = 0.0;
+//    std::valarray<double> out (0.0, 9);
     FMR_PRAGMA_OMP(omp parallel) {
       //const auto omp_i = fmr::Local_int (omp_get_thread_num());
       //
@@ -231,7 +237,9 @@ FMR_WARN_INLINE_ON
         } else {// busy time run
           busy_s = double (timer.add_busy_time_now ());
         }
-        out = stress;
+        for (fmr::Local_int i=0; i<9; ++i) {
+          out+= stress [i];
+        }
       }//end phase loop
       fprintf (stdout, "name: %s\n"          ,"Kernel MTR-N: 3D isotropic naive D-matrix");
       fprintf (stdout, "time: %g sec\n"      , busy_s);
@@ -242,8 +250,9 @@ FMR_WARN_INLINE_ON
   return out;
   }
   inline
-  std::valarray<double> mtrl_iso3_lame (const fmr::Global_int test_n=1100l *1000000l) {// about 10 sec
-    std::valarray<double> out (0.0, 9);
+  double mtrl_iso3_lame (const fmr::Global_int test_n=1100l *Mega) {// about 10 sec
+    double out = 0.0;
+//    std::valarray<double> out (0.0, 9);
     FMR_PRAGMA_OMP(omp parallel) {
       //const auto omp_i = fmr::Local_int (omp_get_thread_num());
       //
@@ -300,7 +309,9 @@ FMR_WARN_INLINE_ON
         } else {// busy time run
           busy_s = double (timer.add_busy_time_now ());
         }
-        out = stress;
+        for (fmr::Local_int i=0; i<9; ++i) {
+          out+= stress [i];
+        }
       }//end phase loop
       fprintf (stdout, "name: %s\n"          ,"Kernel MTR-L: 3D isotropic Lame formula reference");
       fprintf (stdout, "time: %g sec\n"      , busy_s);
@@ -311,8 +322,9 @@ FMR_WARN_INLINE_ON
   return out;
   }
   inline
-  std::valarray<double> mtrl_iso3_scalar (const fmr::Global_int test_n=300l *1000000l) {// about 10 sec
-    std::valarray<double> out (0.0, 9);
+  double mtrl_iso3_scalar (const fmr::Global_int test_n=300l *Mega) {// about 10 sec
+    double out = 0.0;
+//    std::valarray<double> out (0.0, 9);
     FMR_PRAGMA_OMP(omp parallel) {
       //const auto omp_i = fmr::Local_int (omp_get_thread_num());
       //
@@ -373,7 +385,7 @@ FMR_WARN_INLINE_ON
           busy_s = double (timer.add_busy_time_now ());
         }
         for (fmr::Local_int i=0; i<9; ++i) {
-          out [i] = stress [i];
+          out+= stress [i];
         }
       }//end phase loop
       fprintf (stdout, "name: %s\n"          ,"Kernel MTR-S: 3D isotropic minimum scalar reference");
@@ -384,8 +396,9 @@ FMR_WARN_INLINE_ON
     }//end parallel region
   return out;
   }
-  std::valarray<double> mtrl_iso3_avx2 (const fmr::Global_int test_n=3000 *1000000l) {
-    std::valarray<double> out (0.0, 9);
+  double mtrl_iso3_avx2 (const fmr::Global_int test_n=3000 *Mega) {
+    double out = 0.0;
+//    std::valarray<double> out (0.0, 9);
     //
     FMR_PRAGMA_OMP(omp parallel) {
       //const auto omp_i = fmr::Local_int (omp_get_thread_num());
@@ -410,13 +423,13 @@ FMR_WARN_INLINE_ON
       volatile __m256d vA1 = {H7, H6,H5,H4};
       volatile __m256d vA2 = {0.0, 0.0,0.0,H8};
 #endif
-#if 1
-      volatile __m256d vA0 = {H0, H1, H2, 0.0};//TODO check if zero or next H value.
+#if 0
+      volatile __m256d vA0 = {H0, H1, H2, 0.0};
       volatile __m256d vA1 = {H3, H4, H5, 0.0};
       volatile __m256d vA2 = {H6, H7, H8, 0.0};
 #endif
-#if 0
-      volatile __m256d vA0 = {H0, H1, H2, H3};//TODO Check layout.
+#if 1
+      volatile __m256d vA0 = {H0, H1, H2, H3};
       volatile __m256d vA1 = {H4, H5, H6, H7};
       volatile __m256d vA2 = {H8,0.0,0.0,0.0};
 #endif
@@ -519,8 +532,14 @@ FMR_WARN_INLINE_ON
           busy_s = double (timer.add_busy_time_now ());
         }
         //FIXME put vA[] into stress.
-        for (fmr::Local_int i=0; i<9; ++i) {
-          out [i] = stress [i];
+//        for (fmr::Local_int i=0; i<9; ++i) {
+//          out [i] = stress.sum ();
+//        }
+        stress [ 3] = 0.0;
+        stress [ 7] = 0.0;
+        stress [11] = 0.0;
+        for (fmr::Local_int i=0; i<12; ++i) {
+          out+= stress [i];
         }
       }//end phase loop
       fprintf (stdout, "name: %s\n"          ,"Kernel MTR-V: 3D isotropic AVX2 reference");
@@ -531,26 +550,25 @@ FMR_WARN_INLINE_ON
     }//end parallel region
     return out;
   }
-  fmr::Global_int Mega = 1000000;
 #if 1
   TEST( TestMtrlIsoPerf1, LameIsCorrect ){
-    EXPECT_DOUBLE_EQ( 0.0*100.0 + mtrl_iso3_lame (1100l*Mega/1)[0], mtrl_iso3_ref (400*Mega/1)[0] );
+    EXPECT_DOUBLE_EQ( 0.0*100.0 + mtrl_iso3_lame (1100l*Mega/10), mtrl_iso3_ref (400*Mega/10) );
   }
 #endif
 #if 1
   TEST( TestMtrlIsoPerf2, ScalarIsCorrect ){
-    EXPECT_DOUBLE_EQ( 0.0*100.0+mtrl_iso3_scalar (300l*Mega/1)[0], mtrl_iso3_ref (400*Mega/1)[0] );
+    EXPECT_DOUBLE_EQ( 0.0*100.0+mtrl_iso3_scalar (300l*Mega/10), mtrl_iso3_ref (400*Mega/10) );
   }
 #endif
-#if 0
+#if 1
 // not really worth continuing to test
   TEST( TestMtrlIsoPerf2, NaiveIsCorrect ){
-    EXPECT_DOUBLE_EQ( 0.0*100.0+mtrl_iso3_naive (130l*Mega/1)[0], mtrl_iso3_ref (400*Mega/1)[0] );
+    EXPECT_DOUBLE_EQ( 0.0*100.0+mtrl_iso3_naive (130l*Mega/10), mtrl_iso3_ref (400*Mega/10) );
   }
 #endif
 #if 1
   TEST( TestMtrlIsoPerf2, AVX2IsCorrect ){
-    EXPECT_DOUBLE_EQ( 0.0*100.0+mtrl_iso3_avx2 (3000*Mega/1)[0], mtrl_iso3_ref (400*Mega/1)[0] );
+    EXPECT_DOUBLE_EQ( 0.0*100.0+mtrl_iso3_avx2 (3000*Mega/10), mtrl_iso3_ref (400*Mega/10) );
   }
 #endif
 } } }//end femera::test::perf:: namespace
