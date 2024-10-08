@@ -60,8 +60,6 @@ FMR_WARN_INLINE_ON
   inline
   //std::valarray<double>
   double mtrl_iso3_ref (const fmr::Global_int test_n=400l *Mega/1) {// about 10 sec
-  // returns stress tensor.
-    //std::valarray<double> out (0.0, 9);
     double out = 0.0;
     FMR_PRAGMA_OMP(omp parallel) {
       //const auto omp_i = fmr::Local_int (omp_get_thread_num());
@@ -162,11 +160,9 @@ FMR_WARN_INLINE_ON
   }
   inline
   double mtrl_iso3_naive (const fmr::Global_int test_n=130l *Mega) {// about 10 sec
-  // returns stress tensor. Uses valarray operations within kernel.
+  //  Uses valarray operations within kernel.
     double out = 0.0;
-//    std::valarray<double> out (0.0, 9);
     FMR_PRAGMA_OMP(omp parallel) {
-      //const auto omp_i = fmr::Local_int (omp_get_thread_num());
       //
       femera::Work::Work_time_t timer;
       timer.start ();
@@ -252,7 +248,6 @@ FMR_WARN_INLINE_ON
   inline
   double mtrl_iso3_lame (const fmr::Global_int test_n=1100l *Mega) {// about 10 sec
     double out = 0.0;
-//    std::valarray<double> out (0.0, 9);
     FMR_PRAGMA_OMP(omp parallel) {
       //const auto omp_i = fmr::Local_int (omp_get_thread_num());
       //
@@ -313,7 +308,7 @@ FMR_WARN_INLINE_ON
           out+= stress [i];
         }
       }//end phase loop
-      fprintf (stdout, "name: %s\n"          ,"Kernel MTR-L: 3D isotropic Lame formula reference");
+      fprintf (stdout, "name: %s\n"          ,"Kernel MTR-L: 3D isotropic Lame formula");
       fprintf (stdout, "time: %g sec\n"      , busy_s);
       fprintf (stdout, "  AI: %g FLOP/byte\n", double (timer.get_ai ()));
       fprintf (stdout, "perf: %g FLOP/sec\n" , double (timer.get_busy_flop_speed ()));
@@ -324,7 +319,6 @@ FMR_WARN_INLINE_ON
   inline
   double mtrl_iso3_scalar (const fmr::Global_int test_n=300l *Mega) {// about 10 sec
     double out = 0.0;
-//    std::valarray<double> out (0.0, 9);
     FMR_PRAGMA_OMP(omp parallel) {
       //const auto omp_i = fmr::Local_int (omp_get_thread_num());
       //
@@ -388,7 +382,7 @@ FMR_WARN_INLINE_ON
           out+= stress [i];
         }
       }//end phase loop
-      fprintf (stdout, "name: %s\n"          ,"Kernel MTR-S: 3D isotropic minimum scalar reference");
+      fprintf (stdout, "name: %s\n"          ,"Kernel MTR-S: 3D isotropic minimum scalar");
       fprintf (stdout, "time: %g sec\n"      , busy_s);
       fprintf (stdout, "  AI: %g FLOP/byte\n", double (timer.get_ai ()));
       fprintf (stdout, "perf: %g FLOP/sec\n" , double (timer.get_busy_flop_speed ()));
@@ -531,10 +525,6 @@ FMR_WARN_INLINE_ON
         } else {// busy time run
           busy_s = double (timer.add_busy_time_now ());
         }
-        //FIXME put vA[] into stress.
-//        for (fmr::Local_int i=0; i<9; ++i) {
-//          out [i] = stress.sum ();
-//        }
         stress [ 3] = 0.0;
         stress [ 7] = 0.0;
         stress [11] = 0.0;
@@ -542,7 +532,7 @@ FMR_WARN_INLINE_ON
           out+= stress [i];
         }
       }//end phase loop
-      fprintf (stdout, "name: %s\n"          ,"Kernel MTR-V: 3D isotropic AVX2 reference");
+      fprintf (stdout, "name: %s\n"          ,"Kernel MTR-V: 3D isotropic AVX2");
       fprintf (stdout, "time: %g sec\n"      , busy_s);
       fprintf (stdout, "  AI: %g FLOP/byte\n", double (timer.get_ai ()));
       fprintf (stdout, "perf: %g FLOP/sec\n" , double (timer.get_busy_flop_speed ()));
