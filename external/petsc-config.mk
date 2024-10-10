@@ -75,7 +75,7 @@ ifeq ($(ENABLE_PETSC),ON)
   ifeq ($(ENABLE_CGNS),ON)
     #NOTE PETSc does not recognize high order branch
     EXTERNAL_DOT+="PETSc" -> "CGNS" [color="blue"]\n
-    PETSC_REQUIRES += cgns
+#    PETSC_REQUIRES += cgns
     # PETSC_MAKE_FLAGS += --with-cgns-dir=$(INSTALL_CPU)
     PETSC_FLAGS += --download-cgns
   endif
@@ -110,7 +110,7 @@ ifeq ($(ENABLE_PETSC),ON)
     # PETSC_REQUIRES += fblas
     # PETSC_REQUIRES += flapack
     # PETSC_FLAGS += --download-fblaslapack
-    PETSC_REQUIRES += openblas
+#    PETSC_REQUIRES += openblas
     PETSC_FLAGS += --download-openblas
   endif
   ifeq ($(ENABLE_PETSC_SUITESPARSE),ON)

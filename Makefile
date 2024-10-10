@@ -314,6 +314,7 @@ endif
 #TODO Remove following 2 lines.
 EXTERNAL_DOT+="Femera" -> "CUDA" [style=dotted]\n
 EXTERNAL_DOT+="Femera" -> "ParaView" [style=dotted]\n
+#
 ifeq ($(ENABLE_PARAVIEW),ON)
   #TODO move to external/paraview-* files
   LIST_EXTERNAL += paraview
@@ -353,6 +354,9 @@ ifeq ($(ENABLE_NEPER),ON)
     EXTERNAL_DOT+="Neper" -> "POV-Ray"\n
   endif
 endif
+
+
+
 # Developer tools
 SRC_STAT_FILE:=data/src/femera-$(CPUMODEL)-build-stats.csv
 ifeq ($(ENABLE_DOT),ON)

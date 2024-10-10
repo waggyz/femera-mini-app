@@ -13,7 +13,7 @@ ifeq ($(ENABLE_CGNS),ON)
   EXTERNAL_DOT+="CGNS" -> "OpenGL"\n
   ifeq ($(ENABLE_HDF5),ON)
     FMRFLAGS += -DFMR_HAS_HDF5
-    CGNS_REQUIRES += hdf5
+#    CGNS_REQUIRES += hdf5
     EXTERNAL_DOT+="CGNS" -> "HDF5"\n
     CGNS_FLAGS += -DCGNS_ENABLE_HDF5:BOOL=ON
   else

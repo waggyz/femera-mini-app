@@ -43,7 +43,7 @@ ifeq ($(ENABLE_GMSH),ON)
     GMSH_FLAGS += -DENABLE_WRAP_PYTHON=ON -DENABLE_NUMPY=ON
   endif
   ifeq ($(ENABLE_CGNS),ON)
-    GMSH_REQUIRES += cgns
+#    GMSH_REQUIRES += cgns
     EXTERNAL_DOT+="Gmsh" -> "CGNS"\n
     GMSH_FLAGS += -DENABLE_CGNS=ON
     GMSH_FLAGS += -DENABLE_CGNS_CPEX0045=OFF
@@ -56,7 +56,7 @@ ifeq ($(ENABLE_GMSH),ON)
   endif
   ifeq (1,0) # Disable PETSc in Gmsh for now
   ifeq ($(ENABLE_PETSC),ON)
-    GMSH_REQUIRES += petsc
+    GMSH_REQUIRES += petsc #FIXME PETSC_REQUIRES?
     EXTERNAL_DOT+="Gmsh" -> "PETSc"\n
     GMSH_FLAGS += -DENABLE_PETSC=ON
     ifeq ($(ENABLE_PYBIND11),ON)
@@ -78,7 +78,7 @@ ifeq ($(ENABLE_GMSH),ON)
   else
     GMSH_FLAGS += -DENABLE_FLTK=OFF
   endif
-  ifeq ($(ENABLE_OCCT),ON)
+  ifeq ($(ENABLE_OCCT),ON)#FIXME PETSC_REQUIRES?
 #    GMSH_REQUIRES += occt
     EXTERNAL_DOT+="Gmsh" -> "OpenCASCADE"\n
     GMSH_FLAGS += -DENABLE_OCC=ON -DENABLE_OCC_CAF=ON -DENABLE_OCC_STATIC=ON
@@ -94,7 +94,8 @@ endif
 ifeq ($(ENABLE_OCCT),ON)
   FMRFLAGS += -DFMR_HAS_OCC
 #  LIST_EXTERNAL += occt
-  OCCT_REQUIRES += freetype
+#  OCCT_REQUIRES += freetype#FIXME PETSC_REQUIRES?
+#   GMSH_REQUIRES += occt
   EXTERNAL_DOT+="OpenCASCADE" -> "FreeType"\n
   EXTERNAL_DOT+="Femera" -> "FreeType" [color="cyan"]\n
   ENABLE_FREETYPE:=ON

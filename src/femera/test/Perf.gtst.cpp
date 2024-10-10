@@ -10,17 +10,17 @@ FMR_WARN_INLINE_OFF
 FMR_WARN_INLINE_ON
 }
 namespace femera { namespace test { namespace perf {
-  const fmr::Global_int Mega = 1000000l;
+  const fmr::Perf_int Mega = fmr::Perf_int (1000000l);
   inline
-  double test_proc_id_speed (const fmr::Local_int n=100000) {
+  double test_proc_id_speed (const fmr::Perf_int n=100000l) {
     fmr::Local_int ans1=0, ans2=0;
     mini->test->time.add_idle_time_now ();
-    for (fmr::Local_int i=0; i<n; ++i) {
+    for (fmr::Perf_int i=0; i<n; ++i) {
       ans1 += mini->proc->get_team_n ();// just returns a member variable
     }
     const auto base_time = mini->test->time.add_busy_time_now ();// - start;
     mini->test->time.add_idle_time_now ();
-    for (fmr::Local_int i=0; i<n; ++i) {
+    for (fmr::Perf_int i=0; i<n; ++i) {
       ans2 += mini->proc->get_proc_id ();// descends the processing stack
     }
     const auto pids_time = mini->test->time.add_busy_time_now ();// - start;
@@ -59,7 +59,7 @@ FMR_WARN_INLINE_ON
 //
   inline
   //std::valarray<double>
-  double mtrl_iso3_ref (const fmr::Global_int test_n=400l *Mega/1) {// about 10 sec
+  double mtrl_iso3_ref (const fmr::Perf_int test_n=400l *Mega/1) {// about 10 sec
     double out = 0.0;
     FMR_PRAGMA_OMP(omp parallel) {
       //const auto omp_i = fmr::Local_int (omp_get_thread_num());
@@ -77,31 +77,29 @@ FMR_WARN_INLINE_ON
       const double c1 = lambda + 2.0*mu;
       const double c2 = lambda;
       const double c3 = mu;
-      //
-      double H0 = 1.0, H1 = 0.0, H2 = 0.0;
-      double H3 = 0.0, H4 = 0.0, H5 = 0.0;
-      double H6 = 0.0, H7 = 0.0, H8 = 0.0;
-      //
-      double strain_voigt[6] = { 0.0,0.0,0.0, 0.0,0.0,0.0 };
-      double stress_voigt[6] = { 0.0,0.0,0.0, 0.0,0.0,0.0 };
-      //
-      std::valarray<double> stress (0.0, 9);
-      std::valarray<double> D (0.0, 36);
-      D = {
+      const double D [36] = {
         c1, c2, c2, 0 , 0 , 0,
         c2, c1, c2, 0 , 0 , 0,
         c2, c2, c1, 0 , 0 , 0,
         0 , 0 , 0 , c3, 0 , 0,
         0 , 0 , 0 , 0 , c3, 0,
-        0 , 0 , 0 , 0 , 0 , c3
-      };
+        0 , 0 , 0 , 0 , 0 , c3 };
+      //
+      double H0 = 1.0, H1 = 0.0, H2 = 0.0;
+      double H3 = 0.0, H4 = 0.0, H5 = 0.0;
+      double H6 = 0.0, H7 = 0.0, H8 = 0.0;
+      //
+      double strain_voigt [6] = { 0.0,0.0,0.0, 0.0,0.0,0.0 };
+      double stress_voigt [6] = { 0.0,0.0,0.0, 0.0,0.0,0.0 };
+      //
+      std::valarray<double> stress (0.0, 9);
       for (int phase =0; phase < 2; ++phase) {
-        fmr::Global_int phase_n = test_n / 10;// warmup
+        fmr::Perf_int phase_n = test_n / 10;// warmup
         if (phase==1) {// busy time run
           phase_n = test_n;
         }
         timer.add_idle_time_now ();
-        for (fmr::Global_int n=0; n < phase_n; ++n) {
+        for (fmr::Perf_int n=0; n < phase_n; ++n) {
           __asm__ volatile ("" : "+g" (n) : :);
           __asm__ volatile ("" : "+g" (H0) : :);
           __asm__ volatile ("" : "+g" (H1) : :);
@@ -112,22 +110,15 @@ FMR_WARN_INLINE_ON
           __asm__ volatile ("" : "+g" (H6) : :);
           __asm__ volatile ("" : "+g" (H7) : :);
           __asm__ volatile ("" : "+g" (H8) : :);
-#if 0
-          strain_voigt [0] = H0;
-          strain_voigt [1] = H4;
-          strain_voigt [2] = H8;
-          strain_voigt [3] = H5 + H7;
-          strain_voigt [4] = H2 + H6;
-          strain_voigt [5] = H1 + H3;
-#else
           const double H [9] = { H0,H1,H2,H3,H4,H5,H6,H7,H8 };// Snapshot the volatiles.
+          //
           strain_voigt [0] = H[0];
           strain_voigt [1] = H[4];
           strain_voigt [2] = H[8];
           strain_voigt [3] = H[5] + H[7];
           strain_voigt [4] = H[2] + H[6];
           strain_voigt [5] = H[1] + H[3];
-#endif
+          //
           for (fmr::Local_int i=0; i<6; ++i) { stress_voigt[i] = 0.0; }
           for (fmr::Local_int i=0; i < 6; ++i) {
             for (fmr::Local_int j=0; j < 6; ++j) {
@@ -159,7 +150,7 @@ FMR_WARN_INLINE_ON
   return out;
   }
   inline
-  double mtrl_iso3_naive (const fmr::Global_int test_n=130l *Mega) {// about 10 sec
+  double mtrl_iso3_naive (const fmr::Perf_int test_n=130l *Mega) {// about 10 sec
   //  Uses valarray operations within kernel.
     double out = 0.0;
     FMR_PRAGMA_OMP(omp parallel) {
@@ -177,6 +168,13 @@ FMR_WARN_INLINE_ON
       const double c1 = lambda + 2.0*mu;
       const double c2 = lambda;
       const double c3 = mu;
+      const double D [36] = {
+        c1, c2, c2, 0 , 0 , 0,
+        c2, c1, c2, 0 , 0 , 0,
+        c2, c2, c1, 0 , 0 , 0,
+        0 , 0 , 0 , c3, 0 , 0,
+        0 , 0 , 0 , 0 , c3, 0,
+        0 , 0 , 0 , 0 , 0 , c3 };
       //
       double H0 = 1.0, H1 = 0.0, H2 = 0.0;
       double H3 = 0.0, H4 = 0.0, H5 = 0.0;
@@ -185,22 +183,14 @@ FMR_WARN_INLINE_ON
       std::valarray<double> strain_voigt (0.0, 6);
       std::valarray<double> stress_voigt (0.0, 6);
       std::valarray<double> stress (0.0, 9);
-      std::valarray<double> D (0.0, 36);
-      D = {
-        c1, c2, c2, 0 , 0 , 0,
-        c2, c1, c2, 0 , 0 , 0,
-        c2, c2, c1, 0 , 0 , 0,
-        0 , 0 , 0 , c3, 0 , 0,
-        0 , 0 , 0 , 0 , c3, 0,
-        0 , 0 , 0 , 0 , 0 , c3
-      };
+      //
       for (int phase =0; phase < 2; ++phase) {
-        fmr::Global_int phase_n = test_n / 10;// warmup
+        fmr::Perf_int phase_n = test_n / 10;// warmup
         if (phase==1) {// busy time run
           phase_n = test_n;
         }
         timer.add_idle_time_now ();
-        for (fmr::Global_int n=0; n < phase_n; ++n) {
+        for (fmr::Perf_int n=0; n < phase_n; ++n) {
           __asm__ volatile ("" : "+g" (n) : :);
           __asm__ volatile ("" : "+g" (H0) : :);
           __asm__ volatile ("" : "+g" (H1) : :);
@@ -246,7 +236,7 @@ FMR_WARN_INLINE_ON
   return out;
   }
   inline
-  double mtrl_iso3_lame (const fmr::Global_int test_n=1100l *Mega) {// about 10 sec
+  double mtrl_iso3_lame (const fmr::Perf_int test_n=1100l *Mega) {// about 10 sec
     double out = 0.0;
     FMR_PRAGMA_OMP(omp parallel) {
       //const auto omp_i = fmr::Local_int (omp_get_thread_num());
@@ -261,6 +251,7 @@ FMR_WARN_INLINE_ON
       //
       const double lambda = 0.5;
       const double mu = 0.5;
+      //
       double H0 = 1.0, H1 = 0.0, H2 = 0.0;
       double H3 = 0.0, H4 = 0.0, H5 = 0.0;
       double H6 = 0.0, H7 = 0.0, H8 = 0.0;
@@ -268,7 +259,7 @@ FMR_WARN_INLINE_ON
       std::valarray<double> HT (9);
       std::valarray<double> stress (9);
       for (int phase =0; phase < 2; ++phase) {
-        fmr::Global_int phase_n = test_n / 10;// warmup
+        fmr::Perf_int phase_n = test_n / 10;// warmup
         if (phase == 1) {// busy time run
           phase_n = test_n;
         }
@@ -317,7 +308,7 @@ FMR_WARN_INLINE_ON
   return out;
   }
   inline
-  double mtrl_iso3_scalar (const fmr::Global_int test_n=300l *Mega) {// about 10 sec
+  double mtrl_iso3_scalar (const fmr::Perf_int test_n=300l *Mega) {// about 10 sec
     double out = 0.0;
     FMR_PRAGMA_OMP(omp parallel) {
       //const auto omp_i = fmr::Local_int (omp_get_thread_num());
@@ -335,19 +326,21 @@ FMR_WARN_INLINE_ON
       const double c1 = lambda + 2.0*mu;
       const double c2 = lambda;
       const double c3 = mu;
+      //
       double H0 = 1.0, H1 = 0.0, H2 = 0.0;
       double H3 = 0.0, H4 = 0.0, H5 = 0.0;
       double H6 = 0.0, H7 = 0.0, H8 = 0.0;
       //
       std::valarray<double> stress (0.0, 9);
       std::valarray<double> stress_voigt (0.0, 6);
+      //
       for (int phase=0; phase < 2; ++phase) {
-        fmr::Global_int phase_n = test_n / 10;// warmup
+        fmr::Perf_int phase_n = test_n / 10;// warmup
         if (phase == 1) {// busy time run
           phase_n = test_n;
         }
         timer.add_idle_time_now ();
-        for (fmr::Global_int n=0; n < (phase_n); ++n) {
+        for (fmr::Perf_int n=0; n < (phase_n); ++n) {
           __asm__ volatile ("" : "+g" (n) : :);
           __asm__ volatile ("" : "+g" (H0) : :);
           __asm__ volatile ("" : "+g" (H1) : :);
@@ -390,9 +383,8 @@ FMR_WARN_INLINE_ON
     }//end parallel region
   return out;
   }
-  double mtrl_iso3_avx2 (const fmr::Global_int test_n=3000 *Mega) {
-    double out = 0.0;
-//    std::valarray<double> out (0.0, 9);
+  double mtrl_iso3_avx2 (const fmr::Perf_int test_n=3000 *Mega) {
+    double out = 0.0;// returns sum of stress tensor component s.
     //
     FMR_PRAGMA_OMP(omp parallel) {
       //const auto omp_i = fmr::Local_int (omp_get_thread_num());
@@ -402,7 +394,7 @@ FMR_WARN_INLINE_ON
       timer.add_unit (test_n);
       timer.add_flop (test_n * (12*3 +1 +8*3));
       timer.add_read (test_n * ( 9 + 2) * sizeof(double));
-      timer.add_save (test_n * ( 9)     * sizeof(double));// returns true stress tensor.
+      timer.add_save (test_n * ( 9)     * sizeof(double));
       double busy_s = 0.0;
       //
       const double lambda = 0.5;
@@ -431,17 +423,18 @@ FMR_WARN_INLINE_ON
       std::valarray<double> stress (0.0, 12);
       //
       for (int phase=0; phase < 2; ++phase) {
-        fmr::Global_int phase_n = test_n / 10;// warmup
+        fmr::Perf_int phase_n = test_n / 10;// warmup
         if (phase == 1) {// busy time run
           phase_n = test_n;
         }
         timer.add_idle_time_now ();
-        for (fmr::Global_int n=0; n < (phase_n); ++n) {
+        for (fmr::Perf_int n=0; n < (phase_n); ++n) {
           __asm__ volatile ("" : "+g" (n) : :);
           __asm__ volatile ("" : "+g" (vA0) : :);
           __asm__ volatile ("" : "+g" (vA1) : :);
           __asm__ volatile ("" : "+g" (vA2) : :);
-          __m256d vA[3] = { vA0,vA1,vA2 };// Snapshot the volatiles (may need to reverse).
+          __m256d vA[3] = { vA0,vA1,vA2 };// Snapshot volatiles
+          //                                 (may need to reverse).
 #ifdef HAS_AVX2
           //TODO Pull AVX into mtrl_iso3_avx (..)
           // S = mu * (H+H^T) + lambda * I * ( H[0]+H[5]+H[10] )
@@ -454,9 +447,12 @@ FMR_WARN_INLINE_ON
           {
           const __m256d z0 =_mm256_set_pd(0.0,1.0,1.0,1.0);
           const __m256d ml =_mm256_set_pd(lambda,mu,mu,mu);
-          vA[0]=_mm256_permute4x64_pd( vA[0]*z0,_MM_SHUFFLE(0,2,3,1) ); Ssum+= vA[0]*ml;// 12 FLOP
-          vA[1]=_mm256_permute4x64_pd( vA[1]*z0,_MM_SHUFFLE(1,3,2,0) ); Ssum+= vA[1]*ml;// 12 FLOP
-          vA[2]=_mm256_permute4x64_pd( vA[2]*z0,_MM_SHUFFLE(2,0,1,3) ); Ssum+= vA[2]*ml;// 12 FLOP
+          vA[0]=_mm256_permute4x64_pd( vA[0]*z0,_MM_SHUFFLE(0,2,3,1) );
+          Ssum+= vA[0]*ml;// 12 FLOP
+          vA[1]=_mm256_permute4x64_pd( vA[1]*z0,_MM_SHUFFLE(1,3,2,0) );
+          Ssum+= vA[1]*ml;// 12 FLOP
+          vA[2]=_mm256_permute4x64_pd( vA[2]*z0,_MM_SHUFFLE(2,0,1,3) );
+          Ssum+= vA[2]*ml;// 12 FLOP
           }
           //      3   2   1   0
           //     sxy 0.0 sxz sxx
@@ -474,9 +470,12 @@ FMR_WARN_INLINE_ON
           printf("S step 2\n");
           print_m256( S[0] ); print_m256( S[1] ); print_m256( S[2] );
 #endif
-          vA[0]=_mm256_permute4x64_pd( Ssum + vA[0]*m2,_MM_SHUFFLE(3,2,0,3) );// 8 FLOP
-          vA[1]=_mm256_permute4x64_pd( Ssum + vA[1]*m2,_MM_SHUFFLE(3,1,3,0) );// 8 FLOP
-          vA[2]=_mm256_permute4x64_pd( Ssum + vA[2]*m2,_MM_SHUFFLE(3,3,1,2) );// 8 FLOP
+          vA[0]=_mm256_permute4x64_pd( Ssum + vA[0]*m2,_MM_SHUFFLE(3,2,0,3) );
+          // 8 FLOP
+          vA[1]=_mm256_permute4x64_pd( Ssum + vA[1]*m2,_MM_SHUFFLE(3,1,3,0) );
+          // 8 FLOP
+          vA[2]=_mm256_permute4x64_pd( Ssum + vA[2]*m2,_MM_SHUFFLE(3,3,1,2) );
+          // 8 FLOP
           }
 #if 0
           printf("S step 3\n");
@@ -516,7 +515,8 @@ FMR_WARN_INLINE_ON
           __asm__ volatile ("" : "+g" (H8) : :);
           const double H [9] = { H0,H1,H2,H3,H4,H5,H6,H7,H8 };// Snapshot the volatiles.
 #endif
-          _mm256_storeu_pd( &stress[0], vA[0]);//TODO try to remove these from this kernel.
+          //TODO try to remove the following from this kernel?
+          _mm256_storeu_pd( &stress[0], vA[0]);
           _mm256_storeu_pd( &stress[4], vA[1]);
           _mm256_storeu_pd( &stress[8], vA[2]);
         }// end kernel loop
@@ -525,7 +525,7 @@ FMR_WARN_INLINE_ON
         } else {// busy time run
           busy_s = double (timer.add_busy_time_now ());
         }
-        stress [ 3] = 0.0;
+        stress [ 3] = 0.0;// Zero the unused lanes.
         stress [ 7] = 0.0;
         stress [11] = 0.0;
         for (fmr::Local_int i=0; i<12; ++i) {
@@ -540,25 +540,26 @@ FMR_WARN_INLINE_ON
     }//end parallel region
     return out;
   }
+  fmr::Perf_int test_div = 100;
 #if 1
   TEST( TestMtrlIsoPerf1, LameIsCorrect ){
-    EXPECT_DOUBLE_EQ( 0.0*100.0 + mtrl_iso3_lame (1100l*Mega/10), mtrl_iso3_ref (400*Mega/10) );
+    EXPECT_DOUBLE_EQ( mtrl_iso3_lame (1100l*Mega/test_div), mtrl_iso3_ref (400*Mega/test_div) );
   }
 #endif
 #if 1
   TEST( TestMtrlIsoPerf2, ScalarIsCorrect ){
-    EXPECT_DOUBLE_EQ( 0.0*100.0+mtrl_iso3_scalar (300l*Mega/10), mtrl_iso3_ref (400*Mega/10) );
+    EXPECT_DOUBLE_EQ( mtrl_iso3_scalar (300l*Mega/test_div), mtrl_iso3_ref (400*Mega/test_div) );
   }
 #endif
 #if 1
 // not really worth continuing to test
   TEST( TestMtrlIsoPerf2, NaiveIsCorrect ){
-    EXPECT_DOUBLE_EQ( 0.0*100.0+mtrl_iso3_naive (130l*Mega/10), mtrl_iso3_ref (400*Mega/10) );
+    EXPECT_DOUBLE_EQ( mtrl_iso3_naive (130l*Mega/test_div), mtrl_iso3_ref (400*Mega/test_div) );
   }
 #endif
 #if 1
   TEST( TestMtrlIsoPerf2, AVX2IsCorrect ){
-    EXPECT_DOUBLE_EQ( 0.0*100.0+mtrl_iso3_avx2 (3000*Mega/10), mtrl_iso3_ref (400*Mega/10) );
+    EXPECT_DOUBLE_EQ( mtrl_iso3_avx2 (3000*Mega/test_div), mtrl_iso3_ref (400*Mega/test_div) );
   }
 #endif
 } } }//end femera::test::perf:: namespace

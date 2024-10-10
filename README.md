@@ -46,7 +46,7 @@ For Red Hat Enterprise Linux (RHEL) 8, install the following packages.
 #TODO Add RHEL CodeReady repository.
 #  https://stackoverflow.com/questions/36651091/how-to-install-packages-in-linux-centos-without-root-user-with-automatic-depen
 
-sudo yum install tcl tk glut-devel numactl-devel [**TODO**] more?
+sudo yum install tcl tk glut-devel numactl-devel python36-devel [**TODO**] more?
 
 # Developers 
 sudo yum install bats graphiz gtest-devel
@@ -93,6 +93,7 @@ make install
    * Python3, MPI, OpenMP, BLAS, LAPACK, SuiteSparse, CUDA, OpenGL, libGL, X11, libnuma, libcairo, Tcl/Tk, (Bats, Valgrind)
    * Developers: Graphviz, cinclude2dot, (Lyx or LaTeX?)
 2. If needed, build and install Bats, **Pybind11**, FreeType, FLTK, libXML2, libgif, and **googletest**.
+   * Pybind11 limited to v2.9 for Python < v3.7
    * PETSc downloads the external package source code to femera-mini-demo/external/petsc-packages/(CPUNAME)-debug/git.googletest/
    * [**TODO** Test new PETSc version > v3.18.0-25-gc2e5504b09e for bugs noted here.]
    * PETSc 3.20.2 does not compile with gcc 8.5.0 20210514 (Red Hat 8.5.0-18)
@@ -102,26 +103,22 @@ make install
 ```bash
 cd external/petsc
 
-./configure PETSC_ARCH=i7-12800H-debug --prefix=/home/dwagner5/.local/i7-12800H \
-  --with-packages-build-dir=/home/dwagner5/Code/femera-mini-demo/external/petsc-packages \
+PACKAGE_INSTALL_DIR=$HOME/Code/femera-mini-cmake/external/petsc-packages
+./configure PETSC_ARCH=i7-12800H-debug --prefix=$HOME/.local/i7-12800H \
+  --with-packages-build-dir=$PACKAGE_INSTALL_DIR \
   --doCleanup=1 --with-shared-libraries --with-debugging \
   --with-64-bit-indices --with-memalign=32 \
-  COPTFLAGS='-march=native -mtune=native \
-  -Ofast -fno-builtin-sin -fno-builtin-cos -fvisibility=hidden -funroll-loops \
-  -frename-registers -ftree-vectorize -fno-common -fearly-inlining' \
-  CXXOPTFLAGS='-march=native -mtune=native -Ofast -fno-builtin-sin \
-  -fno-builtin-cos -fvisibility=hidden -fvisibility-inlines-hidden \
-  -funroll-loops -frename-registers -ftree-vectorize -fno-common \
-  -fearly-inlining' FOPTFLAGS='-march=native -mtune=native -Ofast \
-  -fvisibility=hidden -funroll-loops -frename-registers -ftree-vectorize \
-  -fno-common -fearly-inlining' \
+  COPTFLAGS='-march=native -mtune=native -Ofast -fno-builtin-sin -fno-builtin-cos -fvisibility=hidden -funroll-loops -frename-registers -ftree-vectorize -fno-common -fearly-inlining' \
+  CXXOPTFLAGS='-march=native -mtune=native -Ofast -fno-builtin-sin -fno-builtin-cos -fvisibility=hidden -fvisibility-inlines-hidden -funroll-loops -frename-registers -ftree-vectorize -fno-common -fearly-inlining' FOPTFLAGS='-march=native -mtune=native -Ofast -fvisibility=hidden -funroll-loops -frename-registers -ftree-vectorize -fno-common -fearly-inlining' \
   --with-openmp --with-mpi --with-petsc4py \
   --download-fblaslapack --download-suitesparse --download-hwloc \
-  --download-mpi4py --download-zlib --download-libjpeg --download-libpng \
+  --download-zlib --download-libjpeg --download-libpng \
   --download-boost --download-opencascade --download-hdf5 --download-cgns \
   --download-netcdf --download-metis --download-parmetis --download-fftw \
   --download-gsl --download-eigen
 
+# BUG: --download-mpi4py doesn't work.  TRY AGAIN
+#
 # --download-pnetcdf --download-exodusii --download-libmesh --download-mumps
 # These need approval
 
