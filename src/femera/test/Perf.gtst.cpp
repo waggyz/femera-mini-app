@@ -52,15 +52,16 @@ FMR_WARN_INLINE_ON
 #endif
 #define HAS_AVX2
 //TODO Remove above includes.
-//  Move to Phys module.
+//  Move to Mtrl module.
 //
 // Empty assembly trick to prevent over-optimization of these test functions adapted from:
 // https://stackoverflow.com/questions/7083482/how-can-i-prevent-gcc-from-optimizing-out-a-busy-wait-loop
 //
+  const fmr::Phys_float correct_value = 1.5;
   inline
   //std::valarray<double>
-  double mtrl_iso3_ref (const fmr::Perf_int test_n=400l *Mega/1) {// about 10 sec
-    double out = 0.0;
+  double mtrl_iso3_base (const fmr::Perf_int test_n=400l *Mega/1) {// about 10 sec
+    double out = 0.0;// returns performance
     FMR_PRAGMA_OMP(omp parallel) {
       //const auto omp_i = fmr::Local_int (omp_get_thread_num());
       //
@@ -111,6 +112,14 @@ FMR_WARN_INLINE_ON
           __asm__ volatile ("" : "+g" (H7) : :);
           __asm__ volatile ("" : "+g" (H8) : :);
           const double H [9] = { H0,H1,H2,H3,H4,H5,H6,H7,H8 };// Snapshot the volatiles.
+#if 0
+          //TODO instead call:
+          fmr::mtrl::elas_dmat_base<fmr::Phys_float> (&stress, &D, &H);
+          //
+          template <typename F> static inline
+          void elas_dmat_base<fmr::Phys_float F> (&F stress, const &F D, const &F H) {
+          //};
+#else
           //
           strain_voigt [0] = H[0];
           strain_voigt [1] = H[4];
@@ -129,6 +138,7 @@ FMR_WARN_INLINE_ON
             stress_voigt[5], stress_voigt[1], stress_voigt[3],
             stress_voigt[4], stress_voigt[3], stress_voigt[2]
           };
+#endif
         }//end kernel loop
         if (phase == 0) {// warmup
           printf ("warm: %g sec\n", double (timer.add_idle_time_now ()));
@@ -139,18 +149,19 @@ FMR_WARN_INLINE_ON
           out+= stress [i];
         }
       }//end phase loop
+      timer.set_is_ok ( (abs(out - correct_value) < 1e-10) );
       fprintf (stdout, "name: %s\n"          ,"Kernel MTR-D: 3D isotropic D-matrix reference");
       fprintf (stdout, "time: %g sec\n"      , busy_s);
       fprintf (stdout, "  AI: %g FLOP/byte\n", double (timer.get_ai ()));
       fprintf (stdout, "perf: %g FLOP/sec\n" , double (timer.get_busy_flop_speed ()));
       fprintf (stdout, "mtrl: %g mtrl/sec\n" , double (timer.get_busy_unit_speed ()));
       //
-      //out[0] = timer.get_busy_unit_speed;// return performance
     }//end parallel region
-  return out;
+    return out;//FIXME race condition
+//  return (timer.get_is_ok () ? timer.get_busy_unit_speed () : -1.0;
   }
   inline
-  double mtrl_iso3_naive (const fmr::Perf_int test_n=130l *Mega) {// about 10 sec
+  double mtrl_iso3_valarray (const fmr::Perf_int test_n=130l *Mega) {// about 10 sec
   //  Uses valarray operations within kernel.
     double out = 0.0;
     FMR_PRAGMA_OMP(omp parallel) {
@@ -174,8 +185,8 @@ FMR_WARN_INLINE_ON
         c2, c2, c1, 0 , 0 , 0,
         0 , 0 , 0 , c3, 0 , 0,
         0 , 0 , 0 , 0 , c3, 0,
-        0 , 0 , 0 , 0 , 0 , c3 };
-      //
+        0 , 0 , 0 , 0 , 0 , c3
+      };
       double H0 = 1.0, H1 = 0.0, H2 = 0.0;
       double H3 = 0.0, H4 = 0.0, H5 = 0.0;
       double H6 = 0.0, H7 = 0.0, H8 = 0.0;
@@ -227,13 +238,16 @@ FMR_WARN_INLINE_ON
           out+= stress [i];
         }
       }//end phase loop
+      timer.set_is_ok ( (abs(out - correct_value) < 1e-10) );
+      //
       fprintf (stdout, "name: %s\n"          ,"Kernel MTR-N: 3D isotropic naive D-matrix");
       fprintf (stdout, "time: %g sec\n"      , busy_s);
       fprintf (stdout, "  AI: %g FLOP/byte\n", double (timer.get_ai ()));
       fprintf (stdout, "perf: %g FLOP/sec\n" , double (timer.get_busy_flop_speed ()));
       fprintf (stdout, "mtrl: %g mtrl/sec\n" , double (timer.get_busy_unit_speed ()));
     }//end parallel region
-  return out;
+    return out;//FIXME race condition
+//  return (timer.get_is_ok () ? timer.get_busy_unit_speed () : -1.0;
   }
   inline
   double mtrl_iso3_lame (const fmr::Perf_int test_n=1100l *Mega) {// about 10 sec
@@ -296,16 +310,19 @@ FMR_WARN_INLINE_ON
           busy_s = double (timer.add_busy_time_now ());
         }
         for (fmr::Local_int i=0; i<9; ++i) {
-          out+= stress [i];
+          out+= stress [i];//FIXME race condition
         }
       }//end phase loop
+      timer.set_is_ok ( (abs(out - correct_value) < 1e-10) );
+      //
       fprintf (stdout, "name: %s\n"          ,"Kernel MTR-L: 3D isotropic Lame formula");
       fprintf (stdout, "time: %g sec\n"      , busy_s);
       fprintf (stdout, "  AI: %g FLOP/byte\n", double (timer.get_ai ()));
       fprintf (stdout, "perf: %g FLOP/sec\n" , double (timer.get_busy_flop_speed ()));
       fprintf (stdout, "mtrl: %g mtrl/sec\n" , double (timer.get_busy_unit_speed ()));
     }//end parallel region
-  return out;
+    return out;
+//  return (timer.get_is_ok () ? timer.get_busy_unit_speed () : -1.0;
   }
   inline
   double mtrl_iso3_scalar (const fmr::Perf_int test_n=300l *Mega) {// about 10 sec
@@ -372,16 +389,19 @@ FMR_WARN_INLINE_ON
           busy_s = double (timer.add_busy_time_now ());
         }
         for (fmr::Local_int i=0; i<9; ++i) {
-          out+= stress [i];
+          out+= stress [i];//FIXME race condition
         }
       }//end phase loop
+      timer.set_is_ok ( (abs(out - correct_value) < 1e-10) );
+      //
       fprintf (stdout, "name: %s\n"          ,"Kernel MTR-S: 3D isotropic minimum scalar");
       fprintf (stdout, "time: %g sec\n"      , busy_s);
       fprintf (stdout, "  AI: %g FLOP/byte\n", double (timer.get_ai ()));
       fprintf (stdout, "perf: %g FLOP/sec\n" , double (timer.get_busy_flop_speed ()));
       fprintf (stdout, "mtrl: %g mtrl/sec\n" , double (timer.get_busy_unit_speed ()));
     }//end parallel region
-  return out;
+    return out;
+//  return (timer.get_is_ok () ? timer.get_busy_unit_speed () : -1.0;
   }
   double mtrl_iso3_avx2 (const fmr::Perf_int test_n=3000 *Mega) {
     double out = 0.0;// returns sum of stress tensor component s.
@@ -528,10 +548,12 @@ FMR_WARN_INLINE_ON
         stress [ 3] = 0.0;// Zero the unused lanes.
         stress [ 7] = 0.0;
         stress [11] = 0.0;
-        for (fmr::Local_int i=0; i<12; ++i) {
+        for (fmr::Local_int i=0; i<12; ++i) {//FIXME race condition
           out+= stress [i];
         }
       }//end phase loop
+      timer.set_is_ok ( (abs(out - correct_value) < 1e-10) );
+      //
       fprintf (stdout, "name: %s\n"          ,"Kernel MTR-V: 3D isotropic AVX2");
       fprintf (stdout, "time: %g sec\n"      , busy_s);
       fprintf (stdout, "  AI: %g FLOP/byte\n", double (timer.get_ai ()));
@@ -539,27 +561,28 @@ FMR_WARN_INLINE_ON
       fprintf (stdout, "mtrl: %g mtrl/sec\n" , double (timer.get_busy_unit_speed ()));
     }//end parallel region
     return out;
+//  return (timer.get_is_ok () ? timer.get_busy_unit_speed () : -1.0;
   }
   fmr::Perf_int test_div = 100;
 #if 1
   TEST( TestMtrlIsoPerf1, LameIsCorrect ){
-    EXPECT_DOUBLE_EQ( mtrl_iso3_lame (1100l*Mega/test_div), mtrl_iso3_ref (400*Mega/test_div) );
+    EXPECT_DOUBLE_EQ( mtrl_iso3_lame (1100l*Mega/test_div), mtrl_iso3_base (400*Mega/test_div) );
   }
 #endif
 #if 1
   TEST( TestMtrlIsoPerf2, ScalarIsCorrect ){
-    EXPECT_DOUBLE_EQ( mtrl_iso3_scalar (300l*Mega/test_div), mtrl_iso3_ref (400*Mega/test_div) );
+    EXPECT_DOUBLE_EQ( mtrl_iso3_scalar (300l*Mega/test_div), mtrl_iso3_base (400*Mega/test_div) );
   }
 #endif
 #if 1
 // not really worth continuing to test
-  TEST( TestMtrlIsoPerf2, NaiveIsCorrect ){
-    EXPECT_DOUBLE_EQ( mtrl_iso3_naive (130l*Mega/test_div), mtrl_iso3_ref (400*Mega/test_div) );
+  TEST( TestMtrlIsoPerf2, ValarrayIsCorrect ){
+    EXPECT_DOUBLE_EQ( mtrl_iso3_valarray (130l*Mega/test_div), mtrl_iso3_base (400*Mega/test_div) );
   }
 #endif
 #if 1
   TEST( TestMtrlIsoPerf2, AVX2IsCorrect ){
-    EXPECT_DOUBLE_EQ( mtrl_iso3_avx2 (3000*Mega/test_div), mtrl_iso3_ref (400*Mega/test_div) );
+    EXPECT_DOUBLE_EQ( mtrl_iso3_avx2 (3000*Mega/test_div), mtrl_iso3_base (400*Mega/test_div) );
   }
 #endif
 } } }//end femera::test::perf:: namespace

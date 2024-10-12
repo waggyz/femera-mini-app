@@ -20,7 +20,7 @@ namespace fmr { namespace perf {
     F add_flop (I);
     F add_read (I);
     F add_save (I);
-    F add_count            // returns current unit_n total
+    F add_count // returns current unit_n total after adding
       (I units=1, I flops=0, I read=0, I save=0);
     //
     I get_unit_n ();
@@ -56,6 +56,9 @@ namespace fmr { namespace perf {
     F get_busy_data_speed ();
     F get_busy_read_speed ();
     F get_busy_save_speed ();
+    // Correctness (when applicable)
+    bool get_is_ok ();    // Is result correct?
+    bool set_is_ok (const bool);// returns value after setting
     // Constructors
     Meter (const std::string& unit_name) noexcept;
     Meter () =default;
@@ -67,6 +70,7 @@ namespace fmr { namespace perf {
     I         flop_n  = 0;
     I         read_n  = 0;// bytes in
     I         save_n  = 0;// bytes out
+    bool      is_ok   = false;
     std::string unit_name = std::string("units");
   };
 } }// end fmr::perf:: namespace

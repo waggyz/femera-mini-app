@@ -54,6 +54,7 @@ BUILD_TREE += $(BUILD_CPU)/femera/data/
 BUILD_TREE += $(BUILD_CPU)/femera/test/
 BUILD_TREE += $(BUILD_CPU)/femera/task/
 BUILD_TREE += $(BUILD_CPU)/fmr/perf/
+BUILD_TREE += $(BUILD_CPU)/fmr/mtrl/
 BUILD_TREE += $(BUILD_CPU)/zyclops/
 
 STAGE_TREE += $(STAGE_DIR)/bin/ $(STAGE_DIR)/lib/

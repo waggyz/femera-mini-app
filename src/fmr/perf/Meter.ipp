@@ -222,6 +222,15 @@ namespace fmr {
   F perf::Meter<I,F>::get_busy_save_speed () {
     return F (this->save_n) / this->get_busy_s();
   }
+  template <typename I, typename F> inline
+  bool perf::Meter<I,F>::get_is_ok () {// Is result correct?
+    return this->is_ok;
+  }
+  template <typename I, typename F> inline
+  bool perf::Meter<I,F>::set_is_ok (const bool ok) {// returns value after setting
+    this->is_ok = ok;
+    return this->is_ok;
+  }
 }// end fmr:: namespace
 #undef FMR_DEBUG
 #undef THIS_PRAGMA_OMP
