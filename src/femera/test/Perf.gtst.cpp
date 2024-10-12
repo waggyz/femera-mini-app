@@ -1,4 +1,6 @@
 #include "../femera.hpp"
+#include "../../fmr/mtrl/elastic-general.hpp"
+
 
 #include <gtest/gtest.h>
 
@@ -111,14 +113,12 @@ FMR_WARN_INLINE_ON
           __asm__ volatile ("" : "+g" (H6) : :);
           __asm__ volatile ("" : "+g" (H7) : :);
           __asm__ volatile ("" : "+g" (H8) : :);
-          const double H [9] = { H0,H1,H2,H3,H4,H5,H6,H7,H8 };// Snapshot the volatiles.
+          double H [9] = { H0,H1,H2,H3,H4,H5,H6,H7,H8 };// Snapshot the volatiles.
 #if 0
           //TODO instead call:
-          fmr::mtrl::elas_dmat_base<fmr::Phys_float> (&stress, &D, &H);
+          fmr::mtrl::elas_dmat_base<fmr::Phys_float> (&stress[0], &D[0], &H[0],
+          &strain_voigt[0], &stress_voigt[0]);
           //
-          template <typename F> static inline
-          void elas_dmat_base<fmr::Phys_float F> (&F stress, const &F D, const &F H) {
-          //};
 #else
           //
           strain_voigt [0] = H[0];
@@ -150,7 +150,7 @@ FMR_WARN_INLINE_ON
         }
       }//end phase loop
       timer.set_is_ok ( (abs(out - correct_value) < 1e-10) );
-      fprintf (stdout, "name: %s\n"          ,"Kernel MTR-D: 3D isotropic D-matrix reference");
+      fprintf (stdout, "name: %s\n"          ,"Kernel MTR-D: 3D isotropic D-matrix baseline");
       fprintf (stdout, "time: %g sec\n"      , busy_s);
       fprintf (stdout, "  AI: %g FLOP/byte\n", double (timer.get_ai ()));
       fprintf (stdout, "perf: %g FLOP/sec\n" , double (timer.get_busy_flop_speed ()));
@@ -563,7 +563,7 @@ FMR_WARN_INLINE_ON
     return out;
 //  return (timer.get_is_ok () ? timer.get_busy_unit_speed () : -1.0;
   }
-  fmr::Perf_int test_div = 100;
+  fmr::Perf_int test_div = 1;//00;
 #if 1
   TEST( TestMtrlIsoPerf1, LameIsCorrect ){
     EXPECT_DOUBLE_EQ( mtrl_iso3_lame (1100l*Mega/test_div), mtrl_iso3_base (400*Mega/test_div) );
@@ -575,14 +575,14 @@ FMR_WARN_INLINE_ON
   }
 #endif
 #if 1
+  TEST( TestMtrlIsoPerf2, AVX2IsCorrect ){
+    EXPECT_DOUBLE_EQ( mtrl_iso3_avx2 (3000*Mega/test_div), mtrl_iso3_base (400*Mega/test_div) );
+  }
+#endif
+#if 0
 // not really worth continuing to test
   TEST( TestMtrlIsoPerf2, ValarrayIsCorrect ){
     EXPECT_DOUBLE_EQ( mtrl_iso3_valarray (130l*Mega/test_div), mtrl_iso3_base (400*Mega/test_div) );
-  }
-#endif
-#if 1
-  TEST( TestMtrlIsoPerf2, AVX2IsCorrect ){
-    EXPECT_DOUBLE_EQ( mtrl_iso3_avx2 (3000*Mega/test_div), mtrl_iso3_base (400*Mega/test_div) );
   }
 #endif
 } } }//end femera::test::perf:: namespace
