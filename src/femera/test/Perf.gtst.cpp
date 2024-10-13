@@ -5,6 +5,7 @@
 
 #define TMP_HAS_AVX
 #define TMP_HAS_AVX2
+//FIXME Need macros defined: FMR_HAS_AVX and FMR_HAS_AVX2
 
 auto mini = fmr::new_jobs ();
 
@@ -91,7 +92,7 @@ FMR_WARN_INLINE_ON
       timer.add_flop (test_n * (36*2 +3));
       timer.add_read (test_n * sizeof(fmr::Phys_float) * (9 + 3));
       timer.add_save (test_n * sizeof(fmr::Phys_float) * (9    ));
-      double busy_s = 0.0;
+      fmr::Perf_float busy_s = 0.0;
       //
       const fmr::Phys_float lambda = 0.5;
       const fmr::Phys_float mu = 0.5;
@@ -122,13 +123,15 @@ FMR_WARN_INLINE_ON
         }
         timer.add_idle_time_now ();
         for (fmr::Perf_int n=0; n < phase_n; ++n) {
-          fmr::mtrl::elas_dmat_base<fmr::Phys_float> (&stress[0], &D[0], &H[0],
-            &strain_voigt[0], &stress_voigt[0]);
+          //
+          fmr::mtrl::elas_dmat_base<fmr::Phys_float>
+            (&stress[0], &D[0], &H[0], &strain_voigt[0], &stress_voigt[0]);
+          //
         }//end kernel loop
         if (phase == 0) {// warmup
           printf ("warm: %g sec\n", double (timer.add_idle_time_now ()));
         } else {// busy time run
-          busy_s = double (timer.add_busy_time_now ());
+          busy_s = timer.add_busy_time_now ();
         }
         for (fmr::Local_int i=0; i<9; ++i) {
           out [omp_i]+= stress [i];
@@ -136,7 +139,7 @@ FMR_WARN_INLINE_ON
       }//end phase loop
       timer.set_is_ok ( (abs(out[0] - correct_value) < 1e-10) );
       fprintf (stdout, "name: %s\n"          ,"Kernel MTR-D: 3D isotropic D-matrix baseline");
-      fprintf (stdout, "time: %g sec\n"      , busy_s);
+      fprintf (stdout, "time: %g sec\n"      , double (busy_s));
       fprintf (stdout, "  AI: %g FLOP/byte\n", double (timer.get_ai ()));
       fprintf (stdout, "perf: %g FLOP/sec\n" , double (timer.get_busy_flop_speed ()));
       fprintf (stdout, "mtrl: %g mtrl/sec\n" , double (timer.get_busy_unit_speed ()));
@@ -162,7 +165,7 @@ FMR_WARN_INLINE_ON
       timer.add_flop (test_n * (18 + 6));
       timer.add_read (test_n * ( 9 + 2) * sizeof(fmr::Phys_float));
       timer.add_save (test_n * ( 9)     * sizeof(fmr::Phys_float));// returns true stress tensor.
-      double busy_s = 0.0;
+      fmr::Perf_float busy_s = 0.0;
       //
       const fmr::Phys_float lambda = 0.5;
       const fmr::Phys_float mu = 0.5;
@@ -181,13 +184,15 @@ FMR_WARN_INLINE_ON
         }
         timer.add_idle_time_now ();
         for (fmr::Local_int n=0; n < phase_n; ++n) {
+          //
           fmr::mtrl::elas_iso_lame<fmr::Phys_float>
             (&stress[0], lambda, mu, &H[0], &HT[0]);
+          //
         }//end kernel loop
         if (phase == 0) {// warmup
           printf ("warm: %g sec\n", double (timer.add_idle_time_now ()));
         } else {// busy time run
-          busy_s = double (timer.add_busy_time_now ());
+          busy_s = timer.add_busy_time_now ();
         }
         for (fmr::Local_int i=0; i<9; ++i) {
           out [omp_i]+= stress [i];
@@ -196,7 +201,7 @@ FMR_WARN_INLINE_ON
       timer.set_is_ok ( (abs(out[0] - correct_value) < 1e-10) );
       //
       fprintf (stdout, "name: %s\n"          ,"Kernel MTR-L: 3D isotropic Lame formula");
-      fprintf (stdout, "time: %g sec\n"      , busy_s);
+      fprintf (stdout, "time: %g sec\n"      , double (busy_s));
       fprintf (stdout, "  AI: %g FLOP/byte\n", double (timer.get_ai ()));
       fprintf (stdout, "perf: %g FLOP/sec\n" , double (timer.get_busy_flop_speed ()));
       fprintf (stdout, "mtrl: %g mtrl/sec\n" , double (timer.get_busy_unit_speed ()));
@@ -222,7 +227,7 @@ FMR_WARN_INLINE_ON
       timer.add_flop (test_n * (15 + 6));
       timer.add_read (test_n * ( 9 + 2) * sizeof(fmr::Phys_float));
       timer.add_save (test_n * ( 9)     * sizeof(fmr::Phys_float));// returns true stress tensor.
-      double busy_s = 0.0;
+      fmr::Perf_float busy_s = 0.0;
       //
       const fmr::Phys_float lambda = 0.5;
       const fmr::Phys_float mu = 0.5;
@@ -245,13 +250,15 @@ FMR_WARN_INLINE_ON
         }
         timer.add_idle_time_now ();
         for (fmr::Perf_int n=0; n < (phase_n); ++n) {
+          //
           fmr::mtrl::elas_iso_scalar<fmr::Phys_float>
             (&stress[0], c1, c2, c3, &H[0], &stress_voigt[0]);
+          //
         }// end kernel loop
         if (phase == 0) {// warmup
           printf ("warm: %g sec\n", double (timer.add_idle_time_now ()));
         } else {// busy time run
-          busy_s = double (timer.add_busy_time_now ());
+          busy_s = timer.add_busy_time_now ();
         }
         for (fmr::Local_int i=0; i<9; ++i) {
           out [omp_i]+= stress [i];
@@ -260,7 +267,7 @@ FMR_WARN_INLINE_ON
       timer.set_is_ok ( (abs(out[0] - correct_value) < 1e-10) );
       //
       fprintf (stdout, "name: %s\n"          ,"Kernel MTR-S: 3D isotropic minimum scalar");
-      fprintf (stdout, "time: %g sec\n"      , busy_s);
+      fprintf (stdout, "time: %g sec\n"      , double (busy_s));
       fprintf (stdout, "  AI: %g FLOP/byte\n", double (timer.get_ai ()));
       fprintf (stdout, "perf: %g FLOP/sec\n" , double (timer.get_busy_flop_speed ()));
       fprintf (stdout, "mtrl: %g mtrl/sec\n" , double (timer.get_busy_unit_speed ()));
@@ -271,6 +278,7 @@ FMR_WARN_INLINE_ON
   return (is_ok[0] ? perf[0] : -1.0);
   }
 #ifdef TMP_HAS_AVX
+  inline
   fmr::Phys_float mtrl_iso3_avx (const fmr::Perf_int test_n=1250l *Mega) {
     const auto omp_n = size_t( omp_get_max_threads ());
     std::valarray<fmr::Phys_float>  out (omp_n);// returns performance if correct, -1.0 if not
@@ -286,7 +294,7 @@ FMR_WARN_INLINE_ON
       timer.add_flop (test_n * ( 3 + 12 + 6));// 21 FLOP
       timer.add_read (test_n * ( 12 + 2) * sizeof(fmr::Phys_float));// 14 actual, 11 effective
       timer.add_save (test_n * ( 12)     * sizeof(fmr::Phys_float));// 12 actua;.  9 effective
-      double busy_s = 0.0;
+      fmr::Perf_float busy_s = 0.0;
       //
       const fmr::Phys_float lambda = 0.5;
       const fmr::Phys_float mu     = 0.5;
@@ -309,15 +317,17 @@ FMR_WARN_INLINE_ON
         timer.add_idle_time_now ();
         for (fmr::Perf_int n=0; n < (phase_n); ++n) {
           __m256d vA[3] = { vA0,vA1,vA2 };
+          //
           fmr::mtrl::elas_iso_avx<fmr::Phys_float>
             (&stress[0], lambda, mu, &vA[0]);
+          //
         }// end kernel loop
         if (phase == 0) {// warmup
           printf ("warm: %g sec\n", double (timer.add_idle_time_now ()));
         } else {// busy time run
-          busy_s = double (timer.add_busy_time_now ());
+          busy_s =  timer.add_busy_time_now ();
         }
-        stress [ 3] = 0.0;// Zero the unused lanes.
+        stress [ 3] = 0.0;// Zero the unused lane.
         stress [ 7] = 0.0;
         stress [11] = 0.0;
         for (fmr::Local_int i=0; i<12; ++i) {
@@ -327,7 +337,7 @@ FMR_WARN_INLINE_ON
       timer.set_is_ok ( (abs(out[0] - correct_value) < 1e-10) );
       //
       fprintf (stdout, "name: %s\n"          ,"Kernel MTR-V: 3D isotropic AVX");
-      fprintf (stdout, "time: %g sec\n"      , busy_s);
+      fprintf (stdout, "time: %g sec\n"      , double (busy_s));
       fprintf (stdout, "  AI: %g FLOP/byte\n", double (timer.get_ai ()));
       fprintf (stdout, "perf: %g FLOP/sec\n" , double (timer.get_busy_flop_speed ()));
       fprintf (stdout, "mtrl: %g mtrl/sec\n" , double (timer.get_busy_unit_speed ()));
@@ -339,6 +349,7 @@ FMR_WARN_INLINE_ON
   }
 #endif
 #ifdef TMP_HAS_AVX2
+  inline
   fmr::Phys_float mtrl_iso3_avx2 (const fmr::Perf_int test_n=1400l *Mega) {
     const auto omp_n = size_t( omp_get_max_threads ());
     std::valarray<fmr::Phys_float>  out (omp_n);// returns performance if correct, -1.0 if not
@@ -354,7 +365,7 @@ FMR_WARN_INLINE_ON
       timer.add_flop (test_n * (4*3 +1 +8*3));// 37 FLOP
       timer.add_read (test_n * ( 12 + 2) * sizeof(fmr::Phys_float));// 14 actual, 11 effective
       timer.add_save (test_n * ( 12)     * sizeof(fmr::Phys_float));// 12 actua;.  9 effective
-      double busy_s = 0.0;
+      fmr::Perf_float busy_s = 0.0;
       //
       const fmr::Phys_float lambda = 0.5;
       const fmr::Phys_float mu     = 0.5;
@@ -377,8 +388,10 @@ FMR_WARN_INLINE_ON
         timer.add_idle_time_now ();
         for (fmr::Perf_int n=0; n < (phase_n); ++n) {
           __m256d vA[3] = { vA0,vA1,vA2 };
-        fmr::mtrl::elas_iso_avx2<fmr::Phys_float>
-          (&vA[0], lambda, mu);
+          //
+          fmr::mtrl::elas_iso_avx2<fmr::Phys_float>
+            (&vA[0], lambda, mu);
+          //
           _mm256_storeu_pd( &stress[0], vA[0]);
           _mm256_storeu_pd( &stress[4], vA[1]);
           _mm256_storeu_pd( &stress[8], vA[2]);
@@ -386,7 +399,7 @@ FMR_WARN_INLINE_ON
         if (phase == 0) {// warmup
           printf ("warm: %g sec\n", double (timer.add_idle_time_now ()));
         } else {// busy time run
-          busy_s = double (timer.add_busy_time_now ());
+          busy_s = timer.add_busy_time_now ();
         }
         stress [ 3] = 0.0;// Zero the unused lanes.
         stress [ 7] = 0.0;
@@ -398,7 +411,7 @@ FMR_WARN_INLINE_ON
       timer.set_is_ok ( (abs(out[0] - correct_value) < 1e-10) );
       //
       fprintf (stdout, "name: %s\n"          ,"Kernel MTR-V2: 3D isotropic AVX2");
-      fprintf (stdout, "time: %g sec\n"      , busy_s);
+      fprintf (stdout, "time: %g sec\n"      , double (busy_s));
       fprintf (stdout, "  AI: %g FLOP/byte\n", double (timer.get_ai ()));
       fprintf (stdout, "perf: %g FLOP/sec\n" , double (timer.get_busy_flop_speed ()));
       fprintf (stdout, "mtrl: %g mtrl/sec\n" , double (timer.get_busy_unit_speed ()));
