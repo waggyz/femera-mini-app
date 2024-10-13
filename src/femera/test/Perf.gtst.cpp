@@ -664,7 +664,7 @@ FMR_WARN_INLINE_ON
 //    return out;
   return (is_ok[0] ? perf[0] : -1.0);
   }
-  fmr::Perf_int test_div = 1;//000;
+  fmr::Perf_int test_div = 1000;
 #if 1
   TEST( PerfMtrlIsoLame, IsCorrectAndFaster ){
     EXPECT_GT( mtrl_iso3_lame (1200l*Mega/test_div), mtrl_iso3_base (500l*Mega/test_div) );
