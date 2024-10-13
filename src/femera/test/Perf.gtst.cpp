@@ -76,7 +76,7 @@ FMR_WARN_INLINE_ON
   //i7-12800H 537.6 Gflop/s
   //
   inline
-  double mtrl_iso3_base (const fmr::Perf_int test_n=400l *Mega/1) {// about 10 sec
+  double mtrl_iso3_base (const fmr::Perf_int test_n=500l *Mega/1) {// about 10 sec
     const auto omp_n = size_t( omp_get_max_threads ());
     std::valarray<fmr::Phys_float>  out (omp_n);// returns performance if correct, -1.0 if not
     std::valarray<fmr::Phys_float> perf (omp_n);
@@ -147,7 +147,7 @@ FMR_WARN_INLINE_ON
   return (is_ok[0] ? perf[0] : -1.0);
   }
   inline
-  double mtrl_iso3_lame (const fmr::Perf_int test_n=1100l *Mega) {// about 10 sec
+  fmr::Phys_float mtrl_iso3_lame (const fmr::Perf_int test_n=1200l *Mega) {// about 10 sec
     const auto omp_n = size_t( omp_get_max_threads ());
     std::valarray<fmr::Phys_float>  out (omp_n);// returns performance if correct, -1.0 if not
     std::valarray<fmr::Phys_float> perf (omp_n);
@@ -207,7 +207,7 @@ FMR_WARN_INLINE_ON
   return (is_ok[0] ? perf[0] : -1.0);
   }
   inline
-  fmr::Phys_float mtrl_iso3_scalar (const fmr::Perf_int test_n=300l *Mega) {// about 10 sec
+  fmr::Phys_float mtrl_iso3_scalar (const fmr::Perf_int test_n=1800l *Mega) {// about 10 sec
     const auto omp_n = size_t( omp_get_max_threads ());
     std::valarray<fmr::Phys_float>  out (omp_n);// returns performance if correct, -1.0 if not
     std::valarray<fmr::Phys_float> perf (omp_n);
@@ -271,7 +271,7 @@ FMR_WARN_INLINE_ON
   return (is_ok[0] ? perf[0] : -1.0);
   }
 #ifdef TMP_HAS_AVX
-  double mtrl_iso3_avx (const fmr::Perf_int test_n=3000 *Mega) {
+  fmr::Phys_float mtrl_iso3_avx (const fmr::Perf_int test_n=1250l *Mega) {
     const auto omp_n = size_t( omp_get_max_threads ());
     std::valarray<fmr::Phys_float>  out (omp_n);// returns performance if correct, -1.0 if not
     std::valarray<fmr::Phys_float> perf (omp_n);
@@ -339,7 +339,7 @@ FMR_WARN_INLINE_ON
   }
 #endif
 #ifdef TMP_HAS_AVX2
-  double mtrl_iso3_avx2 (const fmr::Perf_int test_n=1000 *Mega) {
+  fmr::Phys_float mtrl_iso3_avx2 (const fmr::Perf_int test_n=1400l *Mega) {
     const auto omp_n = size_t( omp_get_max_threads ());
     std::valarray<fmr::Phys_float>  out (omp_n);// returns performance if correct, -1.0 if not
     std::valarray<fmr::Phys_float> perf (omp_n);
@@ -422,11 +422,11 @@ FMR_WARN_INLINE_ON
 #endif
 #ifdef TMP_HAS_AVX
   TEST( PerfMtrlIsoAVX, IsCorrectAndFaster ){
-    EXPECT_GT( mtrl_iso3_avx (1000*Mega/test_div), mtrl_iso3_base (500l*Mega/test_div) );
+    EXPECT_GT( mtrl_iso3_avx (1250l*Mega/test_div), mtrl_iso3_base (500l*Mega/test_div) );
   }
 #ifdef TMP_HAS_AVX2
   TEST( PerfMtrlIsoAVX2, IsCorrectAndFaster ){
-    EXPECT_GT( mtrl_iso3_avx2 (1400*Mega/test_div), mtrl_iso3_base (500l*Mega/test_div) );
+    EXPECT_GT( mtrl_iso3_avx2 (1400l*Mega/test_div), mtrl_iso3_base (500l*Mega/test_div) );
   }
 #endif
 #endif
