@@ -47,7 +47,7 @@ namespace fmr { namespace perf {
     // Overall speed
     F get_unit_speed ();
     F get_flop_speed ();
-    F get_data_speed ();
+    F get_data_speed ();// input + output speed
     F get_read_speed ();// input speed
     F get_save_speed ();// output speed
     // Active speed
