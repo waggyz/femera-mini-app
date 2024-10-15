@@ -27,11 +27,6 @@ const fmr::Phys_float test_strain [9] = {
   0.0, 0.0, 0.0
 }; */
 
-const fmr::Phys_float correct_value = 5.0;// sum (stress)
-const fmr::Perf_int Mega = fmr::Perf_int (1000000l);
-using Perf_time_t = fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>;
-
-fmr::Perf_int test_div = 1000;// reduce 10-sec rapid development tests.
 //TODO add another function parameter to run once for correctness,
 //     multiple for performance?
 //
@@ -40,7 +35,14 @@ fmr::Perf_int test_div = 1000;// reduce 10-sec rapid development tests.
 //
 // https://www.intel.com/content/dam/support/us/en/documents/processors/APP-for-Intel-Core-Processors.pdf
 //i7-12800H 537.6 Gflop/s
-//
+
+using Perf_time_t = fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>;
+
+fmr::Perf_int test_div = 1000;// reduce 10-sec rapid development tests.
+
+const fmr::Perf_int Mega = fmr::Perf_int (1000000l);
+const fmr::Phys_float correct_value = 5.0;// sum (stress)
+
 inline
 double mtrl_iso3_base (const fmr::Perf_int test_n=500l *Mega/1) {// ~ 10 sec
   const auto omp_n = size_t( omp_get_max_threads ());
@@ -81,7 +83,6 @@ double mtrl_iso3_base (const fmr::Perf_int test_n=500l *Mega/1) {// ~ 10 sec
     fmr::Phys_float strain_voigt [6] = { 0.0,0.0,0.0, 0.0,0.0,0.0 };
     fmr::Phys_float stress_voigt [6] = { 0.0,0.0,0.0, 0.0,0.0,0.0 };
     //
-//      std::valarray<fmr::Phys_float> stress (0.0, 9);
     fmr::Phys_float stress [9] = { 0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0 };
     for (int phase =0; phase < 2; ++phase) {
       fmr::Perf_int phase_n = test_n / 10;// warmup
