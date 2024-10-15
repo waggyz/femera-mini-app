@@ -1,0 +1,77 @@
+Modern CMake refactor
+
+Refactor selected shell scripts to Python.
+Remove file extension from executable scripts.
+
+Start by refactoring Zyclops into lib/libzyclops.a and include/zyclops.inc.
+
+Refactor fmr::perf::Meter.hpp into lib/libperfy.a and include/perfy.inc?
+**BITC**: Busy/Idle Timer and Counter
+
+IMP: Instrument(ation) for Measuring Performance
+Minimal Integrated Performance Object
+CHIMP: C++ High-performance Instrument(ation) to Measure Performance
+CHOMP: C++ High-performance Object to Measure Performance
+PerfICT: Performance + Integrated Counter and Timer
+MPICT: Minimal Performance Integrated Counter and Timer
+MICT: Minimal Integrated/Integral Counter and Timer
+TICT: Tiny Integrated/Integral Counter and Timer
+TACIT: Timer and Counter Instrument(ation) Template
+PerfCAT: Performance + Counter And Timer
+TIETAC: Tiny/Templated Integral/Integrated Elapsed Timer And Counter
+TICTAC: Tiny/Templated Integral/Integrated Computation Timer And Counter (R)
+TICTOC: Tiny/Templated Integral/Integrated Computation Timer and Operation Counter (NOT AVAILABLE)
+INP__: Integral Numerical Performance _ _
+COCAT: Computation/Computational Operations Counter And Timer
+COPCAT: Computation Operations Performance Counter And Timer
+MOPCAT: Memory and Operation Performance Counter And Timer
+MACCAT: Memory And Computation Counter And Timer
+MCCAT: Memory and Computation Counter And Timer
+MOPM: Memory and Operation Performance Meter
+MMOM: Minimal Memory and Operation Meter
+(M)OMM: (Minimal) Operation and Memory Meter
+MOMCAT: Minimal Operation and Memory Counter And Timer
+MOCAT: Minimal Operation Counter And Timer
+AIM: Algebraic Intensity Meter
+NOMCAT: Numerical Operation and Memory Counter And Timer
+NOMM: Numerical Operations and Memory Meter
+BICAT: Busy/Idle Counter And Timer
+
+
+Refactor fmr::form into a library/module?
+
+Maybe just perfy and formy libraries?
+
+Cmake build system
+* Require CMake >=3.x
+* Make parallel when possible.
+* Change to JSON configuration files? (parse with Python), or, because no comments, NOT:
+  https://revelry.co/insights/development/json-configuration-file-format/
+* Append build stats to data/src/femera-$CPUNNAME-build-stats.csv for each new commit
+* Pybind11
+
+Terminal output when building Femera
+* ANSI colors
+* NOSA notice (modification if applicable)
+* See NOSA (LICENSE) file
+* Target time lines
+* Warn if unit testing turned off
+* Warn if *.cpp does not have associated *.gtst.cpp
+* Abbreviated .c?? -> .o compile lines
+* Abbreviated libzyclops.a <- .o lines
+* Abbreviated libfemera.a <- .o lines
+* Link .o -> googletest compile exectable lines
+* Compile mini.cpp -> mini executable file size line
+* Run fmrexec tdd:../mini -> mini.out test line
+* Find mpi suppression file, if available
+* Valgrind suppression file generation line
+* Run valgrind on mini and report leaks, if any
+* See valgrind log line
+* Compile valgrind.supp.cpp line
+* Build stats (lines, files, tests, coverage percent, TODO count, FIXME count)
+* Source code include graphs (headers, notest, with tests)
+* DONE, e.g., lines
+
+
+
+

@@ -137,7 +137,7 @@ FMR_WARN_INLINE_ON
           out [omp_i]+= stress [i];
         }
       }//end phase loop
-      timer.set_is_ok ( (abs(out[0] - correct_value) < 1e-10) );
+      timer.set_is_ok ( (abs(out[0] - correct_value) < 1e-10) );//TODO use type information for eps.
       fprintf (stdout, "name: %s\n"          ,"Kernel MTR-D: 3D isotropic D-matrix baseline");
       fprintf (stdout, "time: %g sec\n"      , double (busy_s));
       fprintf (stdout, "  AI: %g FLOP/byte\n", double (timer.get_ai ()));
@@ -198,7 +198,7 @@ FMR_WARN_INLINE_ON
           out [omp_i]+= stress [i];
         }
       }//end phase loop
-      timer.set_is_ok ( (abs(out[0] - correct_value) < 1e-10) );
+      timer.set_is_ok ( (abs(out[0] - correct_value) < 1e-10) );//TODO use type information for eps.
       //
       fprintf (stdout, "name: %s\n"          ,"Kernel MTR-L: 3D isotropic Lame formula");
       fprintf (stdout, "time: %g sec\n"      , double (busy_s));
@@ -264,7 +264,7 @@ FMR_WARN_INLINE_ON
           out [omp_i]+= stress [i];
         }
       }//end phase loop
-      timer.set_is_ok ( (abs(out[0] - correct_value) < 1e-10) );
+      timer.set_is_ok ( (abs(out[0] - correct_value) < 1e-10) );//TODO use type information for eps.
       //
       fprintf (stdout, "name: %s\n"          ,"Kernel MTR-S: 3D isotropic minimum scalar");
       fprintf (stdout, "time: %g sec\n"      , double (busy_s));
@@ -334,7 +334,7 @@ FMR_WARN_INLINE_ON
           out [omp_i]+= stress [i];
         }
       }//end phase loop
-      timer.set_is_ok ( (abs(out[0] - correct_value) < 1e-10) );
+      timer.set_is_ok ( (abs(out[0] - correct_value) < 1e-10) );//TODO use type information for eps.
       //
       fprintf (stdout, "name: %s\n"          ,"Kernel MTR-V: 3D isotropic AVX");
       fprintf (stdout, "time: %g sec\n"      , double (busy_s));
@@ -408,7 +408,7 @@ FMR_WARN_INLINE_ON
           out [omp_i]+= stress [i];
         }
       }//end phase loop
-      timer.set_is_ok ( (abs(out[0] - correct_value) < 1e-10) );
+      timer.set_is_ok ( (abs(out[0] - correct_value) < 1e-10) );//TODO use type information for eps.
       //
       fprintf (stdout, "name: %s\n"          ,"Kernel MTR-V2: 3D isotropic AVX2");
       fprintf (stdout, "time: %g sec\n"      , double (busy_s));
@@ -425,21 +425,21 @@ FMR_WARN_INLINE_ON
   fmr::Perf_int test_div = 1000;
 #if 1
   TEST( PerfMtrlIsoLame, IsCorrectAndFaster ){
-    EXPECT_GT( mtrl_iso3_lame (1200l*Mega/test_div), mtrl_iso3_base (500l*Mega/test_div) );
+    EXPECT_GT( mtrl_iso3_lame (1200*Mega/test_div), mtrl_iso3_base (500*Mega/test_div) );
   }
 #endif
 #if 1
   TEST( PerfMtrlIsoScalar, IsCorrectAndFaster ){
-    EXPECT_GT( mtrl_iso3_scalar (1800l*Mega/test_div), mtrl_iso3_base (500l*Mega/test_div) );
+    EXPECT_GT( mtrl_iso3_scalar (1800*Mega/test_div), mtrl_iso3_base (500*Mega/test_div) );
   }
 #endif
 #ifdef TMP_HAS_AVX
   TEST( PerfMtrlIsoAVX, IsCorrectAndFaster ){
-    EXPECT_GT( mtrl_iso3_avx (1250l*Mega/test_div), mtrl_iso3_base (500l*Mega/test_div) );
+    EXPECT_GT( mtrl_iso3_avx (1250*Mega/test_div), mtrl_iso3_base (500*Mega/test_div) );
   }
 #ifdef TMP_HAS_AVX2
   TEST( PerfMtrlIsoAVX2, IsCorrectAndFaster ){
-    EXPECT_GT( mtrl_iso3_avx2 (1400l*Mega/test_div), mtrl_iso3_base (500l*Mega/test_div) );
+    EXPECT_GT( mtrl_iso3_avx2 (1400*Mega/test_div), mtrl_iso3_base (500*Mega/test_div) );
   }
 #endif
 #endif
