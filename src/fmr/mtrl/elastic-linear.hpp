@@ -35,7 +35,7 @@ namespace fmr { namespace mtrl {
   //
 } }//end namespace fmr::mtrl
 
-#include "elastic-general.ipp"
+#include "elastic-linear.ipp"
 
 //end FMR_HAS_ELASTIC_GENERAL_HPP
 #endif

@@ -1,4 +1,4 @@
-#include "elastic-general.hpp"
+#include "elastic-linear.hpp"
 
 #include <gtest/gtest.h>
 

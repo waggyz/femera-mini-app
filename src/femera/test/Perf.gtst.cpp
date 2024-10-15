@@ -1,5 +1,5 @@
 #include "../femera.hpp"
-#include "../../fmr/mtrl/elastic-general.hpp"
+#include "../../fmr/mtrl/elastic-linear.hpp"
 
 #include <gtest/gtest.h>
 
