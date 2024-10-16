@@ -201,8 +201,8 @@ FMR_WARN_INLINE_ON
 #endif
   }
   template <fmr::Align_int A> template <typename T> inline
-  T Bulk<A>::make_hash (T in,
-    typename std::enable_if <sizeof(T) == 4>::type*)// CRC32
+  T Bulk<A>::make_hash
+    (T in, typename std::enable_if <sizeof(T) == 4>::type*)// CRC32
   noexcept {
     std::uint64_t crc = ~in;
     auto sz = this->cval_n * this->cval_szof * this->zplx.hc_size ();
@@ -236,8 +236,8 @@ FMR_WARN_INLINE_ON
     return T (~crc);
   }
   template <fmr::Align_int A> template <typename T> inline
-  T Bulk<A>::make_hash (T crc,
-    typename std::enable_if <sizeof(T) == 8>::type*)// CRC64
+  T Bulk<A>::make_hash
+    (T crc, typename std::enable_if <sizeof(T) == 8>::type*)// CRC64
   noexcept {// https://stackoverflow.com/questions/27939882/fast-crc-algorithm
     crc = ~crc;
     std::size_t sz = this->cval_n * this->cval_szof * this->zplx.hc_size ();

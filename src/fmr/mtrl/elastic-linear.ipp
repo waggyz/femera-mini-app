@@ -2,7 +2,7 @@ namespace fmr { namespace mtrl {
 //
   template <typename F> static inline// 75 FLOP
   void elas_dmat_base
-    (F* stress, const F* D, volatile F* H, F* strain_voigt, F* stress_voigt) {
+    (F* stress, const F* D, volatile F* H, F* strain_voigt, F* stress_v) {
     //
     strain_voigt [0] = H[0];
     strain_voigt [1] = H[4];
@@ -11,17 +11,15 @@ namespace fmr { namespace mtrl {
     strain_voigt [4] = H[2] + H[6];// 1 FLOP
     strain_voigt [5] = H[1] + H[3];// 1 FLOP
     //
-    for (fmr::Local_int i=0; i<6; ++i) { stress_voigt[i] = 0.0; }
+    for (fmr::Local_int i=0; i<6; ++i) { stress_v[i] = 0.0; }
     for (fmr::Local_int i=0; i < 6; ++i) {
       for (fmr::Local_int j=0; j < 6; ++j) {
-        stress_voigt[i] += D [6*i+j] * strain_voigt [j];// 2*36 = 72
+        stress_v[i] += D [6*i+j] * strain_voigt [j];// 2*36 = 72
     } }
-    stress [0] = stress_voigt[0]; stress [1] = stress_voigt[5]; stress [2] = stress_voigt[4];
-    stress [3] = stress_voigt[5]; stress [4] = stress_voigt[1]; stress [5] = stress_voigt[3];
-    stress [6] = stress_voigt[4]; stress [7] = stress_voigt[3]; stress [8] = stress_voigt[2];
+    stress[0] = stress_v[0]; stress[1] = stress_v[5]; stress[2] = stress_v[4];
+    stress[3] = stress_v[5]; stress[4] = stress_v[1]; stress[5] = stress_v[3];
+    stress[6] = stress_v[4]; stress[7] = stress_v[3]; stress[8] = stress_v[2];
   }
-  //TODO Move the rest to elastic-isotropic.*
-  //
   template <typename F> static inline// 24 FLOP
   void elas_iso_lame
     (F* stress, const F lambda, const F mu, volatile F* H, F* HT) {
@@ -41,25 +39,25 @@ namespace fmr { namespace mtrl {
   template <typename F> static inline// 21 FLOP
   void elas_iso_scalar
     (F* stress, const F c1, const F c2, const F c3, volatile F* H,
-     F* stress_voigt) {
-    stress_voigt [0] = c1*H[0] + c2*H[4] + c2*H[8];// 5 FLOP
-    stress_voigt [1] = c2*H[0] + c1*H[4] + c2*H[8];// 5 FLOP
-    stress_voigt [2] = c2*H[0] + c2*H[4] + c1*H[8];// 5 FLOP
-    stress_voigt [3] = (H[5] + H[7]) * c3;// 2 FLOP
-    stress_voigt [4] = (H[2] + H[6]) * c3;// 2 FLOP
-    stress_voigt [5] = (H[1] + H[3]) * c3;// 2 FLOP
+     F* stress_v) {
+    stress_v [0] = c1 * H[0] + c2 * H[4] + c2 * H[8];// 5 FLOP
+    stress_v [1] = c2 * H[0] + c1 * H[4] + c2 * H[8];// 5 FLOP
+    stress_v [2] = c2 * H[0] + c2 * H[4] + c1 * H[8];// 5 FLOP
+    stress_v [3] = (H[5] + H[7]) * c3;// 2 FLOP
+    stress_v [4] = (H[2] + H[6]) * c3;// 2 FLOP
+    stress_v [5] = (H[1] + H[3]) * c3;// 2 FLOP
     //
-    stress [0] = stress_voigt[0]; stress [1] = stress_voigt[5]; stress [2] = stress_voigt[4];
-    stress [3] = stress_voigt[5]; stress [4] = stress_voigt[1]; stress [5] = stress_voigt[3];
-    stress [6] = stress_voigt[4]; stress [7] = stress_voigt[3]; stress [8] = stress_voigt[2];
+    stress[0] = stress_v[0]; stress[1] = stress_v[5]; stress[2] = stress_v[4];
+    stress[3] = stress_v[5]; stress[4] = stress_v[1]; stress[5] = stress_v[3];
+    stress[6] = stress_v[4]; stress[7] = stress_v[3]; stress[8] = stress_v[2];
   }
-  //FIXME Need macros defined: FMR_HAS_AVX and FMR_HAS_AVX2
+  //TODO Need macros defined: FMR_HAS_AVX and FMR_HAS_AVX2
   //
   template <typename F> static inline//NOTE H volatile for performance testing
   void elas_iso_avx
     (F* fS, const F lambda, const F mu, volatile __m256d* vA) {
     //
-    _mm256_storeu_pd(&fS[0],vA[0]);//TODO change storeu to store busing VECALIGN from Femera v0.1.
+    _mm256_storeu_pd(&fS[0],vA[0]);//TODO change storeu to store using VECALIGN from Femera v0.1.
     _mm256_storeu_pd(&fS[4],vA[1]);
     _mm256_storeu_pd(&fS[8],vA[2]);
     {
