@@ -222,7 +222,6 @@ fmr::Perf_float mtrl_iso3_scalar_a
       0.0, 0.0, 0.0,
     };
     fmr::Phys_float stress       [9]={0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0};
-//    fmr::Phys_float stress_voigt [9]={0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0};
     //
     for (int phase=0; phase < 2; ++phase) {
       fmr::Perf_int phase_n = test_n / 10;// warmup

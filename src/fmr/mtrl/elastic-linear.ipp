@@ -45,6 +45,7 @@ namespace fmr { namespace mtrl { namespace elastic {
     stress [5] = (H[5] + H[7]) * c3;// 2 FLOP
     stress [2] = (H[2] + H[6]) * c3;// 2 FLOP
     stress [1] = (H[1] + H[3]) * c3;// 2 FLOP
+    //
     stress [7] = stress [5];
     stress [6] = stress [2];
     stress [3] = stress [1];
