@@ -45,7 +45,7 @@ const fmr::Perf_int Mega = fmr::Perf_int (1000000l);
 const fmr::Phys_float correct_value = 5.0;// sum (stress)
 
 inline
-fmr::Perf_float mtrl_iso3_base (const fmr::Perf_int test_n=500l *Mega/1) {// ~ 10 sec
+fmr::Perf_float mtrl_iso3_dmat (const fmr::Perf_int test_n=500l *Mega/1) {// ~ 10 sec
   const auto omp_n = size_t( omp_get_max_threads ());
   std::valarray<fmr::Phys_float>  out (omp_n);// performance if correct,
                                               // nan if not
@@ -93,7 +93,7 @@ fmr::Perf_float mtrl_iso3_base (const fmr::Perf_int test_n=500l *Mega/1) {// ~ 1
       timer.add_idle_time_now ();
       for (fmr::Perf_int n=0; n < phase_n; ++n) {
         //
-        fmr::mtrl::elas_dmat_base<fmr::Phys_float>
+        fmr::mtrl::elastic::linear_dmat_3d_base<fmr::Phys_float>
           (&stress[0], &D[0], &H[0], &strain_voigt[0], &stress_voigt[0]);
         //
       }//end kernel loop
@@ -109,7 +109,7 @@ fmr::Perf_float mtrl_iso3_base (const fmr::Perf_int test_n=500l *Mega/1) {// ~ 1
     timer.set_is_ok ( (abs(out[0] - correct_value) < 1e-10) );
     //TODO use type information for eps.
     fprintf (stdout, "name: %s\n"          ,
-      "Kernel MTR-D: 3D isotropic D-matrix baseline per-core performance");
+      "Kernel MTR-D: elastic 3D isotropic D-matrix baseline per-core performance");
     fprintf (stdout, "time: %g sec\n"      , double (busy_s));
     fprintf (stdout, "  AI: %g FLOP/byte\n", double (timer.get_ai ()));
     fprintf (stdout, "perf: %g FLOP/sec\n" , double
@@ -160,7 +160,7 @@ fmr::Perf_float mtrl_iso3_lame
       timer.add_idle_time_now ();
       for (fmr::Local_int n=0; n < phase_n; ++n) {
         //
-        fmr::mtrl::elas_iso_lame<fmr::Phys_float>
+        fmr::mtrl::elastic::linear_isotropic_3d_lame<fmr::Phys_float>
           (&stress[0], lambda, mu, &H[0], &HT[0]);
         //
       }//end kernel loop
@@ -177,7 +177,7 @@ fmr::Perf_float mtrl_iso3_lame
     //TODO use type information for eps.
     //
     fprintf (stdout, "name: %s\n"          ,
-      "Kernel MTR-L: 3D isotropic Lame formula per-core performance");
+      "Kernel MTR-L: 3D elastic isotropic Lame formula per-core performance");
     fprintf (stdout, "time: %g sec\n"      , double (busy_s));
     fprintf (stdout, "  AI: %g FLOP/byte\n", double (timer.get_ai ()));
     fprintf (stdout, "perf: %g FLOP/sec\n" ,
@@ -191,7 +191,78 @@ fmr::Perf_float mtrl_iso3_lame
 return (is_ok[0] ? perf[0] : perf_NaN);
 }
 inline
-fmr::Perf_float mtrl_iso3_scalar
+fmr::Perf_float mtrl_iso3_scalar_a
+ (const fmr::Perf_int test_n=1800l *Mega) {// about 10 sec
+  const auto omp_n = size_t( omp_get_max_threads ());
+  std::valarray<fmr::Phys_float>  out (omp_n);// performance if correct,
+                                              // nan if not
+  std::valarray<fmr::Perf_float> perf (omp_n);
+  std::valarray<bool>           is_ok (omp_n);
+  //
+  FMR_PRAGMA_OMP(omp parallel) {
+    const auto omp_i = fmr::Local_int (omp_get_thread_num());
+    //
+    Perf_time_t timer;
+    timer.start ();
+    timer.add_unit (test_n);
+    timer.add_flop (test_n * (15 + 6));
+    timer.add_read (test_n * ( 9 + 2) * sizeof(fmr::Phys_float));
+    timer.add_save (test_n * ( 9)     * sizeof(fmr::Phys_float));
+    fmr::Perf_float busy_s = 0.0;
+    //
+    const fmr::Phys_float lambda = 0.5;
+    const fmr::Phys_float mu = 0.5;
+    const fmr::Phys_float c1 = lambda + 2.0*mu;
+    const fmr::Phys_float c2 = lambda;
+    const fmr::Phys_float c3 = mu;
+    //
+    volatile fmr::Phys_float H [9] = {
+      1.0, 0.0, 0.0,
+      0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0,
+    };
+    fmr::Phys_float stress       [9]={0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0};
+//    fmr::Phys_float stress_voigt [9]={0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0};
+    //
+    for (int phase=0; phase < 2; ++phase) {
+      fmr::Perf_int phase_n = test_n / 10;// warmup
+      if (phase == 1) {// busy time run
+        phase_n = test_n;
+      }
+      timer.add_idle_time_now ();
+      for (fmr::Perf_int n=0; n < (phase_n); ++n) {
+        //
+        fmr::mtrl::elastic::linear_cubic_3d_scalar_a<fmr::Phys_float>
+          (&stress[0], c1, c2, c3, &H[0]);
+        //
+      }// end kernel loop
+      if (phase == 0) {// warmup
+        printf ("warm: %g sec\n", double (timer.add_idle_time_now ()));
+      } else {// busy time run
+        busy_s = timer.add_busy_time_now ();
+      }
+      for (fmr::Local_int i=0; i<9; ++i) {
+        out [omp_i]+= stress [i];
+      }
+    }//end phase loop
+    timer.set_is_ok ( (abs(out[0] - correct_value) < 1e-10) );
+    //
+    fprintf (stdout, "name: %s\n"          ,
+      "Kernel MTR-S: 3D elastic isotropic minimum scalar A per-core performance");
+    fprintf (stdout, "time: %g sec\n"      , double (busy_s));
+    fprintf (stdout, "  AI: %g FLOP/byte\n", double (timer.get_ai ()));
+    fprintf (stdout, "perf: %g FLOP/sec\n" ,
+      double (timer.get_busy_flop_speed ()));
+    fprintf (stdout, "mtrl: %g mtrl/sec\n" ,
+      double (timer.get_busy_unit_speed ()));
+    //
+    is_ok [omp_i] = timer.get_is_ok ();
+    perf  [omp_i] = timer.get_busy_unit_speed ();
+  }//end parallel region
+return (is_ok[0] ? perf[0] : perf_NaN);
+}
+inline
+fmr::Perf_float mtrl_iso3_scalar_b
  (const fmr::Perf_int test_n=1800l *Mega) {// about 10 sec
   const auto omp_n = size_t( omp_get_max_threads ());
   std::valarray<fmr::Phys_float>  out (omp_n);// performance if correct,
@@ -232,7 +303,7 @@ fmr::Perf_float mtrl_iso3_scalar
       timer.add_idle_time_now ();
       for (fmr::Perf_int n=0; n < (phase_n); ++n) {
         //
-        fmr::mtrl::elas_iso_scalar<fmr::Phys_float>
+        fmr::mtrl::elastic::linear_cubic_3d_scalar_b<fmr::Phys_float>
           (&stress[0], c1, c2, c3, &H[0], &stress_voigt[0]);
         //
       }// end kernel loop
@@ -248,7 +319,7 @@ fmr::Perf_float mtrl_iso3_scalar
     timer.set_is_ok ( (abs(out[0] - correct_value) < 1e-10) );
     //
     fprintf (stdout, "name: %s\n"          ,
-      "Kernel MTR-S: 3D isotropic minimum scalar per-core performance");
+      "Kernel MTR-S: 3D elastic isotropic minimum scalar B per-core performance");
     fprintf (stdout, "time: %g sec\n"      , double (busy_s));
     fprintf (stdout, "  AI: %g FLOP/byte\n", double (timer.get_ai ()));
     fprintf (stdout, "perf: %g FLOP/sec\n" ,
@@ -308,7 +379,7 @@ fmr::Perf_float mtrl_iso3_avx (const fmr::Perf_int test_n=1250l *Mega) {
       for (fmr::Perf_int n=0; n < (phase_n); ++n) {
         __m256d vA[3] = { vA0,vA1,vA2 };
         //
-        fmr::mtrl::elas_iso_avx<fmr::Phys_float>
+        fmr::mtrl::elastic::linear_isotropic_3d_avx<fmr::Phys_float>
           (&stress[0], lambda, mu, &vA[0]);
         //
       }// end kernel loop
@@ -328,7 +399,7 @@ fmr::Perf_float mtrl_iso3_avx (const fmr::Perf_int test_n=1250l *Mega) {
     //TODO use type information for eps.
     //
     fprintf (stdout, "name: %s\n"          ,
-      "Kernel MTR-V: 3D isotropic AVX per-core performance");
+      "Kernel MTR-V: 3D elastic isotropic AVX per-core performance");
     fprintf (stdout, "time: %g sec\n"      , double (busy_s));
     fprintf (stdout, "  AI: %g FLOP/byte\n", double (timer.get_ai ()));
     fprintf (stdout, "perf: %g FLOP/sec\n" ,
@@ -390,7 +461,7 @@ fmr::Perf_float mtrl_iso3_avx2 (const fmr::Perf_int test_n=1400l *Mega) {
       for (fmr::Perf_int n=0; n < (phase_n); ++n) {
         __m256d vA[3] = { vA0,vA1,vA2 };
         //
-        fmr::mtrl::elas_iso_avx2<fmr::Phys_float>
+        fmr::mtrl::elastic::linear_isotropic_3d_avx2<fmr::Phys_float>
           (&vA[0], lambda, mu);
         //
         _mm256_storeu_pd( &stress[0], vA[0]);
@@ -413,7 +484,7 @@ fmr::Perf_float mtrl_iso3_avx2 (const fmr::Perf_int test_n=1400l *Mega) {
     //TODO use type information for eps.
     //
     fprintf (stdout, "name: %s\n"          ,
-      "Kernel MTR-2: 3D isotropic AVX2 per-core performance");
+      "Kernel MTR-2: 3D elastic isotropic AVX2 per-core performance");
     fprintf (stdout, "time: %g sec\n"      , double (busy_s));
     fprintf (stdout, "  AI: %g FLOP/byte\n", double (timer.get_ai ()));
     fprintf (stdout, "perf: %g FLOP/sec\n" ,
@@ -428,28 +499,33 @@ return (is_ok[0] ? perf[0] : perf_NaN);
 }
 #endif
 
-TEST(ElasticIsotropic, TrivialTest) {
+TEST(PerfMtrlElasticLinear, TrivialTest) {
   EXPECT_EQ(1,1);
 }
 
-fmr::Phys_float base_dmat_speed = mtrl_iso3_base ( 500*Mega/test_div);
+const auto base_dmat_speed = mtrl_iso3_dmat ( 500*Mega/test_div);
 //
-TEST( PerfMtrlIsoScalar, IsCorrectAndFaster ){
+TEST( PerfMtrlElasticLinearIso, ScalarAIsCorrectAndFaster ){
   EXPECT_GT(
-    mtrl_iso3_scalar (1200*Mega/test_div), base_dmat_speed);
+    mtrl_iso3_scalar_a (1200*Mega/test_div), base_dmat_speed);
 }
-TEST( PerfMtrlIsoLame, IsCorrectAndFaster ){
+//
+TEST( PerfMtrlElasticLinearIso, ScalarBIsCorrectAndFaster ){
+  EXPECT_GT(
+    mtrl_iso3_scalar_b (1200*Mega/test_div), base_dmat_speed);
+}
+TEST( PerfMtrlElasticLinearIso, LameIsCorrectAndFaster ){
   EXPECT_GT(
     mtrl_iso3_lame (1200*Mega/test_div), base_dmat_speed);
 }
 #ifdef TMP_HAS_AVX
-  TEST( PerfMtrlIsoAVX, IsCorrectAndFaster ){
+  TEST( PerfMtrlElasticLinearIso, AVXIsCorrectAndFaster ){
     EXPECT_GT(
       mtrl_iso3_avx  (1250*Mega/test_div), base_dmat_speed);
   }
 #endif
 #ifdef TMP_HAS_AVX2
-  TEST( PerfMtrlIsoAVX2, IsCorrectAndFaster ){
+  TEST( PerfMtrlElasticLinearIso, AVX2IsCorrectAndFaster ){
     EXPECT_GT(
       mtrl_iso3_avx2 (1400*Mega/test_div), base_dmat_speed);
   }
