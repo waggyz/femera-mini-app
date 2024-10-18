@@ -14,8 +14,8 @@ namespace femera { namespace phys {
     void task_init (int* argc, char** argv);
     void task_exit ();
   private:
-    Beds (femera::Work::Core_ptrs_t) noexcept;
-    Beds () =delete;//NOTE Use the constructor above.
+    Mtrl (femera::Work::Core_ptrs_t) noexcept;
+    Mtrl () =delete;//NOTE Use the constructor above.
   };
 } }//end femera::phys:: namespace
 

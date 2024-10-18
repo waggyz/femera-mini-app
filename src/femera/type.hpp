@@ -8,8 +8,8 @@ namespace femera {
   /what-happens-if-you-static-cast-invalid-value-to-enum-class
   */
   enum class Base_type : fmr::Enum_int {             // Abstract CRTP base classes
-    None=0, Work, Proc, Data, Test, Mtrl, Cell, Slvr,// derived from Work
-    // Geom, Load, Phys, Cond, Solv, Sync, Part?, Post?, View?
+    None=0, Work, Proc, Data, Test, Phys, Cell_base, Algo,// derived from Work
+    // Geom, Load, Cond, Solv, Sync, Part?, Post?, View?
     Task // Must be last, Task_type numbers start after this.
   };
   enum class Task_type : fmr::Enum_int {// Built-in modules
@@ -39,6 +39,9 @@ namespace femera {
     Gtst,                        // Test type: Googletest handler
 //#endif
     Jobs, Sims, Runs,            // Task types //TODO: Part?, Post?, View?
+    Phys, Mtrl, Elas, Plas,      // Phys types
+    Cell, Gfe , FD  , FV  ,      // Cell_base types
+    Algo, Slvr, Spcg, Sncg,      // Phys types
 #if 0
     Geom, // Move to base/core type?
     Mesh, Grid, Gcad,// Gfem, Gfdm, Gfvm,// Geom types
@@ -47,7 +50,6 @@ namespace femera {
     Elem,// FEM low-order (p:1,2,3) elements
     Elfs,// FEM Finite-strain elements (or just different material/physics?)
     Bars, Quad, Tris, Tets, Pyrm, Prsm, Cube, Beam, Shll,// Elem types
-    Mtrl,
     Cmat, Cuel,// C or C++ source code
     Fmat, Fuel,// Fortran source code (Umat, Uel ?)
     Boco, Fix0, Diri, Neum,

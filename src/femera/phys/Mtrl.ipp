@@ -3,7 +3,7 @@
 
 namespace femera {
   inline
-  phys::mtrl::Mtrl (const femera::Work::Core_ptrs_t W)
+  phys::Mtrl::Mtrl (const femera::Work::Core_ptrs_t W)
   noexcept : Phys (W) {
     this->name      ="Femera materials";
     this->abrv      ="mtrl";

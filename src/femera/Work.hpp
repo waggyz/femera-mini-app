@@ -56,20 +56,20 @@ namespace femera {
     //class Plug;                      // plugins
 } }//end femera::task:: namespace
 namespace femera {
-  template <typename> class Mtrl;      // abstract CRTP base derived from Work
-  namespace mtrl {                     // CRTP inheriance from Mtrl
-    class Xxxx;                        // public interface for material handling //TODO
-    class Linr; class Plst;            // Elastic: linear, nonlinear plastic materials
+  template <typename> class Phys;      // abstract CRTP base derived from Work
+  namespace phys {                     // CRTP inheriance from Mtrl
+    class Mtrl;                        // public interface for material handling
+    class Elas; class Plst;            // Elastic: linear, nonlinear plastic materials
 } }//end femera::task:: namespace
 namespace femera {
   template <typename> class Mesh;      // abstract CRTP base derived from Work
-  namespace task {                     // CRTP inheriance from Mesh
-    class Cell;                        // public interface for Mesh handling
+  namespace xxxx {                     // CRTP inheriance from Xxxx //TODO
+    class Cell;                        // public interface for Xxxx handling
     class Fe; class Fd; class Fv;      // Femera cell (numerical method) types
 } }//end femera::task:: namespace
 namespace femera {
   template <typename> class Slvr;      // abstract CRTP base derived from Work
-  namespace task {                     // CRTP inheriance from Slvr
+  namespace slvr {                     // CRTP inheriance from Slvr
     class Xxxx;                        // public interface for Slvr handling //TODO
     class Pcg ; class Ncg ;            // Femera tasks
     //class Post;

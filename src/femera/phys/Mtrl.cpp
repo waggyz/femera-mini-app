@@ -1,18 +1,24 @@
-#include "../core.h"
+//#include "../core.h"
+
+#include "Mtrl.hpp"
 
 //#include "FE.hpp"
 //#include "FD.hpp"
 //#include "FV.hpp"
 
-#include <unistd.h>          // argc opterr optopt optind optarg
+//#include <unistd.h>          // argc opterr optopt optind optarg
 
 namespace femera {
-  void test::Mtrl::task_init (int* argc, char** argv) {
-//    this->scan (argc, argv);
+#if 0
+  void phys::Mtrl::task_init (int* argc, char** argv) {
+    this->scan (argc, argv);
+#else
+  void phys::Mtrl::task_init (int*, char**) {
+#endif
     this->set_init (true);
   }
 #if 0
-  void test::Mtrl::scan (int* argc, char** argv) {
+  void phys::mtrl::scan (int* argc, char** argv) {
     if (argc != nullptr && argv != nullptr) {
       FMR_PRAGMA_OMP(omp MAIN) {//NOTE getopt is NOT thread safe.
         int ac=argc[0];// Copy getopt variables.

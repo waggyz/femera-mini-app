@@ -3,6 +3,8 @@
 
 #include "../Task.hpp"
 
+#include "../phys/Mtrl.hpp"
+
 namespace femera { namespace task {
   class Sims;// Derive a CRTP concrete class from Task.
   class Sims final: public Task<Sims> { friend class Task;
