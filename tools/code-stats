@@ -27,7 +27,7 @@ LOC1="lines of source code in"
 LOC2="lines of  test  code in"
 #
 printf "$SRCD counted %6i %s %4i files,\n" $CODE_LINES "$LOC1" $CODE_FILES
-printf "$SPCS and     %6i %s %4i files (%3.0f%% coverage),\n" \
+printf "$SPCS and     %6i %s %4i files (%3.0f%% line coverage),\n" \
 $TEST_LINES "$LOC2" $TEST_FILES $COVERAGE
 #
 TD="TO""DO"

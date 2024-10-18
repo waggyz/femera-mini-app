@@ -7,8 +7,8 @@ namespace femera {
   https://stackoverflow.com/questions/18195312
   /what-happens-if-you-static-cast-invalid-value-to-enum-class
   */
-  enum class Base_type : fmr::Enum_int {// Abstract CRTP base classes
-    None=0, Work, Proc, Data, Test,     // derived from Work
+  enum class Base_type : fmr::Enum_int {             // Abstract CRTP base classes
+    None=0, Work, Proc, Data, Test, Mtrl, Cell, Slvr,// derived from Work
     // Geom, Load, Phys, Cond, Solv, Sync, Part?, Post?, View?
     Task // Must be last, Task_type numbers start after this.
   };

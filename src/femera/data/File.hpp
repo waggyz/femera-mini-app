@@ -13,7 +13,7 @@
  */
 namespace femera { namespace data {
   class File;// Derive as a CRTP concrete class from Data.
-  class File final: public Data <File> { friend class Data;
+  class File final: public Data <File> { friend class Data;// interface to Data classes
   private:
     using css = const std::string;// for convenience
   public:

@@ -5,7 +5,7 @@
 
 namespace femera { namespace proc {
   class Main;// Derive a CRTP concrete class from Proc.
-  class Main final: public Proc<Main> { friend class Proc;
+  class Main final: public Proc<Main> { friend class Proc;// interface to Proc classes
   //TODO friend class Proc<Main> or just Proc? Both work.
   private:
     fmr::Local_int race_n = 0;// number of shared-memory threads
