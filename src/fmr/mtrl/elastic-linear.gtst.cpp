@@ -11,10 +11,6 @@
 
 #include <immintrin.h>
 
-#define TMP_HAS_AVX
-#define TMP_HAS_AVX2
-//FIXME Need macros defined: FMR_HAS_AVX and FMR_HAS_AVX2
-
 // Empty assembly trick might prevent over-optimization of these functions.
 // Adapted from:
 // https://stackoverflow.com/questions/7083482/how-can-i-prevent-gcc-from-optimizing-out-a-busy-wait-loop
@@ -331,7 +327,7 @@ fmr::Perf_float mtrl_iso3_scalar_b
   }//end parallel region
 return (is_ok[0] ? perf[0] : perf_NaN);
 }
-#ifdef TMP_HAS_AVX
+#ifdef FMR_HAS_AVX
 inline
 fmr::Perf_float mtrl_iso3_avx (const fmr::Perf_int test_n=1250l *Mega) {
   const auto omp_n = size_t( omp_get_max_threads ());
@@ -412,7 +408,7 @@ fmr::Perf_float mtrl_iso3_avx (const fmr::Perf_int test_n=1250l *Mega) {
 return (is_ok[0] ? perf[0] : perf_NaN);
 }
 #endif
-#ifdef TMP_HAS_AVX2
+#ifdef FMR_HAS_AVX2
 inline
 fmr::Perf_float mtrl_iso3_avx2 (const fmr::Perf_int test_n=1400l *Mega) {
   const auto omp_n = size_t( omp_get_max_threads ());
@@ -517,21 +513,18 @@ TEST( PerfMtrlElasticLinearIso, LameIsCorrectAndFaster ){
   EXPECT_GT(
     mtrl_iso3_lame (1200*Mega/test_div), base_dmat_speed);
 }
-#ifdef TMP_HAS_AVX
+#ifdef FMR_HAS_AVX
   TEST( PerfMtrlElasticLinearIso, AVXIsCorrectAndFaster ){
     EXPECT_GT(
       mtrl_iso3_avx  (1250*Mega/test_div), base_dmat_speed);
   }
 #endif
-#ifdef TMP_HAS_AVX2
+#ifdef FMR_HAS_AVX2
   TEST( PerfMtrlElasticLinearIso, AVX2IsCorrectAndFaster ){
     EXPECT_GT(
       mtrl_iso3_avx2 (1400*Mega/test_div), base_dmat_speed);
   }
 #endif
-
-#undef TMP_HAS_AVX
-#undef TMP_HAS_AVX2
 
 int main (int argc, char** argv) {
   return femera::test:: early_main (&argc, argv);

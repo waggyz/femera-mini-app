@@ -141,6 +141,13 @@ endif
 ifneq ($(FMR_TIMES_UCHAR),)
   FMRFLAGS   += -DFMR_TIMES_UCHAR=$(FMR_TIMES_UCHAR)
 endif
+ifneq ($(findstring AVX,$(CPUSIMDS)),)
+  FMRFLAGS   += -DFMR_HAS_AVX
+endif
+ifneq ($(findstring AVX2,$(CPUSIMDS)),)
+  FMRFLAGS   += -DFMR_HAS_AVX2
+endif
+
 INCFLAGS     += -I"$(STAGE_CPU)/include"
 INCFLAGS     += -I"$(STAGE_DIR)/include"
 INCFLAGS     += -isystem"$(INSTALL_CPU)/include"

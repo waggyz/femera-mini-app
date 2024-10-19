@@ -25,7 +25,7 @@ ifeq ("$(CPUNUMAS)","")
   #(info $(INFO) set CPUNUMAS to $(CPUNUMAS))
 endif
 ifeq ("$(CPUSIMDS)","")
-  CPUSIMDS := $(shell tools/cpusimds.sh)
+  CPUSIMDS := $(shell tools/fmrsimds.sh)
   #(info $(INFO) set CPUSIMDS to $(CPUSIMDS))
 endif
 ifneq ("$(MAKEJOBS)","")

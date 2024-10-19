@@ -64,8 +64,7 @@ namespace fmr { namespace mtrl { namespace elastic {
     stress[3] = stress_v[5]; stress[4] = stress_v[1]; stress[5] = stress_v[3];
     stress[6] = stress_v[4]; stress[7] = stress_v[3]; stress[8] = stress_v[2];
   }
-  //TODO Need macros defined: FMR_HAS_AVX and FMR_HAS_AVX2
-  //
+#ifdef FMR_HAS_AVX
   template <typename F> static inline//NOTE vH volatile for performance testing
   void linear_isotropic_3d_avx
     (F* fS, const F lambda, const F mu, volatile __m256d* vH) {
@@ -87,7 +86,8 @@ namespace fmr { namespace mtrl { namespace elastic {
     fS[6]+= fS[9];
     fS[4]=fS[1]; fS[9]=fS[6]; fS[8]=fS[2];
   }
-  //
+#endif
+#ifdef FMR_HAS_AVX2
   template <typename F> static inline//NOTE vA volatile for performance testing
   void linear_isotropic_3d_avx2
     (volatile __m256d* vA, const F lambda, const F mu) {
@@ -138,7 +138,6 @@ namespace fmr { namespace mtrl { namespace elastic {
     print_m256( S[0] ); print_m256( S[1] ); print_m256( S[2] );
 #endif
   }
-
-
+#endif
 
 } } }//end namespace fmr::mtrl::elastic
