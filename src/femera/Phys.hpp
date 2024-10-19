@@ -13,8 +13,8 @@ namespace femera {
   public:
     std::string get_base_abrv ()               noexcept final override;
     //
-    fmr::Exit_int   init (int*, char**)        noexcept final override;
-    fmr::Exit_int   exit (fmr::Exit_int err=0) noexcept final override;
+    fmr::Exit_int init (int*, char**)        noexcept final override;
+    fmr::Exit_int exit (fmr::Exit_int err=0) noexcept final override;
   public:
     static constexpr
     This_spt new_task (const Work::Core_ptrs_t) noexcept;
@@ -24,6 +24,8 @@ namespace femera {
     This_spt new_task (int*, char**)      noexcept;
     T*       get_task (fmr::Local_int)    noexcept;
     T*       get_task (Work::Task_path_t) noexcept;
+    T*       get_task (Work_type, fmr::Local_int ix=0) noexcept;
+    T*       get_task (Task_type, fmr::Local_int ix=0) noexcept;
   private:
     static constexpr
     T* this_cast (Phys*) noexcept;

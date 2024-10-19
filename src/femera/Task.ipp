@@ -83,6 +83,16 @@ FMR_WARN_INLINE_OFF
     return static_cast<T*> (ptr);
   }
 FMR_WARN_INLINE_ON
+  template <typename T> inline
+  T* Task<T>::get_task (const Work_type t, const fmr::Local_int ix)
+  noexcept {
+    return Task::this_cast (Work::get_work (t, ix));
+  }
+  template <typename T> inline
+  T* Task<T>::get_task (const Task_type t, const fmr::Local_int ix)
+  noexcept {
+    return Task::this_cast (Work::get_work (task_cast (t), ix));
+  }//
 }// end femera:: namespace
 
 #undef FMR_DEBUG

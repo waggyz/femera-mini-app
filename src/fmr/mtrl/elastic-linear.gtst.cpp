@@ -118,6 +118,13 @@ fmr::Perf_float mtrl_iso3_dmat (const fmr::Perf_int test_n=500l *Mega/1) {// ~ 1
   }//end parallel region
 return is_ok[0] ? perf[0] : perf_NaN;
 }
+#ifdef FMR_HAS_MKL
+//TODO placeholder for Intel MKL symmetric version
+inline
+fmr::Perf_float mtrl_iso3_symm (const fmr::Perf_int test_n=500l *Mega/1) {// ~ 10 sec
+//
+}
+#endif
 inline
 fmr::Perf_float mtrl_iso3_lame
  (const fmr::Perf_int test_n=1200l *Mega) {// about 10 sec
@@ -498,13 +505,19 @@ TEST(PerfMtrlElasticLinear, TrivialTest) {
   EXPECT_EQ(1,1);
 }
 
-const auto base_dmat_speed = mtrl_iso3_dmat ( 500*Mega/test_div);
+const auto base_dmat_speed = mtrl_iso3_dmat (500*Mega/test_div);
 //
+#ifdef FMR_HAS_MKL
+//TODO placeholder for Intel MKL symmetric version
+TEST( PerfMtrlElasticLinearIso, MKLSymmetricIsCorrectAndFaster ){
+  EXPECT_GT(
+    mtrl_iso3_symm (500*Mega/test_div), base_dmat_speed);
+}
+#endif
 TEST( PerfMtrlElasticLinearIso, ScalarAIsCorrectAndFaster ){
   EXPECT_GT(
     mtrl_iso3_scalar_a (1200*Mega/test_div), base_dmat_speed);
 }
-//
 TEST( PerfMtrlElasticLinearIso, ScalarBIsCorrectAndFaster ){
   EXPECT_GT(
     mtrl_iso3_scalar_b (1200*Mega/test_div), base_dmat_speed);

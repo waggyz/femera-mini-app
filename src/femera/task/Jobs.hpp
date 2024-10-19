@@ -10,6 +10,7 @@ namespace femera { namespace task {
   private:
     void task_init (int* argc, char** argv);
     void task_exit ();
+//    Sims add_sims ();
   public:
     Jobs (femera::Work::Core_ptrs_t) noexcept;
     Jobs () noexcept;

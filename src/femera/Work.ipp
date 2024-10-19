@@ -52,6 +52,27 @@ namespace femera {
     return fmr::Local_int (this->task_list.size ());
   }
   inline
+  fmr::Local_int Work::get_task_n (const Work_type wt)
+  noexcept {
+    fmr::Local_int count=0;
+    const auto n = this->task_list.size ();
+    for (fmr::Local_int i=0; i<n; ++i) {
+      count += (this->get_work (i)->get_task_type () == wt) ? 1u : 0u ;
+    }
+    return count;
+  }
+  inline
+  fmr::Local_int Work::get_task_n (const Task_type wt)
+  noexcept {
+    fmr::Local_int count=0;
+    const auto n = this->task_list.size ();
+    for (fmr::Local_int i=0; i<n; ++i) {
+      count+= ( this->get_work (i)->get_task_type () == femera::task_cast (wt))
+      ? 1u : 0u ;
+    }
+    return count;
+  }
+  inline
   fmr::Local_int Work::del_task (const fmr::Local_int ix)
   noexcept {
     if (ix < this->task_list.size ()) {
@@ -68,6 +89,11 @@ namespace femera {
   std::string Work::get_abrv ()
   noexcept {
     return this->abrv;
+  }
+  inline
+  Work_type Work::get_task_type ()
+  noexcept {
+    return this->task_type;
   }
   inline
   std::string Work::set_name (const std::string& nm)

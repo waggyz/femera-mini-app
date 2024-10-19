@@ -59,7 +59,8 @@ namespace femera {
   template <typename> class Phys;      // abstract CRTP base derived from Work
   namespace phys {                     // CRTP inheriance from Mtrl
     class Mtrl;                        // public interface for material handling
-    class Elas; class Plst;            // Elastic: linear, nonlinear plastic materials
+    class Elas; class Plst;            // Elastic: linear, nonlinear plastic materils
+    class Ther;                        // Thermal material
 } }//end femera::task:: namespace
 namespace femera {
   template <typename> class Mesh;      // abstract CRTP base derived from Work
@@ -121,15 +122,18 @@ https://stackoverflow.com/questions/60040665
     bool        set_init     (bool) noexcept;// sets & returns did_work_init
   public:// methods -----------------------------------------------------------
     template <typename T, typename C> static constexpr
-    T* cast_via_work (C* child) noexcept;
-    Core_ptrs_t get_core     () noexcept;
-    std::string get_abrv     () noexcept;
-    std::string get_version  () noexcept;
-    std::string get_name     () noexcept;
-    std::string set_name     (const std::string&) noexcept;
-    bool        did_init     () noexcept;//     returns did_work_init
+    T* cast_via_work  (C* child) noexcept;
+    Core_ptrs_t get_core      () noexcept;
+    std::string get_abrv      () noexcept;
+    std::string get_version   () noexcept;
+    std::string get_name      () noexcept;
+    Work_type   get_task_type () noexcept;
+    std::string set_name      (const std::string&) noexcept;
+    bool        did_init      () noexcept;//     returns did_work_init
     // task stack handling
     fmr::Local_int get_task_n () noexcept;
+    fmr::Local_int get_task_n (const Work_type) noexcept;
+    fmr::Local_int get_task_n (const Task_type) noexcept;
     fmr::Local_int add_task   (Work_spt) noexcept;// returns task number added
     fmr::Local_int del_task   (fmr::Local_int ix) noexcept;// returns task_n
     //NOTE more efficient to get_task (..) then check for nullptr

@@ -3,12 +3,24 @@
 #include "../fmr.hpp"
 #include <immintrin.h>
 
+#ifdef FMR_HAS_MKL
+#include <MKL.h>
+#endif
+
 namespace fmr { namespace mtrl { namespace elastic {
   //
   template <typename F> static inline//NOTE H volatile for performance testing
   void linear_dmat_3d_base
     (F* stress, const F* D, volatile F* H, F* strain_voigt, F* stress_voigt)
     __attribute__((optimize ("O3")));// This is for performance testing.
+  //
+#ifdef FMR_HAS_MKL
+//TODO placeholder for Intel MKL symmetric version
+  template <typename F> static inline//NOTE H volatile for performance testing
+  void linear_dmat_3d_symm
+    (F* stress, const F* D, volatile F* H, F* strain_voigt, F* stress_voigt)
+    __attribute__((optimize ("O3")));
+#endif
   //
   template <typename F> static inline//NOTE H volatile for performance testing
   void linear_isotropic_3D_lame
@@ -25,13 +37,14 @@ namespace fmr { namespace mtrl { namespace elastic {
     (F* stress, const F c1, const F c2, const F c3, volatile F* H,
      F* stress_voigt)
     __attribute__((optimize ("O3")));
-
+  //
 #ifdef FMR_HAS_AVX
   template <typename F> static inline//NOTE vH volatile for performance testing
   void linear_isotropic_3d_avx
     (F* stress, const F lambda, const F mu, volatile __m256d* vH)
     __attribute__((optimize ("O3")));
 #endif
+  //
 #ifdef FMR_HAS_AVX2
   template <typename F> static inline//NOTE vA volatile for performance testing
   // Strain goes into vA, stress comes out aofs vA

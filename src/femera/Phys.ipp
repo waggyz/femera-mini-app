@@ -71,6 +71,16 @@ FMR_WARN_INLINE_ON
   FMR_SMART_PTR<T> Phys<T>::new_task (const Work::Core_ptrs_t core)
   noexcept {
     return FMR_MAKE_SMART(T) (T(core));
+  }
+  template <typename T> inline
+  T* Phys<T>::get_task (const Work_type t, const fmr::Local_int ix)
+  noexcept {
+    return Phys::this_cast (Work::get_work (t, ix));
+  }
+  template <typename T> inline
+  T* Phys<T>::get_task (const Task_type t, const fmr::Local_int ix)
+  noexcept {
+    return Phys::this_cast (Work::get_work (task_cast (t), ix));
   }//
   //
 }// end femera:: namespace

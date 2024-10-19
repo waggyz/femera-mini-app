@@ -20,6 +20,100 @@ namespace fmr { namespace mtrl { namespace elastic {
     stress[3] = stress_v[5]; stress[4] = stress_v[1]; stress[5] = stress_v[3];
     stress[6] = stress_v[4]; stress[7] = stress_v[3]; stress[8] = stress_v[2];
   }
+#if 0
+//TODO general AVX/AVX2 6x6 matrix-vector multiply
+  template <typename F> static inline //NOTE vH volatile for performance testing
+  // for F==__m256d
+  void linear_isotropic_3d_dmat_avx
+    (F* S, const F* D, volatile F* H) {
+    // Structure of S and H
+    //  3   2   1  0       3   2   1  0
+    // sxx sxy sxz 0 -or- sxx sxy sxz 0
+    // sxy syy syz 0 -or- syx syy syz 0
+    // sxz syz szz 0 -or- szx szy szz 0
+    //
+    // Structure of vS and vH
+    //  3   2   1   0 |   3    2     1    0
+    // sxx syy szz  0 | 2*sxz 2*syz 2*sxy 0
+    //               -or-
+    //  3   2   1   0 |    3       2       1    0
+    // sxx syy szz  0 | sxz+szx syz+sxy sxy+syx 0
+    // = sum:
+    // sxx syy szz  0 |   sxz     syz     sxy   0
+    //                |   szx     szy     syx   0
+    //
+    // Structure of D
+    //  3   2   1   0 | 3   2   1   0
+    // d11 d12 d13  0 |d14 d15 d16  0
+    // d12 d22 d23  0 |d24 d25 d26  0
+    // d13 d23 d33  0 |d34 d35 d36  0
+    // d14 d24 d34  0 |d44 d45 d46  0
+    // d15 d25 d35  0 |d45 d55 d56  0
+    // d16 d26 d36  0 |d46 d56 d66  0
+  }
+//
+// by NASA LunAI, Gemini 1.5 Pro, 2024-10-19
+// [This should work for both AVX and AVX2]
+//
+// Define a structure for a 6x6 matrix aligned to 32 bytes
+typedef struct {
+    __m256d data[6][2];
+} Matrix6x6;
+
+// Define a structure for a conformal vector aligned to 32 bytes
+typedef struct {
+    double x;
+    double y;
+    double z;
+    double w;
+    double p;
+    double d;
+} ConformalVector;
+
+// Function to multiply a 6x6 matrix by a conformal vector using AVX2 intrinsics
+ConformalVector multiplyMatrixVector(const Matrix6x6 *matrix, const ConformalVector *vector) {
+    ConformalVector result;
+
+    // Load vector elements into AVX registers
+    __m256d vec0 = _mm256_set_pd(vector->x, vector->y, vector->z, vector->w);
+    __m256d vec1 = _mm256_set_pd(vector->p, vector->d, 0.0, 0.0);
+
+    // Perform matrix multiplication using AVX2 intrinsics
+    for (int i = 0; i < 6; ++i) {
+        __m256d sum = _mm256_mul_pd(matrix->data[i][0], vec0);
+        sum = _mm256_fmadd_pd(matrix->data[i][1], vec1, sum);
+        
+        // Extract and accumulate results
+        if (i < 4) {
+            (&result.x)[i] = sum[0] + sum[2]; 
+        } else {
+            (&result.p)[i - 4] = sum[0] + sum[2];
+        }
+    }
+
+    return result;
+}
+Exp
+#endif
+#ifdef FMR_HAS_MKL
+  template <typename F> static inline// assume 75 FLOP
+  void elastic::linear_dmat_3d_symm
+    (F* stress, const F* D, volatile F* H, F* strain_voigt, F* stress_v) {
+    //
+    strain_voigt [0] = H[0];
+    strain_voigt [1] = H[4];
+    strain_voigt [2] = H[8];
+    strain_voigt [3] = H[5] + H[7];// 1 FLOP
+    strain_voigt [4] = H[2] + H[6];// 1 FLOP
+    strain_voigt [5] = H[1] + H[3];// 1 FLOP
+    //
+    //TODO placeholder for Intel MKL symmetric function call
+    //
+    stress[0] = stress_v[0]; stress[1] = stress_v[5]; stress[2] = stress_v[4];
+    stress[3] = stress_v[5]; stress[4] = stress_v[1]; stress[5] = stress_v[3];
+    stress[6] = stress_v[4]; stress[7] = stress_v[3]; stress[8] = stress_v[2];
+  }
+#endif
   template <typename F> static inline// 24 FLOP
   void linear_isotropic_3d_lame
     (F* stress, const F lambda, const F mu, volatile F* H, F* HT) {
@@ -69,7 +163,8 @@ namespace fmr { namespace mtrl { namespace elastic {
   void linear_isotropic_3d_avx
     (F* fS, const F lambda, const F mu, volatile __m256d* vH) {
     //
-    _mm256_storeu_pd(&fS[0],vH[0]);//TODO change storeu to store using VECALIGN from Femera v0.1.
+    _mm256_storeu_pd(&fS[0],vH[0]);//TODO change storeu to store using 32-byte
+                                   //     aligned and padded data.
     _mm256_storeu_pd(&fS[4],vH[1]);
     _mm256_storeu_pd(&fS[8],vH[2]);
     {
@@ -90,7 +185,7 @@ namespace fmr { namespace mtrl { namespace elastic {
 #ifdef FMR_HAS_AVX2
   template <typename F> static inline//NOTE vA volatile for performance testing
   void linear_isotropic_3d_avx2
-    (volatile __m256d* vA, const F lambda, const F mu) {
+    (volatile __m256d* vA, const F lambda, const F mu) {//FIXME only good for F=double
     //vA is strain coming in and stress going out.
     //
     // S = mu * (H+H^T) + lambda * I * ( H[0]+H[5]+H[10] )
@@ -100,7 +195,7 @@ namespace fmr { namespace mtrl { namespace elastic {
     // sxy syy syz | sxz
     // sxz syz szz | ---
     __m256d Ssum=_mm256_setzero_pd();
-    {
+    {// Scope variables  z0 and ml.
     const __m256d z0 =_mm256_set_pd(0.0,1.0,1.0,1.0);
     const __m256d ml =_mm256_set_pd(lambda,mu,mu,mu);
     vA[0]=_mm256_permute4x64_pd( vA[0]*z0,_MM_SHUFFLE(0,2,3,1) );

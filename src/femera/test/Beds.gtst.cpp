@@ -9,6 +9,6 @@ FMR_WARN_INLINE_OFF
   return mini->exit (mini->init (&argc,argv));
 FMR_WARN_INLINE_ON
 }
-TEST( Gtst, TaskName ){
+TEST( TestBeds, TaskName ){
   EXPECT_EQ( mini->test->get_abrv (), "beds" );
 }
