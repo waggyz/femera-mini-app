@@ -5,10 +5,8 @@
 auto jobs = femera::task::Jobs
  ( femera::Work::Core_ptrs_t (nullptr,nullptr,nullptr) );
 #else
-FMR_WARN_INLINE_OFF
   auto jobs = femera::task::Jobs ();
 //  auto jobs = femera::new_jobs ();
-FMR_WARN_INLINE_ON
 #endif
 
 int   dummy_argc = 1;

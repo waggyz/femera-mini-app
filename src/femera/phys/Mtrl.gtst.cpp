@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 
 auto  mini_ptr = fmr::new_jobs ();
-auto& mini = *mini_ptr;
+auto &mini = *mini_ptr;
 
 fmr::Local_int sims_count =0;
 std::string sims_abrv;
