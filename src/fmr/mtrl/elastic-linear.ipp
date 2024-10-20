@@ -1,6 +1,8 @@
 namespace fmr { namespace mtrl { namespace elastic {
 //
-  template <typename F> static inline// 75 FLOP
+  template <typename F,// 75 FLOP
+  typename std::enable_if<std::is_floating_point<F>::value>::type* = nullptr>
+  static inline
   void elastic::linear_3d_dmat_base
     (F* stress, const F* D, volatile F* H, F* strain_voigt, F* stress_v) {
     //
@@ -22,7 +24,8 @@ namespace fmr { namespace mtrl { namespace elastic {
   }
 #if 0
 //TODO general AVX/AVX2 6x6 matrix-vector multiply
-  template <typename F> static inline //NOTE vH volatile for performance testing
+  template <typename F,// XXX FLOP
+  typename std::enable_if<std::is_same<F, double>::value>::type* = nullptr>
   // for F==__m256d
   void linear_3d_isotropic_dmat_avx
     (F* S, const F* D, volatile F* H) {
@@ -96,7 +99,9 @@ ConformalVector multiplyMatrixVector(const Matrix6x6 *matrix, const ConformalVec
 Exp
 #endif
 #ifdef FMR_HAS_MKL
-  template <typename F> static inline// assume 75 FLOP
+  template <typename F,// assume 75 FLOP
+  typename std::enable_if<std::is_floating_point<F>::value>::type* = nullptr>
+  static inline
   void elastic::linear_3d_dmat_symm
     (F* stress, const F* D, volatile F* H, F* strain_voigt, F* stress_v) {
     //
@@ -114,7 +119,9 @@ Exp
     stress[6] = stress_v[4]; stress[7] = stress_v[3]; stress[8] = stress_v[2];
   }
 #endif
-  template <typename F> static inline// 24 FLOP
+  template <typename F,// 24 FLOP
+  typename std::enable_if<std::is_floating_point<F>::value>::type* = nullptr >
+  static inline
   void linear_3d_isotropic_lame
     (F* stress, const F lambda, const F mu, volatile F* H, F* HT) {
     //
@@ -130,7 +137,9 @@ Exp
     stress [4] += lambda_trace;// 1 FLOP
     stress [8] += lambda_trace;// 1 FLOP
   }
-  template <typename F> static inline// 21 FLOP
+  template <typename F,// 21 FLOP
+  typename std::enable_if<std::is_floating_point<F>::value>::type* = nullptr>
+  static inline
   void linear_3d_cubic_scalar_a
     (F* stress, const F c1,const F c2,const F c3, volatile F* H) {
     //
@@ -145,7 +154,9 @@ Exp
     stress [6] = stress [2];
     stress [3] = stress [1];
   }
-  template <typename F> static inline// 21 FLOP
+  template <typename F,// 21 FLOP
+  typename std::enable_if<std::is_floating_point<F>::value>::type* = nullptr>
+  static inline
   void linear_3d_cubic_scalar_b
     (F* stress, const F c1,const F c2,const F c3, volatile F* H, F* stress_v) {
     //
@@ -161,7 +172,9 @@ Exp
     stress[6] = stress_v[4]; stress[7] = stress_v[3]; stress[8] = stress_v[2];
   }
 #ifdef FMR_HAS_AVX
-  template <typename F> static inline//NOTE vH volatile for performance testing
+  template <typename F,
+  typename std::enable_if<std::is_same<F, double>::value>::type* = nullptr>
+  static inline
   void linear_3d_isotropic_avx
     (F* fS, const F lambda, const F mu, volatile __m256d* vH) {
     //
@@ -186,7 +199,9 @@ Exp
   }
 #endif
 #ifdef FMR_HAS_AVX2
-  template <typename F> static inline//NOTE vA volatile for performance testing
+  template <typename F,
+  typename std::enable_if<std::is_same<F, double>::value>::type* = nullptr>
+  static inline//NOTE vA volatile for performance testing
   void linear_3d_isotropic_avx2 //FIXME only for F=double
     (volatile __m256d* vA, const F lambda, const F mu) {
     //
