@@ -64,7 +64,7 @@ fmr::Perf_float mtrl_iso3_dmat (const fmr::Perf_int test_n=500l *Mega/1) {// ~ 1
     const fmr::Phys_float c1 = lambda + 2.0*mu;
     const fmr::Phys_float c2 = lambda;
     const fmr::Phys_float c3 = mu;
-    const fmr::Phys_float D [36] = {
+    const fmr::mtrl::elastic::dmat_full<fmr::Phys_float> D = {
       c1, c2, c2, 0 , 0 , 0,
       c2, c1, c2, 0 , 0 , 0,
       c2, c2, c1, 0 , 0 , 0,
@@ -89,7 +89,7 @@ fmr::Perf_float mtrl_iso3_dmat (const fmr::Perf_int test_n=500l *Mega/1) {// ~ 1
       timer.add_idle_time_now ();
       for (fmr::Perf_int n=0; n < phase_n; ++n) {
         //
-        fmr::mtrl::elastic::linear_dmat_3d_base<fmr::Phys_float>
+        fmr::mtrl::elastic::linear_3d_dmat_base<fmr::Phys_float>
           (&stress[0], &D[0], &H[0], &strain_voigt[0], &stress_voigt[0]);
         //
       }//end kernel loop
@@ -121,7 +121,7 @@ return is_ok[0] ? perf[0] : perf_NaN;
 #ifdef FMR_HAS_MKL
 //TODO placeholder for Intel MKL symmetric version
 inline
-fmr::Perf_float mtrl_iso3_symm (const fmr::Perf_int test_n=500l *Mega/1) {// ~ 10 sec
+fmr::Perf_float mtrl_iso3_spmv (const fmr::Perf_int test_n=500l *Mega/1) {// ~ 10 sec
 //
 }
 #endif
@@ -163,7 +163,7 @@ fmr::Perf_float mtrl_iso3_lame
       timer.add_idle_time_now ();
       for (fmr::Local_int n=0; n < phase_n; ++n) {
         //
-        fmr::mtrl::elastic::linear_isotropic_3d_lame<fmr::Phys_float>
+        fmr::mtrl::elastic::linear_3d_isotropic_lame<fmr::Phys_float>
           (&stress[0], lambda, mu, &H[0], &HT[0]);
         //
       }//end kernel loop
@@ -234,7 +234,7 @@ fmr::Perf_float mtrl_iso3_scalar_a
       timer.add_idle_time_now ();
       for (fmr::Perf_int n=0; n < (phase_n); ++n) {
         //
-        fmr::mtrl::elastic::linear_cubic_3d_scalar_a<fmr::Phys_float>
+        fmr::mtrl::elastic::linear_3d_cubic_scalar_a<fmr::Phys_float>
           (&stress[0], c1, c2, c3, &H[0]);
         //
       }// end kernel loop
@@ -305,7 +305,7 @@ fmr::Perf_float mtrl_iso3_scalar_b
       timer.add_idle_time_now ();
       for (fmr::Perf_int n=0; n < (phase_n); ++n) {
         //
-        fmr::mtrl::elastic::linear_cubic_3d_scalar_b<fmr::Phys_float>
+        fmr::mtrl::elastic::linear_3d_cubic_scalar_b<fmr::Phys_float>
           (&stress[0], c1, c2, c3, &H[0], &stress_voigt[0]);
         //
       }// end kernel loop
@@ -367,11 +367,12 @@ fmr::Perf_float mtrl_iso3_avx (const fmr::Perf_int test_n=1250l *Mega) {
     volatile __m256d vA1 = {H4, H5, H6, H7};
     volatile __m256d vA2 = {H8,0.0,0.0,0.0};
     //
-    fmr::Phys_float stress [12] = {
-      0.0, 0.0, 0.0, 0.0,
-      0.0, 0.0, 0.0, 0.0,
-      0.0, 0.0, 0.0, 0.0
-    };
+    __m256d s[3];//32-byte aligned to use _store instead of _storeu in kernel
+    s[0] = _mm256_setzero_pd ();
+    s[1] = _mm256_setzero_pd ();
+    s[2] = _mm256_setzero_pd ();
+    fmr::Phys_float* stress = (fmr::Phys_float*) &s[0];// cast to floating pt.
+    //
     for (int phase=0; phase < 2; ++phase) {
       fmr::Perf_int phase_n = test_n / 10;// warmup
       if (phase == 1) {// busy time run
@@ -381,7 +382,7 @@ fmr::Perf_float mtrl_iso3_avx (const fmr::Perf_int test_n=1250l *Mega) {
       for (fmr::Perf_int n=0; n < (phase_n); ++n) {
         __m256d vA[3] = { vA0,vA1,vA2 };
         //
-        fmr::mtrl::elastic::linear_isotropic_3d_avx<fmr::Phys_float>
+        fmr::mtrl::elastic::linear_3d_isotropic_avx<fmr::Phys_float>
           (&stress[0], lambda, mu, &vA[0]);
         //
       }// end kernel loop
@@ -463,7 +464,7 @@ fmr::Perf_float mtrl_iso3_avx2 (const fmr::Perf_int test_n=1400l *Mega) {
       for (fmr::Perf_int n=0; n < (phase_n); ++n) {
         __m256d vA[3] = { vA0,vA1,vA2 };
         //
-        fmr::mtrl::elastic::linear_isotropic_3d_avx2<fmr::Phys_float>
+        fmr::mtrl::elastic::linear_3d_isotropic_avx2<fmr::Phys_float>
           (&vA[0], lambda, mu);
         //
         _mm256_storeu_pd( &stress[0], vA[0]);

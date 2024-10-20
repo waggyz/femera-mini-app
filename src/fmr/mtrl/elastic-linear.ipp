@@ -1,7 +1,7 @@
 namespace fmr { namespace mtrl { namespace elastic {
 //
   template <typename F> static inline// 75 FLOP
-  void elastic::linear_dmat_3d_base
+  void elastic::linear_3d_dmat_base
     (F* stress, const F* D, volatile F* H, F* strain_voigt, F* stress_v) {
     //
     strain_voigt [0] = H[0];
@@ -24,7 +24,7 @@ namespace fmr { namespace mtrl { namespace elastic {
 //TODO general AVX/AVX2 6x6 matrix-vector multiply
   template <typename F> static inline //NOTE vH volatile for performance testing
   // for F==__m256d
-  void linear_isotropic_3d_dmat_avx
+  void linear_3d_isotropic_dmat_avx
     (F* S, const F* D, volatile F* H) {
     // Structure of S and H
     //  3   2   1  0       3   2   1  0
@@ -97,7 +97,7 @@ Exp
 #endif
 #ifdef FMR_HAS_MKL
   template <typename F> static inline// assume 75 FLOP
-  void elastic::linear_dmat_3d_symm
+  void elastic::linear_3d_dmat_symm
     (F* stress, const F* D, volatile F* H, F* strain_voigt, F* stress_v) {
     //
     strain_voigt [0] = H[0];
@@ -115,7 +115,7 @@ Exp
   }
 #endif
   template <typename F> static inline// 24 FLOP
-  void linear_isotropic_3d_lame
+  void linear_3d_isotropic_lame
     (F* stress, const F lambda, const F mu, volatile F* H, F* HT) {
     //
     HT [0] = H [0]; HT [1] = H [3]; HT [2] = H [6];
@@ -131,8 +131,9 @@ Exp
     stress [8] += lambda_trace;// 1 FLOP
   }
   template <typename F> static inline// 21 FLOP
-  void linear_cubic_3d_scalar_a
+  void linear_3d_cubic_scalar_a
     (F* stress, const F c1,const F c2,const F c3, volatile F* H) {
+    //
     stress [0] = c1 * H[0] + c2 * H[4] + c2 * H[8];// 5 FLOP
     stress [4] = c2 * H[0] + c1 * H[4] + c2 * H[8];// 5 FLOP
     stress [8] = c2 * H[0] + c2 * H[4] + c1 * H[8];// 5 FLOP
@@ -145,8 +146,9 @@ Exp
     stress [3] = stress [1];
   }
   template <typename F> static inline// 21 FLOP
-  void linear_cubic_3d_scalar_b
+  void linear_3d_cubic_scalar_b
     (F* stress, const F c1,const F c2,const F c3, volatile F* H, F* stress_v) {
+    //
     stress_v [0] = c1 * H[0] + c2 * H[4] + c2 * H[8];// 5 FLOP
     stress_v [1] = c2 * H[0] + c1 * H[4] + c2 * H[8];// 5 FLOP
     stress_v [2] = c2 * H[0] + c2 * H[4] + c1 * H[8];// 5 FLOP
@@ -160,32 +162,34 @@ Exp
   }
 #ifdef FMR_HAS_AVX
   template <typename F> static inline//NOTE vH volatile for performance testing
-  void linear_isotropic_3d_avx
+  void linear_3d_isotropic_avx
     (F* fS, const F lambda, const F mu, volatile __m256d* vH) {
     //
-    _mm256_storeu_pd(&fS[0],vH[0]);//TODO change storeu to store using 32-byte
-                                   //     aligned and padded data.
-    _mm256_storeu_pd(&fS[4],vH[1]);
-    _mm256_storeu_pd(&fS[8],vH[2]);
-    {
-    const fmr::Phys_float tr = (fS[0]+fS[5]+fS[10]) * lambda;// 3 FLOP
-    const __m256d mw= _mm256_set1_pd(mu);
-    _mm256_storeu_pd( &fS[0], mw * vH[0] );// sxx sxy sxz | syx   // 4 FLOP
-    _mm256_storeu_pd( &fS[4], mw * vH[1] );// syx syy syz | szx   // 4 FLOP
-    _mm256_storeu_pd( &fS[8], mw * vH[2] );// szx szy szz | ---   // 4 FLOP
-    //
-    fS[0]=2.0*fS[0]+tr; fS[5]=2.0*fS[5]+tr; fS[10]=2.0*fS[10]+tr;// 6 FLOP
+    _mm256_store_pd (&fS[0], vH[0]);
+    _mm256_store_pd (&fS[4], vH[1]);
+    _mm256_store_pd (&fS[8], vH[2]);
+    {// Scope variables tr and mw.
+      const fmr::Phys_float tr = (fS[0] + fS[5] + fS[10]) * lambda;// 3 FLOP
+      const __m256d         mw =_mm256_set1_pd (mu);
+      _mm256_store_pd (&fS[0], mw * vH[0]);// sxx sxy sxz | syx    // 4 FLOP
+      _mm256_store_pd (&fS[4], mw * vH[1]);// syx syy syz | szx    // 4 FLOP
+      _mm256_store_pd (&fS[8], mw * vH[2]);// szx szy szz | ---    // 4 FLOP
+      //
+      fS[ 0] = 2.0*fS[ 0] + tr;// 2 FLOP
+      fS[ 5] = 2.0*fS[ 5] + tr;// 2 FLOP
+      fS[10] = 2.0*fS[10] + tr;// 2 FLOP
     }
-    fS[1]+= fS[4];
-    fS[2]+= fS[8];
-    fS[6]+= fS[9];
+    fS[1]+=fS[4];
+    fS[2]+=fS[8];
+    fS[6]+=fS[9];
     fS[4]=fS[1]; fS[9]=fS[6]; fS[8]=fS[2];
   }
 #endif
 #ifdef FMR_HAS_AVX2
   template <typename F> static inline//NOTE vA volatile for performance testing
-  void linear_isotropic_3d_avx2
-    (volatile __m256d* vA, const F lambda, const F mu) {//FIXME only good for F=double
+  void linear_3d_isotropic_avx2 //FIXME only for F=double
+    (volatile __m256d* vA, const F lambda, const F mu) {
+    //
     //vA is strain coming in and stress going out.
     //
     // S = mu * (H+H^T) + lambda * I * ( H[0]+H[5]+H[10] )
@@ -195,15 +199,15 @@ Exp
     // sxy syy syz | sxz
     // sxz syz szz | ---
     __m256d Ssum=_mm256_setzero_pd();
-    {// Scope variables  z0 and ml.
-    const __m256d z0 =_mm256_set_pd(0.0,1.0,1.0,1.0);
-    const __m256d ml =_mm256_set_pd(lambda,mu,mu,mu);
-    vA[0]=_mm256_permute4x64_pd( vA[0]*z0,_MM_SHUFFLE(0,2,3,1) );
-    Ssum+= vA[0]*ml;// 4 FLOP
-    vA[1]=_mm256_permute4x64_pd( vA[1]*z0,_MM_SHUFFLE(1,3,2,0) );
-    Ssum+= vA[1]*ml;// 4 FLOP
-    vA[2]=_mm256_permute4x64_pd( vA[2]*z0,_MM_SHUFFLE(2,0,1,3) );
-    Ssum+= vA[2]*ml;// 4 FLOP
+    {// Scope variables z0 and ml.
+      const __m256d z0 =_mm256_set_pd(0.0,1.0,1.0,1.0);
+      const __m256d ml =_mm256_set_pd(lambda,mu,mu,mu);
+      vA[0]=_mm256_permute4x64_pd( vA[0]*z0,_MM_SHUFFLE(0,2,3,1) );
+      Ssum+= vA[0]*ml;// 4 FLOP
+      vA[1]=_mm256_permute4x64_pd( vA[1]*z0,_MM_SHUFFLE(1,3,2,0) );
+      Ssum+= vA[1]*ml;// 4 FLOP
+      vA[2]=_mm256_permute4x64_pd( vA[2]*z0,_MM_SHUFFLE(2,0,1,3) );
+      Ssum+= vA[2]*ml;// 4 FLOP
     }
     //      3   2   1   0
     //     sxy 0.0 sxz sxx
