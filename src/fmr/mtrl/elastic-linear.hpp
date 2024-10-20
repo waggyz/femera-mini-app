@@ -1,5 +1,5 @@
-#ifndef FMR_HAS_ELASTIC_GENERAL_HPP
-#define FMR_HAS_ELASTIC_GENERAL_HPP
+#ifndef FMR_HAS_ELASTIC_LINEAR_HPP
+#define FMR_HAS_ELASTIC_LINEAR_HPP
 #include "../fmr.hpp"
 
 #include <type_traits>
@@ -11,20 +11,6 @@
 
 namespace fmr { namespace mtrl { namespace elastic {
   //
-#if 0
-  template <typename F>
-  struct Isotropic_lame_parameters {
-    F lambda;
-    F mu;
-  };
-  //
-  template <typename F>
-  struct Cubic_dmat_constants {
-    F c1;// iso: lambda+2*mu (D11, D22, D33)
-    F c2;// iso: mu          (D44, D55, D66)
-    F c3;// iso: lambda      (D13, D23, D12, D31, D32, D21)
-  };
-#else
   template <typename F>
   using Isotropic_lame_parameters  = F[ 2];
   template <typename F>
@@ -35,7 +21,6 @@ namespace fmr { namespace mtrl { namespace elastic {
   using dmat_symm                  = F[21];
   template <typename F>
   using dmat_full                  = F[36];
-#endif
   //
   template <typename F,///NOTE H volatile for performance testing
   typename std::enable_if<std::is_floating_point<F>::value>::type* = nullptr>
@@ -98,6 +83,6 @@ namespace fmr { namespace mtrl { namespace elastic {
 
 #include "elastic-linear.ipp"
 
-//end FMR_HAS_ELASTIC_GENERAL_HPP
+//end FMR_HAS_ELASTIC_LINEAR_HPP
 #endif
 

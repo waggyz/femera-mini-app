@@ -1,5 +1,5 @@
 namespace fmr { namespace mtrl { namespace elastic {
-//
+  //
   template <typename F,// 75 FLOP
   typename std::enable_if<std::is_floating_point<F>::value>::type* = nullptr>
   static inline
@@ -41,7 +41,7 @@ namespace fmr { namespace mtrl { namespace elastic {
     //               -or-
     //  3   2   1   0 |    3       2       1    0
     // sxx syy szz  0 | sxz+szx syz+sxy sxy+syx 0
-    // = sum:
+    //             = sum:
     // sxx syy szz  0 |   sxz     syz     sxy   0
     //                |   szx     szy     syx   0
     //
@@ -93,13 +93,12 @@ ConformalVector multiplyMatrixVector(const Matrix6x6 *matrix, const ConformalVec
             (&result.p)[i - 4] = sum[0] + sum[2];
         }
     }
-
     return result;
 }
 Exp
 #endif
 #ifdef FMR_HAS_MKL
-  template <typename F,// assume 75 FLOP
+  template <typename F,// assume 75 FLOP?
   typename std::enable_if<std::is_floating_point<F>::value>::type* = nullptr>
   static inline
   void elastic::linear_3d_dmat_symm
@@ -202,7 +201,7 @@ Exp
   template <typename F,
   typename std::enable_if<std::is_same<F, double>::value>::type* = nullptr>
   static inline//NOTE vA volatile for performance testing
-  void linear_3d_isotropic_avx2 //FIXME only for F=double
+  void linear_3d_isotropic_avx2
     (volatile __m256d* vA, const F lambda, const F mu) {
     //
     //vA is strain coming in and stress going out.
@@ -213,6 +212,7 @@ Exp
     // sxx sxy sxz | sxy
     // sxy syy syz | sxz
     // sxz syz szz | ---
+    //
     __m256d Ssum=_mm256_setzero_pd();
     {// Scope variables z0 and ml.
       const __m256d z0 =_mm256_set_pd(0.0,1.0,1.0,1.0);
@@ -230,22 +230,22 @@ Exp
     //     0.0 szy szx szz
     //
     // mu*(sxy syz sxz)trace(H)*lambda : Ssum
-    {
-    const __m256d m2=_mm256_set_pd(2.0*mu,0.0,0.0,0.0);// 1 FLOP
-    //      3   2   1   0
-    // mu*(sxy 0.0 sxz)sxx*2*mu+lambda*trace(H)
-    // mu*(sxy syz 0.0)syy*2*mu+lambda*trace(H)
-    // mu*(0.0 syz sxz)szz*2*mu+lambda*trace(H)
+    {// Scope variable m2.
+      const __m256d m2 =_mm256_set_pd(2.0*mu,0.0,0.0,0.0);// 1 FLOP
+      //      3   2   1   0
+      // mu*(sxy 0.0 sxz)sxx*2*mu+lambda*trace(H)
+      // mu*(sxy syz 0.0)syy*2*mu+lambda*trace(H)
+      // mu*(0.0 syz sxz)szz*2*mu+lambda*trace(H)
 #if 0
-    printf("S step 2\n");
-    print_m256( S[0] ); print_m256( S[1] ); print_m256( S[2] );
+      printf("S step 2\n");
+      print_m256( S[0] ); print_m256( S[1] ); print_m256( S[2] );
 #endif
-    vA[0]=_mm256_permute4x64_pd( Ssum + vA[0]*m2,_MM_SHUFFLE(3,2,0,3) );
-    // 8 FLOP
-    vA[1]=_mm256_permute4x64_pd( Ssum + vA[1]*m2,_MM_SHUFFLE(3,1,3,0) );
-    // 8 FLOP
-    vA[2]=_mm256_permute4x64_pd( Ssum + vA[2]*m2,_MM_SHUFFLE(3,3,1,2) );
-    // 8 FLOP
+      vA[0]=_mm256_permute4x64_pd( Ssum + vA[0]*m2,_MM_SHUFFLE(3,2,0,3) );
+      // 8 FLOP
+      vA[1]=_mm256_permute4x64_pd( Ssum + vA[1]*m2,_MM_SHUFFLE(3,1,3,0) );
+      // 8 FLOP
+      vA[2]=_mm256_permute4x64_pd( Ssum + vA[2]*m2,_MM_SHUFFLE(3,3,1,2) );
+      // 8 FLOP
     }
 #if 0
     printf("S step 3\n");

@@ -14,23 +14,15 @@
 // Empty assembly trick might prevent over-optimization of these functions.
 // Adapted from:
 // https://stackoverflow.com/questions/7083482/how-can-i-prevent-gcc-from-optimizing-out-a-busy-wait-loop
-/*
-// Test values
-// lambda = mu = 0.5
-const fmr::Phys_float test_strain [9] = {
-  1.0, 0.0, 0.0,
-  0.0, 0.0, 0.0,
-  0.0, 0.0, 0.0
-}; */
-
-//TODO add another function parameter to run once for correctness,
-//     multiple for performance?
 //
 //NOTE Intel i7-12800H floating point math: 62.1 GOps/sec
 // https://nanoreview.net/en/cpu/intel-core-i7-12800h
 //
 // https://www.intel.com/content/dam/support/us/en/documents/processors/APP-for-Intel-Core-Processors.pdf
 //i7-12800H 537.6 Gflop/s
+
+//TODO add another function parameter to run once for correctness,
+//     multiple for performance?
 
 using Perf_time_t = fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>;
 
@@ -39,12 +31,15 @@ fmr::Perf_int test_div = 1000;// reduce 10-sec rapid development tests.
 const static auto perf_NaN = std::numeric_limits<fmr::Perf_float>::quiet_NaN();
 const fmr::Perf_int Mega = fmr::Perf_int (1000000l);
 const fmr::Phys_float correct_value = 5.0;// sum (stress)
+const fmr::Phys_float correct_eps
+  = 10.0 * std::numeric_limits<fmr::Phys_float>::epsilon();
 
 inline
-fmr::Perf_float mtrl_iso3_dmat (const fmr::Perf_int test_n=500l *Mega/1) {// ~ 10 sec
+fmr::Perf_float mtrl_iso3_dmat
+ (const fmr::Perf_int test_n=500l *Mega/1) {// ~ 10 sec
   const auto omp_n = size_t( omp_get_max_threads ());
-  std::valarray<fmr::Phys_float>  out (omp_n);// performance if correct,
-                                              // nan if not
+  std::valarray<fmr::Phys_float>
+    out (omp_n);// performance if correct, nan if not
   std::valarray<fmr::Perf_float> perf (omp_n);
   std::valarray<bool>           is_ok (omp_n);
   //
@@ -102,10 +97,10 @@ fmr::Perf_float mtrl_iso3_dmat (const fmr::Perf_int test_n=500l *Mega/1) {// ~ 1
         out [omp_i]+= stress [i];
       }
     }//end phase loop
-    timer.set_is_ok ( (abs(out[0] - correct_value) < 1e-10) );
-    //TODO use type information for eps.
+    timer.set_is_ok ( (abs(out[0] - correct_value) < correct_eps) );
     fprintf (stdout, "name: %s\n"          ,
-      "Kernel MTR-D: elastic 3D isotropic D-matrix baseline per-core performance");
+      "Kernel MTR-D: elastic 3D isotropic D-matrix baseline"
+      " per-core performance");
     fprintf (stdout, "time: %g sec\n"      , double (busy_s));
     fprintf (stdout, "  AI: %g FLOP/byte\n", double (timer.get_ai ()));
     fprintf (stdout, "perf: %g FLOP/sec\n" , double
@@ -121,7 +116,8 @@ return is_ok[0] ? perf[0] : perf_NaN;
 #ifdef FMR_HAS_MKL
 //TODO placeholder for Intel MKL symmetric version
 inline
-fmr::Perf_float mtrl_iso3_spmv (const fmr::Perf_int test_n=500l *Mega/1) {// ~ 10 sec
+fmr::Perf_float mtrl_iso3_spmv
+  (const fmr::Perf_int test_n=500l *Mega/1) {// ~ 10 sec
 //
 }
 #endif
@@ -129,8 +125,8 @@ inline
 fmr::Perf_float mtrl_iso3_lame
  (const fmr::Perf_int test_n=1200l *Mega) {// about 10 sec
   const auto omp_n = size_t( omp_get_max_threads ());
-  std::valarray<fmr::Phys_float>  out (omp_n);// performance if correct,
-                                              // nan if not
+  std::valarray<fmr::Phys_float>
+    out (omp_n);// performance if correct, nan if not
   std::valarray<fmr::Perf_float> perf (omp_n);
   std::valarray<bool>           is_ok (omp_n);
   //
@@ -176,8 +172,7 @@ fmr::Perf_float mtrl_iso3_lame
         out [omp_i]+= stress [i];
       }
     }//end phase loop
-    timer.set_is_ok ( (abs(out[0] - correct_value) < 1e-10) );
-    //TODO use type information for eps.
+    timer.set_is_ok ( (abs(out[0] - correct_value) < correct_eps) );
     //
     fprintf (stdout, "name: %s\n"          ,
       "Kernel MTR-L: 3D elastic isotropic Lame formula per-core performance");
@@ -247,10 +242,11 @@ fmr::Perf_float mtrl_iso3_scalar_a
         out [omp_i]+= stress [i];
       }
     }//end phase loop
-    timer.set_is_ok ( (abs(out[0] - correct_value) < 1e-10) );
+    timer.set_is_ok ( (abs(out[0] - correct_value) < correct_eps) );
     //
     fprintf (stdout, "name: %s\n"          ,
-      "Kernel MTR-S: 3D elastic isotropic minimum scalar A per-core performance");
+      "Kernel MTR-S: 3D elastic isotropic minimum scalar A"
+      " per-core performance");
     fprintf (stdout, "time: %g sec\n"      , double (busy_s));
     fprintf (stdout, "  AI: %g FLOP/byte\n", double (timer.get_ai ()));
     fprintf (stdout, "perf: %g FLOP/sec\n" ,
@@ -267,8 +263,8 @@ inline
 fmr::Perf_float mtrl_iso3_scalar_b
  (const fmr::Perf_int test_n=1800l *Mega) {// about 10 sec
   const auto omp_n = size_t( omp_get_max_threads ());
-  std::valarray<fmr::Phys_float>  out (omp_n);// performance if correct,
-                                              // nan if not
+  std::valarray<fmr::Phys_float>
+    out (omp_n);// performance if correct, nan if not
   std::valarray<fmr::Perf_float> perf (omp_n);
   std::valarray<bool>           is_ok (omp_n);
   //
@@ -318,10 +314,11 @@ fmr::Perf_float mtrl_iso3_scalar_b
         out [omp_i]+= stress [i];
       }
     }//end phase loop
-    timer.set_is_ok ( (abs(out[0] - correct_value) < 1e-10) );
+    timer.set_is_ok ( (abs(out[0] - correct_value) < correct_eps) );
     //
     fprintf (stdout, "name: %s\n"          ,
-      "Kernel MTR-S: 3D elastic isotropic minimum scalar B per-core performance");
+      "Kernel MTR-S: 3D elastic isotropic minimum scalar B"
+      " per-core performance");
     fprintf (stdout, "time: %g sec\n"      , double (busy_s));
     fprintf (stdout, "  AI: %g FLOP/byte\n", double (timer.get_ai ()));
     fprintf (stdout, "perf: %g FLOP/sec\n" ,
@@ -336,10 +333,11 @@ return (is_ok[0] ? perf[0] : perf_NaN);
 }
 #ifdef FMR_HAS_AVX
 inline
-fmr::Perf_float mtrl_iso3_avx (const fmr::Perf_int test_n=1250l *Mega) {
+fmr::Perf_float mtrl_iso3_avx
+ (const fmr::Perf_int test_n=1250l *Mega) {
   const auto omp_n = size_t( omp_get_max_threads ());
-  std::valarray<fmr::Phys_float>  out (omp_n);// performance if correct,
-                                              // nan if not
+  std::valarray<fmr::Phys_float> 
+    out (omp_n);// performance if correct, nan if not
   std::valarray<fmr::Perf_float> perf (omp_n);
   std::valarray<bool>           is_ok (omp_n);
   //
@@ -398,8 +396,7 @@ fmr::Perf_float mtrl_iso3_avx (const fmr::Perf_int test_n=1250l *Mega) {
         out [omp_i]+= stress [i];
       }
     }//end phase loop
-    timer.set_is_ok ( (abs(out[0] - correct_value) < 1e-10) );
-    //TODO use type information for eps.
+    timer.set_is_ok ( (abs(out[0] - correct_value) < correct_eps) );
     //
     fprintf (stdout, "name: %s\n"          ,
       "Kernel MTR-V: 3D elastic isotropic AVX per-core performance");
@@ -418,10 +415,11 @@ return (is_ok[0] ? perf[0] : perf_NaN);
 #endif
 #ifdef FMR_HAS_AVX2
 inline
-fmr::Perf_float mtrl_iso3_avx2 (const fmr::Perf_int test_n=1400l *Mega) {
+fmr::Perf_float mtrl_iso3_avx2
+ (const fmr::Perf_int test_n=1400l *Mega) {
   const auto omp_n = size_t( omp_get_max_threads ());
-  std::valarray<fmr::Phys_float>  out (omp_n);// performance if correct,
-                                              // nan if not
+  std::valarray<fmr::Phys_float>
+    out (omp_n);// performance if correct, nan if not
   std::valarray<fmr::Perf_float> perf (omp_n);
   std::valarray<bool>           is_ok (omp_n);
   //
@@ -483,8 +481,7 @@ fmr::Perf_float mtrl_iso3_avx2 (const fmr::Perf_int test_n=1400l *Mega) {
         out [omp_i]+= stress [i];
       }
     }//end phase loop
-    timer.set_is_ok ( (abs(out[0] - correct_value) < 1e-10) );
-    //TODO use type information for eps.
+    timer.set_is_ok ( (abs(out[0] - correct_value) < correct_eps) );
     //
     fprintf (stdout, "name: %s\n"          ,
       "Kernel MTR-2: 3D elastic isotropic AVX2 per-core performance");
