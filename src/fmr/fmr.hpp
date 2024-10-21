@@ -44,7 +44,8 @@ namespace fmr {
   enum class Vals_type : Enum_int { None=0, Error, Unknown,
     Bulk, String, Dim, Enum, Local, Global, Hash,
     Count, Perf,
-    Geom, Phys, Solv, Cond, Post, Plot,
+    Geom, Phys, Solv, Cond, Post, Plot,//TODO Change to below
+//    Grid, Phys, Algo, Cond, Post, Plot,//FIXME align with data-vals-type.inc
     end// The last item (end) is for indicating the number of enumerated values.
   };
   enum class Data_type : Enum_int { None=0, Error, Unknown,

@@ -26,14 +26,14 @@
 namespace femera {
   class Work;                          // abstract (pure virtual) base class
   template <typename> class Proc;      // abstract CRTP base derived from Work
-  namespace proc {                     // CRTP inheriance from Proc
+  namespace proc {                     // CRTP inheritance from Proc
     class Main;                        // public interface for process handling
     class Root; class Node; class Fcpu;// Femera process handling
     class Fmpi; class Fomp; class Nvid;// process handling libraries
 } }//end femera::proc:: namespace
 namespace femera {
   template <typename> class Data;      // abstract CRTP base derived from Work
-  namespace data {                     // CRTP inheriance from Data
+  namespace data {                     // CRTP inheritance from Data
     class File;                        // public interface for data handling
     class Logs; class Dlim; class Text;// Femera data handling
     class Bank;// class View;          // View here or as a CRTP base? 
@@ -42,14 +42,14 @@ namespace femera {
 } }//end femera::data:: namespace
 namespace femera {
   template <typename> class Test;      // abstract CRTP base derived from Work
-  namespace test {                     // CRTP inheriance from Test
+  namespace test {                     // CRTP inheritance from Test
     class Beds;                        // public interface for test handling
     class Unit; class Self; class Perf;// Femera testing
     class Gtst;                        // testing libraries
 } }//end femera::test:: namespace
 namespace femera {
   template <typename> class Task;      // abstract CRTP base derived from Work
-  namespace task {                     // CRTP inheriance from Task
+  namespace task {                     // CRTP inheritance from Task
     class Jobs;                        // public interface for task handling
     class Sims; class Runs;            // Femera tasks
     //class Post;
@@ -57,25 +57,25 @@ namespace femera {
 } }//end femera::task:: namespace
 namespace femera {
   template <typename> class Phys;      // abstract CRTP base derived from Work
-  namespace phys {                     // CRTP inheriance from Mtrl
+  namespace phys {                     // CRTP inheritance from Phys
     class Mtrl;                        // public interface for material handling
-    class Elas; class Plst;            // Elastic: linear, nonlinear plastic materils
-    class Ther;                        // Thermal material
-} }//end femera::task:: namespace
+    class Elas; class Plst;            // Elastic: linear, nonlinear plastic
+    class Thrm;                        // Thermal material
+} }//end femera::phys:: namespace
 namespace femera {
-  template <typename> class Mesh;      // abstract CRTP base derived from Work
-  namespace xxxx {                     // CRTP inheriance from Xxxx //TODO
-    class Cell;                        // public interface for Xxxx handling
-    class Fe; class Fd; class Fv;      // Femera cell (numerical method) types
-} }//end femera::task:: namespace
+  template <typename> class Grid;      // abstract CRTP base derived from Work
+  namespace grid {                     // CRTP inheritance from Grid
+    class Cell;                        // public interface for discretizations
+    class Fems; class Fdms; class Fv;  // Femera cell (numerical method) typesms
+} }//end femera::grid:: namespace
 namespace femera {
-  template <typename> class Slvr;      // abstract CRTP base derived from Work
-  namespace slvr {                     // CRTP inheriance from Slvr
-    class Xxxx;                        // public interface for Slvr handling //TODO
-    class Pcg ; class Ncg ;            // Femera tasks
+  template <typename> class Algo;      // abstract CRTP base derived from Work
+  namespace algo {                     // CRTP inheritance from Algo
+    class Slvr;                        // public interface for solver handling
+    class Spcg ; class Sncg ;          // Femera solvers
     //class Post;
     //class Plug;                      // plugins
-} }//end femera::task:: namespace
+} }//end femera::algo:: namespace
 // typedefs -------------------------------------------------------------------
 namespace femera {
   using Work_spt = FMR_SMART_PTR <Work>;      // abstract packaging base class

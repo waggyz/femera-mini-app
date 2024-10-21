@@ -1,11 +1,12 @@
-#ifndef FEMERA_HAS_PHYS_HPP
-#define FEMERA_HAS_PHYS_HPP
+#ifndef FEMERA_HAS_GRID_HPP
+#define FEMERA_HAS_GRID_HPP
 
 #include "Work.hpp"
 
 namespace femera {
   template <typename T>
-  class Phys : public Work {// abstract class for materials (Phys)
+  class Grid : public Work {// abstract class for materials (Grid)
+  //TODO change Grid to Geom?
   private:
     using This_spt = FMR_SMART_PTR<T>;
   protected:
@@ -28,21 +29,21 @@ namespace femera {
     T*       get_task (Task_type, fmr::Local_int ix=0) noexcept;
   private:
     static constexpr
-    T* this_cast (Phys*) noexcept;
+    T* this_cast (Grid*) noexcept;
     static constexpr
     T* this_cast (Work*) noexcept;
   protected:// make it clear this class needs to be inherited
-    Phys (Work::Core_ptrs_t) noexcept;
-    Phys ()            =default;
-    Phys (const Phys&) =default;
-    Phys (Phys&&)      =default;// shallow (pointer) copyable
-    Phys& operator =
-      (const Phys&)    =default;
-    ~Phys ()           =default;
+    Grid (Work::Core_ptrs_t) noexcept;
+    Grid ()            =default;
+    Grid (const Grid&) =default;
+    Grid (Grid&&)      =default;// shallow (pointer) copyable
+    Grid& operator =
+      (const Grid&)    =default;
+    ~Grid ()           =default;
   };
 }//end femera:: namespace
 
-#include "Phys.ipp"
+#include "Grid.ipp"
 
-//end FEMERA_HAS_PHYS_HPP
+//end FEMERA_HAS_GRID_HPP
 #endif

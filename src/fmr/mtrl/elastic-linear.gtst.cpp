@@ -36,11 +36,11 @@ const static fmr::mtrl::elastic::Isotropic_lame_parameters<fmr::Phys_float>
 const static fmr::mtrl::elastic::Cubic_dmat_constants<fmr::Phys_float>
   test_cubic = {test_lame[0] + 2.0*test_lame[1], test_lame[0], test_lame[1]};
 volatile fmr::Phys_float test_H [9] = {
-  3.0, 0.0, 0.0,
-  0.0, 0.0, 2.0,
-  0.0, 1.0, 0.0
+  1.0, 0.0, 0.0,
+  0.0, 0.0, 3.0,
+  0.0,-2.0, 0.0
 };
-const fmr::Phys_float correct_value = 60.0;// sum (stress)
+const static fmr::Phys_float correct_value = 20.0;// sum (stress)
 const fmr::Phys_float correct_eps
   = 5.0 * correct_value * std::numeric_limits<fmr::Phys_float>::epsilon();
 

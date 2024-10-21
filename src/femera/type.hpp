@@ -8,7 +8,7 @@ namespace femera {
   /what-happens-if-you-static-cast-invalid-value-to-enum-class
   */
   enum class Base_type : fmr::Enum_int {             // Abstract CRTP base classes
-    None=0, Work, Proc, Data, Test, Phys, Cell_base, Algo,// derived from Work
+    None=0, Work, Proc, Data, Test, Phys, Grid, Algo,// derived from Work
     // Geom, Load, Cond, Solv, Sync, Part?, Post?, View?
     Task // Must be last, Task_type numbers start after this.
   };
@@ -39,9 +39,9 @@ namespace femera {
     Gtst,                        // Test type: Googletest handler
 //#endif
     Jobs, Sims, Runs,            // Task types //TODO: Part?, Post?, View?
-    Phys, Mtrl, Elas, Plas,      // Phys types
-    Cell, Gfe , FD  , FV  ,      // Cell_base types
-    Algo, Slvr, Spcg, Sncg,      // Phys types
+    Mtrl, Elas, Plas,            // Phys types
+    Cell, Fems, FDms, FVms,      // Grid types
+    Slvr, Spcg, Sncg,            // Algo types
 #if 0
     Geom, // Move to base/core type?
     Mesh, Grid, Gcad,// Gfem, Gfdm, Gfvm,// Geom types

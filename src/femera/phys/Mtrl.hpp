@@ -1,5 +1,5 @@
-#ifndef FEMERA_HAS_MTRL_HPP
-#define FEMERA_HAS_MTRL_HPP
+#ifndef FEMERA_HAS_PHYS_MTRL_HPP
+#define FEMERA_HAS_PHYS_MTRL_HPP
 
 #include "../Phys.hpp"
 
@@ -21,5 +21,5 @@ namespace femera { namespace phys {
 
 #include "Mtrl.ipp"
 
-//end FEMERA_HAS_MTRL_HPP
+//end FEMERA_HAS_PHYS_MTRL_HPP
 #endif
