@@ -3,18 +3,18 @@
 
 namespace femera {
   inline
-  algo::Spcg::Spcg (const femera::Work::Core_ptrs_t core)
+  algo::PCGs::PCGs (const femera::Work::Core_ptrs_t core)
   noexcept : Algo (core) {
     this->name      ="Femera elastic algoics";
     this->abrv      ="elas";
-    this->task_type = task_cast (Task_type::Spcg);
+    this->task_type = task_cast (Task_type::PCGs);
   }
   inline
-  void algo::Spcg::task_init (int*, char**) {
+  void algo::PCGs::task_init (int*, char**) {
     this->set_init (true);
   }
   inline
-  void algo::Spcg::task_exit () {
+  void algo::PCGs::task_exit () {
   }
 }//end femera namespace
 

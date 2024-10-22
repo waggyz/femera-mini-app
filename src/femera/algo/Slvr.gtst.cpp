@@ -2,11 +2,11 @@
 
 #include <gtest/gtest.h>
 
-auto  mini_ptr = fmr::new_jobs ();
-auto &mini = *mini_ptr;
-
 fmr::Local_int sims_count =0;
 std::string sims_abrv;
+
+auto  mini_ptr = fmr::new_jobs ();
+auto &mini = *mini_ptr;
 
 fmr::Exit_int main (int argc, char** argv) {
   mini.init (&argc, argv);
@@ -19,5 +19,11 @@ fmr::Exit_int main (int argc, char** argv) {
 
 TEST( AlgoSlvr, TrivialTest ){
   EXPECT_EQ( 1, 1 );
+}
+TEST( AlgoSlvr, AbrvTest ){
+  EXPECT_EQ( sims_abrv, "sims" );
+}
+TEST( AlgoSlvr, InitSimsExist ){
+  EXPECT_GT( sims_count, 0 );
 }
 

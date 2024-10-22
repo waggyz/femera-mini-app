@@ -1245,10 +1245,10 @@ build/src-notest.eps: src/docs/src-notest.dot tools/src-inherit
 ifeq ($(ENABLE_DOT),ON)
 	@tools/src-inherit
 	@dot $< -Gsize="12.0,8.0" -Teps -o $@
-	@dot src/docs/src-headers.dot -Gsize="18.0,9.0" -Teps -o build/src-headers.eps
+	@dot src/docs/src-headers.dot -Gsize="10.0,5.0" -Teps -o build/src-headers.eps
 ifeq ($(ENABLE_DOT_PNG),ON)
 	@dot $< -Gsize="12.0,8.0" -Tpng -o build/src-notest.png
-	@dot src/docs/src-headers.dot -Gsize="18.0,9.0" -Tpng -o build/src-headers.png
+	@dot src/docs/src-headers.dot -Gsize="10.0,5.0" -Gdpi=600 -Tpng -o build/src-headers.png
 endif
 	#  -Gratio="fill" -Gsize="11.7,8.267!" -Gmargin=0
 	$(info $(INFO) source code include graph: $@)

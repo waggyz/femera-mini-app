@@ -1,5 +1,5 @@
 #include "../core.h"
-#include "Spcg.hpp"
+#include "PCGs.hpp"
 
 namespace femera {
 }//end femera namespace

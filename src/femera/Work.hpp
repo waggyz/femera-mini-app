@@ -51,7 +51,7 @@ namespace femera {
   template <typename> class Task;      // abstract CRTP base derived from Work
   namespace task {                     // CRTP inheritance from Task
     class Jobs;                        // public interface for task handling
-    class Sims; class Runs;            // Femera tasks
+    class Sims; class Runs; class Part;// Femera tasks
     //class Post;
     //class Plug;                      // plugins
 } }//end femera::task:: namespace
@@ -66,13 +66,14 @@ namespace femera {
   template <typename> class Grid;      // abstract CRTP base derived from Work
   namespace grid {                     // CRTP inheritance from Grid
     class Cell;                        // public interface for discretizations
-    class Fems; class Fdms; class Fv;  // Femera cell (numerical method) typesms
+    class FEms; class FDms; class FVms;// Femera cell (numerical method) types
+    class BEms; class SGms;            //boudary elem, Staggered grid
 } }//end femera::grid:: namespace
 namespace femera {
   template <typename> class Algo;      // abstract CRTP base derived from Work
   namespace algo {                     // CRTP inheritance from Algo
     class Slvr;                        // public interface for solver handling
-    class Spcg ; class Sncg ;          // Femera solvers
+    class PCGs; class NCGs;            // Femera solvers
     //class Post;
     //class Plug;                      // plugins
 } }//end femera::algo:: namespace

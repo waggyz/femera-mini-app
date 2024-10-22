@@ -9,7 +9,7 @@ namespace femera {
   */
   enum class Base_type : fmr::Enum_int {             // Abstract CRTP base classes
     None=0, Work, Proc, Data, Test, Phys, Grid, Algo,// derived from Work
-    // Geom, Load, Cond, Solv, Sync, Part?, Post?, View?
+    // Load, Cond, Sync, Part?, Post?, View?
     Task // Must be last, Task_type numbers start after this.
   };
   enum class Task_type : fmr::Enum_int {// Built-in modules
@@ -38,10 +38,11 @@ namespace femera {
 //#ifdef FMR_HAS_GTEST
     Gtst,                        // Test type: Googletest handler
 //#endif
-    Jobs, Sims, Runs,            // Task types //TODO: Part?, Post?, View?
+    Jobs, Sims, Runs, Part,      // Task types //TODO: Part?, Post?, View?
     Mtrl, Elas, Plas,            // Phys types
-    Cell, Fems, FDms, FVms,      // Grid types
-    Slvr, Spcg, Sncg,            // Algo types
+    Cell, FEms, FDms, FVms, BEms,// Grid types
+    SGms,
+    Slvr, PCGs, NCGs,            // Algo types
 #if 0
     Geom, // Move to base/core type?
     Mesh, Grid, Gcad,// Gfem, Gfdm, Gfvm,// Geom types
@@ -55,7 +56,7 @@ namespace femera {
     Boco, Fix0, Diri, Neum,
     Elas, Ther,
     Cnd1, Cjac,// Preconditioners
-    Grad, Spcg, Sncg,// Solvers
+    Grad, PCGs, NCGs,// Solvers
     Mono, Halo,
 #endif
     User// Must be last, User_type numbering starts after this.
