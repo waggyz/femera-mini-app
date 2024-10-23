@@ -9,6 +9,7 @@ namespace femera {
   private:
     using This_spt = FMR_SMART_PTR<T>;
   protected:
+    fmr::Local_int thrd_ownr = 0;
     bool do_exit_zero = false;// Used by Jobs to exit normally from MPI.
   public:
     std::string get_base_abrv ()               noexcept final override;
@@ -26,6 +27,7 @@ namespace femera {
     T*       get_task (Work::Task_path_t) noexcept;
     T*       get_task (Work_type, fmr::Local_int ix=0) noexcept;
     T*       get_task (Task_type, fmr::Local_int ix=0) noexcept;
+    fmr::Local_int get_thrd_ownr ();
   private:
     static constexpr
     T* this_cast (Task*) noexcept;

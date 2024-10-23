@@ -8,12 +8,14 @@ namespace femera {
     this->name      ="Femera simulation job handler";
     this->abrv      ="jobs";
     this->task_type = task_cast (Task_type::Jobs);
+    this->thrd_ownr = fmr::Local_int (::omp_get_thread_num ());
   }
   inline
   task::Jobs::Jobs () noexcept {
     this->name      ="simulation job handler";
     this->abrv      ="jobs";
     this->task_type = task_cast (Task_type::Jobs);
+    this->thrd_ownr = fmr::Local_int (::omp_get_thread_num ());
   }
   inline
   void task::Jobs::task_exit () {
@@ -22,6 +24,5 @@ namespace femera {
 #endif
   }
 }//end femera namespace
-
 //end FEMERA_HAS_JOBS_IPP
 #endif

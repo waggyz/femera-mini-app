@@ -8,6 +8,7 @@ namespace femera {
     this->name      ="Femera simulation runner";
     this->abrv      ="runs";
     this->task_type = task_cast (Task_type::Runs);
+    this->thrd_ownr = fmr::Local_int (::omp_get_thread_num ());
   }
   inline
   void task::Runs::task_init (int*, char**) {
@@ -17,6 +18,5 @@ namespace femera {
   void task::Runs::task_exit () {
   }
 }//end femera namespace
-
 //end FEMERA_HAS_RUNS_IPP
 #endif

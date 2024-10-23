@@ -2,17 +2,16 @@
 
 #include <gtest/gtest.h>
 
-namespace femera { namespace test {
-  //
-  auto mini = fmr::new_jobs ();
-  //
-  TEST( Part, TrivialTest ){
-    EXPECT_EQ( 1, 1 );
-  }
-  } }// end femera::test:: namespace
+auto  mini_ptr = fmr::new_jobs ();
+auto& mini = *mini_ptr;
 
 fmr::Exit_int main (int argc, char** argv) {
-FMR_WARN_INLINE_OFF
-  return femera::test::mini->exit (femera::test::mini->init (&argc,argv));
-FMR_WARN_INLINE_ON
+  mini.init (& argc, argv);
+  //
+  //
+  FMR_PRAGMA_OMP(omp barrier)
+  return mini.exit ();
+}
+TEST( TaskPart, TrivialTest ){
+  EXPECT_EQ( 1, 1 );
 }

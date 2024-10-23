@@ -22,7 +22,8 @@ namespace femera {
     try { Task::this_cast (this)->task_init (argc, argv); }// Init this task,...
     catch (const Warn& e)    { err =-1; e.print (); }
     catch (const Errs& e)    { err = 1; e.print (); }
-    catch (std::exception& e){ err = 2; Errs::print (this->get_abrv ()+" task_init", e); }
+    catch (std::exception& e){ err = 2; Errs::print
+      (this->get_abrv ()+" task_init", e); }
     catch (...)              { err = 3; Errs::print (abrv+" task_init"); }
     if (err > 0) { return this->exit (err); }
     const auto list_err = Work::init_list (argc, argv);// ...then init children.
@@ -92,7 +93,12 @@ FMR_WARN_INLINE_ON
   T* Task<T>::get_task (const Task_type t, const fmr::Local_int ix)
   noexcept {
     return Task::this_cast (Work::get_work (task_cast (t), ix));
+  }
+  template <typename T> inline
+  fmr::Local_int Task<T>::get_thrd_ownr () {
+    return this->thrd_ownr;
   }//
+  //
 }// end femera:: namespace
 
 #undef FMR_DEBUG

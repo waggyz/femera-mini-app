@@ -8,6 +8,7 @@ namespace femera {
     this->name      ="Femera partition";
     this->abrv      ="part";
     this->task_type = task_cast (Task_type::Part);
+    this->thrd_ownr = fmr::Local_int (::omp_get_thread_num ());
   }
   inline
   void task::Part::task_init (int*, char**) {
@@ -17,6 +18,5 @@ namespace femera {
   void task::Part::task_exit () {
   }
 }//end femera namespace
-
 //end FEMERA_HAS_PART_IPP
 #endif

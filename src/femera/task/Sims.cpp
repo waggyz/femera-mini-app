@@ -14,7 +14,7 @@ namespace femera {
     o = this->proc->get_race_n ();
 #endif
     FMR_PRAGMA_OMP(omp parallel for schedule(static) ordered num_threads(o))
-    for (fmr::Local_int i=0; i<o; ++i) {// Make & add thread-local Sims...
+    for (fmr::Local_int i=0; i<o; ++i) {// Make & add thread-local Runs...
       FMR_PRAGMA_OMP(omp ordered) {     // ...in order.
         const auto R = Data<task::Runs>::new_task (this->get_core());
 #ifdef FMR_RUNS_LOCAL
