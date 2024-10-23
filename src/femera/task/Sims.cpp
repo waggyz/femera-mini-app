@@ -18,7 +18,7 @@ namespace femera {
       FMR_PRAGMA_OMP(omp ordered) {     // ...in order.
         const auto R = Data<task::Runs>::new_task (this->get_core());
 #ifdef FMR_RUNS_LOCAL
-        R->set_name ("Femera simulations running on process "
+        R->set_name ("Femera simulation runs on process "
           + std::to_string (this->proc->get_proc_id ()));
 #endif
 #ifdef FMR_DEBUG
