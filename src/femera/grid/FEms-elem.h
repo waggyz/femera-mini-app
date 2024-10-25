@@ -14,9 +14,9 @@ static constexpr fmr::Geom_float bars_meas  = 2.0;// natural element length
 static constexpr
 fmr::Geom_float bars_vert_coor [bars_vert_n * bars_d ]// transposed coor_vert
   = {
-      // vert
- -1.0,// 0    0---1
-  1.0 // 1             o--x
+      // vertex
+ -1.0,// 0       0---1
+  1.0 // 1                o--x
 };
 //================================== tris ====================================
 static constexpr fmr::Local_int tris_d      = 2;// tris spatial dimension
@@ -33,7 +33,7 @@ static constexpr fmr::Geom_float tris_meas  = 0.5;// natural element area
 static constexpr
 fmr::Geom_float tris_vert_coor [tris_vert_n * tris_d ]// transposed coor_vert
   = {
-           // vert    2
+           // vertex  2
   0.0, 0.0,// 0       |\      y
   1.0, 0.0,// 1       | \     |
   0.0, 1.0 // 2       0--1    o--x
@@ -53,11 +53,11 @@ static constexpr fmr::Geom_float quad_meas  = 4.0;// natural element area
 static constexpr
 fmr::Geom_float quad_vert_coor [quad_vert_n * quad_d ]// transposed coor_vert
   = {
-            // vert
-  -1.0,-1.0,// 0    3----2
-   1.0,-1.0,// 1    |    |    y
-   1.0, 1.0,// 2    |    |    |
-  -1.0, 1.0 // 3    0----1    o--x
+            // vertex
+  -1.0,-1.0,// 0      3----2
+   1.0,-1.0,// 1      |    |    y
+   1.0, 1.0,// 2      |    |    |
+  -1.0, 1.0 // 3      0----1    o--x
 };
 static constexpr
 fmr::Geom_float quad_coor_vert [quad_d * quad_vert_n]// transposed vert_coor
@@ -92,13 +92,13 @@ static constexpr fmr::Geom_float tets_meas  = 1.0 / 6.0;// ntrl elem volume
 static constexpr fmr::Geom_float tets_face_meas  = 2.0;// elem surface area
 static constexpr
 fmr::Geom_float tets_vert_coor [tets_vert_n * tets_d ]// transposed coor_vert
-  = {            //          3              //
-                 // vert    /|\             //
-  0.0, 0.0, 0.0, // 0      / | \            //
-  1.0, 0.0, 0.0, // 1     2--|--1           //
-  0.0, 1.0, 0.0, // 2      \ | /     y z x  //
-  0.0, 0.0, 1.0  // 3       \|/       \|/   //
-};               //          0         o    //
+  = {            //            3              //
+                 // vertex    /|\             //
+  0.0, 0.0, 0.0, // 0        / | \            //
+  1.0, 0.0, 0.0, // 1       2--|--1           //
+  0.0, 1.0, 0.0, // 2        \ | /     y z x  //
+  0.0, 0.0, 1.0  // 3         \|/       \|/   //
+};               //            0         o    //
 static constexpr
 fmr::Geom_float tets_coor_vert [tets_d * tets_vert_n]// transposed vert_coor
   = {
@@ -215,7 +215,7 @@ static constexpr fmr::Geom_float brck_face_meas  = 24.0;// elem surface area
 static constexpr
 fmr::Geom_float brck_vert_coor [brck_vert_n * brck_d ]// transposed coor_vert
   = {
-                  // vert     7---------6
+                  // vertex   7---------6
   -1.0,-1.0,-1.0, // 0       /|        /|
    1.0,-1.0,-1.0, // 1      / |       / |
    1.0, 1.0,-1.0, // 2     /  |      /  |
@@ -276,15 +276,15 @@ static constexpr fmr::Geom_float fac3_meas  = 1.0;// ntrl elem surface area
 static constexpr
 fmr::Geom_float fac3_vert_coor [fac3_vert_n * fac3_d ]// transposed coor_vert
   = {
-            // vertex             |   5-----4  -+
+            // vertex             |   2-----1  -+
   0.0, 0.0, // 0                  |    \   /    |
   1.0, 0.0, // 1                  |     \ /     |   zero
-  0.0, 1.0, // 2    5,2-----1,4   |      3      | thickness
+  0.0, 1.0, // 2    5,2-----1,4   |      0      | thickness
             //         \   /      |             |
-  0.0, 0.0, // 3        \ /       |   2-----1  -+
+  0.0, 0.0, // 3        \ /       |   5-----4  -+
   1.0, 0.0, // 4         0,3      |    \   /        y z x
   0.0, 1.0  // 5                  |     \ /          \|/
-};          //                    |      0            o
+};          //                    |      3            o
 static constexpr
 fmr::Geom_float fac3_coor_vert [fac3_d * fac3_vert_n]// transposed vert_coor
   = {
@@ -315,17 +315,17 @@ static constexpr fmr::Geom_float fac4_meas  = 8.0;// natural element area
 static constexpr
 fmr::Geom_float fac4_vert_coor [fac4_vert_n * fac4_d ]// transposed coor_vert
   = {
-             // vertex                     |       7---------6  -+           //
+             // vertex                     |       3---------2  -+           //
   -1.0,-1.0, // 0                          |      /         /    |           //
    1.0,-1.0, // 1                          |     /         /     |   zero    //
    1.0, 1.0, // 2        7,3---------2,6   |    /         /      | thickenss //
-  -1.0, 1.0, // 3         /         /      |   4---------5       |           //
+  -1.0, 1.0, // 3         /         /      |   0---------1       |           //
              //          /         /       |                     |           //
-  -1.0,-1.0, // 4       /         /        |       3---------2  -+           //
+  -1.0,-1.0, // 4       /         /        |       7---------6  -+           //
    1.0,-1.0, // 5    4,0---------1,5       |      /         /        z  y    //
    1.0, 1.0, // 6                          |     /         /         | /     //
   -1.0, 1.0  // 7                          |    /         /          |/      //
-};           //                            |   0---------1           o--x    //
+};           //                            |   4---------5           o--x    //
 static constexpr
 fmr::Geom_float fac4_coor_vert [fac4_d * fac4_vert_n]// transposed vert_coor
   = {
