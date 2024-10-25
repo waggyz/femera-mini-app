@@ -85,8 +85,8 @@ fmr::Local_int tets_vert_edge_bars [bars_vert_n * tets_edge_n]
 };
 static constexpr
 fmr::Local_int tets_vert_face_tris [tris_vert_n * tets_face_n]
-  = { 
-  0,1,2, 0,1,3, 0,3,2, 1,2,3
+  = { //NOTE the normals point inward. This might be wrong.
+  0,1,2, 0,3,1, 0,2,3, 1,3,2
 };
 static constexpr fmr::Geom_float tets_meas  = 1.0 / 6.0;// ntrl elem volume
 static constexpr fmr::Geom_float tets_face_meas  = 2.0;// elem surface area
