@@ -10,6 +10,9 @@ float tet_vol_ref = float (1.0 / 6.0);
 fmr::Phys_float wsum1=0.0, wsum4=0.0, wsum5=0.0, wsum10=0.0, wsum11=0.0;
 const fmr::Phys_float zero = 0.0;
 
+fmr::Geom_float tet4_ntrl_jac3_trace  = -999.9;
+//fmr::Geom_float tet4_ntrl_jac3_volume = -999.9;//TODO determinant for volume?
+
 inline
 std::string tri2_norm_str (const fmr::Phys_float* p1,
   const fmr::Phys_float* p2, const fmr::Phys_float* p3) {
@@ -48,6 +51,20 @@ std::string tri3_norm_str (const fmr::Phys_float* p1,
     + std::to_string (Ny) + ", "
     + std::to_string (Nz) + "]");
 }
+inline
+void tet4_jac3 ( fmr::Geom_float jac3[9],
+  const fmr::Geom_float shpg[4 *3], const fmr::Geom_float coor[4 *3]) {
+  //NOTE Zero shpg before calling this.
+  //coor = femera::grid::fems::tets_vert_coor;// 4x3
+  //coor = femera::grid::fems::tets_coor_vert;// 3x4 **Use this
+  for (int i=0; i<3; ++i) {
+    for (int j=0; j<3; ++j) {
+      for (int k=0; k<4; ++k) {
+        jac3 [3*i +j]+= shpg [4*i +k] * coor [4*j +k];
+  } } }
+  return;
+}
+//============================================================================
 fmr::Exit_int main (int argc, char** argv) {
   mini.init (& argc, argv);
   //
@@ -61,6 +78,22 @@ fmr::Exit_int main (int argc, char** argv) {
     wsum10 += femera::grid::fems::tets_intg_10_ptwt [4*i +3];}
   for (int i=0; i<11; ++i) {
     wsum11 += femera::grid::fems::tets_intg_11_ptwt [4*i +3];}
+  //
+  // Calculate the Jacbian of a natural tet, which should be the 3x3 identity,
+  // and is constant, independent of the integration point coordinates.
+  // The one-point tet integration rule is sufficient.
+  fmr::Geom_float intp [ 3];
+  for (int i=0; i<3;++i){intp[i] = femera::grid::fems::tets_intg_1_ptwt[i];}
+  //const auto intw = femera::grid::fems::tets_intg_1_ptwt [3];
+  fmr::Geom_float shpg [12]
+     = {0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0};;
+  femera::grid::fems::tets_shap_grad_4 (&shpg[0], &intp[0]);
+  fmr::Geom_float coor [12];
+  for (int i=0; i<12;++i){coor[i] = femera::grid::fems::tets_coor_vert[i];}
+  fmr::Geom_float jac3 [ 9] = {0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0};
+  //
+  tet4_jac3 (&jac3[0], &shpg[0], &coor[0]);
+  tet4_ntrl_jac3_trace = jac3[0] + jac3[4] + jac3[8];// 3 for 3x3 identity
   //
   return mini.exit ();
 }
@@ -86,6 +119,14 @@ TEST( GridCellFEmsElem, TetsIntWgtsSumVol10 ){
 TEST( GridCellFEmsElem, TetsIntWgtsSumVol11 ){
   EXPECT_FLOAT_EQ( float(wsum11), tet_vol_ref );
 }
+TEST( GridCellFEmsElem, TetsJacTraceThree ){
+  EXPECT_FLOAT_EQ( float(tet4_ntrl_jac3_trace), float (3.0) );
+}
+#if 0
+TEST( GridCellFEmsElem, TetsJacDetVolOneSixth ){
+  EXPECT_FLOAT_EQ( float(tet4_jac3_volume), tet_vol_ref );
+}
+#endif
 namespace femera { namespace grid { namespace fems {
 
 TEST( GridCellFEmsTet, FaceNormal1 ){
@@ -178,48 +219,48 @@ TEST( GridCellFEmsCube, FaceNormal ){
     & cube_vert_coor [3*  cube_vert_face_quad [20]]), "+x" );
 }
 TEST( GridCellFEmsFac3, FaceNormal ){
-  EXPECT_EQ( tri2_norm_str (
-    &fac3_vert_coor [2* fac3_vert_face_tris [0]],
-    &fac3_vert_coor [2* fac3_vert_face_tris [1]],
-    &fac3_vert_coor [2* fac3_vert_face_tris [2]]), "+z" );
-  EXPECT_EQ( tri2_norm_str (
-    &fac3_vert_coor [2* fac3_vert_face_tris [3]],
-    &fac3_vert_coor [2* fac3_vert_face_tris [4]],
-    &fac3_vert_coor [2* fac3_vert_face_tris [5]]), "-z" );
+  EXPECT_EQ( tri3_norm_str (
+    &fac3_vert_coor [3* fac3_vert_face_tris [0]],
+    &fac3_vert_coor [3* fac3_vert_face_tris [1]],
+    &fac3_vert_coor [3* fac3_vert_face_tris [2]]), "+z" );
+  EXPECT_EQ( tri3_norm_str (
+    &fac3_vert_coor [3* fac3_vert_face_tris [3]],
+    &fac3_vert_coor [3* fac3_vert_face_tris [4]],
+    &fac3_vert_coor [3* fac3_vert_face_tris [5]]), "-z" );
 }
 TEST( GridCellFEmsFac4, FaceNormal ){
-  EXPECT_EQ( tri2_norm_str (
-    &fac4_vert_coor [2* fac4_vert_face_quad [0]],
-    &fac4_vert_coor [2* fac4_vert_face_quad [1]],
-    &fac4_vert_coor [2* fac4_vert_face_quad [2]]), "+z" );
-  EXPECT_EQ( tri2_norm_str (
-    &fac4_vert_coor [2* fac4_vert_face_quad [2]],
-    &fac4_vert_coor [2* fac4_vert_face_quad [3]],
-    &fac4_vert_coor [2* fac4_vert_face_quad [0]]), "+z" );
-  EXPECT_EQ( tri2_norm_str (
-    &fac4_vert_coor [2* fac4_vert_face_quad [4]],
-    &fac4_vert_coor [2* fac4_vert_face_quad [5]],
-    &fac4_vert_coor [2* fac4_vert_face_quad [6]]), "-z" );
-  EXPECT_EQ( tri2_norm_str (
-    &fac4_vert_coor [2* fac4_vert_face_quad [6]],
-    &fac4_vert_coor [2* fac4_vert_face_quad [7]],
-    &fac4_vert_coor [2* fac4_vert_face_quad [4]]), "-z" );
+  EXPECT_EQ( tri3_norm_str (
+    &fac4_vert_coor [3* fac4_vert_face_quad [0]],
+    &fac4_vert_coor [3* fac4_vert_face_quad [1]],
+    &fac4_vert_coor [3* fac4_vert_face_quad [2]]), "+z" );
+  EXPECT_EQ( tri3_norm_str (
+    &fac4_vert_coor [3* fac4_vert_face_quad [2]],
+    &fac4_vert_coor [3* fac4_vert_face_quad [3]],
+    &fac4_vert_coor [3* fac4_vert_face_quad [0]]), "+z" );
+  EXPECT_EQ( tri3_norm_str (
+    &fac4_vert_coor [3* fac4_vert_face_quad [4]],
+    &fac4_vert_coor [3* fac4_vert_face_quad [5]],
+    &fac4_vert_coor [3* fac4_vert_face_quad [6]]), "-z" );
+  EXPECT_EQ( tri3_norm_str (
+    &fac4_vert_coor [3* fac4_vert_face_quad [6]],
+    &fac4_vert_coor [3* fac4_vert_face_quad [7]],
+    &fac4_vert_coor [3* fac4_vert_face_quad [4]]), "-z" );
 }
 TEST( GridCellFEmsTris, FaceNormal ){
-  EXPECT_EQ( tri2_norm_str (
-    &tris_vert_coor [2* 0],
-    &tris_vert_coor [2* 1],
-    &tris_vert_coor [2* 2]), "+z" );
+  EXPECT_EQ( tri3_norm_str (
+    &tris_vert_coor [3* 0],
+    &tris_vert_coor [3* 1],
+    &tris_vert_coor [3* 2]), "+z" );
 }
 TEST( GridCellFEmsQuad, FaceNormal ){
-  EXPECT_EQ( tri2_norm_str (
-    &quad_vert_coor [2* 0],
-    &quad_vert_coor [2* 1],
-    &quad_vert_coor [2* 2]), "+z" );
-  EXPECT_EQ( tri2_norm_str (
-    &quad_vert_coor [2* 2],
-    &quad_vert_coor [2* 3],
-    &quad_vert_coor [2* 0]), "+z" );
+  EXPECT_EQ( tri3_norm_str (
+    &quad_vert_coor [3* 0],
+    &quad_vert_coor [3* 1],
+    &quad_vert_coor [3* 2]), "+z" );
+  EXPECT_EQ( tri3_norm_str (
+    &quad_vert_coor [3* 2],
+    &quad_vert_coor [3* 3],
+    &quad_vert_coor [3* 0]), "+z" );
 }
 
 } } }//end femera::grid::fems:: namespace

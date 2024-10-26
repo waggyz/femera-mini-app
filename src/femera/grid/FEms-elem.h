@@ -1,5 +1,8 @@
 namespace femera { namespace grid { namespace fems {
 
+// These are all embedded in 3D space
+static constexpr fmr::Local_int sims_d      = 3;
+
 //================================= points ===================================
 static constexpr fmr::Local_int vert_d      = 0;
 static constexpr fmr::Local_int node_d      = 0;
@@ -12,11 +15,17 @@ fmr::Local_int  bars_vert_conn [bars_vert_n] = {0,1};
 //
 static constexpr fmr::Geom_float bars_meas  = 1.0;// natural element length
 static constexpr
-fmr::Geom_float bars_vert_coor [bars_vert_n * bars_d ]// transposed coor_vert
+fmr::Geom_float bars_vert_coor [bars_vert_n * sims_d ]// transposed coor_vert
   = {
-       // vertex                      //
-   0.0,// 0       0---1               //
-   1.0 // 1                o--x       //
+                 // vertex                      //
+   0.0, 0.0, 0.0,// 0       0---1               //
+   1.0, 0.0, 0.0 // 1                o--x       //
+};
+fmr::Geom_float bars_coor_vert [bars_vert_n * sims_d ]// transposed vert_coor
+  = {
+  0.0, 1.0,
+  0.0, 0.0,
+  0.0, 0.0
 };
 //================================== tris ====================================
 static constexpr fmr::Local_int tris_d      = 2;// tris spatial dimension
@@ -31,12 +40,19 @@ fmr::Local_int tris_vert_edge_bars [bars_vert_n * tris_edge_n]
 };
 static constexpr fmr::Geom_float tris_meas  = 0.5;// natural element area
 static constexpr
-fmr::Geom_float tris_vert_coor [tris_vert_n * tris_d ]// transposed coor_vert
+fmr::Geom_float tris_vert_coor [tris_vert_n * sims_d ]// transposed coor_vert
   = {
-           // vertex  2              //
-  0.0, 0.0,// 0       |\      y      //
-  1.0, 0.0,// 1       | \     |      //
-  0.0, 1.0 // 2       0--1    o--x   //
+                // vertex  2              //
+  0.0, 0.0, 0.0,// 0       |\      y      //
+  1.0, 0.0, 0.0,// 1       | \     |      //
+  0.0, 1.0, 0.0 // 2       0--1    o--x   //
+};
+static constexpr
+fmr::Geom_float tris_coor_vert [tris_vert_n * sims_d ]// transposed vert_coor
+  = {
+  0.0, 1.0, 0.0,
+  0.0, 0.0, 1.0,
+  0.0, 0.0, 0.0
 };
 //================================== quad ====================================
 static constexpr fmr::Local_int quad_d      = 2;// tris spatial dimension
@@ -51,19 +67,20 @@ fmr::Local_int quad_vert_edge_bars [bars_vert_n * quad_edge_n]
 };
 static constexpr fmr::Geom_float quad_meas  = 1.0;// natural element area
 static constexpr
-fmr::Geom_float quad_vert_coor [quad_vert_n * quad_d ]// transposed coor_vert
+fmr::Geom_float quad_vert_coor [quad_vert_n * sims_d ]// transposed coor_vert
   = {
-            // vertex                //
-   0.0, 0.0,// 0      3----2         //
-   1.0, 0.0,// 1      |    |    y    //
-   1.0, 1.0,// 2      |    |    |    //
-   0.0, 1.0 // 3      0----1    o--x //
+                 // vertex                //
+   0.0, 0.0, 0.0,// 0      3----2         //
+   1.0, 0.0, 0.0,// 1      |    |    y    //
+   1.0, 1.0, 0.0,// 2      |    |    |    //
+   0.0, 1.0, 0.0 // 3      0----1    o--x //
 };
 static constexpr
-fmr::Geom_float quad_coor_vert [quad_d * quad_vert_n]// transposed vert_coor
+fmr::Geom_float quad_coor_vert [sims_d * quad_vert_n]// transposed vert_coor
   = {
    0.0, 1.0, 1.0, 0.0,
    0.0, 0.0, 1.0, 1.0,
+   0.0, 0.0, 0.0, 0.0
 };
 //================================== tets ====================================
 static constexpr fmr::Local_int tets_d      = 3;// tets spatial dimension
@@ -140,27 +157,27 @@ fmr::Local_int tet5_cube_conn [4* 5]// 5-tet fill, tilable with rotation
 };
 //TODO tets patch test
 //-------------------------- tet shape functions -----------------------------
-static inline
+template <typename F> static inline// single or double
 void tets_shap_func_4
-(fmr::Geom_float f[4], const fmr::Phys_float x[3]) {
-  f[ 0] = fmr::Geom_float (1.0 -x[0] -x[1] -x[2]);
-  f[ 1] = fmr::Geom_float (x[0]);
-  f[ 2] = fmr::Geom_float (x[1]);
-  f[ 3] = fmr::Geom_float (x[2]);
+(F f[4], const F x[3]) {
+  f[ 0] = 1.0 -x[0] -x[1] -x[2];
+  f[ 1] = x[0];
+  f[ 2] = x[1];
+  f[ 3] = x[2];
   return;
 }
-static inline
-void tets_shap_grad_4 //TODO Transpose g?
-(fmr::Geom_float g[4 *3], const fmr::Phys_float[]) {//  x[3] not used
+template <typename F> static inline
+void tets_shap_grad_4
+(F g[4u *3u], const F[]) {//  x[3] not used; //TODO Transpose g?
   g[ 0]=-1.0; g[ 1]=1.0; g[ 2]=0.0; g[ 3]=0.0;// dN/dx (natural coords)
   g[ 4]=-1.0; g[ 5]=0.0; g[ 6]=1.0; g[ 7]=0.0;// dN/dy
   g[ 8]=-1.0; g[ 9]=0.0; g[10]=0.0; g[11]=1.0;// dN/dz
 }
-static inline
+template <typename F> static inline
 void tets_shap_func_10
-(fmr::Geom_float f[10], const fmr::Phys_float x[3]) {
-  const fmr::Phys_float L2=x[0], L3=x[1], L4=x[2];
-  const fmr::Phys_float L1=(1.0-L2-L3-L4);
+(F f[10], const F x[3]) {
+  const F L2=x[0], L3=x[1], L4=x[2];
+  const F L1=1.0-L2-L3-L4;
   f[ 0] = 2.0*L1*L1 - L1;// Vertex nodes
   f[ 1] = 2.0*L2*L2 - L2;
   f[ 2] = 2.0*L3*L3 - L3;
@@ -173,15 +190,15 @@ void tets_shap_func_10
   f[ 9] = 4.0*L2*L4;
   return;
 }
-static inline
+template <typename F> static inline
 void tets_shap_grad_10 //TODO Return transpose?
-(fmr::Geom_float g[10 *3], const fmr::Phys_float x[3]) {
-  const fmr::Phys_float L2=x[0], L3=x[1], L4=x[2];
-  const fmr::Phys_float L1=(1.0-L2-L3-L4);
+(F g[10u *3u], const F x[3]) {
+  const F L2=x[0], L3=x[1], L4=x[2];
+  const F L1=1.0-L2-L3-L4;
   // Term-by-term derivs
-  const fmr::Phys_float L1r=-1.0, L2r=1.0, L3r=0.0, L4r=0.0;
-  const fmr::Phys_float L1s=-1.0, L2s=0.0, L3s=1.0, L4s=0.0;
-  const fmr::Phys_float L1t=-1.0, L2t=0.0, L3t=0.0, L4t=1.0;
+  const F L1r=-1.0, L2r=1.0, L3r=0.0, L4r=0.0;
+  const F L1s=-1.0, L2s=0.0, L3s=1.0, L4s=0.0;
+  const F L1t=-1.0, L2t=0.0, L3t=0.0, L4t=1.0;
   // edges: 0,1; 1,2; 0,2; 0,3; 2,3; 1,3;
   // r-derivs by product rule
   g[ 0] = 2.0*L1*L1r + 2.0*L1r*L1 - L1r;// Corner nodes
@@ -218,11 +235,11 @@ void tets_shap_grad_10 //TODO Return transpose?
   g[29] = 4.0*L4*L2t + 4.0*L4t*L2;
   return;
 }
-static inline
+template <typename F> static inline
 void tets_shap_func_20 //TODO Return transpose?
-(fmr::Geom_float f[20], const fmr::Phys_float x[3]) {
-  const fmr::Phys_float L2=x[0], L3=x[1], L4=x[2];
-  const fmr::Phys_float L1=(1.0-L2-L3-L4);
+(F f[20], const F x[3]) {
+  const F L2=x[0], L3=x[1], L4=x[2];
+  const F L1=(1.0-L2-L3-L4);
   f[ 0]= 0.5* L1 *(3.0* L1 -1.)*(3.0* L1 -2.);// Vertex nodes;
   f[ 1]= 0.5* L2 *(3.0* L2 -1.)*(3.0* L2 -2.);
   f[ 2]= 0.5* L3 *(3.0* L3 -1.)*(3.0* L3 -2.);
@@ -252,15 +269,15 @@ void tets_shap_func_20 //TODO Return transpose?
   f[19]=27.0*( L2*L3 *L4 );
   return;
 }
-static inline
+template <typename F> static inline
 void tets_shap_grad_20 //TODO Return transpose?
-(fmr::Geom_float g[20 *3], const fmr::Phys_float x[3]) {
-  const fmr::Phys_float L2=x[0], L3=x[1], L4=x[2];
-  const fmr::Phys_float L1=(1.0-L2-L3-L4);
+(F g[20u *3u], const F x[3]) {
+  const F L2=x[0], L3=x[1], L4=x[2];
+  const F L1=(1.0-L2-L3-L4);
   // Term-by-term derivs
-  const fmr::Phys_float L1r=-1.0, L2r=1.0, L3r=0.0, L4r=0.0;
-  const fmr::Phys_float L1s=-1.0, L2s=0.0, L3s=1.0, L4s=0.0;
-  const fmr::Phys_float L1t=-1.0, L2t=0.0, L3t=0.0, L4t=1.0 ;
+  const F L1r=-1.0, L2r=1.0, L3r=0.0, L4r=0.0;
+  const F L1s=-1.0, L2s=0.0, L3s=1.0, L4s=0.0;
+  const F L1t=-1.0, L2t=0.0, L3t=0.0, L4t=1.0 ;
   // edges: 0,1; 1,2; 0,2; 0,3; 2,3; 1,3;
   g[ 0]= 0.5* L1r *(3.* L1 -1.)*(3.* L1 -2.)// corner nodes
        + 0.5* L1  *(3.* L1r   )*(3.* L1 -2.)
@@ -392,10 +409,10 @@ static constexpr fmr::Phys_float b2 = 0.1381966011250105;
   // b2 = (5.0-std::sqrt(5.0))/20.0;
 static constexpr
 fmr::Phys_float tets_intg_4_ptwt [4* tets_intg_4_n] = {
-  b2,b2,b2, 0.25 / 6.0,
-  a2,b2,b2, 0.25 / 6.0,
-  b2,a2,b2, 0.25 / 6.0,
-  b2,b2,a2, 0.25 / 6.0
+  b2,b2,b2, 0.25/6.0,
+  a2,b2,b2, 0.25/6.0,
+  b2,a2,b2, 0.25/6.0,
+  b2,b2,a2, 0.25/6.0
 };
 static constexpr fmr::Local_int tets_intg_5_n = 5;// Alternate P2
 //NOTE tet20s don't converge with 5-point rule
@@ -449,7 +466,8 @@ fmr::Phys_float tets_intg_11_ptwt [4* tets_intg_11_n] = {
   b3,a3,b3, 56.0/2250.0,
   b3,b3,a3, 56.0/2250.0
 };
-//==================================  cube ====================================
+//TODO singularity tetrahedron elements
+//================================== cube ====================================
 static constexpr fmr::Local_int  cube_d      =  3;// spatial dimension
 static constexpr fmr::Local_int  cube_vert_n =  8;
 static constexpr fmr::Local_int  cube_edge_n = 12;
@@ -515,6 +533,12 @@ fmr::Geom_float  cube_coor_vert [ cube_d *  cube_vert_n]// transposed vert_coor
                    //   |/        |/
   };               //   0---------1
 #endif
+//================================== prism ===================================
+//TODO prism elements
+//TODO singularity prism elements
+//================================= pyramid ==================================
+//TODO pyramid elements
+//TODO singularity pyramid elements
 //=========================== interface triangle =============================
 // e.g., cohesive elements
 static constexpr fmr::Local_int fac3_d      = 2;// spatial dimension
@@ -537,22 +561,23 @@ fmr::Local_int fac3_vert_face_tris [tris_vert_n * fac3_face_n]
 };
 static constexpr fmr::Geom_float fac3_meas  = 1.0;// ntrl elem surface area
 static constexpr
-fmr::Geom_float fac3_vert_coor [fac3_vert_n * fac3_d ]// transposed coor_vert
+fmr::Geom_float fac3_vert_coor [fac3_vert_n * sims_d ]// transposed coor_vert
   = {
-            // vertex             |   2-----1  -+                  //
-  0.0, 0.0, // 0                  |    \   /    |                  //
-  1.0, 0.0, // 1                  |     \ /     |   zero           //
-  0.0, 1.0, // 2    5,2-----1,4   |      0      | thickness        //
-            //         \   /      |             |                  //
-  0.0, 0.0, // 3        \ /       |   5-----4  -+                  //
-  1.0, 0.0, // 4         0,3      |    \   /        y z x          //
-  0.0, 1.0  // 5                  |     \ /          \|/           //
-};          //                    |      3            o            //
+                 // vertex             |   2-----1  -+             //
+  0.0, 0.0, 0.0, // 0                  |    \   /    |             //
+  1.0, 0.0, 0.0, // 1                  |     \ /     |   zero      //
+  0.0, 1.0, 0.0, // 2    5,2-----1,4   |      0      | thickness   //
+                 //         \   /      |             |             //
+  0.0, 0.0, 0.0, // 3        \ /       |   5-----4  -+             //
+  1.0, 0.0, 0.0, // 4         0,3      |    \   /        y z x     //
+  0.0, 1.0, 0.0  // 5                  |     \ /          \|/      //
+};               //                    |      3            o       //
 static constexpr
-fmr::Geom_float fac3_coor_vert [fac3_d * fac3_vert_n]// transposed vert_coor
+fmr::Geom_float fac3_coor_vert [sims_d * fac3_vert_n]// transposed vert_coor
   = {
   0.0, 1.0, 0.0,  0.0, 1.0, 0.0,
-  0.0, 0.0, 1.0,  0.0, 0.0, 1.0
+  0.0, 0.0, 1.0,  0.0, 0.0, 1.0,
+  0.0, 0.0, 0.0,  0.0, 0.0, 0.0
 };
 //=========================== interface quadangles ===========================
 // e.g., cohesive elements
@@ -576,24 +601,25 @@ fmr::Local_int fac4_vert_face_quad [quad_vert_n * fac4_face_n]
 };
 static constexpr fmr::Geom_float fac4_meas  = 2.0;// natural element area
 static constexpr
-fmr::Geom_float fac4_vert_coor [fac4_vert_n * fac4_d ]// transposed coor_vert
+fmr::Geom_float fac4_vert_coor [fac4_vert_n * sims_d ]// transposed coor_vert
   = {
-             // vertex                     |       3---------2  -+           //
-   0.0, 0.0, // 0                          |      /         /    |           //
-   1.0, 0.0, // 1                          |     /         /     |   zero    //
-   1.0, 1.0, // 2        7,3---------2,6   |    /         /      | thickenss //
-   0.0, 1.0, // 3         /         /      |   0---------1       |           //
-             //          /         /       |                     |           //
-   0.0, 0.0, // 4       /         /        |       7---------6  -+           //
-   1.0, 0.0, // 5    4,0---------1,5       |      /         /        z  y    //
-   1.0, 1.0, // 6                          |     /         /         | /     //
-   0.0, 1.0  // 7                          |    /         /          |/      //
-};           //                            |   4---------5           o--x    //
+                  // vertex                  |      3---------2 -+           //
+   0.0, 0.0, 0.0, // 0                       |     /         /   |           //
+   1.0, 0.0, 0.0, // 1                       |    /         /    |   zero    //
+   1.0, 1.0, 0.0, // 2      7,3---------2,6  |   /         /     | thickenss //
+   0.0, 1.0, 0.0, // 3       /         /     |  0---------1      |           //
+                  //        /         /      |                   |           //
+   0.0, 0.0, 0.0, // 4     /         /       |      7---------6 -+           //
+   1.0, 0.0, 0.0, // 5  4,0---------1,5      |     /         /       z  y    //
+   1.0, 1.0, 0.0, // 6                       |    /         /        | /     //
+   0.0, 1.0, 0.0  // 7                       |   /         /         |/      //
+};                //                         |  4---------5          o--x    //
 static constexpr
-fmr::Geom_float fac4_coor_vert [fac4_d * fac4_vert_n]// transposed vert_coor
+fmr::Geom_float fac4_coor_vert [sims_d * fac4_vert_n]// transposed vert_coor
   = {
    0.0, 1.0, 1.0, 0.0,   0.0, 1.0, 1.0, 0.0,
-   0.0, 0.0, 1.0, 1.0,   0.0, 0.0, 1.0, 1.0
+   0.0, 0.0, 1.0, 1.0,   0.0, 0.0, 1.0, 1.0,
+   0.0, 0.0, 0.0, 0.0,   0.0, 0.0, 0.0, 0.0
 };
 
 } } }//end femera::grid::fems:: namespace
