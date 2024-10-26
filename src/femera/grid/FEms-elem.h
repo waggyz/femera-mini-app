@@ -10,12 +10,12 @@ static constexpr fmr::Local_int bars_vert_n = 2;
 static constexpr
 fmr::Local_int  bars_vert_conn [bars_vert_n] = {0,1};
 //
-static constexpr fmr::Geom_float bars_meas  = 2.0;// natural element length
+static constexpr fmr::Geom_float bars_meas  = 1.0;// natural element length
 static constexpr
 fmr::Geom_float bars_vert_coor [bars_vert_n * bars_d ]// transposed coor_vert
   = {
        // vertex                      //
-  -1.0,// 0       0---1               //
+   0.0,// 0       0---1               //
    1.0 // 1                o--x       //
 };
 //================================== tris ====================================
@@ -49,21 +49,21 @@ fmr::Local_int quad_vert_edge_bars [bars_vert_n * quad_edge_n]
   = {
   0,1, 1,2, 2,3, 3,0
 };
-static constexpr fmr::Geom_float quad_meas  = 4.0;// natural element area
+static constexpr fmr::Geom_float quad_meas  = 1.0;// natural element area
 static constexpr
 fmr::Geom_float quad_vert_coor [quad_vert_n * quad_d ]// transposed coor_vert
   = {
             // vertex                //
-  -1.0,-1.0,// 0      3----2         //
-   1.0,-1.0,// 1      |    |    y    //
+   0.0, 0.0,// 0      3----2         //
+   1.0, 0.0,// 1      |    |    y    //
    1.0, 1.0,// 2      |    |    |    //
-  -1.0, 1.0 // 3      0----1    o--x //
+   0.0, 1.0 // 3      0----1    o--x //
 };
 static constexpr
 fmr::Geom_float quad_coor_vert [quad_d * quad_vert_n]// transposed vert_coor
   = {
-  -1.0, 1.0, 1.0,-1.0,
-  -1.0,-1.0, 1.0, 1.0,
+   0.0, 1.0, 1.0, 0.0,
+   0.0, 0.0, 1.0, 1.0,
 };
 //================================== tets ====================================
 static constexpr fmr::Local_int tets_d      = 3;// tets spatial dimension
@@ -106,257 +106,279 @@ fmr::Geom_float tets_coor_vert [tets_d * tets_vert_n]// transposed vert_coor
   0.0, 0.0, 1.0, 0.0,
   0.0, 0.0, 0.0, 1.0
 };
+fmr::Geom_float tets_cube_coor [3* 8]// same as cube elem below
+  = {
+                  // vertex   7---------6                //
+   0.0, 0.0, 0.0, // 0       /|        /|                //
+   1.0, 0.0, 0.0, // 1      / |       / |                //
+   1.0, 1.0, 0.0, // 2     /  |      /  |                //
+   0.0, 1.0, 0.0, // 3    4---------5   |                //
+                  //      |   |     |   |                //
+   0.0, 0.0, 1.0, // 4    |   3-----|---2                //
+   1.0, 0.0, 1.0, // 5    |  /      |  /      z  y       //
+   1.0, 1.0, 1.0, // 6    | /       | /       | /        //
+   0.0, 1.0, 1.0  // 7    |/        |/        |/         //
+                  //      0---------1         o--x       //
+};
+fmr::Local_int tet6_cube_conn [4* 6]// 6-tet fill, tilable w/out rotation
+  = {// These are all conformal and differ only by rotation.
+  0,1,5,6,
+  0,1,2,6,
+  0,5,6,4,
+  3,0,7,6,
+  0,4,7,6,
+  0,3,2,6
+};
+//fmr::Local_int tet5_cube_conn =[4* 6]//  5-tet fill
+fmr::Local_int tet5_cube_conn [4* 5]// 5-tet fill, tilable with rotation
+  = {
+  1,3,4,6,// This one is twice the volume of the rest.
+  0,1,3,4,// Identical to the natural tet.
+  2,3,1,6,
+  5,6,1,4,
+  7,6,4,3
+};
+//TODO tets patch test
 //-------------------------- tet shape functions -----------------------------
-#if 0
 static inline
-const FMR_RESTRICT Mesh::vals Tet::ShapeFunction(
-  const fmr::Dim_int p, const fmr::Float_phys x[3]){
-  const fmr::Float_phys v=1.0;//0.550321208149104;
-  // vol of unit-sized tet is 1/6
-  switch(int(p)){
-  case(1): return Mesh::vals {v-v*x[0]-v*x[1]-v*x[2], v*x[0], v*x[1], v*x[2]};
-  case(2):{ FMR_RESTRICT Mesh::vals f(10);
-    const fmr::Float_phys L2=x[0]*v, L3=x[1]*v, L4=x[2]*v;
-    const fmr::Float_phys L1=(v-L2-L3-L4);
-    f[ 0] = 2.*L1*L1 - L1;// corner nodes
-    f[ 1] = 2.*L2*L2 - L2;
-    f[ 2] = 2.*L3*L3 - L3;
-    f[ 3] = 2.*L4*L4 - L4;
-    f[ 4] = 4.*L1*L2 ;// Edge nodes
-    f[ 5] = 4.*L2*L3 ;
-    f[ 6] = 4.*L3*L1 ;
-    f[ 7] = 4.*L1*L4 ;
-    f[ 8] = 4.*L3*L4 ;
-    f[ 9] = 4.*L2*L4 ;
-    return f; }
-  case(3):{ FMR_RESTRICT Mesh::vals f(20);//TODO 16-node cubic tet
-    const fmr::Float_phys L2=x[0]*v, L3=x[1]*v, L4=x[2]*v;
-    const fmr::Float_phys L1=(v-L2-L3-L4);
-    f[ 0]= 0.5* L1 *(3.* L1 -1.)*(3.* L1 -2.);// corner nodes;
-    f[ 1]= 0.5* L2 *(3.* L2 -1.)*(3.* L2 -2.);
-    f[ 2]= 0.5* L3 *(3.* L3 -1.)*(3.* L3 -2.);
-    f[ 3]= 0.5* L4 *(3.* L4 -1.)*(3.* L4 -2.);
-    // edge nodes
-    f[ 4]=4.5*( L1*L2 *(3.*L1 -1.) );
-    f[ 5]=4.5*( L1*L2 *(3.*L2 -1.) );
-    //
-    f[ 6]=4.5*( L2*L3 *(3.*L2 -1.) );
-    f[ 7]=4.5*( L2*L3 *(3.*L3 -1.) );
-    //
-    f[ 8]=4.5*( L1*L3 *(3.*L3 -1.) );
-    f[ 9]=4.5*( L1*L3 *(3.*L1 -1.) );
-    //
-    f[10]=4.5*( L1*L4 *(3.*L4 -1.) );
-    f[11]=4.5*( L1*L4 *(3.*L1 -1.) );
-    //
-    f[12]=4.5*( L3*L4 *(3.*L4 -1.) );
-    f[13]=4.5*( L3*L4 *(3.*L3 -1.) );
-    //
-    f[14]=4.5*( L2*L4 *(3.*L4 -1.) );
-    f[15]=4.5*( L2*L4 *(3.*L2 -1.) );
-    // face nodes 0,1,2, 0,1,3, 0,3,2, 1,2,3 
-    f[16]=27.*( L1*L2 *L3 );
-    f[17]=27.*( L1*L2 *L4 );
-    f[18]=27.*( L1*L4 *L3 );
-    f[19]=27.*( L2*L3 *L4 );
-    return f;}
-  default: return Mesh::vals{};
-  };
+void tets_shap_func_4
+(fmr::Geom_float f[4], const fmr::Phys_float x[3]) {
+  f[ 0] = fmr::Geom_float (1.0 -x[0] -x[1] -x[2]);
+  f[ 1] = fmr::Geom_float (x[0]);
+  f[ 2] = fmr::Geom_float (x[1]);
+  f[ 3] = fmr::Geom_float (x[2]);
+  return;
 }
 static inline
-const FMR_RESTRICT Mesh::vals Tet::ShapeGradient(
-  const fmr::Dim_int p, const fmr::Float_phys x[3]) {
-  FMR_RESTRICT Mesh::vals g={};
-  //printf("=== GA ===\n");
-  //FIXME Should these take a list of points?
-  fmr::Float_phys v=1.0;//0.550321208149104;// (1/6)^(1/3)//FIXME?
-  switch( int(p) ){//this->elem_p
-  case(1):{// printf("=== G1 ===\n"); 
-    //return Mesh::vals {//FIXME Transpose?
-    g.resize(12);
-    g={//FIXME Transpose?
-      -v, v, 0.0, 0.0,  // dN/dx (natural coords)//FIXED Check these.
-      -v, 0.0, v, 0.0,  // dN/dy
-      -v, 0.0, 0.0, v }; break;}// dN/
-  case(2):{ v=1.0;//FIXME?
-    const fmr::Float_phys L2=x[0]*v, L3=x[1]*v, L4=x[2]*v;
-    const fmr::Float_phys L1=(v-L2-L3-L4);
-    // Term-by-term derivs
-    const fmr::Float_phys L1r=-v, L2r=v , L3r=0., L4r=0.;
-    const fmr::Float_phys L1s=-v, L2s=0., L3s=v , L4s=0.;
-    const fmr::Float_phys L1t=-v, L2t=0., L3t=0., L4t=v ;
-    // edges: 0,1; 1,2; 0,2; 0,3; 2,3; 1,3;
-    //FMR_RESTRICT Mesh::vals g(3*10);
-    // r-derivs by product rule
-    g.resize(30);
-    g[ 0] = 2.*L1*L1r + 2.*L1r*L1 - L1r;// Corner nodes
-    g[ 1] = 2.*L2*L2r + 2.*L2r*L2 - L2r;
-    g[ 2] = 2.*L3*L3r + 2.*L3r*L3 - L3r;
-    g[ 3] = 2.*L4*L4r + 2.*L4r*L4 - L4r;
-    g[ 4] = 4.*L2*L1r + 4.*L2r*L1;// Edge nodes
-    g[ 5] = 4.*L2*L3r + 4.*L2r*L3;
-    g[ 6] = 4.*L3*L1r + 4.*L3r*L1;
-    g[ 7] = 4.*L4*L1r + 4.*L4r*L1;
-    g[ 8] = 4.*L3*L4r + 4.*L3r*L4;
-    g[ 9] = 4.*L4*L2r + 4.*L4r*L2;
-    // s-derivs
-    g[10] = 2.*L1*L1s + 2.*L1s*L1 - L1s;// Corner nodes
-    g[11] = 2.*L2*L2s + 2.*L2s*L2 - L2s;
-    g[12] = 2.*L3*L3s + 2.*L3s*L3 - L3s;
-    g[13] = 2.*L4*L4s + 2.*L4s*L4 - L4s;
-    g[14] = 4.*L2*L1s + 4.*L2s*L1;// Edge nodes
-    g[15] = 4.*L2*L3s + 4.*L2s*L3;
-    g[16] = 4.*L3*L1s + 4.*L3s*L1;
-    g[17] = 4.*L4*L1s + 4.*L4s*L1;
-    g[18] = 4.*L3*L4s + 4.*L3s*L4;
-    g[19] = 4.*L4*L2s + 4.*L4s*L2;
-    // t-derivs
-    g[20] = 2.*L1*L1t + 2.*L1t*L1 - L1t;// Corner nodes
-    g[21] = 2.*L2*L2t + 2.*L2t*L2 - L2t;
-    g[22] = 2.*L3*L3t + 2.*L3t*L3 - L3t;
-    g[23] = 2.*L4*L4t + 2.*L4t*L4 - L4t;
-    g[24] = 4.*L2*L1t + 4.*L2t*L1;// Edge nodes
-    g[25] = 4.*L2*L3t + 4.*L2t*L3;
-    g[26] = 4.*L3*L1t + 4.*L3t*L1;
-    g[27] = 4.*L4*L1t + 4.*L4t*L1;
-    g[28] = 4.*L3*L4t + 4.*L3t*L4;
-    g[29] = 4.*L4*L2t + 4.*L4t*L2;
-    //
-    //return g;
-    break;}
-  case(3):{ v=1.0;
-    const fmr::Float_phys L2=x[0]*v, L3=x[1]*v, L4=x[2]*v;
-    const fmr::Float_phys L1=(v-L2-L3-L4);
-    // Term-by-term derivs
-    const fmr::Float_phys L1r=-v, L2r=v , L3r=0., L4r=0.;
-    const fmr::Float_phys L1s=-v, L2s=0., L3s=v , L4s=0.;
-    const fmr::Float_phys L1t=-v, L2t=0., L3t=0., L4t=v ;
-    // edges: 0,1; 1,2; 0,2; 0,3; 2,3; 1,3;
-    //FMR_RESTRICT Mesh::vals g(3*20);
-    g.resize(60);
-    g[ 0]= 0.5* L1r *(3.* L1 -1.)*(3.* L1 -2.)// corner nodes
-         + 0.5* L1  *(3.* L1r   )*(3.* L1 -2.)
-         + 0.5* L1  *(3.* L1 -1.)*(3.* L1r   );
-    g[ 1]= 0.5* L2r *(3.* L2 -1.)*(3.* L2 -2.)
-         + 0.5* L2  *(3.* L2r   )*(3.* L2 -2.)
-         + 0.5* L2  *(3.* L2 -1.)*(3.* L2r   );
-    g[ 2]= 0.5* L3r *(3.* L3 -1.)*(3.* L3 -2.)
-         + 0.5* L3  *(3.* L3r   )*(3.* L3 -2.)
-         + 0.5* L3  *(3.* L3 -1.)*(3.* L3r   );
-    g[ 3]= 0.5* L4r *(3.* L4 -1.)*(3.* L4 -2.)
-         + 0.5* L4  *(3.* L4r   )*(3.* L4 -2.)
-         + 0.5* L4  *(3.* L4 -1.)*(3.* L4r   );
-    // r-derivs, edge nodes
-    g[ 4]=4.5*( L1r*L2 *(3.*L1 -1.) + L1 *L2r*(3.*L1 -1.) + L1 *L2 *(3.*L1r) );
-    g[ 5]=4.5*( L1r*L2 *(3.*L2 -1.) + L1 *L2r*(3.*L2 -1.) + L1 *L2 *(3.*L2r) );
-    //
-    g[ 6]=4.5*( L2r*L3 *(3.*L2 -1.) + L2 *L3r*(3.*L2 -1.) + L2 *L3 *(3.*L2r) );
-    g[ 7]=4.5*( L2r*L3 *(3.*L3 -1.) + L2 *L3r*(3.*L3 -1.) + L2 *L3 *(3.*L3r) );
-    //
-    g[ 8]=4.5*( L1r*L3 *(3.*L3 -1.) + L1 *L3r*(3.*L3 -1.) + L1 *L3 *(3.*L3r) );
-    g[ 9]=4.5*( L1r*L3 *(3.*L1 -1.) + L1 *L3r*(3.*L1 -1.) + L1 *L3 *(3.*L1r) );
-    //
-    g[10]=4.5*( L1r*L4 *(3.*L4 -1.) + L1 *L4r*(3.*L4 -1.) + L1 *L4 *(3.*L4r) );
-    g[11]=4.5*( L1r*L4 *(3.*L1 -1.) + L1 *L4r*(3.*L1 -1.) + L1 *L4 *(3.*L1r) );
-    //
-    g[12]=4.5*( L3r*L4 *(3.*L4 -1.) + L3 *L4r*(3.*L4 -1.) + L3 *L4 *(3.*L4r) );
-    g[13]=4.5*( L3r*L4 *(3.*L3 -1.) + L3 *L4r*(3.*L3 -1.) + L3 *L4 *(3.*L3r) );
-    //
-    g[14]=4.5*( L2r*L4 *(3.*L4 -1.) + L2 *L4r*(3.*L4 -1.) + L2 *L4 *(3.*L4r) );
-    g[15]=4.5*( L2r*L4 *(3.*L2 -1.) + L2 *L4r*(3.*L2 -1.) + L2 *L4 *(3.*L2r) );
-    // face nodes 0,1,2, 0,1,3, 0,3,2, 1,2,3 
-    g[16]=27.*( L1r*L2 *L3 + L1 *L2r*L3 + L1 *L2 *L3r);
-    g[17]=27.*( L1r*L2 *L4 + L1 *L2r*L4 + L1 *L2 *L4r);
-    g[18]=27.*( L1r*L4 *L3 + L1 *L4r*L3 + L1 *L4 *L3r);
-    g[19]=27.*( L2r*L3 *L4 + L2 *L3r*L4 + L2 *L3 *L4r);
-    // s-derivs
-    g[20]= 0.5* L1s *(3.* L1 -1.)*(3.* L1 -2.)// corner nodes
-         + 0.5* L1  *(3.* L1s   )*(3.* L1 -2.)
-         + 0.5* L1  *(3.* L1 -1.)*(3.* L1s   );
-    g[21]= 0.5* L2s *(3.* L2 -1.)*(3.* L2 -2.)
-         + 0.5* L2  *(3.* L2s   )*(3.* L2 -2.)
-         + 0.5* L2  *(3.* L2 -1.)*(3.* L2s   );
-    g[22]= 0.5* L3s *(3.* L3 -1.)*(3.* L3 -2.)
-         + 0.5* L3  *(3.* L3s   )*(3.* L3 -2.)
-         + 0.5* L3  *(3.* L3 -1.)*(3.* L3s   );
-    g[23]= 0.5* L4s *(3.* L4 -1.)*(3.* L4 -2.)
-         + 0.5* L4  *(3.* L4s   )*(3.* L4 -2.)
-         + 0.5* L4  *(3.* L4 -1.)*(3.* L4s   );
-    // s-desivs, edge nodes
-    g[24]=4.5*( L1s*L2 *(3.*L1 -1.) + L1 *L2s*(3.*L1 -1.) + L1 *L2 *(3.*L1s) );
-    g[25]=4.5*( L1s*L2 *(3.*L2 -1.) + L1 *L2s*(3.*L2 -1.) + L1 *L2 *(3.*L2s) );
-    //
-    g[26]=4.5*( L2s*L3 *(3.*L2 -1.) + L2 *L3s*(3.*L2 -1.) + L2 *L3 *(3.*L2s) );
-    g[27]=4.5*( L2s*L3 *(3.*L3 -1.) + L2 *L3s*(3.*L3 -1.) + L2 *L3 *(3.*L3s) );
-    //
-    g[28]=4.5*( L1s*L3 *(3.*L3 -1.) + L1 *L3s*(3.*L3 -1.) + L1 *L3 *(3.*L3s) );
-    g[29]=4.5*( L1s*L3 *(3.*L1 -1.) + L1 *L3s*(3.*L1 -1.) + L1 *L3 *(3.*L1s) );
-    //
-    g[30]=4.5*( L1s*L4 *(3.*L4 -1.) + L1 *L4s*(3.*L4 -1.) + L1 *L4 *(3.*L4s) );
-    g[31]=4.5*( L1s*L4 *(3.*L1 -1.) + L1 *L4s*(3.*L1 -1.) + L1 *L4 *(3.*L1s) );
-    //
-    g[32]=4.5*( L3s*L4 *(3.*L4 -1.) + L3 *L4s*(3.*L4 -1.) + L3 *L4 *(3.*L4s) );
-    g[33]=4.5*( L3s*L4 *(3.*L3 -1.) + L3 *L4s*(3.*L3 -1.) + L3 *L4 *(3.*L3s) );
-    //
-    g[34]=4.5*( L2s*L4 *(3.*L4 -1.) + L2 *L4s*(3.*L4 -1.) + L2 *L4 *(3.*L4s) );
-    g[35]=4.5*( L2s*L4 *(3.*L2 -1.) + L2 *L4s*(3.*L2 -1.) + L2 *L4 *(3.*L2s) );
-    // face nodes 0,1,2, 0,1,3, 0,3,2, 1,2,3 
-    g[36]=27.*( L1s*L2 *L3 + L1 *L2s*L3 + L1 *L2 *L3s);
-    g[37]=27.*( L1s*L2 *L4 + L1 *L2s*L4 + L1 *L2 *L4s);
-    g[38]=27.*( L1s*L4 *L3 + L1 *L4s*L3 + L1 *L4 *L3s);
-    g[39]=27.*( L2s*L3 *L4 + L2 *L3s*L4 + L2 *L3 *L4s);
-    // t-derivs
-    g[40]= 0.5* L1t *(3.* L1 -1.)*(3.* L1 -2.)// corner nodes
-         + 0.5* L1  *(3.* L1t   )*(3.* L1 -2.)
-         + 0.5* L1  *(3.* L1 -1.)*(3.* L1t   );
-    g[41]= 0.5* L2t *(3.* L2 -1.)*(3.* L2 -2.)
-         + 0.5* L2  *(3.* L2t   )*(3.* L2 -2.)
-         + 0.5* L2  *(3.* L2 -1.)*(3.* L2t   );
-    g[42]= 0.5* L3t *(3.* L3 -1.)*(3.* L3 -2.)
-         + 0.5* L3  *(3.* L3t   )*(3.* L3 -2.)
-         + 0.5* L3  *(3.* L3 -1.)*(3.* L3t   );
-    g[43]= 0.5* L4t *(3.* L4 -1.)*(3.* L4 -2.)
-         + 0.5* L4  *(3.* L4t   )*(3.* L4 -2.)
-         + 0.5* L4  *(3.* L4 -1.)*(3.* L4t   );
-    // t-detivs, edge nodes
-    g[44]=4.5*( L1t*L2 *(3.*L1 -1.) + L1 *L2t*(3.*L1 -1.) + L1 *L2 *(3.*L1t) );
-    g[45]=4.5*( L1t*L2 *(3.*L2 -1.) + L1 *L2t*(3.*L2 -1.) + L1 *L2 *(3.*L2t) );
-    //
-    g[46]=4.5*( L2t*L3 *(3.*L2 -1.) + L2 *L3t*(3.*L2 -1.) + L2 *L3 *(3.*L2t) );
-    g[47]=4.5*( L2t*L3 *(3.*L3 -1.) + L2 *L3t*(3.*L3 -1.) + L2 *L3 *(3.*L3t) );
-    //
-    g[48]=4.5*( L1t*L3 *(3.*L3 -1.) + L1 *L3t*(3.*L3 -1.) + L1 *L3 *(3.*L3t) );
-    g[49]=4.5*( L1t*L3 *(3.*L1 -1.) + L1 *L3t*(3.*L1 -1.) + L1 *L3 *(3.*L1t) );
-    //
-    g[50]=4.5*( L1t*L4 *(3.*L4 -1.) + L1 *L4t*(3.*L4 -1.) + L1 *L4 *(3.*L4t) );
-    g[51]=4.5*( L1t*L4 *(3.*L1 -1.) + L1 *L4t*(3.*L1 -1.) + L1 *L4 *(3.*L1t) );
-    //
-    g[52]=4.5*( L3t*L4 *(3.*L4 -1.) + L3 *L4t*(3.*L4 -1.) + L3 *L4 *(3.*L4t) );
-    g[53]=4.5*( L3t*L4 *(3.*L3 -1.) + L3 *L4t*(3.*L3 -1.) + L3 *L4 *(3.*L3t) );
-    //
-    g[54]=4.5*( L2t*L4 *(3.*L4 -1.) + L2 *L4t*(3.*L4 -1.) + L2 *L4 *(3.*L4t) );
-    g[55]=4.5*( L2t*L4 *(3.*L2 -1.) + L2 *L4t*(3.*L2 -1.) + L2 *L4 *(3.*L2t) );
-    // face nodes 0,1,2, 0,1,3, 0,3,2, 1,2,3 
-    g[56]=27.*( L1t*L2 *L3 + L1 *L2t*L3 + L1 *L2 *L3t);
-    g[57]=27.*( L1t*L2 *L4 + L1 *L2t*L4 + L1 *L2 *L4t);
-    g[58]=27.*( L1t*L4 *L3 + L1 *L4t*L3 + L1 *L4 *L3t);
-    g[59]=27.*( L2t*L3 *L4 + L2 *L3t*L4 + L2 *L3 *L4t);
-    //
-    //return g;
-    break;}
-  //default: return Mesh::vals{};
-  default: break;//const FMR_RESTRICT Mesh::vals g={};
-  };
-  return g;
+void tets_shap_grad_4 //TODO Transpose g?
+(fmr::Geom_float g[4 *3], const fmr::Phys_float[]) {//  x[3] not used
+  g[ 0]=-1.0; g[ 1]=1.0; g[ 2]=0.0; g[ 3]=0.0;// dN/dx (natural coords)
+  g[ 4]=-1.0; g[ 5]=0.0; g[ 6]=1.0; g[ 7]=0.0;// dN/dy
+  g[ 8]=-1.0; g[ 9]=0.0; g[10]=0.0; g[11]=1.0;// dN/dz
 }
-#endif
+static inline
+void tets_shap_func_10
+(fmr::Geom_float f[10], const fmr::Phys_float x[3]) {
+  const fmr::Phys_float L2=x[0], L3=x[1], L4=x[2];
+  const fmr::Phys_float L1=(1.0-L2-L3-L4);
+  f[ 0] = 2.0*L1*L1 - L1;// Vertex nodes
+  f[ 1] = 2.0*L2*L2 - L2;
+  f[ 2] = 2.0*L3*L3 - L3;
+  f[ 3] = 2.0*L4*L4 - L4;
+  f[ 4] = 4.0*L1*L2;// Edge nodes
+  f[ 5] = 4.0*L2*L3;
+  f[ 6] = 4.0*L3*L1;
+  f[ 7] = 4.0*L1*L4;
+  f[ 8] = 4.0*L3*L4;
+  f[ 9] = 4.0*L2*L4;
+  return;
+}
+static inline
+void tets_shap_grad_10 //TODO Return transpose?
+(fmr::Geom_float g[10 *3], const fmr::Phys_float x[3]) {
+  const fmr::Phys_float L2=x[0], L3=x[1], L4=x[2];
+  const fmr::Phys_float L1=(1.0-L2-L3-L4);
+  // Term-by-term derivs
+  const fmr::Phys_float L1r=-1.0, L2r=1.0, L3r=0.0, L4r=0.0;
+  const fmr::Phys_float L1s=-1.0, L2s=0.0, L3s=1.0, L4s=0.0;
+  const fmr::Phys_float L1t=-1.0, L2t=0.0, L3t=0.0, L4t=1.0;
+  // edges: 0,1; 1,2; 0,2; 0,3; 2,3; 1,3;
+  // r-derivs by product rule
+  g[ 0] = 2.0*L1*L1r + 2.0*L1r*L1 - L1r;// Corner nodes
+  g[ 1] = 2.0*L2*L2r + 2.0*L2r*L2 - L2r;
+  g[ 2] = 2.0*L3*L3r + 2.0*L3r*L3 - L3r;
+  g[ 3] = 2.0*L4*L4r + 2.0*L4r*L4 - L4r;
+  g[ 4] = 4.0*L2*L1r + 4.0*L2r*L1;// Edge nodes
+  g[ 5] = 4.0*L2*L3r + 4.0*L2r*L3;
+  g[ 6] = 4.0*L3*L1r + 4.0*L3r*L1;
+  g[ 7] = 4.0*L4*L1r + 4.0*L4r*L1;
+  g[ 8] = 4.0*L3*L4r + 4.0*L3r*L4;
+  g[ 9] = 4.0*L4*L2r + 4.0*L4r*L2;
+  // s-derivs
+  g[10] = 2.0*L1*L1s + 2.0*L1s*L1 - L1s;// Corner nodes
+  g[11] = 2.0*L2*L2s + 2.0*L2s*L2 - L2s;
+  g[12] = 2.0*L3*L3s + 2.0*L3s*L3 - L3s;
+  g[13] = 2.0*L4*L4s + 2.0*L4s*L4 - L4s;
+  g[14] = 4.0*L2*L1s + 4.0*L2s*L1;// Edge nodes
+  g[15] = 4.0*L2*L3s + 4.0*L2s*L3;
+  g[16] = 4.0*L3*L1s + 4.0*L3s*L1;
+  g[17] = 4.0*L4*L1s + 4.0*L4s*L1;
+  g[18] = 4.0*L3*L4s + 4.0*L3s*L4;
+  g[19] = 4.0*L4*L2s + 4.0*L4s*L2;
+  // t-derivs
+  g[20] = 2.0*L1*L1t + 2.0*L1t*L1 - L1t;// Corner nodes
+  g[21] = 2.0*L2*L2t + 2.0*L2t*L2 - L2t;
+  g[22] = 2.0*L3*L3t + 2.0*L3t*L3 - L3t;
+  g[23] = 2.0*L4*L4t + 2.0*L4t*L4 - L4t;
+  g[24] = 4.0*L2*L1t + 4.0*L2t*L1;// Edge nodes
+  g[25] = 4.0*L2*L3t + 4.0*L2t*L3;
+  g[26] = 4.0*L3*L1t + 4.0*L3t*L1;
+  g[27] = 4.0*L4*L1t + 4.0*L4t*L1;
+  g[28] = 4.0*L3*L4t + 4.0*L3t*L4;
+  g[29] = 4.0*L4*L2t + 4.0*L4t*L2;
+  return;
+}
+static inline
+void tets_shap_func_20 //TODO Return transpose?
+(fmr::Geom_float f[20], const fmr::Phys_float x[3]) {
+  const fmr::Phys_float L2=x[0], L3=x[1], L4=x[2];
+  const fmr::Phys_float L1=(1.0-L2-L3-L4);
+  f[ 0]= 0.5* L1 *(3.0* L1 -1.)*(3.0* L1 -2.);// Vertex nodes;
+  f[ 1]= 0.5* L2 *(3.0* L2 -1.)*(3.0* L2 -2.);
+  f[ 2]= 0.5* L3 *(3.0* L3 -1.)*(3.0* L3 -2.);
+  f[ 3]= 0.5* L4 *(3.0* L4 -1.)*(3.0* L4 -2.);
+  // Edge nodes
+  f[ 4]=4.5*( L1*L2 *(3.0*L1 -1.) );
+  f[ 5]=4.5*( L1*L2 *(3.0*L2 -1.) );
+  //
+  f[ 6]=4.5*( L2*L3 *(3.0*L2 -1.) );
+  f[ 7]=4.5*( L2*L3 *(3.0*L3 -1.) );
+  //
+  f[ 8]=4.5*( L1*L3 *(3.0*L3 -1.) );
+  f[ 9]=4.5*( L1*L3 *(3.0*L1 -1.) );
+  //
+  f[10]=4.5*( L1*L4 *(3.0*L4 -1.) );
+  f[11]=4.5*( L1*L4 *(3.0*L1 -1.) );
+  //
+  f[12]=4.5*( L3*L4 *(3.0*L4 -1.) );
+  f[13]=4.5*( L3*L4 *(3.0*L3 -1.) );
+  //
+  f[14]=4.5*( L2*L4 *(3.0*L4 -1.) );
+  f[15]=4.5*( L2*L4 *(3.0*L2 -1.) );
+  // Face nodes 0,1,2, 0,1,3, 0,3,2, 1,2,3 
+  f[16]=27.0*( L1*L2 *L3 );
+  f[17]=27.0*( L1*L2 *L4 );
+  f[18]=27.0*( L1*L4 *L3 );
+  f[19]=27.0*( L2*L3 *L4 );
+  return;
+}
+static inline
+void tets_shap_grad_20 //TODO Return transpose?
+(fmr::Geom_float g[20 *3], const fmr::Phys_float x[3]) {
+  const fmr::Phys_float L2=x[0], L3=x[1], L4=x[2];
+  const fmr::Phys_float L1=(1.0-L2-L3-L4);
+  // Term-by-term derivs
+  const fmr::Phys_float L1r=-1.0, L2r=1.0, L3r=0.0, L4r=0.0;
+  const fmr::Phys_float L1s=-1.0, L2s=0.0, L3s=1.0, L4s=0.0;
+  const fmr::Phys_float L1t=-1.0, L2t=0.0, L3t=0.0, L4t=1.0 ;
+  // edges: 0,1; 1,2; 0,2; 0,3; 2,3; 1,3;
+  g[ 0]= 0.5* L1r *(3.* L1 -1.)*(3.* L1 -2.)// corner nodes
+       + 0.5* L1  *(3.* L1r   )*(3.* L1 -2.)
+       + 0.5* L1  *(3.* L1 -1.)*(3.* L1r   );
+  g[ 1]= 0.5* L2r *(3.* L2 -1.)*(3.* L2 -2.)
+       + 0.5* L2  *(3.* L2r   )*(3.* L2 -2.)
+       + 0.5* L2  *(3.* L2 -1.)*(3.* L2r   );
+  g[ 2]= 0.5* L3r *(3.* L3 -1.)*(3.* L3 -2.)
+       + 0.5* L3  *(3.* L3r   )*(3.* L3 -2.)
+       + 0.5* L3  *(3.* L3 -1.)*(3.* L3r   );
+  g[ 3]= 0.5* L4r *(3.* L4 -1.)*(3.* L4 -2.)
+       + 0.5* L4  *(3.* L4r   )*(3.* L4 -2.)
+       + 0.5* L4  *(3.* L4 -1.)*(3.* L4r   );
+  // r-derivs, edge nodes
+  g[ 4]=4.5*( L1r*L2 *(3.*L1 -1.) + L1 *L2r*(3.*L1 -1.) + L1 *L2 *(3.*L1r) );
+  g[ 5]=4.5*( L1r*L2 *(3.*L2 -1.) + L1 *L2r*(3.*L2 -1.) + L1 *L2 *(3.*L2r) );
+  //
+  g[ 6]=4.5*( L2r*L3 *(3.*L2 -1.) + L2 *L3r*(3.*L2 -1.) + L2 *L3 *(3.*L2r) );
+  g[ 7]=4.5*( L2r*L3 *(3.*L3 -1.) + L2 *L3r*(3.*L3 -1.) + L2 *L3 *(3.*L3r) );
+  //
+  g[ 8]=4.5*( L1r*L3 *(3.*L3 -1.) + L1 *L3r*(3.*L3 -1.) + L1 *L3 *(3.*L3r) );
+  g[ 9]=4.5*( L1r*L3 *(3.*L1 -1.) + L1 *L3r*(3.*L1 -1.) + L1 *L3 *(3.*L1r) );
+  //
+  g[10]=4.5*( L1r*L4 *(3.*L4 -1.) + L1 *L4r*(3.*L4 -1.) + L1 *L4 *(3.*L4r) );
+  g[11]=4.5*( L1r*L4 *(3.*L1 -1.) + L1 *L4r*(3.*L1 -1.) + L1 *L4 *(3.*L1r) );
+  //
+  g[12]=4.5*( L3r*L4 *(3.*L4 -1.) + L3 *L4r*(3.*L4 -1.) + L3 *L4 *(3.*L4r) );
+  g[13]=4.5*( L3r*L4 *(3.*L3 -1.) + L3 *L4r*(3.*L3 -1.) + L3 *L4 *(3.*L3r) );
+  //
+  g[14]=4.5*( L2r*L4 *(3.*L4 -1.) + L2 *L4r*(3.*L4 -1.) + L2 *L4 *(3.*L4r) );
+  g[15]=4.5*( L2r*L4 *(3.*L2 -1.) + L2 *L4r*(3.*L2 -1.) + L2 *L4 *(3.*L2r) );
+  // face nodes 0,1,2, 0,1,3, 0,3,2, 1,2,3 
+  g[16]=27.*( L1r*L2 *L3 + L1 *L2r*L3 + L1 *L2 *L3r);
+  g[17]=27.*( L1r*L2 *L4 + L1 *L2r*L4 + L1 *L2 *L4r);
+  g[18]=27.*( L1r*L4 *L3 + L1 *L4r*L3 + L1 *L4 *L3r);
+  g[19]=27.*( L2r*L3 *L4 + L2 *L3r*L4 + L2 *L3 *L4r);
+  // s-derivs
+  g[20]= 0.5* L1s *(3.* L1 -1.)*(3.* L1 -2.)// corner nodes
+       + 0.5* L1  *(3.* L1s   )*(3.* L1 -2.)
+       + 0.5* L1  *(3.* L1 -1.)*(3.* L1s   );
+  g[21]= 0.5* L2s *(3.* L2 -1.)*(3.* L2 -2.)
+       + 0.5* L2  *(3.* L2s   )*(3.* L2 -2.)
+       + 0.5* L2  *(3.* L2 -1.)*(3.* L2s   );
+  g[22]= 0.5* L3s *(3.* L3 -1.)*(3.* L3 -2.)
+       + 0.5* L3  *(3.* L3s   )*(3.* L3 -2.)
+       + 0.5* L3  *(3.* L3 -1.)*(3.* L3s   );
+  g[23]= 0.5* L4s *(3.* L4 -1.)*(3.* L4 -2.)
+       + 0.5* L4  *(3.* L4s   )*(3.* L4 -2.)
+       + 0.5* L4  *(3.* L4 -1.)*(3.* L4s   );
+  // s-desivs, edge nodes
+  g[24]=4.5*( L1s*L2 *(3.*L1 -1.) + L1 *L2s*(3.*L1 -1.) + L1 *L2 *(3.*L1s) );
+  g[25]=4.5*( L1s*L2 *(3.*L2 -1.) + L1 *L2s*(3.*L2 -1.) + L1 *L2 *(3.*L2s) );
+  //
+  g[26]=4.5*( L2s*L3 *(3.*L2 -1.) + L2 *L3s*(3.*L2 -1.) + L2 *L3 *(3.*L2s) );
+  g[27]=4.5*( L2s*L3 *(3.*L3 -1.) + L2 *L3s*(3.*L3 -1.) + L2 *L3 *(3.*L3s) );
+  //
+  g[28]=4.5*( L1s*L3 *(3.*L3 -1.) + L1 *L3s*(3.*L3 -1.) + L1 *L3 *(3.*L3s) );
+  g[29]=4.5*( L1s*L3 *(3.*L1 -1.) + L1 *L3s*(3.*L1 -1.) + L1 *L3 *(3.*L1s) );
+  //
+  g[30]=4.5*( L1s*L4 *(3.*L4 -1.) + L1 *L4s*(3.*L4 -1.) + L1 *L4 *(3.*L4s) );
+  g[31]=4.5*( L1s*L4 *(3.*L1 -1.) + L1 *L4s*(3.*L1 -1.) + L1 *L4 *(3.*L1s) );
+  //
+  g[32]=4.5*( L3s*L4 *(3.*L4 -1.) + L3 *L4s*(3.*L4 -1.) + L3 *L4 *(3.*L4s) );
+  g[33]=4.5*( L3s*L4 *(3.*L3 -1.) + L3 *L4s*(3.*L3 -1.) + L3 *L4 *(3.*L3s) );
+  //
+  g[34]=4.5*( L2s*L4 *(3.*L4 -1.) + L2 *L4s*(3.*L4 -1.) + L2 *L4 *(3.*L4s) );
+  g[35]=4.5*( L2s*L4 *(3.*L2 -1.) + L2 *L4s*(3.*L2 -1.) + L2 *L4 *(3.*L2s) );
+  // face nodes 0,1,2, 0,1,3, 0,3,2, 1,2,3 
+  g[36]=27.*( L1s*L2 *L3 + L1 *L2s*L3 + L1 *L2 *L3s);
+  g[37]=27.*( L1s*L2 *L4 + L1 *L2s*L4 + L1 *L2 *L4s);
+  g[38]=27.*( L1s*L4 *L3 + L1 *L4s*L3 + L1 *L4 *L3s);
+  g[39]=27.*( L2s*L3 *L4 + L2 *L3s*L4 + L2 *L3 *L4s);
+  // t-derivs
+  g[40]= 0.5* L1t *(3.* L1 -1.)*(3.* L1 -2.)// corner nodes
+       + 0.5* L1  *(3.* L1t   )*(3.* L1 -2.)
+       + 0.5* L1  *(3.* L1 -1.)*(3.* L1t   );
+  g[41]= 0.5* L2t *(3.* L2 -1.)*(3.* L2 -2.)
+       + 0.5* L2  *(3.* L2t   )*(3.* L2 -2.)
+       + 0.5* L2  *(3.* L2 -1.)*(3.* L2t   );
+  g[42]= 0.5* L3t *(3.* L3 -1.)*(3.* L3 -2.)
+       + 0.5* L3  *(3.* L3t   )*(3.* L3 -2.)
+       + 0.5* L3  *(3.* L3 -1.)*(3.* L3t   );
+  g[43]= 0.5* L4t *(3.* L4 -1.)*(3.* L4 -2.)
+       + 0.5* L4  *(3.* L4t   )*(3.* L4 -2.)
+       + 0.5* L4  *(3.* L4 -1.)*(3.* L4t   );
+  // t-detivs, edge nodes
+  g[44]=4.5*( L1t*L2 *(3.*L1 -1.) + L1 *L2t*(3.*L1 -1.) + L1 *L2 *(3.*L1t) );
+  g[45]=4.5*( L1t*L2 *(3.*L2 -1.) + L1 *L2t*(3.*L2 -1.) + L1 *L2 *(3.*L2t) );
+  //
+  g[46]=4.5*( L2t*L3 *(3.*L2 -1.) + L2 *L3t*(3.*L2 -1.) + L2 *L3 *(3.*L2t) );
+  g[47]=4.5*( L2t*L3 *(3.*L3 -1.) + L2 *L3t*(3.*L3 -1.) + L2 *L3 *(3.*L3t) );
+  //
+  g[48]=4.5*( L1t*L3 *(3.*L3 -1.) + L1 *L3t*(3.*L3 -1.) + L1 *L3 *(3.*L3t) );
+  g[49]=4.5*( L1t*L3 *(3.*L1 -1.) + L1 *L3t*(3.*L1 -1.) + L1 *L3 *(3.*L1t) );
+  //
+  g[50]=4.5*( L1t*L4 *(3.*L4 -1.) + L1 *L4t*(3.*L4 -1.) + L1 *L4 *(3.*L4t) );
+  g[51]=4.5*( L1t*L4 *(3.*L1 -1.) + L1 *L4t*(3.*L1 -1.) + L1 *L4 *(3.*L1t) );
+  //
+  g[52]=4.5*( L3t*L4 *(3.*L4 -1.) + L3 *L4t*(3.*L4 -1.) + L3 *L4 *(3.*L4t) );
+  g[53]=4.5*( L3t*L4 *(3.*L3 -1.) + L3 *L4t*(3.*L3 -1.) + L3 *L4 *(3.*L3t) );
+  //
+  g[54]=4.5*( L2t*L4 *(3.*L4 -1.) + L2 *L4t*(3.*L4 -1.) + L2 *L4 *(3.*L4t) );
+  g[55]=4.5*( L2t*L4 *(3.*L2 -1.) + L2 *L4t*(3.*L2 -1.) + L2 *L4 *(3.*L2t) );
+  // face nodes 0,1,2, 0,1,3, 0,3,2, 1,2,3 
+  g[56]=27.*( L1t*L2 *L3 + L1 *L2t*L3 + L1 *L2 *L3t);
+  g[57]=27.*( L1t*L2 *L4 + L1 *L2t*L4 + L1 *L2 *L4t);
+  g[58]=27.*( L1t*L4 *L3 + L1 *L4t*L3 + L1 *L4 *L3t);
+  g[59]=27.*( L2t*L3 *L4 + L2 *L3t*L4 + L2 *L3 *L4t);
+  return;
+}
 //---------------------------- tet integration -------------------------------
 // Tetrahedral integration points and weights
 // for linear-shaped tetrahedra (edge nodes are interpolated),
 // the Jacobian is constant and independent of the int pt locations.
 // So, only ONE 3x3+1 (Jacobian+det) is needed for each element
 // regardless of tet element order.
-// Volume of natural tet is 1/6.
+// The volume of a natural tet is 1/6,
+// and multiplied into the integration rules here.
 //
 static constexpr fmr::Local_int tets_intg_1_n = 1;// Preferred P1
 static constexpr
@@ -427,22 +449,22 @@ fmr::Phys_float tets_intg_11_ptwt [4* tets_intg_11_n] = {
   b3,a3,b3, 56.0/2250.0,
   b3,b3,a3, 56.0/2250.0
 };
-//================================== brck ====================================
-static constexpr fmr::Local_int brck_d      =  3;// spatial dimension
-static constexpr fmr::Local_int brck_vert_n =  8;
-static constexpr fmr::Local_int brck_edge_n = 12;
-static constexpr fmr::Local_int brck_face_n =  6;
+//==================================  cube ====================================
+static constexpr fmr::Local_int  cube_d      =  3;// spatial dimension
+static constexpr fmr::Local_int  cube_vert_n =  8;
+static constexpr fmr::Local_int  cube_edge_n = 12;
+static constexpr fmr::Local_int  cube_face_n =  6;
 //
 static constexpr
 //TODO brick elem edge and face conventions
-fmr::Local_int brck_vert_edge_bars [bars_vert_n * brck_edge_n]
+fmr::Local_int  cube_vert_edge_bars [bars_vert_n *  cube_edge_n]
   = {
   0,1, 1,2, 2,3, 3,0,
   4,5, 5,6, 6,7, 7,4,
   0,4, 1,5, 2,6, 3,7
 };
 static constexpr
-fmr::Local_int brck_vert_face_quad [quad_vert_n * brck_face_n]
+fmr::Local_int  cube_vert_face_quad [quad_vert_n *  cube_face_n]
   = { 
   0,1,2,3,
   7,6,5,4,
@@ -451,28 +473,28 @@ fmr::Local_int brck_vert_face_quad [quad_vert_n * brck_face_n]
   2,6,7,3,
   3,7,4,0
 };
-static constexpr fmr::Geom_float brck_meas       =  8.0;// natural elem volume
-static constexpr fmr::Geom_float brck_face_meas  = 24.0;// elem surface area
+static constexpr fmr::Geom_float  cube_meas       = 1.0;// natural elem volume
+static constexpr fmr::Geom_float  cube_face_meas  = 6.0;// elem surface area
 static constexpr
-fmr::Geom_float brck_vert_coor [brck_vert_n * brck_d ]// transposed coor_vert
+fmr::Geom_float  cube_vert_coor [ cube_vert_n *  cube_d ]// transposed coor_vert
   = {
                   // vertex   7---------6                //
-  -1.0,-1.0,-1.0, // 0       /|        /|                //
-   1.0,-1.0,-1.0, // 1      / |       / |                //
-   1.0, 1.0,-1.0, // 2     /  |      /  |                //
-  -1.0, 1.0,-1.0, // 3    4---------5   |                //
+   0.0, 0.0, 0.0, // 0       /|        /|                //
+   1.0, 0.0, 0.0, // 1      / |       / |                //
+   1.0, 1.0, 0.0, // 2     /  |      /  |                //
+   0.0, 1.0, 0.0, // 3    4---------5   |                //
                   //      |   |     |   |                //
-  -1.0,-1.0, 1.0, // 4    |   3-----|---2                //
-   1.0,-1.0, 1.0, // 5    |  /      |  /      z  y       //
+   0.0, 0.0, 1.0, // 4    |   3-----|---2                //
+   1.0, 0.0, 1.0, // 5    |  /      |  /      z  y       //
    1.0, 1.0, 1.0, // 6    | /       | /       | /        //
-  -1.0, 1.0, 1.0  // 7    |/        |/        |/         //
+   0.0, 1.0, 1.0  // 7    |/        |/        |/         //
 };                //      0---------1         o--x       //
 static constexpr
-fmr::Geom_float brck_coor_vert [brck_d * brck_vert_n]// transposed vert_coor
+fmr::Geom_float  cube_coor_vert [ cube_d *  cube_vert_n]// transposed vert_coor
   = {
-  -1.0, 1.0, 1.0,-1.0, -1.0, 1.0, 1.0,-1.0,
-  -1.0,-1.0, 1.0, 1.0, -1.0,-1.0, 1.0, 1.0,
-  -1.0,-1.0,-1.0,-1.0,  1.0, 1.0, 1.0, 1.0
+   0.0, 1.0, 1.0, 0.0,  0.0, 1.0, 1.0, 0.0,
+   0.0, 0.0, 1.0, 1.0,  0.0, 0.0, 1.0, 1.0,
+   0.0, 0.0, 0.0, 0.0,  1.0, 1.0, 1.0, 1.0
 };
 #if 0
   const Mesh::ints vert_conn={ 0,1,2,3, 4,5,6,7 };
@@ -480,7 +502,7 @@ fmr::Geom_float brck_coor_vert [brck_d * brck_vert_n]// transposed vert_coor
     ={ 0,1, 1,2, 2,3,3,0, 4,5,5,6,6,7,7,4, 0,4,1,5,2,6,3,7 };
   const Mesh::ints vert_face
     ={ 0,1,2,3, 7,6,5,4, 0,4,5,1, 2,3,7,6, 0,3,7,4, 1,5,6,2 };
-  const Mesh::vals node_coor={
+  const fmr::Geom_float node_coor={
                    //       7---------6
      0.0, 0.0, 0.0,//      /|        /|
      1.0, 0.0, 0.0,//     / |       / |
@@ -552,26 +574,26 @@ fmr::Local_int fac4_vert_face_quad [quad_vert_n * fac4_face_n]
   = { 
   0,1,2,3, 7,6,5,4
 };
-static constexpr fmr::Geom_float fac4_meas  = 8.0;// natural element area
+static constexpr fmr::Geom_float fac4_meas  = 2.0;// natural element area
 static constexpr
 fmr::Geom_float fac4_vert_coor [fac4_vert_n * fac4_d ]// transposed coor_vert
   = {
              // vertex                     |       3---------2  -+           //
-  -1.0,-1.0, // 0                          |      /         /    |           //
-   1.0,-1.0, // 1                          |     /         /     |   zero    //
+   0.0, 0.0, // 0                          |      /         /    |           //
+   1.0, 0.0, // 1                          |     /         /     |   zero    //
    1.0, 1.0, // 2        7,3---------2,6   |    /         /      | thickenss //
-  -1.0, 1.0, // 3         /         /      |   0---------1       |           //
+   0.0, 1.0, // 3         /         /      |   0---------1       |           //
              //          /         /       |                     |           //
-  -1.0,-1.0, // 4       /         /        |       7---------6  -+           //
-   1.0,-1.0, // 5    4,0---------1,5       |      /         /        z  y    //
+   0.0, 0.0, // 4       /         /        |       7---------6  -+           //
+   1.0, 0.0, // 5    4,0---------1,5       |      /         /        z  y    //
    1.0, 1.0, // 6                          |     /         /         | /     //
-  -1.0, 1.0  // 7                          |    /         /          |/      //
+   0.0, 1.0  // 7                          |    /         /          |/      //
 };           //                            |   4---------5           o--x    //
 static constexpr
 fmr::Geom_float fac4_coor_vert [fac4_d * fac4_vert_n]// transposed vert_coor
   = {
-  -1.0, 1.0, 1.0,-1.0,  -1.0, 1.0, 1.0,-1.0,
-  -1.0,-1.0, 1.0, 1.0,  -1.0,-1.0, 1.0, 1.0
+   0.0, 1.0, 1.0, 0.0,   0.0, 1.0, 1.0, 0.0,
+   0.0, 0.0, 1.0, 1.0,   0.0, 0.0, 1.0, 1.0
 };
 
 } } }//end femera::grid::fems:: namespace

@@ -126,56 +126,56 @@ TEST( GridCellFEmsTet, FaceNormal2 ){
     &tets_vert_coor [3* tets_vert_face_tris [11]]),
     "[-0.577350, -0.577350, -0.577350]" );
 }
-// Check Brck element surfaces as triangles
-TEST( GridCellFEmsBrck, FaceNormal ){
+// Check Cube element surfaces as triangles
+TEST( GridCellFEmsCube, FaceNormal ){
   EXPECT_EQ( tri3_norm_str (
-    &brck_vert_coor [3* brck_vert_face_quad [0]],
-    &brck_vert_coor [3* brck_vert_face_quad [1]],
-    &brck_vert_coor [3* brck_vert_face_quad [2]]), "+z" );
+    & cube_vert_coor [3*  cube_vert_face_quad [0]],
+    & cube_vert_coor [3*  cube_vert_face_quad [1]],
+    & cube_vert_coor [3*  cube_vert_face_quad [2]]), "+z" );
   EXPECT_EQ( tri3_norm_str (
-    &brck_vert_coor [3* brck_vert_face_quad [2]],
-    &brck_vert_coor [3* brck_vert_face_quad [3]],
-    &brck_vert_coor [3* brck_vert_face_quad [0]]), "+z" );
+    & cube_vert_coor [3*  cube_vert_face_quad [2]],
+    & cube_vert_coor [3*  cube_vert_face_quad [3]],
+    & cube_vert_coor [3*  cube_vert_face_quad [0]]), "+z" );
   EXPECT_EQ( tri3_norm_str (
-    &brck_vert_coor [3* brck_vert_face_quad [4]],
-    &brck_vert_coor [3* brck_vert_face_quad [5]],
-    &brck_vert_coor [3* brck_vert_face_quad [6]]), "-z" );
+    & cube_vert_coor [3*  cube_vert_face_quad [4]],
+    & cube_vert_coor [3*  cube_vert_face_quad [5]],
+    & cube_vert_coor [3*  cube_vert_face_quad [6]]), "-z" );
   EXPECT_EQ( tri3_norm_str (
-    &brck_vert_coor [3* brck_vert_face_quad [6]],
-    &brck_vert_coor [3* brck_vert_face_quad [7]],
-    &brck_vert_coor [3* brck_vert_face_quad [4]]), "-z" );
+    & cube_vert_coor [3*  cube_vert_face_quad [6]],
+    & cube_vert_coor [3*  cube_vert_face_quad [7]],
+    & cube_vert_coor [3*  cube_vert_face_quad [4]]), "-z" );
   EXPECT_EQ( tri3_norm_str (
-    &brck_vert_coor [3* brck_vert_face_quad [ 8]],
-    &brck_vert_coor [3* brck_vert_face_quad [ 9]],
-    &brck_vert_coor [3* brck_vert_face_quad [10]]), "+y" );
+    & cube_vert_coor [3*  cube_vert_face_quad [ 8]],
+    & cube_vert_coor [3*  cube_vert_face_quad [ 9]],
+    & cube_vert_coor [3*  cube_vert_face_quad [10]]), "+y" );
   EXPECT_EQ( tri3_norm_str (
-    &brck_vert_coor [3* brck_vert_face_quad [10]],
-    &brck_vert_coor [3* brck_vert_face_quad [11]],
-    &brck_vert_coor [3* brck_vert_face_quad [ 8]]), "+y" );
+    & cube_vert_coor [3*  cube_vert_face_quad [10]],
+    & cube_vert_coor [3*  cube_vert_face_quad [11]],
+    & cube_vert_coor [3*  cube_vert_face_quad [ 8]]), "+y" );
   EXPECT_EQ( tri3_norm_str (
-    &brck_vert_coor [3* brck_vert_face_quad [12]],
-    &brck_vert_coor [3* brck_vert_face_quad [13]],
-    &brck_vert_coor [3* brck_vert_face_quad [14]]), "-x" );
+    & cube_vert_coor [3*  cube_vert_face_quad [12]],
+    & cube_vert_coor [3*  cube_vert_face_quad [13]],
+    & cube_vert_coor [3*  cube_vert_face_quad [14]]), "-x" );
   EXPECT_EQ( tri3_norm_str (
-    &brck_vert_coor [3* brck_vert_face_quad [14]],
-    &brck_vert_coor [3* brck_vert_face_quad [15]],
-    &brck_vert_coor [3* brck_vert_face_quad [12]]), "-x" );
+    & cube_vert_coor [3*  cube_vert_face_quad [14]],
+    & cube_vert_coor [3*  cube_vert_face_quad [15]],
+    & cube_vert_coor [3*  cube_vert_face_quad [12]]), "-x" );
   EXPECT_EQ( tri3_norm_str (
-    &brck_vert_coor [3* brck_vert_face_quad [16]],
-    &brck_vert_coor [3* brck_vert_face_quad [17]],
-    &brck_vert_coor [3* brck_vert_face_quad [18]]), "-y" );
+    & cube_vert_coor [3*  cube_vert_face_quad [16]],
+    & cube_vert_coor [3*  cube_vert_face_quad [17]],
+    & cube_vert_coor [3*  cube_vert_face_quad [18]]), "-y" );
   EXPECT_EQ( tri3_norm_str (
-    &brck_vert_coor [3* brck_vert_face_quad [18]],
-    &brck_vert_coor [3* brck_vert_face_quad [19]],
-    &brck_vert_coor [3* brck_vert_face_quad [16]]), "-y" );
+    & cube_vert_coor [3*  cube_vert_face_quad [18]],
+    & cube_vert_coor [3*  cube_vert_face_quad [19]],
+    & cube_vert_coor [3*  cube_vert_face_quad [16]]), "-y" );
   EXPECT_EQ( tri3_norm_str (
-    &brck_vert_coor [3* brck_vert_face_quad [20]],
-    &brck_vert_coor [3* brck_vert_face_quad [21]],
-    &brck_vert_coor [3* brck_vert_face_quad [22]]), "+x" );
+    & cube_vert_coor [3*  cube_vert_face_quad [20]],
+    & cube_vert_coor [3*  cube_vert_face_quad [21]],
+    & cube_vert_coor [3*  cube_vert_face_quad [22]]), "+x" );
   EXPECT_EQ( tri3_norm_str (
-    &brck_vert_coor [3* brck_vert_face_quad [22]],
-    &brck_vert_coor [3* brck_vert_face_quad [23]],
-    &brck_vert_coor [3* brck_vert_face_quad [20]]), "+x" );
+    & cube_vert_coor [3*  cube_vert_face_quad [22]],
+    & cube_vert_coor [3*  cube_vert_face_quad [23]],
+    & cube_vert_coor [3*  cube_vert_face_quad [20]]), "+x" );
 }
 TEST( GridCellFEmsFac3, FaceNormal ){
   EXPECT_EQ( tri2_norm_str (
