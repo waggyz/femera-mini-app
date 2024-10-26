@@ -11,30 +11,24 @@ fmr::Phys_float wsum1=0.0, wsum4=0.0, wsum5=0.0, wsum10=0.0, wsum11=0.0;
 const fmr::Phys_float zero = 0.0;
 
 inline
-std::string tri2_norm_str
-  (const fmr::Phys_float* p1, const fmr::Phys_float* p2, const fmr::Phys_float* p3) {
+std::string tri2_norm_str (const fmr::Phys_float* p1,
+  const fmr::Phys_float* p2, const fmr::Phys_float* p3) {
   // Use this to check correct orientation of element surfaces.
-  const auto Ax = p2[0] - p1[0], Ay =  p2[1] - p1[1], Az =  0.0;
-  const auto Bx = p3[0] - p2[0], By =  p3[1] - p2[1], Bz =  0.0;
-  auto Nx = float(Ay * Bz - Az * By);
-  auto Ny = float(Az * Bx - Ax * Bz);
+  const auto Ax = p2[0] - p1[0], Ay =  p2[1] - p1[1];
+  const auto Bx = p3[0] - p2[0], By =  p3[1] - p2[1];
   auto Nz = float(Ax * By - Ay * Bx);
-  const auto len = std::sqrt (Nx*Nx + Ny*Ny + Nz*Nz);
-  Nx /= len; Ny /= len; Nz /= len;
-  if (std::abs (Nx - float(1.0)) < float(1.0e-6)) {return std::string ("+x");}
-  if (std::abs (Nx + float(1.0)) < float(1.0e-6)) {return std::string ("-x");}
-  if (std::abs (Ny - float(1.0)) < float(1.0e-6)) {return std::string ("+y");}
-  if (std::abs (Ny + float(1.0)) < float(1.0e-6)) {return std::string ("-y");}
+  const auto len = std::sqrt (Nz*Nz);
+  Nz /= len;
   if (std::abs (Nz - float(1.0)) < float(1.0e-6)) {return std::string ("+z");}
   if (std::abs (Nz + float(1.0)) < float(1.0e-6)) {return std::string ("-z");}
   return std::string ("["
-    + std::to_string (Nx) + ", "
-    + std::to_string (Ny) + ", "
+    + std::to_string (0.0) + ", "
+    + std::to_string (0.0) + ", "
     + std::to_string (Nz) + "]");
 }
 inline
-std::string tri3_norm_str
-  (const fmr::Phys_float* p1, const fmr::Phys_float* p2, const fmr::Phys_float* p3) {
+std::string tri3_norm_str (const fmr::Phys_float* p1,
+  const fmr::Phys_float* p2, const fmr::Phys_float* p3) {
   // Use this to check correct orientation of element surfaces.
   const auto Ax = p2[0] - p1[0], Ay =  p2[1] - p1[1], Az =  p2[2] - p1[2];
   const auto Bx = p3[0] - p2[0], By =  p3[1] - p2[1], Bz =  p3[2] - p2[2];
@@ -54,7 +48,6 @@ std::string tri3_norm_str
     + std::to_string (Ny) + ", "
     + std::to_string (Nz) + "]");
 }
-
 fmr::Exit_int main (int argc, char** argv) {
   mini.init (& argc, argv);
   //
@@ -71,7 +64,6 @@ fmr::Exit_int main (int argc, char** argv) {
   //
   return mini.exit ();
 }
-
 TEST( GridCellFEms, TrivialTest ){
   EXPECT_EQ( 1, 1 );
 }
@@ -94,27 +86,27 @@ TEST( GridCellFEmsElem, TetsIntWgtsSumVol10 ){
 TEST( GridCellFEmsElem, TetsIntWgtsSumVol11 ){
   EXPECT_FLOAT_EQ( float(wsum11), tet_vol_ref );
 }
+namespace femera { namespace grid { namespace fems {
 
 TEST( GridCellFEmsTet, FaceNormal1 ){
-  EXPECT_EQ( tri3_norm_str (//TODO get indices from tets_vert_face_tris
-    &femera::grid::fems::tets_vert_coor [3* 0],
-    &femera::grid::fems::tets_vert_coor [3* 1],
-    &femera::grid::fems::tets_vert_coor [3* 2]), "+z" );
   EXPECT_EQ( tri3_norm_str (
-    &femera::grid::fems::tets_vert_coor [3* 0],
-    &femera::grid::fems::tets_vert_coor [3* 3],
-    &femera::grid::fems::tets_vert_coor [3* 1]), "+y" );
+    &tets_vert_coor [3* 0],
+    &tets_vert_coor [3* 1],
+    &tets_vert_coor [3* 2]), "+z" );
   EXPECT_EQ( tri3_norm_str (
-    &femera::grid::fems::tets_vert_coor [3* 0],
-    &femera::grid::fems::tets_vert_coor [3* 2],
-    &femera::grid::fems::tets_vert_coor [3* 3]), "+x" );
+    &tets_vert_coor [3* 0],
+    &tets_vert_coor [3* 3],
+    &tets_vert_coor [3* 1]), "+y" );
   EXPECT_EQ( tri3_norm_str (
-    &femera::grid::fems::tets_vert_coor [3* 1],
-    &femera::grid::fems::tets_vert_coor [3* 3],
-    &femera::grid::fems::tets_vert_coor [3* 2]),
-    "[-0.577350, -0.577350, -0.577350]" );
+    &tets_vert_coor [3* 0],
+    &tets_vert_coor [3* 2],
+    &tets_vert_coor [3* 3]), "+x" );
+  EXPECT_EQ( tri3_norm_str (
+    &tets_vert_coor [3* 1],
+    &tets_vert_coor [3* 3],
+    &tets_vert_coor [3* 2]),
+    "[-0.577350, -0.577350, -0.577350]" );// -sqrt(1/3)
 }
-namespace femera { namespace grid { namespace fems {
 TEST( GridCellFEmsTet, FaceNormal2 ){
   EXPECT_EQ( tri3_norm_str (
     &tets_vert_coor [3* tets_vert_face_tris [0]],
@@ -230,4 +222,4 @@ TEST( GridCellFEmsQuad, FaceNormal ){
     &quad_vert_coor [2* 0]), "+z" );
 }
 
-} } }
+} } }//end femera::grid::fems:: namespace
