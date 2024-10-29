@@ -2,6 +2,7 @@
 #define FEMERA_HAS_GRID_ELEM_TETS_HPP
 
 #include "Tris.hpp"
+#include "Cube.hpp"
 
 namespace femera { namespace grid { namespace elem {
 
@@ -79,8 +80,8 @@ struct Tets : public Elem<Tets> {//TODO Tet?
   //fmr::Local_int tet5_cube_conn =[4* 6]//  5-tet fill
   fmr::Local_int cube_conn_5 [4* 5]// 5-tet fill, tilable with rotation
     = {
-    1,3,4,6,// This one is twice the volume of the rest.
-    0,1,3,4,// Identical to the natural tet.
+    1,3,4,6,// This tet is twice the volume of the rest.
+    0,1,3,4,// Identical to the natural tet (identity Jacobian).
     2,3,1,6,
     5,6,1,4,
     7,6,4,3

@@ -2,32 +2,6 @@
 #define FEMERA_HAS_FEMS_ELEM_HPP
 
 namespace femera { namespace grid { namespace fems {
-#if 0
-struct Quad : public Elem<Quad> {//TODO Qua?
-  static constexpr fmr::Local_int sims_d = 3;
-  static constexpr fmr::Local_int elem_d = 2;
-  static constexpr fmr::Local_int vert_n = 3;
-  static constexpr fmr::Local_int vols_n = 0;
-};
-struct Cube : public Elem<Cube> {//TODO Hex?
-  static constexpr fmr::Local_int sims_d = 3;
-  static constexpr fmr::Local_int elem_d = 3;
-  static constexpr fmr::Local_int vert_n = 8;
-  static constexpr fmr::Local_int vols_n = 1;
-};
-struct Wdge : public Elem<Wdge> {//TODO Wdg?
-  static constexpr fmr::Local_int sims_d = 3;
-  static constexpr fmr::Local_int elem_d = 3;
-  static constexpr fmr::Local_int vert_n = 6;
-  static constexpr fmr::Local_int vols_n = 1;
-};
-struct Prmd : public Elem<Prmd> {//TODO Pyr?
-  static constexpr fmr::Local_int sims_d = 3;
-  static constexpr fmr::Local_int elem_d = 3;
-  static constexpr fmr::Local_int vert_n = 5;
-  static constexpr fmr::Local_int vols_n = 1;
-};
-#endif
 //////////////////////////////////////////////////////////////////////////////
 // These are all embedded in 3D space
 static constexpr fmr::Local_int sims_d      = 3;
