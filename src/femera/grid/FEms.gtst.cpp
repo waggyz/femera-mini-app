@@ -1,5 +1,5 @@
 #include "../femera.hpp"
-#include "FEms-elem.h"
+#include "FEms-elem.hpp"
 
 #include <gtest/gtest.h>
 
@@ -12,6 +12,15 @@ const fmr::Phys_float zero = 0.0;
 
 fmr::Geom_float tet4_ntrl_jac3_trace  = -999.9;
 //fmr::Geom_float tet4_ntrl_jac3_volume = -999.9;//TODO determinant for volume?
+
+#if 0
+// Both of the following seem to work.
+femera::grid::fems::Tets test_ctet;
+femera::grid::fems::Elem<femera::grid::fems::Tets>   test_tet ;// P1 (default)
+femera::grid::fems::Elem<femera::grid::fems::Tets,1> test_tet1;// P1 linear
+femera::grid::fems::Elem<femera::grid::fems::Tets,2> test_tet2;// P2 quadratic
+femera::grid::fems::Elem<femera::grid::fems::Tets,3> test_tet3;// P3 cubic
+#endif
 
 inline
 std::string tri2_norm_str (const fmr::Phys_float* p1,
@@ -95,11 +104,49 @@ fmr::Exit_int main (int argc, char** argv) {
   tet4_jac3 (&jac3[0], &shpg[0], &coor[0]);
   tet4_ntrl_jac3_trace = jac3[0] + jac3[4] + jac3[8];// 3 for 3x3 identity
   //
+  //
   return mini.exit ();
 }
 TEST( GridCellFEms, TrivialTest ){
   EXPECT_EQ( 1, 1 );
 }
+// Check stuff in element info.
+#if 0
+TEST( GridCellFEmsElem, CtetVolOneSixth ){
+  EXPECT_FLOAT_EQ( float(test_ctet.get_elem_v ()), tet_vol_ref );
+}
+TEST( GridCellFEmsElem, EtetVolOneSixth ){
+  EXPECT_FLOAT_EQ( float(test_tet.get_elem_v ()), tet_vol_ref );
+}
+TEST( GridCellFEmsElem, AtetVolOneSixth ){
+  EXPECT_FLOAT_EQ( float(femera::grid::fems::Tets::elem_v), tet_vol_ref );
+}
+TEST( GridCellFEmsElem, DefaultTetOrder1 ){
+  EXPECT_EQ( test_tet.get_elem_p(), 1 );
+}
+TEST( GridCellFEmsElem, P1TetTetOrder1 ){
+  EXPECT_EQ( test_tet1.get_elem_p(), 1 );
+}
+TEST( GridCellFEmsElem, P2TetTetOrder2 ){
+  EXPECT_EQ( test_tet2.get_elem_p(), 2 );
+}
+TEST( GridCellFEmsElem, P3TetTetOrder3 ){
+  EXPECT_EQ( test_tet3.get_elem_p(), 3 );
+}
+TEST( GridCellFEmsElem, DefaultTetHas4Nodes ){
+  EXPECT_EQ( test_tet.get_node_n(), 4 );
+}
+TEST( GridCellFEmsElem, P1TetHas4Nodes ){
+  EXPECT_EQ( test_tet1.get_node_n(), 4 );
+}
+TEST( GridCellFEmsElem, P2TetHas10Nodes ){
+  EXPECT_EQ( test_tet2.get_node_n(), 10 );
+}
+TEST( GridCellFEmsElem, P3TetHas20Nodes ){
+  EXPECT_EQ( test_tet3.get_node_n(), 20 );
+}
+#endif
+// ******************** the rest are old ********************
 // Check stuff in FEms-elem.h.
 TEST( GridCellFEmsElem, TetsVolOneSixth ){
   EXPECT_FLOAT_EQ( float(femera::grid::fems::tets_meas), tet_vol_ref );
@@ -148,6 +195,11 @@ TEST( GridCellFEmsTet, FaceNormal1 ){
     &tets_vert_coor [3* 2]),
     "[-0.577350, -0.577350, -0.577350]" );// -sqrt(1/3)
 }
+#if 0
+TEST( GridCellFEmsTet, P1_NODE_N ){
+  EXPECT_EQ( femera::grid::fems::Tets::get_node_n<1>(), 4 );
+}
+#endif
 TEST( GridCellFEmsTet, FaceNormal2 ){
   EXPECT_EQ( tri3_norm_str (
     &tets_vert_coor [3* tets_vert_face_tris [0]],
@@ -169,19 +221,19 @@ TEST( GridCellFEmsTet, FaceNormal2 ){
 }
 // Check Cube element surfaces as triangles
 TEST( GridCellFEmsCube, FaceNormal ){
-  EXPECT_EQ( tri3_norm_str (
+  EXPECT_EQ( tri3_norm_str (// bottom face
     & cube_vert_coor [3*  cube_vert_face_quad [0]],
     & cube_vert_coor [3*  cube_vert_face_quad [1]],
     & cube_vert_coor [3*  cube_vert_face_quad [2]]), "+z" );
-  EXPECT_EQ( tri3_norm_str (
+  EXPECT_EQ( tri3_norm_str (// bottom face
     & cube_vert_coor [3*  cube_vert_face_quad [2]],
     & cube_vert_coor [3*  cube_vert_face_quad [3]],
     & cube_vert_coor [3*  cube_vert_face_quad [0]]), "+z" );
-  EXPECT_EQ( tri3_norm_str (
+  EXPECT_EQ( tri3_norm_str (// top face
     & cube_vert_coor [3*  cube_vert_face_quad [4]],
     & cube_vert_coor [3*  cube_vert_face_quad [5]],
     & cube_vert_coor [3*  cube_vert_face_quad [6]]), "-z" );
-  EXPECT_EQ( tri3_norm_str (
+  EXPECT_EQ( tri3_norm_str (// top face
     & cube_vert_coor [3*  cube_vert_face_quad [6]],
     & cube_vert_coor [3*  cube_vert_face_quad [7]],
     & cube_vert_coor [3*  cube_vert_face_quad [4]]), "-z" );
@@ -219,29 +271,29 @@ TEST( GridCellFEmsCube, FaceNormal ){
     & cube_vert_coor [3*  cube_vert_face_quad [20]]), "+x" );
 }
 TEST( GridCellFEmsFac3, FaceNormal ){
-  EXPECT_EQ( tri3_norm_str (
+  EXPECT_EQ( tri3_norm_str (// bottom face
     &fac3_vert_coor [3* fac3_vert_face_tris [0]],
     &fac3_vert_coor [3* fac3_vert_face_tris [1]],
     &fac3_vert_coor [3* fac3_vert_face_tris [2]]), "+z" );
-  EXPECT_EQ( tri3_norm_str (
+  EXPECT_EQ( tri3_norm_str (// top face
     &fac3_vert_coor [3* fac3_vert_face_tris [3]],
     &fac3_vert_coor [3* fac3_vert_face_tris [4]],
     &fac3_vert_coor [3* fac3_vert_face_tris [5]]), "-z" );
 }
 TEST( GridCellFEmsFac4, FaceNormal ){
-  EXPECT_EQ( tri3_norm_str (
+  EXPECT_EQ( tri3_norm_str (// bottom face
     &fac4_vert_coor [3* fac4_vert_face_quad [0]],
     &fac4_vert_coor [3* fac4_vert_face_quad [1]],
     &fac4_vert_coor [3* fac4_vert_face_quad [2]]), "+z" );
-  EXPECT_EQ( tri3_norm_str (
+  EXPECT_EQ( tri3_norm_str (// bottom face
     &fac4_vert_coor [3* fac4_vert_face_quad [2]],
     &fac4_vert_coor [3* fac4_vert_face_quad [3]],
     &fac4_vert_coor [3* fac4_vert_face_quad [0]]), "+z" );
-  EXPECT_EQ( tri3_norm_str (
+  EXPECT_EQ( tri3_norm_str (// top face
     &fac4_vert_coor [3* fac4_vert_face_quad [4]],
     &fac4_vert_coor [3* fac4_vert_face_quad [5]],
     &fac4_vert_coor [3* fac4_vert_face_quad [6]]), "-z" );
-  EXPECT_EQ( tri3_norm_str (
+  EXPECT_EQ( tri3_norm_str (// top face
     &fac4_vert_coor [3* fac4_vert_face_quad [6]],
     &fac4_vert_coor [3* fac4_vert_face_quad [7]],
     &fac4_vert_coor [3* fac4_vert_face_quad [4]]), "-z" );

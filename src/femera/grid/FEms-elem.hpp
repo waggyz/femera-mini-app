@@ -1,5 +1,125 @@
-namespace femera { namespace grid { namespace fems {
+#ifndef FEMERA_HAS_FEMS_ELEM_HPP
+#define FEMERA_HAS_FEMS_ELEM_HPP
 
+namespace femera { namespace grid { namespace fems {
+#if 0
+template <class T, typename fmr::Local_int P=1, typename fmr::Local_int D=3>
+struct Elem {//TODO enable_if P>0 or for P in [1,2,3]
+  /*
+  Elements are defined in 3D by derived classes and reduced as needed to match
+  the simulation spatial dimension template parameter (D).
+  */
+  T* this_chld = reinterpret_cast<T*>(this);
+  // A static_cast only works for default template arguments.
+  //
+//  constexpr fmr::Local_int get_elem_spce_d () {return this_chld->sims_d;}
+  constexpr fmr::Local_int get_elem_d () {return this_chld->elem_d;}
+  constexpr fmr::Local_int get_vert_n () {return this_chld->vert_n;}
+  constexpr fmr::Local_int get_vols_n () {return this_chld->vols_n;}
+  constexpr fmr::Local_int get_edge_n () {return this_chld->edge_n;}
+  constexpr fmr::Local_int get_tris_n () {return this_chld->tris_n;}
+  constexpr fmr::Local_int get_quad_n () {return this_chld->quad_n;}
+  //
+  constexpr fmr::Geom_float get_edge_l () {return this_chld->edge_l;}
+  constexpr fmr::Geom_float get_face_a () {return this_chld->face_a;}
+  constexpr fmr::Geom_float get_elem_v () {return this_chld->elem_v;}
+  //
+  constexpr fmr::Local_int* get_spar_conn () {return this_chld->spar_conn;}
+  constexpr fmr::Local_int* get_tris_conn () {return this_chld->tris_conn;}
+  constexpr fmr::Local_int* get_quad_conn () {return this_chld->quad_conn;}
+  constexpr fmr::Local_int* get_vert_conn () {return this_chld->vert_conn;}
+  //
+  constexpr fmr::Geom_float* get_vert_coor () {return this_chld->vert_coor;}
+  constexpr fmr::Geom_float* get_coor_vert () {return this_chld->coor_vert;}
+  //
+  constexpr fmr::Local_int get_elem_p () {return P;}
+  constexpr fmr::Local_int get_sims_d () {return D;}
+  constexpr fmr::Local_int get_face_n () {
+    return this->get_tris_n () + this->get_quad_n ();
+  }
+  constexpr fmr::Local_int get_node_n () {
+    return this->get_vert_n ()
+      + (P -1) * this->get_edge_n ()
+      + (P==3  ? this->get_vols_n () * this->get_face_n () : 0);
+  }
+  constexpr fmr::Geom_float* get_node_coor () {
+    return this_chld->vert_coor;// P=1, D=3 //FIXME Generate for P = 2,3, D=1,2.
+  }
+  constexpr fmr::Geom_float* get_coor_node () {
+    return this_chld->coor_vert;// P=1, D=3 //FIXME Generate for P = 2,3, D=1,2.
+  }
+};
+struct Spar : public Elem<Spar> {//TODO Bar?
+  static constexpr fmr::Local_int sims_d = 3;
+  static constexpr fmr::Local_int elem_d = 1;
+  static constexpr fmr::Local_int vert_n = 2;
+  static constexpr fmr::Local_int vols_n = 0;
+};
+struct Tris : public Elem<Tris> {//TODO Tri?
+  static constexpr fmr::Local_int sims_d = 3;
+  static constexpr fmr::Local_int elem_d = 2;
+  static constexpr fmr::Local_int vert_n = 3;
+  static constexpr fmr::Local_int vols_n = 0;
+};
+struct Quad : public Elem<Quad> {//TODO Qua?
+  static constexpr fmr::Local_int sims_d = 3;
+  static constexpr fmr::Local_int elem_d = 2;
+  static constexpr fmr::Local_int vert_n = 3;
+  static constexpr fmr::Local_int vols_n = 0;
+};
+struct Cube : public Elem<Cube> {//TODO Hex?
+  static constexpr fmr::Local_int sims_d = 3;
+  static constexpr fmr::Local_int elem_d = 3;
+  static constexpr fmr::Local_int vert_n = 8;
+  static constexpr fmr::Local_int vols_n = 1;
+};
+struct Wdge : public Elem<Wdge> {//TODO Wdg?
+  static constexpr fmr::Local_int sims_d = 3;
+  static constexpr fmr::Local_int elem_d = 3;
+  static constexpr fmr::Local_int vert_n = 6;
+  static constexpr fmr::Local_int vols_n = 1;
+};
+struct Prmd : public Elem<Prmd> {//TODO Pyr?
+  static constexpr fmr::Local_int sims_d = 3;
+  static constexpr fmr::Local_int elem_d = 3;
+  static constexpr fmr::Local_int vert_n = 5;
+  static constexpr fmr::Local_int vols_n = 1;
+};
+struct Tets : public Elem<Tets> {//TODO Tet?
+  static constexpr fmr::Local_int sims_d = 3;
+  static constexpr fmr::Local_int elem_d = 3;
+  static constexpr fmr::Local_int vert_n = 4;
+  static constexpr fmr::Local_int edge_n = 6;
+  static constexpr fmr::Local_int tris_n = 4;
+  static constexpr fmr::Local_int quad_n = 0;
+  static constexpr fmr::Local_int vols_n = 1;
+  static constexpr fmr::Local_int conn_n = 4;
+  //
+  static constexpr fmr::Geom_float edge_l  // total length of edges
+    = 3.0 + 3.0*(std::sqrt(2.0));
+  static constexpr fmr::Geom_float face_a // total surface area
+    = 1.5 + std::sqrt(2.0) * std::sqrt(1.5);
+  static constexpr fmr::Geom_float elem_v  // natural element volume
+    = 1.0 / 6.0;
+  //
+  //NOTE Gmsh element conventions
+  static constexpr
+    fmr::Local_int vert_conn [vert_n] = {0,1,2,3};
+  static constexpr
+  fmr::Local_int spar_conn [Spar::vert_n * edge_n]
+    = {
+    0,1, 1,2, 2,0, 0,3, 2,3, 1,3
+  };
+  static constexpr
+  fmr::Local_int tris_conn [Tris::vert_n * tris_n]
+    = { //NOTE the normals point inward. This might be wrong.
+    0,1,2, 0,3,1, 0,2,3, 1,3,2
+  };
+  static constexpr
+  fmr::Local_int* quad_conn = nullptr;
+};
+#endif
+//////////////////////////////////////////////////////////////////////////////
 // These are all embedded in 3D space
 static constexpr fmr::Local_int sims_d      = 3;
 
@@ -7,21 +127,21 @@ static constexpr fmr::Local_int sims_d      = 3;
 static constexpr fmr::Local_int vert_d      = 0;
 static constexpr fmr::Local_int node_d      = 0;
 
-//================================== bars ====================================
-static constexpr fmr::Local_int bars_d      = 1;// bars spatial dimension
-static constexpr fmr::Local_int bars_vert_n = 2;
+//================================== spar ====================================
+static constexpr fmr::Local_int spar_d      = 1;// spar spatial dimension
+static constexpr fmr::Local_int spar_vert_n = 2;
 static constexpr
-fmr::Local_int  bars_vert_conn [bars_vert_n] = {0,1};
+fmr::Local_int  spar_vert_conn [spar_vert_n] = {0,1};
 //
-static constexpr fmr::Geom_float bars_meas  = 1.0;// natural element length
+static constexpr fmr::Geom_float spar_meas  = 1.0;// natural element length
 static constexpr
-fmr::Geom_float bars_vert_coor [bars_vert_n * sims_d ]// transposed coor_vert
+fmr::Geom_float spar_vert_coor [spar_vert_n * sims_d ]// transposed coor_vert
   = {
                  // vertex                      //
    0.0, 0.0, 0.0,// 0       0---1               //
    1.0, 0.0, 0.0 // 1                o--x       //
 };
-fmr::Geom_float bars_coor_vert [bars_vert_n * sims_d ]// transposed vert_coor
+fmr::Geom_float spar_coor_vert [spar_vert_n * sims_d ]// transposed vert_coor
   = {
   0.0, 1.0,
   0.0, 0.0,
@@ -34,7 +154,7 @@ static constexpr fmr::Local_int tris_edge_n = 3;
 static constexpr
 fmr::Local_int tris_vert_conn [tris_vert_n] = {0,1,2};
 static constexpr
-fmr::Local_int tris_vert_edge_bars [bars_vert_n * tris_edge_n]
+fmr::Local_int tris_vert_edge_spar [spar_vert_n * tris_edge_n]
   = {
   0,1, 1,2, 2,0
 };
@@ -61,7 +181,7 @@ static constexpr fmr::Local_int quad_edge_n = 4;
 static constexpr
 fmr::Local_int quad_vert_conn [quad_vert_n] = {0,1,2,4};
 static constexpr
-fmr::Local_int quad_vert_edge_bars [bars_vert_n * quad_edge_n]
+fmr::Local_int quad_vert_edge_spar [spar_vert_n * quad_edge_n]
   = {
   0,1, 1,2, 2,3, 3,0
 };
@@ -96,7 +216,7 @@ static constexpr
 //
 //NOTE The following match the gmsh convention for tets.
 static constexpr
-fmr::Local_int tets_vert_edge_bars [bars_vert_n * tets_edge_n]
+fmr::Local_int tets_vert_edge_spar [spar_vert_n * tets_edge_n]
   = {
   0,1, 1,2, 2,0, 0,3, 2,3, 1,3
 };
@@ -155,7 +275,85 @@ fmr::Local_int tet5_cube_conn [4* 5]// 5-tet fill, tilable with rotation
   5,6,1,4,
   7,6,4,3
 };
-//TODO tets patch test
+//TODO tets patch test mesh
+//---------------------------- tet integration -------------------------------
+// Tetrahedral integration points and weights
+// for linear-shaped tetrahedra (edge nodes are interpolated),
+// the Jacobian is constant and independent of the int pt locations.
+// So, only ONE 3x3+1 (Jacobian+det) is needed for each element
+// regardless of tet element order.
+// The volume of a natural tet is 1/6,
+// and multiplied into the integration rules here.
+//
+static constexpr fmr::Local_int tets_intg_1_n = 1;// Preferred P1
+static constexpr
+fmr::Phys_float tets_intg_1_ptwt [4* tets_intg_1_n] = {
+  0.25,0.25,0.25, 1.0/6.0
+};
+static constexpr fmr::Local_int tets_intg_4_n = 4;// Preferred P2
+static constexpr fmr::Phys_float a2 = 0.5854101966249685;
+  // a2 = (5.0+3.0*std::sqrt(5.0))/20.0;
+static constexpr fmr::Phys_float b2 = 0.1381966011250105;
+  // b2 = (5.0-std::sqrt(5.0))/20.0;
+static constexpr
+fmr::Phys_float tets_intg_4_ptwt [4* tets_intg_4_n] = {
+  b2,b2,b2, 0.25/6.0,
+  a2,b2,b2, 0.25/6.0,
+  b2,a2,b2, 0.25/6.0,
+  b2,b2,a2, 0.25/6.0
+};
+static constexpr fmr::Local_int tets_intg_5_n = 5;// Alternate P2
+//NOTE tet20s don't converge with 5-point rule
+//NOTE Triple-checked these 5-point rule values
+static constexpr
+fmr::Phys_float tets_intg_5_ptwt [4* tets_intg_5_n] = {
+  0.25   , 0.25   , 0.25   ,-4.0/ 30.0,
+  0.5    , 1.0/6.0, 1.0/6.0, 9.0/120.0,
+  1.0/6.0, 0.5    , 1.0/6.0, 9.0/120.0,
+  1.0/6.0, 1.0/6.0, 0.5    , 9.0/120.0,
+  1.0/6.0, 1.0/6.0, 1.0/6.0, 9.0/120.0
+};
+static constexpr fmr::Local_int tets_intg_10_n = 10;//Preferred B3
+// From Lee Shunn, Frank Ham, Symmetric quadrature rules for tetrahedra
+// based on a cubic close-packed lattice arrangement, 2012
+static constexpr
+fmr::Phys_float
+  a0=0.0738349017262234    , a1=0.7784952948213300,
+  b0=0.0937556561159491    , b1=0.4062443438840510,
+  w0=0.0476331348432089/6.0, w1=0.1349112434378610/6.0;
+static constexpr
+fmr::Phys_float tets_intg_10_ptwt [4* tets_intg_10_n] = {
+  a0,a0,a0, w0,
+  a1,a0,a0, w0,
+  a0,a1,a0, w0,
+  a0,a0,a1, w0,
+  b1,b0,b0, w1,
+  b0,b1,b0, w1,
+  b0,b0,b1, w1,
+  b0,b1,b1, w1,
+  b1,b0,b1, w1,
+  b1,b1,b0, w1
+};
+static constexpr fmr::Local_int tets_intg_11_n = 11;//OLD B3
+//NOTE This converges tet20 meshes
+static constexpr fmr::Phys_float a3=0.3994035761667992;
+// a3 = (1.+std::sqrt(5./14.))/4.;
+static constexpr fmr::Phys_float b3=0.1005964238332008;
+// b3 = (1.-std::sqrt(5./14.))/4.;
+static constexpr
+fmr::Phys_float tets_intg_11_ptwt [4* tets_intg_11_n] = {
+   0.25    , 0.25    , 0.25    , -74.0/ 5625.0,
+   1.0/14.0, 1.0/14.0, 1.0/14.0, 343.0/45000.0,
+  11.0/14.0, 1.0/14.0, 1.0/14.0, 343.0/45000.0,
+   1.0/14.0,11.0/14.0, 1.0/14.0, 343.0/45000.0,
+   1.0/14.0, 1.0/14.0,11.0/14.0, 343.0/45000.0,
+  b3,a3,a3, 56.0/2250.0,
+  a3,b3,a3, 56.0/2250.0,
+  a3,a3,b3, 56.0/2250.0,
+  a3,b3,b3, 56.0/2250.0,
+  b3,a3,b3, 56.0/2250.0,
+  b3,b3,a3, 56.0/2250.0
+};
 //-------------------------- tet shape functions -----------------------------
 template <typename F> static inline// single or double
 void tets_shap_func_4
@@ -388,84 +586,6 @@ void tets_shap_grad_20 //TODO Return transpose?
   g[59]=27.*( L2t*L3 *L4 + L2 *L3t*L4 + L2 *L3 *L4t);
   return;
 }
-//---------------------------- tet integration -------------------------------
-// Tetrahedral integration points and weights
-// for linear-shaped tetrahedra (edge nodes are interpolated),
-// the Jacobian is constant and independent of the int pt locations.
-// So, only ONE 3x3+1 (Jacobian+det) is needed for each element
-// regardless of tet element order.
-// The volume of a natural tet is 1/6,
-// and multiplied into the integration rules here.
-//
-static constexpr fmr::Local_int tets_intg_1_n = 1;// Preferred P1
-static constexpr
-fmr::Phys_float tets_intg_1_ptwt [4* tets_intg_1_n] = {
-  0.25,0.25,0.25, 1.0/6.0
-};
-static constexpr fmr::Local_int tets_intg_4_n = 4;// Preferred P2
-static constexpr fmr::Phys_float a2 = 0.5854101966249685;
-  // a2 = (5.0+3.0*std::sqrt(5.0))/20.0;
-static constexpr fmr::Phys_float b2 = 0.1381966011250105;
-  // b2 = (5.0-std::sqrt(5.0))/20.0;
-static constexpr
-fmr::Phys_float tets_intg_4_ptwt [4* tets_intg_4_n] = {
-  b2,b2,b2, 0.25/6.0,
-  a2,b2,b2, 0.25/6.0,
-  b2,a2,b2, 0.25/6.0,
-  b2,b2,a2, 0.25/6.0
-};
-static constexpr fmr::Local_int tets_intg_5_n = 5;// Alternate P2
-//NOTE tet20s don't converge with 5-point rule
-//NOTE Triple-checked these 5-point rule values
-static constexpr
-fmr::Phys_float tets_intg_5_ptwt [4* tets_intg_5_n] = {
-  0.25   , 0.25   , 0.25   ,-4.0/ 30.0,
-  0.5    , 1.0/6.0, 1.0/6.0, 9.0/120.0,
-  1.0/6.0, 0.5    , 1.0/6.0, 9.0/120.0,
-  1.0/6.0, 1.0/6.0, 0.5    , 9.0/120.0,
-  1.0/6.0, 1.0/6.0, 1.0/6.0, 9.0/120.0
-};
-static constexpr fmr::Local_int tets_intg_10_n = 10;//Preferred B3
-// From Lee Shunn, Frank Ham, Symmetric quadrature rules for tetrahedra
-// based on a cubic close-packed lattice arrangement, 2012
-static constexpr
-fmr::Phys_float
-  a0=0.0738349017262234    , a1=0.7784952948213300,
-  b0=0.0937556561159491    , b1=0.4062443438840510,
-  w0=0.0476331348432089/6.0, w1=0.1349112434378610/6.0;
-static constexpr
-fmr::Phys_float tets_intg_10_ptwt [4* tets_intg_10_n] = {
-  a0,a0,a0, w0,
-  a1,a0,a0, w0,
-  a0,a1,a0, w0,
-  a0,a0,a1, w0,
-  b1,b0,b0, w1,
-  b0,b1,b0, w1,
-  b0,b0,b1, w1,
-  b0,b1,b1, w1,
-  b1,b0,b1, w1,
-  b1,b1,b0, w1
-};
-static constexpr fmr::Local_int tets_intg_11_n = 11;//OLD B3
-//NOTE This converges tet20 meshes
-static constexpr fmr::Phys_float a3=0.3994035761667992;
-// a3 = (1.+std::sqrt(5./14.))/4.;
-static constexpr fmr::Phys_float b3=0.1005964238332008;
-// b3 = (1.-std::sqrt(5./14.))/4.;
-static constexpr
-fmr::Phys_float tets_intg_11_ptwt [4* tets_intg_11_n] = {
-   0.25    , 0.25    , 0.25    , -74.0/ 5625.0,
-   1.0/14.0, 1.0/14.0, 1.0/14.0, 343.0/45000.0,
-  11.0/14.0, 1.0/14.0, 1.0/14.0, 343.0/45000.0,
-   1.0/14.0,11.0/14.0, 1.0/14.0, 343.0/45000.0,
-   1.0/14.0, 1.0/14.0,11.0/14.0, 343.0/45000.0,
-  b3,a3,a3, 56.0/2250.0,
-  a3,b3,a3, 56.0/2250.0,
-  a3,a3,b3, 56.0/2250.0,
-  a3,b3,b3, 56.0/2250.0,
-  b3,a3,b3, 56.0/2250.0,
-  b3,b3,a3, 56.0/2250.0
-};
 //TODO singularity tetrahedron elements
 //================================== cube ====================================
 static constexpr fmr::Local_int  cube_d      =  3;// spatial dimension
@@ -475,7 +595,7 @@ static constexpr fmr::Local_int  cube_face_n =  6;
 //
 static constexpr
 //TODO brick elem edge and face conventions
-fmr::Local_int  cube_vert_edge_bars [bars_vert_n *  cube_edge_n]
+fmr::Local_int  cube_vert_edge_spar [spar_vert_n *  cube_edge_n]
   = {
   0,1, 1,2, 2,3, 3,0,
   4,5, 5,6, 6,7, 7,4,
@@ -549,7 +669,7 @@ static constexpr
   fmr::Local_int fac3_vert_conn [fac3_vert_n] = {0,1,2, 3,4,5};
 //
 static constexpr
-fmr::Local_int fac3_vert_edge_bars [bars_vert_n * fac3_edge_n]
+fmr::Local_int fac3_vert_edge_spar [spar_vert_n * fac3_edge_n]
   = {
   0,1, 1,2, 2,0,
   3,4, 4,5, 5,3
@@ -589,7 +709,7 @@ static constexpr
   fmr::Local_int fac4_vert_conn [fac4_vert_n] = {0,1,2,3, 4,5,6,7};
 //
 static constexpr
-fmr::Local_int fac4_vert_edge_bars [bars_vert_n * fac4_edge_n]
+fmr::Local_int fac4_vert_edge_spar [spar_vert_n * fac4_edge_n]
   = {
   0,1, 1,2, 2,3, 3,0,
   4,5, 5,6, 6,7, 7,4
@@ -623,3 +743,6 @@ fmr::Geom_float fac4_coor_vert [sims_d * fac4_vert_n]// transposed vert_coor
 };
 
 } } }//end femera::grid::fems:: namespace
+
+//end FEMERA_HAS_FEMS_ELEM_HPP
+#endif

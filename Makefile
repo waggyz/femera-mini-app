@@ -55,6 +55,7 @@ BUILD_TREE += $(BUILD_CPU)/femera/test/
 BUILD_TREE += $(BUILD_CPU)/femera/task/
 BUILD_TREE += $(BUILD_CPU)/femera/phys/
 BUILD_TREE += $(BUILD_CPU)/femera/grid/
+BUILD_TREE += $(BUILD_CPU)/femera/grid/elem/
 BUILD_TREE += $(BUILD_CPU)/femera/algo/
 BUILD_TREE += $(BUILD_CPU)/fmr/perf/
 BUILD_TREE += $(BUILD_CPU)/fmr/mtrl/
