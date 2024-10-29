@@ -1,7 +1,7 @@
 #ifndef FEMERA_HAS_GRID_ELEM_TRIS_HPP
 #define FEMERA_HAS_GRID_ELEM_TRIS_HPP
 
-#include "../Elem.hpp"
+#include "Spar.hpp"
 
 namespace femera { namespace grid { namespace elem {
 

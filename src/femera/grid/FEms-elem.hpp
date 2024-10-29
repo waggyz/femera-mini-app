@@ -3,64 +3,6 @@
 
 namespace femera { namespace grid { namespace fems {
 #if 0
-template <class T, typename fmr::Local_int P=1, typename fmr::Local_int D=3>
-struct Elem {//TODO enable_if P>0 or for P in [1,2,3]
-  /*
-  Elements are defined in 3D by derived classes and reduced as needed to match
-  the simulation spatial dimension template parameter (D).
-  */
-  T* this_chld = reinterpret_cast<T*>(this);
-  // A static_cast only works for default template arguments.
-  //
-//  constexpr fmr::Local_int get_elem_spce_d () {return this_chld->sims_d;}
-  constexpr fmr::Local_int get_elem_d () {return this_chld->elem_d;}
-  constexpr fmr::Local_int get_vert_n () {return this_chld->vert_n;}
-  constexpr fmr::Local_int get_vols_n () {return this_chld->vols_n;}
-  constexpr fmr::Local_int get_edge_n () {return this_chld->edge_n;}
-  constexpr fmr::Local_int get_tris_n () {return this_chld->tris_n;}
-  constexpr fmr::Local_int get_quad_n () {return this_chld->quad_n;}
-  //
-  constexpr fmr::Geom_float get_edge_l () {return this_chld->edge_l;}
-  constexpr fmr::Geom_float get_face_a () {return this_chld->face_a;}
-  constexpr fmr::Geom_float get_elem_v () {return this_chld->elem_v;}
-  //
-  constexpr fmr::Local_int* get_spar_conn () {return this_chld->spar_conn;}
-  constexpr fmr::Local_int* get_tris_conn () {return this_chld->tris_conn;}
-  constexpr fmr::Local_int* get_quad_conn () {return this_chld->quad_conn;}
-  constexpr fmr::Local_int* get_vert_conn () {return this_chld->vert_conn;}
-  //
-  constexpr fmr::Geom_float* get_vert_coor () {return this_chld->vert_coor;}
-  constexpr fmr::Geom_float* get_coor_vert () {return this_chld->coor_vert;}
-  //
-  constexpr fmr::Local_int get_elem_p () {return P;}
-  constexpr fmr::Local_int get_sims_d () {return D;}
-  constexpr fmr::Local_int get_face_n () {
-    return this->get_tris_n () + this->get_quad_n ();
-  }
-  constexpr fmr::Local_int get_node_n () {
-    return this->get_vert_n ()
-      + (P -1) * this->get_edge_n ()
-      + (P==3  ? this->get_vols_n () * this->get_face_n () : 0);
-  }
-  constexpr fmr::Geom_float* get_node_coor () {
-    return this_chld->vert_coor;// P=1, D=3 //FIXME Generate for P = 2,3, D=1,2.
-  }
-  constexpr fmr::Geom_float* get_coor_node () {
-    return this_chld->coor_vert;// P=1, D=3 //FIXME Generate for P = 2,3, D=1,2.
-  }
-};
-struct Spar : public Elem<Spar> {//TODO Bar?
-  static constexpr fmr::Local_int sims_d = 3;
-  static constexpr fmr::Local_int elem_d = 1;
-  static constexpr fmr::Local_int vert_n = 2;
-  static constexpr fmr::Local_int vols_n = 0;
-};
-struct Tris : public Elem<Tris> {//TODO Tri?
-  static constexpr fmr::Local_int sims_d = 3;
-  static constexpr fmr::Local_int elem_d = 2;
-  static constexpr fmr::Local_int vert_n = 3;
-  static constexpr fmr::Local_int vols_n = 0;
-};
 struct Quad : public Elem<Quad> {//TODO Qua?
   static constexpr fmr::Local_int sims_d = 3;
   static constexpr fmr::Local_int elem_d = 2;
@@ -84,39 +26,6 @@ struct Prmd : public Elem<Prmd> {//TODO Pyr?
   static constexpr fmr::Local_int elem_d = 3;
   static constexpr fmr::Local_int vert_n = 5;
   static constexpr fmr::Local_int vols_n = 1;
-};
-struct Tets : public Elem<Tets> {//TODO Tet?
-  static constexpr fmr::Local_int sims_d = 3;
-  static constexpr fmr::Local_int elem_d = 3;
-  static constexpr fmr::Local_int vert_n = 4;
-  static constexpr fmr::Local_int edge_n = 6;
-  static constexpr fmr::Local_int tris_n = 4;
-  static constexpr fmr::Local_int quad_n = 0;
-  static constexpr fmr::Local_int vols_n = 1;
-  static constexpr fmr::Local_int conn_n = 4;
-  //
-  static constexpr fmr::Geom_float edge_l  // total length of edges
-    = 3.0 + 3.0*(std::sqrt(2.0));
-  static constexpr fmr::Geom_float face_a // total surface area
-    = 1.5 + std::sqrt(2.0) * std::sqrt(1.5);
-  static constexpr fmr::Geom_float elem_v  // natural element volume
-    = 1.0 / 6.0;
-  //
-  //NOTE Gmsh element conventions
-  static constexpr
-    fmr::Local_int vert_conn [vert_n] = {0,1,2,3};
-  static constexpr
-  fmr::Local_int spar_conn [Spar::vert_n * edge_n]
-    = {
-    0,1, 1,2, 2,0, 0,3, 2,3, 1,3
-  };
-  static constexpr
-  fmr::Local_int tris_conn [Tris::vert_n * tris_n]
-    = { //NOTE the normals point inward. This might be wrong.
-    0,1,2, 0,3,1, 0,2,3, 1,3,2
-  };
-  static constexpr
-  fmr::Local_int* quad_conn = nullptr;
 };
 #endif
 //////////////////////////////////////////////////////////////////////////////
