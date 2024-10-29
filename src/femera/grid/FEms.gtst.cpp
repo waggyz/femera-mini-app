@@ -111,41 +111,6 @@ TEST( GridCellFEms, TrivialTest ){
   EXPECT_EQ( 1, 1 );
 }
 // Check stuff in element info.
-#if 0
-TEST( GridCellFEmsElem, CtetVolOneSixth ){
-  EXPECT_FLOAT_EQ( float(test_ctet.get_elem_v ()), tet_vol_ref );
-}
-TEST( GridCellFEmsElem, EtetVolOneSixth ){
-  EXPECT_FLOAT_EQ( float(test_tet.get_elem_v ()), tet_vol_ref );
-}
-TEST( GridCellFEmsElem, AtetVolOneSixth ){
-  EXPECT_FLOAT_EQ( float(femera::grid::fems::Tets::elem_v), tet_vol_ref );
-}
-TEST( GridCellFEmsElem, DefaultTetOrder1 ){
-  EXPECT_EQ( test_tet.get_elem_p(), 1 );
-}
-TEST( GridCellFEmsElem, P1TetTetOrder1 ){
-  EXPECT_EQ( test_tet1.get_elem_p(), 1 );
-}
-TEST( GridCellFEmsElem, P2TetTetOrder2 ){
-  EXPECT_EQ( test_tet2.get_elem_p(), 2 );
-}
-TEST( GridCellFEmsElem, P3TetTetOrder3 ){
-  EXPECT_EQ( test_tet3.get_elem_p(), 3 );
-}
-TEST( GridCellFEmsElem, DefaultTetHas4Nodes ){
-  EXPECT_EQ( test_tet.get_node_n(), 4 );
-}
-TEST( GridCellFEmsElem, P1TetHas4Nodes ){
-  EXPECT_EQ( test_tet1.get_node_n(), 4 );
-}
-TEST( GridCellFEmsElem, P2TetHas10Nodes ){
-  EXPECT_EQ( test_tet2.get_node_n(), 10 );
-}
-TEST( GridCellFEmsElem, P3TetHas20Nodes ){
-  EXPECT_EQ( test_tet3.get_node_n(), 20 );
-}
-#endif
 // ******************** the rest are old ********************
 // Check stuff in FEms-elem.h.
 TEST( GridCellFEmsElem, TetsVolOneSixth ){

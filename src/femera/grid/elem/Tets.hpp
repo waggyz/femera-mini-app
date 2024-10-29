@@ -14,7 +14,7 @@ struct Tets : public Elem<Tets> {//TODO Tet?
   static constexpr fmr::Local_int tris_n = 4;
   static constexpr fmr::Local_int quad_n = 0;
   static constexpr fmr::Local_int vols_n = 1;
-  static constexpr fmr::Local_int conn_n = 4;
+//  static constexpr fmr::Local_int conn_n = 4;
   //
   static constexpr fmr::Geom_float edge_l  // total length of edges
     = 3.0 + 3.0*(std::sqrt(2.0));
