@@ -3,9 +3,11 @@
 
 #include "../Grid.hpp"
 
-#include "elem/Tets.hpp"// Brings in Tris, Spar, Cube, Quad
+#include "elem/Tets.hpp"// brings in Tris, Spar, Cube, Quad
 #include "elem/Prmd.hpp"
 #include "elem/Wdge.hpp"
+#include "elem/Itri.hpp"
+#include "elem/Iqud.hpp"
 
 #include "FEms-elem.hpp" //here for testing for now
 

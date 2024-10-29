@@ -15,7 +15,6 @@ struct Itri : public Elem<Itri> {
   static constexpr fmr::Local_int quad_n = 0;
   static constexpr fmr::Local_int vols_n = 0;
   //
-  //TODO natural pyramid perimeter, surface area, volume
   static constexpr fmr::Geom_float edge_l // total length of edges
     = 2.0 * Tris::edge_l;
   static constexpr fmr::Geom_float face_a // total surface area
