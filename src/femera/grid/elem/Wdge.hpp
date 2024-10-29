@@ -14,12 +14,12 @@ struct Wdge : public Elem<Wdge> {
   static constexpr fmr::Local_int tris_n = 2;
   static constexpr fmr::Local_int quad_n = 3;
   static constexpr fmr::Local_int vols_n = 1;
-//  static constexpr fmr::Local_int conn_n = 6;
   //
-  //TODO natural pyramid perimeter, surface area, volume
-  static constexpr fmr::Geom_float edge_l = -999.0;// total length of edges
-  static constexpr fmr::Geom_float face_a = -999.0;// total surface area
-  static constexpr fmr::Geom_float elem_v = -999.0;// natural element volume
+  static constexpr fmr::Geom_float edge_l // total length of edges
+    = 2.0 * Tris::edge_l + 3.0;
+  static constexpr fmr::Geom_float face_a // total surface area
+    = 2.0 * Tris::face_a + 3.0 * Quad::face_a;
+  static constexpr fmr::Geom_float elem_v = 0.5;// natural element volume
   //
   static constexpr
   fmr::Local_int vert_conn [vert_n] = {0,1,2, 3,4,5};
@@ -59,9 +59,6 @@ struct Wdge : public Elem<Wdge> {
     0.0, 0.0, 1.0,  0.0, 0.0, 1.0,
     0.0, 0.0, 0.0,  1.0, 1.0, 1.0
   };
-  
-  
-  
 };
 
 } } }//end femera::grid::elem:: namespace

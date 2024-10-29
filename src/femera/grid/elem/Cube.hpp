@@ -13,7 +13,6 @@ struct Cube : public Elem<Cube> {//TODO Hex?
   static constexpr fmr::Local_int tris_n = 0;
   static constexpr fmr::Local_int quad_n = 6;
   static constexpr fmr::Local_int vols_n = 1;
-//  static constexpr fmr::Local_int conn_n = 8;
   //
   static constexpr fmr::Geom_float edge_l =12.0;// total length of edges
   static constexpr fmr::Geom_float face_a = 6.0;// total surface area

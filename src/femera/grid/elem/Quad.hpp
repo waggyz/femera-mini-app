@@ -13,7 +13,6 @@ struct Quad : public Elem<Quad> {//TODO Sqr?
   static constexpr fmr::Local_int tris_n = 0;
   static constexpr fmr::Local_int quad_n = 1;
   static constexpr fmr::Local_int vols_n = 0;
-//  static constexpr fmr::Local_int conn_n = 4;
   //
   static constexpr fmr::Geom_float edge_l = 4.0;// total length of edges
   static constexpr fmr::Geom_float face_a = 1.0;// total surface area

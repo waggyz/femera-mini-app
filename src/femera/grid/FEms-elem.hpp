@@ -582,7 +582,7 @@ fmr::Geom_float fac3_coor_vert [sims_d * fac3_vert_n]// transposed vert_coor
   0.0, 0.0, 1.0,  0.0, 0.0, 1.0,
   0.0, 0.0, 0.0,  0.0, 0.0, 0.0
 };
-//=========================== interface quadangles ===========================
+//========================== interface quadrangles ===========================
 // e.g., cohesive elements
 static constexpr fmr::Local_int fac4_d      = 2;// spatial dimension
 static constexpr fmr::Local_int fac4_vert_n = 8;

@@ -14,7 +14,6 @@ struct Prmd : public Elem<Prmd> {//TODO Pyr?
   static constexpr fmr::Local_int tris_n = 4;
   static constexpr fmr::Local_int quad_n = 1;
   static constexpr fmr::Local_int vols_n = 1;
-//  static constexpr fmr::Local_int conn_n = 5;
   //
   //TODO natural pyramid perimeter, surface area, volume
   static constexpr fmr::Geom_float edge_l = 4.0 + -1000.0;// total length of edges

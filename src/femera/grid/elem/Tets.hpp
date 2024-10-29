@@ -14,7 +14,6 @@ struct Tets : public Elem<Tets> {//TODO Tet?
   static constexpr fmr::Local_int tris_n = 4;
   static constexpr fmr::Local_int quad_n = 0;
   static constexpr fmr::Local_int vols_n = 1;
-//  static constexpr fmr::Local_int conn_n = 4;
   //
   static constexpr fmr::Geom_float edge_l  // total length of edges
     = 3.0 + 3.0*(std::sqrt(2.0));
@@ -54,6 +53,7 @@ struct Tets : public Elem<Tets> {//TODO Tet?
     0.0, 0.0, 1.0, 0.0,
     0.0, 0.0, 0.0, 1.0
   };
+#if 0
   fmr::Geom_float cube_coor [3* 8]// same as cube elem below
     = {
                     // vertex   7---------6                //
@@ -68,6 +68,7 @@ struct Tets : public Elem<Tets> {//TODO Tet?
      0.0, 1.0, 1.0  // 7    |/        |/        |/         //
                     //      0---------1         o--x       //
   };
+#endif
   fmr::Local_int cube_conn_6 [4* 6]// 6-tet fill, tilable w/out rotation
     = {// These are all conformal and differ only by rotation.
     0,1,5,6,

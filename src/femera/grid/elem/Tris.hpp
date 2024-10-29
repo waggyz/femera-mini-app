@@ -15,7 +15,6 @@ struct Tris : public Elem<Tris> {//TODO Tri?
   static constexpr fmr::Local_int tris_n = 1;
   static constexpr fmr::Local_int quad_n = 0;
   static constexpr fmr::Local_int vols_n = 0;
-  static constexpr fmr::Local_int conn_n = 3;
   //
   static constexpr fmr::Geom_float edge_l       // total length of edges
     = 2.0 + std::sqrt (2.0);

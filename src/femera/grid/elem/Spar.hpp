@@ -13,7 +13,6 @@ struct Spar : public Elem<Spar> {//TODO Bar?
   static constexpr fmr::Local_int tris_n = 0;
   static constexpr fmr::Local_int quad_n = 0;
   static constexpr fmr::Local_int vols_n = 0;
-//  static constexpr fmr::Local_int conn_n = 2;
   //
   static constexpr fmr::Geom_float edge_l = 1.0;// total length of edges
   static constexpr fmr::Geom_float face_a = 0.0;// total surface area
