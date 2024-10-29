@@ -49,11 +49,11 @@ struct Elem {//TODO enable_if P>0 or for P in [1,2,3]
   constexpr fmr::Local_int get_node_n () noexcept;
   //
   constexpr fmr::Geom_float* get_node_coor () noexcept {
-    return this_chld->vert_coor;}// P=1, D=3 //FIXME Generate for P = 2,3, D=1,2.
-  }
+    return this_chld->vert_coor;// P=1, D=3
+  }//FIXME Generate for P = 2,3, D=1,2.
   constexpr fmr::Geom_float* get_coor_node () noexcept {
-    return this_chld->coor_vert;// P=1, D=3 //FIXME Generate for P = 2,3, D=1,2.
-  }
+    return this_chld->coor_vert;// P=1, D=3
+  }//FIXME Generate for P = 2,3, D=1,2.
 };
 
 } } }//end femera::grid::elem:: namespace
