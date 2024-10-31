@@ -3,8 +3,6 @@
 
 #include "Spar.hpp"
 
-#include <cmath>// std::sqrt () needed to calculate edge lengths
-
 namespace femera { namespace grid { namespace elem {
 
 struct Tris : public Elem<Tris> {//TODO Tri?

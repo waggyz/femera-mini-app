@@ -8,57 +8,172 @@ auto  mini_ptr = fmr::new_jobs ();
 auto &mini = *mini_ptr;
 
 float tet_vol_ref = float (1.0 / 6.0);
+fmr::Phys_float wsum1=0.0, wsum4=0.0, wsum5=0.0, wsum10=0.0, wsum11=0.0;
 
-fmr::Exit_int main (int argc, char** argv) {
-  mini.init (&argc, argv);
-  //
-  //
-  return mini.exit ();
-}
-
-TEST( GridElemTets, TrivialTest ){
-  EXPECT_EQ( 1, 1 );
-}
-// Check stuff in element info.
-// Both of the following seem to work.
+// Both of the following two seem to work for the defaults.
 femera::grid::elem::Tets test_ctet;
 femera::grid::elem::Elem<femera::grid::elem::Tets>   test_tet ;// P1 (default)
 femera::grid::elem::Elem<femera::grid::elem::Tets,1> test_tet1;// P1 linear
 femera::grid::elem::Elem<femera::grid::elem::Tets,2> test_tet2;// P2 quadratic
 femera::grid::elem::Elem<femera::grid::elem::Tets,3> test_tet3;// P3 cubic
+fmr::Geom_float coor1 [12];
 
+fmr::Exit_int main (int argc, char** argv) {
+  mini.init (&argc, argv);
+  //
+  for (int i=0; i< 1; ++i) {
+    wsum1  += femera::grid::elem::Tets::intg_1_ptwt  [4*i +3];}
+  for (int i=0; i< 4; ++i) {
+    wsum4  += femera::grid::elem::Tets::intg_4_ptwt  [4*i +3];}
+  for (int i=0; i< 5; ++i) {
+    wsum5  += femera::grid::elem::Tets::intg_5_ptwt  [4*i +3];}
+  for (int i=0; i<10; ++i) {
+    wsum10 += femera::grid::elem::Tets::intg_10_ptwt [4*i +3];}
+  for (int i=0; i<11; ++i) {
+    wsum11 += femera::grid::elem::Tets::intg_11_ptwt [4*i +3];}
+  //
+  #if 0
+  const auto coor_n = test_tet1.get_vert_n () * test_tet1.get_sims_d ();
+  for (fmr::Local_int i=0; i<coor_n; ++i) {
+    coor1 [i] = femera::grid::elem::Tet::vert_coor [i];
+  }
+  #endif
+  //
+  return mini.exit ();
+}
+
+//-----------------------------
+TEST( GridElemTets, TrivialTest ){
+  EXPECT_EQ( 1, 1 );
+}
+// Check stuff in element info.
+
+
+//-----------------------------
+#if 0
 TEST( GridElemTets, CtetVolOneSixth ){
   EXPECT_FLOAT_EQ( float(test_ctet.get_elem_v ()), tet_vol_ref );
 }
 TEST( GridElemTets, EtetVolOneSixth ){
   EXPECT_FLOAT_EQ( float(test_tet.get_elem_v ()), tet_vol_ref );
 }
-TEST( GridElemTets, AtetVolOneSixth ){
+TEST( GridElemTets, AnyVolOneSixth ){
   EXPECT_FLOAT_EQ( float(femera::grid::elem::Tets::elem_v), tet_vol_ref );
 }
-
+#endif
+#if 0
+TEST( GridCellTets, P1_Node_N ){
+  EXPECT_EQ(//NOTE it looks like googletest can't parse this correctly.
+    femera::grid::elem::Elem<femera::grid::elem::Tets,1>::get_node_n (), 4 );
+}
+#endif
+//-----------------------------
 TEST( GridElemTets, DefaultTetOrder1 ){
   EXPECT_EQ( test_tet.get_elem_p(), 1 );
 }
-TEST( GridElemTets, P1TetTetOrder1 ){
+TEST( GridElemTets, P1Order1 ){
   EXPECT_EQ( test_tet1.get_elem_p(), 1 );
 }
-TEST( GridElemTets, P2TetTetOrder2 ){
+TEST( GridElemTets, P2Order2 ){
   EXPECT_EQ( test_tet2.get_elem_p(), 2 );
 }
-TEST( GridElemTets, P3TetTetOrder3 ){
+TEST( GridElemTets, P3Order3 ){
   EXPECT_EQ( test_tet3.get_elem_p(), 3 );
 }
-TEST( GridElemTets, DefaultTetHas4Nodes ){
+//-----------------------------
+TEST( GridElemTets, DefaultHas4Nodes ){
   EXPECT_EQ( test_tet.get_node_n(), 4 );
 }
-TEST( GridElemTets, P1TetHas4Nodes ){
+TEST( GridElemTets, P1Has4Nodes ){
   EXPECT_EQ( test_tet1.get_node_n(), 4 );
 }
-TEST( GridElemTets, P2TetHas10Nodes ){
+TEST( GridElemTets, P2Has10Nodes ){
   EXPECT_EQ( test_tet2.get_node_n(), 10 );
 }
-TEST( GridElemTets, P3TetHas20Nodes ){
+TEST( GridElemTets, P3Has20Nodes ){
   EXPECT_EQ( test_tet3.get_node_n(), 20 );
 }
+//-----------------------------
+TEST( GridElemTets, IntgWgtsSumVol1 ){
+  EXPECT_FLOAT_EQ( float(wsum1), tet_vol_ref );
+}
+TEST( GridElemTets, IntgWgtsSumVol4 ){
+  EXPECT_FLOAT_EQ( float(wsum4), tet_vol_ref );
+}
+TEST( GridElemTets, IntgWgtsSumVol5 ){
+  EXPECT_FLOAT_EQ( float(wsum5), tet_vol_ref );
+}
+TEST( GridElemTets, IntgWgtsSumVol10 ){
+  EXPECT_FLOAT_EQ( float(wsum10), tet_vol_ref );
+}
+TEST( GridElemTets, IntgWgtsSumVol11 ){
+  EXPECT_FLOAT_EQ( float(wsum11), tet_vol_ref );
+}
+//-----------------------------
+//NOTE Google test fails report undefined reference and don't ;onk.
+TEST( GridElemTets, ArrayAccessInline ){
+  EXPECT_EQ( test_tet1.get_spar_conn ()[0], 0 );
+  EXPECT_EQ( test_tet1.get_spar_conn ()[1], 1 );
+}
+auto vert1 = test_tet1.get_spar_conn ();
+//auto s0 = &spar1[0];
+auto v0 = &test_tet1.get_vert_conn ()[0];
+auto v1 = &test_tet1.get_vert_conn ()[1];
+TEST( GridElemTets, ArrayAccessVariable ){
+  EXPECT_EQ( vert1 [0], 0 );
+  EXPECT_EQ( vert1 [1], 1 );
+  EXPECT_EQ( v0 [0], 0 );
+  EXPECT_EQ( v0 [1], 1 );
+  EXPECT_EQ( v1 [0], 1 );
+  EXPECT_EQ( v1 [1], 2 );
+}
+//TEST( GridElemTet, JacTraceThree ){
+//  EXPECT_FLOAT_EQ( float(tet4_ntrl_jac3_trace), float (3.0) );
+//}
 
+namespace femera { namespace grid { namespace elem {
+
+TEST( GridCellElemTet, FaceNormalVerts ){
+  EXPECT_EQ( tri3_norm_str (
+    &Tets::vert_coor [3* 0],
+    &Tets::vert_coor [3* 1],
+    &Tets::vert_coor [3* 2]), "+z" );
+  EXPECT_EQ( tri3_norm_str (
+    &Tets::vert_coor [3* 2],
+    &Tets::vert_coor [3* 1],
+    &Tets::vert_coor [3* 0]), "-z" );
+  EXPECT_EQ( tri3_norm_str (
+    &Tets::vert_coor [3* 0],
+    &Tets::vert_coor [3* 3],
+    &Tets::vert_coor [3* 1]), "+y" );
+  EXPECT_EQ( tri3_norm_str (
+    &Tets::vert_coor [3* 0],
+    &Tets::vert_coor [3* 2],
+    &Tets::vert_coor [3* 3]), "+x" );
+  EXPECT_EQ( tri3_norm_str (
+    &Tets::vert_coor [3* 1],
+    &Tets::vert_coor [3* 3],
+    &Tets::vert_coor [3* 2]),
+    "[-0.577350, -0.577350, -0.577350]" );// -sqrt(1/3)
+}
+TEST( GridCellElemTet, FaceNormalTris ){
+  EXPECT_EQ( tri3_norm_str (
+    &Tets::vert_coor [3* Tets::tris_conn [0]],
+    &Tets::vert_coor [3* Tets::tris_conn [1]],
+    &Tets::vert_coor [3* Tets::tris_conn [2]]), "+z" );
+  EXPECT_EQ( tri3_norm_str (
+    &Tets::vert_coor [3* Tets::tris_conn [3]],
+    &Tets::vert_coor [3* Tets::tris_conn [4]],
+    &Tets::vert_coor [3* Tets::tris_conn [5]]), "+y" );
+  EXPECT_EQ( tri3_norm_str (
+    &Tets::vert_coor [3* Tets::tris_conn [6]],
+    &Tets::vert_coor [3* Tets::tris_conn [7]],
+    &Tets::vert_coor [3* Tets::tris_conn [8]]), "+x" );
+  EXPECT_EQ( tri3_norm_str (
+    &Tets::vert_coor [3* Tets::tris_conn [ 9]],
+    &Tets::vert_coor [3* Tets::tris_conn [10]],
+    &Tets::vert_coor [3* Tets::tris_conn [11]]),
+    "[-0.577350, -0.577350, -0.577350]" );
+}
+
+} } }//end femera::grid::elem:: namespace

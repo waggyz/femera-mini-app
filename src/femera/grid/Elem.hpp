@@ -4,10 +4,12 @@
 //#include "../Grid.hpp"
 #include "../../fmr/fmr.hpp"
 
+#include <cmath>// std::sqrt () needed to calculate edge lengths
+
 namespace femera { namespace grid { namespace elem {
 
 template <class T, typename fmr::Local_int P=1, typename fmr::Local_int D=3>
-struct Elem {//TODO enable_if P>0 or for P in [1,2,3]
+struct Elem {//TODO enable_if P>0 or for P in [1,2,3]?
   /*
   Elements are defined in 3D by derived classes and reduced as needed to match
   the simulation spatial dimension template parameter (D).
@@ -19,42 +21,72 @@ struct Elem {//TODO enable_if P>0 or for P in [1,2,3]
   constexpr fmr::Local_int get_elem_p () noexcept {return P;}
   constexpr fmr::Local_int get_sims_d () noexcept {return D;}
   //
-  constexpr fmr::Local_int get_elem_d () noexcept {return this_chld->elem_d;}
-  constexpr fmr::Local_int get_vert_n () noexcept {return this_chld->vert_n;}
-  constexpr fmr::Local_int get_vols_n () noexcept {return this_chld->vols_n;}
-  constexpr fmr::Local_int get_edge_n () noexcept {return this_chld->edge_n;}
-  constexpr fmr::Local_int get_tris_n () noexcept {return this_chld->tris_n;}
-  constexpr fmr::Local_int get_quad_n () noexcept {return this_chld->quad_n;}
+  constexpr fmr::Local_int get_elem_d () noexcept {return T::elem_d;}
+  constexpr fmr::Local_int get_vert_n () noexcept {return T::vert_n;}
+  constexpr fmr::Local_int get_vols_n () noexcept {return T::vols_n;}
+  constexpr fmr::Local_int get_edge_n () noexcept {return T::edge_n;}
+  constexpr fmr::Local_int get_tris_n () noexcept {return T::tris_n;}
+  constexpr fmr::Local_int get_quad_n () noexcept {return T::quad_n;}
   //
-  constexpr fmr::Geom_float get_edge_l () noexcept {return this_chld->edge_l;}
-  constexpr fmr::Geom_float get_face_a () noexcept {return this_chld->face_a;}
-  constexpr fmr::Geom_float get_elem_v () noexcept {return this_chld->elem_v;}
+  constexpr fmr::Geom_float get_edge_l () noexcept {return T::edge_l;}
+  constexpr fmr::Geom_float get_face_a () noexcept {return T::face_a;}
+  constexpr fmr::Geom_float get_elem_v () noexcept {return T::elem_v;}
   //
-  constexpr fmr::Local_int* get_spar_conn () noexcept {
-    return this_chld->spar_conn;}
-  constexpr fmr::Local_int* get_tris_conn () noexcept {
-    return this_chld->tris_conn;}
-  constexpr fmr::Local_int* get_quad_conn () noexcept {
-    return this_chld->quad_conn;}
-  constexpr fmr::Local_int* get_vert_conn () noexcept {
-    return this_chld->vert_conn;}
+  constexpr const fmr::Local_int* get_spar_conn () noexcept {
+    return T::spar_conn;}
+  constexpr const fmr::Local_int* get_tris_conn () noexcept {
+    return T::tris_conn;}
+  constexpr const fmr::Local_int* get_quad_conn () noexcept {
+    return T::quad_conn;}
+  constexpr const fmr::Local_int* get_vert_conn () noexcept {
+    return T::vert_conn;}
   //
-  constexpr fmr::Geom_float* get_vert_coor () noexcept {
-    return this_chld->vert_coor;}
-  constexpr fmr::Geom_float* get_coor_vert () noexcept {
-    return this_chld->coor_vert;}
+  constexpr const fmr::Geom_float* get_vert_coor () noexcept {
+    return T::vert_coor;}
+  constexpr const fmr::Geom_float* get_coor_vert () noexcept {
+    return T::coor_vert;}
   //
   // Methods -----------------------------------------------------------------
   constexpr fmr::Local_int get_face_n () noexcept;
   constexpr fmr::Local_int get_node_n () noexcept;
   //
-  constexpr fmr::Geom_float* get_node_coor () noexcept {
-    return this_chld->vert_coor;// P=1, D=3
-  }//FIXME Generate for P = 2,3, D=1,2.
-  constexpr fmr::Geom_float* get_coor_node () noexcept {
-    return this_chld->coor_vert;// P=1, D=3
-  }//FIXME Generate for P = 2,3, D=1,2.
+  constexpr const fmr::Geom_float* get_node_coor () noexcept {
+   return T::vert_coor;// P=1, D=3
+  }//TODO Generate node_coor for P=2,3, D=1,2.
+  constexpr const fmr::Geom_float* get_coor_node () noexcept {
+    return T::coor_vert;// P=1, D=3
+  }//TODO Generate coor_node for P=2,3, D=1,2.
 };
+
+inline
+std::string tri3_norm_str (const fmr::Phys_float* p1,
+  const fmr::Phys_float* p2, const fmr::Phys_float* p3) {
+  // Use this to check correct orientation of element surfaces.
+  const auto Ax = p2[0] - p1[0], Ay =  p2[1] - p1[1], Az =  p2[2] - p1[2];
+  const auto Bx = p3[0] - p2[0], By =  p3[1] - p2[1], Bz =  p3[2] - p2[2];
+  auto Nx = float(Ay * Bz - Az * By);
+  auto Ny = float(Az * Bx - Ax * Bz);
+  auto Nz = float(Ax * By - Ay * Bx);
+  const auto len = std::sqrt (Nx*Nx + Ny*Ny + Nz*Nz);
+  Nx /= len; Ny /= len; Nz /= len;
+  if (std::abs (Nx - float(1.0)) < float(1.0e-6)) {return std::string ("+x");}
+  if (std::abs (Nx + float(1.0)) < float(1.0e-6)) {return std::string ("-x");}
+  if (std::abs (Ny - float(1.0)) < float(1.0e-6)) {return std::string ("+y");}
+  if (std::abs (Ny + float(1.0)) < float(1.0e-6)) {return std::string ("-y");}
+  if (std::abs (Nz - float(1.0)) < float(1.0e-6)) {return std::string ("+z");}
+  if (std::abs (Nz + float(1.0)) < float(1.0e-6)) {return std::string ("-z");}
+  #if 0
+  if (std::abs (Nx) < float(1.0e-6)) {return std::string ("xy");}
+  if (std::abs (Ny) < float(1.0e-6)) {return std::string ("xz");}
+  if (std::abs (Nz) < float(1.0e-6)) {return std::string ("yz");}
+  return std::string ("xyz");
+  #else
+  return std::string ("["
+    + std::to_string (Nx) + ", "
+    + std::to_string (Ny) + ", "
+    + std::to_string (Nz) + "]");
+  #endif
+}
 
 } } }//end femera::grid::elem:: namespace
 

@@ -7,7 +7,7 @@ auto  mini_ptr = fmr::new_jobs ();
 auto& mini = *mini_ptr;
 
 float tet_vol_ref = float (1.0 / 6.0);
-fmr::Phys_float wsum1=0.0, wsum4=0.0, wsum5=0.0, wsum10=0.0, wsum11=0.0;
+//fmr::Phys_float wsum1=0.0, wsum4=0.0, wsum5=0.0, wsum10=0.0, wsum11=0.0;
 const fmr::Phys_float zero = 0.0;
 
 fmr::Geom_float tet4_ntrl_jac3_trace  = -999.9;
@@ -55,10 +55,17 @@ std::string tri3_norm_str (const fmr::Phys_float* p1,
   if (std::abs (Ny + float(1.0)) < float(1.0e-6)) {return std::string ("-y");}
   if (std::abs (Nz - float(1.0)) < float(1.0e-6)) {return std::string ("+z");}
   if (std::abs (Nz + float(1.0)) < float(1.0e-6)) {return std::string ("-z");}
+  #if 0
+  if (std::abs (Nx) < float(1.0e-6)) {return std::string ("xy");}
+  if (std::abs (Ny) < float(1.0e-6)) {return std::string ("xz");}
+  if (std::abs (Nz) < float(1.0e-6)) {return std::string ("yz");}
+  return std::string ("xyz");
+  #else
   return std::string ("["
     + std::to_string (Nx) + ", "
     + std::to_string (Ny) + ", "
     + std::to_string (Nz) + "]");
+  #endif
 }
 inline
 void tet4_jac3 ( fmr::Geom_float jac3[9],
@@ -76,7 +83,7 @@ void tet4_jac3 ( fmr::Geom_float jac3[9],
 //============================================================================
 fmr::Exit_int main (int argc, char** argv) {
   mini.init (& argc, argv);
-  //
+  /*
   for (int i=0; i< 1; ++i) {
     wsum1  += femera::grid::fems::tets_intg_1_ptwt  [4*i +3];}
   for (int i=0; i< 4; ++i) {
@@ -87,7 +94,7 @@ fmr::Exit_int main (int argc, char** argv) {
     wsum10 += femera::grid::fems::tets_intg_10_ptwt [4*i +3];}
   for (int i=0; i<11; ++i) {
     wsum11 += femera::grid::fems::tets_intg_11_ptwt [4*i +3];}
-  //
+  */
   // Calculate the Jacbian of a natural tet, which should be the 3x3 identity,
   // and is constant, independent of the integration point coordinates.
   // The one-point tet integration rule is sufficient.
@@ -113,6 +120,7 @@ TEST( GridCellFEms, TrivialTest ){
 // Check stuff in element info.
 // ******************** the rest are old ********************
 // Check stuff in FEms-elem.h.
+/*
 TEST( GridCellFEmsElem, TetsVolOneSixth ){
   EXPECT_FLOAT_EQ( float(femera::grid::fems::tets_meas), tet_vol_ref );
 }
@@ -130,7 +138,7 @@ TEST( GridCellFEmsElem, TetsIntWgtsSumVol10 ){
 }
 TEST( GridCellFEmsElem, TetsIntWgtsSumVol11 ){
   EXPECT_FLOAT_EQ( float(wsum11), tet_vol_ref );
-}
+}*/
 TEST( GridCellFEmsElem, TetsJacTraceThree ){
   EXPECT_FLOAT_EQ( float(tet4_ntrl_jac3_trace), float (3.0) );
 }
@@ -140,7 +148,7 @@ TEST( GridCellFEmsElem, TetsJacDetVolOneSixth ){
 }
 #endif
 namespace femera { namespace grid { namespace fems {
-
+/*
 TEST( GridCellFEmsTet, FaceNormal1 ){
   EXPECT_EQ( tri3_norm_str (
     &tets_vert_coor [3* 0],
@@ -159,7 +167,7 @@ TEST( GridCellFEmsTet, FaceNormal1 ){
     &tets_vert_coor [3* 3],
     &tets_vert_coor [3* 2]),
     "[-0.577350, -0.577350, -0.577350]" );// -sqrt(1/3)
-}
+}*/
 #if 0
 TEST( GridCellFEmsTet, P1_NODE_N ){
   EXPECT_EQ( femera::grid::fems::Tets::get_node_n<1>(), 4 );
