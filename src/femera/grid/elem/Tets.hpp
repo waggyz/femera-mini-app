@@ -24,7 +24,7 @@ struct Tets : public Elem<Tets> {//TODO Tet?
   //
   //NOTE Gmsh element conventions
   static constexpr
-    fmr::Local_int vert_conn [vert_n] = {0,1,2,3};
+  fmr::Local_int vert_conn [vert_n] = {0,1,2,3};
   static constexpr
   fmr::Local_int tris_conn [Tris::vert_n * tris_n]
     = { //NOTE the normals point inward. This might be wrong.

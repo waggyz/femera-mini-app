@@ -29,11 +29,12 @@ struct Iqud : public Elem<Iqud> {
     0,1, 1,2, 2,3, 3,0,
     4,5, 5,6, 6,7, 7,4
   };
-  static constexpr fmr::Local_int tris_conn [Quad::vert_n * quad_n]
+  static constexpr fmr::Local_int* tris_conn = nullptr;
+  static constexpr fmr::Local_int quad_conn [Quad::vert_n * quad_n]
     = { 
     0,1,2,3, 7,6,5,4
   };
-  static constexpr fmr::Local_int* quad_conn = nullptr;
+  static constexpr
   fmr::Geom_float vert_coor [vert_n * sims_d]// transposed coor_vert
     = {
                    // vertex                  |      3---------2 -+           //
@@ -48,6 +49,7 @@ struct Iqud : public Elem<Iqud> {
     0.0, 1.0, 0.0  // 7                       |   /         /         |/      //
   };               //                         |  4---------5          o--x    //
   //
+  static constexpr
   fmr::Geom_float coor_vert [vert_n * sims_d]// transposed vert_coor
     = {
     0.0, 1.0, 1.0, 0.0,   0.0, 1.0, 1.0, 0.0,

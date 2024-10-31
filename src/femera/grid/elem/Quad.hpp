@@ -25,6 +25,7 @@ struct Quad : public Elem<Quad> {//TODO Sqr?
   static constexpr fmr::Local_int* tris_conn = nullptr;
   static constexpr fmr::Local_int  quad_conn [Quad::vert_n * quad_n] = {0,1,2,3};
   //
+  static constexpr
   fmr::Geom_float vert_coor [vert_n * sims_d]// transposed coor_vert
     = {
                   // vertex                //
@@ -33,6 +34,7 @@ struct Quad : public Elem<Quad> {//TODO Sqr?
     1.0, 1.0, 0.0,// 2      |    |    |    //
     0.0, 1.0, 0.0 // 3      0----1    o--x //
   };
+  static constexpr
   fmr::Geom_float coor_vert [vert_n * sims_d]// transposed vert_coor
     = {
     0.0, 1.0, 1.0, 0.0,

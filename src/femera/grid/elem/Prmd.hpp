@@ -39,6 +39,7 @@ struct Prmd : public Elem<Prmd> {//TODO Pyr?
     = { 
     0,1,2,3
   };
+  static constexpr
   fmr::Geom_float vert_coor [vert_n * sims_d]// transposed coor_vert
     = {
                    // vertex               //
@@ -49,6 +50,7 @@ struct Prmd : public Elem<Prmd> {//TODO Pyr?
                    //      |/   \|   |     //
     0.0, 0.0, 1.0  // 4    0-----1   o--x  //
   };
+  static constexpr
   fmr::Geom_float coor_vert [vert_n * sims_d]// transposed vert_coor
     = {
     0.0, 1.0, 1.0, 0.0,  0.0,

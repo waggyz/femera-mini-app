@@ -37,6 +37,7 @@ struct Cube : public Elem<Cube> {//TODO Hex?
     2,6,7,3,
     3,7,4,0
   };
+  static constexpr
   fmr::Geom_float vert_coor [vert_n * sims_d]// transposed coor_vert
     = {
                    // vertex   7---------6                //
@@ -50,6 +51,7 @@ struct Cube : public Elem<Cube> {//TODO Hex?
     1.0, 1.0, 1.0, // 6    | /       | /       | /        //
     0.0, 1.0, 1.0  // 7    |/        |/        |/         //
   };               //      0---------1         o--x       //
+  static constexpr
   fmr::Geom_float coor_vert [vert_n * sims_d]// transposed vert_coor
     = {
     0.0, 1.0, 1.0, 0.0,  0.0, 1.0, 1.0, 0.0,

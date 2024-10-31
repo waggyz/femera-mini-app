@@ -34,6 +34,7 @@ struct Itri : public Elem<Itri> {
     0,1,2, 5,4,3
   };
   static constexpr fmr::Local_int* quad_conn = nullptr;
+  static constexpr
   fmr::Geom_float vert_coor [vert_n * sims_d]// transposed coor_vert
     = {
                    // vertex             |   5-----4  -+             //
@@ -46,6 +47,7 @@ struct Itri : public Elem<Itri> {
     0.0, 1.0, 0.0  // 5                  |     \ /          \|/      //
   };               //                    |      0            o       //
   //
+  static constexpr
   fmr::Geom_float coor_vert [vert_n * sims_d]// transposed vert_coor
     = {
     0.0, 1.0, 0.0,  0.0, 1.0, 0.0,
