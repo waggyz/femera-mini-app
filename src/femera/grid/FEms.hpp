@@ -13,8 +13,6 @@
 #include "Elem.hpp"
 #endif
 
-#include "FEms-elem.hpp" //here for testing for now
-
 namespace femera { namespace grid {
   class FEms;// Derive a CRTP concrete class from Grid.
   class FEms final: public Grid<FEms> { friend class Grid;
