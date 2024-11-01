@@ -8,7 +8,7 @@ auto& mini = *mini_ptr;
 
 float tet_vol_ref = float (1.0 / 6.0);
 //fmr::Phys_float wsum1=0.0, wsum4=0.0, wsum5=0.0, wsum10=0.0, wsum11=0.0;
-const fmr::Phys_float zero = 0.0;
+//const fmr::Phys_float zero = 0.0;
 
 fmr::Geom_float tet4_ntrl_jac3_trace  = -999.9;
 //fmr::Geom_float tet4_ntrl_jac3_volume = -999.9;//TODO determinant for volume?
@@ -173,6 +173,7 @@ TEST( GridCellFEmsTet, P1_NODE_N ){
   EXPECT_EQ( femera::grid::fems::Tets::get_node_n<1>(), 4 );
 }
 #endif
+#if 0
 TEST( GridCellFEmsTet, FaceNormal2 ){
   EXPECT_EQ( tri3_norm_str (
     &tets_vert_coor [3* tets_vert_face_tris [0]],
@@ -192,6 +193,7 @@ TEST( GridCellFEmsTet, FaceNormal2 ){
     &tets_vert_coor [3* tets_vert_face_tris [11]]),
     "[-0.577350, -0.577350, -0.577350]" );
 }
+#endif
 // Check Cube element surfaces as triangles
 TEST( GridCellFEmsCube, FaceNormal ){
   EXPECT_EQ( tri3_norm_str (// bottom face

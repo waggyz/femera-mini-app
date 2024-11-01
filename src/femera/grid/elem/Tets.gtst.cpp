@@ -17,6 +17,7 @@ femera::grid::elem::Elem<femera::grid::elem::Tets,1> test_tet1;// P1 linear
 femera::grid::elem::Elem<femera::grid::elem::Tets,2> test_tet2;// P2 quadratic
 femera::grid::elem::Elem<femera::grid::elem::Tets,3> test_tet3;// P3 cubic
 fmr::Geom_float coor1 [12];
+fmr::Geom_float ntrl_jac3_trace =-999.9;
 
 fmr::Exit_int main (int argc, char** argv) {
   mini.init (&argc, argv);
@@ -32,12 +33,26 @@ fmr::Exit_int main (int argc, char** argv) {
   for (int i=0; i<11; ++i) {
     wsum11 += femera::grid::elem::Tets::intg_11_ptwt [4*i +3];}
   //
-  #if 0
-  const auto coor_n = test_tet1.get_vert_n () * test_tet1.get_sims_d ();
-  for (fmr::Local_int i=0; i<coor_n; ++i) {
-    coor1 [i] = femera::grid::elem::Tet::vert_coor [i];
-  }
-  #endif
+  // Calculate the Jacbian of a natural tet, which should be the 3x3 identity,
+  // and is constant, independent of the integration point coordinates.
+  // The one-point tet integration rule is sufficient.
+  fmr::Geom_float intp [ 3];
+  for (int i=0; i<3;++i){intp[i] = femera::grid::elem::Tets::intg_1_ptwt[i];}
+  //const auto intw = femera::grid::fems::tets_intg_1_ptwt [3];
+  fmr::Geom_float shpg [12]
+     = {0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0};
+  femera::grid::elem::Tets::shap_grad_4 (&shpg[0], &intp[0]);
+  fmr::Geom_float coor [12];
+  for (int i=0; i<12;++i){coor[i] = femera::grid::elem::Tets::coor_vert[i];}
+  fmr::Geom_float jac3 [ 9] = {0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0};
+  //coor = femera::grid::fems::tets_vert_coor;// 4x3
+  //coor = femera::grid::fems::tets_coor_vert;// 3x4 **Use this
+  for (int i=0; i<3; ++i) {
+    for (int j=0; j<3; ++j) {
+      for (int k=0; k<4; ++k) {
+        jac3 [3*i +j]+= shpg [4*i +k] * coor [4*j +k];
+  } } }
+  ntrl_jac3_trace = jac3[0] + jac3[4] + jac3[8];// 3 for 3x3 identity
   //
   return mini.exit ();
 }
@@ -127,9 +142,9 @@ TEST( GridElemTets, ArrayAccessVariable ){
   EXPECT_EQ( v1 [0], 1 );
   EXPECT_EQ( v1 [1], 2 );
 }
-//TEST( GridElemTet, JacTraceThree ){
-//  EXPECT_FLOAT_EQ( float(tet4_ntrl_jac3_trace), float (3.0) );
-//}
+TEST( GridElemTet, JacTraceThree ){
+  EXPECT_FLOAT_EQ( float(ntrl_jac3_trace), float (3.0) );
+}
 
 namespace femera { namespace grid { namespace elem {
 

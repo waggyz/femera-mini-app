@@ -50,6 +50,9 @@ struct Elem {//TODO enable_if P>0 or for P in [1,2,3]?
   constexpr fmr::Local_int get_face_n () noexcept;
   constexpr fmr::Local_int get_node_n () noexcept;
   //
+  constexpr const fmr::Local_int* get_node_conn () noexcept {
+   return T::vert_conn;// P=1, D=3
+  }//TODO Generate node_coor for P=2,3, D=1,2.
   constexpr const fmr::Geom_float* get_node_coor () noexcept {
    return T::vert_coor;// P=1, D=3
   }//TODO Generate node_coor for P=2,3, D=1,2.
@@ -58,35 +61,15 @@ struct Elem {//TODO enable_if P>0 or for P in [1,2,3]?
   }//TODO Generate coor_node for P=2,3, D=1,2.
 };
 
-inline
-std::string tri3_norm_str (const fmr::Phys_float* p1,
-  const fmr::Phys_float* p2, const fmr::Phys_float* p3) {
-  // Use this to check correct orientation of element surfaces.
-  const auto Ax = p2[0] - p1[0], Ay =  p2[1] - p1[1], Az =  p2[2] - p1[2];
-  const auto Bx = p3[0] - p2[0], By =  p3[1] - p2[1], Bz =  p3[2] - p2[2];
-  auto Nx = float(Ay * Bz - Az * By);
-  auto Ny = float(Az * Bx - Ax * Bz);
-  auto Nz = float(Ax * By - Ay * Bx);
-  const auto len = std::sqrt (Nx*Nx + Ny*Ny + Nz*Nz);
-  Nx /= len; Ny /= len; Nz /= len;
-  if (std::abs (Nx - float(1.0)) < float(1.0e-6)) {return std::string ("+x");}
-  if (std::abs (Nx + float(1.0)) < float(1.0e-6)) {return std::string ("-x");}
-  if (std::abs (Ny - float(1.0)) < float(1.0e-6)) {return std::string ("+y");}
-  if (std::abs (Ny + float(1.0)) < float(1.0e-6)) {return std::string ("-y");}
-  if (std::abs (Nz - float(1.0)) < float(1.0e-6)) {return std::string ("+z");}
-  if (std::abs (Nz + float(1.0)) < float(1.0e-6)) {return std::string ("-z");}
-  #if 0
-  if (std::abs (Nx) < float(1.0e-6)) {return std::string ("xy");}
-  if (std::abs (Ny) < float(1.0e-6)) {return std::string ("xz");}
-  if (std::abs (Nz) < float(1.0e-6)) {return std::string ("yz");}
-  return std::string ("xyz");
-  #else
-  return std::string ("["
-    + std::to_string (Nx) + ", "
-    + std::to_string (Ny) + ", "
-    + std::to_string (Nz) + "]");
-  #endif
-}
+//TODO These are mostly used for testing. Should they live somewhere else?
+std::string tri2_norm_str
+ (const fmr::Geom_float* p1,
+  const fmr::Geom_float* p2,
+  const fmr::Geom_float* p3);
+std::string tri3_norm_str
+ (const fmr::Geom_float* p1,
+  const fmr::Geom_float* p2,
+  const fmr::Geom_float* p3);
 
 } } }//end femera::grid::elem:: namespace
 

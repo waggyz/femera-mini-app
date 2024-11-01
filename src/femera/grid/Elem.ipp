@@ -3,7 +3,6 @@
 
 namespace femera { namespace grid {
 
-
 template <class T, typename fmr::Local_int P, typename fmr::Local_int D>
 inline constexpr fmr::Local_int elem::Elem<T,P,D>::get_face_n () noexcept {
   return this->get_tris_n () + this->get_quad_n ();
