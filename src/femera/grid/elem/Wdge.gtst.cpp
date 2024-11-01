@@ -1,4 +1,5 @@
 #include "../../femera.hpp"
+#include "Wdge.hpp"
 
 #include <gtest/gtest.h>
 

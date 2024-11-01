@@ -1,4 +1,5 @@
 #include "../../femera.hpp"
+#include "Spar.hpp"
 
 #include <gtest/gtest.h>
 
