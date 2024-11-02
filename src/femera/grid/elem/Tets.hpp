@@ -4,6 +4,8 @@
 #include "Tris.hpp"
 #include "Cube.hpp"
 
+#include <cmath> // std::sqrt()
+
 namespace femera { namespace grid { namespace elem {
 
 struct Tets : public Elem<Tets> {//TODO Tet?
@@ -15,11 +17,11 @@ struct Tets : public Elem<Tets> {//TODO Tet?
   static constexpr fmr::Local_int quad_n = 0;
   static constexpr fmr::Local_int vols_n = 1;
   //
-  static constexpr fmr::Geom_float edge_l  // total length of edges
+  static constexpr fmr::Geom_float edge_l // total length of edges
     = 3.0 + 3.0*(std::sqrt(2.0));
   static constexpr fmr::Geom_float face_a // total surface area
     = 1.5 + std::sqrt(2.0) * std::sqrt(1.5);
-  static constexpr fmr::Geom_float elem_v  // natural element volume
+  static constexpr fmr::Geom_float elem_v // natural element volume
     = 1.0 / 6.0;
   //
   //NOTE Gmsh element conventions
@@ -104,10 +106,10 @@ struct Tets : public Elem<Tets> {//TODO Tet?
     0.25,0.25,0.25, 1.0/6.0
   };
   static constexpr fmr::Local_int intg_4_n = 4;// Preferred P2
-  static constexpr fmr::Phys_float a2 = 0.5854101966249685;
-    // a2 = (5.0+3.0*std::sqrt(5.0))/20.0;
-  static constexpr fmr::Phys_float b2 = 0.1381966011250105;
-    // b2 = (5.0-std::sqrt(5.0))/20.0;
+  // a2 = (5.0+3.0*std::sqrt(5.0))/20.0 = 0.5854101966249685;
+  // b2 = (5.0-    std::sqrt(5.0))/20.0 = 0.1381966011250105;
+#define a2 (5.0+3.0*std::sqrt(5.0))/20.0
+#define b2 (5.0-std::sqrt(5.0))/20.0
   static constexpr
   fmr::Phys_float intg_4_ptwt [4* intg_4_n] = {
     b2,b2,b2, 0.25/6.0,
@@ -115,6 +117,8 @@ struct Tets : public Elem<Tets> {//TODO Tet?
     b2,a2,b2, 0.25/6.0,
     b2,b2,a2, 0.25/6.0
   };
+#undef a2
+#undef b2
   static constexpr fmr::Local_int intg_5_n = 5;// Alternate P2
   //NOTE tet20s don't converge with 5-point rule
   //NOTE Triple-checked these 5-point rule values
@@ -129,11 +133,12 @@ struct Tets : public Elem<Tets> {//TODO Tet?
   static constexpr fmr::Local_int intg_10_n = 10;//Preferred B3
   // From Lee Shunn, Frank Ham, Symmetric quadrature rules for tetrahedra
   // based on a cubic close-packed lattice arrangement, 2012
-  static constexpr
-  fmr::Phys_float
-    a0=0.0738349017262234    , a1=0.7784952948213300,
-    b0=0.0937556561159491    , b1=0.4062443438840510,
-    w0=0.0476331348432089/6.0, w1=0.1349112434378610/6.0;
+#define a0 0.0738349017262234
+#define a1 0.7784952948213300
+#define b0 0.0937556561159491
+#define b1 0.4062443438840510
+#define w0 0.0476331348432089/6.0
+#define w1 0.1349112434378610/6.0
   static constexpr
   fmr::Phys_float intg_10_ptwt [4* intg_10_n] = {
     a0,a0,a0, w0,
@@ -147,12 +152,18 @@ struct Tets : public Elem<Tets> {//TODO Tet?
     b1,b0,b1, w1,
     b1,b1,b0, w1
   };
+#undef a0
+#undef a1
+#undef b0
+#undef b1
+#undef w0
+#undef w1
   static constexpr fmr::Local_int intg_11_n = 11;//OLD B3
-  //NOTE This converges tet20 meshes
-  static constexpr fmr::Phys_float a3=0.3994035761667992;
-  // a3 = (1.+std::sqrt(5./14.))/4.;
-  static constexpr fmr::Phys_float b3=0.1005964238332008;
-  // b3 = (1.-std::sqrt(5./14.))/4.;
+  // This converges tet20 meshes
+  // a3 = (1.0+std::sqrt(5.0/14.0))/4.0 = 0.3994035761667992
+  // b3 = (1.0-std::sqrt(5.0/14.0))/4.0 = 0.1005964238332008
+#define a3 (1.0+std::sqrt(5.0/14.0))/4.0
+#define b3 (1.0-std::sqrt(5.0/14.0))/4.0
   static constexpr
   fmr::Phys_float intg_11_ptwt [4* intg_11_n] = {
      0.25    , 0.25    , 0.25    , -74.0/ 5625.0,
@@ -167,6 +178,8 @@ struct Tets : public Elem<Tets> {//TODO Tet?
     b3,a3,b3, 56.0/2250.0,
     b3,b3,a3, 56.0/2250.0
   };
+#undef a3
+#undef b3
   //------------------------- tet shape functions ----------------------------
   //TODO Return shape function/gradient transposed?
   template <typename F> static inline// single or double

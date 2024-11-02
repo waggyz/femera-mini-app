@@ -34,48 +34,57 @@
 #define FMR_ALIGN_PTR ZYC_ALIGN_PTR
 
 namespace fmr { namespace math {
-  enum class Poly : int8_t {None=0, Error, Unknown,
-    Full, Serendipity, Bipoly, Tripoly, Pyramid, Prism,
-    end };
-  static const std::map<Poly,std::pair<std::string,std::string>>
-  poly_letter_name {
-    {Poly::        None, std::make_pair ("-","no polynomial")},
-    {Poly::       Error, std::make_pair ("!","polynomial error")},
-    {Poly::     Unknown, std::make_pair ("?","unknown polynomial")},
-    {Poly::        Full, std::make_pair ("P","Full Taylor polynomial")},
-    {Poly:: Serendipity, std::make_pair ("S","Serendipity")},
-    {Poly::      Bipoly, std::make_pair ("B","Bipolynomial")},
-    {Poly::     Tripoly, std::make_pair ("T","Tripolynomial")},
-    {Poly::     Pyramid, std::make_pair ("Y","Pyramid polynomial")},
-    {Poly::       Prism, std::make_pair ("M","Prism polynomial")},
-    {Poly::         end, std::make_pair ("*","Poly enum end marker")}
-  };
+
+enum class Poly : int8_t {None=0, Error, Unknown,
+  Full, Serendipity, Bipoly, Tripoly, Pyramid, Prism,
+  end };
+static const std::map<Poly,std::pair<std::string,std::string>>
+poly_letter_name {
+  {Poly::        None, std::make_pair ("-","no polynomial")},
+  {Poly::       Error, std::make_pair ("!","polynomial error")},
+  {Poly::     Unknown, std::make_pair ("?","unknown polynomial")},
+  {Poly::        Full, std::make_pair ("P","Full Taylor polynomial")},
+  {Poly:: Serendipity, std::make_pair ("S","Serendipity")},
+  {Poly::      Bipoly, std::make_pair ("B","Bipolynomial")},
+  {Poly::     Tripoly, std::make_pair ("T","Tripolynomial")},
+  {Poly::     Pyramid, std::make_pair ("Y","Pyramid polynomial")},
+  {Poly::       Prism, std::make_pair ("M","Prism polynomial")},
+  {Poly::         end, std::make_pair (".","Poly enum end marker")}
+};
+
 } }// end fmr::math namespace
 
 namespace fmr { namespace math {
-  template <typename I> static inline
-  I divide_ceil (const I x, const I y);
-  // I : Integer type
-  static inline
-  uint base2_digits (uint x);
-  static inline
-  uint count_digits (uint x);
-  static inline
-  uint upow (uint base, uint exp);
-  static inline
-  uint nchoosek (uint n, uint k);
-  static inline
-  uint poly_terms (Poly ptype, uint nvars, uint pord);
-  template <typename F> static inline
-  bool are_close (const F a, const F b);
-  template <typename F> static inline
-  bool are_equal (const F a, const F b);
-  template <typename F> static inline
-  bool is_less_than (const F a, const F b);
-  template <typename F> static inline
-  bool is_more_than (const F a, const F b);
-  template <typename F> static inline
-  bool is_greater_than (const F a, const F b);
+
+template <typename I> static inline// I : Integer type
+I divide_ceil (const I x, const I y);
+static inline
+uint base2_digits (uint x);
+static inline
+uint count_digits (uint x);
+static inline
+uint upow (uint base, uint exp);
+static inline
+uint nchoosek (uint n, uint k);
+static inline
+uint poly_terms (Poly ptype, uint nvars, uint pord);
+//
+template <typename F> static inline
+bool are_close (const F a, const F b);
+template <typename F> static inline
+bool are_equal (const F a, const F b);
+template <typename F> static inline
+bool is_less_than (const F a, const F b);
+template <typename F> static inline
+bool is_more_than (const F a, const F b);
+template <typename F> static inline
+bool is_greater_than (const F a, const F b);
+//
+# if 0
+template <int N, typename F> static inline
+F* matrix_inv_det (F* invdet, const F* mat);
+#endif
+
 } }// end fmr::math namespace
 
 #if 0
