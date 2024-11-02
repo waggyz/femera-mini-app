@@ -8,7 +8,14 @@
 
 namespace femera { namespace grid { namespace elem {
 
-template <class T, typename fmr::Local_int P=1, typename fmr::Local_int D=3>
+// Forward-delare elements
+class Tets; class Prmd; class Wdge; class Cube;
+class Itri; class Iqud;
+class Tris; class Quad;
+class Spar;
+
+template <class T, typename fmr::Local_int P=1, typename fmr::Local_int D=3,
+  typename F=fmr::Geom_float>
 struct Elem {//TODO enable_if P>0 or for P in [1,2,3]?
   /*
   Elements are defined in 3D by derived classes and reduced as needed to match
@@ -28,9 +35,9 @@ struct Elem {//TODO enable_if P>0 or for P in [1,2,3]?
   constexpr fmr::Local_int get_tris_n () noexcept {return T::tris_n;}
   constexpr fmr::Local_int get_quad_n () noexcept {return T::quad_n;}
   //
-  constexpr fmr::Geom_float get_edge_l () noexcept {return T::edge_l;}
-  constexpr fmr::Geom_float get_face_a () noexcept {return T::face_a;}
-  constexpr fmr::Geom_float get_elem_v () noexcept {return T::elem_v;}
+  constexpr F get_edge_l () noexcept {return F(T::edge_l);}
+  constexpr F get_face_a () noexcept {return F(T::face_a);}
+  constexpr F get_elem_v () noexcept {return F(T::elem_v);}
   //
   constexpr const fmr::Local_int* get_spar_conn () noexcept {
     return T::spar_conn;}
@@ -41,10 +48,26 @@ struct Elem {//TODO enable_if P>0 or for P in [1,2,3]?
   constexpr const fmr::Local_int* get_vert_conn () noexcept {
     return T::vert_conn;}
   //
-  constexpr const fmr::Geom_float* get_vert_coor () noexcept {
-    return T::vert_coor;}
-  constexpr const fmr::Geom_float* get_coor_vert () noexcept {
-    return T::coor_vert;}
+  template <typename FF=F,
+    typename std::enable_if <std::is_same< FF, double >::value >::type>
+  constexpr const F* get_vert_coor () noexcept {
+    return T::vert_coor;
+  }
+  template <typename FF=F,
+    typename std::enable_if <std::is_same< FF, double >::value >::type>
+  constexpr const F* get_coor_vert () noexcept {
+    return T::coor_vert;
+  }
+  template <typename FF=F,
+    typename std::enable_if <std::is_same< FF, float >::value >::type>
+  constexpr const F* get_vert_coor () noexcept {
+    return T::vert_coor_f;
+  }
+  template <typename FF=F,
+    typename std::enable_if <std::is_same< FF, float >::value >::type>
+  constexpr const F* get_coor_vert () noexcept {
+    return T::coor_vert_f;
+  }
   //
   // Methods -----------------------------------------------------------------
   constexpr fmr::Local_int get_face_n () noexcept;
@@ -53,12 +76,22 @@ struct Elem {//TODO enable_if P>0 or for P in [1,2,3]?
   constexpr const fmr::Local_int* get_node_conn () noexcept {
    return T::vert_conn;// P=1, D=3
   }//TODO Generate node_coor for P=2,3, D=1,2.
-  constexpr const fmr::Geom_float* get_node_coor () noexcept {
+  constexpr const F* get_node_coor () noexcept {
    return T::vert_coor;// P=1, D=3
   }//TODO Generate node_coor for P=2,3, D=1,2.
-  constexpr const fmr::Geom_float* get_coor_node () noexcept {
+  constexpr const F* get_coor_node () noexcept {
     return T::coor_vert;// P=1, D=3
   }//TODO Generate coor_node for P=2,3, D=1,2.
+  //
+  static inline
+  fmr::Local_int jacd_size (const fmr::Local_int intp_n=1) noexcept;
+#if 0
+  template <typename = typename std::enable_if
+    <std::is_same< F, double >::value >::type>
+  static inline
+  F* jacd
+    (F* jacd, const fmr::math::Intg_rule) noexcept;
+#endif
 };
 
 //TODO These are mostly used for testing. Should they live somewhere else?

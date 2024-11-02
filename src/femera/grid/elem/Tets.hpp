@@ -18,9 +18,9 @@ struct Tets : public Elem<Tets> {//TODO Tet?
   static constexpr fmr::Local_int vols_n = 1;
   //
   static constexpr fmr::Geom_float edge_l // total length of edges
-    = 3.0 + 3.0*(std::sqrt(2.0));
+    = 3.0 + 3.0 * std::sqrt (2.0);
   static constexpr fmr::Geom_float face_a // total surface area
-    = 1.5 + std::sqrt(2.0) * std::sqrt(1.5);
+    = 1.5 + std::sqrt (2.0) * std::sqrt (1.5);
   static constexpr fmr::Geom_float elem_v // natural element volume
     = 1.0 / 6.0;
   //
@@ -39,9 +39,8 @@ struct Tets : public Elem<Tets> {//TODO Tet?
     = {
     0,1, 1,2, 2,0, 0,3, 2,3, 1,3
   };
-  //const
   static constexpr
-  fmr::Geom_float vert_coor [vert_n * sims_d ]// transposed coor_vert
+  double vert_coor [vert_n * sims_d ]// transposed coor_vert
     = {            //            3               //
                    // vertex    /|\              //
     0.0, 0.0, 0.0, // 0        / | \             //
@@ -50,7 +49,22 @@ struct Tets : public Elem<Tets> {//TODO Tet?
     0.0, 0.0, 1.0  // 3         \|/       \|/    //
   };               //            0         o     //
   static constexpr
-  fmr::Geom_float coor_vert [sims_d * vert_n]// transposed vert_coor
+  double coor_vert [sims_d * vert_n]// transposed vert_coor
+    = {
+    0.0, 1.0, 0.0, 0.0,
+    0.0, 0.0, 1.0, 0.0,
+    0.0, 0.0, 0.0, 1.0
+  };
+  static constexpr
+  float vert_coor_f [vert_n * sims_d ]// transposed coor_vert
+    = {
+    0.0, 0.0, 0.0,
+    1.0, 0.0, 0.0,
+    0.0, 1.0, 0.0,
+    0.0, 0.0, 1.0 
+  };
+  static constexpr
+  float coor_vert_f [sims_d * vert_n]// transposed vert_coor
     = {
     0.0, 1.0, 0.0, 0.0,
     0.0, 0.0, 1.0, 0.0,
