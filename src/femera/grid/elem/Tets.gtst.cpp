@@ -17,7 +17,8 @@ femera::grid::elem::Elem<femera::grid::elem::Tets,1> test_tet1;// P1 linear
 femera::grid::elem::Elem<femera::grid::elem::Tets,2> test_tet2;// P2 quadratic
 femera::grid::elem::Elem<femera::grid::elem::Tets,3> test_tet3;// P3 cubic
 fmr::Geom_float coor1 [12];
-fmr::Geom_float ntrl_jac3_trace =-999.9;
+fmr::Geom_float ntrl_jac3_trace_p1 = 0.0;
+fmr::Geom_float ntrl_jac3_trace_p2 = 0.0;
 
 fmr::Exit_int main (int argc, char** argv) {
   mini.init (&argc, argv);
@@ -52,11 +53,27 @@ fmr::Exit_int main (int argc, char** argv) {
       for (int k=0; k<4; ++k) {
         jac3 [3*i +j]+= shpg [4*i +k] * coor [4*j +k];
   } } }
-  ntrl_jac3_trace = jac3[0] + jac3[4] + jac3[8];// 3 for 3x3 identity
+  ntrl_jac3_trace_p1 = jac3[0] + jac3[4] + jac3[8];// 3 for 3x3 identity
+  //
+  fmr::Geom_float shp2 [30];
+  for (int i=0; i<30; ++i){shp2[i]=0.0;}
+  for (int i=0; i< 9; ++i){jac3[i]=0.0;}
+  fmr::Geom_float coo2 [30];
+  for (int i=0; i<30;++i){coo2[i] = femera::grid::elem::Tets::coor_node_2[i];}
+  femera::grid::elem::Tets::shap_grad_10 (&shp2[0], &intp[0]);
+  for (int i=0; i<3; ++i) {
+    for (int j=0; j<3; ++j) {
+      for (int k=0; k<10; ++k) {
+        jac3 [3*i +j]+= shp2 [10*i +k] * coo2 [10*j +k];
+  } } }
+  ntrl_jac3_trace_p2 = jac3[0] + jac3[4] + jac3[8];
+#if 0
+  printf ("[%f, %f, %f,\n %f, %f, %f,\n %f, %f, %f]\n",
+    jac3[0],jac3[1],jac3[2],jac3[3],jac3[4],jac3[5],jac3[6],jac3[7],jac3[8] );
+#endif
   //
   return mini.exit ();
 }
-
 //-----------------------------
 TEST( GridElemTets, TrivialTest ){
   EXPECT_EQ( 1, 1 );
@@ -143,7 +160,8 @@ TEST( GridElemTets, ArrayAccessVariable ){
   EXPECT_EQ( v1 [1], 2 );
 }
 TEST( GridElemTet, JacTraceThree ){
-  EXPECT_FLOAT_EQ( float(ntrl_jac3_trace), float (3.0) );
+  EXPECT_FLOAT_EQ( float(ntrl_jac3_trace_p1), float (3.0) );
+  EXPECT_FLOAT_EQ( float(ntrl_jac3_trace_p2), float (3.0) );
 }
 
 namespace femera { namespace grid { namespace elem {

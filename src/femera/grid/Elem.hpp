@@ -48,41 +48,55 @@ struct Elem {//TODO enable_if P>0 or for P in [1,2,3]?
   constexpr const fmr::Local_int* get_vert_conn () noexcept {
     return T::vert_conn;}
   //
-  template <typename FF=F,
-    typename std::enable_if <std::is_same< FF, double >::value >::type>
+  template <typename tF=F,
+    typename std::enable_if <std::is_same< tF, double >::value >::type>
   constexpr const F* get_vert_coor () noexcept {
     return T::vert_coor;
   }
-  template <typename FF=F,
-    typename std::enable_if <std::is_same< FF, double >::value >::type>
+  template <typename tF=F,
+    typename std::enable_if <std::is_same< tF, double >::value >::type>
   constexpr const F* get_coor_vert () noexcept {
     return T::coor_vert;
   }
-  template <typename FF=F,
-    typename std::enable_if <std::is_same< FF, float >::value >::type>
+  template <typename tF=F,
+    typename std::enable_if <std::is_same< tF, float >::value >::type>
   constexpr const F* get_vert_coor () noexcept {
     return T::vert_coor_f;
   }
-  template <typename FF=F,
-    typename std::enable_if <std::is_same< FF, float >::value >::type>
+  template <typename tF=F,
+    typename std::enable_if <std::is_same< tF, float >::value >::type>
   constexpr const F* get_coor_vert () noexcept {
     return T::coor_vert_f;
   }
-  //
   // Methods -----------------------------------------------------------------
   constexpr fmr::Local_int get_face_n () noexcept;
   constexpr fmr::Local_int get_node_n () noexcept;
   //
+  //TODO Generate vert_conn, node_coor, coor_node for P=2,3, D=1,2.
+  //TODO Consider enums for element type, order (# nodes), integration rule.
+  template <fmr::Local_int tP=P,
+    typename std::enable_if <(tP == 1)>::value>// P=1, D does not matter
   constexpr const fmr::Local_int* get_node_conn () noexcept {
-   return T::vert_conn;// P=1, D=3
-  }//TODO Generate node_coor for P=2,3, D=1,2.
+   return T::vert_conn;
+  }
+  template <fmr::Local_int tP=P, fmr::Local_int tD=D,
+    typename std::enable_if <(tP == 1)>::value,
+    typename std::enable_if <(tD == 3)>::value>// P=1, D=3
   constexpr const F* get_node_coor () noexcept {
-   return T::vert_coor;// P=1, D=3
-  }//TODO Generate node_coor for P=2,3, D=1,2.
+   return T::vert_coor;
+  }
+  template <fmr::Local_int tP=P, fmr::Local_int tD=D,
+    typename std::enable_if <(tP == 1)>::value,
+    typename std::enable_if <(tD == 3)>::value>// P=1, D=3
   constexpr const F* get_coor_node () noexcept {
-    return T::coor_vert;// P=1, D=3
-  }//TODO Generate coor_node for P=2,3, D=1,2.
-  //
+    return T::coor_vert;
+  }
+  template <fmr::Local_int tP=P, fmr::Local_int tD=D,
+    typename std::enable_if <(tP == 2)>::value,
+    typename std::enable_if <(tD == 3)>::value>// P=2, D=3
+  constexpr const F* get_coor_node () noexcept {
+    return T::coor_node_2;
+  }
   static inline
   fmr::Local_int jacd_size (const fmr::Local_int intp_n=1) noexcept;
 #if 0
@@ -94,7 +108,7 @@ struct Elem {//TODO enable_if P>0 or for P in [1,2,3]?
 #endif
 };
 
-//TODO These are mostly used for testing. Should they live somewhere else?
+//TODO These are used for testing. Should they live somewhere else?
 std::string tri2_norm_str
  (const fmr::Geom_float* p1,
   const fmr::Geom_float* p2,

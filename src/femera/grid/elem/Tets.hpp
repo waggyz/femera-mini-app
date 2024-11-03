@@ -38,6 +38,7 @@ struct Tets : public Elem<Tets> {//TODO Tet?
   fmr::Local_int spar_conn [Spar::vert_n * edge_n]
     = {
     0,1, 1,2, 2,0, 0,3, 2,3, 1,3
+//  0,1, 1,2, 2,0, 0,3, 1,3, 2,3//TODO switch in the shape functions?
   };
   static constexpr
   double vert_coor [vert_n * sims_d ]// transposed coor_vert
@@ -55,6 +56,13 @@ struct Tets : public Elem<Tets> {//TODO Tet?
     0.0, 0.0, 1.0, 0.0,
     0.0, 0.0, 0.0, 1.0
   };
+  static constexpr
+  double coor_node_2 [sims_d * (vert_n + edge_n)]// transposed vert_coor
+    = {
+    0.0, 1.0, 0.0, 0.0,   0.5, 0.5, 0.0, 0.0, 0.0, 0.5,
+    0.0, 0.0, 1.0, 0.0,   0.0, 0.5, 0.5, 0.0, 0.5, 0.0,
+    0.0, 0.0, 0.0, 1.0,   0.0, 0.0, 0.0, 0.5, 0.5, 0.5
+  };//0,  1,   2,   3,     4,   5,   6,   7,   8,   9 TODO switch columns 8 & 9?
   static constexpr
   float vert_coor_f [vert_n * sims_d ]// transposed coor_vert
     = {
