@@ -3,6 +3,11 @@
 
 //#include "../Grid.hpp"
 #include "../../fmr/fmr.hpp"
+//#include "elem/Tets.hpp"
+//#include "elem/Prmd.hpp"
+//#include "elem/Wdge.hpp"
+//#include "elem/Itri.hpp"
+//#include "elem/Iqud.hpp"
 
 #include <cmath>// std::sqrt () needed to calculate edge lengths
 
@@ -20,6 +25,9 @@ struct Elem {//TODO enable_if P>0 or for P in [1,2,3]?
   /*
   Elements are defined in 3D by derived classes and reduced as needed to match
   the simulation spatial dimension template parameter (D).
+  
+  Members are constexpr so that everything is kept thread-local to the instance
+  that created it.
   */
   T* this_chld = reinterpret_cast<T*>(this);
   // A static_cast only works for default template arguments.
@@ -69,36 +77,46 @@ struct Elem {//TODO enable_if P>0 or for P in [1,2,3]?
     return T::coor_vert_f;
   }
   // Methods -----------------------------------------------------------------
-  constexpr fmr::Local_int get_face_n () noexcept;
-  constexpr fmr::Local_int get_node_n () noexcept;
+  constexpr
+  fmr::Local_int get_face_n () noexcept;
+  constexpr
+  fmr::Local_int jacd_size (const fmr::Local_int intp_n=1) noexcept;
+  constexpr
+  fmr::Local_int get_node_n () noexcept;
+  //TODO Decide if methods should be constexpr or static;
+  //TODO static needed for use without object instance.
   //
-  //TODO Generate vert_conn, node_coor, coor_node for P=2,3, D=1,2.
+  //TODO Generate node_conn, node_coor, coor_node for P=2,3; D=1,2.
   //TODO Consider enums for element type, order (# nodes), integration rule.
   template <fmr::Local_int tP=P,
-    typename std::enable_if <(tP == 1)>::value>// P=1, D does not matter
-  constexpr const fmr::Local_int* get_node_conn () noexcept {
+    typename std::enable_if <tP == 1>::value>// P=1, D does not matter
+  fmr::Local_int* get_node_conn () noexcept {
    return T::vert_conn;
   }
   template <fmr::Local_int tP=P, fmr::Local_int tD=D,
-    typename std::enable_if <(tP == 1)>::value,
-    typename std::enable_if <(tD == 3)>::value>// P=1, D=3
+    typename std::enable_if <tP == 1>::value,
+    typename std::enable_if <tD == 3>::value>// P=1, D=3
   constexpr const F* get_node_coor () noexcept {
    return T::vert_coor;
   }
   template <fmr::Local_int tP=P, fmr::Local_int tD=D,
-    typename std::enable_if <(tP == 1)>::value,
-    typename std::enable_if <(tD == 3)>::value>// P=1, D=3
+    typename std::enable_if <tP == 1>::value,
+    typename std::enable_if <tD == 3>::value>// P=1, D=3
   constexpr const F* get_coor_node () noexcept {
     return T::coor_vert;
   }
   template <fmr::Local_int tP=P, fmr::Local_int tD=D,
-    typename std::enable_if <(tP == 2)>::value,
-    typename std::enable_if <(tD == 3)>::value>// P=2, D=3
-  constexpr const F* get_coor_node () noexcept {
-    return T::coor_node_2;
+    typename std::enable_if <tP == 2>::value,
+    typename std::enable_if <tD == 3>::value>// P=2, D=3
+  constexpr const F* get_node_coor () noexcept {
+   return T::node_coor_p2;
   }
-  static inline
-  fmr::Local_int jacd_size (const fmr::Local_int intp_n=1) noexcept;
+  template <fmr::Local_int tP=P, fmr::Local_int tD=D,
+    typename std::enable_if <tP == 2>::value,
+    typename std::enable_if <tD == 3>::value>// P=2, D=3
+  constexpr const F* get_coor_node () noexcept {
+    return T::coor_node_p2;
+  }
 #if 0
   template <typename = typename std::enable_if
     <std::is_same< F, double >::value >::type>
@@ -110,13 +128,13 @@ struct Elem {//TODO enable_if P>0 or for P in [1,2,3]?
 
 //TODO These are used for testing. Should they live somewhere else?
 std::string tri2_norm_str
- (const fmr::Geom_float* p1,
-  const fmr::Geom_float* p2,
-  const fmr::Geom_float* p3);
+ (const fmr::Geom_float* pt1,
+  const fmr::Geom_float* pt2,
+  const fmr::Geom_float* pt3);
 std::string tri3_norm_str
- (const fmr::Geom_float* p1,
-  const fmr::Geom_float* p2,
-  const fmr::Geom_float* p3);
+ (const fmr::Geom_float* pt1,
+  const fmr::Geom_float* pt2,
+  const fmr::Geom_float* pt3);
 
 } } }//end femera::grid::elem:: namespace
 

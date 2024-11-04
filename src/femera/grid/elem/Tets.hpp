@@ -9,7 +9,7 @@
 namespace femera { namespace grid { namespace elem {
 
 struct Tets : public Elem<Tets> {//TODO Tet?
-  static constexpr fmr::Local_int sims_d = 3;
+  static constexpr fmr::Local_int sims_d = 3;//TODO Remove from here?
   static constexpr fmr::Local_int elem_d = 3;
   static constexpr fmr::Local_int vert_n = 4;
   static constexpr fmr::Local_int edge_n = 6;
@@ -57,11 +57,27 @@ struct Tets : public Elem<Tets> {//TODO Tet?
     0.0, 0.0, 0.0, 1.0
   };
   static constexpr
-  double coor_node_2 [sims_d * (vert_n + edge_n)]// transposed vert_coor
+  double node_coor_p2 [sims_d * (vert_n + edge_n) ]// transposed coor_node_2
     = {
-    0.0, 1.0, 0.0, 0.0,   0.5, 0.5, 0.0, 0.0, 0.0, 0.5,
-    0.0, 0.0, 1.0, 0.0,   0.0, 0.5, 0.5, 0.0, 0.5, 0.0,
-    0.0, 0.0, 0.0, 1.0,   0.0, 0.0, 0.0, 0.5, 0.5, 0.5
+    0.0, 0.0, 0.0,// vertes nodes
+    1.0, 0.0, 0.0,
+    0.0, 1.0, 0.0,
+    0.0, 0.0, 1.0,
+    //
+    0.5, 0.0, 0.0,// bottom triangle edge nodes
+    0.5, 0.5, 0.0,
+    0.0, 0.5, 0.0,
+    //
+    0.0, 0.0, 0.5,// apex edge nodes
+    0.0, 0.5, 0.5,//TOD switch these last two?
+    0.5, 0.0, 0.5
+  };
+  static constexpr
+  double coor_node_p2 [sims_d * (vert_n + edge_n)]// transposed node_coor_2
+    = {
+    0.0, 1.0, 0.0, 0.0,   0.5, 0.5, 0.0,   0.0, 0.0, 0.5,
+    0.0, 0.0, 1.0, 0.0,   0.0, 0.5, 0.5,   0.0, 0.5, 0.0,
+    0.0, 0.0, 0.0, 1.0,   0.0, 0.0, 0.0,   0.5, 0.5, 0.5
   };//0,  1,   2,   3,     4,   5,   6,   7,   8,   9 TODO switch columns 8 & 9?
   static constexpr
   float vert_coor_f [vert_n * sims_d ]// transposed coor_vert
@@ -94,7 +110,8 @@ struct Tets : public Elem<Tets> {//TODO Tet?
                     //      0---------1         o--x       //
   };
 #endif
-  fmr::Local_int cube_conn_6 [4* 6]// 6-tet fill, tilable w/out rotation
+  static constexpr
+  fmr::Local_int cube_conn_6tet [4* 6]// 6-tet fill, tilable w/out rotation
     = {// These are all conformal and differ only by rotation.
     0,1,5,6,
     0,1,2,6,
@@ -104,7 +121,8 @@ struct Tets : public Elem<Tets> {//TODO Tet?
     0,3,2,6
   };
   //fmr::Local_int tet5_cube_conn =[4* 6]//  5-tet fill
-  fmr::Local_int cube_conn_5 [4* 5]// 5-tet fill, tilable with rotation
+  static constexpr
+  fmr::Local_int cube_conn_5tet [4* 5]// 5-tet fill, tilable with rotation
     = {
     1,3,4,6,// This tet is twice the volume of the rest.
     0,1,3,4,// Identical to the natural tet (identity Jacobian).

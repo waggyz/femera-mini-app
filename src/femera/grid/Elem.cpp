@@ -3,12 +3,12 @@
 namespace femera { namespace grid {
 
 std::string elem::tri2_norm_str
- (const fmr::Geom_float* p1,
-  const fmr::Geom_float* p2,
-  const fmr::Geom_float* p3) {
+ (const fmr::Geom_float* pt1,
+  const fmr::Geom_float* pt2,
+  const fmr::Geom_float* pt3) {
   // Use to check correct orientation of element surfaces in 2D.
-  const auto Ax = p2[0] - p1[0], Ay =  p2[1] - p1[1];
-  const auto Bx = p3[0] - p2[0], By =  p3[1] - p2[1];
+  const auto Ax = pt2[0] - pt1[0], Ay =  pt2[1] - pt1[1];
+  const auto Bx = pt3[0] - pt2[0], By =  pt3[1] - pt2[1];
   auto Nz = float(Ax * By - Ay * Bx);
   const auto len = std::sqrt (Nz*Nz);
   Nz /= len;
@@ -20,12 +20,12 @@ std::string elem::tri2_norm_str
     + std::to_string (Nz) + "]");
 }
 std::string elem::tri3_norm_str
- (const fmr::Geom_float* p1,
-  const fmr::Geom_float* p2,
-  const fmr::Geom_float* p3) {
+ (const fmr::Geom_float* pt1,
+  const fmr::Geom_float* pt2,
+  const fmr::Geom_float* pt3) {
   // Use to check correct orientation of element surfaces in 3D.
-  const auto Ax = p2[0] - p1[0], Ay =  p2[1] - p1[1], Az =  p2[2] - p1[2];
-  const auto Bx = p3[0] - p2[0], By =  p3[1] - p2[1], Bz =  p3[2] - p2[2];
+  const auto Ax = pt2[0] - pt1[0], Ay =  pt2[1] - pt1[1], Az =  pt2[2] - pt1[2];
+  const auto Bx = pt3[0] - pt2[0], By =  pt3[1] - pt2[1], Bz =  pt3[2] - pt2[2];
   auto Nx = float(Ay * Bz - Az * By);
   auto Ny = float(Az * Bx - Ax * Bz);
   auto Nz = float(Ax * By - Ay * Bx);
