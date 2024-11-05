@@ -59,7 +59,7 @@ fmr::Exit_int main (int argc, char** argv) {
   for (int i=0; i<30; ++i){shp2[i]=0.0;}
   for (int i=0; i< 9; ++i){jac3[i]=0.0;}
   fmr::Geom_float coo2 [30];
-  for (int i=0; i<30;++i){coo2[i] = femera::grid::elem::Tets::coor_node_p2[i];}
+  for (int i=0; i<30;++i){coo2[i] = femera::grid::elem::Tets::coor_tet10[i];}
   femera::grid::elem::Tets::shap_grad_10 (&shp2[0], &intp[0]);
   for (int i=0; i<3; ++i) {
     for (int j=0; j<3; ++j) {
@@ -142,7 +142,7 @@ TEST( GridElemTets, IntgWgtsSumVol11 ){
   EXPECT_FLOAT_EQ( float(wsum11), tet_vol_ref );
 }
 //-----------------------------
-//NOTE Google test fails report undefined reference and don't ;onk.
+//NOTE Google test fails report undefined reference and don't link.
 TEST( GridElemTets, ArrayAccessInline ){
   EXPECT_EQ( test_tet1.get_spar_conn ()[0], 0 );
   EXPECT_EQ( test_tet1.get_spar_conn ()[1], 1 );

@@ -13,15 +13,31 @@
 
 namespace femera { namespace grid { namespace elem {
 
-// Forward-delare elements
+// Forward-delare element shapes
 class Tets; class Prmd; class Wdge; class Cube;
 class Itri; class Iqud;
 class Tris; class Quad;
 class Spar;
 
+#if 0
+struct Elem_info {
+  fmr::Local_int node_n;
+  fmr::Local_int intp_n;
+  fmr::Local_int sims_n;
+};
+// Supported element examples
+static constexpr Elem_info tet10_args = {10, 4, 3};
+static constexpr Elem_info tri6_2d_args = {6, 4, 2};
+static constexpr Elem_info tri6_3d_args = {6, 4, 3};
+#endif
+
 template <class T, typename fmr::Local_int P=1, typename fmr::Local_int D=3,
   typename F=fmr::Geom_float>
-struct Elem {//TODO enable_if P>0 or for P in [1,2,3]?
+class Elem {//TODO enable_if P>0 or for P in [1,2,3]?
+  //FIXME higher-order elements are identified by node_n <N>, not elem_p <P>.
+  //TODO one more Elem template parameter for integration rule <R>?
+  //TODO Consider enums for element type, order (# nodes), integration rule.
+  //TODO Change to template <class T, Elem_args A, typename F>, as above
   /*
   Elements are defined in 3D by derived classes and reduced as needed to match
   the simulation spatial dimension template parameter (D).
@@ -29,13 +45,21 @@ struct Elem {//TODO enable_if P>0 or for P in [1,2,3]?
   Members are constexpr so that everything is kept thread-local to the instance
   that created it.
   */
+#if 0
+  static_assert (D >= T::elem_d,//TODO move to constructor?
+  "Element can only be embedded in a "
+  "simulation of equal or greater spatial dimension.");
+#endif
+  //
+  private:
   T* this_chld = reinterpret_cast<T*>(this);
   // A static_cast only works for default template arguments.
   //
+  public:
   // Simple accessors --------------------------------------------------------
+  // constexpr functions are implicitly inline
   constexpr fmr::Local_int get_elem_p () noexcept {return P;}
   constexpr fmr::Local_int get_sims_d () noexcept {return D;}
-  //
   constexpr fmr::Local_int get_elem_d () noexcept {return T::elem_d;}
   constexpr fmr::Local_int get_vert_n () noexcept {return T::vert_n;}
   constexpr fmr::Local_int get_vols_n () noexcept {return T::vols_n;}
@@ -56,6 +80,7 @@ struct Elem {//TODO enable_if P>0 or for P in [1,2,3]?
   constexpr const fmr::Local_int* get_vert_conn () noexcept {
     return T::vert_conn;}
   //
+  // Natural element vertex coordinates --------------------------------------
   template <typename tF=F,
     typename std::enable_if <std::is_same< tF, double >::value >::type>
   constexpr const F* get_vert_coor () noexcept {
@@ -80,19 +105,29 @@ struct Elem {//TODO enable_if P>0 or for P in [1,2,3]?
   constexpr
   fmr::Local_int get_face_n () noexcept;
   constexpr
+  fmr::Local_int get_node_n () noexcept;
+  constexpr
   fmr::Local_int jacd_size (const fmr::Local_int intp_n=1) noexcept;
   constexpr
-  fmr::Local_int get_node_n () noexcept;
-  //TODO Decide if methods should be constexpr or static;
-  //TODO static needed for use without object instance.
+  fmr::Local_int shpg_size (const fmr::Local_int intp_n=1) noexcept;
+#if 0
+  constexpr
+  F face_norm [sims_d * face_n]]//TODO this can be evaluated at compile time.
+  //NOTE specialize for simulation dimension <D>
+    = {
+  };
+#endif
   //
-  //TODO Generate node_conn, node_coor, coor_node for P=2,3; D=1,2.
-  //TODO Consider enums for element type, order (# nodes), integration rule.
+#if 0
   template <fmr::Local_int tP=P,
     typename std::enable_if <tP == 1>::value>// P=1, D does not matter
-  fmr::Local_int* get_node_conn () noexcept {
-   return T::vert_conn;
+  constexpr const fmr::Local_int* get_node_conn () noexcept {//TODO Needed?
+  // This is just a list of integers [1..node_n]
+    return T::vert_conn;
   }
+#endif
+  // Node coordinates --------------------------------------------------------
+  //TODO Generate node_coor, coor_node for P=2,3; D=1,2.
   template <fmr::Local_int tP=P, fmr::Local_int tD=D,
     typename std::enable_if <tP == 1>::value,
     typename std::enable_if <tD == 3>::value>// P=1, D=3
@@ -109,29 +144,26 @@ struct Elem {//TODO enable_if P>0 or for P in [1,2,3]?
     typename std::enable_if <tP == 2>::value,
     typename std::enable_if <tD == 3>::value>// P=2, D=3
   constexpr const F* get_node_coor () noexcept {
-   return T::node_coor_p2;
+   return T::tet10_coor;
   }
   template <fmr::Local_int tP=P, fmr::Local_int tD=D,
     typename std::enable_if <tP == 2>::value,
     typename std::enable_if <tD == 3>::value>// P=2, D=3
   constexpr const F* get_coor_node () noexcept {
-    return T::coor_node_p2;
+    return  T::coor_tet10;
   }
-#if 0
-  template <typename = typename std::enable_if
-    <std::is_same< F, double >::value >::type>
-  static inline
-  F* jacd
-    (F* jacd, const fmr::math::Intg_rule) noexcept;
-#endif
+  // Integration points and weights (default) --------------------------------
+  //
+  // Shape functions and gradients -------------------------------------------
+  //
 };
 
 //TODO These are used for testing. Should they live somewhere else?
-std::string tri2_norm_str
+std::string tri2_norm_str // in 3D
  (const fmr::Geom_float* pt1,
   const fmr::Geom_float* pt2,
   const fmr::Geom_float* pt3);
-std::string tri3_norm_str
+std::string tri3_norm_str // in 3D
  (const fmr::Geom_float* pt1,
   const fmr::Geom_float* pt2,
   const fmr::Geom_float* pt3);

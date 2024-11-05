@@ -9,6 +9,7 @@
 namespace femera { namespace grid { namespace elem {
 
 struct Tets : public Elem<Tets> {//TODO Tet?
+  public://TODO make protected or private with friend class Elem?
   static constexpr fmr::Local_int sims_d = 3;//TODO Remove from here?
   static constexpr fmr::Local_int elem_d = 3;
   static constexpr fmr::Local_int vert_n = 4;
@@ -57,7 +58,7 @@ struct Tets : public Elem<Tets> {//TODO Tet?
     0.0, 0.0, 0.0, 1.0
   };
   static constexpr
-  double node_coor_p2 [sims_d * (vert_n + edge_n) ]// transposed coor_node_2
+  double tet10_coor [sims_d * (vert_n + edge_n) ]// transposed coor_node_2
     = {
     0.0, 0.0, 0.0,// vertes nodes
     1.0, 0.0, 0.0,
@@ -73,7 +74,7 @@ struct Tets : public Elem<Tets> {//TODO Tet?
     0.5, 0.0, 0.5
   };
   static constexpr
-  double coor_node_p2 [sims_d * (vert_n + edge_n)]// transposed node_coor_2
+  double coor_tet10 [sims_d * (vert_n + edge_n)]// transposed node_coor_2
     = {
     0.0, 1.0, 0.0, 0.0,   0.5, 0.5, 0.0,   0.0, 0.0, 0.5,
     0.0, 0.0, 1.0, 0.0,   0.0, 0.5, 0.5,   0.0, 0.5, 0.0,

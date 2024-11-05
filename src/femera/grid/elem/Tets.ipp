@@ -13,8 +13,8 @@ constexpr fmr::Local_int Tets::tris_conn [];
 constexpr fmr::Local_int Tets::spar_conn [];
 constexpr fmr::Geom_float Tets::vert_coor [];
 constexpr fmr::Geom_float Tets::coor_vert [];
-constexpr fmr::Geom_float Tets::coor_node_p2 [];
-constexpr fmr::Geom_float Tets::node_coor_p2 [];
+constexpr fmr::Geom_float Tets::coor_tet10 [];
+constexpr fmr::Geom_float Tets::tet10_coor [];
 
 constexpr fmr::Phys_float Tets::intg_1_ptwt [];
 constexpr fmr::Phys_float Tets::intg_4_ptwt [];
@@ -67,7 +67,7 @@ F* Tets::shap_grad_10
   const F L1t=-1.0, L2t=0.0, L3t=0.0, L4t=1.0;
   // edges: 0,1; 1,2; 0,2; 0,3; 2,3; 1,3;
   // r-derivs by product rule
-  g[ 0] = 2.0*L1*L1r + 2.0*L1r*L1 - L1r;// Corner nodes
+  g[ 0] = 2.0*L1*L1r + 2.0*L1r*L1 - L1r;// Vertex nodes
   g[ 1] = 2.0*L2*L2r + 2.0*L2r*L2 - L2r;
   g[ 2] = 2.0*L3*L3r + 2.0*L3r*L3 - L3r;
   g[ 3] = 2.0*L4*L4r + 2.0*L4r*L4 - L4r;
@@ -78,7 +78,7 @@ F* Tets::shap_grad_10
   g[ 8] = 4.0*L3*L4r + 4.0*L3r*L4;
   g[ 9] = 4.0*L4*L2r + 4.0*L4r*L2;
   // s-derivs
-  g[10] = 2.0*L1*L1s + 2.0*L1s*L1 - L1s;// Corner nodes
+  g[10] = 2.0*L1*L1s + 2.0*L1s*L1 - L1s;// Vertex nodes
   g[11] = 2.0*L2*L2s + 2.0*L2s*L2 - L2s;
   g[12] = 2.0*L3*L3s + 2.0*L3s*L3 - L3s;
   g[13] = 2.0*L4*L4s + 2.0*L4s*L4 - L4s;
@@ -89,7 +89,7 @@ F* Tets::shap_grad_10
   g[18] = 4.0*L3*L4s + 4.0*L3s*L4;
   g[19] = 4.0*L4*L2s + 4.0*L4s*L2;
   // t-derivs
-  g[20] = 2.0*L1*L1t + 2.0*L1t*L1 - L1t;// Corner nodes
+  g[20] = 2.0*L1*L1t + 2.0*L1t*L1 - L1t;// Vertex nodes
   g[21] = 2.0*L2*L2t + 2.0*L2t*L2 - L2t;
   g[22] = 2.0*L3*L3t + 2.0*L3t*L3 - L3t;
   g[23] = 2.0*L4*L4t + 2.0*L4t*L4 - L4t;
@@ -145,7 +145,7 @@ F* shap_grad_20
   const F L1s=-1.0, L2s=0.0, L3s=1.0, L4s=0.0;
   const F L1t=-1.0, L2t=0.0, L3t=0.0, L4t=1.0 ;
   // edges: 0,1; 1,2; 0,2; 0,3; 2,3; 1,3;
-  g[ 0]= 0.5* L1r *(3.* L1 -1.)*(3.* L1 -2.)// corner nodes
+  g[ 0]= 0.5* L1r *(3.* L1 -1.)*(3.* L1 -2.)// Vertex nodes
        + 0.5* L1  *(3.* L1r   )*(3.* L1 -2.)
        + 0.5* L1  *(3.* L1 -1.)*(3.* L1r   );
   g[ 1]= 0.5* L2r *(3.* L2 -1.)*(3.* L2 -2.)
@@ -181,7 +181,7 @@ F* shap_grad_20
   g[18]=27.*( L1r*L4 *L3 + L1 *L4r*L3 + L1 *L4 *L3r);
   g[19]=27.*( L2r*L3 *L4 + L2 *L3r*L4 + L2 *L3 *L4r);
   // s-derivs
-  g[20]= 0.5* L1s *(3.* L1 -1.)*(3.* L1 -2.)// corner nodes
+  g[20]= 0.5* L1s *(3.* L1 -1.)*(3.* L1 -2.)// Vertex nodes
        + 0.5* L1  *(3.* L1s   )*(3.* L1 -2.)
        + 0.5* L1  *(3.* L1 -1.)*(3.* L1s   );
   g[21]= 0.5* L2s *(3.* L2 -1.)*(3.* L2 -2.)
@@ -217,7 +217,7 @@ F* shap_grad_20
   g[38]=27.*( L1s*L4 *L3 + L1 *L4s*L3 + L1 *L4 *L3s);
   g[39]=27.*( L2s*L3 *L4 + L2 *L3s*L4 + L2 *L3 *L4s);
   // t-derivs
-  g[40]= 0.5* L1t *(3.* L1 -1.)*(3.* L1 -2.)// corner nodes
+  g[40]= 0.5* L1t *(3.* L1 -1.)*(3.* L1 -2.)// Vertex nodes
        + 0.5* L1  *(3.* L1t   )*(3.* L1 -2.)
        + 0.5* L1  *(3.* L1 -1.)*(3.* L1t   );
   g[41]= 0.5* L2t *(3.* L2 -1.)*(3.* L2 -2.)

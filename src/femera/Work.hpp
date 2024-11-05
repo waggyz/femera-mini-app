@@ -67,7 +67,7 @@ namespace femera {
   namespace grid {                     // CRTP inheritance from Grid
     class Cell;                        // public interface for discretizations
     class FEms; class FDms; class FVms;// Femera cell (numerical method) types
-    class BEms; class SGms;            //boudary elem, Staggered grid
+    class BEms; class SGms;            // boudary elem, Staggered grid
 } }//end femera::grid:: namespace
 namespace femera {
   template <typename> class Algo;      // abstract CRTP base derived from Work
