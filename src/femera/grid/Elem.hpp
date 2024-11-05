@@ -37,7 +37,7 @@ class Elem {//TODO enable_if P>0 or for P in [1,2,3]?
   //FIXME higher-order elements are identified by node_n <N>, not elem_p <P>.
   //TODO one more Elem template parameter for integration rule <R>?
   //TODO Consider enums for element type, order (# nodes), integration rule.
-  //TODO Change to template <class T, Elem_args A, typename F>, as above
+  //TODO Change to template <class T, Elem_args A, typename F>, as above?
   /*
   Elements are defined in 3D by derived classes and reduced as needed to match
   the simulation spatial dimension template parameter (D).
