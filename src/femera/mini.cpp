@@ -7,18 +7,18 @@ TEST( Mini, TrivialTest ){
 }
 #endif
 int main (int argc, char** argv) {
-  const int choice = 0;
+  const int choice = 1;
   switch ( choice ){
     // These all work.
-    case 0: {
-      return fmr::new_jobs (& argc, argv)->exit ();// one-liner
-    }
-    case 1: {// Preferred
+    case 0: {// Preferred
       const auto mini_ptr = std::move (fmr::new_jobs (& argc, argv));
       // --or-- auto mini_ptr = fmr::new_jobs (& argc, argv);
       auto& mini = *mini_ptr;
       // Do mini.* things after parsing the arguments
       return mini.exit ();
+    }
+    case 1: {
+      return fmr::new_jobs (& argc, argv)->exit ();// one-liner
     }
     case 2: {
       const auto mini = std::move (fmr::new_jobs ());

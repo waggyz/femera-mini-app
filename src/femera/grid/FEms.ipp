@@ -5,8 +5,8 @@ namespace femera {
   inline
   grid::FEms::FEms (const femera::Work::Core_ptrs_t core)
   noexcept : Grid (core) {
-    this->name      ="Femera femstic gridics";
-    this->abrv      ="fems";
+    this->name      ="Femera finite element grid";
+    this->abrv      ="FEM";
     this->task_type = task_cast (Task_type::FEms);
   }
   inline

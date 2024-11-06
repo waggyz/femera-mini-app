@@ -2,10 +2,6 @@
 
 #include "Cell.hpp"
 
-//#include "FE.hpp"
-//#include "FD.hpp"
-//#include "FV.hpp"
-
 //#include <unistd.h>          // argc opterr optopt optind optarg
 
 namespace femera {

@@ -11,6 +11,23 @@
 
 #include <cmath>// std::sqrt () needed to calculate edge lengths
 
+#if 0
+namespace fmr { namespace{ grid { namespace elem {//TODO move to src/fmr/
+
+struct Elem_info {
+  fmr::Local_int node_n;
+  fmr::Local_int intp_n;
+  fmr::Local_int sims_n;
+};
+// Supported element examples
+static constexpr Elem_info tet10_args   = {10, 4, 3};
+static constexpr Elem_info tri6_2d_args = { 6, 4, 2};
+static constexpr Elem_info tri6_3d_args = { 6, 4, 3};
+
+} } }//end fmr::grid::elem:: namespace
+#endif
+
+
 namespace femera { namespace grid { namespace elem {
 
 // Forward-delare element shapes
@@ -18,18 +35,6 @@ class Tets; class Prmd; class Wdge; class Cube;
 class Itri; class Iqud;
 class Tris; class Quad;
 class Spar;
-
-#if 0
-struct Elem_info {
-  fmr::Local_int node_n;
-  fmr::Local_int intp_n;
-  fmr::Local_int sims_n;
-};
-// Supported element examples
-static constexpr Elem_info tet10_args = {10, 4, 3};
-static constexpr Elem_info tri6_2d_args = {6, 4, 2};
-static constexpr Elem_info tri6_3d_args = {6, 4, 3};
-#endif
 
 template <class T, typename fmr::Local_int P=1, typename fmr::Local_int D=3,
   typename F=fmr::Geom_float>
