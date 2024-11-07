@@ -18,6 +18,17 @@ constexpr auto elem_tet1 = femera::grid::elem::Elem<femera::grid::elem::Tets,1> 
 constexpr auto elem_tet2 = femera::grid::elem::Elem<femera::grid::elem::Tets,2> ();
 constexpr auto elem_tet3 = femera::grid::elem::Elem<femera::grid::elem::Tets,3> ();
 
+static constexpr fmr::grid::elem::Elem_args tri6_2d_args = { 6, 3, 2};
+static constexpr fmr::grid::elem::Elem_args tri6_3d_args = { 6, 3, 3};
+static constexpr fmr::grid::elem::Elem_args tet10_args   = {10, 4, 3};
+
+constexpr auto test_tet_3d = fmr::grid::elem::Elem_test
+  <femera::grid::elem::Tets, tet10_args> ();
+//static auto test_node_n
+//  = fmr::grid::elem::Elem_test
+//  <femera::grid::elem::Tets, tet10_args>.node_n;
+
+
 fmr::Exit_int main (int argc, char** argv) {
   mini.init (&argc, argv);
   //
@@ -59,11 +70,15 @@ TEST( GridElem, TetsConnN ){
 }
 TEST( GridElem, Measures ){
   EXPECT_FLOAT_EQ( float(elem_tet1.get_elem_v ()), float(1.0/6.0) );
+  EXPECT_FLOAT_EQ( float(elem_tet1.get_elem_d ()), 3 );
 }
 TEST( GridElem, ShapeGradient ){
   EXPECT_EQ( elem_tet1.shpg_size (), 12 );
   EXPECT_EQ( elem_tet2.shpg_size (), 30 );
   EXPECT_EQ( elem_tet3.shpg_size (), 60 );
   EXPECT_EQ( elem_tet2.shpg_size (4), 120 );
+}
+TEST( ElemStruct, Works ){
+  EXPECT_EQ( test_tet_3d.test_vert_n (), 4);
 }
 

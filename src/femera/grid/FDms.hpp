@@ -4,6 +4,7 @@
 #include "../Grid.hpp"
 
 namespace femera { namespace grid {
+
   class FDms;// Derive a CRTP concrete class from Grid.
   class FDms final: public Grid<FDms> { friend class Grid;
   private:
@@ -13,6 +14,7 @@ namespace femera { namespace grid {
     FDms (femera::Work::Core_ptrs_t) noexcept;
     FDms () =delete;//NOTE Use the constructor above.
   };
+
 } }//end femera::grid:: namespace
 
 #include "FDms.ipp"

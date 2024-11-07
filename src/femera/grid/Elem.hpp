@@ -11,22 +11,39 @@
 
 #include <cmath>// std::sqrt () needed to calculate edge lengths
 
-#if 0
-namespace fmr { namespace{ grid { namespace elem {//TODO move to src/fmr/
+#if 1
+namespace fmr { namespace grid { namespace elem { //TODO move to src/fmr/
 
-struct Elem_info {
+struct Elem_args {
+public:
   fmr::Local_int node_n;
   fmr::Local_int intp_n;
-  fmr::Local_int sims_n;
+  fmr::Local_int sims_d;
 };
-// Supported element examples
-static constexpr Elem_info tet10_args   = {10, 4, 3};
-static constexpr Elem_info tri6_2d_args = { 6, 4, 2};
-static constexpr Elem_info tri6_3d_args = { 6, 4, 3};
 
+template <class T, Elem_args const &A, typename F=fmr::Geom_float>
+class Elem_test {
+  private:
+  static constexpr fmr::Local_int node_n = A.node_n;
+  static constexpr fmr::Local_int intp_n = A.intp_n;
+  static constexpr fmr::Local_int sims_d = A.sims_d;
+  public:
+  template <typename fmr::Local_int D=sims_d>
+  constexpr typename std::enable_if <D == 3, fmr::Local_int>::type
+  test_vert_n () noexcept {
+    return T::vert_n;
+  }
+//    typename std::enable_if <tP == 1>::value,
+
+};
 } } }//end fmr::grid::elem:: namespace
 #endif
 
+
+// Supported element examples
+//static constexpr Elem_args tet10_args   = {10, 4, 3};
+//static constexpr Elem_args tri6_2d_args = { 6, 3, 2};
+//static constexpr Elem_args tri6_3d_args = { 6, 3, 3};
 
 namespace femera { namespace grid { namespace elem {
 
@@ -43,6 +60,7 @@ class Elem {//TODO enable_if P>0 or for P in [1,2,3]?
   //TODO one more Elem template parameter for integration rule <R>?
   //TODO Consider enums for element type, order (# nodes), integration rule.
   //TODO Change to template <class T, Elem_args A, typename F>, as above?
+  //     But, does this allow enable_if on the struct content? - YES
   /*
   Elements are defined in 3D by derived classes and reduced as needed to match
   the simulation spatial dimension template parameter (D).
@@ -65,7 +83,10 @@ class Elem {//TODO enable_if P>0 or for P in [1,2,3]?
   // constexpr functions are implicitly inline
   constexpr fmr::Local_int get_elem_p () noexcept {return P;}
   constexpr fmr::Local_int get_sims_d () noexcept {return D;}
-  constexpr fmr::Local_int get_elem_d () noexcept {return T::elem_d;}
+  constexpr fmr::Local_int get_elem_d () noexcept {
+    static_assert( T::elem_d <= D, //NOTE only checked if this function used.
+      "Element dimension cannot exceed simulation spatial dimension.");
+    return T::elem_d;}
   constexpr fmr::Local_int get_vert_n () noexcept {return T::vert_n;}
   constexpr fmr::Local_int get_vols_n () noexcept {return T::vols_n;}
   constexpr fmr::Local_int get_edge_n () noexcept {return T::edge_n;}
@@ -106,7 +127,7 @@ class Elem {//TODO enable_if P>0 or for P in [1,2,3]?
   constexpr const F* get_coor_vert () noexcept {
     return T::coor_vert_f;
   }
-  // Methods -----------------------------------------------------------------
+  // Non-trivial member functions --------------------------------------------
   constexpr
   fmr::Local_int get_face_n () noexcept;
   constexpr

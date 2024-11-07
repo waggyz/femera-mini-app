@@ -14,6 +14,7 @@
 #endif
 
 namespace femera { namespace grid {
+
   class FEms;// Derive a CRTP concrete class from Grid.
   class FEms final: public Grid<FEms> { friend class Grid;
   private:
@@ -23,6 +24,7 @@ namespace femera { namespace grid {
     FEms (femera::Work::Core_ptrs_t) noexcept;
     FEms () =delete;//NOTE Use the constructor above.
   };
+
 } }//end femera::grid:: namespace
 
 #include "FEms.ipp"
