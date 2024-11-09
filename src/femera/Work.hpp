@@ -60,7 +60,7 @@ namespace femera {
   namespace phys {                     // CRTP inheritance from Phys
     class Mtrl;                        // public interface for material handling
     class Elas; class Plst;            // Elastic: linear, nonlinear plastic
-    class Thrm;                        // Thermal material
+    class Ther;                        // Thermal material
 } }//end femera::phys:: namespace
 namespace femera {
   template <typename> class Grid;      // abstract CRTP base derived from Work

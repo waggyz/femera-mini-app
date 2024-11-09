@@ -20,7 +20,6 @@ public:
   fmr::Local_int intp_n;
   fmr::Local_int sims_d;
 };
-
 template <class T, Elem_args const &A, typename F=fmr::Geom_float>
 class Elem_test {
   private:
@@ -30,20 +29,11 @@ class Elem_test {
   public:
   template <typename fmr::Local_int D=sims_d>
   constexpr typename std::enable_if <D == 3, fmr::Local_int>::type
-  test_vert_n () noexcept {
-    return T::vert_n;
-  }
-//    typename std::enable_if <tP == 1>::value,
-
+  test_vert_n () noexcept {return T::vert_n;}
 };
+
 } } }//end fmr::grid::elem:: namespace
 #endif
-
-
-// Supported element examples
-//static constexpr Elem_args tet10_args   = {10, 4, 3};
-//static constexpr Elem_args tri6_2d_args = { 6, 3, 2};
-//static constexpr Elem_args tri6_3d_args = { 6, 3, 3};
 
 namespace femera { namespace grid { namespace elem {
 
@@ -56,11 +46,6 @@ class Spar;
 template <class T, typename fmr::Local_int P=1, typename fmr::Local_int D=3,
   typename F=fmr::Geom_float>
 class Elem {//TODO enable_if P>0 or for P in [1,2,3]?
-  //FIXME higher-order elements are identified by node_n <N>, not elem_p <P>.
-  //TODO one more Elem template parameter for integration rule <R>?
-  //TODO Consider enums for element type, order (# nodes), integration rule.
-  //TODO Change to template <class T, Elem_args A, typename F>, as above?
-  //     But, does this allow enable_if on the struct content? - YES
   /*
   Elements are defined in 3D by derived classes and reduced as needed to match
   the simulation spatial dimension template parameter (D).
@@ -68,6 +53,11 @@ class Elem {//TODO enable_if P>0 or for P in [1,2,3]?
   Members are constexpr so that everything is kept thread-local to the instance
   that created it.
   */
+  //FIXME higher-order elements are identified by node_n <N>, not elem_p <P>.
+  //TODO one more Elem template parameter for integration rule <R>?
+  //TODO Consider enums for element type, order (# nodes), integration rule.
+  //TODO Change to template <class T, Elem_args A, typename F>, as above?
+  //     But, does this allow enable_if on the struct content? - YES
 #if 0
   static_assert (D >= T::elem_d,//TODO move to constructor?
   "Element can only be embedded in a "

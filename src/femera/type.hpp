@@ -40,6 +40,7 @@ namespace femera {
 //#endif
     Jobs, Sims, Runs, Part,      // Task types //TODO: Part?, Post?, View?
     Mtrl, Elas, Plas,            // Phys types
+    Ther,
     Cell, FEms, FDms, FVms, BEms,// Grid types
     SGms,
     Slvr, PCGs, NCGs,            // Algo types
