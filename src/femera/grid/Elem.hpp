@@ -22,11 +22,11 @@ public:
 };
 template <class T, Elem_args const &A, typename F=fmr::Geom_float>
 class Elem_test {
-  private:
+private:
   static constexpr fmr::Local_int node_n = A.node_n;
   static constexpr fmr::Local_int intp_n = A.intp_n;
   static constexpr fmr::Local_int sims_d = A.sims_d;
-  public:
+public:
   template <typename fmr::Local_int D=sims_d>
   constexpr typename std::enable_if <D == 3, fmr::Local_int>::type
   test_vert_n () noexcept {return T::vert_n;}
@@ -53,7 +53,9 @@ class Elem {//TODO enable_if P>0 or for P in [1,2,3]?
   Members are constexpr so that everything is kept thread-local to the instance
   that created it.
   */
-  //FIXME higher-order elements are identified by node_n <N>, not elem_p <P>.
+  //FIXME higher-order elements are identified by node_n <N>, not elem_p <P>
+  //      because there are different elements (e.g., Lagrangian, serendipity)
+  //      with the same shape and order but a different number of nodes.
   //TODO one more Elem template parameter for integration rule <R>?
   //TODO Consider enums for element type, order (# nodes), integration rule.
   //TODO Change to template <class T, Elem_args A, typename F>, as above?

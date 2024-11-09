@@ -7,6 +7,7 @@
 namespace femera { namespace grid { namespace elem {
 
 struct Prmd : public Elem<Prmd> {//TODO Pyr?
+public:
   static constexpr fmr::Local_int sims_d = 3;
   static constexpr fmr::Local_int elem_d = 3;
   static constexpr fmr::Local_int vert_n = 5;

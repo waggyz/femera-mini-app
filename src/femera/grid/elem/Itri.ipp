@@ -2,10 +2,10 @@
 #define FEMERA_HAS_GRID_ELEM_ITRI_IPP
 
 namespace femera { namespace grid { namespace elem {
-
-// C++11 requires redundant declaration/definition for constexpr arrays to 
-// reference them later.
-
+/*
+C++11 requires redundant declaration/definition for constexpr arrays to 
+reference them later.
+*/
 constexpr fmr::Local_int Itri::tris_conn [];
 //constexpr fmr::Local_int Itri::quad_conn [];
 constexpr fmr::Local_int Itri::spar_conn [];

@@ -9,7 +9,7 @@
 namespace femera { namespace grid { namespace elem {
 
 struct Tets : public Elem<Tets> {//TODO Tet?
-  public://TODO make protected or private with friend class Elem?
+public://TODO make protected or private with friend class Elem?
   static constexpr fmr::Local_int sims_d = 3;//TODO Remove from here?
   static constexpr fmr::Local_int elem_d = 3;
   static constexpr fmr::Local_int vert_n = 4;

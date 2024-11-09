@@ -6,6 +6,7 @@
 namespace femera { namespace grid { namespace elem {
 
 struct Spar : public Elem<Spar> {//TODO Bar?
+public:
   static constexpr fmr::Local_int sims_d = 3;
   static constexpr fmr::Local_int elem_d = 1;
   static constexpr fmr::Local_int vert_n = 2;
