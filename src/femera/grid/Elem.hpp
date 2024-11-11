@@ -60,6 +60,7 @@ class Elem {//TODO enable_if P>0 or for P in [1,2,3]?
   //TODO Consider enums for element type, order (# nodes), integration rule.
   //TODO Change to template <class T, Elem_args A, typename F>, as above?
   //     But, does this allow enable_if on the struct content? - YES
+  //TODO memalign member variables
 #if 0
   static_assert (D >= T::elem_d,//TODO move to constructor?
   "Element can only be embedded in a "
@@ -99,23 +100,23 @@ class Elem {//TODO enable_if P>0 or for P in [1,2,3]?
     return T::vert_conn;}
   //
   // Natural element vertex coordinates --------------------------------------
-  template <typename tF=F,
-    typename std::enable_if <std::is_same< tF, double >::value >::type>
+  template <typename Ft=F,
+    typename std::enable_if <std::is_same<Ft, double>::value>::type* = nullptr>
   constexpr const F* get_vert_coor () noexcept {
     return T::vert_coor;
   }
-  template <typename tF=F,
-    typename std::enable_if <std::is_same< tF, double >::value >::type>
+  template <typename Ft=F,
+    typename std::enable_if <std::is_same<Ft, double>::value>::type* = nullptr>
   constexpr const F* get_coor_vert () noexcept {
     return T::coor_vert;
   }
-  template <typename tF=F,
-    typename std::enable_if <std::is_same< tF, float >::value >::type>
+  template <typename Ft=F,
+    typename std::enable_if <std::is_same<Ft, float>::value>::type* = nullptr>
   constexpr const F* get_vert_coor () noexcept {
     return T::vert_coor_f;
   }
-  template <typename tF=F,
-    typename std::enable_if <std::is_same< tF, float >::value >::type>
+  template <typename Ft=F,
+    typename std::enable_if <std::is_same< Ft,float>::value>::type* = nullptr>
   constexpr const F* get_coor_vert () noexcept {
     return T::coor_vert_f;
   }

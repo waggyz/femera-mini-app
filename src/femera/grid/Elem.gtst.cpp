@@ -18,6 +18,13 @@ constexpr auto elem_tet1 = femera::grid::elem::Elem<femera::grid::elem::Tets,1> 
 constexpr auto elem_tet2 = femera::grid::elem::Elem<femera::grid::elem::Tets,2> ();
 constexpr auto elem_tet3 = femera::grid::elem::Elem<femera::grid::elem::Tets,3> ();
 
+constexpr auto elem_tetf
+  = femera::grid::elem::Elem<femera::grid::elem::Tets,2,3,float> ();
+constexpr auto elem_tetd
+  = femera::grid::elem::Elem<femera::grid::elem::Tets,2,3,double> ();
+const auto size_coor_f = sizeof(elem_tetf.get_vert_coor ()[0]);
+const auto size_coor_d = sizeof(elem_tet1.get_vert_coor ()[0]);
+
 // Supported element examples
 static constexpr fmr::grid::elem::Elem_args tri6_2d_args = { 6, 3, 2};
 static constexpr fmr::grid::elem::Elem_args tri6_3d_args = { 6, 3, 3};
@@ -95,4 +102,9 @@ TEST( ElemStruct, Works ){
 TEST( ElemStruct, ThreadLocalAssignedFromConstexpr ){
   EXPECT_NE( val0_adress, val1_adress);
 }
+TEST( ElemStruct, DoubleFloatSpecializationWorks ){
+  EXPECT_EQ( size_coor_d, 2 * size_coor_f);
+}
+
+
 
