@@ -25,6 +25,10 @@ constexpr auto elem_tetd
 const auto size_coor_f = sizeof(elem_tetf.get_vert_coor ()[0]);
 const auto size_coor_d = sizeof(elem_tet1.get_vert_coor ()[0]);
 
+const float a_float = float(1.0/6.0);
+const float an_array_f[2] = {float(1.0/6.0), float(1.0/6.0)};
+
+// Elem_test *****************************************************************
 // Supported element examples
 static constexpr fmr::grid::elem::Elem_args tri6_2d_args = { 6, 3, 2};
 static constexpr fmr::grid::elem::Elem_args tri6_3d_args = { 6, 3, 3};
@@ -34,6 +38,7 @@ uintptr_t val0_adress=0, val1_adress=0;
 
 constexpr auto test_tet_3d = fmr::grid::elem::Elem_test
   <femera::grid::elem::Tets, tet10_args> ();
+//****************************************************************************
 
 fmr::Exit_int main (int argc, char** argv) {
   mini.init (&argc, argv);
@@ -52,7 +57,7 @@ fmr::Exit_int main (int argc, char** argv) {
   //
 #pragma omp parallel
   {// Check that variables assigned from constexpr values are thread-local.
-    auto elem = femera::grid::elem::Elem<femera::grid::elem::Tets,2> ();
+    const auto elem = femera::grid::elem::Elem<femera::grid::elem::Tets,2> ();
     const auto val_local = elem.get_node_n ();
     if (omp_get_thread_num () == 0){
       val0_adress = reinterpret_cast<uintptr_t>(&val_local);
@@ -66,6 +71,8 @@ fmr::Exit_int main (int argc, char** argv) {
 }
 TEST( GridElem, TrivialTest ){
   EXPECT_EQ( 1, 1 );
+  EXPECT_FLOAT_EQ (a_float, an_array_f[0]);
+  EXPECT_FLOAT_EQ (a_float, an_array_f[0]);
 }
 TEST( GridElem, JacdSizeTest ){
   EXPECT_EQ( jacs_size, 10 );// 3D, 1 point rule default
@@ -96,14 +103,15 @@ TEST( GridElem, ShapeGradient ){
   EXPECT_EQ( elem_tet3.shpg_size ( ), 60 );
   EXPECT_EQ( elem_tet2.shpg_size (4),120 );
 }
-TEST( ElemStruct, Works ){
+TEST( GridElem, DoubleFloatSpecialization ){
+  EXPECT_EQ( size_coor_d, 2 * size_coor_f );
+}
+TEST( GridElem, ThreadLocalAssignedFromConstexpr ){
+  EXPECT_NE( val0_adress, val1_adress );
+}
+// Elem_test *****************************************************************
+TEST( ElemStructTemplateArg, Works ){
   EXPECT_EQ( test_tet_3d.test_vert_n (), 4);
-}
-TEST( ElemStruct, ThreadLocalAssignedFromConstexpr ){
-  EXPECT_NE( val0_adress, val1_adress);
-}
-TEST( ElemStruct, DoubleFloatSpecializationWorks ){
-  EXPECT_EQ( size_coor_d, 2 * size_coor_f);
 }
 
 

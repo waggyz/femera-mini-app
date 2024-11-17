@@ -16,9 +16,14 @@ femera::grid::elem::Elem<femera::grid::elem::Tets>   test_tet ;// P1 (default)
 femera::grid::elem::Elem<femera::grid::elem::Tets,1> test_tet1;// P1 linear
 femera::grid::elem::Elem<femera::grid::elem::Tets,2> test_tet2;// P2 quadratic
 femera::grid::elem::Elem<femera::grid::elem::Tets,3> test_tet3;// P3 cubic
+//
 fmr::Geom_float coor1 [12];
+int tet4_tranpose_bad=0, tet10_tranpose_bad=0, tet20_tranpose_bad=0;
+//
 fmr::Geom_float ntrl_jac3_trace_p1 = 0.0;
 fmr::Geom_float ntrl_jac3_trace_p2 = 0.0;
+fmr::Geom_float ntrl_jac3_trace_p3 = 0.0;
+//
 
 fmr::Exit_int main (int argc, char** argv) {
   mini.init (&argc, argv);
@@ -34,6 +39,27 @@ fmr::Exit_int main (int argc, char** argv) {
   for (int i=0; i<11; ++i) {
     wsum11 += femera::grid::elem::Tets::intg_11_ptwt [4*i +3];}
   //
+  //Check coordinate transpose correct
+  for (int i=0; i<4; ++i){
+    for (int j=0; j<3; ++j){ tet4_tranpose_bad
+      += (std::abs(femera::grid::elem::Tets::vert_coor[3*i+j]
+        - femera::grid::elem::Tets::coor_vert[4*j+i])
+        < (10.0*double(std::numeric_limits<float>::epsilon()))) ? 0 : 1;
+  } }
+  for (int i=0; i<10; ++i){
+    for (int j=0; j<3; ++j){ tet10_tranpose_bad
+      += (std::abs(femera::grid::elem::Tets::tet10_coor[3*i+j]
+        - femera::grid::elem::Tets::coor_tet10[10*j+i])
+        < (10.0*double(std::numeric_limits<float>::epsilon()))) ? 0 : 1;
+  } }
+  for (int i=0; i<20; ++i){
+    for (int j=0; j<3; ++j){ tet20_tranpose_bad
+      += (std::abs(femera::grid::elem::Tets::tet20_coor[3*i+j]
+        - femera::grid::elem::Tets::coor_tet20[20*j+i])
+        < (10.0*double(std::numeric_limits<float>::epsilon()))) ? 0 : 1;
+  } }
+  //tet4_tranpose_bad
+  //
   // Calculate the Jacbian of a natural tet, which should be the 3x3 identity,
   // and is constant, independent of the integration point coordinates.
   // The one-point tet integration rule is sufficient.
@@ -44,7 +70,7 @@ fmr::Exit_int main (int argc, char** argv) {
      = {0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0};
   femera::grid::elem::Tets::shap_grad_4 (&shpg[0], &intp[0]);
   fmr::Geom_float coor [12];
-  for (int i=0; i<12;++i){coor[i] = femera::grid::elem::Tets::coor_vert[i];}
+  for (int i=0; i<12; ++i){coor[i] = femera::grid::elem::Tets::coor_vert[i];}
   fmr::Geom_float jac3 [ 9] = {0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0};
   //coor = femera::grid::fems::tets_vert_coor;// 4x3
   //coor = femera::grid::fems::tets_coor_vert;// 3x4 **Use this
@@ -55,11 +81,12 @@ fmr::Exit_int main (int argc, char** argv) {
   } } }
   ntrl_jac3_trace_p1 = jac3[0] + jac3[4] + jac3[8];// 3 for 3x3 identity
   //
+  // Test 10-node tet for correct node ordering.
   fmr::Geom_float shp2 [30];
   for (int i=0; i<30; ++i){shp2[i]=0.0;}
   for (int i=0; i< 9; ++i){jac3[i]=0.0;}
   fmr::Geom_float coo2 [30];
-  for (int i=0; i<30;++i){coo2[i] = femera::grid::elem::Tets::coor_tet10[i];}
+  for (int i=0; i<30; ++i){coo2[i] = femera::grid::elem::Tets::coor_tet10[i];}
   femera::grid::elem::Tets::shap_grad_10 (&shp2[0], &intp[0]);
   for (int i=0; i<3; ++i) {
     for (int j=0; j<3; ++j) {
@@ -67,8 +94,23 @@ fmr::Exit_int main (int argc, char** argv) {
         jac3 [3*i +j]+= shp2 [10*i +k] * coo2 [10*j +k];
   } } }
   ntrl_jac3_trace_p2 = jac3[0] + jac3[4] + jac3[8];
-#if 0
-  printf ("[%f, %f, %f,\n %f, %f, %f,\n %f, %f, %f]\n",
+  //
+  // Test 20-node tet for correct node ordering.
+  fmr::Geom_float shp3 [60];
+  for (int i=0; i<60; ++i){shp3[i]=0.0;}
+  for (int i=0; i< 9; ++i){jac3[i]=0.0;}
+  fmr::Geom_float coo3 [60];
+  for (int i=0; i<60; ++i){coo3[i] = femera::grid::elem::Tets::coor_tet20[i];}
+  femera::grid::elem::Tets::shap_grad_20 (&shp3[0], &intp[0]);
+  for (int i=0; i<3; ++i) {
+    for (int j=0; j<3; ++j) {
+      for (int k=0; k<20; ++k) {
+        jac3 [3*i +j]+= shp3 [20*i +k] * coo3 [20*j +k];
+  } } }
+  ntrl_jac3_trace_p3 = jac3[0] + jac3[4] + jac3[8];
+  //
+#if 1
+  printf ("%s\n[%f, %f, %f\n %f, %f, %f\n %f, %f, %f]\n", "Tets.gtst.cpp",
     jac3[0],jac3[1],jac3[2],jac3[3],jac3[4],jac3[5],jac3[6],jac3[7],jac3[8] );
 #endif
   //
@@ -159,11 +201,16 @@ TEST( GridElemTets, ArrayAccessVariable ){
   EXPECT_EQ( v1 [0], 1 );
   EXPECT_EQ( v1 [1], 2 );
 }
-TEST( GridElemTet, JacTraceThree ){
+TEST( GridElemTet, JacTraceIsThree ){
   EXPECT_FLOAT_EQ( float(ntrl_jac3_trace_p1), float (3.0) );
   EXPECT_FLOAT_EQ( float(ntrl_jac3_trace_p2), float (3.0) );
+//  EXPECT_FLOAT_EQ( float(ntrl_jac3_trace_p3), float (3.0) );//TODO
 }
-
+TEST( GridElemTets, CoorTranspose ){
+  EXPECT_EQ( tet4_tranpose_bad, 0 );
+  EXPECT_EQ( tet10_tranpose_bad, 0 );
+  EXPECT_EQ( tet20_tranpose_bad, 0 );
+}
 namespace femera { namespace grid { namespace elem {
 
 TEST( GridCellElemTet, FaceNormalVerts ){

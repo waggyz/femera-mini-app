@@ -15,6 +15,8 @@ constexpr fmr::Geom_float Tets::vert_coor [];
 constexpr fmr::Geom_float Tets::coor_vert [];
 constexpr fmr::Geom_float Tets::coor_tet10 [];
 constexpr fmr::Geom_float Tets::tet10_coor [];
+constexpr fmr::Geom_float Tets::coor_tet20 [];
+constexpr fmr::Geom_float Tets::tet20_coor [];
 
 constexpr fmr::Phys_float Tets::intg_1_ptwt [];
 constexpr fmr::Phys_float Tets::intg_4_ptwt [];
@@ -25,7 +27,7 @@ constexpr fmr::Phys_float Tets::intg_11_ptwt [];
 template <typename F> inline// single or double
 F* Tets::shap_func_4
 (F f[4u], const F x[3u]) {
-  f[ 0] = 1.0 -x[0] -x[1] -x[2];
+  f[ 0] = 1.0-x[0]-x[1]-x[2];
   f[ 1] = x[0];
   f[ 2] = x[1];
   f[ 3] = x[2];
@@ -135,8 +137,8 @@ F* Tets::shap_func_20
   f[19]=27.0*( L2*L3 *L4 );
   return f;
 }
-template <typename F>
-F* shap_grad_20
+template <typename F> inline
+F* Tets::shap_grad_20
 (F g[20u *3u], const F x[3u]) {
   const F L2=x[0], L3=x[1], L4=x[2];
   const F L1=(1.0-L2-L3-L4);

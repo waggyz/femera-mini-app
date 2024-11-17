@@ -12,6 +12,7 @@
 #include <cmath>// std::sqrt () needed to calculate edge lengths
 
 #if 1
+// Elem_test *****************************************************************
 namespace fmr { namespace grid { namespace elem { //TODO move to src/fmr/
 
 struct Elem_args {
@@ -33,6 +34,7 @@ public:
 };
 
 } } }//end fmr::grid::elem:: namespace
+// ***************************************************************************
 #endif
 
 namespace femera { namespace grid { namespace elem {
@@ -146,7 +148,7 @@ class Elem {//TODO enable_if P>0 or for P in [1,2,3]?
   }
 #endif
   // Node coordinates --------------------------------------------------------
-  //TODO Generate node_coor, coor_node for P=2,3; D=1,2.
+  //TODO Generalize for different element shapes by moving to Tets, etc.
   template <fmr::Local_int tP=P, fmr::Local_int tD=D,
     typename std::enable_if <tP == 1>::value,
     typename std::enable_if <tD == 3>::value>// P=1, D=3
@@ -170,6 +172,18 @@ class Elem {//TODO enable_if P>0 or for P in [1,2,3]?
     typename std::enable_if <tD == 3>::value>// P=2, D=3
   constexpr const F* get_coor_node () noexcept {
     return  T::coor_tet10;
+  }
+  template <fmr::Local_int tP=P, fmr::Local_int tD=D,
+    typename std::enable_if <tP == 3>::value,
+    typename std::enable_if <tD == 3>::value>// P=3, D=3
+  constexpr const F* get_node_coor () noexcept {
+   return T::tet20_coor;
+  }
+  template <fmr::Local_int tP=P, fmr::Local_int tD=D,
+    typename std::enable_if <tP == 3>::value,
+    typename std::enable_if <tD == 3>::value>// P=3, D=3
+  constexpr const F* get_coor_node () noexcept {
+    return  T::coor_tet20;
   }
   // Integration points and weights (default) --------------------------------
   //
