@@ -34,7 +34,7 @@ if __name__ == "__main__":
   ntd = [] # number of TO_DO
   nfm = [] # number of FIX_ME
   commit = []
-  files_ylim = 200.0
+  files_ylim = 250.0
   lines_ylim = files_ylim * 100.0
   with open ('data/src/femera-'+cpumodel+'-build-stats.csv') as File:
     data = csv.reader(File, delimiter=',')
@@ -65,14 +65,15 @@ if __name__ == "__main__":
   plt.gca().xaxis.set_major_formatter(pdt.DateFormatter('%m-%d'))
   plt.gca().xaxis.set_major_locator(pdt.MonthLocator())
   #
-  plt.gca().set_yticks (np.arange(0, files_ylim*1.001, 25))
+  plt.gca().set_yticks (np.arange(0, files_ylim*1.001, 50))
   plt.plot(x,loc,label='Hundreds of lines source code', linestyle='dashed')
   plt.plot(x,lot,label='Hundreds of lines test code', linestyle='dashed')
   plt.plot(x,foc,label='Number of source code files')
   plt.plot(x,fot,label='Number of test code files')
   plt.plot(x,ntd,label='Number of TO'+'DO in source code')
   plt.plot(x,nfm,label='Number of FIX'+'ME in source code')
-  plt.plot(x,build_time,label='Build time for '+cpumodel+' (sec)')
+  plt.plot(x,build_time,label='Build time for '+cpumodel+' (sec)', 
+    linestyle='none', marker='.')
   #plt.plot(x,commit,label='Repository commit number', linestyle='dotted')
   plt.grid()
   plt.title('Femera 0.3 mini-app source code statistics')
