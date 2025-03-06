@@ -31,24 +31,25 @@ public://TODO make protected or private with friend class Elem?
   static constexpr
   fmr::Local_int spar_conn [Spar::vert_n * edge_n]
   = {
+#if 1
+  0,1, 1,2, 2,0, 0,3, 1,3, 2,3
+#endif
 #if 0
   0,1, 1,2, 2,0, 0,3, 1,3, 2,3//TODO switch in the shape functions?
 #endif
 #if 0
   0,1, 1,2, 2,0, 0,3, 2,3, 1,3
 #endif
-#if 1
-  0,1, 1,2, 2,0, 0,3, 1,3, 2,3
-#endif
   };
   static constexpr
   fmr::Local_int tris_conn [Tris::vert_n * tris_n]
   = { //NOTE the normals point inward. This might be wrong.
-#if 0
-    0,1,2, 0,3,1, 1,3,2, 0,2,3
-#endif
+      //     Gmsh deinfes element faces with outward normals.
 #if 1
     0,1,2, 0,3,1, 0,2,3, 1,3,2
+#endif
+#if 0
+    0,1,2, 0,3,1, 1,3,2, 0,2,3
 #endif
   };
   static constexpr
@@ -74,15 +75,15 @@ public://TODO make protected or private with friend class Elem?
   = {
     0.0, 0.0, 0.0,// vertes nodes
     1.0, 0.0, 0.0,
-    0.0, 1.0, 0.0,
-    0.0, 0.0, 1.0,
-    //
-    0.5, 0.0, 0.0,// bottom triangle edge nodes
-    0.5, 0.5, 0.0,
-    0.0, 0.5, 0.0,
-    //
-    0.0, 0.0, 0.5,// apex edge nodes
-    0.0, 0.5, 0.5,//TOD switch these last two?
+    0.0, 1.0, 0.0,                               //         3               //
+    0.0, 0.0, 1.0,                               //        /|\              //
+                                                 //       8 | 9             //
+    0.5, 0.0, 0.0,// bottom triangle edge nodes  //      /  7  \            //
+    0.5, 0.5, 0.0,                               //     2---|5--1           //
+    0.0, 0.5, 0.0,                               //      \  |  /            //
+                                                 //       6 | 4     y z x   //
+    0.0, 0.0, 0.5,// apex edge nodes             //        \|/       \|/    //
+    0.0, 0.5, 0.5,//TODO switch these last two?  //         0         o     //
     0.5, 0.0, 0.5
   };
   static constexpr
@@ -121,7 +122,8 @@ public://TODO make protected or private with friend class Elem?
     f13, 0.0, f13,
     f13, 0.0, f13,
     f13, f13, f13
-#else
+#endif
+#if 0
     // Gmsh node numbering
     0.0, 0.0, 0.0,// vertes nodes
     1.0, 0.0, 0.0,
@@ -130,27 +132,29 @@ public://TODO make protected or private with friend class Elem?
     //
     f13, 0.0, 0.0,// bottom triangle edge nodes
     f23, 0.0, 0.0,
-    0.0, f13, 0.0,
-    0.0, f23, 0.0,
     f23, f13, 0.0,
     f13, f23, 0.0,
+    0.0, f13, 0.0,
+    0.0, f23, 0.0,
     //
     0.0, 0.0, f13,// apex edge nodes
     0.0, 0.0, f23,
-    f23, 0.0, f13,
-    f13, 0.0, f23,
-    0.0, f23, f13,
+    f13, 0.0, f13,
+    f23, 0.0, f23,
     0.0, f13, f23,
+    0.0, f23, f13,
     //
     f13, f13, 0.0,// face nodes
     f13, 0.0, f13,
-    f13, 0.0, f13,
+    0.0, f13, f13,
     f13, f13, f13
 #endif
   };
   static constexpr
   double coor_tet20 [sims_d * (vert_n + 2*edge_n + tris_n)]// transposed
   = {
+#if 1
+    // Standard node order
     0.0, 1.0, 0.0, 0.0,// x-ordinates
     f13, f23, f23, f13, 0.0, 0.0,
     0.0, 0.0, 0.0, 0.0, f13, f23,
@@ -165,6 +169,24 @@ public://TODO make protected or private with friend class Elem?
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
     f13, f23, f13, f23, f13, f23,
     0.0, f13, f13, f13
+#endif
+#if 0
+    // Gmsh node order
+    0.0, 1.0, 0.0, 0.0,// x-ordinates
+    f13, f23, f23, f13, 0.0, 0.0,
+    0.0, 0.0, f13, f23, 0.0, 0.0,
+    f13, f13, 0.0, f13,
+    //
+    0.0, 0.0, 1.0, 0.0,// y-ordinates
+    0.0, 0.0, f13, f23, f13, f23,
+    0.0, 0.0, 0.0, 0.0, f13, f23,
+    f13, 0.0, f13, f13,
+    //
+    0.0, 0.0, 0.0, 1.0,// z-ordinates
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    f13, f23, f13, f23, f23, f13,
+    0.0, f13, f13, f13
+#endif
     };
 #undef f13
 #undef f23

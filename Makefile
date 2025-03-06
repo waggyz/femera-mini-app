@@ -39,7 +39,7 @@ STAGE_CPU  :=$(STAGE_DIR)/$(CPUMODEL)
 INSTALL_CPU:=$(INSTALL_DIR)/$(CPUMODEL)
 
 # Export TMPDIR to avoid system tmpdir overflow. (MPI needs it, maybe others.)
-TEMP_DIR   :=$FMRDIR/$(BUILD_DIR)/tmp
+TEMP_DIR   :=$FMRDIR/$(BUILD_CPU)/tmp
 
 #NOTE Subdirectories needed in the build directory have a trailing slash.
 BUILD_TREE += $(BUILD_DIR)/external/tools/
@@ -103,6 +103,7 @@ ifeq ($(CXX),g++)
   # CXXFLAGS+= --param inline-min-speedup=2
   # CXXFLAGS+= --param inline-unit-growth=500
   # CXXFLAGS+= --param large-function-growth=2000
+  #
   # Library archiver
   AREXE      :=gcc-ar
 endif
@@ -114,7 +115,6 @@ ifeq ($(CXX),icx)
   CXXFLAGS   := c++11 -restrict -g $(OPTFLAGS)
   #NOTE -fPIC needed for shared libs, but may degrade static lib performance.
   ENABLE_GCC_PROFILE :=OFF
-  # CXXWARNS   += -Wall -Wextra -Wshadow
   ifeq ($(ENABLE_MKL),ON)
     LDLIBS   += -mkl=sequential
     CXXFLAGS += -DMKL_DIRECT_CALL_SEQ
@@ -125,6 +125,7 @@ CXX_VERSION  :=$(shell $(CXX) -dumpversion)
 # Flags for compiling tests
 CXXTESTS     :=$(CXXFLAGS) $(CXXWARNS)
 CXXPERFS     :=$(CXXFLAGS) $(CXXWARNS)
+# Femera option flags
 FMRFLAGS     += -DFMR_VERSION="$(FEMERA_VERSION)"
 FMRFLAGS     += -DFMR_CPUMODEL="$(CPUMODEL)"
 ifneq ($(CPUCOUNT),)
@@ -142,6 +143,7 @@ endif
 ifneq ($(FMR_TIMES_UCHAR),)
   FMRFLAGS   += -DFMR_TIMES_UCHAR=$(FMR_TIMES_UCHAR)
 endif
+# CPUSIMDS set in set-undefined.mk
 ifneq ($(findstring AVX,$(CPUSIMDS)),)
   FMRFLAGS   += -DFMR_HAS_AVX
 endif
@@ -155,7 +157,7 @@ INCFLAGS     += -isystem"$(INSTALL_CPU)/include"
 INCFLAGS     += -isystem"$(INSTALL_DIR)/include"
 LDFLAGS      += -L"$(STAGE_CPU)/lib"
 LDFLAGS      += -L"$(STAGE_DIR)/lib"
-# -----------------------------------------------------------------------------
+# Set paths -------------------------------------------------------------------
 ifeq ("$(findstring $(INSTALL_DIR)/bin:,$(PATH):)","")
   ADD_TO_PATH   :=$(INSTALL_DIR)/bin:$(ADD_TO_PATH)
 endif
@@ -167,31 +169,49 @@ ifneq ("$(ADD_TO_PATH)","")# only true once during build
   #NOTE export does not work for this when in a recipe.
 endif
 
-ifeq ("$(findstring $(INSTALL_DIR)/lib64:,$(LD_RUN_PATH):)","")
+ifeq ("$(findstring $(INSTALL_DIR)/lib64:,$(LD_LIBRARY_PATH):)","")
   ADD_TO_LDPATH :=$(INSTALL_DIR)/lib64:$(ADD_TO_LDPATH)
 endif
-ifeq ("$(findstring $(INSTALL_DIR)/lib:,$(LD_RUN_PATH):)","")
+ifeq ("$(findstring $(INSTALL_DIR)/lib:,$(LD_LIBRARY_PATH):)","")
   ADD_TO_LDPATH :=$(INSTALL_DIR)/lib:$(ADD_TO_LDPATH)
 endif
-ifeq ("$(findstring $(INSTALL_CPU)/lib64:,$(LD_RUN_PATH):)","")
+ifeq ("$(findstring $(INSTALL_CPU)/lib64:,$(LD_LIBRARY_PATH):)","")
   ADD_TO_LDPATH :=$(INSTALL_CPU)/lib64:$(ADD_TO_LDPATH)
 endif
-ifeq ("$(findstring $(INSTALL_CPU)/lib:,$(LD_RUN_PATH):)","")
+ifeq ("$(findstring $(INSTALL_CPU)/lib:,$(LD_LIBRARY_PATH):)","")
   ADD_TO_LDPATH :=$(INSTALL_CPU)/lib:$(ADD_TO_LDPATH)
 endif
+
+ifeq ("$(findstring $(INSTALL_DIR)/lib64:,$(LD_RUN_PATH):)","")
+  ADD_TO_LDRUN :=$(INSTALL_DIR)/lib64:$(ADD_TO_LDRUN)
+endif
+ifeq ("$(findstring $(INSTALL_DIR)/lib:,$(LD_RUN_PATH):)","")
+  ADD_TO_LDRUN :=$(INSTALL_DIR)/lib:$(ADD_TO_LDRUN)
+endif
+ifeq ("$(findstring $(INSTALL_CPU)/lib64:,$(LD_RUN_PATH):)","")
+  ADD_TO_LDRUN :=$(INSTALL_CPU)/lib64:$(ADD_TO_LDRUN)
+endif
+ifeq ("$(findstring $(INSTALL_CPU)/lib:,$(LD_RUN_PATH):)","")
+  ADD_TO_LDRUN :=$(INSTALL_CPU)/lib:$(ADD_TO_LDRUN)
+endif
+
 ifeq ($(ENABLE_MKL),ON)
   ifeq ("$(findstring $(INSTALL_CPU)/mkl/2021.4.0/lib/intel64:,$(LD_RUN_PATH):)","")
     ADD_TO_LDPATH :=$(INSTALL_CPU)/mkl/2021.4.0/lib/intel64:$(ADD_TO_LDPATH)
   endif
 endif
 ifneq ("$(ADD_TO_LDPATH)","")# only true once during build
-  export LD_RUN_PATH     :=$(LD_RUN_PATH):$(ADD_TO_LDPATH)
-  export LD_LIBRARY_PATH :=$(LD_LIBRARY_PATH):$(ADD_TO_LDPATH)
+  export LD_LIBRARY_PATH :=$(ADD_TO_LDPATH)$(LD_LIBRARY_PATH)
+endif
+ifneq ("$(ADD_TO_LDRUN)","")# only true once during build
+  export LD_RUN_PATH     :=$(ADD_TO_LDRUN)$(LD_RUN_PATH)
+  #TODO move the next two somewhere else.
   export OMP_PROC_BIND=spread
   export OMP_PLACES=cores;
 endif
 
 # TMP_LIBRARY_PATH_=$(LD_RUN_PATH);
+# -----------------------------------------------------------------------------
 ifeq ("$(findstring $(INSTALL_CPU)/lib -L,$(LDFLAGS) -L)","")
   LDFLAGS   += -L"$(INSTALL_CPU)/lib"
 endif
@@ -209,22 +229,18 @@ ifeq ($(ENABLE_MKL),ON)
     LDFLAGS += -L"$(INSTALL_CPU)/mkl/2021.4.0/lib/intel64"
   endif
 endif
-ifeq ("$(FMR_COPYRIGHT)","")# only true once during build
-  export FMR_COPYRIGHT := cat data/copyright.txt | tr '\n' ' ' | tr -s ' '
-  NOSA_SEE := See the NASA open source agreement (LICENSE) file for details.
-endif
 
 -include $(BUILD_CPU)/external-config.mk
 
 #NOTE CGNS, FLTK, FreeType, PETSc build in external/*/
 # Libraries and applications available ----------------------------------------
 ifeq ($(ENABLE_ZYCLOPS),ON)
-  EXTERNAL_DOT+="Femera" -> "Zyclops" [color="cyan"]\n
+  EXTERNAL_DOT+="Femera" -> "Zyclops" [color="green"]\n
   FMRFLAGS+= -DFMR_HAS_ZYCLOPS
 endif
-  ifeq ($(ENABLE_PYMERA),ON)
-    EXTERNAL_DOT+="Femera" -> "pymera" [color="cyan"] [style="dotted"]\n
-  endif
+ifeq ($(ENABLE_PYMERA),ON)
+  EXTERNAL_DOT+="Femera" -> "pymera" [color="green"]\n
+endif
 ifeq ($(ENABLE_OMP),ON)
   EXTERNAL_DOT+="Femera" -> "OpenMP"\n
   # FMRFLAGS+= -DFMR_HAS_OMP not needed; OpenMP defines _OPENMP:
@@ -232,7 +248,7 @@ endif
 ifeq ($(ENABLE_NVIDIA),ON)
 #TODO move to external.config-nvidia.mk?
   ifeq ("$(NVIDIA_DIR)","")
-    NVIDIA_DIR:="/usr/local/cuda-11.6"
+    NVIDIA_DIR:="/usr/local/Fas partcuda-11.6"
   endif
   # EXTERNAL_DOT+="Femera" -> "NVIDIA"\n
   FMRFLAGS+= -DFMR_HAS_NVIDIA
@@ -290,6 +306,7 @@ ifeq ($(ENABLE_GOOGLETEST),ON)
 #  MAKE_DOT+="Makefile" -> "GoogleTest"\n
 #  GTEST_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
   LDLIBS += -lpthread -lgtest -lgmock
+  EXTERNAL_DOT+="GoogleTest" -> "libpthread"\n
 #  GTEST_FLAGFILE:= $(BUILD_CPU)/external/googletest-install.flags
 endif
 ifeq ($(ENABLE_PYBIND11),ON)
@@ -349,7 +366,7 @@ ifeq ($(ENABLE_POVRAY),ON)
   EXTERNAL_DOT+="POV-Ray" -> "OpenEXR"\n
   EXTERNAL_DOT+="OpenEXR" -> "lmath" [color="green"]\n
   EXTERNAL_DOT+="POV-Ray" -> "SDL"\n
-  EXTERNAL_DOT+="POV-Ray" -> "pthreads"\n
+  EXTERNAL_DOT+="POV-Ray" -> "libpthread"\n
 endif
 ifeq ($(ENABLE_NEPER),ON)
   #TODO move to external/neper-* files
@@ -360,7 +377,7 @@ ifeq ($(ENABLE_NEPER),ON)
   # EXTERNAL_DOT+="Neper" -> "GSL" [color="blue"]\n
   EXTERNAL_DOT+="Neper" -> "Scotch" [color="green"]\n
   EXTERNAL_DOT+="Neper" -> "NLopt" [color="green"]\n
-  EXTERNAL_DOT+="Neper" -> "pthreads"\n
+  EXTERNAL_DOT+="Neper" -> "libpthread"\n
   EXTERNAL_DOT+="Neper" -> "Gmsh"\n
   ifeq ($(ENABLE_POVRAY),ON)
     EXTERNAL_DOT+="Neper" -> "POV-Ray"\n
@@ -392,19 +409,22 @@ ifeq ($(ENABLE_DOT),ON)
     LEGEND_DOT+=  key [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0">\n
     LEGEND_DOT+=    <tr><td align="right" port="i1">Installs during Femera build</td></tr>\n
     LEGEND_DOT+=    <tr><td align="right" port="i2">Installs during PETSc config</td></tr>\n
-    LEGEND_DOT+=    <tr><td align="right" port="i3">Uses</td></tr>\n
-    LEGEND_DOT+=    <tr><td align="right" port="i4">Not implemented yet</td></tr>\n
+    LEGEND_DOT+=    <tr><td align="right" port="i3">Installs</td></tr>\n
+    LEGEND_DOT+=    <tr><td align="right" port="i4">Uses</td></tr>\n
+    LEGEND_DOT+=    <tr><td align="right" port="i5">Not implemented yet</td></tr>\n
     LEGEND_DOT+=    </table>>]\n
     LEGEND_DOT+=  key2 [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0">\n
     LEGEND_DOT+=    <tr><td port="i1">&nbsp;</td></tr>\n
     LEGEND_DOT+=    <tr><td port="i2">&nbsp;</td></tr>\n
     LEGEND_DOT+=    <tr><td port="i3">&nbsp;</td></tr>\n
     LEGEND_DOT+=    <tr><td port="i4">&nbsp;</td></tr>\n
+    LEGEND_DOT+=    <tr><td port="i5">&nbsp;</td></tr>\n
     LEGEND_DOT+=    </table>>]\n
     LEGEND_DOT+=  key:i1:e -> key2:i1:w [color=cyan] {rank=same; key, key2 }\n
     LEGEND_DOT+=  key:i2:e -> key2:i2:w [color=blue] {rank=same; key, key2 }\n
-    LEGEND_DOT+=  key:i3:e -> key2:i3:w {rank=same; key, key2 }\n
-    LEGEND_DOT+=  key:i4:e -> key2:i4:w [style="dotted"] {rank=same; key, key2 }\n
+    LEGEND_DOT+=  key:i3:e -> key2:i3:w [color=green] {rank=same; key, key2 }\n
+    LEGEND_DOT+=  key:i4:e -> key2:i4:w {rank=same; key, key2 }\n
+    LEGEND_DOT+=  key:i5:e -> key2:i5:w [style="dotted"] {rank=same; key, key2 }\n
     LEGEND_DOT+=}\n
     #LEGEND_DOT+=}
   endif
@@ -564,6 +584,7 @@ mini: | intro
 	$(call timestamp,$@,$^)
 	$(MAKE) $(JLIM) $(FMROUTS)
 	$(MAKE) $(JLIM) $(BUILD_CPU)/mini
+	$(MAKE) $(JSER) $(BUILD_CPU)/mini.valgrind.log
 	$(MAKE) $(JPAR) build-done
 
 perf: | intro
@@ -643,19 +664,13 @@ ifneq ("$(NOSA_SEE)","") # Run once during a build
 ifneq ("$(external-flags)","")
 	$(MAKE) $(JPAR) external-flags
 endif
-	
 ifeq ($(ENABLE_DOT),ON)
 	@printf '%s' '$(MAKE_DOT)' | sed 's/\\n/\n/g' > '$(MAKE_DOTFILE)'
 	@dot '$(MAKE_DOTFILE)' -Teps -o $(BUILD_DIR)/make.eps
-	# @dot external/external.dot -Teps -o $(BUILD_DIR)/external/external.eps
-# ifeq ($(ENABLE_DOT_PNG),ON)
-	# @dot external/external.dot -Tpng -o $(BUILD_DIR)/external/external.png
-# endif
 	@printf '%s' '$(EXTERNAL_DOT)' | sed 's/\\n/\n/g' > '$(EXTERNAL_DOTFILE)'
-	#@cat 'external/build-external-legend.dot' >> '$(EXTERNAL_DOTFILE)'
 	@dot '$(EXTERNAL_DOTFILE)' -Teps -o $(BUILD_DIR)/external/external.eps
 ifeq ($(ENABLE_DOT_PNG),ON)
-	@dot '$(EXTERNAL_DOTFILE)' -Tpng -o $(BUILD_DIR)/external/external.png
+	@dot '$(EXTERNAL_DOTFILE)' -Gdpi=600 -Tpng -o $(BUILD_DIR)/external/external.png
 endif
 endif
 endif
@@ -715,7 +730,7 @@ remove-done:
 	$(call timestamp,$@,)
 
 # $(BUILD_CPU)/make-build.post.test.out
-build-done: build/src-notest.eps $(BUILD_CPU)/mini.valgrind.log code-stats
+build-done: build/src-notest.eps code-stats
 	$(call timestamp,$@,)
 	$(info $(DONE) building $(FEMERA_VERSION) with $(CXX) $(CXX_VERSION))
 	$(info $(SPCS) on $(HOSTNAME) for $(CPUMODEL))
@@ -1217,8 +1232,7 @@ $(SRC_STAT_FILE): | build/$(CPUMODEL)/
 	then echo "$(BUILD_DATE)",'"'$(FEMERA_VERSION)'"',\
 	"`cat build/src-code-stats.csv`",\
 	"`tools/elapsed-time $(BUILD_SECS)`",'"'$(CXX) $(CXX_VERSION)'"',\
-	'"'$(HOSTNAME)'"','"'$(CPUMODEL)'"'\
-	>> "$(SRC_STAT_FILE)"; fi
+	'"'$(HOSTNAME)'"','"'$(CPUMODEL)'"' >> "$(SRC_STAT_FILE)"; fi
 	-tools/plot_code_stats 2>/dev/null
 	$(call timestamp,$@,)
 
@@ -1227,9 +1241,9 @@ build/test-files.txt: tools/list-test-files build/.md5
 
 src/docs/src.dot: build/.md5
 	@external/tools/cinclude2dot --src src >$@ 2>build/src.dot.err
-	@dot $@ -Gsize="18.0,12.0" -Teps -o build/src-test.eps
+	@dot $@ -Gsize="9.0,6.0" -Teps -o build/src-test.eps
 ifeq ($(ENABLE_DOT_PNG),ON)
-	@dot $@ -Gsize="18.0,12.0" -Tpng -o build/src-test.png
+	@dot $@ -Gsize="9.0,6.0" -Gdpi=600 -Tpng -o build/src-test.png
 endif
 	#cinclude2dot --groups is nice, too
 	#(info $(INFO) Source dependencies: $@)

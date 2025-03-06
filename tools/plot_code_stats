@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf8 -*-
 
 import csv
@@ -23,7 +23,7 @@ def parse_commit_number(version):
 
 if __name__ == "__main__":
   ''' Plot code stats '''
-  cpumodel='i7-7820HQ'
+  cpumodel='i7-12800H'
   t = []
   #dur = [] # seconds since commit #177
   loc = [] # lines of code

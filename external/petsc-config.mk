@@ -173,7 +173,8 @@ ifeq ($(ENABLE_PETSC),ON)
     PETSC_INSTALLS += occt
     PETSC_FLAGS += --download-opencascade
   endif
-  ifeq ($(ENABLE_PYBIND11),ON)
+  #ifeq ($(ENABLE_PYBIND11),ON)
+  ifeq ($(ENABLE_POVRAY),ON)
     EXTERNAL_DOT+="PETSc" -> "Boost" [color="blue"]\n
     PETSC_FLAGS += --download-boost
   endif

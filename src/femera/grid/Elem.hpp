@@ -1,13 +1,7 @@
 #ifndef FEMERA_HAS_GRID_ELEM_HPP
 #define FEMERA_HAS_GRID_ELEM_HPP
 
-//#include "../Grid.hpp"
 #include "../../fmr/fmr.hpp"
-//#include "elem/Tets.hpp"
-//#include "elem/Prmd.hpp"
-//#include "elem/Wdge.hpp"
-//#include "elem/Itri.hpp"
-//#include "elem/Iqud.hpp"
 
 #include <cmath>// std::sqrt () needed to calculate edge lengths
 
@@ -17,11 +11,11 @@ namespace fmr { namespace grid { namespace elem { //TODO move to src/fmr/
 
 struct Elem_args {
 public:
-  fmr::Local_int node_n;
-  fmr::Local_int intp_n;
-  fmr::Local_int sims_d;
+  fmr::Local_int node_n;// N
+  fmr::Local_int intp_n;// G
+  fmr::Local_int sims_d;// D
 };
-template <class T, Elem_args const &A, typename F=fmr::Geom_float>
+template <class E, Elem_args const &A, typename F=fmr::Geom_float>
 class Elem_test {
 private:
   static constexpr fmr::Local_int node_n = A.node_n;
@@ -29,8 +23,8 @@ private:
   static constexpr fmr::Local_int sims_d = A.sims_d;
 public:
   template <typename fmr::Local_int D=sims_d>
-  constexpr typename std::enable_if <D == 3, fmr::Local_int>::type
-  test_vert_n () noexcept {return T::vert_n;}
+  constexpr typename std::enable_if <D==3, fmr::Local_int>::type
+  test_vert_n () noexcept {return E::vert_n;}
 };
 
 } } }//end fmr::grid::elem:: namespace
@@ -40,10 +34,12 @@ public:
 namespace femera { namespace grid { namespace elem {
 
 // Forward-delare element shapes
-class Tets; class Prmd; class Wdge; class Cube;
-class Itri; class Iqud;
-class Tris; class Quad;
 class Spar;
+class Line;//TODO 1D interface element embedded in 2D or 3D space
+class Itri; class Iqud;// 2D interface elements embedded in 3D space
+class Tris; class Quad;
+class Tets; class Prmd; class Wdge; class Cube;
+class User;//TODO user element
 
 template <class T, typename fmr::Local_int P=1, typename fmr::Local_int D=3,
   typename F=fmr::Geom_float>

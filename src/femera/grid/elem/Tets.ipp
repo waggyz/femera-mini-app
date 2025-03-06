@@ -24,7 +24,10 @@ constexpr fmr::Phys_float Tets::intg_5_ptwt [];
 constexpr fmr::Phys_float Tets::intg_10_ptwt [];
 constexpr fmr::Phys_float Tets::intg_11_ptwt [];
 
-template <typename F> inline// single or double
+// Tets::shap_func_X and Tets::shap_grad_N evaluate the shape functions or
+// gradients at 3D natural coordinate point x.
+
+template <typename F> inline// single or double precision
 F* Tets::shap_func_4
 (F f[4u], const F x[3u]) {
   f[ 0] = 1.0-x[0]-x[1]-x[2];
@@ -35,7 +38,7 @@ F* Tets::shap_func_4
 }
 template <typename F> inline
 F* Tets::shap_grad_4
-(F g[4u *3u], const F[]) {//  x[3u] not used;
+(F g[4u *3u], const F[]) {//  x[3u] not used (constant gradient)
   g[ 0]=-1.0; g[ 1]=1.0; g[ 2]=0.0; g[ 3]=0.0;// dN/dx (natural coords)
   g[ 4]=-1.0; g[ 5]=0.0; g[ 6]=1.0; g[ 7]=0.0;// dN/dy
   g[ 8]=-1.0; g[ 9]=0.0; g[10]=0.0; g[11]=1.0;// dN/dz

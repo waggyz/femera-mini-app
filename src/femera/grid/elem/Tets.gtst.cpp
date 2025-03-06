@@ -202,9 +202,9 @@ TEST( GridElemTets, ArrayAccessVariable ){
   EXPECT_EQ( v1 [1], 2 );
 }
 TEST( GridElemTet, JacTraceIsThree ){
-  EXPECT_FLOAT_EQ( float(ntrl_jac3_trace_p1), float (3.0) );
-  EXPECT_FLOAT_EQ( float(ntrl_jac3_trace_p2), float (3.0) );
-//  EXPECT_FLOAT_EQ( float(ntrl_jac3_trace_p3), float (3.0) );//TODO
+  EXPECT_FLOAT_EQ( float (ntrl_jac3_trace_p1), float (3.0) );
+  EXPECT_FLOAT_EQ( float (ntrl_jac3_trace_p2), float (3.0) );
+  EXPECT_FLOAT_EQ( float (ntrl_jac3_trace_p3), float (3.0) );//TODO node order
 }
 TEST( GridElemTets, CoorTranspose ){
   EXPECT_EQ( tet4_tranpose_bad, 0 );

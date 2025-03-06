@@ -6,7 +6,7 @@ ifeq ($(ENABLE_GMSH),ON)
 #  ifeq ($(USE_STATIC_LIBS),ON)
 #    LDLIBS += $(INSTALL_CPU)/lib64/libgmsh.a
 #  else
-#TODO fix gmsh dependency linking errors to use static gmsh library
+#TODO fix gmsh dependency linking errors to use static gmsh library above
     LDLIBS += -lgmsh
 #  endif
 #  ifeq ("$(CXX) $(CXX_VERSION)","g++ 4.8.5") # g+= or mpic++
@@ -35,13 +35,14 @@ ifeq ($(ENABLE_GMSH),ON)
     GMSH_FLAGS += -DENABLE_OPENMP=ON
     EXTERNAL_DOT+="Gmsh" -> "OpenMP"\n
   endif
-  ifeq ($(ENABLE_PYBIND11),ON)
-    GMSH_REQUIRES += pybind11
-    GMSH_DEPS += $(BUILD_DIR)/external/pybind11-install.out
-    EXTERNAL_DOT+="Gmsh" -> "pybind11"\n
-    EXTERNAL_DOT+="Gmsh" -> "numpy"\n
-    GMSH_FLAGS += -DENABLE_WRAP_PYTHON=ON -DENABLE_NUMPY=ON
-  endif
+#  ifeq ($(ENABLE_PYBIND11),ON)
+#  # should be ENABLE_GMSH_PRIVATE_API?
+#    GMSH_REQUIRES += pybind11
+#    GMSH_DEPS += $(BUILD_DIR)/external/pybind11-install.out
+#    #EXTERNAL_DOT+="Gmsh" -> "pybind11"\n
+#    EXTERNAL_DOT+="Gmsh" -> "numpy"\n
+#    GMSH_FLAGS += -DENABLE_WRAP_PYTHON=ON -DENABLE_NUMPY=ON
+#  endif
   ifeq ($(ENABLE_CGNS),ON)
 #    GMSH_REQUIRES += cgns
     EXTERNAL_DOT+="Gmsh" -> "CGNS"\n
