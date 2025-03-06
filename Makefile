@@ -200,14 +200,18 @@ ifeq ($(ENABLE_MKL),ON)
     ADD_TO_LDPATH :=$(INSTALL_CPU)/mkl/2021.4.0/lib/intel64:$(ADD_TO_LDPATH)
   endif
 endif
+
 ifneq ("$(ADD_TO_LDPATH)","")# only true once during build
   export LD_LIBRARY_PATH :=$(ADD_TO_LDPATH)$(LD_LIBRARY_PATH)
 endif
 ifneq ("$(ADD_TO_LDRUN)","")# only true once during build
   export LD_RUN_PATH     :=$(ADD_TO_LDRUN)$(LD_RUN_PATH)
-  #TODO move the next two somewhere else.
+endif
+ifeq ("$(OMP_PROC_BIND)","")
   export OMP_PROC_BIND=spread
-  export OMP_PLACES=cores;
+endif
+ifeq ("$(OMP_PLACES)","")
+  export OMP_PLACES=cores
 endif
 
 # TMP_LIBRARY_PATH_=$(LD_RUN_PATH);

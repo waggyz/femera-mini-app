@@ -56,11 +56,12 @@ if __name__ == "__main__":
         build_time.append(time2sec(rowcol[8]))
         #i+=1
   #x = commit
-  #plt.xlabel('Repository commit number')
   #
   x = t
+  #
   #plt.gca().xaxis.set_major_formatter(pdt.DateFormatter('%m/%d/%y'))
   #plt.gca().xaxis.set_major_formatter(pdt.DateFormatter('%Y-%m-%d'))
+  plt.gcf().set_size_inches(10, 6)
   plt.gca().xaxis.set_major_formatter(pdt.DateFormatter('%m-%d'))
   plt.gca().xaxis.set_major_locator(pdt.MonthLocator())
   #
@@ -75,7 +76,8 @@ if __name__ == "__main__":
   #plt.plot(x,commit,label='Repository commit number', linestyle='dotted')
   plt.grid()
   plt.title('Femera 0.3 mini-app source code statistics')
-  dt0=dt.datetime.strptime('2022-02-01','%Y-%m-%d')
+  #dt0=dt.datetime.strptime('2022-02-01','%Y-%m-%d') # i7-7820HQ start date
+  dt0=dt.datetime.strptime('2024-01-01','%Y-%m-%d') # i7-12800H start date
   plt.gca().set(xlim=(dt0.date(), max(t) + dt.timedelta(days=1)))
   plt.gca().set(ylim=(0, files_ylim))
   plt.legend(loc='upper left', fontsize=10)
