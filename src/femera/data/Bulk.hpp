@@ -11,7 +11,9 @@
 #include <immintrin.h>       // _mm_crc32_u64
 
 namespace femera { namespace data {
+#ifdef FMR_HAS_ZYCLOPS
   namespace zyc = ::zyclops;
+#endif
   //
   using Bulk_t = std::vector <fmr::Bulk_int>;
   //

@@ -17,8 +17,8 @@ int main (int argc, char** argv) {
       // Do mini.* things after parsing the arguments
       return mini.exit ();
     }
-    case 1: {
-      return fmr::new_jobs (& argc, argv)->exit ();// one-liner
+    case 1: {// one-liner
+      return fmr::new_jobs (& argc, argv)->exit ();
     }
     case 2: {
       const auto mini = std::move (fmr::new_jobs ());

@@ -29,15 +29,16 @@ namespace zyclops { namespace test {
     return ((row ^ col) == (row - col)) ? (&v)[row - col] : T(0.0);
   }
   static inline
-  double pass_by_reference (const zyc::Zindex_int row, const zyc::Zindex_int col)
+  double pass_by_ref (const zyc::Zindex_int row, const zyc::Zindex_int col)
   noexcept {
-    std::vector<double> bidual = {1.0,0.0,0.0,0.0};
+    std::vector<double> bidual = {1.0,2.0,3.0,4.0};// Re:1, Im1:2, rest ignored
   return mdcr_elem_test (bidual [0], row, col);
   }
   TEST( Zyc, ByReference ){
-    EXPECT_DOUBLE_EQ( pass_by_reference (0,0), 1.0 );
-    EXPECT_DOUBLE_EQ( pass_by_reference (0,1), 0.0 );
-    EXPECT_DOUBLE_EQ( pass_by_reference (1,1), 1.0 );
+    EXPECT_DOUBLE_EQ( pass_by_ref (0,0), 1.0 );
+    EXPECT_DOUBLE_EQ( pass_by_ref (0,1), 0.0 );
+    EXPECT_DOUBLE_EQ( pass_by_ref (1,0), 2.0 );
+    EXPECT_DOUBLE_EQ( pass_by_ref (1,1), 1.0 );
   }
   static inline constexpr
   int dual_ix (const int row, const int col)
