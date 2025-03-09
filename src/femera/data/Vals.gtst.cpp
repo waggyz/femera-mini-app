@@ -12,16 +12,16 @@ namespace femera { namespace test {
   //
 FMR_WARN_INLINE_OFF
   TEST(Vals, Ints10) {
-    EXPECT_EQ( vals.get<int> ("integer name not found"), nullptr);
-    EXPECT_EQ( vals.set      (ints10,10,int(1))[9], int(1));
+    EXPECT_EQ( vals.get<int> ("Test integer name not found"), nullptr);
+    EXPECT_EQ( vals.set (ints10,10,int(1))[9], int(1));
     EXPECT_EQ( vals.get<int> (ints10)     [0], int(1));
     EXPECT_EQ( vals.get<int> (ints10)     [9], int(1));
     EXPECT_EQ( vals.get<int> (ints10,9)   [0], int(1));
   }
   TEST(Vals, Vals10) {
-    EXPECT_EQ( vals.get<double> ("floating point name not found"), nullptr);
+    EXPECT_EQ( vals.get<double> ("Test floating point name not found"),nullptr);
     EXPECT_EQ( vals.set<double> ("10 zeros",10) [9], double(0.0));
-    EXPECT_EQ( vals.set   (vals10,10,1.0) [9], double(1.0));
+    EXPECT_EQ( vals.set (vals10, 10, 1.0) [9], double(1.0));
     EXPECT_EQ( vals.get<double> (vals10)  [0], double(1.0));
     EXPECT_EQ( vals.get<double> (vals10)  [9], double(1.0));
     EXPECT_EQ( vals.get<double> (vals10,9)[0], double(1.0));

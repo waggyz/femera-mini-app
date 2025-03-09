@@ -18,12 +18,16 @@ public://TODO make protected or private with friend class Elem?
   static constexpr fmr::Local_int quad_n = 0;
   static constexpr fmr::Local_int vols_n = 1;
   //
+#define sqrt2 1.4142135623731
+#define sqrt1_5 1.2247448713915900000
   static constexpr fmr::Geom_float edge_l // total length of edges
-  = 3.0 + 3.0 * std::sqrt (2.0);
+  = 3.0 + 3.0 * sqrt2;
   static constexpr fmr::Geom_float face_a // total surface area
-  = 1.5 + std::sqrt (2.0) * std::sqrt (1.5);
+  = 1.5 + sqrt2 * sqrt1_5;
   static constexpr fmr::Geom_float elem_v // natural element volume
   = 1.0 / 6.0;
+#undef sqrt2
+#undef sqrt1_5
   //
   //NOTE Gmsh element conventions
   static constexpr
@@ -267,13 +271,15 @@ public://TODO make protected or private with friend class Elem?
   fmr::Phys_float intg_4_ptwt [4* intg_4_n] = {
   // a0 = (5.0-    std::sqrt(5.0))/20.0 = 0.1381966011250105;
   // a1 = (5.0+3.0*std::sqrt(5.0))/20.0 = 0.5854101966249685;
-#define a0 (5.0-std::sqrt(5.0))/20.0
-#define a1 (5.0+3.0*std::sqrt(5.0))/20.0
+#define sqrt5 2.23606797749979
+#define a0 (5.0-sqrt5)/20.0
+#define a1 (5.0+3.0*sqrt5)/20.0
 #define w0 0.25/6.0
     a0,a0,a0, w0,
     a1,a0,a0, w0,
     a0,a1,a0, w0,
     a0,a0,a1, w0
+#undef sqrt5
 #undef a0
 #undef a1
 #undef w0
@@ -333,11 +339,13 @@ public://TODO make protected or private with friend class Elem?
   // This converges tet20 meshes
   // c0 = (1.0+std::sqrt(5.0/14.0))/4.0 = 0.3994035761667992
   // c1 = (1.0-std::sqrt(5.0/14.0))/4.0 = 0.1005964238332008
+#define sqrt514 0.597614304667197
+//std::sqrt(5.0/14.0)
 #define a0 0.25
 #define b0 1.0/14.0
 #define b3 11.0/14.0
-#define c0 (1.0+std::sqrt(5.0/14.0))/4.0
-#define c1 (1.0-std::sqrt(5.0/14.0))/4.0
+#define c0 (1.0+sqrt514)/4.0
+#define c1 (1.0-sqrt514)/4.0
 #define w0 -74.0/ 5625.0
 #define w1 343.0/45000.0
 #define w2 56.0/2250.0
@@ -352,6 +360,7 @@ public://TODO make protected or private with friend class Elem?
     c0,c1,c1, w2,
     c1,c0,c1, w2,
     c1,c1,c0, w2
+#undef sqrt514
 #undef a0
 #undef p1
 #undef p2
