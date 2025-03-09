@@ -4,8 +4,6 @@
 #include "Tris.hpp"
 #include "Cube.hpp"
 
-#include <cmath> // std::sqrt()
-
 namespace femera { namespace grid { namespace elem {
 
 struct Tets : public Elem<Tets> {//TODO Tet?
@@ -19,7 +17,7 @@ public://TODO make protected or private with friend class Elem?
   static constexpr fmr::Local_int vols_n = 1;
   //
 #define sqrt2 1.4142135623731
-#define sqrt1_5 1.2247448713915900000
+#define sqrt1_5 1.22474487139159
   static constexpr fmr::Geom_float edge_l // total length of edges
   = 3.0 + 3.0 * sqrt2;
   static constexpr fmr::Geom_float face_a // total surface area
@@ -47,8 +45,8 @@ public://TODO make protected or private with friend class Elem?
   };
   static constexpr
   fmr::Local_int tris_conn [Tris::vert_n * tris_n]
-  = { //NOTE the normals point inward. This might be wrong.
-      //     Gmsh deinfes element faces with outward normals.
+  = { //TODO the normals point inward. This might be wrong.
+      //     Gmsh defines element faces with outward normals.
 #if 1
     0,1,2, 0,3,1, 0,2,3, 1,3,2
 #endif
@@ -292,7 +290,7 @@ public://TODO make protected or private with friend class Elem?
 #define a0 0.25
 #define b0 0.5
 #define b1 1.0/6.0
-#define w0 -4.0/ 30.0
+#define w0 -4.0/30.0
 #define w1 9.0/120.0
     a0,a0,a0, w0,
     b0,b1,b1, w1,

@@ -1,5 +1,7 @@
 #include "Elem.hpp"
 
+#include <cmath>// std::sqrt () needed to calculate edge lengths
+
 namespace femera { namespace grid {
 
 std::string elem::tri2_norm_str

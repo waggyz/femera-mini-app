@@ -15,8 +15,10 @@ public:
   static constexpr fmr::Local_int quad_n = 0;
   static constexpr fmr::Local_int vols_n = 0;
   //
+#define sqrt2 1.4142135623731
   static constexpr fmr::Geom_float edge_l       // total length of edges
-    = 2.0 + std::sqrt (2.0);
+    = 2.0 + sqrt2;
+#undef sqrt2
   static constexpr fmr::Geom_float face_a = 0.5;// total surface area
   static constexpr fmr::Geom_float elem_v = 0.0;// natural element volume
   //

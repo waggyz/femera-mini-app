@@ -3,8 +3,6 @@
 
 #include "../../fmr/fmr.hpp"
 
-#include <cmath>// std::sqrt () needed to calculate edge lengths
-
 #if 1
 // Elem_test *****************************************************************
 namespace fmr { namespace grid { namespace elem { //TODO move to src/fmr/
