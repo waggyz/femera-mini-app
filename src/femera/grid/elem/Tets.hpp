@@ -130,29 +130,29 @@ public://TODO make protected or private with friend class Elem?
 #endif
 #if 1
     // Gmsh node numbering
-    0.0, 0.0, 0.0,// vertes nodes
-    1.0, 0.0, 0.0,
-    0.0, 1.0, 0.0,
-    0.0, 0.0, 1.0,
+    0.0, 0.0, 0.0,// 1 vertes nodes
+    1.0, 0.0, 0.0,// 2
+    0.0, 1.0, 0.0,// 3
+    0.0, 0.0, 1.0,// 4
     //
-    f13, 0.0, 0.0,// bottom triangle edge nodes
-    f23, 0.0, 0.0,
-    f23, f13, 0.0,
-    f13, f23, 0.0,
-    0.0, f23, 0.0,
-    0.0, f13, 0.0,
+    f13, 0.0, 0.0,// 5 bottom triangle edge nodes
+    f23, 0.0, 0.0,// 6
+    f23, f13, 0.0,// 7
+    f13, f23, 0.0,// 8
+    0.0, f23, 0.0,// 9
+    0.0, f13, 0.0,//10
     //
-    0.0, 0.0, f23,// apex edge nodes
-    0.0, 0.0, f13,
-    0.0, f13, f23,
-    0.0, f23, f13,
-    f13, 0.0, f23,
-    f23, 0.0, f13,
+    0.0, 0.0, f23,//11 apex edge nodes
+    0.0, 0.0, f13,//12
+    0.0, f13, f23,//13
+    0.0, f23, f13,//14
+    f13, 0.0, f23,//15
+    f23, 0.0, f13,//16
     //
-    f13, f13, 0.0,// face nodes
-    f13, 0.0, f13,
-    0.0, f13, f13,
-    f13, f13, f13
+    f13, f13, 0.0,//17 face nodes
+    f13, 0.0, f13,//18
+    0.0, f13, f13,//19
+    f13, f13, f13 //20
 #endif
   };
   static constexpr

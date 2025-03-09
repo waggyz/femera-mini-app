@@ -43,8 +43,9 @@ FMR_WARN_INLINE_ON
     Bulk_vals* vals = nullptr;
     try { vals =& this->name_vals.at (id); }
     catch (std::out_of_range & e) {
-      fprintf (stderr, "%s: floating point name not found\n",
-        id.c_str());
+#ifdef FMR_DEBUG
+      fprintf (stdout, "%s: floating point name not found\n", id.c_str());
+#endif
       return nullptr;
     }
     const auto ptr = vals->get_fast<T>();
@@ -86,7 +87,9 @@ FMR_WARN_INLINE_ON
     Bulk_ints* vals = nullptr;
     try { vals =& this->name_ints.at(id); }
     catch (std::out_of_range & e) {
-      fprintf (stderr, "%s: integer name not found\n", id.c_str());
+#ifdef FMR_DEBUG
+      fprintf (stdout, "%s: integer name not found\n", id.c_str());
+#endif
       return nullptr;
     }
     const auto ptr = vals->get_fast<T>();
