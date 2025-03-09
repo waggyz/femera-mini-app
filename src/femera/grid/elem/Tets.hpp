@@ -136,20 +136,20 @@ public://TODO make protected or private with friend class Elem?
     0.0, 0.0, 1.0,// 4
     //
     f13, 0.0, 0.0,// 5 bottom triangle edge nodes
-    f23, 0.0, 0.0,// 6
-    f23, f13, 0.0,// 7
-    f13, f23, 0.0,// 8
-    0.0, f23, 0.0,// 9
-    0.0, f13, 0.0,//10
-    //
-    0.0, 0.0, f23,//11 apex edge nodes
-    0.0, 0.0, f13,//12
-    0.0, f13, f23,//13
-    0.0, f23, f13,//14
-    f13, 0.0, f23,//15
-    f23, 0.0, f13,//16
-    //
-    f13, f13, 0.0,//17 face nodes
+    f23, 0.0, 0.0,// 6                        //             3              //
+    f23, f13, 0.0,// 7                        //            /|\             //
+    f13, f23, 0.0,// 8                        //          13 | 15   xyz     //
+    0.0, f23, 0.0,// 9                        //          /  |x \ <--20     //
+    0.0, f13, 0.0,//10                        //        14   11  16         //
+    //                                        //        /    |    \         //
+    0.0, 0.0, f23,//11 apex edge nodes        //  yz   2---8-|-7---1   xz   //
+    0.0, 0.0, f13,//12                        //  19--> \  x |  x / <--18   //
+    0.0, f13, f23,//13                        //         9   12  6          //
+    0.0, f23, f13,//14                        //    17--> \ x|  /           //
+    f13, 0.0, f23,//15                        //    xy    10 | 5     y z x  //
+    f23, 0.0, f13,//16                        //            \|/       \|/   //
+    //                                        //             0         o    //
+    f13, f13, 0.0,//17 face nodes             // x face node                //
     f13, 0.0, f13,//18
     0.0, f13, f13,//19
     f13, f13, f13 //20
@@ -209,6 +209,7 @@ public://TODO make protected or private with friend class Elem?
     0.0, 0.0, 1.0, 0.0,
     0.0, 0.0, 0.0, 1.0
   };
+  // Structured mesh tilable tet fills ---------------------------------------
 #if 0
   fmr::Geom_float cube_coor [3* 8]// same as cube elem below
   = {
@@ -227,7 +228,7 @@ public://TODO make protected or private with friend class Elem?
 #endif
   static constexpr
   fmr::Local_int cube_conn_6tet [4* 6]// 6-tet fill, tilable w/out rotation
-  = {// These are all conformal and differ only by rotation.
+  = {// These are all conformal natural tets and differ only by rotation.
     0,1,5,6,
     0,1,2,6,
     0,5,6,4,
@@ -239,7 +240,7 @@ public://TODO make protected or private with friend class Elem?
   fmr::Local_int cube_conn_5tet [4* 5]// 5-tet fill, tilable with rotation
   = {
     1,3,4,6,// This first tet is twice the volume of the rest.
-    0,1,3,4,// Identical to the natural tet (identity Jacobian).
+    0,1,3,4,// The rest are conformal to the natural tet (identity Jacobian).
     2,3,1,6,
     5,6,1,4,
     7,6,4,3
