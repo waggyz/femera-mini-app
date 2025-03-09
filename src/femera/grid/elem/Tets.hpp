@@ -98,32 +98,35 @@ public://TODO make protected or private with friend class Elem?
   static constexpr
   double tet20_coor [sims_d * (vert_n + 2*edge_n + tris_n)]// TODO side node #s
   = {
-#if 1
+#if 0
     0.0, 0.0, 0.0,// vertes nodes
     1.0, 0.0, 0.0,
     0.0, 1.0, 0.0,
     0.0, 0.0, 1.0,
     //
+    // edges: 0,1; 1,2; 0,2; 0,3; 2,3; 1,3;
     f13, 0.0, 0.0,// bottom triangle edge nodes
     f23, 0.0, 0.0,
     f23, f13, 0.0,
     f13, f23, 0.0,
-    0.0, f23, 0.0,
     0.0, f13, 0.0,
+    0.0, f23, 0.0,
     //
     0.0, 0.0, f13,// apex edge nodes
     0.0, 0.0, f23,
-    0.0, f13, f13,
-    0.0, f23, f23,
-    f13, 0.0, f13,
-    f23, 0.0, f23,
+    0.0, f23, f13,
+    0.0, f13, f23,
+    f23, 0.0, f13,
+    f13, 0.0, f23,
     //
+    // Face nodes 0,1,2, 0,1,3, 0,3,2, 1,2,3 
     f13, f13, 0.0,// face nodes
     f13, 0.0, f13,
-    f13, 0.0, f13,
+    0.0, f13, f13,
     f13, f13, f13
+    //
 #endif
-#if 0
+#if 1
     // Gmsh node numbering
     0.0, 0.0, 0.0,// vertes nodes
     1.0, 0.0, 0.0,
@@ -134,15 +137,15 @@ public://TODO make protected or private with friend class Elem?
     f23, 0.0, 0.0,
     f23, f13, 0.0,
     f13, f23, 0.0,
-    0.0, f13, 0.0,
     0.0, f23, 0.0,
+    0.0, f13, 0.0,
     //
-    0.0, 0.0, f13,// apex edge nodes
-    0.0, 0.0, f23,
-    f13, 0.0, f13,
-    f23, 0.0, f23,
+    0.0, 0.0, f23,// apex edge nodes
+    0.0, 0.0, f13,
     0.0, f13, f23,
     0.0, f23, f13,
+    f13, 0.0, f23,
+    f23, 0.0, f13,
     //
     f13, f13, 0.0,// face nodes
     f13, 0.0, f13,
@@ -153,38 +156,37 @@ public://TODO make protected or private with friend class Elem?
   static constexpr
   double coor_tet20 [sims_d * (vert_n + 2*edge_n + tris_n)]// transposed
   = {
-#if 1
-    // Standard node order
+#if 0
     0.0, 1.0, 0.0, 0.0,// x-ordinates
     f13, f23, f23, f13, 0.0, 0.0,
-    0.0, 0.0, 0.0, 0.0, f13, f23,
-    f13, f13, f13, f13,
+    0.0, 0.0, 0.0, 0.0, f23, f13,
+    f13, f13, 0.0, f13,
     //
     0.0, 0.0, 1.0, 0.0,// y-ordinates
-    0.0, 0.0, f13, f23, f23, f13,
-    0.0, 0.0, f13, f23, 0.0, 0.0,
-    f13, 0.0, 0.0, f13,
+    0.0, 0.0, f13, f23, f13, f23,
+    0.0, 0.0, f23, f13, 0.0, 0.0,
+    f13, 0.0, f13, f13,
     //
     0.0, 0.0, 0.0, 1.0,// z-ordinates
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
     f13, f23, f13, f23, f13, f23,
     0.0, f13, f13, f13
 #endif
-#if 0
+#if 1
     // Gmsh node order
     0.0, 1.0, 0.0, 0.0,// x-ordinates
     f13, f23, f23, f13, 0.0, 0.0,
-    0.0, 0.0, f13, f23, 0.0, 0.0,
+    0.0, 0.0, 0.0, 0.0, f13, f23,
     f13, f13, 0.0, f13,
     //
     0.0, 0.0, 1.0, 0.0,// y-ordinates
-    0.0, 0.0, f13, f23, f13, f23,
-    0.0, 0.0, 0.0, 0.0, f13, f23,
+    0.0, 0.0, f13, f23, f23, f13,
+    0.0, 0.0, f13, f23, 0.0, 0.0,
     f13, 0.0, f13, f13,
     //
     0.0, 0.0, 0.0, 1.0,// z-ordinates
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    f13, f23, f13, f23, f23, f13,
+    f23, f13, f23, f13, f23, f13,
     0.0, f13, f13, f13
 #endif
     };

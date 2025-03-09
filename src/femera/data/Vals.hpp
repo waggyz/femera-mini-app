@@ -36,13 +36,13 @@ namespace femera { namespace data {
     I* get (const fmr::Vals_name_t& id, size_t start=0, typename
       std::enable_if <std::is_integral <I>::value>::type* = nullptr)
     noexcept;
-    template <typename V>
-    V* get (const fmr::Vals_name_t& id, size_t start=0, typename
-      std::enable_if <std::is_floating_point <V>::value>::type* = nullptr)
+    template <typename F>
+    F* get (const fmr::Vals_name_t& id, size_t start=0, typename
+      std::enable_if <std::is_floating_point <F>::value>::type* = nullptr)
     noexcept;
     //TODO get_fast (id), get_safe (id), get_cast (id), get_copy (id, T* copy)
     //     take (id, & dest), give (id, & src)
-    template <typename T>
+    template <typename T>//TODO Check if template needed.
     void del (const fmr::Vals_name_t& id)
     noexcept;
     fmr::Local_int del_all ()// clears int and float maps; returns # deleted

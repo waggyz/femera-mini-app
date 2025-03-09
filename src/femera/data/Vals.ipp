@@ -43,7 +43,8 @@ FMR_WARN_INLINE_ON
     Bulk_vals* vals = nullptr;
     try { vals =& this->name_vals.at (id); }
     catch (std::out_of_range & e) {
-      printf ("%s: floating point name not found\n", id.c_str());
+      fprintf (stderr, "%s: floating point name not found\n",
+        id.c_str());
       return nullptr;
     }
     const auto ptr = vals->get_fast<T>();
@@ -85,7 +86,7 @@ FMR_WARN_INLINE_ON
     Bulk_ints* vals = nullptr;
     try { vals =& this->name_ints.at(id); }
     catch (std::out_of_range & e) {
-      printf ("%s: integer name not found\n", id.c_str());
+      fprintf (stderr, "%s: integer name not found\n", id.c_str());
       return nullptr;
     }
     const auto ptr = vals->get_fast<T>();
@@ -95,7 +96,8 @@ FMR_WARN_INLINE_ON
     }
     // convert stored to requested type
 #ifdef FMR_DEBUG
-    printf ("converting %s from %sint%lu_t to %sint%lu_t...\n", id.c_str(),
+    printf ("converting %s from %sint%lu_t to %sint%lu_t...\n",
+      id.c_str(),
       vals->has_sign () ? "":"u", vals->get_sizeof (),
       std::is_signed <T>::value ? "":"u", sizeof(T) )
 #endif

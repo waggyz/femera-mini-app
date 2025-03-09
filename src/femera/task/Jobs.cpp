@@ -15,7 +15,8 @@ namespace femera {
       this->add_task (std::move (proc_ptr));
     }
     if (this->proc == nullptr) {
-      FMR_THROW("Jobs failed to add a new processing environment."); return;
+      FMR_THROW("Femera Jobs failed to add a new processing environment.");
+      return;
     }
     if (this->proc->proc == nullptr) { this->proc->proc = this->proc; }
 #ifdef FMR_HAS_MPI
@@ -23,14 +24,13 @@ namespace femera {
 #endif
     // Add the File data handler (this->data).
     if (this->data == nullptr) {
-FMR_WARN_INLINE_OFF
       const auto data_ptr = std::move (data::File::new_task (this->get_core()));
-FMR_WARN_INLINE_ON
       this->data = data_ptr.get();
       this->add_task (std::move (data_ptr));
     }
     if (this->data == nullptr) {
-      FMR_THROW("Jobs failed to add a new data handler."); return;
+      FMR_THROW("Femera Jobs failed to add a new data handler.");
+      return;
     }
     if (this->proc->data == nullptr) { this->proc->data = this->data; }
     if (this->data->data == nullptr) { this->data->data = this->data; }
@@ -41,7 +41,8 @@ FMR_WARN_INLINE_ON
       this->add_task (std::move (test_ptr));
     }
     if (this->test == nullptr) {
-      FMR_THROW("Jobs failed to add new testbeds."); return;
+      FMR_THROW("Femera Jobs failed to add new testbeds.");
+      return;
     }
     if (this->proc->test == nullptr) { this->proc->test = this->test; }
     if (this->data->test == nullptr) { this->data->test = this->test; }
