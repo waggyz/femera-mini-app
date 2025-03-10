@@ -34,7 +34,6 @@ The library includes various utility functions for:
 
 - Hypercomplex array operations (addition, subtraction, multiplication, division)
 - Multidual Cauchy-Riemann (CR) matrix operations
-- TODO Power and exponent calculations
 
 ## Usage
 
@@ -49,7 +48,8 @@ Then, you can create and manipulate hypercomplex numbers and matrices using the 
 C++11 or later
 OpenMP support (optional, for parallel processing)
 
-## TODO Installation
+## Installation
+This is a header-only library. To use it in your project, simply copy the header files (*.hpp and *.ipp) to your project's include directory.
 
 ## TODO Contributing
 [Insert contribution guidelines or contact information for potential contributors]
