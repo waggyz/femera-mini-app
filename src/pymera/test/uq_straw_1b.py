@@ -35,8 +35,8 @@ sims.set_partition_n(1)# 1 partition per model
 #TODO is 'mean' a synonym for 'to'?
 sims.set_parameter(name='tip-displacement-z', mean=0.10, stdev=0.01)
 sims.set_parameter(name='fmr:geom:length', to=1.000) #x (global parameter)
-sims.set_parameter('fmr:geom:width',  0.100)# y
-sims.set_parameter('fmr:geom:height', 0.100)# z
+sims.set_parameter('fmr:geom:width',  0.050)# y
+sims.set_parameter('fmr:geom:height', 0.050)# z
 sims.set_parameter('fmr:mtrl:youngs-modulus', 210e9)# E
 sims.set_parameter('fmr:mtrl:poissons-ratio', 0.30)# nu  
 
@@ -44,15 +44,15 @@ sims.set_parameter('fmr:mtrl:poissons-ratio', 0.30)# nu
 sims.add_post('fmr:geom:parameters')# all geometry parameters set
 sims.add_post('fmr:mtrl:parameters')# all material parameters set
 sims.add_post('tip-displacement')
-sims.add_post(name='base-force-z',
+sims.add_post(name='base-force-mag',
               at='fmr:geom:plane:x-min',
-              sum='fmr:phys:node:force:z')
+              sum='fmr:phys:node:force:mag')
 
 sims.init()
 sims.run()
 
 # post-process numpy arrays from Pymera
-base_force = sims.get_post('base-force-z')
+base_force = sims.get_post('base-force-mag')
 base_area = ( sims.get_parameter('fmr:geom:width')
             * sims.get_parameter('fmr:geom:height') )
 base_pressure_avg = base_force / base_area
