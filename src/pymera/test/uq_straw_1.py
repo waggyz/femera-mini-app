@@ -31,7 +31,7 @@ sims.set_solve(name='linear-solve', method='fmr:solve:PCG')
 sims.set_grid(method='fmr:grid:FE', elem='fmr:elem:tet10', elem_size=0.020)
 sims.set_partition_n(1)# 1 partition per model
 
-# Set up random variables.
+# Set up random variables. These will all be size N arrays.
 #TODO is 'mean' a synonym for 'to'?
 sims.set_parameter(name='tip-displacement-z', mean=0.10, stdev=0.01)
 sims.set_parameter(name='fmr:geom:length', to=1.000) #x (global parameter)
@@ -56,5 +56,7 @@ base_force = sims.get_post('base-force-z')
 base_area = ( sims.get_parameter('fmr:geom:width')
             * sims.get_parameter('fmr:geom:height') )
 base_pressure_avg = base_force / base_area
+
+sims.exit() #NOTE invalidates sims post-processing pointers
 
 jobs.exit()
