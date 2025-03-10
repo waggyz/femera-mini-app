@@ -136,20 +136,20 @@ public://TODO make protected or private with friend class Elem?
     0.0, 0.0, 1.0,// 4
     //
     f13, 0.0, 0.0,// 5 bottom triangle edge nodes
-    f23, 0.0, 0.0,// 6                        //             3              //
-    f23, f13, 0.0,// 7                        //            /|\             //
-    f13, f23, 0.0,// 8                        //          13 | 15   xyz     //
-    0.0, f23, 0.0,// 9                        //          /  |x \ <--20     //
-    0.0, f13, 0.0,//10                        //        14   11  16         //
-    //                                        //        /    |    \         //
-    0.0, 0.0, f23,//11 apex edge nodes        //  yz   2---8-|-7---1   xz   //
-    0.0, 0.0, f13,//12                        //  19--> \  x |  x / <--18   //
-    0.0, f13, f23,//13                        //         9   12  6          //
-    0.0, f23, f13,//14                        //    17--> \ x|  /           //
-    f13, 0.0, f23,//15                        //    xy    10 | 5     y z x  //
-    f23, 0.0, f13,//16                        //            \|/       \|/   //
-    //                                        //             0         o    //
-    f13, f13, 0.0,//17 face nodes             // x face node                //
+    f23, 0.0, 0.0,// 6                     //               3               //
+    f23, f13, 0.0,// 7                     //              /|\              //
+    f13, f23, 0.0,// 8                     //            13 | 15   xyz      //
+    0.0, f23, 0.0,// 9                     //            /  |x \ <--20      //
+    0.0, f13, 0.0,//10                     //          14   11  16          //
+    //                                     //          /    |    \          //
+    0.0, 0.0, f23,//11 apex edge nodes     //    yz   2---8-|-7---1   xz    //
+    0.0, 0.0, f13,//12                     //    19--> \  x |  x / <--18    //
+    0.0, f13, f23,//13                     //           9   12  6           //
+    0.0, f23, f13,//14                     //      17--> \ x|  /            //
+    f13, 0.0, f23,//15                     //      xy    10 | 5     y z x   //
+    f23, 0.0, f13,//16                     //              \|/       \|/    //
+    //                                     //               0         o     //
+    f13, f13, 0.0,//17 face nodes          //  x face nodes                 //
     f13, 0.0, f13,//18
     0.0, f13, f13,//19
     f13, f13, f13 //20
@@ -211,6 +211,7 @@ public://TODO make protected or private with friend class Elem?
   };
   // Structured mesh tilable tet fills ---------------------------------------
 #if 0
+  static constexpr
   fmr::Geom_float cube_coor [3* 8]// same as cube elem below
   = {
                     // vertex   7---------6                //
@@ -240,7 +241,7 @@ public://TODO make protected or private with friend class Elem?
   fmr::Local_int cube_conn_5tet [4* 5]// 5-tet fill, tilable with rotation
   = {
     1,3,4,6,// This first tet is twice the volume of the rest.
-    0,1,3,4,// The rest are conformal to the natural tet (identity Jacobian).
+    0,1,3,4,// The rest are conformal to the natural tet.
     2,3,1,6,
     5,6,1,4,
     7,6,4,3

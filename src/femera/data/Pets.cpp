@@ -37,7 +37,7 @@ namespace femera {
       if (P != nullptr) {
         MPI_Comm c;
         const auto err = MPI_Comm_dup (MPI_Comm (P->get_team_id()), &c);
-        if (err) {//TODO exception should remove Pets from the data task_list
+        if (err) {//TODO exception should remove Pets from the data task_list?
           FMR_THROW("Failed to copy MPI communicator for Pets.");
         } else {
           this->team_id = fmr::Team_int (c);

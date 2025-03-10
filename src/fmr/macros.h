@@ -34,6 +34,8 @@
 #define FMR_VALS_LOCAL
 //NOTE define only one of the two above.
 // Define FMR_xxxx_LOCAL to make data arrays thread-local to each OpenMP thread.
+// FMR_VALS_LOCAL better because thread handling done by femera::data::Bank
+// instead of this->data (femera::data::File).
 //
 #define FMR_RUNS_LOCAL
 // Define FMR_RUNS_LOCAL for thread-local sim runners on each OpenMP thread.

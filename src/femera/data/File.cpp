@@ -43,6 +43,8 @@ namespace femera {
 #ifdef FMR_BANK_LOCAL
         B->set_name ("Femera data bank for process "
           + std::to_string (this->proc->get_proc_id ()));
+#else
+        B->set_name ("Femera data bank");
 #endif
 #ifdef FMR_DEBUG
         const auto m = this->proc->get_proc_ix (Task_type::Fmpi);

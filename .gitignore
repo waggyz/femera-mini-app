@@ -47,6 +47,8 @@ local.*
 .venv/
 
 # Auto-created directories and files
+.venv*
+.vscode*
 *.kate-swp
 *.lyx~
 *.lyx#
