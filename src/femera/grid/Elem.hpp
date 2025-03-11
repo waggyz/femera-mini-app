@@ -30,15 +30,15 @@ public:
 #endif
 
 namespace femera { namespace grid { namespace elem {
-
-// Forward-delare element shapes
+/*
+// Forward-delare element shapes TODO is this needed?
 class Spar;
 class Line;//TODO 1D interface element embedded in 2D or 3D space
 class Itri; class Iqud;// 2D interface elements embedded in 3D space
 class Tris; class Quad;
 class Tets; class Prmd; class Wdge; class Cube;
 class User;//TODO user element
-
+*/
 template <class T, typename fmr::Local_int P=1, typename fmr::Local_int D=3,
   typename F=fmr::Geom_float>
 class Elem {//TODO enable_if P>0 or for P in [1,2,3]?

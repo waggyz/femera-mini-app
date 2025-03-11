@@ -12,7 +12,9 @@ echo         clusterrank=\"local\"\; >>$DOT
 # e.g.   class Jobs : public Sims<Jobs> { #NOTE does not work
 #
 sed -n 's/^[ ]*class \([A-Z][a-zA-Z0-9_]*\)\([ :a-z=,]*\)\([A-Z][a-zA-Z0-9_][a-zA-Z0-9_][a-zA-Z0-9_]\).*/\"\1\" -> \"\3\"/p' \
-  src/*/*.hpp src/*/*/*.hpp >>$DOT
+  src/*/*.hpp src/*/*/*.hpp src/*/*/*/*.hpp >>$DOT
+sed -n 's/^[ ]*struct \([A-Z][a-zA-Z0-9_]*\)\([ :a-z=,]*\)\([A-Z][a-zA-Z0-9_][a-zA-Z0-9_][a-zA-Z0-9_]\).*/\"\1\" -> \"\3\"/p' \
+  src/*/*.hpp src/*/*/*.hpp src/*/*/*/*.hpp >>$DOT
 #
 #echo '{ rank = sink; "perf"; }' >>$DOT
 #
