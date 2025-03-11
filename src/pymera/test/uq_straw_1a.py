@@ -54,7 +54,7 @@ def main():
     sims.set_solve(name='linear-solve', method='fmr:solve:PCG')
     # defaults: analysis='fmr:solve:static', load_step_n=1, rtol=1e-6)
     
-    sims.set_partition_n(1)# 1 partition per model
+    sims.set_partition_n(1)# one partition per model
 
     sims.set_parameter('beam-mesh','fmr:grid:cell_count_lwh', beam_elem_count)
     sims.set_parameter('tip-bc', 'fmr:phys:node:displacement:z', tip_z)
