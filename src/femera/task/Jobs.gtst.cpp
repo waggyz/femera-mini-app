@@ -24,6 +24,9 @@ FMR_WARN_INLINE_ON
   EXPECT_EQ( jobs.data->get_abrv (), "file" );
   EXPECT_EQ( jobs.test->get_abrv (), "beds" );
 }
+TEST( Jobs, Version ){
+  EXPECT_EQ( jobs.get_version (), MAKESTR(FMR_VERSION) );
+}
 TEST( Jobs, TaskStackHasSims ){
   EXPECT_GT( jobs.get_task_n (femera::Task_type::Sims), 0);
   EXPECT_EQ( jobs.get_task   (femera::Task_type::Sims)->get_abrv (), "sims" );

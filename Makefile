@@ -509,6 +509,7 @@ INSTALL_EXTERNAL+= $(patsubst %,$(BUILD_CPU)/external/%-install.out, \
 #TODO REMVOE GET_BATS:= $(patsubst %,%-get,$(BATS_MODS))
 
 LIBFEMERA:=$(STAGE_CPU)/lib/libfemera.a
+LIBFEMERA_SO:=$(STAGE_CPU)/lib/tmp.libfemera.so
 
 # Changing any of these should cause a full Femera rebuild.
 TOPDEPS += Makefile config.local $(BUILD_CPU)/femera.flags
@@ -532,7 +533,7 @@ PRFOUTS:= $(patsubst src/%.perf.cpp,$(BUILD_CPU)/%.perf.out,$(FMRPERF))
 
 # These .PHONY targets are intended for users.
 # external libfemera test tune
-.PHONY: all tools external mini femera install
+.PHONY: all tools external mini femera install shared
 .PHONY: remove reinstall clean cleaner cleanest purge
 # -----------------------------------------------------------------------------
 # The rest are for developers...
@@ -559,7 +560,7 @@ PRFOUTS:= $(patsubst src/%.perf.cpp,$(BUILD_CPU)/%.perf.out,$(FMRPERF))
 
 # $(STAGE_DIR)/% Does not work as target for .SECONDARY or .PRECIOUS.
 # It looks like .PRECIOUS prerequisites must match a target pattern exactly.
-.PRECIOUS: $(STAGE_DIR)/bin/fmr% $(LIBFEMERA)
+.PRECIOUS: $(STAGE_DIR)/bin/fmr% $(LIBFEMERA) $(LIBFEMERA_SO)
 .PRECIOUS: $(BUILD_DIR)/external/%-install.flags
 .PRECIOUS: $(BUILD_CPU)/external/%-install.flags
 
@@ -588,6 +589,7 @@ mini: | intro
 	$(call timestamp,$@,$^)
 	$(MAKE) $(JLIM) $(FMROUTS)
 	$(MAKE) $(JLIM) $(BUILD_CPU)/mini
+	$(MAKE) shared
 	$(MAKE) $(JSER) $(BUILD_CPU)/mini.valgrind.log
 	$(MAKE) $(JPAR) build-done
 
@@ -1073,10 +1075,23 @@ $(BUILD_CPU)/%.test.out: # Warn if no test.
 # Library targets -------------------------------------------------------------
 $(LIBFEMERA)(build/%.o) : build/%.o
 	#(info $(LIBS) $(AREXE) -cr libfemera.a <-- $^)
-	$(call col2lib,$(LIBS),$(AREXE) -cr libfemera.a <--,$^)
+	$(call col2lib,$(LIBS),$(AREXE) -crs libfemera.a <--,$^)
 	# Serialize archive operations.
-	flock "$(STAGE_CPU)/libfemera.lck" $(AREXE) -cr $(LIBFEMERA) $^
+	flock "$(STAGE_CPU)/libfemera.a.lck" $(AREXE) -crs $(LIBFEMERA) $^
+	# $(call col2lib,$(LIBS),$(CXX) -shared -o tmp.libfemera.so <--,$^)
+	# flock "$(STAGE_CPU)/libfemera.so.lck" 
+	# $(CXX) $^ -shared $(LDFLAGS) -Wl,-soname,tmp.libfemera.so -o $(LIBFEMERA_SO) $^
 
+shared: $(LIBFEMERA)
+	$(call col2lib,$(LIBS),$(CXX) -shared -o tmp.libfemera.so <--,libfemera.a)
+	$(CXX) $(CXXFLAGS) -shared  $(LDFLAGS) -o $(LIBFEMERA_SO) \
+	 -Wl,--whole-archive $(LIBFEMERA) -Wl,--no-whole-archive
+#	$(info $(INFO) Shared library built: $@)
+#
+#$(LIBFEMERA_SO)(build/%.o): $(BUILD_CPU)/%.o
+#	#(info $(LIBS) $(CXX) -shared libfemera.so <-- $^)#
+#	$(call col2lib,$(LIBS),$(CXX) -shared -o $@,$^)
+#	$(CXX) -shared $(LDFLAGS) -o $@ $^
 # Executable targets ----------------------------------------------------------
 $(BUILD_CPU)/mini: export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/mini: export PATH:=$(shell pwd)/$(BUILD_CPU):$(PATH)

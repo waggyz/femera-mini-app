@@ -22,7 +22,7 @@ public:
   static constexpr
   fmr::Local_int vert_conn [vert_n] = {0,1};
   static constexpr
-  fmr::Local_int spar_conn [Spar::vert_n * edge_n] = {0,1};
+  fmr::Local_int spar_conn [Spar::vert_n * Spar::edge_n] = {0,1};
   static constexpr fmr::Local_int* tris_conn = nullptr;
   static constexpr fmr::Local_int* quad_conn = nullptr;
   //
@@ -41,7 +41,6 @@ public:
     0.0, 0.0
   };
 };
-
 } } }//end femera::grid::elem:: namespace
 
 #include "Spar.ipp"
