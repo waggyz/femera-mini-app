@@ -14,11 +14,11 @@ def main():
     beam_width = 0.050
     beam_height = 0.050
     elem_size = 0.010
-    
+    #
     nominal_dims = np.array([beam_length, beam_width, beam_height])
     beam_elem_count = np.ascontiguousarray(
         np.array(nominal_dims / elem_size, dtype='u4'))
-    
+    #
     # Set up random input variables as size N numpy arrays.
     tip_z = np.ascontiguousarray(#TODO hide ascontiguousarray.
         np.random.normal(0.100, 0.010, N)) # mean=0.100, stdev=0.010
@@ -32,52 +32,66 @@ def main():
         np.random.normal(210e9, 210e8, N))
     poissons = np.ascontiguousarray(
         np.random.normal(0.285, 0.0285, N))
-    
+    #
     my_jobs = fmr.jobs()
     sims = my_jobs.add_sims(name='cantilever-beam-sims', runs_n=N)
-    
+    #
+    #NOTE Model setup could be done in a JSON file. ---------------------------
+    # sims.read('uq_straw_1a.json')
+    # 
+    # Set model partitioning method.
+    sims.set_partition_n(1)# one partition per model
+    #
+    # Set model geometry and mesh.
     sims.add_geometry(name='beam-geometry', shape='fmr:geom:block')
-    sims.add_grid(name='beam-mesh', method='fmr:grid:FE', structured=true,
-                 elem='fmr:elem:tet10')
-
+    sims.add_grid(name='beam-mesh',
+                  for='beam-geometry',
+                  type='fmr:grid:FE',
+                  method='fmr:grid:structured',
+                  elem='fmr:elem:tet10')
+    #
+    # Set boundary conditions.
     sims.set_bcs(name='fixed-base-bc',
                 at='fmr:grid:node:x-min',
                 set='fmr:phys:node:displacement:xyz',
                 to='fmr:phys:bcs:encastre')
-    sims.add_bcs(name='tip-bc',
+    sims.add_bcs(name='tip-displace-bc',
                 at='fmr:grid:node:x-max')# value is tip-bc parameter below
-    
+    #
+    # Set material.
     sims.set_material(name='basic-steel',
                     physics='fmr:mtrl:linear-elastic-isotropic')
-    
-    sims.set_preconditioner(name='fmr:precon:jacobi')
+    #
+    # Set preconditioner and solver.
+    sims.set_preconditioner(name='fmr:solve:precon:jacobi')
     sims.set_solve(name='linear-solve', method='fmr:solve:PCG')
     # defaults: analysis='fmr:solve:static', load_step_n=1, rtol=1e-6)
-    
-    sims.set_partition_n(1)# one partition per model
-
+    #
+    # Identify output parameters for post-processing.
+    sims.add_post(name='base-force-mag',
+                at='fmr:grid:node:x-min',
+                sum='fmr:phys:node:force:mag')
+    #--------------------------------------------------------------------------
+    # Set input parameters.
     sims.set_parameter('beam-mesh','fmr:grid:cell_count_lwh', beam_elem_count)
-    sims.set_parameter('tip-bc', 'fmr:phys:node:displacement:z', tip_z)
+    sims.set_parameter('tip-displace-bc', 'fmr:phys:node:displacement:z', tip_z)
     sims.set_parameter('beam-geometry', 'fmr:geom:length', length) #x
     sims.set_parameter('beam-geometry', 'fmr:geom:width', width)# y
     sims.set_parameter('beam-geometry', 'fmr:geom:height', height)# z
     sims.set_parameter('basic-steel', 'fmr:mtrl:youngs-modulus', youngs)# E
     sims.set_parameter('basic-steel', 'fmr:mtrl:poissons-ratio', poissons)# nu
-    
-    # Identify parameters for post-processing.
-    sims.add_post(name='base-force-mag',
-                at='fmr:grid:node:x-min',
-                sum='fmr:phys:node:force:mag')
-    
-    sims.init()
+    #
+    sims.init()# optional, sims.run() will call sims.init()
     sims.run()
-    
+    #
     # Get numpy array contents from Pymera.
     base_force = sims.get_post('base-force-mag')
     base_pressure_avg = base_force / (width * height)
-    
-    sims.exit() #NOTE invalidates sims post-processing pointers
-    
+    #
+    sims.exit() #NOTE invalidates sims post-processing pointers (base_force)
+    #
+    #TODO UQ stuff, maybe create and run more sims...
+    #
     my_jobs.exit()
 
 if __name__ == "__main__":
