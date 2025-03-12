@@ -6,6 +6,7 @@ namespace femera { namespace grid { namespace elem {
 C++11 requires redundant declaration/definition for constexpr arrays to 
 reference them later.
 */
+#if 0
 constexpr fmr::Local_int Tets::vols_n;// optional for basic types
 
 constexpr fmr::Local_int Tets::tris_conn [];
@@ -23,7 +24,7 @@ constexpr fmr::Phys_float Tets::intg_4_ptwt [];
 constexpr fmr::Phys_float Tets::intg_5_ptwt [];
 constexpr fmr::Phys_float Tets::intg_10_ptwt [];
 constexpr fmr::Phys_float Tets::intg_11_ptwt [];
-
+#endif
 // Tets::shap_func_X and Tets::shap_grad_N evaluate the shape functions or
 // gradients at 3D natural coordinate point x.
 

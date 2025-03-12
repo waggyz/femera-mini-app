@@ -510,6 +510,7 @@ INSTALL_EXTERNAL+= $(patsubst %,$(BUILD_CPU)/external/%-install.out, \
 
 LIBFEMERA:=$(STAGE_CPU)/lib/libfemera.a
 LIBFEMERA_SO:=$(STAGE_CPU)/lib/tmp.libfemera.so
+# tmp.libfemera.so prevents premature linking to the shared library.
 
 # Changing any of these should cause a full Femera rebuild.
 TOPDEPS += Makefile config.local $(BUILD_CPU)/femera.flags
@@ -1078,20 +1079,12 @@ $(LIBFEMERA)(build/%.o) : build/%.o
 	$(call col2lib,$(LIBS),$(AREXE) -crs libfemera.a <--,$^)
 	# Serialize archive operations.
 	flock "$(STAGE_CPU)/libfemera.a.lck" $(AREXE) -crs $(LIBFEMERA) $^
-	# $(call col2lib,$(LIBS),$(CXX) -shared -o tmp.libfemera.so <--,$^)
-	# flock "$(STAGE_CPU)/libfemera.so.lck" 
-	# $(CXX) $^ -shared $(LDFLAGS) -Wl,-soname,tmp.libfemera.so -o $(LIBFEMERA_SO) $^
 
 shared: $(LIBFEMERA)
 	$(call col2lib,$(LIBS),$(CXX) -shared -o tmp.libfemera.so <--,libfemera.a)
 	$(CXX) $(CXXFLAGS) -shared  $(LDFLAGS) -o $(LIBFEMERA_SO) \
 	 -Wl,--whole-archive $(LIBFEMERA) -Wl,--no-whole-archive
-#	$(info $(INFO) Shared library built: $@)
-#
-#$(LIBFEMERA_SO)(build/%.o): $(BUILD_CPU)/%.o
-#	#(info $(LIBS) $(CXX) -shared libfemera.so <-- $^)#
-#	$(call col2lib,$(LIBS),$(CXX) -shared -o $@,$^)
-#	$(CXX) -shared $(LDFLAGS) -o $@ $^
+
 # Executable targets ----------------------------------------------------------
 $(BUILD_CPU)/mini: export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/mini: export PATH:=$(shell pwd)/$(BUILD_CPU):$(PATH)
