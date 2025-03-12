@@ -5,11 +5,11 @@ SHELL := bash
 SPC40:=$(shell echo "                                        ")
 
 # These keep the time persistent through recursive makefile calls.
-BUILD_DATE := ${BUILD_DATE}
-BUILD_SECS := ${BUILD_SECS}
-ifndef BUILD_DATE
-  export BUILD_DATE := $(shell date -u +"%Y-%m-%dT%H:%M")
-  export BUILD_SECS := $(shell date +%s)
+FMR_BUILD_DATE := ${FMR_BUILD_DATE}
+FMR_BUILD_SECS := ${FMR_BUILD_SECS}
+ifndef FMR_BUILD_DATE
+  export FMR_BUILD_DATE := $(shell date -u +"%Y-%m-%dT%H:%M")
+  export FMR_BUILD_SECS := $(shell date +%s)
 endif
 
 parse_email = $(shell echo '$(1)' | sed 's/ *(.*)//; s/>.*//; s/.*[:<] *//')
@@ -22,11 +22,11 @@ make_jobs_str = $(shell if [[ "$(MAKEFLAGS)" == *"j"* ]]; \
 
 timestamp = @printf '%8s%-45s %1s%25s\n' "$(Make) " \
 '$(call strcut,$(1): $(2)$(SPC40)$(SPC40),44)' $(call make_jobs_str) \
-$(BUILD_DATE)"+"$(shell tools/elapsed-time $(BUILD_SECS))
+$(FMR_BUILD_DATE)"+"$(shell tools/elapsed-time $(FMR_BUILD_SECS))
 
 elapstamp = @printf '%8s%-62s %9s\n' "$(Make) " \
 '$(call strcut,$(1): $(2)$(SPC40)$(SPC40),61)' \
-"+"$(shell tools/elapsed-time $(BUILD_SECS))
+"+"$(shell tools/elapsed-time $(FMR_BUILD_SECS))
 
 # 80-8 = 72, (80-8)/2 =41
 col2cxx = printf "%s %-47s%25s\n" "$(1)" "$(2)" "$(3)";

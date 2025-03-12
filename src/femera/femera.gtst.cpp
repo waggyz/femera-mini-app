@@ -11,4 +11,6 @@ FMR_WARN_INLINE_ON
 }
 TEST(NewTask, AbrvIsJobs) {
   EXPECT_EQ( mini->get_abrv (), "jobs");
+  EXPECT_EQ( mini->get_version ().substr(0,6), "Femera");
+  EXPECT_EQ( mini->get_version (), MAKESTR(FMR_VERSION));
 }

@@ -18,7 +18,7 @@ namespace femera { namespace test {
 
 //...
 
-  TEST(Mtrl, IsOK) {
+  TEST(Algo, IsOK) {
     EXPECT_EQ( 1, 1);
   }
 

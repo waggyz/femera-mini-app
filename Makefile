@@ -1233,9 +1233,9 @@ endif
 $(SRC_STAT_FILE): | build/$(CPUMODEL)/
 	touch "$(SRC_STAT_FILE)"; \
 	if ! grep "$(FEMERA_VERSION)" "$(SRC_STAT_FILE)" | grep -q "$(HOSTNAME)"; \
-	then echo "$(BUILD_DATE)",'"'$(FEMERA_VERSION)'"',\
+	then echo "$(FMR_BUILD_DATE)",'"'$(FEMERA_VERSION)'"',\
 	"`cat build/src-code-stats.csv`",\
-	"`tools/elapsed-time $(BUILD_SECS)`",'"'$(CXX) $(CXX_VERSION)'"',\
+	"`tools/elapsed-time $(FMR_BUILD_SECS)`",'"'$(CXX) $(CXX_VERSION)'"',\
 	'"'$(HOSTNAME)'"','"'$(CPUMODEL)'"' >> "$(SRC_STAT_FILE)"; fi
 	-tools/plot_code_stats 2>/dev/null
 	$(call timestamp,$@,)
