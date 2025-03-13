@@ -103,6 +103,7 @@ ifeq ($(CXX),g++)
   # CXXFLAGS+= --param inline-min-speedup=2
   # CXXFLAGS+= --param inline-unit-growth=500
   # CXXFLAGS+= --param large-function-growth=2000
+  #  -fvisibility-inlines-hidden  -fvisibility=hidden
   #
   # Library archiver
   AREXE      :=gcc-ar
@@ -508,9 +509,9 @@ INSTALL_EXTERNAL+= $(patsubst %,$(BUILD_CPU)/external/%-install.out, \
 
 #TODO REMVOE GET_BATS:= $(patsubst %,%-get,$(BATS_MODS))
 
-LIBFEMERA:=$(STAGE_CPU)/lib/libfemera.a
-LIBFEMERA_SO:=$(STAGE_CPU)/lib/tmp.libfemera.so
-# tmp.libfemera.so prevents premature linking to the shared library.
+LIBFEMERA_A:=$(STAGE_CPU)/lib/libfemera.a
+LIBFEMERA_SO:=$(STAGE_CPU)/lib/libfemerac.so
+# libfemerac.so prevents premature linking to the shared library.
 
 # Changing any of these should cause a full Femera rebuild.
 TOPDEPS += Makefile config.local $(BUILD_CPU)/femera.flags
@@ -561,7 +562,7 @@ PRFOUTS:= $(patsubst src/%.perf.cpp,$(BUILD_CPU)/%.perf.out,$(FMRPERF))
 
 # $(STAGE_DIR)/% Does not work as target for .SECONDARY or .PRECIOUS.
 # It looks like .PRECIOUS prerequisites must match a target pattern exactly.
-.PRECIOUS: $(STAGE_DIR)/bin/fmr% $(LIBFEMERA) $(LIBFEMERA_SO)
+.PRECIOUS: $(STAGE_DIR)/bin/fmr% $(LIBFEMERA_A) $(LIBFEMERA_SO)
 .PRECIOUS: $(BUILD_DIR)/external/%-install.flags
 .PRECIOUS: $(BUILD_CPU)/external/%-install.flags
 
@@ -570,7 +571,7 @@ PRFOUTS:= $(patsubst src/%.perf.cpp,$(BUILD_CPU)/%.perf.out,$(FMRPERF))
 .PRECIOUS: $(INSTALL_DIR)/bin/ build/%.gtst build/%.perf
 
 # Compile and add the exception handler (Errs) to libfemera early.
-$(BUILD_CPU)/femera/Test.o: $(LIBFEMERA)($(BUILD_CPU)/femera/Errs.o)
+$(BUILD_CPU)/femera/Test.o: $(LIBFEMERA_A)($(BUILD_CPU)/femera/Errs.o)
 
 # Primary named targets -------------------------------------------------------
 # These are intended for users.
@@ -1074,21 +1075,21 @@ $(BUILD_CPU)/%.test.out: # Warn if no test.
 	$(info $(DBUG) did not find test: $(*).test.*)
 
 # Library targets -------------------------------------------------------------
-$(LIBFEMERA)(build/%.o) : build/%.o
-	#(info $(LIBS) $(AREXE) -cr libfemera.a <-- $^)
-	$(call col2lib,$(LIBS),$(AREXE) -crs libfemera.a <--,$^)
+$(LIBFEMERA_A)(build/%.o) : build/%.o
+	#(info $(LIBS) $(AREXE) rcs libfemera.a <-- $^)
+	$(call col2lib,$(LIBS),$(AREXE) rcs libfemera.a <--,$^)
 	# Serialize archive operations.
-	flock "$(STAGE_CPU)/libfemera.a.lck" $(AREXE) -crs $(LIBFEMERA) $^
+	flock "$(STAGE_CPU)/libfemera.a.lck" $(AREXE) rcs $(LIBFEMERA_A) $^
 
-shared: $(LIBFEMERA)
-	$(call col2lib,$(LIBS),$(CXX) -shared -o tmp.libfemera.so <--,libfemera.a)
-	$(CXX) $(CXXFLAGS) -shared  $(LDFLAGS) -o $(LIBFEMERA_SO) \
-	 -Wl,--whole-archive $(LIBFEMERA) -Wl,--no-whole-archive
+shared: $(LIBFEMERA_A)
+	$(call col2libb,$(LIBS),$(CXX) -shared -o libfemerac.so <--,libfemera.a)
+	$(CXX) -shared -o $(LIBFEMERA_SO) $(LDFLAGS) $(LDLIBS) \
+	 -Wl,--whole-archive -Wl,--export-dynamic $(LIBFEMERA_A) -Wl,--no-whole-archive
 
 # Executable targets ----------------------------------------------------------
 $(BUILD_CPU)/mini: export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/mini: export PATH:=$(shell pwd)/$(BUILD_CPU):$(PATH)
-$(BUILD_CPU)/mini: src/femera/mini.cpp src/femera/femera.hpp $(LIBFEMERA)
+$(BUILD_CPU)/mini: src/femera/mini.cpp src/femera/femera.hpp $(LIBFEMERA_A)
 	$(call timestamp,$@,$<)
 ifeq ($(ENABLE_GCC_PROFILE),ON)
 	-$(CXX) $(CXXMINI) $< $(LDFLAGS) -lfemera $(LDLIBS) -o $@.pro
@@ -1128,7 +1129,7 @@ else
 endif
 
 build/%.perf : export TMPDIR := $(TEMP_DIR)
-build/%.perf : build/%.perf.o $(LIBFEMERA)(build/%.o)
+build/%.perf : build/%.perf.o $(LIBFEMERA_A)(build/%.o)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(@).o,$(notdir $@))
 	-$(CXX) $(CXXPERFS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
@@ -1159,9 +1160,9 @@ else
 endif
 
 build/%.gtst : export TMPDIR := $(TEMP_DIR)
-build/%.gtst : build/%.gtst.o $(LIBFEMERA)(build/%.o) \
-  $(LIBFEMERA)($(BUILD_CPU)/femera/Test.o) \
-  $(LIBFEMERA)($(BUILD_CPU)/femera/task/Jobs.o)
+build/%.gtst : build/%.gtst.o $(LIBFEMERA_A)(build/%.o) \
+  $(LIBFEMERA_A)($(BUILD_CPU)/femera/Test.o) \
+  $(LIBFEMERA_A)($(BUILD_CPU)/femera/task/Jobs.o)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(@).o,$(notdir $@))
 	-$(CXX) $(CXXTESTS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
@@ -1173,7 +1174,7 @@ endif
 
 # Header-only
 build/%.gtst : export TMPDIR := $(TEMP_DIR)
-build/%.gtst : build/%.gtst.o $(LIBFEMERA)($(BUILD_CPU)/femera/Test.o)
+build/%.gtst : build/%.gtst.o $(LIBFEMERA_A)($(BUILD_CPU)/femera/Test.o)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(@).o,$(notdir $@))
 	-$(CXX) $(CXXTESTS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@

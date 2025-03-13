@@ -31,6 +31,7 @@ elapstamp = @printf '%8s%-62s %9s\n' "$(Make) " \
 # 80-8 = 72, (80-8)/2 =41
 col2cxx = printf "%s %-47s%25s\n" "$(1)" "$(2)" "$(3)";
 col2lib = printf "%s %-30s%42s\n" "$(1)" "$(2)" "$(3)";
+col2libb = printf "%s %-40s%32s\n" "$(1)" "$(2)" "$(3)";
 
 label_test = -tools/label-test "$(1)" "$(2)" "$(3)" "$(4)"
 

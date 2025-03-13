@@ -10,10 +10,16 @@ namespace fmr {
    * https://google.github.io/styleguide/cppguide.html#Aliases
    */
   using Jobs_t = femera::Jobs_spt;
+  using Jobs_c = femera::task::Jobs;
   // functions
-  Jobs_t new_jobs ();
-  Jobs_t new_jobs (int*, char**);
-  //
+    Jobs_t new_jobs (int*, char**);
+    Jobs_t new_jobs ();
+    extern "C" {
+      Jobs_c* newc_jobs ();
+      void jobs_init(Jobs_c*);
+      void jobs_exit(Jobs_c*);
+      void delete_jobs(Jobs_c* jobs);
+    }
 }//end fmr:: namespace
 
 #include "femera.ipp"

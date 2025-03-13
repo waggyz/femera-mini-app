@@ -4,9 +4,43 @@ This is a notional strawman of what using Pymera for UQ might look like.
 It uses only internal Femera models, deferring file format handling.
 NOTE names starting with fmr: are reserved for internal Femera identifiers.
 """
-import pymera as fmr
-import uqtools as uq
+#import pymera as fmr
+#import uqtools as uq
 import numpy as np
+
+import ctypes as ct
+import os
+
+libpath='/home/dwagner5/Code/femera-mini-cmake/build/stage/i7-12800H/lib/'
+
+# Load the shared library
+if os.name == 'posix':
+    lib = ct.CDLL(libpath + 'libfemerac.so')
+elif os.name == 'nt':
+    #lib = ctypes.CDLL('./jobs.dll')
+    raise OSError("Unsupported operating system")
+else:
+    raise OSError("Unsupported operating system")
+
+# Define the argument and return types for the C interface functions
+lib.newc_jobs.restype = ct.c_void_p
+lib.delete_jobs.argtypes = [ct.c_void_p]
+lib.jobs_init.argtypes = [ct.c_void_p]
+lib.jobs_exit.argtypes = [ct.c_void_p]
+
+# Create a class to represent the Jobs object in Python
+class Jobs:
+    def __init__(self):
+        self.obj = lib.newc_jobs()
+
+    def init(self):
+        lib.jobs_init(self.obj)
+
+    def exit(self):
+        lib.jobs_exit(self.obj)
+
+    def __del__(self):
+        lib.delete_jobs(self.obj)
 
 def main():
     N = 1000 # number of simulations
@@ -26,7 +60,10 @@ def main():
     youngs = np.random.normal(210e9, 210e8, N)
     poissons = np.random.normal(0.285, 0.0285, N)
     #
-    my_jobs = fmr.jobs()
+    my_jobs = Jobs()
+    my_jobs.init()
+    #
+    """
     sims = my_jobs.add_sims(name='cantilever-beam-sims', runs_n=N)
     #
     #NOTE Model setup could be done in a JSON file. ---------------------------
@@ -86,7 +123,8 @@ def main():
     #
     #TODO UQ stuff, maybe create and run more sims,...
     uq.do_some_stuff(base_stress_avg)
-    #
+    #"
+    """
     my_jobs.exit()
 
 if __name__ == "__main__":

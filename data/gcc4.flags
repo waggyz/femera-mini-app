@@ -1,5 +1,5 @@
 -march=native -mtune=native -Ofast
 -fno-builtin-sin -fno-builtin-cos
--fvisibility=hidden -fvisibility-inlines-hidden
+-fvisibility=default
 -funroll-loops -frename-registers -ftree-vectorize -fno-common
 -fearly-inlining
