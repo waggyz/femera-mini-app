@@ -15,32 +15,32 @@ libpath='/home/dwagner5/Code/femera-mini-cmake/build/stage/i7-12800H/lib/'
 
 # Load the shared library
 if os.name == 'posix':
-    lib = ct.CDLL(libpath + 'libfemerac.so')
+    fmr = ct.CDLL(libpath + 'libfemerac.so')
 elif os.name == 'nt':
     #lib = ctypes.CDLL('./jobs.dll')
     raise OSError("Unsupported operating system")
 else:
     raise OSError("Unsupported operating system")
 
-# Define the argument and return types for the C interface functions
-lib.newc_jobs.restype = ct.c_void_p
-lib.delete_jobs.argtypes = [ct.c_void_p]
-lib.jobs_init.argtypes = [ct.c_void_p]
-lib.jobs_exit.argtypes = [ct.c_void_p]
+# Define the argument and return types for the C interface functions.
+fmr.newc_jobs.restype = ct.c_void_p
+fmr.delete_jobs.argtypes = [ct.c_void_p]
+fmr.jobs_init.argtypes = [ct.c_void_p]
+fmr.jobs_exit.argtypes = [ct.c_void_p]
 
-# Create a class to represent the Jobs object in Python
+# Create a class to represent the Jobs object in Python.
 class Jobs:
     def __init__(self):
-        self.obj = lib.newc_jobs()
+        self.obj = fmr.newc_jobs()
 
     def init(self):
-        lib.jobs_init(self.obj)
+        fmr.jobs_init(self.obj)
 
     def exit(self):
-        lib.jobs_exit(self.obj)
+        fmr.jobs_exit(self.obj)
 
     def __del__(self):
-        lib.delete_jobs(self.obj)
+        fmr.delete_jobs(self.obj)
 
 def main():
     N = 1000 # number of simulations
@@ -55,16 +55,16 @@ def main():
     # Set up random input variables as size N numpy arrays.
     tip_z = np.random.normal(0.100, 0.010, N) # mean=0.100, stdev=0.010
     length = np.random.normal(beam_length, beam_length/10, N)
-    width =np.random.normal(beam_width, beam_width/10, N)
+    width = np.random.normal(beam_width, beam_width/10, N)
     height = np.random.normal(beam_height, beam_height/10, N)
     youngs = np.random.normal(210e9, 210e8, N)
     poissons = np.random.normal(0.285, 0.0285, N)
     #
-    my_jobs = Jobs()
-    my_jobs.init()
+    fmr_jobs = Jobs()# will be fmr_jobs = fmr.Jobs() when Pymera is ready
+    fmr_jobs.init()
     #
     """
-    sims = my_jobs.add_sims(name='cantilever-beam-sims', runs_n=N)
+    sims = fmr_jobs.add_sims(name='cantilever-beam-sims', runs_n=N)
     #
     #NOTE Model setup could be done in a JSON file. ---------------------------
     # sims.read('uq_straw_1a.json')
@@ -125,7 +125,7 @@ def main():
     uq.do_some_stuff(base_stress_avg)
     #"
     """
-    my_jobs.exit()
+    fmr_jobs.exit()
 
 if __name__ == "__main__":
     main()

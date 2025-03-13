@@ -1,6 +1,8 @@
 #ifndef HAS_FEMERA_HPP
 #define HAS_FEMERA_HPP
 
+#define FMR_EXPORT __attribute__((visibility("default")))
+
 #include "core.h"
 
 namespace fmr {
@@ -9,17 +11,18 @@ namespace fmr {
    * The "using" syntax is preferred to "typedef" in the Google C++ Style Guide:
    * https://google.github.io/styleguide/cppguide.html#Aliases
    */
-  using Jobs_t = femera::Jobs_spt;
-  using Jobs_c = femera::task::Jobs;
+  using Jobs_t = femera::Jobs_spt;// smart pointer for internal C++ interface
+  using Jobs_c = femera::task::Jobs;// plain pointer for C/Python interface
   // functions
-    Jobs_t new_jobs (int*, char**);
-    Jobs_t new_jobs ();
-    extern "C" {
-      Jobs_c* newc_jobs ();
-      void jobs_init(Jobs_c*);
-      void jobs_exit(Jobs_c*);
-      void delete_jobs(Jobs_c* jobs);
-    }
+  Jobs_t new_jobs (int*, char**);
+  Jobs_t new_jobs ();
+
+  extern "C" {
+    FMR_EXPORT Jobs_c* newc_jobs ();
+    FMR_EXPORT void jobs_init (Jobs_c*);
+    FMR_EXPORT void jobs_exit (Jobs_c*);
+    FMR_EXPORT void delete_jobs (Jobs_c* jobs);
+  }
 }//end fmr:: namespace
 
 #include "femera.ipp"

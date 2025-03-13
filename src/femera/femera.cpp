@@ -15,7 +15,7 @@ extern "C" {
   fmr::Jobs_c* fmr::newc_jobs () {
     return new femera::task::Jobs();
   }
-  void fmr::jobs_init (fmr::Jobs_c*  jobs) {
+  void fmr::jobs_init (fmr::Jobs_c* jobs) {
     jobs->init(nullptr, nullptr);
   }
   void fmr::jobs_exit (fmr::Jobs_c* jobs) {

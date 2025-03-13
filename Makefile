@@ -103,7 +103,7 @@ ifeq ($(CXX),g++)
   # CXXFLAGS+= --param inline-min-speedup=2
   # CXXFLAGS+= --param inline-unit-growth=500
   # CXXFLAGS+= --param large-function-growth=2000
-  #  -fvisibility-inlines-hidden  -fvisibility=hidden
+  #  -fvisibility=hidden -fvisibility-inlines-hidden
   #
   # Library archiver
   AREXE      :=gcc-ar
