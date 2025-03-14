@@ -24,4 +24,8 @@ extern "C" {
   void fmc::delete_jobs(fmc::Jobs_t* jobs) {
     delete jobs;
   }
+  const char* fmc::get_version (fmc::Jobs_t* jobs) {
+    static std::string version = jobs->get_version();
+    return version.c_str();
+  }
 }

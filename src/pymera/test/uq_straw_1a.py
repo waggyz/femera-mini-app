@@ -27,6 +27,8 @@ fmr.new_jobs.restype = ct.c_void_p
 fmr.delete_jobs.argtypes = [ct.c_void_p]
 fmr.jobs_init.argtypes = [ct.c_void_p]
 fmr.jobs_exit.argtypes = [ct.c_void_p]
+fmr.get_version.restype = ct.c_char_p
+fmr.get_version.argtypes = [ct.c_void_p]
 
 # Create a class to represent the Jobs object in Python.
 class Jobs:
@@ -41,6 +43,9 @@ class Jobs:
 
     def __del__(self):
         fmr.delete_jobs(self.obj)
+    
+    def get_version (self):
+        return fmr.get_version(self.obj).decode('utf-8', errors='replace')
 
 def main():
     N = 1000 # number of simulations
@@ -61,6 +66,8 @@ def main():
     poissons = np.random.normal(0.285, 0.0285, N)
     #
     fmr_jobs = Jobs()# will be fmr_jobs = fmr.Jobs() when Pymera is ready
+    print ('Hello '+ fmr_jobs.get_version() + '!')
+    #print (fmr_jobs.get_version())
     #TODO Set Femera init options?
     fmr_jobs.init()
     #

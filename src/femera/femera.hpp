@@ -23,6 +23,7 @@ namespace fmc {
     FMR_EXPORT void jobs_init (Jobs_t*);
     FMR_EXPORT void jobs_exit (Jobs_t*);
     FMR_EXPORT void delete_jobs (Jobs_t*);
+    FMR_EXPORT const char* get_version (Jobs_t*);
   }
 }//end fmr:: namespace
 
