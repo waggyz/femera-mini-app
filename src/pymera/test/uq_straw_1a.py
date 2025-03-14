@@ -23,7 +23,7 @@ else:
     raise OSError("Unsupported operating system")
 
 # Define the argument and return types for the C interface functions.
-fmr.newc_jobs.restype = ct.c_void_p
+fmr.new_jobs.restype = ct.c_void_p
 fmr.delete_jobs.argtypes = [ct.c_void_p]
 fmr.jobs_init.argtypes = [ct.c_void_p]
 fmr.jobs_exit.argtypes = [ct.c_void_p]
@@ -31,7 +31,7 @@ fmr.jobs_exit.argtypes = [ct.c_void_p]
 # Create a class to represent the Jobs object in Python.
 class Jobs:
     def __init__(self):
-        self.obj = fmr.newc_jobs()
+        self.obj = fmr.new_jobs()
 
     def init(self):
         fmr.jobs_init(self.obj)
@@ -61,6 +61,7 @@ def main():
     poissons = np.random.normal(0.285, 0.0285, N)
     #
     fmr_jobs = Jobs()# will be fmr_jobs = fmr.Jobs() when Pymera is ready
+    #TODO Set Femera init options?
     fmr_jobs.init()
     #
     """

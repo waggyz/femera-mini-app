@@ -12,16 +12,17 @@ namespace fmr {
    * https://google.github.io/styleguide/cppguide.html#Aliases
    */
   using Jobs_t = femera::Jobs_spt;// smart pointer for internal C++ interface
-  using Jobs_c = femera::task::Jobs;// plain pointer for C/Python interface
   // functions
   Jobs_t new_jobs (int*, char**);
   Jobs_t new_jobs ();
-
+}
+namespace fmc {
+  using Jobs_t = femera::task::Jobs;// plain pointer for C/Python interface
   extern "C" {
-    FMR_EXPORT Jobs_c* newc_jobs ();
-    FMR_EXPORT void jobs_init (Jobs_c*);
-    FMR_EXPORT void jobs_exit (Jobs_c*);
-    FMR_EXPORT void delete_jobs (Jobs_c* jobs);
+    FMR_EXPORT Jobs_t* new_jobs ();
+    FMR_EXPORT void jobs_init (Jobs_t*);
+    FMR_EXPORT void jobs_exit (Jobs_t*);
+    FMR_EXPORT void delete_jobs (Jobs_t*);
   }
 }//end fmr:: namespace
 
