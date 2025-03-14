@@ -23,7 +23,7 @@ fmr.jobs_exit.argtypes = [ct.c_void_p]
 fmr.get_version.restype = ct.c_char_p
 fmr.get_version.argtypes = [ct.c_void_p]
 
-# Create a class to represent the Jobs object in Python.
+# Create a class to represent the Sims object in Python.
 class Sims:
     def __init__(self, jobs, name='fmr:user:sims', runs_n=0):
         self.jobs = jobs
@@ -39,7 +39,7 @@ class Sims:
         self.parameters = {}
         self.partition_n = 1
 
-    def set_partition_n(self, n):
+    def set_partition_n(self, n=1):
         self.partition_n = n
 
     def add_geometry(self, name, shape):
@@ -95,10 +95,18 @@ class Sims:
             "sum": sum
         })
 
+    def get_post(self, name):
+        # Placeholder for getting post-processing results
+        # In a real implementation, this would return actual data
+        return np.ones(self.runs_n)
+
     def set_parameter(self, component, parameter, value):
         if component not in self.parameters:
             self.parameters[component] = {}
         self.parameters[component][parameter] = value
+    
+    def get_parameter(self, component, parameter):
+        return self.parameters[component][parameter]
 
     def init(self):
         # Placeholder for initialization logic
@@ -107,11 +115,6 @@ class Sims:
     def run(self):
         # Placeholder for run logic
         pass
-
-    def get_post(self, name):
-        # Placeholder for getting post-processing results
-        # In a real implementation, this would return actual data
-        return np.ones(self.runs_n)
 
     def exit(self):
         # Placeholder for cleanup logic

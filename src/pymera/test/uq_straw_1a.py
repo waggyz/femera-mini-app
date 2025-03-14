@@ -25,9 +25,9 @@ def main():
     #
     # Set up random input variables as size N numpy arrays.
     tip_z = np.random.normal(0.100, 0.010, N) # mean=0.100, stdev=0.010
-    length = np.random.normal(beam_length, beam_length/10, N)
-    width = np.random.normal(beam_width, beam_width/10, N)
-    height = np.random.normal(beam_height, beam_height/10, N)
+    length = np.random.normal(beam_length, beam_length/100, N)
+    width = np.random.normal(beam_width, beam_width/100, N)
+    height = np.random.normal(beam_height, beam_height/100, N)
     youngs = np.random.normal(210e9, 210e8, N)
     poissons = np.random.normal(0.285, 0.0285, N)
     #
@@ -74,7 +74,6 @@ def main():
                 at='fmr:grid:node:x-min',
                 sum='fmr:phys:node:force:mag')
     #--------------------------------------------------------------------------
-    #
     # Set input parameters.
     sims.set_parameter('beam-mesh','fmr:grid:cell_count_lwh', beam_elem_count)
     sims.set_parameter('tip-displace-bc', 'fmr:phys:node:displacement:z', tip_z)
@@ -89,12 +88,12 @@ def main():
     #
     # Get numpy array contents from Pymera.
     base_force = sims.get_post('base-force-mag')
-    #
     base_stress_avg = base_force / (width * height)# averaged over each base
-    print ('mean base stress: ' + str(base_stress_avg.sum() / N) )
     #
     sims.exit() #NOTE invalidates sims post-processing pointers (base_force)
     #
+    print ('base stress mean: ' + str(base_stress_avg.sum() / N) )
+    print ('base stress standard deviation: ' + str(base_stress_avg.std()) )
     """
     #TODO UQ stuff, maybe create and run more sims,...
     uq.do_some_stuff(base_stress_avg)
