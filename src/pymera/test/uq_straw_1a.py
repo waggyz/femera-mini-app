@@ -4,48 +4,14 @@ This is a notional strawman of what using Pymera for UQ might look like.
 It uses only internal Femera models, deferring file format handling.
 NOTE names starting with fmr: are reserved for internal Femera identifiers.
 """
-#import pymera as fmr
+# Add path (parent directory) to find Pymera module.
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(sys.path[0])))
+
+import pymera as fmr
 #import uqtools as uq
+
 import numpy as np
-
-import ctypes as ct
-import os
-
-libpath='/home/dwagner5/Code/femera-mini-cmake/build/stage/i7-12800H/lib/'
-
-# Load the shared library
-if os.name == 'posix':
-    fmr = ct.CDLL(libpath + 'libfemerac.so')
-elif os.name == 'nt':
-    #lib = ctypes.CDLL('./jobs.dll')
-    raise OSError("Unsupported operating system")
-else:
-    raise OSError("Unsupported operating system")
-
-# Define the argument and return types for the C interface functions.
-fmr.new_jobs.restype = ct.c_void_p
-fmr.delete_jobs.argtypes = [ct.c_void_p]
-fmr.jobs_init.argtypes = [ct.c_void_p]
-fmr.jobs_exit.argtypes = [ct.c_void_p]
-fmr.get_version.restype = ct.c_char_p
-fmr.get_version.argtypes = [ct.c_void_p]
-
-# Create a class to represent the Jobs object in Python.
-class Jobs:
-    def __init__(self):
-        self.obj = fmr.new_jobs()
-
-    def init(self):
-        fmr.jobs_init(self.obj)
-
-    def exit(self):
-        fmr.jobs_exit(self.obj)
-
-    def __del__(self):
-        fmr.delete_jobs(self.obj)
-    
-    def get_version (self):
-        return fmr.get_version(self.obj).decode('utf-8', errors='replace')
 
 def main():
     N = 1000 # number of simulations
@@ -65,13 +31,11 @@ def main():
     youngs = np.random.normal(210e9, 210e8, N)
     poissons = np.random.normal(0.285, 0.0285, N)
     #
-    fmr_jobs = Jobs()# will be fmr_jobs = fmr.Jobs() when Pymera is ready
+    fmr_jobs = fmr.Jobs()
     print ('Hello '+ fmr_jobs.get_version() + '!')
-    #print (fmr_jobs.get_version())
     #TODO Set Femera init options?
     fmr_jobs.init()
     #
-    """
     sims = fmr_jobs.add_sims(name='cantilever-beam-sims', runs_n=N)
     #
     #NOTE Model setup could be done in a JSON file. ---------------------------
@@ -83,7 +47,7 @@ def main():
     # Add model geometry and mesh.
     sims.add_geometry(name='beam-geometry', shape='fmr:geom:block')
     sims.add_grid(name='beam-mesh',
-                  for='beam-geometry',# optional, assumes last geometry added
+                  for_geometry='beam-geometry',# optional, assumes last geometry added
                   type='fmr:grid:FE',
                   method='fmr:grid:structured',
                   elem='fmr:elem:tet10')
@@ -120,19 +84,22 @@ def main():
     sims.set_parameter('basic-steel', 'fmr:mtrl:youngs-modulus', youngs)# E
     sims.set_parameter('basic-steel', 'fmr:mtrl:poissons-ratio', poissons)# nu
     #
-    sims.init()# optional, sims.run() will call sims.init()
+    sims.init()# Optional: sims.run() will call sims.init() as needed.
     sims.run()
     #
     # Get numpy array contents from Pymera.
     base_force = sims.get_post('base-force-mag')
-    base_stress_avg = base_force / (width * height)
+    #
+    base_stress_avg = base_force / (width * height)# averaged over each base
+    print ('mean base stress: ' + str(base_stress_avg.sum() / N) )
     #
     sims.exit() #NOTE invalidates sims post-processing pointers (base_force)
     #
+    """
     #TODO UQ stuff, maybe create and run more sims,...
     uq.do_some_stuff(base_stress_avg)
-    #"
     """
+    print ('DONE')
     fmr_jobs.exit()
 
 if __name__ == "__main__":
