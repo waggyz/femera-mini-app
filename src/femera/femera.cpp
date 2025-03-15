@@ -32,17 +32,19 @@ extern "C" {
     return fmr_version.c_str();
   }
   fmr::Dim_int fmc::get_verbosity (fmc::Jobs_t* jobs) {
-    if (jobs->data == ((femera::data::File*) nullptr)) {//TODO Make this work.
+    if (jobs->data == nullptr) {
       fprintf (stderr, " fmc jobs WARN "
-        "Femera data handler not found. Please initialize Femera.\n");
+        "Femera data handler not found.\n"
+        "Please initialize Femera before calling get_verbosity.\n");
       return 0;
     }
     return jobs->data->get_verb ();
   }
   fmr::Dim_int fmc::set_verbosity (fmc::Jobs_t* jobs, fmr::Dim_int v) {
-    if (jobs->data == (femera::data::File*) nullptr) {//TODO Make this work.
+    if (jobs->data == nullptr) {
       fprintf (stderr, " fmc jobs WARN "
-        "Femera data handler not found. Please initialize Femera.\n");
+        "Femera data handler not found.\n"
+        "Please initialize Femera before calling set_verbosity.\n");
       return 0;
     }
 #if 0
