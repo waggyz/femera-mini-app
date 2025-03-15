@@ -26,22 +26,23 @@ namespace femera {
       {fmr::debug, {fmr::out }} // default all threads to ::stdout verb_d >= 5
     };
   }
-  fmr::Dim_int data::Logs::set_verb (const fmr::Dim_int v)
-  noexcept {
+//  fmr::Dim_int data::Logs::get_verb () noexcept {...defined in Logs.ipp
+  fmr::Dim_int data::Logs::set_verb (const fmr::Dim_int v) {
     bool did_reduce = false, did_increase = false;
 #if 0
-    if (v < 0) {//NOTE enable this if fmr::Dim_int is signed.
-      if (this->did_init ()) {// print warning
-        this->data->send (fmr::err, "data","logs","WARN","Verbosity remains "
-          "(%i) because requested verbosity (%i) is negative.",
-          int (this->verb_d), int (v));
-      } else {
-        fprintf (::stderr, "data logs WARN Verbosity remains "
-          "(%i) because requested verbosity (%i) is negative.\n",
-          int (this->verb_d), int (v));
-      }
-      return this->verb_d;
-    }
+   if (std::is_signed<fmr::Dim_int>::value) {
+      if (v < 0) {//NOTE enable this if fmr::Dim_int is signed.
+        if (this->did_init ()) {// print warning
+          this->data->send (fmr::err, "data","logs","WARN","Verbosity remains "
+            "(%i) because requested verbosity (%i) is negative.",
+            int (this->verb_d), int (v));
+        } else {
+          fprintf (::stderr, "data logs WARN Verbosity remains "
+            "(%i) because requested verbosity (%i) is negative.\n",
+            int (this->verb_d), int (v));
+        }
+        return this->verb_d;
+    } }
 #endif
     if (v > FMR_VERBMAX) {
       did_increase = FMR_VERBMAX > this->verb_d;
@@ -49,24 +50,24 @@ namespace femera {
       if (this->did_init ()) {// print warning
         this->data->send (fmr::err, "data","logs","WARN","Verbosity set "
           "to (%i) because requested (%i) exceeds maximum (%i).",
-          int (this->verb_d), int (v), int (FMR_VERBMAX));
+          (int) this->verb_d, (int) v, int (FMR_VERBMAX));
       } else {
         fprintf (::stderr, "data logs WARN Verbosity set "
           "to (%i) because requested (%i) exceeds maximum (%i).\n",
-          int (this->verb_d), int (v), int (FMR_VERBMAX));
+          (int) this->verb_d, (int) v, int (FMR_VERBMAX));
     } }
     else {// v < FMR_VERBMAX
       did_reduce   = v < this->verb_d;
       did_increase = v > this->verb_d;
-      this->verb_d = fmr::Dim_int (v);
+      this->verb_d = v;
     }
     if (did_reduce || did_increase) { this->name ="Femera logger"; }
     if (did_reduce) {// verbosity reduced
       switch (this->verb_d) {// all cases fall through
         case 0: this->out_name_list [fmr::out  ] = {};
-                       out_name_list [fmr::log  ] = {};
+                      out_name_list [fmr::log  ] = {};
         FMR_FALL_THROUGH
-        case 1: this->out_name_list [fmr::plog] = {};
+        case 1: this->out_name_list [fmr::plog ] = {};
         FMR_FALL_THROUGH
         case 2: this->out_name_list [fmr::info ] = {};
         FMR_FALL_THROUGH
@@ -80,7 +81,7 @@ namespace femera {
     if (this->did_init ()) {// print info
       this->data->send (fmr::info,
         "data","logs","verb","%4i    /%4i maximum verbosity",
-        int (this->verb_d), int (FMR_VERBMAX));
+        (int) this->verb_d, (int) FMR_VERBMAX);
     }
     return this->verb_d;
   }

@@ -18,6 +18,8 @@ namespace femera { namespace data {
     using css = const std::string;// for convenience
   public:
     bool did_logs_init () noexcept;// true if first Logs initialized ok
+    fmr::Dim_int get_verb () noexcept;// gets logs verbosity
+    fmr::Dim_int set_verb (fmr::Dim_int) noexcept;// sets logs verbosity
     //
     // send (..) methods append data and return bytes sent
     fmr::Global_int send (const fmr::Data_name_t&,// fmr::Data_type::Text_line

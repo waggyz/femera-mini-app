@@ -1,6 +1,8 @@
 #include "femera.hpp"
 #include "task/Jobs.hpp"
 
+#include <type_traits>
+
 fmr::Jobs_t fmr::new_jobs (int* argc, char** argv) {
   FMR_WARN_INLINE_OFF
     return femera::Task<femera::task::Jobs>::new_task (argc,argv);
@@ -25,7 +27,37 @@ extern "C" {
     delete jobs;
   }
   const char* fmc::get_version (fmc::Jobs_t* jobs) {
-    static std::string version = jobs->get_version();
-    return version.c_str();
+    static std::string fmr_version = jobs->get_version();
+    //printf("Size of fmr::Dim_int is %lu.\n", sizeof(fmr::Dim_int));
+    return fmr_version.c_str();
   }
-}
+  fmr::Dim_int fmc::get_verbosity (fmc::Jobs_t* jobs) {
+    if (jobs->data == ((femera::data::File*) nullptr)) {//TODO Make this work.
+      fprintf (stderr, " fmc jobs WARN "
+        "Femera data handler not found. Please initialize Femera.\n");
+      return 0;
+    }
+    return jobs->data->get_verb ();
+  }
+  fmr::Dim_int fmc::set_verbosity (fmc::Jobs_t* jobs, fmr::Dim_int v) {
+    if (jobs->data == (femera::data::File*) nullptr) {//TODO Make this work.
+      fprintf (stderr, " fmc jobs WARN "
+        "Femera data handler not found. Please initialize Femera.\n");
+      return 0;
+    }
+#if 0
+    if (std::is_signed<fmr::Dim_int>::value) {
+      if (v < 0) {
+        jobs->data->send(fmr::log, "jobs","data","NOTE",
+          "Negative verbosity is treated as zero (0).");
+        v = 0;
+    } }
+#endif
+    if (v > FMR_VERBMAX) {
+      jobs->data->send (fmr::log, " fmc","jobs","NOTE",
+        "Verbosity clamped to maximum (%i).", FMR_VERBMAX);
+      v = FMR_VERBMAX;
+    }
+    return jobs->data->set_verb (v);
+  }
+}//end extern "C"

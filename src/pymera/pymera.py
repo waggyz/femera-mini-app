@@ -15,17 +15,47 @@ elif os.name == 'nt':
 else:
     raise OSError("Unsupported operating system")
 
+#TODO Need specifiers for
+#    fmr::Exit_int, fmr::Dim_int, fmr::Enum_int, fmr::Local_int, fmr::Global_int
+#    ...
 # Define the argument and return types for C interface functions.
+#NOTE fmr::Dim_int (ct.c_ubyte) segfaults.
 fmr.new_jobs.restype = ct.c_void_p
 fmr.delete_jobs.argtypes = [ct.c_void_p]
 fmr.jobs_init.argtypes = [ct.c_void_p]
 fmr.jobs_exit.argtypes = [ct.c_void_p]
 fmr.get_version.restype = ct.c_char_p
 fmr.get_version.argtypes = [ct.c_void_p]
+fmr.get_verbosity.restype = ct.c_ubyte
+fmr.get_verbosity.argtypes = [ct.c_void_p]
+fmr.set_verbosity.restype = ct.c_ubyte
+fmr.set_verbosity.argtypes = [ct.c_void_p, ct.c_ubyte]
 
 # Create a class to represent the Sims object in Python.
 class Sims:
-    def __init__(self, jobs, name='fmr:user:sims', runs_n=0):
+    def __init__(self, jobs, name='fmr:user:sims', runs_n=1):
+        """
+        Initializes a Sims object with the given parameters.
+
+        Parameters:
+            jobs (Jobs_t): The Jobs object to associate with the Sims object.
+            name (str, optional): The name of the Sims object. Defaults to 'fmr:user:sims'.
+            runs_n (int, optional): The number of runs for the Sims object. Defaults to 1.
+
+        Attributes:
+            jobs (Jobs_t): The Jobs object associated with the Sims object.
+            name (str): The name of the Sims object.
+            runs_n (int): The number of runs for the Sims object.
+            geometries (list): The list of geometries associated with the Sims object.
+            grids (list): The list of grids associated with the Sims object.
+            bcs (list): The list of boundary conditions associated with the Sims object.
+            materials (list): The list of materials associated with the Sims object.
+            preconditioner (object or None): The preconditioner associated with the Sims object. Defaults to None.
+            solve (object or None): The solver associated with the Sims object. Defaults to None.
+            post_processes (list): The list of post-processing functions associated with the Sims object.
+            parameters (dict): The parameters associated with the Sims object.
+            partition_n (int): The partition number associated with the Sims object. Defaults to 1.
+        """
         self.jobs = jobs
         self.name = name
         self.runs_n = runs_n
@@ -79,7 +109,8 @@ class Sims:
     def set_preconditioner(self, name):
         self.preconditioner = name
 
-    def set_solve(self, name, method, analysis='fmr:solve:static', load_step_n=1, rtol=1e-6):
+    def set_solve(self, name, method,
+                  analysis='fmr:solve:static', load_step_n=1, rtol=1e-6):
         self.solve = {
             "name": name,
             "method": method,
@@ -138,5 +169,15 @@ class Jobs:
     def exit(self):
         fmr.jobs_exit(self.obj)
     
-    def get_version (self):
+    def get_version(self):
         return fmr.get_version(self.obj).decode('utf-8', errors='replace')
+    
+    def get_verbosity(self):
+        return fmr.get_verbosity(self.obj)
+    def set_verbosity(self, verbosity=3):
+        # Clamp values to range of ct.c_ubyte.
+        if(verbosity<0):
+            verbosity=0
+        if(verbosity>255):
+            verbosity=255
+        return fmr.set_verbosity(self.obj, verbosity)

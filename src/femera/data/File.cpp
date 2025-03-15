@@ -95,6 +95,16 @@ namespace femera {
     }
 #endif
     return (L == nullptr) ? false : L->did_init ();
+  }
+  fmr::Dim_int data::File::get_verb ()
+  noexcept {
+    const auto L = cast_via_work<data::Logs> (this->get_task (Task_type::Logs));
+    return (L == nullptr) ? 0 : L->get_verb ();
+  }
+  fmr::Dim_int data::File::set_verb (fmr::Dim_int v)
+  noexcept {
+    const auto L = cast_via_work<data::Logs> (this->get_task (Task_type::Logs));
+    return (L == nullptr) ? 0 : L->set_verb (v);
   }//
   //
 }// end femera::namespace
