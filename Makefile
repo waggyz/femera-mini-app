@@ -535,7 +535,7 @@ PRFOUTS:= $(patsubst src/%.perf.cpp,$(BUILD_CPU)/%.perf.out,$(FMRPERF))
 
 # These .PHONY targets are intended for users.
 # external libfemera test tune
-.PHONY: all tools external mini femera install shared
+.PHONY: all tools external mini femera install shared pymera
 .PHONY: remove reinstall clean cleaner cleanest purge
 # -----------------------------------------------------------------------------
 # The rest are for developers...
@@ -591,8 +591,9 @@ mini: | intro
 	$(call timestamp,$@,$^)
 	$(MAKE) $(JLIM) $(FMROUTS)
 	$(MAKE) $(JLIM) $(BUILD_CPU)/mini
-	$(MAKE) shared
 	$(MAKE) $(JSER) $(BUILD_CPU)/mini.valgrind.log
+	$(MAKE)  $(JSER) shared
+	# $(MAKE) $(JPAR) pymera # instead of shared?
 	$(MAKE) $(JPAR) build-done
 
 perf: | intro
@@ -601,6 +602,10 @@ perf: | intro
 	$(MAKE) $(JLIM) $(BUILD_CPU)/mini
 	$(MAKE) $(JLIM) $(PRFOUTS) #TODO *.perf executable should run serially
 	$(MAKE) $(JPAR) perf-done
+
+pymera: $(LIBFEMERA_SO)
+	$(call timestamp,$@,$^)
+	-src/pymera/pymera_test.py
 
 tools: | intro
 	$(MAKE) $(JPAR) install-tools
@@ -1084,7 +1089,9 @@ $(LIBFEMERA_A)(build/%.o) : build/%.o
 	# Serialize archive operations.
 	flock "$(STAGE_CPU)/libfemera.a.lck" $(AREXE) rcs $(LIBFEMERA_A) $^
 
-shared: $(LIBFEMERA_A)
+shared: $(LIBFEMERA_SO)
+
+$(LIBFEMERA_SO): $(LIBFEMERA_A)
 	$(call col2libb,$(LIBS),$(CXX) -shared -o libfemerac.so <--,libfemera.a)
 	$(CXX) -shared -o $(LIBFEMERA_SO) $(LDFLAGS) $(LDLIBS) \
 	 -Wl,--whole-archive -Wl,--export-dynamic $(LIBFEMERA_A) -Wl,--no-whole-archive

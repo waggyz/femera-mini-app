@@ -2,9 +2,8 @@
 import numpy as np
 import ctypes as ct
 
-import os, sys
-basedir = os.getcwd()
-libpath = os.path.join(basedir,'build','stage','i7-12800H','lib')
+import os
+libpath = os.path.join(os.getcwd(),'build','stage','i7-12800H','lib')
 
 # Load the shared library
 if os.name == 'posix':
@@ -23,8 +22,12 @@ fmr.new_jobs.restype = ct.c_void_p
 fmr.delete_jobs.argtypes = [ct.c_void_p]
 fmr.jobs_init.argtypes = [ct.c_void_p]
 fmr.jobs_exit.argtypes = [ct.c_void_p]
+fmr.jobs_did_init.restype = ct.c_bool
+fmr.jobs_did_init.argtypes = [ct.c_void_p]
 fmr.get_version.restype = ct.c_char_p
 fmr.get_version.argtypes = [ct.c_void_p]
+fmr.jobs_get_name.restype = ct.c_char_p
+fmr.jobs_get_name.argtypes = [ct.c_void_p]
 fmr.get_verbosity.restype = ct.c_ubyte
 fmr.get_verbosity.argtypes = [ct.c_void_p]
 fmr.set_verbosity.restype = ct.c_ubyte
@@ -37,7 +40,8 @@ class Jobs:
         self.name = name
 
     def __del__(self):
-        fmr.exit()
+        if fmr.jobs_did_init(self.obj):
+            fmr.jobs_exit(self.obj)#TODO automatically exit here?
         fmr.delete_jobs(self.obj)
     
     def add_sims(self, name='fmr:user:sims', runs_n=1):
@@ -48,9 +52,15 @@ class Jobs:
 
     def exit(self):
         fmr.jobs_exit(self.obj)
+
+    def did_init(self):
+        return fmr.jobs_did_init(self.obj)
     
     def get_version(self):
         return fmr.get_version(self.obj).decode('utf-8', errors='replace')
+    
+    def get_name(self):
+        return fmr.jobs_get_name(self.obj).decode('utf-8', errors='replace')
     
     def get_verbosity(self):
         return fmr.get_verbosity(self.obj)

@@ -4,14 +4,14 @@ This is a notional strawman of what using Pymera for UQ might look like.
 It uses only internal Femera models, deferring file format handling.
 runs_nOTE names starting with fmr: are reserved for internal Femera identifiers.
 """
+import numpy as np
+
 # Add path (parent directory) to find Pymera module.
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(sys.path[0])))
 
-import pymera as fmr
+import pymera
 #import uqtools as uq
-
-import numpy as np
 
 def main():
     """
@@ -66,13 +66,13 @@ def main():
     youngs = np.random.normal(youngs_modulus, youngs_modulus/10, runs_n)
     poissons = np.random.normal(poissons_ratio, poissons_ratio/10, runs_n)
     #
-    fmr_jobs = fmr.Jobs()
-    print('Hello ' + fmr_jobs.get_version() + '!')
+    fmr = pymera.Jobs()
+    print('Hello ' + fmr.get_version() +' '+ fmr.get_name() + '!')
     #TODO Set Femera init options?
     #--------------------------------------------------------------------------
-    fmr_jobs.init()
+    fmr.init()
     #
-    sims = fmr_jobs.add_sims(name='cantilever-beam-sims', runs_n=runs_n)
+    sims = fmr.add_sims(name='cantilever-beam-sims', runs_n=runs_n)
     #
     # Set input parameters for each run.
     #TODO use a Runs object for run parameters?
@@ -132,6 +132,7 @@ def main():
     #
     sims.exit() #NOTE invalidates sims post-processing pointers (base_force)
     #
+    print()
     print('base stress mean: ' + str(base_stress_avg.mean()))
     print('base stress standard deviation: ' + str(base_stress_avg.std()))
     """
@@ -139,7 +140,7 @@ def main():
     uq.do_some_stuff(base_stress_avg)
     """
     print('DONE')
-    fmr_jobs.exit()
+    fmr.exit()
     #
     #TODO more UQ stuff...
 

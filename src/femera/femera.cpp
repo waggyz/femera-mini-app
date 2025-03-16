@@ -20,6 +20,9 @@ extern "C" {
   void fmc::jobs_init (fmc::Jobs_t* jobs) {
     jobs->init(nullptr, nullptr);
   }
+  bool fmc::jobs_did_init (fmc::Jobs_t* jobs) {
+    return jobs->did_init();
+  }
   void fmc::jobs_exit (fmc::Jobs_t* jobs) {
     jobs->exit(0);
   }
@@ -28,8 +31,11 @@ extern "C" {
   }
   const char* fmc::get_version (fmc::Jobs_t* jobs) {
     static std::string fmr_version = jobs->get_version();
-    //printf("Size of fmr::Dim_int is %lu.\n", sizeof(fmr::Dim_int));
     return fmr_version.c_str();
+  }
+  const char* fmc::jobs_get_name (fmc::Jobs_t* jobs) {
+    static std::string fmr_name = jobs->get_name();
+    return fmr_name.c_str();
   }
   fmr::Dim_int fmc::get_verbosity (fmc::Jobs_t* jobs) {
     if (jobs->data == nullptr) {
