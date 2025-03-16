@@ -3,7 +3,7 @@ import numpy as np
 import ctypes as ct
 
 import os, sys
-basedir = os.path.dirname(os.path.dirname(os.path.dirname(sys.path[0])))
+basedir = os.getcwd()
 libpath = os.path.join(basedir,'build','stage','i7-12800H','lib')
 
 # Load the shared library
@@ -37,6 +37,7 @@ class Jobs:
         self.name = name
 
     def __del__(self):
+        fmr.exit()
         fmr.delete_jobs(self.obj)
     
     def add_sims(self, name='fmr:user:sims', runs_n=1):
@@ -57,7 +58,7 @@ class Jobs:
         # Clamp values to range of ct.c_ubyte.
         if(verbosity<0):
             verbosity=0
-        if(verbosity>255):
+        elif(verbosity>255):
             verbosity=255
         return fmr.set_verbosity(self.obj, verbosity)
 
@@ -170,7 +171,7 @@ class Sims:
 
     def get_post(self, name):
         # Placeholder for getting post-processing results
-        # In a real implementation, this would return actual data
+        # In a real implementation, this would return actual data.
         return np.ones(self.runs_n)
 
     def set_parameter(self, component, parameter, value):

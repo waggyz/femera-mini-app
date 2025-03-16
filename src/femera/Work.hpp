@@ -67,7 +67,7 @@ namespace femera {
   namespace grid {                     // CRTP inheritance from Grid
     class Cell;                        // public interface for discretizations
     class FEms; class FDms; class FVms;// Femera cell (numerical method) types
-    class BEms; class SGms;            // boudary elem, Staggered grid
+    class BEms; class SGms;            // boudary elem, staggered grid
 } }//end femera::grid:: namespace
 namespace femera {
   template <typename> class Algo;      // abstract CRTP base derived from Work
@@ -105,7 +105,7 @@ namespace femera {
     Task_stck_t task_list ={};
     std::string      name ="unknown work";
     std::string      abrv ="work";
-    std::string   version ="";
+    std::string   version = MAKESTR(FMR_VERSION);// default version string
     Work_type   task_type = task_cast (Base_type::Work);
 #if 0
 /*
@@ -120,7 +120,7 @@ https://stackoverflow.com/questions/60040665
     bool did_work_init = false;
     bool  is_work_main = true ;// save for use after proc::exit (..)
   protected:// variables visible to CRTP children with friend class
-    bool        set_init     (bool) noexcept;// sets & returns did_work_init
+    bool        set_init (bool) noexcept;// sets & returns did_work_init
   public:// methods -----------------------------------------------------------
     template <typename T, typename C> static constexpr
     T* cast_via_work  (C* child) noexcept;

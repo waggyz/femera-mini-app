@@ -71,8 +71,6 @@ def main():
     #TODO Set Femera init options?
     #--------------------------------------------------------------------------
     fmr_jobs.init()
-    print('get verbosity: ' + str(fmr_jobs.get_verbosity ()))
-    print('set verbosity: ' + str(fmr_jobs.set_verbosity (3)))
     #
     sims = fmr_jobs.add_sims(name='cantilever-beam-sims', runs_n=runs_n)
     #

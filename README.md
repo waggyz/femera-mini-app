@@ -10,6 +10,8 @@ The primary goal is to verify that the high level of performance demonstrated
 by version v0.1 can be maintained while providing the flexible data handling
 demonstrated by version v0.2.
 
+This mini-app is another step toward a comprehensive, modular framework for scientific computing and engineering simulations, capable of handling complex tasks related to processing, data management, physical simulations, numerical methods, and performance tracking.
+
 ## Femera demo mini-app installation
 
 Femera is distributed only as source code. It is intended to be built by the user and optimized for the specific hardware that it will be run on. Femera supports several optional external packages, which may be provided or built by the user. The Femera source includes instructions and scripts to help with this process.
@@ -35,10 +37,9 @@ The recommended Femera configuration uses several external applications and
 libraries.
 
 * BLAS and LAPACK must be installed to use several packages on non-Intel CPUs.
-* CMake 3.? is required for several external packages.
-* Pybind11 requires boost 1.56.
 * MPI: OpenMPI 2.1.1 and 3.1 have been tested. [**FIXME** only Femera 0.2]
-* X11
+* CMake 3.? is required for several external packages.
+* X11 is needed for visualization support.
 
 For Red Hat Enterprise Linux (RHEL) 8, install the following packages.
 
@@ -90,16 +91,20 @@ make install
 ## Manual build
 
 1. Check system
-   * Python3, MPI, OpenMP, BLAS, LAPACK, SuiteSparse, CUDA, OpenGL, libGL, X11, libnuma, libcairo, Tcl/Tk, (Bats, Valgrind)
+   * Python3, MPI, OpenMP, BLAS, LAPACK, SuiteSparse, CUDA, OpenGL, libGL, X11,
+     libnuma, libcairo, Tcl/Tk, (Bats, Valgrind)
    * Developers: Graphviz, cinclude2dot, (Lyx or LaTeX?)
 2. If needed, build and install Bats, **Pybind11**, FreeType, FLTK, libXML2, libgif, and **googletest**.
    * Pybind11 limited to v2.9 for Python < v3.7
-   * PETSc downloads the external package source code to femera-mini-demo/external/petsc-packages/(CPUNAME)-debug/git.googletest/
-   * [**TODO** Test new PETSc version > v3.18.0-25-gc2e5504b09e for bugs noted here.]
+   * PETSc downloads the external package source code to femera-mini-demo/external/
+   petsc-packages/(CPUNAME)-debug/git.googletest/
+   * [**TODO** Test new PETSc version > v3.18.0-25-gc2e5504b09e for bugs noted
+     here.]
    * PETSc 3.20.2 does not compile with gcc 8.5.0 20210514 (Red Hat 8.5.0-18)
    * TRYING 3.19.6 ... works!
 3. Build and install PETSc with debugging. 
-   * Note that this may require considerable (>15 GB) available disk space during the build, depending on the optional external packages selected.
+   * Note that this may require considerable (>15 GB) available disk space during
+     the build, depending on the optional external packages selected.
 ```bash
 cd external/petsc
 
