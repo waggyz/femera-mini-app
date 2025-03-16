@@ -39,20 +39,20 @@ def main():
     console.
 
     Note: The function assumes that the Pymera library is properly
-    installed and configured.
+    configured and installed.
     """
     runs_n = 1000 # number of simulation runs
     #
-    youngs_modulus = 210e9
-    poissons_ratio = 0.285
+    youngs_modulus = 210e9# Pa
+    poissons_ratio = 0.285 #NOTE Clamp >= 0.25?
     #
-    tip_displacement =-0.100
+    tip_displacement =-0.100# m
     #
-    beam_length = 1.000
-    beam_width = 0.050
-    beam_height = 0.050
+    beam_length = 1.000# m
+    beam_width = 0.050# m
+    beam_height = 0.050# m
     #
-    cell_size = 0.010
+    cell_size = 0.010# m
     #--------------------------------------------------------------------------
     nominal_dims = np.array([beam_length, beam_width, beam_height])
     beam_elem_count = np.array(nominal_dims / cell_size, dtype='u8')
@@ -68,14 +68,17 @@ def main():
     #
     fmr = pymera.Jobs()
     print('Hello ' + fmr.get_version() +' '+ fmr.get_name() + '!')
-    #TODO Set Femera init options?
-    #--------------------------------------------------------------------------
+    #TODO Set Femera init options (MPI, OpenMP, verbosity, self-tests)?
+    #
     fmr.init()
+    #**************************************************************************
+    #TODO Femera sims functions not implemented yet.
     #
     sims = fmr.add_sims(name='cantilever-beam-sims', runs_n=runs_n)
     #
     # Set input parameters for each run.
     #TODO use a Runs object for run parameters?
+    #
     sims.set_parameter('beam-mesh', 'fmr:grid:cell_count_lwh', beam_elem_count)
     #
     sims.set_parameter('tip-displace-bc', 'fmr:phys:node:displacement:z', tip_z)
@@ -123,6 +126,10 @@ def main():
                   sum='fmr:phys:node:force:mag')
     #==========================================================================
     #
+    #TODO Solve at nominal values for initial solution (u0) starting vector.
+    #     Or, just keep the first solution and reuse it for u0.
+    #NOTE Avoid relative tolerance (rtol) when providing a good initial guess.
+    #
     sims.init()# Optional: sims.run() will call sims.init() as needed.
     sims.run()
     #
@@ -131,6 +138,7 @@ def main():
     base_stress_avg = base_force / (width * height)# averaged over each base
     #
     sims.exit() #NOTE invalidates sims post-processing pointers (base_force)
+    #**************************************************************************
     #
     print()
     print('base stress mean: ' + str(base_stress_avg.mean()))
@@ -139,7 +147,7 @@ def main():
     #TODO UQ stuff, maybe create and run more sims,...
     uq.do_some_stuff(base_stress_avg)
     """
-    print('DONE')
+    print()
     fmr.exit()
     #
     #TODO more UQ stuff...

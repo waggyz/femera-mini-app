@@ -137,6 +137,7 @@ class Sims:
         })
 
     def set_bcs(self, name, at, set, to):
+        self.bcs = []
         self.bcs.append({
             "name": name,
             "at": at,
