@@ -8,6 +8,16 @@
 
 namespace femera {
   void task::Jobs::task_init (int*, char**) {
+   /**
+    * Initializes the Jobs task by setting up the processing environment, data
+    * handler, and testbeds.
+    *
+    * @param argc the number of command-line arguments
+    * @param argv the command-line arguments
+    *
+    * @throws std::runtime_error if the processing environment or data handler
+    * fails to initialize
+    */
     // Add the Main processing environment (this->proc).
     if (this->proc == nullptr) {
       const auto proc_ptr = std::move (proc::Main::new_task (this->get_core()));

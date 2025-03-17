@@ -1,6 +1,8 @@
 #!/bin/python3
 import numpy as np
 import ctypes as ct
+import csv
+from enum import Enum
 
 import os
 libpath = os.path.join(os.getcwd(),'build','stage','i7-12800H','lib')
@@ -14,6 +16,36 @@ elif os.name == 'nt':
 else:
     raise OSError("Unsupported operating system")
 
+# Enums =======================================================================
+
+def create_enum_from_csv(file_path, enum_name, start_at=None):
+    # Read the CSV file
+    # from NASA ChatGSFC, Claude 3.5 Sonnet v2
+    with open(file_path, 'r') as csv_file:
+        reader = csv.reader(csv_file)
+        # Assuming the first row contains headers, skip it
+        next(reader, None)
+        
+        # Create a dictionary to hold enum members
+        enum_members = {}
+        if(start_at == None):
+            # Iterate through the rows and add them to the enum_members dictionary
+            for row in reader:
+                if len(row) >= 2:  # Ensure we have at least a name and a value
+                    name, value = row[0], row[1]
+                    enum_members[name] = value
+        else:
+            row_i = start_at
+            for row in reader:
+                if len(row) >= 1:  # Ensure we have at least a name
+                    name = row[0]
+                    enum_members[name] = row_i
+                    row_i += 1
+    #
+    # Create and return the Enum class dynamically
+    return Enum(enum_name, enum_members)
+
+#==============================================================================
 #TODO Need specifiers for
 #    fmr::Exit_int, fmr::Dim_int, fmr::Enum_int, fmr::Local_int, fmr::Global_int
 #    ...
@@ -33,11 +65,16 @@ fmr.get_verbosity.argtypes = [ct.c_void_p]
 fmr.set_verbosity.restype = ct.c_ubyte
 fmr.set_verbosity.argtypes = [ct.c_void_p, ct.c_ubyte]
 
+Data_type = create_enum_from_csv(
+    os.path.join(os.getcwd(),'data','src','data-type.csv'),
+    'Data_type', start_at=3)
+
 # Create a class to represent the Jobs object in Python.
 class Jobs:
     def __init__(self, name='fmr:user:jobs'):
         self.obj = fmr.new_jobs()
         self.name = name
+        # enum
 
     def __del__(self):
         if fmr.jobs_did_init(self.obj):
@@ -173,11 +210,14 @@ class Sims:
             "rtol": rtol
         }
 
-    def add_post(self, name, at, sum):
+    def add_post(self, name, at, sum, count=-1):
+        #if(count<0):
+        #    self.count=self.runs_n
         self.post_processes.append({
             "name": name,
             "at": at,
-            "sum": sum
+            "sum": sum,
+            "count": count
         })
 
     def get_post(self, name):
@@ -204,3 +244,5 @@ class Sims:
     def exit(self):
         # Placeholder for cleanup logic
         pass
+
+

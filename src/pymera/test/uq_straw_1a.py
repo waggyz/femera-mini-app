@@ -2,7 +2,8 @@
 """
 This is a notional strawman of what using Pymera for UQ might look like.
 It uses only internal Femera models, deferring file format handling.
-runs_nOTE names starting with fmr: are reserved for internal Femera identifiers.
+NOTE names starting with fmr: are reserved for internal Femera identifiers.
+TODO change internal Femera identifiers to enums.
 """
 import numpy as np
 
@@ -55,7 +56,7 @@ def main():
     cell_size = 0.010# m
     #--------------------------------------------------------------------------
     nominal_dims = np.array([beam_length, beam_width, beam_height])
-    beam_elem_count = np.array(nominal_dims / cell_size, dtype='u8')
+    beam_elem_lwh = np.array(nominal_dims / cell_size, dtype='u8')
     #
     # Set up random input variables as size runs_n numpy arrays.
     # (mean, stdev, N)
@@ -73,20 +74,21 @@ def main():
     fmr.init()
     #**************************************************************************
     #TODO Femera sims functions not implemented yet.
+    #TODO changing internal femera fmr: string identifiers to enums.
     #
     sims = fmr.add_sims(name='cantilever-beam-sims', runs_n=runs_n)
     #
     # Set input parameters for each run.
     #TODO use a Runs object for run parameters?
     #
-    sims.set_parameter('beam-mesh', 'fmr:grid:cell_count_lwh', beam_elem_count)
+    sims.set_parameter('beam-mesh', 'fmr:grid:cell_count_lwh', beam_elem_lwh)
     #
-    sims.set_parameter('tip-displace-bc', 'fmr:phys:node:displacement:z', tip_z)
+    sims.set_parameter('tip-displace-bc', pymera.Data_type['Displacement_z'], tip_z)
     sims.set_parameter('beam-geometry', 'fmr:geom:length', length) #x
     sims.set_parameter('beam-geometry', 'fmr:geom:width', width)# y
     sims.set_parameter('beam-geometry', 'fmr:geom:height', height)# z
-    sims.set_parameter('basic-steel', 'fmr:mtrl:youngs-modulus', youngs)# E
-    sims.set_parameter('basic-steel', 'fmr:mtrl:poissons-ratio', poissons)# nu
+    sims.set_parameter('basic-steel', pymera.Data_type['Youngs_modulus'], youngs)# E
+    sims.set_parameter('basic-steel', pymera.Data_type['Poissons_ratio'], poissons)# nu
     #
     #NOTE Model setup could be done in a JSON file. ===========================
     # sims.read('uq_straw_1a.json')
@@ -105,11 +107,11 @@ def main():
     #
     # Set boundary conditions.
     sims.set_bcs(name='fixed-base-bc',
-                 at='fmr:grid:node:x-min',
-                 set='fmr:phys:node:displacement:xyz',
-                 to='fmr:phys:bcs:encastre')
+                 at=pymera.Data_type['Node_x_min'],
+                 set=pymera.Data_type['Displacement_xyz'],
+                 to=0)# 'fmr:phys:bcs:encastre'
     sims.add_bcs(name='tip-displace-bc',
-                 at='fmr:grid:node:x-max')# value is tip-bc parameter below
+                 at=pymera.Data_type['Node_x_max'])# value is tip-bc parameter below
     #
     # Set material.
     sims.set_material(name='basic-steel',
@@ -122,8 +124,9 @@ def main():
     #
     # Identify output parameters for post-processing.
     sims.add_post(name='base-force-mag',
-                  at='fmr:grid:node:x-min',
-                  sum='fmr:phys:node:force:mag')
+                  at=pymera.Data_type['Node_x_min'],
+                  sum=pymera.Data_type['Force_mag'],
+                  count=runs_n)
     #==========================================================================
     #
     #TODO Solve at nominal values for initial solution (u0) starting vector.
@@ -138,19 +141,21 @@ def main():
     base_stress_avg = base_force / (width * height)# averaged over each base
     #
     sims.exit() #NOTE invalidates sims post-processing pointers (base_force)
+    #
+    """
+    #TODO UQ stuff, maybe create and run more sims,...
+    # uq.do_some_stuff(base_stress_avg)
+    """
     #**************************************************************************
     #
     print()
     print('base stress mean: ' + str(base_stress_avg.mean()))
     print('base stress standard deviation: ' + str(base_stress_avg.std()))
-    """
-    #TODO UQ stuff, maybe create and run more sims,...
-    uq.do_some_stuff(base_stress_avg)
-    """
     print()
     fmr.exit()
     #
     #TODO more UQ stuff...
+    #print(pymera.Data_type['Node_x_min'].value)
 
 if __name__ == "__main__":
     main()

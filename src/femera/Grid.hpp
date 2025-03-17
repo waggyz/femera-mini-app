@@ -5,7 +5,7 @@
 
 namespace femera {
   template <typename T>
-  class Grid : public Work {// abstract class for materials (Grid)
+  class Grid : public Work {// abstract class for discretization (Grid)
   //TODO change Grid to Geom?
   private:
     using This_spt = FMR_SMART_PTR<T>;

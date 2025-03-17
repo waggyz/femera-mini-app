@@ -25,6 +25,16 @@ namespace femera {
   noexcept {
     return (ix < this->task_list.size()) ? this->task_list [ix].get() : nullptr;
   }
+  /**
+   * Retrieves a specific work object given its type and index.
+   *
+   * @param t The type of the work object to retrieve.
+   * @param ix The index of the work object to retrieve.
+   *
+   * @return A pointer to the requested work object, or nullptr if it is not found.
+   *
+   * @throws None
+   */
   Work* Work::get_work (const Work_type t, const fmr::Local_int ix)
   noexcept {
     fmr::Local_int i = 0;
@@ -57,6 +67,18 @@ namespace femera {
   }
   fmr::Local_int Work::log_init_list ()
   noexcept { fmr::Local_int did_init_count = 0;
+    /**
+     * Logs the initialization status of tasks in the work object.
+     *
+     * This function iterates over all tasks in the work object and checks
+     * their initialization status. It prints a log message indicating the
+     * number of tasks that were successfully initialized and the number of
+     * tasks that were not initialized.
+     *
+     * @return The number of tasks that were successfully initialized.
+     *
+     * @throws None
+     */
     const auto n = this->get_task_n ();
     if ((n > 0) && (this->proc != nullptr)) {
       if (this->proc->did_init () && this->proc->is_main ()) {
@@ -98,6 +120,22 @@ namespace femera {
     } } }
     return did_init_count;
   }
+  /**
+   * Initializes a list of Work objects in the Work class.
+   *
+   * This function iterates over each Work object in the task_list of the Work
+   * class and initializes them with the given command line arguments. It also
+   * calculates the busy and total time for each Work object and sends the
+   * information to the logs if the initialization is successful. If the
+   * initialization fails, the Work object is queued for removal.
+   *
+   * @param argc pointer to the number of command line arguments
+   * @param argv pointer to an array of command line arguments
+   *
+   * @return the exit status of the initialization process
+   *
+   * @throws none
+   */
   fmr::Exit_int Work::init_list (int* argc, char** argv)
   noexcept { fmr::Exit_int err =0;
     std::stack<fmr::Local_int> del_list = {};
@@ -164,6 +202,15 @@ namespace femera {
   }
   fmr::Exit_int Work::exit_list ()
   noexcept { fmr::Exit_int err = 0;
+    /**
+     * Exits all tasks in the work's task list in reverse order.
+     * If the work is initialized and associated with a process, sets the flag
+     * is_work_main to whether the process is the main process.
+     *
+     * @return The exit code of the function.
+     *
+     * @throws None
+     */
     if ((this->proc != nullptr) && (this->did_init ())) {
 FMR_WARN_INLINE_OFF
       this->is_work_main = this->proc->is_main ();
@@ -200,6 +247,13 @@ FMR_WARN_INLINE_ON
     }
     return err;
   }
+  /**
+   * Exits the work tree by recursively exiting all tasks in the task list.
+   *
+   * @return The exit code of the function.
+   *
+   * @throws None
+   */
   fmr::Exit_int Work::exit_tree ()
   noexcept { fmr::Exit_int err = 0;
     if (this->proc != nullptr && this->did_init ()) {
@@ -254,6 +308,22 @@ FMR_WARN_INLINE_ON
     return err;
   }
   fmr::Exit_int Work::exit_info (Work* W, const fmr::perf::Float busy_s) {
+    /**
+     * Prints information about the execution of a Work object.
+     *
+     * This function calculates the execution time, read time, write time,
+     * and flop time of a Work object and prints them along with the
+     * object's name and version. The information is printed to the
+     * console if the Work object has no data associated with it,
+     * otherwise it is sent to the data object.
+     *
+     * @param W The Work object for which to print information.
+     * @param busy_s The busy time of the Work object in seconds.
+     *
+     * @return The exit code of the function.
+     *
+     * @throws None
+     */
     //TODO change to task_time_info (..) and call from init_* and exit_* methods
     fmr::Exit_int err=0;
     const auto busy = fmr::form::si_time (busy_s);
