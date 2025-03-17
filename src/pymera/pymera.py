@@ -19,13 +19,13 @@ else:
 # Enums =======================================================================
 
 def create_enum_from_csv(file_path, enum_name, start_at=None):
+    # From NASA ChatGSFC, Claude 3.5 Sonnet v2
     # Read the CSV file
-    # from NASA ChatGSFC, Claude 3.5 Sonnet v2
     with open(file_path, 'r') as csv_file:
         reader = csv.reader(csv_file)
         # Assuming the first row contains headers, skip it
         next(reader, None)
-        
+        #
         # Create a dictionary to hold enum members
         enum_members = {}
         if(start_at == None):
@@ -65,20 +65,18 @@ fmr.get_verbosity.argtypes = [ct.c_void_p]
 fmr.set_verbosity.restype = ct.c_ubyte
 fmr.set_verbosity.argtypes = [ct.c_void_p, ct.c_ubyte]
 
-Data_type = create_enum_from_csv(
-    os.path.join(os.getcwd(),'data','src','data-type.csv'),
-    'Data_type', start_at=3)
-
 # Create a class to represent the Jobs object in Python.
 class Jobs:
+    Data_type = create_enum_from_csv(
+        os.path.join(os.getcwd(),'data','src','data-type.csv'),
+                    'Data_type', start_at=3)
     def __init__(self, name='fmr:user:jobs'):
         self.obj = fmr.new_jobs()
         self.name = name
-        # enum
 
     def __del__(self):
         if fmr.jobs_did_init(self.obj):
-            fmr.jobs_exit(self.obj)#TODO automatically exit here?
+            fmr.jobs_exit(self.obj)#TODO automatically exit here, good idea?
         fmr.delete_jobs(self.obj)
     
     def add_sims(self, name='fmr:user:sims', runs_n=1):

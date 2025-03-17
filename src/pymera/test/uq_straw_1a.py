@@ -23,10 +23,10 @@ def main():
 
     The simulation parameters are defined as follows: 
     - runs_n: the number of simulations to run (default: 1000) 
-    - beam_length: the length of the beam (default: 1.000) 
-    - beam_width: the width of the beam (default: 0.050) 
-    - beam_height: the height of the beam (default: 0.050) 
-    - cell_size: the size of each cell in the beam mesh (default: 0.010)
+    - beam_length: the length of the beam (nominal: 1.000) 
+    - beam_width: the width of the beam (nominal: 0.050) 
+    - beam_height: the height of the beam (nominal: 0.050) 
+    - cell_size: the size of each cell in the beam mesh (nominal: 0.010)
 
     The function initializes the Pymera Jobs object, sets the simulation
     options, adds the simulation models, sets the model partitioning method,
@@ -81,14 +81,17 @@ def main():
     # Set input parameters for each run.
     #TODO use a Runs object for run parameters?
     #
-    sims.set_parameter('beam-mesh', 'fmr:grid:cell_count_lwh', beam_elem_lwh)
-    #
-    sims.set_parameter('tip-displace-bc', pymera.Data_type['Displacement_z'], tip_z)
-    sims.set_parameter('beam-geometry', 'fmr:geom:length', length) #x
-    sims.set_parameter('beam-geometry', 'fmr:geom:width', width)# y
-    sims.set_parameter('beam-geometry', 'fmr:geom:height', height)# z
-    sims.set_parameter('basic-steel', pymera.Data_type['Youngs_modulus'], youngs)# E
-    sims.set_parameter('basic-steel', pymera.Data_type['Poissons_ratio'], poissons)# nu
+    sims.set_parameter('beam-geometry',
+                        fmr.Data_type['Dimensions_xyz'],
+                       [length, width, height]) # x,y,z
+    sims.set_parameter('beam-mesh', 
+                       fmr.Data_type['Grid_divs'], beam_elem_lwh)
+    sims.set_parameter('tip-displace-bc',
+                       fmr.Data_type['Displacement_z'], tip_z)
+    sims.set_parameter('basic-steel',
+                        fmr.Data_type['Youngs_modulus'], youngs)# E
+    sims.set_parameter('basic-steel',
+                       fmr.Data_type['Poissons_ratio'], poissons)# nu
     #
     #NOTE Model setup could be done in a JSON file. ===========================
     # sims.read('uq_straw_1a.json')
@@ -107,11 +110,11 @@ def main():
     #
     # Set boundary conditions.
     sims.set_bcs(name='fixed-base-bc',
-                 at=pymera.Data_type['Node_x_min'],
-                 set=pymera.Data_type['Displacement_xyz'],
+                 at=fmr.Data_type['Node_x_min'],
+                 set=fmr.Data_type['Displacement_xyz'],
                  to=0)# 'fmr:phys:bcs:encastre'
     sims.add_bcs(name='tip-displace-bc',
-                 at=pymera.Data_type['Node_x_max'])# value is tip-bc parameter below
+                 at=fmr.Data_type['Node_x_max'])# value is tip-bc parameter below
     #
     # Set material.
     sims.set_material(name='basic-steel',
@@ -124,8 +127,8 @@ def main():
     #
     # Identify output parameters for post-processing.
     sims.add_post(name='base-force-mag',
-                  at=pymera.Data_type['Node_x_min'],
-                  sum=pymera.Data_type['Force_mag'],
+                  at=fmr.Data_type['Node_x_min'],
+                  sum=fmr.Data_type['Force_mag'],# Returns 1 scalar for each sim
                   count=runs_n)
     #==========================================================================
     #
@@ -155,7 +158,7 @@ def main():
     fmr.exit()
     #
     #TODO more UQ stuff...
-    #print(pymera.Data_type['Node_x_min'].value)
+    #print(fmr.Data_type['Node_x_min'].value)
 
 if __name__ == "__main__":
     main()
