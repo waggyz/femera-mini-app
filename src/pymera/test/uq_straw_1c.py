@@ -1,7 +1,4 @@
 #!/bin/python3
-
-#NOTE This file is frozen here. Development continues as uq_straw_1c.py.
-
 """
 This is a notional strawman of what using Pymera for UQ might look like.
 It uses only internal Femera models, deferring file format handling.
@@ -26,10 +23,10 @@ def main():
 
     The simulation parameters are defined as follows: 
     - runs_n: the number of simulations to run (default: 1000) 
-    - beam_length: the length of the beam (nominal: 1.000) 
-    - beam_width: the width of the beam (nominal: 0.050) 
-    - beam_height: the height of the beam (nominal: 0.050) 
-    - cell_size: the size of each cell in the beam mesh (nominal: 0.010)
+    - nominal_length: the length of the beam (nominal: 1.000) 
+    - nominal_width: the width of the beam (nominal: 0.050) 
+    - nominal_height: the height of the beam (nominal: 0.050) 
+    - nominal_cell_size: the size of each cell in the beam mesh (nominal: 0.010)
 
     The function initializes the Pymera Jobs object, sets the simulation
     options, adds the simulation models, sets the model partitioning method,
@@ -47,28 +44,21 @@ def main():
     """
     runs_n = 1000 # number of simulation runs
     #
-    youngs_modulus = 210e9# Pa
-    poissons_ratio = 0.285 #NOTE Clamp >= 0.25?
+    # Simulation nominal values -----------------------------------------------
+    nominal_youngs = 210e9# Pa
+    nominal_poissons = 0.285 #NOTE Clamp >= 0.25?
     #
-    tip_displacement =-0.100# m
+    nominal_tip_z =-0.100# m
     #
-    beam_length = 1.000# m
-    beam_width = 0.050# m
-    beam_height = 0.050# m
+    nominal_length = 1.000# m
+    nominal_width = 0.050# m
+    nominal_height = 0.050# m
     #
-    cell_size = 0.010# m
+    nominal_dims = np.array([nominal_length, nominal_width, nominal_height])
+    nominal_cell_size = 0.010# m
     #--------------------------------------------------------------------------
-    nominal_dims = np.array([beam_length, beam_width, beam_height])
-    beam_elem_LWH = np.array(nominal_dims / cell_size, dtype='u8')
-    #
-    # Set up random input variables as size runs_n numpy arrays.
-    # (mean, stdev, N)
-    length = np.random.normal(beam_length, beam_length/100, runs_n)
-    width = np.random.normal(beam_width, beam_width/100, runs_n)
-    height = np.random.normal(beam_height, beam_height/100, runs_n)
-    tip_z = np.random.normal(tip_displacement, abs(tip_displacement)/10, runs_n)
-    youngs = np.random.normal(youngs_modulus, youngs_modulus/10, runs_n)
-    poissons = np.random.normal(poissons_ratio, poissons_ratio/10, runs_n)
+    # Structured discretization parameters.
+    elem_count_xyz = np.array(nominal_dims / nominal_cell_size, dtype='u8')
     #
     fmr = pymera.Jobs()
     print('Hello ' + fmr.get_version() +' '+ fmr.get_name() + '!')
@@ -76,85 +66,89 @@ def main():
     #
     fmr.init()
     #**************************************************************************
+    # Set nominal model parameters.
     #TODO Femera sims functions not implemented yet.
     #TODO changing internal femera fmr: string identifiers to enums.
     #
-    sims = fmr.add_sims(name='cantilever-beam-sims', runs_n=runs_n)
+    beam_sims = fmr.add_sims(name='cantilever-beam-sims', runs_n=runs_n)
+    #TODO use python context:
+    #     with fmr.sims(name='cantilever-beam-sims') as sims:
     #
-    # Set input parameters for each run.
     #TODO use a Runs object for run parameters?
     #
-    sims.set_parameter('beam-geometry',
-                        fmr.Data_type['Dimensions_xyz'],
-                       [length, width, height]) # x,y,z
-    sims.set_parameter('beam-mesh', 
-                        fmr.Data_type['Grid_divs'], beam_elem_LWH)
-    sims.set_parameter('tip-displace-bc',
-                        fmr.Data_type['Displacement_z'], tip_z)
-    sims.set_parameter('basic-steel',
-                        fmr.Data_type['Youngs_modulus'], youngs)# E
-    sims.set_parameter('basic-steel',
-                        fmr.Data_type['Poissons_ratio'], poissons)# nu
-    #
-    #NOTE Model setup could be done in a JSON file. ===========================
+    #NOTE Nominal model setup could be done in a JSON file. ===================
     # sims.read('uq_straw_1a.json')
     # These are the same for every run.
     # 
     # Set model partitioning method.
-    sims.set_partition_n(1)# one partition per model
+    beam_sims.set_partition_n(1)# one partition per model
     #
-    # Add model geometry and mesh.
-    sims.add_geometry(name='beam-geometry', shape='fmr:geom:block')
-    sims.add_grid(name='beam-mesh',
-                  for_geometry='beam-geometry',# optional, last geometry assumed
+    # Add model geometry.
+    beam_geom = beam_sims.add_geometry(name='beam-geometry', shape='fmr:geom:block')
+    beam_geom.set(fmr.Data_type['Dimensions_xyz'], nominal=nominal_dims)
+    #
+    # Set material.
+    beam_mtrl = beam_geom.set_material(name='basic-steel',
+                      physics='fmr:mtrl:linear-elastic-isotropic')
+    beam_mtrl.set(fmr.Data_type['nominal_youngs'], nominal=nominal_youngs)
+    beam_mtrl.set(fmr.Data_type['nominal_poissons'], nominal=nominal_poissons)
+    #
+    # Add mesh.
+    beam_mesh = beam_geom.set_grid(name='beam-mesh',
                   type='fmr:grid:FE',
                   method='fmr:grid:structured',
                   elem='fmr:elem:tet10')
-    #
+    beam_mesh.set(fmr.Data_type['Grid_divs'], elem_count_xyz)
     # Set boundary conditions.
-    sims.set_bcs(name='fixed-base-bc',
-                 for_grid='beam-mesh',# optional
+    beam_mesh.set_bcs(name='fixed-base-bc',
                  at=fmr.Data_type['Node_x_min'],
                  set=fmr.Data_type['Displacement_xyz'],
                  to=0)# 'fmr:phys:bcs:encastre'
-    sims.add_bcs(name='tip-displace-bc',
-                 at=fmr.Data_type['Node_x_max'])# value is tip-bc parameter above
-    #
-    # Set material.
-    sims.set_material(name='basic-steel',
-                      for_geometry='beam-geometry',
-                      physics='fmr:mtrl:linear-elastic-isotropic')
-    #
-    if(False): # Alternative to fmr.set_parameter (above)for material setup.
-        # This requires more coding.
-        sims.set_material(name='basic-steel',
-                          youngs_modulus=youngs, # E
-                          poissons_ratio=poissons)# nu
+    beam_mesh.add_bcs(name='tip-displace-bc',
+                 at=fmr.Data_type['Node_x_max'],
+                 set=fmr.Data_type['Displacement_z'],
+                 nominal=nominal_tip_z)
     #
     # Set preconditioner and solver.
-    sims.set_preconditioner(method='fmr:solve:precon:jacobi')
-    sims.set_solver(name='linear-solve', method='fmr:solve:pcg')
+    beam_sims.set_preconditioner(method='fmr:solve:precon:jacobi')
+    beam_sims.set_solver(name='linear-solve', method='fmr:solve:pcg')
     # defaults: analysis='fmr:solve:static', load_step_n=1, rtol=1e-6)
     #
     # Identify output parameters for post-processing.
-    sims.add_post(name='base-force-mag',
+    beam_results = beam_sims.add_post(name='base-force-mag',
                   at=fmr.Data_type['Node_x_min'],
                   sum=fmr.Data_type['Force_mag'],# Returns 1 scalar for each sim
-                  count=runs_n)
+                  count=runs_n)#TODO try to hide this from the user.
     #==========================================================================
     #
+    # Set up random input variables as size runs_n numpy arrays.
+    # (mean, stdev, N)
+    length = np.random.normal(nominal_length, nominal_length/100, runs_n)
+    width = np.random.normal(nominal_width, nominal_width/100, runs_n)
+    height = np.random.normal(nominal_height, nominal_height/100, runs_n)
+    tip_z = np.random.normal(nominal_tip_z, abs(nominal_tip_z)/10, runs_n)
+    youngs = np.random.normal(nominal_youngs, nominal_youngs/10, runs_n)
+    poissons = np.random.normal(nominal_poissons, nominal_poissons/10, runs_n)
+    #
+    # Set model parameters.
+    beam_geom.set(fmr.Data_type['Dimensions_xyz'],
+                 [length, width, height]) # x,y,z
+    beam_mesh.set(fmr.Data_type['Displacement_z'], tip_z)
+    beam_mtrl.set(fmr.Data_type['nominal_youngs'], youngs)# E
+    beam_mtrl.set(fmr.Data_type['nominal_poissons'], poissons)# nu
+    #--------------------------------------------------------------------------
     #TODO Solve at nominal values for initial solution (u0) starting vector.
     #     Or, just keep the first solution and reuse it for u0.
     #NOTE Avoid relative tolerance (rtol) when providing a good initial guess.
     #
-    sims.init()# Optional: sims.run() will call sims.init() as needed.
-    sims.run()
+    beam_sims.init()# Optional: sims.run() will call sims.init() as needed.
+    beam_sims.run()
     #
     # Get numpy array contents from Pymera.
-    base_force = sims.get_post('base-force-mag')
+    base_force = beam_results.get('base-force-mag')
     base_stress_avg = base_force / (width * height)# averaged over each base
     #
-    sims.exit() #NOTE invalidates sims post-processing pointers (base_force)
+    beam_sims.exit() #NOTE invalidates sims post-processing pointers (base_force)
     #
     """
     #TODO UQ stuff, maybe create and run more sims,...
