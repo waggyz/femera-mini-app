@@ -42,7 +42,6 @@ def main():
     Note: The function assumes that the Pymera library is properly
     configured and installed.
     """
-    runs_n = 1000 # number of simulation runs
     #
     # Simulation nominal values -----------------------------------------------
     nominal_youngs = 210e9# Pa
@@ -63,64 +62,74 @@ def main():
     fmr = pymera.Jobs()
     print('Hello ' + fmr.get_version() +' '+ fmr.get_name() + '!')
     #TODO Set Femera init options (MPI, OpenMP, verbosity, self-tests)?
+    #TODO use python context:
+    #     with pymera.Jobs() as fmr:
     #
     fmr.init()
     #**************************************************************************
     # Set nominal model parameters.
     #TODO Femera sims functions not implemented yet.
     #TODO changing internal femera fmr: string identifiers to enums.
-    #
-    beam_sims = fmr.add_sims(name='cantilever-beam-sims', runs_n=runs_n)
-    #TODO use python context:
-    #     with fmr.sims(name='cantilever-beam-sims') as sims:
+    #NOTE fmr: string identifiers needed for JSON representation.
     #
     #TODO use a Runs object for run parameters?
     #
     #NOTE Nominal model setup could be done in a JSON file. ===================
     # sims.read('uq_straw_1a.json')
-    # These are the same for every run.
+    #
+    # Add simulation models.
+    beam_sims = fmr.add_sims(name='cantilever-beam-sims')#, runs_n=runs_n)
+    #TODO use python context:
+    #     with fmr.sims(name='cantilever-beam-sims') as beam_sims:
     # 
     # Set model partitioning method.
     beam_sims.set_partition_n(1)# one partition per model
     #
+    #NOTE name is needed only for parameters and post-processing results.
     # Add model geometry.
-    beam_geom = beam_sims.add_geometry(name='beam-geometry', shape='fmr:geom:block')
-    beam_geom.set(fmr.Data_type['Dimensions_xyz'], nominal=nominal_dims)
+    beam_geom = beam_sims.add_geometry(#name='beam-geometry',
+                shape='fmr:geom:block')
+    beam_geom.set(fmr.Data_type['Dimensions_xyz'],
+                name='beam-dims', nominal=nominal_dims )
     #
     # Set material.
-    beam_mtrl = beam_geom.set_material(name='basic-steel',
-                      physics='fmr:mtrl:linear-elastic-isotropic')
-    beam_mtrl.set(fmr.Data_type['nominal_youngs'], nominal=nominal_youngs)
-    beam_mtrl.set(fmr.Data_type['nominal_poissons'], nominal=nominal_poissons)
+    beam_mtrl = beam_geom.set_material(#name='basic-steel',
+                physics='fmr:mtrl:elastic::isotropic')
+    beam_mtrl.set(fmr.Data_type['Youngs_modulus'],
+                name='beam-youngs', nominal=nominal_youngs)
+    beam_mtrl.set(fmr.Data_type['Poissons_ratio'],
+                name='beam-poissons', nominal=nominal_poissons)
     #
     # Add mesh.
-    beam_mesh = beam_geom.set_grid(name='beam-mesh',
-                  type='fmr:grid:FE',
-                  method='fmr:grid:structured',
-                  elem='fmr:elem:tet10')
+    beam_mesh = beam_geom.set_grid(#name='beam-mesh',
+                #analysis_type='fmr:grid:FE',# optional?
+                grid_structure='fmr:grid:structured',
+                cell_type='fmr:cell_type:tet6',# 6 tets per cell
+                elem_type='fmr:elem_type:tet10')# 10 nodes per tet elem.
     beam_mesh.set(fmr.Data_type['Grid_divs'], elem_count_xyz)
     # Set boundary conditions.
-    beam_mesh.set_bcs(name='fixed-base-bc',
-                 at=fmr.Data_type['Node_x_min'],
-                 set=fmr.Data_type['Displacement_xyz'],
-                 to=0)# 'fmr:phys:bcs:encastre'
-    beam_mesh.add_bcs(name='tip-displace-bc',
-                 at=fmr.Data_type['Node_x_max'],
-                 set=fmr.Data_type['Displacement_z'],
-                 nominal=nominal_tip_z)
+    beam_mesh.set_bcs(#name='fixed-base-bcs',
+                nodes_at=fmr.Data_type['Node_x_min'],# Creates a node set
+                set=fmr.Data_type['Displacement_xyz'],
+                to=0)# 'fmr:phys:bcs:encastre'
+    beam_load = beam_mesh.add_bcs(
+                nodes_at=fmr.Data_type['Node_x_max'],# Creates a node set
+                set=fmr.Data_type['Displacement_z'],
+                name='tip-displace-bcs', nominal=nominal_tip_z)
     #
     # Set preconditioner and solver.
     beam_sims.set_preconditioner(method='fmr:solve:precon:jacobi')
-    beam_sims.set_solver(name='linear-solve', method='fmr:solve:pcg')
+    beam_sims.set_solver(method='fmr:solve:pcg')
     # defaults: analysis='fmr:solve:static', load_step_n=1, rtol=1e-6)
     #
     # Identify output parameters for post-processing.
     beam_results = beam_sims.add_post(name='base-force-mag',
-                  at=fmr.Data_type['Node_x_min'],
-                  sum=fmr.Data_type['Force_mag'],# Returns 1 scalar for each sim
-                  count=runs_n)#TODO try to hide this from the user.
+                  nodes_at=fmr.Data_type['Node_x_min'],
+                  sum=fmr.Data_type['Force_mag']# Returns 1 scalar for each sim
+                  )#, count=runs_n)#TODO try to hide this from the user.
     #==========================================================================
     #
+    runs_n = 1000 # number of simulation runs
     # Set up random input variables as size runs_n numpy arrays.
     # (mean, stdev, N)
     length = np.random.normal(nominal_length, nominal_length/100, runs_n)
@@ -130,12 +139,17 @@ def main():
     youngs = np.random.normal(nominal_youngs, nominal_youngs/10, runs_n)
     poissons = np.random.normal(nominal_poissons, nominal_poissons/10, runs_n)
     #
-    # Set model parameters.
-    beam_geom.set(fmr.Data_type['Dimensions_xyz'],
-                 [length, width, height]) # x,y,z
-    beam_mesh.set(fmr.Data_type['Displacement_z'], tip_z)
-    beam_mtrl.set(fmr.Data_type['nominal_youngs'], youngs)# E
-    beam_mtrl.set(fmr.Data_type['nominal_poissons'], poissons)# nu
+    # Set model parameters. These replace the nominal values.
+    if True:
+        fmr.set('beam-dims', [length, width, height]) # x,y,z
+        fmr.set('tip-displace-bcs', tip_z)
+        fmr.set('beam-youngs', youngs)# E
+        fmr.set('beam-poissons', poissons)# nu
+    else:#TODO alternative?
+        beam_geom.set('beam-dims,', [length, width, height]) # x,y,z
+        beam_load.set('tip-displace-bcs', tip_z)
+        beam_mtrl.set('beam-youngs', youngs)# E
+        beam_mtrl.set('beam-poissons', poissons)# nu
     #--------------------------------------------------------------------------
     #TODO Solve at nominal values for initial solution (u0) starting vector.
     #     Or, just keep the first solution and reuse it for u0.
