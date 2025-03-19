@@ -75,7 +75,7 @@ def main():
     #TODO use a Runs object for run parameters?
     #
     #NOTE Nominal model setup could be done in a JSON file. ===================
-    # sims.read('uq_straw_1c.json')
+    # fmr.add_sims_file('uq_straw_1c.json')
     #
     # Add simulation models.
     beam_sims = fmr.add_sims()#name='cantilever-beam-sims')#, runs_n=runs_n)
@@ -92,7 +92,7 @@ def main():
                 name='beam-dims', nominal=nominal_dims )
     #
     # Set material.
-    beam_mtrl = beam_geom.set_material(#name='basic-steel',
+    beam_mtrl = beam_geom.add_material(#name='basic-steel',
                 physics='fmr:mtrl:elastic:isotropic')
     beam_mtrl.set(fmr.Data_type['Youngs_modulus'],
                 name='beam-youngs', nominal=nominal_youngs)
@@ -100,17 +100,17 @@ def main():
                 name='beam-poissons', nominal=nominal_poissons)
     #
     # Add mesh.
-    beam_mesh = beam_geom.set_grid(#name='beam-mesh',
+    beam_mesh = beam_geom.add_grid(#name='beam-mesh',
                 #analysis_type='fmr:grid:FE',# optional?
-                grid_structure='fmr:grid:structured',
+                structured=True,
                 cell_type='fmr:cell_type:tet6',# 6 tets per cell
                 elem_type='fmr:elem_type:tet10')# 10 nodes per tet elem.
     beam_mesh.set(fmr.Data_type['Grid_divs'], elem_count_xyz)
     # Set boundary conditions.
-    beam_mesh.set_bcs(#name='fixed-base-bcs',
+    beam_mesh.add_bcs(#name='fixed-base-bcs',
                 nodes_at=fmr.Data_type['Node_x_min'],# Implied node set
                 set=fmr.Data_type['Displacement_xyz'],
-                to=0)# 'fmr:phys:bcs:encastre'
+                to=0.000)# 'fmr:phys:bcs:encastre'
     beam_load = beam_mesh.add_bcs(
                 nodes_at=fmr.Data_type['Node_x_max'],# Implied node set
                 set=fmr.Data_type['Displacement_z'],

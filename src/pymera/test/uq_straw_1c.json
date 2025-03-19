@@ -1,10 +1,11 @@
-{ "fmr:sims": {
-    "fmr:geom": {
+{ "fmr:Sims": {
+  "TODO": "pym:nominal or fmr:to?, with pym:name implying Python read/write?",
+    "fmr:Geom": {
       "fmr:geom:shape": "fmr:geom:block",
       "fmr:Data_type:Dimensions_xyz": {
         "pym:name": "beam-dims", "pym:nominal": [1.000, 0.050, 0.050]
       },
-      "fmr:mtrl": {
+      "fmr:Mtrl": {
         "fmr:mtrl:elastic:isotropic": {
           "fmr:Data_type:Youngs_modulus": {
             "pym:name": "beam-youngs", "pym:nominal": 210e9
@@ -14,29 +15,45 @@
           }
         }
       },
-      "fmr:grid": {
-        "fmr:grid:structure": "fmr:gri:structured",
+      "fmr:Grid": {
+        "fmr:grid:structured": true,
         "fmr:grid:cell": "fmr:cell:tet6",
         "fmr:grid:elem": "fmr:elem:tet10",
         "fmr:Data_type:Grid_divs": [100, 5, 5],
-        "fmr:grid:bcs": {
-          "TODO": "Distinguish between set and add?",
+        "fmr:grid:BCs": {
           "fmr:Data_type:Displacement_xyz": {
-            "fmr:node:at": "fmr:Data_type:Node_x_min",
-            "pym:to": 0.000
+            "fmr:grid:node:at": "fmr:Data_type:Node_x_min",
+            "fmr:to": 0.000
           },
           "fmr:Data_type:Displacement_z": {
-            "fmr:node:at": "fmr:Data_type:Node_x_max",
+            "fmr:grid:node:at": "fmr:Data_type:Node_x_max",
             "pym:name": "tip-displace-bcs", "pym:nominal": -0.010
           }
         }
       }
     },
-    "fmr:solve:cond": "fmr:solve:cond:jacobi",
-    "fmr:solve": "fmr:solve:pcg",
-    "fmr:post": {
-      "fmr:Data_type:Displacement_z": {
-        "fmr:node:at": "fmr:Data_type:Node_x_min",
+    "fmr:Conditioner": {
+      "fmr:conditioner:method": "fmr:solve:cond:jacobi"
+    },
+    "fmr:Solve[0]" {
+      "fmr:solve:method": "fmr:solve:pcg"
+    },
+    "fmr:Post[0]": {
+      "fmr:Data_type:Node_xyz": {
+        "pym:name": "nominal-node-coordinates"
+      },
+      "fmr:Data_type:Displacement_xyz": {
+        "pym:name": "nominal-displacements"
+      }
+    },
+    "fmr:Solve": {
+      "fmr:solve:method": "fmr:solve:pcg",
+      "fmr:solve:initial-guess": "pym:name:nominal-displacements"
+    },
+    "fmr:Post": {
+      "fmr:Data_type:Displacement_mag": {
+        "fmr:grid:node:at": "fmr:Data_type:Node_x_min",
+        "fmr:math:reduce": "fmr:math:sum",
         "pym:name": "base-force-mag"
       }
     }
