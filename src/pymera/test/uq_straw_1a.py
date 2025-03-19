@@ -97,7 +97,7 @@ def main():
                         fmr.Data_type['Poissons_ratio'], poissons)# nu
     #
     #NOTE Model setup could be done in a JSON file. ===========================
-    # sims.read('uq_straw_1a.json')
+    sims2 = fmr.read_sims('src/pymera/test/uq_straw_1c.json')
     # These are the same for every run.
     # 
     # Set model partitioning method.

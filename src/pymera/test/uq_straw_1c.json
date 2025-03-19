@@ -3,22 +3,22 @@
     "fmr:Geom": {
       "fmr:geom:shape": "fmr:geom:block",
       "fmr:Data_type:Dimensions_xyz": {
-        "pym:name": "beam-dims", "pym:nominal": [1.000, 0.050, 0.050]
+        "pym:name": "dims", "pym:nominal": [1.000, 0.050, 0.050]
       },
       "fmr:Mtrl": {
         "fmr:mtrl:elastic:isotropic": {
           "fmr:Data_type:Youngs_modulus": {
-            "pym:name": "beam-youngs", "pym:nominal": 210e9
+            "pym:name": "youngs", "pym:nominal": 210e9
           },
           "fmr:Data_type:Poissons_ratio": {
-            "pym:name": "beam-poissons", "pym:nominal": 0.285
+            "pym:name": "poissons", "pym:nominal": 0.285
           }
         }
       },
       "fmr:Grid": {
         "fmr:grid:structured": true,
-        "fmr:grid:cell": "fmr:cell:tet6",
-        "fmr:grid:elem": "fmr:elem:tet10",
+        "fmr:grid:cell": "fmr:grid:cell:block-6tet",
+        "fmr:Data_type:Elem_type": "fmr:Data_type:Elem_type:Tet10",
         "fmr:Data_type:Grid_divs": [100, 5, 5],
         "fmr:grid:BCs": {
           "fmr:Data_type:Displacement_xyz": {
@@ -27,7 +27,7 @@
           },
           "fmr:Data_type:Displacement_z": {
             "fmr:grid:node:at": "fmr:Data_type:Node_x_max",
-            "pym:name": "tip-displace-bcs", "pym:nominal": -0.010
+            "pym:name": "tip-displace-z", "pym:nominal": -0.010
           }
         }
       }
@@ -35,27 +35,37 @@
     "fmr:Conditioner": {
       "fmr:conditioner:method": "fmr:solve:cond:jacobi"
     },
-    "fmr:Solve[0]" {
-      "fmr:solve:method": "fmr:solve:pcg"
-    },
-    "fmr:Post[0]": {
-      "fmr:Data_type:Node_xyz": {
-        "pym:name": "nominal-node-coordinates"
+    "fmr:Runs": [
+      {
+        "fmr:Data_type:Runs_n": 1,
+        "fmr:Solve": {
+          "fmr:solve:method": "fmr:solve:pcg"
+        },
+        "fmr:Post": {
+          "fmr:Data_type:Node_xyz": {
+            "pym:name": "nominal-node-coordinates"
+          },
+          "fmr:Data_type:Displacement_xyz": {
+            "pym:name": "nominal-displacements"
+          }
+        }
       },
-      "fmr:Data_type:Displacement_xyz": {
-        "pym:name": "nominal-displacements"
+     {
+        "fmr:Data_type:Runs_n": {
+          "pym:name": "sample_n"
+        },
+        "fmr:Solve": {
+          "fmr:solve:method": "fmr:solve:pcg",
+          "fmr:solve:initial-guess": "pym:name:nominal-displacements"
+        },
+        "fmr:Post": {
+          "fmr:Data_type:Displacement_mag": {
+            "fmr:grid:node:at": "fmr:Data_type:Node_x_min",
+            "fmr:math:reduce": "fmr:math:sum",
+            "pym:name": "base-force-mag"
+          }
+        }
       }
-    },
-    "fmr:Solve": {
-      "fmr:solve:method": "fmr:solve:pcg",
-      "fmr:solve:initial-guess": "pym:name:nominal-displacements"
-    },
-    "fmr:Post": {
-      "fmr:Data_type:Displacement_mag": {
-        "fmr:grid:node:at": "fmr:Data_type:Node_x_min",
-        "fmr:math:reduce": "fmr:math:sum",
-        "pym:name": "base-force-mag"
-      }
-    }
+    ]
   }
 }

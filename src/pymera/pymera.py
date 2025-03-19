@@ -1,7 +1,7 @@
 #!/bin/python3
 import numpy as np
 import ctypes as ct
-import csv
+import csv, json
 from enum import Enum
 
 import os
@@ -41,10 +41,28 @@ def create_enum_from_csv(file_path, enum_name, start_at=None):
                     name = row[0]
                     enum_members[name] = row_i
                     row_i += 1
-    #
     # Create and return the Enum class dynamically
     return Enum(enum_name, enum_members)
 
+def find_pym_names(obj):
+   # Function to recursively search for "pym:name" keys
+   #TODO check for nominal values defined at the same level as each pym:name.
+    result = []
+    if isinstance(obj, dict):
+        for key, value in obj.items():
+            if key == "pym:name":
+                #result.append(value)
+                nominal_value=None
+                if 'pym:nominal' in obj.keys():
+                    nominal_value = obj['pym:nominal']
+                    #result.append(value +': '+ str(nominal_value))
+                result.append([value, nominal_value])
+            elif isinstance(value, (dict, list)):
+                result.extend(find_pym_names(value))
+    elif isinstance(obj, list):
+        for item in obj:
+            result.extend(find_pym_names(item))
+    return result
 #==============================================================================
 #TODO Need specifiers for
 #    fmr::Exit_int, fmr::Dim_int, fmr::Enum_int, fmr::Local_int, fmr::Global_int
@@ -81,6 +99,25 @@ class Jobs:
     
     def add_sims(self, name='fmr:user:sims', runs_n=1):
         return Sims(self, name=name, runs_n=runs_n)
+
+    def add_sims_file(self, filename):
+        self.name=None
+        self.pym_name=None
+        with open(filename, 'r') as file:
+            sims_json = json.load(file)#TODO use json()
+        if 'fmr:Sims' in sims_json:
+            sims_json = sims_json['fmr:Sims']
+            self.pym_names = find_pym_names(sims_json)
+        else:
+            print('Found no fmr:Sims in ' + filename)
+            return
+        if 'pym:name' in sims_json:
+            self.name=sims_json['pym:name']
+            print(sims_json)
+        if 'fmr:Data_type:Name' in sims_json:
+            self.name=sims_json['fmr:Data_type:Name']
+        #self.add_sims(name=sims_json['name'], runs_n=sims_json['runs_n'])
+        return Sims(self)
 
     def init(self):
         fmr.jobs_init(self.obj)

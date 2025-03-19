@@ -6,6 +6,7 @@ NOTE names starting with fmr: are reserved for internal Femera identifiers.
 TODO change internal Femera identifiers to enums.
 """
 import numpy as np
+import csv
 
 # Add path (parent directory) to find Pymera module.
 import sys, os
@@ -76,31 +77,39 @@ def main():
     #
     #NOTE Nominal model setup could be done in a JSON file. ===================
     # fmr.add_sims_file('uq_straw_1c.json')
+    sims2 = fmr.add_sims_file('src/pymera/test/uq_straw_1c.json')
+    print("User (pym:name) parameters and output fields in the JSON file:")
+    for name in fmr.pym_names:
+        if name[1]:
+            print('* ' + name[0] +': '+ str(name[1]))
+        else:
+            print('* ' + name[0])
     #
+    """
     # Add simulation models.
-    beam_sims = fmr.add_sims()#name='cantilever-beam-sims')#, runs_n=runs_n)
+    beam_sims = fmr.add_sims()#name='cantilever-sims')#, runs_n=runs_n)
     #TODO use python context:
-    #     with fmr.sims(name='cantilever-beam-sims') as beam_sims:
+    #     with fmr.sims(name='cantilever-sims') as beam_sims:
     # 
     #TODO Set model partitioning method.
     #
     #NOTE name is needed only for parameters and post-processing results.
     # Add model geometry.
-    beam_geom = beam_sims.add_geometry(#name='beam-geometry',
+    beam_geom = beam_sims.add_geometry(#name='geometry',
                 shape='fmr:geom:block')
     beam_geom.set(fmr.Data_type['Dimensions_xyz'],
-                name='beam-dims', nominal=nominal_dims )
+                name='dims', nominal=nominal_dims )
     #
     # Set material.
     beam_mtrl = beam_geom.add_material(#name='basic-steel',
                 physics='fmr:mtrl:elastic:isotropic')
     beam_mtrl.set(fmr.Data_type['Youngs_modulus'],
-                name='beam-youngs', nominal=nominal_youngs)
+                name='youngs', nominal=nominal_youngs)
     beam_mtrl.set(fmr.Data_type['Poissons_ratio'],
-                name='beam-poissons', nominal=nominal_poissons)
+                name='poissons', nominal=nominal_poissons)
     #
     # Add mesh.
-    beam_mesh = beam_geom.add_grid(#name='beam-mesh',
+    beam_mesh = beam_geom.add_grid(#name='mesh',
                 #analysis_type='fmr:grid:FE',# optional?
                 structured=True,
                 cell_type='fmr:cell_type:tet6',# 6 tets per cell
@@ -126,29 +135,75 @@ def main():
                 nodes_at=fmr.Data_type['Node_x_min'],# Implied node set
                 sum=fmr.Data_type['Force_mag']# Returns 1 scalar for each sim
                 )#, count=runs_n)#TODO try to hide this from the user.
+    """
     #==========================================================================
     #
-    runs_n = 1000 # number of simulation runs
-    # Set up random input variables as size runs_n numpy arrays.
-    # (mean, stdev, N)
-    length = np.random.normal(nominal_length, nominal_length/100, runs_n)
-    width = np.random.normal(nominal_width, nominal_width/100, runs_n)
-    height = np.random.normal(nominal_height, nominal_height/100, runs_n)
-    tip_z = np.random.normal(nominal_tip_z, abs(nominal_tip_z)/10, runs_n)
-    youngs = np.random.normal(nominal_youngs, nominal_youngs/10, runs_n)
-    poissons = np.random.normal(nominal_poissons, nominal_poissons/10, runs_n)
-    #
+    if False:# Write random input variables to a .csv file.
+        sample_n=1000
+        runs_n = sample_n+1 # includes a nominal sims run
+        # Set up random input variables as size runs_n numpy arrays.
+        # (mean, stdev, N)
+        length = np.random.normal(nominal_length, nominal_length/100, sample_n)
+        width = np.random.normal(nominal_width, nominal_width/100, sample_n)
+        height = np.random.normal(nominal_height, nominal_height/100, sample_n)
+        tip_z = np.random.normal(nominal_tip_z, abs(nominal_tip_z)/10, sample_n)
+        youngs = np.random.normal(nominal_youngs, nominal_youngs/10, sample_n)
+        poissons = np.random.normal(nominal_poissons, nominal_poissons/10, sample_n)
+        #
+        rows = zip(length, width, height, tip_z, youngs, poissons)
+        nominals = [1.000,0.050,0.050, -0.010, 210e9,0.285]
+        names=['length','width','height','tip-displace-z','youngs','poissons']
+        with open('src/pymera/test/uq_straw_1c.csv', "w") as f:
+            writer = csv.writer(f)
+            writer.writerow(names)
+            writer.writerow(nominals)
+            for row in rows:
+                writer.writerow(row)
+    else: # read from a .csv file
+        length=[]
+        width=[]
+        height=[]
+        tip_z=[]
+        youngs=[]
+        poissons=[]
+        #
+        dims=[]
+        with open('src/pymera/test/uq_straw_1c.csv', 'r') as f:
+            reader = csv.reader(f)
+            names = next(reader) # if first line has parameter names.
+            #NOTE second line has the nominal values (if provided)
+            for col in reader:
+                # Append each variable to a separate list
+                #dims.append([L,W,H])# x,y,z (L)
+                length.append(float(col[0]))
+                width.append(float(col[1]))
+                height.append(float(col[2]))
+                dims.append([float(col[0]),float(col[1]),float(col[2])])
+                tip_z.append(float(col[3]))
+                youngs.append(float(col[4]))
+                poissons.append(float(col[5]))
+        #nominals =[length[0],width[0],height[0],tip_z[0],youngs[0],poissons[0]]
+        nominals =[dims[0],tip_z[0],youngs[0],poissons[0]]
+        runs_n = len(length)
+        sample_n = runs_n -1
+    print('Parameter names:')
+    print(names)
+    print(' nominal: ' + str(nominals))
+    print('  runs_n: ' + str(runs_n))
+    print('sample_n: ' + str(sample_n))
+    """
     # Set model parameters. These replace the nominal values.
     if True:
-        fmr.set('beam-dims', [length, width, height]) # x,y,z
+        #fmr.set('dims', [length, width, height]) # x,y,z
+        fmr.set('dims', dims) # x,y,z
         fmr.set('tip-displace-bcs', tip_z)
-        fmr.set('beam-youngs', youngs)# E
-        fmr.set('beam-poissons', poissons)# nu
+        fmr.set('youngs', youngs)# E
+        fmr.set('poissons', poissons)# nu
     else:#TODO alternative?
-        beam_geom.set('beam-dims,', [length, width, height]) # x,y,z
+        beam_geom.set('dims,', [length, width, height]) # x,y,z
         beam_load.set('tip-displace-bcs', tip_z)
-        beam_mtrl.set('beam-youngs', youngs)# E
-        beam_mtrl.set('beam-poissons', poissons)# nu
+        beam_mtrl.set('youngs', youngs)# E
+        beam_mtrl.set('poissons', poissons)# nu
     #--------------------------------------------------------------------------
     #TODO Solve at nominal values for initial solution (u0) starting vector.
     #     Or, just keep the first solution and reuse it for u0.
@@ -162,17 +217,17 @@ def main():
     base_stress_avg = base_force / (width * height)# averaged over each base
     #
     beam_sims.exit() #NOTE invalidates sims post-processing pointers (base_force)
-    #
-    """
+    '''
     #TODO UQ stuff, maybe create and run more sims,...
     # uq.do_some_stuff(base_stress_avg)
-    """
+    '''
     #**************************************************************************
     #
     print()
     print('base stress mean: ' + str(base_stress_avg.mean()))
     print('base stress standard deviation: ' + str(base_stress_avg.std()))
-    print()
+    print()'
+    """
     fmr.exit()
     #
     #TODO more UQ stuff...

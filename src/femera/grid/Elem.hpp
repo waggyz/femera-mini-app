@@ -41,7 +41,7 @@ class User;//TODO user element
 */
 template <class T, typename fmr::Local_int P=1, typename fmr::Local_int D=3,
   typename F=fmr::Geom_float>
-class Elem {//TODO enable_if P>0 or for P in [1,2,3]?
+class Elem {
   /*
   Elements are defined in 3D by derived classes and reduced as needed to match
   the simulation spatial dimension template parameter (D).
