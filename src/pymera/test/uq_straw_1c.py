@@ -75,15 +75,14 @@ def main():
     #TODO use a Runs object for run parameters?
     #
     #NOTE Nominal model setup could be done in a JSON file. ===================
-    # sims.read('uq_straw_1a.json')
+    # sims.read('uq_straw_1c.json')
     #
     # Add simulation models.
-    beam_sims = fmr.add_sims(name='cantilever-beam-sims')#, runs_n=runs_n)
+    beam_sims = fmr.add_sims()#name='cantilever-beam-sims')#, runs_n=runs_n)
     #TODO use python context:
     #     with fmr.sims(name='cantilever-beam-sims') as beam_sims:
     # 
-    # Set model partitioning method.
-    beam_sims.set_partition_n(1)# one partition per model
+    #TODO Set model partitioning method.
     #
     #NOTE name is needed only for parameters and post-processing results.
     # Add model geometry.
@@ -94,7 +93,7 @@ def main():
     #
     # Set material.
     beam_mtrl = beam_geom.set_material(#name='basic-steel',
-                physics='fmr:mtrl:elastic::isotropic')
+                physics='fmr:mtrl:elastic:isotropic')
     beam_mtrl.set(fmr.Data_type['Youngs_modulus'],
                 name='beam-youngs', nominal=nominal_youngs)
     beam_mtrl.set(fmr.Data_type['Poissons_ratio'],
@@ -109,11 +108,11 @@ def main():
     beam_mesh.set(fmr.Data_type['Grid_divs'], elem_count_xyz)
     # Set boundary conditions.
     beam_mesh.set_bcs(#name='fixed-base-bcs',
-                nodes_at=fmr.Data_type['Node_x_min'],# Creates a node set
+                nodes_at=fmr.Data_type['Node_x_min'],# Implied node set
                 set=fmr.Data_type['Displacement_xyz'],
                 to=0)# 'fmr:phys:bcs:encastre'
     beam_load = beam_mesh.add_bcs(
-                nodes_at=fmr.Data_type['Node_x_max'],# Creates a node set
+                nodes_at=fmr.Data_type['Node_x_max'],# Implied node set
                 set=fmr.Data_type['Displacement_z'],
                 name='tip-displace-bcs', nominal=nominal_tip_z)
     #
@@ -124,9 +123,9 @@ def main():
     #
     # Identify output parameters for post-processing.
     beam_results = beam_sims.add_post(name='base-force-mag',
-                  nodes_at=fmr.Data_type['Node_x_min'],
-                  sum=fmr.Data_type['Force_mag']# Returns 1 scalar for each sim
-                  )#, count=runs_n)#TODO try to hide this from the user.
+                nodes_at=fmr.Data_type['Node_x_min'],# Implied node set
+                sum=fmr.Data_type['Force_mag']# Returns 1 scalar for each sim
+                )#, count=runs_n)#TODO try to hide this from the user.
     #==========================================================================
     #
     runs_n = 1000 # number of simulation runs

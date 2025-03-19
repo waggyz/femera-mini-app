@@ -1,0 +1,44 @@
+{ "fmr:sims": {
+    "fmr:geom": {
+      "fmr:geom:shape": "fmr:geom:block",
+      "fmr:Data_type:Dimensions_xyz": {
+        "pym:name": "beam-dims", "pym:nominal": [1.000, 0.050, 0.050]
+      },
+      "fmr:mtrl": {
+        "fmr:mtrl:elastic:isotropic": {
+          "fmr:Data_type:Youngs_modulus": {
+            "pym:name": "beam-youngs", "pym:nominal": 210e9
+          },
+          "fmr:Data_type:Poissons_ratio": {
+            "pym:name": "beam-poissons", "pym:nominal": 0.285
+          }
+        }
+      },
+      "fmr:grid": {
+        "fmr:grid:structure": "fmr:gri:structured",
+        "fmr:grid:cell": "fmr:cell:tet6",
+        "fmr:grid:elem": "fmr:elem:tet10",
+        "fmr:Data_type:Grid_divs": [100, 5, 5],
+        "fmr:grid:bcs": {
+          "TODO": "Distinguish between set and add?",
+          "fmr:Data_type:Displacement_xyz": {
+            "fmr:node:at": "fmr:Data_type:Node_x_min",
+            "pym:to": 0.000
+          },
+          "fmr:Data_type:Displacement_z": {
+            "fmr:node:at": "fmr:Data_type:Node_x_max",
+            "pym:name": "tip-displace-bcs", "pym:nominal": -0.010
+          }
+        }
+      }
+    },
+    "fmr:solve:cond": "fmr:solve:cond:jacobi",
+    "fmr:solve": "fmr:solve:pcg",
+    "fmr:post": {
+      "fmr:Data_type:Displacement_z": {
+        "fmr:node:at": "fmr:Data_type:Node_x_min",
+        "pym:name": "base-force-mag"
+      }
+    }
+  }
+}
