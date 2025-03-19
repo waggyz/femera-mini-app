@@ -45,23 +45,22 @@ def create_enum_from_csv(file_path, enum_name, start_at=None):
     return Enum(enum_name, enum_members)
 
 def find_pym_names(obj):
-   # Function to recursively search for "pym:name" keys
-   #TODO check for nominal values defined at the same level as each pym:name.
-    result = []
+    """
+    Function to recursively search for "pym:name" keys in JSON objects
+    Assigns pym:nominal values defined at the same level as each pym:name
+    Only the last nominal value assigned to a pym:name is retained.
+    """
+    result = {}
     if isinstance(obj, dict):
         for key, value in obj.items():
             if key == "pym:name":
-                #result.append(value)
-                nominal_value=None
-                if 'pym:nominal' in obj.keys():
-                    nominal_value = obj['pym:nominal']
-                    #result.append(value +': '+ str(nominal_value))
-                result.append([value, nominal_value])
+                nominal_value = obj.get('pym:nominal')
+                result[value] = nominal_value
             elif isinstance(value, (dict, list)):
-                result.extend(find_pym_names(value))
+                result.update(find_pym_names(value))
     elif isinstance(obj, list):
         for item in obj:
-            result.extend(find_pym_names(item))
+            result.update(find_pym_names(item))
     return result
 #==============================================================================
 #TODO Need specifiers for

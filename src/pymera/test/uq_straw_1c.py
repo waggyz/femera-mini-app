@@ -75,17 +75,15 @@ def main():
     #
     #TODO use a Runs object for run parameters?
     #
-    #NOTE Nominal model setup could be done in a JSON file. ===================
-    # fmr.add_sims_file('uq_straw_1c.json')
+    #TODO Nominal model setupin a JSON file. ==================================
     sims2 = fmr.add_sims_file('src/pymera/test/uq_straw_1c.json')
     print("User (pym:name) parameters and output fields in the JSON file:")
-    for name in fmr.pym_names:
-        if name[1]:
-            print('* ' + name[0] +': '+ str(name[1]))
+    for name, nominal in fmr.pym_names.items():
+        if nominal is not None:
+            print(f'* {name}: {nominal}')
         else:
-            print('* ' + name[0])
+            print(f'* {name}')
     #
-    """
     # Add simulation models.
     beam_sims = fmr.add_sims()#name='cantilever-sims')#, runs_n=runs_n)
     #TODO use python context:
@@ -93,7 +91,8 @@ def main():
     # 
     #TODO Set model partitioning method.
     #
-    #NOTE name is needed only for parameters and post-processing results.
+    #NOTE name is needed only for input parameters and post-processing results.
+    """
     # Add model geometry.
     beam_geom = beam_sims.add_geometry(#name='geometry',
                 shape='fmr:geom:block')

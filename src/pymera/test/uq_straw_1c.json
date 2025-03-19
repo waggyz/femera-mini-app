@@ -50,13 +50,13 @@
           }
         }
       },
-     {
+      {
         "fmr:Data_type:Runs_n": {
           "pym:name": "sample_n"
         },
         "fmr:Solve": {
           "fmr:solve:method": "fmr:solve:pcg",
-          "fmr:solve:initial-guess": "pym:name:nominal-displacements"
+          "fmr:solve:initial-guess": {"pym:name": "nominal-displacements"}
         },
         "fmr:Post": {
           "fmr:Data_type:Displacement_mag": {
