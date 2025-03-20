@@ -197,14 +197,10 @@ class Sims:
         self.sample_n = None
 
     def add_parameter(self, name, nominal=None, values=None):
-        #self.nominal[name] = None
-        #if nominal is not None:
         if isinstance(nominal, (list, tuple, set)):
             if len(nominal) > 1:
                 nominal = np.ascontiguousarray(nominal)
         self.nominal[name] = nominal
-        #self.parameter[name] = None
-        #if values is not None:
         if isinstance(values, (list, tuple, set)):
             if len(values) > 1:
                 values = np.ascontiguousarray(values)
