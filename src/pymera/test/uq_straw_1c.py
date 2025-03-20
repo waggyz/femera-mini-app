@@ -77,12 +77,13 @@ def main():
     #
     #TODO Nominal model setupin a JSON file. ==================================
     sims2 = fmr.add_sims_file('src/pymera/test/uq_straw_1c.json')
-    print("User (pym:name) parameters and output fields in the JSON file:")
-    for name, nominal in fmr.pym_names.items():
+    print('\nUser parameters (pym:name) with nominal values '
+          +'and output fields in the JSON file:')
+    for name, nominal in fmr.parameters.items():
         if nominal is not None:
-            print(f'* {name}: {nominal}')
+            print(f'- {name}: {nominal}')
         else:
-            print(f'* {name}')
+            print(f'- {name}')
     #
     # Add simulation models.
     beam_sims = fmr.add_sims()#name='cantilever-sims')#, runs_n=runs_n)
@@ -139,7 +140,7 @@ def main():
     #
     if False:# Write random input variables to a .csv file.
         sample_n=1000
-        runs_n = sample_n+1 # includes a nominal sims run
+        #runs_n = sample_n+1 # includes a nominal sims run
         # Set up random input variables as size runs_n numpy arrays.
         # (mean, stdev, N)
         length = np.random.normal(nominal_length, nominal_length/100, sample_n)
@@ -159,37 +160,45 @@ def main():
             for row in rows:
                 writer.writerow(row)
     else: # read from a .csv file
-        length=[]
-        width=[]
-        height=[]
-        tip_z=[]
-        youngs=[]
-        poissons=[]
-        #
+        #TODO move CSV read to Jobs method
         dims=[]
         with open('src/pymera/test/uq_straw_1c.csv', 'r') as f:
             reader = csv.reader(f)
-            names = next(reader) # if first line has parameter names.
+            names = next(reader) # first line has parameter names.
             #NOTE second line has the nominal values (if provided)
-            for col in reader:
-                # Append each variable to a separate list
-                #dims.append([L,W,H])# x,y,z (L)
-                length.append(float(col[0]))
-                width.append(float(col[1]))
-                height.append(float(col[2]))
-                dims.append([float(col[0]),float(col[1]),float(col[2])])
-                tip_z.append(float(col[3]))
-                youngs.append(float(col[4]))
-                poissons.append(float(col[5]))
-        #nominals =[length[0],width[0],height[0],tip_z[0],youngs[0],poissons[0]]
-        nominals =[dims[0],tip_z[0],youngs[0],poissons[0]]
-        runs_n = len(length)
-        sample_n = runs_n -1
-    print('Parameter names:')
-    print(names)
-    print(' nominal: ' + str(nominals))
-    print('  runs_n: ' + str(runs_n))
-    print('sample_n: ' + str(sample_n))
+            # make a dictionary having keys for names and empty arrays for values
+            parameter = {name: [] for name in names}
+            nominal = {name: None for name in names}
+            #
+            if True: #TODO csv_has_nominals
+                nominals = next(reader)
+                for name, val in zip(names, nominals):
+                    nominal[name]=float(val)
+            for row_col in reader:
+                for name, col in zip(names, row_col):
+                    parameter[name].append(float(col))
+            sample_n = len(parameter[names[0]])
+        #
+    names.append('dims')
+    d=[parameter['length'],parameter['width'],parameter['height']]
+    parameter['dims'] = list(map(list, zip(*d)))
+    nominal['dims'] = [nominal['length'],nominal['width'],nominal['height']]
+    if True: #TODO csv_has_nominals
+        print('\nUser parameters (first row name) '
+              +'with nominal values (second row) from the CSV file:')
+        i=0
+        for name in names:
+            print(f'- {name}: {nominal[name]}')
+            i+=1
+    else:
+        print('\nUser parameters (first row name) from the CSV file:')
+        for name in names:
+            print(f'- {name}')
+    print('Number of additional values (second or third row on) '
+          +'in the CSV file:')
+    print(f'- sample_n: {sample_n}')
+    #print(f'* runs_n: {runs_n}')
+    print()
     """
     # Set model parameters. These replace the nominal values.
     if True:

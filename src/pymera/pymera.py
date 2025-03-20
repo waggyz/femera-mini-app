@@ -54,7 +54,7 @@ def find_pym_names(obj):
     if isinstance(obj, dict):
         for key, value in obj.items():
             if key == "pym:name":
-                nominal_value = obj.get('pym:nominal')
+                nominal_value = obj.get('pym:nominal')# None if not found
                 result[value] = nominal_value
             elif isinstance(value, (dict, list)):
                 result.update(find_pym_names(value))
@@ -106,7 +106,7 @@ class Jobs:
             sims_json = json.load(file)#TODO use json()
         if 'fmr:Sims' in sims_json:
             sims_json = sims_json['fmr:Sims']
-            self.pym_names = find_pym_names(sims_json)
+            self.parameters = find_pym_names(sims_json)
         else:
             print('Found no fmr:Sims in ' + filename)
             return
