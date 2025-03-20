@@ -68,19 +68,23 @@ def main():
     #
     fmr.init()
     #
+    # Read simulation structure from .json file.
     sims = fmr.sims_from_file('src/pymera/test/uq_straw_1c.json')
-    # read parameters from the .csv file
+    #
+    # Read parameters from the .csv file.
     csv_has_nominals = True
     sims.add_parameter_file('src/pymera/test/uq_straw_1c.csv',
         has_names=True, has_nominals=csv_has_nominals)
     #
-    # Add dims parameter [length, width, height]
-    sims.nominal['dims'] = [sims.nominal['length'],
-        sims.nominal['width'],sims.nominal['height']]
-    d=[sims.parameter['length'],
-       sims.parameter['width'],
-       sims.parameter['height']]
-    sims.parameter['dims'] = np.ascontiguousarray(list(map(list, zip(*d))))
+    # Add dims parameter [length, width, height] values.
+    v = [sims.parameter['length'],
+         sims.parameter['width'],
+         sims.parameter['height']]
+    sims.add_parameter('dims',
+        nominal=[sims.nominal['length'],
+                 sims.nominal['width'],
+                 sims.nominal['height']],
+        values=list(map(list, zip(*v))) )
     #print(sims.parameter['dims'])
     #
     sims.init()# Optional: sims.run() will call sims.init() as needed.
@@ -92,7 +96,7 @@ def main():
         sims.parameter['width'] * sims.parameter['height'])
     #
     sims.exit() #NOTE invalidates sims post-processing pointers (base_force)
-
+    #
     print()
     print('base stress mean: ' + str(base_stress_avg.mean()))
     print('base stress standard deviation: ' + str(base_stress_avg.std()))
@@ -108,13 +112,13 @@ def main():
     #
     if csv_has_nominals:
         print('\nUser parameters (first row name) '
-              +'with nominal values (second row) from the CSV file:')
+              +'with nominal values (second row) from CSV file:')
         i=0
         for name in sims.parameter.keys():
             print(f'- {name}: {sims.nominal[name]}')
             i+=1
     else:
-        print('\nUser parameters (first row name) from the CSV file:')
+        print('\nUser parameters (first row name) from CSV file:')
         for name in sims.parameter.keys():
             print(f'- {name}')
     print('Number of additional values (remaining rows) '

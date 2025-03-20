@@ -54,8 +54,11 @@ def find_pym_names(obj):
     if isinstance(obj, dict):
         for key, value in obj.items():
             if key == "pym:name":
-                nominal_value = obj.get('pym:nominal')# None if not found
-                result[value] = nominal_value
+                nominal = obj.get('pym:nominal')# None if not found
+                if isinstance(nominal, (list, tuple, set)):
+                    if len(nominal) > 1:
+                        nominal = np.ascontiguousarray(nominal)
+                result[value] = nominal
             elif isinstance(value, (dict, list)):
                 result.update(find_pym_names(value))
     elif isinstance(obj, list):
@@ -193,6 +196,20 @@ class Sims:
         self.nominal = {}
         self.sample_n = None
 
+    def add_parameter(self, name, nominal=None, values=None):
+        #self.nominal[name] = None
+        #if nominal is not None:
+        if isinstance(nominal, (list, tuple, set)):
+            if len(nominal) > 1:
+                nominal = np.ascontiguousarray(nominal)
+        self.nominal[name] = nominal
+        #self.parameter[name] = None
+        #if values is not None:
+        if isinstance(values, (list, tuple, set)):
+            if len(values) > 1:
+                values = np.ascontiguousarray(values)
+        self.parameter[name] = values
+
     def add_parameter_file(self, filename, has_names=True, has_nominals=True):
         #TODO move to Sims?
         with open(filename, 'r') as f:
@@ -212,13 +229,12 @@ class Sims:
             for row_col in reader:
                 for name, col in zip(names, row_col):
                     self.parameter[name].append(float(col))
-            # Convert lists to numpy arrays
             self.sample_n = len(self.parameter[names[0]])
             if(self.sample_n >1):
-               for key in self.parameter:
-                   self.parameter[key] = np.array(self.parameter[key])
+                # Convert lists to contiguous numpy arrays
+                for key in self.parameter:
+                    self.parameter[key]=np.ascontiguousarray(self.parameter[key])
 
-    
     def get_post(self, name):
         # Placeholder for getting post-processing results
         # In a real implementation, this would return actual data.
