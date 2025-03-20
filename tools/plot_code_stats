@@ -79,7 +79,7 @@ if __name__ == "__main__":
   plt.title('Femera 0.3 mini-app source code statistics')
   #dt0=dt.datetime.strptime('2022-02-01','%Y-%m-%d') # i7-7820HQ start date
   dt0=dt.datetime.strptime('2024-01-01','%Y-%m-%d') # i7-12800H start date
-  plt.gca().set(xlim=(dt0.date(), max(t) + dt.timedelta(days=1)))
+  plt.gca().set(xlim=(dt0.date(), max(t) + dt.timedelta(days=10)))
   plt.gca().set(ylim=(0, files_ylim))
   plt.legend(loc='upper left', fontsize=10)
   # plt.gcf().autofmt_xdate()

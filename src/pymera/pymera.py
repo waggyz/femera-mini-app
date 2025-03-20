@@ -99,7 +99,7 @@ class Jobs:
     def add_sims(self, name='fmr:user:sims', runs_n=1):
         return Sims(self, name=name, runs_n=runs_n)
 
-    def add_sims_file(self, filename):
+    def sims_from_file(self, filename):
         self.name=None
         self.pym_name=None
         with open(filename, 'r') as file:
@@ -117,27 +117,6 @@ class Jobs:
             self.name=sims_json['fmr:Data_type:Name']
         #self.add_sims(name=sims_json['name'], runs_n=sims_json['runs_n'])
         return Sims(self)
-    
-    def add_parameter_file(self, filename, has_names=True, has_nominals=True):
-        #TODO move to Sims?
-        with open(filename, 'r') as f:
-            reader = csv.reader(f)
-            if has_names:
-                names = next(reader) # first line has parameter names.
-                # make a dictionary having keys for names and empty arrays for values
-                self.parameter = {name: [] for name in names}
-                #NOTE next (second) line has the nominal values (if provided)
-            else:
-                pass #TODO make placeholder names: col1, col2, col3,...
-            if has_nominals:
-                self.nominal = {name: None for name in names}
-                nominals = next(reader)
-                for name, val in zip(names, nominals):
-                    self.nominal[name]=float(val)
-            for row_col in reader:
-                for name, col in zip(names, row_col):
-                    self.parameter[name].append(float(col))
-            self.sample_n = len(self.parameter[names[0]])
 
     def init(self):
         fmr.jobs_init(self.obj)
@@ -210,6 +189,40 @@ class Sims:
         self.post_processes = []
         self.parameters = {}
         self.partition_n = 1
+        self.parameter = {}
+        self.nominal = {}
+        self.sample_n = None
+
+    def add_parameter_file(self, filename, has_names=True, has_nominals=True):
+        #TODO move to Sims?
+        with open(filename, 'r') as f:
+            reader = csv.reader(f)
+            if has_names:
+                names = next(reader) # first line has parameter names.
+                # make a dictionary having keys for names and empty arrays for values
+                self.parameter = {name: [] for name in names}
+                #NOTE next (second) line has the nominal values (if provided)
+            else:
+                pass #TODO make placeholder names: col1, col2, col3,...
+            if has_nominals:
+                self.nominal = {name: None for name in names}
+                nominals = next(reader)
+                for name, val in zip(names, nominals):
+                    self.nominal[name]=float(val)
+            for row_col in reader:
+                for name, col in zip(names, row_col):
+                    self.parameter[name].append(float(col))
+            # Convert lists to numpy arrays
+            self.sample_n = len(self.parameter[names[0]])
+            if(self.sample_n >1):
+               for key in self.parameter:
+                   self.parameter[key] = np.array(self.parameter[key])
+
+    
+    def get_post(self, name):
+        # Placeholder for getting post-processing results
+        # In a real implementation, this would return actual data.
+        return np.ones(self.runs_n)
 
     def set_partition_n(self, n=1):
         self.partition_n = n

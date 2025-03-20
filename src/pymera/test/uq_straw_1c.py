@@ -67,16 +67,37 @@ def main():
     #     with pymera.Jobs() as fmr:
     #
     fmr.init()
-    #**************************************************************************
-    # Set nominal model parameters.
-    #TODO Femera sims functions not implemented yet.
-    #TODO changing internal femera fmr: string identifiers to enums.
-    #NOTE fmr: string identifiers needed for JSON representation.
     #
-    #TODO use a Runs object for run parameters?
+    sims = fmr.sims_from_file('src/pymera/test/uq_straw_1c.json')
+    # read parameters from the .csv file
+    csv_has_nominals = True
+    sims.add_parameter_file('src/pymera/test/uq_straw_1c.csv',
+        has_names=True, has_nominals=csv_has_nominals)
     #
-    #TODO Nominal model setupin a JSON file. ==================================
-    sims2 = fmr.add_sims_file('src/pymera/test/uq_straw_1c.json')
+    # Add dims parameter [length, width, height]
+    sims.nominal['dims'] = [sims.nominal['length'],
+        sims.nominal['width'],sims.nominal['height']]
+    d=[sims.parameter['length'],
+       sims.parameter['width'],
+       sims.parameter['height']]
+    sims.parameter['dims'] = np.ascontiguousarray(list(map(list, zip(*d))))
+    #print(sims.parameter['dims'])
+    #
+    sims.init()# Optional: sims.run() will call sims.init() as needed.
+    sims.run()
+    #
+    # Get numpy array contents from Pymera.
+    base_force = sims.get_post('base-force-mag')
+    base_stress_avg = base_force / (# averaged over each base area
+        sims.parameter['width'] * sims.parameter['height'])
+    #
+    sims.exit() #NOTE invalidates sims post-processing pointers (base_force)
+
+    print()
+    print('base stress mean: ' + str(base_stress_avg.mean()))
+    print('base stress standard deviation: ' + str(base_stress_avg.std()))
+    #
+    #--------------------------------------------------------------------------
     print('\nUser parameters (pym:name) with nominal values '
           +'and output fields in the JSON file:')
     for name, nominal in fmr.parameters.items():
@@ -85,17 +106,43 @@ def main():
         else:
             print(f'- {name}')
     #
+    if csv_has_nominals:
+        print('\nUser parameters (first row name) '
+              +'with nominal values (second row) from the CSV file:')
+        i=0
+        for name in sims.parameter.keys():
+            print(f'- {name}: {sims.nominal[name]}')
+            i+=1
+    else:
+        print('\nUser parameters (first row name) from the CSV file:')
+        for name in sims.parameter.keys():
+            print(f'- {name}')
+    print('Number of additional values (remaining rows) '
+          +'in the CSV file:')
+    print(f'- sample_n: {sims.sample_n}')
+    #print(f'* runs_n: {runs_n}')
+    print()
     # Add simulation models.
-    beam_sims = fmr.add_sims()#name='cantilever-sims')#, runs_n=runs_n)
+    #sims = fmr.add_sims()#name='cantilever-sims')#, runs_n=runs_n)
     #TODO use python context:
-    #     with fmr.sims(name='cantilever-sims') as beam_sims:
+    #     with fmr.sims(name='cantilever-sims') as sims:
     # 
     #TODO Set model partitioning method.
     #
     #NOTE name is needed only for input parameters and post-processing results.
     """
+    # Nominal model setup  (same as the JSON file) ============================
+    #
+    sims = jobs.add_sims()
+    # Set nominal model parameters.
+    #TODO Femera sims functions not implemented yet.
+    #TODO changing internal femera fmr: string identifiers to enums.
+    #NOTE fmr: string identifiers needed for JSON representation.
+    #
+    #TODO use a Runs object for run parameters?
+
     # Add model geometry.
-    beam_geom = beam_sims.add_geometry(#name='geometry',
+    beam_geom = sims.add_geometry(#name='geometry',
                 shape='fmr:geom:block')
     beam_geom.set(fmr.Data_type['Dimensions_xyz'],
                 name='dims', nominal=nominal_dims )
@@ -126,12 +173,12 @@ def main():
                 name='tip-displace-bcs', nominal=nominal_tip_z)
     #
     # Set preconditioner and solver.
-    beam_sims.set_preconditioner(method='fmr:solve:precon:jacobi')
-    beam_sims.set_solver(method='fmr:solve:pcg')
+    sims.set_preconditioner(method='fmr:solve:precon:jacobi')
+    sims.set_solver(method='fmr:solve:pcg')
     # defaults: analysis='fmr:solve:static', load_step_n=1, rtol=1e-6)
     #
     # Identify output parameters for post-processing.
-    beam_results = beam_sims.add_post(name='base-force-mag',
+    beam_results = sims.add_post(name='base-force-mag',
                 nodes_at=fmr.Data_type['Node_x_min'],# Implied node set
                 sum=fmr.Data_type['Force_mag']# Returns 1 scalar for each sim
                 )#, count=runs_n)#TODO try to hide this from the user.
@@ -159,40 +206,14 @@ def main():
             writer.writerow(nominals)
             for row in rows:
                 writer.writerow(row)
-   # read parameters from the .csv file
-    has_nominals = True
-    fmr.add_parameter_file('src/pymera/test/uq_straw_1c.csv',
-                            has_names=True, has_nominals=has_nominals)
-    # Add dims parameter [length, width, height]
-    d=[fmr.parameter['length'],fmr.parameter['width'],fmr.parameter['height']]
-    fmr.parameter['dims'] = list(map(list, zip(*d)))
-    fmr.nominal['dims'] = [
-        fmr.nominal['length'],fmr.nominal['width'],fmr.nominal['height']]
-    #
-    if has_nominals:
-        print('\nUser parameters (first row name) '
-              +'with nominal values (second row) from the CSV file:')
-        i=0
-        for name in fmr.parameter.keys():
-            print(f'- {name}: {fmr.nominal[name]}')
-            i+=1
-    else:
-        print('\nUser parameters (first row name) from the CSV file:')
-        for name in fmr.parameter.keys():
-            print(f'- {name}')
-    print('Number of additional values (remaining rows) '
-          +'in the CSV file:')
-    print(f'- sample_n: {fmr.sample_n}')
-    #print(f'* runs_n: {runs_n}')
-    print()
     """
     # Set model parameters. These replace the nominal values.
     if True:
-        #fmr.set('dims', [length, width, height]) # x,y,z
-        fmr.set('dims', dims) # x,y,z
-        fmr.set('tip-displace-bcs', tip_z)
-        fmr.set('youngs', youngs)# E
-        fmr.set('poissons', poissons)# nu
+        #sims.set('dims', [length, width, height]) # x,y,z
+        sims.set('dims', dims) # x,y,z
+        sims.set('tip-displace-bcs', tip_z)
+        sims.set('youngs', youngs)# E
+        sims.set('poissons', poissons)# nu
     else:#TODO alternative?
         beam_geom.set('dims,', [length, width, height]) # x,y,z
         beam_load.set('tip-displace-bcs', tip_z)
@@ -203,14 +224,14 @@ def main():
     #     Or, just keep the first solution and reuse it for u0.
     #NOTE Avoid relative tolerance (rtol) when providing a good initial guess.
     #
-    beam_sims.init()# Optional: sims.run() will call sims.init() as needed.
-    beam_sims.run()
+    sims.init()# Optional: sims.run() will call sims.init() as needed.
+    sims.run()
     #
     # Get numpy array contents from Pymera.
     base_force = beam_results.get('base-force-mag')
     base_stress_avg = base_force / (width * height)# averaged over each base
     #
-    beam_sims.exit() #NOTE invalidates sims post-processing pointers (base_force)
+    sims.exit() #NOTE invalidates sims post-processing pointers (base_force)
     '''
     #TODO UQ stuff, maybe create and run more sims,...
     # uq.do_some_stuff(base_stress_avg)
