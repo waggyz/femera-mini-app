@@ -117,6 +117,27 @@ class Jobs:
             self.name=sims_json['fmr:Data_type:Name']
         #self.add_sims(name=sims_json['name'], runs_n=sims_json['runs_n'])
         return Sims(self)
+    
+    def add_parameter_file(self, filename, has_names=True, has_nominals=True):
+        #TODO move to Sims?
+        with open(filename, 'r') as f:
+            reader = csv.reader(f)
+            if has_names:
+                names = next(reader) # first line has parameter names.
+                # make a dictionary having keys for names and empty arrays for values
+                self.parameter = {name: [] for name in names}
+                #NOTE next (second) line has the nominal values (if provided)
+            else:
+                pass #TODO make placeholder names: col1, col2, col3,...
+            if has_nominals:
+                self.nominal = {name: None for name in names}
+                nominals = next(reader)
+                for name, val in zip(names, nominals):
+                    self.nominal[name]=float(val)
+            for row_col in reader:
+                for name, col in zip(names, row_col):
+                    self.parameter[name].append(float(col))
+            self.sample_n = len(self.parameter[names[0]])
 
     def init(self):
         fmr.jobs_init(self.obj)

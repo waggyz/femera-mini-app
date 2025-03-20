@@ -138,7 +138,7 @@ def main():
     """
     #==========================================================================
     #
-    if False:# Write random input variables to a .csv file.
+    if False:# Write random input parameters to a .csv file.
         sample_n=1000
         #runs_n = sample_n+1 # includes a nominal sims run
         # Set up random input variables as size runs_n numpy arrays.
@@ -150,53 +150,39 @@ def main():
         youngs = np.random.normal(nominal_youngs, nominal_youngs/10, sample_n)
         poissons = np.random.normal(nominal_poissons, nominal_poissons/10, sample_n)
         #
-        rows = zip(length, width, height, tip_z, youngs, poissons)
-        nominals = [1.000,0.050,0.050, -0.010, 210e9,0.285]
         names=['length','width','height','tip-displace-z','youngs','poissons']
+        nominals = [1.000,0.050,0.050, -0.010, 210e9,0.285]
+        rows = zip(length, width, height, tip_z, youngs, poissons)
         with open('src/pymera/test/uq_straw_1c.csv', "w") as f:
             writer = csv.writer(f)
             writer.writerow(names)
             writer.writerow(nominals)
             for row in rows:
                 writer.writerow(row)
-    else: # read from a .csv file
-        #TODO move CSV read to Jobs method
-        dims=[]
-        with open('src/pymera/test/uq_straw_1c.csv', 'r') as f:
-            reader = csv.reader(f)
-            names = next(reader) # first line has parameter names.
-            #NOTE second line has the nominal values (if provided)
-            # make a dictionary having keys for names and empty arrays for values
-            parameter = {name: [] for name in names}
-            nominal = {name: None for name in names}
-            #
-            if True: #TODO csv_has_nominals
-                nominals = next(reader)
-                for name, val in zip(names, nominals):
-                    nominal[name]=float(val)
-            for row_col in reader:
-                for name, col in zip(names, row_col):
-                    parameter[name].append(float(col))
-            sample_n = len(parameter[names[0]])
-        #
-    names.append('dims')
-    d=[parameter['length'],parameter['width'],parameter['height']]
-    parameter['dims'] = list(map(list, zip(*d)))
-    nominal['dims'] = [nominal['length'],nominal['width'],nominal['height']]
-    if True: #TODO csv_has_nominals
+   # read parameters from the .csv file
+    has_nominals = True
+    fmr.add_parameter_file('src/pymera/test/uq_straw_1c.csv',
+                            has_names=True, has_nominals=has_nominals)
+    # Add dims parameter [length, width, height]
+    d=[fmr.parameter['length'],fmr.parameter['width'],fmr.parameter['height']]
+    fmr.parameter['dims'] = list(map(list, zip(*d)))
+    fmr.nominal['dims'] = [
+        fmr.nominal['length'],fmr.nominal['width'],fmr.nominal['height']]
+    #
+    if has_nominals:
         print('\nUser parameters (first row name) '
               +'with nominal values (second row) from the CSV file:')
         i=0
-        for name in names:
-            print(f'- {name}: {nominal[name]}')
+        for name in fmr.parameter.keys():
+            print(f'- {name}: {fmr.nominal[name]}')
             i+=1
     else:
         print('\nUser parameters (first row name) from the CSV file:')
-        for name in names:
+        for name in fmr.parameter.keys():
             print(f'- {name}')
-    print('Number of additional values (second or third row on) '
+    print('Number of additional values (remaining rows) '
           +'in the CSV file:')
-    print(f'- sample_n: {sample_n}')
+    print(f'- sample_n: {fmr.sample_n}')
     #print(f'* runs_n: {runs_n}')
     print()
     """
