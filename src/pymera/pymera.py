@@ -114,17 +114,18 @@ fmr.get_version.restype = ct.c_char_p
 fmr.get_version.argtypes = [ct.c_void_p]
 fmr.get_jobs_name.restype = ct.c_char_p
 fmr.get_jobs_name.argtypes = [ct.c_void_p]
+
+fmr.get_verbosity.restype = ct.c_ubyte
+fmr.get_verbosity.argtypes = [ct.c_void_p]
+fmr.set_verbosity.restype = ct.c_ubyte
+fmr.set_verbosity.argtypes = [ct.c_void_p, ct.c_ubyte]
+
 fmr.get_sims_name.restype = ct.c_char_p
 fmr.get_sims_name.argtypes = [ct.c_void_p]
 fmr.set_sims_name.argtypes = [ct.c_void_p, ct.c_char_p]
 fmr.get_sims_version.restype = ct.c_char_p
 fmr.get_sims_version.argtypes = [ct.c_void_p]
 fmr.set_sims_version.argtypes = [ct.c_void_p, ct.c_char_p]
-
-fmr.get_verbosity.restype = ct.c_ubyte
-fmr.get_verbosity.argtypes = [ct.c_void_p]
-fmr.set_verbosity.restype = ct.c_ubyte
-fmr.set_verbosity.argtypes = [ct.c_void_p, ct.c_ubyte]
 
 
 # Create a class to represent the Jobs object in Python.
@@ -177,6 +178,16 @@ class Jobs:
     def get_name(self):
         return fmr.get_jobs_name(self.obj).decode('utf-8', errors='replace')
     
+    def get_verbosity(self):
+        return fmr.get_verbosity(self.obj)
+    def set_verbosity(self, verbosity=3):
+        # Clamp values to range of ct.c_ubyte.
+        if(verbosity<0):
+            verbosity=0
+        elif(verbosity>255):
+            verbosity=255
+        return fmr.set_verbosity(self.obj, verbosity)
+    #TODO move to Sims class ==================================================
     def get_sims_name(self):
         return fmr.get_sims_name(self.obj).decode('utf-8', errors='replace')
     def set_sims_name(self, name):
@@ -188,16 +199,7 @@ class Jobs:
     def set_sims_version(self, name):
         fmr.set_sims_version(self.obj, name.encode('utf-8'))
         return
-    
-    def get_verbosity(self):
-        return fmr.get_verbosity(self.obj)
-    def set_verbosity(self, verbosity=3):
-        # Clamp values to range of ct.c_ubyte.
-        if(verbosity<0):
-            verbosity=0
-        elif(verbosity>255):
-            verbosity=255
-        return fmr.set_verbosity(self.obj, verbosity)
+    #==========================================================================
 
 # Create a class to represent the Sims object in Python.
 class Sims:
