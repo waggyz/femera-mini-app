@@ -26,7 +26,8 @@ namespace fmc {
     FMR_EXPORT void jobs_exit (Jobs_t*);
     FMR_EXPORT void delete_jobs (Jobs_t*);
     FMR_EXPORT const char* get_version (Jobs_t*);
-    FMR_EXPORT const char* jobs_get_name (Jobs_t*);
+    FMR_EXPORT const char* get_jobs_name (Jobs_t*);
+    FMR_EXPORT const char* get_sims_name (Jobs_t*);
     FMR_EXPORT fmr::Dim_int get_verbosity (Jobs_t*);
     FMR_EXPORT fmr::Dim_int set_verbosity (Jobs_t*, fmr::Dim_int);
   }

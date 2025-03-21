@@ -63,6 +63,13 @@ def main():
         else:
             print(f'- {name}')
     #
+
+
+    
+    print(fmr.sims_get_name())
+
+
+
     # Read parameters and nominal values from the .csv file.
     has_csv_nominals = True
     sims.add_parameter_file('src/pymera/test/uq_straw_1c.csv',

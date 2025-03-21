@@ -34,6 +34,8 @@ namespace femera { namespace task {
    * 
    * The class is marked as final to prevent any further inheritance.
    */
+  public:
+//    Jobs* get_sims();
   private:
     void task_init (int* argc, char** argv);
     void task_exit ();

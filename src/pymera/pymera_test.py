@@ -18,9 +18,6 @@ class TestPymeraJobs(unittest.TestCase):
         print()
         cls.fmr.exit()
 
-    def test_jobs_init(self):
-        self.assertTrue(self.fmr.did_init())
-
     def test_jobs_version(self):
         self.assertNotEqual(self.fmr.get_version(), None)
         self.assertNotEqual(self.fmr.get_version(), '')
@@ -34,6 +31,12 @@ class TestPymeraJobs(unittest.TestCase):
              + ', '+"it's testing time!")
         print ("This won't hurt a bit... ;)")
 
+    def test_jobs_init(self):
+        self.assertTrue(self.fmr.did_init())
+
+    def test_get_sims_name(self):
+        self.assertTrue("sim" in self.fmr.get_sims_name().lower())
+
     def test_jobs_verbosity(self):
         self.assertGreaterEqual( self.fmr.get_verbosity(), 0)
         verb = self.fmr.get_verbosity()
@@ -43,6 +46,7 @@ class TestPymeraJobs(unittest.TestCase):
         #self.assertLess(self.fmr.set_verbosity(999), 256)
         #self.assertEqual(self.fmr.set_verbosity(verb), verb)
         #self.assertEqual(self.fmr.get_verbosity(), verb)
+
 
 if __name__ == '__main__':
     unittest.main()

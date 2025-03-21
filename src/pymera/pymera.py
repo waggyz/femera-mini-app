@@ -3,6 +3,7 @@ import numpy as np
 import ctypes as ct
 import csv, json
 from enum import Enum
+from warnings import warn
 
 import os
 libpath = os.path.join(os.getcwd(),'build','stage','i7-12800H','lib')
@@ -19,29 +20,48 @@ else:
 # Enums =======================================================================
 
 def create_enum_from_csv(file_path, enum_name, start_at=None):
-    # From NASA ChatGSFC, Claude 3.5 Sonnet v2
-    # Read the CSV file
+    """
+    Create an Enum class dynamically from a CSV file.
+
+    Parameters:
+        file_path (str): The path to the CSV file.
+        enum_name (str): The name of the Enum class to be created.
+        start_at (int, optional): The number to start with when creating the
+        Enum members. If None, the CSV file must contain the member's
+        corresponding number in the second column. Defaults to None.
+
+    Returns:
+        Enum: The dynamically created Enum class.
+
+    Notes:
+        - The CSV file should have at least two columns: name and value.
+        - If start_at is not provided, the Enum members will be created from the
+          first row to the last.
+        - If start_at is provided, the Enum members will be created starting
+          from the specified row number.
+    """
+    # Read the CSV file.
     with open(file_path, 'r') as csv_file:
         reader = csv.reader(csv_file)
-        # Assuming the first row contains headers, skip it
+        # Assuming the first row contains headers. Skip it.
         next(reader, None)
         #
-        # Create a dictionary to hold enum members
+        # Create a dictionary to hold enum members.
         enum_members = {}
         if(start_at == None):
-            # Iterate through the rows and add them to the enum_members dictionary
+            # Iterate through rows and add them to the enum_members dictionary.
             for row in reader:
-                if len(row) >= 2:  # Ensure we have at least a name and a value
+                if len(row) >= 2:  # Ensure we have at least a name and a value.
                     name, value = row[0], row[1]
                     enum_members[name] = value
         else:
             row_i = start_at
             for row in reader:
-                if len(row) >= 1:  # Ensure we have at least a name
+                if len(row) >= 1:  # Ensure we have at least a name.
                     name = row[0]
                     enum_members[name] = row_i
                     row_i += 1
-    # Create and return the Enum class dynamically
+    # Create and return the Enum class dynamically.
     return Enum(enum_name, enum_members)
 
 def find_user_keys(obj):
@@ -84,37 +104,42 @@ def find_user_keys(obj):
 # Define the argument and return types for C interface functions.
 fmr.new_jobs.restype = ct.c_void_p
 fmr.delete_jobs.argtypes = [ct.c_void_p]
+
 fmr.jobs_init.argtypes = [ct.c_void_p]
 fmr.jobs_exit.argtypes = [ct.c_void_p]
 fmr.jobs_did_init.restype = ct.c_bool
 fmr.jobs_did_init.argtypes = [ct.c_void_p]
+
 fmr.get_version.restype = ct.c_char_p
 fmr.get_version.argtypes = [ct.c_void_p]
-fmr.jobs_get_name.restype = ct.c_char_p
-fmr.jobs_get_name.argtypes = [ct.c_void_p]
+fmr.get_jobs_name.restype = ct.c_char_p
+fmr.get_jobs_name.argtypes = [ct.c_void_p]
+fmr.get_sims_name.restype = ct.c_char_p
+fmr.get_sims_name.argtypes = [ct.c_void_p]
+
 fmr.get_verbosity.restype = ct.c_ubyte
 fmr.get_verbosity.argtypes = [ct.c_void_p]
 fmr.set_verbosity.restype = ct.c_ubyte
 fmr.set_verbosity.argtypes = [ct.c_void_p, ct.c_ubyte]
+
 
 # Create a class to represent the Jobs object in Python.
 class Jobs:
     Data_type = create_enum_from_csv(
         os.path.join(os.getcwd(),'data','src','data-type.csv'),
                     'Data_type', start_at=3)
-    def __init__(self, name='fmr:user:jobs'):
+    def __init__(self):
         self.obj = fmr.new_jobs()
-        self.name = name
 
     def __del__(self):
         if fmr.jobs_did_init(self.obj):
-            fmr.jobs_exit(self.obj)#TODO automatically exit here, good idea?
+            fmr.jobs_exit(self.obj)
         fmr.delete_jobs(self.obj)
     
-    def add_sims(self, name='fmr:user:sims', runs_n=1):
+    def new_sims(self, name='fmr:user:sims', runs_n=1):
         return Sims(self, name=name, runs_n=runs_n)
 
-    def sims_from_file(self, filename):
+    def new_sims_from_file(self, filename):
         sims = Sims(self)
         with open(filename, 'r') as file:
             sims_json = json.load(file)#TODO use json()
@@ -124,12 +149,9 @@ class Jobs:
         else:
             print('Found no fmr:Sims in ' + filename)
             return
-        #if 'pym:name' in sims_json:
-        #    self.name=sims_json['pym:name']
-        #    print(sims_json)
-        if 'fmr:Data_type:Name' in sims_json:
-            self.name=sims_json['fmr:Data_type:Name']
-        #self.add_sims(name=sims_json['name'], runs_n=sims_json['runs_n'])
+        #if 'fmr:Data_type:Name' in sims_json:
+        #    sims.name=sims_json['fmr:Data_type:Name']
+        #self.new_sims(name=sims_json['name'], runs_n=sims_json['runs_n'])
         return sims
 
     def init(self):
@@ -145,7 +167,10 @@ class Jobs:
         return fmr.get_version(self.obj).decode('utf-8', errors='replace')
     
     def get_name(self):
-        return fmr.jobs_get_name(self.obj).decode('utf-8', errors='replace')
+        return fmr.get_jobs_name(self.obj).decode('utf-8', errors='replace')
+    
+    def get_sims_name(self):
+        return fmr.get_sims_name(self.obj).decode('utf-8', errors='replace')
     
     def get_verbosity(self):
         return fmr.get_verbosity(self.obj)
@@ -159,14 +184,14 @@ class Jobs:
 
 # Create a class to represent the Sims object in Python.
 class Sims:
-    def __init__(self, jobs, name='fmr:user:sims', runs_n=1):
+    def __init__(self, jobs, name=None, runs_n=1):
         """
         Initializes a Sims object with the given parameters.
 
         Parameters:
             jobs (Jobs_t): The Jobs object to associate with the Sims object.
             name (str, optional): The name of the Sims object. Defaults to
-                'fmr:user:sims'.
+                the Femera library Sims name.
             runs_n (int, optional): The number of runs for the Sims object.
                 Defaults to 1.
 
@@ -192,7 +217,6 @@ class Sims:
                 object. Defaults to 1.
         """
         self.jobs = jobs
-        self.name = name
         self.runs_n = runs_n
         self.geometries = []
         self.grids = []
@@ -272,13 +296,14 @@ class Sims:
                 f.seek(0)# Return to top.
             # Make dictionaries having keys for names and empty arrays (for
             # parameter) or None (for nominal) for values.
-            self.parameter = {name: [] for name in names}
+            for name in names:
+                self.parameter[name] = []
             self.nominal = {name: None for name in names}
             # The next (second) line has the nominal values (if provided)
             if has_nominals:
                 nominals = next(reader)
                 for name, val in zip(names, nominals):
-                    self.nominal[name] = float(val)
+                    self.nominal[name] = float(val)#TODO Check type for each val?
             for row_col in reader:
                 for name, col in zip(names, row_col):
                     self.parameter[name].append(float(col))
@@ -288,6 +313,9 @@ class Sims:
                 for key in self.parameter:
                     self.parameter[key] = np.ascontiguousarray(
                         self.parameter[key])
+            if(self.sample_n!=max(len(self.parameter[name]) for name in names)):
+                warn('Not all parameters have the same number of values. '
+                     +'Something might be wrong with your CSV file.')
 
     def get_post(self, name):
         # Placeholder for getting post-processing results

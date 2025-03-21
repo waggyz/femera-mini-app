@@ -5,7 +5,7 @@ namespace femera {
   inline
   task::Runs::Runs (const femera::Work::Core_ptrs_t W)
   noexcept : Task (W) {
-    this->name      ="Femera simulation runner";
+    this->name      ="simulation runner";
     this->abrv      ="runs";
     this->task_type = task_cast (Task_type::Runs);
 #ifdef FMR_HAS_OPENMP

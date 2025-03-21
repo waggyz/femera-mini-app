@@ -68,7 +68,14 @@ namespace femera {
     MAKESTRING(FMR_VERSION)" started\n");
 #endif
     this->set_init (true);
-  }//
+  }/*
+  task::Jobs* task::Jobs::get_sims() {
+    return this->get_task(Task_type::Sims);
+  }
+  std::string task::Jobs::get_sims_name() {
+    return this->get_Sims()->get_name();
+  }*/
+   //
   //
 }//end femera namespace
 //
