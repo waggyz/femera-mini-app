@@ -1,20 +1,15 @@
 { "fmr:Sims": {
-  "NOTE": "pym:nominal (or fmr:to?) with pym:name implies Python read/write.",
+  "NOTE": "non-fmr: keys imply Python read/write.",
   "TODO": "Remove Data_type: ???",
     "fmr:Geom": {
       "fmr:Data_type:Shape_type": "fmr:Shape_type:Block",
-      "fmr:Data_type:Dimensions_xyz": {
-        "pym:name": "dims", "pym:nominal": [1.000, 0.050, 0.050]
+      "dims": {"fmr:Data_type:Dimensions_xyz": [1.000, 0.050, 0.050] }
       },
       "fmr:Mtrl": {
         "fmr:Data_type:Mtrl_type": "fmr:Mtrl_type:Elastic-isotropic",
-        "fmr:Data_type:Youngs_modulus": {
-          "pym:name": "youngs", "pym:nominal": 210e9
-        },
-        "fmr:Data_type:Poissons_ratio": {
-          "pym:name": "poissons", "pym:nominal": 0.285
-          }
-      },
+        "youngs": {"fmr:Data_type:Youngs_modulus": 210e9 },
+        "poissons": {"fmr:Data_type:Poissons_ratio": 0.285 }
+      ,
       "fmr:Grid": {
         "fmr:Data_type:Structured": true,
         "fmr:Data_type:Cell_type": "fmr:Cell_type:Block-6tet",
@@ -35,12 +30,11 @@
     "fmr:BCs": {
       "fmr:Data_type:Displacement_xyz": {
         "fmr:Data_type:Node_set": "beam-base",
-        "fmr:to": [0.000, 0.000, 0.000]
+        "fmr:Data_type:Displacement_xyz": [0.000, 0.000, 0.000]
       },
       "fmr:Data_type:Displacement_z": {
         "fmr::Data_type:Node_set": "beam-tip",
-        "pym:name": "tip-displace-z",
-        "pym:nominal": -0.010
+        "tip-displace-z": {"fmr:Data_type:Displacement_z": -0.010 }
       }
     },
     "fmr:Conditioner": {
@@ -53,30 +47,21 @@
       {
         "fmr:Data_type:Runs_n": 1,
         "fmr:Post": {
-          "fmr:Data_type:Node_xyz": {
-            "pym:name": "nominal-node-coordinates"
-          },
-          "fmr:Data_type:Displacement_xyz": {
-            "pym:name": "nominal-displacements"
-          },
           "nominal-node-coordinates": "fmr:Data_type:Node_xyz",
           "nominal-displacements": "fmr:Data_type:Displacement_xyz"
         }
       },
       {
-        "fmr:Data_type:Runs_n": {
-          "pym:name": "sample_n"
-        },
+        "sample_n": {"fmr:Data_type:Runs_n": null},
         "fmr:Solve": {
-          "fmr:Data_type:Initial_displacements_xyz": {
-            "pym:name": "nominal-displacements"
-          }
+          "fmr:Data_type:Initial_displacements_xyz": "nominal-displacements"
         },
         "fmr:Post": {
-          "fmr:Data_type:Force_mag": {
-            "fmr:Data_type:Node_set": "beam-base",
-            "fmr:Data_type:Reduce": "fmr:Reduce:Sum",
-            "pym:name": "base-force-mag"
+          "base-force-mag": {
+            "fmr:Data_type:Force_mag": {
+              "fmr:Data_type:Reduce": "fmr:Reduce:Sum",
+              "fmr:Data_type:Node_set": "beam-base"
+            }
           }
         }
       }
