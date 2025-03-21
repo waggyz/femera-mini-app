@@ -23,7 +23,7 @@ def main():
     takes no parameters and returns nothing.
 
     The simulation parameters are defined as follows: 
-    - runs_n: the number of simulations to run (default: 1000) 
+    - sample_n: the number of simulations to run (default: 1000) 
     - nominal_length: the length of the beam (nominal: 1.000) 
     - nominal_width: the width of the beam (nominal: 0.050) 
     - nominal_height: the height of the beam (nominal: 0.050) 
@@ -43,22 +43,7 @@ def main():
     Note: The function assumes that the Pymera library is properly
     configured and installed.
     """
-    #
-    # Simulation nominal values -----------------------------------------------
-    nominal_youngs = 210e9# Pa
-    nominal_poissons = 0.285 #NOTE Clamp >= 0.25?
-    #
-    nominal_tip_z =-0.100# m
-    #
-    nominal_length = 1.000# m
-    nominal_width = 0.050# m
-    nominal_height = 0.050# m
-    #
-    nominal_dims = np.array([nominal_length, nominal_width, nominal_height])
-    nominal_cell_size = 0.010# m
     #--------------------------------------------------------------------------
-    # Structured discretization parameters.
-    elem_count_xyz = np.array(nominal_dims / nominal_cell_size, dtype='u8')
     #
     fmr = pymera.Jobs()
     print('Hello ' + fmr.get_version() +' '+ fmr.get_name() + '!')
@@ -68,10 +53,17 @@ def main():
     #
     fmr.init()
     #
-    # Read simulation structure from .json file.
+    # Read simulation from JSON file.
     sims = fmr.sims_from_file('src/pymera/test/uq_straw_1c.json')
+    print('\nUser parameters (pym:name) with (pym:nominal) values, '
+          + 'and output fields, in JSON:')
+    for name, value in sims.parameter.items():
+        if value is not None:
+            print(f'- {name}: {value}')
+        else:
+            print(f'- {name}')
     #
-    # Read parameters from the .csv file.
+    # Read parameters and nominal values from the .csv file.
     csv_has_nominals = True
     sims.add_parameter_file('src/pymera/test/uq_straw_1c.csv',
         has_names=True, has_nominals=csv_has_nominals)
@@ -84,8 +76,7 @@ def main():
         nominal=[sims.nominal['length'],
                  sims.nominal['width'],
                  sims.nominal['height']],
-        values=list(map(list, zip(*v))) )
-    #print(sims.parameter['dims'])
+        values=list(map(list, zip(*v))) )# SoA to AoS
     #
     sims.init()# Optional: sims.run() will call sims.init() as needed.
     sims.run()
@@ -102,30 +93,20 @@ def main():
     print('base stress standard deviation: ' + str(base_stress_avg.std()))
     #
     #--------------------------------------------------------------------------
-    print('\nUser parameters (pym:name) with nominal values '
-          +'and output fields in the JSON file:')
-    for name, nominal in fmr.parameters.items():
-        if nominal is not None:
-            print(f'- {name}: {nominal}')
-        else:
-            print(f'- {name}')
-    #
     if csv_has_nominals:
-        print('\nUser parameters (first row name) '
+        print('\nUser parameter names (first row) '
               +'with nominal values (second row) from CSV file:')
-        i=0
-        for name in sims.parameter.keys():
-            print(f'- {name}: {sims.nominal[name]}')
-            i+=1
+        for name, nominal in sims.nominal.items():
+            print(f'- {name}: {nominal}')
     else:
-        print('\nUser parameters (first row name) from CSV file:')
+        print('\nUser parameters (first row name) updated from CSV file:')
         for name in sims.parameter.keys():
             print(f'- {name}')
     print('Number of additional values (remaining rows) '
           +'in the CSV file:')
     print(f'- sample_n: {sims.sample_n}')
-    #print(f'* runs_n: {runs_n}')
     print()
+    #
     # Add simulation models.
     #sims = fmr.add_sims()#name='cantilever-sims')#, runs_n=runs_n)
     #TODO use python context:
@@ -134,14 +115,15 @@ def main():
     #TODO Set model partitioning method.
     #
     #NOTE name is needed only for input parameters and post-processing results.
-    """
+    #
     # Nominal model setup  (same as the JSON file) ============================
+    """
     #
     sims = jobs.add_sims()
     # Set nominal model parameters.
     #TODO Femera sims functions not implemented yet.
     #TODO changing internal femera fmr: string identifiers to enums.
-    #NOTE fmr: string identifiers needed for JSON representation.
+    #NOTE fmr:, pym: string identifiers needed for JSON representation.
     #
     #TODO use a Runs object for run parameters?
 
@@ -188,9 +170,23 @@ def main():
                 )#, count=runs_n)#TODO try to hide this from the user.
     """
     #==========================================================================
-    #
     if False:# Write random input parameters to a .csv file.
+        # Simulation nominal values -----------------------------------------------
+        nominal_youngs = 210e9# Pa
+        nominal_poissons = 0.285 #NOTE Clamp >= 0.25?
+        #
+        nominal_tip_z =-0.100# m
+        #
+        nominal_length = 1.000# m
+        nominal_width = 0.050# m
+        nominal_height = 0.050# m
+        #
+        nominal_dims = np.array([nominal_length, nominal_width, nominal_height])
+        nominal_cell_size = 0.010# m
+        # Structured discretization parameters. -------------------------------
+        elem_count_xyz = np.array(nominal_dims / nominal_cell_size, dtype='u8')
         sample_n=1000
+        #----------------------------------------------------------------------
         #runs_n = sample_n+1 # includes a nominal sims run
         # Set up random input variables as size runs_n numpy arrays.
         # (mean, stdev, N)
@@ -224,7 +220,7 @@ def main():
         beam_mtrl.set('youngs', youngs)# E
         beam_mtrl.set('poissons', poissons)# nu
     #--------------------------------------------------------------------------
-    #TODO Solve at nominal values for initial solution (u0) starting vector.
+    #DONE Solve at nominal values for initial solution (u0) starting vector.
     #     Or, just keep the first solution and reuse it for u0.
     #NOTE Avoid relative tolerance (rtol) when providing a good initial guess.
     #

@@ -103,13 +103,12 @@ class Jobs:
         return Sims(self, name=name, runs_n=runs_n)
 
     def sims_from_file(self, filename):
-        self.name=None
-        self.pym_name=None
+        sims = Sims(self)
         with open(filename, 'r') as file:
             sims_json = json.load(file)#TODO use json()
         if 'fmr:Sims' in sims_json:
             sims_json = sims_json['fmr:Sims']
-            self.parameters = find_pym_names(sims_json)
+            sims.parameter = find_pym_names(sims_json)
         else:
             print('Found no fmr:Sims in ' + filename)
             return
@@ -119,7 +118,7 @@ class Jobs:
         if 'fmr:Data_type:Name' in sims_json:
             self.name=sims_json['fmr:Data_type:Name']
         #self.add_sims(name=sims_json['name'], runs_n=sims_json['runs_n'])
-        return Sims(self)
+        return sims
 
     def init(self):
         fmr.jobs_init(self.obj)
@@ -190,13 +189,33 @@ class Sims:
         self.preconditioner = None
         self.solve = None
         self.post_processes = []
-        self.parameters = {}
         self.partition_n = 1
-        self.parameter = {}
         self.nominal = {}
+        self.parameter = {}
+        #self.json_nominal = {}
+        #self.json_parameter = {}
         self.sample_n = None
 
     def add_parameter(self, name, nominal=None, values=None):
+        """
+        Adds a parameter to the Sims object.
+
+        Parameters:
+            name (str): The name of the parameter.
+
+            nominal (Optional[Union[int, float, str, np.ndarray]]): The nominal
+            value(s) of the parameter. If a single value is provided, it will be
+            stored as a scalar. If multiple values are provided, they will be
+            stored as a numpy contiguous array. Defaults to None.
+            
+            values (Optional[Union[int, float, str, np.ndarray]]): The values of
+            the parameter. If a single value is provided, it will be stored as a
+            scalar. If multiple values are provided, they will be stored as a
+            numpy contiguous array. Defaults to None.
+
+        Returns:
+            None
+        """
         if isinstance(nominal, (list, tuple, set)):
             if len(nominal) > 1:
                 nominal = np.ascontiguousarray(nominal)
@@ -207,18 +226,55 @@ class Sims:
         self.parameter[name] = values
 
     def add_parameter_file(self, filename, has_names=True, has_nominals=True):
-        #TODO move to Sims?
+        """
+        Adds a parameter file to the Sims object.
+
+        Parameters:
+            filename (str): The path to the parameter file.
+            has_names (bool, optional): Whether the parameter file contains
+            parameter names.
+                Defaults to True.
+            has_nominals (bool, optional): Whether the parameter file contains
+            nominal values.
+                Defaults to True.
+
+        Returns:
+            None
+
+        This function reads the parameter file and populates the
+        `self.parameter` dictionary with the parameter values. If `has_names` is
+        True, the first line of the file should contain the parameter names. If
+        `has_nominals` is True, the next line of the file should contain the
+        nominal values for each parameter. The remaining lines of the file
+        should contain the parameter values. The function converts the parameter
+        values to a contiguous numpy array and stores them in the
+        `self.parameter` dictionary. If the file does not contain nominal
+        values, the `self.nominal` dictionary will not be populated.
+
+        Note: If `has_names` is False, this function will not work.
+
+        Example:
+            >>> sims = Sims()
+            >>> sims.add_parameter_file('parameters.csv', has_names=True, has_nominals=True)
+            >>> print(sims.parameter)
+            {'parameter1': [1.0, 2.0, 3.0], 'parameter2': [4.0, 5.0, 6.0]}
+        """
         with open(filename, 'r') as f:
             reader = csv.reader(f)
             if has_names:
                 names = next(reader) # first line has parameter names.
                 # make a dictionary having keys for names and empty arrays for values
-                self.parameter = {name: [] for name in names}
+                for name in names:
+                    self.parameter[name] = []
+                #
                 #NOTE next (second) line has the nominal values (if provided)
-            else:
-                pass #TODO make placeholder names: col1, col2, col3,...
+            else: #TODO make placeholder names: col1, col2, col3,...
+                print('You have found a known bug. The first row '
+                    +'of the CSV file must contain parameter names.')
+                return
             if has_nominals:
-                self.nominal = {name: None for name in names}
+                for name in names:
+                    self.nominal[name] = None
                 nominals = next(reader)
                 for name, val in zip(names, nominals):
                     self.nominal[name]=float(val)
@@ -226,7 +282,7 @@ class Sims:
                 for name, col in zip(names, row_col):
                     self.parameter[name].append(float(col))
             self.sample_n = len(self.parameter[names[0]])
-            if(self.sample_n >1):
+            if(self.sample_n > 1):
                 # Convert lists to contiguous numpy arrays
                 for key in self.parameter:
                     self.parameter[key]=np.ascontiguousarray(self.parameter[key])
