@@ -125,11 +125,12 @@ https://stackoverflow.com/questions/60040665
     template <typename T, typename C> static constexpr
     T* cast_via_work  (C* child) noexcept;
     Core_ptrs_t get_core      () noexcept;
+    Work_type   get_task_type () noexcept;
+    std::string get_name      () noexcept;
     std::string get_abrv      () noexcept;
     std::string get_version   () noexcept;
-    std::string get_name      () noexcept;
-    Work_type   get_task_type () noexcept;
     std::string set_name      (const std::string&) noexcept;
+    std::string set_version   (const std::string&) noexcept;
     bool        did_init      () noexcept;//     returns did_work_init
     // task stack handling
     fmr::Local_int get_task_n () noexcept;

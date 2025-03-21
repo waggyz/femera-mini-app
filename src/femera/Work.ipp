@@ -108,6 +108,12 @@ namespace femera {
     return this->abrv;
   }
   inline
+  std::string Work::set_version (const std::string& nm)
+  noexcept {
+    this->version = nm;
+    return this->name;
+  }
+  inline
   bool Work::did_init ()
   noexcept {
     return this->did_work_init;

@@ -37,6 +37,23 @@ class TestPymeraJobs(unittest.TestCase):
     def test_get_sims_name(self):
         self.assertTrue("sim" in self.fmr.get_sims_name().lower())
 
+    def test_get_sims_version(self):
+        self.assertTrue("femera" in self.fmr.get_sims_version().lower())
+
+    def test_set_sims_version(self):
+        keep_vers = self.fmr.get_sims_version()
+        self.fmr.set_sims_version("Testing...")
+        self.assertEqual(self.fmr.get_sims_version(),"Testing...")
+        self.fmr.set_sims_version(keep_vers)
+        self.assertTrue("femera" in self.fmr.get_sims_version().lower())
+
+    def test_set_sims_name(self):
+        keep_name = self.fmr.get_sims_name()
+        self.fmr.set_sims_name("Testing...")
+        self.assertEqual(self.fmr.get_sims_name(),"Testing...")
+        self.fmr.set_sims_name(keep_name)
+        self.assertTrue("sim" in self.fmr.get_sims_name().lower())
+
     def test_jobs_verbosity(self):
         self.assertGreaterEqual( self.fmr.get_verbosity(), 0)
         verb = self.fmr.get_verbosity()

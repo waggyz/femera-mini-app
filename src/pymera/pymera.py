@@ -116,6 +116,10 @@ fmr.get_jobs_name.restype = ct.c_char_p
 fmr.get_jobs_name.argtypes = [ct.c_void_p]
 fmr.get_sims_name.restype = ct.c_char_p
 fmr.get_sims_name.argtypes = [ct.c_void_p]
+fmr.set_sims_name.argtypes = [ct.c_void_p, ct.c_char_p]
+fmr.get_sims_version.restype = ct.c_char_p
+fmr.get_sims_version.argtypes = [ct.c_void_p]
+fmr.set_sims_version.argtypes = [ct.c_void_p, ct.c_char_p]
 
 fmr.get_verbosity.restype = ct.c_ubyte
 fmr.get_verbosity.argtypes = [ct.c_void_p]
@@ -146,6 +150,10 @@ class Jobs:
         if 'fmr:Sims' in sims_json:
             sims_json = sims_json['fmr:Sims']
             sims.parameter = find_user_keys(sims_json)
+            if 'fmr:Data_type:Name' in sims_json:
+                self.set_sims_name(sims_json['fmr:Data_type:Name'])
+            if 'fmr:Data_type:Version' in sims_json:
+                self.set_sims_version(sims_json['fmr:Data_type:Version'])
         else:
             print('Found no fmr:Sims in ' + filename)
             return
@@ -171,6 +179,15 @@ class Jobs:
     
     def get_sims_name(self):
         return fmr.get_sims_name(self.obj).decode('utf-8', errors='replace')
+    def set_sims_name(self, name):
+        fmr.set_sims_name(self.obj, name.encode('utf-8'))
+        return
+    
+    def get_sims_version(self):
+        return fmr.get_sims_version(self.obj).decode('utf-8', errors='replace')
+    def set_sims_version(self, name):
+        fmr.set_sims_version(self.obj, name.encode('utf-8'))
+        return
     
     def get_verbosity(self):
         return fmr.get_verbosity(self.obj)

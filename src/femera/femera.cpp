@@ -41,10 +41,29 @@ extern "C" {
   }
   const char* fmc::get_sims_name (fmc::Jobs_t* jobs) {
     const auto S = jobs->get_task(femera::Task_type::Sims);
-    if (S == nullptr) { return "Could not find any Sims."; } 
+    if (S == nullptr) { return " fmc jobs WARN Could not find any Sims."; }
     static std::string current_name;
     current_name = S->get_name();
     return current_name.c_str();
+  }
+  void fmc::set_sims_name (fmc::Jobs_t* jobs, const char* name) {
+    const auto S = jobs->get_task(femera::Task_type::Sims);
+    if (S == nullptr) { return; }
+    S->set_name(name);
+    return;
+  }
+  const char* fmc::get_sims_version (fmc::Jobs_t* jobs) {
+    const auto S = jobs->get_task(femera::Task_type::Sims);
+    if (S == nullptr) { return " fmc jobs WARN Could not find any Sims."; }
+    static std::string current_vers;
+    current_vers = S->get_version();
+    return current_vers.c_str();
+  }
+  void fmc::set_sims_version (fmc::Jobs_t* jobs, const char* name) {
+    const auto S = jobs->get_task(femera::Task_type::Sims);
+    if (S == nullptr) { return; }
+    S->set_version(name);
+    return;
   }
   fmr::Dim_int fmc::get_verbosity (fmc::Jobs_t* jobs) {
     if (jobs->data == nullptr) {

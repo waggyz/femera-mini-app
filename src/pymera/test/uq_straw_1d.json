@@ -1,6 +1,8 @@
 { "fmr:Sims": {
   "fmr:NOTE": "non-fmr: keys imply Python read/write.",
   "fmr:TODO": "Remove 'Data_type:' substring ?",
+  "fmr:Data_type:Name": "uq_straw_1d",
+  "fmr:Data_type:Version": "0.0.4",
     "fmr:Geom": {
       "fmr:Data_type:Shape_type": "fmr:Shape_type:Block",
       "dims": {"fmr:Data_type:Dimensions_xyz": [1.000, 0.050, 0.050] }

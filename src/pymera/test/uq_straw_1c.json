@@ -1,6 +1,7 @@
 { "fmr:Sims": {
   "NOTE": "pym:nominal (or fmr:to?) with pym:name implies Python read/write.",
   "TODO": "Remove Data_type: ???",
+  "fmr:Data": {
     "fmr:Geom": {
       "fmr:Data_type:Shape_type": "fmr:Shape_type:Block",
       "fmr:Data_type:Dimensions_xyz": {

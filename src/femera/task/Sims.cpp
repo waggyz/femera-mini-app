@@ -19,7 +19,7 @@ namespace femera {
         //const auto R = Data<task::Runs>::new_task (this->get_core());
         const auto R = Task<task::Runs>::new_task (this->get_core());
 #ifdef FMR_RUNS_LOCAL
-        R->set_name ("Femera simulation runs on process "
+        R->set_name ("simulation runner on process "
           + std::to_string (this->proc->get_proc_id ()));
 #endif
 #ifdef FMR_DEBUG
