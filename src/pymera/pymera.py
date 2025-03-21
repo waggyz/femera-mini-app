@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/usr/bin/env python3
 import numpy as np
 import ctypes as ct
 import csv, json
@@ -44,26 +44,38 @@ def create_enum_from_csv(file_path, enum_name, start_at=None):
     # Create and return the Enum class dynamically
     return Enum(enum_name, enum_members)
 
-def find_pym_names(obj):
+def find_user_keys(obj):
     """
-    Function to recursively search for "pym:name" keys in JSON objects
-    Assigns pym:nominal values defined at the same level as each pym:name
-    Only the last nominal value assigned to a pym:name is retained.
+    Recursively traverses a nested dictionary or list and returns a dictionary
+    containing the keys that are not prefixed with "fmr:" and their
+    corresponding values.
+    
+    Parameters:
+        obj (dict or list): The object to traverse.
+        
+    Returns:
+        dict: A dictionary containing the keys that are not prefixed with "fmr:"
+        and their corresponding values.
     """
     result = {}
     if isinstance(obj, dict):
         for key, value in obj.items():
-            if key == "pym:name":
-                nominal = obj.get('pym:nominal')# None if not found
+            if not key.startswith("fmr:") and isinstance(value, dict):
+                #TODO resolve datatype of value key.
+                nominal = next(iter(value.values()))
                 if isinstance(nominal, (list, tuple, set)):
                     if len(nominal) > 1:
                         nominal = np.ascontiguousarray(nominal)
-                result[value] = nominal
+                elif not isinstance(nominal, (int, float, str)):
+                    nominal = None #str(next(iter(value.keys())))# datatype
+                result[key] = nominal
+                if isinstance(value, (dict, list)):
+                    result.update(find_user_keys(value))
             elif isinstance(value, (dict, list)):
-                result.update(find_pym_names(value))
+                result.update(find_user_keys(value))
     elif isinstance(obj, list):
         for item in obj:
-            result.update(find_pym_names(item))
+            result.update(find_user_keys(item))
     return result
 #==============================================================================
 #TODO Need specifiers for
@@ -108,13 +120,13 @@ class Jobs:
             sims_json = json.load(file)#TODO use json()
         if 'fmr:Sims' in sims_json:
             sims_json = sims_json['fmr:Sims']
-            sims.parameter = find_pym_names(sims_json)
+            sims.parameter = find_user_keys(sims_json)
         else:
             print('Found no fmr:Sims in ' + filename)
             return
-        if 'pym:name' in sims_json:
-            self.name=sims_json['pym:name']
-            print(sims_json)
+        #if 'pym:name' in sims_json:
+        #    self.name=sims_json['pym:name']
+        #    print(sims_json)
         if 'fmr:Data_type:Name' in sims_json:
             self.name=sims_json['fmr:Data_type:Name']
         #self.add_sims(name=sims_json['name'], runs_n=sims_json['runs_n'])
@@ -225,67 +237,57 @@ class Sims:
                 values = np.ascontiguousarray(values)
         self.parameter[name] = values
 
-    def add_parameter_file(self, filename, has_names=True, has_nominals=True):
+    def add_parameter_file(self, filename, has_names=True, has_nominals=False):
         """
-        Adds a parameter file to the Sims object.
-
-        Parameters:
-            filename (str): The path to the parameter file.
-            has_names (bool, optional): Whether the parameter file contains
-            parameter names.
-                Defaults to True.
-            has_nominals (bool, optional): Whether the parameter file contains
-            nominal values.
-                Defaults to True.
-
-        Returns:
-            None
-
-        This function reads the parameter file and populates the
-        `self.parameter` dictionary with the parameter values. If `has_names` is
-        True, the first line of the file should contain the parameter names. If
-        `has_nominals` is True, the next line of the file should contain the
-        nominal values for each parameter. The remaining lines of the file
-        should contain the parameter values. The function converts the parameter
-        values to a contiguous numpy array and stores them in the
-        `self.parameter` dictionary. If the file does not contain nominal
-        values, the `self.nominal` dictionary will not be populated.
-
-        Note: If `has_names` is False, this function will not work.
-
-        Example:
-            >>> sims = Sims()
-            >>> sims.add_parameter_file('parameters.csv', has_names=True, has_nominals=True)
-            >>> print(sims.parameter)
-            {'parameter1': [1.0, 2.0, 3.0], 'parameter2': [4.0, 5.0, 6.0]}
+        Adds parameters from a CSV file to the parameter dictionary and the
+        nominal dictionary. The function takes the following arguments:
+        
+        - filename (str): The path to the CSV file containing the parameters.
+        - has_names (bool, optional): Whether the first line of the CSV file
+          contains parameter names. Defaults to True.
+        - has_nominals (bool, optional): Whether the next line of the CSV file
+          contains nominal values. Defaults to False.
+        
+        The function reads the CSV file and populates the parameter and nominal
+        dictionaries with the values. If has_names is True, the function assumes
+        that the first line of the CSV file contains the parameter names and
+        creates an empty list for each parameter. If has_nominals is True, the
+        function assumes that the second line of the CSV file contains the
+        nominal values and sets each nominal value to None. The function then
+        appends each value from the remaining lines of the CSV file to the
+        corresponding parameter list. If the number of values for a parameter is
+        greater than 1, the function converts the list to a contiguous numpy
+        array.
+        
+        The function sets the sample_n attribute to the minimum number of values
+        of all parameters.
         """
         with open(filename, 'r') as f:
             reader = csv.reader(f)
-            if has_names:
-                names = next(reader) # first line has parameter names.
-                # make a dictionary having keys for names and empty arrays for values
-                for name in names:
-                    self.parameter[name] = []
-                #
-                #NOTE next (second) line has the nominal values (if provided)
-            else: #TODO make placeholder names: col1, col2, col3,...
-                print('You have found a known bug. The first row '
-                    +'of the CSV file must contain parameter names.')
-                return
+            if has_names: # first line has parameter names
+                names = next(reader)
+            else: # Make placeholder names: param_1, param_2,, param_3,...
+                line = next(reader)
+                names =  [f'param_{i+1}' for i in range(len(line))]
+                f.seek(0)# Return to top.
+            # Make dictionaries having keys for names and empty arrays (for
+            # parameter) or None (for nominal) for values.
+            self.parameter = {name: [] for name in names}
+            self.nominal = {name: None for name in names}
+            # The next (second) line has the nominal values (if provided)
             if has_nominals:
-                for name in names:
-                    self.nominal[name] = None
                 nominals = next(reader)
                 for name, val in zip(names, nominals):
-                    self.nominal[name]=float(val)
+                    self.nominal[name] = float(val)
             for row_col in reader:
                 for name, col in zip(names, row_col):
                     self.parameter[name].append(float(col))
-            self.sample_n = len(self.parameter[names[0]])
+            self.sample_n = min(len(self.parameter[name]) for name in names)
             if(self.sample_n > 1):
                 # Convert lists to contiguous numpy arrays
                 for key in self.parameter:
-                    self.parameter[key]=np.ascontiguousarray(self.parameter[key])
+                    self.parameter[key] = np.ascontiguousarray(
+                        self.parameter[key])
 
     def get_post(self, name):
         # Placeholder for getting post-processing results

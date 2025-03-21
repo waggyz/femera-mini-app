@@ -1,6 +1,6 @@
 { "fmr:Sims": {
-  "NOTE": "non-fmr: keys imply Python read/write.",
-  "TODO": "Remove Data_type: ???",
+  "fmr:NOTE": "non-fmr: keys imply Python read/write.",
+  "fmr:TODO": "Remove Data_type: ???",
     "fmr:Geom": {
       "fmr:Data_type:Shape_type": "fmr:Shape_type:Block",
       "dims": {"fmr:Data_type:Dimensions_xyz": [1.000, 0.050, 0.050] }

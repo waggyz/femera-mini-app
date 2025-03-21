@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/usr/bin/env python3
 """
 This is a notional strawman of what using Pymera for UQ might look like.
 It uses only internal Femera models, deferring file format handling.
@@ -44,6 +44,7 @@ def main():
     configured and installed.
     """
     #--------------------------------------------------------------------------
+    here = os.path.dirname(os.path.abspath(__file__))
     #
     fmr = pymera.Jobs()
     print('Hello ' + fmr.get_version() +' '+ fmr.get_name() + '!')
@@ -54,9 +55,10 @@ def main():
     fmr.init()
     #
     # Read simulation from JSON file.
-    sims = fmr.sims_from_file('src/pymera/test/uq_straw_1d.json')
-    print('\nUser parameters (pym:name) with (pym:nominal) values, '
-          + 'and output fields, in JSON:')
+    sims = fmr.sims_from_file(os.path.join(here, 'uq_straw_1d.json'))
+    #
+    print('\nUser parameters with assigned values '
+          + 'and output fields in JSON file:')
     for name, value in sims.parameter.items():
         if value is not None:
             print(f'- {name}: {value}')
@@ -65,7 +67,7 @@ def main():
     #
     # Read parameters and nominal values from the .csv file.
     has_csv_nominals = True
-    sims.add_parameter_file('src/pymera/test/uq_straw_1d.csv',
+    sims.add_parameter_file(os.path.join(here, 'uq_straw_1d.csv'),
         has_names=True, has_nominals=has_csv_nominals)
     #
     # Add dims parameter [length, width, height] values.
@@ -122,7 +124,6 @@ def main():
     # Set nominal model parameters.
     #TODO Femera sims functions not implemented yet.
     #TODO changing internal femera fmr: string identifiers to enums.
-    #NOTE fmr:, pym: string identifiers needed for JSON representation.
     #
     #TODO use a Runs object for run parameters?
 
