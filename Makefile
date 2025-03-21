@@ -693,7 +693,7 @@ ifneq ("$(ADD_TO_PATH)","")
 endif
 
 info: | intro docs
-	echo "Environment variables:"
+	echo "Some environment variables:"
 	env | grep OMP_
 	env | grep MPI_
 	printf "CXXFLAGS:\n$(CXXFLAGS)\n"

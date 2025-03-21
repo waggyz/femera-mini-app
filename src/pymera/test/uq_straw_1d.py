@@ -54,7 +54,7 @@ def main():
     fmr.init()
     #
     # Read simulation from JSON file.
-    sims = fmr.sims_from_file('src/pymera/test/uq_straw_1c.json')
+    sims = fmr.sims_from_file('src/pymera/test/uq_straw_1d.json')
     print('\nUser parameters (pym:name) with (pym:nominal) values, '
           + 'and output fields, in JSON:')
     for name, value in sims.parameter.items():
@@ -65,7 +65,7 @@ def main():
     #
     # Read parameters and nominal values from the .csv file.
     has_csv_nominals = True
-    sims.add_parameter_file('src/pymera/test/uq_straw_1c.csv',
+    sims.add_parameter_file('src/pymera/test/uq_straw_1d.csv',
         has_names=True, has_nominals=has_csv_nominals)
     #
     # Add dims parameter [length, width, height] values.
@@ -166,7 +166,7 @@ def main():
     beam_results = sims.add_post(name='base-force-mag',
                 nodes_at=fmr.Data_type['Node_x_min'],# Implied node set
                 sum=fmr.Data_type['Force_mag']# Returns 1 scalar for each sim
-                )#, count=runs_n)#TODO try to hide this from the user.
+                )#, count=runs_n)
     """
     #==========================================================================
     if False:# Write random input parameters to a .csv file.
@@ -184,7 +184,7 @@ def main():
         nominal_cell_size = 0.010# m
         # Structured discretization parameters. -------------------------------
         elem_count_xyz = np.array(nominal_dims / nominal_cell_size, dtype='u8')
-        sample_n=1000
+        sample_n=100
         #----------------------------------------------------------------------
         #runs_n = sample_n+1 # includes a nominal sims run
         # Set up random input variables as size runs_n numpy arrays.
@@ -199,7 +199,7 @@ def main():
         names=['length','width','height','tip-displace-z','youngs','poissons']
         nominals = [1.000,0.050,0.050, -0.010, 210e9,0.285]
         rows = zip(length, width, height, tip_z, youngs, poissons)
-        with open('src/pymera/test/uq_straw_1c.csv', "w") as f:
+        with open('src/pymera/test/uq_straw_1d.csv', "w") as f:
             writer = csv.writer(f)
             writer.writerow(names)
             writer.writerow(nominals)
