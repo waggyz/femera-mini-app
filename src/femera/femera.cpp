@@ -4,6 +4,7 @@
 
 #include <type_traits>
 
+// Jobs ==================================================================
 fmr::Jobs_t fmr::new_jobs (int* argc, char** argv) {
   FMR_WARN_INLINE_OFF
     return femera::Task<femera::task::Jobs>::new_task (argc,argv);
@@ -71,43 +72,57 @@ extern "C" {
     }
     return jobs->data->set_verb (v);
   }
-  
-  fmc::Sims_t* fmc::fmr_add_sims (fmc::Jobs_t* jobs) {
-    jobs->add_task (std::move
+/*  fmc::Sims_t* fmc::fmr_add_sims (fmc::Jobs_t* jobs) {
+    const auto i = jobs->add_task (std::move
       (femera::Task<femera::task::Sims>::new_task (jobs->get_core())));
-/*TODO see if storage is needed.
-    const auto S = jobs->get_task(femera::Task_type::Sims);
-    static fmc::Sims_t* stored_ptr;// Store it to extend its lifetime.
-    stored_ptr = reinterpret_cast<fmc::Sims_t*>(S);
-    return stored_ptr;
-*/
-    return reinterpret_cast<fmc::Sims_t*>//TODO try a less dangerous cast.
-      (jobs->get_task(femera::Task_type::Sims));
+    if (false) {
+      //TODO see if storage is needed.
+      auto S = jobs->get_task(femera::Task_type::Sims, i);
+      static fmc::Sims_t* stored_ptr;// Store it to extend its lifetime.
+      stored_ptr = reinterpret_cast<fmc::Sims_t*>(S);
+      return stored_ptr;
+    } else {
+      // use if storage is not needed
+      return reinterpret_cast<fmc::Sims_t*>//TODO try a less dangerous cast.
+        (jobs->get_task(femera::Task_type::Sims, i));
+    }*/
+  fmr::Local_int fmc::fmr_add_sims (fmc::Jobs_t* jobs) {
+    return jobs->add_task (std::move
+      (femera::Task<femera::task::Sims>::new_task (jobs->get_core())));
   }
+  // Sims operations ---------------------------------------------------------
   const char* fmc::fmr_get_sims_name (fmc::Jobs_t* jobs) {
-    const auto S = jobs->get_task(femera::Task_type::Sims);
-    if (S == nullptr) { return " fmc jobs WARN Could not find any Sims."; }
+    const auto S = jobs->get_task (femera::Task_type::Sims,
+      jobs->get_task_n(femera::Task_type::Sims) -1);
     static std::string current_name;
-    current_name = S->get_name();
-    return current_name.c_str();
+    if (S == nullptr) {
+      current_name = "No Sims found in fmr_get_sims_name (Jobs*).";
+    } else {
+      current_name = S->get_name ();
+    }
+    return current_name.c_str ();
   }
   void fmc::fmr_set_sims_name (fmc::Jobs_t* jobs, const char* name) {
-    const auto S = jobs->get_task(femera::Task_type::Sims);
+    const auto S = jobs->get_task (femera::Task_type::Sims,
+      jobs->get_task_n(femera::Task_type::Sims) -1);
     if (S == nullptr) { return; }
-    S->set_name(name);
+    S->set_name (name);
     return;
   }
   const char* fmc::fmr_get_sims_version (fmc::Jobs_t* jobs) {
-    const auto S = jobs->get_task(femera::Task_type::Sims);
+    const auto S = jobs->get_task (femera::Task_type::Sims,
+      jobs->get_task_n(femera::Task_type::Sims) -1);
     if (S == nullptr) { return " fmc jobs WARN Could not find any Sims."; }
     static std::string current_vers;
-    current_vers = S->get_version();
-    return current_vers.c_str();
+    current_vers = S->get_version ();
+    return current_vers.c_str ();
   }
   void fmc::fmr_set_sims_version (fmc::Jobs_t* jobs, const char* name) {
-    const auto S = jobs->get_task(femera::Task_type::Sims);
+    const auto S = jobs->get_task (femera::Task_type::Sims,
+      jobs->get_task_n(femera::Task_type::Sims) -1);
     if (S == nullptr) { return; }
-    S->set_version(name);
+    S->set_version (name);
     return;
   }
+  // ==========================================================================
 }//end extern "C"

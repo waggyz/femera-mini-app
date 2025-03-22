@@ -123,7 +123,7 @@ fmr.fmr_set_verbosity.restype = ct.c_ubyte
 fmr.fmr_set_verbosity.argtypes = [ct.c_void_p, ct.c_ubyte]
 
 fmr.fmr_add_sims.argtypes = [ct.c_void_p]# Jobs
-fmr.fmr_add_sims.restype = ct.c_void_p   # Sims
+fmr.fmr_add_sims.restype = ct.c_uint32
 
 #TODO Pass Sims_t* for ct.c_void_p. Not yet implemented.
 fmr.fmr_get_sims_name.restype = ct.c_char_p
@@ -132,7 +132,6 @@ fmr.fmr_set_sims_name.argtypes = [ct.c_void_p, ct.c_char_p]
 fmr.fmr_get_sims_version.restype = ct.c_char_p
 fmr.fmr_get_sims_version.argtypes = [ct.c_void_p]
 fmr.fmr_set_sims_version.argtypes = [ct.c_void_p, ct.c_char_p]
-
 
 # Create a class to represent the Jobs object in Python.
 class Jobs:
@@ -157,10 +156,12 @@ class Jobs:
         if 'fmr:Sims' in sims_json:
             sims_json = sims_json['fmr:Sims']
             sims.parameter = find_user_keys(sims_json)
+            '''
             if 'fmr:Data_type:Name' in sims_json:
                 self.set_sims_name(sims_json['fmr:Data_type:Name'])
             if 'fmr:Data_type:Version' in sims_json:
                 self.set_sims_version(sims_json['fmr:Data_type:Version'])
+            '''
         else:
             print('Found no fmr:Sims in ' + filename)
             return
@@ -186,6 +187,7 @@ class Jobs:
     
     def get_verbosity(self):
         return fmr.fmr_get_verbosity(self.obj)
+
     def set_verbosity(self, verbosity=3):
         # Clamp values to range of ct.c_ubyte.
         if(verbosity<0):
@@ -193,6 +195,7 @@ class Jobs:
         elif(verbosity>255):
             verbosity=255
         return fmr.fmr_set_verbosity(self.obj, verbosity)
+    '''
     #TODO move to Sims class ==================================================
     def get_sims_name(self):
         return fmr.fmr_get_sims_name(self.obj).decode('utf-8', errors='replace')
@@ -206,7 +209,7 @@ class Jobs:
         fmr.fmr_set_sims_version(self.obj, name.encode('utf-8'))
         return
     #==========================================================================
-
+    '''
 # Create a class to represent the Sims object in Python.
 class Sims:
     """
@@ -240,13 +243,20 @@ class Sims:
         partition_n (int): The partition number associated with the Sims
             object. Defaults to 1.
     """
-    def __init__(self, jobs, name=None, runs_n=None):
+    def __init__(self, jobs, name=None):
+        if not isinstance(jobs, Jobs):
+            warn('\n pym sims WARN Sims must be created from Jobs.\n'
+                  +'               '
+                 +'Try one of the new_sims* methods of a Jobs object.')
+            return None
         self.jobs = jobs
-        self.obj = fmr.fmr_add_sims(jobs.obj)
+        self.sims_index = fmr.fmr_add_sims(jobs.obj)
         self.nominal = {}
         self.parameter = {}
+        self.sample_n = None
         #
-        self.runs_n = runs_n
+        self.runs_n = 1 #runs_n
+        #
         self.geometries = []
         self.grids = []
         self.bcs = []
@@ -257,8 +267,12 @@ class Sims:
         self.partition_n = 1
         #self.json_nominal = {}
         #self.json_parameter = {}
-        self.sample_n = None
 
+    def get_name(self):
+        #return('*** not working ***')
+        return fmr.fmr_get_sims_name(self.jobs.obj).decode(
+            'utf-8', errors='replace')
+    
     def add_parameter(self, name, nominal=None, values=None):
         """
         Adds a parameter to the Sims object.
@@ -341,7 +355,8 @@ class Sims:
                     self.parameter[key] = np.ascontiguousarray(
                         self.parameter[key])
             if(self.sample_n!=max(len(self.parameter[name]) for name in names)):
-                warn('Not all parameters have the same number of values. '
+                warn('\n pym Jobs WARN Not all parameters have the same number '
+                     +'of values. '
                      +'Something might be wrong with your CSV file.')
 
     def get_post(self, name):

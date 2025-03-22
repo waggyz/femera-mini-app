@@ -46,16 +46,16 @@ def main():
     #--------------------------------------------------------------------------
     here = os.path.dirname(os.path.abspath(__file__))
     #
-    fmr = pymera.Jobs()
-    print('Hello ' + fmr.get_version() +' '+ fmr.get_name() + '!')
+    jobs = pymera.Jobs()
+    print('Hello ' + jobs.get_version() +' '+ jobs.get_name() + '!')
     #TODO Set Femera init options (MPI, OpenMP, verbosity, self-tests)?
     #TODO use python context:
-    #     with pymera.Jobs() as fmr:
+    #     with pymera.Jobs() as jobs:
     #
-    fmr.init()
+    jobs.init()
     #
     # Read simulation from JSON file.
-    sims = fmr.new_sims_from_file(os.path.join(here, 'uq_straw_1d.json'))
+    sims = jobs.new_sims_from_file(os.path.join(here, 'uq_straw_1d.json'))
     #
     print('\nUser parameters with assigned values '
           + 'and output fields in JSON file:')
@@ -116,7 +116,7 @@ def main():
     #TODO Set model partitioning method.
     #
     #NOTE name is needed only for input parameters and post-processing results.
-    #
+    '''
     # Nominal model setup  (same as the JSON file) ============================
     #
     sims = fmr.new_sims()
@@ -125,7 +125,7 @@ def main():
     #TODO changing internal femera fmr: string identifiers to enums.
     #
     #TODO use a Runs object for run parameters?
-
+    '''
     """
     # Add model geometry.
     beam_geom = sims.add_geometry(#name='geometry',
@@ -219,7 +219,6 @@ def main():
         beam_load.set('tip-displace-bcs', tip_z)
         beam_mtrl.set('youngs', youngs)# E
         beam_mtrl.set('poissons', poissons)# nu
-    """
     #--------------------------------------------------------------------------
     #DONE Solve at nominal values for initial solution (u0) starting vector.
     #     Or, just keep the first solution and reuse it for u0.
@@ -233,6 +232,7 @@ def main():
     #base_stress_avg = base_force / (width * height)# averaged over each base
     #
     sims.exit() #NOTE invalidates sims post-processing pointers (base_force)
+    """
     '''
     #TODO UQ stuff, maybe create and run more sims,...
     # uq.do_some_stuff(base_stress_avg)
@@ -243,7 +243,7 @@ def main():
     #print('base stress mean: ' + str(base_stress_avg.mean()))
     #print('base stress standard deviation: ' + str(base_stress_avg.std()))
     #print()
-    fmr.exit()
+    jobs.exit()
     #
     #TODO more UQ stuff...
     #print(fmr.Data_type['Node_x_min'].value)

@@ -8,62 +8,90 @@ class TestPymeraJobs(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Initialize Pymera before tests"""
-        cls.fmr = pymera.Jobs()
-        cls.fmr.init()
+        cls.jobs = pymera.Jobs()
+        cls.jobs.init()
         return super().setUpClass()
 
     @classmethod
     def tearDownClass(cls):
         """Clean up Pymera after tests"""
         print()
-        cls.fmr.exit()
+        cls.jobs.exit()
 
     def test_jobs_version(self):
-        self.assertNotEqual(self.fmr.get_version(), None)
-        self.assertNotEqual(self.fmr.get_version(), '')
-        self.assertEqual(self.fmr.get_version()[:6], 'Femera')
+        self.assertNotEqual(self.jobs.get_version(), None)
+        self.assertNotEqual(self.jobs.get_version(), '')
+        self.assertEqual(self.jobs.get_version()[:6], 'Femera')
 
     def test_jobs_name(self):
-        self.assertNotEqual(self.fmr.get_name(), None)
-        self.assertNotEqual(self.fmr.get_name(), '')
-        self.assertTrue("job" in self.fmr.get_name().lower())
-        print ('\nHello ' + self.fmr.get_version()
-               +' '+self.fmr.get_name()
+        self.assertNotEqual(self.jobs.get_name(), None)
+        self.assertNotEqual(self.jobs.get_name(), '')
+        self.assertTrue("job" in self.jobs.get_name().lower())
+        print ('\nHello ' + self.jobs.get_version()
+               +' '+self.jobs.get_name()
              + ', '+"it's testing time!")
         print ("This won't hurt a bit... ;)")
 
     def test_jobs_init(self):
-        self.assertTrue(self.fmr.did_init())
-
-    def test_get_sims_name(self):
-        self.assertTrue("sim" in self.fmr.get_sims_name().lower())
-
-    def test_get_sims_version(self):
-        self.assertTrue("femera" in self.fmr.get_sims_version().lower())
-
-    def test_set_sims_version(self):
-        keep_vers = self.fmr.get_sims_version()
-        self.fmr.set_sims_version("Testing...")
-        self.assertEqual(self.fmr.get_sims_version(),"Testing...")
-        self.fmr.set_sims_version(keep_vers)
-        self.assertTrue("femera" in self.fmr.get_sims_version().lower())
-
-    def test_set_sims_name(self):
-        keep_name = self.fmr.get_sims_name()
-        self.fmr.set_sims_name("Testing...")
-        self.assertEqual(self.fmr.get_sims_name(),"Testing...")
-        self.fmr.set_sims_name(keep_name)
-        self.assertTrue("sim" in self.fmr.get_sims_name().lower())
+        self.assertTrue(self.jobs.did_init())
 
     def test_jobs_verbosity(self):
-        self.assertGreaterEqual( self.fmr.get_verbosity(), 0)
-        verb = self.fmr.get_verbosity()
+        self.assertGreaterEqual( self.jobs.get_verbosity(), 0)
+        verb = self.jobs.get_verbosity()
         self.assertEqual(verb, 3)# default
         #TODO Fix set_verbosity() in C++ source.
-        #self.assertEqual(self.fmr.set_verbosity(-1), 0)
-        #self.assertLess(self.fmr.set_verbosity(999), 256)
-        #self.assertEqual(self.fmr.set_verbosity(verb), verb)
-        #self.assertEqual(self.fmr.get_verbosity(), verb)
+        #self.assertEqual(self.jobs.set_verbosity(-1), 0)
+        #self.assertLess(self.jobs.set_verbosity(999), 256)
+        #self.assertEqual(self.jobs.set_verbosity(verb), verb)
+        #self.assertEqual(self.jobs.get_verbosity(), verb)
+
+    def test_jobs_new_sims(self):
+        sims = self.jobs.new_sims()
+        self.assertIsInstance(sims, pymera.Sims)
+        self.assertIsInstance(sims.jobs, pymera.Jobs)
+        self.assertTrue("simulation" in sims.get_name().lower())
+'''
+    def test_new_sims(self):
+        with self.assertWarns(Warning):
+            pymera.Sims('fail')# First argument must be an instance of Jobs.
+'''
+'''
+class TestPymeraSims(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        """Initialize Pymera before tests"""
+        cls.jobs = pymera.Jobs()
+        cls.jobs.init()
+        return super().setUpClass()
+
+    @classmethod
+    def tearDownClass(cls):
+        """Clean up Pymera after tests"""
+        print()
+        cls.jobs.exit()
+
+'''
+'''
+    def test_get_sims_name(self):
+        self.assertTrue("sim" in self.jobs.get_sims_name().lower())
+
+    def test_get_sims_version(self):
+        self.assertTrue("femera" in self.jobs.get_sims_version().lower())
+
+    def test_set_sims_version(self):
+        keep_vers = self.jobs.get_sims_version()
+        self.jobs.set_sims_version("Testing...")
+        self.assertEqual(self.jobs.get_sims_version(),"Testing...")
+        self.jobs.set_sims_version(keep_vers)
+        self.assertTrue("femera" in self.jobs.get_sims_version().lower())
+
+    def test_set_sims_name(self):
+        keep_name = self.jobs.get_sims_name()
+        self.jobs.set_sims_name("Testing...")
+        self.assertEqual(self.jobs.get_sims_name(),"Testing...")
+        self.jobs.set_sims_name(keep_name)
+        self.assertTrue("sim" in self.jobs.get_sims_name().lower())
+'''
 
 
 if __name__ == '__main__':
