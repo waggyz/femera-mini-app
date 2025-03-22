@@ -16,8 +16,9 @@ namespace fmr {
   Jobs_t new_jobs (int*, char**);
   Jobs_t new_jobs ();
 }
-namespace fmc {
+namespace fmc {// Femera C namespace
   using Jobs_t = femera::task::Jobs;// plain pointer for C/Python interface
+  using Sims_t = femera::task::Sims;
   extern "C" {
     FMR_EXPORT Jobs_t* fmr_new_jobs ();
     FMR_EXPORT void fmr_jobs_init (Jobs_t*);
@@ -30,12 +31,13 @@ namespace fmc {
     FMR_EXPORT fmr::Dim_int fmr_set_verbosity (Jobs_t*, fmr::Dim_int);
 
     // Change Jobs_t* to Sims_t* for Pymera Sims interface.
+    FMR_EXPORT Sims_t* fmr_add_sims (Jobs_t*);
     FMR_EXPORT const char* fmr_get_sims_name (Jobs_t*);
     FMR_EXPORT const char* fmr_get_sims_version (Jobs_t*);
     FMR_EXPORT void fmr_set_sims_name (Jobs_t*, const char*);
     FMR_EXPORT void fmr_set_sims_version (Jobs_t*, const char*);
   }
-}//end fmr:: namespace
+}//end fmc:: namespace
 
 #include "femera.ipp"
 /*

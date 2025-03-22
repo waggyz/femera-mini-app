@@ -10,7 +10,7 @@ libpath = os.path.join(os.getcwd(),'build','stage','i7-12800H','lib')
 
 # Load the shared library
 if os.name == 'posix':
-    fmr = ct.CDLL(libpath + '/libfemerac.so')
+    fmr = ct.CDLL(libpath + '/libfemerac.so')#TODO change fmr to jobs?
 elif os.name == 'nt':
     # lib = ctypes.CDLL('./jobs.dll')
     raise OSError("Unsupported operating system")
@@ -122,6 +122,9 @@ fmr.fmr_get_verbosity.argtypes = [ct.c_void_p]
 fmr.fmr_set_verbosity.restype = ct.c_ubyte
 fmr.fmr_set_verbosity.argtypes = [ct.c_void_p, ct.c_ubyte]
 
+fmr.fmr_add_sims.argtypes = [ct.c_void_p]# Jobs
+fmr.fmr_add_sims.restype = ct.c_void_p   # Sims
+
 #TODO Pass Sims_t* for ct.c_void_p. Not yet implemented.
 fmr.fmr_get_sims_name.restype = ct.c_char_p
 fmr.fmr_get_sims_name.argtypes = [ct.c_void_p]
@@ -144,8 +147,8 @@ class Jobs:
             fmr.fmr_jobs_exit(self.obj)
         fmr.fmr_delete_jobs(self.obj)
     
-    def new_sims(self, name='fmr:user:sims', runs_n=1):
-        return Sims(self, name=name, runs_n=runs_n)
+    def new_sims(self, sims_name=None):
+        return Sims(self, name=sims_name)
 
     def new_sims_from_file(self, filename):
         sims = Sims(self)
@@ -206,39 +209,43 @@ class Jobs:
 
 # Create a class to represent the Sims object in Python.
 class Sims:
-    def __init__(self, jobs, name=None, runs_n=1):
-        """
-        Initializes a Sims object with the given parameters.
+    """
+    Initializes a Sims object with the given parameters.
 
-        Parameters:
-            jobs (Jobs_t): The Jobs object to associate with the Sims object.
-            name (str, optional): The name of the Sims object. Defaults to
-                the Femera library Sims name.
-            runs_n (int, optional): The number of runs for the Sims object.
-                Defaults to 1.
+    Parameters:
+        jobs (Jobs_t): The Jobs object to associate with the Sims object.
+        name (str, optional): The name of the Sims object. Defaults to
+            the Femera library Sims name.
+        runs_n (int, optional): The number of runs for the Sims object.
+            Defaults to 1.
 
-        Attributes:
-            jobs (Jobs_t): The Jobs object associated with the Sims object.
-            name (str): The name of the Sims object.
-            runs_n (int): The number of runs for the Sims object.
-            geometries (list): The list of geometries associated with the Sims
-                object.
-            grids (list): The list of grids associated with the Sims object.
-            bcs (list): The list of boundary conditions associated with the Sims
-                object.
-            materials (list): The list of materials associated with the Sims
-                object.
-            preconditioner (object or None): The preconditioner associated with
-                the Sims object. Defaults to None.
-            solve (object or None): The solver associated with the Sims object.
-                Defaults to None.
-            post_processes (list): The list of post-processing functions
-                associated with the Sims object.
-            parameters (dict): The parameters associated with the Sims object.
-            partition_n (int): The partition number associated with the Sims
-                object. Defaults to 1.
-        """
+    Attributes:
+        jobs (Jobs_t): The Jobs object associated with the Sims object.
+        name (str): The name of the Sims object.
+        runs_n (int): The number of runs for the Sims object.
+        geometries (list): The list of geometries associated with the Sims
+            object.
+        grids (list): The list of grids associated with the Sims object.
+        bcs (list): The list of boundary conditions associated with the Sims
+            object.
+        materials (list): The list of materials associated with the Sims
+            object.
+        preconditioner (object or None): The preconditioner associated with
+            the Sims object. Defaults to None.
+        solve (object or None): The solver associated with the Sims object.
+            Defaults to None.
+        post_processes (list): The list of post-processing functions
+            associated with the Sims object.
+        parameters (dict): The parameters associated with the Sims object.
+        partition_n (int): The partition number associated with the Sims
+            object. Defaults to 1.
+    """
+    def __init__(self, jobs, name=None, runs_n=None):
         self.jobs = jobs
+        self.obj = fmr.fmr_add_sims(jobs.obj)
+        self.nominal = {}
+        self.parameter = {}
+        #
         self.runs_n = runs_n
         self.geometries = []
         self.grids = []
@@ -248,8 +255,6 @@ class Sims:
         self.solve = None
         self.post_processes = []
         self.partition_n = 1
-        self.nominal = {}
-        self.parameter = {}
         #self.json_nominal = {}
         #self.json_parameter = {}
         self.sample_n = None
