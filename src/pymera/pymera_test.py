@@ -27,7 +27,8 @@ class TestPymeraJobs(unittest.TestCase):
         self.assertNotEqual(self.fmr.get_name(), None)
         self.assertNotEqual(self.fmr.get_name(), '')
         self.assertTrue("job" in self.fmr.get_name().lower())
-        print ('\nHello ' + self.fmr.get_version()+' '+self.fmr.get_name()
+        print ('\nHello ' + self.fmr.get_version()
+               +' '+self.fmr.get_name()
              + ', '+"it's testing time!")
         print ("This won't hurt a bit... ;)")
 

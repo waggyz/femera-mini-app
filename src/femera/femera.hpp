@@ -19,20 +19,21 @@ namespace fmr {
 namespace fmc {
   using Jobs_t = femera::task::Jobs;// plain pointer for C/Python interface
   extern "C" {
-    //NOTE ctypes does not like fmr::Dim_int (c_ubyte).
-    FMR_EXPORT Jobs_t* new_jobs ();
-    FMR_EXPORT void jobs_init (Jobs_t*);
-    FMR_EXPORT bool jobs_did_init (Jobs_t*);
-    FMR_EXPORT void jobs_exit (Jobs_t*);
-    FMR_EXPORT void delete_jobs (Jobs_t*);
-    FMR_EXPORT const char* get_version (Jobs_t*);
-    FMR_EXPORT const char* get_jobs_name (Jobs_t*);
-    FMR_EXPORT const char* get_sims_name (Jobs_t*);
-    FMR_EXPORT const char* get_sims_version (Jobs_t*);
-    FMR_EXPORT void set_sims_name (Jobs_t*, const char*);
-    FMR_EXPORT void set_sims_version (Jobs_t*, const char*);
-    FMR_EXPORT fmr::Dim_int get_verbosity (Jobs_t*);
-    FMR_EXPORT fmr::Dim_int set_verbosity (Jobs_t*, fmr::Dim_int);
+    FMR_EXPORT Jobs_t* fmr_new_jobs ();
+    FMR_EXPORT void fmr_jobs_init (Jobs_t*);
+    FMR_EXPORT bool fmr_jobs_did_init (Jobs_t*);
+    FMR_EXPORT void fmr_jobs_exit (Jobs_t*);
+    FMR_EXPORT void fmr_delete_jobs (Jobs_t*);
+    FMR_EXPORT const char* fmr_get_version (Jobs_t*);
+    FMR_EXPORT const char* fmr_get_jobs_name (Jobs_t*);
+    FMR_EXPORT fmr::Dim_int fmr_get_verbosity (Jobs_t*);
+    FMR_EXPORT fmr::Dim_int fmr_set_verbosity (Jobs_t*, fmr::Dim_int);
+
+    // Change Jobs_t* to Sims_t* for Pymera Sims interface.
+    FMR_EXPORT const char* fmr_get_sims_name (Jobs_t*);
+    FMR_EXPORT const char* fmr_get_sims_version (Jobs_t*);
+    FMR_EXPORT void fmr_set_sims_name (Jobs_t*, const char*);
+    FMR_EXPORT void fmr_set_sims_version (Jobs_t*, const char*);
   }
 }//end fmr:: namespace
 

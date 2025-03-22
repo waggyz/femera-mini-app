@@ -102,30 +102,33 @@ def find_user_keys(obj):
 #    fmr::Exit_int, fmr::Dim_int, fmr::Enum_int, fmr::Local_int, fmr::Global_int
 #    ...
 # Define the argument and return types for C interface functions.
-fmr.new_jobs.restype = ct.c_void_p
-fmr.delete_jobs.argtypes = [ct.c_void_p]
 
-fmr.jobs_init.argtypes = [ct.c_void_p]
-fmr.jobs_exit.argtypes = [ct.c_void_p]
-fmr.jobs_did_init.restype = ct.c_bool
-fmr.jobs_did_init.argtypes = [ct.c_void_p]
+# Pass Jobs_t* as ct.c_void_p
+fmr.fmr_new_jobs.restype = ct.c_void_p
+fmr.fmr_delete_jobs.argtypes = [ct.c_void_p]
 
-fmr.get_version.restype = ct.c_char_p
-fmr.get_version.argtypes = [ct.c_void_p]
-fmr.get_jobs_name.restype = ct.c_char_p
-fmr.get_jobs_name.argtypes = [ct.c_void_p]
+fmr.fmr_jobs_init.argtypes = [ct.c_void_p]
+fmr.fmr_jobs_exit.argtypes = [ct.c_void_p]
+fmr.fmr_jobs_did_init.restype = ct.c_bool
+fmr.fmr_jobs_did_init.argtypes = [ct.c_void_p]
 
-fmr.get_verbosity.restype = ct.c_ubyte
-fmr.get_verbosity.argtypes = [ct.c_void_p]
-fmr.set_verbosity.restype = ct.c_ubyte
-fmr.set_verbosity.argtypes = [ct.c_void_p, ct.c_ubyte]
+fmr.fmr_get_version.restype = ct.c_char_p
+fmr.fmr_get_version.argtypes = [ct.c_void_p]
+fmr.fmr_get_jobs_name.restype = ct.c_char_p
+fmr.fmr_get_jobs_name.argtypes = [ct.c_void_p]
 
-fmr.get_sims_name.restype = ct.c_char_p
-fmr.get_sims_name.argtypes = [ct.c_void_p]
-fmr.set_sims_name.argtypes = [ct.c_void_p, ct.c_char_p]
-fmr.get_sims_version.restype = ct.c_char_p
-fmr.get_sims_version.argtypes = [ct.c_void_p]
-fmr.set_sims_version.argtypes = [ct.c_void_p, ct.c_char_p]
+fmr.fmr_get_verbosity.restype = ct.c_ubyte
+fmr.fmr_get_verbosity.argtypes = [ct.c_void_p]
+fmr.fmr_set_verbosity.restype = ct.c_ubyte
+fmr.fmr_set_verbosity.argtypes = [ct.c_void_p, ct.c_ubyte]
+
+#TODO Pass Sims_t* for ct.c_void_p. Not yet implemented.
+fmr.fmr_get_sims_name.restype = ct.c_char_p
+fmr.fmr_get_sims_name.argtypes = [ct.c_void_p]
+fmr.fmr_set_sims_name.argtypes = [ct.c_void_p, ct.c_char_p]
+fmr.fmr_get_sims_version.restype = ct.c_char_p
+fmr.fmr_get_sims_version.argtypes = [ct.c_void_p]
+fmr.fmr_set_sims_version.argtypes = [ct.c_void_p, ct.c_char_p]
 
 
 # Create a class to represent the Jobs object in Python.
@@ -134,12 +137,12 @@ class Jobs:
         os.path.join(os.getcwd(),'data','src','data-type.csv'),
                     'Data_type', start_at=3)
     def __init__(self):
-        self.obj = fmr.new_jobs()
+        self.obj = fmr.fmr_new_jobs()
 
     def __del__(self):
-        if fmr.jobs_did_init(self.obj):
-            fmr.jobs_exit(self.obj)
-        fmr.delete_jobs(self.obj)
+        if fmr.fmr_jobs_did_init(self.obj):
+            fmr.fmr_jobs_exit(self.obj)
+        fmr.fmr_delete_jobs(self.obj)
     
     def new_sims(self, name='fmr:user:sims', runs_n=1):
         return Sims(self, name=name, runs_n=runs_n)
@@ -164,40 +167,40 @@ class Jobs:
         return sims
 
     def init(self):
-        fmr.jobs_init(self.obj)
+        fmr.fmr_jobs_init(self.obj)
 
     def exit(self):
-        fmr.jobs_exit(self.obj)
+        fmr.fmr_jobs_exit(self.obj)
 
     def did_init(self):
-        return fmr.jobs_did_init(self.obj)
+        return fmr.fmr_jobs_did_init(self.obj)
     
     def get_version(self):
-        return fmr.get_version(self.obj).decode('utf-8', errors='replace')
+        return fmr.fmr_get_version(self.obj).decode('utf-8', errors='replace')
     
     def get_name(self):
-        return fmr.get_jobs_name(self.obj).decode('utf-8', errors='replace')
+        return fmr.fmr_get_jobs_name(self.obj).decode('utf-8', errors='replace')
     
     def get_verbosity(self):
-        return fmr.get_verbosity(self.obj)
+        return fmr.fmr_get_verbosity(self.obj)
     def set_verbosity(self, verbosity=3):
         # Clamp values to range of ct.c_ubyte.
         if(verbosity<0):
             verbosity=0
         elif(verbosity>255):
             verbosity=255
-        return fmr.set_verbosity(self.obj, verbosity)
+        return fmr.fmr_set_verbosity(self.obj, verbosity)
     #TODO move to Sims class ==================================================
     def get_sims_name(self):
-        return fmr.get_sims_name(self.obj).decode('utf-8', errors='replace')
+        return fmr.fmr_get_sims_name(self.obj).decode('utf-8', errors='replace')
     def set_sims_name(self, name):
-        fmr.set_sims_name(self.obj, name.encode('utf-8'))
+        fmr.fmr_set_sims_name(self.obj, name.encode('utf-8'))
         return
     
     def get_sims_version(self):
-        return fmr.get_sims_version(self.obj).decode('utf-8', errors='replace')
+        return fmr.fmr_get_sims_version(self.obj).decode('utf-8',errors='replace')
     def set_sims_version(self, name):
-        fmr.set_sims_version(self.obj, name.encode('utf-8'))
+        fmr.fmr_set_sims_version(self.obj, name.encode('utf-8'))
         return
     #==========================================================================
 
