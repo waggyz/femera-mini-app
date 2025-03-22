@@ -55,7 +55,7 @@ def main():
     jobs.init()
     #
     # Read simulation from JSON file.
-    sims = jobs.new_sims_from_file(os.path.join(here, 'uq_straw_1d.json'))
+    sims = jobs.add_sims_from_file(os.path.join(here, 'uq_straw_1d.json'))
     #
     print('\nUser parameters with assigned values '
           + 'and output fields in JSON file:')
@@ -109,7 +109,7 @@ def main():
     print(f'- sims.sample_n: {sims.sample_n}')
     print()
     # Add simulation models.
-    #sims = fmr.new_sims()#name='cantilever-sims')#, runs_n=runs_n)
+    #sims = fmr.add_sims()#name='cantilever-sims')#, runs_n=runs_n)
     #TODO use python context:
     #     with fmr.sims(name='cantilever-sims') as sims:
     # 
@@ -119,7 +119,7 @@ def main():
     '''
     # Nominal model setup  (same as the JSON file) ============================
     #
-    sims = fmr.new_sims()
+    sims = fmr.add_sims()
     # Set nominal model parameters.
     #TODO Femera sims functions not implemented yet.
     #TODO changing internal femera fmr: string identifiers to enums.

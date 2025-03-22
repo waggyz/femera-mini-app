@@ -122,16 +122,19 @@ fmr.fmr_get_verbosity.argtypes = [ct.c_void_p]
 fmr.fmr_set_verbosity.restype = ct.c_ubyte
 fmr.fmr_set_verbosity.argtypes = [ct.c_void_p, ct.c_ubyte]
 
-fmr.fmr_add_sims.argtypes = [ct.c_void_p]# Jobs
+fmr.fmr_add_sims.argtypes = [ct.c_void_p]
 fmr.fmr_add_sims.restype = ct.c_uint32
 
-#TODO Pass Sims_t* for ct.c_void_p. Not yet implemented.
+fmr.fmr_get_sims_n.restype = ct.c_uint32
+fmr.fmr_get_sims_n.argtypes = [ct.c_void_p]
+
 fmr.fmr_get_sims_name.restype = ct.c_char_p
-fmr.fmr_get_sims_name.argtypes = [ct.c_void_p]
-fmr.fmr_set_sims_name.argtypes = [ct.c_void_p, ct.c_char_p]
+fmr.fmr_get_sims_name.argtypes = [ct.c_void_p, ct.c_uint32]
+fmr.fmr_set_sims_name.argtypes = [ct.c_void_p, ct.c_uint32, ct.c_char_p]
+
 fmr.fmr_get_sims_version.restype = ct.c_char_p
-fmr.fmr_get_sims_version.argtypes = [ct.c_void_p]
-fmr.fmr_set_sims_version.argtypes = [ct.c_void_p, ct.c_char_p]
+fmr.fmr_get_sims_version.argtypes = [ct.c_void_p, ct.c_uint32]
+fmr.fmr_set_sims_version.argtypes = [ct.c_void_p, ct.c_uint32, ct.c_char_p]
 
 # Create a class to represent the Jobs object in Python.
 class Jobs:
@@ -146,28 +149,31 @@ class Jobs:
             fmr.fmr_jobs_exit(self.obj)
         fmr.fmr_delete_jobs(self.obj)
     
-    def new_sims(self, sims_name=None):
+    def add_sims(self, sims_name=None):
         return Sims(self, name=sims_name)
+    
+    def get_sims_n(self):
+        return fmr.fmr_get_sims_n(self.obj)
 
-    def new_sims_from_file(self, filename):
+    def add_sims_from_file(self, filename):
         sims = Sims(self)
         with open(filename, 'r') as file:
             sims_json = json.load(file)#TODO use json()
         if 'fmr:Sims' in sims_json:
             sims_json = sims_json['fmr:Sims']
             sims.parameter = find_user_keys(sims_json)
-            '''
+            
             if 'fmr:Data_type:Name' in sims_json:
-                self.set_sims_name(sims_json['fmr:Data_type:Name'])
+                sims.set_name(sims_json['fmr:Data_type:Name'])
             if 'fmr:Data_type:Version' in sims_json:
-                self.set_sims_version(sims_json['fmr:Data_type:Version'])
-            '''
+                sims.set_version(sims_json['fmr:Data_type:Version'])
+            
         else:
             print('Found no fmr:Sims in ' + filename)
             return
         #if 'fmr:Data_type:Name' in sims_json:
         #    sims.name=sims_json['fmr:Data_type:Name']
-        #self.new_sims(name=sims_json['name'], runs_n=sims_json['runs_n'])
+        #self.add_sims(name=sims_json['name'], runs_n=sims_json['runs_n'])
         return sims
 
     def init(self):
@@ -195,21 +201,7 @@ class Jobs:
         elif(verbosity>255):
             verbosity=255
         return fmr.fmr_set_verbosity(self.obj, verbosity)
-    '''
-    #TODO move to Sims class ==================================================
-    def get_sims_name(self):
-        return fmr.fmr_get_sims_name(self.obj).decode('utf-8', errors='replace')
-    def set_sims_name(self, name):
-        fmr.fmr_set_sims_name(self.obj, name.encode('utf-8'))
-        return
-    
-    def get_sims_version(self):
-        return fmr.fmr_get_sims_version(self.obj).decode('utf-8',errors='replace')
-    def set_sims_version(self, name):
-        fmr.fmr_set_sims_version(self.obj, name.encode('utf-8'))
-        return
-    #==========================================================================
-    '''
+
 # Create a class to represent the Sims object in Python.
 class Sims:
     """
@@ -247,10 +239,10 @@ class Sims:
         if not isinstance(jobs, Jobs):
             warn('\n pym sims WARN Sims must be created from Jobs.\n'
                   +'               '
-                 +'Try one of the new_sims* methods of a Jobs object.')
+                 +'Try one of the add_sims* methods of a Jobs object.')
             return None
         self.jobs = jobs
-        self.sims_index = fmr.fmr_add_sims(jobs.obj)
+        self.task_index = fmr.fmr_add_sims(jobs.obj)
         self.nominal = {}
         self.parameter = {}
         self.sample_n = None
@@ -269,9 +261,18 @@ class Sims:
         #self.json_parameter = {}
 
     def get_name(self):
-        #return('*** not working ***')
-        return fmr.fmr_get_sims_name(self.jobs.obj).decode(
+        return fmr.fmr_get_sims_name(self.jobs.obj, self.task_index).decode(
             'utf-8', errors='replace')
+    def set_name(self, name):
+        fmr.fmr_set_sims_name(self.jobs.obj, self.task_index, name.encode(
+            'utf-8'))
+        
+    def get_version(self):
+        return fmr.fmr_get_sims_version(self.jobs.obj, self.task_index).decode(
+            'utf-8', errors='replace')
+    def set_version(self, name):
+        fmr.fmr_set_sims_version(self.jobs.obj, self.task_index, name.encode(
+            'utf-8'))
     
     def add_parameter(self, name, nominal=None, values=None):
         """

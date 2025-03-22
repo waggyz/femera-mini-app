@@ -91,35 +91,38 @@ extern "C" {
       (femera::Task<femera::task::Sims>::new_task (jobs->get_core())));
   }
   // Sims operations ---------------------------------------------------------
-  const char* fmc::fmr_get_sims_name (fmc::Jobs_t* jobs) {
-    const auto S = jobs->get_task (femera::Task_type::Sims,
-      jobs->get_task_n(femera::Task_type::Sims) -1);
+  fmr::Local_int fmc::fmr_get_sims_n (fmc::Jobs_t* jobs) {
+    return jobs->get_task_n (femera::Task_type::Sims);
+  }
+  const char* fmc::fmr_get_sims_name
+    (fmc::Jobs_t* jobs, const fmr::Local_int ix) {
+    const auto S = jobs->get_task (ix);
     static std::string current_name;
     if (S == nullptr) {
-      current_name = "No Sims found in fmr_get_sims_name (Jobs*).";
+      current_name = "Sims not found in fmr_get_sims_name (Jobs*).";
     } else {
       current_name = S->get_name ();
     }
     return current_name.c_str ();
   }
-  void fmc::fmr_set_sims_name (fmc::Jobs_t* jobs, const char* name) {
-    const auto S = jobs->get_task (femera::Task_type::Sims,
-      jobs->get_task_n(femera::Task_type::Sims) -1);
+  void fmc::fmr_set_sims_name
+    (fmc::Jobs_t* jobs, const fmr::Local_int ix, const char* name) {
+    const auto S = jobs->get_task (ix);
     if (S == nullptr) { return; }
     S->set_name (name);
     return;
   }
-  const char* fmc::fmr_get_sims_version (fmc::Jobs_t* jobs) {
-    const auto S = jobs->get_task (femera::Task_type::Sims,
-      jobs->get_task_n(femera::Task_type::Sims) -1);
+  const char* fmc::fmr_get_sims_version
+   (fmc::Jobs_t* jobs, const fmr::Local_int ix) {
+    const auto S = jobs->get_task (ix);
     if (S == nullptr) { return " fmc jobs WARN Could not find any Sims."; }
     static std::string current_vers;
     current_vers = S->get_version ();
     return current_vers.c_str ();
   }
-  void fmc::fmr_set_sims_version (fmc::Jobs_t* jobs, const char* name) {
-    const auto S = jobs->get_task (femera::Task_type::Sims,
-      jobs->get_task_n(femera::Task_type::Sims) -1);
+  void fmc::fmr_set_sims_version
+    (fmc::Jobs_t* jobs, const fmr::Local_int ix, const char* name) {
+    const auto S = jobs->get_task (ix);
     if (S == nullptr) { return; }
     S->set_version (name);
     return;

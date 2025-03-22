@@ -45,16 +45,18 @@ class TestPymeraJobs(unittest.TestCase):
         #self.assertEqual(self.jobs.set_verbosity(verb), verb)
         #self.assertEqual(self.jobs.get_verbosity(), verb)
 
-    def test_jobs_new_sims(self):
-        sims = self.jobs.new_sims()
+    def test_jobs_add_sims(self):
+        self.assertEqual(self.jobs.get_sims_n(),1)
+        sims = self.jobs.add_sims()
+        self.assertEqual(self.jobs.get_sims_n(),2)
         self.assertIsInstance(sims, pymera.Sims)
         self.assertIsInstance(sims.jobs, pymera.Jobs)
         self.assertTrue("simulation" in sims.get_name().lower())
-'''
-    def test_new_sims(self):
-        with self.assertWarns(Warning):
-            pymera.Sims('fail')# First argument must be an instance of Jobs.
-'''
+        sims.set_name ("Test Sims name")
+        sims.set_version ("0.0.1")
+        self.assertEqual(sims.get_version(), "0.0.1")
+        
+
 '''
 class TestPymeraSims(unittest.TestCase):
     @classmethod
