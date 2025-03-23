@@ -9,6 +9,8 @@ def find_user_keys(obj):
     Recursively traverses a nested dictionary or list and returns a dictionary
     containing the keys that are not prefixed with "fmr:" and their
     corresponding values.
+
+    NOTE Currently, this function also extracts fmr: enums.
     
     Parameters:
         obj (dict or list): The object to traverse.
@@ -23,15 +25,18 @@ def find_user_keys(obj):
             if key in fmr_enum:
                 result[key] = fmr_enum[key][val.upper()]
                 #result[key] = fmr_enum[key][val.upper()].value # integer
-            if not key.startswith("fmr:") and isinstance(val, dict):
-                #TODO resolve datatype of value key.
-                nominal = next(iter(val.values()))
-                if isinstance(nominal, (list, tuple, set)):
-                    if len(nominal) > 1:
-                        nominal = np.ascontiguousarray(nominal)
-                elif not isinstance(nominal, (int, float, str)):
-                    nominal = None #str(next(iter(val.keys())))# datatype
-                result[key] = nominal
+            if not key.startswith("fmr:"):
+                if isinstance(val, (int, float, str)):
+                    result[key] = val
+                elif isinstance(val, (dict,list)):
+                    #TODO resolve datatype of value key.
+                    nominal = val#next(iter(val.values()))
+                    if isinstance(nominal, (list, tuple, set)):
+                        if len(nominal) > 1:
+                            nominal = np.ascontiguousarray(nominal)
+                    elif not isinstance(nominal, (int, float, str)):
+                        nominal = None #str(next(iter(val.keys())))# datatype
+                    result[key] = nominal
                 if isinstance(val, (dict, list)):
                     result.update(find_user_keys(val))
             elif isinstance(val, (dict, list)):
@@ -91,7 +96,10 @@ def flatten_json(data, prefix='', sep='\x1f'):
             result.update(flatten_json(value, new_key, sep))
         elif isinstance(value, list):
             if is_terminal_list(value):
-                result[new_key] = value
+                #if isinstance(value,list):
+                result[new_key] = np.ascontiguousarray(value)
+                #else:
+                #    result[new_key] = value
             else:
                 for i, item in enumerate(value):
                     if isinstance(item, dict):
