@@ -7,8 +7,7 @@ SRCD=`printf " $HINT_COLOR src/ $NORM_COLOR"`
 SPCS="       "
 #
 CODE_FILES=`find src \( -name '*.?pp' -o -name '*.c' -o -name '*.h' \
-  -o -name '*.inc' -o -name '*.bats' -o -name '*.py' -o -name '*.json' \
-  -o -name '*.csv' \) \
+  -o -name '*.inc' -o -name '*.bats' -o -name '*.py' -o -name '*.json' \) \
   -printf x | wc -c`
 TEST_FILES=`find src \( -name '*.gtst.?pp' -o -name '*perf.?pp' \
   -o -name '*.bats' -o -name '*_test.py' -o -name '*.json' -o -name '*.csv' \) \
