@@ -16,11 +16,11 @@ else:
 # C/Python ctypes interface ===================================================
 # Define the argument and return ctypes for C interface functions.
 
-fmr_Dim_int = ct.c_ubyte
-fmr_Exit_int = ct.c_int32
-fmr_Enum_int = ct.c_int32
-fmr_Local_int = ct.c_uint32
-fmr_Global_int = ct.c_uint64
+Dim_int = ct.c_ubyte
+Exit_int = ct.c_int32
+Enum_int = ct.c_int32
+Local_int = ct.c_uint32
+Global_int = ct.c_uint64
 
 # Pass Jobs_t* as ct.c_void_p
 fmr.fmr_new_jobs.restype = ct.c_void_p
@@ -36,20 +36,20 @@ fmr.fmr_get_version.argtypes = [ct.c_void_p]
 fmr.fmr_get_jobs_name.restype = ct.c_char_p
 fmr.fmr_get_jobs_name.argtypes = [ct.c_void_p]
 
-fmr.fmr_get_verbosity.restype = fmr_Dim_int
+fmr.fmr_get_verbosity.restype = Dim_int
 fmr.fmr_get_verbosity.argtypes = [ct.c_void_p]
-fmr.fmr_set_verbosity.restype = fmr_Dim_int
-fmr.fmr_set_verbosity.argtypes = [ct.c_void_p, fmr_Dim_int]
+fmr.fmr_set_verbosity.restype = Dim_int
+fmr.fmr_set_verbosity.argtypes = [ct.c_void_p, Dim_int]
 
-fmr.fmr_get_sims_n.restype = fmr_Local_int
+fmr.fmr_get_sims_n.restype = Local_int
 fmr.fmr_get_sims_n.argtypes = [ct.c_void_p]
 fmr.fmr_add_sims.argtypes = [ct.c_void_p]
-fmr.fmr_add_sims.restype = fmr_Local_int
+fmr.fmr_add_sims.restype = Local_int
 
 fmr.fmr_get_sims_name.restype = ct.c_char_p
-fmr.fmr_get_sims_name.argtypes = [ct.c_void_p, fmr_Local_int]
-fmr.fmr_set_sims_name.argtypes = [ct.c_void_p, fmr_Local_int, ct.c_char_p]
+fmr.fmr_get_sims_name.argtypes = [ct.c_void_p, Local_int]
+fmr.fmr_set_sims_name.argtypes = [ct.c_void_p, Local_int, ct.c_char_p]
 
 fmr.fmr_get_sims_version.restype = ct.c_char_p
-fmr.fmr_get_sims_version.argtypes = [ct.c_void_p, fmr_Local_int]
-fmr.fmr_set_sims_version.argtypes = [ct.c_void_p, fmr_Local_int, ct.c_char_p]
+fmr.fmr_get_sims_version.argtypes = [ct.c_void_p, Local_int]
+fmr.fmr_set_sims_version.argtypes = [ct.c_void_p, Local_int, ct.c_char_p]

@@ -3,29 +3,54 @@ from enum import Enum, auto
 import os, csv
 
 # Enums =======================================================================
-class fmr_Enums(Enum): #TODO read from data-types.csv
-    # Enums used by Femera (and in JSON)
-    fmr_Module = auto() # Femera classes
-    fmr_Data_type = auto()
-    fmr_Grid_structure = auto()
-    fmr_Shape_type = auto()
-    fmr_Cell_type = auto()
-    fmr_Elem_type = auto()
-    fmr_Mtrl_physics = auto()
-    fmr_Conditioner = auto()
-    fmr_Solver = auto()
-
-class fmr_Module(Enum):
+class Module(Enum):# fmr:Sims, fmr:Geom, fmr:Grid, fmr:Mtrl,...
     SIMS = auto()
     GEOM = auto()
     GRID = auto()
+    PART = auto()
     MTRL = auto()
     BCS = auto()
     SOLVE = auto()
     RUNS = auto()
     POST = auto()
+    end = auto()
 
-class fmr_Grid_structure(Enum):
+class Cell_type(Enum):
+    BLOCK_2PRISM = auto()
+    BLOCK_5TET = auto()
+    BLOCK_6TET = auto()
+    BLOCK_6PYRAMID = auto()
+    end = auto()
+
+class Mtrl_physics(Enum):
+    ELASTIC_ISOTROPIC = auto()
+    ELASTIC_ORTHOTROPIC = auto()
+    PLASTIC_KINEMATIC = auto()
+    THERMAL_ISOTROPIC = auto()
+    THERMAL_OTHOTROPIC = auto()
+    end = auto()
+
+class Conditioner(Enum):
+    JACOBI = auto()
+    BLOCK_JACOBI = auto()
+    INCOMPLETE_LU = auto()
+    end = auto()
+
+class Solver(Enum):
+    PCG = auto()
+    PCR = auto()
+    NCG = auto()
+
+class Reduce(Enum):
+    MIN = auto()
+    MAX = auto()
+    SUM = auto()
+    MAX_ABS = auto()
+    MIN_ABS = auto()
+    SUM_SQUARES = auto()
+    end = auto()
+
+class Grid_structure(Enum):
     UNSTRUCTURED = auto()
     CARTESIAN = auto() # isotropic scaling (scalar)
     RECTILINEAR = auto() # scaled x,y,z
@@ -37,7 +62,7 @@ class fmr_Grid_structure(Enum):
     CONFORMAL_MAP = auto()
     CURVILINEAR = auto() # orthogonal, non-orthogonal
     BODY_FITTED = auto()
-    END = auto()
+    end = auto()
 '''
 C++
 enum class fmr::grid::Grid_structure {
@@ -54,6 +79,28 @@ enum class fmr::grid::Grid_structure {
     Body_fitted,
     end
 };
+'''
+# Dictionary of enums ---------------------------------------------------------
+fmr_enum ={
+    'fmr:Grid_structure': Grid_structure,
+    'fmr:Cell_type': Cell_type,
+    'fmr:Mtrl_physics': Mtrl_physics,
+    'fmr:Conditioner': Conditioner,
+    'fmr:Solver': Solver,
+    'fmr:Reduce': Reduce
+}
+'''
+    # Enums used by Femera (and in JSON)
+    Module = auto() # Femera classes
+    Data_type = auto()
+    Sims_type = auto()
+    Grid_structure = auto()
+    Shape_type = auto()
+    Cell_type = auto()
+    Elem_type = auto()
+    Mtrl_physics = auto()
+    Conditioner = auto()
+    Solver = auto()
 '''
 #==============================================================================
 def create_enum_from_csv(file_path, enum_name, start_at=None):
@@ -101,6 +148,6 @@ def create_enum_from_csv(file_path, enum_name, start_at=None):
     # Create and return the Enum class dynamically.
     return Enum(enum_name, enum_members)
 
-fmr_Data_type = create_enum_from_csv(
+Data_type = create_enum_from_csv(
     os.path.join(os.getcwd(),'data','src','data-type.csv'),
                 'Data_type', start_at=3)
