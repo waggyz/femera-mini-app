@@ -3,19 +3,41 @@ from enum import Enum, auto
 import os, csv
 
 # Enums =======================================================================
+class fmr_Enums(Enum): #TODO read from data-types.csv
+    # Enums used by Femera (and in JSON)
+    fmr_Module = auto() # Femera classes
+    fmr_Data_type = auto()
+    fmr_Grid_structure = auto()
+    fmr_Shape_type = auto()
+    fmr_Cell_type = auto()
+    fmr_Elem_type = auto()
+    fmr_Mtrl_physics = auto()
+    fmr_Conditioner = auto()
+    fmr_Solver = auto()
+
+class fmr_Module(Enum):
+    SIMS = auto()
+    GEOM = auto()
+    GRID = auto()
+    MTRL = auto()
+    BCS = auto()
+    SOLVE = auto()
+    RUNS = auto()
+    POST = auto()
+
 class fmr_Grid_structure(Enum):
-    Unstructured = auto()
-    Cartesian = auto() # isotropic scaling (scalar)
-    Rectilinear = auto() # scaled x,y,z
-    General_linear = auto() # 3x3 matrix
-    Cylindrical = auto() # x,y,z axis
-    Spherical = auto()
-    Elliptical = auto()
-    Spheroidal = auto()  # Oblate, Prolate
-    Conformal_map = auto()
-    Curvilinear = auto() # orthogonal, non-orthogonal
-    Body_fitted = auto()
-    end = auto()
+    UNSTRUCTURED = auto()
+    CARTESIAN = auto() # isotropic scaling (scalar)
+    RECTILINEAR = auto() # scaled x,y,z
+    GENERAL_LINEAR = auto() # 3x3 matrix
+    CYLINDRICAL = auto() # x,y,z axis
+    SPHERICAL = auto()
+    ELLIPTICAL = auto()
+    SPHEROIDAL = auto()  # Oblate, Prolate
+    CONFORMAL_MAP = auto()
+    CURVILINEAR = auto() # orthogonal, non-orthogonal
+    BODY_FITTED = auto()
+    END = auto()
 '''
 C++
 enum class fmr::grid::Grid_structure {
@@ -68,13 +90,13 @@ def create_enum_from_csv(file_path, enum_name, start_at=None):
             for row in reader:
                 if len(row) >= 2:  # Ensure we have at least a name and a value.
                     name, value = row[0], row[1]
-                    enum_members[name] = value
+                    enum_members[name.upper()] = value
         else:
             row_i = start_at
             for row in reader:
                 if len(row) >= 1:  # Ensure we have at least a name.
                     name = row[0]
-                    enum_members[name] = row_i
+                    enum_members[name.upper()] = row_i
                     row_i += 1
     # Create and return the Enum class dynamically.
     return Enum(enum_name, enum_members)

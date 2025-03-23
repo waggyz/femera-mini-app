@@ -1,71 +1,70 @@
 { "fmr:Sims": {
-  "fmr:NOTE": "non-fmr: keys imply Python read/write.",
-  "fmr:TODO": "Remove 'Data_type:' substring, or replace with Data ?",
+  "fmr:NOTE": "non-fmr: keys imply Python read/write values and parameters.",
 
-  "fmr:Data:Name": "Cantilever beam (uq_straw_1d)",
-  "fmr:Data:Version": "0.1.4",
+  "fmr:Name": "Cantilever beam (uq_straw_1d)",
+  "fmr:Sims_type": "fmr:Sims_type:UQ",
+  "fmr:Version": "0.1.4",
     "fmr:Geom": {
-      "fmr:Data:Shape_type": "fmr:Shape_type:Block",
-      "dims": {"fmr:Data:Dimensions_xyz": [1.000, 0.050, 0.050] }
+      "fmr:Shape_type": "fmr:Shape_type:Block",
+      "dims": {"fmr:Dimensions_xyz": [1.000, 0.050, 0.050] }
+    },
+    "fmr:Grid": {
+      "fmr:Geom": 0,
+      "fmr:Grid_structure": "fmr:Grid_structure:Cartesian",
+      "fmr:Cell_type": "fmr:Cell_type:Block-6tet",
+      "fmr:Elem_type": "fmr:Elem_type:Tet10",
+      "fmr:Grid_divs": [100, 5, 5],
+      "beam-base": {
+        "fmr:Node_set": {
+          "fmr:Node_at": "fmr:Node_x_min"
+        }
       },
-      "fmr:Mtrl": {
-        "fmr:Data:Mtrl_type": "fmr:Mtrl_type:Elastic-isotropic",
-        "youngs": {"fmr:Data:Youngs_modulus": 210e9 },
-        "poissons": {"fmr:Data:Poissons_ratio": 0.285 }
-      ,
-      "fmr:Grid": {
-        "fmr:Data:Grid_structure": "fmr:Grid_structure:Cartesian",
-        "fmr:Data:Cell_type": "fmr:Cell_type:Block-6tet",
-        "fmr:Data:Elem_type": "fmr:Elem_type:Tet10",
-        "fmr:Data:Grid_divs": [100, 5, 5],
-        "beam-base": {
-          "fmr:Data:Node_set": {
-            "fmr:Data:Node_at": "fmr:Data:Node_x_min"
-          }
-        },
-        "beam-tip": {
-          "fmr:Data:Node_set": {
-            "fmr:Data:Node_at": "fmr:Data:Node_x_max"
-          }
+      "beam-tip": {
+        "fmr:Node_set": {
+          "fmr:Node_at": "fmr:Node_x_max"
         }
       }
     },
-    "fmr:BCs": {
-      "fmr:Data:Displacement_xyz": {
-        "fmr:Data:Node_set": "beam-base",
-        "fmr:Data:Displacement_xyz": [0.000, 0.000, 0.000]
+    "fmr:Mtrl": {
+      "fmr:Grid": 0,
+      "fmr:Mtrl_physics": "fmr:Mtrl_physics:Elastic-isotropic",
+      "youngs": {"fmr:Youngs_modulus": 210e9 },
+      "poissons": {"fmr:Poissons_ratio": 0.285 }
+    },
+    "fmr:BCs": [
+      {
+        "fmr:Node_set": "beam-base",
+        "fmr:Displacement_xyz": [0.000, 0.000, 0.000]
       },
-      "fmr:Data:Displacement_z": {
+      {
         "fmr::Data_type:Node_set": "beam-tip",
-        "tip-displace-z": {"fmr:Data:Displacement_z": -0.010 }
+        "tip-displace-z": {"fmr:Displacement_z": -0.010 }
       }
-    },
-    "fmr:Conditioner": {
-      "fmr:Data:Conditioner": "fmr:Conditioner:Jacobi"
-    },
+    ],
     "fmr:Solve": {
-      "fmr:Data:Solver": "fmr:Solver:PCG"
+      "fmr:Conditioner": "fmr:Conditioner:Jacobi",
+      "fmr:Solver": "fmr:Solver:PCG"
     },
     "fmr:Runs": [
       {
-        "fmr:Data:Name": "Cantilever beam nominal solution",
-        "fmr:Data:Runs_n": 1,
+        "fmr:Name": "Cantilever beam nominal solution",
+        "fmr:Runs_n": 1,
         "fmr:Post": {
-          "nominal-node-coordinates": "fmr:Data:Node_xyz",
-          "nominal-displacements": "fmr:Data:Displacement_xyz"
+          "nominal-node-coordinates": "fmr:Node_xyz",
+          "nominal-displacements": "fmr:Displacement_xyz"
         }
       },
       {
-        "fmr:Data:Name": "Cantilever beam sample solution",
-        "sample_n": {"fmr:Data:Runs_n": null},
+        "fmr:Name": "Cantilever beam sample solutions",
+        "sample_n": {"fmr:Runs_n": null},
         "fmr:Solve": {
-          "fmr:Data:Initial_displacements_xyz": "nominal-displacements"
+          "fmr:Initial_displacements_xyz": "nominal-displacements"
         },
         "fmr:Post": {
           "base-force-mag": {
-            "fmr:Data:Force_mag": {
-              "fmr:Data:Reduce": "fmr:Reduce:Sum",
-              "fmr:Data:Node_set": "beam-base"
+            "fmr:Force_mag": {
+              "fmr:Reduce": "fmr:Reduce:Sum",
+              "fmr:Node_set": "beam-base"
             }
           }
         }

@@ -15,6 +15,8 @@ sys.path.append(os.path.join(os.path.dirname(sys.path[0])))
 import pymera
 #import uqtools as uq
 
+from pymera_parse import fmr_flatten_file # temporary until integrated into pymera module
+
 def main():
     """
     This performs a Monte Carlo simulation of a cantilever beam subjected to tip
@@ -81,8 +83,13 @@ def main():
                  sims.nominal['height']],
         values=list(map(list, zip(*v))) )# SoA to AoS
     #
-    sims.init()# Optional: sims.run() will call sims.init() as needed.
-    sims.run()
+    flat = fmr_flatten_file(os.path.join(here, 'uq_straw_1d.json'))
+    print()
+    for key, value in flat.items():
+        print(f"{key} = {value}")
+    #
+    #sims.init()# Optional: sims.run() will call sims.init() as needed.
+    #sims.run()
     #
     # Get numpy array contents from Pymera.
     base_force = sims.get_post('base-force-mag')

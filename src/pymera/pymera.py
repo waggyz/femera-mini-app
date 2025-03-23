@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from pymera_enum import fmr_Data_type, fmr_Grid_structure
 from pymera_ctypes import fmr
-from pymera_parse import parse_sims_from_file
+from pymera_parse import fmr_parse_sims_from_file, fmr_flatten_file
 
 import numpy as np
 import csv
@@ -26,7 +26,7 @@ class Jobs:
         return Sims(self, name=sims_name)
 
     def add_sims_from_file(self, filename):
-        return parse_sims_from_file(Sims(self), filename)
+        return fmr_parse_sims_from_file(Sims(self), filename)
 
     def init(self):
         fmr.fmr_jobs_init(self.obj)
