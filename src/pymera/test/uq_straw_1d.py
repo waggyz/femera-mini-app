@@ -55,6 +55,7 @@ def main():
     jobs.init()
     #
     # Read simulation from JSON file.
+    #TODO should return a Sims list
     sims = jobs.add_sims_from_file(os.path.join(here, 'uq_straw_1d.json'))
     #
     print('\nUser parameters with assigned values '

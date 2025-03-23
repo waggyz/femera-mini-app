@@ -47,11 +47,11 @@ class TestPymeraJobs(unittest.TestCase):
 
     def test_jobs_add_sims(self):
         self.assertEqual(self.jobs.get_sims_n(),1)
-        sims = self.jobs.add_sims()
+        sims = self.jobs.add_sims("New simulation")
         self.assertEqual(self.jobs.get_sims_n(),2)
         self.assertIsInstance(sims, pymera.Sims)
         self.assertIsInstance(sims.jobs, pymera.Jobs)
-        self.assertTrue("simulation" in sims.get_name().lower())
+        self.assertEqual(sims.get_name(), "New simulation")
         sims.set_name ("Test Sims name")
         sims.set_version ("0.0.1")
         self.assertEqual(sims.get_version(), "0.0.1")

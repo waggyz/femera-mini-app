@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
+import pymera_enum
+
 import numpy as np
 import ctypes as ct
 import csv, json
-from enum import Enum
 from warnings import warn
 
 import os
@@ -17,53 +18,48 @@ elif os.name == 'nt':
 else:
     raise OSError("Unsupported operating system")
 
-# Enums =======================================================================
+# C/Python ctypes interface ===================================================
+# Define the argument and return ctypes for C interface functions.
 
-def create_enum_from_csv(file_path, enum_name, start_at=None):
-    """
-    Create an Enum class dynamically from a CSV file.
+fmr_Dim_int = ct.c_ubyte
+fmr_Exit_int = ct.c_int32
+fmr_Enum_int = ct.c_int32
+fmr_Local_int = ct.c_uint32
+fmr_Global_int = ct.c_uint64
 
-    Parameters:
-        file_path (str): The path to the CSV file.
-        enum_name (str): The name of the Enum class to be created.
-        start_at (int, optional): The number to start with when creating the
-        Enum members. If None, the CSV file must contain the member's
-        corresponding number in the second column. Defaults to None.
+# Pass Jobs_t* as ct.c_void_p
+fmr.fmr_new_jobs.restype = ct.c_void_p
+fmr.fmr_delete_jobs.argtypes = [ct.c_void_p]
 
-    Returns:
-        Enum: The dynamically created Enum class.
+fmr.fmr_jobs_init.argtypes = [ct.c_void_p]
+fmr.fmr_jobs_exit.argtypes = [ct.c_void_p]
+fmr.fmr_jobs_did_init.restype = ct.c_bool
+fmr.fmr_jobs_did_init.argtypes = [ct.c_void_p]
 
-    Notes:
-        - The CSV file should have at least two columns: name and value.
-        - If start_at is not provided, the Enum members will be created from the
-          first row to the last.
-        - If start_at is provided, the Enum members will be created starting
-          from the specified row number.
-    """
-    # Read the CSV file.
-    with open(file_path, 'r') as csv_file:
-        reader = csv.reader(csv_file)
-        # Assuming the first row contains headers. Skip it.
-        next(reader, None)
-        #
-        # Create a dictionary to hold enum members.
-        enum_members = {}
-        if(start_at == None):
-            # Iterate through rows and add them to the enum_members dictionary.
-            for row in reader:
-                if len(row) >= 2:  # Ensure we have at least a name and a value.
-                    name, value = row[0], row[1]
-                    enum_members[name] = value
-        else:
-            row_i = start_at
-            for row in reader:
-                if len(row) >= 1:  # Ensure we have at least a name.
-                    name = row[0]
-                    enum_members[name] = row_i
-                    row_i += 1
-    # Create and return the Enum class dynamically.
-    return Enum(enum_name, enum_members)
+fmr.fmr_get_version.restype = ct.c_char_p
+fmr.fmr_get_version.argtypes = [ct.c_void_p]
+fmr.fmr_get_jobs_name.restype = ct.c_char_p
+fmr.fmr_get_jobs_name.argtypes = [ct.c_void_p]
 
+fmr.fmr_get_verbosity.restype = fmr_Dim_int
+fmr.fmr_get_verbosity.argtypes = [ct.c_void_p]
+fmr.fmr_set_verbosity.restype = fmr_Dim_int
+fmr.fmr_set_verbosity.argtypes = [ct.c_void_p, fmr_Dim_int]
+
+fmr.fmr_get_sims_n.restype = fmr_Local_int
+fmr.fmr_get_sims_n.argtypes = [ct.c_void_p]
+fmr.fmr_add_sims.argtypes = [ct.c_void_p]
+fmr.fmr_add_sims.restype = fmr_Local_int
+
+fmr.fmr_get_sims_name.restype = ct.c_char_p
+fmr.fmr_get_sims_name.argtypes = [ct.c_void_p, fmr_Local_int]
+fmr.fmr_set_sims_name.argtypes = [ct.c_void_p, fmr_Local_int, ct.c_char_p]
+
+fmr.fmr_get_sims_version.restype = ct.c_char_p
+fmr.fmr_get_sims_version.argtypes = [ct.c_void_p, fmr_Local_int]
+fmr.fmr_set_sims_version.argtypes = [ct.c_void_p, fmr_Local_int, ct.c_char_p]
+
+#==============================================================================
 def find_user_keys(obj):
     """
     Recursively traverses a nested dictionary or list and returns a dictionary
@@ -97,63 +93,27 @@ def find_user_keys(obj):
         for item in obj:
             result.update(find_user_keys(item))
     return result
-#==============================================================================
-#TODO Need specifiers for
-#    fmr::Exit_int, fmr::Dim_int, fmr::Enum_int, fmr::Local_int, fmr::Global_int
-#    ...
-# Define the argument and return types for C interface functions.
 
-# Pass Jobs_t* as ct.c_void_p
-fmr.fmr_new_jobs.restype = ct.c_void_p
-fmr.fmr_delete_jobs.argtypes = [ct.c_void_p]
-
-fmr.fmr_jobs_init.argtypes = [ct.c_void_p]
-fmr.fmr_jobs_exit.argtypes = [ct.c_void_p]
-fmr.fmr_jobs_did_init.restype = ct.c_bool
-fmr.fmr_jobs_did_init.argtypes = [ct.c_void_p]
-
-fmr.fmr_get_version.restype = ct.c_char_p
-fmr.fmr_get_version.argtypes = [ct.c_void_p]
-fmr.fmr_get_jobs_name.restype = ct.c_char_p
-fmr.fmr_get_jobs_name.argtypes = [ct.c_void_p]
-
-fmr.fmr_get_verbosity.restype = ct.c_ubyte
-fmr.fmr_get_verbosity.argtypes = [ct.c_void_p]
-fmr.fmr_set_verbosity.restype = ct.c_ubyte
-fmr.fmr_set_verbosity.argtypes = [ct.c_void_p, ct.c_ubyte]
-
-fmr.fmr_add_sims.argtypes = [ct.c_void_p]
-fmr.fmr_add_sims.restype = ct.c_uint32
-
-fmr.fmr_get_sims_n.restype = ct.c_uint32
-fmr.fmr_get_sims_n.argtypes = [ct.c_void_p]
-
-fmr.fmr_get_sims_name.restype = ct.c_char_p
-fmr.fmr_get_sims_name.argtypes = [ct.c_void_p, ct.c_uint32]
-fmr.fmr_set_sims_name.argtypes = [ct.c_void_p, ct.c_uint32, ct.c_char_p]
-
-fmr.fmr_get_sims_version.restype = ct.c_char_p
-fmr.fmr_get_sims_version.argtypes = [ct.c_void_p, ct.c_uint32]
-fmr.fmr_set_sims_version.argtypes = [ct.c_void_p, ct.c_uint32, ct.c_char_p]
-
-# Create a class to represent the Jobs object in Python.
+# Python classes ==============================================================
+# Create a class to represent a Jobs object in Python.
 class Jobs:
-    Data_type = create_enum_from_csv(
+    Data_type = pymera_enum.create_enum_from_csv(
         os.path.join(os.getcwd(),'data','src','data-type.csv'),
                     'Data_type', start_at=3)
     def __init__(self):
         self.obj = fmr.fmr_new_jobs()
-
     def __del__(self):
         if fmr.fmr_jobs_did_init(self.obj):
             fmr.fmr_jobs_exit(self.obj)
         fmr.fmr_delete_jobs(self.obj)
     
-    def add_sims(self, sims_name=None):
-        return Sims(self, name=sims_name)
-    
     def get_sims_n(self):
         return fmr.fmr_get_sims_n(self.obj)
+    
+    #NOTE there is no method to remove Sims. It would mess up the indexing.
+    
+    def add_sims(self, sims_name=None):
+        return Sims(self, name=sims_name)
 
     def add_sims_from_file(self, filename):
         sims = Sims(self)
@@ -163,16 +123,16 @@ class Jobs:
             sims_json = sims_json['fmr:Sims']
             sims.parameter = find_user_keys(sims_json)
             
-            if 'fmr:Data_type:Name' in sims_json:
-                sims.set_name(sims_json['fmr:Data_type:Name'])
-            if 'fmr:Data_type:Version' in sims_json:
-                sims.set_version(sims_json['fmr:Data_type:Version'])
+            if 'fmr:Data:Name' in sims_json:
+                sims.set_name(sims_json['fmr:Data:Name'])
+            if 'fmr:Data:Version' in sims_json:
+                sims.set_version(sims_json['fmr:Data:Version'])
             
         else:
             print('Found no fmr:Sims in ' + filename)
             return
-        #if 'fmr:Data_type:Name' in sims_json:
-        #    sims.name=sims_json['fmr:Data_type:Name']
+        #if 'fmr:Data:Name' in sims_json:
+        #    sims.name=sims_json['fmr:Data:Name']
         #self.add_sims(name=sims_json['name'], runs_n=sims_json['runs_n'])
         return sims
 
@@ -202,7 +162,8 @@ class Jobs:
             verbosity=255
         return fmr.fmr_set_verbosity(self.obj, verbosity)
 
-# Create a class to represent the Sims object in Python.
+#------------------------------------------------------------------------------
+# Create a class to represent a Sims object in Python.
 class Sims:
     """
     Initializes a Sims object with the given parameters.
@@ -238,16 +199,18 @@ class Sims:
     def __init__(self, jobs, name=None):
         if not isinstance(jobs, Jobs):
             warn('\n pym sims WARN Sims must be created from Jobs.\n'
-                  +'               '
-                 +'Try one of the add_sims* methods of a Jobs object.')
+                 + '               '
+                 + 'Try one of the add_sims* methods of a Jobs object.')
             return None
-        self.jobs = jobs
+        self.jobs=jobs
         self.task_index = fmr.fmr_add_sims(jobs.obj)
+        self.set_name(name)
+        #
         self.nominal = {}
         self.parameter = {}
         self.sample_n = None
         #
-        self.runs_n = 1 #runs_n
+        self.runs_n = 1 #TODO remove?
         #
         self.geometries = []
         self.grids = []
@@ -259,20 +222,27 @@ class Sims:
         self.partition_n = 1
         #self.json_nominal = {}
         #self.json_parameter = {}
+    def __del__(self):
+        pass
+        #if fmr.fmr_sims_did_init(self.jobs.obj):
+        #    fmr.fmr_sims_exit(self.jobs.obj)
+        #fmr.fmr_delete_sims(self.jobs.obj)
 
     def get_name(self):
         return fmr.fmr_get_sims_name(self.jobs.obj, self.task_index).decode(
             'utf-8', errors='replace')
     def set_name(self, name):
-        fmr.fmr_set_sims_name(self.jobs.obj, self.task_index, name.encode(
-            'utf-8'))
+        if name is not None:
+            fmr.fmr_set_sims_name(self.jobs.obj, self.task_index,
+                                  name.encode('utf-8'))
         
     def get_version(self):
         return fmr.fmr_get_sims_version(self.jobs.obj, self.task_index).decode(
             'utf-8', errors='replace')
-    def set_version(self, name):
-        fmr.fmr_set_sims_version(self.jobs.obj, self.task_index, name.encode(
-            'utf-8'))
+    def set_version(self, vers):
+        if vers is not None:
+            fmr.fmr_set_sims_version(self.jobs.obj, self.task_index,
+                                     vers.encode('utf-8'))
     
     def add_parameter(self, name, nominal=None, values=None):
         """
@@ -453,5 +423,4 @@ class Sims:
     def exit(self):
         # Placeholder for cleanup logic
         pass
-
 
