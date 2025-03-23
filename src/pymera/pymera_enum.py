@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from enum import Enum, auto
-import csv
+import os, csv
 
 # Enums =======================================================================
 class fmr_Grid_structure(Enum):
@@ -78,3 +78,7 @@ def create_enum_from_csv(file_path, enum_name, start_at=None):
                     row_i += 1
     # Create and return the Enum class dynamically.
     return Enum(enum_name, enum_members)
+
+fmr_Data_type = create_enum_from_csv(
+    os.path.join(os.getcwd(),'data','src','data-type.csv'),
+                'Data_type', start_at=3)

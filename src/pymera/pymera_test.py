@@ -55,8 +55,6 @@ class TestPymeraJobs(unittest.TestCase):
         sims.set_name ("Test Sims name")
         sims.set_version ("0.0.1")
         self.assertEqual(sims.get_version(), "0.0.1")
-        
-
 '''
 class TestPymeraSims(unittest.TestCase):
     @classmethod
