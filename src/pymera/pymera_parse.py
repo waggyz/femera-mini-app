@@ -54,10 +54,10 @@ def parse_sims_from_file(sims, filename):
         sims_json = sims_json['fmr:Sims']
         sims.parameter = find_user_keys(sims_json)
         #
-        if 'fmr:Data:Name' in sims_json:
-            sims.set_name(sims_json['fmr:Data:Name'])
-        if 'fmr:Data:Version' in sims_json:
-            sims.set_version(sims_json['fmr:Data:Version'])
+        if 'fmr:Name' in sims_json:
+            sims.set_name(sims_json['fmr:Name'])
+        if 'fmr:Version' in sims_json:
+            sims.set_version(sims_json['fmr:Version'])
     else:
         print('Found no fmr:Sims in ' + filename)
         return
@@ -96,10 +96,7 @@ def flatten_json(data, prefix='', sep='\x1f'):
             result.update(flatten_json(value, new_key, sep))
         elif isinstance(value, list):
             if is_terminal_list(value):
-                #if isinstance(value,list):
                 result[new_key] = np.ascontiguousarray(value)
-                #else:
-                #    result[new_key] = value
             else:
                 for i, item in enumerate(value):
                     if isinstance(item, dict):

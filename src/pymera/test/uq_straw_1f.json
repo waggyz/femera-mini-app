@@ -4,17 +4,17 @@
   "fmr:Name": "Cantilever beam (uq_straw_1f)",
   "fmr:Sims_type": "UQ",
   "fmr:Version": "0.1.6",
-    "fmr:Geom": {
+    "fmr:Geom": [{
       "fmr:Shape_type": "Block",
       "fmr:Dimensions_xyz": {"dims": [1.000, 0.050, 0.050] }
-    },
-    "fmr:Grid": {
+    }],
+    "fmr:Grid": [{
       "fmr:Geom": 0,
-      "fmr:Grid_structure": "Cartesian",
+      "fmr:Grid_structure": "Rectilinear",
       "fmr:Grid_divs": [100, 5, 5],
-      "fmr:Cell_size": 0.010,
       "fmr:Cell_type": "Block_6tet",
       "fmr:Elem_type": "Tet10",
+
       "beam-base": {
         "fmr:Node_set": {
           "fmr:Node_at": "fmr:Node_x_min"
@@ -24,52 +24,68 @@
         "fmr:Node_set": {
           "fmr:Node_at": "fmr:Node_x_max"
         }
-      }
-    },
-    "fmr:Mtrl": {
+      },
+      "nominal-node-coordinates": "fmr:Node_xyz"
+    }],
+    "fmr:Part": [{
       "fmr:Grid": 0,
+      "fmr:Part_method": "Single",
+      "Part_n": 1
+      }],
+    "fmr:Mtrl": [{
       "fmr:Mtrl_physics": "Elastic_isotropic",
       "fmr:Youngs_modulus": {"youngs": 210e9 },
       "fmr:Poissons_ratio": {"poissons": 0.285 }
-    },
+    }],
     "fmr:BCs": [
-      {
+      { "fmr:Grid": 0,
         "fmr:Node_set": "beam-base",
         "fmr:Displacement_xyz": [0.000, 0.000, 0.000]
       },
-      {
+      { "fmr:Grid": 0,
         "fmr::Data_type:Node_set": "beam-tip",
         "fmr:Displacement_z": {"tip-displace-z": -0.010 }
       }
     ],
-    "fmr:Solve": {
+    "fmr:Solve": [{
       "fmr:Conditioner": "Jacobi",
-      "fmr:Solver": "PCG"
-    },
-    "fmr:Runs": [
-      {
-        "fmr:Name": "Cantilever beam nominal solution",
-        "fmr:Runs_n": 1,
-        "fmr:Post": {
-          "nominal-node-coordinates": "fmr:Node_xyz",
-          "nominal-displacements": "fmr:Displacement_xyz"
-        }
-      },
-      {
-        "fmr:Name": "Cantilever beam sample solutions",
-        "fmr:Runs_n": {"sample_n": 0},
-        "fmr:Solve": {
-          "fmr:Initial_displacements_xyz": "nominal-displacements"
-        },
-        "fmr:Post": {
-          "base-force-mag": {
-            "fmr:Force_mag": {
-              "fmr:Reduce": "Sum",
-              "fmr:Node_set": "beam-base"
-            }
-          }
+      "fmr:Solver": "PCG",
+      "nominal-displacements": "fmr:Displacement_xyz"
+    },{
+      "fmr:Conditioner": "Jacobi",
+      "fmr:Solver": "PCG",
+      "fmr:Initial_displacements_xyz": "nominal-displacements",
+      "base-force-mag": {
+        "fmr:Force_mag": {
+          "fmr:Reduce": "Sum",
+          "fmr:Node_set": "beam-base"
         }
       }
-    ]
+    }],
+  "fmr:Post": [[
+    "nominal-node-coordinates",
+    "nominal-displacements"
+  ],
+   [
+    "base-force-mag"
+  ]],
+  "fmr:Runs": [
+    { 
+      "fmr:Name": "Cantilever beam nominal solution",
+      "fmr:Part": 0,
+      "fmr:Mtrl": 0,
+      "fmr:Solve": 0,
+      "fmr:Runs_n": 1,
+      "fmr:Post": 0
+    },
+    { 
+      "fmr:Name": "Cantilever beam sample solutions",
+      "fmr:Part": 0,
+      "fmr:Mtrl": 0,
+      "fmr:Solve": 1,
+      "fmr:Runs_n": {"sample_n": 0},
+      "fmr:Post": 1
+    }
+  ]
   }
 }

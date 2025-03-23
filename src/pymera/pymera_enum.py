@@ -4,6 +4,9 @@ import os, csv
 
 # Enums =======================================================================
 class Module(Enum):# fmr:Sims, fmr:Geom, fmr:Grid, fmr:Mtrl,...
+    NONE = auto()
+    ERROR = auto()
+    UNKNOWN = auto()
     SIMS = auto()
     GEOM = auto()
     GRID = auto()
@@ -13,56 +16,82 @@ class Module(Enum):# fmr:Sims, fmr:Geom, fmr:Grid, fmr:Mtrl,...
     SOLVE = auto()
     RUNS = auto()
     POST = auto()
-    end = auto()
+    END = auto()
 
 class Cell_type(Enum):
+    NONE = auto()
+    ERROR = auto()
+    UNKNOWN = auto()
     BLOCK_2PRISM = auto()
     BLOCK_5TET = auto()
     BLOCK_6TET = auto()
     BLOCK_6PYRAMID = auto()
-    end = auto()
+    END = auto()
+
+class Part_method(Enum):
+    NONE = auto()
+    ERROR = auto()
+    UNKNOWN = auto()
+    BLOCK_2PRISM = auto()
+    SINGLE = auto()
+    RECTILINEAR = auto()
+    BY_VOLUME = auto()
 
 class Mtrl_physics(Enum):
+    NONE = auto()
+    ERROR = auto()
+    UNKNOWN = auto()
     ELASTIC_ISOTROPIC = auto()
     ELASTIC_ORTHOTROPIC = auto()
     PLASTIC_KINEMATIC = auto()
     THERMAL_ISOTROPIC = auto()
     THERMAL_OTHOTROPIC = auto()
-    end = auto()
+    END = auto()
 
 class Conditioner(Enum):
+    NONE = auto()
+    ERROR = auto()
+    UNKNOWN = auto()
     JACOBI = auto()
     BLOCK_JACOBI = auto()
-    INCOMPLETE_LU = auto()
-    end = auto()
+    END = auto()
 
 class Solver(Enum):
-    PCG = auto()
+    NONE = auto()
+    ERROR = auto()
+    UNKNOWN = auto()
     PCR = auto()
+    PCG = auto()
     NCG = auto()
 
 class Reduce(Enum):
+    NONE = auto()
+    ERROR = auto()
+    UNKNOWN = auto()
     MIN = auto()
     MAX = auto()
     SUM = auto()
     MAX_ABS = auto()
     MIN_ABS = auto()
     SUM_SQUARES = auto()
-    end = auto()
+    END = auto()
 
 class Grid_structure(Enum):
+    NONE = auto()
+    ERROR = auto()
+    UNKNOWN = auto()
     UNSTRUCTURED = auto()
-    CARTESIAN = auto() # isotropic scaling (scalar)
+    CARTESIAN = auto() # isotropic (scalar) scaling
     RECTILINEAR = auto() # scaled x,y,z
-    GENERAL_LINEAR = auto() # 3x3 matrix
-    CYLINDRICAL = auto() # x,y,z axis
+    GENERAL_LINEAR = auto() # 3x3 transformation matrix
+    CYLINDRICAL = auto() # rotate around x, y, or z axis
     SPHERICAL = auto()
     ELLIPTICAL = auto()
     SPHEROIDAL = auto()  # Oblate, Prolate
     CONFORMAL_MAP = auto()
     CURVILINEAR = auto() # orthogonal, non-orthogonal
     BODY_FITTED = auto()
-    end = auto()
+    END = auto()
 '''
 C++
 enum class fmr::grid::Grid_structure {
@@ -77,7 +106,7 @@ enum class fmr::grid::Grid_structure {
     Conformal_map,
     Curvilinear, // orthogonal, non-orthogonal
     Body_fitted,
-    end
+    END
 };
 '''
 # Dictionary of enums ---------------------------------------------------------
@@ -87,7 +116,8 @@ fmr_enum ={
     'fmr:Mtrl_physics': Mtrl_physics,
     'fmr:Conditioner': Conditioner,
     'fmr:Solver': Solver,
-    'fmr:Reduce': Reduce
+    'fmr:Reduce': Reduce,
+    'fmr:Part_method': Part_method
 }
 '''
     # Enums used by Femera (and in JSON)
