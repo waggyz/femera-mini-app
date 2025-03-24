@@ -13,6 +13,11 @@ from warnings import warn
 class Jobs:
     def __init__(self):
         self.obj = fmr.fmr_new_jobs()
+    def __enter__(self):
+        self.init()
+        return(self)
+    def __exit__(self, exception_type, exception_value, traceback):
+        self.exit()
     def __del__(self):
         if fmr.fmr_jobs_did_init(self.obj):
             fmr.fmr_jobs_exit(self.obj)

@@ -18,6 +18,25 @@ class Module(Enum):# fmr:Sims, fmr:Geom, fmr:Grid, fmr:Mtrl,...
     POST = auto()
     END = auto()
 
+class Sims_application(Enum):
+    NONE = auto()
+    ERROR = auto()
+    UNKNOWN = auto()
+    SOLVE = auto()
+    PARAMETER_SWEEP = auto()
+    SENSITIVITY = auto()
+    UQ = auto()
+
+class Shape_form(Enum):
+    NONE = auto()
+    ERROR = auto()
+    UNKNOWN = auto()
+    RECTANGLE = auto()
+    BLOCK = auto()
+    CYLINDER = auto()
+    SPHERE = auto()
+    SPHERE_SHELL = auto()
+
 class Cell_type(Enum):
     NONE = auto()
     ERROR = auto()
@@ -94,6 +113,13 @@ class Grid_structure(Enum):
     CURVILINEAR = auto() # orthogonal, non-orthogonal
     BODY_FITTED = auto()
     END = auto()
+
+class File_format(Enum):
+    NONE = auto()
+    ERROR = auto()
+    UNKNOWN = auto()
+    TEXT = auto()
+    CSV = auto()
 '''
 C++
 enum class fmr::grid::Grid_structure {
@@ -113,13 +139,16 @@ enum class fmr::grid::Grid_structure {
 '''
 # Dictionary of enums ---------------------------------------------------------
 fmr_enum ={
+    'fmr:Shape_form': Shape_form,
     'fmr:Grid_structure': Grid_structure,
     'fmr:Cell_type': Cell_type,
     'fmr:Mtrl_physics': Mtrl_physics,
     'fmr:Conditioner': Conditioner,
     'fmr:Solver': Solver,
     'fmr:Reduce': Reduce,
-    'fmr:Part_method': Part_method
+    'fmr:Part_method': Part_method,
+    'fmr:Sims_application': Sims_application,
+    'fmr:File_format': File_format
 }
 #==============================================================================
 def create_enum_from_csv(file_path, enum_name, start_at=None):
