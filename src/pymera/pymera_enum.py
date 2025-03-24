@@ -121,19 +121,6 @@ fmr_enum ={
     'fmr:Reduce': Reduce,
     'fmr:Part_method': Part_method
 }
-'''
-    # Enums used by Femera (and in JSON)
-    Module = auto() # Femera classes
-    Data_type = auto()
-    Sims_type = auto()
-    Grid_structure = auto()
-    Shape_type = auto()
-    Cell_type = auto()
-    Elem_type = auto()
-    Mtrl_physics = auto()
-    Conditioner = auto()
-    Solver = auto()
-'''
 #==============================================================================
 def create_enum_from_csv(file_path, enum_name, start_at=None):
     """

@@ -54,10 +54,10 @@ def parse_sims_from_file(sims, filename):
         sims_json = sims_json['fmr:Sims']
         sims.parameter = find_user_keys(sims_json)
         #
-        if 'fmr:Name' in sims_json:
-            sims.set_name(sims_json['fmr:Name'])
-        if 'fmr:Version' in sims_json:
-            sims.set_version(sims_json['fmr:Version'])
+        if 'fmr:Name' in sims_json[0]:
+            sims.set_name(sims_json[0]['fmr:Name'])
+        if 'fmr:Version' in sims_json[0]:
+            sims.set_version(sims_json[0]['fmr:Version'])
     else:
         print('Found no fmr:Sims in ' + filename)
         return
@@ -65,24 +65,6 @@ def parse_sims_from_file(sims, filename):
     #    sims.name=sims_json['fmr:Data:Name']
     #self.add_sims(name=sims_json['name'], runs_n=sims_json['runs_n'])
     return sims
-'''
-def flatten_json(data, prefix=''):
-    result = {}
-    for key, value in data.items():
-        new_key = f"{prefix}|{key}" if prefix else key
-        if isinstance(value, dict):
-            result.update(flatten_json(value, new_key))
-        elif isinstance(value, list):
-            for i, item in enumerate(value):
-                if isinstance(item, dict):
-                    result.update(flatten_json(item, f"{new_key}|{i}"))
-                else:
-                    result[f"{new_key}|{i}"] = item
-        else:
-            result[new_key] = value
-    return result
-'''
-
 
 def is_terminal_list(lst):
     return all(isinstance(item, (float, int, bool)) for item in lst)
@@ -109,29 +91,7 @@ def flatten_json(data, prefix='', sep='\x1f'):
         else:
             result[new_key] = value
     return result
-'''
-def flatten_json(data, prefix='', index=0):
-    result = {}
-    if isinstance(data, dict):
-        for key, value in data.items():
-            new_key = f"{prefix}[{index}]|{key}" if prefix else key
-            if isinstance(value, dict):
-                result.update(flatten_json(value, new_key))
-            elif isinstance(value, list):
-                if is_terminal_list(value):
-                    result[new_key] = value
-                else:
-                    for i, item in enumerate(value):
-                        result.update(flatten_json(item, new_key, i))
-            else:
-                result[new_key] = value
-    elif isinstance(data, list):
-        for i, item in enumerate(data):
-            result.update(flatten_json(item, prefix, i))
-    else:
-        result[f"{prefix}[{index}]"] = data
-    return result
-'''
+
 def flatten_json_file(filename):
     with open(filename, 'r') as file:
         json_data = json.load(file)
