@@ -22,9 +22,9 @@ def find_user_keys(obj):
     result = {}
     if isinstance(obj, dict):
         for key, val in obj.items():
-            if key in fmr_enum:
-                result[key] = fmr_enum[key][val.upper()]
-                #result[key] = fmr_enum[key][val.upper()].value # integer
+            #if key in fmr_enum:
+            #    result[key] = fmr_enum[key][val.upper()]
+            #    #result[key] = fmr_enum[key][val.upper()].value # integer
             if not key.startswith("fmr:"):
                 if isinstance(val, (int, float, str)):
                     result[key] = val

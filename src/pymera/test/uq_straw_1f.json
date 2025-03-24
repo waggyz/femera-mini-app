@@ -4,9 +4,9 @@
   "fmr:Name": "Cantilever beam (uq_straw_1f)",
   "fmr:Sims_type": "UQ",
   "fmr:Version": "0.1.6",
-    "fmr:Geom": [{
-      "fmr:Shape_type": "Block",
-      "fmr:Dimensions_xyz": {"dims": [1.000, 0.050, 0.050] }
+  "fmr:Geom": [{
+    "fmr:Shape_type": "Block",
+    "fmr:Dimensions_xyz": {"dims": [1.000, 0.050, 0.050] }
   }],
   "fmr:Grid": [{
     "fmr:Geom": 0,
@@ -31,79 +31,66 @@
   "fmr:Part": [{
     "fmr:Grid": 0,
     "fmr:Part_method": "Single",
-    "Part_n": 1
-    }],
+    "fmr:Part_n": 1
+  }],
   "fmr:Mtrl": [{
     "fmr:Name": "Basic steel",
     "fmr:Mtrl_physics": "Elastic_isotropic",
-    "fmr:Youngs_modulus": {"youngs": 210e9 },
-    "fmr:Poissons_ratio": {"poissons": 0.285 }
+    "fmr:Youngs_modulus": {"youngs": 210e9},
+    "fmr:Poissons_ratio": {"poissons": 0.285}
   }],
-  "fmr:BCs": [
-    { 
-      "fmr:Name": "Base encastre",
-      "fmr:Grid": 0,
-      "fmr:Node_set": "beam-base",
-      "fmr:Displacement_xyz": [0.000, 0.000, 0.000]
-    },
-    { 
-      "fmr:Name": "Beam tip face displacement",
-      "fmr:Grid": 0,
-      "fmr::Data_type:Node_set": "beam-tip",
-      "fmr:Displacement_z": {"tip-displace-z": -0.010 }
-    }
-  ],
+  "fmr:BCs": [{ 
+    "fmr:Name": "Beam base encastre",
+    "fmr:Grid": 0,
+    "fmr:Node_set": "beam-base",
+    "fmr:Displacement_xyz": [0.000, 0.000, 0.000]
+    },{ 
+    "fmr:Name": "Beam tip face displacement",
+    "fmr:Grid": 0,
+    "fmr::Data_type:Node_set": "beam-tip",
+    "fmr:Displacement_z": {"tip-displace-z": -0.010}
+  }],
   "fmr:Solve": [{
     "fmr:Name": "Solve nominal beam.",
     "fmr:Conditioner": "Jacobi",
     "fmr:Solver": "PCG",
     "nominal-displacements": "fmr:Displacement_xyz"
-  },{
+    },{
     "fmr:Name": "Solve samples.",
     "fmr:Conditioner": "Jacobi",
     "fmr:Solver": "PCG",
     "fmr:Initial_displacements_xyz": "nominal-displacements",
     "base-force-mag": {
-      "fmr:Force_mag": {
-        "fmr:Reduce": "Sum",
-        "fmr:Node_set": "beam-base"
-      }
+      "fmr:Node_set": "beam-base",
+      "fmr:Force_mag": { "fmr:Reduce": "Sum" }
     }
   }],
-  "fmr:Post":
-  [
-    {
-      "fmr:File_name": "uq_straw_1_nominal.csv",
-      "fmr:Field": [
-        "node-number",
-        "nominal-node-coordinates",
-        "nominal-displacements"
-      ]
-    },
-    {
-      "fmr:File_name": "uq_straw_1_samples.csv",
-      "fmr:Field": [
-        "base-force-mag"
-      ]
-    }  
-  ],
-  "fmr:Runs":
-  [
-    { 
-      "fmr:Name": "Cantilever beam nominal solution",
-      "fmr:Part": 0,
-      "fmr:Mtrl": 0,
-      "fmr:Solve": 0,
-      "fmr:Runs_n": 1,
-      "fmr:Post": 0
-    },
-    { 
-      "fmr:Name": "Cantilever beam sample solutions",
-      "fmr:Part": 0,
-      "fmr:Mtrl": 0,
-      "fmr:Solve": 1,
-      "fmr:Runs_n": {"sample_n": 0},
-      "fmr:Post": 1
-    }
-  ]
-} ] }
+  "fmr:Post": [{
+    "fmr:File_name": "uq_straw_1_nominal.csv",
+    "fmr:Field": [
+      "node-number",
+      "nominal-node-coordinates",
+      "nominal-displacements"
+    ]
+    },{
+    "fmr:File_name": "uq_straw_1_samples.csv",
+    "fmr:Field": [
+      "base-force-mag"
+    ]
+  }],
+  "fmr:Runs": [{
+    "fmr:Name": "Cantilever beam nominal solution",
+    "fmr:Part": 0,
+    "fmr:Mtrl": 0,
+    "fmr:Solve": 0,
+    "fmr:Runs_n": 1,
+    "fmr:Post": 0
+    },{ 
+    "fmr:Name": "Cantilever beam sample solutions",
+    "fmr:Part": 0,
+    "fmr:Mtrl": 0,
+    "fmr:Solve": 1,
+    "fmr:Runs_n": {"sample_n": 0},
+    "fmr:Post": 1
+  }]
+ } ] }

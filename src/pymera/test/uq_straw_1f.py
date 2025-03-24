@@ -59,7 +59,8 @@ def main():
     flat = flatten_json_file(os.path.join(here, 'uq_straw_1f.json'))
     print()
     for key, value in flat.items():
-        print(f"{key} = {value}")
+        key_pretty = key.replace('\x1f', '\u00b7')
+        print(f"{key_pretty} = {value}")
     #
     # Read simulation from JSON file.
     sims = jobs.add_sims_from_file(os.path.join(here, 'uq_straw_1f.json'))
