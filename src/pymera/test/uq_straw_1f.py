@@ -56,6 +56,11 @@ def main():
     #
     jobs.init()
     #
+    flat = flatten_json_file(os.path.join(here, 'uq_straw_1f.json'))
+    print()
+    for key, value in flat.items():
+        print(f"{key} = {value}")
+    #
     # Read simulation from JSON file.
     sims = jobs.add_sims_from_file(os.path.join(here, 'uq_straw_1f.json'))
     #
@@ -81,11 +86,6 @@ def main():
                  sims.nominal['width'],
                  sims.nominal['height']],
         values=list(map(list, zip(*v))) )# SoA to AoS
-    #
-    flat = flatten_json_file(os.path.join(here, 'uq_straw_1f.json'))
-    print()
-    for key, value in flat.items():
-        print(f"{key} = {value}")
     #
     #sims.init()# Optional: sims.run() will call sims.init() as needed.
     #sims.run()
