@@ -45,87 +45,97 @@ def main():
     Note: The function assumes that the Pymera library is properly
     configured and installed.
     """
-    #--------------------------------------------------------------------------
     here = os.path.dirname(os.path.abspath(__file__))
     #
-    if True:
+    json_filname = os.path.join(here,'uq_straw_1f.json')
+    csv_filname = os.path.join(here,'uq_straw_1f.csv')
+    csv_has_nominals = True
+    #
+    if True: # Print flattened JSON file.
         flat = flatten_json_file(os.path.join(here, 'uq_straw_1f.json'))
-        print()
         for key, value in flat.items():
             key_pretty = key.replace('\x1f', '\u00b7')
             print(f"{key_pretty} = {value}")
-    #jobs = pymera.Jobs()
-    #print('Hello ' + jobs.get_version() +' '+ jobs.get_name() + '!')
-    #TODO Set Femera init options (MPI, OpenMP, verbosity, self-tests)
-    #     as arguments to the Jobs constructor.
-    #DONE use python context:
-    #     with pymera.Jobs() as jobs:
-    #jobs.init()
-    with pymera.Jobs() as jobs:
-        print('Hello ' + jobs.get_version() +' '+ jobs.get_name() + '!')
-        #
-        if True:
+        print()
+    #--------------------------------------------------------------------------
+    if True: # Load simulations from JSON and CSV files.
+        with pymera.Jobs() as jobs:
+            print('\nHello '+jobs.get_version()+' '+jobs.get_name()+'!')
+            #
             # Read simulation from JSON file.
-            sims = jobs.add_sims_from_file(os.path.join(here, 'uq_straw_1f.json'))
-            #
-            print('\nUser parameters with assigned values '
-                + 'and output fields in JSON file:')
-            for name, value in sims.parameter.items():
-                if value is not None:
-                    print(f'- {name}: {value}')
-                else:
-                    print(f'- {name}')
-            #
-            else:
-                # Set up sims manually
+            with jobs.add_sims_from_file(json_filname) as sims:
+                print('Hello '+sims.get_name()+' '+sims.get_version()+'!')
                 #
+                print('\nUser parameters, output fields, '
+                      + 'and internal parameters in JSON file:')
+                for name, value in sims.parameter.items():
+                    if value is not None:
+                        print(f'- {name}: {value}')
+                    else:
+                        print(f'- {name}')
                 #
-                #sims.init()# Optional: sims.run() will call sims.init() as needed.
-                #sims.run()
+                # Read parameters and nominal values from the .csv file.
+                sims.add_parameter_file(csv_filname,
+                    has_names=True, has_nominals=csv_has_nominals)
+                #TODO Check if this is overwriting sims.parameter.
                 #
-                sims.exit() #NOTE invalidates sims post-processing pointers
-                            #     (e.g., base_force)
-                pass
+                # Add dims parameter [length, width, height] values.
+                v = [sims.parameter['length'],
+                    sims.parameter['width'],
+                    sims.parameter['height']]
+                sims.add_parameter('dims',
+                    nominal=[sims.nominal['length'],
+                            sims.nominal['width'],
+                            sims.nominal['height']],
+                    values=list(map(list, zip(*v))) )# SoA to AoS
+                print()
+                # sims.init called on exit from sims with context block
+            # jobs.run() called on exit from the jobs with context block
+        # jobs.exit() called before jobs is destroyed.
+    else:
+        # Set up sims manually
+        #jobs = pymera.Jobs()
+        #print('Hello ' + jobs.get_version() +' '+ jobs.get_name() + '!')
+        #TODO Set Femera init options (MPI, OpenMP, verbosity, self-tests)
+        #     as arguments to the Jobs constructor.
+        #jobs.init()
         #
-        # Read parameters and nominal values from the .csv file.
-        has_csv_nominals = True
-        sims.add_parameter_file(os.path.join(here, 'uq_straw_1f.csv'),
-            has_names=True, has_nominals=has_csv_nominals)
-        #TODO Check if this is overwriting sims.parameter.
+        sims=jobs.add_sims()
+        print('Hello ' +  sims.get_name() +' '+ sims.get_version() + '!')
         #
-        # Add dims parameter [length, width, height] values.
-        v = [sims.parameter['length'],
-            sims.parameter['width'],
-            sims.parameter['height']]
-        sims.add_parameter('dims',
-            nominal=[sims.nominal['length'],
-                    sims.nominal['width'],
-                    sims.nominal['height']],
-            values=list(map(list, zip(*v))) )# SoA to AoS
+        # sims.init()# Optional: jobs.run() will call sims.init() as needed.
         #
-        # Get numpy array contents from Pymera.
-        base_force = sims.get_post('base-force-mag')
-        base_stress_avg = base_force / (# averaged over each base area
-            sims.parameter['width'] * sims.parameter['height'])
-        #--------------------------------------------------------------------------
+        # jobs.run()
         #
-        print()
-        print('base stress mean: ' + str(base_stress_avg.mean()))
-        print('base stress standard deviation: ' + str(base_stress_avg.std()))
+        # sims.exit() #NOTE invalidates sims post-processing pointers
+                    #     (e.g., base_force)
         #
-        if has_csv_nominals:
-            print('\nUser parameter names (first row) '
-                +'with nominal values (second row) from CSV file:')
-            for name, nominal in sims.nominal.items():
-                print(f'- {name}: {nominal}')
-        else:
-            print('\nUser parameters (first row name)'
-                +' added or updated from CSV file:')
-            for name, value in sims.parameter.items():
-                print(f'- {name}: {value}')
-        print('Number of additional values (remaining rows) in the CSV file:')
-        print(f'- sample_n: {sims.sample_n}')
-        print()
+        # jobs.exit()
+        #
+        pass
+    #
+    # Get numpy array contents from Pymera.
+    base_force = sims.get_post('base-force-mag')
+    #
+    base_stress_avg = base_force / (# averaged over each base area
+    sims.parameter['width'] * sims.parameter['height'])
+    print()
+    print('base stress mean: ' + str(base_stress_avg.mean()))
+    print('base stress standard deviation: ' + str(base_stress_avg.std()))
+    #--------------------------------------------------------------------------
+    if csv_has_nominals:
+        print('\nUser parameter names (first row) '
+            +'with nominal values (second row) from CSV file:')
+        for name, nominal in sims.nominal.items():
+            print(f'- {name}: {nominal}')
+    else:
+        print('\nUser parameters (first row name)'
+            +' added or updated from CSV file:')
+        for name, value in sims.parameter.items():
+            print(f'- {name}: {value}')
+    print('\nNumber of additional values (remaining rows) in the CSV file:')
+    print(f'- sample_n: {sims.sample_n}')
+    print()
     '''
     # Nominal model setup  (same as the JSON file) ============================
     #

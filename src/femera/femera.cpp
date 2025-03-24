@@ -29,6 +29,9 @@ extern "C" {
     jobs->exit(0);
   }
   void fmc::fmr_delete_jobs(fmc::Jobs_t* jobs) {
+    if (jobs->did_init()) {
+      jobs->exit(0);
+    }
     delete jobs;
   }
   const char* fmc::fmr_get_version (fmc::Jobs_t* jobs) {

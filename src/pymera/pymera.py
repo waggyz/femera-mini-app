@@ -17,28 +17,34 @@ class Jobs:
         self.init()
         return(self)
     def __exit__(self, exception_type, exception_value, traceback):
-        self.exit()
+        self.run()
     def __del__(self):
-        if fmr.fmr_jobs_did_init(self.obj):
-            fmr.fmr_jobs_exit(self.obj)
+        self.exit()
         fmr.fmr_delete_jobs(self.obj)
+    
+    #NOTE there is no method to remove Sims from Jobs.
+    #     It would mess up the indexing.
     
     def get_sims_n(self):
         return fmr.fmr_get_sims_n(self.obj)
     
-    #NOTE there is no method to remove Sims. It would mess up the indexing.
-    
-    def add_sims(self, sims_name=None):
-        return Sims(self, name=sims_name)
+    def add_sims(self, sims_name=None, sims_version=None):
+        return Sims(self, name=sims_name, version=sims_version)
 
     def add_sims_from_file(self, filename):
         return parse_sims_from_file(Sims(self), filename)
 
     def init(self):
         fmr.fmr_jobs_init(self.obj)
+    
+    def run(self):
+        #fmr.fmr_jobs_run(self.obj)
+        print('Running '+str(self.get_sims_n())+' simulations.... (jk ;)')
+        pass
 
     def exit(self):
-        fmr.fmr_jobs_exit(self.obj)
+        if fmr.fmr_jobs_did_init(self.obj):
+            fmr.fmr_jobs_exit(self.obj)
 
     def did_init(self):
         return fmr.fmr_jobs_did_init(self.obj)
@@ -94,7 +100,7 @@ class Sims:
         partition_n (int): The partition number associated with the Sims
             object. Defaults to 1.
     """
-    def __init__(self, jobs, name=None):
+    def __init__(self, jobs, name=None, version=None):
         if not isinstance(jobs, Jobs):
             warn('\n pym sims WARN Sims must be created from Jobs.\n'
                  + '               '
@@ -102,7 +108,10 @@ class Sims:
             return None
         self.jobs=jobs
         self.task_index = fmr.fmr_add_sims(jobs.obj)
-        self.set_name(name)
+        if name is not None:
+            self.set_name(name)
+        if version is not None:
+            self.set_version(version)
         #
         self.nominal = {}
         self.parameter = {}
@@ -120,6 +129,10 @@ class Sims:
         self.partition_n = 1
         #self.json_nominal = {}
         #self.json_parameter = {}
+    def __enter__(self):
+        return(self)
+    def __exit__(self, exception_type, exception_value, traceback):
+        self.init()
     def __del__(self):
         pass
         #if fmr.fmr_sims_did_init(self.jobs.obj):
