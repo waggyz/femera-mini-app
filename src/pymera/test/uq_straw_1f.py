@@ -48,37 +48,50 @@ def main():
     #--------------------------------------------------------------------------
     here = os.path.dirname(os.path.abspath(__file__))
     #
-    #jobs = pymera.Jobs()
-    #print('Hello ' + jobs.get_version() +' '+ jobs.get_name() + '!')
-    #TODO Set Femera init options (MPI, OpenMP, verbosity, self-tests)?
-    #TODO use python context:
-    #     with pymera.Jobs() as jobs:
-    #
-    #jobs.init()
-    with pymera.Jobs() as jobs:
-        print('Hello ' + jobs.get_version() +' '+ jobs.get_name() + '!')
-        #
+    if True:
         flat = flatten_json_file(os.path.join(here, 'uq_straw_1f.json'))
         print()
         for key, value in flat.items():
             key_pretty = key.replace('\x1f', '\u00b7')
             print(f"{key_pretty} = {value}")
+    #jobs = pymera.Jobs()
+    #print('Hello ' + jobs.get_version() +' '+ jobs.get_name() + '!')
+    #TODO Set Femera init options (MPI, OpenMP, verbosity, self-tests)
+    #     as arguments to the Jobs constructor.
+    #DONE use python context:
+    #     with pymera.Jobs() as jobs:
+    #jobs.init()
+    with pymera.Jobs() as jobs:
+        print('Hello ' + jobs.get_version() +' '+ jobs.get_name() + '!')
         #
-        # Read simulation from JSON file.
-        sims = jobs.add_sims_from_file(os.path.join(here, 'uq_straw_1f.json'))
-        #
-        print('\nUser parameters with assigned values '
-            + 'and output fields in JSON file:')
-        for name, value in sims.parameter.items():
-            if value is not None:
-                print(f'- {name}: {value}')
+        if True:
+            # Read simulation from JSON file.
+            sims = jobs.add_sims_from_file(os.path.join(here, 'uq_straw_1f.json'))
+            #
+            print('\nUser parameters with assigned values '
+                + 'and output fields in JSON file:')
+            for name, value in sims.parameter.items():
+                if value is not None:
+                    print(f'- {name}: {value}')
+                else:
+                    print(f'- {name}')
+            #
             else:
-                print(f'- {name}')
+                # Set up sims manually
+                #
+                #
+                #sims.init()# Optional: sims.run() will call sims.init() as needed.
+                #sims.run()
+                #
+                sims.exit() #NOTE invalidates sims post-processing pointers
+                            #     (e.g., base_force)
+                pass
         #
         # Read parameters and nominal values from the .csv file.
         has_csv_nominals = True
         sims.add_parameter_file(os.path.join(here, 'uq_straw_1f.csv'),
             has_names=True, has_nominals=has_csv_nominals)
+        #TODO Check if this is overwriting sims.parameter.
         #
         # Add dims parameter [length, width, height] values.
         v = [sims.parameter['length'],
@@ -90,21 +103,16 @@ def main():
                     sims.nominal['height']],
             values=list(map(list, zip(*v))) )# SoA to AoS
         #
-        #sims.init()# Optional: sims.run() will call sims.init() as needed.
-        #sims.run()
-        #
         # Get numpy array contents from Pymera.
         base_force = sims.get_post('base-force-mag')
         base_stress_avg = base_force / (# averaged over each base area
             sims.parameter['width'] * sims.parameter['height'])
-        #
-        sims.exit() #NOTE invalidates sims post-processing pointers (base_force)
+        #--------------------------------------------------------------------------
         #
         print()
         print('base stress mean: ' + str(base_stress_avg.mean()))
         print('base stress standard deviation: ' + str(base_stress_avg.std()))
         #
-        #--------------------------------------------------------------------------
         if has_csv_nominals:
             print('\nUser parameter names (first row) '
                 +'with nominal values (second row) from CSV file:')
@@ -118,23 +126,13 @@ def main():
         print('Number of additional values (remaining rows) in the CSV file:')
         print(f'- sample_n: {sims.sample_n}')
         print()
-        # Add simulation models.
-        #sims = fmr.add_sims()#name='cantilever-sims')#, runs_n=runs_n)
-        #TODO use python context:
-        #     with fmr.sims(name='cantilever-sims') as sims:
-        # 
-        #TODO Set model partitioning method.
-        #
-        #NOTE name is needed only for input parameters and post-processing results.
     '''
     # Nominal model setup  (same as the JSON file) ============================
     #
     sims = fmr.add_sims()
     # Set nominal model parameters.
     #TODO Femera sims functions not implemented yet.
-    #TODO changing internal femera fmr: string identifiers to enums.
     #
-    #TODO use a Runs object for run parameters?
     '''
     """
     # Add model geometry.
@@ -216,47 +214,6 @@ def main():
             writer.writerow(nominals)
             for row in rows:
                 writer.writerow(row)
-    """
-    # Set model parameters. These replace the nominal values.
-    if True:
-        #sims.set('dims', [length, width, height]) # x,y,z
-        sims.set('dims', dims) # x,y,z
-        sims.set('tip-displace-bcs', tip_z)
-        sims.set('youngs', youngs)# E
-        sims.set('poissons', poissons)# nu
-    else:#TODO alternative?
-        beam_geom.set('dims,', [length, width, height]) # x,y,z
-        beam_load.set('tip-displace-bcs', tip_z)
-        beam_mtrl.set('youngs', youngs)# E
-        beam_mtrl.set('poissons', poissons)# nu
-    #--------------------------------------------------------------------------
-    #DONE Solve at nominal values for initial solution (u0) starting vector.
-    #     Or, just keep the first solution and reuse it for u0.
-    #NOTE Avoid relative tolerance (rtol) when providing a good initial guess.
-    #
-    sims.init()# Optional: sims.run() will call sims.init() as needed.
-    sims.run()
-    #
-    # Get numpy array contents from Pymera.
-    #base_force = beam_results.get('base-force-mag')
-    #base_stress_avg = base_force / (width * height)# averaged over each base
-    #
-    sims.exit() #NOTE invalidates sims post-processing pointers (base_force)
-    """
-    '''
-    #TODO UQ stuff, maybe create and run more sims,...
-    # uq.do_some_stuff(base_stress_avg)
-    '''
-    #**************************************************************************
-    #
-    #print()
-    #print('base stress mean: ' + str(base_stress_avg.mean()))
-    #print('base stress standard deviation: ' + str(base_stress_avg.std()))
-    #print()
-    #jobs.exit()
-    #
-    #TODO more UQ stuff...
-    #print(fmr.Data_type['Node_x_min'].value)
 
 if __name__ == "__main__":
     main()
