@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-from pymera_enum import Data_type, Grid_structure
+from pymera_enum import Data_type, Grid_structure, Cell_type, Mtrl_physics
+from pymera_enum import Conditioner, Solver, Reduce, Part_method
 from pymera_ctypes import fmr
 from pymera_parse import parse_sims_from_file, flatten_json_file
 

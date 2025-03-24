@@ -7,69 +7,88 @@
     "fmr:Geom": [{
       "fmr:Shape_type": "Block",
       "fmr:Dimensions_xyz": {"dims": [1.000, 0.050, 0.050] }
-    }],
-    "fmr:Grid": [{
-      "fmr:Geom": 0,
-      "fmr:Grid_structure": "Rectilinear",
-      "fmr:Grid_divs": [100, 5, 5],
-      "fmr:Cell_type": "Block_6tet",
-      "fmr:Elem_type": "Tet10",
+  }],
+  "fmr:Grid": [{
+    "fmr:Geom": 0,
+    "fmr:Grid_structure": "Rectilinear",
+    "fmr:Grid_divs": [100, 5, 5],
+    "fmr:Cell_type": "Block_6tet",
+    "fmr:Elem_type": "Tet10",
 
-      "beam-base": {
-        "fmr:Node_set": {
-          "fmr:Node_at": "fmr:Node_x_min"
-        }
-      },
-      "beam-tip": {
-        "fmr:Node_set": {
-          "fmr:Node_at": "fmr:Node_x_max"
-        }
-      },
-      "nominal-node-coordinates": "fmr:Node_xyz"
+    "beam-base": {
+      "fmr:Node_set": {
+        "fmr:Node_at": "fmr:Node_x_min"
+      }
+    },
+    "beam-tip": {
+      "fmr:Node_set": {
+        "fmr:Node_at": "fmr:Node_x_max"
+      }
+    },
+    "node-number": "fmr:Node_id",
+    "nominal-node-coordinates": "fmr:Node_xyz"
+  }],
+  "fmr:Part": [{
+    "fmr:Grid": 0,
+    "fmr:Part_method": "Single",
+    "Part_n": 1
     }],
-    "fmr:Part": [{
+  "fmr:Mtrl": [{
+    "fmr:Name": "Basic steel",
+    "fmr:Mtrl_physics": "Elastic_isotropic",
+    "fmr:Youngs_modulus": {"youngs": 210e9 },
+    "fmr:Poissons_ratio": {"poissons": 0.285 }
+  }],
+  "fmr:BCs": [
+    { 
+      "fmr:Name": "Base encastre",
       "fmr:Grid": 0,
-      "fmr:Part_method": "Single",
-      "Part_n": 1
-      }],
-    "fmr:Mtrl": [{
-      "fmr:Mtrl_physics": "Elastic_isotropic",
-      "fmr:Youngs_modulus": {"youngs": 210e9 },
-      "fmr:Poissons_ratio": {"poissons": 0.285 }
-    }],
-    "fmr:BCs": [
-      { "fmr:Grid": 0,
-        "fmr:Node_set": "beam-base",
-        "fmr:Displacement_xyz": [0.000, 0.000, 0.000]
-      },
-      { "fmr:Grid": 0,
-        "fmr::Data_type:Node_set": "beam-tip",
-        "fmr:Displacement_z": {"tip-displace-z": -0.010 }
-      }
-    ],
-    "fmr:Solve": [{
-      "fmr:Conditioner": "Jacobi",
-      "fmr:Solver": "PCG",
-      "nominal-displacements": "fmr:Displacement_xyz"
-    },{
-      "fmr:Conditioner": "Jacobi",
-      "fmr:Solver": "PCG",
-      "fmr:Initial_displacements_xyz": "nominal-displacements",
-      "base-force-mag": {
-        "fmr:Force_mag": {
-          "fmr:Reduce": "Sum",
-          "fmr:Node_set": "beam-base"
-        }
-      }
-    }],
-  "fmr:Post": [[
-    "nominal-node-coordinates",
-    "nominal-displacements"
+      "fmr:Node_set": "beam-base",
+      "fmr:Displacement_xyz": [0.000, 0.000, 0.000]
+    },
+    { 
+      "fmr:Name": "Beam tip face displacement",
+      "fmr:Grid": 0,
+      "fmr::Data_type:Node_set": "beam-tip",
+      "fmr:Displacement_z": {"tip-displace-z": -0.010 }
+    }
   ],
-   [
-    "base-force-mag"
-  ]],
-  "fmr:Runs": [
+  "fmr:Solve": [{
+    "fmr:Name": "Solve nominal beam.",
+    "fmr:Conditioner": "Jacobi",
+    "fmr:Solver": "PCG",
+    "nominal-displacements": "fmr:Displacement_xyz"
+  },{
+    "fmr:Name": "Solve samples.",
+    "fmr:Conditioner": "Jacobi",
+    "fmr:Solver": "PCG",
+    "fmr:Initial_displacements_xyz": "nominal-displacements",
+    "base-force-mag": {
+      "fmr:Force_mag": {
+        "fmr:Reduce": "Sum",
+        "fmr:Node_set": "beam-base"
+      }
+    }
+  }],
+  "fmr:Post":
+  [
+    {
+      "fmr:File_name": "uq_straw_1_nominal.csv",
+      "fmr:Field": [
+        "node-number",
+        "nominal-node-coordinates",
+        "nominal-displacements"
+      ]
+    },
+    {
+      "fmr:File_name": "uq_straw_1_samples.csv",
+      "fmr:Field": [
+        "base-force-mag"
+      ]
+    }  
+  ],
+  "fmr:Runs":
+  [
     { 
       "fmr:Name": "Cantilever beam nominal solution",
       "fmr:Part": 0,
@@ -87,5 +106,4 @@
       "fmr:Post": 1
     }
   ]
-  }
-}
+} }

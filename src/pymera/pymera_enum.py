@@ -71,6 +71,8 @@ class Reduce(Enum):
     MIN = auto()
     MAX = auto()
     SUM = auto()
+    MEAN = auto()
+    STDEV = auto()
     MAX_ABS = auto()
     MIN_ABS = auto()
     SUM_SQUARES = auto()
