@@ -66,34 +66,42 @@ def main():
         print('\nHello '+jobs.get_version()+' '+jobs.get_name()+' (jobs)!')
         #
         # Read simulation from JSON file.
-        with jobs.add_sims_from_file(json_filname) as sims:
-            print('Hello '+sims.get_name()+' '+sims.get_version()+'!')
-            #
-            print('\nUser parameters, output fields, '
-                    + 'and internal variables in JSON file:')
-            for name, value in sims.parameter.items():
-                if value is not None:
-                    print(f'- {name}: {value}')
-                else:
-                    print(f'- {name}')
-            #
-            # Read parameters and nominal values from the .csv file.
-            sims.add_parameter_file(csv_filname,
-                has_names=True, has_nominals=csv_has_nominals)
-            #
-            # Add dims parameter [length, width, height] values.
-            sims.add_parameter('dims',
-                values=np.transpose(
-                    [sims.parameter['length'],
-                     sims.parameter['width'],
-                     sims.parameter['height']]),
-                nominal=
-                    [sims.nominal['length'],
-                     sims.nominal['width'],
-                     sims.nominal['height']]
-            )
-            print()
-            # sims.init called on exit from sims with context block
+        sims = jobs.add_sims_from_file(json_filname)
+        #
+        print('Hello '+sims.get_name()+' '+sims.get_version()+'!')
+        #
+        print('\nUser parameters, output fields, '
+                + 'and internal variables in JSON file:')
+        for name, value in sims.parameter.items():
+            if value is not None:
+                print(f'- {name}: {value}')
+            else:
+                print(f'- {name}')
+        #
+        # Read parameters and nominal values from the .csv file.
+        sims.add_parameter_file(csv_filname,
+            has_names=True, has_nominals=csv_has_nominals)
+        #
+        # Add beam_dimensions parameter [length, width, height] values.
+        sims.add_parameter('beam_dimensions',
+            values=np.transpose(
+                [sims.parameter['length'],
+                    sims.parameter['width'],
+                    sims.parameter['height']]),
+            nominal=
+                [sims.nominal['length'],
+                    sims.nominal['width'],
+                    sims.nominal['height']]
+        )
+        # sims.init # Initialize just this sims object.
+        # jobs.sims_init() # Initializes all the sims.
+        # jobs.run() is called on exit from the jobs "with" context block
+        # and will initialize and then run each of the sims objects in turn.
+        #
+        print()
+        # jobs.run() is called on exit from the jobs "with" context block.
+        # * initializes (if needed) and runs all sims
+        # * sims.init() also performs sanity checks.
         if False: #------------------------------------------------------------
             #TODO Set up the same sims manually.
             #
@@ -107,9 +115,7 @@ def main():
             jobs.run()
             sims.exit() # invalidates sims post-processing pointers?
                         # (e.g., base_force)
-            #
-        # jobs.run() is called on exit from the jobs "with" context block.
-        #            * initializes (if needed) and runs all sims
+            #------------------------------------------------------------------
     #--------------------------------------------------------------------------
     # Get numpy array contents from Pymera.
     base_force = sims.get_post('base-force-mag')

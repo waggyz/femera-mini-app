@@ -120,10 +120,11 @@ class Grid_structure(Enum):
     CARTESIAN = auto() # isotropic (scalar) scaling
     RECTILINEAR = auto() # scaled x,y,z
     GENERAL_LINEAR = auto() # 3x3 transformation matrix
+    POLAR = auto()
     CYLINDRICAL = auto() # rotate around x, y, or z axis
     SPHERICAL = auto()
     ELLIPTICAL = auto()
-    SPHEROIDAL = auto()  # Oblate, Prolate
+    SPHEROIDAL = auto()  # oblate, prolate
     CONFORMAL_MAP = auto()
     CURVILINEAR = auto() # orthogonal, non-orthogonal
     BODY_FITTED = auto()

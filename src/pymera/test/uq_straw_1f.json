@@ -6,8 +6,8 @@
   "fmr:Version": "0.1.6",
   "fmr:Geom": [{
     "fmr:Shape_form": "Block",
-    "fmr:Dimensions_xyz": {"dims": [1.000, 0.050, 0.050] },
-    "fmr:NOTE": "Using dims for testing; could use fmr:Dimension_x, etc."
+    "fmr:Dimensions_xyz": {"beam_dimensions": [1.000, 0.050, 0.050] },
+    "fmr:NOTE": "Using beam_dimensions for testing; could use fmr:Dimension_x,..."
   }],
   "fmr:Grid": [{
     "fmr:Geom": 0,
@@ -43,12 +43,10 @@
   }],
   "fmr:BCs": [{ 
     "fmr:Name": "Beam base encastre",
-    "fmr:Grid": 0,
     "fmr:Node_set": "beam-base-nodeset",
     "fmr:Displacement_xyz": [0.000, 0.000, 0.000]
     },{ 
     "fmr:Name": "Beam tip face displacement",
-    "fmr:Grid": 0,
     "fmr::Data_type:Node_set": "beam-tip-nodeset",
     "fmr:Displacement_z": {"tip_displace_z": -0.010}
   }],
@@ -90,6 +88,7 @@
     "fmr:Name": "Cantilever beam nominal solution",
     "fmr:Part": 0,
     "fmr:Mtrl": 0,
+    "fmr:BCs": [0,1],
     "fmr:Solve": 0,
     "fmr:Runs_n": 1,
     "fmr:Post": 0
@@ -97,6 +96,7 @@
     "fmr:Name": "Cantilever beam sample solutions",
     "fmr:Part": 0,
     "fmr:Mtrl": 0,
+    "fmr:BCs": [0,1],
     "fmr:Solve": 1,
     "fmr:Post": 1,
     "fmr:Runs_n": {"sample_n": 0},
