@@ -155,7 +155,7 @@ class Sims:
             fmr.fmr_set_sims_version(self.jobs.obj, self.task_index,
                                      vers.encode('utf-8'))
     
-    def add_parameter(self, name, nominal=None, values=None):
+    def add_parameter(self, name, values=None, nominal=None):
         """
         Adds a parameter to the Sims object.
 
@@ -214,7 +214,7 @@ class Sims:
             if has_names: # first line has parameter names
                 names = next(reader)
             else: # Make placeholder names: param_1, param_2,, param_3,...
-                line = next(reader)
+                line = next(reader)# need a line to get length
                 names =  [f'param_{i+1}' for i in range(len(line))]
                 f.seek(0)# Return to top.
             # Make dictionaries having keys for names and empty arrays (for

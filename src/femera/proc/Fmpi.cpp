@@ -70,9 +70,9 @@ namespace femera {
         "WARNING sizeof (Proc::mpi_required) is %lu but should be %lu\n",
         sizeof (this->fmpi_required), sizeof (MPI_Comm));
     }
-    if (did_mpi_init ()) {
+    if (this->did_mpi_init ()) {
       this->do_final_on_exit = false;
-      std::printf ("MPI is already initialized.\n");
+      std::printf ("proc  mpi NOTE MPI is already initialized.\n");
     }
     if (!err && !did_mpi_init ()) {
       err= MPI_Init_thread (argc,&argv, this->fmpi_required, & fmpi_provided);
@@ -80,7 +80,7 @@ namespace femera {
       std::printf ("%u:Fmpi::task_init (%i) start...\n", get_proc_ix(), err);
 #endif
     }
-    if (did_mpi_init ()) {
+    if (this->did_mpi_init ()) {
       MPI_Comm comm =0;//nullptr;
       if (!err) {//NOTE Good practice: use a copy of MPI_COMM_WORLD.
         err= MPI_Comm_dup (MPI_COMM_WORLD, & comm);// task_exit() frees this
@@ -141,7 +141,7 @@ namespace femera {
 #ifdef FMR_DEBUG
   std::printf ("Fmpi::exit_task (%i) done...\n", err);
 #endif
-  }
+  }//
   //
 }// end femera:: namespace
 //end if FMR_HAS_MPI

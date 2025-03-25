@@ -26,6 +26,7 @@ class Sims_application(Enum):
     PARAMETER_SWEEP = auto()
     SENSITIVITY = auto()
     UQ = auto()
+    END = auto()
 
 class Shape_form(Enum):
     NONE = auto()
@@ -36,6 +37,7 @@ class Shape_form(Enum):
     CYLINDER = auto()
     SPHERE = auto()
     SPHERE_SHELL = auto()
+    END = auto()
 
 class Cell_type(Enum):
     NONE = auto()
@@ -55,6 +57,7 @@ class Part_method(Enum):
     SINGLE = auto()
     RECTILINEAR = auto()
     BY_VOLUME = auto()
+    END = auto()
 
 class Mtrl_physics(Enum):
     NONE = auto()
@@ -82,6 +85,16 @@ class Solver(Enum):
     PCR = auto()
     PCG = auto()
     NCG = auto()
+    END = auto()
+
+class Analysis(Enum):
+    NONE = auto()
+    ERROR = auto()
+    UNKNOWN = auto()
+    STATIC = auto()
+    DYNAMIC = auto()
+    MODAL = auto()
+    END = auto()
 
 class Reduce(Enum):
     NONE = auto()
@@ -89,12 +102,14 @@ class Reduce(Enum):
     UNKNOWN = auto()
     MIN = auto()
     MAX = auto()
+    MIN_ABS = auto()
+    MAX_ABS = auto()
+    PRODUCT = auto()
     SUM = auto()
     MEAN = auto()
     STDEV = auto()
-    MAX_ABS = auto()
-    MIN_ABS = auto()
     SUM_SQUARES = auto()
+    SUM_INVERSES = auto()# parallel Ohm's law
     END = auto()
 
 class Grid_structure(Enum):
@@ -120,6 +135,7 @@ class File_format(Enum):
     UNKNOWN = auto()
     TEXT = auto()
     CSV = auto()
+    END = auto()
 '''
 C++
 enum class fmr::grid::Grid_structure {
@@ -148,7 +164,8 @@ fmr_enum ={
     'fmr:Reduce': Reduce,
     'fmr:Part_method': Part_method,
     'fmr:Sims_application': Sims_application,
-    'fmr:File_format': File_format
+    'fmr:File_format': File_format,
+    'fmr:Analysis': Analysis
 }
 #==============================================================================
 def create_enum_from_csv(file_path, enum_name, start_at=None):

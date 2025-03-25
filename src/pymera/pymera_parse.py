@@ -4,7 +4,7 @@ from pymera_enum import fmr_enum, Data_type, Grid_structure
 import numpy as np
 import json
 
-def find_keys_used(obj, is_user_key=True, is_enum_key=True):
+def find_keys_used(obj, user_keys=True, enum_keys=True):
     """
     Recursively traverses a nested dictionary or list and returns a dictionary
     containing the keys that are not prefixed with "fmr:" and their
@@ -22,7 +22,7 @@ def find_keys_used(obj, is_user_key=True, is_enum_key=True):
     result = {}
     if isinstance(obj, dict):
         for key, val in obj.items():
-            if is_enum_key and (key.upper() in fmr_enum):
+            if enum_keys and (key in fmr_enum):
                 result[key] = fmr_enum[key][val.upper()]
                 #result[key] = fmr_enum[key][val.upper()].value # integer
             if not key.startswith("fmr:"):
@@ -38,12 +38,12 @@ def find_keys_used(obj, is_user_key=True, is_enum_key=True):
                         nominal = None #str(next(iter(val.keys())))# datatype
                     result[key] = nominal
                 if isinstance(val, (dict, list)):
-                    result.update(find_keys_used(val))
+                    result.update(find_keys_used(val, user_keys, enum_keys))
             elif isinstance(val, (dict, list)):
-                result.update(find_keys_used(val))
+                result.update(find_keys_used(val, user_keys, enum_keys))
     elif isinstance(obj, list):
         for item in obj:
-            result.update(find_keys_used(item))
+            result.update(find_keys_used(item, user_keys, enum_keys))
     return result
 
 def parse_sims_from_file(sims, filename):
@@ -53,7 +53,7 @@ def parse_sims_from_file(sims, filename):
     if 'fmr:Sims' in sims_json:
         sims_json = sims_json['fmr:Sims']
         sims.parameter = find_keys_used(sims_json,
-                                         is_user_key=True, is_enum_key=False)
+                                        user_keys=True, enum_keys=False)
         #
         if 'fmr:Name' in sims_json[0]:
             sims.set_name(sims_json[0]['fmr:Name'])

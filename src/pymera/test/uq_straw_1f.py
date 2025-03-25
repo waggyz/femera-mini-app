@@ -15,7 +15,7 @@ sys.path.append(os.path.join(os.path.dirname(sys.path[0])))
 import pymera
 #import uqtools as uq
 
-from pymera_parse import flatten_json_file # temporary until integrated into pymera module
+from pymera_parse import flatten_json_file # temp. until put into pymera module
 
 def main():
     """
@@ -52,77 +52,79 @@ def main():
     csv_has_nominals = True
     #
     if True: # Print flattened JSON file.
-        flat = flatten_json_file(os.path.join(here, 'uq_straw_1f.json'))
+        flat = flatten_json_file(json_filname)
         for key, value in flat.items():
             key_pretty = key.replace('\x1f', '\u00b7')
             print(f"{key_pretty} = {value}")
         print()
-    #--------------------------------------------------------------------------
-    if True: # Load simulations from JSON and CSV files.
-        with pymera.Jobs() as jobs:
-            print('\nHello '+jobs.get_version()+' '+jobs.get_name()+'!')
-            #
-            # Read simulation from JSON file.
-            with jobs.add_sims_from_file(json_filname) as sims:
-                print('Hello '+sims.get_name()+' '+sims.get_version()+'!')
-                #
-                print('\nUser parameters, output fields, '
-                      + 'and internal parameters in JSON file:')
-                for name, value in sims.parameter.items():
-                    if value is not None:
-                        print(f'- {name}: {value}')
-                    else:
-                        print(f'- {name}')
-                #
-                # Read parameters and nominal values from the .csv file.
-                sims.add_parameter_file(csv_filname,
-                    has_names=True, has_nominals=csv_has_nominals)
-                #TODO Check if this is overwriting sims.parameter.
-                #
-                # Add dims parameter [length, width, height] values.
-                v = [sims.parameter['length'],
-                    sims.parameter['width'],
-                    sims.parameter['height']]
-                sims.add_parameter('dims',
-                    nominal=[sims.nominal['length'],
-                            sims.nominal['width'],
-                            sims.nominal['height']],
-                    values=list(map(list, zip(*v))) )# SoA to AoS
-                print()
-                # sims.init called on exit from sims with context block
-            # jobs.run() called on exit from the jobs with context block
-        # jobs.exit() called before jobs is destroyed.
-    else:
-        # Set up sims manually
-        #jobs = pymera.Jobs()
-        #print('Hello ' + jobs.get_version() +' '+ jobs.get_name() + '!')
-        #TODO Set Femera init options (MPI, OpenMP, verbosity, self-tests)
-        #     as arguments to the Jobs constructor.
-        #jobs.init()
-        #
-        sims=jobs.add_sims()
-        print('Hello ' +  sims.get_name() +' '+ sims.get_version() + '!')
-        #
-        # sims.init()# Optional: jobs.run() will call sims.init() as needed.
-        #
-        # jobs.run()
-        #
-        # sims.exit() #NOTE invalidates sims post-processing pointers
-                    #     (e.g., base_force)
-        #
-        # jobs.exit()
-        #
-        pass
     #
+    #TODO Set Femera init options (MPI, OpenMP, verbosity, self-tests)
+    #     as arguments to the Jobs constructor.
+    #--------------------------------------------------------------------------
+    # Load simulations from JSON and CSV files.
+    with pymera.Jobs() as jobs:
+        print('\nHello '+jobs.get_version()+' '+jobs.get_name()+' (jobs)!')
+        #
+        # Read simulation from JSON file.
+        with jobs.add_sims_from_file(json_filname) as sims:
+            print('Hello '+sims.get_name()+' '+sims.get_version()+'!')
+            #
+            print('\nUser parameters, output fields, '
+                    + 'and internal variables in JSON file:')
+            for name, value in sims.parameter.items():
+                if value is not None:
+                    print(f'- {name}: {value}')
+                else:
+                    print(f'- {name}')
+            #
+            # Read parameters and nominal values from the .csv file.
+            sims.add_parameter_file(csv_filname,
+                has_names=True, has_nominals=csv_has_nominals)
+            #
+            # Add dims parameter [length, width, height] values.
+            sims.add_parameter('dims',
+                values=np.transpose(
+                    [sims.parameter['length'],
+                     sims.parameter['width'],
+                     sims.parameter['height']]),
+                nominal=
+                    [sims.nominal['length'],
+                     sims.nominal['width'],
+                     sims.nominal['height']]
+            )
+            print()
+            # sims.init called on exit from sims with context block
+        if False: #------------------------------------------------------------
+            #TODO Set up the same sims manually.
+            #
+            sims = jobs.add_sims(name='Another simulation', version='0.0.1')
+            print('Hello ' +  sims.get_name() +' '+ sims.get_version() + '!')
+            #
+            # Set nominal model parameters.
+            #TODO Femera sims functions not implemented yet.
+            #
+            sims.init()
+            jobs.run()
+            sims.exit() # invalidates sims post-processing pointers?
+                        # (e.g., base_force)
+            #
+        # jobs.run() is called on exit from the jobs "with" context block.
+        #            * initializes (if needed) and runs all sims
+    #--------------------------------------------------------------------------
     # Get numpy array contents from Pymera.
     base_force = sims.get_post('base-force-mag')
     #
     base_stress_avg = base_force / (# averaged over each base area
-    sims.parameter['width'] * sims.parameter['height'])
+        sims.parameter['width'] * sims.parameter['height'])
+    #
+    # jobs.exit() is called before jobs is destroyed.
+    #             * jobs is destroyed at the end of this function
+    #             * exits (if needed) and deletes all sims first
+    #--------------------------------------------------------------------------
     print()
     print('base stress mean: ' + str(base_stress_avg.mean()))
     print('base stress standard deviation: ' + str(base_stress_avg.std()))
-    #--------------------------------------------------------------------------
+    #
     if csv_has_nominals:
         print('\nUser parameter names (first row) '
             +'with nominal values (second row) from CSV file:')
@@ -136,14 +138,7 @@ def main():
     print('\nNumber of additional values (remaining rows) in the CSV file:')
     print(f'- sample_n: {sims.sample_n}')
     print()
-    '''
-    # Nominal model setup  (same as the JSON file) ============================
-    #
-    sims = fmr.add_sims()
-    # Set nominal model parameters.
-    #TODO Femera sims functions not implemented yet.
-    #
-    '''
+    #==========================================================================
     """
     # Add model geometry.
     beam_geom = sims.add_geometry(#name='geometry',
@@ -187,9 +182,8 @@ def main():
                 sum=fmr.Data_type['Force_mag']# Returns 1 scalar for each sim
                 )#, count=runs_n)
     """
-    #==========================================================================
     if False:# Write random input parameters to a .csv file.
-        # Simulation nominal values -----------------------------------------------
+        # Simulation nominal values -------------------------------------------
         nominal_youngs = 210e9# Pa
         nominal_poissons = 0.285 #NOTE Clamp >= 0.25?
         #
@@ -201,7 +195,7 @@ def main():
         #
         nominal_dims = np.array([nominal_length, nominal_width, nominal_height])
         nominal_cell_size = 0.010# m
-        # Structured discretization parameters. -------------------------------
+        # Structured discretization parameters --------------------------------
         elem_count_xyz = np.array(nominal_dims / nominal_cell_size, dtype='u8')
         sample_n=100
         #----------------------------------------------------------------------
