@@ -60,6 +60,7 @@
     "nominal_displacements": "fmr:Displacement_xyz"
     },{
     "fmr:Name": "Solve samples.",
+    "fmr:Analysis": "Static",
     "fmr:Conditioner": "Jacobi",
     "fmr:Solver": "PCG",
     "fmr:Initial_displacements_xyz": "nominal_displacements",

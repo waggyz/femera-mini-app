@@ -4,7 +4,7 @@ import os, csv
 
 # Enums =======================================================================
 class Module(Enum):# fmr:Sims, fmr:Geom, fmr:Grid, fmr:Mtrl,...
-    NONE = auto()
+    NONE = 0
     ERROR = auto()
     UNKNOWN = auto()
     SIMS = auto()
@@ -19,7 +19,7 @@ class Module(Enum):# fmr:Sims, fmr:Geom, fmr:Grid, fmr:Mtrl,...
     END = auto()
 
 class Sims_application(Enum):
-    NONE = auto()
+    NONE = 0
     ERROR = auto()
     UNKNOWN = auto()
     SOLVE = auto()
@@ -29,7 +29,7 @@ class Sims_application(Enum):
     END = auto()
 
 class Shape_form(Enum):
-    NONE = auto()
+    NONE = 0
     ERROR = auto()
     UNKNOWN = auto()
     RECTANGLE = auto()
@@ -40,7 +40,7 @@ class Shape_form(Enum):
     END = auto()
 
 class Cell_type(Enum):
-    NONE = auto()
+    NONE = 0
     ERROR = auto()
     UNKNOWN = auto()
     BLOCK_2PRISM = auto()
@@ -50,7 +50,7 @@ class Cell_type(Enum):
     END = auto()
 
 class Part_method(Enum):
-    NONE = auto()
+    NONE = 0
     ERROR = auto()
     UNKNOWN = auto()
     BLOCK_2PRISM = auto()
@@ -60,7 +60,7 @@ class Part_method(Enum):
     END = auto()
 
 class Mtrl_physics(Enum):
-    NONE = auto()
+    NONE = 0
     ERROR = auto()
     UNKNOWN = auto()
     ELASTIC_ISOTROPIC = auto()
@@ -71,7 +71,7 @@ class Mtrl_physics(Enum):
     END = auto()
 
 class Conditioner(Enum):
-    NONE = auto()
+    NONE = 0
     ERROR = auto()
     UNKNOWN = auto()
     JACOBI = auto()
@@ -79,7 +79,7 @@ class Conditioner(Enum):
     END = auto()
 
 class Solver(Enum):
-    NONE = auto()
+    NONE = 0
     ERROR = auto()
     UNKNOWN = auto()
     PCR = auto()
@@ -88,7 +88,7 @@ class Solver(Enum):
     END = auto()
 
 class Analysis(Enum):
-    NONE = auto()
+    NONE = 0
     ERROR = auto()
     UNKNOWN = auto()
     STATIC = auto()
@@ -97,7 +97,7 @@ class Analysis(Enum):
     END = auto()
 
 class Reduce(Enum):
-    NONE = auto()
+    NONE = 0
     ERROR = auto()
     UNKNOWN = auto()
     MIN = auto()
@@ -113,7 +113,7 @@ class Reduce(Enum):
     END = auto()
 
 class Grid_structure(Enum):
-    NONE = auto()
+    NONE = 0
     ERROR = auto()
     UNKNOWN = auto()
     UNSTRUCTURED = auto()
@@ -130,7 +130,7 @@ class Grid_structure(Enum):
     END = auto()
 
 class File_format(Enum):
-    NONE = auto()
+    NONE = 0
     ERROR = auto()
     UNKNOWN = auto()
     TEXT = auto()
