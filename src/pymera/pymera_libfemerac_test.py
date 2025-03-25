@@ -7,10 +7,20 @@ class TestPymeraJobs(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Initialize Pymera before tests"""
-        cls.obj =  fmr.fmr_new_jobs()
-        fmr.fmr_jobs_init(cls.obj)
-        #cls.jobs = pymera.Jobs()
-        #cls.jobs.init()
+        cls.obj_create_ok = False
+        try:
+            cls.obj = fmr.fmr_new_jobs()
+            cls.obj_create_ok = True
+        except Exception as e:
+            print(f"ERROR: {e}")
+        #
+        cls.jobs_init_ok = False
+        try:
+            fmr.fmr_jobs_init(cls.obj)
+            cls.jobs_init_ok = True
+        except Exception as e:
+            print(f"ERROR: {e}")
+
         return super().setUpClass()
 
     @classmethod
@@ -18,18 +28,17 @@ class TestPymeraJobs(unittest.TestCase):
         """Clean up Pymera after tests"""
         print()
         fmr.fmr_jobs_exit(cls.obj)
-        #cls.jobs.exit()
 
-    def test_fmr_new_jobs(self): #TODO
-        pass
-    def test_fmr_delete_jobs(self): #TODO
+    def test_fmr_new_jobs(self):
+        self.assertTrue(self.obj_create_ok)
+    def test_fmr_delete_jobs(self):
+        # not testing this here
         pass
 
-    def test_fmr_jobs_init(self): #TODO
-        #self.assertFalse(fmr.fmr_jobs_init(self.obj))
-        # void return C functions return False
-        pass
-    def test_fmr_jobs_exit(self): #TODO
+    def test_fmr_jobs_init(self):
+        self.assertTrue(self.jobs_init_ok)
+    def test_fmr_jobs_exit(self):
+        # not testing this here
         pass
     def test_fmr_jobs_did_init(self):
         self.assertTrue(fmr.fmr_jobs_did_init(self.obj))
@@ -42,7 +51,7 @@ class TestPymeraJobs(unittest.TestCase):
 
     def test_fmr_get_verbosity(self):
         self.assertGreaterEqual(fmr.fmr_get_verbosity(self.obj), 0)
-    def test_fmr_set_verbosity(self): #TODO
+    def test_fmr_set_verbosity(self): #TODO Femera verbosity is broken.
         pass
 
     def test_fmr_get_sims_n(self):
@@ -72,9 +81,17 @@ class TestPymeraJobs(unittest.TestCase):
 
     def test_fmr_get_sims_version(self):
         n=fmr.fmr_add_sims(self.obj)
-        self.assertGreater(fmr.fmr_get_sims_version(self.obj, n).len(), 0)
+        vers = fmr.fmr_get_sims_version(self.obj, n).decode('utf-8')
+        self.assertGreater(len(vers), 0)
     def test_fmr_set_sims_version(self):
-        pass
+        n=fmr.fmr_add_sims(self.obj)
+        if(n>0):
+            vers = 'test version name'
+            fmr.fmr_set_sims_version(self.obj, n, vers.encode('utf-8'))
+            vers_set=fmr.fmr_get_sims_version(self.obj, n).decode('utf-8')
+            self.assertEqual(vers_set, vers)
+        else:
+            self.assertTrue(False)
 
 if __name__ == '__main__':
     unittest.main()
