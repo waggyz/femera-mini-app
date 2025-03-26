@@ -62,9 +62,24 @@
     "fmr:Conditioner": "Jacobi",
     "fmr:Solver": "PCG",
     "fmr:Initial_displacements_xyz": "nominal_displacements",
-    "base_force_mag": {
-      "fmr:Node_set": "beam-base-nodeset",
-      "fmr:Force_mag": { "fmr:Reduce": "Sum" }
+
+    "base_force_mag_A": {
+      "fmr:Force_mag": { "fmr:Reduce": "Sum" },
+      "fmr:Node_set": "beam-base-nodeset"
+    },
+    "base_force_mag_B": {
+      "fmr:Values": "fmr:Force_mag",
+      "fmr:At": "beam-base-nodeset",
+      "fmr:Reduce": "Sum"
+    },
+    "base_force_mag_C-NO": {
+      "fmr:Reduce:Sum" : { "fmr:Force_mag": "beam-base-nodeset" }
+    },
+    "base_force_mag_D-YES": {
+      "fmr:Force_mag" : { "fmr:Reduce:Sum": "beam-base-nodeset" }
+    },
+    "base_force_mag_E": {
+      "beam-base-nodeset": { "fmr:Reduce:Sum": "fmr:Force_mag" }
     }
   }],
   "fmr:Post": [{
@@ -90,8 +105,8 @@
     "fmr:Mtrl": 0,
     "fmr:BCs": [0,1],
     "fmr:Solve": 0,
-    "fmr:Runs_n": 1,
-    "fmr:Post": 0
+    "fmr:Post": 0,
+    "fmr:Runs_n": 1
     },{ 
     "fmr:Name": "Cantilever beam sample solutions",
     "fmr:Part": 0,

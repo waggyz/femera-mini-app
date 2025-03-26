@@ -102,14 +102,25 @@ class Reduce(Enum):
     UNKNOWN = auto()
     MIN = auto()
     MAX = auto()
+    MAX_ABS = auto() # maximum of absolute values (suprenum norm, Linf norm)
     MIN_ABS = auto()
-    MAX_ABS = auto()
     PRODUCT = auto()
     SUM = auto()
     MEAN = auto()
     STDEV = auto()
+    VARIANCE = auto()
+    SKEWNESS = auto()
+    KURTOSIS = auto()
+    COUNT_NONZERO = auto() # count of non-zero elements (L0 norm)
+    L1_NORM = auto()
+    L2_NORM = auto()
     SUM_SQUARES = auto()
-    SUM_INVERSES = auto()# parallel Ohm's law
+    SUM_RECIPROCALS = auto()# parallel Ohm's law
+    HARMONIC_MEAN=auto() # The reciprocal of the arithmetic mean of reciprocals.
+    GEOMETRIC_MEAN =auto() # The nth root of the product of n numbers.
+    ENTROPY = auto()
+    ALL = auto() # all are true
+    ANY = auto() # any are true
     END = auto()
 
 class Grid_structure(Enum):

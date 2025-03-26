@@ -86,12 +86,12 @@ def main():
         sims.add_parameter('beam_dimensions',
             values=np.transpose(
                 [sims.parameter['length'],
-                    sims.parameter['width'],
-                    sims.parameter['height']]),
+                 sims.parameter['width'],
+                 sims.parameter['height']]),
             nominal=
                 [sims.nominal['length'],
-                    sims.nominal['width'],
-                    sims.nominal['height']]
+                 sims.nominal['width'],
+                 sims.nominal['height']]
         )
         # sims.init # Initialize just this sims object.
         # jobs.sims_init() # Initializes all the sims.
