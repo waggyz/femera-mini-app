@@ -70,22 +70,22 @@ def parse_sims_from_file(sims, filename):
 def is_terminal_list(lst):
     return all(isinstance(item, (float, int, bool)) for item in lst)
 
-def flatten_json(data, prefix='', sep='\x1f'):
+def full_path_json(data, prefix='', sep='\x1f'):
     # \x1f (\31): ASCII unit separator
     result = {}
     for key, value in data.items():
         new_key = f"{prefix}{sep}{key}" if prefix else key
         if isinstance(value, dict):
-            result.update(flatten_json(value, new_key, sep))
+            result.update(full_path_json(value, new_key, sep))
         elif isinstance(value, list):
             if is_terminal_list(value):
                 result[new_key] = np.ascontiguousarray(value)
             else:
                 for i, item in enumerate(value):
                     if isinstance(item, dict):
-                        result.update(flatten_json(
+                        result.update(full_path_json(
                             item, f"{new_key}{sep}{i}", sep))
-                        #result.update(flatten_json(item, f"{new_key}[{i}]", sep))
+                        #result.update(full_path_json(item, f"{new_key}[{i}]", sep))
                     else:
                         result[f"{new_key}{sep}{i}"] = item
                         #result[f"{new_key}[{i}]"] = item
@@ -93,9 +93,9 @@ def flatten_json(data, prefix='', sep='\x1f'):
             result[new_key] = value
     return result
 
-def flatten_json_file(filename):
+def full_path_json_file(filename):
     with open(filename, 'r') as file:
         json_data = json.load(file)
-    return flatten_json(json_data)
+    return full_path_json(json_data)
 
 

@@ -22,9 +22,7 @@
       }
     },
     "beam-tip-nodeset": {
-      "fmr:Node_set": {
-        "fmr:Node_at": "fmr:Node_x_max"
-      }
+      "fmr:Node_set": { "fmr:Node_at": "fmr:Node_x_max" }
     },
     "node_number": "fmr:Node_id",
     "nominal_node_coordinates": "fmr:Node_xyz",

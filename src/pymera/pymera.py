@@ -2,7 +2,7 @@
 from pymera_enum import Data_type, Grid_structure, Cell_type, Mtrl_physics
 from pymera_enum import Conditioner, Solver, Reduce, Part_method
 from pymera_libfemerac import fmr
-from pymera_parse import parse_sims_from_file, flatten_json_file
+from pymera_parse import parse_sims_from_file, full_path_json_file
 
 import numpy as np
 import csv
@@ -13,6 +13,7 @@ from warnings import warn
 class Jobs:
     def __init__(self):
         self.obj = fmr.fmr_new_jobs()
+        self.sims=[]
     def __enter__(self):
         self.init()
         return(self)
@@ -29,10 +30,12 @@ class Jobs:
         return fmr.fmr_get_sims_n(self.obj)
     
     def add_sims(self, sims_name=None, sims_version=None):
-        return Sims(self, name=sims_name, version=sims_version)
+        self.sims.append(Sims(self, name=sims_name, version=sims_version))
+        return self.sims[-1]
 
     def add_sims_from_file(self, filename):
-        return parse_sims_from_file(Sims(self), filename)
+        self.sims.append(parse_sims_from_file(Sims(self), filename))
+        return self.sims[-1]
 
     def init(self):
         fmr.fmr_jobs_init(self.obj)

@@ -31,17 +31,17 @@ class TestPymeraJobs(unittest.TestCase):
 
     def test_fmr_new_jobs(self):
         self.assertTrue(self.obj_create_ok)
-    if False:
-        def test_fmr_delete_jobs(self):
-            # not testing this here
-            pass
+
+    @unittest.skip("not testing this here")
+    def test_fmr_delete_jobs(self):
+        pass
 
     def test_fmr_jobs_init(self):
         self.assertTrue(self.jobs_init_ok)
-    if False:
-        def test_fmr_jobs_exit(self):
-            # not testing this here
-            pass
+    @unittest.skip("not testing this here")
+    def test_fmr_jobs_exit(self):
+        # not testing this here
+        pass
     def test_fmr_jobs_did_init(self):
         self.assertTrue(fmr.fmr_jobs_did_init(self.obj))
 
@@ -53,9 +53,9 @@ class TestPymeraJobs(unittest.TestCase):
 
     def test_fmr_get_verbosity(self):
         self.assertGreaterEqual(fmr.fmr_get_verbosity(self.obj), 0)
-    if False:
-        def test_fmr_set_verbosity(self): #TODO Femera verbosity is broken.
-            pass
+    @unittest.skip("TODO Femera verbosity is broken")
+    def test_fmr_set_verbosity(self): #.
+        pass
 
     def test_fmr_get_sims_n(self):
         n = fmr.fmr_get_sims_n(self.obj)

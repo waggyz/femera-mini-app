@@ -15,7 +15,7 @@ sys.path.append(os.path.join(os.path.dirname(sys.path[0])))
 import pymera
 #import uqtools as uq
 
-from pymera_parse import flatten_json_file # temp. until put into pymera module
+from pymera_parse import full_path_json_file # temp. until put into pymera module
 
 def main():
     """
@@ -51,8 +51,8 @@ def main():
     csv_filname = os.path.join(here,'uq_straw_1f.csv')
     csv_has_nominals = True
     #
-    if True: # Print flattened JSON file.
-        flat = flatten_json_file(json_filname)
+    if True: # Print tfull path JSON file.
+        flat = full_path_json_file(json_filname)
         for key, value in flat.items():
             key_pretty = key.replace('\x1f', '\u00b7')
             print(f"{key_pretty} = {value}")

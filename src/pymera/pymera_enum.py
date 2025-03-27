@@ -3,7 +3,7 @@ from enum import Enum, auto
 import os, csv
 
 # Enums =======================================================================
-class Module(Enum):# fmr:Sims, fmr:Geom, fmr:Grid, fmr:Mtrl,...
+class Component(Enum):# fmr:Sims, fmr:Geom, fmr:Grid, fmr:Mtrl,...
     NONE = 0
     ERROR = auto()
     UNKNOWN = auto()
@@ -16,16 +16,20 @@ class Module(Enum):# fmr:Sims, fmr:Geom, fmr:Grid, fmr:Mtrl,...
     SOLVE = auto()
     RUNS = auto()
     POST = auto()
+    PLUGIN = auto()
+    USER = auto()
     END = auto()
 
 class Sims_application(Enum):
     NONE = 0
     ERROR = auto()
     UNKNOWN = auto()
-    SOLVE = auto()
+    RESEARCH = auto()
+    ENGINEERING = auto()
     PARAMETER_SWEEP = auto()
     SENSITIVITY = auto()
     UQ = auto()
+    ML = auto()
     END = auto()
 
 class Shape_form(Enum):
@@ -167,6 +171,7 @@ enum class fmr::grid::Grid_structure {
 '''
 # Dictionary of enums ---------------------------------------------------------
 fmr_enum ={
+    'fmr:Component': Component,
     'fmr:Shape_form': Shape_form,
     'fmr:Grid_structure': Grid_structure,
     'fmr:Cell_type': Cell_type,
