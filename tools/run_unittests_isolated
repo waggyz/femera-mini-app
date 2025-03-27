@@ -1,0 +1,59 @@
+#!/usr/bin/env python3
+import subprocess
+import sys
+import os
+import argparse
+import fnmatch
+
+class IsolatedTestRunner:
+    def __init__(self, verbosity=1, start_dir='.', pattern='test*.py'):
+        self.verbosity = verbosity
+        self.start_dir = os.path.abspath(start_dir)
+        self.pattern = pattern
+
+    def find_test_files(self):
+        test_files = []
+        for root, _, files in os.walk(self.start_dir):
+            for filename in fnmatch.filter(files, self.pattern):
+                test_files.append(os.path.join(root, filename))
+        return test_files
+
+    def run(self):
+        test_files = self.find_test_files()
+        all_tests_passed = True
+
+        for test_file in test_files:
+            if self.verbosity > 0:
+                print(f"\nRunning test: {test_file}")
+
+            result = subprocess.run(['mpiexec', '-n', '1', 'python', test_file], 
+                                    stdout=subprocess.PIPE, 
+                                    stderr=subprocess.PIPE,
+                                    universal_newlines=True)
+            
+            if self.verbosity > 1 or result.returncode != 0:
+                print(result.stdout)
+                print(result.stderr)
+            
+            if result.returncode != 0:
+                print(f"Test {test_file} failed")
+                all_tests_passed = False
+            elif self.verbosity > 0:
+                print(f"Test {test_file} passed")
+
+        return all_tests_passed
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Run MPI tests")
+    parser.add_argument('-v', '--verbosity', action='count', default=1,
+                        help="Increase output verbosity")
+    parser.add_argument('-s', '--start-dir', default='.',
+                        help="Directory to start discovery (default: current directory)")
+    parser.add_argument('-p', '--pattern', default='test*.py',
+                        help="Pattern to match test files (default: test*.py)")
+    args = parser.parse_args()
+
+    runner = IsolatedTestRunner(verbosity=args.verbosity, start_dir=args.start_dir, pattern=args.pattern)
+    result = runner.run()
+    
+    sys.exit(0 if result else 1)

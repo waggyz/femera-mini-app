@@ -4,6 +4,7 @@ from pymera_enum import Conditioner, Solver, Reduce, Part_method
 from pymera_libfemerac import fmr
 from pymera_parse import parse_sims_from_file, full_path_json_file
 
+from atexit import register as atexit_register
 import numpy as np
 import csv
 from warnings import warn
@@ -14,15 +15,22 @@ class Jobs:
     def __init__(self):
         self.obj = fmr.fmr_new_jobs()
         self.sims=[]
+        atexit_register(self.exit_python)
     def __enter__(self):
         self.init()
         return(self)
     def __exit__(self, exception_type, exception_value, traceback):
         self.run()
     def __del__(self):
-        self.exit()
+        pass
+        #self.exit()
         fmr.fmr_delete_jobs(self.obj)
     
+    def exit_python(self):
+        print('exiting Python...')
+        self.exit()
+        #fmr.fmr_delete_jobs(self.obj)
+
     #NOTE there is no method to remove Sims from Jobs.
     #     It would mess up the indexing.
     

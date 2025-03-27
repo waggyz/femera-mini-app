@@ -53,7 +53,7 @@ class TestPymeraJobs(unittest.TestCase):
 
     def test_fmr_get_verbosity(self):
         self.assertGreaterEqual(fmr.fmr_get_verbosity(self.obj), 0)
-    @unittest.skip("TODO Femera verbosity is broken")
+    @unittest.skip("FIXME Femera verbosity is broken")
     def test_fmr_set_verbosity(self): #.
         pass
 
