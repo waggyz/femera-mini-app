@@ -4,12 +4,14 @@ import sys
 import os
 import argparse
 import fnmatch
+from multiprocessing import Pool, cpu_count
 
-class IsolatedTestRunner:
-    def __init__(self, verbosity=1, start_dir='.', pattern='test*.py'):
+class ParallelTestRunner:
+    def __init__(self, verbosity=1, start_dir='.', pattern='test*.py', max_workers=None):
         self.verbosity = verbosity
         self.start_dir = os.path.abspath(start_dir)
         self.pattern = pattern
+        self.max_workers = max_workers or cpu_count()
 
     def find_test_files(self):
         test_files = []
@@ -18,42 +20,49 @@ class IsolatedTestRunner:
                 test_files.append(os.path.join(root, filename))
         return test_files
 
+    def run_test(self, test_file):
+        if self.verbosity > 0:
+            print(f"\nRunning test: {test_file}")
+
+        result = subprocess.run(['mpiexec', '-n', '1', 'python', test_file], 
+                                stdout=subprocess.PIPE, 
+                                stderr=subprocess.PIPE,
+                                universal_newlines=True)
+        
+        if self.verbosity > 1 or result.returncode != 0:
+            print(result.stdout)
+            print(result.stderr)
+        
+        if result.returncode != 0:
+            print(f"Test {test_file} failed")
+            return False
+        elif self.verbosity > 0:
+            print(f"Test {test_file} passed")
+        return True
+
     def run(self):
         test_files = self.find_test_files()
-        all_tests_passed = True
-
-        for test_file in test_files:
-            if self.verbosity > 0:
-                print(f"\nRunning test: {test_file}")
-
-            result = subprocess.run(['mpiexec', '-n', '1', 'python', test_file], 
-                                    stdout=subprocess.PIPE, 
-                                    stderr=subprocess.PIPE,
-                                    universal_newlines=True)
-            
-            if self.verbosity > 1 or result.returncode != 0:
-                print(result.stdout)
-                print(result.stderr)
-            
-            if result.returncode != 0:
-                print(f"Test {test_file} failed")
-                all_tests_passed = False
-            elif self.verbosity > 0:
-                print(f"Test {test_file} passed")
-
+        
+        with Pool(processes=self.max_workers) as pool:
+            results = pool.map(self.run_test, test_files)
+        
+        all_tests_passed = all(results)
         return all_tests_passed
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Run MPI tests")
+    parser = argparse.ArgumentParser(description="Run MPI tests in parallel")
     parser.add_argument('-v', '--verbosity', action='count', default=1,
                         help="Increase output verbosity")
     parser.add_argument('-s', '--start-dir', default='.',
                         help="Directory to start discovery (default: current directory)")
     parser.add_argument('-p', '--pattern', default='test*.py',
                         help="Pattern to match test files (default: test*.py)")
+    parser.add_argument('-w', '--workers', type=int, default=None,
+                        help="Number of worker processes (default: number of CPU cores)")
     args = parser.parse_args()
 
-    runner = IsolatedTestRunner(verbosity=args.verbosity, start_dir=args.start_dir, pattern=args.pattern)
+    runner = ParallelTestRunner(verbosity=args.verbosity, start_dir=args.start_dir, 
+                                pattern=args.pattern, max_workers=args.workers)
     result = runner.run()
     
     sys.exit(0 if result else 1)
