@@ -5,8 +5,8 @@ if [ ! -z "$1" ]; then
   OUTDIR="build/"${1/src/}
   mkdir -p "$OUTDIR"
   #
-  $SCRIPT_DIR/run_unittests_isolated -v -s "$1" -p '*_test.py' \
-   1> "$OUTDIR/test.out" 2> "$OUTDIR/test.err"
+  $SCRIPT_DIR/run_unittests_isolated -v -s "$1" -p '*_test.py' -o "$OUTDIR"
+  #
 else
   >&2 echo "Please provide a directory."
 fi

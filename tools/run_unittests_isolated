@@ -7,11 +7,12 @@ import fnmatch
 from multiprocessing import Pool, cpu_count
 
 class ParallelTestRunner:
-    def __init__(self, verbosity=1, start_dir='.', pattern='test*.py', max_workers=None):
+    def __init__(self, verbosity=1, start_dir='.', pattern='test*.py', max_workers=None, output_dir=None):
         self.verbosity = verbosity
         self.start_dir = os.path.abspath(start_dir)
         self.pattern = pattern
         self.max_workers = max_workers or cpu_count()
+        self.output_dir = output_dir
 
     def find_test_files(self):
         test_files = []
@@ -24,24 +25,46 @@ class ParallelTestRunner:
         if self.verbosity > 0:
             print(f"\nRunning test: {test_file}")
 
-        result = subprocess.run(['mpiexec', '-n', '1', 'python', test_file], 
-                                stdout=subprocess.PIPE, 
-                                stderr=subprocess.PIPE,
-                                universal_newlines=True)
-        
-        if self.verbosity > 1 or result.returncode != 0:
-            print(result.stdout)
-            print(result.stderr)
-        
-        if result.returncode != 0:
-            print(f"Test {test_file} failed")
-            return False
-        elif self.verbosity > 0:
-            print(f"Test {test_file} passed")
-        return True
+        stdout_file = stderr_file = None
+        try:
+            if self.output_dir:
+                base_name = os.path.splitext(os.path.basename(test_file))[0]
+                stdout_file = open(os.path.join(self.output_dir, f"{base_name}.out"), 'w')
+                stderr_file = open(os.path.join(self.output_dir, f"{base_name}.err"), 'w')
+
+            result = subprocess.run(['mpiexec', '-n', '1', 'python', test_file], 
+                                    stdout=stdout_file or subprocess.PIPE, 
+                                    stderr=stderr_file or subprocess.PIPE,
+                                    universal_newlines=True)
+            
+            if self.output_dir:
+                stdout_content = f"Output redirected to {stdout_file.name}"
+                stderr_content = f"Errors redirected to {stderr_file.name}"
+            else:
+                stdout_content = result.stdout
+                stderr_content = result.stderr
+
+            if self.verbosity > 1 or result.returncode != 0:
+                print(stdout_content)
+                print(stderr_content)
+            
+            if result.returncode != 0:
+                print(f"Test {test_file} failed")
+                return False
+            elif self.verbosity > 0:
+                print(f"Test {test_file} passed")
+            return True
+        finally:
+            if stdout_file:
+                stdout_file.close()
+            if stderr_file:
+                stderr_file.close()
 
     def run(self):
         test_files = self.find_test_files()
+        
+        if self.output_dir and not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir)
         
         with Pool(processes=self.max_workers) as pool:
             results = pool.map(self.run_test, test_files)
@@ -59,10 +82,13 @@ if __name__ == '__main__':
                         help="Pattern to match test files (default: test*.py)")
     parser.add_argument('-w', '--workers', type=int, default=None,
                         help="Number of worker processes (default: number of CPU cores)")
+    parser.add_argument('-o', '--output-dir', default=None,
+                        help="Directory for test output files")
     args = parser.parse_args()
 
     runner = ParallelTestRunner(verbosity=args.verbosity, start_dir=args.start_dir, 
-                                pattern=args.pattern, max_workers=args.workers)
+                                pattern=args.pattern, max_workers=args.workers,
+                                output_dir=args.output_dir)
     result = runner.run()
     
     sys.exit(0 if result else 1)
