@@ -74,7 +74,7 @@ namespace femera {
       this->do_final_on_exit = false;
       std::printf ("proc  mpi NOTE MPI is already initialized.\n");
     }
-    if (!err && !did_mpi_init ()) {
+    if (!err && !did_mpi_init ()) {//TODO also check ! MPI_Finalized().
       err= MPI_Init_thread (argc,&argv, this->fmpi_required, & fmpi_provided);
 #ifdef FMR_DEBUG
       std::printf ("%u:Fmpi::task_init (%i) start...\n", get_proc_ix(), err);

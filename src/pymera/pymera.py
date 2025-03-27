@@ -22,14 +22,12 @@ class Jobs:
     def __exit__(self, exception_type, exception_value, traceback):
         self.run()
     def __del__(self):
-        pass
         #self.exit()
         fmr.fmr_delete_jobs(self.obj)
     
     def exit_python(self):
-        print('exiting Python...')
+        #print('exiting Python...')
         self.exit()
-        #fmr.fmr_delete_jobs(self.obj)
 
     #NOTE there is no method to remove Sims from Jobs.
     #     It would mess up the indexing.

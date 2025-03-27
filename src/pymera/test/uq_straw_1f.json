@@ -84,6 +84,9 @@
   }],
   "fmr:Runs": [{
     "fmr:Name": "Cantilever beam nominal solution",
+    "fmr:Sims": [0],
+    "fmr:Geom": [0],
+    "fmr:Grid": [0],
     "fmr:Part": [0],
     "fmr:Mtrl": [0],
     "fmr:BCs": [[0,1]],
@@ -92,6 +95,9 @@
     "fmr:Runs_n": 1
     },{ 
     "fmr:Name": "Cantilever beam sample solutions",
+    "fmr:Sims": [0],
+    "fmr:Geom": [0],
+    "fmr:Grid": [0],
     "fmr:Part": [0],
     "fmr:Mtrl": [0],
     "fmr:BCs": [[0,1]],
