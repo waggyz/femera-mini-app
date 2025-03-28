@@ -15,15 +15,10 @@
     "fmr:Grid_divs": [100, 5, 5],
     "fmr:Cell_type": "Block_6tet",
     "fmr:Elem_type": "Tet10",
-
-    "beam-base-nodeset": {
-      "fmr:Node_set": {
-        "fmr:Node_at": "fmr:Node_x_min"
-      }
-    },
-    "beam-tip-nodeset": {
-      "fmr:Node_set": { "fmr:Node_at": "fmr:Node_x_max" }
-    },
+    "fmr:Node_set": [
+      {"beam-base-nodeset": {"fmr:Node_at": "fmr:Node_x_min" }},
+      {"beam-tip-nodeset": {"fmr:Node_at": "fmr:Node_x_max" }}
+    ],
     "node_number": "fmr:Node_id",
     "nominal_node_coordinates": "fmr:Node_xyz",
     "beam_volume": "fmr:Volume"
@@ -40,11 +35,11 @@
     "fmr:Poissons_ratio": {"poissons": 0.285}
   }],
   "fmr:BCs": [{ 
-    "fmr:Name": "Beam base encastre",
+    "fmr:Name": "Encastre the beam's base.",
     "fmr:Node_set": "beam-base-nodeset",
     "fmr:Displacement_xyz": [0.000, 0.000, 0.000]
     },{ 
-    "fmr:Name": "Beam tip face displacement",
+    "fmr:Name": "Displace the beam's free end face.",
     "fmr::Data_type:Node_set": "beam-tip-nodeset",
     "fmr:Displacement_z": {"tip_displace_z": -0.010}
   }],
@@ -94,8 +89,8 @@
     "fmr:Post": [0],
     "fmr:Simulation_size": "XS",
     "fmr:Schedule": "Preallocate",
-    "fmr:CoresPerRun": 1,
-    "fmr:DuplicateRuns": "fmr:CPU_n",
+    "fmr:Cores_per_run": 1,
+    "fmr:Duplicate_runs": "fmr:CPU_n",
     "fmr:Runs_n": 1
     },{ 
     "fmr:Name": "Cantilever beam sample solutions",
@@ -109,7 +104,7 @@
     "fmr:Post": [1],
     "fmr:Simulation_size": "XS",
     "fmr:Schedule": "FIFO",
-    "fmr:CoresPerRun": 1,
+    "fmr:Cores_per_run": 1,
     "run_number": "fmr:Runs_ix",
     "fmr:Runs_n": {"sample_n": 0}
   }]

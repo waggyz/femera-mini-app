@@ -40,20 +40,8 @@ class TestPymeraSims(unittest.TestCase):
         self.assertTrue("femera" in self.sims.get_version().lower())
     def test_set_version(self):
         version = '0.0.0'
-        self.sims.set_name(version)
-        self.assertEqual(self.sims.get_name(), version)
-
-'''
-    def test_get_sims_version(self):
-        self.assertTrue("femera" in self.jobs.get_sims_version().lower())
-
-    def test_set_sims_version(self):
-        keep_vers = self.jobs.get_sims_version()
-        self.jobs.set_sims_version("Testing...")
-        self.assertEqual(self.jobs.get_sims_version(),"Testing...")
-        self.jobs.set_sims_version(keep_vers)
-        self.assertTrue("femera" in self.jobs.get_sims_version().lower())
-'''
+        self.sims.set_version(version)
+        self.assertEqual(self.sims.get_version(), version)
 
 
 if __name__ == '__main__':

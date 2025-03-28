@@ -6,11 +6,10 @@ NOTE names starting with fmr: are reserved for internal Femera identifiers.
 TODO change internal Femera identifiers to enums.
 """
 import numpy as np
-import csv
-import sys, os
 
-# Add path (parent directory) to find Pymera module.
-sys.path.append(os.path.join(os.path.dirname(sys.path[0])))
+import sys, os
+sys.path.append(os.path.dirname(os.path.dirname(sys.path[0]))) # grandparent
+sys.path.append(os.path.dirname(sys.path[0])) # parent
 
 import pymera
 #import uqtools as uq
@@ -65,7 +64,7 @@ def main():
     with pymera.Jobs() as jobs:
         print('\nHello '+jobs.get_version()+' '+jobs.get_name()+' (jobs)!')
         #
-        # Read simulation from JSON file.
+        # Read simulation set from JSON file.
         sims = jobs.add_sims_from_file(json_filname)
         #
         print('Hello '+sims.get_name()+' '+sims.get_version()+'!')
@@ -138,7 +137,7 @@ def main():
             print(f'- {name}: {nominal}')
     else:
         print('\nUser parameters (first row name)'
-            +' added or updated from CSV file:')
+             +' added or updated from CSV file:')
         for name, value in sims.parameter.items():
             print(f'- {name}: {value}')
     print('\nNumber of additional values (remaining rows) in the CSV file:')
