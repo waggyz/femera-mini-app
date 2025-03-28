@@ -592,8 +592,8 @@ mini: | intro
 	$(MAKE) $(JLIM) $(FMROUTS)
 	$(MAKE) $(JLIM) $(BUILD_CPU)/mini
 	$(MAKE) $(JSER) $(BUILD_CPU)/mini.valgrind.log
-	$(MAKE)  $(JSER) shared
-	# $(MAKE) $(JPAR) pymera # instead of shared?
+	#$(MAKE) $(JSER) shared
+	$(MAKE) $(JSER) pymera # instead of shared?
 	$(MAKE) $(JPAR) build-done
 
 perf: | intro
@@ -605,7 +605,14 @@ perf: | intro
 
 pymera: $(LIBFEMERA_SO)
 	$(call timestamp,$@,$^)
-	-src/pymera/pymera_test.py
+	@tools/run_python_tests_in_dir "src/pymera" \
+	  > $(BUILD_DIR)/pymera.out 2> $(BUILD_DIR)/pymera.err; \
+	if [ $$? -eq 0 ]; then \
+		printf "$(PASS) tools/run_python_tests_in_dir\n"; \
+	else \
+		printf "$(FAIL) tools/run_python_tests_in_dir\n"; \
+		printf "$(MORE) $(BUILD_DIR)/pymera.out\n"; \
+	fi
 
 tools: | intro
 	$(MAKE) $(JPAR) install-tools
