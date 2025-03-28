@@ -169,10 +169,10 @@ class Schedule(Enum):
     NONE = 0
     ERROR = auto()
     UNKNOWN = auto()
-    Preallocate = auto()
+    PREALLOCATE = auto()
     FIFO = auto()
     LIFO = auto()
-    Large_to_small = auto()
+    LARGE_TO_SMALL = auto()
     END = auto()
 '''
 C++
