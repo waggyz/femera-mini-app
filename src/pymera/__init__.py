@@ -6,4 +6,4 @@ from .sims import Sims
 #from .class3 import Class3
 #from .class3 import Class3
 
-__all__ = ['Jobs', 'Sims']
+__all__ = ['enumerators', 'Jobs', 'Sims']

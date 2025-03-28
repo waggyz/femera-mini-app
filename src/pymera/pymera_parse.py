@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from pymera_enum import fmr_enum, Data_type, Grid_structure
+from pymera.enumerators import fmr_enum, Data_type, Grid_structure
 
 import numpy as np
 import json

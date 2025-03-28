@@ -614,6 +614,7 @@ pymera: $(LIBFEMERA_SO)
 		printf "$(PASS) tools/run_python_tests_in_dir src/pymera\n"; \
 	else \
 		printf "$(FAIL) tools/run_python_tests_in_dir src/pymera\n"; \
+		grep "FA""IL" $(BUILD_DIR)/pymera/*; \
 		printf "$(MORE) $(BUILD_DIR)/pymera.out and $(BUILD_DIR)/pymera/*_test.py\n"; \
 	fi
 else

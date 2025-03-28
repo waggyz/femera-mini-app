@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
-from pymera_enum import Data_type, Grid_structure, Cell_type, Mtrl_physics
-from pymera_enum import Conditioner, Solver, Reduce, Part_method
-from pymera_libfemerac import fmr
-from pymera_parse import parse_sims_from_file, full_path_json_file
-#from jobs import Jobs
+from pymera.enumerators import Data_type, Grid_structure, Cell_type, Mtrl_physics
+from pymera.enumerators import Conditioner, Solver, Reduce, Part_method
+from pymera.pymera_libfemerac import fmr
 
-from atexit import register as atexit_register
 import numpy as np
 import csv
 from warnings import warn
@@ -13,43 +10,38 @@ from warnings import warn
 #------------------------------------------------------------------------------
 # Class to represent a Sims object.
 class Sims:
-    """
-    Initializes a Sims object with the given parameters.
-
-    Parameters:
-        jobs (Jobs_t): The Jobs object to associate with the Sims object.
-        name (str, optional): The name of the Sims object. Defaults to
-            the Femera library Sims name.
-        runs_n (int, optional): The number of runs for the Sims object.
-            Defaults to 1.
-
-    Attributes:
-        jobs (Jobs_t): The Jobs object associated with the Sims object.
-        name (str): The name of the Sims object.
-        runs_n (int): The number of runs for the Sims object.
-        geometries (list): The list of geometries associated with the Sims
-            object.
-        grids (list): The list of grids associated with the Sims object.
-        bcs (list): The list of boundary conditions associated with the Sims
-            object.
-        materials (list): The list of materials associated with the Sims
-            object.
-        preconditioner (object or None): The preconditioner associated with
-            the Sims object. Defaults to None.
-        solve (object or None): The solver associated with the Sims object.
-            Defaults to None.
-        post_processes (list): The list of post-processing functions
-            associated with the Sims object.
-        parameters (dict): The parameters associated with the Sims object.
-        partition_n (int): The partition number associated with the Sims
-            object. Defaults to 1.
-    """
     def __init__(self, jobs, name=None, version=None):
-        #if not isinstance(jobs, Jobs):
-        #    warn('\n pym sims WARN Sims must be created from Jobs.\n'
-        #         + '               '
-        #         + 'Try one of the add_sims* methods of a Jobs object.')
-        #    return None
+        """
+        Initializes a Sims object with the given parameters.
+
+        Parameters:
+            jobs (Jobs_t): The Jobs object to associate with the Sims object.
+            name (str, optional): The name of the Sims object. Defaults to
+                the Femera library Sims name.
+            runs_n (int, optional): The number of runs for the Sims object.
+                Defaults to 1.
+
+        Attributes:
+            jobs (Jobs_t): The Jobs object associated with the Sims object.
+            name (str): The name of the Sims object.
+            runs_n (int): The number of runs for the Sims object.
+            geometries (list): The list of geometries associated with the Sims
+                object.
+            grids (list): The list of grids associated with the Sims object.
+            bcs (list): The list of boundary conditions associated with the Sims
+                object.
+            materials (list): The list of materials associated with the Sims
+                object.
+            preconditioner (object or None): The preconditioner associated with
+                the Sims object. Defaults to None.
+            solve (object or None): The solver associated with the Sims object.
+                Defaults to None.
+            post_processes (list): The list of post-processing functions
+                associated with the Sims object.
+            parameters (dict): The parameters associated with the Sims object.
+            partition_n (int): The partition number associated with the Sims
+                object. Defaults to 1.
+        """
         self.jobs=jobs
         self.task_index = fmr.fmr_add_sims(jobs.obj)
         if name is not None:
@@ -99,7 +91,7 @@ class Sims:
     def set_version(self, vers):
         if vers is not None:
             fmr.fmr_set_sims_version(self.jobs.obj, self.task_index,
-                                     vers.encode('utf-8'))
+                                    vers.encode('utf-8'))
     
     def add_parameter(self, name, values=None, nominal=None):
         """

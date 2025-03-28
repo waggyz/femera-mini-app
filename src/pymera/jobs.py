@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-from pymera_enum import Data_type, Grid_structure, Cell_type, Mtrl_physics
-from pymera_enum import Conditioner, Solver, Reduce, Part_method
-from pymera_libfemerac import fmr
+from pymera.enumerators import Data_type, Grid_structure, Cell_type, Mtrl_physics
+from pymera.enumerators import Conditioner, Solver, Reduce, Part_method
+from pymera.pymera_libfemerac import fmr
 from pymera_parse import parse_sims_from_file, full_path_json_file
 from sims import Sims
 
@@ -74,5 +74,4 @@ class Jobs:
         elif(verbosity>255):
             verbosity=255
         return fmr.fmr_set_verbosity(self.obj, verbosity)
-
-
+    

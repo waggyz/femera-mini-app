@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import unittest
 
-import pymera_enum as pnm
+import enumerators as pnm
 
 class TestPymeraJobs(unittest.TestCase):
 
