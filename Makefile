@@ -245,6 +245,7 @@ ifeq ($(ENABLE_ZYCLOPS),ON)
 endif
 ifeq ($(ENABLE_PYMERA),ON)
   EXTERNAL_DOT+="Femera" -> "pymera" [color="green"]\n
+  EXTERNAL_DOT+="pymera" -> "numpy"\n
 endif
 ifeq ($(ENABLE_OMP),ON)
   EXTERNAL_DOT+="Femera" -> "OpenMP"\n
@@ -322,9 +323,9 @@ ifeq ($(ENABLE_PYBIND11),ON)
   # BUILD_TREE += $(BUILD_DIR)/external/pybind11/
   EXTERNAL_DOT+="pybind11" -> "Boost"\n
   EXTERNAL_DOT+="pybind11" -> "Python"\n
-  ifeq ($(ENABLE_PYMERA),ON)
-    EXTERNAL_DOT+="pymera" -> "pybind11"\n
-  endif
+  #ifeq ($(ENABLE_PYMERA),ON)
+  #  EXTERNAL_DOT+="pymera" -> "pybind11"\n
+  #endif
   # FMRFLAGS += -DFMR_HAS_PYBIND11
   PYBIND11_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_DIR)"
   PYBIND11_FLAGS += -DDOWNLOAD_CATCH=0
@@ -592,8 +593,9 @@ mini: | intro
 	$(MAKE) $(JLIM) $(FMROUTS)
 	$(MAKE) $(JLIM) $(BUILD_CPU)/mini
 	$(MAKE) $(JSER) $(BUILD_CPU)/mini.valgrind.log
-	#$(MAKE) $(JSER) shared
-	$(MAKE) $(JSER) pymera # instead of shared?
+ifeq ($(ENABLE_PYMERA),ON)
+	$(MAKE) $(JSER) pymera
+endif
 	$(MAKE) $(JPAR) build-done
 
 perf: | intro
@@ -603,17 +605,22 @@ perf: | intro
 	$(MAKE) $(JLIM) $(PRFOUTS) #TODO *.perf executable should run serially
 	$(MAKE) $(JPAR) perf-done
 
+ifeq ($(ENABLE_PYMERA),ON)
 pymera: $(LIBFEMERA_SO)
 	$(call timestamp,$@,$^)
 	@tools/run_python_tests_in_dir "src/pymera" \
 	  > $(BUILD_DIR)/pymera.out 2> $(BUILD_DIR)/pymera.err; \
 	if [ $$? -eq 0 ]; then \
-		printf "$(PASS) tools/run_python_tests_in_dir\n"; \
+		printf "$(PASS) tools/run_python_tests_in_dir src/pymera\n"; \
 	else \
-		printf "$(FAIL) tools/run_python_tests_in_dir\n"; \
-		printf "$(MORE) $(BUILD_DIR)/pymera.out\n"; \
+		printf "$(FAIL) tools/run_python_tests_in_dir src/pymera\n"; \
+		printf "$(MORE) $(BUILD_DIR)/pymera.out and $(BUILD_DIR)/pymera/*_test.py\n"; \
 	fi
-
+else
+pymera:
+	$(call timestamp,$@,$^)
+	printf "$(MORE) Set ENABLE_PYMERA:=ON to enable pymera.\n"
+endif
 tools: | intro
 	$(MAKE) $(JPAR) install-tools
 	$(call timestamp,$@,$^)

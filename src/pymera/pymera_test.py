@@ -29,7 +29,7 @@ class TestPymeraJobs(unittest.TestCase):
         self.assertTrue("job" in self.jobs.get_name().lower())
         print ('\nHello ' + self.jobs.get_version()
                +' '+self.jobs.get_name()
-             + ', '+"it's testing time!")
+               +', '+"it's testing time!")
         print ("This won't hurt a bit... ;)")
 
     def test_jobs_init(self):

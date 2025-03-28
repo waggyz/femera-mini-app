@@ -94,7 +94,7 @@ namespace femera {
     using Task_path_t = std::vector <fmr::Local_int>;
     using Work_time_t = fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>;
   private:
-    using Task_stck_t = std::deque <Work_spt>;
+    using Task_list_t = std::deque <Work_spt>;
   public:// variables ---------------------------------------------------------
     // classes with (mostly) only member methods public
     Work_time_t time = Work_time_t (); // performance timer, NOT thread-safe
@@ -102,7 +102,7 @@ namespace femera {
     data::File* data = nullptr;        // data, logging, and file handling
     test::Beds* test = nullptr;        // correctness and performance testing
   protected:// variables
-    Task_stck_t task_list ={};
+    Task_list_t task_list ={};
     std::string      name ="unknown work";
     std::string      abrv ="work";
     std::string   version = MAKESTR(FMR_VERSION);// default version string

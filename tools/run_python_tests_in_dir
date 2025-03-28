@@ -2,9 +2,9 @@
 
 if [ ! -z "$1" ]; then
   SCRIPTDIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-  OUTDIR="build/"${1/src/}
+  OUTDIR="build/"${1/src\//}
   #
-  $SCRIPTDIR/run_unittests_isolated -v -s "$1" -p '*_test.py' -o "$OUTDIR"
+  $SCRIPTDIR/run_unittests_parallel -v -s "$1" -p '*_test.py' -o "$OUTDIR"
 else
   >&2 echo "Please provide a directory containing *_test.py files."
 fi

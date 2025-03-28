@@ -123,9 +123,6 @@ ifeq ($(ENABLE_PETSC),ON)
     EXTERNAL_DOT+="mpi4py" -> "MPI"\n
     EXTERNAL_DOT+="mpi4py" -> "Python"\n
     PETSC_FLAGS += --download-mpi4py
-    ifeq ($(ENABLE_PYMERA),ON)
-      EXTERNAL_DOT+="pymera" -> "mpi4py"\n
-    endif
   endif
   ifeq ($(ENABLE_PETSC4PY),ON)
     # petsc4py requires numpy and (optional but highly recommended) mpi4py 
@@ -134,10 +131,6 @@ ifeq ($(ENABLE_PETSC),ON)
     EXTERNAL_DOT+="numpy" -> "Python"\n
     EXTERNAL_DOT+="Femera" -> "numpy" [color="cyan"]\n
     PETSC_FLAGS += --with-petsc4py
-    ifeq ($(ENABLE_PYMERA),ON)
-      EXTERNAL_DOT+="pymera" -> "numpy"\n
-      EXTERNAL_DOT+="pymera" -> "petsc4py"\n
-    endif
   endif
   ifeq ($(ENABLE_PETSC_HWLOC),ON)
     #TODO use hwloc instead of libnuma?

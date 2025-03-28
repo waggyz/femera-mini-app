@@ -32,6 +32,18 @@ class Sims_application(Enum):
     ML = auto()
     END = auto()
 
+
+class Simulation_size(Enum):
+    NONE = 0
+    ERROR = auto()
+    UNKNOWN = auto()
+    XS = auto()
+    S = auto()
+    M = auto()
+    L = auto()
+    XL = auto()
+    END = auto()
+
 class Shape_form(Enum):
     NONE = 0
     ERROR = auto()
@@ -152,6 +164,16 @@ class File_format(Enum):
     TEXT = auto()
     CSV = auto()
     END = auto()
+ 
+class Schedule(Enum):
+    NONE = 0
+    ERROR = auto()
+    UNKNOWN = auto()
+    Preallocate = auto()
+    FIFO = auto()
+    LIFO = auto()
+    Large_to_small = auto()
+    END = auto()
 '''
 C++
 enum class fmr::grid::Grid_structure {
@@ -172,6 +194,7 @@ enum class fmr::grid::Grid_structure {
 # Dictionary of enums ---------------------------------------------------------
 fmr_enum ={
     'fmr:Component': Component,
+    'fmr:Simulation_size': Simulation_size,
     'fmr:Shape_form': Shape_form,
     'fmr:Grid_structure': Grid_structure,
     'fmr:Cell_type': Cell_type,
@@ -182,7 +205,8 @@ fmr_enum ={
     'fmr:Part_method': Part_method,
     'fmr:Sims_application': Sims_application,
     'fmr:File_format': File_format,
-    'fmr:Analysis': Analysis
+    'fmr:Analysis': Analysis,
+    'fmr:Schedule': Schedule
 }
 #==============================================================================
 def create_enum_from_csv(file_path, enum_name, start_at=None):

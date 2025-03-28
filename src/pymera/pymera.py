@@ -130,12 +130,14 @@ class Sims:
         #
         self.geometries = []
         self.grids = []
-        self.bcs = []
+        self.partitions = []
         self.materials = []
-        self.preconditioner = None
-        self.solve = None
+        self.bcs = []
+        self.preconditioner = [None] #TODO self.solve.preconditioner
+        self.solve = []
         self.post_processes = []
-        self.partition_n = 1
+        self.runs = []
+        self.partition_n = 1 #TODO self.get_partition_n = len(self.partitions)
         #self.json_nominal = {}
         #self.json_parameter = {}
     def __enter__(self):

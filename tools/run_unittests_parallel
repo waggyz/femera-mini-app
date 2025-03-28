@@ -28,9 +28,9 @@ class IsolatedTestRunner:
                 print(f"\nRunning test: {test_file}")
 
             if self.verbosity > 0:
-                runline = ['mpiexec', '-n', '1', 'python', test_file, '-v']
+                runline = ['mpiexec', '-n', '1', 'python3', test_file, '-v']
             else:
-                runline = ['mpiexec', '-n', '1', 'python', test_file]
+                runline = ['mpiexec', '-n', '1', 'python3', test_file]
             result = subprocess.run(runline, 
                                     stdout=subprocess.PIPE, 
                                     stderr=subprocess.PIPE,
@@ -77,9 +77,9 @@ class ParallelTestRunner:
                 stderr_file = open(os.path.join(self.output_dir,
                                                 f"{base_name}.err"), 'w')
             if self.verbosity > 0:
-                runline = ['mpiexec', '-n', '1', 'python', test_file, '-v']
+                runline = ['mpiexec', '-n', '1', 'python3', test_file, '-v']
             else:
-                runline = ['mpiexec', '-n', '1', 'python', test_file]
+                runline = ['mpiexec', '-n', '1', 'python3', test_file]
             result = subprocess.run(runline, 
                                     stdout=stdout_file or subprocess.PIPE, 
                                     stderr=stderr_file or subprocess.PIPE,
@@ -102,6 +102,9 @@ class ParallelTestRunner:
             elif self.verbosity > 0:
                 print(f"Test {test_file} passed")
             return True
+        except Exception as e:
+            print(f"Error running test {test_file}: {str(e)}")
+            return False
         finally:
             if stdout_file:
                 stdout_file.close()

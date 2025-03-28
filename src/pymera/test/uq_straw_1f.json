@@ -1,7 +1,7 @@
 { "fmr:Sims": [ {
   "fmr:NOTE": "non-fmr: keys imply Python shared values and parameters.",
 
-  "fmr:Name": "Cantilever beam sims (uq_straw_1f)",
+  "fmr:Name": "Cantilever beam sims (uq_straw_1)",
   "fmr:Sims_application": "UQ",
   "fmr:Version": "0.1.6",
   "fmr:Geom": [{
@@ -92,6 +92,10 @@
     "fmr:BCs": [[0,1]],
     "fmr:Solve": [0],
     "fmr:Post": [0],
+    "fmr:Simulation_size": "XS",
+    "fmr:Schedule": "Preallocate",
+    "fmr:CoresPerRun": 1,
+    "fmr:DuplicateRuns": "fmr:CPU_n",
     "fmr:Runs_n": 1
     },{ 
     "fmr:Name": "Cantilever beam sample solutions",
@@ -103,7 +107,10 @@
     "fmr:BCs": [[0,1]],
     "fmr:Solve": [1],
     "fmr:Post": [1],
-    "fmr:Runs_n": {"sample_n": 0},
-    "run_number": "fmr:Runs_ix"
+    "fmr:Simulation_size": "XS",
+    "fmr:Schedule": "FIFO",
+    "fmr:CoresPerRun": 1,
+    "run_number": "fmr:Runs_ix",
+    "fmr:Runs_n": {"sample_n": 0}
   }]
  } ] }
