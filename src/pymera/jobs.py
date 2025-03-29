@@ -1,19 +1,23 @@
 #!/usr/bin/env python3
-from pymera.enumerators import Data_type, Grid_structure, Cell_type, Mtrl_physics
-from pymera.enumerators import Conditioner, Solver, Reduce, Part_method
+from pymera.enumerators import Data_type, Grid_structure, Cell_type, \
+    Mtrl_physics, Conditioner, Solver, Reduce, Part_method, Sims_file_format
 from pymera.pymera_libfemerac import fmr
 from pymera_parse import parse_sims_from_file, full_path_json_file
 from sims import Sims
 
-from atexit import register as atexit_register
 import numpy as np
 import csv
 from warnings import warn
+from atexit import register as atexit_register
 
 class Jobs:
     def __init__(self): # create instance
         self.obj = fmr.fmr_new_jobs()
         self.sims=[]
+        self.sims_format_from_file_extension = {
+            'json': Sims_file_format.JSON,
+            'csv': Sims_file_format.CSV
+        }
         atexit_register(self.exit_python)
     def __enter__(self): # enter context
         self.init()
@@ -39,9 +43,17 @@ class Jobs:
         self.sims.append(Sims(self, name=sims_name, version=sims_version))
         return self.sims[-1]
 
-    def add_sims_from_file(self, filename):
-        self.sims.append(parse_sims_from_file(Sims(self), filename))
-        return self.sims[-1]
+    def add_sims_from_file(self, filename, format=Sims_file_format.UNKNOWN):
+        if(format == Sims_file_format.UNKNOWN):
+            if '.' in filename: # Infer format from file extension.
+                ext = filename.split('.')[-1]
+                format = self.sims_format_from_file_extension[ext]
+        if(format == Sims_file_format.UNKNOWN):
+            print(f'WARNING Unknown sims file format: {filename}') # throw?
+        if((format.value > Sims_file_format.UNKNOWN.value) and
+           (format != Sims_file_format.END)):
+            self.sims.append(parse_sims_from_file(Sims(self), filename, format))
+            return self.sims[-1]
 
     def init(self):
         fmr.fmr_jobs_init(self.obj)

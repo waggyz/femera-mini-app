@@ -18,13 +18,10 @@ class Sims:
             jobs (Jobs_t): The Jobs object to associate with the Sims object.
             name (str, optional): The name of the Sims object. Defaults to
                 the Femera library Sims name.
-            runs_n (int, optional): The number of runs for the Sims object.
-                Defaults to 1.
 
         Attributes:
             jobs (Jobs_t): The Jobs object associated with the Sims object.
             name (str): The name of the Sims object.
-            runs_n (int): The number of runs for the Sims object.
             geometries (list): The list of geometries associated with the Sims
                 object.
             grids (list): The list of grids associated with the Sims object.
@@ -51,22 +48,18 @@ class Sims:
         #
         self.nominal = {}
         self.parameter = {}
-        self.sample_n = None
-        #
-        self.runs_n = 1 #TODO remove?
         #
         self.geometries = []
         self.grids = []
         self.partitions = []
         self.materials = []
         self.bcs = []
-        self.preconditioner = [None] #TODO self.solve.preconditioner
-        self.solve = []
-        self.post_processes = []
+        self.solvers = []
+        self.post_processors = []
         self.runs = []
-        self.partition_n = 1 #TODO self.get_partition_n = len(self.partitions)
-        #self.json_nominal = {}
-        #self.json_parameter = {}
+        #
+        self.sample_n = None # self.runs_n ?
+        #
     def __enter__(self):
         return(self)
     def __exit__(self, exception_type, exception_value, traceback):
@@ -182,7 +175,7 @@ class Sims:
     def get_post(self, name):
         # Placeholder for getting post-processing results
         # In a real implementation, this would return actual data.
-        return np.ones(self.runs_n)
+        return np.ones(self.sample_n)
 
     def set_partition_n(self, n=1):
         self.partition_n = n
@@ -240,7 +233,7 @@ class Sims:
 
     def add_post(self, name, at, sum, count=-1):
         #if(count<0):
-        #    self.count=self.runs_n
+        #    self.count=self.sample_n
         self.post_processes.append({
             "name": name,
             "at": at,
@@ -251,7 +244,7 @@ class Sims:
     def get_post(self, name):
         # Placeholder for getting post-processing results
         # In a real implementation, this would return actual data.
-        return np.ones(self.runs_n)
+        return np.ones(self.sample_n)
 
     def set_parameter(self, component, parameter, value):
         if component not in self.parameters:

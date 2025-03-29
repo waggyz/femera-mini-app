@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-from pymera.enumerators import fmr_enum, Data_type, Grid_structure
+from pymera.enumerators import fmr_enum, Data_type, Grid_structure, \
+    Sims_file_format
 
 import numpy as np
 import json
 
-def find_keys_used(obj, user_keys=True, enum_keys=True):
+def find_keys_used(obj, user_keys=True, enum_keys=False):
     """
     Recursively traverses a nested dictionary or list and returns a dictionary
     containing the keys that are not prefixed with "fmr:" and their
@@ -23,7 +24,7 @@ def find_keys_used(obj, user_keys=True, enum_keys=True):
     if isinstance(obj, dict):
         for key, val in obj.items():
             if enum_keys and (key in fmr_enum):
-                result[key] = fmr_enum[key][val.upper()]
+                result[key] = fmr_enum[key][val.split('fmr:')[1].upper()]
                 #result[key] = fmr_enum[key][val.upper()].value # integer
             if not key.startswith("fmr:"):
                 if isinstance(val, (int, float, str)):
@@ -46,25 +47,25 @@ def find_keys_used(obj, user_keys=True, enum_keys=True):
             result.update(find_keys_used(item, user_keys, enum_keys))
     return result
 
-def parse_sims_from_file(sims, filename):
-    #sims = Sims(self)
-    with open(filename, 'r') as file:
-        sims_json = json.load(file)#TODO use json()
-    if 'fmr:Sims' in sims_json:
-        sims_json = sims_json['fmr:Sims']
-        sims.parameter = find_keys_used(sims_json,
-                                        user_keys=True, enum_keys=False)
-        #
-        if 'fmr:Name' in sims_json[0]:
-            sims.set_name(sims_json[0]['fmr:Name'])
-        if 'fmr:Version' in sims_json[0]:
-            sims.set_version(sims_json[0]['fmr:Version'])
-    else:
-        print('Found no fmr:Sims in ' + filename)
-        return
-    #if 'fmr:Data:Name' in sims_json:
-    #    sims.name=sims_json['fmr:Data:Name']
-    #self.add_sims(name=sims_json['name'], runs_n=sims_json['runs_n'])
+def parse_sims_from_file(sims, filename, format):
+    if(format == Sims_file_format.JSON):
+        with open(filename, 'r') as file:
+            sims_json = json.load(file)#TODO use json()
+        if 'fmr:Sims' in sims_json:
+            sims_json = sims_json['fmr:Sims']
+            sims.parameter = find_keys_used(sims_json,
+                                            user_keys=True, enum_keys=False)
+            #
+            if 'fmr:Name' in sims_json[0]:
+                sims.set_name(sims_json[0]['fmr:Name'])
+            if 'fmr:Version' in sims_json[0]:
+                sims.set_version(sims_json[0]['fmr:Version'])
+        else:
+            print('Found no fmr:Sims in ' + filename)
+            return
+        #if 'fmr:Data:Name' in sims_json:
+        #    sims.name=sims_json['fmr:Data:Name']
+        #self.add_sims(name=sims_json['name'], runs_n=sims_json['runs_n'])
     return sims
 
 def is_terminal_list(lst):

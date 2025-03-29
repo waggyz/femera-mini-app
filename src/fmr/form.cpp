@@ -5,9 +5,34 @@
 #include <cfloat>   // DBL_EPSILON
 #include <chrono>
 #include <array>
+#include <codecvt>  //  deprecated in C++17?
+#include <locale>
 
 namespace femera {
 
+  size_t form::utf8_visible_strlen(const std::string& str) {//TODO test this
+    //NOTE AI generated, needs tests; consider moving to .ipp
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
+    std::u32string utf32 = converter.from_bytes(str);
+    
+    size_t count = 0;
+    for (char32_t ch : utf32) {
+      // Skip zero-width characters and combining marks
+      if (ch != 0x200B && ch != 0x200C && ch != 0x200D && // Zero-width characters
+        (ch < 0x0300 || ch > 0x036F) &&  // Combining Diacritical Marks
+        (ch < 0x1AB0 || ch > 0x1AFF) &&  // Combining Diacritical Marks Extended
+        (ch < 0x1DC0 || ch > 0x1DFF) &&  // Combining Diacritical Marks Supplement
+        (ch < 0x20D0 || ch > 0x20FF) &&  // Combining Diacritical Marks for Symbols
+        (ch < 0xFE20 || ch > 0xFE2F)) {  // Combining Half Marks
+        count++;
+    } }
+    return count;
+    /* WAS:
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+    std::wstring wide = converter.from_bytes(str);
+    return wide.length();
+    */
+  }
   std::string form::si_unit (// implemented here, not inline
   double v, std::string unit, const int min_digits, const std::string sign) {
     if (unit.size()>8) { unit = unit.substr (0,8); }
@@ -15,9 +40,9 @@ namespace femera {
       = (0.95 - DBL_EPSILON) * std::pow (10.0, double(min_digits - 1));
     int log1000 = 0;
     if (v > double(DBL_EPSILON) * 0.5) {//1.0e-24) {// was FLT_EPSILON
-    log1000 = int(std::log10 (v)) / 3 - ((v < 1.0) ? 1 : 0);
-    v *= std::pow (10.0, -3.0 * double(log1000));
-    if (v < threshold) { v *= 1000.0; log1000--; }//return std::to_string(log1000);
+      log1000 = int(std::log10 (v)) / 3 - ((v < 1.0) ? 1 : 0);
+      v *= std::pow (10.0, -3.0 * double(log1000));
+      if (v < threshold) {v *= 1000.0; log1000--;}//return std::to_string(log1000);
     }// else {return std::string("???");}
     const int i = log1000 + 6;
     const char prefix[]="afpnum kMGTPE";

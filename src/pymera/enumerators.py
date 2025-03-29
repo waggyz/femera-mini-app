@@ -32,16 +32,25 @@ class Sims_application(Enum):
     ML = auto()
     END = auto()
 
-
 class Simulation_size(Enum):
     NONE = 0
     ERROR = auto()
     UNKNOWN = auto()
+    AUTO = auto()
     XS = auto()
     S = auto()
     M = auto()
     L = auto()
     XL = auto()
+    END = auto()
+
+class Sims_file_format(Enum):
+    NONE = 0
+    ERROR = auto()
+    UNKNOWN = auto()
+    AUTO = auto()
+    JSON = auto()
+    CSV = auto()
     END = auto()
 
 class Shape_form(Enum):
@@ -63,6 +72,20 @@ class Cell_type(Enum):
     BLOCK_5TET = auto()
     BLOCK_6TET = auto()
     BLOCK_6PYRAMID = auto()
+    END = auto()
+
+
+class Node_at(Enum):
+    NONE = 0
+    ERROR = auto()
+    UNKNOWN = auto()
+    ORIGIN = auto()
+    NODE_X_MIN = auto()
+    NODE_Y_MIN = auto()
+    NODE_Z_MIN = auto()
+    NODE_X_MAX = auto()
+    NODE_Y_MAX = auto()
+    NODE_Z_MAX = auto()
     END = auto()
 
 class Part_method(Enum):
@@ -197,6 +220,7 @@ fmr_enum ={
     'fmr:Simulation_size': Simulation_size,
     'fmr:Shape_form': Shape_form,
     'fmr:Grid_structure': Grid_structure,
+    'fmr:Node_at': Node_at,
     'fmr:Cell_type': Cell_type,
     'fmr:Mtrl_physics': Mtrl_physics,
     'fmr:Conditioner': Conditioner,

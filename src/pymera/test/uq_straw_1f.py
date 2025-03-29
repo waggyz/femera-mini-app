@@ -50,7 +50,7 @@ def main():
     csv_filname = os.path.join(here,'uq_straw_1f.csv')
     csv_has_nominals = True
     #
-    if True: # Print tfull path JSON file.
+    if True: # Print full path JSON file.
         flat = full_path_json_file(json_filname)
         for key, value in flat.items():
             key_pretty = key.replace('\x1f', '\u00b7')

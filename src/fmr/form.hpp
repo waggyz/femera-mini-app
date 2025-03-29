@@ -32,6 +32,8 @@ namespace fmr {
 
 namespace femera { namespace form {
 
+  size_t utf8_visible_strlen(const std::string& str);
+
   std::string si_unit (const double val, std::string unit,
     const int min_digits, const std::string signchar);// defined in form.cpp
 

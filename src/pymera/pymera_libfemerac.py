@@ -22,6 +22,7 @@ Enum_int = ct.c_int32
 Local_int = ct.c_uint32
 Global_int = ct.c_uint64
 
+# Jobs ------------------------------------------------------------------------
 # Pass Jobs_t* as ct.c_void_p
 fmr.fmr_new_jobs.restype = ct.c_void_p
 fmr.fmr_delete_jobs.argtypes = [ct.c_void_p]
@@ -46,6 +47,7 @@ fmr.fmr_get_sims_n.argtypes = [ct.c_void_p]
 fmr.fmr_add_sims.argtypes = [ct.c_void_p]
 fmr.fmr_add_sims.restype = Local_int
 
+# Sims ------------------------------------------------------------------------
 fmr.fmr_get_sims_name.restype = ct.c_char_p
 fmr.fmr_get_sims_name.argtypes = [ct.c_void_p, Local_int]
 fmr.fmr_set_sims_name.argtypes = [ct.c_void_p, Local_int, ct.c_char_p]
@@ -53,3 +55,15 @@ fmr.fmr_set_sims_name.argtypes = [ct.c_void_p, Local_int, ct.c_char_p]
 fmr.fmr_get_sims_version.restype = ct.c_char_p
 fmr.fmr_get_sims_version.argtypes = [ct.c_void_p, Local_int]
 fmr.fmr_set_sims_version.argtypes = [ct.c_void_p, Local_int, ct.c_char_p]
+
+# Geom ------------------------------------------------------------------------
+
+
+# Grid ------------------------------------------------------------------------
+
+
+# Part ------------------------------------------------------------------------
+
+
+# Mtrl ------------------------------------------------------------------------
+
