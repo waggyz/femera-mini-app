@@ -39,8 +39,8 @@ class Jobs:
     def get_sims_n(self):
         return fmr.fmr_get_sims_n(self.obj)
     
-    def add_sims(self, sims_name=None, sims_version=None):
-        self.sims.append(Sims(self, name=sims_name, version=sims_version))
+    def add_sims(self, name=None, version=None):
+        self.sims.append(Sims(self, name=name, version=version))
         return self.sims[-1]
 
     def add_sims_from_file(self, filename, format=Sims_file_format.UNKNOWN):

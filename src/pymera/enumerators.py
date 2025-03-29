@@ -53,7 +53,7 @@ class Sims_file_format(Enum):
     CSV = auto()
     END = auto()
 
-class Shape_form(Enum):
+class Geometry_shape(Enum):
     NONE = 0
     ERROR = auto()
     UNKNOWN = auto()
@@ -74,6 +74,17 @@ class Cell_type(Enum):
     BLOCK_6PYRAMID = auto()
     END = auto()
 
+class Elem_type(Enum):
+    NONE = 0
+    ERROR = auto()
+    UNKNOWN = auto()
+    TRI3 = auto()
+    TRI6 = auto()
+    TRI10 = auto()
+    TET4 = auto()
+    TET10 = auto()
+    TET20 = auto()
+    END = auto()
 
 class Node_at(Enum):
     NONE = 0
@@ -218,10 +229,11 @@ enum class fmr::grid::Grid_structure {
 fmr_enum ={
     'fmr:Component': Component,
     'fmr:Simulation_size': Simulation_size,
-    'fmr:Shape_form': Shape_form,
+    'fmr:Geom_shape': Geometry_shape,
     'fmr:Grid_structure': Grid_structure,
     'fmr:Node_at': Node_at,
     'fmr:Cell_type': Cell_type,
+    'fmr:Elem_type': Elem_type,
     'fmr:Mtrl_physics': Mtrl_physics,
     'fmr:Conditioner': Conditioner,
     'fmr:Solver': Solver,

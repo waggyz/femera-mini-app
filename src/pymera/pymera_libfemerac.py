@@ -56,6 +56,11 @@ fmr.fmr_get_sims_version.restype = ct.c_char_p
 fmr.fmr_get_sims_version.argtypes = [ct.c_void_p, Local_int]
 fmr.fmr_set_sims_version.argtypes = [ct.c_void_p, Local_int, ct.c_char_p]
 
+fmr.fmr_get_sims_application.restype = Enum_int
+fmr.fmr_get_sims_application.argtypes = [ct.c_void_p, Local_int]
+fmr.fmr_set_sims_application.restype = Enum_int
+fmr.fmr_set_sims_application.argtypes = [ct.c_void_p, Local_int, Enum_int]
+
 # Geom ------------------------------------------------------------------------
 
 

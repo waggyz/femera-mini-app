@@ -13,6 +13,15 @@ namespace femera {
   inline
   void task::Sims::task_exit () {
   }
+  inline
+  fmr::Application task::Sims::get_application (){
+    return this->app;
+  }
+  inline
+  fmr::Application task::Sims::set_application (fmr::Application value){
+    this->app = value;
+    return this->app;
+  }//
 }//end femera namespace
 //end FEMERA_HAS_SIMS_IPP
 #endif

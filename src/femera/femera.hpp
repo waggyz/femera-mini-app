@@ -32,10 +32,16 @@ namespace fmc {// Femera C namespace
     FMR_EXPORT fmr::Local_int fmr_add_sims (Jobs_t*);
 
     FMR_EXPORT fmr::Local_int fmr_get_sims_n (Jobs_t*);
+
     FMR_EXPORT const char* fmr_get_sims_name (Jobs_t*, fmr::Local_int);
-    FMR_EXPORT const char* fmr_get_sims_version (Jobs_t*, fmr::Local_int);
     FMR_EXPORT void fmr_set_sims_name (Jobs_t*, fmr::Local_int, const char*);
+
+    FMR_EXPORT const char* fmr_get_sims_version (Jobs_t*, fmr::Local_int);
     FMR_EXPORT void fmr_set_sims_version (Jobs_t*, fmr::Local_int, const char*);
+
+    FMR_EXPORT fmr::Enum_int fmr_get_sims_application (Jobs_t*, fmr::Local_int);
+    FMR_EXPORT fmr::Enum_int fmr_set_sims_application 
+      (Jobs_t*, fmr::Local_int, fmr::Enum_int);
   }
 }//end fmc:: namespace
 

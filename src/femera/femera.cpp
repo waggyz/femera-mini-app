@@ -130,5 +130,25 @@ extern "C" {
     S->set_version (name);
     return;
   }
+  fmr::Enum_int fmc::fmr_get_sims_application
+   (fmc::Jobs_t* jobs, const fmr::Local_int ix) {
+    //TODO 
+    const auto S
+      = femera::Work::cast_via_work<femera::task::Sims> (jobs->get_task (ix));
+    if (S == nullptr) {
+      return static_cast<fmr::Enum_int> (fmr::Application::Error);
+    }
+    return static_cast<fmr::Enum_int> (S->get_application ());
+  }
+  fmr::Enum_int  fmc::fmr_set_sims_application
+    (fmc::Jobs_t* jobs, const fmr::Local_int ix, fmr::Enum_int val) {
+    const auto S
+      = femera::Work::cast_via_work<femera::task::Sims> (jobs->get_task (ix));
+    if (S == nullptr) {
+      return static_cast<fmr::Enum_int> (fmr::Application::Error);
+    }
+    return static_cast<fmr::Enum_int> (
+      S->set_application (static_cast<fmr::Application> (val)));
+  }
   // ==========================================================================
 }//end extern "C"

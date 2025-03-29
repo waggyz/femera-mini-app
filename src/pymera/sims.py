@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-from pymera.enumerators import Data_type, Grid_structure, Cell_type, Mtrl_physics
-from pymera.enumerators import Conditioner, Solver, Reduce, Part_method
+from pymera.enumerators import Data_type, Sims_application, \
+    Grid_structure, Cell_type, \
+    Mtrl_physics, Conditioner, Solver, Reduce, Part_method
 from pymera.pymera_libfemerac import fmr
 
 import numpy as np
@@ -85,6 +86,13 @@ class Sims:
         if vers is not None:
             fmr.fmr_set_sims_version(self.jobs.obj, self.task_index,
                                     vers.encode('utf-8'))
+    def get_application(self):
+        return Sims_application(
+            fmr.fmr_get_sims_application(self.jobs.obj, self.task_index))
+    def set_application(self, app):
+        return Sims_application(
+            fmr.fmr_set_sims_application(self.jobs.obj, self.task_index,
+                                          app.value))
     
     def add_parameter(self, name, values=None, nominal=None):
         """

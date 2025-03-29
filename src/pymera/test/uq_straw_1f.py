@@ -12,6 +12,9 @@ sys.path.append(os.path.dirname(os.path.dirname(sys.path[0]))) # grandparent
 sys.path.append(os.path.dirname(sys.path[0])) # parent
 
 import pymera
+from pymera.enumerators import fmr_enum, Data_type, Sims_application, \
+    Geometry_shape, Grid_structure, Cell_type, Elem_type, Node_at
+
 #import uqtools as uq
 
 from pymera_parse import full_path_json_file # temp. until put into pymera module
@@ -54,7 +57,7 @@ def main():
         flat = full_path_json_file(json_filname)
         for key, value in flat.items():
             key_pretty = key.replace('\x1f', '\u00b7')
-            print(f"{key_pretty} = {value}")
+            print(f"{key_pretty}: {value}")
         print()
     #
     #TODO Set Femera init options (MPI, OpenMP, verbosity, self-tests)
@@ -65,32 +68,32 @@ def main():
         print('\nHello '+jobs.get_version()+' '+jobs.get_name()+' (jobs)!')
         #
         # Read simulation set from JSON file.
-        sims = jobs.add_sims_from_file(json_filname)
+        sims_json = jobs.add_sims_from_file(json_filname)
         #
-        print('Hello '+sims.get_name()+' '+sims.get_version()+'!')
+        print('Hello '+sims_json.get_name()+' '+sims_json.get_version()+'!')
         #
         print('\nUser parameters, output fields, '
                 + 'and internal variables in JSON file:')
-        for name, value in sims.parameter.items():
+        for name, value in sims_json.parameter.items():
             if value is not None:
                 print(f'- {name}: {value}')
             else:
                 print(f'- {name}')
         #
         # Read parameters and nominal values from the .csv file.
-        sims.add_parameter_file(csv_filname,
+        sims_json.add_parameter_file(csv_filname,
             has_names=True, has_nominals=csv_has_nominals)
         #
         # Add beam_dimensions parameter [length, width, height] values.
-        sims.add_parameter('beam_dimensions',
+        sims_json.add_parameter('beam_dimensions',
             values=np.transpose(
-                [sims.parameter['length'],
-                 sims.parameter['width'],
-                 sims.parameter['height']]),
+                [sims_json.parameter['length'],
+                 sims_json.parameter['width'],
+                 sims_json.parameter['height']]),
             nominal=
-                [sims.nominal['length'],
-                 sims.nominal['width'],
-                 sims.nominal['height']]
+                [sims_json.nominal['length'],
+                 sims_json.nominal['width'],
+                 sims_json.nominal['height']]
         )
         # sims.init # Initialize just this sims object.
         # jobs.sims_init() # Initializes all the sims.
@@ -100,27 +103,51 @@ def main():
         print()
         # jobs.run() is called on exit from the jobs "with" context block.
         # * initializes (if needed) and runs all sims
-        # * sims.init() also performs sanity checks.
-        if False: #------------------------------------------------------------
-            #TODO Set up the same sims manually.
+        # * sims.init() also performs sanity checks. 
+        #----------------------------------------------------------------------
+        #TODO Set up the same sims manually.
+        #
+        sims_py = jobs.add_sims(name='Cantilever beam sims (uq_straw_1.py)', 
+                             version='0.1.6')
+        print('Hello ' +  sims_py.get_name() +' '+ sims_py.get_version() + '!')
+        #
+        print(sims_py.get_application())
+        sims_py.set_application(Sims_application.UQ)
+        print(sims_py.get_application())
+        #
+        if False:
+            #TODO Femera geom functions not implemented yet.
+            geom = sims.add_geomety()
+            geom.set_shape(Geometry_shape.BLOCK)
+            geom.set_dimensions([1.0, 0.05, 0.05], param='beam_dimensions')
+            #                        ***** name or param? *****
             #
-            sims = jobs.add_sims(name='Another simulation', version='0.0.1')
-            print('Hello ' +  sims.get_name() +' '+ sims.get_version() + '!')
+            grid = sims.add_grid()
+            grid.set_structure(Grid_structure.RECTILINEAR)
+            grid.set_divisions([100, 5, 5])
+            grid.set_cell_type(Cell_type.BLOCK_6TET)
+            grid.set_elem_type(Elem_type.TET10)
+            grid.add_node_set(Node_at.NODE_X_MIN, name='beam-base-nodest')
+            grid.add_node_set(Node_at.NODE_X_MAX, name='beam-tip-nodest')
             #
-            # Set nominal model parameters.
-            #TODO Femera sims functions not implemented yet.
+            grid.add_parameter('node_number', Data_type.NODE_ID)
+            grid.add_parameter('nominal_coordinates', Data_type.NODE_XYZ)
+            grid.add_parameter('beam_volume', Data_type.VOLUME)
             #
-            sims.init()
+            #
+            #
+            #sims.init()
             jobs.run()
-            sims.exit() # invalidates sims post-processing pointers?
-                        # (e.g., base_force)
+            #sims.exit() # invalidates sims post-processing pointers?
+            #            # (e.g., base_force)
             #------------------------------------------------------------------
+        print()
     #--------------------------------------------------------------------------
     # Get numpy array contents from Pymera.
-    base_force = sims.get_post('base-force-mag')
+    base_force = sims_json.get_post('base-force-mag')
     #
     base_stress_avg = base_force / (# averaged over each base area
-        sims.parameter['width'] * sims.parameter['height'])
+        sims_json.parameter['width'] * sims_json.parameter['height'])
     #
     # jobs.exit() is called before jobs is destroyed.
     #             * jobs is destroyed at the end of this function
@@ -133,15 +160,15 @@ def main():
     if csv_has_nominals:
         print('\nUser parameter names (first row) '
             +'with nominal values (second row) from CSV file:')
-        for name, nominal in sims.nominal.items():
+        for name, nominal in sims_json.nominal.items():
             print(f'- {name}: {nominal}')
     else:
         print('\nUser parameters (first row name)'
              +' added or updated from CSV file:')
-        for name, value in sims.parameter.items():
+        for name, value in sims_json.parameter.items():
             print(f'- {name}: {value}')
     print('\nNumber of additional values (remaining rows) in the CSV file:')
-    print(f'- sample_n: {sims.sample_n}')
+    print(f'- sample_n: {sims_json.sample_n}')
     print()
     #==========================================================================
     """

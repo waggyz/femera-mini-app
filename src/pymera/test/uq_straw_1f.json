@@ -1,11 +1,11 @@
 { "fmr:Sims": [ {
   "fmr:NOTE": "non-fmr: keys imply Python shared values and parameters.",
 
-  "fmr:Name": "Cantilever beam sims (uq_straw_1)",
-  "fmr:Sims_application": "fmr:UQ",
+  "fmr:Name": "Cantilever beam sims (uq_straw_1.json)",
   "fmr:Version": "0.1.6",
+  "fmr:Sims_application": "fmr:UQ",
   "fmr:Geom": [{
-    "fmr:Shape_form": "fmr:Block",
+    "fmr:Geometry_shape": "fmr:Block",
     "fmr:Dimensions_xyz": {"beam_dimensions": [1.000, 0.050, 0.050] },
     "fmr:NOTE": "Using beam_dimensions for testing; could use fmr:Dimension_x,..."
   },{
@@ -23,7 +23,7 @@
       {"beam-tip-nodeset": {"fmr:Node_at": "fmr:Node_x_max" }}
     ],
     "node_number": "fmr:Node_id",
-    "nominal_node_coordinates": "fmr:Node_xyz",
+    "nominal_coordinates": "fmr:Node_xyz",
     "beam_volume": "fmr:Volume"
   },{
     "fmr:Geom": 1,
@@ -32,7 +32,7 @@
       {"beam-tip-nodeset": {"fmr:Node_at": "fmr:Node_x_max" }}
     ],
     "node_number": "fmr:Node_id",
-    "nominal_node_coordinates": "fmr:Node_xyz",
+    "nominal_coordinates": "fmr:Node_xyz",
     "beam_volume": "fmr:Volume"
   }],
   "fmr:Part": [{
@@ -77,7 +77,7 @@
     "fmr:File_format": "fmr:CSV",
     "fmr:Field": [
       "node_number",
-      "nominal_node_coordinates",
+      "nominal_coordinates",
       "nominal_displacements"
     ]
     },{
