@@ -55,7 +55,6 @@ class TestPymeraSims(unittest.TestCase):
         self.assertEqual(self.sims.set_application(app), app)
         self.assertEqual(self.sims.get_application(), app)
 
-
 if __name__ == '__main__':
     unittest.main()
     

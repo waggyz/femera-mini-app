@@ -290,6 +290,6 @@ def create_enum_from_csv(file_path, enum_name, start_at=None):
     # Create and return the Enum class dynamically.
     return Enum(enum_name, enum_members)
 
-Data_type = create_enum_from_csv(
+Data = create_enum_from_csv(
     os.path.join(os.getcwd(),'data','src','data-type.csv'),
                 'Data_type', start_at=3)

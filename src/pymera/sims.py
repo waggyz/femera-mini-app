@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from pymera.enumerators import Data_type, Sims_application, \
+from pymera.enumerators import Data, Sims_application, \
     Grid_structure, Cell_type, \
     Mtrl_physics, Conditioner, Solver, Reduce, Part_method
 from pymera.pymera_libfemerac import fmr

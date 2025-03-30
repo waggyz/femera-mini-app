@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from pymera.enumerators import fmr_enum, Data_type, Grid_structure, \
+from pymera.enumerators import fmr_enum, Data, Grid_structure, \
     Sims_file_format
 
 import numpy as np

@@ -12,8 +12,10 @@ sys.path.append(os.path.dirname(os.path.dirname(sys.path[0]))) # grandparent
 sys.path.append(os.path.dirname(sys.path[0])) # parent
 
 import pymera
-from pymera.enumerators import fmr_enum, Data_type, Sims_application, \
-    Geometry_shape, Grid_structure, Cell_type, Elem_type, Node_at
+from pymera.enumerators import fmr_enum, Data, Sims_application, \
+    Geometry_shape, Grid_structure, Part_method, Mtrl_physics, \
+    Cell_type, Elem_type, Node_at
+    
 
 #import uqtools as uq
 
@@ -105,36 +107,80 @@ def main():
         # * initializes (if needed) and runs all sims
         # * sims.init() also performs sanity checks. 
         #----------------------------------------------------------------------
-        #TODO Set up the same sims manually.
+        # Set up the same sims manually.
         #
         sims_py = jobs.add_sims(name='Cantilever beam sims (uq_straw_1.py)', 
                              version='0.1.6')
-        print('Hello ' +  sims_py.get_name() +' '+ sims_py.get_version() + '!')
+        print(f'Hello {sims_py.get_name()} {sims_py.get_version()}!')
         #
-        print(sims_py.get_application())
         sims_py.set_application(Sims_application.UQ)
-        print(sims_py.get_application())
+        # sims_py.set_property(Sims_application.UQ) #TODO
+        #
+        print(f'Are you ready to do some {sims_py.get_application().name}?')
         #
         if False:
-            #TODO Femera geom functions not implemented yet.
+            #TODO Implement geometry functions.
             geom = sims.add_geomety()
-            geom.set_shape(Geometry_shape.BLOCK)
-            geom.set_dimensions([1.0, 0.05, 0.05], param='beam_dimensions')
-            #                        ***** name or param? *****
+            geom.set_property(Geometry_shape.BLOCK)
+            geom.set_property(Data.DIVISIONS, [1.0, 0.05, 0.05],
+                              param='beam_dimensions')
             #
-            grid = sims.add_grid()
-            grid.set_structure(Grid_structure.RECTILINEAR)
-            grid.set_divisions([100, 5, 5])
-            grid.set_cell_type(Cell_type.BLOCK_6TET)
-            grid.set_elem_type(Elem_type.TET10)
-            grid.add_node_set(Node_at.NODE_X_MIN, name='beam-base-nodest')
-            grid.add_node_set(Node_at.NODE_X_MAX, name='beam-tip-nodest')
+            grid = sims.add_grid(for_geometry=geom)
+            grid.set_property(Grid_structure.RECTILINEAR)
+            grid.set_property(Cell_type.BLOCK_6TET)
+            grid.set_property(Elem_type.TET10)
+            grid.set_property(Data.GRID_DIVISIONS, [100, 5, 5])
             #
-            grid.add_parameter('node_number', Data_type.NODE_ID)
-            grid.add_parameter('nominal_coordinates', Data_type.NODE_XYZ)
-            grid.add_parameter('beam_volume', Data_type.VOLUME)
+            grid.add_node_set(Node_at.NODE_X_MIN, param='beam-base-nodest')
+            grid.add_node_set(Node_at.NODE_X_MAX, param='beam-tip-nodest')
             #
+            grid.add_param('node_number', Data.NODE_ID)
+            grid.add_param('nominal_coordinates', Data.NODE_XYZ)
+            grid.add_param('beam_volume', Data.VOLUME)
             #
+            part = sims.add_part(for_grid=grid)
+            part.set_propertry(Part_method.SINGLE)
+            #
+            bc_base = sims.add_bcs(name="Encastre the beam's base.")
+            bc_base.set_property(Data.Node_set, param='beam-base-nodeset')
+            bc_base.set_property(Data.Displacement_xyz, [0.0, 0.0, 0.0])
+            #
+            bc_tip = sims.add_bcs(name="Displace the beam's free end face.")
+            bc_tip.set_property(Data.Node_set, param='beam-tip-nodeset')
+            bc_tip.set_property(Data.Displacement_z,-0.010,
+                                  param='tip_displace_z')
+            #
+            mtrl = sims.add_material(name="Basic steel")
+            mtrl.set_propertry(Mtrl_physics.ELASTIC_ISOTROPIC)
+            mtrl.set_propertry(Data.YOUNGS_MODULUS, 210E9, param='youngs')
+            mtrl.set_propertry(Data.POISSONS_RATIO, 0.285, param='poissons')
+            #
+            solve = sims.add_solver(name='Solve nominal beam.')
+            solve.set_parameter(Analysis.STATIC)
+            solve.set_parameter(Conditioner.JACOBI)
+            solve.set_parameter(Solver.PCG)
+            solve.set_parameter('nominal_displacements', Data.DISPLACEMENT_XYZ)
+            #
+            post = sims.add_post()
+            post.set_parameter(Data.FILE_NAME, 'uq_straw_1_nominal.csv')
+            post.set_parameter(Data.FIELD,
+                param=['node_number',
+                       'nominal_coordinates',
+                       'nominal_displacements'])
+            #
+            runs = sims.add_runs()
+            sims.set_parameter(Simulation_size.XS)
+            sims.set_parameter(Data.CORES_PER_RUN, 1)
+            sims.set_parameter(Data.RUNS_N, 1)
+            sims.set_parameter(Duplicate_runs.CPU_N)
+            runs.add_sims(0)
+            runs.add_Geom(0)
+            runs.add_Grid(0)
+            runs.add_Part(0)
+            runs.add_Mtrl(0)
+            runs.add_BCs([0,1])
+            runs.add_Solve(0)
+            runs.add_Post(0)
             #
             #sims.init()
             jobs.run()

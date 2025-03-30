@@ -9,6 +9,6 @@ from .sims import Sims
 from .enumerators import Component, Simulation_size, Geometry_shape, \
     Grid_structure, Cell_type, Mtrl_physics, Conditioner, Solver, Reduce, \
     Part_method, Sims_application, File_format, Analysis, Schedule, \
-    Data_type
+    Data
 
 __all__ = ['enumerators', 'Jobs', 'Sims']
