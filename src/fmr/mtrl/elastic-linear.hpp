@@ -12,15 +12,20 @@
 namespace fmr { namespace mtrl { namespace elastic {
   //
   template <typename F>
-  using Isotropic_lame_parameters  = F[ 2];
+  using Isotropic_lame_parameters  = F[ 2];// lambda, mu (shear modulus, C44)
+  template <typename F>                // C11=C22=C33, C44=C55=C66, C12=C13=C23
+  using DMAT_cubic_constants       = F[ 3];// [C11 C44 C12], includes isotropic
+#if 0
+  template <typename F>              // C11=C22, C33, C44=C55, C66, C12, C13=C23
+  using Hexagonal_dmat_constants   = F[ 6];// 5 independent, C66=(C11-C12)*0.5
+  // Tetragonal, Rhombohedral: 7
+#endif
+  template <typename F>           // C11, C22, C33, C44, C55, C66, C12, C13, C23
+  using DMAT_orthotropic_constants = F[ 9];//inc. orthorhombic crystal structure
   template <typename F>
-  using Cubic_dmat_constants       = F[ 3];
+  using DMAT_symm                  = F[21];// Triclinic crystal structure
   template <typename F>
-  using Orthotropic_dmat_constants = F[ 9];
-  template <typename F>
-  using dmat_symm                  = F[21];
-  template <typename F>
-  using dmat_full                  = F[36];
+  using DMAT_full                  = F[36];
   //
   template <typename F,///NOTE H volatile for performance testing
   typename std::enable_if<std::is_floating_point<F>::value>::type* = nullptr>

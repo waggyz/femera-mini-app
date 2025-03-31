@@ -148,7 +148,7 @@ def main():
             bc_tip = sims.add_bcs(name="Displace the beam's free end face.")
             bc_tip.set_property(Data.Node_set, param='beam-tip-nodeset')
             bc_tip.set_property(Data.Displacement_z,-0.010,
-                                  param='tip_displace_z')
+                                param='tip_displace_z')
             #
             mtrl = sims.add_material(name="Basic steel")
             mtrl.set_propertry(Mtrl_physics.ELASTIC_ISOTROPIC)
@@ -163,10 +163,9 @@ def main():
             #
             post = sims.add_post()
             post.set_parameter(Data.FILE_NAME, 'uq_straw_1_nominal.csv')
-            post.set_parameter(Data.FIELD,
-                param=['node_number',
-                       'nominal_coordinates',
-                       'nominal_displacements'])
+            post.set_parameter(Data.FIELD, param=['node_number',
+                                                  'nominal_coordinates',
+                                                  'nominal_displacements'])
             #
             runs = sims.add_runs()
             sims.set_parameter(Simulation_size.XS)

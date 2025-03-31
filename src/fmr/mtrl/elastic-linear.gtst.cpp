@@ -33,7 +33,7 @@ const static fmr::Perf_int Mega = fmr::Perf_int (1000000l);
 //
 const static fmr::mtrl::elastic::Isotropic_lame_parameters<fmr::Phys_float>
   test_lame = {2.0, 1.0};// lambda, mu
-const static fmr::mtrl::elastic::Cubic_dmat_constants<fmr::Phys_float>
+const static fmr::mtrl::elastic::DMAT_cubic_constants<fmr::Phys_float>
   test_cubic = {test_lame[0] + 2.0*test_lame[1], test_lame[0], test_lame[1]};
 volatile fmr::Phys_float test_H [9] = {
   1.0, 0.0, 0.0,
@@ -47,6 +47,16 @@ const fmr::Phys_float correct_eps
 inline
 fmr::Perf_float mtrl_iso3_dmat
  (const fmr::Perf_int test_n=500l *Mega/1) {// ~ 10 sec
+  /**
+   * Measures the performance of a 3D isotropic linear elasticity material model
+   * using a D-matrix (material elastic response matrix) and prints performance
+   * metrics per core.
+   *
+   * @param test_n Number of iterations for the test (default is 500 * Mega / 1)
+   *
+   * @return The performance measurement in material response computations per
+   * second if the output is correct, otherwise returns NaN.
+   */
   const auto omp_n = size_t( omp_get_max_threads ());
   std::valarray<fmr::Phys_float>
     out (omp_n);// performance if correct, nan if not
@@ -69,7 +79,7 @@ fmr::Perf_float mtrl_iso3_dmat
     const fmr::Phys_float c1 = lambda + 2.0*mu;
     const fmr::Phys_float c2 = lambda;
     const fmr::Phys_float c3 = mu;
-    const fmr::mtrl::elastic::dmat_full<fmr::Phys_float> D = {
+    const fmr::mtrl::elastic::DMAT_full<fmr::Phys_float> D = {
       c1, c2, c2, 0 , 0 , 0,
       c2, c1, c2, 0 , 0 , 0,
       c2, c2, c1, 0 , 0 , 0,
@@ -77,6 +87,24 @@ fmr::Perf_float mtrl_iso3_dmat
       0 , 0 , 0 , 0 , c3, 0,
       0 , 0 , 0 , 0 , 0 , c3
     };
+#if 0
+    const fmr::mtrl::elastic::DMAT_symm<fmr::Phys_float> Dlt = {
+      c1,// lower trianglular
+      c2, c1,
+      c2, c2, c1,
+      0 , 0 , 0 , c3,
+      0 , 0 , 0 , 0 , c3,
+      0 , 0 , 0 , 0 , 0 , c3
+    };
+    const fmr::mtrl::elastic::DMAT_symm<fmr::Phys_float> Dut = {
+      c1, c2, c2, 0 , 0 , 0,// upper trianglular
+          c1, c2, 0 , 0 , 0,
+              c1, 0 , 0 , 0,
+                  c3, 0 , 0,
+                      c3, 0,
+                         c3
+    };
+#endif
     volatile fmr::Phys_float H [9] = {
       test_H[0], test_H[1], test_H[2],
       test_H[3], test_H[4], test_H[5],

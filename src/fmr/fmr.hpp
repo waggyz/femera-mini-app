@@ -13,6 +13,7 @@ namespace fmr {
  * This "using" syntax is preferred to "typedef" in the Google C++ Style Guide.
  * https://google.github.io/styleguide/cppguide.html#Aliases
  */
+  using Bool       = bool          ;// native boolean type 
   // internal ints
   using   Exit_int = int           ;// system return code type
   using   Team_int = uintptr_t     ;// cast-compatible with MPI_comm from mpi.h
@@ -48,7 +49,7 @@ namespace fmr {
 //    Grid, Phys, Algo, Cond, Post, Plot,//FIXME align with data-vals-type.inc
     end// The last item (end) is for indicating the number of enumerated values.
   };
-  enum class Data_type : Enum_int { None=0, Error, Unknown,
+  enum class Data_item : Enum_int { None=0, Error, Unknown,
 #include "data-type-enum.inc"
     end
   };
@@ -60,7 +61,7 @@ namespace fmr {
     */
     return static_cast <typename std::underlying_type<E>::type> (e);
   }
-  static const std::array <Vals_type, enum2val (Data_type::end)+1>
+  static const std::array <Vals_type, enum2val (Data_item::end)+1>
   vals_type = {
     Vals_type::None,
     Vals_type::Error,
@@ -69,7 +70,7 @@ namespace fmr {
     Vals_type::None
   };
 #if 1
-  static const std::array <std::string, enum2val (Data_type::end)+1>
+  static const std::array <std::string, enum2val (Data_item::end)+1>
   vals_name = {
     "data_none",
     "data_err",
@@ -77,7 +78,7 @@ namespace fmr {
 #include "data-type-name.inc"
     "END"
   };
-  static const std::array <std::string, enum2val (Data_type::end)+1>
+  static const std::array <std::string, enum2val (Data_item::end)+1>
   vals_info = {
     "no data",
     "data error",

@@ -15,10 +15,10 @@ TEST(FmrPerfMeter, StructSize) {
 }
 #endif
 TEST(FmrPerfMeter, Startup) {
-  EXPECT_FLOAT_EQ(perf.get_busy_s (), fmr::Perf_float(0));
-  EXPECT_GT(perf.get_idle_s (), fmr::Perf_float(0));
-  EXPECT_GT(perf.get_work_s (), fmr::Perf_float(0));
-  EXPECT_FLOAT_EQ(perf.get_idle_s (), perf.get_work_s ());
+  EXPECT_DOUBLE_EQ(double(perf.get_busy_s ()), double(0));
+  EXPECT_GT(double(perf.get_idle_s ()), double(0));
+  EXPECT_GT(double(perf.get_work_s ()), double(0));
+  EXPECT_DOUBLE_EQ(double(perf.get_idle_s ()), double(perf.get_work_s ()));
   perf.add_idle_time_now ();
   EXPECT_GT(perf.get_idle_s (), first_idle);
 }
@@ -35,8 +35,9 @@ TEST(FmrPerfMeter, Naptime) {
 }
 TEST(FmrPerfMeter, ArithmeticIntensity) {
   perf.add_count (0, 1000, 500, 500);
-  EXPECT_FLOAT_EQ(perf.get_ai (), fmr::Perf_float(1.0));
-  EXPECT_FLOAT_EQ(perf.get_ai (), perf.get_arithmetic_intensity ());
+  EXPECT_DOUBLE_EQ(double(perf.get_ai ()), double(1.0));
+  EXPECT_DOUBLE_EQ(double(perf.get_ai ()),
+    double(perf.get_arithmetic_intensity ()));
 }
 int main (int argc, char** argv) {
   return femera::test:: early_main (&argc, argv);

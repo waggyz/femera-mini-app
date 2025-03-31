@@ -63,6 +63,7 @@ namespace fmr { namespace perf {
     Meter (const std::string& unit_name) noexcept;
     Meter () =default;
   private:// All member variables are private.
+    std::string unit_name = std::string("units");
     Timepoint tick    = ::fmr::perf::get_now_ns ();
     Elapsed   idle_ns = 0;
     Elapsed   busy_ns = 0;
@@ -71,7 +72,6 @@ namespace fmr { namespace perf {
     I         read_n  = 0;// bytes in
     I         save_n  = 0;// bytes out
     bool      is_ok   = false;
-    std::string unit_name = std::string("units");
   };
 } }// end fmr::perf:: namespace
 
