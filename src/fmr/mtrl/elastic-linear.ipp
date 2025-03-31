@@ -95,7 +95,6 @@ ConformalVector multiplyMatrixVector(const Matrix6x6 *matrix, const ConformalVec
     }
     return result;
 }
-Exp
 #endif
 #ifdef FMR_HAS_MKL
   template <typename F,// assume 75 FLOP?
@@ -122,7 +121,22 @@ Exp
   typename std::enable_if<std::is_floating_point<F>::value>::type* = nullptr >
   static inline
   void linear_3d_isotropic_lame
-    (F* stress, const F lambda, const F mu, volatile F* H, F* HT) {
+  (F* stress, const F lambda, const F mu, volatile F* H) {
+    const fmr::Local_int T[9] = {0, 3, 6, 1, 4, 7, 2, 5, 8};
+    for (fmr::Local_int i=0; i < 9; ++i) {
+      stress[i] = mu * (H[i] + H[T[i]]);// 18 FLOP
+    }
+    const F lambda_trace = lambda * (H[0] + H[4] + H[8]);//3 FLOP
+    //
+    stress [0] += lambda_trace;// 1 FLOP
+    stress [4] += lambda_trace;// 1 FLOP
+    stress [8] += lambda_trace;// 1 FLOP
+  }
+  template <typename F,// 24 FLOP
+  typename std::enable_if<std::is_floating_point<F>::value>::type* = nullptr >
+  static inline
+  void linear_3d_isotropic_lame
+  (F* stress, const F lambda, const F mu, volatile F* H, F* HT) {
     //
     HT [0] = H [0]; HT [1] = H [3]; HT [2] = H [6];
     HT [3] = H [1]; HT [4] = H [4]; HT [5] = H [7];
@@ -131,10 +145,6 @@ Exp
       stress[i] = mu * (H[i] + HT[i]);// 18 FLOP
     }
     const F lambda_trace = lambda * (H[0] + H[4] + H[8]);//3 FLOP
-    //
-    stress [0] += lambda_trace;// 1 FLOP
-    stress [4] += lambda_trace;// 1 FLOP
-    stress [8] += lambda_trace;// 1 FLOP
   }
   template <typename F,// 21 FLOP
   typename std::enable_if<std::is_floating_point<F>::value>::type* = nullptr>
@@ -153,29 +163,12 @@ Exp
     stress [6] = stress [2];
     stress [3] = stress [1];
   }
-  template <typename F,// 21 FLOP
-  typename std::enable_if<std::is_floating_point<F>::value>::type* = nullptr>
-  static inline
-  void linear_3d_cubic_scalar_b
-    (F* stress, const F c1,const F c2,const F c3, volatile F* H, F* stress_v) {
-    //
-    stress_v [0] = c1 * H[0] + c2 * H[4] + c2 * H[8];// 5 FLOP
-    stress_v [1] = c2 * H[0] + c1 * H[4] + c2 * H[8];// 5 FLOP
-    stress_v [2] = c2 * H[0] + c2 * H[4] + c1 * H[8];// 5 FLOP
-    stress_v [3] = (H[5] + H[7]) * c3;// 2 FLOP
-    stress_v [4] = (H[2] + H[6]) * c3;// 2 FLOP
-    stress_v [5] = (H[1] + H[3]) * c3;// 2 FLOP
-    //
-    stress[0] = stress_v[0]; stress[1] = stress_v[5]; stress[2] = stress_v[4];
-    stress[3] = stress_v[5]; stress[4] = stress_v[1]; stress[5] = stress_v[3];
-    stress[6] = stress_v[4]; stress[7] = stress_v[3]; stress[8] = stress_v[2];
-  }
 #ifdef FMR_HAS_AVX
-  template <typename F,
-  typename std::enable_if<std::is_same<F, double>::value>::type* = nullptr>
+//  template <typename F,
+//  typename std::enable_if<std::is_same<F, double>::value>::type* = nullptr>
   static inline
   void linear_3d_isotropic_avx
-    (F* fS, const F lambda, const F mu, volatile __m256d* vH) {
+    (double* fS, const double lambda, const double mu, volatile __m256d* vH) {
     //
     _mm256_store_pd (&fS[0], vH[0]);
     _mm256_store_pd (&fS[4], vH[1]);
@@ -198,11 +191,11 @@ Exp
   }
 #endif
 #ifdef FMR_HAS_AVX2
-  template <typename F,
-  typename std::enable_if<std::is_same<F, double>::value>::type* = nullptr>
+//  template <typename F,
+//  typename std::enable_if<std::is_same<F, double>::value>::type* = nullptr>
   static inline//NOTE vA volatile for performance testing
   void linear_3d_isotropic_avx2
-    (volatile __m256d* vA, const F lambda, const F mu) {
+    (volatile __m256d* vA, const double lambda, const double mu) {
     //
     //vA is strain coming in and stress going out.
     //
@@ -253,5 +246,22 @@ Exp
 #endif
   }
 #endif
+template <typename F,// 21 FLOP
+typename std::enable_if<std::is_floating_point<F>::value>::type* = nullptr>
+static inline
+void linear_3d_cubic_scalar_b
+  (F* stress, const F c1,const F c2,const F c3, volatile F* H, F* stress_v) {
+  //
+  stress_v [0] = c1 * H[0] + c2 * H[4] + c2 * H[8];// 5 FLOP
+  stress_v [1] = c2 * H[0] + c1 * H[4] + c2 * H[8];// 5 FLOP
+  stress_v [2] = c2 * H[0] + c2 * H[4] + c1 * H[8];// 5 FLOP
+  stress_v [3] = (H[5] + H[7]) * c3;// 2 FLOP
+  stress_v [4] = (H[2] + H[6]) * c3;// 2 FLOP
+  stress_v [5] = (H[1] + H[3]) * c3;// 2 FLOP
+  //
+  stress[0] = stress_v[0]; stress[1] = stress_v[5]; stress[2] = stress_v[4];
+  stress[3] = stress_v[5]; stress[4] = stress_v[1]; stress[5] = stress_v[3];
+  stress[6] = stress_v[4]; stress[7] = stress_v[3]; stress[8] = stress_v[2];
+}
 
 } } }//end namespace fmr::mtrl::elastic

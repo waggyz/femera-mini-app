@@ -48,26 +48,37 @@ namespace fmr { namespace mtrl { namespace elastic {
   typename std::enable_if<std::is_floating_point<F>::value>::type* = nullptr>
   static inline
   void linear_3d_isotropic_lame
-    (F* stress, const F lambda, const F mu, volatile F* H, F* HT)
+  (F* stress, const F lambda, const F mu, volatile F* H, F* HT)
     __attribute__((optimize ("O3")));
   //
 #ifdef FMR_HAS_AVX
-  template <typename F,///NOTE vH volatile for performance testing
-  typename std::enable_if<std::is_same<F, double>::value>::type* = nullptr>
+//  template <typename F,///NOTE vH volatile for performance testing
+//  typename std::enable_if<std::is_same<F, double>::value>::type* = nullptr>
   static inline
   void linear_3d_isotropic_avx
-    (F* stress, const F lambda, const F mu, volatile __m256d* vH)
+    (double* stress, const double lambda, const double mu, volatile __m256d* vH)
     __attribute__((optimize ("O3")));
 #endif
-  //
 #ifdef FMR_HAS_AVX2
-  template <typename F,
-  typename std::enable_if<std::is_same<F, double>::value>::type* = nullptr>
+//  template <typename F,
+//  typename std::enable_if<std::is_same<F, double>::value>::type* = nullptr>
   static inline//NOTE vA volatile for performance testing
-  // Strain goes into vA, stress comes out aofs vA
+  // Strain goes into vA, stress comes out as vA.
   void linear_3d_isotropic_avx2
-    (volatile __m256d* vA, const F lambda, const F mu)
+    (volatile __m256d* vA, const double lambda, const double mu)
     __attribute__((optimize ("O3")));
+    
+  #if 0
+  static inline
+  void linear_3d_isotropic_lame_avx2
+  (F* stress, const F lambda, const F mu, volatile __m256s* H);
+
+  template <typename F,// 24 FLOP
+  typename std::enable_if<std::is_floating_point<F>::value>::type* = nullptr >
+  static inline
+  void linear_3d_isotropic_lame_avx2
+  (F* stress, const F lambda, const F mu, volatile __m256d* H);
+#endif
 #endif
   //
   template <typename F,///NOTE H volatile for performance testing

@@ -52,7 +52,7 @@ fmr::Perf_float mtrl_iso3_dmat
    * using a D-matrix (material elastic response matrix) and prints performance
    * metrics per core.
    *
-   * @param test_n Number of iterations for the test (default is 500 * Mega / 1)
+   * @param test_n Number of iterations for the test (default is 500 million)
    *
    * @return The performance measurement in material response computations per
    * second if the output is correct, otherwise returns NaN.
@@ -190,7 +190,7 @@ fmr::Perf_float mtrl_iso3_lame
       test_H[3], test_H[4], test_H[5],
       test_H[6], test_H[7], test_H[8]
     };
-    fmr::Phys_float     HT [9] = {0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0};
+//    fmr::Phys_float     HT [9] = {0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0};
     fmr::Phys_float stress [9] = {0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0};
     //
     for (int phase =0; phase < 2; ++phase) {
@@ -202,7 +202,8 @@ fmr::Perf_float mtrl_iso3_lame
       for (fmr::Local_int n=0; n < phase_n; ++n) {
         //
         fmr::mtrl::elastic::linear_3d_isotropic_lame<fmr::Phys_float>
-          (&stress[0], lambda, mu, &H[0], &HT[0]);
+        (&stress[0], lambda, mu, &H[0]);
+//        (&stress[0], lambda, mu, &H[0], &HT[0]);
         //
       }//end kernel loop
       if (phase == 0) {// warmup
@@ -427,7 +428,7 @@ fmr::Perf_float mtrl_iso3_avx
       for (fmr::Perf_int n=0; n < (phase_n); ++n) {
         __m256d vA[3] = { vA0,vA1,vA2 };
         //
-        fmr::mtrl::elastic::linear_3d_isotropic_avx<fmr::Phys_float>
+        fmr::mtrl::elastic::linear_3d_isotropic_avx//<fmr::Phys_float>
           (&stress[0], lambda, mu, &vA[0]);
         //
       }// end kernel loop
@@ -508,7 +509,7 @@ fmr::Perf_float mtrl_iso3_avx2
       for (fmr::Perf_int n=0; n < (phase_n); ++n) {
         __m256d vA[3] = { vA0,vA1,vA2 };
         //
-        fmr::mtrl::elastic::linear_3d_isotropic_avx2<fmr::Phys_float>
+        fmr::mtrl::elastic::linear_3d_isotropic_avx2//<fmr::Phys_float>
           (&vA[0], lambda, mu);
         //
         _mm256_storeu_pd( &stress[0], vA[0]);
