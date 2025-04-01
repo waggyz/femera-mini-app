@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-from pymera.enumerators import Data, Grid_structure, Cell_type, \
-    Mtrl_physics, Conditioner, Solver, Reduce, Part_method, Sims_file_format
-from pymera.pymera_libfemerac import fmr
+from pymera.enumerators import Data, Sims_file_format
+from pymera.pymera_libfemerac import libfemerac
 from pymera_parse import parse_sims_from_file, full_path_json_file
 from sims import Sims
 
@@ -12,7 +11,7 @@ from atexit import register as atexit_register
 
 class Jobs:
     def __init__(self): # create instance
-        self.obj = fmr.fmr_new_jobs()
+        self.obj = libfemerac.fmr_new_jobs()
         self.sims=[]
         self.sims_format_from_file_extension = {
             'json': Sims_file_format.JSON,
@@ -27,7 +26,7 @@ class Jobs:
         self.run()
     def __del__(self): # delete instance
         #self.exit()
-        fmr.fmr_delete_jobs(self.obj)
+        libfemerac.fmr_delete_jobs(self.obj)
     
     def exit_python(self):
         #print('exiting Python...')
@@ -37,7 +36,7 @@ class Jobs:
     #     It would mess up the indexing.
     
     def get_sims_n(self):
-        return fmr.fmr_get_sims_n(self.obj)
+        return libfemerac.fmr_get_sims_n(self.obj)
     
     def add_sims(self, name=None, version=None):
         self.sims.append(Sims(self, name=name, version=version))
@@ -56,7 +55,7 @@ class Jobs:
             return self.sims[-1]
 
     def init(self):
-        fmr.fmr_jobs_init(self.obj)
+        libfemerac.fmr_jobs_init(self.obj)
     
     def run(self):
         #fmr.fmr_jobs_run(self.obj)
@@ -64,20 +63,20 @@ class Jobs:
         pass
 
     def exit(self):
-        if fmr.fmr_jobs_did_init(self.obj):
-            fmr.fmr_jobs_exit(self.obj)
+        if libfemerac.fmr_jobs_did_init(self.obj):
+            libfemerac.fmr_jobs_exit(self.obj)
 
     def did_init(self):
-        return fmr.fmr_jobs_did_init(self.obj)
+        return libfemerac.fmr_jobs_did_init(self.obj)
     
     def get_version(self):
-        return fmr.fmr_get_version(self.obj).decode('utf-8', errors='replace')
+        return libfemerac.fmr_get_version(self.obj).decode('utf-8', errors='replace')
     
     def get_name(self):
-        return fmr.fmr_get_jobs_name(self.obj).decode('utf-8', errors='replace')
+        return libfemerac.fmr_get_jobs_name(self.obj).decode('utf-8', errors='replace')
     
     def get_verbosity(self):
-        return fmr.fmr_get_verbosity(self.obj)
+        return libfemerac.fmr_get_verbosity(self.obj)
 
     def set_verbosity(self, verbosity=3):
         # Clamp values to range of ct.c_ubyte.
@@ -85,5 +84,5 @@ class Jobs:
             verbosity=0
         elif(verbosity>255):
             verbosity=255
-        return fmr.fmr_set_verbosity(self.obj, verbosity)
+        return libfemerac.fmr_set_verbosity(self.obj, verbosity)
     

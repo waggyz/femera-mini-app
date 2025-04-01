@@ -57,14 +57,14 @@
   "fmr:Solve": [{
     "fmr:Name": "Solve nominal beam.",
     "fmr:Analysis": "fmr:Static",
-    "fmr:Conditioner": "fmr:Jacobi",
-    "fmr:Solver": "fmr:PCG",
+    "fmr:Condition_method": "fmr:Jacobi",
+    "fmr:Solve_method": "fmr:PCG",
     "nominal_displacements": "fmr:Displacement_xyz"
     },{
     "fmr:Name": "Solve samples.",
     "fmr:Analysis": "fmr:Static",
-    "fmr:Conditioner": "fmr:Jacobi",
-    "fmr:Solver": "fmr:PCG",
+    "fmr:Condition_method": "fmr:Jacobi",
+    "fmr:Solve_method": "fmr:PCG",
     "fmr:Initial_displacements_xyz": "nominal_displacements",
 
     "base_force_mag": {

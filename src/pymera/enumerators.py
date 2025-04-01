@@ -120,7 +120,7 @@ class Mtrl_physics(Enum):
     THERMAL_OTHOTROPIC = auto()
     END = auto()
 
-class Conditioner(Enum):
+class Condition_method(Enum):
     NONE = 0
     ERROR = auto()
     UNKNOWN = auto()
@@ -128,7 +128,7 @@ class Conditioner(Enum):
     BLOCK_JACOBI = auto()
     END = auto()
 
-class Solver(Enum):
+class Solve_method(Enum):
     NONE = 0
     ERROR = auto()
     UNKNOWN = auto()
@@ -235,8 +235,8 @@ fmr_enum ={
     'fmr:Cell_type': Cell_type,
     'fmr:Elem_type': Elem_type,
     'fmr:Mtrl_physics': Mtrl_physics,
-    'fmr:Conditioner': Conditioner,
-    'fmr:Solver': Solver,
+    'fmr:Condition_method': Condition_method,
+    'fmr:Solve_method': Solve_method,
     'fmr:Reduce': Reduce,
     'fmr:Part_method': Part_method,
     'fmr:Sims_application': Sims_application,
@@ -293,3 +293,11 @@ def create_enum_from_csv(file_path, enum_name, start_at=None):
 Data = create_enum_from_csv(
     os.path.join(os.getcwd(),'data','src','data-type.csv'),
                 'Data_type', start_at=3)
+
+class Sims(Enum):
+    NONE = 0
+    ERROR = auto()
+    UNKNOWN = auto()
+    NAME = Data.NAME
+    VERSION = Data.VERSION
+    END = auto()

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 from pymera.enumerators import Data, Sims_application, \
     Grid_structure, Cell_type, \
-    Mtrl_physics, Conditioner, Solver, Reduce, Part_method
-from pymera.pymera_libfemerac import fmr
+    Mtrl_physics, Condition_method, Solve_method, Reduce, Part_method
+from pymera.pymera_libfemerac import libfemerac
 
 import numpy as np
 import csv
@@ -41,7 +41,7 @@ class Sims:
                 object. Defaults to 1.
         """
         self.jobs=jobs
-        self.task_index = fmr.fmr_add_sims(jobs.obj)
+        self.task_index = libfemerac.fmr_add_sims(jobs.obj)
         if name is not None:
             self.set_name(name)
         if version is not None:
@@ -59,7 +59,7 @@ class Sims:
         self.post_processors = []
         self.runs = []
         #
-        self.sample_n = None # self.runs_n ?
+        self.sample_n = None # self.runs_n ? TODO Remove this.
         #
     def __enter__(self):
         return(self)
@@ -72,26 +72,26 @@ class Sims:
         #fmr.fmr_delete_sims(self.jobs.obj)
 
     def get_name(self):
-        return fmr.fmr_get_sims_name(self.jobs.obj, self.task_index).decode(
+        return libfemerac.fmr_get_sims_name(self.jobs.obj, self.task_index).decode(
             'utf-8', errors='replace')
     def set_name(self, name):
         if name is not None:
-            fmr.fmr_set_sims_name(self.jobs.obj, self.task_index,
+            libfemerac.fmr_set_sims_name(self.jobs.obj, self.task_index,
                                   name.encode('utf-8'))
         
     def get_version(self):
-        return fmr.fmr_get_sims_version(self.jobs.obj, self.task_index).decode(
+        return libfemerac.fmr_get_sims_version(self.jobs.obj, self.task_index).decode(
             'utf-8', errors='replace')
     def set_version(self, vers):
         if vers is not None:
-            fmr.fmr_set_sims_version(self.jobs.obj, self.task_index,
+            libfemerac.fmr_set_sims_version(self.jobs.obj, self.task_index,
                                     vers.encode('utf-8'))
     def get_application(self):
         return Sims_application(
-            fmr.fmr_get_sims_application(self.jobs.obj, self.task_index))
+            libfemerac.fmr_get_sims_application(self.jobs.obj, self.task_index))
     def set_application(self, app):
         return Sims_application(
-            fmr.fmr_set_sims_application(self.jobs.obj, self.task_index,
+            libfemerac.fmr_set_sims_application(self.jobs.obj, self.task_index,
                                           app.value))
     
     def add_parameter(self, name, values=None, nominal=None):
@@ -122,6 +122,14 @@ class Sims:
             if len(values) > 1:
                 values = np.ascontiguousarray(values)
         self.parameter[name] = values
+
+    def set_parameter(self, component, parameter, value):
+        if component not in self.parameters:
+            self.parameters[component] = {}
+        self.parameters[component][parameter] = value
+    
+    def get_parameter(self, component, parameter):
+        return self.parameters[component][parameter]
 
     def add_parameter_file(self, filename, has_names=True, has_nominals=False):
         """
@@ -253,14 +261,6 @@ class Sims:
         # Placeholder for getting post-processing results
         # In a real implementation, this would return actual data.
         return np.ones(self.sample_n)
-
-    def set_parameter(self, component, parameter, value):
-        if component not in self.parameters:
-            self.parameters[component] = {}
-        self.parameters[component][parameter] = value
-    
-    def get_parameter(self, component, parameter):
-        return self.parameters[component][parameter]
 
     def init(self):
         # Placeholder for initialization logic
