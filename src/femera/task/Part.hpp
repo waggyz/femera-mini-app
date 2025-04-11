@@ -1,11 +1,13 @@
 #ifndef FEMERA_HAS_PART_HPP
 #define FEMERA_HAS_PART_HPP
 
-#include "../Task.hpp"
+//#include "../Task.hpp"
 
 #include "../phys/Mtrl.hpp"
 #include "../grid/Cell.hpp"
 #include "../algo/Slvr.hpp"
+
+#include "Runs.hpp"
 
 namespace femera { namespace task {
   class Part;// Derive a CRTP concrete class from Task.

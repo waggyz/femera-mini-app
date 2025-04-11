@@ -123,10 +123,19 @@ class Sims:
                 values = np.ascontiguousarray(values)
         self.parameter[name] = values
 
-    def set_parameter(self, component, parameter, value):
-        if component not in self.parameters:
-            self.parameters[component] = {}
-        self.parameters[component][parameter] = value
+    def set_parameter(self, name, values=None, nominal=None):#TODO same as add_?
+        if isinstance(nominal, (list, tuple, set)):
+            if len(nominal) > 1:
+                nominal = np.ascontiguousarray(nominal)
+        self.nominal[name] = nominal
+        if isinstance(values, (list, tuple, set)):
+            if len(values) > 1:
+                values = np.ascontiguousarray(values)
+        self.parameter[name] = values
+    #def set_parameter(self, component, parameter, value):
+    #    if component not in self.parameters:
+    #        self.parameters[component] = {}
+    #    self.parameters[component][parameter] = value
     
     def get_parameter(self, component, parameter):
         return self.parameters[component][parameter]

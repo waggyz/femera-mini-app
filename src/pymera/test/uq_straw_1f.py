@@ -85,7 +85,7 @@ def main():
             has_names=True, has_nominals=csv_has_nominals)
         #
         # Add beam_dimensions parameter [length, width, height] values.
-        sims_json.add_parameter('beam_dimensions',
+        sims_json.set_parameter('beam_dimensions',
             values=np.transpose(
                 [sims_json.parameter['length'],
                  sims_json.parameter['width'],
@@ -137,8 +137,8 @@ def main():
             grid.get(Grid.NODE_XYZ, param='nominal_coordinates')
             grid.get(Grid.VOLUME, param='beam_volume')
             #
-            part = sims.add_part(for_grid=grid)
-            part.set(Part_method.SINGLE)
+            #part = sims.add_part(for_grid=grid)
+            #part.set(Part_method.SINGLE)
             #
             bc_base = sims.add_bcs(name="Encastre the beam's base.")
             bc_base.set(BCs.NODE_SET, param='beam-base-nodeset')
@@ -157,7 +157,7 @@ def main():
             solve.set(Analysis.STATIC)
             solve.set(Conditioner_method.JACOBI)
             solve.set(Solve_method.PCG)
-            solve.get(Data.DISPLACEMENT_XYZ, param='nominal_displacements')
+            solve.get(Solve.DISPLACEMENT_XYZ, param='nominal_displacements')
             #
             post = sims.add_post()
             post.set(Post.FILE_NAME, 'uq_straw_1_nominal.csv')
@@ -167,6 +167,7 @@ def main():
             #
             runs = sims.add_runs()
             runs.set(Simulation_size.XS)
+            runs.set(Part_method.SINGLE_PART)
             runs.set(Runs.CORES_PER_RUN, 1)
             runs.set(Runs.RUNS_N, 1)
             runs.set(Duplicate_runs.CPU_N)

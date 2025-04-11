@@ -59,7 +59,7 @@ libfemerac.fmr_set_sims_version.argtypes = [ct.c_void_p, Local_int, ct.c_char_p]
 libfemerac.fmr_get_sims_application.restype = Enum_int
 libfemerac.fmr_get_sims_application.argtypes = [ct.c_void_p, Local_int]
 libfemerac.fmr_set_sims_application.restype = Enum_int
-libfemerac.fmr_set_sims_application.argtypes = [ct.c_void_p, Local_int, Enum_int]
+libfemerac.fmr_set_sims_application.argtypes =[ct.c_void_p, Local_int, Enum_int]
 
 # Geom ------------------------------------------------------------------------
 

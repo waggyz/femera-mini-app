@@ -103,21 +103,34 @@ class Part_method(Enum):
     NONE = 0
     ERROR = auto()
     UNKNOWN = auto()
-    BLOCK_2PRISM = auto()
-    SINGLE = auto()
+    SINGLE_PART = auto()
+    BY_GEOMETRY = auto()
+    BY_GRID = auto()
     RECTILINEAR = auto()
-    BY_VOLUME = auto()
+    # EXTERNAL = auto() #TODO ?
+    # METIS = auto() #TODO ?
+    # PARMETIS = auto()
     END = auto()
 
 class Mtrl_physics(Enum):
     NONE = 0
     ERROR = auto()
     UNKNOWN = auto()
-    ELASTIC_ISOTROPIC = auto()
-    ELASTIC_ORTHOTROPIC = auto()
+    ELASTIC = auto()
     PLASTIC_KINEMATIC = auto()
-    THERMAL_ISOTROPIC = auto()
-    THERMAL_OTHOTROPIC = auto()
+    THERMAL = auto()
+    THERMOELASTIC_1WAY = auto() # 1- and 2-way coupling
+    THERMOELASTIC_2WAY = auto()
+    END = auto()
+
+class Mtrl_symmetry(Enum):
+    NONE = 0
+    ERROR = auto()
+    UNKNOWN = auto()
+    GENERAL = auto()
+    ORTHOTROPIC = auto()
+    CUBIC = auto()
+    ISOTROPIC = auto()
     END = auto()
 
 class Condition_method(Enum):
@@ -235,6 +248,7 @@ fmr_enum ={
     'fmr:Cell_type': Cell_type,
     'fmr:Elem_type': Elem_type,
     'fmr:Mtrl_physics': Mtrl_physics,
+    'fmr:Mtrl_symmetry': Mtrl_symmetry,
     'fmr:Condition_method': Condition_method,
     'fmr:Solve_method': Solve_method,
     'fmr:Reduce': Reduce,

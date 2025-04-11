@@ -3,6 +3,10 @@
 
 #include "../Task.hpp"
 
+//#include "../phys/Mtrl.hpp"
+//#include "../grid/Cell.hpp"
+//#include "../algo/Slvr.hpp"
+
 namespace femera { namespace task {
   class Runs;// Derive a CRTP concrete class from Task.
   class Runs final: public Task<Runs> { friend class Task;
