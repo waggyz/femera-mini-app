@@ -46,12 +46,12 @@ class TestPymeraSims(unittest.TestCase):
 
     def test_get_application(self):
         self.assertIsNotNone(self.sims.get_application())
-        self.assertEqual(self.sims.get_application(), Sims_application.UNKNOWN)
+        self.assertEqual(self.sims.get_application(), Application.UNKNOWN)
     def test_set_application(self):
-        app = Sims_application.RESEARCH
+        app = Application.RESEARCH
         self.sims.set_application(app)
         self.assertEqual(self.sims.get_application(), app)
-        app = Sims_application.UQ
+        app = Application.UQ
         self.assertEqual(self.sims.set_application(app), app)
         self.assertEqual(self.sims.get_application(), app)
 

@@ -48,7 +48,7 @@ class Sims:
         if version is not None:
             self.set_version(version)
         if application is not None:
-            self.set_application(Application.UQ)
+            self.set_application(application)
         #
         # sims_py.set(Application.UQ) #TODO
         # sims_py.set(Sims.NAME, "Fred") #TODO
@@ -99,7 +99,7 @@ class Sims:
             libfemerac.fmr_set_sims_application(self.jobs.obj, self.task_index,
                                           app.value))
     
-    def add_parameter(self, name, values=None, nominal=None):
+    def add_parameter(self, name, type=None, values=None, nominal=None):
         """
         Adds a parameter to the Sims object.
 
