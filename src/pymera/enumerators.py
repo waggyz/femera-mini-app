@@ -314,4 +314,5 @@ class Sims(Enum):
     UNKNOWN = auto()
     NAME = Data.NAME
     VERSION = Data.VERSION
+    SIMS_APPLICATION = Data.SIMS_APPLICATION
     END = auto()

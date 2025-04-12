@@ -3,9 +3,12 @@
 
 //#include "../Task.hpp"
 
-#include "../phys/Mtrl.hpp"
-#include "../grid/Cell.hpp"
-#include "../algo/Slvr.hpp"
+//#include "../phys/Mtrl.hpp"
+//#include "../grid/Cell.hpp"
+//#include "../algo/Slvr.hpp"
+
+//#include "../algo/BCs.hpp"// needed?
+//#include "../data/Post.hpp"// needed?
 
 #include "Runs.hpp"
 

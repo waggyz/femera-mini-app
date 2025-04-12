@@ -36,6 +36,28 @@ namespace femera {
     T* get_task (const fmr::Data_name_t&, const fmr::Vals_name_t&,
       fmr::Local_int ix=0) noexcept;
 #endif
+#if 0
+//TODO Here or in File.hpp?
+    template <typename V>
+    V get (const fmr::Data_name_t& name) const;
+    template <typename V>
+    V set (const fmr::Data_name_t& name, V val=V(0)) const;
+    template <typename V>
+    V add (const fmr::Data_name_t& name, V val=V(0)) const;
+    //
+    template <typename V>
+    V* get (const fmr::Data_name_t& name) const;
+    template <typename V>
+    V* set (const fmr::Data_name_t& name, V* val) const;
+    template <typename V>
+    V* add (const fmr::Data_name_t& name, V* val=nullptr) const;
+    //
+    bool is_ok (const fmr::Data_name_t& name) const;
+    fmr::Global_int get_n (const fmr::Data_name_t& name) const;
+    fmr::Global_int set_n (const fmr::Data_name_t& name, fmr::Global_int) const;
+    fmr::Global_int get_byte (const fmr::Data_name_t& name) const;
+    fmr::Global_int del (const fmr::Data_name_t& name) const;
+#endif
     static constexpr
     T* this_cast (Data*) noexcept;
     static constexpr

@@ -7,7 +7,17 @@
 #include <cstdint>
 #include <array>
 
-namespace fmr {
+namespace femera { namespace test {
+  int early_main (int* argc, char** argv);//defined in femera/Test.cpp
+} }// end femera::test:: namespace
+
+namespace fmr {// inline functions defined in fmr.ipp
+  template <typename E> constexpr typename
+  std::underlying_type<E>::type enum2val (E e);
+}//end fmr:: namespace
+#include "fmr.ipp"
+
+namespace fmr {// typdefs, constants, enums
 /* prefer ints e.g. int_fast8_t, uint_least8_t, ...,  uintmax_t, uintptr_t
  *
  * This "using" syntax is preferred to "typedef" in the Google C++ Style Guide.
@@ -53,40 +63,33 @@ namespace fmr {
 #include "data-type-enum.inc"
     end
   };
-  template <typename E> constexpr typename
-  std::underlying_type<E>::type enum2val (E e) {
-   /* Cast enum to underlying type to get the last enum index number for
-    * size, sync., etc., use, e.g.,
-    * const auto data_type_n = fmr::enum2val (fmr::Data_type::end);
-    */
-    return static_cast <typename std::underlying_type<E>::type> (e);
-  }
   static const std::array <Vals_type, enum2val (Data_item::end)+1>
-  vals_type = {
-    Vals_type::None,
-    Vals_type::Error,
-    Vals_type::Unknown,
+  vals_type = { Vals_type::None, Vals_type::Error, Vals_type::Unknown,
 #include "data-vals-type.inc"
     Vals_type::None
   };
 #if 1
   static const std::array <std::string, enum2val (Data_item::end)+1>
-  vals_name = {
-    "data_none",
-    "data_err",
-    "data_unk",
+  vals_name = { "data_none", "data_err", "data_unk",
 #include "data-type-name.inc"
     "END"
   };
   static const std::array <std::string, enum2val (Data_item::end)+1>
-  vals_info = {
-    "no data",
-    "data error",
-    "unknown data",
+  vals_info = { "no data", "data error", "unknown data",
 #include "data-type-info.inc"
     "Data_type enum end marker"
   };
 #endif
+  enum class Application : fmr::Enum_int { None=0, Error, Unknown,
+    //#include "sims-application-enum.inc"// TODO generate from pymera
+    Research,
+    Engineering,
+    Parameter_sweep,
+    Sensitivity,
+    UQ,
+    ML,
+    end
+  };
   //
 }//end fmr:: namespace
 //
@@ -123,10 +126,5 @@ namespace fmr {
 #endif
   // formats: fmr::Vals_type::Info_line, fmr::Vals_type::Text_line, ...
 }//end fmr:: namespace
-//
-namespace femera { namespace test {
-  int early_main (int* argc, char** argv);
-} }// end femera::test:: namespace
-
 //end FMR_HAS_FMR_HPP
 #endif

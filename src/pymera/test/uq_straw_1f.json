@@ -1,6 +1,7 @@
 { "fmr:Sims": [ {
-  "fmr:NOTE": "non-fmr: keys imply Python shared values and parameters.",
-
+  "fmr:NOTE": [
+    "non-fmr: keys imply Python shared values and parameters."
+  ],
   "fmr:Name": "Cantilever beam sims (uq_straw_1.json)",
   "fmr:Version": "0.1.6",
   "fmr:Sims_application": "fmr:UQ",
@@ -8,7 +9,9 @@
     "fmr:Geom_d": 3,
     "fmr:Geometry_shape": "fmr:Block",
     "fmr:Dimensions_xyz": {"beam_dimensions": [1.000, 0.050, 0.050] },
-    "fmr:NOTE": "Using beam_dimensions for testing; could use fmr:Dimension_x,..."
+    "fmr:NOTE": [
+      "Using fmr:Dimensions_xyz for testing; could use fmr:Dimension_x,..."
+    ]
   },{
     "fmr:File_name": "uq_straw_1.geo",
     "fmr:Parameter": {"beam_dimensions": [1.000, 0.050, 0.050] }
@@ -47,7 +50,7 @@
     "fmr::Data_type:Node_set": "beam-tip-nodeset",
     "fmr:Displacement_z": {"tip_displace_z": -0.010}
   },{
-    "fmr:BCs":[0,1], "fmr:TODO": "Combine BCs into a single list."
+    "fmr:BCs":[0,1], "fmr:TODO": ["Combine BCs into a single list."]
   }],
   "fmr:Mtrl": [{
     "fmr:Mtrl_d": 3,
