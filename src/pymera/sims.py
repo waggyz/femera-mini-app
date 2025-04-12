@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-from pymera.enumerators import Data, Sims_application, \
+from pymera.enumerators import Data, Application, \
     Grid_structure, Cell_type, \
     Mtrl_physics, Condition_method, Solve_method, Reduce, Part_method
+#    Sims, Geom,
 from pymera.pymera_libfemerac import libfemerac
 
 import numpy as np
@@ -11,7 +12,7 @@ from warnings import warn
 #------------------------------------------------------------------------------
 # Class to represent a Sims object.
 class Sims:
-    def __init__(self, jobs, name=None, version=None):
+    def __init__(self, jobs, name=None, version=None, application=None):
         """
         Initializes a Sims object with the given parameters.
 
@@ -46,9 +47,15 @@ class Sims:
             self.set_name(name)
         if version is not None:
             self.set_version(version)
+        if application is not None:
+            self.set_application(Application.UQ)
         #
-        self.nominal = {}
-        self.parameter = {}
+        # sims_py.set(Application.UQ) #TODO
+        # sims_py.set(Sims.NAME, "Fred") #TODO
+        # self.set(Sims.App
+        #
+        self.nominal = {}# dictionary of nominal values
+        self.parameter = {}# dictionary of parameters
         #
         self.geometries = []
         self.grids = []
@@ -58,8 +65,6 @@ class Sims:
         self.solvers = []
         self.post_processors = []
         self.runs = []
-        #
-        self.sample_n = None # self.runs_n ? TODO Remove this.
         #
     def __enter__(self):
         return(self)
@@ -87,10 +92,10 @@ class Sims:
             libfemerac.fmr_set_sims_version(self.jobs.obj, self.task_index,
                                     vers.encode('utf-8'))
     def get_application(self):
-        return Sims_application(
+        return Application(
             libfemerac.fmr_get_sims_application(self.jobs.obj, self.task_index))
     def set_application(self, app):
-        return Sims_application(
+        return Application(
             libfemerac.fmr_set_sims_application(self.jobs.obj, self.task_index,
                                           app.value))
     
@@ -162,8 +167,8 @@ class Sims:
         greater than 1, the function converts the list to a contiguous numpy
         array.
         
-        The function sets the sample_n attribute to the minimum number of values
-        of all parameters.
+        The function sets the parameter "sample_n" to the minimum number of
+        values of all parameters.
         """
         with open(filename, 'r') as f:
             reader = csv.reader(f)
@@ -182,17 +187,19 @@ class Sims:
             if has_nominals:
                 nominals = next(reader)
                 for name, val in zip(names, nominals):
-                    self.nominal[name] = float(val)#TODO Check type for each val?
+                    self.nominal[name] = float(val)#TODO Check type of each val?
             for row_col in reader:
                 for name, col in zip(names, row_col):
                     self.parameter[name].append(float(col))
-            self.sample_n = min(len(self.parameter[name]) for name in names)
-            if(self.sample_n > 1):
+            self.parameter["sample_n"] = min(len(self.parameter[name])
+                                              for name in names)
+            if(self.parameter["sample_n"] > 1):
                 # Convert lists to contiguous numpy arrays
                 for key in self.parameter:
                     self.parameter[key] = np.ascontiguousarray(
                         self.parameter[key])
-            if(self.sample_n!=max(len(self.parameter[name]) for name in names)):
+            if(self.parameter["sample_n"] != max(len(self.parameter[name])
+                                                for name in names)):
                 warn('\n pym Jobs WARN Not all parameters have the same number '
                      +'of values. '
                      +'Something might be wrong with your CSV file.')
@@ -200,16 +207,14 @@ class Sims:
     def get_post(self, name):
         # Placeholder for getting post-processing results
         # In a real implementation, this would return actual data.
-        return np.ones(self.sample_n)
-
-    def set_partition_n(self, n=1):
-        self.partition_n = n
+        return np.ones(self.parameter["sample_n"])
 
     def add_geometry(self, name, shape):
-        self.geometries.append({"name": name, "shape": shape})
+        #self.geometries.append({"name": name, "shape": shape})
+        pass
 
     def add_grid(self, name, for_geometry=None, type=None, method=None, elem=None):
-        if for_geometry is None and self.geometries:
+        '''if for_geometry is None and self.geometries:
             for_geometry = self.geometries[-1]["name"]
         self.grids.append({
             "name": name,
@@ -217,59 +222,66 @@ class Sims:
             "type": type,
             "method": method,
             "elem": elem
-        })
+        })'''
+        pass
 
     def set_bcs(self, name, at, set, to):
-        self.bcs = []
+        '''self.bcs = []
         self.bcs.append({
             "name": name,
             "at": at,
             "set": set,
             "to": to
-        })
+        })'''
+        pass
 
     def add_bcs(self, name, at):
-        self.bcs.append({
+        '''self.bcs.append({
             "name": name,
             "at": at
-        })
+        })'''
+        pass
 
     def set_material(self, name, physics):
-        self.materials.append({
+        '''self.materials.append({
             "name": name,
             "physics": physics
-        })
+        })'''
+        pass
 
     def set_preconditioner(self, name=None, method=None):
-        self.preconditioner = {
+        '''self.preconditioner = {
             "name" : name,
             "method": method
-        }
+        }'''
+        pass
 
     def set_solver(self, name, method,
                    analysis='fmr:solve:static', load_step_n=1, rtol=1e-6):
-        self.solve = {
+        '''self.solve = {
             "name": name,
             "method": method,
             "analysis": analysis,
             "load_step_n": load_step_n,
             "rtol": rtol
-        }
+        }'''
+        pass
 
     def add_post(self, name, at, sum, count=-1):
         #if(count<0):
-        #    self.count=self.sample_n
-        self.post_processes.append({
+        #    self.count=self.parameter["sample_n"]
+        '''self.post_processes.append({
             "name": name,
             "at": at,
             "sum": sum,
             "count": count
-        })
+        })'''
+        pass
 
     def get_post(self, name):
         # Placeholder for getting post-processing results
         # In a real implementation, this would return actual data.
-        return np.ones(self.sample_n)
+        return np.ones(self.parameter["sample_n"])
 
     def init(self):
         # Placeholder for initialization logic

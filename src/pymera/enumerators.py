@@ -20,7 +20,7 @@ class Component(Enum):# fmr:Sims, fmr:Geom, fmr:Grid, fmr:Mtrl,...
     USER = auto()
     END = auto()
 
-class Sims_application(Enum):
+class Application(Enum):
     NONE = 0
     ERROR = auto()
     UNKNOWN = auto()
@@ -253,7 +253,7 @@ fmr_enum ={
     'fmr:Solve_method': Solve_method,
     'fmr:Reduce': Reduce,
     'fmr:Part_method': Part_method,
-    'fmr:Sims_application': Sims_application,
+    'fmr:Application': Application,
     'fmr:File_format': File_format,
     'fmr:Analysis': Analysis,
     'fmr:Schedule': Schedule
@@ -308,11 +308,24 @@ Data = create_enum_from_csv(
     os.path.join(os.getcwd(),'data','src','data-type.csv'),
                 'Data_type', start_at=3)
 
-class Sims(Enum):
-    NONE = 0
-    ERROR = auto()
-    UNKNOWN = auto()
-    NAME = Data.NAME
-    VERSION = Data.VERSION
-    SIMS_APPLICATION = Data.SIMS_APPLICATION
-    END = auto()
+if False:
+    # The following define which data types apply to each class.
+    class Sims(Enum):
+        NONE = 0
+        ERROR = auto()
+        UNKNOWN = auto()
+        NAME = Data.NAME
+        VERSION = Data.VERSION
+        APPLICATION = Data.APPLICATION
+        END = auto()
+    class Geom(Enum):
+        NONE = 0
+        ERROR = auto()
+        UNKNOWN = auto()
+        NAME = Data.NAME
+        VERSION = Data.VERSION
+        FILE_NAME = Data.FILE_NAME
+        GEOM_D = Data.GEOM_D
+        GEOMETRY_SHAPE = Data.GEOMETRY_SHAPE
+        BOUNDING_BOX = Data.BOUNDING_BOX
+        END = auto()

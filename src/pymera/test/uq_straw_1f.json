@@ -4,7 +4,7 @@
   ],
   "fmr:Name": "Cantilever beam sims (uq_straw_1.json)",
   "fmr:Version": "0.1.6",
-  "fmr:Sims_application": "fmr:UQ",
+  "fmr:Application": "fmr:UQ",
   "fmr:Geom": [{
     "fmr:Geom_d": 3,
     "fmr:Geometry_shape": "fmr:Block",

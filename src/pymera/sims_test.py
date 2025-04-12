@@ -5,7 +5,7 @@ import numpy as np
 import sys, os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import pymera
-from pymera.enumerators import Sims_application
+from pymera.enumerators import Application
 
 class TestPymeraSims(unittest.TestCase):
     @classmethod

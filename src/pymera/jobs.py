@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from pymera.enumerators import Data, Sims_file_format
+from pymera.enumerators import Data, Sims_file_format, Application
 from pymera.pymera_libfemerac import libfemerac
 from pymera_parse import parse_sims_from_file, full_path_json_file
 from sims import Sims
@@ -38,8 +38,10 @@ class Jobs:
     def get_sims_n(self):
         return libfemerac.fmr_get_sims_n(self.obj)
     
-    def add_sims(self, name=None, version=None):
-        self.sims.append(Sims(self, name=name, version=version))
+    def add_sims(self, name=None, version=None,
+                  application=Application.UNKNOWN):
+        self.sims.append(Sims(self, name=name, version=version,
+                               application=application))
         return self.sims[-1]
 
     def add_sims_from_file(self, filename, format=Sims_file_format.UNKNOWN):
