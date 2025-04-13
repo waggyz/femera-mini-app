@@ -76,10 +76,10 @@ def main():
         print('\nUser parameters, output fields, '
                 + 'and internal variables in JSON file:')
         for name, value in sims_from_json.parameter.items():
-            if value is not None:
-                print(f'- {name}: {value}')
-            else:
+            if value is None:
                 print(f'- {name}')
+            else:
+                print(f'- {name}: {value}')
         #
         # Read parameters and nominal values from the .csv file.
         sims_from_json.add_parameter_file(csv_filname,
@@ -115,11 +115,12 @@ def main():
         #sims_py.set(Sims.VERSION, "0.1.6")
         #sims_py.set(Application.UQ)
         #
-        sims_py.add_parameter("beam_dimensions",[1.0, 0.05, 0.05])
-        sims_py.add_parameter("tip_displace_z", -0.01)
-        sims_py.add_parameter("youngs", 200e9)
-        sims_py.add_parameter("poissons", 0.285)
-        sims_py.add_parameter("sample_n", 0)
+        sims_py.add_parameter("beam_dimensions",[1.0, 0.05, 0.05],
+                              data=Data.DIMENSIONS_XYZ)
+        sims_py.add_parameter("tip_displace_z", -0.01, data=Data.DISPLACEMENT_Z)
+        sims_py.add_parameter("youngs", 210e9, data=Data.YOUNGS_MODULUS)
+        sims_py.add_parameter("poissons", 0.285, data=Data.POISSONS_RATIO)
+        sims_py.add_parameter("sample_n", 0, data=Data.RUNS_N)
         #
         sims_py.add_parameter("node_number", Data.NODE_ID)
         sims_py.add_parameter("nominal_coordinates", Data.NODE_XYZ)
@@ -127,12 +128,19 @@ def main():
         sims_py.add_parameter("run_number", Data.RUNS_IX)
         sims_py.add_parameter("beam_volume", Data.VOLUME)
         #
-        print(f'Hello {sims_py.get_name()} {sims_py.get_version()}!')
-        print(f'Are you ready to do some {sims_py.get_application().name}?')
-        #
         #sims_py.add_parameter("beam-base-nodeset", Data.UNKNOWN)
         #sims_py.add_parameter("beam-tip-nodeset", Data.UNKNOWN)
         #sims_py.add_parameter("beam-force-mag", Data.UNKNOWN)
+        #
+        print(f'Hello {sims_py.get_name()} {sims_py.get_version()}!')
+        print(f'Are you ready to do some {sims_py.get_application().name}?')
+        #
+        print('\nUser parameters, output fields, and internal variables:')
+        for name, value in sims_py.parameter.items():
+            if value is None:
+                print(f'- {name}')
+            else:
+                print(f'- {name}: {value}')
         #
         if False:
             #TODO Implement geometry functions.

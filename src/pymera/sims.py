@@ -99,7 +99,7 @@ class Sims:
             libfemerac.fmr_set_sims_application(self.jobs.obj, self.task_index,
                                           app.value))
     
-    def add_parameter(self, name, type=None, values=None, nominal=None):
+    def add_parameter(self, name, values=None, data=None, nominal=None):
         """
         Adds a parameter to the Sims object.
 
@@ -128,7 +128,7 @@ class Sims:
                 values = np.ascontiguousarray(values)
         self.parameter[name] = values
 
-    def set_parameter(self, name, values=None, nominal=None):#TODO same as add_?
+    def set_parameter(self, name, values=None, data=None, nominal=None):#TODO same as add_?
         if isinstance(nominal, (list, tuple, set)):
             if len(nominal) > 1:
                 nominal = np.ascontiguousarray(nominal)
