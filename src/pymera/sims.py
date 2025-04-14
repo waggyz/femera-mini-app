@@ -176,7 +176,7 @@ class Sims:
     def get_post(self, name):
         # Placeholder for getting post-processing results
         # In a real implementation, this would return actual data.
-        return np.ones(self.parameter["sample_n"])
+        return np.ones(self.jobs.parameter["sample_n"])
 
     def init(self):
         # Placeholder for initialization logic

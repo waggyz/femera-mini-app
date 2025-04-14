@@ -70,9 +70,9 @@ def main():
         #
         # Read simulation set from JSON file.
         #sims_from_json = jobs.add_sims_from_file(json_filname)
-        jobs.add_sims_from_file(json_filname)
+        sims_from_json = jobs.add_sims_from_file(json_filname)
         #
-        print('Hello '+jobs.get_name()+' '+jobs.get_version()+'!')
+        print('Hello '+sims_from_json.get_name()+' '+sims_from_json.get_version()+'!')
         #
         print('\nUser parameters, output fields, '
                 + 'and internal variables in JSON file:')
@@ -86,6 +86,7 @@ def main():
         jobs.add_parameter_file(csv_filname,
             has_names=True, has_nominals=csv_has_nominals)
         #
+        #----------------------------------------------------------------------
         # Add beam_dimensions parameter [length, width, height] values.
         jobs.set_parameter('beam_dimensions',
             values=np.transpose(
@@ -107,45 +108,45 @@ def main():
         # * initializes (if needed) and runs all sims
         # * sims.init() also performs sanity checks. 
         #----------------------------------------------------------------------
-        # Set up the same sims manually.
-        #
-        #sims_py = jobs.add_sims(name='Cantilever beam sims (uq_straw_1.py)', 
-        #    version='0.1.6', application=Application.UQ)
-        jobs.add_sims(name='Cantilever beam sims (uq_straw_1.py)', 
-            version='0.1.6', application=Application.UQ)
-        #
-        #sims_py.set(Sims.NAME, "Fred")
-        #sims_py.set(Sims.VERSION, "0.1.6")
-        #sims_py.set(Application.UQ)
-        #
-        jobs.add_parameter("beam_dimensions",[1.0, 0.05, 0.05],
-                              data=Data.DIMENSIONS_XYZ)
-        jobs.add_parameter("tip_displace_z", -0.01, data=Data.DISPLACEMENT_Z)
-        jobs.add_parameter("youngs", 210e9, data=Data.YOUNGS_MODULUS)
-        jobs.add_parameter("poissons", 0.285, data=Data.POISSONS_RATIO)
-        jobs.add_parameter("sample_n", 0, data=Data.RUNS_N)
-        #
-        jobs.add_parameter("node_number", Data.NODE_ID)
-        jobs.add_parameter("nominal_coordinates", Data.NODE_XYZ)
-        jobs.add_parameter("nominal_displacements", Data.DISPLACEMENT_XYZ)
-        jobs.add_parameter("run_number", Data.RUNS_IX)
-        jobs.add_parameter("beam_volume", Data.VOLUME)
-        #
-        #sims_py.add_parameter("beam-base-nodeset", Data.UNKNOWN)
-        #sims_py.add_parameter("beam-tip-nodeset", Data.UNKNOWN)
-        #sims_py.add_parameter("beam-force-mag", Data.UNKNOWN)
-        #
-        print(f'Hello {jobs.get_name()} {jobs.get_version()}!')
-        print(f'Are you ready to do some {jobs.get_application().name}?')
-        #
-        print('\nUser parameters, output fields, and internal variables:')
-        for name, value in jobs.parameter.items():
-            if value is None:
-                print(f'- {name}')
-            else:
-                print(f'- {name}: {value}')
-        #
         if False:
+            # Set up the same sims manually.
+            #
+            #sims_py = jobs.add_sims(name='Cantilever beam sims (uq_straw_1.py)', 
+            #    version='0.1.6', application=Application.UQ)
+            sims_py = jobs.add_sims(name='Cantilever beam sims (uq_straw_1.py)', 
+                version='0.1.6', application=Application.UQ)
+            #
+            #sims_py.set(Sims.NAME, "Fred")
+            #sims_py.set(Sims.VERSION, "0.1.6")
+            #sims_py.set(Application.UQ)
+            #
+            jobs.add_parameter("beam_dimensions",[1.0, 0.05, 0.05],
+                                data=Data.DIMENSIONS_XYZ)
+            jobs.add_parameter("tip_displace_z", -0.01, data=Data.DISPLACEMENT_Z)
+            jobs.add_parameter("youngs", 210e9, data=Data.YOUNGS_MODULUS)
+            jobs.add_parameter("poissons", 0.285, data=Data.POISSONS_RATIO)
+            jobs.add_parameter("sample_n", 0, data=Data.RUNS_N)
+            #
+            jobs.add_parameter("node_number", Data.NODE_ID)
+            jobs.add_parameter("nominal_coordinates", Data.NODE_XYZ)
+            jobs.add_parameter("nominal_displacements", Data.DISPLACEMENT_XYZ)
+            jobs.add_parameter("run_number", Data.RUNS_IX)
+            jobs.add_parameter("beam_volume", Data.VOLUME)
+            #
+            #sims_py.add_parameter("beam-base-nodeset", Data.UNKNOWN)
+            #sims_py.add_parameter("beam-tip-nodeset", Data.UNKNOWN)
+            #sims_py.add_parameter("beam-force-mag", Data.UNKNOWN)
+            #
+            print(f'Hello {sims_py.get_name()} {sims_py.get_version()}!')
+            print(f'Are you ready to do some {sims_py.get_application().name}?')
+            #
+            print('\nUser parameters, output fields, and internal variables:')
+            for name, value in jobs.parameter.items():
+                if value is None:
+                    print(f'- {name}')
+                else:
+                    print(f'- {name}: {value}')
+            #
             #TODO Implement geometry functions.
             geom = sims.add_geomety()
             geom.set(Geometry_shape.BLOCK)
@@ -214,18 +215,18 @@ def main():
             #sims.exit() # invalidates sims post-processing pointers?
             #            # (e.g., base_force)
             #------------------------------------------------------------------
-        print()
+        print('Exit jobs...')
     #--------------------------------------------------------------------------
-    # Get numpy array contents from Pymera.
-    base_force = sims_from_json.get_post('base-force-mag')
-    #
-    base_stress_avg = base_force / (# averaged over each base area
-        sims_from_json.parameter['width'] * sims_from_json.parameter['height'])
     #
     # jobs.exit() is called before jobs is destroyed.
     #             * jobs is destroyed at the end of this function
     #             * exits (if needed) and deletes all sims first
-    #--------------------------------------------------------------------------
+    #----------------------------------------------------------------------
+    # Get numpy array contents from Pymera.
+    base_force = sims_from_json.get_post('base-force-mag')
+    #
+    base_stress_avg = base_force / (# averaged over each base area
+        jobs.parameter['width'] * jobs.parameter['height'])
     print()
     print('base stress mean: ' + str(base_stress_avg.mean()))
     print('base stress standard deviation: ' + str(base_stress_avg.std()))
@@ -233,15 +234,15 @@ def main():
     if csv_has_nominals:
         print('\nUser parameter names (first row) '
             +'with nominal values (second row) from CSV file:')
-        for name, nominal in sims_from_json.nominal.items():
+        for name, nominal in jobs.nominal.items():
             print(f'- {name}: {nominal}')
     else:
         print('\nUser parameters (first row name)'
-             +' added or updated from CSV file:')
-        for name, value in sims_from_json.parameter.items():
+            +' added or updated from CSV file:')
+        for name, value in jobs.parameter.items():
             print(f'- {name}: {value}')
     print('\nNumber of additional values (remaining rows) in the CSV file:')
-    print(f'- sample_n: {sims_from_json.parameter["sample_n"]}')
+    print(f'- sample_n: {jobs.parameter["sample_n"]}')
     print()
     #==========================================================================
     """

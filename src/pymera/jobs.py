@@ -142,7 +142,6 @@ class Jobs:
                      +'of values. '
                      +'Something might be wrong with your CSV file.')
 
-    
     def get_sims_n(self):
         return libfemerac.fmr_get_sims_n(self.obj)
     

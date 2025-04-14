@@ -53,7 +53,7 @@ def parse_sims_from_file(sims, filename, format):
             sims_json = json.load(file)#TODO use json()
         if 'fmr:Sims' in sims_json:
             sims_json = sims_json['fmr:Sims']
-            sims.parameter = find_keys_used(sims_json,
+            sims.jobs.parameter = find_keys_used(sims_json,
                                             user_keys=True, enum_keys=False)
             #
             if 'fmr:Name' in sims_json[0]:
