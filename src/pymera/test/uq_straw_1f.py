@@ -69,32 +69,33 @@ def main():
         print('\nHello '+jobs.get_version()+' '+jobs.get_name()+' (jobs)!')
         #
         # Read simulation set from JSON file.
-        sims_from_json = jobs.add_sims_from_file(json_filname)
+        #sims_from_json = jobs.add_sims_from_file(json_filname)
+        jobs.add_sims_from_file(json_filname)
         #
-        print('Hello '+sims_from_json.get_name()+' '+sims_from_json.get_version()+'!')
+        print('Hello '+jobs.get_name()+' '+jobs.get_version()+'!')
         #
         print('\nUser parameters, output fields, '
                 + 'and internal variables in JSON file:')
-        for name, value in sims_from_json.parameter.items():
+        for name, value in jobs.parameter.items():
             if value is None:
                 print(f'- {name}')
             else:
                 print(f'- {name}: {value}')
         #
         # Read parameters and nominal values from the .csv file.
-        sims_from_json.add_parameter_file(csv_filname,
+        jobs.add_parameter_file(csv_filname,
             has_names=True, has_nominals=csv_has_nominals)
         #
         # Add beam_dimensions parameter [length, width, height] values.
-        sims_from_json.set_parameter('beam_dimensions',
+        jobs.set_parameter('beam_dimensions',
             values=np.transpose(
-                [sims_from_json.parameter['length'],
-                 sims_from_json.parameter['width'],
-                 sims_from_json.parameter['height']]),
+                [jobs.parameter['length'],
+                 jobs.parameter['width'],
+                 jobs.parameter['height']]),
             nominal=
-                [sims_from_json.nominal['length'],
-                 sims_from_json.nominal['width'],
-                 sims_from_json.nominal['height']]
+                [jobs.nominal['length'],
+                 jobs.nominal['width'],
+                 jobs.nominal['height']]
         )
         # sims.init # Initialize just this sims object.
         # jobs.sims_init() # Initializes all the sims.
@@ -108,35 +109,37 @@ def main():
         #----------------------------------------------------------------------
         # Set up the same sims manually.
         #
-        sims_py = jobs.add_sims(name='Cantilever beam sims (uq_straw_1.py)', 
+        #sims_py = jobs.add_sims(name='Cantilever beam sims (uq_straw_1.py)', 
+        #    version='0.1.6', application=Application.UQ)
+        jobs.add_sims(name='Cantilever beam sims (uq_straw_1.py)', 
             version='0.1.6', application=Application.UQ)
         #
         #sims_py.set(Sims.NAME, "Fred")
         #sims_py.set(Sims.VERSION, "0.1.6")
         #sims_py.set(Application.UQ)
         #
-        sims_py.add_parameter("beam_dimensions",[1.0, 0.05, 0.05],
+        jobs.add_parameter("beam_dimensions",[1.0, 0.05, 0.05],
                               data=Data.DIMENSIONS_XYZ)
-        sims_py.add_parameter("tip_displace_z", -0.01, data=Data.DISPLACEMENT_Z)
-        sims_py.add_parameter("youngs", 210e9, data=Data.YOUNGS_MODULUS)
-        sims_py.add_parameter("poissons", 0.285, data=Data.POISSONS_RATIO)
-        sims_py.add_parameter("sample_n", 0, data=Data.RUNS_N)
+        jobs.add_parameter("tip_displace_z", -0.01, data=Data.DISPLACEMENT_Z)
+        jobs.add_parameter("youngs", 210e9, data=Data.YOUNGS_MODULUS)
+        jobs.add_parameter("poissons", 0.285, data=Data.POISSONS_RATIO)
+        jobs.add_parameter("sample_n", 0, data=Data.RUNS_N)
         #
-        sims_py.add_parameter("node_number", Data.NODE_ID)
-        sims_py.add_parameter("nominal_coordinates", Data.NODE_XYZ)
-        sims_py.add_parameter("nominal_displacements", Data.DISPLACEMENT_XYZ)
-        sims_py.add_parameter("run_number", Data.RUNS_IX)
-        sims_py.add_parameter("beam_volume", Data.VOLUME)
+        jobs.add_parameter("node_number", Data.NODE_ID)
+        jobs.add_parameter("nominal_coordinates", Data.NODE_XYZ)
+        jobs.add_parameter("nominal_displacements", Data.DISPLACEMENT_XYZ)
+        jobs.add_parameter("run_number", Data.RUNS_IX)
+        jobs.add_parameter("beam_volume", Data.VOLUME)
         #
         #sims_py.add_parameter("beam-base-nodeset", Data.UNKNOWN)
         #sims_py.add_parameter("beam-tip-nodeset", Data.UNKNOWN)
         #sims_py.add_parameter("beam-force-mag", Data.UNKNOWN)
         #
-        print(f'Hello {sims_py.get_name()} {sims_py.get_version()}!')
-        print(f'Are you ready to do some {sims_py.get_application().name}?')
+        print(f'Hello {jobs.get_name()} {jobs.get_version()}!')
+        print(f'Are you ready to do some {jobs.get_application().name}?')
         #
         print('\nUser parameters, output fields, and internal variables:')
-        for name, value in sims_py.parameter.items():
+        for name, value in jobs.parameter.items():
             if value is None:
                 print(f'- {name}')
             else:
