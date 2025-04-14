@@ -86,6 +86,19 @@ def main():
         jobs.add_parameter_file(csv_filname,
             has_names=True, has_nominals=csv_has_nominals)
         #
+        if csv_has_nominals:
+            print('\nUser parameter names (first row) '
+                +'with nominal values (second row) from CSV file:')
+            for name, nominal in jobs.nominal.items():
+                print(f'- {name}: {nominal}')
+        else:
+            print('\nUser parameters (first row name)'
+                +' added or updated from CSV file:')
+            for name, value in jobs.parameter.items():
+                print(f'- {name}: {value}')
+        print('\nNumber of additional values (remaining rows) in the CSV file:')
+        print(f'- sample_n: {jobs.parameter["sample_n"]}')
+        print()
         #----------------------------------------------------------------------
         # Add beam_dimensions parameter [length, width, height] values.
         jobs.set_parameter('beam_dimensions',
@@ -103,7 +116,6 @@ def main():
         # jobs.run() is called on exit from the jobs "with" context block
         # and will initialize and then run each of the sims objects in turn.
         #
-        print()
         # jobs.run() is called on exit from the jobs "with" context block.
         # * initializes (if needed) and runs all sims
         # * sims.init() also performs sanity checks. 
@@ -215,7 +227,7 @@ def main():
             #sims.exit() # invalidates sims post-processing pointers?
             #            # (e.g., base_force)
             #------------------------------------------------------------------
-        print('Exit jobs...')
+        print('Exiting jobs...')
     #--------------------------------------------------------------------------
     #
     # jobs.exit() is called before jobs is destroyed.
@@ -230,19 +242,6 @@ def main():
     print()
     print('base stress mean: ' + str(base_stress_avg.mean()))
     print('base stress standard deviation: ' + str(base_stress_avg.std()))
-    #
-    if csv_has_nominals:
-        print('\nUser parameter names (first row) '
-            +'with nominal values (second row) from CSV file:')
-        for name, nominal in jobs.nominal.items():
-            print(f'- {name}: {nominal}')
-    else:
-        print('\nUser parameters (first row name)'
-            +' added or updated from CSV file:')
-        for name, value in jobs.parameter.items():
-            print(f'- {name}: {value}')
-    print('\nNumber of additional values (remaining rows) in the CSV file:')
-    print(f'- sample_n: {jobs.parameter["sample_n"]}')
     print()
     #==========================================================================
     """
