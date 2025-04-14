@@ -238,26 +238,6 @@ enum class fmr::grid::Grid_structure {
     END
 };
 '''
-# Dictionary of enums ---------------------------------------------------------
-fmr_enum ={
-    'fmr:Component': Component,
-    'fmr:Simulation_size': Simulation_size,
-    'fmr:Geom_shape': Geometry_shape,
-    'fmr:Grid_structure': Grid_structure,
-    'fmr:Node_at': Node_at,
-    'fmr:Cell_type': Cell_type,
-    'fmr:Elem_type': Elem_type,
-    'fmr:Mtrl_physics': Mtrl_physics,
-    'fmr:Mtrl_symmetry': Mtrl_symmetry,
-    'fmr:Condition_method': Condition_method,
-    'fmr:Solve_method': Solve_method,
-    'fmr:Reduce': Reduce,
-    'fmr:Part_method': Part_method,
-    'fmr:Application': Application,
-    'fmr:File_format': File_format,
-    'fmr:Analysis': Analysis,
-    'fmr:Schedule': Schedule
-}
 #==============================================================================
 def create_enum_from_csv(file_path, enum_name, start_at=None,
                          add_std_members=False):
@@ -318,3 +298,25 @@ if False:
         GEOMETRY_SHAPE = Data.GEOMETRY_SHAPE
         BOUNDING_BOX = Data.BOUNDING_BOX
         END = auto()
+
+# Dictionary of enums ---------------------------------------------------------
+fmr_enum ={
+    'fmr:Component': Component,
+    'fmr:Simulation_size': Simulation_size,
+    'fmr:Geom_shape': Geometry_shape,
+    'fmr:Grid_structure': Grid_structure,
+    'fmr:Node_at': Node_at,
+    'fmr:Cell_type': Cell_type,
+    'fmr:Elem_type': Elem_type,
+    'fmr:Mtrl_physics': Mtrl_physics,
+    'fmr:Mtrl_symmetry': Mtrl_symmetry,
+    'fmr:Condition_method': Condition_method,
+    'fmr:Solve_method': Solve_method,
+    'fmr:Reduce': Reduce,
+    'fmr:Part_method': Part_method,
+    'fmr:Application': Application,
+    'fmr:File_format': File_format,
+    'fmr:Analysis': Analysis,
+    'fmr:Schedule': Schedule,
+    'fmr:Data_type': Data
+}

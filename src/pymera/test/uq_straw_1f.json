@@ -1,7 +1,9 @@
-{ "fmr:Sims": [ {
-  "fmr:NOTE": [
+{ "fmr:NOTE": [
     "non-fmr: keys imply Python shared values and parameters."
   ],
+  "test-parameter-1": 1,
+  "test-parameter-2": [1,2],
+  "fmr:Sims": [ {
   "fmr:Name": "Cantilever beam sims (uq_straw_1.json)",
   "fmr:Version": "0.1.6",
   "fmr:Application": "fmr:UQ",
