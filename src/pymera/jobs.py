@@ -81,7 +81,7 @@ class Jobs:
 
     def add_parameter_file(self, filename, has_names=True, has_nominals=False):
         [self.parameter, self.nominal] = parse_parameter_file(
-            filename, has_names=True, has_nominals=False)
+            filename, has_names=has_names, has_nominals=has_nominals)
 
     def get_sims_n(self):
         return libfemerac.fmr_get_sims_n(self.obj)
@@ -93,9 +93,19 @@ class Jobs:
         return self.sims[-1]
     
     def add_sims_from_file(self, filename):
+        """
+        Adds simulations from a JSON file to the list of simulations.
+
+        Parameters:
+            filename (str): The path to the JSON file containing simulation
+            data.
+
+        Returns:
+            Sims: The last newly added Sims object.
+        """
         self.add_parameter_file(filename)
         if filename.endswith('.json'):
-            # append sims if fmr:Sims in filename
+            # Append sims if fmr:Sims in filename content.
             with open(filename, 'r') as file:
                 sims_json = json.load(file)
             if 'fmr:Sims' in sims_json:
@@ -107,11 +117,10 @@ class Jobs:
                     if sim.get('fmr:Version') is not None:
                         sim_version = sim['fmr:Version']
                     if sim.get('fmr:Application').startswith('fmr:'):
-                        # get string after fmr:
+                        # get string after fmr: and uppercase it:
                         app_str = sim['fmr:Application'][4:].upper()
-                        sim_app = Application[app_str]
                     self.sims.append(Sims(self, name=sim_name,
-                        version=sim_version, application=sim_app))
+                        version=sim_version, application=Application[app_str]))
             else:
                 print(f'Found no fmr:Sims in {filename}.')
                 return

@@ -47,31 +47,36 @@ def find_keys_used(obj, user_keys=True, enum_keys=False):
             result.update(find_keys_used(item, user_keys, enum_keys))
     return result
 
-def OLD_parse_sims_from_file(sims, filename, format):#TODO remove?
-    if(format == Sims_file_format.JSON):
-        with open(filename, 'r') as file:
-            sims_json = json.load(file)
-        if 'fmr:Sims' in sims_json:
-            sims_json = sims_json['fmr:Sims']
-            sims.jobs.parameter = find_keys_used(sims_json,
-                                            user_keys=True, enum_keys=False)
-            #
-            if 'fmr:Name' in sims_json[0]:
-                sims.set_name(sims_json[0]['fmr:Name'])
-            if 'fmr:Version' in sims_json[0]:
-                sims.set_version(sims_json[0]['fmr:Version'])
-        else:
-            print('Found no fmr:Sims in ' + filename)
-            return
-        #if 'fmr:Data:Name' in sims_json:
-        #    sims.name=sims_json['fmr:Data:Name']
-        #self.add_sims(name=sims_json['name'], runs_n=sims_json['runs_n'])
-    return sims
+
 
 def is_terminal_list(lst):
+    """
+    Check if all items in a list are of type float, int, or bool.
+    
+    Parameters:
+        lst (list): The list of items to check.
+    
+    Returns:
+        bool: True if all items are of type float, int, or bool, False
+        otherwise.
+    """
     return all(isinstance(item, (float, int, bool)) for item in lst)
 
 def full_path_json(data, prefix='', sep='\x1f'):
+    """
+    Recursively traverses a JSON-like data structure and prepends a given prefix to each key, separated by a given separator.
+    
+    Parameters:
+        data (dict): The JSON-like data structure to traverse.
+        prefix (str, optional): The prefix to prepend to each key. Defaults to
+            ''.
+        sep (str, optional): The separator to use between the prefix and each
+            key. Defaults to '\x1f'.
+    
+    Returns:
+        dict: A new dictionary with the keys prepended by the prefix and
+            separated by the separator.
+    """
     # \x1f (\31): ASCII unit separator
     result = {}
     for key, value in data.items():
@@ -95,11 +100,35 @@ def full_path_json(data, prefix='', sep='\x1f'):
     return result
 
 def full_path_json_file(filename):
+    """
+    Reads a JSON file specified by the given filename and returns a new
+    dictionary with the keys prepended by the prefix and separated by the
+    separator.
+    
+    Parameters:
+        filename (str): The path to the JSON file to be read.
+    
+    Returns:
+        dict: A new dictionary with the keys prepended by the prefix and
+            separated by the separator.
+    """
     with open(filename, 'r') as file:
         json_data = json.load(file)
     return full_path_json(json_data)
 
 def parse_parameter_json(filename):
+    """
+    Parse a JSON file containing simulation parameters and return a list with
+    two elements.
+    
+    Parameters:
+        filename (str): The path to the JSON file to be parsed.
+    
+    Returns:
+        list: A list with two elements. The first element is a list of
+        simulation parameters found in the JSON file. The second element is an
+        empty dictionary.
+    """
     with open(filename, 'r') as file:
         sims_json = json.load(file)
     param = find_keys_used(sims_json, user_keys=True, enum_keys=False)
@@ -168,6 +197,27 @@ def parse_parameter_csv(filename, has_names=True, has_nominals=False):
         return [parameter, nominal]
     
 def parse_parameter_file(filename, has_names=True, has_nominals=False):
+    """
+    Parses a parameter file and returns a list containing a dictionary of parameter values and a dictionary of nominal values.
+    
+    Parameters:
+        filename (str): The path to the parameter file.
+        has_names (bool, optional): Whether the first line of the file contains
+            parameter names. Defaults to True.
+        has_nominals (bool, optional): Whether the second line of the file
+            contains nominal values. Defaults to False.
+    
+    Returns:
+        list: A list containing two dictionaries. The first dictionary contains
+        the parameter values, where the keys are the parameter names and the
+        values are the corresponding values. The second dictionary contains the
+        nominal values, where the keys are the parameter names and the values
+        are the corresponding nominal values.
+    
+    Raises:
+        Exception: If the file extension is not recognized (i.e., not '.json' or
+            '.csv').
+    """
     # switch on extension
     ext = os.path.splitext(filename)[1] # extension with dot (e.g., '.csv')
     if ext == '.json':
