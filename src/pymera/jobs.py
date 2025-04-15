@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 from pymera.enumerators import Data, Sims_file_format, Application
 from pymera.pymera_libfemerac import libfemerac
-from pymera_parse import parse_sims_from_file, parse_parameter_file
+from pymera_parse import parse_parameter_file
 from sims import Sims
 
 import numpy as np
+import json
 from warnings import warn
 from atexit import register as atexit_register
 
@@ -14,10 +15,6 @@ class Jobs:
         self.parameter = {}# dictionary of parameters
         self.nominal = {}# dictionary of nominal values
         self.sims=[]
-        self.sims_format_from_file_extension = {
-            'json': Sims_file_format.JSON,
-            'csv': Sims_file_format.CSV
-        }
         atexit_register(self.exit_python)
     def __enter__(self): # enter context
         self.init()
@@ -84,7 +81,7 @@ class Jobs:
 
     def add_parameter_file(self, filename, has_names=True, has_nominals=False):
         [self.parameter, self.nominal] = parse_parameter_file(
-            filename, has_names, has_nominals)
+            filename, has_names=True, has_nominals=False)
 
     def get_sims_n(self):
         return libfemerac.fmr_get_sims_n(self.obj)
@@ -94,18 +91,31 @@ class Jobs:
         self.sims.append(Sims(self, name=name, version=version,
                                application=application))
         return self.sims[-1]
-
-    def add_sims_from_file(self, filename, format=Sims_file_format.UNKNOWN):
-        if(format == Sims_file_format.UNKNOWN):
-            if '.' in filename: # Infer format from file extension.
-                ext = filename.split('.')[-1]
-                format = self.sims_format_from_file_extension[ext]
-        if(format == Sims_file_format.UNKNOWN):
-            print(f'WARNING Unknown sims file format: {filename}') # throw?
-        if((format.value > Sims_file_format.UNKNOWN.value) and
-           (format != Sims_file_format.END)):
-            self.sims.append(parse_sims_from_file(Sims(self), filename, format))
-            return self.sims[-1]
+    
+    def add_sims_from_file(self, filename):
+        self.add_parameter_file(filename)
+        if filename.endswith('.json'):
+            # append sims if fmr:Sims in filename
+            with open(filename, 'r') as file:
+                sims_json = json.load(file)
+            if 'fmr:Sims' in sims_json:
+                for sim in sims_json['fmr:Sims']:
+                    sim_name=sim_version=None
+                    sim_app=Application.UNKNOWN
+                    if sim.get('fmr:Name') is not None:
+                        sim_name = sim['fmr:Name']
+                    if sim.get('fmr:Version') is not None:
+                        sim_version = sim['fmr:Version']
+                    if sim.get('fmr:Application').startswith('fmr:'):
+                        # get string after fmr:
+                        app_str = sim['fmr:Application'][4:].upper()
+                        sim_app = Application[app_str]
+                    self.sims.append(Sims(self, name=sim_name,
+                        version=sim_version, application=sim_app))
+            else:
+                print(f'Found no fmr:Sims in {filename}.')
+                return
+        return self.sims[-1]# return the last added.
 
     def init(self):
         libfemerac.fmr_jobs_init(self.obj)

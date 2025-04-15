@@ -18,6 +18,7 @@ from pymera.enumerators import fmr_enum, Data, Application, \
     
 #import uqtools as uq
 
+from pymera_parse import parse_parameter_file
 from pymera_parse import full_path_json_file # temp. until put into pymera module
 
 def main():
@@ -50,12 +51,12 @@ def main():
     """
     here = os.path.dirname(os.path.abspath(__file__))
     #
-    json_filname = os.path.join(here,'uq_straw_1f.json')
+    json_filename = os.path.join(here,'uq_straw_1f.json')
     csv_filname = os.path.join(here,'uq_straw_1f.csv')
     csv_has_nominals = True
     #
     if True: # Print full path JSON file.
-        flat = full_path_json_file(json_filname)
+        flat = full_path_json_file(json_filename)
         for key, value in flat.items():
             key_pretty = key.replace('\x1f', '\u00b7')
             print(f"{key_pretty}: {value}")
@@ -69,11 +70,10 @@ def main():
         print('\nHello '+jobs.get_version()+' '+jobs.get_name()+' (jobs)!')
         #
         # Read simulation set from JSON file.
-        #sims_from_json = jobs.add_sims_from_file(json_filname)
-        sims_from_json = jobs.add_sims_from_file(json_filname)
+        sims_from_json = jobs.add_sims_from_file(json_filename)
         #
         print('Hello '+sims_from_json.get_name()+' '+sims_from_json.get_version()+'!')
-        #
+        print(f'Are you ready to rock an {sims_from_json.get_application()}?')
         print('\nUser parameters, output fields, '
                 + 'and internal variables in JSON file:')
         for name, value in jobs.parameter.items():
@@ -83,7 +83,7 @@ def main():
                 print(f'- {name}: {value}')
         #
         # Read parameters and nominal values from the .csv file.
-        jobs.add_parameter_file(csv_filname,
+        jobs.add_parameter_file(csv_filname,#TODO set_parameter_file
             has_names=True, has_nominals=csv_has_nominals)
         #
         if csv_has_nominals:

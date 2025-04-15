@@ -3,8 +3,7 @@ from pymera.enumerators import fmr_enum, Data, Grid_structure, \
     Sims_file_format
 
 import numpy as np
-import json
-import csv
+import os, json, csv
 
 def find_keys_used(obj, user_keys=True, enum_keys=False):
     """
@@ -48,10 +47,10 @@ def find_keys_used(obj, user_keys=True, enum_keys=False):
             result.update(find_keys_used(item, user_keys, enum_keys))
     return result
 
-def parse_sims_from_file(sims, filename, format):
+def OLD_parse_sims_from_file(sims, filename, format):#TODO remove?
     if(format == Sims_file_format.JSON):
         with open(filename, 'r') as file:
-            sims_json = json.load(file)#TODO use json()
+            sims_json = json.load(file)
         if 'fmr:Sims' in sims_json:
             sims_json = sims_json['fmr:Sims']
             sims.jobs.parameter = find_keys_used(sims_json,
@@ -100,7 +99,13 @@ def full_path_json_file(filename):
         json_data = json.load(file)
     return full_path_json(json_data)
 
-def parse_parameter_file(filename, has_names=True, has_nominals=False):
+def parse_parameter_json(filename):
+    with open(filename, 'r') as file:
+        sims_json = json.load(file)
+    param = find_keys_used(sims_json, user_keys=True, enum_keys=False)
+    return [param,{}]
+
+def parse_parameter_csv(filename, has_names=True, has_nominals=False):
     """
     Adds parameters from a CSV file to the parameter dictionary and the
     nominal dictionary. The function takes the following arguments:
@@ -161,3 +166,14 @@ def parse_parameter_file(filename, has_names=True, has_nominals=False):
                     +'of values. '
                     +'Something might be wrong with your CSV file.')
         return [parameter, nominal]
+    
+def parse_parameter_file(filename, has_names=True, has_nominals=False):
+    # switch on extension
+    ext = os.path.splitext(filename)[1] # extension with dot (e.g., '.csv')
+    if ext == '.json':
+        return parse_parameter_json(filename)
+    if ext == '.csv':
+        return parse_parameter_csv(filename, has_names, has_nominals)
+    else:
+        raise Exception(f'Unknown parameter file format: {filename}')
+
