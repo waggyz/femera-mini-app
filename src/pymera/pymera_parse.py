@@ -4,6 +4,7 @@ from pymera.enumerators import fmr_enum, Data, Grid_structure, \
 
 import numpy as np
 import json
+import csv
 
 def find_keys_used(obj, user_keys=True, enum_keys=False):
     """
@@ -99,4 +100,64 @@ def full_path_json_file(filename):
         json_data = json.load(file)
     return full_path_json(json_data)
 
-
+def parse_parameter_file(filename, has_names=True, has_nominals=False):
+    """
+    Adds parameters from a CSV file to the parameter dictionary and the
+    nominal dictionary. The function takes the following arguments:
+    
+    - filename (str): The path to the CSV file containing the parameters.
+    - has_names (bool, optional): Whether the first line of the CSV file
+        contains parameter names. Defaults to True.
+    - has_nominals (bool, optional): Whether the next line of the CSV file
+        contains nominal values. Defaults to False.
+    
+    The function reads the CSV file and populates the parameter and nominal
+    dictionaries with the values. If has_names is True, the function assumes
+    that the first line of the CSV file contains the parameter names and
+    creates an empty list for each parameter. If has_nominals is True, the
+    function assumes that the second line of the CSV file contains the
+    nominal values and sets each nominal value to None. The function then
+    appends each value from the remaining lines of the CSV file to the
+    corresponding parameter list. If the number of values for a parameter is
+    greater than 1, the function converts the list to a contiguous numpy
+    array.
+    
+    The function sets the parameter "sample_n" to the minimum number of
+    values of all parameters.
+    """
+    with open(filename, 'r') as f:
+        parameter={}
+        nominal={}
+        reader = csv.reader(f)
+        if has_names: # first line has parameter names
+            names = next(reader)
+        else: # Make placeholder names: param_1, param_2,, param_3,...
+            line = next(reader)# need a line to get length
+            names =  [f'param_{i+1}' for i in range(len(line))]
+            f.seek(0)# Return to top.
+        # Make dictionaries having keys for names and empty arrays (for
+        # parameter) or None (for nominal) for values.
+        for name in names:
+            parameter[name] = []
+        nominal = {name: None for name in names}
+        # The next (second) line has the nominal values (if provided)
+        if has_nominals:
+            nominals = next(reader)
+            for name, val in zip(names, nominals):
+                nominal[name] = float(val)#TODO Check type of each val?
+        for row_col in reader:
+            for name, col in zip(names, row_col):
+                parameter[name].append(float(col))
+        parameter["sample_n"] = min(len(parameter[name])
+                                            for name in names)
+        if(parameter["sample_n"] > 1):
+            # Convert lists to contiguous numpy arrays
+            for key in parameter:
+                parameter[key] = np.ascontiguousarray(
+                    parameter[key])
+        if(parameter["sample_n"] != max(len(parameter[name])
+                                            for name in names)):
+            warn('\n pym Jobs WARN Not all parameters have the same number '
+                    +'of values. '
+                    +'Something might be wrong with your CSV file.')
+        return [parameter, nominal]

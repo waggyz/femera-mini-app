@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
 from pymera.enumerators import Data, Sims_file_format, Application
 from pymera.pymera_libfemerac import libfemerac
-from pymera_parse import parse_sims_from_file, full_path_json_file
+from pymera_parse import parse_sims_from_file, parse_parameter_file
 from sims import Sims
 
 import numpy as np
-import csv
 from warnings import warn
 from atexit import register as atexit_register
 
 class Jobs:
     def __init__(self): # create instance
         self.obj = libfemerac.fmr_new_jobs()
-        self.nominal = {}# dictionary of nominal values
         self.parameter = {}# dictionary of parameters
+        self.nominal = {}# dictionary of nominal values
         self.sims=[]
         self.sims_format_from_file_extension = {
             'json': Sims_file_format.JSON,
@@ -84,63 +83,8 @@ class Jobs:
         return self.parameters[component][parameter]
 
     def add_parameter_file(self, filename, has_names=True, has_nominals=False):
-        """
-        Adds parameters from a CSV file to the parameter dictionary and the
-        nominal dictionary. The function takes the following arguments:
-        
-        - filename (str): The path to the CSV file containing the parameters.
-        - has_names (bool, optional): Whether the first line of the CSV file
-          contains parameter names. Defaults to True.
-        - has_nominals (bool, optional): Whether the next line of the CSV file
-          contains nominal values. Defaults to False.
-        
-        The function reads the CSV file and populates the parameter and nominal
-        dictionaries with the values. If has_names is True, the function assumes
-        that the first line of the CSV file contains the parameter names and
-        creates an empty list for each parameter. If has_nominals is True, the
-        function assumes that the second line of the CSV file contains the
-        nominal values and sets each nominal value to None. The function then
-        appends each value from the remaining lines of the CSV file to the
-        corresponding parameter list. If the number of values for a parameter is
-        greater than 1, the function converts the list to a contiguous numpy
-        array.
-        
-        The function sets the parameter "sample_n" to the minimum number of
-        values of all parameters.
-        """
-        with open(filename, 'r') as f:
-            reader = csv.reader(f)
-            if has_names: # first line has parameter names
-                names = next(reader)
-            else: # Make placeholder names: param_1, param_2,, param_3,...
-                line = next(reader)# need a line to get length
-                names =  [f'param_{i+1}' for i in range(len(line))]
-                f.seek(0)# Return to top.
-            # Make dictionaries having keys for names and empty arrays (for
-            # parameter) or None (for nominal) for values.
-            for name in names:
-                self.parameter[name] = []
-            self.nominal = {name: None for name in names}
-            # The next (second) line has the nominal values (if provided)
-            if has_nominals:
-                nominals = next(reader)
-                for name, val in zip(names, nominals):
-                    self.nominal[name] = float(val)#TODO Check type of each val?
-            for row_col in reader:
-                for name, col in zip(names, row_col):
-                    self.parameter[name].append(float(col))
-            self.parameter["sample_n"] = min(len(self.parameter[name])
-                                              for name in names)
-            if(self.parameter["sample_n"] > 1):
-                # Convert lists to contiguous numpy arrays
-                for key in self.parameter:
-                    self.parameter[key] = np.ascontiguousarray(
-                        self.parameter[key])
-            if(self.parameter["sample_n"] != max(len(self.parameter[name])
-                                                for name in names)):
-                warn('\n pym Jobs WARN Not all parameters have the same number '
-                     +'of values. '
-                     +'Something might be wrong with your CSV file.')
+        [self.parameter, self.nominal] = parse_parameter_file(
+            filename, has_names, has_nominals)
 
     def get_sims_n(self):
         return libfemerac.fmr_get_sims_n(self.obj)
