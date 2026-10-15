@@ -8,6 +8,8 @@ L_n = 1+ L / el;
 W_n = 1+ W / el;
 H_n = 1+ H / el;
 //
+//NOTE point, edge, and surface numbers do not match other block geometry defs.
+//TODO point, edge, and surface numbers might be fixable.
 Point(1) = {0, 0, 0};
 Point(2) = {L, 0, 0};
 //

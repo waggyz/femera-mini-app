@@ -69,7 +69,6 @@ namespace femera {
   noexcept {
     return this->proc_n;
   }
-  //
 }//end femera:: namespace
-
+//
 #undef FMR_DEBUG

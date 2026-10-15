@@ -62,7 +62,29 @@ class Jobs:
                 values = np.ascontiguousarray(values)
         self.parameter[name] = values
 
-    def set_parameter(self, name, values=None, data=None, nominal=None):#TODO same as add_?
+    def set_parameter(self, name, values=None, data=None, nominal=None):
+        #TODO same as add_? Should set instead of append if already exists.
+        """
+        Set the parameter values for a given name.
+
+        Parameters:
+            name (str): The name of the parameter.
+            
+            values (Optional[Union[int, float, str, np.ndarray]]): The values of
+            the parameter. If a single value is provided, it will be stored as a
+            scalar. If multiple values are provided, they will be stored as a
+            numpy contiguous array. Defaults to None.
+
+            data (Any): Unused parameter. Defaults to None.
+
+            nominal (Optional[Union[int, float, str, np.ndarray]]): The nominal
+            value(s) of the parameter. If a single value is provided, it will be
+            stored as a scalar. If multiple values are provided, they will be
+            stored as a numpy contiguous array. Defaults to None.
+
+        Returns:
+            None
+        """
         if isinstance(nominal, (list, tuple, set)):
             if len(nominal) > 1:
                 nominal = np.ascontiguousarray(nominal)
@@ -124,14 +146,18 @@ class Jobs:
             else:
                 print(f'Found no fmr:Sims in {filename}.')
                 return
-        return self.sims[-1]# return the last added.
+        return self.sims# return list of sims.
 
     def init(self):
         libfemerac.fmr_jobs_init(self.obj)
     
     def run(self):
         #fmr.fmr_jobs_run(self.obj)
-        print('Running '+str(self.get_sims_n())+' simulations.... (jk ;)')
+        user_sims_n = self.get_sims_n() - 1 # Don't count default Sims handler.
+        print('Running '
+              +str(user_sims_n)
+              +' simulation set'+('' if user_sims_n == 1 else 's')
+              +'... (jk ;)')
         pass
 
     def exit(self):

@@ -3,10 +3,11 @@
   ],
   "jobs-parameter-1": 1,
   "jobs-parameter-2": [1,2],
-  "fmr:Sims": [ {
-  "fmr:Name": "Cantilever beam sims (uq_straw_1.json)",
-  "fmr:Version": "0.1.6",
-  "fmr:Application": "fmr:UQ",
+  "fmr:Sims": [{
+    "fmr:Name": "Cantilever beam sims",
+    "fmr:Version": "0.1.6",
+    "fmr:Application": "fmr:UQ"
+  }],
   "fmr:Geom": [{
     "fmr:Geom_d": 3,
     "fmr:Geometry_shape": "fmr:Block",
@@ -16,7 +17,12 @@
     ]
   },{
     "fmr:File_name": "uq_straw_1.geo",
-    "fmr:Parameter": {"beam_dimensions": [1.000, 0.050, 0.050] }
+    "fmr:Dimension_x": {"length": 1.000},
+    "fmr:Dimension_y": {"width": 0.050},
+    "fmr:Dimension_z": {"height": 0.050},
+    "fmr:NOTE": [
+      "Gmsh geometry (.geo) file accepts scalar parameters."
+    ]
   }],
   "fmr:Grid": [{
     "fmr:Geom": 0,
@@ -49,7 +55,7 @@
     "fmr:Displacement_xyz": [0.000, 0.000, 0.000]
     },{ 
     "fmr:Name": "Displace the beam's free end face.",
-    "fmr::Data_type:Node_set": "beam-tip-nodeset",
+    "fmr:Node_set": "beam-tip-nodeset",
     "fmr:Displacement_z": {"tip_displace_z": -0.010}
   },{
     "fmr:BCs":[0,1], "fmr:TODO": ["Combine BCs into a single list."]
@@ -60,8 +66,10 @@
     "fmr:Name": "Basic steel",
     "fmr:Mtrl_physics": "fmr:Elastic",
     "fmr:Mtrl_symmetry": "fmr:Isotropic",
-    "fmr:Youngs_modulus": {"youngs": 210e9},
-    "fmr:Poissons_ratio": {"poissons": 0.285}
+    "fmr:Youngs_modulus": {"nominal-youngs": 210e9},
+    "fmr:Poissons_ratio": {"nominal-poissons": 0.285},
+    "fmr:Precision": "fmr:Double",
+    "fmr:FPU_SIMD": "fmr:AVX2"
   }],
   "fmr:Solve": [{
     "fmr:Name": "Solve nominal beam.",
@@ -92,16 +100,16 @@
     "fmr:File_format": "fmr:CSV",
     "fmr:Field": [
       "run_number",
-      "base_force_mag",
-      "beam_volume"
+      "beam_volume",
+      "base_force_mag"
     ]
   },{
     "fmr:File_name": "uq_straw_1_samples_gmsh.csv",
     "fmr:File_format": "fmr:CSV",
     "fmr:Field": [
       "run_number",
-      "base_force_mag",
-      "beam_volume"
+      "beam_volume",
+      "base_force_mag"
     ]
     }],
   "fmr:Runs": [{
@@ -112,7 +120,7 @@
     "fmr:Duplicate_runs": "fmr:CPU_n",
     "fmr:Cores_per_run": 1,
     "fmr:Runs_n": 1,
-    "fmr:Sims": [0],
+    "fmr:Sims": [1],
     "fmr:Geom": [0],
     "fmr:Grid": [0],
     "fmr:Mtrl": [0],
@@ -127,7 +135,7 @@
     "fmr:Cores_per_run": 1,
     "run_number": "fmr:Runs_ix",
     "fmr:Runs_n": {"sample_n": 0},
-    "fmr:Sims": [0],
+    "fmr:Sims": [1],
     "fmr:Geom": [0],
     "fmr:Grid": [0],
     "fmr:Mtrl": [0],
@@ -142,7 +150,7 @@
     "fmr:Cores_per_run": 1,
     "run_number": "fmr:Runs_ix",
     "fmr:Runs_n": {"sample_n": 0},
-    "fmr:Sims": [0],
+    "fmr:Sims": [1],
     "fmr:Geom": [1],
     "fmr:Grid": [1],
     "fmr:Mtrl": [0],
@@ -150,4 +158,4 @@
     "fmr:Solve": [1],
     "fmr:Post": [2]
   }]
- } ] }
+ }

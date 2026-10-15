@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-from pymera.enumerators import fmr_enum, Data, Grid_structure, \
+from pymera.enumerators import fmr_enum_list, Data, Grid_structure, \
     Sims_file_format
 
 import numpy as np
 import os, json, csv
+from warnings import warn
 
 def find_keys_used(obj, user_keys=True, enum_keys=False):
     """
@@ -23,8 +24,8 @@ def find_keys_used(obj, user_keys=True, enum_keys=False):
     result = {}
     if isinstance(obj, dict):
         for key, val in obj.items():
-            if enum_keys and (key in fmr_enum):
-                result[key] = fmr_enum[key][val.split('fmr:')[1].upper()]
+            if enum_keys and (key in fmr_enum_list):
+                result[key] = fmr_enum_list[key][val.split('fmr:')[1].upper()]
                 #result[key] = fmr_enum[key][val.upper()].value # integer
             if not key.startswith("fmr:"):
                 if isinstance(val, (int, float, str)):
@@ -187,10 +188,9 @@ def parse_parameter_csv(filename, has_names=True, has_nominals=False):
         if(parameter["sample_n"] > 1):
             # Convert lists to contiguous numpy arrays
             for key in parameter:
-                parameter[key] = np.ascontiguousarray(
-                    parameter[key])
+                parameter[key] = np.ascontiguousarray(parameter[key])
         if(parameter["sample_n"] != max(len(parameter[name])
-                                            for name in names)):
+                                    for name in names)):
             warn('\n pym Jobs WARN Not all parameters have the same number '
                     +'of values. '
                     +'Something might be wrong with your CSV file.')
@@ -198,7 +198,8 @@ def parse_parameter_csv(filename, has_names=True, has_nominals=False):
     
 def parse_parameter_file(filename, has_names=True, has_nominals=False):
     """
-    Parses a parameter file and returns a list containing a dictionary of parameter values and a dictionary of nominal values.
+    Parses a parameter file and returns a list containing a dictionary of
+    parameter values and a dictionary of nominal values.
     
     Parameters:
         filename (str): The path to the parameter file.
@@ -224,6 +225,6 @@ def parse_parameter_file(filename, has_names=True, has_nominals=False):
         return parse_parameter_json(filename)
     if ext == '.csv':
         return parse_parameter_csv(filename, has_names, has_nominals)
-    else:
-        raise Exception(f'Unknown parameter file format: {filename}')
+    raise Exception(f'Unknown parameter file format: {filename}, '
+                    +'must be either .json or .csv.')
 

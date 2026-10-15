@@ -82,6 +82,7 @@ namespace fmr {// typdefs, constants, enums
 #endif
   enum class Application : fmr::Enum_int { None=0, Error, Unknown,
     //#include "sims-application-enum.inc"// TODO generate from pymera
+    Handler,
     Research,
     Engineering,
     Parameter_sweep,

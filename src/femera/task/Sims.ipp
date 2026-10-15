@@ -5,7 +5,7 @@ namespace femera {
   inline
   task::Sims::Sims (const femera::Work::Core_ptrs_t W)
   noexcept : Task (W) {
-    this->name      ="simulation handler";
+    this->name      ="simulation set handler";
     this->abrv      ="sims";
     this->task_type = task_cast (Task_type::Sims);
     this->thrd_ownr = fmr::Local_int (::omp_get_thread_num ());
@@ -22,6 +22,7 @@ namespace femera {
     this->app = value;
     return this->app;
   }//
-}//end femera namespace
+} //end femera namespace
+ //
 //end FEMERA_HAS_SIMS_IPP
 #endif

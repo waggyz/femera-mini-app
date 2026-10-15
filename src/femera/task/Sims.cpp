@@ -28,6 +28,7 @@ namespace femera {
 #endif
         this->add_task (std::move (R));
     } }
+  this->set_application (fmr::Application::Handler);// applies to sims[0]
   this->set_init (true);
   }//
   //

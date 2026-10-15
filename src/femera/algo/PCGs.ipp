@@ -5,8 +5,8 @@ namespace femera {
   inline
   algo::PCGs::PCGs (const femera::Work::Core_ptrs_t core)
   noexcept : Algo (core) {
-    this->name      ="Femera elastic algoics";
-    this->abrv      ="elas";
+    this->name      ="Femera preconditioned conjugate gradient (PCG) solver";
+    this->abrv      ="pcg";
     this->task_type = task_cast (Task_type::PCGs);
   }
   inline

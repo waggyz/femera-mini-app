@@ -6,7 +6,7 @@ import enumerators as pnm
 class TestPymeraJobs(unittest.TestCase):
 
     def test_standard_enum_members(self):
-        for key, enum in pnm.fmr_enum.items():
+        for key, enum in pnm.fmr_enum_list.items():
             print(f'Checking {enum} for standard members...')
             self.assertEqual(enum['NONE'].value , 0 )
             self.assertEqual(enum['ERROR'].value, 1 )

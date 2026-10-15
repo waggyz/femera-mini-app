@@ -11,7 +11,7 @@ sys.path.append(os.path.dirname(os.path.dirname(sys.path[0]))) # grandparent
 sys.path.append(os.path.dirname(sys.path[0])) # parent
 
 import pymera
-from pymera.enumerators import fmr_enum, Data, Application, \
+from pymera.enumerators import fmr_enum_list, Data, Application, \
     Geometry_shape, Grid_structure, Part_method, Mtrl_physics, \
     Cell_type, Elem_type, Node_at
  #   Sims, Geom
@@ -69,8 +69,8 @@ def main():
     with pymera.Jobs() as jobs:
         print('\nHello '+jobs.get_version()+' '+jobs.get_name()+' (jobs)!')
         #
-        # Read simulation set from JSON file.
-        sims_from_json = jobs.add_sims_from_file(json_filename)
+        # Read simulation data from JSON file.
+        sims_from_json = jobs.add_sims_from_file(json_filename)[-1]# get last sims added from file.
         #
         print('Hello '+sims_from_json.get_name()+' '+sims_from_json.get_version()+'!')
         print(f'Are you ready to rock an {sims_from_json.get_application()}?')

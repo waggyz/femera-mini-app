@@ -24,6 +24,7 @@ class Application(Enum):
     NONE = 0
     ERROR = auto()
     UNKNOWN = auto()
+    HANDLER = auto()
     RESEARCH = auto()
     ENGINEERING = auto()
     PARAMETER_SWEEP = auto()
@@ -186,24 +187,6 @@ class Reduce(Enum):
     ANY = auto() # any are true
     END = auto()
 
-class Grid_structure(Enum):
-    NONE = 0
-    ERROR = auto()
-    UNKNOWN = auto()
-    UNSTRUCTURED = auto()
-    CARTESIAN = auto() # isotropic (scalar) scaling
-    RECTILINEAR = auto() # scaled x,y,z
-    GENERAL_LINEAR = auto() # 3x3 transformation matrix
-    POLAR = auto()
-    CYLINDRICAL = auto() # rotate around x, y, or z axis
-    SPHERICAL = auto()
-    ELLIPTICAL = auto()
-    SPHEROIDAL = auto()  # oblate, prolate
-    CONFORMAL_MAP = auto()
-    CURVILINEAR = auto() # orthogonal, non-orthogonal
-    BODY_FITTED = auto()
-    END = auto()
-
 class File_format(Enum):
     NONE = 0
     ERROR = auto()
@@ -221,9 +204,54 @@ class Schedule(Enum):
     LIFO = auto()
     LARGE_TO_SMALL = auto()
     END = auto()
+
+class Precision(Enum):
+    NONE = 0
+    ERROR = auto()
+    UNKNOWN = auto()
+    SINGLE = auto()
+    DOUBLE = auto()
+    END = auto()
+
+class CPU_SIMD(Enum):
+    NONE = 0
+    ERROR = auto()
+    UNKNOWN = auto()
+    # REFERENCE = auto() # Reference implementation #TODO?
+    SCALAR = auto()
+    SSE = auto()
+    AVX = auto()
+    AVX2 = auto()
+    AVX512 = auto()
+    END = auto()
+
+class Grid_structure(Enum):
+    NONE = 0
+    ERROR = auto()
+    UNKNOWN = auto()
+    UNSTRUCTURED = auto()
+    # 1D-3D grids
+    CARTESIAN = auto() # isotropic (scalar) scaling (1D-3D)
+    RECTILINEAR = auto() # scaled x,y,z (1D-3D)
+    GENERAL_LINEAR = auto() # 1x1-3x3 transformation matrix (1D-3D)
+    CURVILINEAR = auto() # orthogonal, non-orthogonal (1D-3D)
+    BODY_FITTED = auto() # (1D-3D)
+    # 2D grids
+    CONFORMAL_MAP = auto() # (2D?)
+    POLAR = auto() # (2D)
+    ELLIPTICAL = auto() # (2D)
+    # 3D grids
+    CYLINDRICAL = auto() # rotate around x, y, or z axis (3D)
+    SPHERICAL = auto() # (3D)
+    SPHEROIDAL = auto()  # oblate, prolate (3D)
+    #
+    END = auto()
 '''
 C++
 enum class fmr::grid::Grid_structure {
+    None,
+    Error,
+    Unknown,
     Unstructured,
     Cartesian,// isotropic scaling (scalar)
     Rectilinear,// scaled x,y,z
@@ -235,7 +263,7 @@ enum class fmr::grid::Grid_structure {
     Conformal_map,
     Curvilinear, // orthogonal, non-orthogonal
     Body_fitted,
-    END
+    end
 };
 '''
 #==============================================================================
@@ -297,10 +325,11 @@ if False:
         GEOM_D = Data.GEOM_D
         GEOMETRY_SHAPE = Data.GEOMETRY_SHAPE
         BOUNDING_BOX = Data.BOUNDING_BOX
+        PRECISION = Data.PRECISION
         END = auto()
 
 # Dictionary of enums ---------------------------------------------------------
-fmr_enum ={
+fmr_enum_list ={
     'fmr:Component': Component,
     'fmr:Simulation_size': Simulation_size,
     'fmr:Geom_shape': Geometry_shape,
@@ -318,5 +347,7 @@ fmr_enum ={
     'fmr:File_format': File_format,
     'fmr:Analysis': Analysis,
     'fmr:Schedule': Schedule,
+    'fmr:Precision': Precision,
+    'fmr:CPU_SIMD': CPU_SIMD,
     'fmr:Data_type': Data
 }
