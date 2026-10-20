@@ -1211,7 +1211,7 @@ endif
 
 ifeq ($(ENABLE_MPI),ON)
 $(BUILD_CPU)/sizeof-mpi-comm.exe : export TMPDIR := $(TEMP_DIR)
-$(BUILD_CPU)/sizeof-mpi-comm.exe : src/sizeof-mpi-comm.c
+$(BUILD_CPU)/sizeof-mpi-comm.exe : src/sizeof-mpi-comm.c | $(BUILD_CPU)/ $(BUILD_CPU)/tmp/
 	$(call col2cxx,$(CXX_),$(CXX) $<,$(notdir $@))
 	$(CXX) $(CXXFLAGS) $< $(LDFLAGS) $(INCFLAGS) -lmpi -o $@
 endif

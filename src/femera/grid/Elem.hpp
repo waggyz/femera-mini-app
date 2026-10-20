@@ -64,8 +64,7 @@ class Elem {
 #endif
   //
   private:
-  T* this_chld = reinterpret_cast<T*>(this);
-  // A static_cast only works for default template arguments.
+  // No private members
   //
   public:
   // Simple accessors --------------------------------------------------------

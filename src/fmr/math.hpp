@@ -5,6 +5,7 @@
 #include <valarray>
 #include <map>
 #include <immintrin.h>
+#include <string>
 
 #define FMR_ALIGN_INTS 32
 //alignof(std::size_t) FIXME does not return const

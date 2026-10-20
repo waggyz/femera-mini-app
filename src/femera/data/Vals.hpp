@@ -4,6 +4,7 @@
 #include "Bulk.hpp"
 
 #include <unordered_map>
+#include <stdexcept>
 
 namespace femera { namespace data {
   class Vals {//No vtable for fast non-static procedural data generation methods

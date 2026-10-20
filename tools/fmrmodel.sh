@@ -2,13 +2,19 @@
 # Prints the first word containing digits from the model name in /proc/cpuinfo
 #
 if which lscpu >/dev/null 2>/dev/null; then
-  cpumodel=`lscpu | grep -i  -m1 '^model name' \
+  cpumodel=`lscpu | grep -i -m1 '^model name' \
   | sed -e 's/\ /\n/g' \
   | grep -m 1 '[0-9]'`
   if [ "$cpumodel" == "12th" ]; then
-    cpumodel=`lscpu | grep -i  -m1 '^model name' \
+    cpumodel=`lscpu | grep -i -m1 '^model name' \
     | sed -e 's/\ /\n/g' \
     | grep -m 2 '[0-9]' | tail -n1`
+  fi
+  if [ "$cpumodel" == "7" ]; then
+    cpumodel=`lscpu | grep -i -m1 '^model name' \
+    | sed -e 's/\ /\n/g' \
+    | grep -C 1 '[0-9]' \
+    | paste -sd '-'`
   fi
 else
   cpumodel=`grep -m 1 "model name" /proc/cpuinfo \

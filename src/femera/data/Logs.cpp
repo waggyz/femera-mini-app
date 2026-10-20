@@ -2,6 +2,8 @@
 #include "File.hpp"
 #include "../proc/Main.hpp"
 
+#include <stdexcept>
+
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
 #include <cstdio>     // std::printf
