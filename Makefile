@@ -455,6 +455,7 @@ ifeq ($(ENABLE_VALGRIND),ON)
   VGSUPP_FLAGS += --suppressions=$(BUILD_CPU)/$(VALGRIND_SUPP)
   # Use (mostly) the same flags to compile the suppression file.
   VGFLAGS := $(CXXFLAGS) $(filter-out -Winline,$(CXXWARNS))
+ifeq ($(ENABLE_MPI),ON)
 ifeq ($(FMR_MPI_TYPE),MPICH)
   # This is for MPICH.
   VGSUPP := valgrind --leak-check=full --show-reachable=yes --error-limit=no \
@@ -491,8 +492,15 @@ else
       $(BUILD_CPU)/mini.valgrind.log;                      \
     sed -i '/select an alternative log fd/d'               \
       $(BUILD_CPU)/mini.valgrind.log
-endif
-endif
+endif # MPICH/OpenMPI switch
+else # No MPI
+  VGSUPP :=
+  VGEXEC := valgrind --leak-check=full --track-origins=yes        \
+    --log-file=$(BUILD_CPU)/mini.valgrind.log     \
+    $(BUILD_CPU)/mini -v0 $(TDD_FMRFILE) \
+    > $(BUILD_CPU)/mini.valgrind.out;
+endif # ENABLE_MPI
+endif # ENABLE_VALGRIND
 
 #TODO CXXMINI flags should show -Winline errors?
 CXXMINI := $(CXXFLAGS) $(FMRFLAGS) $(filter-out -Winline,$(CXXWARNS))
@@ -606,6 +614,7 @@ perf: | intro
 	$(MAKE) $(JPAR) perf-done
 
 ifeq ($(ENABLE_PYMERA),ON)
+pymera: export FMR_LIBDIR := $(abspath $(STAGE_CPU)/lib)
 pymera: $(LIBFEMERA_SO)
 	$(call timestamp,$@,$^)
 	@tools/run_python_tests_in_dir "src/pymera" \
@@ -1108,7 +1117,7 @@ shared: $(LIBFEMERA_SO)
 
 $(LIBFEMERA_SO): $(LIBFEMERA_A)
 	$(call col2libb,$(LIBS),$(CXX) -shared -o libfemerac.so <--,libfemera.a)
-	$(CXX) -shared -o $(LIBFEMERA_SO) $(LDFLAGS) $(LDLIBS) \
+	$(CXX) $(CXXFLAGS) -shared -o $(LIBFEMERA_SO) $(LDFLAGS) $(LDLIBS) \
 	 -Wl,--whole-archive -Wl,--export-dynamic $(LIBFEMERA_A) -Wl,--no-whole-archive
 
 # Executable targets ----------------------------------------------------------
@@ -1133,7 +1142,11 @@ endif
 $(BUILD_CPU)/mini.valgrind.log: export PATH:=$(shell pwd)/$(BUILD_CPU):$(PATH)
 $(BUILD_CPU)/mini.valgrind.log: $(VALGRIND_SUPP_EXE)
 ifeq ($(ENABLE_VALGRIND),ON)
+ifeq ($(ENABLE_MPI),ON)
 	$(info $(GRND) valgrind .. fmrexec tdd:$(<))
+else
+	$(info $(GRND) valgrind .. $(<))
+endif
 	$(VGEXEC) # >> $(BUILD_CPU)/mini.valgrind.out
 	-grep -i 'lost: [1-9]' $(BUILD_CPU)/mini.valgrind.log \
   | cut -d " " -f 5- | awk '{print "$(WARN) valgrind:",$$0}'

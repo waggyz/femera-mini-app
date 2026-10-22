@@ -4,7 +4,7 @@ import numpy as np
 import contextlib
 import io
 
-from src.pymera.math.spline import (
+from spline import (
     eval_cubic_spline_ref, eval_cubic_spline_knot_4_avx
     )
 def test_cubic_spline_knot_4_avx(n_tests=256,

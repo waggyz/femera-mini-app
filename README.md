@@ -88,6 +88,21 @@ make test tune
 make install
 ```
 
+### Running the Python bindings
+
+`make pymera ENABLE_PYMERA=ON` tests the shared library for the selected
+`CPUMODEL`. For direct Python runs, the bindings use `tools/fmrmodel.sh` to
+select `build/stage/<CPU model>/lib`, relative to the repository rather than
+the working directory. Set `FMR_LIBDIR` to use a different build or installation:
+
+```bash
+FMR_LIBDIR="$PWD/build/stage/Ultra-7-255H/lib" \
+  python3 src/pymera/pymera_libfemerac_test.py
+```
+
+Optional native dependencies such as CGNS are only required if the selected
+shared library was built with them.
+
 ## Manual build
 
 1. Check system

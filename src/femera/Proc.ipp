@@ -1,6 +1,10 @@
 #ifndef FEMERA_HAS_PROC_IPP
 #define FEMERA_HAS_PROC_IPP
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
 #include <cstdio>     // std::printf
@@ -59,7 +63,10 @@ FMR_WARN_INLINE_ON
     catch (...)              { task_err = 3;
       Errs::print (this->get_abrv ()+" task_exit"); }
     this->set_init (false);
-    return (task_err > 0) ? task_err : err;
+#ifdef _OPENMP
+    omp_pause_resource_all(omp_pause_hard);
+#endif
+    return (task_err > 0) ? task_err : err;// Final Femera exit
   }
   template <typename T> inline
   T* Proc<T>::get_task (const fmr::Local_int i)

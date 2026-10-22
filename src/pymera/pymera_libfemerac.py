@@ -2,11 +2,18 @@
 import ctypes as ct
 
 import os
-libpath = os.path.join(os.getcwd(),'build','stage','i7-12800H','lib')
+from pathlib import Path
+import subprocess
 
 # Load the shared library
 if os.name == 'posix':
-    libfemerac = ct.CDLL(libpath + '/libfemerac.so')
+    libpath = os.environ.get('FMR_LIBDIR')
+    if libpath is None:
+        root = Path(__file__).resolve().parents[2]
+        cpumodel = subprocess.check_output(
+            [str(root / 'tools' / 'fmrmodel.sh')], text=True).strip()
+        libpath = root / 'build' / 'stage' / cpumodel / 'lib'
+    libfemerac = ct.CDLL(str(Path(libpath) / 'libfemerac.so'))
 elif os.name == 'nt':
     # lib = ctypes.CDLL('./jobs.dll')
     raise OSError("Unsupported operating system")
@@ -71,4 +78,3 @@ libfemerac.fmr_set_sims_application.argtypes =[ct.c_void_p, Local_int, Enum_int]
 
 
 # Mtrl ------------------------------------------------------------------------
-
