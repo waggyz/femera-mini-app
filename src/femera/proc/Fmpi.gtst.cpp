@@ -1,6 +1,8 @@
 #include "../core.h"
 
+#ifdef FMR_HAS_MPI
 #include "mpi.h"
+#endif
 
 #include <gtest/gtest.h>
 
@@ -9,6 +11,7 @@ fmr::Exit_int main (int argc, char** argv) {
 }
 auto test_mpi = femera::proc::Main ();
 
+#ifdef FMR_HAS_MPI
 TEST( Fmpi, Init ){// Initialize Fmpi with MPI already init by early_main(..)
 FMR_WARN_INLINE_OFF
   EXPECT_EQ( test_mpi.init (nullptr,nullptr), 0 );
@@ -37,3 +40,20 @@ TEST( Fmpi, Exit ){// should NOT finalize MPI: not initialized by test_mpi
   EXPECT_EQ( err, 0 );
   EXPECT_EQ( bool (is_init), true );
 }
+#else
+TEST( Fmpi, Init ){
+  GTEST_SKIP() << "MPI not available";
+}
+TEST( Fmpi, TaskName ){
+  GTEST_SKIP() << "MPI not available";
+}
+TEST( Fmpi, TeamID ){
+  GTEST_SKIP() << "MPI not available";
+}
+TEST( Fmpi, ProcN ){
+  GTEST_SKIP() << "MPI not available";
+}
+TEST( Fmpi, Exit ){
+  GTEST_SKIP() << "MPI not available";
+}
+#endif

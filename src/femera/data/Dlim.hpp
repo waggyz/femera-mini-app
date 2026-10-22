@@ -32,7 +32,7 @@ namespace femera { namespace data {
     std::string csv_item (char);*/
     template <typename I> static
     std::string csv_item (I integer,//NOTE includes char type
-      typename std::enable_if<std::is_integral<I>::value>::type* = 0);
+      typename std::enable_if<std::is_integral<I>::value>::type* = nullptr);
   private:// character string types are double-quoted ("item")
     static
     std::string csv_item (const std::string&);

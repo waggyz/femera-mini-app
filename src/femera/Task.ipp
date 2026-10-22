@@ -15,7 +15,7 @@ namespace femera {
   noexcept {
     return "task";
   }
-  template <typename T> inline
+  template <typename T>
   fmr::Exit_int Task<T>::init (int* argc, char** argv)
   noexcept {
     fmr::Exit_int err = 0;

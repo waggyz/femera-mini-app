@@ -7,7 +7,7 @@ ifeq ($(ENABLE_GMSH),ON)
 #    LDLIBS += $(INSTALL_CPU)/lib64/libgmsh.a
 #  else
 #TODO fix gmsh dependency linking errors to use static gmsh library above
-    LDLIBS += -lgmsh
+    LDLIBS += -lgmsh -lz
 #  endif
 #  ifeq ("$(CXX) $(CXX_VERSION)","g++ 4.8.5") # g+= or mpic++
   ifeq ("$(CXX_VERSION)","4.8.5")
@@ -19,6 +19,7 @@ ifeq ($(ENABLE_GMSH),ON)
     GMSH_FLAGFILE:=$(BUILD_CPU)/external/gmsh-install.flags
   endif
   EXTERNAL_DOT+="Femera" -> "Gmsh" [color="cyan"]\n
+  EXTERNAL_DOT+="Gmsh" -> "zlib"\n
   EXTERNAL_DOT+="Gmsh" -> "libjpeg"\n
   EXTERNAL_DOT+="Gmsh" -> "libpng"\n
   EXTERNAL_DOT+="Gmsh" -> "giflib"\n

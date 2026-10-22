@@ -28,6 +28,10 @@ ifeq ("$(CPUSIMDS)","")
   CPUSIMDS := $(shell tools/fmrsimds.sh)
   #(info $(INFO) set CPUSIMDS to $(CPUSIMDS))
 endif
+ifeq ("$(TDD_OMP_NP)","")
+  TDD_OMP_NP := 2
+  #(info $(INFO) set TDD_OMP_NP to $(TDD_OMP_NP))
+endif
 ifeq ("$(FMR_COPYRIGHT)","")# only true once during build
   export FMR_COPYRIGHT := cat data/copyright.txt | tr '\n' ' ' | tr -s ' '
   NOSA_SEE := See the NASA open source agreement (LICENSE) file for details.

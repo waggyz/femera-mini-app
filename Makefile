@@ -78,7 +78,7 @@ ifeq ($(CXX),g++)
   #NOTE -fPIC (or -fpic?) needed for shared libs, but may degrade static lib performance.
   #TODO Consider finding all dependency static libs and building -static.
   ifeq ($(ENABLE_LTO),ON)
-    CXXFLAGS += -flto
+    CXXFLAGS += -flto=auto
   endif
   ifeq ($(ENABLE_OMP),ON)
     CXXFLAGS += -D_GLIBCXX_PARALLEL
@@ -296,7 +296,7 @@ ifeq ($(ENABLE_GOOGLETEST),ON)
 endif
 ifeq ($(ENABLE_GOOGLETEST),ON-FIXME-DISABLED)
   CXXTESTS := $(filter-out -Wundef,$(CXXTESTS))
-  CXXTESTS := $(filter-out -flto,$(CXXTESTS))
+  CXXTESTS := $(filter-out -flto=auto,$(CXXTESTS))
   #NOTE Parallel library build breaks link-time optimization of gtests. (gcc 4.8)
   # CXXTESTS := $(filter-out -fprofile-generate,$(CXXTESTS))
   #

@@ -11,6 +11,7 @@
 #include "metis.h"
 #endif
 
+#ifdef FMR_HAS_GMSH
 namespace femera {
   data::Gmsh::Gmsh (const femera::Work::Core_ptrs_t core)
   noexcept : Data (core) {
@@ -65,5 +66,23 @@ namespace femera {
   } }// }
   //
 }//end femera:: namespace
+#else
+// Compile without Gmsh
+namespace femera {
+  data::Gmsh::Gmsh (const femera::Work::Core_ptrs_t core)
+  noexcept : Data (core) {
+    this->name      ="Gmsh not available";
+    this->abrv      ="gmsh";
+    this->task_type = task_cast (Task_type::Gmsh);
+  }
+  void data::Gmsh::task_init (int*, char**) {
+    this->did_gmsh_init = false;
+    this->set_init (false);
+  }
+  void data::Gmsh::task_exit () {
+  }//
+  //
+}//end femera:: namespace
 
+#endif
 

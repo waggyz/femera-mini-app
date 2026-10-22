@@ -5,7 +5,7 @@ namespace femera {
   inline
   void data::File::task_exit () {
   }
-  template <typename ...Args> inline// standard fmr:log line
+  template <typename ...Args>// standard fmr:log line
   fmr::Global_int data::File::send (const fmr::Data_name_t& data_name,
     const std::string& lab1, const std::string& lab2, const std::string& lab3,
     const std::string& form, Args...args) {

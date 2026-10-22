@@ -117,6 +117,9 @@ T* zyclops::mdas_madd// array of structs storage, c += a * b
 (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyclops::Zorder_int zorder, const std::size_t n)
 noexcept {
+  //suppress spurious -Wtype-limits when Zorder_int is unsigned.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtype-limits"
   if (zorder>=0 && n>0) {
     const auto zsz = std::size_t (1) << zorder;
     const auto nsz = n * zsz;
@@ -125,6 +128,7 @@ noexcept {
         for (zyclops::Zindex_int i=0; i<=j; ++i) {// only lower triangle
           (&c)[k + j] += zyclops::mdcr_mult_elem ((&a)[k], (&b)[k], j, i);
   } } } }
+#pragma GCC diagnostic pop
   return &c;
 }
 template <typename T> static inline
@@ -132,6 +136,8 @@ T* zyclops::mdsa_madd// struct of arrays storage, c += a * b
 (T& ZYC_RESTRICT c, const T& ZYC_RESTRICT a, const T& ZYC_RESTRICT b,
   const zyclops::Zorder_int zorder, const std::size_t n)
 noexcept {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtype-limits"
 #if 0
   if (n>0 && zorder>=0) {
     const auto zsz = std::size_t (1) << zorder;
@@ -154,6 +160,7 @@ noexcept {
             (&c)[n* j + k] += (&b)[n* i + k] * (&a)[n* (j^i) + k];
   } } } } }
 #endif
+#pragma GCC diagnostic pop
   return &c;
 }
 template <typename T> static inline

@@ -13,6 +13,7 @@
 #endif
 #endif
 
+#ifdef FMR_HAS_CGNS
 namespace femera {
   void data::Cgns::task_init (int*, char**) {
 #if 0
@@ -67,8 +68,21 @@ namespace femera {
 #endif
   }
   bool data::Cgns::does_file (const fmr::Data_name_t& fname) {
-    int err=0, fmt=0;
+    int err=0; fmt=0;
     err = cg_is_cgns (fname.c_str(), &fmt);
     return err == 0;
   }
 }//end femera:: namespace
+#else
+// Compile without CGNS
+namespace femera {
+  void data::Cgns::task_init (int*, char**) {
+    this->set_init (false);
+  }
+  void data::Cgns::task_exit () {
+  }
+  bool data::Cgns::does_file (const fmr::Data_name_t&) {
+    return false;
+  }
+}//end femera:: namespace
+#endif

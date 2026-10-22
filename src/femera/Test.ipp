@@ -42,7 +42,7 @@ FMR_WARN_INLINE_ON
     Work::init_list (argc, argv);//                       then init child tasks.
     return err;
   }
-  template <typename T> inline
+  template <typename T>
   fmr::Exit_int Test<T>::exit (const fmr::Exit_int err)
   noexcept {
     Work::exit_list ();//                                 Exit child tasks,...

@@ -25,7 +25,7 @@ namespace femera {
   noexcept {
     return static_cast<T*> (ptr);
   }
-  template <typename T> inline
+  template <typename T>
   fmr::Exit_int Proc<T>::init (int* argc, char** argv)
   noexcept {
     fmr::Exit_int err = 0;
@@ -45,7 +45,7 @@ FMR_WARN_INLINE_OFF
 FMR_WARN_INLINE_ON
     return err;
   }
-  template <typename T> inline
+  template <typename T>
   fmr::Exit_int Proc<T>::exit (const fmr::Exit_int err)
   noexcept {
     this->data = nullptr;

@@ -142,7 +142,7 @@ ZYC_WARN_INLINE_ON
     zyc::mdas_madd (zf.data()[0], zx.data()[0], zy.data()[0], 2, n);
     const auto zf0 = zf [zsz*0 + std::size_t (imag_part)];
     const auto zf1 = zf [zsz*1 + std::size_t (imag_part)];
-    if ((zf0<zf1) || (zf0>zf1)){ return NAN; }
+    if ((zf0<zf1) || (zf0>zf1)){ return std::numeric_limits<double>::quiet_NaN(); }
     return zf0;
   }
   TEST( Zyc, BidualMultiplyAoS ){
@@ -162,7 +162,7 @@ ZYC_WARN_INLINE_ON
     zyc::mdsa_madd (zf.data()[0], zx.data()[0], zy.data()[0], 2, n);
     const auto zf0 = zf [std::size_t (n* imag_part +0)];
     const auto zf1 = zf [std::size_t (n* imag_part +1)];
-    if ((zf0<zf1) || (zf0>zf1)){ return NAN; }
+    if ((zf0<zf1) || (zf0>zf1)){ return std::numeric_limits<double>::quiet_NaN(); }
     return zf0;
   }
   TEST( Zyc, BidualMultiplySoA ){
@@ -182,7 +182,7 @@ ZYC_WARN_INLINE_ON
     zyc::mdas_div (zf.data()[0], zx.data()[0], zy.data()[0], 2, n);
     const auto zf0 = zf [zsz*0 + std::size_t (imag_part)];
     const auto zf1 = zf [zsz*1 + std::size_t (imag_part)];
-    if ((zf0<zf1) || (zf0>zf1)){ return NAN; }
+    if ((zf0<zf1) || (zf0>zf1)){ return std::numeric_limits<double>::quiet_NaN(); }
     return zf0;
   }
   TEST( Zyc, BidualDivideAoS ){
@@ -202,7 +202,7 @@ ZYC_WARN_INLINE_ON
     zyc::mdsa_div (zf.data()[0], zx.data()[0], zy.data()[0], 2, n);
     const auto zf0 = zf [std::size_t (n* imag_part +0)];
     const auto zf1 = zf [std::size_t (n* imag_part +1)];
-    if ((zf0<zf1) || (zf0>zf1)){ return NAN; }
+    if ((zf0<zf1) || (zf0>zf1)){ return std::numeric_limits<double>::quiet_NaN(); }
     return zf0;
   }
   TEST( Zyc, BidualDivideSoA ){
