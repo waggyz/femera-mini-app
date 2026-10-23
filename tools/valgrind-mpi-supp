@@ -1,12 +1,15 @@
 #!/bin/bash
 #
-WMPICC=`which mpicc`
-MPIDIR=`dirname $WMPICC`
-if test -d "$MPIDIR../share"; then
-  SHAREDIR="/../share"
-  cd "$MPIDIR"; SHAREDIR=`pwd`
-  if test -f "$SHAREDIR/*/*.supp"; then
-    echo $SHAREDIR/*/*.supp | head -n1
+compiler=$(command -v "${MPICC:-mpicc}") || exit 0
+compiler=$(readlink -f "$compiler") || exit 0
+prefix=$(dirname "$(dirname "$compiler")")
+shopt -s nullglob
+for seed in "$prefix"/share/*.supp \
+            "$prefix"/share/openmpi/*.supp \
+            "$prefix"/share/mpich/*.supp; do
+  if [[ -f "$seed" && -r "$seed" ]]; then
+    printf '%s\n' "$seed"
+    exit 0
   fi
-fi
-#
+done
+exit 0

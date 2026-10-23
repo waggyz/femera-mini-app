@@ -6,10 +6,15 @@
 int main(int argc, char **argv) { int err=0;
   int provided=MPI_UNDEFINED;
   err= MPI_Init_thread (&argc,&argv, MPI_THREAD_SERIALIZED,& provided );
+  if(err){ return err; }
+  if(provided < MPI_THREAD_SERIALIZED){ MPI_Abort (MPI_COMM_WORLD, 1); }
   if(!err){
     MPI_Comm comm = MPI_COMM_NULL;
     err= MPI_Comm_dup ( MPI_COMM_WORLD,& comm );
-    int proc_id=0; MPI_Comm_rank ( comm,& proc_id );
+    if(err){ MPI_Abort (MPI_COMM_WORLD, err); }
+    int proc_id=0;
+    err= MPI_Comm_rank ( comm,& proc_id );
+    if(err){ MPI_Abort (comm, err); }
     double x=0.0;
 #ifdef _OPENMP
 #pragma omp parallel for reduction(+:x)
@@ -18,11 +23,12 @@ int main(int argc, char **argv) { int err=0;
       x+=1.0/double(i+proc_id+1);
     }
     double tot=0.0;
-    err+= MPI_Reduce (& x,& tot, 1, MPI_DOUBLE, MPI_SUM, 0, comm );
-    if(tot<0.0){ MPI_Abort (); }
-    MPI_Free (& comm );
-    MPI_Finalize ();
-    if( provided != MPI_THREAD_SERIALIZED ){ return 1; }
+    err= MPI_Reduce (& x,& tot, 1, MPI_DOUBLE, MPI_SUM, 0, comm );
+    if(err){ MPI_Abort (comm, err); }
+    if(tot<0.0){ MPI_Abort (comm, 1); }
+    err= MPI_Comm_free (& comm );
+    if(err){ MPI_Abort (MPI_COMM_WORLD, err); }
+    err= MPI_Finalize ();
   }
   return err;
 }

@@ -451,55 +451,27 @@ endif
 ifeq ($(ENABLE_VALGRIND),ON)
   VALGRIND_SUPP := valgrind.supp
   VALGRIND_SUPP_EXE := $(BUILD_CPU)/$(VALGRIND_SUPP).exe
-  VGMPI := fmrexec tdd
+	VALGRIND_SUPP_PATH := $(BUILD_CPU)/$(VALGRIND_SUPP)
+	VALGRIND_FLAGS := $(BUILD_CPU)/valgrind.flags
   VGSUPP_FLAGS += --suppressions=$(BUILD_CPU)/$(VALGRIND_SUPP)
   # Use (mostly) the same flags to compile the suppression file.
   VGFLAGS := $(CXXFLAGS) $(filter-out -Winline,$(CXXWARNS))
+	VG_LAUNCH :=
 ifeq ($(ENABLE_MPI),ON)
-ifeq ($(FMR_MPI_TYPE),MPICH)
-  # This is for MPICH.
-  VGSUPP := valgrind --leak-check=full --show-reachable=yes --error-limit=no \
-    --show-leak-kinds=all --gen-suppressions=all \
-    mpiexec -n $(TDD_MPI_N)                      \
-    $(VALGRIND_SUPP_EXE) 3>&1 1>&2 2>&3          \
-    | tools/grindmerge -f $(VGMPISUPP)        \
-    > $(BUILD_CPU)/$(VALGRIND_SUPP) 2>/dev/null;
-  VGEXEC := valgrind --leak-check=full --track-origins=yes        \
-    $(VGSUPP_FLAGS) --log-file=$(BUILD_CPU)/mini.valgrind.log     \
-    $(VGMPI):$(BUILD_CPU)/mini -n$(TDD_OMP_NP) -v0 $(TDD_FMRFILE) \
-    > $(BUILD_CPU)/mini.valgrind.out; #\
-    #sed -i '/invalid file descriptor 10[0-4][0-9] /d'      \
-    #  $(BUILD_CPU)/mini.valgrind.log;                      \
-    #sed -i '/invalid file descriptor 2[56][0-9] /d'        \
-    #  $(BUILD_CPU)/mini.valgrind.log;                      \
-    #sed -i '/select an alternative log fd/d'               \
-    #  $(BUILD_CPU)/mini.valgrind.log
-else
-  # This is for OpenMPI
-  VGSUPP := valgrind --leak-check=full --show-reachable=yes --error-limit=no \
-    --show-leak-kinds=all --gen-suppressions=all \
-    mpiexec -n $(TDD_MPI_N) --bind-to core -map-by node:pe=$(TDD_OMP_N) \
-    $(VALGRIND_SUPP_EXE) 3>&1 1>&2 2>&3 \
-    | tools/grindmerge -f $(VGMPISUPP) \
-    > $(BUILD_CPU)/$(VALGRIND_SUPP) 2>/dev/null;
-  VGEXEC := valgrind --leak-check=full --track-origins=yes         \
-    $(VGSUPP_FLAGS) --log-file=$(BUILD_CPU)/mini.valgrind.log      \
-    $(VGMPI):$(BUILD_CPU)/mini -n$(TDD_OMP_NP) -v0 $(TDD_FMRFILE) \
-    > $(BUILD_CPU)/mini.valgrind.out; \
-    sed -i '/invalid file descriptor 10[0-4][0-9] /d'      \
-      $(BUILD_CPU)/mini.valgrind.log;                      \
-    sed -i '/invalid file descriptor 2[56][0-9] /d'        \
-      $(BUILD_CPU)/mini.valgrind.log;                      \
-    sed -i '/select an alternative log fd/d'               \
-      $(BUILD_CPU)/mini.valgrind.log
-endif # MPICH/OpenMPI switch
-else # No MPI
-  VGSUPP :=
-  VGEXEC := valgrind --leak-check=full --track-origins=yes        \
-    --log-file=$(BUILD_CPU)/mini.valgrind.log     \
-    $(BUILD_CPU)/mini -v0 $(TDD_FMRFILE) \
-    > $(BUILD_CPU)/mini.valgrind.out;
+	VG_LAUNCH := mpiexec -n $(TDD_MPI_N)
+ifeq ($(FMR_MPI_TYPE),OPENMPI)
+	VG_LAUNCH += --bind-to core -map-by node:pe=$(TDD_OMP_NP)
+endif
 endif # ENABLE_MPI
+	VG_ENV := env OMP_NUM_THREADS=$(TDD_OMP_NP)
+	VGSUPP = $(VG_ENV) $(VG_LAUNCH) valgrind --leak-check=full \
+		--show-reachable=yes --error-limit=no --show-leak-kinds=all \
+		--gen-suppressions=all \
+		--log-file=$(BUILD_CPU)/valgrind.supp.raw.%p.log $(VALGRIND_SUPP_EXE)
+	VGEXEC = $(VG_ENV) $(VG_LAUNCH) valgrind --leak-check=full \
+		--track-origins=yes $(VGSUPP_FLAGS) \
+		--log-file=$(BUILD_CPU)/mini.valgrind.%p.log \
+		$(BUILD_CPU)/mini -fmr:T -fmr:o$(TDD_OMP_NP) -v0 $(TDD_FMRFILE)
 endif # ENABLE_VALGRIND
 
 #TODO CXXMINI flags should show -Winline errors?
@@ -1117,8 +1089,9 @@ shared: $(LIBFEMERA_SO)
 
 $(LIBFEMERA_SO): $(LIBFEMERA_A)
 	$(call col2libb,$(LIBS),$(CXX) -shared -o libfemerac.so <--,libfemera.a)
-	$(CXX) $(CXXFLAGS) -shared -o $(LIBFEMERA_SO) $(LDFLAGS) $(LDLIBS) \
-	 -Wl,--whole-archive -Wl,--export-dynamic $(LIBFEMERA_A) -Wl,--no-whole-archive
+	$(CXX) $(CXXFLAGS) -shared -o $(LIBFEMERA_SO) $(LDFLAGS) \
+	 -Wl,--whole-archive -Wl,--export-dynamic $(LIBFEMERA_A) \
+	 -Wl,--no-whole-archive $(LDLIBS)
 
 # Executable targets ----------------------------------------------------------
 $(BUILD_CPU)/mini: export TMPDIR := $(TEMP_DIR)
@@ -1140,22 +1113,27 @@ endif
 	$(call label_test,$(PASS),$(FAIL),fmrexec tdd:$(@),$(@))
 
 $(BUILD_CPU)/mini.valgrind.log: export PATH:=$(shell pwd)/$(BUILD_CPU):$(PATH)
-$(BUILD_CPU)/mini.valgrind.log: $(VALGRIND_SUPP_EXE)
 ifeq ($(ENABLE_VALGRIND),ON)
-ifeq ($(ENABLE_MPI),ON)
-	$(info $(GRND) valgrind .. fmrexec tdd:$(<))
-else
-	$(info $(GRND) valgrind .. $(<))
-endif
-	$(VGEXEC) # >> $(BUILD_CPU)/mini.valgrind.out
+$(BUILD_CPU)/mini.valgrind.log: $(BUILD_CPU)/mini $(VALGRIND_SUPP_PATH)
+$(BUILD_CPU)/mini.valgrind.log: $(VALGRIND_FLAGS) Makefile
+	$(info $(GRND) valgrind .. $(BUILD_CPU)/mini)
+	set -eu; \
+	  rm -f "$@" "$@.tmp" $(BUILD_CPU)/mini.valgrind.*.log; \
+	  trap 'rm -f "$@.tmp"' EXIT; \
+	  $(VGEXEC) > $(BUILD_CPU)/mini.valgrind.out; \
+	  logs=( $(BUILD_CPU)/mini.valgrind.*.log ); \
+	  test -f "$${logs[0]}"; \
+	  cat "$${logs[@]}" > "$@.tmp"; \
+	  mv "$@.tmp" "$@"
 	-grep -i 'lost: [1-9]' $(BUILD_CPU)/mini.valgrind.log \
   | cut -d " " -f 5- | awk '{print "$(WARN) valgrind:",$$0}'
 	-grep -i '[1-9] err' $(BUILD_CPU)/mini.valgrind.log \
   | cut -d " " -f 4- | awk '{print "$(WARN) valgrind:",$$0}'
 	$(info $(MORE) $(BUILD_CPU)/mini.valgrind.log)
 else
-	echo "Set ENABLE_VALGRIND ON in config.local to check for memory leaks." \
-	  >$@
+.PHONY: $(BUILD_CPU)/mini.valgrind.log
+$(BUILD_CPU)/mini.valgrind.log:
+	echo "Set ENABLE_VALGRIND=ON to check for memory leaks."
 endif
 
 build/%.perf.out : build/%.perf
@@ -1229,22 +1207,41 @@ $(BUILD_CPU)/sizeof-mpi-comm.exe : src/sizeof-mpi-comm.c | $(BUILD_CPU)/ $(BUILD
 	$(CXX) $(CXXFLAGS) $< $(LDFLAGS) $(INCFLAGS) -lmpi -o $@
 endif
 
-$(VALGRIND_SUPP_EXE) : export TMPDIR := $(TEMP_DIR)
-$(VALGRIND_SUPP_EXE) : src/$(VALGRIND_SUPP).cpp $(BUILD_CPU)/$(VALGRIND_SUPP)
 ifeq ($(ENABLE_VALGRIND),ON)
-	$(call col2cxx,$(CXX_),$(CXX) $<,$(notdir $@))
-	$(CXX) $(VGFLAGS) $< $(LDFLAGS) -o $@ $(LDLIBS)
-	$(info $(GRND) suppression file: $(BUILD_CPU)/$(VALGRIND_SUPP))
-	$(VGSUPP)
-else
-	touch $@
-endif
+.PHONY: valgrind-force
+valgrind-force:
 
-$(BUILD_CPU)/$(VALGRIND_SUPP): $(VALGRIND_SUPP_FILE)
-ifeq ("$(VALGRIND_SUPP_FILE)","")
-	#touch $(*)
-else
-	cat $(VALGRIND_SUPP_FILE) >> $(*)
+$(VALGRIND_FLAGS): valgrind-force | $(BUILD_CPU)/
+	printf '%s\n' '$(CXX) $(VGFLAGS) $(INCFLAGS) $(LDFLAGS) $(LDLIBS)' \
+	  '$(filter -DFMR_HAS_MPI,$(FMRFLAGS)) $(VG_LAUNCH) $(VG_ENV)' \
+	  '$(VGSUPP) $(VGEXEC)' '$(VGMPISUPP) $(VALGRIND_SUPP_FILE)' > "$@.new"
+	tools/update-file-if-diff "$@"
+	rm -f "$@.new"
+
+$(VALGRIND_SUPP_EXE): export TMPDIR := $(abspath $(BUILD_CPU)/tmp)
+$(VALGRIND_SUPP_EXE): src/valgrind.supp.cpp $(VALGRIND_FLAGS) Makefile
+$(VALGRIND_SUPP_EXE): | $(BUILD_CPU)/ $(BUILD_CPU)/tmp/
+	$(call col2cxx,$(CXX_),$(CXX) $<,$(notdir $@))
+	$(CXX) $(VGFLAGS) $(filter -DFMR_HAS_MPI,$(FMRFLAGS)) $(INCFLAGS) \
+	  $< $(LDFLAGS) -o $@ $(LDLIBS)
+
+$(VALGRIND_SUPP_PATH): $(VALGRIND_SUPP_EXE) $(VALGRIND_FLAGS) Makefile
+$(VALGRIND_SUPP_PATH): tools/grindmerge tools/valgrind-mpi-supp
+$(VALGRIND_SUPP_PATH): $(VGMPISUPP) $(VALGRIND_SUPP_FILE)
+	$(info $(GRND) suppression file: $@)
+	set -euo pipefail; \
+	  rm -f "$@" "$@.tmp" $(BUILD_CPU)/valgrind.supp.raw.*.log; \
+	  trap 'rm -f "$@.tmp"' EXIT; \
+	  $(VGSUPP) > $(BUILD_CPU)/valgrind.supp.out; \
+	  logs=( $(BUILD_CPU)/valgrind.supp.raw.*.log ); \
+	  test -f "$${logs[0]}"; \
+	  { \
+	    for seed in $(VGMPISUPP) $(VALGRIND_SUPP_FILE); do \
+	      cat "$$seed" || exit; \
+	    done; \
+	    cat "$${logs[@]}"; \
+	  } | tools/grindmerge > "$@.tmp"; \
+	  mv "$@.tmp" "$@"
 endif
 
 # hm ==========================================================================

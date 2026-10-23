@@ -1,0 +1,40 @@
+Some environment variables:
+OMP_PLACES=cores
+OMP_PROC_BIND=spread
+MPI_LIB=/usr/lib64/mpich/lib
+MPI_COMPILER=mpich-x86_64
+MPI_PYTHON2_SITEARCH=%{python2_sitearch}/mpich
+MPI_INCLUDE=/usr/include/mpich-x86_64
+MPI_FORTRAN_MOD_DIR=/usr/lib64/gfortran/modules/mpich
+MPI_HOME=/usr/lib64/mpich
+MPI_SYSCONFIG=/etc/mpich-x86_64
+MPI_SUFFIX=_mpich
+MPI_PYTHON_SITEARCH=%{python2_sitearch}/mpich
+MPI_BIN=/usr/lib64/mpich/bin
+MPI_PYTHON3_SITEARCH=/usr/lib64/python3.9/site-packages/mpich
+MPI_MAN=/usr/share/man/mpich-x86_64
+CXXFLAGS:
+-std=c++11 -g -MMD -MP -fPIC -D_GLIBCXX_PARALLEL -fopenmp -march=native -mtune=native -Ofast -fno-builtin-sin -fno-builtin-cos -fvisibility=hidden -funroll-loops -frename-registers -ftree-vectorize -fno-common -fearly-inlining  -fstrict-enums -Wall -Wextra -Wpedantic -Wuninitialized -Wshadow -Wfloat-equal -Wdouble-promotion -Wconversion -Wsign-conversion -Wlogical-op -Wcast-qual -Wcast-align -Woverloaded-virtual -Wundef -Wmissing-declarations -Wredundant-decls -Wunused-macros -Wzero-as-null-pointer-constant -Wstrict-null-sentinel -Weffc++ -Wdisabled-optimization -Winline
+
+FMRFLAGS:
+-DFMR_VERSION=Femera 0.3.847+g4ba0f569 -DFMR_CPUMODEL=Ultra-7-255H -DFMR_CORE_N=8 -DFMR_LOCAL_INT=uint32_t -DFMR_GLOBAL_INT=uint64_t -DFMR_MICRO_UCHAR=u00b5 -DFMR_HAS_AVX -DFMR_HAS_AVX2 -DFMR_HAS_ZYCLOPS -DFMR_HAS_LIBNUMA -DFMR_HAS_GTEST -DFMR_GTEST_VERSION=1.10
+
+INCFLAGS:
+-Ibuild/stage/Ultra-7-255H/include -Ibuild/stage/include -isystem/home/dwagner5/.local/Ultra-7-255H/include -isystem/home/dwagner5/.local/include
+
+LDFLAGS:
+-Lbuild/stage/Ultra-7-255H/lib -Lbuild/stage/lib -L/home/dwagner5/.local/Ultra-7-255H/lib -L/home/dwagner5/.local/Ultra-7-255H/lib64 -L/home/dwagner5/.local/lib -L/home/dwagner5/.local/lib64
+
+LDLIBS:
+-lnuma -lpthread -lgtest -lgmock
+
+LD_RUN_PATH:
+/home/dwagner5/.local/Ultra-7-255H/lib:/home/dwagner5/.local/Ultra-7-255H/lib64:/home/dwagner5/.local/lib:/home/dwagner5/.local/lib64:
+
+LD_LIBRARY_PATH:
+/home/dwagner5/.local/Ultra-7-255H/lib:/home/dwagner5/.local/Ultra-7-255H/lib64:/home/dwagner5/.local/lib:/home/dwagner5/.local/lib64:/usr/lib64/mpich/lib
+
+PATH:
+/home/dwagner5/.local/Ultra-7-255H/bin::/home/dwagner5/Code/femera-mini-cmake/.venv/bin:/usr/lib64/mpich/bin:/home/dwagner5/.local/bin:/home/dwagner5/bin:/usr/share/Modules/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin
+make[1]: Entering directory '/home/dwagner5/Code/femera-mini-cmake'
+

@@ -2,8 +2,35 @@
 
 Date: 2026-10-23
 
-Status: proposal only. This document is the only repository file added for this
-request. None of the corrections below have been applied or runtime-tested.
+Status: implemented and validated on the local MPICH stack. The illustrative
+fragments below preserve the original proposal; the Makefile is authoritative
+for the implemented targets and configuration tracking.
+
+## Implementation Results
+
+- Corrected MPI checker ordering in the Makefile and `tools/fmrexec.sh`.
+- Split helper compilation, suppression generation and application checking;
+  added content-compared configuration tracking and success-only aggregate logs.
+- Enabled and repaired the helper's MPI branch, including MPI error handling.
+- Repaired optional MPI suppression discovery and added executable test fixtures.
+- All 23 focused Bats tests pass: 10 wrapper tests and 13 target/discovery tests.
+- Shell syntax checks and editor diagnostics pass for the touched implementation.
+- The helper compiled and ran in both non-MPI and two-rank MPI modes.
+- The real MPICH application check completed with two ranks and two OpenMP
+  threads per rank. Both rank logs reported zero errors and zero definitely
+  lost bytes, and identified the native `mini` executable rather than Bash.
+- `make mini ENABLE_VALGRIND=ON` reached `build-done`, including a successful
+  Valgrind check after rebuilding the application. Its other test stages
+  reported an elastic-material AVX2 speed assertion failure
+  (`PerfMtrlElasticLinearIso.AVX2IsCorrectAndFaster`) and a pymera test failure.
+  Those failures are outside this change and were not repaired.
+- OpenMPI and non-MPI Make target branches were exercised with isolated fake
+  tools. Full application runtime validation used MPICH only; no clean was run.
+
+The implementation does not install a new global `fmrexec` copy. Makefile
+Valgrind targets use explicit launch commands and therefore do not depend on
+the version installed in the user's PATH. Separate simultaneous checks in the
+same CPU build directory remain unsupported, as noted in the original plan.
 
 ## Diagnosis
 
@@ -262,7 +289,9 @@ select suppressions from a different MPI installation.
 
 ## Validation Plan
 
-No commands in this section were executed for this documentation-only request.
+The focused checks and real MPICH workflow below have now been exercised as
+summarized above. Alternate-stack runtime checks remain conditional on suitable
+installed compilers, launchers and libraries.
 
 1. Run shell syntax checks and the existing Bats suite after implementation:
 

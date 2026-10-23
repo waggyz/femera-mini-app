@@ -125,7 +125,7 @@ fi
 #FMREXE+=" -fmr:n$NMPI -fmr:o$NOMP"
 FMREXE+=" -fmr:o$NOMP"
 #FMREXE+=" -o$NOMP" #TODO pass -o or -fmr:o ?
-RUN=$VGEXE"$VGARGS"mpiexec$MPIARGS" "$FMREXE$FMRARGS
+RUN="mpiexec$MPIARGS $VGEXE$VGARGS$FMREXE$FMRARGS"
 
 LOCAL_INSTALL="/home/dwagner5/.local"
 #FIXME argument?
