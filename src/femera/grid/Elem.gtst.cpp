@@ -76,9 +76,9 @@ TEST( GridElem, TrivialTest ){
 }
 TEST( GridElem, JacdSizeTest ){
   EXPECT_EQ( jacs_size, 10 );// 3D, 1 point rule default
-  EXPECT_EQ( jac1_size,  2 );
-  EXPECT_EQ( jac2_size,  5 );
-  EXPECT_EQ( jac3_size, 10 );
+  EXPECT_EQ( jac1_size,  2 );// 1D, 1 point rule
+  EXPECT_EQ( jac2_size,  5 );// 2D, 1 point rule
+  EXPECT_EQ( jac3_size, 10 );// 3D, 1 point rule
   EXPECT_EQ( jac4_size, 40 );// 3D, 4 points
 }
 TEST( GridElem, TetsVertN ){
