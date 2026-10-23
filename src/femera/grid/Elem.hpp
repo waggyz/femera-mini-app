@@ -5,7 +5,7 @@
 
 #if 1
 // Elem_test *****************************************************************
-namespace fmr { namespace grid { namespace elem { //TODO move to src/fmr/
+namespace fmr { namespace grid { namespace elem { //TODO move to src/fmr/ or Test?
 
 struct Elem_args {
 public:
@@ -30,6 +30,7 @@ public:
 #endif
 
 namespace femera { namespace grid { namespace elem {
+//namespace femera { namespace grid { //TODO move up to here?
 /*
 // Forward-delare element shapes TODO is this needed?
 class Spar;

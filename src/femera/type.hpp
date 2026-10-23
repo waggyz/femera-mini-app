@@ -34,14 +34,15 @@ namespace femera {
     Gmsh,                        // Data type: Gmsh handler
 //#endif
     Petsc,                       // Data type: PETSc handler
-    Beds, Unit, Self, Perf,      // Test types
+    Beds, Unit, Self, FE1e, Ptch,Perf, // Test types
 //#ifdef FMR_HAS_GTEST
     Gtst,                        // Test type: Googletest handler
 //#endif
     Jobs, Sims, Runs, Part,      // Task types //TODO: Part?, Post?, View?
     Mtrl, Elas, Plas,            // Phys types
     Ther,
-    Cell, FEms, FDms, FVms, BEms,// Grid types
+    Cell, FEms, FDms, FVms, // BEms,// Grid types //TODO BEms same as FEms?
+    // Fourier methods use FD grids. Boundary element methods may use FE grids?
     SGms,
     Slvr, PCGs, NCGs,            // Algo types
 #if 0

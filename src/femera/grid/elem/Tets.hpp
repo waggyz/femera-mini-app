@@ -346,7 +346,7 @@ public://TODO make protected or private with friend class Elem?
 #define b3 11.0/14.0
 #define c0 (1.0+sqrt514)/4.0
 #define c1 (1.0-sqrt514)/4.0
-#define w0 -74.0/ 5625.0
+#define w0 -74.0/5625.0
 #define w1 343.0/45000.0
 #define w2 56.0/2250.0
     a0,a0,a0, w0,
@@ -362,10 +362,10 @@ public://TODO make protected or private with friend class Elem?
     c1,c1,c0, w2
 #undef sqrt514
 #undef a0
-#undef p1
-#undef p2
-#undef p3
-#undef p4
+#undef b0
+#undef b3
+#undef c0
+#undef c1
 #undef w0
 #undef w1
 #undef w2

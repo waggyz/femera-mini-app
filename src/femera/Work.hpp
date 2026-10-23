@@ -45,6 +45,7 @@ namespace femera {
   namespace test {                     // CRTP inheritance from Test
     class Beds;                        // public interface for test handling
     class Unit; class Self; class Perf;// Femera testing
+    class FE1e; class Ptch;
     class Gtst;                        // testing libraries
 } }//end femera::test:: namespace
 namespace femera {

@@ -4,6 +4,8 @@
 #include "Gtst.hpp"
 #endif
 #include "Self.hpp"
+#include "FE1e.hpp"
+#include "Ptch.hpp"
 #include "Perf.hpp"
 
 #include <unistd.h>          // argc opterr optopt optind optarg
@@ -16,6 +18,8 @@ namespace femera {
 #endif
     if (this->do_test) {// -T option in args
       this->add_task (std::move(Test<test::Self>::new_task (this->get_core())));
+      this->add_task (std::move(Test<test::FE1e>::new_task (this->get_core())));
+      this->add_task (std::move(Test<test::Ptch>::new_task (this->get_core())));
     }
     if (this->do_test || this->do_perf) {// -T or -P option in args
       this->add_task (std::move(Test<test::Perf>::new_task (this->get_core())));
