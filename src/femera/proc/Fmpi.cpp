@@ -81,7 +81,7 @@ namespace femera {
 #endif
     }
     if (this->did_mpi_init ()) {
-      MPI_Comm comm =0;//nullptr;
+      MPI_Comm comm =0;//TODO nullptr for OpenMPI, 0 for MPICH
       if (!err) {//NOTE Good practice: use a copy of MPI_COMM_WORLD.
         err= MPI_Comm_dup (MPI_COMM_WORLD, & comm);// task_exit() frees this
       }

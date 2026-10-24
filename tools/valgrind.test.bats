@@ -124,6 +124,77 @@ setup() {
   [[ $(grep -c '^fixture$' "$work/valgrind.supp") == 1 ]]
 }
 
+@test "generated MPI leak rules stop at MPI boundaries but retain allocation frames" {
+  run "${make_check[@]}" "$work/valgrind.supp"
+  assert_success
+  grep -A1 '^fun:PMPI_Init_thread$' "$work/valgrind.supp" | grep -q '^}$'
+  grep -A1 '^fun:ompi_mpi_finalize$' "$work/valgrind.supp" | grep -q '^}$'
+  grep -A4 '^fixture-mpi-init$' "$work/valgrind.supp" | grep -q '^fun:malloc$'
+  grep -A4 '^fixture-mpi-finalize$' "$work/valgrind.supp" | grep -q '^fun:calloc$'
+  [[ $(grep -c '^fun:main$' "$work/valgrind.supp") == 1 ]]
+  grep -A1 '^fun:baseline_helper$' "$work/valgrind.supp" | grep -q '^fun:main$'
+}
+
+@test "MPI normalization is opt-in and preserves non-leak rules and seed callers" {
+  input="$BATS_TEST_TMPDIR/input.supp"
+  cat > "$input" <<'EOF'
+{
+mpi-init
+Memcheck:Leak
+fun:malloc
+fun:MPI_Init
+fun:baseline_helper
+fun:main
+}
+{
+mpi-finalize
+Memcheck:Leak
+fun:calloc
+fun:PMPI_Finalize
+fun:baseline_helper
+fun:main
+}
+{
+mpi-address
+Memcheck:Addr8
+fun:MPI_Init_thread
+fun:main
+}
+EOF
+  run tools/grindmerge < "$input"
+  assert_success
+  [[ $(grep -c '^fun:main$' <<< "$output") == 3 ]]
+  run tools/grindmerge --mpi-boundary < "$input"
+  assert_success
+  [[ $(grep -c '^fun:main$' <<< "$output") == 1 ]]
+  [[ "$output" != *"fun:baseline_helper"* ]]
+  [[ "$output" == *$'fun:MPI_Init\n}'* ]]
+  [[ "$output" == *$'fun:PMPI_Finalize\n}'* ]]
+  [[ "$output" == *$'Memcheck:Addr8\nfun:MPI_Init_thread\nfun:main'* ]]
+  run tools/grindmerge --mpi-boundary -f "$input" < /dev/null
+  assert_success
+  [[ $(grep -c '^fun:main$' <<< "$output") == 3 ]]
+}
+
+@test "MPI and user seeds keep their callers in the generation pipeline" {
+  for seed in mpi user; do
+    cat > "$BATS_TEST_TMPDIR/$seed.supp" <<EOF
+{
+$seed-seed
+Memcheck:Leak
+fun:${seed}_allocation
+fun:PMPI_Init_thread
+fun:seed_caller
+}
+EOF
+  done
+  run "${make_check[@]}" "VGMPISUPP=$BATS_TEST_TMPDIR/mpi.supp" \
+    "VALGRIND_SUPP_FILE=$BATS_TEST_TMPDIR/user.supp" "$work/valgrind.supp"
+  assert_success
+  [[ $(grep -c '^fun:seed_caller$' "$work/valgrind.supp") == 2 ]]
+  grep -A1 '^fun:PMPI_Init_thread$' "$work/valgrind.supp" | grep -q '^}$'
+}
+
 @test "missing explicit seed fails instead of silently dropping it" {
   run "${make_check[@]}" "VALGRIND_SUPP_FILE=$BATS_TEST_TMPDIR/missing.supp" "$target"
   assert_failure

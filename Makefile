@@ -1,6 +1,7 @@
 #!/usr/bin/make
 .DEFAULT_GOAL:=all
 SHELL        :=bash
+MAKEFLAGS += --no-print-directory
 
 include examples/config.recommended
 -include config.local
@@ -1239,7 +1240,7 @@ $(VALGRIND_SUPP_PATH): $(VGMPISUPP) $(VALGRIND_SUPP_FILE)
 	    for seed in $(VGMPISUPP) $(VALGRIND_SUPP_FILE); do \
 	      cat "$$seed" || exit; \
 	    done; \
-	    cat "$${logs[@]}"; \
+	    cat "$${logs[@]}" | tools/grindmerge --mpi-boundary; \
 	  } | tools/grindmerge > "$@.tmp"; \
 	  mv "$@.tmp" "$@"
 endif

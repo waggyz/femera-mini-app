@@ -8,17 +8,24 @@
 #
 
 # valgrind foo 3>&1 1>&2 2>&3 | grindmerge -f input >newrules
+# --mpi-boundary trims baseline-specific callers from generated MPI leak rules
+# on stdin. Rules loaded with -f are preserved.
 
 use warnings;
 use strict;
 
 use Digest::MD5 qw/md5_hex/;
+use Getopt::Long qw/GetOptions/;
 
 my %known;
 my $dups = 0;
+my $mpi_boundary = 0;
+my $seed;
+GetOptions('mpi-boundary' => \$mpi_boundary, 'f=s' => \$seed)
+    && !@ARGV or die "Usage: $0 [--mpi-boundary] [-f input]\n";
 
 sub parse {
-    my $in = shift;
+    my ($in, $normalize_mpi) = @_;
 
     while( <$in> ) {
         next unless( /^\{/ );
@@ -36,6 +43,9 @@ sub parse {
             print STDERR ("Unterminated suppression at line $.\n" );
             last;
         }
+        if ($normalize_mpi && $block =~ /^[ \t]*Memcheck:Leak[ \t]*$/m) {
+            $block =~ s/(^[ \t]*fun:(?:P?MPI_Init(?:_thread)?|P?MPI_Finalize|ompi_mpi_finalize)[ \t]*\n).*?(?=^\})/$1/ms;
+        }
         my $key = $block;
         $key =~ s/(\A\{[^\n]*\n)\s*[^\n]*\n/$1/;
         my $sum = md5_hex( $key );
@@ -44,18 +54,18 @@ sub parse {
     }
 }
 
-if( @ARGV >= 2 && $ARGV[0] eq '-f' ) {
-    if( open( my $db, '<', $ARGV[1] ) ) {
-        parse( $db );
+if( defined $seed ) {
+    if( open( my $db, '<', $seed ) ) {
+        parse( $db, 0 );
         close( $db );
     } else {
-        print STDERR ("Open failed for $ARGV[1]: $!\n");
+        print STDERR ("Open failed for $seed: $!\n");
         exit 1;
     }
-    print STDERR ("Read " . keys( %known ) . " suppressions from $ARGV[1]\n" );
+    print STDERR ("Read " . keys( %known ) . " suppressions from $seed\n" );
 }
 
-parse( \*STDIN );
+parse( \*STDIN, $mpi_boundary );
 
 print $known{$_} foreach ( sort keys %known );
 

@@ -46,6 +46,32 @@ case "$(basename "$0")" in
       printf 'Command: %s\n' "$*" > "$log"
       if [[ -n "$generate" ]]; then
         printf '{\nfixture\nMemcheck:Leak\nfun:fixture\n}\n' >> "$log"
+        cat >> "$log" <<'EOF'
+{
+fixture-mpi-init
+Memcheck:Leak
+match-leak-kinds: definite
+fun:malloc
+fun:ompi_mpi_init
+fun:PMPI_Init_thread
+fun:main
+}
+{
+fixture-mpi-finalize
+Memcheck:Leak
+match-leak-kinds: definite
+fun:calloc
+fun:ompi_mpi_finalize
+fun:main
+}
+{
+fixture-non-mpi
+Memcheck:Leak
+fun:malloc
+fun:baseline_helper
+fun:main
+}
+EOF
       fi
     fi
     if [[ "${MOCK_CHECKER_STATUS:-0}" != 0 ]]; then
