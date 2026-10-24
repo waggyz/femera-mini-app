@@ -2,7 +2,8 @@
 #
 # fmrexec -n 2 --bind-to core -map-by node:pe=2 build/femera/mini -n2 -o2
 #
-#FIXME This is for OpenMPI. Need one for MPICH.
+# Works with OpenMPI and MPICH.
+# Runs directly when mpiexec is not available on PATH.
 #
 FMREXE="femera"
 MAP_BY="node"
@@ -125,7 +126,10 @@ fi
 #FMREXE+=" -fmr:n$NMPI -fmr:o$NOMP"
 FMREXE+=" -fmr:o$NOMP"
 #FMREXE+=" -o$NOMP" #TODO pass -o or -fmr:o ?
-RUN="mpiexec$MPIARGS $VGEXE$VGARGS$FMREXE$FMRARGS"
+RUN="$VGEXE$VGARGS$FMREXE$FMRARGS"
+if command -v mpiexec >/dev/null 2>&1; then
+  RUN="mpiexec$MPIARGS $RUN"
+fi
 
 LOCAL_INSTALL="/home/dwagner5/.local"
 #FIXME argument?
@@ -188,4 +192,3 @@ if [ 0 -eq 1 ]; then
           "$@"
   exit $?
 fi
-

@@ -125,8 +125,8 @@ ifeq ($(CXX),icx)
 endif
 CXX_VERSION  :=$(shell $(CXX) -dumpversion)
 # Flags for compiling tests
-CXXTESTS     :=$(CXXFLAGS) $(CXXWARNS)
-CXXPERFS     :=$(CXXFLAGS) $(CXXWARNS)
+CXXTESTS     :=$(CXXFLAGS) -pthread $(CXXWARNS)
+CXXPERFS     :=$(CXXFLAGS) -pthread $(CXXWARNS)
 # Femera option flags
 FMRFLAGS     += -DFMR_VERSION="$(FEMERA_VERSION)"
 FMRFLAGS     += -DFMR_CPUMODEL="$(CPUMODEL)"
@@ -312,7 +312,7 @@ ifeq ($(ENABLE_GOOGLETEST),ON)
   EXTERNAL_DOT+="Femera" -> "GoogleTest"\n
 #  MAKE_DOT+="Makefile" -> "GoogleTest"\n
 #  GTEST_FLAGS += -DCMAKE_INSTALL_PREFIX="$(INSTALL_CPU)"
-  LDLIBS += -lpthread -lgtest -lgmock
+  LDLIBS += -lgtest -lgmock -lpthread
   EXTERNAL_DOT+="GoogleTest" -> "libpthread"\n
 #  GTEST_FLAGFILE:= $(BUILD_CPU)/external/googletest-install.flags
 endif

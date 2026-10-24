@@ -4,7 +4,18 @@ import sys
 import os
 import argparse
 import fnmatch
+import shutil
 from multiprocessing import Pool, cpu_count
+
+
+def test_command(test_file, verbosity):
+    command = ['python3', test_file]
+    if verbosity > 0:
+        command.append('-v')
+    if shutil.which('mpiexec') is not None:
+        command = ['mpiexec', '-n', '1'] + command
+    return command
+
 
 class IsolatedTestRunner:
     def init(self, verbosity=1, start_dir='.', pattern='test*.py'):
@@ -27,10 +38,7 @@ class IsolatedTestRunner:
             if self.verbosity > 0:
                 print(f"\nRunning test: {test_file}")
 
-            if self.verbosity > 0:
-                runline = ['mpiexec', '-n', '1', 'python3', test_file, '-v']
-            else:
-                runline = ['mpiexec', '-n', '1', 'python3', test_file]
+            runline = test_command(test_file, self.verbosity)
             result = subprocess.run(runline, 
                                     stdout=subprocess.PIPE, 
                                     stderr=subprocess.PIPE,
@@ -76,10 +84,7 @@ class ParallelTestRunner:
                                                 f"{base_name}.out"), 'w')
                 stderr_file = open(os.path.join(self.output_dir,
                                                 f"{base_name}.err"), 'w')
-            if self.verbosity > 0:
-                runline = ['mpiexec', '-n', '1', 'python3', test_file, '-v']
-            else:
-                runline = ['mpiexec', '-n', '1', 'python3', test_file]
+            runline = test_command(test_file, self.verbosity)
             result = subprocess.run(runline, 
                                     stdout=stdout_file or subprocess.PIPE, 
                                     stderr=stderr_file or subprocess.PIPE,
@@ -124,7 +129,8 @@ class ParallelTestRunner:
         return all_tests_passed
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Run MPI tests in parallel")
+    parser = argparse.ArgumentParser(
+        description="Run tests in parallel, using MPI when mpiexec is on PATH")
     parser.add_argument('-v', '--verbosity', action='count', default=0,
         help="Increase output verbosity")
     parser.add_argument('-s', '--start-dir', default='.',
