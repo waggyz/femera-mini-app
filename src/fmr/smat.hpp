@@ -2,9 +2,9 @@
 #define FMR_HAS_SMAT_HPP
 // Small matrix utilities
 
-#include <immintrin.h>
-
 #include "math.hpp"
+
+#include <immintrin.h>
 
 namespace fmr { namespace math {
   /**
