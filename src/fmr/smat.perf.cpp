@@ -57,7 +57,7 @@ void send_perf_results (std::string label, int test_case,
 
   inline
   fmr::Perf_float time_m2x2 (
-    int test_case=0, uint n=1024*1024/4/sizeof(double), uint reps=256) {
+    int test_case=0, uint n=1024*1024/8/sizeof(double), uint reps=512) {
     auto m2x2_det = std::valarray<double>(5*n);
     auto m2x2_out = std::valarray<double>(4*n);
     auto m2x2_in = std::valarray<double>(4*n);
@@ -77,7 +77,7 @@ void send_perf_results (std::string label, int test_case,
           // Set timer count, bytes in/out, flops
           perf_time.add_count (n);
           perf_time.add_read (4*n*sizeof(double));
-          perf_time.add_save (4*n);
+          perf_time.add_save (4*n*sizeof(double));
           perf_time.add_flop (8*n);
           // Warm up
           for (uint i = 0; i < (n*4); ++i) {
@@ -180,6 +180,28 @@ void send_perf_results (std::string label, int test_case,
         }
       break;
       }
+      case 5: {
+        bad_dets = 0;
+        perf_time.reset ();
+        for (uint r = 0; r < reps; ++r) {
+          // Set timer count, bytes in/out, flops
+          perf_time.add_count (n);
+          perf_time.add_read (4*n*sizeof(double));
+          perf_time.add_save (5*n*sizeof(double));
+          perf_time.add_flop (8*n);
+          // Warm up
+          for (uint i = 0; i < (n*4); ++i) {
+            m2x2_det[i] = 5.0 * m2x2_in[i];
+          }
+          perf_time.add_idle_time_now ();// Start timing.
+          for (uint i = 0; i < n; ++i) {
+            bad_dets += abs(::fmr::math::smat_invt_det<2> (
+              &m2x2_in[4*i], &m2x2_det[5*i]));
+          }
+          this_time += perf_time.add_busy_time_now ();
+        }
+      break;
+      }
       default: {
         return fmr::Perf_float(-1.0);
       }
@@ -190,7 +212,7 @@ void send_perf_results (std::string label, int test_case,
 
   inline
   fmr::Perf_float time_m3x3 (
-    int test_case=0, uint n=1024*1024/8/sizeof(double), uint reps=256) {
+    int test_case=0, uint n=1024*1024/16/sizeof(double), uint reps=512) {
     auto m3x3_det = std::valarray<double>(10*n);
     auto m3x3_out = std::valarray<double>(9*n);
     auto m3x3_in = std::valarray<double>(9*n);
@@ -294,6 +316,27 @@ void send_perf_results (std::string label, int test_case,
         }
         break;
       }
+      case 4: {// Scope this timing block.
+        bad_dets = 0;
+        perf_time.reset ();
+        for (uint r = 0; r < reps; ++r) {
+          // Set timer count, bytes in/out, flops
+          perf_time.add_count (n);
+          perf_time.add_read (9*n * sizeof(double));
+          perf_time.add_save (10*n * sizeof(double));
+          perf_time.add_flop (49*n);
+          // Warm up
+          for (uint i = 0; i < (n*9); ++i) {
+            m3x3_det[i] = 5.0 * m3x3_in[i];
+          }
+          perf_time.add_idle_time_now ();// Start timing.
+          for (uint i = 0; i < n; ++i) {
+            bad_dets += abs(::fmr::math::smat_invt_det<3> (&m3x3_in[9*i], &m3x3_det[9*i]));
+          }
+          this_time += perf_time.add_busy_time_now ();
+        }
+        break;
+      }
       default: {
         return fmr::Perf_float(-1.0);
       }
@@ -309,38 +352,42 @@ TEST(FmrSmatPerf, BaseTime) {// Sets baseline times
 //NOTE These all run about the same as baseline on dev laptop.
 //     The conditionals below are for checking again on prod node.
 TEST(FmrSmatPerf, M2x2Inv) {
-#if FMR_PERF_TOL < 15
+#if FMR_PERF_PCT < 15
   EXPECT_GT(time_m2x2(1), m2x2_base_time);// slower than baseline?
   EXPECT_GT(time_m2x2(2), m2x2_base_time);// slower than baseline
 #else
   EXPECT_NEAR(time_m2x2(1), m2x2_base_time, perf_tol_rel * m2x2_base_time);
-  EXPECT_NEAR(time_m2x2(2), m2x2_base_time, perf_tol_rel * m2x2_base_time);
+  EXPECT_GT(time_m2x2(2), m2x2_base_time);// slower than baseline
 #endif
 }
 TEST(FmrSmatPerf, M2x2InvDets) {
-#if FMR_PERF_TOL < 15
+#if FMR_PERF_PCT < 15
   EXPECT_GT(time_m2x2(3), m2x2_base_time);// slower than w/out det
   EXPECT_GT(time_m2x2(4), m2x2_dets_time);// slower than baseline
+  EXPECT_GT(time_m2x2(5), m2x2_dets_time);
 #else
   EXPECT_NEAR(time_m2x2(3), m2x2_base_time, perf_tol_rel * m2x2_base_time);
   EXPECT_NEAR(time_m2x2(4), m2x2_dets_time, perf_tol_rel * m2x2_dets_time);
+  EXPECT_NEAR(time_m2x2(5), m2x2_dets_time, perf_tol_rel * m2x2_dets_time);
 #endif
 }
 
 TEST(FmrSmatPerf, M3x3Inv) {
-#if FMR_PERF_TOL < 15
+#if FMR_PERF_PCT < 15
   EXPECT_GT(time_m3x3(1), m3x3_base_time);// slower than baseline
 #else
   EXPECT_NEAR(time_m3x3(1), m3x3_base_time, perf_tol_rel * m3x3_base_time);
 #endif
 }
 TEST(FmrSmatPerf, M3x3InvDets) {
-#if FMR_PERF_TOL < 15
+#if FMR_PERF_PCT < 15
   EXPECT_GT(time_m3x3(2), m3x3_base_time);// slower than w/out dets?
   EXPECT_GT(time_m3x3(3), m3x3_dets_time);// slower than baseline?
+  EXPECT_GT(time_m3x3(4), m3x3_dets_time);
 #else
   EXPECT_NEAR(time_m3x3(2), m3x3_base_time, perf_tol_rel * m3x3_base_time);
   EXPECT_NEAR(time_m3x3(3), m3x3_dets_time, perf_tol_rel * m3x3_dets_time);
+  EXPECT_NEAR(time_m3x3(4), m3x3_dets_time, perf_tol_rel * m3x3_dets_time);
 #endif
 }
 } }//end femerea::test:: namespace

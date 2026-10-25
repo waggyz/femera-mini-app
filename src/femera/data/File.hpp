@@ -22,13 +22,21 @@ namespace femera { namespace data {
     fmr::Dim_int set_verb (fmr::Dim_int) noexcept;// sets logs verbosity
     //
     // send (..) methods append data and return bytes sent
-    fmr::Global_int send (const fmr::Data_name_t&,// fmr::Data_type::Text_line
-      css& text)
-    noexcept;
     template <typename ...Args>
     fmr::Global_int send (const fmr::Data_name_t&,// fmr::Data_type::Logs_line
       css& lab1, css& lab2, css& lab3, css& form, Args...);
     //
+    fmr::Global_int send (const fmr::Data_name_t&,// fmr::Data_type::Text_line
+      css& text) noexcept;
+#if 0
+    template <typename D>
+    fmr::Global_int send (const fmr::Data_type, const D data)
+    noexcept;// Data_type provides typeof the data expected for send (for cast?).
+    template <typename V>
+    fmr::Global_int send (const fmr::Data_name_t&,// fmr::Data_type::Text_line
+      fmr::Global_int size)// use for new array in, e.g.,  databank
+    noexcept;
+#endif
   public:
     void task_init (int* argc, char** argv);
     void task_exit ();

@@ -17,15 +17,15 @@ namespace femera {
     this->abrv      ="logs";
     this->task_type = task_cast (Task_type::Logs);
     this->out_name_list = {     //NOTE task_init calls set_verb to reset these
-      {fmr::none , {}},         // suppress output
-      {fmr::null , {}},         // convenient synonym to fmr::none
-      {fmr::err  , {fmr::err }},// default all threads to ::stderr verb_d >= 0
-      {fmr::out  , {fmr::out }},// default all threads to ::stdout verb_d >= 1
-      {fmr::log  , {fmr::out }},// default main thread to ::stdout verb_d >= 1
-      {fmr::plog , {fmr::out }},// default main thread to ::stdout verb_d >= 2
-      {fmr::info , {fmr::out }},// default main thread to ::stdout verb_d >= 3
-      {fmr::spam , {fmr::out }},// default all threads to ::stdout verb_d >= 4
-      {fmr::debug, {fmr::out }} // default all threads to ::stdout verb_d >= 5
+      {fmr::none, {}},         // suppress output
+      {fmr::null, {}},         // convenient synonym to fmr::none
+      {fmr::err , {fmr::err }},// default all threads to ::stderr verb_d >= 0
+      {fmr::out , {fmr::out }},// default all threads to ::stdout verb_d >= 1
+      {fmr::log , {fmr::out }},// default main thread to ::stdout verb_d >= 1
+      {fmr::plog, {fmr::out }},// default main thread to ::stdout verb_d >= 2
+      {fmr::info, {fmr::out }},// default main thread to ::stdout verb_d >= 3
+      {fmr::spam, {fmr::out }},// default all threads to ::stdout verb_d >= 4
+      {fmr::dbug, {fmr::out }} // default all threads to ::stdout verb_d >= 5
     };
   }
 //  fmr::Dim_int data::Logs::get_verb () noexcept {...defined in Logs.ipp
@@ -75,7 +75,7 @@ namespace femera {
         FMR_FALL_THROUGH
         case 3: this->out_name_list [fmr::spam ] = {};
         FMR_FALL_THROUGH
-        case 4: this->out_name_list [fmr::debug] = {};
+        case 4: this->out_name_list [fmr::dbug] = {};
         FMR_FALL_THROUGH
         default: {}// Do nothing.
     } }

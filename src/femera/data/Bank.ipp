@@ -22,13 +22,12 @@ namespace femera {
   }
 #endif
   inline
-  bool data::Bank::does_file (const fmr::Data_name_t&){
-    return false;
+  bool data::Bank::does_file (const fmr::Data_name_t&) noexcept {
+    return false;//file == fmr::bank;
   }
   inline
   void data::Bank::task_exit () {
   }
 }//end femera namespace
-
 //end FEMERA_DATA_BANK_IPP
 #endif

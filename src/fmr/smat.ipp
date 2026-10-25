@@ -3,12 +3,39 @@
 
 //#define FMR_DEBUG
 
-template <typename F> static inline
-F fmr::math::m3x3_det_ref (const F* mat){// 12 FLOP
-	return mat[0]*(mat[4]*mat[8] - mat[5]*mat[7])
-	     - mat[1]*(mat[3]*mat[8] - mat[5]*mat[6])
-	     + mat[2]*(mat[3]*mat[7] - mat[4]*mat[6]);
+// Generalized functions call the most performant implementation. =============
+template <fmr::Dim_int D, typename F> static inline
+F fmr::math::smat_det (const F* mat){
+  static_assert(D >= 1 && D <= 4,
+                "smat_det supports only dimensions 1, 2, 3, and 4");
+  if (D == 1) return mat[0];// too trivial to test
+  if (D == 2) return mat[0]*mat[3] - mat[1]*mat[2];// too trivial to test
+  if (D == 3) return fmr::math::m3x3_det_ref(mat);//TODO Test variants?
+  return fmr::math::m4x4_det_ref(mat);//TODO Test variants?
 }
+template <fmr::Dim_int D, typename F> static inline
+int fmr::math::smat_invt_det (const F* mat, F* invt_det){
+  static_assert(D >= 1 && D <= 4,
+                "smat_det supports only dimensions 1, 2, 3, and 4");
+  if (D == 1) return fmr::math::m1x1_invt_det_ref(mat, invt_det);
+  if (D == 2) return fmr::math::m2x2_invt_det_ref(mat, invt_det);
+  if (D == 3) return fmr::math::m3x3_invt_det_ref(mat, invt_det);
+  // So far, tested variants for D = 1, 2, 3 all seem like they will
+  // perform about the same. No m4x4 variants tested yet.
+  return fmr::math::m4x4_invt_det_ref(mat, invt_det);//TODO test variants.
+}
+#if 0
+// Default variants call the most performant implementation. ==================
+template <typename F> static inline
+F fmr::math::m3x3_det (const F* mat){// 12 FLOP
+	return fmr::math::m3x3_det_ref (mat);
+}
+template <typename F> static inline
+int fmr::math::m3x3_invt_det (const F* mat, F* invt_det){
+  return fmr::math::m3x3_invt_det_ref(mat, invt_det);
+}
+#endif
+// Helpers ====================================================================
 
 template <typename F> static inline
 void smat_cofactors3_ref (const F* mat, F* cofactors)// 27 FLOP
@@ -39,9 +66,22 @@ void smat_cofactors4_ref (const F* mat, F* cofactors)
 				}
 			}
 			const F sign = (row + col) % 2 == 0 ? F(1) : F(-1);
-			cofactors[row*4 + col] = sign*fmr::math::m3x3_det_ref(minor);
+			cofactors[row*4 + col] = sign*fmr::math::smat_det<3>(minor);
 		}
 	}
+}
+// Test variants ==============================================================
+template <typename F> static inline
+F fmr::math::m3x3_det_ref (const F* mat){// 12 FLOP
+	return mat[0]*(mat[4]*mat[8] - mat[5]*mat[7])
+	     - mat[1]*(mat[3]*mat[8] - mat[5]*mat[6])
+	     + mat[2]*(mat[3]*mat[7] - mat[4]*mat[6]);
+}
+template <typename F> static inline
+F fmr::math::m4x4_det_ref (const F* mat){// 64 FLOP
+	F cof[16];
+	smat_cofactors4_ref(mat, cof);
+	return mat[0]*cof[0] + mat[1]*cof[1] + mat[2]*cof[2] + mat[3]*cof[3];
 }
 
 template <typename F> static inline
@@ -178,7 +218,7 @@ int ::fmr::math::m3x3_invt_det_ref (const F* mat, F* invt_det)
 template <typename F> static inline
 int ::fmr::math::m3x3_inv_a (const F* mat, F* inv)// 36 + 12 +1 = 49 FLOP
 {
-  const F det = fmr::math::m3x3_det_ref(mat);// 12 FLOP
+  const F det = fmr::math::smat_det<3>(mat);// 12 FLOP
 	if (::fmr::math::are_equal(det, F(0))) return 1;// FLOP not counted
   const F inv_det = F(1)/det;// 1 FLOP
   for (int i = 0; i < 9; ++i) {inv[i] = inv_det;}// 36 FLOP
@@ -200,7 +240,7 @@ int ::fmr::math::m3x3_inv_a (const F* mat, F* inv)// 36 + 12 +1 = 49 FLOP
 template <typename F> static inline// matrix inverse transposed & determinant
 int ::fmr::math::m3x3_invt_det_a (const F* mat, F* invt_det)
 {
-  invt_det[9] = fmr::math::m3x3_det_ref(mat);// 12 FLOP
+  invt_det[9] = fmr::math::smat_det<3>(mat);// 12 FLOP
 	if (::fmr::math::are_equal(invt_det[9], F(0))) return 1;// FLOP not counted
   const F inv_det = F(1)/invt_det[9];// 1 FLOP
   for (int i = 0; i < 9; ++i) {invt_det[i] = inv_det;}// 36 FLOP

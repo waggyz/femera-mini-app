@@ -20,8 +20,8 @@ if __name__ == "__main__":
     for item in vals_enum:
       print('{0},'.format(item.strip()), file=File)
   with open ('src/fmr/data-type-name.inc','w') as File:
-    for item in vals_name:
-      print('{0},'.format(item.strip().lower()), file=File)
+    for item in vals_name:# for, e.g., JSON files
+      print('{0},'.format(item.strip().replace('_','-').lower()), file=File)
   with open ('src/fmr/data-vals-type.inc','w') as File:
     for item in vals_type:
       print('{0},'.format(item.strip()), file=File)

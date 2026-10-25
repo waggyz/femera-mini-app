@@ -82,7 +82,7 @@ namespace femera {
             if (C->does_file (data_name)) {
               byte = C->task_send (data_name, text);
           } }
-          default: {}// Do nothing.
+          default: {}//TODO Do nothing or emit wa rning??
     } } }
     return byte;
   }

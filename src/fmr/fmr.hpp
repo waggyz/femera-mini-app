@@ -111,17 +111,19 @@ namespace fmr {
   */
   // built-in data sources and destinations
   // These are patterned similar to C stdout, stderr, stdin and C++ std::out,...
-  static const Data_name_t   log ="fmr:log" ;// default stdout main thread only
-  static const Data_name_t   out ="fmr:out" ;// default stdout from all threads
-  static const Data_name_t   err ="fmr:err" ;// default stderr from all threads
-  static const Data_name_t    in ="fmr:in"  ;// default stdin to each MPI thread
-  static const Data_name_t  none ="fmr:none";
-  static const Data_name_t  null ="fmr:null";// convenient synonym of fmr::none
+  static const Data_name_t  log ="fmr:log" ;// default stdout main thread only
+  static const Data_name_t  out ="fmr:out" ;// default stdout from all threads
+  static const Data_name_t  err ="fmr:err" ;// default stderr from all threads
+  static const Data_name_t   in ="fmr:in"  ;// default stdin to each MPI thread
+  static const Data_name_t none ="fmr:none";
+  static const Data_name_t null ="fmr:null";// convenient synonym of fmr::none
   //
-  static const Data_name_t  info ="fmr:info";
-  static const Data_name_t  plog ="fmr:perf";// performance log
-  static const Data_name_t  spam ="fmr:spam";
-  static const Data_name_t debug ="fmr:debug";
+  static const Data_name_t info ="fmr:info";
+  static const Data_name_t plog ="fmr:perf";// performance log
+  static const Data_name_t spam ="fmr:spam";
+  static const Data_name_t dbug ="fmr:dbug";
+  //
+  //static const Data_name_t bank ="fmr:bank";// default bank for storing data in mem
 #if 0
   static const Data_name_t perf="fmr:perf";//NOTE collides with namespace perf::
 #endif
