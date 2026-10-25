@@ -8,7 +8,9 @@
 namespace femera { namespace test {
   const auto mini = fmr::new_jobs ();
   //
+  const auto perf_tol_rel = fmr::Perf_float(fmr::perf::perf_tol_rel);
   auto perf_time = fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>();
+
   // Baseline times
   fmr::Perf_float m2x2_base_time = -1.0;
   fmr::Perf_float m3x3_base_time = -1.0;
@@ -24,32 +26,33 @@ namespace femera { namespace test {
 void send_perf_results (std::string label, int test_case,
   fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>& perf,
   fmr::Perf_float this_time,
-  int bad_dets);
+  int bad_dets, uint test_count);
 
   void send_perf_results (std::string label, int test_case,
     fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>& perf,
     fmr::Perf_float this_time,
-    int bad_dets) {
+    int bad_dets, uint test_count) {
       mini->data->send (fmr::out, "math", "smat", label.c_str(),
-        "(%i) %s: %s/%s, bad dets: %u",
+        "(%i) %s: %s/%s, errs: %u",
         test_case,
         fmr::form::si_unit (perf.get_busy_unit_speed (), "inv /s").c_str(),
         fmr::form::si_unit (perf.get_unit (), "inv ").c_str(),
         fmr::form::si_unit (this_time, "s").c_str(),
         bad_dets);
       mini->data->send (fmr::out, "math", "smat", label.c_str(),
-        "(%i) %s: %s/%s, AI: %g",
+        "(%i) %s: %s/%s, reps: %u",
         test_case,
         fmr::form::si_unit (perf.get_busy_flop_speed (), "flop/s").c_str(),
         fmr::form::si_unit (perf.get_flop (), "flop").c_str(),
         fmr::form::si_unit (this_time, "s").c_str(),
-        double(perf.get_arithmetic_intensity ()));
+        test_count);
       mini->data->send (fmr::out, "math", "smat", label.c_str(),
-        "(%i) %s: %s/%s",
+        "(%i) %s: %s/%s,   AI: %g",
         test_case,
         fmr::form::si_unit (perf.get_busy_data_speed (), "B   /s").c_str(),
         fmr::form::si_unit (perf.get_byte (), "B   ").c_str(),
-        fmr::form::si_unit (this_time, "s").c_str());
+        fmr::form::si_unit (this_time, "s").c_str(),
+        double(perf.get_arithmetic_intensity ()));
   }
 
   inline
@@ -181,7 +184,7 @@ void send_perf_results (std::string label, int test_case,
         return fmr::Perf_float(-1.0);
       }
     }// end switch test_case
-    send_perf_results ("m2x2", test_case, perf_time, this_time, bad_dets);
+    send_perf_results ("m2x2", test_case, perf_time, this_time, bad_dets, reps);
     return bad_dets == 0 ? this_time : fmr::Perf_float(-1.0);
   }
 
@@ -295,7 +298,7 @@ void send_perf_results (std::string label, int test_case,
         return fmr::Perf_float(-1.0);
       }
     }// end switch test_case
-    send_perf_results ("m3x3", test_case, perf_time, this_time, bad_dets);
+    send_perf_results ("m3x3", test_case, perf_time, this_time, bad_dets, reps);
     return bad_dets == 0 ? this_time : fmr::Perf_float(-1.0);
   }
 
@@ -303,23 +306,43 @@ TEST(FmrSmatPerf, BaseTime) {// Sets baseline times
   EXPECT_GT(time_m2x2(0), 0.0);// m2x2_base_time set AFTER test
   EXPECT_GT(time_m3x3(0), m2x2_base_time);// slower than 2x2
 }
+//NOTE These all run about the same as baseline on dev laptop.
+//     The conditionals below are for checking again on prod node.
 TEST(FmrSmatPerf, M2x2Inv) {
+#if FMR_PERF_TOL < 15
   EXPECT_GT(time_m2x2(1), m2x2_base_time);// slower than baseline?
   EXPECT_GT(time_m2x2(2), m2x2_base_time);// slower than baseline
+#else
+  EXPECT_NEAR(time_m2x2(1), m2x2_base_time, perf_tol_rel * m2x2_base_time);
+  EXPECT_NEAR(time_m2x2(2), m2x2_base_time, perf_tol_rel * m2x2_base_time);
+#endif
 }
 TEST(FmrSmatPerf, M2x2InvDets) {
+#if FMR_PERF_TOL < 15
   EXPECT_GT(time_m2x2(3), m2x2_base_time);// slower than w/out det
   EXPECT_GT(time_m2x2(4), m2x2_dets_time);// slower than baseline
+#else
+  EXPECT_NEAR(time_m2x2(3), m2x2_base_time, perf_tol_rel * m2x2_base_time);
+  EXPECT_NEAR(time_m2x2(4), m2x2_dets_time, perf_tol_rel * m2x2_dets_time);
+#endif
 }
 
 TEST(FmrSmatPerf, M3x3Inv) {
+#if FMR_PERF_TOL < 15
   EXPECT_GT(time_m3x3(1), m3x3_base_time);// slower than baseline
+#else
+  EXPECT_NEAR(time_m3x3(1), m3x3_base_time, perf_tol_rel * m3x3_base_time);
+#endif
 }
 TEST(FmrSmatPerf, M3x3InvDets) {
+#if FMR_PERF_TOL < 15
   EXPECT_GT(time_m3x3(2), m3x3_base_time);// slower than w/out dets?
   EXPECT_GT(time_m3x3(3), m3x3_dets_time);// slower than baseline?
+#else
+  EXPECT_NEAR(time_m3x3(2), m3x3_base_time, perf_tol_rel * m3x3_base_time);
+  EXPECT_NEAR(time_m3x3(3), m3x3_dets_time, perf_tol_rel * m3x3_dets_time);
+#endif
 }
-
 } }//end femerea::test:: namespace
 
 fmr::Exit_int main (int argc, char** argv) {

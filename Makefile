@@ -145,6 +145,9 @@ endif
 ifneq ($(FMR_TIMES_UCHAR),)
   FMRFLAGS   += -DFMR_TIMES_UCHAR=$(FMR_TIMES_UCHAR)
 endif
+ifneq ($(FMR_PERF_TOL),)
+  FMRFLAGS   += -DFMR_PERF_TOL=$(FMR_PERF_TOL)
+endif
 # CPUSIMDS set in set-undefined.mk
 ifneq ($(findstring AVX,$(CPUSIMDS)),)
   FMRFLAGS   += -DFMR_HAS_AVX

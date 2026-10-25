@@ -16,6 +16,5 @@ namespace femera { namespace test {
 } }//end femera::test:: namespace
 
 #include "Perf.ipp"
-
 //end FEMERA_HAS_TEST_PERF_HPP
 #endif

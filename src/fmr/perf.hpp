@@ -9,6 +9,12 @@ namespace fmr { namespace perf {
 // This "using" syntax is preferred to "typedef" in the Google C++ Style Guide:
 // https://google.github.io/styleguide/cppguide.html#Aliases
 
+#ifndef FMR_PERF_TOL
+#define FMR_PERF_TOL 5
+#endif
+static const fmr::Perf_float perf_tol_rel
+  = fmr::Perf_float(FMR_PERF_TOL) / fmr::Perf_float(100.0);
+
 using Float     = fmr::Perf_float;
 using Int       = fmr::Perf_int  ;
 //
@@ -22,6 +28,5 @@ static inline Timepoint get_now_ns () noexcept;
 
 #include "perf.ipp"
 
-#undef FMR_DEBUG
 //end FMR_HAS_PERF_HPP
 #endif
