@@ -9,7 +9,7 @@
 #endif
 // Inline definitions
 namespace fmr {
-  template <typename I, typename F> inline
+  template <typename I, typename F>
   perf::Meter<I,F>::Meter (const std::string& units)
     noexcept : unit_name (units) {
   }

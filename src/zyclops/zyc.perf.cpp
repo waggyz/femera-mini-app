@@ -6,6 +6,8 @@
 
 #include <vector>
 #include <cstdio>
+#include <cmath>
+
 
 #if 0
 #define TEST_ZYC_ARRAY_PTR auto

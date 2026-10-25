@@ -162,7 +162,9 @@ namespace femera { namespace test {
     return 0;
   }
   TEST(NewVals, Time) {
+FMR_WARN_INLINE_OFF
     EXPECT_EQ( time_init_vec (1024*1, 1024*16*4), 0);
+FMR_WARN_INLINE_ON
   }
 } }//end femerea::test:: namespace
 

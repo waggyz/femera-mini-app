@@ -61,6 +61,7 @@ namespace fmr { namespace perf {
     bool set_is_ok (const bool);// returns value after setting
     // Constructors
     Meter (const std::string& unit_name) noexcept;
+    __attribute__((noinline))
     Meter () =default;
   private:// All member variables are private.
     std::string unit_name = std::string("units");

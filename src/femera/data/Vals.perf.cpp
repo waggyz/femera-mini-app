@@ -1,4 +1,5 @@
 #include "../femera.hpp"
+#include "Vals.hpp"
 
 #include <gtest/gtest.h>
 

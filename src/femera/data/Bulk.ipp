@@ -11,7 +11,7 @@ namespace femera { namespace data {
   }
   template <fmr::Align_int A> inline
   Bulk<A>::Bulk ()
-  noexcept {
+  noexcept : bulk {} {
   }
   template <fmr::Align_int A> template <typename T> inline
   std::uintptr_t Bulk<A>::offset (const std::uintptr_t address)
