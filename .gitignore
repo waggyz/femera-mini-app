@@ -38,13 +38,20 @@ local.*
 *.odg
 *.ods
 
-# valgrind suppression files
+# valgrind suppression files are machine-specific
 *.supp
 
 # CI/CD stuff
 *.yml
 
+# Folders & FILES
 .venv/
+research-notes/femera-v0.1/
+research-notes/femera-v0.2/
+research-notes/femera-prior-work/figs/
+research-notes/femera-prior-work/data/
+research-notes/femera-prior-work/femera-v0.1-tm-DRAFT-2026-01-25.tex
+
 
 # Auto-created directories and files
 .venv*

@@ -9,7 +9,7 @@ namespace femera { namespace test {
   const auto mini = fmr::new_jobs ();
   //
   const auto perf_tol_rel = fmr::Perf_float(fmr::perf::perf_tol_rel);
-  auto perf_time = fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>();
+  auto perf_time = fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>("inv");
 
   // Baseline times
   fmr::Perf_float m2x2_base_time = -1.0;

@@ -14,7 +14,12 @@
 namespace femera { namespace data {
   class File;// Derive as a CRTP concrete class from Data.
   class File final: public Data <File> { friend class Data;// interface to Data classes
-  private:
+  // handles Bank, Dlim, Logs, Text internal;
+  // and CGNS, Gmsh, Moab, Pets external data handlers.
+  // Bank : Vals : Bulk : hierarchy handles internal data (RRAM) organization.
+  // - Vals are thread-local.
+  // - Bulk are low-level allocators.
+    private:
     using css = const std::string;// for convenience
   public:
     bool did_logs_init () noexcept;// true if first Logs initialized ok
