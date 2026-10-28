@@ -53,12 +53,14 @@ namespace femera { namespace test { namespace self {
     EXPECT_EQ( 1, 1 );
   }
 #ifdef FMR_HAS_MPI
+#ifndef FMR_OMP_LEVELS
 FMR_WARN_INLINE_OFF
   TEST( SelfTestProc, LocalProcIDs ){
     EXPECT_THAT( get_local_proc_ids (),
       ElementsAreArray( std::vector<fmr::Local_int>// ({0,1})));
         ({mini->proc->get_proc_id (), mini->proc->get_proc_id () + 1})));
   }
+#endif
   //TODO else test expectation for openMP only
 #endif
 FMR_WARN_INLINE_ON

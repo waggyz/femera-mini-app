@@ -5,7 +5,7 @@
 
 namespace fmr { namespace perf {
   template <typename I, typename F>
-  struct Meter {//NOTE not thread-safe.
+  struct Meter {//NOTE not thread-safe. Create one instance per thread.
   public:// methods
     std::string get_unit_name () noexcept;
     std::string set_unit_name (const std::string&) noexcept;

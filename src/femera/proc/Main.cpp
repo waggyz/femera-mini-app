@@ -55,9 +55,9 @@ namespace femera {
 #endif
 #ifdef FMR_HAS_OPENMP
 #ifdef FMR_OMP_LOCAL
-    // Add thread-local Fomp instances.
-    const fmr::Local_int omp_n = 2;//TODO calc or get from command arg
-    FMR_PRAGMA_OMP(omp parallel for schedule(static) ordered num_threads(n))
+    // Add thread-local Fomp instances to support FMR_OMP_LEVELS > 1
+    const fmr::Local_int omp_n = fmr::Local_int (::omp_get_max_threads () );
+    FMR_PRAGMA_OMP(omp parallel for schedule(static) ordered num_threads(omp_n))
     for (fmr::Local_int i=0; i<omp_n; ++i) {
       FMR_PRAGMA_OMP(omp ordered)
       path.push_back (get_task (path)->add_task

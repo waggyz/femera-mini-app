@@ -84,6 +84,9 @@ ifeq ($(CXX),g++)
   ifeq ($(ENABLE_OMP),ON)
     CXXFLAGS += -D_GLIBCXX_PARALLEL
     CXXFLAGS += -fopenmp
+  ifeq ($(FMR_OMP_LEVELS),)
+    FMR_OMP_LEVELS:=1
+  endif
   endif
   ifeq ($(ENABLE_GCC_PROFILE),ON)
   # CXXFLAGS += -fprofile-abs-path fprofile-dir=$(BUILD_CPU)/%p/
@@ -253,7 +256,8 @@ ifeq ($(ENABLE_PYMERA),ON)
 endif
 ifeq ($(ENABLE_OMP),ON)
   EXTERNAL_DOT+="Femera" -> "OpenMP"\n
-  # FMRFLAGS+= -DFMR_HAS_OMP not needed; OpenMP defines _OPENMP:
+  # FMRFLAGS+= -DFMR_HAS_OMP not needed; OpenMP defines _OPENMP when available
+  FMRFLAGS+= -DFMR_OMP_LEVELS=$(FMR_OMP_LEVELS)
 endif
 ifeq ($(ENABLE_NVIDIA),ON)
 #TODO move to external.config-nvidia.mk?

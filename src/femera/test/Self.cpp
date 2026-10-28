@@ -56,16 +56,22 @@ namespace femera {
       const auto x = std::string ("x");
 #endif
       this->data->send (fmr::log, get_base_abrv (), abrv, "proc",
-        ("%4u    /%4u total CPU processes (%4u MPI  "
+        ("%4u    /%4u total CPU process%s (%4u MPI  "
           + x +"%4u OpenMP)").c_str(),
-        mpi_n * omp_n, all_n, mpi_n, omp_n);
+        mpi_n * omp_n, all_n, (mpi_n * omp_n==1)?"  ":"es", mpi_n, omp_n);
       this->data->send (fmr::log, get_base_abrv (), abrv, "core",
-        ("%4u    /%4u total physical CPUs (%4u node "
+        ("%4u    /%4u total physical CPU%s (%4u node "
           + x +"%4u cores )").c_str(),
-        node_n * core_n, all_n, node_n, core_n);
+        node_n * core_n, all_n, (node_n * core_n==1)?" ":"s", node_n, core_n);
+      this->data->send (fmr::log, get_base_abrv (), abrv, "numa",
+        ("%4u          total NUMA domain%s  (%4u node "
+          + x +"%4u NUMA  )").c_str(),
+        numa_all, (numa_all==1)?" ":"s", node_n, numa_n);
+#if 0
       this->data->send (fmr::log, get_base_abrv (), abrv, "numa",
         ("%4u ea "+ x +"%4u node,%4u NUMA domain%s total").c_str(),
         numa_n, node_n, numa_all, (numa_all==1)?"":"s");
+#endif
     }
     if (all_n < core_n) { err =-1;
       this->data->send (fmr::log, get_base_abrv (), abrv, "NOTE",

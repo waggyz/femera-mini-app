@@ -20,9 +20,23 @@ namespace femera {
     this->version = std::to_string (_OPENMP);
     this->task_type = task_cast (Task_type::Fomp);
     this->proc_n  = fmr::Local_int (::omp_get_max_threads ());
+    this->proc_ix = fmr::Local_int (::omp_get_thread_num ());
   }
   void proc::Fomp::task_init (int* argc, char** argv) {
-    this->scan (argc, argv);
+    this->scan (argc, argv);//FIXME scan only top level OMP options
+    // Logs not initialized yet so append this init info to version string.
+    this->version += " on thread "
+      + std::to_string (this->proc_ix) + "/"
+      + std::to_string (this->task_proc_n ());
+    // deeper levels init with 0 threads
+    // Hierarchical OMP is handled dynamically at run time.
+#ifdef FMR_OMP_LEVELS
+    ::omp_set_max_active_levels (
+      FMR_OMP_LEVELS
+    );
+    this->version += " (" 
+    + std::to_string (::omp_get_max_active_levels ()) + " levels max)";
+#endif
     this->set_init (true);
   }
   void proc::Fomp::scan (int* argc, char** argv) {
@@ -45,20 +59,19 @@ namespace femera {
     } }
     if (this->proc_n != orig_proc_n) {
       ::omp_set_num_threads (int (this->proc_n));
-      FMR_PRAGMA_OMP(omp parallel) {
-        this->proc_n = fmr::Local_int (::omp_get_num_threads ());
-      }
+    }
 #ifdef FMR_DEBUG
       printf ("%s Fomp::task_proc_n %i\n", get_abrv ().c_str(),
         ::omp_get_num_threads ());
 #endif
-  } }
+  } // end proc::Fomp::scan
   bool proc::Fomp::is_in_parallel ()
   noexcept {
     return ::omp_in_parallel ();
   }
   fmr::Local_int proc::Fomp::task_proc_ix ()
   noexcept {
+    // returns the actual thread index this is running on now.
 #ifdef FMR_DEBUG
     printf ("%s Fomp::task_proc_ix %i\n", get_abrv ().c_str(),
       ::omp_get_thread_num());

@@ -15,6 +15,7 @@ namespace fmr {// inline functions defined in fmr.ipp
   template <typename E> constexpr typename
   std::underlying_type<E>::type enum2val (E e);
 }//end fmr:: namespace
+
 #include "fmr.ipp"
 
 namespace fmr {// typdefs, constants, enums

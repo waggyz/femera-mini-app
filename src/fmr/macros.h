@@ -39,9 +39,12 @@
 //
 #define FMR_RUNS_LOCAL
 // Define FMR_RUNS_LOCAL for thread-local sim runners on each OpenMP thread.
-#undef FMR_OMP_LOCAL
+#define FMR_OMP_LOCAL
+//NOTE best to disable this on compile and set up hierarchy at runtime.
+//     so Femera starts consistently with one level of OpenMP threads.
 // Define FMR_OMP_LOCAL to make & use thread-local drivers for each OpenMP
-// thread. This may be needed to avoid race conditions in OpenMP parallel
+// thread. This is used to support hierarchical OpenMP.
+// This may be needed to avoid race conditions in OpenMP parallel
 // regions. It should also help if the threads in an MPI process are in more
 // than one NUMA domain.
 //NOTE NUMA data locality is NOT automatic when >= 1 MPI thread/NUMA domain,
