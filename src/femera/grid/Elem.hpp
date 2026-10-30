@@ -22,7 +22,7 @@ private:
 public:
   template <typename fmr::Local_int D=sims_d>
   constexpr typename std::enable_if <D==3, fmr::Local_int>::type
-  test_vert_n () noexcept {return E::vert_n;}
+  test_vert_n () const noexcept {return E::vert_n;}
 };
 
 } } }//end fmr::grid::elem:: namespace
@@ -70,61 +70,61 @@ class Elem {
   public:
   // Simple accessors --------------------------------------------------------
   // constexpr functions are implicitly inline
-  constexpr fmr::Local_int get_elem_p () noexcept {return P;}
-  constexpr fmr::Local_int get_sims_d () noexcept {return D;}
-  constexpr fmr::Local_int get_elem_d () noexcept {
+  constexpr fmr::Local_int get_elem_p () const noexcept {return P;}
+  constexpr fmr::Local_int get_sims_d () const noexcept {return D;}
+  constexpr fmr::Local_int get_elem_d () const noexcept {
     static_assert( T::elem_d <= D, //NOTE only checked if this function used.
       "Element dimension cannot exceed simulation spatial dimension.");
     return T::elem_d;}
-  constexpr fmr::Local_int get_vert_n () noexcept {return T::vert_n;}
-  constexpr fmr::Local_int get_vols_n () noexcept {return T::vols_n;}
-  constexpr fmr::Local_int get_edge_n () noexcept {return T::edge_n;}
-  constexpr fmr::Local_int get_tris_n () noexcept {return T::tris_n;}
-  constexpr fmr::Local_int get_quad_n () noexcept {return T::quad_n;}
+  constexpr fmr::Local_int get_vert_n () const noexcept {return T::vert_n;}
+  constexpr fmr::Local_int get_vols_n () const noexcept {return T::vols_n;}
+  constexpr fmr::Local_int get_edge_n () const noexcept {return T::edge_n;}
+  constexpr fmr::Local_int get_tris_n () const noexcept {return T::tris_n;}
+  constexpr fmr::Local_int get_quad_n () const noexcept {return T::quad_n;}
   //
-  constexpr F get_edge_l () noexcept {return F(T::edge_l);}
-  constexpr F get_face_a () noexcept {return F(T::face_a);}
-  constexpr F get_elem_v () noexcept {return F(T::elem_v);}
+  constexpr F get_edge_l () const noexcept {return F(T::edge_l);}
+  constexpr F get_face_a () const noexcept {return F(T::face_a);}
+  constexpr F get_elem_v () const noexcept {return F(T::elem_v);}
   //
-  constexpr const fmr::Local_int* get_spar_conn () noexcept {
+  constexpr const fmr::Local_int* get_spar_conn () const noexcept {
     return T::spar_conn;}
-  constexpr const fmr::Local_int* get_tris_conn () noexcept {
+  constexpr const fmr::Local_int* get_tris_conn () const noexcept {
     return T::tris_conn;}
-  constexpr const fmr::Local_int* get_quad_conn () noexcept {
+  constexpr const fmr::Local_int* get_quad_conn () const noexcept {
     return T::quad_conn;}
-  constexpr const fmr::Local_int* get_vert_conn () noexcept {
+  constexpr const fmr::Local_int* get_vert_conn () const noexcept {
     return T::vert_conn;}
   //
   // Natural element vertex coordinates --------------------------------------
   template <typename Ft=F,
     typename std::enable_if <std::is_same<Ft, double>::value>::type* = nullptr>
-  constexpr const F* get_vert_coor () noexcept {
+  constexpr const F* get_vert_coor () const noexcept {
     return T::vert_coor;
   }
   template <typename Ft=F,
     typename std::enable_if <std::is_same<Ft, double>::value>::type* = nullptr>
-  constexpr const F* get_coor_vert () noexcept {
+  constexpr const F* get_coor_vert () const noexcept {
     return T::coor_vert;
   }
   template <typename Ft=F,
     typename std::enable_if <std::is_same<Ft, float>::value>::type* = nullptr>
-  constexpr const F* get_vert_coor () noexcept {
+  constexpr const F* get_vert_coor () const noexcept {
     return T::vert_coor_f;
   }
   template <typename Ft=F,
     typename std::enable_if <std::is_same< Ft,float>::value>::type* = nullptr>
-  constexpr const F* get_coor_vert () noexcept {
+  constexpr const F* get_coor_vert () const noexcept {
     return T::coor_vert_f;
   }
   // Non-trivial member functions --------------------------------------------
   constexpr
-  fmr::Local_int get_face_n () noexcept;
+  fmr::Local_int get_face_n () const noexcept;
   constexpr
-  fmr::Local_int get_node_n () noexcept;
+  fmr::Local_int get_node_n () const noexcept;
   constexpr
-  fmr::Local_int jacd_size (const fmr::Local_int intp_n=1) noexcept;
+  fmr::Local_int jacd_size (const fmr::Local_int intp_n=1) const noexcept;
   constexpr
-  fmr::Local_int shpg_size (const fmr::Local_int intp_n=1) noexcept;
+  fmr::Local_int shpg_size (const fmr::Local_int intp_n=1) const noexcept;
 #if 0
   constexpr
   F face_norm [sims_d * face_n]]//TODO this can be evaluated at compile time.
@@ -146,37 +146,37 @@ class Elem {
   template <fmr::Local_int tP=P, fmr::Local_int tD=D,
     typename std::enable_if <tP == 1>::value,
     typename std::enable_if <tD == 3>::value>// P=1, D=3
-  constexpr const F* get_node_coor () noexcept {
+  constexpr const F* get_node_coor () const noexcept {
    return T::vert_coor;
   }
   template <fmr::Local_int tP=P, fmr::Local_int tD=D,
     typename std::enable_if <tP == 1>::value,
     typename std::enable_if <tD == 3>::value>// P=1, D=3
-  constexpr const F* get_coor_node () noexcept {
+  constexpr const F* get_coor_node () const noexcept {
     return T::coor_vert;
   }
   template <fmr::Local_int tP=P, fmr::Local_int tD=D,
     typename std::enable_if <tP == 2>::value,
     typename std::enable_if <tD == 3>::value>// P=2, D=3
-  constexpr const F* get_node_coor () noexcept {
+  constexpr const F* get_node_coor () const noexcept {
    return T::tet10_coor;
   }
   template <fmr::Local_int tP=P, fmr::Local_int tD=D,
     typename std::enable_if <tP == 2>::value,
     typename std::enable_if <tD == 3>::value>// P=2, D=3
-  constexpr const F* get_coor_node () noexcept {
+  constexpr const F* get_coor_node () const noexcept {
     return  T::coor_tet10;
   }
   template <fmr::Local_int tP=P, fmr::Local_int tD=D,
     typename std::enable_if <tP == 3>::value,
     typename std::enable_if <tD == 3>::value>// P=3, D=3
-  constexpr const F* get_node_coor () noexcept {
+  constexpr const F* get_node_coor () const noexcept {
    return T::tet20_coor;
   }
   template <fmr::Local_int tP=P, fmr::Local_int tD=D,
     typename std::enable_if <tP == 3>::value,
     typename std::enable_if <tD == 3>::value>// P=3, D=3
-  constexpr const F* get_coor_node () noexcept {
+  constexpr const F* get_coor_node () const noexcept {
     return  T::coor_tet20;
   }
   // Integration points and weights (default) --------------------------------

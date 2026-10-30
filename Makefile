@@ -73,7 +73,7 @@ ifeq ($(CXX),g++)
   endif
   #TODO replace below with data/gcc8.flags
   OPTFLAGS   := $(shell cat data/gcc4.flags | tr '\n' ' ' | tr -s ' ')
-  CXXFLAGS   += -std=c++11 -g -MMD -MP -fPIC
+  CXXFLAGS   += -std=c++14 -g -MMD -MP -fPIC
   # Dependency file generation: -MMD -MP
   #WAS: -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
   #NOTE -fPIC (or -fpic?) needed for shared libs, but may degrade static lib performance.
@@ -117,7 +117,7 @@ endif
 # in LDLIBS.
 ifeq ($(CXX),icx)
   OPTFLAGS   := $(shell cat data/icpc.flags | tr '\n' ' ' | tr -s ' ')
-  CXXFLAGS   := c++11 -restrict -g $(OPTFLAGS)
+  CXXFLAGS   := c++14 -restrict -g $(OPTFLAGS)
   #NOTE -fPIC needed for shared libs, but may degrade static lib performance.
   ENABLE_GCC_PROFILE :=OFF
   ifeq ($(ENABLE_MKL),ON)
@@ -270,7 +270,7 @@ ifeq ($(ENABLE_NVIDIA),ON)
   INCFLAGS+= -isystem"$(NVIDIA_DIR)/include"
   LDFLAGS+= -L"$(NVIDIA_DIR)/lib64"
   LDLIBS+= -lcuda -lcudart
-  CUFLAGS+= --std=c++11 -g -MMD -MP -O3
+  CUFLAGS+= --std=c++14 -g -MMD -MP -O3
   CUFLAGS+= -DFMR_HAS_NVIDIA
   CUFLAGS+= -L"$(NVIDIA_DIR)/lib64" -lcuda -lcudart
 endif
@@ -505,7 +505,7 @@ LIBFEMERA_SO:=$(STAGE_CPU)/lib/libfemerac.so
 # Changing any of these should cause a full Femera rebuild.
 TOPDEPS += Makefile config.local $(BUILD_CPU)/femera.flags
 
-# C++11 code to compile and gtest
+# c++14 code to compile and gtest
 FMRCPPS:= $(shell find src/ -maxdepth 4 -name "*.cpp" -printf "%p ")
 # FMRCUS:= $(shell find src/ -maxdepth 4 -name "*.cu.cpp" -printf "%p ")
 DEPFILE:= $(patsubst src/%.cpp,$(BUILD_CPU)/%.d,$(FMRCPPS))
