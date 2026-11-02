@@ -1,5 +1,7 @@
 #include "../core.h"
 #include "Self.hpp"
+#include "self/FE1e.hpp"
+#include "self/Ptch.hpp"
 
 //TODO Remove Node.hpp" below?
 #include "../proc/Node.hpp"
@@ -16,6 +18,10 @@ namespace femera {
   void test::Self::task_init (int*, char**) {// Test for initialization errors.
     this->log_init_info ();// pulled out method to prevent inline fail warning
     this->proc_node_chck ();
+    // Integration tests
+    this->add_task (Test<test::FE1e>::new_task (this->get_core()));
+    this->add_task (Test<test::Ptch>::new_task (this->get_core()));
+    //
     this->set_init (true);
   }
   void test::Self::log_init_info () {// pulled out of task_init (inline fail)

@@ -19,7 +19,12 @@ template <class T, typename fmr::Local_int P, typename fmr::Local_int D, typenam
   return intp_n * (D*D + 1);
 }
 template <class T, typename fmr::Local_int P, typename fmr::Local_int D, typename F>
- constexpr fmr::Local_int elem::Elem<T,P,D,F>::shpg_size
+ constexpr fmr::Local_int elem::Elem<T,P,D,F>::poly_func_size
+  (const fmr::Local_int intp_n) const noexcept {// default 1
+  return intp_n * get_node_n ();
+}
+template <class T, typename fmr::Local_int P, typename fmr::Local_int D, typename F>
+ constexpr fmr::Local_int elem::Elem<T,P,D,F>::poly_grad_size
   (const fmr::Local_int intp_n) const noexcept {// default 1
   return intp_n * get_node_n () * D;
 }

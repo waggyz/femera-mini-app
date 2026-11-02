@@ -1,11 +1,11 @@
-#ifndef FEMERA_HAS_GRID_ELEM_SPAR_HPP
-#define FEMERA_HAS_GRID_ELEM_SPAR_HPP
+#ifndef FEMERA_HAS_GRID_ELEM_BARS_HPP
+#define FEMERA_HAS_GRID_ELEM_BARS_HPP
 
 #include "../Elem.hpp"
 
 namespace femera { namespace grid { namespace elem {
 
-struct Spar : public Elem<Spar> {//TODO Bar?
+struct Bars : public Elem<Bars> {//TODO Bars?
 public:
   static constexpr fmr::Local_int sims_d = 3;
   static constexpr fmr::Local_int elem_d = 1;
@@ -22,7 +22,7 @@ public:
   static constexpr
   fmr::Local_int vert_conn [vert_n] = {0,1};
   static constexpr
-  fmr::Local_int spar_conn [Spar::vert_n * Spar::edge_n] = {0,1};
+  fmr::Local_int bars_conn [Bars::vert_n * Bars::edge_n] = {0,1};
   static constexpr fmr::Local_int* tris_conn = nullptr;
   static constexpr fmr::Local_int* quad_conn = nullptr;
   //
@@ -43,7 +43,7 @@ public:
 };
 } } }//end femera::grid::elem:: namespace
 
-#include "Spar.ipp"
+#include "Bars.ipp"
 
-//end FEMERA_HAS_GRID_ELEM_SPAR_HPP
+//end FEMERA_HAS_GRID_ELEM_BARS_HPP
 #endif

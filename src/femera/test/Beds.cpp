@@ -4,8 +4,6 @@
 #include "Gtst.hpp"
 #endif
 #include "Self.hpp"
-#include "FE1e.hpp"
-#include "Ptch.hpp"
 #include "Perf.hpp"
 
 #include <unistd.h>          // argc opterr optopt optind optarg
@@ -14,15 +12,13 @@ namespace femera {
   void test::Beds::task_init (int* argc, char** argv) {
     this->scan (argc, argv);
 #ifdef FMR_HAS_GTEST
-    this->add_task (std::move(Test<test::Gtst>::new_task (this->get_core())));
+    this->add_task (Test<test::Gtst>::new_task (this->get_core()));
 #endif
     if (this->do_test) {// -T option in args
-      this->add_task (std::move(Test<test::Self>::new_task (this->get_core())));
-      this->add_task (std::move(Test<test::FE1e>::new_task (this->get_core())));
-      this->add_task (std::move(Test<test::Ptch>::new_task (this->get_core())));
+      this->add_task (Test<test::Self>::new_task (this->get_core()));
     }
-    if (this->do_test || this->do_perf) {// -T or -P option in args
-      this->add_task (std::move(Test<test::Perf>::new_task (this->get_core())));
+    if (this->do_test || this->do_perf) {// -T or -P option in args//TODO huh?
+      this->add_task (Test<test::Perf>::new_task (this->get_core()));
     }
   this->set_init (true);
   }
@@ -35,7 +31,7 @@ namespace femera {
         while ((optchar = getopt (argc[0], argv, "TP")) != -1) {
           // T  -T has no argument//NOTE -g gets eaten by MPI
           //NOTE -fmr:T, -fmr:P are working because -f -m -r and -: are skipped,
-          //     leaving only the recognized option -T, -P.
+          //     leaving only the recognized options -T, -P.
           switch (optchar) {
             case 'T':{ this->do_test = true; break; }
             //TODO: this->proc->add_optc (optchar); break; }

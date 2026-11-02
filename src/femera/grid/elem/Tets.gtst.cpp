@@ -1,5 +1,5 @@
 #include "../../femera.hpp"
-
+#include "../Elem.test.hpp"
 #include "Tets.hpp"
 
 #include <gtest/gtest.h>
@@ -68,7 +68,7 @@ fmr::Exit_int main (int argc, char** argv) {
   //const auto intw = femera::grid::fems::tets_intg_1_ptwt [3];
   fmr::Geom_float shpg [12]
      = {0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0};
-  femera::grid::elem::Tets::shap_grad_4 (&shpg[0], &intp[0]);
+  femera::grid::elem::Tets::poly_grad_4 (&shpg[0], &intp[0]);
   fmr::Geom_float coor [12];
   for (int i=0; i<12; ++i){coor[i] = femera::grid::elem::Tets::coor_vert[i];}
   fmr::Geom_float jac3 [ 9] = {0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0};
@@ -87,7 +87,7 @@ fmr::Exit_int main (int argc, char** argv) {
   for (int i=0; i< 9; ++i){jac3[i]=0.0;}
   fmr::Geom_float coo2 [30];
   for (int i=0; i<30; ++i){coo2[i] = femera::grid::elem::Tets::coor_tet10[i];}
-  femera::grid::elem::Tets::shap_grad_10 (&shp2[0], &intp[0]);
+  femera::grid::elem::Tets::poly_grad_10 (&shp2[0], &intp[0]);
   for (int i=0; i<3; ++i) {
     for (int j=0; j<3; ++j) {
       for (int k=0; k<10; ++k) {
@@ -101,7 +101,7 @@ fmr::Exit_int main (int argc, char** argv) {
   for (int i=0; i< 9; ++i){jac3[i]=0.0;}
   fmr::Geom_float coo3 [60];
   for (int i=0; i<60; ++i){coo3[i] = femera::grid::elem::Tets::coor_tet20[i];}
-  femera::grid::elem::Tets::shap_grad_20 (&shp3[0], &intp[0]);
+  femera::grid::elem::Tets::poly_grad_20 (&shp3[0], &intp[0]);
   for (int i=0; i<3; ++i) {
     for (int j=0; j<3; ++j) {
       for (int k=0; k<20; ++k) {
@@ -142,30 +142,26 @@ TEST( GridCellTets, P1_Node_N ){
 }
 #endif
 //-----------------------------
-TEST( GridElemTets, DefaultTetOrder1 ){
-  EXPECT_EQ( test_tet.get_elem_p(), 1 );
-}
-TEST( GridElemTets, P1Order1 ){
+TEST( GridElemTets, ElementOrderP ){
+  EXPECT_EQ( test_tet.get_elem_p(), test_tet1.get_elem_p() );
   EXPECT_EQ( test_tet1.get_elem_p(), 1 );
-}
-TEST( GridElemTets, P2Order2 ){
   EXPECT_EQ( test_tet2.get_elem_p(), 2 );
-}
-TEST( GridElemTets, P3Order3 ){
   EXPECT_EQ( test_tet3.get_elem_p(), 3 );
 }
 //-----------------------------
-TEST( GridElemTets, DefaultHas4Nodes ){
-  EXPECT_EQ( test_tet.get_node_n(), 4 );
-}
-TEST( GridElemTets, P1Has4Nodes ){
-  EXPECT_EQ( test_tet1.get_node_n(), 4 );
-}
-TEST( GridElemTets, P2Has10Nodes ){
+TEST( GridElemTets, ElementNodeCount ){
+  EXPECT_EQ( test_tet.get_node_n(), test_tet1.get_node_n() );// default linear tet
+  EXPECT_EQ( test_tet1.get_node_n(),  4 );
   EXPECT_EQ( test_tet2.get_node_n(), 10 );
-}
-TEST( GridElemTets, P3Has20Nodes ){
   EXPECT_EQ( test_tet3.get_node_n(), 20 );
+}
+TEST( GridElemTets, ElementPolynomialType ){// Node count equal to poly term count
+  EXPECT_EQ( test_tet1.get_node_n(), fmr::math::poly_term_n(
+    fmr::math::Poly::Full, test_tet1.get_elem_p(), test_tet1.get_elem_d()) );
+  EXPECT_EQ( test_tet2.get_node_n(), fmr::math::poly_term_n(
+    fmr::math::Poly::Full, test_tet2.get_elem_p(), test_tet2.get_elem_d()) );
+  EXPECT_EQ( test_tet3.get_node_n(), fmr::math::poly_term_n(
+    fmr::math::Poly::Full, test_tet3.get_elem_p(), test_tet3.get_elem_d()) );
 }
 //-----------------------------
 TEST( GridElemTets, IntgWgtsSumVol1 ){
@@ -186,10 +182,10 @@ TEST( GridElemTets, IntgWgtsSumVol11 ){
 //-----------------------------
 //NOTE Google test fails report undefined reference and don't link.
 TEST( GridElemTets, ArrayAccessInline ){
-  EXPECT_EQ( test_tet1.get_spar_conn ()[0], 0 );
-  EXPECT_EQ( test_tet1.get_spar_conn ()[1], 1 );
+  EXPECT_EQ( test_tet1.get_bars_conn ()[0], 0 );
+  EXPECT_EQ( test_tet1.get_bars_conn ()[1], 1 );
 }
-auto vert1 = test_tet1.get_spar_conn ();
+auto vert1 = test_tet1.get_bars_conn ();
 //auto s0 = &spar1[0];
 auto v0 = &test_tet1.get_vert_conn ()[0];
 auto v1 = &test_tet1.get_vert_conn ()[1];

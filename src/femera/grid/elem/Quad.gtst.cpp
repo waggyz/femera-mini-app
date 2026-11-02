@@ -1,4 +1,5 @@
 #include "../../femera.hpp"
+#include "../Elem.test.hpp"
 #include "Quad.hpp"
 
 #include <gtest/gtest.h>

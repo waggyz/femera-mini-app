@@ -1,10 +1,13 @@
 #include "../femera.hpp"
 
+#include "Elem.test.hpp"
+
 #include "elem/Tets.hpp"
 #include "elem/Prmd.hpp"
 #include "elem/Wdge.hpp"
 #include "elem/Itri.hpp"
 #include "elem/Iqud.hpp"
+#include "elem/Ibar.hpp"
 
 #include <gtest/gtest.h>
 
@@ -30,13 +33,13 @@ const float an_array_f[2] = {float(1.0/6.0), float(1.0/6.0)};
 
 // Elem_test *****************************************************************
 // Supported element examples
-static constexpr fmr::grid::elem::Elem_args tri6_2d_args = { 6, 3, 2};
-static constexpr fmr::grid::elem::Elem_args tri6_3d_args = { 6, 3, 3};
-static constexpr fmr::grid::elem::Elem_args tet10_args   = {10, 4, 3};
+static constexpr femera::grid::elem::Elem_args tri6_2d_args = { 6, 3, 2};
+static constexpr femera::grid::elem::Elem_args tri6_3d_args = { 6, 3, 3};
+static constexpr femera::grid::elem::Elem_args tet10_args   = {10, 4, 3};
 
 uintptr_t val0_adress=0, val1_adress=0;
 
-constexpr auto test_tet_3d = fmr::grid::elem::Elem_test
+constexpr auto test_tet_3d = femera::grid::elem::Elem_test
   <femera::grid::elem::Tets, tet10_args> ();
 //****************************************************************************
 
@@ -44,11 +47,11 @@ fmr::Exit_int main (int argc, char** argv) {
   mini.init (&argc, argv);
   //
   const auto elem_quad = femera::grid::elem::Elem<femera::grid::elem::Quad> ();
-  const auto elem_spar = femera::grid::elem::Elem<femera::grid::elem::Spar,1,1> ();
+  const auto elem_bars = femera::grid::elem::Elem<femera::grid::elem::Bars,1,1> ();
   const auto elem_tris = femera::grid::elem::Elem<femera::grid::elem::Tris,1,2> ();
   //
   jacs_size = elem_quad.jacd_size ();
-  jac1_size = elem_spar.jacd_size ();
+  jac1_size = elem_bars.jacd_size ();
   jac2_size = elem_tris.jacd_size ();
   jac3_size = elem_tet1.jacd_size (1);
   jac4_size = elem_tet1.jacd_size (4);
@@ -97,11 +100,17 @@ TEST( GridElem, Measures ){
   EXPECT_FLOAT_EQ( float(elem_tet1.get_elem_v ()), float(1.0/6.0) );
   EXPECT_FLOAT_EQ( float(elem_tet1.get_elem_d ()), 3 );
 }
-TEST( GridElem, ShapeGradient ){
-  EXPECT_EQ( elem_tet1.shpg_size ( ), 12 );
-  EXPECT_EQ( elem_tet2.shpg_size ( ), 30 );
-  EXPECT_EQ( elem_tet3.shpg_size ( ), 60 );
-  EXPECT_EQ( elem_tet2.shpg_size (4),120 );
+TEST( GridElem, PolynomialShapeFunction ){
+  EXPECT_EQ( elem_tet1.poly_func_size ( ), 4 );
+  EXPECT_EQ( elem_tet2.poly_func_size ( ), 10 );
+  EXPECT_EQ( elem_tet3.poly_func_size ( ), 20 );
+  EXPECT_EQ( elem_tet2.poly_func_size (4), 40 );
+}
+TEST( GridElem, PolynomialShapeGradient ){
+  EXPECT_EQ( elem_tet1.poly_grad_size ( ), 12 );
+  EXPECT_EQ( elem_tet2.poly_grad_size ( ), 30 );
+  EXPECT_EQ( elem_tet3.poly_grad_size ( ), 60 );
+  EXPECT_EQ( elem_tet2.poly_grad_size (4),120 );
 }
 TEST( GridElem, DoubleFloatSpecialization ){
   EXPECT_EQ( size_coor_d, 2 * size_coor_f );

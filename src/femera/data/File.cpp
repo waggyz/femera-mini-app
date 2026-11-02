@@ -50,22 +50,22 @@ namespace femera {
         const auto m = this->proc->get_proc_ix (Task_type::Fmpi);
         printf ("%s (MPI: %u)\n", B->get_name ().c_str(), m);
 #endif
-        this->add_task (std::move (B));
+        this->add_task (B);
     } }
-    this->add_task (std::move (Data<data::Logs>::new_task (this->get_core())));
-    this->add_task (std::move (Data<data::Text>::new_task (this->get_core())));
-    this->add_task (std::move (Data<data::Dlim>::new_task (this->get_core())));
+    this->add_task (Data<data::Logs>::new_task (this->get_core()));
+    this->add_task (Data<data::Text>::new_task (this->get_core()));
+    this->add_task (Data<data::Dlim>::new_task (this->get_core()));
 #ifdef FMR_HAS_CGNS
-    this->add_task (std::move (Data<data::Cgns>::new_task (this->get_core())));
+    this->add_task (Data<data::Cgns>::new_task (this->get_core()));
 #endif
 #ifdef FMR_HAS_MOAB
-    this->add_task (std::move (Data<data::Moab>::new_task (this->get_core())));
+    this->add_task (Data<data::Moab>::new_task (this->get_core()));
 #endif
 #ifdef FMR_HAS_GMSH
-    this->add_task (std::move (Data<data::Gmsh>::new_task (this->get_core())));
+    this->add_task (Data<data::Gmsh>::new_task (this->get_core()));
 #endif
 #ifdef FMR_HAS_PETSC
-    this->add_task (std::move (Data<data::Pets>::new_task (this->get_core())));
+    this->add_task (Data<data::Pets>::new_task (this->get_core()));
 #endif
     this->set_init (true);
   }

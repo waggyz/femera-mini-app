@@ -11,7 +11,7 @@ constexpr fmr::Local_int Tets::vols_n;// optional for basic types
 
 constexpr fmr::Local_int Tets::tris_conn [];
 //constexpr fmr::Local_int Tets::quad_conn [];
-constexpr fmr::Local_int Tets::spar_conn [];
+constexpr fmr::Local_int Tets::bars_conn [];
 constexpr fmr::Geom_float Tets::vert_coor [];
 constexpr fmr::Geom_float Tets::coor_vert [];
 constexpr fmr::Geom_float Tets::coor_tet10 [];
@@ -25,11 +25,11 @@ constexpr fmr::Phys_float Tets::intg_5_ptwt [];
 constexpr fmr::Phys_float Tets::intg_10_ptwt [];
 constexpr fmr::Phys_float Tets::intg_11_ptwt [];
 #endif
-// Tets::shap_func_X and Tets::shap_grad_N evaluate the shape functions or
+// Tets::poly_func_X and Tets::poly_grad_N evaluate the shape functions or
 // gradients at 3D natural coordinate point x.
 
 template <typename F> inline// single or double precision
-F* Tets::shap_func_4
+F* Tets::poly_func_4
 (F f[4u], const F x[3u]) {
   f[ 0] = 1.0-x[0]-x[1]-x[2];
   f[ 1] = x[0];
@@ -38,7 +38,7 @@ F* Tets::shap_func_4
   return f;
 }
 template <typename F> inline
-F* Tets::shap_grad_4
+F* Tets::poly_grad_4
 (F g[4u *3u], const F[]) {//  x[3u] not used (constant gradient)
   g[ 0]=-1.0; g[ 1]=1.0; g[ 2]=0.0; g[ 3]=0.0;// dN/dx (natural coords)
   g[ 4]=-1.0; g[ 5]=0.0; g[ 6]=1.0; g[ 7]=0.0;// dN/dy
@@ -46,7 +46,7 @@ F* Tets::shap_grad_4
   return g;
 }
 template <typename F> inline
-F* Tets::shap_func_10
+F* Tets::poly_func_10
 (F f[10u], const F x[3u]) {
   const F L2=x[0], L3=x[1], L4=x[2];
   const F L1=1.0-L2-L3-L4;
@@ -63,7 +63,7 @@ F* Tets::shap_func_10
   return f;
 }
 template <typename F> inline
-F* Tets::shap_grad_10
+F* Tets::poly_grad_10
 (F g[10u *3u], const F x[3u]) {
   const F L2=x[0], L3=x[1], L4=x[2];
   const F L1=1.0-L2-L3-L4;
@@ -108,7 +108,7 @@ F* Tets::shap_grad_10
   return g;
 }
 template <typename F> inline
-F* Tets::shap_func_20
+F* Tets::poly_func_20
 (F f[20u], const F x[3u]) {
   const F L2=x[0], L3=x[1], L4=x[2];
   const F L1=(1.0-L2-L3-L4);
@@ -142,7 +142,7 @@ F* Tets::shap_func_20
   return f;
 }
 template <typename F> inline
-F* Tets::shap_grad_20
+F* Tets::poly_grad_20
 (F g[20u *3u], const F x[3u]) {
   const F L2=x[0], L3=x[1], L4=x[2];
   const F L1=(1.0-L2-L3-L4);

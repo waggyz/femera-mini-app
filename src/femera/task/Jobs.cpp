@@ -61,7 +61,7 @@ namespace femera {
     // and its proc, data, and test pointer members are set but NOT initialized.
 #if 1
     // Add simulation set handlers, one for each mpi procss,//TODO if needed.
-    this->add_task (std::move (Task<task::Sims>::new_task (this->get_core())));
+    this->add_task (Task<task::Sims>::new_task (this->get_core()));
 #endif
 #if 0
     this->data->time_line (data->fmrlog,"Femera",

@@ -25,7 +25,7 @@ namespace femera {
   void proc::Fomp::task_init (int* argc, char** argv) {
     this->scan (argc, argv);//FIXME scan only top level OMP options
     // Logs not initialized yet so append this init info to version string.
-    this->version += " on thread "
+    this->version += " on process "
       + std::to_string (this->proc_ix) + "/"
       + std::to_string (this->task_proc_n ());
     // deeper levels init with 0 threads

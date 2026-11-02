@@ -9,7 +9,7 @@ reference them later.
 */
 constexpr fmr::Local_int Wdge::tris_conn [];
 constexpr fmr::Local_int Wdge::quad_conn [];
-constexpr fmr::Local_int Wdge::spar_conn [];
+constexpr fmr::Local_int Wdge::bars_conn [];
 constexpr fmr::Geom_float Wdge::vert_coor [];
 constexpr fmr::Geom_float Wdge::coor_vert [];
 #endif

@@ -25,7 +25,7 @@ public:
   static constexpr
   fmr::Local_int vert_conn [vert_n] = {0,1,2, 3,4,5};
   static constexpr
-  fmr::Local_int spar_conn [Spar::vert_n * edge_n]
+  fmr::Local_int bars_conn [Bars::vert_n * edge_n]
     = {
     0,1, 1,2, 2,0,
     3,4, 4,5, 5,3,

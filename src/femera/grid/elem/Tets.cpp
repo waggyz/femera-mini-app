@@ -6,7 +6,7 @@ namespace femera { namespace grid { namespace elem {
     reference them later.
     */
     constexpr fmr::Local_int Tets::tris_conn [];
-    constexpr fmr::Local_int Tets::spar_conn [];
+    constexpr fmr::Local_int Tets::bars_conn [];
     constexpr fmr::Local_int Tets::vert_conn [];
     //
     constexpr fmr::Geom_float Tets::vert_coor [];

@@ -116,7 +116,7 @@ uint fmr::math::nchoosek (const uint n, const uint k) {
 #endif
 }
 static inline
-uint fmr::math::poly_terms (
+uint fmr::math::poly_term_n (
 /**
  * Calculates the number of terms in a polynomial based on its type, the number
  * of variables, and the polynomial order.
@@ -142,7 +142,7 @@ uint fmr::math::poly_terms (
  *
  * @throws None
  */
-    const fmr::math::Poly ptype, const uint nvar, const uint pord) {
+    const fmr::math::Poly ptype, const uint pord, const uint nvar) {
   if (nvar < 1) {return 0;}
   if (pord < 1) {return 1;}
   uint terms = 0;
@@ -156,9 +156,9 @@ uint fmr::math::poly_terms (
 #endif
       break;}
     case math::Poly::Serendipity : {
-      terms = fmr::math::poly_terms (fmr::math::Poly::Bipoly, nvar, pord);
+      terms = fmr::math::poly_term_n (fmr::math::Poly::Bipoly, nvar, pord);
       terms-= (pord > 1 && nvar > 1)
-        ? fmr::math::poly_terms (fmr::math::Poly::Full, nvar, pord - 2) : 0;
+        ? fmr::math::poly_term_n (fmr::math::Poly::Full, nvar, pord - 2) : 0;
       break;}
     case fmr::math::Poly::Bipoly :// Fall through.
     case fmr::math::Poly::Tripoly : {

@@ -7,7 +7,7 @@ namespace femera { namespace grid { namespace elem {
     */
     //constexpr fmr::Local_int Cube::tris_conn [];
     constexpr fmr::Local_int Cube::quad_conn [];
-    constexpr fmr::Local_int Cube::spar_conn [];
+    constexpr fmr::Local_int Cube::bars_conn [];
     constexpr fmr::Geom_float Cube::vert_coor [];
     constexpr fmr::Geom_float Cube::coor_vert [];
     

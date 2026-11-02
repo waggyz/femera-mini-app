@@ -3,37 +3,11 @@
 
 #include "../../fmr/fmr.hpp"
 
-#if 1
-// Elem_test *****************************************************************
-namespace fmr { namespace grid { namespace elem { //TODO move to src/fmr/ or Test?
-
-struct Elem_args {
-public:
-  fmr::Local_int node_n;// N
-  fmr::Local_int intp_n;// G
-  fmr::Local_int sims_d;// D
-};
-template <class E, Elem_args const &A, typename F=fmr::Geom_float>
-class Elem_test {
-private:
-  static constexpr fmr::Local_int node_n = A.node_n;
-  static constexpr fmr::Local_int intp_n = A.intp_n;
-  static constexpr fmr::Local_int sims_d = A.sims_d;
-public:
-  template <typename fmr::Local_int D=sims_d>
-  constexpr typename std::enable_if <D==3, fmr::Local_int>::type
-  test_vert_n () const noexcept {return E::vert_n;}
-};
-
-} } }//end fmr::grid::elem:: namespace
-// ***************************************************************************
-#endif
-
 namespace femera { namespace grid { namespace elem {
 //namespace femera { namespace grid { //TODO move up to here?
 /*
 // Forward-delare element shapes TODO is this needed?
-class Spar;
+class Bars;
 class Line;//TODO 1D interface element embedded in 2D or 3D space
 class Itri; class Iqud;// 2D interface elements embedded in 3D space
 class Tris; class Quad;
@@ -44,8 +18,8 @@ template <class T, typename fmr::Local_int P=1, typename fmr::Local_int D=3,
   typename F=fmr::Geom_float>
 class Elem {
   /*
-  Elements are defined in 3D by derived classes and reduced as needed to match
-  the simulation spatial dimension template parameter (D).
+  Elements are defined in 3D by derived classes and arrays reduced as needed
+  to match the simulation spatial dimension template parameter (D).
   
   Members are constexpr so that everything is kept thread-local to the instance
   that created it.
@@ -64,11 +38,35 @@ class Elem {
   "simulation of equal or greater spatial dimension.");
 #endif
   //
+#if 0
+// Should this class remain stateless? //TODO Move to FEms?
   private:
-  // No private members
+  // Element quality criteria: warn if bad.
+  F dets_qual_min = F(0.2);// min (det) / abs (max (det)) at vert_coor
+  // bars,tris,tets: const det > std::numeric_limits<F>::min() [* part_size??]
+  //                          OR std::numeric_limits<F>::epsilon()
+  //NOTE these are all vert_n == elem_d + 1 (when side nodes at natural positions)
+  F edge_qual_min = F(0.2);// shortest / longest shortest edge
+  F skew_qual_min = F(0.6);// = 1.0-skewness [0-1] (quad, cube)
   //
   public:
-  // Simple accessors --------------------------------------------------------
+  // Simple get / set / compare ----------------------------------------------
+  //
+  F get_dets_min () const noexcept {return dets_qual_min;}
+  F get_edge_min () const noexcept {return edge_qual_min;}
+  F get_skew_min () const noexcept {return skew_qual_min;}
+ //
+  F set_dets_min (const F val) noexcept {return dets_qual_min = F(val);}
+  F set_edge_min (const F val) noexcept {return edge_qual_min = F(val);}
+  F set_skew_min (const F val) noexcept {return skew_qual_min = F(val);}
+  //
+  bool is_dets_qual_ok (const F val) const noexcept {return val >= dets_qual_min;}
+  bool is_edge_qual_ok (const F val) const noexcept {return val >= edge_qual_min;}
+  bool is_skew_qual_ok (const F val) const noexcept {return val >= skew_qual_min;}
+#endif
+  //
+  public:
+  // Simple constexpr accessors -----------------------------------------------
   // constexpr functions are implicitly inline
   constexpr fmr::Local_int get_elem_p () const noexcept {return P;}
   constexpr fmr::Local_int get_sims_d () const noexcept {return D;}
@@ -85,9 +83,24 @@ class Elem {
   constexpr F get_edge_l () const noexcept {return F(T::edge_l);}
   constexpr F get_face_a () const noexcept {return F(T::face_a);}
   constexpr F get_elem_v () const noexcept {return F(T::elem_v);}
+//
+  // Non-trivial constexpr member functions -----------------------------------
+  constexpr
+  fmr::Local_int get_face_n () const noexcept;
+  constexpr
+  fmr::Local_int get_node_n () const noexcept;
+  constexpr
+  fmr::Local_int jacd_size (const fmr::Local_int intp_n=1) const noexcept;
+  constexpr
+  fmr::Local_int poly_func_size (const fmr::Local_int intp_n=1) const noexcept;
+  constexpr
+  fmr::Local_int poly_grad_size (const fmr::Local_int intp_n=1) const noexcept;
   //
-  constexpr const fmr::Local_int* get_spar_conn () const noexcept {
-    return T::spar_conn;}
+  // Array constexpr pointers =================================================
+  //
+  //NOTE the following are all only vertex connectivity (p==1) arrays.
+  constexpr const fmr::Local_int* get_bars_conn () const noexcept {
+    return T::bars_conn;}
   constexpr const fmr::Local_int* get_tris_conn () const noexcept {
     return T::tris_conn;}
   constexpr const fmr::Local_int* get_quad_conn () const noexcept {
@@ -96,6 +109,7 @@ class Elem {
     return T::vert_conn;}
   //
   // Natural element vertex coordinates --------------------------------------
+  //NOTE these are only valid when element dimension matches simulation dimension.
   template <typename Ft=F,
     typename std::enable_if <std::is_same<Ft, double>::value>::type* = nullptr>
   constexpr const F* get_vert_coor () const noexcept {
@@ -116,15 +130,19 @@ class Elem {
   constexpr const F* get_coor_vert () const noexcept {
     return T::coor_vert_f;
   }
-  // Non-trivial member functions --------------------------------------------
-  constexpr
-  fmr::Local_int get_face_n () const noexcept;
-  constexpr
-  fmr::Local_int get_node_n () const noexcept;
-  constexpr
-  fmr::Local_int jacd_size (const fmr::Local_int intp_n=1) const noexcept;
-  constexpr
-  fmr::Local_int shpg_size (const fmr::Local_int intp_n=1) const noexcept;
+  // Element functions ========================================================
+  //F calc_bbox_size // 1D:length, 2D:area, 3D:volume
+  //  (const F* node_coor, const fmr::Dim_int dims=D) noexcept;// needs node_n
+  //
+  // Element quality calculations
+  F calc_dets_qual (const F* node_coor, const fmr::Dim_int dims=D) noexcept;
+  F calc_edge_qual (const F* node_coor, const fmr::Dim_int dims=D) noexcept;
+  F calc_skew_qual (const F* node_coor, const fmr::Dim_int dims=D) noexcept;
+   
+  //
+  // Element static functions (independent of elem type) =====================
+  //
+  // =========================================================================
 #if 0
   constexpr
   F face_norm [sims_d * face_n]]//TODO this can be evaluated at compile time.
@@ -143,6 +161,7 @@ class Elem {
 #endif
   // Node coordinates --------------------------------------------------------
   //TODO Generalize for different element shapes by moving to Tets, etc.
+#if 0
   template <fmr::Local_int tP=P, fmr::Local_int tD=D,
     typename std::enable_if <tP == 1>::value,
     typename std::enable_if <tD == 3>::value>// P=1, D=3
@@ -179,21 +198,12 @@ class Elem {
   constexpr const F* get_coor_node () const noexcept {
     return  T::coor_tet20;
   }
+#endif
   // Integration points and weights (default) --------------------------------
   //
   // Shape functions and gradients -------------------------------------------
   //
 };
-
-//TODO These are used for testing. Should they live somewhere else?
-std::string tri2_norm_str // in 3D
- (const fmr::Geom_float* pt1,
-  const fmr::Geom_float* pt2,
-  const fmr::Geom_float* pt3);
-std::string tri3_norm_str // in 3D
- (const fmr::Geom_float* pt1,
-  const fmr::Geom_float* pt2,
-  const fmr::Geom_float* pt3);
 
 } } }//end femera::grid::elem:: namespace
 

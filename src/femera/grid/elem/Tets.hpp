@@ -31,7 +31,7 @@ public://TODO make protected or private with friend class Elem?
   static constexpr
   fmr::Local_int vert_conn [vert_n] = {0,1,2,3};
   static constexpr
-  fmr::Local_int spar_conn [Spar::vert_n * edge_n]
+  fmr::Local_int bars_conn [Bars::vert_n * edge_n]
   = {
 #if 1
   0,1, 1,2, 2,0, 0,3, 1,3, 2,3
@@ -247,6 +247,21 @@ public://TODO make protected or private with friend class Elem?
     7,6,4,3
   };
   //TODO tets patch test mesh
+  //------------------------- tet shape functions ----------------------------
+  //TODO Return poynomial shape function/gradient transposed?
+  template <typename F> static inline// single or double
+  F* poly_func_4 (F f[4u], const F x[3u]);
+  template <typename F> static inline
+  F* poly_grad_4 (F g[4u *3u], const F[]);// x[3u] not used; result is constant
+  template <typename F> static inline
+  F* poly_func_10 (F f[10u], const F x[3u]);
+  template <typename F> static inline
+  F* poly_grad_10 (F g[10u *3u], const F x[3u]);
+  template <typename F> static inline
+  F* poly_func_20 (F f[20u], const F x[3u]);
+  template <typename F> static inline
+  F* poly_grad_20 (F g[20u *3u], const F x[3u]);
+  //TODO singularity tetrahedron element shape functions and integration rules
   //--------------------------- tet integration ------------------------------
   // Tetrahedral integration points and weights
   // for linear-shaped tetrahedra (edge nodes are interpolated),
@@ -370,21 +385,6 @@ public://TODO make protected or private with friend class Elem?
 #undef w1
 #undef w2
   };
-  //------------------------- tet shape functions ----------------------------
-  //TODO Return shape function/gradient transposed?
-  template <typename F> static inline// single or double
-  F* shap_func_4 (F f[4u], const F x[3u]);
-  template <typename F> static inline
-  F* shap_grad_4 (F g[4u *3u], const F[]);// x[3u] not used; result is constant
-  template <typename F> static inline
-  F* shap_func_10 (F f[10u], const F x[3u]);
-  template <typename F> static inline
-  F* shap_grad_10 (F g[10u *3u], const F x[3u]);
-  template <typename F> static inline
-  F* shap_func_20 (F f[20u], const F x[3u]);
-  template <typename F> static inline
-  F* shap_grad_20 (F g[20u *3u], const F x[3u]);
-  //TODO singularity tetrahedron element shape functions and integration rules
 };
 
 } } }//end femera::grid::elem:: namespace

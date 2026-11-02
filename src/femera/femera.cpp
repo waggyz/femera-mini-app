@@ -90,8 +90,8 @@ extern "C" {
         (jobs->get_task(femera::Task_type::Sims, i));
     }*/
   fmr::Local_int fmc::fmr_add_sims (fmc::Jobs_t* jobs) {
-    return jobs->add_task (std::move
-      (femera::Task<femera::task::Sims>::new_task (jobs->get_core())));
+    return jobs->add_task (
+      femera::Task<femera::task::Sims>::new_task (jobs->get_core()));
   }
   // Sims operations ---------------------------------------------------------
   fmr::Local_int fmc::fmr_get_sims_n (fmc::Jobs_t* jobs) {

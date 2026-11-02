@@ -14,7 +14,7 @@ public:
   static constexpr fmr::Local_int edge_n = 8;
   static constexpr fmr::Local_int tris_n = 0;
   static constexpr fmr::Local_int quad_n = 2;
-  static constexpr fmr::Local_int vols_n = 0;
+  static constexpr fmr::Local_int vols_n = 1;
   //
   static constexpr fmr::Geom_float edge_l // total length of edges
     = 2.0 * Quad::edge_l;
@@ -25,7 +25,7 @@ public:
   static constexpr
   fmr::Local_int vert_conn [vert_n] = {0,1,2,3, 4,5,6,7};
   static constexpr
-  fmr::Local_int spar_conn [Spar::vert_n * edge_n]
+  fmr::Local_int bars_conn [Bars::vert_n * edge_n]
     = {
     0,1, 1,2, 2,3, 3,0,
     4,5, 5,6, 6,7, 7,4

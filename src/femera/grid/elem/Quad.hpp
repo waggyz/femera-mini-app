@@ -1,7 +1,7 @@
 #ifndef FEMERA_HAS_GRID_ELEM_QUAD_HPP
 #define FEMERA_HAS_GRID_ELEM_QUAD_HPP
 
-#include "Spar.hpp"
+#include "Bars.hpp"
 
 namespace femera { namespace grid { namespace elem {
 
@@ -22,7 +22,7 @@ public:
   static constexpr
   fmr::Local_int vert_conn [vert_n] = {0,1,2,4};
   static constexpr
-  fmr::Local_int spar_conn [Spar::vert_n * edge_n] = {0,1, 1,2, 2,3, 3,0};
+  fmr::Local_int bars_conn [Bars::vert_n * edge_n] = {0,1, 1,2, 2,3, 3,0};
   static constexpr fmr::Local_int* tris_conn = nullptr;
   static constexpr fmr::Local_int  quad_conn [Quad::vert_n * quad_n] = {0,1,2,3};
   //

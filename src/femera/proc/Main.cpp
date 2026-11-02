@@ -37,18 +37,17 @@ namespace femera {
     const auto core = this->get_core ();
     Work::Task_path_t path ={};
 #ifdef FMR_USE_PROC_ROOT
-    path.push_back (add_task (std::move (Proc<proc::Root>::new_task (core))));
+    path.push_back (add_task (Proc<proc::Root>::new_task (core)));
     path.push_back (get_task (path)->add_task
-      (std::move(Proc<proc::Node>::new_task (core))));
+      (Proc<proc::Node>::new_task (core)));
 #else
-    path.push_back (add_task (std::move (Proc<proc::Node>::new_task (core))));
+    path.push_back (add_task (Proc<proc::Node>::new_task (core)));
 #endif
 #ifdef FMR_HAS_NVIDIA
     auto gpu_parent_path = path;
 #endif
 #ifdef FMR_HAS_MPI
-    path.push_back (get_task (path)->add_task
-      (std::move(Proc<proc::Fmpi>::new_task (core))));
+    path.push_back (get_task (path)->add_task(Proc<proc::Fmpi>::new_task (core)));
 #ifdef FMR_HAS_NVIDIA
     gpu_parent_path = path;
 #endif
@@ -60,25 +59,19 @@ namespace femera {
     FMR_PRAGMA_OMP(omp parallel for schedule(static) ordered num_threads(omp_n))
     for (fmr::Local_int i=0; i<omp_n; ++i) {
       FMR_PRAGMA_OMP(omp ordered)
-      path.push_back (get_task (path)->add_task
-        (std::move(Proc <proc::Fomp>::new_task (core))));
-      this->get_task (path)->add_task
-        (std::move(Proc <proc::Fcpu>::new_task (core)));
+      path.push_back (get_task (path)->add_task (Proc <proc::Fomp>::new_task (core)));
+      this->get_task (path)->add_task (Proc <proc::Fcpu>::new_task (core));
       path.pop_back ();
     }
 #else // ifndef FMR_OMP_LOCAL
-    path.push_back (get_task (path)->add_task
-      (std::move(Proc <proc::Fomp>::new_task (core))));
-    this->get_task (path)->add_task
-      (std::move(Proc <proc::Fcpu>::new_task (core)));
+    path.push_back (get_task (path)->add_task (Proc <proc::Fomp>::new_task (core)));
+    this->get_task (path)->add_task (Proc <proc::Fcpu>::new_task (core));
 #endif // ifdef FMR_OMP_LOCAL
 #else // ifndef FMR_HAS_OPENMP
-    this->get_task (path)->add_task
-      (std::move(Proc <proc::Fcpu>::new_task (core)));
+    this->get_task (path)->add_task (Proc <proc::Fcpu>::new_task (core));
 #endif
 #ifdef FMR_HAS_NVIDIA
-    this->get_task (gpu_parent_path)->add_task
-      (std::move(Proc <proc::Nvid>::new_task (core)));
+    this->get_task (gpu_parent_path)->add_task (Proc <proc::Nvid>::new_task (core));
 #endif
 #ifdef FMR_DEBUG
     //for (const auto P : this->task_list) { P->init (argc, argv); }

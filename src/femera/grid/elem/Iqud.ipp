@@ -9,7 +9,7 @@ reference them later.
 */
 //constexpr fmr::Local_int Iqud::tris_conn [];
 constexpr fmr::Local_int Iqud::quad_conn [];
-constexpr fmr::Local_int Iqud::spar_conn [];
+constexpr fmr::Local_int Iqud::bars_conn [];
 constexpr fmr::Geom_float Iqud::vert_coor [];
 constexpr fmr::Geom_float Iqud::coor_vert [];
 #endif

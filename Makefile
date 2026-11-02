@@ -53,6 +53,7 @@ BUILD_TREE += $(BUILD_CPU)/tools/
 BUILD_TREE += $(BUILD_CPU)/femera/proc/
 BUILD_TREE += $(BUILD_CPU)/femera/data/
 BUILD_TREE += $(BUILD_CPU)/femera/test/
+BUILD_TREE += $(BUILD_CPU)/femera/test/self/
 BUILD_TREE += $(BUILD_CPU)/femera/task/
 BUILD_TREE += $(BUILD_CPU)/femera/phys/
 BUILD_TREE += $(BUILD_CPU)/femera/grid/
@@ -511,6 +512,8 @@ FMRCPPS:= $(shell find src/ -maxdepth 4 -name "*.cpp" -printf "%p ")
 DEPFILE:= $(patsubst src/%.cpp,$(BUILD_CPU)/%.d,$(FMRCPPS))
 # DEPFILE+= $(patsubst src/%.cu.cpp,$(BUILD_CPU)/%.d,$(FMRCUS))
 FMRGTST:= $(filter %.gtst.cpp,$(FMRCPPS))
+FMRTEST:= $(filter %.test.cpp,$(FMRCPPS))
+FMRTESTOBJS:= $(patsubst src/%.test.cpp,$(BUILD_CPU)/%.test.o,$(FMRTEST))
 FMRPERF:= $(filter %.perf.cpp,$(FMRCPPS))
 FMROUTS:= $(patsubst src/%.gtst.cpp,$(BUILD_CPU)/%.gtst.out,$(FMRGTST))
 PRFOUTS:= $(patsubst src/%.perf.cpp,$(BUILD_CPU)/%.perf.out,$(FMRPERF))
@@ -1032,6 +1035,11 @@ else
 	touch $@
 endif
 
+$(BUILD_CPU)/%.test.o : export TMPDIR := $(TEMP_DIR)
+$(BUILD_CPU)/%.test.o : src/%.test.cpp #src/%.cpp src/%.hpp $(TOPDEPS)
+	$(call col2cxx,$(CXX_),$(CXX) -c $<,$(notdir $@))
+	$(CXX) -c $(CXXTESTS) $(FMRFLAGS) $(INCFLAGS) $< -o $@
+
 $(BUILD_CPU)/%.gtst.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.gtst.o : src/%.gtst.cpp src/%.cpp src/%.hpp $(TOPDEPS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
@@ -1189,10 +1197,10 @@ endif
 build/%.gtst : export TMPDIR := $(TEMP_DIR)
 build/%.gtst : build/%.gtst.o $(LIBFEMERA_A)(build/%.o) \
   $(LIBFEMERA_A)($(BUILD_CPU)/femera/Test.o) \
-  $(LIBFEMERA_A)($(BUILD_CPU)/femera/task/Jobs.o)
+  $(LIBFEMERA_A)($(BUILD_CPU)/femera/task/Jobs.o) $(FMRTESTOBJS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(@).o,$(notdir $@))
-	-$(CXX) $(CXXTESTS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
+	-$(CXX) $(CXXTESTS) $@.o $(filter %.test.o,$^) $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
 	$(info $(WARN) $@ not tested: GoogleTest disabled)
 	echo "WARNING: $@ not tested: GoogleTest disabled" >> $@.err
@@ -1201,10 +1209,11 @@ endif
 
 # Header-only
 build/%.gtst : export TMPDIR := $(TEMP_DIR)
-build/%.gtst : build/%.gtst.o $(LIBFEMERA_A)($(BUILD_CPU)/femera/Test.o)
+build/%.gtst : build/%.gtst.o $(LIBFEMERA_A)($(BUILD_CPU)/femera/Test.o) \
+  $(FMRTESTOBJS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(@).o,$(notdir $@))
-	-$(CXX) $(CXXTESTS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
+	-$(CXX) $(CXXTESTS) $@.o $(filter %.test.o,$^) $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
 	$(info $(WARN) $@ not tested: GoogleTest disabled)
 	echo "WARNING: $@ not tested: GoogleTest disabled" >> $@.err

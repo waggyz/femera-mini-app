@@ -68,7 +68,7 @@ uint upow (uint base, uint exp);
 static inline
 uint nchoosek (uint n, uint k);
 static inline
-uint poly_terms (Poly ptype, uint nvars, uint pord);
+uint poly_term_n (Poly ptype, uint pord, uint nvars);
 //
 template <typename F> static inline
 bool are_close (const F a, const F b);

@@ -3,14 +3,14 @@
 
 #include "../Grid.hpp"
 
-#if 0
-//#include "elem/Tets.hpp"// brings in Tris, Spar, Cube, Quad
+#if 1
+#include "Elem.hpp"
+#else
+//#include "elem/Tets.hpp"// brings in Tris, Bars, Cube, Quad
 //#include "elem/Prmd.hpp"
 //#include "elem/Wdge.hpp"
 //#include "elem/Itri.hpp"
 //#include "elem/Iqud.hpp"
-#else
-#include "Elem.hpp"
 #endif
 
 namespace femera { namespace grid {

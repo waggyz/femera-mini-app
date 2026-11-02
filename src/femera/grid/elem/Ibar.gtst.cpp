@@ -1,5 +1,6 @@
 #include "../../femera.hpp"
-#include "Spar.hpp"
+#include "../Elem.test.hpp"
+#include "Ibar.hpp"
 
 #include <gtest/gtest.h>
 
@@ -13,7 +14,11 @@ fmr::Exit_int main (int argc, char** argv) {
   return mini.exit ();
 }
 
-TEST( GridElemTets, TrivialTest ){
+TEST( GridElemIbar, TrivialTest ){
   EXPECT_EQ( 1, 1 );
 }
 
+namespace femera { namespace grid { namespace elem {
+
+
+} } }//end femera::grid::elem:: namespace
