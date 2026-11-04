@@ -25,6 +25,7 @@ namespace femera { namespace data {
     bool did_logs_init () noexcept;// true if first Logs initialized ok
     fmr::Dim_int get_verb () noexcept;// gets logs verbosity
     fmr::Dim_int set_verb (fmr::Dim_int) noexcept;// sets logs verbosity
+    bool in_filesystem (const std::string& path);// Check if file or folder exists.
     //
     // send (..) methods append data and return bytes sent
     template <typename ...Args>

@@ -27,7 +27,7 @@ public:
 
 //namespace femera { namespace grid { namespace elem { //TODO move to test namespace?
 
-//TODO These are used for testing. Should they live somewhere else?
+//TODO These are used for testing.
 std::string tri2_norm_str // in 3D
  (const fmr::Geom_float* pt1,
   const fmr::Geom_float* pt2,

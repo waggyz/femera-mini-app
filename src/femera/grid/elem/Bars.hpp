@@ -15,6 +15,9 @@ public:
   static constexpr fmr::Local_int quad_n = 0;
   static constexpr fmr::Local_int vols_n = 0;
   //
+  static constexpr fmr::Local_int tile_elem_n = 1;
+  static constexpr fmr::Local_int tile_node_n = Bars::vert_n;// tiles naturally
+  //
   static constexpr fmr::Geom_float edge_l = 1.0;// total length of edges
   static constexpr fmr::Geom_float face_a = 0.0;// total surface area
   static constexpr fmr::Geom_float elem_v = 0.0;// natural element volume
@@ -23,13 +26,15 @@ public:
   fmr::Local_int vert_conn [vert_n] = {0,1};
   static constexpr
   fmr::Local_int bars_conn [Bars::vert_n * Bars::edge_n] = {0,1};
+  static constexpr
+  fmr::Local_int tile_conn [tile_node_n] = {0,1};
+  //
   static constexpr fmr::Local_int* tris_conn = nullptr;
   static constexpr fmr::Local_int* quad_conn = nullptr;
   //
   static constexpr
   fmr::Geom_float vert_coor [vert_n * sims_d]// transposed coor_vert
-    = {
-                  // vertex                      //
+    = {           // vertex                      //
     0.0, 0.0, 0.0,// 0       0---1               //
     1.0, 0.0, 0.0 // 1                o--x       //
   };

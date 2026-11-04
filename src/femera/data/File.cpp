@@ -18,6 +18,8 @@
 #include "Pets.hpp"
 #endif
 
+#include <sys/stat.h> // stat
+
 #undef FMR_DEBUG
 #ifdef FMR_DEBUG
 #include <cstdio>     // std::printf
@@ -68,6 +70,10 @@ namespace femera {
     this->add_task (Data<data::Pets>::new_task (this->get_core()));
 #endif
     this->set_init (true);
+  }
+  bool data::File::in_filesystem (const std::string& path) {
+    struct stat buffer;
+    return (stat(path.c_str(), &buffer) == 0); 
   }
   fmr::Global_int data::File::send
   (const fmr::Data_name_t& data_name, const std::string& text)

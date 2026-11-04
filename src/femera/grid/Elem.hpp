@@ -2,8 +2,9 @@
 #define FEMERA_HAS_GRID_ELEM_HPP
 
 #include "../../fmr/fmr.hpp"
+#include "../../fmr/smat.hpp"// needed in Elem.ipp for Jacobian inverse & det
 
-namespace femera { namespace grid { namespace elem {
+namespace femera { namespace grid { namespace elem {//TODO grid -> geom
 //namespace femera { namespace grid { //TODO move up to here?
 /*
 // Forward-delare element shapes TODO is this needed?
@@ -52,13 +53,13 @@ class Elem {
   public:
   // Simple get / set / compare ----------------------------------------------
   //
-  F get_dets_min () const noexcept {return dets_qual_min;}
-  F get_edge_min () const noexcept {return edge_qual_min;}
-  F get_skew_min () const noexcept {return skew_qual_min;}
+  F get_dets_tol () const noexcept {return dets_qual_min;}
+  F get_edge_tol () const noexcept {return edge_qual_min;}
+  F get_skew_tol () const noexcept {return skew_qual_min;}
  //
-  F set_dets_min (const F val) noexcept {return dets_qual_min = F(val);}
-  F set_edge_min (const F val) noexcept {return edge_qual_min = F(val);}
-  F set_skew_min (const F val) noexcept {return skew_qual_min = F(val);}
+  F set_dets_tol (const F val) noexcept {return dets_qual_min = F(val);}
+  F set_edge_tol (const F val) noexcept {return edge_qual_min = F(val);}
+  F set_skew_tol (const F val) noexcept {return skew_qual_min = F(val);}
   //
   bool is_dets_qual_ok (const F val) const noexcept {return val >= dets_qual_min;}
   bool is_edge_qual_ok (const F val) const noexcept {return val >= edge_qual_min;}
@@ -130,6 +131,27 @@ class Elem {
   constexpr const F* get_coor_vert () const noexcept {
     return T::coor_vert_f;
   }
+  //
+  //TODO structured grid element tiles ----------------------------------------
+  constexpr fmr::Local_int get_tile_elem_n () const noexcept {
+    return T::tile_elem_n;}
+  constexpr fmr::Local_int get_tile_node_n () const noexcept {
+    return T::tile_node_n;}
+  constexpr const fmr::Local_int* get_tile_conn () const noexcept {
+    return T::tile_conn;}
+  //
+  constexpr bool get_tile_conn (fmr::Local_int* conn,
+    const fmr::Local_int tile_i,
+    const fmr::Local_int* grid_size)// {x}, {x,y}, {x,y,z} for 1D,2D,3D elems
+    //NOTE conn, grid_size bounds should be checked by the caller.
+    noexcept;
+  constexpr bool get_tile_conn (fmr::Local_int* conn,
+    const fmr::Local_int tile_i,
+    const fmr::Local_int* grid_size,// {x}, {x,y}, {x,y,z} for 1D,2D,3D elems
+    const fmr::Local_int* part_size)
+    //NOTE conn, grid_size, part_size bounds should be checked by the caller.
+  noexcept;
+  //
   // Element functions ========================================================
   //F calc_bbox_size // 1D:length, 2D:area, 3D:volume
   //  (const F* node_coor, const fmr::Dim_int dims=D) noexcept;// needs node_n

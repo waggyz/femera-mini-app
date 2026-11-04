@@ -2,7 +2,7 @@
 #define FEMERA_HAS_GRID_ELEM_TETS_HPP
 
 #include "Tris.hpp"
-#include "Cube.hpp"
+//#include "Cube.hpp"
 
 namespace femera { namespace grid { namespace elem {
 

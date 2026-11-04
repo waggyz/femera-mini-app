@@ -2,7 +2,7 @@
 #define FEMERA_HAS_GRID_ELEM_CUBE_IPP
 
 namespace femera { namespace grid { namespace elem {
-    #if 0
+#if 0
 /*
 C++11 requires redundant declaration/definition for constexpr arrays to 
 reference them later.

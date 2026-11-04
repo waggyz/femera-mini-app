@@ -19,7 +19,8 @@ namespace femera {
     Fomp,                        // Proc type
 //#ifdef FMR_HAS_MPI
     Fmpi,                        // Proc type
-//#endif
+//#endiffile:///home/dwagner5/Code/femera-mini-cmake/src/femera/grid/elem/Tets.hpp
+
 //#ifdef FMR_HAS_NVIDIA
     Nvid,                        // Proc type: NVIDIA GPU handler
 //#endif
@@ -34,7 +35,7 @@ namespace femera {
     Gmsh,                        // Data type: Gmsh handler
 //#endif
     Petsc,                       // Data type: PETSc handler
-    Beds, Unit, Self, FE1e, Ptch,Perf, // Test types
+    Beds, Unit, Self, FE1e, Ptch, Perf, // Test types
 //#ifdef FMR_HAS_GTEST
     Gtst,                        // Test type: Googletest handler
 //#endif

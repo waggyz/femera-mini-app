@@ -45,6 +45,9 @@ TEMP_DIR   :=$FMRDIR/$(BUILD_CPU)/tmp
 #NOTE Subdirectories needed in the build directory have a trailing slash.
 BUILD_TREE += $(BUILD_DIR)/external/tools/
 BUILD_TREE += $(BUILD_DIR)/docs/
+BUILD_TREE += $(BUILD_DIR)/femera/test/self/
+BUILD_TREE += $(BUILD_DIR)/femera/test/self/fe1e/
+BUILD_TREE += $(BUILD_DIR)/femera/test/self/ptch/
 
 BUILD_TREE += $(BUILD_CPU)/tmp/
 BUILD_TREE += $(BUILD_CPU)/external/
@@ -54,6 +57,8 @@ BUILD_TREE += $(BUILD_CPU)/femera/proc/
 BUILD_TREE += $(BUILD_CPU)/femera/data/
 BUILD_TREE += $(BUILD_CPU)/femera/test/
 BUILD_TREE += $(BUILD_CPU)/femera/test/self/
+BUILD_TREE += $(BUILD_CPU)/femera/test/self/fe1e/
+BUILD_TREE += $(BUILD_CPU)/femera/test/self/ptch/
 BUILD_TREE += $(BUILD_CPU)/femera/task/
 BUILD_TREE += $(BUILD_CPU)/femera/phys/
 BUILD_TREE += $(BUILD_CPU)/femera/grid/

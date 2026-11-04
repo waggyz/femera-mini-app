@@ -5,7 +5,7 @@
 
 namespace femera { namespace phys {
   class Mtrl;// Derive a CRTP concrete class from Test.
-  class Mtrl final: public Phys<Mtrl> { friend class Phys;// Interface to Test class
+  class Mtrl final: public Phys<Mtrl> { friend class Phys;// Interface to Mtrl class
   private:
     bool do_test = false;
     bool do_perf = false;

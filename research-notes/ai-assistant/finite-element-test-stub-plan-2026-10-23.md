@@ -156,4 +156,21 @@ substitute production solvers inside test fixtures.
 - Documentation distinguishes the stub milestone from later numerical
   implementation.
 
-[Edited by David Wagner: replaced Selt with FE1e.]
+## 8. Reusable `Elem` contract-test support
+
+Extend the existing [`Elem.test.hpp`](../../src/femera/grid/Elem.test.hpp)
+test support with a reusable free-function template that checks the common
+`Elem<T,P,D,F>` contract against explicit expected metadata. The shared checks
+should cover order, simulation and element dimensions, vertex/face/edge counts,
+node counts, and size calculations. Call the helper from each element's test
+file for every supported shape and relevant order/dimension/scalar
+instantiation; keep shape-specific connectivity and geometry assertions in
+those element tests.
+
+Treat APIs with shape- or scalar-specific availability (such as coordinate
+layouts) as conditional checks rather than assuming every `T` provides every
+array. This permits consistent coverage of all `Elem` variations without
+introducing a common fixture class.
+
+[2026-10-24: edited by David Wagner: replaced Selt with FE1e.]
+[2026-11-04: note that the test Mesh.* files and Mesh* code have been renamed Mesh_test* to avoid confusion with Mesh.* files and Mesh* code in the implementation]

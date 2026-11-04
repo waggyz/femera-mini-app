@@ -10,11 +10,11 @@ namespace femera {
     this->task_type = task_cast (Task_type::FE1e);
   }
   inline
-  void test::FE1e::task_init (int*, char**) {
-    this->set_init (true);
+  void test::FE1e::task_exit () {
   }
   inline
-  void test::FE1e::task_exit () {
+  std::string test::FE1e::get_data_dir() {
+    return this->data_dir;
   }
 }//end femera namespace
 
