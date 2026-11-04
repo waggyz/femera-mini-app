@@ -1,5 +1,6 @@
 #include "../femera/femera.hpp"
 #include "smat.hpp"
+#include "smat.perf.hpp"
 
 #include <gtest/gtest.h>
 
@@ -55,9 +56,8 @@ void send_perf_results (std::string label, int test_case,
         double(perf.get_arithmetic_intensity ()));
   }
 
-  inline
-  fmr::Perf_float time_m2x2 (
-    int test_case=0, uint n=1024*1024/8/sizeof(double), uint reps=512) {
+  fmr::Perf_float smat::time_m2x2 (
+    int test_case, uint n, uint reps) {
     auto m2x2_det = std::valarray<double>(5*n);
     auto m2x2_out = std::valarray<double>(4*n);
     auto m2x2_in = std::valarray<double>(4*n);
@@ -210,9 +210,8 @@ void send_perf_results (std::string label, int test_case,
     return bad_dets == 0 ? this_time : fmr::Perf_float(-1.0);
   }
 
-  inline
-  fmr::Perf_float time_m3x3 (
-    int test_case=0, uint n=1024*1024/16/sizeof(double), uint reps=512) {
+  fmr::Perf_float smat::time_m3x3 (
+    int test_case, uint n, uint reps) {
     auto m3x3_det = std::valarray<double>(10*n);
     auto m3x3_out = std::valarray<double>(9*n);
     auto m3x3_in = std::valarray<double>(9*n);
@@ -346,48 +345,48 @@ void send_perf_results (std::string label, int test_case,
   }
 
 TEST(FmrSmatPerf, BaseTime) {// Sets baseline times
-  EXPECT_GT(time_m2x2(0), 0.0);// m2x2_base_time set AFTER test
-  EXPECT_GT(time_m3x3(0), m2x2_base_time);// slower than 2x2
+  EXPECT_GT(smat::time_m2x2(0), 0.0);// m2x2_base_time set AFTER test
+  EXPECT_GT(smat::time_m3x3(0), m2x2_base_time);// slower than 2x2
 }
 //NOTE These all run about the same as baseline on dev laptop.
 //     The conditionals below are for checking again on prod node.
 TEST(FmrSmatPerf, M2x2Inv) {
 #if FMR_PERF_PCT < 15
-  EXPECT_GT(time_m2x2(1), m2x2_base_time);// slower than baseline?
-  EXPECT_GT(time_m2x2(2), m2x2_base_time);// slower than baseline
+  EXPECT_GT(smat::time_m2x2(1), m2x2_base_time);// slower than baseline?
+  EXPECT_GT(smat::time_m2x2(2), m2x2_base_time);// slower than baseline
 #else
-  EXPECT_NEAR(time_m2x2(1), m2x2_base_time, perf_tol_rel * m2x2_base_time);
-  EXPECT_GT(time_m2x2(2), m2x2_base_time);// slower than baseline
+  EXPECT_NEAR(smat::time_m2x2(1), m2x2_base_time, perf_tol_rel * m2x2_base_time);
+  EXPECT_GT(smat::time_m2x2(2), m2x2_base_time);// slower than baseline
 #endif
 }
 TEST(FmrSmatPerf, M2x2InvDets) {
 #if FMR_PERF_PCT < 15
-  EXPECT_GT(time_m2x2(3), m2x2_base_time);// slower than w/out det
-  EXPECT_GT(time_m2x2(4), m2x2_dets_time);// slower than baseline
-  EXPECT_GT(time_m2x2(5), m2x2_dets_time);
+  EXPECT_GT(smat::time_m2x2(3), m2x2_base_time);// slower than w/out det
+  EXPECT_GT(smat::time_m2x2(4), m2x2_dets_time);// slower than baseline
+  EXPECT_GT(smat::time_m2x2(5), m2x2_dets_time);
 #else
-  EXPECT_NEAR(time_m2x2(3), m2x2_base_time, perf_tol_rel * m2x2_base_time);
-  EXPECT_NEAR(time_m2x2(4), m2x2_dets_time, perf_tol_rel * m2x2_dets_time);
-  EXPECT_NEAR(time_m2x2(5), m2x2_dets_time, perf_tol_rel * m2x2_dets_time);
+  EXPECT_NEAR(smat::time_m2x2(3), m2x2_base_time, perf_tol_rel * m2x2_base_time);
+  EXPECT_NEAR(smat::time_m2x2(4), m2x2_dets_time, perf_tol_rel * m2x2_dets_time);
+  EXPECT_NEAR(smat::time_m2x2(5), m2x2_dets_time, perf_tol_rel * m2x2_dets_time);
 #endif
 }
 
 TEST(FmrSmatPerf, M3x3Inv) {
 #if FMR_PERF_PCT < 15
-  EXPECT_GT(time_m3x3(1), m3x3_base_time);// slower than baseline
+  EXPECT_GT(smat::time_m3x3(1), m3x3_base_time);// slower than baseline
 #else
-  EXPECT_NEAR(time_m3x3(1), m3x3_base_time, perf_tol_rel * m3x3_base_time);
+  EXPECT_NEAR(smat::time_m3x3(1), m3x3_base_time, perf_tol_rel * m3x3_base_time);
 #endif
 }
 TEST(FmrSmatPerf, M3x3InvDets) {
 #if FMR_PERF_PCT < 15
-  EXPECT_GT(time_m3x3(2), m3x3_base_time);// slower than w/out dets?
-  EXPECT_GT(time_m3x3(3), m3x3_dets_time);// slower than baseline?
-  EXPECT_GT(time_m3x3(4), m3x3_dets_time);
+  EXPECT_GT(smat::time_m3x3(2), m3x3_base_time);// slower than w/out dets?
+  EXPECT_GT(smat::time_m3x3(3), m3x3_dets_time);// slower than baseline?
+  EXPECT_GT(smat::time_m3x3(4), m3x3_dets_time);
 #else
-  EXPECT_NEAR(time_m3x3(2), m3x3_base_time, perf_tol_rel * m3x3_base_time);
-  EXPECT_NEAR(time_m3x3(3), m3x3_dets_time, perf_tol_rel * m3x3_dets_time);
-  EXPECT_NEAR(time_m3x3(4), m3x3_dets_time, perf_tol_rel * m3x3_dets_time);
+  EXPECT_NEAR(smat::time_m3x3(2), m3x3_base_time, perf_tol_rel * m3x3_base_time);
+  EXPECT_NEAR(smat::time_m3x3(3), m3x3_dets_time, perf_tol_rel * m3x3_dets_time);
+  EXPECT_NEAR(smat::time_m3x3(4), m3x3_dets_time, perf_tol_rel * m3x3_dets_time);
 #endif
 }
 } }//end femerea::test:: namespace

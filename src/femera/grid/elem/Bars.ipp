@@ -17,11 +17,11 @@ inline constexpr fmr::Geom_float Bars::coor_vert [];
 #endif
 
   inline constexpr
-  bool get_tile_conn (fmr::Local_int* conn,
+  bool get_tile_conn (fmr::Local_int* conn,//FIXME generalize & move to Elem.ipp
     const fmr::Local_int tile_i,// local element index
     const fmr::Local_int* grid_size)
     noexcept{
-    conn[0] = tile_i % grid_size[0];
+    conn[0] = (tile_i + 0)% grid_size[0];
     conn[1] = (tile_i + 1) % grid_size[0];// periodic BC
     return tile_i < grid_size[0];// false if tile_i out of range
   }
@@ -31,13 +31,13 @@ inline constexpr fmr::Geom_float Bars::coor_vert [];
     const fmr::Local_int* grid_size,// handles grid_x not multiple of part_x
     const fmr::Local_int* part_size)
     noexcept{
-    conn[0] = tile_i % grid_size[0] % part_size[0];
+    conn[0] = (tile_i + 0)% grid_size[0] % part_size[0];
     conn[1] = (tile_i + 1) % grid_size[0] % part_size[0];// periodic BC
     return tile_i < grid_size[0];// false if tile_i out of range
   }
 #if 0
   inline
-  bool get_tile_conn (fmr::Local_int* conn,
+  bool Elem::get_tile_conn (fmr::Local_int* conn,
     const fmr::Local_int tile_i,// local element index
     const fmr::Local_int grid_x = 1,// handles grid_x not multiple of part_x
     const fmr::Local_int part_x = 1) noexcept{
@@ -46,7 +46,7 @@ inline constexpr fmr::Geom_float Bars::coor_vert [];
     return tile_i < grid_x;// false if tile_i out of range
   }
     // free surface BCs
-  constexpr fmr::Local_int* get_tile_conn (fmr::Local_int tile_i,// local element index
+  constexpr fmr::Local_int* Bars::get_tile_conn (fmr::Local_int tile_i,// local element index
     const fmr::Local_int grid_x = 1,
     const fmr::Local_int part_x = 1) noexcept{
     return new fmr::Local_int[2]{

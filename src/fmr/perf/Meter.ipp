@@ -48,7 +48,7 @@ namespace fmr {
     this->save_n  = 0;
     return this->start ();
   }
-  template <typename I, typename F> inline volatile
+  template <typename I, typename F> volatile
     F perf::Meter<I,F>::add_busy_time_now () {
     const fmr::perf::Count now = perf::get_now_ns ();
     const fmr::perf::Count last_busy = (now > this->tick) ? now - tick : 0;
@@ -58,7 +58,7 @@ namespace fmr {
     this->busy_ns += last_busy;
     return F (1.0e-9) * F (last_busy);
   }
-  template <typename I, typename F> inline volatile
+  template <typename I, typename F> volatile
   F perf::Meter<I,F>::add_idle_time_now () {
     const fmr::perf::Count now = perf::get_now_ns ();
     const fmr::perf::Count last_idle = (now > this->tick) ? now - tick : 0;
