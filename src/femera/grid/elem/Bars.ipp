@@ -21,7 +21,7 @@ inline constexpr fmr::Geom_float Bars::coor_vert [];
     const fmr::Local_int tile_i,// local element index
     const fmr::Local_int* grid_size)
     noexcept{
-    conn[0] = (tile_i + 0)% grid_size[0];
+    conn[0] = (tile_i + 0) % grid_size[0];
     conn[1] = (tile_i + 1) % grid_size[0];// periodic BC
     return tile_i < grid_size[0];// false if tile_i out of range
   }
@@ -31,7 +31,7 @@ inline constexpr fmr::Geom_float Bars::coor_vert [];
     const fmr::Local_int* grid_size,// handles grid_x not multiple of part_x
     const fmr::Local_int* part_size)
     noexcept{
-    conn[0] = (tile_i + 0)% grid_size[0] % part_size[0];
+    conn[0] = (tile_i + 0) % grid_size[0] % part_size[0];
     conn[1] = (tile_i + 1) % grid_size[0] % part_size[0];// periodic BC
     return tile_i < grid_size[0];// false if tile_i out of range
   }

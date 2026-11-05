@@ -15,6 +15,11 @@ namespace femera { namespace test { namespace smat {
   fmr::Perf_float time_m4x4 (
     int test_case=0, uint n=1024*1024/32/sizeof(double), uint reps=512);
 
+void send_perf_results (std::string label, int test_case,
+  fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>& perf,
+  fmr::Perf_float this_time,
+  int bad_dets, uint test_count);
+
 } } } // namespace femera::test::smat
 
 #include "smat.ipp"

@@ -3,8 +3,18 @@
 
 #include "../Elem.hpp"
 
+#include "../../../fmr/perf/Meter.hpp"
+
 namespace femera { namespace grid { namespace elem {
-fmr::Local_int run_bars_perf_tests(const int test_case, const fmr::Local_int test_n=1);
+
+void send_perf_results (std::string label, int test_case,
+  fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>& perf,
+  fmr::Perf_float this_time, uint test_count, uint check);
+
+double run_bars_perf_test(const int test_case,
+  const fmr::Local_int test_n=1);
+
 } } }//end namespace femera::grid::elem
+
 //end FEMERA_HAS_GRID_ELEM_BARS_PERF_HPP
 #endif

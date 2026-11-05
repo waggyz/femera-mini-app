@@ -24,36 +24,31 @@ namespace femera { namespace test {
   // Should try to exercise L3 cache
   // Target abouut 1 MB/core and repeat tests.
 
-void send_perf_results (std::string label, int test_case,
+  void smat::send_perf_results (std::string label, int test_case,
   fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>& perf,
   fmr::Perf_float this_time,
-  int bad_dets, uint test_count);
-
-  void send_perf_results (std::string label, int test_case,
-    fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>& perf,
-    fmr::Perf_float this_time,
-    int bad_dets, uint test_count) {
-      mini->data->send (fmr::out, "math", "smat", label.c_str(),
-        "(%i) %s: %s/%s, errs: %u",
-        test_case,
-        fmr::form::si_unit (perf.get_busy_unit_speed (), "inv /s").c_str(),
-        fmr::form::si_unit (perf.get_unit (), "inv ").c_str(),
-        fmr::form::si_unit (this_time, "s").c_str(),
-        bad_dets);
-      mini->data->send (fmr::out, "math", "smat", label.c_str(),
-        "(%i) %s: %s/%s, reps: %u",
-        test_case,
-        fmr::form::si_unit (perf.get_busy_flop_speed (), "flop/s").c_str(),
-        fmr::form::si_unit (perf.get_flop (), "flop").c_str(),
-        fmr::form::si_unit (this_time, "s").c_str(),
-        test_count);
-      mini->data->send (fmr::out, "math", "smat", label.c_str(),
-        "(%i) %s: %s/%s,   AI: %g",
-        test_case,
-        fmr::form::si_unit (perf.get_busy_data_speed (), "B   /s").c_str(),
-        fmr::form::si_unit (perf.get_byte (), "B   ").c_str(),
-        fmr::form::si_unit (this_time, "s").c_str(),
-        double(perf.get_arithmetic_intensity ()));
+  int bad_dets, uint test_count) {
+    mini->data->send (fmr::out, "math", "smat", label.c_str(),
+      "(%i) %s: %s/%s, errs: %u",
+      test_case,
+      fmr::form::si_unit (perf.get_busy_unit_speed (), "inv /s").c_str(),
+      fmr::form::si_unit (perf.get_unit (), "inv ").c_str(),
+      fmr::form::si_unit (this_time, "s").c_str(),
+      bad_dets);
+    mini->data->send (fmr::out, "math", "smat", label.c_str(),
+      "(%i) %s: %s/%s, reps: %u",
+      test_case,
+      fmr::form::si_unit (perf.get_busy_flop_speed (), "flop/s").c_str(),
+      fmr::form::si_unit (perf.get_flop (), "flop").c_str(),
+      fmr::form::si_unit (this_time, "s").c_str(),
+      test_count);
+    mini->data->send (fmr::out, "math", "smat", label.c_str(),
+      "(%i) %s: %s/%s,   AI: %g",
+      test_case,
+      fmr::form::si_unit (perf.get_busy_data_speed (), "B   /s").c_str(),
+      fmr::form::si_unit (perf.get_byte (), "B   ").c_str(),
+      fmr::form::si_unit (this_time, "s").c_str(),
+      double(perf.get_arithmetic_intensity ()));
   }
 
   fmr::Perf_float smat::time_m2x2 (
