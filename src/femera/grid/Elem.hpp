@@ -91,6 +91,8 @@ class Elem {
   constexpr
   fmr::Local_int get_node_n () const noexcept;
   constexpr
+  fmr::Local_int jacs_size (const fmr::Local_int intp_n=1) const noexcept;
+  constexpr
   fmr::Local_int jacd_size (const fmr::Local_int intp_n=1) const noexcept;
   constexpr
   fmr::Local_int poly_func_size (const fmr::Local_int intp_n=1) const noexcept;
@@ -155,6 +157,33 @@ class Elem {
   // Element functions ========================================================
   //F calc_bbox_size // 1D:length, 2D:area, 3D:volume
   //  (const F* node_coor, const fmr::Dim_int dims=D) noexcept;// needs node_n
+  //
+  // Element Jacobian and determinant calculations
+  //template <typename Y=F>// Y: physics precision
+  void jacs_nsoa (fmr::Phys_float* jacs,// returns determinants at integration points
+    const F* node_coor,// x1,x2,..., y1,y2,..., z1,z2,...
+    const fmr::Local_int intp_n=1,
+    const fmr::Local_int node_n=get_node_n ()) noexcept;
+#if 0
+  void jacs_naos (fmr::Phys_float* jacs,// returns determinants at integration points
+    const F* node_coor,// x1,y1,z1, x2,y2,z2,...
+    const fmr::Local_int intp_n=1,
+    const fmr::Local_int node_n=get_node_n ()) noexcept;
+  template <typename Y=F>
+  Y* jatd_naos (const fmr::Local_int intp_n=1,// inverted and transposed
+    // Jacobian & determinants
+    const fmr::Dim_int dims=D, fmr::Local_int node_n=get_node_n (),
+    const F* node_coor) const noexcept;
+  
+  template <typename Y=F>
+  Y* jacs_nsoa (const fmr::Local_int intp_n=1,// x1,x2,..., y1,y2,..., z1,z2,...
+    const fmr::Dim_int dims=D, fmr::Local_int node_n=get_node_n (),
+  const F* coor_node) const noexcept;
+  template <typename Y=F>
+  Y* jatd_nsoa (const fmr::Local_int intp_n=1,
+    const fmr::Dim_int dims=D, fmr::Local_int node_n=get_node_n (),
+  const F* coor_node[D*get_node_n ()]) const noexcept;
+#endif
   //
   // Element quality calculations
   F calc_dets_qual (const F* node_coor, const fmr::Dim_int dims=D) noexcept;

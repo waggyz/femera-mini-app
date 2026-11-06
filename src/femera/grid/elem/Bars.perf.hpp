@@ -5,11 +5,11 @@
 
 #include "../../../fmr/perf/Meter.hpp"
 
-namespace femera { namespace grid { namespace elem {
+namespace femera { namespace grid { namespace elem {//TODO move to test namespace?
 
 void send_perf_results (std::string label, int test_case,
   fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>& perf,
-  fmr::Perf_float this_time, uint test_count, uint check);
+  uint test_count, uint check);
 
 double run_bars_perf_test(const int test_case,
   const fmr::Local_int test_n=1);
