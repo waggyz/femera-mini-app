@@ -51,8 +51,6 @@ struct gaus_lege_quad{
   */
   private:
   using fuint = std::uint_fast8_t;
-  static constexpr F point_value(const fuint i);
-  static constexpr F weight_value(const fuint i);
   static_assert(N >= 1 && N <= 5,
       "gaus_lege_quad currently supports 1- through 5-point rules");
   static constexpr F interval[2] = {F(-1.0), F(1.0)};
@@ -94,7 +92,46 @@ struct gaus_lege_quad{
     for (fuint i = 0; i < N; ++i) { integral += weight_value(i) * f_values[i]; }
     return integral * jac;
   }
+  private:
+  static constexpr F point_value(const fuint i);
+  static constexpr F weight_value(const fuint i);
 };//end struct gaus_lege_quad
+
+template <std::uint_fast8_t N, std::uint_fast8_t D=1, typename F=double,
+typename = std::enable_if_t<std::is_floating_point<F>::value>>
+/** N-point Gauss-Jacobi quadrature for (1-x)^alpha (1+x)^beta on [-1, 1]. */
+struct gaus_jaco_quad {
+  private:
+  using fuint = std::uint_fast8_t;
+  public:
+  static_assert(N >= 1, "gaus_jaco_quad requires at least one point");
+  gaus_jaco_quad(const F alpha, const F beta);// constructor declaration
+  static constexpr fuint get_num_points() { return N; }
+  static constexpr F get_interval_start() { return F(-1); }
+  static constexpr F get_interval_end() { return F(1); }
+  //
+  F get_alpha() const { return alpha_; }
+  F get_beta() const { return beta_; }
+  F get_point(const fuint i) const { return points_[i]; }
+  F get_weight(const fuint i) const { return weights_[i]; }
+  void get_points(F* points) const {
+    for (fuint i = 0; i < N; ++i) { points[i] = points_[i]; }
+  }
+  void get_weights(F* weights) const {
+    for (fuint i = 0; i < N; ++i) { weights[i] = weights_[i]; }
+  }
+  F integrate(const F* values) const {
+    F result = F(0);
+    for (fuint i = 0; i < N; ++i) { result += weights_[i] * values[i]; }
+    return result;
+  }
+  F integrate(F* values) const {return integrate(static_cast<const F*>(values));}
+  private:
+  std::array<F, N> points_{};
+  std::array<F, N> weights_{};
+  F alpha_;
+  F beta_;
+};//end struct gaus_jaco_quad
 
 template <std::uint_fast8_t N, std::uint_fast8_t D=1, typename F=double,
 typename = std::enable_if_t<std::is_floating_point<F>::value>>
@@ -102,8 +139,6 @@ typename = std::enable_if_t<std::is_floating_point<F>::value>>
 struct sqrt_sing_quad {
   private:
   using fuint = std::uint_fast8_t;
-  gaus_jaco_quad<N, D, F> rule_{F(0), F(-0.5)};
-
   public:
   static constexpr fuint get_num_points() { return N; }
   static constexpr F get_interval_start() { return F(0); }
@@ -125,148 +160,10 @@ struct sqrt_sing_quad {
     for (fuint i = 0; i < N; ++i) { result += get_weight(i) * values[i]; }
     return result;
   }
-  F integrate(F* values) const { return integrate(static_cast<const F*>(values)); }
-};//end struct sqrt_sing_quad
-
-template <std::uint_fast8_t N, std::uint_fast8_t D=1, typename F=double,
-typename = std::enable_if_t<std::is_floating_point<F>::value>>
-/** N-point Gauss-Jacobi quadrature for (1-x)^alpha (1+x)^beta on [-1, 1]. */
-struct gaus_jaco_quad {
+  F integrate(F* values) const {return integrate(static_cast<const F*>(values));}
   private:
-  using fuint = std::uint_fast8_t;
-  std::array<F, N> points_{};
-  std::array<F, N> weights_{};
-  F alpha_;
-  F beta_;
-
-  public:
-  static_assert(N >= 1, "gaus_jaco_quad requires at least one point");
-  static constexpr fuint get_num_points() { return N; }
-  static constexpr F get_interval_start() { return F(-1); }
-  static constexpr F get_interval_end() { return F(1); }
-
-  gaus_jaco_quad(const F alpha, const F beta) : alpha_(alpha), beta_(beta) {
-    if (!(alpha > F(-1)) || !(beta > F(-1)) ||
-        !std::isfinite(alpha) || !std::isfinite(beta)) {
-      throw std::invalid_argument("gaus_jaco_quad requires alpha and beta > -1");
-    }
-
-    using matrix = std::array<std::array<F, N>, N>;
-    matrix jacobi{};
-    matrix eigenvectors{};
-    const F sum = alpha + beta;
-
-    for (fuint i = 0; i < N; ++i) {
-      eigenvectors[i][i] = F(1);
-      const F k = static_cast<F>(i);
-      jacobi[i][i] = i == 0 ? (beta - alpha) / (sum + F(2)) :
-          (beta * beta - alpha * alpha) /
-          ((F(2) * k + sum) * (F(2) * k + sum + F(2)));
-      if (i > 0) {
-        const F factor = i == 1 ? F(1) :
-            (k + sum) / (F(2) * k + sum - F(1));
-        const F off_diagonal = F(2) * std::sqrt(
-            k * (k + alpha) * (k + beta) * factor /
-            ((F(2) * k + sum) * (F(2) * k + sum) *
-             (F(2) * k + sum + F(1))));
-        jacobi[i - 1][i] = off_diagonal;
-        jacobi[i][i - 1] = off_diagonal;
-      }
-    }
-
-    const F tolerance = std::numeric_limits<F>::epsilon() * F(8);
-    const std::size_t max_iterations = std::size_t(50) * N * N;
-    bool converged = false;
-    for (std::size_t iteration = 0; iteration < max_iterations; ++iteration) {
-      fuint p = 0;
-      fuint q = 0;
-      F largest = F(0);
-      F scale = F(1);
-      for (fuint i = 0; i < N; ++i) {
-        scale = std::max(scale, std::abs(jacobi[i][i]));
-        for (fuint j = static_cast<fuint>(i + 1); j < N; ++j) {
-          const F magnitude = std::abs(jacobi[i][j]);
-          if (magnitude > largest) {
-            largest = magnitude;
-            p = i;
-            q = j;
-          }
-        }
-      }
-      if (largest <= tolerance * scale) {
-        converged = true;
-        break;
-      }
-
-      const F apq = jacobi[p][q];
-      const F tau = (jacobi[q][q] - jacobi[p][p]) / (F(2) * apq);
-      const F t = (tau >= F(0) ? F(1) : F(-1)) /
-          (std::abs(tau) + std::sqrt(F(1) + tau * tau));
-      const F c = F(1) / std::sqrt(F(1) + t * t);
-      const F s = t * c;
-      const F app = jacobi[p][p];
-      const F aqq = jacobi[q][q];
-      jacobi[p][p] = app - t * apq;
-      jacobi[q][q] = aqq + t * apq;
-      jacobi[p][q] = F(0);
-      jacobi[q][p] = F(0);
-
-      for (fuint k = 0; k < N; ++k) {
-        if (k != p && k != q) {
-          const F akp = jacobi[k][p];
-          const F akq = jacobi[k][q];
-          jacobi[k][p] = c * akp - s * akq;
-          jacobi[p][k] = jacobi[k][p];
-          jacobi[k][q] = s * akp + c * akq;
-          jacobi[q][k] = jacobi[k][q];
-        }
-        const F vkp = eigenvectors[k][p];
-        const F vkq = eigenvectors[k][q];
-        eigenvectors[k][p] = c * vkp - s * vkq;
-        eigenvectors[k][q] = s * vkp + c * vkq;
-      }
-    }
-    if (!converged) {
-      throw std::runtime_error("gaus_jaco_quad eigensolver did not converge");
-    }
-
-    const F moment_zero = std::pow(F(2), sum + F(1)) *
-        std::tgamma(alpha + F(1)) * std::tgamma(beta + F(1)) /
-        std::tgamma(sum + F(2));
-    if (!std::isfinite(moment_zero) || !(moment_zero > F(0))) {
-      throw std::overflow_error("gaus_jaco_quad weight normalization is invalid");
-    }
-    for (fuint i = 0; i < N; ++i) {
-      points_[i] = jacobi[i][i];
-      weights_[i] = moment_zero * eigenvectors[0][i] * eigenvectors[0][i];
-    }
-    for (fuint i = 0; i < N; ++i) {
-      for (fuint j = static_cast<fuint>(i + 1); j < N; ++j) {
-        if (points_[j] < points_[i]) {
-          std::swap(points_[i], points_[j]);
-          std::swap(weights_[i], weights_[j]);
-        }
-      }
-    }
-  }
-
-  F get_alpha() const { return alpha_; }
-  F get_beta() const { return beta_; }
-  F get_point(const fuint i) const { return points_[i]; }
-  F get_weight(const fuint i) const { return weights_[i]; }
-  void get_points(F* points) const {
-    for (fuint i = 0; i < N; ++i) { points[i] = points_[i]; }
-  }
-  void get_weights(F* weights) const {
-    for (fuint i = 0; i < N; ++i) { weights[i] = weights_[i]; }
-  }
-  F integrate(const F* values) const {
-    F result = F(0);
-    for (fuint i = 0; i < N; ++i) { result += weights_[i] * values[i]; }
-    return result;
-  }
-  F integrate(F* values) const { return integrate(static_cast<const F*>(values)); }
-};//end struct gaus_jaco_quad
+  gaus_jaco_quad<N, D, F> rule_{F(0), F(-0.5)};// magic :)
+};//end struct sqrt_sing_quad
 
 } }//end fmr::math namespace
 
