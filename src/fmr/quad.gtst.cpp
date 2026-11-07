@@ -189,6 +189,86 @@ TEST(FmrQuad, MaximumPolynomialDegree) {
   EXPECT_EQ(Rule5::polynomial_degree_max(), 9);
 }
 
+TEST(FmrQuad, SelectsRuleForPolynomialDegree) {
+  using Rule = fmr::math::gaus_lege_quad<1>;
+
+  static_assert(Rule::rule_for_degree(0) == 1, "constant needs one point");
+  static_assert(Rule::rule_for_degree(1) == 1, "linear needs one point");
+  static_assert(Rule::rule_for_degree(2) == 2, "quadratic needs two points");
+  static_assert(Rule::rule_for_degree(3) == 2, "cubic needs two points");
+  static_assert(Rule::rule_for_degree(4) == 3, "quartic needs three points");
+  static_assert(Rule::rule_for_degree(5) == 3, "quintic needs three points");
+  static_assert(Rule::rule_for_degree(6) == 4, "degree six needs four points");
+  static_assert(Rule::rule_for_degree(7) == 4, "degree seven needs four points");
+  static_assert(Rule::rule_for_degree(8) == 5, "degree eight needs five points");
+  static_assert(Rule::rule_for_degree(9) == 5, "degree nine needs five points");
+
+  EXPECT_EQ(Rule::rule_for_degree(0), 1);
+  EXPECT_EQ(Rule::rule_for_degree(1), 1);
+  EXPECT_EQ(Rule::rule_for_degree(2), 2);
+  EXPECT_EQ(Rule::rule_for_degree(3), 2);
+  EXPECT_EQ(Rule::rule_for_degree(4), 3);
+  EXPECT_EQ(Rule::rule_for_degree(5), 3);
+  EXPECT_EQ(Rule::rule_for_degree(6), 4);
+  EXPECT_EQ(Rule::rule_for_degree(7), 4);
+  EXPECT_EQ(Rule::rule_for_degree(8), 5);
+  EXPECT_EQ(Rule::rule_for_degree(9), 5);
+  EXPECT_THROW(Rule::rule_for_degree(10), std::out_of_range);
+}
+
+TEST(FmrQuad, GaussJacobiIntegratesWeightedPolynomials) {
+  using Rule = fmr::math::gaus_jaco_quad<3>;
+  const Rule rule(1.0, 0.0);
+  double values[3];
+  double points[3];
+  rule.get_points(points);
+
+  for (std::uint_fast8_t degree = 0; degree <= 5; ++degree) {
+    for (std::uint_fast8_t i = 0; i < 3; ++i) {
+      values[i] = std::pow(points[i], degree);
+    }
+    const double exact = degree % 2 == 0 ? 2.0 / (degree + 1) :
+        -2.0 / (degree + 2);
+    EXPECT_NEAR(rule.integrate(values), exact, 2e-14);
+  }
+}
+
+TEST(FmrQuad, GaussJacobiSupportsLegendreWeightAndValidatesParameters) {
+  using Rule = fmr::math::gaus_jaco_quad<3>;
+  const Rule rule(0.0, 0.0);
+  const double node = std::sqrt(3.0 / 5.0);
+
+  EXPECT_NEAR(rule.get_point(0), -node, 2e-15);
+  EXPECT_NEAR(rule.get_point(1), 0.0, 2e-15);
+  EXPECT_NEAR(rule.get_point(2), node, 2e-15);
+  EXPECT_NEAR(rule.get_weight(0), 5.0 / 9.0, 2e-15);
+  EXPECT_NEAR(rule.get_weight(1), 8.0 / 9.0, 2e-15);
+  EXPECT_NEAR(rule.get_weight(2), 5.0 / 9.0, 2e-15);
+  EXPECT_THROW(Rule(-1.0, 0.0), std::invalid_argument);
+  EXPECT_THROW(Rule(0.0, -1.0), std::invalid_argument);
+
+  const Rule endpoint_singular(-0.5, -0.5);
+  double ones[3] = {1.0, 1.0, 1.0};
+  EXPECT_NEAR(endpoint_singular.integrate(ones), std::acos(-1.0), 2e-14);
+}
+
+TEST(FmrQuad, GaussJacobiIntegratesInverseSquareRootOnUnitInterval) {
+  using Rule = fmr::math::sqrt_sing_quad<3>;
+  const Rule rule;
+  double points[3];
+  double values[3];
+  rule.get_points(points);
+
+  EXPECT_DOUBLE_EQ(Rule::get_interval_start(), 0.0);
+  EXPECT_DOUBLE_EQ(Rule::get_interval_end(), 1.0);
+  for (std::uint_fast8_t degree = 0; degree <= 5; ++degree) {
+    for (std::uint_fast8_t i = 0; i < 3; ++i) {
+      values[i] = std::pow(points[i], degree);
+    }
+    EXPECT_NEAR(rule.integrate(values), 1.0 / (degree + 0.5), 2e-14);
+  }
+}
+
 int main (int argc, char** argv) {
   return femera::test:: early_main (&argc, argv);
 }
