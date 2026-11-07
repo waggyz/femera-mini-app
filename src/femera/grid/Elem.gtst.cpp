@@ -22,9 +22,9 @@ constexpr auto elem_tet2 = femera::grid::elem::Elem<femera::grid::elem::Tets,2> 
 constexpr auto elem_tet3 = femera::grid::elem::Elem<femera::grid::elem::Tets,3> ();
 
 constexpr auto elem_tetf
-  = femera::grid::elem::Elem<femera::grid::elem::Tets,2,3,float> ();
+  = femera::grid::elem::Elem<femera::grid::elem::Tets,2,float> ();
 constexpr auto elem_tetd
-  = femera::grid::elem::Elem<femera::grid::elem::Tets,2,3,double> ();
+  = femera::grid::elem::Elem<femera::grid::elem::Tets,2,double> ();
 const auto size_coor_f = sizeof(elem_tetf.get_vert_coor ()[0]);
 const auto size_coor_d = sizeof(elem_tet1.get_vert_coor ()[0]);
 
@@ -47,12 +47,12 @@ fmr::Exit_int main (int argc, char** argv) {
   mini.init (&argc, argv);
   //
   const auto elem_quad = femera::grid::elem::Elem<femera::grid::elem::Quad> ();
-  const auto elem_bars = femera::grid::elem::Elem<femera::grid::elem::Bars,1,1> ();
-  const auto elem_tris = femera::grid::elem::Elem<femera::grid::elem::Tris,1,2> ();
+  const auto elem_bars = femera::grid::elem::Elem<femera::grid::elem::Bars,1> ();
+  const auto elem_tris = femera::grid::elem::Elem<femera::grid::elem::Tris,1> ();
   //
   jacs_size = elem_quad.jacd_size ();
-  jac1_size = elem_bars.jacd_size ();
-  jac2_size = elem_tris.jacd_size ();
+  jac1_size = elem_bars.jacd_size (1, 1);// 1D sims space
+  jac2_size = elem_tris.jacd_size (1, 2);// 2D sims space
   jac3_size = elem_tet1.jacd_size (1);
   jac4_size = elem_tet1.jacd_size (4);
   //
@@ -75,12 +75,12 @@ fmr::Exit_int main (int argc, char** argv) {
 TEST( GridElem, TrivialTest ){
   EXPECT_EQ( 1, 1 );
   EXPECT_FLOAT_EQ (a_float, an_array_f[0]);
-  EXPECT_FLOAT_EQ (a_float, an_array_f[0]);
+  EXPECT_FLOAT_EQ (a_float, an_array_f[1]);
 }
 TEST( GridElem, JacdSizeTest ){
   EXPECT_EQ( jacs_size, 10 );// 3D, 1 point rule default
-  EXPECT_EQ( jac1_size,  2 );// 1D, 1 point rule
-  EXPECT_EQ( jac2_size,  5 );// 2D, 1 point rule
+  EXPECT_EQ( jac1_size,  2 );// 1D, 1 point rule, 1D space
+  EXPECT_EQ( jac2_size,  5 );// 2D, 1 point rule, 2D space
   EXPECT_EQ( jac3_size, 10 );// 3D, 1 point rule
   EXPECT_EQ( jac4_size, 40 );// 3D, 4 points
 }

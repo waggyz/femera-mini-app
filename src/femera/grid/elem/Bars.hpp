@@ -48,17 +48,24 @@ public:
   //------------------------- bar shape functions ----------------------------
   //TODO Return poynomial shape function/gradient transposed?
   template <typename F> static inline// single or double
-  F* poly_func_2 (F f[2u], const F x[3u]);
+  F* poly_func_2 (F f[2u], const F x[3u]);// Linear 2-node bar
   template <typename F> static inline
   F* poly_grad_2 (F g[2u *3u], const F[]);// x[3u] not used; result is constant
   template <typename F> static inline
-  F* poly_func_3 (F f[3u], const F x[3u]);
+  F* poly_grat_2 (F g[2u *3u], const F[]);// transposed gradient
+  
+  template <typename F> static inline
+  F* poly_func_3 (F f[3u], const F x[3u]);// Quadratic 3-node bar
   template <typename F> static inline
   F* poly_grad_3 (F g[3u *3u], const F x[3u]);
   template <typename F> static inline
-  F* poly_func_4 (F f[4u], const F x[3u]);
+  F* poly_grat_3 (F g[3u *3u], const F x[3u]);// transposed gradient
+  template <typename F> static inline
+  F* poly_func_4 (F f[4u], const F x[3u]);// Cubic 4-node bar
   template <typename F> static inline
   F* poly_grad_4 (F g[4u *3u], const F x[3u]);
+  template <typename F> static inline
+  F* poly_grat_4 (F g[4u *3u], const F x[3u]);// transposed gradient
 };//end struct Bars
 } } }//end femera::grid::elem:: namespace
 

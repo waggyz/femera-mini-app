@@ -15,19 +15,19 @@ class Tris; class Quad;
 class Tets; class Prmd; class Wdge; class Cube;
 class User;//TODO user element
 */
-template <class T, typename fmr::Local_int P=1, typename fmr::Local_int D=3,
-  typename F=fmr::Geom_float>
+template <class T, typename fmr::Local_int P=1, typename F=fmr::Geom_float>
 class Elem {
   /*
   Elements are defined in 3D by derived classes and arrays reduced as needed
   to match the simulation spatial dimension template parameter (D).
+
+  These only define serendipity polynomial elements for P > 0.
+  Other elements (e.g., Lagrangian) will be handleed seperately.
   
   Members are constexpr so that everything is kept thread-local to the instance
   that created it.
   */
-  //FIXME higher-order elements are identified by node_n <N>, not elem_p <P>
-  //      because there are different elements (e.g., Lagrangian, serendipity)
-  //      with the same shape and order but a different number of nodes.
+  //TODO consider using P == 0 for non-serendipity elements.
   //TODO one more Elem template parameter for integration rule <R>?
   //TODO Consider enums for element type, order (# nodes), integration rule.
   //TODO Change to template <class T, Elem_args A, typename F>, as above?
@@ -70,10 +70,11 @@ class Elem {
   // Simple constexpr accessors -----------------------------------------------
   // constexpr functions are implicitly inline
   constexpr fmr::Local_int get_elem_p () const noexcept {return P;}
-  constexpr fmr::Local_int get_sims_d () const noexcept {return D;}
+  //constexpr fmr::Local_int get_sims_d () const noexcept {return D;}
+  constexpr fmr::Local_int get_sims_d () const noexcept {return T::sims_d;}
   constexpr fmr::Local_int get_elem_d () const noexcept {
-    static_assert( T::elem_d <= D, //NOTE only checked if this function used.
-      "Element dimension cannot exceed simulation spatial dimension.");
+    //static_assert( T::elem_d <= D, //NOTE only checked if this function used.
+    //  "Element dimension cannot exceed simulation spatial dimension.");
     return T::elem_d;}
   constexpr fmr::Local_int get_vert_n () const noexcept {return T::vert_n;}
   constexpr fmr::Local_int get_vols_n () const noexcept {return T::vols_n;}
@@ -91,13 +92,18 @@ class Elem {
   constexpr
   fmr::Local_int get_node_n () const noexcept;
   constexpr
-  fmr::Local_int jacs_size (const fmr::Local_int intp_n=1) const noexcept;
+  fmr::Local_int jacs_size (
+    const fmr::Local_int intp_n=1, const fmr::Local_int sims_d=3
+  ) const noexcept;
   constexpr
-  fmr::Local_int jacd_size (const fmr::Local_int intp_n=1) const noexcept;
+  fmr::Local_int jacd_size (
+    const fmr::Local_int intp_n=1, const fmr::Local_int sims_d=3
+  ) const noexcept;
   constexpr
   fmr::Local_int poly_func_size (const fmr::Local_int intp_n=1) const noexcept;
   constexpr
-  fmr::Local_int poly_grad_size (const fmr::Local_int intp_n=1) const noexcept;
+  fmr::Local_int poly_grad_size (
+    const fmr::Local_int intp_n=1, const fmr::Local_int sims_d=3) const noexcept;
   //
   // Array constexpr pointers =================================================
   //
@@ -134,7 +140,7 @@ class Elem {
     return T::coor_vert_f;
   }
   //
-  //TODO structured grid element tiles ----------------------------------------
+  // Structured grid element tiles ----------------------------------------
   constexpr fmr::Local_int get_tile_elem_n () const noexcept {
     return T::tile_elem_n;}
   constexpr fmr::Local_int get_tile_node_n () const noexcept {
@@ -142,30 +148,65 @@ class Elem {
   constexpr const fmr::Local_int* get_tile_conn () const noexcept {
     return T::tile_conn;}
   //
+  //TODO how to handle when grid_size not evenly disible by part_size?
   constexpr bool get_tile_conn (fmr::Local_int* conn,
     const fmr::Local_int tile_i,
-    const fmr::Local_int* grid_size)// {x}, {x,y}, {x,y,z} for 1D,2D,3D elems
-    //NOTE conn, grid_size bounds should be checked by the caller.
+    const fmr::Local_int* part_size)// {x}, {x,y}, {x,y,z} for 1D,2D,3D elems
+    //NOTE conn, part_size bounds should be checked by the caller.
     noexcept;
-  constexpr bool get_tile_conn (fmr::Local_int* conn,
+  constexpr bool get_tile_conn_prdc (fmr::Local_int* conn,// Periodic BCs
+    //NOTE This is for a periodic partion, not an overall periodic grid.
     const fmr::Local_int tile_i,
-    const fmr::Local_int* grid_size,// {x}, {x,y}, {x,y,z} for 1D,2D,3D elems
-    const fmr::Local_int* part_size)
-    //NOTE conn, grid_size, part_size bounds should be checked by the caller.
-  noexcept;
+    const fmr::Local_int* part_size)// {x}, {x,y}, {x,y,z} for 1D,2D,3D elems
+    //NOTE conn, part_size bounds should be checked by the caller.
+    noexcept;
+  //
+  constexpr bool get_tile_node_coor(fmr::Geom_float* node_coor,
+    const fmr::Local_int node_i,
+    const fmr::Local_int node_n,
+    const fmr::Geom_float* elem_size,
+    const fmr::Geom_float* part_orig)// origin should default to {0.0,0.0,0.0}
+    //NOTE node_coor, elem_size, part_orig bounds should be checked by the caller.
+    noexcept;
+  constexpr bool get_tile_elem_vert_coor(
+    fmr::Geom_float* vert_coor,// size: vert_n * sims_d
+    const fmr::Local_int elem_i,
+    const fmr::Local_int elem_n,
+    const fmr::Geom_float* elem_size,
+    const fmr::Geom_float* part_orig)// origin should default to {0.0,0.0,0.0}
+    //NOTE vert_coor, elem_size, part_orig bounds should be checked by the caller.
+    noexcept;
+  constexpr bool get_tile_elem_coor_vert(
+    fmr::Geom_float* vert_coor,// size: vert_n * sims_d
+    const fmr::Local_int elem_i,
+    const fmr::Local_int elem_n,
+    const fmr::Geom_float* elem_size,
+    const fmr::Geom_float* part_orig)// origin should default to {0.0,0.0,0.0}
+    //NOTE vert_coor, elem_size, part_orig bounds should be checked by the caller.
+    noexcept;
   //
   // Element functions ========================================================
   //F calc_bbox_size // 1D:length, 2D:area, 3D:volume
   //  (const F* node_coor, const fmr::Dim_int dims=D) noexcept;// needs node_n
   //
   // Element Jacobian and determinant calculations
-  //template <typename Y=F>// Y: physics precision
-  void jacs_nsoa (fmr::Phys_float* jacs,// returns determinants at integration points
-    const F* node_coor,// x1,x2,..., y1,y2,..., z1,z2,...
-    const fmr::Local_int intp_n=1,
-    const fmr::Local_int node_n=get_node_n ()) noexcept;
+  //NOTE Although element Jacobians and determinants are purely geometric,
+  //     these calculations span geometry and physics.
+  //TODO Handle jac and det calc elsewhere?
+  inline void calc_jacs_naos_ref (fmr::Phys_float* jacs,
+    // Calculates Jacobians with nodes provided as an array of structs (naos)
+    const F* node_coor,// x1,y1,z1, x2,y2,z2,...
+    const F* poly_grad,// shape function gradients at integration points
+    const fmr::Local_int intp_n=1, const fmr::Local_int sims_d=3)
+    const noexcept;
+  inline void calc_jacs_nsoa_ref (fmr::Phys_float* jacs,
+    // Calculates Jacobians with nodes provided as a struct of arrays (nsoa)
+    const F* coor_node,// x1,x2,..., y1,y2,..., z1,z2,...
+    const F* poly_grad,// shape function gradients at integration points
+    const fmr::Local_int intp_n=1, const fmr::Local_int sims_d=3)
+    const noexcept;
 #if 0
-  void jacs_naos (fmr::Phys_float* jacs,// returns determinants at integration points
+  void jacs_naos (fmr::Phys_float* jacs,// calculates determinants at integration points
     const F* node_coor,// x1,y1,z1, x2,y2,z2,...
     const fmr::Local_int intp_n=1,
     const fmr::Local_int node_n=get_node_n ()) noexcept;
@@ -186,9 +227,9 @@ class Elem {
 #endif
   //
   // Element quality calculations
-  F calc_dets_qual (const F* node_coor, const fmr::Dim_int dims=D) noexcept;
-  F calc_edge_qual (const F* node_coor, const fmr::Dim_int dims=D) noexcept;
-  F calc_skew_qual (const F* node_coor, const fmr::Dim_int dims=D) noexcept;
+  F calc_dets_qual (const F* node_coor, const fmr::Dim_int dims=3) noexcept;
+  F calc_edge_qual (const F* node_coor, const fmr::Dim_int dims=3) noexcept;
+  F calc_skew_qual (const F* node_coor, const fmr::Dim_int dims=3) noexcept;
    
   //
   // Element static functions (independent of elem type) =====================
@@ -211,7 +252,7 @@ class Elem {
   }
 #endif
   // Node coordinates --------------------------------------------------------
-  //TODO Generalize for different element shapes by moving to Tets, etc.
+  //TODO Generalize for different element shapes by moving to Tets, etc.?
 #if 0
   template <fmr::Local_int tP=P, fmr::Local_int tD=D,
     typename std::enable_if <tP == 1>::value,
