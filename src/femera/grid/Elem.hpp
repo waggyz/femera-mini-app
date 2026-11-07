@@ -2,7 +2,7 @@
 #define FEMERA_HAS_GRID_ELEM_HPP
 
 #include "../../fmr/fmr.hpp"
-#include "../../fmr/smat.hpp"// needed in Elem.ipp for Jacobian inverse & det
+#include "../../fmr/smat.hpp"// needed in Elem.ipp for Jacobian inverse & det?
 
 namespace femera { namespace grid { namespace elem {//TODO grid -> geom
 //namespace femera { namespace grid { //TODO move up to here?
@@ -47,8 +47,10 @@ class Elem {
   // bars,tris,tets: const det > std::numeric_limits<F>::min() [* part_size??]
   //                          OR std::numeric_limits<F>::epsilon()
   //NOTE these are all vert_n == elem_d + 1 (when side nodes at natural positions)
-  F edge_qual_min = F(0.2);// shortest / longest shortest edge
+  F edge_qual_min = F(0.2);// shortest / longest edge
   F skew_qual_min = F(0.6);// = 1.0-skewness [0-1] (quad, cube)
+  F delt_qual_min// ratio of min edge length / max coord absolute value
+  = F(std::numeric_limits<F>::epsilon ());
   //
   public:
   // Simple get / set / compare ----------------------------------------------
@@ -85,6 +87,8 @@ class Elem {
   constexpr F get_edge_l () const noexcept {return F(T::edge_l);}
   constexpr F get_face_a () const noexcept {return F(T::face_a);}
   constexpr F get_elem_v () const noexcept {return F(T::elem_v);}
+  //
+  constexpr fmr::math::Poly get_poly_type () const noexcept {return T::poly_type;}
 //
   // Non-trivial constexpr member functions -----------------------------------
   constexpr
@@ -227,10 +231,13 @@ class Elem {
 #endif
   //
   // Element quality calculations
-  F calc_dets_qual (const F* node_coor, const fmr::Dim_int dims=3) noexcept;
-  F calc_edge_qual (const F* node_coor, const fmr::Dim_int dims=3) noexcept;
-  F calc_skew_qual (const F* node_coor, const fmr::Dim_int dims=3) noexcept;
-   
+#if 0
+  F calc_dets_qual (const F* node_coor, const fmr::Dim_int dims=3) const noexcept;
+  F calc_edge_qual (const F* node_coor, const fmr::Dim_int dims=3) const noexcept;
+  F calc_skew_qual (const F* node_coor, const fmr::Dim_int dims=3) const noexcept;
+#endif
+  constexpr
+  F calc_delt_qual (const F* node_coor, const fmr::Dim_int dims=3) const noexcept;
   //
   // Element static functions (independent of elem type) =====================
   //

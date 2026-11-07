@@ -3,12 +3,9 @@
 
 #include <cstdint>
 #include <array>
-#include <algorithm>
 #include <cmath>
-#include <limits>
 #include <stdexcept>
 #include <type_traits>
-#include <utility>
 
 //#include <immintrin.h>// for optimzaiton later, if needed
 

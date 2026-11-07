@@ -22,6 +22,8 @@ public:
   static constexpr fmr::Geom_float face_a = 0.0;// total surface area
   static constexpr fmr::Geom_float elem_v = 0.0;// natural element volume
   //
+  static constexpr fmr::math::Poly poly_type = fmr::math::Poly::Full;
+  //
   static constexpr
   fmr::Local_int vert_conn [vert_n] = {0,1};
   static constexpr
@@ -53,13 +55,14 @@ public:
   F* poly_grad_2 (F g[2u *3u], const F[]);// x[3u] not used; result is constant
   template <typename F> static inline
   F* poly_grat_2 (F g[2u *3u], const F[]);// transposed gradient
-  
+  //
   template <typename F> static inline
   F* poly_func_3 (F f[3u], const F x[3u]);// Quadratic 3-node bar
   template <typename F> static inline
   F* poly_grad_3 (F g[3u *3u], const F x[3u]);
   template <typename F> static inline
   F* poly_grat_3 (F g[3u *3u], const F x[3u]);// transposed gradient
+  //
   template <typename F> static inline
   F* poly_func_4 (F f[4u], const F x[3u]);// Cubic 4-node bar
   template <typename F> static inline
@@ -67,6 +70,7 @@ public:
   template <typename F> static inline
   F* poly_grat_4 (F g[4u *3u], const F x[3u]);// transposed gradient
 };//end struct Bars
+
 } } }//end femera::grid::elem:: namespace
 
 #include "Bars.ipp"

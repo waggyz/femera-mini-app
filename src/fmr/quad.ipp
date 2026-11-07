@@ -1,12 +1,16 @@
 #ifndef FMR_HAS_MATH_QUAD_IPP
 #define FMR_HAS_MATH_QUAD_IPP
 
+#include <algorithm>
+#include <limits>
+#include <utility>
+
 //#define FMR_DEBUG
 
 namespace fmr { namespace math {
 
 template <std::uint_fast8_t N, std::uint_fast8_t D, typename F, typename Enable>
-constexpr F gaus_lege_quad<N, D, F, Enable>::point_value(const fuint i) {// moved this mess to the end
+constexpr F gaus_lege_quad<N, D, F, Enable>::point_value(const fuint i) {
     return N == 1 ? F(0.0) :
         N == 2 ? (i == 0 ? F(0.57735026918962576451) : F(-0.57735026918962576451)) :
         N == 3 ? (i == 0 ? F(0.0) :
@@ -33,7 +37,7 @@ constexpr F gaus_lege_quad<N, D, F, Enable>::weight_value(
   }
 
 template <std::uint_fast8_t N, std::uint_fast8_t D, typename F, typename Enable>
-gaus_jaco_quad<N, D, F, Enable>::gaus_jaco_quad(
+gaus_jaco_quad<N, D, F, Enable>::gaus_jaco_quad(// constructor definition
     const F alpha, const F beta) : alpha_(alpha), beta_(beta) {
     if (!(alpha > F(-1)) || !(beta > F(-1)) ||
         !std::isfinite(alpha) || !std::isfinite(beta)) {
@@ -137,7 +141,7 @@ gaus_jaco_quad<N, D, F, Enable>::gaus_jaco_quad(
         }
       }
     }
-  }
+  }//end gaus_jaco_quad constructor
 
 } }//end fmr::math namespace
 #undef FMR_DEBUG

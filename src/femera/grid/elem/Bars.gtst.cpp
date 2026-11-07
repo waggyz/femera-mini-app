@@ -43,8 +43,37 @@ TEST( GridElemBars, ElementOrderNodeCounts ){
   EXPECT_EQ( linear.get_node_n (), 2 );
   EXPECT_EQ( quadratic.get_node_n (), 3 );
   EXPECT_EQ( cubic.get_node_n (), 4 );
+}
+
+TEST( GridElemBars, ElementPolynomials ){
+  const Elem<Bars> linear;
+  const Elem<Bars, 2> quadratic;
+  const Elem<Bars, 3> cubic;
+  // Check polynomial function and gradient sizes against reference counts.
+  EXPECT_EQ( linear.poly_func_size (), 2 );
+  EXPECT_EQ( linear.poly_grad_size (), 6 );//TODO may be incorrect for bar in 3D
+  EXPECT_EQ( quadratic.poly_func_size (), 3 );
+  EXPECT_EQ( quadratic.poly_grad_size (), 9 );//TODO may be incorrect for bar in 3D
   EXPECT_EQ( cubic.poly_func_size (), 4 );
-  EXPECT_EQ( cubic.poly_grad_size (), 12 );
+  EXPECT_EQ( cubic.poly_grad_size (), 12 );//TODO may be incorrect for bar in 3D
+  // Check polynomial type.
+  EXPECT_EQ( linear.get_poly_type (), fmr::math::Poly::Full );
+  EXPECT_EQ( quadratic.get_poly_type (), fmr::math::Poly::Full );
+  EXPECT_EQ( cubic.get_poly_type (), fmr::math::Poly::Full );
+  // Check node_n matches polynomial function size.
+  EXPECT_EQ( linear.get_node_n (), linear.poly_func_size () );
+  EXPECT_EQ( quadratic.get_node_n (), quadratic.poly_func_size () );
+  EXPECT_EQ( cubic.get_node_n (), cubic.poly_func_size () );
+  // Check node_n matches poly term count.
+  EXPECT_EQ( linear.get_node_n (),\
+    fmr::math::poly_term_n (linear.get_poly_type (), linear.get_elem_p (),\
+    linear.get_elem_d () ) );
+  EXPECT_EQ( quadratic.get_node_n (),\
+    fmr::math::poly_term_n (quadratic.get_poly_type (), quadratic.get_elem_p (),\
+    quadratic.get_elem_d () ) );
+  EXPECT_EQ( cubic.get_node_n (),\
+    fmr::math::poly_term_n (cubic.get_poly_type (), cubic.get_elem_p (),\
+    cubic.get_elem_d () ) );
 }
 
 TEST( GridElemBars, VertexConnectivityAndCoordinates ){
@@ -82,6 +111,31 @@ TEST( GridElemBars, VertexConnectivityAndCoordinates ){
     }
   }
 }
+
+TEST( GridElemBars, ElementQuality ){
+  const Elem<Bars> linear;
+  const double* natural_coor = linear.get_vert_coor ();
+  const double* zero_coor = []{
+    static double arr[6] = {0.0,0.0,0.0, 0.0,0.0,0.0};
+    return arr;
+  }();
+  const double* bad_coor = []{
+    static double arr[6] = {1.0,0.0,0.0, 1.0+1e-7,0.0,0.0};
+    return arr;
+  }();
+  ASSERT_NE( natural_coor, nullptr );
+  ASSERT_NE( zero_coor, nullptr );
+  ASSERT_NE( bad_coor, nullptr );
+  const double qual = linear.calc_delt_qual (natural_coor, 3u);
+  EXPECT_GT( qual, 0.0 );
+  const double zero_qual = linear.calc_delt_qual (zero_coor, 3u);
+  EXPECT_EQ( zero_qual, 0.0 );
+  const double bad_qual = linear.calc_delt_qual (bad_coor, 3u);
+  EXPECT_GT( bad_qual, 0.0 );
+  EXPECT_LT( bad_qual, qual );
+}
+
+//calc_delt_qual
 TEST( GridElemBars, ShapeFunctionsAndGradients ){
   const Bars bars;// Default linear 2-node element
   const double xi = 0.5;// integration point for Gauss Legendre first order quadrature
