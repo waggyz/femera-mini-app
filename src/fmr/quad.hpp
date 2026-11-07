@@ -21,7 +21,7 @@ struct gaus_lege_quad{
   * Typical use:
   *   1. Implement a rule struct.
   *   2. Retrieve quadrature points and weights.
-  *   3. Fill an array with function values at the quadrature points.
+  *   3. Fill (thread-)local arrays with function values at the quadrature points.
   *   4. Compute the integral.
   *
   * Example usage to integrate float x*x*x + 1 over [0, 1] using 2-point rule:
@@ -44,22 +44,35 @@ struct gaus_lege_quad{
   * ref: https://en.wikipedia.org/wiki/Gauss%E2%80%93Legendre_quadrature
   */
   private:
-  static_assert(N >= 1 && N <= 3,
-      "gaus_lege_quad currently supports 1-, 2-, and 3-point rules");
+  static_assert(N >= 1 && N <= 5,
+      "gaus_lege_quad currently supports 1- through 5-point rules");
   static constexpr F point_value(const std::uint_fast8_t i) {
     return N == 1 ? F(0.0) :
         N == 2 ? (i == 0 ? F(0.57735026918962576451) : F(-0.57735026918962576451)) :
+        N == 3 ? (i == 0 ? F(0.0) :
+                  i == 1 ? F(0.77459666924148337704) : F(-0.77459666924148337704)) :
+        N == 4 ? (i == 0 ? F(0.86113631159405257522) :
+                  i == 1 ? F(0.33998104358485626480) :
+                  i == 2 ? F(-0.33998104358485626480) : F(-0.86113631159405257522)) :
         (i == 0 ? F(0.0) :
-         i == 1 ? F(0.77459666924148337704) : F(-0.77459666924148337704));
+         i == 1 ? F(0.53846931010568309104) :
+         i == 2 ? F(-0.53846931010568309104) :
+         i == 3 ? F(0.90617984593866399280) : F(-0.90617984593866399280));
   }
   static constexpr F weight_value(const std::uint_fast8_t i) {
     return N == 1 ? F(2.0) :
         N == 2 ? F(1.0) :
-        (i == 0 ? F(8.0 / 9.0) : F(5.0 / 9.0));
+        N == 3 ? (i == 0 ? F(8.0 / 9.0) : F(5.0 / 9.0)) :
+        N == 4 ? (i == 0 || i == 3 ? F(0.34785484513745385737) :
+                  F(0.65214515486254614263)) :
+        (i == 0 ? F(128.0 / 225.0) :
+         i == 1 || i == 2 ? F(0.47862867049936646804) :
+         F(0.23692688505618908751));
   }
   static constexpr F interval[2] = {F(-1.0), F(1.0)};
   public:
   static constexpr std::uint_fast8_t get_num_points() { return N; }
+  static constexpr std::uint_fast8_t polynomial_degree_max() { return 2 * N - 1; }
   static constexpr F get_interval_start() { return interval[0]; }
   static constexpr F get_interval_end() { return interval[1]; }
   static constexpr F get_point(const std::uint_fast8_t i) { return point_value(i); }
