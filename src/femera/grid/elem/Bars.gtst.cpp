@@ -115,6 +115,12 @@ TEST( GridElemBars, VertexConnectivityAndCoordinates ){
 TEST( GridElemBars, ElementQuality ){
   const Elem<Bars> linear;
   const double* natural_coor = linear.get_vert_coor ();
+  //
+  // reversed order of nodes for testing purposes
+  const double* reversed_coor = []{
+    static double arr[6] = {1.0,0.0,0.0, 0.0,0.0,0.0};
+    return arr;
+  }();
   const double* zero_coor = []{
     static double arr[6] = {0.0,0.0,0.0, 0.0,0.0,0.0};
     return arr;
@@ -125,20 +131,26 @@ TEST( GridElemBars, ElementQuality ){
   }();
   ASSERT_NE( natural_coor, nullptr );
   ASSERT_NE( zero_coor, nullptr );
+  ASSERT_NE( reversed_coor, nullptr );
   ASSERT_NE( bad_coor, nullptr );
+//calc_delt_qual
   const double qual = linear.calc_delt_qual (natural_coor, 3u);
   EXPECT_GT( qual, 0.0 );
+  const double reversed_qual = linear.calc_delt_qual (reversed_coor, 3u);
+  EXPECT_DOUBLE_EQ( reversed_qual, qual );
   const double zero_qual = linear.calc_delt_qual (zero_coor, 3u);
-  EXPECT_EQ( zero_qual, 0.0 );
+  EXPECT_DOUBLE_EQ( zero_qual, 0.0 );
   const double bad_qual = linear.calc_delt_qual (bad_coor, 3u);
   EXPECT_GT( bad_qual, 0.0 );
   EXPECT_LT( bad_qual, qual );
+  //TODO more checks here
+  //
+  //NOTE See TileElementEdgeDeltaQuality tests below for tiling checks.
 }
 
-//calc_delt_qual
 TEST( GridElemBars, ShapeFunctionsAndGradients ){
   const Bars bars;// Default linear 2-node element
-  const double xi = 0.5;// integration point for Gauss Legendre first order quadrature
+  const double xi = 0.5;// int point for Gauss Legendre first order quadrature
   double N_storage[2];
   double dN_storage[2 * 3];// Default 3D space
   double* N = N_storage;
@@ -282,8 +294,8 @@ TEST( GridElemBars, TileElementVertexCoordinatesAOS ){
   const fmr::Geom_float part_orig[3] = {0.0, 0.0, 0.0};
   const fmr::Geom_float elem_size[3] = {1.0, 1.0, 1.0};
   const fmr::Local_int elem_n = 2;
-  fmr::Geom_float vert_coor[Bars::tile_elem_n * 2 * 3];// 2 vertices per element, 3 coordinates each
-
+  fmr::Geom_float vert_coor[Bars::tile_elem_n * 2 * 3];
+  // 2 vertices per element, 3 coordinates each
   EXPECT_TRUE( get_tile_elem_vert_coor(vert_coor, 0, elem_n, elem_size, part_orig) );
   EXPECT_DOUBLE_EQ( vert_coor[0], 0.0 );
   EXPECT_DOUBLE_EQ( vert_coor[1], 0.0 );
@@ -305,7 +317,8 @@ TEST( GridElemBars, TileElementVertexCoordinatesSOA ){
   const fmr::Geom_float part_orig[3] = {0.0, 0.0, 0.0};
   const fmr::Geom_float elem_size[3] = {1.0, 1.0, 1.0};
   const fmr::Local_int elem_n = 2;
-  fmr::Geom_float vert_coor[Bars::tile_elem_n * 2 * 3];// 2 vertices per element, 3 coordinates each
+  fmr::Geom_float vert_coor[Bars::tile_elem_n * 2 * 3];
+  // 2 vertices per element, 3 coordinates each
   EXPECT_TRUE( get_tile_elem_coor_vert(vert_coor, 0, elem_n, elem_size, part_orig) );
   EXPECT_DOUBLE_EQ( vert_coor[0], 0.0 );
   EXPECT_DOUBLE_EQ( vert_coor[1], 1.0 );
@@ -321,6 +334,34 @@ TEST( GridElemBars, TileElementVertexCoordinatesSOA ){
   EXPECT_DOUBLE_EQ( vert_coor[4], 1.0 );
   EXPECT_DOUBLE_EQ( vert_coor[5], 2.0 );
   EXPECT_FALSE( get_tile_elem_coor_vert(vert_coor, 2, elem_n, elem_size, part_orig) );
+}
+
+TEST( GridElemBars, TileElementEdgeDeltaQuality){
+  const Bars bars;
+  // use get_tile_elem_vert_coor to get the vertex coordinates of the element
+  const fmr::Geom_float part_orig[3] = {0.0, 0.0, 0.0};
+  const fmr::Geom_float elem_size[3] = {1.0, 1.0, 1.0};
+  const fmr::Local_int elem_n = 2;
+  fmr::Geom_float vert_coor[Bars::tile_elem_n * 2 * 3];
+  // 2 vertices per element, 3 coordinates each
+  EXPECT_TRUE( get_tile_elem_vert_coor(vert_coor, 0, elem_n, elem_size, part_orig) );
+  const double delt_qual = bars.calc_delt_qual(vert_coor, 3);
+  EXPECT_GT( delt_qual, 1.0 );
+  //
+  const fmr::Geom_float tiny_size[3] = {1e-6, 0.0,0.0};
+  const fmr::Local_int tiny_n = 1000000;
+  EXPECT_TRUE( get_tile_elem_vert_coor(vert_coor, 0, tiny_n, tiny_size, part_orig) );
+  const double tiny_delt_qual = bars.calc_delt_qual(vert_coor, 3);
+  EXPECT_GT( tiny_delt_qual, 0.0 );
+  // Loop through elements and count those with "low" delta quality.
+  fmr::Local_int low_quality_count = 0;
+  for(fmr::Local_int i=0; i<tiny_n; ++i){
+    EXPECT_TRUE( get_tile_elem_vert_coor(vert_coor, i, tiny_n, tiny_size, part_orig) );
+    const double dq = bars.calc_delt_qual(vert_coor, 3);
+    if(dq < 2e-6) ++low_quality_count;// just for this test, so half look bad
+  }
+  EXPECT_GT(low_quality_count, 0);
+  EXPECT_EQ(low_quality_count, tiny_n / 2);
 }
 
 } } } // end namespace femera::grid::elem

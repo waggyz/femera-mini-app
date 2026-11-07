@@ -143,7 +143,6 @@ class Elem {
   constexpr const F* get_coor_vert () const noexcept {
     return T::coor_vert_f;
   }
-  //
   // Structured grid element tiles ----------------------------------------
   constexpr fmr::Local_int get_tile_elem_n () const noexcept {
     return T::tile_elem_n;}
