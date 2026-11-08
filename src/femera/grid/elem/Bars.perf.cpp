@@ -133,7 +133,7 @@ double elem::run_bars_perf_test(const int test_case, const fmr::Local_int test_n
     std::valarray<fmr::Local_int> part_conn(part_conn_array_size);
     fmr::Local_int this_conn[2] = {0, 0};
     for (fmr::Local_int elem_i = 0; elem_i < part_elem_n; ++elem_i) {
-      femera::grid::elem::get_tile_conn(this_conn, elem_i, grid_size);
+      femera::grid::elem::get_tile_vert_conn(this_conn, elem_i, grid_size);
       part_conn[2*elem_i + 0] = this_conn[0];
       part_conn[2*elem_i + 1] = this_conn[1];
     }
@@ -164,7 +164,7 @@ double elem::run_bars_perf_test(const int test_case, const fmr::Local_int test_n
           //
           this_meter->add_idle_time_now ();
           for (fmr::Local_int elem_i = 0; elem_i < part_elem_n; ++elem_i) {
-            femera::grid::elem::get_tile_conn(this_conn, elem_i, grid_size);// 4 in
+            femera::grid::elem::get_tile_vert_conn(this_conn, elem_i, grid_size);// 4 in
             part_chck += (this_conn[0] + this_conn[1]) % 3;// +1 in,, 1 out, 3 IOPS
             //just so loop does not opitimize away
           }

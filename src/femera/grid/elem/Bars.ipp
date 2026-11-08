@@ -17,22 +17,36 @@ inline constexpr fmr::Geom_float Bars::coor_vert [];
 #endif
   //TODO FIXME only works for elem_p==1; generalize for higher orders
   inline constexpr
-  bool get_tile_conn (fmr::Local_int* conn,//FIXME generalize & move to Elem.ipp
+  bool get_tile_vert_conn (fmr::Local_int* conn,//FIXME generalize & move to Elem.ipp
     const fmr::Local_int tile_i,// local element index
     const fmr::Local_int* part_size)
     noexcept{
     conn[0] = (tile_i + 0);// % part_size[0];
     conn[1] = (tile_i + 1);// % part_size[0];// periodic BC
+    //TODO FIXME this only works for P=1
     return tile_i < part_size[0];// false if tile_i out of range
   }
   inline constexpr
-  bool get_tile_conn_prdc (fmr::Local_int* conn,//FIXME generalize & move to Elem.ipp
+  bool get_tile_vert_conn_prdc (fmr::Local_int* conn,//FIXME generalize & move to Elem.ipp
     const fmr::Local_int tile_i,// local element index
     const fmr::Local_int* part_size)
     noexcept{
     conn[0] = (tile_i + 0) % part_size[0];// periodic BC
     conn[1] = (tile_i + 1) % part_size[0];
+    //TODO FIXME this only works for P=1
     return tile_i < part_size[0];// false if tile_i out of range
+  }
+  inline constexpr
+  bool get_tile_vert_coor(fmr::Geom_float* coor,
+    const fmr::Local_int vert_i,
+    const fmr::Local_int vert_n,
+    const fmr::Geom_float* elem_size,
+    const fmr::Geom_float* part_orig)
+    noexcept{
+    coor[0] = part_orig[0] + vert_i * elem_size[0];
+    coor[1] = part_orig[1] + vert_i * elem_size[1];
+    coor[2] = part_orig[2] + vert_i * elem_size[2];
+    return vert_i < vert_n;
   }
   inline constexpr
   bool get_tile_node_coor(fmr::Geom_float* coor,
@@ -44,6 +58,7 @@ inline constexpr fmr::Geom_float Bars::coor_vert [];
     coor[0] = part_orig[0] + node_i * elem_size[0];
     coor[1] = part_orig[1] + node_i * elem_size[1];
     coor[2] = part_orig[2] + node_i * elem_size[2];
+    //TODO FIXME this only works for P=1
     return node_i < node_n;
   }
   constexpr bool get_tile_elem_vert_coor(//x1,y1,z1, x2,y2,z2
@@ -76,7 +91,7 @@ inline constexpr fmr::Geom_float Bars::coor_vert [];
     }
 #if 0
   inline
-  bool Elem::get_tile_conn (fmr::Local_int* conn,
+  bool Elem::get_tile_vert_conn (fmr::Local_int* conn,
     const fmr::Local_int tile_i,// local element index
     const fmr::Local_int grid_x = 1,// handles grid_x not multiple of part_x
     const fmr::Local_int part_x = 1) noexcept{
@@ -85,7 +100,7 @@ inline constexpr fmr::Geom_float Bars::coor_vert [];
     return tile_i < grid_x;// false if tile_i out of range
   }
     // free surface BCs
-  constexpr fmr::Local_int* Bars::get_tile_conn (fmr::Local_int tile_i,
+  constexpr fmr::Local_int* Bars::get_tile_vert_conn (fmr::Local_int tile_i,
     // local element index
     const fmr::Local_int grid_x = 1,
     const fmr::Local_int part_x = 1) noexcept{

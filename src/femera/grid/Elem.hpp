@@ -144,26 +144,37 @@ class Elem {
     return T::coor_vert_f;
   }
   // Structured grid element tiles ----------------------------------------
-  constexpr fmr::Local_int get_tile_elem_n () const noexcept {
+  constexpr fmr::Local_int get_tile_n () const noexcept {
     return T::tile_elem_n;}
   constexpr fmr::Local_int get_tile_node_n () const noexcept {
-    return T::tile_node_n;}
-  constexpr const fmr::Local_int* get_tile_conn () const noexcept {
+    return get_node_n ();}
+  constexpr fmr::Local_int get_tile_vert_n () const noexcept {
+    return T::tile_vert_n;}
+  constexpr const fmr::Local_int* get_tile_vert_conn () const noexcept {
+    return T::tile_conn;}
+  constexpr const fmr::Local_int* get_tile_node_conn () const noexcept {
     return T::tile_conn;}
   //
   //TODO how to handle when grid_size not evenly disible by part_size?
-  constexpr bool get_tile_conn (fmr::Local_int* conn,
+  constexpr bool get_tile_vert_conn (fmr::Local_int* conn,
     const fmr::Local_int tile_i,
     const fmr::Local_int* part_size)// {x}, {x,y}, {x,y,z} for 1D,2D,3D elems
     //NOTE conn, part_size bounds should be checked by the caller.
     noexcept;
-  constexpr bool get_tile_conn_prdc (fmr::Local_int* conn,// Periodic BCs
+  constexpr bool get_tile_vert_conn_prdc (fmr::Local_int* conn,// Periodic BCs
     //NOTE This is for a periodic partion, not an overall periodic grid.
     const fmr::Local_int tile_i,
     const fmr::Local_int* part_size)// {x}, {x,y}, {x,y,z} for 1D,2D,3D elems
     //NOTE conn, part_size bounds should be checked by the caller.
     noexcept;
   //
+  constexpr bool get_tile_vert_coor(fmr::Geom_float* vert_coor,
+    const fmr::Local_int node_i,
+    const fmr::Local_int node_n,
+    const fmr::Geom_float* elem_size,
+    const fmr::Geom_float* part_orig)// origin should default to {0.0,0.0,0.0}
+    //NOTE node_coor, elem_size, part_orig bounds should be checked by the caller.
+    noexcept;
   constexpr bool get_tile_node_coor(fmr::Geom_float* node_coor,
     const fmr::Local_int node_i,
     const fmr::Local_int node_n,
@@ -171,7 +182,8 @@ class Elem {
     const fmr::Geom_float* part_orig)// origin should default to {0.0,0.0,0.0}
     //NOTE node_coor, elem_size, part_orig bounds should be checked by the caller.
     noexcept;
-  constexpr bool get_tile_elem_vert_coor(
+
+  constexpr bool get_tile_elem_vert_coor(//TODO need: 
     fmr::Geom_float* vert_coor,// size: vert_n * sims_d
     const fmr::Local_int elem_i,
     const fmr::Local_int elem_n,

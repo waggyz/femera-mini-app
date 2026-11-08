@@ -94,7 +94,7 @@ constexpr fmr::Local_int elem::Elem<T,P,F>::poly_grad_size
     // Early return if max_coord is zero to avoid division by zero.
     if(!(max_coord < F(0) || max_coord > F(0))) return F(0);
     //
-    const auto conn = get_bars_conn ();// Use edge connectivity.
+    const auto conn = get_vert_conn ();// Use edge connectivity.
     const auto edge_n = get_edge_n ();
     for(fmr::Local_int j=0; j<edge_n; ++j){// loop through edges
       F edge_len2 = F(0);// tracks square of edge length
