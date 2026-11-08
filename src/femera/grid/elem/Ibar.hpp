@@ -22,8 +22,8 @@ public:
     = 0.0;
   static constexpr fmr::Geom_float elem_v = 0.0;// planar element
   //
-  static constexpr
-  fmr::Local_int vert_conn [vert_n] = {0,1, 2,3};
+  //static constexpr
+  //fmr::Local_int vert_conn [vert_n] = {0,1, 2,3};
   static constexpr
   fmr::Local_int bars_conn [Bars::vert_n * edge_n] = { 0,1, 2,3 };
   static constexpr fmr::Local_int* tris_conn = nullptr;

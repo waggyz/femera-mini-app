@@ -19,8 +19,8 @@ public:
   static constexpr fmr::Geom_float face_a = 6.0;// total surface area
   static constexpr fmr::Geom_float elem_v = 1.0;// natural element volume
   //
-  static constexpr
-  fmr::Local_int vert_conn [vert_n] = {0,1,2,4};
+  //static constexpr
+  //fmr::Local_int vert_conn [vert_n] = {0,1,2,4};
   static constexpr
   fmr::Local_int bars_conn [Bars::vert_n * edge_n]
     = {

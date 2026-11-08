@@ -2,27 +2,35 @@
 #define FEMERA_HAS_GRID_ELEM_HPP
 
 #include "../../fmr/fmr.hpp"
-#include "../../fmr/smat.hpp"// needed in Elem.ipp for Jacobian inverse & det?
+#include "../../fmr/math.hpp"
+//#include "../../fmr/smat.hpp"// needed in Elem.ipp for Jacobian inverse & det?
 
 namespace femera { namespace grid { namespace elem {//TODO grid -> geom
-//namespace femera { namespace grid { //TODO move up to here?
-/*
+//namespace femera { namespace geom { //TODO change to here?
+#if 0
 // Forward-delare element shapes TODO is this needed?
+//class Pins;//TODO point element for "soft" pins & arbitrary point forces?
 class Bars;
-class Line;//TODO 1D interface element embedded in 2D or 3D space
+//class Ipts;//TODO 1D interface element embedded in 1D, 2D, 3D space
+class Ibar;// 1D interface element embedded in 2D or 3D space
 class Itri; class Iqud;// 2D interface elements embedded in 3D space
 class Tris; class Quad;
 class Tets; class Prmd; class Wdge; class Cube;
-class User;//TODO user element
-*/
+//class User;//TODO user element
+#endif
 template <class T, typename fmr::Local_int P=1, typename F=fmr::Geom_float>
 class Elem {
   /*
   Elements are defined in 3D by derived classes and arrays reduced as needed
   to match the simulation spatial dimension template parameter (D).
 
-  These only define serendipity polynomial elements for P > 0.
+  These only define serendipity polynomial elements for order P in [1,2,3].
   Other elements (e.g., Lagrangian) will be handleed seperately.
+
+  Node numbering follows Gmsh canonical ordering.
+  See: https://gmsh.info/dev/doc/texinfo/gmsh.html#Node-ordering
+  NOTE: this code may or may not have the same prism/Wdge exception.
+  TODO double-check serendipity elements for the use of face nodes.
   
   Members are constexpr so that everything is kept thread-local to the instance
   that created it.
@@ -79,10 +87,10 @@ class Elem {
     //  "Element dimension cannot exceed simulation spatial dimension.");
     return T::elem_d;}
   constexpr fmr::Local_int get_vert_n () const noexcept {return T::vert_n;}
-  constexpr fmr::Local_int get_vols_n () const noexcept {return T::vols_n;}
   constexpr fmr::Local_int get_edge_n () const noexcept {return T::edge_n;}
   constexpr fmr::Local_int get_tris_n () const noexcept {return T::tris_n;}
   constexpr fmr::Local_int get_quad_n () const noexcept {return T::quad_n;}
+  constexpr fmr::Local_int get_vols_n () const noexcept {return T::vols_n;}
   //
   constexpr F get_edge_l () const noexcept {return F(T::edge_l);}
   constexpr F get_face_a () const noexcept {return F(T::face_a);}
@@ -91,10 +99,10 @@ class Elem {
   constexpr fmr::math::Poly get_poly_type () const noexcept {return T::poly_type;}
 //
   // Non-trivial constexpr member functions -----------------------------------
-  constexpr
-  fmr::Local_int get_face_n () const noexcept;
-  constexpr
-  fmr::Local_int get_node_n () const noexcept;
+  constexpr fmr::Local_int get_face_n () const noexcept;
+  constexpr fmr::Local_int get_node_n () const noexcept;
+  constexpr fmr::Local_int get_tile_node_n () const noexcept;
+  //
   constexpr
   fmr::Local_int jacs_size (
     const fmr::Local_int intp_n=1, const fmr::Local_int sims_d=3
@@ -111,6 +119,11 @@ class Elem {
   //
   // Array constexpr pointers =================================================
   //
+#if 0
+  // vert_conn and node_conn are trivial: just consecutive integers.
+  constexpr const fmr::Local_int* get_vert_conn () const noexcept {
+    return T::vert_conn;}
+#endif
   //NOTE the following are all only vertex connectivity (p==1) arrays.
   constexpr const fmr::Local_int* get_bars_conn () const noexcept {
     return T::bars_conn;}
@@ -118,8 +131,6 @@ class Elem {
     return T::tris_conn;}
   constexpr const fmr::Local_int* get_quad_conn () const noexcept {
     return T::quad_conn;}
-  constexpr const fmr::Local_int* get_vert_conn () const noexcept {
-    return T::vert_conn;}
   //
   // Natural element vertex coordinates --------------------------------------
   //NOTE these are only valid when element dimension matches simulation dimension.
@@ -146,14 +157,19 @@ class Elem {
   // Structured grid element tiles ----------------------------------------
   constexpr fmr::Local_int get_tile_n () const noexcept {
     return T::tile_elem_n;}
-  constexpr fmr::Local_int get_tile_node_n () const noexcept {
-    return get_node_n ();}
   constexpr fmr::Local_int get_tile_vert_n () const noexcept {
     return T::tile_vert_n;}
+  constexpr fmr::Local_int get_tile_edge_n () const noexcept {
+    return T::tile_edge_n;}
+  constexpr fmr::Local_int get_tile_face_n () const noexcept {
+    return T::tile_tris_n;}
+  constexpr fmr::Local_int get_tile_quads_n () const noexcept {
+    return T::tile_quads_n;}
+  constexpr fmr::Local_int get_tile_vols_n () const noexcept {
+    return T::tile_vols_n;}// 3D elements of this type (assume all same)
+  //
   constexpr const fmr::Local_int* get_tile_vert_conn () const noexcept {
-    return T::tile_conn;}
-  constexpr const fmr::Local_int* get_tile_node_conn () const noexcept {
-    return T::tile_conn;}
+    return T::tile_vert_conn;}
   //
   //TODO how to handle when grid_size not evenly disible by part_size?
   constexpr bool get_tile_vert_conn (fmr::Local_int* conn,

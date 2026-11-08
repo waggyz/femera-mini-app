@@ -12,8 +12,8 @@ namespace femera { namespace test {
     mesh.nodes_per_element = Tet::vert_n;
     mesh.coordinates.assign (Tet::vert_coor,
       Tet::vert_coor + Tet::sims_d * Tet::vert_n);
-    mesh.connectivity.assign (Tet::vert_conn,
-      Tet::vert_conn + Tet::vert_n);
+    //mesh.connectivity.assign (Tet::vert_conn,
+    //  Tet::vert_conn + Tet::vert_n);
     mesh.boundary_nodes = {0, 1, 2, 3};
     return mesh;
   }

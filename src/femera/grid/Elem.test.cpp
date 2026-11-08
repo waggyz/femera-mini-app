@@ -2,12 +2,12 @@
 
 #include "Elem.test.hpp"
 
+#if 0
+// Tets included temporaily for testing.
+// The public API should be able to include only a generic interface to access
+// all element types.
 #include "elem/Tets.hpp"
-#include "elem/Prmd.hpp"
-#include "elem/Wdge.hpp"
-#include "elem/Itri.hpp"
-#include "elem/Iqud.hpp"
-#include "elem/Ibar.hpp"
+#endif
 
 namespace femera { namespace grid {
 

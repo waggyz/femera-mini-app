@@ -2,14 +2,18 @@
 
 #include "Elem.test.hpp"
 
+#if 1
+// These included temporaily for testing.
+// The public API should be able to include only a generic interface to access
+// all element types.
 #include "elem/Tets.hpp"
-#include "elem/Prmd.hpp"
-#include "elem/Wdge.hpp"
-#include "elem/Itri.hpp"
-#include "elem/Iqud.hpp"
-#include "elem/Ibar.hpp"
+#include "elem/Quad.hpp"
+#include "elem/Tris.hpp"
+#include "elem/Bars.hpp"
+#endif
 
 #include <gtest/gtest.h>
+#include <omp.h>
 
 auto  mini_ptr = fmr::new_jobs ();
 auto &mini = *mini_ptr;
@@ -64,7 +68,7 @@ fmr::Exit_int main (int argc, char** argv) {
     const auto val_local = elem.get_node_n ();
     if (omp_get_thread_num () == 0){
       val0_adress = reinterpret_cast<uintptr_t>(&val_local);
-    } 
+    }
     if (omp_get_thread_num () == 1){
       val1_adress = reinterpret_cast<uintptr_t>(&val_local);
     }

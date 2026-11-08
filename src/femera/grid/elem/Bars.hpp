@@ -9,15 +9,21 @@ struct Bars : public Elem<Bars> {//TODO Bars?
 public:
   static constexpr fmr::Local_int sims_d = 3;
   static constexpr fmr::Local_int elem_d = 1;
+  //
   static constexpr fmr::Local_int vert_n = 2;
   static constexpr fmr::Local_int edge_n = 1;
   static constexpr fmr::Local_int tris_n = 0;
   static constexpr fmr::Local_int quad_n = 0;
   static constexpr fmr::Local_int vols_n = 0;
   //
-  static constexpr fmr::Local_int tile_elem_n = 1;
-  //static constexpr fmr::Local_int tile_node_n = Bars::get_node_n();// tiles naturall
-  static constexpr fmr::Local_int tile_vert_n = Bars::vert_n;// tiles naturally have vert_n vertices
+  static constexpr fmr::Local_int tile_elem_n = 1;// # this type element / tile
+  //static constexpr fmr::Local_int tile_node_n = Bars::get_node_n();
+  // Bars tile naturally, so tile counts match element counts.
+  static constexpr fmr::Local_int tile_vert_n = Bars::vert_n;
+  static constexpr fmr::Local_int tile_edge_n = Bars::edge_n;
+  static constexpr fmr::Local_int tile_tris_n = Bars::tris_n;
+  static constexpr fmr::Local_int tile_quad_n = Bars::quad_n;
+  static constexpr fmr::Local_int tile_vols_n = Bars::vols_n;
   //
   static constexpr fmr::Geom_float edge_l = 1.0;// total length of edges
   static constexpr fmr::Geom_float face_a = 0.0;// total surface area
@@ -25,17 +31,19 @@ public:
   //
   static constexpr fmr::math::Poly poly_type = fmr::math::Poly::Full;
   //
-  static constexpr
-  fmr::Local_int vert_conn [Bars::vert_n] = {0,1};
-  static constexpr
-  fmr::Local_int bars_conn [Bars::vert_n] = {0,1};
-  //fmr::Local_int bars_conn [Bars::vert_n + (P-1) * Bars::edge_n] = {0,1};
-  static constexpr
-  fmr::Local_int tile_conn [2] = {0,1};
-  //fmr::Local_int tile_conn [tile_node_n] = {0,1};//FIXME handle p2, p3
+  //static constexpr
+  //fmr::Local_int vert_conn [Bars::vert_n] = {0,1};// always integers [0,vert_n-1]
+  // elem_conn is an array [0,get_conn_n()-1].
+  //TODO these are vertext connectivity.
+  static constexpr fmr::Local_int edge_conn [Bars::vert_n] = {0,1};
+  //static constexpr
+  //fmr::Local_int bars_conn [Bars::vert_n] = {0,1};//FIXME handle p2, p3
+  //fmr::Local_int bars_conn [Bars::get_conn_n ()] = {0,1};
+  static constexpr fmr::Local_int tris_conn = {};
+  static constexpr fmr::Local_int quad_conn = {};
   //
-  static constexpr fmr::Local_int* tris_conn = nullptr;
-  static constexpr fmr::Local_int* quad_conn = nullptr;
+  static constexpr
+  fmr::Local_int tile_vert_conn [2] = {0,1};// self-tiling
   //
   static constexpr
   fmr::Geom_float vert_coor [vert_n * sims_d]// transposed coor_vert

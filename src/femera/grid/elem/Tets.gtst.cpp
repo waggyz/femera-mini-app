@@ -184,18 +184,19 @@ TEST( GridElemTets, IntgWgtsSumVol11 ){
 TEST( GridElemTets, ArrayAccessInline ){
   EXPECT_EQ( test_tet1.get_bars_conn ()[0], 0 );
   EXPECT_EQ( test_tet1.get_bars_conn ()[1], 1 );
-}
-auto vert1 = test_tet1.get_bars_conn ();
-//auto s0 = &spar1[0];
+
+  auto vert1 = test_tet1.get_bars_conn ();
+  EXPECT_EQ( vert1 [0], 0 );
+  EXPECT_EQ( vert1 [1], 1 );
+#if 0
 auto v0 = &test_tet1.get_vert_conn ()[0];
 auto v1 = &test_tet1.get_vert_conn ()[1];
 TEST( GridElemTets, ArrayAccessVariable ){
-  EXPECT_EQ( vert1 [0], 0 );
-  EXPECT_EQ( vert1 [1], 1 );
   EXPECT_EQ( v0 [0], 0 );
   EXPECT_EQ( v0 [1], 1 );
   EXPECT_EQ( v1 [0], 1 );
   EXPECT_EQ( v1 [1], 2 );
+#endif
 }
 TEST( GridElemTet, JacTraceIsThree ){
   EXPECT_FLOAT_EQ( float (ntrl_jac3_trace_p1), float (3.0) );

@@ -28,8 +28,8 @@ public://TODO make protected or private with friend class Elem?
 #undef sqrt1_5
   //
   //NOTE Gmsh element conventions
-  static constexpr
-  fmr::Local_int vert_conn [vert_n] = {0,1,2,3};
+  //static constexpr
+  //fmr::Local_int vert_conn [vert_n] = {0,1,2,3};
   static constexpr
   fmr::Local_int bars_conn [Bars::vert_n * edge_n]
   = {
