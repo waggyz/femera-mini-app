@@ -105,16 +105,16 @@ TEST( GridElem, Measures ){
   EXPECT_FLOAT_EQ( float(elem_tet1.get_elem_d ()), 3 );
 }
 TEST( GridElem, PolynomialShapeFunction ){
-  EXPECT_EQ( elem_tet1.poly_func_size ( ), 4 );
-  EXPECT_EQ( elem_tet2.poly_func_size ( ), 10 );
-  EXPECT_EQ( elem_tet3.poly_func_size ( ), 20 );
-  EXPECT_EQ( elem_tet2.poly_func_size (4), 40 );
+  EXPECT_EQ( elem_tet1.get_poly_func_size ( ), 4 );
+  EXPECT_EQ( elem_tet2.get_poly_func_size ( ), 10 );
+  EXPECT_EQ( elem_tet3.get_poly_func_size ( ), 20 );
+  EXPECT_EQ( elem_tet2.get_poly_func_size (4), 40 );
 }
 TEST( GridElem, PolynomialShapeGradient ){
-  EXPECT_EQ( elem_tet1.poly_grad_size ( ), 12 );
-  EXPECT_EQ( elem_tet2.poly_grad_size ( ), 30 );
-  EXPECT_EQ( elem_tet3.poly_grad_size ( ), 60 );
-  EXPECT_EQ( elem_tet2.poly_grad_size (4),120 );
+  EXPECT_EQ( elem_tet1.get_poly_grad_size ( ), 12 );
+  EXPECT_EQ( elem_tet2.get_poly_grad_size ( ), 30 );
+  EXPECT_EQ( elem_tet3.get_poly_grad_size ( ), 60 );
+  EXPECT_EQ( elem_tet2.get_poly_grad_size (4),120 );
 }
 TEST( GridElem, DoubleFloatSpecialization ){
   EXPECT_EQ( size_coor_d, 2 * size_coor_f );

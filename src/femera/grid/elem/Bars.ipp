@@ -15,7 +15,7 @@ inline constexpr fmr::Geom_float Bars::vert_coor [];
 inline constexpr fmr::Geom_float Bars::coor_vert [];
 
 #endif
-constexpr bool Bars::get_tile_vert_conn_impl (
+constexpr bool Bars::calc_tile_vert_conn (
   fmr::Local_int* conn,
     const fmr::Local_int tile_i,// local element index
     const fmr::Local_int* part_size,
@@ -25,7 +25,7 @@ constexpr bool Bars::get_tile_vert_conn_impl (
     conn[1] = p * (tile_i + 1);
     return tile_i < part_size[0];// false if tile_i out of range
   }
-constexpr bool Bars::get_tile_vert_conn_prdc_impl (
+constexpr bool Bars::calc_tile_vert_conn_prdc (
   fmr::Local_int* conn,
     const fmr::Local_int tile_i,// local element index
     const fmr::Local_int* part_size,
@@ -37,54 +37,71 @@ constexpr bool Bars::get_tile_vert_conn_prdc_impl (
     conn[1] = p * ((tile_i + 1) % part_size[0]);
     return tile_i < part_size[0];// false if tile_i out of range
   }
-constexpr bool Bars::get_tile_vert_coor_impl(fmr::Geom_float* coor,
+constexpr bool Bars::calc_tile_node_conn (
+  fmr::Local_int* conn,
+    const fmr::Local_int tile_i,// local element index
+    const fmr::Local_int* part_size,
+    const fmr::Local_int elem_p)
+    noexcept {
+    conn[0] = elem_p * tile_i;
+    conn[1] = elem_p * (tile_i + 1);
+    if (elem_p > 1) {
+      for (fmr::Local_int j = 1; j < elem_p; ++j) {
+        conn[j + 1] = elem_p * tile_i + j;
+      }
+    }
+    return tile_i < part_size[0];// false if tile_i out of range
+  }
+constexpr bool Bars::calc_tile_vert_coor(fmr::Geom_float* coor,
     const fmr::Local_int vert_i,
     const fmr::Local_int vert_n,
-    const fmr::Geom_float* elem_size,
+    const fmr::Geom_float* tile_size,
     const fmr::Geom_float* part_orig)
     noexcept{
-    coor[0] = part_orig[0] + vert_i * elem_size[0];
-    coor[1] = part_orig[1] + vert_i * elem_size[1];
-    coor[2] = part_orig[2] + vert_i * elem_size[2];
+    coor[0] = part_orig[0] + vert_i * tile_size[0];
+    coor[1] = part_orig[1] + vert_i * tile_size[1];
+    coor[2] = part_orig[2] + vert_i * tile_size[2];
     return vert_i < vert_n;
   }
-constexpr bool Bars::get_tile_node_coor_impl(fmr::Geom_float* coor,
+#if 0
+constexpr bool Bars::calc_tile_node_coor(fmr::Geom_float* coor,
     const fmr::Local_int node_i,
     const fmr::Local_int node_n,
-    const fmr::Geom_float* elem_size,
+    const fmr::Geom_float* tile_size,
     const fmr::Geom_float* part_orig)
     noexcept{
-    coor[0] = part_orig[0] + node_i * elem_size[0];
-    coor[1] = part_orig[1] + node_i * elem_size[1];
-    coor[2] = part_orig[2] + node_i * elem_size[2];
+    coor[0] = part_orig[0] + node_i * tile_size[0];
+    coor[1] = part_orig[1] + node_i * tile_size[1];
+    coor[2] = part_orig[2] + node_i * tile_size[2];
     //TODO FIXME this only works for P=1
     return node_i < node_n;
   }
-constexpr bool Bars::get_tile_elem_vert_coor_impl(//x1,y1,z1, x2,y2,z2
+#endif
+constexpr bool Bars::calc_tile_elem_vert_coor(//x1,y1,z1, x2,y2,z2
     fmr::Geom_float* vert_coor,// size: vert_n * sims_d
     const fmr::Local_int elem_i,
     const fmr::Local_int elem_n,
-    const fmr::Geom_float* elem_size,
+    const fmr::Geom_float* tile_size,
     const fmr::Geom_float* part_orig)// origin should default to {0.0,0.0,0.0}
     noexcept{
       for (fmr::Local_int v = 0; v < 2; ++v) {// 2 vertices for 1D bar element
-        vert_coor[v * 3 + 0] = part_orig[0] + (elem_i + v) * elem_size[0];
-        vert_coor[v * 3 + 1] = part_orig[1] + (elem_i + v) * elem_size[1];
-        vert_coor[v * 3 + 2] = part_orig[2] + (elem_i + v) * elem_size[2];
+        vert_coor[v * 3 + 0] = part_orig[0] + (elem_i + v) * tile_size[0];
+        vert_coor[v * 3 + 1] = part_orig[1] + (elem_i + v) * tile_size[1];
+        vert_coor[v * 3 + 2] = part_orig[2] + (elem_i + v) * tile_size[2];
       }
       return elem_i < elem_n;
     }
-constexpr bool Bars::get_tile_elem_coor_vert_impl(//x1,x2, y1,y2, z1, z2
+constexpr bool Bars::calc_tile_elem_coor_vert(//x1,x2, y1,y2, z1, z2
     fmr::Geom_float* vert_coor,// size: vert_n * sims_d
     const fmr::Local_int elem_i,
     const fmr::Local_int elem_n,
-    const fmr::Geom_float* elem_size,
+    const fmr::Geom_float* tile_size,
     const fmr::Geom_float* part_orig)// origin should default to {0.0,0.0,0.0}
     noexcept{
       for (fmr::Local_int v = 0; v < 2; ++v) {// 2 vertices for 1D bar element
-        vert_coor[v + 0] = part_orig[0] + (elem_i + v) * elem_size[0];
-        vert_coor[v + 2] = part_orig[1] + (elem_i + v) * elem_size[1];
-        vert_coor[v + 4] = part_orig[2] + (elem_i + v) * elem_size[2];
+        vert_coor[v + 0] = part_orig[0] + (elem_i + v) * tile_size[0];
+        vert_coor[v + 2] = part_orig[1] + (elem_i + v) * tile_size[1];
+        vert_coor[v + 4] = part_orig[2] + (elem_i + v) * tile_size[2];
       }
       return elem_i < elem_n;
     }
@@ -109,58 +126,68 @@ constexpr bool Bars::get_tile_elem_coor_vert_impl(//x1,x2, y1,y2, z1, z2
     }
 #endif
 
-//} } }//end femera::grid::elem namespace
-
-
 //namespace femera { namespace grid {
-// Bars::poly_func_X and Bars::poly_grad_N evaluate the shape functions or
-// gradients at 3D (reduced to 1D) natural coordinate point x.
-// Bars nonzero shape functions are only in the x-direction x[0].
+// Bars::calc_poly_func_pX and Bars::calc_poly_grad_pX evaluate the shape functions or
+// gradients at 3D natural coordinate point x.
+// Bars nonzero shape functions are only in the x-direction x[0].//TODO correct?
 // When edge nodes are at their natural locations, the Jacobian is constant,
-// and only poly_func2 and poly_grad_2 are needed for constant Jacobian evaluation.
+// and only calc_poly_func_p1 and calc_poly_grad_p1 are needed for constant Jacobian evaluation.
 
-template <typename F> inline// single or double precision
-F* Bars::poly_func_2
-(F f[2u], const F x[1u]) {// x[1], x[2] not used for 1D bar element
+template <typename Y, typename G> inline
+//TODO mixed precision support for single or double precision
+Y* Bars::calc_poly_func_p1
+(Y f[2u], const G x[1u]) {// x[1], x[2] not used for 1D bar element?
   f[ 0] = 1.0-x[0];
   f[ 1] = x[0];
   return f;
 }
-template <typename F> inline
-F* Bars::poly_grad_2
-(F g[2u *3u], const F[]) {// x[3u] not used (constant gradient)
+template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> inline
+Y* Bars::calc_poly_grad_p1
+(Y g[2u *3u], const G[]) {// x[3u] not used (constant gradient)
+#if 1
   g[ 0]=-1.0; g[ 1]=1.0;// dN/dx (natural coords)
   g[ 2]= 0.0; g[ 3]=0.0;// dN/dy
   g[ 4]= 0.0; g[ 5]=0.0;// dN/dz
+#else
+  g[ 0]=-1.0; g[ 1]=1.0;// dN/dx (natural coords)
+  g[ 2]=-1.0; g[ 3]=1.0;// dN/dy
+  g[ 4]=-1.0; g[ 5]=1.0;// dN/dz
+#endif
   return g;
 }
-template <typename F> inline
-F* Bars::poly_grat_2
-(F g[2u *3u], const F[]) {// x[3u] not used (constant gradient)
+template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> inline
+Y* Bars::calc_poly_grat_p1
+(Y g[2u *3u], const G[]) {// x[3u] not used (constant gradient)
+#if 1
   g[ 0]=-1.0; g[ 3]=1.0;// dN/dx (natural coords)
   g[ 1]= 0.0; g[ 4]=0.0;// dN/dy
   g[ 2]= 0.0; g[ 5]=0.0;// dN/dz
+#else
+  g[ 0]=-1.0; g[ 3]=1.0;// dN/dx (natural coords)
+  g[ 1]=-1.0; g[ 4]=1.0;// dN/dy
+  g[ 2]=-1.0; g[ 5]=1.0;// dN/dz
+#endif
   return g;
 }
-template <typename F> inline
-F* Bars::poly_func_3
-(F f[3u], const F x[1u]) {
-  const F L2=x[0];
-  const F L1=1.0-L2;
+template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> inline
+Y* Bars::calc_poly_func_p2
+(Y f[3u], const G x[1u]) {
+  const Y L2=x[0];
+  const Y L1=1.0-L2;
   f[ 0] = 2.0*L1*L1 - L1;// Vertex nodes
   f[ 1] = 2.0*L2*L2 - L2;
   f[ 2] = 4.0*L1*L2;// Edge node
   return f;
 }
-template <typename F> inline
-F* Bars::poly_grad_3
-(F g[3u *3u], const F x[1u]) {
-  const F L2=x[0];
-  const F L1=1.0-L2;
+template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> inline
+Y* Bars::calc_poly_grad_p2
+(Y g[3u *3u], const G x[1u]) {
+  const Y L2=x[0];
+  const Y L1=1.0-L2;
   // Term-by-term derivs
-  const F L1r=-1.0, L2r=1.0;
-  const F L1s=-1.0, L2s=0.0;
-  const F L1t=-1.0, L2t=0.0;
+  const Y L1r=-1.0, L2r=1.0;
+  const Y L1s=-1.0, L2s=0.0;
+  const Y L1t=-1.0, L2t=0.0;
   // edges: 0,1; 1,2; 0,2; 0,3; 2,3; 1,3;
   // r-derivs by product rule
   g[ 0] = 2.0*L1*L1r + 2.0*L1r*L1 - L1r;// Vertex nodes
@@ -176,15 +203,15 @@ F* Bars::poly_grad_3
   g[ 8] = 4.0*L2*L1t + 4.0*L2t*L1;// Edge node
   return g;
 }
-template <typename F> inline
-F* Bars::poly_grat_3// transposed
-(F g[3u *3u], const F x[1u]) {
-  const F L2=x[0];
-  const F L1=1.0-L2;
+template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> inline
+Y* Bars::calc_poly_grat_p2// transposed
+(Y g[3u *3u], const G x[1u]) {
+  const Y L2=x[0];
+  const Y L1=1.0-L2;
   // Term-by-term derivs
-  const F L1r=-1.0, L2r=1.0;
-  const F L1s=-1.0, L2s=0.0;
-  const F L1t=-1.0, L2t=0.0;
+  const Y L1r=-1.0, L2r=1.0;
+  const Y L1s=-1.0, L2s=0.0;
+  const Y L1t=-1.0, L2t=0.0;
   // edges: 0,1; 1,2; 0,2; 0,3; 2,3; 1,3;
   // r-derivs by product rule
   g[ 0] = 2.0*L1*L1r + 2.0*L1r*L1 - L1r;// Vertex nodes
@@ -200,11 +227,11 @@ F* Bars::poly_grat_3// transposed
   g[ 8] = 4.0*L2*L1t + 4.0*L2t*L1;// Edge node
   return g;
 }
-template <typename F> inline
-F* elem::Bars::poly_func_4
-(F f[4u], const F x[1u]) {
-  const F L2=x[0];
-  const F L1=(1.0-L2);
+template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> inline
+Y* elem::Bars::calc_poly_func_p3
+(Y f[4u], const G x[1u]) {
+  const Y L2=x[0];
+  const Y L1=(1.0-L2);
   f[ 0]= 0.5* L1 *(3.0* L1 -1.0)*(3.0* L1 -2.0);// Vertex nodes;
   f[ 1]= 0.5* L2 *(3.0* L2 -1.0)*(3.0* L2 -2.0);
   // Edge nodes
@@ -212,15 +239,15 @@ F* elem::Bars::poly_func_4
   f[ 3]=4.5*( L1*L2 *(3.0*L2 -1.0) );
   return f;
 }
-template <typename F> inline
-F* elem::Bars::poly_grad_4
-(F g[4u *3u], const F x[1u]) {
-  const F L2=x[0];
-  const F L1=(1.0-L2);
+template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> inline
+Y* elem::Bars::calc_poly_grad_p3
+(Y g[4u *3u], const G x[1u]) {
+  const Y L2=x[0];
+  const Y L1=(1.0-L2);
   // Term-by-term derivs
-  const F L1r=-1.0, L2r=1.0;
-  const F L1s=-1.0, L2s=0.0;
-  const F L1t=-1.0, L2t=0.0;
+  const Y L1r=-1.0, L2r=1.0;
+  const Y L1s=-1.0, L2s=0.0;
+  const Y L1t=-1.0, L2t=0.0;
   // edge: 0,1;
   g[ 0]= 0.5* L1r *(3.* L1 -1.)*(3.* L1 -2.)// Vertex nodes
        + 0.5* L1  *(3.* L1r   )*(3.* L1 -2.)
@@ -253,15 +280,15 @@ F* elem::Bars::poly_grad_4
   g[11]=4.5*( L1t*L2 *(3.*L2 -1.) + L1 *L2t*(3.*L2 -1.) + L1 *L2 *(3.*L2t) );
   return g;
 }
-template <typename F> inline
-F* elem::Bars::poly_grat_4
-(F g[4u *3u], const F x[1u]) {
-  const F L2=x[0];
-  const F L1=(1.0-L2);
+template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> inline
+Y* elem::Bars::calc_poly_grat_p3
+(Y g[4u *3u], const G x[1u]) {
+  const Y L2=x[0];
+  const Y L1=(1.0-L2);
   // Term-by-term derivs
-  const F L1r=-1.0, L2r=1.0;
-  const F L1s=-1.0, L2s=0.0;
-  const F L1t=-1.0, L2t=0.0;
+  const Y L1r=-1.0, L2r=1.0;
+  const Y L1s=-1.0, L2s=0.0;
+  const Y L1t=-1.0, L2t=0.0;
   // edge: 0,1;
   g[ 0]= 0.5* L1r *(3.* L1 -1.)*(3.* L1 -2.)// Vertex nodes
        + 0.5* L1  *(3.* L1r   )*(3.* L1 -2.)

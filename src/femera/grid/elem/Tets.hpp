@@ -250,17 +250,17 @@ public://TODO make protected or private with friend class Elem?
   //------------------------- tet shape functions ----------------------------
   //TODO Return poynomial shape function/gradient transposed?
   template <typename F> static inline// single or double
-  F* poly_func_4 (F f[4u], const F x[3u]);
+  F* calc_poly_func_4 (F f[4u], const F x[3u]);
   template <typename F> static inline
-  F* poly_grad_4 (F g[4u *3u], const F[]);// x[3u] not used; result is constant
+  F* calc_poly_grad_4 (F g[4u *3u], const F[]);// x[3u] not used; result is constant
   template <typename F> static inline
-  F* poly_func_10 (F f[10u], const F x[3u]);
+  F* calc_poly_func_10 (F f[10u], const F x[3u]);
   template <typename F> static inline
-  F* poly_grad_10 (F g[10u *3u], const F x[3u]);
+  F* calc_poly_grad_10 (F g[10u *3u], const F x[3u]);
   template <typename F> static inline
-  F* poly_func_20 (F f[20u], const F x[3u]);
+  F* calc_poly_func_20 (F f[20u], const F x[3u]);
   template <typename F> static inline
-  F* poly_grad_20 (F g[20u *3u], const F x[3u]);
+  F* calc_poly_grad_20 (F g[20u *3u], const F x[3u]);
   //TODO singularity tetrahedron element shape functions and integration rules
   //--------------------------- tet integration ------------------------------
   // Tetrahedral integration points and weights

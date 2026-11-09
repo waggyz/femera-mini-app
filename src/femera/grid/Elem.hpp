@@ -101,7 +101,6 @@ class Elem {
   // Non-trivial constexpr member functions -----------------------------------
   constexpr fmr::Local_int get_face_n () const noexcept;
   constexpr fmr::Local_int get_node_n () const noexcept;
-  constexpr fmr::Local_int get_tile_node_n () const noexcept;
   //
   constexpr
   fmr::Local_int jacs_size (
@@ -112,9 +111,9 @@ class Elem {
     const fmr::Local_int intp_n=1, const fmr::Local_int sims_d=3
   ) const noexcept;
   constexpr
-  fmr::Local_int poly_func_size (const fmr::Local_int intp_n=1) const noexcept;
+  fmr::Local_int get_poly_func_size (const fmr::Local_int intp_n=1) const noexcept;
   constexpr
-  fmr::Local_int poly_grad_size (
+  fmr::Local_int get_poly_grad_size (
     const fmr::Local_int intp_n=1, const fmr::Local_int sims_d=3) const noexcept;
   //
   // Array constexpr pointers =================================================
@@ -154,8 +153,8 @@ class Elem {
   constexpr const F* get_coor_vert () const noexcept {
     return T::coor_vert_f;
   }
-  // Structured grid element tiles ----------------------------------------
-  constexpr fmr::Local_int get_tile_n () const noexcept {
+  // Structured grid element tiles ============================================
+  constexpr fmr::Local_int get_tile_elem_n () const noexcept {
     return T::tile_elem_n;}
   constexpr fmr::Local_int get_tile_vert_n () const noexcept {
     return T::tile_vert_n;}
@@ -168,14 +167,25 @@ class Elem {
   constexpr fmr::Local_int get_tile_vols_n () const noexcept {
     return T::tile_vols_n;}// 3D elements of this type (assume all same)
   //
+  constexpr fmr::Local_int get_tile_elem_node_n () const noexcept;
+#if 0
+  constexpr fmr::Local_int get_tile_node_n (fmr::Local_int* mesh_size)
+  const noexcept;
+#endif
+  // Tiled (strucured mesh) node coordinates
+  //get_tile_node_coor (node_i) {
+  //  return {}
+  // }
+#if 0
   constexpr const fmr::Local_int* get_tile_vert_conn () const noexcept {
-    return T::tile_vert_conn;}//NOTE only valid for P=1
-  //
-  // Tile operations dispatch to T's corresponding static *_impl method.
+    return T::tile_vert_conn;}// single tile vertex connectivity is trivial:
+  //                             {0,1,...,vert_n-1}
+ #endif
+  // Tile operations dispatch to T's corresponding static calc_* method.
   // Shapes without an implementation fail at compile time when called.
   // Connectivity implementations receive p (defaulting to P), allowing
   // shape-specific behavior for each order without templating the shape.
-  //TODO how to handle when grid_size not evenly disible by part_size?
+  //TODO how to handle when grid_size not evenly divisible by part_size?
   constexpr bool get_tile_vert_conn (fmr::Local_int* conn,
     const fmr::Local_int tile_i,
     const fmr::Local_int* part_size,
@@ -183,7 +193,14 @@ class Elem {
     //NOTE conn, part_size bounds should be checked by the caller.
     const noexcept;
   constexpr bool get_tile_vert_conn_prdc (fmr::Local_int* conn,// Periodic BCs
-    //NOTE This is for a periodic partion, not an overall periodic grid.
+    //NOTE This is for a periodic partition, not an overall periodic grid.
+    const fmr::Local_int tile_i,
+    const fmr::Local_int* part_size,
+    const fmr::Local_int p=P)// {x}, {x,y}, {x,y,z} for 1D,2D,3D elems
+    //NOTE conn, part_size bounds should be checked by the caller.
+    const noexcept;
+  //
+  constexpr bool get_tile_node_conn (fmr::Local_int* conn,
     const fmr::Local_int tile_i,
     const fmr::Local_int* part_size,
     const fmr::Local_int p=P)// {x}, {x,y}, {x,y,z} for 1D,2D,3D elems
@@ -193,25 +210,26 @@ class Elem {
   constexpr bool get_tile_vert_coor(fmr::Geom_float* vert_coor,
     const fmr::Local_int node_i,
     const fmr::Local_int node_n,
-    const fmr::Geom_float* elem_size,
+    const fmr::Geom_float* tile_size,
     const fmr::Geom_float* part_orig)// origin should default to {0.0,0.0,0.0}
     //NOTE node_coor, elem_size, part_orig bounds should be checked by the caller.
     const noexcept;
   // For Bars, elem_size is the spacing between successive nodes; this
   // currently matches element spacing only for P=1.
-  constexpr bool get_tile_node_coor(fmr::Geom_float* node_coor,
+#if 0
+  constexpr bool get_tile_elem_node_coor(fmr::Geom_float* node_coor,
     const fmr::Local_int node_i,
     const fmr::Local_int node_n,
-    const fmr::Geom_float* elem_size,
+    const fmr::Geom_float* tile_size,
     const fmr::Geom_float* part_orig)// origin should default to {0.0,0.0,0.0}
     //NOTE node_coor, elem_size, part_orig bounds should be checked by the caller.
     const noexcept;
-
+#endif
   constexpr bool get_tile_elem_vert_coor(//TODO need: 
     fmr::Geom_float* vert_coor,// size: vert_n * sims_d
     const fmr::Local_int elem_i,
     const fmr::Local_int elem_n,
-    const fmr::Geom_float* elem_size,
+    const fmr::Geom_float* tile_size,
     const fmr::Geom_float* part_orig)// origin should default to {0.0,0.0,0.0}
     //NOTE vert_coor, elem_size, part_orig bounds should be checked by the caller.
     const noexcept;
@@ -219,9 +237,9 @@ class Elem {
     fmr::Geom_float* vert_coor,// size: vert_n * sims_d
     const fmr::Local_int elem_i,
     const fmr::Local_int elem_n,
-    const fmr::Geom_float* elem_size,
+    const fmr::Geom_float* tile_size,
     const fmr::Geom_float* part_orig)// origin should default to {0.0,0.0,0.0}
-    //NOTE vert_coor, elem_size, part_orig bounds should be checked by the caller.
+    //NOTE vert_coor, tile_size, part_orig bounds should be checked by the caller.
     const noexcept;
   //
 #if 0
@@ -270,45 +288,7 @@ class Elem {
   }
 #endif
   // Node coordinates --------------------------------------------------------
-  //TODO Generalize for different element shapes by moving to Tets, etc.?
-#if 0
-  template <fmr::Local_int tP=P, fmr::Local_int tD=D,
-    typename std::enable_if <tP == 1>::value,
-    typename std::enable_if <tD == 3>::value>// P=1, D=3
-  constexpr const F* get_node_coor () const noexcept {
-   return T::vert_coor;
-  }
-  template <fmr::Local_int tP=P, fmr::Local_int tD=D,
-    typename std::enable_if <tP == 1>::value,
-    typename std::enable_if <tD == 3>::value>// P=1, D=3
-  constexpr const F* get_coor_node () const noexcept {
-    return T::coor_vert;
-  }
-  template <fmr::Local_int tP=P, fmr::Local_int tD=D,
-    typename std::enable_if <tP == 2>::value,
-    typename std::enable_if <tD == 3>::value>// P=2, D=3
-  constexpr const F* get_node_coor () const noexcept {
-   return T::tet10_coor;
-  }
-  template <fmr::Local_int tP=P, fmr::Local_int tD=D,
-    typename std::enable_if <tP == 2>::value,
-    typename std::enable_if <tD == 3>::value>// P=2, D=3
-  constexpr const F* get_coor_node () const noexcept {
-    return  T::coor_tet10;
-  }
-  template <fmr::Local_int tP=P, fmr::Local_int tD=D,
-    typename std::enable_if <tP == 3>::value,
-    typename std::enable_if <tD == 3>::value>// P=3, D=3
-  constexpr const F* get_node_coor () const noexcept {
-   return T::tet20_coor;
-  }
-  template <fmr::Local_int tP=P, fmr::Local_int tD=D,
-    typename std::enable_if <tP == 3>::value,
-    typename std::enable_if <tD == 3>::value>// P=3, D=3
-  constexpr const F* get_coor_node () const noexcept {
-    return  T::coor_tet20;
-  }
-#endif
+  //
   // Integration points and weights (default) --------------------------------
   //
   // Shape functions and gradients -------------------------------------------

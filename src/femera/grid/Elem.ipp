@@ -15,65 +15,7 @@ template <class T, typename fmr::Local_int P, typename F>
     + (P==3  ? T::vols_n * (T::tris_n + T::quad_n)// face nodes for P==3
     : 0);      // vols_n is 0 (1D,2D elems) or 1 (3D solid elems)
 }
-template <class T, typename fmr::Local_int P, typename F>
- constexpr fmr::Local_int elem::Elem<T,P,F>::get_tile_node_n () const noexcept {
-  // Handles solid and interface elements
-  return T::tile_vert_n// vertex nodes
-    + (P -1) * T::tile_edge_n// edge nodes
-    + (P==3  ? T::tile_vols_n * (T::tile_tris_n + T::tile_quad_n)// face nodes for P==3
-    : 0);      // vols_n is 0 (1D,2D elems) or 1 (3D solid elems)
-}
-template <class T, typename fmr::Local_int P, typename F>
-constexpr bool elem::Elem<T,P,F>::get_tile_vert_conn (
-  fmr::Local_int* conn, const fmr::Local_int tile_i,
-  const fmr::Local_int* part_size, const fmr::Local_int p) const noexcept {
-  return T::get_tile_vert_conn_impl (conn, tile_i, part_size, p);
-}
-template <class T, typename fmr::Local_int P, typename F>
-constexpr bool elem::Elem<T,P,F>::get_tile_vert_conn_prdc (
-  fmr::Local_int* conn, const fmr::Local_int tile_i,
-  const fmr::Local_int* part_size, const fmr::Local_int p) const noexcept {
-  return T::get_tile_vert_conn_prdc_impl (conn, tile_i, part_size, p);
-}
-template <class T, typename fmr::Local_int P, typename F>
-constexpr bool elem::Elem<T,P,F>::get_tile_vert_coor (
-  fmr::Geom_float* coor, const fmr::Local_int vert_i,
-  const fmr::Local_int vert_n, const fmr::Geom_float* elem_size,
-  const fmr::Geom_float* part_orig) const noexcept {
-  return T::get_tile_vert_coor_impl (coor, vert_i, vert_n, elem_size, part_orig);
-}
-template <class T, typename fmr::Local_int P, typename F>
-constexpr bool elem::Elem<T,P,F>::get_tile_node_coor (
-  fmr::Geom_float* coor, const fmr::Local_int node_i,
-  const fmr::Local_int node_n, const fmr::Geom_float* elem_size,
-  const fmr::Geom_float* part_orig) const noexcept {
-  return T::get_tile_node_coor_impl (coor, node_i, node_n, elem_size, part_orig);
-}
-template <class T, typename fmr::Local_int P, typename F>
-constexpr bool elem::Elem<T,P,F>::get_tile_elem_vert_coor (
-  fmr::Geom_float* coor, const fmr::Local_int elem_i,
-  const fmr::Local_int elem_n, const fmr::Geom_float* elem_size,
-  const fmr::Geom_float* part_orig) const noexcept {
-  return T::get_tile_elem_vert_coor_impl (coor, elem_i, elem_n, elem_size, part_orig);
-}
-template <class T, typename fmr::Local_int P, typename F>
-constexpr bool elem::Elem<T,P,F>::get_tile_elem_coor_vert (
-  fmr::Geom_float* coor, const fmr::Local_int elem_i,
-  const fmr::Local_int elem_n, const fmr::Geom_float* elem_size,
-  const fmr::Geom_float* part_orig) const noexcept {
-  return T::get_tile_elem_coor_vert_impl (coor, elem_i, elem_n, elem_size, part_orig);
-}
-#if 0
-template <class T, typename fmr::Local_int P, typename F>
-constexpr fmr::Local_int elem::Elem<T,P,F>::get_elem_conn (fmr::Local_int i)
-const noexcept {
-  switch(i){
-    case 0: return T::tris_n;
-    case 1: return T::quad_n;
-    default: return 0;
-  }
-}
-#endif
+// Element shape function and Jacobian stuff ==================================
 template <class T, typename fmr::Local_int P, typename F>
 constexpr fmr::Local_int elem::Elem<T,P,F>::jacs_size
   (const fmr::Local_int intp_n, const fmr::Local_int this_d
@@ -87,16 +29,95 @@ template <class T, typename fmr::Local_int P, typename F>
   return intp_n * (this_d*this_d + 1);
 }
 template <class T, typename fmr::Local_int P, typename F>
-constexpr fmr::Local_int elem::Elem<T,P,F>::poly_func_size
+constexpr fmr::Local_int elem::Elem<T,P,F>::get_poly_func_size
   (const fmr::Local_int intp_n) const noexcept {// default 1
   return intp_n * get_node_n ();
 }
 template <class T, typename fmr::Local_int P, typename F>
-constexpr fmr::Local_int elem::Elem<T,P,F>::poly_grad_size
+constexpr fmr::Local_int elem::Elem<T,P,F>::get_poly_grad_size
   (const fmr::Local_int intp_n, const fmr::Local_int this_d) const noexcept {// default 1
   return intp_n * get_node_n () * this_d;
 }
-
+// Structured mesh tiling elements ============================================
+template <class T, typename fmr::Local_int P, typename F>
+ constexpr fmr::Local_int elem::Elem<T,P,F>::get_tile_elem_node_n () const noexcept {
+  // Handles solid and interface elements
+  return T::tile_vert_n// vertex nodes
+    + (P -1) * T::tile_edge_n// edge nodes
+    + (P==3  ? T::tile_vols_n * (T::tile_tris_n + T::tile_quad_n)// face nodes for P==3
+    : 0);      // vols_n is 0 (1D,2D elems) or 1 (3D solid elems)
+}
+#if 0
+template <class T, typename fmr::Local_int P, typename F>
+ constexpr fmr::Local_int elem::Elem<T,P,F>::get_tile_node_n (
+  fmr::Local_int* mesh_size) const noexcept {
+  // Handles solid and interface elements
+  return T::tile_vert_n// vertex nodes
+    + (P -1) * T::tile_edge_n// edge nodes
+    + (P==3  ? T::tile_vols_n * (T::tile_tris_n + T::tile_quad_n)// face nodes for P==3
+    : 0);      // vols_n is 0 (1D,2D elems) or 1 (3D solid elems)
+}
+#endif
+template <class T, typename fmr::Local_int P, typename F>
+constexpr bool elem::Elem<T,P,F>::get_tile_node_conn (
+  fmr::Local_int* conn, const fmr::Local_int tile_i,
+  const fmr::Local_int* part_size, const fmr::Local_int p) const noexcept {
+  return T::calc_tile_node_conn (conn, tile_i, part_size, p);
+}
+template <class T, typename fmr::Local_int P, typename F>
+constexpr bool elem::Elem<T,P,F>::get_tile_vert_conn (
+  fmr::Local_int* conn, const fmr::Local_int tile_i,
+  const fmr::Local_int* part_size, const fmr::Local_int p) const noexcept {
+  return T::calc_tile_vert_conn (conn, tile_i, part_size, p);
+}
+template <class T, typename fmr::Local_int P, typename F>
+constexpr bool elem::Elem<T,P,F>::get_tile_vert_conn_prdc (
+  fmr::Local_int* conn, const fmr::Local_int tile_i,
+  const fmr::Local_int* part_size, const fmr::Local_int p) const noexcept {
+  return T::calc_tile_vert_conn_prdc (conn, tile_i, part_size, p);
+}
+template <class T, typename fmr::Local_int P, typename F>
+constexpr bool elem::Elem<T,P,F>::get_tile_vert_coor (
+  fmr::Geom_float* coor, const fmr::Local_int vert_i,
+  const fmr::Local_int vert_n, const fmr::Geom_float* elem_size,
+  const fmr::Geom_float* part_orig) const noexcept {
+  return T::calc_tile_vert_coor (coor, vert_i, vert_n, elem_size, part_orig);
+}
+#if 0
+template <class T, typename fmr::Local_int P, typename F>
+constexpr bool elem::Elem<T,P,F>::get_tile_node_coor (
+  fmr::Geom_float* coor, const fmr::Local_int node_i,
+  const fmr::Local_int node_n, const fmr::Geom_float* elem_size,
+  const fmr::Geom_float* part_orig) const noexcept {
+  return T::calc_tile_node_coor (coor, node_i, node_n, elem_size, part_orig);
+}
+#endif
+template <class T, typename fmr::Local_int P, typename F>
+constexpr bool elem::Elem<T,P,F>::get_tile_elem_vert_coor (
+  fmr::Geom_float* coor, const fmr::Local_int elem_i,
+  const fmr::Local_int elem_n, const fmr::Geom_float* elem_size,
+  const fmr::Geom_float* part_orig) const noexcept {
+  return T::calc_tile_elem_vert_coor (coor, elem_i, elem_n, elem_size, part_orig);
+}
+template <class T, typename fmr::Local_int P, typename F>
+constexpr bool elem::Elem<T,P,F>::get_tile_elem_coor_vert (
+  fmr::Geom_float* coor, const fmr::Local_int elem_i,
+  const fmr::Local_int elem_n, const fmr::Geom_float* elem_size,
+  const fmr::Geom_float* part_orig) const noexcept {
+  return T::calc_tile_elem_coor_vert (coor, elem_i, elem_n, elem_size, part_orig);
+}
+#if 0
+template <class T, typename fmr::Local_int P, typename F>
+constexpr fmr::Local_int elem::Elem<T,P,F>::get_elem_conn (fmr::Local_int i)
+const noexcept {
+  switch(i){
+    case 0: return T::tris_n;
+    case 1: return T::quad_n;
+    default: return 0;
+  }
+}
+#endif
+// Element quality metrics ====================================================
   template <class T, typename fmr::Local_int P, typename F>//, typename Y>
   constexpr
   F elem::Elem<T,P,F>::calc_delt_qual (const F* vert_coor, const fmr::Dim_int dims)
@@ -104,6 +125,7 @@ constexpr fmr::Local_int elem::Elem<T,P,F>::poly_grad_size
     // Calculate the ratio of the minimum edge length
     // to the maximum coordinate absolute value.
     //NOTE only element vertices are used for this quality metric.
+    //TODO genalize & move to Elem.ipp?
     const auto vert_n = get_vert_n ();
     F min_edge = std::numeric_limits<F>::max ();
     F max_coord = std::numeric_limits<F>::lowest ();

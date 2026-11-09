@@ -5,12 +5,16 @@
 
 namespace femera { namespace grid { namespace elem {
 
-struct Bars : public Elem<Bars> {//TODO Bars?
+//class Bars final: public Elem<Bars> { friend class Elem;
+class Bars final : public Elem<Bars> {
+  template <class T, fmr::Local_int P, class F>
+  friend class Elem;
 public:
+  static constexpr fmr::Local_int vert_n = 2;// needed by other elements
+private:
   static constexpr fmr::Local_int sims_d = 3;
   static constexpr fmr::Local_int elem_d = 1;
   //
-  static constexpr fmr::Local_int vert_n = 2;
   static constexpr fmr::Local_int edge_n = 1;
   static constexpr fmr::Local_int tris_n = 0;
   static constexpr fmr::Local_int quad_n = 0;
@@ -36,20 +40,14 @@ public:
   // elem_conn is an array [0,get_conn_n()-1].
   //TODO these are vertex connectivity.
   static constexpr fmr::Local_int edge_conn [Bars::vert_n] = {0,1};
-  //static constexpr
-  //fmr::Local_int bars_conn [Bars::vert_n] = {0,1};//FIXME handle p2, p3
-  //fmr::Local_int bars_conn [Bars::get_conn_n ()] = {0,1};
   static constexpr fmr::Local_int tris_conn = {};
   static constexpr fmr::Local_int quad_conn = {};
-  //
-  static constexpr
-  fmr::Local_int tile_vert_conn [2] = {0,1};// self-tiling
   //
   static constexpr
   fmr::Geom_float vert_coor [vert_n * sims_d]// transposed coor_vert
     = {           // vertex                      //
     0.0, 0.0, 0.0,// 0       0-------1           //
-    1.0, 0.0, 0.0 // 1                o--x       //
+    1.0, 0.0, 0.0 // 1                  o--x     //
   };
   static constexpr
   fmr::Geom_float coor_vert [vert_n * sims_d]// transposed vert_coor
@@ -58,30 +56,13 @@ public:
     0.0, 0.0,
     0.0, 0.0
   };
-  static constexpr bool get_tile_vert_conn_impl (fmr::Local_int* conn,
-    fmr::Local_int tile_i, const fmr::Local_int* part_size,
-    fmr::Local_int p) noexcept;
-  static constexpr bool get_tile_vert_conn_prdc_impl (fmr::Local_int* conn,
-    fmr::Local_int tile_i, const fmr::Local_int* part_size,
-    fmr::Local_int p) noexcept;
-  static constexpr bool get_tile_vert_coor_impl (fmr::Geom_float* coor,
-    fmr::Local_int vert_i, fmr::Local_int vert_n,
-    const fmr::Geom_float* elem_size, const fmr::Geom_float* part_orig) noexcept;
-  static constexpr bool get_tile_node_coor_impl (fmr::Geom_float* coor,
-    fmr::Local_int node_i, fmr::Local_int node_n,
-    const fmr::Geom_float* elem_size, const fmr::Geom_float* part_orig) noexcept;
-  static constexpr bool get_tile_elem_vert_coor_impl (fmr::Geom_float* coor,
-    fmr::Local_int elem_i, fmr::Local_int elem_n,
-    const fmr::Geom_float* elem_size, const fmr::Geom_float* part_orig) noexcept;
-  static constexpr bool get_tile_elem_coor_vert_impl (fmr::Geom_float* coor,
-    fmr::Local_int elem_i, fmr::Local_int elem_n,
-    const fmr::Geom_float* elem_size, const fmr::Geom_float* part_orig) noexcept;
-  /* node_coor_p1 same as vert_coor//TODO FIXME move this to Elem.ipp
+  /* node_coor_p1 same as vert_coor
   fmr::Geom_float node_coor_p2 [(vert_n+1) * sims_d]// transposed coor_node_p2
     = {           // node                        //
     0.0, 0.0, 0.0,// 0       0---2---1           // starts with p1 vert_coor
-    1.0, 0.0, 0.0 // 1                o--x       //
-    0.5, 0.0, 0.0 // 2: edge node = (vert0 + vert1) * 0.5
+    0.5, 0.0, 0.0 // 1                  o--x     //
+    1.0, 0.0, 0.0 // 2
+    edge node 1: x = 0.5*vert0 + 0.5*vert1
     //                  or node 2 = 0.5*vert0 + 0.5*vert1
     // Follow bars_conn for edge node placement.
   };
@@ -89,38 +70,89 @@ public:
   #define F13 F(1.0)/F(3)
   #define F23 F(2.0)/F(3)
     = {           // node                        //
-    0.0, 0.0, 0.0,// 0      0--2--3--1           //
-    1.0, 0.0, 0.0 // 1                o--x       //
-    F13, 0.0, 0.0 // 2: edge node = F13*vert0 + F23*vert1)
-    F23, 0.0, 0.0 // 3: edge node = F23*vert0 + F13*vert1)
+    0.0, 0.0, 0.0,// 0      0--3--1--2           //
+    F13, 0.0, 0.0 // 1                  o--x     //
+    F23, 0.0, 0.0 // 2
+    1.0, 0.0, 0.0 // 3
+    edge node 1: x = F23*vert0 + F13*vert1
+    edge node 2: x = F13*vert0 + F23*vert1
     // Follow bars_conn for edge node placement,
-    // Then, follow tris_conn and quad_conn for face node placement.
+    // then, follow tris_conn and quad_conn for face node placement.
     #undef F13
     #undef F23
-  };
-  */
-  //------------------------- bar shape functions ----------------------------
-  //TODO Return poynomial shape function/gradient transposed?
-  template <typename F> static inline// single or double
-  F* poly_func_2 (F f[2u], const F x[3u]);// Linear 2-node bar
-  template <typename F> static inline
-  F* poly_grad_2 (F g[2u *3u], const F[]);// x[3u] not used; result is constant
-  template <typename F> static inline
-  F* poly_grat_2 (F g[2u *3u], const F[]);// transposed gradient
+  }; */
+  public:
+  // Bar shape functions and gradients ========================================
+  // Includes transposed poynomial shape function/gradient
+  // These bridge between Geom (input) and Phys (output) classes.
+  //TODO FIXME these can be dispactched on the polynomial order P (1,2,3),
+  //           HOWEVER they should default to Phys_float, not Geom_float,
+  //           and adapt to the second (x[]) argument of different precision.
+  //           and maybe should not be dispatched by Elem?
+  template <typename Y, typename G> static inline
+  Y* calc_poly_func_p1 (Y f[2u], const G x[3u]);// Linear 2-node bar
+  template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static inline
+  Y* calc_poly_grad_p1 (Y g[2u *3u], const G[]);// x[3u] not used; result is constant
+  template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static inline
+  Y* calc_poly_grat_p1 (Y g[2u *3u], const G[]);// transposed gradient
   //
-  template <typename F> static inline
-  F* poly_func_3 (F f[3u], const F x[3u]);// Quadratic 3-node bar
-  template <typename F> static inline
-  F* poly_grad_3 (F g[3u *3u], const F x[3u]);
-  template <typename F> static inline
-  F* poly_grat_3 (F g[3u *3u], const F x[3u]);// transposed gradient
+  template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static inline
+  Y* calc_poly_func_p2 (Y f[3u], const G x[3u]);// Quadratic 3-node bar
+  template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static inline
+  Y* calc_poly_grad_p2 (Y g[3u *3u], const G x[3u]);
+  template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static inline
+  Y* calc_poly_grat_p2 (Y g[3u *3u], const G x[3u]);// transposed gradient
   //
-  template <typename F> static inline
-  F* poly_func_4 (F f[4u], const F x[3u]);// Cubic 4-node bar
-  template <typename F> static inline
-  F* poly_grad_4 (F g[4u *3u], const F x[3u]);
-  template <typename F> static inline
-  F* poly_grat_4 (F g[4u *3u], const F x[3u]);// transposed gradient
+  template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static inline
+  Y* calc_poly_func_p3 (Y f[4u], const G x[3u]);// Cubic 4-node bar
+  template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static inline
+  Y* calc_poly_grad_p3 (Y g[4u *3u], const G x[3u]);
+  template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static inline
+  Y* calc_poly_grat_p3 (Y g[4u *3u], const G x[3u]);// transposed gradient
+  //
+  private:
+  // Tiling ===================================================================
+  // Bars are self-tiling (no other element types involved)
+#if 0
+  static constexpr fmr::Local_int tile_vert_conn [2] = {0,1};// trivial
+#endif
+    /*
+    Vertex connectivity:
+    - For P1, vert_conn sequence: {0,1}, {1,2}, {2,3},...
+    - For P2, vert_conn sequence: {0,2}, {2,4}, {4,6},...
+    - For P3, vert_conn sequence: {0,3}, {3,6}, {6,9},...
+
+    Node connectivity:
+    - For P1, node conn sequence: {0,1}, {1,2}, {2,3},...
+    - For P2, node conn sequence: {0,2,1}, {2,4,3}, {4,6,5},...
+    - For P3, node conn sequence: {0,3,1,2}, {3,6,4,5}, {6,9,7,8},...
+    */
+  static constexpr bool calc_tile_vert_conn (fmr::Local_int* conn,
+    fmr::Local_int tile_i, const fmr::Local_int* part_size,
+    fmr::Local_int p) noexcept;
+  static constexpr bool calc_tile_vert_conn_prdc (fmr::Local_int* conn,
+    fmr::Local_int tile_i, const fmr::Local_int* part_size,
+    fmr::Local_int p) noexcept;
+  //
+  static constexpr bool calc_tile_node_conn (fmr::Local_int* conn,
+    fmr::Local_int tile_i, const fmr::Local_int* part_size,
+    fmr::Local_int p) noexcept;
+  // Node coordinates ---------------------------------------------------------
+  static constexpr bool calc_tile_vert_coor (fmr::Geom_float* coor,
+    fmr::Local_int vert_i, fmr::Local_int vert_n,
+    const fmr::Geom_float* tile_size, const fmr::Geom_float* part_orig) noexcept;
+#if 0
+  static constexpr bool calc_tile_node_coor (fmr::Geom_float* coor,
+    fmr::Local_int node_i, fmr::Local_int node_n,
+    const fmr::Geom_float* tile_size, const fmr::Geom_float* part_orig) noexcept;
+#endif
+  static constexpr bool calc_tile_elem_vert_coor (fmr::Geom_float* coor,
+    fmr::Local_int elem_i, fmr::Local_int elem_n,
+    const fmr::Geom_float* tile_size, const fmr::Geom_float* part_orig) noexcept;
+  static constexpr bool calc_tile_elem_coor_vert (fmr::Geom_float* coor,
+    fmr::Local_int elem_i, fmr::Local_int elem_n,
+    const fmr::Geom_float* tile_size, const fmr::Geom_float* part_orig) noexcept;
+  //
 };//end struct Bars
 
 } } }//end femera::grid::elem:: namespace

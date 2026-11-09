@@ -68,7 +68,7 @@ fmr::Exit_int main (int argc, char** argv) {
   //const auto intw = femera::grid::fems::tets_intg_1_ptwt [3];
   fmr::Geom_float shpg [12]
      = {0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0};
-  femera::grid::elem::Tets::poly_grad_4 (&shpg[0], &intp[0]);
+  femera::grid::elem::Tets::calc_poly_grad_4 (&shpg[0], &intp[0]);
   fmr::Geom_float coor [12];
   for (int i=0; i<12; ++i){coor[i] = femera::grid::elem::Tets::coor_vert[i];}
   fmr::Geom_float jac3 [ 9] = {0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0};
@@ -87,7 +87,7 @@ fmr::Exit_int main (int argc, char** argv) {
   for (int i=0; i< 9; ++i){jac3[i]=0.0;}
   fmr::Geom_float coo2 [30];
   for (int i=0; i<30; ++i){coo2[i] = femera::grid::elem::Tets::coor_tet10[i];}
-  femera::grid::elem::Tets::poly_grad_10 (&shp2[0], &intp[0]);
+  femera::grid::elem::Tets::calc_poly_grad_10 (&shp2[0], &intp[0]);
   for (int i=0; i<3; ++i) {
     for (int j=0; j<3; ++j) {
       for (int k=0; k<10; ++k) {
@@ -101,7 +101,7 @@ fmr::Exit_int main (int argc, char** argv) {
   for (int i=0; i< 9; ++i){jac3[i]=0.0;}
   fmr::Geom_float coo3 [60];
   for (int i=0; i<60; ++i){coo3[i] = femera::grid::elem::Tets::coor_tet20[i];}
-  femera::grid::elem::Tets::poly_grad_20 (&shp3[0], &intp[0]);
+  femera::grid::elem::Tets::calc_poly_grad_20 (&shp3[0], &intp[0]);
   for (int i=0; i<3; ++i) {
     for (int j=0; j<3; ++j) {
       for (int k=0; k<20; ++k) {

@@ -16,10 +16,8 @@ public:
   static constexpr fmr::Local_int quad_n = 1;
   static constexpr fmr::Local_int vols_n = 0;
   //
-  static constexpr fmr::Geom_float edge_l // total length of edges
-    = 2.0 * Bars::edge_l;
-  static constexpr fmr::Geom_float face_a // total surface area
-    = 0.0;
+  static constexpr fmr::Geom_float edge_l = 2.0;// total length of edges
+  static constexpr fmr::Geom_float face_a = 1.0;// total surface area
   static constexpr fmr::Geom_float elem_v = 0.0;// planar element
   //
   //static constexpr
