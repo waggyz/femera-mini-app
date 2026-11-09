@@ -35,11 +35,11 @@ TEST(FmrElem, JacobianCalculationsMatchExpectedResults) {
       }
     }
 
-    fmr::fems::calc_jacs_caos_ref(
+    fmr::fems::elem::calc_jacs_caos_ref(
       jacs_caos, node_coor, poly_grad, intp_n, node_n, sims_d);
-    fmr::fems::calc_jacs_csoa_ref(
+    fmr::fems::elem::calc_jacs_csoa_ref(
       jacs_csoa, coor_node, poly_grad, intp_n, node_n, sims_d);
-    fmr::fems::calc_jacs_caos_a(
+    fmr::fems::elem::calc_jacs_caos_a(
       jacs_caos_a, node_coor, poly_grat, intp_n, node_n, sims_d);
 
     for(fmr::Local_int ip=0; ip<intp_n; ++ip){

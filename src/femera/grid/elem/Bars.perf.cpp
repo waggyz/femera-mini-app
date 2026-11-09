@@ -129,11 +129,12 @@ double elem::run_bars_perf_test(const int test_case, const fmr::Local_int test_n
   #pragma omp parallel for default(none) shared(part_conn_vec) \
     firstprivate(part_n, part_elem_n, part_conn_array_size)
   for (fmr::Local_int part_id = 0; part_id < part_n; ++part_id) {
+    Bars bars;
     const fmr::Local_int grid_size[1] = {part_elem_n * part_n};
     std::valarray<fmr::Local_int> part_conn(part_conn_array_size);
     fmr::Local_int this_conn[2] = {0, 0};
     for (fmr::Local_int elem_i = 0; elem_i < part_elem_n; ++elem_i) {
-      femera::grid::elem::get_tile_vert_conn(this_conn, elem_i, grid_size);
+      bars.get_tile_vert_conn(this_conn, elem_i, grid_size);
       part_conn[2*elem_i + 0] = this_conn[0];
       part_conn[2*elem_i + 1] = this_conn[1];
     }
@@ -157,14 +158,14 @@ double elem::run_bars_perf_test(const int test_case, const fmr::Local_int test_n
           const fmr::Local_int grid_size[1] = {part_elem_n};
           Perf_time_t* this_meter = part_meter[part_id];// thread local ptr
           //
-          //Bars this_bars;// Make a Bars instance for this part.
+          Bars this_bars;
           fmr::Local_int this_conn[2] = {0, 0};
 
           fmr::Local_int part_chck = 0;
           //
           this_meter->add_idle_time_now ();
           for (fmr::Local_int elem_i = 0; elem_i < part_elem_n; ++elem_i) {
-            femera::grid::elem::get_tile_vert_conn(this_conn, elem_i, grid_size);// 4 in
+            this_bars.get_tile_vert_conn(this_conn, elem_i, grid_size);// 4 in
             part_chck += (this_conn[0] + this_conn[1]) % 3;// +1 in,, 1 out, 3 IOPS
             //just so loop does not opitimize away
           }

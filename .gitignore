@@ -71,3 +71,4 @@ cython_debug/
 .goutputstream-*
 *.core.*
 vgcore.*
+*inlines.txt

@@ -15,6 +15,8 @@ FMR_VERBMAX:=5
 # Use parallel make jobs
 ENABLE_MAKEJOBS:=ON
 
+ENABLE_INLINE_REPORT:=ON
+
 # Libraries needed ------------------------------------------------------------
 ENABLE_OMP:=ON
 ENABLE_MPI:=ON

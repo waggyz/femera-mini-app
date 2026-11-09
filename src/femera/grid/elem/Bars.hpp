@@ -17,7 +17,7 @@ public:
   static constexpr fmr::Local_int vols_n = 0;
   //
   static constexpr fmr::Local_int tile_elem_n = 1;// # this type element / tile
-  //static constexpr fmr::Local_int tile_node_n = Bars::get_node_n();
+  //
   // Bars tile naturally, so tile counts match element counts.
   static constexpr fmr::Local_int tile_vert_n = Bars::vert_n;
   static constexpr fmr::Local_int tile_edge_n = Bars::edge_n;
@@ -34,7 +34,7 @@ public:
   //static constexpr
   //fmr::Local_int vert_conn [Bars::vert_n] = {0,1};// always integers [0,vert_n-1]
   // elem_conn is an array [0,get_conn_n()-1].
-  //TODO these are vertext connectivity.
+  //TODO these are vertex connectivity.
   static constexpr fmr::Local_int edge_conn [Bars::vert_n] = {0,1};
   //static constexpr
   //fmr::Local_int bars_conn [Bars::vert_n] = {0,1};//FIXME handle p2, p3
@@ -58,6 +58,24 @@ public:
     0.0, 0.0,
     0.0, 0.0
   };
+  static constexpr bool get_tile_vert_conn_impl (fmr::Local_int* conn,
+    fmr::Local_int tile_i, const fmr::Local_int* part_size,
+    fmr::Local_int p) noexcept;
+  static constexpr bool get_tile_vert_conn_prdc_impl (fmr::Local_int* conn,
+    fmr::Local_int tile_i, const fmr::Local_int* part_size,
+    fmr::Local_int p) noexcept;
+  static constexpr bool get_tile_vert_coor_impl (fmr::Geom_float* coor,
+    fmr::Local_int vert_i, fmr::Local_int vert_n,
+    const fmr::Geom_float* elem_size, const fmr::Geom_float* part_orig) noexcept;
+  static constexpr bool get_tile_node_coor_impl (fmr::Geom_float* coor,
+    fmr::Local_int node_i, fmr::Local_int node_n,
+    const fmr::Geom_float* elem_size, const fmr::Geom_float* part_orig) noexcept;
+  static constexpr bool get_tile_elem_vert_coor_impl (fmr::Geom_float* coor,
+    fmr::Local_int elem_i, fmr::Local_int elem_n,
+    const fmr::Geom_float* elem_size, const fmr::Geom_float* part_orig) noexcept;
+  static constexpr bool get_tile_elem_coor_vert_impl (fmr::Geom_float* coor,
+    fmr::Local_int elem_i, fmr::Local_int elem_n,
+    const fmr::Geom_float* elem_size, const fmr::Geom_float* part_orig) noexcept;
   /* node_coor_p1 same as vert_coor//TODO FIXME move this to Elem.ipp
   fmr::Geom_float node_coor_p2 [(vert_n+1) * sims_d]// transposed coor_node_p2
     = {           // node                        //

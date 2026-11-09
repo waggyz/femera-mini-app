@@ -23,6 +23,46 @@ template <class T, typename fmr::Local_int P, typename F>
     + (P==3  ? T::tile_vols_n * (T::tile_tris_n + T::tile_quad_n)// face nodes for P==3
     : 0);      // vols_n is 0 (1D,2D elems) or 1 (3D solid elems)
 }
+template <class T, typename fmr::Local_int P, typename F>
+constexpr bool elem::Elem<T,P,F>::get_tile_vert_conn (
+  fmr::Local_int* conn, const fmr::Local_int tile_i,
+  const fmr::Local_int* part_size, const fmr::Local_int p) const noexcept {
+  return T::get_tile_vert_conn_impl (conn, tile_i, part_size, p);
+}
+template <class T, typename fmr::Local_int P, typename F>
+constexpr bool elem::Elem<T,P,F>::get_tile_vert_conn_prdc (
+  fmr::Local_int* conn, const fmr::Local_int tile_i,
+  const fmr::Local_int* part_size, const fmr::Local_int p) const noexcept {
+  return T::get_tile_vert_conn_prdc_impl (conn, tile_i, part_size, p);
+}
+template <class T, typename fmr::Local_int P, typename F>
+constexpr bool elem::Elem<T,P,F>::get_tile_vert_coor (
+  fmr::Geom_float* coor, const fmr::Local_int vert_i,
+  const fmr::Local_int vert_n, const fmr::Geom_float* elem_size,
+  const fmr::Geom_float* part_orig) const noexcept {
+  return T::get_tile_vert_coor_impl (coor, vert_i, vert_n, elem_size, part_orig);
+}
+template <class T, typename fmr::Local_int P, typename F>
+constexpr bool elem::Elem<T,P,F>::get_tile_node_coor (
+  fmr::Geom_float* coor, const fmr::Local_int node_i,
+  const fmr::Local_int node_n, const fmr::Geom_float* elem_size,
+  const fmr::Geom_float* part_orig) const noexcept {
+  return T::get_tile_node_coor_impl (coor, node_i, node_n, elem_size, part_orig);
+}
+template <class T, typename fmr::Local_int P, typename F>
+constexpr bool elem::Elem<T,P,F>::get_tile_elem_vert_coor (
+  fmr::Geom_float* coor, const fmr::Local_int elem_i,
+  const fmr::Local_int elem_n, const fmr::Geom_float* elem_size,
+  const fmr::Geom_float* part_orig) const noexcept {
+  return T::get_tile_elem_vert_coor_impl (coor, elem_i, elem_n, elem_size, part_orig);
+}
+template <class T, typename fmr::Local_int P, typename F>
+constexpr bool elem::Elem<T,P,F>::get_tile_elem_coor_vert (
+  fmr::Geom_float* coor, const fmr::Local_int elem_i,
+  const fmr::Local_int elem_n, const fmr::Geom_float* elem_size,
+  const fmr::Geom_float* part_orig) const noexcept {
+  return T::get_tile_elem_coor_vert_impl (coor, elem_i, elem_n, elem_size, part_orig);
+}
 #if 0
 template <class T, typename fmr::Local_int P, typename F>
 constexpr fmr::Local_int elem::Elem<T,P,F>::get_elem_conn (fmr::Local_int i)

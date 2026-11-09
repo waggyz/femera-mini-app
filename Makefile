@@ -95,6 +95,11 @@ ifeq ($(CXX),g++)
     FMR_OMP_LEVELS:=1
   endif
   endif
+  ifeq ($(ENABLE_INLINE_REPORT),ON)
+    CXXFLAGS   += -fopt-info-inline=$@.inlines.txt
+	# above for all, below for successful inlining only
+    #CXXFLAGS   += -fopt-info-inline-optimized=$@.inlines.txt
+  endif
   ifeq ($(ENABLE_GCC_PROFILE),ON)
   # CXXFLAGS += -fprofile-abs-path fprofile-dir=$(BUILD_CPU)/%p/
     CXXFLAGS += -fprofile-dir=$(abspath $(BUILD_CPU))

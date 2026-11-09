@@ -15,29 +15,29 @@ inline constexpr fmr::Geom_float Bars::vert_coor [];
 inline constexpr fmr::Geom_float Bars::coor_vert [];
 
 #endif
-  //TODO FIXME only works for elem_p==1; generalize for higher orders
-  inline constexpr
-  bool get_tile_vert_conn (fmr::Local_int* conn,//FIXME generalize & move to Elem.ipp
+constexpr bool Bars::get_tile_vert_conn_impl (
+  fmr::Local_int* conn,
     const fmr::Local_int tile_i,// local element index
-    const fmr::Local_int* part_size)
-    noexcept{
-    conn[0] = (tile_i + 0);// % part_size[0];
-    conn[1] = (tile_i + 1);// % part_size[0];// periodic BC
-    //TODO FIXME this only works for P=1
+    const fmr::Local_int* part_size,
+    const fmr::Local_int p)
+    noexcept {
+    conn[0] = p * tile_i;
+    conn[1] = p * (tile_i + 1);
     return tile_i < part_size[0];// false if tile_i out of range
   }
-  inline constexpr
-  bool get_tile_vert_conn_prdc (fmr::Local_int* conn,//FIXME generalize & move to Elem.ipp
+constexpr bool Bars::get_tile_vert_conn_prdc_impl (
+  fmr::Local_int* conn,
     const fmr::Local_int tile_i,// local element index
-    const fmr::Local_int* part_size)
+    const fmr::Local_int* part_size,
+    const fmr::Local_int p)
     noexcept{
-    conn[0] = (tile_i + 0) % part_size[0];// periodic BC
-    conn[1] = (tile_i + 1) % part_size[0];
-    //TODO FIXME this only works for P=1
+    if (part_size[0] == 0) return false;//TODO remove this check?
+    // part_size counts elements; each element spans p node indices.
+    conn[0] = p * (tile_i % part_size[0]);
+    conn[1] = p * ((tile_i + 1) % part_size[0]);
     return tile_i < part_size[0];// false if tile_i out of range
   }
-  inline constexpr
-  bool get_tile_vert_coor(fmr::Geom_float* coor,
+constexpr bool Bars::get_tile_vert_coor_impl(fmr::Geom_float* coor,
     const fmr::Local_int vert_i,
     const fmr::Local_int vert_n,
     const fmr::Geom_float* elem_size,
@@ -48,8 +48,7 @@ inline constexpr fmr::Geom_float Bars::coor_vert [];
     coor[2] = part_orig[2] + vert_i * elem_size[2];
     return vert_i < vert_n;
   }
-  inline constexpr
-  bool get_tile_node_coor(fmr::Geom_float* coor,
+constexpr bool Bars::get_tile_node_coor_impl(fmr::Geom_float* coor,
     const fmr::Local_int node_i,
     const fmr::Local_int node_n,
     const fmr::Geom_float* elem_size,
@@ -61,7 +60,7 @@ inline constexpr fmr::Geom_float Bars::coor_vert [];
     //TODO FIXME this only works for P=1
     return node_i < node_n;
   }
-  constexpr bool get_tile_elem_vert_coor(//x1,y1,z1, x2,y2,z2
+constexpr bool Bars::get_tile_elem_vert_coor_impl(//x1,y1,z1, x2,y2,z2
     fmr::Geom_float* vert_coor,// size: vert_n * sims_d
     const fmr::Local_int elem_i,
     const fmr::Local_int elem_n,
@@ -75,7 +74,7 @@ inline constexpr fmr::Geom_float Bars::coor_vert [];
       }
       return elem_i < elem_n;
     }
-  constexpr bool get_tile_elem_coor_vert(//x1,x2, y1,y2, z1, z2
+constexpr bool Bars::get_tile_elem_coor_vert_impl(//x1,x2, y1,y2, z1, z2
     fmr::Geom_float* vert_coor,// size: vert_n * sims_d
     const fmr::Local_int elem_i,
     const fmr::Local_int elem_n,

@@ -4,7 +4,7 @@
 #include "../fmr.hpp"
 #include "../smat.hpp"
 
-namespace fmr { namespace fems {
+namespace fmr { namespace fems { namespace elem {
   // Element functions ========================================================
   //F calc_bbox_size // 1D:length, 2D:area, 3D:volume
   //  (const F* node_coor, const fmr::Dim_int dims=D) noexcept;// needs node_n
@@ -43,7 +43,7 @@ namespace fmr { namespace fems {
     const fmr::Local_int sims_d)
     noexcept;
 
-} }//end fmr::fems namespace
+} } }//end fmr::fems::elem namespace
 
 #include "elem.ipp"
 
