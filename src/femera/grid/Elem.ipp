@@ -56,50 +56,6 @@ constexpr fmr::Local_int elem::Elem<T,P,F>::poly_grad_size
   (const fmr::Local_int intp_n, const fmr::Local_int this_d) const noexcept {// default 1
   return intp_n * get_node_n () * this_d;
 }
-  // Element Jacobian and determinant calculations
-  //NOTE only element vertices and first-order shape functions are used for 
-  //     this element's geometric element Jacobian.
-  //template <typename Y>
-  template <class T, typename fmr::Local_int P, typename F>//, typename Y>
-  inline void elem::Elem<T,P,F>::calc_jacs_nsoa_ref (fmr::Phys_float* jacs,
-    const F* coor_vert,// x1,x2,..., y1,y2,..., z1,z2,...
-    const F* poly_grad,// shape function gradients at integration points
-    const fmr::Local_int intp_n, const fmr::Local_int sims_d) const noexcept {
-      /* In general, Jacobians are D x D matrices at each integration point.
-         The jacs array should be filled with the Jacobian matrices
-         for each integration point.
-         Each Jacobians is a matrix-matrix product of the first-order
-         shape function gradients and the node coordinates.
-      */
-     const auto vert_n = get_vert_n ();
-     for(fmr::Local_int ip=0; ip<intp_n; ++ip){
-       for(fmr::Local_int i=0; i<sims_d; ++i){
-         for(fmr::Local_int j=0; j<sims_d; ++j){
-           jacs[ip*sims_d*sims_d + i*sims_d + j] = 0;
-           for(fmr::Local_int k=0; k<vert_n; ++k){
-             jacs[ip*sims_d*sims_d + i*sims_d + j] += coor_vert[i*vert_n + k]
-               * poly_grad[ip*vert_n*sims_d + k*sims_d + j];
-  } } } } }
-  template <class T, typename fmr::Local_int P, typename F>//, typename Y>
-  inline void elem::Elem<T,P,F>::calc_jacs_naos_ref (fmr::Phys_float* jacs,
-    const F* vert_coor,// x1,y1,z1, x2,y2,z2,...
-    const F* poly_grad,// shape function gradients at integration points
-    const fmr::Local_int intp_n, const fmr::Local_int sims_d) const noexcept {
-      /* In general, Jacobians are D x D matrices at each integration point.
-         The jacs array should be filled with the Jacobian matrices
-         for each integration point.
-         Each Jacobians is a matrix-matrix product of the shape function gradients
-         and the node coordinates.
-      */
-     const auto vert_n = get_vert_n ();
-     for(fmr::Local_int ip=0; ip<intp_n; ++ip){
-       for(fmr::Local_int i=0; i<sims_d; ++i){
-         for(fmr::Local_int j=0; j<sims_d; ++j){
-           jacs[ip*sims_d*sims_d + i*sims_d + j] = 0;
-           for(fmr::Local_int k=0; k<vert_n; ++k){
-             jacs[ip*sims_d*sims_d + i*sims_d + j] += vert_coor[k*sims_d + i]
-               * poly_grad[ip*vert_n*sims_d + k*sims_d + j];
-  } } } } }
 
   template <class T, typename fmr::Local_int P, typename F>//, typename Y>
   constexpr

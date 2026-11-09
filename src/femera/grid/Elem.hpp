@@ -216,31 +216,7 @@ class Elem {
     //NOTE vert_coor, elem_size, part_orig bounds should be checked by the caller.
     noexcept;
   //
-  // Element functions ========================================================
-  //F calc_bbox_size // 1D:length, 2D:area, 3D:volume
-  //  (const F* node_coor, const fmr::Dim_int dims=D) noexcept;// needs node_n
-  //
-  // Element Jacobian and determinant calculations
-  //NOTE Although element Jacobians and determinants are purely geometric,
-  //     these calculations span geometry and physics.
-  //TODO Handle jac and det calc elsewhere?
-  inline void calc_jacs_naos_ref (fmr::Phys_float* jacs,
-    // Calculates Jacobians with nodes provided as an array of structs (naos)
-    const F* node_coor,// x1,y1,z1, x2,y2,z2,...
-    const F* poly_grad,// shape function gradients at integration points
-    const fmr::Local_int intp_n=1, const fmr::Local_int sims_d=3)
-    const noexcept;
-  inline void calc_jacs_nsoa_ref (fmr::Phys_float* jacs,
-    // Calculates Jacobians with nodes provided as a struct of arrays (nsoa)
-    const F* coor_node,// x1,x2,..., y1,y2,..., z1,z2,...
-    const F* poly_grad,// shape function gradients at integration points
-    const fmr::Local_int intp_n=1, const fmr::Local_int sims_d=3)
-    const noexcept;
 #if 0
-  void jacs_naos (fmr::Phys_float* jacs,// calculates determinants at integration points
-    const F* node_coor,// x1,y1,z1, x2,y2,z2,...
-    const fmr::Local_int intp_n=1,
-    const fmr::Local_int node_n=get_node_n ()) noexcept;
   template <typename Y=F>
   Y* jatd_naos (const fmr::Local_int intp_n=1,// inverted and transposed
     // Jacobian & determinants
@@ -248,7 +224,7 @@ class Elem {
     const F* node_coor) const noexcept;
   
   template <typename Y=F>
-  Y* jacs_nsoa (const fmr::Local_int intp_n=1,// x1,x2,..., y1,y2,..., z1,z2,...
+  Y* jacs_csoa (const fmr::Local_int intp_n=1,// x1,x2,..., y1,y2,..., z1,z2,...
     const fmr::Dim_int dims=D, fmr::Local_int node_n=get_node_n (),
   const F* coor_node) const noexcept;
   template <typename Y=F>
