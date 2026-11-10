@@ -101,8 +101,8 @@ TEST( GridElemBars, VertexConnectivityAndCoordinates ){
   EXPECT_EQ( bars.get_vert_conn ()[1], 1 );
 #endif
 
-  const double* vert_coor = bars.get_vert_coor ();
-  const double* coor_vert = bars.get_coor_vert ();
+  const double* vert_coor = bars.get_elem_vert_coor ();
+  const double* coor_vert = bars.get_elem_coor_vert ();
   ASSERT_NE( vert_coor, nullptr );
   ASSERT_NE( coor_vert, nullptr );
   EXPECT_DOUBLE_EQ( vert_coor[0], 0.0 );
@@ -129,7 +129,7 @@ TEST( GridElemBars, VertexConnectivityAndCoordinates ){
 
 TEST( GridElemBars, ElementQuality ){
   const Elem<Bars> linear;
-  const double* natural_coor = linear.get_vert_coor ();
+  const double* natural_coor = linear.get_elem_vert_coor ();
   //
   // reversed order of nodes for testing purposes
   const double* reversed_coor = []{
@@ -199,8 +199,8 @@ TEST( GridElemBars, JacobianCalculation ){
   fmr::Phys_float* jacs_caos_a = jacs_caos_a_storage;
   fmr::Phys_float jacs_csoa_storage[3 * 3];
   fmr::Phys_float* jacs_csoa = jacs_csoa_storage;
-  const double* node_coor = bars.get_vert_coor ();// naos
-  const double* coor_node = bars.get_coor_vert ();// nsoa
+  const double* node_coor = bars.get_elem_vert_coor ();// naos
+  const double* coor_node = bars.get_elem_coor_vert ();// nsoa
   //
   fmr::fems::elem::calc_jacs_caos_ref (jacs_caos, node_coor, dNT, 1u, 2u, 3u);// coor aos
   fmr::fems::elem::calc_jacs_caos_a   (jacs_caos_a, node_coor, dN, 1u, 2u, 3u);// coor aos

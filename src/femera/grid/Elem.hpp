@@ -118,11 +118,6 @@ class Elem {
   //
   // Array constexpr pointers =================================================
   //
-#if 0
-  // vert_conn and node_conn are trivial: just consecutive integers.
-  constexpr const fmr::Local_int* get_vert_conn () const noexcept {
-    return T::vert_conn;}
-#endif
   //NOTE the following are all only vertex connectivity (p==1) arrays.
   constexpr const fmr::Local_int* get_bars_conn () const noexcept {
     return T::bars_conn;}
@@ -132,27 +127,33 @@ class Elem {
     return T::quad_conn;}
   //
   // Natural element vertex coordinates --------------------------------------
-  //NOTE these are only valid when element dimension matches simulation dimension.
-  template <typename Ft=F,
-    typename std::enable_if <std::is_same<Ft, double>::value>::type* = nullptr>
-  constexpr const F* get_vert_coor () const noexcept {
+  //NOTE these currently return 3D coordinates,
+  //     regardless of element or simulation dimension.
+  //NOTE This may not be the best way to dispatch.
+  template <typename G=F,
+    typename std::enable_if <std::is_same<G, double>::value>::type* = nullptr>
+  constexpr const G* get_elem_vert_coor () const noexcept {
     return T::vert_coor;
   }
-  template <typename Ft=F,
-    typename std::enable_if <std::is_same<Ft, double>::value>::type* = nullptr>
-  constexpr const F* get_coor_vert () const noexcept {
+  template <typename G=F,
+    typename std::enable_if <std::is_same<G, double>::value>::type* = nullptr>
+  constexpr const G* get_elem_coor_vert () const noexcept {
     return T::coor_vert;
   }
-  template <typename Ft=F,
-    typename std::enable_if <std::is_same<Ft, float>::value>::type* = nullptr>
-  constexpr const F* get_vert_coor () const noexcept {
+  template <typename G=F,
+    typename std::enable_if <std::is_same<G, float>::value>::type* = nullptr>
+  constexpr const G* get_elem_vert_coor () const noexcept {
     return T::vert_coor_f;
   }
-  template <typename Ft=F,
-    typename std::enable_if <std::is_same< Ft,float>::value>::type* = nullptr>
-  constexpr const F* get_coor_vert () const noexcept {
+  template <typename G=F,
+    typename std::enable_if <std::is_same< G,float>::value>::type* = nullptr>
+  constexpr const G* get_elem_coor_vert () const noexcept {
     return T::coor_vert_f;
   }
+  // Natural element node coordinates ----------------------------------------
+#if 1
+  constexpr const F* get_elem_node_coor () const noexcept;
+#endif
   // Structured grid element tiles ============================================
   constexpr fmr::Local_int get_tile_elem_n () const noexcept {
     return T::tile_elem_n;}
@@ -162,8 +163,8 @@ class Elem {
     return T::tile_edge_n;}
   constexpr fmr::Local_int get_tile_face_n () const noexcept {
     return T::tile_tris_n;}
-  constexpr fmr::Local_int get_tile_quads_n () const noexcept {
-    return T::tile_quads_n;}
+  constexpr fmr::Local_int get_tile_quad_n () const noexcept {
+    return T::tile_quad_n;}
   constexpr fmr::Local_int get_tile_vols_n () const noexcept {
     return T::tile_vols_n;}// 3D elements of this type (assume all same)
   //
@@ -173,14 +174,25 @@ class Elem {
   const noexcept;
 #endif
   // Tiled (strucured mesh) node coordinates
-  //get_tile_node_coor (node_i) {
-  //  return {}
-  // }
 #if 0
-  constexpr const fmr::Local_int* get_tile_vert_conn () const noexcept {
-    return T::tile_vert_conn;}// single tile vertex connectivity is trivial:
-  //                             {0,1,...,vert_n-1}
- #endif
+  constexpr bool get_tile_node_coor (F* coor,
+    const fmr::Local_int node_i);
+  constexpr bool get_tile_elem_node_coor (F* node_coor,
+    const fmr::Local_int elem_i);
+  constexpr bool get_tile_elem_coor_node (F* node_coor,
+    const fmr::Local_int elem_i);
+#endif
+#if 0
+  constexpr bool get_tile_elem_node_coor(fmr::Geom_float* node_coor,
+  // For Bars, elem_size is the spacing between successive nodes; this
+  // currently matches element spacing only for P=1.
+    const fmr::Local_int node_i,
+    const fmr::Local_int node_n,
+    const fmr::Geom_float* tile_size,
+    const fmr::Geom_float* part_orig)// origin should default to {0.0,0.0,0.0}
+    //NOTE node_coor, elem_size, part_orig bounds should be checked by the caller.
+    const noexcept;
+#endif
   // Tile operations dispatch to T's corresponding static calc_* method.
   // Shapes without an implementation fail at compile time when called.
   // Connectivity implementations receive p (defaulting to P), allowing
@@ -207,38 +219,22 @@ class Elem {
     //NOTE conn, part_size bounds should be checked by the caller.
     const noexcept;
   //
-  constexpr bool get_tile_vert_coor(fmr::Geom_float* vert_coor,
-    const fmr::Local_int node_i,
-    const fmr::Local_int node_n,
-    const fmr::Geom_float* tile_size,
-    const fmr::Geom_float* part_orig)// origin should default to {0.0,0.0,0.0}
+  constexpr bool get_tile_vert_coor(F* vert_coor,
+    const fmr::Local_int vert_i, const fmr::Local_int vert_n,
+    const F* tile_size, const F* part_orig)// origin should default to {0.0,0.0,0.0}
     //NOTE node_coor, elem_size, part_orig bounds should be checked by the caller.
     const noexcept;
-  // For Bars, elem_size is the spacing between successive nodes; this
-  // currently matches element spacing only for P=1.
-#if 0
-  constexpr bool get_tile_elem_node_coor(fmr::Geom_float* node_coor,
-    const fmr::Local_int node_i,
-    const fmr::Local_int node_n,
-    const fmr::Geom_float* tile_size,
-    const fmr::Geom_float* part_orig)// origin should default to {0.0,0.0,0.0}
-    //NOTE node_coor, elem_size, part_orig bounds should be checked by the caller.
-    const noexcept;
-#endif
+  //
   constexpr bool get_tile_elem_vert_coor(//TODO need: 
-    fmr::Geom_float* vert_coor,// size: vert_n * sims_d
-    const fmr::Local_int elem_i,
-    const fmr::Local_int elem_n,
-    const fmr::Geom_float* tile_size,
-    const fmr::Geom_float* part_orig)// origin should default to {0.0,0.0,0.0}
+    F* vert_coor,// size: vert_n * sims_d
+    const fmr::Local_int elem_i, const fmr::Local_int elem_n,
+    const F* tile_size, const F* part_orig)// origin should default to {0.0,0.0,0.0}
     //NOTE vert_coor, elem_size, part_orig bounds should be checked by the caller.
     const noexcept;
   constexpr bool get_tile_elem_coor_vert(
-    fmr::Geom_float* vert_coor,// size: vert_n * sims_d
-    const fmr::Local_int elem_i,
-    const fmr::Local_int elem_n,
-    const fmr::Geom_float* tile_size,
-    const fmr::Geom_float* part_orig)// origin should default to {0.0,0.0,0.0}
+    F* vert_coor,// size: vert_n * sims_d
+    const fmr::Local_int elem_i, const fmr::Local_int elem_n,
+    const F* tile_size, const F* part_orig)// origin should default to {0.0,0.0,0.0}
     //NOTE vert_coor, tile_size, part_orig bounds should be checked by the caller.
     const noexcept;
   //

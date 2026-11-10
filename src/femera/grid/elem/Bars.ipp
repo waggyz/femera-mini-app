@@ -52,17 +52,6 @@ constexpr bool Bars::calc_tile_node_conn (
     }
     return tile_i < part_size[0];// false if tile_i out of range
   }
-constexpr bool Bars::calc_tile_vert_coor(fmr::Geom_float* coor,
-    const fmr::Local_int vert_i,
-    const fmr::Local_int vert_n,
-    const fmr::Geom_float* tile_size,
-    const fmr::Geom_float* part_orig)
-    noexcept{
-    coor[0] = part_orig[0] + vert_i * tile_size[0];
-    coor[1] = part_orig[1] + vert_i * tile_size[1];
-    coor[2] = part_orig[2] + vert_i * tile_size[2];
-    return vert_i < vert_n;
-  }
 #if 0
 constexpr bool Bars::calc_tile_node_coor(fmr::Geom_float* coor,
     const fmr::Local_int node_i,
@@ -77,12 +66,21 @@ constexpr bool Bars::calc_tile_node_coor(fmr::Geom_float* coor,
     return node_i < node_n;
   }
 #endif
+  template <typename F>
+  constexpr bool Bars::calc_tile_vert_coor(F* coor,
+    const fmr::Local_int vert_i, const fmr::Local_int vert_n,
+    const F* tile_size, const F* part_orig)
+    noexcept{
+    coor[0] = part_orig[0] + vert_i * tile_size[0];
+    coor[1] = part_orig[1] + vert_i * tile_size[1];
+    coor[2] = part_orig[2] + vert_i * tile_size[2];
+    return vert_i < vert_n;
+  }
+  template <typename F>
 constexpr bool Bars::calc_tile_elem_vert_coor(//x1,y1,z1, x2,y2,z2
-    fmr::Geom_float* vert_coor,// size: vert_n * sims_d
-    const fmr::Local_int elem_i,
-    const fmr::Local_int elem_n,
-    const fmr::Geom_float* tile_size,
-    const fmr::Geom_float* part_orig)// origin should default to {0.0,0.0,0.0}
+    F* vert_coor,// size: vert_n * sims_d
+    const fmr::Local_int elem_i, const fmr::Local_int elem_n,
+    const F* tile_size, const F* part_orig)// origin should default to {0.0,0.0,0.0}
     noexcept{
       for (fmr::Local_int v = 0; v < 2; ++v) {// 2 vertices for 1D bar element
         vert_coor[v * 3 + 0] = part_orig[0] + (elem_i + v) * tile_size[0];
@@ -91,12 +89,11 @@ constexpr bool Bars::calc_tile_elem_vert_coor(//x1,y1,z1, x2,y2,z2
       }
       return elem_i < elem_n;
     }
-constexpr bool Bars::calc_tile_elem_coor_vert(//x1,x2, y1,y2, z1, z2
-    fmr::Geom_float* vert_coor,// size: vert_n * sims_d
-    const fmr::Local_int elem_i,
-    const fmr::Local_int elem_n,
-    const fmr::Geom_float* tile_size,
-    const fmr::Geom_float* part_orig)// origin should default to {0.0,0.0,0.0}
+  template <typename F>
+  constexpr bool Bars::calc_tile_elem_coor_vert(//x1,x2, y1,y2, z1, z2
+    F* vert_coor,// size: vert_n * sims_d
+    const fmr::Local_int elem_i, const fmr::Local_int elem_n,
+    const F* tile_size, const F* part_orig)// origin should default to {0.0,0.0,0.0}
     noexcept{
       for (fmr::Local_int v = 0; v < 2; ++v) {// 2 vertices for 1D bar element
         vert_coor[v + 0] = part_orig[0] + (elem_i + v) * tile_size[0];
@@ -136,7 +133,7 @@ constexpr bool Bars::calc_tile_elem_coor_vert(//x1,x2, y1,y2, z1, z2
 template <typename Y, typename G> inline
 //TODO mixed precision support for single or double precision
 Y* Bars::calc_poly_func_p1
-(Y f[2u], const G x[1u]) {// x[1], x[2] not used for 1D bar element?
+(Y f[2u], const G x[3u]) {// x[1], x[2] not used for 1D bar element?
   f[ 0] = 1.0-x[0];
   f[ 1] = x[0];
   return f;
@@ -171,7 +168,7 @@ Y* Bars::calc_poly_grat_p1
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> inline
 Y* Bars::calc_poly_func_p2
-(Y f[3u], const G x[1u]) {
+(Y f[3u], const G x[3u]) {
   const Y L2=x[0];
   const Y L1=1.0-L2;
   f[ 0] = 2.0*L1*L1 - L1;// Vertex nodes
@@ -181,7 +178,7 @@ Y* Bars::calc_poly_func_p2
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> inline
 Y* Bars::calc_poly_grad_p2
-(Y g[3u *3u], const G x[1u]) {
+(Y g[3u *3u], const G x[3u]) {
   const Y L2=x[0];
   const Y L1=1.0-L2;
   // Term-by-term derivs
@@ -205,7 +202,7 @@ Y* Bars::calc_poly_grad_p2
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> inline
 Y* Bars::calc_poly_grat_p2// transposed
-(Y g[3u *3u], const G x[1u]) {
+(Y g[3u *3u], const G x[3u]) {
   const Y L2=x[0];
   const Y L1=1.0-L2;
   // Term-by-term derivs
@@ -229,7 +226,7 @@ Y* Bars::calc_poly_grat_p2// transposed
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> inline
 Y* elem::Bars::calc_poly_func_p3
-(Y f[4u], const G x[1u]) {
+(Y f[4u], const G x[3u]) {
   const Y L2=x[0];
   const Y L1=(1.0-L2);
   f[ 0]= 0.5* L1 *(3.0* L1 -1.0)*(3.0* L1 -2.0);// Vertex nodes;
@@ -241,7 +238,7 @@ Y* elem::Bars::calc_poly_func_p3
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> inline
 Y* elem::Bars::calc_poly_grad_p3
-(Y g[4u *3u], const G x[1u]) {
+(Y g[4u *3u], const G x[3u]) {
   const Y L2=x[0];
   const Y L1=(1.0-L2);
   // Term-by-term derivs
@@ -282,7 +279,7 @@ Y* elem::Bars::calc_poly_grad_p3
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> inline
 Y* elem::Bars::calc_poly_grat_p3
-(Y g[4u *3u], const G x[1u]) {
+(Y g[4u *3u], const G x[3u]) {
   const Y L2=x[0];
   const Y L1=(1.0-L2);
   // Term-by-term derivs

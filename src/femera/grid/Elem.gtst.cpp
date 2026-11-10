@@ -29,8 +29,8 @@ constexpr auto elem_tetf
   = femera::grid::elem::Elem<femera::grid::elem::Tets,2,float> ();
 constexpr auto elem_tetd
   = femera::grid::elem::Elem<femera::grid::elem::Tets,2,double> ();
-const auto size_coor_f = sizeof(elem_tetf.get_vert_coor ()[0]);
-const auto size_coor_d = sizeof(elem_tet1.get_vert_coor ()[0]);
+const auto size_coor_f = sizeof(elem_tetf.get_elem_vert_coor ()[0]);
+const auto size_coor_d = sizeof(elem_tet1.get_elem_vert_coor ()[0]);
 
 const float a_float = float(1.0/6.0);
 const float an_array_f[2] = {float(1.0/6.0), float(1.0/6.0)};

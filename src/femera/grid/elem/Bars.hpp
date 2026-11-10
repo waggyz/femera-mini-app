@@ -7,7 +7,7 @@ namespace femera { namespace grid { namespace elem {
 
 //class Bars final: public Elem<Bars> { friend class Elem;
 class Bars final : public Elem<Bars> {
-  template <class T, fmr::Local_int P, class F>
+  template <class T, fmr::Local_int P, typename F>
   friend class Elem;
 public:
   static constexpr fmr::Local_int vert_n = 2;// needed by other elements
@@ -81,7 +81,7 @@ private:
     #undef F13
     #undef F23
   }; */
-  public:
+  public://TODO make private, accessed through Elem.
   // Bar shape functions and gradients ========================================
   // Includes transposed poynomial shape function/gradient
   // These bridge between Geom (input) and Phys (output) classes.
@@ -89,10 +89,13 @@ private:
   //           HOWEVER they should default to Phys_float, not Geom_float,
   //           and adapt to the second (x[]) argument of different precision.
   //           and maybe should not be dispatched by Elem?
+  //NOTE the size of f is get_poly_func_size(1) = node_n for order P
+  //     the size of g is get_poly_grad_size(1) = node_n * sims_d for order P
+  //     x is sized for 3D, even if not all are used.
   template <typename Y, typename G> static inline
   Y* calc_poly_func_p1 (Y f[2u], const G x[3u]);// Linear 2-node bar
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static inline
-  Y* calc_poly_grad_p1 (Y g[2u *3u], const G[]);// x[3u] not used; result is constant
+  Y* calc_poly_grad_p1 (Y g[2u *3u], const G[]);// x[] not used; result is constant
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static inline
   Y* calc_poly_grat_p1 (Y g[2u *3u], const G[]);// transposed gradient
   //
@@ -138,20 +141,23 @@ private:
     fmr::Local_int tile_i, const fmr::Local_int* part_size,
     fmr::Local_int p) noexcept;
   // Node coordinates ---------------------------------------------------------
-  static constexpr bool calc_tile_vert_coor (fmr::Geom_float* coor,
+  template <typename F=fmr::Geom_float>
+  static constexpr bool calc_tile_vert_coor (F* coor,
     fmr::Local_int vert_i, fmr::Local_int vert_n,
-    const fmr::Geom_float* tile_size, const fmr::Geom_float* part_orig) noexcept;
+    const F* tile_size, const F* part_orig) noexcept;
 #if 0
   static constexpr bool calc_tile_node_coor (fmr::Geom_float* coor,
     fmr::Local_int node_i, fmr::Local_int node_n,
     const fmr::Geom_float* tile_size, const fmr::Geom_float* part_orig) noexcept;
 #endif
-  static constexpr bool calc_tile_elem_vert_coor (fmr::Geom_float* coor,
+  template <typename F=fmr::Geom_float>
+  static constexpr bool calc_tile_elem_vert_coor (F* coor,
     fmr::Local_int elem_i, fmr::Local_int elem_n,
-    const fmr::Geom_float* tile_size, const fmr::Geom_float* part_orig) noexcept;
-  static constexpr bool calc_tile_elem_coor_vert (fmr::Geom_float* coor,
+    const F* tile_size, const F* part_orig) noexcept;
+  template <typename F=fmr::Geom_float>
+  static constexpr bool calc_tile_elem_coor_vert (F* coor,
     fmr::Local_int elem_i, fmr::Local_int elem_n,
-    const fmr::Geom_float* tile_size, const fmr::Geom_float* part_orig) noexcept;
+    const F* tile_size, const F* part_orig) noexcept;
   //
 };//end struct Bars
 

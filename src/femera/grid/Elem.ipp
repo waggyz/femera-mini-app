@@ -76,13 +76,6 @@ constexpr bool elem::Elem<T,P,F>::get_tile_vert_conn_prdc (
   const fmr::Local_int* part_size, const fmr::Local_int p) const noexcept {
   return T::calc_tile_vert_conn_prdc (conn, tile_i, part_size, p);
 }
-template <class T, typename fmr::Local_int P, typename F>
-constexpr bool elem::Elem<T,P,F>::get_tile_vert_coor (
-  fmr::Geom_float* coor, const fmr::Local_int vert_i,
-  const fmr::Local_int vert_n, const fmr::Geom_float* elem_size,
-  const fmr::Geom_float* part_orig) const noexcept {
-  return T::calc_tile_vert_coor (coor, vert_i, vert_n, elem_size, part_orig);
-}
 #if 0
 template <class T, typename fmr::Local_int P, typename F>
 constexpr bool elem::Elem<T,P,F>::get_tile_node_coor (
@@ -93,17 +86,21 @@ constexpr bool elem::Elem<T,P,F>::get_tile_node_coor (
 }
 #endif
 template <class T, typename fmr::Local_int P, typename F>
-constexpr bool elem::Elem<T,P,F>::get_tile_elem_vert_coor (
-  fmr::Geom_float* coor, const fmr::Local_int elem_i,
-  const fmr::Local_int elem_n, const fmr::Geom_float* elem_size,
-  const fmr::Geom_float* part_orig) const noexcept {
+constexpr bool elem::Elem<T,P,F>::get_tile_vert_coor ( F* coor,
+  const fmr::Local_int vert_i, const fmr::Local_int vert_n,
+  const F* elem_size, const F* part_orig) const noexcept {
+  return T::calc_tile_vert_coor (coor, vert_i, vert_n, elem_size, part_orig);
+}
+template <class T, typename fmr::Local_int P, typename F>
+constexpr bool elem::Elem<T,P,F>::get_tile_elem_vert_coor ( F* coor,
+  const fmr::Local_int elem_i, const fmr::Local_int elem_n,
+  const F* elem_size, const F* part_orig) const noexcept {
   return T::calc_tile_elem_vert_coor (coor, elem_i, elem_n, elem_size, part_orig);
 }
 template <class T, typename fmr::Local_int P, typename F>
-constexpr bool elem::Elem<T,P,F>::get_tile_elem_coor_vert (
-  fmr::Geom_float* coor, const fmr::Local_int elem_i,
-  const fmr::Local_int elem_n, const fmr::Geom_float* elem_size,
-  const fmr::Geom_float* part_orig) const noexcept {
+constexpr bool elem::Elem<T,P,F>::get_tile_elem_coor_vert ( F* coor,
+  const fmr::Local_int elem_i, const fmr::Local_int elem_n,
+  const F* elem_size, const F* part_orig) const noexcept {
   return T::calc_tile_elem_coor_vert (coor, elem_i, elem_n, elem_size, part_orig);
 }
 #if 0
