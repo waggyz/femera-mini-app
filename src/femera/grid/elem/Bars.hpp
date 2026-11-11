@@ -141,16 +141,13 @@ private:
   static constexpr bool calc_tile_node_conn (fmr::Local_int* conn,
     fmr::Local_int tile_i, const fmr::Local_int* part_size,
     fmr::Local_int p) noexcept;
-  // Node coordinates ---------------------------------------------------------
+  //
+  // Vertex coordinates -------------------------------------------------------
   template <typename F=fmr::Geom_float>
   static constexpr bool calc_tile_vert_coor (F* coor,
     fmr::Local_int vert_i, fmr::Local_int vert_n,
     const F* tile_size, const F* part_orig) noexcept;
-#if 0
-  static constexpr bool calc_tile_node_coor (fmr::Geom_float* coor,
-    fmr::Local_int node_i, fmr::Local_int node_n,
-    const fmr::Geom_float* tile_size, const fmr::Geom_float* part_orig) noexcept;
-#endif
+  //
   template <typename F=fmr::Geom_float>
   static constexpr bool calc_tile_elem_vert_coor (F* coor,
     fmr::Local_int elem_i, fmr::Local_int elem_n,
@@ -159,6 +156,15 @@ private:
   static constexpr bool calc_tile_elem_coor_vert (F* coor,
     fmr::Local_int elem_i, fmr::Local_int elem_n,
     const F* tile_size, const F* part_orig) noexcept;
+  //
+  // Node coordinates ---------------------------------------------------------
+  template <typename F=fmr::Geom_float>
+  static constexpr bool calc_tile_node_coor (F* coor,
+    const fmr::Local_int node_i,
+    const fmr::Local_int elem_p,
+    const fmr::Local_int* part_node_dims,
+    const F* tile_size, const F* part_orig,
+    const fmr::Dim_int* ) noexcept;//TODO tile_dirs not used yet
   //
 };//end struct Bars
 

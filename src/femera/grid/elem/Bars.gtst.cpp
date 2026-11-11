@@ -479,6 +479,7 @@ TEST( GridElemBars, TileVertexCoordinates ){
   Bars bars;
   const fmr::Geom_float part_orig[3] = {0.0, 0.0, 0.0};
   const fmr::Geom_float elem_size[3] = {1.0, 1.0, 1.0};
+  //const fmr::Local_int part_node_dims[3] = {3,0,0};
   const fmr::Local_int vert_n = 3;
   fmr::Geom_float coor[3];
 
@@ -491,14 +492,8 @@ TEST( GridElemBars, TileVertexCoordinates ){
   EXPECT_DOUBLE_EQ( coor[1], 2.0 );
   EXPECT_DOUBLE_EQ( coor[2], 2.0 );
   EXPECT_FALSE( bars.get_tile_vert_coor(coor, 3, vert_n, elem_size, part_orig) );
-#if 0
-  EXPECT_TRUE( bars.get_tile_node_coor(coor, 2, vert_n, elem_size, part_orig) );
-  EXPECT_DOUBLE_EQ( coor[0], 2.0 );
-  EXPECT_DOUBLE_EQ( coor[1], 2.0 );
-  EXPECT_DOUBLE_EQ( coor[2], 2.0 );
-  EXPECT_FALSE( bars.get_tile_node_coor(coor, 3, vert_n, elem_size, part_orig) );
-#endif
 }
+
 TEST( GridElemBars, MoreTileVertexCoordinates ){
   Bars bars;
   const fmr::Geom_float part_orig[3] = {0.0, 0.0, 0.0};
@@ -515,6 +510,35 @@ TEST( GridElemBars, MoreTileVertexCoordinates ){
   EXPECT_DOUBLE_EQ( coor[1], 4.0 );
   EXPECT_DOUBLE_EQ( coor[2], 6.0 );
   EXPECT_FALSE( bars.get_tile_vert_coor(coor, 3, vert_n, elem_size, part_orig) );
+}
+TEST( GridElemBars, TileNodeCoordinates ){
+  constexpr Elem<Bars> bars_p1;// linear default
+  constexpr Elem<Bars, 2> bars_p2;
+  constexpr Elem<Bars, 3> bars_p3;
+  const fmr::Geom_float part_orig[3] = {0.0, 1.0, 2.0};
+  const fmr::Geom_float elem_size[3] = {1.0, 1.0, 1.0};
+  const fmr::Local_int part_node_dims[3] = {3,0,0};
+  fmr::Geom_float coor[3];
+  EXPECT_TRUE( bars_p1.get_tile_node_coor(coor, 0, part_node_dims, elem_size) );
+  EXPECT_DOUBLE_EQ( coor[0], 0.0 );// default origin
+  EXPECT_DOUBLE_EQ( coor[1], 0.0 );
+  EXPECT_DOUBLE_EQ( coor[2], 0.0 );
+
+  EXPECT_TRUE( bars_p1.get_tile_node_coor(coor, 2, part_node_dims, elem_size, part_orig) );
+  EXPECT_DOUBLE_EQ( coor[0], 2.0 );
+  EXPECT_DOUBLE_EQ( coor[1], 3.0 );
+  EXPECT_DOUBLE_EQ( coor[2], 4.0 );
+  EXPECT_FALSE( bars_p1.get_tile_node_coor(coor, 3, part_node_dims, elem_size, part_orig) );
+
+  EXPECT_TRUE( bars_p2.get_tile_node_coor(coor, 2, part_node_dims, elem_size, part_orig) );
+  EXPECT_DOUBLE_EQ( coor[0], 1.0 );
+  EXPECT_DOUBLE_EQ( coor[1], 2.0 );
+  EXPECT_DOUBLE_EQ( coor[2], 3.0 );
+
+  EXPECT_TRUE( bars_p3.get_tile_node_coor(coor, 2, part_node_dims, elem_size, part_orig) );
+  EXPECT_DOUBLE_EQ( coor[0], 2.0/3.0 );
+  EXPECT_DOUBLE_EQ( coor[1], 1.0 + 2.0/3.0 );
+  EXPECT_DOUBLE_EQ( coor[2], 2.0 + 2.0/3.0 );
 }
 
 TEST( GridElemBars, TileElementVertexCoordinatesAOS ){

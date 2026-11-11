@@ -175,23 +175,33 @@ class Elem {
   const noexcept;
 #endif
   // Tiled (strucured mesh) node coordinates
-#if 0
   constexpr bool get_tile_node_coor (F* coor,
-    const fmr::Local_int node_i);
-  constexpr bool get_tile_elem_node_coor (F* node_coor,
-    const fmr::Local_int elem_i);
+    const fmr::Local_int node_i,
+    const fmr::Local_int* part_node_dims,// partition dimensions nodes_x,node_y,node_z for 1D,2D,3D elems
+    //FIXME TODO should be part_elem_dims to avoid incomplete cut off() elements
+    const F* tile_size,
+    const F* part_orig = nullptr,
+    const fmr::Dim_int* tile_dirs = nullptr)// tile orientation
+  const noexcept{
+    return T::calc_tile_node_coor (
+      coor, node_i, P, part_node_dims, tile_size, part_orig, tile_dirs);
+  }
+  //NOTE node_coor, part_node_dims, tile_size, part_orig bounds checked by caller.
+  // Orientation of the tile is specified by tile_dirs,
+  // which changes where mesh "holes" are when tiling by, e.g., Wdge elements.
+  // P1 FE meshes are the same as FD grids.
+#if 0
   constexpr bool get_tile_elem_coor_node (F* node_coor,
     const fmr::Local_int elem_i);
 #endif
 #if 0
   constexpr bool get_tile_elem_node_coor(fmr::Geom_float* node_coor,
-  // For Bars, elem_size is the spacing between successive nodes; this
-  // currently matches element spacing only for P=1.
     const fmr::Local_int node_i,
     const fmr::Local_int node_n,
     const fmr::Geom_float* tile_size,
-    const fmr::Geom_float* part_orig)// origin should default to {0.0,0.0,0.0}
-    //NOTE node_coor, elem_size, part_orig bounds should be checked by the caller.
+    const fmr::Geom_float* part_orig = {0.0,0.0,0.0})// origin should default to {0.0,0.0,0.0}
+  //NOTE node_coor, part_orig bounds should be checked by the caller.
+  //TODO consistent and periodically alternating orientations .
     const noexcept;
 #endif
   // Tile operations dispatch to T's corresponding static calc_* method.
@@ -204,40 +214,52 @@ class Elem {
     const fmr::Local_int* part_size,
     const fmr::Local_int p=P)// {x}, {x,y}, {x,y,z} for 1D,2D,3D elems
     //NOTE conn, part_size bounds should be checked by the caller.
-    const noexcept;
+    const noexcept{
+      return T::calc_tile_vert_conn (conn, tile_i, part_size, p);
+    }
   constexpr bool get_tile_vert_conn_prdc (fmr::Local_int* conn,// Periodic BCs
     //NOTE This is for a periodic partition, not an overall periodic grid.
     const fmr::Local_int tile_i,
     const fmr::Local_int* part_size,
     const fmr::Local_int p=P)// {x}, {x,y}, {x,y,z} for 1D,2D,3D elems
     //NOTE conn, part_size bounds should be checked by the caller.
-    const noexcept;
+    const noexcept{
+      return T::calc_tile_vert_conn_prdc (conn, tile_i, part_size, p);
+    }
   //
   constexpr bool get_tile_node_conn (fmr::Local_int* conn,
     const fmr::Local_int tile_i,
     const fmr::Local_int* part_size,
     const fmr::Local_int p=P)// {x}, {x,y}, {x,y,z} for 1D,2D,3D elems
     //NOTE conn, part_size bounds should be checked by the caller.
-    const noexcept;
+    const noexcept{
+      return T::calc_tile_node_conn (conn, tile_i, part_size, p);
+    }
   //
   constexpr bool get_tile_vert_coor(F* vert_coor,
     const fmr::Local_int vert_i, const fmr::Local_int vert_n,
     const F* tile_size, const F* part_orig)// origin should default to {0.0,0.0,0.0}
     //NOTE node_coor, elem_size, part_orig bounds should be checked by the caller.
-    const noexcept;
+    const noexcept{
+      return T::calc_tile_vert_coor (vert_coor, vert_i, vert_n, tile_size, part_orig);
+    }
   //
   constexpr bool get_tile_elem_vert_coor(//TODO need: 
     F* vert_coor,// size: vert_n * sims_d
     const fmr::Local_int elem_i, const fmr::Local_int elem_n,
     const F* tile_size, const F* part_orig)// origin should default to {0.0,0.0,0.0}
     //NOTE vert_coor, elem_size, part_orig bounds should be checked by the caller.
-    const noexcept;
+    const noexcept{
+      return T::calc_tile_elem_vert_coor (vert_coor, elem_i, elem_n, tile_size, part_orig);
+    }
   constexpr bool get_tile_elem_coor_vert(
     F* vert_coor,// size: vert_n * sims_d
     const fmr::Local_int elem_i, const fmr::Local_int elem_n,
     const F* tile_size, const F* part_orig)// origin should default to {0.0,0.0,0.0}
     //NOTE vert_coor, tile_size, part_orig bounds should be checked by the caller.
-    const noexcept;
+    const noexcept{
+      return T::calc_tile_elem_coor_vert (vert_coor, elem_i, elem_n, tile_size, part_orig);
+    }
   //
 #if 0
   template <typename Y=F>

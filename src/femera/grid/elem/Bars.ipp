@@ -52,20 +52,26 @@ constexpr bool Bars::calc_tile_node_conn (
     }
     return tile_i < part_size[0];// false if tile_i out of range
   }
-#if 0
-constexpr bool Bars::calc_tile_node_coor(fmr::Geom_float* coor,
+template <typename F>
+constexpr bool Bars::calc_tile_node_coor(F* coor,
     const fmr::Local_int node_i,
-    const fmr::Local_int node_n,
-    const fmr::Geom_float* tile_size,
-    const fmr::Geom_float* part_orig)
-    noexcept{
-    coor[0] = part_orig[0] + node_i * tile_size[0];
-    coor[1] = part_orig[1] + node_i * tile_size[1];
-    coor[2] = part_orig[2] + node_i * tile_size[2];
+    const fmr::Local_int elem_p,
+    const fmr::Local_int* part_node_dims,
+    const F* tile_size,
+    const F* part_orig,
+    const fmr::Dim_int* )//TODO tile_dirs not used yet
+  noexcept{
+    const F node_delt = F(1.0) / F(elem_p);
+    // Guard against null part_orig pointer.
+    coor[0] = (part_orig ? part_orig[0] : F(0.0))
+      + node_i * tile_size[0] * node_delt;
+    coor[1] = (part_orig ? part_orig[1] : F(0.0))
+      + node_i * tile_size[1] * node_delt;
+    coor[2] = (part_orig ? part_orig[2] : F(0.0))
+      + node_i * tile_size[2] * node_delt;
     //TODO FIXME this only works for P=1
-    return node_i < node_n;
+    return node_i < part_node_dims[0];
   }
-#endif
   template <typename F>
   constexpr bool Bars::calc_tile_vert_coor(F* coor,
     const fmr::Local_int vert_i, const fmr::Local_int vert_n,
