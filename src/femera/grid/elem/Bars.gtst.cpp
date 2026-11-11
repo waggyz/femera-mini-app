@@ -5,6 +5,8 @@
 
 #include <gtest/gtest.h>
 
+#include <type_traits>
+
 auto  mini_ptr = fmr::new_jobs ();
 auto &mini = *mini_ptr;
 
@@ -16,6 +18,10 @@ fmr::Exit_int main (int argc, char** argv) {
 }
 namespace femera { namespace grid { namespace elem {
 
+TEST( GridElemBars, IsStateless ){
+  EXPECT_TRUE( (std::is_empty<Bars>::value) );
+  EXPECT_TRUE( (std::is_empty<Elem<Bars>>::value) );
+}
 TEST( GridElemBars, ElementTopology ){
   constexpr Bars bars;
 #if 0
@@ -125,6 +131,66 @@ TEST( GridElemBars, VertexConnectivityAndCoordinates ){
         coor_vert[dim * bars.get_vert_n() + vertex]);
     }
   }
+}
+
+TEST( GridElemBars, NodeCoordinates ){
+  constexpr Bars bars_p1;// linear default
+  constexpr Elem<Bars, 2> bars_p2;// quadratic
+  constexpr Elem<Bars, 3> bars_p3;// cubic
+  const fmr::Geom_float test_vert_coor[6] = {0.0,1.0,2.0, 3.0,4.0,5.0};
+  const fmr::Local_int p1_sims_d = bars_p1.get_sims_d();
+  const fmr::Local_int p2_sims_d = bars_p2.get_sims_d();
+  const fmr::Local_int p3_sims_d = bars_p3.get_sims_d();
+  const fmr::Local_int p1_node_n = bars_p1.get_node_n();
+  const fmr::Local_int p2_node_n = bars_p2.get_node_n();
+  const fmr::Local_int p3_node_n = bars_p3.get_node_n();
+  ASSERT_EQ(p1_sims_d, 3);
+  ASSERT_EQ(p2_sims_d, 3);
+  ASSERT_EQ(p3_sims_d, 3);
+  ASSERT_EQ(p1_node_n, 2);
+  ASSERT_EQ(p2_node_n, 3);
+  ASSERT_EQ(p3_node_n, 4);
+
+  const fmr::Geom_float p1_base_node_coor[6]
+    = {0.0,0.0,0.0, 1.0,0.0,0.0};
+  const fmr::Geom_float p1_test_node_coor[6]
+    = {0.0,1.0,2.0, 3.0,4.0,5.0};
+  const fmr::Geom_float p2_base_node_coor[9]
+    = {0.0,0.0,0.0, 1.0,0.0,0.0, 0.5,0.0,0.0};
+  const fmr::Geom_float p2_test_node_coor[9]
+    = {0.0,1.0,2.0, 3.0,4.0,5.0, 1.5,2.5,3.5};
+  const fmr::Geom_float f13 = 1.0/3.0, f23 = 2.0/3.0;
+  const fmr::Geom_float p3_base_node_coor[12]
+    = {0.0,0.0,0.0, 1.0,0.0,0.0,
+       f23*0.0+f13*1.0,0.0,0.0, f13*0.0+f23*1.0,0.0,0.0};
+  const fmr::Geom_float p3_test_node_coor[12]
+    = {0.0,1.0,2.0, 3.0,4.0,5.0,
+       f23*0.0+f13*3.0, f23*1.0+f13*4.0, f23*2.0+f13*5.0,
+       f13*0.0+f23*3.0, f13*1.0+f23*4.0, f13*2.0+f23*5.0};
+
+  fmr::Geom_float node_coor[12] = {};
+  const auto expect_node_coor = [&node_coor](
+    const auto& elem, const fmr::Geom_float* expected) {
+    for (fmr::Local_int i = 0; i < elem.get_node_n() * elem.get_sims_d(); ++i) {
+      EXPECT_DOUBLE_EQ(node_coor[i], expected[i]);
+    }
+  };
+
+  ASSERT_TRUE(bars_p1.get_elem_node_coor(node_coor));
+  expect_node_coor(bars_p1, p1_base_node_coor);
+  ASSERT_TRUE(bars_p1.get_elem_node_coor(node_coor, test_vert_coor));
+  expect_node_coor(bars_p1, p1_test_node_coor);
+
+  ASSERT_TRUE(bars_p2.get_elem_node_coor(node_coor));
+  expect_node_coor(bars_p2, p2_base_node_coor);
+  ASSERT_TRUE(bars_p2.get_elem_node_coor(node_coor, test_vert_coor));
+  expect_node_coor(bars_p2, p2_test_node_coor);
+
+  ASSERT_TRUE(bars_p3.get_elem_node_coor(node_coor));
+  expect_node_coor(bars_p3, p3_base_node_coor);
+  ASSERT_TRUE(bars_p3.get_elem_node_coor(node_coor, test_vert_coor));
+  expect_node_coor(bars_p3, p3_test_node_coor);
+
 }
 
 TEST( GridElemBars, ElementQuality ){

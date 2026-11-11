@@ -9,8 +9,9 @@ namespace femera { namespace grid { namespace elem {
 class Bars final : public Elem<Bars> {
   template <class T, fmr::Local_int P, typename F>
   friend class Elem;
+// Scalars ====================================================================
 public:
-  static constexpr fmr::Local_int vert_n = 2;// needed by other elements
+  static constexpr fmr::Local_int vert_n = 2;// needed by other elements?
 private:
   static constexpr fmr::Local_int sims_d = 3;
   static constexpr fmr::Local_int elem_d = 1;
@@ -34,15 +35,17 @@ private:
   static constexpr fmr::Geom_float elem_v = 0.0;// natural element volume
   //
   static constexpr fmr::math::Poly poly_type = fmr::math::Poly::Full;
-  //
+//
+// Arrays & pointers ==========================================================
   //static constexpr
   //fmr::Local_int vert_conn [Bars::vert_n] = {0,1};// always integers [0,vert_n-1]
   // elem_conn is an array [0,get_conn_n()-1].
   //TODO these are vertex connectivity.
-  static constexpr fmr::Local_int edge_conn [Bars::vert_n] = {0,1};
-  static constexpr fmr::Local_int tris_conn = {};
-  static constexpr fmr::Local_int quad_conn = {};
-  //
+  static constexpr fmr::Local_int bars_conn [Bars::vert_n] = {0,1};
+  static constexpr fmr::Local_int* tris_conn = nullptr;
+  static constexpr fmr::Local_int* quad_conn = nullptr;
+//
+// Methods ====================================================================
   static constexpr
   fmr::Geom_float vert_coor [vert_n * sims_d]// transposed coor_vert
     = {           // vertex                      //
@@ -86,12 +89,10 @@ private:
   // Includes transposed poynomial shape function/gradient
   // These bridge between Geom (input) and Phys (output) classes.
   //TODO FIXME these can be dispactched on the polynomial order P (1,2,3),
-  //           HOWEVER they should default to Phys_float, not Geom_float,
-  //           and adapt to the second (x[]) argument of different precision.
-  //           and maybe should not be dispatched by Elem?
+  //           and adapt to arguments of different precision.
   //NOTE the size of f is get_poly_func_size(1) = node_n for order P
   //     the size of g is get_poly_grad_size(1) = node_n * sims_d for order P
-  //     x is sized for 3D, even if not all are used.
+  //     x is sized for 3D, even if not all are dimensions used.
   template <typename Y, typename G> static inline
   Y* calc_poly_func_p1 (Y f[2u], const G x[3u]);// Linear 2-node bar
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static inline

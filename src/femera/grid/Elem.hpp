@@ -152,7 +152,8 @@ class Elem {
   }
   // Natural element node coordinates ----------------------------------------
 #if 1
-  constexpr const F* get_elem_node_coor () const noexcept;
+  constexpr bool get_elem_node_coor (F* node_coor,
+    const F* vert_coor = T::vert_coor ) const noexcept;
 #endif
   // Structured grid element tiles ============================================
   constexpr fmr::Local_int get_tile_elem_n () const noexcept {
