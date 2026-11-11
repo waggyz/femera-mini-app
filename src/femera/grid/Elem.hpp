@@ -96,12 +96,11 @@ class Elem {
   constexpr F get_face_a () const noexcept {return F(T::face_a);}
   constexpr F get_elem_v () const noexcept {return F(T::elem_v);}
   //
-  constexpr fmr::math::Poly get_poly_type () const noexcept {return T::poly_type;}
-//
-  // Non-trivial constexpr member functions -----------------------------------
+  // Non-trivial constexpr scalar member functions ----------------------------
   constexpr fmr::Local_int get_face_n () const noexcept;
   constexpr fmr::Local_int get_node_n () const noexcept;
   //
+  constexpr fmr::math::Poly get_poly_type () const noexcept {return T::poly_type;}
   constexpr
   fmr::Local_int jacs_size (
     const fmr::Local_int intp_n=1, const fmr::Local_int sims_d=3
@@ -117,6 +116,8 @@ class Elem {
     const fmr::Local_int intp_n=1, const fmr::Local_int sims_d=3) const noexcept;
   //
   // Array constexpr pointers =================================================
+  //NOTE get_vert_conn () is trivial = {0,1,...,get_vert_n()-1}
+  //     get_node_conn () is trivial = {0,1,...,get_node_n()-1}
   //
   //NOTE the following are all only vertex connectivity (p==1) arrays.
   constexpr const fmr::Local_int* get_bars_conn () const noexcept {
@@ -126,10 +127,14 @@ class Elem {
   constexpr const fmr::Local_int* get_quad_conn () const noexcept {
     return T::quad_conn;}
   //
-  // Natural element vertex coordinates --------------------------------------
+  // Natural element coordinates ----------------------------------------------
   //NOTE these currently return 3D coordinates,
   //     regardless of element or simulation dimension.
-  //NOTE This may not be the best way to dispatch.
+  //
+  constexpr bool get_elem_node_coor (F* node_coor,
+    const F* vert_coor = T::vert_coor ) const noexcept;
+  //
+  //NOTE The following may not be the best way to dispatch.
   template <typename G=F,
     typename std::enable_if <std::is_same<G, double>::value>::type* = nullptr>
   constexpr const G* get_elem_vert_coor () const noexcept {
@@ -150,12 +155,34 @@ class Elem {
   constexpr const G* get_elem_coor_vert () const noexcept {
     return T::coor_vert_f;
   }
-  // Natural element node coordinates ----------------------------------------
-#if 1
-  constexpr bool get_elem_node_coor (F* node_coor,
-    const F* vert_coor = T::vert_coor ) const noexcept;
+  // Element quality calculations ---------------------------------------------
+#if 0
+  F get_edge_qual (const F* node_coor, const fmr::Dim_int dims=3) const noexcept;
+  F get_skew_qual (const F* node_coor, const fmr::Dim_int dims=3) const noexcept;
 #endif
-  // Structured grid element tiles ============================================
+  constexpr
+  F get_delt_qual (const F* node_coor, const fmr::Dim_int dims=3) const noexcept;
+  //
+  // Jacobian and determinant calculations ------------------------------------
+  #if 0
+  template <typename Y=F>
+  Y* jatd_naos (const fmr::Local_int intp_n=1,// inverted and transposed
+    // Jacobian & determinants
+    const fmr::Dim_int dims=D, fmr::Local_int node_n=get_node_n (),
+    const F* node_coor) const noexcept;
+  
+  template <typename Y=F>
+  Y* jacs_csoa (const fmr::Local_int intp_n=1,// x1,x2,..., y1,y2,..., z1,z2,...
+    const fmr::Dim_int dims=D, fmr::Local_int node_n=get_node_n (),
+  const F* coor_node) const noexcept;
+  template <typename Y=F>
+  Y* jatd_nsoa (const fmr::Local_int intp_n=1,
+    const fmr::Dim_int dims=D, fmr::Local_int node_n=get_node_n (),
+  const F* coor_node[D*get_node_n ()]) const noexcept;
+#endif
+  //
+  // Structured grid element tiling ===========================================
+  //
   constexpr fmr::Local_int get_tile_elem_n () const noexcept {
     return T::tile_elem_n;}
   constexpr fmr::Local_int get_tile_vert_n () const noexcept {
@@ -170,26 +197,39 @@ class Elem {
     return T::tile_vols_n;}// 3D elements of this type (assume all same)
   //
   constexpr fmr::Local_int get_tile_elem_node_n () const noexcept;
-#if 0
-  constexpr fmr::Local_int get_tile_node_n (fmr::Local_int* mesh_size)
-  const noexcept;
-#endif
+
+  constexpr fmr::Local_int get_tile_part_elem_n (
+    const fmr::Local_int* part_elem_dims)// size 3 for 1D,2D,3D elements
+  const noexcept{
+  //NOTE only [0] is used for 1D elements like Bars,
+  //     for 2D elements only [0] and [1] are used,
+  //     for 3D elements all three are used.
+  //
+    return T::tile_elem_n
+    * ((part_elem_dims[0] > 0 && T::elem_d > 0) ? part_elem_dims[0] : 0)
+    * ((part_elem_dims[1] > 0 && T::elem_d > 1) ? part_elem_dims[1] : 1)
+    * ((part_elem_dims[2] > 0 && T::elem_d > 2) ? part_elem_dims[2] : 1);
+  }
+  constexpr fmr::Local_int get_tile_part_node_n (const fmr::Local_int* part_elem_dims)
+  const noexcept{
+    return T::calc_tile_part_node_n(P, part_elem_dims);
+  }
   // Tiled (strucured mesh) node coordinates
-  constexpr bool get_tile_node_coor (F* coor,
+  constexpr bool get_tile_part_node_coor (F* coor,
     const fmr::Local_int node_i,
-    const fmr::Local_int* part_node_dims,// partition dimensions nodes_x,node_y,node_z for 1D,2D,3D elems
-    //FIXME TODO should be part_elem_dims to avoid incomplete cut off() elements
+    const fmr::Local_int* part_elem_dims,// partition dimensions nodes_x,node_y,node_z for 1D,2D,3D elems
     const F* tile_size,
-    const F* part_orig = nullptr,
+    const F* part_orig = nullptr,// default is {0.0,0.0,0.0}
     const fmr::Dim_int* tile_dirs = nullptr)// tile orientation
   const noexcept{
-    return T::calc_tile_node_coor (
-      coor, node_i, P, part_node_dims, tile_size, part_orig, tile_dirs);
+    return T::calc_tile_part_node_coor (
+      coor, node_i, P, part_elem_dims, tile_size, part_orig, tile_dirs);
   }
   //NOTE node_coor, part_node_dims, tile_size, part_orig bounds checked by caller.
   // Orientation of the tile is specified by tile_dirs,
   // which changes where mesh "holes" are when tiling by, e.g., Wdge elements.
-  // P1 FE meshes are the same as FD grids.
+  //
+  // P1 FE meshes are the same as FD grids, regardless of element type.
 #if 0
   constexpr bool get_tile_elem_coor_node (F* node_coor,
     const fmr::Local_int elem_i);
@@ -260,59 +300,7 @@ class Elem {
     const noexcept{
       return T::calc_tile_elem_coor_vert (vert_coor, elem_i, elem_n, tile_size, part_orig);
     }
-  //
-#if 0
-  template <typename Y=F>
-  Y* jatd_naos (const fmr::Local_int intp_n=1,// inverted and transposed
-    // Jacobian & determinants
-    const fmr::Dim_int dims=D, fmr::Local_int node_n=get_node_n (),
-    const F* node_coor) const noexcept;
-  
-  template <typename Y=F>
-  Y* jacs_csoa (const fmr::Local_int intp_n=1,// x1,x2,..., y1,y2,..., z1,z2,...
-    const fmr::Dim_int dims=D, fmr::Local_int node_n=get_node_n (),
-  const F* coor_node) const noexcept;
-  template <typename Y=F>
-  Y* jatd_nsoa (const fmr::Local_int intp_n=1,
-    const fmr::Dim_int dims=D, fmr::Local_int node_n=get_node_n (),
-  const F* coor_node[D*get_node_n ()]) const noexcept;
-#endif
-  //
-  // Element quality calculations
-#if 0
-  F calc_dets_qual (const F* node_coor, const fmr::Dim_int dims=3) const noexcept;
-  F calc_edge_qual (const F* node_coor, const fmr::Dim_int dims=3) const noexcept;
-  F calc_skew_qual (const F* node_coor, const fmr::Dim_int dims=3) const noexcept;
-#endif
-  constexpr
-  F calc_delt_qual (const F* node_coor, const fmr::Dim_int dims=3) const noexcept;
-  //
-  // Element static functions (independent of elem type) =====================
-  //
-  // =========================================================================
-#if 0
-  constexpr
-  F face_norm [sims_d * face_n]]//TODO this can be evaluated at compile time.
-  //NOTE specialize for simulation dimension <D>
-    = {
-  };
-#endif
-  //
-#if 0
-  template <fmr::Local_int tP=P,
-    typename std::enable_if <tP == 1>::value>// P=1, D does not matter
-  constexpr const fmr::Local_int* get_node_conn () noexcept {//TODO Needed?
-  // This is just a list of integers [1..node_n]
-    return T::vert_conn;
-  }
-#endif
-  // Node coordinates --------------------------------------------------------
-  //
-  // Integration points and weights (default) --------------------------------
-  //
-  // Shape functions and gradients -------------------------------------------
-  //
-};
+};//end Elem
 
 } } }//end femera::grid::elem:: namespace
 

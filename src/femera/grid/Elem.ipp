@@ -131,17 +131,6 @@ template <class T, typename fmr::Local_int P, typename F>
 }
 #if 0
 template <class T, typename fmr::Local_int P, typename F>
- constexpr fmr::Local_int elem::Elem<T,P,F>::get_tile_node_n (
-  fmr::Local_int* mesh_size) const noexcept {
-  // Handles solid and interface elements
-  return T::tile_vert_n// vertex nodes
-    + (P -1) * T::tile_edge_n// edge nodes
-    + (P==3  ? T::tile_vols_n * (T::tile_tris_n + T::tile_quad_n)// face nodes for P==3
-    : 0);      // vols_n is 0 (1D,2D elems) or 1 (3D solid elems)
-}
-#endif
-#if 0
-template <class T, typename fmr::Local_int P, typename F>
 constexpr fmr::Local_int elem::Elem<T,P,F>::get_elem_conn (fmr::Local_int i)
 const noexcept {
   switch(i){
@@ -154,7 +143,7 @@ const noexcept {
 // Element quality metrics ====================================================
   template <class T, typename fmr::Local_int P, typename F>//, typename Y>
   constexpr
-  F elem::Elem<T,P,F>::calc_delt_qual (const F* vert_coor, const fmr::Dim_int dims)
+  F elem::Elem<T,P,F>::get_delt_qual (const F* vert_coor, const fmr::Dim_int dims)
   const noexcept {
     // Calculate the ratio of the minimum edge length
     // to the maximum coordinate absolute value.
@@ -170,7 +159,6 @@ const noexcept {
     // Early return if max_coord is zero to avoid division by zero.
     if(!(max_coord < F(0) || max_coord > F(0))) return F(0);
     //
-    //const auto conn = get_vert_conn ();// Use edge connectivity {0,1}.
     const auto edge_n = get_edge_n ();
     for(fmr::Local_int j=0; j<edge_n; ++j){// loop through edges
       F edge_len2 = F(0);// tracks square of edge length
@@ -185,7 +173,7 @@ const noexcept {
       if(edge_len2 < min_edge) min_edge = edge_len2;
     }
     return sqrt(min_edge) / max_coord;
-  }//end calc_delt_qual
+  }//end get_delt_qual
 
 } }//end femera::grid namespace
 

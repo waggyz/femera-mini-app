@@ -21,6 +21,10 @@ private:
   static constexpr fmr::Local_int quad_n = 0;
   static constexpr fmr::Local_int vols_n = 0;
   //
+  static constexpr fmr::Geom_float edge_l = 1.0;// total length of edges
+  static constexpr fmr::Geom_float face_a = 0.0;// total surface area
+  static constexpr fmr::Geom_float elem_v = 0.0;// natural element volume
+  //
   static constexpr fmr::Local_int tile_elem_n = 1;// # this type element / tile
   //
   // Bars tile naturally, so tile counts match element counts.
@@ -30,22 +34,15 @@ private:
   static constexpr fmr::Local_int tile_quad_n = Bars::quad_n;
   static constexpr fmr::Local_int tile_vols_n = Bars::vols_n;
   //
-  static constexpr fmr::Geom_float edge_l = 1.0;// total length of edges
-  static constexpr fmr::Geom_float face_a = 0.0;// total surface area
-  static constexpr fmr::Geom_float elem_v = 0.0;// natural element volume
-  //
   static constexpr fmr::math::Poly poly_type = fmr::math::Poly::Full;
-//
-// Arrays & pointers ==========================================================
-  //static constexpr
-  //fmr::Local_int vert_conn [Bars::vert_n] = {0,1};// always integers [0,vert_n-1]
-  // elem_conn is an array [0,get_conn_n()-1].
-  //TODO these are vertex connectivity.
+  //
+  // Arrays & pointers ========================================================
+  // vert_conn is trivial: {0,...,get_vert_n-1}
+  // elem_conn is trivial: {0,...,get_elem_n()-1}.
   static constexpr fmr::Local_int bars_conn [Bars::vert_n] = {0,1};
   static constexpr fmr::Local_int* tris_conn = nullptr;
   static constexpr fmr::Local_int* quad_conn = nullptr;
-//
-// Methods ====================================================================
+  //
   static constexpr
   fmr::Geom_float vert_coor [vert_n * sims_d]// transposed coor_vert
     = {           // vertex                      //
@@ -84,6 +81,8 @@ private:
     #undef F13
     #undef F23
   }; */
+  //
+  // Methods ====================================================================
   public://TODO make private, accessed through Elem.
   // Bar shape functions and gradients ========================================
   // Includes transposed poynomial shape function/gradient
@@ -116,28 +115,30 @@ private:
   //
   private:
   // Tiling ===================================================================
-  // Bars are self-tiling (no other element types involved)
-#if 0
-  static constexpr fmr::Local_int tile_vert_conn [2] = {0,1};// trivial
-#endif
-    /*
-    Vertex connectivity:
-    - For P1, vert_conn sequence: {0,1}, {1,2}, {2,3},...
-    - For P2, vert_conn sequence: {0,2}, {2,4}, {4,6},...
-    - For P3, vert_conn sequence: {0,3}, {3,6}, {6,9},...
+  // Bars are self-tiling (no other element types involved).
+  /*
+  Vertex connectivity:
+  - For P1, vert_conn sequence: {0,1}, {1,2}, {2,3},...
+  - For P2, vert_conn sequence: {0,2}, {2,4}, {4,6},...
+  - For P3, vert_conn sequence: {0,3}, {3,6}, {6,9},...
 
-    Node connectivity:
-    - For P1, node conn sequence: {0,1}, {1,2}, {2,3},...
-    - For P2, node conn sequence: {0,2,1}, {2,4,3}, {4,6,5},...
-    - For P3, node conn sequence: {0,3,1,2}, {3,6,4,5}, {6,9,7,8},...
-    */
+  Node connectivity:
+  - For P1, node conn sequence: {0,1}, {1,2}, {2,3},...
+  - For P2, node conn sequence: {0,2,1}, {2,4,3}, {4,6,5},...
+  - For P3, node conn sequence: {0,3,1,2}, {3,6,4,5}, {6,9,7,8},...
+  */
+  static constexpr fmr::Local_int calc_tile_part_node_n (
+    const fmr::Local_int elem_p, const fmr::Local_int* part_elem_dims)
+  noexcept{ return part_elem_dims[0] * elem_p  + 1;
+  }
   static constexpr bool calc_tile_vert_conn (fmr::Local_int* conn,
     fmr::Local_int tile_i, const fmr::Local_int* part_size,
-    fmr::Local_int p) noexcept;
+    fmr::Local_int p)
+    noexcept;
   static constexpr bool calc_tile_vert_conn_prdc (fmr::Local_int* conn,
     fmr::Local_int tile_i, const fmr::Local_int* part_size,
-    fmr::Local_int p) noexcept;
-  //
+    fmr::Local_int p)
+    noexcept;
   static constexpr bool calc_tile_node_conn (fmr::Local_int* conn,
     fmr::Local_int tile_i, const fmr::Local_int* part_size,
     fmr::Local_int p) noexcept;
@@ -159,10 +160,10 @@ private:
   //
   // Node coordinates ---------------------------------------------------------
   template <typename F=fmr::Geom_float>
-  static constexpr bool calc_tile_node_coor (F* coor,
+  static constexpr bool calc_tile_part_node_coor (F* coor,
     const fmr::Local_int node_i,
     const fmr::Local_int elem_p,
-    const fmr::Local_int* part_node_dims,
+    const fmr::Local_int* part_elem_dims,
     const F* tile_size, const F* part_orig,
     const fmr::Dim_int* ) noexcept;//TODO tile_dirs not used yet
   //

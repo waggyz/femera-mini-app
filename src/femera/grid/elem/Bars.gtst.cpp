@@ -94,18 +94,9 @@ TEST( GridElemBars, ElementPolynomials ){
     fmr::math::poly_term_n (cubic.get_poly_type (), cubic.get_elem_p (),\
     cubic.get_elem_d () ) );
 }
-
+// Element connectivity and coordinates tests =================================
 TEST( GridElemBars, VertexConnectivityAndCoordinates ){
   constexpr Bars bars;
-#if 0
-  ASSERT_NE( bars.get_vert_conn (), nullptr );
-  constexpr fmr::Local_int vert0 = Bars::vert_conn[0];
-  constexpr fmr::Local_int vert1 = Bars::vert_conn[1];
-  EXPECT_EQ( vert0, 0u );
-  EXPECT_EQ( vert1, 1u );
-  EXPECT_EQ( bars.get_vert_conn ()[0], 0 );
-  EXPECT_EQ( bars.get_vert_conn ()[1], 1 );
-#endif
 
   const double* vert_coor = bars.get_elem_vert_coor ();
   const double* coor_vert = bars.get_elem_coor_vert ();
@@ -190,8 +181,8 @@ TEST( GridElemBars, NodeCoordinates ){
   expect_node_coor(bars_p3, p3_base_node_coor);
   ASSERT_TRUE(bars_p3.get_elem_node_coor(node_coor, test_vert_coor));
   expect_node_coor(bars_p3, p3_test_node_coor);
-
 }
+// Element calculations =======================================================
 
 TEST( GridElemBars, ElementQuality ){
   const Elem<Bars> linear;
@@ -214,14 +205,14 @@ TEST( GridElemBars, ElementQuality ){
   ASSERT_NE( zero_coor, nullptr );
   ASSERT_NE( reversed_coor, nullptr );
   ASSERT_NE( bad_coor, nullptr );
-//calc_delt_qual
-  const double qual = linear.calc_delt_qual (natural_coor, 3u);
+//get_delt_qual
+  const double qual = linear.get_delt_qual (natural_coor, 3u);
   EXPECT_GT( qual, 0.0 );
-  const double reversed_qual = linear.calc_delt_qual (reversed_coor, 3u);
+  const double reversed_qual = linear.get_delt_qual (reversed_coor, 3u);
   EXPECT_DOUBLE_EQ( reversed_qual, qual );
-  const double zero_qual = linear.calc_delt_qual (zero_coor, 3u);
+  const double zero_qual = linear.get_delt_qual (zero_coor, 3u);
   EXPECT_DOUBLE_EQ( zero_qual, 0.0 );
-  const double bad_qual = linear.calc_delt_qual (bad_coor, 3u);
+  const double bad_qual = linear.get_delt_qual (bad_coor, 3u);
   EXPECT_GT( bad_qual, 0.0 );
   EXPECT_LT( bad_qual, qual );
   //TODO more checks here
@@ -353,7 +344,7 @@ TEST( GridElemBars, JacobianCalculationMultiplePointsAndDimensions ){
     }
   }
 }
-
+// Tiling tests ===============================================================
 TEST( GridElemBars, TileMetadata ){
   constexpr Bars bars;
   EXPECT_EQ( static_cast<fmr::Local_int>(bars.get_tile_elem_n ()), 1u );
@@ -385,6 +376,20 @@ constexpr bool tile_dispatch_constexpr_test () {
   return shape.get_tile_vert_conn (conn, 2, part_size) && conn[0] == 5;
 }
 static_assert (tile_dispatch_constexpr_test (), "Tile dispatch must be constexpr");
+
+TEST( GridElemBars, TilePartElemCount ){
+  //get_tile_part_elem_n
+  constexpr Bars bars; // only [0] is used for Bars.
+  const fmr::Local_int part_elem_dims_a[3] = {2, 0, 0};
+  const fmr::Local_int part_elem_dims_b[3] = {2, 3, 4};
+  const fmr::Local_int part_elem_dims_c[3] = {0, 0, 0};
+  const fmr::Local_int part_elem_dims_d[3] = {0, 3, 4};
+  //NOTE only [0] is used for 1D elements like Bars
+  EXPECT_EQ( bars.get_tile_part_elem_n (part_elem_dims_a), 2);
+  EXPECT_EQ( bars.get_tile_part_elem_n (part_elem_dims_b), 2);
+  EXPECT_EQ( bars.get_tile_part_elem_n (part_elem_dims_c), 0);
+  EXPECT_EQ( bars.get_tile_part_elem_n (part_elem_dims_d), 0);
+}
 
 TEST( GridElemBars, TileVertexConnectivity ){
   constexpr Bars bars1;
@@ -511,34 +516,44 @@ TEST( GridElemBars, MoreTileVertexCoordinates ){
   EXPECT_DOUBLE_EQ( coor[2], 6.0 );
   EXPECT_FALSE( bars.get_tile_vert_coor(coor, 3, vert_n, elem_size, part_orig) );
 }
-TEST( GridElemBars, TileNodeCoordinates ){
-  constexpr Elem<Bars> bars_p1;// linear default
-  constexpr Elem<Bars, 2> bars_p2;
-  constexpr Elem<Bars, 3> bars_p3;
+TEST( GridElemBars, TileNodeCountAndCoordinates ){
+  constexpr Elem<Bars> bars_p1;// linear default, 4 nodes in 3 elems
+  constexpr Elem<Bars, 2> bars_p2;// 7 nodes in 3 elems
+  constexpr Elem<Bars, 3> bars_p3;// 10 nodes in 3 elems
   const fmr::Geom_float part_orig[3] = {0.0, 1.0, 2.0};
   const fmr::Geom_float elem_size[3] = {1.0, 1.0, 1.0};
-  const fmr::Local_int part_node_dims[3] = {3,0,0};
+  const fmr::Local_int part_elem_dims[3] = {3,0,0};
   fmr::Geom_float coor[3];
-  EXPECT_TRUE( bars_p1.get_tile_node_coor(coor, 0, part_node_dims, elem_size) );
+  //
+  EXPECT_EQ( bars_p1.get_tile_part_node_n(part_elem_dims), 4 );
+  EXPECT_EQ( bars_p2.get_tile_part_node_n(part_elem_dims), 7 );
+  EXPECT_EQ( bars_p3.get_tile_part_node_n(part_elem_dims), 10 );
+  //
+  EXPECT_TRUE( bars_p1.get_tile_part_node_coor(coor, 0, part_elem_dims, elem_size) );
   EXPECT_DOUBLE_EQ( coor[0], 0.0 );// default origin
   EXPECT_DOUBLE_EQ( coor[1], 0.0 );
   EXPECT_DOUBLE_EQ( coor[2], 0.0 );
 
-  EXPECT_TRUE( bars_p1.get_tile_node_coor(coor, 2, part_node_dims, elem_size, part_orig) );
+  EXPECT_TRUE( bars_p1.get_tile_part_node_coor(coor, 2, part_elem_dims, elem_size, part_orig) );
   EXPECT_DOUBLE_EQ( coor[0], 2.0 );
   EXPECT_DOUBLE_EQ( coor[1], 3.0 );
   EXPECT_DOUBLE_EQ( coor[2], 4.0 );
-  EXPECT_FALSE( bars_p1.get_tile_node_coor(coor, 3, part_node_dims, elem_size, part_orig) );
+  EXPECT_TRUE( bars_p1.get_tile_part_node_coor(coor, 3, part_elem_dims, elem_size, part_orig) );
+  EXPECT_FALSE( bars_p1.get_tile_part_node_coor(coor, 4, part_elem_dims, elem_size, part_orig) );
 
-  EXPECT_TRUE( bars_p2.get_tile_node_coor(coor, 2, part_node_dims, elem_size, part_orig) );
+  EXPECT_TRUE( bars_p2.get_tile_part_node_coor(coor, 2, part_elem_dims, elem_size, part_orig) );
   EXPECT_DOUBLE_EQ( coor[0], 1.0 );
   EXPECT_DOUBLE_EQ( coor[1], 2.0 );
   EXPECT_DOUBLE_EQ( coor[2], 3.0 );
+  EXPECT_TRUE( bars_p2.get_tile_part_node_coor(coor, 3, part_elem_dims, elem_size, part_orig) );
+  EXPECT_FALSE( bars_p2.get_tile_part_node_coor(coor, 7, part_elem_dims, elem_size, part_orig) );
 
-  EXPECT_TRUE( bars_p3.get_tile_node_coor(coor, 2, part_node_dims, elem_size, part_orig) );
+  EXPECT_TRUE( bars_p3.get_tile_part_node_coor(coor, 2, part_elem_dims, elem_size, part_orig) );
   EXPECT_DOUBLE_EQ( coor[0], 2.0/3.0 );
   EXPECT_DOUBLE_EQ( coor[1], 1.0 + 2.0/3.0 );
   EXPECT_DOUBLE_EQ( coor[2], 2.0 + 2.0/3.0 );
+  EXPECT_TRUE( bars_p3.get_tile_part_node_coor(coor, 9, part_elem_dims, elem_size, part_orig) );
+  EXPECT_FALSE( bars_p3.get_tile_part_node_coor(coor, 10, part_elem_dims, elem_size, part_orig) );
 }
 
 TEST( GridElemBars, TileElementVertexCoordinatesAOS ){
@@ -598,19 +613,19 @@ TEST( GridElemBars, TileElementEdgeDeltaQuality){
   fmr::Geom_float vert_coor[bars.get_tile_elem_n () * 2 * 3];
   // 2 vertices per element, 3 coordinates each
   EXPECT_TRUE( bars.get_tile_elem_vert_coor(vert_coor, 0, elem_n, elem_size, part_orig) );
-  const double delt_qual = bars.calc_delt_qual(vert_coor, 3);
+  const double delt_qual = bars.get_delt_qual(vert_coor, 3);
   EXPECT_GT( delt_qual, 1.0 );
   //
   const fmr::Geom_float tiny_size[3] = {1e-6, 0.0,0.0};
   const fmr::Local_int tiny_n = 1000000;
   EXPECT_TRUE( bars.get_tile_elem_vert_coor(vert_coor, 0, tiny_n, tiny_size, part_orig) );
-  const double tiny_delt_qual = bars.calc_delt_qual(vert_coor, 3);
+  const double tiny_delt_qual = bars.get_delt_qual(vert_coor, 3);
   EXPECT_GT( tiny_delt_qual, 0.0 );
   // Loop through elements and count those with "low" delta quality.
   fmr::Local_int low_quality_count = 0;
   for(fmr::Local_int i=0; i<tiny_n; ++i){
     EXPECT_TRUE( bars.get_tile_elem_vert_coor(vert_coor, i, tiny_n, tiny_size, part_orig) );
-    const double dq = bars.calc_delt_qual(vert_coor, 3);
+    const double dq = bars.get_delt_qual(vert_coor, 3);
     if(dq < 2e-6) ++low_quality_count;// just for this test, so half look bad
   }
   EXPECT_GT(low_quality_count, 0);
