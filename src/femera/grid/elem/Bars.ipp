@@ -58,9 +58,8 @@ constexpr bool Bars::calc_tile_part_node_coor(F* coor,
     const fmr::Local_int elem_p,
     const fmr::Local_int* part_elem_dims,
     const F* tile_size,
-    const F* part_orig,
-    const fmr::Dim_int* )//TODO tile_dirs not used yet
-  noexcept{
+    const F* part_orig
+  ) noexcept{
     const F node_delt = F(1.0) / F(elem_p);
     // Guard against null part_orig pointer.
     coor[0] = (part_orig ? part_orig[0] : F(0.0))

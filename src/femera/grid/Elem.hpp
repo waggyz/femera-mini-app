@@ -20,12 +20,28 @@ class Tets; class Prmd; class Wdge; class Cube;
 #endif
 template <class T, typename fmr::Local_int P=1, typename F=fmr::Geom_float>
 class Elem {
+
+  //TODO decide on the implementation of reduced integration elements.
   /*
+  This class only defines serendipity polynomial elements for order P in [1,2,3].
+  Other elements (e.g., Lagrangian) will be handleed seperately.
+
+  For higher-order elements, edge and side nodes are assumed to 
+  be placed at their natural positions along edges and faces. Node placement
+  along curved edges and faces is not supported by this class.
+  This puts an upper limit on the polynomial order needed to accurtely
+  represent the element geometry. I.e., using higher-order integration than the
+  default will not improve the already exact integration performed.
+
+  All of the elements defined by this class can tile a cartesian grid of the
+  same dimension as the element dimesion, even interface elements.
+  First-order (P1) element tiled grids are compatible with other regular
+  cartesian grids, e.g., for finite difference (FD analysis).
+  Higher-order element tiled grids have "holes" that make them incompatible
+  with regular cartesian grids.
+
   Elements are defined in 3D by derived classes and arrays reduced as needed
   to match the simulation spatial dimension template parameter (D).
-
-  These only define serendipity polynomial elements for order P in [1,2,3].
-  Other elements (e.g., Lagrangian) will be handleed seperately.
 
   Node numbering follows Gmsh canonical ordering.
   See: https://gmsh.info/dev/doc/texinfo/gmsh.html#Node-ordering
@@ -38,9 +54,8 @@ class Elem {
   //TODO consider using P == 0 for non-serendipity elements.
   //TODO one more Elem template parameter for integration rule <R>?
   //TODO Consider enums for element type, order (# nodes), integration rule.
-  //TODO Change to template <class T, Elem_args A, typename F>, as above?
+  //TODO Change to template <class T, Elem_args A, typename F?
   //     But, does this allow enable_if on the struct content? - YES
-  //TODO memalign member variables
 #if 0
   static_assert (D >= T::elem_d,//TODO move to constructor?
   "Element can only be embedded in a "
@@ -219,11 +234,10 @@ class Elem {
     const fmr::Local_int node_i,
     const fmr::Local_int* part_elem_dims,// partition dimensions nodes_x,node_y,node_z for 1D,2D,3D elems
     const F* tile_size,
-    const F* part_orig = nullptr,// default is {0.0,0.0,0.0}
-    const fmr::Dim_int* tile_dirs = nullptr)// tile orientation
-  const noexcept{
+    const F* part_orig = nullptr// default is {0.0,0.0,0.0}
+  ) const noexcept{
     return T::calc_tile_part_node_coor (
-      coor, node_i, P, part_elem_dims, tile_size, part_orig, tile_dirs);
+      coor, node_i, P, part_elem_dims, tile_size, part_orig);
   }
   //NOTE node_coor, part_node_dims, tile_size, part_orig bounds checked by caller.
   // Orientation of the tile is specified by tile_dirs,

@@ -63,6 +63,7 @@ BUILD_TREE += $(BUILD_CPU)/femera/task/
 BUILD_TREE += $(BUILD_CPU)/femera/phys/
 BUILD_TREE += $(BUILD_CPU)/femera/grid/
 BUILD_TREE += $(BUILD_CPU)/femera/grid/elem/
+BUILD_TREE += $(BUILD_CPU)/femera/grid/tile/
 BUILD_TREE += $(BUILD_CPU)/femera/algo/
 BUILD_TREE += $(BUILD_CPU)/fmr/perf/
 BUILD_TREE += $(BUILD_CPU)/fmr/fems/
@@ -518,7 +519,7 @@ LIBFEMERA_SO:=$(STAGE_CPU)/lib/libfemerac.so
 TOPDEPS += Makefile config.local $(BUILD_CPU)/femera.flags
 
 # c++14 code to compile and gtest
-FMRCPPS:= $(shell find src/ -maxdepth 4 -name "*.cpp" -printf "%p ")
+FMRCPPS:= $(shell find src/ -name "*.cpp" -printf "%p ")
 # FMRCUS:= $(shell find src/ -maxdepth 4 -name "*.cu.cpp" -printf "%p ")
 DEPFILE:= $(patsubst src/%.cpp,$(BUILD_CPU)/%.d,$(FMRCPPS))
 # DEPFILE+= $(patsubst src/%.cu.cpp,$(BUILD_CPU)/%.d,$(FMRCUS))

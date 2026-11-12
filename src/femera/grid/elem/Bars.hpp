@@ -164,8 +164,8 @@ private:
     const fmr::Local_int node_i,
     const fmr::Local_int elem_p,
     const fmr::Local_int* part_elem_dims,
-    const F* tile_size, const F* part_orig,
-    const fmr::Dim_int* ) noexcept;//TODO tile_dirs not used yet
+    const F* tile_size, const F* part_orig
+  ) noexcept;
   //
 };//end struct Bars
 
