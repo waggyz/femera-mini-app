@@ -1,9 +1,9 @@
-#ifndef FEMERA_HAS_GRID_TILE_BARS_IPP
-#define FEMERA_HAS_GRID_TILE_BARS_IPP
+#ifndef FEMERA_HAS_GRID_TILE_BAR1_IPP
+#define FEMERA_HAS_GRID_TILE_BAR1_IPP
 
 namespace femera { namespace grid { namespace tile {
 
-constexpr bool Bars::calc_tile_vert_conn (
+constexpr bool Bar1::calc_tile_vert_conn (
   fmr::Local_int* conn,
     const fmr::Local_int tile_i,// local element index
     const fmr::Local_int* part_size,
@@ -13,7 +13,7 @@ constexpr bool Bars::calc_tile_vert_conn (
     conn[1] = p * (tile_i + 1);
     return tile_i < part_size[0];// false if tile_i out of range
   }
-constexpr bool Bars::calc_tile_vert_conn_prdc (
+constexpr bool Bar1::calc_tile_vert_conn_prdc (
   fmr::Local_int* conn,
     const fmr::Local_int tile_i,// local element index
     const fmr::Local_int* part_size,
@@ -25,7 +25,7 @@ constexpr bool Bars::calc_tile_vert_conn_prdc (
     conn[1] = p * ((tile_i + 1) % part_size[0]);
     return tile_i < part_size[0];// false if tile_i out of range
   }
-constexpr bool Bars::calc_tile_node_conn (
+constexpr bool Bar1::calc_tile_node_conn (
   fmr::Local_int* conn,
     const fmr::Local_int tile_i,// local element index
     const fmr::Local_int* part_size,
@@ -41,7 +41,7 @@ constexpr bool Bars::calc_tile_node_conn (
     return tile_i < part_size[0];// false if tile_i out of range
   }
 template <typename F>
-constexpr bool Bars::calc_tile_part_node_coor(F* coor,
+constexpr bool Bar1::calc_tile_part_node_coor(F* coor,
     const fmr::Local_int node_i,
     const fmr::Local_int elem_p,
     const fmr::Local_int* part_elem_dims,
@@ -60,7 +60,7 @@ constexpr bool Bars::calc_tile_part_node_coor(F* coor,
     return node_i < elem_p * part_elem_dims[0] + 1;
   }
   template <typename F>
-  constexpr bool Bars::calc_tile_vert_coor(F* coor,
+  constexpr bool Bar1::calc_tile_vert_coor(F* coor,
     const fmr::Local_int vert_i, const fmr::Local_int vert_n,
     const F* tile_size, const F* part_orig)
     noexcept{
@@ -70,7 +70,7 @@ constexpr bool Bars::calc_tile_part_node_coor(F* coor,
     return vert_i < vert_n;
   }
   template <typename F>
-constexpr bool Bars::calc_tile_elem_vert_coor(//x1,y1,z1, x2,y2,z2
+constexpr bool Bar1::calc_tile_elem_vert_coor(//x1,y1,z1, x2,y2,z2
     F* vert_coor,// size: vert_n * sims_d
     const fmr::Local_int elem_i, const fmr::Local_int elem_n,
     const F* tile_size, const F* part_orig)// origin should default to {0.0,0.0,0.0}
@@ -86,7 +86,7 @@ constexpr bool Bars::calc_tile_elem_vert_coor(//x1,y1,z1, x2,y2,z2
       return elem_i < elem_n;
     }
   template <typename F>
-  constexpr bool Bars::calc_tile_elem_coor_vert(//x1,x2, y1,y2, z1, z2
+  constexpr bool Bar1::calc_tile_elem_coor_vert(//x1,x2, y1,y2, z1, z2
     F* vert_coor,// size: vert_n * sims_d
     const fmr::Local_int elem_i, const fmr::Local_int elem_n,
     const F* tile_size, const F* part_orig)// origin should default to {0.0,0.0,0.0}
@@ -113,7 +113,7 @@ constexpr bool Bars::calc_tile_elem_vert_coor(//x1,y1,z1, x2,y2,z2
     return tile_i < grid_x;// false if tile_i out of range
   }
     // free surface BCs
-  constexpr fmr::Local_int* Bars::get_tile_vert_conn (fmr::Local_int tile_i,
+  constexpr fmr::Local_int* Bar1::get_tile_vert_conn (fmr::Local_int tile_i,
     // local element index
     const fmr::Local_int grid_x = 1,
     const fmr::Local_int part_x = 1) noexcept{
@@ -126,5 +126,5 @@ constexpr bool Bars::calc_tile_elem_vert_coor(//x1,y1,z1, x2,y2,z2
 } } }//end femera::grid::tile namespace
 
 
-//end FEMERA_HAS_GRID_TILE_BARS_IPP
+//end FEMERA_HAS_GRID_TILE_BAR1_IPP
 #endif

@@ -1,11 +1,11 @@
-#ifndef FEMERA_HAS_GRID_TILE_BARS_HPP
-#define FEMERA_HAS_GRID_TILE_BARS_HPP
+#ifndef FEMERA_HAS_GRID_TILE_BAR1_HPP
+#define FEMERA_HAS_GRID_TILE_BAR1_HPP
 
 #include "../Tile.hpp"
 
 namespace femera { namespace grid { namespace tile {
 
-class Bars final : public Tile<Bars> {
+class Bar1 final : public Tile<Bar1> {
   template <class T, fmr::Local_int P, typename F>
   friend class Tile;
 private:
@@ -75,11 +75,11 @@ private:
     const F* tile_size, const F* part_orig
   ) noexcept;
   //
-};//end class Bars
+};//end class Bar1
 
 } } }//end femera::grid::tile:: namespace
 
-#include "Bars.ipp"
+#include "Bar1.ipp"
 
 #endif
-//end FEMERA_HAS_GRID_TILE_BARS_HPP
+//end FEMERA_HAS_GRID_TILE_BAR1_HPP
