@@ -195,19 +195,6 @@ class Elem {
     const fmr::Dim_int dims=D, fmr::Local_int node_n=get_node_n (),
   const F* coor_node[D*get_node_n ()]) const noexcept;
 #endif
-#if 1
-  //TODO FIXME remove these: still used for testing element quality
-  constexpr bool get_tile_elem_vert_coor(//TODO need: 
-    F* vert_coor,// size: vert_n * sims_d
-    const fmr::Local_int elem_i, const fmr::Local_int elem_n,
-    const F* tile_size, const F* part_orig)// origin should default to {0.0,0.0,0.0}
-    //NOTE vert_coor, elem_size, part_orig bounds should be checked by the caller.
-    const noexcept{
-      return T::calc_tile_elem_vert_coor (vert_coor, elem_i, elem_n, tile_size, part_orig);
-    }
-  constexpr fmr::Local_int get_tile_elem_n () const noexcept {
-    return T::tile_elem_n;}
-#endif
 };//end Elem
 
 } } }//end femera::grid::elem:: namespace

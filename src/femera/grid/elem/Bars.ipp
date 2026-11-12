@@ -15,22 +15,6 @@ inline constexpr fmr::Geom_float Bars::vert_coor [];
 inline constexpr fmr::Geom_float Bars::coor_vert [];
 
 #endif
-  template <typename F>//TODO FIXME remove: still used to test elem qualtiy
-constexpr bool Bars::calc_tile_elem_vert_coor(//x1,y1,z1, x2,y2,z2
-    F* vert_coor,// size: vert_n * sims_d
-    const fmr::Local_int elem_i, const fmr::Local_int elem_n,
-    const F* tile_size, const F* part_orig)// origin should default to {0.0,0.0,0.0}
-    noexcept{
-      for (fmr::Local_int v = 0; v < 2; ++v) {// 2 vertices for 1D bar element
-        vert_coor[v * 3 + 0] = (part_orig ? part_orig[0] : F(0.0))
-          + (elem_i + v) * tile_size[0];
-        vert_coor[v * 3 + 1] = (part_orig ? part_orig[1] : F(0.0))
-          + (elem_i + v) * tile_size[1];
-        vert_coor[v * 3 + 2] = (part_orig ? part_orig[2] : F(0.0))
-          + (elem_i + v) * tile_size[2];
-      }
-      return elem_i < elem_n;
-    }
 //namespace femera { namespace grid {
 // Bars::calc_poly_func_pX and Bars::calc_poly_grad_pX evaluate the shape functions or
 // gradients at 3D natural coordinate point x.

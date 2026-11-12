@@ -1,5 +1,6 @@
 #include "../../femera.hpp"
 #include "Bar1.hpp"
+#include "../elem/Bars.hpp"// Used for quality test.
 
 #include <gtest/gtest.h>
 
@@ -300,34 +301,35 @@ TEST( GridTileBar1, TileElementVertexCoordinatesSOA ){
   EXPECT_DOUBLE_EQ( vert_coor[5], 2.0 );
   EXPECT_FALSE( bar1.get_tile_elem_coor_vert(vert_coor, 2, elem_n, elem_size, part_orig) );
 }
-#if 0
+
 TEST( GridTileBar1, TileElementEdgeDeltaQuality){
   constexpr Bar1 bar1;
-  // use get_tile_vert_coor to get the vertex coordinates of the element
+  constexpr femera::grid::elem::Bars bars;
+
+  // Use get_tile_vert_coor to get the vertex coordinates of the element.
   const fmr::Geom_float part_orig[3] = {0.0, 0.0, 0.0};
   const fmr::Geom_float elem_size[3] = {1.0, 1.0, 1.0};
   const fmr::Local_int elem_n = 2;
   fmr::Geom_float vert_coor[bar1.get_tile_elem_n () * 2 * 3];
   // 2 vertices per element, 3 coordinates each
   EXPECT_TRUE( bar1.get_tile_elem_vert_coor(vert_coor, 0, elem_n, elem_size, part_orig) );
-  const double delt_qual = bar1.get_delt_qual(vert_coor, 3);
+  const double delt_qual = bars.get_delt_qual(vert_coor, 3);
   EXPECT_GT( delt_qual, 1.0 );
   //
   const fmr::Geom_float tiny_size[3] = {1e-6, 0.0,0.0};
   const fmr::Local_int tiny_n = 1000000;
   EXPECT_TRUE( bar1.get_tile_elem_vert_coor(vert_coor, 0, tiny_n, tiny_size, part_orig) );
-  const double tiny_delt_qual = bar1.get_delt_qual(vert_coor, 3);
+  const double tiny_delt_qual = bars.get_delt_qual(vert_coor, 3);
   EXPECT_GT( tiny_delt_qual, 0.0 );
   // Loop through elements and count those with "low" delta quality.
   fmr::Local_int low_quality_count = 0;
   for(fmr::Local_int i=0; i<tiny_n; ++i){
     EXPECT_TRUE( bar1.get_tile_elem_vert_coor(vert_coor, i, tiny_n, tiny_size, part_orig) );
-    const double dq = bar1.get_delt_qual(vert_coor, 3);
+    const double dq = bars.get_delt_qual(vert_coor, 3);
     if(dq < 2e-6) ++low_quality_count;// just for this test, so half look bad
   }
   EXPECT_GT(low_quality_count, 0);
   EXPECT_EQ(low_quality_count, tiny_n / 2);
 }
-#endif
 
 } } } // end namespace femera::grid::tile

@@ -103,25 +103,6 @@ private:
   Y* calc_poly_grad_p3 (Y g[4u *3u], const G x[3u]);
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static inline
   Y* calc_poly_grat_p3 (Y g[4u *3u], const G x[3u]);// transposed gradient
-  //
-  private:
-  // Tiling ===================================================================
-  // Vertex coordinates -------------------------------------------------------
-  //FIXME TODO remove: still used to test edge_delt quality
-  static constexpr fmr::Local_int tile_elem_n = 1;//TODO remove
-  template <typename F=fmr::Geom_float>
-  static constexpr bool calc_tile_vert_coor (F* coor,
-    fmr::Local_int vert_i, fmr::Local_int vert_n,
-    const F* tile_size, const F* part_orig) noexcept;
-  //
-  template <typename F=fmr::Geom_float>
-  static constexpr bool calc_tile_elem_vert_coor (F* coor,
-    fmr::Local_int elem_i, fmr::Local_int elem_n,
-    const F* tile_size, const F* part_orig) noexcept;
-  template <typename F=fmr::Geom_float>
-  static constexpr bool calc_tile_elem_coor_vert (F* coor,
-    fmr::Local_int elem_i, fmr::Local_int elem_n,
-    const F* tile_size, const F* part_orig) noexcept;
 
 };//end struct Bars
 
