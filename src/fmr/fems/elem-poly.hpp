@@ -15,8 +15,6 @@ namespace fmr { namespace fems { namespace elem {
   //     x is sized for 3D, even if not all are dimensions used.
   //
   // Encoded by dimension, shape code, and number of nodes.
-  //NOTE these codes are temporary until proper namespace and classes
-  //     are established.
   // C: n-Cube (bars, quad, cube) [hyperCube, Box, Orthotope]
   // T: Triangle, Tetrahedron (simplex shapes, with 1DC1 == 1DT1)
   // Y: pYramid, W: Wedge (prism)
@@ -29,6 +27,8 @@ namespace fmr { namespace fems { namespace elem {
   // _T3D10: 3D, 10-node tetrahedron (P2)
   // _Y3D5: 3D, 5-node pyramid
   // _W3D6: 3D, 6-node wedge (prism)
+  //NOTE these codes are temporary until proper namespace and classes
+  //     are established.
   template <typename Y, typename G> static constexpr
   Y* calc_poly_func_C1D2N (Y f[2u], const G x[3u]) noexcept;// Linear 2-node bar
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
