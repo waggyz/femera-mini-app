@@ -12,14 +12,14 @@ namespace femera { namespace grid { namespace elem {
 template <typename Y, typename G> constexpr
 //TODO mixed precision support for single or double precision
 Y* Bars::calc_poly_func_C1D2N
-(Y f[2u], const G x[3u]) {// x[1], x[2] not used for 1D bar element?
+(Y f[2u], const G x[3u]) noexcept {// x[1], x[2] not used for 1D bar element?
   f[ 0] = 1.0-x[0];
   f[ 1] = x[0];
   return f;
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
 Y* Bars::calc_poly_grad_node_C1D2N// 3D rows x 2 node cols
-(Y g[2u *3u], const G[]) {// x[3u] not used (constant gradient)
+(Y g[2u *3u], const G[]) noexcept {// x[3u] not used (constant gradient)
 #if 1
   g[ 0]=-1.0; g[ 1]=1.0;// dN/dx (natural coords)
   g[ 2]= 0.0; g[ 3]=0.0;// dN/dy
@@ -33,7 +33,7 @@ Y* Bars::calc_poly_grad_node_C1D2N// 3D rows x 2 node cols
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
 Y* Bars::calc_poly_node_grad_C1D2N// 2 node cols x 3D rows (transposed)
-(Y g[2u *3u], const G[]) {// x[3u] not used (constant gradient)
+(Y g[2u *3u], const G[]) noexcept {// x[3u] not used (constant gradient)
 #if 1
   g[ 0]=-1.0; g[ 3]=1.0;// dN/dx (natural coords)
   g[ 1]= 0.0; g[ 4]=0.0;// dN/dy
@@ -47,7 +47,7 @@ Y* Bars::calc_poly_node_grad_C1D2N// 2 node cols x 3D rows (transposed)
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
 Y* Bars::calc_poly_func_C1D3N
-(Y f[3u], const G x[3u]) {
+(Y f[3u], const G x[3u]) noexcept {
   const Y L2=x[0];
   const Y L1=1.0-L2;
   f[ 0] = 2.0*L1*L1 - L1;// Vertex nodes
@@ -57,7 +57,7 @@ Y* Bars::calc_poly_func_C1D3N
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
 Y* Bars::calc_poly_grad_node_C1D3N// 3D rows x 3 node cols
-(Y g[3u *3u], const G x[3u]) {
+(Y g[3u *3u], const G x[3u]) noexcept {
   const Y L2=x[0];
   const Y L1=1.0-L2;
   // Term-by-term derivs
@@ -81,7 +81,7 @@ Y* Bars::calc_poly_grad_node_C1D3N// 3D rows x 3 node cols
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
 Y* Bars::calc_poly_node_grad_C1D3N// 3 node cols x 3D rows (transposed)
-(Y g[3u *3u], const G x[3u]) {
+(Y g[3u *3u], const G x[3u]) noexcept {
   const Y L2=x[0];
   const Y L1=1.0-L2;
   // Term-by-term derivs
@@ -105,7 +105,7 @@ Y* Bars::calc_poly_node_grad_C1D3N// 3 node cols x 3D rows (transposed)
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
 Y* elem::Bars::calc_poly_func_C1D4N
-(Y f[4u], const G x[3u]) {
+(Y f[4u], const G x[3u]) noexcept {
   const Y L2=x[0];
   const Y L1=(1.0-L2);
   f[ 0]= 0.5* L1 *(3.0* L1 -1.0)*(3.0* L1 -2.0);// Vertex nodes;
@@ -117,7 +117,7 @@ Y* elem::Bars::calc_poly_func_C1D4N
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
 Y* elem::Bars::calc_poly_grad_node_C1D4N// 3D rows x 4 node cols
-(Y g[4u *3u], const G x[3u]) {
+(Y g[4u *3u], const G x[3u]) noexcept {
   const Y L2=x[0];
   const Y L1=(1.0-L2);
   // Term-by-term derivs
@@ -158,7 +158,7 @@ Y* elem::Bars::calc_poly_grad_node_C1D4N// 3D rows x 4 node cols
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
 Y* elem::Bars::calc_poly_node_grad_C1D4N// 4 node cols x 3D rows (transposed)
-(Y g[4u *3u], const G x[3u]) {
+(Y g[4u *3u], const G x[3u]) noexcept {
   const Y L2=x[0];
   const Y L1=(1.0-L2);
   // Term-by-term derivs

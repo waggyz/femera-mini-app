@@ -4,11 +4,11 @@
 namespace femera { namespace grid {
 
 template <class T, typename fmr::Local_int P, typename F>
-constexpr fmr::Local_int elem::Elem<T,P,F>::get_face_n () const noexcept {
+constexpr fmr::Local_int elem::Elem<T,P,F>::get_face_n () noexcept {
   return T::tris_n + T::quad_n;
 }
 template <class T, typename fmr::Local_int P, typename F>
- constexpr fmr::Local_int elem::Elem<T,P,F>::get_node_n () const noexcept {
+constexpr fmr::Local_int elem::Elem<T,P,F>::get_node_n () noexcept {
   // Handles solid and interface elements
   return T::vert_n// vertex nodes
     + (P -1) * T::edge_n// edge nodes
@@ -16,31 +16,20 @@ template <class T, typename fmr::Local_int P, typename F>
            // vols_n is 0 (1D,2D elems) or 1 (3D solid elems)
 }
 // Element shape function and Jacobian stuff ==================================
-template <class T, typename fmr::Local_int P, typename F>
-constexpr fmr::Local_int elem::Elem<T,P,F>::jacs_size
-  (const fmr::Local_int intp_n, const fmr::Local_int this_d
-  ) const noexcept {// default 1
-  return intp_n * (this_d*this_d);
-}
-template <class T, typename fmr::Local_int P, typename F>
- constexpr fmr::Local_int elem::Elem<T,P,F>::jacd_size
-  (const fmr::Local_int intp_n, const fmr::Local_int this_d
-  ) const noexcept {// default 1
-  return intp_n * (this_d*this_d + 1);
-}
+//
 template <class T, typename fmr::Local_int P, typename F>
 constexpr fmr::Local_int elem::Elem<T,P,F>::get_poly_func_size
-  (const fmr::Local_int intp_n) const noexcept {// default 1
+  (const fmr::Local_int intp_n) noexcept {// default 1
   return intp_n * get_node_n ();
 }
 template <class T, typename fmr::Local_int P, typename F>
 constexpr fmr::Local_int elem::Elem<T,P,F>::get_poly_grad_size
-  (const fmr::Local_int intp_n, const fmr::Local_int this_d) const noexcept {// default 1
+  (const fmr::Local_int intp_n, const fmr::Local_int this_d) noexcept {
   return intp_n * get_node_n () * this_d;
 }
 template <class T, typename fmr::Local_int P, typename F>
 constexpr bool elem::Elem<T,P,F>::get_elem_node_coor (F* node_coor,
-  const F* vert_coor) const noexcept {// 3D coordinates
+  const F* vert_coor) noexcept {// 3D coordinates
   //NOTE Caller checks array bounds:
   //     node_coor is size get_node_n() * 3
   //     vert_coor is size get_vert_n() * 3.
@@ -123,7 +112,7 @@ constexpr bool elem::Elem<T,P,F>::get_elem_node_coor (F* node_coor,
 #if 0
 template <class T, typename fmr::Local_int P, typename F>
 constexpr fmr::Local_int elem::Elem<T,P,F>::get_elem_conn (fmr::Local_int i)
-const noexcept {
+noexcept {
   switch(i){
     case 0: return T::tris_n;
     case 1: return T::quad_n;
@@ -136,7 +125,7 @@ const noexcept {
   constexpr
   F elem::Elem<T,P,F>::get_delt_qual (
     const F* vert_coor, const fmr::Local_int dims, const bool is_squared)
-  const noexcept {
+  noexcept {
     // Calculate the ratio of the minimum edge length
     // to the maximum coordinate absolute value.
     //NOTE only element vertices are used for this quality metric.

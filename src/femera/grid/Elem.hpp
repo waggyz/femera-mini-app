@@ -102,92 +102,94 @@ class Elem {
   public:
   // Simple constexpr accessors -----------------------------------------------
   // constexpr methods are implicitly inline
-  constexpr fmr::Local_int get_elem_p () const noexcept {return P;}
-  //constexpr fmr::Local_int get_sims_d () const noexcept {return D;}
-  constexpr fmr::Local_int get_sims_d () const noexcept {//TODO remove?
+  static constexpr fmr::math::Poly get_poly_type () noexcept {
+    return T::poly_type;}
+  static constexpr fmr::Local_int get_elem_p () noexcept {return P;}
+  //
+  static constexpr fmr::Local_int get_sims_d () noexcept {//TODO remove?
     return T::sims_d;}
-  constexpr fmr::Local_int get_elem_d () const noexcept {
+  static constexpr fmr::Local_int get_elem_d () noexcept {
     //static_assert( T::elem_d <= D, //NOTE only checked if this function used.
     //  "Element dimension cannot exceed simulation spatial dimension.");
     return T::elem_d;}
-  constexpr fmr::Local_int get_vert_n () const noexcept {return T::vert_n;}
-  constexpr fmr::Local_int get_edge_n () const noexcept {return T::edge_n;}
-  constexpr fmr::Local_int get_tris_n () const noexcept {return T::tris_n;}
-  constexpr fmr::Local_int get_quad_n () const noexcept {return T::quad_n;}
-  constexpr fmr::Local_int get_vols_n () const noexcept {return T::vols_n;}
+  static constexpr fmr::Local_int get_vert_n () noexcept {return T::vert_n;}
+  static constexpr fmr::Local_int get_edge_n () noexcept {return T::edge_n;}
+  static constexpr fmr::Local_int get_tris_n () noexcept {return T::tris_n;}
+  static constexpr fmr::Local_int get_quad_n () noexcept {return T::quad_n;}
+  static constexpr fmr::Local_int get_vols_n () noexcept {return T::vols_n;}
   //
-  constexpr F get_edge_l () const noexcept {return F(T::edge_l);}
-  constexpr F get_face_a () const noexcept {return F(T::face_a);}
-  constexpr F get_elem_v () const noexcept {return F(T::elem_v);}
+  static constexpr F get_edge_l () noexcept {return F(T::edge_l);}
+  static constexpr F get_face_a () noexcept {return F(T::face_a);}
+  static constexpr F get_elem_v () noexcept {return F(T::elem_v);}
   //
   // Non-trivial constexpr scalar member functions ----------------------------
-  constexpr fmr::Local_int get_face_n () const noexcept;
-  constexpr fmr::Local_int get_node_n () const noexcept;
+  static constexpr fmr::Local_int get_face_n () noexcept;
+  static constexpr fmr::Local_int get_node_n () noexcept;
   //
-  constexpr fmr::math::Poly get_poly_type () const noexcept {return T::poly_type;}
-  constexpr
+  static constexpr
   fmr::Local_int jacs_size (
     const fmr::Local_int intp_n=1, const fmr::Local_int sims_d=3
-  ) const noexcept;
-  constexpr
+  ) noexcept {return intp_n * (sims_d*sims_d);}
+  static constexpr
   fmr::Local_int jacd_size (
     const fmr::Local_int intp_n=1, const fmr::Local_int sims_d=3
-  ) const noexcept;
-  constexpr
-  fmr::Local_int get_poly_func_size (const fmr::Local_int intp_n=1) const noexcept;
-  constexpr
+  ) noexcept {return intp_n * (sims_d*sims_d + 1);}
+  static constexpr
+  fmr::Local_int get_poly_func_size (const fmr::Local_int intp_n=1) noexcept;
+  static constexpr
   fmr::Local_int get_poly_grad_size (
-    const fmr::Local_int intp_n=1, const fmr::Local_int sims_d=3) const noexcept;
+    const fmr::Local_int intp_n=1, const fmr::Local_int sims_d=3) noexcept;
   //
   // Array constexpr pointers =================================================
   //NOTE get_vert_conn () is trivial = {0,1,...,get_vert_n()-1}
   //     get_node_conn () is trivial = {0,1,...,get_node_n()-1}
   //
   //NOTE the following are all only vertex connectivity (p==1) arrays.
-  constexpr const fmr::Local_int* get_bars_conn () const noexcept {
+  static constexpr const fmr::Local_int* get_bars_conn () noexcept {
     return T::bars_conn;}
-  constexpr const fmr::Local_int* get_tris_conn () const noexcept {
+  static constexpr const fmr::Local_int* get_tris_conn () noexcept {
     return T::tris_conn;}
-  constexpr const fmr::Local_int* get_quad_conn () const noexcept {
+  static constexpr const fmr::Local_int* get_quad_conn () noexcept {
     return T::quad_conn;}
   //
   // Natural element coordinates ----------------------------------------------
   //NOTE these currently return 3D coordinates,
   //     regardless of element or simulation dimension.
   //
-  constexpr bool get_elem_node_coor (F* node_coor,
-    const F* vert_coor = T::vert_coor ) const noexcept;
+  static constexpr bool get_elem_node_coor (F* node_coor,
+    const F* vert_coor = T::vert_coor ) noexcept;
   //
   //NOTE The following may not be the best way to dispatch.
   template <typename G=F,
     typename std::enable_if <std::is_same<G, double>::value>::type* = nullptr>
-  constexpr const G* get_elem_vert_coor () const noexcept {
+  static constexpr const G* get_elem_vert_coor () noexcept {
     return T::vert_coor;
   }
   template <typename G=F,
     typename std::enable_if <std::is_same<G, double>::value>::type* = nullptr>
-  constexpr const G* get_elem_coor_vert () const noexcept {
+  static constexpr const G* get_elem_coor_vert () noexcept {
     return T::coor_vert;
   }
   template <typename G=F,
     typename std::enable_if <std::is_same<G, float>::value>::type* = nullptr>
-  constexpr const G* get_elem_vert_coor () const noexcept {
+  static constexpr const G* get_elem_vert_coor () noexcept {
     return T::vert_coor_f;
   }
   template <typename G=F,
     typename std::enable_if <std::is_same< G,float>::value>::type* = nullptr>
-  constexpr const G* get_elem_coor_vert () const noexcept {
+  static constexpr const G* get_elem_coor_vert () noexcept {
     return T::coor_vert_f;
   }
   // Element quality calculations ---------------------------------------------
 #if 0
-  F get_edge_qual (const F* node_coor, const fmr::Local_int dims=3) const noexcept;
-  F get_skew_qual (const F* node_coor, const fmr::Local_int dims=3) const noexcept;
+  static constexpr F get_edge_qual (
+    const F* node_coor, const fmr::Local_int dims=3) noexcept;
+  static constexpr F get_skew_qual (
+    const F* node_coor, const fmr::Local_int dims=3) noexcept;
 #endif
-  constexpr
-  F get_delt_qual (
+  static constexpr F get_delt_qual (
     const F* node_coor, const fmr::Local_int dims=3, const bool is_squared=false)
-  const noexcept;
+  noexcept;
   //
   // Jacobian and determinant calculations ------------------------------------
 #if 0

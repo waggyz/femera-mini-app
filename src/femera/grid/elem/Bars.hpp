@@ -100,25 +100,25 @@ private:
   // _Y3D5: 3D, 5-node pyramid
   // _W3D6: 3D, 6-node wedge (prism)
   template <typename Y, typename G> static constexpr
-  Y* calc_poly_func_C1D2N (Y f[2u], const G x[3u]);// Linear 2-node bar
+  Y* calc_poly_func_C1D2N (Y f[2u], const G x[3u]) noexcept;// Linear 2-node bar
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_grad_node_C1D2N (Y g[2u *3u], const G[]);// x[] not used; result is constant
+  Y* calc_poly_grad_node_C1D2N (Y g[2u *3u], const G[]) noexcept;// x[] not used; result is constant
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_node_grad_C1D2N (Y g[2u *3u], const G[]);// transposed gradients
+  Y* calc_poly_node_grad_C1D2N (Y g[2u *3u], const G[]) noexcept;// transposed gradients
   //
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_func_C1D3N (Y f[3u], const G x[3u]);// Quadratic 3-node bar
+  Y* calc_poly_func_C1D3N (Y f[3u], const G x[3u]) noexcept;// Quadratic 3-node bar
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_grad_node_C1D3N (Y g[3u *3u], const G x[3u]);
+  Y* calc_poly_grad_node_C1D3N (Y g[3u *3u], const G x[3u]) noexcept;
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_node_grad_C1D3N (Y g[3u *3u], const G x[3u]);// transposed gradients
+  Y* calc_poly_node_grad_C1D3N (Y g[3u *3u], const G x[3u]) noexcept;// transposed gradients
   //
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_func_C1D4N (Y f[4u], const G x[3u]);// Cubic 4-node bar
+  Y* calc_poly_func_C1D4N (Y f[4u], const G x[3u]) noexcept;// Cubic 4-node bar
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_grad_node_C1D4N (Y g[4u *3u], const G x[3u]);
+  Y* calc_poly_grad_node_C1D4N (Y g[4u *3u], const G x[3u]) noexcept;
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_node_grad_C1D4N (Y g[4u *3u], const G x[3u]);// transposed gradients
+  Y* calc_poly_node_grad_C1D4N (Y g[4u *3u], const G x[3u]) noexcept;// transposed gradients
   //...and so on up to 5-pt rules
   //
   //NOTE do not do the following.
