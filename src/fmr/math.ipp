@@ -156,7 +156,8 @@ uint fmr::math::poly_term_n (
 #endif
       break;}
     case math::Poly::Serendipity : {
-      terms = fmr::math::poly_term_n (fmr::math::Poly::Bipoly, nvar, pord);
+      terms = (nvar <=1 ) ? fmr::math::nchoosek (pord + nvar, nvar)// Full
+        : fmr::math::poly_term_n (fmr::math::Poly::Bipoly, nvar, pord);
       terms-= (pord > 1 && nvar > 1)
         ? fmr::math::poly_term_n (fmr::math::Poly::Full, nvar, pord - 2) : 0;
       break;}

@@ -46,7 +46,7 @@ class Tile {
   static constexpr fmr::Local_int get_tile_quad_n () noexcept {
     return T::tile_quad_n;}
   static constexpr fmr::Local_int get_tile_vols_n () noexcept {
-    return T::tile_vols_n;}// 3D elements of this type (assume all same)
+    return T::tile_vols_n;}// 3D elements of this type (assumes all same)
   //
   static constexpr fmr::Local_int get_tile_elem_node_n () noexcept;
 

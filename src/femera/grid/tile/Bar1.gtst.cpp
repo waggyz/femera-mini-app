@@ -15,7 +15,6 @@ fmr::Exit_int main (int argc, char** argv) {
   //
   return mini.exit ();
 }
-
 TEST( GridTileBar1, TrivialTest ){
   EXPECT_TRUE( true );
 }
@@ -27,6 +26,9 @@ TEST( GridTileBar1, IsStateless ){
 }
 
 TEST( TileElemBar1, ElementOrderNodeCounts ){
+  EXPECT_EQ( Tile<Bar1>::get_tile_vert_n (), 2 );
+  EXPECT_EQ( Tile<Bar1>::get_tile_elem_node_n (), 2 );
+
   constexpr Tile<Bar1> linear;
   constexpr Tile<Bar1, 2> quadratic;
   constexpr Tile<Bar1, 3> cubic;
@@ -55,6 +57,11 @@ TEST( GridTileBar1, TileMetadata ){
   constexpr fmr::Local_int tile1 = 1;
   EXPECT_EQ( tile0, 0u );
   EXPECT_EQ( tile1, 1u );
+}
+TEST( GridTileBar1, TileMetadataWithoutInstance ){
+  EXPECT_EQ( Tile<Bar1>::get_tile_vert_n (), 2 );
+  EXPECT_EQ( Tile<Bar1>::get_tile_elem_node_n (), 2 );
+  EXPECT_EQ( Tile<Bar1>::get_tile_elem_n (), 1 );
 }
 
 struct TileDispatchTestShape {
@@ -87,6 +94,8 @@ TEST( GridTileBar1, TilePartElemCount ){
   EXPECT_EQ( bar1.get_tile_part_elem_n (part_elem_dims_b), 2);
   EXPECT_EQ( bar1.get_tile_part_elem_n (part_elem_dims_c), 0);
   EXPECT_EQ( bar1.get_tile_part_elem_n (part_elem_dims_d), 0);
+
+  EXPECT_EQ( Tile<Bar1>::get_tile_part_elem_n (part_elem_dims_a), 2);
 }
 
 TEST( GridTileBar1, TileVertexConnectivity ){
@@ -101,6 +110,8 @@ TEST( GridTileBar1, TileVertexConnectivity ){
   EXPECT_EQ( conn[0], 3 );
   EXPECT_EQ( conn[1], 4 );
   EXPECT_FALSE( bar1_1.get_tile_vert_conn (conn, 4, part_size) );
+
+  EXPECT_TRUE( Tile<Bar1>::get_tile_vert_conn (conn, 0u, part_size) );
 }
 
 TEST( GridTileBar1, TileVertexConnectivityPeriodic ){
@@ -140,6 +151,8 @@ TEST( GridTileBar1, HigherOrderTileVertexConnectivity ){
   EXPECT_EQ( conn[0], 3 );
   EXPECT_EQ( conn[1], 6 );
   EXPECT_FALSE( quadratic.get_tile_vert_conn_prdc (conn, 0, empty_part) );
+
+  EXPECT_TRUE( (Tile<Bar1, 2>::get_tile_vert_conn (conn, 2, part_size)) );
 }
 
 TEST( GridTileBar1, TileNodeConnectivity ){
@@ -167,6 +180,8 @@ TEST( GridTileBar1, TileNodeConnectivity ){
   EXPECT_EQ( cubic_conn[3], 8 );
 
   EXPECT_FALSE( cubic.get_tile_node_conn (cubic_conn, 4, part_size) );
+
+  EXPECT_TRUE( (Tile<Bar1>::get_tile_node_conn (linear_conn, 2, part_size)) );
 }
 
 TEST( GridTileBar1, PartitionedTileVertexConnectivity ){

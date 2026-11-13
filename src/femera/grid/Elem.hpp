@@ -27,9 +27,7 @@ class Tets; class Prmd; class Wdge; class Cube;
 //class User;//TODO user element
 #endif
 template <class T, typename fmr::Dim_int P=1u, typename F=fmr::Geom_float>
-class Elem {
-
-  //TODO decide on the implementation of reduced integration elements.
+class Elem {//TODO consider pulling P out of the template parameters. 
   /*
   This class only defines serendipity polynomial elements for order P in [1,2,3].
   Other elements (e.g., Lagrangian) will be handleed seperately.
