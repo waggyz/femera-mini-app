@@ -26,7 +26,7 @@ class Tris; class Quad;
 class Tets; class Prmd; class Wdge; class Cube;
 //class User;//TODO user element
 #endif
-template <class T, typename fmr::Local_int P=1, typename F=fmr::Geom_float>
+template <class T, typename fmr::Dim_int P=1u, typename F=fmr::Geom_float>
 class Elem {
 
   //TODO decide on the implementation of reduced integration elements.
@@ -40,13 +40,6 @@ class Elem {
   This puts an upper limit on the polynomial order needed to accurtely
   represent the element geometry. I.e., using higher-order integration than the
   default will not improve the already exact integration performed.
-
-  All of the elements defined by this class can tile a cartesian grid of the
-  same dimension as the element dimesion, even interface elements.
-  First-order (P1) element tiled grids are compatible with other regular
-  cartesian grids, e.g., for finite difference (FD analysis).
-  Higher-order element tiled grids have "holes" that make them incompatible
-  with regular cartesian grids.
 
   Elements are defined in 3D by derived classes and arrays reduced as needed
   to match the simulation spatial dimension template parameter (D).
@@ -104,11 +97,11 @@ class Elem {
   // constexpr methods are implicitly inline
   static constexpr fmr::math::Poly get_poly_type () noexcept {
     return T::poly_type;}
-  static constexpr fmr::Local_int get_elem_p () noexcept {return P;}
+  static constexpr fmr::Dim_int get_elem_p () noexcept {return P;}
   //
   static constexpr fmr::Local_int get_sims_d () noexcept {//TODO remove?
     return T::sims_d;}
-  static constexpr fmr::Local_int get_elem_d () noexcept {
+  static constexpr fmr::Dim_int get_elem_d () noexcept {
     //static_assert( T::elem_d <= D, //NOTE only checked if this function used.
     //  "Element dimension cannot exceed simulation spatial dimension.");
     return T::elem_d;}
@@ -128,17 +121,17 @@ class Elem {
   //
   static constexpr
   fmr::Local_int jacs_size (
-    const fmr::Local_int intp_n=1, const fmr::Local_int sims_d=3
+    const fmr::Local_int intp_n=1u, const fmr::Dim_int sims_d=3u
   ) noexcept {return intp_n * (sims_d*sims_d);}
   static constexpr
   fmr::Local_int jacd_size (
-    const fmr::Local_int intp_n=1, const fmr::Local_int sims_d=3
-  ) noexcept {return intp_n * (sims_d*sims_d + 1);}
+    const fmr::Local_int intp_n=1, const fmr::Dim_int sims_d=3u
+  ) noexcept {return intp_n * (sims_d*sims_d + 1u);}
   static constexpr
-  fmr::Local_int get_poly_func_size (const fmr::Local_int intp_n=1) noexcept;
+  fmr::Local_int get_poly_func_size (const fmr::Local_int intp_n=1u) noexcept;
   static constexpr
   fmr::Local_int get_poly_grad_size (
-    const fmr::Local_int intp_n=1, const fmr::Local_int sims_d=3) noexcept;
+    const fmr::Local_int intp_n=1, const fmr::Dim_int sims_d=3u) noexcept;
   //
   // Array constexpr pointers =================================================
   //NOTE get_vert_conn () is trivial = {0,1,...,get_vert_n()-1}
@@ -183,12 +176,12 @@ class Elem {
   // Element quality calculations ---------------------------------------------
 #if 0
   static constexpr F get_edge_qual (
-    const F* node_coor, const fmr::Local_int dims=3) noexcept;
+    const F* node_coor, const fmr::Dim_int dims=3) noexcept;
   static constexpr F get_skew_qual (
-    const F* node_coor, const fmr::Local_int dims=3) noexcept;
+    const F* node_coor, const fmr::Dim_int dims=3) noexcept;
 #endif
   static constexpr F get_delt_qual (
-    const F* node_coor, const fmr::Local_int dims=3, const bool is_squared=false)
+    const F* node_coor, const fmr::Dim_int dims=3, const bool is_squared=false)
   noexcept;
   //
   // Jacobian and determinant calculations ------------------------------------
@@ -196,16 +189,16 @@ class Elem {
   template <typename Y=F>
   Y* jatd_naos (const fmr::Local_int intp_n=1,// inverted and transposed
     // Jacobian & determinants
-    const fmr::Local_int dims=D, fmr::Local_int node_n=get_node_n (),
+    const fmr::Dim_int dims=D, fmr::Local_int node_n=get_node_n (),
     const F* node_coor) const noexcept;
   
   template <typename Y=F>
   Y* jacs_csoa (const fmr::Local_int intp_n=1,// x1,x2,..., y1,y2,..., z1,z2,...
-    const fmr::Local_int dims=D, fmr::Local_int node_n=get_node_n (),
+    const fmr::Dim_int dims=D, fmr::Local_int node_n=get_node_n (),
   const F* coor_node) const noexcept;
   template <typename Y=F>
   Y* jatd_nsoa (const fmr::Local_int intp_n=1,
-    const fmr::Local_int dims=D, fmr::Local_int node_n=get_node_n (),
+    const fmr::Dim_int dims=D, fmr::Local_int node_n=get_node_n (),
   const F* coor_node[D*get_node_n ()]) const noexcept;
 #endif
 };//end Elem

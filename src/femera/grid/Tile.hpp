@@ -18,7 +18,14 @@ class Tets; class Prmd; class Wdge; class Cube;
 #endif
 template <class T, typename fmr::Dim_int P=1, typename F=fmr::Geom_float>
 class Tile {
-  //
+  /*
+  All of the elements defined by Elem can tile a cartesian grid of the
+  same dimension as the element dimesion, even interface elements.
+  First-order (P1) element tiled grids are compatible with other regular
+  cartesian grids, e.g., for finite difference (FD analysis).
+  Some higher-order element tiled grids have "holes" that make them incompatible
+  with regular cartesian grids.
+  */
   public:
   // Simple constexpr accessors -----------------------------------------------
   // constexpr functions are implicitly inline
