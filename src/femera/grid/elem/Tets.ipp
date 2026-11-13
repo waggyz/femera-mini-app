@@ -25,7 +25,7 @@ constexpr fmr::Phys_float Tets::intg_5_ptwt [];
 constexpr fmr::Phys_float Tets::intg_10_ptwt [];
 constexpr fmr::Phys_float Tets::intg_11_ptwt [];
 #endif
-// Tets::calc_poly_func_X and Tets::calc_poly_grad_N evaluate the shape functions or
+// Tets::calc_poly_func_X and Tets::calc_poly_grad_node_N evaluate the shape functions or
 // gradients at 3D natural coordinate point x.
 
 template <typename F> inline// single or double precision
@@ -38,7 +38,7 @@ F* Tets::calc_poly_func_4
   return f;
 }
 template <typename F> inline
-F* Tets::calc_poly_grad_4
+F* Tets::calc_poly_grad_node_4
 (F g[4u *3u], const F[]) {//  x[3u] not used (constant gradient)
   g[ 0]=-1.0; g[ 1]=1.0; g[ 2]=0.0; g[ 3]=0.0;// dN/dx (natural coords)
   g[ 4]=-1.0; g[ 5]=0.0; g[ 6]=1.0; g[ 7]=0.0;// dN/dy
@@ -63,7 +63,7 @@ F* Tets::calc_poly_func_10
   return f;
 }
 template <typename F> inline
-F* Tets::calc_poly_grad_10
+F* Tets::calc_poly_grad_node_10
 (F g[10u *3u], const F x[3u]) {
   const F L2=x[0], L3=x[1], L4=x[2];
   const F L1=1.0-L2-L3-L4;
@@ -142,7 +142,7 @@ F* Tets::calc_poly_func_20
   return f;
 }
 template <typename F> inline
-F* Tets::calc_poly_grad_20
+F* Tets::calc_poly_grad_node_20
 (F g[20u *3u], const F x[3u]) {
   const F L2=x[0], L3=x[1], L4=x[2];
   const F L1=(1.0-L2-L3-L4);

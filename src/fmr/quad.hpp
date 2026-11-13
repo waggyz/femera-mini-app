@@ -162,6 +162,32 @@ struct sqrt_sing_quad {
   gaus_jaco_quad<N, D, F> rule_{F(0), F(-0.5)};// magic :)
 };//end struct sqrt_sing_quad
 
+
+  // Perhaps encode these with the appropriate shape, rule, and number of
+  // integration pts.
+  // Rules (n: number of integration points):
+  // GLn: Gauss-Legendre
+  // GJn: Gauss-Jacobi
+  //
+  // Shapes:
+  // C: n-Cube (bars, quad, cube) [hyperCube, Box, Orthotope]
+  // T: triangle, tetrahedron (simplex shapes, with 1DC1== 1DT)
+  // P: pyramid, W: wedge (prism)
+  //
+  // Examples:
+  // _C1D_GL1: 1D 1-point Gauss-Legendre rule for bar
+  // _C1D_GL2: 1D 2-point Gauss-Legendre rule for bar
+  // _C2D_GL1: 2D 1-point Gauss-Legendre rule for quad
+  // _C2D_GL4: 2D 4-point Gauss-Legendre rule for quad
+  // _C3D_GL8: 3D 8-point Gauss-Legendre rule for cube
+  // _T2D_GL1: 2D 1-point triangle rule (TODO check if GL)
+  // _T2D_GJ4: 2D 4-point Gauss-Jacobi rule for singularity tris
+  // _T3D_GL4: 3D 4-point tet rule (TODO check if GL)
+  // _Y3D_GL1: 3D 1-point pyramid rule (at least partial GL)
+  // _W3D_GL1: 3D 1-point wedge/prism (at least partial GL)
+  
+  
+
 } }//end fmr::math namespace
 
 #include "quad.ipp"

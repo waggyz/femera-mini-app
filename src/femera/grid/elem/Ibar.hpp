@@ -8,8 +8,8 @@ namespace femera { namespace grid { namespace elem {
 struct Ibar : public Elem<Ibar> {
   // interface bars, e.g., 2D cohesive elements
 public:
-  static constexpr fmr::Local_int sims_d = 2;
-  static constexpr fmr::Local_int elem_d = 1;
+  static constexpr fmr::Dim_int sims_d = 2;
+  static constexpr fmr::Dim_int elem_d = 1;
   static constexpr fmr::Local_int vert_n = 4;
   static constexpr fmr::Local_int edge_n = 2;
   static constexpr fmr::Local_int tris_n = 0;

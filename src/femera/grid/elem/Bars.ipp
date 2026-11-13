@@ -2,36 +2,23 @@
 #define FEMERA_HAS_GRID_ELEM_BARS_IPP
 
 namespace femera { namespace grid { namespace elem {
-#if 0
-/*
-C++11 requires redundant declaration/definition for constexpr arrays to 
-reference them later.
-*/
-//constexpr fmr::Local_int Bars::tris_conn [];
-//constexpr fmr::Local_int Bars::quad_conn [];
-
-inline constexpr fmr::Local_int Bars::bars_conn [];
-inline constexpr fmr::Geom_float Bars::vert_coor [];
-inline constexpr fmr::Geom_float Bars::coor_vert [];
-
-#endif
 //namespace femera { namespace grid {
-// Bars::calc_poly_func_pX and Bars::calc_poly_grad_pX evaluate the shape functions or
+// Bars::calc_poly_func_pX and Bars::calc_poly_grad_node_pX evaluate the shape functions or
 // gradients at 3D natural coordinate point x.
 // Bars nonzero shape functions are only in the x-direction x[0].//TODO correct?
 // When edge nodes are at their natural locations, the Jacobian is constant,
-// and only calc_poly_func_p1 and calc_poly_grad_p1 are needed for constant Jacobian evaluation.
+// and only calc_poly_func_C1D2N and calc_poly_grad_node_C1D2N are needed for constant Jacobian evaluation.
 
-template <typename Y, typename G> inline
+template <typename Y, typename G> constexpr
 //TODO mixed precision support for single or double precision
-Y* Bars::calc_poly_func_p1
+Y* Bars::calc_poly_func_C1D2N
 (Y f[2u], const G x[3u]) {// x[1], x[2] not used for 1D bar element?
   f[ 0] = 1.0-x[0];
   f[ 1] = x[0];
   return f;
 }
-template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> inline
-Y* Bars::calc_poly_grad_p1
+template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
+Y* Bars::calc_poly_grad_node_C1D2N// 3D rows x 2 node cols
 (Y g[2u *3u], const G[]) {// x[3u] not used (constant gradient)
 #if 1
   g[ 0]=-1.0; g[ 1]=1.0;// dN/dx (natural coords)
@@ -44,8 +31,8 @@ Y* Bars::calc_poly_grad_p1
 #endif
   return g;
 }
-template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> inline
-Y* Bars::calc_poly_grat_p1
+template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
+Y* Bars::calc_poly_node_grad_C1D2N// 2 node cols x 3D rows (transposed)
 (Y g[2u *3u], const G[]) {// x[3u] not used (constant gradient)
 #if 1
   g[ 0]=-1.0; g[ 3]=1.0;// dN/dx (natural coords)
@@ -58,8 +45,8 @@ Y* Bars::calc_poly_grat_p1
 #endif
   return g;
 }
-template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> inline
-Y* Bars::calc_poly_func_p2
+template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
+Y* Bars::calc_poly_func_C1D3N
 (Y f[3u], const G x[3u]) {
   const Y L2=x[0];
   const Y L1=1.0-L2;
@@ -68,8 +55,8 @@ Y* Bars::calc_poly_func_p2
   f[ 2] = 4.0*L1*L2;// Edge node
   return f;
 }
-template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> inline
-Y* Bars::calc_poly_grad_p2
+template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
+Y* Bars::calc_poly_grad_node_C1D3N// 3D rows x 3 node cols
 (Y g[3u *3u], const G x[3u]) {
   const Y L2=x[0];
   const Y L1=1.0-L2;
@@ -92,8 +79,8 @@ Y* Bars::calc_poly_grad_p2
   g[ 8] = 4.0*L2*L1t + 4.0*L2t*L1;// Edge node
   return g;
 }
-template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> inline
-Y* Bars::calc_poly_grat_p2// transposed
+template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
+Y* Bars::calc_poly_node_grad_C1D3N// 3 node cols x 3D rows (transposed)
 (Y g[3u *3u], const G x[3u]) {
   const Y L2=x[0];
   const Y L1=1.0-L2;
@@ -116,8 +103,8 @@ Y* Bars::calc_poly_grat_p2// transposed
   g[ 8] = 4.0*L2*L1t + 4.0*L2t*L1;// Edge node
   return g;
 }
-template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> inline
-Y* elem::Bars::calc_poly_func_p3
+template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
+Y* elem::Bars::calc_poly_func_C1D4N
 (Y f[4u], const G x[3u]) {
   const Y L2=x[0];
   const Y L1=(1.0-L2);
@@ -128,8 +115,8 @@ Y* elem::Bars::calc_poly_func_p3
   f[ 3]=4.5*( L1*L2 *(3.0*L2 -1.0) );
   return f;
 }
-template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> inline
-Y* elem::Bars::calc_poly_grad_p3
+template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
+Y* elem::Bars::calc_poly_grad_node_C1D4N// 3D rows x 4 node cols
 (Y g[4u *3u], const G x[3u]) {
   const Y L2=x[0];
   const Y L1=(1.0-L2);
@@ -169,8 +156,8 @@ Y* elem::Bars::calc_poly_grad_p3
   g[11]=4.5*( L1t*L2 *(3.*L2 -1.) + L1 *L2t*(3.*L2 -1.) + L1 *L2 *(3.*L2t) );
   return g;
 }
-template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> inline
-Y* elem::Bars::calc_poly_grat_p3
+template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
+Y* elem::Bars::calc_poly_node_grad_C1D4N// 4 node cols x 3D rows (transposed)
 (Y g[4u *3u], const G x[3u]) {
   const Y L2=x[0];
   const Y L1=(1.0-L2);

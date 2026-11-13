@@ -3,15 +3,23 @@
 
 #include "../../fmr/fmr.hpp"
 #include "../../fmr/math.hpp"
-//#include "../../fmr/smat.hpp"// needed in Elem.ipp for Jacobian inverse & det?
 
+#if 0
+namespace femera {//TODO change this example to support Elem & Tile
+  template <typename> class Grid;      // abstract CRTP base derived from Work
+  namespace grid {                     // CRTP inheritance from Grid
+    class Cell;                        // public interface for discretizations
+    class FEms; class FDms; class FVms;// Femera cell (numerical method) types
+    class BEms; class SGms;            // boudary elem, staggered grid
+} }//end femera::grid:: namespace
+#endif
 namespace femera { namespace grid { namespace elem {//TODO grid -> geom
 //namespace femera { namespace geom { //TODO change to here?
 #if 0
 // Forward-delare element shapes TODO is this needed?
-//class Pins;//TODO point element for "soft" pins & arbitrary point forces?
+class Pins;// 1D point element for "hard" pins & arbitrary point forces
 class Bars;
-//class Ipts;//TODO 1D interface element embedded in 1D, 2D, 3D space
+class Ipin;// 1D interface element for "soft" pins (force-displacement relation)
 class Ibar;// 1D interface element embedded in 2D or 3D space
 class Itri; class Iqud;// 2D interface elements embedded in 3D space
 class Tris; class Quad;
@@ -93,10 +101,11 @@ class Elem {
   //
   public:
   // Simple constexpr accessors -----------------------------------------------
-  // constexpr functions are implicitly inline
+  // constexpr methods are implicitly inline
   constexpr fmr::Local_int get_elem_p () const noexcept {return P;}
   //constexpr fmr::Local_int get_sims_d () const noexcept {return D;}
-  constexpr fmr::Local_int get_sims_d () const noexcept {return T::sims_d;}
+  constexpr fmr::Local_int get_sims_d () const noexcept {//TODO remove?
+    return T::sims_d;}
   constexpr fmr::Local_int get_elem_d () const noexcept {
     //static_assert( T::elem_d <= D, //NOTE only checked if this function used.
     //  "Element dimension cannot exceed simulation spatial dimension.");
@@ -172,27 +181,29 @@ class Elem {
   }
   // Element quality calculations ---------------------------------------------
 #if 0
-  F get_edge_qual (const F* node_coor, const fmr::Dim_int dims=3) const noexcept;
-  F get_skew_qual (const F* node_coor, const fmr::Dim_int dims=3) const noexcept;
+  F get_edge_qual (const F* node_coor, const fmr::Local_int dims=3) const noexcept;
+  F get_skew_qual (const F* node_coor, const fmr::Local_int dims=3) const noexcept;
 #endif
   constexpr
-  F get_delt_qual (const F* node_coor, const fmr::Dim_int dims=3) const noexcept;
+  F get_delt_qual (
+    const F* node_coor, const fmr::Local_int dims=3, const bool is_squared=false)
+  const noexcept;
   //
   // Jacobian and determinant calculations ------------------------------------
-  #if 0
+#if 0
   template <typename Y=F>
   Y* jatd_naos (const fmr::Local_int intp_n=1,// inverted and transposed
     // Jacobian & determinants
-    const fmr::Dim_int dims=D, fmr::Local_int node_n=get_node_n (),
+    const fmr::Local_int dims=D, fmr::Local_int node_n=get_node_n (),
     const F* node_coor) const noexcept;
   
   template <typename Y=F>
   Y* jacs_csoa (const fmr::Local_int intp_n=1,// x1,x2,..., y1,y2,..., z1,z2,...
-    const fmr::Dim_int dims=D, fmr::Local_int node_n=get_node_n (),
+    const fmr::Local_int dims=D, fmr::Local_int node_n=get_node_n (),
   const F* coor_node) const noexcept;
   template <typename Y=F>
   Y* jatd_nsoa (const fmr::Local_int intp_n=1,
-    const fmr::Dim_int dims=D, fmr::Local_int node_n=get_node_n (),
+    const fmr::Local_int dims=D, fmr::Local_int node_n=get_node_n (),
   const F* coor_node[D*get_node_n ()]) const noexcept;
 #endif
 };//end Elem

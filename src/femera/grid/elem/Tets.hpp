@@ -8,8 +8,8 @@ namespace femera { namespace grid { namespace elem {
 
 struct Tets : public Elem<Tets> {//TODO Tet?
 public://TODO make protected or private with friend class Elem?
-  static constexpr fmr::Local_int sims_d = 3;//TODO Remove from here?
-  static constexpr fmr::Local_int elem_d = 3;
+  static constexpr fmr::Dim_int sims_d = 3;//TODO Remove from here?
+  static constexpr fmr::Dim_int elem_d = 3;
   static constexpr fmr::Local_int vert_n = 4;
   static constexpr fmr::Local_int edge_n = 6;
   static constexpr fmr::Local_int tris_n = 4;
@@ -252,15 +252,15 @@ public://TODO make protected or private with friend class Elem?
   template <typename F> static inline// single or double
   F* calc_poly_func_4 (F f[4u], const F x[3u]);
   template <typename F> static inline
-  F* calc_poly_grad_4 (F g[4u *3u], const F[]);// x[3u] not used; result is constant
+  F* calc_poly_grad_node_4 (F g[4u *3u], const F[]);// x[3u] not used; result is constant
   template <typename F> static inline
   F* calc_poly_func_10 (F f[10u], const F x[3u]);
   template <typename F> static inline
-  F* calc_poly_grad_10 (F g[10u *3u], const F x[3u]);
+  F* calc_poly_grad_node_10 (F g[10u *3u], const F x[3u]);
   template <typename F> static inline
   F* calc_poly_func_20 (F f[20u], const F x[3u]);
   template <typename F> static inline
-  F* calc_poly_grad_20 (F g[20u *3u], const F x[3u]);
+  F* calc_poly_grad_node_20 (F g[20u *3u], const F x[3u]);
   //TODO singularity tetrahedron element shape functions and integration rules
   //--------------------------- tet integration ------------------------------
   // Tetrahedral integration points and weights

@@ -7,8 +7,8 @@ namespace femera { namespace grid { namespace elem {
 
 struct Tris : public Elem<Tris> {//TODO Tri?
 public:
-  static constexpr fmr::Local_int sims_d = 3;
-  static constexpr fmr::Local_int elem_d = 2;
+  static constexpr fmr::Dim_int sims_d = 3;
+  static constexpr fmr::Dim_int elem_d = 2;
   static constexpr fmr::Local_int vert_n = 3;
   static constexpr fmr::Local_int edge_n = 3;
   static constexpr fmr::Local_int tris_n = 1;

@@ -134,7 +134,8 @@ const noexcept {
 // Element quality metrics ====================================================
   template <class T, typename fmr::Local_int P, typename F>//, typename Y>
   constexpr
-  F elem::Elem<T,P,F>::get_delt_qual (const F* vert_coor, const fmr::Dim_int dims)
+  F elem::Elem<T,P,F>::get_delt_qual (
+    const F* vert_coor, const fmr::Local_int dims, const bool is_squared)
   const noexcept {
     // Calculate the ratio of the minimum edge length
     // to the maximum coordinate absolute value.
@@ -145,10 +146,11 @@ const noexcept {
     F max_coord = std::numeric_limits<F>::lowest ();
     for(fmr::Local_int i=0; i<(vert_n * dims); ++i){
       const F coor = abs(vert_coor[i]);
-      if(coor > max_coord) max_coord = coor;
+      //if(coor > max_coord) max_coord = coor;
+      max_coord = (coor > max_coord) ? coor : max_coord;
     }
     // Early return if max_coord is zero to avoid division by zero.
-    if(!(max_coord < F(0) || max_coord > F(0))) return F(0);
+    //if(!(max_coord < F(0) || max_coord > F(0))) return F(0);
     //
     const auto edge_n = get_edge_n ();
     for(fmr::Local_int j=0; j<edge_n; ++j){// loop through edges
@@ -157,13 +159,17 @@ const noexcept {
       //const auto vert_j = conn[j*2 + 1];
       const auto vert_i = j*2 + 0;
       const auto vert_j = j*2 + 1;
-      for(fmr::Dim_int d=0; d<dims; ++d){
+      for(fmr::Local_int d=0; d<dims; ++d){
         const F diff = vert_coor[vert_i*dims + d] - vert_coor[vert_j*dims + d];
         edge_len2 += diff * diff;
       }
-      if(edge_len2 < min_edge) min_edge = edge_len2;
+      //if(edge_len2 < min_edge) min_edge = edge_len2;
+      min_edge = (edge_len2 < min_edge) ? edge_len2 : min_edge;
     }
-    return sqrt(min_edge) / max_coord;
+    //return sqrt(min_edge) / max_coord;
+    return (!(max_coord < F(0) || max_coord > F(0))) ? F(0)
+      : (is_squared ? min_edge / (max_coord * max_coord)
+      : sqrt(min_edge) / max_coord);
   }//end get_delt_qual
 
 } }//end femera::grid namespace

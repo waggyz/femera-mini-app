@@ -4,32 +4,32 @@
 namespace femera { namespace grid { namespace tile {
 
 constexpr bool Bar1::calc_tile_vert_conn (
-  fmr::Local_int* conn,
+  fmr::Local_int conn[2],
     const fmr::Local_int tile_i,// local element index
     const fmr::Local_int* part_size,
-    const fmr::Local_int p)
+    const fmr::Dim_int elem_p)
     noexcept {
-    conn[0] = p * tile_i;
-    conn[1] = p * (tile_i + 1);
+    conn[0] = elem_p * tile_i;
+    conn[1] = elem_p * (tile_i + 1);
     return tile_i < part_size[0];// false if tile_i out of range
   }
 constexpr bool Bar1::calc_tile_vert_conn_prdc (
-  fmr::Local_int* conn,
+  fmr::Local_int conn[2],
     const fmr::Local_int tile_i,// local element index
     const fmr::Local_int* part_size,
-    const fmr::Local_int p)
+    const fmr::Dim_int elem_p)
     noexcept{
     if (part_size[0] == 0) return false;//TODO remove this check?
     // part_size counts elements; each element spans p node indices.
-    conn[0] = p * (tile_i % part_size[0]);
-    conn[1] = p * ((tile_i + 1) % part_size[0]);
+    conn[0] = elem_p * (tile_i % part_size[0]);
+    conn[1] = elem_p * ((tile_i + 1) % part_size[0]);
     return tile_i < part_size[0];// false if tile_i out of range
   }
 constexpr bool Bar1::calc_tile_node_conn (
   fmr::Local_int* conn,
     const fmr::Local_int tile_i,// local element index
     const fmr::Local_int* part_size,
-    const fmr::Local_int elem_p)
+    const fmr::Dim_int elem_p)
     noexcept {
     conn[0] = elem_p * tile_i;
     conn[1] = elem_p * (tile_i + 1);
@@ -43,10 +43,10 @@ constexpr bool Bar1::calc_tile_node_conn (
 template <typename F>
 constexpr bool Bar1::calc_tile_part_node_coor(F* coor,
     const fmr::Local_int node_i,
-    const fmr::Local_int elem_p,
+    const fmr::Dim_int elem_p,
     const fmr::Local_int* part_elem_dims,
-    const F* tile_size,
-    const F* part_orig
+    const F tile_size[3],
+    const F part_orig[3]
   ) noexcept{
     const F node_delt = F(1.0) / F(elem_p);
     // Guard against null part_orig pointer.
@@ -60,9 +60,9 @@ constexpr bool Bar1::calc_tile_part_node_coor(F* coor,
     return node_i < elem_p * part_elem_dims[0] + 1;
   }
   template <typename F>
-  constexpr bool Bar1::calc_tile_vert_coor(F* coor,
+  constexpr bool Bar1::calc_tile_vert_coor(F coor[3],
     const fmr::Local_int vert_i, const fmr::Local_int vert_n,
-    const F* tile_size, const F* part_orig)
+    const F tile_size[3], const F part_orig[3])
     noexcept{
     coor[0] = (part_orig ? part_orig[0] : F(0.0)) + vert_i * tile_size[0];
     coor[1] = (part_orig ? part_orig[1] : F(0.0)) + vert_i * tile_size[1];
@@ -71,9 +71,9 @@ constexpr bool Bar1::calc_tile_part_node_coor(F* coor,
   }
   template <typename F>
 constexpr bool Bar1::calc_tile_elem_vert_coor(//x1,y1,z1, x2,y2,z2
-    F* vert_coor,// size: vert_n * sims_d
+    F vert_coor[6],// size: vert_n * sims_d
     const fmr::Local_int elem_i, const fmr::Local_int elem_n,
-    const F* tile_size, const F* part_orig)// origin should default to {0.0,0.0,0.0}
+    const F tile_size[3], const F part_orig[3])// origin should default to {0.0,0.0,0.0}
     noexcept{
       for (fmr::Local_int v = 0; v < 2; ++v) {// 2 vertices for 1D bar element
         vert_coor[v * 3 + 0] = (part_orig ? part_orig[0] : F(0.0))
@@ -87,9 +87,9 @@ constexpr bool Bar1::calc_tile_elem_vert_coor(//x1,y1,z1, x2,y2,z2
     }
   template <typename F>
   constexpr bool Bar1::calc_tile_elem_coor_vert(//x1,x2, y1,y2, z1, z2
-    F* vert_coor,// size: vert_n * sims_d
+    F vert_coor[6],// size: vert_n * sims_d
     const fmr::Local_int elem_i, const fmr::Local_int elem_n,
-    const F* tile_size, const F* part_orig)// origin should default to {0.0,0.0,0.0}
+    const F tile_size[3], const F part_orig[3])// origin should default to {0.0,0.0,0.0}
     noexcept{
       for (fmr::Local_int v = 0; v < 2; ++v) {// 2 vertices for 1D bar element
         vert_coor[v + 0] = (part_orig ? part_orig[0] : F(0.0))

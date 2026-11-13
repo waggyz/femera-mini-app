@@ -9,14 +9,14 @@ struct Elem_args {
 public:
   fmr::Local_int node_n;// N
   fmr::Local_int intp_n;// G
-  fmr::Local_int sims_d;// D
+  fmr::Dim_int sims_d;// D
 };
 template <class E, Elem_args const &A, typename F=fmr::Geom_float>
 class Elem_test {
 private:
   static constexpr fmr::Local_int node_n = A.node_n;
   static constexpr fmr::Local_int intp_n = A.intp_n;
-  static constexpr fmr::Local_int sims_d = A.sims_d;
+  static constexpr fmr::Dim_int sims_d = A.sims_d;
 public:
   template <typename fmr::Local_int D=sims_d>
   constexpr typename std::enable_if <D==3, fmr::Local_int>::type

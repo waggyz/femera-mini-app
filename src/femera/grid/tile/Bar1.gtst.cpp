@@ -322,14 +322,27 @@ TEST( GridTileBar1, TileElementEdgeDeltaQuality){
   const double tiny_delt_qual = bars.get_delt_qual(vert_coor, 3);
   EXPECT_GT( tiny_delt_qual, 0.0 );
   // Loop through elements and count those with "low" delta quality.
+  const double qual_min = 2e-6;// just for this test, so half look bad
   fmr::Local_int low_quality_count = 0;
   for(fmr::Local_int i=0; i<tiny_n; ++i){
     EXPECT_TRUE( bar1.get_tile_elem_vert_coor(vert_coor, i, tiny_n, tiny_size, part_orig) );
     const double dq = bars.get_delt_qual(vert_coor, 3);
-    if(dq < 2e-6) ++low_quality_count;// just for this test, so half look bad
+    if(dq < qual_min) ++low_quality_count;
   }
+  // Check the return squared variant (avoids sqrt()).
+  // This uses the is_squared=true flag in get_delt_qual.
   EXPECT_GT(low_quality_count, 0);
   EXPECT_EQ(low_quality_count, tiny_n / 2);
+  const double qual_min2 = qual_min * qual_min;
+  fmr::Local_int low_quality_count2 = 0;
+  for(fmr::Local_int i=0; i<tiny_n; ++i){
+    EXPECT_TRUE( bar1.get_tile_elem_vert_coor(vert_coor, i, tiny_n, tiny_size, part_orig) );
+    const double dq2 = bars.get_delt_qual(vert_coor, 3, true);
+    //if(dq2 < qual_min2) ++low_quality_count2;
+    low_quality_count2 += (dq2 < qual_min2) ? 1 : 0;
+  }
+  EXPECT_GT(low_quality_count2, 0);
+  EXPECT_EQ(low_quality_count2, tiny_n / 2);
 }
 
 } } } // end namespace femera::grid::tile

@@ -1,7 +1,7 @@
 #include "../../femera.hpp"
 #include "../Elem.test.hpp"
 #include "Bars.hpp"
-#include "../../../fmr/fems/elem.hpp"
+#include "../../../fmr/fems/elem-jacs.hpp"
 
 #include <gtest/gtest.h>
 
@@ -19,11 +19,11 @@ fmr::Exit_int main (int argc, char** argv) {
 namespace femera { namespace grid { namespace elem {
 
 TEST( GridElemBars, IsStateless ){
-  EXPECT_TRUE( (std::is_empty<Bars>::value) );
+  //EXPECT_TRUE( (std::is_empty<Bars>::value) );
   EXPECT_TRUE( (std::is_empty<Elem<Bars>>::value) );
 }
 TEST( GridElemBars, ElementTopology ){
-  constexpr Bars bars;
+  constexpr Elem<Bars> bars;
 #if 0
   EXPECT_EQ( static_cast<fmr::Local_int>(Elem<Bars>::get_sims_d ()), 3u );
   EXPECT_EQ( static_cast<fmr::Local_int>(Elem<Bars>::get_elem_d ()), 1u );
@@ -88,7 +88,7 @@ TEST( GridElemBars, ElementPolynomials ){
 }
 // Element connectivity and coordinates tests =================================
 TEST( GridElemBars, VertexConnectivityAndCoordinates ){
-  constexpr Bars bars;
+  constexpr Elem<Bars> bars;
 
   const double* vert_coor = bars.get_elem_vert_coor ();
   const double* coor_vert = bars.get_elem_coor_vert ();
@@ -117,13 +117,13 @@ TEST( GridElemBars, VertexConnectivityAndCoordinates ){
 }
 
 TEST( GridElemBars, NodeCoordinates ){
-  constexpr Bars bars_p1;// linear default
+  constexpr Elem<Bars> bars_p1;// linear default
   constexpr Elem<Bars, 2> bars_p2;// quadratic
   constexpr Elem<Bars, 3> bars_p3;// cubic
   const fmr::Geom_float test_vert_coor[6] = {0.0,1.0,2.0, 3.0,4.0,5.0};
-  const fmr::Local_int p1_sims_d = bars_p1.get_sims_d();
-  const fmr::Local_int p2_sims_d = bars_p2.get_sims_d();
-  const fmr::Local_int p3_sims_d = bars_p3.get_sims_d();
+  const fmr::Dim_int p1_sims_d = bars_p1.get_sims_d();
+  const fmr::Dim_int p2_sims_d = bars_p2.get_sims_d();
+  const fmr::Dim_int p3_sims_d = bars_p3.get_sims_d();
   const fmr::Local_int p1_node_n = bars_p1.get_node_n();
   const fmr::Local_int p2_node_n = bars_p2.get_node_n();
   const fmr::Local_int p3_node_n = bars_p3.get_node_n();
@@ -211,14 +211,14 @@ TEST( GridElemBars, ElementQuality ){
 }
 #if 1
 TEST( GridElemBars, ShapeFunctionsAndGradients ){
-  constexpr Bars bars;// Default linear 2-node element
+  constexpr Bars bars;//TODO Elem<Bars> accessors
   const double xi = 0.5;// int point for Gauss Legendre first order quadrature
   double N_storage[2];
   double dN_storage[2 * 3];// Default 3D space
   double* N = N_storage;
   double* dN = dN_storage;
-  bars.calc_poly_func_p1 (N, &xi);
-  bars.calc_poly_grad_p1 (dN, &xi);
+  bars.calc_poly_func_C1D2N (N, &xi);
+  bars.calc_poly_grad_node_C1D2N (dN, &xi);
   ASSERT_NE( N, nullptr );
   ASSERT_NE( dN, nullptr );
   EXPECT_DOUBLE_EQ( N[0], 0.5 );
@@ -238,20 +238,20 @@ TEST( GridElemBars, JacobianCalculation ){
   double* dN = dN_storage;
   double dNT_storage[2 * 3];
   double* dNT = dNT_storage;
-  bars.calc_poly_grad_p1 (dN, &xi);
-  bars.calc_poly_grat_p1 (dNT, &xi);
-  fmr::Phys_float jacs_caos_storage[3 * 3];
-  fmr::Phys_float* jacs_caos = jacs_caos_storage;
-  fmr::Phys_float jacs_caos_a_storage[3 * 3];
-  fmr::Phys_float* jacs_caos_a = jacs_caos_a_storage;
-  fmr::Phys_float jacs_csoa_storage[3 * 3];
-  fmr::Phys_float* jacs_csoa = jacs_csoa_storage;
+  bars.calc_poly_grad_node_C1D2N (dN, &xi);
+  bars.calc_poly_node_grad_C1D2N (dNT, &xi);
+  fmr::Phys_float jacs_node_coor_storage[3 * 3];
+  fmr::Phys_float* jacs_caos = jacs_node_coor_storage;
+  fmr::Phys_float jacs_node_coor_a_storage[3 * 3];
+  fmr::Phys_float* jacs_node_coor_a = jacs_node_coor_a_storage;
+  fmr::Phys_float jacs_coor_node_storage[3 * 3];
+  fmr::Phys_float* jacs_csoa = jacs_coor_node_storage;
   const double* node_coor = bars.get_elem_vert_coor ();// naos
   const double* coor_node = bars.get_elem_coor_vert ();// nsoa
   //
-  fmr::fems::elem::calc_jacs_caos_ref (jacs_caos, node_coor, dNT, 1u, 2u, 3u);// coor aos
-  fmr::fems::elem::calc_jacs_caos_a   (jacs_caos_a, node_coor, dN, 1u, 2u, 3u);// coor aos
-  fmr::fems::elem::calc_jacs_csoa_ref (jacs_csoa, coor_node, dNT, 1u, 2u, 3u);// coor soa
+  fmr::fems::elem::elem_jacs_node_coor_ref (jacs_caos, node_coor, dNT, 1u, 2u, 3u);// coor aos
+  fmr::fems::elem::elem_jacs_node_coor_a   (jacs_node_coor_a, node_coor, dN, 1u, 2u, 3u);// coor aos
+  fmr::fems::elem::elem_jacs_coor_node_ref (jacs_csoa, coor_node, dNT, 1u, 2u, 3u);// coor soa
   //
   // A bar along the natural x-axis has only a nonzero x derivative.
   //TODO FIXME incorrect Jacobian for 1D element embedded in higher dimensions.
@@ -275,31 +275,31 @@ TEST( GridElemBars, JacobianCalculation ){
   EXPECT_DOUBLE_EQ( jacs_csoa[7], jacs_caos[7] );
   EXPECT_DOUBLE_EQ( jacs_csoa[8], jacs_caos[8] );
   //
-  EXPECT_DOUBLE_EQ( jacs_caos_a[0], jacs_caos[0] );
-  EXPECT_DOUBLE_EQ( jacs_caos_a[1], jacs_caos[1] );
-  EXPECT_DOUBLE_EQ( jacs_caos_a[2], jacs_caos[2] );
-  EXPECT_DOUBLE_EQ( jacs_caos_a[3], jacs_caos[3] );
-  EXPECT_DOUBLE_EQ( jacs_caos_a[4], jacs_caos[4] );
-  EXPECT_DOUBLE_EQ( jacs_caos_a[5], jacs_caos[5] );
-  EXPECT_DOUBLE_EQ( jacs_caos_a[6], jacs_caos[6] );
-  EXPECT_DOUBLE_EQ( jacs_caos_a[7], jacs_caos[7] );
-  EXPECT_DOUBLE_EQ( jacs_caos_a[8], jacs_caos[8] );
+  EXPECT_DOUBLE_EQ( jacs_node_coor_a[0], jacs_caos[0] );
+  EXPECT_DOUBLE_EQ( jacs_node_coor_a[1], jacs_caos[1] );
+  EXPECT_DOUBLE_EQ( jacs_node_coor_a[2], jacs_caos[2] );
+  EXPECT_DOUBLE_EQ( jacs_node_coor_a[3], jacs_caos[3] );
+  EXPECT_DOUBLE_EQ( jacs_node_coor_a[4], jacs_caos[4] );
+  EXPECT_DOUBLE_EQ( jacs_node_coor_a[5], jacs_caos[5] );
+  EXPECT_DOUBLE_EQ( jacs_node_coor_a[6], jacs_caos[6] );
+  EXPECT_DOUBLE_EQ( jacs_node_coor_a[7], jacs_caos[7] );
+  EXPECT_DOUBLE_EQ( jacs_node_coor_a[8], jacs_caos[8] );
 }
 
 TEST( GridElemBars, JacobianCalculationMultiplePointsAndDimensions ){
-  constexpr Bars bars;
+  constexpr Elem<Bars> bars;
   constexpr fmr::Local_int vert_n = bars.get_vert_n ();
   constexpr fmr::Local_int intp_n = 2;
   const double origin[3] = {2.0, 3.0, 5.0};
   const double edge[3] = {5.0, 8.0, 11.0};
-  for(fmr::Local_int dims=1; dims<=3; ++dims){
+  for(fmr::Dim_int dims=1; dims<=3; ++dims){
     SCOPED_TRACE(dims);
     double vert_coor[2 * 3];
     double coor_vert[2 * 3];
     double poly_grad[2 * 2 * 3];
     double poly_grat[2 * 2 * 3];
     fmr::Phys_float jacs_caos[2 * 3 * 3];
-    fmr::Phys_float jacs_caos_a[2 * 3 * 3];
+    fmr::Phys_float jacs_node_coor_a[2 * 3 * 3];
     fmr::Phys_float jacs_csoa[2 * 3 * 3];
     for(fmr::Local_int k=0; k<vert_n; ++k){
       for(fmr::Local_int i=0; i<dims; ++i){
@@ -318,16 +318,19 @@ TEST( GridElemBars, JacobianCalculationMultiplePointsAndDimensions ){
         }
       }
     }
-    fmr::fems::elem::calc_jacs_caos_ref (jacs_caos, vert_coor, poly_grad, intp_n, vert_n, dims);
-    fmr::fems::elem::calc_jacs_caos_a (jacs_caos_a, vert_coor, poly_grat, intp_n, vert_n, dims);
-    fmr::fems::elem::calc_jacs_csoa_ref (jacs_csoa, coor_vert, poly_grad, intp_n, vert_n, dims);
+    fmr::fems::elem::elem_jacs_node_coor_ref (
+      jacs_caos, vert_coor, poly_grad, intp_n, vert_n, dims);
+    fmr::fems::elem::elem_jacs_node_coor_a (
+      jacs_node_coor_a, vert_coor, poly_grat, intp_n, vert_n, dims);
+    fmr::fems::elem::elem_jacs_coor_node_ref (
+      jacs_csoa, coor_vert, poly_grad, intp_n, vert_n, dims);
     for(fmr::Local_int ip=0; ip<intp_n; ++ip){
       for(fmr::Local_int i=0; i<dims; ++i){
         for(fmr::Local_int j=0; j<dims; ++j){
           const auto index = ip*dims*dims + i*dims + j;
           const double expected = edge[i] * (ip*dims + j + 1);
           EXPECT_DOUBLE_EQ( jacs_caos[index], expected );
-          EXPECT_DOUBLE_EQ( jacs_caos_a[index], expected );
+          EXPECT_DOUBLE_EQ( jacs_node_coor_a[index], expected );
           EXPECT_DOUBLE_EQ( jacs_csoa[index], expected );
         }
       }

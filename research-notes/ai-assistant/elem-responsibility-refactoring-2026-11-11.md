@@ -52,7 +52,7 @@ This note is an analysis only. Names and interfaces below are illustrative.
   `Bars`, so tiling must remain an optional capability rather than a required
   operation for every element.
 - A source search found the relevant `get_tile_*`, `calc_poly_*`, and
-  `calc_jacs_*` uses primarily in the element/kernel tests and
+  `elem_jacs_*` uses primarily in the element/kernel tests and
   [`Bars.perf.cpp`](../../src/femera/grid/elem/Bars.perf.cpp).
   [`Bars.gtst.cpp`](../../src/femera/grid/elem/Bars.gtst.cpp) also checks
   empty types and constexpr tile dispatch. These are useful design and
@@ -192,8 +192,8 @@ policies or functions unless inheritance gives a demonstrated benefit.
    `intp_n * node_n * r` entries. Keep dimensions explicit and validate
    `r <= s`; the ambient dimension should come from the physical context,
    not the reference topology.
-2. **Choose and document layouts.** Current `Bars::calc_poly_grad_p1`
-   writes dimension-major `[dimension][node]`, while `calc_poly_grat_p1`
+2. **Choose and document layouts.** Current `Bars::calc_poly_grad_node_C1D2N`
+   writes dimension-major `[dimension][node]`, while `calc_poly_node_grad_C1D2N`
    writes node-major `[node][dimension]`, each padded to three components.
    The `fmr` reference kernels consume node-major gradients and the `_a`
    kernel consumes dimension-major gradients. The test-local variable names
