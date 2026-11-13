@@ -1,6 +1,7 @@
 #include "Bars.perf.hpp"
 #include "../../femera.hpp"
 #include "Bars.hpp"
+#include "Bar1.hpp"
 
 #include <gtest/gtest.h>
 
@@ -124,17 +125,17 @@ double elem::run_bars_perf_test(const int test_case, const fmr::Local_int test_n
   // vector of thread-local part_conn valarrays
   std::vector<std::valarray<fmr::Local_int>> part_conn_vec(part_n);
   const size_t part_conn_array_size
-    = static_cast<size_t>(part_elem_n) * Bars::vert_n;
+    = static_cast<size_t>(part_elem_n) * Elem<Bars>::get_vert_n ();
   // Fill the part_conn_vec with thread-local connectivity arrays.
   #pragma omp parallel for default(none) shared(part_conn_vec) \
     firstprivate(part_n, part_elem_n, part_conn_array_size)
   for (fmr::Local_int part_id = 0; part_id < part_n; ++part_id) {
-    Bars bars;
+    femera::grid::tile::Bar1 bar1;
     const fmr::Local_int grid_size[1] = {part_elem_n * part_n};
     std::valarray<fmr::Local_int> part_conn(part_conn_array_size);
     fmr::Local_int this_conn[2] = {0, 0};
     for (fmr::Local_int elem_i = 0; elem_i < part_elem_n; ++elem_i) {
-      bars.get_tile_vert_conn(this_conn, elem_i, grid_size);
+      bar1.get_tile_vert_conn(this_conn, elem_i, grid_size);
       part_conn[2*elem_i + 0] = this_conn[0];
       part_conn[2*elem_i + 1] = this_conn[1];
     }
@@ -158,14 +159,14 @@ double elem::run_bars_perf_test(const int test_case, const fmr::Local_int test_n
           const fmr::Local_int grid_size[1] = {part_elem_n};
           Perf_time_t* this_meter = part_meter[part_id];// thread local ptr
           //
-          Bars this_bars;
+          femera::grid::tile::Bar1 this_bar1;
           fmr::Local_int this_conn[2] = {0, 0};
 
           fmr::Local_int part_chck = 0;
           //
           this_meter->add_idle_time_now ();
           for (fmr::Local_int elem_i = 0; elem_i < part_elem_n; ++elem_i) {
-            this_bars.get_tile_vert_conn(this_conn, elem_i, grid_size);// 4 in
+            this_bar1.get_tile_vert_conn(this_conn, elem_i, grid_size);// 4 in
             part_chck += (this_conn[0] + this_conn[1]) % 3;// +1 in,, 1 out, 3 IOPS
             //just so loop does not opitimize away
           }

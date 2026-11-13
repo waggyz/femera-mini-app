@@ -9,14 +9,13 @@ namespace femera { namespace grid { namespace elem {
 class Bars final : public Elem<Bars> {
   template <class T, fmr::Local_int P, typename F>
   friend class Elem;
+private:// Everything should be private, accessible through the Elem interface.
 // Scalars ====================================================================
-public:
   static constexpr fmr::Local_int vert_n = 2;// needed by other elements?
-private:
   static constexpr fmr::math::Poly poly_type = fmr::math::Poly::Full;
   //
   static constexpr fmr::Local_int sims_d = 3;//TODO remove?
-  static constexpr fmr::Dim_int elem_d = 1;
+  static constexpr fmr::Dim_int   elem_d = 1;
   //
   static constexpr fmr::Local_int edge_n = 1;
   static constexpr fmr::Local_int tris_n = 0;

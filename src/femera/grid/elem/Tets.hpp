@@ -31,7 +31,7 @@ public://TODO make protected or private with friend class Elem?
   //static constexpr
   //fmr::Local_int vert_conn [vert_n] = {0,1,2,3};
   static constexpr
-  fmr::Local_int bars_conn [Bars::vert_n * edge_n]
+  fmr::Local_int bars_conn [Elem<Bars>::get_vert_n () * edge_n]
   = {
 #if 1
   0,1, 1,2, 2,0, 0,3, 1,3, 2,3

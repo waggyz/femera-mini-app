@@ -23,9 +23,9 @@ public:
   //static constexpr
   //fmr::Local_int vert_conn [vert_n] = {0,1, 2,3};
   static constexpr
-  fmr::Local_int bars_conn [Bars::vert_n * edge_n] = { 0,1, 2,3 };
+  fmr::Local_int bars_conn [Elem<Bars>::get_vert_n () * edge_n] = { 0,1, 2,3 };
   static constexpr fmr::Local_int* tris_conn = nullptr;
-  static constexpr fmr::Local_int quad_conn [Bars::vert_n * edge_n]
+  static constexpr fmr::Local_int quad_conn [Elem<Bars>::get_vert_n () * edge_n]
     = { 0,1,2,3 };
   static constexpr
   fmr::Geom_float vert_coor [vert_n * sims_d]// transposed coor_vert
