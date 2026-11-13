@@ -1,7 +1,7 @@
-#include "Bars.perf.hpp"
-#include "../../femera.hpp"
-#include "Bars.hpp"
+#include "Bar1.perf.hpp"
 #include "Bar1.hpp"
+
+#include "../../femera.hpp"
 
 #include <gtest/gtest.h>
 
@@ -17,7 +17,7 @@ using Perf_time_t = fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>;
 
 namespace femera { namespace grid {
 
-  void elem::send_perf_results (std::string label, int test_case,
+  void tile::send_perf_results (std::string label, int test_case,
   fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>& perf,
   uint test_count, uint check) {
     const auto this_time = perf.get_busy_s ();
@@ -44,7 +44,7 @@ namespace femera { namespace grid {
       check);
   }
 
-double elem::run_bars_perf_test(const int test_case, const fmr::Local_int test_n) {
+double tile::run_bars_perf_test(const int test_case, const fmr::Local_int test_n) {
   /* These peroforance tests will be used to evaluate different design choices
   * for the Bars element and provide preliminary indications of best practices
   * for Elem variants in general.
@@ -125,7 +125,7 @@ double elem::run_bars_perf_test(const int test_case, const fmr::Local_int test_n
   // vector of thread-local part_conn valarrays
   std::vector<std::valarray<fmr::Local_int>> part_conn_vec(part_n);
   const size_t part_conn_array_size
-    = static_cast<size_t>(part_elem_n) * Elem<Bars>::get_vert_n ();
+    = static_cast<size_t>(part_elem_n) * Tile<Bar1>::get_tile_vert_n ();
   // Fill the part_conn_vec with thread-local connectivity arrays.
   #pragma omp parallel for default(none) shared(part_conn_vec) \
     firstprivate(part_n, part_elem_n, part_conn_array_size)
@@ -227,7 +227,7 @@ double elem::run_bars_perf_test(const int test_case, const fmr::Local_int test_n
   const auto mpi_str
     = "Bars " + std::to_string(mpi_i) + "/" + std::to_string(mpi_n);
   for (fmr::Local_int i = 0; i < part_n; ++i) {// log all from main threads.
-    elem::send_perf_results(mpi_str, test_case, *part_meter[i],
+    tile::send_perf_results(mpi_str, test_case, *part_meter[i],
       test_n, total_sum / part_n / test_n);
   }
   // total_sum / part_n / test_n == 1048575 for 1024*1024
@@ -253,7 +253,7 @@ TEST( GridElemBarsPerf, TrivialTest ){
 TEST( GridElemBarsPerf, RunBarsPerfTests ){
   const fmr::Local_int test_n = 200; // test count
   EXPECT_LT( \
-    elem::run_bars_perf_test(1, test_n), \
-    elem::run_bars_perf_test(2, test_n) );
+    tile::run_bars_perf_test(1, test_n), \
+    tile::run_bars_perf_test(2, test_n) );
 }
-} }// end namespace femera::grid::elem
+} }// end namespace femera::grid
