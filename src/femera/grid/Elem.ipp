@@ -36,8 +36,9 @@ constexpr bool elem::Elem<T,P,F>::get_elem_node_coor (F* node_coor,
   //
   // Calculate this based on get_elem_coor_vert () and element constituents:
   // concatenate elem_conn {0,1,...,vert_n-1} coordinates, then,
-  // for P>1, follow get_bars_conn () calculate edge node coordinates, and 
-  // for P>2, follow get_tris_conn (), get_quad_conn () for face node coordinates.
+  // for P>1, follow get_bars_vert_conn () calculate edge node coordinates, and 
+  // for P>2, follow get_tris_vert_conn (), get_quad_vert_conn () for face node
+  // coordinates.
   // Interior volume nodes not needed for serendipity elements.
   if (node_coor == nullptr || vert_coor == nullptr
     || get_vert_n() <= 0 || P<=0 || P>3) return false;
@@ -48,7 +49,7 @@ constexpr bool elem::Elem<T,P,F>::get_elem_node_coor (F* node_coor,
   }
   if (P == 1) return true;// First-order elements have only vertex nodes.
   if(get_edge_n() > 0){
-    if(get_bars_conn() == nullptr) return false;
+    if(get_bars_vert_conn() == nullptr) return false;
     for (fmr::Local_int el = 0; el < get_edge_n(); ++el) {
       for (fmr::Local_int i = 0; i < P-1; ++i) {
         const F vert0_weight = (P == 2) ? F(0.5)
@@ -56,21 +57,21 @@ constexpr bool elem::Elem<T,P,F>::get_elem_node_coor (F* node_coor,
         const F vert1_weight = (P == 2) ? F(0.5)
           : ((i == 0) ? F(1.0/3.0) : F(2.0/3.0));
         node_coor[get_vert_n() * 3 + i * 3 + 0]// x-coordinate
-        = vert0_weight * vert_coor[get_bars_conn()[el*2+0]*3 + 0]
-        + vert1_weight * vert_coor[get_bars_conn()[el*2+1]*3 + 0];
+        = vert0_weight * vert_coor[get_bars_vert_conn()[el*2+0]*3 + 0]
+        + vert1_weight * vert_coor[get_bars_vert_conn()[el*2+1]*3 + 0];
         node_coor[get_vert_n() * 3 + i * 3 + 1]// y-coordinate
-        = vert0_weight * vert_coor[get_bars_conn()[el*2+0]*3 + 1]
-        + vert1_weight * vert_coor[get_bars_conn()[el*2+1]*3 + 1];
+        = vert0_weight * vert_coor[get_bars_vert_conn()[el*2+0]*3 + 1]
+        + vert1_weight * vert_coor[get_bars_vert_conn()[el*2+1]*3 + 1];
         node_coor[get_vert_n() * 3 + i * 3 + 2]// z-coordinate
-        = vert0_weight * vert_coor[get_bars_conn()[el*2+0]*3 + 2]
-        + vert1_weight * vert_coor[get_bars_conn()[el*2+1]*3 + 2];
+        = vert0_weight * vert_coor[get_bars_vert_conn()[el*2+0]*3 + 2]
+        + vert1_weight * vert_coor[get_bars_vert_conn()[el*2+1]*3 + 2];
       }
     }
   }
   if (P == 2) return true;// Second-order elements have vertex and edge nodes only.
   // Calculate face node coordinates for P>2
   if (get_tris_n() > 0) {
-    if (get_tris_conn() == nullptr) return false;
+    if (get_tris_vert_conn() == nullptr) return false;
     const F intrp_tri = 1.0/3.0;// only one interpolation weight needed.
     // three nodes for triangular face, one centroid calculation.
     // starting index for face nodes
@@ -81,15 +82,15 @@ constexpr bool elem::Elem<T,P,F>::get_elem_node_coor (F* node_coor,
         for(fmr::Local_int j = 0; j < 3; ++j) {// let the compilre unroll this
           node_coor[start_tris + i * 3 + j]
           = intrp_tri * (
-            vert_coor[get_tris_conn()[el*3+0]*3 + j]
-          + vert_coor[get_tris_conn()[el*3+1]*3 + j]
-          + vert_coor[get_tris_conn()[el*3+2]*3 + j]);
+            vert_coor[get_tris_vert_conn()[el*3+0]*3 + j]
+          + vert_coor[get_tris_vert_conn()[el*3+1]*3 + j]
+          + vert_coor[get_tris_vert_conn()[el*3+2]*3 + j]);
         }
       }
     }
   }
   if (get_quad_n() > 0) {
-    if (get_quad_conn() == nullptr) return false;
+    if (get_quad_vert_conn() == nullptr) return false;
     const F intrp_quad = 0.25;
     const fmr::Local_int start_quad
     = get_vert_n() * 3 + get_edge_n() * (P-1) * 3 + get_tris_n() * 3;
@@ -99,10 +100,10 @@ constexpr bool elem::Elem<T,P,F>::get_elem_node_coor (F* node_coor,
         for (fmr::Local_int j = 0; j < 3; ++j) {
           node_coor[start_quad + i * 3 + j]
           = intrp_quad * (
-            vert_coor[get_quad_conn()[el*4+0]*3 + j]
-          + vert_coor[get_quad_conn()[el*4+1]*3 + j]
-          + vert_coor[get_quad_conn()[el*4+2]*3 + j]
-          + vert_coor[get_quad_conn()[el*4+3]*3 + j]);
+            vert_coor[get_quad_vert_conn()[el*4+0]*3 + j]
+          + vert_coor[get_quad_vert_conn()[el*4+1]*3 + j]
+          + vert_coor[get_quad_vert_conn()[el*4+2]*3 + j]
+          + vert_coor[get_quad_vert_conn()[el*4+3]*3 + j]);
         }
       }
     }

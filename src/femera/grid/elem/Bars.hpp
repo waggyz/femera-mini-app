@@ -28,17 +28,25 @@ private:// Everything should be private, accessible through the Elem interface.
   // Arrays & pointers ========================================================
   // vert_conn is trivial: {0,...,get_vert_n-1}
   // elem_conn is trivial: {0,...,get_elem_n()-1}.
+  //TODO the following are vertex connectivity arrays only.
+  //TODO rename them as bars_vert_conn, tris_vert_conn, quad_vert_conn
+  static constexpr fmr::Local_int bars_vert_conn [Bars::vert_n] = {0,1};
+  static constexpr fmr::Local_int* tris_vert_conn = nullptr;
+  static constexpr fmr::Local_int* quad_vert_conn = nullptr;
+#if 1
+  //TODO FIXME Old compatibility functions for connectivity arrays.
   static constexpr fmr::Local_int bars_conn [Bars::vert_n] = {0,1};
   static constexpr fmr::Local_int* tris_conn = nullptr;
   static constexpr fmr::Local_int* quad_conn = nullptr;
+#endif
   //
-  template <typename F=fmr::Geom_float> static constexpr
-  F vert_coor [vert_n * 3u]// transposed coor_vert (vert major, dims minor)
+  template <typename F> static constexpr
+  F vert_coor [vert_n * 3u]// transpose coor_vert (vert major, dims minor)
     = {           // vertex                      //
     F(0.0), F(0.0), F(0.0),// 0       0-------1           //
     F(1.0), F(0.0), F(0.0) // 1                  o--x     //
   };
-  template <typename F=fmr::Geom_float> static constexpr
+  template <typename F> static constexpr
   F coor_vert [vert_n * 3u]// transposed vert_coor (dims major, vert minor)
     = {
     F(0.0), F(1.0),
@@ -66,7 +74,7 @@ private:// Everything should be private, accessible through the Elem interface.
     edge node 1: x = F23*vert0 + F13*vert1
     edge node 2: x = F13*vert0 + F23*vert1
     // Follow bars_conn for edge node placement,
-    // then, follow tris_conn and quad_conn for face node placement.
+    // then, follow tris_vert_conn and quad_vert_conn for face node placement.
     #undef F13
     #undef F23
   }; */

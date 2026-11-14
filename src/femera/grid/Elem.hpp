@@ -70,12 +70,22 @@ class Elem {//TODO consider pulling P out of the template parameters.
   //     get_node_conn () is trivial = {0,1,...,get_node_n()-1}
   //
   //NOTE the following are all only vertex connectivity (p==1) arrays.
+
+  static constexpr const fmr::Local_int* get_bars_vert_conn () noexcept {
+    return T::bars_vert_conn;}
+  static constexpr const fmr::Local_int* get_tris_vert_conn () noexcept {
+    return T::tris_vert_conn;}
+  static constexpr const fmr::Local_int* get_quad_vert_conn () noexcept {
+    return T::quad_vert_conn;}
+#if 1
+//TODO FIXME old compatibility functions._conn, get_quad_conn
   static constexpr const fmr::Local_int* get_bars_conn () noexcept {
     return T::bars_conn;}
   static constexpr const fmr::Local_int* get_tris_conn () noexcept {
     return T::tris_conn;}
   static constexpr const fmr::Local_int* get_quad_conn () noexcept {
     return T::quad_conn;}
+#endif
   //
   // Non-trivial constexpr scalar member functions ----------------------------
   static constexpr fmr::Local_int get_face_n () noexcept;
