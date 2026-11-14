@@ -41,12 +41,6 @@ class Elem {//TODO consider pulling P out of the template parameters.
   Members are constexpr so that everything is kept thread-local to the instance
   that created it.
   */
-  //TODO consider using P == 0 for non-serendipity elements.
-  //TODO one more Elem template parameter for integration rule <R>?
-  //TODO Consider enums for element type, order (# nodes), integration rule.
-  //TODO Change to template <class T, Elem_args A, typename F?
-  //     But, does this allow enable_if on the struct content? - YES
-  //
   public:
   // Simple constexpr accessors -----------------------------------------------
   // constexpr methods are implicitly inline
@@ -65,32 +59,46 @@ class Elem {//TODO consider pulling P out of the template parameters.
   static constexpr F get_face_a () noexcept {return F(T::face_a);}
   static constexpr F get_elem_v () noexcept {return F(T::elem_v);}
   //
+  // Non-trivial constexpr scalar member functions ----------------------------
+  static constexpr fmr::Local_int get_face_n () noexcept;
+  static constexpr fmr::Local_int get_node_n () noexcept;
+  //
   // Array constexpr pointers =================================================
+  // Natural element coordinates
+  //NOTE these currently return 3D coordinates, regardless of element dimension.
+  static constexpr bool get_elem_node_coor (F* node_coor,
+    const F* vert_coor = T::template vert_coor<F> ) noexcept;
+  //
+  static constexpr const F* get_elem_vert_coor ()// vert major, dims minor
+  noexcept { return T::template vert_coor<F>;// transposed coor_vert
+  }
+  static constexpr const F* get_elem_coor_vert ()// dims major, vert minor
+  noexcept { return T::template coor_vert<F>;// (transposed vert_coor)
+  }
+  // Element constituent connectivity
   //NOTE get_vert_conn () is trivial = {0,1,...,get_vert_n()-1}
   //     get_node_conn () is trivial = {0,1,...,get_node_n()-1}
   //
   //NOTE the following are all only vertex connectivity (p==1) arrays.
-
   static constexpr const fmr::Local_int* get_bars_vert_conn () noexcept {
     return T::bars_vert_conn;}
   static constexpr const fmr::Local_int* get_tris_vert_conn () noexcept {
     return T::tris_vert_conn;}
   static constexpr const fmr::Local_int* get_quad_vert_conn () noexcept {
     return T::quad_vert_conn;}
-#if 1
-//TODO FIXME old compatibility functions._conn, get_quad_conn
-  static constexpr const fmr::Local_int* get_bars_conn () noexcept {
-    return T::bars_conn;}
-  static constexpr const fmr::Local_int* get_tris_conn () noexcept {
-    return T::tris_conn;}
-  static constexpr const fmr::Local_int* get_quad_conn () noexcept {
-    return T::quad_conn;}
+  //
+  // Element quality calculations ---------------------------------------------
+#if 0
+  static constexpr F get_edge_qual (
+    const F* node_coor, const fmr::Dim_int dims=3) noexcept;
+  static constexpr F get_skew_qual (
+    const F* node_coor, const fmr::Dim_int dims=3) noexcept;
 #endif
+  static constexpr F get_delt_qual (
+    const F* node_coor, const fmr::Dim_int dims=3, const bool is_squared=false)
+  noexcept;
   //
-  // Non-trivial constexpr scalar member functions ----------------------------
-  static constexpr fmr::Local_int get_face_n () noexcept;
-  static constexpr fmr::Local_int get_node_n () noexcept;
-  //
+  // Jacobian and polynomial sizes ============================================
   static constexpr
   fmr::Local_int jacs_size (
     const fmr::Local_int intp_n=1u, const fmr::Dim_int sims_d=3u)
@@ -104,29 +112,6 @@ class Elem {//TODO consider pulling P out of the template parameters.
   static constexpr
   fmr::Local_int get_poly_grad_size (
     const fmr::Local_int intp_n=1, const fmr::Dim_int sims_d=3u) noexcept;
-  //
-  // Natural element coordinates ----------------------------------------------
-  //NOTE these currently return 3D coordinates, regardless of element dimension.
-  //
-  static constexpr bool get_elem_node_coor (F* node_coor,
-    const F* vert_coor = T::template vert_coor<F> ) noexcept;
-  //
-  static constexpr const F* get_elem_vert_coor () noexcept {
-    return T::template vert_coor<F>;
-  }
-  static constexpr const F* get_elem_coor_vert () noexcept {
-    return T::template coor_vert<F>;
-  }
-  // Element quality calculations ---------------------------------------------
-#if 0
-  static constexpr F get_edge_qual (
-    const F* node_coor, const fmr::Dim_int dims=3) noexcept;
-  static constexpr F get_skew_qual (
-    const F* node_coor, const fmr::Dim_int dims=3) noexcept;
-#endif
-  static constexpr F get_delt_qual (
-    const F* node_coor, const fmr::Dim_int dims=3, const bool is_squared=false)
-  noexcept;
   //
 };//end Elem
 

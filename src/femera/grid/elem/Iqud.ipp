@@ -7,9 +7,9 @@ namespace femera { namespace grid { namespace elem {
 C++11 requires redundant declaration/definition for constexpr arrays to 
 reference them later.
 */
-//constexpr fmr::Local_int Iqud::tris_conn [];
-constexpr fmr::Local_int Iqud::quad_conn [];
-constexpr fmr::Local_int Iqud::bars_conn [];
+//constexpr fmr::Local_int Iqud::tris_vert_conn [];
+constexpr fmr::Local_int Iqud::quad_vert_conn [];
+constexpr fmr::Local_int Iqud::bars_vert_conn [];
 constexpr fmr::Geom_float Iqud::vert_coor [];
 constexpr fmr::Geom_float Iqud::coor_vert [];
 #endif

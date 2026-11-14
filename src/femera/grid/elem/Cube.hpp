@@ -22,14 +22,14 @@ public:
   //static constexpr
   //fmr::Local_int vert_conn [vert_n] = {0,1,2,4};
   static constexpr
-  fmr::Local_int bars_conn [Elem<Bars>::get_vert_n () * edge_n]
+  fmr::Local_int bars_vert_conn [Elem<Bars>::get_vert_n () * edge_n]
     = {
     0,1, 1,2, 2,3, 3,0,
     4,5, 5,6, 6,7, 7,4,
     0,4, 1,5, 2,6, 3,7
   };
-  static constexpr fmr::Local_int* tris_conn = nullptr;
-  static constexpr fmr::Local_int  quad_conn [Quad::vert_n * quad_n]
+  static constexpr fmr::Local_int* tris_vert_conn = nullptr;
+  static constexpr fmr::Local_int  quad_vert_conn [Quad::vert_n * quad_n]
     = { 
     0,1,2,3,
     7,6,5,4,

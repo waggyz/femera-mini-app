@@ -182,10 +182,10 @@ TEST( GridElemTets, IntgWgtsSumVol11 ){
 //-----------------------------
 //NOTE Google test fails report undefined reference and don't link.
 TEST( GridElemTets, ArrayAccessInline ){
-  EXPECT_EQ( test_tet1.get_bars_conn ()[0], 0 );
-  EXPECT_EQ( test_tet1.get_bars_conn ()[1], 1 );
+  EXPECT_EQ( test_tet1.get_bars_vert_conn ()[0], 0 );
+  EXPECT_EQ( test_tet1.get_bars_vert_conn ()[1], 1 );
 
-  auto vert1 = test_tet1.get_bars_conn ();
+  auto vert1 = test_tet1.get_bars_vert_conn ();
   EXPECT_EQ( vert1 [0], 0 );
   EXPECT_EQ( vert1 [1], 1 );
 }
@@ -226,21 +226,21 @@ TEST( GridCellElemTet, FaceNormalVerts ){
 }
 TEST( GridCellElemTet, FaceNormalTris ){
   EXPECT_EQ( tri3_norm_str (
-    &Tets::vert_coor [3* Tets::tris_conn [0]],
-    &Tets::vert_coor [3* Tets::tris_conn [1]],
-    &Tets::vert_coor [3* Tets::tris_conn [2]]), "+z" );
+    &Tets::vert_coor [3* Tets::tris_vert_conn [0]],
+    &Tets::vert_coor [3* Tets::tris_vert_conn [1]],
+    &Tets::vert_coor [3* Tets::tris_vert_conn [2]]), "+z" );
   EXPECT_EQ( tri3_norm_str (
-    &Tets::vert_coor [3* Tets::tris_conn [3]],
-    &Tets::vert_coor [3* Tets::tris_conn [4]],
-    &Tets::vert_coor [3* Tets::tris_conn [5]]), "+y" );
+    &Tets::vert_coor [3* Tets::tris_vert_conn [3]],
+    &Tets::vert_coor [3* Tets::tris_vert_conn [4]],
+    &Tets::vert_coor [3* Tets::tris_vert_conn [5]]), "+y" );
   EXPECT_EQ( tri3_norm_str (
-    &Tets::vert_coor [3* Tets::tris_conn [6]],
-    &Tets::vert_coor [3* Tets::tris_conn [7]],
-    &Tets::vert_coor [3* Tets::tris_conn [8]]), "+x" );
+    &Tets::vert_coor [3* Tets::tris_vert_conn [6]],
+    &Tets::vert_coor [3* Tets::tris_vert_conn [7]],
+    &Tets::vert_coor [3* Tets::tris_vert_conn [8]]), "+x" );
   EXPECT_EQ( tri3_norm_str (
-    &Tets::vert_coor [3* Tets::tris_conn [ 9]],
-    &Tets::vert_coor [3* Tets::tris_conn [10]],
-    &Tets::vert_coor [3* Tets::tris_conn [11]]),
+    &Tets::vert_coor [3* Tets::tris_vert_conn [ 9]],
+    &Tets::vert_coor [3* Tets::tris_vert_conn [10]],
+    &Tets::vert_coor [3* Tets::tris_vert_conn [11]]),
     "[-0.577350, -0.577350, -0.577350]" );
 }
 

@@ -9,9 +9,9 @@ reference them later.
 #if 0
 constexpr fmr::Local_int Tets::vols_n;// optional for basic types
 
-constexpr fmr::Local_int Tets::tris_conn [];
-//constexpr fmr::Local_int Tets::quad_conn [];
-constexpr fmr::Local_int Tets::bars_conn [];
+constexpr fmr::Local_int Tets::tris_vert_conn [];
+//constexpr fmr::Local_int Tets::quad_vert_conn [];
+constexpr fmr::Local_int Tets::bars_vert_conn [];
 constexpr fmr::Geom_float Tets::vert_coor [];
 constexpr fmr::Geom_float Tets::coor_vert [];
 constexpr fmr::Geom_float Tets::coor_tet10 [];

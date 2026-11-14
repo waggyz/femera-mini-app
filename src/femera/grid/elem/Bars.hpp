@@ -12,6 +12,7 @@ class Bars final : public Elem<Bars> {
 private:// Everything should be private, accessible through the Elem interface.
 // Scalars ====================================================================
   static constexpr fmr::math::Poly poly_type = fmr::math::Poly::Serendipity;
+  //NOTE same as fmr::math::Poly::Full for this element.
   //
   static constexpr fmr::Dim_int   elem_d = 1;
   //
@@ -28,26 +29,20 @@ private:// Everything should be private, accessible through the Elem interface.
   // Arrays & pointers ========================================================
   // vert_conn is trivial: {0,...,get_vert_n-1}
   // elem_conn is trivial: {0,...,get_elem_n()-1}.
-  //TODO the following are vertex connectivity arrays only.
-  //TODO rename them as bars_vert_conn, tris_vert_conn, quad_vert_conn
-  static constexpr fmr::Local_int bars_vert_conn [Bars::vert_n] = {0,1};
+  //
+  //NOTE the following are vertex connectivity arrays only.
+  static constexpr fmr::Local_int  bars_vert_conn [Bars::vert_n] = {0,1};
   static constexpr fmr::Local_int* tris_vert_conn = nullptr;
   static constexpr fmr::Local_int* quad_vert_conn = nullptr;
-#if 1
-  //TODO FIXME Old compatibility functions for connectivity arrays.
-  static constexpr fmr::Local_int bars_conn [Bars::vert_n] = {0,1};
-  static constexpr fmr::Local_int* tris_conn = nullptr;
-  static constexpr fmr::Local_int* quad_conn = nullptr;
-#endif
   //
   template <typename F> static constexpr
-  F vert_coor [vert_n * 3u]// transpose coor_vert (vert major, dims minor)
+  F vert_coor [vert_n * 3u]// vert major, dims minor (transposed coor_vert)
     = {           // vertex                      //
     F(0.0), F(0.0), F(0.0),// 0       0-------1           //
     F(1.0), F(0.0), F(0.0) // 1                  o--x     //
   };
   template <typename F> static constexpr
-  F coor_vert [vert_n * 3u]// transposed vert_coor (dims major, vert minor)
+  F coor_vert [vert_n * 3u]// dims major, vert minor (transposed vert_coor)
     = {
     F(0.0), F(1.0),
     F(0.0), F(0.0),
@@ -61,7 +56,7 @@ private:// Everything should be private, accessible through the Elem interface.
     1.0, 0.0, 0.0 // 2
     edge node 1: x = 0.5*vert0 + 0.5*vert1
     //                  or node 2 = 0.5*vert0 + 0.5*vert1
-    // Follow bars_conn for edge node placement.
+    // Follow bars_vert_conn for edge node placement.
   };
   fmr::Geom_float node_coor_p3 [(vert_n+2) * sims_d]// transposed coor_node_p3
   #define F13 F(1.0)/F(3)
@@ -73,7 +68,7 @@ private:// Everything should be private, accessible through the Elem interface.
     1.0, 0.0, 0.0 // 3
     edge node 1: x = F23*vert0 + F13*vert1
     edge node 2: x = F13*vert0 + F23*vert1
-    // Follow bars_conn for edge node placement,
+    // Follow bars_vert_conn for edge node placement,
     // then, follow tris_vert_conn and quad_vert_conn for face node placement.
     #undef F13
     #undef F23
