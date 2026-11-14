@@ -16,6 +16,13 @@ class Tris; class Quad;
 class Tets; class Prmd; class Wdge; class Cube;
 //class User;//TODO user element
 #endif
+// Pattern offsets are measured in tiles, not nodes or physical coordinates.
+struct TilePattern {
+  fmr::Local_int variant;
+  fmr::Local_int offset_x;
+  fmr::Local_int offset_y;
+};
+
 template <class T, typename fmr::Dim_int P=1, typename F=fmr::Geom_float>
 class Tile {
   /*
@@ -26,6 +33,32 @@ class Tile {
   Some higher-order element tiled grids have "holes" that make them incompatible
   with regular cartesian grids.
   */
+  private:
+  template <class S>
+  static constexpr auto calc_part_elem_n (
+    const fmr::Local_int* dims, int) noexcept
+    -> decltype(S::calc_tile_part_elem_n (dims)) {
+    return S::calc_tile_part_elem_n (dims);
+  }
+  template <class S>
+  static constexpr fmr::Local_int calc_part_elem_n (
+    const fmr::Local_int* dims, long) noexcept {
+    return S::tile_elem_n
+    * ((dims[0] > 0 && S::tile_d > 0) ? dims[0] : 0)
+    * ((dims[1] > 0 && S::tile_d > 1) ? dims[1] : 1)
+    * ((dims[2] > 0 && S::tile_d > 2) ? dims[2] : 1);
+  }
+  template <class S>
+  static constexpr auto calc_elem_node_n (int) noexcept
+    -> decltype(S::calc_tile_elem_node_n (P)) {
+    return S::calc_tile_elem_node_n (P);
+  }
+  template <class S>
+  static constexpr fmr::Local_int calc_elem_node_n (long) noexcept {
+    return S::tile_vert_n + (P - 1) * S::tile_edge_n
+      + (P == 3 ? S::tile_vols_n * (S::tile_tris_n + S::tile_quad_n) : 0);
+  }
+
   public:
   // Simple constexpr accessors -----------------------------------------------
   // constexpr functions are implicitly inline
@@ -58,15 +91,14 @@ class Tile {
   static constexpr const fmr::Local_int* get_quad_vert_conn () noexcept {
     return T::quad_vert_conn; }
   //
-  static constexpr fmr::Local_int get_tile_elem_node_n () noexcept;
+  static constexpr fmr::Local_int get_tile_elem_node_n () noexcept {
+    return calc_elem_node_n<T> (0);
+  }
   //
   static constexpr fmr::Local_int get_tile_part_elem_n (
     const fmr::Local_int* part_elem_dims)// size 3 for 1D,2D,3D elements
   noexcept {
-    return T::tile_elem_n
-    * ((part_elem_dims[0] > 0 && T::elem_d > 0) ? part_elem_dims[0] : 0)
-    * ((part_elem_dims[1] > 0 && T::elem_d > 1) ? part_elem_dims[1] : 1)
-    * ((part_elem_dims[2] > 0 && T::elem_d > 2) ? part_elem_dims[2] : 1);
+    return calc_part_elem_n<T> (part_elem_dims, 0);
   }
   static constexpr fmr::Local_int get_tile_part_node_n (
     const fmr::Local_int* part_elem_dims)
@@ -82,6 +114,12 @@ class Tile {
   ) noexcept {
     return T::calc_tile_part_node_coor (
       coor, node_i, P, part_elem_dims, tile_size, part_orig);
+  }
+  static constexpr bool get_tile_part_node_coor (F* coor,
+    const fmr::Local_int node_i, const fmr::Local_int* part_elem_dims,
+    const F* tile_size, const F* part_orig, const TilePattern pattern) noexcept {
+    return T::calc_tile_part_node_coor (
+      coor, node_i, P, part_elem_dims, tile_size, part_orig, pattern);
   }
   //NOTE node_coor, part_node_dims, tile_size, part_orig bounds checked by caller.
   // Orientation of the tile is specified by tile_dirs,
@@ -115,6 +153,11 @@ class Tile {
     noexcept {
       return T::calc_tile_vert_conn (conn, tile_i, part_size, p);
     }
+  static constexpr bool get_tile_vert_conn (fmr::Local_int* conn,
+    const fmr::Local_int tile_i, const fmr::Local_int* part_size,
+    const TilePattern pattern, const fmr::Dim_int p=P) noexcept {
+    return T::calc_tile_vert_conn (conn, tile_i, part_size, p, pattern);
+  }
   static constexpr bool get_tile_vert_conn_prdc (fmr::Local_int* conn,// Periodic BCs
     //NOTE This is for a periodic partition, not an overall periodic grid.
     const fmr::Local_int tile_i,
@@ -124,6 +167,11 @@ class Tile {
     noexcept {
       return T::calc_tile_vert_conn_prdc (conn, tile_i, part_size, p);
     }
+  static constexpr bool get_tile_vert_conn_prdc (fmr::Local_int* conn,
+    const fmr::Local_int tile_i, const fmr::Local_int* part_size,
+    const TilePattern pattern, const fmr::Dim_int p=P) noexcept {
+    return T::calc_tile_vert_conn_prdc (conn, tile_i, part_size, p, pattern);
+  }
   //
   static constexpr bool get_tile_node_conn (fmr::Local_int* conn,
     const fmr::Local_int tile_i,
@@ -133,6 +181,11 @@ class Tile {
     noexcept {
       return T::calc_tile_node_conn (conn, tile_i, part_size, p);
     }
+  static constexpr bool get_tile_node_conn (fmr::Local_int* conn,
+    const fmr::Local_int tile_i, const fmr::Local_int* part_size,
+    const TilePattern pattern, const fmr::Dim_int p=P) noexcept {
+    return T::calc_tile_node_conn (conn, tile_i, part_size, p, pattern);
+  }
   //
   static constexpr bool get_tile_vert_coor(F* vert_coor,
     const fmr::Local_int vert_i, const fmr::Local_int vert_n,
@@ -141,6 +194,11 @@ class Tile {
     noexcept {
       return T::calc_tile_vert_coor (vert_coor, vert_i, vert_n, tile_size, part_orig);
     }
+  static constexpr bool get_tile_vert_coor(F* vert_coor,
+    const fmr::Local_int vert_i, const fmr::Local_int* part_size,
+    const F* tile_size, const F* part_orig = nullptr) noexcept {
+    return T::calc_tile_vert_coor (vert_coor, vert_i, part_size, tile_size, part_orig);
+  }
   //
   static constexpr bool get_tile_elem_vert_coor(//TODO need: 
     F* vert_coor,// size: vert_n * sims_d
@@ -158,6 +216,20 @@ class Tile {
     noexcept {
       return T::calc_tile_elem_coor_vert (vert_coor, elem_i, elem_n, tile_size, part_orig);
     }
+  static constexpr bool get_tile_elem_vert_coor(F* vert_coor,
+    const fmr::Local_int elem_i, const fmr::Local_int* part_size,
+    const F* tile_size, const F* part_orig = nullptr,
+    const TilePattern pattern = {0, 0, 0}) noexcept {
+    return T::calc_tile_elem_vert_coor (
+      vert_coor, elem_i, part_size, tile_size, part_orig, pattern);
+  }
+  static constexpr bool get_tile_elem_coor_vert(F* vert_coor,
+    const fmr::Local_int elem_i, const fmr::Local_int* part_size,
+    const F* tile_size, const F* part_orig = nullptr,
+    const TilePattern pattern = {0, 0, 0}) noexcept {
+    return T::calc_tile_elem_coor_vert (
+      vert_coor, elem_i, part_size, tile_size, part_orig, pattern);
+  }
 };//end Elem
 
 } } }//end femera::grid::tile:: namespace
@@ -166,4 +238,3 @@ class Tile {
 
 #endif
 //end FEMERA_HAS_GRID_TILE_HPP
-

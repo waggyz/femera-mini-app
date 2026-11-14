@@ -43,49 +43,66 @@ private:
   static constexpr fmr::Local_int* tris_vert_conn = nullptr;
   static constexpr fmr::Local_int* quad_vert_conn = nullptr;
  /*
-  Tiling variants:
-  0 Standard (canonical) tiling: consecutive elements along the bar (left to right) with
-    the diagonal element from bottom left to top right.
-  1 Reversed tiling: consecutive elements along the bar (left to right) with
-    the diagonal element from bottom right to top left.
-  2 Alternating tiling: consecutive elements along the bar, alternating between
-    standard and reversed connectivity.
-  3 Alternating like 2, but starting with the alternate, instead of canaonical,
-    tile.
-
-  - These are not particularly useful for modelling.
-  - They are useful for prototyping and testing tiling variants in higher dimensions.
+  Partition edges are numbered once, in row-major horizontal, vertical, then
+  diagonal blocks. Horizontal and vertical edges point along positive axes;
+  diagonals point 0->2 (canonical) or 1->3 (alternate). Vertex node IDs
+  are row-major; interior IDs follow in edge-major order, from endpoint 0.
+  Variant 0 is canonical, 1 alternate, 2 checkerboard with canonical at
+  even global tile parity, and 3 its complement. TilePattern provides the
+  global tile offset. Invalid inputs return false without writing outputs.
+  Periodic vertex connectivity identifies both opposite boundary pairs, with
+  row-major nx*ny vertex IDs, independent of p. It does not merge partition
+  edges or provide periodic higher-order node IDs. Odd periodic extents can
+  have a non-alternating checkerboard seam.
+  Coordinate calls use partition dimensions (not only a vertex/element count).
+  Tiles lie in the XY plane: tile_size[0:2] scales x and y, tile_size[2] is
+  unused, and a null origin is (0,0,0). Caller supplies valid buffers.
   */
+  // Partition dimensions count tiles. Counts require positive order and
+  // dimensions small enough that all intermediate results fit in Local_int.
+  static constexpr fmr::Local_int calc_tile_elem_node_n (
+    const fmr::Dim_int elem_p) noexcept {
+    return elem_p + 1;
+  }
+  static constexpr fmr::Local_int calc_tile_part_elem_n (
+    const fmr::Local_int* dims) noexcept {
+    const fmr::Local_int nx = dims[0], ny = dims[1];
+    return nx == 0 || ny == 0 ? 0
+      : nx * (ny + 1) + (nx + 1) * ny + nx * ny;
+  }
   static constexpr fmr::Local_int calc_tile_part_node_n (
-    const fmr::Dim_int elem_p, const fmr::Local_int* part_elem_dims)
-  noexcept{ return part_elem_dims[0] * elem_p  + 1;
+    const fmr::Dim_int elem_p, const fmr::Local_int* dims) noexcept {
+    const fmr::Local_int nx = dims[0], ny = dims[1];
+    return nx == 0 || ny == 0 ? 0
+      : (nx + 1) * (ny + 1)
+        + (elem_p - 1) * calc_tile_part_elem_n (dims);
   }
   static constexpr bool calc_tile_vert_conn (fmr::Local_int conn[2],
     fmr::Local_int tile_i, const fmr::Local_int* part_size,
-    fmr::Dim_int elem_p)
+    fmr::Dim_int elem_p, TilePattern pattern = {0, 0, 0})
   noexcept;
   static constexpr bool calc_tile_vert_conn_prdc (fmr::Local_int conn[2],
     fmr::Local_int tile_i, const fmr::Local_int* part_size,
-    fmr::Dim_int elem_p)
+    fmr::Dim_int elem_p, TilePattern pattern = {0, 0, 0})
   noexcept;
   static constexpr bool calc_tile_node_conn (fmr::Local_int* conn,
     fmr::Local_int tile_i, const fmr::Local_int* part_size,
-    fmr::Dim_int elem_p) noexcept;
+    fmr::Dim_int elem_p, TilePattern pattern = {0, 0, 0}) noexcept;
   //
   // Vertex coordinates -------------------------------------------------------
   template <typename F=fmr::Geom_float>
   static constexpr bool calc_tile_vert_coor (F coor[3],
-    fmr::Local_int vert_i, fmr::Local_int vert_n,
+    fmr::Local_int vert_i, const fmr::Local_int* part_size,
     const F tile_size[3], const F part_orig[3]) noexcept;
   //
   template <typename F=fmr::Geom_float>
   static constexpr bool calc_tile_elem_vert_coor (F coor[6],
-    fmr::Local_int elem_i, fmr::Local_int elem_n,
-    const F tile_size[3], const F part_orig[3]) noexcept;
+    fmr::Local_int elem_i, const fmr::Local_int* part_size,
+    const F tile_size[3], const F part_orig[3], TilePattern pattern) noexcept;
   template <typename F=fmr::Geom_float>
   static constexpr bool calc_tile_elem_coor_vert (F coor[6],
-    fmr::Local_int elem_i, fmr::Local_int elem_n,
-    const F tile_size[3], const F part_orig[3]) noexcept;
+    fmr::Local_int elem_i, const fmr::Local_int* part_size,
+    const F tile_size[3], const F part_orig[3], TilePattern pattern) noexcept;
   //
   // Node coordinates ---------------------------------------------------------
   template <typename F=fmr::Geom_float>
@@ -93,7 +110,8 @@ private:
     const fmr::Local_int node_i,
     const fmr::Dim_int elem_p,
     const fmr::Local_int* part_elem_dims,
-    const F tile_size[3], const F part_orig[3]
+    const F tile_size[3], const F part_orig[3],
+    TilePattern pattern = {0, 0, 0}
   ) noexcept;
   //
 };//end class Bar5
