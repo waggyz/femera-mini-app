@@ -45,8 +45,11 @@ private:
  /*
   Partition edges are numbered once, in row-major horizontal, vertical, then
   diagonal blocks. Horizontal and vertical edges point along positive axes;
-  diagonals point 0->2 (canonical) or 1->3 (alternate). Vertex node IDs
-  are row-major; interior IDs follow in edge-major order, from endpoint 0.
+  diagonals point 0->2 (canonical) or 1->3 (alternate). Vertex connectivity
+  uses row-major coarse-grid vertex IDs for every order. P2 node connectivity
+  instead uses row-major IDs on the (2*nx+1) by (2*ny+1) refined grid.
+  For other orders, node IDs use row-major vertices followed by edge-major
+  interior nodes, ordered from endpoint 0.
   Variant 0 is canonical, 1 alternate, 2 checkerboard with canonical at
   even global tile parity, and 3 its complement. TilePattern provides the
   global tile offset. Invalid inputs return false without writing outputs.

@@ -41,6 +41,12 @@ constexpr bool bar5_connectivity_constexpr () {
     && conn[0] == 1 && conn[1] == 4 && conn[2] == 16 && conn[3] == 17;
 }
 static_assert (bar5_connectivity_constexpr (), "Bar5 connectivity must be constexpr");
+constexpr bool bar5_quadratic_connectivity_constexpr () {
+  fmr::Local_int conn[3] = {};
+  return Tile<Bar5, 2>::get_tile_node_conn (conn, 8, bar5_test_dims, {1,0,0})
+    && conn[0] == 4 && conn[1] == 12 && conn[2] == 8;
+}
+static_assert (bar5_quadratic_connectivity_constexpr (), "P2 FD connectivity must be constexpr");
 constexpr bool bar5_coordinates_constexpr () {
   const double size[3] = {2, 3, 0};
   double coor[3] = {};
@@ -168,14 +174,37 @@ TEST( GridTileBar5, HigherOrderUniqueEdgeNodes ){
   ASSERT_TRUE( (Tile<Bar5, 3>::get_tile_node_conn (conn, 5, dims)) );
   for (unsigned j = 0; j < 4; ++j) EXPECT_EQ( conn[j], expected[j] );
   ASSERT_TRUE( (Tile<Bar5, 2>::get_tile_node_conn (conn, 8, dims, {1,0,0})) );
-  EXPECT_EQ( conn[0], 2 );
-  EXPECT_EQ( conn[1], 4 );
-  EXPECT_EQ( conn[2], 14 );
+  EXPECT_EQ( conn[0], 4 );
+  EXPECT_EQ( conn[1], 12 );
+  EXPECT_EQ( conn[2], 8 );
   ASSERT_TRUE( (Tile<Bar5, 2>::get_tile_node_conn (conn, 8, dims, {1,0,0}, 3)) );
   EXPECT_EQ( conn[0], 2 );
   EXPECT_EQ( conn[1], 4 );
   EXPECT_EQ( conn[2], 22 );
   EXPECT_EQ( conn[3], 23 );
+}
+
+TEST( GridTileBar5, QuadraticFDNodeConnectivity ){
+  const fmr::Local_int dims[3] = {2,2,0};
+  const fmr::Local_int edge_indices[] = {0, 4, 6, 8, 12, 13};
+  const fmr::Local_int canonical[][3] = {
+    {0,2,1}, {20,22,21}, {0,10,5}, {4,14,9}, {0,12,6}, {2,14,8}
+  };
+  const fmr::Local_int alternate[][3] = {
+    {0,2,1}, {20,22,21}, {0,10,5}, {4,14,9}, {2,10,6}, {4,12,8}
+  };
+  for (unsigned i = 0; i < 6; ++i) {
+    fmr::Local_int nodes[3] = {};
+    ASSERT_TRUE( (Tile<Bar5, 2>::get_tile_node_conn (nodes, edge_indices[i], dims, {0,0,0})) );
+    for (unsigned j = 0; j < 3; ++j) EXPECT_EQ( nodes[j], canonical[i][j] );
+    ASSERT_TRUE( (Tile<Bar5, 2>::get_tile_node_conn (nodes, edge_indices[i], dims, {1,0,0})) );
+    for (unsigned j = 0; j < 3; ++j) EXPECT_EQ( nodes[j], alternate[i][j] );
+  }
+  fmr::Local_int vertices[2] = {}, nodes[3] = {};
+  ASSERT_TRUE( (Tile<Bar5, 2>::get_tile_vert_conn (vertices, 0, dims)) );
+  EXPECT_EQ( vertices[0], 0 ); EXPECT_EQ( vertices[1], 1 );
+  ASSERT_TRUE( (Tile<Bar5, 3>::get_tile_node_conn (nodes, 0, dims, {0,0,0}, 2)) );
+  EXPECT_EQ( nodes[0], 0 ); EXPECT_EQ( nodes[1], 2 ); EXPECT_EQ( nodes[2], 1 );
 }
 
 TEST( GridTileBar5, UniqueEdgesAndHigherOrderNodeCoverage ){
@@ -240,6 +269,8 @@ TEST( GridTileBar5, PeriodicVertexConnectivity ){
   EXPECT_EQ( conn[0], 3 ); EXPECT_EQ( conn[1], 0 );
   ASSERT_TRUE( (Tile<Bar5, 3>::get_tile_vert_conn_prdc (conn, 15, dims, {1,0,0})) );
   EXPECT_EQ( conn[0], 2 ); EXPECT_EQ( conn[1], 1 );
+  ASSERT_TRUE( (Tile<Bar5, 2>::get_tile_vert_conn_prdc (conn, 15, dims, {1,0,0})) );
+  EXPECT_EQ( conn[0], 2 ); EXPECT_EQ( conn[1], 1 );
   const fmr::Local_int one[3] = {1, 1, 0};
   ASSERT_TRUE( Tile<Bar5>::get_tile_vert_conn_prdc (conn, 4, one) );
   EXPECT_EQ( conn[0], 0 ); EXPECT_EQ( conn[1], 0 );
@@ -276,7 +307,7 @@ TEST( GridTileBar5, NodeCoordinatesAndLayouts ){
   const fmr::Local_int dims[3] = {2, 1, 0};
   const double size[3] = {2,3,7}, origin[3] = {10,20,30};
   double coor[3] = {}, aos[6] = {}, soa[6] = {};
-  ASSERT_TRUE( (Tile<Bar5, 2>::get_tile_part_node_coor (coor, 14, dims, size, origin, {1,0,0})) );
+  ASSERT_TRUE( (Tile<Bar5, 2>::get_tile_part_node_coor (coor, 8, dims, size, origin, {1,0,0})) );
   EXPECT_DOUBLE_EQ( coor[0], 13 ); EXPECT_DOUBLE_EQ( coor[1], 21.5 );
   EXPECT_DOUBLE_EQ( coor[2], 30 );
   ASSERT_TRUE( (Tile<Bar5>::get_tile_elem_vert_coor (aos, 8, dims, size, origin, {1,0,0})) );
@@ -322,6 +353,50 @@ TEST( GridTileBar5, AllOrdersAndPatternsCoordinateConsistency ){
   check_bar5_node_geometry<1> ();
   check_bar5_node_geometry<2> ();
   check_bar5_node_geometry<3> ();
+}
+
+TEST( GridTileBar5, QuadraticRectangularFDNumberingAndCoverage ){
+  const fmr::Local_int dimensions[][3] = {{3,2,0}, {1,3,0}};
+  const double size[3] = {2,4,99}, origin[3] = {10,20,30};
+  for (const auto& dims : dimensions) {
+    const fmr::Local_int width = 2 * dims[0] + 1;
+    const fmr::Local_int node_n = width * (2 * dims[1] + 1);
+    for (fmr::Local_int variant = 0; variant < 4; ++variant) {
+      for (fmr::Local_int offset = 0; offset < 2; ++offset) {
+        const TilePattern pattern = {variant,offset,1};
+        bool seen[35] = {};
+        ASSERT_LE( node_n, 35 );
+        EXPECT_EQ( (Tile<Bar5, 2>::get_tile_part_node_n (dims)), node_n );
+        for (fmr::Local_int i = 0; i < node_n; ++i) {
+          double coor[3] = {};
+          ASSERT_TRUE( (Tile<Bar5, 2>::get_tile_part_node_coor
+            (coor, i, dims, size, origin, pattern)) );
+          EXPECT_DOUBLE_EQ( coor[0], 10 + double(i % width) );
+          EXPECT_DOUBLE_EQ( coor[1], 20 + 2 * double(i / width) );
+          EXPECT_DOUBLE_EQ( coor[2], 30 );
+        }
+        const auto edge_n = Tile<Bar5>::get_tile_part_elem_n (dims);
+        for (fmr::Local_int edge = 0; edge < edge_n; ++edge) {
+          fmr::Local_int nodes[3] = {}, vertices[2] = {};
+          ASSERT_TRUE( (Tile<Bar5, 2>::get_tile_node_conn (nodes, edge, dims, pattern)) );
+          ASSERT_TRUE( (Tile<Bar5, 2>::get_tile_vert_conn (vertices, edge, dims, pattern)) );
+          for (unsigned j = 0; j < 3; ++j) {
+            ASSERT_LT( nodes[j], node_n );
+            seen[nodes[j]] = true;
+          }
+          for (unsigned j = 0; j < 2; ++j) {
+            const auto x = vertices[j] % (dims[0] + 1);
+            const auto y = vertices[j] / (dims[0] + 1);
+            EXPECT_EQ( nodes[j], 2 * y * width + 2 * x );
+          }
+          const auto midpoint_x = (nodes[0] % width + nodes[1] % width) / 2;
+          const auto midpoint_y = (nodes[0] / width + nodes[1] / width) / 2;
+          EXPECT_EQ( nodes[2], midpoint_y * width + midpoint_x );
+        }
+        for (fmr::Local_int i = 0; i < node_n; ++i) EXPECT_TRUE( seen[i] );
+      }
+    }
+  }
 }
 
 TEST( GridTileBar5, InvalidCoordinatesDoNotWrite ){
@@ -373,7 +448,7 @@ TEST( GridTileBar5, P1P2MeshCompatibleWithFD ){
       for (fmr::Local_int offy = 0; offy < 2; ++offy) {
         TilePattern pattern = {patvar,offx,offy};
         for (fmr::Local_int i = 0; i < FD3x3_node_n; ++i) {
-          Tile<Bar5, 1>::get_tile_part_node_coor(tile_node_coor, i, d2x2, tile_size, origin, pattern);
+          ASSERT_TRUE( (Tile<Bar5, 1>::get_tile_part_node_coor(tile_node_coor, i, d2x2, tile_size, origin, pattern)) );
           for (fmr::Local_int j = 0; j < 3; ++j) {
             EXPECT_DOUBLE_EQ( tile_node_coor[j], node_coor_FD3x3[3*i + j] );
           }
@@ -386,7 +461,7 @@ TEST( GridTileBar5, P1P2MeshCompatibleWithFD ){
       for (fmr::Local_int offy = 0; offy < 2; ++offy) {
         TilePattern pattern = {patvar,offx,offy};
         for (fmr::Local_int i = 0; i < FD5x5_node_n; ++i) {
-          Tile<Bar5, 2>::get_tile_part_node_coor(tile_node_coor, i, d2x2, tile_size, origin, pattern);
+          ASSERT_TRUE( (Tile<Bar5, 2>::get_tile_part_node_coor(tile_node_coor, i, d2x2, tile_size, origin, pattern)) );
           for (fmr::Local_int j = 0; j < 3; ++j) {
             EXPECT_DOUBLE_EQ( tile_node_coor[j], node_coor_FD5x5[3*i + j] );
           }

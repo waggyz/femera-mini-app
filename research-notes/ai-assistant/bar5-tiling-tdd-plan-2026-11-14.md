@@ -54,14 +54,13 @@ policy. Encode them in tests and API documentation before implementation.
    tile offset `(ox, oy)`: use `(x + ox + y + oy) % 2`. The offset defaults
    to zero. Test horizontal and vertical adjacency, row boundaries, and
    partition seams.
-4. **Numbering and order.** Use unique row-major grid vertices, x fastest.
-   Connectivity uses node IDs even for endpoints at `p > 1`, consistent with
-   Bar1. Number high-order nodes deterministically per *unique* horizontal,
-   vertical, and diagonal edge; do not allocate nodes at unused grid points
-   merely to make a dense refined lattice. Specify the exact edge-class order,
-   edge orientation, and ID offsets in the implementation tests and docs.
-   Per-bar node connectivity is `[endpoint 0, endpoint 1, interior nodes from
-   endpoint 0 to endpoint 1]`.
+4. **Numbering and order.** Vertex connectivity uses row-major coarse-grid
+   vertex IDs, x fastest. P2 node connectivity uses row-major IDs on the
+   refined `(2*nx+1) x (2*ny+1)` grid, matching the FD grid; all points in
+   that grid are used. Other orders use coarse vertices followed by interior
+   nodes per unique horizontal, vertical, and diagonal edge, without unused
+   grid points. Per-bar node connectivity is `[endpoint 0, endpoint 1,
+   interior nodes from endpoint 0 to endpoint 1]`.
 5. **Geometry.** Define the initial rectangular tile in the XY plane:
    `origin + (x * size_x, y * size_y, 0)`, with three output components and
    a translated z origin. Define how `tile_size[2]` is interpreted rather
@@ -276,8 +275,9 @@ are documented.
 
 - Added `TilePattern` with variant and global tile offsets, and compatible
   connectivity overloads. Partition edge order is horizontal, vertical,
-  diagonal; each block is x-fastest. P1-P3 connectivity returns row-major
-  vertices followed by edge-major interior IDs, in edge orientation.
+  diagonal; each block is x-fastest. Initially P1-P3 node connectivity used
+  row-major vertices followed by edge-major interior IDs; see the P2
+  numbering change below.
   Nonperiodic connectivity rejects empty partitions, zero order, invalid
   variants and out-of-range indices without modifying the output. Existing
   Bar1 entry points remain available.
@@ -309,3 +309,17 @@ are documented.
   Bar1 18/18 and Tile 2/2 passing, including the harness's own tests. The
   focused executables were rebuilt against the changed headers; the complete
   project-wide suite was not run.
+
+## P2 FD numbering update
+
+- The P2 coordinate set already matched the refined FD grid, but its
+  vertices-first numbering did not. The user's FD comparison and new
+  hand-calculated connectivity tests failed before the change.
+- P2 node coordinates and node connectivity now use refined-grid row-major
+  IDs. Coarse vertex connectivity, including periodic vertex connectivity,
+  remains unchanged; P1 and P3 node numbering is unchanged. P2 diagonal
+  midpoints have the same ID in both orientations. Runtime order overrides
+  follow the requested order's numbering.
+- Added exact connectivity cases, rectangular-grid and variant/offset
+  coverage, endpoint/midpoint checks, and constexpr and periodic regressions.
+  Configured test runs reported Bar5 22/22 and Bar1 18/18 passing.

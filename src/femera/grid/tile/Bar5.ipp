@@ -42,6 +42,18 @@ constexpr bool Bar5::calc_tile_node_conn (fmr::Local_int* conn,
   const fmr::Local_int edge_i, const fmr::Local_int* dims,
   const fmr::Dim_int p, const TilePattern pattern) noexcept {
   if (!calc_tile_vert_conn (conn, edge_i, dims, p, pattern)) return false;
+  if (p == 2) {
+    const fmr::Local_int coarse_width = dims[0] + 1;
+    const fmr::Local_int width = 2 * dims[0] + 1;
+    const fmr::Local_int x0 = conn[0] % coarse_width;
+    const fmr::Local_int y0 = conn[0] / coarse_width;
+    const fmr::Local_int x1 = conn[1] % coarse_width;
+    const fmr::Local_int y1 = conn[1] / coarse_width;
+    conn[0] = 2 * y0 * width + 2 * x0;
+    conn[1] = 2 * y1 * width + 2 * x1;
+    conn[2] = (y0 + y1) * width + x0 + x1;
+    return true;
+  }
   const fmr::Local_int vertex_n = (dims[0] + 1) * (dims[1] + 1);
   for (fmr::Local_int j = 0; j + 1 < p; ++j) {
     conn[2 + j] = vertex_n + edge_i * (p - 1) + j;
@@ -95,6 +107,13 @@ constexpr bool Bar5::calc_tile_part_node_coor (F* coor, const fmr::Local_int nod
   const F* origin, const TilePattern pattern) noexcept {
   if (p == 0 || dims[0] == 0 || dims[1] == 0 || pattern.variant > 3
       || node_i >= calc_tile_part_node_n (p, dims)) return false;
+  if (p == 2) {
+    const fmr::Local_int width = 2 * dims[0] + 1;
+    coor[0] = (origin ? origin[0] : F(0)) + F(node_i % width) * size[0] / F(2);
+    coor[1] = (origin ? origin[1] : F(0)) + F(node_i / width) * size[1] / F(2);
+    coor[2] = origin ? origin[2] : F(0);
+    return true;
+  }
   const fmr::Local_int vertex_n = (dims[0] + 1) * (dims[1] + 1);
   if (node_i < vertex_n) return calc_tile_vert_coor (coor, node_i, dims, size, origin);
   const fmr::Local_int local = node_i - vertex_n;
