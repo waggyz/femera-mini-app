@@ -441,8 +441,8 @@ TEST( GridTileBar5, P1P2MeshCompatibleWithFD ){
   // Check this by comparing tiling node coordinates with expected equivalent
   // FD grid coordinates.
   double tile_node_coor[3] = {0.0, 0.0, 0.0};// init to suppress compile warning
-  double tile_size[3] = {1.0, 1.0, 0.0};
-  double origin[3] = {0.0, 0.0, 0.0};
+  const double tile_size[3] = {1.0, 1.0, 0.0};
+  const double origin[3] = {0.0, 0.0, 0.0};
   for (fmr::Local_int patvar = 0; patvar < 4; ++patvar) {
     for (fmr::Local_int offx = 0; offx < 2; ++offx) {
       for (fmr::Local_int offy = 0; offy < 2; ++offy) {
@@ -464,6 +464,76 @@ TEST( GridTileBar5, P1P2MeshCompatibleWithFD ){
           ASSERT_TRUE( (Tile<Bar5, 2>::get_tile_part_node_coor(tile_node_coor, i, d2x2, tile_size, origin, pattern)) );
           for (fmr::Local_int j = 0; j < 3; ++j) {
             EXPECT_DOUBLE_EQ( tile_node_coor[j], node_coor_FD5x5[3*i + j] );
+          }
+        }
+      }
+    }
+  }
+}
+TEST( GridTileBar5, ElemNodeAndVertexCoordinateConsistency ) {
+  // P1 nodes are exactly its vertices; higher-order endpoint nodes must
+  // describe the same points despite different node numbering.
+  fmr::Local_int elem_vert_conn_p1[2];
+  fmr::Local_int elem_vert_conn_p2[2];
+  fmr::Local_int elem_vert_conn_p3[2];
+  fmr::Local_int elem_node_conn_p1[2];
+  fmr::Local_int elem_node_conn_p2[3];
+  fmr::Local_int elem_node_conn_p3[4];
+  const fmr::Local_int tile2x2[3] = {2,2,0};
+  const double tile_size[3] = {1.0, 1.0, 0.0};
+  const double origin[3] = {0.0, 0.0, 0.0};
+  double vert_coor_p1[3];
+  double vert_coor_p2[3];
+  double vert_coor_p3[3];
+  double node_coor_p1[3];
+  double node_coor_p2[3];
+  double node_coor_p3[3];
+  const fmr::Local_int part_bars_n
+    = Tile<Bar5, 1>::get_tile_part_elem_n( tile2x2 );
+  EXPECT_EQ( (Tile<Bar5, 2>::get_tile_part_elem_n( tile2x2 )), part_bars_n);
+  EXPECT_EQ( (Tile<Bar5, 3>::get_tile_part_elem_n( tile2x2 )), part_bars_n);
+  for (fmr::Local_int patvar = 0; patvar < 4; ++patvar) {
+    for (fmr::Local_int offx = 0; offx < 2; ++offx) {
+      for (fmr::Local_int offy = 0; offy < 2; ++offy) {
+        TilePattern pattern = {patvar,offx,offy};
+        for (fmr::Local_int elem_i = 0; elem_i < part_bars_n; ++elem_i) {
+          SCOPED_TRACE( ::testing::Message() << "variant=" << patvar
+            << " offset=(" << offx << "," << offy << ") element=" << elem_i );
+          ASSERT_TRUE( (Tile<Bar5, 1>::get_tile_vert_conn(elem_vert_conn_p1, \
+            elem_i, tile2x2, pattern)) );
+          ASSERT_TRUE( (Tile<Bar5, 2>::get_tile_vert_conn(elem_vert_conn_p2, \
+            elem_i, tile2x2, pattern)) );
+          ASSERT_TRUE( (Tile<Bar5, 3>::get_tile_vert_conn(elem_vert_conn_p3, \
+            elem_i, tile2x2, pattern)) );
+          ASSERT_TRUE( (Tile<Bar5, 1>::get_tile_node_conn(elem_node_conn_p1, \
+            elem_i, tile2x2, pattern)) );
+          ASSERT_TRUE( (Tile<Bar5, 2>::get_tile_node_conn(elem_node_conn_p2, \
+            elem_i, tile2x2, pattern)) );
+          ASSERT_TRUE( (Tile<Bar5, 3>::get_tile_node_conn(elem_node_conn_p3, \
+            elem_i, tile2x2, pattern)) );
+          // Check each vertex coordinate.
+          for (fmr::Local_int vert_i = 0; vert_i < 2; ++vert_i) {
+            SCOPED_TRACE( ::testing::Message() << "endpoint=" << vert_i );
+            EXPECT_EQ( elem_node_conn_p1[vert_i], elem_vert_conn_p1[vert_i] );
+            ASSERT_TRUE( (Tile<Bar5, 1>::get_tile_vert_coor(vert_coor_p1, \
+              elem_vert_conn_p1[vert_i], tile2x2, tile_size, origin)) );
+            ASSERT_TRUE( (Tile<Bar5, 2>::get_tile_vert_coor(vert_coor_p2, \
+              elem_vert_conn_p2[vert_i], tile2x2, tile_size, origin)) );
+            ASSERT_TRUE( (Tile<Bar5, 3>::get_tile_vert_coor(vert_coor_p3, \
+              elem_vert_conn_p3[vert_i], tile2x2, tile_size, origin)) );
+            ASSERT_TRUE( (Tile<Bar5, 1>::get_tile_part_node_coor(node_coor_p1, \
+              elem_node_conn_p1[vert_i], tile2x2, tile_size, origin, pattern)) );
+            ASSERT_TRUE( (Tile<Bar5, 2>::get_tile_part_node_coor(node_coor_p2, \
+              elem_node_conn_p2[vert_i], tile2x2, tile_size, origin, pattern)) );
+            ASSERT_TRUE( (Tile<Bar5, 3>::get_tile_part_node_coor(node_coor_p3, \
+              elem_node_conn_p3[vert_i], tile2x2, tile_size, origin, pattern)) );
+            for (fmr::Local_int j = 0; j < 3; ++j) {
+              EXPECT_DOUBLE_EQ( vert_coor_p1[j], vert_coor_p2[j] );
+              EXPECT_DOUBLE_EQ( vert_coor_p1[j], vert_coor_p3[j] );
+              EXPECT_DOUBLE_EQ( vert_coor_p1[j], node_coor_p1[j] );
+              EXPECT_DOUBLE_EQ( node_coor_p1[j], node_coor_p2[j] );
+              EXPECT_DOUBLE_EQ( node_coor_p1[j], node_coor_p3[j] );
+            }
           }
         }
       }
