@@ -97,8 +97,6 @@ class Elem {//TODO consider pulling P out of the template parameters.
     return T::poly_type;}
   static constexpr fmr::Dim_int get_elem_p () noexcept {return P;}
   //
-  static constexpr fmr::Local_int get_sims_d () noexcept {//TODO remove?
-    return T::sims_d;}
   static constexpr fmr::Dim_int get_elem_d () noexcept {
     //static_assert( T::elem_d <= D, //NOTE only checked if this function used.
     //  "Element dimension cannot exceed simulation spatial dimension.");

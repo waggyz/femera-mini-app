@@ -13,7 +13,6 @@ private:// Everything should be private, accessible through the Elem interface.
 // Scalars ====================================================================
   static constexpr fmr::math::Poly poly_type = fmr::math::Poly::Serendipity;
   //
-  static constexpr fmr::Local_int   sims_d = 3;//TODO remove?
   static constexpr fmr::Dim_int   elem_d = 1;
   //
   static constexpr fmr::Local_int vert_n = 2;
@@ -34,13 +33,13 @@ private:// Everything should be private, accessible through the Elem interface.
   static constexpr fmr::Local_int* quad_conn = nullptr;
   //
   static constexpr
-  fmr::Geom_float vert_coor [vert_n * sims_d]// transposed coor_vert
+  fmr::Geom_float vert_coor [vert_n * 3u]// transposed coor_vert
     = {           // vertex                      //
     0.0, 0.0, 0.0,// 0       0-------1           //
     1.0, 0.0, 0.0 // 1                  o--x     //
   };
   static constexpr
-  fmr::Geom_float coor_vert [vert_n * sims_d]// transposed vert_coor
+  fmr::Geom_float coor_vert [vert_n * 3u]// transposed vert_coor
     = {
     0.0, 1.0,
     0.0, 0.0,

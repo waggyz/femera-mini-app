@@ -26,7 +26,6 @@ TEST( GridElemBars, IsStateless ){
   EXPECT_TRUE( (std::is_empty<Elem<Bars>>::value) );
 }
 TEST( GridElemBars, ElementTopologyWithoutInstance ){
-  EXPECT_EQ( Elem<Bars>::get_sims_d (), 3u );
   EXPECT_EQ( Elem<Bars>::get_elem_d (), 1u );
   EXPECT_EQ( Elem<Bars>::get_vert_n (), 2u );
   EXPECT_EQ( Elem<Bars>::get_edge_n (), 1u );
@@ -41,11 +40,6 @@ TEST( GridElemBars, ElementTopologyWithoutInstance ){
 }
 TEST( GridElemBars, ElementTopology ){
   constexpr Elem<Bars> bars;
-#if 0
-  EXPECT_EQ( static_cast<fmr::Local_int>(Elem<Bars>::get_sims_d ()), 3u );
-  EXPECT_EQ( static_cast<fmr::Local_int>(Elem<Bars>::get_elem_d ()), 1u );
-#endif
-  EXPECT_EQ( bars.get_sims_d (), 3u );
   EXPECT_EQ( bars.get_elem_d (), 1u );
   EXPECT_EQ( bars.get_vert_n (), 2u );
   EXPECT_EQ( bars.get_edge_n (), 1u );
@@ -143,9 +137,9 @@ TEST( GridElemBars, VertexConnectivityAndCoordinates ){
   EXPECT_DOUBLE_EQ( coor_vert[5], 0.0 );
 
   for (fmr::Local_int vertex = 0; vertex < bars.get_vert_n(); ++vertex) {
-    for (fmr::Local_int dim = 0; dim < bars.get_sims_d(); ++dim) {
+    for (fmr::Local_int dim = 0; dim < 3; ++dim) {
       EXPECT_DOUBLE_EQ(
-        vert_coor[vertex * bars.get_sims_d() + dim],
+        vert_coor[vertex * 3 + dim],
         coor_vert[dim * bars.get_vert_n() + vertex]);
     }
   }
@@ -155,15 +149,9 @@ TEST( GridElemBars, NodeCoordinates ){
   constexpr Elem<Bars, 2> bars_p2;// quadratic
   constexpr Elem<Bars, 3> bars_p3;// cubic
   const fmr::Geom_float test_vert_coor[6] = {0.0,1.0,2.0, 3.0,4.0,5.0};
-  const fmr::Dim_int p1_sims_d = bars_p1.get_sims_d();
-  const fmr::Dim_int p2_sims_d = bars_p2.get_sims_d();
-  const fmr::Dim_int p3_sims_d = bars_p3.get_sims_d();
   const fmr::Local_int p1_node_n = bars_p1.get_node_n();
   const fmr::Local_int p2_node_n = bars_p2.get_node_n();
   const fmr::Local_int p3_node_n = bars_p3.get_node_n();
-  ASSERT_EQ(p1_sims_d, 3);
-  ASSERT_EQ(p2_sims_d, 3);
-  ASSERT_EQ(p3_sims_d, 3);
   ASSERT_EQ(p1_node_n, 2);
   ASSERT_EQ(p2_node_n, 3);
   ASSERT_EQ(p3_node_n, 4);
@@ -188,7 +176,7 @@ TEST( GridElemBars, NodeCoordinates ){
   fmr::Geom_float node_coor[12] = {};
   const auto expect_node_coor = [&node_coor](
     const auto& elem, const fmr::Geom_float* expected) {
-    for (fmr::Local_int i = 0; i < elem.get_node_n() * elem.get_sims_d(); ++i) {
+    for (fmr::Local_int i = 0; i < elem.get_node_n() * 3; ++i) {
       EXPECT_DOUBLE_EQ(node_coor[i], expected[i]);
     }
   };
