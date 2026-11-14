@@ -10,9 +10,6 @@ class Bar1 final : public Tile<Bar1> {
   friend class Tile;
 private:
 // Scalars ====================================================================
-#if 1
-  //static constexpr fmr::Dim_int sims_d = 3;//TODO remove? get from Elem<Bars>?
-#endif
   static constexpr fmr::Dim_int        elem_d = 1;
   static constexpr fmr::Dim_int        tile_d = 1;
   static constexpr fmr::Local_int tile_elem_n = 1;// # this type element / tile
@@ -23,6 +20,13 @@ private:
   static constexpr fmr::Local_int tile_quad_n = 0;
   static constexpr fmr::Local_int tile_vols_n = 0;
 
+  static constexpr fmr::Local_int tile_alts_n = 1;
+
+  static constexpr fmr::Local_int
+  bars_vert_conn [Bar1::tile_alts_n * Bar1::tile_edge_n * 2u] = {0,1};
+  static constexpr fmr::Local_int* tris_vert_conn = nullptr;
+  static constexpr fmr::Local_int* quad_vert_conn = nullptr;
+  //
   // Tiling =====================================================================
   // Bars are self-tiling (no other element types involved).
   /*

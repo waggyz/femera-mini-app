@@ -3,10 +3,8 @@
 
 namespace fmr { namespace fems {
 
-// These functions evaluate the shape functions and gradients at
-// a 3D natural coordinate point x.
-//
-// C1 nonzero shape functions are only in the x-direction x[0].//TODO correct?
+// These functions evaluate shape functions at x[0] in the one-dimensional
+// reference interval. Physical coordinate dimension is independent.
 // When edge nodes are at their natural locations, the Jacobian is constant,
 // and only calc_poly_func_C1D2N and calc_poly_grad_node_C1D2N are needed for constant Jacobian evaluation.
 //
@@ -19,31 +17,17 @@ Y* elem::calc_poly_func_C1D2N// C1 domain: [0.0,1.0]
   return f;
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
-Y* elem::calc_poly_grad_node_C1D2N// 3D rows x 2 node cols
-(Y g[2u *3u], const G[]) noexcept {// x[3u] not used (constant gradient)
-#if 1
-  g[ 0]=-1.0; g[ 1]=1.0;// dN/dx (natural coords)
-  g[ 2]= 0.0; g[ 3]=0.0;// dN/dy
-  g[ 4]= 0.0; g[ 5]=0.0;// dN/dz
-#else
-  g[ 0]=-1.0; g[ 1]=1.0;// dN/dx (natural coords)
-  g[ 2]=-1.0; g[ 3]=1.0;// dN/dy
-  g[ 4]=-1.0; g[ 5]=1.0;// dN/dz
-#endif
+Y* elem::calc_poly_grad_node_C1D2N
+(Y g[2u], const G[]) noexcept {
+  g[0]=-1.0;
+  g[1]= 1.0;
   return g;
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
-Y* elem::calc_poly_node_grad_C1D2N// 2 node cols x 3D rows (transposed)
-(Y g[2u *3u], const G[]) noexcept {// x[3u] not used (constant gradient)
-#if 1
-  g[ 0]=-1.0; g[ 3]=1.0;// dN/dx (natural coords)
-  g[ 1]= 0.0; g[ 4]=0.0;// dN/dy
-  g[ 2]= 0.0; g[ 5]=0.0;// dN/dz
-#else
-  g[ 0]=-1.0; g[ 3]=1.0;// dN/dx (natural coords)
-  g[ 1]=-1.0; g[ 4]=1.0;// dN/dy
-  g[ 2]=-1.0; g[ 5]=1.0;// dN/dz
-#endif
+Y* elem::calc_poly_node_grad_C1D2N
+(Y g[2u], const G[]) noexcept {
+  g[0]=-1.0;
+  g[1]= 1.0;
   return g;
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
@@ -57,51 +41,18 @@ Y* elem::calc_poly_func_C1D3N
   return f;
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
-Y* elem::calc_poly_grad_node_C1D3N// 3D rows x 3 node cols
-(Y g[3u *3u], const G x[3u]) noexcept {
-  const Y L2=x[0];
-  const Y L1=1.0-L2;
-  // Term-by-term derivs
-  const Y L1r=-1.0, L2r=1.0;
-  const Y L1s=-1.0, L2s=0.0;
-  const Y L1t=-1.0, L2t=0.0;
-  // edges: 0,1; 1,2; 0,2; 0,3; 2,3; 1,3;
-  // r-derivs by product rule
-  g[ 0] = 2.0*L1*L1r + 2.0*L1r*L1 - L1r;// Vertex nodes
-  g[ 1] = 2.0*L2*L2r + 2.0*L2r*L2 - L2r;
-  g[ 2] = 4.0*L2*L1r + 4.0*L2r*L1;// Edge node
-  // s-derivs
-  g[ 3] = 2.0*L1*L1s + 2.0*L1s*L1 - L1s;// Vertex nodes
-  g[ 4] = 2.0*L2*L2s + 2.0*L2s*L2 - L2s;
-  g[ 5] = 4.0*L2*L1s + 4.0*L2s*L1;// Edge node
-  // t-derivs
-  g[ 6] = 2.0*L1*L1t + 2.0*L1t*L1 - L1t;// Vertex nodes
-  g[ 7] = 2.0*L2*L2t + 2.0*L2t*L2 - L2t;
-  g[ 8] = 4.0*L2*L1t + 4.0*L2t*L1;// Edge node
+Y* elem::calc_poly_grad_node_C1D3N
+(Y g[3u], const G x[3u]) noexcept {
+  const Y xi=x[0];
+  g[0]=4.0*xi-3.0;
+  g[1]=4.0*xi-1.0;
+  g[2]=4.0-8.0*xi;
   return g;
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
-Y* elem::calc_poly_node_grad_C1D3N// 3 node cols x 3D rows (transposed)
-(Y g[3u *3u], const G x[3u]) noexcept {
-  const Y L2=x[0];
-  const Y L1=1.0-L2;
-  // Term-by-term derivs
-  const Y L1r=-1.0, L2r=1.0;
-  const Y L1s=-1.0, L2s=0.0;
-  const Y L1t=-1.0, L2t=0.0;
-  // edges: 0,1; 1,2; 0,2; 0,3; 2,3; 1,3;
-  // r-derivs by product rule
-  g[ 0] = 2.0*L1*L1r + 2.0*L1r*L1 - L1r;// Vertex nodes
-  g[ 3] = 2.0*L2*L2r + 2.0*L2r*L2 - L2r;
-  g[ 6] = 4.0*L2*L1r + 4.0*L2r*L1;// Edge node
-  // s-derivs
-  g[ 1] = 2.0*L1*L1s + 2.0*L1s*L1 - L1s;// Vertex nodes
-  g[ 4] = 2.0*L2*L2s + 2.0*L2s*L2 - L2s;
-  g[ 7] = 4.0*L2*L1s + 4.0*L2s*L1;// Edge node
-  // t-derivs
-  g[ 2] = 2.0*L1*L1t + 2.0*L1t*L1 - L1t;// Vertex nodes
-  g[ 5] = 2.0*L2*L2t + 2.0*L2t*L2 - L2t;
-  g[ 8] = 4.0*L2*L1t + 4.0*L2t*L1;// Edge node
+Y* elem::calc_poly_node_grad_C1D3N
+(Y g[3u], const G x[3u]) noexcept {
+  calc_poly_grad_node_C1D3N(g, x);
   return g;
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
@@ -117,85 +68,20 @@ Y* elem::calc_poly_func_C1D4N
   return f;
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
-Y* elem::calc_poly_grad_node_C1D4N// 3D rows x 4 node cols
-(Y g[4u *3u], const G x[3u]) noexcept {
-  const Y L2=x[0];
-  const Y L1=(1.0-L2);
-  // Term-by-term derivs
-  const Y L1r=-1.0, L2r=1.0;
-  const Y L1s=-1.0, L2s=0.0;
-  const Y L1t=-1.0, L2t=0.0;
-  // edge: 0,1;
-  g[ 0]= 0.5* L1r *(3.* L1 -1.)*(3.* L1 -2.)// Vertex nodes
-       + 0.5* L1  *(3.* L1r   )*(3.* L1 -2.)
-       + 0.5* L1  *(3.* L1 -1.)*(3.* L1r   );
-  g[ 1]= 0.5* L2r *(3.* L2 -1.)*(3.* L2 -2.)
-       + 0.5* L2  *(3.* L2r   )*(3.* L2 -2.)
-       + 0.5* L2  *(3.* L2 -1.)*(3.* L2r   );
-  // r-derivs, edge nodes
-  g[ 2]=4.5*( L1r*L2 *(3.*L1 -1.) + L1 *L2r*(3.*L1 -1.) + L1 *L2 *(3.*L1r) );
-  g[ 3]=4.5*( L1r*L2 *(3.*L2 -1.) + L1 *L2r*(3.*L2 -1.) + L1 *L2 *(3.*L2r) );
-  // s-derivs
-  g[ 4]= 0.5* L1s *(3.* L1 -1.)*(3.* L1 -2.)// Vertex nodes
-       + 0.5* L1  *(3.* L1s   )*(3.* L1 -2.)
-       + 0.5* L1  *(3.* L1 -1.)*(3.* L1s   );
-  g[ 5]= 0.5* L2s *(3.* L2 -1.)*(3.* L2 -2.)
-       + 0.5* L2  *(3.* L2s   )*(3.* L2 -2.)
-       + 0.5* L2  *(3.* L2 -1.)*(3.* L2s   );
-  // s-derivs, edge nodes
-  g[ 6]=4.5*( L1s*L2 *(3.*L1 -1.) + L1 *L2s*(3.*L1 -1.) + L1 *L2 *(3.*L1s) );
-  g[ 7]=4.5*( L1s*L2 *(3.*L2 -1.) + L1 *L2s*(3.*L2 -1.) + L1 *L2 *(3.*L2s) );
-  // t-derivs
-  g[ 8]= 0.5* L1t *(3.* L1 -1.)*(3.* L1 -2.)// Vertex nodes
-       + 0.5* L1  *(3.* L1t   )*(3.* L1 -2.)
-       + 0.5* L1  *(3.* L1 -1.)*(3.* L1t   );
-  g[ 9]= 0.5* L2t *(3.* L2 -1.)*(3.* L2 -2.)
-       + 0.5* L2  *(3.* L2t   )*(3.* L2 -2.)
-       + 0.5* L2  *(3.* L2 -1.)*(3.* L2t   );
-  // t-derivs, edge nodes
-  g[10]=4.5*( L1t*L2 *(3.*L1 -1.) + L1 *L2t*(3.*L1 -1.) + L1 *L2 *(3.*L1t) );
-  g[11]=4.5*( L1t*L2 *(3.*L2 -1.) + L1 *L2t*(3.*L2 -1.) + L1 *L2 *(3.*L2t) );
+Y* elem::calc_poly_grad_node_C1D4N
+(Y g[4u], const G x[3u]) noexcept {
+  const Y xi=x[0];
+  const Y L1=1.0-xi;
+  g[0]=-0.5*(27.0*L1*L1-18.0*L1+2.0);
+  g[1]= 0.5*(27.0*xi*xi-18.0*xi+2.0);
+  g[2]= 4.5*(2.0-10.0*xi+9.0*xi*xi);
+  g[3]= 4.5*(-1.0+8.0*xi-9.0*xi*xi);
   return g;
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
-Y* elem::calc_poly_node_grad_C1D4N// 4 node cols x 3D rows (transposed)
-(Y g[4u *3u], const G x[3u]) noexcept {
-  const Y L2=x[0];
-  const Y L1=(1.0-L2);
-  // Term-by-term derivs
-  const Y L1r=-1.0, L2r=1.0;
-  const Y L1s=-1.0, L2s=0.0;
-  const Y L1t=-1.0, L2t=0.0;
-  // edge: 0,1;
-  g[ 0]= 0.5* L1r *(3.* L1 -1.)*(3.* L1 -2.)// Vertex nodes
-       + 0.5* L1  *(3.* L1r   )*(3.* L1 -2.)
-       + 0.5* L1  *(3.* L1 -1.)*(3.* L1r   );
-  g[ 3]= 0.5* L2r *(3.* L2 -1.)*(3.* L2 -2.)
-       + 0.5* L2  *(3.* L2r   )*(3.* L2 -2.)
-       + 0.5* L2  *(3.* L2 -1.)*(3.* L2r   );
-  // r-derivs, edge nodes
-  g[ 6]=4.5*( L1r*L2 *(3.*L1 -1.) + L1 *L2r*(3.*L1 -1.) + L1 *L2 *(3.*L1r) );
-  g[ 9]=4.5*( L1r*L2 *(3.*L2 -1.) + L1 *L2r*(3.*L2 -1.) + L1 *L2 *(3.*L2r) );
-  // s-derivs
-  g[ 1]= 0.5* L1s *(3.* L1 -1.)*(3.* L1 -2.)// Vertex nodes
-       + 0.5* L1  *(3.* L1s   )*(3.* L1 -2.)
-       + 0.5* L1  *(3.* L1 -1.)*(3.* L1s   );
-  g[ 4]= 0.5* L2s *(3.* L2 -1.)*(3.* L2 -2.)
-       + 0.5* L2  *(3.* L2s   )*(3.* L2 -2.)
-       + 0.5* L2  *(3.* L2 -1.)*(3.* L2s   );
-  // s-derivs, edge nodes
-  g[ 7]=4.5*( L1s*L2 *(3.*L1 -1.) + L1 *L2s*(3.*L1 -1.) + L1 *L2 *(3.*L1s) );
-  g[10]=4.5*( L1s*L2 *(3.*L2 -1.) + L1 *L2s*(3.*L2 -1.) + L1 *L2 *(3.*L2s) );
-  // t-derivs
-  g[ 2]= 0.5* L1t *(3.* L1 -1.)*(3.* L1 -2.)// Vertex nodes
-       + 0.5* L1  *(3.* L1t   )*(3.* L1 -2.)
-       + 0.5* L1  *(3.* L1 -1.)*(3.* L1t   );
-  g[ 5]= 0.5* L2t *(3.* L2 -1.)*(3.* L2 -2.)
-       + 0.5* L2  *(3.* L2t   )*(3.* L2 -2.)
-       + 0.5* L2  *(3.* L2 -1.)*(3.* L2t   );
-  // t-derivs, edge nodes
-  g[ 8]=4.5*( L1t*L2 *(3.*L1 -1.) + L1 *L2t*(3.*L1 -1.) + L1 *L2 *(3.*L1t) );
-  g[11]=4.5*( L1t*L2 *(3.*L2 -1.) + L1 *L2t*(3.*L2 -1.) + L1 *L2 *(3.*L2t) );
+Y* elem::calc_poly_node_grad_C1D4N
+(Y g[4u], const G x[3u]) noexcept {
+  calc_poly_grad_node_C1D4N(g, x);
   return g;
 }
 
@@ -203,4 +89,3 @@ Y* elem::calc_poly_node_grad_C1D4N// 4 node cols x 3D rows (transposed)
 
 #endif
 //end FMR_HAS_FEMS_ELEM_POLY_IPP
-

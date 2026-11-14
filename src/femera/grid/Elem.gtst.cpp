@@ -82,11 +82,17 @@ TEST( GridElem, TrivialTest ){
   EXPECT_FLOAT_EQ (a_float, an_array_f[1]);
 }
 TEST( GridElem, JacdSizeTest ){
-  EXPECT_EQ( jacs_size, 10 );// 3D, 1 point rule default
+  EXPECT_EQ( jacs_size, 7 );// 2D reference quad in 3D ambient space
   EXPECT_EQ( jac1_size,  2 );// 1D, 1 point rule, 1D space
   EXPECT_EQ( jac2_size,  5 );// 2D, 1 point rule, 2D space
   EXPECT_EQ( jac3_size, 10 );// 3D, 1 point rule
   EXPECT_EQ( jac4_size, 40 );// 3D, 4 points
+  EXPECT_EQ( femera::grid::elem::Elem<femera::grid::elem::Bars>::jacs_size(1, 1), 1 );
+  EXPECT_EQ( femera::grid::elem::Elem<femera::grid::elem::Bars>::jacs_size(1, 2), 2 );
+  EXPECT_EQ( femera::grid::elem::Elem<femera::grid::elem::Bars>::jacs_size(1, 3), 3 );
+  EXPECT_EQ( femera::grid::elem::Elem<femera::grid::elem::Bars>::jacs_size(4, 3), 12 );
+  EXPECT_EQ( femera::grid::elem::Elem<femera::grid::elem::Bars>::jacd_size(1, 3), 4 );
+  EXPECT_EQ( femera::grid::elem::Elem<femera::grid::elem::Bars>::jacd_size(4, 3), 16 );
 }
 TEST( GridElem, TetsVertN ){
   EXPECT_EQ( elem_tet1.get_vert_n (), 4 );
@@ -128,6 +134,3 @@ TEST( GridElem, ThreadLocalAssignedFromConstexpr ){
 TEST( ElemStructTemplateArg, Works ){
   EXPECT_EQ( test_tet_3d.test_vert_n (), 4);
 }
-
-
-

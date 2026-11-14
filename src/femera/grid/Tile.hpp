@@ -36,27 +36,33 @@ class Tile {
   // Structured grid element tiling ===========================================
   //
   static constexpr fmr::Local_int get_tile_elem_n () noexcept {
-    return T::tile_elem_n;}
+    return T::tile_elem_n; }
   static constexpr fmr::Local_int get_tile_vert_n () noexcept {
-    return T::tile_vert_n;}
+    return T::tile_vert_n; }
   static constexpr fmr::Local_int get_tile_edge_n () noexcept {
-    return T::tile_edge_n;}
+    return T::tile_edge_n; }
   static constexpr fmr::Local_int get_tile_face_n () noexcept {
-    return T::tile_tris_n;}
+    return T::tile_tris_n; }
   static constexpr fmr::Local_int get_tile_quad_n () noexcept {
-    return T::tile_quad_n;}
+    return T::tile_quad_n; }
   static constexpr fmr::Local_int get_tile_vols_n () noexcept {
-    return T::tile_vols_n;}// 3D elements of this type (assumes all same)
+    return T::tile_vols_n; }// 3D elements of this type (assumes all same)
+  //
+  static constexpr fmr::Local_int tile_alts_n () noexcept {
+    return T::tile_alts_n; }
+  //
+  static constexpr const fmr::Local_int* get_bars_vert_conn () noexcept {
+    return T::bars_vert_conn; }
+  static constexpr const fmr::Local_int* get_tris_vert_conn () noexcept {
+    return T::tris_vert_conn; }
+  static constexpr const fmr::Local_int* get_quad_vert_conn () noexcept {
+    return T::quad_vert_conn; }
   //
   static constexpr fmr::Local_int get_tile_elem_node_n () noexcept;
-
+  //
   static constexpr fmr::Local_int get_tile_part_elem_n (
     const fmr::Local_int* part_elem_dims)// size 3 for 1D,2D,3D elements
   noexcept {
-  //NOTE only [0] is used for 1D elements like Bars,
-  //     for 2D elements only [0] and [1] are used,
-  //     for 3D elements all three are used.
-  //
     return T::tile_elem_n
     * ((part_elem_dims[0] > 0 && T::elem_d > 0) ? part_elem_dims[0] : 0)
     * ((part_elem_dims[1] > 0 && T::elem_d > 1) ? part_elem_dims[1] : 1)

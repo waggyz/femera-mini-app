@@ -30,8 +30,9 @@ class Elem {//TODO consider pulling P out of the template parameters.
   represent the element geometry. I.e., using higher-order integration than the
   default will not improve the already exact integration performed.
 
-  Elements are defined in 3D by derived classes and arrays reduced as needed
-  to match the simulation spatial dimension template parameter (D).
+  Reference dimensions are defined by derived topologies. Physical coordinate
+  dimensions are supplied by the geometry mapping and need not equal them;
+  canonical reference-coordinate arrays currently store three components.
 
   Node numbering follows Gmsh canonical ordering.
   See: https://gmsh.info/dev/doc/texinfo/gmsh.html#Node-ordering
@@ -99,19 +100,25 @@ class Elem {//TODO consider pulling P out of the template parameters.
   noexcept;
   //
   // Jacobian and polynomial sizes ============================================
+  // Jacobians are stored per integration point as row-major sims_d x elem_d.
+  // jacd_size reserves one additional scalar per point; for a rectangular
+  // Jacobian this scalar is not an ordinary determinant.
   static constexpr
   fmr::Local_int jacs_size (
-    const fmr::Local_int intp_n=1u, const fmr::Dim_int sims_d=3u)
-  noexcept {return intp_n * (sims_d*sims_d);}
+    const fmr::Local_int intp_n=1u, const fmr::Dim_int sims_d=3u,
+    const fmr::Dim_int elem_d=T::elem_d)
+  noexcept {return intp_n * (sims_d*elem_d);}
   static constexpr
   fmr::Local_int jacd_size (
-    const fmr::Local_int intp_n=1, const fmr::Dim_int sims_d=3u)
-  noexcept {return intp_n * (sims_d*sims_d + 1u);}
+    const fmr::Local_int intp_n=1, const fmr::Dim_int sims_d=3u,
+    const fmr::Dim_int elem_d=T::elem_d)
+  noexcept {return intp_n * (sims_d*elem_d + 1u);}
   static constexpr
   fmr::Local_int get_poly_func_size (const fmr::Local_int intp_n=1u) noexcept;
+  // Reference gradients have elem_d components per node.
   static constexpr
   fmr::Local_int get_poly_grad_size (
-    const fmr::Local_int intp_n=1, const fmr::Dim_int sims_d=3u) noexcept;
+    const fmr::Local_int intp_n=1, const fmr::Dim_int elem_d=T::elem_d) noexcept;
   //
 };//end Elem
 

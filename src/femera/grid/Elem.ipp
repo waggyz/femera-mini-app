@@ -24,8 +24,8 @@ constexpr fmr::Local_int elem::Elem<T,P,F>::get_poly_func_size
 }
 template <class T, typename fmr::Dim_int P, typename F>
 constexpr fmr::Local_int elem::Elem<T,P,F>::get_poly_grad_size
-  (const fmr::Local_int intp_n, const fmr::Dim_int this_d) noexcept {
-  return intp_n * get_node_n () * this_d;
+  (const fmr::Local_int intp_n, const fmr::Dim_int elem_d) noexcept {
+  return intp_n * get_node_n () * elem_d;
 }
 template <class T, typename fmr::Dim_int P, typename F>
 constexpr bool elem::Elem<T,P,F>::get_elem_node_coor (F* node_coor,
