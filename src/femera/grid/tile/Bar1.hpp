@@ -20,10 +20,13 @@ private:
   static constexpr fmr::Local_int tile_quad_n = 0;
   static constexpr fmr::Local_int tile_vols_n = 0;
 
-  static constexpr fmr::Local_int tile_alts_n = 1;
+  static constexpr fmr::Local_int tile_alts_n = 2;
 
   static constexpr fmr::Local_int
-  bars_vert_conn [Bar1::tile_alts_n * Bar1::tile_edge_n * 2u] = {0,1};
+  bars_vert_conn [Bar1::tile_alts_n * Bar1::tile_edge_n * 2u] 
+  = { 0,1, // Canonical tile
+      1,0  // Alternate
+    };
   static constexpr fmr::Local_int* tris_vert_conn = nullptr;
   static constexpr fmr::Local_int* quad_vert_conn = nullptr;
   //
@@ -50,11 +53,14 @@ private:
   - For P3, node conn sequence: {3,0,2,1}, {6,3,5,4}, {9,6,8,7},...
 
   Tiling variants:
-  - Standard tiling: consecutive elements along the bar (left to right).
-  - Reversed tiling: consecutive elements along the bar with reversed
+  0 Standard tiling: consecutive elements along the bar (left to right).
+  1 Reversed tiling: consecutive elements along the bar with reversed
     connectivity (right to left).
-  - Alternating tiling: consecutive elements along the bar with alternate
+  2 Alternating tiling: consecutive elements along the bar with alternate
     (reversed) connectivity.
+  3 Alternating like 2, but starting with the alternate, instead of canonical,
+    tile.
+
   - These are not particularly useful for modelling.
   - They are useful for prototyping tiling variants in higher dimensions.
   */

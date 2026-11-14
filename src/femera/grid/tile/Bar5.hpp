@@ -37,19 +37,22 @@ private:
   // Tiling =====================================================================
   static constexpr fmr::Local_int
   bars_vert_conn [Bar5::tile_alts_n * Bar5::tile_edge_n * 2u]
-   = {0,1, 1,2, 2,3, 3,0, 0,2,// Canonical
-      0,1, 1,2, 2,3, 3,0, 1,3 // Alternate //TODO last can be: 3,1
+   = { 0,1, 1,2, 2,3, 3,0, 0,2,// Canonical tile
+       0,1, 1,2, 2,3, 3,0, 1,3 // Alternate //TODO last can be: 3,1
   };
   static constexpr fmr::Local_int* tris_vert_conn = nullptr;
   static constexpr fmr::Local_int* quad_vert_conn = nullptr;
  /*
   Tiling variants:
-  - Standard (canonical) tiling: consecutive elements along the bar (left to right) with
+  0 Standard (canonical) tiling: consecutive elements along the bar (left to right) with
     the diagonal element from bottom left to top right.
-  - Reversed tiling: consecutive elements along the bar (left to right) with
+  1 Reversed tiling: consecutive elements along the bar (left to right) with
     the diagonal element from bottom right to top left.
-  - Alternating tiling: consecutive elements along the bar, alternating between
+  2 Alternating tiling: consecutive elements along the bar, alternating between
     standard and reversed connectivity.
+  3 Alternating like 2, but starting with the alternate, instead of canaonical,
+    tile.
+
   - These are not particularly useful for modelling.
   - They are useful for prototyping and testing tiling variants in higher dimensions.
   */

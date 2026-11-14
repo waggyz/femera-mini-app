@@ -1,6 +1,6 @@
 #include "../../femera.hpp"
 #include "Bar5.hpp"
-#include "../elem/Bars.hpp"// Used for quality test.
+#include "../elem/Bars.hpp"// Used for quality tests.
 
 #include <gtest/gtest.h>
 
