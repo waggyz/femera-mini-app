@@ -11,12 +11,12 @@ class Bars final : public Elem<Bars> {
   friend class Elem;
 private:// Everything should be private, accessible through the Elem interface.
 // Scalars ====================================================================
-  static constexpr fmr::Local_int vert_n = 2;// needed by other elements?
   static constexpr fmr::math::Poly poly_type = fmr::math::Poly::Serendipity;
   //
   static constexpr fmr::Local_int   sims_d = 3;//TODO remove?
   static constexpr fmr::Dim_int   elem_d = 1;
   //
+  static constexpr fmr::Local_int vert_n = 2;
   static constexpr fmr::Local_int edge_n = 1;
   static constexpr fmr::Local_int tris_n = 0;
   static constexpr fmr::Local_int quad_n = 0;
