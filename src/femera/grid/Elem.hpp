@@ -39,11 +39,10 @@ class Elem {//TODO consider pulling P out of the template parameters.
   TODO double-check serendipity elements for the use of face nodes.
   
   Members are constexpr so that everything is kept thread-local to the instance
-  that created it.
+  that created it; constexpr methods are implicitly inline
   */
   public:
-  // Simple constexpr accessors -----------------------------------------------
-  // constexpr methods are implicitly inline
+  // Simple constexpr accessors ===============================================
   static constexpr fmr::math::Poly get_poly_type () noexcept {
     return T::poly_type;}
   static constexpr fmr::Dim_int   get_elem_p () noexcept {return P;}
@@ -64,6 +63,7 @@ class Elem {//TODO consider pulling P out of the template parameters.
   static constexpr fmr::Local_int get_node_n () noexcept;
   //
   // Array constexpr pointers =================================================
+  //
   // Natural element coordinates
   //NOTE these currently return 3D coordinates, regardless of element dimension.
   static constexpr bool get_elem_node_coor (F* node_coor,
