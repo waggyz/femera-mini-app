@@ -4,6 +4,11 @@
 namespace femera { namespace grid { namespace elem {
 //namespace femera { namespace grid {
 
+template <typename F>
+constexpr F Bars::vert_coor[];
+
+template <typename F>
+constexpr F Bars::coor_vert[];
 
 } } }//end femera::grid::elem namespace
 

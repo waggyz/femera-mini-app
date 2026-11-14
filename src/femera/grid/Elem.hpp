@@ -52,12 +52,9 @@ class Elem {//TODO consider pulling P out of the template parameters.
   // constexpr methods are implicitly inline
   static constexpr fmr::math::Poly get_poly_type () noexcept {
     return T::poly_type;}
-  static constexpr fmr::Dim_int get_elem_p () noexcept {return P;}
+  static constexpr fmr::Dim_int   get_elem_p () noexcept {return P;}
   //
-  static constexpr fmr::Dim_int get_elem_d () noexcept {
-    //static_assert( T::elem_d <= D, //NOTE only checked if this function used.
-    //  "Element dimension cannot exceed simulation spatial dimension.");
-    return T::elem_d;}
+  static constexpr fmr::Dim_int   get_elem_d () noexcept {return T::elem_d;}
   static constexpr fmr::Local_int get_vert_n () noexcept {return T::vert_n;}
   static constexpr fmr::Local_int get_edge_n () noexcept {return T::edge_n;}
   static constexpr fmr::Local_int get_tris_n () noexcept {return T::tris_n;}
@@ -67,24 +64,6 @@ class Elem {//TODO consider pulling P out of the template parameters.
   static constexpr F get_edge_l () noexcept {return F(T::edge_l);}
   static constexpr F get_face_a () noexcept {return F(T::face_a);}
   static constexpr F get_elem_v () noexcept {return F(T::elem_v);}
-  //
-  // Non-trivial constexpr scalar member functions ----------------------------
-  static constexpr fmr::Local_int get_face_n () noexcept;
-  static constexpr fmr::Local_int get_node_n () noexcept;
-  //
-  static constexpr
-  fmr::Local_int jacs_size (
-    const fmr::Local_int intp_n=1u, const fmr::Dim_int sims_d=3u
-  ) noexcept {return intp_n * (sims_d*sims_d);}
-  static constexpr
-  fmr::Local_int jacd_size (
-    const fmr::Local_int intp_n=1, const fmr::Dim_int sims_d=3u
-  ) noexcept {return intp_n * (sims_d*sims_d + 1u);}
-  static constexpr
-  fmr::Local_int get_poly_func_size (const fmr::Local_int intp_n=1u) noexcept;
-  static constexpr
-  fmr::Local_int get_poly_grad_size (
-    const fmr::Local_int intp_n=1, const fmr::Dim_int sims_d=3u) noexcept;
   //
   // Array constexpr pointers =================================================
   //NOTE get_vert_conn () is trivial = {0,1,...,get_vert_n()-1}
@@ -98,33 +77,35 @@ class Elem {//TODO consider pulling P out of the template parameters.
   static constexpr const fmr::Local_int* get_quad_conn () noexcept {
     return T::quad_conn;}
   //
+  // Non-trivial constexpr scalar member functions ----------------------------
+  static constexpr fmr::Local_int get_face_n () noexcept;
+  static constexpr fmr::Local_int get_node_n () noexcept;
+  //
+  static constexpr
+  fmr::Local_int jacs_size (
+    const fmr::Local_int intp_n=1u, const fmr::Dim_int sims_d=3u)
+  noexcept {return intp_n * (sims_d*sims_d);}
+  static constexpr
+  fmr::Local_int jacd_size (
+    const fmr::Local_int intp_n=1, const fmr::Dim_int sims_d=3u)
+  noexcept {return intp_n * (sims_d*sims_d + 1u);}
+  static constexpr
+  fmr::Local_int get_poly_func_size (const fmr::Local_int intp_n=1u) noexcept;
+  static constexpr
+  fmr::Local_int get_poly_grad_size (
+    const fmr::Local_int intp_n=1, const fmr::Dim_int sims_d=3u) noexcept;
+  //
   // Natural element coordinates ----------------------------------------------
-  //NOTE these currently return 3D coordinates,
-  //     regardless of element or simulation dimension.
+  //NOTE these currently return 3D coordinates, regardless of element dimension.
   //
   static constexpr bool get_elem_node_coor (F* node_coor,
-    const F* vert_coor = T::vert_coor ) noexcept;
+    const F* vert_coor = T::template vert_coor<F> ) noexcept;
   //
-  //NOTE The following may not be the best way to dispatch.
-  template <typename G=F,
-    typename std::enable_if <std::is_same<G, double>::value>::type* = nullptr>
-  static constexpr const G* get_elem_vert_coor () noexcept {
-    return T::vert_coor;
+  static constexpr const F* get_elem_vert_coor () noexcept {
+    return T::template vert_coor<F>;
   }
-  template <typename G=F,
-    typename std::enable_if <std::is_same<G, double>::value>::type* = nullptr>
-  static constexpr const G* get_elem_coor_vert () noexcept {
-    return T::coor_vert;
-  }
-  template <typename G=F,
-    typename std::enable_if <std::is_same<G, float>::value>::type* = nullptr>
-  static constexpr const G* get_elem_vert_coor () noexcept {
-    return T::vert_coor_f;
-  }
-  template <typename G=F,
-    typename std::enable_if <std::is_same< G,float>::value>::type* = nullptr>
-  static constexpr const G* get_elem_coor_vert () noexcept {
-    return T::coor_vert_f;
+  static constexpr const F* get_elem_coor_vert () noexcept {
+    return T::template coor_vert<F>;
   }
   // Element quality calculations ---------------------------------------------
 #if 0

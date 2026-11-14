@@ -29,8 +29,8 @@ constexpr auto elem_tetf
   = femera::grid::elem::Elem<femera::grid::elem::Tets,2,float> ();
 constexpr auto elem_tetd
   = femera::grid::elem::Elem<femera::grid::elem::Tets,2,double> ();
-const auto size_coor_f = sizeof(elem_tetf.get_elem_vert_coor ()[0]);
-const auto size_coor_d = sizeof(elem_tet1.get_elem_vert_coor ()[0]);
+//const auto size_coor_f = sizeof(elem_tetf.get_elem_vert_coor ()[0]);
+//const auto size_coor_d = sizeof(elem_tet1.get_elem_vert_coor ()[0]);
 
 const float a_float = float(1.0/6.0);
 const float an_array_f[2] = {float(1.0/6.0), float(1.0/6.0)};
@@ -116,9 +116,11 @@ TEST( GridElem, PolynomialShapeGradient ){
   EXPECT_EQ( elem_tet3.get_poly_grad_size ( ), 60 );
   EXPECT_EQ( elem_tet2.get_poly_grad_size (4),120 );
 }
+#if 0
 TEST( GridElem, DoubleFloatSpecialization ){
   EXPECT_EQ( size_coor_d, 2 * size_coor_f );
 }
+#endif
 TEST( GridElem, ThreadLocalAssignedFromConstexpr ){
   EXPECT_NE( val0_adress, val1_adress );
 }

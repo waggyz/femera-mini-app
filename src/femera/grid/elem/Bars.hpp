@@ -32,18 +32,18 @@ private:// Everything should be private, accessible through the Elem interface.
   static constexpr fmr::Local_int* tris_conn = nullptr;
   static constexpr fmr::Local_int* quad_conn = nullptr;
   //
-  static constexpr
-  fmr::Geom_float vert_coor [vert_n * 3u]// transposed coor_vert
+  template <typename F=fmr::Geom_float> static constexpr
+  F vert_coor [vert_n * 3u]// transposed coor_vert (vert major, dims minor)
     = {           // vertex                      //
-    0.0, 0.0, 0.0,// 0       0-------1           //
-    1.0, 0.0, 0.0 // 1                  o--x     //
+    F(0.0), F(0.0), F(0.0),// 0       0-------1           //
+    F(1.0), F(0.0), F(0.0) // 1                  o--x     //
   };
-  static constexpr
-  fmr::Geom_float coor_vert [vert_n * 3u]// transposed vert_coor
+  template <typename F=fmr::Geom_float> static constexpr
+  F coor_vert [vert_n * 3u]// transposed vert_coor (dims major, vert minor)
     = {
-    0.0, 1.0,
-    0.0, 0.0,
-    0.0, 0.0
+    F(0.0), F(1.0),
+    F(0.0), F(0.0),
+    F(0.0), F(0.0)
   };
   /* node_coor_p1 same as vert_coor
   fmr::Geom_float node_coor_p2 [(vert_n+1) * sims_d]// transposed coor_node_p2
