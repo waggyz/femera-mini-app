@@ -116,8 +116,12 @@ class Tile {
       coor, node_i, P, part_elem_dims, tile_size, part_orig);
   }
   static constexpr bool get_tile_part_node_coor (F* coor,
-    const fmr::Local_int node_i, const fmr::Local_int* part_elem_dims,
-    const F* tile_size, const F* part_orig, const TilePattern pattern) noexcept {
+    const fmr::Local_int node_i,
+    const fmr::Local_int* part_elem_dims,
+    const F* tile_size,
+    const F* part_orig,
+    const TilePattern pattern)
+   noexcept {
     return T::calc_tile_part_node_coor (
       coor, node_i, P, part_elem_dims, tile_size, part_orig, pattern);
   }

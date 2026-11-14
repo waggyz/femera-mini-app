@@ -334,5 +334,63 @@ TEST( GridTileBar5, InvalidCoordinatesDoNotWrite ){
   EXPECT_FALSE( (Tile<Bar5>::get_tile_part_node_coor (coor, 0, dims, size, nullptr, {4,0,0})) );
   for (double value : coor) EXPECT_DOUBLE_EQ( value, 99 );
 }
-
+TEST( GridTileBar5, P1P2MeshCompatibleWithFD ){
+  // Compares the node coordinates of P1 and P2 Bar5 meshes with the expected
+  // finite difference (FD) layout.
+  const fmr::Local_int FD3x3_node_n = 3*3; // same as 2x2 element P1 Bar5 mesh
+  const fmr::Local_int FD5x5_node_n = 5*5; // same as 2x2 element P2 Bar5 mesh
+  const fmr::Local_int FD7x7_node_n = 7*7; // same as 2x2 element P3 Bar5 mesh
+  const fmr::Local_int d2x2[3] = {2,2,0};
+  //
+  EXPECT_EQ( (Tile<Bar5, 1>::get_tile_part_node_n (d2x2)), FD3x3_node_n );
+  EXPECT_EQ( (Tile<Bar5, 2>::get_tile_part_node_n (d2x2)), FD5x5_node_n );
+  EXPECT_LT( (Tile<Bar5, 3>::get_tile_part_node_n (d2x2)), FD7x7_node_n );
+  //
+  double node_coor_FD3x3[FD3x3_node_n * 3]
+  = {
+    0.0,0.0,0.0, 1.0,0.0,0.0, 2.0,0.0,0.0,
+    0.0,1.0,0.0, 1.0,1.0,0.0, 2.0,1.0,0.0,
+    0.0,2.0,0.0, 1.0,2.0,0.0, 2.0,2.0,0.0
+  };
+  double node_coor_FD5x5[FD5x5_node_n * 3]
+  = {
+    0.0,0.0,0.0, 0.5,0.0,0.0, 1.0,0.0,0.0, 1.5,0.0,0.0, 2.0,0.0,0.0,
+    0.0,0.5,0.0, 0.5,0.5,0.0, 1.0,0.5,0.0, 1.5,0.5,0.0, 2.0,0.5,0.0,
+    0.0,1.0,0.0, 0.5,1.0,0.0, 1.0,1.0,0.0, 1.5,1.0,0.0, 2.0,1.0,0.0,
+    0.0,1.5,0.0, 0.5,1.5,0.0, 1.0,1.5,0.0, 1.5,1.5,0.0, 2.0,1.5,0.0,
+    0.0,2.0,0.0, 0.5,2.0,0.0, 1.0,2.0,0.0, 1.5,2.0,0.0, 2.0,2.0,0.0
+  };
+  // Node numbering should be tiling pattern invariant for P1 & P2.
+  // Check this by comparing the computed node coordinates with the expected FD coordinates.
+  double tile_node_coor[3] = {0.0, 0.0, 0.0};// init to suppress compile warning
+  double tile_size[3] = {1.0, 1.0, 0.0};
+  double origin[3] = {0.0, 0.0, 0.0};
+  for (fmr::Local_int patvar = 0; patvar < 4; ++patvar) {
+    for (fmr::Local_int offx = 0; offx < 2; ++offx) {
+      for (fmr::Local_int offy = 0; offy < 2; ++offy) {
+        TilePattern pattern = {patvar,offx,offy};
+        for (fmr::Local_int i = 0; i < FD3x3_node_n; ++i) {
+          Tile<Bar5, 1>::get_tile_part_node_coor(tile_node_coor, i, d2x2, tile_size, origin, pattern);
+          for (fmr::Local_int j = 0; j < 3; ++j) {
+            EXPECT_DOUBLE_EQ( tile_node_coor[j], node_coor_FD3x3[3*i + j] );
+          }
+        }
+      }
+    }
+  }
+  for (fmr::Local_int patvar = 0; patvar < 4; ++patvar) {
+    for (fmr::Local_int offx = 0; offx < 2; ++offx) {
+      for (fmr::Local_int offy = 0; offy < 2; ++offy) {
+        TilePattern pattern = {patvar,offx,offy};
+        for (fmr::Local_int i = 0; i < FD5x5_node_n; ++i) {
+          Tile<Bar5, 2>::get_tile_part_node_coor(tile_node_coor, i, d2x2, tile_size, origin, pattern);
+          for (fmr::Local_int j = 0; j < 3; ++j) {
+            EXPECT_DOUBLE_EQ( tile_node_coor[j], node_coor_FD5x5[3*i + j] );
+          }
+        }
+      }
+    }
+  }
+}
+//
 } } } // end namespace femera::grid::tile

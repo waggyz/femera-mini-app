@@ -58,6 +58,23 @@ private:
   Tiles lie in the XY plane: tile_size[0:2] scales x and y, tile_size[2] is
   unused, and a null origin is (0,0,0). Caller supplies valid buffers.
   */
+  /* Node numbering for P1 and P2 grids match finite difference (FD) conventions.
+     The nodes are numbered first along the x-direction, then along the
+     y-direction. P3 grids are *not* compatible with FD because they have "holes"
+     in the node layout. Here are examples for P1 and P2 2x2 element grids:
+     
+      6 --------- 7 --------- 8        20 -- 21 -- 22 -- 23 -- 24
+      |  \        |        /  |         |  \  |  /  |  \  |  /  |
+      |     \     |     /     |        15 -- 16 -- 17 -- 18 -- 19
+      |        \  |  /        |         |  /  |  \  |  /  |  \  |
+      3 --------- 4 --------- 5        10 -- 11 -- 12 -- 13 -- 14
+      |        /  |  \        |         |  \  |  /  |  \  |  /  |
+      |     /     |     \     |         5 --- 6 --- 7 --- 8 --- 9
+      |  /        |        \  |         |  /  |  \  |  /  |  \  |
+      0 --------- 1 --------- 2         0 --- 1 --- 2 --- 3 --- 4
+         2-node Bars P1 grid               3-node Bars P2 grid
+         same as 3x3 FD grid               same as 5x5 FD grid
+   */
   // Partition dimensions count tiles. Counts require positive order and
   // dimensions small enough that all intermediate results fit in Local_int.
   static constexpr fmr::Local_int calc_tile_elem_node_n (
