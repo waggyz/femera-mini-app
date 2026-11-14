@@ -4,15 +4,6 @@
 #include "../../fmr/fmr.hpp"
 #include "../../fmr/math.hpp"
 
-#if 0
-namespace femera {//TODO change this example to support Elem & Tile
-  template <typename> class Grid;      // abstract CRTP base derived from Work
-  namespace grid {                     // CRTP inheritance from Grid
-    class Cell;                        // public interface for discretizations
-    class FEms; class FDms; class FVms;// Femera cell (numerical method) types
-    class BEms; class SGms;            // boudary elem, staggered grid
-} }//end femera::grid:: namespace
-#endif
 namespace femera { namespace grid { namespace elem {//TODO grid -> geom
 //namespace femera { namespace geom { //TODO change to here?
 #if 0
@@ -55,40 +46,6 @@ class Elem {//TODO consider pulling P out of the template parameters.
   //TODO Consider enums for element type, order (# nodes), integration rule.
   //TODO Change to template <class T, Elem_args A, typename F?
   //     But, does this allow enable_if on the struct content? - YES
-#if 0
-  static_assert (D >= T::elem_d,//TODO move to constructor?
-  "Element can only be embedded in a "
-  "simulation of equal or greater spatial dimension.");
-#endif
-  //
-#if 0
-// Should this class remain stateless? //TODO Move to FEms?
-  private:
-  // Element quality criteria: warn if bad.
-  F dets_qual_min = F(0.2);// min (det) / abs (max (det)) at vert_coor
-  // bars,tris,tets: const det > std::numeric_limits<F>::min() [* part_size??]
-  //                          OR std::numeric_limits<F>::epsilon()
-  //NOTE these are all vert_n == elem_d + 1 (when side nodes at natural positions)
-  F edge_qual_min = F(0.2);// shortest / longest edge
-  F skew_qual_min = F(0.6);// = 1.0-skewness [0-1] (quad, cube)
-  F delt_qual_min// ratio of min edge length / max coord absolute value
-  = F(std::numeric_limits<F>::epsilon ());
-  //
-  public:
-  // Simple get / set / compare ----------------------------------------------
-  //
-  F get_dets_tol () const noexcept {return dets_qual_min;}
-  F get_edge_tol () const noexcept {return edge_qual_min;}
-  F get_skew_tol () const noexcept {return skew_qual_min;}
- //
-  F set_dets_tol (const F val) noexcept {return dets_qual_min = F(val);}
-  F set_edge_tol (const F val) noexcept {return edge_qual_min = F(val);}
-  F set_skew_tol (const F val) noexcept {return skew_qual_min = F(val);}
-  //
-  bool is_dets_qual_ok (const F val) const noexcept {return val >= dets_qual_min;}
-  bool is_edge_qual_ok (const F val) const noexcept {return val >= edge_qual_min;}
-  bool is_skew_qual_ok (const F val) const noexcept {return val >= skew_qual_min;}
-#endif
   //
   public:
   // Simple constexpr accessors -----------------------------------------------
@@ -180,23 +137,6 @@ class Elem {//TODO consider pulling P out of the template parameters.
     const F* node_coor, const fmr::Dim_int dims=3, const bool is_squared=false)
   noexcept;
   //
-  // Jacobian and determinant calculations ------------------------------------
-#if 0
-  template <typename Y=F>
-  Y* jatd_naos (const fmr::Local_int intp_n=1,// inverted and transposed
-    // Jacobian & determinants
-    const fmr::Dim_int dims=D, fmr::Local_int node_n=get_node_n (),
-    const F* node_coor) const noexcept;
-  
-  template <typename Y=F>
-  Y* jacs_csoa (const fmr::Local_int intp_n=1,// x1,x2,..., y1,y2,..., z1,z2,...
-    const fmr::Dim_int dims=D, fmr::Local_int node_n=get_node_n (),
-  const F* coor_node) const noexcept;
-  template <typename Y=F>
-  Y* jatd_nsoa (const fmr::Local_int intp_n=1,
-    const fmr::Dim_int dims=D, fmr::Local_int node_n=get_node_n (),
-  const F* coor_node[D*get_node_n ()]) const noexcept;
-#endif
 };//end Elem
 
 } } }//end femera::grid::elem:: namespace
