@@ -339,12 +339,14 @@ TEST( GridTileBar5, P1P2MeshCompatibleWithFD ){
   // finite difference (FD) layout.
   const fmr::Local_int FD3x3_node_n = 3*3; // same as 2x2 element P1 Bar5 mesh
   const fmr::Local_int FD5x5_node_n = 5*5; // same as 2x2 element P2 Bar5 mesh
-  const fmr::Local_int FD7x7_node_n = 7*7; // same as 2x2 element P3 Bar5 mesh
+  const fmr::Local_int FD7x7_node_n = 7*7; // NOT same as 2x2 element P3 Bar5 mesh
   const fmr::Local_int d2x2[3] = {2,2,0};
   //
   EXPECT_EQ( (Tile<Bar5, 1>::get_tile_part_node_n (d2x2)), FD3x3_node_n );
   EXPECT_EQ( (Tile<Bar5, 2>::get_tile_part_node_n (d2x2)), FD5x5_node_n );
   EXPECT_LT( (Tile<Bar5, 3>::get_tile_part_node_n (d2x2)), FD7x7_node_n );
+  // P3 missing 2 nodes / tile
+  EXPECT_EQ( (Tile<Bar5, 3>::get_tile_part_node_n (d2x2)), FD7x7_node_n -2*4);
   //
   double node_coor_FD3x3[FD3x3_node_n * 3]
   = {
@@ -361,7 +363,8 @@ TEST( GridTileBar5, P1P2MeshCompatibleWithFD ){
     0.0,2.0,0.0, 0.5,2.0,0.0, 1.0,2.0,0.0, 1.5,2.0,0.0, 2.0,2.0,0.0
   };
   // Node numbering should be tiling pattern invariant for P1 & P2.
-  // Check this by comparing the computed node coordinates with the expected FD coordinates.
+  // Check this by comparing tiling node coordinates with expected equivalent
+  // FD grid coordinates.
   double tile_node_coor[3] = {0.0, 0.0, 0.0};// init to suppress compile warning
   double tile_size[3] = {1.0, 1.0, 0.0};
   double origin[3] = {0.0, 0.0, 0.0};
