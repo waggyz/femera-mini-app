@@ -46,6 +46,7 @@ local.*
 
 # Folders & FILES
 .venv/
+research-notes/assets/*
 research-notes/femera-v0.1/
 research-notes/femera-v0.2/
 research-notes/femera-prior-work/figs/

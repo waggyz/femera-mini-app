@@ -109,8 +109,7 @@ uint fmr::math::nchoosek (const uint n, const uint k) {
   if (k > n / 2) {return fmr::math::nchoosek (n, n - k);}
   uint res = 1;
   for (uint r = 1; r <= k; ++r) {
-    res *= n - r + 1;
-    res /= r;
+    res = uint(std::uint64_t(res) * (n - r + 1) / r);
   }
   return res;
 #endif
@@ -139,6 +138,9 @@ uint fmr::math::poly_term_n (
  *
  * The function uses a switch statement to determine the type of the polynomial
  * and calculates the number of terms based on the given parameters.
+ * For positive order, Serendipity terms are monomials whose superlinear degree
+ * (the sum of exponents greater than one) is at most pord. Order zero is
+ * treated as a constant polynomial.
  *
  * @throws None
  */
@@ -156,10 +158,13 @@ uint fmr::math::poly_term_n (
 #endif
       break;}
     case math::Poly::Serendipity : {
-      terms = (nvar <=1 ) ? fmr::math::nchoosek (pord + nvar, nvar)// Full
-        : fmr::math::poly_term_n (fmr::math::Poly::Bipoly, nvar, pord);
-      terms-= (pord > 1 && nvar > 1)
-        ? fmr::math::poly_term_n (fmr::math::Poly::Full, nvar, pord - 2) : 0;
+      // Choose d superlinear variables, their exponents, and the remaining
+      // variables' independent linear or constant factors.
+      for (uint d = 0; d <= nvar && d <= pord / 2; ++d) {
+        terms += fmr::math::upow (2, nvar - d)
+          * fmr::math::nchoosek (nvar, d)
+          * fmr::math::nchoosek (pord - d, d);
+      }
       break;}
     case fmr::math::Poly::Bipoly :// Fall through.
     case fmr::math::Poly::Tripoly : {

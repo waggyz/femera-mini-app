@@ -4,6 +4,9 @@
 #include <tuple>
 #include <valarray>
 #include <map>
+#include <cmath>
+#include <cstdint>
+#include <limits>
 #include <immintrin.h>
 #include <string>
 
