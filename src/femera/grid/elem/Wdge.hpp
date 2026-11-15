@@ -13,6 +13,7 @@ public:
   static constexpr fmr::Local_int vert_n = 6;
   static constexpr fmr::Local_int edge_n = 9;
   static constexpr fmr::Local_int tris_n = 2;
+  static constexpr fmr::Local_int cubic_tris_node_n = 2;
   static constexpr fmr::Local_int quad_n = 3;
   static constexpr fmr::Local_int vols_n = 1;
   //
@@ -33,7 +34,7 @@ public:
   };
   static constexpr fmr::Local_int tris_vert_conn [Tris::vert_n * tris_n]
     = { 
-    0,1,2,
+    0,2,1,
     3,4,5
   };
   static constexpr fmr::Local_int quad_vert_conn [Quad::vert_n * quad_n]

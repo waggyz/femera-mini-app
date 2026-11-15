@@ -19,6 +19,7 @@ private:// Everything should be private, accessible through the Elem interface.
   static constexpr fmr::Local_int vert_n = 2;
   static constexpr fmr::Local_int edge_n = 1;
   static constexpr fmr::Local_int tris_n = 0;
+  static constexpr fmr::Local_int cubic_tris_node_n = 0;
   static constexpr fmr::Local_int quad_n = 0;
   static constexpr fmr::Local_int vols_n = 0;
   //

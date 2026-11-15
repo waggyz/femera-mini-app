@@ -13,6 +13,7 @@ public://TODO make protected or private with friend class Elem?
   static constexpr fmr::Local_int vert_n = 4;
   static constexpr fmr::Local_int edge_n = 6;
   static constexpr fmr::Local_int tris_n = 4;
+  static constexpr fmr::Local_int cubic_tris_node_n = 4;
   static constexpr fmr::Local_int quad_n = 0;
   static constexpr fmr::Local_int vols_n = 1;
   //
@@ -27,33 +28,12 @@ public://TODO make protected or private with friend class Elem?
 #undef sqrt2
 #undef sqrt1_5
   //
-  //NOTE Gmsh element conventions
-  //static constexpr
-  //fmr::Local_int vert_conn [vert_n] = {0,1,2,3};
   static constexpr
   fmr::Local_int bars_vert_conn [Elem<Bars>::get_vert_n () * edge_n]
-  = {
-#if 1
-  0,1, 1,2, 2,0, 0,3, 1,3, 2,3
-#endif
-#if 0
-  0,1, 1,2, 2,0, 0,3, 1,3, 2,3//TODO switch in the shape functions?
-#endif
-#if 0
-  0,1, 1,2, 2,0, 0,3, 2,3, 1,3
-#endif
-  };
+  = {0,1, 1,2, 2,0, 3,0, 3,2, 3,1};
   static constexpr
   fmr::Local_int tris_vert_conn [Tris::vert_n * tris_n]
-  = { //TODO the normals point inward. This might be wrong.
-      //     Gmsh defines element faces with outward normals.
-#if 1
-    0,1,2, 0,3,1, 0,2,3, 1,3,2
-#endif
-#if 0
-    0,1,2, 0,3,1, 1,3,2, 0,2,3
-#endif
-  };
+  = {0,2,1, 0,1,3, 0,3,2, 1,2,3};
   static constexpr
   fmr::Local_int* quad_vert_conn = nullptr;
   static constexpr
@@ -85,7 +65,7 @@ public://TODO make protected or private with friend class Elem?
     0.0, 0.5, 0.0,                               //      \  |  /            //
                                                  //       6 | 4     y z x   //
     0.0, 0.0, 0.5,// apex edge nodes             //        \|/       \|/    //
-    0.0, 0.5, 0.5,//TODO switch these last two?  //         0         o     //
+    0.0, 0.5, 0.5,                               //         0         o     //
     0.5, 0.0, 0.5
   };
   static constexpr
@@ -94,7 +74,7 @@ public://TODO make protected or private with friend class Elem?
     0.0, 1.0, 0.0, 0.0,   0.5, 0.5, 0.0,   0.0, 0.0, 0.5,
     0.0, 0.0, 1.0, 0.0,   0.0, 0.5, 0.5,   0.0, 0.5, 0.0,
     0.0, 0.0, 0.0, 1.0,   0.0, 0.0, 0.0,   0.5, 0.5, 0.5};
-  // 0,   1,   2,   3,     4,   5,   6,     7,   8,   9 TODO switch col. 8 & 9?
+  // 0,   1,   2,   3,     4,   5,   6,     7,   8,   9
 #define f13 1.0/3.0
 #define f23 2.0/3.0
   static constexpr
@@ -129,7 +109,7 @@ public://TODO make protected or private with friend class Elem?
     //
 #endif
 #if 1
-    // Gmsh node numbering
+    // Vertex, directed-edge, then face node ordering.
     0.0, 0.0, 0.0,// 1 vertes nodes
     1.0, 0.0, 0.0,// 2
     0.0, 1.0, 0.0,// 3
@@ -175,7 +155,7 @@ public://TODO make protected or private with friend class Elem?
     0.0, f13, f13, f13
 #endif
 #if 1
-    // Gmsh node order
+    // Vertex, directed-edge, then face node ordering.
     0.0, 1.0, 0.0, 0.0,// x-ordinates
     f13, f23, f23, f13, 0.0, 0.0,
     0.0, 0.0, 0.0, 0.0, f13, f23,

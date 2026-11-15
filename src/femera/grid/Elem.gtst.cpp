@@ -13,6 +13,9 @@
 #include "elem/Cube.hpp"
 #include "elem/Prmd.hpp"
 #include "elem/Wdge.hpp"
+#include "elem/Itri.hpp"
+#include "elem/Ibar.hpp"
+#include "elem/Iqud.hpp"
 #endif
 
 #include <gtest/gtest.h>
@@ -92,7 +95,7 @@ TEST( GridElem, SerendipityElementNodeCounts ){
   //
   EXPECT_EQ( (Elem<Tris,1>::get_node_n ()), 3 );
   EXPECT_EQ( (Elem<Tris,2>::get_node_n ()), 6 );
-  EXPECT_EQ( (Elem<Tris,3>::get_node_n ()), 9 );
+  EXPECT_EQ( (Elem<Tris,3>::get_node_n ()), 10 );
   //
   EXPECT_EQ( (Elem<Quad,1>::get_node_n ()), 4 );
   EXPECT_EQ( (Elem<Quad,2>::get_node_n ()), 8 );
@@ -108,11 +111,249 @@ TEST( GridElem, SerendipityElementNodeCounts ){
   //
   EXPECT_EQ( (Elem<Prmd,1>::get_node_n ()), 5 );
   EXPECT_EQ( (Elem<Prmd,2>::get_node_n ()), 13 );
-  EXPECT_EQ( (Elem<Prmd,3>::get_node_n ()), 21 );//TODO incorrect calc by Elem?
+  EXPECT_EQ( (Elem<Prmd,3>::get_node_n ()), 21 );
   //
   EXPECT_EQ( (Elem<Wdge,1>::get_node_n ()), 6 );
   EXPECT_EQ( (Elem<Wdge,2>::get_node_n ()), 15 );
   EXPECT_EQ( (Elem<Wdge,3>::get_node_n ()), 26 );
+  EXPECT_EQ( (Elem<Ibar,3>::get_node_n ()), 8 );
+  EXPECT_EQ( (Elem<Itri,3>::get_node_n ()), 20 );
+  EXPECT_EQ( (Elem<Iqud,3>::get_node_n ()), 24 );
+}
+
+template <class T, std::size_t N>
+void check_solid_topology(const fmr::Local_int (&expected_edges)[N]) {
+  using E = Elem<T>;
+  const auto* edges = E::get_bars_vert_conn();
+  const auto* vertices = T::vert_coor;
+  const auto* transposed = T::coor_vert;
+  ASSERT_EQ(N, 2u*E::get_edge_n());
+  ASSERT_NE(edges, nullptr);
+  EXPECT_EQ(E::get_tris_vert_conn() == nullptr, E::get_tris_n() == 0);
+  EXPECT_EQ(E::get_quad_vert_conn() == nullptr, E::get_quad_n() == 0);
+  EXPECT_EQ(int(E::get_vert_n())-int(E::get_edge_n())+int(E::get_face_n()), 2);
+  double center[3] = {};
+  for (fmr::Local_int v=0; v<E::get_vert_n(); ++v) {
+    for (int d=0; d<3; ++d) {
+      EXPECT_DOUBLE_EQ(vertices[3*v+d], transposed[d*E::get_vert_n()+v]);
+      center[d] += vertices[3*v+d]/E::get_vert_n();
+    }
+  }
+  for (std::size_t i=0; i<N; ++i) EXPECT_EQ(edges[i], expected_edges[i]);
+  for (fmr::Local_int e=0; e<E::get_edge_n(); ++e) {
+    ASSERT_LT(edges[2*e], E::get_vert_n());
+    ASSERT_LT(edges[2*e+1], E::get_vert_n());
+    ASSERT_NE(edges[2*e], edges[2*e+1]);
+    for (fmr::Local_int f=0; f<e; ++f) {
+      EXPECT_FALSE((edges[2*e] == edges[2*f] && edges[2*e+1] == edges[2*f+1])
+        || (edges[2*e] == edges[2*f+1] && edges[2*e+1] == edges[2*f]));
+    }
+  }
+  int incidence[12] = {};
+  int orientation[12] = {};
+  for (int kind=0; kind<2; ++kind) {
+    const int size = kind == 0 ? 3 : 4;
+    const auto count = kind == 0 ? E::get_tris_n() : E::get_quad_n();
+    const auto* faces = kind == 0 ? E::get_tris_vert_conn() : E::get_quad_vert_conn();
+    for (fmr::Local_int f=0; f<count; ++f) {
+      const auto* face = faces+f*size;
+      for (fmr::Local_int previous=0; previous<f; ++previous) {
+        int shared = 0;
+        for (int i=0; i<size; ++i) for (int j=0; j<size; ++j) {
+          if (face[i] == faces[previous*size+j]) ++shared;
+        }
+        EXPECT_NE(shared, size);
+      }
+      double centroid[3] = {};
+      for (int i=0; i<size; ++i) {
+        ASSERT_LT(face[i], E::get_vert_n());
+        for (int j=0; j<i; ++j) ASSERT_NE(face[i], face[j]);
+        for (int d=0; d<3; ++d) centroid[d] += vertices[3*face[i]+d]/size;
+        const auto a = face[i], b = face[(i+1)%size];
+        int found = -1;
+        for (fmr::Local_int e=0; e<E::get_edge_n(); ++e) {
+          if ((edges[2*e] == a && edges[2*e+1] == b)
+            || (edges[2*e] == b && edges[2*e+1] == a)) found = int(e);
+        }
+        ASSERT_GE(found, 0);
+        ++incidence[found];
+        orientation[found] += edges[2*found] == a ? 1 : -1;
+      }
+      double first_normal[3] = {};
+      for (int triangle=0; triangle<size-2; ++triangle) {
+        double normal[3] = {};
+        ASSERT_TRUE(fmr::math::tri3_norm(normal, vertices+3*face[0],
+          vertices+3*face[triangle+1], vertices+3*face[triangle+2]));
+        double outward = 0, alignment = 0;
+        for (int d=0; d<3; ++d) {
+          outward += normal[d]*(centroid[d]-center[d]);
+          alignment += normal[d]*first_normal[d];
+          if (triangle == 0) first_normal[d] = normal[d];
+        }
+        EXPECT_GT(outward, 1e-12);
+        if (triangle > 0) {
+          EXPECT_NEAR(alignment, 1.0, 1e-12);
+        }
+      }
+    }
+  }
+  for (fmr::Local_int e=0; e<E::get_edge_n(); ++e) {
+    EXPECT_EQ(incidence[e], 2);
+    EXPECT_EQ(orientation[e], 0);
+  }
+}
+
+TEST( GridElem, SolidTopologyAndOutwardFaceNormals ){
+  const fmr::Local_int tets[] = {0,1, 1,2, 2,0, 3,0, 3,2, 3,1};
+  const fmr::Local_int prmd[] = {0,1, 1,2, 2,3, 3,0, 0,4, 1,4, 2,4, 3,4};
+  const fmr::Local_int wdge[] = {0,1, 1,2, 2,0, 3,4, 4,5, 5,3, 0,3, 1,4, 2,5};
+  const fmr::Local_int cube[] = {0,1, 1,2, 2,3, 3,0, 4,5, 5,6, 6,7, 7,4,
+    0,4, 1,5, 2,6, 3,7};
+  check_solid_topology<Tets>(tets);
+  check_solid_topology<Prmd>(prmd);
+  check_solid_topology<Wdge>(wdge);
+  check_solid_topology<Cube>(cube);
+}
+
+template <class T, std::size_t N>
+void check_planar_topology(const fmr::Local_int (&expected_edges)[N],
+  const fmr::Local_int* face, fmr::Local_int face_size) {
+  using E = Elem<T>;
+  const auto* edges = E::get_bars_vert_conn();
+  ASSERT_EQ(N, 2u*E::get_edge_n());
+  ASSERT_EQ(face_size, E::get_vert_n());
+  ASSERT_NE(face, nullptr);
+  for (std::size_t i=0; i<N; ++i) EXPECT_EQ(edges[i], expected_edges[i]);
+  for (fmr::Local_int v=0; v<E::get_vert_n(); ++v) {
+    EXPECT_EQ(face[v], v);
+    for (int d=0; d<3; ++d) {
+      EXPECT_DOUBLE_EQ(T::vert_coor[3*v+d], T::coor_vert[d*E::get_vert_n()+v]);
+    }
+  }
+  for (fmr::Local_int edge=0; edge<E::get_edge_n(); ++edge) {
+    EXPECT_EQ(edges[2*edge], face[edge]);
+    EXPECT_EQ(edges[2*edge+1], face[(edge+1)%face_size]);
+  }
+  double normal[3] = {};
+  ASSERT_TRUE(fmr::math::tri3_norm(normal, T::vert_coor+3*face[0],
+    T::vert_coor+3*face[1], T::vert_coor+3*face[2]));
+  EXPECT_NEAR(normal[0], 0, 1e-14);
+  EXPECT_NEAR(normal[1], 0, 1e-14);
+  EXPECT_NEAR(normal[2], 1, 1e-14);
+  if (face_size == 4) {
+    ASSERT_TRUE(fmr::math::tri3_norm(normal, T::vert_coor+3*face[0],
+      T::vert_coor+3*face[2], T::vert_coor+3*face[3]));
+    EXPECT_NEAR(normal[2], 1, 1e-14);
+  }
+}
+TEST( GridElem, PlanarSolidTopology ){
+  const fmr::Local_int tris[] = {0,1, 1,2, 2,0};
+  const fmr::Local_int quad[] = {0,1, 1,2, 2,3, 3,0};
+  EXPECT_EQ((Elem<Tris>::get_quad_vert_conn()), nullptr);
+  EXPECT_EQ((Elem<Quad>::get_tris_vert_conn()), nullptr);
+  check_planar_topology<Tris>(tris, Tris::tris_vert_conn, 3);
+  check_planar_topology<Quad>(quad, Quad::quad_vert_conn, 4);
+}
+
+template <class T>
+void check_cubic_coordinates(const double* vertices, int face_nodes) {
+  using E = Elem<T,3>;
+  double storage[3*32+2] = {};
+  const int count = E::get_node_n();
+  storage[0] = 123;
+  storage[3*count+1] = 456;
+  ASSERT_TRUE(E::get_elem_node_coor(storage+1, vertices));
+  EXPECT_DOUBLE_EQ(storage[0], 123);
+  EXPECT_DOUBLE_EQ(storage[3*count+1], 456);
+  for (int v=0; v<int(E::get_vert_n()); ++v) {
+    for (int d=0; d<3; ++d) EXPECT_DOUBLE_EQ(storage[1+3*v+d], vertices[3*v+d]);
+  }
+  for (int e=0; e<int(E::get_edge_n()); ++e) {
+    const auto a = E::get_bars_vert_conn()[2*e];
+    const auto b = E::get_bars_vert_conn()[2*e+1];
+    for (int i=0; i<2; ++i) for (int d=0; d<3; ++d) {
+      const double expected = ((2-i)*vertices[3*a+d] + (i+1)*vertices[3*b+d])/3;
+      EXPECT_NEAR(storage[1+3*(E::get_vert_n()+2*e+i)+d], expected, 1e-14);
+    }
+  }
+  ASSERT_EQ(count, int(E::get_vert_n()+2*E::get_edge_n())+face_nodes);
+  for (int face=0; face<face_nodes; ++face) for (int d=0; d<3; ++d) {
+    const auto conn = E::get_tris_vert_conn()+3*face;
+    const double expected = (vertices[3*conn[0]+d] + vertices[3*conn[1]+d]
+      + vertices[3*conn[2]+d])/3;
+    EXPECT_NEAR(storage[1+3*(E::get_vert_n()+2*E::get_edge_n()+face)+d],
+      expected, 1e-14);
+  }
+}
+
+TEST( GridElem, CubicNodeCoordinateBoundsAndOrdering ){
+  check_cubic_coordinates<Tris>(Tris::vert_coor, 1);
+  check_cubic_coordinates<Quad>(Quad::vert_coor, 0);
+  check_cubic_coordinates<Tets>(Tets::vert_coor, 4);
+  check_cubic_coordinates<Cube>(Cube::vert_coor, 0);
+  check_cubic_coordinates<Prmd>(Prmd::vert_coor, 0);
+  check_cubic_coordinates<Wdge>(Wdge::vert_coor, 2);
+  check_cubic_coordinates<Itri>(Itri::vert_coor, 2);
+}
+template <class T>
+void check_quadratic_coordinates(const double* vertices) {
+  using E = Elem<T,2>;
+  double storage[3*32+2] = {};
+  const auto count = E::get_node_n();
+  storage[0] = 123;
+  storage[3*count+1] = 456;
+  ASSERT_TRUE(E::get_elem_node_coor(storage+1, vertices));
+  EXPECT_DOUBLE_EQ(storage[0], 123);
+  EXPECT_DOUBLE_EQ(storage[3*count+1], 456);
+  for (fmr::Local_int e=0; e<E::get_edge_n(); ++e) {
+    const auto a = E::get_bars_vert_conn()[2*e];
+    const auto b = E::get_bars_vert_conn()[2*e+1];
+    for (int d=0; d<3; ++d) {
+      EXPECT_NEAR(storage[1+3*(E::get_vert_n()+e)+d],
+        (vertices[3*a+d]+vertices[3*b+d])/2, 1e-14);
+    }
+  }
+}
+TEST( GridElem, QuadraticSolidNodeCoordinates ){
+  check_quadratic_coordinates<Tets>(Tets::vert_coor);
+  check_quadratic_coordinates<Prmd>(Prmd::vert_coor);
+  check_quadratic_coordinates<Wdge>(Wdge::vert_coor);
+  check_quadratic_coordinates<Cube>(Cube::vert_coor);
+}
+template <class T>
+void check_linear_coordinates(const double* vertices) {
+  using E = Elem<T,1>;
+  double storage[3*8+2] = {};
+  const auto count = E::get_node_n();
+  storage[0] = 123;
+  storage[3*count+1] = 456;
+  ASSERT_EQ(count, E::get_vert_n());
+  ASSERT_TRUE(E::get_elem_node_coor(storage+1, vertices));
+  EXPECT_DOUBLE_EQ(storage[0], 123);
+  EXPECT_DOUBLE_EQ(storage[3*count+1], 456);
+  for (fmr::Local_int i=0; i<3*count; ++i) {
+    EXPECT_DOUBLE_EQ(storage[1+i], vertices[i]);
+  }
+}
+TEST( GridElem, LinearSolidNodeCoordinates ){
+  check_linear_coordinates<Tets>(Tets::vert_coor);
+  check_linear_coordinates<Prmd>(Prmd::vert_coor);
+  check_linear_coordinates<Wdge>(Wdge::vert_coor);
+  check_linear_coordinates<Cube>(Cube::vert_coor);
+}
+TEST( GridElem, InterfaceBarReferenceCoordinateStride ){
+  double storage[26] = {};
+  storage[0] = 123;
+  storage[25] = 456;
+  ASSERT_EQ((Elem<Ibar,3>::get_node_n()), 8);
+  ASSERT_TRUE((Elem<Ibar,3>::get_elem_node_coor(storage+1)));
+  EXPECT_DOUBLE_EQ(storage[0], 123);
+  EXPECT_DOUBLE_EQ(storage[25], 456);
+  const double expected[24] = {
+    0,0,0, 1,0,0, 0,0,0, 1,0,0,
+    1.0/3,0,0, 2.0/3,0,0, 1.0/3,0,0, 2.0/3,0,0
+  };
+  for (int i=0; i<24; ++i) EXPECT_NEAR(storage[1+i], expected[i], 1e-14);
 }
 }}}//end namespace femera::grid::elem
 TEST( GridElem, JacdSizeTest ){

@@ -3,6 +3,7 @@
 
 #include "../../fmr/fmr.hpp"
 #include "../../fmr/math.hpp"
+#include <type_traits>
 
 namespace femera { namespace grid { namespace elem {//TODO grid -> geom
 //namespace femera { namespace geom { //TODO change to here?
@@ -37,6 +38,32 @@ class Elem {//TODO consider pulling P out of the template parameters.
   Members are constexpr so that everything is kept thread-local to the instance
   that created it; constexpr methods are implicitly inline
   */
+  private:
+  template <class U> static
+  auto has_fixed_coor (int) -> decltype((void) U::vert_coor, std::true_type{});
+  template <class U> static std::false_type has_fixed_coor (...);
+  template <class U> static constexpr
+  const F* vert_coor_ptr (std::false_type) noexcept {
+    return &U::template vert_coor<F>[0];
+  }
+  template <class U> static constexpr
+  const F* vert_coor_ptr (std::true_type) noexcept {
+    return &U::vert_coor[0];
+  }
+  template <class U> static constexpr
+  const F* coor_vert_ptr (std::false_type) noexcept {
+    return &U::template coor_vert<F>[0];
+  }
+  template <class U> static constexpr
+  const F* coor_vert_ptr (std::true_type) noexcept {
+    return &U::coor_vert[0];
+  }
+  template <class U> static constexpr
+  auto coor_stride (int) noexcept -> decltype(U::sims_d) { return U::sims_d; }
+  template <class U> static constexpr
+  fmr::Dim_int coor_stride (...) noexcept { return 3; }
+  static constexpr bool get_elem_node_coor_impl
+    (F* node_coor, const F* vert_coor, fmr::Dim_int stride) noexcept;
   public:
   // Simple constexpr accessors ===============================================
   static constexpr fmr::math::Poly get_poly_type () noexcept {
@@ -61,21 +88,30 @@ class Elem {//TODO consider pulling P out of the template parameters.
   // Array constexpr pointers =================================================
   //
   // Natural element coordinates
-  //NOTE these currently return 3D coordinates, regardless of element dimension.
+  // Node coordinates use three components; supplied vertex coordinates do too.
   static constexpr bool get_elem_node_coor (F* node_coor,
-    const F* vert_coor = T::template vert_coor<F> ) noexcept;
+    const F* vert_coor) noexcept {
+    return get_elem_node_coor_impl(node_coor, vert_coor, 3);
+  }
+  static constexpr bool get_elem_node_coor (F* node_coor) noexcept {
+    return get_elem_node_coor_impl(node_coor,
+      vert_coor_ptr<T>(decltype(has_fixed_coor<T>(0)){}), coor_stride<T>(0));
+  }
   //
+  // Vertex arrays use the topology's stored coordinate stride.
   static constexpr const F* get_elem_vert_coor ()// vert major, dims minor
-  noexcept { return T::template vert_coor<F>;// transposed coor_vert
+  noexcept { return vert_coor_ptr<T>(decltype(has_fixed_coor<T>(0)){});// transposed coor_vert
   }
   static constexpr const F* get_elem_coor_vert ()// dims major, vert minor
-  noexcept { return T::template coor_vert<F>;// (transposed vert_coor)
+  noexcept { return coor_vert_ptr<T>(decltype(has_fixed_coor<T>(0)){});// (transposed vert_coor)
   }
   // Element constituent connectivity
   //NOTE get_vert_conn () is trivial = {0,1,...,get_vert_n()-1}
   //     get_node_conn () is trivial = {0,1,...,get_node_n()-1}
   //
   //NOTE the following are all only vertex connectivity (p==1) arrays.
+  // Edge directions determine the order of higher-order edge nodes.
+  // Solid face vertices wind counter-clockwise as viewed from outside.
   static constexpr const fmr::Local_int* get_bars_vert_conn () noexcept {
     return T::bars_vert_conn;}
   static constexpr const fmr::Local_int* get_tris_vert_conn () noexcept {

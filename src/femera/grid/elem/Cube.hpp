@@ -12,6 +12,7 @@ public:
   static constexpr fmr::Local_int vert_n = 8;
   static constexpr fmr::Local_int edge_n =12;
   static constexpr fmr::Local_int tris_n = 0;
+  static constexpr fmr::Local_int cubic_tris_node_n = 0;
   static constexpr fmr::Local_int quad_n = 6;
   static constexpr fmr::Local_int vols_n = 1;
   //
@@ -31,12 +32,12 @@ public:
   static constexpr fmr::Local_int* tris_vert_conn = nullptr;
   static constexpr fmr::Local_int  quad_vert_conn [Quad::vert_n * quad_n]
     = { 
-    0,1,2,3,
-    7,6,5,4,
-    0,4,5,1,
-    1,5,6,2,
-    2,6,7,3,
-    3,7,4,0
+    0,3,2,1,
+    7,4,5,6,
+    0,1,5,4,
+    1,2,6,5,
+    2,3,7,6,
+    3,0,4,7
   };
   static constexpr
   fmr::Geom_float vert_coor [vert_n * sims_d]// transposed coor_vert

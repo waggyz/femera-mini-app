@@ -13,6 +13,7 @@ public:
   static constexpr fmr::Local_int vert_n = 6;
   static constexpr fmr::Local_int edge_n = 6;
   static constexpr fmr::Local_int tris_n = 2;
+  static constexpr fmr::Local_int cubic_tris_node_n = 2;
   static constexpr fmr::Local_int quad_n = 0;
   static constexpr fmr::Local_int vols_n = 1;
   //
@@ -63,4 +64,3 @@ public:
 
 //end FEMERA_HAS_GRID_ELEM_ITRI_HPP
 #endif
-

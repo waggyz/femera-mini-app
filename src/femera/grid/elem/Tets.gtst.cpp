@@ -1,6 +1,7 @@
 #include "../../femera.hpp"
 #include "../Elem.test.hpp"
 #include "Tets.hpp"
+#include "../../../fmr/fems/elem-poly.hpp"
 
 #include <gtest/gtest.h>
 
@@ -199,6 +200,102 @@ TEST( GridElemTets, CoorTranspose ){
   EXPECT_EQ( tet10_tranpose_bad, 0 );
   EXPECT_EQ( tet20_tranpose_bad, 0 );
 }
+TEST( GridElemTets, NodeOrderingAndBasisAgreement ){
+  using femera::grid::elem::Elem;
+  using femera::grid::elem::Tets;
+  double p2[30] = {}, p3[60] = {};
+  ASSERT_TRUE((Elem<Tets,2>::get_elem_node_coor(p2)));
+  ASSERT_TRUE((Elem<Tets,3>::get_elem_node_coor(p3)));
+  for (int i=0; i<30; ++i) EXPECT_NEAR(p2[i], Tets::tet10_coor[i], 1e-14);
+  for (int i=0; i<60; ++i) EXPECT_NEAR(p3[i], Tets::tet20_coor[i], 1e-14);
+  for (int n=0; n<10; ++n) {
+    double values[10] = {};
+    Tets::calc_poly_func_10(values, p2+3*n);
+    for (int i=0; i<10; ++i) EXPECT_NEAR(values[i], i==n ? 1.0 : 0.0, 1e-13);
+  }
+  for (int n=0; n<20; ++n) {
+    double values[20] = {};
+    Tets::calc_poly_func_20(values, p3+3*n);
+    for (int i=0; i<20; ++i) EXPECT_NEAR(values[i], i==n ? 1.0 : 0.0, 1e-13);
+  }
+  const double points[2][3] = {{0.13,0.21,0.17}, {0.4,0.1,0.2}};
+  for (const auto& x : points) {
+    double g2[30] = {}, g3[60] = {};
+    Tets::calc_poly_grad_node_10(g2, x);
+    Tets::calc_poly_grad_node_20(g3, x);
+    for (int d=0; d<3; ++d) {
+      double plus[3] = {x[0],x[1],x[2]}, minus[3] = {x[0],x[1],x[2]};
+      plus[d] += 1e-6;
+      minus[d] -= 1e-6;
+      double f2p[10] = {}, f2m[10] = {}, f3p[20] = {}, f3m[20] = {};
+      Tets::calc_poly_func_10(f2p, plus);
+      Tets::calc_poly_func_10(f2m, minus);
+      Tets::calc_poly_func_20(f3p, plus);
+      Tets::calc_poly_func_20(f3m, minus);
+      for (int i=0; i<10; ++i) EXPECT_NEAR(g2[d*10+i], (f2p[i]-f2m[i])/2e-6, 1e-8);
+      for (int i=0; i<20; ++i) EXPECT_NEAR(g3[d*20+i], (f3p[i]-f3m[i])/2e-6, 1e-8);
+    }
+  }
+}
+TEST( GridElemTets, CubicTriangularFaceTraces ){
+  using femera::grid::elem::Tets;
+  for (int face=0; face<4; ++face) {
+    const auto* vertices = Tets::tris_vert_conn+3*face;
+    int mapping[10] = {int(vertices[0]), int(vertices[1]), int(vertices[2])};
+    for (int edge=0; edge<3; ++edge) {
+      const auto a = vertices[edge], b = vertices[(edge+1)%3];
+      int matched = -1;
+      bool reversed = false;
+      for (int e=0; e<6; ++e) {
+        const auto start = Tets::bars_vert_conn[2*e];
+        const auto end = Tets::bars_vert_conn[2*e+1];
+        if ((start == a && end == b) || (start == b && end == a)) {
+          matched = e;
+          reversed = start != a;
+        }
+      }
+      ASSERT_GE(matched, 0);
+      mapping[3+2*edge] = 4+2*matched+(reversed ? 1 : 0);
+      mapping[4+2*edge] = 4+2*matched+(reversed ? 0 : 1);
+    }
+    mapping[9] = 16+face;
+    const double points[2][3] = {{0.13,0.27,0}, {0.52,0.21,0}};
+    for (const auto& uv : points) {
+      double x[3] = {}, tangent[2][3] = {};
+      for (int d=0; d<3; ++d) {
+        const double a = Tets::vert_coor[3*vertices[0]+d];
+        tangent[0][d] = Tets::vert_coor[3*vertices[1]+d]-a;
+        tangent[1][d] = Tets::vert_coor[3*vertices[2]+d]-a;
+        x[d] = a+uv[0]*tangent[0][d]+uv[1]*tangent[1][d];
+      }
+      double tri[10] = {}, tri_grad[20] = {}, tet[20] = {}, tet_grad[60] = {};
+      fmr::fems::elem::calc_poly_func_T2D10N(tri, uv);
+      fmr::fems::elem::calc_poly_grad_node_T2D10N(tri_grad, uv);
+      Tets::calc_poly_func_20(tet, x);
+      Tets::calc_poly_grad_node_20(tet_grad, x);
+      for (int i=0; i<10; ++i) {
+        EXPECT_NEAR(tri[i], tet[mapping[i]], 1e-13);
+        for (int d=0; d<2; ++d) {
+          double derivative = 0;
+          for (int k=0; k<3; ++k) derivative += tet_grad[20*k+mapping[i]]*tangent[d][k];
+          EXPECT_NEAR(tri_grad[2*i+d], derivative, 1e-13);
+        }
+      }
+      for (int i=0; i<20; ++i) {
+        bool on_face = false;
+        for (int j=0; j<10; ++j) if (mapping[j] == i) on_face = true;
+        if (!on_face) {
+          EXPECT_NEAR(tet[i], 0, 1e-13);
+          for (int d=0; d<2; ++d) {
+            double derivative = 0;
+            for (int k=0; k<3; ++k) derivative += tet_grad[20*k+i]*tangent[d][k];
+            EXPECT_NEAR(derivative, 0, 1e-13);
+          }
+        }
+      }
+    }
+  }
+}
 namespace femera { namespace grid { namespace elem {
 
 TEST( GridCellElemTet, FaceNormalVerts ){
@@ -228,20 +325,20 @@ TEST( GridCellElemTet, FaceNormalTris ){
   EXPECT_EQ( tri3_norm_str (
     &Tets::vert_coor [3* Tets::tris_vert_conn [0]],
     &Tets::vert_coor [3* Tets::tris_vert_conn [1]],
-    &Tets::vert_coor [3* Tets::tris_vert_conn [2]]), "+z" );
+    &Tets::vert_coor [3* Tets::tris_vert_conn [2]]), "-z" );
   EXPECT_EQ( tri3_norm_str (
     &Tets::vert_coor [3* Tets::tris_vert_conn [3]],
     &Tets::vert_coor [3* Tets::tris_vert_conn [4]],
-    &Tets::vert_coor [3* Tets::tris_vert_conn [5]]), "+y" );
+    &Tets::vert_coor [3* Tets::tris_vert_conn [5]]), "-y" );
   EXPECT_EQ( tri3_norm_str (
     &Tets::vert_coor [3* Tets::tris_vert_conn [6]],
     &Tets::vert_coor [3* Tets::tris_vert_conn [7]],
-    &Tets::vert_coor [3* Tets::tris_vert_conn [8]]), "+x" );
+    &Tets::vert_coor [3* Tets::tris_vert_conn [8]]), "-x" );
   EXPECT_EQ( tri3_norm_str (
     &Tets::vert_coor [3* Tets::tris_vert_conn [ 9]],
     &Tets::vert_coor [3* Tets::tris_vert_conn [10]],
     &Tets::vert_coor [3* Tets::tris_vert_conn [11]]),
-    "[-0.577350, -0.577350, -0.577350]" );
+    "[0.577350, 0.577350, 0.577350]" );
 }
 
 } } }//end femera::grid::elem:: namespace

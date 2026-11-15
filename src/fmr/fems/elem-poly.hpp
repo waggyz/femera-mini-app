@@ -52,6 +52,25 @@ namespace fmr { namespace fems { namespace elem {
   Y* calc_poly_node_grad_C1D4N (Y g[4u], const G x[3u]) noexcept;// reference-major
   //...and so on up to 5-pt rules
   //
+  // Cubic triangles: vertices 0,1,2; directed edges 0-1, 1-2, 2-0.
+  // T2D10N also has an interior node; T2D9N is the incomplete variant.
+  // Reference vertices: (0,0), (1,0), (0,1).
+  // T2D9N constrains the T2D10N interior value to -sum(vertices)/6
+  // + sum(edge nodes)/4; it reproduces P2 but not all cubic polynomials.
+  template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
+  Y* calc_poly_func_T2D9N (Y f[9u], const G x[3u]) noexcept;
+  template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
+  Y* calc_poly_grad_node_T2D9N (Y g[18u], const G x[3u]) noexcept;// node-major
+  template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
+  Y* calc_poly_node_grad_T2D9N (Y g[18u], const G x[3u]) noexcept;// reference-major
+  //
+  template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
+  Y* calc_poly_func_T2D10N (Y f[10u], const G x[3u]) noexcept;
+  template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
+  Y* calc_poly_grad_node_T2D10N (Y g[20u], const G x[3u]) noexcept;// node-major
+  template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
+  Y* calc_poly_node_grad_T2D10N (Y g[20u], const G x[3u]) noexcept;// reference-major
+  //
   template <typename Y, typename G> static constexpr
   Y* calc_poly_func_C2D4N (Y f[2u], const G x[3u]) noexcept;// Linear 2-node bar
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr

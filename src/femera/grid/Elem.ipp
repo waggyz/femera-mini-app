@@ -12,9 +12,7 @@ constexpr fmr::Local_int elem::Elem<T,P,F>::get_node_n () noexcept {
   // Handles solid and interface elements
   return T::vert_n// vertex nodes
     + (P -1) * T::edge_n// edge nodes
-    + (((P<3) || (T::quad_n==1)) ? 0 : (T::vols_n * T::tris_n));
-    // face nodes for P==3 tets and Wdge (only)
-    // vols_n is 0 (1D,2D elems) or 1 (3D solid elems)
+    + ((P<3) ? 0 : T::cubic_tris_node_n);
 }
 // Element shape function and Jacobian stuff ==================================
 //
@@ -29,23 +27,22 @@ constexpr fmr::Local_int elem::Elem<T,P,F>::get_poly_grad_size
   return intp_n * get_node_n () * elem_d;
 }
 template <class T, typename fmr::Dim_int P, typename F>
-constexpr bool elem::Elem<T,P,F>::get_elem_node_coor (F* node_coor,
-  const F* vert_coor) noexcept {// 3D coordinates
+constexpr bool elem::Elem<T,P,F>::get_elem_node_coor_impl (F* node_coor,
+  const F* vert_coor, fmr::Dim_int stride) noexcept {
   //NOTE Caller checks array bounds:
   //     node_coor is size get_node_n() * 3
-  //     vert_coor is size get_vert_n() * 3.
+  //     vert_coor has get_vert_n() vertices with the supplied stride.
   //
   // Calculate this based on get_elem_coor_vert () and element constituents:
   // concatenate elem_conn {0,1,...,vert_n-1} coordinates, then,
   // for P>1, follow get_bars_vert_conn () calculate edge node coordinates, and 
-  // for P>2, follow get_tris_vert_conn (), get_quad_vert_conn () for face node
-  // coordinates.
-  // Interior volume nodes not needed for serendipity elements.
+  // for P==3, follow get_tris_vert_conn () for eligible triangular interiors.
+  // Cubic triangle interiors may be element-interior or solid face nodes.
   if (node_coor == nullptr || vert_coor == nullptr
     || get_vert_n() <= 0 || P<=0 || P>3) return false;
   for (fmr::Local_int i = 0; i < get_vert_n (); ++i) {
     for (fmr::Local_int j = 0; j < 3; ++j) {
-      node_coor[i*3 + j] = vert_coor[i*3 + j];
+      node_coor[i*3 + j] = j < stride ? vert_coor[i*stride + j] : F(0);
     }
   }
   if (P == 1) return true;// First-order elements have only vertex nodes.
@@ -57,55 +54,28 @@ constexpr bool elem::Elem<T,P,F>::get_elem_node_coor (F* node_coor,
           : ((i == 0) ? F(2.0/3.0) : F(1.0/3.0));
         const F vert1_weight = (P == 2) ? F(0.5)
           : ((i == 0) ? F(1.0/3.0) : F(2.0/3.0));
-        node_coor[get_vert_n() * 3 + i * 3 + 0]// x-coordinate
-        = vert0_weight * vert_coor[get_bars_vert_conn()[el*2+0]*3 + 0]
-        + vert1_weight * vert_coor[get_bars_vert_conn()[el*2+1]*3 + 0];
-        node_coor[get_vert_n() * 3 + i * 3 + 1]// y-coordinate
-        = vert0_weight * vert_coor[get_bars_vert_conn()[el*2+0]*3 + 1]
-        + vert1_weight * vert_coor[get_bars_vert_conn()[el*2+1]*3 + 1];
-        node_coor[get_vert_n() * 3 + i * 3 + 2]// z-coordinate
-        = vert0_weight * vert_coor[get_bars_vert_conn()[el*2+0]*3 + 2]
-        + vert1_weight * vert_coor[get_bars_vert_conn()[el*2+1]*3 + 2];
+        for (fmr::Local_int j = 0; j < 3; ++j) {
+          node_coor[(get_vert_n() + el * (P-1) + i) * 3 + j]
+            = vert0_weight * node_coor[get_bars_vert_conn()[el*2+0]*3 + j]
+            + vert1_weight * node_coor[get_bars_vert_conn()[el*2+1]*3 + j];
+        }
       }
     }
   }
   if (P == 2) return true;// Second-order elements have vertex and edge nodes only.
   // Calculate face node coordinates for P>2
-  if (get_tris_n() > 0) {
+  const fmr::Local_int face_node_n = get_node_n() - get_vert_n()
+    - get_edge_n() * (P-1);
+  if (face_node_n > 0) {
     if (get_tris_vert_conn() == nullptr) return false;
     const F intrp_tri = 1.0/3.0;// only one interpolation weight needed.
-    // three nodes for triangular face, one centroid calculation.
-    // starting index for face nodes
-    const fmr::Local_int start_tris = get_vert_n() * 3 + get_edge_n() * (P-1) * 3; 
-    for (fmr::Local_int el = 0; el < get_tris_n(); ++el) {
-      // Calculate face node coordinates for each triangular face
-      for(fmr::Local_int i = 0; i < 3; ++i) {
-        for(fmr::Local_int j = 0; j < 3; ++j) {// let the compilre unroll this
-          node_coor[start_tris + i * 3 + j]
-          = intrp_tri * (
-            vert_coor[get_tris_vert_conn()[el*3+0]*3 + j]
-          + vert_coor[get_tris_vert_conn()[el*3+1]*3 + j]
-          + vert_coor[get_tris_vert_conn()[el*3+2]*3 + j]);
-        }
-      }
-    }
-  }
-  if (get_quad_n() > 0) {
-    if (get_quad_vert_conn() == nullptr) return false;
-    const F intrp_quad = 0.25;
-    const fmr::Local_int start_quad
-    = get_vert_n() * 3 + get_edge_n() * (P-1) * 3 + get_tris_n() * 3;
-    for (fmr::Local_int el = 0; el < get_quad_n(); ++el) {
-      // Calculate face node coordinates for each quadrilateral face
-      for (fmr::Local_int i = 0; i < 4; ++i) {
-        for (fmr::Local_int j = 0; j < 3; ++j) {
-          node_coor[start_quad + i * 3 + j]
-          = intrp_quad * (
-            vert_coor[get_quad_vert_conn()[el*4+0]*3 + j]
-          + vert_coor[get_quad_vert_conn()[el*4+1]*3 + j]
-          + vert_coor[get_quad_vert_conn()[el*4+2]*3 + j]
-          + vert_coor[get_quad_vert_conn()[el*4+3]*3 + j]);
-        }
+    const fmr::Local_int start_tris = get_vert_n() + get_edge_n() * (P-1);
+    for (fmr::Local_int el = 0; el < face_node_n; ++el) {
+      for (fmr::Local_int j = 0; j < 3; ++j) {
+        node_coor[(start_tris + el) * 3 + j] = intrp_tri * (
+            node_coor[get_tris_vert_conn()[el*3+0]*3 + j]
+          + node_coor[get_tris_vert_conn()[el*3+1]*3 + j]
+          + node_coor[get_tris_vert_conn()[el*3+2]*3 + j]);
       }
     }
   }

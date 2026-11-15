@@ -86,6 +86,92 @@ Y* elem::calc_poly_node_grad_C1D4N
   return g;
 }
 
+template <typename Y, typename G> constexpr
+Y* elem::calc_poly_func_T2D10N (Y f[10u], const G x[3u]) noexcept {
+  const Y L[3] = {Y(1)-Y(x[0])-Y(x[1]), Y(x[0]), Y(x[1])};
+  for (int i=0; i<3; ++i) {
+    f[i] = Y(0.5)*L[i]*(Y(3)*L[i]-Y(1))*(Y(3)*L[i]-Y(2));
+    const int j = (i+1)%3;
+    f[3+2*i] = Y(4.5)*L[i]*L[j]*(Y(3)*L[i]-Y(1));
+    f[4+2*i] = Y(4.5)*L[i]*L[j]*(Y(3)*L[j]-Y(1));
+  }
+  f[9] = Y(27)*L[0]*L[1]*L[2];
+  return f;
+}
+
+template <typename Y, typename G> constexpr
+Y* elem::calc_poly_grad_node_T2D10N (Y g[20u], const G x[3u]) noexcept {
+  const Y L[3] = {Y(1)-Y(x[0])-Y(x[1]), Y(x[0]), Y(x[1])};
+  const Y dL[3][2] = {{Y(-1),Y(-1)}, {Y(1),Y(0)}, {Y(0),Y(1)}};
+  for (int i=0; i<3; ++i) {
+    const int j = (i+1)%3;
+    for (int d=0; d<2; ++d) {
+      g[2*i+d] = Y(0.5)*(Y(27)*L[i]*L[i]-Y(18)*L[i]+Y(2))*dL[i][d];
+      g[2*(3+2*i)+d] = Y(4.5) * (
+        L[j]*(Y(6)*L[i]-Y(1))*dL[i][d]
+        + L[i]*(Y(3)*L[i]-Y(1))*dL[j][d]);
+      g[2*(4+2*i)+d] = Y(4.5) * (
+        L[j]*(Y(3)*L[j]-Y(1))*dL[i][d]
+        + L[i]*(Y(6)*L[j]-Y(1))*dL[j][d]);
+    }
+  }
+  for (int d=0; d<2; ++d) {
+    g[18+d] = Y(27)*(dL[0][d]*L[1]*L[2]
+      + L[0]*dL[1][d]*L[2] + L[0]*L[1]*dL[2][d]);
+  }
+  return g;
+}
+
+template <typename Y, typename G> constexpr
+Y* elem::calc_poly_node_grad_T2D10N (Y g[20u], const G x[3u]) noexcept {
+  Y node_grad[20] = {};
+  calc_poly_grad_node_T2D10N(node_grad, x);
+  for (int i=0; i<10; ++i) {
+    for (int d=0; d<2; ++d) {
+      g[d*10+i] = node_grad[i*2+d];
+    }
+  }
+  return g;
+}
+
+// Constrain the Tri10 interior degree of freedom using its quadratic interpolant.
+template <typename Y, typename G> constexpr
+Y* elem::calc_poly_func_T2D9N (Y f[9u], const G x[3u]) noexcept {
+  Y full[10] = {};
+  calc_poly_func_T2D10N(full, x);
+  for (int i=0; i<9; ++i) {
+    const Y weight = i<3 ? -Y(1)/Y(6) : Y(1)/Y(4);
+    f[i] = full[i] + weight*full[9];
+  }
+  return f;
+}
+
+template <typename Y, typename G> constexpr
+Y* elem::calc_poly_grad_node_T2D9N (Y g[18u], const G x[3u]) noexcept {
+  Y full[20] = {};
+  calc_poly_grad_node_T2D10N(full, x);
+  for (int i=0; i<9; ++i) {
+    const Y weight = i<3 ? -Y(1)/Y(6) : Y(1)/Y(4);
+    for (int d=0; d<2; ++d) {
+      g[2*i+d] = full[2*i+d] + weight*full[18+d];
+    }
+  }
+  return g;
+}
+
+template <typename Y, typename G> constexpr
+Y* elem::calc_poly_node_grad_T2D9N (Y g[18u], const G x[3u]) noexcept {
+  Y full[20] = {};
+  calc_poly_node_grad_T2D10N(full, x);
+  for (int i=0; i<9; ++i) {
+    const Y weight = i<3 ? -Y(1)/Y(6) : Y(1)/Y(4);
+    for (int d=0; d<2; ++d) {
+      g[d*9+i] = full[d*10+i] + weight*full[d*10+9];
+    }
+  }
+  return g;
+}
+
 } }// end fmr::fems namespace
 
 #endif

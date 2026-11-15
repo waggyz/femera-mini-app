@@ -12,6 +12,7 @@ public:
   static constexpr fmr::Local_int vert_n = 3;
   static constexpr fmr::Local_int edge_n = 3;
   static constexpr fmr::Local_int tris_n = 1;
+  static constexpr fmr::Local_int cubic_tris_node_n = 1;
   static constexpr fmr::Local_int quad_n = 0;
   static constexpr fmr::Local_int vols_n = 0;
   //

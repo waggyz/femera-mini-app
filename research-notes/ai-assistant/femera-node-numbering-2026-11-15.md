@@ -43,12 +43,36 @@ Save this plan to a file in the #research-notes/ai-assistant/ folder.
   rotation of a face preserves its normal, while reversal changes it. Shared
   edges and faces need orientation/permutation maps when two elements use
   different local directions, rather than assuming equal local indices.
-- The current [node-count rule](../../src/femera/grid/Elem.ipp) adds one
-  face node per face at P3 only when `vols_n` is nonzero. Thus the intended
-  solid n-cube counts are Quad 4/8/12 and Cube 8/20/38 for P1/P2/P3.
-  A 38-node cube is an enriched element, not the standard edge-only 32-node
-  cubic serendipity cube. Preserve the 38-node contract unless a deliberate
-  element-family change is made.
+- Target the standard serendipity/simplex families rather than preserving
+  prototype behavior. The revised
+  [node-count rule](../../src/femera/grid/Elem.ipp) agrees with the current
+  [P1/P2/P3 test expectations](../../src/femera/grid/Elem.gtst.cpp):
+
+  | Element | P1 | P2 | P3 |
+  | --- | ---: | ---: | ---: |
+  | Bars | 2 | 3 | 4 |
+  | Tris | 3 | 6 | 10 |
+  | Quad | 4 | 8 | 12 |
+  | Tets | 4 | 10 | 20 |
+  | Cube | 8 | 20 | 32 |
+  | Prmd | 5 | 13 | 21 |
+  | Wdge | 6 | 15 | 26 |
+
+  These expectations are requirements under investigation, not proof that
+  all of the resulting elements are standard or mutually compatible. The
+  selected complete cubic triangle has three vertices, six edge nodes and
+  one interior node, matching the full Tri10 traces of Tet20 and Wdge26.
+  The 21-node
+  pyramid also has nine boundary nodes on each triangular face, so check its
+  intended   cubic space and compatibility with full Tri10 faces before
+  certifying it. Counts alone do not define a finite-element space.
+  Triangular cubic interior counts are now explicit per-topology metadata;
+  higher polynomial orders remain outside the P1-P3 plan.
+- This is a prototype: revise internal APIs, layouts, node counts and tests
+  where required by the chosen mathematical requirements. No backward
+  compatibility or migration of prototype data is required. Pymera is
+  currently stubbed; preserve a clear path to its eventual user-facing
+  element metadata without treating its current stubs as a fixed API.
 
 ### 1. Audit and establish reference topology
 
@@ -75,17 +99,17 @@ Save this plan to a file in the #research-notes/ai-assistant/ folder.
    For 2D solids, check the documented positive reference-plane winding and
    boundary coverage instead of an outward-volume normal.
 3. Use the existing arrays only as candidates to compare, not as evidence.
-   Preliminary checks against the canonical coordinates identify the
-   following work:
-   - `Tets`: all four current face windings point inward. One outward set in
+   The initial checks against canonical coordinates identified the
+   following corrections, now implemented:
+   - `Tets`: all four former face windings pointed inward. The outward set in
      the present face order is `(0,2,1)`, `(0,1,3)`, `(0,3,2)`,
      `(1,2,3)`.
-   - `Prmd`: the current base `(0,1,2,3)` points inward; reverse it. The
+   - `Prmd`: the former base `(0,1,2,3)` pointed inward and was reversed. The
      apex is `(0,0,1)`, not above the square center; test actual coordinates,
      not the drawing.
-   - `Wdge`: the current bottom triangle `(0,1,2)` points inward; reverse it.
-   - `Cube`: all six current quadrilateral windings point inward. Reverse
-     each while retaining the selected face order, and check both triangles.
+   - `Wdge`: the former bottom triangle `(0,1,2)` pointed inward and was reversed.
+   - `Cube`: all six former quadrilateral windings pointed inward and were
+     reversed while retaining the selected face order.
    - `Bars`, `Tris`, and `Quad`: verify their edge/face sets and directed
      ordering under the same rules rather than assuming they require changes.
 4. Handle cohesive/interface elements separately. `Itri` and `Iqud` have
@@ -113,30 +137,31 @@ Save this plan to a file in the #research-notes/ai-assistant/ folder.
    before using it as a node-order oracle. Its edge writes currently omit the
    edge index, so later edges overwrite earlier ones. Its P3 face loops repeat
    the same centroid into multiple slots and omit the face index; they also
-   run for 2D elements even though the count rule allocates no face node
-   there. Write exactly one slot per eligible face, honor the count policy,
+   run for faces for which the current count rule allocates no nodes.
+   Write exactly one slot per eligible face, honor the chosen count policy,
    and check buffer boundaries with sentinel/canary or sanitizer tests.
    Resolve the interface-element face policy and two-versus-three-coordinate
    storage explicitly rather than silently reading past `Ibar` arrays.
 2. Check all P1-P3 node coordinates against independently constructed tables:
    vertices first, `(P-1)` positions for each directed edge, then one centroid
-   per eligible triangular and quadrilateral face in the chosen order. Test
+   per eligible triangular face in the chosen order. A Tri10 centroid is an
+   element-interior node even though the triangle also appears as a face in
+   the topology metadata. The targeted cubic Cube32 and Quad12 have no face
+   centers. Test
    nontrivial edges and all faces, not just `Bars`. Check that generated
    counts, sizes and coordinates agree and that the caller-provided geometry
    path uses the same convention.
-3. Reconcile [Tets shape functions and gradients](../../src/femera/grid/elem/Tets.ipp),
-   `tet10_coor`/`tet20_coor` and their transposes with the finalized edge and
-   face order. In particular, current Tet10 functions put edges `(2,3)` and
-   `(1,3)` in the opposite order from the active connectivity; Tet20 also
-   contains reversed cubic edge directions. Apply the same permutation to
-   values and every gradient component. The legacy `Tets::calc_poly_grad_node_*`
-   actually stores reference-major blocks: preserve or deliberately migrate
-   that API and its callers rather than inferring layout from its name.
-4. Audit consumers of these orderings, including node-coordinate generation,
-   tetrahedron tests, mesh import/export conventions, assembly and any stored
-   connectivity. If external node orders differ, define explicit import/export
-   permutations and test round trips. Do not silently reinterpret existing
-   mesh data.
+3. [Tets shape functions and gradients](../../src/femera/grid/elem/Tets.ipp),
+   `tet10_coor`/`tet20_coor` and their transposes now agree with the
+   finalized edge and face order. The chosen tetrahedral edge sequence is
+   `(0,1)`, `(1,2)`, `(2,0)`, `(3,0)`, `(3,2)`, `(3,1)`, matching the
+   existing basis. The legacy `Tets::calc_poly_grad_node_*` actually stores
+   reference-major blocks: retain alternative layouts for later HPC
+   performance evaluation.
+4. Update consumers of these orderings, including node-coordinate generation,
+   tetrahedron tests and assembly. For actual supported external mesh
+   formats, specify conversions to and from the chosen internal numbering
+   and test round trips; do not add migration machinery for prototype data.
 
 ### 3. Compose constexpr n-cube values and gradients
 
@@ -155,24 +180,15 @@ Save this plan to a file in the #research-notes/ai-assistant/ folder.
    not the requested element. Derive and verify the interpolation formulas,
    including their edge restrictions, rather than merely deleting interior
    tensor-product functions.
-3. For Cube P3 explicitly implement the six face-center degrees of freedom
-   implied by 38 nodes. A concrete construction to evaluate is: start with
-   the 32-node cubic serendipity nodal basis `S_i`; on a face with varying
-   axes `u,v` and fixed axis `w`, form
-   `B_f = q_edge(u) * q_edge(v) * l_side(w)`, using the quadratic 1D
-   midpoint function and linear 1D endpoint function. It is one at that face
-   center and zero at every other selected node. Set each old basis to
-   `S_i - sum_f S_i(center_f) * B_f`, and use the six `B_f` as face bases
-   in `quad_vert_conn` order. Prove/test unisolvence, partition of unity and
-   cubic polynomial reproduction for this enriched space before adopting it.
-   Differentiate these corrections too.
-4. Explicitly resolve trace compatibility: Cube38 has a 13-node enriched
-   quadrilateral face trace (12 boundary nodes plus a center), whereas the
-   planned standalone Quad12 has no face-center degree of freedom. Adjacent
-   Cube38 faces must share the center and use the correct face permutation;
-   a Cube38-to-Quad12 interface requires a defined constraint, an enriched
-   Quad13 alternative, or another intentional policy. Do not claim identical
-   trace spaces or drop the cube face nodes to hide this mismatch.
+3. Implement standard Cube32 for P3: eight vertices and two nodes on each
+   of twelve directed edges, with no face-center nodes. Rename the undefined
+   `C3D38N` declarations to `C3D32N` and correct their extents. Verify
+   unisolvence and polynomial reproduction for the selected standard
+   serendipity space; do not add the previously proposed Cube38 enrichment.
+4. Require the restrictions of Cube8/20/32 to quadrilateral faces to agree
+   with Quad4/8/12, after the appropriate face and edge permutations, for
+   both values and tangential derivatives. Verify triangular-face compatibility
+   for Tets, Wdge and Prmd.
 5. Compute gradients analytically with the product rule from the same 1D
    values and derivatives and the same correction terms. Define and test the
    exact layouts: node-major `g[node * dim + axis]` for
@@ -181,12 +197,13 @@ Save this plan to a file in the #research-notes/ai-assistant/ folder.
    copied bar comments and array extents in the 2D/3D declarations: values
    have `node_n` entries and gradients have `node_n * dim`. Keep existing
    pointer-return, `noexcept`, `static constexpr` and input-coordinate
-   conventions, and ensure the two layouts are transposes.
+   conventions where useful, and ensure the two layouts are transposes.
 6. Connect the implementations to the relevant element evaluation path,
    including the intended Bars integration and Quad/Cube dispatch for
    supported orders and integration-point strides. Inspect current callers
    before selecting an interface; do not confuse reference dimension with
-   physical embedding dimension or silently change the legacy Tets layout.
+   physical embedding dimension. Preserve layout alternatives, including
+   the Tets reference-major layout, pending HPC performance testing.
 
 ### 4. Verification and acceptance
 
@@ -195,23 +212,74 @@ Save this plan to a file in the #research-notes/ai-assistant/ folder.
   precision instantiations. Test the returned output pointer and guard
   regions around arrays.
 - Independently verify the full Kronecker-delta matrix at every reference
-  node, including every cubic edge direction and all six Cube38 face
-  centers. At multiple interior and boundary points, check partition of
+  node, including every cubic edge direction. At multiple interior and
+  boundary points, check partition of
   unity, zero gradient sums, and analytical gradients against centered finite
   differences in every reference direction with precision-appropriate
   tolerances. Verify both layouts element by element.
-- Test reproduction of every monomial of total degree at most P and the
+- For the selected standard n-cube and complete simplex spaces, test
+  reproduction of every monomial of total degree at most P and the
   corresponding derivatives, including affine coordinate reproduction and
-  reference Jacobians. Check the actual declared polynomial space and
-  enrichment separately; do not equate P3 completeness with a pure
-  total-degree-three basis.
+  reference Jacobians. Check the full declared polynomial space as well;
+  serendipity also includes suitable higher-total-degree terms. If an
+  incomplete simplex or pyramid is intentionally retained, document and
+  test its actual reproduction space instead of asserting full P3
+  completeness.
 - On every edge compare restrictions with the matching 1D basis after
   orientation permutation, including zero traces for non-edge nodes. On
   every solid face check restrictions and tangential derivatives, and test
   adjacent cells under face rotations/reflections and reversed shared edges.
-  For Cube38 test both the 13-node face trace and whichever Quad12 coupling
-  policy is selected.
+  Verify Cube32/Quad12 trace equality and the selected triangular trace
+  policy for Tets, Wdge and Prmd.
 - Run the focused topology, node-coordinate, Tets and elem-poly tests, plus
   relevant mesh/assembly integration tests; use memory-safety instrumentation
   for node-buffer tests where available. Finally run the applicable wider
   test/build suite and record any pre-existing blockers separately.
+
+---
+
+### Implementation progress
+
+- Implemented the complete cubic triangle values and both reference-gradient
+  layouts. The current tests cover nodal interpolation, cubic reproduction,
+  finite differences, constant face loads, and the Tet20 reference bottom-face
+  trace. The triangle routines are lower-level evaluators; general element
+  dispatch and load-assembly integration remain future work.
+- Added an explicit incomplete Tri9 evaluator with both gradient layouts. It
+  constrains the Tri10 interior value to `-sum(vertices)/6 + sum(edges)/4`;
+  this reproduces P2 and cubic edge traces, but not all cubic polynomials.
+  Its tests cover interpolation, derivatives, edge orientations, vertex
+  permutations, constant-load integration and equivalence to the constrained
+  Tri10 basis. Use is intended for pyramid faces, but the eventual pyramid
+  volume basis must be shown to restrict to this exact space.
+- Updated the cubic triangle and triangular-interface node counts and fixed
+  edge and triangular-interior coordinate writes. Tests cover generated cubic
+  nodes and buffer bounds for the solid topologies and triangular interface,
+  plus the two-component reference-coordinate stride of `Ibar`.
+- Corrected all 3D solid face windings using the reference coordinates. Tests
+  check outward normals, face-edge incidence, directed traversal, edge
+  uniqueness and coordinate transposes. The tetrahedron's directed edges
+  now agree with its existing Tet10/Tet20 coordinates and basis; tests check
+  nodal interpolation and all four Tri10 face restrictions, including
+  orientation-dependent edge permutations.
+- Preserve both existing gradient layouts and other storage choices until
+  comprehensive performance testing on HPC hardware; do not remove or select
+  layouts merely to make prototype APIs uniform.
+- Still to implement: reusable face-orientation/permutation handling and the
+  2D/3D n-cube functions and dispatch. The cubic pyramid volume basis and
+  verification of its Tri9 face restriction remain to be implemented; no
+  wedge-pyramid constraint or assembly path has been implemented yet.
+
+I think I corrected the `get_node_n` calculation in `Elem`. The goal here is to implement the standard serendipity/simplex family of elements. Expectations in #Elem.gtst.cpp document my current understanding of the correct counts. This code is in very early development; we're determining the requirements while prototyping the implementation, and there is no such thing as backward compatibility at this point. I talk with intended users often and have a good understanding of what they will need exposed in the Python API (Pymera), which is only stubbed out at present until the internals are working well enough to demonstrate. This plan looks good so far, with these adjustments.
+
+---
+
+Implement the 10-node cubic triangle (and fix `Elem::get_node_n`). The userbase will be doing mostly 3D solid modelling, so it is more immediately important to be able to integrate over triangle faces (to apply loads) than to solve cubic triangle 2D models (which can be deferred).
+
+And, one final note before implementation. This is prototype high-performance computing (HPC) code, which is why you see a variety of storage/layout options (including transposed options). Decisions on which layouts to retain/use will be deferred until after comprehensive performance testing has been completed on HPC hardware. Now, please begin implementing this plan.
+
+---
+
+On reviewing node placement, I see that both 9- and 10-node triangles will be needed. The `Wdge` (prism) element has 10-node triangular faces, while the `Prmd` element has 9-node triangular faces. Please verify this and recommend a solution that will support both triangle variants.
+
+---
