@@ -84,10 +84,8 @@ bool is_more_than (const F a, const F b);
 template <typename F> static inline
 bool is_greater_than (const F a, const F b);
 //
-# if 0
-template <int N, typename F> static inline
-F* matrix_inv_det (F* invdet, const F* mat);
-#endif
+template <typename F> static inline// normal vector of a triangle in 3D space
+bool tri3_norm (F normal[3], const F pt1[3], const F pt2[3], const F pt3[3]);
 
 } }// end fmr::math namespace
 

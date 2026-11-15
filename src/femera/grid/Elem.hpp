@@ -33,11 +33,6 @@ class Elem {//TODO consider pulling P out of the template parameters.
   Reference dimensions are defined by derived topologies. Physical coordinate
   dimensions are supplied by the geometry mapping and need not equal them;
   canonical reference-coordinate arrays currently store three components.
-
-  Node numbering follows Gmsh canonical ordering.
-  See: https://gmsh.info/dev/doc/texinfo/gmsh.html#Node-ordering
-  NOTE: this code may or may not have the same prism/Wdge exception.
-  TODO double-check serendipity elements for the use of face nodes.
   
   Members are constexpr so that everything is kept thread-local to the instance
   that created it; constexpr methods are implicitly inline

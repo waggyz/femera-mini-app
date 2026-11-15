@@ -217,6 +217,21 @@ bool fmr::math::is_greater_than (const F a, const F b) {
     ? std::abs(b) : std::abs(a)) * std::numeric_limits<F>::epsilon());
 }
 
+template <typename F> static inline
+bool fmr::math::tri3_norm (F normal[3], const F pt1[3], const F pt2[3], const F pt3[3]) {
+  // Use to calculate orientation of element surfaces in 3D.
+  const auto Ax = pt2[0] - pt1[0], Ay =  pt2[1] - pt1[1], Az =  pt2[2] - pt1[2];
+  const auto Bx = pt3[0] - pt2[0], By =  pt3[1] - pt2[1], Bz =  pt3[2] - pt2[2];
+  auto Nx = F(Ay * Bz - Az * By);
+  auto Ny = F(Az * Bx - Ax * Bz);
+  auto Nz = F(Ax * By - Ay * Bx);
+  const auto len = std::sqrt (Nx*Nx + Ny*Ny + Nz*Nz);
+  if (len <= 0.0) return false;
+  Nx /= len; Ny /= len; Nz /= len;
+  normal[0] = Nx; normal[1] = Ny; normal[2] = Nz;
+  return true;
+}
+
 #undef FMR_DEBUG
 //end FMR_HAS_MATH_IPP
 #endif
