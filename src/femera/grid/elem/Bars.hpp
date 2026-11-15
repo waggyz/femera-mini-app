@@ -11,8 +11,8 @@ class Bars final : public Elem<Bars> {
   friend class Elem;
 private:// Everything should be private, accessible through the Elem interface.
 // Scalars ====================================================================
-  static constexpr fmr::math::Poly poly_type = fmr::math::Poly::Serendipity;
-  //NOTE same as fmr::math::Poly::Full for this element.
+  static constexpr fmr::math::Poly poly_type = fmr::math::Poly::Full;
+  //NOTE same as fmr::math::Poly::Serendipity for this element.
   //
   static constexpr fmr::Dim_int   elem_d = 1;
   //
