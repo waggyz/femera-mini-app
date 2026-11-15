@@ -31,6 +31,10 @@ F smat_det (const F* mat);
 
 template <fmr::Dim_int D, typename F> static inline// matrix inverse transposed & determinant
 int smat_invt_det (F* invt_det, const F* mat);
+
+// Pseudo-inverse of a D x 1 column, stored as a 1 x D row.
+template <fmr::Dim_int D, typename F> static inline
+int smat_pinv_col_ref (F* pinv, const F* col);
 #if 0
 //TODO Remove to simplify the header, keep only the generalized functions and test variants
 // Default variants call the most performant implementation. ==================

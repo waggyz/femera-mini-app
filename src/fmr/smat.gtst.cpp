@@ -67,6 +67,21 @@ TEST(FmrSmat, SmatInverseTransposedAndDeterminant) {
   EXPECT_DOUBLE_EQ(invt_det4[16], 120);
 }
 
+TEST(FmrSmat, ColumnPseudoInverse) {
+  const double col[] = {2, 3, 6};
+  const double expected_pinv[] = {2.0/49, 3.0/49, 6.0/49};
+  double pinv[3] = {};
+
+  ASSERT_EQ(0, fmr::math::smat_pinv_col_ref<3>(pinv, col));
+  for (int i = 0; i < 3; ++i) EXPECT_DOUBLE_EQ(pinv[i], expected_pinv[i]);
+  EXPECT_DOUBLE_EQ(pinv[0]*col[0] + pinv[1]*col[1] + pinv[2]*col[2], 1.0);
+
+  const double zero_col[] = {0, 0, 0};
+  pinv[0] = pinv[1] = pinv[2] = -1;
+  EXPECT_EQ(1, fmr::math::smat_pinv_col_ref<3>(pinv, zero_col));
+  for (const double value : pinv) EXPECT_DOUBLE_EQ(value, -1);
+}
+
 TEST(FmrSmat, M1x1InverseAndDeterminant) {
   const double mat[] = {2};
   double inv[1];

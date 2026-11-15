@@ -24,6 +24,17 @@ int fmr::math::smat_invt_det (F* invt_det, const F* mat){
   // perform about the same. No m4x4 variants tested yet.
   return fmr::math::m4x4_invt_det_ref(invt_det, mat);//TODO test variants.
 }
+template <fmr::Dim_int D, typename F> static inline
+int fmr::math::smat_pinv_col_ref (F* pinv, const F* col){
+  static_assert(D >= 1 && D <= 4,
+                "smat_pinv_col_ref supports dimensions 1 through 4");
+  F norm_sq = F(0);
+  for (fmr::Dim_int i = 0; i < D; ++i) norm_sq += col[i]*col[i];
+  if (::fmr::math::are_equal(norm_sq, F(0))) return 1;
+  const F inv_norm_sq = F(1)/norm_sq;
+  for (fmr::Dim_int i = 0; i < D; ++i) pinv[i] = col[i]*inv_norm_sq;
+  return 0;
+}
 #if 0
 // Default variants call the most performant implementation. ==================
 template <typename F> static inline

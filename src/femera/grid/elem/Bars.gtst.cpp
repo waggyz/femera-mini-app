@@ -348,57 +348,102 @@ TEST( GridElemBars, StrainCalculation1D ){
   // First, check P1 element
   const double vert_coor[2*sims_d] = {0.0, 2.0};
   const double u[2*sims_d] = {0.2, 0.4};
-  const fmr::Local_int intp_n = 1;
-  double intp1[intp_n] = {0.5};// 1 integration point for P1 bar element
-  double dN1[2];// constant for bar elements with edge nodes at natural positions
-  double dNp[2];// constant for 2-node bar element
+  constexpr fmr::Local_int intp_n = 2;
+  const double intp1[intp_n] = {0.25, 0.75};
+  double dN1[intp_n*2];
+  double dNp[intp_n*2];
   const fmr::Local_int jacs_size = Elem<Bars>::jacs_size (intp_n, sims_d);
   const fmr::Local_int jacs_dets_size = Elem<Bars>::jacs_dets_size (intp_n, sims_d);
   double J[jacs_size];
   double jacs_dets[jacs_dets_size];
   double Jinv[jacs_size];
-  double G[2];
+  double G[intp_n*2];
   double strain[intp_n];
-  fmr::fems::elem::calc_poly_grad_node_C1D2N(dN1, intp1);
-  fmr::fems::elem::calc_poly_grad_node_C1D2N(dNp, intp1);
-  EXPECT_DOUBLE_EQ(dN1[0], -1.0);
-  EXPECT_DOUBLE_EQ(dN1[1],  1.0);
-  
-  J[0] = 0.0;// calc J, inverse, and non-inverse determinant
-  for(int i=0; i<2; ++i){
-    J[0] += dN1[i] * vert_coor[i];
+  for(fmr::Local_int ip=0; ip<intp_n; ++ip){
+    fmr::fems::elem::calc_poly_grad_node_C1D2N(
+      dN1 + ip*2, intp1 + ip);
+    fmr::fems::elem::calc_poly_grad_node_C1D2N(
+      dNp + ip*2, intp1 + ip);
+    EXPECT_DOUBLE_EQ(dN1[ip*2], -1.0);
+    EXPECT_DOUBLE_EQ(dN1[ip*2+1], 1.0);
+
+    J[ip] = 0.0;
+    for(fmr::Local_int i=0; i<2; ++i){
+      J[ip] += dN1[ip*2+i] * vert_coor[i];
+    }
+    fmr::math::smat_invt_det<1> (jacs_dets + ip*2, J + ip);
+    Jinv[ip] = jacs_dets[ip*2];
+    EXPECT_DOUBLE_EQ(Jinv[ip], 1.0 / J[ip]);
+    EXPECT_DOUBLE_EQ(jacs_dets[ip*2+1], J[ip]);
+
+    for(fmr::Local_int i=0; i<2; ++i){
+      G[ip*2+i] = Jinv[ip] * dNp[ip*2+i];
+    }
+    strain[ip] = 0.0;
+    for(fmr::Local_int i=0; i<2; ++i){
+      strain[ip] += G[ip*2+i] * u[i];
+    }
+    EXPECT_DOUBLE_EQ(strain[ip], 0.1);
   }
-  fmr::math::smat_invt_det<1> (jacs_dets, J);
-  Jinv[0] = jacs_dets[0];
-  EXPECT_DOUBLE_EQ(Jinv[0], 1.0 / J[0]);
-  EXPECT_DOUBLE_EQ(jacs_dets[1], J[0]);// 1x1 inverse and non-inverse determinant
-  // calc G
-  G[0] = 0.0;
-  for(int i=0; i<2; ++i){
-    G[i] = Jinv[0] * dNp[i];
-  }
-  // calc strain
-  strain[0] = 0.0;
-  for(int i=0; i<2; ++i){
-    strain[0] += G[i] * u[i];
-  }
-  EXPECT_DOUBLE_EQ(strain[0], 0.1); // expected strain for P1 bar element with given u and vert_coor
 }
 TEST( GridElemBars, StrainCalculation3D ){
-  // 3D space test for 1D P1 bar element strain calculation
-  double vert_coor[6] = {0.0,0.0,0.0, 2.0,0.0,0.0};
-  double u[6] = {0.2,0.4,0.6, 0.4,0.8,0.12};
-  double intp1[1] = {0.5};// 1 integration point for P1 bar element
-  double strain[1];
-  double dN1[2];
-  double dNp[2];
-  double J[1];
-  double Jinv[1];
-  double G[2];
-  fmr::fems::elem::calc_poly_grad_node_C1D2N(dN1, intp1);
-  fmr::fems::elem::calc_poly_grad_node_C1D2N(dNp, intp1);
-  EXPECT_DOUBLE_EQ(dN1[0], -1.0);
-  EXPECT_DOUBLE_EQ(dN1[1], 1.0);
+  const double vert_coor[6] = {1.0,2.0,3.0, 3.0,5.0,9.0};
+  const double u[6] = {0.2,0.4,0.6, 0.4,0.8,1.2};
+  constexpr fmr::Local_int intp_n = 2;
+  const double intp1[intp_n] = {0.25, 0.75};
+  double strain[intp_n];
+  double dN1[intp_n*2];
+  double dNp[intp_n*2];
+  double J[intp_n*3];
+  double Jpinv[intp_n*3];
+  double G[intp_n*6];
+  const double length_sq = 49.0;
+  const double expected_strain
+    = (0.2*2.0 + 0.4*3.0 + 0.6*6.0) / length_sq;
+
+  for(fmr::Local_int ip=0; ip<intp_n; ++ip){
+    fmr::fems::elem::calc_poly_grad_node_C1D2N(
+      dN1 + ip*2, intp1 + ip);
+    fmr::fems::elem::calc_poly_grad_node_C1D2N(
+      dNp + ip*2, intp1 + ip);
+    EXPECT_DOUBLE_EQ(dN1[ip*2], -1.0);
+    EXPECT_DOUBLE_EQ(dN1[ip*2+1], 1.0);
+
+    for(fmr::Dim_int dim=0; dim<3; ++dim){
+      J[ip*3+dim] = 0.0;
+      for(fmr::Local_int node=0; node<2; ++node){
+        J[ip*3+dim] += dN1[ip*2+node] * vert_coor[node*3+dim];
+      }
+    }
+    ASSERT_EQ(0, fmr::math::smat_pinv_col_ref<3>(
+      Jpinv + ip*3, J + ip*3));
+
+    for(fmr::Local_int node=0; node<2; ++node){
+      for(fmr::Dim_int dim=0; dim<3; ++dim){
+        G[ip*6+node*3+dim]
+          = Jpinv[ip*3+dim] * dNp[ip*2+node];
+      }
+    }
+
+    double displacement_gradient[9] = {};
+    for(fmr::Local_int node=0; node<2; ++node){
+      for(fmr::Dim_int disp_dim=0; disp_dim<3; ++disp_dim){
+        for(fmr::Dim_int coor_dim=0; coor_dim<3; ++coor_dim){
+          displacement_gradient[disp_dim*3+coor_dim]
+            += u[node*3+disp_dim] * G[ip*6+node*3+coor_dim];
+        }
+      }
+    }
+    strain[ip] = 0.0;
+    for(fmr::Dim_int disp_dim=0; disp_dim<3; ++disp_dim){
+      for(fmr::Dim_int coor_dim=0; coor_dim<3; ++coor_dim){
+        strain[ip] += J[ip*3+disp_dim] / 7.0
+          * displacement_gradient[disp_dim*3+coor_dim]
+          * J[ip*3+coor_dim] / 7.0;
+      }
+    }
+    EXPECT_NEAR(strain[ip], expected_strain, 1e-14);
+  }
 }
 #endif
 } } } // end namespace femera::grid::elem
