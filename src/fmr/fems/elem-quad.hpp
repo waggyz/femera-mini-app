@@ -1,5 +1,5 @@
-#ifndef FMR_QUAD_HPP
-#define FMR_QUAD_HPP
+#ifndef FMR_FEMS_ELEM_QUAD_HPP
+#define FMR_FEMS_ELEM_QUAD_HPP
 
 #include <cstdint>
 #include <array>
@@ -14,7 +14,7 @@
 #include <iostream>
 #endif
 
-namespace fmr { namespace math {
+namespace fmr { namespace fems { namespace elem {
 
 template <std::uint_fast8_t N, std::uint_fast8_t D=1, typename F=double,
 typename = std::enable_if_t<std::is_floating_point<F>::value>>
@@ -188,9 +188,9 @@ struct sqrt_sing_quad {
   
   
 
-} }//end fmr::math namespace
+} } }//end fmr::fems::elem namespace
 
-#include "quad.ipp"
+#include "elem-quad.ipp"
 
 #undef FMR_DEBUG
-#endif // FMR_QUAD_HPP
+#endif // FMR_FEMS_ELEM_QUAD_HPP

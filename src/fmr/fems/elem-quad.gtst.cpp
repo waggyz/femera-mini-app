@@ -1,11 +1,11 @@
-#include "fmr.hpp"
-#include "quad.hpp"
+#include "../fmr.hpp"
+#include "elem-quad.hpp"
 
 #include <cmath>
 #include <gtest/gtest.h>
 
 TEST(FmrQuad, OnePointRule) {
-  using Rule = fmr::math::gaus_lege_quad<1>;
+  using Rule = fmr::fems::elem::gaus_lege_quad<1>;
 
   EXPECT_EQ(Rule::get_num_points(), 1);
   EXPECT_DOUBLE_EQ(Rule::get_interval_start(), -1.0);
@@ -23,7 +23,7 @@ TEST(FmrQuad, OnePointRule) {
 }
 
 TEST(FmrQuad, TwoPointRule) {
-  using Rule = fmr::math::gaus_lege_quad<2>;
+  using Rule = fmr::fems::elem::gaus_lege_quad<2>;
   const double node = 1.0 / std::sqrt(3.0);
 
   EXPECT_EQ(Rule::get_num_points(), 2);
@@ -46,7 +46,7 @@ TEST(FmrQuad, TwoPointRule) {
 }
 
 TEST(FmrQuad, ThreePointRule) {
-  using Rule = fmr::math::gaus_lege_quad<3>;
+  using Rule = fmr::fems::elem::gaus_lege_quad<3>;
   const double node = std::sqrt(3.0 / 5.0);
 
   EXPECT_EQ(Rule::get_num_points(), 3);
@@ -75,7 +75,7 @@ TEST(FmrQuad, ThreePointRule) {
 }
 
 TEST(FmrQuad, FourPointRule) {
-  using Rule = fmr::math::gaus_lege_quad<4>;
+  using Rule = fmr::fems::elem::gaus_lege_quad<4>;
   const double outer_node = 0.86113631159405257522;
   const double inner_node = 0.33998104358485626480;
   const double outer_weight = 0.34785484513745385737;
@@ -109,7 +109,7 @@ TEST(FmrQuad, FourPointRule) {
 }
 
 TEST(FmrQuad, FivePointRule) {
-  using Rule = fmr::math::gaus_lege_quad<5>;
+  using Rule = fmr::fems::elem::gaus_lege_quad<5>;
   const double inner_node = 0.53846931010568309104;
   const double outer_node = 0.90617984593866399280;
   const double center_weight = 128.0 / 225.0;
@@ -146,7 +146,7 @@ TEST(FmrQuad, FivePointRule) {
 }
 
 TEST(FmrQuad, MapsPointsAndScalesIntegralToInterval) {
-  using Rule = fmr::math::gaus_lege_quad<2>;
+  using Rule = fmr::fems::elem::gaus_lege_quad<2>;
   const double a = 2.0;
   const double b = 6.0;
   const double node = 1.0 / std::sqrt(3.0);
@@ -163,18 +163,18 @@ TEST(FmrQuad, MapsPointsAndScalesIntegralToInterval) {
 }
 
 TEST(FmrQuad, SupportsFloatRules) {
-  using Rule = fmr::math::gaus_lege_quad<1, 1, float>;
+  using Rule = fmr::fems::elem::gaus_lege_quad<1, 1, float>;
 
   EXPECT_FLOAT_EQ(Rule::get_point(0), 0.0f);
   EXPECT_FLOAT_EQ(Rule::get_weight(0), 2.0f);
 }
 
 TEST(FmrQuad, MaximumPolynomialDegree) {
-  using Rule1 = fmr::math::gaus_lege_quad<1>;
-  using Rule2 = fmr::math::gaus_lege_quad<2>;
-  using Rule3 = fmr::math::gaus_lege_quad<3>;
-  using Rule4 = fmr::math::gaus_lege_quad<4>;
-  using Rule5 = fmr::math::gaus_lege_quad<5>;
+  using Rule1 = fmr::fems::elem::gaus_lege_quad<1>;
+  using Rule2 = fmr::fems::elem::gaus_lege_quad<2>;
+  using Rule3 = fmr::fems::elem::gaus_lege_quad<3>;
+  using Rule4 = fmr::fems::elem::gaus_lege_quad<4>;
+  using Rule5 = fmr::fems::elem::gaus_lege_quad<5>;
 
   static_assert(Rule1::polynomial_degree_max() == 1, "1-point rule degree");
   static_assert(Rule2::polynomial_degree_max() == 3, "2-point rule degree");
@@ -190,7 +190,7 @@ TEST(FmrQuad, MaximumPolynomialDegree) {
 }
 
 TEST(FmrQuad, SelectsRuleForPolynomialDegree) {
-  using Rule = fmr::math::gaus_lege_quad<1>;
+  using Rule = fmr::fems::elem::gaus_lege_quad<1>;
 
   static_assert(Rule::rule_for_degree(0) == 1, "constant needs one point");
   static_assert(Rule::rule_for_degree(1) == 1, "linear needs one point");
@@ -217,7 +217,7 @@ TEST(FmrQuad, SelectsRuleForPolynomialDegree) {
 }
 
 TEST(FmrQuad, GaussJacobiIntegratesWeightedPolynomials) {
-  using Rule = fmr::math::gaus_jaco_quad<3>;
+  using Rule = fmr::fems::elem::gaus_jaco_quad<3>;
   const Rule rule(1.0, 0.0);
   double values[3];
   double points[3];
@@ -234,7 +234,7 @@ TEST(FmrQuad, GaussJacobiIntegratesWeightedPolynomials) {
 }
 
 TEST(FmrQuad, GaussJacobiSupportsLegendreWeightAndValidatesParameters) {
-  using Rule = fmr::math::gaus_jaco_quad<3>;
+  using Rule = fmr::fems::elem::gaus_jaco_quad<3>;
   const Rule rule(0.0, 0.0);
   const double node = std::sqrt(3.0 / 5.0);
 
@@ -253,7 +253,7 @@ TEST(FmrQuad, GaussJacobiSupportsLegendreWeightAndValidatesParameters) {
 }
 
 TEST(FmrQuad, GaussJacobiIntegratesInverseSquareRootOnUnitInterval) {
-  using Rule = fmr::math::sqrt_sing_quad<3>;
+  using Rule = fmr::fems::elem::sqrt_sing_quad<3>;
   const Rule rule;
   double points[3];
   double values[3];

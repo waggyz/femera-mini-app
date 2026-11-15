@@ -1,5 +1,5 @@
-#ifndef FMR_HAS_MATH_QUAD_IPP
-#define FMR_HAS_MATH_QUAD_IPP
+#ifndef FMR_HAS_FEMS_ELEM_QUAD_IPP
+#define FMR_HAS_FEMS_ELEM_QUAD_IPP
 
 #include <algorithm>
 #include <limits>
@@ -7,7 +7,7 @@
 
 //#define FMR_DEBUG
 
-namespace fmr { namespace math {
+namespace fmr { namespace fems { namespace elem {
 
 template <std::uint_fast8_t N, std::uint_fast8_t D, typename F, typename Enable>
 constexpr F gaus_lege_quad<N, D, F, Enable>::point_value(const fuint i) {
@@ -143,7 +143,7 @@ gaus_jaco_quad<N, D, F, Enable>::gaus_jaco_quad(// constructor definition
     }
   }//end gaus_jaco_quad constructor
 
-} }//end fmr::math namespace
+} } }//end fmr::fems::elem namespace
 #undef FMR_DEBUG
-//end FMR_HAS_MATH_QUAD_IPP
+//end FMR_HAS_FEMS_ELEM_QUAD_IPP
 #endif
