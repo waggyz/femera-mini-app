@@ -340,21 +340,25 @@ TEST( GridElemBars, JacobianCalculationMultiplePointsAndDimensions ){
 // G = inv(J) * dNp, inv here is a pseudo-inverse for 1D bar element
 // strain = G * u
 TEST( GridElemBars, StrainCalculation1D ){
-  //NOTE this is a prototype for all element strain calculations:
-  //     J = dN * vert_coor, G = inv(J) * dNp, strain = G * u.
+  //NOTE this tests a prototype for all element strain calculations:
+  //     J = dN1 * vert_coor, G = inv(J) * dNp, strain = G * u.
   //     This default implementation also gets the non-inverted J determinant.
   //
+  const fmr::Dim_int sims_d = 1;
   // First, check P1 element
-  const double vert_coor[2] = {0.0, 2.0};
-  const double u[2] = {0.2, 0.4};
-  double intp1[1] = {0.5};// 1 integration point for P1 bar element
+  const double vert_coor[2*sims_d] = {0.0, 2.0};
+  const double u[2*sims_d] = {0.2, 0.4};
+  fmr::Local_int intp_n = 1;
+  double intp1[intp_n] = {0.5};// 1 integration point for P1 bar element
   double dN1[2];// constant for bar elements with edge nodes at natural positions
   double dNp[2];// constant for 2-node bar element
-  double J[1];
-  double jacs_dets[2];
-  double Jinv[1];
+  const fmr::Local_int jacs_size = Elem<Bar>::jacs_size (intp_n, sims_d);
+  const fmr::Local_int jacs_dets_size = Elem<Bar>::jacs_dets_size (intp_n, sims_d);
+  double J[jacs_size];
+  double jacs_dets[jacs_dets_size];
+  double Jinv[jacs_size];
   double G[2];
-  double strain[1];
+  double strain[intp_n];
   fmr::fems::elem::calc_poly_grad_node_C1D2N(dN1, intp1);
   fmr::fems::elem::calc_poly_grad_node_C1D2N(dNp, intp1);
   EXPECT_DOUBLE_EQ(dN1[0], -1.0);
