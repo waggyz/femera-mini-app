@@ -185,53 +185,91 @@ FMR_CUBE_BASIS(C3D32N, 3, 3, 32)
 
 #undef FMR_CUBE_BASIS
 
-template <typename Y, typename G> constexpr
-Y* elem::calc_poly_func_T2D10N (Y f[10u], const G x[3u]) noexcept {
-  const Y L[3] = {Y(1)-Y(x[0])-Y(x[1]), Y(x[0]), Y(x[1])};
-  for (int i=0; i<3; ++i) {
-    f[i] = Y(0.5)*L[i]*(Y(3)*L[i]-Y(1))*(Y(3)*L[i]-Y(2));
-    const int j = (i+1)%3;
-    f[3+2*i] = Y(4.5)*L[i]*L[j]*(Y(3)*L[i]-Y(1));
-    f[4+2*i] = Y(4.5)*L[i]*L[j]*(Y(3)*L[j]-Y(1));
-  }
-  f[9] = Y(27)*L[0]*L[1]*L[2];
-  return f;
-}
+namespace elem { namespace detail {
 
-template <typename Y, typename G> constexpr
-Y* elem::calc_poly_grad_node_T2D10N (Y g[20u], const G x[3u]) noexcept {
-  const Y L[3] = {Y(1)-Y(x[0])-Y(x[1]), Y(x[0]), Y(x[1])};
-  const Y dL[3][2] = {{Y(-1),Y(-1)}, {Y(1),Y(0)}, {Y(0),Y(1)}};
-  for (int i=0; i<3; ++i) {
-    const int j = (i+1)%3;
-    for (int d=0; d<2; ++d) {
-      g[2*i+d] = Y(0.5)*(Y(27)*L[i]*L[i]-Y(18)*L[i]+Y(2))*dL[i][d];
-      g[2*(3+2*i)+d] = Y(4.5) * (
-        L[j]*(Y(6)*L[i]-Y(1))*dL[i][d]
-        + L[i]*(Y(3)*L[i]-Y(1))*dL[j][d]);
-      g[2*(4+2*i)+d] = Y(4.5) * (
-        L[j]*(Y(3)*L[j]-Y(1))*dL[i][d]
-        + L[i]*(Y(6)*L[j]-Y(1))*dL[j][d]);
+template <int Dim, int Order, bool Grad, bool Transposed, typename Y, typename G>
+constexpr Y* simplex_basis (Y* out, const G x[3]) noexcept {
+  using Work = typename std::common_type<Y, G, double>::type;
+  constexpr int vertices = Dim+1;
+  constexpr int edges = Dim == 2 ? 3 : 6;
+  constexpr int faces = Order == 3 ? (Dim == 2 ? 1 : 4) : 0;
+  constexpr int nodes = vertices + edges*(Order-1) + faces;
+  const int ends[6][2] = {{0,1},{1,2},{2,0},{3,0},{3,2},{3,1}};
+  const int face_vertices[4][3] = {{0,2,1},{0,1,3},{0,3,2},{1,2,3}};
+  Work bary[4] = {Work(1),Work(0),Work(0),Work(0)};
+  for (int d=0; d<Dim; ++d) {
+    bary[d+1] = Work(x[d]);
+    bary[0] -= bary[d+1];
+  }
+  for (int n=0; n<nodes; ++n) {
+    int alpha[4] = {};
+    if (n<vertices) {
+      alpha[n] = Order;
+    } else if (n<vertices+edges*(Order-1)) {
+      const int edge = (n-vertices)/(Order>1 ? Order-1 : 1);
+      const int j = (n-vertices)%(Order>1 ? Order-1 : 1)+1;
+      alpha[ends[edge][0]] = Order-j;
+      alpha[ends[edge][1]] = j;
+    } else if (Dim == 2) {
+      alpha[0] = alpha[1] = alpha[2] = 1;
+    } else {
+      const int face = n-vertices-edges*(Order-1);
+      for (int i=0; i<3; ++i) alpha[face_vertices[face][i]] = 1;
+    }
+    // Lagrange factor for barycentric index alpha: product (Order*L-k)/(k+1).
+    // Differentiate the product directly, without dividing by a vanishing factor.
+    Work factor[4] = {}, derivative[4] = {};
+    for (int i=0; i<vertices; ++i) {
+      factor[i] = Work(1);
+      for (int k=0; k<alpha[i]; ++k) {
+        const Work term = (Work(Order)*bary[i]-Work(k))/Work(k+1);
+        derivative[i] = derivative[i]*term + factor[i]*Work(Order)/Work(k+1);
+        factor[i] *= term;
+      }
+    }
+    if (!Grad) {
+      Work value = Work(1);
+      for (int i=0; i<vertices; ++i) value *= factor[i];
+      out[n] = Y(value);
+    } else {
+      for (int d=0; d<Dim; ++d) {
+        Work value = Work(0);
+        for (int i=0; i<vertices; ++i) {
+          const int db = i==0 ? -1 : (i==d+1 ? 1 : 0);
+          Work term = derivative[i]*Work(db);
+          for (int j=0; j<vertices; ++j) if (j!=i) term *= factor[j];
+          value += term;
+        }
+        out[Transposed ? d*nodes+n : n*Dim+d] = Y(value);
+      }
     }
   }
-  for (int d=0; d<2; ++d) {
-    g[18+d] = Y(27)*(dL[0][d]*L[1]*L[2]
-      + L[0]*dL[1][d]*L[2] + L[0]*L[1]*dL[2][d]);
-  }
-  return g;
+  return out;
 }
 
-template <typename Y, typename G> constexpr
-Y* elem::calc_poly_node_grad_T2D10N (Y g[20u], const G x[3u]) noexcept {
-  Y node_grad[20] = {};
-  calc_poly_grad_node_T2D10N(node_grad, x);
-  for (int i=0; i<10; ++i) {
-    for (int d=0; d<2; ++d) {
-      g[d*10+i] = node_grad[i*2+d];
-    }
-  }
-  return g;
+} }// end elem::detail
+
+#define FMR_SIMPLEX_BASIS(NAME, DIM, ORDER, NODES) \
+template <typename Y, typename G> constexpr \
+Y* elem::calc_poly_func_##NAME (Y f[NODES], const G x[3]) noexcept { \
+  return elem::detail::simplex_basis<DIM,ORDER,false,false>(f,x); \
+} \
+template <typename Y, typename G> constexpr \
+Y* elem::calc_poly_grad_node_##NAME (Y g[NODES*DIM], const G x[3]) noexcept { \
+  return elem::detail::simplex_basis<DIM,ORDER,true,false>(g,x); \
+} \
+template <typename Y, typename G> constexpr \
+Y* elem::calc_poly_node_grad_##NAME (Y g[NODES*DIM], const G x[3]) noexcept { \
+  return elem::detail::simplex_basis<DIM,ORDER,true,true>(g,x); \
 }
+
+FMR_SIMPLEX_BASIS(T2D3N,  2, 1, 3)
+FMR_SIMPLEX_BASIS(T2D6N,  2, 2, 6)
+FMR_SIMPLEX_BASIS(T2D10N, 2, 3, 10)
+FMR_SIMPLEX_BASIS(T3D4N,  3, 1, 4)
+FMR_SIMPLEX_BASIS(T3D10N, 3, 2, 10)
+FMR_SIMPLEX_BASIS(T3D20N, 3, 3, 20)
+#undef FMR_SIMPLEX_BASIS
 
 // Constrain the Tri10 interior degree of freedom using its quadratic interpolant.
 template <typename Y, typename G> constexpr

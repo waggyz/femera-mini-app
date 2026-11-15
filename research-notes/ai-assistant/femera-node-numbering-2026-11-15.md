@@ -267,6 +267,13 @@ Save this plan to a file in the #research-notes/ai-assistant/ folder.
   vertex corrections. Tests cover C++14 constant evaluation, mixed precision,
   all reference nodes, gradients, the full serendipity polynomial space,
   directed quadrilateral edges and all six oriented cube-face traces.
+- Added a shared barycentric Lagrange construction for complete Tri3/6/10
+  and Tet4/10/20 values and both reference-gradient layouts. Tri10 now uses
+  this construction; Tri9 retains its constraint on Tri10. Tests compare
+  Tri10 and Tet4/10/20 with their previous formulas, and check nodes,
+  complete polynomial reproduction, derivatives, directed triangle edges,
+  and all tetrahedral face traces for each order. The existing specialized
+  tetrahedron evaluators remain available for comparison and benchmarking.
 - Preserve both existing gradient layouts and other storage choices until
   comprehensive performance testing on HPC hardware; do not remove or select
   layouts merely to make prototype APIs uniform.

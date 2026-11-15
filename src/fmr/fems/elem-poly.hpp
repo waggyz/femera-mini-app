@@ -53,9 +53,26 @@ namespace fmr { namespace fems { namespace elem {
   Y* calc_poly_node_grad_C1D4N (Y g[4u], const G x[3u]) noexcept;// reference-major
   //...and so on up to 5-pt rules
   //
-  // Cubic triangles: vertices 0,1,2; directed edges 0-1, 1-2, 2-0.
-  // T2D10N also has an interior node; T2D9N is the incomplete variant.
-  // Reference vertices: (0,0), (1,0), (0,1).
+  // Complete simplex nodes follow Tris/Tets vertex, directed edge and face
+  // connectivity. Gradients are node-major or reference-major respectively.
+  // Reference triangle vertices: (0,0), (1,0), (0,1).
+  // Reference tetrahedron adds vertex (0,0,1).
+#define FMR_DECLARE_SIMPLEX(NAME, DIM, NODES) \
+  template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr \
+  Y* calc_poly_func_##NAME (Y f[NODES], const G x[3u]) noexcept; \
+  template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr \
+  Y* calc_poly_grad_node_##NAME (Y g[NODES*DIM], const G x[3u]) noexcept; \
+  template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr \
+  Y* calc_poly_node_grad_##NAME (Y g[NODES*DIM], const G x[3u]) noexcept;
+  FMR_DECLARE_SIMPLEX(T2D3N,  2, 3)
+  FMR_DECLARE_SIMPLEX(T2D6N,  2, 6)
+  FMR_DECLARE_SIMPLEX(T2D10N, 2, 10)
+  FMR_DECLARE_SIMPLEX(T3D4N,  3, 4)
+  FMR_DECLARE_SIMPLEX(T3D10N, 3, 10)
+  FMR_DECLARE_SIMPLEX(T3D20N, 3, 20)
+#undef FMR_DECLARE_SIMPLEX
+  //
+  // T2D9N is the incomplete cubic triangle.
   // T2D9N constrains the T2D10N interior value to -sum(vertices)/6
   // + sum(edge nodes)/4; it reproduces P2 but not all cubic polynomials.
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
@@ -64,13 +81,6 @@ namespace fmr { namespace fems { namespace elem {
   Y* calc_poly_grad_node_T2D9N (Y g[18u], const G x[3u]) noexcept;// node-major
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
   Y* calc_poly_node_grad_T2D9N (Y g[18u], const G x[3u]) noexcept;// reference-major
-  //
-  template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_func_T2D10N (Y f[10u], const G x[3u]) noexcept;
-  template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_grad_node_T2D10N (Y g[20u], const G x[3u]) noexcept;// node-major
-  template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_node_grad_T2D10N (Y g[20u], const G x[3u]) noexcept;// reference-major
   //
   // Quadrilateral and hexahedron nodes follow Quad/Cube vertex and directed
   // edge connectivity. Gradients are node-major or reference-major respectively.

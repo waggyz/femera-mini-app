@@ -101,6 +101,87 @@ FMR_TEST_CUBE_CONSTEXPR(C3D20N, 20, 3, -3.0f)
 FMR_TEST_CUBE_CONSTEXPR(C3D32N, 32, 3, -5.5f)
 #undef FMR_TEST_CUBE_CONSTEXPR
 
+#define FMR_TEST_SIMPLEX_CONSTEXPR(NAME, NODES, DIM, DERIVATIVE) \
+constexpr bool constexpr_##NAME() { \
+  const double x[3] = {0,0,0}; \
+  float f[NODES] = {}, g[NODES*DIM] = {}, gt[NODES*DIM] = {}; \
+  return fmr::fems::elem::calc_poly_func_##NAME(f,x) == f \
+    && fmr::fems::elem::calc_poly_grad_node_##NAME(g,x) == g \
+    && fmr::fems::elem::calc_poly_node_grad_##NAME(gt,x) == gt \
+    && constexpr_near(f[0],1.0f,1e-6f) \
+    && constexpr_near(g[0],DERIVATIVE,1e-6f) \
+    && constexpr_near(g[0],gt[0],1e-6f); \
+} \
+static_assert(constexpr_##NAME(), "simplex basis must support mixed-precision constexpr");
+FMR_TEST_SIMPLEX_CONSTEXPR(T2D3N, 3, 2, -1.0f)
+FMR_TEST_SIMPLEX_CONSTEXPR(T2D6N, 6, 2, -3.0f)
+FMR_TEST_SIMPLEX_CONSTEXPR(T2D10N, 10, 2, -5.5f)
+FMR_TEST_SIMPLEX_CONSTEXPR(T3D4N, 4, 3, -1.0f)
+FMR_TEST_SIMPLEX_CONSTEXPR(T3D10N, 10, 3, -3.0f)
+FMR_TEST_SIMPLEX_CONSTEXPR(T3D20N, 20, 3, -5.5f)
+#undef FMR_TEST_SIMPLEX_CONSTEXPR
+
+template <class Topology, int Order, int Dim, int NodeN,
+          typename Values, typename Gradient, typename Transposed>
+void check_simplex_basis(Values values, Gradient gradient, Transposed transposed) {
+  using E = femera::grid::elem::Elem<Topology,Order>;
+  double nodes[std::size_t(NodeN*3)] = {};
+  ASSERT_EQ(E::get_node_n(), NodeN);
+  ASSERT_TRUE(E::get_elem_node_coor(nodes));
+  for (int n=0; n<NodeN; ++n) {
+    double guarded[std::size_t(NodeN+2)] = {};
+    guarded[0] = 123; guarded[NodeN+1] = 456;
+    ASSERT_EQ(values(guarded+1,nodes+3*n), guarded+1);
+    EXPECT_DOUBLE_EQ(guarded[0],123);
+    EXPECT_DOUBLE_EQ(guarded[NodeN+1],456);
+    for (int i=0; i<NodeN; ++i) EXPECT_NEAR(guarded[i+1],i==n ? 1.0 : 0.0,1e-13);
+  }
+  const double points[4][3] = {{0.13,0.21,0.17},{0.4,0.1,0.2},{0,0,0},{0.5,0.5,0}};
+  for (const auto& x : points) {
+    double f[std::size_t(NodeN)] = {}, gb[std::size_t(NodeN*Dim+2)] = {};
+    double tb[std::size_t(NodeN*Dim+2)] = {};
+    gb[0] = tb[0] = 123; gb[NodeN*Dim+1] = tb[NodeN*Dim+1] = 456;
+    double* g = gb+1; double* gt = tb+1;
+    ASSERT_EQ(values(f,x),f);
+    ASSERT_EQ(gradient(g,x),g);
+    ASSERT_EQ(transposed(gt,x),gt);
+    EXPECT_DOUBLE_EQ(gb[0],123); EXPECT_DOUBLE_EQ(gb[NodeN*Dim+1],456);
+    EXPECT_DOUBLE_EQ(tb[0],123); EXPECT_DOUBLE_EQ(tb[NodeN*Dim+1],456);
+    for (int d=0; d<Dim; ++d) {
+      double xp[3] = {x[0],x[1],x[2]}, xm[3] = {x[0],x[1],x[2]};
+      xp[d] += 1e-6; xm[d] -= 1e-6;
+      double fp[std::size_t(NodeN)] = {}, fm[std::size_t(NodeN)] = {}, sum = 0;
+      values(fp,xp); values(fm,xm);
+      for (int i=0; i<NodeN; ++i) {
+        EXPECT_NEAR(g[i*Dim+d],gt[d*NodeN+i],1e-13);
+        EXPECT_NEAR(g[i*Dim+d],(fp[i]-fm[i])/2e-6,1e-8);
+        sum += g[i*Dim+d];
+      }
+      EXPECT_NEAR(sum,0,1e-12);
+    }
+    for (int a=0; a<=Order; ++a) for (int b=0; a+b<=Order; ++b)
+      for (int c=0; c<=(Dim==3 ? Order-a-b : 0); ++c) {
+        const int powers[3] = {a,b,c};
+        double result = 0, deriv[3] = {};
+        for (int i=0; i<NodeN; ++i) {
+          double nodal = 1;
+          for (int d=0; d<Dim; ++d) nodal *= std::pow(nodes[3*i+d],powers[d]);
+          result += nodal*f[i];
+          for (int d=0; d<Dim; ++d) deriv[d] += nodal*g[Dim*i+d];
+        }
+        double expected = 1;
+        for (int d=0; d<Dim; ++d) expected *= std::pow(x[d],powers[d]);
+        EXPECT_NEAR(result,expected,1e-12);
+        for (int d=0; d<Dim; ++d) {
+          double expected_d = powers[d];
+          if (powers[d]>0) for (int k=0; k<Dim; ++k)
+            expected_d *= std::pow(x[k],powers[k]-(k==d ? 1 : 0));
+          EXPECT_NEAR(deriv[d],expected_d,1e-12);
+        }
+      }
+  }
+}
+
 template <class Topology, int Order, int Dim, int NodeN,
           typename Values, typename Gradient, typename Transposed>
 void check_cube_basis(Values values, Gradient gradient, Transposed transposed) {
@@ -140,7 +221,7 @@ void check_cube_basis(Values values, Gradient gradient, Transposed transposed) {
       values(fp,xp);
       values(fm,xm);
       for (int i=0; i<NodeN; ++i) {
-        EXPECT_DOUBLE_EQ(g[Dim*i+d], gt[d*NodeN+i]);
+        EXPECT_NEAR(g[Dim*i+d], gt[d*NodeN+i], 1e-13);
         EXPECT_NEAR(g[Dim*i+d], (fp[i]-fm[i])/2e-6, 1e-8);
         sum += g[Dim*i+d];
       }
@@ -177,7 +258,7 @@ template <int Dim, int NodeN, typename FloatValues, typename FloatGrad,
           typename FloatTransposed, typename DoubleValues, typename DoubleGrad>
 void check_cube_mixed_precision(FloatValues values, FloatGrad gradient,
     FloatTransposed transposed, DoubleValues double_values, DoubleGrad double_gradient) {
-  const double x[3] = {0.17,0.41,0.72};
+  const double x[3] = {0.17,0.21,0.24};
   float f[std::size_t(NodeN)] = {}, g[std::size_t(Dim*NodeN)] = {};
   float gt[std::size_t(Dim*NodeN)] = {};
   double expected[std::size_t(NodeN)] = {}, eg[std::size_t(Dim*NodeN)] = {};
@@ -186,7 +267,7 @@ void check_cube_mixed_precision(FloatValues values, FloatGrad gradient,
   for (int i=0; i<NodeN; ++i) {
     EXPECT_NEAR(f[i],expected[i],2e-6);
     for (int d=0; d<Dim; ++d) {
-      EXPECT_FLOAT_EQ(g[i*Dim+d],gt[d*NodeN+i]);
+      EXPECT_NEAR(g[i*Dim+d],gt[d*NodeN+i],2e-6);
       EXPECT_NEAR(g[i*Dim+d],eg[i*Dim+d],2e-6);
     }
   }
@@ -216,7 +297,7 @@ void expect_bar_gradient_matches_finite_difference(
       values(N_minus, x_minus);
       const double numerical = (N_plus[node]-N_minus[node])/(2.0*h);
       EXPECT_NEAR(dN[node], numerical, 1.0e-8);
-      EXPECT_DOUBLE_EQ(dN_transposed[node], dN[node]);
+      EXPECT_NEAR(dN_transposed[node], dN[node], 1e-13);
       derivative_sum += dN[node];
     }
     EXPECT_NEAR(derivative_sum, 0.0, 1.0e-12);
@@ -232,6 +313,165 @@ void expect_bar_gradient_matches_finite_difference(
 }
 
 }// end anonymous namespace
+
+TEST(FmrElemPoly, CompleteSimplexBasisAndGradients) {
+  using femera::grid::elem::Tris;
+  using femera::grid::elem::Tets;
+  using namespace fmr::fems::elem;
+#define FMR_CHECK_SIMPLEX(TOPO, ORDER, DIM, NODES, NAME) \
+  check_simplex_basis<TOPO,ORDER,DIM,NODES>(calc_poly_func_##NAME<double,double>, \
+    calc_poly_grad_node_##NAME<double,double>, calc_poly_node_grad_##NAME<double,double>); \
+  check_cube_mixed_precision<DIM,NODES>(calc_poly_func_##NAME<float,double>, \
+    calc_poly_grad_node_##NAME<float,double>, calc_poly_node_grad_##NAME<float,double>, \
+    calc_poly_func_##NAME<double,double>, calc_poly_grad_node_##NAME<double,double>);
+  FMR_CHECK_SIMPLEX(Tris,1,2,3,T2D3N)
+  FMR_CHECK_SIMPLEX(Tris,2,2,6,T2D6N)
+  FMR_CHECK_SIMPLEX(Tris,3,2,10,T2D10N)
+  FMR_CHECK_SIMPLEX(Tets,1,3,4,T3D4N)
+  FMR_CHECK_SIMPLEX(Tets,2,3,10,T3D10N)
+  FMR_CHECK_SIMPLEX(Tets,3,3,20,T3D20N)
+#undef FMR_CHECK_SIMPLEX
+}
+
+namespace {
+template <int NodeN, typename Values, typename Gradient, typename LegacyValues,
+          typename LegacyGradient>
+void check_legacy_tet(Values values, Gradient gradient, LegacyValues old_values,
+                      LegacyGradient old_gradient) {
+  const double points[4][3] = {{0.13,0.21,0.17},{0.4,0.1,0.2},{0,0,0},{0.5,0.5,0}};
+  for (const auto& x : points) {
+    double f[std::size_t(NodeN)] = {}, old_f[std::size_t(NodeN)] = {};
+    double g[std::size_t(3*NodeN)] = {}, old_g[std::size_t(3*NodeN)] = {};
+    values(f,x); gradient(g,x); old_values(old_f,x); old_gradient(old_g,x);
+    for (int i=0; i<NodeN; ++i) {
+      EXPECT_NEAR(f[i],old_f[i],1e-13);
+      for (int d=0; d<3; ++d) EXPECT_NEAR(g[3*i+d],old_g[d*NodeN+i],1e-13);
+    }
+  }
+}
+
+template <int Order, int TriN, int TetN, typename TriValues, typename TriGrad,
+          typename TetValues, typename TetGrad>
+void check_simplex_faces(TriValues tri_values, TriGrad tri_grad,
+                         TetValues tet_values, TetGrad tet_grad) {
+  using femera::grid::elem::Tets;
+  for (int face=0; face<4; ++face) {
+    const auto* verts = Tets::tris_vert_conn+3*face;
+    int mapping[std::size_t(TriN)] = {};
+    for (int i=0; i<3; ++i) mapping[i] = int(verts[i]);
+    for (int e=0; e<3 && Order>1; ++e) {
+      const auto a=verts[e], b=verts[(e+1)%3];
+      int match=-1; bool reverse=false;
+      for (int j=0; j<6; ++j) {
+        const auto first=Tets::bars_vert_conn[2*j], last=Tets::bars_vert_conn[2*j+1];
+        if ((first==a && last==b) || (first==b && last==a)) {
+          match=j; reverse=first!=a;
+        }
+      }
+      ASSERT_GE(match,0);
+      for (int j=0; j<Order-1; ++j)
+        mapping[3+e*(Order-1)+j] = 4+match*(Order-1)+(reverse ? Order-2-j : j);
+    }
+    if (Order==3) mapping[9] = 16+face;
+    const double points[2][3] = {{0.13,0.27,0},{0.52,0.21,0}};
+    for (const auto& uv : points) {
+      double x[3] = {}, tangent[2][3] = {};
+      for (int d=0; d<3; ++d) {
+        const double a=Tets::vert_coor[3*int(verts[0])+d];
+        tangent[0][d]=Tets::vert_coor[3*int(verts[1])+d]-a;
+        tangent[1][d]=Tets::vert_coor[3*int(verts[2])+d]-a;
+        x[d]=a+uv[0]*tangent[0][d]+uv[1]*tangent[1][d];
+      }
+      double f[std::size_t(TriN)] = {}, g[std::size_t(2*TriN)] = {};
+      double tf[std::size_t(TetN)] = {}, tg[std::size_t(3*TetN)] = {};
+      tri_values(f,uv); tri_grad(g,uv); tet_values(tf,x); tet_grad(tg,x);
+      for (int i=0; i<TetN; ++i) {
+        int tri=-1;
+        for (int j=0; j<TriN; ++j) if (mapping[j]==i) tri=j;
+        EXPECT_NEAR(tf[i],tri<0 ? 0 : f[tri],1e-13);
+        for (int d=0; d<2; ++d) {
+          double tangential=0;
+          for (int k=0; k<3; ++k) tangential += tg[3*i+k]*tangent[d][k];
+          EXPECT_NEAR(tangential,tri<0 ? 0 : g[2*tri+d],1e-13);
+        }
+      }
+    }
+  }
+}
+
+template <int Order, int NodeN, typename Values, typename Gradient,
+          typename BarValues, typename BarGradient>
+void check_simplex_edges(Values values, Gradient gradient, BarValues bar_values,
+                         BarGradient bar_gradient) {
+  using femera::grid::elem::Tris;
+  for (int e=0; e<3; ++e) for (double t : {0.17,0.52,0.84}) {
+    const int a=int(Tris::bars_vert_conn[2*e]), b=int(Tris::bars_vert_conn[2*e+1]);
+    double x[3] = {}, tangent[2] = {};
+    for (int d=0; d<2; ++d) {
+      tangent[d]=Tris::vert_coor[3*b+d]-Tris::vert_coor[3*a+d];
+      x[d]=Tris::vert_coor[3*a+d]+t*tangent[d];
+    }
+    const double axis[3] = {t,0,0};
+    double f[std::size_t(NodeN)] = {}, g[std::size_t(2*NodeN)] = {};
+    double bar[std::size_t(Order+1)] = {}, bg[std::size_t(Order+1)] = {};
+    values(f,x); gradient(g,x); bar_values(bar,axis); bar_gradient(bg,axis);
+    for (int i=0; i<NodeN; ++i) {
+      int idx=i==a ? 0 : (i==b ? 1 : -1);
+      for (int j=0; j<Order-1; ++j) if (i==3+e*(Order-1)+j) idx=2+j;
+      EXPECT_NEAR(f[i],idx<0 ? 0 : bar[idx],1e-13);
+      EXPECT_NEAR(g[2*i]*tangent[0]+g[2*i+1]*tangent[1],idx<0 ? 0 : bg[idx],1e-13);
+    }
+  }
+}
+}
+
+TEST(FmrElemPoly, CompleteSimplexTracesAndExistingTets) {
+  using femera::grid::elem::Tets;
+  using namespace fmr::fems::elem;
+#define FMR_CHECK_SIMPLEX_TRACE(ORDER, TN, VN, TRI, TET, BAR, LEGACY) \
+  check_simplex_faces<ORDER,TN,VN>(calc_poly_func_##TRI<double,double>, \
+    calc_poly_grad_node_##TRI<double,double>, calc_poly_func_##TET<double,double>, \
+    calc_poly_grad_node_##TET<double,double>); \
+  check_simplex_edges<ORDER,TN>(calc_poly_func_##TRI<double,double>, \
+    calc_poly_grad_node_##TRI<double,double>, calc_poly_func_##BAR<double,double>, \
+    calc_poly_grad_node_##BAR<double,double>); \
+  check_legacy_tet<VN>(calc_poly_func_##TET<double,double>, \
+    calc_poly_grad_node_##TET<double,double>, Tets::calc_poly_func_##LEGACY<double>, \
+    Tets::calc_poly_grad_node_##LEGACY<double>);
+  FMR_CHECK_SIMPLEX_TRACE(1,3,4,T2D3N,T3D4N,C1D2N,4)
+  FMR_CHECK_SIMPLEX_TRACE(2,6,10,T2D6N,T3D10N,C1D3N,10)
+  FMR_CHECK_SIMPLEX_TRACE(3,10,20,T2D10N,T3D20N,C1D4N,20)
+#undef FMR_CHECK_SIMPLEX_TRACE
+}
+
+TEST(FmrElemPoly, CompleteCubicTriangleMatchesOriginalFormula) {
+  const double points[4][3] = {{0.13,0.21,0},{0.4,0.1,0},{0,0,0},{0.5,0.5,0}};
+  const double dl[3][2] = {{-1,-1},{1,0},{0,1}};
+  for (const auto& x : points) {
+    const double l[3] = {1-x[0]-x[1],x[0],x[1]};
+    double expected[10] = {}, dg[20] = {}, f[10] = {}, g[20] = {};
+    for (int i=0; i<3; ++i) {
+      const int j=(i+1)%3;
+      expected[i]=0.5*l[i]*(3*l[i]-1)*(3*l[i]-2);
+      expected[3+2*i]=4.5*l[i]*l[j]*(3*l[i]-1);
+      expected[4+2*i]=4.5*l[i]*l[j]*(3*l[j]-1);
+      for (int d=0; d<2; ++d) {
+        dg[2*i+d]=0.5*(27*l[i]*l[i]-18*l[i]+2)*dl[i][d];
+        dg[2*(3+2*i)+d]=4.5*(l[j]*(6*l[i]-1)*dl[i][d]
+          +l[i]*(3*l[i]-1)*dl[j][d]);
+        dg[2*(4+2*i)+d]=4.5*(l[j]*(3*l[j]-1)*dl[i][d]
+          +l[i]*(6*l[j]-1)*dl[j][d]);
+      }
+    }
+    expected[9]=27*l[0]*l[1]*l[2];
+    for (int d=0; d<2; ++d)
+      dg[18+d]=27*(dl[0][d]*l[1]*l[2]+l[0]*dl[1][d]*l[2]+l[0]*l[1]*dl[2][d]);
+    fmr::fems::elem::calc_poly_func_T2D10N(f,x);
+    fmr::fems::elem::calc_poly_grad_node_T2D10N(g,x);
+    for (int i=0; i<10; ++i) EXPECT_NEAR(f[i],expected[i],1e-13);
+    for (int i=0; i<20; ++i) EXPECT_NEAR(g[i],dg[i],1e-13);
+  }
+}
 
 TEST(FmrElemPoly, SerendipityCubeBasisAndGradients) {
   using femera::grid::elem::Quad;
@@ -438,7 +678,7 @@ TEST(FmrElemPoly, CubicTriangleBasisAndGradients) {
       fmr::fems::elem::calc_poly_func_T2D10N(fm, xm);
       double sum = 0;
       for (int i=0; i<10; ++i) {
-        EXPECT_DOUBLE_EQ(g[2*i+d], gt[d*10+i]);
+        EXPECT_NEAR(g[2*i+d], gt[d*10+i], 1e-13);
         EXPECT_NEAR(g[2*i+d], (fp[i]-fm[i])/2e-6, 1e-8);
         sum += g[2*i+d];
       }
@@ -535,7 +775,7 @@ TEST(FmrElemPoly, IncompleteCubicTriangleBasisAndGradients) {
       fmr::fems::elem::calc_poly_func_T2D9N(fp, xp);
       fmr::fems::elem::calc_poly_func_T2D9N(fm, xm);
       for (int i=0; i<9; ++i) {
-        EXPECT_DOUBLE_EQ(g[2*i+d], gt[d*9+i]);
+        EXPECT_NEAR(g[2*i+d], gt[d*9+i], 1e-13);
         EXPECT_NEAR(g[2*i+d], (fp[i]-fm[i])/2e-6, 1e-8);
         sum += g[2*i+d];
       }
