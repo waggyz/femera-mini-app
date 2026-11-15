@@ -12,8 +12,9 @@ constexpr fmr::Local_int elem::Elem<T,P,F>::get_node_n () noexcept {
   // Handles solid and interface elements
   return T::vert_n// vertex nodes
     + (P -1) * T::edge_n// edge nodes
-    + ((P<3) ? 0 : T::vols_n * (T::tris_n + T::quad_n));// face nodes for P==3
-           // vols_n is 0 (1D,2D elems) or 1 (3D solid elems)
+    + (((P<3) || (T::quad_n==1)) ? 0 : (T::vols_n * T::tris_n));
+    // face nodes for P==3 tets and Wdge (only)
+    // vols_n is 0 (1D,2D elems) or 1 (3D solid elems)
 }
 // Element shape function and Jacobian stuff ==================================
 //

@@ -6,10 +6,13 @@
 // These included temporaily for testing.
 // The public API should be able to include only a generic interface to access
 // all element types.
-#include "elem/Tets.hpp"
-#include "elem/Quad.hpp"
-#include "elem/Tris.hpp"
 #include "elem/Bars.hpp"
+#include "elem/Tris.hpp"
+#include "elem/Quad.hpp"
+#include "elem/Tets.hpp"
+#include "elem/Cube.hpp"
+#include "elem/Prmd.hpp"
+#include "elem/Wdge.hpp"
 #endif
 
 #include <gtest/gtest.h>
@@ -81,6 +84,37 @@ TEST( GridElem, TrivialTest ){
   EXPECT_FLOAT_EQ (a_float, an_array_f[0]);
   EXPECT_FLOAT_EQ (a_float, an_array_f[1]);
 }
+namespace femera { namespace grid { namespace elem {
+TEST( GridElem, SerendipityElementNodeCounts ){
+  EXPECT_EQ( (Elem<Bars,1>::get_node_n ()), 2 );
+  EXPECT_EQ( (Elem<Bars,2>::get_node_n ()), 3 );
+  EXPECT_EQ( (Elem<Bars,3>::get_node_n ()), 4 );
+  //
+  EXPECT_EQ( (Elem<Tris,1>::get_node_n ()), 3 );
+  EXPECT_EQ( (Elem<Tris,2>::get_node_n ()), 6 );
+  EXPECT_EQ( (Elem<Tris,3>::get_node_n ()), 9 );
+  //
+  EXPECT_EQ( (Elem<Quad,1>::get_node_n ()), 4 );
+  EXPECT_EQ( (Elem<Quad,2>::get_node_n ()), 8 );
+  EXPECT_EQ( (Elem<Quad,3>::get_node_n ()), 12 );
+  //
+  EXPECT_EQ( (Elem<Tets,1>::get_node_n ()), 4 );
+  EXPECT_EQ( (Elem<Tets,2>::get_node_n ()), 10 );
+  EXPECT_EQ( (Elem<Tets,3>::get_node_n ()), 20 );
+  //
+  EXPECT_EQ( (Elem<Cube,1>::get_node_n ()), 8 );
+  EXPECT_EQ( (Elem<Cube,2>::get_node_n ()), 20 );
+  EXPECT_EQ( (Elem<Cube,3>::get_node_n ()), 32 );
+  //
+  EXPECT_EQ( (Elem<Prmd,1>::get_node_n ()), 5 );
+  EXPECT_EQ( (Elem<Prmd,2>::get_node_n ()), 13 );
+  EXPECT_EQ( (Elem<Prmd,3>::get_node_n ()), 21 );//TODO incorrect calc by Elem?
+  //
+  EXPECT_EQ( (Elem<Wdge,1>::get_node_n ()), 6 );
+  EXPECT_EQ( (Elem<Wdge,2>::get_node_n ()), 15 );
+  EXPECT_EQ( (Elem<Wdge,3>::get_node_n ()), 26 );
+}
+}}}//end namespace femera::grid::elem
 TEST( GridElem, JacdSizeTest ){
   EXPECT_EQ( jacs_size, 7 );// 2D reference quad in 3D ambient space
   EXPECT_EQ( jac1_size,  2 );// 1D, 1 point rule, 1D space
