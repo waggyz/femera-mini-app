@@ -226,7 +226,7 @@ bool fmr::math::tri3_norm (F normal[3], const F pt1[3], const F pt2[3], const F 
   auto Ny = F(Az * Bx - Ax * Bz);
   auto Nz = F(Ax * By - Ay * Bx);
   const auto len = std::sqrt (Nx*Nx + Ny*Ny + Nz*Nz);
-  if (len <= 0.0) return false;
+  if (len <= F(0.0)) return false;
   Nx /= len; Ny /= len; Nz /= len;
   normal[0] = Nx; normal[1] = Ny; normal[2] = Nz;
   return true;

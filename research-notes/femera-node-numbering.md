@@ -11,3 +11,8 @@
 - Then, if present, one or more edge nodes, in order of the edges defined in `bars_vert_conn`.
 - Then, if present, face nodes, using `tris_vert_conn` followed by `quad_vert_conn`.
 
+**Standards to consider**
+
+- [CGNS](https://cgns.org/standard/SIDS/convention.html#unstructured-grid-element-numbering-conventions)
+- [Gmsh](https://gmsh.info/dev/doc/texinfo/gmsh.html#Node-ordering)
+

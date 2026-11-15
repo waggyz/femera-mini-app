@@ -23,12 +23,63 @@ uint count_serendipity_monomials(uint variables, uint remaining_degree) {
   return count;
 }
 
+template <typename F>
+void check_triangle_normal() {
+  const F pt1[] = {F(1), F(2), F(3)};
+  const F pt2[] = {F(3), F(2), F(3)};
+  const F pt3[] = {F(3), F(5), F(6)};
+  F normal[3] = {};
+  const F inverse_sqrt_two = F(1) / std::sqrt(F(2));
+
+  ASSERT_TRUE(fmr::math::tri3_norm(normal, pt1, pt2, pt3));
+  const F tolerance = F(10) * std::numeric_limits<F>::epsilon();
+  EXPECT_LE(std::abs(normal[0]), tolerance);
+  EXPECT_LE(std::abs(normal[1] + inverse_sqrt_two), tolerance);
+  EXPECT_LE(std::abs(normal[2] - inverse_sqrt_two), tolerance);
+
+  ASSERT_TRUE(fmr::math::tri3_norm(normal, pt1, pt3, pt2));
+  EXPECT_LE(std::abs(normal[0]), tolerance);
+  EXPECT_LE(std::abs(normal[1] - inverse_sqrt_two), tolerance);
+  EXPECT_LE(std::abs(normal[2] + inverse_sqrt_two), tolerance);
+}
+
+template <typename F>
+void check_degenerate_triangle_normal() {
+  const F collinear1[] = {F(0), F(0), F(0)};
+  const F collinear2[] = {F(1), F(2), F(3)};
+  const F collinear3[] = {F(2), F(4), F(6)};
+  const F repeated[] = {F(1), F(2), F(3)};
+  F normal[] = {F(4), F(5), F(6)};
+
+  EXPECT_FALSE(fmr::math::tri3_norm(normal, collinear1, collinear2, collinear3));
+  EXPECT_EQ(normal[0], F(4));
+  EXPECT_EQ(normal[1], F(5));
+  EXPECT_EQ(normal[2], F(6));
+
+  EXPECT_FALSE(fmr::math::tri3_norm(normal, repeated, repeated, collinear3));
+  EXPECT_EQ(normal[0], F(4));
+  EXPECT_EQ(normal[1], F(5));
+  EXPECT_EQ(normal[2], F(6));
+}
+
 TEST(FmrMath, DivideCeil) {
   EXPECT_EQ(fmr::math::divide_ceil(0u, 3u), 0u);
   EXPECT_EQ(fmr::math::divide_ceil(1u, 3u), 1u);
   EXPECT_EQ(fmr::math::divide_ceil(6u, 3u), 2u);
   EXPECT_EQ(fmr::math::divide_ceil(7u, 3u), 3u);
   EXPECT_EQ(fmr::math::divide_ceil(7, 1), 7);
+}
+
+TEST(FmrMath, TriangleNormal) {
+  check_triangle_normal<float>();
+  check_triangle_normal<double>();
+  check_triangle_normal<long double>();
+}
+
+TEST(FmrMath, DegenerateTriangleNormal) {
+  check_degenerate_triangle_normal<float>();
+  check_degenerate_triangle_normal<double>();
+  check_degenerate_triangle_normal<long double>();
 }
 
 TEST(FmrMath, BinaryDigits) {
