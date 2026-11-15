@@ -262,13 +262,22 @@ Save this plan to a file in the #research-notes/ai-assistant/ folder.
   now agree with its existing Tet10/Tet20 coordinates and basis; tests check
   nodal interpolation and all four Tri10 face restrictions, including
   orientation-dependent edge permutations.
+- Implemented `static constexpr` Quad4/8/12 and Cube8/20/32 values and both
+  reference-gradient layouts by composing the 1D basis and derivatives with
+  vertex corrections. Tests cover C++14 constant evaluation, mixed precision,
+  all reference nodes, gradients, the full serendipity polynomial space,
+  directed quadrilateral edges and all six oriented cube-face traces.
 - Preserve both existing gradient layouts and other storage choices until
   comprehensive performance testing on HPC hardware; do not remove or select
   layouts merely to make prototype APIs uniform.
 - Still to implement: reusable face-orientation/permutation handling and the
-  2D/3D n-cube functions and dispatch. The cubic pyramid volume basis and
-  verification of its Tri9 face restriction remain to be implemented; no
-  wedge-pyramid constraint or assembly path has been implemented yet.
+  general element evaluation/dispatch path, including Bars and the new n-cube
+  evaluators. Wedge and pyramid volume bases and verification of their
+  triangular face restrictions remain to be implemented; in particular, the
+  pyramid must be checked against the selected Tri9 space. No wedge-pyramid
+  constraint or assembly path has been implemented yet.
+
+---
 
 I think I corrected the `get_node_n` calculation in `Elem`. The goal here is to implement the standard serendipity/simplex family of elements. Expectations in #Elem.gtst.cpp document my current understanding of the correct counts. This code is in very early development; we're determining the requirements while prototyping the implementation, and there is no such thing as backward compatibility at this point. I talk with intended users often and have a good understanding of what they will need exposed in the Python API (Pymera), which is only stubbed out at present until the internals are working well enough to demonstrate. This plan looks good so far, with these adjustments.
 

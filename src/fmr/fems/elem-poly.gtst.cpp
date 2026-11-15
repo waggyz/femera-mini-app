@@ -1,5 +1,7 @@
 #include "elem-poly.hpp"
 #include "../../femera/grid/elem/Tets.hpp"
+#include "../../femera/grid/elem/Quad.hpp"
+#include "../../femera/grid/elem/Cube.hpp"
 #include "../math.hpp"
 
 #include <gtest/gtest.h>
@@ -78,6 +80,118 @@ constexpr bool incomplete_triangle_constexpr_test() {
 }
 static_assert(incomplete_triangle_constexpr_test(), "Tri9 must be constexpr");
 
+#define FMR_TEST_CUBE_CONSTEXPR(NAME, NODES, DIM, DERIVATIVE) \
+constexpr bool constexpr_##NAME() { \
+  const double x[3] = {0,0,0}; \
+  float f[NODES] = {}, g[NODES*DIM] = {}, gt[NODES*DIM] = {}; \
+  return fmr::fems::elem::calc_poly_func_##NAME(f,x) == f \
+    && fmr::fems::elem::calc_poly_grad_node_##NAME(g,x) == g \
+    && fmr::fems::elem::calc_poly_node_grad_##NAME(gt,x) == gt \
+    && constexpr_near(f[0],1.0f,1e-6f) \
+    && constexpr_near(g[0],DERIVATIVE,1e-6f) \
+    && constexpr_near(g[0],gt[0],1e-6f); \
+} \
+static_assert(constexpr_##NAME(), "cube basis must support mixed-precision constexpr");
+
+FMR_TEST_CUBE_CONSTEXPR(C2D4N, 4, 2, -1.0f)
+FMR_TEST_CUBE_CONSTEXPR(C2D8N, 8, 2, -3.0f)
+FMR_TEST_CUBE_CONSTEXPR(C2D12N, 12, 2, -5.5f)
+FMR_TEST_CUBE_CONSTEXPR(C3D8N, 8, 3, -1.0f)
+FMR_TEST_CUBE_CONSTEXPR(C3D20N, 20, 3, -3.0f)
+FMR_TEST_CUBE_CONSTEXPR(C3D32N, 32, 3, -5.5f)
+#undef FMR_TEST_CUBE_CONSTEXPR
+
+template <class Topology, int Order, int Dim, int NodeN,
+          typename Values, typename Gradient, typename Transposed>
+void check_cube_basis(Values values, Gradient gradient, Transposed transposed) {
+  using E = femera::grid::elem::Elem<Topology,Order>;
+  double nodes[std::size_t(NodeN*3)] = {};
+  ASSERT_EQ(E::get_node_n(), NodeN);
+  ASSERT_TRUE(E::get_elem_node_coor(nodes));
+  for (int n=0; n<NodeN; ++n) {
+    double guarded[std::size_t(NodeN+2)] = {};
+    guarded[0] = 123;
+    guarded[NodeN+1] = 456;
+    ASSERT_EQ(values(guarded+1, nodes+3*n), guarded+1);
+    EXPECT_DOUBLE_EQ(guarded[0], 123);
+    EXPECT_DOUBLE_EQ(guarded[NodeN+1], 456);
+    for (int i=0; i<NodeN; ++i) EXPECT_NEAR(guarded[1+i], i==n ? 1.0 : 0.0, 1e-13);
+  }
+  const double points[3][3] = {{0.17,0.31,0.47}, {0.72,0.24,0.61}, {0,0.5,1}};
+  for (const auto& x : points) {
+    double f[std::size_t(NodeN)] = {}, guard[std::size_t(NodeN*Dim+2)] = {};
+    double guardt[std::size_t(NodeN*Dim+2)] = {};
+    guard[0] = guardt[0] = 123;
+    guard[NodeN*Dim+1] = guardt[NodeN*Dim+1] = 456;
+    double* g = guard+1;
+    double* gt = guardt+1;
+    ASSERT_EQ(values(f,x), f);
+    ASSERT_EQ(gradient(g,x), g);
+    ASSERT_EQ(transposed(gt,x), gt);
+    EXPECT_DOUBLE_EQ(guard[0], 123);
+    EXPECT_DOUBLE_EQ(guard[NodeN*Dim+1], 456);
+    EXPECT_DOUBLE_EQ(guardt[0], 123);
+    EXPECT_DOUBLE_EQ(guardt[NodeN*Dim+1], 456);
+    for (int d=0; d<Dim; ++d) {
+      double xp[3] = {x[0],x[1],x[2]}, xm[3] = {x[0],x[1],x[2]};
+      xp[d] += 1e-6;
+      xm[d] -= 1e-6;
+      double fp[std::size_t(NodeN)] = {}, fm[std::size_t(NodeN)] = {}, sum = 0;
+      values(fp,xp);
+      values(fm,xm);
+      for (int i=0; i<NodeN; ++i) {
+        EXPECT_DOUBLE_EQ(g[Dim*i+d], gt[d*NodeN+i]);
+        EXPECT_NEAR(g[Dim*i+d], (fp[i]-fm[i])/2e-6, 1e-8);
+        sum += g[Dim*i+d];
+      }
+      EXPECT_NEAR(sum,0,1e-12);
+    }
+    for (int a=0; a<=Order; ++a) for (int b=0; b<=Order; ++b)
+      for (int c=0; c<=(Dim==3 ? Order : 0); ++c) {
+        const int superlinear = (a>1 ? a : 0)+(b>1 ? b : 0)+(c>1 ? c : 0);
+        if (superlinear>Order) continue;
+        const int powers[3] = {a,b,c};
+        double actual = 0, deriv[3] = {};
+        for (int i=0; i<NodeN; ++i) {
+          double nodal = 1;
+          for (int d=0; d<Dim; ++d) nodal *= std::pow(nodes[3*i+d], powers[d]);
+          actual += nodal*f[i];
+          for (int d=0; d<Dim; ++d) deriv[d] += nodal*g[Dim*i+d];
+        }
+        double expected = 1;
+        for (int d=0; d<Dim; ++d) expected *= std::pow(x[d], powers[d]);
+        EXPECT_NEAR(actual,expected,1e-12);
+        for (int d=0; d<Dim; ++d) {
+          double derivative = powers[d];
+          if (powers[d] > 0) {
+            for (int k=0; k<Dim; ++k)
+              derivative *= std::pow(x[k],powers[k]-(k==d ? 1 : 0));
+          }
+          EXPECT_NEAR(deriv[d],derivative,1e-12);
+        }
+      }
+  }
+}
+
+template <int Dim, int NodeN, typename FloatValues, typename FloatGrad,
+          typename FloatTransposed, typename DoubleValues, typename DoubleGrad>
+void check_cube_mixed_precision(FloatValues values, FloatGrad gradient,
+    FloatTransposed transposed, DoubleValues double_values, DoubleGrad double_gradient) {
+  const double x[3] = {0.17,0.41,0.72};
+  float f[std::size_t(NodeN)] = {}, g[std::size_t(Dim*NodeN)] = {};
+  float gt[std::size_t(Dim*NodeN)] = {};
+  double expected[std::size_t(NodeN)] = {}, eg[std::size_t(Dim*NodeN)] = {};
+  values(f,x); gradient(g,x); transposed(gt,x);
+  double_values(expected,x); double_gradient(eg,x);
+  for (int i=0; i<NodeN; ++i) {
+    EXPECT_NEAR(f[i],expected[i],2e-6);
+    for (int d=0; d<Dim; ++d) {
+      EXPECT_FLOAT_EQ(g[i*Dim+d],gt[d*NodeN+i]);
+      EXPECT_NEAR(g[i*Dim+d],eg[i*Dim+d],2e-6);
+    }
+  }
+}
+
 template <fmr::Local_int NodeN, typename Values, typename Gradient,
           typename TransposedGradient>
 void expect_bar_gradient_matches_finite_difference(
@@ -118,6 +232,144 @@ void expect_bar_gradient_matches_finite_difference(
 }
 
 }// end anonymous namespace
+
+TEST(FmrElemPoly, SerendipityCubeBasisAndGradients) {
+  using femera::grid::elem::Quad;
+  using femera::grid::elem::Cube;
+  using namespace fmr::fems::elem;
+#define FMR_CHECK_CUBE(TOPO, ORDER, DIM, NODES, NAME) \
+  check_cube_basis<TOPO,ORDER,DIM,NODES>( \
+    calc_poly_func_##NAME<double,double>, calc_poly_grad_node_##NAME<double,double>, \
+    calc_poly_node_grad_##NAME<double,double>);
+  FMR_CHECK_CUBE(Quad,1,2,4,C2D4N)
+  FMR_CHECK_CUBE(Quad,2,2,8,C2D8N)
+  FMR_CHECK_CUBE(Quad,3,2,12,C2D12N)
+  FMR_CHECK_CUBE(Cube,1,3,8,C3D8N)
+  FMR_CHECK_CUBE(Cube,2,3,20,C3D20N)
+  FMR_CHECK_CUBE(Cube,3,3,32,C3D32N)
+#undef FMR_CHECK_CUBE
+}
+
+TEST(FmrElemPoly, SerendipityCubeMixedPrecision) {
+  using namespace fmr::fems::elem;
+#define FMR_CHECK_MIXED(DIM, NODES, NAME) \
+  check_cube_mixed_precision<DIM,NODES>(calc_poly_func_##NAME<float,double>, \
+    calc_poly_grad_node_##NAME<float,double>, calc_poly_node_grad_##NAME<float,double>, \
+    calc_poly_func_##NAME<double,double>, calc_poly_grad_node_##NAME<double,double>);
+  FMR_CHECK_MIXED(2,4,C2D4N)
+  FMR_CHECK_MIXED(2,8,C2D8N)
+  FMR_CHECK_MIXED(2,12,C2D12N)
+  FMR_CHECK_MIXED(3,8,C3D8N)
+  FMR_CHECK_MIXED(3,20,C3D20N)
+  FMR_CHECK_MIXED(3,32,C3D32N)
+#undef FMR_CHECK_MIXED
+}
+
+namespace {
+template <int Order, int QuadN, int CubeN, typename Values2, typename Grad2,
+          typename Values3, typename Grad3>
+void check_cube_face_traces(Values2 values2, Grad2 grad2, Values3 values3, Grad3 grad3) {
+  using femera::grid::elem::Cube;
+  for (int face=0; face<6; ++face) {
+    const auto* verts = Cube::quad_vert_conn+4*face;
+    int mapping[std::size_t(QuadN)] = {};
+    for (int i=0; i<4; ++i) mapping[i] = int(verts[i]);
+    for (int e=0; e<4 && Order>1; ++e) {
+      const auto a = verts[e], b = verts[(e+1)%4];
+      int match = -1;
+      bool reverse = false;
+      for (int j=0; j<12; ++j) {
+        const auto first = Cube::bars_vert_conn[2*j], last = Cube::bars_vert_conn[2*j+1];
+        if ((first==a && last==b) || (first==b && last==a)) {
+          match = j;
+          reverse = first!=a;
+        }
+      }
+      ASSERT_GE(match,0);
+      for (int j=0; j<Order-1; ++j) {
+        mapping[4+e*(Order-1)+j] = 8+match*(Order-1)
+          +(reverse ? Order-2-j : j);
+      }
+    }
+    const double points[2][3] = {{0.21,0.37,0}, {0.72,0.18,0}};
+    for (const auto& uv : points) {
+      double x[3] = {}, tangent[2][3] = {};
+      for (int d=0; d<3; ++d) {
+        const double a = Cube::vert_coor[3*int(verts[0])+d];
+        tangent[0][d] = Cube::vert_coor[3*int(verts[1])+d]-a;
+        tangent[1][d] = Cube::vert_coor[3*int(verts[3])+d]-a;
+        x[d] = a+uv[0]*tangent[0][d]+uv[1]*tangent[1][d];
+      }
+      double f2[std::size_t(QuadN)] = {}, g2[std::size_t(QuadN*2)] = {};
+      double f3[std::size_t(CubeN)] = {}, g3[std::size_t(CubeN*3)] = {};
+      values2(f2,uv); grad2(g2,uv); values3(f3,x); grad3(g3,x);
+      for (int i=0; i<QuadN; ++i) {
+        EXPECT_NEAR(f2[i], f3[mapping[i]], 1e-13);
+        for (int d=0; d<2; ++d) {
+          double tangential = 0;
+          for (int k=0; k<3; ++k) tangential += g3[3*mapping[i]+k]*tangent[d][k];
+          EXPECT_NEAR(g2[2*i+d], tangential, 1e-13);
+        }
+      }
+      for (int i=0; i<CubeN; ++i) {
+        bool belongs = false;
+        for (int j=0; j<QuadN; ++j) if (mapping[j]==i) belongs = true;
+        if (!belongs) {
+          EXPECT_NEAR(f3[i],0,1e-13);
+          for (int d=0; d<2; ++d) {
+            double tangential = 0;
+            for (int k=0; k<3; ++k) tangential += g3[3*i+k]*tangent[d][k];
+            EXPECT_NEAR(tangential,0,1e-13);
+          }
+        }
+      }
+    }
+  }
+}
+
+template <int Order, int NodeN, typename Values, typename Gradient,
+          typename BarValues, typename BarGradient>
+void check_quad_edges(Values values, Gradient gradient, BarValues bar_values,
+                      BarGradient bar_gradient) {
+  using femera::grid::elem::Quad;
+  for (int e=0; e<4; ++e) for (double t : {0.17,0.52,0.84}) {
+    const auto a=Quad::bars_vert_conn[2*e], b=Quad::bars_vert_conn[2*e+1];
+    double x[3] = {}, tangent[2] = {};
+    for (int d=0; d<2; ++d) {
+      tangent[d] = Quad::vert_coor[3*int(b)+d]-Quad::vert_coor[3*int(a)+d];
+      x[d] = Quad::vert_coor[3*int(a)+d]+t*tangent[d];
+    }
+    const double axis[3] = {t,0,0};
+    double f[std::size_t(NodeN)] = {}, g[std::size_t(NodeN*2)] = {};
+    double bar[std::size_t(Order+1)] = {}, bg[std::size_t(Order+1)] = {};
+    values(f,x); gradient(g,x); bar_values(bar,axis); bar_gradient(bg,axis);
+    for (int i=0; i<NodeN; ++i) {
+      int idx = i==int(a) ? 0 : (i==int(b) ? 1 : -1);
+      for (int j=0; j<Order-1; ++j) {
+        if (i==4+e*(Order-1)+j) idx = 2+j;
+      }
+      EXPECT_NEAR(f[i],idx<0 ? 0 : bar[idx],1e-13);
+      EXPECT_NEAR(g[2*i]*tangent[0]+g[2*i+1]*tangent[1],
+        idx<0 ? 0 : bg[idx],1e-13);
+    }
+  }
+}
+}
+
+TEST(FmrElemPoly, SerendipityCubeFaceAndEdgeTraces) {
+  using namespace fmr::fems::elem;
+#define FMR_CHECK_TRACE(ORDER, QN, CN, Q, C, B) \
+  check_cube_face_traces<ORDER,QN,CN>(calc_poly_func_##Q<double,double>, \
+    calc_poly_grad_node_##Q<double,double>, calc_poly_func_##C<double,double>, \
+    calc_poly_grad_node_##C<double,double>); \
+  check_quad_edges<ORDER,QN>(calc_poly_func_##Q<double,double>, \
+    calc_poly_grad_node_##Q<double,double>, calc_poly_func_##B<double,double>, \
+    calc_poly_grad_node_##B<double,double>);
+  FMR_CHECK_TRACE(1,4,8,C2D4N,C3D8N,C1D2N)
+  FMR_CHECK_TRACE(2,8,20,C2D8N,C3D20N,C1D3N)
+  FMR_CHECK_TRACE(3,12,32,C2D12N,C3D32N,C1D4N)
+#undef FMR_CHECK_TRACE
+}
 
 TEST(FmrElemPoly, BarReferenceGradientsMatchFiniteDifferences) {
   const double p1_nodes[2] = {0.0, 1.0};

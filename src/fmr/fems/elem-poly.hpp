@@ -2,6 +2,7 @@
 #define FMR_HAS_FEMS_ELEM_POLY_HPP
 
 #include "../fmr.hpp"
+#include <type_traits>
 
 namespace fmr { namespace fems { namespace elem {
   // Element serendipity shape functions ======================================
@@ -71,48 +72,50 @@ namespace fmr { namespace fems { namespace elem {
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
   Y* calc_poly_node_grad_T2D10N (Y g[20u], const G x[3u]) noexcept;// reference-major
   //
+  // Quadrilateral and hexahedron nodes follow Quad/Cube vertex and directed
+  // edge connectivity. Gradients are node-major or reference-major respectively.
   template <typename Y, typename G> static constexpr
-  Y* calc_poly_func_C2D4N (Y f[2u], const G x[3u]) noexcept;// Linear 2-node bar
+  Y* calc_poly_func_C2D4N (Y f[4u], const G x[3u]) noexcept;
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_grad_node_C2D4N (Y g[2u], const G[]) noexcept;// node-major, constant
+  Y* calc_poly_grad_node_C2D4N (Y g[8u], const G x[3u]) noexcept;
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_node_grad_C2D4N (Y g[2u], const G[]) noexcept;// reference-major
+  Y* calc_poly_node_grad_C2D4N (Y g[8u], const G x[3u]) noexcept;
   //
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_func_C2D8N (Y f[3u], const G x[3u]) noexcept;// Quadratic 3-node bar
+  Y* calc_poly_func_C2D8N (Y f[8u], const G x[3u]) noexcept;
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_grad_node_C2D8N (Y g[3u], const G x[3u]) noexcept;
+  Y* calc_poly_grad_node_C2D8N (Y g[16u], const G x[3u]) noexcept;
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_node_grad_C2D8N (Y g[3u], const G x[3u]) noexcept;// reference-major
+  Y* calc_poly_node_grad_C2D8N (Y g[16u], const G x[3u]) noexcept;
   //
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_func_C2D12N (Y f[4u], const G x[3u]) noexcept;// Cubic 4-node bar
+  Y* calc_poly_func_C2D12N (Y f[12u], const G x[3u]) noexcept;
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_grad_node_C2D12N (Y g[4u], const G x[3u]) noexcept;
+  Y* calc_poly_grad_node_C2D12N (Y g[24u], const G x[3u]) noexcept;
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_node_grad_C2D12N (Y g[4u], const G x[3u]) noexcept;// reference-major
+  Y* calc_poly_node_grad_C2D12N (Y g[24u], const G x[3u]) noexcept;
   //...and so on up to 5-pt rules
   //
   template <typename Y, typename G> static constexpr
-  Y* calc_poly_func_C3D8N (Y f[2u], const G x[3u]) noexcept;// Linear 2-node bar
+  Y* calc_poly_func_C3D8N (Y f[8u], const G x[3u]) noexcept;
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_grad_node_C3D8N (Y g[2u], const G[]) noexcept;// node-major, constant
+  Y* calc_poly_grad_node_C3D8N (Y g[24u], const G x[3u]) noexcept;
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_node_grad_C3D8N (Y g[2u], const G[]) noexcept;// reference-major
+  Y* calc_poly_node_grad_C3D8N (Y g[24u], const G x[3u]) noexcept;
   //
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_func_C3D20N (Y f[3u], const G x[3u]) noexcept;// Quadratic 3-node bar
+  Y* calc_poly_func_C3D20N (Y f[20u], const G x[3u]) noexcept;
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_grad_node_C3D20N (Y g[3u], const G x[3u]) noexcept;
+  Y* calc_poly_grad_node_C3D20N (Y g[60u], const G x[3u]) noexcept;
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_node_grad_C3D20N (Y g[3u], const G x[3u]) noexcept;// reference-major
+  Y* calc_poly_node_grad_C3D20N (Y g[60u], const G x[3u]) noexcept;
   //
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_func_C3D38N (Y f[4u], const G x[3u]) noexcept;// Cubic 4-node bar
+  Y* calc_poly_func_C3D32N (Y f[32u], const G x[3u]) noexcept;
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_grad_node_C3D38N (Y g[4u], const G x[3u]) noexcept;
+  Y* calc_poly_grad_node_C3D32N (Y g[96u], const G x[3u]) noexcept;
   template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> static constexpr
-  Y* calc_poly_node_grad_C3D38N (Y g[4u], const G x[3u]) noexcept;// reference-major
+  Y* calc_poly_node_grad_C3D32N (Y g[96u], const G x[3u]) noexcept;
   //...and so on up to 5-pt rules
 
 } } }//end fmr::fems::elem namespace
