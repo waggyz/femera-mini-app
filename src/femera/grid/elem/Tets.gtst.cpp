@@ -262,7 +262,7 @@ TEST( GridElemTets, CubicTriangularFaceTraces ){
     const double points[2][3] = {{0.13,0.27,0}, {0.52,0.21,0}};
     for (const auto& uv : points) {
       double x[3] = {}, tangent[2][3] = {};
-      for (int d=0; d<3; ++d) {
+      for (uint d=0; d<3; ++d) {
         const double a = Tets::vert_coor[3*vertices[0]+d];
         tangent[0][d] = Tets::vert_coor[3*vertices[1]+d]-a;
         tangent[1][d] = Tets::vert_coor[3*vertices[2]+d]-a;

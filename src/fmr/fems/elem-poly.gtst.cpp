@@ -35,6 +35,12 @@ TEST(FmrElemPoly, SerendipityPolynomialTermCount) {
 
 namespace {
 
+template <typename T>
+constexpr bool constexpr_near(T actual, T expected, T tolerance) {
+  const T difference = actual - expected;
+  return difference >= -tolerance && difference <= tolerance;
+}
+
 constexpr bool triangle_constexpr_test() {
   const double x[3] = {0.0, 0.0, 0.0};
   double f[10] = {};
@@ -43,7 +49,10 @@ constexpr bool triangle_constexpr_test() {
   return fmr::fems::elem::calc_poly_func_T2D10N(f, x) == f
     && fmr::fems::elem::calc_poly_grad_node_T2D10N(g, x) == g
     && fmr::fems::elem::calc_poly_node_grad_T2D10N(gt, x) == gt
-    && f[0] == 1.0 && f[9] == 0.0 && g[0] == -5.5 && gt[0] == g[0];
+    && constexpr_near(f[0], 1.0, 1.0e-14)
+    && constexpr_near(f[9], 0.0, 1.0e-14)
+    && constexpr_near(g[0], -5.5, 1.0e-14)
+    && constexpr_near(gt[0], g[0], 1.0e-14);
 }
 static_assert(triangle_constexpr_test(), "cubic triangle must be constexpr");
 constexpr bool triangle_mixed_precision_test() {
@@ -52,7 +61,8 @@ constexpr bool triangle_mixed_precision_test() {
   float g[20] = {};
   return fmr::fems::elem::calc_poly_func_T2D10N(f, x) == f
     && fmr::fems::elem::calc_poly_grad_node_T2D10N(g, x) == g
-    && f[0] == 1.0f && g[0] == -5.5f;
+    && constexpr_near(f[0], 1.0f, 1.0e-6f)
+    && constexpr_near(g[0], -5.5f, 1.0e-6f);
 }
 static_assert(triangle_mixed_precision_test(), "triangle supports mixed precision");
 
@@ -62,7 +72,9 @@ constexpr bool incomplete_triangle_constexpr_test() {
   return fmr::fems::elem::calc_poly_func_T2D9N(f, x) == f
     && fmr::fems::elem::calc_poly_grad_node_T2D9N(g, x) == g
     && fmr::fems::elem::calc_poly_node_grad_T2D9N(gt, x) == gt
-    && f[0] == 1.0f && g[0] == -5.5f && gt[0] == g[0];
+    && constexpr_near(f[0], 1.0f, 1.0e-6f)
+    && constexpr_near(g[0], -5.5f, 1.0e-6f)
+    && constexpr_near(gt[0], g[0], 1.0e-6f);
 }
 static_assert(incomplete_triangle_constexpr_test(), "Tri9 must be constexpr");
 

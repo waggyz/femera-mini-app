@@ -134,7 +134,7 @@ void check_solid_topology(const fmr::Local_int (&expected_edges)[N]) {
   EXPECT_EQ(int(E::get_vert_n())-int(E::get_edge_n())+int(E::get_face_n()), 2);
   double center[3] = {};
   for (fmr::Local_int v=0; v<E::get_vert_n(); ++v) {
-    for (int d=0; d<3; ++d) {
+    for (uint d=0; d<3; ++d) {
       EXPECT_DOUBLE_EQ(vertices[3*v+d], transposed[d*E::get_vert_n()+v]);
       center[d] += vertices[3*v+d]/E::get_vert_n();
     }
@@ -152,23 +152,23 @@ void check_solid_topology(const fmr::Local_int (&expected_edges)[N]) {
   int incidence[12] = {};
   int orientation[12] = {};
   for (int kind=0; kind<2; ++kind) {
-    const int size = kind == 0 ? 3 : 4;
+    const uint size = kind == 0 ? 3 : 4;
     const auto count = kind == 0 ? E::get_tris_n() : E::get_quad_n();
     const auto* faces = kind == 0 ? E::get_tris_vert_conn() : E::get_quad_vert_conn();
     for (fmr::Local_int f=0; f<count; ++f) {
       const auto* face = faces+f*size;
       for (fmr::Local_int previous=0; previous<f; ++previous) {
-        int shared = 0;
-        for (int i=0; i<size; ++i) for (int j=0; j<size; ++j) {
+        uint shared = 0;
+        for (uint i=0; i<size; ++i) for (uint j=0; j<size; ++j) {
           if (face[i] == faces[previous*size+j]) ++shared;
         }
         EXPECT_NE(shared, size);
       }
       double centroid[3] = {};
-      for (int i=0; i<size; ++i) {
+      for (uint i=0; i<size; ++i) {
         ASSERT_LT(face[i], E::get_vert_n());
-        for (int j=0; j<i; ++j) ASSERT_NE(face[i], face[j]);
-        for (int d=0; d<3; ++d) centroid[d] += vertices[3*face[i]+d]/size;
+        for (uint j=0; j<i; ++j) ASSERT_NE(face[i], face[j]);
+        for (uint d=0; d<3; ++d) centroid[d] += vertices[3*face[i]+d]/size;
         const auto a = face[i], b = face[(i+1)%size];
         int found = -1;
         for (fmr::Local_int e=0; e<E::get_edge_n(); ++e) {
@@ -180,12 +180,12 @@ void check_solid_topology(const fmr::Local_int (&expected_edges)[N]) {
         orientation[found] += edges[2*found] == a ? 1 : -1;
       }
       double first_normal[3] = {};
-      for (int triangle=0; triangle<size-2; ++triangle) {
+      for (uint triangle=0; triangle<size-2; ++triangle) {
         double normal[3] = {};
         ASSERT_TRUE(fmr::math::tri3_norm(normal, vertices+3*face[0],
           vertices+3*face[triangle+1], vertices+3*face[triangle+2]));
         double outward = 0, alignment = 0;
-        for (int d=0; d<3; ++d) {
+        for (uint d=0; d<3; ++d) {
           outward += normal[d]*(centroid[d]-center[d]);
           alignment += normal[d]*first_normal[d];
           if (triangle == 0) first_normal[d] = normal[d];
@@ -226,7 +226,7 @@ void check_planar_topology(const fmr::Local_int (&expected_edges)[N],
   for (std::size_t i=0; i<N; ++i) EXPECT_EQ(edges[i], expected_edges[i]);
   for (fmr::Local_int v=0; v<E::get_vert_n(); ++v) {
     EXPECT_EQ(face[v], v);
-    for (int d=0; d<3; ++d) {
+    for (uint d=0; d<3; ++d) {
       EXPECT_DOUBLE_EQ(T::vert_coor[3*v+d], T::coor_vert[d*E::get_vert_n()+v]);
     }
   }
@@ -256,7 +256,7 @@ TEST( GridElem, PlanarSolidTopology ){
 }
 
 template <class T>
-void check_cubic_coordinates(const double* vertices, int face_nodes) {
+void check_cubic_coordinates(const double* vertices, uint face_nodes) {
   using E = Elem<T,3>;
   double storage[3*32+2] = {};
   const int count = E::get_node_n();
@@ -265,19 +265,19 @@ void check_cubic_coordinates(const double* vertices, int face_nodes) {
   ASSERT_TRUE(E::get_elem_node_coor(storage+1, vertices));
   EXPECT_DOUBLE_EQ(storage[0], 123);
   EXPECT_DOUBLE_EQ(storage[3*count+1], 456);
-  for (int v=0; v<int(E::get_vert_n()); ++v) {
-    for (int d=0; d<3; ++d) EXPECT_DOUBLE_EQ(storage[1+3*v+d], vertices[3*v+d]);
+  for (uint v=0; v<int(E::get_vert_n()); ++v) {
+    for (uint d=0; d<3; ++d) EXPECT_DOUBLE_EQ(storage[1+3*v+d], vertices[3*v+d]);
   }
-  for (int e=0; e<int(E::get_edge_n()); ++e) {
+  for (uint e=0; e<int(E::get_edge_n()); ++e) {
     const auto a = E::get_bars_vert_conn()[2*e];
     const auto b = E::get_bars_vert_conn()[2*e+1];
-    for (int i=0; i<2; ++i) for (int d=0; d<3; ++d) {
+    for (uint i=0; i<2; ++i) for (uint d=0; d<3; ++d) {
       const double expected = ((2-i)*vertices[3*a+d] + (i+1)*vertices[3*b+d])/3;
       EXPECT_NEAR(storage[1+3*(E::get_vert_n()+2*e+i)+d], expected, 1e-14);
     }
   }
   ASSERT_EQ(count, int(E::get_vert_n()+2*E::get_edge_n())+face_nodes);
-  for (int face=0; face<face_nodes; ++face) for (int d=0; d<3; ++d) {
+  for (uint face=0; face<face_nodes; ++face) for (uint d=0; d<3; ++d) {
     const auto conn = E::get_tris_vert_conn()+3*face;
     const double expected = (vertices[3*conn[0]+d] + vertices[3*conn[1]+d]
       + vertices[3*conn[2]+d])/3;
@@ -308,7 +308,7 @@ void check_quadratic_coordinates(const double* vertices) {
   for (fmr::Local_int e=0; e<E::get_edge_n(); ++e) {
     const auto a = E::get_bars_vert_conn()[2*e];
     const auto b = E::get_bars_vert_conn()[2*e+1];
-    for (int d=0; d<3; ++d) {
+    for (uint d=0; d<3; ++d) {
       EXPECT_NEAR(storage[1+3*(E::get_vert_n()+e)+d],
         (vertices[3*a+d]+vertices[3*b+d])/2, 1e-14);
     }
