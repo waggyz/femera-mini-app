@@ -340,6 +340,10 @@ TEST( GridElemBars, JacobianCalculationMultiplePointsAndDimensions ){
 // G = inv(J) * dNp, inv here is a pseudo-inverse for 1D bar element
 // strain = G * u
 TEST( GridElemBars, StrainCalculation1D ){
+  //NOTE this is a prototype for all element strain calculations:
+  //     J = dN * vert_coor, G = inv(J) * dNp, strain = G * u.
+  //     This default implementation also gets the non-inverted J determinant.
+  //
   // First, check P1 element
   const double vert_coor[2] = {0.0, 2.0};
   const double u[2] = {0.2, 0.4};
@@ -356,14 +360,14 @@ TEST( GridElemBars, StrainCalculation1D ){
   EXPECT_DOUBLE_EQ(dN1[0], -1.0);
   EXPECT_DOUBLE_EQ(dN1[1],  1.0);
   
-  J[0] = 0.0;// calc J, inverse, and determinant
+  J[0] = 0.0;// calc J, inverse, and non-inverse determinant
   for(int i=0; i<2; ++i){
     J[0] += dN1[i] * vert_coor[i];
   }
-  fmr::math::smat_invt_det<1> (J, jacs_dets);
+  fmr::math::smat_invt_det<1> (jacs_dets, J);
   Jinv[0] = jacs_dets[0];
   EXPECT_DOUBLE_EQ(Jinv[0], 1.0 / J[0]);
-  EXPECT_DOUBLE_EQ(jacs_dets[1], 1.0 / J[0]);// 1x1 inverse and determinant
+  EXPECT_DOUBLE_EQ(jacs_dets[1], J[0]);// 1x1 inverse and non-inverse determinant
   // calc G
   G[0] = 0.0;
   for(int i=0; i<2; ++i){

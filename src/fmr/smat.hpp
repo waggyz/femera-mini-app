@@ -30,7 +30,7 @@ template <fmr::Dim_int D, typename F> static inline
 F smat_det (const F* mat);
 
 template <fmr::Dim_int D, typename F> static inline// matrix inverse transposed & determinant
-int smat_invt_det (const F* mat, F* invt_det);//TODO FIXME ALL BACKWARD ARGS
+int smat_invt_det (F* invt_det, const F* mat);
 #if 0
 //TODO Remove to simplify the header, keep only the generalized functions and test variants
 // Default variants call the most performant implementation. ==================
@@ -38,7 +38,7 @@ template <typename F> static inline
 F m3x3_det (const F* mat);
 
 template <typename F> static inline// matrix inverse transposed & determinant
-int m3x3_invt_det (const F* mat, F* invt_det);
+int m3x3_invt_det (F* invt_det, const F* mat);
 #endif
 // Reference & test variants ==================================================
 // These are exposed here so they can be tested in situ where used.
@@ -50,49 +50,48 @@ F m4x4_det_ref (const F* mat);
 
 
 template <typename F> static inline
-int m1x1_inv_ref (const F* mat, F* inv);
+int m1x1_inv_ref (F* inv, const F* mat);
 
 template <typename F> static inline// matrix inverse & determinant
-int m1x1_inv_det_ref (const F* mat, F* inv_det);
+int m1x1_inv_det_ref (F* inv_det, const F* mat);
 
 template <typename F> static inline// matrix inverse transposed & determinant
-int m1x1_invt_det_ref (const F* mat, F* invt_det);
+int m1x1_invt_det_ref (F* invt_det, const F* mat);
 
 template <typename F> static inline
-int m2x2_inv_ref (const F* mat, F* inv);
+int m2x2_inv_ref (F* inv, const F* mat);
 template <typename F> static inline
-int m2x2_inv_a (const F* mat, F* inv);
+int m2x2_inv_a (F* inv, const F* mat);
 template <typename F> static inline
-int m2x2_inv_b (const F* mat, F* inv);
+int m2x2_inv_b (F* inv, const F* mat);
 
 template <typename F> static inline// matrix inverse & determinant
-int m2x2_inv_det_ref (const F* mat, F* inv_det);
+int m2x2_inv_det_ref (F* inv_det, const F* mat);
 
 template <typename F> static inline// matrix inverse transposed & determinant
-int m2x2_invt_det_ref (const F* mat, F* invt_det);
-
+int m2x2_invt_det_ref (F* invt_det, const F* mat);
 
 template <typename F> static inline
-int m3x3_inv_ref (const F* mat, F* inv);
+int m3x3_inv_ref (F* inv, const F* mat);
 template <typename F> static inline
-int m3x3_inv_a (const F* mat, F* inv);
+int m3x3_inv_a (F* inv, const F* mat);
 
 template <typename F> static inline// matrix inverse & determinant
-int m3x3_inv_det_ref (const F* mat, F* inv_det);
+int m3x3_inv_det_ref (F* inv_det, const F* mat);
 
 template <typename F> static inline// matrix inverse transposed & determinant
-int m3x3_invt_det_ref (const F* mat, F* invt_det);
+int m3x3_invt_det_ref (F* invt_det, const F* mat);
 template <typename F> static inline
-int m3x3_invt_det_a (const F* mat, F* invt_det);
+int m3x3_invt_det_a (F* invt_det, const F* mat);
 
 template <typename F> static inline
-int m4x4_inv_ref (const F* mat, F* inv);
+int m4x4_inv_ref (F* inv, const F* mat);
 
 template <typename F> static inline// matrix inverse & determinant
-int m4x4_inv_det_ref (const F* mat, F* inv_det);
+int m4x4_inv_det_ref (F* inv_det, const F* mat);
 
 template <typename F> static inline// matrix inverse transposed & determinant
-int m4x4_invt_det_ref (const F* mat, F* invt_det);
+int m4x4_invt_det_ref (F* invt_det, const F* mat);
 
 } } // namespace fmr::math
 

@@ -14,15 +14,15 @@ F fmr::math::smat_det (const F* mat){
   return fmr::math::m4x4_det_ref(mat);//TODO Test variants?
 }
 template <fmr::Dim_int D, typename F> static inline
-int fmr::math::smat_invt_det (const F* mat, F* invt_det){
+int fmr::math::smat_invt_det (F* invt_det, const F* mat){
   static_assert(D >= 1 && D <= 4,
                 "smat_det supports only dimensions 1, 2, 3, and 4");
-  if (D == 1) return fmr::math::m1x1_invt_det_ref(mat, invt_det);
-  if (D == 2) return fmr::math::m2x2_invt_det_ref(mat, invt_det);
-  if (D == 3) return fmr::math::m3x3_invt_det_ref(mat, invt_det);
+  if (D == 1) return fmr::math::m1x1_invt_det_ref(invt_det, mat);
+  if (D == 2) return fmr::math::m2x2_invt_det_ref(invt_det, mat);
+  if (D == 3) return fmr::math::m3x3_invt_det_ref(invt_det, mat);
   // So far, tested variants for D = 1, 2, 3 all seem like they will
   // perform about the same. No m4x4 variants tested yet.
-  return fmr::math::m4x4_invt_det_ref(mat, invt_det);//TODO test variants.
+  return fmr::math::m4x4_invt_det_ref(invt_det, mat);//TODO test variants.
 }
 #if 0
 // Default variants call the most performant implementation. ==================
@@ -31,14 +31,14 @@ F fmr::math::m3x3_det (const F* mat){// 12 FLOP
 	return fmr::math::m3x3_det_ref (mat);
 }
 template <typename F> static inline
-int fmr::math::m3x3_invt_det (const F* mat, F* invt_det){
-  return fmr::math::m3x3_invt_det_ref(mat, invt_det);
+int fmr::math::m3x3_invt_det (F* invt_det, const F* mat){
+  return fmr::math::m3x3_invt_det_ref(invt_det, mat);
 }
 #endif
 // Helpers ====================================================================
 
 template <typename F> static inline
-void smat_cofactors3_ref (const F* mat, F* cofactors)// 27 FLOP
+void smat_cofactors3_ref (F* cofactors, const F* mat)// 27 FLOP
 {
 	cofactors[0] = mat[4]*mat[8] - mat[5]*mat[7];
 	cofactors[1] = mat[5]*mat[6] - mat[3]*mat[8];
@@ -52,7 +52,7 @@ void smat_cofactors3_ref (const F* mat, F* cofactors)// 27 FLOP
 }
 
 template <typename F> static inline
-void smat_cofactors4_ref (const F* mat, F* cofactors)
+void smat_cofactors4_ref (F* cofactors, const F* mat)
 {
 	F minor[9];
 	for (int row = 0; row < 4; ++row) {
@@ -80,19 +80,19 @@ F fmr::math::m3x3_det_ref (const F* mat){// 12 FLOP
 template <typename F> static inline
 F fmr::math::m4x4_det_ref (const F* mat){// 64 FLOP
 	F cof[16];
-	smat_cofactors4_ref(mat, cof);
+	smat_cofactors4_ref(cof, mat);
 	return mat[0]*cof[0] + mat[1]*cof[1] + mat[2]*cof[2] + mat[3]*cof[3];
 }
 
 template <typename F> static inline
-int ::fmr::math::m1x1_inv_ref (const F* mat, F* inv)
+int ::fmr::math::m1x1_inv_ref (F* inv, const F* mat)
 {
 	if (::fmr::math::are_equal(mat[0], F(0))) return 1;// FLOP not counted
 	inv[0] = F(1)/mat[0];
 	return mat[0] < F(0) ? -1 : 0;
 }
 template <typename F> static inline
-int ::fmr::math::m1x1_inv_det_ref (const F* mat, F* inv_det)
+int ::fmr::math::m1x1_inv_det_ref (F* inv_det, const F* mat)
 {
 	inv_det[1] = mat[0];
 	if (::fmr::math::are_equal(inv_det[1], F(0))) return 1;// FLOP not counted
@@ -100,7 +100,7 @@ int ::fmr::math::m1x1_inv_det_ref (const F* mat, F* inv_det)
 	return mat[0] < F(0) ? -1 : 0;
 }
 template <typename F> static inline
-int ::fmr::math::m1x1_invt_det_ref (const F* mat, F* invt_det)
+int ::fmr::math::m1x1_invt_det_ref (F* invt_det, const F* mat)
 {
 	invt_det[1] = mat[0];
 	if (::fmr::math::are_equal(invt_det[1], F(0))) return 1;// FLOP not counted
@@ -108,7 +108,7 @@ int ::fmr::math::m1x1_invt_det_ref (const F* mat, F* invt_det)
 	return mat[0] < F(0) ? -1 : 0;
 }
 template <typename F> static inline
-int ::fmr::math::m2x2_inv_ref (const F* mat, F* inv)
+int ::fmr::math::m2x2_inv_ref (F* inv, const F* mat)
 {
 	const F det = mat[0]*mat[3] - mat[1]*mat[2];
 	if (::fmr::math::are_equal(det, F(0))) return 1;// FLOP not counted
@@ -120,7 +120,7 @@ int ::fmr::math::m2x2_inv_ref (const F* mat, F* inv)
 	return det < F(0) ? -1 : 0;
 }
 template <typename F> static inline
-int ::fmr::math::m2x2_inv_a (const F* mat, F* inv)
+int ::fmr::math::m2x2_inv_a (F* inv, const F* mat)
 {
 	const F det = mat[0]*mat[3] - mat[1]*mat[2];
 	if (::fmr::math::are_equal(det, F(0))) return 1;// FLOP not counted
@@ -133,7 +133,7 @@ int ::fmr::math::m2x2_inv_a (const F* mat, F* inv)
 	return det < F(0) ? -1 : 0;
 }
 template <typename F> static inline
-int ::fmr::math::m2x2_inv_b (const F* mat, F* inv)
+int ::fmr::math::m2x2_inv_b (F* inv, const F* mat)
 {
 	inv[0] =  mat[3];
 	inv[1] = -mat[1];
@@ -146,7 +146,7 @@ int ::fmr::math::m2x2_inv_b (const F* mat, F* inv)
 	return det < F(0) ? -1 : 0;
 }
 template <typename F> static inline// matrix inverse & determinant
-int ::fmr::math::m2x2_inv_det_ref (const F* mat, F* inv_det)
+int ::fmr::math::m2x2_inv_det_ref (F* inv_det, const F* mat)
 // returns false if not invertible (determinant is zero)
 {
 	inv_det[4] = mat[0]*mat[3] - mat[1]*mat[2];// det
@@ -159,7 +159,7 @@ int ::fmr::math::m2x2_inv_det_ref (const F* mat, F* inv_det)
 	return inv_det[4] < F(0) ? -1 : 0;
 }
 template <typename F> static inline// matrix inverse transposed & determinant
-int ::fmr::math::m2x2_invt_det_ref (const F* mat, F* invt_det)
+int ::fmr::math::m2x2_invt_det_ref (F* invt_det, const F* mat)
 // returns false if not invertible (determinant is zero)
 {
 	const F det = mat[0]*mat[3] - mat[1]*mat[2];
@@ -174,10 +174,10 @@ int ::fmr::math::m2x2_invt_det_ref (const F* mat, F* invt_det)
 }
 
 template <typename F> static inline
-int ::fmr::math::m3x3_inv_ref (const F* mat, F* inv)// 41 FLOP
+int ::fmr::math::m3x3_inv_ref (F* inv, const F* mat)// 41 FLOP
 {
 	F cofactors[9];
-	smat_cofactors3_ref(mat, cofactors);// 27 FLOP
+	smat_cofactors3_ref(cofactors, mat);// 27 FLOP
 	const F det = mat[0]*cofactors[0] + mat[1]*cofactors[1]
 	            + mat[2]*cofactors[2];// 4 FLOP
 	if (::fmr::math::are_equal(det, F(0))) return 1;// FLOP not counted
@@ -188,10 +188,10 @@ int ::fmr::math::m3x3_inv_ref (const F* mat, F* inv)// 41 FLOP
 	return det < F(0) ? -1 : 0;
 }
 template <typename F> static inline// matrix inverse & determinant
-int ::fmr::math::m3x3_inv_det_ref (const F* mat, F* inv_det)
+int ::fmr::math::m3x3_inv_det_ref (F* inv_det, const F* mat)
 {
 	F cofactors[9];
-	smat_cofactors3_ref(mat, cofactors);
+	smat_cofactors3_ref(cofactors, mat);
 	inv_det[9] = mat[0]*cofactors[0] + mat[1]*cofactors[1]
 	           + mat[2]*cofactors[2];
 	if (::fmr::math::are_equal(inv_det[9], F(0))) return 1;// FLOP not counted
@@ -202,10 +202,10 @@ int ::fmr::math::m3x3_inv_det_ref (const F* mat, F* inv_det)
 	return inv_det[9] < F(0) ? -1 : 0;
 }
 template <typename F> static inline// matrix inverse transposed & determinant
-int ::fmr::math::m3x3_invt_det_ref (const F* mat, F* invt_det)
+int ::fmr::math::m3x3_invt_det_ref (F* invt_det, const F* mat)
 {
 	F cofactors[9];
-	smat_cofactors3_ref(mat, cofactors);
+	smat_cofactors3_ref(cofactors, mat);
 	invt_det[9] = mat[0]*cofactors[0] + mat[1]*cofactors[1]
 	            + mat[2]*cofactors[2];
 	if (::fmr::math::are_equal(invt_det[9], F(0))) return 1;// FLOP not counted
@@ -216,7 +216,7 @@ int ::fmr::math::m3x3_invt_det_ref (const F* mat, F* invt_det)
 }
 
 template <typename F> static inline
-int ::fmr::math::m3x3_inv_a (const F* mat, F* inv)// 36 + 12 +1 = 49 FLOP
+int ::fmr::math::m3x3_inv_a (F* inv, const F* mat)// 36 + 12 +1 = 49 FLOP
 {
   const F det = fmr::math::smat_det<3>(mat);// 12 FLOP
 	if (::fmr::math::are_equal(det, F(0))) return 1;// FLOP not counted
@@ -238,7 +238,7 @@ int ::fmr::math::m3x3_inv_a (const F* mat, F* inv)// 36 + 12 +1 = 49 FLOP
 	return inv_det < F(0) ? -1 : 0;
 }
 template <typename F> static inline// matrix inverse transposed & determinant
-int ::fmr::math::m3x3_invt_det_a (const F* mat, F* invt_det)
+int ::fmr::math::m3x3_invt_det_a (F* invt_det, const F* mat)
 {
   invt_det[9] = fmr::math::smat_det<3>(mat);// 12 FLOP
 	if (::fmr::math::are_equal(invt_det[9], F(0))) return 1;// FLOP not counted
@@ -262,10 +262,10 @@ int ::fmr::math::m3x3_invt_det_a (const F* mat, F* invt_det)
 
 
 template <typename F> static inline
-int ::fmr::math::m4x4_inv_ref (const F* mat, F* inv)
+int ::fmr::math::m4x4_inv_ref (F* inv, const F* mat)
 {
 	F cofactors[16];
-	smat_cofactors4_ref(mat, cofactors);// 6 FLOP
+	smat_cofactors4_ref(cofactors, mat);// 6 FLOP
 	const F det = mat[0]*cofactors[0] + mat[1]*cofactors[1]
 	            + mat[2]*cofactors[2] + mat[3]*cofactors[3];
 	if (::fmr::math::are_equal(det, F(0))) return 1;// FLOP not counted
@@ -276,10 +276,10 @@ int ::fmr::math::m4x4_inv_ref (const F* mat, F* inv)
 	return det < F(0) ? -1 : 0;
 }
 template <typename F> static inline// matrix inverse & determinant
-int ::fmr::math::m4x4_inv_det_ref (const F* mat, F* inv_det)
+int ::fmr::math::m4x4_inv_det_ref (F* inv_det, const F* mat)
 {
 	F cofactors[16];
-	smat_cofactors4_ref(mat, cofactors);
+	smat_cofactors4_ref(cofactors, mat);
 	inv_det[16] = mat[0]*cofactors[0] + mat[1]*cofactors[1]
 	            + mat[2]*cofactors[2] + mat[3]*cofactors[3];
 	if (::fmr::math::are_equal(inv_det[16], F(0))) return 1;// FLOP not counted
@@ -290,10 +290,10 @@ int ::fmr::math::m4x4_inv_det_ref (const F* mat, F* inv_det)
 	return inv_det[16] < F(0) ? -1 : 0;
 }
 template <typename F> static inline// matrix inverse transposed & determinant
-int ::fmr::math::m4x4_invt_det_ref (const F* mat, F* invt_det)
+int ::fmr::math::m4x4_invt_det_ref (F* invt_det, const F* mat)
 {
 	F cofactors[16];
-	smat_cofactors4_ref(mat, cofactors);
+	smat_cofactors4_ref(cofactors, mat);
 	invt_det[16] = mat[0]*cofactors[0] + mat[1]*cofactors[1]
 	             + mat[2]*cofactors[2] + mat[3]*cofactors[3];
 	if (::fmr::math::are_equal(invt_det[16], F(0))) return 1;// FLOP not counted
