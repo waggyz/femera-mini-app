@@ -348,12 +348,12 @@ TEST( GridElemBars, StrainCalculation1D ){
   // First, check P1 element
   const double vert_coor[2*sims_d] = {0.0, 2.0};
   const double u[2*sims_d] = {0.2, 0.4};
-  fmr::Local_int intp_n = 1;
+  const fmr::Local_int intp_n = 1;
   double intp1[intp_n] = {0.5};// 1 integration point for P1 bar element
   double dN1[2];// constant for bar elements with edge nodes at natural positions
   double dNp[2];// constant for 2-node bar element
-  const fmr::Local_int jacs_size = Elem<Bar>::jacs_size (intp_n, sims_d);
-  const fmr::Local_int jacs_dets_size = Elem<Bar>::jacs_dets_size (intp_n, sims_d);
+  const fmr::Local_int jacs_size = Elem<Bars>::jacs_size (intp_n, sims_d);
+  const fmr::Local_int jacs_dets_size = Elem<Bars>::jacs_dets_size (intp_n, sims_d);
   double J[jacs_size];
   double jacs_dets[jacs_dets_size];
   double Jinv[jacs_size];
