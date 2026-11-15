@@ -54,7 +54,7 @@ physical coordinates:
 - Calculate a row-major rectangular Jacobian with shape `s x r`:
   `J[a,r_i] = sum_k X[k,a] * dN[k,r_i]`. Use `s` only for physical
   coordinate indexing and `r` only for reference-gradient indexing.
-- Store `intp_n * s * r` Jacobian entries. If `jacd_size` continues to mean
+- Store `intp_n * s * r` Jacobian entries. If `jacs_dets_size` continues to mean
   Jacobian entries plus one scalar per point, size it as
   `intp_n * (s * r + 1)`; document that scalar's meaning and do not imply an
   ordinary determinant exists for rectangular maps.
@@ -93,7 +93,7 @@ physical coordinates:
    and compute exactly `intp_n * s * r` entries. Preserve AoS/SoA and
    gradient-layout distinctions where they are useful, and explicitly
    document each indexing formula. Adjust `Elem::jacs_size` and
-   `Elem::jacd_size` (or replace them with a clearer shared helper) to use
+   `Elem::jacs_dets_size` (or replace them with a clearer shared helper) to use
    reference and ambient dimensions.
 4. **Add correct embedded measures only where required by callers.**
    First locate current determinant/measure consumers; the current Jacobian

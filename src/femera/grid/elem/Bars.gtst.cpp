@@ -3,6 +3,7 @@
 #include "Bars.hpp"
 #include "../../../fmr/fems/elem-jacs.hpp"
 #include "../../../fmr/fems/elem-poly.hpp"
+#include "../../../fmr/smat.hpp"
 
 #include <gtest/gtest.h>
 
@@ -333,6 +334,63 @@ TEST( GridElemBars, JacobianCalculationMultiplePointsAndDimensions ){
     EXPECT_DOUBLE_EQ(jacs_soa[intp_n*sims_d], -99.0);
     EXPECT_DOUBLE_EQ(jacs_ref_major[intp_n*sims_d], -99.0);
   }
+}
+// Strain calculation tests for bar elements in 1D and 3D space
+// J = dN1 * vert_coor, dN1 is P1 shape function
+// G = inv(J) * dNp, inv here is a pseudo-inverse for 1D bar element
+// strain = G * u
+TEST( GridElemBars, StrainCalculation1D ){
+  // First, check P1 element
+  const double vert_coor[2] = {0.0, 2.0};
+  const double u[2] = {0.2, 0.4};
+  double intp1[1] = {0.5};// 1 integration point for P1 bar element
+  double dN1[2];// constant for bar elements with edge nodes at natural positions
+  double dNp[2];// constant for 2-node bar element
+  double J[1];
+  double jacs_dets[2];
+  double Jinv[1];
+  double G[2];
+  double strain[1];
+  fmr::fems::elem::calc_poly_grad_node_C1D2N(dN1, intp1);
+  fmr::fems::elem::calc_poly_grad_node_C1D2N(dNp, intp1);
+  EXPECT_DOUBLE_EQ(dN1[0], -1.0);
+  EXPECT_DOUBLE_EQ(dN1[1],  1.0);
+  
+  J[0] = 0.0;// calc J, inverse, and determinant
+  for(int i=0; i<2; ++i){
+    J[0] += dN1[i] * vert_coor[i];
+  }
+  fmr::math::smat_invt_det<1> (J, jacs_dets);
+  Jinv[0] = jacs_dets[0];
+  EXPECT_DOUBLE_EQ(Jinv[0], 1.0 / J[0]);
+  EXPECT_DOUBLE_EQ(jacs_dets[1], 1.0 / J[0]);// 1x1 inverse and determinant
+  // calc G
+  G[0] = 0.0;
+  for(int i=0; i<2; ++i){
+    G[i] = Jinv[0] * dNp[i];
+  }
+  // calc strain
+  strain[0] = 0.0;
+  for(int i=0; i<2; ++i){
+    strain[0] += G[i] * u[i];
+  }
+  EXPECT_DOUBLE_EQ(strain[0], 0.1); // expected strain for P1 bar element with given u and vert_coor
+}
+TEST( GridElemBars, StrainCalculation3D ){
+  // 3D space test for 1D P1 bar element strain calculation
+  double vert_coor[6] = {0.0,0.0,0.0, 2.0,0.0,0.0};
+  double u[6] = {0.2,0.4,0.6, 0.4,0.8,0.12};
+  double intp1[1] = {0.5};// 1 integration point for P1 bar element
+  double strain[1];
+  double dN1[2];
+  double dNp[2];
+  double J[1];
+  double Jinv[1];
+  double G[2];
+  fmr::fems::elem::calc_poly_grad_node_C1D2N(dN1, intp1);
+  fmr::fems::elem::calc_poly_grad_node_C1D2N(dNp, intp1);
+  EXPECT_DOUBLE_EQ(dN1[0], -1.0);
+  EXPECT_DOUBLE_EQ(dN1[1], 1.0);
 }
 #endif
 } } } // end namespace femera::grid::elem

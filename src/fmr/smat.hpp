@@ -30,7 +30,7 @@ template <fmr::Dim_int D, typename F> static inline
 F smat_det (const F* mat);
 
 template <fmr::Dim_int D, typename F> static inline// matrix inverse transposed & determinant
-int smat_invt_det (const F* mat, F* invt_det);
+int smat_invt_det (const F* mat, F* invt_det);//TODO FIXME ALL BACKWARD ARGS
 #if 0
 //TODO Remove to simplify the header, keep only the generalized functions and test variants
 // Default variants call the most performant implementation. ==================

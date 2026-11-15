@@ -101,7 +101,7 @@ class Elem {//TODO consider pulling P out of the template parameters.
   //
   // Jacobian and polynomial sizes ============================================
   // Jacobians are stored per integration point as row-major sims_d x elem_d.
-  // jacd_size reserves one additional scalar per point; for a rectangular
+  // jacs_dets_size reserves one additional scalar per point; for a rectangular
   // Jacobian this scalar is not an ordinary determinant.
   static constexpr
   fmr::Local_int jacs_size (
@@ -109,7 +109,7 @@ class Elem {//TODO consider pulling P out of the template parameters.
     const fmr::Dim_int elem_d=T::elem_d)
   noexcept {return intp_n * (sims_d*elem_d);}
   static constexpr
-  fmr::Local_int jacd_size (
+  fmr::Local_int jacs_dets_size (
     const fmr::Local_int intp_n=1, const fmr::Dim_int sims_d=3u,
     const fmr::Dim_int elem_d=T::elem_d)
   noexcept {return intp_n * (sims_d*elem_d + 1u);}

@@ -214,7 +214,7 @@ policies or functions unless inheritance gives a demonstrated benefit.
    use `sqrt(det(J^T J))` for measure and a metric/pseudoinverse-based
    transformation when appropriate; no ordinary determinant or inverse exists
    for rectangular `J`. Define behavior for zero-length/degenerate maps and
-   orientation separately. Current `jacd_size` only computes a size; the
+   orientation separately. Current `jacs_dets_size` only computes a size; the
    inspected kernel file does not implement a determinant.
 5. **Define error and shape contracts deliberately.** Decide on caller-owned
    buffers, lengths, error reporting, origin defaults, and coordinate dimension.

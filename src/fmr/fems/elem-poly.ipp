@@ -6,12 +6,13 @@ namespace fmr { namespace fems {
 // These functions evaluate shape functions at x[0] in the one-dimensional
 // reference interval. Physical coordinate dimension is independent.
 // When edge nodes are at their natural locations, the Jacobian is constant,
-// and only calc_poly_func_C1D2N and calc_poly_grad_node_C1D2N are needed for constant Jacobian evaluation.
+// and only calc_poly_func_C1D2N and calc_poly_grad_node_C1D2N are needed for
+// constant Jacobian evaluation.
 //
 template <typename Y, typename G> constexpr
 // Mixed precision support for single or double precision
 Y* elem::calc_poly_func_C1D2N// C1 domain: [0.0,1.0]
-(Y f[2u], const G x[3u]) noexcept {// x[1], x[2] not used for 1D bar element?
+(Y f[2u], const G x[3u]) noexcept {// x[1], x[2] not used for 1D bar element.
   f[ 0] = 1.0-x[0];
   f[ 1] = x[0];
   return f;
