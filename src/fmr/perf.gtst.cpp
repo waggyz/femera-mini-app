@@ -4,6 +4,9 @@
 
 #include <limits>
 
+int main (int argc, char** argv) {
+  return femera::test:: early_main (&argc, argv);
+}
 
 TEST(FmrPerf, PerfIntSizes) {
   EXPECT_EQ(sizeof (fmr::perf::Timepoint), sizeof (fmr::perf::Elapsed));
@@ -11,7 +14,4 @@ TEST(FmrPerf, PerfIntSizes) {
 }
 TEST(FmrPerf, MaxPerfCountGT10G) {
   EXPECT_GT(std::numeric_limits<fmr::perf::Count>::max(), size_t(10000000000));
-}
-int main (int argc, char** argv) {
-  return femera::test:: early_main (&argc, argv);
 }

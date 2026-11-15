@@ -3,6 +3,10 @@
 
 #include <gtest/gtest.h>
 
+int main (int argc, char** argv) {
+  return femera::test:: early_main (&argc, argv);
+}
+
 TEST(FmrSmat, SmatDeterminant) {
   const double mat1[] = {2};
   const double mat2[] = {4, 7, 2, 6};
@@ -286,8 +290,4 @@ TEST(FmrSmat, SingularMatricesAreNotInvertible) {
   EXPECT_DOUBLE_EQ(invt_det[16], 0);
   EXPECT_EQ(1, fmr::math::smat_invt_det<4>(invt_det, mat4));
   EXPECT_DOUBLE_EQ(invt_det[16], 0);
-}
-
-int main (int argc, char** argv) {
-  return femera::test:: early_main (&argc, argv);
 }
