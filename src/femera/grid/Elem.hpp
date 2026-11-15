@@ -98,11 +98,48 @@ class Elem {//TODO consider pulling P out of the template parameters.
   static constexpr F get_delt_qual (
     const F* node_coor, const fmr::Dim_int dims=3, const bool is_squared=false)
   noexcept;
-  //
-  // Jacobian and polynomial sizes ============================================
+  // Shape function and gradients =============================================
+  static constexpr
+  fmr::Local_int get_poly_func_size (const fmr::Local_int intp_n=1u)
+  noexcept;
+  static constexpr
+  fmr::Local_int get_poly_grad_size (
+    const fmr::Local_int intp_n=1u, const fmr::Dim_int elem_d=T::elem_d)
+  noexcept;
+  // Calculate at integration points.
+  static constexpr
+  void get_poly_func_vals (F* poly_func, const F* intp,
+    const fmr::Local_int node_n=T::get_node_n (),
+    const fmr::Local_int intp_n=1u,
+    const fmr::Dim_int   elem_d=T::elem_d)
+  noexcept;
+  static constexpr
+  void get_poly_node_grad (F* poly_grad, const F* intp,
+    const fmr::Local_int node_n=T::get_node_n (),
+    const fmr::Local_int intp_n=1u,
+    const fmr::Dim_int   elem_d=T::elem_d)
+  noexcept;
+  static constexpr
+  void get_poly_grad_node (F* poly_grad, const F* intp,
+    const fmr::Local_int node_n=T::get_node_n (),
+    const fmr::Local_int intp_n=1u,
+    const fmr::Dim_int   elem_d=T::elem_d)
+  noexcept;
+  // Jacobians, inverses, and determinants ====================================
   // Jacobians are stored per integration point as row-major sims_d x elem_d.
   // jacs_dets_size reserves one additional scalar per point; for a rectangular
-  // Jacobian this scalar is not an ordinary determinant.
+  // Jacobian this scalar is not an ordinary determinant. Inverted, or 
+  // pseudo-inverted, it would normally be elem_d x sims_d.
+  //
+  // However, inverses are generally stored per integration point transposed as
+  // sims_d x elem_d, and generally include an additional scalar per
+  // integration point for the determinant of the non-inverted Jacobian.
+  // Exceptions to the layout and extra scalar storage may be made in
+  // low-dimensional cases for better performance.
+  // This is why several variations are exposed here. The optimal storage layout
+  // may depend on the specific element and problem dimensions and will be 
+  // determined by automated performance self-testing of the variations.
+  //
   static constexpr
   fmr::Local_int jacs_size (
     const fmr::Local_int intp_n=1u, const fmr::Dim_int sims_d=3u,
@@ -113,12 +150,6 @@ class Elem {//TODO consider pulling P out of the template parameters.
     const fmr::Local_int intp_n=1, const fmr::Dim_int sims_d=3u,
     const fmr::Dim_int elem_d=T::elem_d)
   noexcept {return intp_n * (sims_d*elem_d + 1u);}
-  static constexpr
-  fmr::Local_int get_poly_func_size (const fmr::Local_int intp_n=1u) noexcept;
-  // Reference gradients have elem_d components per node.
-  static constexpr
-  fmr::Local_int get_poly_grad_size (
-    const fmr::Local_int intp_n=1, const fmr::Dim_int elem_d=T::elem_d) noexcept;
   //
 };//end Elem
 

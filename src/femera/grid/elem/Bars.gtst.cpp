@@ -360,10 +360,8 @@ TEST( GridElemBars, StrainCalculation1D ){
   double G[intp_n*2];
   double strain[intp_n];
   for(fmr::Local_int ip=0; ip<intp_n; ++ip){
-    fmr::fems::elem::calc_poly_grad_node_C1D2N(
-      dN1 + ip*2, intp1 + ip);
-    fmr::fems::elem::calc_poly_grad_node_C1D2N(
-      dNp + ip*2, intp1 + ip);
+    fmr::fems::elem::calc_poly_grad_node_C1D2N(dN1 + ip*2, intp1 + ip);
+    fmr::fems::elem::calc_poly_grad_node_C1D2N(dNp + ip*2, intp1 + ip);
     EXPECT_DOUBLE_EQ(dN1[ip*2], -1.0);
     EXPECT_DOUBLE_EQ(dN1[ip*2+1], 1.0);
 
