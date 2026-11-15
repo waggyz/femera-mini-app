@@ -3,6 +3,9 @@
 
 #include "../../fmr/fmr.hpp"
 #include "../../fmr/math.hpp"
+#include "../../fmr/fems/elem-poly.hpp"
+#include <cstddef>
+#include <stdexcept>
 #include <type_traits>
 
 namespace femera { namespace grid { namespace elem {//TODO grid -> geom
@@ -137,25 +140,30 @@ class Elem {//TODO consider pulling P out of the template parameters.
   fmr::Local_int get_poly_grad_size (
     const fmr::Local_int intp_n=1u, const fmr::Dim_int elem_d=T::elem_d)
   noexcept;
-  // Calculate at integration points.
+  // P1-P3 Bars, Tris, Quad, Tets and Cube only. Points are packed as
+  // [integration point][reference coordinate], with elem_d coordinates each.
+  // Results are [point][node], [point][reference coordinate][node] for
+  // get_poly_node_grad, and [point][node][reference coordinate] for
+  // get_poly_grad_node. The dimension is the reference, not physical, dimension.
+  // Buffers must not overlap and must hold intp_n*elem_d coordinates and
+  // the number of results given by get_poly_func_size/get_poly_grad_size.
+  // node_n and elem_d must match this specialization. Invalid arguments throw
+  // std::invalid_argument; zero points may use null buffers.
   static constexpr
   void get_poly_func_vals (F* poly_func, const F* intp,
-    const fmr::Local_int node_n=T::get_node_n (),
+    const fmr::Local_int node_n=get_node_n (),
     const fmr::Local_int intp_n=1u,
-    const fmr::Dim_int   elem_d=T::elem_d)
-  noexcept;
+    const fmr::Dim_int   elem_d=T::elem_d);
   static constexpr
   void get_poly_node_grad (F* poly_grad, const F* intp,
-    const fmr::Local_int node_n=T::get_node_n (),
+    const fmr::Local_int node_n=get_node_n (),
     const fmr::Local_int intp_n=1u,
-    const fmr::Dim_int   elem_d=T::elem_d)
-  noexcept;
+    const fmr::Dim_int   elem_d=T::elem_d);
   static constexpr
   void get_poly_grad_node (F* poly_grad, const F* intp,
-    const fmr::Local_int node_n=T::get_node_n (),
+    const fmr::Local_int node_n=get_node_n (),
     const fmr::Local_int intp_n=1u,
-    const fmr::Dim_int   elem_d=T::elem_d)
-  noexcept;
+    const fmr::Dim_int   elem_d=T::elem_d);
   // Jacobians, inverses, and determinants ====================================
   // Jacobians are stored per integration point as row-major sims_d x elem_d.
   // jacs_dets_size reserves one additional scalar per point; for a rectangular

@@ -13,8 +13,9 @@ template <typename Y, typename G> constexpr
 // Mixed precision support for single or double precision
 Y* elem::calc_poly_func_C1D2N// C1 domain: [0.0,1.0]
 (Y f[2u], const G x[3u]) noexcept {// x[1], x[2] not used for 1D bar element.
-  f[ 0] = 1.0-x[0];
-  f[ 1] = x[0];
+  using Work = typename std::common_type<G, double>::type;
+  f[ 0] = Y(Work(1)-Work(x[0]));
+  f[ 1] = Y(x[0]);
   return f;
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
@@ -34,20 +35,22 @@ Y* elem::calc_poly_node_grad_C1D2N
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
 Y* elem::calc_poly_func_C1D3N
 (Y f[3u], const G x[3u]) noexcept {
-  const Y L2=x[0];
-  const Y L1=1.0-L2;
-  f[ 0] = 2.0*L1*L1 - L1;// Vertex nodes
-  f[ 1] = 2.0*L2*L2 - L2;
-  f[ 2] = 4.0*L1*L2;// Edge node
+  using Work = typename std::common_type<Y, double>::type;
+  const Y L2=Y(x[0]);
+  const Y L1=Y(Work(1)-Work(L2));
+  f[ 0] = Y(Work(2)*Work(L1)*Work(L1) - Work(L1));// Vertex nodes
+  f[ 1] = Y(Work(2)*Work(L2)*Work(L2) - Work(L2));
+  f[ 2] = Y(Work(4)*Work(L1)*Work(L2));// Edge node
   return f;
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
 Y* elem::calc_poly_grad_node_C1D3N
 (Y g[3u], const G x[3u]) noexcept {
-  const Y xi=x[0];
-  g[0]=4.0*xi-3.0;
-  g[1]=4.0*xi-1.0;
-  g[2]=4.0-8.0*xi;
+  using Work = typename std::common_type<Y, double>::type;
+  const Y xi=Y(x[0]);
+  g[0]=Y(Work(4)*Work(xi)-Work(3));
+  g[1]=Y(Work(4)*Work(xi)-Work(1));
+  g[2]=Y(Work(4)-Work(8)*Work(xi));
   return g;
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
@@ -59,24 +62,29 @@ Y* elem::calc_poly_node_grad_C1D3N
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
 Y* elem::calc_poly_func_C1D4N
 (Y f[4u], const G x[3u]) noexcept {
-  const Y L2=x[0];
-  const Y L1=(1.0-L2);
-  f[ 0]= 0.5* L1 *(3.0* L1 -1.0)*(3.0* L1 -2.0);// Vertex nodes;
-  f[ 1]= 0.5* L2 *(3.0* L2 -1.0)*(3.0* L2 -2.0);
+  using Work = typename std::common_type<Y, double>::type;
+  const Y L2=Y(x[0]);
+  const Y L1=Y(Work(1)-Work(L2));
+  const Work a=Work(L1), b=Work(L2);
+  f[ 0]=Y(Work(0.5)*a*(Work(3)*a-Work(1))*(Work(3)*a-Work(2)));
+  f[ 1]=Y(Work(0.5)*b*(Work(3)*b-Work(1))*(Work(3)*b-Work(2)));
   // Edge nodes
-  f[ 2]=4.5*( L1*L2 *(3.0*L1 -1.0) );
-  f[ 3]=4.5*( L1*L2 *(3.0*L2 -1.0) );
+  const Work ab=Work(Y(L1*L2));
+  f[ 2]=Y(Work(4.5)*(ab*(Work(3)*a-Work(1))));
+  f[ 3]=Y(Work(4.5)*(ab*(Work(3)*b-Work(1))));
   return f;
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr
 Y* elem::calc_poly_grad_node_C1D4N
 (Y g[4u], const G x[3u]) noexcept {
-  const Y xi=x[0];
-  const Y L1=1.0-xi;
-  g[0]=-0.5*(27.0*L1*L1-18.0*L1+2.0);
-  g[1]= 0.5*(27.0*xi*xi-18.0*xi+2.0);
-  g[2]= 4.5*(2.0-10.0*xi+9.0*xi*xi);
-  g[3]= 4.5*(-1.0+8.0*xi-9.0*xi*xi);
+  using Work = typename std::common_type<Y, double>::type;
+  const Y xi=Y(x[0]);
+  const Y L1=Y(Work(1)-Work(xi));
+  const Work a=Work(L1), b=Work(xi);
+  g[0]=Y(-Work(0.5)*(Work(27)*a*a-Work(18)*a+Work(2)));
+  g[1]=Y( Work(0.5)*(Work(27)*b*b-Work(18)*b+Work(2)));
+  g[2]=Y( Work(4.5)*(Work(2)-Work(10)*b+Work(9)*b*b));
+  g[3]=Y( Work(4.5)*(-Work(1)+Work(8)*b-Work(9)*b*b));
   return g;
 }
 template <typename Y=fmr::Phys_float, typename G=fmr::Geom_float> constexpr

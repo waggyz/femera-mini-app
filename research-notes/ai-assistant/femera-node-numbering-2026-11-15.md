@@ -274,12 +274,20 @@ Save this plan to a file in the #research-notes/ai-assistant/ folder.
   complete polynomial reproduction, derivatives, directed triangle edges,
   and all tetrahedral face traces for each order. The existing specialized
   tetrahedron evaluators remain available for comparison and benchmarking.
+- Wired P1-P3 Bars, Tris, Quad, Tets and Cube through the three `Elem`
+  polynomial evaluation interfaces. Integration points use packed reference
+  coordinates, and both gradient layouts are stored per point. Mismatched
+  node counts/dimensions and null nonempty buffers raise `std::invalid_argument`;
+  unsupported topologies and orders are rejected when dispatch is instantiated.
+  The topology/order mappings are specialized beside their respective element
+  classes; the common validation and point traversal remain in `Elem`.
+  Tests cover float/double dispatch, multiple points, output bounds, constexpr
+  evaluation, invalid inputs and Jacobians in both gradient layouts.
 - Preserve both existing gradient layouts and other storage choices until
   comprehensive performance testing on HPC hardware; do not remove or select
   layouts merely to make prototype APIs uniform.
-- Still to implement: reusable face-orientation/permutation handling and the
-  general element evaluation/dispatch path, including Bars and the new n-cube
-  evaluators. Wedge and pyramid volume bases and verification of their
+- Still to implement: reusable face-orientation/permutation handling and
+  dispatch for remaining topologies. Wedge and pyramid volume bases and verification of their
   triangular face restrictions remain to be implemented; in particular, the
   pyramid must be checked against the selected Tri9 space. No wedge-pyramid
   constraint or assembly path has been implemented yet.

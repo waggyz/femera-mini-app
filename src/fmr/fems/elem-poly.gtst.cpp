@@ -1,4 +1,5 @@
 #include "elem-poly.hpp"
+#include "elem-jacs.hpp"
 #include "../../femera/grid/elem/Tets.hpp"
 #include "../../femera/grid/elem/Quad.hpp"
 #include "../../femera/grid/elem/Cube.hpp"
@@ -120,6 +121,131 @@ FMR_TEST_SIMPLEX_CONSTEXPR(T3D4N, 4, 3, -1.0f)
 FMR_TEST_SIMPLEX_CONSTEXPR(T3D10N, 10, 3, -3.0f)
 FMR_TEST_SIMPLEX_CONSTEXPR(T3D20N, 20, 3, -5.5f)
 #undef FMR_TEST_SIMPLEX_CONSTEXPR
+
+constexpr bool elem_dispatch_constexpr_test() {
+  using E = femera::grid::elem::Elem<femera::grid::elem::Tris,2>;
+  const double points[4] = {0,0,0.5,0};
+  double values[12] = {}, ng[24] = {}, gn[24] = {};
+  E::get_poly_func_vals(values,points,6,2);
+  E::get_poly_node_grad(ng,points,6,2);
+  E::get_poly_grad_node(gn,points,6,2);
+  return constexpr_near(values[0],1.0,1e-14)
+    && constexpr_near(values[9],1.0,1e-14)
+    && constexpr_near(ng[0],-3.0,1e-14)
+    && constexpr_near(gn[0],ng[0],1e-14);
+}
+static_assert(elem_dispatch_constexpr_test(), "element dispatch must be constexpr");
+
+template <class Topology, int Order>
+constexpr bool elem_dispatch_all_constexpr() {
+  using E = femera::grid::elem::Elem<Topology,Order>;
+  constexpr auto nodes = E::get_node_n();
+  constexpr auto dim = E::get_elem_d();
+  const double point[3] = {};
+  double values[std::size_t(nodes)] = {};
+  double ng[std::size_t(nodes*dim)] = {}, gn[std::size_t(nodes*dim)] = {};
+  E::get_poly_func_vals(values,point);
+  E::get_poly_node_grad(ng,point);
+  E::get_poly_grad_node(gn,point);
+  const double derivative = Order==1 ? -1.0 : (Order==2 ? -3.0 : -5.5);
+  return constexpr_near(values[0],1.0,1e-14)
+    && constexpr_near(ng[0],derivative,1e-14)
+    && constexpr_near(gn[0],derivative,1e-14);
+}
+#define FMR_TEST_ELEM_CONSTEXPR(TOPO) \
+  static_assert(elem_dispatch_all_constexpr<femera::grid::elem::TOPO,1>() \
+    && elem_dispatch_all_constexpr<femera::grid::elem::TOPO,2>() \
+    && elem_dispatch_all_constexpr<femera::grid::elem::TOPO,3>(), \
+    "element dispatch must be constexpr for all supported orders");
+FMR_TEST_ELEM_CONSTEXPR(Bars)
+FMR_TEST_ELEM_CONSTEXPR(Tris)
+FMR_TEST_ELEM_CONSTEXPR(Quad)
+FMR_TEST_ELEM_CONSTEXPR(Tets)
+FMR_TEST_ELEM_CONSTEXPR(Cube)
+#undef FMR_TEST_ELEM_CONSTEXPR
+
+template <class Topology, int Order, typename F, typename Values, typename Gradient,
+          typename Transposed>
+void check_elem_dispatch(Values values, Gradient gradient, Transposed transposed) {
+  using E = femera::grid::elem::Elem<Topology,Order,F>;
+  constexpr auto dim = E::get_elem_d();
+  constexpr auto nodes = E::get_node_n();
+  constexpr fmr::Local_int points_n = 3;
+  const double tolerance = std::is_same<F,double>::value ? 1e-12 : 2e-6;
+  const F points[3][3] = {{F(0.13),F(0.21),F(0.17)},
+                          {F(0.41),F(0.12),F(0.22)},
+                          {F(0.0),F(0.5),F(0.0)}};
+  F packed[std::size_t(points_n*dim)] = {};
+  for (fmr::Local_int p=0; p<points_n; ++p)
+    for (fmr::Dim_int d=0; d<dim; ++d) packed[p*dim+d] = points[p][d];
+  F fv[std::size_t(points_n*nodes+2)] = {};
+  F ng[std::size_t(points_n*nodes*dim+2)] = {};
+  F gn[std::size_t(points_n*nodes*dim+2)] = {};
+  fv[0]=ng[0]=gn[0]=F(123);
+  fv[points_n*nodes+1]=ng[points_n*nodes*dim+1]=gn[points_n*nodes*dim+1]=F(456);
+  E::get_poly_func_vals(fv+1,packed,nodes,points_n,dim);
+  E::get_poly_node_grad(ng+1,packed,nodes,points_n,dim);
+  E::get_poly_grad_node(gn+1,packed,nodes,points_n,dim);
+  EXPECT_EQ(fv[0],F(123)); EXPECT_EQ(fv[points_n*nodes+1],F(456));
+  EXPECT_EQ(ng[0],F(123)); EXPECT_EQ(ng[points_n*nodes*dim+1],F(456));
+  EXPECT_EQ(gn[0],F(123)); EXPECT_EQ(gn[points_n*nodes*dim+1],F(456));
+  for (fmr::Local_int p=0; p<points_n; ++p) {
+    double x[3] = {}, expected[std::size_t(nodes)] = {};
+    double eg[std::size_t(nodes*dim)] = {}, et[std::size_t(nodes*dim)] = {};
+    for (fmr::Dim_int d=0; d<dim; ++d) x[d]=double(points[p][d]);
+    values(expected,x); gradient(eg,x); transposed(et,x);
+    for (fmr::Local_int i=0; i<nodes; ++i) {
+      EXPECT_NEAR(double(fv[1+p*nodes+i]),expected[i],tolerance);
+      for (fmr::Dim_int d=0; d<dim; ++d) {
+        EXPECT_NEAR(double(gn[1+p*nodes*dim+i*dim+d]),eg[i*dim+d],tolerance);
+        EXPECT_NEAR(double(ng[1+p*nodes*dim+d*nodes+i]),et[d*nodes+i],tolerance);
+      }
+    }
+  }
+  F single[std::size_t(nodes*dim)] = {};
+  E::get_poly_func_vals(single,packed);
+  for (fmr::Local_int i=0; i<nodes; ++i) EXPECT_NEAR(double(single[i]),double(fv[1+i]),tolerance);
+  E::get_poly_node_grad(single,packed);
+  for (fmr::Local_int i=0; i<nodes*dim; ++i) EXPECT_NEAR(double(single[i]),double(ng[1+i]),tolerance);
+  E::get_poly_grad_node(single,packed);
+  for (fmr::Local_int i=0; i<nodes*dim; ++i) EXPECT_NEAR(double(single[i]),double(gn[1+i]),tolerance);
+  E::get_poly_func_vals(nullptr,nullptr,nodes,0,dim);
+  E::get_poly_node_grad(nullptr,nullptr,nodes,0,dim);
+  E::get_poly_grad_node(nullptr,nullptr,nodes,0,dim);
+  EXPECT_THROW(E::get_poly_func_vals(nullptr,packed),std::invalid_argument);
+  EXPECT_THROW(E::get_poly_node_grad(single,nullptr),std::invalid_argument);
+  EXPECT_THROW(E::get_poly_grad_node(single,packed,nodes+1),std::invalid_argument);
+  EXPECT_THROW(E::get_poly_func_vals(single,packed,nodes,1,dim+1),std::invalid_argument);
+  single[0] = F(789);
+  EXPECT_THROW(E::get_poly_func_vals(single,packed,nodes+1,points_n,dim),std::invalid_argument);
+  EXPECT_THROW(E::get_poly_node_grad(single,packed,nodes,points_n,dim+1),std::invalid_argument);
+  EXPECT_THROW(E::get_poly_grad_node(single,nullptr,nodes,points_n,dim),std::invalid_argument);
+  EXPECT_EQ(single[0],F(789));
+}
+
+template <class T, int Order>
+void check_elem_dispatch_jacobians() {
+  using E = femera::grid::elem::Elem<T,Order,double>;
+  constexpr auto n = E::get_node_n();
+  constexpr auto dim = E::get_elem_d();
+  const double points[2][3] = {{0.13,0.21,0.17}, {0.4,0.1,0.2}};
+  double packed[std::size_t(2*dim)] = {};
+  for (int p=0; p<2; ++p) for (fmr::Dim_int d=0; d<dim; ++d)
+    packed[p*dim+d]=points[p][d];
+  double coords[std::size_t(n*3)] = {}, grad[std::size_t(2*n*dim)] = {};
+  double transposed[std::size_t(2*n*dim)] = {}, jac[std::size_t(2*3*dim)] = {};
+  double jac_t[std::size_t(2*3*dim)] = {};
+  ASSERT_TRUE(E::get_elem_node_coor(coords));
+  E::get_poly_grad_node(grad,packed,n,2);
+  E::get_poly_node_grad(transposed,packed,n,2);
+  fmr::fems::elem::elem_jacs_node_coor_ref(jac,coords,grad,2,n,3,dim);
+  fmr::fems::elem::elem_jacs_node_coor_a(jac_t,coords,transposed,2,n,3,dim);
+  for (int p=0; p<2; ++p) for (int i=0; i<3; ++i)
+    for (fmr::Dim_int j=0; j<dim; ++j) {
+      EXPECT_NEAR(jac[p*3*dim+i*dim+j],i==int(j) ? 1.0 : 0.0,1e-12);
+      EXPECT_NEAR(jac_t[p*3*dim+i*dim+j],i==int(j) ? 1.0 : 0.0,1e-12);
+    }
+}
 
 template <class Topology, int Order, int Dim, int NodeN,
           typename Values, typename Gradient, typename Transposed>
@@ -313,6 +439,46 @@ void expect_bar_gradient_matches_finite_difference(
 }
 
 }// end anonymous namespace
+
+TEST(FmrElemPoly, ElemDispatchMatchesEvaluators) {
+  using namespace femera::grid::elem;
+  using namespace fmr::fems::elem;
+#define FMR_CHECK_DISPATCH(TOPO, ORDER, NAME) \
+  check_elem_dispatch<TOPO,ORDER,double>(calc_poly_func_##NAME<double,double>, \
+    calc_poly_grad_node_##NAME<double,double>,calc_poly_node_grad_##NAME<double,double>); \
+  check_elem_dispatch<TOPO,ORDER,float>(calc_poly_func_##NAME<double,double>, \
+    calc_poly_grad_node_##NAME<double,double>,calc_poly_node_grad_##NAME<double,double>);
+  FMR_CHECK_DISPATCH(Bars,1,C1D2N)
+  FMR_CHECK_DISPATCH(Bars,2,C1D3N)
+  FMR_CHECK_DISPATCH(Bars,3,C1D4N)
+  FMR_CHECK_DISPATCH(Tris,1,T2D3N)
+  FMR_CHECK_DISPATCH(Tris,2,T2D6N)
+  FMR_CHECK_DISPATCH(Tris,3,T2D10N)
+  FMR_CHECK_DISPATCH(Quad,1,C2D4N)
+  FMR_CHECK_DISPATCH(Quad,2,C2D8N)
+  FMR_CHECK_DISPATCH(Quad,3,C2D12N)
+  FMR_CHECK_DISPATCH(Tets,1,T3D4N)
+  FMR_CHECK_DISPATCH(Tets,2,T3D10N)
+  FMR_CHECK_DISPATCH(Tets,3,T3D20N)
+  FMR_CHECK_DISPATCH(Cube,1,C3D8N)
+  FMR_CHECK_DISPATCH(Cube,2,C3D20N)
+  FMR_CHECK_DISPATCH(Cube,3,C3D32N)
+#undef FMR_CHECK_DISPATCH
+}
+
+TEST(FmrElemPoly, ElemDispatchGradientsFeedJacobians) {
+  using namespace femera::grid::elem;
+#define FMR_CHECK_JACS(TOPO) \
+  check_elem_dispatch_jacobians<TOPO,1>(); \
+  check_elem_dispatch_jacobians<TOPO,2>(); \
+  check_elem_dispatch_jacobians<TOPO,3>();
+  FMR_CHECK_JACS(Bars)
+  FMR_CHECK_JACS(Tris)
+  FMR_CHECK_JACS(Quad)
+  FMR_CHECK_JACS(Tets)
+  FMR_CHECK_JACS(Cube)
+#undef FMR_CHECK_JACS
+}
 
 TEST(FmrElemPoly, CompleteSimplexBasisAndGradients) {
   using femera::grid::elem::Tris;
