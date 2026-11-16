@@ -20,6 +20,11 @@ TEST( GridElemCube, TrivialTest ){
 
 namespace femera { namespace grid { namespace elem {
 
+TEST( GridCellFEmsCube, PolynomialInfo ){
+  EXPECT_EQ( (Elem<Cube,1>::get_poly_type ()), fmr::math::Poly::Serendipity );
+  EXPECT_EQ( (Elem<Cube,2>::get_poly_type ()), fmr::math::Poly::Serendipity );
+  EXPECT_EQ( (Elem<Cube,3>::get_poly_type ()), fmr::math::Poly::Serendipity );
+}
 // Check Cube element surfaces as triangles
 TEST( GridCellFEmsCube, FaceNormal ){
   EXPECT_EQ( tri3_norm_str (// bottom face

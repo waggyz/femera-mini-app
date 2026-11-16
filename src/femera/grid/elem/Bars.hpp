@@ -9,7 +9,8 @@ namespace femera { namespace grid { namespace elem {
 class Bars final : public Elem<Bars> {
   template <class T, fmr::Dim_int P, typename F>
   friend class Elem;
-private:// Everything should be private, accessible through the Elem interface.
+private:// Everything is private, accessible through the Elem interface.
+  Bars() = default;// Constrctor is private, too. Use: Elem<Bars, 1> bars;
 // Scalars ====================================================================
   static constexpr fmr::math::Poly poly_type = fmr::math::Poly::Full;
   //NOTE same as fmr::math::Poly::Serendipity for this element.
@@ -18,8 +19,7 @@ private:// Everything should be private, accessible through the Elem interface.
   //
   static constexpr fmr::Local_int vert_n = 2;
   static constexpr fmr::Local_int edge_n = 1;
-  static constexpr fmr::Local_int tris_n = 0;
-  static constexpr fmr::Local_int cubic_tris_node_n = 0;
+  static constexpr fmr::Local_int tris_n = 0, tri3_face_node_n = 0;
   static constexpr fmr::Local_int quad_n = 0;
   static constexpr fmr::Local_int vols_n = 0;
   //
@@ -74,7 +74,7 @@ private:// Everything should be private, accessible through the Elem interface.
     #undef F13
     #undef F23
   }; */
-  // Methods ====================================================================
+  // Methods ==================================================================
   //
 };//end struct Bars
 

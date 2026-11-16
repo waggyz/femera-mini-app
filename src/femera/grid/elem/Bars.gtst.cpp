@@ -22,9 +22,10 @@ fmr::Exit_int main (int argc, char** argv) {
 }
 namespace femera { namespace grid { namespace elem {
 
-TEST( GridElemBars, IsStateless ){
-  //EXPECT_TRUE( (std::is_empty<Bars>::value) );
+TEST( GridElemBars, IsStatelessAndPrivate ){
   EXPECT_TRUE( (std::is_empty<Elem<Bars>>::value) );
+  EXPECT_TRUE( (std::is_empty<Bars>::value) );// private constructor
+  EXPECT_FALSE( (std::is_default_constructible<Bars>::value) );
 }
 TEST( GridElemBars, ElementTopologyWithoutInstance ){
   EXPECT_EQ( Elem<Bars>::get_elem_d (), 1u );
@@ -75,7 +76,7 @@ TEST( GridElemBars, ElementOrderNodeCounts ){
 TEST( GridElemBars, ElementPolynomialMetadata ){
   EXPECT_EQ( Elem<Bars>::get_poly_func_size (), 2 );
   EXPECT_EQ( Elem<Bars>::get_poly_grad_size (), 2 );
-  EXPECT_EQ( Elem<Bars>::get_poly_type (), fmr::math::Poly::Serendipity );
+  EXPECT_EQ( Elem<Bars>::get_poly_type (), fmr::math::Poly::Full );
   
   const Elem<Bars> linear;
   const Elem<Bars, 2> quadratic;
@@ -91,9 +92,9 @@ TEST( GridElemBars, ElementPolynomialMetadata ){
   EXPECT_EQ( cubic.get_poly_grad_size (), 4 );
   EXPECT_EQ( cubic.get_poly_grad_size (4), 16 );
   // Check polynomial type.
-  EXPECT_EQ( linear.get_poly_type (), fmr::math::Poly::Serendipity );
-  EXPECT_EQ( quadratic.get_poly_type (), fmr::math::Poly::Serendipity );
-  EXPECT_EQ( cubic.get_poly_type (), fmr::math::Poly::Serendipity );
+  EXPECT_EQ( linear.get_poly_type (), fmr::math::Poly::Full );
+  EXPECT_EQ( quadratic.get_poly_type (), fmr::math::Poly::Full );
+  EXPECT_EQ( cubic.get_poly_type (), fmr::math::Poly::Full );
   // Check node_n matches polynomial function size.
   EXPECT_EQ( linear.get_node_n (), linear.get_poly_func_size () );
   EXPECT_EQ( quadratic.get_node_n (), quadratic.get_poly_func_size () );

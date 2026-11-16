@@ -319,7 +319,7 @@ TEST( GridTileBar1, TileElementVertexCoordinatesSOA ){
 
 TEST( GridTileBar1, TileElementEdgeDeltaQuality){
   constexpr Bar1 bar1;
-  constexpr femera::grid::elem::Bars bars;
+  constexpr femera::grid::elem::Elem<femera::grid::elem::Bars> bars;
 
   // Use get_tile_vert_coor to get the vertex coordinates of the element.
   const fmr::Geom_float part_orig[3] = {0.0, 0.0, 0.0};

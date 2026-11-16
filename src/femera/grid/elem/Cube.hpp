@@ -5,14 +5,19 @@
 
 namespace femera { namespace grid { namespace elem {
 
-struct Cube : public Elem<Cube> {//TODO Hex?
-public:
+//struct Cube : public Elem<Cube> {
+class Cube final : public Elem<Cube> {
+  template <class T, fmr::Dim_int P, typename F>
+  friend class Elem;
+private:
+  static constexpr fmr::math::Poly poly_type = fmr::math::Poly::Serendipity;
+//
+public://TODO Everything should be private, accessible through the Elem interface.
   static constexpr fmr::Dim_int sims_d = 3;
   static constexpr fmr::Dim_int elem_d = 3;
   static constexpr fmr::Local_int vert_n = 8;
   static constexpr fmr::Local_int edge_n =12;
-  static constexpr fmr::Local_int tris_n = 0;
-  static constexpr fmr::Local_int cubic_tris_node_n = 0;
+  static constexpr fmr::Local_int tris_n = 0, tri3_face_node_n = 0;
   static constexpr fmr::Local_int quad_n = 6;
   static constexpr fmr::Local_int vols_n = 1;
   //

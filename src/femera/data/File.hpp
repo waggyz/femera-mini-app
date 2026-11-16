@@ -22,6 +22,8 @@ namespace femera { namespace data {
     private:
     using css = const std::string;// for convenience
   public:
+    //
+    //TODO replace following with generics: bool did_init(type: fmr::Logs)
     bool did_logs_init () noexcept;// true if first Logs initialized ok
     fmr::Dim_int get_verb () noexcept;// gets logs verbosity
     fmr::Dim_int set_verb (fmr::Dim_int) noexcept;// sets logs verbosity
@@ -34,6 +36,14 @@ namespace femera { namespace data {
     //
     fmr::Global_int send (const fmr::Data_name_t&,// fmr::Data_type::Text_line
       css& text) noexcept;
+#if 0
+    std::size_t make (const fmr::Data_name_t, ...);// new_data () <-- BETTER!
+    std::size_t init (const fmr::Data_name_t, ...);// ini_data ()
+    std::size_t read (const fmr::Data_name_t, ...);// get_data ()
+    std::size_t save (const fmr::Data_name_t, ...);// set_data (), clr_data
+    std::size_t send (const fmr::Data_name_t, ...);// add_data ()
+    std::size_t toss (const fmr::Data_name_t, ...);// del_data ()
+#endif
 #if 0
     template <typename D>
     fmr::Global_int send (const fmr::Data_type, const D data)
@@ -71,11 +81,13 @@ namespace femera { namespace data {
     List_file_id  add_file (Fnl& name_list, Dt =Dt::All, Ft =Ft::Auto);
     List_file_id  inp_file (Fnl& name_list, Dt =Dt::All, Ft =Ft::Auto);
     List_file_id  out_file (Fnl& name_list, Dt =Dt::All, Ft =Ft::Auto);
-    //
+#endif
+#if 0
     List_file_id scan_file (Fnl& name_list={""}, Dt =Dt::All, Ft =Ft::Auto);
     List_file_id read_file (Fnl& name_list={""}, Dt =Dt::All, Ft =Ft::Auto);
     void         save_file (Fnl& name_list={""}, Dt =Dt::All, Ft =Ft::Auto);
     void         send_file (Fnl& name_list={""}, Dt =Dt::All, Ft =Ft::Auto);
+    //List_file_id toss_file (Fnl& name_list={""}, Dt =Dt::All, Ft =Ft::Auto);
 #endif
   };//
 } }//end femera::data namespace

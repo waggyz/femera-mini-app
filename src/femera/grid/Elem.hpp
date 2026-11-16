@@ -65,7 +65,7 @@ class Elem {//TODO consider pulling P out of the template parameters.
   auto coor_stride (int) noexcept -> decltype(U::sims_d) { return U::sims_d; }
   template <class U> static constexpr
   fmr::Dim_int coor_stride (...) noexcept { return 3; }
-  static constexpr bool get_elem_node_coor_impl
+  static constexpr bool calc_elem_node_coor
     (F* node_coor, const F* vert_coor, fmr::Dim_int stride) noexcept;
   public:
   // Simple constexpr accessors ===============================================
@@ -94,10 +94,10 @@ class Elem {//TODO consider pulling P out of the template parameters.
   // Node coordinates use three components; supplied vertex coordinates do too.
   static constexpr bool get_elem_node_coor (F* node_coor,
     const F* vert_coor) noexcept {
-    return get_elem_node_coor_impl(node_coor, vert_coor, 3);
+    return calc_elem_node_coor(node_coor, vert_coor, 3);
   }
   static constexpr bool get_elem_node_coor (F* node_coor) noexcept {
-    return get_elem_node_coor_impl(node_coor,
+    return calc_elem_node_coor(node_coor,
       vert_coor_ptr<T>(decltype(has_fixed_coor<T>(0)){}), coor_stride<T>(0));
   }
   //

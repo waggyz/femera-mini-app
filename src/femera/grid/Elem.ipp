@@ -12,7 +12,7 @@ constexpr fmr::Local_int elem::Elem<T,P,F>::get_node_n () noexcept {
   // Handles solid and interface elements
   return T::vert_n// vertex nodes
     + (P -1) * T::edge_n// edge nodes
-    + ((P<3) ? 0 : T::cubic_tris_node_n);
+    + ((P<3) ? 0 : T::tri3_face_node_n);
 }
 // Element quality metrics ====================================================
   template <class T, typename fmr::Dim_int P, typename F>//, typename Y>
@@ -121,7 +121,7 @@ constexpr fmr::Local_int elem::Elem<T,P,F>::get_poly_grad_size
   return intp_n * get_node_n () * elem_d;
 }
 template <class T, typename fmr::Dim_int P, typename F>
-constexpr bool elem::Elem<T,P,F>::get_elem_node_coor_impl (F* node_coor,
+constexpr bool elem::Elem<T,P,F>::calc_elem_node_coor (F* node_coor,
   const F* vert_coor, fmr::Dim_int stride) noexcept {
   //NOTE Caller checks array bounds:
   //     node_coor is size get_node_n() * 3
