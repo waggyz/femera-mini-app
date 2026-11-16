@@ -23,7 +23,7 @@ namespace femera { namespace data {
     using css = const std::string;// for convenience
   public:
     //
-    //TODO replace following with generics: bool did_init(type: fmr::Logs)
+    //TODO replace following with generics: bool did_init(fmr::Logs)
     bool did_logs_init () noexcept;// true if first Logs initialized ok
     fmr::Dim_int get_verb () noexcept;// gets logs verbosity
     fmr::Dim_int set_verb (fmr::Dim_int) noexcept;// sets logs verbosity

@@ -655,9 +655,16 @@ reinstall: | intro
 	$(MAKE) $(JPAR) remove
 	$(MAKE) $(JSER) install
 
+# Retains dependency files while cleaning other build artifacts
+tidy: $(BUILD_CPU)/femera/ $(BUILD_CPU)/fmr/ $(STAGE_CPU)/lib/
+tidy: $(BUILD_CPU)/zyclops/ $(BUILD_CPU)/build/
+	$(call timestamp,$@,$^)s
+	-find $^ -depth \( -type f -o -type l \) ! -name '*.d' -delete
+	$(info $(DONE) made $(FEMERA_VERSION) for $(CPUMODEL) $@)
+
 clean: $(BUILD_CPU)/femera/ $(BUILD_CPU)/fmr/ $(STAGE_CPU)/lib/
 clean: $(BUILD_CPU)/zyclops/ $(BUILD_CPU)/build/
-	$(call timestamp,$@,$^)
+	$(call timestamp,$@,$^)s
 	-rm -rf $^
 	$(info $(DONE) made $(FEMERA_VERSION) for $(CPUMODEL) $@)
 

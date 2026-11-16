@@ -39,34 +39,8 @@ class Elem {//TODO consider pulling P out of the template parameters.
   canonical reference-coordinate arrays currently store three components.
   
   Members are constexpr so that everything is kept thread-local to the instance
-  that created it; constexpr methods are implicitly inline
+  that created it; constexpr methods are implicitly inline.
   */
-  private:
-  template <class U> static
-  auto has_fixed_coor (int) -> decltype((void) U::vert_coor, std::true_type{});
-  template <class U> static std::false_type has_fixed_coor (...);
-  template <class U> static constexpr
-  const F* vert_coor_ptr (std::false_type) noexcept {
-    return &U::template vert_coor<F>[0];
-  }
-  template <class U> static constexpr
-  const F* vert_coor_ptr (std::true_type) noexcept {
-    return &U::vert_coor[0];
-  }
-  template <class U> static constexpr
-  const F* coor_vert_ptr (std::false_type) noexcept {
-    return &U::template coor_vert<F>[0];
-  }
-  template <class U> static constexpr
-  const F* coor_vert_ptr (std::true_type) noexcept {
-    return &U::coor_vert[0];
-  }
-  template <class U> static constexpr
-  auto coor_stride (int) noexcept -> decltype(U::sims_d) { return U::sims_d; }
-  template <class U> static constexpr
-  fmr::Dim_int coor_stride (...) noexcept { return 3; }
-  static constexpr bool calc_elem_node_coor
-    (F* node_coor, const F* vert_coor, fmr::Dim_int stride) noexcept;
   public:
   // Simple constexpr accessors ===============================================
   static constexpr fmr::math::Poly get_poly_type () noexcept {
@@ -155,12 +129,12 @@ class Elem {//TODO consider pulling P out of the template parameters.
     const fmr::Local_int intp_n=1u,
     const fmr::Dim_int   elem_d=T::elem_d);
   static constexpr
-  void get_poly_node_grad (F* poly_grad, const F* intp,
+  void get_poly_node_grad (F* poly_grad, const F* intp,//FIXME get_poly_grad_node
     const fmr::Local_int node_n=get_node_n (),
     const fmr::Local_int intp_n=1u,
     const fmr::Dim_int   elem_d=T::elem_d);
   static constexpr
-  void get_poly_grad_node (F* poly_grad, const F* intp,
+  void get_poly_grad_node (F* poly_grad, const F* intp,//FIXME get_poly_node_grad
     const fmr::Local_int node_n=get_node_n (),
     const fmr::Local_int intp_n=1u,
     const fmr::Dim_int   elem_d=T::elem_d);
@@ -190,8 +164,43 @@ class Elem {//TODO consider pulling P out of the template parameters.
     const fmr::Dim_int elem_d=T::elem_d)
   noexcept {return intp_n * (sims_d*elem_d + 1u);}
   //
-};//end Elem
-
+  private:// ==================================================================
+  template <class U> static
+  auto has_fixed_coor (int) -> decltype((void) U::vert_coor, std::true_type{});
+  template <class U> static std::false_type has_fixed_coor (...);
+  template <class U> static constexpr
+  const F* vert_coor_ptr (std::false_type) noexcept {
+    return &U::template vert_coor<F>[0];
+  }
+  template <class U> static constexpr
+  const F* vert_coor_ptr (std::true_type) noexcept {
+    return &U::vert_coor[0];
+  }
+  template <class U> static constexpr
+  const F* coor_vert_ptr (std::false_type) noexcept {
+    return &U::template coor_vert<F>[0];
+  }
+  template <class U> static constexpr
+  const F* coor_vert_ptr (std::true_type) noexcept {
+    return &U::coor_vert[0];
+  }
+  template <class U> static constexpr
+  auto coor_stride (int) noexcept -> decltype(U::sims_d) { return U::sims_d; }
+  template <class U> static constexpr
+  fmr::Dim_int coor_stride (...) noexcept { return 3; }
+  static constexpr bool calc_elem_node_coor
+    (F* node_coor, const F* vert_coor, fmr::Dim_int stride) noexcept;
+  //
+ };//end Elem
+  namespace detail {
+    enum class poly_output;
+    template <class T, fmr::Dim_int P> struct poly_dispatch;
+    template <class T, fmr::Dim_int P, typename F>
+    constexpr void eval_poly(F* out, const F* intp, fmr::Local_int node_n,
+                            fmr::Local_int intp_n, fmr::Dim_int elem_d,
+                            poly_output output);
+  }// end detail namespace
+  //
 } } }//end femera::grid::elem:: namespace
 
 #include "Elem.ipp"
