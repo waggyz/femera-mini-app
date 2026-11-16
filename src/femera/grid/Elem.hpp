@@ -116,9 +116,9 @@ class Elem {//TODO consider pulling P out of the template parameters.
   noexcept;
   // P1-P3 Bars, Tris, Quad, Tets and Cube only. Points are packed as
   // [integration point][reference coordinate], with elem_d coordinates each.
-  // Results are [point][node], [point][reference coordinate][node] for
-  // get_poly_node_grad, and [point][node][reference coordinate] for
-  // get_poly_grad_node. The dimension is the reference, not physical, dimension.
+  // Results are [point][node], [point][coordinate direction][node] for
+  // get_poly_grad_node, and [point][node][coordinate direction] for
+  // get_poly_node_grad. The dimension is the reference, not physical, dimension.
   // Buffers must not overlap and must hold intp_n*elem_d coordinates and
   // the number of results given by get_poly_func_size/get_poly_grad_size.
   // node_n and elem_d must match this specialization. Invalid arguments throw
@@ -129,12 +129,12 @@ class Elem {//TODO consider pulling P out of the template parameters.
     const fmr::Local_int intp_n=1u,
     const fmr::Dim_int   elem_d=T::elem_d);
   static constexpr
-  void get_poly_node_grad (F* poly_grad, const F* intp,//FIXME get_poly_grad_node
+  void get_poly_grad_node (F* poly_grad, const F* intp,
     const fmr::Local_int node_n=get_node_n (),
     const fmr::Local_int intp_n=1u,
     const fmr::Dim_int   elem_d=T::elem_d);
   static constexpr
-  void get_poly_grad_node (F* poly_grad, const F* intp,//FIXME get_poly_node_grad
+  void get_poly_node_grad (F* poly_grad, const F* intp,
     const fmr::Local_int node_n=get_node_n (),
     const fmr::Local_int intp_n=1u,
     const fmr::Dim_int   elem_d=T::elem_d);

@@ -127,8 +127,8 @@ constexpr bool elem_dispatch_constexpr_test() {
   const double points[4] = {0,0,0.5,0};
   double values[12] = {}, ng[24] = {}, gn[24] = {};
   E::get_poly_func_vals(values,points,6,2);
-  E::get_poly_node_grad(ng,points,6,2);
-  E::get_poly_grad_node(gn,points,6,2);
+  E::get_poly_grad_node(ng,points,6,2);
+  E::get_poly_node_grad(gn,points,6,2);
   return constexpr_near(values[0],1.0,1e-14)
     && constexpr_near(values[9],1.0,1e-14)
     && constexpr_near(ng[0],-3.0,1e-14)
@@ -145,8 +145,8 @@ constexpr bool elem_dispatch_all_constexpr() {
   double values[std::size_t(nodes)] = {};
   double ng[std::size_t(nodes*dim)] = {}, gn[std::size_t(nodes*dim)] = {};
   E::get_poly_func_vals(values,point);
-  E::get_poly_node_grad(ng,point);
-  E::get_poly_grad_node(gn,point);
+  E::get_poly_grad_node(ng,point);
+  E::get_poly_node_grad(gn,point);
   const double derivative = Order==1 ? -1.0 : (Order==2 ? -3.0 : -5.5);
   return constexpr_near(values[0],1.0,1e-14)
     && constexpr_near(ng[0],derivative,1e-14)
@@ -184,8 +184,8 @@ void check_elem_dispatch(Values values, Gradient gradient, Transposed transposed
   fv[0]=ng[0]=gn[0]=F(123);
   fv[points_n*nodes+1]=ng[points_n*nodes*dim+1]=gn[points_n*nodes*dim+1]=F(456);
   E::get_poly_func_vals(fv+1,packed,nodes,points_n,dim);
-  E::get_poly_node_grad(ng+1,packed,nodes,points_n,dim);
-  E::get_poly_grad_node(gn+1,packed,nodes,points_n,dim);
+  E::get_poly_grad_node(ng+1,packed,nodes,points_n,dim);
+  E::get_poly_node_grad(gn+1,packed,nodes,points_n,dim);
   EXPECT_EQ(fv[0],F(123)); EXPECT_EQ(fv[points_n*nodes+1],F(456));
   EXPECT_EQ(ng[0],F(123)); EXPECT_EQ(ng[points_n*nodes*dim+1],F(456));
   EXPECT_EQ(gn[0],F(123)); EXPECT_EQ(gn[points_n*nodes*dim+1],F(456));
@@ -205,21 +205,21 @@ void check_elem_dispatch(Values values, Gradient gradient, Transposed transposed
   F single[std::size_t(nodes*dim)] = {};
   E::get_poly_func_vals(single,packed);
   for (fmr::Local_int i=0; i<nodes; ++i) EXPECT_NEAR(double(single[i]),double(fv[1+i]),tolerance);
-  E::get_poly_node_grad(single,packed);
-  for (fmr::Local_int i=0; i<nodes*dim; ++i) EXPECT_NEAR(double(single[i]),double(ng[1+i]),tolerance);
   E::get_poly_grad_node(single,packed);
+  for (fmr::Local_int i=0; i<nodes*dim; ++i) EXPECT_NEAR(double(single[i]),double(ng[1+i]),tolerance);
+  E::get_poly_node_grad(single,packed);
   for (fmr::Local_int i=0; i<nodes*dim; ++i) EXPECT_NEAR(double(single[i]),double(gn[1+i]),tolerance);
   E::get_poly_func_vals(nullptr,nullptr,nodes,0,dim);
-  E::get_poly_node_grad(nullptr,nullptr,nodes,0,dim);
   E::get_poly_grad_node(nullptr,nullptr,nodes,0,dim);
+  E::get_poly_node_grad(nullptr,nullptr,nodes,0,dim);
   EXPECT_THROW(E::get_poly_func_vals(nullptr,packed),std::invalid_argument);
-  EXPECT_THROW(E::get_poly_node_grad(single,nullptr),std::invalid_argument);
-  EXPECT_THROW(E::get_poly_grad_node(single,packed,nodes+1),std::invalid_argument);
+  EXPECT_THROW(E::get_poly_grad_node(single,nullptr),std::invalid_argument);
+  EXPECT_THROW(E::get_poly_node_grad(single,packed,nodes+1),std::invalid_argument);
   EXPECT_THROW(E::get_poly_func_vals(single,packed,nodes,1,dim+1),std::invalid_argument);
   single[0] = F(789);
   EXPECT_THROW(E::get_poly_func_vals(single,packed,nodes+1,points_n,dim),std::invalid_argument);
-  EXPECT_THROW(E::get_poly_node_grad(single,packed,nodes,points_n,dim+1),std::invalid_argument);
-  EXPECT_THROW(E::get_poly_grad_node(single,nullptr,nodes,points_n,dim),std::invalid_argument);
+  EXPECT_THROW(E::get_poly_grad_node(single,packed,nodes,points_n,dim+1),std::invalid_argument);
+  EXPECT_THROW(E::get_poly_node_grad(single,nullptr,nodes,points_n,dim),std::invalid_argument);
   EXPECT_EQ(single[0],F(789));
 }
 
@@ -236,8 +236,8 @@ void check_elem_dispatch_jacobians() {
   double transposed[std::size_t(2*n*dim)] = {}, jac[std::size_t(2*3*dim)] = {};
   double jac_t[std::size_t(2*3*dim)] = {};
   ASSERT_TRUE(E::get_elem_node_coor(coords));
-  E::get_poly_grad_node(grad,packed,n,2);
-  E::get_poly_node_grad(transposed,packed,n,2);
+  E::get_poly_node_grad(grad,packed,n,2);
+  E::get_poly_grad_node(transposed,packed,n,2);
   fmr::fems::elem::elem_jacs_node_coor_ref(jac,coords,grad,2,n,3,dim);
   fmr::fems::elem::elem_jacs_node_coor_a(jac_t,coords,transposed,2,n,3,dim);
   for (int p=0; p<2; ++p) for (int i=0; i<3; ++i)

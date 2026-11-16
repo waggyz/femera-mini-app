@@ -100,12 +100,12 @@ constexpr void elem::Elem<T,P,F>::get_poly_func_vals(F* out, const F* intp,
   detail::eval_poly<T,P>(out,intp,node_n,intp_n,elem_d,detail::poly_output::values);
 }
 template <class T, typename fmr::Dim_int P, typename F>
-constexpr void elem::Elem<T,P,F>::get_poly_node_grad(F* out, const F* intp,
+constexpr void elem::Elem<T,P,F>::get_poly_grad_node(F* out, const F* intp,
     fmr::Local_int node_n, fmr::Local_int intp_n, fmr::Dim_int elem_d) {
   detail::eval_poly<T,P>(out,intp,node_n,intp_n,elem_d,detail::poly_output::node_grad);
 }
 template <class T, typename fmr::Dim_int P, typename F>
-constexpr void elem::Elem<T,P,F>::get_poly_grad_node(F* out, const F* intp,
+constexpr void elem::Elem<T,P,F>::get_poly_node_grad(F* out, const F* intp,
     fmr::Local_int node_n, fmr::Local_int intp_n, fmr::Dim_int elem_d) {
   detail::eval_poly<T,P>(out,intp,node_n,intp_n,elem_d,detail::poly_output::grad_node);
 }

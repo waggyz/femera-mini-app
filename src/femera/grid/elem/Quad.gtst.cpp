@@ -4,10 +4,7 @@
 
 #include <gtest/gtest.h>
 
-#define DEBUG_PRINT
-#ifdef DEBUG_PRINT
-//#include "../../fmr.hpp"
-#endif
+#undef DEBUG_PRINT
 
 auto  mini = fmr::new_jobs ();
 
@@ -49,8 +46,7 @@ TEST( GridCellElemQuad, ShapeGradient ){
 
   for (fmr::Local_int i = 0; i < elem_d; ++i) {// Check these are transposes.
     for (fmr::Local_int j = 0; j < node_n; ++j) {
-      //EXPECT_DOUBLE_EQ(dN_node_grad[elem_d*j + i], dN_grad_node[node_n*i + j]);
-      EXPECT_DOUBLE_EQ(dN_grad_node[elem_d*j + i], dN_node_grad[node_n*i + j]);
+      EXPECT_DOUBLE_EQ(dN_node_grad[elem_d*j + i], dN_grad_node[node_n*i + j]);
     }
   }
 
@@ -72,18 +68,10 @@ TEST( GridCellElemQuad, ShapeGradient ){
       0.0,0.0};
   double grad_expc[elem_d] = {1.0, 0.0}; // expected gradient for function of x only  
   double grad[elem_d];// correctnes check
-
-
-#define IS_CORRECT_LAYOUT
-
   for (fmr::Local_int i = 0; i < elem_d; ++i) {
     grad[i] = 0.0;
     for (fmr::Local_int j = 0; j < node_n; ++j) {
-#ifdef IS_CORRECT_LAYOUT
       grad[i] += dN_node_grad[2*j + i] * node_vals[2*j + i];
-#else
-      grad[i] += dN_node_grad[4*i + j] * node_vals[2*j + i];//works w/ bad layout
-#endif
     }
   }
   for (fmr::Local_int i = 0; i < elem_d; ++i) {
@@ -92,21 +80,14 @@ TEST( GridCellElemQuad, ShapeGradient ){
   for (fmr::Local_int i = 0; i < elem_d; ++i) {
     grad[i] = 0.0;
     for (fmr::Local_int j = 0; j < node_n; ++j) {
-#ifdef IS_CORRECT_LAYOUT
       grad[i] += dN_grad_node[4*i + j] * node_vals[2*j + i];
-#else
-      grad[i] += dN_grad_node[2*j + i] * node_vals[2*j + i];//works w/ bad layout
-#endif
     }
   }
   for (fmr::Local_int i = 0; i < elem_d; ++i) {
     EXPECT_DOUBLE_EQ(grad[i], grad_expc[i]);
   }
-#undef IS_CORRECT_LAYOUT
-
-
 }
-
+//
 } } }//end femera::grid::elem:: namespace
 
 #undef DEBUG_PRINT
