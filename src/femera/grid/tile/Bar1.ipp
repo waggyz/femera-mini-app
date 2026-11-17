@@ -122,6 +122,31 @@ constexpr bool Bar1::calc_tile_elem_vert_coor(//x1,y1,z1, x2,y2,z2
       tile_i % grid_x % part_x + 1};// periodic BC
     }
 #endif
+  //
+  // Halo operations ----------------------------------------------------------
+  // Easy for this tile: only two nodes and elements might be at partition edges.
+  //TODO check if get_elem_n > 0?
+  constexpr
+  fmr::Local_int Bar1::calc_halo_node_n (
+    const fmr::Local_int*, const fmr::Local_int) noexcept { return 2;
+    }
+  constexpr
+  fmr::Local_int Bar1::calc_halo_elem_n (
+    const fmr::Local_int*, const fmr::Local_int) noexcept { return 2;
+    }
+  constexpr
+    fmr::Local_int Bar1::calc_halo_node (fmr::Local_int halo_node_i,
+    const fmr::Local_int* part_elem_dims, const fmr::Dim_int elem_p) noexcept
+    {return halo_node_i <= 0
+      ? 0 : Bar1::calc_tile_part_node_n(elem_p, part_elem_dims) - 1;
+    }
+  constexpr
+  fmr::Local_int Bar1::calc_sort_halo_elem (const fmr::Local_int halo_elem_i,
+    const fmr::Local_int* part_elem_dims) noexcept {
+      return  (halo_elem_i <= 0) ? 0
+      : ((halo_elem_i == 1) ? Bar1::get_tile_part_elem_n(part_elem_dims) - 1
+        : halo_elem_i - 1);
+    }
 
 } } }//end femera::grid::tile namespace
 

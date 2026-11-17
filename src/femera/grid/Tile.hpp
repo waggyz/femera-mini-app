@@ -94,7 +94,6 @@ class Tile {
   static constexpr fmr::Local_int get_tile_elem_node_n () noexcept {
     return calc_elem_node_n<T> (0);
   }
-  //
   static constexpr fmr::Local_int get_tile_part_elem_n (
     const fmr::Local_int* part_elem_dims)// size 3 for 1D,2D,3D elements
   noexcept {
@@ -105,7 +104,33 @@ class Tile {
   noexcept {
     return T::calc_tile_part_node_n(P, part_elem_dims);
   }
-  // Tiled (strucured mesh) node coordinates
+  // Halo and interior elements and nodes -------------------------------------
+  //NOTE These are only candidates and do not account for partition boundaries
+  //     at the edges of the domain.
+  // However, there is little harm done in working the halo first, whether or
+  // not the partition boundaries are at the edges of the domain. This can be
+  // reviewed later when accounting for actual partition boundaries.
+  //
+  //TODO are bool is_node_halo and is_elem_halo needed?
+  //
+  static constexpr fmr::Local_int get_halo_node_n (
+  const fmr::Local_int* part_elem_dims ) noexcept {
+    return T::calc_halo_node_n(part_elem_dims, P);}
+  static constexpr
+  fmr::Local_int get_halo_elem_n (
+  const fmr::Local_int* part_elem_dims ) noexcept {
+ return T::calc_halo_elem_n(part_elem_dims, P);}
+  static constexpr
+  fmr::Local_int get_halo_node (
+    const fmr::Local_int halo_node_i, const fmr::Local_int* part_elem_dims
+  ) noexcept {return T::calc_halo_node(halo_node_i, part_elem_dims, P);}
+  static constexpr
+  fmr::Local_int get_halo_sort_elem (
+    const fmr::Local_int halo_elem_i, const fmr::Local_int* part_elem_dims
+  ) noexcept {// halo elems first, then interior, up to total number of elements
+    return T::calc_sort_halo_elem(halo_elem_i, part_elem_dims);}
+
+  // Connectivity & coordinates  coordinates ----------------------------------
   static constexpr bool get_tile_part_node_coor (F* coor,
     const fmr::Local_int node_i,
     const fmr::Local_int* part_elem_dims,// partition dimensions nodes_x,node_y,node_z for 1D,2D,3D elems

@@ -316,6 +316,21 @@ TEST( GridTileBar1, TileElementVertexCoordinatesSOA ){
   EXPECT_DOUBLE_EQ( vert_coor[5], 2.0 );
   EXPECT_FALSE( bar1.get_tile_elem_coor_vert(vert_coor, 2, elem_n, elem_size, part_orig) );
 }
+// Check halo nodes and elements for the Bar1 tile
+TEST( GridTileBar1, HaloNodesAndElements){
+  Tile<Bar1> bars;
+  const fmr::Local_int part_elem_dims[1] = {4};
+  EXPECT_EQ( bars.get_halo_node_n(part_elem_dims), 2 );
+  EXPECT_EQ( bars.get_halo_elem_n(part_elem_dims), 2 );
+  EXPECT_EQ( bars.get_halo_sort_elem(0, part_elem_dims), 0 );
+  EXPECT_EQ( bars.get_halo_sort_elem(1, part_elem_dims), \
+    bars.get_tile_part_elem_n(part_elem_dims) - 1 );
+  EXPECT_EQ( bars.get_halo_sort_elem(2, part_elem_dims), 1 );
+  EXPECT_EQ( bars.get_halo_sort_elem(3, part_elem_dims), 2 );
+  EXPECT_EQ( bars.get_halo_node(0, part_elem_dims), 0 );
+  EXPECT_EQ( bars.get_halo_node(1, part_elem_dims), \
+    bars.get_tile_part_node_n(part_elem_dims) - 1 );
+}
 
 TEST( GridTileBar1, TileElementEdgeDeltaQuality){
   constexpr Bar1 bar1;

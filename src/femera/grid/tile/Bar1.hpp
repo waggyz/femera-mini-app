@@ -104,6 +104,22 @@ private:
     const F tile_size[3], const F part_orig[3]
   ) noexcept;
   //
+  // Halo operations ----------------------------------------------------------
+  // Easy for this tile: only two nodes and elements might be at partition edges.
+  //TODO check if get_elem_n > 0?
+  static constexpr
+  fmr::Local_int calc_halo_node_n (
+    const fmr::Local_int*, const fmr::Local_int) noexcept;
+  static constexpr
+  fmr::Local_int calc_halo_elem_n (
+    const fmr::Local_int*, const fmr::Local_int) noexcept;
+  static constexpr
+  fmr::Local_int calc_halo_node (fmr::Local_int halo_node_i,
+    const fmr::Local_int* part_elem_dims, const fmr::Dim_int elem_p) noexcept;
+  static constexpr
+  fmr::Local_int calc_sort_halo_elem (const fmr::Local_int halo_elem_i,
+    const fmr::Local_int* part_elem_dims) noexcept;
+  //
 };//end class Bar1
 
 } } }//end femera::grid::tile:: namespace
