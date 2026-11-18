@@ -3,15 +3,16 @@
 
 namespace femera { namespace grid { namespace tile {
 
+//NOTE The underlying Pins elements have no edges, but the Ipn1 tile is a bar
+//     with one edge, so its tiling methods can delegate to Bar1.
+
 constexpr bool Ipn1::calc_tile_vert_conn (
   fmr::Local_int conn[2],
     const fmr::Local_int tile_i,// local element index
     const fmr::Local_int* part_size,
     const fmr::Dim_int elem_p)
     noexcept {
-    conn[0] = elem_p * tile_i;
-    conn[1] = elem_p * (tile_i + 1);
-    return tile_i < part_size[0];// false if tile_i out of range
+    return Bar1::calc_tile_vert_conn(conn, tile_i, part_size, elem_p);
   }
 constexpr bool Ipn1::calc_tile_vert_conn_prdc (
   fmr::Local_int conn[2],
@@ -19,11 +20,7 @@ constexpr bool Ipn1::calc_tile_vert_conn_prdc (
     const fmr::Local_int* part_size,
     const fmr::Dim_int elem_p)
     noexcept{
-    if (part_size[0] == 0) return false;//TODO remove this check?
-    // part_size counts elements; each element spans p node indices.
-    conn[0] = elem_p * (tile_i % part_size[0]);
-    conn[1] = elem_p * ((tile_i + 1) % part_size[0]);
-    return tile_i < part_size[0];// false if tile_i out of range
+    return Bar1::calc_tile_vert_conn_prdc(conn, tile_i, part_size, elem_p);
   }
 constexpr bool Ipn1::calc_tile_node_conn (
   fmr::Local_int* conn,
@@ -31,14 +28,7 @@ constexpr bool Ipn1::calc_tile_node_conn (
     const fmr::Local_int* part_size,
     const fmr::Dim_int elem_p)
     noexcept {
-    conn[0] = elem_p * tile_i;
-    conn[1] = elem_p * (tile_i + 1);
-    if (elem_p > 1) {
-      for (fmr::Local_int j = 1; j < elem_p; ++j) {
-        conn[j + 1] = elem_p * tile_i + j;
-      }
-    }
-    return tile_i < part_size[0];// false if tile_i out of range
+    return Bar1::calc_tile_node_conn(conn, tile_i, part_size, elem_p);
   }
 template <typename F>
 constexpr bool Ipn1::calc_tile_part_node_coor(F* coor,
@@ -48,26 +38,15 @@ constexpr bool Ipn1::calc_tile_part_node_coor(F* coor,
     const F tile_size[3],
     const F part_orig[3]
   ) noexcept{
-    const F node_delt = F(1.0) / F(elem_p);
-    // Guard against null part_orig pointer.
-    coor[0] = (part_orig ? part_orig[0] : F(0.0))
-      + node_i * tile_size[0] * node_delt;
-    coor[1] = (part_orig ? part_orig[1] : F(0.0))
-      + node_i * tile_size[1] * node_delt;
-    coor[2] = (part_orig ? part_orig[2] : F(0.0))
-      + node_i * tile_size[2] * node_delt;
-    //TODO FIXME this only works for P=1
-    return node_i < elem_p * part_elem_dims[0] + 1;
+    return Bar1::calc_tile_part_node_coor(
+      coor, node_i, elem_p, part_elem_dims, tile_size, part_orig);
   }
   template <typename F>
   constexpr bool Ipn1::calc_tile_vert_coor(F coor[3],
     const fmr::Local_int vert_i, const fmr::Local_int vert_n,
     const F tile_size[3], const F part_orig[3])
     noexcept{
-    coor[0] = (part_orig ? part_orig[0] : F(0.0)) + vert_i * tile_size[0];
-    coor[1] = (part_orig ? part_orig[1] : F(0.0)) + vert_i * tile_size[1];
-    coor[2] = (part_orig ? part_orig[2] : F(0.0)) + vert_i * tile_size[2];
-    return vert_i < vert_n;
+    return Bar1::calc_tile_vert_coor(coor, vert_i, vert_n, tile_size, part_orig);
   }
   template <typename F>
 constexpr bool Ipn1::calc_tile_elem_vert_coor(//x1,y1,z1, x2,y2,z2
@@ -75,15 +54,8 @@ constexpr bool Ipn1::calc_tile_elem_vert_coor(//x1,y1,z1, x2,y2,z2
     const fmr::Local_int elem_i, const fmr::Local_int elem_n,
     const F tile_size[3], const F part_orig[3])// origin should default to {0.0,0.0,0.0}
     noexcept{
-      for (fmr::Local_int v = 0; v < 2; ++v) {// 2 vertices for 1D bar element
-        vert_coor[v * 3 + 0] = (part_orig ? part_orig[0] : F(0.0))
-          + (elem_i + v) * tile_size[0];
-        vert_coor[v * 3 + 1] = (part_orig ? part_orig[1] : F(0.0))
-          + (elem_i + v) * tile_size[1];
-        vert_coor[v * 3 + 2] = (part_orig ? part_orig[2] : F(0.0))
-          + (elem_i + v) * tile_size[2];
-      }
-      return elem_i < elem_n;
+      return Bar1::calc_tile_elem_vert_coor(
+        vert_coor, elem_i, elem_n, tile_size, part_orig);
     }
   template <typename F>
   constexpr bool Ipn1::calc_tile_elem_coor_vert(//x1,x2, y1,y2, z1, z2
@@ -91,15 +63,8 @@ constexpr bool Ipn1::calc_tile_elem_vert_coor(//x1,y1,z1, x2,y2,z2
     const fmr::Local_int elem_i, const fmr::Local_int elem_n,
     const F tile_size[3], const F part_orig[3])// origin should default to {0.0,0.0,0.0}
     noexcept{
-      for (fmr::Local_int v = 0; v < 2; ++v) {// 2 vertices for 1D bar element
-        vert_coor[v + 0] = (part_orig ? part_orig[0] : F(0.0))
-          + (elem_i + v) * tile_size[0];
-        vert_coor[v + 2] = (part_orig ? part_orig[1] : F(0.0))
-          + (elem_i + v) * tile_size[1];
-        vert_coor[v + 4] = (part_orig ? part_orig[2] : F(0.0))
-         + (elem_i + v) * tile_size[2];
-      }
-      return elem_i < elem_n;
+      return Bar1::calc_tile_elem_coor_vert(
+        vert_coor, elem_i, elem_n, tile_size, part_orig);
     }
 
 #if 0
@@ -112,40 +77,30 @@ constexpr bool Ipn1::calc_tile_elem_vert_coor(//x1,y1,z1, x2,y2,z2
     conn[1] = (tile_i + 1) % grid_x % part_x;// periodic BC
     return tile_i < grid_x;// false if tile_i out of range
   }
-    // free surface BCs
-  constexpr fmr::Local_int* Ipn1::get_tile_vert_conn (fmr::Local_int tile_i,
-    // local element index
-    const fmr::Local_int grid_x = 1,
-    const fmr::Local_int part_x = 1) noexcept{
-    return new fmr::Local_int[2]{
-      tile_i % grid_x % part_x,
-      tile_i % grid_x % part_x + 1};// periodic BC
-    }
+  // call Bar1 method
 #endif
   //
   // Halo operations ----------------------------------------------------------
-  // Easy for this tile: only two nodes and elements might be at partition edges.
-  //TODO check if get_elem_n() > 0?
   constexpr
   fmr::Local_int Ipn1::calc_halo_node_n (
-    const fmr::Local_int*, const fmr::Local_int) noexcept { return 2;
+    const fmr::Local_int* part_elem_dims, const fmr::Local_int elem_p) noexcept {
+    return Bar1::calc_halo_node_n(part_elem_dims, elem_p);
     }
   constexpr
   fmr::Local_int Ipn1::calc_halo_elem_n (
-    const fmr::Local_int*, const fmr::Local_int) noexcept { return 2;
+    const fmr::Local_int* part_elem_dims, const fmr::Local_int elem_p) noexcept {
+    return Bar1::calc_halo_elem_n(part_elem_dims, elem_p);
     }
   constexpr
     fmr::Local_int Ipn1::calc_halo_node (fmr::Local_int halo_node_i,
     const fmr::Local_int* part_elem_dims, const fmr::Dim_int elem_p) noexcept
-    {return halo_node_i <= 0
-      ? 0 : Ipn1::calc_tile_part_node_n(elem_p, part_elem_dims) - 1;
+    {
+    return Bar1::calc_halo_node(halo_node_i, part_elem_dims, elem_p);
     }
   constexpr
   fmr::Local_int Ipn1::calc_sort_halo_elem (const fmr::Local_int halo_elem_i,
     const fmr::Local_int* part_elem_dims) noexcept {
-      return  (halo_elem_i <= 0) ? 0
-      : ((halo_elem_i == 1) ? Ipn1::get_tile_part_elem_n(part_elem_dims) - 1
-        : halo_elem_i - 1);
+      return Bar1::calc_sort_halo_elem(halo_elem_i, part_elem_dims);
     }
 //
 } } }//end femera::grid::tile namespace

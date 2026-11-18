@@ -7,7 +7,7 @@ namespace femera { namespace grid { namespace tile {
 
 class Bar1 final : public Tile<Bar1> {
   template <class T, fmr::Dim_int P, typename F>
-  friend class Tile;
+  friend class Tile; friend class Ipn1;
 private:
 // Scalars ====================================================================
   static constexpr fmr::Dim_int        elem_d = 1;

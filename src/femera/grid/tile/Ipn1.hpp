@@ -1,7 +1,7 @@
 #ifndef FEMERA_HAS_GRID_TILE_IPN1_HPP
 #define FEMERA_HAS_GRID_TILE_IPN1_HPP
 
-#include "../Tile.hpp"
+#include "Bar1.hpp"// This element tiles exactly like Bar1.
 
 namespace femera { namespace grid { namespace tile {
 
@@ -15,7 +15,7 @@ private:
   static constexpr fmr::Local_int tile_elem_n = 1;// # this type element / tile
   //
   static constexpr fmr::Local_int tile_vert_n = 2;
-  static constexpr fmr::Local_int tile_edge_n = 1;
+  static constexpr fmr::Local_int tile_edge_n = 1;// virtual edge for tiling
   static constexpr fmr::Local_int tile_tris_n = 0;
   static constexpr fmr::Local_int tile_quad_n = 0;
   static constexpr fmr::Local_int tile_vols_n = 0;
@@ -23,7 +23,7 @@ private:
   static constexpr fmr::Local_int tile_alts_n = 2;
 
   static constexpr fmr::Local_int
-  bars_vert_conn [Ipn1::tile_alts_n * Ipn1::tile_edge_n * 2u] 
+  bars_vert_conn [Ipn1::tile_alts_n * Ipn1::tile_edge_n * 2u]
   = { 0,1, // Canonical tile
       1,0  // Alternate
     };
