@@ -23,7 +23,7 @@ template <fmr::Dim_int P> struct poly_dispatch<Bars,P> {
     else fmr::fems::elem::calc_poly_grad_node_C1D4N(out,x);
   }
 };
-}
+}//end namespace detail
 
 template <typename F>
 constexpr F Bars::vert_coor[];

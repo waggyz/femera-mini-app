@@ -51,6 +51,8 @@ namespace femera {
       this->data->send (fmr::info, this->get_base_abrv (), this->abrv, "zord",
         "Hypercomplex support not available. Make with: ENABLE_ZYCLOPS:=ON");
 #endif
+    this->data->send (fmr::info, this->get_base_abrv (), this->abrv, "rand",
+      "%4u default seed", fmr::rand_seed);
   }
   fmr::Exit_int test::Self::proc_node_chck () {
     fmr::Exit_int err = 0;

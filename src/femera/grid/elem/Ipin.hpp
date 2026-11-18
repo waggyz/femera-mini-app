@@ -25,10 +25,18 @@ private:
   static constexpr fmr::Local_int* bars_vert_conn = nullptr;
   static constexpr fmr::Local_int* tris_vert_conn = nullptr;
   static constexpr fmr::Local_int* quad_vert_conn = nullptr;
-  static constexpr
-  fmr::Geom_float vert_coor [vert_n * 3u] = {0.0,0.0,0.0, 0.0,0.0,0.0};
-  static constexpr
-  fmr::Geom_float coor_vert [vert_n * 3u] = {0.0,0.0, 0.0,0.0, 0.0,0.0};
+
+  template <typename F> static constexpr
+  F vert_coor [vert_n * 3u] = {// vert major, dims minor (transposed coor_vert)
+    F(0.0), F(0.0), F(0.0),
+    F(0.0), F(0.0), F(0.0) 
+  };
+  template <typename F> static constexpr
+  F coor_vert [vert_n * 3u] = {// dims major, vert minor (transposed vert_coor)
+    F(0.0), F(0.0),
+    F(0.0), F(0.0),
+    F(0.0), F(0.0)
+  };
 };
 
 } } }//end femera::grid::elem:: namespace

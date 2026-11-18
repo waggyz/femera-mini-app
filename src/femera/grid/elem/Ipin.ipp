@@ -3,6 +3,11 @@
 
 namespace femera { namespace grid { namespace elem {
 
+template <typename F>
+constexpr F Ipin::vert_coor[];
+
+template <typename F>
+constexpr F Ipin::coor_vert[];
 
 
 } } }//end femera::grid::elem namespace

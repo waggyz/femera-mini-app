@@ -77,7 +77,7 @@ TEST( GridElemBars, ElementPolynomialMetadata ){
   EXPECT_EQ( Elem<Bars>::get_poly_func_size (), 2 );
   EXPECT_EQ( Elem<Bars>::get_poly_grad_size (), 2 );
   EXPECT_EQ( Elem<Bars>::get_poly_type (), fmr::math::Poly::Full );
-  
+  //
   const Elem<Bars> linear;
   const Elem<Bars, 2> quadratic;
   const Elem<Bars, 3> cubic;
@@ -119,6 +119,55 @@ TEST( GridElemBars, ElementPolynomialMetadata ){
   EXPECT_EQ( cubic.get_node_n (),\
     fmr::math::poly_term_n (fmr::math::Poly::Full, cubic.get_elem_p (),\
     cubic.get_elem_d () ) );
+}
+
+TEST( GridElemBars, ElementPolynomialEval ){
+  const Elem<Bars> linear;
+  const Elem<Bars, 2> quadratic;
+  const Elem<Bars, 3> cubic;
+  // Check polynomial functions at coor {0.5}
+  const fmr::Geom_float intp_coor[1] = {0.5};
+  const auto poly_1_size = linear.get_poly_func_size ();
+  const auto poly_2_size = quadratic.get_poly_func_size ();
+  const auto poly_3_size = cubic.get_poly_func_size ();
+  const auto grad_1_size = linear.get_poly_grad_size ();
+  const auto grad_2_size = quadratic.get_poly_grad_size ();
+  const auto grad_3_size = cubic.get_poly_grad_size ();
+  double poly_1[poly_1_size];
+  double poly_2[poly_2_size];
+  double poly_3[poly_3_size];
+  double grad_1[grad_1_size];
+  double grad_2[grad_2_size];
+  double grad_3[grad_3_size];
+  linear.get_poly_func_vals (poly_1, &intp_coor[0] );
+  linear.get_poly_node_grad (grad_1, &intp_coor[0] );
+  quadratic.get_poly_func_vals (poly_2, &intp_coor[0] );
+  quadratic.get_poly_node_grad (grad_2, &intp_coor[0] );
+  cubic.get_poly_func_vals (poly_3, &intp_coor[0] );
+  cubic.get_poly_node_grad (grad_3, &intp_coor[0] );
+  EXPECT_DOUBLE_EQ( poly_1[0], 0.5 );
+  EXPECT_DOUBLE_EQ( poly_1[1], 0.5 );
+  //
+  EXPECT_DOUBLE_EQ( poly_2[0], 0.0 );
+  EXPECT_DOUBLE_EQ( poly_2[1], 0.0 );
+  EXPECT_DOUBLE_EQ( poly_2[2], 1.0 );
+  //
+  EXPECT_DOUBLE_EQ( poly_3[0],-0.0625 );
+  EXPECT_DOUBLE_EQ( poly_3[1],-0.0625 );
+  EXPECT_DOUBLE_EQ( poly_3[2], 0.5625 );
+  EXPECT_DOUBLE_EQ( poly_3[3], 0.5625 );
+  //
+  EXPECT_DOUBLE_EQ( grad_1[0],-1.0 );
+  EXPECT_DOUBLE_EQ( grad_1[1], 1.0 );
+  //
+  EXPECT_DOUBLE_EQ( grad_2[0],-1.0 );
+  EXPECT_DOUBLE_EQ( grad_2[1], 1.0 );
+  EXPECT_DOUBLE_EQ( grad_2[2], 0.0 );
+  //
+  EXPECT_DOUBLE_EQ( grad_3[0], 0.125 );
+  EXPECT_DOUBLE_EQ( grad_3[1],-0.125 );
+  EXPECT_DOUBLE_EQ( grad_3[2],-3.375 );
+  EXPECT_DOUBLE_EQ( grad_3[3], 3.375 );
 }
 // Element connectivity and coordinates tests =================================
 TEST( GridElemBars, VertexConnectivityAndCoordinates ){

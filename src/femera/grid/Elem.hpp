@@ -59,7 +59,8 @@ class Elem {//TODO consider pulling P out of the template parameters.
   static constexpr F get_elem_v () noexcept {return F(T::elem_v);}
   //
   // Non-trivial constexpr scalar member functions ----------------------------
-  static constexpr fmr::Local_int get_face_n () noexcept;
+  static constexpr fmr::Local_int get_face_n ()
+  noexcept{ return T::tris_n + T::quad_n;}
   static constexpr fmr::Local_int get_node_n () noexcept;
   //
   // Array constexpr pointers =================================================
@@ -107,13 +108,17 @@ class Elem {//TODO consider pulling P out of the template parameters.
     const F* node_coor, const fmr::Dim_int dims=3, const bool is_squared=false)
   noexcept;
   // Shape function and gradients =============================================
-  static constexpr
+  static constexpr// zero if nothing (edge, face, volume) to integrate over
   fmr::Local_int get_poly_func_size (const fmr::Local_int intp_n=1u)
-  noexcept;
+  noexcept { return (get_edge_n() + get_face_n() + get_vols_n() == 0) ? 0
+    : intp_n * get_node_n ();
+  }
   static constexpr
   fmr::Local_int get_poly_grad_size (
     const fmr::Local_int intp_n=1u, const fmr::Dim_int elem_d=T::elem_d)
-  noexcept;
+  noexcept { return (get_edge_n() + get_face_n() + get_vols_n() == 0) ? 0
+    : intp_n * get_node_n () * elem_d;
+  }
   // P1-P3 Bars, Tris, Quad, Tets and Cube only. Points are packed as
   // [integration point][reference coordinate], with elem_d coordinates each.
   // Results are [point][node], [point][coordinate direction][node] for
@@ -121,20 +126,21 @@ class Elem {//TODO consider pulling P out of the template parameters.
   // get_poly_node_grad. The dimension is the reference, not physical, dimension.
   // Buffers must not overlap and must hold intp_n*elem_d coordinates and
   // the number of results given by get_poly_func_size/get_poly_grad_size.
-  // node_n and elem_d must match this specialization. Invalid arguments throw
-  // std::invalid_argument; zero points may use null buffers.
+  // Returns false without writing when there are no results (including zero
+  // points); otherwise node_n and elem_d must match this specialization and
+  // invalid arguments throw std::invalid_argument.
   static constexpr
-  void get_poly_func_vals (F* poly_func, const F* intp,
+  bool get_poly_func_vals (F* poly_func, const F* intp,
     const fmr::Local_int node_n=get_node_n (),
     const fmr::Local_int intp_n=1u,
     const fmr::Dim_int   elem_d=T::elem_d);
   static constexpr
-  void get_poly_grad_node (F* poly_grad, const F* intp,
+  bool get_poly_grad_node (F* poly_grad, const F* intp,
     const fmr::Local_int node_n=get_node_n (),
     const fmr::Local_int intp_n=1u,
     const fmr::Dim_int   elem_d=T::elem_d);
   static constexpr
-  void get_poly_node_grad (F* poly_grad, const F* intp,
+  bool get_poly_node_grad (F* poly_grad, const F* intp,
     const fmr::Local_int node_n=get_node_n (),
     const fmr::Local_int intp_n=1u,
     const fmr::Dim_int   elem_d=T::elem_d);
@@ -196,7 +202,7 @@ class Elem {//TODO consider pulling P out of the template parameters.
     enum class poly_output;
     template <class T, fmr::Dim_int P> struct poly_dispatch;
     template <class T, fmr::Dim_int P, typename F>
-    constexpr void eval_poly(F* out, const F* intp, fmr::Local_int node_n,
+    constexpr bool eval_poly(F* out, const F* intp, fmr::Local_int node_n,
                             fmr::Local_int intp_n, fmr::Dim_int elem_d,
                             poly_output output);
   }// end detail namespace

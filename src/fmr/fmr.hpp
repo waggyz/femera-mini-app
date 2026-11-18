@@ -96,6 +96,13 @@ namespace fmr {// typdefs, constants, enums
 }//end fmr:: namespace
 //
 namespace fmr {
+
+  // Set a random seed, primarily for test reproducibility.
+#ifdef FMR_RAND_SEED
+  static const unsigned int rand_seed = FMR_RAND_SEED;
+#else
+  static const unsigned int rand_seed = 309;// default seed for reproducibility
+#endif
   //
   using Vals_name_t = std::string;
   using File_name_t = std::string;

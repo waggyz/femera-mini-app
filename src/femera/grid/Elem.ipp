@@ -3,10 +3,12 @@
 
 namespace femera { namespace grid {
 
+#if 0
 template <class T, typename fmr::Dim_int P, typename F>
 constexpr fmr::Local_int elem::Elem<T,P,F>::get_face_n () noexcept {
   return T::tris_n + T::quad_n;
 }
+#endif
 template <class T, typename fmr::Dim_int P, typename F>
 constexpr fmr::Local_int elem::Elem<T,P,F>::get_node_n () noexcept {
   // Handles solid and interface elements
@@ -60,23 +62,34 @@ namespace elem { namespace detail {
 
 template <class T, fmr::Dim_int P>
 struct poly_dispatch {
-  static_assert(P >= 1 && P <= 3, "polynomial dispatch supports orders 1 through 3");
+  static_assert(P >= 1 && P <= 3,
+    "Polynomial dispatch supports orders 1 through 3.");
   static_assert(P < 1 || P > 3 || !std::is_same<T, T>::value,
-    "polynomial dispatch is not implemented for this topology");
+    "Polynomial dispatch is not implemented for this topology.");
 };
 
 enum class poly_output { values, node_grad, grad_node };
 
 template <class T, fmr::Dim_int P, typename F>
-constexpr void eval_poly(F* out, const F* intp, fmr::Local_int node_n,
+constexpr bool eval_poly(F*, const F*, fmr::Local_int, fmr::Local_int,
+                         fmr::Dim_int, poly_output, std::false_type) {
+  return false;
+}
+
+template <class T, fmr::Dim_int P, typename F>
+constexpr bool eval_poly(F* out, const F* intp, fmr::Local_int node_n,
                          fmr::Local_int intp_n, fmr::Dim_int elem_d,
-                         poly_output output) {
+                         poly_output output, std::true_type) {
   using E = Elem<T,P,F>;
   using Dispatch = poly_dispatch<T,P>;
+  if ((output == poly_output::values ? E::get_poly_func_size(intp_n)
+                                     : E::get_poly_grad_size(intp_n)) == 0)
+    return false;
   if (node_n != E::get_node_n() || elem_d != E::get_elem_d())
-    throw std::invalid_argument("element polynomial node count or reference dimension mismatch");
-  if (intp_n != 0 && (out == nullptr || intp == nullptr))
-    throw std::invalid_argument("element polynomial buffers must not be null");
+    throw std::invalid_argument(
+      "Element polynomial node count or reference dimension mismatch.");
+  if (out == nullptr || intp == nullptr)
+    throw std::invalid_argument("Element polynomial buffers must not be null.");
   const std::size_t out_stride = std::size_t(node_n)
     * (output == poly_output::values ? 1u : std::size_t(elem_d));
   for (fmr::Local_int ip=0; ip<intp_n; ++ip) {
@@ -90,26 +103,37 @@ constexpr void eval_poly(F* out, const F* intp, fmr::Local_int node_n,
       case poly_output::grad_node: Dispatch::grad_node(result,x); break;
     }
   }
+  return true;
+}
+
+template <class T, fmr::Dim_int P, typename F>
+constexpr bool eval_poly(F* out, const F* intp, fmr::Local_int node_n,
+                         fmr::Local_int intp_n, fmr::Dim_int elem_d,
+                         poly_output output) {
+  // Do not instantiate polynomial kernels for elements like Pins and Ipin.
+  using HasPoly = std::integral_constant<bool,
+    (Elem<T,P,F>::get_poly_func_size() != 0)>;
+  return eval_poly<T,P>(out,intp,node_n,intp_n,elem_d,output,HasPoly{});
 }
 
 } }// end elem::detail
 
 template <class T, typename fmr::Dim_int P, typename F>
-constexpr void elem::Elem<T,P,F>::get_poly_func_vals(F* out, const F* intp,
+constexpr bool elem::Elem<T,P,F>::get_poly_func_vals(F* out, const F* intp,
     fmr::Local_int node_n, fmr::Local_int intp_n, fmr::Dim_int elem_d) {
-  detail::eval_poly<T,P>(out,intp,node_n,intp_n,elem_d,detail::poly_output::values);
+  return detail::eval_poly<T,P>(out,intp,node_n,intp_n,elem_d,detail::poly_output::values);
 }
 template <class T, typename fmr::Dim_int P, typename F>
-constexpr void elem::Elem<T,P,F>::get_poly_grad_node(F* out, const F* intp,
+constexpr bool elem::Elem<T,P,F>::get_poly_grad_node(F* out, const F* intp,
     fmr::Local_int node_n, fmr::Local_int intp_n, fmr::Dim_int elem_d) {
-  detail::eval_poly<T,P>(out,intp,node_n,intp_n,elem_d,detail::poly_output::node_grad);
+  return detail::eval_poly<T,P>(out,intp,node_n,intp_n,elem_d,detail::poly_output::node_grad);
 }
 template <class T, typename fmr::Dim_int P, typename F>
-constexpr void elem::Elem<T,P,F>::get_poly_node_grad(F* out, const F* intp,
+constexpr bool elem::Elem<T,P,F>::get_poly_node_grad(F* out, const F* intp,
     fmr::Local_int node_n, fmr::Local_int intp_n, fmr::Dim_int elem_d) {
-  detail::eval_poly<T,P>(out,intp,node_n,intp_n,elem_d,detail::poly_output::grad_node);
+  return detail::eval_poly<T,P>(out,intp,node_n,intp_n,elem_d,detail::poly_output::grad_node);
 }
-
+#if 0
 template <class T, typename fmr::Dim_int P, typename F>
 constexpr fmr::Local_int elem::Elem<T,P,F>::get_poly_func_size
   (const fmr::Local_int intp_n) noexcept {// default 1
@@ -120,6 +144,7 @@ constexpr fmr::Local_int elem::Elem<T,P,F>::get_poly_grad_size
   (const fmr::Local_int intp_n, const fmr::Dim_int elem_d) noexcept {
   return intp_n * get_node_n () * elem_d;
 }
+#endif
 template <class T, typename fmr::Dim_int P, typename F>
 constexpr bool elem::Elem<T,P,F>::calc_elem_node_coor (F* node_coor,
   const F* vert_coor, fmr::Dim_int stride) noexcept {

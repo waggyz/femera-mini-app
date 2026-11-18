@@ -155,6 +155,9 @@ endif
 ifneq ($(FMR_GLOBAL_INT),)
   FMRFLAGS   += -DFMR_GLOBAL_INT=$(FMR_GLOBAL_INT)
 endif
+ifneq ($(FMR_RAND_SEED),)
+  FMRFLAGS   += -DFMR_RAND_SEED=$(FMR_RAND_SEED)
+endif
 ifneq ($(FMR_MICRO_UCHAR),)
   FMRFLAGS   += -DFMR_MICRO_UCHAR=$(FMR_MICRO_UCHAR)
 endif

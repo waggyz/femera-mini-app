@@ -23,5 +23,10 @@ TEST( GridElemPins, ElemMetaData ){
   EXPECT_EQ( Elem<Pins>::get_elem_d(), 1 );
   EXPECT_EQ( Elem<Pins>::get_vert_n(), 1 );
 }
+TEST( GridElemPins, NoPolyFuncGrad ){
+  EXPECT_FALSE( Elem<Pins>::get_poly_func_vals(nullptr,nullptr) );
+  EXPECT_FALSE( Elem<Pins>::get_poly_grad_node(nullptr,nullptr) );
+  EXPECT_FALSE( Elem<Pins>::get_poly_node_grad(nullptr,nullptr) );
+}
 
 } } }
