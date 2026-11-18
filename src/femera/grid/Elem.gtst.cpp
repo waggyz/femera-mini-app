@@ -2,10 +2,7 @@
 
 #include "Elem.test.hpp"
 
-#if 1
-// These included temporaily for testing.
-// The public API should be able to include only a generic interface to access
-// all element types.
+// These are included for testing.
 #include "elem/Bars.hpp"
 #include "elem/Tris.hpp"
 #include "elem/Quad.hpp"
@@ -16,25 +13,27 @@
 #include "elem/Itri.hpp"
 #include "elem/Ibar.hpp"
 #include "elem/Iqud.hpp"
-#endif
+// The public API should be able to include only a generic interface to access
+// all element types.
 
 #include <gtest/gtest.h>
 #include <omp.h>
 
-auto  mini_ptr = fmr::new_jobs ();
-auto &mini = *mini_ptr;
+auto  mini = fmr::new_jobs ();
+
+namespace femera { namespace grid { namespace elem {
 
 fmr::Local_int jacs_size=0, jac1_size=0, jac2_size=0, jac3_size=0, jac4_size=0;
 fmr::Local_int elem_tet2_node_n=0;
 
-constexpr auto elem_tet1 = femera::grid::elem::Elem<femera::grid::elem::Tets,1> ();
-constexpr auto elem_tet2 = femera::grid::elem::Elem<femera::grid::elem::Tets,2> ();
-constexpr auto elem_tet3 = femera::grid::elem::Elem<femera::grid::elem::Tets,3> ();
+constexpr auto elem_tet1 = Elem<Tets,1> ();
+constexpr auto elem_tet2 = Elem<Tets,2> ();
+constexpr auto elem_tet3 = Elem<Tets,3> ();
 
 constexpr auto elem_tetf
-  = femera::grid::elem::Elem<femera::grid::elem::Tets,2,float> ();
+  = Elem<Tets,2,float> ();
 constexpr auto elem_tetd
-  = femera::grid::elem::Elem<femera::grid::elem::Tets,2,double> ();
+  = Elem<Tets,2,double> ();
 //const auto size_coor_f = sizeof(elem_tetf.get_elem_vert_coor ()[0]);
 //const auto size_coor_d = sizeof(elem_tet1.get_elem_vert_coor ()[0]);
 
@@ -43,22 +42,24 @@ const float an_array_f[2] = {float(1.0/6.0), float(1.0/6.0)};
 
 // Elem_test *****************************************************************
 // Supported element examples
-static constexpr femera::grid::elem::Elem_args tri6_2d_args = { 6, 3, 2};
-static constexpr femera::grid::elem::Elem_args tri6_3d_args = { 6, 3, 3};
-static constexpr femera::grid::elem::Elem_args tet10_args   = {10, 4, 3};
+static constexpr Elem_args tri6_2d_args = { 6, 3, 2};
+static constexpr Elem_args tri6_3d_args = { 6, 3, 3};
+static constexpr Elem_args tet10_args   = {10, 4, 3};
 
 uintptr_t val0_adress=0, val1_adress=0;
 
-constexpr auto test_tet_3d = femera::grid::elem::Elem_test
-  <femera::grid::elem::Tets, tet10_args> ();
+constexpr auto test_tet_3d = Elem_test
+  <Tets, tet10_args> ();
 //****************************************************************************
-
+} } } //end namespace femera::grid::elem
 fmr::Exit_int main (int argc, char** argv) {
-  mini.init (&argc, argv);
+  mini->init (&argc, argv);
   //
-  const auto elem_quad = femera::grid::elem::Elem<femera::grid::elem::Quad> ();
-  const auto elem_bars = femera::grid::elem::Elem<femera::grid::elem::Bars,1> ();
-  const auto elem_tris = femera::grid::elem::Elem<femera::grid::elem::Tris,1> ();
+  using namespace femera::grid::elem;
+
+  const auto elem_quad = Elem<Quad> ();
+  const auto elem_bars = Elem<Bars,1> ();
+  const auto elem_tris = Elem<Tris,1> ();
   //
   jacs_size = elem_quad.jacs_dets_size ();
   jac1_size = elem_bars.jacs_dets_size (1, 1);// 1D sims space
@@ -70,7 +71,7 @@ fmr::Exit_int main (int argc, char** argv) {
   //
 #pragma omp parallel
   {// Check that variables assigned from constexpr values are thread-local.
-    const auto elem = femera::grid::elem::Elem<femera::grid::elem::Tets,2> ();
+    const auto elem = Elem<Tets,2> ();
     const auto val_local = elem.get_node_n ();
     if (omp_get_thread_num () == 0){
       val0_adress = reinterpret_cast<uintptr_t>(&val_local);
@@ -80,14 +81,15 @@ fmr::Exit_int main (int argc, char** argv) {
     }
   }//end parallel region
   //
-  return mini.exit ();
+  return mini->exit ();
 }
+namespace femera { namespace grid { namespace elem {
 TEST( GridElem, TrivialTest ){
   EXPECT_EQ( 1, 1 );
   EXPECT_FLOAT_EQ (a_float, an_array_f[0]);
   EXPECT_FLOAT_EQ (a_float, an_array_f[1]);
 }
-namespace femera { namespace grid { namespace elem {
+
 TEST( GridElem, SerendipityElementNodeCounts ){
   EXPECT_EQ( (Elem<Bars,1>::get_node_n ()), 2 );
   EXPECT_EQ( (Elem<Bars,2>::get_node_n ()), 3 );
@@ -355,19 +357,18 @@ TEST( GridElem, InterfaceBarReferenceCoordinateStride ){
   };
   for (int i=0; i<24; ++i) EXPECT_NEAR(storage[1+i], expected[i], 1e-14);
 }
-}}}//end namespace femera::grid::elem
 TEST( GridElem, JacdSizeTest ){
   EXPECT_EQ( jacs_size, 7 );// 2D reference quad in 3D ambient space
   EXPECT_EQ( jac1_size,  2 );// 1D, 1 point rule, 1D space
   EXPECT_EQ( jac2_size,  5 );// 2D, 1 point rule, 2D space
   EXPECT_EQ( jac3_size, 10 );// 3D, 1 point rule
   EXPECT_EQ( jac4_size, 40 );// 3D, 4 points
-  EXPECT_EQ( femera::grid::elem::Elem<femera::grid::elem::Bars>::jacs_size(1, 1), 1 );
-  EXPECT_EQ( femera::grid::elem::Elem<femera::grid::elem::Bars>::jacs_size(1, 2), 2 );
-  EXPECT_EQ( femera::grid::elem::Elem<femera::grid::elem::Bars>::jacs_size(1, 3), 3 );
-  EXPECT_EQ( femera::grid::elem::Elem<femera::grid::elem::Bars>::jacs_size(4, 3), 12 );
-  EXPECT_EQ( femera::grid::elem::Elem<femera::grid::elem::Bars>::jacs_dets_size(1, 3), 4 );
-  EXPECT_EQ( femera::grid::elem::Elem<femera::grid::elem::Bars>::jacs_dets_size(4, 3), 16 );
+  EXPECT_EQ( Elem<Bars>::jacs_size(1, 1), 1 );
+  EXPECT_EQ( Elem<Bars>::jacs_size(1, 2), 2 );
+  EXPECT_EQ( Elem<Bars>::jacs_size(1, 3), 3 );
+  EXPECT_EQ( Elem<Bars>::jacs_size(4, 3), 12 );
+  EXPECT_EQ( Elem<Bars>::jacs_dets_size(1, 3), 4 );
+  EXPECT_EQ( Elem<Bars>::jacs_dets_size(4, 3), 16 );
 }
 TEST( GridElem, TetsVertN ){
   EXPECT_EQ( elem_tet1.get_vert_n (), 4 );
@@ -409,3 +410,5 @@ TEST( GridElem, ThreadLocalAssignedFromConstexpr ){
 TEST( ElemStructTemplateArg, Works ){
   EXPECT_EQ( test_tet_3d.test_vert_n (), 4);
 }
+//
+} } }//end namespace femera::grid::elem

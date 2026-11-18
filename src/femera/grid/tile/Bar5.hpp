@@ -67,15 +67,15 @@ private:
      in the node layout. Here are examples for P1 and P2 2x2 element grids:
      
       6 --------- 7 --------- 8        20 -- 21 -- 22 -- 23 -- 24
-      |  \        |        /  |         |  \  |  /  |  \  |  /  |
-      |     \     |     /     |        15 -- 16 -- 17 -- 18 -- 19
-      |        \  |  /        |         |  /  |  \  |  /  |  \  |
+      |  \        |        /  |         |        /  |        /  |
+      |     \     |     /     |        15    16    17    18    19
+      |        \  |  /        |         |  /        |  /        |
       3 --------- 4 --------- 5        10 -- 11 -- 12 -- 13 -- 14
-      |        /  |  \        |         |  \  |  /  |  \  |  /  |
-      |     /     |     \     |         5 --- 6 --- 7 --- 8 --- 9
-      |  /        |        \  |         |  /  |  \  |  /  |  \  |
+      |        /  |  \        |         |        /  |        /  |
+      |     /     |     \     |         5     6     7     8     9
+      |  /        |        \  |         |  /        |  /        |
       0 --------- 1 --------- 2         0 --- 1 --- 2 --- 3 --- 4
-         2-node Bars P1 grid               3-node Bars P2 grid
+       2-node 2x2 Bars P1 grid           3-node 2x2 Bars P2 grid
          same as 3x3 FD grid               same as 5x5 FD grid
    */
   // Partition dimensions count tiles. Counts require positive order and

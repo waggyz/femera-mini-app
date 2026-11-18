@@ -1177,7 +1177,7 @@ endif
 build/%.perf.out : build/%.perf
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call label_test,$(PASS),$(FAIL),fmrexec tdd:$(^),$(^))
-else
+else #TODO should not require GoogleTest for building performance tests
 	echo "build/$*.o not tested: GoogleTest disabled" > $@
 	echo "WARNING: build/$*.o not tested: GoogleTest disabled" > $^.err
 endif
@@ -1188,7 +1188,7 @@ ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(@).o,$(notdir $@))
 	-$(CXX) $(CXXPERFS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
-	$(info $(WARN) $@ not tested: GoogleTest disabled)
+	$(info $(WARN) $@ not tested: GoogleTest disabled)#TODO should not require GoogleTest for building performance tests
 	echo "WARNING: $@ not tested: GoogleTest disabled" >> $@.err
 	touch $@
 endif
@@ -1200,7 +1200,7 @@ ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(@).o,$(notdir $@))
 	-$(CXX) $(CXXPERFS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
-	$(info $(WARN) $@ not tested: GoogleTest disabled)
+	$(info $(WARN) $@ not tested: GoogleTest disabled)#TODO should not require GoogleTest for building performance tests
 	echo "WARNING: $@ not tested: GoogleTest disabled" >> $@.err
 	touch $@
 endif

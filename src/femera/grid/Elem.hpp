@@ -12,9 +12,9 @@ namespace femera { namespace grid { namespace elem {//TODO grid -> geom
 //namespace femera { namespace geom { //TODO change to here?
 #if 0
 // Forward-delare element shapes TODO is this needed?
-class Pins;// 1D point element for "hard" pins & arbitrary point forces
+class Pins;// 1D point element for "soft" pins and point forces & displacements
 class Bars;
-class Ipin;// 1D interface element for "soft" pins (force-displacement relation)
+class Ipin;// 1D interface element for springs (force-displacement relation)
 class Ibar;// 1D interface element embedded in 2D or 3D space
 class Itri; class Iqud;// 2D interface elements embedded in 3D space
 class Tris; class Quad;
@@ -25,7 +25,7 @@ template <class T, typename fmr::Dim_int P=1u, typename F=fmr::Geom_float>
 class Elem {//TODO consider pulling P out of the template parameters. 
   /*
   This class only defines serendipity polynomial elements for order P in [1,2,3].
-  Other elements (e.g., Lagrangian) will be handleed seperately.
+  Other elements (e.g., Lagrangian) will be handled seperately.
 
   For higher-order elements, edge and side nodes are assumed to 
   be placed at their natural positions along edges and faces. Node placement

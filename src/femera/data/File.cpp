@@ -75,6 +75,10 @@ namespace femera {
     struct stat buffer;
     return (stat(path.c_str(), &buffer) == 0); 
   }
+  bool data::File::can_send (fmr::Data_name_t data_name){
+    const auto L = cast_via_work<data::Logs> (this->get_task (Task_type::Logs));
+    return (L == nullptr) ? false : L->can_send (data_name);
+  }
   fmr::Global_int data::File::send
   (const fmr::Data_name_t& data_name, const std::string& text)
   noexcept { fmr::Global_int byte = 0;// Return bytes sent.

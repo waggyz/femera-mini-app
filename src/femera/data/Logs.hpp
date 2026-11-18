@@ -12,7 +12,7 @@ FMR_WARN_INLINE_ON
   private:
     std::unordered_map <fmr::Data_name_t, FILE*> open_file_map = {
       { fmr::err, ::stderr },// verb_d >= 0 (quiet)
-      { fmr::log, ::stdout },// verb_d >= 1 default: main thread
+      { fmr::log, ::stdout },// verb_d >= 1 default: main thread (one per MPI rank)
       { fmr::out, ::stdout } // verb_d >= 1 default: all threads
     };
     fmr::Dim_int verb_d = 3;//TODO set by command line option -v<int>
@@ -23,8 +23,10 @@ FMR_WARN_INLINE_ON
     void task_init (int* argc, char** argv);
     void task_exit ();
     //
-    bool does_file (const fmr::Data_name_t&)// true if Logs handles data_name
-    noexcept;
+    bool does_file (const fmr::Data_name_t&)
+    noexcept;// true if Logs handles data_name
+    bool can_send (const fmr::Data_name_t&)
+    noexcept;// true if Logs can append (write) to data_name
     fmr::Global_int task_send (const fmr::Data_name_t& file, const std::string&)
     noexcept;
 #if 0

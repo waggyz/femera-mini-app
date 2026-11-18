@@ -25,8 +25,30 @@ namespace femera {
       {fmr::plog, {fmr::out }},// default main thread to ::stdout verb_d >= 2
       {fmr::info, {fmr::out }},// default main thread to ::stdout verb_d >= 3
       {fmr::spam, {fmr::out }},// default all threads to ::stdout verb_d >= 4
-      {fmr::dbug, {fmr::out }} // default all threads to ::stdout verb_d >= 5
+      {fmr::dbug, {fmr::err }} // default all threads to ::stderr verb_d >= 5
+      /*
+      { fmr::warn,::stderr } // verb_d >= 1
+      { fmr::one, ::stdout } // verb_d >= 1 default: one main thread
+      { fmr::omp, ::stdout } // verb_d >= 1 default: one thread per OpenMP thread
+      { fmr::mpi, ::stdout } // verb_d >= 1 default: one thread per MPI rank
+      */
     };
+  }
+  bool data::Logs::can_send (const fmr::Data_name_t& file) noexcept {
+    // check if verbosity allows and file handle exists
+    auto it = this->open_file_map.find(file);
+    if (it == this->open_file_map.end()) return false;
+    bool verb_ok = false;
+    if (file == fmr::err) verb_ok = true;
+    else if (file == fmr::out && this->verb_d >= 1) verb_ok = true;
+    else if (file == fmr::log && this->verb_d >= 1) verb_ok = true;
+    else if (file == fmr::plog && this->verb_d >= 2) verb_ok = true;
+    else if (file == fmr::info && this->verb_d >= 3) verb_ok = true;
+    else if (file == fmr::spam && this->verb_d >= 4) verb_ok = true;
+    else if (file == fmr::dbug && this->verb_d >= 5) verb_ok = true;
+    //check file handle
+    if (it->second == nullptr) return false;
+    return verb_ok;
   }
 //  fmr::Dim_int data::Logs::get_verb () noexcept {...defined in Logs.ipp
   fmr::Dim_int data::Logs::set_verb (const fmr::Dim_int v) {

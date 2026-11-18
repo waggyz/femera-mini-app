@@ -1,19 +1,12 @@
 #include "../core.h"
 #include "Self.hpp"
+
 #include "self/FE1e.hpp"
 #include "self/Ptch.hpp"
 
 //TODO Remove Node.hpp" below?
 #include "../proc/Node.hpp"
 
-#include <valarray>
-
-#if 0
-//#include <gtest/gtest.h>
-TEST( SelfTest, TrivialTest ){
-  EXPECT_EQ( 0, 0 );
-}
-#endif
 namespace femera {
   void test::Self::task_init (int*, char**) {// Test for initialization errors.
     this->log_init_info ();// pulled out method to prevent inline fail warning
@@ -25,6 +18,20 @@ namespace femera {
     this->set_init (true);
   }
   void test::Self::log_init_info () {// pulled out of task_init (inline fail)
+#if 0
+    bool ok = false;
+    // First check if fmr::info is ok.
+    ok = bool (this->data->can_send (fmr::info));
+    if (ok) {
+      for (const auto& file : { fmr::none, fmr::err, fmr::out, fmr::log,
+        fmr::plog, fmr::info, fmr::spam, fmr::dbug})
+      {
+        ok = ok && bool (this->data->can_send (file));
+        this->data->send (fmr::info, this->get_base_abrv (), this->abrv, "file", 
+          "%s is %s", file.c_str(), ok ? "ok" : "not ok");
+      }
+    }
+#endif
     this->data->send (fmr::info, this->get_base_abrv (), this->abrv, "fmr",
       std::string (MAKESTR(FMR_VERSION)));
 #ifdef __INTEL_COMPILER
@@ -37,8 +44,13 @@ namespace femera {
     const auto cppver = __cplusplus;
     this->data->send (fmr::info, this->get_base_abrv (), this->abrv, "C++",
       "%li", cppver);
+#ifdef FMR_HAS_ZYCLOPS
     this->data->send (fmr::info, this->get_base_abrv (), this->abrv, "zord",
       "%4u maximum hypercomplex order", zyclops::max_zorder);
+#else
+      this->data->send (fmr::info, this->get_base_abrv (), this->abrv, "zord",
+        "Hypercomplex support not available. Make with: ENABLE_ZYCLOPS:=ON");
+#endif
   }
   fmr::Exit_int test::Self::proc_node_chck () {
     fmr::Exit_int err = 0;

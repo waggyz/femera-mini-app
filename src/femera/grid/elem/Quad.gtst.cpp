@@ -52,11 +52,11 @@ TEST( GridCellElemQuad, ShapeGradient ){
 
 #ifdef DEBUG_PRINT
   for (fmr::Local_int i=0; i<node_n; ++i){
-    mini->data->send (fmr::out, "elem", "quad", "grad", "%f,%f",
+    mini->data->send (fmr::info, "elem", "quad", "grad", "%f,%f",
       dN_node_grad[elem_d*i + 0], dN_node_grad[elem_d*i + 1]);
   }
   for (fmr::Local_int i=0; i<elem_d; ++i){
-    mini->data->send (fmr::out, "elem", "quad", "graT", "%f,%f,%f,%f",
+    mini->data->send (fmr::info, "elem", "quad", "graT", "%f,%f,%f,%f",
       dN_grad_node[node_n*i + 0], dN_grad_node[node_n*i + 1],
       dN_grad_node[node_n*i + 2], dN_grad_node[node_n*i + 3]);
   }

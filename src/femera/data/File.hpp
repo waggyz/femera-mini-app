@@ -29,6 +29,7 @@ namespace femera { namespace data {
     fmr::Dim_int set_verb (fmr::Dim_int) noexcept;// sets logs verbosity
     bool in_filesystem (const std::string& path);// Check if file or folder exists.
     //
+    bool can_send (fmr::Data_name_t);
     // send (..) methods append data and return bytes sent
     template <typename ...Args>
     fmr::Global_int send (const fmr::Data_name_t&,// fmr::Data_type::Logs_line
@@ -93,5 +94,6 @@ namespace femera { namespace data {
 } }//end femera::data namespace
   //
 #include "File.ipp"
+
 //end FEMERA_HAS_FILE_HPP
 #endif
