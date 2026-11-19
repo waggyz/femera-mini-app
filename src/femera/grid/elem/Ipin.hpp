@@ -41,7 +41,7 @@ private:
 /* Notionally, shape function and gradient matrices do make sense for a
    1D pin element. The matrix below represents stiffness contributions from a
    simple linear force-displacement relationship along each axis for the
-   two nodes of the element in 3D space, and readilly reduces to
+   two nodes of the P1 Ipin element in 3D space, and readilly reduces to
    2D and 1D spaces.
 
         f1x f2x f1y f2y f1z f2z
@@ -53,7 +53,17 @@ private:
          0   0   0   0   kz -kz    u1z
          0   0   0   0  -kz  kz    u2z
 
-  Isotropic response: kx = ky = kz
+   Isotropic response: kx = ky = kz
+
+   An Ipin element could be placed along structural edges to model axial
+   stiffness contributions. The formulation above is fine for P1 edges.
+   What are the implications for higher-order Ipin elements?
+
+   Will 2D (Ibar) and 3D (Itri and Iqud) elements follow a similar pattern for
+   traction-seperation relationships, e.g., cohesive elements? Do the
+   higher-dimensional element formulations reduce naturally to this Ipin
+   formulation?
+
  */
 
 } } }//end femera::grid::elem:: namespace
