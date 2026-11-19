@@ -121,7 +121,7 @@ TEST( GridElemBars, ElementPolynomialMetadata ){
     cubic.get_elem_d () ) );
 }
 
-TEST( GridElemBars, ElementPolynomialEval ){
+TEST( GridElemBars, ElementPolyGradEval ){
   const Elem<Bars> linear;
   const Elem<Bars, 2> quadratic;
   const Elem<Bars, 3> cubic;
@@ -168,6 +168,68 @@ TEST( GridElemBars, ElementPolynomialEval ){
   EXPECT_DOUBLE_EQ( grad_3[1],-0.125 );
   EXPECT_DOUBLE_EQ( grad_3[2],-3.375 );
   EXPECT_DOUBLE_EQ( grad_3[3], 3.375 );
+}
+TEST( GridElemBars, ElementPolyEvalFloat ){
+  const Elem<Bars, 1, float> linear;
+  const Elem<Bars, 2, float> quadratic;
+  const Elem<Bars, 3, float> cubic;
+// Test at natural element ordinates.
+  const float test_coor[5] = {0.0f, 1.0f, 0.5f, 1.0f/3.0f, 2.0f/3.0f};
+  float test_poly[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+  const float eps = std::numeric_limits<float>::epsilon();
+  linear.get_poly_func_vals (test_poly, &test_coor[0] );
+  EXPECT_FLOAT_EQ( test_poly[0], 1.0f );
+  EXPECT_LE( abs(test_poly[1]), eps );
+  linear.get_poly_func_vals (test_poly, &test_coor[1] );
+  EXPECT_LE( abs(test_poly[0]), eps );
+  EXPECT_FLOAT_EQ( test_poly[1], 1.0f );
+  linear.get_poly_func_vals (test_poly, &test_coor[2] );
+  EXPECT_FLOAT_EQ( test_poly[0], 0.5f );
+  EXPECT_FLOAT_EQ( test_poly[1], 0.5f );
+  // Linear is constant gradient.
+  linear.get_poly_node_grad (test_poly, &test_coor[0] );
+  EXPECT_FLOAT_EQ( test_poly[0],-1.0f );
+  EXPECT_FLOAT_EQ( test_poly[1], 1.0f );
+  linear.get_poly_node_grad (test_poly, &test_coor[1] );
+  EXPECT_FLOAT_EQ( test_poly[0],-1.0f );
+  EXPECT_FLOAT_EQ( test_poly[1], 1.0f );
+  linear.get_poly_node_grad (test_poly, &test_coor[2] );
+  EXPECT_FLOAT_EQ( test_poly[0],-1.0f );
+  EXPECT_FLOAT_EQ( test_poly[1], 1.0f );
+  //
+  quadratic.get_poly_func_vals (test_poly, &test_coor[0] );
+  EXPECT_FLOAT_EQ( test_poly[0], 1.0f );
+  EXPECT_LE( abs(test_poly[1]), eps );
+  EXPECT_LE( abs(test_poly[2]), eps );
+  quadratic.get_poly_func_vals (test_poly, &test_coor[1] );
+  EXPECT_LE( abs(test_poly[0]), eps );
+  EXPECT_FLOAT_EQ( test_poly[1], 1.0f );
+  EXPECT_FLOAT_EQ( test_poly[2], 0.0f );
+  quadratic.get_poly_func_vals (test_poly, &test_coor[2] );
+  EXPECT_FLOAT_EQ( test_poly[0], 0.0f );
+  EXPECT_FLOAT_EQ( test_poly[1], 0.0f );
+  EXPECT_FLOAT_EQ( test_poly[2], 1.0f );
+  //
+  cubic.get_poly_func_vals (test_poly, &test_coor[0] );
+  EXPECT_FLOAT_EQ( test_poly[0], 1.0f );
+  EXPECT_LE( abs(test_poly[1]), eps );
+  EXPECT_LE( abs(test_poly[2]), eps );
+  EXPECT_LE( abs(test_poly[3]), eps );
+  cubic.get_poly_func_vals (test_poly, &test_coor[1] );
+  EXPECT_LE( abs(test_poly[0]), eps );
+  EXPECT_FLOAT_EQ( test_poly[1], 1.0f );
+  EXPECT_LE( abs(test_poly[2]), eps );
+  EXPECT_LE( abs(test_poly[3]), eps );
+  cubic.get_poly_func_vals (test_poly, &test_coor[3] );
+  EXPECT_LE( abs(test_poly[0]), eps );
+  EXPECT_LE( abs(test_poly[1]), eps );
+  EXPECT_FLOAT_EQ( test_poly[2], 1.0f );
+  EXPECT_LE( abs(test_poly[3]), eps );
+  cubic.get_poly_func_vals (test_poly, &test_coor[4] );
+  EXPECT_LE( abs(test_poly[0]), eps );
+  EXPECT_LE( abs(test_poly[1]), eps );
+  EXPECT_LE( abs(test_poly[2]), eps );
+  EXPECT_FLOAT_EQ( test_poly[3], 1.0f );
 }
 // Element connectivity and coordinates tests =================================
 TEST( GridElemBars, VertexConnectivityAndCoordinates ){

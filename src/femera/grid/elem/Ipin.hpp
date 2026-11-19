@@ -38,6 +38,23 @@ private:
     F(0.0), F(0.0)
   };
 };
+/* Notionally, shape function and gradient matrices do make sense for a
+   1D pin element. The matrix below represents stiffness contributions from a
+   simple linear force-displacement relationship along each axis for the
+   two nodes of the element in 3D space, and readilly reduces to
+   2D and 1D spaces.
+
+        f1x f2x f1y f2y f1z f2z
+        =
+         kx -kx  0   0   0   0     u1x
+        -kx  kx  0   0   0   0     u2x
+         0   0   ky -ky  0   0     u1y
+         0   0  -ky  ky  0   0     u2y
+         0   0   0   0   kz -kz    u1z
+         0   0   0   0  -kz  kz    u2z
+
+  Isotropic response: kx = ky = kz
+ */
 
 } } }//end femera::grid::elem:: namespace
 
