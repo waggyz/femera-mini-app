@@ -13,12 +13,12 @@ private:
   //
   static constexpr fmr::Dim_int   elem_d = 1;
   static constexpr fmr::Local_int vert_n = 2;
-  static constexpr fmr::Local_int edge_n = 1;
+  static constexpr fmr::Local_int edge_n = 1;// virtual edge
   static constexpr fmr::Local_int tris_n = 0, tri3_face_node_n = 0;
   static constexpr fmr::Local_int quad_n = 0;
   static constexpr fmr::Local_int vols_n = 0;
   //
-  static constexpr fmr::Geom_float edge_l = 1.0;
+  static constexpr fmr::Geom_float edge_l = 1.0;// virtual edge
   static constexpr fmr::Geom_float face_a = 0.0;
   static constexpr fmr::Geom_float elem_v = 0.0;
   //

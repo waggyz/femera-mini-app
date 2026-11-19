@@ -23,6 +23,10 @@ TEST( GridElemIpin, ElemMetaData ){
   EXPECT_EQ( Elem<Ipin>::get_vert_n(), 2 );
   EXPECT_EQ( Elem<Ipin>::get_edge_n(), 1 );
   EXPECT_DOUBLE_EQ( Elem<Ipin>::get_edge_l(), 1.0 );
+  //
+  EXPECT_EQ( (Elem<Ipin, 2>::get_elem_d()), 1);
+  EXPECT_EQ( (Elem<Ipin, 2>::get_poly_func_size()), 3);
+  EXPECT_EQ( (Elem<Ipin, 3>::get_poly_func_size()), 4);
 }
 TEST( GridElemIpin, P1ShapeFunctionsAndGradients ){
   const auto poly_size = Elem<Ipin>::get_poly_func_size();

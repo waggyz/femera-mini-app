@@ -19,7 +19,9 @@ int fmr::math::smat_invt_det (F* invt_det, const F* mat){
                 "smat_det supports only dimensions 1, 2, 3, and 4");
   if (D == 1) return fmr::math::m1x1_invt_det_ref(invt_det, mat);
   if (D == 2) return fmr::math::m2x2_invt_det_ref(invt_det, mat);
+FMR_WARN_INLINE_OFF
   if (D == 3) return fmr::math::m3x3_invt_det_ref(invt_det, mat);
+FMR_WARN_INLINE_ON
   // So far, tested variants for D = 1, 2, 3 all seem like they will
   // perform about the same. No m4x4 variants tested yet.
   return fmr::math::m4x4_invt_det_ref(invt_det, mat);//TODO test variants.

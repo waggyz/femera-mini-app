@@ -5,8 +5,7 @@
 
 #include <gtest/gtest.h>
 
-auto  mini_ptr = fmr::new_jobs ();
-auto &mini = *mini_ptr;
+auto  mini = fmr::new_jobs ();
 
 float tet_vol_ref = float (1.0 / 6.0);
 fmr::Phys_float wsum1=0.0, wsum4=0.0, wsum5=0.0, wsum10=0.0, wsum11=0.0;
@@ -27,7 +26,7 @@ fmr::Geom_float ntrl_jac3_trace_p3 = 0.0;
 //
 
 fmr::Exit_int main (int argc, char** argv) {
-  mini.init (&argc, argv);
+  mini->init (&argc, argv);
   //
   for (int i=0; i< 1; ++i) {
     wsum1  += femera::grid::elem::Tets::intg_1_ptwt  [4*i +3];}
@@ -115,7 +114,7 @@ fmr::Exit_int main (int argc, char** argv) {
     jac3[0],jac3[1],jac3[2],jac3[3],jac3[4],jac3[5],jac3[6],jac3[7],jac3[8] );
 #endif
   //
-  return mini.exit ();
+  return mini->exit ();
 }
 //-----------------------------
 TEST( GridElemTets, TrivialTest ){

@@ -3,11 +3,10 @@
 #include <gtest/gtest.h>
 
 fmr::Exit_int main (int argc, char** argv) {
-  auto  mini_ptr = fmr::new_jobs (& argc, argv);
-  auto& mini = *mini_ptr;
+  auto  mini = fmr::new_jobs (& argc, argv);
   //
   FMR_WARN_INLINE_OFF
-    return mini.exit ();
+    return mini->exit ();
   FMR_WARN_INLINE_ON
 }
 TEST( PhysMtrlElas, TrivialTest ){

@@ -5,16 +5,15 @@
 fmr::Local_int sims_count =0;
 std::string sims_abrv;
 
-auto  mini_ptr = fmr::new_jobs ();
-auto &mini = *mini_ptr;
+auto  mini = fmr::new_jobs ();
 
 fmr::Exit_int main (int argc, char** argv) {
-  mini.init (&argc, argv);
+  mini->init (&argc, argv);
   //
-  sims_count = mini.get_task_n (femera::Task_type::Sims);
-  sims_abrv  = mini.get_task   (femera::Task_type::Sims)->get_abrv ();
+  sims_count = mini->get_task_n (femera::Task_type::Sims);
+  sims_abrv  = mini->get_task   (femera::Task_type::Sims)->get_abrv ();
   //
-  return mini.exit ();
+  return mini->exit ();
 }
 
 TEST( AlgoSlvr, TrivialTest ){

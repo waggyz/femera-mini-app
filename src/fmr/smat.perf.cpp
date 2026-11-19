@@ -264,7 +264,10 @@ namespace femera { namespace test {
           }
           perf_time.add_idle_time_now ();// Start timing.
           for (uint i = 0; i < n; ++i) {
-            bad_dets += abs(::fmr::math::m3x3_inv_a (&m3x3_out[9*i], &m3x3_in[9*i]));
+FMR_WARN_INLINE_OFF
+            bad_dets += abs(::fmr::math::m3x3_inv_a
+              (&m3x3_out[9*i], &m3x3_in[9*i]));
+FMR_WARN_INLINE_ON
           }
           this_time += perf_time.add_busy_time_now ();
         }
@@ -285,7 +288,10 @@ namespace femera { namespace test {
           }
           perf_time.add_idle_time_now ();// Start timing.
           for (uint i = 0; i < n; ++i) {
-            bad_dets += abs(::fmr::math::m3x3_invt_det_ref (&m3x3_det[9*i], &m3x3_in[9*i]));
+FMR_WARN_INLINE_OFF
+            bad_dets += abs(::fmr::math::m3x3_invt_det_ref
+              (&m3x3_det[9*i], &m3x3_in[9*i]));
+FMR_WARN_INLINE_ON
           }
           this_time += perf_time.add_busy_time_now ();
         }
@@ -307,7 +313,10 @@ namespace femera { namespace test {
           }
           perf_time.add_idle_time_now ();// Start timing.
           for (uint i = 0; i < n; ++i) {
-            bad_dets += abs(::fmr::math::m3x3_invt_det_a (&m3x3_det[9*i], &m3x3_in[9*i]));
+FMR_WARN_INLINE_OFF
+            bad_dets += abs(::fmr::math::m3x3_invt_det_a
+              (&m3x3_det[9*i], &m3x3_in[9*i]));
+FMR_WARN_INLINE_ON
           }
           this_time += perf_time.add_busy_time_now ();
         }
