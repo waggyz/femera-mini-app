@@ -34,9 +34,9 @@ namespace femera { namespace grid { namespace elem {
   const std::valarray<fmr::Phys_float> intp_coor(0.5, std::size_t(part_d * 1));
   //
   std::valarray<fmr::Phys_float> dN(elem_p1.get_poly_grad_size());
-FMR_WARN_INLINE_OFF
+//FMR_WARN_INLINE_OFF
   elem_p1.get_poly_grad_node(&dN[0], &intp_coor[0]);
-FMR_WARN_INLINE_ON
+//FMR_WARN_INLINE_ON
   for (fmr::Local_int el = 0; el < part_elem_n; ++el) {
     std::valarray<fmr::Phys_float>
     coor(std::size_t(part_d * elem_p1.get_node_n()));// buffer
@@ -138,14 +138,7 @@ fmr::Exit_int main (int argc, char** argv) {
       "%u in part", halo_node_n);
   }
 #endif
-  const fmr::Local_int elem_intp_n = 1;
-  const std::valarray<fmr::Phys_float> intp_coor
-    (0.5, elem_intp_n * elem.get_elem_d ());
-  std::valarray<fmr::Phys_float> elem_dN(elem.get_poly_grad_size());
-FMR_WARN_INLINE_OFF
-  elem.get_poly_grad_node(&elem_dN[0], &intp_coor[0]);
-FMR_WARN_INLINE_ON
-  // Initialize physics --------------------------------------------------------
+  // Initialize physics -------------------------------------------------------
   const std::valarray<fmr::Phys_float> mtrl_prop(fmr::Phys_float(1.0), 1);
   //
   const fmr::Local_int node_dofs_n = part_d;
@@ -176,19 +169,11 @@ FMR_WARN_INLINE_ON
   const fmr::Local_int iter_max
   = part_dofs_n - fmr::Local_int(part_disp_bc.size());
   //
-  // Iterate ==================================================================
   fmr::Local_int iter = 0;// Initialization counts as iter 0.
   fmr::Phys_float res2 = std::numeric_limits<fmr::Phys_float>::max();
-#ifdef DEBUG_PRINT
-  {
-  bool ok = (iter < iter_max) && (res2 > tol2) && (res2 > 0.0) && (tol2 > 0.0);
-  mini->data->send (fmr::log, ok?" ok ":" :( ", " GO ", "iter",
-    "%4u %.2e %2s %.2e tolerance",
-    iter, sqrt(res2), ok?">=":"< ", sqrt(tol2) );
-  }
-#endif
+  fmr::Local_int bad_jac_n = 0;
   {// Scope part_jacs_dets *******************************************************
-    // Set node coordinates (temporarily).
+    // Get node coordinates (temporarily).
     constexpr Elem<femera::grid::elem::Bars, 1> elem_p1;
     const auto elem_d = tile.get_elem_d ();
     const auto elem_jacd_size = elem_p1.get_jacs_dets_size (part_elem_n);
@@ -201,25 +186,39 @@ FMR_WARN_INLINE_ON
       for ( fmr::Local_int n=0; n < part_node_n; ++n) {
         fmr::Geom_float buf[4];
         const auto ok = tile.get_tile_part_node_coor
-          (buf, n, &part_elem_dims[0], &tile_size[0]);//TODO get rid of need for buf?
+          (buf, n, &part_elem_dims[0], &tile_size[0]);//TODO get rid of buf?
         for (fmr::Dim_int d = 0; d < part_d; ++d) {
           part_node_coor[n * part_d + d] = buf[d];
         }
-  #ifdef DEBUG_PRINT
+#ifdef DEBUG_PRINT
         if (n < 5) {
           const auto i = n * part_d;
           mini->data->send (fmr::log, ok?" ok ":" :( ", "tile", "node",
             "%4u coor %f", n, double(part_node_coor[i]));
         }
-  #endif
+#endif
       }
-    //const fmr::Local_int intp_n = 1;
-    //std::valarray<fmr::Phys_float> intp_coor(0.5, std::size_t(part_d * elem_intp_n));
-    const fmr::Local_int bad
-    = femera::grid::elem::calc_bars_invt_dets( &part_jacs_dets[0],
+    bad_jac_n += femera::grid::elem::calc_bars_invt_dets<1>( &part_jacs_dets[0],
       &part_node_coor[0], &part_node_conn[0], part_elem_n, part_d);
-    }//end Scope node_coor
+    }//end node_coor scope
+    // Iterate ================================================================
+    const fmr::Local_int elem_intp_n = 1;
     std::valarray<fmr::Phys_float> intp_wgts(0.5, std::size_t(elem_intp_n));
+    const std::valarray<fmr::Phys_float> intp_coor
+      (0.5, elem_intp_n * elem.get_elem_d ());
+    std::valarray<fmr::Phys_float> elem_dN(elem.get_poly_grad_size());
+//FMR_WARN_INLINE_OFF
+    elem.get_poly_grad_node(&elem_dN[0], &intp_coor[0]);
+//FMR_WARN_INLINE_ON
+#ifdef DEBUG_PRINT
+    {
+    bool ok = (iter < iter_max) && (bad_jac_n == 0)
+      && (res2 > tol2) && (res2 > 0.0) && (tol2 > 0.0);
+    mini->data->send (fmr::log, ok?" ok ":" :( ", " GO ", "iter",
+      "%4u %.2e %2s %.2e tolerance, bad jacd: %u",
+      iter, sqrt(res2), ok?">=":"< ", sqrt(tol2), bad_jac_n );
+    }
+#endif
     while (iter < iter_max && res2 > tol2) {++iter;// Init counts as iter 0.
       part_f = fmr::Phys_float(0.0); // Zero part_f to accumulate sums.
       // Make local copies of constants.
