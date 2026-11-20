@@ -463,8 +463,8 @@ TEST( GridElemBars, StrainCalculation1D ){
   const double intp1[intp_n] = {0.25, 0.75};
   double dN1[intp_n*2];
   double dNp[intp_n*2];
-  const fmr::Local_int jacs_size = Elem<Bars>::jacs_size (intp_n, sims_d);
-  const fmr::Local_int jacs_dets_size = Elem<Bars>::jacs_dets_size (intp_n, sims_d);
+  const fmr::Local_int jacs_size = Elem<Bars>::get_jacs_size (intp_n, sims_d);
+  const fmr::Local_int jacs_dets_size = Elem<Bars>::get_jacs_dets_size (intp_n, sims_d);
   double J[jacs_size];
   double jacs_dets[jacs_dets_size];
   double Jinv[jacs_size];

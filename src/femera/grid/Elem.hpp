@@ -160,12 +160,12 @@ class Elem {//TODO consider pulling P out of the template parameters.
   // determined by automated performance self-testing of the variations.
   //
   static constexpr
-  fmr::Local_int jacs_size (
+  fmr::Local_int get_jacs_size (
     const fmr::Local_int intp_n=1u, const fmr::Dim_int sims_d=3u,
     const fmr::Dim_int elem_d=T::elem_d)
   noexcept {return intp_n * (sims_d*elem_d);}
   static constexpr
-  fmr::Local_int jacs_dets_size (
+  fmr::Local_int get_jacs_dets_size (
     const fmr::Local_int intp_n=1, const fmr::Dim_int sims_d=3u,
     const fmr::Dim_int elem_d=T::elem_d)
   noexcept {return intp_n * (sims_d*elem_d + 1u);}

@@ -61,11 +61,11 @@ fmr::Exit_int main (int argc, char** argv) {
   const auto elem_bars = Elem<Bars,1> ();
   const auto elem_tris = Elem<Tris,1> ();
   //
-  jacs_size = elem_quad.jacs_dets_size ();
-  jac1_size = elem_bars.jacs_dets_size (1, 1);// 1D sims space
-  jac2_size = elem_tris.jacs_dets_size (1, 2);// 2D sims space
-  jac3_size = elem_tet1.jacs_dets_size (1);
-  jac4_size = elem_tet1.jacs_dets_size (4);
+  jacs_size = elem_quad.get_jacs_dets_size ();
+  jac1_size = elem_bars.get_jacs_dets_size (1, 1);// 1D sims space
+  jac2_size = elem_tris.get_jacs_dets_size (1, 2);// 2D sims space
+  jac3_size = elem_tet1.get_jacs_dets_size (1);
+  jac4_size = elem_tet1.get_jacs_dets_size (4);
   //
   elem_tet2_node_n = elem_tet2.get_node_n ();
   //
@@ -363,12 +363,12 @@ TEST( GridElem, JacdSizeTest ){
   EXPECT_EQ( jac2_size,  5 );// 2D, 1 point rule, 2D space
   EXPECT_EQ( jac3_size, 10 );// 3D, 1 point rule
   EXPECT_EQ( jac4_size, 40 );// 3D, 4 points
-  EXPECT_EQ( Elem<Bars>::jacs_size(1, 1), 1 );
-  EXPECT_EQ( Elem<Bars>::jacs_size(1, 2), 2 );
-  EXPECT_EQ( Elem<Bars>::jacs_size(1, 3), 3 );
-  EXPECT_EQ( Elem<Bars>::jacs_size(4, 3), 12 );
-  EXPECT_EQ( Elem<Bars>::jacs_dets_size(1, 3), 4 );
-  EXPECT_EQ( Elem<Bars>::jacs_dets_size(4, 3), 16 );
+  EXPECT_EQ( Elem<Bars>::get_jacs_size(1, 1), 1 );
+  EXPECT_EQ( Elem<Bars>::get_jacs_size(1, 2), 2 );
+  EXPECT_EQ( Elem<Bars>::get_jacs_size(1, 3), 3 );
+  EXPECT_EQ( Elem<Bars>::get_jacs_size(4, 3), 12 );
+  EXPECT_EQ( Elem<Bars>::get_jacs_dets_size(1, 3), 4 );
+  EXPECT_EQ( Elem<Bars>::get_jacs_dets_size(4, 3), 16 );
 }
 TEST( GridElem, TetsVertN ){
   EXPECT_EQ( elem_tet1.get_vert_n (), 4 );

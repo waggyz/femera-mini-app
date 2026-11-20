@@ -84,13 +84,6 @@ class Tile {
   static constexpr fmr::Local_int tile_alts_n () noexcept {
     return T::tile_alts_n; }
   //
-  static constexpr const fmr::Local_int* get_bars_vert_conn () noexcept {
-    return T::bars_vert_conn; }
-  static constexpr const fmr::Local_int* get_tris_vert_conn () noexcept {
-    return T::tris_vert_conn; }
-  static constexpr const fmr::Local_int* get_quad_vert_conn () noexcept {
-    return T::quad_vert_conn; }
-  //
   static constexpr fmr::Local_int get_tile_elem_node_n () noexcept {
     return calc_elem_node_n<T> (0);
   }
@@ -104,6 +97,13 @@ class Tile {
   noexcept {
     return T::calc_tile_part_node_n(P, part_elem_dims);
   }
+  //
+  static constexpr const fmr::Local_int* get_bars_vert_conn () noexcept {
+    return T::bars_vert_conn; }
+  static constexpr const fmr::Local_int* get_tris_vert_conn () noexcept {
+    return T::tris_vert_conn; }
+  static constexpr const fmr::Local_int* get_quad_vert_conn () noexcept {
+    return T::quad_vert_conn; }
   // Halo and interior elements and nodes -------------------------------------
   //NOTE These are only candidates and do not account for partition boundaries
   //     at the edges of the domain.
