@@ -16,8 +16,10 @@
 auto  mini = fmr::new_jobs ();
 
 
-namespace femera { namespace grid { namespace elem {
+namespace femera { namespace grid { namespace test {
 
+using femera::grid::elem::Elem;
+using femera::grid::elem::Bars;
 
   template <fmr::Dim_int P=1,
     typename Y=fmr::Phys_float, typename G=fmr::Geom_float> inline
@@ -28,8 +30,8 @@ namespace femera { namespace grid { namespace elem {
     const fmr::Dim_int part_d) {
   // NOTE this is for Bars elements.
   fmr::Local_int bad = 0;
-  Elem<femera::grid::elem::Bars, P> part_elem;
-  Elem<femera::grid::elem::Bars, 1> elem_p1;
+  Elem<Bars, P> part_elem;
+  Elem<Bars, 1> elem_p1;
   const auto elem_d = part_elem.get_elem_d();
   const std::valarray<fmr::Phys_float> intp_coor(0.5, std::size_t(part_d * 1));
   //
@@ -62,17 +64,17 @@ namespace femera { namespace grid { namespace elem {
           - 1.0 / part_invt_dets[el * (part_d * elem_d + 1) + 1])
         < std::numeric_limits<fmr::Phys_float>::epsilon();
       mini->data->send (fmr::log, ok?" ok ":" :( ", "jacd", "elem",
-        "%4u %f = 1.0 / %f bad: %u", el,
+        "%4u %f = 1.0 / %f bad: %u / %u", el,
         double(part_invt_dets[el * (part_d * elem_d + 1) + 0]),
         double(part_invt_dets[el * (part_d * elem_d + 1) + 1]),
-        this_bad);
+        this_bad, bad);
     }
 #endif
   }//end el loop
   return bad;
 }//end calc_bars_invt_dets
 
-} } }//end namespace femera::grid::elem
+} } }//end namespace femera::grid::test
 
 
 fmr::Exit_int main (int argc, char** argv) {
@@ -84,7 +86,9 @@ fmr::Exit_int main (int argc, char** argv) {
   typedef std::vector<BCitem> BClist;
   // Set mesh parameters. -----------------------------------------------------
   using femera::grid::tile::Tile;
+  using femera::grid::tile::Bar1;
   using femera::grid::elem::Elem;
+  using femera::grid::elem::Bars;
   // Set mesh partition parameters.
   constexpr fmr::Dim_int part_d = 1;
   constexpr fmr::Dim_int part_elem_p = 1;
@@ -93,7 +97,7 @@ fmr::Exit_int main (int argc, char** argv) {
   std::valarray<fmr::Geom_float> tile_size(3);
   tile_size[0] = 1.0 / part_elem_dims[0]; tile_size[1] = 0.0; tile_size[2] = 0.0;
   // Get derived mesh partition information.
-  constexpr Tile<femera::grid::tile::Bar1, part_elem_p> tile;
+  constexpr Tile<Bar1, part_elem_p> tile;
   const auto part_elem_n = tile.get_tile_part_elem_n (&part_elem_dims[0]);
   const auto part_node_n = tile.get_tile_part_node_n (&part_elem_dims[0]);
   const auto elem_node_n = tile.get_tile_elem_node_n ();// Bars elements
@@ -105,18 +109,18 @@ fmr::Exit_int main (int argc, char** argv) {
     const auto h = tile.get_halo_sort_elem (el, &part_elem_dims[0]);
     //const auto el_i = el;
     const auto ok = tile.get_tile_node_conn
-      (&part_node_conn[h * elem_node_n], h, &part_elem_dims[0]);
+      (&part_node_conn[el * elem_node_n], h, &part_elem_dims[0]);
 #ifdef DEBUG_PRINT
     if (el < 5) {
-      const auto i = h * elem_node_n;
+      const auto i = el * elem_node_n;
       mini->data->send (fmr::log, ok?" ok ":" :( ", "tile", "elem",
         "%4u conn %u %u (halo sort)",
-        h, part_node_conn[i], part_node_conn[i+1]);
+        el, part_node_conn[i], part_node_conn[i+1]);
     }
 #endif
   }
  // Set up iterations ---------------------------------------------------------
-  constexpr Elem<femera::grid::elem::Bars, part_elem_p> elem;
+  constexpr Elem<Bars, part_elem_p> elem;
   //
 //#ifdef DEBUG_PRINT
 #if 0
@@ -174,7 +178,7 @@ fmr::Exit_int main (int argc, char** argv) {
   fmr::Local_int bad_jac_n = 0;
   {// Scope part_jacs_dets *******************************************************
     // Get node coordinates (temporarily).
-    constexpr Elem<femera::grid::elem::Bars, 1> elem_p1;
+    constexpr Elem<Bars, 1> elem_p1;
     const auto elem_d = tile.get_elem_d ();
     const auto elem_jacd_size = elem_p1.get_jacs_dets_size (part_elem_n);
     //
@@ -198,8 +202,10 @@ fmr::Exit_int main (int argc, char** argv) {
         }
 #endif
       }
-    bad_jac_n += femera::grid::elem::calc_bars_invt_dets<1>( &part_jacs_dets[0],
+FMR_WARN_INLINE_OFF
+    bad_jac_n += femera::grid::test::calc_bars_invt_dets<1>( &part_jacs_dets[0],
       &part_node_coor[0], &part_node_conn[0], part_elem_n, part_d);
+FMR_WARN_INLINE_ON
     }//end node_coor scope
     // Iterate ================================================================
     const fmr::Local_int elem_intp_n = 1;
@@ -210,7 +216,6 @@ fmr::Exit_int main (int argc, char** argv) {
 //FMR_WARN_INLINE_OFF
     elem.get_poly_grad_node(&elem_dN[0], &intp_coor[0]);
 //FMR_WARN_INLINE_ON
-#ifdef DEBUG_PRINT
     {
     bool ok = (iter < iter_max) && (bad_jac_n == 0)
       && (res2 > tol2) && (res2 > 0.0) && (tol2 > 0.0);
@@ -218,17 +223,45 @@ fmr::Exit_int main (int argc, char** argv) {
       "%4u %.2e %2s %.2e tolerance, bad jacd: %u",
       iter, sqrt(res2), ok?">=":"< ", sqrt(tol2), bad_jac_n );
     }
-#endif
     while (iter < iter_max && res2 > tol2) {++iter;// Init counts as iter 0.
       part_f = fmr::Phys_float(0.0); // Zero part_f to accumulate sums.
+      // Copy loads and displacements into local lists.
+      const auto this_disp_bc = part_disp_bc;
+      const auto this_load_bc = part_load_bc;
+      const auto this_disp_n = fmr::Local_int(this_disp_bc.size());
+      const auto this_load_n = fmr::Local_int(this_load_bc.size());
+      if (this_load_n > 0) {// Apply point loads.
+        for (fmr::Local_int i = 0; i < this_load_n; ++i) {
+          part_f[this_load_bc[i].first] += this_load_bc[i].second;// Sum loads.
+#ifdef DEBUG_PRINT
+          if (iter < 5) {
+            mini->data->send (fmr::log, "iter", " BC ", "node",
+              "%4u load %f", this_load_bc[i].first,
+              double(part_f[this_load_bc[i].first]));
+          }
+#endif
+        }
+      }
+      if (this_disp_n > 0) {// Apply Dirichlet boundary conditions.
+        for (fmr::Local_int i = 0; i < this_disp_n; ++i) {
+          part_u[this_disp_bc[i].first] = this_disp_bc[i].second;// Set disps.
+ #ifdef DEBUG_PRINT
+          if (iter < 5) {
+            mini->data->send (fmr::log, "iter", " BC ", "node",
+              "%4u disp %f", this_disp_bc[i].first,
+              double(part_u[this_disp_bc[i].first]));
+          }
+#endif
+        }
+      }
       // Make local copies of constants.
       const auto halo_elem_n = tile.get_halo_elem_n (&part_elem_dims[0]);
       const auto halo_node_n = tile.get_halo_node_n (&part_elem_dims[0]);
       const auto this_elem_n = part_elem_n;
       const auto conn_n = elem.get_node_n ();//constexpr
       const auto dofs_n = node_dofs_n;
-      //const auto this_elem_d = elem.get_elem_d ();
-     // const auto this_part_d = part_d;
+      const auto this_elem_d = elem.get_elem_d ();
+      const auto this_part_d = part_d;
       const auto this_intp_n = elem_intp_n;
       const auto this_intp_w = intp_wgts;//std::valarray<fmr::Phys_float>(1.0, this_intp_n);
       const auto this_dN = elem_dN;
@@ -241,36 +274,97 @@ fmr::Exit_int main (int argc, char** argv) {
       std::valarray<fmr::Phys_float> fval(conn_n * dofs_n);// force buffer
       std::valarray<fmr::Phys_float> jinv_det(elem.get_jacs_dets_size ());
       // Do halo elements.
-      for (fmr::Local_int elem_i = 0; elem_i < halo_elem_n; ++elem_i) {
+      for (fmr::Local_int elem_i = 0; elem_i < this_elem_n; ++elem_i) {
+      //for (fmr::Local_int elem_i = 0; elem_i < halo_elem_n; ++elem_i) {
         for (fmr::Local_int i = 0; i < conn_n; ++i) {// Copy to conn buffer.
           conn[i] = part_node_conn[elem_i * conn_n + i];
         }
+#ifdef DEBUG_PRINT
+        if (iter < 5 && elem_i < 5) {// Only print the first few elements for debugging.
+          mini->data->send (fmr::log, "iter", "mesh", "elem",
+            "%4u conn %u %u", elem_i, conn[0], conn[1]);
+        }
+#endif
         for (fmr::Local_int i = 0; i < conn_n; ++i) {
           for (fmr::Local_int d = 0; d < dofs_n; ++d) {// Gather to uval buffer.
             uval[i * dofs_n + d] = part_u[conn[i] * dofs_n + d];
           }
         }
+        // Only one jacobian & determinant for each Bars, Tris, Tets element.
         for (fmr::Local_int i = 0; i < elem.get_jacs_dets_size (); ++i) {
           jinv_det[i] = part_jacs_dets[elem_i * elem.get_jacs_dets_size () + i];
         }
-        const auto this_det = jinv_det[part_d * elem_d];// last value
+        const auto this_det = jinv_det[this_part_d * elem_d];// last value
         // Do physics.
-        //TODO G = dN * u, H = Jinv * G for real physics
         fval = fmr::Phys_float(0.0);
-        for (fmr::Local_int j = 0; j < this_intp_n; ++j) {
-          const auto df = this_intp_w[j] * this_det;
-          for (fmr::Local_int n = 0; n < conn_n; ++n) {
+        for (fmr::Local_int ip = 0; ip < this_intp_n; ++ip) {
+          // G = dN * u, H = Jinv * G, S = E * H, f = dNT * S.
+          const auto df = this_intp_w[ip] * this_det;
+          std::valarray<fmr::Phys_float>G(0.0, conn_n * elem_d);// G = dN * u
+          for (fmr::Local_int i = 0; i < this_elem_d; ++i) {
+            for (fmr::Local_int j = 0; j < this_elem_d; ++j) {
+              for (fmr::Local_int k = 0; k < conn_n; ++k) {
+                G[i * conn_n + k]
+                += this_dN[i * conn_n + k] * uval[k * dofs_n + i];
+              }
+            }
+          }
+          std::valarray<fmr::Phys_float>
+          H(this_elem_d * this_part_d);// H = Jinv * G
+          for (fmr::Local_int i = 0; i < this_elem_d; ++i) {
+            for (fmr::Local_int j = 0; j < this_part_d; ++j) {
+              H[i * this_elem_d + j] = fmr::Phys_float(0.0);
+              for (fmr::Local_int k = 0; k < conn_n; ++k) {
+                H[i * this_elem_d + j]
+                += jinv_det[i * this_elem_d + j] * G[j * conn_n + k];
+              }
+            }
+          }
+          std::valarray<fmr::Phys_float> S(this_elem_d * this_part_d);// S = E * H
+          for (fmr::Local_int i = 0; i < this_elem_d; ++i) {
+            for (fmr::Local_int j = 0; j < this_part_d; ++j) {
+              S[i * this_part_d + j] = fmr::Phys_float(0.0);
+              for (fmr::Local_int k = 0; k < this_elem_d; ++k) {
+                S[i * this_elem_d + j] += this_prop[0] * H[i * this_elem_d + k];
+              }
+            }
+          }
+          for (fmr::Local_int i = 0; i < conn_n; ++i) {// f = GT * S * df
+            for (fmr::Local_int j = 0; j < dofs_n; ++j) {
+              for (fmr::Local_int k = 0; k < this_elem_d; ++k) {
+                fval[i * dofs_n + j]
+                += G[k * conn_n + i] * S[k * this_elem_d + j] * df;
+              }
+            }
+          }
+        }// end this_intp_n loop
+#if 0
+          for (fmr::Local_int n = 0; n < conn_n; ++n) {//Physics placeholder
             for (fmr::Local_int d = 0; d < dofs_n; ++d) {
               fval[n * dofs_n + d] +=  this_prop[0] * uval[n * dofs_n + d] * df;
             }
           }
-        }
+#endif
         for (fmr::Local_int i = 0; i < conn_n; ++i) {// Scatter to part_f.
           for (fmr::Local_int d = 0; d < dofs_n; ++d) {
             part_f[conn[i] * dofs_n + d] += fval[i * dofs_n + d];
           }
         }
+      if (elem_i == halo_elem_n - 1) {// Synchronize halo nodes.
+        for (fmr::Local_int h = 0; h < halo_node_n; ++h) {
+          const auto //TODO Move halo_node_list to init.
+          n = Tile<Bar1, part_elem_p>::get_halo_node(h, &part_elem_dims[0]);
+#ifdef DEBUG_PRINT
+          if (iter < 5) {
+            mini->data->send (fmr::log, "sync", "halo", "node",
+              "%4u force: %f disp: %f (elem %u done)",
+              n, part_f[n * dofs_n], part_u[n * dofs_n], elem_i);
+          }
+#endif
+        }
       }
+    }//end elem loop
+#if 0
       for (fmr::Local_int h = 0; h < halo_node_n; ++h) {
         // Synchronize halo nodes.
       }
@@ -289,7 +383,7 @@ fmr::Exit_int main (int argc, char** argv) {
         }
         const auto this_det = jinv_det[part_d * elem_d];// last value
         // Do physics.
-        //TODO G = dN * u, H = Jinv * G for real physics
+        //TODO G = dN * u, H = Jinv * G, S = E * H for real physics
         fval = fmr::Phys_float(0.0);
         for (fmr::Local_int j = 0; j < this_intp_n; ++j) {
           const auto df = this_intp_w[j] * this_det;
@@ -305,44 +399,27 @@ fmr::Exit_int main (int argc, char** argv) {
           }
         }
       }
+#endif
       const auto this_dofs_n = part_dofs_n;// local copy
-      // Copy loads and displacements into local lists.
-      const auto this_disp_bc = part_disp_bc;
-      const auto this_load_bc = part_load_bc;
-      const auto this_disp_n = fmr::Local_int(this_disp_bc.size());
-      const auto this_load_n = fmr::Local_int(this_load_bc.size());
       //TODO Initialize iter loop local temporary solver vectors.
       // Do solver iteration.
-      if (this_load_n > 0) {
-        for (fmr::Local_int i = 0; i < this_load_n; ++i) {
-          // Apply point loads.
-          part_f[this_load_bc[i].first] += this_load_bc[i].second;// Sum loads.
-        }
-      }
       for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
         part_u[i] = part_f[i];// fake solver: just copy f to u
       }
-      if (this_disp_n > 0) {
-        for (fmr::Local_int i = 0; i < this_disp_n; ++i) {
-          // Apply Dirichlet boundary conditions.
-          part_u[this_disp_bc[i].first] = this_disp_bc[i].second;// Set disps.
-        }
-      }
-      res2 = 0.0;//TODO Ensure exit for now.
+      res2 = iter > 1 ? 0.0 : res2;//TODO Ensure exit for now.
     }// end iteration while loop
   }// end scope part_jacs_dets
-#ifdef DEBUG_PRINT
   {
   bool ok = res2 < tol2;
   mini->data->send (fmr::log, ok?" ok ":" :( ", "DONE", "iter",
     "%4u %.2e %2s %.2e tolerance",
     iter, sqrt(res2), ok?"< ":">=", sqrt(tol2) );
   }
-#endif
   // Check correctness ========================================================
   //TODO (fake check for now)
   return mini->exit ();
-}
+}//end main ()
+
 TEST(BarsPerf, TrivialTest) {
   EXPECT_TRUE(true);
 }

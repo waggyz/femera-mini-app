@@ -76,7 +76,7 @@ constexpr bool eval_poly(F*, const F*, fmr::Local_int, fmr::Local_int,
   return false;
 }
 
-template <class T, fmr::Dim_int P, typename F>//TOD force inlining?
+template <class T, fmr::Dim_int P, typename F>//TODO force inlining?
 constexpr bool eval_poly(F* out, const F* intp, fmr::Local_int node_n,
                          fmr::Local_int intp_n, fmr::Dim_int elem_d,
                          poly_output output, std::true_type) {
@@ -113,7 +113,9 @@ constexpr bool eval_poly(F* out, const F* intp, fmr::Local_int node_n,
   // Do not instantiate polynomial kernels for elements like Pins and Ipin.
   using HasPoly = std::integral_constant<bool,
     (Elem<T,P,F>::get_poly_func_size() != 0)>;
-  return eval_poly<T,P>(out,intp,node_n,intp_n,elem_d,output,HasPoly{});\
+FMR_WARN_INLINE_OFF
+  return eval_poly<T,P>(out,intp,node_n,intp_n,elem_d,output,HasPoly{});
+FMR_WARN_INLINE_ON
 }
 
 } }// end elem::detail
