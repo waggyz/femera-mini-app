@@ -44,6 +44,10 @@ namespace femera {
     const auto cppver = __cplusplus;
     this->data->send (fmr::info, this->get_base_abrv (), this->abrv, "C++",
       "%li", cppver);
+    this->data->send (fmr::info, this->get_base_abrv (), this->abrv, " max",
+      "%.2e local id", double(std::numeric_limits<fmr::Local_int>::max()));
+    this->data->send (fmr::info, this->get_base_abrv (), this->abrv, " max",
+      "%.2e global id", double(std::numeric_limits<fmr::Global_int>::max()));
 #ifdef FMR_HAS_ZYCLOPS
     this->data->send (fmr::info, this->get_base_abrv (), this->abrv, "zord",
       "%4u maximum hypercomplex order", zyclops::max_zorder);

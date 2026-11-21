@@ -105,7 +105,7 @@ template <typename F> static inline
 int smat_mmul_ref (F* prod, const F* mat1, const F* mat2,
   fmr::Dim_int m, fmr::Dim_int n, fmr::Dim_int p);// n is the common dimension.
 
-template <typename F> static inline// mat1 is treated as transposed
+template <typename F> static inline // mat1 is treated as transposed
 int smat_tmul_ref (F* prod, const F* mat1, const F* mat2,
   fmr::Dim_int m, fmr::Dim_int n, fmr::Dim_int p);
 

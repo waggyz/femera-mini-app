@@ -67,7 +67,9 @@
 #endif
 
 #ifdef __INTEL_COMPILER
+//
 #else
+#define FMR_ALWAYS_INLINE __attribute__((always_inline))
 #define FMR_WARN_INLINE_ON _Pragma ("GCC diagnostic warning \"-Winline\"")
 #define FMR_WARN_INLINE_OFF _Pragma ("GCC diagnostic ignored \"-Winline\"")
 #define FMR_WARN_NULLPTR0_ON _Pragma ("GCC diagnostic warning \"-Wzero-as-null-pointer-constant\"")
