@@ -105,7 +105,23 @@ fmr::Exit_int main (int argc, char** argv) {
   //
   // Set mesh parameters. -----------------------------------------------------
   const fmr::Local_int do_elem_n = 9;
+  // Set physics parameters. --------------------------------------------------
+
+  const fmr::Phys_float bars_area = 1e-2 * 1e-2;// 1cm x 1cm cross section
+  const fmr::Phys_float mtrl_modx = 200e9;// GPa (steel)
   //
+  const fmr::Enum_int load_case = 1;
+  // 0: no load
+  // 1: apply end displacement (only)
+  // 2: apply end load (only)
+  //
+  const fmr::Phys_float end_disp = 0.001;// 1 mm
+  const fmr::Phys_float end_load = 1e3;// 1 kN tension
+  //
+  // Set solver parameters. ---------------------------------------------------
+  const fmr::Phys_float abs_tol2 = 1e-12*0;// absolute tolerance squared
+  const fmr::Phys_float rel_tol2 = 1e-12*0;// relative tolerance squared
+  // ==========================================================================
   using femera::grid::tile::Tile;
   using femera::grid::elem::Elem;
   using femera::grid::tile::Bar1;
@@ -165,19 +181,6 @@ fmr::Exit_int main (int argc, char** argv) {
   }
 #endif
   // Initialize physics -------------------------------------------------------
-  const fmr::Phys_float bars_area = 1e-2 * 1e-2;// 1cm x 1cm cross section
-  const fmr::Phys_float mtrl_modx = 200e9;// GPa (steel)
-  //
-  const fmr::Enum_int load_case = 1;
-  // 0: no load
-  // 1: apply end displacement (only)
-  // 2: apply end load (only)
-  //
-  const fmr::Phys_float end_disp = 0.001;// 1 mm
-  const fmr::Phys_float end_load = 1e3;// 1 kN tension
-  //
-  const fmr::Phys_float abs_tol2 = 1e-12;// absolute tolerance squared
-  const fmr::Phys_float rel_tol2 = 1e-12;// relative tolerance squared
   // --------------------------------------------------------------------------
   const std::valarray<fmr::Phys_float>
   mtrl_prop(fmr::Phys_float(mtrl_modx * bars_area), 1);// N
@@ -261,7 +264,7 @@ FMR_WARN_INLINE_ON
     }//end node_coor scope
     // Iterate ================================================================
     const fmr::Local_int elem_intp_n = 1;
-    std::valarray<fmr::Phys_float> intp_wgts(0.5, std::size_t(elem_intp_n));
+    std::valarray<fmr::Phys_float> intp_wgts(1.0, std::size_t(elem_intp_n));
     const std::valarray<fmr::Phys_float> intp_coor
       (0.5, elem_intp_n * elem.get_elem_d ());
     std::valarray<fmr::Phys_float> elem_dN(elem.get_poly_grad_size());
@@ -276,6 +279,7 @@ FMR_WARN_INLINE_ON
       "%4u bad jacd: %u",
       iter, bad_jac_n );
     }
+    auto part_r = std::valarray<fmr::Phys_float>(part_dofs_n);
     fmr::Phys_float part_zet2 = 0.0, init_zet2 = 0.0;
     while ((iter < iter_max) && (res2 > abs_tol2) && (rel2 > rel_tol2)) {
       // Init is iter 0.
@@ -314,7 +318,7 @@ FMR_WARN_INLINE_ON
       fmr::Phys_float fval[conn_n * dofs_n];// force buffer
       fmr::Phys_float jinv_det[this_jacs_dets_size];
       //
-      if (iter > 0) {// Apply them to p.
+      if (iter > 0) {// Apply them to p and r.
         femera::grid::test::set_bcs(&part_p[0], this_disp_bc);
       }
       //
@@ -426,7 +430,6 @@ FMR_WARN_INLINE_ON
       // Diagonal preconditioner (already inverted & synced)
       //
       //auto part_p = std::valarray<fmr::Phys_float>(this_dofs_n);
-      auto part_r = std::valarray<fmr::Phys_float>(this_dofs_n);
       auto part_z = std::valarray<fmr::Phys_float>(this_dofs_n);
       //
       // Initialize preconditioned conjugate gradient (PCG) solver. -----------
@@ -438,6 +441,7 @@ FMR_WARN_INLINE_ON
         part_r[i] = -part_f[i];// Assume part_b are applied loads.
       }
       femera::grid::test::sum_bcs(&part_r[0], this_load_bc);
+      femera::grid::test::set_bcs(&part_r[0], this_disp_bc);
       //
       // p = Minv * r : initial gradient descent direction (p)
       for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
@@ -463,7 +467,7 @@ FMR_WARN_INLINE_ON
     else {// part solve iteration scope
       const auto Minv = std::valarray<float>(1.0, this_dofs_n);
       //
-      auto part_r = std::valarray<fmr::Phys_float>(this_dofs_n);
+      //auto part_r = std::valarray<fmr::Phys_float>(this_dofs_n);
       auto part_z = std::valarray<fmr::Phys_float>(this_dofs_n);
     // Do solver iteration. -------------------------------------------------
       const auto this_dofs_n = part_dofs_n;// local copy
@@ -482,6 +486,7 @@ FMR_WARN_INLINE_ON
       for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
         part_r[i] -= part_alpha * part_f[i];
       }
+      femera::grid::test::set_bcs(&part_r[0], this_disp_bc);
       // z = Minv * r : preconditioned residual
       for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
         part_z[i] = fmr::Phys_float(Minv[i]) * part_r[i];
@@ -510,11 +515,16 @@ FMR_WARN_INLINE_ON
       rel2 = part_zet2 / init_zet2;
     }//end part solve scope
 #ifdef DEBUG_PRINT
-    bool ok = (res2 < abs_tol2) || (rel2 < rel_tol2);
-    mini->data->send (fmr::log, "PCG ", "...", "iter",
-      "%4u %.2e %.2e %2s %.2e %.2e tolerance",
-      iter, sqrt(res2), sqrt(rel2), ok?"< ":">=",
-      sqrt(abs_tol2), sqrt(rel_tol2) );
+    const auto digits = fmr::math::count_digits (fmr::Local_int(iter_max) * 2);
+    fmr::Local_int mod = 1;
+    for (fmr::Local_int i = 2; i < digits; ++i) { mod *= 10; }
+    if ((iter < 5) || (iter % mod == 0)) {
+      bool ok = (res2 < abs_tol2) || (rel2 < rel_tol2);
+      mini->data->send (fmr::log, "PCG ", "...", "iter",
+        "%4u %.2e,%.2e %2s %.2e,%.2e abs,rel tolerance",
+        iter, sqrt(res2), sqrt(rel2), ok?"< ":">=",
+        sqrt(abs_tol2), sqrt(rel_tol2) );
+    }
 #endif
     ++iter;
     }// end iteration while loop
@@ -522,7 +532,7 @@ FMR_WARN_INLINE_ON
   {
   bool ok = (res2 < abs_tol2) || (rel2 < rel_tol2);
   mini->data->send (fmr::log, ok?" ok ":" :( ", "DONE", "iter",
-    "%4u %.2e %.2e %2s %.2e %.2e tolerance",
+    "%4u %.2e,%.2e %2s %.2e,%.2e abs,rel tolerance",
     iter, sqrt(res2), sqrt(rel2), ok?"< ":">=", sqrt(abs_tol2), sqrt(rel_tol2) );
   }
   // Check correctness ========================================================
