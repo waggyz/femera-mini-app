@@ -1029,6 +1029,12 @@ $(BUILD_DIR)/%.test.out: %.py
 
 #NOTE Make target export requires at least Make 3.81.
 
+ifeq (1,0)
+$(BUILD_CPU)/femera/grid/elem/Bars.perf.o \
+$(BUILD_CPU)/femera/grid/elem/Bars.perf: private CXXPERFS := \
+  $(filter-out -Winline,$(CXXPERFS)) -Wno-inline
+endif
+
 $(BUILD_CPU)/%.perf.o : export TMPDIR := $(TEMP_DIR)
 $(BUILD_CPU)/%.perf.o : src/%.perf.cpp src/%.cpp src/%.hpp $(TOPDEPS)
 ifeq ($(ENABLE_GOOGLETEST),ON)

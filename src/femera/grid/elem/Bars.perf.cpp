@@ -56,6 +56,7 @@ using femera::grid::elem::Bars;
     std::valarray<fmr::Phys_float> jac_inv(std::size_t(elem_d * part_d));
     const auto this_bad = fmr::math::m1x1_invt_det_ref
       (&part_invt_dets[el * (part_d * elem_d + 1)], &jac[0]);
+    //TODO fmr::math::smat_pinv_col_ref () when elem_d != part_d
     bad += fmr::Local_int(abs(this_bad));
 #ifdef DEBUG_PRINT
     if (el < 5) {
@@ -298,9 +299,17 @@ FMR_WARN_INLINE_ON
         // Do physics.
         fval = fmr::Phys_float(0.0);
         for (fmr::Local_int ip = 0; ip < this_intp_n; ++ip) {
-          // G = dN * u, H = Jinv * G, S = E * H, f = dNT * S.
+          // G = dN * u, H = Jinv * G, S = E * H, f = G^T * S.
           const auto df = this_intp_w[ip] * this_det;
-          std::valarray<fmr::Phys_float>G(0.0, conn_n * elem_d);// G = dN * u
+          //
+          // G = dN * u
+#if 1
+        std::valarray<fmr::Phys_float>
+        G(conn_n * elem_d);
+        fmr::math::smat_mmul_ref(&G[0], &this_dN[0], &uval[0],
+          this_elem_d, conn_n, dofs_n);
+#else
+          std::valarray<fmr::Phys_float>G(0.0, conn_n * elem_d);
           for (fmr::Local_int i = 0; i < this_elem_d; ++i) {
             for (fmr::Local_int j = 0; j < this_elem_d; ++j) {
               for (fmr::Local_int k = 0; k < conn_n; ++k) {
@@ -309,8 +318,13 @@ FMR_WARN_INLINE_ON
               }
             }
           }
-          std::valarray<fmr::Phys_float>
-          H(this_elem_d * this_part_d);// H = Jinv * G
+#endif
+        std::valarray<fmr::Phys_float>
+        H(this_elem_d * this_part_d);// H = Jinv * G
+#if 1
+        fmr::math::smat_mmul_ref(&H[0], &jinv_det[0], &G[0],
+          this_elem_d, this_part_d, conn_n);
+#else
           for (fmr::Local_int i = 0; i < this_elem_d; ++i) {
             for (fmr::Local_int j = 0; j < this_part_d; ++j) {
               H[i * this_elem_d + j] = fmr::Phys_float(0.0);
@@ -320,15 +334,18 @@ FMR_WARN_INLINE_ON
               }
             }
           }
-          std::valarray<fmr::Phys_float> S(this_elem_d * this_part_d);// S = E * H
-          for (fmr::Local_int i = 0; i < this_elem_d; ++i) {
-            for (fmr::Local_int j = 0; j < this_part_d; ++j) {
-              S[i * this_part_d + j] = fmr::Phys_float(0.0);
-              for (fmr::Local_int k = 0; k < this_elem_d; ++k) {
-                S[i * this_elem_d + j] += this_prop[0] * H[i * this_elem_d + k];
-              }
-            }
-          }
+#endif
+        std::valarray<fmr::Phys_float>
+        S(this_elem_d * this_part_d);// S = k * H
+        for (fmr::Local_int i = 0; i < this_elem_d * this_part_d; ++i) {
+          S[i] = this_prop[0] * H[i];
+        }
+#if 1
+        for (fmr::Local_int i=0; i<(this_elem_d*this_part_d); ++i) {
+          S[i]*= df;}// f = GT * S * df
+        fmr::math::smat_tmul_ref(&fval[0], &G[0], &S[0],
+          conn_n, dofs_n, this_elem_d);
+#else
           for (fmr::Local_int i = 0; i < conn_n; ++i) {// f = GT * S * df
             for (fmr::Local_int j = 0; j < dofs_n; ++j) {
               for (fmr::Local_int k = 0; k < this_elem_d; ++k) {
@@ -337,6 +354,7 @@ FMR_WARN_INLINE_ON
               }
             }
           }
+#endif
         }// end this_intp_n loop
 #if 0
           for (fmr::Local_int n = 0; n < conn_n; ++n) {//Physics placeholder

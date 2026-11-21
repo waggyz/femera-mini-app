@@ -86,6 +86,26 @@ TEST(FmrSmat, ColumnPseudoInverse) {
   for (const double value : pinv) EXPECT_DOUBLE_EQ(value, -1);
 }
 
+TEST(FmrSmat, MatrixMultiplication) {
+  const double mat1[] = {1, 2, 3, 4, 5, 6};
+  const double mat2[] = {7, 8, 9, 10, 11, 12};
+  const double expected[] = {58, 64, 139, 154};
+  double prod[4] = {};
+
+  ASSERT_EQ(0, fmr::math::smat_mmul_ref(prod, mat1, mat2, 2, 3, 2));
+  for (int i = 0; i < 4; ++i) EXPECT_DOUBLE_EQ(prod[i], expected[i]);
+}
+
+TEST(FmrSmat, TransposedMatrixMultiplication) {
+  const double mat1[] = {1, 2, 3, 4, 5, 6};
+  const double mat2[] = {7, 8, 9, 10, 11, 12};
+  const double expected[] = {89, 98, 116, 128};
+  double prod[4] = {};
+
+  ASSERT_EQ(0, fmr::math::smat_tmul_ref(prod, mat1, mat2, 2, 3, 2));
+  for (int i = 0; i < 4; ++i) EXPECT_DOUBLE_EQ(prod[i], expected[i]);
+}
+
 TEST(FmrSmat, M1x1InverseAndDeterminant) {
   const double mat[] = {2};
   double inv[1];

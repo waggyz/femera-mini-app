@@ -48,6 +48,36 @@ int fmr::math::m3x3_invt_det (F* invt_det, const F* mat){
   return fmr::math::m3x3_invt_det_ref(invt_det, mat);
 }
 #endif
+
+template <typename F> static inline
+int fmr::math::smat_mmul_ref (F* prod, const F* mat1, const F* mat2,
+  fmr::Dim_int m, fmr::Dim_int n, fmr::Dim_int p){// n is the common dimension.
+  for (fmr::Dim_int i = 0; i < m; ++i) {
+    for (fmr::Dim_int j = 0; j < p; ++j) {
+      F sum = F(0);
+      for (fmr::Dim_int k = 0; k < n; ++k) {
+        sum += mat1[i*n + k] * mat2[k*p + j];
+      }
+      prod[i*p + j] = sum;
+    }
+  }
+  return 0;
+}
+template <typename F> static inline
+int fmr::math::smat_tmul_ref (F* prod, const F* mat1, const F* mat2,// m1 is treated as transposed
+  fmr::Dim_int m, fmr::Dim_int n, fmr::Dim_int p){
+    for (fmr::Dim_int i = 0; i < m; ++i) {
+      for (fmr::Dim_int j = 0; j < p; ++j) {
+        F sum = F(0);
+        for (fmr::Dim_int k = 0; k < n; ++k) {
+          sum += mat1[k*m + i] * mat2[k*p + j];
+        }
+        prod[i*p + j] = sum;
+      }
+    }
+    return 0;
+  }
+
 // Helpers ====================================================================
 
 template <typename F> static inline
