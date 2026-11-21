@@ -107,20 +107,22 @@ fmr::Exit_int main (int argc, char** argv) {
   const fmr::Local_int do_elem_n = 9;
   // Set physics parameters. --------------------------------------------------
 
+  const fmr::Phys_float bars_len  = 1.0;// m
   const fmr::Phys_float bars_area = 1e-2 * 1e-2;// 1cm x 1cm cross section
   const fmr::Phys_float mtrl_modx = 200e9;// GPa (steel)
   //
   const fmr::Enum_int load_case = 1;
   // 0: no load
   // 1: apply end displacement (only)
-  // 2: apply end load (only)
+  // 2: apply end load (only),
+  //    tip_u = end_load * bars_len / (bars_area * mtrl_modx)
   //
   const fmr::Phys_float end_disp = 0.001;// 1 mm
   const fmr::Phys_float end_load = 1e3;// 1 kN tension
   //
   // Set solver parameters. ---------------------------------------------------
-  const fmr::Phys_float abs_tol2 = 1e-12;// absolute tolerance squared
-  const fmr::Phys_float rel_tol2 = 1e-12;// relative tolerance squared
+  const fmr::Phys_float abs_tol = 1e-6;// absolute tolerance squared
+  const fmr::Phys_float rel_tol = 1e-6;// relative tolerance squared
   // ==========================================================================
   using femera::grid::tile::Tile;
   using femera::grid::elem::Elem;
@@ -132,7 +134,8 @@ fmr::Exit_int main (int argc, char** argv) {
   std::valarray<fmr::Local_int> part_elem_dims(3);
   part_elem_dims[0] = do_elem_n; part_elem_dims[1] = 1; part_elem_dims[2] = 1;
   std::valarray<fmr::Geom_float> tile_size(3);
-  tile_size[0] = 1.0 / part_elem_dims[0]; tile_size[1] = 0.0; tile_size[2] = 0.0;
+  tile_size[0] = bars_len / part_elem_dims[0];
+  tile_size[1] = 0.0; tile_size[2] = 0.0;
   // Get derived mesh partition information.
   constexpr Tile<Bar1, part_elem_p> tile;
   const auto part_elem_n = tile.get_tile_part_elem_n (&part_elem_dims[0]);
@@ -227,10 +230,12 @@ fmr::Exit_int main (int argc, char** argv) {
   ? fmr::Local_int(part_dofs_n) - fmr::Local_int(part_disp_bc.size()) +1
   : std::numeric_limits<fmr::Local_int>::max() -1;
   //
-  fmr::Local_int iter = 0;// Initialization counts as iter 0.
+    const auto abs_tol2 = abs_tol * abs_tol;
+    const auto rel_tol2 = rel_tol * rel_tol;
   fmr::Phys_float res2 = std::numeric_limits<fmr::Phys_float>::max();
   fmr::Phys_float rel2 = std::numeric_limits<fmr::Phys_float>::max();
   fmr::Local_int bad_jac_n = 0;
+  fmr::Local_int iter = 0;// Initialization counts as iter 0.
   {// Scope part_jacs_dets *******************************************************
     // Get node coordinates (temporarily).
     constexpr Elem<Bars, 1> elem_p1;
@@ -455,14 +460,10 @@ FMR_WARN_INLINE_ON
       // Sync sum zet2.
       init_zet2 = part_zet2;// Keep for relative tolerance.
       part_zet2 = init_zet2;
-      //
-      const auto cmp = (part_zet2 < abs_tol2) ? "< " : ">=";
-      mini->data->send (fmr::log, "PCG ", "init", "zeta",
-        "%0.2e %2s %0.2e preconditioned energy residual norm",
-        sqrt(init_zet2), cmp, sqrt(abs_tol2)
-      );
+      res2 = part_zet2;
+      rel2 = part_zet2 / init_zet2;
       // DONE if already converged.
-      if (part_zet2 < abs_tol2) { break; }// already converged
+      if (part_zet2 < abs_tol2) {++iter; break; }// already converged
     }// end part solve init scope
     else {// part solve iteration scope
       const auto Minv = std::valarray<float>(1.0, this_dofs_n);
@@ -479,7 +480,7 @@ FMR_WARN_INLINE_ON
       }
       // sync sum gamma
       // alpha = zet2 / gamma
-      if (part_gamma == 0.0) { res2 = part_gamma; break; }//FIXME
+      if (part_gamma <= 0.0) {++iter; res2 = part_gamma; break; }
       const auto part_alpha = part_zet2 / part_gamma;
       //
       // r = r - alpha * f : update residuals
@@ -513,21 +514,22 @@ FMR_WARN_INLINE_ON
       part_zet2 = part_zeta;
       res2 = part_zet2;
       rel2 = part_zet2 / init_zet2;
-    }//end part solve scope
-#ifdef DEBUG_PRINT
-    const auto digits = fmr::math::count_digits (fmr::Local_int(iter_max) * 2);
-    fmr::Local_int mod = 1;
-    for (fmr::Local_int i = 2; i < digits; ++i) { mod *= 10; }
-    if ((iter < 5) || (iter % mod == 0)) {
-      bool ok = (res2 < abs_tol2) || (rel2 < rel_tol2);
-      mini->data->send (fmr::log, "PCG ", "...", "iter",
-        "%4u %.2e,%.2e %2s %.2e,%.2e abs,rel tolerance",
-        iter, sqrt(res2), sqrt(rel2), ok?"< ":">=",
-        sqrt(abs_tol2), sqrt(rel_tol2) );
+    }//end part solve iteration scope
+    {
+      const auto digits = fmr::math::count_digits (fmr::Local_int(iter_max) * 2);
+      fmr::Local_int mod = 1;
+      for (fmr::Local_int i = 2; i < digits; ++i) { mod *= 10; }
+      if ((iter < 5) || (iter % mod == 0)) {
+        bool ok = (res2 < abs_tol2) || (rel2 < rel_tol2);
+        mini->data->send (fmr::log, "solv", "PCG", "iter",
+          "%4u %.2e,%.2e %2s %.2e,%.2e abs,rel tolerance", iter,
+          sqrt(res2), sqrt(rel2), ok?"< ":">=",
+          sqrt(abs_tol2), sqrt(rel_tol2) );
+      }
     }
-#endif
     ++iter;
     }// end iteration while loop
+  if(iter < iter_max) {--iter;}// count is off by one here, except at max.
   }// end scope part_jacs_dets
   {
   bool ok = (res2 < abs_tol2) || (rel2 < rel_tol2);
@@ -536,7 +538,30 @@ FMR_WARN_INLINE_ON
     iter, sqrt(res2), sqrt(rel2), ok?"< ":">=", sqrt(abs_tol2), sqrt(rel_tol2) );
   }
   // Check correctness ========================================================
-  //TODO (fake check for now)
+  fmr::Local_int ok = 0;
+  const auto numtol = std::numeric_limits<fmr::Phys_float>::epsilon();
+  for (fmr::Local_int i = 0; i < part_dofs_n; ++i) {
+    printf("%4u %0.3e\n", i, part_u[i]);
+    switch (load_case) {
+    case 0:{// No load
+      ok += std::abs(part_u[i] - 0.0) < numtol;
+      break;
+    }
+    case 1: {// 1cm end displacement
+      const fmr::Phys_float tip_u = end_load * bars_len / (bars_area * mtrl_modx);
+      ok += std::abs(part_u[i] 
+      - (fmr::Phys_float(i) * tip_u / fmr::Phys_float(part_node_n ))) < numtol;
+      break;
+    }
+    default:{// 1 kN end load.
+      ok += std::abs(part_u[i]
+      - (fmr::Phys_float(i) * 0.010 / fmr::Phys_float(part_node_n ))) < numtol;
+      break;
+    }
+    }
+  }
+  mini->data->send (fmr::log, ok==part_dofs_n?" ok ":" :( ", "chck", "disp",
+    "%4u / %4u good", ok, part_dofs_n);
   return mini->exit ();
 }//end main ()
 
