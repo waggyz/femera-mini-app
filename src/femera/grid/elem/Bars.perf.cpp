@@ -119,8 +119,8 @@ fmr::Exit_int main (int argc, char** argv) {
   const fmr::Phys_float end_load = 1e3;// 1 kN tension
   //
   // Set solver parameters. ---------------------------------------------------
-  const fmr::Phys_float abs_tol2 = 1e-12*0;// absolute tolerance squared
-  const fmr::Phys_float rel_tol2 = 1e-12*0;// relative tolerance squared
+  const fmr::Phys_float abs_tol2 = 1e-12;// absolute tolerance squared
+  const fmr::Phys_float rel_tol2 = 1e-12;// relative tolerance squared
   // ==========================================================================
   using femera::grid::tile::Tile;
   using femera::grid::elem::Elem;
