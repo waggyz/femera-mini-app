@@ -56,7 +56,7 @@ constexpr bool bar5_coordinates_constexpr () {
 static_assert (bar5_coordinates_constexpr (), "Bar5 coordinates must be constexpr");
 
 TEST( GridTileBar5, TileMetadata ){
-  EXPECT_TRUE( (std::is_empty<Bar5>::value) );
+  EXPECT_TRUE( (std::is_empty<Tile<Bar5>>::value) );
   EXPECT_EQ( Tile<Bar5>::get_elem_d (), 1 );
   EXPECT_EQ( Tile<Bar5>::get_tile_d (), 2 );
   EXPECT_EQ( Tile<Bar5>::get_tile_elem_n (), 5 );

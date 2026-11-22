@@ -130,7 +130,7 @@ double tile::run_bars_perf_test(const int test_case, const fmr::Local_int test_n
   #pragma omp parallel for default(none) shared(part_conn_vec) \
     firstprivate(part_n, part_elem_n, part_conn_array_size)
   for (fmr::Local_int part_id = 0; part_id < part_n; ++part_id) {
-    femera::grid::tile::Bar1 bar1;
+    femera::grid::tile::Tile<Bar1> bar1;
     const fmr::Local_int grid_size[1] = {part_elem_n * part_n};
     std::valarray<fmr::Local_int> part_conn(part_conn_array_size);
     fmr::Local_int this_conn[2] = {0, 0};
@@ -159,7 +159,7 @@ double tile::run_bars_perf_test(const int test_case, const fmr::Local_int test_n
           const fmr::Local_int grid_size[1] = {part_elem_n};
           Perf_time_t* this_meter = part_meter[part_id];// thread local ptr
           //
-          femera::grid::tile::Bar1 this_bar1;
+          femera::grid::tile::Tile<Bar1> this_bar1;
           fmr::Local_int this_conn[2] = {0, 0};
 
           fmr::Local_int part_chck = 0;

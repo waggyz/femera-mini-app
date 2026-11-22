@@ -271,7 +271,7 @@ class Tile {
       vert_coor, elem_i, part_size, tile_size, part_orig, pattern);
   }
   // Mesh operations ----------------------------------------------------------
-  //// Get a whole mesh (for comparison)
+  //// Get a whole mesh (for export and testing)
   static fmr::Local_int get_tile_mesh (// returns halo_elem_n
     fmr::Local_int* node_conn, F* node_coor,//NOTE elems halo sorted, nodes not.
     const F* tile_size,// only [0] used for this tile

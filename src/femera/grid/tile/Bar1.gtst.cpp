@@ -20,7 +20,6 @@ TEST( GridTileBar1, TrivialTest ){
 namespace femera { namespace grid { namespace tile {
 
 TEST( GridTileBar1, IsStateless ){
-  EXPECT_TRUE( (std::is_empty<Bar1>::value) );
   EXPECT_TRUE( (std::is_empty<Tile<Bar1>>::value) );
 }
 
@@ -41,15 +40,9 @@ TEST( TileElemBar1, ElementOrderNodeCounts ){
   EXPECT_EQ( cubic.get_tile_elem_node_n (), 4 );
 }
 TEST( GridTileBar1, TileMetadata ){
-  constexpr Bar1 bar1;
+  constexpr Tile<Bar1> bar1;
   EXPECT_EQ( static_cast<fmr::Local_int>(bar1.get_tile_elem_n ()), 1u );
   EXPECT_EQ( static_cast<fmr::Local_int>(bar1.get_tile_elem_node_n ()), 2u );
-#if 0
-  EXPECT_EQ( static_cast<fmr::Local_int>(bar1.get_tile_elem_node_n ()),
-    static_cast<fmr::Local_int>(bar1.get_vert_n ()) );// P1 only
-  EXPECT_EQ( static_cast<fmr::Local_int>(bar1.get_tile_vert_n ()),
-    static_cast<fmr::Local_int>(bar1.get_vert_n ()) );
-#endif
   EXPECT_EQ( static_cast<fmr::Local_int>(bar1.get_tile_vert_n ()), 2u );
   EXPECT_EQ( bar1.get_tile_elem_n (), 1u );
   constexpr fmr::Local_int tile0 = 0;
@@ -83,7 +76,7 @@ static_assert (tile_dispatch_constexpr_test (), "Tile dispatch must be constexpr
 
 TEST( GridTileBar1, TilePartElemCount ){
   //get_tile_part_elem_n
-  constexpr Bar1 bar1; // only [0] is used for Bar1.
+  constexpr Tile<Bar1> bar1; // only [0] is used for Bar1.
   const fmr::Local_int part_elem_dims_a[3] = {2, 0, 0};
   const fmr::Local_int part_elem_dims_b[3] = {2, 3, 4};
   const fmr::Local_int part_elem_dims_c[3] = {0, 0, 0};
@@ -98,7 +91,7 @@ TEST( GridTileBar1, TilePartElemCount ){
 }
 
 TEST( GridTileBar1, TileVertexConnectivity ){
-  constexpr Bar1 bar1_1;
+  constexpr Tile<Bar1> bar1_1;
   const fmr::Local_int part_size[1] = {4};
   fmr::Local_int conn[bar1_1.get_tile_vert_n ()] = {0, 0};
 
@@ -114,7 +107,7 @@ TEST( GridTileBar1, TileVertexConnectivity ){
 }
 
 TEST( GridTileBar1, TileVertexConnectivityPeriodic ){
-  constexpr Bar1 bar1_1;// linear
+  constexpr Tile<Bar1> bar1_1;// linear
   const fmr::Local_int part_size[1] = {4};
   fmr::Local_int conn[bar1_1.get_tile_vert_n ()] = {0, 0};
 
@@ -237,7 +230,7 @@ TEST( GridTileBar1, WholeMeshDefaultOrigin ){
 }
 
 TEST( GridTileBar1, PartitionedTileVertexConnectivity ){
-  constexpr Bar1 bar1;
+  constexpr Tile<Bar1> bar1;
   const fmr::Local_int part_size[1] = {3};
   fmr::Local_int conn[bar1.get_tile_vert_n ()] = {0, 0};
 
@@ -246,7 +239,7 @@ TEST( GridTileBar1, PartitionedTileVertexConnectivity ){
 }
 
 TEST( GridTileBar1, TileVertexCoordinates ){
-  Bar1 bar1;
+  Tile<Bar1> bar1;
   const fmr::Geom_float part_orig[3] = {0.0, 0.0, 0.0};
   const fmr::Geom_float elem_size[3] = {1.0, 1.0, 1.0};
   //const fmr::Local_int part_node_dims[3] = {3,0,0};
@@ -265,7 +258,7 @@ TEST( GridTileBar1, TileVertexCoordinates ){
 }
 
 TEST( GridTileBar1, MoreTileVertexCoordinates ){
-  Bar1 bar1;
+  Tile<Bar1> bar1;
   const fmr::Geom_float part_orig[3] = {0.0, 0.0, 0.0};
   const fmr::Geom_float elem_size[3] = {1.0,2.0, 3.0};
   const fmr::Local_int vert_n = 3;
@@ -322,7 +315,7 @@ TEST( GridTileBar1, TileNodeCountAndCoordinates ){
 }
 
 TEST( GridTileBar1, TileElementVertexCoordinatesAOS ){
-  Bar1 bar1;
+  Tile<Bar1> bar1;
   const fmr::Geom_float part_orig[3] = {0.0, 0.0, 0.0};
   const fmr::Geom_float elem_size[3] = {1.0, 1.0, 1.0};
   const fmr::Local_int elem_n = 2;
@@ -346,7 +339,7 @@ TEST( GridTileBar1, TileElementVertexCoordinatesAOS ){
 }
 
 TEST( GridTileBar1, TileElementVertexCoordinatesSOA ){
-  Bar1 bar1;
+  Tile<Bar1> bar1;
   const fmr::Geom_float part_orig[3] = {0.0, 0.0, 0.0};
   const fmr::Geom_float elem_size[3] = {1.0, 1.0, 1.0};
   const fmr::Local_int elem_n = 2;
@@ -385,7 +378,7 @@ TEST( GridTileBar1, HaloNodesAndElements){
 }
 
 TEST( GridTileBar1, TileElementEdgeDeltaQuality){
-  constexpr Bar1 bar1;
+  constexpr Tile<Bar1> bar1;
   constexpr femera::grid::elem::Elem<femera::grid::elem::Bars> bars;
 
   // Use get_tile_vert_coor to get the vertex coordinates of the element.

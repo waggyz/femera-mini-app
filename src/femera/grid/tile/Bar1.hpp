@@ -9,6 +9,7 @@ class Bar1 final : public Tile<Bar1> {
   template <class T, fmr::Dim_int P, typename F>
   friend class Tile; friend class Ipn1;
 private:
+  Bar1() = default;// Constructor is private. Use: Tile<Bar1, 1> tile;
 // Scalars ====================================================================
   static constexpr fmr::Dim_int        elem_d = 1;
   static constexpr fmr::Dim_int        tile_d = 1;

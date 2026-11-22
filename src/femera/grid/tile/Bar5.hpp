@@ -21,6 +21,7 @@ class Bar5 final : public Tile<Bar5> {
       Canonical     Alternate
   */
 private:
+  Bar5() = default;// Constructor is private. Use: Tile<Bar5, 1> tile;
 // Scalars ====================================================================
   static constexpr fmr::Dim_int        elem_d = 1;
   static constexpr fmr::Dim_int        tile_d = 2;
