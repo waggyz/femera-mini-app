@@ -162,12 +162,6 @@ constexpr bool Bar1::calc_tile_elem_vert_coor(//x1,y1,z1, x2,y2,z2
       std::valarray<fmr::Geom_float>
       part_node_coor(std::size_t(part_node_n) * part_d);
 
-#if 0
-          if(is_unstructured) {
-            part_node_coor[n * part_d + d] += 0.99 * (bars_len / do_elem_n)
-            * (fmr::Geom_float(rand()) / RAND_MAX - 0.5);// [-0.5,0.5]
-          }
-#endif
 
 
 #ifdef DEBUG_PRINT

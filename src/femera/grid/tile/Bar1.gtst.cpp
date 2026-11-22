@@ -217,6 +217,25 @@ TEST( GridTileBar1, WholeMesh ){
   check_bar_mesh<3, float> (nullptr, 3);
 }
 
+TEST( GridTileBar1, WholeMeshDefaultOrigin ){
+  constexpr Tile<Bar1, 2, double> tile;
+  const fmr::Local_int dims[3] = {2, 1, 1};
+  const double tile_size[3] = {6.0, 3.0, -3.0};
+  fmr::Local_int conn[6] = {};
+  double coor[15] = {};
+
+  EXPECT_EQ( tile.get_tile_mesh (conn, coor, tile_size, dims, 3), 2 );
+  const fmr::Local_int expected_conn[6] = {0, 2, 1, 2, 4, 3};
+  for (fmr::Local_int i = 0; i < 6; ++i) {
+    EXPECT_EQ( conn[i], expected_conn[i] );
+  }
+  for (fmr::Local_int n = 0; n < 5; ++n) {
+    for (fmr::Dim_int d = 0; d < 3; ++d) {
+      EXPECT_DOUBLE_EQ( coor[n * 3 + d], double(n) * tile_size[d] / 2.0 );
+    }
+  }
+}
+
 TEST( GridTileBar1, PartitionedTileVertexConnectivity ){
   constexpr Bar1 bar1;
   const fmr::Local_int part_size[1] = {3};

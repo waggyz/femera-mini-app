@@ -275,10 +275,10 @@ class Tile {
     const F* tile_size,// only [0] used for this tile
     const fmr::Local_int* part_elem_dims,
     const fmr::Dim_int part_d,
-    const F* orig_coor
+    const F* part_orig = nullptr
   ) noexcept {
     return T::calc_tile_mesh(node_conn, node_coor,
-      tile_size, part_elem_dims, P, part_d, orig_coor);
+      tile_size, part_elem_dims, P, part_d, part_orig);
   }
 };//end Elem
 
