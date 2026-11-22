@@ -159,25 +159,6 @@ fmr::Exit_int main (int argc, char** argv) {
   // Make the mesh.
   std::valarray<fmr::Local_int>
   part_node_conn (std::size_t(part_elem_n) * elem_node_n);
-  // Connectivity: first halo elements, then the remaining elements.
-  //TODO also renumber local nodes, halo first.
-  for (fmr::Local_int el = 0; el < part_elem_n; ++el) {
-    const auto h = tile.get_halo_sort_elem (el, &part_elem_dims[0]);
-  //
-#ifdef DEBUG_PRINT
-    const auto ok = tile.get_tile_node_conn
-      (&part_node_conn[el * elem_node_n], h, &part_elem_dims[0]);
-    if (el < 10) {
-      const auto i = el * elem_node_n;
-      mini->data->send (fmr::log, ok?" ok ":" :( ", "tile", "elem",
-        "%4u conn %u %u (halo sort)",
-        el, part_node_conn[i], part_node_conn[i+1]);
-    }
-#else
-    tile.get_tile_node_conn
-      (&part_node_conn[el * elem_node_n], h, &part_elem_dims[0]);
-#endif
-  }
  // Set up iterations ---------------------------------------------------------
   constexpr Elem<Bars, part_elem_p> elem;
   //
@@ -277,46 +258,17 @@ fmr::Exit_int main (int argc, char** argv) {
     //
     auto part_jacs_dets = std::valarray<fmr::Phys_float>
       (std::size_t(part_elem_n * elem_jacd_size));
+    //
     {// Scope node_coor
       std::valarray<fmr::Geom_float>
       part_node_coor(std::size_t(part_node_n) * part_d);
-
-
-    const fmr::Local_int halo_elem_n = tile.get_tile_mesh (// returns halo_elem_n
+      tile.get_tile_mesh (// returns halo_elem_n
         &part_node_conn[0], &part_node_coor[0],//NOTE elems halo sorted, nodes not.
         &tile_size[0],// only [0] used for this tile
         &part_elem_dims[0],
         part_d,
         &orig_coor[0]
       );
-
-
-
-      for ( fmr::Local_int n=0; n < part_node_n; ++n) {
-        fmr::Geom_float buf[4];
-#ifdef DEBUG_PRINT
-        const auto ok = tile.get_tile_part_node_coor
-          (buf, n, &part_elem_dims[0], &tile_size[0]);//TODO get rid of buf?
-        for (fmr::Dim_int d = 0; d < part_d; ++d) {
-          part_node_coor[n * part_d + d] = buf[d];
-        }
-        if (n < 10) {
-          const auto i = n * part_d;
-          mini->data->send (fmr::log, ok?" ok ":" :( ", "tile", "node",
-            "%4u coor %f", n, double(part_node_coor[i]));
-        }
-#else
-        tile.get_tile_part_node_coor
-          (buf, n, &part_elem_dims[0], &tile_size[0]);//TODO get rid of buf?
-        for (fmr::Dim_int d = 0; d < part_d; ++d) {
-          part_node_coor[n * part_d + d] = buf[d];
-          if(is_unstructured) {
-            part_node_coor[n * part_d + d] += 0.99 * (bars_len / do_elem_n)
-            * (fmr::Geom_float(rand()) / RAND_MAX - 0.5);// [-0.5,0.5]
-          }
-        }
-#endif
-      }
 FMR_WARN_INLINE_OFF
     bad_jac_n += femera::grid::test::calc_bars_invt_dets<1>( &part_jacs_dets[0],
       &part_node_coor[0], &part_node_conn[0], part_elem_n, part_d);

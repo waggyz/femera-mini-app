@@ -183,6 +183,40 @@ TEST( GridTileBar1, TileNodeConnectivity ){
   EXPECT_TRUE( (Tile<Bar1>::get_tile_node_conn (linear_conn, 2, part_size)) );
 }
 
+template <fmr::Dim_int P, typename F>
+void check_bar_mesh (const F* orig_coor, const fmr::Dim_int part_d) {
+  constexpr Tile<Bar1, P, F> tile;
+  const fmr::Local_int dims[3] = {4, 1, 1};
+  const F tile_size[3] = {F(6), F(3), F(-3)};
+  fmr::Local_int conn[4u * (P + 1u)] = {};
+  F coor[(4u * P + 1u) * 3u] = {};
+  EXPECT_EQ( tile.get_tile_mesh (conn, coor, tile_size, dims, part_d, orig_coor), 2 );
+  const fmr::Local_int sorted_elems[4] = {0, 3, 1, 2};
+  for (fmr::Local_int el = 0; el < 4; ++el) {
+    EXPECT_EQ( conn[el * (P + 1)], sorted_elems[el] * P );
+    EXPECT_EQ( conn[el * (P + 1) + 1], (sorted_elems[el] + 1) * P );
+    for (fmr::Local_int j = 1; j < P; ++j) {
+      EXPECT_EQ( conn[el * (P + 1) + j + 1], sorted_elems[el] * P + j );
+    }
+  }
+  for (fmr::Local_int n = 0; n < 4 * P + 1; ++n) {
+    for (fmr::Dim_int d = 0; d < part_d; ++d) {
+      const F expected = (orig_coor ? orig_coor[d] : F(0))
+        + F(n) * tile_size[d] / F(P);
+      EXPECT_NEAR( coor[n * part_d + d], expected, 1e-5 );
+    }
+  }
+}
+
+TEST( GridTileBar1, WholeMesh ){
+  const double origin[3] = {1.0, -2.0, 4.0};
+  check_bar_mesh<1> (origin, 1);
+  check_bar_mesh<2> (origin, 3);
+  check_bar_mesh<3> (origin, 1);
+  check_bar_mesh<3> (origin, 3);
+  check_bar_mesh<3, float> (nullptr, 3);
+}
+
 TEST( GridTileBar1, PartitionedTileVertexConnectivity ){
   constexpr Bar1 bar1;
   const fmr::Local_int part_size[1] = {3};

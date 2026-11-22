@@ -123,7 +123,7 @@ private:
   // Mesh operations ----------------------------------------------------------
   //
   template <typename F=fmr::Geom_float>// Get a whole mesh (for comparison)
-  fmr::Local_int calc_tile_mesh (// returns halo_elem_n
+  static fmr::Local_int calc_tile_mesh (// returns halo_elem_n
     fmr::Local_int* node_conn, F* node_coor,//NOTE elems halo sorted, nodes not.
     const F* tile_size,// only [0] used for this tile
     const fmr::Local_int* part_elem_dims,

@@ -51,11 +51,11 @@ constexpr bool Bar1::calc_tile_part_node_coor(F* coor,
     const F node_delt = F(1.0) / F(elem_p);
     // Guard against null part_orig pointer.
     coor[0] = (part_orig ? part_orig[0] : F(0.0))
-      + node_i * tile_size[0] * node_delt;
+      + F(node_i) * tile_size[0] * node_delt;
     coor[1] = (part_orig ? part_orig[1] : F(0.0))
-      + node_i * tile_size[1] * node_delt;
+      + F(node_i) * tile_size[1] * node_delt;
     coor[2] = (part_orig ? part_orig[2] : F(0.0))
-      + node_i * tile_size[2] * node_delt;
+      + F(node_i) * tile_size[2] * node_delt;
     //TODO FIXME this only works for P=1
     return node_i < elem_p * part_elem_dims[0] + 1;
   }
@@ -193,52 +193,35 @@ constexpr bool Bar1::calc_tile_elem_vert_coor(//x1,y1,z1, x2,y2,z2
         }
 #endif
 */
-  template <typename F=fmr::Geom_float>// Get a whole mesh (for comparison)
-  fmr::Local_int calc_tile_mesh (// returns halo_elem_n
+  template <typename F>
+  fmr::Local_int Bar1::calc_tile_mesh (// returns halo_elem_n
     fmr::Local_int* node_conn, F* node_coor,//NOTE elems halo sorted, nodes not.
     const F tile_size[3],// only [0] used for this tile
     const fmr::Local_int* part_elem_dims,
-    const fmr::Dim_int part_d,
     const fmr::Dim_int elem_p,
+    const fmr::Dim_int part_d,
     const F* orig_coor
   ) noexcept{
   if (!node_conn || !node_coor || !tile_size || !part_elem_dims) return 0;
-  F zero_coor[3] = {0.0, 0.0, 0.0};
-  const auto part_orig = orig_coor ? orig_coor : zero_coor;
-  //
-  using femera::grid::tile::Tile;
-  using femera::grid::tile::Bar1;
-  //
-  Tile<Bar1> tile;
-  switch(elem_p) {
-    case 1: tile = Tile<Bar1, 1>(); break;
-    case 2: tile = Tile<Bar1, 2>(); break;
-    case 3: tile = Tile<Bar1, 3>(); break;
-    default: tile = Tile<Bar1, 1>(); break;
-  }
-  //
-  const auto part_elem_n = tile.get_tile_part_elem_n (&part_elem_dims[0]);
-  const auto elem_node_n = tile.get_tile_elem_node_n ();
+  const auto part_elem_n = get_tile_part_elem_n (part_elem_dims);
+  const fmr::Local_int elem_node_n = elem_p + 1;
   //
   // Connectivity: first halo elements, then the remaining elements.
   for (fmr::Local_int el = 0; el < part_elem_n; ++el) {
-    const auto h = tile.get_halo_sort_elem (el, &part_elem_dims[0]);
-  //
-    tile.get_tile_node_conn
-      (&node_conn[el * elem_node_n], h, &part_elem_dims[0]);
+    const auto h = calc_sort_halo_elem (el, part_elem_dims);
+    calc_tile_node_conn (&node_conn[el * elem_node_n], h, part_elem_dims, elem_p);
   }
   // Node coordinates
   //TODO also renumber local nodes, halo first.
-  const auto part_node_n = tile.get_tile_part_node_n (&part_elem_dims[0]);
-  fmr::Geom_float buf[4];
+  const auto part_node_n = calc_tile_part_node_n (elem_p, part_elem_dims);
+  F buf[3];
   for ( fmr::Local_int n=0; n < part_node_n; ++n) {
-    tile.get_tile_part_node_coor
-      (buf, n, &part_elem_dims[0], &tile_size[0]);//TODO get rid of buf?
+    calc_tile_part_node_coor (buf, n, elem_p, part_elem_dims, tile_size, orig_coor);
     for (fmr::Dim_int d = 0; d < part_d; ++d) {
-      node_coor[n * part_d + d] = buf[d] + part_orig[d];
+      node_coor[n * part_d + d] = buf[d];
     }
   }
-  return tile.get_halo_elem_n(part_elem_dims);
+  return calc_halo_elem_n (part_elem_dims, elem_p);
   }
 
 
