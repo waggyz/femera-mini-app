@@ -2,7 +2,44 @@
 
 Date: 2026-11-22
 
-Status: plan only; no implementation or validation has been performed.
+Status: implemented and validated on the local MPICH/OpenMP build.
+
+## Implementation results
+
+- `Beds::get_rand()` supplies per-instance, per-thread `std::mt19937` sequences,
+  with `get_rand_max()` defining the inclusive upper bound and `get_rand_seed()`
+  implementing the specified modulo arithmetic without overflow.
+- Initialization seeds the actual OpenMP team before child tests initialize.
+  Each slot records its operating-system thread owner and processing ID.
+  Nested regions, larger teams, foreign/replacement workers and uninitialized
+  access fail explicitly. RNG readiness remains true during child-test exit,
+  because `Work::exit_list` clears `did_init()` before those tests run.
+- The Bars call site uses the Beds draw and its range. Defaults and unrelated
+  benchmark parameters remain unchanged. The test README documents the API,
+  supported topology and lifecycle.
+- All nine focused Beds tests pass with one MPI rank and one or four OpenMP
+  threads, and with two MPI ranks and two threads per rank. XML results for the
+  single-rank runs report nine completed tests and zero failures/errors.
+  Coverage includes exact reference sequences, overflow boundaries, separate
+  instances, reset, serial/smaller-team/parallel continuity, independent draw
+  counts, lifetime through child exit, invalid access and mesh perturbations.
+  The complete Beds executable also passes all 10 tests on both MPI ranks.
+- The changed RNG source compiles without OpenMP. Compile-time checks also
+  pass with 64-bit `Local_int` and `FMR_RAND_SEED=4294967295u`, including an
+  addition that would overflow without modular reduction. A full non-OpenMP
+  application build was not validated; the existing Jobs constructors use
+  OpenMP functions unconditionally.
+- The default Bars benchmark builds and passes its displacement check
+  (10/10), with no bad Jacobians. A scratch unstructured variant exercises the
+  actual replacement call: no bad Jacobians and solver convergence. Its final
+  displacement check reports 2/10 because the existing checker uses uniform
+  node-index coordinates. A scratch variant using the old `rand()` expression
+  has the same 2/10 failure. This pre-existing checker limitation is unchanged.
+- Affected archive members were rebuilt to remove stale-layout ODR warnings
+  before final validation. Existing Bars inline warnings remain. No race
+  detector run or full application test suite was performed.
+
+The original implementation and validation plan follows.
 
 ## Goal and current behavior
 

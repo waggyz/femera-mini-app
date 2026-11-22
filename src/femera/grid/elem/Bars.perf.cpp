@@ -275,7 +275,8 @@ fmr::Exit_int main (int argc, char** argv) {
         for (fmr::Local_int n = 1; n < part_node_n-1; ++n) {// not the ends
           for (fmr::Dim_int d = 0; d < part_d; ++d) {
             part_node_coor[n * part_d + d] += 0.99 * (bars_len / do_elem_n)
-            * (fmr::Geom_float(rand()) / RAND_MAX - 0.5);// [-0.5,0.5]
+            * (fmr::Geom_float(mini->test->get_rand())
+               / mini->test->get_rand_max() - 0.5);// [-0.5,0.5]
           }
         }
       }
