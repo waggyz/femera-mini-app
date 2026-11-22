@@ -1,6 +1,8 @@
 #ifndef FEMERA_HAS_GRID_TILE_HPP
 #define FEMERA_HAS_GRID_TILE_HPP
 
+#include "Elem.hpp"
+
 #include "../../fmr/fmr.hpp"
 
 namespace femera { namespace grid { namespace tile {//TODO grid -> geom
@@ -71,7 +73,7 @@ class Tile {
   public:
   // Simple constexpr accessors -----------------------------------------------
   // constexpr functions are implicitly inline
-
+  //
   static constexpr fmr::Dim_int   get_elem_d () noexcept { return T::elem_d; }
   static constexpr fmr::Dim_int   get_tile_d () noexcept { return T::tile_d; }
 

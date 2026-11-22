@@ -64,6 +64,7 @@ private:
   - These are not particularly useful for modelling.
   - They are useful for prototyping tiling variants in higher dimensions.
   */
+  //
   static constexpr fmr::Local_int calc_tile_part_node_n (
     const fmr::Dim_int elem_p, const fmr::Local_int* part_elem_dims)
   noexcept{ return part_elem_dims[0] * elem_p  + 1;
