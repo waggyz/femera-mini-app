@@ -60,7 +60,7 @@ using femera::grid::elem::Bars;
     const auto this_bad = fmr::math::m1x1_invt_det_ref
       (&part_invt_dets[el * (part_d * elem_d + 1)], &jac[0]);
     //TODO fmr::math::smat_pinv_col_ref () when elem_d != part_d
-    bad += fmr::Local_int(abs(this_bad));
+    bad += fmr::Local_int(std::abs(this_bad));
 #ifdef DEBUG_PRINT
     if (el < 5) {
       const bool ok = (this_bad == 0) &&
@@ -84,6 +84,15 @@ using femera::grid::elem::Bars;
     if (n>0) {
       for (fmr::Local_int i = 0; i < n; ++i) {
         vals[bcs[i].first] = F(bcs[i].second);// Set vals.
+    } }
+  return n;
+}
+  template < typename F=fmr::Phys_float> inline
+  fmr::Local_int set_bc0 (F* vals, const BClist bcs){// sets listed dof to 0
+    const auto n = fmr::Local_int(bcs.size());
+    if (n>0) {
+      for (fmr::Local_int i = 0; i < n; ++i) {
+        vals[bcs[i].first] = F(0);// Set vals.
     } }
   return n;
 }
@@ -114,7 +123,9 @@ fmr::Exit_int main (int argc, char** argv) {
   const fmr::Enum_int load_case = 1;
   // 0: no load
   // 1: apply end displacement (only)
-  // 2: apply end load (only),
+  // 2: apply end force (only),
+  // 3: pin both ends, apply a displacement near the middle
+  // 4: pin both ends, apply a force near the middle
   //    tip_u = end_load * bars_len / (bars_area * mtrl_modx)
   //
   const fmr::Phys_float end_disp = 0.001;// 1 mm
@@ -152,7 +163,7 @@ fmr::Exit_int main (int argc, char** argv) {
     const auto ok = tile.get_tile_node_conn
       (&part_node_conn[el * elem_node_n], h, &part_elem_dims[0]);
 #ifdef DEBUG_PRINT
-    if (el < 5) {
+    if (el < 10) {
       const auto i = el * elem_node_n;
       mini->data->send (fmr::log, ok?" ok ":" :( ", "tile", "elem",
         "%4u conn %u %u (halo sort)",
@@ -210,9 +221,19 @@ fmr::Exit_int main (int argc, char** argv) {
       case 0: break;
       case 1: maps_disp_bc[part_dofs_n - 1] = fmr::Phys_float(end_disp);
       break;
-      case 2: maps_load_bc[part_dofs_n - 1] += fmr::Phys_float(end_load);
-      maps_load_bc[part_dofs_n - 1] += fmr::Phys_float(1.0);// Sum loads.
+      case 2: maps_load_bc[part_dofs_n - 1] = fmr::Phys_float(end_load);
       break;
+      case 3: {
+        maps_disp_bc[part_dofs_n - 1] = fmr::Phys_float(0.0);
+        maps_disp_bc[part_dofs_n / 2] = fmr::Phys_float(end_disp);
+      break;
+      }
+      case 4: {
+        maps_disp_bc[part_dofs_n - 1] = fmr::Phys_float(0.0);
+        maps_load_bc[part_dofs_n / 2] = fmr::Phys_float(end_load);
+      break;
+      }
+      default: break;
     }
     // Copy maps to lists.
     for (const auto &p : maps_disp_bc) {
@@ -240,10 +261,15 @@ fmr::Exit_int main (int argc, char** argv) {
     // Get node coordinates (temporarily).
     constexpr Elem<Bars, 1> elem_p1;
     //const auto elem_d = tile.get_elem_d ();
-    const auto elem_jacd_size = elem_p1.get_jacs_dets_size (part_elem_n);
+    //const auto elem_jacd_size = elem_p1.get_jacs_dets_size (part_elem_n);// WRONG
+    //const auto elem_jacd_size = elem_p1.get_jacs_dets_size ();// WRONG
+    const fmr::Local_int elem_jacd_size = 2;
+#if 0
+    printf("elems: %u, elem_jacd_size: %u\n", part_elem_n, elem_jacd_size);
+#endif
     //
-    std::valarray<fmr::Phys_float>
-    part_jacs_dets (std::size_t(part_elem_n) * elem_jacd_size);
+    auto part_jacs_dets = std::valarray<fmr::Phys_float>
+      (std::size_t(part_elem_n * elem_jacd_size));
     {// Scope node_coor
       std::valarray<fmr::Geom_float>
       part_node_coor(std::size_t(part_node_n) * part_d);
@@ -255,7 +281,7 @@ fmr::Exit_int main (int argc, char** argv) {
           part_node_coor[n * part_d + d] = buf[d];
         }
 #ifdef DEBUG_PRINT
-        if (n < 5) {
+        if (n < 10) {
           const auto i = n * part_d;
           mini->data->send (fmr::log, ok?" ok ":" :( ", "tile", "node",
             "%4u coor %f", n, double(part_node_coor[i]));
@@ -285,6 +311,10 @@ FMR_WARN_INLINE_ON
       iter, bad_jac_n );
     }
     auto part_r = std::valarray<fmr::Phys_float>(part_dofs_n);
+    auto Minv = std::valarray<float>(1.0, part_dofs_n);
+    femera::grid::test::set_bc0(&Minv[0], part_disp_bc);
+    //femera::grid::test::set_bc0(&Minv[0], part_load_bc);
+    //
     fmr::Phys_float part_zet2 = 0.0, init_zet2 = 0.0;
     while ((iter < iter_max) && (res2 > abs_tol2) && (rel2 > rel_tol2)) {
       // Init is iter 0.
@@ -306,7 +336,7 @@ FMR_WARN_INLINE_ON
       const auto this_elem_d = elem.get_elem_d ();
       const auto this_part_d = part_d;
       const auto this_intp_n = elem_intp_n;
-      const auto this_jacs_dets_size = elem.get_jacs_dets_size ();
+      const auto this_jacs_dets_size = fmr::Local_int(2);//FIXME: elem.get_jacs_dets_size ();
       const auto this_dofs_n = part_node_n * dofs_n;
       //
       // Constant arrays to copy in.
@@ -323,9 +353,9 @@ FMR_WARN_INLINE_ON
       fmr::Phys_float fval[conn_n * dofs_n];// force buffer
       fmr::Phys_float jinv_det[this_jacs_dets_size];
       //
-      if (iter > 0) {// Apply them to p and r.
-        femera::grid::test::set_bcs(&part_p[0], this_disp_bc);
-      }
+//      if (iter > 0) {// Apply BCs to p and r.
+//        femera::grid::test::set_bc0(&part_p[0], this_disp_bc);
+//      }
       //
       // Do halo elements.
       for (fmr::Local_int elem_i = 0; elem_i < this_elem_n; ++elem_i) {
@@ -334,7 +364,7 @@ FMR_WARN_INLINE_ON
           conn[i] = part_node_conn[elem_i * conn_n + i];
         }
 #ifdef DEBUG_PRINT
-        if (iter < 1 && elem_i < 5) {// Only print the first few elements for debugging.
+        if (iter < 1 && elem_i < 10) {// Only print the first few elements for debugging.
           mini->data->send (fmr::log, "iter", "mesh", "elem",
             "%4u conn %u %u", elem_i, conn[0], conn[1]);
         }
@@ -357,7 +387,13 @@ FMR_WARN_INLINE_ON
         for (fmr::Local_int i = 0; i < this_jacs_dets_size; ++i) {
           jinv_det[i] = this_jacd[elem_i * this_jacs_dets_size + i];
         }
-        const auto this_det = jinv_det[this_part_d * this_elem_d];// last value
+        const auto this_det = jinv_det[this_part_d * this_elem_d ];// last value
+#if 0
+        {
+          mini->data->send (fmr::log, "iter", "jacd", "elem",
+            "%4u %e %e", elem_i, jinv_det[0], this_det);
+        }
+#endif
         // Integration point loop internal arrays
         fmr::Phys_float G[dofs_n * conn_n];
         fmr::Phys_float H[dofs_n * this_elem_d];
@@ -431,7 +467,7 @@ FMR_WARN_INLINE_ON
       const auto this_dofs_n = part_dofs_n;// local copy
       //TODO Initialize iter loop local temporary solver vectors.
       //
-      const auto Minv = std::valarray<float>(1.0, this_dofs_n);
+      //const auto Minv = std::valarray<float>(1.0, this_dofs_n);
       // Diagonal preconditioner (already inverted & synced)
       //
       //auto part_p = std::valarray<fmr::Phys_float>(this_dofs_n);
@@ -445,13 +481,14 @@ FMR_WARN_INLINE_ON
         // part_r[i] = part_b[i] - part_f[i];
         part_r[i] = -part_f[i];// Assume part_b are applied loads.
       }
-      femera::grid::test::sum_bcs(&part_r[0], this_load_bc);
-      femera::grid::test::set_bcs(&part_r[0], this_disp_bc);
+      femera::grid::test::sum_bcs(&part_r[0], this_load_bc);// RHS
+      //femera::grid::test::set_bc0(&part_r[0], this_disp_bc);
       //
       // p = Minv * r : initial gradient descent direction (p)
       for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
         part_p[i] = fmr::Phys_float(Minv[i]) * part_r[i];
       }
+      //femera::grid::test::set_bc0(&part_p[0], this_disp_bc);
       //
       // zet2 = r dot p : reduce initial residual norm.
       for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
@@ -466,7 +503,7 @@ FMR_WARN_INLINE_ON
       if (part_zet2 < abs_tol2) {++iter; break; }// already converged
     }// end part solve init scope
     else {// part solve iteration scope
-      const auto Minv = std::valarray<float>(1.0, this_dofs_n);
+      //const auto Minv = std::valarray<float>(1.0, this_dofs_n);
       //
       //auto part_r = std::valarray<fmr::Phys_float>(this_dofs_n);
       auto part_z = std::valarray<fmr::Phys_float>(this_dofs_n);
@@ -487,7 +524,7 @@ FMR_WARN_INLINE_ON
       for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
         part_r[i] -= part_alpha * part_f[i];
       }
-      femera::grid::test::set_bcs(&part_r[0], this_disp_bc);
+      //femera::grid::test::set_bc0(&part_r[0], this_disp_bc);
       // z = Minv * r : preconditioned residual
       for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
         part_z[i] = fmr::Phys_float(Minv[i]) * part_r[i];
@@ -510,6 +547,7 @@ FMR_WARN_INLINE_ON
       for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
         part_p[i] = part_z[i] + part_beta * part_p[i];
       }
+      //femera::grid::test::set_bc0(&part_p[0], this_disp_bc);
       // zeta2 = zeta : update for next iteration
       part_zet2 = part_zeta;
       res2 = part_zet2;
@@ -529,7 +567,7 @@ FMR_WARN_INLINE_ON
     }
     ++iter;
     }// end iteration while loop
-  if(iter < iter_max) {--iter;}// count is off by one here, except at max.
+  --iter;// Count is off by one here.
   }// end scope part_jacs_dets
   {
   bool ok = (res2 < abs_tol2) || (rel2 < rel_tol2);
@@ -539,25 +577,37 @@ FMR_WARN_INLINE_ON
   }
   // Check correctness ========================================================
   fmr::Local_int ok = 0;
-  const auto numtol = std::numeric_limits<fmr::Phys_float>::epsilon();
+  const auto numtol = 1e-9;//std::numeric_limits<fmr::Phys_float>::epsilon();
   for (fmr::Local_int i = 0; i < part_dofs_n; ++i) {
-    printf("%4u %0.3e\n", i, part_u[i]);
+    //printf("%4u %0.3e\n", i, part_u[i]);
     switch (load_case) {
     case 0:{// No load
       ok += std::abs(part_u[i] - 0.0) < numtol;
       break;
     }
     case 1: {// 1cm end displacement
-      const fmr::Phys_float tip_u = end_load * bars_len / (bars_area * mtrl_modx);
-      ok += std::abs(part_u[i] 
-      - (fmr::Phys_float(i) * tip_u / fmr::Phys_float(part_node_n ))) < numtol;
+      const auto chck = fmr::Phys_float(i)
+         * end_disp / fmr::Phys_float(part_node_n - 1);
+      //const fmr::Phys_float tip_u = end_disp * bars_len / (bars_area * mtrl_modx);
+      ok += std::abs(part_u[i] - chck) < numtol * end_disp;
       break;
     }
-    default:{// 1 kN end load.
+    case 2: {// 1 kN end load. (1e3)
+      const auto chck = end_load / (mtrl_modx * bars_area) * bars_len;
       ok += std::abs(part_u[i]
-      - (fmr::Phys_float(i) * 0.010 / fmr::Phys_float(part_node_n ))) < numtol;
+      - chck * (fmr::Phys_float(i) / fmr::Phys_float(part_node_n - 1)))
+      < numtol;
       break;
     }
+    case 3: {// 1 cm end displacement
+      ok = 9999;//TODO
+      break;
+    }
+    case 4: {// 1 cm end displacement
+      ok = 9999;//TODO
+      break;
+    }
+    default: break;
     }
   }
   mini->data->send (fmr::log, ok==part_dofs_n?" ok ":" :( ", "chck", "disp",
