@@ -120,6 +120,18 @@ private:
   fmr::Local_int calc_sort_halo_elem (const fmr::Local_int halo_elem_i,
     const fmr::Local_int* part_elem_dims) noexcept;
   //
+  // Mesh operations ----------------------------------------------------------
+  //
+  template <typename F=fmr::Geom_float>// Get a whole mesh (for comparison)
+  fmr::Local_int calc_tile_mesh (// returns halo_elem_n
+    fmr::Local_int* node_conn, F* node_coor,//NOTE elems halo sorted, nodes not.
+    const F* tile_size,// only [0] used for this tile
+    const fmr::Local_int* part_elem_dims,
+    const fmr::Dim_int elem_p,
+    const fmr::Dim_int part_d,
+    const F* orig_coor
+  ) noexcept;
+  //
 };//end class Bar1
 
 } } }//end femera::grid::tile:: namespace

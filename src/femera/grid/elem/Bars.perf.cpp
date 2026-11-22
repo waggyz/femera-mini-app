@@ -15,8 +15,9 @@
 
 auto  mini = fmr::new_jobs ();
 
-  typedef std::map<fmr::Global_int, fmr::Phys_float> BCmap;// DOF id, value
-  typedef std::pair<fmr::Global_int, fmr::Phys_float> BCitem;
+  // These are sized for one partition, not the whole model.
+  typedef std::map<fmr::Local_int, fmr::Phys_float> BCmap;// DOF id, value
+  typedef std::pair<fmr::Local_int, fmr::Phys_float> BCitem;
   typedef std::vector<BCitem> BClist;
 
 namespace femera { namespace grid { namespace test {
@@ -114,9 +115,12 @@ fmr::Exit_int main (int argc, char** argv) {
   //
   // Set mesh parameters. -----------------------------------------------------
   const fmr::Local_int do_elem_n = 9;
+  const bool is_unstructured = false;// perturb nodes.//TODO save coor for check.
+  //
+  const fmr::Geom_float bars_len  = 1.0;// m
+  const fmr::Geom_float orig_coor[3] = {0.0, 0.0, 0.0};
   // Set physics parameters. --------------------------------------------------
 
-  const fmr::Phys_float bars_len  = 1.0;// m
   const fmr::Phys_float bars_area = 1e-2 * 1e-2;// 1cm x 1cm cross section
   const fmr::Phys_float mtrl_modx = 200e9;// GPa (steel)
   //
@@ -159,7 +163,7 @@ fmr::Exit_int main (int argc, char** argv) {
   //TODO also renumber local nodes, halo first.
   for (fmr::Local_int el = 0; el < part_elem_n; ++el) {
     const auto h = tile.get_halo_sort_elem (el, &part_elem_dims[0]);
-    //
+  //
 #ifdef DEBUG_PRINT
     const auto ok = tile.get_tile_node_conn
       (&part_node_conn[el * elem_node_n], h, &part_elem_dims[0]);
@@ -204,12 +208,11 @@ fmr::Exit_int main (int argc, char** argv) {
   //
   const fmr::Local_int node_dofs_n = part_d;// elasticity only
   // These are kept for correctness check after solve.
-  const fmr::Global_int part_dofs_n
-  = fmr::Global_int(fmr::Global_int(part_node_n) * node_dofs_n);
+  const fmr::Local_int part_dofs_n = part_node_n * node_dofs_n;
   auto part_f = std::valarray<fmr::Phys_float>(part_dofs_n);// Zeroed at iter start.
   auto part_u = std::valarray<fmr::Phys_float>(fmr::Phys_float(0.0), part_dofs_n);
   auto part_p = std::valarray<fmr::Phys_float>(fmr::Phys_float(0.0), part_dofs_n);
-  //TODO init to constant strain.
+  //TODO init part_u to constant strain.
   // Defer temporary solver vector allocation to within iter loop.
   //
   BClist part_disp_bc;
@@ -246,12 +249,13 @@ fmr::Exit_int main (int argc, char** argv) {
       part_load_bc.emplace_back(p.first, p.second);
     }
   }
+  femera::grid::test::set_bcs(&part_u[0], part_disp_bc);
   //const fmr::Phys_float tol = 1e-6;
  // const fmr::Phys_float tol2 = tol * tol;
   // Conjugate gradient is exact when iterated to the number of unknowns.
   const fmr::Local_int iter_max// guard agains overflow.
   = (part_dofs_n < std::numeric_limits<fmr::Local_int>::max() )
-  ? fmr::Local_int(part_dofs_n) - fmr::Local_int(part_disp_bc.size()) +1
+  ? fmr::Local_int(part_dofs_n) - fmr::Local_int(part_disp_bc.size()) + 1
   : std::numeric_limits<fmr::Local_int>::max() -1;
   //
     const auto abs_tol2 = abs_tol * abs_tol;
@@ -276,6 +280,18 @@ fmr::Exit_int main (int argc, char** argv) {
     {// Scope node_coor
       std::valarray<fmr::Geom_float>
       part_node_coor(std::size_t(part_node_n) * part_d);
+
+
+    const fmr::Local_int halo_elem_n = tile.get_tile_mesh (// returns halo_elem_n
+        &part_node_conn[0], &part_node_coor[0],//NOTE elems halo sorted, nodes not.
+        &tile_size[0],// only [0] used for this tile
+        &part_elem_dims[0],
+        part_d,
+        &orig_coor[0]
+      );
+
+
+
       for ( fmr::Local_int n=0; n < part_node_n; ++n) {
         fmr::Geom_float buf[4];
 #ifdef DEBUG_PRINT
@@ -294,6 +310,10 @@ fmr::Exit_int main (int argc, char** argv) {
           (buf, n, &part_elem_dims[0], &tile_size[0]);//TODO get rid of buf?
         for (fmr::Dim_int d = 0; d < part_d; ++d) {
           part_node_coor[n * part_d + d] = buf[d];
+          if(is_unstructured) {
+            part_node_coor[n * part_d + d] += 0.99 * (bars_len / do_elem_n)
+            * (fmr::Geom_float(rand()) / RAND_MAX - 0.5);// [-0.5,0.5]
+          }
         }
 #endif
       }
@@ -315,7 +335,7 @@ FMR_WARN_INLINE_ON
     bool ok = (iter < iter_max) && (bad_jac_n == 0)
       && (res2 > abs_tol2) && (rel2 > rel_tol2)
       && (res2 > 0.0) && (abs_tol2 > 0.0);
-    mini->data->send (fmr::log, ok?" ok ":" :( ", " GO ", "iter",
+    mini->data->send (fmr::log, ok?" ok ":" :( ", " GO ", "init",
       "%4u bad jacd: %u",
       iter, bad_jac_n );
     }
@@ -328,13 +348,15 @@ FMR_WARN_INLINE_ON
       // Init is iter 0.
       part_f = fmr::Phys_float(0.0); // Zero part_f to accumulate sums.
       // ----------------------------------------------------------------------
+#if 0
       // Copy loads and displacement BCs into local lists.
       const auto this_disp_bc = part_disp_bc;
       const auto this_load_bc = part_load_bc;
-      if (iter == 0) {// Apply them to u.
+      if (iter == 0) {// Apply them to u. TODO done before entering here.
         femera::grid::test::set_bcs(&part_u[0], this_disp_bc);
       }
       // ----------------------------------------------------------------------
+#endif
       // Make local copies of scalar constants.
       const auto halo_elem_n = tile.get_halo_elem_n (&part_elem_dims[0]);
       const auto halo_node_n = tile.get_halo_node_n (&part_elem_dims[0]);
@@ -360,6 +382,12 @@ FMR_WARN_INLINE_ON
       fmr::Phys_float uval[conn_n * dofs_n];// displacement buffer
       fmr::Phys_float fval[conn_n * dofs_n];// force buffer
       fmr::Phys_float jinv_det[this_jacs_dets_size];
+      //
+      // physics array: mtrl_prop (small)
+      // mesh arrays: part_node_conn, part_jacs_dets
+      //
+      // input arrays: part_u, part_p
+      // output array: part_f : response
       //
       // Do halo elements.
       for (fmr::Local_int elem_i = 0; elem_i < this_elem_n; ++elem_i) {
@@ -471,15 +499,21 @@ FMR_WARN_INLINE_ON
       //auto part_p = std::valarray<fmr::Phys_float>(this_dofs_n);
       auto part_z = std::valarray<fmr::Phys_float>(this_dofs_n);
       //
+      // Copy loads and displacement BCs into local lists.
+      //const auto this_disp_bc = part_disp_bc;
+      const auto this_load_bc = part_load_bc;
+      //
       // Initialize preconditioned conjugate gradient (PCG) solver. -----------
       // f = Y(u) : initial response
       // r = b - f : initial residuals (r)
       //NOTE b is not used again. Is this the RHS?
+#if 1
       for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
         // part_r[i] = part_b[i] - part_f[i];
         part_r[i] = -part_f[i];// Assume part_b are applied loads.
-      }
+      }//TODO pull RHS application out of the iter loop.
       femera::grid::test::sum_bcs(&part_r[0], this_load_bc);// RHS
+#endif
       //
       // p = Minv * r : initial gradient descent direction (p)
       for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
@@ -554,8 +588,9 @@ FMR_WARN_INLINE_ON
       for (fmr::Local_int i = 2; i < digits; ++i) { mod *= 10; }
       if ((iter < 5) || (iter % mod == 0)) {
         bool ok = (res2 < abs_tol2) || (rel2 < rel_tol2);
-        mini->data->send (fmr::log, "solv", "PCG", "iter",
-          "%4u %.2e,%.2e %2s %.2e,%.2e abs,rel tolerance", iter,
+        const auto istr = iter == 0 ? "init" : "iter";
+        mini->data->send (fmr::log, "solv", "PCG", istr,
+          "%4u /%4u %.2e,%.2e %2s %.2e,%.2e abs,rel tolerance", iter, iter_max-1,
           sqrt(res2), sqrt(rel2), ok?"< ":">=",
           sqrt(abs_tol2), sqrt(rel_tol2) );
       }

@@ -33,6 +33,15 @@ class Tile {
   Some higher-order element tiled grids have "holes" that make them incompatible
   with regular cartesian grids.
   */
+#if 0
+   public:
+  //
+  template <typename F=fmr::Geom_float>
+  struct MeshSize {
+    fmr::Local_int node_n;
+    fmr::Local_int elem_n;
+  };
+#endif
   private:
   template <class S>
   static constexpr auto calc_part_elem_n (
@@ -258,6 +267,18 @@ class Tile {
     const TilePattern pattern = {0, 0, 0}) noexcept {
     return T::calc_tile_elem_coor_vert (
       vert_coor, elem_i, part_size, tile_size, part_orig, pattern);
+  }
+  // Mesh operations ----------------------------------------------------------
+  //// Get a whole mesh (for comparison)
+  fmr::Local_int get_tile_mesh (// returns halo_elem_n
+    fmr::Local_int* node_conn, F* node_coor,//NOTE elems halo sorted, nodes not.
+    const F* tile_size,// only [0] used for this tile
+    const fmr::Local_int* part_elem_dims,
+    const fmr::Dim_int part_d,
+    const F* orig_coor
+  ) noexcept {
+    return T::calc_tile_mesh(node_conn, node_coor,
+      tile_size, part_elem_dims, P, part_d, orig_coor);
   }
 };//end Elem
 

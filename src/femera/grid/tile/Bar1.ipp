@@ -147,6 +147,101 @@ constexpr bool Bar1::calc_tile_elem_vert_coor(//x1,y1,z1, x2,y2,z2
       : ((halo_elem_i == 1) ? Bar1::get_tile_part_elem_n(part_elem_dims) - 1
         : halo_elem_i - 1);
     }
+/*
+  std::valarray<fmr::Local_int> part_elem_dims(3);
+  part_elem_dims[0] = do_elem_n; part_elem_dims[1] = 1; part_elem_dims[2] = 1;
+
+
+  std::valarray<fmr::Geom_float> tile_size(3);
+  tile_size[0] = bars_len / part_elem_dims[0];
+  tile_size[1] = 0.0; tile_size[2] = 0.0;
+
+  std::valarray<fmr::Local_int>
+  part_node_conn (std::size_t(part_elem_n) * elem_node_n);
+
+      std::valarray<fmr::Geom_float>
+      part_node_coor(std::size_t(part_node_n) * part_d);
+
+#if 0
+          if(is_unstructured) {
+            part_node_coor[n * part_d + d] += 0.99 * (bars_len / do_elem_n)
+            * (fmr::Geom_float(rand()) / RAND_MAX - 0.5);// [-0.5,0.5]
+          }
+#endif
+
+
+#ifdef DEBUG_PRINT
+    const auto ok = Tile<Bar1, elem_p>::get_tile_node_conn
+      (&part_node_conn[el * elem_node_n], h, &part_elem_dims[0]);
+    if (el < 10) {
+      const auto i = el * elem_node_n;
+      mini->data->send (fmr::log, ok?" ok ":" :( ", "tile", "elem",
+        "%4u conn %u %u (halo sort)",
+        el, part_node_conn[i], part_node_conn[i+1]);
+    }
+#endif
+#ifdef DEBUG_PRINT
+        const auto ok = tile.get_tile_part_node_coor
+          (buf, n, &part_elem_dims[0], &tile_size[0]);//TODO get rid of buf?
+        for (fmr::Dim_int d = 0; d < part_d; ++d) {
+          part_node_coor[n * part_d + d] = buf[d];
+        }
+        if (n < 10) {
+          const auto i = n * part_d;
+          mini->data->send (fmr::log, ok?" ok ":" :( ", "tile", "node",
+            "%4u coor %f", n, double(part_node_coor[i]));
+        }
+#endif
+*/
+  template <typename F=fmr::Geom_float>// Get a whole mesh (for comparison)
+  fmr::Local_int calc_tile_mesh (// returns halo_elem_n
+    fmr::Local_int* node_conn, F* node_coor,//NOTE elems halo sorted, nodes not.
+    const F tile_size[3],// only [0] used for this tile
+    const fmr::Local_int* part_elem_dims,
+    const fmr::Dim_int part_d,
+    const fmr::Dim_int elem_p,
+    const F* orig_coor
+  ) noexcept{
+  if (!node_conn || !node_coor || !tile_size || !part_elem_dims) return 0;
+  F zero_coor[3] = {0.0, 0.0, 0.0};
+  const auto part_orig = orig_coor ? orig_coor : zero_coor;
+  //
+  using femera::grid::tile::Tile;
+  using femera::grid::tile::Bar1;
+  //
+  Tile<Bar1> tile;
+  switch(elem_p) {
+    case 1: tile = Tile<Bar1, 1>(); break;
+    case 2: tile = Tile<Bar1, 2>(); break;
+    case 3: tile = Tile<Bar1, 3>(); break;
+    default: tile = Tile<Bar1, 1>(); break;
+  }
+  //
+  const auto part_elem_n = tile.get_tile_part_elem_n (&part_elem_dims[0]);
+  const auto elem_node_n = tile.get_tile_elem_node_n ();
+  //
+  // Connectivity: first halo elements, then the remaining elements.
+  for (fmr::Local_int el = 0; el < part_elem_n; ++el) {
+    const auto h = tile.get_halo_sort_elem (el, &part_elem_dims[0]);
+  //
+    tile.get_tile_node_conn
+      (&node_conn[el * elem_node_n], h, &part_elem_dims[0]);
+  }
+  // Node coordinates
+  //TODO also renumber local nodes, halo first.
+  const auto part_node_n = tile.get_tile_part_node_n (&part_elem_dims[0]);
+  fmr::Geom_float buf[4];
+  for ( fmr::Local_int n=0; n < part_node_n; ++n) {
+    tile.get_tile_part_node_coor
+      (buf, n, &part_elem_dims[0], &tile_size[0]);//TODO get rid of buf?
+    for (fmr::Dim_int d = 0; d < part_d; ++d) {
+      node_coor[n * part_d + d] = buf[d] + part_orig[d];
+    }
+  }
+  return tile.get_halo_elem_n(part_elem_dims);
+  }
+
+
 //
 } } }//end femera::grid::tile namespace
 
