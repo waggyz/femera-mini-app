@@ -443,19 +443,26 @@ FMR_WARN_INLINE_ON
       }
     }//end elem loop
     if (iter == 0) {// part solve init scope ==================================
+      using namespace femera::grid::test;
       //
       // Copy loads and displacement BCs into local lists.
       const auto part_load_bc = data_load_bc;// only used once
       //
       // Initialize preconditioned conjugate gradient (PCG) solver. -----------
+      // Every step is a defined kernel, so that later merges track each step.
+      // E.g., pcgs_kern_iter_ab_ref would merge steps a & b.
       //
-      using namespace femera::grid::test;
+      // f = Y(u) : initial response assumed already done.
       //
-      // f = Y(u) : initial response
       // r = b - f : initial residuals (r)
       //NOTE b (RHS) is not used again.
+#if 1
+      pcgs_kern_init_a_1(&part_r[0], &part_f[0], &part_load_bc,
+        fmr::Local_int(part_load_bc.size()), this_dofs_n);// does inline
+#else
       pcgs_kern_init_a_ref(&part_r[0], &part_f[0], &part_load_bc,
-        fmr::Local_int(part_load_bc.size()), this_dofs_n);
+        this_dofs_n);// does not inline
+#endif
       pcgs_kern_init_b_ref(&part_p[0], &Minv[0], &part_r[0], this_dofs_n);
       part_zet2 = pcgs_kern_init_c_ref(&part_r[0], &part_p[0], this_dofs_n);
       //
@@ -468,61 +475,42 @@ FMR_WARN_INLINE_ON
       if (part_zet2 < abs_tol2) {++iter; break; }// already converged
     }// end part solve init scope
     else {// part solve iteration scope
+      using namespace femera::grid::test;
       //
       auto part_z = &data_z[0];
-    // Do solver iteration. -------------------------------------------------
-#if 1
-#else
-#endif
-      //const auto this_dofs_n = part_dofs_n;// local copy
-      // f = Y(p) : already done
-      // gamma = p dot f : reduce
-      // pcgs_kern_iter_a_ref
-      fmr::Phys_float part_gamma = 0.0;
-      for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
-        part_gamma += part_p[i] * part_f[i];
-      }
+    // Do solver iteration. ---------------------------------------------------
+    //
+    // f = Y(p) : assumed already done
+    const fmr::Phys_float// gamma = p dot f : reduce
+    part_gamma = pcgs_kern_iter_a_ref(&part_p[0], &part_f[0], this_dofs_n);
+      //
       //TODO sync sum gamma
+      if (part_gamma <= 0.0) {++iter; res2 = part_gamma; break; }
       //
       // alpha = zet2 / gamma
-      // pcgs_kern_iter_b_ref
-      if (part_gamma <= 0.0) {++iter; res2 = part_gamma; break; }
-      const auto part_alpha = part_zet2 / part_gamma;
-      //
+      const auto part_alpha = pcgs_kern_iter_b_ref (part_zet2, part_gamma);
       // r = r - alpha * f : update residuals
-      // pcgs_kern_iter_c_ref
-      for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
-        part_r[i] -= part_alpha * part_f[i];
-      }
+      pcgs_kern_iter_c_ref (&part_r[0], &part_f[0], part_alpha, this_dofs_n);
       // z = Minv * r : preconditioned residual
-      // pcgs_kern_iter_d_ref
-      for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
-        part_z[i] = fmr::Phys_float(Minv[i]) * part_r[i];
-      }
+      pcgs_kern_iter_d_ref (&part_z[0], &Minv[0], &part_r[0], this_dofs_n);
       // zeta = r dot z : reduce preconditioned residual norm
-      // pcgs_kern_iter_e_ref
-      fmr::Phys_float part_zeta = 0.0;
-      for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
-        part_zeta += part_r[i] * part_z[i];
-      }
+      const fmr::Phys_float part_zeta
+      = pcgs_kern_iter_e_ref(&part_r[0], &part_z[0], this_dofs_n);
+      //
       //TODO sync sum zeta
       //
       // beta = zeta / zet2
-      // pcgs_kern_iter_f_ref
-      const auto part_beta = part_zeta / part_zet2;
-      //
+      const fmr::Phys_float part_beta
+      = pcgs_kern_iter_f_ref (part_zeta, part_zet2);
       // u = u + alpha * p : update solution
-      // pcgs_kern_iter_g_ref
-      for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
-        part_u[i] += part_alpha * part_p[i];
-      }
+      pcgs_kern_iter_g_ref (&part_u[0], &part_p[0], part_alpha, this_dofs_n);
       // p = z + beta * p : update search direction
       // pcgs_kern_iter_h_ref
-      for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
-        part_p[i] = part_z[i] + part_beta * part_p[i];
-      }
+      pcgs_kern_iter_h_ref (&part_p[0], &part_z[0], part_beta, this_dofs_n);
       // zeta2 = zeta : update for next iteration
-      part_zet2 = part_zeta;
+      part_zet2 = pcgs_kern_i_ref (part_zeta);
+      //
+      // iteration residuals
       res2 = part_zet2;
       rel2 = part_zet2 / init_zet2;
     }//end part solve iteration scope

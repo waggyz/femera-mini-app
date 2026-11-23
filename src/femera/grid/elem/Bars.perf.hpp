@@ -110,19 +110,24 @@ using femera::grid::elem::Bars;
 //
 template <typename F=fmr::Phys_float> inline
 void pcgs_kern_init_a_ref (F* r, const F* f, const BClist* load_bc,
-  const fmr::Local_int bc_n, const fmr::Local_int dofs_n) {
+  const fmr::Local_int dofs_n) {
   // r = b - f : initial residuals (r)
-  //NOTE b (RHS) is not used again.
   for (fmr::Local_int i = 0; i < dofs_n; ++i) {
     r[i] = -f[i];// Assume part_b are applied loads.
   }
-#if 1
-  for (fmr::Local_int i = 0; i < bc_n; ++i) {// does inline
-    r[(*load_bc)[i].dof] += F((*load_bc)[i].val);// RHS
-  }
-#else
   sum_bcs(&r[0], *load_bc);// does not inline
-#endif
+}
+template <typename F=fmr::Phys_float> inline
+void pcgs_kern_init_a_1 (F* r, const F* f, const BClist* load_bc,
+  const fmr::Local_int bc_n, const fmr::Local_int dofs_n) {
+  // r = b - f : initial residuals (r)
+  for (fmr::Local_int i = 0; i < dofs_n; ++i) {
+    r[i] = -f[i];// Assume part_b are applied loads.
+  }
+    if (bc_n > 0) {
+      for (fmr::Local_int i = 0; i < bc_n; ++i) {// does inline
+        r[(*load_bc)[i].dof] += F((*load_bc)[i].val);// RHS
+    } }
 }
 template <typename F=fmr::Phys_float, typename G>
 void pcgs_kern_init_b_ref (F* p, const G* Minv, const F* r,
@@ -142,7 +147,71 @@ F pcgs_kern_init_c_ref (F* r, const F* p,
   }
   return zet2;
 }
-
+template <typename F=fmr::Phys_float> inline
+F pcgs_kern_iter_a_ref(const F* p, const F* f, const fmr::Local_int dofs_n) {
+  // gamma = p dot f : reduce
+  F gamma = F(0);
+  for (fmr::Local_int i = 0; i < dofs_n; ++i) {
+    gamma += p[i] * f[i];
+  }
+  return gamma;
+}
+template <typename F=fmr::Phys_float> inline
+F pcgs_kern_iter_b_ref(const F zet2, const F gamma) {
+  // alpha = zet2 / gamma
+  return zet2 / gamma;
+}
+template <typename F=fmr::Phys_float> inline
+void pcgs_kern_iter_c_ref (F* r, const F* f, const F alpha,
+  const fmr::Local_int dofs_n) {
+  // r = r - alpha * f : update residuals
+  for (fmr::Local_int i = 0; i < dofs_n; ++i) {
+    r[i] -= alpha * f[i];
+  }
+}
+template <typename F=fmr::Phys_float, typename G>
+inline void pcgs_kern_iter_d_ref (F* z, const G* Minv, const F* r,
+  const fmr::Local_int dofs_n) {
+  // z = Minv * r : preconditioned residual
+  for (fmr::Local_int i = 0; i < dofs_n; ++i) {
+    z[i] = F(Minv[i]) * r[i];
+  }
+}
+template <typename F=fmr::Phys_float> inline
+F pcgs_kern_iter_e_ref(const F* r, const F* z, const fmr::Local_int dofs_n) {
+  // zeta = r dot z : reduce preconditioned residual norm
+  F zeta = F(0);
+  for (fmr::Local_int i = 0; i < dofs_n; ++i) {
+    zeta += r[i] * z[i];
+  }
+  return zeta;
+}
+template <typename F=fmr::Phys_float> inline
+F pcgs_kern_iter_f_ref(const F zeta, const F zet2) {
+  // beta = zeta / zet2
+  return zeta / zet2;
+}
+template <typename F=fmr::Phys_float> inline
+void pcgs_kern_iter_g_ref (F* u, const F* p, const F alpha,
+  const fmr::Local_int dofs_n) {
+  // u = u + alpha * p : update solution
+  for (fmr::Local_int i = 0; i < dofs_n; ++i) {
+    u[i] += alpha * p[i];
+  }
+}
+template <typename F=fmr::Phys_float> inline
+void pcgs_kern_iter_h_ref (F* p, const F* z, const F beta,
+  const fmr::Local_int dofs_n) {
+  // p = z + beta * p : update search direction
+  for (fmr::Local_int i = 0; i < dofs_n; ++i) {
+    p[i] = z[i] + beta * p[i];
+  }
+}
+template <typename F=fmr::Phys_float> inline
+F pcgs_kern_i_ref(const F zeta) {
+  // zet2 = zeta : update for next iteration
+  return zeta;
+}
 
 
 
