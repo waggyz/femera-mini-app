@@ -12,7 +12,6 @@
 #include "../tile/Bar1.hpp"
 
 #include <type_traits>
-
 #include <valarray>
 
 #include <gtest/gtest.h>
@@ -290,7 +289,7 @@ FMR_WARN_INLINE_ON
     data_node_size += sizeof(data_z[0]) * part_node_n * node_dofs_n;
     //
     const auto part_data_size = data_scal_size + data_node_size + data_elem_size;
-    mini->data->send (fmr::log, " FE ", "PCG ", "data",
+    mini->data->send (fmr::log, "Bars", "PCGs", "data",
       "%s: %s + %s + %s",
       fmr::form::si_unit (part_data_size, "B").c_str(),
       fmr::form::si_unit (data_scal_size, "B").c_str(),
@@ -449,8 +448,10 @@ FMR_WARN_INLINE_ON
       const auto part_load_bc = data_load_bc;// only used once
       //
       // Initialize preconditioned conjugate gradient (PCG) solver. -----------
-      // Every step is a defined kernel, so that later merges track each step.
-      // E.g., pcgs_kern_iter_ab_ref would merge steps a & b.
+      // Every step, even when trivial, is a defined kernel, so that later
+      // merges track each step.
+      // E.g., pcgs_kern_iter_cde_ref merges steps c, d, and e into one kernel
+      // (reference implementation).
       //
       // f = Y(u) : initial response assumed already done.
       //
@@ -475,6 +476,7 @@ FMR_WARN_INLINE_ON
       if (part_zet2 < abs_tol2) {++iter; break; }// already converged
     }// end part solve init scope
     else {// part solve iteration scope
+#define MERGE_PCG_ITER_CDE_GH
       using namespace femera::grid::test;
       //
       auto part_z = &data_z[0];
@@ -485,10 +487,18 @@ FMR_WARN_INLINE_ON
     part_gamma = pcgs_kern_iter_a_ref(&part_p[0], &part_f[0], this_dofs_n);
       //
       //TODO sync sum gamma
-      if (part_gamma <= 0.0) {++iter; res2 = part_gamma; break; }
+      //
+      if (part_gamma <= 0.0) {++iter; res2 = part_gamma; break; }//TODO remove?
       //
       // alpha = zet2 / gamma
       const auto part_alpha = pcgs_kern_iter_b_ref (part_zet2, part_gamma);
+#ifdef MERGE_PCG_ITER_CDE_GH
+      // r = r - alpha * f : update residuals
+      // z = Minv * r : preconditioned residual
+      // zeta = r dot z : reduce preconditioned residual norm
+      const fmr::Phys_float part_zeta = pcgs_kern_iter_cde_ref
+        (&part_r[0], &part_z[0], &part_f[0], &Minv[0], part_alpha, this_dofs_n);
+#else
       // r = r - alpha * f : update residuals
       pcgs_kern_iter_c_ref (&part_r[0], &part_f[0], part_alpha, this_dofs_n);
       // z = Minv * r : preconditioned residual
@@ -496,20 +506,28 @@ FMR_WARN_INLINE_ON
       // zeta = r dot z : reduce preconditioned residual norm
       const fmr::Phys_float part_zeta
       = pcgs_kern_iter_e_ref(&part_r[0], &part_z[0], this_dofs_n);
+#endif
       //
       //TODO sync sum zeta
       //
       // beta = zeta / zet2
-      const fmr::Phys_float part_beta
-      = pcgs_kern_iter_f_ref (part_zeta, part_zet2);
+      const fmr::Phys_float
+      part_beta = pcgs_kern_iter_f_ref (part_zeta, part_zet2);
+#ifdef MERGE_PCG_ITER_CDE_GH
+      // u = u + alpha * p : update solution
+      // p = z + beta * p : update search direction
+     pcgs_kern_iter_gh_ref(&part_u[0], &part_p[0],
+       &part_z[0], part_alpha, part_beta, this_dofs_n);
+#else
       // u = u + alpha * p : update solution
       pcgs_kern_iter_g_ref (&part_u[0], &part_p[0], part_alpha, this_dofs_n);
       // p = z + beta * p : update search direction
-      // pcgs_kern_iter_h_ref
       pcgs_kern_iter_h_ref (&part_p[0], &part_z[0], part_beta, this_dofs_n);
+#endif
       // zeta2 = zeta : update for next iteration
       part_zet2 = pcgs_kern_i_ref (part_zeta);
       //
+#undef MERGE_PCG_ITER_CDE_GH
       // iteration residuals
       res2 = part_zet2;
       rel2 = part_zet2 / init_zet2;
@@ -524,13 +542,13 @@ FMR_WARN_INLINE_ON
         if (iter == 0) {
           const auto format = iter_form_str + " /" + iter_form_str
           + " %.2e,%.2e %2s %.2e,%.2e rel,abs tol";
-          mini->data->send (fmr::log, " FE ", "PCG ", istr,
+          mini->data->send (fmr::log, "Bars", "PCGs", istr,
             format.c_str(), iter, iter_max-1,
             sqrt(rel2), sqrt(res2), ok?"< ":">=",
             sqrt(rel_tol2), sqrt(abs_tol2) );
         } else {
           const auto format = iter_form_str + " /" + iter_form_str + " %.2e";
-          mini->data->send (fmr::log, " FE ", "PCG ", istr,
+          mini->data->send (fmr::log, "Bars", "PCGs", istr,
             format.c_str(), iter, iter_max-1, sqrt(rel2) );
         }
       }
@@ -583,7 +601,7 @@ FMR_WARN_INLINE_ON
     }
   }
   mini->data->send (fmr::log, ok==part_dofs_n?" ok ":" :( ", "chck", "disp",
-    "%4u / %4u good", ok, part_dofs_n);
+    "%4u / %4u < %0.2e error", ok, part_dofs_n, numtol);
   return mini->exit ();
 }//end main ()
 

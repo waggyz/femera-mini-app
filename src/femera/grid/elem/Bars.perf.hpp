@@ -169,8 +169,8 @@ void pcgs_kern_iter_c_ref (F* r, const F* f, const F alpha,
     r[i] -= alpha * f[i];
   }
 }
-template <typename F=fmr::Phys_float, typename G>
-inline void pcgs_kern_iter_d_ref (F* z, const G* Minv, const F* r,
+template <typename F=fmr::Phys_float, typename G> inline
+void pcgs_kern_iter_d_ref (F* z, const G* Minv, const F* r,
   const fmr::Local_int dofs_n) {
   // z = Minv * r : preconditioned residual
   for (fmr::Local_int i = 0; i < dofs_n; ++i) {
@@ -182,6 +182,21 @@ F pcgs_kern_iter_e_ref(const F* r, const F* z, const fmr::Local_int dofs_n) {
   // zeta = r dot z : reduce preconditioned residual norm
   F zeta = F(0);
   for (fmr::Local_int i = 0; i < dofs_n; ++i) {
+    zeta += r[i] * z[i];
+  }
+  return zeta;
+}
+template <typename F=fmr::Phys_float, typename G> inline
+F pcgs_kern_iter_cde_ref (F* r, F* z, const F* f, const G* Minv, const F alpha,
+  const fmr::Local_int dofs_n) {
+  // Merge steps c, d, and e: update residuals, preconditioned residual, and zeta.
+  // r = r - alpha * f : update residuals
+  // z = Minv * r : preconditioned residual
+  // zeta = r dot z : reduce preconditioned residual norm
+  F zeta = F(0);
+  for (fmr::Local_int i = 0; i < dofs_n; ++i) {
+    r[i] -= alpha * f[i];
+    z[i] = F(Minv[i]) * r[i];
     zeta += r[i] * z[i];
   }
   return zeta;
@@ -207,6 +222,16 @@ void pcgs_kern_iter_h_ref (F* p, const F* z, const F beta,
     p[i] = z[i] + beta * p[i];
   }
 }
+template <typename F=fmr::Phys_float> inline
+void pcgs_kern_iter_gh_ref (F* u, F* p,
+   const F* z, const F alpha, const F beta, const fmr::Local_int dofs_n) {
+    // u = u + alpha * p : update solution
+    for (fmr::Local_int i = 0; i < dofs_n; ++i) {
+      u[i] += alpha * p[i];
+    // p = z + beta * p : update search direction
+      p[i] = z[i] + beta * p[i];
+    }
+   }
 template <typename F=fmr::Phys_float> inline
 F pcgs_kern_i_ref(const F zeta) {
   // zet2 = zeta : update for next iteration
