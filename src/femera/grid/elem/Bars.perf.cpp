@@ -280,11 +280,35 @@ fmr::Exit_int main (int argc, char** argv) {
           }
         }
       }
+#if 0
+      // swap nodes in half the elements in data_node_conn
+      for (fmr::Local_int e = 0; e < part_elem_n/2; ++e) {
+        std::swap(data_node_conn[e * 2], data_node_conn[e * 2 + 1]);
+      }
+    mini->data->send(fmr::log, "info", "swap", "elem",
+      "Swapped first half of element connectivity");
+#endif
 FMR_WARN_INLINE_OFF
     bad_jac_n += femera::grid::test::calc_bars_invt_dets<1>( &part_jacs_dets[0],
       &part_node_coor[0], &data_node_conn[0], part_elem_n, part_d);
 FMR_WARN_INLINE_ON
     }//end node_coor scope
+#if 0
+    // apply std::abs() to the determinants.
+    for (fmr::Local_int e = 0; e < part_elem_n; ++e) {
+      //part_jacs_dets[e * elem_jacd_size + 0]
+      //= std::abs(part_jacs_dets[e * elem_jacd_size + 0]);
+      part_jacs_dets[e * elem_jacd_size + 1]
+      = std::abs(part_jacs_dets[e * elem_jacd_size + 1]);
+    }
+    // log jacs and dets
+    const auto n = (part_elem_n < 10 ? part_elem_n : 10);
+    for (fmr::Local_int e = 0; e < n; ++e) {
+      mini->data->send(fmr::log, "jacs", "dets", "elem",
+        "%4u %0.2e %0.2e", e, part_jacs_dets[e * elem_jacd_size],
+        part_jacs_dets[e * elem_jacd_size + 1]);
+    }
+#endif
     // ------------------------------------------------------------------------
     const fmr::Local_int elem_intp_n = 1;
     std::valarray<fmr::Phys_float> data_intp_wgts(1.0, std::size_t(elem_intp_n));
@@ -292,9 +316,7 @@ FMR_WARN_INLINE_ON
       (0.5, elem_intp_n * elem.get_elem_d ());
     std::valarray<fmr::Phys_float> data_dN(elem.get_poly_grad_size());
 
-//FMR_WARN_INLINE_OFF
     elem.get_poly_grad_node(&data_dN[0], &data_intp_coor[0]);
-//FMR_WARN_INLINE_ON
     {
     bool ok = (iter < iter_max) && (bad_jac_n == 0)
       && (res2 > abs_tol2) && (rel2 > rel_tol2)
@@ -559,8 +581,8 @@ FMR_WARN_INLINE_ON
   {
   bool ok = (res2 < abs_tol2) || (rel2 < rel_tol2);
   mini->data->send (fmr::log, ok?" ok ":" :( ", "DONE", "iter",
-    "%4u %.2e,%.2e %2s %.2e,%.2e abs,rel tolerance",
-    iter, sqrt(res2), sqrt(rel2), ok?"< ":">=", sqrt(abs_tol2), sqrt(rel_tol2) );
+    "%4u /%4u %.2e,%.2e %2s %.2e,%.2e abs,rel tolerance", iter, iter_max,
+    sqrt(res2), sqrt(rel2), ok?"< ":">=", sqrt(abs_tol2), sqrt(rel_tol2) );
   }
   // Check correctness ========================================================
   fmr::Local_int ok = 0;
