@@ -106,6 +106,18 @@ private:
     const F tile_size[3], const F part_orig[3]
   ) noexcept;
   //
+  static constexpr fmr::Local_int calc_tile_elem_jacs_dets_size ()
+  noexcept { return 2; }// One inverse Jacobian and one determinant per point.
+  //
+  // Affine bars have J = +/- tile_size[0] for every point and order.
+  // Returns false without writing for empty output, null output or tile_size,
+  // zero order, a singular Jacobian, or a variant outside [0,3].
+  template <typename Y, typename F>
+  static constexpr bool calc_tile_elem_jacs_invt_dets (Y* jacs_dets,
+    const Y* coor, fmr::Local_int coor_n,
+    fmr::Local_int elem_i, const F* tile_size, fmr::Dim_int elem_p,
+    TilePattern pattern = {0, 0, 0}) noexcept;
+  //
   // Halo operations ----------------------------------------------------------
   // Easy for this tile: only two nodes and elements might be at partition edges.
   //TODO check if get_elem_n > 0?

@@ -270,6 +270,17 @@ class Tile {
     return T::calc_tile_elem_coor_vert (
       vert_coor, elem_i, part_size, tile_size, part_orig, pattern);
   }
+  // Shape functions, Jacs and dets  ------------------------------------------
+  //TODO retrive shape function gradients for the tile's underlying element.
+  //
+  // Results are [point][transposed inverse Jacobian, non-inverted determinant].
+  // Bar1 needs 2*coor_n output scalars, [1/J, J], using tile_size[0] on [0,1].
+  // Its affine Jacobian is independent of coor (which may be null) and order.
+  //
+  static constexpr fmr::Local_int get_tile_elem_jacs_dets_size ()
+  noexcept {// returns data size of the Jacobian and determinant at one point.
+    return T::calc_tile_elem_jacs_dets_size ();
+  }
   template<typename Y>
   static constexpr bool get_tile_elem_jacs_invt_dets(Y* jacs_dets,
     const Y* coor, fmr::Local_int coor_n,
@@ -283,7 +294,7 @@ class Tile {
   static constexpr bool get_tile_elem_jacs_invt_dets(Y* jacs_dets,
     const Y* coor, fmr::Local_int coor_n,
     const fmr::Local_int elem_i, const F* tile_size,
-    const TilePattern pattern = {0, 0, 0}, const fmr::Dim_int p=P)
+    const TilePattern pattern, const fmr::Dim_int p=P)
     noexcept {
       return T::calc_tile_elem_jacs_invt_dets
         (jacs_dets, coor, coor_n, elem_i, tile_size, p, pattern);

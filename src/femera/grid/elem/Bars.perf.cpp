@@ -247,13 +247,14 @@ fmr::Exit_int main (int argc, char** argv) {
   fmr::Phys_float rel2 = std::numeric_limits<fmr::Phys_float>::max();
   fmr::Local_int bad_jac_n = 0;
   //
+  auto iter_digits = fmr::math::count_digits(iter_max);
+  if (iter_digits < 4) { iter_digits = 4; }
+  const auto iter_form_str   = "%" + std::to_string(iter_digits) + "u";
   fmr::Local_int iter = 0;// Initialization counts as iter 0.
    {// Iteration internal data scope ==========================================
     // For now, pull most array allocation out of the loop.
     //
-    //const auto elem_jacd_size = elem_p1.get_jacs_dets_size (part_elem_n);// WRONG
-    //const auto elem_jacd_size = elem_p1.get_jacs_dets_size ();// WRONG
-    const fmr::Local_int elem_jacd_size = 2;
+    const fmr::Local_int elem_jacd_size = tile.get_tile_elem_jacs_dets_size ();
 #if 0
     printf("elems: %u, elem_jacd_size: %u\n", part_elem_n, elem_jacd_size);
 #endif
@@ -267,7 +268,7 @@ fmr::Exit_int main (int argc, char** argv) {
       part_node_coor(std::size_t(part_node_n) * part_d);
       tile.get_tile_part_mesh (// returns halo_elem_n
         &data_node_conn[0], &part_node_coor[0],//NOTE elems halo sorted, nodes not.
-        &tile_size[0],// only [0] used for this tile
+        &tile_size[0],// only [0] used for Bar1 tile
         &data_elem_dims[0],
         part_d
       );
@@ -294,12 +295,13 @@ FMR_WARN_INLINE_OFF
 FMR_WARN_INLINE_ON
     }//end node_coor scope
 #if 0
-    // apply std::abs() to the determinants.
-    for (fmr::Local_int e = 0; e < part_elem_n; ++e) {
-      //part_jacs_dets[e * elem_jacd_size + 0]
-      //= std::abs(part_jacs_dets[e * elem_jacd_size + 0]);
-      part_jacs_dets[e * elem_jacd_size + 1]
-      = std::abs(part_jacs_dets[e * elem_jacd_size + 1]);
+    if (false) {// apply std::abs() to the determinants.
+      for (fmr::Local_int e = 0; e < part_elem_n; ++e) {
+        //part_jacs_dets[e * elem_jacd_size + 0]
+        //= std::abs(part_jacs_dets[e * elem_jacd_size + 0]);
+        part_jacs_dets[e * elem_jacd_size + 1]
+        = std::abs(part_jacs_dets[e * elem_jacd_size + 1]);
+      }
     }
     // log jacs and dets
     const auto n = (part_elem_n < 10 ? part_elem_n : 10);
@@ -313,7 +315,7 @@ FMR_WARN_INLINE_ON
     const fmr::Local_int elem_intp_n = 1;
     std::valarray<fmr::Phys_float> data_intp_wgts(1.0, std::size_t(elem_intp_n));
     const std::valarray<fmr::Phys_float> data_intp_coor
-      (0.5, elem_intp_n * elem.get_elem_d ());
+      (0.5, elem_intp_n * tile.get_elem_d ());
     std::valarray<fmr::Phys_float> data_dN(elem.get_poly_grad_size());
 
     elem.get_poly_grad_node(&data_dN[0], &data_intp_coor[0]);
@@ -321,9 +323,10 @@ FMR_WARN_INLINE_ON
     bool ok = (iter < iter_max) && (bad_jac_n == 0)
       && (res2 > abs_tol2) && (rel2 > rel_tol2)
       && (res2 > 0.0) && (abs_tol2 > 0.0);
-    mini->data->send (fmr::log, ok?" ok ":" :( ", " GO ", "init",
-      "%4u bad jacd: %u",
-      iter, bad_jac_n );
+    mini->data->send (fmr::log, ok?" ok ":" :( ", "GO! ", "size",
+      "%4u dofs %4u node %4u elem (%4u bad/%4u Jacs)",
+      part_dofs_n, part_node_n, part_elem_n,
+      bad_jac_n, part_elem_n * elem_intp_n );
     }
     auto data_p = std::valarray<fmr::Phys_float>(fmr::Phys_float(0.0), part_dofs_n);
     auto data_r = std::valarray<fmr::Phys_float>(part_dofs_n);
@@ -334,6 +337,55 @@ FMR_WARN_INLINE_ON
     femera::grid::test::set_bc0(&data_Minv[0], part_disp_bc);
     //
     fmr::Phys_float part_zet2 = 0.0, init_zet2 = 0.0;
+    //
+    // Calculate the total data size for the part.
+    fmr::Global_int data_scal_size = 0;
+    fmr::Global_int data_node_size = 0;// scales with node/dofs
+    fmr::Global_int data_elem_size = 0;// scales with elem count
+    //
+    // data in and out
+    data_scal_size += sizeof(iter);
+    data_scal_size += sizeof(res2);// redundant?
+    data_scal_size += sizeof(part_zet2);
+    data_scal_size += sizeof(init_zet2);
+    data_node_size += sizeof(data_u[0]) * part_node_n * node_dofs_n;
+    data_node_size += sizeof(data_f[0]) * part_node_n * node_dofs_n;
+    //
+    // data in
+    data_scal_size += sizeof(tile) * 0;// static constexpr
+    data_scal_size += sizeof(iter_max);
+    data_scal_size += sizeof(abs_tol2);
+    data_scal_size += sizeof(rel_tol2);
+    data_scal_size += sizeof(mtrl_prop[0]) * 1;
+    data_scal_size += sizeof(part_dofs_n);
+    data_scal_size += sizeof(data_load_bc);// might be in/out
+    data_scal_size += sizeof(data_dN[0]) * 2;
+    data_scal_size += sizeof(data_intp_wgts[0]) * 1;
+    data_node_size += sizeof(data_Minv[0]) * part_node_n * node_dofs_n;
+    data_elem_size += sizeof(part_jacs_dets[0]) * part_elem_n * 2;
+    data_elem_size += sizeof(data_node_conn[0]) * part_elem_n
+    * tile.get_tile_elem_node_n ();
+    //
+    // internal data
+    data_scal_size += sizeof(part_d);
+    data_scal_size += sizeof(node_dofs_n);
+    data_scal_size += sizeof(elem_intp_n);
+    data_scal_size += sizeof(data_elem_dims[0]) * 1;
+    // this_elem_n, halo_elem_n, halo_node_n, conn_n, this_jacs_dets_size
+    data_scal_size += sizeof(fmr::Local_int) * 5;
+    data_scal_size += sizeof(fmr::Dim_int) * 1;// this_elem_d
+    data_node_size += sizeof(data_p[0]) * part_node_n * node_dofs_n;
+    data_node_size += sizeof(data_r[0]) * part_node_n * node_dofs_n;
+    data_node_size += sizeof(data_z[0]) * part_node_n * node_dofs_n;
+    //
+    const auto part_data_size = data_scal_size + data_node_size + data_elem_size;
+    mini->data->send (fmr::log, " FE ", "PCG ", "data",
+      "%s: %s + %s + %s",
+      fmr::form::si_unit (part_data_size, "B").c_str(),
+      fmr::form::si_unit (data_scal_size, "B").c_str(),
+      fmr::form::si_unit (data_node_size / part_node_n, "B/node").c_str(),
+      fmr::form::si_unit (data_elem_size / part_elem_n, "B/elem").c_str());
+    // fmr::form::si_unit (perf.get_byte (), "B   ").c_str(),
     // Iterate ================================================================
     while ((iter < iter_max) && (res2 > abs_tol2) && (rel2 > rel_tol2)) {
       // Init is iter 0.
@@ -341,31 +393,31 @@ FMR_WARN_INLINE_ON
 #if 0
       // Copy loads and displacement BCs into local lists.
       const auto this_disp_bc = part_disp_bc;// not used in iter loop
-      const auto part_load_bc = data_load_bc;// only used once in init
+      const auto part_load_bc = data_load_bc;// only used once and copied in init
 #endif
       // Make local copies of scalar constants.
+      const auto this_part_d    = part_d;
+      const auto dofs_n         = node_dofs_n;
+      const auto this_intp_n    = elem_intp_n;
       const auto part_elem_dims = &data_elem_dims[0];
-      const auto halo_elem_n = tile.get_halo_elem_n (&part_elem_dims[0]);
-      const auto halo_node_n = tile.get_halo_node_n (&part_elem_dims[0]);
-      const auto this_elem_n = part_elem_n;
-      const auto conn_n = elem.get_node_n ();//constexpr
-      const auto dofs_n = node_dofs_n;
-      const auto this_elem_d = elem.get_elem_d ();
-      const auto this_part_d = part_d;
-      const auto this_intp_n = elem_intp_n;
-      const auto this_jacs_dets_size = fmr::Local_int(2);//FIXME: elem.get_jacs_dets_size ();
-      const auto this_dofs_n = part_node_n * dofs_n;
+      // Get the rest using tile.get_*.
+      const auto this_elem_n    = tile.get_tile_part_elem_n (&part_elem_dims[0]);
+      const auto halo_elem_n    = tile.get_halo_elem_n (&part_elem_dims[0]);
+      const auto halo_node_n    = tile.get_halo_node_n (&part_elem_dims[0]);
+      const auto conn_n         = tile.get_tile_elem_node_n ();
+      const auto this_elem_d    = tile.get_elem_d ();
+      const auto this_dofs_n
+      = tile.get_tile_part_node_n (&part_elem_dims[0]) * dofs_n;
+      const auto this_jacs_dets_size = tile.get_tile_elem_jacs_dets_size ();
       //
       // Constant arrays to copy in. (Drop the valarray overhead.)
       const auto part_node_conn = &data_node_conn[0];
-      const auto this_jacd = &part_jacs_dets[0];
-      const auto this_prop = &mtrl_prop[0];
-      //
-      const auto elem_dN = &data_dN[0];
-      //const auto intp_coor = &data_intp_coor[0];
-      const auto intp_wgts = &data_intp_wgts[0];
-      const auto Minv = &data_Minv[0];
-      //
+      const auto this_jacd      = &part_jacs_dets[0];
+      const auto elem_dN        = &data_dN[0];
+      const auto intp_wgts      = &data_intp_wgts[0];
+      const auto this_prop      = &mtrl_prop[0];
+      const auto Minv           = &data_Minv[0];// inverted preconditioner w/BCs
+      // PCG working vectors
       auto part_p = &data_p[0];
       auto part_r = &data_r[0];
       //
@@ -568,10 +620,18 @@ FMR_WARN_INLINE_ON
       if ((iter < 5) || (iter % mod == 0)) {
         bool ok = (res2 < abs_tol2) || (rel2 < rel_tol2);
         const auto istr = iter == 0 ? "init" : "iter";
-        mini->data->send (fmr::log, "solv", "PCG", istr,
-          "%4u /%4u %.2e,%.2e %2s %.2e,%.2e abs,rel tolerance", iter, iter_max-1,
-          sqrt(res2), sqrt(rel2), ok?"< ":">=",
-          sqrt(abs_tol2), sqrt(rel_tol2) );
+        if (iter == 0) {
+          const auto format = iter_form_str + " /" + iter_form_str
+          + " %.2e,%.2e %2s %.2e,%.2e rel,abs tol";
+          mini->data->send (fmr::log, " FE ", "PCG ", istr,
+            format.c_str(), iter, iter_max-1,
+            sqrt(rel2), sqrt(res2), ok?"< ":">=",
+            sqrt(rel_tol2), sqrt(abs_tol2) );
+        } else {
+          const auto format = iter_form_str + " /" + iter_form_str + " %.2e";
+          mini->data->send (fmr::log, " FE ", "PCG ", istr,
+            format.c_str(), iter, iter_max-1, sqrt(rel2) );
+        }
       }
     }
     ++iter;
@@ -579,10 +639,12 @@ FMR_WARN_INLINE_ON
   --iter;// Count is off by one here.
   }// end scope part_jacs_dets
   {
+  const auto format = iter_form_str + " /" + iter_form_str
+  + " %.2e,%.2e %2s %.2e,%.2e rel,abs tol";
   bool ok = (res2 < abs_tol2) || (rel2 < rel_tol2);
   mini->data->send (fmr::log, ok?" ok ":" :( ", "DONE", "iter",
-    "%4u /%4u %.2e,%.2e %2s %.2e,%.2e abs,rel tolerance", iter, iter_max,
-    sqrt(res2), sqrt(rel2), ok?"< ":">=", sqrt(abs_tol2), sqrt(rel_tol2) );
+    format.c_str(), iter, iter_max-1,
+    sqrt(rel2), sqrt(res2), ok?"< ":">=", sqrt(rel_tol2), sqrt(abs_tol2) );
   }
   // Check correctness ========================================================
   fmr::Local_int ok = 0;

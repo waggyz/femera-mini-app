@@ -72,6 +72,111 @@ constexpr bool tile_dispatch_constexpr_test () {
 }
 static_assert (tile_dispatch_constexpr_test (), "Tile dispatch must be constexpr");
 
+TEST( GridTileBar1, TileJacobianDeterminantSize ){
+  constexpr auto linear_size = Tile<Bar1>::get_tile_elem_jacs_dets_size ();
+  constexpr auto quadratic_size = Tile<Bar1, 2>::get_tile_elem_jacs_dets_size ();
+  constexpr auto cubic_size = Tile<Bar1, 3, float>::get_tile_elem_jacs_dets_size ();
+  static_assert (linear_size == 2 && quadratic_size == 2 && cubic_size == 2,
+    "Bar Jacobians require two scalars per integration point");
+  EXPECT_EQ( linear_size, 2u );
+  EXPECT_EQ( quadratic_size, 2u );
+  EXPECT_EQ( cubic_size, 2u );
+  EXPECT_TRUE( noexcept(Tile<Bar1>::get_tile_elem_jacs_dets_size ()) );
+}
+
+constexpr bool bar_jacobian_constexpr_test () {
+  const double size[1] = {4.0};
+  const double points[2] = {0.25, 0.75};
+  double result[4] = {};
+  return Tile<Bar1>::get_tile_elem_jacs_invt_dets (result, points, 2, 7, size)
+    && result[0] > 0.0 && result[1] > 0.0
+    && Tile<Bar1, 3>::get_tile_elem_jacs_invt_dets (
+      result, points, 2, 7, size, TilePattern{2, 0, 0})
+    && result[2] < 0.0 && result[3] < 0.0;
+}
+static_assert (bar_jacobian_constexpr_test (), "Bar Jacobians must be constexpr");
+
+template <fmr::Dim_int P, typename F, typename Y>
+void check_bar_jacobians () {
+  constexpr Tile<Bar1, P, F> tile;
+  constexpr auto result_size = 4u * tile.get_tile_elem_jacs_dets_size ();
+  const Y points[4] = {Y(0), Y(0.25), Y(0.75), Y(1)};
+  for (const F length : {F(4), F(-4)}) {
+    const F size[3] = {length, F(7), F(-9)};
+    for (fmr::Local_int variant = 0; variant < 4; ++variant) {
+      for (fmr::Local_int offset = 0; offset < 2; ++offset) {
+        for (fmr::Local_int el = 0; el < 4; ++el) {
+          const TilePattern pattern = {variant, offset, 1};
+          const bool reversed = variant == 1
+            || (variant == 2 && (el + offset) % 2 == 1)
+            || (variant == 3 && (el + offset) % 2 == 0);
+          const Y jac = reversed ? -Y(length) : Y(length);
+          Y result[result_size + 1u] = {};
+          result[result_size] = Y(99);
+          ASSERT_TRUE( tile.get_tile_elem_jacs_invt_dets (
+            result, points, 4, el, size, pattern) );
+          Y gradients[4u * (P + 1u)] = {};
+          ASSERT_TRUE( (elem::Elem<elem::Bars, P, Y>::get_poly_node_grad (
+            gradients, points, P + 1, 4)) );
+          for (fmr::Local_int ip = 0; ip < 4; ++ip) {
+            Y reference_jac = Y(0);
+            for (fmr::Local_int node = 0; node < P + 1u; ++node) {
+              const Y fraction = node == 0 ? Y(0)
+                : (node == 1 ? Y(1) : Y(node - 1) / Y(P));
+              const Y coordinate = reversed
+                ? Y(length) * (Y(1) - fraction) : Y(length) * fraction;
+              reference_jac += gradients[ip * (P + 1u) + node] * coordinate;
+            }
+            EXPECT_NEAR( result[2u * ip + 1u], reference_jac, 1e-5 );
+            EXPECT_EQ( result[2u * ip], Y(1) / jac );
+            EXPECT_EQ( result[2u * ip + 1u], jac );
+          }
+          EXPECT_EQ( result[result_size], Y(99) );
+        }
+      }
+    }
+  }
+}
+
+TEST( GridTileBar1, TileJacobians ){
+  check_bar_jacobians<1, double, double> ();
+  check_bar_jacobians<2, double, double> ();
+  check_bar_jacobians<3, double, double> ();
+  check_bar_jacobians<1, float, float> ();
+  check_bar_jacobians<2, double, float> ();
+  check_bar_jacobians<3, float, double> ();
+}
+
+TEST( GridTileBar1, TileJacobianArguments ){
+  const double size[1] = {4.0};
+  const double zero_size[1] = {0.0};
+  const double point[1] = {0.5};
+  double result[3] = {99.0, 99.0, 99.0};
+  EXPECT_FALSE( Tile<Bar1>::get_tile_elem_jacs_invt_dets (
+    result, point, 0, 0, size) );
+  EXPECT_FALSE( Tile<Bar1>::get_tile_elem_jacs_invt_dets (
+    result, point, 1, 0, size, 0) );
+  EXPECT_FALSE( Tile<Bar1>::get_tile_elem_jacs_invt_dets (
+    result, point, 1, 0, size, TilePattern{4, 0, 0}) );
+  EXPECT_FALSE( Tile<Bar1>::get_tile_elem_jacs_invt_dets (
+    result, point, 1, 0, zero_size) );
+  EXPECT_FALSE( Tile<Bar1>::get_tile_elem_jacs_invt_dets (
+    result, point, 1, 0, nullptr) );
+  EXPECT_FALSE( Tile<Bar1>::get_tile_elem_jacs_invt_dets<double> (
+    nullptr, point, 1, 0, size) );
+  for (const double value : result) EXPECT_DOUBLE_EQ( value, 99.0 );
+
+  EXPECT_TRUE( Tile<Bar1>::get_tile_elem_jacs_invt_dets<double> (
+    result, nullptr, 1, 0, size, 3) );
+  EXPECT_DOUBLE_EQ( result[0], 0.25 );
+  EXPECT_DOUBLE_EQ( result[1], 4.0 );
+  EXPECT_DOUBLE_EQ( result[2], 99.0 );
+  EXPECT_TRUE( Tile<Bar1>::get_tile_elem_jacs_invt_dets (
+    result, point, 1, 0, size, TilePattern{1, 0, 0}, 2) );
+  EXPECT_DOUBLE_EQ( result[0], -0.25 );
+  EXPECT_DOUBLE_EQ( result[1], -4.0 );
+}
+
 // Tiling tests ===============================================================
 
 TEST( GridTileBar1, TilePartElemCount ){

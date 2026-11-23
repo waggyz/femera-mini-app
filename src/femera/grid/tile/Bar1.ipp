@@ -102,6 +102,26 @@ constexpr bool Bar1::calc_tile_elem_vert_coor(//x1,y1,z1, x2,y2,z2
       return elem_i < elem_n;
     }
 
+template <typename Y, typename F>
+constexpr bool Bar1::calc_tile_elem_jacs_invt_dets (Y* jacs_dets,
+  const Y*, const fmr::Local_int coor_n,
+  const fmr::Local_int elem_i, const F* tile_size,
+  const fmr::Dim_int elem_p, const TilePattern pattern) noexcept {
+  if (!jacs_dets || !tile_size || coor_n == 0 || elem_p == 0
+      || pattern.variant > 3) return false;
+  const bool reversed = pattern.variant == 1
+    || (pattern.variant >= 2
+      && ((elem_i ^ pattern.offset_x ^ (pattern.variant - 2)) & 1u));
+  const Y jac = reversed ? -Y(tile_size[0]) : Y(tile_size[0]);
+  if (!(jac > Y(0) || jac < Y(0))) return false;
+  const Y inv = Y(1) / jac;
+  for (fmr::Local_int ip = 0; ip < coor_n; ++ip) {
+    jacs_dets[2u * ip] = inv;
+    jacs_dets[2u * ip + 1u] = jac;
+  }
+  return true;
+}
+
 #if 0
   inline
   bool Elem::get_tile_vert_conn (fmr::Local_int* conn,
