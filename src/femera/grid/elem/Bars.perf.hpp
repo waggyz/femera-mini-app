@@ -237,6 +237,123 @@ F pcgs_kern_i_ref(const F zeta) {
   // zet2 = zeta : update for next iteration
   return zeta;
 }
+// ============================================================================
+template <class T, typename F=fmr::Phys_float>
+class PCGs {
+public:
+F init (F* f, const F* Minv, const BClist& load_bc,
+    const fmr::Local_int ndof) {
+  init_data(ndof);
+  return init_a(f, Minv, load_bc, ndof);
+}
+F iter (F* f, F* u, const F* Minv, const fmr::Local_int ndof) {
+  return iter_a(f, u, Minv, ndof);
+}
+std::size_t exit () {
+  const std::size_t bytes = sizeof(F) * (p.size()  + r.size() + z.size());
+  p.resize(0);// Resize to zero should free memory.
+  r.resize(0);
+  z.resize(0);
+  return bytes;
+}
+F* ptr_p() { return &p[0];
+}
+F get_res2() const { return zet2;
+}
+std::size_t get_byte_size() const {//NOTE includes one extra F for zet2
+  return sizeof(F) * (p.size() + r.size() + z.size() + 1);
+}
+// Kernel variations ----------------------------------------------------------
+template <typename G=fmr::Geom_float> inline
+F init_a (F* f, const G* Minv, const BClist& load_bc,
+    const fmr::Local_int ndof) {
+  pcgs_kern_init_a_1(&r[0], &f[0], &load_bc,
+    fmr::Local_int(load_bc.size()), ndof); // does inline
+  pcgs_kern_init_b_ref(&p[0], &Minv[0], &r[0], ndof);
+  zet2 = pcgs_kern_init_c_ref(&r[0], &p[0], ndof);
+  return zet2;
+}
+template <typename G=fmr::Geom_float> inline
+F init_ref(F* f, const G* Minv, const BClist& load_bc,
+    const fmr::Local_int ndof) {
+  pcgs_kern_init_a_ref(&r[0], &f[0], &load_bc, ndof);// does not inline
+  pcgs_kern_init_b_ref(&p[0], &Minv[0], &r[0], ndof);
+  zet2 = pcgs_kern_init_c_ref(&r[0], &p[0], ndof);
+  return zet2;
+}
+template <typename G=fmr::Geom_float> inline
+F iter_a(F* f, F* u, const G* Minv, const fmr::Local_int ndof) {
+  // gamma = p dot f : reduce
+  const F gamma = pcgs_kern_iter_a_ref(&p[0], &f[0], ndof);
+  //
+  //TODO sync sum gamma
+  //
+  //if (gamma <= 0.0) {++iter; res2 = gamma; break; }//TODO remove?
+  //
+  // alpha = zet2 / gamma
+  const auto alpha = pcgs_kern_iter_b_ref (zet2, gamma);
+  // r = r - alpha * f : update residuals
+  // z = Minv * r : preconditioned residual
+  // zeta = r dot z : reduce preconditioned residual norm
+  const auto zeta = pcgs_kern_iter_cde_ref (&r[0], &z[0], &f[0], &Minv[0],
+    alpha, ndof);
+  //
+  //TODO sync sum zeta
+  //
+  // beta = zeta / zet2
+  //const fmr::Phys_float zeta = zeta;
+  const auto beta = pcgs_kern_iter_f_ref (zeta, zet2);
+  // u = u + alpha * p : update solution
+  // p = z + beta * p : update search direction
+  pcgs_kern_iter_gh_ref(&u[0], &p[0], &z[0], alpha, beta, ndof);
+  // zeta2 = zeta : update for next iteration
+  zet2 = pcgs_kern_i_ref (zeta);
+  return zet2;
+}
+template <typename G=fmr::Geom_float> inline
+F iter_ref(F* f, F* u, const G* Minv, const fmr::Local_int ndof) {
+  // gamma = p dot f : reduce
+  const auto gamma = pcgs_kern_iter_a_ref(&p[0], &f[0], ndof);
+  //
+  //TODO sync sum gamma
+  //
+  //if (gamma <= 0.0) {++iter; res2 = gamma; break; }//TODO remove?
+  //
+  // alpha = zet2 / gamma
+  const auto alpha = pcgs_kern_iter_b_ref (zet2, gamma);
+  // r = r - alpha * f : update residuals
+  pcgs_kern_iter_c_ref (&r[0], &f[0], alpha, ndof);
+  // z = Minv * r : preconditioned residual
+  pcgs_kern_iter_d_ref (&z[0], &Minv[0], &r[0], ndof);
+  // zeta = r dot z : reduce preconditioned residual norm
+  const auto zeta = pcgs_kern_iter_e_ref(&r[0], &z[0], ndof);
+  //
+  //TODO sync sum zeta
+  //
+  // beta = zeta / zet2
+  const auto beta = pcgs_kern_iter_f_ref (zeta, zet2);
+  // u = u + alpha * p : update solution
+  pcgs_kern_iter_g_ref (&u[0], &p[0], alpha, ndof);
+    // p = z + beta * p : update search direction
+  pcgs_kern_iter_h_ref (&p[0], &z[0], beta, ndof);
+  // zeta2 = zeta : update for next iteration
+  zet2 = pcgs_kern_i_ref (zeta);
+  return zet2;
+}
+private:// ====================================================================
+F zet2;
+std::valarray<F> p;
+std::valarray<F> r;
+std::valarray<F> z;
+std::size_t init_data(const fmr::Local_int ndof) {
+  //NOTE valarray inits and resizes to zeros.
+  if( p.size() != ndof) {p.resize(ndof);}else{}// zero if needed.
+  if( r.size() != ndof) {r.resize(ndof);}else{}
+  if( z.size() != ndof) {z.resize(ndof);}else{}
+  //NOTE only reallocates when new size exceeds previously allocated capacity
+  return ndof * sizeof(F);
+}
+};//end class PCGs
 
 
 

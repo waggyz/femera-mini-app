@@ -1,5 +1,3 @@
-#include "Bars.perf.hpp"
-
 #if 0
 // included by Bars.perf.hpp
 #include "../../femera.hpp"
@@ -9,6 +7,10 @@
 #include "../../../fmr/smat.hpp"
 #endif
 
+//#define MERGE_PCG_ITER_CDE_GH
+#include "Bars.perf.hpp"
+//#undef MERGE_PCG_ITER_CDE_GH
+
 #include "../tile/Bar1.hpp"
 
 #include <type_traits>
@@ -17,6 +19,8 @@
 #include <gtest/gtest.h>
 
 #undef DEBUG_PRINT
+
+#define MERGE_PCG_ITER_CDE_GH
 
 auto  mini = fmr::new_jobs ();
 
@@ -30,16 +34,17 @@ fmr::Exit_int main (int argc, char** argv) {
   const fmr::Geom_float bars_len  = 1.0;// 1m long
   //
   // Set physics parameters. --------------------------------------------------
-  const fmr::Phys_float bars_area = 1e-2 * 1e-2;// 1cm x 1cm cross section
+  const fmr::Phys_float bars_area = 0.010 * 0.010;// 1cm x 1cm cross section
   const fmr::Phys_float mtrl_modx = 200e9;// GPa (steel)
   //
   const fmr::Enum_int load_case = 1;
   // 0: no load
   // 1: apply end displacement (only)
   // 2: apply end force (only),
+  //    tip_u = end_load * bars_len / (bars_area * mtrl_modx)
   // 3: pin both ends, apply a displacement near the middle
   // 4: pin both ends, apply a force near the middle
-  //    tip_u = end_load * bars_len / (bars_area * mtrl_modx)
+  // 5: apply symmetric end displacements (exact at halfway)
   //
   const fmr::Phys_float end_disp = 0.001;// 1 mm
   const fmr::Phys_float end_load = 1e3;// 1 kN tension
@@ -126,6 +131,11 @@ fmr::Exit_int main (int argc, char** argv) {
       case 4: {
         maps_disp_bc[part_dofs_n - 1] = fmr::Phys_float(0.0);
         maps_load_bc[part_dofs_n / 2] = fmr::Phys_float(end_load);
+      break;
+      }
+      case 5: {
+        maps_disp_bc[0              ] = fmr::Phys_float(-end_disp);//overwrite
+        maps_disp_bc[part_dofs_n - 1] = fmr::Phys_float( end_disp);
       break;
       }
       default: break;
@@ -289,7 +299,7 @@ FMR_WARN_INLINE_ON
     data_node_size += sizeof(data_z[0]) * part_node_n * node_dofs_n;
     //
     const auto part_data_size = data_scal_size + data_node_size + data_elem_size;
-    mini->data->send (fmr::log, "Bars", "PCGs", "data",
+    mini->data->send (fmr::log, "Bar1", "PCGs", "data",
       "%s: %s + %s + %s",
       fmr::form::si_unit (part_data_size, "B").c_str(),
       fmr::form::si_unit (data_scal_size, "B").c_str(),
@@ -441,6 +451,28 @@ FMR_WARN_INLINE_ON
         }
       }
     }//end elem loop
+    /*
+    // u, f, Minv, BCs owned by caller
+    //
+    const fmr::Local int bad_jacs = fems_resp (&part_f[0], &part_u[0]);
+    //
+    PCGs slvr = PCGs();// ndof optional arg?
+    const fmr::Phys_float init_res2 = slvr.init_ref
+      (&part_u[0], &part_f[0], %Minv[0],*load_bcs, ndof);
+    //
+    if (init_res2 <=0) {break;}
+    fmr::Phys_float iter_rel2 = iter_res2 / init_res2 ;
+    //
+    // Iterate...
+    fems_resp (&part_f[0], slvr.get_p(), ndof);
+    iter_res2 = slvr.iter_ref (&part_u[0], &part_f[0], &Minv[0], ndof);
+    iter_rel2 = iter_res2 / init_res2;
+    //
+    slvr.exit();// frees mem. Skip this if running another solve.
+    //
+    // ...until exit.
+    //
+    */
     if (iter == 0) {// part solve init scope ==================================
       using namespace femera::grid::test;
       //
@@ -473,10 +505,9 @@ FMR_WARN_INLINE_ON
       res2 = part_zet2;
       rel2 = part_zet2 / init_zet2;
       // DONE if already converged.
-      if (part_zet2 < abs_tol2) {++iter; break; }// already converged
+      if (res2 < abs_tol2) {++iter; break; }// already converged
     }// end part solve init scope
     else {// part solve iteration scope
-#define MERGE_PCG_ITER_CDE_GH
       using namespace femera::grid::test;
       //
       auto part_z = &data_z[0];
@@ -527,7 +558,6 @@ FMR_WARN_INLINE_ON
       // zeta2 = zeta : update for next iteration
       part_zet2 = pcgs_kern_i_ref (part_zeta);
       //
-#undef MERGE_PCG_ITER_CDE_GH
       // iteration residuals
       res2 = part_zet2;
       rel2 = part_zet2 / init_zet2;
@@ -542,13 +572,13 @@ FMR_WARN_INLINE_ON
         if (iter == 0) {
           const auto format = iter_form_str + " /" + iter_form_str
           + " %.2e,%.2e %2s %.2e,%.2e rel,abs tol";
-          mini->data->send (fmr::log, "Bars", "PCGs", istr,
+          mini->data->send (fmr::log, "Bar1", "PCGs", istr,
             format.c_str(), iter, iter_max-1,
             sqrt(rel2), sqrt(res2), ok?"< ":">=",
             sqrt(rel_tol2), sqrt(abs_tol2) );
         } else {
           const auto format = iter_form_str + " /" + iter_form_str + " %.2e";
-          mini->data->send (fmr::log, "Bars", "PCGs", istr,
+          mini->data->send (fmr::log, "Bar1", "PCGs", istr,
             format.c_str(), iter, iter_max-1, sqrt(rel2) );
         }
       }
@@ -611,5 +641,7 @@ TEST(BarsPerf, TrivialTest) {
 namespace femera { namespace test {
 
 } }//end femera::test namespace
+
+#undef MERGE_PCG_ITER_CDE_GH
 
 #undef DEBUG_PRINT
