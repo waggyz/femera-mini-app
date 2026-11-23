@@ -183,7 +183,7 @@ void check_bar_mesh (const F* orig_coor, const fmr::Dim_int part_d) {
   const F tile_size[3] = {F(6), F(3), F(-3)};
   fmr::Local_int conn[4u * (P + 1u)] = {};
   F coor[(4u * P + 1u) * 3u] = {};
-  EXPECT_EQ( tile.get_tile_mesh (conn, coor, tile_size, dims, part_d, orig_coor), 2 );
+  EXPECT_EQ( tile.get_tile_part_mesh (conn, coor, tile_size, dims, part_d, orig_coor), 2 );
   const fmr::Local_int sorted_elems[4] = {0, 3, 1, 2};
   for (fmr::Local_int el = 0; el < 4; ++el) {
     EXPECT_EQ( conn[el * (P + 1)], sorted_elems[el] * P );
@@ -217,7 +217,7 @@ TEST( GridTileBar1, WholeMeshDefaultOrigin ){
   fmr::Local_int conn[6] = {};
   double coor[15] = {};
 
-  EXPECT_EQ( tile.get_tile_mesh (conn, coor, tile_size, dims, 3), 2 );
+  EXPECT_EQ( tile.get_tile_part_mesh (conn, coor, tile_size, dims, 3), 2 );
   const fmr::Local_int expected_conn[6] = {0, 2, 1, 2, 4, 3};
   for (fmr::Local_int i = 0; i < 6; ++i) {
     EXPECT_EQ( conn[i], expected_conn[i] );

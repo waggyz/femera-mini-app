@@ -270,9 +270,22 @@ class Tile {
     return T::calc_tile_elem_coor_vert (
       vert_coor, elem_i, part_size, tile_size, part_orig, pattern);
   }
+  template<typename Y>
+  static constexpr bool get_tile_elem_jacs_invt_dets(Y* jacs_dets,
+    const Y* coor, const fmr::Local_int elem_i, const F* tile_size)
+    noexcept {
+      return T::calc_tile_elem_jacs_invt_dets (jacs_dets, coor, elem_i, tile_size);
+    }
+  template<typename Y>
+  static constexpr bool get_tile_elem_jacs_invt_dets(Y* jacs_dets,
+    const Y* coor, const fmr::Local_int elem_i, const F* tile_size,
+    const TilePattern pattern = {0, 0, 0})
+    noexcept {
+      return T::calc_tile_elem_jacs_invt_dets (jacs_dets, coor, elem_i, tile_size, pattern);
+    }
   // Mesh operations ----------------------------------------------------------
   //// Get a whole mesh (for export and testing)
-  static fmr::Local_int get_tile_mesh (// returns halo_elem_n
+  static fmr::Local_int get_tile_part_mesh (// returns halo_elem_n
     fmr::Local_int* node_conn, F* node_coor,//NOTE elems halo sorted, nodes not.
     const F* tile_size,// only [0] used for this tile
     const fmr::Local_int* part_elem_dims,
@@ -283,7 +296,7 @@ class Tile {
       tile_size, part_elem_dims, P, part_d, part_orig);
   }
 };//end Elem
-
+//
 } } }//end femera::grid::tile:: namespace
 
 #include "Tile.ipp"

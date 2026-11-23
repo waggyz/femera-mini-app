@@ -265,7 +265,7 @@ fmr::Exit_int main (int argc, char** argv) {
       // Get node coordinates (temporarily).
       std::valarray<fmr::Geom_float>
       part_node_coor(std::size_t(part_node_n) * part_d);
-      tile.get_tile_mesh (// returns halo_elem_n
+      tile.get_tile_part_mesh (// returns halo_elem_n
         &data_node_conn[0], &part_node_coor[0],//NOTE elems halo sorted, nodes not.
         &tile_size[0],// only [0] used for this tile
         &data_elem_dims[0],
