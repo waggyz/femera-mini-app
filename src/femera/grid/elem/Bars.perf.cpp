@@ -1,9 +1,15 @@
+#include "Bars.perf.hpp"
+
+#if 0
+// included by Bars.perf.hpp
 #include "../../femera.hpp"
 #include "Bars.hpp"
-#include "../tile/Bar1.hpp"
 #include "../../../fmr/fems/elem-jacs.hpp"
 #include "../../../fmr/fems/elem-poly.hpp"
 #include "../../../fmr/smat.hpp"
+#endif
+
+#include "../tile/Bar1.hpp"
 
 #include <type_traits>
 
@@ -15,105 +21,10 @@
 
 auto  mini = fmr::new_jobs ();
 
-  // These are sized for one partition, not the whole model.
-  typedef std::map<fmr::Local_int, fmr::Phys_float> BCmap;// DOF id, value
-  typedef std::pair<fmr::Local_int, fmr::Phys_float> BCitem;
-  typedef std::vector<BCitem> BClist;
-
-namespace femera { namespace grid { namespace test {
-
-using femera::grid::elem::Elem;
-using femera::grid::elem::Bars;
-
-  template <fmr::Dim_int P=1,
-    typename Y=fmr::Phys_float, typename G=fmr::Geom_float> inline
-  fmr::Local_int calc_bars_invt_dets (Y* part_invt_dets,
-    const G* part_node_coor,// for full P elem.
-    const fmr::Local_int* part_node_conn,
-    const fmr::Local_int part_elem_n,
-    const fmr::Dim_int part_d) {
-  // NOTE this is for Bars elements.
-  fmr::Local_int bad = 0;
-  Elem<Bars, P> part_elem;
-  Elem<Bars, 1> elem_p1;
-  const auto elem_d = part_elem.get_elem_d();
-  const std::valarray<fmr::Phys_float> intp_coor(0.5, std::size_t(part_d * 1));
-  //
-  std::valarray<fmr::Phys_float> dN(elem_p1.get_poly_grad_size());
-//FMR_WARN_INLINE_OFF
-  elem_p1.get_poly_grad_node(&dN[0], &intp_coor[0]);
-//FMR_WARN_INLINE_ON
-  for (fmr::Local_int el = 0; el < part_elem_n; ++el) {
-    std::valarray<fmr::Phys_float>
-    coor(std::size_t(part_d * elem_p1.get_node_n()));// buffer
-    for (fmr::Local_int n = 0; n < elem_p1.get_node_n(); ++n) {
-      for (fmr::Dim_int d = 0; d < part_d; ++d) {
-        coor[n * part_d + d] = Y(part_node_coor
-          [part_node_conn[el * part_elem.get_node_n() + n] * part_d + d]);
-      }
-    }
-    // Calculate Jacobian.
-    std::valarray<fmr::Phys_float> jac(std::size_t(part_d * elem_d));
-    fmr::fems::elem::elem_jacs_node_coor_a(
-      &jac[0], &coor[0], &dN[0], 1, elem_p1.get_node_n(), part_d, elem_d);
-    // Calculate inverse Jacobian and determinant.
-    std::valarray<fmr::Phys_float> jac_inv(std::size_t(elem_d * part_d));
-    const auto this_bad = fmr::math::m1x1_invt_det_ref
-      (&part_invt_dets[el * (part_d * elem_d + 1)], &jac[0]);
-    //TODO fmr::math::smat_pinv_col_ref () when elem_d != part_d
-    bad += fmr::Local_int(std::abs(this_bad));
-#ifdef DEBUG_PRINT
-    if (el < 5) {
-      const bool ok = (this_bad == 0) &&
-        std::abs(part_invt_dets[el * (part_d * elem_d + 1) + 0]
-          - 1.0 / part_invt_dets[el * (part_d * elem_d + 1) + 1])
-        < std::numeric_limits<fmr::Phys_float>::epsilon();
-      mini->data->send (fmr::log, ok?" ok ":" :( ", "jacd", "elem",
-        "%4u %f = 1.0 / %f bad: %u / %u", el,
-        double(part_invt_dets[el * (part_d * elem_d + 1) + 0]),
-        double(part_invt_dets[el * (part_d * elem_d + 1) + 1]),
-        this_bad, bad);
-    }
-#endif
-  }//end el loop
-  return bad;
-}//end calc_bars_invt_dets
-
-  template < typename F=fmr::Phys_float> inline
-  fmr::Local_int set_bcs (F* vals, const BClist bcs){
-    const auto n = fmr::Local_int(bcs.size());
-    if (n>0) {
-      for (fmr::Local_int i = 0; i < n; ++i) {
-        vals[bcs[i].first] = F(bcs[i].second);// Set vals.
-    } }
-  return n;
-}
-  template < typename F=fmr::Phys_float> inline
-  fmr::Local_int set_bc0 (F* vals, const BClist bcs){// sets listed dof to 0
-    const auto n = fmr::Local_int(bcs.size());
-    if (n>0) {
-      for (fmr::Local_int i = 0; i < n; ++i) {
-        vals[bcs[i].first] = F(0);// Set vals.
-    } }
-  return n;
-}
-  template < typename F=fmr::Phys_float> inline
-  fmr::Local_int sum_bcs (F* vals, const BClist bcs){
-  const auto n = fmr::Local_int(bcs.size());
-    if (n>0) {
-    for (fmr::Local_int i = 0; i < n; ++i) {
-      vals[bcs[i].first] += F(bcs[i].second);// Sum vals.
-    } }
-  return n;
-}
-//
-} } }//end namespace femera::grid::test =======================================
-
 fmr::Exit_int main (int argc, char** argv) {
-  mini->init (&argc, argv);
-  // Prototype unstructured mesh partition full FEA stack.
-  //
+  mini->init (&argc, argv);// Prototype (un)structured partition full FEA stack.
   // Set mesh parameters. -----------------------------------------------------
+  //
   const bool is_unstructured = false;// perturb nodes.//TODO save coor to check.
   const fmr::Local_int do_elem_n = 9;
   //
@@ -185,22 +96,20 @@ fmr::Exit_int main (int argc, char** argv) {
   }
 #endif
   // Initialize physics -------------------------------------------------------
-  // --------------------------------------------------------------------------
   const std::valarray<fmr::Phys_float>
   mtrl_prop(fmr::Phys_float(mtrl_modx * bars_area), 1);// N
   //
   const fmr::Local_int node_dofs_n = part_d;// elasticity only
   const fmr::Local_int part_dofs_n = part_node_n * node_dofs_n;
-  auto data_f = std::valarray<fmr::Phys_float>(part_dofs_n);// Zeroed at iter start.
+  auto data_f = std::valarray<fmr::Phys_float>(part_dofs_n);// Zeroed in iter.
   auto data_u = std::valarray<fmr::Phys_float>(fmr::Phys_float(0.0), part_dofs_n);
   //TODO init part_u to constant strain.
   //
-  //
-  BClist part_disp_bc;
-  BClist data_load_bc;
+  femera::grid::test::BClist part_disp_bc;
+  femera::grid::test::BClist data_load_bc;
   {// Scope boundary condition maps. These sort and dedupe BCs.
-    BCmap maps_disp_bc;
-    BCmap maps_load_bc;
+    femera::grid::test::BCmap maps_disp_bc;
+    femera::grid::test::BCmap maps_load_bc;
     //
     maps_disp_bc[0] = fmr::Phys_float(0.0);// Fix left end.
     //
@@ -225,6 +134,7 @@ fmr::Exit_int main (int argc, char** argv) {
     // Copy maps to lists.
     for (const auto &p : maps_disp_bc) {
       part_disp_bc.emplace_back(p.first, p.second);
+      //part_disp_bc.emplace_back(BCitem<>(p.first, p.second));
     }
     for (const auto &p : maps_load_bc) {
       data_load_bc.emplace_back(p.first, p.second);
@@ -249,7 +159,7 @@ fmr::Exit_int main (int argc, char** argv) {
   //
   auto iter_digits = fmr::math::count_digits(iter_max);
   if (iter_digits < 4) { iter_digits = 4; }
-  const auto iter_form_str   = "%" + std::to_string(iter_digits) + "u";
+  const auto iter_form_str = "%" + std::to_string(iter_digits) + "u";
   fmr::Local_int iter = 0;// Initialization counts as iter 0.
    {// Iteration internal data scope ==========================================
     // For now, pull most array allocation out of the loop.
@@ -345,13 +255,14 @@ FMR_WARN_INLINE_ON
     //
     // data in and out
     data_scal_size += sizeof(iter);
-    data_scal_size += sizeof(res2);// redundant?
+    data_scal_size += sizeof(res2);
+    data_scal_size += sizeof(rel2);
     data_scal_size += sizeof(part_zet2);
     data_scal_size += sizeof(init_zet2);
     data_node_size += sizeof(data_u[0]) * part_node_n * node_dofs_n;
     data_node_size += sizeof(data_f[0]) * part_node_n * node_dofs_n;
     //
-    // data in
+    // const data in
     data_scal_size += sizeof(tile) * 0;// static constexpr
     data_scal_size += sizeof(iter_max);
     data_scal_size += sizeof(abs_tol2);
@@ -537,29 +448,20 @@ FMR_WARN_INLINE_ON
       const auto part_load_bc = data_load_bc;// only used once
       //
       // Initialize preconditioned conjugate gradient (PCG) solver. -----------
+      //
+      using namespace femera::grid::test;
+      //
       // f = Y(u) : initial response
       // r = b - f : initial residuals (r)
-      //NOTE b is not used again. Is this the RHS?
-#if 1
-      for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
-        // part_r[i] = part_b[i] - part_f[i];
-        part_r[i] = -part_f[i];// Assume part_b are applied loads.
-      }//TODO pull RHS application out of the iter loop.
-      femera::grid::test::sum_bcs(&part_r[0], part_load_bc);// RHS
-#endif
+      //NOTE b (RHS) is not used again.
+      pcgs_kern_init_a_ref(&part_r[0], &part_f[0], &part_load_bc,
+        fmr::Local_int(part_load_bc.size()), this_dofs_n);
+      pcgs_kern_init_b_ref(&part_p[0], &Minv[0], &part_r[0], this_dofs_n);
+      part_zet2 = pcgs_kern_init_c_ref(&part_r[0], &part_p[0], this_dofs_n);
       //
-      // p = Minv * r : initial gradient descent direction (p)
-      for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
-        part_p[i] = fmr::Phys_float(Minv[i]) * part_r[i];
-      }
-      // zet2 = r dot p : reduce initial residual norm.
-      for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
-        part_zet2 += part_r[i] * part_p[i];
-      }
       //TODO Sync sum zet2.
       //
       init_zet2 = part_zet2;// Keep for relative tolerance.
-      part_zet2 = init_zet2;
       res2 = part_zet2;
       rel2 = part_zet2 / init_zet2;
       // DONE if already converged.
@@ -569,9 +471,13 @@ FMR_WARN_INLINE_ON
       //
       auto part_z = &data_z[0];
     // Do solver iteration. -------------------------------------------------
+#if 1
+#else
+#endif
       //const auto this_dofs_n = part_dofs_n;// local copy
       // f = Y(p) : already done
       // gamma = p dot f : reduce
+      // pcgs_kern_iter_a_ref
       fmr::Phys_float part_gamma = 0.0;
       for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
         part_gamma += part_p[i] * part_f[i];
@@ -579,18 +485,22 @@ FMR_WARN_INLINE_ON
       //TODO sync sum gamma
       //
       // alpha = zet2 / gamma
+      // pcgs_kern_iter_b_ref
       if (part_gamma <= 0.0) {++iter; res2 = part_gamma; break; }
       const auto part_alpha = part_zet2 / part_gamma;
       //
       // r = r - alpha * f : update residuals
+      // pcgs_kern_iter_c_ref
       for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
         part_r[i] -= part_alpha * part_f[i];
       }
       // z = Minv * r : preconditioned residual
+      // pcgs_kern_iter_d_ref
       for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
         part_z[i] = fmr::Phys_float(Minv[i]) * part_r[i];
       }
       // zeta = r dot z : reduce preconditioned residual norm
+      // pcgs_kern_iter_e_ref
       fmr::Phys_float part_zeta = 0.0;
       for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
         part_zeta += part_r[i] * part_z[i];
@@ -598,13 +508,16 @@ FMR_WARN_INLINE_ON
       //TODO sync sum zeta
       //
       // beta = zeta / zet2
+      // pcgs_kern_iter_f_ref
       const auto part_beta = part_zeta / part_zet2;
       //
       // u = u + alpha * p : update solution
+      // pcgs_kern_iter_g_ref
       for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
         part_u[i] += part_alpha * part_p[i];
       }
       // p = z + beta * p : update search direction
+      // pcgs_kern_iter_h_ref
       for (fmr::Local_int i = 0; i < this_dofs_n; ++i) {
         part_p[i] = part_z[i] + part_beta * part_p[i];
       }

@@ -2,7 +2,6 @@
 #define FEMERA_HAS_GRID_ELEM_BARS_HPP
 
 #include "../Elem.hpp"
-
 namespace femera { namespace grid { namespace elem {
 
 //class Bars final: public Elem<Bars> { friend class Elem;
