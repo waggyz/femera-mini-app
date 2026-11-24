@@ -1195,7 +1195,7 @@ build/%.perf : export TMPDIR := $(TEMP_DIR)
 build/%.perf : build/%.perf.o $(LIBFEMERA_A)(build/%.o)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(@).o,$(notdir $@))
-	-$(CXX) $(CXXPERFS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
+	$(CXX) $(CXXPERFS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
 	$(info $(WARN) $@ not tested: GoogleTest disabled)#TODO should not require GoogleTest for building performance tests
 	echo "WARNING: $@ not tested: GoogleTest disabled" >> $@.err
@@ -1207,7 +1207,7 @@ build/%.perf : export TMPDIR := $(TEMP_DIR)
 build/%.perf : build/%.perf.o
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(@).o,$(notdir $@))
-	-$(CXX) $(CXXPERFS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
+	$(CXX) $(CXXPERFS) $@.o $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
 	$(info $(WARN) $@ not tested: GoogleTest disabled)#TODO should not require GoogleTest for building performance tests
 	echo "WARNING: $@ not tested: GoogleTest disabled" >> $@.err
@@ -1228,7 +1228,7 @@ build/%.gtst : build/%.gtst.o $(LIBFEMERA_A)(build/%.o) \
   $(LIBFEMERA_A)($(BUILD_CPU)/femera/task/Jobs.o) $(FMRTESTOBJS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(@).o,$(notdir $@))
-	-$(CXX) $(CXXTESTS) $@.o $(filter %.test.o,$^) $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
+	$(CXX) $(CXXTESTS) $@.o $(filter %.test.o,$^) $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
 	$(info $(WARN) $@ not tested: GoogleTest disabled)
 	echo "WARNING: $@ not tested: GoogleTest disabled" >> $@.err
@@ -1241,7 +1241,7 @@ build/%.gtst : build/%.gtst.o $(LIBFEMERA_A)($(BUILD_CPU)/femera/Test.o) \
   $(FMRTESTOBJS)
 ifeq ($(ENABLE_GOOGLETEST),ON)
 	$(call col2cxx,$(LINK),$(CXX) $(@).o,$(notdir $@))
-	-$(CXX) $(CXXTESTS) $@.o $(filter %.test.o,$^) $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
+	$(CXX) $(CXXTESTS) $@.o $(filter %.test.o,$^) $(FMRFLAGS) $(LDFLAGS) -lfemera $(LDLIBS) -o $@
 else
 	$(info $(WARN) $@ not tested: GoogleTest disabled)
 	echo "WARNING: $@ not tested: GoogleTest disabled" >> $@.err
