@@ -3,6 +3,7 @@
 
 #include "../../femera.hpp"
 #include "Bars.hpp"
+#include "../tile/Bar1.hpp"// used for MeshPhys class
 #include "../../../fmr/fems/elem-jacs.hpp"
 
 namespace femera { namespace grid { namespace test {
@@ -236,10 +237,10 @@ F pcgs_kern_i_ref(const F zeta) {
   return zeta;
 }
 // ============================================================================
-template <class T, typename F=fmr::Phys_float>
-class PCGs {
+template <typename F=fmr::Phys_float>
+class PCGsTest {
 public:
-PCGs() : p(), r(), z(), zet2 (std::numeric_limits<F>::max()) {}
+PCGsTest() : p(), r(), z(), zet2 (std::numeric_limits<F>::max()) {}
 //= default;//default constructor
 //
 template<typename M=float> inline FMR_ALWAYS_INLINE
@@ -358,9 +359,234 @@ std::size_t init_data(const fmr::Local_int ndof) {
   //NOTE only reallocates when new size exceeds previously allocated capacity
   return ndof * sizeof(F);
 }
-};//end class PCGs
+};//end class PCGsTest
 
 
+
+
+
+
+// ============================================================================
+//#include "../tile/Bar1.hpp"
+template <class T, fmr::Dim_int P=1, typename F=fmr::Phys_float>
+class MeshPhys {// This has Mesh and Phys, but Part owns part_f, part_u.
+// Structred finite element mesh part.
+public:
+  //MeshPhys()/* : p(), r(), z(), */) {}
+  //
+  //
+  std::size_t init(const fmr::Dim_int ndof, const fmr::Local_int dims[4]) {
+  // return bytes
+  if (dims==nullptr) { return 0; }// Use exit() to clear data.
+  this->node_ndof = ndof;
+  for (int i = 0; i < 4; ++i) { this->tile_dims[i] = dims[i]; }
+  std::size_t byte = init_data();
+  // Initialize the tile part with the given number of degrees of freedom.
+  // This is a placeholder implementation.
+  return byte;//TODO
+  }
+  std::size_t exit() {
+    // Placeholder implementation for cleanup.
+    return sizeof(MeshPhys);
+  }
+
+
+  fmr::Local_int get_node_dofs_n() const {
+    return this->node_ndof;
+  }
+  fmr::Local_int get_part_node_n() const {
+    return tile.get_tile_part_node_n (&this->tile_dims[0]);
+  }
+  fmr::Local_int get_part_dofs_n() const {
+    return tile.get_tile_part_node_n (&this->tile_dims[0]) * this->node_ndof;
+  }
+
+  std::size_t get_byte() const { return sizeof(MeshPhys);}//TODO }
+
+private:// ====================================================================
+  femera::grid::tile::Tile<T, P> tile;
+  std::valarray<F> part_node_conn;
+  std::valarray<F> part_jacs_dets;
+  std::valarray<F> part_Minv;
+  std::valarray<F> elem_dN;
+  std::valarray<F> elem_intp_wgts;
+  std::valarray<F> elem_intp_coor;
+  std::valarray<F> mtrl_prop;
+  //
+  fmr::Local_int part_dims[4];// Containing spatial dimension
+  fmr::Local_int tile_dims[4];// Dimension of the tile mesh, tile_dims <= part_dims
+  fmr::Dim_int node_ndof;
+  fmr::Dim_int part_d;
+  fmr::Dim_int elem_intp_n;
+  // Methods ------------------------------------------------------------------
+  std::size_t init_data() {
+    // Placeholder implementation for initializing internal data.
+    return this->node_ndof * sizeof(F);//TODO
+  }
+  //
+  //
+public://TODO move back up later **********************************************
+  //TODO variations on init and get_part_resp wit and without
+  //     unstructured node_coor & jinv_dets overhead for testing.
+  bool get_part_resp (F* f, const F* u) {// Caller checks bounds.
+    // Get the response (forward pass) for  any given u.
+    if (!f || !u) {return false;}
+    // Fill f with some data from the tile part. placeholder implementation.
+    const auto n = tile.get_part_node_n (&this->tile_dims[0]) * this->node_ndof;
+    for (fmr::Local_int i = 0; i < n; ++i) {
+      f[i] = F(0.0);
+    }
+
+
+      //TODO temp alias *******************************************************
+      auto part_f = f;// temp rename during refactoring
+      const auto part_u = u;
+      const auto data_elem_dims = &this->tile_dims[0];
+      const auto data_node_conn = &this->part_node_conn[0];
+      const auto data_dN = &this->elem_dN[0];
+      const auto data_intp_wgts = &this->elem_intp_wgts[0];
+      const auto data_intp_coor = &this->elem_intp_coor[0];
+      const auto data_Minv = &this->part_Minv[0];
+      // **********************************************************************
+
+      //
+      // Avoid making local copies of scalar constants. Here for refactoring
+      const auto this_part_d    = part_d;
+      const auto dofs_n         = get_node_dofs_n();
+      const auto this_intp_n    = elem_intp_n;
+      const auto part_elem_dims = &data_elem_dims[0];
+      // Get the rest using tile.get_*.
+      const auto this_elem_n    = tile.get_tile_part_elem_n (&part_elem_dims[0]);
+      const auto halo_elem_n    = tile.get_halo_elem_n (&part_elem_dims[0]);
+      const auto halo_node_n    = tile.get_halo_node_n (&part_elem_dims[0]);
+      const auto conn_n         = tile.get_tile_elem_node_n ();
+      const auto this_elem_d    = tile.get_elem_d ();
+      const auto part_dofs_n
+      = tile.get_tile_part_node_n (&part_elem_dims[0]) * dofs_n;
+      //
+      // Constant arrays to copy in. (Drop the valarray overhead.)
+      //const auto part_node_conn = &data_node_conn[0];
+      const auto this_jacd      = &part_jacs_dets[0];
+      const auto this_Minv      = &data_Minv[0];
+      //const auto elem_dN        = &data_dN[0];
+      const auto intp_wgts      = &data_intp_wgts[0];
+      const auto this_prop      = &mtrl_prop[0];
+      const auto Minv           = &data_Minv[0];// inverted preconditioner w/BCs
+      //
+      // Zero part_f to accumulate sums.
+      for(fmr::Local_int i = 0; i < part_dofs_n; ++i) {
+        part_f[i] = fmr::Phys_float(0.0);
+      }
+      // Element loop internal arrays
+      fmr::Phys_float uval[conn_n * dofs_n];// displacement buffer
+      fmr::Phys_float fval[conn_n * dofs_n];// force buffer
+      fmr::Local_int  conn[conn_n];// connectivity buffer
+      fmr::Phys_float jval[10];//TODO max buf needed?
+      // Element loop =========================================================
+      for (fmr::Local_int elem_i = 0; elem_i < this_elem_n; ++elem_i) {
+      //
+      //for (fmr::Local_int elem_i = 0; elem_i < halo_elem_n; ++elem_i) {
+        for (fmr::Local_int i = 0; i < conn_n; ++i) {// Copy to conn buffer.
+          conn[i] = part_node_conn[elem_i * conn_n + i];
+        }
+#ifdef DEBUG_PRINT
+        if (this_iter < 1 && elem_i < 10) {// Only print the first few elements for debugging.
+          mini->data->send (fmr::log, "iter", "mesh", "elem",
+            "%4u conn %u %u", elem_i, conn[0], conn[1]);
+        }
+#endif
+        for (fmr::Local_int i = 0; i < conn_n; ++i) {
+          for (fmr::Local_int d = 0; d < dofs_n; ++d) {// Gather to uval buffer.
+            uval[i * dofs_n + d] = part_u[conn[i] * dofs_n + d];
+          }
+        }
+        // Only one constant geometric Jacobian & determinant for each
+        // Bars, Tris, Tets element, regardless of the integration point count.
+        for (fmr::Local_int i = 0; i < tile.get_tile_elem_jacs_dets_size (); ++i) {
+          jval[i] = this_jacd[elem_i * tile.get_tile_elem_jacs_dets_size () + i];
+        }
+        const auto this_det = jval[this_part_d * this_elem_d ];// last value
+#if 0
+        {
+          mini->data->send (fmr::log, "iter", "jacd", "elem",
+            "%4u %e %e", elem_i, jval[0], this_det);
+        }
+#endif
+        // Integration point loop internal arrays
+        fmr::Phys_float G[dofs_n * conn_n];
+        fmr::Phys_float H[dofs_n * this_elem_d];
+        fmr::Phys_float S[dofs_n * this_elem_d];
+        // --------------------------------------------------------------------
+        // Do physics.
+        for (fmr::Local_int i = 0; i < conn_n * dofs_n; ++i) {
+          fval[i] = fmr::Phys_float(0.0); }
+        for (fmr::Local_int ip = 0; ip < this_intp_n; ++ip) {
+          // G = Jinv * dN, H =  G * u, S = E * H, f = G^T * S.
+          const auto df = intp_wgts[ip] * this_det;
+          //
+          // G = Jinv * dN
+          fmr::math::smat_mmul_ref(&G[0], &jval[0], &elem_dN[0],
+            this_elem_d, dofs_n, conn_n);
+          // H = G * u
+          fmr::math::smat_mmul_ref(&H[0], &G[0], &uval[0],
+            dofs_n, conn_n, this_elem_d);
+          // S = k * H
+#if 0
+          for (fmr::Local_int i = 0; i < this_elem_d * this_elem_d; ++i) {
+            S[i] = this_prop[0] * H[i];
+          }
+          for (fmr::Local_int i=0; i<(this_elem_d*this_elem_d); ++i) {
+            S[i]*= df;
+          }
+#else
+          //  S = k * H * dF (merged)
+          for (fmr::Local_int i=0; i<(this_elem_d*this_elem_d); ++i) {
+            S[i] = this_prop[0] * H[i] * df;
+          }
+#endif
+          // f = GT * S [* df]
+          fmr::math::smat_tmul_ref(&fval[0], &G[0], &S[0],
+            conn_n, dofs_n, this_elem_d);
+        }// end this_intp_n loop
+        for (fmr::Local_int i = 0; i < conn_n; ++i) {// Scatter to part_f.
+          for (fmr::Local_int d = 0; d < dofs_n; ++d) {
+            part_f[conn[i] * dofs_n + d] += fval[i * dofs_n + d];
+          }
+        }
+      if (elem_i == halo_elem_n - 1) {//TODO Synchronize halo nodes.
+        for (fmr::Local_int h = 0; h < halo_node_n; ++h) {
+#ifdef DEBUG_PRINT
+          const auto //TODO Move halo_node_list to init OR renumber nodes.
+          n = Tile<Bar1, tile.get_elem_p ()>::get_halo_node(h, &part_elem_dims[0]);
+          if (this_iter < 5) {
+            if (this_iter == 0) {
+              mini->data->send (fmr::log, "sync", "halo", "node",
+                "%4u f: %+0.2e u: %+0.2e (elem %u done)",
+                n, part_f[n * dofs_n], part_u[n * dofs_n], elem_i);
+            } else {
+              mini->data->send (fmr::log, "sync", "halo", "node",
+                "%4u f: %+0.2e p: %+0.2e (elem %u done)",
+                n, part_f[n * dofs_n], part_p[n * dofs_n], elem_i);
+            }
+         }
+#else
+          tile.get_halo_node(h, &part_elem_dims[0]);
+#endif
+        }
+      }
+
+
+
+
+
+    }//end elem loop
+
+
+
+    return true;
+  }
+  //
+};//end class MeshPhys
 
 
 

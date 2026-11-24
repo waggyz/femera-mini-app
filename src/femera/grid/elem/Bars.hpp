@@ -10,7 +10,9 @@ class Bars final : public Elem<Bars> {
   friend class Elem;
 private:// Everything is private, accessible through the Elem interface.
   Bars() = default;// Constrctor is private, too. Use: Elem<Bars, 1> bars;
-// Scalars ====================================================================
+  //NOTE Higher-order Bars do not work unless edge nodes are tied to a
+  //     higher-dimensional elemnt.
+  // Scalars ==================================================================
   static constexpr fmr::math::Poly poly_type = fmr::math::Poly::Full;
   //NOTE same as fmr::math::Poly::Serendipity for this element.
   //

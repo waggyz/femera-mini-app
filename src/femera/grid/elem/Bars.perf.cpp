@@ -36,21 +36,22 @@ fmr::Exit_int main (int argc, char** argv) {
   const fmr::Phys_float bars_area = 0.010 * 0.010;// 1cm x 1cm cross section
   const fmr::Phys_float mtrl_modx = 200e9;// GPa (steel)
   //
+  const fmr::Local_int elem_intp_n = 1;//TODO 0 for default?
+  //
   // Set solver parameters. ---------------------------------------------------
   const fmr::Phys_float abs_tol = 1e-6;// absolute tolerance squared
   const fmr::Phys_float rel_tol = 1e-6;// relative tolerance squared
   //
   fmr::Local_int iter_max = 0;// set to zero for max
   // ==========================================================================
-  constexpr fmr::Dim_int part_d = 1;
-  constexpr fmr::Dim_int part_elem_p = 1;//NOTE higher-order Bars don't work.
-  const fmr::Local_int elem_intp_n = 1;//TODO 0 for default?
-  // --------------------------------------------------------------------------
   using femera::grid::tile::Tile;
   using femera::grid::elem::Elem;
   using femera::grid::tile::Bar1;
   using femera::grid::elem::Bars;
   //
+  constexpr fmr::Dim_int part_d = 1;
+  constexpr fmr::Dim_int part_elem_p = 1;//NOTE higher-order Bars don't work.
+  // --------------------------------------------------------------------------
   std::valarray<fmr::Local_int> data_elem_dims(3);
   data_elem_dims[0] = do_elem_n; data_elem_dims[1] = 1; data_elem_dims[2] = 1;
   std::valarray<fmr::Geom_float> tile_size(3);
@@ -65,7 +66,7 @@ fmr::Exit_int main (int argc, char** argv) {
   std::valarray<fmr::Local_int>
   data_node_conn (std::size_t(part_elem_n) * elem_node_n);
  // Set up iterations ---------------------------------------------------------
-  constexpr Elem<Bars, part_elem_p> elem;
+  constexpr Elem<Bars, tile.get_elem_p ()> elem;//TODO use only tile.* methods
   //
 //#ifdef DEBUG_PRINT
 #if 0
@@ -274,12 +275,18 @@ FMR_WARN_INLINE_ON
     data_scal_size += sizeof(node_dofs_n);
     data_scal_size += sizeof(elem_intp_n);
     data_scal_size += sizeof(data_elem_dims[0]) * 1;
-    // this_elem_n, halo_elem_n, halo_node_n, conn_n, this_jacs_dets_size
-    data_scal_size += sizeof(fmr::Local_int) * 5;
+    // this_elem_n, halo_elem_n, halo_node_n, conn_n
+    data_scal_size += sizeof(fmr::Local_int) * 4;
     data_scal_size += sizeof(fmr::Dim_int) * 1;// this_elem_d
+    //
+    // IAMHERE ****************************************************************
+    using namespace femera::grid::test;
+    //
+    auto phsh = MeshPhys<Bar1, part_elem_p, fmr::Phys_float> ();
+    //
     // Iterate ================================================================
     auto init_uptr = &part_u[0];
-    auto slvr = femera::grid::test::PCGs<fmr::Phys_float> ();
+    auto slvr = PCGsTest<fmr::Phys_float> ();
     while ((this_iter < iter_max)
     && (iter_res2 > abs_tol2) && (iter_rel2 > rel_tol2)) {
       // Init is this_iter 0.
@@ -302,7 +309,6 @@ FMR_WARN_INLINE_ON
       const auto this_elem_d    = tile.get_elem_d ();
       const auto this_dofs_n
       = tile.get_tile_part_node_n (&part_elem_dims[0]) * dofs_n;
-      const auto this_jacs_dets_size = tile.get_tile_elem_jacs_dets_size ();
       //
       // Constant arrays to copy in. (Drop the valarray overhead.)
       const auto part_node_conn = &data_node_conn[0];
@@ -320,7 +326,7 @@ FMR_WARN_INLINE_ON
       fmr::Phys_float uval[conn_n * dofs_n];// displacement buffer
       fmr::Phys_float fval[conn_n * dofs_n];// force buffer
       fmr::Local_int  conn[conn_n];// connectivity buffer
-      fmr::Phys_float jinv_det[this_jacs_dets_size];
+      fmr::Phys_float jval[tile.get_tile_elem_jacs_dets_size ()];
       // Element loop =========================================================
       for (fmr::Local_int elem_i = 0; elem_i < this_elem_n; ++elem_i) {
       //
@@ -341,14 +347,14 @@ FMR_WARN_INLINE_ON
         }
         // Only one constant geometric Jacobian & determinant for each
         // Bars, Tris, Tets element, regardless of the integration point count.
-        for (fmr::Local_int i = 0; i < this_jacs_dets_size; ++i) {
-          jinv_det[i] = this_jacd[elem_i * this_jacs_dets_size + i];
+        for (fmr::Local_int i = 0; i < tile.get_tile_elem_jacs_dets_size (); ++i) {
+          jval[i] = this_jacd[elem_i * tile.get_tile_elem_jacs_dets_size () + i];
         }
-        const auto this_det = jinv_det[this_part_d * this_elem_d ];// last value
+        const auto this_det = jval[this_part_d * this_elem_d ];// last value
 #if 0
         {
           mini->data->send (fmr::log, "iter", "jacd", "elem",
-            "%4u %e %e", elem_i, jinv_det[0], this_det);
+            "%4u %e %e", elem_i, jval[0], this_det);
         }
 #endif
         // Integration point loop internal arrays
@@ -364,7 +370,7 @@ FMR_WARN_INLINE_ON
           const auto df = intp_wgts[ip] * this_det;
           //
           // G = Jinv * dN
-          fmr::math::smat_mmul_ref(&G[0], &jinv_det[0], &elem_dN[0],
+          fmr::math::smat_mmul_ref(&G[0], &jval[0], &elem_dN[0],
             this_elem_d, dofs_n, conn_n);
           // H = G * u
           fmr::math::smat_mmul_ref(&H[0], &G[0], &uval[0],
@@ -396,7 +402,7 @@ FMR_WARN_INLINE_ON
         for (fmr::Local_int h = 0; h < halo_node_n; ++h) {
 #ifdef DEBUG_PRINT
           const auto //TODO Move halo_node_list to init OR renumber nodes.
-          n = Tile<Bar1, part_elem_p>::get_halo_node(h, &part_elem_dims[0]);
+          n = Tile<Bar1, tile.get_elem_p ()>::get_halo_node(h, &part_elem_dims[0]);
           if (this_iter < 5) {
             if (this_iter == 0) {
               mini->data->send (fmr::log, "sync", "halo", "node",
@@ -409,7 +415,7 @@ FMR_WARN_INLINE_ON
             }
          }
 #else
-          Tile<Bar1, part_elem_p>::get_halo_node(h, &part_elem_dims[0]);
+          Tile<Bar1, tile.get_elem_p ()>::get_halo_node(h, &part_elem_dims[0]);
 #endif
         }
       }
@@ -420,11 +426,10 @@ FMR_WARN_INLINE_ON
       using namespace femera::grid::test;
       //
       init_res2 = slvr.init (&part_f[0], &Minv[0], part_load_bc, this_dofs_n);
-      //
       data_node_size += slvr.get_byte_size ();
       //
       const auto part_data_size = data_scal_size + data_node_size + data_elem_size;
-      mini->data->send (fmr::log, "Bar1", "PCGs", "data",
+      mini->data->send (fmr::log, "Bar1", "PCGsTest", "data",
         "%s: %s + %s + %s",
         fmr::form::si_unit (part_data_size, "B").c_str(),
         fmr::form::si_unit (data_scal_size, "B").c_str(),
@@ -450,13 +455,13 @@ FMR_WARN_INLINE_ON
         if (this_iter == 0) {
           const auto format = iter_form_str + " /" + iter_form_str
           + " %.2e,%.2e %2s %.2e,%.2e rel,abs tol";
-          mini->data->send (fmr::log, "Bar1", "PCGs", istr,
+          mini->data->send (fmr::log, "Bar1", "PCGsTest", istr,
             format.c_str(), this_iter, iter_max-1,
             sqrt(iter_rel2), sqrt(iter_res2), ok?"< ":">=",
             sqrt(rel_tol2), sqrt(abs_tol2) );
         } else {
           const auto format = iter_form_str + " /" + iter_form_str + " %.2e";
-          mini->data->send (fmr::log, "Bar1", "PCGs", istr,
+          mini->data->send (fmr::log, "Bar1", "PCGsTest", istr,
             format.c_str(), this_iter, iter_max-1, sqrt(iter_rel2) );
         }
       }
@@ -466,8 +471,8 @@ FMR_WARN_INLINE_ON
   --this_iter;// Count is off by one here.
     part_u = init_uptr;// Restore part_u.
 FMR_WARN_INLINE_OFF
-//NOTE the PCGs slvr instance goes out of scope, calling inline defined constructor.
-//TODO move the (empty) PCGs constructor body to a .cpp when moved out of test namespace.
+//NOTE the PCGsTest slvr instance goes out of scope, calling inline defined constructor.
+//TODO move the (empty) PCGsTest constructor body to a .cpp when moved out of test namespace.
   }// end scope part_jacs_dets
 FMR_WARN_INLINE_ON
   {

@@ -44,39 +44,15 @@ class Tile {
     fmr::Local_int elem_n;
   };
 #endif
-  private:
-  template <class S>
-  static constexpr auto calc_part_elem_n (
-    const fmr::Local_int* dims, int) noexcept
-    -> decltype(S::calc_tile_part_elem_n (dims)) {
-    return S::calc_tile_part_elem_n (dims);
-  }
-  template <class S>
-  static constexpr fmr::Local_int calc_part_elem_n (
-    const fmr::Local_int* dims, long) noexcept {
-    return S::tile_elem_n
-    * ((dims[0] > 0 && S::tile_d > 0) ? dims[0] : 0)
-    * ((dims[1] > 0 && S::tile_d > 1) ? dims[1] : 1)
-    * ((dims[2] > 0 && S::tile_d > 2) ? dims[2] : 1);
-  }
-  template <class S>
-  static constexpr auto calc_elem_node_n (int) noexcept
-    -> decltype(S::calc_tile_elem_node_n (P)) {
-    return S::calc_tile_elem_node_n (P);
-  }
-  template <class S>
-  static constexpr fmr::Local_int calc_elem_node_n (long) noexcept {
-    return S::tile_vert_n + (P - 1) * S::tile_edge_n
-      + (P == 3 ? S::tile_vols_n * (S::tile_tris_n + S::tile_quad_n) : 0);
-  }
 
   public:
   // Simple constexpr accessors -----------------------------------------------
   // constexpr functions are implicitly inline
   //
+  static constexpr fmr::Dim_int   get_elem_p () noexcept { return P; }
   static constexpr fmr::Dim_int   get_elem_d () noexcept { return T::elem_d; }
   static constexpr fmr::Dim_int   get_tile_d () noexcept { return T::tile_d; }
-
+  //
   // Structured grid element tiling ===========================================
   //
   static constexpr fmr::Local_int get_tile_elem_n () noexcept {
@@ -310,6 +286,31 @@ class Tile {
   ) noexcept {
     return T::calc_tile_mesh(node_conn, node_coor,
       tile_size, part_elem_dims, P, part_d, part_orig);
+  }
+  private:
+  template <class S>
+  static constexpr auto calc_part_elem_n (
+    const fmr::Local_int* dims, int) noexcept
+    -> decltype(S::calc_tile_part_elem_n (dims)) {
+    return S::calc_tile_part_elem_n (dims);
+  }
+  template <class S>
+  static constexpr fmr::Local_int calc_part_elem_n (
+    const fmr::Local_int* dims, long) noexcept {
+    return S::tile_elem_n
+    * ((dims[0] > 0 && S::tile_d > 0) ? dims[0] : 0)
+    * ((dims[1] > 0 && S::tile_d > 1) ? dims[1] : 1)
+    * ((dims[2] > 0 && S::tile_d > 2) ? dims[2] : 1);
+  }
+  template <class S>
+  static constexpr auto calc_elem_node_n (int) noexcept
+    -> decltype(S::calc_tile_elem_node_n (P)) {
+    return S::calc_tile_elem_node_n (P);
+  }
+  template <class S>
+  static constexpr fmr::Local_int calc_elem_node_n (long) noexcept {
+    return S::tile_vert_n + (P - 1) * S::tile_edge_n
+      + (P == 3 ? S::tile_vols_n * (S::tile_tris_n + S::tile_quad_n) : 0);
   }
 };//end Elem
 //
