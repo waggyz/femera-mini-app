@@ -148,18 +148,17 @@ fmr::Exit_int main (int argc, char** argv) {
     : std::numeric_limits<fmr::Local_int>::max() -1;
   }
   fmr::Local_int bad_jac_n = 0;
-    const auto abs_tol2 = abs_tol * abs_tol;
-    const auto rel_tol2 = rel_tol * rel_tol;
-  fmr::Phys_float res2 = std::numeric_limits<fmr::Phys_float>::max();
-  fmr::Phys_float rel2 = std::numeric_limits<fmr::Phys_float>::max();
-  //TODO switch to using: init_res2, iter_res2
+  const auto abs_tol2 = abs_tol * abs_tol;
+  const auto rel_tol2 = rel_tol * rel_tol;
+  //
   fmr::Phys_float init_res2 = std::numeric_limits<fmr::Phys_float>::max();
   fmr::Phys_float iter_res2 = std::numeric_limits<fmr::Phys_float>::max();
+  fmr::Phys_float iter_rel2 = std::numeric_limits<fmr::Phys_float>::max();
     //
   auto iter_digits = fmr::math::count_digits(iter_max);
   if (iter_digits < 4) { iter_digits = 4; }
   const auto iter_form_str = "%" + std::to_string(iter_digits) + "u";
-  fmr::Local_int iter = 0;// Initialization counts as iter 0.
+  fmr::Local_int this_iter = 0;// Initialization counts as iter 0.
    {// Iteration internal data scope ==========================================
     // For now, pull most array allocation out of the loop.
     //
@@ -229,23 +228,18 @@ FMR_WARN_INLINE_ON
 
     elem.get_poly_grad_node(&data_dN[0], &data_intp_coor[0]);
     {
-    bool ok = (iter < iter_max) && (bad_jac_n == 0)
-      && (res2 > abs_tol2) && (rel2 > rel_tol2)
-      && (res2 > 0.0) && (abs_tol2 > 0.0);
+    bool ok = (this_iter < iter_max) && (bad_jac_n == 0)
+      && (iter_res2 > abs_tol2) && (iter_rel2 > rel_tol2)
+      && (iter_res2 > 0.0) && (abs_tol2 > 0.0);
     mini->data->send (fmr::log, ok?" ok ":" :( ", "GO! ", "size",
       "%4u dofs %4u node %4u elem (%4u bad/%4u Jacs)",
       part_dofs_n, part_node_n, part_elem_n,
       bad_jac_n, part_elem_n * elem_intp_n );
     }
-    auto data_p = std::valarray<fmr::Phys_float>(fmr::Phys_float(0.0), part_dofs_n);
-    auto data_r = std::valarray<fmr::Phys_float>(part_dofs_n);
-    auto data_z = std::valarray<fmr::Phys_float>(part_dofs_n);
     //
     // Diagonal preconditioner (already inverted & synced)
     auto data_Minv = std::valarray<float>(1.0, part_dofs_n);
     femera::grid::test::set_bc0(&data_Minv[0], part_disp_bc);
-    //
-    fmr::Phys_float part_zet2 = 0.0, init_zet2 = 0.0;
     //
     // Calculate the total data size for the part.
     fmr::Global_int data_scal_size = 0;
@@ -253,11 +247,10 @@ FMR_WARN_INLINE_ON
     fmr::Global_int data_elem_size = 0;// scales with elem count
     //
     // data in and out
-    data_scal_size += sizeof(iter);
-    data_scal_size += sizeof(res2);
-    data_scal_size += sizeof(rel2);
-    data_scal_size += sizeof(part_zet2);
-    data_scal_size += sizeof(init_zet2);
+    data_scal_size += sizeof(this_iter);
+    data_scal_size += sizeof(init_res2);
+    data_scal_size += sizeof(iter_res2);
+    data_scal_size += sizeof(iter_rel2);
     data_node_size += sizeof(data_u[0]) * part_node_n * node_dofs_n;
     data_node_size += sizeof(data_f[0]) * part_node_n * node_dofs_n;
     //
@@ -284,27 +277,16 @@ FMR_WARN_INLINE_ON
     // this_elem_n, halo_elem_n, halo_node_n, conn_n, this_jacs_dets_size
     data_scal_size += sizeof(fmr::Local_int) * 5;
     data_scal_size += sizeof(fmr::Dim_int) * 1;// this_elem_d
-    data_node_size += sizeof(data_p[0]) * part_node_n * node_dofs_n;
-    data_node_size += sizeof(data_r[0]) * part_node_n * node_dofs_n;
-    data_node_size += sizeof(data_z[0]) * part_node_n * node_dofs_n;
-    //
-    const auto part_data_size = data_scal_size + data_node_size + data_elem_size;
-    mini->data->send (fmr::log, "Bar1", "PCGs", "data",
-      "%s: %s + %s + %s",
-      fmr::form::si_unit (part_data_size, "B").c_str(),
-      fmr::form::si_unit (data_scal_size, "B").c_str(),
-      fmr::form::si_unit (data_node_size / part_node_n, "B/node").c_str(),
-      fmr::form::si_unit (data_elem_size / part_elem_n, "B/elem").c_str());
-    // fmr::form::si_unit (perf.get_byte (), "B   ").c_str(),
     // Iterate ================================================================
     auto init_uptr = &part_u[0];
     auto slvr = femera::grid::test::PCGs<fmr::Phys_float> ();
-    while ((iter < iter_max) && (res2 > abs_tol2) && (rel2 > rel_tol2)) {
-      // Init is iter 0.
+    while ((this_iter < iter_max)
+    && (iter_res2 > abs_tol2) && (iter_rel2 > rel_tol2)) {
+      // Init is this_iter 0.
       // ----------------------------------------------------------------------
 #if 0
       // Copy loads and displacement BCs into local lists.
-      const auto this_disp_bc = part_disp_bc;// not used in iter loop
+      const auto this_disp_bc = part_disp_bc;// not used in this_iter loop
       const auto part_load_bc = data_load_bc;// only used once and copied in init
 #endif
       // Make local copies of scalar constants.
@@ -347,7 +329,7 @@ FMR_WARN_INLINE_ON
           conn[i] = part_node_conn[elem_i * conn_n + i];
         }
 #ifdef DEBUG_PRINT
-        if (iter < 1 && elem_i < 10) {// Only print the first few elements for debugging.
+        if (this_iter < 1 && elem_i < 10) {// Only print the first few elements for debugging.
           mini->data->send (fmr::log, "iter", "mesh", "elem",
             "%4u conn %u %u", elem_i, conn[0], conn[1]);
         }
@@ -415,8 +397,8 @@ FMR_WARN_INLINE_ON
 #ifdef DEBUG_PRINT
           const auto //TODO Move halo_node_list to init OR renumber nodes.
           n = Tile<Bar1, part_elem_p>::get_halo_node(h, &part_elem_dims[0]);
-          if (iter < 5) {
-            if (iter == 0) {
+          if (this_iter < 5) {
+            if (this_iter == 0) {
               mini->data->send (fmr::log, "sync", "halo", "node",
                 "%4u f: %+0.2e u: %+0.2e (elem %u done)",
                 n, part_f[n * dofs_n], part_u[n * dofs_n], elem_i);
@@ -432,48 +414,56 @@ FMR_WARN_INLINE_ON
         }
       }
     }//end elem loop
-    if (iter == 0){
+    if (this_iter == 0){
       const auto part_load_bc = data_load_bc;// only used once
       //
       using namespace femera::grid::test;
       //
       init_res2 = slvr.init (&part_f[0], &Minv[0], part_load_bc, this_dofs_n);
       //
-      res2 = init_res2;
-      if (res2 < abs_tol2) {rel2=1.0; ++iter; break; }// already converged
+      data_node_size += slvr.get_byte_size ();
+      //
+      const auto part_data_size = data_scal_size + data_node_size + data_elem_size;
+      mini->data->send (fmr::log, "Bar1", "PCGs", "data",
+        "%s: %s + %s + %s",
+        fmr::form::si_unit (part_data_size, "B").c_str(),
+        fmr::form::si_unit (data_scal_size, "B").c_str(),
+        fmr::form::si_unit (data_node_size / part_node_n, "B/node").c_str(),
+        fmr::form::si_unit (data_elem_size / part_elem_n, "B/elem").c_str());
+      //
+      iter_res2 = init_res2;
+      if (iter_res2 < abs_tol2) {iter_rel2=1.0; ++this_iter; break; }// converged
       part_u = slvr.ptr_p();// Pass p to next response calc.
-    }
-    else{
+    } else{// iter > 0
       part_u = init_uptr;// Restore part_u.
       iter_res2 = slvr.iter (&part_f[0], &part_u[0], &Minv[0], this_dofs_n);
-      res2 = iter_res2;
       part_u = slvr.ptr_p();// Pass p to next response calc.
     }
-    rel2 = res2 / init_res2;
+    iter_rel2 = iter_res2 / init_res2;
     {
       const auto digits = fmr::math::count_digits (fmr::Local_int(iter_max) * 2);
       fmr::Local_int mod = 1;
       for (fmr::Local_int i = 2; i < digits; ++i) { mod *= 10; }
-      if ((iter < 5) || (iter % mod == 0)) {
-        bool ok = (res2 < abs_tol2) || (rel2 < rel_tol2);
-        const auto istr = iter == 0 ? "init" : "iter";
-        if (iter == 0) {
+      if ((this_iter < 5) || (this_iter % mod == 0)) {
+        bool ok = (iter_res2 < abs_tol2) || (iter_rel2 < rel_tol2);
+        const auto istr = this_iter == 0 ? "init" : "iter";
+        if (this_iter == 0) {
           const auto format = iter_form_str + " /" + iter_form_str
           + " %.2e,%.2e %2s %.2e,%.2e rel,abs tol";
           mini->data->send (fmr::log, "Bar1", "PCGs", istr,
-            format.c_str(), iter, iter_max-1,
-            sqrt(rel2), sqrt(res2), ok?"< ":">=",
+            format.c_str(), this_iter, iter_max-1,
+            sqrt(iter_rel2), sqrt(iter_res2), ok?"< ":">=",
             sqrt(rel_tol2), sqrt(abs_tol2) );
         } else {
           const auto format = iter_form_str + " /" + iter_form_str + " %.2e";
           mini->data->send (fmr::log, "Bar1", "PCGs", istr,
-            format.c_str(), iter, iter_max-1, sqrt(rel2) );
+            format.c_str(), this_iter, iter_max-1, sqrt(iter_rel2) );
         }
       }
     }
-    ++iter;
+    ++this_iter;
     }// end iteration while loop
-  --iter;// Count is off by one here.
+  --this_iter;// Count is off by one here.
     part_u = init_uptr;// Restore part_u.
 FMR_WARN_INLINE_OFF
 //NOTE the PCGs slvr instance goes out of scope, calling inline defined constructor.
@@ -483,10 +473,10 @@ FMR_WARN_INLINE_ON
   {
   const auto format = iter_form_str + " /" + iter_form_str
   + " %.2e,%.2e %2s %.2e,%.2e rel,abs tol";
-  bool ok = (res2 < abs_tol2) || (rel2 < rel_tol2);
+  bool ok = (iter_res2 < abs_tol2) || (iter_rel2 < rel_tol2);
   mini->data->send (fmr::log, ok?" ok ":" :( ", "DONE", "iter",
-    format.c_str(), iter, iter_max-1,
-    sqrt(rel2), sqrt(res2), ok?"< ":">=", sqrt(rel_tol2), sqrt(abs_tol2) );
+    format.c_str(), this_iter, iter_max-1,
+    sqrt(iter_rel2), sqrt(iter_res2), ok?"< ":">=", sqrt(rel_tol2), sqrt(abs_tol2) );
   }
   // Check correctness ========================================================
   fmr::Local_int ok = 0;
