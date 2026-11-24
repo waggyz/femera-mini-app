@@ -7,9 +7,7 @@
 #include "../../../fmr/smat.hpp"
 #endif
 
-//#define MERGE_PCG_ITER_CDE_GH
 #include "Bars.perf.hpp"
-//#undef MERGE_PCG_ITER_CDE_GH
 
 #include "../tile/Bar1.hpp"
 
@@ -19,8 +17,6 @@
 #include <gtest/gtest.h>
 
 #undef DEBUG_PRINT
-
-#define MERGE_PCG_ITER_CDE_GH
 
 auto  mini = fmr::new_jobs ();
 
@@ -160,12 +156,15 @@ fmr::Exit_int main (int argc, char** argv) {
     ? fmr::Local_int(part_dofs_n) - fmr::Local_int(part_disp_bc.size()) + 1
     : std::numeric_limits<fmr::Local_int>::max() -1;
   }
+  fmr::Local_int bad_jac_n = 0;
     const auto abs_tol2 = abs_tol * abs_tol;
     const auto rel_tol2 = rel_tol * rel_tol;
   fmr::Phys_float res2 = std::numeric_limits<fmr::Phys_float>::max();
   fmr::Phys_float rel2 = std::numeric_limits<fmr::Phys_float>::max();
-  fmr::Local_int bad_jac_n = 0;
-  //
+  //TODO switch to using: init_res2, iter_res2
+  fmr::Phys_float init_res2 = std::numeric_limits<fmr::Phys_float>::max();
+  fmr::Phys_float iter_res2 = std::numeric_limits<fmr::Phys_float>::max();
+    //
   auto iter_digits = fmr::math::count_digits(iter_max);
   if (iter_digits < 4) { iter_digits = 4; }
   const auto iter_form_str = "%" + std::to_string(iter_digits) + "u";
@@ -307,6 +306,8 @@ FMR_WARN_INLINE_ON
       fmr::form::si_unit (data_elem_size / part_elem_n, "B/elem").c_str());
     // fmr::form::si_unit (perf.get_byte (), "B   ").c_str(),
     // Iterate ================================================================
+    auto init_uptr = &part_u[0];
+    auto slvr = femera::grid::test::PCGs<fmr::Phys_float> ();
     while ((iter < iter_max) && (res2 > abs_tol2) && (rel2 > rel_tol2)) {
       // Init is iter 0.
       // ----------------------------------------------------------------------
@@ -337,9 +338,9 @@ FMR_WARN_INLINE_ON
       const auto intp_wgts      = &data_intp_wgts[0];
       const auto this_prop      = &mtrl_prop[0];
       const auto Minv           = &data_Minv[0];// inverted preconditioner w/BCs
-      // PCG working vectors
-      auto part_p = &data_p[0];
-      auto part_r = &data_r[0];
+      //TODO REMOVE PCG working vectors
+      //auto part_p = &data_p[0];
+      //auto part_r = &data_r[0];
       //
       // Zero part_f to accumulate sums.
       for(fmr::Local_int i = 0; i < part_dofs_n; ++i) {
@@ -363,6 +364,13 @@ FMR_WARN_INLINE_ON
             "%4u conn %u %u", elem_i, conn[0], conn[1]);
         }
 #endif
+#if 1
+        for (fmr::Local_int i = 0; i < conn_n; ++i) {
+          for (fmr::Local_int d = 0; d < dofs_n; ++d) {// Gather to uval buffer.
+            uval[i * dofs_n + d] = part_u[conn[i] * dofs_n + d];
+          }
+        }
+#else
         if (iter == 0) {
           for (fmr::Local_int i = 0; i < conn_n; ++i) {
             for (fmr::Local_int d = 0; d < dofs_n; ++d) {// Gather to uval buffer.
@@ -376,6 +384,7 @@ FMR_WARN_INLINE_ON
             }
           }
         }
+#endif
         // Only one constant geometric Jacobian & determinant for each
         // Bars, Tris, Tets element, regardless of the integration point count.
         for (fmr::Local_int i = 0; i < this_jacs_dets_size; ++i) {
@@ -473,6 +482,28 @@ FMR_WARN_INLINE_ON
     // ...until exit.
     //
     */
+
+#if 1
+    if (iter == 0){
+      const auto part_load_bc = data_load_bc;// only used once
+      //
+      using namespace femera::grid::test;
+      //
+      init_res2 = slvr.init (&part_f[0], &Minv[0], part_load_bc, this_dofs_n);
+      //
+      res2 = init_res2;
+      if (res2 < abs_tol2) {++iter; break; }// already converged
+      part_u = slvr.ptr_p();// Pass p to next response calc.
+    }
+    else{
+      part_u = init_uptr;// Restore part_u.
+      iter_res2 = slvr.iter (&part_f[0], &part_u[0], &Minv[0], this_dofs_n);
+      res2 = iter_res2;
+      part_u = slvr.ptr_p();// Pass p to next response calc.
+    }
+    rel2 = res2 / init_res2;
+#else
+#define MERGE_PCG_ITER_CDE_GH
     if (iter == 0) {// part solve init scope ==================================
       using namespace femera::grid::test;
       //
@@ -562,6 +593,8 @@ FMR_WARN_INLINE_ON
       res2 = part_zet2;
       rel2 = part_zet2 / init_zet2;
     }//end part solve iteration scope
+#undef MERGE_PCG_ITER_CDE_GH
+#endif
     {
       const auto digits = fmr::math::count_digits (fmr::Local_int(iter_max) * 2);
       fmr::Local_int mod = 1;
@@ -586,7 +619,12 @@ FMR_WARN_INLINE_ON
     ++iter;
     }// end iteration while loop
   --iter;// Count is off by one here.
+    part_u = init_uptr;// Restore part_u.
+FMR_WARN_INLINE_OFF
+//NOTE the PCGs slvr instance goes out of scope, calling inline defined constructor.
+//TODO move the (empty) PCGs constructor body to a .cpp when moved out of test namespace.
   }// end scope part_jacs_dets
+FMR_WARN_INLINE_ON
   {
   const auto format = iter_form_str + " /" + iter_form_str
   + " %.2e,%.2e %2s %.2e,%.2e rel,abs tol";
@@ -641,7 +679,5 @@ TEST(BarsPerf, TrivialTest) {
 namespace femera { namespace test {
 
 } }//end femera::test namespace
-
-#undef MERGE_PCG_ITER_CDE_GH
 
 #undef DEBUG_PRINT

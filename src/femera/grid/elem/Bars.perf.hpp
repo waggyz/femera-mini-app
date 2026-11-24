@@ -241,12 +241,17 @@ F pcgs_kern_i_ref(const F zeta) {
 template <class T, typename F=fmr::Phys_float>
 class PCGs {
 public:
-F init (F* f, const F* Minv, const BClist& load_bc,
+PCGs() : p(), r(), z(), zet2 (std::numeric_limits<F>::max()) {}
+//= default;//default constructor
+//
+template<typename M=float> inline FMR_ALWAYS_INLINE
+F init (F* f, const M* Minv, const BClist& load_bc,
     const fmr::Local_int ndof) {
   init_data(ndof);
   return init_a(f, Minv, load_bc, ndof);
 }
-F iter (F* f, F* u, const F* Minv, const fmr::Local_int ndof) {
+template<typename M> inline FMR_ALWAYS_INLINE
+F iter (F* f, F* u, const M* Minv, const fmr::Local_int ndof) {
   return iter_a(f, u, Minv, ndof);
 }
 std::size_t exit () {
@@ -264,25 +269,26 @@ std::size_t get_byte_size() const {//NOTE includes one extra F for zet2
   return sizeof(F) * (p.size() + r.size() + z.size() + 1);
 }
 // Kernel variations ----------------------------------------------------------
-template <typename G=fmr::Geom_float> inline
-F init_a (F* f, const G* Minv, const BClist& load_bc,
-    const fmr::Local_int ndof) {
-  pcgs_kern_init_a_1(&r[0], &f[0], &load_bc,
+template <typename M> inline FMR_ALWAYS_INLINE
+F init_a (F* f, const M* Minv, const BClist& load_bc,
+  const fmr::Local_int ndof)
+{
+  pcgs_kern_init_a_1(&r[0], &f[0], &load_bc,//TODO check differs from _a_ref
     fmr::Local_int(load_bc.size()), ndof); // does inline
   pcgs_kern_init_b_ref(&p[0], &Minv[0], &r[0], ndof);
   zet2 = pcgs_kern_init_c_ref(&r[0], &p[0], ndof);
   return zet2;
 }
-template <typename G=fmr::Geom_float> inline
-F init_ref(F* f, const G* Minv, const BClist& load_bc,
+template <typename M> inline
+F init_ref(F* f, const M* Minv, const BClist& load_bc,
     const fmr::Local_int ndof) {
   pcgs_kern_init_a_ref(&r[0], &f[0], &load_bc, ndof);// does not inline
   pcgs_kern_init_b_ref(&p[0], &Minv[0], &r[0], ndof);
   zet2 = pcgs_kern_init_c_ref(&r[0], &p[0], ndof);
   return zet2;
 }
-template <typename G=fmr::Geom_float> inline
-F iter_a(F* f, F* u, const G* Minv, const fmr::Local_int ndof) {
+template <typename M> inline FMR_ALWAYS_INLINE
+F iter_a (F* f, F* u, const M* Minv, const fmr::Local_int ndof) {
   // gamma = p dot f : reduce
   const F gamma = pcgs_kern_iter_a_ref(&p[0], &f[0], ndof);
   //
@@ -310,8 +316,8 @@ F iter_a(F* f, F* u, const G* Minv, const fmr::Local_int ndof) {
   zet2 = pcgs_kern_i_ref (zeta);
   return zet2;
 }
-template <typename G=fmr::Geom_float> inline
-F iter_ref(F* f, F* u, const G* Minv, const fmr::Local_int ndof) {
+template <typename M> inline FMR_ALWAYS_INLINE
+F iter_ref (F* f, F* u, const M* Minv,const fmr::Local_int ndof) {
   // gamma = p dot f : reduce
   const auto gamma = pcgs_kern_iter_a_ref(&p[0], &f[0], ndof);
   //
@@ -341,10 +347,11 @@ F iter_ref(F* f, F* u, const G* Minv, const fmr::Local_int ndof) {
   return zet2;
 }
 private:// ====================================================================
-F zet2;
 std::valarray<F> p;
 std::valarray<F> r;
 std::valarray<F> z;
+F zet2;
+//
 std::size_t init_data(const fmr::Local_int ndof) {
   //NOTE valarray inits and resizes to zeros.
   if( p.size() != ndof) {p.resize(ndof);}else{}// zero if needed.
