@@ -283,6 +283,8 @@ FMR_WARN_INLINE_ON
     using namespace femera::grid::test;
     //
     auto phsh = MeshPhys<Bar1, part_elem_p, fmr::Phys_float> ();
+    phsh.init(node_dofs_n, &data_elem_dims[0]);
+    //mini->data->send (fmr::log, "TEST","phsh","init","initialized");
     //
     // Iterate ================================================================
     auto init_uptr = &part_u[0];
@@ -429,7 +431,7 @@ FMR_WARN_INLINE_ON
       data_node_size += slvr.get_byte_size ();
       //
       const auto part_data_size = data_scal_size + data_node_size + data_elem_size;
-      mini->data->send (fmr::log, "Bar1", "PCGsTest", "data",
+      mini->data->send (fmr::log, "Bar1", "PCGs", "data",
         "%s: %s + %s + %s",
         fmr::form::si_unit (part_data_size, "B").c_str(),
         fmr::form::si_unit (data_scal_size, "B").c_str(),
@@ -455,13 +457,13 @@ FMR_WARN_INLINE_ON
         if (this_iter == 0) {
           const auto format = iter_form_str + " /" + iter_form_str
           + " %.2e,%.2e %2s %.2e,%.2e rel,abs tol";
-          mini->data->send (fmr::log, "Bar1", "PCGsTest", istr,
+          mini->data->send (fmr::log, "Bar1", "PCGs", istr,
             format.c_str(), this_iter, iter_max-1,
             sqrt(iter_rel2), sqrt(iter_res2), ok?"< ":">=",
             sqrt(rel_tol2), sqrt(abs_tol2) );
         } else {
           const auto format = iter_form_str + " /" + iter_form_str + " %.2e";
-          mini->data->send (fmr::log, "Bar1", "PCGsTest", istr,
+          mini->data->send (fmr::log, "Bar1", "PCGs", istr,
             format.c_str(), this_iter, iter_max-1, sqrt(iter_rel2) );
         }
       }
