@@ -41,7 +41,9 @@ ifneq ("$(MAKEJOBS)","")
 endif
 ifeq ($(ENABLE_MAKEJOBS),ON)
   JSER:= -j1
+ifeq ("$(JPAR)","")
   JPAR:= -j
+endif
   ifeq ("$(MAKEJOBS)","")
     ifeq ($(shell expr $(CPUCOUNT) \<= 8), 1)
       JLIM:= -j`echo "2*$(CPUCOUNT)" | bc`
