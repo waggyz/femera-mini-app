@@ -4,8 +4,6 @@
 #include "../../femera.hpp"
 #include "Bars.hpp"
 #include "../../../fmr/fems/elem-jacs.hpp"
-#include "../../../fmr/fems/elem-poly.hpp"
-#include "../../../fmr/smat.hpp"
 
 namespace femera { namespace grid { namespace test {
 
@@ -247,12 +245,12 @@ PCGs() : p(), r(), z(), zet2 (std::numeric_limits<F>::max()) {}
 template<typename M=float> inline FMR_ALWAYS_INLINE
 F init (F* f, const M* Minv, const BClist& load_bc,
     const fmr::Local_int ndof) {
-  init_data(ndof);
-  return init_a(f, Minv, load_bc, ndof);
+  init_data (ndof);
+  return init_a (f, Minv, load_bc, ndof);
 }
 template<typename M> inline FMR_ALWAYS_INLINE
 F iter (F* f, F* u, const M* Minv, const fmr::Local_int ndof) {
-  return iter_a(f, u, Minv, ndof);
+  return iter_a (f, u, Minv, ndof);
 }
 std::size_t exit () {
   const std::size_t bytes = sizeof(F) * (p.size()  + r.size() + z.size());
@@ -273,8 +271,8 @@ template <typename M> inline FMR_ALWAYS_INLINE
 F init_a (F* f, const M* Minv, const BClist& load_bc,
   const fmr::Local_int ndof)
 {
-  pcgs_kern_init_a_1(&r[0], &f[0], &load_bc,//TODO check differs from _a_ref
-    fmr::Local_int(load_bc.size()), ndof); // does inline
+  pcgs_kern_init_a_1(&r[0], &f[0], &load_bc, // does inline
+    fmr::Local_int(load_bc.size()), ndof);
   pcgs_kern_init_b_ref(&p[0], &Minv[0], &r[0], ndof);
   zet2 = pcgs_kern_init_c_ref(&r[0], &p[0], ndof);
   return zet2;

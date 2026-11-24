@@ -1,12 +1,3 @@
-#if 0
-// included by Bars.perf.hpp
-#include "../../femera.hpp"
-#include "Bars.hpp"
-#include "../../../fmr/fems/elem-jacs.hpp"
-#include "../../../fmr/fems/elem-poly.hpp"
-#include "../../../fmr/smat.hpp"
-#endif
-
 #include "Bars.perf.hpp"
 
 #include "../tile/Bar1.hpp"
@@ -27,11 +18,8 @@ fmr::Exit_int main (int argc, char** argv) {
   const bool is_unstructured = false;// perturb nodes.//TODO save coor to check.
   const fmr::Local_int do_elem_n = 9;
   //
-  const fmr::Geom_float bars_len  = 1.0;// 1m long
-  //
+  const fmr::Phys_float bars_len  = 1.0;// 1m long
   // Set physics parameters. --------------------------------------------------
-  const fmr::Phys_float bars_area = 0.010 * 0.010;// 1cm x 1cm cross section
-  const fmr::Phys_float mtrl_modx = 200e9;// GPa (steel)
   //
   const fmr::Enum_int load_case = 1;
   // 0: no load
@@ -45,6 +33,9 @@ fmr::Exit_int main (int argc, char** argv) {
   const fmr::Phys_float end_disp = 0.001;// 1 mm
   const fmr::Phys_float end_load = 1e3;// 1 kN tension
   //
+  const fmr::Phys_float bars_area = 0.010 * 0.010;// 1cm x 1cm cross section
+  const fmr::Phys_float mtrl_modx = 200e9;// GPa (steel)
+  //
   // Set solver parameters. ---------------------------------------------------
   const fmr::Phys_float abs_tol = 1e-6;// absolute tolerance squared
   const fmr::Phys_float rel_tol = 1e-6;// relative tolerance squared
@@ -52,7 +43,7 @@ fmr::Exit_int main (int argc, char** argv) {
   fmr::Local_int iter_max = 0;// set to zero for max
   // ==========================================================================
   constexpr fmr::Dim_int part_d = 1;
-  constexpr fmr::Dim_int part_elem_p = 1;
+  constexpr fmr::Dim_int part_elem_p = 1;//NOTE higher-order Bars don't work.
   // --------------------------------------------------------------------------
   using femera::grid::tile::Tile;
   using femera::grid::elem::Elem;
@@ -338,9 +329,6 @@ FMR_WARN_INLINE_ON
       const auto intp_wgts      = &data_intp_wgts[0];
       const auto this_prop      = &mtrl_prop[0];
       const auto Minv           = &data_Minv[0];// inverted preconditioner w/BCs
-      //TODO REMOVE PCG working vectors
-      //auto part_p = &data_p[0];
-      //auto part_r = &data_r[0];
       //
       // Zero part_f to accumulate sums.
       for(fmr::Local_int i = 0; i < part_dofs_n; ++i) {
@@ -364,27 +352,11 @@ FMR_WARN_INLINE_ON
             "%4u conn %u %u", elem_i, conn[0], conn[1]);
         }
 #endif
-#if 1
         for (fmr::Local_int i = 0; i < conn_n; ++i) {
           for (fmr::Local_int d = 0; d < dofs_n; ++d) {// Gather to uval buffer.
             uval[i * dofs_n + d] = part_u[conn[i] * dofs_n + d];
           }
         }
-#else
-        if (iter == 0) {
-          for (fmr::Local_int i = 0; i < conn_n; ++i) {
-            for (fmr::Local_int d = 0; d < dofs_n; ++d) {// Gather to uval buffer.
-              uval[i * dofs_n + d] = part_u[conn[i] * dofs_n + d];
-            }
-          }
-        } else {
-          for (fmr::Local_int i = 0; i < conn_n; ++i) {
-            for (fmr::Local_int d = 0; d < dofs_n; ++d) {// Gather to uval buffer.
-              uval[i * dofs_n + d] = part_p[conn[i] * dofs_n + d];
-            }
-          }
-        }
-#endif
         // Only one constant geometric Jacobian & determinant for each
         // Bars, Tris, Tets element, regardless of the integration point count.
         for (fmr::Local_int i = 0; i < this_jacs_dets_size; ++i) {
@@ -460,30 +432,6 @@ FMR_WARN_INLINE_ON
         }
       }
     }//end elem loop
-    /*
-    // u, f, Minv, BCs owned by caller
-    //
-    const fmr::Local int bad_jacs = fems_resp (&part_f[0], &part_u[0]);
-    //
-    PCGs slvr = PCGs();// ndof optional arg?
-    const fmr::Phys_float init_res2 = slvr.init_ref
-      (&part_u[0], &part_f[0], %Minv[0],*load_bcs, ndof);
-    //
-    if (init_res2 <=0) {break;}
-    fmr::Phys_float iter_rel2 = iter_res2 / init_res2 ;
-    //
-    // Iterate...
-    fems_resp (&part_f[0], slvr.get_p(), ndof);
-    iter_res2 = slvr.iter_ref (&part_u[0], &part_f[0], &Minv[0], ndof);
-    iter_rel2 = iter_res2 / init_res2;
-    //
-    slvr.exit();// frees mem. Skip this if running another solve.
-    //
-    // ...until exit.
-    //
-    */
-
-#if 1
     if (iter == 0){
       const auto part_load_bc = data_load_bc;// only used once
       //
@@ -492,7 +440,7 @@ FMR_WARN_INLINE_ON
       init_res2 = slvr.init (&part_f[0], &Minv[0], part_load_bc, this_dofs_n);
       //
       res2 = init_res2;
-      if (res2 < abs_tol2) {++iter; break; }// already converged
+      if (res2 < abs_tol2) {rel2=1.0; ++iter; break; }// already converged
       part_u = slvr.ptr_p();// Pass p to next response calc.
     }
     else{
@@ -502,99 +450,6 @@ FMR_WARN_INLINE_ON
       part_u = slvr.ptr_p();// Pass p to next response calc.
     }
     rel2 = res2 / init_res2;
-#else
-#define MERGE_PCG_ITER_CDE_GH
-    if (iter == 0) {// part solve init scope ==================================
-      using namespace femera::grid::test;
-      //
-      // Copy loads and displacement BCs into local lists.
-      const auto part_load_bc = data_load_bc;// only used once
-      //
-      // Initialize preconditioned conjugate gradient (PCG) solver. -----------
-      // Every step, even when trivial, is a defined kernel, so that later
-      // merges track each step.
-      // E.g., pcgs_kern_iter_cde_ref merges steps c, d, and e into one kernel
-      // (reference implementation).
-      //
-      // f = Y(u) : initial response assumed already done.
-      //
-      // r = b - f : initial residuals (r)
-      //NOTE b (RHS) is not used again.
-#if 1
-      pcgs_kern_init_a_1(&part_r[0], &part_f[0], &part_load_bc,
-        fmr::Local_int(part_load_bc.size()), this_dofs_n);// does inline
-#else
-      pcgs_kern_init_a_ref(&part_r[0], &part_f[0], &part_load_bc,
-        this_dofs_n);// does not inline
-#endif
-      pcgs_kern_init_b_ref(&part_p[0], &Minv[0], &part_r[0], this_dofs_n);
-      part_zet2 = pcgs_kern_init_c_ref(&part_r[0], &part_p[0], this_dofs_n);
-      //
-      //TODO Sync sum zet2.
-      //
-      init_zet2 = part_zet2;// Keep for relative tolerance.
-      res2 = part_zet2;
-      rel2 = part_zet2 / init_zet2;
-      // DONE if already converged.
-      if (res2 < abs_tol2) {++iter; break; }// already converged
-    }// end part solve init scope
-    else {// part solve iteration scope
-      using namespace femera::grid::test;
-      //
-      auto part_z = &data_z[0];
-    // Do solver iteration. ---------------------------------------------------
-    //
-    // f = Y(p) : assumed already done
-    const fmr::Phys_float// gamma = p dot f : reduce
-    part_gamma = pcgs_kern_iter_a_ref(&part_p[0], &part_f[0], this_dofs_n);
-      //
-      //TODO sync sum gamma
-      //
-      if (part_gamma <= 0.0) {++iter; res2 = part_gamma; break; }//TODO remove?
-      //
-      // alpha = zet2 / gamma
-      const auto part_alpha = pcgs_kern_iter_b_ref (part_zet2, part_gamma);
-#ifdef MERGE_PCG_ITER_CDE_GH
-      // r = r - alpha * f : update residuals
-      // z = Minv * r : preconditioned residual
-      // zeta = r dot z : reduce preconditioned residual norm
-      const fmr::Phys_float part_zeta = pcgs_kern_iter_cde_ref
-        (&part_r[0], &part_z[0], &part_f[0], &Minv[0], part_alpha, this_dofs_n);
-#else
-      // r = r - alpha * f : update residuals
-      pcgs_kern_iter_c_ref (&part_r[0], &part_f[0], part_alpha, this_dofs_n);
-      // z = Minv * r : preconditioned residual
-      pcgs_kern_iter_d_ref (&part_z[0], &Minv[0], &part_r[0], this_dofs_n);
-      // zeta = r dot z : reduce preconditioned residual norm
-      const fmr::Phys_float part_zeta
-      = pcgs_kern_iter_e_ref(&part_r[0], &part_z[0], this_dofs_n);
-#endif
-      //
-      //TODO sync sum zeta
-      //
-      // beta = zeta / zet2
-      const fmr::Phys_float
-      part_beta = pcgs_kern_iter_f_ref (part_zeta, part_zet2);
-#ifdef MERGE_PCG_ITER_CDE_GH
-      // u = u + alpha * p : update solution
-      // p = z + beta * p : update search direction
-     pcgs_kern_iter_gh_ref(&part_u[0], &part_p[0],
-       &part_z[0], part_alpha, part_beta, this_dofs_n);
-#else
-      // u = u + alpha * p : update solution
-      pcgs_kern_iter_g_ref (&part_u[0], &part_p[0], part_alpha, this_dofs_n);
-      // p = z + beta * p : update search direction
-      pcgs_kern_iter_h_ref (&part_p[0], &part_z[0], part_beta, this_dofs_n);
-#endif
-      // zeta2 = zeta : update for next iteration
-      part_zet2 = pcgs_kern_i_ref (part_zeta);
-      //
-      // iteration residuals
-      res2 = part_zet2;
-      rel2 = part_zet2 / init_zet2;
-    }//end part solve iteration scope
-#undef MERGE_PCG_ITER_CDE_GH
-#endif
     {
       const auto digits = fmr::math::count_digits (fmr::Local_int(iter_max) * 2);
       fmr::Local_int mod = 1;
