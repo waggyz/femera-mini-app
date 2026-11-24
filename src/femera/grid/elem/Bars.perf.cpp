@@ -44,6 +44,7 @@ fmr::Exit_int main (int argc, char** argv) {
   // ==========================================================================
   constexpr fmr::Dim_int part_d = 1;
   constexpr fmr::Dim_int part_elem_p = 1;//NOTE higher-order Bars don't work.
+  const fmr::Local_int elem_intp_n = 1;//TODO 0 for default?
   // --------------------------------------------------------------------------
   using femera::grid::tile::Tile;
   using femera::grid::elem::Elem;
@@ -99,40 +100,40 @@ fmr::Exit_int main (int argc, char** argv) {
   femera::grid::test::BClist part_disp_bc;
   femera::grid::test::BClist data_load_bc;
   {// Scope boundary condition maps. These sort and dedupe BCs.
-    femera::grid::test::BCmap maps_disp_bc;
-    femera::grid::test::BCmap maps_load_bc;
+    femera::grid::test::BCmap map_disp_bc;
+    femera::grid::test::BCmap map_load_bc;
     //
-    maps_disp_bc[0] = fmr::Phys_float(0.0);// Fix left end.
+    map_disp_bc[0] = fmr::Phys_float(0.0);// Fix left end.
     //
     switch (load_case) {
       case 0: break;
-      case 1: maps_disp_bc[part_dofs_n - 1] = fmr::Phys_float(end_disp);
+      case 1: map_disp_bc[part_dofs_n - 1] = fmr::Phys_float(end_disp);
       break;
-      case 2: maps_load_bc[part_dofs_n - 1] = fmr::Phys_float(end_load);
+      case 2: map_load_bc[part_dofs_n - 1] = fmr::Phys_float(end_load);
       break;
       case 3: {
-        maps_disp_bc[part_dofs_n - 1] = fmr::Phys_float(0.0);
-        maps_disp_bc[part_dofs_n / 2] = fmr::Phys_float(end_disp);
+        map_disp_bc[part_dofs_n - 1] = fmr::Phys_float(0.0);
+        map_disp_bc[part_dofs_n / 2] = fmr::Phys_float(end_disp);
       break;
       }
       case 4: {
-        maps_disp_bc[part_dofs_n - 1] = fmr::Phys_float(0.0);
-        maps_load_bc[part_dofs_n / 2] = fmr::Phys_float(end_load);
+        map_disp_bc[part_dofs_n - 1] = fmr::Phys_float(0.0);
+        map_load_bc[part_dofs_n / 2] = fmr::Phys_float(end_load);
       break;
       }
       case 5: {
-        maps_disp_bc[0              ] = fmr::Phys_float(-end_disp);//overwrite
-        maps_disp_bc[part_dofs_n - 1] = fmr::Phys_float( end_disp);
+        map_disp_bc[0              ] = fmr::Phys_float(-end_disp);//overwrite
+        map_disp_bc[part_dofs_n - 1] = fmr::Phys_float( end_disp);
       break;
       }
       default: break;
     }
     // Copy maps to lists.
-    for (const auto &p : maps_disp_bc) {
+    for (const auto &p : map_disp_bc) {
       part_disp_bc.emplace_back(p.first, p.second);
       //part_disp_bc.emplace_back(BCitem<>(p.first, p.second));
     }
-    for (const auto &p : maps_load_bc) {
+    for (const auto &p : map_load_bc) {
       data_load_bc.emplace_back(p.first, p.second);
     }
   }
@@ -220,7 +221,6 @@ FMR_WARN_INLINE_ON
     }
 #endif
     // ------------------------------------------------------------------------
-    const fmr::Local_int elem_intp_n = 1;
     std::valarray<fmr::Phys_float> data_intp_wgts(1.0, std::size_t(elem_intp_n));
     const std::valarray<fmr::Phys_float> data_intp_coor
       (0.5, elem_intp_n * tile.get_elem_d ());
