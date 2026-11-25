@@ -51,6 +51,75 @@ TEST( GridElemBars, MixedPrecisionBoundaryConditions ){
   check_mixed_precision_bcs<double, float>();
 }
 
+static void check_bar_prototype_case (const double end_disp,
+  const double end_load, const bool force_controlled) {
+  const fmr::Local_int elem_n = 9;
+  const fmr::Local_int dofs_n = elem_n + 1;
+  const fmr::Local_int dims[3] = {elem_n, 0, 0};
+  const double size[3] = {1.0, 0.0, 0.0};
+  const fmr::Local_int initial_dims[3] = {3, 0, 0};
+  const double initial_size[3] = {2.0, 0.0, 0.0};
+  const double ea = 2e7;
+  double u[10] = {};
+  double f[10] = {};
+  float minv[10];
+  for (fmr::Local_int i = 0; i < dofs_n; ++i) { minv[i] = 1.0f; }
+
+  test::BClist disp_bc = {{0, 0.0}};
+  test::BClist load_bc;
+  if (!force_controlled) {
+    disp_bc.emplace_back(dofs_n - 1, end_disp);
+  } else {
+    load_bc.emplace_back(dofs_n - 1, end_load);
+  }
+  test::set_bcs(u, disp_bc);
+  test::set_bc0(minv, disp_bc);
+
+  test::MeshPhys<tile::Bar1, 1, double> mesh;
+  mesh.init_phys(1, &ea);
+  mesh.init_mesh(1, initial_dims, initial_size);
+  mesh.init_mesh(1, dims, size);
+  ASSERT_TRUE(mesh.get_part_resp(f, u));
+  const double end_force = ea * elem_n * end_disp / size[0];
+  EXPECT_NEAR(f[dofs_n - 2], -end_force, 1e-8);
+  EXPECT_NEAR(f[dofs_n - 1], end_force, 1e-8);
+
+  test::PCGsProto<double> solver;
+  const double initial_res2 = solver.init(f, minv, load_bc, dofs_n);
+  const double expected_res = force_controlled ? end_load : end_force;
+  EXPECT_NEAR(initial_res2, expected_res * expected_res, 1e-3);
+
+  double res2 = initial_res2;
+  for (fmr::Local_int i = 0; i < dofs_n && res2 > 1e-12; ++i) {
+    ASSERT_TRUE(mesh.get_part_resp(f, solver.ptr_p()));
+    res2 = solver.iter(f, u, minv, dofs_n);
+  }
+  EXPECT_LE(res2, 1e-12);
+  const double tip = force_controlled ? end_load * size[0] / ea : end_disp;
+  for (fmr::Local_int i = 0; i < dofs_n; ++i) {
+    EXPECT_NEAR(u[i], tip * double(i) / elem_n, 1e-12);
+  }
+}
+
+TEST( GridElemBars, PrototypePrescribedDisplacement ){
+  check_bar_prototype_case(0.001, 0.0, false);
+}
+
+TEST( GridElemBars, PrototypeZeroLoad ){
+  check_bar_prototype_case(0.0, 0.0, false);
+}
+
+TEST( GridElemBars, PrototypeEndForce ){
+  check_bar_prototype_case(0.0, 1e3, true);
+}
+
+TEST( GridElemBars, PrototypeRejectsEmptyMesh ){
+  test::MeshPhys<tile::Bar1, 1, double> mesh;
+  const fmr::Local_int dims[3] = {0, 0, 0};
+  const double size[3] = {1.0, 0.0, 0.0};
+  EXPECT_THROW(mesh.init_mesh(1, dims, size), std::invalid_argument);
+}
+
 TEST( GridElemBars, IsStatelessAndPrivate ){
   EXPECT_TRUE( (std::is_empty<Elem<Bars>>::value) );
   EXPECT_TRUE( (std::is_empty<Bars>::value) );// private constructor

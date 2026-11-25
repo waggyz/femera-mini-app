@@ -53,7 +53,7 @@ fmr::Exit_int main (int argc, char** argv) {
   constexpr fmr::Dim_int part_elem_p = 1;//NOTE higher-order Bars don't work.
   // --------------------------------------------------------------------------
   std::valarray<fmr::Local_int> data_elem_dims(3);
-  data_elem_dims[0] = do_elem_n; data_elem_dims[1] = 1; data_elem_dims[2] = 1;
+  data_elem_dims[0] = do_elem_n; data_elem_dims[1] = 0; data_elem_dims[2] = 0;
   std::valarray<fmr::Geom_float> phys_size(3);
   phys_size[0] = bars_len;
   phys_size[1] = 0.0; phys_size[2] = 0.0;
@@ -102,7 +102,7 @@ fmr::Exit_int main (int argc, char** argv) {
   //TODO init part_u to constant strain.
   //
   femera::grid::test::BClist part_disp_bc;
-  femera::grid::test::BClist data_load_bc;
+  femera::grid::test::BClist part_load_bc;
   {// Scope boundary condition maps. These sort and dedupe BCs.
     femera::grid::test::BCmap map_disp_bc;
     femera::grid::test::BCmap map_load_bc;
@@ -138,13 +138,14 @@ fmr::Exit_int main (int argc, char** argv) {
       //part_disp_bc.emplace_back(BCitem<>(p.first, p.second));
     }
     for (const auto &p : map_load_bc) {
-      data_load_bc.emplace_back(p.first, p.second);
+      part_load_bc.emplace_back(p.first, p.second);
     }
   }
   // These are kept for correctness check after solve.
   auto part_f = &data_f[0];
   auto part_u = &data_u[0];
   femera::grid::test::set_bcs(&part_u[0], part_disp_bc);
+  //femera::grid::test::sum_bcs(&part_f[0], part_load_bc);
   //
   // Conjugate gradient is exact when iterated to the number of unknowns.
   if (iter_max == 0) {
@@ -229,8 +230,8 @@ FMR_WARN_INLINE_ON
     const std::valarray<fmr::Phys_float> data_intp_coor
       (0.5, elem_intp_n * tile.get_elem_d ());
     std::valarray<fmr::Phys_float> data_dN(elem.get_poly_grad_size());
-
-    elem.get_poly_grad_node(&data_dN[0], &data_intp_coor[0]);
+    //
+    elem.get_poly_grad_node(&data_dN[0], &data_intp_coor[0]);// initialize
     {
     bool ok = (this_iter < iter_max) && (bad_jac_n == 0)
       && (iter_res2 > abs_tol2) && (iter_rel2 > rel_tol2)
@@ -244,6 +245,7 @@ FMR_WARN_INLINE_ON
     // Diagonal preconditioner (already inverted & synced)
     auto data_Minv = std::valarray<float>(1.0, part_dofs_n);
     femera::grid::test::set_bc0(&data_Minv[0], part_disp_bc);
+    //femera::grid::test::set_bc0(&data_Minv[0], part_load_bc);
     //
     // Calculate the total data size for the part.
     fmr::Global_int data_scal_size = 0;
@@ -265,7 +267,7 @@ FMR_WARN_INLINE_ON
     data_scal_size += sizeof(rel_tol2);
     data_scal_size += sizeof(mtrl_prop[0]) * 1;
     data_scal_size += sizeof(part_dofs_n);
-    data_scal_size += sizeof(data_load_bc);// might be in/out
+    data_scal_size += sizeof(part_load_bc);
     data_scal_size += sizeof(data_dN[0]) * 2;
     data_scal_size += sizeof(data_intp_wgts[0]) * 1;
     data_node_size += sizeof(data_Minv[0]) * part_node_n * node_dofs_n;
@@ -289,6 +291,7 @@ FMR_WARN_INLINE_ON
     //
     auto init_uptr = &part_u[0];
     phsh.init_phys(1, &mtrl_prop[0]);
+
     auto data_size = phsh.init_mesh(node_dofs_n, &data_elem_dims[0], &phys_size[0]);
     //mini->data->send (fmr::log, "TEST","phsh","init","initialized");
     auto slvr = PCGsProto<fmr::Phys_float> ();
@@ -332,7 +335,7 @@ FMR_WARN_INLINE_ON
 #endif
 #endif
     if (this_iter == 0){
-      const auto part_load_bc = data_load_bc;// only used once
+      //const auto part_load_bc = data_load_bc;// only used once
       //
       using namespace femera::grid::test;
       //

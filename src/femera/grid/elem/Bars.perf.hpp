@@ -6,6 +6,8 @@
 #include "../tile/Bar1.hpp"// used for MeshPhys class
 #include "../../../fmr/fems/elem-jacs.hpp"
 
+#include <stdexcept>
+
 #undef DEBUG_PRINT
 
 namespace femera { namespace grid { namespace test {
@@ -76,9 +78,9 @@ using femera::grid::elem::Bars;
         this_bad, bad);
     }
 #endif
-  }//end el loop
-  return bad;
-}//end calc_bars_invt_dets
+    }//end el loop
+    return bad;
+  }//end calc_bars_invt_dets
 
   template <typename F=fmr::Phys_float, typename G=fmr::Phys_float> inline
   fmr::Local_int set_bcs (F* vals, const std::vector<BCitem<G>>& bcs){
@@ -485,7 +487,6 @@ private:// ====================================================================
   //
   // member variables: byte_size, data_size, node_ndof,
   // grid_size, phys_size,  part_d, tile_d, elem_d, elem_intp_n
-  //
   byte = 2 * sizeof(std::size_t) + 1 * sizeof(fmr::Local_int)
   + 6 * sizeof(fmr::Dim_int);
   size = byte;// approximately the same for now (does not account for padding.)
@@ -509,16 +510,8 @@ private:// ====================================================================
   }
   byte += part_jacs_dets.size() * sizeof (F);
   size += sizeof(part_jacs_dets);
-//  if (part_Minv.size() != part_dofs_n) {
-//    part_Minv.resize(get_part_dofs_n());
-//  }
-//  byte += part_Minv.size() * sizeof (float);
-//  size += sizeof(part_Minv);
-#if 0
-  if (part_mtrl_prop.size() != 1) {
-    part_mtrl_prop.resize(1, 1.0);
-  }
-#endif
+  //
+  // Sizing handled in init_phys.
   byte += part_mtrl_prop.size() * sizeof (F);
   size += sizeof(part_mtrl_prop);
   if (elem_dN.size() != elem_intp_n * elem_node_n * elem_d) {
@@ -570,9 +563,9 @@ public:
   //NOTE this amount already included in init_mesh return fvalue.
   return part_mtrl_prop.size() * sizeof(F);
   }
-  std::size_t init_mesh(
+  std::size_t init_mesh(// returns byte size of mesh data arrays
     const fmr::Dim_int ndof,
-    const fmr::Local_int gsize[4], const F ysize[4]
+    const fmr::Local_int gsize[4], const F ysize[4]// total physical size
   ) {
   // returns bytes in use by arrays
   // These are needed to resize arrays.
@@ -587,52 +580,16 @@ public:
   if (ysize != nullptr) {
     for (int i = 0; i < 3; ++i) { this->phys_size[i] = ysize[i]; }
   }
+  if (this->grid_size[0] == 0) {
+    throw std::invalid_argument("MeshPhys requires at least one bar element");
+  }
   std::size_t byte = init_mesh_data();// just resizes arrays
+  elem_intp_coor = F(0.5);
+  elem_intp_wgts = F(1.0);
+  Elem<Bars, P, F>::get_poly_grad_node(&elem_dN[0], &elem_intp_coor[0]);
+  const F tile_size[3] = {phys_size[0] / F(grid_size[0]), F(0), F(0)};
   //
   fmr::Local_int bad_jac_n = 0;
-
-#if 0
-//  this->part_Minv.resize(part_dofs_n, 1.0);
-  {// Scope boundary condition maps. These sort and dedupe BCs.
-    //TODO handle BCs more systematically using a small BC manager class.
-    femera::grid::test::BCmap map_disp_bc;
-    femera::grid::test::BCmap map_load_bc;
-    //
-    map_disp_bc[0] = F(0.0);// Fix left end.
-    //
-    switch (load_case) {
-      case 0: break;
-      case 1: map_disp_bc[part_dofs_n - 1] = F(end_disp);
-      break;
-      case 2: map_load_bc[part_dofs_n - 1] = F(end_load);
-      break;
-      case 3: {
-        map_disp_bc[part_dofs_n - 1] = F(0.0);
-        map_disp_bc[part_dofs_n / 2] = F(end_disp);
-      break;
-      }
-      case 4: {
-        map_disp_bc[part_dofs_n - 1] = F(0.0);
-        map_load_bc[part_dofs_n / 2] = F(end_load);
-      break;
-      }
-      case 5: {
-        map_disp_bc[0              ] = F(-end_disp);//overwrite
-        map_disp_bc[part_dofs_n - 1] = F( end_disp);
-      break;
-      }
-      default: break;
-    }
-    // Copy maps to lists.
-    for (const auto &p : map_disp_bc) {
-      this->part_disp_bc.emplace_back(p.first, p.second);
-      //part_disp_bc.emplace_back(BCitem<>(p.first, p.second));
-    }
-    for (const auto &p : map_load_bc) {
-      this->data_load_bc.emplace_back(p.first, p.second);
-    }
-  }
-#endif
     {// Scope node_coor//TODO no longer scoped because node_coor lives above.
 //TODO optionally clear node_coor when done with it?
 #ifdef DEBUG_PRINT
@@ -643,7 +600,7 @@ public:
       // Get node coordinates (temporarily).
       tile.get_tile_part_mesh (// returns halo_elem_n
         &part_node_conn[0], &part_node_coor[0],//NOTE elems halo sorted, nodes not.
-        &phys_size[0],
+        &tile_size[0],
         &grid_size[0],
         part_d
       );
@@ -698,21 +655,7 @@ FMR_WARN_INLINE_ON
         part_jacs_dets[e * elem_jacd_size + 1]);
     }
 #endif
-    // ------------------------------------------------------------------------
-    Elem<Bars>::get_poly_grad_node(&elem_dN[0], &elem_intp_coor[0]);//TODO loop ipts
-#if 0
-    {
-    bool ok = (this_iter < iter_max) && (bad_jac_n == 0)
-      && (iter_res2 > abs_tol2) && (iter_rel2 > rel_tol2)
-      && (iter_res2 > 0.0) && (abs_tol2 > 0.0);
-    mini->data->send (fmr::log, ok?" ok ":" :( ", "GO! ", "size",
-      "%4u dofs %4u node %4u elem (%4u bad/%4u Jacs)",
-      part_dofs_n, part_node_n, part_elem_n,
-      bad_jac_n, part_elem_n * elem_intp_n );
-    }
-#endif
-//  femera::grid::test::set_bc0(&this->part_Minv[0], part_disp_bc);
-  //
+//
   return byte;
   }//end init_mesh
 
