@@ -446,7 +446,7 @@ private:// ====================================================================
     // Typically run after init and before resp ().
     return true;//TODO implement actual checks
   }
-  std::size_t init_data(const fmr::Dim_int ndof) {
+  std::size_t init_data() {
     // Resizes internal array (if needed) and fills with zeros or ones.
     // dims is grid size.  const fmr::Local_int node_dofs_n = this->node_ndof;// elasticity only
   const fmr::Local_int part_node_n = get_part_node_n();
@@ -455,34 +455,50 @@ private:// ====================================================================
   const fmr::Local_int elem_node_n = tile.get_tile_elem_node_n();
   const fmr::Local_int elem_jacs_dets_size = tile.get_tile_elem_jacs_dets_size();
   //
+  std::size_t byte = 0;// bytes used: size()
+  std::size_t size = 0;// bytes allocated: sizeof
+  //
   if (part_node_conn.size() != part_elem_n * elem_node_n) {
     part_node_conn.resize(part_elem_n * elem_node_n);}
+  byte += part_node_conn.size() * sizeof (fmr::Local_int);
+  size += sizeof(part_node_conn);
   if (part_node_coor.size() != part_node_n * this->part_d) {
     part_node_coor.resize(part_node_n * this->part_d);
   }
+  byte += part_node_coor.size() * sizeof (F);
+  size += sizeof(part_node_coor);
   if (part_jacs_dets.size() != part_elem_n * elem_jacs_dets_size) {
     part_jacs_dets.resize(part_elem_n * elem_jacs_dets_size);
   }
+  byte += part_jacs_dets.size() * sizeof (F);
+  size += sizeof(part_jacs_dets);
   if (part_Minv.size() != part_dofs_n) {
     part_Minv.resize(get_part_dofs_n());
   }
+  byte += part_Minv.size() * sizeof (F);
+  size += sizeof(part_Minv);
   if (part_mtrl_prop.size() != 1) {
     part_mtrl_prop.resize(1, 1.0);
   }
+  byte += part_mtrl_prop.size() * sizeof (F);
+  size += sizeof(part_mtrl_prop);
   if (elem_dN.size() != elem_intp_n * elem_node_n * elem_d) {
     elem_dN.resize(elem_intp_n * elem_node_n * elem_d);
   }
+  byte += elem_dN.size() * sizeof (F);
+  size += sizeof(elem_dN);
   if (elem_intp_wgts.size() != elem_intp_n) {
     elem_intp_wgts.resize(elem_intp_n);
   }
+  byte += elem_intp_wgts.size() * sizeof (F);
+  size += sizeof(elem_intp_wgts);
   if (elem_intp_coor.size() != elem_intp_n * elem_d) {
     elem_intp_coor.resize(elem_intp_n * elem_d);
   }
-
-
-
-
-    return ndof * sizeof(F);//TODO
+  byte += elem_intp_coor.size() * sizeof (F);
+  size += sizeof(elem_intp_coor);
+  //
+  return byte;//TODO something with size allocated
   }
 public:
   std::size_t init(const fmr::Dim_int ndof, const fmr::Local_int dims[4]) {
@@ -496,7 +512,7 @@ public:
   if (dims != nullptr) {
     for (int i = 0; i < 3; ++i) { this->part_dims[i] = dims[i]; }
   }
-  std::size_t byte = init_data(ndof);// just resizes arrays
+  std::size_t byte = init_data();// just resizes arrays
   //
   const fmr::Local_int node_dofs_n = this->node_ndof;// elasticity only
   const fmr::Local_int part_node_n = this->get_part_node_n();
@@ -504,7 +520,6 @@ public:
 //  const fmr::Local_int part_elem_n
 //  = tile.get_tile_part_elem_n(&this->part_dims[0]);
 //  const fmr::Local_int elem_node_n = tile.get_tile_elem_node_n();
-  
   fmr::Local_int bad_jac_n = 0;
   // **************************************************************************
 //  const bool is_unstructured = false;
@@ -524,7 +539,7 @@ public:
   ////TODO placeholders
   //
   // Initialize physics -------------------------------------------------------
-  
+  //
   this->part_size[0] = bars_len;
   this->part_mtrl_prop[0] = fmr::Phys_float(mtrl_modx * bars_area);// N
   //
@@ -534,11 +549,7 @@ public:
   //
   //femera::grid::test::BClist part_disp_bc;
   //femera::grid::test::BClist data_load_bc;
-  
   this->part_Minv.resize(part_dofs_n, 1.0);
-
-
-
   {// Scope boundary condition maps. These sort and dedupe BCs.
     femera::grid::test::BCmap map_disp_bc;
     femera::grid::test::BCmap map_load_bc;
@@ -582,7 +593,6 @@ public:
   //auto part_u = &data_u[0];
   //femera::grid::test::set_bcs(&part_u[0], this->part_disp_bc);//FFIXME int Phys
   //
-   {// Iteration internal data scope ==========================================
     // For now, pull most array allocation out of the loop.
     //
 
@@ -644,11 +654,6 @@ const auto this_elem_n = this->tile.get_tile_part_elem_n (&part_dims[0]);
       &part_node_coor[0], &part_node_conn[0], this_elem_n, part_d);
 FMR_WARN_INLINE_ON
     }//end node_coor scope
-
-
-
-
-
 #if 0
     if (false) {// apply std::abs() to the determinants.
       for (fmr::Local_int e = 0; e < part_elem_n; ++e) {
@@ -666,7 +671,6 @@ FMR_WARN_INLINE_ON
         part_jacs_dets[e * elem_jacd_size + 1]);
     }
 #endif
-return 0;//TODO remove DEBUG
     // ------------------------------------------------------------------------
 //    std::valarray<fmr::Phys_float> data_intp_wgts(1.0, std::size_t(elem_intp_n));
  //   const std::valarray<fmr::Phys_float> data_intp_coor
@@ -686,19 +690,10 @@ return 0;//TODO remove DEBUG
       bad_jac_n, part_elem_n * elem_intp_n );
     }
 #endif
-
-    //
+  //
   femera::grid::test::set_bc0(&this->part_Minv[0], part_disp_bc);
-
-
-
-
-
-
+  //
   return byte;//TODO
-  }
-
-
   }
 
 
