@@ -54,7 +54,10 @@ fmr::Exit_int main (int argc, char** argv) {
   // --------------------------------------------------------------------------
   std::valarray<fmr::Local_int> data_elem_dims(3);
   data_elem_dims[0] = do_elem_n; data_elem_dims[1] = 1; data_elem_dims[2] = 1;
-  std::valarray<fmr::Geom_float> tile_size(3);
+  std::valarray<fmr::Geom_float> phys_size(3);
+  phys_size[0] = bars_len;
+  phys_size[1] = 0.0; phys_size[2] = 0.0;
+  std::valarray<fmr::Geom_float> tile_size(3);//TODO remove?
   tile_size[0] = bars_len / data_elem_dims[0];
   tile_size[1] = 0.0; tile_size[2] = 0.0;
   // Get derived mesh partition information.
@@ -285,7 +288,7 @@ FMR_WARN_INLINE_ON
     auto phsh = MeshPhys<Bar1, part_elem_p, fmr::Phys_float> ();
     //
     auto init_uptr = &part_u[0];
-    phsh.part_init(node_dofs_n, &data_elem_dims[0]);
+    phsh.init_mesh(node_dofs_n, &data_elem_dims[0], &phys_size[0]);
     //mini->data->send (fmr::log, "TEST","phsh","init","initialized");
     auto slvr = PCGsProto<fmr::Phys_float> ();
     // Iterate ================================================================
@@ -299,151 +302,40 @@ FMR_WARN_INLINE_ON
     if (this_iter == 0) {init_res2 = iter_res2;}
 
 
-      const auto part_elem_dims = &data_elem_dims[0];
-      const auto dofs_n         = node_dofs_n;
+      //const auto part_elem_dims = &data_elem_dims[0];
       const auto this_dofs_n
-      = tile.get_tile_part_node_n (&part_elem_dims[0]) * dofs_n;
-      const auto Minv           = &data_Minv[0];// inverted preconditioner w/BCs
+      = tile.get_tile_part_node_n (&data_elem_dims[0]) * node_dofs_n;
+      //const auto part_elem_dims = &data_elem_dims[0];
+      //const auto Minv           = &data_Minv[0];// inverted preconditioner w/BCs
 #if 0
-      // ----------------------------------------------------------------------
-#if 0
-      // Copy loads and displacement BCs into local lists.
-      const auto this_disp_bc = part_disp_bc;// not used in this_iter loop
-      const auto part_load_bc = data_load_bc;// only used once and copied in init
-#endif
-      // Make local copies of scalar constants.
-      const auto this_part_d    = part_d;
-      const auto this_intp_n    = elem_intp_n;
-      // Get the rest using tile.get_*.
-      const auto this_elem_n    = tile.get_tile_part_elem_n (&part_elem_dims[0]);
-      const auto halo_elem_n    = tile.get_halo_elem_n (&part_elem_dims[0]);
-      const auto halo_node_n    = tile.get_halo_node_n (&part_elem_dims[0]);
-      const auto conn_n         = tile.get_tile_elem_node_n ();
-      const auto this_elem_d    = tile.get_elem_d ();
-      //
-      // Constant arrays to copy in. (Drop the valarray overhead.)
-      const auto part_node_conn = &data_node_conn[0];
-      const auto this_jacd      = &part_jacs_dets[0];
-      const auto elem_dN        = &data_dN[0];
-      const auto intp_wgts      = &data_intp_wgts[0];
-      const auto this_prop      = &mtrl_prop[0];
-      //
-      // Zero part_f to accumulate sums.
-      for(fmr::Local_int i = 0; i < part_dofs_n; ++i) {
-        part_f[i] = fmr::Phys_float(0.0);
-      }
-
-
-
-
-
-
-
-      // Element loop internal arrays
-      fmr::Phys_float uval[conn_n * dofs_n];// displacement buffer
-      fmr::Phys_float fval[conn_n * dofs_n];// force buffer
-      fmr::Local_int  conn[conn_n];// connectivity buffer
-      fmr::Phys_float jval[tile.get_tile_elem_jacs_dets_size ()];
-      // Element loop =========================================================
-      for (fmr::Local_int elem_i = 0; elem_i < this_elem_n; ++elem_i) {
-      //
-      //for (fmr::Local_int elem_i = 0; elem_i < halo_elem_n; ++elem_i) {
-        for (fmr::Local_int i = 0; i < conn_n; ++i) {// Copy to conn buffer.
-          conn[i] = part_node_conn[elem_i * conn_n + i];
-        }
-#ifdef DEBUG_PRINT
-        if (this_iter < 1 && elem_i < 10) {// Only print the first few elements for debugging.
-          mini->data->send (fmr::log, "iter", "mesh", "elem",
-            "%4u conn %u %u", elem_i, conn[0], conn[1]);
-        }
-#endif
-        for (fmr::Local_int i = 0; i < conn_n; ++i) {
-          for (fmr::Local_int d = 0; d < dofs_n; ++d) {// Gather to uval buffer.
-            uval[i * dofs_n + d] = part_u[conn[i] * dofs_n + d];
-          }
-        }
-        // Only one constant geometric Jacobian & determinant for each
-        // Bars, Tris, Tets element, regardless of the integration point count.
-        for (fmr::Local_int i = 0; i < tile.get_tile_elem_jacs_dets_size (); ++i) {
-          jval[i] = this_jacd[elem_i * tile.get_tile_elem_jacs_dets_size () + i];
-        }
-        const auto this_det = jval[this_part_d * this_elem_d ];// last value
-#if 0
-        {
-          mini->data->send (fmr::log, "iter", "jacd", "elem",
-            "%4u %e %e", elem_i, jval[0], this_det);
-        }
-#endif
-        // Integration point loop internal arrays
-        fmr::Phys_float G[dofs_n * conn_n];
-        fmr::Phys_float H[dofs_n * this_elem_d];
-        fmr::Phys_float S[dofs_n * this_elem_d];
-        // --------------------------------------------------------------------
-        // Do physics.
-        for (fmr::Local_int i = 0; i < conn_n * dofs_n; ++i) {
-          fval[i] = fmr::Phys_float(0.0); }
-        for (fmr::Local_int ip = 0; ip < this_intp_n; ++ip) {
-          // G = Jinv * dN, H =  G * u, S = E * H, f = G^T * S.
-          const auto df = intp_wgts[ip] * this_det;
-          //
-          // G = Jinv * dN
-          fmr::math::smat_mmul_ref(&G[0], &jval[0], &elem_dN[0],
-            this_elem_d, dofs_n, conn_n);
-          // H = G * u
-          fmr::math::smat_mmul_ref(&H[0], &G[0], &uval[0],
-            dofs_n, conn_n, this_elem_d);
-          // S = k * H
-#if 0
-          for (fmr::Local_int i = 0; i < this_elem_d * this_elem_d; ++i) {
-            S[i] = this_prop[0] * H[i];
-          }
-          for (fmr::Local_int i=0; i<(this_elem_d*this_elem_d); ++i) {
-            S[i]*= df;
-          }
-#else
-          //  S = k * H * dF (merged)
-          for (fmr::Local_int i=0; i<(this_elem_d*this_elem_d); ++i) {
-            S[i] = this_prop[0] * H[i] * df;
-          }
-#endif
-          // f = GT * S [* df]
-          fmr::math::smat_tmul_ref(&fval[0], &G[0], &S[0],
-            conn_n, dofs_n, this_elem_d);
-        }// end this_intp_n loop
-        for (fmr::Local_int i = 0; i < conn_n; ++i) {// Scatter to part_f.
-          for (fmr::Local_int d = 0; d < dofs_n; ++d) {
-            part_f[conn[i] * dofs_n + d] += fval[i * dofs_n + d];
-          }
-        }
       if (elem_i == halo_elem_n - 1) {//TODO Synchronize halo nodes.
-        for (fmr::Local_int h = 0; h < halo_node_n; ++h) {
+         for (fmr::Local_int h = 0; h < tile.halo_node_n (); ++h)
 #ifdef DEBUG_PRINT
           const auto //TODO Move halo_node_list to init OR renumber nodes.
-          n = Tile<Bar1, tile.get_elem_p ()>::get_halo_node(h, &part_elem_dims[0]);
+          n = Tile<Bar1, tile.get_elem_p ()>::get_halo_node(h, &data_elem_dims[0]);
           if (this_iter < 5) {
             if (this_iter == 0) {
               mini->data->send (fmr::log, "sync", "halo", "node",
                 "%4u f: %+0.2e u: %+0.2e (elem %u done)",
-                n, part_f[n * dofs_n], part_u[n * dofs_n], elem_i);
+                n, part_f[n * node_dofs_n], part_u[n * node_dofs_n], elem_i);
             } else {
               mini->data->send (fmr::log, "sync", "halo", "node",
                 "%4u f: %+0.2e p: %+0.2e (elem %u done)",
-                n, part_f[n * dofs_n], part_p[n * dofs_n], elem_i);
+                n, part_f[n * node_dofs_n], part_p[n * node_dofs_n], elem_i);
             }
          }
 #else
           Tile<Bar1, tile.get_elem_p ()>::get_halo_node(h, &part_elem_dims[0]);
-#endif
         }
       }
-    }//end elem loop
-    #endif
+#endif
+#endif
     if (this_iter == 0){
       const auto part_load_bc = data_load_bc;// only used once
       //
       using namespace femera::grid::test;
       //
-      init_res2 = slvr.init (&part_f[0], &Minv[0], part_load_bc, this_dofs_n);
+      init_res2 = slvr.init (&part_f[0], &data_Minv[0], part_load_bc, this_dofs_n);
       data_node_size += slvr.get_byte_size ();
       //
       const auto part_data_size = data_scal_size + data_node_size + data_elem_size;
@@ -457,9 +349,9 @@ FMR_WARN_INLINE_ON
       iter_res2 = init_res2;
       if (iter_res2 < abs_tol2) {iter_rel2=1.0; ++this_iter; break; }// converged
       part_u = slvr.ptr_p();// Pass p to next response calc.
-    } else{// iter > 0
+    } else {// iter > 0
       part_u = init_uptr;// Restore part_u.
-      iter_res2 = slvr.iter (&part_f[0], &part_u[0], &Minv[0], this_dofs_n);
+      iter_res2 = slvr.iter (&part_f[0], &part_u[0], &data_Minv[0], this_dofs_n);
       part_u = slvr.ptr_p();// Pass p to next response calc.
     }
     iter_rel2 = iter_res2 / init_res2;
