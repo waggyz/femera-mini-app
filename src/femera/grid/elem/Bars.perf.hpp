@@ -460,10 +460,10 @@ private:// ====================================================================
   fmr::Dim_int elem_d;// Dimension of the element elem_dims <= tile_d
   fmr::Dim_int elem_intp_n;
   //
-  F G[9];// max buffer size
-  F H[9];
-  F S[9];
-  F jval[10];
+//  F G[9];// max buffer size
+//  F H[9];
+//  F S[9];
+//  F jval[10];
   //TODO F fval[conn_n * dofs_n], fmr::Local_int  conn[conn_n], 
   // Methods ------------------------------------------------------------------
   bool chck (){
@@ -555,10 +555,10 @@ private:// ====================================================================
   this->data_size = byte;
   this->byte_size = size;
   //
-  return byte;//TODO something with size allocated?
+  return byte;
   }
 public:
-  std::size_t init_phys(
+  std::size_t init_phys(// set_phys ()?
     const fmr::Local_int nprop, const F* props/*, const F ysize[4]*/) {
       if (nprop != part_mtrl_prop.size()) {
         part_mtrl_prop.resize(nprop, 1.0);
@@ -572,8 +572,7 @@ public:
   }
   std::size_t init_mesh(
     const fmr::Dim_int ndof,
-    const fmr::Local_int gsize[4]
-    , const F ysize[4]
+    const fmr::Local_int gsize[4], const F ysize[4]
   ) {
   // returns bytes in use by arrays
   // These are needed to resize arrays.
@@ -585,29 +584,13 @@ public:
   if (gsize != nullptr) {
     for (int i = 0; i < 3; ++i) { this->grid_size[i] = gsize[i]; }
   }
+  if (ysize != nullptr) {
+    for (int i = 0; i < 3; ++i) { this->phys_size[i] = ysize[i]; }
+  }
   std::size_t byte = init_mesh_data();// just resizes arrays
   //
-  const fmr::Local_int node_dofs_n = this->node_ndof;// elasticity only
-  const fmr::Local_int part_node_n = this->get_part_node_n();
-//  const fmr::Local_int part_dofs_n = part_node_n * node_dofs_n;
-//
   fmr::Local_int bad_jac_n = 0;
-  // **************************************************************************
-//  const bool is_unstructured = false;
-  const fmr::Local_int do_elem_n = 9;
-  //placeholder data for physics initialization
-//  const fmr::Enum_int load_case = 1;
-  const F mtrl_modx = 200e9;
-  const F bars_area = 1.0;
-//  const F end_disp = 0.01;
-//  const F end_load = 1e3;
-  const F bars_len = 1.0 / F(do_elem_n);
-  //
-  // Initialize physics -------------------------------------------------------
-  //
-  this->phys_size[0] = bars_len;
-  this->part_mtrl_prop[0] = F(mtrl_modx * bars_area);// Newtons
-  //
+
 #if 0
 //  this->part_Minv.resize(part_dofs_n, 1.0);
   {// Scope boundary condition maps. These sort and dedupe BCs.
@@ -745,14 +728,6 @@ public://TODO move back up later **********************************************
       //TODO temp alias *******************************************************
       auto part_f = f;// temp rename during refactoring
       const auto part_u = u;
-//      const auto data_elem_dims = &this->grid_size[0];
-//      const auto data_node_conn = &this->part_node_conn[0];
-//      const auto data_dN = &this->elem_dN[0];
-//      const auto elem_intp_wgts = &this->elem_intp_wgts[0];
-//      const auto elem_intp_coor = &this->elem_intp_coor[0];
-//      const auto data_Minv = &this->part_Minv[0];
-      // **********************************************************************
-      //
       //
       // Avoid making local copies of scalar constants. Here for refactoring
       const auto this_part_d    = part_d;
@@ -777,6 +752,16 @@ public://TODO move back up later **********************************************
       const auto this_prop      = &part_mtrl_prop[0];
 //      const auto Minv           = &data_Minv[0];// inverted preconditioner w/BCs
       //
+      F G[9];// max buffer size needed (single physics)
+      F H[9];//TODO consider compile-time sizing based on Tile elem type?
+      F S[9];
+      F jval[10];
+#if 0
+      //TODO uval, fval, conn buffers for element loop
+      F uval[conn_n * dofs_n];// displacement buffer
+      F fval[conn_n * dofs_n];// force buffer
+      fmr::Local_int  conn[conn_n];// connectivity buffer
+#endif
       // Zero part_f to accumulate sums.
       for(fmr::Local_int i = 0; i < part_dofs_n; ++i) {
         part_f[i] = F(0.0);

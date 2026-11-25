@@ -288,7 +288,8 @@ FMR_WARN_INLINE_ON
     auto phsh = MeshPhys<Bar1, part_elem_p, fmr::Phys_float> ();
     //
     auto init_uptr = &part_u[0];
-    phsh.init_mesh(node_dofs_n, &data_elem_dims[0], &phys_size[0]);
+    phsh.init_phys(1, &mtrl_prop[0]);
+    auto data_size = phsh.init_mesh(node_dofs_n, &data_elem_dims[0], &phys_size[0]);
     //mini->data->send (fmr::log, "TEST","phsh","init","initialized");
     auto slvr = PCGsProto<fmr::Phys_float> ();
     // Iterate ================================================================
