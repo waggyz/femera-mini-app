@@ -283,12 +283,14 @@ FMR_WARN_INLINE_ON
     using namespace femera::grid::test;
     //
     auto phsh = MeshPhys<Bar1, part_elem_p, fmr::Phys_float> ();
-    phsh.init(node_dofs_n, &data_elem_dims[0]);
+    phsh.part_init(node_dofs_n, &data_elem_dims[0]);
     //mini->data->send (fmr::log, "TEST","phsh","init","initialized");
+    phsh.get_part_resp(&part_f[0], &part_u[0]);
+    //
     //
     // Iterate ================================================================
     auto init_uptr = &part_u[0];
-    auto slvr = PCGsTest<fmr::Phys_float> ();
+    auto slvr = PCGsProto<fmr::Phys_float> ();
     while ((this_iter < iter_max)
     && (iter_res2 > abs_tol2) && (iter_rel2 > rel_tol2)) {
       // Init is this_iter 0.
@@ -473,8 +475,8 @@ FMR_WARN_INLINE_ON
   --this_iter;// Count is off by one here.
     part_u = init_uptr;// Restore part_u.
 FMR_WARN_INLINE_OFF
-//NOTE the PCGsTest slvr instance goes out of scope, calling inline defined constructor.
-//TODO move the (empty) PCGsTest constructor body to a .cpp when moved out of test namespace.
+//NOTE the PCGsProto slvr instance goes out of scope, calling inline defined constructor.
+//TODO move the (empty) PCGsProto constructor body to a .cpp when moved out of test namespace.
   }// end scope part_jacs_dets
 FMR_WARN_INLINE_ON
   {

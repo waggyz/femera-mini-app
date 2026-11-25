@@ -1,6 +1,7 @@
 #include "../../femera.hpp"
 #include "../Elem.test.hpp"
 #include "Bars.hpp"
+#include "Bars.perf.hpp"
 #include "../../../fmr/fems/elem-jacs.hpp"
 #include "../../../fmr/fems/elem-poly.hpp"
 #include "../../../fmr/smat.hpp"
@@ -20,6 +21,35 @@ fmr::Exit_int main (int argc, char** argv) {
   return mini->exit ();
 }
 namespace femera { namespace grid { namespace elem {
+
+template <typename F, typename G>
+void check_mixed_precision_bcs () {
+  const std::vector<test::BCitem<G>> bcs = {{0, G(1.25)}, {2, G(-0.5)}};
+  F vals[] = {F(4), F(5), F(6)};
+  EXPECT_EQ(test::set_bcs(vals, bcs), 2u);
+  EXPECT_EQ(vals[0], F(1.25));
+  EXPECT_EQ(vals[1], F(5));
+  EXPECT_EQ(vals[2], F(-0.5));
+  EXPECT_EQ(test::sum_bcs(vals, bcs), 2u);
+  EXPECT_EQ(vals[0], F(2.5));
+  EXPECT_EQ(vals[1], F(5));
+  EXPECT_EQ(vals[2], F(-1));
+  EXPECT_EQ(test::set_bc0(vals, bcs), 2u);
+  EXPECT_EQ(vals[0], F(0));
+  EXPECT_EQ(vals[1], F(5));
+  EXPECT_EQ(vals[2], F(0));
+
+  const std::vector<test::BCitem<G>> empty;
+  EXPECT_EQ(test::set_bcs(vals, empty), 0u);
+  EXPECT_EQ(test::sum_bcs(vals, empty), 0u);
+  EXPECT_EQ(test::set_bc0(vals, empty), 0u);
+  EXPECT_EQ(vals[1], F(5));
+}
+
+TEST( GridElemBars, MixedPrecisionBoundaryConditions ){
+  check_mixed_precision_bcs<float, double>();
+  check_mixed_precision_bcs<double, float>();
+}
 
 TEST( GridElemBars, IsStatelessAndPrivate ){
   EXPECT_TRUE( (std::is_empty<Elem<Bars>>::value) );
