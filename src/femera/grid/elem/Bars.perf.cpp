@@ -283,17 +283,28 @@ FMR_WARN_INLINE_ON
     using namespace femera::grid::test;
     //
     auto phsh = MeshPhys<Bar1, part_elem_p, fmr::Phys_float> ();
+    //
+    auto init_uptr = &part_u[0];
     phsh.part_init(node_dofs_n, &data_elem_dims[0]);
     //mini->data->send (fmr::log, "TEST","phsh","init","initialized");
-    phsh.get_part_resp(&part_f[0], &part_u[0]);
-    //
-    //
-    // Iterate ================================================================
-    auto init_uptr = &part_u[0];
     auto slvr = PCGsProto<fmr::Phys_float> ();
+    // Iterate ================================================================
     while ((this_iter < iter_max)
     && (iter_res2 > abs_tol2) && (iter_rel2 > rel_tol2)) {
       // Init is this_iter 0.
+
+
+    iter_res2 = phsh.get_part_resp (&part_f[0],
+      (this_iter == 0 ? &part_u[0] : slvr.ptr_p()));
+    if (this_iter == 0) {init_res2 = iter_res2;}
+
+
+      const auto part_elem_dims = &data_elem_dims[0];
+      const auto dofs_n         = node_dofs_n;
+      const auto this_dofs_n
+      = tile.get_tile_part_node_n (&part_elem_dims[0]) * dofs_n;
+      const auto Minv           = &data_Minv[0];// inverted preconditioner w/BCs
+#if 0
       // ----------------------------------------------------------------------
 #if 0
       // Copy loads and displacement BCs into local lists.
@@ -302,17 +313,13 @@ FMR_WARN_INLINE_ON
 #endif
       // Make local copies of scalar constants.
       const auto this_part_d    = part_d;
-      const auto dofs_n         = node_dofs_n;
       const auto this_intp_n    = elem_intp_n;
-      const auto part_elem_dims = &data_elem_dims[0];
       // Get the rest using tile.get_*.
       const auto this_elem_n    = tile.get_tile_part_elem_n (&part_elem_dims[0]);
       const auto halo_elem_n    = tile.get_halo_elem_n (&part_elem_dims[0]);
       const auto halo_node_n    = tile.get_halo_node_n (&part_elem_dims[0]);
       const auto conn_n         = tile.get_tile_elem_node_n ();
       const auto this_elem_d    = tile.get_elem_d ();
-      const auto this_dofs_n
-      = tile.get_tile_part_node_n (&part_elem_dims[0]) * dofs_n;
       //
       // Constant arrays to copy in. (Drop the valarray overhead.)
       const auto part_node_conn = &data_node_conn[0];
@@ -320,12 +327,18 @@ FMR_WARN_INLINE_ON
       const auto elem_dN        = &data_dN[0];
       const auto intp_wgts      = &data_intp_wgts[0];
       const auto this_prop      = &mtrl_prop[0];
-      const auto Minv           = &data_Minv[0];// inverted preconditioner w/BCs
       //
       // Zero part_f to accumulate sums.
       for(fmr::Local_int i = 0; i < part_dofs_n; ++i) {
         part_f[i] = fmr::Phys_float(0.0);
       }
+
+
+
+
+
+
+
       // Element loop internal arrays
       fmr::Phys_float uval[conn_n * dofs_n];// displacement buffer
       fmr::Phys_float fval[conn_n * dofs_n];// force buffer
@@ -424,6 +437,7 @@ FMR_WARN_INLINE_ON
         }
       }
     }//end elem loop
+    #endif
     if (this_iter == 0){
       const auto part_load_bc = data_load_bc;// only used once
       //
