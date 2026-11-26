@@ -51,7 +51,8 @@ TEST( GridElemBars, MixedPrecisionBoundaryConditions ){
   check_mixed_precision_bcs<double, float>();
 }
 
-static void check_bar_prototype_case (const double end_disp,
+static void check_bar_prototype_case (
+  const double end_disp,
   const double end_load, const bool force_controlled) {
   const fmr::Local_int elem_n = 9;
   const fmr::Local_int dofs_n = elem_n + 1;

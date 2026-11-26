@@ -6,7 +6,7 @@
 #include "../../fmr/fmr.hpp"
 
 namespace femera { namespace grid { namespace tile {//TODO grid -> geom
-//namespace femera { namespace geom { //TODO change to here?
+//namespace femera { namespace geom { }}//TODO change to here?
 #if 0
 // Forward-delare element shapes TODO is this needed?
 //class Pins;//TODO point element for "soft" pins & arbitrary point forces?
@@ -275,6 +275,34 @@ class Tile {
       return T::calc_tile_elem_jacs_invt_dets
         (jacs_dets, coor, coor_n, elem_i, tile_size, p, pattern);
     }
+
+  // Shape function and gradient sizes for a given number of integration points.
+  // shpf_size is the size needed for shape function values.
+  // shpg_size is the size needed for shape function gradients.
+  static constexpr fmr::Local_int get_elem_shpf_size (
+    const fmr::Local_int intp_n=1u) noexcept {
+    return elem::Elem<typename T::Shape, P, F>::get_poly_func_size(intp_n);
+  }
+
+  static constexpr fmr::Local_int get_elem_shpg_size (
+    const fmr::Local_int intp_n=1u) noexcept {
+    return elem::Elem<typename T::Shape, P, F>::get_poly_grad_size(intp_n);
+  }
+
+  // Copy shape function values and gradients from partition arrays to element.
+  // shpf_size and shpg_size count scalars as returned by get_elem_shpf_size and
+  // get_elem_shpg_size respectively. Nonempty copies require valid, non-overlapping
+  // ranges and a representable offset. Zero size is a no-op and permits null pointers.
+  template <typename Y>
+  static constexpr void get_elem_shpf (
+    Y* shpf, const Y* part_shpf, const fmr::Local_int shpf_size,
+    const fmr::Local_int elem_i) noexcept;
+
+  template <typename Y>
+  static constexpr void get_elem_shpg (
+    Y* shpg, const Y* part_shpg, const fmr::Local_int shpg_size,
+    const fmr::Local_int elem_i) noexcept;
+
   // Mesh operations ----------------------------------------------------------
   //// Get a whole mesh (for export and testing)
   static fmr::Local_int get_tile_part_mesh (// returns halo_elem_n

@@ -1,3 +1,4 @@
+#include "../femera.hpp"
 #include "Free.hpp"
 #include "elem/Bars.hpp"
 
@@ -5,9 +6,12 @@
 
 #include <array>
 
-int main (int argc, char** argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+auto  mini = fmr::new_jobs ();
+
+fmr::Exit_int main (int argc, char** argv) {
+  mini->init (& argc, argv);
+  //
+  return mini->exit ();
 }
 
 namespace femera { namespace grid { namespace free {

@@ -9,7 +9,7 @@
 #include <type_traits>
 
 namespace femera { namespace grid { namespace elem {//TODO grid -> geom
-//namespace femera { namespace geom { //TODO change to here?
+//namespace femera { namespace geom { }}//TODO change to here?
 #if 0
 // Forward-delare element shapes TODO is this needed?
 class Pins;// 1D point element for "soft" pins and point forces & displacements

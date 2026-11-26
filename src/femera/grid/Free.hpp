@@ -34,18 +34,19 @@ public:
   static constexpr fmr::Local_int get_elem_vert_n () noexcept {
     return Element::get_vert_n();
   }
-  // Ordinary packed matrix-plus-measure width; caller supplies
-  // sims_d >= get_elem_d(), independently of the fixed reference dimension.
-  static constexpr fmr::Local_int get_elem_jacd_size (
-    const fmr::Dim_int sims_d) noexcept {
-    return Element::get_jacs_dets_size(1, sims_d);
-  }
 
   // Copy [element][local node], including all higher-order solution nodes.
   // Caller supplies valid, non-overlapping ranges and a representable offset.
   static constexpr void get_elem_conn (
     fmr::Local_int* conn, const fmr::Local_int* part_node_conn,
     const fmr::Local_int elem_i) noexcept;
+
+  // Ordinary packed matrix-plus-measure width; caller supplies
+  // sims_d >= get_elem_d(), independently of the fixed reference dimension.
+  static constexpr fmr::Local_int get_elem_jacd_size (
+    const fmr::Dim_int sims_d) noexcept {
+    return Element::get_jacs_dets_size(1, sims_d);
+  }
 
   // Natural-node Bars store one opaque geometric record per element, reused
   // for every quadrature point. jacd_size counts scalars, including the measure.
@@ -54,6 +55,33 @@ public:
   template <typename Y>
   static constexpr void get_elem_jacd (
     Y* jval, const Y* part_jacd, const fmr::Local_int jacd_size,
+    const fmr::Local_int elem_i) noexcept;
+
+  // Shape function and gradient sizes for a given number of integration points.
+  // shpf_size is the size needed for shape function values.
+  // shpg_size is the size needed for shape function gradients.
+  static constexpr fmr::Local_int get_elem_shpf_size (
+    const fmr::Local_int intp_n=1u) noexcept {
+    return Element::get_poly_func_size(intp_n);
+  }
+
+  static constexpr fmr::Local_int get_elem_shpg_size (
+    const fmr::Local_int intp_n=1u) noexcept {
+    return Element::get_poly_grad_size(intp_n);
+  }
+
+  // Copy shape function values and gradients from partition arrays to element.
+  // shpf_size and shpg_size count scalars as returned by get_elem_shpf_size and
+  // get_elem_shpg_size respectively. Nonempty copies require valid, non-overlapping
+  // ranges and a representable offset. Zero size is a no-op and permits null pointers.
+  template <typename Y>
+  static constexpr void get_elem_shpf (
+    Y* shpf, const Y* part_shpf, const fmr::Local_int shpf_size,
+    const fmr::Local_int elem_i) noexcept;
+
+  template <typename Y>
+  static constexpr void get_elem_shpg (
+    Y* shpg, const Y* part_shpg, const fmr::Local_int shpg_size,
     const fmr::Local_int elem_i) noexcept;
 };
 

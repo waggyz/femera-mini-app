@@ -19,7 +19,7 @@
 #include <gtest/gtest.h>
 #include <omp.h>
 
-auto  mini = fmr::new_jobs ();
+auto mini = fmr::new_jobs ();
 
 namespace femera { namespace grid { namespace elem {
 
