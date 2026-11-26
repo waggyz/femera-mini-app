@@ -73,7 +73,10 @@ public:
   // Copy shape function values and gradients from partition arrays to element.
   // shpf_size and shpg_size count scalars as returned by get_elem_shpf_size and
   // get_elem_shpg_size respectively. Nonempty copies require valid, non-overlapping
-  // ranges and a representable offset. Zero size is a no-op and permits null pointers.
+  // ranges and a representable offset.
+  //NOTE It is the caller's responsibility to ensure that shpf_size and shpg_size
+  //     are correct for the given element and that the provided arrays have
+  //     enough space.
   template <typename Y>
   static constexpr void get_elem_shpf (
     Y* shpf, const Y* part_shpf, const fmr::Local_int shpf_size,
