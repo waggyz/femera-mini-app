@@ -13,6 +13,10 @@ auto  mini = fmr::new_jobs ();
 
 fmr::Exit_int main (int argc, char** argv) {
   mini->init (&argc, argv);// Prototype (un)structured partition full FEA stack.
+  // for Bar1, set mod to 1.
+  //const fmr::Local_int elem_mod = std::numeric_limits<fmr::Local_int>::max();
+  const fmr::Local_int elem_mod = 1;//ok for now, should pass tile instead
+  //
   // Set mesh parameters. -----------------------------------------------------
   //
   const bool is_unstructured = false;// perturb nodes.//TODO save coor to check.
@@ -25,10 +29,10 @@ fmr::Exit_int main (int argc, char** argv) {
   // 0: no load
   // 1: apply end displacement (only)
   // 2: apply end force (only),
+  // 3: apply symmetric end displacements (exact at half iters)
   //    tip_u = end_load * bars_len / (bars_area * mtrl_modx)
-  // 3: pin both ends, apply a displacement near the middle
-  // 4: pin both ends, apply a force near the middle
-  // 5: apply symmetric end displacements (exact at halfway)
+  // 4: pin both ends, apply a displacement near the middle
+  // 5: pin both ends, apply a force near the middle
   //
   const fmr::Phys_float end_disp = 0.001;// 1 mm
   const fmr::Phys_float end_load = 1e3;// 1 kN tension
@@ -117,18 +121,18 @@ fmr::Exit_int main (int argc, char** argv) {
       case 2: map_load_bc[part_dofs_n - 1] = fmr::Phys_float(end_load);
       break;
       case 3: {
-        map_disp_bc[part_dofs_n - 1] = fmr::Phys_float(0.0);
-        map_disp_bc[part_dofs_n / 2] = fmr::Phys_float(end_disp);
+        map_disp_bc[0              ] = fmr::Phys_float(-end_disp);//overwrite
+        map_disp_bc[part_dofs_n - 1] = fmr::Phys_float( end_disp);
       break;
       }
       case 4: {
         map_disp_bc[part_dofs_n - 1] = fmr::Phys_float(0.0);
-        map_load_bc[part_dofs_n / 2] = fmr::Phys_float(end_load);
+        map_disp_bc[part_dofs_n / 2] = fmr::Phys_float(end_disp);
       break;
       }
       case 5: {
-        map_disp_bc[0              ] = fmr::Phys_float(-end_disp);//overwrite
-        map_disp_bc[part_dofs_n - 1] = fmr::Phys_float( end_disp);
+        map_disp_bc[part_dofs_n - 1] = fmr::Phys_float(0.0);
+        map_load_bc[part_dofs_n / 2] = fmr::Phys_float(end_load);
       break;
       }
       default: break;
@@ -177,7 +181,15 @@ fmr::Exit_int main (int argc, char** argv) {
     auto part_jacs_dets = std::valarray<fmr::Phys_float>
       (std::size_t(part_elem_n * elem_jacd_size));
     //
-    {// Scope node_coor
+    if (false && elem_mod < std::numeric_limits<fmr::Local_int>::max()) {
+      std::valarray<fmr::Geom_float>
+      part_node_coor(elem_mod * part_d);
+      part_node_coor[0] = 0.0;
+      part_node_coor[1] = bars_len / fmr::Phys_float(elem_mod);
+      
+      bad_jac_n += femera::grid::test::calc_bars_invt_dets<1>( &part_jacs_dets[0],
+        &part_node_coor[0], &data_node_conn[0], part_elem_n % elem_mod, part_d);
+    } else {// Scope node_coor
       // Get node coordinates (temporarily).
       std::valarray<fmr::Geom_float>
       part_node_coor(std::size_t(part_node_n) * part_d);
@@ -297,12 +309,20 @@ FMR_WARN_INLINE_ON
     // Iterate ================================================================
     while ((this_iter < iter_max)
     && (iter_res2 > abs_tol2) && (iter_rel2 > rel_tol2)) {// Init is this_iter 0.
-      //
-      iter_res2 = phsh.get_part_resp (&part_f[0],
-        (this_iter == 0 ? &part_u[0] : slvr.ptr_p()));
-      if (this_iter == 0) {init_res2 = iter_res2;}
+      using namespace femera::grid::test;
       const auto this_dofs_n
       = tile.get_tile_part_node_n (&data_elem_dims[0]) * node_dofs_n;
+      //
+      iter_res2 = phsh.get_part_resp (&part_f[0],
+        (this_iter == 0 ? &part_u[0] : slvr.ptr_p()), elem_mod);
+      //if (init_res2 < abs_tol2) {++this_iter; break;}
+      init_res2 = (this_iter == 0) ? iter_res2 : init_res2;
+      // sync part_f
+      iter_res2 = (this_iter == 0)
+      ? slvr.init (&part_f[0], &data_Minv[0], part_load_bc, this_dofs_n)
+      : slvr.iter (&part_f[0], &part_u[0], &data_Minv[0], this_dofs_n);
+      init_res2 = (this_iter == 0) ? iter_res2 : init_res2;
+      iter_rel2 = iter_res2 / init_res2;
 #if 0
       if (elem_i == halo_elem_n - 1) {//TODO Synchronize halo nodes.
          for (fmr::Local_int h = 0; h < tile.halo_node_n (); ++h)
@@ -325,17 +345,7 @@ FMR_WARN_INLINE_ON
         }
 #endif
 #endif
-    if (this_iter == 0) {
-      using namespace femera::grid::test;
-      init_res2 = slvr.init (&part_f[0], &data_Minv[0], part_load_bc, this_dofs_n);
-      iter_res2 = init_res2;
-      // Break if already correct.
-      if (iter_res2 < abs_tol2) {iter_rel2=1.0; ++this_iter;}// break; }
-    } else {// iter > 0
-      iter_res2 = slvr.iter (&part_f[0], &part_u[0], &data_Minv[0], this_dofs_n);
-    }
-    iter_rel2 = iter_res2 / init_res2;
-    if (true) {// verbose
+    if (true) {// verbose 1
       const auto digits = fmr::math::count_digits (fmr::Local_int(iter_max) * 2);
       fmr::Local_int mod = 1;
       for (fmr::Local_int i = 2; i < digits; ++i) { mod *= 10; }
@@ -357,11 +367,12 @@ FMR_WARN_INLINE_ON
       }
     }
     ++this_iter;
-    }// end iteration while loop
+  }// end iteration while loop
   --this_iter;// Count is off by one here.
     //
     //const auto data_byte_size = slvr.get_byte_size ();//TODO something with this
-    const auto part_data_size = data_scal_size + data_node_size + data_elem_size;
+    const auto part_data_size = data_scal_size + data_node_size 
+    + data_elem_size;
     mini->data->send (fmr::log, "Bar1", "PCGs", "data",
       "%s: %s + %s + %s",
       fmr::form::si_unit (part_data_size, "B").c_str(),
@@ -408,11 +419,17 @@ FMR_WARN_INLINE_ON
       < numtol;
       break;
     }
-    case 3: {// 1 cm end displacement
+    case 3: {// Equal and opposite end displacements.
+      const auto chck = -end_disp + 2 * end_disp
+        * (fmr::Phys_float(i) / fmr::Phys_float(part_node_n - 1));
+      ok += std::abs(part_u[i] - chck) < numtol * end_disp;
+      break;
+    }
+    case 4: {// 1 cm mid displacement
       ok = 9999;//TODO
       break;
     }
-    case 4: {// 1 cm end displacement
+    case 5: {// 1 cm mid force
       ok = 9999;//TODO
       break;
     }

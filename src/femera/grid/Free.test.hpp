@@ -1,0 +1,7 @@
+#ifndef FEMERA_HAS_GRID_FREE_TEST_HPP
+#define FEMERA_HAS_GRID_FREE_TEST_HPP
+
+#include "Free.hpp"
+
+//end FEMERA_HAS_GRID_FREE_TEST_HPP
+#endif

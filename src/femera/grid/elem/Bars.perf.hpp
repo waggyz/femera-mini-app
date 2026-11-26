@@ -240,6 +240,17 @@ F pcgs_kern_i_ref(const F zeta) {
   // zet2 = zeta : update for next iteration
   return zeta;
 }
+#if 0
+template <typename T,
+  fmr::Local_int M=std::numeric_limits<fmr::Local_int>::max()> inline
+T* get_vals_mod (const T* vals,
+  const fmr::Local_int vals_i, const fmr::Local_int vals_size) {
+  // Returns pointer to numeric vals of type T.
+  // M selects the access pattern for the data.
+  return &vals[vals_i % M * vals_size];
+}
+#endif
+
 // ============================================================================
 template <typename F=fmr::Phys_float>
 class PCGsProto {
@@ -390,7 +401,7 @@ public:
   elem_intp_coor (),
   //TODO FIXME Make the floowing loop local.
 //  G (10), H (10), S (10), jval (10),
-  uval (), fval (), conn (),//TODO resize properly in data_init
+//  uval (), fval (), conn (),//TODO resize properly in data_init
 
 //  part_disp_bc (),
 //  data_load_bc (),
@@ -443,9 +454,9 @@ private:// ====================================================================
 //  std::valarray<F> H;
 //  std::valarray<F> S;
  // std::valarray<F> jval;
-  std::valarray<F> uval;
-  std::valarray<F> fval;
-  std::valarray<fmr::Local_int> conn;
+//  std::valarray<F> uval;
+//  std::valarray<F> fval;
+//  std::valarray<fmr::Local_int> conn;
   //
 //  BClist part_disp_bc;//TODO small class to handle BCList, BCmap, set_*_bc,...
 //  BClist data_load_bc;
@@ -527,6 +538,7 @@ private:// ====================================================================
   if (elem_intp_coor.size() != elem_intp_n * elem_d) {
     elem_intp_coor.resize(elem_intp_n * elem_d);
   }
+#if 0
   byte += elem_intp_coor.size() * sizeof (F);
   size += sizeof(elem_intp_coor);
   if (uval.size() != part_node_n * node_ndof) {
@@ -544,6 +556,7 @@ private:// ====================================================================
   }
   byte += conn.size() * sizeof(fmr::Local_int);
   size += sizeof(conn);
+#endif
   //
   this->data_size = byte;
   this->byte_size = size;
@@ -660,11 +673,11 @@ FMR_WARN_INLINE_ON
   }//end init_mesh
 
 
-
 public://TODO move back up later **********************************************
   //TODO variations on init and get_part_resp wit and without
   //     unstructured node_coor & jinv_dets overhead for testing.
-  bool get_part_resp (F* f, const F* u) {// Caller checks bounds.
+  bool get_part_resp (F* f, const F* u,// Caller checks bounds.
+    const fmr::Local_int elem_mod=std::numeric_limits<fmr::Local_int>::max()) {
     // Get the response (forward pass) for  any given u.
     if (!f || !u) {return false;}
 
@@ -695,6 +708,9 @@ public://TODO move back up later **********************************************
       const auto this_prop      = &part_mtrl_prop[0];
 //      const auto Minv           = &data_Minv[0];// inverted preconditioner w/BCs
       //
+      std::valarray<fmr::Local_int> conn(conn_n);
+      std::valarray<fmr::Geom_float> uval(conn_n * dofs_n);
+      std::valarray<fmr::Geom_float> fval(conn_n * dofs_n);
       F G[9];// max buffer size needed (single physics)
       F H[9];//TODO consider compile-time sizing based on Tile elem type?
       F S[9];
@@ -735,7 +751,9 @@ public://TODO move back up later **********************************************
         // Only one constant geometric Jacobian & determinant for each
         // Bars, Tris, Tets element, regardless of the integration point count.
         for (fmr::Local_int i = 0; i < tile.get_tile_elem_jacs_dets_size (); ++i) {
-          jval[i] = this_jacd[elem_i * tile.get_tile_elem_jacs_dets_size () + i];
+          jval[i] = this_jacd[
+            elem_i % elem_mod * elem_intp_n * tile.get_tile_elem_jacs_dets_size ()
+            + i];
         }
         const auto this_det = jval[this_part_d * this_elem_d ];// last value
 #if 0
@@ -808,24 +826,14 @@ public://TODO move back up later **********************************************
 #endif
         }
       }//end if (elem_i == halo_elem_n - 1)
-
-
-
-
     }//end elem loop
-
-
     return true;
   }
   //
 };//end class MeshPhys
-
-
-
-
+//
 } } }//end namespace femera::grid::test =======================================
 //
-
 #undef DEBUG_PRINT
 //FEMERA_HAS_GRID_ELEM_BARS_PERF_HPP
 #endif
