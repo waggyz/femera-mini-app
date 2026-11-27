@@ -368,7 +368,7 @@ F zet2;
 //
 std::size_t init_data(const fmr::Local_int ndof) {
   //NOTE valarray inits and resizes to zeros.
-  if( p.size() != ndof) {p.resize(ndof);}else{p=0.0;}// zero if needed.
+  if( p.size() != ndof) {p.resize(ndof);}else{p=0.0;}//TODO check if needed.
   if( r.size() != ndof) {r.resize(ndof);}else{r=0.0;}
   if( z.size() != ndof) {z.resize(ndof);}else{z=0.0;}
   //NOTE only reallocates when new size exceeds previously allocated capacity
