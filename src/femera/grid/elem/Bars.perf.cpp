@@ -44,12 +44,13 @@ fmr::Exit_int main (int argc, char** argv) {
   //
   const auto targ_time = -1.0;// <=0.0 for no target time
   // Set mesh parameters. -----------------------------------------------------
-  bool is_rand = false;// perturb nodes.//TODO save coor to check.
-  //
-  constexpr bool is_tile = false;// false for free, true overrides is_rand
   const fmr::Local_int do_elem_n = 9;// 49999 about 30s, 9999 about 1s
+  const bool do_rand_elem_n = false;// random problem size
+  //
+  constexpr bool is_free = true;// false for free, true overrides do_rand_len
   //
   const fmr::Phys_float bars_len  = 1.0;// 1m long
+  bool do_rand_len = false;// perturb nodes.//TODO save coor to check.
   // Set physics parameters. --------------------------------------------------
   //
   const fmr::Enum_int load_case = 2;
@@ -75,19 +76,20 @@ fmr::Exit_int main (int argc, char** argv) {
   //
   fmr::Local_int iter_max = 0;// set to zero for max (or target)
   // ==========================================================================
+  const auto is_tile = !is_free;
   if (targ_time > 0.0) {iter_max = 0;}
-  if (is_tile) {is_rand = false;}
+  if (is_tile) {do_rand_len = false;}
   fmr::Local_int elem_mod;//ok for now, should pass tile instead
   if (is_tile){
     elem_mod = 1;// structured tile elements
-  } else{
+  } else {// unstructured free elements
     elem_mod = std::numeric_limits<fmr::Local_int>::max();
-    // unstructured free elements
+  }
+  if (do_rand_elem_n) {
+    //
   }
   using femera::grid::tile::Tile;
-  using femera::grid::elem::Elem;
   using femera::grid::tile::Bar1;
-  using femera::grid::elem::Bars;
   //
   constexpr fmr::Dim_int part_d = 1;
   constexpr fmr::Dim_int part_elem_p = 1;//NOTE higher-order Bars don't work.
@@ -106,24 +108,11 @@ fmr::Exit_int main (int argc, char** argv) {
   const auto part_node_n = tile.get_tile_part_node_n (&data_elem_dims[0]);
   const auto elem_node_n = tile.get_tile_elem_node_n ();// Bars elements
   // Make the mesh.
-  std::valarray<fmr::Local_int>
-  data_node_conn (std::size_t(part_elem_n) * elem_node_n);
+  std::valarray<fmr::Local_int> data_node_conn
+    (std::size_t(part_elem_n) * elem_node_n);
  // Set up iterations ---------------------------------------------------------
-  constexpr Elem<Bars, tile.get_elem_p ()> elem;//TODO use only tile.* methods
   //
 //#ifdef DEBUG_PRINT
-#if 0
-  // Double-check element dimension and node count.
-  {// local scope
-    bool ok = elem.get_elem_d () == elem_d;
-    mini->data->send (fmr::log, ok?" ok ":" :( ", "elem", " dim",
-      "%4u", u_int(elem.get_elem_d()));
-    //
-    ok = elem.get_node_n () == elem_node_n;
-    mini->data->send (fmr::log, ok?" ok ":" :( ", "elem", "node",
-      "%4u each", elem.get_node_n());
-  }
-#endif
 #if 0
   {// local scope
     bool ok = halo_node_n > 0;
@@ -248,7 +237,7 @@ fmr::Exit_int main (int argc, char** argv) {
         &data_elem_dims[0],
         part_d
       );
-      if(is_rand && part_node_n > 2) {
+      if(do_rand_len && part_node_n > 2) {
         for (fmr::Local_int n = 1; n < part_node_n-1; ++n) {// not the ends
           for (fmr::Dim_int d = 0; d < part_d; ++d) {
             part_node_coor[n * part_d + d] += 0.99 * (bars_len / do_elem_n)
@@ -289,11 +278,6 @@ FMR_WARN_INLINE_ON
 #endif
     // ------------------------------------------------------------------------
     std::valarray<fmr::Phys_float> data_intp_wgts(1.0, std::size_t(elem_intp_n));
-    const std::valarray<fmr::Phys_float> data_intp_coor
-      (0.5, elem_intp_n * tile.get_elem_d ());
-    std::valarray<fmr::Phys_float> data_dN(elem.get_poly_grad_size());
-    //
-    elem.get_poly_grad_node(&data_dN[0], &data_intp_coor[0]);// initialize
     {
     bool ok = (this_iter < iter_max) && (bad_jac_n == 0)
       && (iter_res2 > abs_tol2) && (iter_rel2 > rel_tol2)
@@ -340,8 +324,7 @@ FMR_WARN_INLINE_ON
     data_byte_size += mtrl_prop.size() * sizeof (fmr::Phys_float);
     data_scal_size += sizeof(part_dofs_n);
     data_scal_size += sizeof(part_load_bc);
-    data_scal_size += sizeof(data_dN[0]) * 2;
-    data_byte_size += data_dN.size() * sizeof (fmr::Phys_float);
+    data_scal_size += sizeof(fmr::Phys_float) * tile.get_elem_shpg_size(elem_intp_n);
     data_scal_size += sizeof(data_intp_wgts[0]) * 1;
     data_byte_size += data_intp_wgts.size() * sizeof (fmr::Phys_float);
     if (!is_tile) {//unstructured Free
@@ -434,7 +417,7 @@ FMR_WARN_INLINE_ON
           }
   #endif
 #endif
-      if (test_i == 0) {// verbose 1
+      if (test_i < 2) {// verbose 1
         const auto digits = fmr::math::count_digits (fmr::Local_int(iter_max) * 2);
         fmr::Local_int mod = 1;
         for (fmr::Local_int i = 2; i < digits; ++i) { mod *= 10; }

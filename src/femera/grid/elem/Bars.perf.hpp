@@ -368,9 +368,9 @@ F zet2;
 //
 std::size_t init_data(const fmr::Local_int ndof) {
   //NOTE valarray inits and resizes to zeros.
-  if( p.size() != ndof) {p.resize(ndof);}else{p=0.0;}//TODO check if needed.
-  if( r.size() != ndof) {r.resize(ndof);}else{r=0.0;}
-  if( z.size() != ndof) {z.resize(ndof);}else{z=0.0;}
+  if( p.size() != ndof) {p.resize(ndof);}// not zeroed, vals set on first use
+  if( r.size() != ndof) {r.resize(ndof);}// not zeroed, vals set on first use
+  if( z.size() != ndof) {z.resize(ndof);}// not zeroed, vals set on first use
   //NOTE only reallocates when new size exceeds previously allocated capacity
   return ndof * sizeof(F);
 }
@@ -580,7 +580,6 @@ public:
     const fmr::Dim_int ndof,
     const fmr::Local_int gsize[4], const F ysize[4]// total physical size
   ) {
-  // returns bytes in use by arrays
   // These are needed to resize arrays.
   this->part_d = 1;//TODO arg to pass in?
   this->elem_intp_n = 1;//TODO get default from tile or element type? arg?
@@ -599,7 +598,8 @@ public:
   std::size_t byte = init_mesh_data();// just resizes arrays
   elem_intp_coor = F(0.5);
   elem_intp_wgts = F(1.0);
-  Elem<Bars, P, F>::get_poly_grad_node(&elem_dN[0], &elem_intp_coor[0]);
+  Elem<Bars, P, F>::get_poly_grad_node(&elem_dN[0], &elem_intp_coor[0],
+    tile.get_tile_elem_node_n(), elem_intp_n);
   const F tile_size[3] = {phys_size[0] / F(grid_size[0]), F(0), F(0)};
   //
   fmr::Local_int bad_jac_n = 0;
@@ -712,7 +712,7 @@ public://TODO move back up later **********************************************
       std::valarray<fmr::Phys_float> uval(conn_n * dofs_n);
       std::valarray<fmr::Phys_float> fval(conn_n * dofs_n);
       //std::valarray<fmr::Phys_float> jval((dofs_n * dofs_n + 1) * intp_n);
-      std::valarray<fmr::Phys_float> grad(conn_n * elem_d);// elem_dN buffer
+      std::valarray<F> grad(tile.get_elem_shpg_size());// elem_dN buffer
       F G[9];// max buffer size needed (single physics)
       F H[9];//TODO consider compile-time sizing based on Tile elem type?
       F S[9];
@@ -778,7 +778,8 @@ public://TODO move back up later **********************************************
           const auto df = intp_wgts[ip] * this_det;
           //
           // G = Jinv * dN
-          fmr::math::smat_mmul_ref(&G[0], &jval[0], &elem_dN[0],
+          tile.get_elem_shpg(&grad[0], &elem_dN[0], tile.get_elem_shpg_size(), ip);
+          fmr::math::smat_mmul_ref(&G[0], &jval[0], &grad[0],
             this_elem_d, dofs_n, conn_n);
           // H = G * u
           fmr::math::smat_mmul_ref(&H[0], &G[0], &uval[0],

@@ -280,27 +280,27 @@ class Tile {
   // shpg_size is the size needed for shape function gradients.
   static constexpr fmr::Local_int get_elem_shpf_size (
     const fmr::Local_int intp_n=1u) noexcept {
-    return elem::Elem<typename T::Shape, P, F>::get_poly_func_size(intp_n);
+    return intp_n * get_tile_elem_node_n();
   }
 
   static constexpr fmr::Local_int get_elem_shpg_size (
     const fmr::Local_int intp_n=1u) noexcept {
-    return elem::Elem<typename T::Shape, P, F>::get_poly_grad_size(intp_n);
+    return intp_n * get_tile_elem_node_n() * get_elem_d();
   }
 
-  // Copy shape function values and gradients from partition arrays to element.
-  // shpf_size and shpg_size count scalars as returned by get_elem_shpf_size and
-  // get_elem_shpg_size respectively. Nonempty copies require valid, non-overlapping
-  // ranges and a representable offset. Zero size is a no-op and permits null pointers.
+  // Copy a fixed-width record from caller-owned shape data. record_i can select
+  // an element's full integration-point table or one point in a shared table.
+  // The size is the number of scalars per record. Nonempty copies require valid,
+  // non-overlapping ranges and a representable offset. Zero size permits null.
   template <typename Y>
   static constexpr void get_elem_shpf (
     Y* shpf, const Y* part_shpf, const fmr::Local_int shpf_size,
-    const fmr::Local_int elem_i) noexcept;
+    const fmr::Local_int record_i) noexcept;
 
   template <typename Y>
   static constexpr void get_elem_shpg (
     Y* shpg, const Y* part_shpg, const fmr::Local_int shpg_size,
-    const fmr::Local_int elem_i) noexcept;
+    const fmr::Local_int record_i) noexcept;
 
   // Mesh operations ----------------------------------------------------------
   //// Get a whole mesh (for export and testing)

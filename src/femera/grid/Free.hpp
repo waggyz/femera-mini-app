@@ -70,22 +70,19 @@ public:
     return Element::get_poly_grad_size(intp_n);
   }
 
-  // Copy shape function values and gradients from partition arrays to element.
-  // shpf_size and shpg_size count scalars as returned by get_elem_shpf_size and
-  // get_elem_shpg_size respectively. Nonempty copies require valid, non-overlapping
-  // ranges and a representable offset.
-  //NOTE It is the caller's responsibility to ensure that shpf_size and shpg_size
-  //     are correct for the given element and that the provided arrays have
-  //     enough space.
+  // Copy a fixed-width record from caller-owned shape data. record_i can select
+  // an element's full integration-point table or one point in a shared table.
+  // The size is the number of scalars per record. Nonempty copies require valid,
+  // non-overlapping ranges and a representable offset. Zero size permits null.
   template <typename Y>
   static constexpr void get_elem_shpf (
     Y* shpf, const Y* part_shpf, const fmr::Local_int shpf_size,
-    const fmr::Local_int elem_i) noexcept;
+    const fmr::Local_int record_i) noexcept;
 
   template <typename Y>
   static constexpr void get_elem_shpg (
     Y* shpg, const Y* part_shpg, const fmr::Local_int shpg_size,
-    const fmr::Local_int elem_i) noexcept;
+    const fmr::Local_int record_i) noexcept;
 };
 
 } } }//end femera::grid::free:: namespace
