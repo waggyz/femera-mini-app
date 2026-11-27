@@ -484,7 +484,7 @@ private:// ====================================================================
     // Typically run after init and before resp ().
     return true;//TODO implement actual checks
   }
-  std::size_t init_mesh_data() {
+  std::size_t init_mesh_data() {// returns the total byte size of the initialized mesh data
     // Resizes internal array (if needed) and fills with zeros or ones.
     // gsize is grid size.  const fmr::Local_int node_dofs_n = this->node_ndof;// elasticity only
   const fmr::Local_int part_node_n = get_part_node_n();
@@ -514,8 +514,8 @@ private:// ====================================================================
   if (part_node_coor.size() != part_node_n * this->part_d) {
     part_node_coor.resize(part_node_n * this->part_d);
   }
-  byte += part_node_coor.size() * sizeof (F);
-  size += sizeof(part_node_coor);
+  //byte += part_node_coor.size() * sizeof (F);//NOTE not counted (temporary)
+  //size += sizeof(part_node_coor);// not counted (temporary)
   if (part_jacs_dets.size() != part_elem_n * elem_jacs_dets_size) {
     part_jacs_dets.resize(part_elem_n * elem_jacs_dets_size);
   }
@@ -709,8 +709,10 @@ public://TODO move back up later **********************************************
 //      const auto Minv           = &data_Minv[0];// inverted preconditioner w/BCs
       //
       std::valarray<fmr::Local_int> conn(conn_n);
-      std::valarray<fmr::Geom_float> uval(conn_n * dofs_n);
-      std::valarray<fmr::Geom_float> fval(conn_n * dofs_n);
+      std::valarray<fmr::Phys_float> uval(conn_n * dofs_n);
+      std::valarray<fmr::Phys_float> fval(conn_n * dofs_n);
+      //std::valarray<fmr::Phys_float> jval((dofs_n * dofs_n + 1) * intp_n);
+      std::valarray<fmr::Phys_float> grad(conn_n * elem_d);// elem_dN buffer
       F G[9];// max buffer size needed (single physics)
       F H[9];//TODO consider compile-time sizing based on Tile elem type?
       F S[9];

@@ -11,10 +11,10 @@
 
 auto  mini = fmr::new_jobs ();
 
-    inline void send_perf_results (std::string label, int load_case,
+    inline void send_perf_results (std::string label, fmr::Enum_int load_case,
     fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>& perf,
     fmr::Perf_float this_time,
-    int iter_count, uint test_count)  {
+    fmr::Local_int iter_count, uint test_count)  {
       mini->data->send (fmr::out, "elem", "Bars", label.c_str(),
         "(%i) %s: %s/%s, iter: %u",
         load_case,
@@ -42,18 +42,17 @@ fmr::Exit_int main (int argc, char** argv) {
   mini->init (&argc, argv);// Prototype (un)structured partition full FEA stack.
   // for Bar1, set mod to 1.
   //
-  //const fmr::Local_int elem_mod = std::numeric_limits<fmr::Local_int>::max();
-  const fmr::Local_int elem_mod = 1;//ok for now, should pass tile instead
   //
   // Set mesh parameters. -----------------------------------------------------
+  bool is_rand = false;// perturb nodes.//TODO save coor to check.
   //
-  const bool is_unstructured = false;// perturb nodes.//TODO save coor to check.
-  const fmr::Local_int do_elem_n = 9999;
+  constexpr bool is_tile = false;// false for free, true overrides is_rand
+  const fmr::Local_int do_elem_n = 9;// 49999 about 30s, 9999 about 1s
   //
   const fmr::Phys_float bars_len  = 1.0;// 1m long
   // Set physics parameters. --------------------------------------------------
   //
-  const fmr::Enum_int load_case = 1;
+  const fmr::Enum_int load_case = 2;
   // 0: no load
   // 1: apply end displacement (only)
   // 2: apply end force (only),
@@ -76,6 +75,14 @@ fmr::Exit_int main (int argc, char** argv) {
   //
   fmr::Local_int iter_max = 0;// set to zero for max
   // ==========================================================================
+  if (is_tile) {is_rand = false;}
+  fmr::Local_int elem_mod;//ok for now, should pass tile instead
+  if (is_tile){
+    elem_mod = 1;// structured tile elements
+  } else{
+    elem_mod = std::numeric_limits<fmr::Local_int>::max();
+    // unstructured free elements
+  }
   using femera::grid::tile::Tile;
   using femera::grid::elem::Elem;
   using femera::grid::tile::Bar1;
@@ -209,9 +216,9 @@ fmr::Exit_int main (int argc, char** argv) {
     auto part_jacs_dets = std::valarray<fmr::Phys_float>
       (std::size_t(part_elem_n * elem_jacd_size));
     //
-    if (false && elem_mod < std::numeric_limits<fmr::Local_int>::max()) {
+    if (false && is_tile) {
       std::valarray<fmr::Geom_float>
-      part_node_coor(elem_mod * part_d);
+      part_node_coor((elem_mod + 1) * part_d);
       part_node_coor[0] = 0.0;
       part_node_coor[1] = bars_len / fmr::Phys_float(elem_mod);
       
@@ -227,7 +234,7 @@ fmr::Exit_int main (int argc, char** argv) {
         &data_elem_dims[0],
         part_d
       );
-      if(is_unstructured && part_node_n > 2) {
+      if(is_rand && part_node_n > 2) {
         for (fmr::Local_int n = 1; n < part_node_n-1; ++n) {// not the ends
           for (fmr::Dim_int d = 0; d < part_d; ++d) {
             part_node_coor[n * part_d + d] += 0.99 * (bars_len / do_elem_n)
@@ -294,6 +301,7 @@ FMR_WARN_INLINE_ON
     fmr::Global_int data_elem_size = 0;// scales with elem count
     fmr::Global_int data_read_size = 0;// main memory read size
     fmr::Global_int data_save_size = 0;// main memory write size
+    fmr::Global_int data_byte_size = 0;// allocated
     //
     // data in and out
     data_scal_size += sizeof(this_iter);
@@ -303,9 +311,11 @@ FMR_WARN_INLINE_ON
     data_node_size += sizeof(data_u[0]) * part_node_n * node_dofs_n;
     data_read_size += sizeof(data_u[0]) * part_node_n * node_dofs_n;
     data_save_size += sizeof(data_u[0]) * part_node_n * node_dofs_n;
+    data_byte_size += data_u.size() * sizeof (fmr::Phys_float);
     data_node_size += sizeof(data_f[0]) * part_node_n * node_dofs_n;
     data_read_size += sizeof(data_f[0]) * part_node_n * node_dofs_n;
     data_save_size += sizeof(data_f[0]) * part_node_n * node_dofs_n;
+    data_byte_size += data_f.size() * sizeof (fmr::Phys_float);
     //
     // const data in
     data_scal_size += sizeof(tile) * 0;// static constexpr
@@ -313,11 +323,14 @@ FMR_WARN_INLINE_ON
     data_scal_size += sizeof(abs_tol2);
     data_scal_size += sizeof(rel_tol2);
     data_scal_size += sizeof(mtrl_prop[0]) * 1;
+    data_byte_size += mtrl_prop.size() * sizeof (fmr::Phys_float);
     data_scal_size += sizeof(part_dofs_n);
     data_scal_size += sizeof(part_load_bc);
     data_scal_size += sizeof(data_dN[0]) * 2;
+    data_byte_size += data_dN.size() * sizeof (fmr::Phys_float);
     data_scal_size += sizeof(data_intp_wgts[0]) * 1;
-    if (elem_mod > 1) {//unstructured Free
+    data_byte_size += data_intp_wgts.size() * sizeof (fmr::Phys_float);
+    if (!is_tile) {//unstructured Free
       data_node_size += sizeof(data_Minv[0]) * part_node_n * node_dofs_n;
       data_read_size += sizeof(data_Minv[0]) * part_node_n * node_dofs_n;
       data_elem_size += sizeof(part_jacs_dets[0]) * part_elem_n * 2;
@@ -326,8 +339,12 @@ FMR_WARN_INLINE_ON
       data_read_size += sizeof(part_jacs_dets[0]) * part_elem_n * 2;
       data_read_size += sizeof(data_node_conn[0]) * part_elem_n
     * tile.get_tile_elem_node_n ();
+    data_byte_size += data_intp_wgts.size() * sizeof (fmr::Phys_float);
+    data_byte_size += data_Minv.size() * sizeof (fmr::Phys_float);
+    data_byte_size += part_jacs_dets.size() * sizeof (fmr::Phys_float);
+    data_byte_size += data_node_conn.size() * sizeof (fmr::Phys_float);
     } else {//structured Tile
-      data_scal_size += sizeof(data_u[0]) * node_dofs_n;// already promoted
+      data_scal_size += sizeof(fmr::Phys_float) * node_dofs_n;//Minv (promoted)
       data_scal_size += sizeof(part_jacs_dets[0]) * 2;
       data_scal_size += sizeof(data_node_conn[0]) * tile.get_tile_elem_node_n ();
     }
@@ -341,14 +358,16 @@ FMR_WARN_INLINE_ON
     data_scal_size += sizeof(fmr::Local_int) * 4;
     data_scal_size += sizeof(fmr::Dim_int) * 1;// this_elem_d
     //
+    data_byte_size += data_scal_size;//allocated
+    //
     using namespace femera::grid::test;
     //
     auto phsh = MeshPhys<Bar1, part_elem_p, fmr::Phys_float> ();
     //
     phsh.init_phys(mtrl_prop_n, &mtrl_prop[0]);
-    //
-    auto data_size = phsh.init_mesh(node_dofs_n, &data_elem_dims[0], &phys_size[0]);
-    //mini->data->send (fmr::log, "TEST","phsh","init","initialized");
+    data_byte_size += phsh.init_mesh
+      (node_dofs_n, &data_elem_dims[0], &phys_size[0]);
+    //m
     auto slvr = PCGsProto<fmr::Phys_float> ();
     // Iterate ================================================================
     auto time_iter = femera::Work::Work_time_t ("dofs");
@@ -418,27 +437,26 @@ FMR_WARN_INLINE_ON
     ++this_iter;
   }// end iteration while loop
   --this_iter;// Count is off by one here.
-    //
-    //const auto data_byte_size = slvr.get_byte_size ();//TODO something with this
-    const auto part_data_size = data_scal_size + data_node_size 
-    + data_elem_size;
-    time_iter.add_count(this_iter * part_dofs_n);
-    time_iter.add_read(this_iter * data_read_size);
-    time_iter.add_save(this_iter * data_save_size);
-    mini->data->send (fmr::log, "Bar1", "PCGs", "data",
-      "%s: %s + %s + %s",
-      fmr::form::si_unit (part_data_size, "B").c_str(),
-      fmr::form::si_unit (data_scal_size, "B").c_str(),
-      fmr::form::si_unit (data_node_size / part_node_n, "B/node").c_str(),
-      fmr::form::si_unit (data_elem_size / part_elem_n, "B/elem").c_str()
-    );
+  const auto this_idle = time_iter.get_idle_s();
+  const auto this_busy = time_iter.get_busy_s();
+  time_iter.add_count(this_iter * part_dofs_n);
+  time_iter.add_read(this_iter * data_read_size);
+  time_iter.add_save(this_iter * data_save_size);
+  //
+  const auto part_data_size = data_scal_size + data_node_size + data_elem_size;
+  data_byte_size += slvr.get_byte_size ();
+  mini->data->send (fmr::log, "Bar1", "PCGs", "data",
+    "%s/%s: %s + %s + %s",
+    fmr::form::si_unit (part_data_size, "B").c_str(),
+    fmr::form::si_unit (data_byte_size, "B").c_str(),//allocated
+    fmr::form::si_unit (data_scal_size, "B").c_str(),
+    fmr::form::si_unit (data_node_size / part_node_n, "B/node").c_str(),
+    fmr::form::si_unit (data_elem_size / part_elem_n, "B/elem").c_str()
+  );
   {
-    const std::string label = "perf";
-    const auto this_time = time_iter.get_busy_s();
-    const auto perf = time_iter;
-    //const fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>& perf = perf;
-    send_perf_results (label, load_case,
-    time_iter, this_time, this_iter, 1);
+    send_perf_results ("busy", load_case, time_iter, this_busy, this_iter, 1);
+    send_perf_results ("iter", load_case, time_iter, this_busy + this_idle,
+      this_iter, 1);
   }
   //TODO move the (empty) PCGsProto constructor body to a .cpp when moved out of test namespace.
   //NOTE the PCGsProto slvr instance goes out of scope, calling inline defined
