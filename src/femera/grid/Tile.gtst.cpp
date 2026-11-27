@@ -53,6 +53,15 @@ void check_shape_records () {
     EXPECT_DOUBLE_EQ(grad_buffer[0], -9);
     EXPECT_DOUBLE_EQ(grad_buffer[4], -9);
   }
+  double staged_gradients[6] = {};
+  Mesh::get_elem_shpg(staged_gradients, gradients, Mesh::get_elem_shpg_size(2), 0);
+  for (fmr::Local_int ip = 0; ip < 2; ++ip) {
+    double point_gradients[3] = {};
+    Mesh::get_elem_shpg(point_gradients, gradients, grad_width, ip);
+    for (fmr::Local_int i = 0; i < grad_width; ++i) {
+      EXPECT_DOUBLE_EQ(staged_gradients[ip * grad_width + i], point_gradients[i]);
+    }
+  }
   const double per_element[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
   double element_gradients[6] = {};
   Mesh::get_elem_shpg(element_gradients, per_element, Mesh::get_elem_shpg_size(2), 1);

@@ -42,9 +42,9 @@ using femera::grid::elem::Bars;
   const auto elem_d = part_elem.get_elem_d();
   const std::valarray<fmr::Phys_float> intp_coor(0.5, std::size_t(part_d * 1));
   //
-  std::valarray<fmr::Phys_float> dN(elem_p1.get_poly_grad_size());
+  std::valarray<fmr::Phys_float> grad(elem_p1.get_poly_grad_size());
 //FMR_WARN_INLINE_OFF
-  elem_p1.get_poly_grad_node(&dN[0], &intp_coor[0]);
+  elem_p1.get_poly_grad_node(&grad[0], &intp_coor[0]);
 //FMR_WARN_INLINE_ON
   for (fmr::Local_int el = 0; el < part_elem_n; ++el) {
     std::valarray<fmr::Phys_float>
@@ -58,7 +58,7 @@ using femera::grid::elem::Bars;
     // Calculate Jacobian.
     std::valarray<fmr::Phys_float> jac(std::size_t(part_d * elem_d));
     fmr::fems::elem::elem_jacs_node_coor_a(
-      &jac[0], &coor[0], &dN[0], 1, elem_p1.get_node_n(), part_d, elem_d);
+      &jac[0], &coor[0], &grad[0], 1, elem_p1.get_node_n(), part_d, elem_d);
     // Calculate inverse Jacobian and determinant.
     std::valarray<fmr::Phys_float> jac_inv(std::size_t(elem_d * part_d));
     const auto this_bad = fmr::math::m1x1_invt_det_ref
@@ -250,7 +250,6 @@ T* get_vals_mod (const T* vals,
   return &vals[vals_i % M * vals_size];
 }
 #endif
-
 // ============================================================================
 template <typename F=fmr::Phys_float>
 class PCGsProto {
@@ -375,12 +374,6 @@ std::size_t init_data(const fmr::Local_int ndof) {
   return ndof * sizeof(F);
 }
 };//end class PCGsProto
-
-
-
-
-
-
 // ============================================================================
 //#include "../tile/Bar1.hpp"
 template <class T, fmr::Dim_int P=1, typename F=fmr::Phys_float>
@@ -396,12 +389,12 @@ public:
   part_jacs_dets (),
 //  part_Minv (),
   part_mtrl_prop (1.0, 1),
-  elem_dN (),
+  elem_grad (),
   elem_intp_wgts (1.0, 1),
   elem_intp_coor (),
   //TODO FIXME Make the floowing loop local.
 //  G (10), H (10), S (10), jval (10),
-//  uval (), fval (), conn (),//TODO resize properly in data_init
+//  data_uval (), data_fval (), data_conn (),
 
 //  part_disp_bc (),
 //  data_load_bc (),
@@ -446,17 +439,17 @@ private:// ====================================================================
 //  std::valarray<float> part_Minv;//TODO REMOVE, owned by caller or solver
   std::valarray<F> part_mtrl_prop;
   //
-  std::valarray<F> elem_dN;
+  std::valarray<F> elem_grad;
   std::valarray<F> elem_intp_wgts;
   std::valarray<F> elem_intp_coor;
 
 //  std::valarray<F> G;
 //  std::valarray<F> H;
 //  std::valarray<F> S;
- // std::valarray<F> jval;
-//  std::valarray<F> uval;
-//  std::valarray<F> fval;
-//  std::valarray<fmr::Local_int> conn;
+//  std::valarray<F> jval;
+//  std::valarray<F> data_uval;
+//  std::valarray<F> data_fval;
+//  std::valarray<fmr::Local_int> data_conn;
   //
 //  BClist part_disp_bc;//TODO small class to handle BCList, BCmap, set_*_bc,...
 //  BClist data_load_bc;
@@ -525,11 +518,11 @@ private:// ====================================================================
   // Sizing handled in init_phys.
   byte += part_mtrl_prop.size() * sizeof (F);
   size += sizeof(part_mtrl_prop);
-  if (elem_dN.size() != elem_intp_n * elem_node_n * elem_d) {
-    elem_dN.resize(elem_intp_n * elem_node_n * elem_d);
+  if (elem_grad.size() != elem_intp_n * elem_node_n * elem_d) {
+    elem_grad.resize(elem_intp_n * elem_node_n * elem_d);
   }
-  byte += elem_dN.size() * sizeof (F);
-  size += sizeof(elem_dN);
+  byte += elem_grad.size() * sizeof (F);
+  size += sizeof(elem_grad);
   if (elem_intp_wgts.size() != elem_intp_n) {
     elem_intp_wgts.resize(elem_intp_n);
   }
@@ -538,24 +531,24 @@ private:// ====================================================================
   if (elem_intp_coor.size() != elem_intp_n * elem_d) {
     elem_intp_coor.resize(elem_intp_n * elem_d);
   }
-#if 0
   byte += elem_intp_coor.size() * sizeof (F);
   size += sizeof(elem_intp_coor);
-  if (uval.size() != part_node_n * node_ndof) {
-    uval.resize(part_node_n * node_ndof);
+#if 0
+  if (data_uval.size() != part_node_n * node_ndof) {
+    data_uval.resize(part_node_n * node_ndof);
   }
-  byte += uval.size() * sizeof(F);
-  size += sizeof(uval);
-  if (fval.size() != part_node_n * node_ndof) {
-    fval.resize(part_node_n * node_ndof);
+  byte += data_uval.size() * sizeof(F);
+  size += sizeof(data_uval);
+  if (data_fval.size() != part_node_n * node_ndof) {
+    data_fval.resize(part_node_n * node_ndof);
   }
-  byte += fval.size() * sizeof(F);
-  size += sizeof(fval);
-  if (conn.size() != part_elem_n * elem_node_n) {
-    conn.resize(part_elem_n * elem_node_n);
+  byte += data_fval.size() * sizeof(F);
+  size += sizeof(data_fval);
+  if (data_conn.size() != part_elem_n * elem_node_n) {
+    data_conn.resize(part_elem_n * elem_node_n);
   }
-  byte += conn.size() * sizeof(fmr::Local_int);
-  size += sizeof(conn);
+  byte += data_conn.size() * sizeof(fmr::Local_int);
+  size += sizeof(data_conn);
 #endif
   //
   this->data_size = byte;
@@ -598,7 +591,7 @@ public:
   std::size_t byte = init_mesh_data();// just resizes arrays
   elem_intp_coor = F(0.5);
   elem_intp_wgts = F(1.0);
-  Elem<Bars, P, F>::get_poly_grad_node(&elem_dN[0], &elem_intp_coor[0],
+  Elem<Bars, P, F>::get_poly_grad_node(&elem_grad[0], &elem_intp_coor[0],
     tile.get_tile_elem_node_n(), elem_intp_n);
   const F tile_size[3] = {phys_size[0] / F(grid_size[0]), F(0), F(0)};
   //
@@ -672,18 +665,13 @@ FMR_WARN_INLINE_ON
   return byte;
   }//end init_mesh
 
-
 public://TODO move back up later **********************************************
   //TODO variations on init and get_part_resp wit and without
   //     unstructured node_coor & jinv_dets overhead for testing.
-  bool get_part_resp (F* f, const F* u,// Caller checks bounds.
+  bool get_part_resp (F* part_f, const F* part_u,
     const fmr::Local_int elem_mod=std::numeric_limits<fmr::Local_int>::max()) {
     // Get the response (forward pass) for  any given u.
-    if (!f || !u) {return false;}
-
-      //TODO temp alias *******************************************************
-      auto part_f = f;// temp rename during refactoring
-      const auto part_u = u;
+    if (!part_f || !part_u) {return false;}// Caller checks bounds.
       //
       // Avoid making local copies of scalar constants. Here for refactoring
       const auto this_part_d    = part_d;
@@ -696,27 +684,40 @@ public://TODO move back up later **********************************************
       const auto halo_node_n    = tile.get_halo_node_n (&part_elem_dims[0]);
       const auto conn_n         = tile.get_tile_elem_node_n ();
       const auto this_elem_d    = tile.get_elem_d ();
+      const auto grad_size      = tile.get_elem_shpg_size ();
+      const auto jacd_size      = tile.get_tile_elem_jacs_dets_size ();
       const auto part_dofs_n
       = tile.get_tile_part_node_n (&part_elem_dims[0]) * dofs_n;
       //
       // Constant arrays to copy in. (Drop the valarray overhead.)
       //const auto part_node_conn = &data_node_conn[0];
       const auto this_jacd      = &part_jacs_dets[0];
-//      const auto this_Minv      = &data_Minv[0];
-      //const auto elem_dN        = &data_dN[0];
       const auto intp_wgts      = &elem_intp_wgts[0];
       const auto this_prop      = &part_mtrl_prop[0];
-//      const auto Minv           = &data_Minv[0];// inverted preconditioner w/BCs
-      //
-      std::valarray<fmr::Local_int> conn(conn_n);
-      std::valarray<fmr::Phys_float> uval(conn_n * dofs_n);
-      std::valarray<fmr::Phys_float> fval(conn_n * dofs_n);
-      //std::valarray<fmr::Phys_float> jval((dofs_n * dofs_n + 1) * intp_n);
-      std::valarray<F> grad(tile.get_elem_shpg_size());// elem_dN buffer
+#if 0
+      const auto elem_grad_size = tile.get_elem_shpg_size (this_intp_n);
+      const auto elem_grad      = &part_elem_grad[0];
+      std::valarray<F> grad(elem_grad_size);
+      if (elem_grad_size > 0) {
+        tile.get_elem_shpg(&grad[0], &elem_grad[0], elem_grad_size, 0);
+#else
+      const FMR_RESTRICT F* grad = &elem_grad[0];// get a const pointer. alias?
+#endif
+      #if 0
+      FMR_RESTRICT fmr::Local_int* conn = &data_conn[0];
+      FMR_RESTRICT F* uval = &data_uval[0];
+      FMR_RESTRICT F* fval = &data_fval[0];
+#else
+      std::valarray<fmr::Local_int> conn(conn_n);//TODO hoist valarrays out?
+      std::valarray<F> uval(conn_n * dofs_n);
+      std::valarray<F> fval(conn_n * dofs_n);
+#endif
+//      }
       F G[9];// max buffer size needed (single physics)
       F H[9];//TODO consider compile-time sizing based on Tile elem type?
       F S[9];
       F jval[10];
+      //std::valarray<fmr::Phys_float> jval((dofs_n * dofs_n + 1) * intp_n);
 #if 0
       //TODO uval, fval, conn buffers for element loop
       F uval[conn_n * dofs_n];// displacement buffer
@@ -752,9 +753,9 @@ public://TODO move back up later **********************************************
         }
         // Only one constant geometric Jacobian & determinant for each
         // Bars, Tris, Tets element, regardless of the integration point count.
-        for (fmr::Local_int i = 0; i < tile.get_tile_elem_jacs_dets_size (); ++i) {
+        for (fmr::Local_int i = 0; i < jacd_size; ++i) {
           jval[i] = this_jacd[
-            elem_i % elem_mod * elem_intp_n * tile.get_tile_elem_jacs_dets_size ()
+            elem_i % elem_mod * elem_intp_n * jacd_size
             + i];
         }
         const auto this_det = jval[this_part_d * this_elem_d ];// last value
@@ -774,12 +775,12 @@ public://TODO move back up later **********************************************
           fval[i] = F(0.0); }
           //
         for (fmr::Local_int ip = 0; ip < this_intp_n; ++ip) {
-          // G = Jinv * dN, H =  G * u, S = E * H, f = G^T * S.
+          // G = Jinv * grad, H =  G * u, S = E * H, f = G^T * S.
           const auto df = intp_wgts[ip] * this_det;
           //
-          // G = Jinv * dN
-          tile.get_elem_shpg(&grad[0], &elem_dN[0], tile.get_elem_shpg_size(), ip);
-          fmr::math::smat_mmul_ref(&G[0], &jval[0], &grad[0],
+          // G = Jinv * grad
+          fmr::math::smat_mmul_ref(&G[0], &jval[0],
+            &grad[std::size_t(ip) * grad_size],
             this_elem_d, dofs_n, conn_n);
           // H = G * u
           fmr::math::smat_mmul_ref(&H[0], &G[0], &uval[0],
