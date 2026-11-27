@@ -40,9 +40,9 @@ auto  mini = fmr::new_jobs ();
 
 fmr::Exit_int main (int argc, char** argv) {
   mini->init (&argc, argv);// Prototype (un)structured partition full FEA stack.
-  // for Bar1, set mod to 1.
+  const auto dofs_per_s = 85e6, base_time = 1e-6;
   //
-  //
+  const auto targ_time = -1.0;// <=0.0 for no target time
   // Set mesh parameters. -----------------------------------------------------
   bool is_rand = false;// perturb nodes.//TODO save coor to check.
   //
@@ -73,8 +73,9 @@ fmr::Exit_int main (int argc, char** argv) {
   const fmr::Phys_float abs_tol = 1e-6;// absolute tolerance squared
   const fmr::Phys_float rel_tol = 1e-6;// relative tolerance squared
   //
-  fmr::Local_int iter_max = 0;// set to zero for max
+  fmr::Local_int iter_max = 0;// set to zero for max (or target)
   // ==========================================================================
+  if (targ_time > 0.0) {iter_max = 0;}
   if (is_tile) {is_rand = false;}
   fmr::Local_int elem_mod;//ok for now, should pass tile instead
   if (is_tile){
@@ -184,7 +185,7 @@ fmr::Exit_int main (int argc, char** argv) {
   // These are kept for correctness check after solve.
   auto part_f = &data_f[0];
   auto part_u = &data_u[0];
-  femera::grid::test::set_bcs(&part_u[0], part_disp_bc);
+  //femera::grid::test::set_bcs(&part_u[0], part_disp_bc);
   //femera::grid::test::sum_bcs(&part_f[0], part_load_bc);
   //
   // Conjugate gradient is exact when iterated to the number of unknowns.
@@ -193,6 +194,19 @@ fmr::Exit_int main (int argc, char** argv) {
     ? fmr::Local_int(part_dofs_n) - fmr::Local_int(part_disp_bc.size()) + 1
     : std::numeric_limits<fmr::Local_int>::max() -1;
   }
+  fmr::Local_int test_n = 1;
+  if (targ_time > 0.0) {
+    auto time_est = iter_max * part_dofs_n / dofs_per_s + base_time;
+    if (time_est < targ_time) {
+      test_n = static_cast<fmr::Local_int>
+        (targ_time / time_est + 1);
+    } else {
+      iter_max = static_cast<fmr::Local_int>
+        (targ_time / time_est * iter_max + 1);
+    }
+    mini->data->send(fmr::log, "Bars","perf","test",
+      "%ux %u iter %0.2fs target", test_n, iter_max, targ_time);
+   }
   fmr::Local_int bad_jac_n = 0;
   const auto abs_tol2 = abs_tol * abs_tol;
   const auto rel_tol2 = rel_tol * rel_tol;
@@ -363,85 +377,93 @@ FMR_WARN_INLINE_ON
     using namespace femera::grid::test;
     //
     auto phsh = MeshPhys<Bar1, part_elem_p, fmr::Phys_float> ();
-    //
-    phsh.init_phys(mtrl_prop_n, &mtrl_prop[0]);
-    data_byte_size += phsh.init_mesh
-      (node_dofs_n, &data_elem_dims[0], &phys_size[0]);
-    //m
     auto slvr = PCGsProto<fmr::Phys_float> ();
-    // Iterate ================================================================
+    //
     auto time_iter = femera::Work::Work_time_t ("dofs");
-    while ((this_iter < iter_max)
-    && (iter_res2 > abs_tol2) && (iter_rel2 > rel_tol2)) {// Init is this_iter 0.
-      using namespace femera::grid::test;
-      
-      const auto this_dofs_n
-      = tile.get_tile_part_node_n (&data_elem_dims[0]) * node_dofs_n;
+    for (fmr::Local_int test_i = 0; test_i < test_n; ++test_i) {// test repeats
+      this_iter = 0;
+      init_res2 = std::numeric_limits<fmr::Phys_float>::max();
+      iter_res2 = init_res2;
+      iter_rel2 = init_res2;
+      data_u = 0.0;// data_f = 0.0;
+      femera::grid::test::set_bcs(&part_u[0], part_disp_bc);
+      phsh.init_phys(mtrl_prop_n, &mtrl_prop[0]);
+      data_byte_size += phsh.init_mesh
+        (node_dofs_n, &data_elem_dims[0], &phys_size[0]);
       //
-      time_iter.add_idle_time_now();
-      iter_res2 = phsh.get_part_resp (&part_f[0],
-        (this_iter == 0 ? &part_u[0] : slvr.ptr_p()), elem_mod);
-      //if (init_res2 < abs_tol2) {++this_iter; break;}
-      init_res2 = (this_iter == 0) ? iter_res2 : init_res2;
-      time_iter.add_busy_time_now();
-      // sync part_f
-      iter_res2 = (this_iter == 0)
-      ? slvr.init (&part_f[0], &data_Minv[0], part_load_bc, this_dofs_n)
-      : slvr.iter (&part_f[0], &part_u[0], &data_Minv[0], this_dofs_n);
-      time_iter.add_idle_time_now();
-      init_res2 = (this_iter == 0) ? iter_res2 : init_res2;
-      iter_rel2 = iter_res2 / init_res2;
+      // Iterate ================================================================
+      while ((this_iter < iter_max)
+      && (iter_res2 > abs_tol2) && (iter_rel2 > rel_tol2)) {// Init is this_iter 0.
+        using namespace femera::grid::test;
+        
+        const auto this_dofs_n
+        = tile.get_tile_part_node_n (&data_elem_dims[0]) * node_dofs_n;
+        //
+        time_iter.add_idle_time_now();
+        iter_res2 = phsh.get_part_resp (&part_f[0],
+          (this_iter == 0 ? &part_u[0] : slvr.ptr_p()), elem_mod);
+        //if (init_res2 < abs_tol2) {++this_iter; break;}
+        init_res2 = (this_iter == 0) ? iter_res2 : init_res2;
+        //time_iter.add_busy_time_now();
+        // sync part_f
+        iter_res2 = (this_iter == 0)
+        ? slvr.init (&part_f[0], &data_Minv[0], part_load_bc, this_dofs_n)
+        : slvr.iter (&part_f[0], &part_u[0], &data_Minv[0], this_dofs_n);
+        init_res2 = (this_iter == 0) ? iter_res2 : init_res2;
+        iter_rel2 = iter_res2 / init_res2;
+        time_iter.add_busy_time_now();
 #if 0
-      if (elem_i == halo_elem_n - 1) {//TODO Synchronize halo nodes.
-         for (fmr::Local_int h = 0; h < tile.halo_node_n (); ++h)
-#ifdef DEBUG_PRINT
-          const auto //TODO Move halo_node_list to init OR renumber nodes.
-          n = Tile<Bar1, tile.get_elem_p ()>::get_halo_node(h, &data_elem_dims[0]);
-          if (this_iter < 5) {
-            if (this_iter == 0) {
-              mini->data->send (fmr::log, "sync", "halo", "node",
-                "%4u f: %+0.2e u: %+0.2e (elem %u done)",
-                n, part_f[n * node_dofs_n], part_u[n * node_dofs_n], elem_i);
-            } else {
-              mini->data->send (fmr::log, "sync", "halo", "node",
-                "%4u f: %+0.2e p: %+0.2e (elem %u done)",
-                n, part_f[n * node_dofs_n], part_p[n * node_dofs_n], elem_i);
-            }
-         }
-#else
-          Tile<Bar1, tile.get_elem_p ()>::get_halo_node(h, &part_elem_dims[0]);
-        }
+        if (elem_i == halo_elem_n - 1) {//TODO Synchronize halo nodes.
+          for (fmr::Local_int h = 0; h < tile.halo_node_n (); ++h)
+  #ifdef DEBUG_PRINT
+            const auto //TODO Move halo_node_list to init OR renumber nodes.
+            n = Tile<Bar1, tile.get_elem_p ()>::get_halo_node(h, &data_elem_dims[0]);
+            if (this_iter < 5) {
+              if (this_iter == 0) {
+                mini->data->send (fmr::log, "sync", "halo", "node",
+                  "%4u f: %+0.2e u: %+0.2e (elem %u done)",
+                  n, part_f[n * node_dofs_n], part_u[n * node_dofs_n], elem_i);
+              } else {
+                mini->data->send (fmr::log, "sync", "halo", "node",
+                  "%4u f: %+0.2e p: %+0.2e (elem %u done)",
+                  n, part_f[n * node_dofs_n], part_p[n * node_dofs_n], elem_i);
+              }
+          }
+  #else
+            Tile<Bar1, tile.get_elem_p ()>::get_halo_node(h, &part_elem_dims[0]);
+          }
+  #endif
 #endif
-#endif
-    if (true) {// verbose 1
-      const auto digits = fmr::math::count_digits (fmr::Local_int(iter_max) * 2);
-      fmr::Local_int mod = 1;
-      for (fmr::Local_int i = 2; i < digits; ++i) { mod *= 10; }
-      if ((this_iter < 5) || (this_iter % mod == 0)) {
-        bool ok = (iter_res2 < abs_tol2) || (iter_rel2 < rel_tol2);
-        const auto istr = this_iter == 0 ? "init" : "iter";
-        if (this_iter == 0) {
-          const auto format = iter_form_str + " /" + iter_form_str
-          + " %.2e,%.2e %2s %.2e,%.2e rel,abs tol";
-          mini->data->send (fmr::log, "Bar1", "PCGs", istr,
-            format.c_str(), this_iter, iter_max-1,
-            sqrt(iter_rel2), sqrt(iter_res2), ok?"< ":">=",
-            sqrt(rel_tol2), sqrt(abs_tol2) );
-        } else {
-          const auto format = iter_form_str + " /" + iter_form_str + " %.2e";
-          mini->data->send (fmr::log, "Bar1", "PCGs", istr,
-            format.c_str(), this_iter, iter_max-1, sqrt(iter_rel2) );
+      if (test_i == 0) {// verbose 1
+        const auto digits = fmr::math::count_digits (fmr::Local_int(iter_max) * 2);
+        fmr::Local_int mod = 1;
+        for (fmr::Local_int i = 2; i < digits; ++i) { mod *= 10; }
+        if ((this_iter < 5) || (this_iter % mod == 0)) {
+          bool ok = (iter_res2 < abs_tol2) || (iter_rel2 < rel_tol2);
+          const auto istr = this_iter == 0 ? "init" : "iter";
+          if (this_iter == 0) {
+            const auto format = iter_form_str + " /" + iter_form_str
+            + " %.2e,%.2e %2s %.2e,%.2e rel,abs tol";
+            mini->data->send (fmr::log, "Bar1", "PCGs", istr,
+              format.c_str(), this_iter, iter_max-1,
+              sqrt(iter_rel2), sqrt(iter_res2), ok?"< ":">=",
+              sqrt(rel_tol2), sqrt(abs_tol2) );
+          } else {
+            const auto format = iter_form_str + " /" + iter_form_str + " %.2e";
+            mini->data->send (fmr::log, "Bar1", "PCGs", istr,
+              format.c_str(), this_iter, iter_max-1, sqrt(iter_rel2) );
+          }
         }
       }
-    }
-    ++this_iter;
-  }// end iteration while loop
+      ++this_iter;
+    }//end iteration while loop
+    time_iter.add_count(this_iter * part_dofs_n);
+    time_iter.add_read(this_iter * data_read_size);
+    time_iter.add_save(this_iter * data_save_size);
+  }//end test_i loop
   --this_iter;// Count is off by one here.
   const auto this_idle = time_iter.get_idle_s();
   const auto this_busy = time_iter.get_busy_s();
-  time_iter.add_count(this_iter * part_dofs_n);
-  time_iter.add_read(this_iter * data_read_size);
-  time_iter.add_save(this_iter * data_save_size);
   //
   const auto part_data_size = data_scal_size + data_node_size + data_elem_size;
   data_byte_size += slvr.get_byte_size ();
@@ -455,8 +477,8 @@ FMR_WARN_INLINE_ON
   );
   {
     send_perf_results ("busy", load_case, time_iter, this_busy, this_iter, 1);
-    send_perf_results ("iter", load_case, time_iter, this_busy + this_idle,
-      this_iter, 1);
+    //send_perf_results ("iter", load_case, time_iter, this_busy + this_idle,
+    //  this_iter, 1);
   }
   //TODO move the (empty) PCGsProto constructor body to a .cpp when moved out of test namespace.
   //NOTE the PCGsProto slvr instance goes out of scope, calling inline defined
