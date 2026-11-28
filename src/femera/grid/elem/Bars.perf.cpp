@@ -10,44 +10,55 @@
 #undef DEBUG_PRINT
 
 auto  mini = fmr::new_jobs ();
+/*
+This prototype can be the basis for three modules.
 
-    inline void send_perf_results (std::string label, fmr::Enum_int load_case,
-    fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>& perf,
-    fmr::Perf_float this_time,
-    fmr::Local_int iter_count, uint test_count)  {
-      mini->data->send (fmr::out, "elem", "Bars", label.c_str(),
-        "(%i) %s + %s = %s/%s",
-        load_case,
-        fmr::form::si_unit (perf.get_busy_s (), "s").c_str(),
-        fmr::form::si_unit (perf.get_idle_s (), "s").c_str(),
-        fmr::form::si_unit (perf.get_busy_s ()+perf.get_idle_s (), "s").c_str(),
-        fmr::form::si_unit (this_time, "s").c_str());
-      mini->data->send (fmr::out, "elem", "Bars", "time",
-        "(%i) %s: %s/%s, test: %u",
-        load_case,
-        fmr::form::si_unit (perf.get_unit_speed (), "dofs/s").c_str(),
-        fmr::form::si_unit (perf.get_unit (), perf.get_unit_name ()).c_str(),
-        fmr::form::si_unit (this_time, "s").c_str(),
-        test_count);
-      mini->data->send (fmr::out, "elem", "Bars", label.c_str(),
-        "(%i) %s: %s/%s, iter: %g",
-        load_case,
-        fmr::form::si_unit (perf.get_busy_flop_speed (), "flop/s").c_str(),
-        fmr::form::si_unit (perf.get_flop (), "flop").c_str(),
-        fmr::form::si_unit (this_time, "s").c_str(),
-        double(iter_count));
-      mini->data->send (fmr::out, "elem", "Bars", "time",
-        "(%i) %s: %s/%s,   AI: %g",
-        load_case,
-        fmr::form::si_unit (perf.get_data_speed (), "B   /s").c_str(),
-        fmr::form::si_unit (perf.get_byte (), "B   ").c_str(),
-        fmr::form::si_unit (this_time, "s").c_str(),
-        double(perf.get_arithmetic_intensity ()));
-    }
+- Data: an FE mesh generator that provides a structured mesh (Tile) in
+  unstructured format (node_conn, node_coor) for dependency-free self tests.
+- Part: a partition Mesh + Phys + Solv module that handles the finite element
+  analysis for unstructured Free mesh partitions
+- Part: a partition Mesh + Phys + Solv module that handles the finite element
+  analysis for structured (mesh free Tile) partitions
+
+In addition, the Tile<Bar1> (P1, P2, P3) provides grids compatible with
+1D finite difference (FD), and Tile<Bar5> (P1, P2) provides 2D FD grids.
+Tile<Bar5> (P1, P2, P3) also provide 2D finite element triangle mesh nodes.
+*/
+inline void send_perf_results (std::string label, fmr::Enum_int load_case,
+fmr::perf::Meter <fmr::Perf_int, fmr::Perf_float>& perf,
+fmr::Perf_float this_time,
+fmr::Local_int iter_count, uint test_count)  {
+  //
+  mini->data->send (fmr::out, "elem", "Bars", label.c_str(),
+    "%s +%s=%s/%s case: %u",
+    fmr::form::si_unit (perf.get_busy_s (), "s").c_str(),
+    fmr::form::si_unit (perf.get_idle_s (), "s").c_str(),
+    fmr::form::si_unit (perf.get_busy_s ()+perf.get_idle_s (), "s").c_str(),
+    fmr::form::si_unit (this_time, "s").c_str(),
+    load_case);
+  mini->data->send (fmr::out, "elem", "Bars", "time",
+    "%s: %s/%s test: %u",
+    fmr::form::si_unit (perf.get_unit_speed (), "dof /s").c_str(),
+    fmr::form::si_unit (perf.get_unit (), perf.get_unit_name ()).c_str(),
+    fmr::form::si_unit (this_time, "s").c_str(),
+    test_count);
+  mini->data->send (fmr::out, "elem", "Bars", label.c_str(),
+    "%s: %s/%s iter: %g",
+    fmr::form::si_unit (perf.get_busy_flop_speed (), "flop/s").c_str(),
+    fmr::form::si_unit (perf.get_flop (), "flop").c_str(),
+    fmr::form::si_unit (this_time, "s").c_str(),
+    double(iter_count));
+  mini->data->send (fmr::out, "elem", "Bars", "time",
+    "%s: %s/%s   AI: %g",
+    fmr::form::si_unit (perf.get_data_speed (), "B   /s").c_str(),
+    fmr::form::si_unit (perf.get_byte (), "B   ").c_str(),
+    fmr::form::si_unit (this_time, "s").c_str(),
+    double(perf.get_arithmetic_intensity ()));
+}
 
 fmr::Exit_int main (int argc, char** argv) {
   mini->init (&argc, argv);// Prototype (un)structured partition full FEA stack.
-  const auto dofs_per_s = 150e6, base_time = 1e-6;
+  const auto dofs_per_s = 200e6, base_time = 1e-6;
   //
   const auto targ_time = -1.0;// <=0.0 for no target time
   // Set mesh parameters. -----------------------------------------------------
@@ -290,11 +301,10 @@ FMR_WARN_INLINE_ON
       && (iter_res2 > abs_tol2) && (iter_rel2 > rel_tol2)
       && (iter_res2 > 0.0) && (abs_tol2 > 0.0);
     mini->data->send (fmr::log, ok?" ok ":" :( ", "GO! ", "size",
-      "%4u dofs %4u node %4u elem (%4u bad/%4u Jacs)",
+      "%4u dof  %4u node %4u elem (%4u bad/%4u Jacs)",
       part_dofs_n, part_node_n, part_elem_n,
       bad_jac_n, part_elem_n * elem_intp_n );
     }
-    //
     // Diagonal preconditioner (already inverted & synced)
     auto data_Minv = std::valarray<float>(1.0, part_dofs_n);
     femera::grid::test::set_bc0(&data_Minv[0], part_disp_bc);
@@ -314,11 +324,11 @@ FMR_WARN_INLINE_ON
     data_scal_size += sizeof(iter_res2);
     data_scal_size += sizeof(iter_rel2);
     data_node_size += sizeof(data_u[0]) * part_node_n * node_dofs_n;
-    data_read_size += sizeof(data_u[0]) * part_node_n * node_dofs_n;
-    data_save_size += sizeof(data_u[0]) * part_node_n * node_dofs_n;
+    data_read_size += sizeof(data_u[0]) * part_node_n * node_dofs_n +2;
+    data_save_size += sizeof(data_u[0]) * part_node_n * node_dofs_n *2;
     data_byte_size += data_u.size() * sizeof (fmr::Phys_float);
     data_node_size += sizeof(data_f[0]) * part_node_n * node_dofs_n;
-    data_read_size += sizeof(data_f[0]) * part_node_n * node_dofs_n;
+    data_read_size += sizeof(data_f[0]) * part_node_n * node_dofs_n *2;
     data_save_size += sizeof(data_f[0]) * part_node_n * node_dofs_n;
     data_byte_size += data_f.size() * sizeof (fmr::Phys_float);
     //
@@ -331,7 +341,8 @@ FMR_WARN_INLINE_ON
     data_byte_size += mtrl_prop.size() * sizeof (fmr::Phys_float);
     data_scal_size += sizeof(part_dofs_n);
     data_scal_size += sizeof(part_load_bc);
-    data_scal_size += sizeof(fmr::Phys_float) * tile.get_elem_shpg_size(elem_intp_n);
+    data_scal_size += sizeof(fmr::Phys_float)
+    * tile.get_elem_shpg_size(elem_intp_n);
     data_scal_size += sizeof(data_intp_wgts[0]) * 1;
     data_byte_size += data_intp_wgts.size() * sizeof (fmr::Phys_float);
     data_read_size += sizeof(data_Minv[0]) * part_node_n * node_dofs_n;
@@ -339,16 +350,14 @@ FMR_WARN_INLINE_ON
     data_node_size += sizeof(data_Minv[0]) * part_node_n * node_dofs_n;
     if (!is_tile) {//unstructured Free
       data_elem_size += sizeof(part_jacs_dets[0]) * part_elem_n * 2;
-      data_elem_size += sizeof(data_node_conn[0]) * part_elem_n
-      * tile.get_tile_elem_node_n ();
+      data_elem_size += sizeof(data_node_conn[0]) * part_elem_n * elem_node_n;
       data_read_size += sizeof(part_jacs_dets[0]) * part_elem_n * 2;
-      data_read_size += sizeof(data_node_conn[0]) * part_elem_n
-      * tile.get_tile_elem_node_n ();
+      data_read_size += sizeof(data_node_conn[0]) * part_elem_n * elem_node_n;
       data_byte_size += part_jacs_dets.size() * sizeof (part_jacs_dets[0]);
       data_byte_size += data_node_conn.size() * sizeof (data_node_conn[0]);
     } else {//structured Tile
       data_scal_size += sizeof(part_jacs_dets[0]) * 2;
-      data_node_size += sizeof(data_node_conn[0]) * tile.get_tile_elem_node_n ();
+      data_node_size += sizeof(data_node_conn[0]) * elem_node_n;
     }
     //
     // internal data
@@ -367,7 +376,7 @@ FMR_WARN_INLINE_ON
     auto phsh = MeshPhys<Bar1, part_elem_p, fmr::Phys_float> ();
     auto slvr = PCGsProto<fmr::Phys_float> ();
     //
-    auto time_iter = femera::Work::Work_time_t ("dofs");
+    auto time_iter = femera::Work::Work_time_t ("dof ");
     for (fmr::Local_int test_i = 0; test_i < test_n; ++test_i) {// test repeats
       this_iter = 0;
       init_res2 = std::numeric_limits<fmr::Phys_float>::max();
@@ -382,9 +391,8 @@ FMR_WARN_INLINE_ON
       while ((this_iter < iter_max)
       && (iter_res2 > abs_tol2) && (iter_rel2 > rel_tol2)) {// Init is this_iter 0.
         using namespace femera::grid::test;
-        
-        const auto this_dofs_n
-        = tile.get_tile_part_node_n (&data_elem_dims[0]) * node_dofs_n;
+        //
+      const auto this_dofs_n = part_node_n * node_dofs_n;
         //
         time_iter.add_idle_time_now();// busy time ----------------------------
         iter_res2 = phsh.get_part_resp (&part_f[0],
@@ -447,14 +455,14 @@ FMR_WARN_INLINE_ON
     time_iter.add_count(this_iter * part_dofs_n);
     time_iter.add_read(this_iter * data_read_size);
     time_iter.add_save(this_iter * data_save_size);
+    time_iter.add_flop(this_iter * phsh.get_iter_flop());
     if (this_iter > 0) {// for busy inner loop counts
-      time_iter.add_flop(this_iter * phsh.get_iter_flop());
       time_iter.add_flop(slvr.get_init_flop()
         + (this_iter - 1) * slvr.get_iter_flop());
     }
     // include phsh.init for total count
-    //time_iter.add_flop(this_iter * phsh.get_init_flop());
-//
+    //time_iter.add_flop(phsh.get_init_flop());
+  //
   }//end test_i loop
   --this_iter;// Count is off by one here.
   //const auto this_idle = time_iter.get_idle_s();

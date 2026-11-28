@@ -373,11 +373,11 @@ F zet2;
 fmr::Global_int init_flop;
 fmr::Global_int iter_flop;
 //
-void count_flops(const fmr::Local_int ndof, const std::size_t bc_n) {
+void count_flops(const fmr::Local_int ndof, const std::size_t load_bc_n) {
   const fmr::Global_int dofs_n = ndof;
   // Negation and assignments are not counted as arithmetic FLOPs.
   init_flop = 0;
-  init_flop += bc_n;// pcgs_kern_init_a: sum applied loads
+  init_flop += load_bc_n;// pcgs_kern_init_a: sum applied loads
   init_flop += dofs_n;// pcgs_kern_init_b: p = Minv * r
   init_flop += dofs_n * 2;// pcgs_kern_init_c: zet2 = r dot p
   //
@@ -604,12 +604,8 @@ std::size_t init (const fmr::Dim_int ndof, const fmr::Local_int nprop,
   //this->tile_d = this->tile.get_tile_d();
   this->elem_d = this->tile.get_elem_d();
   this->node_ndof = ndof;
-  if (gsize != nullptr) {
-    for (int i = 0; i < 3; ++i) { this->grid_size[i] = gsize[i]; }
-  }
-  if (ysize != nullptr) {
-    for (int i = 0; i < 3; ++i) { this->phys_size[i] = ysize[i]; }
-  }
+  if (gsize != nullptr) {for (int i = 0; i < 3; ++i) {grid_size[i] = gsize[i];}}
+  if (ysize != nullptr) {for (int i = 0; i < 3; ++i) {phys_size[i] = ysize[i];}}
   if (this->grid_size[0] == 0) {
     throw std::invalid_argument("MeshPhys requires at least one bar element");
   }
@@ -736,7 +732,7 @@ bool get_part_resp (F* part_f, const F* part_u,
   }
   // Element loop =========================================================
   for (fmr::Local_int elem_i = 0; elem_i < this_elem_n; ++elem_i) {
-    //
+    // Mesh -------------------------------------------------------------------
     //for (fmr::Local_int elem_i = 0; elem_i < halo_elem_n; ++elem_i) {
     for (fmr::Local_int i = 0; i < conn_n; ++i) {// Copy to conn buffer.
       conn[i] = part_node_conn[elem_i * conn_n + i];
@@ -764,8 +760,6 @@ bool get_part_resp (F* part_f, const F* part_u,
         "%4u %e %e", elem_i, jval[0], this_det);
     }
 #endif
-    // Do physics. ------------------------------------------------------------
-    //
     for (fmr::Local_int i = 0; i < conn_n * dofs_n; ++i) {
       fval[i] = F(0.0); }
     //
@@ -778,10 +772,11 @@ bool get_part_resp (F* part_f, const F* part_u,
       fmr::math::smat_mmul_ref(&G[0], &jval[0],
         &grad[std::size_t(ip) * grad_size],// (elem_d * dofs_n * conn_n ) *2 FLOP
         this_elem_d, dofs_n, conn_n);
-      // H = G * u
+      // H = G * u (strain)
       fmr::math::smat_mmul_ref(&H[0], &G[0], &uval[0],
         dofs_n, conn_n, this_elem_d);
-      // S = k * H
+      // Phys -----------------------------------------------------------------
+      // S = k * H (stress)
 #if 0
       for (fmr::Local_int i = 0; i < this_elem_d * this_elem_d; ++i) {
         S[i] = this_prop[0] * H[i];
@@ -790,14 +785,16 @@ bool get_part_resp (F* part_f, const F* part_u,
         S[i]*= df;
       }
 #else
+      //TODO UMAT equivalent goes here
       //  S = k * H * dF (merged)
       for (fmr::Local_int i=0; i<(this_elem_d*this_elem_d); ++i) {
-        S[i] = this_prop[0] * H[i] * df;
+        S[i] = this_prop[0] * H[i] * df;// apply df where appropriate.
       }
 #endif
-        // f = GT * S [* df]
-        fmr::math::smat_tmul_ref(&fval[0], &G[0], &S[0],
-          conn_n, dofs_n, this_elem_d);
+      // Mesh -----------------------------------------------------------------
+      // f = GT * S [* df, optional possibility]
+      fmr::math::smat_tmul_ref(&fval[0], &G[0], &S[0],
+        conn_n, dofs_n, this_elem_d);
       }// end this_intp_n loop
       for (fmr::Local_int i = 0; i < conn_n; ++i) {// Scatter to part_f.
         for (fmr::Local_int d = 0; d < dofs_n; ++d) {
@@ -821,7 +818,7 @@ bool get_part_resp (F* part_f, const F* part_u,
           }
         }
 #else
-        tile.get_halo_node(h, &grid_size[0]);
+//        tile.get_halo_node(h, &grid_size[0]);
 #endif
       }
     }//end if (elem_i == halo_elem_n - 1)
