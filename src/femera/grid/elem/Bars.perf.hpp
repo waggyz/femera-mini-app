@@ -393,9 +393,6 @@ public:
   elem_intp_wgts (1.0, 1),
   elem_intp_coor (),
 //
-//  G (10), H (10), S (10), jval (10),
-//  data_uval (), data_fval (), data_conn (),
-//
 //  part_disp_bc (),
 //  data_load_bc (),
   data_size(0),
@@ -405,7 +402,7 @@ public:
   tile_d (),
   elem_d (),
   elem_intp_n ()
-  {}/* : p(), r(), z(), */
+  {}
   //
   std::size_t exit() {
     // Placeholder implementation for cleanup.
@@ -436,20 +433,11 @@ private:// ====================================================================
   std::valarray<fmr::Geom_float> part_node_coor;
   std::valarray<F> part_jacs_dets;
   // Diagonal preconditioner (already inverted & synced)
-//  std::valarray<float> part_Minv;//TODO REMOVE, owned by caller or solver
   std::valarray<F> part_mtrl_prop;
   //
   std::valarray<F> elem_grad;
   std::valarray<F> elem_intp_wgts;
   std::valarray<F> elem_intp_coor;
-
-//  std::valarray<F> G;
-//  std::valarray<F> H;
-//  std::valarray<F> S;
-//  std::valarray<F> jval;
-//  std::valarray<F> data_uval;
-//  std::valarray<F> data_fval;
-//  std::valarray<fmr::Local_int> data_conn;
   //
 //  BClist part_disp_bc;//TODO small class to handle BCList, BCmap, set_*_bc,...
 //  BClist data_load_bc;
@@ -466,11 +454,6 @@ private:// ====================================================================
   fmr::Dim_int elem_d;// Dimension of the element elem_dims <= tile_d
   fmr::Dim_int elem_intp_n;
   //
-//  F G[9];// max buffer size
-//  F H[9];
-//  F S[9];
-//  F jval[10];
-  //TODO F fval[conn_n * dofs_n], fmr::Local_int  conn[conn_n], 
   // Methods ------------------------------------------------------------------
   bool chck (){
     // Placeholder for checking internal consistency of the mesh and physics.
@@ -489,8 +472,6 @@ private:// ====================================================================
   std::size_t byte = 0;// bytes used: size()
   std::size_t size = 0;// bytes allocated: sizeof (approximate)
   //
-  // member variables: byte_size, data_size, node_ndof,
-  // grid_size, phys_size,  part_d, tile_d, elem_d, elem_intp_n
   byte = 2 * sizeof(std::size_t) + 1 * sizeof(fmr::Local_int)
   + 6 * sizeof(fmr::Dim_int);
   size = byte;// approximately the same for now (does not account for padding.)
@@ -533,23 +514,6 @@ private:// ====================================================================
   }
   byte += elem_grad.size() * sizeof (F);
   size += sizeof(elem_grad);
-#if 0
-  if (data_uval.size() != part_node_n * node_ndof) {
-    data_uval.resize(part_node_n * node_ndof);
-  }
-  byte += data_uval.size() * sizeof(F);
-  size += sizeof(data_uval);
-  if (data_fval.size() != part_node_n * node_ndof) {
-    data_fval.resize(part_node_n * node_ndof);
-  }
-  byte += data_fval.size() * sizeof(F);
-  size += sizeof(data_fval);
-  if (data_conn.size() != part_elem_n * elem_node_n) {
-    data_conn.resize(part_elem_n * elem_node_n);
-  }
-  byte += data_conn.size() * sizeof(fmr::Local_int);
-  size += sizeof(data_conn);
-#endif
   //
   this->data_size = byte;
   this->byte_size = size;
@@ -557,7 +521,13 @@ private:// ====================================================================
   return byte;
   }
 public:
-  std::size_t init_phys(// set_phys ()?
+std::size_t init (const fmr::Dim_int ndof, const fmr::Local_int nprop,
+  const fmr::Local_int* gsize, const F ysize[4], const F* mtrl_prop) {
+  size_t byte = init_phys(nprop, mtrl_prop);
+  return byte + init_mesh(ndof, gsize, ysize);
+}
+  std::size_t init_phys(// returns bytes in use by arrays
+  //NOTE this amount already included in init_mesh return fvalue.
     const fmr::Local_int nprop, const F* props/*, const F ysize[4]*/) {
       if (nprop != part_mtrl_prop.size()) {
         part_mtrl_prop.resize(nprop, 1.0);
@@ -565,8 +535,6 @@ public:
     for (fmr::Local_int i = 0; i < nprop; ++i) {
       part_mtrl_prop[i] = props[i];
       }
-  // returns bytes in use by arrays
-  //NOTE this amount already included in init_mesh return fvalue.
   return part_mtrl_prop.size() * sizeof(F);
   }
   std::size_t init_mesh(// returns byte size of mesh data arrays
@@ -673,175 +641,136 @@ bool get_part_resp (F* part_f, const F* part_u,
   // Get the response (forward pass) for  any given u.
   if (!part_f || !part_u) {return false;}// Caller checks bounds.
   //
-  constexpr auto dofs_n     = 1;//TODO refactor all for compile-time fixed DOF.
-  //
-//  const auto dofs_n         = fmr::Dim_int(get_node_dofs_n());
-  const auto this_part_d    = part_d;
-  const auto this_intp_n    = elem_intp_n;
-  const auto part_elem_dims = &grid_size[0];
-  const auto part_dofs_n
-  = tile.get_tile_part_node_n (&part_elem_dims[0]) * dofs_n;
-  const auto this_elem_n    = tile.get_tile_part_elem_n (&part_elem_dims[0]);
-  const auto halo_elem_n    = tile.get_halo_elem_n (&part_elem_dims[0]);
-  const auto halo_node_n    = tile.get_halo_node_n (&part_elem_dims[0]);
+  constexpr auto dofs_n = tile.get_elem_d ();//TODO refactor for constexpr DOF.
+  // This is for elasticity, with elem_d dof/node.
   //
   constexpr auto conn_n         = tile.get_tile_elem_node_n ();
   constexpr auto this_elem_d    = tile.get_elem_d ();
   constexpr auto grad_size      = tile.get_elem_shpg_size ();
   constexpr auto jacd_size      = tile.get_tile_elem_jacs_dets_size ();
   //
+  const auto this_part_d    = part_d;
+  const auto this_intp_n    = elem_intp_n;
+  const auto this_elem_n    = tile.get_tile_part_elem_n (&grid_size[0]);
+  const auto halo_elem_n    = tile.get_halo_elem_n (&grid_size[0]);
+  const auto halo_node_n    = tile.get_halo_node_n (&grid_size[0]);
+  const auto part_dofs_n
+  = tile.get_tile_part_node_n (&grid_size[0]) * dofs_n;
+  //
   // Constant arrays to copy in. (Drop the valarray overhead.)
-  //const auto part_node_conn = &data_node_conn[0];
   const auto this_jacd      = &part_jacs_dets[0];
   const auto intp_wgts      = &elem_intp_wgts[0];
   const auto this_prop      = &part_mtrl_prop[0];
-#if 0
-      std::valarray<F> grad(grad_size);
-      if (elem_grad_size > 0) {
-        tile.get_elem_shpg(&grad[0], &elem_grad[0], grad_size, 0);
-#endif
-#if 0
-      const FMR_RESTRICT F* grad = &elem_grad[0];// get a const pointer. alias?
-#endif
-     //   tile.get_elem_shpg(&grad[0], &elem_grad[0], grad_size, 0);
-#if 0
-     FMR_RESTRICT fmr::Local_int* conn = &data_conn[0];
-     FMR_RESTRICT F* uval = &data_uval[0];
-     FMR_RESTRICT F* fval = &data_fval[0];
-#endif
-#if 1
-//      std::valarray<fmr::Local_int> conn(conn_n);//TODO hoist valarrays out?
-      //std::valarray<F> uval(conn_n * dofs_n);
-      //std::valarray<F> fval(conn_n * dofs_n);
-#endif
-      F grad [grad_size];
-      for (fmr::Local_int i = 0; i < grad_size; ++i) {
-        grad[i] = elem_grad[i];
-      }
-      fmr::Local_int conn[conn_n];
-      F uval[conn_n * dofs_n];
-      F fval[conn_n * dofs_n];
-      F G[9];// max buffer size needed (single physics)
-      F H[9];//TODO consider compile-time sizing based on Tile elem type?
-      F S[9];
-      F jval[10];
-      //std::valarray<fmr::Phys_float> jval((dofs_n * dofs_n + 1) * intp_n);
-#if 0
-      //TODO uval, fval, conn buffers for element loop
-      F uval[conn_n * dofs_n];// displacement buffer
-      F fval[conn_n * dofs_n];// force buffer
-      fmr::Local_int  conn[conn_n];// connectivity buffer
-#endif
-      // Zero part_f to accumulate sums.
-      for(fmr::Local_int i = 0; i < part_dofs_n; ++i) {
-        part_f[i] = F(0.0);
-      }
-      // Element loop internal arrays
-//      F uval[conn_n * dofs_n];// displacement buffer
-//      F fval[conn_n * dofs_n];// force buffer
-//      fmr::Local_int  conn[conn_n];// connectivity buffer
-//      F jval[10];//TODO max buf needed?
-      // Element loop =========================================================
-      for (fmr::Local_int elem_i = 0; elem_i < this_elem_n; ++elem_i) {
-      //
-      //for (fmr::Local_int elem_i = 0; elem_i < halo_elem_n; ++elem_i) {
-        for (fmr::Local_int i = 0; i < conn_n; ++i) {// Copy to conn buffer.
-          conn[i] = part_node_conn[elem_i * conn_n + i];
-        }
-#ifdef DEBUG_PRINT
-        if (this_iter < 1 && elem_i < 10) {// Only print the first few elements for debugging.
-          mini->data->send (fmr::log, "iter", "mesh", "elem",
-            "%4u conn %u %u", elem_i, conn[0], conn[1]);
-        }
-#endif
-        for (fmr::Local_int i = 0; i < conn_n; ++i) {
-          for (fmr::Local_int d = 0; d < dofs_n; ++d) {// Gather to uval buffer.
-            uval[i * dofs_n + d] = part_u[conn[i] * dofs_n + d];
-          }
-        }
-        // Only one constant geometric Jacobian & determinant for each
-        // Bars, Tris, Tets element, regardless of the integration point count.
-        for (fmr::Local_int i = 0; i < jacd_size; ++i) {
-          jval[i] = this_jacd[
-            elem_i % elem_mod * elem_intp_n * jacd_size
-            + i];
-        }
-        const auto this_det = jval[this_part_d * this_elem_d ];// last value
-#if 0
-        {
-          mini->data->send (fmr::log, "iter", "jacd", "elem",
-            "%4u %e %e", elem_i, jval[0], this_det);
-        }
-#endif
-        // Integration point loop internal arrays
-//        //F G[dofs_n * conn_n];
-//        //F H[dofs_n * this_elem_d];
-//        //F S[dofs_n * this_elem_d];
-        // --------------------------------------------------------------------
-        // Do physics.
-        for (fmr::Local_int i = 0; i < conn_n * dofs_n; ++i) {
-          fval[i] = F(0.0); }
-          //
-        for (fmr::Local_int ip = 0; ip < this_intp_n; ++ip) {
-          // G = Jinv * grad, H =  G * u, S = E * H, f = G^T * S.
-          const auto df = intp_wgts[ip] * this_det;
-          //
-          // G = Jinv * grad
-          fmr::math::smat_mmul_ref(&G[0], &jval[0],
-            &grad[std::size_t(ip) * grad_size],
-            this_elem_d, dofs_n, conn_n);
-          // H = G * u
-          fmr::math::smat_mmul_ref(&H[0], &G[0], &uval[0],
-            dofs_n, conn_n, this_elem_d);
-          // S = k * H
-#if 0
-          for (fmr::Local_int i = 0; i < this_elem_d * this_elem_d; ++i) {
-            S[i] = this_prop[0] * H[i];
-          }
-          for (fmr::Local_int i=0; i<(this_elem_d*this_elem_d); ++i) {
-            S[i]*= df;
-          }
-#else
-          //  S = k * H * dF (merged)
-          for (fmr::Local_int i=0; i<(this_elem_d*this_elem_d); ++i) {
-            S[i] = this_prop[0] * H[i] * df;
-          }
-#endif
-          // f = GT * S [* df]
-          fmr::math::smat_tmul_ref(&fval[0], &G[0], &S[0],
-            conn_n, dofs_n, this_elem_d);
-        }// end this_intp_n loop
-        for (fmr::Local_int i = 0; i < conn_n; ++i) {// Scatter to part_f.
-          for (fmr::Local_int d = 0; d < dofs_n; ++d) {
-            part_f[conn[i] * dofs_n + d] += fval[i * dofs_n + d];
-          }
-        }
-
-      if (elem_i == halo_elem_n - 1) {//TODO Synchronize halo nodes.
-        for (fmr::Local_int h = 0; h < halo_node_n; ++h) {
-#ifdef DEBUG_PRINT
-          const auto //TODO Move halo_node_list to init OR renumber nodes.
-          n = Tile<Bar1, tile.get_elem_p ()>::get_halo_node(h, &part_elem_dims[0]);
-          if (this_iter < 5) {
-            if (this_iter == 0) {
-              mini->data->send (fmr::log, "sync", "halo", "node",
-                "%4u f: %+0.2e u: %+0.2e (elem %u done)",
-                n, part_f[n * dofs_n], part_u[n * dofs_n], elem_i);
-            } else {
-              mini->data->send (fmr::log, "sync", "halo", "node",
-                "%4u f: %+0.2e p: %+0.2e (elem %u done)",
-                n, part_f[n * dofs_n], part_p[n * dofs_n], elem_i);
-            }
-         }
-#else
-          tile.get_halo_node(h, &part_elem_dims[0]);
-#endif
-        }
-      }//end if (elem_i == halo_elem_n - 1)
-    }//end elem loop
-    return true;
-  }
   //
+  F grad [grad_size];
+  for (fmr::Local_int i = 0; i < grad_size; ++i) {
+    grad[i] = elem_grad[i];
+  }
+  fmr::Local_int conn[conn_n];
+  F uval[conn_n * dofs_n];
+  F fval[conn_n * dofs_n];
+  F jval[10];
+  F G[9];// max buffer size needed (single physics)
+  F H[9];
+  F S[9];
+  // Zero part_f to accumulate sums.
+  for(fmr::Local_int i = 0; i < part_dofs_n; ++i) {
+    part_f[i] = F(0.0);
+  }
+  // Element loop =========================================================
+  for (fmr::Local_int elem_i = 0; elem_i < this_elem_n; ++elem_i) {
+    //
+    //for (fmr::Local_int elem_i = 0; elem_i < halo_elem_n; ++elem_i) {
+    for (fmr::Local_int i = 0; i < conn_n; ++i) {// Copy to conn buffer.
+      conn[i] = part_node_conn[elem_i * conn_n + i];
+    }
+#ifdef DEBUG_PRINT
+    if (this_iter < 1 && elem_i < 10) {// Only print the first few elements for debugging.
+      mini->data->send (fmr::log, "iter", "mesh", "elem",
+        "%4u conn %u %u", elem_i, conn[0], conn[1]);
+    }
+#endif
+    for (fmr::Local_int i = 0; i < conn_n; ++i) {
+      for (fmr::Local_int d = 0; d < dofs_n; ++d) {// Gather to uval buffer.
+        uval[i * dofs_n + d] = part_u[conn[i] * dofs_n + d];
+      }
+    }
+    // Only one constant geometric Jacobian & determinant for each
+    // Bars, Tris, Tets element, regardless of the integration point count.
+    for (fmr::Local_int i = 0; i < jacd_size; ++i) {
+      jval[i] = this_jacd[elem_i % elem_mod * elem_intp_n * jacd_size + i];
+    }
+    const auto this_det = jval[this_part_d * this_elem_d ];// last value
+#if 0
+    {
+      mini->data->send (fmr::log, "iter", "jacd", "elem",
+        "%4u %e %e", elem_i, jval[0], this_det);
+    }
+#endif
+    // Do physics. ------------------------------------------------------------
+    //
+    for (fmr::Local_int i = 0; i < conn_n * dofs_n; ++i) {
+      fval[i] = F(0.0); }
+    //
+    for (fmr::Local_int ip = 0; ip < this_intp_n; ++ip) {
+      // G = Jinv * grad, H =  G * u, S = E * H, f = G^T * S.
+      const auto df = intp_wgts[ip] * this_det;
+      //
+      // G = Jinv * grad
+      fmr::math::smat_mmul_ref(&G[0], &jval[0],
+        &grad[std::size_t(ip) * grad_size],
+        this_elem_d, dofs_n, conn_n);
+      // H = G * u
+      fmr::math::smat_mmul_ref(&H[0], &G[0], &uval[0],
+        dofs_n, conn_n, this_elem_d);
+      // S = k * H
+#if 0
+      for (fmr::Local_int i = 0; i < this_elem_d * this_elem_d; ++i) {
+        S[i] = this_prop[0] * H[i];
+      }
+      for (fmr::Local_int i=0; i<(this_elem_d*this_elem_d); ++i) {
+        S[i]*= df;
+      }
+#else
+      //  S = k * H * dF (merged)
+      for (fmr::Local_int i=0; i<(this_elem_d*this_elem_d); ++i) {
+        S[i] = this_prop[0] * H[i] * df;
+      }
+#endif
+        // f = GT * S [* df]
+        fmr::math::smat_tmul_ref(&fval[0], &G[0], &S[0],
+          conn_n, dofs_n, this_elem_d);
+      }// end this_intp_n loop
+      for (fmr::Local_int i = 0; i < conn_n; ++i) {// Scatter to part_f.
+        for (fmr::Local_int d = 0; d < dofs_n; ++d) {
+          part_f[conn[i] * dofs_n + d] += fval[i * dofs_n + d];
+        }
+      }
+    if (elem_i == halo_elem_n - 1) {//TODO Synchronize halo nodes.
+      for (fmr::Local_int h = 0; h < halo_node_n; ++h) {
+#ifdef DEBUG_PRINT
+        const auto //TODO Move halo_node_list to init OR renumber nodes.
+        n = Tile<Bar1, tile.get_elem_p ()>::get_halo_node(h, &grid_size[0]);
+        if (this_iter < 5) {
+          if (this_iter == 0) {
+            mini->data->send (fmr::log, "sync", "halo", "node",
+              "%4u f: %+0.2e u: %+0.2e (elem %u done)",
+              n, part_f[n * dofs_n], part_u[n * dofs_n], elem_i);
+          } else {
+            mini->data->send (fmr::log, "sync", "halo", "node",
+              "%4u f: %+0.2e p: %+0.2e (elem %u done)",
+              n, part_f[n * dofs_n], part_p[n * dofs_n], elem_i);
+          }
+        }
+#else
+        tile.get_halo_node(h, &grid_size[0]);
+#endif
+      }
+    }//end if (elem_i == halo_elem_n - 1)
+  }//end elem loop
+  return true;
+}
+//
 };//end class MeshPhys
 //
 } } }//end namespace femera::grid::test =======================================

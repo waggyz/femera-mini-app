@@ -40,7 +40,7 @@ auto  mini = fmr::new_jobs ();
 
 fmr::Exit_int main (int argc, char** argv) {
   mini->init (&argc, argv);// Prototype (un)structured partition full FEA stack.
-  const auto dofs_per_s = 85e6, base_time = 1e-6;
+  const auto dofs_per_s = 150e6, base_time = 1e-6;
   //
   const auto targ_time = -1.0;// <=0.0 for no target time
   // Set mesh parameters. -----------------------------------------------------
@@ -335,11 +335,11 @@ FMR_WARN_INLINE_ON
       * tile.get_tile_elem_node_n ();
       data_read_size += sizeof(part_jacs_dets[0]) * part_elem_n * 2;
       data_read_size += sizeof(data_node_conn[0]) * part_elem_n
-    * tile.get_tile_elem_node_n ();
-    data_byte_size += data_intp_wgts.size() * sizeof (fmr::Phys_float);
-    data_byte_size += data_Minv.size() * sizeof (fmr::Phys_float);
-    data_byte_size += part_jacs_dets.size() * sizeof (fmr::Phys_float);
-    data_byte_size += data_node_conn.size() * sizeof (fmr::Phys_float);
+      * tile.get_tile_elem_node_n ();
+      data_byte_size += data_intp_wgts.size() * sizeof (fmr::Phys_float);
+      data_byte_size += data_Minv.size() * sizeof (fmr::Phys_float);
+      data_byte_size += part_jacs_dets.size() * sizeof (fmr::Phys_float);
+      data_byte_size += data_node_conn.size() * sizeof (fmr::Phys_float);
     } else {//structured Tile
       data_scal_size += sizeof(fmr::Phys_float) * node_dofs_n;//Minv (promoted)
       data_scal_size += sizeof(part_jacs_dets[0]) * 2;
@@ -370,9 +370,9 @@ FMR_WARN_INLINE_ON
       iter_rel2 = init_res2;
       data_u = 0.0;// data_f = 0.0;
       femera::grid::test::set_bcs(&part_u[0], part_disp_bc);
-      phsh.init_phys(mtrl_prop_n, &mtrl_prop[0]);
-      data_byte_size += phsh.init_mesh
-        (node_dofs_n, &data_elem_dims[0], &phys_size[0]);
+      //
+      data_byte_size += phsh.init(node_dofs_n, mtrl_prop_n,
+        &data_elem_dims[0], &phys_size[0], &mtrl_prop[0]);
       //
       // Iterate ================================================================
       while ((this_iter < iter_max)
