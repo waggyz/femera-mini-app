@@ -121,6 +121,40 @@ TEST( GridElemBars, PrototypeRejectsEmptyMesh ){
   EXPECT_THROW(mesh.init_mesh(1, dims, size), std::invalid_argument);
 }
 
+TEST( GridElemBars, PrototypeResponseFlopCount ){
+  const double size[3] = {1.0, 0.0, 0.0};
+  const fmr::Local_int one_elem[3] = {1, 0, 0};
+  const fmr::Local_int nine_elems[3] = {9, 0, 0};
+  test::MeshPhys<tile::Bar1, 1, double> linear;
+  linear.init_mesh(1, one_elem, size);
+  EXPECT_EQ(linear.get_iter_flop(), 17u);
+  linear.init_mesh(1, nine_elems, size);
+  EXPECT_EQ(linear.get_iter_flop(), 9u * 17u);
+
+  test::MeshPhys<tile::Bar1, 2, double> quadratic;
+  quadratic.init_mesh(1, one_elem, size);
+  EXPECT_EQ(quadratic.get_iter_flop(), 24u);
+}
+
+TEST( GridElemBars, PrototypeInitFlopCount ){
+  const double size[3] = {1.0, 0.0, 0.0};
+  const fmr::Local_int one_elem[3] = {1, 0, 0};
+  const fmr::Local_int nine_elems[3] = {9, 0, 0};
+  test::MeshPhys<tile::Bar1, 1, double> linear;
+  linear.init_mesh(1, one_elem, size);
+  EXPECT_EQ(linear.get_init_flop(), 26u);
+  linear.init_mesh(1, nine_elems, size);
+  EXPECT_EQ(linear.get_init_flop(), 146u);
+
+  test::MeshPhys<tile::Bar1, 2, double> quadratic;
+  quadratic.init_mesh(1, one_elem, size);
+  EXPECT_EQ(quadratic.get_init_flop(), 42u);
+
+  test::MeshPhys<tile::Bar1, 3, double> cubic;
+  cubic.init_mesh(1, one_elem, size);
+  EXPECT_EQ(cubic.get_init_flop(), 71u);
+}
+
 TEST( GridElemBars, IsStatelessAndPrivate ){
   EXPECT_TRUE( (std::is_empty<Elem<Bars>>::value) );
   EXPECT_TRUE( (std::is_empty<Bars>::value) );// private constructor

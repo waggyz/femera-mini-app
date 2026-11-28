@@ -481,18 +481,25 @@ private:// ====================================================================
   {// scope temp variables}
     constexpr fmr::Local_int conn_n = elem_node_n;
     constexpr fmr::Local_int dofs_n = 1;
-    const auto elem_n = part_elem_n;
+    const fmr::Local_int elem_n = part_elem_n;
     const auto intp_n = this->elem_intp_n;
     //
+    // Source-level arithmetic; inverse counts assume nonsingular Jacobians.
     init_flop = 0;
-    init_flop += 0;// get_poly_grad_node
-    init_flop += elem_d * 1;// tile_size
-    init_flop += 0;// get_tile_part_mesh
-    init_flop += 0;// calc_bars_invt_dets
+    init_flop += intp_n * (P == 1 ? 0 : P == 2 ? 6 : 25);// get_poly_grad_node
+    init_flop += elem_d;// tile_size
+    init_flop += fmr::Local_int(part_node_n) * (1 + 3 * 3);// get_tile_part_mesh coordinates
+    init_flop += 0;// calc_bars_invt_dets linear shape gradients
+    init_flop += elem_n * part_d * elem_d * 2 * 2;// elem_jacs_node_coor_a
+    init_flop += elem_n;// m1x1_invt_det_ref
     //
     iter_flop = 0;
     iter_flop += elem_n * intp_n * 1;// df
-    iter_flop += elem_n * intp_n * elem_d * dofs_n * conn_n * 2;// grad
+    iter_flop += elem_n * intp_n * elem_d * dofs_n * conn_n * 2;// G = Jinv * grad
+    iter_flop += elem_n * intp_n * dofs_n * conn_n * elem_d * 2;// H = G * u
+    iter_flop += elem_n * intp_n * elem_d * elem_d * 2;// S = k * H * df
+    iter_flop += elem_n * intp_n * conn_n * dofs_n * elem_d * 2;// f = G^T * S
+    iter_flop += elem_n * conn_n * dofs_n * 1;// sum f into part_f
     //
   }
   // Byte counts --------------------------------------------------------------
