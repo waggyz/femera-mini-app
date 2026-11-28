@@ -16,23 +16,30 @@ auto  mini = fmr::new_jobs ();
     fmr::Perf_float this_time,
     fmr::Local_int iter_count, uint test_count)  {
       mini->data->send (fmr::out, "elem", "Bars", label.c_str(),
-        "(%i) %s: %s/%s, iter: %u",
+        "(%i) %s + %s = %s/%s",
         load_case,
-        fmr::form::si_unit (perf.get_busy_unit_speed (), "dofs/s").c_str(),
+        fmr::form::si_unit (perf.get_busy_s (), "s").c_str(),
+        fmr::form::si_unit (perf.get_idle_s (), "s").c_str(),
+        fmr::form::si_unit (perf.get_busy_s ()+perf.get_idle_s (), "s").c_str(),
+        fmr::form::si_unit (this_time, "s").c_str());
+      mini->data->send (fmr::out, "elem", "Bars", "time",
+        "(%i) %s: %s/%s, test: %u",
+        load_case,
+        fmr::form::si_unit (perf.get_unit_speed (), "dofs/s").c_str(),
         fmr::form::si_unit (perf.get_unit (), perf.get_unit_name ()).c_str(),
         fmr::form::si_unit (this_time, "s").c_str(),
-        iter_count);
+        test_count);
       mini->data->send (fmr::out, "elem", "Bars", label.c_str(),
-        "(%i) %s: %s/%s, test: %u",
+        "(%i) %s: %s/%s, iter: %g",
         load_case,
         fmr::form::si_unit (perf.get_busy_flop_speed (), "flop/s").c_str(),
         fmr::form::si_unit (perf.get_flop (), "flop").c_str(),
         fmr::form::si_unit (this_time, "s").c_str(),
-        test_count);
-      mini->data->send (fmr::out, "elem", "Bars", label.c_str(),
+        double(iter_count));
+      mini->data->send (fmr::out, "elem", "Bars", "time",
         "(%i) %s: %s/%s,   AI: %g",
         load_case,
-        fmr::form::si_unit (perf.get_busy_data_speed (), "B   /s").c_str(),
+        fmr::form::si_unit (perf.get_data_speed (), "B   /s").c_str(),
         fmr::form::si_unit (perf.get_byte (), "B   ").c_str(),
         fmr::form::si_unit (this_time, "s").c_str(),
         double(perf.get_arithmetic_intensity ()));
@@ -44,7 +51,7 @@ fmr::Exit_int main (int argc, char** argv) {
   //
   const auto targ_time = -1.0;// <=0.0 for no target time
   // Set mesh parameters. -----------------------------------------------------
-  const fmr::Local_int do_elem_n = 9999;// 49999 about 30s, 9999 about 1s
+  const fmr::Local_int do_elem_n = 9;// 49999 about 30s, 9999 about 1s
   const bool do_rand_elem_n = false;// random problem size
   //
   constexpr bool is_free = true;// false for free, true overrides do_rand_len
@@ -327,23 +334,21 @@ FMR_WARN_INLINE_ON
     data_scal_size += sizeof(fmr::Phys_float) * tile.get_elem_shpg_size(elem_intp_n);
     data_scal_size += sizeof(data_intp_wgts[0]) * 1;
     data_byte_size += data_intp_wgts.size() * sizeof (fmr::Phys_float);
+    data_read_size += sizeof(data_Minv[0]) * part_node_n * node_dofs_n;
+    data_byte_size += data_Minv.size() * sizeof (data_Minv[0]);
+    data_node_size += sizeof(data_Minv[0]) * part_node_n * node_dofs_n;
     if (!is_tile) {//unstructured Free
-      data_node_size += sizeof(data_Minv[0]) * part_node_n * node_dofs_n;
-      data_read_size += sizeof(data_Minv[0]) * part_node_n * node_dofs_n;
       data_elem_size += sizeof(part_jacs_dets[0]) * part_elem_n * 2;
       data_elem_size += sizeof(data_node_conn[0]) * part_elem_n
       * tile.get_tile_elem_node_n ();
       data_read_size += sizeof(part_jacs_dets[0]) * part_elem_n * 2;
       data_read_size += sizeof(data_node_conn[0]) * part_elem_n
       * tile.get_tile_elem_node_n ();
-      data_byte_size += data_intp_wgts.size() * sizeof (fmr::Phys_float);
-      data_byte_size += data_Minv.size() * sizeof (fmr::Phys_float);
-      data_byte_size += part_jacs_dets.size() * sizeof (fmr::Phys_float);
-      data_byte_size += data_node_conn.size() * sizeof (fmr::Phys_float);
+      data_byte_size += part_jacs_dets.size() * sizeof (part_jacs_dets[0]);
+      data_byte_size += data_node_conn.size() * sizeof (data_node_conn[0]);
     } else {//structured Tile
-      data_scal_size += sizeof(fmr::Phys_float) * node_dofs_n;//Minv (promoted)
       data_scal_size += sizeof(part_jacs_dets[0]) * 2;
-      data_scal_size += sizeof(data_node_conn[0]) * tile.get_tile_elem_node_n ();
+      data_node_size += sizeof(data_node_conn[0]) * tile.get_tile_elem_node_n ();
     }
     //
     // internal data
@@ -371,9 +376,8 @@ FMR_WARN_INLINE_ON
       data_u = 0.0;// data_f = 0.0;
       femera::grid::test::set_bcs(&part_u[0], part_disp_bc);
       //
-      data_byte_size += phsh.init(node_dofs_n, mtrl_prop_n,
+      data_byte_size = phsh.init(node_dofs_n, mtrl_prop_n,
         &data_elem_dims[0], &phys_size[0], &mtrl_prop[0]);
-      //
       // Iterate ================================================================
       while ((this_iter < iter_max)
       && (iter_res2 > abs_tol2) && (iter_rel2 > rel_tol2)) {// Init is this_iter 0.
@@ -443,9 +447,10 @@ FMR_WARN_INLINE_ON
     time_iter.add_count(this_iter * part_dofs_n);
     time_iter.add_read(this_iter * data_read_size);
     time_iter.add_save(this_iter * data_save_size);
+    time_iter.add_flop(this_iter * phsh.get_iter_flop());
   }//end test_i loop
   --this_iter;// Count is off by one here.
-  const auto this_idle = time_iter.get_idle_s();
+  //const auto this_idle = time_iter.get_idle_s();
   const auto this_busy = time_iter.get_busy_s();
   //
   const auto part_data_size = data_scal_size + data_node_size + data_elem_size;
@@ -459,9 +464,11 @@ FMR_WARN_INLINE_ON
     fmr::form::si_unit (data_elem_size / part_elem_n, "B/elem").c_str()
   );
   {
+FMR_WARN_INLINE_OFF
     send_perf_results ("busy", load_case, time_iter, this_busy, this_iter, 1);
     //send_perf_results ("iter", load_case, time_iter, this_busy + this_idle,
     //  this_iter, 1);
+FMR_WARN_INLINE_ON
   }
   //TODO move the (empty) PCGsProto constructor body to a .cpp when moved out of test namespace.
   //NOTE the PCGsProto slvr instance goes out of scope, calling inline defined

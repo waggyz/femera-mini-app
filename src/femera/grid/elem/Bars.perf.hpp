@@ -286,7 +286,7 @@ template <typename M> inline FMR_ALWAYS_INLINE
 F init_a (F* f, const M* Minv, const BClist& load_bc,
   const fmr::Local_int ndof)
 {
-  pcgs_kern_init_a_1(&r[0], &f[0], &load_bc, // does inline
+  pcgs_kern_init_a_1(&r[0], &f[0], &load_bc, //TODO did inline before, now does not.
     fmr::Local_int(load_bc.size()), ndof);
   pcgs_kern_init_b_ref(&p[0], &Minv[0], &r[0], ndof);
   zet2 = pcgs_kern_init_c_ref(&r[0], &p[0], ndof);
@@ -395,6 +395,8 @@ public:
 //
 //  part_disp_bc (),
 //  data_load_bc (),
+  init_flop(0),
+  iter_flop(0),
   data_size(0),
   byte_size(0),
   node_ndof (),
@@ -422,6 +424,8 @@ public:
   }
   std::size_t get_data_size() const { return this->data_size;}// in use
   std::size_t get_byte_size() const { return this->byte_size;}// allocated
+  fmr::Global_int get_init_flop() const { return this->init_flop; }
+  fmr::Global_int get_iter_flop() const { return this->iter_flop; }
 //
 private:// ====================================================================
   femera::grid::tile::Tile<T, P> tile;
@@ -445,6 +449,8 @@ private:// ====================================================================
   //fmr::Local_int grid_size[4];//TODO
   //fmr::Local_int phys_size[4];
   //
+  fmr::Global_int init_flop;
+  fmr::Global_int iter_flop;
   std::size_t data_size;// in use
   std::size_t byte_size;// allocated
   //
@@ -466,12 +472,30 @@ private:// ====================================================================
   const fmr::Local_int part_node_n = get_part_node_n();
 //  const fmr::Local_int part_dofs_n = get_part_dofs_n();
   const fmr::Local_int part_elem_n = get_part_elem_n();
-  const fmr::Local_int elem_node_n = tile.get_tile_elem_node_n();
+  constexpr fmr::Local_int elem_node_n = tile.get_tile_elem_node_n();
   const fmr::Local_int elem_jacs_dets_size = tile.get_tile_elem_jacs_dets_size();
   //
   std::size_t byte = 0;// bytes used: size()
   std::size_t size = 0;// bytes allocated: sizeof (approximate)
-  //
+  // FLOP counts---------------------------------------------------------------
+  {// scope temp variables}
+    constexpr fmr::Local_int conn_n = elem_node_n;
+    constexpr fmr::Local_int dofs_n = 1;
+    const auto elem_n = part_elem_n;
+    const auto intp_n = this->elem_intp_n;
+    //
+    init_flop = 0;
+    init_flop += 0;// get_poly_grad_node
+    init_flop += elem_d * 1;// tile_size
+    init_flop += 0;// get_tile_part_mesh
+    init_flop += 0;// calc_bars_invt_dets
+    //
+    iter_flop = 0;
+    iter_flop += elem_n * intp_n * 1;// df
+    iter_flop += elem_n * intp_n * elem_d * dofs_n * conn_n * 2;// grad
+    //
+  }
+  // Byte counts --------------------------------------------------------------
   byte = 2 * sizeof(std::size_t) + 1 * sizeof(fmr::Local_int)
   + 6 * sizeof(fmr::Dim_int);
   size = byte;// approximately the same for now (does not account for padding.)
@@ -560,8 +584,8 @@ std::size_t init (const fmr::Dim_int ndof, const fmr::Local_int nprop,
   elem_intp_coor = F(0.5);
   elem_intp_wgts = F(1.0);
   Elem<Bars, P, F>::get_poly_grad_node(&elem_grad[0], &elem_intp_coor[0],
-    tile.get_tile_elem_node_n(), elem_intp_n);
-  const F tile_size[3] = {phys_size[0] / F(grid_size[0]), F(0), F(0)};
+    tile.get_tile_elem_node_n(), elem_intp_n);// ??? FLOP
+  const F tile_size[3] = {phys_size[0] / F(grid_size[0]), F(0), F(0)};// 1 FLOP
   //
   fmr::Local_int bad_jac_n = 0;
     {// Scope node_coor//TODO no longer scoped because node_coor lives above.
@@ -572,7 +596,7 @@ std::size_t init (const fmr::Dim_int ndof, const fmr::Local_int nprop,
        uint(grid_size[0]), uint(part_d), this->part_jacs_dets.size());
 #endif
       // Get node coordinates (temporarily).
-      tile.get_tile_part_mesh (// returns halo_elem_n
+      tile.get_tile_part_mesh (// returns halo_elem_n, ???FLOP
         &part_node_conn[0], &part_node_coor[0],//NOTE elems halo sorted, nodes not.
         &tile_size[0],
         &grid_size[0],
@@ -609,7 +633,7 @@ std::size_t init (const fmr::Dim_int ndof, const fmr::Local_int nprop,
 FMR_WARN_INLINE_OFF
 const auto this_elem_n = this->tile.get_tile_part_elem_n (&grid_size[0]);
     bad_jac_n += femera::grid::test::calc_bars_invt_dets<1>( &part_jacs_dets[0],
-      &part_node_coor[0], &part_node_conn[0], this_elem_n, part_d);
+      &part_node_coor[0], &part_node_conn[0], this_elem_n, part_d);// ??? FLOP
 FMR_WARN_INLINE_ON
     }//end node_coor scope
 #if 0
@@ -712,13 +736,14 @@ bool get_part_resp (F* part_f, const F* part_u,
     for (fmr::Local_int i = 0; i < conn_n * dofs_n; ++i) {
       fval[i] = F(0.0); }
     //
-    for (fmr::Local_int ip = 0; ip < this_intp_n; ++ip) {
       // G = Jinv * grad, H =  G * u, S = E * H, f = G^T * S.
-      const auto df = intp_wgts[ip] * this_det;
+    for (fmr::Local_int ip = 0; ip < this_intp_n; ++ip) {
+      //
+      const auto df = intp_wgts[ip] * this_det;// intp_n *1 FLOP
       //
       // G = Jinv * grad
       fmr::math::smat_mmul_ref(&G[0], &jval[0],
-        &grad[std::size_t(ip) * grad_size],
+        &grad[std::size_t(ip) * grad_size],// (elem_d * dofs_n * conn_n ) *2 FLOP
         this_elem_d, dofs_n, conn_n);
       // H = G * u
       fmr::math::smat_mmul_ref(&H[0], &G[0], &uval[0],
