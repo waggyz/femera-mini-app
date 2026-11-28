@@ -392,10 +392,10 @@ public:
   elem_grad (),
   elem_intp_wgts (1.0, 1),
   elem_intp_coor (),
-  //TODO FIXME Make the floowing loop local.
+//
 //  G (10), H (10), S (10), jval (10),
 //  data_uval (), data_fval (), data_conn (),
-
+//
 //  part_disp_bc (),
 //  data_load_bc (),
   data_size(0),
@@ -518,11 +518,6 @@ private:// ====================================================================
   // Sizing handled in init_phys.
   byte += part_mtrl_prop.size() * sizeof (F);
   size += sizeof(part_mtrl_prop);
-  if (elem_grad.size() != elem_intp_n * elem_node_n * elem_d) {
-    elem_grad.resize(elem_intp_n * elem_node_n * elem_d);
-  }
-  byte += elem_grad.size() * sizeof (F);
-  size += sizeof(elem_grad);
   if (elem_intp_wgts.size() != elem_intp_n) {
     elem_intp_wgts.resize(elem_intp_n);
   }
@@ -533,6 +528,11 @@ private:// ====================================================================
   }
   byte += elem_intp_coor.size() * sizeof (F);
   size += sizeof(elem_intp_coor);
+  if (elem_grad.size() != elem_intp_n * elem_node_n * elem_d) {
+    elem_grad.resize(elem_intp_n * elem_node_n * elem_d);
+  }
+  byte += elem_grad.size() * sizeof (F);
+  size += sizeof(elem_grad);
 #if 0
   if (data_uval.size() != part_node_n * node_ndof) {
     data_uval.resize(part_node_n * node_ndof);
@@ -668,51 +668,59 @@ FMR_WARN_INLINE_ON
 public://TODO move back up later **********************************************
   //TODO variations on init and get_part_resp wit and without
   //     unstructured node_coor & jinv_dets overhead for testing.
-  bool get_part_resp (F* part_f, const F* part_u,
-    const fmr::Local_int elem_mod=std::numeric_limits<fmr::Local_int>::max()) {
-    // Get the response (forward pass) for  any given u.
-    if (!part_f || !part_u) {return false;}// Caller checks bounds.
-      //
-      // Avoid making local copies of scalar constants. Here for refactoring
-      const auto this_part_d    = part_d;
-      const auto dofs_n         = fmr::Dim_int(get_node_dofs_n());
-      const auto this_intp_n    = elem_intp_n;
-      const auto part_elem_dims = &grid_size[0];
-      // Get the rest using tile.get_*.
-      const auto this_elem_n    = tile.get_tile_part_elem_n (&part_elem_dims[0]);
-      const auto halo_elem_n    = tile.get_halo_elem_n (&part_elem_dims[0]);
-      const auto halo_node_n    = tile.get_halo_node_n (&part_elem_dims[0]);
-      const auto conn_n         = tile.get_tile_elem_node_n ();
-      const auto this_elem_d    = tile.get_elem_d ();
-      const auto grad_size      = tile.get_elem_shpg_size ();
-      const auto jacd_size      = tile.get_tile_elem_jacs_dets_size ();
-      const auto part_dofs_n
-      = tile.get_tile_part_node_n (&part_elem_dims[0]) * dofs_n;
-      //
-      // Constant arrays to copy in. (Drop the valarray overhead.)
-      //const auto part_node_conn = &data_node_conn[0];
-      const auto this_jacd      = &part_jacs_dets[0];
-      const auto intp_wgts      = &elem_intp_wgts[0];
-      const auto this_prop      = &part_mtrl_prop[0];
+bool get_part_resp (F* part_f, const F* part_u,
+  const fmr::Local_int elem_mod=std::numeric_limits<fmr::Local_int>::max()) {
+  // Get the response (forward pass) for  any given u.
+  if (!part_f || !part_u) {return false;}// Caller checks bounds.
+  //
+  constexpr auto dofs_n     = 1;//TODO refactor all for compile-time fixed DOF.
+  //
+//  const auto dofs_n         = fmr::Dim_int(get_node_dofs_n());
+  const auto this_part_d    = part_d;
+  const auto this_intp_n    = elem_intp_n;
+  const auto part_elem_dims = &grid_size[0];
+  const auto part_dofs_n
+  = tile.get_tile_part_node_n (&part_elem_dims[0]) * dofs_n;
+  const auto this_elem_n    = tile.get_tile_part_elem_n (&part_elem_dims[0]);
+  const auto halo_elem_n    = tile.get_halo_elem_n (&part_elem_dims[0]);
+  const auto halo_node_n    = tile.get_halo_node_n (&part_elem_dims[0]);
+  //
+  constexpr auto conn_n         = tile.get_tile_elem_node_n ();
+  constexpr auto this_elem_d    = tile.get_elem_d ();
+  constexpr auto grad_size      = tile.get_elem_shpg_size ();
+  constexpr auto jacd_size      = tile.get_tile_elem_jacs_dets_size ();
+  //
+  // Constant arrays to copy in. (Drop the valarray overhead.)
+  //const auto part_node_conn = &data_node_conn[0];
+  const auto this_jacd      = &part_jacs_dets[0];
+  const auto intp_wgts      = &elem_intp_wgts[0];
+  const auto this_prop      = &part_mtrl_prop[0];
 #if 0
-      const auto elem_grad_size = tile.get_elem_shpg_size (this_intp_n);
-      const auto elem_grad      = &part_elem_grad[0];
-      std::valarray<F> grad(elem_grad_size);
+      std::valarray<F> grad(grad_size);
       if (elem_grad_size > 0) {
-        tile.get_elem_shpg(&grad[0], &elem_grad[0], elem_grad_size, 0);
-#else
+        tile.get_elem_shpg(&grad[0], &elem_grad[0], grad_size, 0);
+#endif
+#if 0
       const FMR_RESTRICT F* grad = &elem_grad[0];// get a const pointer. alias?
 #endif
-      #if 0
-      FMR_RESTRICT fmr::Local_int* conn = &data_conn[0];
-      FMR_RESTRICT F* uval = &data_uval[0];
-      FMR_RESTRICT F* fval = &data_fval[0];
-#else
-      std::valarray<fmr::Local_int> conn(conn_n);//TODO hoist valarrays out?
-      std::valarray<F> uval(conn_n * dofs_n);
-      std::valarray<F> fval(conn_n * dofs_n);
+     //   tile.get_elem_shpg(&grad[0], &elem_grad[0], grad_size, 0);
+#if 0
+     FMR_RESTRICT fmr::Local_int* conn = &data_conn[0];
+     FMR_RESTRICT F* uval = &data_uval[0];
+     FMR_RESTRICT F* fval = &data_fval[0];
 #endif
-//      }
+#if 1
+//      std::valarray<fmr::Local_int> conn(conn_n);//TODO hoist valarrays out?
+      //std::valarray<F> uval(conn_n * dofs_n);
+      //std::valarray<F> fval(conn_n * dofs_n);
+#endif
+      F grad [grad_size];
+      for (fmr::Local_int i = 0; i < grad_size; ++i) {
+        grad[i] = elem_grad[i];
+      }
+      fmr::Local_int conn[conn_n];
+      F uval[conn_n * dofs_n];
+      F fval[conn_n * dofs_n];
       F G[9];// max buffer size needed (single physics)
       F H[9];//TODO consider compile-time sizing based on Tile elem type?
       F S[9];

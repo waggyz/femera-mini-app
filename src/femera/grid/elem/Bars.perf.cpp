@@ -44,7 +44,7 @@ fmr::Exit_int main (int argc, char** argv) {
   //
   const auto targ_time = -1.0;// <=0.0 for no target time
   // Set mesh parameters. -----------------------------------------------------
-  const fmr::Local_int do_elem_n = 9;// 49999 about 30s, 9999 about 1s
+  const fmr::Local_int do_elem_n = 9999;// 49999 about 30s, 9999 about 1s
   const bool do_rand_elem_n = false;// random problem size
   //
   constexpr bool is_free = true;// false for free, true overrides do_rand_len
