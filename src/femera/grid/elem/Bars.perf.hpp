@@ -254,7 +254,8 @@ T* get_vals_mod (const T* vals,
 template <typename F=fmr::Phys_float>
 class PCGsProto {
 public:
-PCGsProto() : p(), r(), z(), zet2 (std::numeric_limits<F>::max()) {}
+PCGsProto() : p(), r(), z(), zet2 (std::numeric_limits<F>::max()),
+  init_flop(0), iter_flop(0) {}
 //= default;//default constructor
 //
 template<typename M=float> inline FMR_ALWAYS_INLINE
@@ -278,14 +279,18 @@ F* ptr_p() { return &p[0];
 }
 F get_res2() const { return zet2;
 }
-std::size_t get_byte_size() const {//NOTE includes one extra F for zet2
-  return sizeof(F) * (p.size() + r.size() + z.size() + 1);
+fmr::Global_int get_init_flop() const { return this->init_flop; }
+fmr::Global_int get_iter_flop() const { return this->iter_flop; }
+std::size_t get_byte_size() const {//NOTE includes zet2 and FLOP counters
+  return sizeof(F) * (p.size() + r.size() + z.size() + 1)
+    + 2 * sizeof(fmr::Global_int);
 }
 // Kernel variations ----------------------------------------------------------
 template <typename M> inline FMR_ALWAYS_INLINE
 F init_a (F* f, const M* Minv, const BClist& load_bc,
   const fmr::Local_int ndof)
 {
+  count_flops(ndof, load_bc.size());
   pcgs_kern_init_a_1(&r[0], &f[0], &load_bc, //TODO did inline before, now does not.
     fmr::Local_int(load_bc.size()), ndof);
   pcgs_kern_init_b_ref(&p[0], &Minv[0], &r[0], ndof);
@@ -295,6 +300,7 @@ F init_a (F* f, const M* Minv, const BClist& load_bc,
 template <typename M> inline
 F init_ref(F* f, const M* Minv, const BClist& load_bc,
     const fmr::Local_int ndof) {
+  count_flops(ndof, load_bc.size());
   pcgs_kern_init_a_ref(&r[0], &f[0], &load_bc, ndof);// does not inline
   pcgs_kern_init_b_ref(&p[0], &Minv[0], &r[0], ndof);
   zet2 = pcgs_kern_init_c_ref(&r[0], &p[0], ndof);
@@ -364,7 +370,27 @@ std::valarray<F> p;
 std::valarray<F> r;
 std::valarray<F> z;
 F zet2;
+fmr::Global_int init_flop;
+fmr::Global_int iter_flop;
 //
+void count_flops(const fmr::Local_int ndof, const std::size_t bc_n) {
+  const fmr::Global_int dofs_n = ndof;
+  // Negation and assignments are not counted as arithmetic FLOPs.
+  init_flop = 0;
+  init_flop += bc_n;// pcgs_kern_init_a: sum applied loads
+  init_flop += dofs_n;// pcgs_kern_init_b: p = Minv * r
+  init_flop += dofs_n * 2;// pcgs_kern_init_c: zet2 = r dot p
+  //
+  iter_flop = 0;
+  iter_flop += dofs_n * 2;// pcgs_kern_iter_a: gamma = p dot f
+  iter_flop += 1;// pcgs_kern_iter_b: alpha = zet2 / gamma
+  iter_flop += dofs_n * 2;// pcgs_kern_iter_c: r -= alpha * f
+  iter_flop += dofs_n;// pcgs_kern_iter_d: z = Minv * r
+  iter_flop += dofs_n * 2;// pcgs_kern_iter_e: zeta = r dot z
+  iter_flop += 1;// pcgs_kern_iter_f: beta = zeta / zet2
+  iter_flop += dofs_n * 2;// pcgs_kern_iter_g: u += alpha * p
+  iter_flop += dofs_n * 2;// pcgs_kern_iter_h: p = z + beta * p
+}
 std::size_t init_data(const fmr::Local_int ndof) {
   //NOTE valarray inits and resizes to zeros.
   if( p.size() != ndof) {p.resize(ndof);}// not zeroed, vals set on first use

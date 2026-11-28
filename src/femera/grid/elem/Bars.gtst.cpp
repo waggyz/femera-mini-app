@@ -155,6 +155,36 @@ TEST( GridElemBars, PrototypeInitFlopCount ){
   EXPECT_EQ(cubic.get_init_flop(), 71u);
 }
 
+TEST( GridElemBars, PrototypeSolverFlopCount ){
+  double f[] = {1.0, 2.0, 3.0};
+  double u_a[] = {0.0, 0.0, 0.0};
+  double u_ref[] = {0.0, 0.0, 0.0};
+  float minv[] = {1.0f, 1.0f, 1.0f};
+  const test::BClist no_load;
+  const test::BClist loads = {{0, 4.0}, {2, 1.0}};
+  test::PCGsProto<double> solver_a;
+  test::PCGsProto<double> solver_ref;
+  EXPECT_EQ(solver_a.get_init_flop(), 0u);
+  EXPECT_EQ(solver_a.get_iter_flop(), 0u);
+
+  solver_a.init(f, minv, no_load, 2);
+  EXPECT_EQ(solver_a.get_init_flop(), 6u);
+  EXPECT_EQ(solver_a.get_iter_flop(), 24u);
+  solver_a.init(f, minv, loads, 3);
+  solver_ref.init(f, minv, no_load, 3);
+  EXPECT_DOUBLE_EQ(solver_ref.init_ref(f, minv, loads, 3), solver_a.get_res2());
+  EXPECT_EQ(solver_a.get_init_flop(), 11u);
+  EXPECT_EQ(solver_a.get_iter_flop(), 35u);
+  EXPECT_EQ(solver_ref.get_init_flop(), solver_a.get_init_flop());
+  EXPECT_EQ(solver_ref.get_iter_flop(), solver_a.get_iter_flop());
+  EXPECT_DOUBLE_EQ(solver_ref.iter_ref(f, u_ref, minv, 3),
+    solver_a.iter(f, u_a, minv, 3));
+  for (int i = 0; i < 3; ++i) {
+    EXPECT_DOUBLE_EQ(u_ref[i], u_a[i]);
+    EXPECT_DOUBLE_EQ(solver_ref.ptr_p()[i], solver_a.ptr_p()[i]);
+  }
+}
+
 TEST( GridElemBars, IsStatelessAndPrivate ){
   EXPECT_TRUE( (std::is_empty<Elem<Bars>>::value) );
   EXPECT_TRUE( (std::is_empty<Bars>::value) );// private constructor

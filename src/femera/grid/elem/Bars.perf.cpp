@@ -60,7 +60,7 @@ fmr::Exit_int main (int argc, char** argv) {
   bool do_rand_len = false;// perturb nodes.//TODO save coor to check.
   // Set physics parameters. --------------------------------------------------
   //
-  const fmr::Enum_int load_case = 2;
+  const fmr::Enum_int load_case = 1;
   // 0: no load
   // 1: apply end displacement (only)
   // 2: apply end force (only),
@@ -386,7 +386,7 @@ FMR_WARN_INLINE_ON
         const auto this_dofs_n
         = tile.get_tile_part_node_n (&data_elem_dims[0]) * node_dofs_n;
         //
-        time_iter.add_idle_time_now();
+        time_iter.add_idle_time_now();// busy time ----------------------------
         iter_res2 = phsh.get_part_resp (&part_f[0],
           (this_iter == 0 ? &part_u[0] : slvr.ptr_p()), elem_mod);
         //if (init_res2 < abs_tol2) {++this_iter; break;}
@@ -398,7 +398,7 @@ FMR_WARN_INLINE_ON
         : slvr.iter (&part_f[0], &part_u[0], &data_Minv[0], this_dofs_n);
         init_res2 = (this_iter == 0) ? iter_res2 : init_res2;
         iter_rel2 = iter_res2 / init_res2;
-        time_iter.add_busy_time_now();
+        time_iter.add_busy_time_now();// --------------------------------------
 #if 0
         if (elem_i == halo_elem_n - 1) {//TODO Synchronize halo nodes.
           for (fmr::Local_int h = 0; h < tile.halo_node_n (); ++h)
@@ -447,7 +447,14 @@ FMR_WARN_INLINE_ON
     time_iter.add_count(this_iter * part_dofs_n);
     time_iter.add_read(this_iter * data_read_size);
     time_iter.add_save(this_iter * data_save_size);
-    time_iter.add_flop(this_iter * phsh.get_iter_flop());
+    if (this_iter > 0) {// for busy inner loop counts
+      time_iter.add_flop(this_iter * phsh.get_iter_flop());
+      time_iter.add_flop(slvr.get_init_flop()
+        + (this_iter - 1) * slvr.get_iter_flop());
+    }
+    // include phsh.init for total count
+    //time_iter.add_flop(this_iter * phsh.get_init_flop());
+//
   }//end test_i loop
   --this_iter;// Count is off by one here.
   //const auto this_idle = time_iter.get_idle_s();
